@@ -27,7 +27,7 @@
 
 #define IS_ROOTCTX(o)  (_ctx == (CTX_t)o)
 
-// These functions are local functions in konoha2 binary.
+// These functions are local functions in minikonoha binary.
 // Don't call from packages directly   (kimio)
 
 struct _kObject** KONOHA_reftail(CTX, size_t size);

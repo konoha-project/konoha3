@@ -1,5 +1,5 @@
-#include "konoha2/konoha2.h"
-#include "konoha2/sugar.h"
+#include "minikonoha/minikonoha.h"
+#include "minikonoha/sugar.h"
 #include "openssl/ssl.h"
 #ifndef OPENSSL_GLUE_H_
 #define OPENSSL_GLUE_H_

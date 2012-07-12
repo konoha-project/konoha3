@@ -23,8 +23,8 @@
  ***************************************************************************/
 
 #include "../../src/gc/commons.h"
-#include "konoha2/gc.h"
-#include "konoha2/konoha2_local.h"
+#include "minikonoha/gc.h"
+#include "minikonoha/local.h"
 
 #ifdef __cplusplus
 extern "C" {

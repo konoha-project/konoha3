@@ -32,7 +32,7 @@
 #include <sys/queue.h>
 //#include <actor/actor.h>
 #include <jansson.h>
-#include <konoha2/konoha2.h>
+#include <minikonoha/minikonoha.h>
 #include "dse_util.h"
 #include "dse_logger.h"
 #include "dse_platform.h"

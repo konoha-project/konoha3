@@ -24,9 +24,9 @@
 
 #define USE_STRINGLIB
 
-#include <konoha2/konoha2.h>
-#include <konoha2/sugar.h>
-#include <konoha2/klib.h>
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
+#include <minikonoha/klib.h>
 #include "pcre_glue.h"
 
 #ifdef __cplusplus

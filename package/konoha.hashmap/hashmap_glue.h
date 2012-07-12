@@ -54,7 +54,7 @@ static void HashMap_p(CTX, ksfp_t *sfp, int pos, kwb_t *wb, int level)
 	// TODO
 }
 
-#include <konoha2/klib.h>
+#include <minikonoha/klib.h>
 /* ------------------------------------------------------------------------ */
 
 static KMETHOD HashMap_get(CTX, ksfp_t *sfp _RIX)

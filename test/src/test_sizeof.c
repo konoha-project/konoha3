@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 #include <stdio.h>
-#include "konoha2/konoha2.h"
+#include "minikonoha/minikonoha.h"
 
 int main(int argc, const char *argv[])
 {

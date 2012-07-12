@@ -22,8 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <konoha2/konoha2.h>
-#include <konoha2/sugar.h>
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
 
 #define MOD_jit  40/*TODO*/
 #define kjitmod ((kjitmod_t*)_ctx->mod[MOD_jit])

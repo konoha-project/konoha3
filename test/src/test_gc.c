@@ -23,8 +23,8 @@
  ***************************************************************************/
 
 #include <stdio.h>
-#include "konoha2/konoha2.h"
-#include "konoha2/gc.h"
+#include "minikonoha/minikonoha.h"
+#include "minikonoha/gc.h"
 #include "test_konoha.h"
 
 #ifdef __cplusplus

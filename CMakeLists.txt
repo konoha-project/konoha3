@@ -69,7 +69,7 @@ if(${CMAKE_BUILD_TYPE} STREQUAL "Compressed")
 endif()
 
 set(RUNTIME
-	src/konoha/konoha2.c
+	src/konoha/minikonoha.c
 )
 
 set(KONOHA_GC_MODULE "" CACHE STRING "konoha gc module")

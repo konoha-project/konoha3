@@ -22,9 +22,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include "konoha2/konoha2.h"
-#include "konoha2/logger.h"
-#include "konoha2/konoha2_local.h"
+#include "minikonoha/minikonoha.h"
+#include "minikonoha/logger.h"
+#include "minikonoha/local.h"
 #include <logpool/logpool.h>
 
 /* ************************************************************************ */

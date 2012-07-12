@@ -22,16 +22,16 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <konoha2/konoha2.h>
-#include <konoha2/sugar.h>
-#include "konoha2/gc.h"
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
+#include "minikonoha/gc.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
 #include <setjmp.h>
 #include <syslog.h>
 #include <dlfcn.h>
-#include <konoha2/klib.h>
+#include <minikonoha/klib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -247,7 +247,7 @@ static const char* packagepath(char *buf, size_t bufsiz, const char *fname)
 	}
 	if(path == NULL) {
 		path = getenv("HOME");
-		local = "/.konoha2/package";
+		local = "/.minikonoha/package";
 	}
 	snprintf(buf, bufsiz, "%s%s/%s/%s_glue.k", path, local, fname, packname(fname));
 #ifdef K_PREFIX
@@ -256,7 +256,7 @@ static const char* packagepath(char *buf, size_t bufsiz, const char *fname)
 		fclose(fp);
 	}
 	else {
-		snprintf(buf, bufsiz, K_PREFIX "/konoha2/package" "/%s/%s_glue.k", fname, packname(fname));
+		snprintf(buf, bufsiz, K_PREFIX "/minikonoha/package" "/%s/%s_glue.k", fname, packname(fname));
 	}
 #endif
 	return (const char*)buf;
@@ -513,7 +513,7 @@ static void konoha_startup(CTX, const char *startup_script)
 	}
 	if(path == NULL) {
 		path = getenv("HOME");
-		local = "/.konoha2/script";
+		local = "/.minikonoha/script";
 	}
 	snprintf(buf, sizeof(buf), "%s%s/%s.k", path, local, startup_script);
 	if(!konoha_load((konoha_t)_ctx, (const char*)buf)) {

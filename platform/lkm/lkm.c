@@ -25,8 +25,8 @@
 /* ************************************************************************ */
 
 #include "konoha_lkm.h"
-#include "konoha2/konoha2.h"
-#include "konoha2/klib.h"
+#include "minikonoha/minikonoha.h"
+#include "minikonoha/klib.h"
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("uchida atsushi");

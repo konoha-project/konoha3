@@ -29,7 +29,7 @@
 
 #include <setjmp.h>
 #include <syslog.h>
-#include <konoha2/konoha2.h>
+#include <minikonoha/minikonoha.h>
 
 typedef kplatform_t dse_platform_t_h;
 
@@ -48,7 +48,7 @@ static const char* _packagepath(char *buf, size_t bufsiz, const char *fname)
 	}
 	if(path == NULL) {
 		path = getenv("HOME");
-		local = "/.konoha2/package";
+		local = "/.minikonoha/package";
 	}
 	snprintf(buf, bufsiz, "%s%s/%s/%s_glue.k", path, local, fname, _packname(fname));
 #ifdef K_PREFIX
@@ -57,7 +57,7 @@ static const char* _packagepath(char *buf, size_t bufsiz, const char *fname)
 		fclose(fp);
 	}
 	else {
-		snprintf(buf, bufsiz, K_PREFIX "/konoha2/package" "/%s/%s_glue.k", fname, _packname(fname));
+		snprintf(buf, bufsiz, K_PREFIX "/minikonoha/package" "/%s/%s_glue.k", fname, _packname(fname));
 	}
 #endif
 	return (const char*)buf;

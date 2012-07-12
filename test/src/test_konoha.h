@@ -1,4 +1,4 @@
-#include "konoha2/konoha2.h"
+#include "minikonoha/minikonoha.h"
 #include <stdio.h>
 #include <syslog.h>
 #include <stdlib.h>
@@ -20,7 +20,7 @@ static const char* packagepath(char *buf, size_t bufsiz, const char *fname)
 	}
 	if(path == NULL) {
 		path = getenv("HOME");
-		local = "/.konoha2/package";
+		local = "/.minikonoha/package";
 	}
 	snprintf(buf, bufsiz, "%s%s/%s/%s_glue.k", path, local, fname, packname(fname));
 #ifdef K_PREFIX
@@ -29,7 +29,7 @@ static const char* packagepath(char *buf, size_t bufsiz, const char *fname)
 		fclose(fp);
 	}
 	else {
-		snprintf(buf, bufsiz, K_PREFIX "/konoha2/package" "/%s/%s_glue.k", fname, packname(fname));
+		snprintf(buf, bufsiz, K_PREFIX "/minikonoha/package" "/%s/%s_glue.k", fname, packname(fname));
 	}
 #endif
 	return (const char*)buf;

@@ -25,7 +25,7 @@
 /* ************************************************************************ */
 
 #define USING_SUGAR_AS_BUILTIN 1
-#include<konoha2/sugar.h>
+#include<minikonoha/sugar.h>
 
 /* ************************************************************************ */
 
@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-#include<konoha2/konoha2_local.h>
+#include<minikonoha/local.h>
 
 // global variable
 int verbose_sugar = 0;

@@ -26,8 +26,8 @@
 #define BYTES_GLUE_H_
 
 #include <stdio.h>
-#include <konoha2/logger.h>
-#include <konoha2/bytes.h>
+#include <minikonoha/logger.h>
+#include <minikonoha/bytes.h>
 
 #include <errno.h> // include this because of E2BIG
 

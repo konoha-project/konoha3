@@ -39,8 +39,8 @@
 #include <btron/event.h>
 #endif
 
-#include "konoha2/gc.h"
-#include "konoha2/konoha2_local.h"
+#include "minikonoha/gc.h"
+#include "minikonoha/local.h"
 
 #ifndef BMGC_H_
 #define BMGC_H_

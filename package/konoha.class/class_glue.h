@@ -25,8 +25,8 @@
 #ifndef CLASS_GLUE_H_
 #define CLASS_GLUE_H_
 
-#include <konoha2/konoha2.h>
-#include <konoha2/sugar.h>
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
 
 static KMETHOD Fmethod_FieldGetter(CTX, ksfp_t *sfp _RIX)
 {

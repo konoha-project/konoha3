@@ -24,11 +24,11 @@
 
 /* ************************************************************************ */
 
-#include <konoha2/konoha2.h>
-#include <konoha2/sugar.h>
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
 #define USE_STRINGLIB
-#include <konoha2/klib.h>
-#include <konoha2/iterator.h>
+#include <minikonoha/klib.h>
+#include <minikonoha/iterator.h>
 
 #ifdef __cplusplus
 extern "C" {

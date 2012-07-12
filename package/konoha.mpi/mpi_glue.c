@@ -22,10 +22,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <konoha2/konoha2.h>
-#include <konoha2/sugar.h>
-#include <konoha2/float.h>
-//#include <konoha2/bytes.h>
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
+#include <minikonoha/float.h>
+//#include <minikonoha/bytes.h>
 #include "mpi_glue.h"
 #include "../konoha.bytes/bytes_glue.h"//FIXME
 

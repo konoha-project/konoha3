@@ -27,8 +27,8 @@
 
 #include "apr_strings.h"
 #include "http_log.h"
-#include <konoha2/konoha2.h>
-#include <konoha2/sugar.h>
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
 #include "../../package/apache/apache_glue.h"
 
 #ifndef K_PREFIX
@@ -57,7 +57,7 @@ static const char* shell_packagepath(char *buf, size_t bufsiz, const char *fname
 	}
 	if(path == NULL) {
 		path = getenv("HOME");
-		local = "/.konoha2/package";
+		local = "/.minikonoha/package";
 	}
 	snprintf(buf, bufsiz, "%s%s/%s/%s_glue.k", path, local, fname, packname(fname));
 #ifdef K_PREFIX
@@ -66,7 +66,7 @@ static const char* shell_packagepath(char *buf, size_t bufsiz, const char *fname
 		fclose(fp);
 	}
 	else {
-		snprintf(buf, bufsiz, K_PREFIX "/konoha2/package" "/%s/%s_glue.k", fname, packname(fname));
+		snprintf(buf, bufsiz, K_PREFIX "/minikonoha/package" "/%s/%s_glue.k", fname, packname(fname));
 	}
 #endif
 	return (const char*)buf;

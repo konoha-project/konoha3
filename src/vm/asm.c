@@ -75,7 +75,7 @@
 #include "minivm.h"
 #endif
 
-#include <konoha2/konoha2_local.h>
+#include <minikonoha/local.h>
 
 /* ************************************************************************ */
 

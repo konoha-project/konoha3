@@ -21,9 +21,10 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
-#include "konoha2/konoha2.h"
-#include "konoha2/klib.h"
-#include "konoha2/gc.h"
+
+#include "minikonoha/minikonoha.h"
+#include "minikonoha/klib.h"
+#include "minikonoha/gc.h"
 
 #ifdef K_USING_LOGPOOL
 #include <logpool.h>
@@ -33,7 +34,7 @@
 extern "C" {
 #endif
 
-#include "konoha2/konoha2_local.h"
+#include "minikonoha/local.h"
 
 #include "klibexec.h"
 #include "datatype.h"

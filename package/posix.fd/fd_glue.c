@@ -22,14 +22,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include<konoha2/konoha2.h>
-#include<konoha2/sugar.h>
+#include<minikonoha/minikonoha.h>
+#include<minikonoha/sugar.h>
 
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/file.h>
-#include <konoha2/bytes.h>
+#include <minikonoha/bytes.h>
 #include <errno.h>
 
 #include"fd_glue.h"

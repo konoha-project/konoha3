@@ -22,8 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include<konoha2/konoha2.h>
-#include<konoha2/sugar.h>
+#include<minikonoha/minikonoha.h>
+#include<minikonoha/sugar.h>
 
 // Expr Expr.tyCheckStub(Gamma gma, int reqtyid);
 //static KMETHOD ExprTyCheck_stub(CTX, ksfp_t *sfp _RIX)

@@ -27,7 +27,7 @@
 #ifndef K_INTERNAL
 #define K_INTERNAL  1
 #endif
-#include <konoha2/konoha2.h>
+#include <minikonoha/minikonoha.h>
 
 #ifdef K_USING_POSIX_
 #include <sys/mman.h>

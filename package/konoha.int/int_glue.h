@@ -26,9 +26,9 @@
 #ifndef INT_GLUE_H_
 #define INT_GLUE_H_
 
-#include <konoha2/konoha2.h>
-#include <konoha2/sugar.h>
-#include <konoha2/klib.h>
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
+#include <minikonoha/klib.h>
 
 #ifdef __cplusplus
 extern "C" {

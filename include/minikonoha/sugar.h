@@ -31,7 +31,7 @@
 #ifndef __KERNEL__
 #include <dlfcn.h>
 #endif
-#include "konoha2.h"
+#include "minikonoha.h"
 #include "klib.h"
 
 #ifdef __cplusplus

@@ -23,8 +23,8 @@
  ***************************************************************************/
 
 #if 0
-#include <konoha2/konoha2.h>
-#include <konoha2/sugar.h>
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
 #include <unistd.h>
 #define MOD_IO 20/*FIXME*/
 #define KNH_TODO(msg) do {\
