@@ -52,7 +52,7 @@ static void kmodjit_setup(KonohaContext *kctx, struct kmodshare_t *def, int newc
 	(void)kctx;(void)def;(void)newctx;
 }
 
-extern struct _kObject **KONOHA_reftail(KonohaContext *kctx, size_t size);
+extern kObjectVar **KONOHA_reftail(KonohaContext *kctx, size_t size);
 
 static void val_reftrace(KonohaContext *kctx, kmape_t *p)
 {

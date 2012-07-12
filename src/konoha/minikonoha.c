@@ -231,7 +231,7 @@ static void kcontext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 // Don't export KONOHA_reftail to packages
 // Don't include KONOHA_reftail in shared header files  (kimio)
 
-struct _kObject** KONOHA_reftail(KonohaContext *kctx, size_t size)
+kObjectVar** KONOHA_reftail(KonohaContext *kctx, size_t size)
 {
 	LocalRuntimeVar *stack = kctx->stack;
 	size_t ref_size = stack->reftail - stack->ref.refhead;
@@ -239,7 +239,7 @@ struct _kObject** KONOHA_reftail(KonohaContext *kctx, size_t size)
 		KARRAY_EXPAND(&stack->ref, (size + ref_size) * sizeof(kObject*));
 		stack->reftail = stack->ref.refhead + ref_size;
 	}
-	struct _kObject **reftail = stack->reftail;
+	kObjectVar **reftail = stack->reftail;
 	stack->reftail = NULL;
 	return reftail;
 }

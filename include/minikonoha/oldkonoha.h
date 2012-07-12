@@ -28,7 +28,6 @@
 #define CTX KonohaContext *kctx
 #define _ctx  kctx
 #define konoha_t  KonohaContext*
-
 #define ksfp_t    KonohaStack
 
 #define kcid_t ktype_t

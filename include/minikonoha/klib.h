@@ -29,7 +29,7 @@
 
 static kinline size_t size64(size_t s)
 {
-	size_t base = sizeof(struct _kObject);
+	size_t base = sizeof(kObjectVar);
 	while(base < s) {
 		base *= 2;
 	}

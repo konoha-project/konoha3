@@ -837,7 +837,7 @@ void MODGC_free(KonohaContext *kctx, KonohaContextVar *ctx)
 
 kObject *MODGC_omalloc(KonohaContext *kctx, size_t size)
 {
-	struct _kObject *o = (struct _kObject*)bm_malloc_internal(kctx, HeapMng(kctx), size);
+	kObjectVar *o = (kObjectVar*)bm_malloc_internal(kctx, HeapMng(kctx), size);
 	OBJECT_INIT(o);
 #if GCDEBUG
 	ktrace(LOGPOL_DEBUG,
@@ -1870,7 +1870,7 @@ static kbool_t knh_isObject(KonohaContext *kctx, kObject *o)
 
 /* ------------------------------------------------------------------------ */
 
-#define K_OZERO(o) ((struct _kObject*)o)->h.ct = NULL
+#define K_OZERO(o) ((kObjectVar*)o)->h.ct = NULL
 static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o)
 {
 	kclass_t *ct = O_ct(o);
@@ -1884,7 +1884,7 @@ static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o)
 		MEMLOG(ctx, "~Object", K_NOTICE, KNH_LDATA(LOG_p("ptr", o), LOG_i("cid", ct->cid)));
 #endif
 		//gc_info("~Object ptr=%p, cid=%d, o->h.meta=%p", o, ct->cid, o->h.meta);
-		KONOHA_freeObjectField(kctx, (struct _kObject*)o);
+		KONOHA_freeObjectField(kctx, (kObjectVar*)o);
 		//ctx->stat->gcObjectCount += 1;
 		K_OZERO(o);
 		STAT_dObject(ctx, ct);

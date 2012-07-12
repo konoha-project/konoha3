@@ -347,15 +347,15 @@ typedef struct {
 	kclass_t *ct;
 } KDEFINE_CLASS_CONST;
 
-static void ObjectField_init(KonohaContext *kctx, const struct _kObject *o, void *conf)
+static void ObjectField_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kclass_t *ct = O_ct(o);
 	DBG_ASSERT(ct->nulvalNULL != NULL);
 	size_t fsize = ct->fsize;
-	memcpy(((struct _kObject *)o)->fields, ct->nulvalNULL->fields, fsize * sizeof(void*));
+	memcpy(((kObjectVar *)o)->fields, ct->nulvalNULL->fields, fsize * sizeof(void*));
 }
 
-extern struct _kObject** KONOHA_reftail(KonohaContext *kctx, size_t size);
+extern kObjectVar** KONOHA_reftail(KonohaContext *kctx, size_t size);
 
 static void ObjectField_reftrace (KonohaContext *kctx, kObject *o)
 {

@@ -129,7 +129,7 @@ namespace konoha {
 template <class T>
 inline T object_cast(kObject *po)
 {
-	struct _kObject *o_ = const_cast<struct _kObject*>(po);
+	kObjectVar *o_ = const_cast<kObjectVar*>(po);
 	kRawPtr *o = reinterpret_cast<kRawPtr*>(o_);
 	return static_cast<T>(o->rawptr);
 }
@@ -146,7 +146,7 @@ inline void convert_array(std::vector<T> &vec, kArray *a)
 
 inline void SetRawPtr(kObject *po, void *rawptr)
 {
-	struct _kObject *o_ = const_cast<struct _kObject*>(po);
+	kObjectVar *o_ = const_cast<kObjectVar*>(po);
 	kRawPtr *o = reinterpret_cast<kRawPtr*>(o_);
 	o->rawptr = rawptr;
 }

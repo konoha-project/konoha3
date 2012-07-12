@@ -244,6 +244,12 @@ typedef uintptr_t                 kline_t;
 #define ULINE_fileid(line)            ((kfileid_t)(line >> (sizeof(kfileid_t) * 8)))
 #define ULINE_line(line)           (line & (kline_t)((kfileid_t)-1))
 
+
+/* ------------------------------------------------------------------------ */
+
+typedef const struct kObjectVar kObject;
+typedef struct kObjectVar kObjectVar;
+
 /* ------------------------------------------------------------------------ */
 
 #define COMMON_BYTEARRAY \
@@ -265,8 +271,8 @@ typedef struct karray_t {
 		const struct _kclass **cts;
 		struct kvs_t          *kvs;
 		struct kopl_t          *opl;
-		const struct _kObject **objects;
-		struct _kObject       **refhead;  // stack->ref
+		kObject **objects;
+		kObjectVar       **refhead;  // stack->ref
 	};
 	size_t bytemax;
 } karray_t ;
@@ -288,7 +294,7 @@ typedef struct kmape_t {
 		void            *pkey;
 	};
 	union {
-		const struct _kObject  *ovalue;
+		kObject  *ovalue;
 		void            *pvalue;
 		uintptr_t        uvalue;
 	};
@@ -397,13 +403,14 @@ struct KonohaContextVar {
 	struct kmodlocal_t               **modlocal;
 };
 
+
 // share, local
 
 struct SharedRuntimeVar {
 	karray_t ca;
 	struct kmap_t               *lcnameMapNN;
 	/* system shared const */
-	const struct _kObject       *constNull;
+	kObject       *constNull;
 	const struct _kBoolean      *constTrue;
 	const struct _kBoolean      *constFalse;
 	const struct _kString       *emptyString;
@@ -443,7 +450,7 @@ struct LocalRuntimeVar {
 	KonohaContext               *rootctx;
 	void*                        cstack_bottom;  // for GC
 	karray_t                     ref;   // reftrace
-	struct _kObject**            reftail;
+	kObjectVar**            reftail;
 	ktype_t   evalty;
 	kushort_t evalidx;
 	jmpbuf_i  *evaljmpbuf;
@@ -451,8 +458,6 @@ struct LocalRuntimeVar {
 
 // module
 #define MOD_MAX    32
-struct _kObject;
-
 #define MOD_logger   0
 #define MOD_gc       1
 #define MOD_code     2
@@ -495,8 +500,8 @@ typedef struct kmodshare_t {
 		const char     *fname \
 
 #define K_FRAME_MEMBER \
-		const struct _kObject *o;  \
-		struct _kObject       *Wo; \
+		kObject *o;  \
+		kObjectVar       *Wo; \
 		const struct _kInt    *i; \
 		const struct _kFloat  *f; \
 		const struct _kString *s; \
@@ -558,13 +563,13 @@ typedef struct kfield_t {
 struct _kclass;
 
 #define KCLASSSPI \
-		void (*init)(KonohaContext *kctx, const struct _kObject*, void *conf);\
-		void (*reftrace)(KonohaContext *kctx, const struct _kObject*);\
-		void (*free)(KonohaContext *kctx, const struct _kObject*);\
-		const struct _kObject* (*fnull)(KonohaContext *kctx, const struct _kclass*);\
+		void (*init)(KonohaContext *kctx, kObject*, void *conf);\
+		void (*reftrace)(KonohaContext *kctx, kObject*);\
+		void (*free)(KonohaContext *kctx, kObject*);\
+		kObject* (*fnull)(KonohaContext *kctx, const struct _kclass*);\
 		void (*p)(KonohaContext *kctx, KonohaStack *, int, kwb_t *, int);\
-		uintptr_t (*unbox)(KonohaContext *kctx, const struct _kObject*);\
-		int  (*compareTo)(const struct _kObject*, const struct _kObject*);\
+		uintptr_t (*unbox)(KonohaContext *kctx, kObject*);\
+		int  (*compareTo)(kObject*, kObject*);\
 		void (*initdef)(KonohaContext *kctx, struct _kclass*, kline_t);\
 		kbool_t (*isSubType)(KonohaContext *kctx, const struct _kclass*, const struct _kclass*);\
 		const struct _kclass* (*realtype)(KonohaContext *kctx, const struct _kclass*, const struct _kclass*)
@@ -587,7 +592,6 @@ typedef struct KDEFINE_CLASS {
 	.cstruct_size = sizeof(k##C)\
 
 struct _kString;
-struct _kObject;
 //struct _kclass;
 typedef uintptr_t kmagicflag_t;
 
@@ -609,8 +613,8 @@ struct _kclass {
 	const struct _kArray     *methods;
 	const struct _kString    *shortNameNULL;
 	union {   // default value
-		const struct _kObject  *nulvalNULL;
-		struct _kObject        *nulvalNULL_;
+		kObject  *nulvalNULL;
+		kObjectVar        *nulvalNULL_;
 	};
 	struct kmap_t            *constPoolMapNO;
 	kclass_t                 *searchSimilarClassNULL;
@@ -722,7 +726,7 @@ struct _kclass {
 
 #define kObject_NullObject         ((kmagicflag_t)(1<<0))
 #define kObject_isNullObject(o)    (TFLAG_is(kmagicflag_t,(o)->h.magicflag,kObject_NullObject))
-#define kObject_setNullObject(o,b) TFLAG_set(kmagicflag_t,((struct _kObject*)o)->h.magicflag,kObject_NullObject,b)
+#define kObject_setNullObject(o,b) TFLAG_set(kmagicflag_t,((kObjectVar*)o)->h.magicflag,kObject_NullObject,b)
 #define IS_NULL(o)                 ((((o)->h.magicflag) & kObject_NullObject) == kObject_NullObject)
 #define IS_NOTNULL(o)              ((((o)->h.magicflag) & kObject_NullObject) != kObject_NullObject)
 
@@ -744,12 +748,11 @@ typedef struct kObjectHeader {
 	karray_t *kvproto;
 } kObjectHeader ;
 
-typedef const struct _kObject kObject;
 
-struct _kObject {
+struct kObjectVar {
 	kObjectHeader h;
 	union {
-		const struct _kObject *fields[4];
+		kObject *fields[4];
 		uintptr_t ndata[4];
 	};
 };
@@ -853,7 +856,7 @@ struct _kInt /* extends kNumber */ {
 #define S_isMallocText(o)    (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local3))
 #define S_setMallocText(o,b) TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local3,b)
 #define S_isASCII(o)         (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local4))
-#define S_setASCII(o,b)      TFLAG_set(uintptr_t,((struct _kObject*)o)->h.magicflag,kObject_Local4,b)
+#define S_setASCII(o,b)      TFLAG_set(uintptr_t,((kObjectVar*)o)->h.magicflag,kObject_Local4,b)
 #define S_isPooled(o)        (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local5))
 #define S_setPooled(o,b)     TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local5,b)
 #define SIZEOF_INLINETEXT    (sizeof(void*)*8 - sizeof(kBytes))
@@ -908,7 +911,7 @@ struct _kArray {
 #ifdef K_USING_FLOAT
 		kfloat_t               *flist;
 #endif
-		const struct _kObject        **list;
+		kObject        **list;
 		const struct _kString        **strings;
 		const struct _kParam         **params;
 		const struct _kMethod        **methods;
@@ -1408,18 +1411,18 @@ typedef struct {
 #define KSETp(parent,  v, o) KSETv(v, o)
 #define KUNUSEv(V)  (V)->h.ct->free(kctx, (V))
 
-#define BEGIN_REFTRACE(SIZE)  int _ref_ = (SIZE); struct _kObject** _tail = KONOHA_reftail(kctx, (SIZE));
+#define BEGIN_REFTRACE(SIZE)  int _ref_ = (SIZE); kObjectVar** _tail = KONOHA_reftail(kctx, (SIZE));
 #define END_REFTRACE()        (void)_ref_; kctx->stack->reftail = _tail;
 
 #define KREFTRACEv(p)  do {\
 	DBG_ASSERT(p != NULL);\
-	_tail[0] = (struct _kObject*)p;\
+	_tail[0] = (kObjectVar*)p;\
 	_tail++;\
 } while (0)
 
 #define KREFTRACEn(p) do {\
 	if(p != NULL) {\
-		_tail[0] = (struct _kObject*)p;\
+		_tail[0] = (kObjectVar*)p;\
 		_tail++;\
 	}\
 } while (0)

@@ -401,7 +401,7 @@ static inline karray_t* kvproto_null(void)  // for proto_get safe null
 	return &pnull;
 }
 
-void KONOHA_freeObjectField(KonohaContext *kctx, struct _kObject *o)
+void KONOHA_freeObjectField(KonohaContext *kctx, kObjectVar *o)
 {
 	kclass_t *ct = O_ct(o);
 	if(o->h.kvproto->bytemax > 0) {
@@ -523,9 +523,8 @@ static kObject* KObject_getObjectNULL(KonohaContext *kctx, kObject *o, ksymbol_t
 
 static void KObject_setObject(KonohaContext *kctx, kObject *o, ksymbol_t key, ktype_t ty, kObject *val)
 {
-	W(kObject, o);
-	kvproto_set(kctx, &Wo->h.kvproto, key | SYMKEY_BOXED, ty, (uintptr_t)val);
-	WASSERT(o);
+	kObjectVar *v = (kObjectVar*)o;
+	kvproto_set(kctx, &v->h.kvproto, key | SYMKEY_BOXED, ty, (uintptr_t)val);
 }
 
 static uintptr_t KObject_getUnboxedValue(KonohaContext *kctx, kObject *o, ksymbol_t key, uintptr_t defval)
@@ -536,9 +535,8 @@ static uintptr_t KObject_getUnboxedValue(KonohaContext *kctx, kObject *o, ksymbo
 
 static void KObject_setUnboxedValue(KonohaContext *kctx, kObject *o, ksymbol_t key, ktype_t ty, uintptr_t uval)
 {
-	W(kObject, o);
-	kvproto_set(kctx, &Wo->h.kvproto, key, ty, uval);
-	WASSERT(o);
+	kObjectVar *v = (kObjectVar*)o;
+	kvproto_set(kctx, &v->h.kvproto, key, ty, uval);
 }
 
 static void KObject_removeKey(KonohaContext *kctx, kObject *o, ksymbol_t key)

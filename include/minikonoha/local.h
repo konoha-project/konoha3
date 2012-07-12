@@ -30,9 +30,9 @@
 // These functions are local functions in minikonoha binary.
 // Don't call from packages directly   (kimio)
 
-struct _kObject** KONOHA_reftail(KonohaContext *kctx, size_t size);
+kObjectVar** KONOHA_reftail(KonohaContext *kctx, size_t size);
 void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o);  // called from MODGC
-void KONOHA_freeObjectField(KonohaContext *kctx, struct _kObject *o);       // callled from MODGC
+void KONOHA_freeObjectField(KonohaContext *kctx, kObjectVar *o);       // callled from MODGC
 
 void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx);
 //void MODCODE_genCode(KonohaContext *kctx, kMethod *mtd, const struct _kBlock *bk);

@@ -133,7 +133,7 @@ typedef struct kopl_t {
 //## flag BasicBlock StackChecked 2 - is set * *;
 
 #define BasicBlock_isVisited(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
-#define BasicBlock_setVisited(o,B)   TFLAG_set(uintptr_t,((struct _kObject*)o)->h.magicflag,kObject_Local1,B)
+#define BasicBlock_setVisited(o,B)   TFLAG_set(uintptr_t,((kObjectVar*)o)->h.magicflag,kObject_Local1,B)
 
 typedef const struct _kBasicBlock kBasicBlock;
 

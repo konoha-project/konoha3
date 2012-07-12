@@ -26,7 +26,7 @@ static kObject* DEFAULT_fnull(KonohaContext *kctx, kclass_t *ct);
 
 static void Object_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct _kObject *of = (struct _kObject*)o;
+	kObjectVar *of = (kObjectVar*)o;
 	of->ndata[0] = 0;
 	of->ndata[1] = 0;
 }
@@ -47,7 +47,7 @@ static void Object_reftrace(KonohaContext *kctx, kObject *o)
 
 static void ObjectX_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct _kObject *of = (struct _kObject*)o;
+	kObjectVar *of = (kObjectVar*)o;
 	kclass_t *ct = O_ct(of);
 	assert(CT_isDefined(ct));
 	assert(ct->nulvalNULL != NULL);
@@ -73,7 +73,7 @@ static void Object_initdef(KonohaContext *kctx, struct _kclass *ct, kline_t plin
 static kObject *new_Object(KonohaContext *kctx, kclass_t *ct, void *conf)
 {
 	DBG_ASSERT(ct->cstruct_size > 0);
-	struct _kObject *o = (struct _kObject*) MODGC_omalloc(kctx, ct->cstruct_size);
+	kObjectVar *o = (kObjectVar*) MODGC_omalloc(kctx, ct->cstruct_size);
 	o->h.magicflag = ct->magicflag;
 	o->h.ct = ct;
 	o->h.kvproto = kvproto_null();

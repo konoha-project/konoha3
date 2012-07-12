@@ -408,7 +408,7 @@ static void knh_ObjectObjectArenaTBL_free0(KonohaContext *kctx, const objpageTBL
 		for(i = 0; i < K_PAGEOBJECTSIZE(0) - 1; ++i) {
 			kGCObject0 *o = &opage->slots[i];
 			if(o->h.ct == NULL) continue;
-			KONOHA_freeObjectField(kctx, (struct _kObject*)o);
+			KONOHA_freeObjectField(kctx, (kObjectVar*)o);
 		}
 		opage++;
 	}
@@ -422,7 +422,7 @@ static void knh_ObjectObjectArenaTBL_free1(KonohaContext *kctx, const objpageTBL
 		for(i = 0; i < K_PAGEOBJECTSIZE(1) - 1; ++i) {
 			kGCObject1 *o = &opage->slots[i];
 			if(o->h.ct == NULL) continue;
-			KONOHA_freeObjectField(kctx, (struct _kObject*)o);
+			KONOHA_freeObjectField(kctx, (kObjectVar*)o);
 		}
 		opage++;
 	}
@@ -436,7 +436,7 @@ static void knh_ObjectObjectArenaTBL_free2(KonohaContext *kctx, const objpageTBL
 		for(i = 0; i < K_PAGEOBJECTSIZE(2) - 1; ++i) {
 			kGCObject2 *o = &opage->slots[i];
 			if(o->h.ct == NULL) continue;
-			KONOHA_freeObjectField(kctx, (struct _kObject*)o);
+			KONOHA_freeObjectField(kctx, (kObjectVar*)o);
 		}
 		opage++;
 	}
@@ -576,7 +576,7 @@ static int marked = 0;
 static void mark_ostack(KonohaContext *kctx, kObject *ref, knh_ostack_t *ostack,int i)
 {
 	if(ref->h.refc != 1) {
-		((struct _kObject *)ref)->h.refc = 1;
+		((kObjectVar *)ref)->h.refc = 1;
 		++marked;
 		ostack_push(kctx, ostack, ref);
 	}
@@ -631,7 +631,7 @@ static size_t sweep0(KonohaContext *kctx, void *p, int n, size_t sizeOfObject)
 			if( O_ct(o)) {
 				//DBG_ASSERT(!IS_Method(o));
 				DBG_P("~Object%d %s", n, O_ct(o)->DBG_NAME);
-				KONOHA_freeObjectField(kctx, (struct _kObject*)o);
+				KONOHA_freeObjectField(kctx, (kObjectVar*)o);
 				assert(O_ct(o)->cstruct_size == sizeOfObject);
 				++collected;
 				OBJECT_REUSE(o, n);
