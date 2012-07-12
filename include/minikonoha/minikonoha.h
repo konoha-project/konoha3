@@ -368,6 +368,13 @@ typedef kushort_t       kparamid_t;
 typedef const struct KonohaContextVar KonohaContext;
 typedef struct KonohaContextVar       KonohaContextVar;
 
+typedef const struct SharedRuntimeVar SharedRuntime;
+typedef struct SharedRuntimeVar       SharedRuntimeVar;
+
+typedef const struct LocalRuntimeVar    LocalRuntime;
+typedef struct LocalRuntimeVar          LocalRuntimeVar;
+
+
 struct KonohaContextVar {
 	int						          safepoint; // set to 1
 	struct ksfp_t                    *esp;
@@ -377,8 +384,8 @@ struct KonohaContextVar {
 	 * checking modgc performance and remove
 	 * memshare/memlocal from context
 	 */
-	struct kshare_t                   *share;
-	struct kstack_t                   *stack;
+	SharedRuntimeVar                  *share;
+	LocalRuntimeVar                   *stack;
 	struct kmemshare_t                *memshare;
 	struct kmemlocal_t                *memlocal;
 	struct kmodshare_t               **modshare;
@@ -386,9 +393,8 @@ struct KonohaContextVar {
 };
 
 // share, local
-typedef struct kshare_t kshare_t;
 
-struct kshare_t {
+struct SharedRuntimeVar {
 	karray_t ca;
 	struct kmap_t               *lcnameMapNN;
 	/* system shared const */
@@ -410,7 +416,7 @@ struct kshare_t {
 	struct kmap_t                *paramdomMapNN;
 };
 
-typedef struct kstack_t {
+struct LocalRuntimeVar {
 	struct ksfp_t*               stack;
 	size_t                       stacksize;
 	struct ksfp_t*               stack_uplimit;
@@ -425,7 +431,7 @@ typedef struct kstack_t {
 	ktype_t   evalty;
 	kushort_t evalidx;
 	jmpbuf_i  *evaljmpbuf;
-} kstack_t;
+};
 
 
 // module

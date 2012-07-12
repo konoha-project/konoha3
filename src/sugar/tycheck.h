@@ -1327,7 +1327,7 @@ static kbool_t Method_compile(KonohaContext *kctx, kMethod *mtd, kString *text, 
 
 static void Gamma_initIt(KonohaContext *kctx, gmabuf_t *genv, kParam *pa)
 {
-	kstack_t *base = kctx->stack;
+	LocalRuntimeVar *base = kctx->stack;
 	genv->f.varsize = 0;
 	if(base->evalty != TY_void) {
 		genv->f.vars[1].fn = FN_("it");
@@ -1339,7 +1339,7 @@ static void Gamma_initIt(KonohaContext *kctx, gmabuf_t *genv, kParam *pa)
 static kstatus_t Method_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtype)
 {
 	BEGIN_LOCAL(lsfp, K_CALLDELTA);
-	kstack_t *base = kctx->stack;
+	LocalRuntimeVar *base = kctx->stack;
 	kstatus_t result = K_CONTINUE;
 	//DBG_P("TY=%s, running EVAL..", TY_t(rtype));
 	if(base->evalty != TY_void) {
@@ -1418,7 +1418,7 @@ static kstatus_t Block_eval(KonohaContext *kctx, kBlock *bk)
 	kMethod_setParam(mtd, TY_Object, 0, NULL);
 	int i, jmpresult;
 	kstatus_t result = K_CONTINUE;
-	kstack_t *base = kctx->stack;
+	LocalRuntimeVar *base = kctx->stack;
 	jmpbuf_i lbuf = {};
 	if(base->evaljmpbuf == NULL) {
 		base->evaljmpbuf = (jmpbuf_i*)KCALLOC(sizeof(jmpbuf_i), 1);

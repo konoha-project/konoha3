@@ -592,7 +592,7 @@ static void gc_mark(KonohaContext *kctx)
 {
 	long i;
 	knh_ostack_t ostackbuf, *ostack = ostack_init(kctx, &ostackbuf);
-	kstack_t *stack = kctx->stack;
+	LocalRuntimeVar *stack = kctx->stack;
 	kObject *ref = NULL;
 	marked = 0;
 

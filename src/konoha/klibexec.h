@@ -584,7 +584,7 @@ static void Kreportf(KonohaContext *kctx, kinfotag_t level, kline_t pline, const
 
 static void Kraise(KonohaContext *kctx, int param)
 {
-	kstack_t *base = kctx->stack;
+	LocalRuntimeVar *base = kctx->stack;
 	if(base->evaljmpbuf != NULL) {
 		PLAT longjmp_i(*base->evaljmpbuf, param+1);  // in setjmp 0 means good
 	}

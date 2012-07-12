@@ -505,7 +505,7 @@ static kclass_t *T_realtype(KonohaContext *kctx, kclass_t *ct, kclass_t *self)
 
 static kclass_t* Kclass(KonohaContext *kctx, ktype_t cid, kline_t pline)
 {
-	kshare_t *share = kctx->share;
+	SharedRuntime *share = kctx->share;
 	if(cid < (share->ca.bytesize/sizeof(struct _kclass*))) {
 		return share->ca.cts[cid];
 	}
@@ -576,7 +576,7 @@ static kObject *CT_null(KonohaContext *kctx, kclass_t *ct)
 
 static struct _kclass* new_CT(KonohaContext *kctx, kclass_t *bct, KDEFINE_CLASS *s, kline_t pline)
 {
-	kshare_t *share = kctx->share;
+	SharedRuntimeVar *share = kctx->share;
 	ktype_t newid = share->ca.bytesize / sizeof(struct _kclass*);
 	if(share->ca.bytesize == share->ca.bytemax) {
 		KARRAY_EXPAND(&share->ca, share->ca.bytemax * 2);
@@ -883,7 +883,7 @@ static void KCLASSTABLE_initklib2(struct _klib2 *l)
 
 static void KCLASSTABLE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
-	kshare_t *share = (kshare_t*)KCALLOC(sizeof(kshare_t), 1);
+	SharedRuntimeVar *share = (SharedRuntimeVar*)KCALLOC(sizeof(SharedRuntime), 1);
 	ctx->share = share;
 	KCLASSTABLE_initklib2((struct _klib2*)kctx->lib2);
 	KARRAY_INIT(&share->ca, K_CLASSTABLE_INIT * sizeof(kclass_t));
@@ -929,7 +929,7 @@ static void val_reftrace(KonohaContext *kctx, kmape_t *p)
 
 static void kshare_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 {
-	kshare_t *share = ctx->share;
+	SharedRuntime *share = ctx->share;
 	kclass_t **cts = (kclass_t**)kctx->share->ca.cts;
 	size_t i, size = kctx->share->ca.bytesize/sizeof(struct _kclass*);
 	for(i = 0; i < size; i++) {
@@ -973,7 +973,7 @@ static void CLASSTABLE_freeCT(KonohaContext *kctx)
 
 static void CLASSTABLE_free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
-	kshare_t *share = ctx->share;
+	SharedRuntimeVar *share = ctx->share;
 	kmap_free(share->lcnameMapNN, NULL);
 	kmap_free(share->fileidMapNN, NULL);
 	kmap_free(share->packMapNN, NULL);
@@ -982,7 +982,7 @@ static void CLASSTABLE_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	kmap_free(share->paramdomMapNN, NULL);
 	CLASSTABLE_freeCT(kctx);
 	KARRAY_FREE(&share->ca);
-	KFREE(share, sizeof(kshare_t));
+	KFREE(share, sizeof(SharedRuntime));
 }
 
 /* operator */

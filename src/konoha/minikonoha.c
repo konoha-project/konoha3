@@ -66,7 +66,7 @@ static void knh_endContext(KonohaContext *kctx)
 static void KRUNTIME_init(KonohaContext *kctx, KonohaContextVar *ctx, size_t stacksize)
 {
 	size_t i;
-	kstack_t *base = (kstack_t*)KCALLOC(sizeof(kstack_t), 1);
+	LocalRuntimeVar *base = (LocalRuntimeVar*)KCALLOC(sizeof(LocalRuntimeVar), 1);
 	base->stacksize = stacksize;
 	base->stack = (ksfp_t*)KCALLOC(sizeof(ksfp_t), stacksize);
 	assert(stacksize>64);
@@ -102,7 +102,7 @@ static void KRUNTIME_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	KARRAY_FREE(&kctx->stack->cwb);
 	KARRAY_FREE(&kctx->stack->ref);
 	KFREE(kctx->stack->stack, sizeof(ksfp_t) * ctx->stack->stacksize);
-	KFREE(kctx->stack, sizeof(kstack_t));
+	KFREE(kctx->stack, sizeof(LocalRuntimeVar));
 }
 
 static kbool_t KRUNTIME_setModule(KonohaContext *kctx, int x, kmodshare_t *d, kline_t pline)
@@ -233,7 +233,7 @@ static void kcontext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 
 struct _kObject** KONOHA_reftail(KonohaContext *kctx, size_t size)
 {
-	kstack_t *stack = kctx->stack;
+	LocalRuntimeVar *stack = kctx->stack;
 	size_t ref_size = stack->reftail - stack->ref.refhead;
 	if(stack->ref.bytemax/sizeof(void*) < size + ref_size) {
 		KARRAY_EXPAND(&stack->ref, (size + ref_size) * sizeof(kObject*));
