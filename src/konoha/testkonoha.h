@@ -77,17 +77,17 @@ static int test_kwb(KonohaContext *kctx)
 	size_t i = 0;
 	KUtilsGrowingArray *buf = new_karray(kctx, 0, 64);
 	KUtilsWriteBuffer wb;
-	kwb_init(buf, &wb);
-	kwb_printf(&wb, "%s%s%s%s", t, t, t, t);
-	t = KUtilsWriteBufferop(&wb, 1);
+	KLIB Kwb_init(buf, &wb);
+	KLIB Kwb_printf(kctx, &wb, "%s%s%s%s", t, t, t, t);
+	t = KLIB Kwb_top(kctx, &wb, 1);
 	while(*t != 0) {
 //		DBG_P("i=%d, ch='%c', '%c'", i, *t, '0' + (i % 10));
 		assert(*t == '0' + (i % 10));
 		i++; t++;
 	}
-	assert(i == kwb_bytesize(&wb));
-	kwb_free(&wb);
-	KARRAY_FREE(buf);
+	assert(i == Kwb_bytesize(&wb));
+	KLIB Kwb_free(&wb);
+	KLIB Karray_free(kctx, buf);
 	KFREE(buf, sizeof(KUtilsGrowingArray));
 	return 0;
 }

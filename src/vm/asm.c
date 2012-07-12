@@ -101,10 +101,10 @@ static kBasicBlock* new_BasicBlockLABEL(KonohaContext *kctx)
 static void BasicBlock_add(KonohaContext *kctx, kBasicBlock *bb, kushort_t line, VirtualMachineInstruction *op, size_t size)
 {
 	if(bb->codeTable.bytemax == 0) {
-		KARRAY_INIT(&(bb->codeTable), 1 * sizeof(VirtualMachineInstruction));
+		KLIB Karray_init(kctx, &(bb->codeTable), 1 * sizeof(VirtualMachineInstruction));
 	}
 	else if(bb->codeTable.bytesize == bb->codeTable.bytemax) {
-		KARRAY_EXPAND(&(bb->codeTable), 4 * sizeof(VirtualMachineInstruction));
+		KLIB Karray_expand(kctx, &(bb->codeTable), 4 * sizeof(VirtualMachineInstruction));
 	}
 	VirtualMachineInstruction *tailcode = bb->codeTable.opl + (bb->codeTable.bytesize/sizeof(VirtualMachineInstruction));
 	memcpy(tailcode, op, size == 0 ? sizeof(VirtualMachineInstruction) : size);
@@ -216,11 +216,11 @@ static void BasicBlock_join(KonohaContext *kctx, kBasicBlock *bb, kBasicBlock *b
 		return;
 	}
 	if(bb->codeTable.bytemax < bb->codeTable.bytesize + bbN->codeTable.bytesize) {
-		KARRAY_EXPAND(&bb->codeTable, (bb->codeTable.bytesize + bbN->codeTable.bytesize));
+		KLIB Karray_expand(kctx, &bb->codeTable, (bb->codeTable.bytesize + bbN->codeTable.bytesize));
 	}
 	memcpy(bb->codeTable.bytebuf + bb->codeTable.bytesize, bbN->codeTable.bytebuf, bbN->codeTable.bytesize);
 	bb->codeTable.bytesize += bbN->codeTable.bytesize;
-	KARRAY_FREE(&bbN->codeTable);
+	KLIB Karray_free(kctx, &bbN->codeTable);
 }
 
 static void BasicBlock_strip1(KonohaContext *kctx, kBasicBlock *bb)
@@ -330,7 +330,7 @@ static VirtualMachineInstruction* BasicBlock_copy(KonohaContext *kctx, VirtualMa
 			bb->opjmp = (dst + (BasicBlock_codesize(bb) - 1));
 		}
 		dst = dst + BasicBlock_codesize(bb);
-		KARRAY_FREE(&bb->codeTable);
+		KLIB Karray_free(kctx, &bb->codeTable);
 		prev[0] = bb;
 	}
 	if(bb->nextBlock != NULL) {
@@ -925,7 +925,7 @@ static void BasicBlock_init(KonohaContext *kctx, kObject *o, void *conf)
 static void BasicBlock_free(KonohaContext *kctx, kObject *o)
 {
 	kBasicBlock *bb = (kBasicBlock*)o;
-	KARRAY_FREE(&bb->codeTable);
+	KLIB Karray_free(kctx, &bb->codeTable);
 }
 
 static void ByteCode_init(KonohaContext *kctx, kObject *o, void *conf)

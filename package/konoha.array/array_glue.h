@@ -89,7 +89,7 @@ static void NArray_ensureMinimumSize(KonohaContext *kctx, struct _kAbstractArray
 	size_t minbyte = min * sizeof(void*);
 	if(!(minbyte < a->a.bytemax)) {
 		if(minbyte < sizeof(kObject)) minbyte = sizeof(kObject);
-		KARRAY_EXPAND(&a->a, minbyte);
+		KLIB Karray_expand(kctx, &a->a, minbyte);
 	}
 }
 

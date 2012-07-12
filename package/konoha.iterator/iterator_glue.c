@@ -63,7 +63,7 @@ static void Iterator_init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void Iterator_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
-//	kwb_printf(wb, KFLOAT_FMT, sfp[pos].fvalue);
+//	KLIB Kwb_printf(kctx, wb, KFLOAT_FMT, sfp[pos].fvalue);
 }
 
 /* ------------------------------------------------------------------------ */

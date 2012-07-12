@@ -68,7 +68,7 @@ static void Log_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuf
 	int i;
 	char *data = log_get_data(log);
 	uint16_t klen, vlen;
-	kwb_printf(wb, "{");
+	KLIB Kwb_printf(kctx, wb, "{");
 	for (i = 0; i < log->logsize; ++i) {
 		char kbuf[64] = {};
 		char vbuf[64] = {};
@@ -77,10 +77,10 @@ static void Log_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuf
 		vlen = log_get_length(log, i*2+1);
 		memcpy(kbuf, data,klen);
 		memcpy(vbuf, data+klen, vlen);
-		kwb_printf(wb, "'%s': '%s' ", kbuf, vbuf);
+		KLIB Kwb_printf(kctx, wb, "'%s': '%s' ", kbuf, vbuf);
 		data = next;
 	}
-	kwb_printf(wb, "}");
+	KLIB Kwb_printf(kctx, wb, "}");
 }
 
 //static kObject *new_RawPtr(KonohaContext *kctx, const KonohaClass *ct, void *ptr)

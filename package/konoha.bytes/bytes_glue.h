@@ -115,32 +115,32 @@ static void Bytes_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteB
 	kBytes *ba = (kBytes*)sfp[pos].o;
 	DBG_P("level:%d", level);
 	if(level == 0) {
-		kwb_printf(wb, "byte[%d]", ba->bytesize);
+		KLIB Kwb_printf(kctx, wb, "byte[%d]", ba->bytesize);
 	}
 	else if(level == 1) {
 		size_t i, j, n;
 		for(j = 0; j * 16 < ba->bytesize; j++) {
-			kwb_printf(wb, "%08x", (int)(j*16));
+			KLIB Kwb_printf(kctx, wb, "%08x", (int)(j*16));
 			for(i = 0; i < 16; i++) {
 				n = j * 16 + i;
 				if(n < ba->bytesize) {
-					kwb_printf(wb, " %2x", (int)ba->utext[n]);
+					KLIB Kwb_printf(kctx, wb, " %2x", (int)ba->utext[n]);
 				}
 				else {
-					kwb_printf(wb, "%s", "   ");
+					KLIB Kwb_printf(kctx, wb, "%s", "   ");
 				}
 			}
-			kwb_printf(wb, "%s", "    ");
+			KLIB Kwb_printf(kctx, wb, "%s", "    ");
 			for(i = 0; i < 16; i++) {
 				n = j * 16 + i;
 				if(n < ba->bytesize && isprint(ba->utext[n])) {
-					kwb_printf(wb, "%c", (int)ba->utext[n]);
+					KLIB Kwb_printf(kctx, wb, "%c", (int)ba->utext[n]);
 				}
 				else {
-					kwb_printf(wb, "%s", " ");
+					KLIB Kwb_printf(kctx, wb, "%s", " ");
 				}
 			}
-			kwb_printf(wb, "\n");
+			KLIB Kwb_printf(kctx, wb, "\n");
 		}
 	}
 }
@@ -200,14 +200,14 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 	size_t processedSize = 0;
 	size_t processedTotalSize = processedSize;
 //	KUtilsGrowingArray *buf = new_karray(kctx, 0, 64);
-	kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	while (inBytesLeft > 0 && iconv_ret == -1) {
 		iconv_ret = kmodiconv->ficonv(conv, inbuf, &inBytesLeft, outbuf, &outBytesLeft);
 		if (iconv_ret == -1 && errno == E2BIG) {
 			// input is too big.
 			processedSize = CONV_BUFSIZE - outBytesLeft;
 			processedTotalSize += processedSize;
-			kwb_printf(&wb, "%s", convBuf);
+			KLIB Kwb_printf(kctx, &wb, "%s", convBuf);
 			// reset convbuf
 			presentPtrTo = convBuf;
 //			outbuf = &presentPtrTo;
@@ -225,12 +225,12 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 			// finished. iconv_ret != -1
 			processedSize = CONV_BUFSIZE - outBytesLeft;
 			processedTotalSize += processedSize;
-			kwb_printf(&wb, "%s", convBuf);
+			KLIB Kwb_printf(kctx, &wb, "%s", convBuf);
 		}
 	} /* end of converting loop */
 	kmodiconv->ficonv_close(conv);
 
-	const char *KUtilsWriteBufferopChar = KUtilsWriteBufferop(&wb, 1);
+	const char *KUtilsWriteBufferopChar = KLIB Kwb_top(kctx, &wb, 1);
 	DBG_P("kwb:'%s'", KUtilsWriteBufferopChar);
 	kBytes *toBa = (kBytes*)new_kObject(CT_Bytes, (void*)processedTotalSize+1);
 	memcpy(toBa->buf, KUtilsWriteBufferopChar, processedTotalSize+1); // including NUL terminate by ensuredZeo

@@ -63,20 +63,20 @@ static size_t write_String(char *buffer, size_t size, size_t nitems, void *strin
 {
 	KonohaContext_t kctx = (KonohaContext_t)ctx;
 	KUtilsWriteBuffer wb;
-	kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	kStringVar *res = (kStringVar *)string;
 	kString *str;
 	char *buf = S_tobytes(res);
 	if(buf) {
-		kwb_write(&wb, buf, strlen(buf));
+		KLIB Kwb_write(kctx, &wb, buf, strlen(buf));
 	}
 	size *= nitems;
-	kwb_write(&wb, buffer, size);
-	str = new_kString(KUtilsWriteBufferop(&wb, 0), kwb_bytesize(&wb), SPOL_POOL);
+	KLIB Kwb_write(kctx, &wb, buffer, size);
+	str = new_kString(KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), SPOL_POOL);
 	res->ubuf = str->ubuf + res->bytesize;// - str->ubuf;
 	res->bytesize = str->bytesize - res->bytesize;// - str->bytesize;
 	KSETv(res, (kStringVar*)str);
-	kwb_free(&wb);
+	KLIB Kwb_free(&wb);
 	return size;
 }
 

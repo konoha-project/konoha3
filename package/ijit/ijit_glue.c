@@ -580,9 +580,9 @@ static KMETHOD Method_getFname(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kMethod *mtd = sfp[0].mtd;
 	KUtilsWriteBuffer wb;
-	kwb_init(&(kctx->stack->cwb), &wb);
-	kwb_printf(&wb, "%s%s", T_mn(mtd->mn));
-	kString *fname = new_kString(KUtilsWriteBufferop(&wb, 0), kwb_bytesize(&wb), SPOL_POOL);
+	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_printf(kctx, &wb, "%s%s", T_mn(mtd->mn));
+	kString *fname = new_kString(KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), SPOL_POOL);
 	RETURN_(fname);
 }
 

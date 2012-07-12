@@ -148,7 +148,7 @@ static void ctxsugar_reftrace(KonohaContext *kctx, struct kmodlocal_t *baseh)
 static void ctxsugar_free(KonohaContext *kctx, struct kmodlocal_t *baseh)
 {
 	SugarContext *base = (SugarContext*)baseh;
-	KARRAY_FREE(&base->errorMessageBuffer);
+	KLIB Karray_free(kctx, &base->errorMessageBuffer);
 	KFREE(base, sizeof(SugarContext));
 }
 
@@ -167,7 +167,7 @@ static void kmodsugar_setup(KonohaContext *kctx, struct kmodshare_t *def, int ne
 		KINITv(base->gma, new_(Gamma, NULL));
 		KINITv(base->singleBlock, new_(Block, NULL));
 		kArray_add(base->singleBlock->stmtList, K_NULL);
-		KARRAY_INIT(&base->errorMessageBuffer, K_PAGESIZE);
+		KLIB Karray_init(kctx, &base->errorMessageBuffer, K_PAGESIZE);
 		kctx->modlocal[MOD_sugar] = (kmodlocal_t*)base;
 	}
 }
@@ -365,12 +365,12 @@ static kstatus_t NameSpace_loadstream(KonohaContext *kctx, kNameSpace *ns, FILE_
 	kstatus_t status = K_CONTINUE;
 	KUtilsWriteBuffer wb;
 	char *p;
-	kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	while(! PLAT feof_i(fp)) {
 		kfileline_t chunkheadline = uline;
 		uline = readchunk(kctx, fp, uline, &wb);
-		const char *script = KUtilsWriteBufferop(&wb, 1);
-		size_t len = kwb_bytesize(&wb);
+		const char *script = KLIB Kwb_top(kctx, &wb, 1);
+		size_t len = Kwb_bytesize(&wb);
 		if (len > 2 && script[0] == '#' && script[1] == '!') {
 			if ((p = strstr(script, "konoha")) != 0) {
 				p += 6;
@@ -386,9 +386,9 @@ static kstatus_t NameSpace_loadstream(KonohaContext *kctx, kNameSpace *ns, FILE_
 			status = MODSUGAR_eval(kctx, script, /*len, */chunkheadline);
 		}
 		if(status != K_CONTINUE) break;
-		kwb_free(&wb);
+		KLIB Kwb_free(&wb);
 	}
-	kwb_free(&wb);
+	KLIB Kwb_free(&wb);
 	if(status != K_CONTINUE) {
 		kreportf(DEBUG_, pline, "running script is failed: %s", SS_t(uline));
 	}

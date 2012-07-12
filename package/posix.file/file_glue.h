@@ -68,7 +68,7 @@ static void File_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBu
 {
 	kFILE *file = (kFILE*)sfp[pos].o;
 	FILE *fp = file->fp;
-	kwb_printf(wb, "FILE :%p, path=%s", fp, file->realpath);
+	KLIB Kwb_printf(kctx, wb, "FILE :%p, path=%s", fp, file->realpath);
 }
 
 /* ------------------------------------------------------------------------ */

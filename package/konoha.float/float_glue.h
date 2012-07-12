@@ -37,7 +37,7 @@ static void Float_init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void Float_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
-	kwb_printf(wb, KFLOAT_FMT, sfp[pos].fvalue);
+	KLIB Kwb_printf(kctx, wb, KFLOAT_FMT, sfp[pos].fvalue);
 }
 
 static void kmodfloat_setup(KonohaContext *kctx, struct kmodshare_t *def, int newctx)

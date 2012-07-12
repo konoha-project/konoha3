@@ -61,7 +61,7 @@ static void Jansson_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWrit
 {
 	struct _kJson *json = (struct _kJson *)sfp[pos].o;
 	char* data = json_dumps(json->obj, JSON_ENSURE_ASCII);
-	kwb_printf(wb, "%s", data);
+	KLIB Kwb_printf(kctx, wb, "%s", data);
 	free(data);
 }
 

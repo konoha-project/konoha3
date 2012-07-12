@@ -121,7 +121,7 @@ static kArray *kStringToCharArray(KonohaContext *kctx, kString *bs, int istrim)
 
 static kString *kwb_newString(KonohaContext *kctx, KUtilsWriteBuffer *wb, int flg)
 {
-	return new_kString(KUtilsWriteBufferop(wb, flg), kwb_bytesize(wb), SPOL_POOL);
+	return new_kString(KLIB Kwb_top(kctx, wb, flg), Kwb_bytesize(wb), SPOL_POOL);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -424,7 +424,7 @@ static void WB_write_regexfmt(KonohaContext *kctx, KUtilsWriteBuffer *wb, kbytes
 					}
 				}
 				kregmatch_t *rp = &r[grpidx];
-				kwb_write(wb, base + rp->rm_so, rp->rm_eo - rp->rm_so);
+				KLIB Kwb_write(kctx, wb, base + rp->rm_so, rp->rm_eo - rp->rm_so);
 				continue; // skip putc
 			}
 		}
@@ -450,7 +450,7 @@ static void Regex_free(KonohaContext *kctx, kObject *o)
 
 static void Regex_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
-	kwb_printf(wb, "/%s/", S_text(sfp[pos].re->pattern));
+	KLIB Kwb_printf(kctx, wb, "/%s/", S_text(sfp[pos].re->pattern));
 }
 
 static void Regex_set(KonohaContext *kctx, kRegex *re, kString *ptns, kString *opts)
@@ -556,7 +556,7 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kString *s = s0;
 	if(IS_NOTNULL(re) && S_size(re->pattern) > 0) {
 		KUtilsWriteBuffer wb;
-		kwb_init(&(kctx->stack->cwb), &wb);
+		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 		const char *str = S_text(s0);  // necessary
 		const char *base = str;
 		const char *eos = str + S_size(s0); // end of str
@@ -570,7 +570,7 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp _RIX)
 			}
 			size_t len = pmatch[0].rm_eo;
 			if (pmatch[0].rm_so > 0) {
-				kwb_write(&wb, str, pmatch[0].rm_so);
+				KLIB Kwb_write(kctx, &wb, str, pmatch[0].rm_so);
 			}
 			size_t matched = knh_regex_matched(pmatch, KREGEX_MATCHSIZE);
 			if (len > 0) {
@@ -583,7 +583,7 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp _RIX)
 				break;
 			}
 		}
-		kwb_write(&wb, str, strlen(str)); // write out remaining string
+		KLIB Kwb_write(kctx, &wb, str, strlen(str)); // write out remaining string
 		s = kwb_newString(kctx, &wb, 0); // close cwb
 	}
 	RETURN_(s);

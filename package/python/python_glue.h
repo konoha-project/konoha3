@@ -56,7 +56,7 @@ static void PyObject_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWri
 	PyObject *pyo =  ((kPyObject*)sfp[pos].o)->self;
 	PyObject* str = pyo->ob_type->tp_str(pyo);
 	Py_INCREF(str);
-	kwb_printf(wb, "%s", PyString_AsString(str));
+	KLIB Kwb_printf(kctx, wb, "%s", PyString_AsString(str));
 	Py_DECREF(str);
 }
 
@@ -149,11 +149,11 @@ static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //	if(po->self == NULL) {
 //		// [TODO] throw Exception
 //	}
-//	kwb_init(&(kctx->stack->cwb), &wb);
+//	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 //	O_ct(sfp[0].o)->p(kctx, sfp, 0, &wb, 0);
-//	struct _kBytes* ba = (struct _kBytes*)new_Bytes(kctx, kwb_bytesize(&wb));
-//	ba->buf = KUtilsWriteBufferop(&wb, 1);
-//	kwb_free(&wb);
+//	struct _kBytes* ba = (struct _kBytes*)new_Bytes(kctx, Kwb_bytesize(&wb));
+//	ba->buf = KLIB Kwb_top(kctx, &wb, 1);
+//	KLIB Kwb_free(&wb);
 //	RETURN_(ba);
 //}
 
@@ -179,10 +179,10 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	KUtilsWriteBuffer wb;
 	// assert
 	DBG_ASSERT(po->self != NULL);
-	kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	O_ct(sfp[0].o)->p(kctx, sfp, 0, &wb, 0);
-	kString* s = new_kString(KUtilsWriteBufferop(&wb, 1), kwb_bytesize(&wb), 0);
-	kwb_free(&wb);
+	kString* s = new_kString(KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
+	KLIB Kwb_free(&wb);
 	RETURN_(s);
 	//if (PyString_Check(po->self)) {
 	//	//dec
@@ -203,10 +203,10 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	//}
 	//else {
 	//	KUtilsWriteBuffer wb;
-	//	kwb_init(&(kctx->stack->cwb), &wb);
+	//	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	//	O_ct(sfp[0].o)->p(kctx, sfp, 0, &wb, 0);
-	//	kString* s = new_kString(KUtilsWriteBufferop(&wb, 1), kwb_bytesize(&wb), 0);
-	//	kwb_free(&wb);
+	//	kString* s = new_kString(KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
+	//	KLIB Kwb_free(&wb);
 	//	RETURN_(s);
 	//}
 }

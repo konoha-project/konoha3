@@ -75,8 +75,8 @@ static void KRUNTIME_init(KonohaContext *kctx, KonohaContextVar *ctx, size_t sta
 		KINITv(base->stack[i].o, K_NULL);
 	}
 	KINITv(base->gcstack, new_(Array, K_PAGESIZE/sizeof(void*)));
-	KARRAY_INIT(&base->cwb, K_PAGESIZE * 4);
-	KARRAY_INIT(&base->ref, K_PAGESIZE);
+	KLIB Karray_init(kctx, &base->cwb, K_PAGESIZE * 4);
+	KLIB Karray_init(kctx, &base->ref, K_PAGESIZE);
 	base->reftail = base->ref.refhead;
 	ctx->esp = base->stack;
 	ctx->stack = base;
@@ -99,8 +99,8 @@ static void KRUNTIME_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	if(kctx->stack->evaljmpbuf != NULL) {
 		KFREE(kctx->stack->evaljmpbuf, sizeof(jmpbuf_i));
 	}
-	KARRAY_FREE(&kctx->stack->cwb);
-	KARRAY_FREE(&kctx->stack->ref);
+	KLIB Karray_free(kctx, &kctx->stack->cwb);
+	KLIB Karray_free(kctx, &kctx->stack->ref);
 	KFREE(kctx->stack->stack, sizeof(KonohaStack) * ctx->stack->stacksize);
 	KFREE(kctx->stack, sizeof(KonohaLocalRuntimeVar));
 }
@@ -236,7 +236,7 @@ kObjectVar** KONOHA_reftail(KonohaContext *kctx, size_t size)
 	KonohaLocalRuntimeVar *stack = kctx->stack;
 	size_t ref_size = stack->reftail - stack->ref.refhead;
 	if(stack->ref.bytemax/sizeof(void*) < size + ref_size) {
-		KARRAY_EXPAND(&stack->ref, (size + ref_size) * sizeof(kObject*));
+		KLIB Karray_expand(kctx, &stack->ref, (size + ref_size) * sizeof(kObject*));
 		stack->reftail = stack->ref.refhead + ref_size;
 	}
 	kObjectVar **reftail = stack->reftail;

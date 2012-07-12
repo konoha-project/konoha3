@@ -203,7 +203,7 @@ static int parseSLASH(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, in
 static int parseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
 {
 	KUtilsWriteBuffer wb;
-	kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	int ch, prev = '"', pos = tok_start + 1, next;
 	while((ch = tenv->source[pos++]) != 0) {
 		if(ch == '\n') {
@@ -211,11 +211,11 @@ static int parseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, TokenizerEn
 		}
 		if(ch == '"' && prev != '\\') {
 			if(IS_NOTNULL(tk)) {
-				size_t length = kwb_bytesize(&wb);
-				KSETv(tk->text, new_kString(KUtilsWriteBufferop(&wb, 1), length, 0));
+				size_t length = Kwb_bytesize(&wb);
+				KSETv(tk->text, new_kString(KLIB Kwb_top(kctx, &wb, 1), length, 0));
 				tk->keyword = TK_TEXT;
 			}
-			kwb_free(&wb);
+			KLIB Kwb_free(&wb);
 			return pos;
 		}
 		if(ch == '\\' && (next = tenv->source[pos]) != 0) {
@@ -233,7 +233,7 @@ static int parseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, TokenizerEn
 	if(IS_NOTNULL(tk)) {
 		Token_pERR(kctx, tk, "must close with \"");
 	}
-	kwb_free(&wb);
+	KLIB Kwb_free(&wb);
 	return pos-1;
 }
 

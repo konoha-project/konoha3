@@ -83,7 +83,7 @@ static void NameSpace_free(KonohaContext *kctx, kObject *o)
 	if(ns->tokenMatrix != NULL) {
 		KFREE((void*)ns->tokenMatrix, SIZEOF_TOKENMATRIX);
 	}
-	KARRAY_FREE(&ns->constTable);
+	KLIB Karray_free(kctx, &ns->constTable);
 }
 
 // syntax
@@ -296,23 +296,23 @@ static void NameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, kvs
 {
 	size_t i, s = KARRAYSIZE(ns->constTable.bytesize, kvs);
 	if(s == 0) {
-		KARRAY_INIT(&ns->constTable, (nitems + 8) * sizeof(kvs_t));
+		KLIB Karray_init(kctx, &ns->constTable, (nitems + 8) * sizeof(kvs_t));
 		memcpy(ns->constTable.kvs, kvs, nitems * sizeof(kvs_t));
 	}
 	else {
 		KUtilsWriteBuffer wb;
-		kwb_init(&(ctxsugar->errorMessageBuffer), &wb);
+		KLIB Kwb_init(&(ctxsugar->errorMessageBuffer), &wb);
 		for(i = 0; i < nitems; i++) {
 			if(checkConflictedConst(kctx, ns, kvs+i, pline)) continue;
-			kwb_write(&wb, (const char*)(kvs+i), sizeof(kvs_t));
+			KLIB Kwb_write(kctx, &wb, (const char*)(kvs+i), sizeof(kvs_t));
 		}
-		kvs = (kvs_t*)KUtilsWriteBufferop(&wb, 0);
-		nitems = kwb_bytesize(&wb)/sizeof(kvs_t);
+		kvs = (kvs_t*)KLIB Kwb_top(kctx, &wb, 0);
+		nitems = Kwb_bytesize(&wb)/sizeof(kvs_t);
 		if(nitems > 0) {
-			KARRAY_RESIZE(&ns->constTable, (s + nitems + 8) * sizeof(kvs_t));
+			KLIB Karray_resize(kctx, &ns->constTable, (s + nitems + 8) * sizeof(kvs_t));
 			memcpy(ns->constTable.kvs + s, kvs, nitems * sizeof(kvs_t));
 		}
-		kwb_free(&wb);
+		KLIB Kwb_free(&wb);
 	}
 	ns->constTable.bytesize = (s + nitems) * sizeof(kvs_t);
 	PLAT qsort_i(ns->constTable.kvs, s + nitems, sizeof(kvs_t), comprKeyVal);
@@ -330,7 +330,7 @@ static void NameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ns, const c
 	INIT_GCSTACK();
 	kvs_t kv;
 	KUtilsWriteBuffer wb;
-	kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	while(d[0] != NULL) {
 		//DBG_P("key='%s'", d[0]);
 		kv.key = ksymbolSPOL(d[0], strlen_alnum(d[0]), SPOL_TEXT|SPOL_ASCII, _NEWID) | SYMKEY_BOXED;
@@ -347,14 +347,14 @@ static void NameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ns, const c
 		else {
 			kv.oval = (kObject*)d[2];
 		}
-		kwb_write(&wb, (const char*)(&kv), sizeof(kvs_t));
+		KLIB Kwb_write(kctx, &wb, (const char*)(&kv), sizeof(kvs_t));
 		d += 3;
 	}
-	size_t nitems = kwb_bytesize(&wb) / sizeof(kvs_t);
+	size_t nitems = Kwb_bytesize(&wb) / sizeof(kvs_t);
 	if(nitems > 0) {
-		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, (kvs_t*)KUtilsWriteBufferop(&wb, 0), nitems, pline);
+		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, (kvs_t*)KLIB Kwb_top(kctx, &wb, 0), nitems, pline);
 	}
-	kwb_free(&wb);
+	KLIB Kwb_free(&wb);
 	RESET_GCSTACK();
 }
 
@@ -362,7 +362,7 @@ static void NameSpace_importClassName(KonohaContext *kctx, kNameSpace *ns, kpack
 {
 	kvs_t kv;
 	KUtilsWriteBuffer wb;
-	kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	size_t i, size = KARRAYSIZE(kctx->share->classTable.bytesize, uintptr);
 	for(i = 0; i < size; i++) {
 		KonohaClass *ct = CT_(i);
@@ -372,14 +372,14 @@ static void NameSpace_importClassName(KonohaContext *kctx, kNameSpace *ns, kpack
 			kv.key = ct->nameid;
 			kv.ty  = TY_TYPE;
 			kv.uval = (uintptr_t)ct;
-			kwb_write(&wb, (const char*)(&kv), sizeof(kvs_t));
+			KLIB Kwb_write(kctx, &wb, (const char*)(&kv), sizeof(kvs_t));
 		}
 	}
-	size_t nitems = kwb_bytesize(&wb) / sizeof(kvs_t);
+	size_t nitems = Kwb_bytesize(&wb) / sizeof(kvs_t);
 	if(nitems > 0) {
-		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, (kvs_t*)KUtilsWriteBufferop(&wb, 0), nitems, pline);
+		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, (kvs_t*)KLIB Kwb_top(kctx, &wb, 0), nitems, pline);
 	}
-	kwb_free(&wb);
+	KLIB Kwb_free(&wb);
 }
 
 // NameSpace

@@ -134,26 +134,26 @@ static kstatus_t readstmt(KonohaContext *kctx, KUtilsWriteBuffer *wb, kfileline_
 		int check;
 		char *ln = kreadline(line == 1 ? ">>> " : "    ");
 		if(ln == NULL) {
-			kwb_free(wb);
+			KLIB Kwb_free(wb);
 			status = K_BREAK;
 			break;
 		}
 		if(line > 1) kwb_putc(wb, '\n');
-		kwb_write(wb, ln, strlen(ln));
+		KLIB Kwb_write(kctx, wb, ln, strlen(ln));
 		free(ln);
-		if((check = checkstmt(KUtilsWriteBufferop(wb, 0), kwb_bytesize(wb))) > 0) {
+		if((check = checkstmt(KLIB Kwb_top(kctx, wb, 0), Kwb_bytesize(wb))) > 0) {
 			uline[0]++;
 			line++;
 			continue;
 		}
 		if(check < 0) {
 			fputs("(Cancelled)...\n", stdout);
-			kwb_free(wb);
+			KLIB Kwb_free(wb);
 		}
 		break;
 	}
-	if(kwb_bytesize(wb) > 0) {
-		kadd_history(KUtilsWriteBufferop(wb, 1));
+	if(Kwb_bytesize(wb) > 0) {
+		kadd_history(KLIB Kwb_top(kctx, wb, 1));
 	}
 //	fputs(TERM_EBOLD(kctx), stdout);
 	fflush(stdout);
@@ -169,32 +169,32 @@ static void dumpEval(KonohaContext *kctx, KUtilsWriteBuffer *wb)
 		KonohaStack *lsfp = base->stack + base->evalidx;
 		CT_(ty)->p(kctx, lsfp, 0, wb, P_DUMP);
 		fflush(stdout);
-		fprintf(stdout, "TYPE=%s EVAL=%s\n", TY_t(ty), KUtilsWriteBufferop(wb,1));
+		fprintf(stdout, "TYPE=%s EVAL=%s\n", TY_t(ty), KLIB Kwb_top(kctx, wb,1));
 	}
 }
 
 static void shell(KonohaContext *kctx)
 {
 	KUtilsWriteBuffer wb;
-	kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	kfileline_t uline = FILEID_("(shell)") | 1;
 	while(1) {
 		kfileline_t inc = 0;
 		kstatus_t status = readstmt(kctx, &wb, &inc);
-		if(status == K_CONTINUE && kwb_bytesize(&wb) > 0) {
-			status = konoha_eval((KonohaContext*)kctx, KUtilsWriteBufferop(&wb, 1), uline);
+		if(status == K_CONTINUE && Kwb_bytesize(&wb) > 0) {
+			status = konoha_eval((KonohaContext*)kctx, KLIB Kwb_top(kctx, &wb, 1), uline);
 			uline += inc;
-			kwb_free(&wb);
+			KLIB Kwb_free(&wb);
 			if(status != K_FAILED) {
 				dumpEval(kctx, &wb);
-				kwb_free(&wb);
+				KLIB Kwb_free(&wb);
 			}
 		}
 		if(status == K_BREAK) {
 			break;
 		}
 	}
-	kwb_free(&wb);
+	KLIB Kwb_free(&wb);
 	fprintf(stdout, "\n");
 	return;
 }

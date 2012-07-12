@@ -49,14 +49,14 @@ static void MethodAttribute_p(KonohaContext *kctx, kMethod *mtd, KUtilsWriteBuff
 	for(i = 0; i < 30; i++) {
 		if(attrs[i].aname == NULL) break;
 		if((attrs[i].flag & mtd->flag) == attrs[i].flag) {
-			kwb_printf(wb, "@%s ", attrs[i].aname);
+			KLIB Kwb_printf(kctx, wb, "@%s ", attrs[i].aname);
 		}
 	}
 	if(kMethod_isCast(mtd)) {
-		kwb_printf(wb, "@Cast ");
+		KLIB Kwb_printf(kctx, wb, "@Cast ");
 	}
 //	if(kMethod_isTransCast(mtd)) {
-//		kwb_printf(wb, "@T ");
+//		KLIB Kwb_printf(kctx, wb, "@T ");
 //	}
 }
 
@@ -68,7 +68,7 @@ static void Method_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWrite
 	if(level != 0) {
 		MethodAttribute_p(kctx, mtd, wb);
 	}
-	kwb_printf(wb, "%s %s.%s%s", TY_t(pa->rtype), TY_t(mtd->cid), T_mn(mtd->mn));
+	KLIB Kwb_printf(kctx, wb, "%s %s.%s%s", TY_t(pa->rtype), TY_t(mtd->cid), T_mn(mtd->mn));
 	if(level != 0) {
 		size_t i;
 		kwb_putc(wb, '(');
@@ -77,9 +77,9 @@ static void Method_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWrite
 				kwb_putc(wb, ',', ' ');
 			}
 			if(FN_isCOERCION(pa->p[i].fn)) {
-				kwb_printf(wb, "@Coercion ");
+				KLIB Kwb_printf(kctx, wb, "@Coercion ");
 			}
-			kwb_printf(wb, "%s %s", TY_t(pa->p[i].ty), SYM_t(pa->p[i].fn));
+			KLIB Kwb_printf(kctx, wb, "%s %s", TY_t(pa->p[i].ty), SYM_t(pa->p[i].fn));
 		}
 //		if(Param_isVARGs(DP(mtd)->mp)) {
 //			knh_write_delimdots(kctx, w);
@@ -103,11 +103,11 @@ static void copyMethodList(KonohaContext *kctx, ktype_t cid, kArray *s, kArray *
 static void dumpMethod(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd)
 {
 	KUtilsWriteBuffer wb;
-	kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	KSETv(sfp[2].mtd, mtd);
 	O_ct(mtd)->p(kctx, sfp, 2, &wb, 1);
-	PLAT printf_i("%s\n", KUtilsWriteBufferop(&wb, 1));
-	kwb_free(&wb);
+	PLAT printf_i("%s\n", KLIB Kwb_top(kctx, &wb, 1));
+	KLIB Kwb_free(&wb);
 	return;
 }
 

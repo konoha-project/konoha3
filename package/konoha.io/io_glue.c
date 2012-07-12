@@ -37,7 +37,7 @@
 
 static kString *kwb_newString(KonohaContext *kctx, KUtilsWriteBuffer *wb, int flg)
 {
-	return new_kString(KUtilsWriteBufferop(wb, flg), kwb_bytesize(wb), SPOL_POOL);
+	return new_kString(KLIB Kwb_top(kctx, wb, flg), Kwb_bytesize(wb), SPOL_POOL);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -276,7 +276,7 @@ static void io2_close(KonohaContext *kctx, kio_t *io2)
 static void io2_check_buffer_inited(KonohaContext *kctx, kio_t *io2, size_t bufsiz)
 {
 	if(io2->buffer.max == 0) {
-		KARRAY_INIT(io2->buffer, bufsiz, char);
+		KLIB Karray_init(kctx, io2->buffer, bufsiz, char);
 	}
 }
 
@@ -330,7 +330,7 @@ static kio_t* new_FILE(KonohaContext *kctx, FILE *fp, size_t bufsiz)
 	io2->fp  = fp;
 	io2->isRunning = 1;
 	if(bufsiz > 0) {
-		KARRAY_INIT(io2->buffer, bufsiz, char);
+		KLIB Karray_init(kctx, io2->buffer, bufsiz, char);
 	}
 	io2->top  = 0;
 	io2->tail = 0;
@@ -437,7 +437,7 @@ static kio_t* new_FILE(KonohaContext *kctx, FILE *fp, size_t bufsiz)
 //	io2->fd = fd;
 //	io2->isRunning = 1;
 //	if(bufsiz > 0) {
-//		KARRAY_INIT(io2->buffer, K_PAGESIZE, char);
+//		KLIB Karray_init(kctx, io2->buffer, K_PAGESIZE, char);
 //	}
 //	io2->top  = 0;
 //	io2->tail = 0;
@@ -468,7 +468,7 @@ static kio_t* new_FILE(KonohaContext *kctx, FILE *fp, size_t bufsiz)
 //	io2->handler2 = NULL;
 //	io2->fd = -1;
 //	io2->isRunning = 0;
-//	KARRAY_INIT(io2->buffer, bufsiz, char);
+//	KLIB Karray_init(kctx, io2->buffer, bufsiz, char);
 //	memcpy(io2->buffer.body, buf, bufsiz);
 //	io2->buffer.size = bufsiz;
 //	io2->top  = 0;
@@ -508,7 +508,7 @@ static void io2_free(KonohaContext *kctx, kio_t *io2)
 		io2->_close(kctx, io2);
 	}
 	if(io2->buffer.max > 0) {
-		KARRAY_FREE(io2->buffer, char);
+		KLIB Karray_free(kctx, io2->buffer, char);
 		io2->top = 0;
 		io2->tail = 0;
 	}
@@ -566,11 +566,11 @@ size_t io2_read(KonohaContext *kctx, kio_t *io2, char *buf, size_t bufsiz)
 
 static kString *kwb_newLine(KonohaContext *kctx, KUtilsWriteBuffer *wb)
 {
-	if(kwb_bytesize(wb) > 0) {
+	if(Kwb_bytesize(wb) > 0) {
 		if(wb->w->buf[wb->w->size - 1] == '\r') {
 			wb->w->buf[wb->w->size - 1] = 0;
 			wb->w->size -= 1;
-			if(kwb_bytesize(wb) == 0) return TS_EMPTY;
+			if(Kwb_bytesize(wb) == 0) return TS_EMPTY;
 		}
 		return kwb_newString(kctx, wb, 0/*SPOL_POOLNEVER*/);
 	}
@@ -580,7 +580,7 @@ static kString *kwb_newLine(KonohaContext *kctx, KUtilsWriteBuffer *wb)
 kString* io2_readLine(KonohaContext *kctx, kio_t *io2)
 {
 	KUtilsWriteBuffer wb;
-	kwb_init(&kctx->stack->cwb, &wb);
+	KLIB Kwb_init(&kctx->stack->cwb, &wb);
 	while(io2->isRunning) {
 		size_t i, start, hasUTF8 = 0;
 		if(!(io2->top < io2->tail)) {
@@ -590,17 +590,17 @@ kString* io2_readLine(KonohaContext *kctx, kio_t *io2)
 		for(i = io2->top; i < io2->tail; i++) {
 			int ch = ((unsigned char*)io2->buffer.buf)[i];
 			if(ch == '\n') {
-				kwb_write(&wb, (const char*)io2->buffer.buf + start, i - start);
+				KLIB Kwb_write(kctx, &wb, (const char*)io2->buffer.buf + start, i - start);
 				io2->top = i + 1;
 				return kwb_newLine(kctx, &wb);
 			}
 			if(ch > 127) hasUTF8 = 1;
 		}
-		kwb_write(&wb, (const char*)io2->buffer.buf + start, io2->tail - start);
+		KLIB Kwb_write(kctx, &wb, (const char*)io2->buffer.buf + start, io2->tail - start);
 		io2->top = i;
 	}
 	if(io2->top < io2->tail) {
-		kwb_write(&wb, (const char*)io2->buffer.buf + io2->top, io2->tail - io2->top);
+		KLIB Kwb_write(kctx, &wb, (const char*)io2->buffer.buf + io2->top, io2->tail - io2->top);
 		io2->top  = 0;
 		io2->tail = 0;
 		return kwb_newLine(kctx, &wb);
@@ -829,10 +829,10 @@ static KMETHOD OutputStream_print(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	KonohaStack *v = sfp + 1;
 	size_t i, ac = knh_stack_argc(kctx, v);
 	KUtilsWriteBuffer wb;
-	kwb_init(&kctx->stack->cwb, &wb);
+	KLIB Kwb_init(&kctx->stack->cwb, &wb);
 	for(i = 0; i < ac; i++) {
 		O_ct(v[i].o)->p(kctx, v, i, &wb, 0);
-		io2_write(kctx, w->io2, KUtilsWriteBufferop(&wb, 1), kwb_bytesize(&wb));
+		io2_write(kctx, w->io2, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb));
 	}
 	RETURNvoid_();
 }
@@ -846,10 +846,10 @@ static KMETHOD OutputStream_println(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	KonohaStack *v = sfp + 1;
 	size_t i, ac = knh_stack_argc(kctx, v);
 	KUtilsWriteBuffer wb;
-	kwb_init(&kctx->stack->cwb, &wb);
+	KLIB Kwb_init(&kctx->stack->cwb, &wb);
 	for(i = 0; i < ac; i++) {
 		O_ct(v[i].o)->p(kctx, v, i, &wb, 0);
-		io2_write(kctx, w->io2, KUtilsWriteBufferop(&wb, 1), kwb_bytesize(&wb));
+		io2_write(kctx, w->io2, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb));
 	}
 	knh_write_EOL(kctx, w);
 	RETURNvoid_();
