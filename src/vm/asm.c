@@ -143,60 +143,59 @@ static inline kopcode_t BasicBlock_opcode(kBasicBlock *bb)
 
 static void BasicBlock_strip0(KonohaContext *kctx, kBasicBlock *bb)
 {
-	L_TAIL:;
-	if(BasicBlock_isVisited(bb)) return;
-	BasicBlock_setVisited(bb, 1);
-	if(bb->branchBlock != NULL) {
-		L_JUMP:;
-		kBasicBlock *bbJ = (kBasicBlock*)bb->branchBlock;
-		if(bbJ->codeTable.bytesize == 0 && bbJ->branchBlock != NULL && bbJ->nextBlock == NULL) {
-			//DBG_P("DIRECT JMP id=%d JMP to id=%d", bbJ->id, DP(bbJ->branchBlock)->id);
-			bbJ->incoming -= 1;
-			bb->branchBlock = bbJ->branchBlock;
-			bb->branchBlock->incoming += 1;
-			goto L_JUMP;
-		}
-		if(bbJ->codeTable.bytesize == 0 && bbJ->branchBlock == NULL && bbJ->nextBlock != NULL) {
-			//DBG_P("DIRECT JMP id=%d NEXT to id=%d", bbJ->id, DP(bbJ->nextBlock)->id);
-			bbJ->incoming -= 1;
-			bb->branchBlock = bbJ->nextBlock;
-			bb->branchBlock->incoming += 1;
-			goto L_JUMP;
-		}
-		if(bb->nextBlock == NULL) {
-			if(bbJ->incoming == 1 ) {
-				//DBG_P("REMOVED %d JMP TO %d", bb->id, bbJ->id);
-				bb->nextBlock = bbJ;
-				bb->branchBlock = NULL;
-				goto L_NEXT;
+	while(true) {
+		if(BasicBlock_isVisited(bb)) return;
+		BasicBlock_setVisited(bb, 1);
+		if(bb->branchBlock != NULL) {
+			L_JUMP:; {
+				kBasicBlock *bbJ = (kBasicBlock*)bb->branchBlock;
+				if(bbJ->codeTable.bytesize == 0 && bbJ->branchBlock != NULL && bbJ->nextBlock == NULL) {
+					//DBG_P("DIRECT JMP id=%d JMP to id=%d", bbJ->id, DP(bbJ->branchBlock)->id);
+					bbJ->incoming -= 1;
+					bb->branchBlock = bbJ->branchBlock;
+					bb->branchBlock->incoming += 1;
+					goto L_JUMP;
+				}
+				if(bbJ->codeTable.bytesize == 0 && bbJ->branchBlock == NULL && bbJ->nextBlock != NULL) {
+					//DBG_P("DIRECT JMP id=%d NEXT to id=%d", bbJ->id, DP(bbJ->nextBlock)->id);
+					bbJ->incoming -= 1;
+					bb->branchBlock = bbJ->nextBlock;
+					bb->branchBlock->incoming += 1;
+					goto L_JUMP;
+				}
+				if(bb->nextBlock == NULL) {
+					if(bbJ->incoming == 1 ) {
+						//DBG_P("REMOVED %d JMP TO %d", bb->id, bbJ->id);
+						bb->nextBlock = bbJ;
+						bb->branchBlock = NULL;
+						goto L_NEXT;
+					}
+				}
+				BasicBlock_strip0(kctx, bbJ);
 			}
 		}
-		BasicBlock_strip0(kctx, bbJ);
-	}
-	if(bb->branchBlock != NULL && bb->nextBlock != NULL) {
-		bb = bb->nextBlock;
-		goto L_TAIL;
-	}
-	L_NEXT:;
-	if(bb->nextBlock != NULL) {
-		kBasicBlock *bbN = bb->nextBlock;
-		if(bbN->codeTable.bytesize == 0 && bbN->nextBlock != NULL && bbN->branchBlock == NULL) {
-			//DBG_P("DIRECT NEXT id=%d to NEXT id=%d", bbN->id, DP(bbN->nextBlock)->id);
-			bbN->incoming -= 1;
-			bb->nextBlock = bbN->nextBlock;
-			bb->nextBlock->incoming += 1;
-			goto L_NEXT;
+		if(bb->branchBlock != NULL && bb->nextBlock != NULL) {
+			bb = bb->nextBlock;
+			continue;
 		}
-		if(bbN->codeTable.bytesize == 0 && bbN->nextBlock == NULL && bbN->branchBlock != NULL) {
-			//DBG_P("DIRECT NEXT id=%d to JUMP id=%d", bbN->id, DP(bbN->branchBlock)->id);
-			bbN->incoming -= 1;
-			bb->nextBlock = NULL;
-			bb->branchBlock = bbN->branchBlock;
-			bb->branchBlock->incoming += 1;
-			goto L_JUMP;
+		L_NEXT:;
+		if(bb->nextBlock != NULL) {
+			kBasicBlock *bbN = bb->nextBlock;
+			if(bbN->codeTable.bytesize == 0 && bbN->nextBlock != NULL && bbN->branchBlock == NULL) {
+				bbN->incoming -= 1;
+				bb->nextBlock = bbN->nextBlock;
+				bb->nextBlock->incoming += 1;
+				goto L_NEXT;
+			}
+			if(bbN->codeTable.bytesize == 0 && bbN->nextBlock == NULL && bbN->branchBlock != NULL) {
+				bbN->incoming -= 1;
+				bb->nextBlock = NULL;
+				bb->branchBlock = bbN->branchBlock;
+				bb->branchBlock->incoming += 1;
+				goto L_JUMP;
+			}
+			bb = bb->nextBlock;
 		}
-		bb = bb->nextBlock;
-		goto L_TAIL;
 	}
 }
 
@@ -226,30 +225,28 @@ static void BasicBlock_join(KonohaContext *kctx, kBasicBlock *bb, kBasicBlock *b
 
 static void BasicBlock_strip1(KonohaContext *kctx, kBasicBlock *bb)
 {
-	L_TAIL:;
-	if(!BasicBlock_isVisited(bb)) return;
-	BasicBlock_setVisited(bb, 0);  // MUST call after strip0
-	if(bb->branchBlock != NULL) {
-		if(bb->nextBlock == NULL) {
-			bb = bb->branchBlock;
-			goto L_TAIL;
+	while(true) {
+		if(!BasicBlock_isVisited(bb)) return;
+		BasicBlock_setVisited(bb, 0);  // MUST call after strip0
+		if(bb->branchBlock != NULL) {
+			if(bb->nextBlock == NULL) {
+				bb = bb->branchBlock;
+			}
+			else {
+				BasicBlock_strip1(kctx, bb->branchBlock);
+				bb = bb->nextBlock;
+			}
+			continue;
 		}
-		else {
-			//DBG_P("** branch next=%d, jump%d", bb->nextBlock->id, DP(bb->branchBlock)->id);
-			BasicBlock_strip1(kctx, bb->branchBlock);
+		if(bb->nextBlock != NULL) {
+			kBasicBlock *bbN = bb->nextBlock;
+			if(bbN->incoming == 1 && BasicBlock_opcode(bbN) != OPCODE_RET) {
+				BasicBlock_join(kctx, bb, bbN);
+				BasicBlock_setVisited(bb, 1);
+				continue;
+			}
 			bb = bb->nextBlock;
-			goto L_TAIL;
 		}
-	}
-	if(bb->nextBlock != NULL) {
-		kBasicBlock *bbN = bb->nextBlock;
-		if(bbN->incoming == 1 && BasicBlock_opcode(bbN) != OPCODE_RET) {
-			BasicBlock_join(kctx, bb, bbN);
-			BasicBlock_setVisited(bb, 1);
-			goto L_TAIL;
-		}
-		bb = bb->nextBlock;
-		goto L_TAIL;
 	}
 }
 
