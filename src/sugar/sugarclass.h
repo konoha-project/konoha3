@@ -301,7 +301,7 @@ static void NameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, kvs
 	}
 	else {
 		KUtilsWriteBuffer wb;
-		kwb_init(&(ctxsugar->cwb), &wb);
+		kwb_init(&(ctxsugar->errorMessageBuffer), &wb);
 		for(i = 0; i < nitems; i++) {
 			if(checkConflictedConst(kctx, ns, kvs+i, pline)) continue;
 			kwb_write(&wb, (const char*)(kvs+i), sizeof(kvs_t));

@@ -307,7 +307,7 @@ static void Stmt_parseClassBlock(KonohaContext *kctx, kStmt *stmt, kToken *tkC)
 	USING_SUGAR;
 	kToken *tkP = (kToken*)kObject_getObject(stmt, KW_BlockPattern, NULL);
 	if(tkP != NULL && tkP->keyword == TK_CODE) {
-		kArray *a = ctxsugar->tokens;
+		kArray *a = ctxsugar->preparedTokenList;
 		size_t atop = kArray_size(a), s, i;
 		SUGAR NameSpace_tokenize(kctx, kStmt_nameSpace(stmt), S_text(tkP->text), tkP->uline, a);
 		s = kArray_size(a);

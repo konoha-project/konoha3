@@ -336,8 +336,8 @@ struct kGammaVar {
 
 /* ------------------------------------------------------------------------ */
 
-#define ctxsugar    ((ctxsugar_t*)kctx->modlocal[MOD_sugar])
-#define kmodsugar  ((kmodsugar_t*)kctx->modshare[MOD_sugar])
+#define ctxsugar    ((SugarContext*)kctx->modlocal[MOD_sugar])
+#define kmodsugar  ((KModuleSugar*)kctx->modshare[MOD_sugar])
 #define CT_Token    kmodsugar->cToken
 #define CT_Expr     kmodsugar->cExpr
 #define CT_Stmt     kmodsugar->cStmt
@@ -495,7 +495,7 @@ typedef struct {
 	void       (*Token_pERR)(KonohaContext *kctx, kTokenVar *tk, const char *fmt, ...);
 	kExpr *    (*Stmt_p)(KonohaContext *kctx, kStmt *stmt, kToken *tk, int pe, const char *fmt, ...);
 
-} kmodsugar_t;
+} KModuleSugar;
 
 #define EXPORT_SUGAR(base) \
 	base->NameSpace_setTokenizeFunc = NameSpace_setTokenizeFunc;\
@@ -533,26 +533,23 @@ typedef struct {
 
 typedef struct {
 	kmodlocal_t h;
-	kArray *tokens;
-	KUtilsGrowingArray cwb;
-	int     err_count;
-	kArray *errors;
-	kBlock *singleBlock;
-	kGamma *gma;
-	kArray *lvarlst;
-	kArray *definedMethods;
-} ctxsugar_t;
+	kArray            *preparedTokenList;
+	KUtilsGrowingArray errorMessageBuffer;
+	int                errorMessageCount;
+	kArray            *errorMessageList;
+	kBlock            *singleBlock;
+	kGamma            *gma;
+	kArray            *lvarlst;
+	kArray            *definedMethodList;
+} SugarContext;
 
 #define TPOL_NOCHECK              1
 #define TPOL_ALLOWVOID      (1 << 1)
 #define TPOL_COERCION       (1 << 2)
 #define TPOL_CONST          (1 << 4)
 
-#define KW_(T)  J
-
 #ifdef USING_SUGAR_AS_BUILTIN
 
-//#define KW_(T)                      keyword(kctx, T, sizeof(T)-1, SYM_NONAME)
 #define SYN_(KS, KW)                NameSpace_syn(kctx, KS, KW, 0)
 
 #define kStmt_token(STMT, KW, DEF)  Stmt_token(kctx, STMT, KW, DEF)
@@ -571,7 +568,7 @@ typedef struct {
 //#define kStmt_tyCheck(E, NI, GMA, T, P)      Stmt_tyCheck(kctx, STMT, NI, GMA, T, P)
 
 #else/*SUGAR_EXPORTS*/
-#define USING_SUGAR                          const kmodsugar_t *_e = (const kmodsugar_t *)kmodsugar
+#define USING_SUGAR                          const KModuleSugar *_e = (const KModuleSugar *)kmodsugar
 #define SUGAR                                _e->
 #define TY_NameSpace                       _e->cNameSpace->cid
 #define TY_Token                             _e->cToken->cid

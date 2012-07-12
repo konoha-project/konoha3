@@ -130,7 +130,6 @@ struct kBasicBlockVar {
 	VirtualMachineInstruction *opjmp;
 };
 
-
 struct kByteCodeVar {
 	KonohaObjectHeader h;
 	VirtualMachineInstruction*   code;

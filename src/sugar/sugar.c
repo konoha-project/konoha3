@@ -102,7 +102,7 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 }
 
 /* ------------------------------------------------------------------------ */
-/* ctxsugar_t global functions */
+/* SugarContext global functions */
 
 static kstatus_t NameSpace_eval(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline)
 {
@@ -110,7 +110,7 @@ static kstatus_t NameSpace_eval(KonohaContext *kctx, kNameSpace *ns, const char 
 	kmodsugar->h.setup(kctx, (kmodshare_t*)kmodsugar, 0/*lazy*/);
 	{
 		INIT_GCSTACK();
-		kArray *tls = ctxsugar->tokens;
+		kArray *tls = ctxsugar->preparedTokenList;
 		size_t pos = kArray_size(tls);
 		NameSpace_tokenize(kctx, ns, script, uline, tls);
 		kBlock *bk = new_Block(kctx, ns, NULL, tls, pos, kArray_size(tls), ';');
@@ -135,39 +135,39 @@ kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, kfileline_t uli
 
 static void ctxsugar_reftrace(KonohaContext *kctx, struct kmodlocal_t *baseh)
 {
-	ctxsugar_t *base = (ctxsugar_t*)baseh;
+	SugarContext *base = (SugarContext*)baseh;
 	BEGIN_REFTRACE(7);
-	KREFTRACEv(base->tokens);
-	KREFTRACEv(base->errors);
+	KREFTRACEv(base->preparedTokenList);
+	KREFTRACEv(base->errorMessageList);
 	KREFTRACEv(base->gma);
 	KREFTRACEv(base->lvarlst);
 	KREFTRACEv(base->singleBlock);
-	KREFTRACEv(base->definedMethods);
+	KREFTRACEv(base->definedMethodList);
 	END_REFTRACE();
 }
 static void ctxsugar_free(KonohaContext *kctx, struct kmodlocal_t *baseh)
 {
-	ctxsugar_t *base = (ctxsugar_t*)baseh;
-	KARRAY_FREE(&base->cwb);
-	KFREE(base, sizeof(ctxsugar_t));
+	SugarContext *base = (SugarContext*)baseh;
+	KARRAY_FREE(&base->errorMessageBuffer);
+	KFREE(base, sizeof(SugarContext));
 }
 
 static void kmodsugar_setup(KonohaContext *kctx, struct kmodshare_t *def, int newctx)
 {
 	if(!newctx && kctx->modlocal[MOD_sugar] == NULL) {
-		ctxsugar_t *base = (ctxsugar_t*)KCALLOC(sizeof(ctxsugar_t), 1);
+		SugarContext *base = (SugarContext*)KCALLOC(sizeof(SugarContext), 1);
 		base->h.reftrace = ctxsugar_reftrace;
 		base->h.free     = ctxsugar_free;
-		KINITv(base->tokens, new_(TokenArray, K_PAGESIZE/sizeof(void*)));
-		base->err_count = 0;
-		KINITv(base->errors, new_(StringArray, 8));
+		KINITv(base->preparedTokenList, new_(TokenArray, K_PAGESIZE/sizeof(void*)));
+		base->errorMessageCount = 0;
+		KINITv(base->errorMessageList, new_(StringArray, 8));
 		KINITv(base->lvarlst, new_(ExprArray, K_PAGESIZE/sizeof(void*)));
-		KINITv(base->definedMethods, new_(MethodArray, 8));
+		KINITv(base->definedMethodList, new_(MethodArray, 8));
 
 		KINITv(base->gma, new_(Gamma, NULL));
 		KINITv(base->singleBlock, new_(Block, NULL));
 		kArray_add(base->singleBlock->stmtList, K_NULL);
-		KARRAY_INIT(&base->cwb, K_PAGESIZE);
+		KARRAY_INIT(&base->errorMessageBuffer, K_PAGESIZE);
 		kctx->modlocal[MOD_sugar] = (kmodlocal_t*)base;
 	}
 }
@@ -187,7 +187,7 @@ static void pack_free(KonohaContext *kctx, void *p)
 
 static void kmodsugar_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
 {
-	kmodsugar_t *base = (kmodsugar_t*)baseh;
+	KModuleSugar *base = (KModuleSugar*)baseh;
 	kmap_reftrace(base->packageMapNO, pack_reftrace);
 	BEGIN_REFTRACE(6);
 	KREFTRACEv(base->packageList);
@@ -201,14 +201,14 @@ static void kmodsugar_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
 
 static void kmodsugar_free(KonohaContext *kctx, struct kmodshare_t *baseh)
 {
-	kmodsugar_t *base = (kmodsugar_t*)baseh;
+	KModuleSugar *base = (KModuleSugar*)baseh;
 	kmap_free(base->packageMapNO, pack_free);
-	KFREE(baseh, sizeof(kmodsugar_t));
+	KFREE(baseh, sizeof(KModuleSugar));
 }
 
 void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
-	kmodsugar_t *base = (kmodsugar_t*)KCALLOC(sizeof(kmodsugar_t), 1);
+	KModuleSugar *base = (KModuleSugar*)KCALLOC(sizeof(KModuleSugar), 1);
 	base->h.name     = "sugar";
 	base->h.setup    = kmodsugar_setup;
 	base->h.reftrace = kmodsugar_reftrace;

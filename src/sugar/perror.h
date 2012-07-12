@@ -48,9 +48,9 @@ static kString* vperrorf(KonohaContext *kctx, int pe, kfileline_t uline, int lpo
 	if(isPRINT(kctx, pe)) {
 		const char *msg = TAG_t(pe);
 		size_t errref = ((size_t)-1);
-		ctxsugar_t *base = ctxsugar;
+		SugarContext *base = ctxsugar;
 		KUtilsWriteBuffer wb;
-		kwb_init(&base->cwb, &wb);
+		kwb_init(&base->errorMessageBuffer, &wb);
 		size_t pos = wb.m->bytesize;
 		if(uline > 0) {
 			const char *file = SS_t(uline);
@@ -64,10 +64,10 @@ static kString* vperrorf(KonohaContext *kctx, int pe, kfileline_t uline, int lpo
 		msg = KUtilsWriteBufferop(&wb, 1);
 		kreportf(pe, uline, "%s", msg + len);
 		kString *emsg = new_kString(msg, strlen(msg), 0);
-		errref = kArray_size(base->errors);
-		kArray_add(base->errors, emsg);
+		errref = kArray_size(base->errorMessageList);
+		kArray_add(base->errorMessageList, emsg);
 		if(pe == ERR_ || pe == CRIT_) {
-			base->err_count ++;
+			base->errorMessageCount ++;
 		}
 		return emsg;
 	}

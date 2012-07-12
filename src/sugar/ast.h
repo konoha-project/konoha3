@@ -140,7 +140,7 @@ static int appendKeyword(KonohaContext *kctx, kNameSpace *ns, kArray *tls, int s
 			kToken *tkB = tls->toks[next + 1];
 			int topch = kToken_topch(tkB);
 			if(topch != '[') break;
-			kArray *abuf = ctxsugar->tokens;
+			kArray *abuf = ctxsugar->preparedTokenList;
 			size_t atop = kArray_size(abuf);
 			next = makeTree(kctx, ns, AST_BRACKET, tls,  next+1, e, ']', abuf, tkERR);
 			if(!(kArray_size(abuf) > atop)) return next;

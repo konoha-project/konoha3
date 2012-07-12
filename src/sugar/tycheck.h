@@ -1157,9 +1157,9 @@ static KMETHOD Fmethod_lazyCompilation(KonohaContext *kctx, KonohaStack *sfp _RI
 
 static void NameSpace_syncMethods(KonohaContext *kctx)
 {
-	size_t i, size = kArray_size(ctxsugar->definedMethods);
+	size_t i, size = kArray_size(ctxsugar->definedMethodList);
 	for (i = 0; i < size; ++i) {
-		kMethod *mtd = ctxsugar->definedMethods->methodList[i];
+		kMethod *mtd = ctxsugar->definedMethodList->methodList[i];
 		if (mtd->fcall_1 == Fmethod_lazyCompilation) {
 			kString *text = mtd->tcode->text;
 			kfileline_t uline = mtd->tcode->uline;
@@ -1168,7 +1168,7 @@ static void NameSpace_syncMethods(KonohaContext *kctx)
 			assert(mtd->fcall_1 != Fmethod_lazyCompilation);
 		}
 	}
-	kArray_clear(ctxsugar->definedMethods, 0);
+	kArray_clear(ctxsugar->definedMethodList, 0);
 }
 
 static void Stmt_setMethodFunc(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, kMethod *mtd)
@@ -1178,7 +1178,7 @@ static void Stmt_setMethodFunc(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns,
 		KSETv(((kMethodVar*)mtd)->tcode, tcode);  //FIXME
 		KSETv(((kMethodVar*)mtd)->lazyns, ns);
 		kMethod_setFunc(mtd, Fmethod_lazyCompilation);
-		kArray_add(ctxsugar->definedMethods, mtd);
+		kArray_add(ctxsugar->definedMethodList, mtd);
 	}
 }
 
@@ -1260,7 +1260,7 @@ static kBlock* Method_newBlock(KonohaContext *kctx, kMethod *mtd, kString *sourc
 		script = S_text(mtd->tcode->text);
 		uline = mtd->tcode->uline;
 	}
-	kArray *tls = ctxsugar->tokens;
+	kArray *tls = ctxsugar->preparedTokenList;
 	size_t pos = kArray_size(tls);
 	NameSpace_tokenize(kctx, KNULL(NameSpace), script, uline, tls); //FIXME: ks
 	kBlock *bk = new_Block(kctx, KNULL(NameSpace), NULL, tls, pos, kArray_size(tls), ';');
