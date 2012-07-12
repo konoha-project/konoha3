@@ -54,7 +54,7 @@ static KMETHOD Fmethod_FieldSetterN(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static kMethod *new_FieldGetter(KonohaContext *kctx, ktype_t cid, ksymbol_t sym, ktype_t ty, int idx)
 {
 	kmethodn_t mn = ty == TY_Boolean ? MN_toISBOOL(sym) : MN_toGETTER(sym);
-	knh_Fmethod f = (TY_isUnbox(ty)) ? Fmethod_FieldGetterN : Fmethod_FieldGetter;
+	MethodFunc f = (TY_isUnbox(ty)) ? Fmethod_FieldGetterN : Fmethod_FieldGetter;
 	kMethod *mtd = new_kMethod(kMethod_Public|kMethod_Immutable, cid, mn, f);
 	kMethod_setParam(mtd, ty, 0, NULL);
 	((kMethodVar*)mtd)->delta = idx;  // FIXME
@@ -64,7 +64,7 @@ static kMethod *new_FieldGetter(KonohaContext *kctx, ktype_t cid, ksymbol_t sym,
 static kMethod *new_FieldSetter(KonohaContext *kctx, ktype_t cid, kmethodn_t sym, ktype_t ty, int idx)
 {
 	kmethodn_t mn = /*(ty == TY_Boolean) ? MN_toISBOOL(sym) :*/ MN_toSETTER(sym);
-	knh_Fmethod f = (TY_isUnbox(ty)) ? Fmethod_FieldSetterN : Fmethod_FieldSetter;
+	MethodFunc f = (TY_isUnbox(ty)) ? Fmethod_FieldSetterN : Fmethod_FieldSetter;
 	kparam_t p = {ty, FN_("x")};
 	kMethod *mtd = new_kMethod(kMethod_Public, cid, mn, f);
 	kMethod_setParam(mtd, ty, 1, &p);
@@ -74,7 +74,7 @@ static kMethod *new_FieldSetter(KonohaContext *kctx, ktype_t cid, kmethodn_t sym
 
 static intptr_t KLIB2_Method_indexOfField(kMethod *mtd)
 {
-	knh_Fmethod f = mtd->fcall_1;
+	MethodFunc f = mtd->fcall_1;
 	if(f== Fmethod_FieldGetter || f == Fmethod_FieldGetterN || f == Fmethod_FieldSetter || f == Fmethod_FieldSetterN) {
 		return (intptr_t)mtd->delta;
 	}

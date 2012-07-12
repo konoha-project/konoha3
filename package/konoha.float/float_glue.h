@@ -31,7 +31,7 @@
 // Int
 static void Float_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct _kNumber *n = (struct _kNumber*)o;  // kFloat has the same structure
+	kNumberVar *n = (kNumberVar*)o;  // kFloat has the same structure
 	n->ndata = (uintptr_t)conf;  // conf is unboxed data
 }
 

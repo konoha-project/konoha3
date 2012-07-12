@@ -182,11 +182,11 @@ typedef struct KDEFINE_SYNTAX {
 	const char *op1;
 	int priority_op2;
 	int type;
-	knh_Fmethod PatternMatch;
-	knh_Fmethod ParseExpr;
-	knh_Fmethod TopStmtTyCheck;
-	knh_Fmethod StmtTyCheck;
-	knh_Fmethod ExprTyCheck;
+	MethodFunc PatternMatch;
+	MethodFunc ParseExpr;
+	MethodFunc TopStmtTyCheck;
+	MethodFunc StmtTyCheck;
+	MethodFunc ExprTyCheck;
 } KDEFINE_SYNTAX;
 
 #define new_SugarFunc(F)     new_(Func, new_kMethod(0, 0, 0, F))

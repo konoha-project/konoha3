@@ -2503,7 +2503,7 @@ static KMETHOD Method_setFunction(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kMethod *mtd = (kMethod*) sfp[0].o;
 	kObject *po = sfp[1].o;
-	union anyptr { void *p; knh_Fmethod f;} ptr;
+	union anyptr { void *p; MethodFunc f;} ptr;
 	ptr.p = konoha::object_cast<void*>(po);
 	kMethod_setFunc(mtd, ptr.f);
 	RETURNvoid_();

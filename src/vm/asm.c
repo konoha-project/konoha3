@@ -986,7 +986,7 @@ static KMETHOD Fmethod_abstract(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //	return (mtd->fcall_1 == Fmethod_abstract);
 //}
 
-static void Method_setFunc(KonohaContext *kctx, kMethod *mtd, knh_Fmethod func)
+static void Method_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
 {
 	func = (func == NULL) ? Fmethod_abstract : func;
 	((kMethodVar*)mtd)->fcall_1 = func;

@@ -90,7 +90,7 @@ static uintptr_t Number_unbox(KonohaContext *kctx, kObject *o)
 // Boolean
 static void Number_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct _kNumber *n = (struct _kNumber*)o;
+	kNumberVar *n = (kNumberVar*)o;
 	n->ndata = (uintptr_t)conf;
 }
 
@@ -441,7 +441,7 @@ static void Method_reftrace(KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
-static kMethod* new_Method(KonohaContext *kctx, uintptr_t flag, ktype_t cid, kmethodn_t mn, knh_Fmethod func)
+static kMethod* new_Method(KonohaContext *kctx, uintptr_t flag, ktype_t cid, kmethodn_t mn, MethodFunc func)
 {
 	kMethodVar* mtd = new_Var(Method, NULL);
 	mtd->flag    = flag;

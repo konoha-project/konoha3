@@ -181,7 +181,7 @@ static void SYN_addSugarFunc(KonohaContext *kctx, kNameSpace *ks, ksymbol_t kw, 
 	kArray_add(a, fo);
 }
 
-static void setSugarFunc(KonohaContext *kctx, knh_Fmethod f, kFunc **synp, knh_Fmethod *p, kFunc **mp)
+static void setSugarFunc(KonohaContext *kctx, MethodFunc f, kFunc **synp, MethodFunc *p, kFunc **mp)
 {
 	if(f != NULL) {
 		if(f != p[0]) {
@@ -194,7 +194,7 @@ static void setSugarFunc(KonohaContext *kctx, knh_Fmethod f, kFunc **synp, knh_F
 
 static void NameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ks, KDEFINE_SYNTAX *syndef)
 {
-	knh_Fmethod pPatternMatch = NULL, pParseExpr = NULL, pStmtTyCheck = NULL, pExprTyCheck = NULL;
+	MethodFunc pPatternMatch = NULL, pParseExpr = NULL, pStmtTyCheck = NULL, pExprTyCheck = NULL;
 	kFunc *mPatternMatch = NULL, *mParseExpr = NULL, *mStmtTyCheck = NULL, *mExprTyCheck = NULL;
 	while(syndef->kw != KW_END) {
 		struct _ksyntax* syn = (struct _ksyntax*)NameSpace_syn(kctx, ks, syndef->kw, 1/*isnew*/);
@@ -511,7 +511,7 @@ static void NameSpace_loadMethodData(KonohaContext *kctx, kNameSpace *ks, intptr
 	intptr_t *d = data;
 	while(d[0] != -1) {
 		uintptr_t flag = (uintptr_t)d[0];
-		knh_Fmethod f = (knh_Fmethod)d[1];
+		MethodFunc f = (MethodFunc)d[1];
 		ktype_t rtype = (ktype_t)d[2];
 		ktype_t cid  = (ktype_t)d[3];
 		kmethodn_t mn = (kmethodn_t)d[4];
@@ -535,7 +535,7 @@ static void NameSpace_loadMethodData(KonohaContext *kctx, kNameSpace *ks, intptr
 
 //#define kNameSpace_loadGlueFunc(NS, F, OPT, UL)  NameSpace_loadGlueFunc(kctx, NS, F, OPT, UL)
 //
-//static knh_Fmethod NameSpace_loadGlueFunc(KonohaContext *kctx, kNameSpace *ks, const char *funcname, int DOPTION, kline_t pline)
+//static MethodFunc NameSpace_loadGlueFunc(KonohaContext *kctx, kNameSpace *ks, const char *funcname, int DOPTION, kline_t pline)
 //{
 //	void *f = NULL;
 //	if(ks->gluehdr != NULL) {
