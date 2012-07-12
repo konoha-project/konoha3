@@ -173,7 +173,7 @@ static KMETHOD Stmt_printError(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //	kStmt *stmt  = sfp[0].stmt;
 //	kArray *tls  = sfp[1].a;
 //	int s = sfp[2].ivalue, e = sfp[3].ivalue;
-//	RETURN_(SUGAR new_Block(kctx, kStmt_ks(stmt), stmt, tls, s, e, ';'));
+//	RETURN_(SUGAR new_Block(kctx, kStmt_nameSpace(stmt), stmt, tls, s, e, ';'));
 //}
 
 //## Expr Stmt.newExpr(Token[] tls, int s, int e);
@@ -193,7 +193,7 @@ static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //	kStmt *stmt  = sfp[0].stmt;
 //	kToken *tk   = sfp[1].tk;
 //	assert(tk->keyword != 0);
-//	kExprVar *expr = new_Var(Expr, SYN_(kStmt_ks(stmt), tk->keyword));
+//	kExprVar *expr = new_Var(Expr, SYN_(kStmt_nameSpace(stmt), tk->keyword));
 //	KSETv(expr->tk, tk);
 //	KSETv(expr->cons, new_(Array, 8));
 //	RETURN_(expr);

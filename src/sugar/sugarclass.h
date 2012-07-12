@@ -859,16 +859,16 @@ static kExpr *Expr_setVariable(KonohaContext *kctx, kExpr *expr, int build, ktyp
 static void Stmt_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kStmtVar *stmt = (kStmtVar*)o;
-	stmt->uline      =   (kfileline_t)conf;
-	stmt->syn = NULL;
-	stmt->parentNULL = NULL;
+	stmt->uline    = (kfileline_t)conf;
+	stmt->syn      = NULL;
+	stmt->parentBlockNULL = NULL;
 }
 
 static void Stmt_reftrace(KonohaContext *kctx, kObject *o)
 {
 	kStmt *stmt = (kStmt*)o;
 	BEGIN_REFTRACE(1);
-	KREFTRACEn(stmt->parentNULL);
+	KREFTRACEn(stmt->parentBlockNULL);
 	END_REFTRACE();
 }
 
@@ -971,10 +971,10 @@ static kBlock* Stmt_block(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw, kBlock
 		if(IS_Token(bk)) {
 			kToken *tk = (kToken*)bk;
 			if (tk->keyword == TK_CODE) {
-				Token_toBRACE(kctx, (kTokenVar*)tk, kStmt_ks(stmt));
+				Token_toBRACE(kctx, (kTokenVar*)tk, kStmt_nameSpace(stmt));
 			}
 			if (tk->keyword == AST_BRACE) {
-				bk = new_Block(kctx, kStmt_ks(stmt), stmt, tk->sub, 0, kArray_size(tk->sub), ';');
+				bk = new_Block(kctx, kStmt_nameSpace(stmt), stmt, tk->sub, 0, kArray_size(tk->sub), ';');
 				kObject_setObject(stmt, kw, bk);
 			}
 		}
@@ -989,10 +989,10 @@ static kBlock* Stmt_block(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw, kBlock
 static void Block_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kBlockVar *bk = (kBlockVar*)o;
-	kNameSpace *ks = (conf != NULL) ? (kNameSpace*)conf : KNULL(NameSpace);
-	bk->parentNULL = NULL;
-	KINITv(bk->ks, ks);
-	KINITv(bk->blocks, new_(StmtArray, 0));
+	kNameSpace *ns = (conf != NULL) ? (kNameSpace*)conf : KNULL(NameSpace);
+	bk->parentStmtNULL = NULL;
+	KINITv(bk->blockNameSpace, ns);
+	KINITv(bk->stmtList, new_(StmtArray, 0));
 	KINITv(bk->esp, new_(Expr, 0));
 }
 
@@ -1000,21 +1000,21 @@ static void Block_reftrace(KonohaContext *kctx, kObject *o)
 {
 	kBlock *bk = (kBlock*)o;
 	BEGIN_REFTRACE(4);
-	KREFTRACEv(bk->ks);
-	KREFTRACEv(bk->blocks);
+	KREFTRACEv(bk->blockNameSpace);
+	KREFTRACEv(bk->stmtList);
 	KREFTRACEv(bk->esp);
-	KREFTRACEn(bk->parentNULL);
+	KREFTRACEn(bk->parentStmtNULL);
 	END_REFTRACE();
 }
 
 static void Block_insertAfter(KonohaContext *kctx, kBlock *bk, kStmt *target, kStmt *stmt)
 {
 	//DBG_ASSERT(stmt->parentNULL == NULL);
-	KSETv(((kStmtVar*)stmt)->parentNULL, bk);
+	KSETv(((kStmtVar*)stmt)->parentBlockNULL, bk);
 	size_t i;
-	for(i = 0; i < kArray_size(bk->blocks); i++) {
-		if(bk->blocks->stmts[i] == target) {
-			kArray_insert(bk->blocks, i+1, stmt);
+	for(i = 0; i < kArray_size(bk->stmtList); i++) {
+		if(bk->stmtList->stmts[i] == target) {
+			kArray_insert(bk->stmtList, i+1, stmt);
 			return;
 		}
 	}

@@ -69,7 +69,7 @@ static KMETHOD StmtTyCheck_for(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static inline kStmt* kStmt_getParentNULL(kStmt *stmt)
 {
-	return stmt->parentNULL->parentNULL;
+	return stmt->parentBlockNULL->parentStmtNULL;
 }
 
 static KMETHOD StmtTyCheck_break(KonohaContext *kctx, KonohaStack *sfp _RIX)

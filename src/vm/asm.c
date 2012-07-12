@@ -855,8 +855,8 @@ static void BLOCK_asm(KonohaContext *kctx, kBlock *bk, int shift)
 {
 	int i, espidx = (bk->esp->build == TEXPR_STACKTOP) ? shift + bk->esp->index : bk->esp->index;
 	//DBG_P("shift=%d, espidx=%d build=%d", shift, espidx, bk->esp->build);
-	for(i = 0; i < kArray_size(bk->blocks); i++) {
-		kStmt *stmt = bk->blocks->stmts[i];
+	for(i = 0; i < kArray_size(bk->stmtList); i++) {
+		kStmt *stmt = bk->stmtList->stmts[i];
 		if(stmt->syn == NULL) continue;
 		ctxcode->uline = stmt->uline;
 		switch(stmt->build) {

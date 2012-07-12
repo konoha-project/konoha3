@@ -258,13 +258,13 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 		}
 
 		if(TK_isType(tk1) && tk2->keyword == AST_PARENTHESIS) {  // new C (...)
-			SugarSyntax *syn = SYN_(kStmt_ks(stmt), KW_ExprMethodCall);
+			SugarSyntax *syn = SYN_(kStmt_nameSpace(stmt), KW_ExprMethodCall);
 			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, tkNEW, NewExpr(kctx, syn, tk1, TK_type(tk1), 0));
 			tkNEW->keyword = MN_new;
 			RETURN_(expr);
 		}
 		if(TK_isType(tk1) && tk2->keyword == AST_BRACKET) {     // new C [...]
-			SugarSyntax *syn = SYN_(kStmt_ks(stmt), KW_new);
+			SugarSyntax *syn = SYN_(kStmt_nameSpace(stmt), KW_new);
 			KonohaClass *ct = CT_p0(kctx, CT_Array, TK_type(tk1));
 			tkNEW->keyword = MN_("newArray");
 			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, tkNEW, NewExpr(kctx, syn, tk1, ct->cid, 0));
@@ -309,7 +309,7 @@ static void Stmt_parseClassBlock(KonohaContext *kctx, kStmt *stmt, kToken *tkC)
 	if(tkP != NULL && tkP->keyword == TK_CODE) {
 		kArray *a = ctxsugar->tokens;
 		size_t atop = kArray_size(a), s, i;
-		SUGAR NameSpace_tokenize(kctx, kStmt_ks(stmt), S_text(tkP->text), tkP->uline, a);
+		SUGAR NameSpace_tokenize(kctx, kStmt_nameSpace(stmt), S_text(tkP->text), tkP->uline, a);
 		s = kArray_size(a);
 		const char *cname = S_text(tkC->text);
 		for(i = atop; i < s; i++) {
@@ -326,9 +326,9 @@ static void Stmt_parseClassBlock(KonohaContext *kctx, kStmt *stmt, kToken *tkC)
 			kArray_add(a, tk);
 			tkP = tk;
 		}
-		kBlock *bk = SUGAR new_Block(kctx, kStmt_ks(stmt), stmt, a, s, kArray_size(a), ';');
-		for (i = 0; i < kArray_size(bk->blocks); i++) {
-			kStmt *methodDecl = bk->blocks->stmts[i];
+		kBlock *bk = SUGAR new_Block(kctx, kStmt_nameSpace(stmt), stmt, a, s, kArray_size(a), ';');
+		for (i = 0; i < kArray_size(bk->stmtList); i++) {
+			kStmt *methodDecl = bk->stmtList->stmts[i];
 			if(methodDecl->syn->keyword == KW_StmtMethodDecl) {
 				kObject_setObject(methodDecl, KW_UsymbolPattern, tkC);
 			}
@@ -396,8 +396,8 @@ static size_t checkFieldSize(KonohaContext *kctx, kBlock *bk)
 {
 	USING_SUGAR;
 	size_t i, c = 0;
-	for(i = 0; i < kArray_size(bk->blocks); i++) {
-		kStmt *stmt = bk->blocks->stmts[i];
+	for(i = 0; i < kArray_size(bk->stmtList); i++) {
+		kStmt *stmt = bk->stmtList->stmts[i];
 		DBG_P("stmt->keyword=%s", KW_t(stmt->syn->keyword));
 		if(stmt->syn->keyword == KW_StmtTypeDecl) {
 			kExpr *expr = kStmt_expr(stmt, KW_ExprPattern, NULL);
@@ -483,8 +483,8 @@ static kbool_t CT_addClassFields(KonohaContext *kctx, KonohaClassVar *ct, kGamma
 {
 	USING_SUGAR;
 	size_t i;
-	for(i = 0; i < kArray_size(bk->blocks); i++) {
-		kStmt *stmt = bk->blocks->stmts[i];
+	for(i = 0; i < kArray_size(bk->stmtList); i++) {
+		kStmt *stmt = bk->stmtList->stmts[i];
 		if(stmt->syn->keyword == KW_StmtTypeDecl) {
 			kshortflag_t flag = kField_Getter | kField_Setter;
 			kToken *tk  = kStmt_token(stmt, KW_TypePattern, NULL);
@@ -504,12 +504,12 @@ static void CT_checkMethodDecl(KonohaContext *kctx, kToken *tkC, kBlock *bk, kSt
 {
 	USING_SUGAR;
 	size_t i;
-	for(i = 0; i < kArray_size(bk->blocks); i++) {
-		kStmt *stmt = bk->blocks->stmts[i];
+	for(i = 0; i < kArray_size(bk->stmtList); i++) {
+		kStmt *stmt = bk->stmtList->stmts[i];
 		if(stmt->syn->keyword == KW_StmtTypeDecl) continue;
 		if(stmt->syn->keyword == KW_StmtMethodDecl) {
 			kStmt *lastStmt = lastStmtRef[0];
-			SUGAR Block_insertAfter(kctx, lastStmt->parentNULL, lastStmt, stmt);
+			SUGAR Block_insertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, stmt);
 			lastStmtRef[0] = stmt;
 		}
 		else {

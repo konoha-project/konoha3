@@ -202,11 +202,11 @@ struct kNameSpaceVar {
 	kpackage_t packageId;  	kpackage_t packageDomain;
 	kNameSpace           *parentNULL;
 	const TokenizeFunc   *tokenMatrix;
-	KUtilsHashMap      *syntaxMapNN;
+	KUtilsHashMap        *syntaxMapNN;
 	//
 	kObject              *scriptObject;
 	kArray*               methodList;   // default K_EMPTYARRAY
-	KUtilsGrowingArray              constTable;        // const variable
+	KUtilsGrowingArray    constTable;        // const variable
 };
 
 typedef kshort_t    kexpr_t;
@@ -264,7 +264,7 @@ struct kExprVar {
 		kObject* data;
 		kArray*  cons;  // Cons
 		kExpr*   single;
-		kBlock* block;
+		kBlock*  block;
 	};
 	union {
 		SugarSyntax *syn;
@@ -287,17 +287,17 @@ struct kExprVar {
 
 struct kStmtVar {
 	KonohaObjectHeader h;
-	kfileline_t uline;
-	SugarSyntax *syn;
-	kBlock *parentNULL;
-	kushort_t build;
+	kfileline_t        uline;
+	SugarSyntax       *syn;
+	kBlock            *parentBlockNULL;
+	kushort_t          build;
 };
 
 struct kBlockVar {
-	KonohaObjectHeader h;
-	kNameSpace          *ks;
-	kStmt               *parentNULL;
-	kArray              *blocks;
+	KonohaObjectHeader   h;
+	kNameSpace          *blockNameSpace;
+	kStmt               *parentStmtNULL;
+	kArray              *stmtList;
 	kExpr               *esp;
 };
 
@@ -441,7 +441,7 @@ struct kGammaVar {
 #define kNameSpace_defineSyntax(L, S)  kmodsugar->KNameSpace_defineSyntax(kctx, L, S)
 
 typedef struct {
-	kmodshare_t h;
+	kmodshare_t  h;
 	KonohaClass *cToken;
 	KonohaClass *cExpr;
 	KonohaClass *cStmt;
@@ -450,8 +450,8 @@ typedef struct {
 	KonohaClass *cGamma;
 	KonohaClass *cTokenArray;
 
-	kArray         *packageList;
-	KUtilsHashMap         *packageMapNO;
+	kArray          *packageList;
+	KUtilsHashMap   *packageMapNO;
 
 	kFunc *UndefinedParseExpr;
 	kFunc *UndefinedStmtTyCheck;
@@ -609,10 +609,10 @@ typedef struct {
 #define TK_isType(TK)    ((TK)->keyword == KW_TypePattern)
 #define TK_type(TK)       (TK)->ty
 
-#define kStmt_ks(STMT)   Stmt_ks(kctx, STMT)
-static inline kNameSpace *Stmt_ks(KonohaContext *kctx, kStmt *stmt)
+#define kStmt_nameSpace(STMT)   Stmt_nameSpace(kctx, STMT)
+static inline kNameSpace *Stmt_nameSpace(KonohaContext *kctx, kStmt *stmt)
 {
-	return stmt->parentNULL->ks;
+	return stmt->parentBlockNULL->blockNameSpace;
 }
 
 #define kStmt_setsyn(STMT, S)  Stmt_setsyn(kctx, STMT, S)

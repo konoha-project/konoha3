@@ -166,7 +166,7 @@ static void kmodsugar_setup(KonohaContext *kctx, struct kmodshare_t *def, int ne
 
 		KINITv(base->gma, new_(Gamma, NULL));
 		KINITv(base->singleBlock, new_(Block, NULL));
-		kArray_add(base->singleBlock->blocks, K_NULL);
+		kArray_add(base->singleBlock->stmtList, K_NULL);
 		KARRAY_INIT(&base->cwb, K_PAGESIZE);
 		kctx->modlocal[MOD_sugar] = (kmodlocal_t*)base;
 	}

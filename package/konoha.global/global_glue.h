@@ -190,8 +190,8 @@ static kbool_t appendSetterStmt(KonohaContext *kctx, kExpr *expr, kStmt **lastSt
 	USING_SUGAR;
 	kStmt *lastStmt = lastStmtRef[0];
 	kStmt *newstmt = new_(Stmt, lastStmt->uline);
-	SUGAR Block_insertAfter(kctx, lastStmt->parentNULL, lastStmt, newstmt);
-	kStmt_setsyn(newstmt, SYN_(kStmt_ks(newstmt), KW_ExprPattern));
+	SUGAR Block_insertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, newstmt);
+	kStmt_setsyn(newstmt, SYN_(kStmt_nameSpace(newstmt), KW_ExprPattern));
 	kObject_setObject(newstmt, KW_ExprPattern, expr);
 	lastStmtRef[0] = newstmt;
 	return true;

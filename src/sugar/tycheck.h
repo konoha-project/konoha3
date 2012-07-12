@@ -862,8 +862,8 @@ static kbool_t Stmt_TyCheck(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, 
 static kbool_t Block_tyCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
 {
 	int i, result = true, lvarsize = gma->genv->l.varsize;
-	for(i = 0; i < kArray_size(bk->blocks); i++) {
-		kStmt *stmt = (kStmt*)bk->blocks->list[i];
+	for(i = 0; i < kArray_size(bk->stmtList); i++) {
+		kStmt *stmt = (kStmt*)bk->stmtList->list[i];
 		SugarSyntax *syn = stmt->syn;
 		dumpStmt(kctx, stmt);
 		if(syn == NULL) continue; /* This means 'done' */
@@ -891,8 +891,8 @@ static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kfileline_t uline = expr->tk->uline;
 	kBlock *bk = expr->block;
 	DBG_ASSERT(IS_Block(bk));
-	if(kArray_size(bk->blocks) > 0) {
-		kStmt *stmt = bk->blocks->stmts[kArray_size(bk->blocks)-1];
+	if(kArray_size(bk->stmtList) > 0) {
+		kStmt *stmt = bk->stmtList->stmts[kArray_size(bk->stmtList)-1];
 		if(stmt->syn->keyword == KW_ExprPattern) {
 			lastExpr = stmt;
 		}
@@ -949,8 +949,8 @@ static kStmt* Stmt_lookupIfStmtWithoutElse(KonohaContext *kctx, kStmt *stmt)
 {
 	kBlock *bkElse = kStmt_block(stmt, KW_else, NULL);
 	if(bkElse != NULL) {
-		if(kArray_size(bkElse->blocks) == 1) {
-			kStmt *stmtIf = bkElse->blocks->stmts[0];
+		if(kArray_size(bkElse->stmtList) == 1) {
+			kStmt *stmtIf = bkElse->stmtList->stmts[0];
 			if(stmtIf->syn->keyword == KW_if) {
 				return Stmt_lookupIfStmtWithoutElse(kctx, stmtIf);
 			}
@@ -963,7 +963,7 @@ static kStmt* Stmt_lookupIfStmtWithoutElse(KonohaContext *kctx, kStmt *stmt)
 static kStmt* Stmt_lookupIfStmtNULL(KonohaContext *kctx, kStmt *stmt)
 {
 	int i;
-	kArray *bka = stmt->parentNULL->blocks;
+	kArray *bka = stmt->parentBlockNULL->stmtList;
 	kStmt *prevIfStmt = NULL;
 	for(i = 0; kArray_size(bka); i++) {
 		kStmt *s = bka->stmts[i];
@@ -1038,8 +1038,8 @@ static kbool_t appendAssignmentStmt(KonohaContext *kctx, kExpr *expr, kStmt **la
 {
 	kStmt *lastStmt = lastStmtRef[0];
 	kStmt *newstmt = new_(Stmt, lastStmt->uline);
-	Block_insertAfter(kctx, lastStmt->parentNULL, lastStmt, newstmt);
-	kStmt_setsyn(newstmt, SYN_(kStmt_ks(newstmt), KW_ExprPattern));
+	Block_insertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, newstmt);
+	kStmt_setsyn(newstmt, SYN_(kStmt_nameSpace(newstmt), KW_ExprPattern));
 	kExpr_typed(expr, LET, TY_void);
 	kObject_setObject(newstmt, KW_ExprPattern, expr);
 	lastStmtRef[0] = newstmt;
@@ -1131,7 +1131,7 @@ static kParam *Stmt_newMethodParamNULL(KonohaContext *kctx, kStmt *stmt, kGamma*
 {
 	kParam *pa = (kParam*)kObject_getObjectNULL(stmt, KW_ParamsPattern);
 	if(pa == NULL || !IS_Param(pa)) {
-		SugarSyntax *syn = SYN_(kStmt_ks(stmt), KW_ParamsPattern);
+		SugarSyntax *syn = SYN_(kStmt_nameSpace(stmt), KW_ParamsPattern);
 		if(!Stmt_TyCheck(kctx, syn, stmt, gma)) {
 			return NULL;
 		}
@@ -1234,10 +1234,10 @@ static KMETHOD StmtTyCheck_ParamsDecl(KonohaContext *kctx, KonohaStack *sfp _RIX
 		pa = new_kParam2(rtype, 0, NULL);
 	}
 	else if(IS_Block(params)) {
-		size_t i, psize = kArray_size(params->blocks);
+		size_t i, psize = kArray_size(params->stmtList);
 		kparam_t p[psize];
 		for(i = 0; i < psize; i++) {
-			kStmt *stmt = params->blocks->stmts[i];
+			kStmt *stmt = params->stmtList->stmts[i];
 			if(stmt->syn->keyword != KW_StmtTypeDecl || !StmtTypeDecl_setParam(kctx, stmt, i, p)) {
 				kStmt_p(stmt, ERR_, "parameter declaration must be a $type $name form");
 				RETURNb_(false);
@@ -1358,7 +1358,7 @@ static ktype_t Stmt_checkReturnType(KonohaContext *kctx, kStmt *stmt)
 		kExpr *expr = (kExpr*)kObject_getObjectNULL(stmt, KW_ExprPattern);
 		DBG_ASSERT(expr != NULL);
 		if(expr->ty != TY_void) {
-			kStmt_setsyn(stmt, SYN_(kStmt_ks(stmt), KW_return));
+			kStmt_setsyn(stmt, SYN_(kStmt_nameSpace(stmt), KW_return));
 			kStmt_typed(stmt, RETURN);
 			return expr->ty;
 		}
@@ -1368,7 +1368,7 @@ static ktype_t Stmt_checkReturnType(KonohaContext *kctx, kStmt *stmt)
 
 static ktype_t Gamma_evalMethod(KonohaContext *kctx, kGamma *gma, kBlock *bk, kMethod *mtd)
 {
-	kStmt *stmt = bk->blocks->stmts[0];
+	kStmt *stmt = bk->stmtList->stmts[0];
 	if(stmt->syn == NULL) {
 		kctx->stack->evalty = TY_void;
 		return K_CONTINUE;
@@ -1424,11 +1424,11 @@ static kstatus_t Block_eval(KonohaContext *kctx, kBlock *bk)
 	}
 	memcpy(&lbuf, base->evaljmpbuf, sizeof(jmpbuf_i));
 	if((jmpresult = PLAT setjmp_i(*base->evaljmpbuf)) == 0) {
-		for(i = 0; i < kArray_size(bk->blocks); i++) {
-			KSETv(bk1->blocks->list[0], bk->blocks->list[i]);
-			KSETv(((kBlockVar*)bk1)->ks, bk->ks);
-			kArray_clear(bk1->blocks, 1);
-			result = SingleBlock_eval(kctx, bk1, mtd, bk->ks);
+		for(i = 0; i < kArray_size(bk->stmtList); i++) {
+			KSETv(bk1->stmtList->list[0], bk->stmtList->list[i]);
+			KSETv(((kBlockVar*)bk1)->blockNameSpace, bk->blockNameSpace);
+			kArray_clear(bk1->stmtList, 1);
+			result = SingleBlock_eval(kctx, bk1, mtd, bk->blockNameSpace);
 			if(result == K_FAILED) break;
 		}
 	}

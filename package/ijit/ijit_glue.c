@@ -406,7 +406,7 @@ static KMETHOD Block_getEspIndex(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static KMETHOD Block_getBlocks(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kBlock *bk = (kBlock *) sfp[0].o;
-	RETURN_(bk->blocks);
+	RETURN_(bk->stmtList);
 }
 
 //## int Array.getSize();
