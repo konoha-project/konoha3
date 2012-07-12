@@ -49,10 +49,10 @@ extern "C" {
 #define KPACKLIB(N, V) \
 	.libname = N, .libversion = V
 
-typedef const struct KDEFINE_PACKAGE KDEFINE_PACKAGE;
+typedef const struct KDEFINE_PACKAGE_ KDEFINE_PACKAGE;
 typedef KDEFINE_PACKAGE* (*PackageLoadFunc)(void);
 
-struct KDEFINE_PACKAGE {
+struct KDEFINE_PACKAGE_ {
 	int konoha_checksum;
 	const char *name;
 	const char *version;
