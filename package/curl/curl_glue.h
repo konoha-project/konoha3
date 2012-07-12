@@ -51,7 +51,7 @@ struct _kCurl {
 typedef struct curl_context_t {
 	struct KonohaContextVar *ctx;
 	union {
-		struct _kString *string;
+		kStringVar *string;
 		struct _kBytes *bytes;
 	};
 } curl_context_t;
@@ -64,7 +64,7 @@ static size_t write_String(char *buffer, size_t size, size_t nitems, void *strin
 	KonohaContext_t kctx = (KonohaContext_t)ctx;
 	kwb_t wb;
 	kwb_init(&(kctx->stack->cwb), &wb);
-	struct _kString *res = (struct _kString *)string;
+	kStringVar *res = (kStringVar *)string;
 	kString *str;
 	char *buf = S_tobytes(res);
 	if(buf) {
@@ -75,7 +75,7 @@ static size_t write_String(char *buffer, size_t size, size_t nitems, void *strin
 	str = new_kString(kwb_top(&wb, 0), kwb_bytesize(&wb), SPOL_POOL);
 	res->ubuf = str->ubuf + res->bytesize;// - str->ubuf;
 	res->bytesize = str->bytesize - res->bytesize;// - str->bytesize;
-	KSETv(res, (struct _kString*)str);
+	KSETv(res, (kStringVar*)str);
 	kwb_free(&wb);
 	return size;
 }

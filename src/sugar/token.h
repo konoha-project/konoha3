@@ -382,7 +382,7 @@ static int kchar(const char *t, int pos)
 static int callFuncTokenize(KonohaContext *kctx, kFunc *fo, struct _kToken *tk, tenv_t *tenv, int tok_start)
 {
 	// The above string operation is bad thing. Don't repeat it
-	struct _kString *preparedString = (struct _kString*)tenv->preparedString;
+	kStringVar *preparedString = (kStringVar*)tenv->preparedString;
 	preparedString->text = tenv->source + tok_start;
 	preparedString->bytesize = tenv->source_length - tok_start;
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);

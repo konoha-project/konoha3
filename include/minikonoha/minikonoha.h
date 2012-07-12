@@ -105,12 +105,12 @@ typedef enum {
 
 typedef void FILE_i;
 
-typedef const struct PlatformApi  PlatformApi;
-typedef struct PlatformApi        PlatformApiVar;
-typedef const struct LibKonohaAPI LibKonohaAPI;
-typedef struct LibKonohaAPI       LibKonohaAPIVar;
+typedef const struct PlatformApiVar  PlatformApi;
+typedef struct PlatformApiVar        PlatformApiVar;
+typedef const struct LibKonohaAPIVar LibKonohaAPI;
+typedef struct LibKonohaAPIVar       LibKonohaAPIVar;
 
-struct PlatformApi {
+struct PlatformApiVar {
 	// settings
 	const char *name;
 	size_t stacksize;
@@ -249,6 +249,12 @@ typedef uintptr_t                 kline_t;
 
 typedef const struct kObjectVar kObject;
 typedef struct kObjectVar kObjectVar;
+typedef const struct kBooleanVar kBoolean;
+typedef struct kBooleanVar kBooleanVar;
+typedef const struct kStringVar kString;
+typedef struct kStringVar kStringVar;
+typedef const struct kArrayVar kArray;
+typedef struct kArrayVar kArrayVar;
 
 /* ------------------------------------------------------------------------ */
 
@@ -288,7 +294,7 @@ typedef struct kmape_t {
 	uintptr_t hcode;
 	struct kmape_t *next;
 	union {
-		const struct _kString  *skey;
+		kString  *skey;
 		const struct _kParam   *paramkey;
 		uintptr_t        ukey;
 		void            *pkey;
@@ -370,17 +376,11 @@ typedef kushort_t       kparamid_t;
 
 /* ------------------------------------------------------------------------ */
 
-//typedef const struct KonohaContextVar* KonohaContext*;
-//
-//struct  KonohaContextVar;
-//typedef const struct KonohaContextVar *const KonohaContext_t;
-//#define KonohaContext *kctx      KonohaContext_t kctx
+typedef const struct KonohaContextVar   KonohaContext;
+typedef struct KonohaContextVar         KonohaContextVar;
 
-typedef const struct KonohaContextVar KonohaContext;
-typedef struct KonohaContextVar       KonohaContextVar;
-
-typedef const struct SharedRuntimeVar SharedRuntime;
-typedef struct SharedRuntimeVar       SharedRuntimeVar;
+typedef const struct SharedRuntimeVar   SharedRuntime;
+typedef struct SharedRuntimeVar         SharedRuntimeVar;
 
 typedef const struct LocalRuntimeVar    LocalRuntime;
 typedef struct LocalRuntimeVar          LocalRuntimeVar;
@@ -388,7 +388,7 @@ typedef struct LocalRuntimeVar          LocalRuntimeVar;
 
 struct KonohaContextVar {
 	int						          safepoint; // set to 1
-	struct KonohaStack                    *esp;
+	KonohaStack                      *esp;
 	const struct _klib2              *lib2;
 	PlatformApi                      *plat;
 	/* TODO(imasahiro)
@@ -411,20 +411,20 @@ struct SharedRuntimeVar {
 	struct kmap_t               *lcnameMapNN;
 	/* system shared const */
 	kObject       *constNull;
-	const struct _kBoolean      *constTrue;
-	const struct _kBoolean      *constFalse;
-	const struct _kString       *emptyString;
-	const struct _kArray        *emptyArray;
+	kBoolean      *constTrue;
+	kBoolean      *constFalse;
+	kString       *emptyString;
+	kArray        *emptyArray;
 
-	const struct _kArray         *fileidList;    // file, http://
+	kArray         *fileidList;    // file, http://
 	struct kmap_t                *fileidMapNN;   //
-	const struct _kArray         *packList;
+	kArray         *packList;
 	struct kmap_t                *packMapNN;
-	const struct _kArray         *symbolList;  // NAME, Name, INT_MAX Int_MAX
+	kArray         *symbolList;  // NAME, Name, INT_MAX Int_MAX
 	struct kmap_t                *symbolMapNN;
-	const struct _kArray         *paramList;
+	kArray         *paramList;
 	struct kmap_t                *paramMapNN;
-	const struct _kArray         *paramdomList;
+	kArray         *paramdomList;
 	struct kmap_t                *paramdomMapNN;
 };
 
@@ -440,10 +440,10 @@ typedef struct KonohaStack KonohaStack;
 #define KonohaContext_setCompileOnly(X)  TFLAG_set1(kshortflag_t, (X)->stack->flag, kContext_CompileOnly)
 
 struct LocalRuntimeVar {
-	struct KonohaStack*               stack;
+	KonohaStack*               stack;
 	size_t                       stacksize;
-	struct KonohaStack*               stack_uplimit;
-	const struct _kArray        *gcstack;
+	KonohaStack*               stack_uplimit;
+	kArray        *gcstack;
 	karray_t                     cwb;
 	// local info
 	kshortflag_t                      flag;
@@ -486,7 +486,6 @@ typedef struct kmodshare_t {
 } kmodshare_t;
 
 
-
 #define K_FRAME_NCMEMBER \
 		uintptr_t   ndata;  \
 		kbool_t     bvalue; \
@@ -504,9 +503,9 @@ typedef struct kmodshare_t {
 		kObjectVar       *Wo; \
 		const struct _kInt    *i; \
 		const struct _kFloat  *f; \
-		const struct _kString *s; \
+		kString *s; \
 		const struct _kBytes  *ba; \
-		const struct _kArray  *a; \
+		kArray  *a; \
 		const struct _kMethod            *mtd;\
 		const struct _kFunc         *fo; \
 		const struct _kNameSpace             *ks;\
@@ -591,9 +590,9 @@ typedef struct KDEFINE_CLASS {
 	.cid = CLASS_newid,\
 	.cstruct_size = sizeof(k##C)\
 
-struct _kString;
 //struct _kclass;
 typedef uintptr_t kmagicflag_t;
+
 
 typedef const struct _kclass kclass_t;
 struct _kclass {
@@ -610,8 +609,8 @@ struct _kclass {
 	ksymbol_t                 nameid;
 	kushort_t                 optvalue;
 
-	const struct _kArray     *methods;
-	const struct _kString    *shortNameNULL;
+	kArray     *methods;
+	kString    *shortNameNULL;
 	union {   // default value
 		kObject  *nulvalNULL;
 		kObjectVar        *nulvalNULL_;
@@ -763,7 +762,7 @@ typedef struct kvs_t {
 	union {
 		uintptr_t                uval;
 		kObject                 *oval;
-		const struct _kString   *sval;
+		kString   *sval;
 	};
 } kvs_t;
 
@@ -796,8 +795,7 @@ struct _kNumber {
 	ABSTRACT_NUMBER;
 };
 
-typedef const struct _kBoolean kBoolean;
-struct _kBoolean /* extends kNumber */ {
+struct kBooleanVar /* extends kNumber */ {
 	kObjectHeader h;
 	ABSTRACT_NUMBER;
 };
@@ -867,8 +865,7 @@ struct _kBytes {
 	COMMON_BYTEARRAY;
 };
 
-typedef const struct _kString kString;
-struct _kString /* extends _Bytes */ {
+struct kStringVar /* extends _Bytes */ {
 	kObjectHeader h;
 	COMMON_BYTEARRAY;
 	const char inline_text[SIZEOF_INLINETEXT];
@@ -901,8 +898,7 @@ struct _kString /* extends _Bytes */ {
 #define kArray_isUnboxData(o)    (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
 #define kArray_setUnboxData(o,b) TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,b)
 
-typedef const struct _kArray kArray;
-struct _kArray {
+struct kArrayVar {
 	kObjectHeader h;
 	size_t bytesize;
 	union {
@@ -912,7 +908,7 @@ struct _kArray {
 		kfloat_t               *flist;
 #endif
 		kObject        **list;
-		const struct _kString        **strings;
+		kString        **strings;
 		const struct _kParam         **params;
 		const struct _kMethod        **methods;
 		const struct _kFunc          **funcs;
@@ -1311,7 +1307,7 @@ struct _klib2 {
 #define new_kStringf(P, FMT, ...) (KPI)->Knew_Stringf(kctx, P, FMT, ## __VA_ARGS__)
 
 #define kArray_size(A)            (((A)->bytesize)/sizeof(void*))
-#define kArray_setsize(A, N)  ((struct _kArray*)A)->bytesize = N * sizeof(void*)
+#define kArray_setsize(A, N)  ((kArrayVar*)A)->bytesize = N * sizeof(void*)
 #define kArray_add(A, V)          (KPI)->KArray_add(kctx, A, UPCAST(V))
 #define kArray_insert(A, N, V)    (KPI)->KArray_insert(kctx, A, N, UPCAST(V))
 #define kArray_clear(A, S)        (KPI)->KArray_clear(kctx, A, S)

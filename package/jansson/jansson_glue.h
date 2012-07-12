@@ -138,7 +138,7 @@ static KMETHOD Json_getArray(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	if (!json_is_array(ja)) {
 		RETURN_(K_NULL);
 	}
-	struct _kArray* a = (struct _kArray*)new_kObject(CT_Array, NULL);
+	kArrayVar* a = (kArrayVar*)new_kObject(CT_Array, NULL);
 	a->list = (kObject**)ja;
 	RETURN_(a);
 }
@@ -243,7 +243,7 @@ static KMETHOD Json_setArray(KonohaContext *kctx, KonohaStack *sfp _RIX)
 		RETURN_(K_NULL);
 	}
 	const char *key = S_text(sfp[1].s);
-	struct _kArray* a = (struct _kArray*)sfp[2].a;
+	kArrayVar* a = (kArrayVar*)sfp[2].a;
 	json_t *ja = (json_t*)a->list;
 	json_object_set(obj, key, ja);
 	RETURNvoid_();
@@ -358,7 +358,7 @@ static KMETHOD Json_dump(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static KMETHOD JsonArray_newArray(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	struct _kArray *a = (struct _kArray *)sfp[0].o;
+	kArrayVar *a = (kArrayVar *)sfp[0].o;
 	size_t asize = (size_t)sfp[1].ivalue;
 	a->bytemax = asize * sizeof(void*);
 	kArray_setsize((kArray*)a, asize);
@@ -370,7 +370,7 @@ static KMETHOD JsonArray_newArray(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## void Json[].add(Json json);
 static KMETHOD JsonArray_add(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	struct _kArray *a = (struct _kArray *)sfp[0].o;
+	kArrayVar *a = (kArrayVar *)sfp[0].o;
 	json_t* ja = (json_t*)a->list;
 
 	if (!json_is_array(ja)) {

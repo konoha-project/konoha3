@@ -112,7 +112,7 @@ static void Int_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int
 // String
 static void String_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct _kString *s = (struct _kString*)o;
+	kStringVar *s = (kStringVar*)o;
 	s->text = "";
 	s->bytesize = 0;
 	S_setTextSgm(s, true);
@@ -161,16 +161,16 @@ static void String_checkASCII(KonohaContext *kctx, kString *s)
 static kString* new_String(KonohaContext *kctx, const char *text, size_t len, int spol)
 {
 	kclass_t *ct = CT_(CLASS_String);
-	struct _kString *s = NULL; //knh_PtrMap_getS(kctx, ct->constPoolMapNULL, text, len);
+	kStringVar *s = NULL; //knh_PtrMap_getS(kctx, ct->constPoolMapNULL, text, len);
 	if(s != NULL) return s;
 	if(TFLAG_is(int, spol, SPOL_TEXT)) {
-		s = (struct _kString*)new_Object(kctx, ct, NULL);
+		s = (kStringVar*)new_Object(kctx, ct, NULL);
 		s->text = text;
 		s->bytesize = len;
 		S_setTextSgm(s, 1);
 	}
 	else if(len + 1 < sizeof(void*) * 2) {
-		s = (struct _kString*)new_Object(kctx, ct, NULL);
+		s = (kStringVar*)new_Object(kctx, ct, NULL);
 		s->text = s->inline_text;
 		s->bytesize = len;
 		S_setTextSgm(s, 1);
@@ -181,7 +181,7 @@ static kString* new_String(KonohaContext *kctx, const char *text, size_t len, in
 		s->buf[len] = '\0';
 	}
 	else {
-		s = (struct _kString*)new_Object(kctx, ct, NULL);
+		s = (kStringVar*)new_Object(kctx, ct, NULL);
 		s->bytesize = len;
 		s->buf = (char*)KMALLOC(len+1);
 		S_setTextSgm(s, 0);
@@ -270,7 +270,7 @@ static void Array_ensureMinimumSize(KonohaContext *kctx, struct _kAbstractArray 
 	}
 }
 
-//#define Array_setsize(A, N)  ((struct _kArray*)A)->size = N
+//#define Array_setsize(A, N)  ((kArrayVar*)A)->size = N
 
 static void Array_add(KonohaContext *kctx, kArray *o, kObject *value)
 {

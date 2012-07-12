@@ -63,7 +63,7 @@ static KMETHOD Array_getSize(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	struct _kArray *a = (struct _kArray *)sfp[0].o;
+	kArrayVar *a = (kArrayVar *)sfp[0].o;
 	size_t asize = (size_t)sfp[1].ivalue;
 	a->bytemax = asize * sizeof(void*);
 	kArray_setsize((kArray*)a, asize);
@@ -99,7 +99,7 @@ static void NArray_add(KonohaContext *kctx, kArray *o, uintptr_t value)
 	struct _kAbstractArray *a = (struct _kAbstractArray*)o;
 	NArray_ensureMinimumSize(kctx, a, asize+1);
 	DBG_ASSERT(a->a.objects[asize] == NULL);
-	struct _kArray *a2 = (struct _kArray *)a;
+	kArrayVar *a2 = (kArrayVar *)a;
 	a2->ndata[asize] = value;
 	kArray_setsize(a2, (asize+1));
 }
