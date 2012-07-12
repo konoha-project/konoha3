@@ -43,7 +43,7 @@ static struct fn attrs[] = {
 	{0, NULL}
 };
 
-static void MethodAttribute_p(CTX, kMethod *mtd, kwb_t *wb)
+static void MethodAttribute_p(KonohaContext *kctx, kMethod *mtd, kwb_t *wb)
 {
 	uintptr_t i;
 	for(i = 0; i < 30; i++) {
@@ -60,13 +60,13 @@ static void MethodAttribute_p(CTX, kMethod *mtd, kwb_t *wb)
 //	}
 }
 
-static void Method_p(CTX, ksfp_t *sfp, int pos, kwb_t *wb, int level)
+static void Method_p(KonohaContext *kctx, ksfp_t *sfp, int pos, kwb_t *wb, int level)
 {
 	kMethod *mtd = sfp[pos].mtd;
 	kParam *pa = kMethod_param(mtd);
 	DBG_ASSERT(IS_Method(mtd));
 	if(level != 0) {
-		MethodAttribute_p(_ctx, mtd, wb);
+		MethodAttribute_p(kctx, mtd, wb);
 	}
 	kwb_printf(wb, "%s %s.%s%s", TY_t(pa->rtype), TY_t(mtd->cid), T_mn(mtd->mn));
 	if(level != 0) {
@@ -82,7 +82,7 @@ static void Method_p(CTX, ksfp_t *sfp, int pos, kwb_t *wb, int level)
 			kwb_printf(wb, "%s %s", TY_t(pa->p[i].ty), SYM_t(pa->p[i].fn));
 		}
 //		if(Param_isVARGs(DP(mtd)->mp)) {
-//			knh_write_delimdots(_ctx, w);
+//			knh_write_delimdots(kctx, w);
 //		}
 		kwb_putc(wb, ')');
 	}
@@ -90,7 +90,7 @@ static void Method_p(CTX, ksfp_t *sfp, int pos, kwb_t *wb, int level)
 
 // --------------------------------------------------------------------------
 
-static void copyMethodList(CTX, kcid_t cid, kArray *s, kArray *d)
+static void copyMethodList(KonohaContext *kctx, ktype_t cid, kArray *s, kArray *d)
 {
 	size_t i;
 	for(i = 0; i < kArray_size(s); i++) {
@@ -100,39 +100,39 @@ static void copyMethodList(CTX, kcid_t cid, kArray *s, kArray *d)
 	}
 }
 
-static void dumpMethod(CTX, ksfp_t *sfp, kMethod *mtd)
+static void dumpMethod(KonohaContext *kctx, ksfp_t *sfp, kMethod *mtd)
 {
 	kwb_t wb;
-	kwb_init(&(_ctx->stack->cwb), &wb);
+	kwb_init(&(kctx->stack->cwb), &wb);
 	KSETv(sfp[2].mtd, mtd);
-	O_ct(mtd)->p(_ctx, sfp, 2, &wb, 1);
+	O_ct(mtd)->p(kctx, sfp, 2, &wb, 1);
 	PLAT printf_i("%s\n", kwb_top(&wb, 1));
 	kwb_free(&wb);
 	return;
 }
 
-static void dumpMethodList(CTX, ksfp_t *sfp, size_t start, kArray *list)
+static void dumpMethodList(KonohaContext *kctx, ksfp_t *sfp, size_t start, kArray *list)
 {
 	size_t i;
 	for(i = start; i < kArray_size(list); i++) {
-		dumpMethod(_ctx, sfp, list->methods[i]);
+		dumpMethod(kctx, sfp, list->methods[i]);
 	}
 }
 
-KMETHOD NameSpace_man(CTX, ksfp_t *sfp _RIX)
+KMETHOD NameSpace_man(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	INIT_GCSTACK();
-	kArray *list = _ctx->stack->gcstack;
+	kArray *list = kctx->stack->gcstack;
 	size_t start = kArray_size(list);
 	kNameSpace *ks = sfp[0].ks;
 	kclass_t *ct = O_ct(sfp[1].o);
 	DBG_P("*** man %s", TY_t(ct->cid));
 	while(ks != NULL) {
-		copyMethodList(_ctx, ct->cid, ks->methods, list);
+		copyMethodList(kctx, ct->cid, ks->methods, list);
 		ks = ks->parentNULL;
 	}
-	copyMethodList(_ctx, ct->cid, ct->methods, list);
-	dumpMethodList(_ctx, sfp, start, list);
+	copyMethodList(kctx, ct->cid, ct->methods, list);
+	dumpMethodList(kctx, sfp, start, list);
 	RESET_GCSTACK();
 }
 
@@ -143,7 +143,7 @@ KMETHOD NameSpace_man(CTX, ksfp_t *sfp _RIX)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static	kbool_t i_initPackage(CTX, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static	kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
 {
 	USING_SUGAR;
 	kclass_t *ct = kclass(TY_Method, pline);
@@ -156,12 +156,12 @@ static	kbool_t i_initPackage(CTX, kNameSpace *ks, int argc, const char**args, kl
 	return true;
 }
 
-static kbool_t i_setupPackage(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t i_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t i_initNameSpace(CTX,  kNameSpace *ks, kline_t pline)
+static kbool_t i_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
 {
 //	USING_SUGAR;
 //	KDEFINE_SYNTAX SYNTAX[] = {
@@ -170,11 +170,11 @@ static kbool_t i_initNameSpace(CTX,  kNameSpace *ks, kline_t pline)
 //		{ TOKEN("$FLOAT"), .kw = KW_TK(TK_FLOAT), .ExprTyCheck = ExprTyCheck_FLOAT, },
 //		{ .kw = KW_END, },
 //	};
-//	SUGAR NameSpace_defineSyntax(_ctx, ks, SYNTAX);
+//	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	return true;
 }
 
-static kbool_t i_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t i_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }

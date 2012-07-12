@@ -25,25 +25,25 @@
 #ifndef KONOHA2_LOCAL_H_
 #define KONOHA2_LOCAL_H_
 
-#define IS_ROOTCTX(o)  (_ctx == (CTX_t)o)
+#define IS_RootKonohaContext(o)   (kctx == (KonohaContext*)o)
 
 // These functions are local functions in minikonoha binary.
 // Don't call from packages directly   (kimio)
 
-struct _kObject** KONOHA_reftail(CTX, size_t size);
-void KONOHA_reftraceObject(CTX, kObject *o);  // called from MODGC
-void KONOHA_freeObjectField(CTX, struct _kObject *o);       // callled from MODGC
+struct _kObject** KONOHA_reftail(KonohaContext *kctx, size_t size);
+void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o);  // called from MODGC
+void KONOHA_freeObjectField(KonohaContext *kctx, struct _kObject *o);       // callled from MODGC
 
-void MODCODE_init(CTX, kcontext_t *ctx);
-//void MODCODE_genCode(CTX, kMethod *mtd, const struct _kBlock *bk);
+void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx);
+//void MODCODE_genCode(KonohaContext *kctx, kMethod *mtd, const struct _kBlock *bk);
 
-void MODSUGAR_init(CTX, kcontext_t *ctx);
-kstatus_t MODSUGAR_loadscript(CTX, const char *path, size_t len, kline_t pline);
-kstatus_t MODSUGAR_eval(CTX, const char *script, kline_t uline);
+void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx);
+kstatus_t MODSUGAR_loadscript(KonohaContext *kctx, const char *path, size_t len, kline_t pline);
+kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, kline_t uline);
 
-void MODLOGGER_init(CTX, kcontext_t *ctx);
-void MODLOGGER_free(CTX, kcontext_t *ctx);
-void MODSUGAR_loadMethod(CTX);
+void MODLOGGER_init(KonohaContext *kctx, KonohaContextVar *ctx);
+void MODLOGGER_free(KonohaContext *kctx, KonohaContextVar *ctx);
+void MODSUGAR_loadMethod(KonohaContext *kctx);
 
 
 

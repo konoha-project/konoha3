@@ -28,7 +28,7 @@
 /* --------------- */
 /* NameSpace */
 
-static void NameSpace_init(CTX, kObject *o, void *conf)
+static void NameSpace_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct _kNameSpace *ks = (struct _kNameSpace*)o;
 	bzero(&ks->parentNULL, sizeof(kNameSpace) - sizeof(kObjectHeader));
@@ -37,7 +37,7 @@ static void NameSpace_init(CTX, kObject *o, void *conf)
 	KINITv(ks->scrobj, knull(CT_System));
 }
 
-static void syntax_reftrace(CTX, kmape_t *p)
+static void syntax_reftrace(KonohaContext *kctx, kmape_t *p)
 {
 	ksyntax_t *syn = (ksyntax_t*)p->uvalue;
 	BEGIN_REFTRACE(6);
@@ -50,7 +50,7 @@ static void syntax_reftrace(CTX, kmape_t *p)
 	END_REFTRACE();
 }
 
-static void NameSpace_reftrace(CTX, kObject *o)
+static void NameSpace_reftrace(KonohaContext *kctx, kObject *o)
 {
 	kNameSpace *ks = (kNameSpace*)o;
 	if(ks->syntaxMapNN != NULL) {
@@ -69,12 +69,12 @@ static void NameSpace_reftrace(CTX, kObject *o)
 	END_REFTRACE();
 }
 
-static void syntax_free(CTX, void *p)
+static void syntax_free(KonohaContext *kctx, void *p)
 {
 	KFREE(p, sizeof(ksyntax_t));
 }
 
-static void NameSpace_free(CTX, kObject *o)
+static void NameSpace_free(KonohaContext *kctx, kObject *o)
 {
 	struct _kNameSpace *ks = (struct _kNameSpace*)o;
 	if(ks->syntaxMapNN != NULL) {
@@ -87,10 +87,10 @@ static void NameSpace_free(CTX, kObject *o)
 }
 
 // syntax
-static void checkFuncArray(CTX, kFunc **synp);
-static void parseSyntaxRule(CTX, const char *rule, kline_t pline, kArray *a);
+static void checkFuncArray(KonohaContext *kctx, kFunc **synp);
+static void parseSyntaxRule(KonohaContext *kctx, const char *rule, kline_t pline, kArray *a);
 
-static ksyntax_t* NameSpace_syn(CTX, kNameSpace *ks0, ksymbol_t kw, int isnew)
+static ksyntax_t* NameSpace_syn(KonohaContext *kctx, kNameSpace *ks0, ksymbol_t kw, int isnew)
 {
 	kNameSpace *ks = ks0;
 	uintptr_t hcode = kw;
@@ -121,11 +121,11 @@ static ksyntax_t* NameSpace_syn(CTX, kNameSpace *ks0, ksymbol_t kw, int isnew)
 
 		if(parent != NULL) {  // TODO: RCGC
 			memcpy(syn, parent, sizeof(ksyntax_t));
-			checkFuncArray(_ctx, &(syn->PatternMatch));
-			checkFuncArray(_ctx, &(syn->ParseExpr));
-			checkFuncArray(_ctx, &(syn->TopStmtTyCheck));
-			checkFuncArray(_ctx, &(syn->StmtTyCheck));
-			checkFuncArray(_ctx, &(syn->ExprTyCheck));
+			checkFuncArray(kctx, &(syn->PatternMatch));
+			checkFuncArray(kctx, &(syn->ParseExpr));
+			checkFuncArray(kctx, &(syn->TopStmtTyCheck));
+			checkFuncArray(kctx, &(syn->StmtTyCheck));
+			checkFuncArray(kctx, &(syn->ExprTyCheck));
 		}
 		else {
 			syn->kw  = kw;
@@ -143,7 +143,7 @@ static ksyntax_t* NameSpace_syn(CTX, kNameSpace *ks0, ksymbol_t kw, int isnew)
 	return NULL;
 }
 
-static void checkFuncArray(CTX, kFunc **synp)
+static void checkFuncArray(KonohaContext *kctx, kFunc **synp)
 {
 	if(synp[0] != NULL && IS_Array(synp[0])) {
 		size_t i;
@@ -155,17 +155,17 @@ static void checkFuncArray(CTX, kFunc **synp)
 	}
 }
 
-static void SYN_setSugarFunc(CTX, kNameSpace *ks, ksymbol_t kw, size_t idx, kFunc *fo)
+static void SYN_setSugarFunc(KonohaContext *kctx, kNameSpace *ks, ksymbol_t kw, size_t idx, kFunc *fo)
 {
-	struct _ksyntax *syn = (struct _ksyntax *)NameSpace_syn(_ctx, ks, kw, 1/*new*/);
+	struct _ksyntax *syn = (struct _ksyntax *)NameSpace_syn(kctx, ks, kw, 1/*new*/);
 	kFunc **synp = &(syn->PatternMatch);
 	DBG_ASSERT(idx <= SYNIDX_ExprTyCheck);
 	KSETv(synp[idx], fo);
 }
 
-static void SYN_addSugarFunc(CTX, kNameSpace *ks, ksymbol_t kw, size_t idx, kFunc *fo)
+static void SYN_addSugarFunc(KonohaContext *kctx, kNameSpace *ks, ksymbol_t kw, size_t idx, kFunc *fo)
 {
-	struct _ksyntax *syn = (struct _ksyntax *)NameSpace_syn(_ctx, ks, kw, 1/*new*/);
+	struct _ksyntax *syn = (struct _ksyntax *)NameSpace_syn(kctx, ks, kw, 1/*new*/);
 	kFunc **synp = &(syn->PatternMatch);
 	DBG_ASSERT(idx <= SYNIDX_ExprTyCheck);
 	if(synp[idx] == kmodsugar->UndefinedParseExpr || synp[idx] == kmodsugar->UndefinedStmtTyCheck || synp[idx] == kmodsugar->UndefinedExprTyCheck) {
@@ -181,7 +181,7 @@ static void SYN_addSugarFunc(CTX, kNameSpace *ks, ksymbol_t kw, size_t idx, kFun
 	kArray_add(a, fo);
 }
 
-static void setSugarFunc(CTX, knh_Fmethod f, kFunc **synp, knh_Fmethod *p, kFunc **mp)
+static void setSugarFunc(KonohaContext *kctx, knh_Fmethod f, kFunc **synp, knh_Fmethod *p, kFunc **mp)
 {
 	if(f != NULL) {
 		if(f != p[0]) {
@@ -192,12 +192,12 @@ static void setSugarFunc(CTX, knh_Fmethod f, kFunc **synp, knh_Fmethod *p, kFunc
 	}
 }
 
-static void NameSpace_defineSyntax(CTX, kNameSpace *ks, KDEFINE_SYNTAX *syndef)
+static void NameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ks, KDEFINE_SYNTAX *syndef)
 {
 	knh_Fmethod pPatternMatch = NULL, pParseExpr = NULL, pStmtTyCheck = NULL, pExprTyCheck = NULL;
 	kFunc *mPatternMatch = NULL, *mParseExpr = NULL, *mStmtTyCheck = NULL, *mExprTyCheck = NULL;
 	while(syndef->kw != KW_END) {
-		struct _ksyntax* syn = (struct _ksyntax*)NameSpace_syn(_ctx, ks, syndef->kw, 1/*isnew*/);
+		struct _ksyntax* syn = (struct _ksyntax*)NameSpace_syn(kctx, ks, syndef->kw, 1/*isnew*/);
 		syn->flag  |= ((kflag_t)syndef->flag);
 		if(syndef->type != 0) {
 			syn->ty = syndef->type;
@@ -213,13 +213,13 @@ static void NameSpace_defineSyntax(CTX, kNameSpace *ks, KDEFINE_SYNTAX *syndef)
 		}
 		if(syndef->rule != NULL) {
 			KINITv(syn->syntaxRuleNULL, new_(TokenArray, 0));
-			parseSyntaxRule(_ctx, syndef->rule, 0, syn->syntaxRuleNULL);
+			parseSyntaxRule(kctx, syndef->rule, 0, syn->syntaxRuleNULL);
 		}
-		setSugarFunc(_ctx, syndef->PatternMatch, &(syn->PatternMatch), &pPatternMatch, &mPatternMatch);
-		setSugarFunc(_ctx, syndef->ParseExpr, &(syn->ParseExpr), &pParseExpr, &mParseExpr);
-		setSugarFunc(_ctx, syndef->TopStmtTyCheck, &(syn->TopStmtTyCheck), &pStmtTyCheck, &mStmtTyCheck);
-		setSugarFunc(_ctx, syndef->StmtTyCheck, &(syn->StmtTyCheck), &pStmtTyCheck, &mStmtTyCheck);
-		setSugarFunc(_ctx, syndef->ExprTyCheck, &(syn->ExprTyCheck), &pExprTyCheck, &mExprTyCheck);
+		setSugarFunc(kctx, syndef->PatternMatch, &(syn->PatternMatch), &pPatternMatch, &mPatternMatch);
+		setSugarFunc(kctx, syndef->ParseExpr, &(syn->ParseExpr), &pParseExpr, &mParseExpr);
+		setSugarFunc(kctx, syndef->TopStmtTyCheck, &(syn->TopStmtTyCheck), &pStmtTyCheck, &mStmtTyCheck);
+		setSugarFunc(kctx, syndef->StmtTyCheck, &(syn->StmtTyCheck), &pStmtTyCheck, &mStmtTyCheck);
+		setSugarFunc(kctx, syndef->ExprTyCheck, &(syn->ExprTyCheck), &pExprTyCheck, &mExprTyCheck);
 		if(syn->ParseExpr == kmodsugar->UndefinedParseExpr) {
 			if(FLAG_is(syn->flag, SYNFLAG_ExprOp)) {
 				KSETv(syn->ParseExpr, kmodsugar->ParseExpr_Op);
@@ -234,9 +234,9 @@ static void NameSpace_defineSyntax(CTX, kNameSpace *ks, KDEFINE_SYNTAX *syndef)
 	//DBG_P("syntax size=%d, hmax=%d", ks->syntaxMapNN->size, ks->syntaxMapNN->hmax);
 }
 
-#define T_statement(kw)  KW_tSTMT_(_ctx, kw), KW_tSTMTPOST(kw)
+#define T_statement(kw)  KW_tSTMT_(kctx, kw), KW_tSTMTPOST(kw)
 
-static const char* KW_tSTMT_(CTX, ksymbol_t kw)
+static const char* KW_tSTMT_(KonohaContext *kctx, ksymbol_t kw)
 {
 	const char *statement = SYM_t(kw);
 	if(kw == KW_ExprPattern) statement = "expression";
@@ -261,7 +261,7 @@ static int comprKeyVal(const void *a, const void *b)
 	return akey - bkey;
 }
 
-static kvs_t* NameSpace_getConstNULL(CTX, kNameSpace *ks, ksymbol_t ukey)
+static kvs_t* NameSpace_getConstNULL(KonohaContext *kctx, kNameSpace *ks, ksymbol_t ukey)
 {
 	size_t min = 0, max = KARRAYSIZE(ks->cl.bytesize, kvs);
 	while(min < max) {
@@ -278,10 +278,10 @@ static kvs_t* NameSpace_getConstNULL(CTX, kNameSpace *ks, ksymbol_t ukey)
 	return NULL;
 }
 
-static kbool_t checkConflictedConst(CTX, kNameSpace *ks, kvs_t *kvs, kline_t pline)
+static kbool_t checkConflictedConst(KonohaContext *kctx, kNameSpace *ks, kvs_t *kvs, kline_t pline)
 {
 	ksymbol_t ukey = kvs->key;
-	kvs_t* ksval = NameSpace_getConstNULL(_ctx, ks, ukey);
+	kvs_t* ksval = NameSpace_getConstNULL(kctx, ks, ukey);
 	if(ksval != NULL) {
 		if(kvs->ty == ksval->ty && kvs->uval == ksval->uval) {
 			return true;  // same value
@@ -292,7 +292,7 @@ static kbool_t checkConflictedConst(CTX, kNameSpace *ks, kvs_t *kvs, kline_t pli
 	return false;
 }
 
-static void NameSpace_mergeConstData(CTX, struct _kNameSpace *ks, kvs_t *kvs, size_t nitems, kline_t pline)
+static void NameSpace_mergeConstData(KonohaContext *kctx, struct _kNameSpace *ks, kvs_t *kvs, size_t nitems, kline_t pline)
 {
 	size_t i, s = KARRAYSIZE(ks->cl.bytesize, kvs);
 	if(s == 0) {
@@ -303,7 +303,7 @@ static void NameSpace_mergeConstData(CTX, struct _kNameSpace *ks, kvs_t *kvs, si
 		kwb_t wb;
 		kwb_init(&(ctxsugar->cwb), &wb);
 		for(i = 0; i < nitems; i++) {
-			if(checkConflictedConst(_ctx, ks, kvs+i, pline)) continue;
+			if(checkConflictedConst(kctx, ks, kvs+i, pline)) continue;
 			kwb_write(&wb, (const char*)(kvs+i), sizeof(kvs_t));
 		}
 		kvs = (kvs_t*)kwb_top(&wb, 0);
@@ -325,12 +325,12 @@ static size_t strlen_alnum(const char *p)
 	return len;
 }
 
-static void NameSpace_loadConstData(CTX, kNameSpace *ks, const char **d, kline_t pline)
+static void NameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ks, const char **d, kline_t pline)
 {
 	INIT_GCSTACK();
 	kvs_t kv;
 	kwb_t wb;
-	kwb_init(&(_ctx->stack->cwb), &wb);
+	kwb_init(&(kctx->stack->cwb), &wb);
 	while(d[0] != NULL) {
 		//DBG_P("key='%s'", d[0]);
 		kv.key = ksymbolSPOL(d[0], strlen_alnum(d[0]), SPOL_TEXT|SPOL_ASCII, _NEWID) | SYMKEY_BOXED;
@@ -352,18 +352,18 @@ static void NameSpace_loadConstData(CTX, kNameSpace *ks, const char **d, kline_t
 	}
 	size_t nitems = kwb_bytesize(&wb) / sizeof(kvs_t);
 	if(nitems > 0) {
-		NameSpace_mergeConstData(_ctx, (struct _kNameSpace*)ks, (kvs_t*)kwb_top(&wb, 0), nitems, pline);
+		NameSpace_mergeConstData(kctx, (struct _kNameSpace*)ks, (kvs_t*)kwb_top(&wb, 0), nitems, pline);
 	}
 	kwb_free(&wb);
 	RESET_GCSTACK();
 }
 
-static void NameSpace_importClassName(CTX, kNameSpace *ks, kpack_t packid, kline_t pline)
+static void NameSpace_importClassName(KonohaContext *kctx, kNameSpace *ks, kpack_t packid, kline_t pline)
 {
 	kvs_t kv;
 	kwb_t wb;
-	kwb_init(&(_ctx->stack->cwb), &wb);
-	size_t i, size = KARRAYSIZE(_ctx->share->ca.bytesize, uintptr);
+	kwb_init(&(kctx->stack->cwb), &wb);
+	size_t i, size = KARRAYSIZE(kctx->share->ca.bytesize, uintptr);
 	for(i = 0; i < size; i++) {
 		kclass_t *ct = CT_(i);
 		if(CT_isPrivate(ct)) continue;
@@ -377,22 +377,22 @@ static void NameSpace_importClassName(CTX, kNameSpace *ks, kpack_t packid, kline
 	}
 	size_t nitems = kwb_bytesize(&wb) / sizeof(kvs_t);
 	if(nitems > 0) {
-		NameSpace_mergeConstData(_ctx, (struct _kNameSpace*)ks, (kvs_t*)kwb_top(&wb, 0), nitems, pline);
+		NameSpace_mergeConstData(kctx, (struct _kNameSpace*)ks, (kvs_t*)kwb_top(&wb, 0), nitems, pline);
 	}
 	kwb_free(&wb);
 }
 
 // NameSpace
 
-static kclass_t *NameSpace_getCT(CTX, kNameSpace *ks, kclass_t *thisct/*NULL*/, const char *name, size_t len, kcid_t def)
+static kclass_t *NameSpace_getCT(KonohaContext *kctx, kNameSpace *ks, kclass_t *thisct/*NULL*/, const char *name, size_t len, ktype_t def)
 {
 	kclass_t *ct = NULL;
 	ksymbol_t un = ksymbolA(name, len, SYM_NONAME);
 	if(un != SYM_NONAME) {
 		uintptr_t hcode = longid(PN_konoha, un);
-		ct = (kclass_t*)map_getu(_ctx, _ctx->share->lcnameMapNN, hcode, 0);
+		ct = (kclass_t*)map_getu(kctx, kctx->share->lcnameMapNN, hcode, 0);
 		if(ct == NULL) {
-			kvs_t *kvs = NameSpace_getConstNULL(_ctx, ks, un);
+			kvs_t *kvs = NameSpace_getConstNULL(kctx, ks, un);
 			DBG_P("kvs=%s, %p", name, kvs);
 			if(kvs != NULL && kvs->ty == TY_TYPE) {
 				return (kclass_t*)kvs->uval;
@@ -402,7 +402,7 @@ static kclass_t *NameSpace_getCT(CTX, kNameSpace *ks, kclass_t *thisct/*NULL*/, 
 	return (ct != NULL) ? ct : ((def >= 0) ? NULL : CT_(def));
 }
 
-static void CT_addMethod(CTX, kclass_t *ct, kMethod *mtd)
+static void CT_addMethod(KonohaContext *kctx, kclass_t *ct, kMethod *mtd)
 {
 	if(unlikely(ct->methods == K_EMPTYARRAY)) {
 		KINITv(((struct _kclass*)ct)->methods, new_(MethodArray, 8));
@@ -410,7 +410,7 @@ static void CT_addMethod(CTX, kclass_t *ct, kMethod *mtd)
 	kArray_add(ct->methods, mtd);
 }
 
-static void NameSpace_addMethod(CTX, kNameSpace *ks, kMethod *mtd)
+static void NameSpace_addMethod(KonohaContext *kctx, kNameSpace *ks, kMethod *mtd)
 {
 	if(ks->methods == K_EMPTYARRAY) {
 		KINITv(((struct _kNameSpace*)ks)->methods, new_(MethodArray, 8));
@@ -419,7 +419,7 @@ static void NameSpace_addMethod(CTX, kNameSpace *ks, kMethod *mtd)
 }
 
 /* NameSpace/Class/Method */
-static kMethod* CT_findMethodNULL(CTX, kclass_t *ct, kmethodn_t mn)
+static kMethod* CT_findMethodNULL(KonohaContext *kctx, kclass_t *ct, kmethodn_t mn)
 {
 	while(ct != NULL) {
 		size_t i;
@@ -435,9 +435,9 @@ static kMethod* CT_findMethodNULL(CTX, kclass_t *ct, kmethodn_t mn)
 	return NULL;
 }
 
-#define kNameSpace_getStaticMethodNULL(ns, mn)   NameSpace_getStaticMethodNULL(_ctx, ns, mn)
+#define kNameSpace_getStaticMethodNULL(ns, mn)   NameSpace_getStaticMethodNULL(kctx, ns, mn)
 
-static kMethod* NameSpace_getMethodNULL(CTX, kNameSpace *ks, kcid_t cid, kmethodn_t mn)
+static kMethod* NameSpace_getMethodNULL(KonohaContext *kctx, kNameSpace *ks, ktype_t cid, kmethodn_t mn)
 {
 	while(ks != NULL) {
 		size_t i;
@@ -450,10 +450,10 @@ static kMethod* NameSpace_getMethodNULL(CTX, kNameSpace *ks, kcid_t cid, kmethod
 		}
 		ks = ks->parentNULL;
 	}
-	return CT_findMethodNULL(_ctx, CT_(cid), mn);
+	return CT_findMethodNULL(kctx, CT_(cid), mn);
 }
 
-//static kMethod* NameSpace_getStaticMethodNULL(CTX, kNameSpace *ks, kmethodn_t mn)
+//static kMethod* NameSpace_getStaticMethodNULL(KonohaContext *kctx, kNameSpace *ks, kmethodn_t mn)
 //{
 //	while(ks != NULL) {
 //		kMethod *mtd = kNameSpace_getMethodNULL(ks, O_cid(ks->scrobj), mn);
@@ -471,22 +471,22 @@ static kMethod* NameSpace_getMethodNULL(CTX, kNameSpace *ks, kcid_t cid, kmethod
 //	return NULL;
 //}
 
-#define kNameSpace_getCastMethodNULL(ns, cid, tcid)     NameSpace_getCastMethodNULL(_ctx, ns, cid, tcid)
-static kMethod* NameSpace_getCastMethodNULL(CTX, kNameSpace *ks, kcid_t cid, kcid_t tcid)
+#define kNameSpace_getCastMethodNULL(ns, cid, tcid)     NameSpace_getCastMethodNULL(kctx, ns, cid, tcid)
+static kMethod* NameSpace_getCastMethodNULL(KonohaContext *kctx, kNameSpace *ks, ktype_t cid, ktype_t tcid)
 {
-	kMethod *mtd = NameSpace_getMethodNULL(_ctx, ks, cid, MN_to(tcid));
+	kMethod *mtd = NameSpace_getMethodNULL(kctx, ks, cid, MN_to(tcid));
 	if(mtd == NULL) {
-		mtd = NameSpace_getMethodNULL(_ctx, ks, cid, MN_as(tcid));
+		mtd = NameSpace_getMethodNULL(kctx, ks, cid, MN_as(tcid));
 	}
 	return mtd;
 }
 
-#define kNameSpace_defineMethod(NS,MTD,UL)  NameSpace_defineMethod(_ctx, NS, MTD, UL)
+#define kNameSpace_defineMethod(NS,MTD,UL)  NameSpace_defineMethod(kctx, NS, MTD, UL)
 
-static kbool_t NameSpace_defineMethod(CTX, kNameSpace *ks, kMethod *mtd, kline_t pline)
+static kbool_t NameSpace_defineMethod(KonohaContext *kctx, kNameSpace *ks, kMethod *mtd, kline_t pline)
 {
 	//if(pline != 0) {
-	//	kMethod *mtdOLD = NameSpace_getMethodNULL(_ctx, ks, mtd->cid, mtd->mn);
+	//	kMethod *mtdOLD = NameSpace_getMethodNULL(kctx, ks, mtd->cid, mtd->mn);
 	//	if(mtdOLD != NULL) {
 	//		char mbuf[128];
 	//		kreportf(ERR_, pline, "method %s.%s is already defined", TY_t(mtd->cid), T_mn(mbuf, mtd->mn));
@@ -498,22 +498,22 @@ static kbool_t NameSpace_defineMethod(CTX, kNameSpace *ks, kMethod *mtd, kline_t
 	}
 	kclass_t *ct = CT_(mtd->cid);
 	if(ct->packdom == ks->packdom && kMethod_isPublic(mtd)) {
-		CT_addMethod(_ctx, ct, mtd);
+		CT_addMethod(kctx, ct, mtd);
 	}
 	else {
-		NameSpace_addMethod(_ctx, ks, mtd);
+		NameSpace_addMethod(kctx, ks, mtd);
 	}
 	return 1;
 }
 
-static void NameSpace_loadMethodData(CTX, kNameSpace *ks, intptr_t *data)
+static void NameSpace_loadMethodData(KonohaContext *kctx, kNameSpace *ks, intptr_t *data)
 {
 	intptr_t *d = data;
 	while(d[0] != -1) {
 		uintptr_t flag = (uintptr_t)d[0];
 		knh_Fmethod f = (knh_Fmethod)d[1];
 		ktype_t rtype = (ktype_t)d[2];
-		kcid_t cid  = (kcid_t)d[3];
+		ktype_t cid  = (ktype_t)d[3];
 		kmethodn_t mn = (kmethodn_t)d[4];
 		size_t i, psize = (size_t)d[5];
 		kparam_t p[psize+1];
@@ -526,16 +526,16 @@ static void NameSpace_loadMethodData(CTX, kNameSpace *ks, intptr_t *data)
 		kMethod *mtd = new_kMethod(flag, cid, mn, f);
 		kMethod_setParam(mtd, rtype, psize, p);
 		if(ks == NULL || kMethod_isPublic(mtd)) {
-			CT_addMethod(_ctx, CT_(cid), mtd);
+			CT_addMethod(kctx, CT_(cid), mtd);
 		} else {
-			NameSpace_addMethod(_ctx, ks, mtd);
+			NameSpace_addMethod(kctx, ks, mtd);
 		}
 	}
 }
 
-//#define kNameSpace_loadGlueFunc(NS, F, OPT, UL)  NameSpace_loadGlueFunc(_ctx, NS, F, OPT, UL)
+//#define kNameSpace_loadGlueFunc(NS, F, OPT, UL)  NameSpace_loadGlueFunc(kctx, NS, F, OPT, UL)
 //
-//static knh_Fmethod NameSpace_loadGlueFunc(CTX, kNameSpace *ks, const char *funcname, int DOPTION, kline_t pline)
+//static knh_Fmethod NameSpace_loadGlueFunc(KonohaContext *kctx, kNameSpace *ks, const char *funcname, int DOPTION, kline_t pline)
 //{
 //	void *f = NULL;
 //	if(ks->gluehdr != NULL) {
@@ -555,7 +555,7 @@ static void NameSpace_loadMethodData(CTX, kNameSpace *ks, intptr_t *data)
 /* --------------- */
 /* Token */
 
-static void Token_init(CTX, kObject *o, void *conf)
+static void Token_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct _kToken *tk = (struct _kToken*)o;
 	tk->uline     =   0;
@@ -563,7 +563,7 @@ static void Token_init(CTX, kObject *o, void *conf)
 	KINITv(tk->text, TS_EMPTY);
 }
 
-static void Token_reftrace(CTX, kObject *o)
+static void Token_reftrace(KonohaContext *kctx, kObject *o)
 {
 	kToken *tk = (kToken*)o;
 	BEGIN_REFTRACE(1);
@@ -602,14 +602,14 @@ static void Token_reftrace(CTX, kObject *o)
 //	return "TK_UNKNOWN";
 //}
 
-static void dumpToken(CTX, kToken *tk)
+static void dumpToken(KonohaContext *kctx, kToken *tk)
 {
 	if(verbose_sugar) {
 		DUMP_P("%s%s %d: kw=%s%s '%s'\n", KW_t(tk->kw), (short)tk->uline, KW_t(tk->kw), kToken_s(tk));
 	}
 }
 
-static void dumpIndent(CTX, int nest)
+static void dumpIndent(KonohaContext *kctx, int nest)
 {
 	int i;
 	for(i = 0; i < nest; i++) {
@@ -637,22 +637,22 @@ static int kTokenList_endChar(kToken *tk)
 	return '>';
 }
 
-static void dumpTokenArray(CTX, int nest, kArray *a, int s, int e)
+static void dumpTokenArray(KonohaContext *kctx, int nest, kArray *a, int s, int e)
 {
 	if(verbose_sugar) {
 		if(nest == 0) DUMP_P("\n");
 		while(s < e) {
 			kToken *tk = a->toks[s];
-			dumpIndent(_ctx, nest);
+			dumpIndent(kctx, nest);
 			if(IS_Array(tk->sub)) {
 				DUMP_P("%c\n", kTokenList_beginChar(tk));
-				dumpTokenArray(_ctx, nest+1, tk->sub, 0, kArray_size(tk->sub));
-				dumpIndent(_ctx, nest);
+				dumpTokenArray(kctx, nest+1, tk->sub, 0, kArray_size(tk->sub));
+				dumpIndent(kctx, nest);
 				DUMP_P("%c\n", kTokenList_endChar(tk));
 			}
 			else {
 				DUMP_P("TK(%d) ", s);
-				dumpToken(_ctx, tk);
+				dumpToken(kctx, tk);
 			}
 			s++;
 		}
@@ -663,7 +663,7 @@ static void dumpTokenArray(CTX, int nest, kArray *a, int s, int e)
 /* --------------- */
 /* Expr */
 
-static void Expr_init(CTX, kObject *o, void *conf)
+static void Expr_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct _kExpr *expr      =   (struct _kExpr*)o;
 	expr->build      =   TEXPR_UNTYPED;
@@ -673,7 +673,7 @@ static void Expr_init(CTX, kObject *o, void *conf)
 	expr->syn = (ksyntax_t*)conf;
 }
 
-static void Expr_reftrace(CTX, kObject *o)
+static void Expr_reftrace(KonohaContext *kctx, kObject *o)
 {
 	kExpr *expr = (kExpr*)o;
 	BEGIN_REFTRACE(2);
@@ -682,7 +682,7 @@ static void Expr_reftrace(CTX, kObject *o)
 	END_REFTRACE();
 }
 
-static struct _kExpr* Expr_vadd(CTX, struct _kExpr *expr, int n, va_list ap)
+static struct _kExpr* Expr_vadd(KonohaContext *kctx, struct _kExpr *expr, int n, va_list ap)
 {
 	int i;
 	if(!IS_Array(expr->cons)) {
@@ -698,34 +698,34 @@ static struct _kExpr* Expr_vadd(CTX, struct _kExpr *expr, int n, va_list ap)
 	return expr;
 }
 
-static kExpr* new_ConsExpr(CTX, ksyntax_t *syn, int n, ...)
+static kExpr* new_ConsExpr(KonohaContext *kctx, ksyntax_t *syn, int n, ...)
 {
 	va_list ap;
 	va_start(ap, n);
 	DBG_ASSERT(syn != NULL);
 	struct _kExpr *expr = new_W(Expr, syn);
 	PUSH_GCSTACK(expr);
-	expr = Expr_vadd(_ctx, expr, n, ap);
+	expr = Expr_vadd(kctx, expr, n, ap);
 	va_end(ap);
 	return (kExpr*)expr;
 }
 
-static kExpr* new_TypedConsExpr(CTX, int build, ktype_t ty, int n, ...)
+static kExpr* new_TypedConsExpr(KonohaContext *kctx, int build, ktype_t ty, int n, ...)
 {
 	va_list ap;
 	va_start(ap, n);
 	struct _kExpr *expr = new_W(Expr, NULL);
 	PUSH_GCSTACK(expr);
-	expr = Expr_vadd(_ctx, expr, n, ap);
+	expr = Expr_vadd(kctx, expr, n, ap);
 	va_end(ap);
 	expr->build = build;
 	expr->ty = ty;
 	return (kExpr*)expr;
 }
 
-static kExpr *Expr_tyCheckCallParams(CTX, kStmt *stmt, kExpr *expr, kMethod *mtd, kGamma *gma, ktype_t reqty);
+static kExpr *Expr_tyCheckCallParams(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kMethod *mtd, kGamma *gma, ktype_t reqty);
 
-static kExpr* new_TypedMethodCall(CTX, kStmt *stmt, ktype_t ty, kMethod *mtd, kGamma *gma, int n, ...)
+static kExpr* new_TypedMethodCall(KonohaContext *kctx, kStmt *stmt, ktype_t ty, kMethod *mtd, kGamma *gma, int n, ...)
 {
 	va_list ap;
 	va_start(ap, n);
@@ -733,15 +733,15 @@ static kExpr* new_TypedMethodCall(CTX, kStmt *stmt, ktype_t ty, kMethod *mtd, kG
 	PUSH_GCSTACK(expr);
 	KSETv(expr->cons, new_(Array, 8));
 	kArray_add(expr->cons, mtd);
-	expr = Expr_vadd(_ctx, expr, n, ap);
+	expr = Expr_vadd(kctx, expr, n, ap);
 	va_end(ap);
 	expr->build = TEXPR_CALL;
 	expr->ty = ty;
-	return Expr_tyCheckCallParams(_ctx, stmt, (kExpr*)expr, mtd, gma, ty);
+	return Expr_tyCheckCallParams(kctx, stmt, (kExpr*)expr, mtd, gma, ty);
 }
 
 
-static kExpr* Expr_add(CTX, kExpr *expr, kExpr *e)
+static kExpr* Expr_add(KonohaContext *kctx, kExpr *expr, kExpr *e)
 {
 	DBG_ASSERT(IS_Array(expr->cons));
 	if(expr != K_NULLEXPR && e != NULL && e != K_NULLEXPR) {
@@ -751,11 +751,11 @@ static kExpr* Expr_add(CTX, kExpr *expr, kExpr *e)
 	return K_NULLEXPR;
 }
 
-static void dumpExpr(CTX, int n, int nest, kExpr *expr)
+static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
 {
 	if(verbose_sugar) {
 		if(nest == 0) DUMP_P("\n");
-		dumpIndent(_ctx, nest);
+		dumpIndent(kctx, nest);
 		if(expr == K_NULLEXPR) {
 			DUMP_P("[%d] ExprTerm: null", n);
 		}
@@ -781,14 +781,14 @@ static void dumpExpr(CTX, int n, int nest, kExpr *expr)
 			for(i=0; i < kArray_size(expr->cons); i++) {
 				kObject *o = expr->cons->list[i];
 				if(O_ct(o) == CT_Expr) {
-					dumpExpr(_ctx, i, nest+1, (kExpr*)o);
+					dumpExpr(kctx, i, nest+1, (kExpr*)o);
 				}
 				else {
-					dumpIndent(_ctx, nest+1);
+					dumpIndent(kctx, nest+1);
 					if(O_ct(o) == CT_Token) {
 						kToken *tk = (kToken*)o;
 						DUMP_P("[%d] O: %s ", i, CT_t(o->h.ct));
-						dumpToken(_ctx, tk);
+						dumpToken(kctx, tk);
 					}
 					else if(o == K_NULL) {
 						DUMP_P("[%d] O: null\n", i);
@@ -802,7 +802,7 @@ static void dumpExpr(CTX, int n, int nest, kExpr *expr)
 	}
 }
 
-static kExpr* Expr_setConstValue(CTX, kExpr *expr, ktype_t ty, kObject *o)
+static kExpr* Expr_setConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, kObject *o)
 {
 	if(expr == NULL) {
 		expr = new_(Expr, 0);
@@ -823,7 +823,7 @@ static kExpr* Expr_setConstValue(CTX, kExpr *expr, ktype_t ty, kObject *o)
 	return expr;
 }
 
-static kExpr* Expr_setNConstValue(CTX, kExpr *expr, ktype_t ty, uintptr_t ndata)
+static kExpr* Expr_setNConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, uintptr_t ndata)
 {
 	if(expr == NULL) {
 		expr = new_(Expr, 0);
@@ -838,7 +838,7 @@ static kExpr* Expr_setNConstValue(CTX, kExpr *expr, ktype_t ty, uintptr_t ndata)
 	return expr;
 }
 
-static kExpr *Expr_setVariable(CTX, kExpr *expr, int build, ktype_t ty, intptr_t index, kGamma *gma)
+static kExpr *Expr_setVariable(KonohaContext *kctx, kExpr *expr, int build, ktype_t ty, intptr_t index, kGamma *gma)
 {
 	if(expr == NULL) {
 		expr = new_W(Expr, 0);
@@ -859,7 +859,7 @@ static kExpr *Expr_setVariable(CTX, kExpr *expr, int build, ktype_t ty, intptr_t
 /* --------------- */
 /* Stmt */
 
-static void Stmt_init(CTX, kObject *o, void *conf)
+static void Stmt_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct _kStmt *stmt = (struct _kStmt*)o;
 	stmt->uline      =   (kline_t)conf;
@@ -867,7 +867,7 @@ static void Stmt_init(CTX, kObject *o, void *conf)
 	stmt->parentNULL = NULL;
 }
 
-static void Stmt_reftrace(CTX, kObject *o)
+static void Stmt_reftrace(KonohaContext *kctx, kObject *o)
 {
 	kStmt *stmt = (kStmt*)o;
 	BEGIN_REFTRACE(1);
@@ -875,20 +875,20 @@ static void Stmt_reftrace(CTX, kObject *o)
 	END_REFTRACE();
 }
 
-static void _dumpToken(CTX, void *arg, kvs_t *d)
+static void _dumpToken(KonohaContext *kctx, void *arg, kvs_t *d)
 {
 	if((d->key & SYMKEY_BOXED) == SYMKEY_BOXED) {
 		ksymbol_t key = ~SYMKEY_BOXED & d->key;
 		DUMP_P("key='%s%s': ", KW_t(key));
 		if(IS_Token(d->oval)) {
-			dumpToken(_ctx, (kToken*)d->oval);
+			dumpToken(kctx, (kToken*)d->oval);
 		} else if (IS_Expr(d->oval)) {
-			dumpExpr(_ctx, 0, 0, (kExpr *) d->oval);
+			dumpExpr(kctx, 0, 0, (kExpr *) d->oval);
 		}
 	}
 }
 
-static void dumpStmt(CTX, kStmt *stmt)
+static void dumpStmt(KonohaContext *kctx, kStmt *stmt)
 {
 	if(verbose_sugar) {
 		if(stmt->syn == NULL) {
@@ -910,7 +910,7 @@ typedef struct flagop_t {
 	uintptr_t flag;
 } flagop_t ;
 
-static uintptr_t Stmt_flag(CTX, kStmt *stmt, flagop_t *fop, uintptr_t flag)
+static uintptr_t Stmt_flag(KonohaContext *kctx, kStmt *stmt, flagop_t *fop, uintptr_t flag)
 {
 	while(fop->key != NULL) {
 		ksymbol_t kw = ksymbolA(fop->key, fop->keysize, SYM_NONAME);
@@ -925,14 +925,14 @@ static uintptr_t Stmt_flag(CTX, kStmt *stmt, flagop_t *fop, uintptr_t flag)
 	return flag;
 }
 
-#define kStmt_is(STMT, KW) Stmt_is(_ctx, STMT, KW)
+#define kStmt_is(STMT, KW) Stmt_is(kctx, STMT, KW)
 
-static inline kbool_t Stmt_is(CTX, kStmt *stmt, ksymbol_t kw)
+static inline kbool_t Stmt_is(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw)
 {
 	return (kObject_getObjectNULL(stmt, kw) != NULL);
 }
 
-static kToken* Stmt_token(CTX, kStmt *stmt, ksymbol_t kw, kToken *def)
+static kToken* Stmt_token(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw, kToken *def)
 {
 	kToken *tk = (kToken*)kObject_getObjectNULL(stmt, kw);
 	if(tk != NULL && IS_Token(tk)) {
@@ -941,7 +941,7 @@ static kToken* Stmt_token(CTX, kStmt *stmt, ksymbol_t kw, kToken *def)
 	return def;
 }
 
-static kExpr* Stmt_expr(CTX, kStmt *stmt, ksymbol_t kw, kExpr *def)
+static kExpr* Stmt_expr(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw, kExpr *def)
 {
 	kExpr *expr = (kExpr*)kObject_getObjectNULL(stmt, kw);
 	if(expr != NULL && IS_Expr(expr)) {
@@ -950,7 +950,7 @@ static kExpr* Stmt_expr(CTX, kStmt *stmt, ksymbol_t kw, kExpr *def)
 	return def;
 }
 
-static const char* Stmt_text(CTX, kStmt *stmt, ksymbol_t kw, const char *def)
+static const char* Stmt_text(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw, const char *def)
 {
 	kExpr *expr = (kExpr*)kObject_getObjectNULL(stmt, kw);
 	if(expr != NULL) {
@@ -965,19 +965,19 @@ static const char* Stmt_text(CTX, kStmt *stmt, ksymbol_t kw, const char *def)
 	return def;
 }
 
-static kbool_t Token_toBRACE(CTX, struct _kToken *tk, kNameSpace *ks);
-static kBlock *new_Block(CTX, kNameSpace* ks, kStmt *stmt, kArray *tls, int s, int e, int delim);
-static kBlock* Stmt_block(CTX, kStmt *stmt, ksymbol_t kw, kBlock *def)
+static kbool_t Token_toBRACE(KonohaContext *kctx, struct _kToken *tk, kNameSpace *ks);
+static kBlock *new_Block(KonohaContext *kctx, kNameSpace* ks, kStmt *stmt, kArray *tls, int s, int e, int delim);
+static kBlock* Stmt_block(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw, kBlock *def)
 {
 	kBlock *bk = (kBlock*)kObject_getObjectNULL(stmt, kw);
 	if(bk != NULL) {
 		if(IS_Token(bk)) {
 			kToken *tk = (kToken*)bk;
 			if (tk->kw == TK_CODE) {
-				Token_toBRACE(_ctx, (struct _kToken*)tk, kStmt_ks(stmt));
+				Token_toBRACE(kctx, (struct _kToken*)tk, kStmt_ks(stmt));
 			}
 			if (tk->kw == AST_BRACE) {
-				bk = new_Block(_ctx, kStmt_ks(stmt), stmt, tk->sub, 0, kArray_size(tk->sub), ';');
+				bk = new_Block(kctx, kStmt_ks(stmt), stmt, tk->sub, 0, kArray_size(tk->sub), ';');
 				kObject_setObject(stmt, kw, bk);
 			}
 		}
@@ -989,7 +989,7 @@ static kBlock* Stmt_block(CTX, kStmt *stmt, ksymbol_t kw, kBlock *def)
 /* --------------- */
 /* Block */
 
-static void Block_init(CTX, kObject *o, void *conf)
+static void Block_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct _kBlock *bk = (struct _kBlock*)o;
 	kNameSpace *ks = (conf != NULL) ? (kNameSpace*)conf : KNULL(NameSpace);
@@ -999,7 +999,7 @@ static void Block_init(CTX, kObject *o, void *conf)
 	KINITv(bk->esp, new_(Expr, 0));
 }
 
-static void Block_reftrace(CTX, kObject *o)
+static void Block_reftrace(KonohaContext *kctx, kObject *o)
 {
 	kBlock *bk = (kBlock*)o;
 	BEGIN_REFTRACE(4);
@@ -1010,7 +1010,7 @@ static void Block_reftrace(CTX, kObject *o)
 	END_REFTRACE();
 }
 
-static void Block_insertAfter(CTX, kBlock *bk, kStmt *target, kStmt *stmt)
+static void Block_insertAfter(KonohaContext *kctx, kBlock *bk, kStmt *target, kStmt *stmt)
 {
 	//DBG_ASSERT(stmt->parentNULL == NULL);
 	KSETv(((struct _kStmt*)stmt)->parentNULL, bk);
@@ -1027,7 +1027,7 @@ static void Block_insertAfter(CTX, kBlock *bk, kStmt *target, kStmt *stmt)
 /* --------------- */
 /* Block */
 
-static void Gamma_init(CTX, kObject *o, void *conf)
+static void Gamma_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct _kGamma *gma = (struct _kGamma*)o;
 	gma->genv = NULL;

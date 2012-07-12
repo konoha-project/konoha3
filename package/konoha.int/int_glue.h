@@ -36,13 +36,13 @@ extern "C" {
 
 /* ------------------------------------------------------------------------ */
 
-static KMETHOD Int_opLSHIFT (CTX, ksfp_t *sfp _RIX)
+static KMETHOD Int_opLSHIFT (KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	int lshift = sfp[1].ivalue;
 	RETURNi_(sfp[0].ivalue << lshift);
 }
 
-static KMETHOD Int_opRSHIFT (CTX, ksfp_t *sfp _RIX)
+static KMETHOD Int_opRSHIFT (KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	int rshift = sfp[1].ivalue;
 	RETURNi_(sfp[0].ivalue >> rshift);
@@ -56,7 +56,7 @@ static KMETHOD Int_opRSHIFT (CTX, ksfp_t *sfp _RIX)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t int_initPackage(CTX, kNameSpace *ns, int argc, const char**args, kline_t pline)
+static kbool_t int_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kline_t pline)
 {
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
@@ -76,12 +76,12 @@ static kbool_t int_initPackage(CTX, kNameSpace *ns, int argc, const char**args, 
 	return true;
 }
 
-static kbool_t int_setupPackage(CTX, kNameSpace *ns, kline_t pline)
+static kbool_t int_setupPackage(KonohaContext *kctx, kNameSpace *ns, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t int_initNameSpace(CTX,  kNameSpace *ns, kline_t pline)
+static kbool_t int_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
@@ -91,11 +91,11 @@ static kbool_t int_initNameSpace(CTX,  kNameSpace *ns, kline_t pline)
 //			{ TOKEN("--"), _OP, .op1 = "opDEC", .priority_op2 = 16, .flag = SYNFLAG_ExprPostfixOp2,},
 			{ .kw = KW_END, },
 	};
-	SUGAR NameSpace_defineSyntax(_ctx, ns, SYNTAX);
+	SUGAR NameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t int_setupNameSpace(CTX, kNameSpace *ns, kline_t pline)
+static kbool_t int_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kline_t pline)
 {
 	return true;
 }

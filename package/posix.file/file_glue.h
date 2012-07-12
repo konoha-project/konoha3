@@ -38,14 +38,14 @@ struct _kFILE {
 
 /* ------------------------------------------------------------------------ */
 
-static void File_init(CTX, kObject *o, void *conf)
+static void File_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct _kFILE *file = (struct _kFILE*)o;
 	file->fp = (conf != NULL) ? conf : NULL;
 	file->realpath = NULL;
 }
 
-static void File_free(CTX, kObject *o)
+static void File_free(KonohaContext *kctx, kObject *o)
 {
 	struct _kFILE *file = (struct _kFILE*)o;
 	if (file->fp != NULL) {
@@ -64,7 +64,7 @@ static void File_free(CTX, kObject *o)
 	}
 }
 
-static void File_p(CTX, ksfp_t *sfp, int pos, kwb_t *wb, int level)
+static void File_p(KonohaContext *kctx, ksfp_t *sfp, int pos, kwb_t *wb, int level)
 {
 	kFILE *file = (kFILE*)sfp[pos].o;
 	FILE *fp = file->fp;
@@ -73,7 +73,7 @@ static void File_p(CTX, ksfp_t *sfp, int pos, kwb_t *wb, int level)
 
 /* ------------------------------------------------------------------------ */
 //## @Native @Throwable FILE System.fopen(String path, String mode);
-static KMETHOD System_fopen(CTX, ksfp_t *sfp _RIX)
+static KMETHOD System_fopen(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kString *s = sfp[1].s;
 	const char *mode = IS_NULL(sfp[2].s) ? "r" : S_text(sfp[2].s);
@@ -92,7 +92,7 @@ static KMETHOD System_fopen(CTX, ksfp_t *sfp _RIX)
 }
 
 //## @Native int File.read(Bytes buf, int offset, int len);
-static KMETHOD File_read(CTX, ksfp_t *sfp _RIX)
+static KMETHOD File_read(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kFILE *file = (kFILE*)sfp[0].o;
 	FILE *fp = file->fp;
@@ -120,7 +120,7 @@ static KMETHOD File_read(CTX, ksfp_t *sfp _RIX)
 }
 
 //## @Native int File.write(Bytes buf, int offset, int len);
-static KMETHOD File_write(CTX , ksfp_t *sfp _RIX)
+static KMETHOD File_write(KonohaContext *kctx , ksfp_t *sfp _RIX)
 {
 	kFILE *file = (kFILE*)sfp[0].o;
 	FILE *fp = file->fp;
@@ -144,7 +144,7 @@ static KMETHOD File_write(CTX , ksfp_t *sfp _RIX)
 }
 
 //## @Native void File.close();
-static KMETHOD File_close(CTX, ksfp_t *sfp _RIX)
+static KMETHOD File_close(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	struct _kFILE *file = (struct _kFILE*)sfp[0].o;
 	FILE *fp = file->fp;
@@ -162,7 +162,7 @@ static KMETHOD File_close(CTX, ksfp_t *sfp _RIX)
 }
 
 //## @Native int File.getC();
-static KMETHOD File_getC(CTX, ksfp_t *sfp _RIX)
+static KMETHOD File_getC(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	FILE *fp = ((kFILE*)sfp[0].o)->fp;
 	int ch = EOF;
@@ -179,7 +179,7 @@ static KMETHOD File_getC(CTX, ksfp_t *sfp _RIX)
 }
 
 //## @Native boolean File.putC(int ch);
-static KMETHOD File_putC(CTX, ksfp_t *sfp _RIX)
+static KMETHOD File_putC(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	FILE *fp = ((kFILE*)sfp[0].o)->fp;
 	if (fp != NULL) {
@@ -207,7 +207,7 @@ static KMETHOD File_putC(CTX, ksfp_t *sfp _RIX)
 #define TY_File         cFile->cid
 #define IS_File(O)      ((O)->h.ct == CT_File)
 
-static kbool_t file_initPackage(CTX, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
 {
 	KDEFINE_CLASS defFile = {
 		STRUCTNAME(FILE),
@@ -240,17 +240,17 @@ static kbool_t file_initPackage(CTX, kNameSpace *ks, int argc, const char**args,
 	return true;
 }
 
-static kbool_t file_setupPackage(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t file_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t file_initNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t file_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t file_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t file_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }

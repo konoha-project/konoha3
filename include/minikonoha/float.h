@@ -27,9 +27,9 @@
 
 #define KFLOAT_FMT             "%.6f"
 
-#define kfloatmod        ((kfloatmod_t*)_ctx->mod[MOD_float])
-#define kmodfloat        ((kmodfloat_t*)_ctx->modshare[MOD_float])
-#define IS_defineFloat()    (_ctx->modshare[MOD_float] != NULL)
+#define kfloatmod        ((kfloatmod_t*)kctx->mod[MOD_float])
+#define kmodfloat        ((kmodfloat_t*)kctx->modshare[MOD_float])
+#define IS_defineFloat()    (kctx->modshare[MOD_float] != NULL)
 #define CT_Float         kmodfloat->cFloat
 #define TY_Float         kmodfloat->cFloat->cid
 

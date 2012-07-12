@@ -22,14 +22,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-static void karray_init(CTX, karray_t *m, size_t bytemax)
+static void karray_init(KonohaContext *kctx, karray_t *m, size_t bytemax)
 {
 	m->bytesize = 0;
 	m->bytemax  = bytemax;
 	m->bytebuf = (char*)KCALLOC(bytemax, 1);
 }
 
-static void karray_resize(CTX, karray_t *m, size_t newsize)
+static void karray_resize(KonohaContext *kctx, karray_t *m, size_t newsize)
 {
 	size_t oldsize = m->bytemax;
 	char *newbody = (char*)KMALLOC(newsize);
@@ -45,19 +45,19 @@ static void karray_resize(CTX, karray_t *m, size_t newsize)
 	m->bytemax = newsize;
 }
 
-static void karray_expand(CTX, karray_t *m, size_t minsize)
+static void karray_expand(KonohaContext *kctx, karray_t *m, size_t minsize)
 {
 	if(m->bytemax == 0) {
-		if(minsize > 0) karray_init(_ctx, m, minsize);
+		if(minsize > 0) karray_init(kctx, m, minsize);
 	}
 	else {
 		size_t oldsize = m->bytemax, newsize = oldsize * 2;
 		if(minsize > newsize) newsize = minsize;
-		karray_resize(_ctx, m, newsize);
+		karray_resize(kctx, m, newsize);
 	}
 }
 
-static void karray_free(CTX, karray_t *m)
+static void karray_free(KonohaContext *kctx, karray_t *m)
 {
 	if(m->bytemax > 0) {
 		KFREE(m->bytebuf, m->bytemax);
@@ -73,17 +73,17 @@ static void Kwb_init(karray_t *m, kwb_t *wb)
 	wb->pos = m->bytesize;
 }
 
-static void Kwb_write(CTX, kwb_t *wb, const char *data, size_t bytelen)
+static void Kwb_write(KonohaContext *kctx, kwb_t *wb, const char *data, size_t bytelen)
 {
 	karray_t *m = wb->m;
 	if(!(m->bytesize + bytelen < m->bytemax)) {
-		karray_expand(_ctx, m, m->bytesize + bytelen);
+		karray_expand(kctx, m, m->bytesize + bytelen);
 	}
 	memcpy(m->bytebuf + m->bytesize, data, bytelen);
 	m->bytesize += bytelen;
 }
 
-static void Kwb_putc(CTX, kwb_t *wb, ...)
+static void Kwb_putc(KonohaContext *kctx, kwb_t *wb, ...)
 {
 	char buf[256];
 	int ch, len = 0;
@@ -93,11 +93,11 @@ static void Kwb_putc(CTX, kwb_t *wb, ...)
 		buf[len] = ch;
 		len++;
  	}
-	Kwb_write(_ctx, wb, buf, len);
+	Kwb_write(kctx, wb, buf, len);
 	va_end(ap);
 }
 
-static void Kwb_vprintf(CTX, kwb_t *wb, const char *fmt, va_list ap)
+static void Kwb_vprintf(KonohaContext *kctx, kwb_t *wb, const char *fmt, va_list ap)
 {
 	va_list ap2;
 	va_copy(ap2, ap);
@@ -105,27 +105,27 @@ static void Kwb_vprintf(CTX, kwb_t *wb, const char *fmt, va_list ap)
 	size_t s = m->bytesize;
 	size_t n = PLAT vsnprintf_i( m->bytebuf + s, m->bytemax - s, fmt, ap);
 	if(n >= (m->bytemax - s)) {
-		karray_expand(_ctx, m, n + 1);
+		karray_expand(kctx, m, n + 1);
 		n = PLAT vsnprintf_i(m->bytebuf + s, m->bytemax - s, fmt, ap2);
 	}
 	va_end(ap2);
 	m->bytesize += n;
 }
 
-static void Kwb_printf(CTX, kwb_t *wb, const char *fmt, ...)
+static void Kwb_printf(KonohaContext *kctx, kwb_t *wb, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
-	Kwb_vprintf(_ctx, wb, fmt, ap);
+	Kwb_vprintf(kctx, wb, fmt, ap);
 	va_end(ap);
 }
 
-static const char* Kwb_top(CTX, kwb_t *wb, int ensureZero)
+static const char* Kwb_top(KonohaContext *kctx, kwb_t *wb, int ensureZero)
 {
 	karray_t *m = wb->m;
 	if(ensureZero) {
 		if(!(m->bytesize + 1 < m->bytemax)) {
-			karray_expand(_ctx, m, m->bytesize + 1);
+			karray_expand(kctx, m, m->bytesize + 1);
 		}
 		m->bytebuf[m->bytesize] = 0;
 	}
@@ -159,7 +159,7 @@ static void kmap_makeFreeList(kmap_t *kmap, size_t s, size_t e)
 	DBG_ASSERT(kmap->arena[e-1].next == NULL);
 }
 
-static void kmap_rehash(CTX, kmap_t *kmap)
+static void kmap_rehash(KonohaContext *kctx, kmap_t *kmap)
 {
 	size_t i, newhmax = kmap->hmax * 2 + 1;
 	kmape_t **newhentry = (kmape_t**)KCALLOC(newhmax, sizeof(kmape_t*));
@@ -186,7 +186,7 @@ static void kmap_shiftptr(kmap_t *kmap, intptr_t shift)
 	}
 }
 
-static kmape_t *Kmap_newentry(CTX, kmap_t *kmap, kuint_t hcode)
+static kmape_t *Kmap_newentry(KonohaContext *kctx, kmap_t *kmap, kuint_t hcode)
 {
 	kmape_t *e;
 	if(kmap->unused == NULL) {
@@ -198,7 +198,7 @@ static kmape_t *Kmap_newentry(CTX, kmap_t *kmap, kuint_t hcode)
 		kmap_shiftptr(kmap, (char*)kmap->arena - oarena);
 		kmap_makeFreeList(kmap, oarenasize, kmap->arenasize);
 		KFREE(oarena, oarenasize * sizeof(kmape_t));
-		kmap_rehash(_ctx, kmap);
+		kmap_rehash(kctx, kmap);
 	}
 	e = kmap->unused;
 	kmap->unused = e->next;
@@ -214,7 +214,7 @@ static kmape_t *Kmap_newentry(CTX, kmap_t *kmap, kuint_t hcode)
 	return e;
 }
 
-static kmap_t *Kmap_init(CTX, size_t init)
+static kmap_t *Kmap_init(KonohaContext *kctx, size_t init)
 {
 	kmap_t *kmap = (kmap_t*)KCALLOC(sizeof(kmap_t), 1);
 	if(init < HMAP_INIT) init = HMAP_INIT;
@@ -227,26 +227,26 @@ static kmap_t *Kmap_init(CTX, size_t init)
 	return (kmap_t*)kmap;
 }
 
-static void Kmap_reftrace(CTX, kmap_t *kmap, void (*f)(CTX, kmape_t *))
+static void Kmap_reftrace(KonohaContext *kctx, kmap_t *kmap, void (*f)(KonohaContext *kctx, kmape_t *))
 {
 	size_t i;
 	for(i = 0; i < kmap->hmax; i++) {
 		kmape_t *e = kmap->hentry[i];
 		while(e != NULL) {
-			f(_ctx, e);
+			f(kctx, e);
 			e = e->next;
 		}
 	}
 }
 
-static void Kmap_free(CTX, kmap_t *kmap, void (*f)(CTX, void *))
+static void Kmap_free(KonohaContext *kctx, kmap_t *kmap, void (*f)(KonohaContext *kctx, void *))
 {
 	if(f != NULL) {
 		size_t i;
 		for(i = 0; i < kmap->hmax; i++) {
 			kmape_t *e = kmap->hentry[i];
 			while(e != NULL) {
-				f(_ctx, e->pvalue);
+				f(kctx, e->pvalue);
 				e = e->next;
 			}
 		}
@@ -296,14 +296,14 @@ static void Kmap_remove(kmap_t* kmap, kmape_t *oe)
 
 // key management
 
-static void map_addStringUnboxValue(CTX, kmap_t *kmp, uintptr_t hcode, kString *skey, uintptr_t uvalue)
+static void map_addStringUnboxValue(KonohaContext *kctx, kmap_t *kmp, uintptr_t hcode, kString *skey, uintptr_t uvalue)
 {
 	kmape_t *e = kmap_newentry(kmp, hcode);
 	KINITv(e->skey, skey);
 	e->uvalue = uvalue;
 }
 
-static ksymbol_t Kmap_getcode(CTX, kmap_t *kmp, kArray *list, const char *name, size_t len, uintptr_t hcode, int spol, ksymbol_t def)
+static ksymbol_t Kmap_getcode(KonohaContext *kctx, kmap_t *kmp, kArray *list, const char *name, size_t len, uintptr_t hcode, int spol, ksymbol_t def)
 {
 	kmape_t *e = kmap_get(kmp, hcode);
 	while(e != NULL) {
@@ -316,27 +316,27 @@ static ksymbol_t Kmap_getcode(CTX, kmap_t *kmp, kArray *list, const char *name, 
 		kString *skey = new_kString(name, len, spol);
 		uintptr_t sym = kArray_size(list);
 		kArray_add(list, skey);
-		map_addStringUnboxValue(_ctx, kmp, hcode, skey, sym);
+		map_addStringUnboxValue(kctx, kmp, hcode, skey, sym);
 		return (ksymbol_t)sym;
 	}
 	return def;
 }
 
-static kline_t Kfileid(CTX, const char *name, size_t len, int spol, ksymbol_t def)
+static kline_t Kfileid(KonohaContext *kctx, const char *name, size_t len, int spol, ksymbol_t def)
 {
 	uintptr_t hcode = strhash(name, len);
-	kline_t uline = Kmap_getcode(_ctx, _ctx->share->fileidMapNN, _ctx->share->fileidList, name, len, hcode, spol, def);
+	kline_t uline = Kmap_getcode(kctx, kctx->share->fileidMapNN, kctx->share->fileidList, name, len, hcode, spol, def);
 	//DBG_P("name='%s', fileid=%d", name, uline);
 	return uline << (sizeof(kshort_t) * 8);
 }
 
-static kpack_t Kpack(CTX, const char *name, size_t len, int spol, ksymbol_t def)
+static kpack_t Kpack(KonohaContext *kctx, const char *name, size_t len, int spol, ksymbol_t def)
 {
 	uintptr_t hcode = strhash(name, len);
-	return Kmap_getcode(_ctx, _ctx->share->packMapNN, _ctx->share->packList, name, len, hcode, spol | SPOL_ASCII, def);
+	return Kmap_getcode(kctx, kctx->share->packMapNN, kctx->share->packList, name, len, hcode, spol | SPOL_ASCII, def);
 }
 
-static ksymbol_t Ksymbol2(CTX, const char *name, size_t len, int spol, ksymbol_t def)
+static ksymbol_t Ksymbol2(KonohaContext *kctx, const char *name, size_t len, int spol, ksymbol_t def)
 {
 	ksymbol_t mask = 0;
 	int ch0 = name[0], ch1 = name[1];
@@ -369,14 +369,14 @@ static ksymbol_t Ksymbol2(CTX, const char *name, size_t len, int spol, ksymbol_t
 		}
 	}
 	uintptr_t hcode = strhash(name, len);
-	ksymbol_t sym = Kmap_getcode(_ctx, _ctx->share->symbolMapNN, _ctx->share->symbolList, name, len, hcode, spol | SPOL_ASCII, def);
+	ksymbol_t sym = Kmap_getcode(kctx, kctx->share->symbolMapNN, kctx->share->symbolList, name, len, hcode, spol | SPOL_ASCII, def);
 	return (sym == def) ? def : (sym | mask);
 }
 
 // -------------------------------------------------------------------------
 // library
 
-static karray_t *new_karray(CTX, size_t bytesize, size_t bytemax)
+static karray_t *new_karray(KonohaContext *kctx, size_t bytesize, size_t bytemax)
 {
 	karray_t *m = (karray_t*)KCALLOC(sizeof(karray_t), 1);
 	DBG_ASSERT(bytesize <= bytemax);
@@ -401,7 +401,7 @@ static inline karray_t* kvproto_null(void)  // for proto_get safe null
 	return &pnull;
 }
 
-void KONOHA_freeObjectField(CTX, struct _kObject *o)
+void KONOHA_freeObjectField(KonohaContext *kctx, struct _kObject *o)
 {
 	kclass_t *ct = O_ct(o);
 	if(o->h.kvproto->bytemax > 0) {
@@ -410,7 +410,7 @@ void KONOHA_freeObjectField(CTX, struct _kObject *o)
 		KFREE(p, sizeof(karray_t));
 		o->h.kvproto = kvproto_null();
 	}
-	ct->free(_ctx, o);
+	ct->free(kctx, o);
 }
 
 static kvs_t* kvproto_get(karray_t *p, ksymbol_t key)
@@ -440,7 +440,7 @@ static inline void kvproto_findset(kvs_t *d, kvs_t *newd)
 	}
 }
 
-static void kvproto_rehash(CTX, karray_t *p)
+static void kvproto_rehash(KonohaContext *kctx, karray_t *p)
 {
 	size_t i, pmax = (p->bytemax) / sizeof(kvs_t);
 	size_t newpmax = pmax * 2, newpsize = newpmax - KVPROTO_DELTA;
@@ -466,7 +466,7 @@ static void kvproto_rehash(CTX, karray_t *p)
 	p->bytesize = newpsize * sizeof(kvs_t);
 }
 
-void KONOHA_reftraceObject(CTX, kObject *o)
+void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o)
 {
 	kclass_t *ct = O_ct(o);
 	if(o->h.kvproto->bytemax > 0) {
@@ -481,14 +481,14 @@ void KONOHA_reftraceObject(CTX, kObject *o)
 		}
 		END_REFTRACE();
 	}
-	ct->reftrace(_ctx, o);
+	ct->reftrace(kctx, o);
 }
 
-static void kvproto_set(CTX, karray_t **pval, ksymbol_t key, ktype_t ty, uintptr_t uval)
+static void kvproto_set(KonohaContext *kctx, karray_t **pval, ksymbol_t key, ktype_t ty, uintptr_t uval)
 {
 	karray_t *p = pval[0];
 	if(p->bytemax == 0) {
-		p = new_karray(_ctx, (KVPROTO_INIT - KVPROTO_DELTA) * sizeof(kvs_t), KVPROTO_INIT * sizeof(kvs_t));
+		p = new_karray(kctx, (KVPROTO_INIT - KVPROTO_DELTA) * sizeof(kvs_t), KVPROTO_INIT * sizeof(kvs_t));
 		pval[0] = p;
 	}
 	do {
@@ -501,47 +501,47 @@ static void kvproto_set(CTX, karray_t **pval, ksymbol_t key, ktype_t ty, uintptr
 			}
 			d++;
 		}
-		kvproto_rehash(_ctx, p);
+		kvproto_rehash(kctx, p);
 	}
 	while(1);
 }
 
-static void KObject_protoEach(CTX, kObject *o, void *thunk, void (*f)(CTX, void *, kvs_t *d))
+static void KObject_protoEach(KonohaContext *kctx, kObject *o, void *thunk, void (*f)(KonohaContext *kctx, void *, kvs_t *d))
 {
 	size_t i, pmax = o->h.kvproto->bytemax / sizeof(kvs_t);
 	kvs_t *d = o->h.kvproto->kvs;
 	for (i = 0; i < pmax; ++i, ++d) {
-		f(_ctx, thunk, d);
+		f(kctx, thunk, d);
 	}
 }
 
-static kObject* KObject_getObjectNULL(CTX, kObject *o, ksymbol_t key, kObject *defval)
+static kObject* KObject_getObjectNULL(KonohaContext *kctx, kObject *o, ksymbol_t key, kObject *defval)
 {
 	kvs_t *d = kvproto_get(o->h.kvproto, key | SYMKEY_BOXED);
 	return (d != NULL) ? d->oval : defval;
 }
 
-static void KObject_setObject(CTX, kObject *o, ksymbol_t key, ktype_t ty, kObject *val)
+static void KObject_setObject(KonohaContext *kctx, kObject *o, ksymbol_t key, ktype_t ty, kObject *val)
 {
 	W(kObject, o);
-	kvproto_set(_ctx, &Wo->h.kvproto, key | SYMKEY_BOXED, ty, (uintptr_t)val);
+	kvproto_set(kctx, &Wo->h.kvproto, key | SYMKEY_BOXED, ty, (uintptr_t)val);
 	WASSERT(o);
 }
 
-static uintptr_t KObject_getUnboxedValue(CTX, kObject *o, ksymbol_t key, uintptr_t defval)
+static uintptr_t KObject_getUnboxedValue(KonohaContext *kctx, kObject *o, ksymbol_t key, uintptr_t defval)
 {
 	kvs_t *d = kvproto_get(o->h.kvproto, key);
 	return (d != NULL) ? d->uval : defval;
 }
 
-static void KObject_setUnboxedValue(CTX, kObject *o, ksymbol_t key, ktype_t ty, uintptr_t uval)
+static void KObject_setUnboxedValue(KonohaContext *kctx, kObject *o, ksymbol_t key, ktype_t ty, uintptr_t uval)
 {
 	W(kObject, o);
-	kvproto_set(_ctx, &Wo->h.kvproto, key, ty, uval);
+	kvproto_set(kctx, &Wo->h.kvproto, key, ty, uval);
 	WASSERT(o);
 }
 
-static void KObject_removeKey(CTX, kObject *o, ksymbol_t key)
+static void KObject_removeKey(KonohaContext *kctx, kObject *o, ksymbol_t key)
 {
 	kvs_t *d = kvproto_get(o->h.kvproto, key | SYMKEY_BOXED);
 	if(d != NULL) {
@@ -558,7 +558,7 @@ static void KObject_removeKey(CTX, kObject *o, ksymbol_t key)
 /* debug mode */
 int verbose_debug = 0;
 
-static void Kreportf(CTX, kinfotag_t level, kline_t pline, const char *fmt, ...)
+static void Kreportf(KonohaContext *kctx, kinfotag_t level, kline_t pline, const char *fmt, ...)
 {
 	if(level == DEBUG_ && !verbose_debug) return;
 	va_list ap;
@@ -582,9 +582,9 @@ static void Kreportf(CTX, kinfotag_t level, kline_t pline, const char *fmt, ...)
 
 // -------------------------------------------------------------------------
 
-static void Kraise(CTX, int param)
+static void Kraise(KonohaContext *kctx, int param)
 {
-	kstack_t *base = _ctx->stack;
+	kstack_t *base = kctx->stack;
 	if(base->evaljmpbuf != NULL) {
 		PLAT longjmp_i(*base->evaljmpbuf, param+1);  // in setjmp 0 means good
 	}
@@ -593,7 +593,7 @@ static void Kraise(CTX, int param)
 
 // -------------------------------------------------------------------------
 
-static kbool_t KRUNTIME_setModule(CTX, int x, kmodshare_t *d, kline_t pline);
+static kbool_t KRUNTIME_setModule(KonohaContext *kctx, int x, kmodshare_t *d, kline_t pline);
 
 static void klib2_init(struct _klib2 *l)
 {

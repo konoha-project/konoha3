@@ -27,45 +27,45 @@
 
 // --------------------------------------------------------------------------
 
-static	kbool_t var_initPackage(CTX, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static	kbool_t var_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t var_setupPackage(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t var_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
-static KMETHOD StmtTyCheck_var(CTX, ksfp_t *sfp _RIX)
+static KMETHOD StmtTyCheck_var(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, syn, gma);
 //	DBG_P("global assignment .. ");
 //	kObject *scr = gma->genv->ks->scrNUL;
 //	if(scr == NULL) {
-//		SUGAR p(_ctx, ERR_, stmt->uline, -1, " global variables are not available");
+//		SUGAR p(kctx, ERR_, stmt->uline, -1, " global variables are not available");
 //		RETURNb_(false);
 //	}
 //	kExpr *vexpr = kStmt_expr(stmt, KW_("var"), K_NULLEXPR);
-//	ksymbol_t fn = tosymbol(_ctx, vexpr);
+//	ksymbol_t fn = tosymbol(kctx, vexpr);
 //	if(fn == SYM_NONAME) {
-//		SUGAR p(_ctx, ERR_, stmt->uline, -1, "not variable name");
+//		SUGAR p(kctx, ERR_, stmt->uline, -1, "not variable name");
 //		RETURNb_(false);
 //	}
 //	kExpr *expr = kStmt_expr(stmt, KW_ExprPattern, K_NULLEXPR);
 //	DBG_P("expr kw='%s'", KW_t(expr->syn->kw));
-//	if(!SUGAR Stmt_tyCheckExpr(_ctx, stmt, KW_ExprPattern, gma, TY_var, 0)) {
-//		SUGAR p(_ctx, ERR_, stmt->uline, -1, "type error");
+//	if(!SUGAR Stmt_tyCheckExpr(kctx, stmt, KW_ExprPattern, gma, TY_var, 0)) {
+//		SUGAR p(kctx, ERR_, stmt->uline, -1, "type error");
 //		RETURNb_(false);
 //	}
 //	/*kExpr **/expr = kStmt_expr(stmt, KW_ExprPattern, K_NULLEXPR);
-//	kMethod *mtd = Object_newProtoSetterNULL(_ctx, scr, gma->genv->ks, expr->ty, fn, stmt->uline);
+//	kMethod *mtd = Object_newProtoSetterNULL(kctx, scr, gma->genv->ks, expr->ty, fn, stmt->uline);
 //	if(mtd == NULL) {
 //		RETURNb_(false);
 //	}
-//	SUGAR p(_ctx, INFO_, stmt->uline, -1, "%s has type %s", SYM_t(fn), TY_t(expr->ty));
-//	expr = SUGAR new_TypedMethodCall(_ctx, TY_void, mtd, gma, 2, new_ConstValue(O_cid(scr), scr), expr);
+//	SUGAR p(kctx, INFO_, stmt->uline, -1, "%s has type %s", SYM_t(fn), TY_t(expr->ty));
+//	expr = SUGAR new_TypedMethodCall(kctx, TY_void, mtd, gma, 2, new_ConstValue(O_cid(scr), scr), expr);
 //	kObject_setObject(stmt, KW_ExprPattern, expr);
 //	kStmt_typed(stmt, EXPR);
 //	RETURNb_(true);
@@ -73,19 +73,19 @@ static KMETHOD StmtTyCheck_var(CTX, ksfp_t *sfp _RIX)
 
 // ---------------------------------------------------------------------------
 
-static kbool_t var_initNameSpace(CTX,  kNameSpace *ks, kline_t pline)
+static kbool_t var_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ TOKEN("var"), StmtTyCheck_(var), .rule = "\"var\" var: $expr \"=\" $expr", },
 		{ .kw = KW_END, },
 	};
-	SUGAR NameSpace_defineSyntax(_ctx, ks, SYNTAX);
+	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	return true;
 }
 
 
-static kbool_t var_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t var_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }

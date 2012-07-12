@@ -37,8 +37,8 @@
 extern "C" {
 #endif
 
-kstatus_t MODSUGAR_eval(CTX, const char *script, size_t len, kline_t uline);
-kstatus_t MODSUGAR_loadscript(CTX, const char *path, size_t len, kline_t pline);
+kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, size_t len, kline_t uline);
+kstatus_t MODSUGAR_loadscript(KonohaContext *kctx, const char *path, size_t len, kline_t pline);
 
 kplatform_t* platform_shell(void);
 
@@ -125,11 +125,11 @@ static int checkstmt(const char *t, size_t len)
 	return 1;
 }
 
-static kstatus_t readstmt(CTX, kwb_t *wb, kline_t *uline)
+static kstatus_t readstmt(KonohaContext *kctx, kwb_t *wb, kline_t *uline)
 {
 	int line = 1;
 	kstatus_t status = K_CONTINUE;
-//	fputs(TERM_BBOLD(_ctx), stdout);
+//	fputs(TERM_BBOLD(kctx), stdout);
 	while(1) {
 		int check;
 		char *ln = kreadline(line == 1 ? ">>> " : "    ");
@@ -155,38 +155,38 @@ static kstatus_t readstmt(CTX, kwb_t *wb, kline_t *uline)
 	if(kwb_bytesize(wb) > 0) {
 		kadd_history(kwb_top(wb, 1));
 	}
-//	fputs(TERM_EBOLD(_ctx), stdout);
+//	fputs(TERM_EBOLD(kctx), stdout);
 	fflush(stdout);
 	uline[0]++;
 	return status;
 }
 
-static void dumpEval(CTX, kwb_t *wb)
+static void dumpEval(KonohaContext *kctx, kwb_t *wb)
 {
-	kstack_t *base = _ctx->stack;
+	kstack_t *base = kctx->stack;
 	ktype_t ty = base->evalty;
 	if(ty != TY_void) {
 		ksfp_t *lsfp = base->stack + base->evalidx;
-		CT_(ty)->p(_ctx, lsfp, 0, wb, P_DUMP);
+		CT_(ty)->p(kctx, lsfp, 0, wb, P_DUMP);
 		fflush(stdout);
 		fprintf(stdout, "TYPE=%s EVAL=%s\n", TY_t(ty), kwb_top(wb,1));
 	}
 }
 
-static void shell(CTX)
+static void shell(KonohaContext *kctx)
 {
 	kwb_t wb;
-	kwb_init(&(_ctx->stack->cwb), &wb);
+	kwb_init(&(kctx->stack->cwb), &wb);
 	kline_t uline = FILEID_("(shell)") | 1;
 	while(1) {
 		kline_t inc = 0;
-		kstatus_t status = readstmt(_ctx, &wb, &inc);
+		kstatus_t status = readstmt(kctx, &wb, &inc);
 		if(status == K_CONTINUE && kwb_bytesize(&wb) > 0) {
-			status = konoha_eval((konoha_t)_ctx, kwb_top(&wb, 1), uline);
+			status = konoha_eval((KonohaContext*)kctx, kwb_top(&wb, 1), uline);
 			uline += inc;
 			kwb_free(&wb);
 			if(status != K_FAILED) {
-				dumpEval(_ctx, &wb);
+				dumpEval(kctx, &wb);
 				kwb_free(&wb);
 			}
 		}
@@ -199,29 +199,29 @@ static void shell(CTX)
 	return;
 }
 
-static void show_version(CTX)
+static void show_version(KonohaContext *kctx)
 {
 	int i;
-	fprintf(stdout, "Konoha 2.0-beta (%s) (%x, %s)\n", K_CODENAME, K_REVISION, __DATE__);
+	fprintf(stdout, K_PROGNAME " " K_VERSION " (%s) (%x, %s)\n", K_CODENAME, K_REVISION, __DATE__);
 	fprintf(stdout, "[gcc %s]\n", __VERSION__);
 	fprintf(stdout, "options:");
 	for(i = 0; i < MOD_MAX; i++) {
-		if(_ctx->modshare[i] != NULL) {
-			fprintf(stdout, " %s", _ctx->modshare[i]->name);
+		if(kctx->modshare[i] != NULL) {
+			fprintf(stdout, " %s", kctx->modshare[i]->name);
 		}
 	}
 	fprintf(stdout, "\n");
 }
 
-static kbool_t konoha_shell(konoha_t konoha)
+static kbool_t konoha_shell(KonohaContext* konoha)
 {
 	void *handler = dlopen("libreadline" K_OSDLLEXT, RTLD_LAZY);
 	void *f = (handler != NULL) ? dlsym(handler, "readline") : NULL;
 	kreadline = (f != NULL) ? (char* (*)(const char*))f : readline;
 	f = (handler != NULL) ? dlsym(handler, "add_history") : NULL;
 	kadd_history = (f != NULL) ? (int (*)(const char*))f : add_history;
-	show_version((CTX_t)konoha);
-	shell((CTX_t)konoha);
+	show_version(konoha);
+	shell(konoha);
 	return true;
 }
 
@@ -356,7 +356,7 @@ kplatform_t* platform_shell(void)
 }
 
 // -------------------------------------------------------------------------
-// konoha_test
+// KonohaContext*est
 
 static FILE *stdlog;
 
@@ -407,7 +407,7 @@ static int check_result(FILE *fp0, FILE *fp1)
 
 extern int konoha_AssertResult;
 
-static int konoha_test(CTX, const char *testname)
+static int KonohaContext_test(KonohaContext *kctx, const char *testname)
 {
 	int ret = 1; //FAILED
 	char script_file[256];
@@ -421,7 +421,7 @@ static int konoha_test(CTX, const char *testname)
 		fprintf(stdout, "no proof file: %s\n", testname);
 	}
 	stdlog = fopen(result_file, "w");
-	konoha_load((konoha_t)_ctx, script_file);
+	konoha_load((KonohaContext*)kctx, script_file);
 	fprintf(stdlog, "Q.E.D.\n");   // Q.E.D.
 	fclose(stdlog);
 
@@ -443,7 +443,7 @@ static int konoha_test(CTX, const char *testname)
 
 #ifdef USE_BUILTINTEST
 extern DEFINE_TESTFUNC KonohaTestSet[];
-static Ftest lookupTestFunc(DEFINE_TESTFUNC *d, const char *name)
+static BuiltInTestFunc lookupTestFunc(DEFINE_TESTFUNC *d, const char *name)
 {
 	while(d->name != NULL) {
 		if(strcasecmp(name, d->name) == 0) {
@@ -455,12 +455,12 @@ static Ftest lookupTestFunc(DEFINE_TESTFUNC *d, const char *name)
 }
 #endif
 
-static int konoha_builtintest(konoha_t konoha, const char* name)
+static int konoha_builtintest(KonohaContext* konoha, const char* name)
 {
 #ifdef USE_BUILTINTEST
-	Ftest f = lookupTestFunc(KonohaTestSet, name);
+	BuiltInTestFunc f = lookupTestFunc(KonohaTestSet, name);
 	if(f != NULL) {
-		return f((CTX_t)konoha);
+		return f(konoha);
 	}
 	fprintf(stderr, "Built-in test is not found: '%s'\n", name);
 #else
@@ -469,7 +469,7 @@ static int konoha_builtintest(konoha_t konoha, const char* name)
 	return 1;
 }
 
-static void konoha_define(CTX, char *keyvalue)
+static void konoha_define(KonohaContext *kctx, char *keyvalue)
 {
 	char *p = strchr(keyvalue, '=');
 	if(p != NULL) {
@@ -492,7 +492,7 @@ static void konoha_define(CTX, char *keyvalue)
 	}
 }
 
-static void konoha_import(CTX, char *packagename)
+static void konoha_import(KonohaContext *kctx, char *packagename)
 {
 	size_t len = strlen(packagename)+1;
 	char bufname[len];
@@ -503,7 +503,7 @@ static void konoha_import(CTX, char *packagename)
 	KEXPORT_PACKAGE(bufname, KNULL(NameSpace), 0);
 }
 
-static void konoha_startup(CTX, const char *startup_script)
+static void konoha_startup(KonohaContext *kctx, const char *startup_script)
 {
 	char buf[256];
 	char *path = getenv("KONOHA_SCRIPTPATH"), *local = "";
@@ -516,14 +516,14 @@ static void konoha_startup(CTX, const char *startup_script)
 		local = "/.minikonoha/script";
 	}
 	snprintf(buf, sizeof(buf), "%s%s/%s.k", path, local, startup_script);
-	if(!konoha_load((konoha_t)_ctx, (const char*)buf)) {
+	if(!konoha_load((KonohaContext*)kctx, (const char*)buf)) {
 		PLAT exit_i(EXIT_FAILURE);
 	}
 }
 
-static void konoha_commandline(CTX, int argc, char** argv)
+static void konoha_commandline(KonohaContext *kctx, int argc, char** argv)
 {
-	kclass_t *CT_StringArray0 = CT_p0(_ctx, CT_Array, TY_String);
+	kclass_t *CT_StringArray0 = CT_p0(kctx, CT_Array, TY_String);
 	kArray *a = (kArray*)new_kObject(CT_StringArray0, NULL);
 	int i;
 	for(i = 0; i < argc; i++) {
@@ -554,7 +554,7 @@ static struct option long_options2[] = {
 	{NULL, 0, 0, 0},
 };
 
-static int konoha_parseopt(konoha_t konoha, kplatform_t *plat, int argc, char **argv)
+static int konoha_parseopt(KonohaContext* konoha, kplatform_t *plat, int argc, char **argv)
 {
 	int ret = true, scriptidx = 0;
 	while (1) {
@@ -574,13 +574,13 @@ static int konoha_parseopt(konoha_t konoha, kplatform_t *plat, int argc, char **
 
 		case 'c': {
 			compileonly_flag = 1;
-			CTX_setCompileOnly(konoha);
+			KonohaContext_setCompileOnly(konoha);
 		}
 		break;
 
 		case 'i': {
 			interactive_flag = 1;
-			CTX_setInteractive(konoha);
+			KonohaContext_setInteractive(konoha);
 		}
 		break;
 
@@ -610,7 +610,7 @@ static int konoha_parseopt(konoha_t konoha, kplatform_t *plat, int argc, char **
 			plat->vprintf_i = TEST_vprintf;
 			plat->begin  = TEST_begin;
 			plat->end    = TEST_end;
-			return konoha_test(konoha, optarg);
+			return KonohaContext_test(konoha, optarg);
 
 		case '?':
 			/* getopt_long already printed an error message. */
@@ -627,7 +627,7 @@ static int konoha_parseopt(konoha_t konoha, kplatform_t *plat, int argc, char **
 	}
 	else {
 		interactive_flag = 1;
-		CTX_setInteractive(konoha);
+		KonohaContext_setInteractive(konoha);
 	}
 	if(ret && interactive_flag) {
 		konoha_import(konoha, "konoha.i");
@@ -649,7 +649,7 @@ int main(int argc, char *argv[])
 		verbose_code = 1;
 	}
 	kplatform_t *plat = platform_shell();
-	konoha_t konoha = konoha_open((const kplatform_t*)plat);
+	KonohaContext* konoha = konoha_open((const kplatform_t*)plat);
 	ret = konoha_parseopt(konoha, plat, argc, argv);
 	konoha_close(konoha);
 	MODGC_check_malloced_size();

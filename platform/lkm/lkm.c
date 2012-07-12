@@ -38,7 +38,7 @@ enum {
 struct konohadev_t {
 	dev_t id;
 	struct cdev cdev;
-	konoha_t  konoha;
+	KonohaContext*  konoha;
 	char* buffer;
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,25))
 	struct semaphore sem;
@@ -158,16 +158,16 @@ const kplatform_t* platform_kernel(void)
 	return (const kplatform_t*)(&plat);
 }
 
-static void CTX_evalScript(CTX, char *data, size_t len)
+static void KonohaContext_evalScript(KonohaContext *kctx, char *data, size_t len)
 {
 	kwb_t wb;
-	kwb_init(&(_ctx->stack->cwb), &wb);
+	kwb_init(&(kctx->stack->cwb), &wb);
 	kwb_write(&wb,data,len);
 	kline_t uline = FILEID_("(kernel)") | 1;
-	konoha_eval((konoha_t)_ctx, kwb_top(&wb,1),uline);
+	konoha_eval((KonohaContext*)kctx, kwb_top(&wb,1),uline);
 	kwb_free(&wb);
 }
-//EXPORT_SYMBOL(CTX_evalScript);
+//EXPORT_SYMBOL(KonohaContext_evalScript);
 
 static ssize_t knh_dev_write(struct file *filp,const char __user *user_buf,
 		size_t count,loff_t *offset) {
@@ -180,9 +180,9 @@ static ssize_t knh_dev_write(struct file *filp,const char __user *user_buf,
 	len = copy_from_user(buf,user_buf,count);
 	memset(dev->buffer,0,sizeof(char)*MAXCOPYBUF);
 	buf[count] = '\0';
-	CTX_evalScript((CTX_t)dev->konoha,buf,strlen(buf));
-//	snprintf(dev->buffer,MAXCOPYBUF,"%s",((CTX_t)dev->konoha)->buffer);
-//	strncpy(((CTX_t)dev->konoha)->buffer,"\0",1);
+	KonohaContext_evalScript((KonohaContext_t)dev->konoha,buf,strlen(buf));
+//	snprintf(dev->buffer,MAXCOPYBUF,"%s",((KonohaContext_t)dev->konoha)->buffer);
+//	strncpy(((KonohaContext_t)dev->konoha)->buffer,"\0",1);
 //	printk(KERN_DEBUG "[%s][dev->buffer='%s']\n",__func__ ,dev->buffer);
 	up(&dev->sem);
 	return count;

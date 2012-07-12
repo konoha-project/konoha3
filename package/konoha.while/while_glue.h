@@ -27,41 +27,41 @@
 
 // --------------------------------------------------------------------------
 
-static	kbool_t while_initPackage(CTX, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static	kbool_t while_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t while_setupPackage(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t while_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
 // --------------------------------------------------------------------------
 
-static KMETHOD StmtTyCheck_while(CTX, ksfp_t *sfp _RIX)
+static KMETHOD StmtTyCheck_while(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, gma);
 	DBG_P("while statement .. ");
 	int ret = false;
-	if(SUGAR Stmt_tyCheckExpr(_ctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0)) {
+	if(SUGAR Stmt_tyCheckExpr(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0)) {
 		kBlock *bk = kStmt_block(stmt, KW_BlockPattern, K_NULLBLOCK);
-		ret = SUGAR Block_tyCheckAll(_ctx, bk, gma);
+		ret = SUGAR Block_tyCheckAll(kctx, bk, gma);
 		kStmt_typed(stmt, LOOP);
 	}
 	RETURNb_(ret);
 }
 
-static KMETHOD StmtTyCheck_for(CTX, ksfp_t *sfp _RIX)
+static KMETHOD StmtTyCheck_for(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, gma);
 	DBG_P("for statement .. ");
 	int ret = false;
-	if(SUGAR Stmt_tyCheckExpr(_ctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0)) {
+	if(SUGAR Stmt_tyCheckExpr(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0)) {
 		kBlock *bk = kStmt_block(stmt, KW_BlockPattern, K_NULLBLOCK);
-		ret = SUGAR Block_tyCheckAll(_ctx, bk, gma);
+		ret = SUGAR Block_tyCheckAll(kctx, bk, gma);
 		kStmt_typed(stmt, LOOP);
 	}
 	RETURNb_(ret);
@@ -72,7 +72,7 @@ static inline kStmt* kStmt_getParentNULL(kStmt *stmt)
 	return stmt->parentNULL->parentNULL;
 }
 
-static KMETHOD StmtTyCheck_break(CTX, ksfp_t *sfp _RIX)
+static KMETHOD StmtTyCheck_break(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, gma);
@@ -84,11 +84,11 @@ static KMETHOD StmtTyCheck_break(CTX, ksfp_t *sfp _RIX)
 			RETURNb_(true);
 		}
 	}
-	SUGAR Stmt_p(_ctx, stmt, NULL, ERR_, "break statement not within a loop");
+	SUGAR Stmt_p(kctx, stmt, NULL, ERR_, "break statement not within a loop");
 	RETURNb_(false);
 }
 
-static KMETHOD StmtTyCheck_continue(CTX, ksfp_t *sfp _RIX)
+static KMETHOD StmtTyCheck_continue(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, gma);
@@ -101,13 +101,13 @@ static KMETHOD StmtTyCheck_continue(CTX, ksfp_t *sfp _RIX)
 			RETURNb_(true);
 		}
 	}
-	SUGAR Stmt_p(_ctx, stmt, NULL, ERR_, "continue statement not within a loop");
+	SUGAR Stmt_p(kctx, stmt, NULL, ERR_, "continue statement not within a loop");
 	RETURNb_((false));
 }
 
 #define _LOOP .flag = (SYNFLAG_StmtJumpAhead|SYNFLAG_StmtJumpSkip)
 
-static kbool_t while_initNameSpace(CTX,  kNameSpace *ks, kline_t pline)
+static kbool_t while_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
@@ -117,11 +117,11 @@ static kbool_t while_initNameSpace(CTX,  kNameSpace *ks, kline_t pline)
 		{ .kw = SYM_("for"), _LOOP, StmtTyCheck_(for), .rule = "\"for\" \"(\" var: $block \";\" $expr \";\" each: $block \")\" $block", },
 		{ .kw = KW_END, },
 	};
-	SUGAR NameSpace_defineSyntax(_ctx, ks, SYNTAX);
+	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	return true;
 }
 
-static kbool_t while_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t while_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }

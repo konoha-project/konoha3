@@ -26,7 +26,7 @@
 #include<minikonoha/sugar.h>
 
 // Expr Expr.tyCheckStub(Gamma gma, int reqtyid);
-//static KMETHOD ExprTyCheck_stub(CTX, ksfp_t *sfp _RIX)
+//static KMETHOD ExprTyCheck_stub(KonohaContext *kctx, ksfp_t *sfp _RIX)
 //{
 //	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 //	DBG_P("stub: size=%d", kArray_size(expr->consNUL));
@@ -40,7 +40,7 @@
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static	kbool_t stub_initPackage(CTX, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static	kbool_t stub_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
 {
 //	KDEFINE_METHOD MethodData[] = {
 //		_Public, _F(Stmt_setBuild), TY_void, TY_Stmt, MN_("setBuild"), 1, TY_Int, FN_buildid,
@@ -55,12 +55,12 @@ static	kbool_t stub_initPackage(CTX, kNameSpace *ks, int argc, const char**args,
 	return true;
 }
 
-static kbool_t stub_setupPackage(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t stub_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t stub_initNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t stub_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 //	USING_SUGAR;
 //	KDEFINE_SYNTAX SYNTAX[] = {
@@ -69,11 +69,11 @@ static kbool_t stub_initNameSpace(CTX, kNameSpace *ks, kline_t pline)
 //		{ TOKEN("$FLOAT"), .kw = KW_TK(TK_FLOAT), .ExprTyCheck = ExprTyCheck_FLOAT, },
 //		{ .kw = KW_END, },
 //	};
-//	SUGAR NameSpace_defineSyntax(_ctx, ks, SYNTAX);
+//	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	return true;
 }
 
-static kbool_t stub_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t stub_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }

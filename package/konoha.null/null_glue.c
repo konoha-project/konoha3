@@ -27,14 +27,14 @@
 
 // --------------------------------------------------------------------------
 //## Boolean Object.isNull();
-static KMETHOD Object_isNull(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Object_isNull(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kObject *o = sfp[0].o;
 	RETURNb_(IS_NULL(o));
 }
 
 //## Boolean Object.isNotNull();
-static KMETHOD Object_isNotNull(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Object_isNotNull(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kObject *o = sfp[0].o;
 	RETURNb_(!IS_NULL(o));
@@ -43,7 +43,7 @@ static KMETHOD Object_isNotNull(CTX, ksfp_t *sfp _RIX)
 // --------------------------------------------------------------------------
 
 #define _F(F) (intptr_t)(F)
-static kbool_t null_initPackage(CTX, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static kbool_t null_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
 {
 	intptr_t MethodData[] = {
 		kMethod_Public, _F(Object_isNull), TY_Boolean, TY_Object, MN_("isNull"), 0,
@@ -55,12 +55,12 @@ static kbool_t null_initPackage(CTX, kNameSpace *ks, int argc, const char**args,
 	return true;
 }
 
-static kbool_t null_setupPackage(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t null_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
-static KMETHOD ExprTyCheck_null(CTX, ksfp_t *sfp _RIX)
+static KMETHOD ExprTyCheck_null(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
@@ -69,18 +69,18 @@ static KMETHOD ExprTyCheck_null(CTX, ksfp_t *sfp _RIX)
 	RETURN_(kExpr_setVariable(expr, NULL, reqty, 0, gma));
 }
 
-static kbool_t null_initNameSpace(CTX,  kNameSpace *ks, kline_t pline)
+static kbool_t null_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .kw = SYM_("null"), _TERM, ExprTyCheck_(null), },
 		{ .kw = KW_END, },
 	};
-	SUGAR NameSpace_defineSyntax(_ctx, ks, SYNTAX);
+	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	return true;
 }
 
-static kbool_t null_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t null_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }

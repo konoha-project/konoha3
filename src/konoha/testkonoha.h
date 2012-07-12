@@ -44,7 +44,7 @@ static int checkkvs(size_t key, uintptr_t val)
 	return false;
 }
 
-static int test_kvproto(CTX)
+static int test_kvproto(KonohaContext *kctx)
 {
 	size_t i;
 	kObject *o = K_NULL;
@@ -71,11 +71,11 @@ static int test_kvproto(CTX)
 	return 0;
 }
 
-static int test_kwb(CTX)
+static int test_kwb(KonohaContext *kctx)
 {
 	const char *t= "0123456789012345678901234567890123456789";
 	size_t i = 0;
-	karray_t *buf = new_karray(_ctx, 0, 64);
+	karray_t *buf = new_karray(kctx, 0, 64);
 	kwb_t wb;
 	kwb_init(buf, &wb);
 	kwb_printf(&wb, "%s%s%s%s", t, t, t, t);
@@ -92,7 +92,7 @@ static int test_kwb(CTX)
 	return 0;
 }
 
-static int test_logger(CTX)
+static int test_logger(KonohaContext *kctx)
 {
 	int v2 = 3;
 	int v3 = -3;

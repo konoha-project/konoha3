@@ -28,7 +28,7 @@
 // --------------------------------------------------------------------------
 
 // Expr Expr.tyCheckStub(Gamma gma, int reqtyid);
-static KMETHOD ExprTyCheck_assignment(CTX, ksfp_t *sfp _RIX)
+static KMETHOD ExprTyCheck_assignment(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
@@ -50,11 +50,11 @@ static KMETHOD ExprTyCheck_assignment(CTX, ksfp_t *sfp _RIX)
 					if(mtd != NULL) {
 						KSETv(lexpr->cons->methods[0], mtd);
 						kArray_add(lexpr->cons, rexpr);
-						RETURN_(SUGAR Expr_tyCheckCallParams(_ctx, stmt, lexpr, mtd, gma, reqty));
+						RETURN_(SUGAR Expr_tyCheckCallParams(kctx, stmt, lexpr, mtd, gma, reqty));
 					}
 				}
 			}
-			SUGAR Stmt_p(_ctx, stmt, (kToken*)expr, ERR_, "variable name is expected");
+			SUGAR Stmt_p(kctx, stmt, (kToken*)expr, ERR_, "variable name is expected");
 		}
 	}
 	RETURN_(K_NULLEXPR);
@@ -62,17 +62,17 @@ static KMETHOD ExprTyCheck_assignment(CTX, ksfp_t *sfp _RIX)
 
 // --------------------------------------------------------------------------
 
-static	kbool_t assignment_initPackage(CTX, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static	kbool_t assignment_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t assignment_setupPackage(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t assignment_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
-static KMETHOD StmtTyCheck_DefaultAssignment(CTX, ksfp_t *sfp _RIX)
+static KMETHOD StmtTyCheck_DefaultAssignment(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 }
 
@@ -81,7 +81,7 @@ static KMETHOD StmtTyCheck_DefaultAssignment(CTX, ksfp_t *sfp _RIX)
 		tk->kw = k;\
 	}
 
-static int transform_oprAssignment(CTX, kArray* tls, int s, int c, int e)
+static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int c, int e)
 {
 	struct _kToken *tkNew, *tkNewOp;
 	kToken *tmp, *tkHead;
@@ -145,18 +145,18 @@ static int transform_oprAssignment(CTX, kArray* tls, int s, int c, int e)
 	return news;
 }
 
-static KMETHOD ParseExpr_OprAssignment(CTX, ksfp_t *sfp _RIX)
+static KMETHOD ParseExpr_OprAssignment(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	USING_SUGAR;
 	VAR_ParseExpr(stmt, tls, s, c, e);
 	size_t atop = kArray_size(tls);
-	s = transform_oprAssignment(_ctx, tls, s, c, e);
-	kExpr *expr = SUGAR Stmt_newExpr2(_ctx, stmt, tls, s, kArray_size(tls));
+	s = transform_oprAssignment(kctx, tls, s, c, e);
+	kExpr *expr = SUGAR Stmt_newExpr2(kctx, stmt, tls, s, kArray_size(tls));
 	kArray_clear(tls, atop);
 	RETURN_(expr);
 }
 
-static kbool_t assignment_initNameSpace(CTX,  kNameSpace *ks, kline_t pline)
+static kbool_t assignment_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
@@ -168,11 +168,11 @@ static kbool_t assignment_initNameSpace(CTX,  kNameSpace *ks, kline_t pline)
 		{ .kw = SYM_("%="), _OPLeft, /*.priority_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .priority_op2 = 4096,},
 		{ .kw = KW_END, },
 	};
-	SUGAR NameSpace_defineSyntax(_ctx, ks, SYNTAX);
+	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	return true;
 }
 
-static kbool_t assignment_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t assignment_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }

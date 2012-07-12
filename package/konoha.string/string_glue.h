@@ -54,7 +54,7 @@ static size_t text_mlen(const char *s_text, size_t s_size)
 }
 
 /* // The function below must not use for ASCII string (nakata) */
-/* static kString *new_MultiByteSubString(CTX, kString *s, size_t moff, size_t mlen) */
+/* static kString *new_MultiByteSubString(KonohaContext *kctx, kString *s, size_t moff, size_t mlen) */
 /* { */
 /* 	DBG_ASSERT(!S_isASCII(s)); */
 /* 	const unsigned char *start = (unsigned char *)S_text(s); */
@@ -76,7 +76,7 @@ static size_t text_mlen(const char *s_text, size_t s_size)
 /* ------------------------------------------------------------------------ */
 //## method @Const Int String.getSize();
 
-static KMETHOD String_getSize(CTX, ksfp_t *sfp _RIX)
+static KMETHOD String_getSize(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kString *s = sfp[0].s;
 	size_t size = (S_isASCII(s) ? S_size(s) : text_mlen(S_text(s), S_size(s)));
@@ -86,7 +86,7 @@ static KMETHOD String_getSize(CTX, ksfp_t *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## @Const method Boolean String.startsWith(String s);
 
-static KMETHOD String_startsWith(CTX, ksfp_t *sfp _RIX)
+static KMETHOD String_startsWith(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	// @TEST "A".startsWith("ABC");
 	RETURNb_(strncmp(S_text(sfp[0].s), S_text(sfp[1].s), S_size(sfp[1].s)) == 0);
@@ -95,7 +95,7 @@ static KMETHOD String_startsWith(CTX, ksfp_t *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## @Const method Boolean String.endsWith(String s);
 
-static KMETHOD String_endsWith(CTX, ksfp_t *sfp _RIX)
+static KMETHOD String_endsWith(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kString *s0 = sfp[0].s;
 	kString *s1 =  sfp[1].s;
@@ -113,7 +113,7 @@ static KMETHOD String_endsWith(CTX, ksfp_t *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## @Const method Int String.indexOf(String s);
 
-static KMETHOD String_indexOf(CTX, ksfp_t *sfp _RIX)
+static KMETHOD String_indexOf(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kString *s0 = sfp[0].s, *s1 = sfp[1].s;
 	long loc = -1;
@@ -134,7 +134,7 @@ static KMETHOD String_indexOf(CTX, ksfp_t *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## @Const method Int String.lastIndexOf(String s);
 
-static KMETHOD String_lastIndexOf(CTX, ksfp_t *sfp _RIX)
+static KMETHOD String_lastIndexOf(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kString *s0 = sfp[0].s;
 	kString *s1 = sfp[1].s;
@@ -157,7 +157,7 @@ static KMETHOD String_lastIndexOf(CTX, ksfp_t *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## @Const method String String.trim();
 
-static KMETHOD String_trim(CTX, ksfp_t *sfp _RIX)
+static KMETHOD String_trim(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	const char *s = S_text(sfp[0].s);
 	int len = S_size(sfp[0].s);
@@ -184,7 +184,7 @@ static KMETHOD String_trim(CTX, ksfp_t *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## @Const method Boolean String.opHAS(String s);
 
-static KMETHOD String_opHAS(CTX, ksfp_t *sfp _RIX)
+static KMETHOD String_opHAS(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNb_(strstr(S_text(sfp[0].s), S_text(sfp[1].s)) != NULL);
 }
@@ -192,7 +192,7 @@ static KMETHOD String_opHAS(CTX, ksfp_t *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## @Const method String String.get(Int n);
 
-static kString *S_mget(CTX, kString *s, size_t n)
+static kString *S_mget(KonohaContext *kctx, kString *s, size_t n)
 {
 	DBG_ASSERT(!S_isASCII(s));
 	kString *ret = NULL;
@@ -215,16 +215,16 @@ static kString *S_mget(CTX, kString *s, size_t n)
 	return ret;
 }
 
-static KMETHOD String_get(CTX, ksfp_t *sfp _RIX)
+static KMETHOD String_get(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kString *s = sfp[0].s;
 	size_t n = (size_t)sfp[1].ivalue;
 	if (S_isASCII(s)) {
-		n = check_index(_ctx, sfp[1].ivalue, S_size(s), sfp[K_RTNIDX].uline);
+		n = check_index(kctx, sfp[1].ivalue, S_size(s), sfp[K_RTNIDX].uline);
 		s = new_kString(S_text(s) + n, 1, SPOL_POOL|SPOL_ASCII);
 	}
 	else {
-		s = S_mget(_ctx, s, n);
+		s = S_mget(kctx, s, n);
 		if (unlikely(s == NULL)) {
 			kreportf(CRIT_, sfp[K_RTNIDX].uline, "Script!!: out of array index %ld", (int)n);
 		}
@@ -235,7 +235,7 @@ static KMETHOD String_get(CTX, ksfp_t *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## @Const method String String.substring(Int offset, Int length);
 
-static kString *S_msubstring(CTX, kString *s, size_t moff, size_t mlen)
+static kString *S_msubstring(KonohaContext *kctx, kString *s, size_t moff, size_t mlen)
 {
 	DBG_ASSERT(!S_isASCII(s));
 	const unsigned char *text = (const unsigned char *)S_text(s);
@@ -272,14 +272,14 @@ static kString *S_msubstring(CTX, kString *s, size_t moff, size_t mlen)
 	return ret;
 }
 
-static KMETHOD String_substring(CTX, ksfp_t *sfp _RIX)
+static KMETHOD String_substring(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kString *s0 = sfp[0].s;
 	size_t offset = (size_t)sfp[1].ivalue;
 	size_t length = (size_t)sfp[2].ivalue;
 	kString *ret = NULL;
 	if (S_isASCII(s0)) {
-		offset = check_index(_ctx, offset, S_size(s0), sfp[K_RTNIDX].uline);
+		offset = check_index(kctx, offset, S_size(s0), sfp[K_RTNIDX].uline);
 		const char *new_text = S_text(s0) + offset;
 		size_t new_size = S_size(s0) - offset;
 		if (length != 0 && length < new_size) {
@@ -288,7 +288,7 @@ static KMETHOD String_substring(CTX, ksfp_t *sfp _RIX)
 		ret = new_kString(new_text, new_size, SPOL_ASCII|SPOL_POOL); // FIXME SPOL
 	}
 	else {
-		ret = S_msubstring(_ctx, s0, offset, length);
+		ret = S_msubstring(kctx, s0, offset, length);
 		if (unlikely(ret == NULL)) {
 			kreportf(CRIT_, sfp[K_RTNIDX].uline, "Script!!: out of array index %ld", (int)offset);
 		}
@@ -298,7 +298,7 @@ static KMETHOD String_substring(CTX, ksfp_t *sfp _RIX)
 
 /* ------------------------------------------------------------------------ */
 
-static kString* S_toupper(CTX, kString *s0, size_t start)
+static kString* S_toupper(KonohaContext *kctx, kString *s0, size_t start)
 {
 	size_t i, size = S_size(s0);
 	kString *s = new_kString(NULL, size, SPOL_sub(s0)|SPOL_NOCOPY);
@@ -313,14 +313,14 @@ static kString* S_toupper(CTX, kString *s0, size_t start)
 }
 
 //## @Const method String String.toLower()
-static KMETHOD String_toUpper(CTX, ksfp_t *sfp _RIX)
+static KMETHOD String_toUpper(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kString *s0 = sfp[0].s;
 	size_t i, size = S_size(s0);
 	for(i = 0; i < size; i++) {
 		int ch = s0->buf[i];
 		if('a' <= ch && ch <= 'z') {
-			RETURN_(S_toupper(_ctx, s0, i));
+			RETURN_(S_toupper(kctx, s0, i));
 		}
 	}
 	RETURN_(s0);
@@ -328,7 +328,7 @@ static KMETHOD String_toUpper(CTX, ksfp_t *sfp _RIX)
 
 /* ------------------------------------------------------------------------ */
 
-static kString* S_tolower(CTX, kString *s0, size_t start)
+static kString* S_tolower(KonohaContext *kctx, kString *s0, size_t start)
 {
 	size_t i, size = S_size(s0);
 	kString *s = new_kString(NULL, size, SPOL_sub(s0)|SPOL_NOCOPY);
@@ -343,14 +343,14 @@ static kString* S_tolower(CTX, kString *s0, size_t start)
 }
 
 //## @Const method String String.toLower()
-static KMETHOD String_toLower(CTX, ksfp_t *sfp _RIX)
+static KMETHOD String_toLower(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kString *s0 = sfp[0].s;
 	size_t i, size = S_size(s0);
 	for(i = 0; i < size; i++) {
 		int ch = s0->buf[i];
 		if('A' <= ch && ch <= 'Z') {
-			RETURN_(S_tolower(_ctx, s0, i));
+			RETURN_(S_tolower(kctx, s0, i));
 		}
 	}
 	RETURN_(s0);
@@ -364,7 +364,7 @@ static KMETHOD String_toLower(CTX, ksfp_t *sfp _RIX)
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t string_initPackage(CTX, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
 {
 	int FN_s = FN_("s");
 	int FN_n = FN_("n");
@@ -386,17 +386,17 @@ static kbool_t string_initPackage(CTX, kNameSpace *ks, int argc, const char**arg
 	return true;
 }
 
-static kbool_t string_setupPackage(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t string_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t string_initNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t string_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t string_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t string_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }

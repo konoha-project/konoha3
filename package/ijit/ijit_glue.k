@@ -233,7 +233,7 @@ boolean isBoxTy(int cid) {
 }
 
 Value getvctx() {
-	Value v = System.getCTX();
+	Value v = System.getKonohaContext *kctx();
 	Type  t = v.getType();
 	return v;
 }
@@ -1011,18 +1011,18 @@ Function build_wrapper_func(Method mtd, Module m, Function f) {
 	IRBuilder builder = IRBuilder.new(bb);
 
 	Array args = wrap.getArguments();
-	Value arg_ctx = args.get(0);
+	Value argkctx = args.get(0);
 	Value arg_sfp = args.get(1);
 	Value arg_rix = args.get(2);
 
-	arg_ctx.setName("ctx");
+	argkctx.setName("ctx");
 	arg_sfp.setName("sfp");
 	arg_rix.setName("rix");
 
 	builder.setInsertPoint(bb);
 	/* load konoha args from sfp and build call params*/
 	Array params = Array.newN(2+mtd.getParamSize());
-	params.set(0, arg_ctx);
+	params.set(0, argkctx);
 	params.set(1, arg_sfp);
 	push_back_params(params, builder, arg_sfp, pa, 0, mtd.getParamSize());
 
@@ -1073,7 +1073,7 @@ Function create_function(Module m, Method mtd) {
 	vctx.setName("lctx");
 	vsfp.setName("lsfp");
 
-	System.setCTX(vctx);
+	System.setKonohaContext *kctx(vctx);
 	System.setSFP(vsfp);
 
 	Array a = Array.newN(psize);
@@ -1138,21 +1138,21 @@ void jit_init() {
 	Type ksfp_t = StructType.create(ksfp_tTy, "ksfp_t", false)
 	System.setTyStack(PointerType.get(ksfp_t));
 
-	/*------- kcontext_t ------*/
-	Array kcontext_tTy = Array.newN(12);
-	kcontext_tTy.set(0, Type.getInt32Ty() /* safepoint */ );
-	kcontext_tTy.set(1, PointerType.get(ksfp_t) /* esp */ );
-	kcontext_tTy.set(2, PointerType.get(klib2) /* lib2 */ );
-	kcontext_tTy.set(3, PointerType.get(kplatform_t) /* plat */ );
-	kcontext_tTy.set(4, PointerType.get(kmemshare_t) /* memshare */ );
-	kcontext_tTy.set(5, PointerType.get(kmemlocal_t) /* memlocal */ );
-	kcontext_tTy.set(6, PointerType.get(kshare_t) /* share */ );
-	kcontext_tTy.set(7, PointerType.get(klocal_t) /* local */ );
-	kcontext_tTy.set(8, PointerType.get(kstack_t) /* stack */ );
-	kcontext_tTy.set(9, PointerType.get(klogger_t) /* logger */ );
-	kcontext_tTy.set(10, PointerType.get(PointerType.get(kmodshare_t)) /* modshare */ );
-	kcontext_tTy.set(11, PointerType.get(PointerType.get(kmodlocal_t)) /* modlocal */ );
-	Type kcontext_t = StructType.create(kcontext_tTy, "kcontext_t", false)
+	/*------- KonohaContextVar ------*/
+	Array KonohaContextVarTy = Array.newN(12);
+	KonohaContextVarTy.set(0, Type.getInt32Ty() /* safepoint */ );
+	KonohaContextVarTy.set(1, PointerType.get(ksfp_t) /* esp */ );
+	KonohaContextVarTy.set(2, PointerType.get(klib2) /* lib2 */ );
+	KonohaContextVarTy.set(3, PointerType.get(kplatform_t) /* plat */ );
+	KonohaContextVarTy.set(4, PointerType.get(kmemshare_t) /* memshare */ );
+	KonohaContextVarTy.set(5, PointerType.get(kmemlocal_t) /* memlocal */ );
+	KonohaContextVarTy.set(6, PointerType.get(kshare_t) /* share */ );
+	KonohaContextVarTy.set(7, PointerType.get(klocal_t) /* local */ );
+	KonohaContextVarTy.set(8, PointerType.get(kstack_t) /* stack */ );
+	KonohaContextVarTy.set(9, PointerType.get(klogger_t) /* logger */ );
+	KonohaContextVarTy.set(10, PointerType.get(PointerType.get(kmodshare_t)) /* modshare */ );
+	KonohaContextVarTy.set(11, PointerType.get(PointerType.get(kmodlocal_t)) /* modlocal */ );
+	Type KonohaContextVar = StructType.create(KonohaContextVarTy, "KonohaContextVar", false)
 
 	/*------- _kArray ------*/
 	Array kArrayTy = Array.newN(4);
@@ -1163,7 +1163,7 @@ void jit_init() {
 	Type kArray = StructType.create(kArrayTy, "kArray", false)
 
 
-	Array argsTy = Array.new3(PointerType.get(kcontext_t), PointerType.get(ksfp_t), getLongTy());
+	Array argsTy = Array.new3(PointerType.get(KonohaContextVar), PointerType.get(ksfp_t), getLongTy());
 	FunctionType funcTy = FunctionType.get(Type.getVoidTy(), argsTy, false);
 
 	/*------- _kMethod ------*/
@@ -1183,7 +1183,7 @@ void jit_init() {
 	kMethodTy.set(12, PointerType.get(kObject) /* proceedNUL */ );
 	Type kMethod = StructType.create(kMethodTy, "kMethod", false)
 
-	System.setTyContext(PointerType.get(kcontext_t));
+	System.setTyContext(PointerType.get(KonohaContextVar));
 	System.setTyFunction(funcTy);
 	System.setTyFunctionP(PointerType.get(funcTy));
 	System.setTyMethod(PointerType.get(kMethod));

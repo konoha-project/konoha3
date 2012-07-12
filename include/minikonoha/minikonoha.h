@@ -40,17 +40,26 @@
 #endif
 #endif
 
+#define K_VERSION   "0.1"
+#define K_MAJOR_VERSION 0
+#define K_MINOR_VERSION 1
+#define K_PATCH_LEVEL   0
+
+#ifndef K_REVISION
+#define K_REVISION 0
+#endif
+
+#ifndef K_PROGNAME
+#define K_PROGNAME  "MiniKonoha"
 /* - 2012/06/14 */
 //#define K_CODENAME "Miyajima"
 /*2012/06/14 -  */
-
 #define K_CODENAME "The Summer Palace, Beijing"
-#ifndef K_REVISION
-#define K_REVISION  1
+#else
+#define K_CODENAME "based on MiniKonoha-" K_VERSION
 #endif
 
 #define K_USING_UTF8 1
-
 #define USE_BUILTINTEST  1
 
 #ifndef PLATFORM_KERNEL
@@ -72,33 +81,25 @@
 #include <stddef.h>
 #include <stdarg.h>
 
-#if defined(K_USING_SIGNAL)
-#include <signal.h>
-#endif
-
-#if defined(K_USING_PTHREAD)
-#include <pthread.h>
-#endif
-
-/* ------------------------------------------------------------------------ */
-/* platform */
-
 #ifdef __GCC__
 #define __PRINT_FMT(idx1, idx2) __attribute__((format(printf, idx1, idx2)))
 #else
 #define __PRINT_FMT(idx1, idx2)
 #endif
 
-#define PLAT (_ctx->plat)->
+/* ------------------------------------------------------------------------ */
+/* platform */
+
+#define PLAT (kctx->plat)->
 
 typedef enum {
 	CritTag, ErrTag, WarnTag, NoticeTag, InfoTag, DebugTag, NoneTag
 } kinfotag_t;
 
-#define CRIT_ CritTag
-#define ERR_  ErrTag
-#define WARN_ WarnTag
-#define INFO_ InfoTag
+#define CRIT_  CritTag
+#define ERR_   ErrTag
+#define WARN_  WarnTag
+#define INFO_  InfoTag
 #define DEBUG_ DebugTag
 #define PRINT_ NoneTag
 
@@ -229,7 +230,7 @@ typedef kushort_t                 kfileid_t;
 #define URI_EVAL                  ((kfileid_t)0)
 #define URI_UNMASK(fileid)           (fileid)
 
-#define URI__(fileid) S_text(knh_getURN(_ctx, fileid))
+#define URI__(fileid) S_text(knh_getURN(kctx, fileid))
 #define shortfilename__(fileid) knh_sfile(URI__(fileid))
 
 typedef uintptr_t                 kline_t;
@@ -300,19 +301,18 @@ typedef struct kmap_t {
 
 // classdef_t
 
-typedef kushort_t       kpack_t;   /* package id*/
-typedef kushort_t       kcid_t;    /* class id */
-typedef kushort_t       ktype_t;     /* extended ktype_t */
+typedef kushort_t       kpack_t;     /* package id*/
+typedef kushort_t       ktype_t;     /* cid classid, ty type */
 typedef kushort_t       ksymbol_t;
 typedef kushort_t       kmethodn_t;
 typedef kushort_t       kparamid_t;
 
-/* kcid_t */
+/* ktype_t */
 #define CLASS_newid        ((ktype_t)-1)
 #define TY_unknown         ((ktype_t)-2)
 
-#define CT_(t)              (_ctx->share->ca.cts[t])
-#define CT_cparam(CT)       (_ctx->share->paramdomList->params[(CT)->paramdom])
+#define CT_(t)              (kctx->share->ca.cts[t])
+#define CT_cparam(CT)       (kctx->share->paramdomList->params[(CT)->paramdom])
 #define TY_isUnbox(t)       FLAG_is(CT_(t)->cflag, kClass_UnboxType)
 #define CT_isUnbox(C)       FLAG_is(C->cflag, kClass_UnboxType)
 
@@ -360,52 +360,16 @@ typedef kushort_t       kparamid_t;
 
 /* ------------------------------------------------------------------------ */
 
-typedef const struct kcontext_t* konoha_t;
+//typedef const struct KonohaContextVar* KonohaContext*;
+//
+//struct  KonohaContextVar;
+//typedef const struct KonohaContextVar *const KonohaContext_t;
+//#define KonohaContext *kctx      KonohaContext_t kctx
 
-struct  kcontext_t;
-typedef const struct kcontext_t *const CTX_t;
-#define CTX      CTX_t _ctx
+typedef const struct KonohaContextVar KonohaContext;
+typedef struct KonohaContextVar       KonohaContextVar;
 
-#define MOD_MAX    32
-struct _kObject;
-
-#define MOD_logger   0
-#define MOD_gc       1
-#define MOD_code     2
-#define MOD_sugar    3
-#define MOD_float        11
-#define MOD_iterator     12
-#define MOD_iconv   13
-//#define MOD_IO      14
-//#define MOD_llvm    15
-//#define MOD_REGEX   16
-
-struct kmodlocal_t;
-typedef struct kmodlocal_t {
-	uintptr_t unique;
-	void (*reftrace)(CTX, struct kmodlocal_t *);
-	void (*free)(CTX, struct kmodlocal_t *);
-} kmodlocal_t;
-
-struct kmodshare_t;
-typedef struct kmodshare_t {
-	const char *name;
-	int mod_id;
-	void (*setup)(CTX, struct kmodshare_t *, int newctx);
-	void (*reftrace)(CTX, struct kmodshare_t *);
-	void (*free)(CTX, struct kmodshare_t *);
-} kmodshare_t;
-
-#define kContext_Debug          ((kflag_t)(1<<0))
-#define kContext_Interactive    ((kflag_t)(1<<1))
-#define kContext_CompileOnly    ((kflag_t)(1<<1))
-
-#define CTX_isInteractive(X)  (TFLAG_is(kflag_t,(X)->stack->flag, kContext_Interactive))
-#define CTX_isCompileOnly(X)  (TFLAG_is(kflag_t,(X)->stack->flag, kContext_CompileOnly))
-#define CTX_setInteractive(X)  TFLAG_set1(kflag_t, (X)->stack->flag, kContext_Interactive)
-#define CTX_setCompileOnly(X)  TFLAG_set1(kflag_t, (X)->stack->flag, kContext_CompileOnly)
-
-typedef struct kcontext_t {
+struct KonohaContextVar {
 	int						          safepoint; // set to 1
 	struct ksfp_t                    *esp;
 	const struct _klib2              *lib2;
@@ -414,15 +378,18 @@ typedef struct kcontext_t {
 	 * checking modgc performance and remove
 	 * memshare/memlocal from context
 	 */
-	struct kmemshare_t                *memshare;
-	struct kmemlocal_t                *memlocal;
 	struct kshare_t                   *share;
 	struct kstack_t                   *stack;
+	struct kmemshare_t                *memshare;
+	struct kmemlocal_t                *memlocal;
 	struct kmodshare_t               **modshare;
 	struct kmodlocal_t               **modlocal;
-} kcontext_t ;
+};
 
-typedef struct kshare_t {
+// share, local
+typedef struct kshare_t kshare_t;
+
+struct kshare_t {
 	karray_t ca;
 	struct kmap_t               *lcnameMapNN;
 	/* system shared const */
@@ -442,7 +409,67 @@ typedef struct kshare_t {
 	struct kmap_t                *paramMapNN;
 	const struct _kArray         *paramdomList;
 	struct kmap_t                *paramdomMapNN;
-} kshare_t ;
+};
+
+typedef struct kstack_t {
+	struct ksfp_t*               stack;
+	size_t                       stacksize;
+	struct ksfp_t*               stack_uplimit;
+	const struct _kArray        *gcstack;
+	karray_t                     cwb;
+	// local info
+	kflag_t                      flag;
+	KonohaContext               *rootctx;
+	void*                        cstack_bottom;  // for GC
+	karray_t                     ref;   // reftrace
+	struct _kObject**            reftail;
+	ktype_t   evalty;
+	kushort_t evalidx;
+	jmpbuf_i  *evaljmpbuf;
+} kstack_t;
+
+
+// module
+
+#define MOD_MAX    32
+struct _kObject;
+
+#define MOD_logger   0
+#define MOD_gc       1
+#define MOD_code     2
+#define MOD_sugar    3
+#define MOD_float        11
+#define MOD_iterator     12
+#define MOD_iconv   13
+//#define MOD_IO      14
+//#define MOD_llvm    15
+//#define MOD_REGEX   16
+
+struct kmodlocal_t;
+typedef struct kmodlocal_t {
+	uintptr_t unique;
+	void (*reftrace)(KonohaContext *kctx, struct kmodlocal_t *);
+	void (*free)(KonohaContext *kctx, struct kmodlocal_t *);
+} kmodlocal_t;
+
+struct kmodshare_t;
+typedef struct kmodshare_t {
+	const char *name;
+	int mod_id;
+	void (*setup)(KonohaContext *kctx, struct kmodshare_t *, int newctx);
+	void (*reftrace)(KonohaContext *kctx, struct kmodshare_t *);
+	void (*free)(KonohaContext *kctx, struct kmodshare_t *);
+} kmodshare_t;
+
+#define kContext_Debug          ((kflag_t)(1<<0))
+#define kContext_Interactive    ((kflag_t)(1<<1))
+#define kContext_CompileOnly    ((kflag_t)(1<<2))
+
+#define KonohaContext_isInteractive(X)  (TFLAG_is(kflag_t,(X)->stack->flag, kContext_Interactive))
+#define KonohaContext_isCompileOnly(X)  (TFLAG_is(kflag_t,(X)->stack->flag, kContext_CompileOnly))
+#define KonohaContext_setInteractive(X)  TFLAG_set1(kflag_t, (X)->stack->flag, kContext_Interactive)
+#define KonohaContext_setCompileOnly(X)  TFLAG_set1(kflag_t, (X)->stack->flag, kContext_CompileOnly)
+
 
 #define K_FRAME_NCMEMBER \
 		uintptr_t   ndata;  \
@@ -505,22 +532,6 @@ typedef struct krbp_t {
 	};
 } krbp_t;
 
-typedef struct kstack_t {
-	struct ksfp_t*               stack;
-	size_t                       stacksize;
-	struct ksfp_t*               stack_uplimit;
-	const struct _kArray        *gcstack;
-	karray_t                     cwb;
-	// local info
-	kflag_t                      flag;
-	CTX_t                        *rootctx;
-	void*                        cstack_bottom;  // for GC
-	karray_t                     ref;   // reftrace
-	struct _kObject**            reftail;
-	ktype_t   evalty;
-	kushort_t evalidx;
-	jmpbuf_i  *evaljmpbuf;
-} kstack_t;
 
 typedef struct kfield_t {
 	kflag_t    flag    ;
@@ -535,21 +546,21 @@ typedef struct kfield_t {
 struct _kclass;
 
 #define KCLASSSPI \
-		void (*init)(CTX, const struct _kObject*, void *conf);\
-		void (*reftrace)(CTX, const struct _kObject*);\
-		void (*free)(CTX, const struct _kObject*);\
-		const struct _kObject* (*fnull)(CTX, const struct _kclass*);\
-		void (*p)(CTX, ksfp_t *, int, kwb_t *, int);\
-		uintptr_t (*unbox)(CTX, const struct _kObject*);\
+		void (*init)(KonohaContext *kctx, const struct _kObject*, void *conf);\
+		void (*reftrace)(KonohaContext *kctx, const struct _kObject*);\
+		void (*free)(KonohaContext *kctx, const struct _kObject*);\
+		const struct _kObject* (*fnull)(KonohaContext *kctx, const struct _kclass*);\
+		void (*p)(KonohaContext *kctx, ksfp_t *, int, kwb_t *, int);\
+		uintptr_t (*unbox)(KonohaContext *kctx, const struct _kObject*);\
 		int  (*compareTo)(const struct _kObject*, const struct _kObject*);\
-		void (*initdef)(CTX, struct _kclass*, kline_t);\
-		kbool_t (*isSubType)(CTX, const struct _kclass*, const struct _kclass*);\
-		const struct _kclass* (*realtype)(CTX, const struct _kclass*, const struct _kclass*)
+		void (*initdef)(KonohaContext *kctx, struct _kclass*, kline_t);\
+		kbool_t (*isSubType)(KonohaContext *kctx, const struct _kclass*, const struct _kclass*);\
+		const struct _kclass* (*realtype)(KonohaContext *kctx, const struct _kclass*, const struct _kclass*)
 
 typedef struct KDEFINE_CLASS {
 	const char *structname;
-	kcid_t     cid;         kflag_t    cflag;
-	kcid_t     bcid;        kcid_t     supcid;
+	ktype_t     cid;         kflag_t    cflag;
+	ktype_t     bcid;        ktype_t     supcid;
 	ktype_t    rtype;       kushort_t  psize;
 	struct kparam_t   *cparams;
 	size_t     cstruct_size;
@@ -572,8 +583,8 @@ typedef const struct _kclass kclass_t;
 struct _kclass {
 	KCLASSSPI;
 	kpack_t   packid;       kpack_t   packdom;
-	kcid_t   cid;           kflag_t  cflag;
-	kcid_t   bcid;          kcid_t   supcid;
+	ktype_t   cid;           kflag_t  cflag;
+	ktype_t   bcid;          ktype_t   supcid;
 	ktype_t  p0;            kparamid_t paramdom;
 	kmagicflag_t magicflag;
 	size_t     cstruct_size;
@@ -586,8 +597,8 @@ struct _kclass {
 	const struct _kArray     *methods;
 	const struct _kString    *shortNameNULL;
 	union {   // default value
-		const struct _kObject  *nulvalNUL;
-		struct _kObject        *WnulvalNUL;
+		const struct _kObject  *nulvalNULL;
+		struct _kObject        *nulvalNULL_;
 	};
 	struct kmap_t            *constPoolMapNO;
 	kclass_t                 *searchSimilarClassNULL;
@@ -597,21 +608,18 @@ struct _kclass {
 /* ----------------------------------------------------------------------- */
 /* CLASS */
 
-/* ------------------------------------------------------------------------ */
-/* mini konoha */
-
-#define CLASS_Tvoid             ((kcid_t)0)
-#define CLASS_Tvar              ((kcid_t)1)
-#define CLASS_Object            ((kcid_t)2)
-#define CLASS_Boolean           ((kcid_t)3)
-#define CLASS_Int               ((kcid_t)4)
-#define CLASS_String            ((kcid_t)5)
-#define CLASS_Array             ((kcid_t)6)
-#define CLASS_Param             ((kcid_t)7)
-#define CLASS_Method            ((kcid_t)8)
-#define CLASS_Func              ((kcid_t)9)
-#define CLASS_System            ((kcid_t)10)
-#define CLASS_T0                ((kcid_t)11)    /* ParamType*/
+#define CLASS_Tvoid             ((ktype_t)0)
+#define CLASS_Tvar              ((ktype_t)1)
+#define CLASS_Object            ((ktype_t)2)
+#define CLASS_Boolean           ((ktype_t)3)
+#define CLASS_Int               ((ktype_t)4)
+#define CLASS_String            ((ktype_t)5)
+#define CLASS_Array             ((ktype_t)6)
+#define CLASS_Param             ((ktype_t)7)
+#define CLASS_Method            ((ktype_t)8)
+#define CLASS_Func              ((ktype_t)9)
+#define CLASS_System            ((ktype_t)10)
+#define CLASS_T0                ((ktype_t)11)    /* Parameter Type*/
 
 #define CT_Object               CT_(CLASS_Object)
 #define CT_Boolean              CT_(CLASS_Boolean)
@@ -747,7 +755,7 @@ typedef struct kvs_t {
 #define O_ct(o)             ((o)->h.ct)
 #define O_cid(o)            (O_ct(o)->cid)
 #define O_bcid(o)           (O_ct(o)->bcid)
-#define O_unbox(o)          (O_ct(o)->unbox(_ctx, o))
+#define O_unbox(o)          (O_ct(o)->unbox(kctx, o))
 #define O_p0(o)             (O_ct(o)->p0)
 
 /* ------------------------------------------------------------------------ */
@@ -781,7 +789,7 @@ struct _kBoolean /* extends kNumber */ {
 
 #define IS_TRUE(o)             (O_bcid(o) == CLASS_Boolean && N_tobool(o))
 #define IS_FALSE(o)            (O_bcid(o) == CLASS_Boolean && N_tobool(o) == 0)
-#define new_Boolean(_ctx, c)    ((c) ? K_TRUE : K_FALSE)
+#define new_Boolean(kctx, c)    ((c) ? K_TRUE : K_FALSE)
 #define N_toint(o)             (((kBoolean*)o)->ivalue)
 #define N_tofloat(o)           (((kBoolean*)o)->fvalue)
 #define N_tobool(o)            (((kBoolean*)o)->bvalue)
@@ -860,7 +868,7 @@ struct _kString /* extends _Bytes */ {
 
 #define new_T(t)            new_kString(t, knh_strlen(t), SPOL_TEXT|SPOL_ASCII|SPOL_POOL)
 #define new_S(T, L)         new_kString(T, L, SPOL_ASCII|SPOL_POOL)
-#define S_text(s)           ((const char*) (O_ct(s)->unbox(_ctx, (kObject*)s)))
+#define S_text(s)           ((const char*) (O_ct(s)->unbox(kctx, (kObject*)s)))
 #define S_size(s)           ((s)->bytesize)
 
 //#define S_equals(s, b)        knh_bytes_equals(S_tobytes(s), b)
@@ -970,7 +978,7 @@ typedef const struct _kMethod kMethod;
 //#define kMethod_isOverload(o)  (TFLAG_is(uintptr_t,DP(o)->flag,kMethod_Overload))
 //#define kMethod_setOverload(o,b) TFLAG_set(uintptr_t,DP(o)->flag,kMethod_Overload,b)
 
-#define kMethod_param(mtd)        _ctx->share->paramList->params[mtd->paramid]
+#define kMethod_param(mtd)        kctx->share->paramList->params[mtd->paramid]
 #define kMethod_rtype(mtd)        (kMethod_param(mtd))->rtype
 
 /* method data */
@@ -993,14 +1001,14 @@ typedef const struct _kMethod kMethod;
 #ifdef K_USING_WIN32_
 //#define KMETHOD  void CC_EXPORT
 //#define ITRNEXT int   CC_EXPORT
-//typedef void (CC_EXPORT *knh_Fmethod)(CTX, ksfp_t* _RIX);
-//typedef int  (CC_EXPORT *knh_Fitrnext)(CTX, ksfp_t * _RIX);
+//typedef void (CC_EXPORT *knh_Fmethod)(KonohaContext *kctx, ksfp_t* _RIX);
+//typedef int  (CC_EXPORT *knh_Fitrnext)(KonohaContext *kctx, ksfp_t * _RIX);
 #else
 #define KMETHOD    void  /*CC_FASTCALL_*/
 #define KMETHODCC  int  /*CC_FASTCALL_*/
-typedef KMETHOD   (*knh_Fmethod)(CTX, ksfp_t* _RIX);
-typedef KMETHOD   (*FmethodFastCall)(CTX, ksfp_t * _KFASTCALL);
-typedef KMETHODCC (*FmethodCallCC)(CTX, ksfp_t *, int, int, struct kopl_t*);
+typedef KMETHOD   (*knh_Fmethod)(KonohaContext *kctx, ksfp_t* _RIX);
+typedef KMETHOD   (*FmethodFastCall)(KonohaContext *kctx, ksfp_t * _KFASTCALL);
+typedef KMETHODCC (*FmethodCallCC)(KonohaContext *kctx, ksfp_t *, int, int, struct kopl_t*);
 #endif
 
 struct _kMethod {
@@ -1014,7 +1022,7 @@ struct _kMethod {
 		FmethodCallCC         callcc_1;
 	};
 	uintptr_t         flag;
-	kcid_t            cid;      kmethodn_t  mn;
+	ktype_t            cid;      kmethodn_t  mn;
 	kparamid_t        paramid;  kparamid_t paramdom;
 	kshort_t          delta;    kpack_t packid;
 	const struct _kToken        *tcode;
@@ -1076,7 +1084,7 @@ struct _kSystem {
 ////	void         (*rawfree)(void *);
 ////} kObject ;
 
-//#define new_ReturnRawPtr(_ctx, sfp, p)  new_ReturnCppObject(_ctx, sfp, p, NULL)
+//#define new_ReturnRawPtr(kctx, sfp, p)  new_ReturnCppObject(kctx, sfp, p, NULL)
 
 #define K_CALLDELTA   4
 #define K_RTNIDX    (-4)
@@ -1092,16 +1100,16 @@ struct _kSystem {
 #define K_PCIDX2     (-3)
 #define K_MTDIDX2    (-1)
 
-#define klr_setesp(_ctx, newesp)  ((kcontext_t*)_ctx)->esp = (newesp)
+#define klr_setesp(kctx, newesp)  ((KonohaContextVar*)kctx)->esp = (newesp)
 #define klr_setmtdNC(sfpA, mtdO)   sfpA.mtdNC = mtdO
 
 //#define Method_isKonohaCode(mtd) ((mtd)->fcall_1 == Fmethod_runVM)
 #define Method_isKonohaCode(mtd) (0)
 
 #define BEGIN_LOCAL(V,N) \
-	ksfp_t *V = _ctx->esp, *esp_ = _ctx->esp; (void)V;((kcontext_t*)_ctx)->esp = esp_+N;\
+	ksfp_t *V = kctx->esp, *esp_ = kctx->esp; (void)V;((KonohaContextVar*)kctx)->esp = esp_+N;\
 
-#define END_LOCAL() ((kcontext_t*)_ctx)->esp = esp_;
+#define END_LOCAL() ((KonohaContextVar*)kctx)->esp = esp_;
 
 #define KCALL(LSFP, RIX, MTD, ARGC, DEFVAL) { \
 		ksfp_t *tsfp = LSFP + RIX + K_CALLDELTA;\
@@ -1110,15 +1118,15 @@ struct _kSystem {
 		tsfp[K_SHIFTIDX].shift = 0;\
 		KSETv(tsfp[K_RTNIDX].o, ((kObject*)DEFVAL));\
 		tsfp[K_RTNIDX].uline = __LINE__;\
-		klr_setesp(_ctx, tsfp + ARGC + 1);\
-		(MTD)->fcall_1(_ctx, tsfp K_RIXPARAM);\
+		klr_setesp(kctx, tsfp + ARGC + 1);\
+		(MTD)->fcall_1(kctx, tsfp K_RIXPARAM);\
 		tsfp[K_MTDIDX].mtdNC = NULL;\
 	} \
 
 #define KSELFCALL(TSFP, MTD) { \
 		ksfp_t *tsfp = TSFP;\
 		tsfp[K_MTDIDX].mtdNC = MTD;\
-		(MTD)->fcall_1(_ctx, tsfp K_RIXPARAM);\
+		(MTD)->fcall_1(kctx, tsfp K_RIXPARAM);\
 		tsfp[K_MTDIDX].mtdNC = NULL;\
 	} \
 
@@ -1131,187 +1139,187 @@ struct klogconf_t;
 
 typedef const struct _klib2  klib2_t;
 struct _klib2 {
-	void* (*Kmalloc)(CTX, size_t);
-	void* (*Kzmalloc)(CTX, size_t);
-	void  (*Kfree)(CTX, void *, size_t);
+	void* (*Kmalloc)(KonohaContext *kctx, size_t);
+	void* (*Kzmalloc)(KonohaContext *kctx, size_t);
+	void  (*Kfree)(KonohaContext *kctx, void *, size_t);
 
-	void  (*Karray_init)(CTX, karray_t *, size_t);
-	void  (*Karray_resize)(CTX, karray_t *, size_t);
-	void  (*Karray_expand)(CTX, karray_t *, size_t);
-	void  (*Karray_free)(CTX, karray_t *);
+	void  (*Karray_init)(KonohaContext *kctx, karray_t *, size_t);
+	void  (*Karray_resize)(KonohaContext *kctx, karray_t *, size_t);
+	void  (*Karray_expand)(KonohaContext *kctx, karray_t *, size_t);
+	void  (*Karray_free)(KonohaContext *kctx, karray_t *);
 
 	void (*Kwb_init)(karray_t *, kwb_t *);
-	void (*Kwb_write)(CTX, kwb_t *, const char *, size_t);
-	void (*Kwb_putc)(CTX, kwb_t *, ...);
-	void (*Kwb_vprintf)(CTX, kwb_t *, const char *fmt, va_list ap);
-	void (*Kwb_printf)(CTX, kwb_t *, const char *fmt, ...);
-	const char* (*Kwb_top)(CTX, kwb_t *, int);
+	void (*Kwb_write)(KonohaContext *kctx, kwb_t *, const char *, size_t);
+	void (*Kwb_putc)(KonohaContext *kctx, kwb_t *, ...);
+	void (*Kwb_vprintf)(KonohaContext *kctx, kwb_t *, const char *fmt, va_list ap);
+	void (*Kwb_printf)(KonohaContext *kctx, kwb_t *, const char *fmt, ...);
+	const char* (*Kwb_top)(KonohaContext *kctx, kwb_t *, int);
 	void (*Kwb_free)(kwb_t *);
 
-	kmap_t*  (*Kmap_init)(CTX, size_t);
-	kmape_t* (*Kmap_newentry)(CTX, kmap_t *, uintptr_t);
+	kmap_t*  (*Kmap_init)(KonohaContext *kctx, size_t);
+	kmape_t* (*Kmap_newentry)(KonohaContext *kctx, kmap_t *, uintptr_t);
 	kmape_t* (*Kmap_get)(kmap_t *, uintptr_t);
 //	void (*Kmap_add)(kmap_t *, kmape_t *);
 	void (*Kmap_remove)(kmap_t *, kmape_t *);
-	void (*Kmap_reftrace)(CTX, kmap_t *, void (*)(CTX, kmape_t*));
-	void (*Kmap_free)(CTX, kmap_t *, void (*)(CTX, void *));
-	ksymbol_t (*Kmap_getcode)(CTX, kmap_t *, kArray *, const char *, size_t, uintptr_t, int, ksymbol_t);
+	void (*Kmap_reftrace)(KonohaContext *kctx, kmap_t *, void (*)(KonohaContext *kctx, kmape_t*));
+	void (*Kmap_free)(KonohaContext *kctx, kmap_t *, void (*)(KonohaContext *kctx, void *));
+	ksymbol_t (*Kmap_getcode)(KonohaContext *kctx, kmap_t *, kArray *, const char *, size_t, uintptr_t, int, ksymbol_t);
 
 
-	kline_t     (*Kfileid)(CTX, const char *, size_t, int spol, ksymbol_t def);
-	kpack_t     (*Kpack)(CTX, const char *, size_t, int spol, ksymbol_t def);
-	ksymbol_t   (*Ksymbol2)(CTX, const char*, size_t, int spol, ksymbol_t def);
+	kline_t     (*Kfileid)(KonohaContext *kctx, const char *, size_t, int spol, ksymbol_t def);
+	kpack_t     (*Kpack)(KonohaContext *kctx, const char *, size_t, int spol, ksymbol_t def);
+	ksymbol_t   (*Ksymbol2)(KonohaContext *kctx, const char*, size_t, int spol, ksymbol_t def);
 
-	kbool_t     (*KimportPackage)(CTX, const struct _kNameSpace*, const char *, kline_t);
-	kclass_t*   (*Kclass)(CTX, kcid_t, kline_t);
-	kString*    (*KCT_shortName)(CTX, kclass_t *ct);
-	kclass_t*   (*KCT_Generics)(CTX, kclass_t *ct, ktype_t rty, int psize, kparam_t *p);
+	kbool_t     (*KimportPackage)(KonohaContext *kctx, const struct _kNameSpace*, const char *, kline_t);
+	kclass_t*   (*Kclass)(KonohaContext *kctx, ktype_t, kline_t);
+	kString*    (*KCT_shortName)(KonohaContext *kctx, kclass_t *ct);
+	kclass_t*   (*KCT_Generics)(KonohaContext *kctx, kclass_t *ct, ktype_t rty, int psize, kparam_t *p);
 
-	kObject*    (*Knew_Object)(CTX, kclass_t *, void *);
-	kObject*    (*Knull)(CTX, kclass_t *);
-	kObject*    (*KObject_getObject)(CTX, kObject *, ksymbol_t, kObject *);
-	void        (*KObject_setObject)(CTX, kObject *, ksymbol_t, ktype_t, kObject *);
-	uintptr_t   (*KObject_getUnboxedValue)(CTX, kObject *, ksymbol_t, uintptr_t);
-	void        (*KObject_setUnboxedValue)(CTX, kObject *, ksymbol_t, ktype_t, uintptr_t);
-	void        (*KObject_protoEach)(CTX, kObject *, void *thunk, void (*f)(CTX, void *, kvs_t *d));
-	void        (*KObject_removeKey)(CTX, kObject *, ksymbol_t);
+	kObject*    (*Knew_Object)(KonohaContext *kctx, kclass_t *, void *);
+	kObject*    (*Knull)(KonohaContext *kctx, kclass_t *);
+	kObject*    (*KObject_getObject)(KonohaContext *kctx, kObject *, ksymbol_t, kObject *);
+	void        (*KObject_setObject)(KonohaContext *kctx, kObject *, ksymbol_t, ktype_t, kObject *);
+	uintptr_t   (*KObject_getUnboxedValue)(KonohaContext *kctx, kObject *, ksymbol_t, uintptr_t);
+	void        (*KObject_setUnboxedValue)(KonohaContext *kctx, kObject *, ksymbol_t, ktype_t, uintptr_t);
+	void        (*KObject_protoEach)(KonohaContext *kctx, kObject *, void *thunk, void (*f)(KonohaContext *kctx, void *, kvs_t *d));
+	void        (*KObject_removeKey)(KonohaContext *kctx, kObject *, ksymbol_t);
 
-	kString*    (*Knew_String)(CTX, const char *, size_t, int);
-	kString*    (*Knew_Stringf)(CTX, int, const char *, ...);
-	kString*    (*KString)(CTX, int, kString *, kString *);
+	kString*    (*Knew_String)(KonohaContext *kctx, const char *, size_t, int);
+	kString*    (*Knew_Stringf)(KonohaContext *kctx, int, const char *, ...);
+	kString*    (*KString)(KonohaContext *kctx, int, kString *, kString *);
 
-	void (*KArray_add)(CTX, kArray *, kObject *);
-	void (*KArray_insert)(CTX, kArray *, size_t, kObject *);
-	void (*KArray_clear)(CTX, kArray *, size_t);
+	void (*KArray_add)(KonohaContext *kctx, kArray *, kObject *);
+	void (*KArray_insert)(KonohaContext *kctx, kArray *, size_t, kObject *);
+	void (*KArray_clear)(KonohaContext *kctx, kArray *, size_t);
 
-//	kParam *   (*Knew_Param)(CTX, ktype_t, int, kparam_t *);
-	kMethod *  (*Knew_Method)(CTX, uintptr_t, kcid_t, kmethodn_t, knh_Fmethod);
-	kParam*    (*KMethod_setParam)(CTX, kMethod *, ktype_t, int, kparam_t *);
-	void       (*KMethod_setFunc)(CTX, kMethod*, knh_Fmethod);
-	void       (*KMethod_genCode)(CTX, kMethod*, const struct _kBlock *bk);
+//	kParam *   (*Knew_Param)(KonohaContext *kctx, ktype_t, int, kparam_t *);
+	kMethod *  (*Knew_Method)(KonohaContext *kctx, uintptr_t, ktype_t, kmethodn_t, knh_Fmethod);
+	kParam*    (*KMethod_setParam)(KonohaContext *kctx, kMethod *, ktype_t, int, kparam_t *);
+	void       (*KMethod_setFunc)(KonohaContext *kctx, kMethod*, knh_Fmethod);
+	void       (*KMethod_genCode)(KonohaContext *kctx, kMethod*, const struct _kBlock *bk);
 	intptr_t   (*KMethod_indexOfField)(kMethod *);
 
-	kbool_t    (*KsetModule)(CTX, int, struct kmodshare_t *, kline_t);
-	kclass_t*  (*KaddClassDef)(CTX, kpack_t, kpack_t, kString *, KDEFINE_CLASS *, kline_t);
+	kbool_t    (*KsetModule)(KonohaContext *kctx, int, struct kmodshare_t *, kline_t);
+	kclass_t*  (*KaddClassDef)(KonohaContext *kctx, kpack_t, kpack_t, kString *, KDEFINE_CLASS *, kline_t);
 
-	kclass_t*  (*KS_getCT)(CTX, const struct _kNameSpace *, kclass_t *, const char *, size_t, kcid_t def);
-	void       (*KS_loadMethodData)(CTX, const struct _kNameSpace *, intptr_t *d);
-	void       (*KS_loadConstData)(CTX, const struct _kNameSpace *, const char **d, kline_t);
-	kMethod*   (*KS_getMethodNULL)(CTX, const struct _kNameSpace *ks, kcid_t cid, kmethodn_t mn);
-	kMethod*   (*KS_getGetterMethodNULL)(CTX, const struct _kNameSpace *, ktype_t cid, ksymbol_t sym);
+	kclass_t*  (*KS_getCT)(KonohaContext *kctx, const struct _kNameSpace *, kclass_t *, const char *, size_t, ktype_t def);
+	void       (*KS_loadMethodData)(KonohaContext *kctx, const struct _kNameSpace *, intptr_t *d);
+	void       (*KS_loadConstData)(KonohaContext *kctx, const struct _kNameSpace *, const char **d, kline_t);
+	kMethod*   (*KS_getMethodNULL)(KonohaContext *kctx, const struct _kNameSpace *ks, ktype_t cid, kmethodn_t mn);
+	kMethod*   (*KS_getGetterMethodNULL)(KonohaContext *kctx, const struct _kNameSpace *, ktype_t cid, ksymbol_t sym);
 
-	void       (*KS_syncMethods)(CTX);
-	void       (*KCodeGen)(CTX, kMethod *, const struct _kBlock *);
-	void       (*Kreportf)(CTX, kinfotag_t, kline_t, const char *fmt, ...);
-	void       (*Kraise)(CTX, int isContinue);     // module
+	void       (*KS_syncMethods)(KonohaContext *kctx);
+	void       (*KCodeGen)(KonohaContext *kctx, kMethod *, const struct _kBlock *);
+	void       (*Kreportf)(KonohaContext *kctx, kinfotag_t, kline_t, const char *fmt, ...);
+	void       (*Kraise)(KonohaContext *kctx, int isContinue);     // module
 
-	uintptr_t  (*Ktrace)(CTX, struct klogconf_t *logconf, ...);
+	uintptr_t  (*Ktrace)(KonohaContext *kctx, struct klogconf_t *logconf, ...);
 };
 
-#define K_NULL            (_ctx->share->constNull)
-#define K_TRUE            (_ctx->share->constTrue)
-#define K_FALSE           (_ctx->share->constFalse)
-#define K_NULLPARAM       (_ctx->share->paramList->params[0])
-#define K_EMPTYARRAY      (_ctx->share->emptyArray)
-#define TS_EMPTY          (_ctx->share->emptyString)
+#define K_NULL            (kctx->share->constNull)
+#define K_TRUE            (kctx->share->constTrue)
+#define K_FALSE           (kctx->share->constFalse)
+#define K_NULLPARAM       (kctx->share->paramList->params[0])
+#define K_EMPTYARRAY      (kctx->share->emptyArray)
+#define TS_EMPTY          (kctx->share->emptyString)
 
 #define UPCAST(o)         ((kObject*)o)
 #define W(T, V)           struct _##T*const W##V = (struct _##T*const)(V); int _check##V
 #define WASSERT(V)        DBG_ASSERT((void*)V == (void*)W##V); (void)_check##V
 
-#define KPI                     (_ctx->lib2)
+#define KPI                     (kctx->lib2)
 
-#define KMALLOC(size)          (KPI)->Kmalloc(_ctx, size)
-#define KCALLOC(size, item)    (KPI)->Kzmalloc(_ctx, ((size) * (item)))
-#define KFREE(p, size)         (KPI)->Kfree(_ctx, p, size)
+#define KMALLOC(size)          (KPI)->Kmalloc(kctx, size)
+#define KCALLOC(size, item)    (KPI)->Kzmalloc(kctx, ((size) * (item)))
+#define KFREE(p, size)         (KPI)->Kfree(kctx, p, size)
 
-#define KARRAY_INIT(VAR, init)           (KPI)->Karray_init(_ctx, VAR, (init))
-#define KARRAY_RESIZE(VAR, newsize)      (KPI)->Karray_resize(_ctx, VAR, (newsize))
-#define KARRAY_EXPAND(VAR, min)          (KPI)->Karray_expand(_ctx, VAR, (min))
-#define KARRAY_FREE(VAR)                 (KPI)->Karray_free(_ctx, VAR)
+#define KARRAY_INIT(VAR, init)           (KPI)->Karray_init(kctx, VAR, (init))
+#define KARRAY_RESIZE(VAR, newsize)      (KPI)->Karray_resize(kctx, VAR, (newsize))
+#define KARRAY_EXPAND(VAR, min)          (KPI)->Karray_expand(kctx, VAR, (min))
+#define KARRAY_FREE(VAR)                 (KPI)->Karray_free(kctx, VAR)
 
 #define kwb_init(M,W)            (KPI)->Kwb_init(M,W)
-#define kwb_write(W,B,S)         (KPI)->Kwb_write(_ctx,W,B,S)
-#define kwb_putc(W,...)          (KPI)->Kwb_putc(_ctx,W, ## __VA_ARGS__, -1)
-#define kwb_vprintf(W,FMT,ARG)   (KPI)->Kwb_vprintf(_ctx,W, FMT, ARG)
-#define kwb_printf(W,FMT,...)    (KPI)->Kwb_printf(_ctx, W, FMT, ## __VA_ARGS__)
+#define kwb_write(W,B,S)         (KPI)->Kwb_write(kctx,W,B,S)
+#define kwb_putc(W,...)          (KPI)->Kwb_putc(kctx,W, ## __VA_ARGS__, -1)
+#define kwb_vprintf(W,FMT,ARG)   (KPI)->Kwb_vprintf(kctx,W, FMT, ARG)
+#define kwb_printf(W,FMT,...)    (KPI)->Kwb_printf(kctx, W, FMT, ## __VA_ARGS__)
 
-#define kwb_top(W,IS)            (KPI)->Kwb_top(_ctx, W, IS)
+#define kwb_top(W,IS)            (KPI)->Kwb_top(kctx, W, IS)
 #define kwb_bytesize(W)          (((W)->m)->bytesize - (W)->pos)
 #define kwb_free(W)              (KPI)->Kwb_free(W)
 
-#define kmap_init(INIT)           (KPI)->Kmap_init(_ctx, INIT)
-#define kmap_newentry(M, H)       (KPI)->Kmap_newentry(_ctx, M, H)
+#define kmap_init(INIT)           (KPI)->Kmap_init(kctx, INIT)
+#define kmap_newentry(M, H)       (KPI)->Kmap_newentry(kctx, M, H)
 #define kmap_get(M, K)            (KPI)->Kmap_get(M, K)
-#define kmap_remove(M, E)         (KPI)->Kmap_remove(_ctx, M, E)
-#define kmap_reftrace(M, F)       (KPI)->Kmap_reftrace(_ctx, M, F)
-#define kmap_free(M, F)           (KPI)->Kmap_free(_ctx, M, F)
-#define kmap_getcode(M,L,N,NL,H,POL,DEF)  (KPI)->Kmap_getcode(_ctx, M, L, N, NL, H, POL, DEF)
+#define kmap_remove(M, E)         (KPI)->Kmap_remove(kctx, M, E)
+#define kmap_reftrace(M, F)       (KPI)->Kmap_reftrace(kctx, M, F)
+#define kmap_free(M, F)           (KPI)->Kmap_free(kctx, M, F)
+#define kmap_getcode(M,L,N,NL,H,POL,DEF)  (KPI)->Kmap_getcode(kctx, M, L, N, NL, H, POL, DEF)
 
-#define kclass(CID, UL)           (KPI)->Kclass(_ctx, CID, UL)
+#define kclass(CID, UL)           (KPI)->Kclass(kctx, CID, UL)
 
 #define FILEID_NATIVE             0
-#define FILEID_(T)                (KPI)->Kfileid(_ctx, T, sizeof(T)-1, SPOL_TEXT|SPOL_ASCII, _NEWID)
-#define kfileid(T,L,SPOL,DEF)          (KPI)->Kfileid(_ctx, T, L, SPOL, DEF)
+#define FILEID_(T)                (KPI)->Kfileid(kctx, T, sizeof(T)-1, SPOL_TEXT|SPOL_ASCII, _NEWID)
+#define kfileid(T,L,SPOL,DEF)          (KPI)->Kfileid(kctx, T, L, SPOL, DEF)
 #define PN_konoha                 0
 #define PN_sugar                  1
-#define PN_(T)                    (KPI)->Kpack(_ctx, T, sizeof(T)-1, SPOL_TEXT|SPOL_ASCII|SPOL_POOL, _NEWID)
-#define kpack(T,L,SPOL,DEF)       (KPI)->Kpack(_ctx, T, L, SPOL, DEF)
+#define PN_(T)                    (KPI)->Kpack(kctx, T, sizeof(T)-1, SPOL_TEXT|SPOL_ASCII|SPOL_POOL, _NEWID)
+#define kpack(T,L,SPOL,DEF)       (KPI)->Kpack(kctx, T, L, SPOL, DEF)
 
-#define ksymbolA(T, L, DEF)       (KPI)->Ksymbol2(_ctx, T, L, SPOL_ASCII, DEF)
-#define ksymbolSPOL(T, L, SPOL, DEF)       (KPI)->Ksymbol2(_ctx, T, L, SPOL, DEF)
+#define ksymbolA(T, L, DEF)       (KPI)->Ksymbol2(kctx, T, L, SPOL_ASCII, DEF)
+#define ksymbolSPOL(T, L, SPOL, DEF)       (KPI)->Ksymbol2(kctx, T, L, SPOL, DEF)
 #define ksymbol(T)
-#define SYM_(T)                   (KPI)->Ksymbol2(_ctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
-#define FN_(T)                    (KPI)->Ksymbol2(_ctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
-#define MN_(T)                    (KPI)->Ksymbol2(_ctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
+#define SYM_(T)                   (KPI)->Ksymbol2(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
+#define FN_(T)                    (KPI)->Ksymbol2(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
+#define MN_(T)                    (KPI)->Ksymbol2(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
 #define T_mn(X)                   SYM_PRE(X), SYM_t(X)
 
 // #define KW_new (((ksymbol_t)39)|0) /*new*/
 #define MN_new                    39  /* @see */
 
-#define new_kObject(C, A)         (KPI)->Knew_Object(_ctx, C, (void*)(A))
-#define new_(C, A)                (k##C*)(KPI)->Knew_Object(_ctx, CT_##C, (void*)(A))
-#define new_W(C, A)               (struct _k##C*)(KPI)->Knew_Object(_ctx, CT_##C, (void*)(A))
-#define knull(C)                  (KPI)->Knull(_ctx, C)
-#define KNULL(C)                  (k##C*)(KPI)->Knull(_ctx, CT_##C)
+#define new_kObject(C, A)         (KPI)->Knew_Object(kctx, C, (void*)(A))
+#define new_(C, A)                (k##C*)(KPI)->Knew_Object(kctx, CT_##C, (void*)(A))
+#define new_W(C, A)               (struct _k##C*)(KPI)->Knew_Object(kctx, CT_##C, (void*)(A))
+#define knull(C)                  (KPI)->Knull(kctx, C)
+#define KNULL(C)                  (k##C*)(KPI)->Knull(kctx, CT_##C)
 
-#define kObject_getObjectNULL(O, K)            (KPI)->KObject_getObject(_ctx, UPCAST(O), K, NULL)
-#define kObject_getObject(O, K, DEF)           (KPI)->KObject_getObject(_ctx, UPCAST(O), K, DEF)
-#define kObject_setObject(O, K, V)             (KPI)->KObject_setObject(_ctx, UPCAST(O), K, O_cid(V), UPCAST(V))
-#define kObject_getUnboxedValue(O, K, DEF)     (KPI)->KObject_getUnboxedValue(_ctx, UPCAST(O), K, DEF)
-#define kObject_setUnboxedValue(O, K, T, V)    (KPI)->KObject_setUnboxedValue(_ctx, UPCAST(O), K, T, V)
-#define kObject_removeKey(O, K)                (KPI)->KObject_removeKey(_ctx, UPCAST(O), K)
-#define kObject_protoEach(O, THUNK, F)         (KPI)->KObject_protoEach(_ctx, UPCAST(O), THUNK, F)
+#define kObject_getObjectNULL(O, K)            (KPI)->KObject_getObject(kctx, UPCAST(O), K, NULL)
+#define kObject_getObject(O, K, DEF)           (KPI)->KObject_getObject(kctx, UPCAST(O), K, DEF)
+#define kObject_setObject(O, K, V)             (KPI)->KObject_setObject(kctx, UPCAST(O), K, O_cid(V), UPCAST(V))
+#define kObject_getUnboxedValue(O, K, DEF)     (KPI)->KObject_getUnboxedValue(kctx, UPCAST(O), K, DEF)
+#define kObject_setUnboxedValue(O, K, T, V)    (KPI)->KObject_setUnboxedValue(kctx, UPCAST(O), K, T, V)
+#define kObject_removeKey(O, K)                (KPI)->KObject_removeKey(kctx, UPCAST(O), K)
+#define kObject_protoEach(O, THUNK, F)         (KPI)->KObject_protoEach(kctx, UPCAST(O), THUNK, F)
 
 
-#define new_kString(T,S,P)        (KPI)->Knew_String(_ctx, T, S, P)
-#define new_kStringf(P, FMT, ...) (KPI)->Knew_Stringf(_ctx, P, FMT, ## __VA_ARGS__)
+#define new_kString(T,S,P)        (KPI)->Knew_String(kctx, T, S, P)
+#define new_kStringf(P, FMT, ...) (KPI)->Knew_Stringf(kctx, P, FMT, ## __VA_ARGS__)
 
 #define kArray_size(A)            (((A)->bytesize)/sizeof(void*))
 #define kArray_setsize(A, N)  ((struct _kArray*)A)->bytesize = N * sizeof(void*)
-#define kArray_add(A, V)          (KPI)->KArray_add(_ctx, A, UPCAST(V))
-#define kArray_insert(A, N, V)    (KPI)->KArray_insert(_ctx, A, N, UPCAST(V))
-#define kArray_clear(A, S)        (KPI)->KArray_clear(_ctx, A, S)
+#define kArray_add(A, V)          (KPI)->KArray_add(kctx, A, UPCAST(V))
+#define kArray_insert(A, N, V)    (KPI)->KArray_insert(kctx, A, N, UPCAST(V))
+#define kArray_clear(A, S)        (KPI)->KArray_clear(kctx, A, S)
 
-#define new_kParam(R,S,P)        (KPI)->Knew_Method(_ctx, R, S, P)
-#define new_kMethod(F,C,M,FF)  (KPI)->Knew_Method(_ctx, F, C, M, FF)
-#define kMethod_setParam(M, R, PSIZE, P)      (KPI)->KMethod_setParam(_ctx, M, R, PSIZE, P)
-#define new_kParam2(R, PSIZE, P)  (KPI)->KMethod_setParam(_ctx, NULL, R, PSIZE, P)
-#define kMethod_setFunc(M,F)     (KPI)->KMethod_setFunc(_ctx, M, F)
-#define kMethod_genCode(M, BLOCK) (KPI)->KMethod_genCode(_ctx, M, BLOCK)
+#define new_kParam(R,S,P)        (KPI)->Knew_Method(kctx, R, S, P)
+#define new_kMethod(F,C,M,FF)  (KPI)->Knew_Method(kctx, F, C, M, FF)
+#define kMethod_setParam(M, R, PSIZE, P)      (KPI)->KMethod_setParam(kctx, M, R, PSIZE, P)
+#define new_kParam2(R, PSIZE, P)  (KPI)->KMethod_setParam(kctx, NULL, R, PSIZE, P)
+#define kMethod_setFunc(M,F)     (KPI)->KMethod_setFunc(kctx, M, F)
+#define kMethod_genCode(M, BLOCK) (KPI)->KMethod_genCode(kctx, M, BLOCK)
 
-#define KREQUIRE_PACKAGE(NAME, UL)                   (KPI)->KimportPackage(_ctx, NULL, NAME, UL)
-#define KEXPORT_PACKAGE(NAME, KS, UL)                (KPI)->KimportPackage(_ctx, KS, NAME, UL)
+#define KREQUIRE_PACKAGE(NAME, UL)                   (KPI)->KimportPackage(kctx, NULL, NAME, UL)
+#define KEXPORT_PACKAGE(NAME, KS, UL)                (KPI)->KimportPackage(kctx, KS, NAME, UL)
 
 #define KCLASS(cid)                          S_text(CT(cid)->name)
-#define kClassTable_Generics(CT, RTY, PSIZE, P)    (KPI)->KCT_Generics(_ctx, CT, RTY, PSIZE, P)
-#define Konoha_setModule(N,D,P)              (KPI)->KsetModule(_ctx, N, D, P)
-#define Konoha_addClassDef(PAC, DOM, NAME, DEF, UL)    (KPI)->KaddClassDef(_ctx, PAC, DOM, NAME, DEF, UL)
-#define kNameSpace_getCT(NS, THIS, S, L, C)      (KPI)->KS_getCT(_ctx, NS, THIS, S, L, C)
-#define kNameSpace_loadMethodData(NS, DEF)       (KPI)->KS_loadMethodData(_ctx, NS, DEF)
-#define kNameSpace_loadConstData(KS, DEF, UL)    (KPI)->KS_loadConstData(_ctx, KS, (const char**)&(DEF), UL)
-#define kNameSpace_getMethodNULL(KS, CID, MN)    (KPI)->KS_getMethodNULL(_ctx, KS, CID, MN)
-#define kNameSpace_syncMethods()    (KPI)->KS_syncMethods(_ctx)
+#define kClassTable_Generics(CT, RTY, PSIZE, P)    (KPI)->KCT_Generics(kctx, CT, RTY, PSIZE, P)
+#define Konoha_setModule(N,D,P)              (KPI)->KsetModule(kctx, N, D, P)
+#define Konoha_addClassDef(PAC, DOM, NAME, DEF, UL)    (KPI)->KaddClassDef(kctx, PAC, DOM, NAME, DEF, UL)
+#define kNameSpace_getCT(NS, THIS, S, L, C)      (KPI)->KS_getCT(kctx, NS, THIS, S, L, C)
+#define kNameSpace_loadMethodData(NS, DEF)       (KPI)->KS_loadMethodData(kctx, NS, DEF)
+#define kNameSpace_loadConstData(KS, DEF, UL)    (KPI)->KS_loadConstData(kctx, KS, (const char**)&(DEF), UL)
+#define kNameSpace_getMethodNULL(KS, CID, MN)    (KPI)->KS_getMethodNULL(kctx, KS, CID, MN)
+#define kNameSpace_syncMethods()    (KPI)->KS_syncMethods(kctx)
 
 typedef intptr_t  KDEFINE_METHOD;
 
@@ -1339,20 +1347,20 @@ typedef struct {
 	kObject *value;
 } KDEFINE_OBJECT_CONST;
 
-#define kreportf(LEVEL, UL, fmt, ...)  (KPI)->Kreportf(_ctx, LEVEL, UL, fmt, ## __VA_ARGS__)
-#define kraise(PARAM)                  (KPI)->Kraise(_ctx, PARAM)
+#define kreportf(LEVEL, UL, fmt, ...)  (KPI)->Kreportf(kctx, LEVEL, UL, fmt, ## __VA_ARGS__)
+#define kraise(PARAM)                  (KPI)->Kraise(kctx, PARAM)
 
 #define KSET_KLIB(T, UL)   do {\
-		void *func = _ctx->lib2->K##T;\
-		((struct _klib2*)_ctx->lib2)->K##T = K##T;\
+		void *func = kctx->lib2->K##T;\
+		((struct _klib2*)kctx->lib2)->K##T = K##T;\
 		if(func != NULL) {\
 			kreportf(DEBUG_, UL, "override of klib2->" #T ", file=%s, line=%d", __FILE__, __LINE__);\
 		}\
 	}while(0)\
 
 #define KSET_KLIB2(T, F, UL)   do {\
-		void *func = _ctx->lib2->K##T;\
-		((struct _klib2*)_ctx->lib2)->K##T = F;\
+		void *func = kctx->lib2->K##T;\
+		((struct _klib2*)kctx->lib2)->K##T = F;\
 		if(func != NULL) {\
 			kreportf(DEBUG_, UL, "override of klib2->" #T ", file=%s, line=%d", __FILE__, __LINE__);\
 		}\
@@ -1378,18 +1386,18 @@ typedef struct {
 #endif /* defined(_MSC_VER) */
 
 
-#define INIT_GCSTACK()         size_t gcstack_ = kArray_size(_ctx->stack->gcstack)
-#define PUSH_GCSTACK(o)        kArray_add(_ctx->stack->gcstack, o)
-#define RESET_GCSTACK()        kArray_clear(_ctx->stack->gcstack, gcstack_)
+#define INIT_GCSTACK()         size_t gcstack_ = kArray_size(kctx->stack->gcstack)
+#define PUSH_GCSTACK(o)        kArray_add(kctx->stack->gcstack, o)
+#define RESET_GCSTACK()        kArray_clear(kctx->stack->gcstack, gcstack_)
 
 #define KINITv(VAR, VAL)   OBJECT_SET(VAR, VAL)
 #define KSETv(VAR, VAL)    /*OBJECT_SET(VAR, VAL)*/ VAR = VAL
 #define KINITp(parent, v, o) KINITv(v, o)
 #define KSETp(parent,  v, o) KSETv(v, o)
-#define KUNUSEv(V)  (V)->h.ct->free(_ctx, (V))
+#define KUNUSEv(V)  (V)->h.ct->free(kctx, (V))
 
-#define BEGIN_REFTRACE(SIZE)  int _ref_ = (SIZE); struct _kObject** _tail = KONOHA_reftail(_ctx, (SIZE));
-#define END_REFTRACE()        (void)_ref_; _ctx->stack->reftail = _tail;
+#define BEGIN_REFTRACE(SIZE)  int _ref_ = (SIZE); struct _kObject** _tail = KONOHA_reftail(kctx, (SIZE));
+#define END_REFTRACE()        (void)_ref_; kctx->stack->reftail = _tail;
 
 #define KREFTRACEv(p)  do {\
 	DBG_ASSERT(p != NULL);\
@@ -1406,11 +1414,11 @@ typedef struct {
 
 // method macro
 
-#define KNH_SAFEPOINT(_ctx, sfp)
+#define KNH_SAFEPOINT(kctx, sfp)
 
 #define RETURN_(vv) do {\
 	KSETv(sfp[K_RIX].o, ((kObject*)vv));\
-	KNH_SAFEPOINT(_ctx, sfp);\
+	KNH_SAFEPOINT(kctx, sfp);\
 	return; \
 } while (0)
 
@@ -1462,17 +1470,17 @@ typedef struct {
 #endif /*unlikely*/
 
 ///* Konoha API */
-extern konoha_t konoha_open(const kplatform_t *);
-extern void konoha_close(konoha_t konoha);
-extern kbool_t konoha_load(konoha_t konoha, const char *scriptfile);
-extern kbool_t konoha_eval(konoha_t konoha, const char *script, kline_t uline);
-extern kbool_t konoha_run(konoha_t konoha);  // TODO
+extern KonohaContext* konoha_open(const kplatform_t *);
+extern void konoha_close(KonohaContext* konoha);
+extern kbool_t konoha_load(KonohaContext* konoha, const char *scriptfile);
+extern kbool_t konoha_eval(KonohaContext* konoha, const char *script, kline_t uline);
+extern kbool_t konoha_run(KonohaContext* konoha);  // TODO
 
 #ifdef USE_BUILTINTEST
-typedef int (*Ftest)(CTX);
+typedef int (*BuiltInTestFunc)(KonohaContext *kctx);
 typedef struct DEFINE_TESTFUNC {
 	const char *name;
-	Ftest f;
+	BuiltInTestFunc f;
 } DEFINE_TESTFUNC ;
 #endif
 

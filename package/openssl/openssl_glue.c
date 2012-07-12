@@ -2,7 +2,7 @@
 #include "openssl/md5.h"
 #include "openssl/sha.h"
 
-static void RawPtr_free(CTX, kObject *po)
+static void RawPtr_free(KonohaContext *kctx, kObject *po)
 {
 	kRawPtr *o = (kRawPtr*)(po);
 	if (o->rawptr) {
@@ -10,20 +10,20 @@ static void RawPtr_free(CTX, kObject *po)
 	}
 	o->rawptr = NULL;
 }
-static void RawPtr_init(CTX, kObject *po, void *conf)
+static void RawPtr_init(KonohaContext *kctx, kObject *po, void *conf)
 {
 	kRawPtr *o = (kRawPtr*)(po);
 	o->rawptr = conf;
 }
 
-static KMETHOD kMD5_Init(CTX, ksfp_t *sfp _RIX)
+static KMETHOD kMD5_Init(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	MD5state_st* c = malloc(sizeof(*c));
 	int ret_ = MD5_Init(c);
-	RawPtr_init(_ctx, sfp[0].o, c);
+	RawPtr_init(kctx, sfp[0].o, c);
 	RETURN_(sfp[0].o);
 }
-static KMETHOD kMD5_Update(CTX, ksfp_t *sfp _RIX)
+static KMETHOD kMD5_Update(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	MD5state_st* c = RawPtr(sfp[0].o);
 	unsigned char* data = (unsigned char *) S_text(sfp[1].s);
@@ -31,7 +31,7 @@ static KMETHOD kMD5_Update(CTX, ksfp_t *sfp _RIX)
 	int ret_ = MD5_Update(c, data, len);
 	RETURNi_(ret_);
 }
-static KMETHOD kMD5_Final(CTX, ksfp_t *sfp _RIX)
+static KMETHOD kMD5_Final(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	unsigned char MD[MD5_DIGEST_LENGTH];
 	MD5state_st* c = RawPtr(sfp[0].o);
@@ -43,14 +43,14 @@ static KMETHOD kMD5_Final(CTX, ksfp_t *sfp _RIX)
 	}
 	RETURN_(new_kString(MD_S, MD5_DIGEST_LENGTH*2, SPOL_ASCII));
 }
-static KMETHOD kSHA1_Init(CTX, ksfp_t *sfp _RIX)
+static KMETHOD kSHA1_Init(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	SHAstate_st* c = malloc(sizeof(*c));
 	int ret_ = SHA1_Init(c);
-	RawPtr_init(_ctx, sfp[0].o, c);
+	RawPtr_init(kctx, sfp[0].o, c);
 	RETURN_(sfp[0].o);
 }
-static KMETHOD kSHA1_Update(CTX, ksfp_t *sfp _RIX)
+static KMETHOD kSHA1_Update(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	SHAstate_st* c = RawPtr(sfp[0].o);
 	unsigned char* data = (unsigned char *) S_text(sfp[1].s);
@@ -58,7 +58,7 @@ static KMETHOD kSHA1_Update(CTX, ksfp_t *sfp _RIX)
 	int ret_ = SHA1_Update(c, data, len);
 	RETURNi_(ret_);
 }
-static KMETHOD kSHA1_Final(CTX, ksfp_t *sfp _RIX)
+static KMETHOD kSHA1_Final(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	unsigned char SHA[SHA_DIGEST_LENGTH];
 	SHAstate_st* c = RawPtr(sfp[0].o);
@@ -79,7 +79,7 @@ static KMETHOD kSHA1_Final(CTX, ksfp_t *sfp _RIX)
 #define TY_openssl  (ct0->cid)
 #define TY_Log      (ct1->cid)
 
-static kbool_t openssl_initPackage(CTX, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static kbool_t openssl_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
 {
 	static const char *names[] = {
 		"MD5",
@@ -115,17 +115,17 @@ static kbool_t openssl_initPackage(CTX, kNameSpace *ks, int argc, const char**ar
 	return true;
 }
 
-static kbool_t openssl_setupPackage(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t openssl_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t openssl_initNameSpace(CTX,  kNameSpace *ks, kline_t pline)
+static kbool_t openssl_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t openssl_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t openssl_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }

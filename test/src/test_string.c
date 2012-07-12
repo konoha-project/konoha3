@@ -27,25 +27,25 @@
 #include "minikonoha/gc.h"
 #include "test_konoha.h"
 
-void test_kString(CTX)
+void test_kString(KonohaContext *kctx)
 {
     intptr_t i;
     kString *s;
     for (i = 0; i < 100; ++i) {
-        s = _ctx->lib2->Knew_String(_ctx, "abcd", 4, 0);
+        s = kctx->lib2->Knew_String(kctx, "abcd", 4, 0);
         assert(strcmp(S_text(s), "abcd") == 0);
         assert(S_size(s) == 4);
         assert(S_isASCII(s) == 1);
     }
     for (i = 0; i < 100; ++i) {
-        s = _ctx->lib2->Knew_String(_ctx, "abcd", 4, 0);
+        s = kctx->lib2->Knew_String(kctx, "abcd", 4, 0);
         assert(strcmp(S_text(s), "abcd") == 0);
         assert(S_size(s) == 4);
         assert(S_text(s) == (char*)s->inline_text);
     }
     for (i = 0; i < 100; ++i) {
         static const char *text = "12345678901234567890";
-        s = _ctx->lib2->Knew_String(_ctx, text, 20, SPOL_TEXT | SPOL_UTF8);
+        s = kctx->lib2->Knew_String(kctx, text, 20, SPOL_TEXT | SPOL_UTF8);
         assert(strcmp(S_text(s), text) == 0);
         assert(S_size(s) == 20);
         assert(S_text(s) == text);
@@ -55,7 +55,7 @@ void test_kString(CTX)
 
 int main(int argc, const char *argv[])
 {
-    konoha_t konoha = konoha_open((const kplatform_t*)&plat);
+    KonohaContext* konoha = konoha_open((const kplatform_t*)&plat);
     int i;
     for (i = 0; i < 100; ++i) {
         test_kString(konoha);

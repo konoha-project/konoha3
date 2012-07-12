@@ -47,7 +47,7 @@ int verbose_sugar = 0;
 #define PATTERN(T)  .kw = KW_##T##Pattern
 #define TOKEN(T)  .kw = KW_##T
 
-static void defineDefaultSyntax(CTX, kNameSpace *ks)
+static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ks)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ TOKEN(ERR), .flag = SYNFLAG_StmtBreakExec, },
@@ -93,47 +93,47 @@ static void defineDefaultSyntax(CTX, kNameSpace *ks)
 		{ TOKEN(return), .rule ="\"return\" [$expr]", .flag = SYNFLAG_StmtBreakExec, StmtTyCheck_(return), },
 		{ .kw = KW_END, },
 	};
-	NameSpace_defineSyntax(_ctx, ks, SYNTAX);
+	NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	struct _ksyntax *syn = (struct _ksyntax*)SYN_(ks, KW_void);
 	syn->ty = TY_void; // it's not cool, but necessary
 	syn = (struct _ksyntax*)SYN_(ks, KW_UsymbolPattern);
 	KINITv(syn->syntaxRuleNULL, new_(TokenArray, 0));
-	parseSyntaxRule(_ctx, "$USYMBOL \"=\" $expr", 0, syn->syntaxRuleNULL);
+	parseSyntaxRule(kctx, "$USYMBOL \"=\" $expr", 0, syn->syntaxRuleNULL);
 }
 
 /* ------------------------------------------------------------------------ */
 /* ctxsugar_t global functions */
 
-static kstatus_t NameSpace_eval(CTX, kNameSpace *ks, const char *script, kline_t uline)
+static kstatus_t NameSpace_eval(KonohaContext *kctx, kNameSpace *ks, const char *script, kline_t uline)
 {
 	kstatus_t result;
-	kmodsugar->h.setup(_ctx, (kmodshare_t*)kmodsugar, 0/*lazy*/);
+	kmodsugar->h.setup(kctx, (kmodshare_t*)kmodsugar, 0/*lazy*/);
 	{
 		INIT_GCSTACK();
 		kArray *tls = ctxsugar->tokens;
 		size_t pos = kArray_size(tls);
-		NameSpace_tokenize(_ctx, ks, script, uline, tls);
-		kBlock *bk = new_Block(_ctx, ks, NULL, tls, pos, kArray_size(tls), ';');
+		NameSpace_tokenize(kctx, ks, script, uline, tls);
+		kBlock *bk = new_Block(kctx, ks, NULL, tls, pos, kArray_size(tls), ';');
 		kArray_clear(tls, pos);
-		result = Block_eval(_ctx, bk);
+		result = Block_eval(kctx, bk);
 		RESET_GCSTACK();
 	}
 	return result;
 }
 
-kstatus_t MODSUGAR_eval(CTX, const char *script, kline_t uline)
+kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, kline_t uline)
 {
 	if(verbose_sugar) {
 		DUMP_P("\n>>>----\n'%s'\n------\n", script);
 	}
-	kmodsugar->h.setup(_ctx, (kmodshare_t*)kmodsugar, 0/*lazy*/);
-	return NameSpace_eval(_ctx, KNULL(NameSpace), script, uline);
+	kmodsugar->h.setup(kctx, (kmodshare_t*)kmodsugar, 0/*lazy*/);
+	return NameSpace_eval(kctx, KNULL(NameSpace), script, uline);
 }
 
 /* ------------------------------------------------------------------------ */
 /* [ctxsugar] */
 
-static void ctxsugar_reftrace(CTX, struct kmodlocal_t *baseh)
+static void ctxsugar_reftrace(KonohaContext *kctx, struct kmodlocal_t *baseh)
 {
 	ctxsugar_t *base = (ctxsugar_t*)baseh;
 	BEGIN_REFTRACE(7);
@@ -145,16 +145,16 @@ static void ctxsugar_reftrace(CTX, struct kmodlocal_t *baseh)
 	KREFTRACEv(base->definedMethods);
 	END_REFTRACE();
 }
-static void ctxsugar_free(CTX, struct kmodlocal_t *baseh)
+static void ctxsugar_free(KonohaContext *kctx, struct kmodlocal_t *baseh)
 {
 	ctxsugar_t *base = (ctxsugar_t*)baseh;
 	KARRAY_FREE(&base->cwb);
 	KFREE(base, sizeof(ctxsugar_t));
 }
 
-static void kmodsugar_setup(CTX, struct kmodshare_t *def, int newctx)
+static void kmodsugar_setup(KonohaContext *kctx, struct kmodshare_t *def, int newctx)
 {
-	if(!newctx && _ctx->modlocal[MOD_sugar] == NULL) {
+	if(!newctx && kctx->modlocal[MOD_sugar] == NULL) {
 		ctxsugar_t *base = (ctxsugar_t*)KCALLOC(sizeof(ctxsugar_t), 1);
 		base->h.reftrace = ctxsugar_reftrace;
 		base->h.free     = ctxsugar_free;
@@ -168,11 +168,11 @@ static void kmodsugar_setup(CTX, struct kmodshare_t *def, int newctx)
 		KINITv(base->singleBlock, new_(Block, NULL));
 		kArray_add(base->singleBlock->blocks, K_NULL);
 		KARRAY_INIT(&base->cwb, K_PAGESIZE);
-		_ctx->modlocal[MOD_sugar] = (kmodlocal_t*)base;
+		kctx->modlocal[MOD_sugar] = (kmodlocal_t*)base;
 	}
 }
 
-static void pack_reftrace(CTX, kmape_t *p)
+static void pack_reftrace(KonohaContext *kctx, kmape_t *p)
 {
 	kpackage_t *pack = (kpackage_t*)p->uvalue;
 	BEGIN_REFTRACE(1);
@@ -180,12 +180,12 @@ static void pack_reftrace(CTX, kmape_t *p)
 	END_REFTRACE();
 }
 
-static void pack_free(CTX, void *p)
+static void pack_free(KonohaContext *kctx, void *p)
 {
 	KFREE(p, sizeof(kpackage_t));
 }
 
-static void kmodsugar_reftrace(CTX, struct kmodshare_t *baseh)
+static void kmodsugar_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
 {
 	kmodsugar_t *base = (kmodsugar_t*)baseh;
 	kmap_reftrace(base->packageMapNO, pack_reftrace);
@@ -199,14 +199,14 @@ static void kmodsugar_reftrace(CTX, struct kmodshare_t *baseh)
 	END_REFTRACE();
 }
 
-static void kmodsugar_free(CTX, struct kmodshare_t *baseh)
+static void kmodsugar_free(KonohaContext *kctx, struct kmodshare_t *baseh)
 {
 	kmodsugar_t *base = (kmodsugar_t*)baseh;
 	kmap_free(base->packageMapNO, pack_free);
 	KFREE(baseh, sizeof(kmodsugar_t));
 }
 
-void MODSUGAR_init(CTX, kcontext_t *ctx)
+void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	kmodsugar_t *base = (kmodsugar_t*)KCALLOC(sizeof(kmodsugar_t), 1);
 	base->h.name     = "sugar";
@@ -261,13 +261,13 @@ void MODSUGAR_init(CTX, kcontext_t *ctx)
 	base->cStmt  = Konoha_addClassDef(PN_sugar, PN_sugar, NULL, &defStmt, 0);
 	base->cBlock = Konoha_addClassDef(PN_sugar, PN_sugar, NULL, &defBlock, 0);
 	base->cGamma = Konoha_addClassDef(PN_sugar, PN_sugar, NULL, &defGamma, 0);
-	base->cTokenArray = CT_p0(_ctx, CT_Array, base->cToken->cid);
+	base->cTokenArray = CT_p0(kctx, CT_Array, base->cToken->cid);
 
 	knull(base->cNameSpace);
 	knull(base->cToken);
 	knull(base->cExpr);
 	knull(base->cBlock);
-	kmodsugar_setup(_ctx, &base->h, 0);
+	kmodsugar_setup(kctx, &base->h, 0);
 
 	KINITv(base->UndefinedParseExpr,   new_SugarFunc(UndefinedParseExpr));
 	KINITv(base->UndefinedStmtTyCheck, new_SugarFunc(UndefinedStmtTyCheck));
@@ -275,7 +275,7 @@ void MODSUGAR_init(CTX, kcontext_t *ctx)
 	KINITv(base->ParseExpr_Op,   new_SugarFunc(ParseExpr_Op));
 	KINITv(base->ParseExpr_Term, new_SugarFunc(ParseExpr_Term));
 
-	defineDefaultSyntax(_ctx, KNULL(NameSpace));
+	defineDefaultSyntax(kctx, KNULL(NameSpace));
 	DBG_ASSERT(SYM_("$params") == KW_ParamsPattern);
 	DBG_ASSERT(SYM_(".") == KW_DOT);
 	DBG_ASSERT(SYM_(",") == KW_COMMA);
@@ -291,7 +291,7 @@ void MODSUGAR_init(CTX, kcontext_t *ctx)
 #define EOF (-1)
 #endif
 
-static kline_t readquote(CTX, FILE_i *fp, kline_t line, kwb_t *wb, int quote)
+static kline_t readquote(KonohaContext *kctx, FILE_i *fp, kline_t line, kwb_t *wb, int quote)
 {
 	int ch, prev = quote;
 	while((ch = PLAT fgetc_i(fp)) != EOF) {
@@ -306,7 +306,7 @@ static kline_t readquote(CTX, FILE_i *fp, kline_t line, kwb_t *wb, int quote)
 	return line;
 }
 
-static kline_t readcomment(CTX, FILE_i *fp, kline_t line, kwb_t *wb)
+static kline_t readcomment(KonohaContext *kctx, FILE_i *fp, kline_t line, kwb_t *wb)
 {
 	int ch, prev = 0, level = 1;
 	while((ch = PLAT fgetc_i(fp)) != EOF) {
@@ -321,7 +321,7 @@ static kline_t readcomment(CTX, FILE_i *fp, kline_t line, kwb_t *wb)
 	return line;
 }
 
-static kline_t readchunk(CTX, FILE_i *fp, kline_t line, kwb_t *wb)
+static kline_t readchunk(KonohaContext *kctx, FILE_i *fp, kline_t line, kwb_t *wb)
 {
 	int ch;
 	int prev = 0, isBLOCK = 0;
@@ -330,11 +330,11 @@ static kline_t readchunk(CTX, FILE_i *fp, kline_t line, kwb_t *wb)
 		if(ch == '\n') line++;
 		kwb_putc(wb, ch);  // SLOW
 		if(prev == '/' && ch == '*') {
-			line = readcomment(_ctx, fp, line, wb);
+			line = readcomment(kctx, fp, line, wb);
 			continue;
 		}
 		if(ch == '\'' || ch == '"' || ch == '`') {
-			line = readquote(_ctx, fp, line, wb, ch);
+			line = readquote(kctx, fp, line, wb, ch);
 			continue;
 		}
 		if(isBLOCK != 1 && prev == '\n' && ch == '\n') {
@@ -360,15 +360,15 @@ static int isemptychunk(const char *t, size_t len)
 	return 0;
 }
 
-static kstatus_t NameSpace_loadstream(CTX, kNameSpace *ns, FILE_i *fp, kline_t uline, kline_t pline)
+static kstatus_t NameSpace_loadstream(KonohaContext *kctx, kNameSpace *ns, FILE_i *fp, kline_t uline, kline_t pline)
 {
 	kstatus_t status = K_CONTINUE;
 	kwb_t wb;
 	char *p;
-	kwb_init(&(_ctx->stack->cwb), &wb);
+	kwb_init(&(kctx->stack->cwb), &wb);
 	while(! PLAT feof_i(fp)) {
 		kline_t chunkheadline = uline;
-		uline = readchunk(_ctx, fp, uline, &wb);
+		uline = readchunk(kctx, fp, uline, &wb);
 		const char *script = kwb_top(&wb, 1);
 		size_t len = kwb_bytesize(&wb);
 		if (len > 2 && script[0] == '#' && script[1] == '!') {
@@ -383,7 +383,7 @@ static kstatus_t NameSpace_loadstream(CTX, kNameSpace *ns, FILE_i *fp, kline_t u
 			}
 		}
 		if(isemptychunk(script, len)) {
-			status = MODSUGAR_eval(_ctx, script, /*len, */chunkheadline);
+			status = MODSUGAR_eval(kctx, script, /*len, */chunkheadline);
 		}
 		if(status != K_CONTINUE) break;
 		kwb_free(&wb);
@@ -399,7 +399,7 @@ static kstatus_t NameSpace_loadstream(CTX, kNameSpace *ns, FILE_i *fp, kline_t u
 #define PATH_MAX 1024
 #endif
 
-static kline_t uline_init(CTX, const char *path, size_t len, int line, int isreal)
+static kline_t uline_init(KonohaContext *kctx, const char *path, size_t len, int line, int isreal)
 {
 	kline_t uline = line;
 	if(isreal) {
@@ -416,18 +416,18 @@ static kline_t uline_init(CTX, const char *path, size_t len, int line, int isrea
 	return uline;
 }
 
-static kstatus_t NameSpace_loadscript(CTX, kNameSpace *ks, const char *path, size_t len, kline_t pline)
+static kstatus_t NameSpace_loadscript(KonohaContext *kctx, kNameSpace *ks, const char *path, size_t len, kline_t pline)
 {
 	kstatus_t status = K_BREAK;
 //	if(path[0] == '-' && path[1] == 0) {
 //		kline_t uline = FILEID_("<stdin>") | 1;
-//		status = NameSpace_loadstream(_ctx, ks, stdin, uline, pline);
+//		status = NameSpace_loadstream(kctx, ks, stdin, uline, pline);
 //	}
 //	else {
 		FILE_i *fp = PLAT fopen_i(path, "r");
 		if(fp != NULL) {
-			kline_t uline = uline_init(_ctx, path, len, 1, 1);
-			status = NameSpace_loadstream(_ctx, ks, fp, uline, pline);
+			kline_t uline = uline_init(kctx, path, len, 1, 1);
+			status = NameSpace_loadstream(kctx, ks, fp, uline, pline);
 			PLAT fclose_i(fp);
 		}
 		else {
@@ -437,15 +437,15 @@ static kstatus_t NameSpace_loadscript(CTX, kNameSpace *ks, const char *path, siz
 	return status;
 }
 
-kstatus_t MODSUGAR_loadscript(CTX, const char *path, size_t len, kline_t pline)
+kstatus_t MODSUGAR_loadscript(KonohaContext *kctx, const char *path, size_t len, kline_t pline)
 {
 	if (ctxsugar == NULL) {
-		kmodsugar->h.setup(_ctx, (kmodshare_t*)kmodsugar, 0/*lazy*/);
+		kmodsugar->h.setup(kctx, (kmodshare_t*)kmodsugar, 0/*lazy*/);
 	}
 	INIT_GCSTACK();
 	kNameSpace *ns = new_(NameSpace, KNULL(NameSpace));
 	PUSH_GCSTACK(ns);
-	kstatus_t result = NameSpace_loadscript(_ctx, ns, path, len, pline);
+	kstatus_t result = NameSpace_loadscript(kctx, ns, path, len, pline);
 	RESET_GCSTACK();
 	return result;
 }
@@ -471,12 +471,12 @@ static KDEFINE_PACKAGE PKGDEFNULL = {
 	.konoha_revision = 0,
 };
 
-static KDEFINE_PACKAGE *NameSpace_openGlueHandler(CTX, kNameSpace *ks, char *pathbuf, size_t bufsiz, const char *pname, kline_t pline)
+static KDEFINE_PACKAGE *NameSpace_openGlueHandler(KonohaContext *kctx, kNameSpace *ks, char *pathbuf, size_t bufsiz, const char *pname, kline_t pline)
 {
 	char *p = strrchr(pathbuf, '.');
 //	snprintf(p, bufsiz - (p  - pathbuf), "%s", K_OSDLLEXT);
 	strncpy(p, K_OSDLLEXT, bufsiz - (p  - pathbuf));
-	void *gluehdr = dlopen(pathbuf, CTX_isCompileOnly(_ctx) ? RTLD_NOW : RTLD_LAZY);  // FIXME
+	void *gluehdr = dlopen(pathbuf, KonohaContext_isCompileOnly(kctx) ? RTLD_NOW : RTLD_LAZY);  // FIXME
 	if(gluehdr != NULL) {
 		char funcbuf[80];
 		PLAT snprintf_i(funcbuf, sizeof(funcbuf), "%s_init", packname(pname));
@@ -495,7 +495,7 @@ static KDEFINE_PACKAGE *NameSpace_openGlueHandler(CTX, kNameSpace *ks, char *pat
 	return &PKGDEFNULL;
 }
 
-static kNameSpace* new_NameSpace(CTX, kpack_t packdom, kpack_t packid)
+static kNameSpace* new_NameSpace(KonohaContext *kctx, kpack_t packdom, kpack_t packid)
 {
 	struct _kNameSpace *ks = new_W(NameSpace, KNULL(NameSpace));
 	ks->packid = packid;
@@ -503,7 +503,7 @@ static kNameSpace* new_NameSpace(CTX, kpack_t packdom, kpack_t packid)
 	return (kNameSpace*)ks;
 }
 
-static kpackage_t *loadPackageNULL(CTX, kpack_t packid, kline_t pline)
+static kpackage_t *loadPackageNULL(KonohaContext *kctx, kpack_t packid, kline_t pline)
 {
 	char fbuf[256];
 	const char *path = PLAT packagepath(fbuf, sizeof(fbuf), S_text(PN_s(packid)));
@@ -511,16 +511,16 @@ static kpackage_t *loadPackageNULL(CTX, kpack_t packid, kline_t pline)
 	kpackage_t *pack = NULL;
 	if(fp != NULL) {
 		INIT_GCSTACK();
-		kNameSpace *ks = new_NameSpace(_ctx, packid, packid);
+		kNameSpace *ks = new_NameSpace(kctx, packid, packid);
 		PUSH_GCSTACK(ks);
-		kline_t uline = uline_init(_ctx, path, strlen(path), 1, 1);
-		KDEFINE_PACKAGE *packdef = NameSpace_openGlueHandler(_ctx, ks, fbuf, sizeof(fbuf), PN_t(packid), pline);
+		kline_t uline = uline_init(kctx, path, strlen(path), 1, 1);
+		KDEFINE_PACKAGE *packdef = NameSpace_openGlueHandler(kctx, ks, fbuf, sizeof(fbuf), PN_t(packid), pline);
 		if(packdef->initPackage != NULL) {
-			packdef->initPackage(_ctx, ks, 0, NULL, pline);
+			packdef->initPackage(kctx, ks, 0, NULL, pline);
 		}
-		if(NameSpace_loadstream(_ctx, ks, fp, uline, pline) == K_CONTINUE) {
+		if(NameSpace_loadstream(kctx, ks, fp, uline, pline) == K_CONTINUE) {
 			if(packdef->initPackage != NULL) {
-				packdef->setupPackage(_ctx, ks, pline);
+				packdef->setupPackage(kctx, ks, pline);
 			}
 			pack = (kpackage_t*)KCALLOC(sizeof(kpackage_t), 1);
 			pack->packid = packid;
@@ -540,24 +540,24 @@ static kpackage_t *loadPackageNULL(CTX, kpack_t packid, kline_t pline)
 	return NULL;
 }
 
-static kpackage_t *getPackageNULL(CTX, kpack_t packid, kline_t pline)
+static kpackage_t *getPackageNULL(KonohaContext *kctx, kpack_t packid, kline_t pline)
 {
-	kpackage_t *pack = (kpackage_t*)map_getu(_ctx, kmodsugar->packageMapNO, packid, uNULL);
+	kpackage_t *pack = (kpackage_t*)map_getu(kctx, kmodsugar->packageMapNO, packid, uNULL);
 	if(pack != NULL) return pack;
-	pack = loadPackageNULL(_ctx, packid, pline);
+	pack = loadPackageNULL(kctx, packid, pline);
 	if(pack != NULL) {
-		map_addu(_ctx, kmodsugar->packageMapNO, packid, (uintptr_t)pack);
+		map_addu(kctx, kmodsugar->packageMapNO, packid, (uintptr_t)pack);
 	}
 	return pack;
 }
 
-static void NameSpace_merge(CTX, kNameSpace *ks, kNameSpace *target, kline_t pline)
+static void NameSpace_merge(KonohaContext *kctx, kNameSpace *ks, kNameSpace *target, kline_t pline)
 {
 	if(target->packid != PN_konoha) {
-		NameSpace_importClassName(_ctx, ks, target->packid, pline);
+		NameSpace_importClassName(kctx, ks, target->packid, pline);
 	}
 	if(target->cl.bytesize > 0) {
-		NameSpace_mergeConstData(_ctx, (struct _kNameSpace*)ks, target->cl.kvs, target->cl.bytesize/sizeof(kvs_t), pline);
+		NameSpace_mergeConstData(kctx, (struct _kNameSpace*)ks, target->cl.kvs, target->cl.bytesize/sizeof(kvs_t), pline);
 	}
 	size_t i;
 	for(i = 0; i < kArray_size(target->methods); i++) {
@@ -568,24 +568,24 @@ static void NameSpace_merge(CTX, kNameSpace *ks, kNameSpace *target, kline_t pli
 	}
 }
 
-static kbool_t NameSpace_importPackage(CTX, kNameSpace *ks, const char *name, kline_t pline)
+static kbool_t NameSpace_importPackage(KonohaContext *kctx, kNameSpace *ks, const char *name, kline_t pline)
 {
 	kbool_t res = 0;
 	kpack_t packid = kpack(name, strlen(name), 0, _NEWID);
-	kpackage_t *pack = getPackageNULL(_ctx, packid, pline);
+	kpackage_t *pack = getPackageNULL(kctx, packid, pline);
 	if(pack != NULL) {
 		res = 1;
 		if(ks != NULL) {
-			NameSpace_merge(_ctx, ks, pack->ks, pline);
+			NameSpace_merge(kctx, ks, pack->ks, pline);
 			if(pack->packdef->initNameSpace != NULL) {
-				res = pack->packdef->initNameSpace(_ctx, ks, pline);
+				res = pack->packdef->initNameSpace(kctx, ks, pline);
 			}
 			if(res && pack->export_script != 0) {
 				kString *fname = SS_s(pack->export_script);
 				kline_t uline = pack->export_script | (kline_t)1;
 				FILE_i *fp = PLAT fopen_i(S_text(fname), "r");
 				if(fp != NULL) {
-					res = (NameSpace_loadstream(_ctx, ks, fp, uline, pline) == K_CONTINUE);
+					res = (NameSpace_loadstream(kctx, ks, fp, uline, pline) == K_CONTINUE);
 					PLAT fclose_i(fp);
 				}
 				else {
@@ -594,7 +594,7 @@ static kbool_t NameSpace_importPackage(CTX, kNameSpace *ks, const char *name, kl
 				}
 			}
 			if(res && pack->packdef->setupNameSpace != NULL) {
-				res = pack->packdef->setupNameSpace(_ctx, ks, pline);
+				res = pack->packdef->setupNameSpace(kctx, ks, pline);
 			}
 		}
 	}
@@ -602,19 +602,19 @@ static kbool_t NameSpace_importPackage(CTX, kNameSpace *ks, const char *name, kl
 }
 
 // boolean NameSpace.importPackage(String pkgname);
-static KMETHOD NameSpace_importPackage_(CTX, ksfp_t *sfp _RIX)
+static KMETHOD NameSpace_importPackage_(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
-	RETURNb_(NameSpace_importPackage(_ctx, sfp[0].ks, S_text(sfp[1].s), sfp[K_RTNIDX].uline));
+	RETURNb_(NameSpace_importPackage(kctx, sfp[0].ks, S_text(sfp[1].s), sfp[K_RTNIDX].uline));
 }
 
 // boolean NameSpace.loadScript(String path);
-static KMETHOD NameSpace_loadScript_(CTX, ksfp_t *sfp _RIX)
+static KMETHOD NameSpace_loadScript_(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kline_t pline = sfp[K_RTNIDX].uline;
 	FILE_i *fp = PLAT fopen_i(S_text(sfp[1].s), "r");
 	if(fp != NULL) {
-		kline_t uline = uline_init(_ctx, S_text(sfp[1].s), S_size(sfp[1].s), 1, 1);
-		kstatus_t status = NameSpace_loadstream(_ctx, sfp[0].ks, fp, uline, 0);
+		kline_t uline = uline_init(kctx, S_text(sfp[1].s), S_size(sfp[1].s), 1, 1);
+		kstatus_t status = NameSpace_loadstream(kctx, sfp[0].ks, fp, uline, 0);
 		PLAT fclose_i(fp);
 		RETURNb_(status == K_CONTINUE);
 	}
@@ -630,7 +630,7 @@ static KMETHOD NameSpace_loadScript_(CTX, ksfp_t *sfp _RIX)
 #define TY_NameSpace  (CT_NameSpace)->cid
 KDEFINE_PACKAGE* konoha_init(void);
 
-void MODSUGAR_loadMethod(CTX)
+void MODSUGAR_loadMethod(KonohaContext *kctx)
 {
 	KDEFINE_METHOD MethodData[] = {
 //		_Public, _F(NameSpace_importPackage_), TY_Boolean, TY_NameSpace, MN_("importPackage"), 1, TY_String, FN_pkgname,
@@ -642,10 +642,10 @@ void MODSUGAR_loadMethod(CTX)
 	KSET_KLIB2(importPackage, NameSpace_importPackage, 0);
 //#ifdef WITH_ECLIPSE
 //	KDEFINE_PACKAGE *d = konoha_init();
-//	d->initPackage(_ctx, KNULL(NameSpace), 0, NULL, 0);
-//	d->setupPackage(_ctx, KNULL(NameSpace), 0);
-//	d->initNameSpace(_ctx, KNULL(NameSpace), 0);
-//	d->setupNameSpace(_ctx, KNULL(NameSpace), 0);
+//	d->initPackage(kctx, KNULL(NameSpace), 0, NULL, 0);
+//	d->setupPackage(kctx, KNULL(NameSpace), 0);
+//	d->initNameSpace(kctx, KNULL(NameSpace), 0);
+//	d->setupNameSpace(kctx, KNULL(NameSpace), 0);
 //#endif
 }
 

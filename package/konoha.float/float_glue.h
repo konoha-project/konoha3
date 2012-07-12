@@ -29,26 +29,26 @@
 #include "ext/mt19937ar.h"
 
 // Int
-static void Float_init(CTX, kObject *o, void *conf)
+static void Float_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct _kNumber *n = (struct _kNumber*)o;  // kFloat has the same structure
 	n->ndata = (uintptr_t)conf;  // conf is unboxed data
 }
 
-static void Float_p(CTX, ksfp_t *sfp, int pos, kwb_t *wb, int level)
+static void Float_p(KonohaContext *kctx, ksfp_t *sfp, int pos, kwb_t *wb, int level)
 {
 	kwb_printf(wb, KFLOAT_FMT, sfp[pos].fvalue);
 }
 
-static void kmodfloat_setup(CTX, struct kmodshare_t *def, int newctx)
+static void kmodfloat_setup(KonohaContext *kctx, struct kmodshare_t *def, int newctx)
 {
 }
 
-static void kmodfloat_reftrace(CTX, struct kmodshare_t *baseh)
+static void kmodfloat_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
 {
 }
 
-static void kmodfloat_free(CTX, struct kmodshare_t *baseh)
+static void kmodfloat_free(KonohaContext *kctx, struct kmodshare_t *baseh)
 {
 	KFREE(baseh, sizeof(kmodfloat_t));
 }
@@ -56,25 +56,25 @@ static void kmodfloat_free(CTX, struct kmodshare_t *baseh)
 // --------------------------------------------------------------------------
 
 /* float + float */
-static KMETHOD Float_opADD(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Float_opADD(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNf_(sfp[0].fvalue + sfp[1].fvalue);
 }
 
 /* float - float */
-static KMETHOD Float_opSUB(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Float_opSUB(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNf_(sfp[0].fvalue - sfp[1].fvalue);
 }
 
 /* float * float */
-static KMETHOD Float_opMUL(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Float_opMUL(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNf_(sfp[0].fvalue * sfp[1].fvalue);
 }
 
 /* float / float */
-static KMETHOD Float_opDIV(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Float_opDIV(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kfloat_t n = sfp[1].fvalue;
 	if(unlikely(n == 0.0)) {
@@ -84,55 +84,55 @@ static KMETHOD Float_opDIV(CTX, ksfp_t *sfp _RIX)
 }
 
 /* float == float */
-static KMETHOD Float_opEQ(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Float_opEQ(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNb_(sfp[0].fvalue == sfp[1].fvalue);
 }
 
 /* float != float */
-static KMETHOD Float_opNEQ(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Float_opNEQ(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNb_(sfp[0].fvalue != sfp[1].fvalue);
 }
 
 /* float < float */
-static KMETHOD Float_opLT(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Float_opLT(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNb_(sfp[0].fvalue < sfp[1].fvalue);
 }
 
 /* float <= float */
-static KMETHOD Float_opLTE(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Float_opLTE(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNb_(sfp[0].fvalue <= sfp[1].fvalue);
 }
 
 /* float > float */
-static KMETHOD Float_opGT(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Float_opGT(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNb_(sfp[0].fvalue > sfp[1].fvalue);
 }
 
 /* float >= float */
-static KMETHOD Float_opGTE(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Float_opGTE(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNb_(sfp[0].fvalue >= sfp[1].fvalue);
 }
 
 /* float to int */
-static KMETHOD Float_toInt(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Float_toInt(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNi_((kint_t)sfp[0].fvalue);
 }
 
 /* float >= float */
-static KMETHOD Int_toFloat(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Int_toFloat(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNf_((kfloat_t)sfp[0].ivalue);
 }
 
 /* float to String */
-static KMETHOD Float_toString(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Float_toString(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	char buf[40];
 	PLAT snprintf_i(buf, sizeof(buf), KFLOAT_FMT, sfp[0].fvalue);
@@ -140,13 +140,13 @@ static KMETHOD Float_toString(CTX, ksfp_t *sfp _RIX)
 }
 
 /* String to float */
-static KMETHOD String_toFloat(CTX, ksfp_t *sfp _RIX)
+static KMETHOD String_toFloat(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNf_((kfloat_t)strtod(S_text(sfp[0].s), NULL));
 }
 
 //## @Const method Int Int.opMINUS();
-static KMETHOD Float_opMINUS(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Float_opMINUS(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNf_(-(sfp[0].fvalue));
 }
@@ -164,7 +164,7 @@ static kfloat_t kfloat_rand(void)
 #endif
 }
 
-static KMETHOD Float_random(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Float_random(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNf_(kfloat_rand());
 }
@@ -178,7 +178,7 @@ static KMETHOD Float_random(CTX, ksfp_t *sfp _RIX)
 #define _Static   kMethod_Static
 #define _F(F)   (intptr_t)(F)
 
-static	kbool_t float_initPackage(CTX, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static	kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
 {
 	kmodfloat_t *base = (kmodfloat_t*)KCALLOC(sizeof(kmodfloat_t), 1);
 	base->h.name     = "float";
@@ -223,14 +223,14 @@ static	kbool_t float_initPackage(CTX, kNameSpace *ks, int argc, const char**args
 	return true;
 }
 
-static kbool_t float_setupPackage(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t float_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
 //----------------------------------------------------------------------------
 
-static KMETHOD ExprTyCheck_Float(CTX, ksfp_t *sfp _RIX)
+static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
@@ -239,7 +239,7 @@ static KMETHOD ExprTyCheck_Float(CTX, ksfp_t *sfp _RIX)
 	RETURN_(kExpr_setNConstValue(expr, TY_Float, sfp[4].ndata));
 }
 
-static kbool_t float_initNameSpace(CTX,  kNameSpace *ks, kline_t pline)
+static kbool_t float_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
@@ -248,11 +248,11 @@ static kbool_t float_initNameSpace(CTX,  kNameSpace *ks, kline_t pline)
 		{ .kw = SYM_("$FLOAT"), ExprTyCheck_(Float), },
 		{ .kw = KW_END, },
 	};
-	SUGAR NameSpace_defineSyntax(_ctx, ks, SYNTAX);
+	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	return true;
 }
 
-static kbool_t float_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t float_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }

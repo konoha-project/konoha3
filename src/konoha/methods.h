@@ -26,48 +26,48 @@
 extern "C" {
 #endif
 /* String */
-static KMETHOD Object_toString(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Object_toString(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kwb_t wb;
-	kwb_init(&(_ctx->stack->cwb), &wb);
-	O_ct(sfp[0].o)->p(_ctx, sfp, 0, &wb, 0);
+	kwb_init(&(kctx->stack->cwb), &wb);
+	O_ct(sfp[0].o)->p(kctx, sfp, 0, &wb, 0);
 	kString* s = new_kString(kwb_top(&wb, 1), kwb_bytesize(&wb), 0);
 	kwb_free(&wb);
 	RETURN_(s);
 }
 
 //## @Const method Boolean Boolean.opNOT();
-static KMETHOD Boolean_opNOT(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Boolean_opNOT(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNb_(!sfp[0].bvalue);
 }
 
 //## @Const method Int Int.opMINUS();
-static KMETHOD Int_opMINUS(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Int_opMINUS(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNi_(-(sfp[0].ivalue));
 }
 
 //## @Const method Int Int.opADD(Int x);
-static KMETHOD Int_opADD(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Int_opADD(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNi_(sfp[0].ivalue + sfp[1].ivalue);
 }
 
 //## @Const method Int Int.opSUB(Int x);
-static KMETHOD Int_opSUB(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Int_opSUB(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNi_(sfp[0].ivalue - sfp[1].ivalue);
 }
 
 //## @Const method Int Int.opMUL(Int x);
-static KMETHOD Int_opMUL(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Int_opMUL(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNi_(sfp[0].ivalue * sfp[1].ivalue);
 }
 
 //## @Const method Int Int.opDIV(Int x);
-static KMETHOD Int_opDIV(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Int_opDIV(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kint_t n = sfp[1].ivalue;
 	if(unlikely(n == 0)) {
@@ -77,7 +77,7 @@ static KMETHOD Int_opDIV(CTX, ksfp_t *sfp _RIX)
 }
 
 //## @Const method Int Int.opMOD(Int x);
-static KMETHOD Int_opMOD(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Int_opMOD(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kint_t n = sfp[1].ivalue;
 	if(unlikely(n == 0)) {
@@ -87,43 +87,43 @@ static KMETHOD Int_opMOD(CTX, ksfp_t *sfp _RIX)
 }
 
 //## @Const method Boolean Int.opEQ(Int x);
-static KMETHOD Int_opEQ(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Int_opEQ(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNb_(sfp[0].ivalue == sfp[1].ivalue);
 }
 
 //## @Const method Boolean Int.opNEQ(Int x);
-static KMETHOD Int_opNEQ(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Int_opNEQ(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNb_(sfp[0].ivalue != sfp[1].ivalue);
 }
 
 //## @Const method Boolean Int.opLT(Int x);
-static KMETHOD Int_opLT(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Int_opLT(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNb_(sfp[0].ivalue < sfp[1].ivalue);
 }
 
 //## @Const method Boolean Int.opLTE(Int x);
-static KMETHOD Int_opLTE(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Int_opLTE(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNb_(sfp[0].ivalue <= sfp[1].ivalue);
 }
 
 //## @Const method Boolean Int.opGT(Int x);
-static KMETHOD Int_opGT(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Int_opGT(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNb_(sfp[0].ivalue > sfp[1].ivalue);
 }
 
 //## @Const method Boolean Int.opGTE(Int x);
-static KMETHOD Int_opGTE(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Int_opGTE(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNb_(sfp[0].ivalue >= sfp[1].ivalue);
 }
 
 //## @Const method String Int.toString();
-static KMETHOD Int_toString(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Int_toString(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	char buf[40];
 	PLAT snprintf_i(buf, sizeof(buf), "%ld", (intptr_t)sfp[0].ivalue);
@@ -131,13 +131,13 @@ static KMETHOD Int_toString(CTX, ksfp_t *sfp _RIX)
 }
 
 //## @Const method String String.toInt();
-static KMETHOD String_toInt(CTX, ksfp_t *sfp _RIX)
+static KMETHOD String_toInt(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNi_((kint_t)strtoll(S_text(sfp[0].s), NULL, 10));
 }
 
 //## @Const @Immutable method String String.opAdd(@Coercion String x);
-static KMETHOD String_opADD(CTX, ksfp_t *sfp _RIX)
+static KMETHOD String_opADD(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kString *lhs = sfp[0].s, *rhs = sfp[1].s;
 	int spol = (S_isASCII(lhs) && S_isASCII(rhs)) ? SPOL_ASCII : SPOL_UTF8;
@@ -149,7 +149,7 @@ static KMETHOD String_opADD(CTX, ksfp_t *sfp _RIX)
 
 //## @Const method Boolean String.equals(String s);
 //## @Const method Boolean String.opEQ(String s);
-static KMETHOD String_opEQ(CTX, ksfp_t *sfp _RIX)
+static KMETHOD String_opEQ(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kString *s0 = sfp[0].s;
 	kString *s1 = sfp[1].s;
@@ -159,7 +159,7 @@ static KMETHOD String_opEQ(CTX, ksfp_t *sfp _RIX)
 	RETURNb_(0);
 }
 
-static KMETHOD String_opNEQ(CTX, ksfp_t *sfp _RIX)
+static KMETHOD String_opNEQ(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kString *s0 = sfp[0].s;
 	kString *s1 = sfp[1].s;
@@ -170,7 +170,7 @@ static KMETHOD String_opNEQ(CTX, ksfp_t *sfp _RIX)
 }
 
 //## This Func.new(Object self, Method mtd);
-static KMETHOD Func_new(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Func_new(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	struct _kFunc *fo = (struct _kFunc*)sfp[0].fo;
 	KSETv(fo->self, sfp[1].o);
@@ -179,7 +179,7 @@ static KMETHOD Func_new(CTX, ksfp_t *sfp _RIX)
 }
 
 //## @Hidden T0 Func.invoke();
-static KMETHOD Func_invoke(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Func_invoke(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kFunc* fo = sfp[0].fo;
 	DBG_P("fo=%s", CT_t(O_ct(fo)));
@@ -193,7 +193,7 @@ static KMETHOD Func_invoke(CTX, ksfp_t *sfp _RIX)
 int konoha_AssertResult = 0;
 
 //## @Const @Static void System.assert(boolean x)
-static KMETHOD System_assert(CTX, ksfp_t *sfp _RIX)
+static KMETHOD System_assert(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kbool_t cond = sfp[1].bvalue;
 	if (cond == false) {
@@ -204,16 +204,16 @@ static KMETHOD System_assert(CTX, ksfp_t *sfp _RIX)
 }
 
 //## method void System.p(@Coercion String msg);
-static KMETHOD System_p(CTX, ksfp_t *sfp _RIX)
+static KMETHOD System_p(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kline_t uline = sfp[K_RTNIDX].uline;
 	kreportf(PRINT_, uline, "%s", S_text(sfp[1].s));
 }
 
 //## method void System.gc();
-static KMETHOD System_gc(CTX, ksfp_t *sfp _RIX)
+static KMETHOD System_gc(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
-	MODGC_gc_invoke(_ctx, 1/* needsCStackTrace */);
+	MODGC_gc_invoke(kctx, 1/* needsCStackTrace */);
 }
 
 #ifdef __cplusplus

@@ -26,7 +26,7 @@
 #include <minikonoha/sugar.h>
 #include <stdio.h>
 
-static KMETHOD StmtTyCheck_import(CTX, ksfp_t *sfp _RIX)
+static KMETHOD StmtTyCheck_import(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	USING_SUGAR;
 	int ret = false;
@@ -36,7 +36,7 @@ static KMETHOD StmtTyCheck_import(CTX, ksfp_t *sfp _RIX)
 		RETURNb_(false);
 	}
 	kwb_t wb;
-	kwb_init(&(_ctx->stack->cwb), &wb);
+	kwb_init(&(kctx->stack->cwb), &wb);
 	int i = 0;
 	if (i + 2 < kArray_size(tls)) {
 		for (; i < kArray_size(tls)-1; i+=2) {
@@ -57,10 +57,10 @@ static KMETHOD StmtTyCheck_import(CTX, ksfp_t *sfp _RIX)
 	struct _kToken *tkImport = new_W(Token, 0);
 	kExpr *ePKG = new_ConstValue(TY_String, pkgname);
 	tkImport->kw = MN_("import");
-	kExpr *expr = SUGAR new_ConsExpr(_ctx, syn1, 3,
+	kExpr *expr = SUGAR new_ConsExpr(kctx, syn1, 3,
 			tkImport, new_ConstValue(O_cid(ks), ks), ePKG);
 	kObject_setObject(stmt, KW_ExprPattern, expr);
-	ret = SUGAR Stmt_tyCheckExpr(_ctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0);
+	ret = SUGAR Stmt_tyCheckExpr(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0);
 	if (ret) {
 		kStmt_typed(stmt, EXPR);
 	}
@@ -69,28 +69,28 @@ static KMETHOD StmtTyCheck_import(CTX, ksfp_t *sfp _RIX)
 
 // --------------------------------------------------------------------------
 
-static kbool_t import_initPackage(CTX, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static kbool_t import_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t import_setupPackage(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t import_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t import_initNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t import_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .kw = SYM_("import"), .rule = "\"import\" $toks", TopStmtTyCheck_(import)},
 		{ .kw = KW_END, },
 	};
-	SUGAR NameSpace_defineSyntax(_ctx, ks, SYNTAX);
+	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	return true;
 }
 
-static kbool_t import_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t import_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }

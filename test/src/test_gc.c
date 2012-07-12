@@ -40,18 +40,18 @@ static int __init__  = 0;
 static int __trace__ = -1;
 static int __free__  = 0;
 
-static void Dummy_init(CTX, kObject *o, void *conf)
+static void Dummy_init(KonohaContext *kctx, kObject *o, void *conf)
 {
     assert((uintptr_t)conf == 0xdeadbeaf);
     ((kDummy*)o)->x = __init__++;
 }
 
-static void Dummy_reftrace(CTX, kObject *o)
+static void Dummy_reftrace(KonohaContext *kctx, kObject *o)
 {
     __trace__++;
 }
 
-static void Dummy_free(CTX, kObject *o)
+static void Dummy_free(KonohaContext *kctx, kObject *o)
 {
     __free__++;
 }
@@ -66,7 +66,7 @@ static KDEFINE_CLASS DummyDef = {
     .free     = Dummy_free
 };
 
-void test_gc(CTX)
+void test_gc(KonohaContext *kctx)
 {
 #define CT_Dummy ct
     int i, j;
@@ -79,7 +79,7 @@ void test_gc(CTX)
         }
         assert(__init__ == (i+1) * 100);
         assert(__trace__ == -1);
-        MODGC_gc_invoke(_ctx, 0);
+        MODGC_gc_invoke(kctx, 0);
     }
 
     int small_object_count = __init__;
@@ -91,14 +91,14 @@ void test_gc(CTX)
         }
         assert(__init__ == (i+1) * 1000 + small_object_count);
         assert(__trace__ == -1);
-        MODGC_gc_invoke(_ctx, 0);
+        MODGC_gc_invoke(kctx, 0);
     }
 }
 
 int main(int argc, const char *argv[])
 {
     int ret = 0;
-    konoha_t konoha = konoha_open((const kplatform_t*)&plat);
+    KonohaContext* konoha = konoha_open((const kplatform_t*)&plat);
     test_gc(konoha);
     konoha_close(konoha);
     assert(__free__ == __init__);

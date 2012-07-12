@@ -27,24 +27,24 @@
 #include "minikonoha/gc.h"
 #include "test_konoha.h"
 
-void test_Kwb(CTX)
+void test_Kwb(KonohaContext *kctx)
 {
     karray_t a;
     kwb_t wb;
     /* if we use karray as kwb, struct_size should be sizeof(char) */
-    _ctx->lib2->Karray_init(_ctx, &a, 4);
-    _ctx->lib2->Kwb_init(&a, &wb);
-    _ctx->lib2->Kwb_write(_ctx, &wb, "abcd", 4);
-    _ctx->lib2->Kwb_write(_ctx, &wb, "abcd", 4);
-    const char *data = _ctx->lib2->Kwb_top(_ctx, &wb, 1);
+    kctx->lib2->Karray_init(kctx, &a, 4);
+    kctx->lib2->Kwb_init(&a, &wb);
+    kctx->lib2->Kwb_write(kctx, &wb, "abcd", 4);
+    kctx->lib2->Kwb_write(kctx, &wb, "abcd", 4);
+    const char *data = kctx->lib2->Kwb_top(kctx, &wb, 1);
     assert(strcmp(data, "abcdabcd") == 0);
-    _ctx->lib2->Kwb_free(&wb);
-    _ctx->lib2->Karray_free(_ctx, &a);
+    kctx->lib2->Kwb_free(&wb);
+    kctx->lib2->Karray_free(kctx, &a);
 }
 
 int main(int argc, const char *argv[])
 {
-    konoha_t konoha = konoha_open((const kplatform_t*)&plat);
+    KonohaContext* konoha = konoha_open((const kplatform_t*)&plat);
     int i;
     for (i = 0; i < 100; ++i) {
         test_Kwb(konoha);

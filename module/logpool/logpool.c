@@ -39,10 +39,10 @@ typedef struct kmodlogpool_t {
 	char trace[16];
 } kmodlogpool_t;
 
-#define kmodlogpool ((kmodlogpool_t*)_ctx->modshare[MOD_logger])
-#define ctxlogpool  ((ctxlogpool_t*)_ctx->modlocal[MOD_logger])
+#define kmodlogpool ((kmodlogpool_t*)kctx->modshare[MOD_logger])
+#define ctxlogpool  ((ctxlogpool_t*)kctx->modlocal[MOD_logger])
 
-static uintptr_t logpool_Ktrace(CTX, klogconf_t *logconf, ...)
+static uintptr_t logpool_Ktrace(KonohaContext *kctx, klogconf_t *logconf, ...)
 {
 	if(TFLAG_is(int, logconf->policy, LOGPOL_INIT)) {
 		TFLAG_set(int,logconf->policy,LOGPOL_INIT,0);
@@ -54,18 +54,18 @@ static uintptr_t logpool_Ktrace(CTX, klogconf_t *logconf, ...)
 	return 0;// FIXME reference to log
 }
 
-static void ctxlogpool_reftrace(CTX, struct kmodlocal_t *baseh)
+static void ctxlogpool_reftrace(KonohaContext *kctx, struct kmodlocal_t *baseh)
 {
 }
 
-static void ctxlogpool_free(CTX, struct kmodlocal_t *baseh)
+static void ctxlogpool_free(KonohaContext *kctx, struct kmodlocal_t *baseh)
 {
 	ctxlogpool_t *base = (ctxlogpool_t*)baseh;
 	logpool_close(base->logpool);
 	KFREE(base, sizeof(ctxlogpool_t));
 }
 
-static void kmodlogpool_setup(CTX, struct kmodshare_t *def, int newctx)
+static void kmodlogpool_setup(KonohaContext *kctx, struct kmodshare_t *def, int newctx)
 {
 	if(newctx) {
 #define DEFAULT_SERVER "127.0.0.1"
@@ -85,17 +85,17 @@ static void kmodlogpool_setup(CTX, struct kmodshare_t *def, int newctx)
 		base->h.reftrace = ctxlogpool_reftrace;
 		base->h.free     = ctxlogpool_free;
 		base->logpool    = logpool_open_trace(NULL, host, port);
-		_ctx->modlocal[MOD_logger] = (kmodlocal_t*)base;
+		kctx->modlocal[MOD_logger] = (kmodlocal_t*)base;
 	}
 }
 
-static void kmodlogpool_reftrace(CTX, struct kmodshare_t *baseh)
+static void kmodlogpool_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
 {
 }
 
-void MODLOGGER_free(CTX, kcontext_t *ctx)
+void MODLOGGER_free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
-	if(IS_ROOTCTX(ctx)) {
+	if(IS_RootKonohaContext(ctx)) {
 		logpool_close(ctxlogpool->logpool);
 		free(ctxlogpool/*, sizeof(ctxlogpool_t)*/);
 		free(kmodlogpool/*, sizeof(kmodshare_t)*/);
@@ -103,7 +103,7 @@ void MODLOGGER_free(CTX, kcontext_t *ctx)
 	}
 }
 
-void MODLOGGER_init(CTX, kcontext_t *ctx)
+void MODLOGGER_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	logpool_global_init(LOGPOOL_TRACE);
 	kmodlogpool_t *base = (kmodlogpool_t*)calloc(sizeof(kmodlogpool_t), 1);
@@ -121,10 +121,10 @@ void MODLOGGER_init(CTX, kcontext_t *ctx)
 		ch = t % 36;
 		base->trace[i] = (ch < 10) ? '0' + ch : 'A' + (ch - 10);
 	}
-	if (IS_ROOTCTX(ctx)) {
-		kmodlogpool_setup(_ctx, (kmodshare_t*)base, 1);
+	if (IS_RootKonohaContext(ctx)) {
+		kmodlogpool_setup(kctx, (kmodshare_t*)base, 1);
 	}
 	Konoha_setModule(MOD_logger, (kmodshare_t*)base, 0);
-	((struct _klib2*)_ctx->lib2)->Ktrace = logpool_Ktrace;
+	((struct _klib2*)kctx->lib2)->Ktrace = logpool_Ktrace;
 }
 

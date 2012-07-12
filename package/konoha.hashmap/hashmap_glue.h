@@ -34,14 +34,14 @@ struct _kHashMap {
 
 /* ------------------------------------------------------------------------ */
 
-static void HashMap_init(CTX, kObject *o, void *conf)
+static void HashMap_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct _kHashMap *map = (struct _kHashMap *)o;
 	map->map = kmap_init(4);
-	map->map = _ctx->lib2->Kmap_init(_ctx, 4);
+	map->map = kctx->lib2->Kmap_init(kctx, 4);
 }
 
-static void HashMap_free(CTX, kObject *o)
+static void HashMap_free(KonohaContext *kctx, kObject *o)
 {
 	struct _kHashMap *map = (struct _kHashMap *)o;
 	if (map->map != NULL) {
@@ -49,7 +49,7 @@ static void HashMap_free(CTX, kObject *o)
 	}
 }
 
-static void HashMap_p(CTX, ksfp_t *sfp, int pos, kwb_t *wb, int level)
+static void HashMap_p(KonohaContext *kctx, ksfp_t *sfp, int pos, kwb_t *wb, int level)
 {
 	// TODO
 }
@@ -57,7 +57,7 @@ static void HashMap_p(CTX, ksfp_t *sfp, int pos, kwb_t *wb, int level)
 #include <minikonoha/klib.h>
 /* ------------------------------------------------------------------------ */
 
-static KMETHOD HashMap_get(CTX, ksfp_t *sfp _RIX)
+static KMETHOD HashMap_get(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	struct _kHashMap *m = (struct _kHashMap *)sfp[0].o;
 	kmap_t *map = m->map;
@@ -75,7 +75,7 @@ static KMETHOD HashMap_get(CTX, ksfp_t *sfp _RIX)
 	}
 }
 
-static KMETHOD HashMap_set(CTX, ksfp_t *sfp _RIX)
+static KMETHOD HashMap_set(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	struct _kHashMap *m = (struct _kHashMap *)sfp[0].o;
 	kmap_t *map = m->map;
@@ -96,7 +96,7 @@ static KMETHOD HashMap_set(CTX, ksfp_t *sfp _RIX)
 	RETURNvoid_();
 }
 
-static KMETHOD HashMap_new(CTX, ksfp_t *sfp _RIX)
+static KMETHOD HashMap_new(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURN_(new_kObject(O_ct(sfp[K_RTNIDX].o), NULL));
 }
@@ -110,7 +110,7 @@ static KMETHOD HashMap_new(CTX, ksfp_t *sfp _RIX)
 
 #define CT_HashMap cHashMap
 #define TY_HashMap cHashMap->cid
-static	kbool_t hashmap_initPackage(CTX, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static	kbool_t hashmap_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
 {
 	KDEFINE_CLASS defHashMap = {
 		STRUCTNAME(HashMap),
@@ -132,14 +132,14 @@ static	kbool_t hashmap_initPackage(CTX, kNameSpace *ks, int argc, const char**ar
 	return true;
 }
 
-static kbool_t hashmap_setupPackage(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t hashmap_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
 //----------------------------------------------------------------------------
 
-static kbool_t hashmap_initNameSpace(CTX,  kNameSpace *ks, kline_t pline)
+static kbool_t hashmap_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
 {
 	// TODO: map literal
 	USING_SUGAR;
@@ -147,11 +147,11 @@ static kbool_t hashmap_initNameSpace(CTX,  kNameSpace *ks, kline_t pline)
 
 			{ .kw = KW_END, },
 	};
-	SUGAR NameSpace_defineSyntax(_ctx, ks, SYNTAX);
+	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	return true;
 }
 
-static kbool_t hashmap_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t hashmap_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }

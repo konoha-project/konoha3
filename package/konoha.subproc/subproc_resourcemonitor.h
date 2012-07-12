@@ -45,13 +45,13 @@ enum e_resource{
 
 #define SUBPROC_RESOURCEMON_INSTANCE subproc_resource_mon_t rmon
 
-#define INIT_RESOURCE_MONITOR(spd) init_resourcemonitor(_ctx, &(spd->rmon))
-#define SETUP_RESOURCE_MONITOR(spd) setup_resourcemonitor(_ctx, &(spd->rmon))
-#define CLEANUP_RESOURCE_MONITOR(spd) cleanup_resourcemonitor(_ctx, &(spd->rmon))
-#define SETUP_RESOURCE_MONITOR_FOR_CHILD(spd) setup_resourcemonitor_for_chlid(_ctx, &(spd->rmon))
-#define ATTACH_RESOURCE_MONITOR_FOR_CHILD(spd, pid) attach_resourcemonitor_for_child(_ctx, &(spd->rmon), pid)
+#define INIT_RESOURCE_MONITOR(spd) init_resourcemonitor(kctx, &(spd->rmon))
+#define SETUP_RESOURCE_MONITOR(spd) setup_resourcemonitor(kctx, &(spd->rmon))
+#define CLEANUP_RESOURCE_MONITOR(spd) cleanup_resourcemonitor(kctx, &(spd->rmon))
+#define SETUP_RESOURCE_MONITOR_FOR_CHILD(spd) setup_resourcemonitor_for_chlid(kctx, &(spd->rmon))
+#define ATTACH_RESOURCE_MONITOR_FOR_CHILD(spd, pid) attach_resourcemonitor_for_child(kctx, &(spd->rmon), pid)
 
-#define FETCH_MEM_FROM_RESOURCE_MONITOR(spd) fetch_resourcemonitor_about(_ctx, &(spd->rmon), R_MEMORY)
+#define FETCH_MEM_FROM_RESOURCE_MONITOR(spd) fetch_resourcemonitor_about(kctx, &(spd->rmon), R_MEMORY)
 
  #if defined(__APPLE__)
  #include "subproc_resourcemonitor_mac.h"

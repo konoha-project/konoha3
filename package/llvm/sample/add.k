@@ -224,7 +224,7 @@ void constructKonohaTypes(Module m) {
 	ctxTy = StructType.get(fields, false);
 	ctxPtrTy = PointerType.get(ctxTy);
 	m.addTypeName("context", ctxTy);
-	m.addTypeName("CTX", ctxPtrTy);
+	m.addTypeName("KonohaContext *kctx", ctxPtrTy);
 	ktype["ctxTy"] = ctxPtrTy;
 
 	Type[] argsTy = [];

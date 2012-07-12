@@ -90,7 +90,7 @@ static void StringBase_unsetFlag(StringBase *s, uint32_t mask)
 	s->h.magicflag ^= mask;
 }
 
-static StringBase *new_StringBase(CTX, uint32_t mask)
+static StringBase *new_StringBase(KonohaContext *kctx, uint32_t mask)
 {
 	StringBase *s = (StringBase *) new_(String, 0);
 	StringBase_unsetFlag(s, MASK_INLINE);
@@ -98,7 +98,7 @@ static StringBase *new_StringBase(CTX, uint32_t mask)
 	return s;
 }
 
-static StringBase *InlineString_new(CTX, StringBase *base, const char *text, size_t len)
+static StringBase *InlineString_new(KonohaContext *kctx, StringBase *base, const char *text, size_t len)
 {
 	size_t i;
 	InlineString *s = (InlineString *) base;
@@ -113,7 +113,7 @@ static StringBase *InlineString_new(CTX, StringBase *base, const char *text, siz
 	return base;
 }
 
-static StringBase *ExternalString_new(CTX, StringBase *base,
+static StringBase *ExternalString_new(KonohaContext *kctx, StringBase *base,
 		const char *text, size_t len)
 {
 	ExternalString *s = (ExternalString *) base;
@@ -123,7 +123,7 @@ static StringBase *ExternalString_new(CTX, StringBase *base,
 	return base;
 }
 
-static StringBase *LinerString_new(CTX, StringBase *base,
+static StringBase *LinerString_new(KonohaContext *kctx, StringBase *base,
 		const char *text, size_t len)
 {
 	LinerString *s = (LinerString *) base;
@@ -135,9 +135,9 @@ static StringBase *LinerString_new(CTX, StringBase *base,
 	return base;
 }
 
-static StringBase *RopeString_new(CTX, StringBase *left, StringBase *right, size_t len)
+static StringBase *RopeString_new(KonohaContext *kctx, StringBase *left, StringBase *right, size_t len)
 {
-	RopeString *s = (RopeString *) new_StringBase(_ctx, MASK_ROPE);
+	RopeString *s = (RopeString *) new_StringBase(kctx, MASK_ROPE);
 	s->base.length = len;
 	s->left  = left;
 	s->right = right;
@@ -154,17 +154,17 @@ static LinerString *RopeString_toLinerString(RopeString *o, char *text, size_t l
 	return s;
 }
 
-static kString *Knew_String(CTX, const char *text, size_t len, int policy)
+static kString *Knew_String(KonohaContext *kctx, const char *text, size_t len, int policy)
 {
-	StringBase *s = (StringBase *) new_StringBase(_ctx, 0);
+	StringBase *s = (StringBase *) new_StringBase(kctx, 0);
 	if (len < SIZEOF_INLINETEXT)
-		return (kString*) InlineString_new(_ctx, s, text, len);
+		return (kString*) InlineString_new(kctx, s, text, len);
 	if(TFLAG_is(int, policy, SPOL_TEXT))
-		return (kString*) ExternalString_new(_ctx, s, text, len);
-	return (kString*) LinerString_new(_ctx, s, text, len);
+		return (kString*) ExternalString_new(kctx, s, text, len);
+	return (kString*) LinerString_new(kctx, s, text, len);
 }
 
-static void String2_free(CTX, kObject *o)
+static void String2_free(KonohaContext *kctx, kObject *o)
 {
 	StringBase *base = (StringBase*) o;
 	if (S_isMallocText(base)) {
@@ -199,7 +199,7 @@ static void write_text(StringBase *base, char *dest, int size)
 	}
 }
 
-static LinerString *RopeString_flatten(CTX, RopeString *rope)
+static LinerString *RopeString_flatten(KonohaContext *kctx, RopeString *rope)
 {
 	size_t length = S_len((StringBase *) rope);
 	char *dest = (char *) KMALLOC(length+1);
@@ -209,7 +209,7 @@ static LinerString *RopeString_flatten(CTX, RopeString *rope)
 	return RopeString_toLinerString(rope, dest, length);
 }
 
-static char *String_getReference(CTX, StringBase *s)
+static char *String_getReference(KonohaContext *kctx, StringBase *s)
 {
 	uint32_t flag = S_flag(s);
 	switch (flag) {
@@ -218,7 +218,7 @@ static char *String_getReference(CTX, StringBase *s)
 		case S_FLAG_INLINE:
 			return ((LinerString*)s)->text;
 		case S_FLAG_ROPE:
-			return RopeString_flatten(_ctx, (RopeString*)s)->text;
+			return RopeString_flatten(kctx, (RopeString*)s)->text;
 		default:
 			/*unreachable*/
 			assert(0);
@@ -226,15 +226,15 @@ static char *String_getReference(CTX, StringBase *s)
 	return NULL;
 }
 
-extern struct _kObject** KONOHA_reftail(CTX, size_t size);
+extern struct _kObject** KONOHA_reftail(KonohaContext *kctx, size_t size);
 
-static void StringBase_reftrace(CTX, StringBase *s)
+static void StringBase_reftrace(KonohaContext *kctx, StringBase *s)
 {
 	while (1) {
 		if (unlikely(!StringBase_isRope(s)))
 			break;
 		RopeString *rope = (RopeString *) s;
-		StringBase_reftrace(_ctx, rope->left);
+		StringBase_reftrace(kctx, rope->left);
 		BEGIN_REFTRACE(3);
 		KREFTRACEv(rope);//FIXME reftracing rope is needed?
 		KREFTRACEv(rope->left);
@@ -244,18 +244,18 @@ static void StringBase_reftrace(CTX, StringBase *s)
 	}
 }
 
-static void String2_reftrace(CTX, kObject *o)
+static void String2_reftrace(KonohaContext *kctx, kObject *o)
 {
-	StringBase_reftrace(_ctx, (StringBase *) o);
+	StringBase_reftrace(kctx, (StringBase *) o);
 }
 
-static uintptr_t String2_unbox(CTX, kObject *o)
+static uintptr_t String2_unbox(KonohaContext *kctx, kObject *o)
 {
 	StringBase *s = (StringBase*)o;
-	return (uintptr_t) String_getReference(_ctx, s);
+	return (uintptr_t) String_getReference(kctx, s);
 }
 
-static StringBase *StringBase_concat(CTX, kString *s0, kString *s1)
+static StringBase *StringBase_concat(KonohaContext *kctx, kString *s0, kString *s1)
 {
 	StringBase *left = (StringBase*) s0, *right = (StringBase*) s1;
 	size_t llen, rlen, length;
@@ -270,9 +270,9 @@ static StringBase *StringBase_concat(CTX, kString *s0, kString *s1)
 
 	length = llen + rlen;
 	if (length < SIZEOF_INLINETEXT) {
-		InlineString *ret = (InlineString *) new_StringBase(_ctx, MASK_INLINE);
-		char *s0 = String_getReference(_ctx, left);
-		char *s1 = String_getReference(_ctx, right);
+		InlineString *ret = (InlineString *) new_StringBase(kctx, MASK_INLINE);
+		char *s0 = String_getReference(kctx, left);
+		char *s1 = String_getReference(kctx, right);
 		assert(length < SIZEOF_INLINETEXT);
 		ret->base.length = length;
 		memcpy(ret->inline_text, s0, llen);
@@ -281,17 +281,17 @@ static StringBase *StringBase_concat(CTX, kString *s0, kString *s1)
 		ret->text = ret->inline_text;
 		return (StringBase *) ret;
 	}
-	return RopeString_new(_ctx, left, right, length);
+	return RopeString_new(kctx, left, right, length);
 }
 
 /* ------------------------------------------------------------------------ */
 //## @Const method String String.concat(String rhs);
 //## @Const method String String.opADD(String rhs);
 
-static KMETHOD Rope_opADD(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Rope_opADD(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kString *lhs = sfp[0].s, *rhs = sfp[1].s;
-	RETURN_(StringBase_concat(_ctx, lhs, rhs));
+	RETURN_(StringBase_concat(kctx, lhs, rhs));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -301,7 +301,7 @@ static KMETHOD Rope_opADD(CTX, ksfp_t *sfp _RIX)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t rope_initPackage(CTX, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static kbool_t rope_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
 {
 	kMethod *mtd = kNameSpace_getMethodNULL(ks, TY_String, MN_("opADD"));
 	if (mtd) {
@@ -321,17 +321,17 @@ static kbool_t rope_initPackage(CTX, kNameSpace *ks, int argc, const char**args,
 	return true;
 }
 
-static kbool_t rope_setupPackage(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t rope_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t rope_initNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t rope_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t rope_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t rope_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }

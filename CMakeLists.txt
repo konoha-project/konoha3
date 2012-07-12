@@ -6,8 +6,8 @@ include(CheckLibraryExists)
 cmake_minimum_required(VERSION 2.6)
 
 project(minikonoha)
-set(VERSION_MAJOR "2")
-set(VERSION_MINOR "0")
+set(VERSION_MAJOR "0")
+set(VERSION_MINOR "1")
 set(VERSION_PATCH "0")
 
 set(PACKAGE_NAME    ${PROJECT_NAME})

@@ -174,7 +174,7 @@ static struct dReq *dse_parseJson(const char *input)
 //	if (JSON_type(message) == JSON_String) {
 //		char *filepath = JSONString_get(a->self, 6);
 //		filepath[5] = '\0';
-//		konoha_t konoha = konoha_open();
+//		KonohaContext* konoha = konoha_open();
 //		int ret = konoha_load(konoha, filepath);
 //		konoha_close(konoha);
 //	}
@@ -204,7 +204,7 @@ static struct dReq *dse_parseJson(const char *input)
 static struct dRes *dse_dispatch(struct dReq *req)
 {
 	kplatform_t *dse = platform_dse();
-	konoha_t konoha = konoha_open((const kplatform_t *)dse);
+	KonohaContext* konoha = konoha_open((const kplatform_t *)dse);
 	logpool_t *lp;
 	void *logpool_args;
 	int ret;

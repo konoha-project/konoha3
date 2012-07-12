@@ -2,10 +2,10 @@
 #ifndef CLASSICVM_H_
 #define CLASSICVM_H_
 
-static void EXPR_asm(CTX, int a, kExpr *expr, int shift, int espidx);
-static struct _kBasicBlock* new_BasicBlockLABEL(CTX);
+static void EXPR_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espidx);
+static struct _kBasicBlock* new_BasicBlockLABEL(KonohaContext *kctx);
 
-static void BUILD_asm(CTX, kopl_t *op, size_t opsize);
+static void BUILD_asm(KonohaContext *kctx, kopl_t *op, size_t opsize);
 #define MN_isNotNull MN_("isNotNull")
 #define MN_isNull    MN_("isNull")
 #define MN_get    MN_("get")
@@ -29,7 +29,7 @@ static void BUILD_asm(CTX, kopl_t *op, size_t opsize);
 #define MN_opLSFT MN_("opLSFT")
 #define MN_opRSFT MN_("opRSFT")
 
-static kbool_t CLASSICVM_BUILD_asmJMPF(CTX, kBasicBlock *bb, klr_JMPF_t *op, int *swap)
+static kbool_t CLASSICVM_BUILD_asmJMPF(KonohaContext *kctx, kBasicBlock *bb, klr_JMPF_t *op, int *swap)
 {
 	while(bb->op.bytesize > 0) {
 		kopl_t *opP = BBOP(bb) + (BBSIZE(bb) - 1);
@@ -88,7 +88,7 @@ static kbool_t CLASSICVM_BUILD_asmJMPF(CTX, kBasicBlock *bb, klr_JMPF_t *op, int
 #define _REMOVE2(opX, opX2)       TONOP(opX); _REMOVE(opX2)
 #define _REMOVE3(opX, opX2, opX3) TONOP(opX); _REMOVE2(opX2, opX3)
 
-static void CLASSICVM_BasicBlock_peephole(CTX, kBasicBlock *bb)
+static void CLASSICVM_BasicBlock_peephole(KonohaContext *kctx, kBasicBlock *bb)
 {
 	size_t i;
 	for(i = 1; i < BBSIZE(bb); i++) {
@@ -211,7 +211,7 @@ static void CLASSICVM_BasicBlock_peephole(CTX, kBasicBlock *bb)
 }
 
 #ifdef OPCODE_CHKIDX
-static void ASM_CHKIDX(CTX, int aidx, int nidx)
+static void ASM_CHKIDX(KonohaContext *kctx, int aidx, int nidx)
 {
 	long i;
 	kBasicBlock *bb = ctxcode->curbbNC;
@@ -226,7 +226,7 @@ static void ASM_CHKIDX(CTX, int aidx, int nidx)
 	ASM(CHKIDX, aidx, nidx);
 }
 
-static void ASM_CHKIDXC(CTX, int aidx, int n)
+static void ASM_CHKIDXC(KonohaContext *kctx, int aidx, int n)
 {
 	kBasicBlock *bb = ctxcode->curbbNC;
 	long i;
@@ -243,7 +243,7 @@ static void ASM_CHKIDXC(CTX, int aidx, int n)
 }
 #endif /* defined(OPCODE_CHKIDX) */
 
-static kopcode_t OPimn(CTX, kmethodn_t mn, int diff)
+static kopcode_t OPimn(KonohaContext *kctx, kmethodn_t mn, int diff)
 {
 	if (mn == MN_opNEG ) return OPCODE_iNEG;
 	if (mn == MN_opADD ) return OPCODE_iADD + diff;
@@ -267,7 +267,7 @@ static kopcode_t OPimn(CTX, kmethodn_t mn, int diff)
 	return OPCODE_NOP;
 }
 
-static kopcode_t OPfmn(CTX, kmethodn_t mn, int diff)
+static kopcode_t OPfmn(KonohaContext *kctx, kmethodn_t mn, int diff)
 {
 	if (mn == MN_opNEG) return OPCODE_fNEG;
 	if (mn == MN_opADD) return OPCODE_fADD + diff;
@@ -291,7 +291,7 @@ static void kExpr_swap(kExpr *expr, int a, int b)
 	kExpr_at(expr, b) = e0;
 }
 
-static kbool_t OPR_hasCONST(CTX, kExpr *expr, kmethodn_t *mn, int swap)
+static kbool_t OPR_hasCONST(KonohaContext *kctx, kExpr *expr, kmethodn_t *mn, int swap)
 {
 	int isCONST = (kExpr_at(expr, 2)->build == TEXPR_NCONST);
 	if(swap == 1 && kExpr_at(expr, 1)->build == TEXPR_NCONST) {
@@ -308,22 +308,22 @@ static kbool_t OPR_hasCONST(CTX, kExpr *expr, kmethodn_t *mn, int swap)
 	return isCONST;
 }
 
-static kbool_t CLASSICVM_CALL_asm(CTX, kMethod *mtd, kExpr *expr, int shift, int espidx)
+static kbool_t CLASSICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr, int shift, int espidx)
 {
-	kcid_t mtd_cid = (mtd)->cid;
+	ktype_t mtd_cid = (mtd)->cid;
 	kmethodn_t mtd_mn = (mtd)->mn;
 	int a = espidx + 1;
 #if 1/*TODO*/
 	if(mtd_cid == CLASS_Array) {
-		kcid_t p1 = 0;//C_p1(cid);
+		ktype_t p1 = 0;//C_p1(cid);
 		if(mtd_mn == MN_get) {
-			EXPR_asm(_ctx, a, kExpr_at(expr, 1), shift, a);
+			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
 			if(kExpr_at(expr, 2)->build == TEXPR_NCONST) {
 				intptr_t n = kExpr_at(expr, 2)->ndata;
 				if(n < 0) {
 					return 0;
 				}
-				ASM_CHKIDXC(_ctx, OC_(a), n);
+				ASM_CHKIDXC(kctx, OC_(a), n);
 				if(TY_isUnbox(p1)) {
 					ASM(NGETIDXC, NC_(espidx), OC_(a), n);
 				}
@@ -333,8 +333,8 @@ static kbool_t CLASSICVM_CALL_asm(CTX, kMethod *mtd, kExpr *expr, int shift, int
 			}
 			else {
 				int an = espidx + 2;
-				EXPR_asm(_ctx, an, kExpr_at(expr, 2), shift, an);
-				ASM_CHKIDX(_ctx, OC_(a), NC_(an));
+				EXPR_asm(kctx, an, kExpr_at(expr, 2), shift, an);
+				ASM_CHKIDX(kctx, OC_(a), NC_(an));
 				if(TY_isUnbox(p1)) {
 					ASM(NGETIDX, NC_(espidx), OC_(a), NC_(an));
 				}
@@ -346,15 +346,15 @@ static kbool_t CLASSICVM_CALL_asm(CTX, kMethod *mtd, kExpr *expr, int shift, int
 		}
 		if(mtd_mn == MN_set) {
 			int v = espidx + 3;
-			EXPR_asm(_ctx, a, kExpr_at(expr, 1), shift, a);
-			EXPR_asm(_ctx, v, kExpr_at(expr, 3), shift, v);
+			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
+			EXPR_asm(kctx, v, kExpr_at(expr, 3), shift, v);
 			if(kExpr_at(expr, 2)->build == TEXPR_NCONST) {
 				intptr_t n = kExpr_at(expr, 2)->ndata;
 				if(n < 0) {
 					return 0;
 				}
-				kcid_t p1 = 0;//TODO C_p1(cid);
-				ASM_CHKIDXC(_ctx, OC_(a), n);
+				ktype_t p1 = 0;//TODO C_p1(cid);
+				ASM_CHKIDXC(kctx, OC_(a), n);
 				if(TY_isUnbox(p1)) {
 					ASM(NSETIDXC, NC_(espidx), OC_(a), n, NC_(v));
 				}
@@ -364,8 +364,8 @@ static kbool_t CLASSICVM_CALL_asm(CTX, kMethod *mtd, kExpr *expr, int shift, int
 			}
 			else {
 				int an = espidx + 2;
-				EXPR_asm(_ctx, an, kExpr_at(expr, 2), shift, an);
-				ASM_CHKIDX(_ctx, OC_(a), NC_(an));
+				EXPR_asm(kctx, an, kExpr_at(expr, 2), shift, an);
+				ASM_CHKIDX(kctx, OC_(a), NC_(an));
 				if(TY_isUnbox(p1)) {
 					ASM(NSETIDX, NC_(espidx), OC_(a), NC_(an), NC_(v));
 				}
@@ -380,36 +380,36 @@ static kbool_t CLASSICVM_CALL_asm(CTX, kMethod *mtd, kExpr *expr, int shift, int
 #if defined(OPCODE_BGETIDX)
 	if(mtd_cid == CLASS_Bytes) {
 		if(mtd_mn == MN_get) {
-			EXPR_asm(_ctx, a, kExpr_at(expr, 1), shift, a);
+			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
 			if(kExpr_at(expr, 2)->build == TEXPR_NCONST) {
 				intptr_t n = kExpr_at(expr, 2)->ndata;
-				ASM_CHKIDXC(_ctx, OC_(a), n);
+				ASM_CHKIDXC(kctx, OC_(a), n);
 				ASM(BGETIDXC, NC_(espidx), OC_(a), n);
 			}
 			else {
 				int an = espidx + 2;
-				EXPR_asm(_ctx, an, kExpr_at(expr, 2), shift, an);
-				ASM_CHKIDX(_ctx, OC_(a), NC_(an));
+				EXPR_asm(kctx, an, kExpr_at(expr, 2), shift, an);
+				ASM_CHKIDX(kctx, OC_(a), NC_(an));
 				ASM(BGETIDX, NC_(espidx), OC_(a), NC_(an));
 			}
 			return 1;
 		}
 		if(mtd_mn == MN_set) {
 			int v = espidx + 3;
-			EXPR_asm(_ctx, a, kExpr_at(expr, 1), shift, a);
-			EXPR_asm(_ctx, v, kExpr_at(expr, 3), shift, v);
+			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
+			EXPR_asm(kctx, v, kExpr_at(expr, 3), shift, v);
 			if(kExpr_at(expr, 2)->build == TEXPR_NCONST) {
 				intptr_t n = kExpr_at(expr, 2)->ndata;
 				if(n < 0) {
 					return 0;
 				}
-				ASM_CHKIDXC(_ctx, OC_(a), n);
+				ASM_CHKIDXC(kctx, OC_(a), n);
 				ASM(BSETIDXC, NC_(espidx), OC_(a), n, NC_(v));
 			}
 			else {
 				int an = espidx + 2;
-				EXPR_asm(_ctx, an, kExpr_at(expr, 2), shift, an);
-				ASM_CHKIDX(_ctx, OC_(a), NC_(an));
+				EXPR_asm(kctx, an, kExpr_at(expr, 2), shift, an);
+				ASM_CHKIDX(kctx, OC_(a), NC_(an));
 				ASM(BSETIDX, NC_(espidx), OC_(a), NC_(an), NC_(v));
 			}
 			return 1;
@@ -420,63 +420,63 @@ static kbool_t CLASSICVM_CALL_asm(CTX, kMethod *mtd, kExpr *expr, int shift, int
 #ifdef OPCODE_bNUL
 	if(mtd_cid == CLASS_Object) {
 		if(mtd_mn == MN_isNull) {
-			EXPR_asm(_ctx, a, kExpr_at(expr, 1), shift, a);
+			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
 			ASM(bNUL, NC_(espidx), OC_(a));
 			return 1;
 		}
 		else if(mtd_mn == MN_isNotNull) {
-			EXPR_asm(_ctx, a, kExpr_at(expr, 1), shift, a);
+			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
 			ASM(bNN, NC_(espidx), OC_(a));
 			return 1;
 		}
 	}
 #endif
 	kopcode_t opcode;
-	kcid_t cid    = mtd_cid;
+	ktype_t cid    = mtd_cid;
 	kmethodn_t mn = mtd_mn;
 	if(mtd_cid == CLASS_Boolean && mtd_mn == MN_opNOT) {
-		EXPR_asm(_ctx, a, kExpr_at(expr, 1), shift, a);
+		EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
 		ASM(bNN, NC_(espidx), NC_(a));
 		return 1;
 	}
-	if(mtd_cid == CLASS_Int && ((opcode = OPimn(_ctx, mn, 0)) != OPCODE_NOP)) {
+	if(mtd_cid == CLASS_Int && ((opcode = OPimn(kctx, mn, 0)) != OPCODE_NOP)) {
 		int swap = 1;
 		if(mn == MN_opNEG) {
-			EXPR_asm(_ctx, a, kExpr_at(expr, 1), shift, a);
+			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
 			ASM(iNEG, NC_(espidx), NC_(a));
 			return 1;
 		}
 		if(mn == MN_opSUB || mn == MN_opDIV || mn == MN_opMOD ||
 				mn == MN_opLSFT || mn == MN_opRSFT) swap = 0;
-		if(OPR_hasCONST(_ctx, expr, &mn, swap)) {
-			EXPR_asm(_ctx, a, kExpr_at(expr, 1), shift, a);
+		if(OPR_hasCONST(kctx, expr, &mn, swap)) {
+			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
 			kint_t b = kExpr_at(expr, 2)->ndata;
 			if(b == 0 && (mn == MN_opDIV || mn == MN_opMOD)) {
 				b = 1;
 				//TODO
-				//WARN_DividedByZero(_ctx);
+				//WARN_DividedByZero(kctx);
 			}
-			opcode = OPimn(_ctx, mn, (OPCODE_iADDC - OPCODE_iADD));
+			opcode = OPimn(kctx, mn, (OPCODE_iADDC - OPCODE_iADD));
 			ASMop(iADDC, opcode, NC_(espidx), NC_(espidx+1), b);
 		}
 		else {
 			int b = espidx + 2;
-			EXPR_asm(_ctx, a, kExpr_at(expr, 1), shift, a);
-			EXPR_asm(_ctx, b, kExpr_at(expr, 2), shift, b);
+			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
+			EXPR_asm(kctx, b, kExpr_at(expr, 2), shift, b);
 			ASMop(iADD, opcode, NC_(espidx), NC_(a), NC_(b));
 		}
 		return 1;
 	} /* CLASS_Int */
-	if(IS_defineFloat() && cid == TY_Float && ((opcode = OPfmn(_ctx, mn, 0)) != OPCODE_NOP)) {
+	if(IS_defineFloat() && cid == TY_Float && ((opcode = OPfmn(kctx, mn, 0)) != OPCODE_NOP)) {
 		int swap = 1;
 		if(mn == MN_opNEG) {
-			EXPR_asm(_ctx, a, kExpr_at(expr, 1), shift, a);
+			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
 			ASM(fNEG, NC_(espidx), NC_(a));
 			return 1;
 		}
 		if(mn == MN_opSUB || mn == MN_opDIV || mn == MN_opMOD) swap = 0;
-		if(OPR_hasCONST(_ctx, expr, &mn, swap)) {
-			EXPR_asm(_ctx, a, kExpr_at(expr, 1), shift, a);
+		if(OPR_hasCONST(kctx, expr, &mn, swap)) {
+			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
 			union { uintptr_t ndata; kfloat_t fvalue; } v;
 			v.ndata = kExpr_at(expr, 2)->ndata;
 			kfloat_t b = v.fvalue;
@@ -486,15 +486,15 @@ static kbool_t CLASSICVM_CALL_asm(CTX, kMethod *mtd, kExpr *expr, int shift, int
 			if(b == KFLOAT_ZERO && mn == MN_opDIV) {
 				b = KFLOAT_ONE;
 				//TODO
-				//WARN_DividedByZero(_ctx);
+				//WARN_DividedByZero(kctx);
 			}
-			opcode = OPfmn(_ctx, mn, (OPCODE_fADDC - OPCODE_fADD));
+			opcode = OPfmn(kctx, mn, (OPCODE_fADDC - OPCODE_fADD));
 			ASMop(fADDC, opcode, NC_(espidx), NC_(a), b);
 		}
 		else {
 			int b = espidx + 2;
-			EXPR_asm(_ctx, a, kExpr_at(expr, 1), shift, a);
-			EXPR_asm(_ctx, b, kExpr_at(expr, 2), shift, b);
+			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
+			EXPR_asm(kctx, b, kExpr_at(expr, 2), shift, b);
 			ASMop(fADD, opcode, NC_(espidx), NC_(a), NC_(b));
 		}
 		return 1;

@@ -29,44 +29,44 @@
 
 //## @Static @Public Int System.getpid();
 
-static KMETHOD System_getpid(CTX, ksfp_t *sfp _RIX)
+static KMETHOD System_getpid(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNi_(getpid());
 }
 
-static KMETHOD System_getppid(CTX, ksfp_t *sfp _RIX)
+static KMETHOD System_getppid(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNi_(getppid());
 }
 
-static KMETHOD System_getuid(CTX, ksfp_t *sfp _RIX)
+static KMETHOD System_getuid(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNi_(getuid());
 }
 
-static KMETHOD System_geteuid(CTX, ksfp_t *sfp _RIX)
+static KMETHOD System_geteuid(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNi_(geteuid());
 }
 
-static KMETHOD System_getgid(CTX, ksfp_t *sfp _RIX)
+static KMETHOD System_getgid(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNi_(getgid());
 }
 
-static KMETHOD System_getegid(CTX, ksfp_t *sfp _RIX)
+static KMETHOD System_getegid(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURNi_(getegid());
 }
 
-static KMETHOD System_getpgid(CTX, ksfp_t *sfp _RIX)
+static KMETHOD System_getpgid(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	int pid = sfp[1].ivalue;
 	int ret = getpgid(pid);
 	RETURNi_(ret);
 }
 
-static KMETHOD System_setpgid(CTX, ksfp_t *sfp _RIX)
+static KMETHOD System_setpgid(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	int pid = sfp[1].ivalue;
 	int pgid = sfp[2].ivalue;
@@ -74,7 +74,7 @@ static KMETHOD System_setpgid(CTX, ksfp_t *sfp _RIX)
 	RETURNi_(ret);
 }
 
-static KMETHOD System_chdir(CTX, ksfp_t *sfp _RIX)
+static KMETHOD System_chdir(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kString *s = sfp[1].s;
 	const char *dir = S_text(s);
@@ -82,13 +82,13 @@ static KMETHOD System_chdir(CTX, ksfp_t *sfp _RIX)
 	RETURNi_(ret);
 }
 
-static KMETHOD System_fchdir(CTX, ksfp_t *sfp _RIX)
+static KMETHOD System_fchdir(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	int ch = fchdir(sfp[1].ivalue);
 	RETURNi_(ch);
 }
 
-static KMETHOD System_chroot(CTX, ksfp_t *sfp _RIX)
+static KMETHOD System_chroot(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kString *s = sfp[1].s;
 	const char *root = S_text(s);
@@ -96,7 +96,7 @@ static KMETHOD System_chroot(CTX, ksfp_t *sfp _RIX)
 	RETURNi_(ret);
 }
 
-static KMETHOD System_getpriority(CTX, ksfp_t *sfp _RIX)
+static KMETHOD System_getpriority(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 
 	int which = sfp[1].ivalue;
@@ -105,7 +105,7 @@ static KMETHOD System_getpriority(CTX, ksfp_t *sfp _RIX)
 	RETURNi_(ret);
 }
 
-static KMETHOD System_setpriority(CTX, ksfp_t *sfp _RIX)
+static KMETHOD System_setpriority(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	int which = sfp[1].ivalue;
 	int who = sfp[2].ivalue;
@@ -114,7 +114,7 @@ static KMETHOD System_setpriority(CTX, ksfp_t *sfp _RIX)
 	RETURNi_(ret);
 }
 
-static KMETHOD System_getgroups(CTX, ksfp_t *sfp _RIX)
+static KMETHOD System_getgroups(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	int size = kArray_size(sfp[2].a);
 	kArray *list = sfp[2].a;
@@ -122,7 +122,7 @@ static KMETHOD System_getgroups(CTX, ksfp_t *sfp _RIX)
 	RETURNi_(ret);
 }
 
-static KMETHOD System_setgroups(CTX, ksfp_t *sfp _RIX)
+static KMETHOD System_setgroups(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	int size = kArray_size(sfp[2].a);
 	kArray *list = sfp[2].a;
@@ -138,7 +138,7 @@ static KMETHOD System_setgroups(CTX, ksfp_t *sfp _RIX)
 
 #define _KVi(T) #T, TY_Int, T
 
-static	kbool_t process_initPackage(CTX, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static	kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
 {
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Static, _F(System_getpid), TY_Int, TY_System, MN_("getpid"), 0,
@@ -170,17 +170,17 @@ static	kbool_t process_initPackage(CTX, kNameSpace *ks, int argc, const char**ar
 	return true;
 }
 
-static kbool_t process_setupPackage(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t process_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t process_initNameSpace(CTX,  kNameSpace *ks, kline_t pline)
+static kbool_t process_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t process_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t process_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }

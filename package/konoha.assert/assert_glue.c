@@ -29,7 +29,7 @@
 //// --------------------------------------------------------------------------
 //
 ////## method @static void NameSpace.assert(boolean cond)
-//static KMETHOD NameSpace_assert(CTX, ksfp_t *sfp _RIX)
+//static KMETHOD NameSpace_assert(KonohaContext *kctx, ksfp_t *sfp _RIX)
 //{
 //	kbool_t cond = sfp[1].bvalue;
 //	kline_t fileid  = sfp[K_RTNIDX].uline;
@@ -43,13 +43,13 @@
 //
 //// --------------------------------------------------------------------------
 //
-//static KMETHOD StmtTyCheck_assert(CTX, ksfp_t *sfp _RIX)
+//static KMETHOD StmtTyCheck_assert(KonohaContext *kctx, ksfp_t *sfp _RIX)
 //{
 //	//FIXME
 ////	USING_SUGAR;
 ////	kbool_t r = 1;
 ////	VAR_StmtTyCheck(stmt, syn, gma);
-////	if((r = SUGAR Stmt_tyCheckExpr(_ctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0))) {
+////	if((r = SUGAR Stmt_tyCheckExpr(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0))) {
 ////		kExpr *expr = kStmt_expr(stmt, KW_ExprPattern, NULL);
 ////		kMethod *mtd = kNameSpace_getMethodNULL(gma->genv->ks, TY_NameSpace, MN_("assert"));
 ////		assert(expr != NULL);
@@ -68,7 +68,7 @@
 //#define _Coercion kMethod_Coercion
 //#define _F(F)   (intptr_t)(F)
 //
-//static kbool_t assert_initPackage(CTX, kNameSpace *ks, int argc, const char**args, kline_t pline)
+//static kbool_t assert_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
 //{
 //	USING_SUGAR;
 //	int FN_cond = FN_("cond");
@@ -80,25 +80,25 @@
 //	return true;
 //}
 //
-//static kbool_t assert_setupPackage(CTX, kNameSpace *ks, kline_t pline)
+//static kbool_t assert_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 //{
 //	return true;
 //}
 //
-//static kbool_t assert_initNameSpace(CTX,  kNameSpace *ks, kline_t pline)
+//static kbool_t assert_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
 //{
 //	USING_SUGAR;
 //	KDEFINE_SYNTAX SYNTAX[] = {
 //		{ .kw = SYM_("assert"), .rule = "'assert' '(' $expr ')'", .TopStmtTyCheck = StmtTyCheck_assert, .StmtTyCheck = StmtTyCheck_assert},
 //		{ .kw = KW_END, },
 //	};
-//	SUGAR NameSpace_defineSyntax(_ctx, ks, SYNTAX);
+//	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 //
 //	return true;
 //}
 //
 //
-//static kbool_t assert_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
+//static kbool_t assert_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 //{
 //	return true;
 //}

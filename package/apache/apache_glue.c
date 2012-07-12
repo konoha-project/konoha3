@@ -33,51 +33,51 @@
 #undef PACKAGE_VERSION
 #include "apache_glue.h"
 
-static void Request_init(CTX, kObject *po, void *conf)
+static void Request_init(KonohaContext *kctx, kObject *po, void *conf)
 {
-	(void)_ctx;
+	(void)kctx;
 	((kRequest*)po)->r = (request_rec *) conf;
 }
 
-static void Request_free(CTX, kObject *po)
+static void Request_free(KonohaContext *kctx, kObject *po)
 {
-	(void)_ctx;
+	(void)kctx;
 ((kRequest*)po)->r = NULL;
 }
 
-static void AprTable_init(CTX, kObject *po, void *conf)
+static void AprTable_init(KonohaContext *kctx, kObject *po, void *conf)
 {
-	(void)_ctx;
+	(void)kctx;
 	((kAprTable*)po)->tbl = (apr_table_t *) conf;
 }
 
-static void AprTable_free(CTX, kObject *po)
+static void AprTable_free(KonohaContext *kctx, kObject *po)
 {
-	(void)_ctx;
+	(void)kctx;
 	((kAprTable*)po)->tbl = NULL;
 }
 
-static void AprTableEntry_init(CTX, kObject *po, void *conf)
+static void AprTableEntry_init(KonohaContext *kctx, kObject *po, void *conf)
 {
-	(void)_ctx;
+	(void)kctx;
 	((kAprTableEntry*)po)->entry = (apr_table_entry_t *) conf;
 }
 
-static void AprTableEntry_free(CTX, kObject *po)
+static void AprTableEntry_free(KonohaContext *kctx, kObject *po)
 {
-	(void)_ctx;
+	(void)kctx;
 	((kAprTableEntry*)po)->entry = NULL;
 }
 
-static void kapacheshare_setup(CTX, struct kmodshare_t *def, int newctx) {}
-static void kapacheshare_reftrace(CTX, struct kmodshare_t *baseh) {}
-static void kapacheshare_free(CTX, struct kmodshare_t *baseh)
+static void kapacheshare_setup(KonohaContext *kctx, struct kmodshare_t *def, int newctx) {}
+static void kapacheshare_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh) {}
+static void kapacheshare_free(KonohaContext *kctx, struct kmodshare_t *baseh)
 {
 	KFREE(baseh, sizeof(kapacheshare_t));
 }
 
 
-static kbool_t apache_initPackage(CTX, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
 {
 	static KDEFINE_CLASS Def = {
 		STRUCTNAME(Request),
@@ -123,17 +123,17 @@ static kbool_t apache_initPackage(CTX, kNameSpace *ks, int argc, const char**arg
 	return true;
 }
 
-static kbool_t apache_setupPackage(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t apache_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t apache_initNameSpace(CTX,  kNameSpace *ks, kline_t pline)
+static kbool_t apache_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t apache_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t apache_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }

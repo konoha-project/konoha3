@@ -36,18 +36,18 @@ typedef struct subproc_resource_mon_t {
 } subproc_resource_mon_t;
 
 
-static void init_resourcemonitor(CTX, subproc_resource_mon_t *mon)
+static void init_resourcemonitor(KonohaContext *kctx, subproc_resource_mon_t *mon)
 {
 	mon->procfs = NULL;
 }
 
-static int setup_resourcemonitor(CTX, subproc_resource_mon_t *mon)
+static int setup_resourcemonitor(KonohaContext *kctx, subproc_resource_mon_t *mon)
 {
 	// DO NOTHING;
 	return 0;
 }
 
-static int cleanup_resourcemonitor(CTX, subproc_resource_mon_t *mon)
+static int cleanup_resourcemonitor(KonohaContext *kctx, subproc_resource_mon_t *mon)
 {
 	if(mon->procfs != NULL) {
 		fclose(mon->procfs);
@@ -55,12 +55,12 @@ static int cleanup_resourcemonitor(CTX, subproc_resource_mon_t *mon)
 	return 0;
 }
 
-static int setup_resourcemonitor_for_chlid(CTX, subproc_resource_mon_t *mon)
+static int setup_resourcemonitor_for_chlid(KonohaContext *kctx, subproc_resource_mon_t *mon)
 {
 	return 0;
 }
 
-static int attach_resourcemonitor_for_child(CTX, subproc_resource_mon_t *mon, int pid)
+static int attach_resourcemonitor_for_child(KonohaContext *kctx, subproc_resource_mon_t *mon, int pid)
 {
 	char statm[32];
 	sprintf(&statm[0], "/proc/%d/statm", pid);
@@ -71,7 +71,7 @@ static int attach_resourcemonitor_for_child(CTX, subproc_resource_mon_t *mon, in
 	return 0;
 }
 
-static int fetch_resourcemonitor_about(CTX, subproc_resource_mon_t *mon, enum e_resource res)
+static int fetch_resourcemonitor_about(KonohaContext *kctx, subproc_resource_mon_t *mon, enum e_resource res)
 {
 	int mem = 0;
 	size_t dummy, vm;

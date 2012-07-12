@@ -35,23 +35,23 @@ extern "C" {
 #endif
 
 
-static kbool_t Nothing_hasNext(CTX, ksfp_t* sfp)
+static kbool_t Nothing_hasNext(KonohaContext *kctx, ksfp_t* sfp)
 {
 	return false;
 }
 
-static void Nothing_setNextResult(CTX, ksfp_t* sfp _RIX)
+static void Nothing_setNextResult(KonohaContext *kctx, ksfp_t* sfp _RIX)
 {
 	kIterator *itr = (kIterator*)sfp[0].o;
 	RETURN_(itr->source);
 }
 
-static void Nothing_setNextResultUnbox(CTX, ksfp_t* sfp _RIX)
+static void Nothing_setNextResultUnbox(KonohaContext *kctx, ksfp_t* sfp _RIX)
 {
 	RETURNi_(0);
 }
 
-static void Iterator_init(CTX, kObject *o, void *conf)
+static void Iterator_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kIterator *itr = (kIterator*)o;
 	int isUnboxEntry = TY_isUnbox(O_ct(itr)->p0);
@@ -61,36 +61,36 @@ static void Iterator_init(CTX, kObject *o, void *conf)
 	itr->setNextResult = isUnboxEntry ? Nothing_setNextResultUnbox : Nothing_setNextResult;
 }
 
-static void Iterator_p(CTX, ksfp_t *sfp, int pos, kwb_t *wb, int level)
+static void Iterator_p(KonohaContext *kctx, ksfp_t *sfp, int pos, kwb_t *wb, int level)
 {
 //	kwb_printf(wb, KFLOAT_FMT, sfp[pos].fvalue);
 }
 
 /* ------------------------------------------------------------------------ */
 
-static KMETHOD Iterator_hasNext(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Iterator_hasNext(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kIterator *itr = sfp[0].itr;
-	RETURNb_(itr->hasNext(_ctx, sfp));
+	RETURNb_(itr->hasNext(kctx, sfp));
 }
 
-static KMETHOD Iterator_next(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Iterator_next(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kIterator *itr = sfp[0].itr;
-	itr->setNextResult(_ctx, sfp, K_RIX);
+	itr->setNextResult(kctx, sfp, K_RIX);
 }
 
-//static kbool_t callFuncHasNext(CTX, ksfp_t *sfp)
+//static kbool_t callFuncHasNext(KonohaContext *kctx, ksfp_t *sfp)
 //{
 //	itr->funcHasNext;
 //}
 //
-//static kbool_t callFuncNext(CTX, ksfp_t *sfp _RIX)
+//static kbool_t callFuncNext(KonohaContext *kctx, ksfp_t *sfp _RIX)
 //{
 //
 //}
 //
-//static KMETHOD Iterator_new(CTX, ksfp_t *sfp _RIX)
+//static KMETHOD Iterator_new(KonohaContext *kctx, ksfp_t *sfp _RIX)
 //{
 //	kIterator *itr = (kIterator*)sfp[0].o;
 //	KSETv(itr->funcHasNext, sfp[1].fo);
@@ -100,13 +100,13 @@ static KMETHOD Iterator_next(CTX, ksfp_t *sfp _RIX)
 //	RETURN_(itr);
 //}
 
-static kbool_t Array_hasNext(CTX, ksfp_t* sfp)
+static kbool_t Array_hasNext(KonohaContext *kctx, ksfp_t* sfp)
 {
 	kIterator *itr = (kIterator*)sfp[0].o;
 	return (itr->current_pos < kArray_size(itr->arrayList));
 }
 
-static void Array_setNextResult(CTX, ksfp_t* sfp _RIX)
+static void Array_setNextResult(KonohaContext *kctx, ksfp_t* sfp _RIX)
 {
 	kIterator *itr = (kIterator*)sfp[0].o;
 	size_t n = itr->current_pos;
@@ -115,7 +115,7 @@ static void Array_setNextResult(CTX, ksfp_t* sfp _RIX)
 	RETURN_(itr->arrayList->list[n]);
 }
 
-static void Array_setNextResultUnbox(CTX, ksfp_t* sfp _RIX)
+static void Array_setNextResultUnbox(KonohaContext *kctx, ksfp_t* sfp _RIX)
 {
 	kIterator *itr = (kIterator*)sfp[0].o;
 	size_t n = itr->current_pos;
@@ -124,10 +124,10 @@ static void Array_setNextResultUnbox(CTX, ksfp_t* sfp _RIX)
 	RETURN_(itr->arrayList->ilist[n]);
 }
 
-static KMETHOD Array_toIterator(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Array_toIterator(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kArray *a = sfp[0].a;
-	kclass_t *cIterator = CT_p0(_ctx, CT_Iterator, O_ct(a)->p0);
+	kclass_t *cIterator = CT_p0(kctx, CT_Iterator, O_ct(a)->p0);
 	kIterator *itr = (kIterator*)new_kObject(cIterator, NULL);
 	KSETv(itr->arrayList, a);
 	itr->hasNext = Array_hasNext;
@@ -156,14 +156,14 @@ static const char _utf8len[] = {
 		4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 0, 0,
 };
 
-static kbool_t String_hasNext(CTX, ksfp_t* sfp)
+static kbool_t String_hasNext(KonohaContext *kctx, ksfp_t* sfp)
 {
 	kIterator *itr = sfp[0].itr;
 	kString *s = (kString*)itr->source;
 	return (itr->current_pos < S_size(s));
 }
 
-static void String_setNextResult(CTX, ksfp_t* sfp _RIX)
+static void String_setNextResult(KonohaContext *kctx, ksfp_t* sfp _RIX)
 {
 	kIterator *itr = sfp[0].itr;
 	kString *s = (kString*)itr->source;
@@ -173,7 +173,7 @@ static void String_setNextResult(CTX, ksfp_t* sfp _RIX)
 	RETURN_(new_kString(t, charsize, (charsize == 1) ? SPOL_ASCII : SPOL_UTF8));
 }
 
-static KMETHOD String_toIterator(CTX, ksfp_t *sfp _RIX)
+static KMETHOD String_toIterator(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kIterator *itr = (kIterator*)new_kObject(CT_StringIterator, NULL);
 	KSETv(itr->source, sfp[0].o);
@@ -184,9 +184,9 @@ static KMETHOD String_toIterator(CTX, ksfp_t *sfp _RIX)
 
 /* ------------------------------------------------------------------------ */
 
-static void kmoditerator_setup(CTX, struct kmodshare_t *def, int newctx) {}
-static void kmoditerator_reftrace(CTX, struct kmodshare_t *baseh) { }
-static void kmoditerator_free(CTX, struct kmodshare_t *baseh) { KFREE(baseh, sizeof(kmoditerator_t)); }
+static void kmoditerator_setup(KonohaContext *kctx, struct kmodshare_t *def, int newctx) {}
+static void kmoditerator_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh) { }
+static void kmoditerator_free(KonohaContext *kctx, struct kmodshare_t *baseh) { KFREE(baseh, sizeof(kmoditerator_t)); }
 
 #define _Public   kMethod_Public
 #define _Const    kMethod_Const
@@ -194,7 +194,7 @@ static void kmoditerator_free(CTX, struct kmodshare_t *baseh) { KFREE(baseh, siz
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t iterator_initPackage(CTX, kNameSpace *ns, int argc, const char**args, kline_t pline)
+static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kline_t pline)
 {
 	kmoditerator_t *base = (kmoditerator_t*)KCALLOC(sizeof(kmoditerator_t), 1);
 	base->h.name     = "iterator";
@@ -210,8 +210,8 @@ static kbool_t iterator_initPackage(CTX, kNameSpace *ns, int argc, const char**a
 		.p      = Iterator_p,
 	};
 	base->cIterator = Konoha_addClassDef(ns->packid, PN_konoha, NULL, &defIterator, pline);
-	base->cStringIterator = CT_p0(_ctx, base->cIterator, TY_String);
-	base->cGenericIterator = CT_p0(_ctx, base->cIterator, TY_0);
+	base->cStringIterator = CT_p0(kctx, base->cIterator, TY_String);
+	base->cGenericIterator = CT_p0(kctx, base->cIterator, TY_0);
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Iterator_hasNext), TY_Boolean, TY_Iterator, MN_("hasNext"), 0,
 		_Public, _F(Iterator_next), TY_0, TY_Iterator, MN_("next"), 0,
@@ -225,12 +225,12 @@ static kbool_t iterator_initPackage(CTX, kNameSpace *ns, int argc, const char**a
 	return true;
 }
 
-static kbool_t iterator_setupPackage(CTX, kNameSpace *ns, kline_t pline)
+static kbool_t iterator_setupPackage(KonohaContext *kctx, kNameSpace *ns, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t iterator_initNameSpace(CTX,  kNameSpace *ns, kline_t pline)
+static kbool_t iterator_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
@@ -240,11 +240,11 @@ static kbool_t iterator_initNameSpace(CTX,  kNameSpace *ns, kline_t pline)
 //			{ TOKEN("--"), _OP, .op1 = "opDEC", .priority_op2 = 16, .flag = SYNFLAG_ExprPostfixOp2,},
 			{ .kw = KW_END, },
 	};
-	SUGAR NameSpace_defineSyntax(_ctx, ns, SYNTAX);
+	SUGAR NameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t iterator_setupNameSpace(CTX, kNameSpace *ns, kline_t pline)
+static kbool_t iterator_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kline_t pline)
 {
 	return true;
 }

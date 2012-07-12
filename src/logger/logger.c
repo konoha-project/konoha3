@@ -43,8 +43,8 @@ typedef struct  {
 	kmodshare_t h;
 } kmodlogger_t;
 
-#define kmodlogger  ((kmodlogger_t*)_ctx->modshare[MOD_logger])
-#define ctxlogger    ((ctxlogger_t*)_ctx->modlocal[MOD_logger])
+#define kmodlogger  ((kmodlogger_t*)kctx->modshare[MOD_logger])
+#define ctxlogger    ((ctxlogger_t*)kctx->modlocal[MOD_logger])
 
 static char *write_byte_toebuf(const char *text, size_t len, char *p, char *ebuf)
 {
@@ -105,7 +105,7 @@ static char *write_uint_toebuf(uintptr_t uvalue, char *const p, const char *cons
 
 #define EBUFSIZ 1024
 
-static uintptr_t Ktrace_p(CTX, klogconf_t *logconf, va_list ap)
+static uintptr_t Ktrace_p(KonohaContext *kctx, klogconf_t *logconf, va_list ap)
 {
 	char buf[EBUFSIZ], *p = buf, *ebuf =  p + (EBUFSIZ - 4);
 	p[0] = '{'; p++;
@@ -139,7 +139,7 @@ static uintptr_t Ktrace_p(CTX, klogconf_t *logconf, va_list ap)
 	return 0;// FIXME reference to log
 }
 
-static uintptr_t Ktrace(CTX, klogconf_t *logconf, ...)
+static uintptr_t Ktrace(KonohaContext *kctx, klogconf_t *logconf, ...)
 {
 	if(TFLAG_is(int, logconf->policy, LOGPOL_INIT)) {
 		TFLAG_set(int,logconf->policy,LOGPOL_INIT,0);
@@ -147,44 +147,44 @@ static uintptr_t Ktrace(CTX, klogconf_t *logconf, ...)
 	}
 	va_list ap;
 	va_start(ap, logconf);
-	uintptr_t ref = Ktrace_p(_ctx, logconf, ap);
+	uintptr_t ref = Ktrace_p(kctx, logconf, ap);
 	va_end(ap);
 	return ref;
 }
 
-static void ctxlogger_reftrace(CTX, struct kmodlocal_t *baseh)
+static void ctxlogger_reftrace(KonohaContext *kctx, struct kmodlocal_t *baseh)
 {
 //	ctxlogger_t *base = (ctxlogger_t*)baseh;
 }
-static void ctxlogger_free(CTX, struct kmodlocal_t *baseh)
+static void ctxlogger_free(KonohaContext *kctx, struct kmodlocal_t *baseh)
 {
 	ctxlogger_t *base = (ctxlogger_t*)baseh;
 	KFREE(base, sizeof(ctxlogger_t));
 }
 
-static void kmodlogger_setup(CTX, struct kmodshare_t *def, int newctx)
+static void kmodlogger_setup(KonohaContext *kctx, struct kmodshare_t *def, int newctx)
 {
 	if(newctx) {
 		ctxlogger_t *base = (ctxlogger_t*)KCALLOC(sizeof(ctxlogger_t), 1);
 		base->h.reftrace = ctxlogger_reftrace;
 		base->h.free     = ctxlogger_free;
-		_ctx->modlocal[MOD_logger] = (kmodlocal_t*)base;
+		kctx->modlocal[MOD_logger] = (kmodlocal_t*)base;
 	}
 }
 
-static void kmodlogger_reftrace(CTX, struct kmodshare_t *baseh)
+static void kmodlogger_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
 {
 
 }
 
-void MODLOGGER_free(CTX, kcontext_t *ctx)
+void MODLOGGER_free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
-	if(IS_ROOTCTX(ctx)) {
+	if(IS_RootKonohaContext(ctx)) {
 		free(kmodlogger/*, sizeof(kmodshare_t)*/);
 	}
 }
 
-void MODLOGGER_init(CTX, kcontext_t *ctx)
+void MODLOGGER_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	kmodlogger_t *base = (kmodlogger_t*)calloc(sizeof(kmodlogger_t), 1);
 	base->h.name     = "syslog";

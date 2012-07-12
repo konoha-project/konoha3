@@ -32,7 +32,7 @@
 extern "C" {
 #endif
 
-struct kcontext_t *ctx;
+struct KonohaContextVar *ctx;
 
 KDEFINE_PACKAGE* curl_init(void)
 {

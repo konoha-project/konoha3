@@ -31,7 +31,7 @@
 extern "C" {
 #endif
 
-extern struct kcontext_t *ctx;
+extern struct KonohaContextVar *ctx;
 
 #define MAX_STR 12
 
@@ -49,7 +49,7 @@ struct _kCurl {
 // [private functions]
 
 typedef struct curl_context_t {
-	struct kcontext_t *ctx;
+	struct KonohaContextVar *ctx;
 	union {
 		struct _kString *string;
 		struct _kBytes *bytes;
@@ -61,9 +61,9 @@ typedef struct curl_context_t {
 /*String call back*/
 static size_t write_String(char *buffer, size_t size, size_t nitems, void *string)
 {
-	CTX_t _ctx = (CTX_t)ctx;
+	KonohaContext_t kctx = (KonohaContext_t)ctx;
 	kwb_t wb;
-	kwb_init(&(_ctx->stack->cwb), &wb);
+	kwb_init(&(kctx->stack->cwb), &wb);
 	struct _kString *res = (struct _kString *)string;
 	kString *str;
 	char *buf = S_tobytes(res);
@@ -83,7 +83,7 @@ static size_t write_String(char *buffer, size_t size, size_t nitems, void *strin
 /*Bytes call back*/
 static size_t write_Bytes(char *buffer, size_t size, size_t nitems, void *bytes)
 {
-//	CTX_t _ctx = (CTX_t)ctx;
+//	KonohaContext_t kctx = (KonohaContext_t)ctx;
 //	struct _kBytes *res = (struct _kBytes *)bytes;
 //	char *buf = res->buf;
 //	res->buf = (char *)KMALLOC(res->bytesize + size);
@@ -101,7 +101,7 @@ static size_t write_Bytes(char *buffer, size_t size, size_t nitems, void *bytes)
 #define String_to(T, a)   ((T)S_text(a.s))
 #define toCURL(o)         ((kCurl *)o)->curl
 
-static void Curl_init(CTX, kObject *o, void *conf)
+static void Curl_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct _kCurl *c = (struct _kCurl *)o;
 	c->headers = NULL;
@@ -109,7 +109,7 @@ static void Curl_init(CTX, kObject *o, void *conf)
 	c->curl = curl_easy_init();
 }
 
-static void Curl_free(CTX, kObject *o)
+static void Curl_free(KonohaContext *kctx, kObject *o)
 {
 	struct _kCurl *c = (struct _kCurl*)o;
 	if(c->curl != NULL) {
@@ -122,13 +122,13 @@ static void Curl_free(CTX, kObject *o)
 }
 
 //## Curl Curl.new();
-static KMETHOD Curl_new (CTX, ksfp_t *sfp _RIX)
+static KMETHOD Curl_new (KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	RETURN_(new_kObject(O_ct(sfp[K_RTNIDX].o), 0));
 }
 
 //##  void Curl.setOpt(int type, dynamic data);
-static KMETHOD Curl_setOpt(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Curl_setOpt(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	CURL* curl = toCURL(sfp[0].o);
 	long curlopt = Int_to(long, sfp[1]);
@@ -311,7 +311,7 @@ static KMETHOD Curl_setOpt(CTX, ksfp_t *sfp _RIX)
 }
 
 //## void Curl.appendHeader();
-static KMETHOD Curl_appendHeader(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Curl_appendHeader(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	struct _kCurl* kcurl = (struct _kCurl*)sfp[0].o;
 	char *h = String_to(char*,sfp[1]);
@@ -320,7 +320,7 @@ static KMETHOD Curl_appendHeader(CTX, ksfp_t *sfp _RIX)
 }
 
 //## boolean Curl.perform();
-static KMETHOD Curl_perform(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Curl_perform(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kCurl* kcurl = (kCurl*)sfp[0].o;
 	CURL* curl = toCURL(sfp[0].o);
@@ -339,7 +339,7 @@ static KMETHOD Curl_perform(CTX, ksfp_t *sfp _RIX)
 }
 
 ////## dynamic Curl.getInfo(int type);
-static KMETHOD Curl_getInfo(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Curl_getInfo(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	CURL* curl = toCURL(sfp[0].o);
 	char *strptr = NULL;
@@ -398,9 +398,9 @@ static KMETHOD Curl_getInfo(CTX, ksfp_t *sfp _RIX)
 
 #define _KVi(T)  #T, TY_Int, T
 
-static	kbool_t curl_initPackage(CTX, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static	kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
 {
-	ctx = (struct kcontext_t *)_ctx;
+	ctx = (struct KonohaContextVar *)kctx;
 
 	KDEFINE_CLASS defCurl = {
 		STRUCTNAME(Curl),
@@ -523,17 +523,17 @@ static	kbool_t curl_initPackage(CTX, kNameSpace *ks, int argc, const char**args,
 	return true;
 }
 
-static kbool_t curl_setupPackage(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t curl_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t curl_initNameSpace(CTX,  kNameSpace *ks, kline_t pline)
+static kbool_t curl_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
-static kbool_t curl_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t curl_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
@@ -663,7 +663,7 @@ static kbool_t curl_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
 //	return 0;
 //}
 //
-//static int CURL_open(CTX ctx, kbytes_t path, const char *mode)
+//static int CURL_open(KonohaContext *kctx ctx, kbytes_t path, const char *mode)
 //{
 //	//TODO mode treats as method
 //	CURLFILE *file = malloc(sizeof(CURLFILE));
@@ -693,12 +693,12 @@ static kbool_t curl_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
 //}
 //
 ////new OutputStream(http://...)
-//static int CURL_init(CTX ctx, kbytes_t path, const char *mode)
+//static int CURL_init(KonohaContext *kctx ctx, kbytes_t path, const char *mode)
 //{
 //	return (int)NULL;
 //}
 //
-//static void CURL_close(CTX ctx, int fd)
+//static void CURL_close(KonohaContext *kctx ctx, int fd)
 //{
 //	CURLFILE *file = (CURLFILE*)fd;
 //	curl_multi_remove_handle(multi_handle, file->curl);
@@ -715,7 +715,7 @@ static kbool_t curl_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
 //	return ret;
 //}
 //
-//static kintptr_t CURL_read(CTX ctx, int fd, char *buf, size_t bufsiz)
+//static kintptr_t CURL_read(KonohaContext *kctx ctx, int fd, char *buf, size_t bufsiz)
 //{
 //	CURLFILE *file = (CURLFILE*)fd;
 //	if(file == NULL) return 0;
@@ -729,18 +729,18 @@ static kbool_t curl_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
 //	return bufsiz;
 //}
 //
-//static kintptr_t CURL_write(CTX ctx, int fd, const char *buf, size_t bufsiz)
+//static kintptr_t CURL_write(KonohaContext *kctx ctx, int fd, const char *buf, size_t bufsiz)
 //{
 //	return 0;
 //}
 //
-//static int CURL_feof(CTX ctx, int fd)
+//static int CURL_feof(KonohaContext *kctx ctx, int fd)
 //{
 //	return url_feof((CURLFILE*)fd);
 //}
 //
 //static int pos = 0;
-//static int CURL_getc(CTX ctx, int fd)
+//static int CURL_getc(KonohaContext *kctx ctx, int fd)
 //{
 //    CURLFILE *file = (CURLFILE*)fd;
 //    if(!file->buffer_pos || file->buffer_pos < file->buffer_len) 
@@ -748,7 +748,7 @@ static kbool_t curl_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
 //    return file->buffer[pos++];
 //}
 //
-//static const char* CURL_getContentType(CTX ctx, int fd)
+//static const char* CURL_getContentType(KonohaContext *kctx ctx, int fd)
 //{
 //	CURLFILE *file = (CURLFILE*)fd;
 //	if(file != NULL){
@@ -759,7 +759,7 @@ static kbool_t curl_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
 //	return NULL;
 //}
 //
-//static const char* CURL_getCharset(CTX ctx, int fd)
+//static const char* CURL_getCharset(KonohaContext *kctx ctx, int fd)
 //{
 //	CURLFILE *file = (CURLFILE*)fd;
 //	if(file != NULL){
@@ -786,7 +786,7 @@ static kbool_t curl_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
 ////	file->buffer_len=0;
 ////}
 //
-//static kuintptr_t CURL_exists(CTX ctx, kbytes_t path, kNameSpace *ns)
+//static kuintptr_t CURL_exists(KonohaContext *kctx ctx, kbytes_t path, kNameSpace *ns)
 //{
 //	CURLFILE *file = malloc(sizeof(CURLFILE));
 //	if(file == NULL) return (kuintptr_t)0;
@@ -818,12 +818,12 @@ static kbool_t curl_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
 //    return (kuintptr_t)1;
 //}
 //
-//static kbool_t CURL_isTyped(CTX ctx, kclass_t cid)
+//static kbool_t CURL_isTyped(KonohaContext *kctx ctx, kclass_t cid)
 //{
 //	return PATH_isTyped(cid);
 //}
 //
-//static Object* newObjectNULL(CTX ctx, kclass_t cid, kString *s, kNameSpace *n)
+//static Object* newObjectNULL(KonohaContext *kctx ctx, kclass_t cid, kString *s, kNameSpace *n)
 //{
 //    return (Object*)s;
 //}

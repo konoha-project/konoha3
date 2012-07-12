@@ -30,7 +30,7 @@
 int main(int argc, const char *argv[])
 {
     klib2_t *lib;
-    konoha_t konoha = konoha_open((const kplatform_t*)&plat);
+    KonohaContext* konoha = konoha_open((const kplatform_t*)&plat);
     lib = konoha->lib2;
     int i;
     void *malloced[100];

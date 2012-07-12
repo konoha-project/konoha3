@@ -57,7 +57,7 @@ static const char *getSystemEncoding(void)
 #endif /* HAVE_ICONV_H */
 
 #ifdef _ICONV_H
-static kbool_t kloadIconv(CTX, kmodiconv_t *base, kline_t pline)
+static kbool_t kloadIconv(KonohaContext *kctx, kmodiconv_t *base, kline_t pline)
 {
 	base->ficonv_open = (ficonv_open)iconv_open;
 	base->ficonv = (ficonv)iconv;
@@ -66,7 +66,7 @@ static kbool_t kloadIconv(CTX, kmodiconv_t *base, kline_t pline)
 	return true;
 }
 #else
-static kbool_t klinkDynamicIconv(CTX, kmodiconv_t *base, kline_t pline)
+static kbool_t klinkDynamicIconv(KonohaContext *kctx, kmodiconv_t *base, kline_t pline)
 {
 	void *handler = dlopen("libiconv" K_OSDLLEXT, RTLD_LAZY);
 	void *f = NULL;
@@ -90,7 +90,7 @@ static kbool_t klinkDynamicIconv(CTX, kmodiconv_t *base, kline_t pline)
 #define BYTES_BUFSIZE 256
 
 // Bytes_init
-static void Bytes_init(CTX, kObject *o, void *conf)
+static void Bytes_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct _kBytes *ba = (struct _kBytes*)o;
 	ba->byteptr = NULL;
@@ -100,7 +100,7 @@ static void Bytes_init(CTX, kObject *o, void *conf)
 	}
 }
 
-static void Bytes_free(CTX, kObject *o)
+static void Bytes_free(KonohaContext *kctx, kObject *o)
 {
 	struct _kBytes *ba = (struct _kBytes*)o;
 	if (ba->byteptr != NULL) {
@@ -110,7 +110,7 @@ static void Bytes_free(CTX, kObject *o)
 	}
 }
 
-static void Bytes_p(CTX, ksfp_t *sfp, int pos, kwb_t *wb, int level)
+static void Bytes_p(KonohaContext *kctx, ksfp_t *sfp, int pos, kwb_t *wb, int level)
 {
 	kBytes *ba = (kBytes*)sfp[pos].o;
 	DBG_P("level:%d", level);
@@ -145,15 +145,15 @@ static void Bytes_p(CTX, ksfp_t *sfp, int pos, kwb_t *wb, int level)
 	}
 }
 
-static void kmodiconv_setup(CTX, struct kmodshare_t *def, int newctx)
+static void kmodiconv_setup(KonohaContext *kctx, struct kmodshare_t *def, int newctx)
 {
 }
 
-static void kmodiconv_reftrace(CTX, struct kmodshare_t *baseh)
+static void kmodiconv_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
 {
 }
 
-static void kmodiconv_free(CTX, struct kmodshare_t *baseh)
+static void kmodiconv_free(KonohaContext *kctx, struct kmodshare_t *baseh)
 {
 	KFREE(baseh, sizeof(kmodiconv_t));
 }
@@ -168,7 +168,7 @@ static void kmodiconv_free(CTX, struct kmodshare_t *baseh)
 //
 //}
 
-static kBytes* convFromTo(CTX, kBytes *fromBa, const char *fromCoding, const char *toCoding)
+static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromCoding, const char *toCoding)
 {
 	kiconv_t conv;
 	kwb_t wb;
@@ -199,8 +199,8 @@ static kBytes* convFromTo(CTX, kBytes *fromBa, const char *fromCoding, const cha
 	size_t iconv_ret = -1;
 	size_t processedSize = 0;
 	size_t processedTotalSize = processedSize;
-//	karray_t *buf = new_karray(_ctx, 0, 64);
-	kwb_init(&(_ctx->stack->cwb), &wb);
+//	karray_t *buf = new_karray(kctx, 0, 64);
+	kwb_init(&(kctx->stack->cwb), &wb);
 	while (inBytesLeft > 0 && iconv_ret == -1) {
 		iconv_ret = kmodiconv->ficonv(conv, inbuf, &inBytesLeft, outbuf, &outBytesLeft);
 		if (iconv_ret == -1 && errno == E2BIG) {
@@ -220,7 +220,7 @@ static kBytes* convFromTo(CTX, kBytes *fromBa, const char *fromCoding, const cha
 				KEYVALUE_s("to", toCoding),
 				KEYVALUE_s("error", strerror(errno))
 			);
-			return (kBytes*)(CT_Bytes->nulvalNUL);
+			return (kBytes*)(CT_Bytes->nulvalNULL);
 		} else {
 			// finished. iconv_ret != -1
 			processedSize = CONV_BUFSIZE - outBytesLeft;
@@ -238,30 +238,30 @@ static kBytes* convFromTo(CTX, kBytes *fromBa, const char *fromCoding, const cha
 }
 
 //## @Const method Bytes Bytes.encodeTo(String toEncoding);
-static KMETHOD Bytes_encodeTo(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Bytes_encodeTo(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kBytes *ba = sfp[0].ba;
 	kString *toCoding = sfp[1].s;
-	RETURN_(convFromTo(_ctx, ba, "UTF-8", S_text(toCoding)));
+	RETURN_(convFromTo(kctx, ba, "UTF-8", S_text(toCoding)));
 }
 
 //## @Const method String Bytes.decodeFrom(String fromEncoding);
-static KMETHOD Bytes_decodeFrom(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kBytes* fromBa = sfp[0].ba;
 	kString*fromCoding = sfp[1].s;
 	kBytes *toBa;
-	if (fromCoding != (kString*)(CT_String->nulvalNUL)) {
-		toBa = convFromTo(_ctx, fromBa, S_text(fromCoding), "UTF-8");
+	if (fromCoding != (kString*)(CT_String->nulvalNULL)) {
+		toBa = convFromTo(kctx, fromBa, S_text(fromCoding), "UTF-8");
 	} else {
 		// conv from default encoding
-		toBa = convFromTo(_ctx, fromBa, getSystemEncoding(), "UTF-8");
+		toBa = convFromTo(kctx, fromBa, getSystemEncoding(), "UTF-8");
 	}
 	RETURN_(new_kString(toBa->buf,toBa->bytesize, 0));
 }
 
 //## @Const method Bytes String.toBytes();
-static KMETHOD String_toBytes(CTX, ksfp_t *sfp _RIX)
+static KMETHOD String_toBytes(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kString* s = sfp[0].s;
 	kBytes* ba = (kBytes*)new_kObject(CT_Bytes, S_size(s));
@@ -276,33 +276,33 @@ static KMETHOD String_toBytes(CTX, ksfp_t *sfp _RIX)
 //#include "../konoha.string/string_glue.h"
 
 //## @Const method String Bytes.toString();
-static KMETHOD Bytes_toString(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Bytes_toString(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kBytes *from = sfp[0].ba;
-	kBytes *to = convFromTo(_ctx, from, getSystemEncoding(), "UTF-8");
+	kBytes *to = convFromTo(kctx, from, getSystemEncoding(), "UTF-8");
 	//calculate strlen
 	size_t strsize = strlen(to->buf);
 	RETURN_(new_kString(to->buf, strsize, 0));
 }
 
 //## Int Bytes.get(Int n);
-static KMETHOD Bytes_get(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Bytes_get(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kBytes *ba = sfp[0].ba;
-	size_t n = check_index(_ctx, sfp[1].ivalue, ba->bytesize, sfp[K_RTNIDX].uline);
+	size_t n = check_index(kctx, sfp[1].ivalue, ba->bytesize, sfp[K_RTNIDX].uline);
 	RETURNi_(ba->utext[n]);
 }
 
 //## method Int Bytes.set(Int n, Int c);
-static KMETHOD Bytes_set(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Bytes_set(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kBytes *ba = sfp[0].ba;
-	size_t n = check_index(_ctx, sfp[1].ivalue, ba->bytesize, sfp[K_RTNIDX].uline);
+	size_t n = check_index(kctx, sfp[1].ivalue, ba->bytesize, sfp[K_RTNIDX].uline);
 	ba->buf[n] = sfp[2].ivalue;
 	RETURNi_(ba->utext[n]);
 }
 
-static KMETHOD Bytes_setAll(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Bytes_setAll(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kBytes *ba = sfp[0].ba;
 	int bytesize = ba->bytesize;
@@ -313,13 +313,13 @@ static KMETHOD Bytes_setAll(CTX, ksfp_t *sfp _RIX)
 	RETURNvoid_();
 
 }
-static KMETHOD Bytes_getSize(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Bytes_getSize(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kBytes *ba = sfp[0].ba;
 	RETURNi_(ba->bytesize);
 }
 
-static KMETHOD Bytes_new(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Bytes_new(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	DBG_P("bytes new called, with size=%d", sfp[1].ivalue);
 	RETURN_(new_kObject(O_ct(sfp[K_RTNIDX].o), sfp[1].ivalue));
@@ -333,13 +333,13 @@ static KMETHOD Bytes_new(CTX, ksfp_t *sfp _RIX)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t bytes_initPackage(CTX, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
 {
 	kmodiconv_t *base = (kmodiconv_t*)KCALLOC(sizeof(kmodiconv_t), 1);
 #ifdef _ICONV_H
-	base->h.name     = kloadIconv(_ctx, base, pline) ? "iconv" : "noconv";
+	base->h.name     = kloadIconv(kctx, base, pline) ? "iconv" : "noconv";
 #else
-	base->h.name     = 	klinkDynamicIconv(_ctx, base, pline) ? "iconv" : "noconv";
+	base->h.name     = 	klinkDynamicIconv(kctx, base, pline) ? "iconv" : "noconv";
 #endif /* _ICONV_H */
 	base->h.setup    = kmodiconv_setup;
 	base->h.reftrace = kmodiconv_reftrace;
@@ -374,13 +374,13 @@ static kbool_t bytes_initPackage(CTX, kNameSpace *ks, int argc, const char**args
 	return true;
 }
 
-static kbool_t bytes_setupPackage(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t bytes_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
 
-static int parseSQUOTE(CTX, struct _kToken *tk, tenv_t *tenv, int tok_start)
+static int parseSQUOTE(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, int tok_start)
 {
 	int ch, prev = '\'', pos = tok_start + 1;
 	while((ch = tenv->source[pos++]) != 0) {
@@ -403,7 +403,7 @@ static int parseSQUOTE(CTX, struct _kToken *tk, tenv_t *tenv, int tok_start)
 }
 
 
-static KMETHOD ExprTyCheck_Squote(CTX, ksfp_t *sfp _RIX)
+static KMETHOD ExprTyCheck_Squote(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
@@ -413,24 +413,24 @@ static KMETHOD ExprTyCheck_Squote(CTX, ksfp_t *sfp _RIX)
 		int ch = S_text(s)[0];
 		RETURN_(kExpr_setNConstValue(expr, TY_Int, ch));
 	} else {
-		SUGAR Stmt_p(_ctx, stmt, (kToken*)expr, ERR_, "single quote doesn't accept multi characters, '%s'", S_text(s));
+		SUGAR Stmt_p(kctx, stmt, (kToken*)expr, ERR_, "single quote doesn't accept multi characters, '%s'", S_text(s));
 	}
 	RETURN_(K_NULLEXPR);
 }
 
-static kbool_t bytes_initNameSpace(CTX,  kNameSpace *ks, kline_t pline)
+static kbool_t bytes_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
 {
 	USING_SUGAR;
-	SUGAR NameSpace_setTokenizeFunc(_ctx, ks, '\'', parseSQUOTE, NULL, 0);
+	SUGAR NameSpace_setTokenizeFunc(kctx, ks, '\'', parseSQUOTE, NULL, 0);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .kw = SYM_("$SingleQuote"), _TERM, ExprTyCheck_(Squote)},
 		{ .kw = KW_END, },
 	};
-	SUGAR NameSpace_defineSyntax(_ctx, ks, SYNTAX);
+	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	return true;
 }
 
-static kbool_t bytes_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t bytes_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }

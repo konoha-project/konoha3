@@ -28,9 +28,9 @@
 /* ------------------------------------------------------------------------ */
 /* [class defs] */
 
-#define ctxiconv         ((ctxiconv_t*)_ctx->mod[MOD_iconv])
-#define kmodiconv        ((kmodiconv_t*)_ctx->modshare[MOD_iconv])
-#define IS_defineBytes() (_ctx->modshare[MOD_iconv] != NULL)
+#define ctxiconv         ((ctxiconv_t*)kctx->mod[MOD_iconv])
+#define kmodiconv        ((kmodiconv_t*)kctx->modshare[MOD_iconv])
+#define IS_defineBytes() (kctx->modshare[MOD_iconv] != NULL)
 #define CT_Bytes         kmodiconv->cBytes
 #define TY_Bytes         kmodiconv->cBytes->cid
 

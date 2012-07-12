@@ -26,8 +26,8 @@
 #ifndef MODGC_H_
 #define MODGC_H_
 
-//#define kgcmod        ((kgcmod_t*)_ctx->mod[MOD_GC])
-//#define kgcshare      ((kgcshare_t*)_ctx->modshare[MOD_GC])
+//#define kgcmod        ((kgcmod_t*)kctx->mod[MOD_GC])
+//#define kgcshare      ((kgcshare_t*)kctx->modshare[MOD_GC])
 //
 //typedef struct {
 //	kmodshare_t h;
@@ -37,18 +37,18 @@
 //	kmodlocal_t h;
 //} kgcmod_t;
 
-extern void MODGC_init(CTX, kcontext_t *ctx);
-extern void MODGCSHARE_free(CTX, kcontext_t *ctx);
-extern void MODGC_destoryAllObjects(CTX, kcontext_t *ctx);
+extern void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx);
+extern void MODGCSHARE_free(KonohaContext *kctx, KonohaContextVar *ctx);
+extern void MODGC_destoryAllObjects(KonohaContext *kctx, KonohaContextVar *ctx);
 
-extern void MODGC_init(CTX, kcontext_t *ctx);
-extern void MODGC_free(CTX, kcontext_t *ctx);
-extern kObject *MODGC_omalloc(CTX, size_t size);
+extern void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx);
+extern void MODGC_free(KonohaContext *kctx, KonohaContextVar *ctx);
+extern kObject *MODGC_omalloc(KonohaContext *kctx, size_t size);
 
 /* root reftrace */
-extern void KRUNTIME_reftraceAll(CTX);
+extern void KRUNTIME_reftraceAll(KonohaContext *kctx);
 
-extern void MODGC_gc_invoke(CTX, int needsCStackTrace);
+extern void MODGC_gc_invoke(KonohaContext *kctx, int needsCStackTrace);
 extern void MODGC_check_malloced_size(void);
 
 #endif /* MODGC_H_ */

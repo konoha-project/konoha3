@@ -29,52 +29,52 @@
 
 static int _sum_  = 0;
 static int _sum2_ = 0;
-static void reftrace(CTX, kmape_t *e)
+static void reftrace(KonohaContext *kctx, kmape_t *e)
 {
     _sum_ += e->uvalue;
 }
-static void reftrace2(CTX, void *e)
+static void reftrace2(KonohaContext *kctx, void *e)
 {
     _sum2_ += (uintptr_t)e;
 }
 
-void test_Kmap(CTX)
+void test_Kmap(KonohaContext *kctx)
 {
     int i;
-    kmap_t* map = _ctx->lib2->Kmap_init(_ctx, 4);
+    kmap_t* map = kctx->lib2->Kmap_init(kctx, 4);
     for (i = 0; i < 10; ++i) {
-        kmape_t *entry = _ctx->lib2->Kmap_newentry(_ctx, map, i);
+        kmape_t *entry = kctx->lib2->Kmap_newentry(kctx, map, i);
         assert(entry->hcode == i);
         entry->ukey = i*2;
         entry->uvalue = i;
     }
     for (i = 0; i < 10; ++i) {
-        kmape_t *entry = _ctx->lib2->Kmap_get(map, i);
+        kmape_t *entry = kctx->lib2->Kmap_get(map, i);
         assert(entry != NULL);
         assert(entry->uvalue == i);
     }
-    _ctx->lib2->Kmap_reftrace(_ctx, map, reftrace);
+    kctx->lib2->Kmap_reftrace(kctx, map, reftrace);
     fprintf(stderr, "%d\n", _sum_);
     assert(_sum_ == 45);
 
     for (i = 0; i < 10; i+=2) {
-        kmape_t *entry = _ctx->lib2->Kmap_get(map, i);
+        kmape_t *entry = kctx->lib2->Kmap_get(map, i);
         assert(entry != NULL);
-        _ctx->lib2->Kmap_remove(map, entry);
+        kctx->lib2->Kmap_remove(map, entry);
     }
     for (i = 0; i < 10; i+=2) {
-        kmape_t *entry = _ctx->lib2->Kmap_get(map, i);
+        kmape_t *entry = kctx->lib2->Kmap_get(map, i);
         assert(entry == NULL);
     }
     for (i = 0; i < 10; ++i) {
-        kmape_t *entry = _ctx->lib2->Kmap_get(map, i);
+        kmape_t *entry = kctx->lib2->Kmap_get(map, i);
         if (i % 2 == 0) {
             assert(entry == NULL);
         } else {
             assert(entry->uvalue == i);
         }
     }
-    _ctx->lib2->Kmap_free(_ctx, map, reftrace2);
+    kctx->lib2->Kmap_free(kctx, map, reftrace2);
     assert(_sum2_ == 25);
     fprintf(stderr, "%d\n", _sum2_);
     _sum_ = _sum2_ = 0;
@@ -82,7 +82,7 @@ void test_Kmap(CTX)
 
 int main(int argc, const char *argv[])
 {
-    konoha_t konoha = konoha_open((const kplatform_t*)&plat);
+    KonohaContext* konoha = konoha_open((const kplatform_t*)&plat);
     int i;
     for (i = 0; i < 100; ++i) {
         test_Kmap(konoha);

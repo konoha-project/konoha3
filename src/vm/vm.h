@@ -34,8 +34,8 @@ extern "C" {
 
 #define K_USING_THCODE_
 
-#define ctxcode    ((ctxcode_t*)_ctx->modlocal[MOD_code])
-#define kmodcode         ((kmodcode_t*)_ctx->modshare[MOD_code])
+#define ctxcode    ((ctxcode_t*)kctx->modlocal[MOD_code])
+#define kmodcode         ((kmodcode_t*)kctx->modshare[MOD_code])
 #define CT_BasicBlock    kmodcode->cBasicBlock
 #define CT_KonohaCode    kmodcode->cKonohaCode
 
@@ -80,12 +80,12 @@ typedef struct ksfx_t {
 } ksfx_t;
 
 struct klr_LDMTD_t;
-typedef void (*klr_Fth)(CTX, struct kopl_t *, void**);
-typedef void (*klr_Floadmtd)(CTX, ksfp_t *, struct klr_LDMTD_t *);
-typedef kbool_t (*Fcallcc)(CTX, ksfp_t *, int, int, void *);
+typedef void (*klr_Fth)(KonohaContext *kctx, struct kopl_t *, void**);
+typedef void (*klr_Floadmtd)(KonohaContext *kctx, ksfp_t *, struct klr_LDMTD_t *);
+typedef kbool_t (*Fcallcc)(KonohaContext *kctx, ksfp_t *, int, int, void *);
 
 typedef struct {
-	kcid_t cid; kmethodn_t mn;
+	ktype_t cid; kmethodn_t mn;
 } kcachedata_t;
 
 #if defined(K_USING_THCODE_)
@@ -176,7 +176,7 @@ struct _kKonohaCode {
 #define OPEXEC_NOP() (void)op
 
 #define OPEXEC_THCODE(F) { \
-		F(_ctx, pc, OPJUMP); \
+		F(kctx, pc, OPJUMP); \
 		pc = PC_NEXT(pc);\
 		goto L_RETURN; \
 	}\
@@ -192,7 +192,7 @@ struct _kKonohaCode {
 
 #define OPEXEC_NCALL() { \
 		(void)op;\
-		(rbp[K_MTDIDX2].mtdNC)->fastcall_1(_ctx, SFP(rbp) K_RIXPARAM);\
+		(rbp[K_MTDIDX2].mtdNC)->fastcall_1(kctx, SFP(rbp) K_RIXPARAM);\
 		OPEXEC_RET();\
 	} \
 
@@ -215,14 +215,14 @@ struct _kKonohaCode {
 #define PC_NEXT(pc)   pc+1
 
 #define OPEXEC_CHKSTACK(UL) \
-	if(unlikely(_ctx->esp > _ctx->stack->stack_uplimit)) {\
+	if(unlikely(kctx->esp > kctx->stack->stack_uplimit)) {\
 		kreportf(CRIT_, UL, "stack overflow");\
 	}\
 
 
 #define OPEXEC_CALL(UL, THIS, espshift, CTO) { \
 		kMethod *mtd_ = rbp[THIS+K_MTDIDX2].mtdNC;\
-		klr_setesp(_ctx, SFP(rshift(rbp, espshift)));\
+		klr_setesp(kctx, SFP(rshift(rbp, espshift)));\
 		OPEXEC_CHKSTACK(UL);\
 		rbp = rshift(rbp, THIS);\
 		rbp[K_ULINEIDX2-1].o = CTO;\
@@ -235,7 +235,7 @@ struct _kKonohaCode {
 
 #define OPEXEC_VCALL(UL, THIS, espshift, mtdO, CTO) { \
 		kMethod *mtd_ = mtdO;\
-		klr_setesp(_ctx, SFP(rshift(rbp, espshift)));\
+		klr_setesp(kctx, SFP(rshift(rbp, espshift)));\
 		OPEXEC_CHKSTACK(UL);\
 		rbp = rshift(rbp, THIS);\
 		rbp[K_ULINEIDX2-1].o = CTO;\
@@ -255,8 +255,8 @@ struct _kKonohaCode {
 		sfp_[K_SHIFTIDX].shift = thisidx; \
 		sfp_[K_PCIDX].pc = PC_NEXT(pc);\
 		sfp_[K_MTDIDX].mtdNC = mtd_;\
-		klr_setesp(_ctx, SFP(rshift(rbp, espshift)));\
-		(mtd_)->fcall_1(_ctx, sfp_ K_RIXPARAM); \
+		klr_setesp(kctx, SFP(rshift(rbp, espshift)));\
+		(mtd_)->fcall_1(kctx, sfp_ K_RIXPARAM); \
 		sfp_[K_MTDIDX].mtdNC = NULL;\
 	} \
 
@@ -290,13 +290,13 @@ struct _kKonohaCode {
 
 #ifdef K_USING_SAFEPOINT
 #define KLR_SAFEPOINT(espidx) \
-	if(_ctx->safepoint != 0) { \
-		klr_setesp(_ctx, SFP(rshift(rbp, espidx)));\
-		knh_checkSafePoint(_ctx, (ksfp_t*)rbp, __FILE__, __LINE__); \
+	if(kctx->safepoint != 0) { \
+		klr_setesp(kctx, SFP(rshift(rbp, espidx)));\
+		knh_checkSafePoint(kctx, (ksfp_t*)rbp, __FILE__, __LINE__); \
 	} \
 
 #else
-#define OPEXEC_SAFEPOINT(RS)   klr_setesp(_ctx, SFP(rshift(rbp, RS)));
+#define OPEXEC_SAFEPOINT(RS)   klr_setesp(kctx, SFP(rshift(rbp, RS)));
 #endif
 
 #define OPEXEC_ERROR(start, msg) {\
@@ -305,9 +305,9 @@ struct _kKonohaCode {
 	}\
 
 #define OPEXEC_ERROR2(start, msg) { \
-		kException *e_ = new_Error(_ctx, 0, msg);\
-		CTX_setThrowingException(_ctx, e_);\
-		knh_throw(_ctx, SFP(rbp), SFPIDX(start)); \
+		kException *e_ = new_Error(kctx, 0, msg);\
+		KonohaContext_setThrowingException(kctx, e_);\
+		knh_throw(kctx, SFP(rbp), SFPIDX(start)); \
 	} \
 
 
@@ -344,7 +344,7 @@ struct _kKonohaCode {
 /* [HALT] */
 
 #define KLR_HALT() {\
-	THROW_Halt(_ctx, SFP(rbp), "HALT"); \
+	THROW_Halt(kctx, SFP(rbp), "HALT"); \
 	goto L_RETURN;\
 }\
 
@@ -382,7 +382,7 @@ struct _kKonohaCode {
 #define knh_Object_RCinc(v_) ((void)v_)
 #define knh_Object_RCdec(v_) ((void)v_)
 #define Object_isRC0(v_) (false)
-#define knh_Object_RCfree(_ctx, v_) ((void)v_)
+#define knh_Object_RCfree(kctx, v_) ((void)v_)
 
 #define OPEXEC_RCINC(a) {\
 		RCGC_(kObject *v_ = Ro_(a);)\
@@ -394,7 +394,7 @@ struct _kKonohaCode {
 		knh_Object_RCinc(v_);\
 		knh_Object_RCdec(v_);\
 		if(Object_isRC0(v_)) {\
-			knh_Object_RCfree(_ctx, v_);\
+			knh_Object_RCfree(kctx, v_);\
 		}\
 	}\
 
@@ -407,7 +407,7 @@ struct _kKonohaCode {
 		kObject *v_ = RXo_(a);\
 		knh_Object_RCdec(v_);\
 		if(Object_isRC0(v_)) {\
-			knh_Object_RCfree(_ctx, v_);\
+			knh_Object_RCfree(kctx, v_);\
 		}\
 	}\
 
@@ -503,8 +503,8 @@ struct _kKonohaCode {
 /* [CALL] */
 
 #define OPEXEC_FASTCALL0(c, thisidx, rix, espidx, fcall) { \
-		klr_setesp(_ctx, SFP(rshift(rbp, espidx)));\
-		fcall(_ctx, SFP(rshift(rbp, thisidx)), (long)rix);\
+		klr_setesp(kctx, SFP(rshift(rbp, espidx)));\
+		fcall(kctx, SFP(rshift(rbp, thisidx)), (long)rix);\
 	} \
 
 /* ------------------------------------------------------------------------- */
@@ -512,7 +512,7 @@ struct _kKonohaCode {
 
 #define OPEXEC_VCALL_(UL, THIS, espshift, mtdO, CTO) { \
 		kMethod *mtd_ = mtdO;\
-		klr_setesp(_ctx, SFP(rshift(rbp, espshift)));\
+		klr_setesp(kctx, SFP(rshift(rbp, espshift)));\
 		OPEXEC_CHKSTACK(UL);\
 		rbp = rshift(rbp, THIS);\
 		rbp[K_ULINEIDX2-1].o = CTO;\
@@ -527,12 +527,12 @@ struct _kKonohaCode {
 #define OPEXEC_JMP_(PC, JUMP)   OPEXEC_RET()
 
 #define OPEXEC_YIELD(espidx) {\
-		klr_setesp(_ctx, SFP(rshift(rbp,espidx)));\
+		klr_setesp(kctx, SFP(rshift(rbp,espidx)));\
 		goto L_RETURN;\
 	}\
 
 #define OPEXEC_LDMTD(thisidx, ldmtd, hc, mtdO) { \
-		ldmtd(_ctx, SFP(rbp), op);\
+		ldmtd(kctx, SFP(rbp), op);\
 	} \
 
 /**
@@ -550,12 +550,12 @@ struct _kKonohaCode {
 
 #define OPEXEC_THUNK(rtnidx, thisidx, espshift, mtdO) { \
 		kMethod *mtd_ = mtdO == NULL ? rbp[thisidx+K_MTDIDX2].mtdNC : mtdO;\
-		klr_setesp(_ctx, SFP(rshift(rbp, espshift)));\
-		knh_stack_newThunk(_ctx, (ksfp_t*)rshift(rbp, thisidx));\
+		klr_setesp(kctx, SFP(rshift(rbp, espshift)));\
+		knh_stack_newThunk(kctx, (ksfp_t*)rshift(rbp, thisidx));\
 	} \
 
 #define OPEXEC_FUNCCALL() { \
-		(rbp[K_MTDIDX2].mtdNC)->fcall_1(_ctx, SFP(rbp), K_RTNIDX);\
+		(rbp[K_MTDIDX2].mtdNC)->fcall_1(kctx, SFP(rbp), K_RTNIDX);\
 		KLR_RET();\
 	} \
 
@@ -578,20 +578,20 @@ struct _kKonohaCode {
 }\
 
 #define OPEXEC_SCAST(rtnidx, thisidx, rix, espidx, tmr)  { \
-		klr_setesp(_ctx, SFP(rshift(rbp, espidx)));\
-		knh_TypeMap_exec(_ctx, tmr, SFP(rshift(rbp,thisidx)), rix); \
+		klr_setesp(kctx, SFP(rshift(rbp, espidx)));\
+		knh_TypeMap_exec(kctx, tmr, SFP(rshift(rbp,thisidx)), rix); \
 	} \
 
-#define OPEXEC_TCAST(_ctx, rtnidx, thisidx, rix, espidx, tmr)  { \
+#define OPEXEC_TCAST(kctx, rtnidx, thisidx, rix, espidx, tmr)  { \
 		kTypeMap *tmr_ = tmr; \
 		ksfp_t *sfp_ = SFP(rshift(rbp,thisidx));\
 		kclass_t scid = SP(tmr_)->scid, this_cid = O_cid(sfp_[0].o);\
 		if(this_cid != scid) {\
-			tmr_ = knh_findTypeMapNULL(_ctx, scid, SP(tmr)->tcid);\
+			tmr_ = knh_findTypeMapNULL(kctx, scid, SP(tmr)->tcid);\
 			KSETv(((klr_TCAST_t*)op)->cast, tmr_);\
 		}\
-		klr_setesp(_ctx, SFP(rshift(rbp, espidx)));\
-		knh_TypeMap_exec(_ctx, tmr_, sfp_, rix); \
+		klr_setesp(kctx, SFP(rshift(rbp, espidx)));\
+		knh_TypeMap_exec(kctx, tmr_, sfp_, rix); \
 	} \
 
 #define OPEXEC_ACAST(rtnidx, thisidx, rix, espidx, tmr)  { \
@@ -600,16 +600,16 @@ struct _kKonohaCode {
 		if(!class_isa(this_cid, tcid)) {\
 			kclass_t scid = SP(tmr_)->scid;\
 			if(this_cid != scid) {\
-				tmr_ = knh_findTypeMapNULL(_ctx, scid, tcid);\
+				tmr_ = knh_findTypeMapNULL(kctx, scid, tcid);\
 				KNH_SETv(((klr_ACAST_t*)op)->cast, tmr_);\
 			}\
-			/*klr_setesp(_ctx, SFP(rshift(rbp, espidx)));*/\
-			knh_TypeMap_exec(_ctx, tmr_, SFP(rshift(rbp,thisidx)), rix); \
+			/*klr_setesp(kctx, SFP(rshift(rbp, espidx)));*/\
+			knh_TypeMap_exec(kctx, tmr_, SFP(rshift(rbp,thisidx)), rix); \
 		}\
 	} \
 
 #define OPEXEC_TR(c, a, rix, ct, f) { \
-	f(_ctx, SFP(rshift(rbp, a)), (long)rix, ct);\
+	f(kctx, SFP(rshift(rbp, a)), (long)rix, ct);\
 }\
 
 /* ------------------------------------------------------------------------ */
@@ -626,8 +626,8 @@ struct _kKonohaCode {
 #define OPEXEC_NEXT(PC, JUMP, rtnidx, ib, rix, espidx) { \
 	ksfp_t *itrsfp_ = SFP(rshift(rbp, ib)); \
 	DBG_ASSERT(IS_bIterator(itrsfp_[0].it));\
-	klr_setesp(_ctx, SFP(rshift(rbp, espidx)));\
-	if(!((itrsfp_[0].it)->fnext_1(_ctx, itrsfp_, rix))) { \
+	klr_setesp(kctx, SFP(rshift(rbp, espidx)));\
+	if(!((itrsfp_[0].it)->fnext_1(kctx, itrsfp_, rix))) { \
 		OPEXEC_JMP(PC, JUMP); \
 	} \
 } \
@@ -653,7 +653,7 @@ struct _kKonohaCode {
 		_hdr = Rh_(hn);\
 		_hdr->espidx = (ctx->esp - ctx->stack); \
 		_hdr->parentNC = ctx->ehdrNC;\
-		((kcontext_t*)ctx)->ehdrNC = _hdr; \
+		((KonohaContextVar*)ctx)->ehdrNC = _hdr; \
 	} else { \
 		_hdr = ctx->ehdrNC;\
 		knh_ExceptionHandlerEX_t* _hdrEX = DP(_hdr);\
@@ -661,7 +661,7 @@ struct _kKonohaCode {
 		rbp = RBP(ctx->stack + _hdrEX->sfpidx);\
 		klr_setesp(ctx, (ctx->stack + _hdr->espidx));\
 		op = _hdrEX->op;\
-		((kcontext_t*)ctx)->ehdrNC = _hdr->parentNC;\
+		((KonohaContextVar*)ctx)->ehdrNC = _hdr->parentNC;\
 		OPEXEC_JMP(PC, JUMP);\
 	}\
 } \
@@ -669,7 +669,7 @@ struct _kKonohaCode {
 #define OPEXEC_TRYEND(ctx, hn)  {\
 	kExceptionHandler* _hdr = Rh_(hn); \
 	DBG_ASSERT(IS_ExceptionHandler(_hdr)); \
-	((kcontext_t*)ctx)->ehdrNC = _hdr->parentNC;\
+	((KonohaContextVar*)ctx)->ehdrNC = _hdr->parentNC;\
 	klr_mov(ctx, Ro_(hn), KNH_TNULL(ExceptionHandler));\
 } \
 
@@ -690,14 +690,14 @@ struct _kKonohaCode {
 		_hdr = Rh_(hn);\
 		_hdr->espidx = (ctx->esp - ctx->stack); \
 		_hdr->parentNC = ctx->ehdrNC;\
-		((kcontext_t*)ctx)->ehdrNC = _hdr; \
+		((KonohaContextVar*)ctx)->ehdrNC = _hdr; \
 	} else { \
 		knh_ExceptionHandlerEX_t* _hdrEX = DP(_hdr);\
 		pc = _hdrEX->pc; \
 		rbp = RBP(ctx->stack + _hdrEX->sfpidx);\
 		klr_setesp(ctx, (ctx->stack + _hdr->espidx));\
 		op = _hdrEX->op;\
-		((kcontext_t*)ctx)->ehdrNC = _hdr->parentNC;\
+		((KonohaContextVar*)ctx)->ehdrNC = _hdr->parentNC;\
 		OPEXEC_JMP(PC, JUMP);\
 	}\
 } \
@@ -707,7 +707,7 @@ struct _kKonohaCode {
 	DBG_ASSERT(IS_ExceptionHandler(_hdr)); \
 	DP(_hdr)->return_address = NULL;\
 	DP(_hdr)->frame_address  = NULL;\
-	((kcontext_t*)ctx)->ehdrNC = _hdr->parentNC;\
+	((KonohaContextVar*)ctx)->ehdrNC = _hdr->parentNC;\
 	klr_mov(ctx, Ro_(hn), KNH_TNULL(ExceptionHandler));\
 } \
 
@@ -723,7 +723,7 @@ struct _kKonohaCode {
 
 #define OPEXEC_ERR(ctx, start, msg) { \
 	kException *e_ = new_Error(ctx, 0, msg);\
-	CTX_setThrowingException(ctx, e_);\
+	KonohaContext_setThrowingException(ctx, e_);\
 	knh_throw(ctx, SFP(rbp), SFPIDX(start)); \
 } \
 
@@ -873,24 +873,24 @@ struct _kKonohaCode {
 /* ------------------------------------------------------------------------ */
 
 #define klr_array_index(n, size)   (size_t)n
-#define THROW_OutOfRange(_ctx, lsfp, n, size) /*TODO*/
+#define THROW_OutOfRange(kctx, lsfp, n, size) /*TODO*/
 #ifdef OPCODE_CHKIDX
 #define klr_array_check(n, size)
 #else
 #define klr_array_check(n, size) \
-	if(unlikely(n >= size)) THROW_OutOfRange(_ctx, SFP(rbp), n, size)
+	if(unlikely(n >= size)) THROW_OutOfRange(kctx, SFP(rbp), n, size)
 
 #endif
 
 #define OPEXEC_CHKIDX(aidx, nidx) {\
 		size_t size_ = kArray_size(rbp[aidx].a);\
 		size_t n_ = Ri_(nidx);\
-		if(unlikely(n_ >= size_)) THROW_OutOfRange(_ctx, SFP(rbp), n_, size_);\
+		if(unlikely(n_ >= size_)) THROW_OutOfRange(kctx, SFP(rbp), n_, size_);\
 	}\
 
 #define OPEXEC_CHKIDXC(aidx, n) {\
 		size_t size_ = kArray_size(rbp[aidx].a);\
-		if(unlikely(n >= size_)) THROW_OutOfRange(_ctx, SFP(rbp), n, size_);\
+		if(unlikely(n >= size_)) THROW_OutOfRange(kctx, SFP(rbp), n, size_);\
 	}\
 
 #define OPEXEC_BGETIDXC(cidx, aidx, N) {\

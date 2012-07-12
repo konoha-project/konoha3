@@ -51,10 +51,10 @@
 //static uint64_t memlog_start = 0;
 //#define MEMLOG_INIT()  memlog_start = knh_getTimeMilliSecond()
 
-#define MEMLOG(_ctx, action, pe, ...) KNH_NTRACE2(_ctx, action, pe, ## __VA_ARGS__)
+#define MEMLOG(kctx, action, pe, ...) KNH_NTRACE2(kctx, action, pe, ## __VA_ARGS__)
 
 #else
-#define MEMLOG(_ctx, action, pe, ...)
+#define MEMLOG(kctx, action, pe, ...)
 #endif
 
 #define KNH_ATOMIC_ADD(a, b) __sync_add_and_fetch(&(a), b)
@@ -62,27 +62,27 @@
 
 #ifdef K_USING_MEMSTAT
 #define STAT_(stmt) stmt
-#define STAT_mem(_ctx, SIZE) do { \
-	kstatinfo_t *stat = _ctx->stat;\
+#define STAT_mem(kctx, SIZE) do { \
+	kstatinfo_t *stat = kctx->stat;\
 	KNH_ATOMIC_ADD(stat->usedMemorySize, (SIZE));\
 	if(stat->usedMemorySize > stat->maxMemoryUsage) stat->maxMemoryUsage = stat->usedMemorySize;\
 } while (0)
 
-#define STAT_dmem(_ctx, SIZE)  KNH_ATOMIC_SUB((_ctx->stat)->usedMemorySize, (SIZE))
+#define STAT_dmem(kctx, SIZE)  KNH_ATOMIC_SUB((kctx->stat)->usedMemorySize, (SIZE))
 
-#define STAT_Object(_ctx, ct) do { \
+#define STAT_Object(kctx, ct) do { \
 	((struct _kclass*)ct)->count += 1; \
 	((struct _kclass*)ct)->total += 1; \
 } while (0)
 
-#define STAT_dObject(_ctx, ct) ((struct _kclass*)ct)->count -= 1
+#define STAT_dObject(kctx, ct) ((struct _kclass*)ct)->count -= 1
 
 #else
 #define STAT_(stmt)
-#define STAT_mem(_ctx, SIZE)
-#define STAT_dmem(_ctx, SIZE)
-#define STAT_Object(_ctx, ct)
-#define STAT_dObject(_ctx, ct)
+#define STAT_mem(kctx, SIZE)
+#define STAT_dmem(kctx, SIZE)
+#define STAT_Object(kctx, ct)
+#define STAT_dObject(kctx, ct)
 
 #endif
 

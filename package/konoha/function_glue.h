@@ -35,14 +35,14 @@ struct _kFunc {
 };
 
 // Int
-static void Func_init(CTX, kObject *o, void *conf)
+static void Func_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct _kFunc *fo = (struct _kFunc*)o;
 	KINITv(fo->self, K_NULL);
 	KINITv(fo->mtd, conf != NULL ? KNULL(Method) : (kMethod*)conf);
 }
 
-static void Func_reftrace(CTX, kObject *o)
+static void Func_reftrace(KonohaContext *kctx, kObject *o)
 {
 	BEGIN_REFTRACE(4);
 	kFunc *fo = (kFunc*)o;
@@ -54,7 +54,7 @@ static void Func_reftrace(CTX, kObject *o)
 /* ------------------------------------------------------------------------ */
 //## This Func.new(Object self, Method mtd);
 
-static KMETHOD Func_new(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Func_new(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kFunc *fo = sfp[0].fo;
 	KSETv(fo->self, sfp[1].o);
@@ -65,12 +65,12 @@ static KMETHOD Func_new(CTX, ksfp_t *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## @Hidden T0 Func.invoke();
 
-static KMETHOD Func_invoke(CTX, ksfp_t *sfp _RIX)
+static KMETHOD Func_invoke(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kFunc* fo = sfp[0].fo;
 	KSETv(sfp[0].o, fo->self);
-	klr_setmtdNC(_ctx, sfp[K_MTDIDX], fo->mtd);
-	KCALL(_ctx, sfp, fo->mtd, K_RIX);
+	klr_setmtdNC(kctx, sfp[K_MTDIDX], fo->mtd);
+	KCALL(kctx, sfp, fo->mtd, K_RIX);
 }
 
 #define _Public   kMethod_Public
@@ -79,7 +79,7 @@ static KMETHOD Func_invoke(CTX, ksfp_t *sfp _RIX)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static	kbool_t function_initPackage(CTX, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static	kbool_t function_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
 {
 	kmodfunction_t *base = (kmodfunction_t*)KCALLOC(sizeof(kmodfunction_t), 1);
 	base->h.name     = "function";
@@ -122,14 +122,14 @@ static	kbool_t function_initPackage(CTX, kNameSpace *ks, int argc, const char**a
 	return true;
 }
 
-static kbool_t function_setupPackage(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t function_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }
 
 //----------------------------------------------------------------------------
 
-static KMETHOD ExprTyCheck_Float(CTX, ksfp_t *sfp _RIX)
+static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
@@ -138,7 +138,7 @@ static KMETHOD ExprTyCheck_Float(CTX, ksfp_t *sfp _RIX)
 	RETURN_(kExpr_setNConstValue(expr, TY_Float, sfp[4].ndata));
 }
 
-static kbool_t function_initNameSpace(CTX,  kNameSpace *ks, kline_t pline)
+static kbool_t function_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
@@ -148,11 +148,11 @@ static kbool_t function_initNameSpace(CTX,  kNameSpace *ks, kline_t pline)
 		{ TOKEN("$param"), ExprTyCheck_(FuncStyleCall), },
 		{ .kw = KW_END, },
 	};
-	SUGAR NameSpace_defineSyntax(_ctx, ks, SYNTAX);
+	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	return true;
 }
 
-static kbool_t function_setupNameSpace(CTX, kNameSpace *ks, kline_t pline)
+static kbool_t function_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
 {
 	return true;
 }

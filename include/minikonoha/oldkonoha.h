@@ -22,45 +22,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#ifndef MODITERATOR_H_
-#define MODITERATOR_H_
+#ifndef OLDKONOHA_H_
+#define OLDKONOHA_H_
 
-#define kiteratormod           ((kiteratormod_t*)kctx->mod[MOD_iterator])
-#define kmoditerator           ((kmoditerator_t*)kctx->modshare[MOD_iterator])
-#define IS_defineIterator()    (kctx->modshare[MOD_iterator] != NULL)
+#define CTX KonohaContext *kctx
+#define _ctx  kctx
+#define konoha_t  KonohaContext*
 
-#define CFLAG_Iterator         kClass_Final
-#define CT_Iterator            kmoditerator->cIterator
-#define TY_Iterator            kmoditerator->cIterator->cid
-#define CT_StringIterator      kmoditerator->cStringIterator
-#define TY_StringIterator      kmoditerator->cStringIterator->cid
+#define kcid_t ktype_t
 
-#define IS_Iterator(O)         (O_ct(O)->bcid == TY_Iterator)
-
-typedef struct {
-	kmodshare_t h;
-	kclass_t *cIterator;
-	kclass_t *cStringIterator;
-	kclass_t *cGenericIterator;
-} kmoditerator_t;
-
-typedef struct {
-	kmodlocal_t h;
-} kiteratormod_t;
-
-typedef struct _kIterator kIterator;
-
-struct _kIterator {
-	kObjectHeader h;
-	kbool_t (*hasNext)(KonohaContext *kctx, ksfp_t *);
-	void (*setNextResult)(KonohaContext *kctx, ksfp_t* _RIX);
-	size_t current_pos;
-	union {
-		kObject  *source;
-		kArray   *arrayList;
-		kFunc    *funcHasNext;
-	};
-	kFunc        *funcNext;
-};
-
-#endif /* MODITERATOR_H_ */
+#endif /* OLDKONOHA_H_ */

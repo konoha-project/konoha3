@@ -48,11 +48,11 @@ typedef struct subproc_resource_mon_t {
 	task_t     task;
 } subproc_resource_mon_t;
 
-#define setup_recv_port(port) k_setup_recv_port(_ctx, port)
-#define send_port(p1, p2) k_send_port (_ctx, p1, p2)
-#define recv_port(p1, p2) k_recv_port (_ctx, p1, p2)
+#define setup_recv_port(port) k_setup_recv_port(kctx, port)
+#define send_port(p1, p2) k_send_port (kctx, p1, p2)
+#define recv_port(p1, p2) k_recv_port (kctx, p1, p2)
 
-static int k_setup_recv_port (CTX, mach_port_t *recv_port) {
+static int k_setup_recv_port (KonohaContext *kctx, mach_port_t *recv_port) {
 	kern_return_t err;
 	mach_port_t port = MACH_PORT_NULL;
 	err = mach_port_allocate (mach_task_self (), MACH_PORT_RIGHT_RECEIVE, &port);
@@ -63,7 +63,7 @@ static int k_setup_recv_port (CTX, mach_port_t *recv_port) {
 	return 0;
 }
 
-static int k_send_port (CTX, mach_port_t remote_port, mach_port_t port) {
+static int k_send_port (KonohaContext *kctx, mach_port_t remote_port, mach_port_t port) {
 	mach_send_port_msg msg;
 	kern_return_t err;
 	msg.header.msgh_remote_port = remote_port;
@@ -87,7 +87,7 @@ static int k_send_port (CTX, mach_port_t remote_port, mach_port_t port) {
 	return 0;
 }
 
-static int k_recv_port (CTX, mach_port_t recv_port, mach_port_t *port) {
+static int k_recv_port (KonohaContext *kctx, mach_port_t recv_port, mach_port_t *port) {
 	mach_recv_port_msg msg;
 	kern_return_t err;
 	err = mach_msg (&msg.header, MACH_RCV_MSG, 0, sizeof (msg), recv_port,
@@ -103,13 +103,13 @@ static int k_recv_port (CTX, mach_port_t recv_port, mach_port_t *port) {
 }
 
 
-static void init_resourcemonitor(CTX, subproc_resource_mon_t *mon) {
+static void init_resourcemonitor(KonohaContext *kctx, subproc_resource_mon_t *mon) {
 	mon->parent_recv_port = MACH_PORT_NULL;
 	mon->child_recv_port = MACH_PORT_NULL;
 	mon->task = MACH_PORT_NULL;
 }
 
-static int setup_resourcemonitor (CTX, subproc_resource_mon_t *mon) {
+static int setup_resourcemonitor (KonohaContext *kctx, subproc_resource_mon_t *mon) {
 	kern_return_t err;
 	if (setup_recv_port(&(mon->parent_recv_port)) != 0) return -1;
 	err = task_set_bootstrap_port(mach_task_self(), mon->parent_recv_port);
@@ -121,7 +121,7 @@ static int setup_resourcemonitor (CTX, subproc_resource_mon_t *mon) {
 	return err;
 }
 
-static int cleanup_resourcemonitor(CTX, subproc_resource_mon_t *mon) {
+static int cleanup_resourcemonitor(KonohaContext *kctx, subproc_resource_mon_t *mon) {
 	if(KERN_SUCCESS != mach_port_deallocate (mach_task_self(), mon->parent_recv_port)) {
 				ktrace(_SystemFault,
 						KEYVALUE_s("@", "dup2"),
@@ -133,7 +133,7 @@ static int cleanup_resourcemonitor(CTX, subproc_resource_mon_t *mon) {
 	return 0;
 }
 
-static int setup_resourcemonitor_for_chlid(CTX, subproc_resource_mon_t *mon) {
+static int setup_resourcemonitor_for_chlid(KonohaContext *kctx, subproc_resource_mon_t *mon) {
 
 	kern_return_t err = task_get_bootstrap_port(mach_task_self(), &(mon->parent_recv_port));
 	if (setup_recv_port(&(mon->child_recv_port)) != 0) return -1;
@@ -145,7 +145,7 @@ static int setup_resourcemonitor_for_chlid(CTX, subproc_resource_mon_t *mon) {
 }
 
 
-static int attach_resourcemonitor_for_child(CTX, subproc_resource_mon_t *mon, int pid) {
+static int attach_resourcemonitor_for_child(KonohaContext *kctx, subproc_resource_mon_t *mon, int pid) {
 	kern_return_t err = task_set_bootstrap_port(mach_task_self(), bootstrap_port);
 	if (recv_port(mon->parent_recv_port, &(mon->task)) != 0) return -1;
 	if (recv_port(mon->parent_recv_port, &(mon->child_recv_port)) != 0) return -1;
@@ -153,7 +153,7 @@ static int attach_resourcemonitor_for_child(CTX, subproc_resource_mon_t *mon, in
 	return err;
 }
 
-static int fetch_resourcemonitor_about(CTX, subproc_resource_mon_t *mon, enum e_resource res) {
+static int fetch_resourcemonitor_about(KonohaContext *kctx, subproc_resource_mon_t *mon, enum e_resource res) {
 	mach_msg_type_number_t t_info_count = TASK_BASIC_INFO_COUNT;
 	struct task_basic_info t_info;
 	int mem = 0;

@@ -52,49 +52,49 @@ static kinline const char* shortfilename(const char *str)
 	return (p == NULL) ? str : (const char*)p+1;
 }
 
-#define SS_s(X)  SS_s_(_ctx, X)
-#define SS_t(X)  S_text(SS_s_(_ctx, X))
+#define SS_s(X)  SS_s_(kctx, X)
+#define SS_t(X)  S_text(SS_s_(kctx, X))
 
-static kinline kString* SS_s_(CTX, kline_t fileid)
+static kinline kString* SS_s_(KonohaContext *kctx, kline_t fileid)
 {
 	kline_t n = (fileid >> (sizeof(kshort_t) * 8));
-	DBG_ASSERT(n < kArray_size(_ctx->share->fileidList));
-	return _ctx->share->fileidList->strings[n];
+	DBG_ASSERT(n < kArray_size(kctx->share->fileidList));
+	return kctx->share->fileidList->strings[n];
 }
 
-#define PN_s(X)    PN_s_(_ctx, X)
-#define PN_t(X)    S_text(PN_s_(_ctx, X))
-static kinline kString* PN_s_(CTX, kpack_t packid)
+#define PN_s(X)    PN_s_(kctx, X)
+#define PN_t(X)    S_text(PN_s_(kctx, X))
+static kinline kString* PN_s_(KonohaContext *kctx, kpack_t packid)
 {
-	DBG_ASSERT(packid < kArray_size(_ctx->share->packList));
-	return _ctx->share->packList->strings[packid];
+	DBG_ASSERT(packid < kArray_size(kctx->share->packList));
+	return kctx->share->packList->strings[packid];
 }
 
-#define CT_s(X)   CT_s_(_ctx, X)
-#define CT_t(X)   S_text(CT_s_(_ctx, X))
-static kinline kString* CT_s_(CTX, kclass_t *ct)
+#define CT_s(X)   CT_s_(kctx, X)
+#define CT_t(X)   S_text(CT_s_(kctx, X))
+static kinline kString* CT_s_(KonohaContext *kctx, kclass_t *ct)
 {
-	return _ctx->lib2->KCT_shortName(_ctx, ct);
+	return kctx->lib2->KCT_shortName(kctx, ct);
 }
 
-#define TY_s(X)   TY_s_(_ctx, X)
+#define TY_s(X)   TY_s_(kctx, X)
 #define TY_t(X)   S_text(TY_s(X))
-static kinline kString* TY_s_(CTX, ktype_t ty)
+static kinline kString* TY_s_(KonohaContext *kctx, ktype_t ty)
 {
-	DBG_ASSERT(ty < KARRAYSIZE(_ctx->share->ca.bytemax, intptr));
-	return CT_s_(_ctx, CT_(ty));
+	DBG_ASSERT(ty < KARRAYSIZE(kctx->share->ca.bytemax, intptr));
+	return CT_s_(kctx, CT_(ty));
 }
 
-#define SYM_s(fn)   SYM_s_(_ctx, fn)
-#define SYM_t(fn)   S_text(SYM_s_(_ctx, fn))
-static kinline kString* SYM_s_(CTX, ksymbol_t sym)
+#define SYM_s(fn)   SYM_s_(kctx, fn)
+#define SYM_t(fn)   S_text(SYM_s_(kctx, fn))
+static kinline kString* SYM_s_(KonohaContext *kctx, ksymbol_t sym)
 {
 	size_t index = (size_t) SYM_UNMASK(sym);
-//	if(!(index < kArray_size(_ctx->share->symbolList))) {
-//		DBG_P("index=%d, size=%d", index, kArray_size(_ctx->share->symbolList));
+//	if(!(index < kArray_size(kctx->share->symbolList))) {
+//		DBG_P("index=%d, size=%d", index, kArray_size(kctx->share->symbolList));
 //	}
-	DBG_ASSERT(index < kArray_size(_ctx->share->symbolList));
-	return _ctx->share->symbolList->strings[index];
+	DBG_ASSERT(index < kArray_size(kctx->share->symbolList));
+	return kctx->share->symbolList->strings[index];
 }
 
 static kinline const char* SYM_PRE(ksymbol_t sym)
@@ -108,12 +108,12 @@ static kinline const char* SYM_PRE(ksymbol_t sym)
 	return prefixes[mask];
 }
 
-#define SYM_equals(S1, S2)     sym_equals(_ctx, S1, S2)
-static kinline kbool_t sym_equals(CTX, ksymbol_t s1, ksymbol_t s2)
+#define SYM_equals(S1, S2)     sym_equals(kctx, S1, S2)
+static kinline kbool_t sym_equals(KonohaContext *kctx, ksymbol_t s1, ksymbol_t s2)
 {
 	if(SYM_HEAD(s1) == SYM_HEAD(s2)) {
-		const char *t1 = S_text(_ctx->share->symbolList->strings[SYM_UNMASK(s1)]);
-		const char *t2 = S_text(_ctx->share->symbolList->strings[SYM_UNMASK(s2)]);
+		const char *t1 = S_text(kctx->share->symbolList->strings[SYM_UNMASK(s1)]);
+		const char *t2 = S_text(kctx->share->symbolList->strings[SYM_UNMASK(s2)]);
 		while(1) {
 			if(t1[0] != t2[0]) {
 				if(t1[0] == '_') { t1++; continue; }
@@ -134,20 +134,20 @@ static kinline uintptr_t longid(kushort_t packdom, kushort_t un)
 	return (hcode << (sizeof(kshort_t)*8)) | un;
 }
 
-static kinline kclass_t *CT_p0(CTX, kclass_t *ct, ktype_t ty)
+static kinline kclass_t *CT_p0(KonohaContext *kctx, kclass_t *ct, ktype_t ty)
 {
 	kparam_t p = {ty, 0};
 	return kClassTable_Generics(ct, TY_void, 1, &p);
 }
 
 #define uNULL   ((uintptr_t)NULL)
-static kinline void map_addu(CTX, kmap_t *kmp, uintptr_t hcode, uintptr_t uvalue)
+static kinline void map_addu(KonohaContext *kctx, kmap_t *kmp, uintptr_t hcode, uintptr_t uvalue)
 {
 	kmape_t *e = kmap_newentry(kmp, hcode);
 	e->uvalue = uvalue;
 }
 
-static kinline uintptr_t map_getu(CTX, kmap_t *kmp, uintptr_t hcode, uintptr_t def)
+static kinline uintptr_t map_getu(KonohaContext *kctx, kmap_t *kmp, uintptr_t hcode, uintptr_t def)
 {
 	kmape_t *e = kmap_get(kmp, hcode);
 	while(e != NULL) {
@@ -171,7 +171,7 @@ static kinline const char* TAG_t(kinfotag_t t)
 	return tags[(int)t];
 }
 
-static kinline size_t check_index(CTX, kint_t n, size_t max, kline_t pline)
+static kinline size_t check_index(KonohaContext *kctx, kint_t n, size_t max, kline_t pline)
 {
 	size_t n1 = (size_t)n;
 	if(unlikely(!(n1 < max))) {
@@ -204,7 +204,7 @@ static const char _utf8len[] = {
 };
 #endif
 
-static kinline void Method_setProceedMethod(CTX, kMethod *mtd, kMethod *mtd2)
+static kinline void Method_setProceedMethod(KonohaContext *kctx, kMethod *mtd, kMethod *mtd2)
 {
 	DBG_ASSERT(mtd != mtd2);
 	DBG_ASSERT(mtd->proceedNUL == NULL);
