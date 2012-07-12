@@ -586,7 +586,7 @@ static KonohaClassVar* new_CT(KonohaContext *kctx, KonohaClass *bct, KDEFINE_CLA
 	share->ca.cts[newid] = (KonohaClass*)ct;
 	if(bct != NULL) {
 		DBG_ASSERT(s == NULL);
-		memcpy(ct, bct, offsetof(KonohaClass, methods));
+		memcpy(ct, bct, offsetof(KonohaClass, methodList));
 		ct->cid = newid;
 		if(ct->fnull == DEFAULT_fnull) ct->fnull =  DEFAULT_fnullinit;
 	}
@@ -631,7 +631,7 @@ static KonohaClass *CT_body(KonohaContext *kctx, KonohaClass *ct, size_t head, s
 			KonohaClassVar *newct = new_CT(kctx, bct, NULL, NOPLINE);
 			newct->cflag |= kClass_Private;
 			newct->cstruct_size = ct->cstruct_size * 2;
-			KINITv(newct->methods, ct->methods);
+			KINITv(newct->methodList, ct->methodList);
 			((KonohaClassVar*)ct)->searchSimilarClassNULL = (KonohaClass*)newct;
 		}
 		ct = ct->searchSimilarClassNULL;
@@ -654,7 +654,7 @@ static KonohaClass *CT_Generics(KonohaContext *kctx, KonohaClass *ct, ktype_t rt
 	KonohaClassVar *newct = new_CT(kctx, ct0, NULL, NOPLINE);
 	newct->paramdom = paramdom;
 	newct->p0 = isNotFuncClass ? p[0].ty : rtype;
-	KINITv(newct->methods, K_EMPTYARRAY);
+	KINITv(newct->methodList, K_EMPTYARRAY);
 	if(newct->searchSuperMethodClassNULL == NULL) {
 		newct->searchSuperMethodClassNULL = ct0;
 	}
@@ -706,8 +706,8 @@ static void CT_setName(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t plin
 	if(ct2 == NULL) {
 		map_addu(kctx, kctx->share->lcnameMapNN, lname, (uintptr_t)ct);
 	}
-	if(ct->methods == NULL) {
-		KINITv(ct->methods, K_EMPTYARRAY);
+	if(ct->methodList == NULL) {
+		KINITv(ct->methodList, K_EMPTYARRAY);
 		if(ct->cid > CLASS_Object) {
 			ct->searchSuperMethodClassNULL = CT_(ct->supcid);
 		}
@@ -936,7 +936,7 @@ static void kshare_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 		KonohaClass *ct = cts[i];
 		{
 			BEGIN_REFTRACE(4);
-			KREFTRACEv(ct->methods);
+			KREFTRACEv(ct->methodList);
 			KREFTRACEn(ct->shortNameNULL);
 			KREFTRACEn(ct->nulvalNULL);
 			END_REFTRACE();

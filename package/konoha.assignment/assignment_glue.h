@@ -42,13 +42,13 @@ static KMETHOD ExprTyCheck_assignment(KonohaContext *kctx, KonohaStack *sfp _RIX
 				RETURN_(expr);
 			}
 			if(lexpr->build == TEXPR_CALL) {  // check getter and transform to setter
-				kMethod *mtd = lexpr->cons->methods[0];
+				kMethod *mtd = lexpr->cons->methodList[0];
 				DBG_ASSERT(IS_Method(mtd));
 				if((MN_isGETTER(mtd->mn) || MN_isISBOOL(mtd->mn)) && !kMethod_isStatic(mtd)) {
 					ktype_t cid = lexpr->cons->exprs[1]->ty;
 					mtd = kNameSpace_getMethodNULL(gma->genv->ks, cid, MN_toSETTER(mtd->mn));
 					if(mtd != NULL) {
-						KSETv(lexpr->cons->methods[0], mtd);
+						KSETv(lexpr->cons->methodList[0], mtd);
 						kArray_add(lexpr->cons, rexpr);
 						RETURN_(SUGAR Expr_tyCheckCallParams(kctx, stmt, lexpr, mtd, gma, reqty));
 					}

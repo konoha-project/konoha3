@@ -628,7 +628,7 @@ struct KonohaClassVar {
 	ksymbol_t                 nameid;
 	kushort_t                 optvalue;
 
-	kArray     *methods;
+	kArray     *methodList;
 	kString    *shortNameNULL;
 	union {   // default value
 		kObject  *nulvalNULL;
@@ -937,7 +937,7 @@ struct kArrayVar {
 		kObject        **list;
 		kString        **strings;
 		kParam         **params;
-		kMethod        **methods;
+		kMethod        **methodList;
 		kFunc          **funcs;
 		kToken         **toks;
 		kTokenVar        **Wtoks;

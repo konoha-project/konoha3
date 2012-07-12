@@ -139,7 +139,7 @@ static const PlatformApi apache_platform = {
 	.dbg_p       = dbg_p,
 };
 
-// class methods start ==============================================================================================
+// class methodList start ==============================================================================================
 // ## void Request.puts(String s)
 static KMETHOD Request_puts(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
@@ -262,7 +262,7 @@ static KMETHOD AprTableEntry_getVal(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kAprTableEntry *self = (kAprTableEntry *) sfp[0].o;
 	RETURN_(new_kString(self->entry->val, strlen(self->entry->val), 0));
 }
-// class methods end ==============================================================================================
+// class methodList end ==============================================================================================
 
 KonohaContext* konoha_create(KonohaClass **cRequest)
 {

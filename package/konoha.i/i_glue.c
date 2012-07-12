@@ -94,7 +94,7 @@ static void copyMethodList(KonohaContext *kctx, ktype_t cid, kArray *s, kArray *
 {
 	size_t i;
 	for(i = 0; i < kArray_size(s); i++) {
-		kMethod *mtd = s->methods[i];
+		kMethod *mtd = s->methodList[i];
 		if(mtd->cid != cid) continue;
 		kArray_add(d, mtd);
 	}
@@ -115,7 +115,7 @@ static void dumpMethodList(KonohaContext *kctx, KonohaStack *sfp, size_t start, 
 {
 	size_t i;
 	for(i = start; i < kArray_size(list); i++) {
-		dumpMethod(kctx, sfp, list->methods[i]);
+		dumpMethod(kctx, sfp, list->methodList[i]);
 	}
 }
 
@@ -128,10 +128,10 @@ KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	KonohaClass *ct = O_ct(sfp[1].o);
 	DBG_P("*** man %s", TY_t(ct->cid));
 	while(ks != NULL) {
-		copyMethodList(kctx, ct->cid, ks->methods, list);
+		copyMethodList(kctx, ct->cid, ks->methodList, list);
 		ks = ks->parentNULL;
 	}
-	copyMethodList(kctx, ct->cid, ct->methods, list);
+	copyMethodList(kctx, ct->cid, ct->methodList, list);
 	dumpMethodList(kctx, sfp, start, list);
 	RESET_GCSTACK();
 }

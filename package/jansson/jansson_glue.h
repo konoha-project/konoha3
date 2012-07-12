@@ -78,7 +78,7 @@ static void Jansson_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb,
 #define _KVi(T)  #T, TY_Int, T
 
 /* ------------------------------------------------------------------------ */
-/* [API methods] */
+/* [API methodList] */
 
 //## Json Json.new();
 static KMETHOD Json_new (KonohaContext *kctx, KonohaStack *sfp _RIX)

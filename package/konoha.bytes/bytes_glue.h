@@ -272,7 +272,7 @@ static KMETHOD String_toBytes(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 // this method is same as Bytes.decodeFrom(defaultencoding);
-// this methods needs string_glue.h for counting mlen...
+// this methodList needs string_glue.h for counting mlen...
 //#include "../konoha.string/string_glue.h"
 
 //## @Const method String Bytes.toString();

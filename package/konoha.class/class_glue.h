@@ -83,10 +83,10 @@ static intptr_t KLIB2_Method_indexOfField(kMethod *mtd)
 
 static void CT_addMethod(KonohaContext *kctx, KonohaClass *ct, kMethod *mtd)
 {
-	if(unlikely(ct->methods == K_EMPTYARRAY)) {
-		KINITv(((KonohaClassVar*)ct)->methods, new_(MethodArray, 8));
+	if(unlikely(ct->methodList == K_EMPTYARRAY)) {
+		KINITv(((KonohaClassVar*)ct)->methodList, new_(MethodArray, 8));
 	}
-	kArray_add(ct->methods, mtd);
+	kArray_add(ct->methodList, mtd);
 }
 
 static void KLIB2_setGetterSetter(KonohaContext *kctx, KonohaClass *ct)
@@ -292,7 +292,7 @@ static KMETHOD ExprTyCheck_Getter(KonohaContext *kctx, KonohaStack *sfp _RIX)
 			mtd = kNameSpace_getMethodNULL(gma->genv->ks, self->ty, MN_toISBOOL(fn));
 		}
 		if(mtd != NULL) {
-			KSETv(expr->cons->methods[0], mtd);
+			KSETv(expr->cons->methodList[0], mtd);
 			RETURN_(SUGAR Expr_tyCheckCallParams(kctx, stmt, expr, mtd, gma, reqty));
 		}
 		SUGAR Stmt_p(kctx, stmt, tkN, ERR_, "undefined field: %s", S_text(tkN->text));

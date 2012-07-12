@@ -202,11 +202,11 @@ struct kNameSpaceVar {
 	kpackage_t packageId;  	kpackage_t packageDomain;
 	kNameSpace           *parentNULL;
 	const TokenizeFunc   *tokenMatrix;
-	KonohaSimpleMap        *syntaxMapNN;
+	KonohaSimpleMap      *syntaxMapNN;
 	//
 	kObject              *scriptObject;
-	kArray*               methods;   // default K_EMPTYARRAY
-	karray_t              cl;        // const variable
+	kArray*               methodList;   // default K_EMPTYARRAY
+	karray_t              constTable;        // const variable
 };
 
 typedef kshort_t    kexpr_t;

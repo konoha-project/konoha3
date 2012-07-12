@@ -644,7 +644,7 @@ static KMETHOD Fmethod_abstract(KonohaContext *kctx, KonohaStack *sfp _RIX);
 
 static void CALL_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espidx)
 {
-	kMethod *mtd = expr->cons->methods[0];
+	kMethod *mtd = expr->cons->methodList[0];
 	DBG_ASSERT(IS_Method(mtd));
 	int i, s = kMethod_isStatic(mtd) ? 2 : 1, thisidx = espidx + K_CALLDELTA;
 #ifdef _CLASSICVM

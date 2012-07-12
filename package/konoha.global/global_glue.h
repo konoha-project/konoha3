@@ -93,10 +93,10 @@ static kMethod *new_ProtoSetter(KonohaContext *kctx, ktype_t cid, ksymbol_t sym,
 
 static void CT_addMethod2(KonohaContext *kctx, KonohaClass *ct, kMethod *mtd)
 {
-	if(unlikely(ct->methods == K_EMPTYARRAY)) {
-		KINITv(((KonohaClassVar*)ct)->methods, new_(MethodArray, 8));
+	if(unlikely(ct->methodList == K_EMPTYARRAY)) {
+		KINITv(((KonohaClassVar*)ct)->methodList, new_(MethodArray, 8));
 	}
-	kArray_add(ct->methods, mtd);
+	kArray_add(ct->methodList, mtd);
 }
 
 static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kObject *o, kStmt *stmt, kNameSpace *ks, ktype_t ty, ksymbol_t fn)

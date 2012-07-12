@@ -555,14 +555,14 @@ static void NameSpace_merge(KonohaContext *kctx, kNameSpace *ns, kNameSpace *tar
 	if(target->packageId != PN_konoha) {
 		NameSpace_importClassName(kctx, ns, target->packageId, pline);
 	}
-	if(target->cl.bytesize > 0) {
-		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, target->cl.kvs, target->cl.bytesize/sizeof(kvs_t), pline);
+	if(target->constTable.bytesize > 0) {
+		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, target->constTable.kvs, target->constTable.bytesize/sizeof(kvs_t), pline);
 	}
 	size_t i;
-	for(i = 0; i < kArray_size(target->methods); i++) {
-		kMethod *mtd = target->methods->methods[i];
+	for(i = 0; i < kArray_size(target->methodList); i++) {
+		kMethod *mtd = target->methodList->methodList[i];
 		if(kMethod_isPublic(mtd) && mtd->packageId == target->packageId) {
-			kArray_add(ns->methods, mtd);
+			kArray_add(ns->methodList, mtd);
 		}
 	}
 }

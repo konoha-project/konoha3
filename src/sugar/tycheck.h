@@ -128,7 +128,7 @@ static void Expr_putConstValue(KonohaContext *kctx, kExpr *expr, KonohaStack *sf
 static kExpr* ExprCall_toConstValue(KonohaContext *kctx, kExpr *expr, kArray *cons, ktype_t rtype)
 {
 	size_t i, size = kArray_size(cons), psize = size - 2;
-	kMethod *mtd = cons->methods[0];
+	kMethod *mtd = cons->methodList[0];
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + psize);
 	for(i = 1; i < size; i++) {
 		Expr_putConstValue(kctx, cons->exprs[i], lsfp + K_CALLDELTA + i - 1);
@@ -452,9 +452,9 @@ static int param_policy(ksymbol_t fn)
 //{
 //	while(ks != NULL) {
 //		size_t i;
-//		kArray *a = ks->methods;
+//		kArray *a = ks->methodList;
 //		for(i = 0; i < kArray_size(a); i++) {
-//			kMethod *mtd = a->methods[i];
+//			kMethod *mtd = a->methodList[i];
 //			if(mtd->cid == cid && mtd->mn == mn) {
 //				kArray_add(abuf, mtd);
 //			}
@@ -464,9 +464,9 @@ static int param_policy(ksymbol_t fn)
 //	KonohaClass *ct = CT_(cid);
 //	while(ct != NULL) {
 //		size_t i;
-//		kArray *a = ct->methods;
+//		kArray *a = ct->methodList;
 //		for(i = 0; i < kArray_size(a); i++) {
-//			kMethod *mtd = a->methods[i];
+//			kMethod *mtd = a->methodList[i];
 //			if(mtd->mn == mn) {
 //				kArray_add(abuf, mtd);
 //			}
@@ -500,15 +500,15 @@ static int param_policy(ksymbol_t fn)
 //{
 //	int i;
 //	for(i = s; i < e; i++) {
-//		kParam *pa = kMethod_param(a->methods[i]);
+//		kParam *pa = kMethod_param(a->methodList[i]);
 //		if(pa->psize == psize && kParam_equals(kctx, pa, thisct, psize, p)) {
-//			return a->methods[i];
+//			return a->methodList[i];
 //		}
 //	}
 //	for(i = s; i < e; i++) {
-//		kParam *pa = kMethod_param(a->methods[i]);
+//		kParam *pa = kMethod_param(a->methodList[i]);
 //		if(kParam_match(kctx, pa, thisct, psize, p)) {
-//			return a->methods[i];
+//			return a->methodList[i];
 //		}
 //	}
 //	return NULL;
@@ -537,7 +537,7 @@ static int param_policy(ksymbol_t fn)
 static kExpr* Expr_typedWithMethod(KonohaContext *kctx, kExpr *expr, kMethod *mtd, ktype_t reqty)
 {
 	kExpr *expr1 = kExpr_at(expr, 1);
-	KSETv(expr->cons->methods[0], mtd);
+	KSETv(expr->cons->methodList[0], mtd);
 	if(expr1->build == TEXPR_NEW) {
 		kExpr_typed(expr, CALL, expr1->ty);
 	}
@@ -1159,7 +1159,7 @@ static void NameSpace_syncMethods(KonohaContext *kctx)
 {
 	size_t i, size = kArray_size(ctxsugar->definedMethods);
 	for (i = 0; i < size; ++i) {
-		kMethod *mtd = ctxsugar->definedMethods->methods[i];
+		kMethod *mtd = ctxsugar->definedMethods->methodList[i];
 		if (mtd->fcall_1 == Fmethod_lazyCompilation) {
 			kString *text = mtd->tcode->text;
 			kfileline_t uline = mtd->tcode->uline;
