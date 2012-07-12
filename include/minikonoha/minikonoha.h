@@ -356,7 +356,7 @@ typedef struct kmap_t {
 
 // classdef_t
 
-typedef kushort_t       kpack_t;     /* package id*/
+typedef kushort_t       kpackage_t;     /* package id*/
 typedef kushort_t       ktype_t;     /* cid classid, ty type */
 typedef kushort_t       ksymbol_t;
 typedef kushort_t       kmethodn_t;
@@ -615,7 +615,7 @@ typedef uintptr_t kmagicflag_t;
 
 struct KonohaClassVar {
 	KCLASSSPI;
-	kpack_t   packid;       kpack_t   packdom;
+	kpackage_t   packid;       kpackage_t   packdom;
 	ktype_t   cid;           kshortflag_t  cflag;
 	ktype_t   bcid;          ktype_t   supcid;
 	ktype_t  p0;            kparamid_t paramdom;
@@ -1058,7 +1058,7 @@ struct kMethodVar {
 	uintptr_t         flag;
 	ktype_t            cid;      kmethodn_t  mn;
 	kparamid_t        paramid;  kparamid_t paramdom;
-	kshort_t          delta;    kpack_t packid;
+	kshort_t          delta;    kpackage_t packid;
 	kToken        *tcode;
 	union {
 		kObject              *objdata;
@@ -1198,7 +1198,7 @@ struct LibKonohaApiVar {
 
 
 	kline_t     (*Kfileid)(KonohaContext *kctx, const char *, size_t, int spol, ksymbol_t def);
-	kpack_t     (*Kpack)(KonohaContext *kctx, const char *, size_t, int spol, ksymbol_t def);
+	kpackage_t     (*Kpack)(KonohaContext *kctx, const char *, size_t, int spol, ksymbol_t def);
 	ksymbol_t   (*Ksymbol2)(KonohaContext *kctx, const char*, size_t, int spol, ksymbol_t def);
 
 	kbool_t     (*KimportPackage)(KonohaContext *kctx, kNameSpace*, const char *, kline_t);
@@ -1231,7 +1231,7 @@ struct LibKonohaApiVar {
 	intptr_t   (*KMethod_indexOfField)(kMethod *);
 
 	kbool_t    (*KsetModule)(KonohaContext *kctx, int, struct kmodshare_t *, kline_t);
-	KonohaClass*  (*KaddClassDef)(KonohaContext *kctx, kpack_t, kpack_t, kString *, KDEFINE_CLASS *, kline_t);
+	KonohaClass*  (*KaddClassDef)(KonohaContext *kctx, kpackage_t, kpackage_t, kString *, KDEFINE_CLASS *, kline_t);
 
 	KonohaClass*  (*KS_getCT)(KonohaContext *kctx, kNameSpace *, KonohaClass *, const char *, size_t, ktype_t def);
 	void       (*KS_loadMethodData)(KonohaContext *kctx, kNameSpace *, intptr_t *d);

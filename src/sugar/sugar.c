@@ -495,7 +495,7 @@ static KDEFINE_PACKAGE *NameSpace_openGlueHandler(KonohaContext *kctx, kNameSpac
 	return &PKGDEFNULL;
 }
 
-static kNameSpace* new_NameSpace(KonohaContext *kctx, kpack_t packdom, kpack_t packid)
+static kNameSpace* new_NameSpace(KonohaContext *kctx, kpackage_t packdom, kpackage_t packid)
 {
 	kNameSpaceVar *ks = new_Var(NameSpace, KNULL(NameSpace));
 	ks->packid = packid;
@@ -503,7 +503,7 @@ static kNameSpace* new_NameSpace(KonohaContext *kctx, kpack_t packdom, kpack_t p
 	return (kNameSpace*)ks;
 }
 
-static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpack_t packid, kline_t pline)
+static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackage_t packid, kline_t pline)
 {
 	char fbuf[256];
 	const char *path = PLAT packagepath(fbuf, sizeof(fbuf), S_text(PN_s(packid)));
@@ -540,7 +540,7 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpack_t packid, kline
 	return NULL;
 }
 
-static KonohaPackage *getPackageNULL(KonohaContext *kctx, kpack_t packid, kline_t pline)
+static KonohaPackage *getPackageNULL(KonohaContext *kctx, kpackage_t packid, kline_t pline)
 {
 	KonohaPackage *pack = (KonohaPackage*)map_getu(kctx, kmodsugar->packageMapNO, packid, uNULL);
 	if(pack != NULL) return pack;
@@ -571,7 +571,7 @@ static void NameSpace_merge(KonohaContext *kctx, kNameSpace *ks, kNameSpace *tar
 static kbool_t NameSpace_importPackage(KonohaContext *kctx, kNameSpace *ks, const char *name, kline_t pline)
 {
 	kbool_t res = 0;
-	kpack_t packid = kpack(name, strlen(name), 0, _NEWID);
+	kpackage_t packid = kpack(name, strlen(name), 0, _NEWID);
 	KonohaPackage *pack = getPackageNULL(kctx, packid, pline);
 	if(pack != NULL) {
 		res = 1;

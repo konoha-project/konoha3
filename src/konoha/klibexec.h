@@ -330,7 +330,7 @@ static kline_t Kfileid(KonohaContext *kctx, const char *name, size_t len, int sp
 	return uline << (sizeof(kshort_t) * 8);
 }
 
-static kpack_t Kpack(KonohaContext *kctx, const char *name, size_t len, int spol, ksymbol_t def)
+static kpackage_t Kpack(KonohaContext *kctx, const char *name, size_t len, int spol, ksymbol_t def)
 {
 	uintptr_t hcode = strhash(name, len);
 	return Kmap_getcode(kctx, kctx->share->packMapNN, kctx->share->packList, name, len, hcode, spol | SPOL_ASCII, def);

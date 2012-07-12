@@ -64,7 +64,7 @@ static kinline kString* SS_s_(KonohaContext *kctx, kline_t fileid)
 
 #define PN_s(X)    PN_s_(kctx, X)
 #define PN_t(X)    S_text(PN_s_(kctx, X))
-static kinline kString* PN_s_(KonohaContext *kctx, kpack_t packid)
+static kinline kString* PN_s_(KonohaContext *kctx, kpackage_t packid)
 {
 	DBG_ASSERT(packid < kArray_size(kctx->share->packList));
 	return kctx->share->packList->strings[packid];

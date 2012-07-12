@@ -358,7 +358,7 @@ static void NameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ks, const c
 	RESET_GCSTACK();
 }
 
-static void NameSpace_importClassName(KonohaContext *kctx, kNameSpace *ks, kpack_t packid, kline_t pline)
+static void NameSpace_importClassName(KonohaContext *kctx, kNameSpace *ks, kpackage_t packid, kline_t pline)
 {
 	kvs_t kv;
 	kwb_t wb;

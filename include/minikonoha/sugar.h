@@ -69,7 +69,7 @@ struct KDEFINE_PACKAGE_ {
 typedef struct KonohaPackageVar KonohaPackage;
 
 struct KonohaPackageVar {
-	kpack_t                      packid;
+	kpackage_t                   packid;
 	kNameSpace  *ks;
 	KDEFINE_PACKAGE             *packdef;
 	kline_t                      export_script;
@@ -200,7 +200,7 @@ typedef struct KDEFINE_SYNTAX {
 struct kNameSpaceVar {
 	KonohaObjectHeader h;
 	kNameSpace   *parentNULL;
-	kpack_t packid;  	kpack_t packdom;
+	kpackage_t packid;  	kpackage_t packdom;
 	const TokenizeFunc *tokenMatrix;
 	struct kmap_t       *syntaxMapNN;
 	//

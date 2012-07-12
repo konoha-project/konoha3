@@ -714,7 +714,7 @@ static void CT_setName(KonohaContext *kctx, KonohaClassVar *ct, kline_t pline)
 	}
 }
 
-static KonohaClass *addClassDef(KonohaContext *kctx, kpack_t packid, kpack_t packdom, kString *name, KDEFINE_CLASS *cdef, kline_t pline)
+static KonohaClass *addClassDef(KonohaContext *kctx, kpackage_t packid, kpackage_t packdom, kString *name, KDEFINE_CLASS *cdef, kline_t pline)
 {
 	KonohaClassVar *ct = new_CT(kctx, NULL, cdef, pline);
 	ct->packid  = packid;
