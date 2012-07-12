@@ -120,7 +120,7 @@ static kbool_t KRUNTIME_setModule(KonohaContext *kctx, int x, kmodshare_t *d, kl
 /* ------------------------------------------------------------------------ */
 /* [kcontext] */
 
-static KonohaContextVar* new_context(KonohaContext *kctx, const kplatform_t *plat)
+static KonohaContextVar* new_context(KonohaContext *kctx, const PlatformApi *plat)
 {
 	KonohaContextVar *newctx;
 	static volatile size_t ctxid_counter = 0;
@@ -250,7 +250,7 @@ struct _kObject** KONOHA_reftail(KonohaContext *kctx, size_t size)
 #define BEGIN_(kctx) knh_beginContext(kctx, (void**)&kctx)
 #define END_(kctx)   knh_endContext(kctx)
 
-KonohaContext* konoha_open(const kplatform_t *platform)
+KonohaContext* konoha_open(const PlatformApi *platform)
 {
 	konoha_init();
 	return (KonohaContext*)new_context(NULL, platform);

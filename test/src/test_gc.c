@@ -98,7 +98,7 @@ void test_gc(KonohaContext *kctx)
 int main(int argc, const char *argv[])
 {
     int ret = 0;
-    KonohaContext* konoha = konoha_open((const kplatform_t*)&plat);
+    KonohaContext* konoha = konoha_open((const PlatformApi*)&plat);
     test_gc(konoha);
     konoha_close(konoha);
     assert(__free__ == __init__);

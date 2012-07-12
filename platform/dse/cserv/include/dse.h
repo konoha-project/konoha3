@@ -203,8 +203,8 @@ static struct dReq *dse_parseJson(const char *input)
 
 static struct dRes *dse_dispatch(struct dReq *req)
 {
-	kplatform_t *dse = platform_dse();
-	KonohaContext* konoha = konoha_open((const kplatform_t *)dse);
+	PlatformApi *dse = platform_dse();
+	KonohaContext* konoha = konoha_open((const PlatformApi *)dse);
 	logpool_t *lp;
 	void *logpool_args;
 	int ret;

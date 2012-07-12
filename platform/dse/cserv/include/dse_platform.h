@@ -31,7 +31,7 @@
 #include <syslog.h>
 #include <minikonoha/minikonoha.h>
 
-typedef kplatform_t dse_platform_t_h;
+typedef PlatformApi dse_platform_t_h;
 
 static const char* _packname(const char *str)
 {
@@ -93,9 +93,9 @@ static void _NOP_dbg_p(const char *file, const char *func, int line, const char 
 {
 }
 
-kplatform_t *platform_dse(void)
+PlatformApi *platform_dse(void)
 {
-	static kplatform_t dse = {
+	static PlatformApi dse = {
 		.name			= "dse",
 		.stacksize		= 4096,
 		.malloc_i		= malloc,

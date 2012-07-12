@@ -40,7 +40,7 @@ extern "C" {
 kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, size_t len, kline_t uline);
 kstatus_t MODSUGAR_loadscript(KonohaContext *kctx, const char *path, size_t len, kline_t pline);
 
-kplatform_t* platform_shell(void);
+PlatformApi* platform_shell(void);
 
 // -------------------------------------------------------------------------
 // getopt
@@ -319,9 +319,9 @@ static void NOP_dbg_p(const char *file, const char *func, int line, const char *
 {
 }
 
-kplatform_t* platform_shell(void)
+PlatformApi* platform_shell(void)
 {
-	static kplatform_t plat = {
+	static PlatformApiVar plat = {
 		.name            = "shell",
 		.stacksize       = K_PAGESIZE * 4,
 		.malloc_i        = malloc,
@@ -352,7 +352,7 @@ kplatform_t* platform_shell(void)
 	if(!verbose_debug) {
 		plat.dbg_p = NOP_dbg_p;
 	}
-	return (&plat);
+	return (PlatformApi*)(&plat);
 }
 
 // -------------------------------------------------------------------------
@@ -554,7 +554,7 @@ static struct option long_options2[] = {
 	{NULL, 0, 0, 0},
 };
 
-static int konoha_parseopt(KonohaContext* konoha, kplatform_t *plat, int argc, char **argv)
+static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc, char **argv)
 {
 	int ret = true, scriptidx = 0;
 	while (1) {
@@ -648,9 +648,9 @@ int main(int argc, char *argv[])
 		verbose_sugar = 1;
 		verbose_code = 1;
 	}
-	kplatform_t *plat = platform_shell();
-	KonohaContext* konoha = konoha_open((const kplatform_t*)plat);
-	ret = konoha_parseopt(konoha, plat, argc, argv);
+	PlatformApi *plat = platform_shell();
+	KonohaContext* konoha = konoha_open(plat);
+	ret = konoha_parseopt(konoha, (PlatformApiVar*)plat, argc, argv);
 	konoha_close(konoha);
 	MODGC_check_malloced_size();
 	return ret ? konoha_AssertResult: 0;

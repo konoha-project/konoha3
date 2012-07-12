@@ -1105,7 +1105,7 @@ void jit_init() {
 	Type klib2 = StructType.create(a0, "klib2", false);
 	Type kclass = StructType.create(a0, "kclass", false);
 	Type karray_t = StructType.create(a0, "karray_t", false);
-	Type kplatform_t = StructType.create(a0, "kplatform_t", false);
+	Type PlatformApi = StructType.create(a0, "PlatformApi", false);
 	Type SharedRuntime = StructType.create(a0, "SharedRuntime", false);
 	Type klocal_t = StructType.create(a0, "klocal_t", false);
 	Type kmemshare_t = StructType.create(a0, "kmemshare_t", false);
@@ -1143,7 +1143,7 @@ void jit_init() {
 	KonohaContextVarTy.set(0, Type.getInt32Ty() /* safepoint */ );
 	KonohaContextVarTy.set(1, PointerType.get(ksfp_t) /* esp */ );
 	KonohaContextVarTy.set(2, PointerType.get(klib2) /* lib2 */ );
-	KonohaContextVarTy.set(3, PointerType.get(kplatform_t) /* plat */ );
+	KonohaContextVarTy.set(3, PointerType.get(PlatformApi) /* plat */ );
 	KonohaContextVarTy.set(4, PointerType.get(kmemshare_t) /* memshare */ );
 	KonohaContextVarTy.set(5, PointerType.get(kmemlocal_t) /* memlocal */ );
 	KonohaContextVarTy.set(6, PointerType.get(SharedRuntime) /* share */ );

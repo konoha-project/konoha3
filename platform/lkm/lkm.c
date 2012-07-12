@@ -127,9 +127,9 @@ static int printf_(const char *fmt, ...)
 	return 0;
 }
 
-const kplatform_t* platform_kernel(void)
+const PlatformApi* platform_kernel(void)
 {
-	static kplatform_t plat = {
+	static PlatformApi plat = {
 		.name = "lkm",
 		.stacksize = K_PAGESIZE * 4,
 		.malloc_i    = malloc,
@@ -155,7 +155,7 @@ const kplatform_t* platform_kernel(void)
 		.end         = kend,
 		.dbg_p       = kdbg_p
 	};
-	return (const kplatform_t*)(&plat);
+	return (const PlatformApi*)(&plat);
 }
 
 static void KonohaContext_evalScript(KonohaContext *kctx, char *data, size_t len)

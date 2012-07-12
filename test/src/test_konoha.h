@@ -52,7 +52,7 @@ static const char* end(kinfotag_t t) { return ""; }
 static void dbg_p(const char *file, const char *func, int line, const char *fmt, ...) {}
 
 
-static kplatform_t plat = {
+static PlatformApi plat = {
 	"test", 4096,
 	malloc,
 	free,

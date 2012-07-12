@@ -105,7 +105,12 @@ typedef enum {
 
 typedef void FILE_i;
 
-typedef struct kplatform_t {
+typedef const struct PlatformApi  PlatformApi;
+typedef struct PlatformApi        PlatformApiVar;
+typedef const struct LibKonohaAPI LibKonohaAPI;
+typedef struct LibKonohaAPI       LibKonohaAPIVar;
+
+struct PlatformApi {
 	// settings
 	const char *name;
 	size_t stacksize;
@@ -137,7 +142,7 @@ typedef struct kplatform_t {
 	const char* (*begin)(kinfotag_t);
 	const char* (*end)(kinfotag_t);
 	void  (*dbg_p)(const char *file, const char *func, int line, const char *fmt, ...) __PRINT_FMT(4, 5);
-} kplatform_t;
+};
 
 /* ------------------------------------------------------------------------ */
 /* type */
@@ -379,7 +384,7 @@ struct KonohaContextVar {
 	int						          safepoint; // set to 1
 	struct ksfp_t                    *esp;
 	const struct _klib2              *lib2;
-	const kplatform_t                *plat;
+	PlatformApi                      *plat;
 	/* TODO(imasahiro)
 	 * checking modgc performance and remove
 	 * memshare/memlocal from context
@@ -1475,7 +1480,7 @@ typedef struct {
 #endif /*unlikely*/
 
 ///* Konoha API */
-extern KonohaContext* konoha_open(const kplatform_t *);
+extern KonohaContext* konoha_open(const PlatformApi *);
 extern void konoha_close(KonohaContext* konoha);
 extern kbool_t konoha_load(KonohaContext* konoha, const char *scriptfile);
 extern kbool_t konoha_eval(KonohaContext* konoha, const char *script, kline_t uline);

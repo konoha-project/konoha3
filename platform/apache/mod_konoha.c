@@ -112,7 +112,7 @@ static void dbg_p(const char *file, const char *func, int L, const char *fmt, ..
 }
 
 
-static const kplatform_t apache_platform = {
+static const PlatformApi apache_platform = {
 	.name        = "apache",
 	.stacksize   = K_PAGESIZE,
 	.malloc_i    = malloc,

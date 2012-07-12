@@ -82,7 +82,7 @@ void test_Kmap(KonohaContext *kctx)
 
 int main(int argc, const char *argv[])
 {
-    KonohaContext* konoha = konoha_open((const kplatform_t*)&plat);
+    KonohaContext* konoha = konoha_open((const PlatformApi*)&plat);
     int i;
     for (i = 0; i < 100; ++i) {
         test_Kmap(konoha);
