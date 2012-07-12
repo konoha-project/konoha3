@@ -270,6 +270,9 @@ typedef const struct KonohaContextVar   KonohaContext;
 typedef struct KonohaContextVar         KonohaContextVar;
 typedef const struct KonohaClassVar     KonohaClass;
 typedef struct KonohaClassVar           KonohaClassVar;
+typedef struct KonohaClassField         KonohaClassField;
+typedef struct KonohaClassField         KonohaClassFieldVar;
+
 
 typedef const struct SharedRuntimeVar   SharedRuntime;
 typedef struct SharedRuntimeVar         SharedRuntimeVar;
@@ -561,12 +564,12 @@ typedef struct krbp_t {
 	};
 } krbp_t;
 
-typedef struct kfield_t {
+struct KonohaClassField {
 	kshortflag_t    flag    ;
 	kshort_t   isobj   ;
 	ktype_t    ty      ;
 	ksymbol_t  fn      ;
-} kfield_t ;
+};
 
 #define P_STR    0
 #define P_DUMP   1
@@ -590,7 +593,7 @@ typedef struct KDEFINE_CLASS {
 	ktype_t    rtype;       kushort_t  psize;
 	struct kparam_t   *cparams;
 	size_t     cstruct_size;
-	kfield_t   *fields;
+	KonohaClassField   *fields;
 	kushort_t  fsize;       kushort_t fallocsize;
 	KCLASSSPI;
 } KDEFINE_CLASS;
@@ -611,7 +614,7 @@ struct KonohaClassVar {
 	ktype_t  p0;            kparamid_t paramdom;
 	kmagicflag_t magicflag;
 	size_t     cstruct_size;
-	kfield_t  *fields;
+	KonohaClassField  *fields;
 	kushort_t  fsize;         kushort_t fallocsize;
 	const char               *DBG_NAME;
 	ksymbol_t                 nameid;

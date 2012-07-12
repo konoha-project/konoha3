@@ -965,7 +965,7 @@ static void CLASSTABLE_freeCT(KonohaContext *kctx)
 	size_t i, size = kctx->share->ca.bytesize/sizeof(KonohaClassVar*);
 	for(i = 0; i < size; i++) {
 		if(cts[i]->fallocsize > 0) {
-			KFREE(cts[i]->fields, cts[i]->fallocsize * sizeof(kfield_t));
+			KFREE(cts[i]->fields, cts[i]->fallocsize * sizeof(KonohaClassField));
 		}
 		KFREE(cts[i], sizeof(KonohaClass));
 	}

@@ -122,11 +122,11 @@ static void setfield(KonohaContext *kctx, KDEFINE_CLASS *ct, int fctsize, Konoha
 	ct->cstruct_size = fctsize * sizeof(kObject*); //size64((fsize * sizeof(void*)) + sizeof(KonohaObjectHeader));
 	//DBG_P("supct->fsize=%d, fctsize=%d, cstruct_size=%d", supct->fsize, fctsize, ct->cstruct_size);
 	if(fsize > 0) {
-		ct->fields = (kfield_t*)KCALLOC(fsize, sizeof(kfield_t));
+		ct->fields = (KonohaClassField*)KCALLOC(fsize, sizeof(KonohaClassField));
 		ct->fsize = supct->fsize;
 		ct->fallocsize = fsize;
 		if(supct->fsize > 0) {
-			memcpy(ct->fields, supct->fields, sizeof(kfield_t)*ct->fsize);
+			memcpy(ct->fields, supct->fields, sizeof(KonohaClassField)*ct->fsize);
 		}
 	}
 }
@@ -360,7 +360,7 @@ extern kObjectVar** KONOHA_reftail(KonohaContext *kctx, size_t size);
 static void ObjectField_reftrace (KonohaContext *kctx, kObject *o)
 {
 	KonohaClass *ct =O_ct(o);
-	kfield_t *fields = ct->fields;
+	KonohaClassField *fields = ct->fields;
 	size_t i, fsize = ct->fsize;
 	BEGIN_REFTRACE(fsize);
 	for (i = 0; i < fsize; i++) {
@@ -415,11 +415,11 @@ static size_t checkFieldSize(KonohaContext *kctx, kBlock *bk)
 static void CT_setField(KonohaContext *kctx, KonohaClassVar *ct, KonohaClass *supct, int fctsize)
 {
 	size_t fsize = supct->fsize + fctsize;
-	ct->fields = (kfield_t*)KCALLOC(fsize, sizeof(kfield_t));
+	ct->fields = (KonohaClassField*)KCALLOC(fsize, sizeof(KonohaClassField));
 	ct->fsize = supct->fsize;
 	ct->fallocsize = fsize;
 	if(supct->fsize > 0) {
-		memcpy(ct->fields, supct->fields, sizeof(kfield_t)*supct->fsize);
+		memcpy(ct->fields, supct->fields, sizeof(KonohaClassField)*supct->fsize);
 		memcpy(ct->nulvalNULL_, supct->nulvalNULL_, sizeof(kObject*) * supct->fsize);
 	}
 }
