@@ -68,7 +68,7 @@ static void KRUNTIME_init(KonohaContext *kctx, KonohaContextVar *ctx, size_t sta
 	size_t i;
 	LocalRuntimeVar *base = (LocalRuntimeVar*)KCALLOC(sizeof(LocalRuntimeVar), 1);
 	base->stacksize = stacksize;
-	base->stack = (ksfp_t*)KCALLOC(sizeof(ksfp_t), stacksize);
+	base->stack = (KonohaStack*)KCALLOC(sizeof(KonohaStack), stacksize);
 	assert(stacksize>64);
 	base->stack_uplimit = base->stack + (stacksize - 64);
 	for(i = 0; i < stacksize; i++) {
@@ -84,7 +84,7 @@ static void KRUNTIME_init(KonohaContext *kctx, KonohaContextVar *ctx, size_t sta
 
 static void KRUNTIME_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 {
-	ksfp_t *sp = ctx->stack->stack;
+	KonohaStack *sp = ctx->stack->stack;
 	BEGIN_REFTRACE((kctx->esp - sp)+1);
 	while(sp < ctx->esp) {
 		KREFTRACEv(sp[0].o);
@@ -101,7 +101,7 @@ static void KRUNTIME_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	}
 	KARRAY_FREE(&kctx->stack->cwb);
 	KARRAY_FREE(&kctx->stack->ref);
-	KFREE(kctx->stack->stack, sizeof(ksfp_t) * ctx->stack->stacksize);
+	KFREE(kctx->stack->stack, sizeof(KonohaStack) * ctx->stack->stacksize);
 	KFREE(kctx->stack, sizeof(LocalRuntimeVar));
 }
 

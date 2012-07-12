@@ -50,7 +50,7 @@ static void PyObject_init(KonohaContext *kctx, kObject *o, void *conf)
 	}
 }
 
-static void PyObject_p(KonohaContext *kctx, ksfp_t *sfp, int pos, kwb_t *wb, int level)
+static void PyObject_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int level)
 {
 	// Now, level value has no effect.
 	PyObject *pyo =  ((kPyObject*)sfp[pos].o)->self;
@@ -75,7 +75,7 @@ static void PyObject_free(KonohaContext *kctx, kObject *o)
 
 #define RETURN_PyObject(O)  RETURN_PyObject_(kctx, sfp, O K_RIXPARAM)
 
-static void RETURN_PyObject_(KonohaContext *kctx, ksfp_t *sfp, PyObject *pyo _RIX)
+static void RETURN_PyObject_(KonohaContext *kctx, KonohaStack *sfp, PyObject *pyo _RIX)
 {
 	if(pyo != NULL) {
     	RETURN_(new_kObject(O_ct(sfp[K_RTNIDX].o), pyo));
@@ -95,12 +95,12 @@ static void RETURN_PyObject_(KonohaContext *kctx, ksfp_t *sfp, PyObject *pyo _RI
 // it is difficult to transfer UCS2 to konoha String.
 // Do not forget test ...
 
-static KMETHOD Int_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Int_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURN_PyObject(PyInt_FromLong(sfp[0].ivalue));
 }
 
-static KMETHOD PyObject_toInt(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD PyObject_toInt(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kPyObject *po = (kPyObject*)sfp[0].o;
 	long v = PyInt_AsLong(po->self);
@@ -110,23 +110,23 @@ static KMETHOD PyObject_toInt(KonohaContext *kctx, ksfp_t *sfp _RIX)
 	RETURNi_(v);
 }
 
-static KMETHOD Boolean_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Boolean_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURN_PyObject(PyBool_FromLong(sfp[0].ivalue));
 }
 
-static KMETHOD PyObject_toBoolean(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD PyObject_toBoolean(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kPyObject *po = (kPyObject*)sfp[0].o;
 	RETURNb_(po->self == Py_True ? 1 : 0);
 }
 
-static KMETHOD Float_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Float_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURN_PyObject(PyFloat_FromDouble(sfp[0].fvalue));
 }
 
-static KMETHOD PyObject_toFloat(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kPyObject *po = (kPyObject*)sfp[0].o;
 	double v = PyFloat_AsDouble(po->self);
@@ -137,12 +137,12 @@ static KMETHOD PyObject_toFloat(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 // [TODO] warning caused ... because some bytes_gule.h function (ex. kdlclose) is not use.
-//static KMETHOD Bytes_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD Bytes_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //	RETURN_PyObject(PyString_FromString(sfp[0].s));
 //}
 //
-//static KMETHOD PyObject_toBytes(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD PyObject_toBytes(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //	kPyObject *po = (kPyObject*)sfp[0].o;
 //	kwb_t wb;
@@ -157,23 +157,23 @@ static KMETHOD PyObject_toFloat(KonohaContext *kctx, ksfp_t *sfp _RIX)
 //	RETURN_(ba);
 //}
 
-//static KMETHOD Complex_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD Complex_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //	//RETURN_PyObject(PyBool_FromLong(sfp[0].ivalue));
 //}
 //
-//static KMETHOD PyObject_toComplex(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD PyObject_toComplex(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //	//kPyObject *po = (kPyObject*)sfp[0].o;
 //	//RETURNb_(po->self == Py_True ? 1 : 0);
 //}
 
-static KMETHOD String_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD String_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURN_PyObject(PyUnicode_FromString(S_text(sfp[0].s)));
 }
 
-static KMETHOD PyObject_toString(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kPyObject *po = (kPyObject*)sfp[0].o;
 	kwb_t wb;
@@ -211,26 +211,26 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, ksfp_t *sfp _RIX)
 	//}
 }
 
-//static KMETHOD Buffer_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD Buffer_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD PyObject_toBuffer(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD PyObject_toBuffer(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD Tuple_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD Tuple_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD PyObject_toTuple(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD PyObject_toTuple(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 
 #define _BITS 8
 #define PY_SSIZE_MAX (size_t)(1 << 31)
 
-//static KMETHOD Array_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD Array_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //	kArray *a = sfp[0].a;
 //	size_t i, n = kArray_size(a);
@@ -251,136 +251,136 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, ksfp_t *sfp _RIX)
 //	RETURN_PyObject(pa);
 //}
 
-//static KMETHOD PyObject_toList(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD PyObject_toList(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //	//kPyObject *po = (kPyObject*)sfp[0].o;
 //	//RETURNb_(po->self == Py_True ? 1 : 0);
 //}
 
-//static KMETHOD Dict_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD Dict_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD PyObject_toDict(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD PyObject_toDict(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD Class_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD Class_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD PyObject_toClass(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD PyObject_toClass(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD Function_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD Function_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD PyObject_toFunction(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD PyObject_toFunction(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD Method_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD Method_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD PyObject_toMethod(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD PyObject_toMethod(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD File_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD File_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD PyObject_toFile(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD PyObject_toFile(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD Module_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD Module_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD PyObject_toModule(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD PyObject_toModule(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD SeqIter_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD SeqIter_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD PyObject_toSeqIter(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD PyObject_toSeqIter(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD Slice_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD Slice_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD PyObject_toSlice(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD PyObject_toSlice(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD Weakref_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD Weakref_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD PyObject_toWeakref(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD PyObject_toWeakref(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD Capsule_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD Capsule_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD PyObject_toCapsule(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD PyObject_toCapsule(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD Cell_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD Cell_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD PyObject_toCell(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD PyObject_toCell(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD Gen_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD Gen_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD PyObject_toGen(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD PyObject_toGen(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD Date_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD Date_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD PyObject_toDate(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD PyObject_toDate(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD Set_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD Set_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD PyObject_toSet(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD PyObject_toSet(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD Code_toPyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD Code_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 //
-//static KMETHOD PyObject_toCode(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD PyObject_toCode(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //}
 
 // --------------------------------------------------------------------------
 
 //## Boolean Python.eval(String script);
-static KMETHOD Python_eval(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Python_eval(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNb_(PyRun_SimpleString(S_text(sfp[1].s)) == 0);
 }
@@ -423,7 +423,7 @@ char** pyenv_split(char* line, char target)
 
 //## PyObject PyObject.importPtModule(String name);
 //[TODO] devide each function PYTHONPATH and default search path.
-static KMETHOD PyObject_import(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD PyObject_import(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	PySys_SetPath("."); // add home dir to python search path.
 	PyListObject* ppath;
@@ -444,7 +444,7 @@ static KMETHOD PyObject_import(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 //## PyObject PyObject.(PyObject o);
-static KMETHOD PyObject_(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD PyObject_(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	// consider about module function and class method.
 	// Now, PyObject_() support only module function.

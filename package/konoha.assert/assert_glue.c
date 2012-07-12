@@ -29,7 +29,7 @@
 //// --------------------------------------------------------------------------
 //
 ////## method @static void NameSpace.assert(boolean cond)
-//static KMETHOD NameSpace_assert(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD NameSpace_assert(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //	kbool_t cond = sfp[1].bvalue;
 //	kline_t fileid  = sfp[K_RTNIDX].uline;
@@ -43,7 +43,7 @@
 //
 //// --------------------------------------------------------------------------
 //
-//static KMETHOD StmtTyCheck_assert(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD StmtTyCheck_assert(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //	//FIXME
 ////	USING_SUGAR;

@@ -1131,17 +1131,17 @@ void jit_init() {
 	Type kObject = StructType.create(kObjectTy, "kObject", false)
 	System.setTyObject(PointerType.get(kObject));
 
-	/*------- ksfp_t ------*/
-	Array ksfp_tTy = Array.newN(2);
-	ksfp_tTy.set(0, PointerType.get(kObject) /* o */ /*union*/);
-	ksfp_tTy.set(1, getLongTy() /* ndata */ /*union*/);
-	Type ksfp_t = StructType.create(ksfp_tTy, "ksfp_t", false)
-	System.setTyStack(PointerType.get(ksfp_t));
+	/*------- KonohaStack ------*/
+	Array KonohaStackTy = Array.newN(2);
+	KonohaStackTy.set(0, PointerType.get(kObject) /* o */ /*union*/);
+	KonohaStackTy.set(1, getLongTy() /* ndata */ /*union*/);
+	Type KonohaStack = StructType.create(KonohaStackTy, "KonohaStack", false)
+	System.setTyStack(PointerType.get(KonohaStack));
 
 	/*------- KonohaContextVar ------*/
 	Array KonohaContextVarTy = Array.newN(12);
 	KonohaContextVarTy.set(0, Type.getInt32Ty() /* safepoint */ );
-	KonohaContextVarTy.set(1, PointerType.get(ksfp_t) /* esp */ );
+	KonohaContextVarTy.set(1, PointerType.get(KonohaStack) /* esp */ );
 	KonohaContextVarTy.set(2, PointerType.get(klib2) /* lib2 */ );
 	KonohaContextVarTy.set(3, PointerType.get(PlatformApi) /* plat */ );
 	KonohaContextVarTy.set(4, PointerType.get(kmemshare_t) /* memshare */ );
@@ -1163,7 +1163,7 @@ void jit_init() {
 	Type kArray = StructType.create(kArrayTy, "kArray", false)
 
 
-	Array argsTy = Array.new3(PointerType.get(KonohaContextVar), PointerType.get(ksfp_t), getLongTy());
+	Array argsTy = Array.new3(PointerType.get(KonohaContextVar), PointerType.get(KonohaStack), getLongTy());
 	FunctionType funcTy = FunctionType.get(Type.getVoidTy(), argsTy, false);
 
 	/*------- _kMethod ------*/

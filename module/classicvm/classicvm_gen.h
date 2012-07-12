@@ -1434,7 +1434,7 @@ static kbool_t kopcode_hasjump(kopcode_t opcode)
 #define GOTO_PC(pc)         GOTO_NEXT()
 #endif/*K_USING_THCODE_*/
 
-static kopl_t* VirtualMachine_run(KonohaContext *kctx, ksfp_t *sfp0, kopl_t *pc)
+static kopl_t* VirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, kopl_t *pc)
 {
 #ifdef K_USING_THCODE_
 	static void *OPJUMP[] = {

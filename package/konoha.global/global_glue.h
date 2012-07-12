@@ -39,21 +39,21 @@ static kbool_t global_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t 
 
 // --------------------------------------------------------------------------
 
-static KMETHOD Fmethod_ProtoGetter(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Fmethod_ProtoGetter(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
 	RETURN_(kObject_getObject(sfp[0].o, key, sfp[K_RTNIDX].o));
 }
 
-static KMETHOD Fmethod_ProtoGetterN(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Fmethod_ProtoGetterN(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
 	RETURNd_(kObject_getUnboxedValue(sfp[0].o, key, 0));
 }
 
-static KMETHOD Fmethod_ProtoSetter(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Fmethod_ProtoSetter(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
@@ -61,7 +61,7 @@ static KMETHOD Fmethod_ProtoSetter(KonohaContext *kctx, ksfp_t *sfp _RIX)
 	RETURN_(sfp[1].o);
 }
 
-static KMETHOD Fmethod_ProtoSetterN(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Fmethod_ProtoSetterN(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
@@ -135,7 +135,7 @@ static ksymbol_t tosymbol(KonohaContext *kctx, kExpr *expr)
 	return SYM_NONAME;
 }
 
-static KMETHOD StmtTyCheck_var(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, gma);
@@ -239,7 +239,7 @@ static kbool_t Expr_declType(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGam
 	return false;
 }
 
-static KMETHOD StmtTyCheck_GlobalTypeDecl(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD StmtTyCheck_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, gma);

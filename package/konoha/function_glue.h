@@ -54,7 +54,7 @@ static void Func_reftrace(KonohaContext *kctx, kObject *o)
 /* ------------------------------------------------------------------------ */
 //## This Func.new(Object self, Method mtd);
 
-static KMETHOD Func_new(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Func_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kFunc *fo = sfp[0].fo;
 	KSETv(fo->self, sfp[1].o);
@@ -65,7 +65,7 @@ static KMETHOD Func_new(KonohaContext *kctx, ksfp_t *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## @Hidden T0 Func.invoke();
 
-static KMETHOD Func_invoke(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Func_invoke(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kFunc* fo = sfp[0].fo;
 	KSETv(sfp[0].o, fo->self);
@@ -129,7 +129,7 @@ static kbool_t function_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_
 
 //----------------------------------------------------------------------------
 
-static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);

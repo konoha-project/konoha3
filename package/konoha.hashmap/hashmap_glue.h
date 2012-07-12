@@ -49,7 +49,7 @@ static void HashMap_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void HashMap_p(KonohaContext *kctx, ksfp_t *sfp, int pos, kwb_t *wb, int level)
+static void HashMap_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int level)
 {
 	// TODO
 }
@@ -57,7 +57,7 @@ static void HashMap_p(KonohaContext *kctx, ksfp_t *sfp, int pos, kwb_t *wb, int 
 #include <minikonoha/klib.h>
 /* ------------------------------------------------------------------------ */
 
-static KMETHOD HashMap_get(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD HashMap_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	struct _kHashMap *m = (struct _kHashMap *)sfp[0].o;
 	kmap_t *map = m->map;
@@ -75,7 +75,7 @@ static KMETHOD HashMap_get(KonohaContext *kctx, ksfp_t *sfp _RIX)
 	}
 }
 
-static KMETHOD HashMap_set(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD HashMap_set(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	struct _kHashMap *m = (struct _kHashMap *)sfp[0].o;
 	kmap_t *map = m->map;
@@ -96,7 +96,7 @@ static KMETHOD HashMap_set(KonohaContext *kctx, ksfp_t *sfp _RIX)
 	RETURNvoid_();
 }
 
-static KMETHOD HashMap_new(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD HashMap_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURN_(new_kObject(O_ct(sfp[K_RTNIDX].o), NULL));
 }

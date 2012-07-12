@@ -36,13 +36,13 @@ extern "C" {
 
 /* ------------------------------------------------------------------------ */
 
-static KMETHOD Int_opLSHIFT (KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Int_opLSHIFT (KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	int lshift = sfp[1].ivalue;
 	RETURNi_(sfp[0].ivalue << lshift);
 }
 
-static KMETHOD Int_opRSHIFT (KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Int_opRSHIFT (KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	int rshift = sfp[1].ivalue;
 	RETURNi_(sfp[0].ivalue >> rshift);

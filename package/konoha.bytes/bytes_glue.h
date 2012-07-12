@@ -110,7 +110,7 @@ static void Bytes_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void Bytes_p(KonohaContext *kctx, ksfp_t *sfp, int pos, kwb_t *wb, int level)
+static void Bytes_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int level)
 {
 	kBytes *ba = (kBytes*)sfp[pos].o;
 	DBG_P("level:%d", level);
@@ -238,7 +238,7 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 }
 
 //## @Const method Bytes Bytes.encodeTo(String toEncoding);
-static KMETHOD Bytes_encodeTo(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Bytes_encodeTo(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kBytes *ba = sfp[0].ba;
 	kString *toCoding = sfp[1].s;
@@ -246,7 +246,7 @@ static KMETHOD Bytes_encodeTo(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 //## @Const method String Bytes.decodeFrom(String fromEncoding);
-static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kBytes* fromBa = sfp[0].ba;
 	kString*fromCoding = sfp[1].s;
@@ -261,7 +261,7 @@ static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 //## @Const method Bytes String.toBytes();
-static KMETHOD String_toBytes(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD String_toBytes(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kString* s = sfp[0].s;
 	kBytes* ba = (kBytes*)new_kObject(CT_Bytes, S_size(s));
@@ -276,7 +276,7 @@ static KMETHOD String_toBytes(KonohaContext *kctx, ksfp_t *sfp _RIX)
 //#include "../konoha.string/string_glue.h"
 
 //## @Const method String Bytes.toString();
-static KMETHOD Bytes_toString(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Bytes_toString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kBytes *from = sfp[0].ba;
 	kBytes *to = convFromTo(kctx, from, getSystemEncoding(), "UTF-8");
@@ -286,7 +286,7 @@ static KMETHOD Bytes_toString(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 //## Int Bytes.get(Int n);
-static KMETHOD Bytes_get(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Bytes_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kBytes *ba = sfp[0].ba;
 	size_t n = check_index(kctx, sfp[1].ivalue, ba->bytesize, sfp[K_RTNIDX].uline);
@@ -294,7 +294,7 @@ static KMETHOD Bytes_get(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 //## method Int Bytes.set(Int n, Int c);
-static KMETHOD Bytes_set(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Bytes_set(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kBytes *ba = sfp[0].ba;
 	size_t n = check_index(kctx, sfp[1].ivalue, ba->bytesize, sfp[K_RTNIDX].uline);
@@ -302,7 +302,7 @@ static KMETHOD Bytes_set(KonohaContext *kctx, ksfp_t *sfp _RIX)
 	RETURNi_(ba->utext[n]);
 }
 
-static KMETHOD Bytes_setAll(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Bytes_setAll(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kBytes *ba = sfp[0].ba;
 	int bytesize = ba->bytesize;
@@ -313,13 +313,13 @@ static KMETHOD Bytes_setAll(KonohaContext *kctx, ksfp_t *sfp _RIX)
 	RETURNvoid_();
 
 }
-static KMETHOD Bytes_getSize(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Bytes_getSize(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kBytes *ba = sfp[0].ba;
 	RETURNi_(ba->bytesize);
 }
 
-static KMETHOD Bytes_new(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Bytes_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	DBG_P("bytes new called, with size=%d", sfp[1].ivalue);
 	RETURN_(new_kObject(O_ct(sfp[K_RTNIDX].o), sfp[1].ivalue));
@@ -403,7 +403,7 @@ static int parseSQUOTE(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, in
 }
 
 
-static KMETHOD ExprTyCheck_Squote(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD ExprTyCheck_Squote(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);

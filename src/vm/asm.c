@@ -429,7 +429,7 @@ static void dumpOPCODE(KonohaContext *kctx, kopl_t *c, kopl_t *pc_start)
 	DUMP_P("\n");
 }
 
-static KMETHOD Fmethod_runVM(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Fmethod_runVM(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	DBG_ASSERT(K_RIX == K_RTNIDX);
 	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].mtdNC));
@@ -641,7 +641,7 @@ static void EXPR_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int esp
 	}
 }
 
-static KMETHOD Fmethod_abstract(KonohaContext *kctx, ksfp_t *sfp _RIX);
+static KMETHOD Fmethod_abstract(KonohaContext *kctx, KonohaStack *sfp _RIX);
 
 static void CALL_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espidx)
 {
@@ -966,7 +966,7 @@ static void KonohaCode_free(KonohaContext *kctx, kObject *o)
 	KFREE(b->code, b->codesize);
 }
 
-static KMETHOD Fmethod_abstract(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Fmethod_abstract(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 //	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
 //	ktype_t rtype = mtd->pa->rtype;

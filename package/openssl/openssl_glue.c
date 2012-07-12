@@ -16,14 +16,14 @@ static void RawPtr_init(KonohaContext *kctx, kObject *po, void *conf)
 	o->rawptr = conf;
 }
 
-static KMETHOD kMD5_Init(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD kMD5_Init(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	MD5state_st* c = malloc(sizeof(*c));
 	int ret_ = MD5_Init(c);
 	RawPtr_init(kctx, sfp[0].o, c);
 	RETURN_(sfp[0].o);
 }
-static KMETHOD kMD5_Update(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD kMD5_Update(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	MD5state_st* c = RawPtr(sfp[0].o);
 	unsigned char* data = (unsigned char *) S_text(sfp[1].s);
@@ -31,7 +31,7 @@ static KMETHOD kMD5_Update(KonohaContext *kctx, ksfp_t *sfp _RIX)
 	int ret_ = MD5_Update(c, data, len);
 	RETURNi_(ret_);
 }
-static KMETHOD kMD5_Final(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD kMD5_Final(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	unsigned char MD[MD5_DIGEST_LENGTH];
 	MD5state_st* c = RawPtr(sfp[0].o);
@@ -43,14 +43,14 @@ static KMETHOD kMD5_Final(KonohaContext *kctx, ksfp_t *sfp _RIX)
 	}
 	RETURN_(new_kString(MD_S, MD5_DIGEST_LENGTH*2, SPOL_ASCII));
 }
-static KMETHOD kSHA1_Init(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD kSHA1_Init(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	SHAstate_st* c = malloc(sizeof(*c));
 	int ret_ = SHA1_Init(c);
 	RawPtr_init(kctx, sfp[0].o, c);
 	RETURN_(sfp[0].o);
 }
-static KMETHOD kSHA1_Update(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD kSHA1_Update(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	SHAstate_st* c = RawPtr(sfp[0].o);
 	unsigned char* data = (unsigned char *) S_text(sfp[1].s);
@@ -58,7 +58,7 @@ static KMETHOD kSHA1_Update(KonohaContext *kctx, ksfp_t *sfp _RIX)
 	int ret_ = SHA1_Update(c, data, len);
 	RETURNi_(ret_);
 }
-static KMETHOD kSHA1_Final(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD kSHA1_Final(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	unsigned char SHA[SHA_DIGEST_LENGTH];
 	SHAstate_st* c = RawPtr(sfp[0].o);

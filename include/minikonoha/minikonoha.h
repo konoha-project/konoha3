@@ -382,7 +382,7 @@ typedef struct LocalRuntimeVar          LocalRuntimeVar;
 
 struct KonohaContextVar {
 	int						          safepoint; // set to 1
-	struct ksfp_t                    *esp;
+	struct KonohaStack                    *esp;
 	const struct _klib2              *lib2;
 	PlatformApi                      *plat;
 	/* TODO(imasahiro)
@@ -421,10 +421,21 @@ struct SharedRuntimeVar {
 	struct kmap_t                *paramdomMapNN;
 };
 
+typedef struct KonohaStack KonohaStack;
+
+#define kContext_Debug          ((kshortflag_t)(1<<0))
+#define kContext_Interactive    ((kshortflag_t)(1<<1))
+#define kContext_CompileOnly    ((kshortflag_t)(1<<2))
+
+#define KonohaContext_isInteractive(X)  (TFLAG_is(kshortflag_t,(X)->stack->flag, kContext_Interactive))
+#define KonohaContext_isCompileOnly(X)  (TFLAG_is(kshortflag_t,(X)->stack->flag, kContext_CompileOnly))
+#define KonohaContext_setInteractive(X)  TFLAG_set1(kshortflag_t, (X)->stack->flag, kContext_Interactive)
+#define KonohaContext_setCompileOnly(X)  TFLAG_set1(kshortflag_t, (X)->stack->flag, kContext_CompileOnly)
+
 struct LocalRuntimeVar {
-	struct ksfp_t*               stack;
+	struct KonohaStack*               stack;
 	size_t                       stacksize;
-	struct ksfp_t*               stack_uplimit;
+	struct KonohaStack*               stack_uplimit;
 	const struct _kArray        *gcstack;
 	karray_t                     cwb;
 	// local info
@@ -438,9 +449,7 @@ struct LocalRuntimeVar {
 	jmpbuf_i  *evaljmpbuf;
 };
 
-
 // module
-
 #define MOD_MAX    32
 struct _kObject;
 
@@ -471,14 +480,6 @@ typedef struct kmodshare_t {
 	void (*free)(KonohaContext *kctx, struct kmodshare_t *);
 } kmodshare_t;
 
-#define kContext_Debug          ((kshortflag_t)(1<<0))
-#define kContext_Interactive    ((kshortflag_t)(1<<1))
-#define kContext_CompileOnly    ((kshortflag_t)(1<<2))
-
-#define KonohaContext_isInteractive(X)  (TFLAG_is(kshortflag_t,(X)->stack->flag, kContext_Interactive))
-#define KonohaContext_isCompileOnly(X)  (TFLAG_is(kshortflag_t,(X)->stack->flag, kContext_CompileOnly))
-#define KonohaContext_setInteractive(X)  TFLAG_set1(kshortflag_t, (X)->stack->flag, kContext_Interactive)
-#define KonohaContext_setCompileOnly(X)  TFLAG_set1(kshortflag_t, (X)->stack->flag, kContext_CompileOnly)
 
 
 #define K_FRAME_NCMEMBER \
@@ -526,14 +527,15 @@ typedef struct kmodshare_t {
 		kint_t     dummy_ivalue;\
 		kfloat_t   dummy_fvalue \
 
-typedef struct ksfp_t {
+
+struct KonohaStack {
 	union {
 		K_FRAME_MEMBER;
 	};
 	union {
 		K_FRAME_NCMEMBER;
 	};
-} ksfp_t;
+};
 
 typedef struct krbp_t {
 	union {
@@ -560,7 +562,7 @@ struct _kclass;
 		void (*reftrace)(KonohaContext *kctx, const struct _kObject*);\
 		void (*free)(KonohaContext *kctx, const struct _kObject*);\
 		const struct _kObject* (*fnull)(KonohaContext *kctx, const struct _kclass*);\
-		void (*p)(KonohaContext *kctx, ksfp_t *, int, kwb_t *, int);\
+		void (*p)(KonohaContext *kctx, KonohaStack *, int, kwb_t *, int);\
 		uintptr_t (*unbox)(KonohaContext *kctx, const struct _kObject*);\
 		int  (*compareTo)(const struct _kObject*, const struct _kObject*);\
 		void (*initdef)(KonohaContext *kctx, struct _kclass*, kline_t);\
@@ -1011,14 +1013,14 @@ typedef const struct _kMethod kMethod;
 #ifdef K_USING_WIN32_
 //#define KMETHOD  void CC_EXPORT
 //#define ITRNEXT int   CC_EXPORT
-//typedef void (CC_EXPORT *knh_Fmethod)(KonohaContext *kctx, ksfp_t* _RIX);
-//typedef int  (CC_EXPORT *knh_Fitrnext)(KonohaContext *kctx, ksfp_t * _RIX);
+//typedef void (CC_EXPORT *knh_Fmethod)(KonohaContext *kctx, KonohaStack* _RIX);
+//typedef int  (CC_EXPORT *knh_Fitrnext)(KonohaContext *kctx, KonohaStack * _RIX);
 #else
 #define KMETHOD    void  /*CC_FASTCALL_*/
 #define KMETHODCC  int  /*CC_FASTCALL_*/
-typedef KMETHOD   (*knh_Fmethod)(KonohaContext *kctx, ksfp_t* _RIX);
-typedef KMETHOD   (*FmethodFastCall)(KonohaContext *kctx, ksfp_t * _KFASTCALL);
-typedef KMETHODCC (*FmethodCallCC)(KonohaContext *kctx, ksfp_t *, int, int, struct kopl_t*);
+typedef KMETHOD   (*knh_Fmethod)(KonohaContext *kctx, KonohaStack* _RIX);
+typedef KMETHOD   (*FmethodFastCall)(KonohaContext *kctx, KonohaStack * _KFASTCALL);
+typedef KMETHODCC (*FmethodCallCC)(KonohaContext *kctx, KonohaStack *, int, int, struct kopl_t*);
 #endif
 
 struct _kMethod {
@@ -1117,12 +1119,12 @@ struct _kSystem {
 #define Method_isKonohaCode(mtd) (0)
 
 #define BEGIN_LOCAL(V,N) \
-	ksfp_t *V = kctx->esp, *esp_ = kctx->esp; (void)V;((KonohaContextVar*)kctx)->esp = esp_+N;\
+	KonohaStack *V = kctx->esp, *esp_ = kctx->esp; (void)V;((KonohaContextVar*)kctx)->esp = esp_+N;\
 
 #define END_LOCAL() ((KonohaContextVar*)kctx)->esp = esp_;
 
 #define KCALL(LSFP, RIX, MTD, ARGC, DEFVAL) { \
-		ksfp_t *tsfp = LSFP + RIX + K_CALLDELTA;\
+		KonohaStack *tsfp = LSFP + RIX + K_CALLDELTA;\
 		tsfp[K_MTDIDX].mtdNC = MTD;\
 		tsfp[K_PCIDX].fname = __FILE__;\
 		tsfp[K_SHIFTIDX].shift = 0;\
@@ -1134,7 +1136,7 @@ struct _kSystem {
 	} \
 
 #define KSELFCALL(TSFP, MTD) { \
-		ksfp_t *tsfp = TSFP;\
+		KonohaStack *tsfp = TSFP;\
 		tsfp[K_MTDIDX].mtdNC = MTD;\
 		(MTD)->fcall_1(kctx, tsfp K_RIXPARAM);\
 		tsfp[K_MTDIDX].mtdNC = NULL;\

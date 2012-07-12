@@ -26,7 +26,7 @@
 #include<minikonoha/sugar.h>
 
 // Expr Expr.tyCheckStub(Gamma gma, int reqtyid);
-//static KMETHOD ExprTyCheck_stub(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD ExprTyCheck_stub(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 //	DBG_P("stub: size=%d", kArray_size(expr->consNUL));

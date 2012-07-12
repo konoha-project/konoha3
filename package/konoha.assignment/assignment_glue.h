@@ -28,7 +28,7 @@
 // --------------------------------------------------------------------------
 
 // Expr Expr.tyCheckStub(Gamma gma, int reqtyid);
-static KMETHOD ExprTyCheck_assignment(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD ExprTyCheck_assignment(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
@@ -72,7 +72,7 @@ static kbool_t assignment_setupPackage(KonohaContext *kctx, kNameSpace *ks, klin
 	return true;
 }
 
-static KMETHOD StmtTyCheck_DefaultAssignment(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD StmtTyCheck_DefaultAssignment(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 }
 
@@ -145,7 +145,7 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 	return news;
 }
 
-static KMETHOD ParseExpr_OprAssignment(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD ParseExpr_OprAssignment(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	USING_SUGAR;
 	VAR_ParseExpr(stmt, tls, s, c, e);

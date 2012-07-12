@@ -37,7 +37,7 @@ static kbool_t var_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pli
 	return true;
 }
 
-static KMETHOD StmtTyCheck_var(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, syn, gma);

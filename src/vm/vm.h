@@ -81,8 +81,8 @@ typedef struct ksfx_t {
 
 struct klr_LDMTD_t;
 typedef void (*klr_Fth)(KonohaContext *kctx, struct kopl_t *, void**);
-typedef void (*klr_Floadmtd)(KonohaContext *kctx, ksfp_t *, struct klr_LDMTD_t *);
-typedef kbool_t (*Fcallcc)(KonohaContext *kctx, ksfp_t *, int, int, void *);
+typedef void (*klr_Floadmtd)(KonohaContext *kctx, KonohaStack *, struct klr_LDMTD_t *);
+typedef kbool_t (*Fcallcc)(KonohaContext *kctx, KonohaStack *, int, int, void *);
 
 typedef struct {
 	ktype_t cid; kmethodn_t mn;
@@ -169,7 +169,7 @@ struct _kKonohaCode {
 //-------------------------------------------------------------------------
 
 #define rshift(rbp, x_) (rbp+(x_))
-#define SFP(rbp)  ((ksfp_t*)(rbp))
+#define SFP(rbp)  ((KonohaStack*)(rbp))
 #define SFPIDX(n) ((n)/2)
 #define RBP(sfp)  ((krbp_t*)(sfp))
 
@@ -249,7 +249,7 @@ struct _kKonohaCode {
 #define OPEXEC_SCALL(UL, thisidx, espshift, mtdO, CTO) { \
 		kMethod *mtd_ = mtdO;\
 		/*prefetch((mtd_)->fcall_1);*/\
-		ksfp_t *sfp_ = SFP(rshift(rbp, thisidx)); \
+		KonohaStack *sfp_ = SFP(rshift(rbp, thisidx)); \
 		sfp_[K_RTNIDX].o = CTO;\
 		sfp_[K_RTNIDX].uline = UL;\
 		sfp_[K_SHIFTIDX].shift = thisidx; \
@@ -292,7 +292,7 @@ struct _kKonohaCode {
 #define KLR_SAFEPOINT(espidx) \
 	if(kctx->safepoint != 0) { \
 		klr_setesp(kctx, SFP(rshift(rbp, espidx)));\
-		knh_checkSafePoint(kctx, (ksfp_t*)rbp, __FILE__, __LINE__); \
+		knh_checkSafePoint(kctx, (KonohaStack*)rbp, __FILE__, __LINE__); \
 	} \
 
 #else
@@ -334,7 +334,7 @@ struct _kKonohaCode {
 #define RXo_(x)    (Rx_(x.i)->fields[x.n])
 //#define RXd_(x)   (*((kunbox_t*) Rx_(x.i)->fields+x.n))
 #define RXd_(x)   (*((kint_t*) Rx_(x.i)->fields+x.n))
-#define SFP(rbp)  ((ksfp_t*)(rbp))
+#define SFP(rbp)  ((KonohaStack*)(rbp))
 #define SFPIDX(n) ((n)/2)
 #define RBP(sfp)  ((krbp_t*)(sfp))
 
@@ -551,7 +551,7 @@ struct _kKonohaCode {
 #define OPEXEC_THUNK(rtnidx, thisidx, espshift, mtdO) { \
 		kMethod *mtd_ = mtdO == NULL ? rbp[thisidx+K_MTDIDX2].mtdNC : mtdO;\
 		klr_setesp(kctx, SFP(rshift(rbp, espshift)));\
-		knh_stack_newThunk(kctx, (ksfp_t*)rshift(rbp, thisidx));\
+		knh_stack_newThunk(kctx, (KonohaStack*)rshift(rbp, thisidx));\
 	} \
 
 #define OPEXEC_FUNCCALL() { \
@@ -584,7 +584,7 @@ struct _kKonohaCode {
 
 #define OPEXEC_TCAST(kctx, rtnidx, thisidx, rix, espidx, tmr)  { \
 		kTypeMap *tmr_ = tmr; \
-		ksfp_t *sfp_ = SFP(rshift(rbp,thisidx));\
+		KonohaStack *sfp_ = SFP(rshift(rbp,thisidx));\
 		kclass_t scid = SP(tmr_)->scid, this_cid = O_cid(sfp_[0].o);\
 		if(this_cid != scid) {\
 			tmr_ = knh_findTypeMapNULL(kctx, scid, SP(tmr)->tcid);\
@@ -624,7 +624,7 @@ struct _kKonohaCode {
 /* ------------------------------------------------------------------------- */
 
 #define OPEXEC_NEXT(PC, JUMP, rtnidx, ib, rix, espidx) { \
-	ksfp_t *itrsfp_ = SFP(rshift(rbp, ib)); \
+	KonohaStack *itrsfp_ = SFP(rshift(rbp, ib)); \
 	DBG_ASSERT(IS_bIterator(itrsfp_[0].it));\
 	klr_setesp(kctx, SFP(rshift(rbp, espidx)));\
 	if(!((itrsfp_[0].it)->fnext_1(kctx, itrsfp_, rix))) { \

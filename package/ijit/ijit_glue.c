@@ -99,18 +99,18 @@ static kObject *get_value(KonohaContext *kctx, int index)
 }
 
 //## void System.setUline(int uline);
-static KMETHOD System_setUline(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_setUline(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kmodjit->uline = sfp[1].ivalue;
 	RETURNvoid_();
 }
 //## void System.getUline();
-static KMETHOD System_getUline(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_getUline(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNi_(kmodjit->uline);
 }
 
-static KMETHOD Expr_getSingle(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Expr_getSingle(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kExpr *expr = (kExpr *) sfp[0].o;
 	DBG_ASSERT(IS_Expr(expr->single));
@@ -126,7 +126,7 @@ static kArray *get_stack(KonohaContext *kctx, kArray *g)
 }
 
 //## Value System.getValue(int index);
-static KMETHOD System_getValue(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_getValue(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kArray *g = kmodjit->global_value;
 	kArray *stack = get_stack(kctx, g);
@@ -135,7 +135,7 @@ static KMETHOD System_getValue(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 //## void  System.setValue(int index, Value v);
-static KMETHOD System_setValue(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_setValue(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kArray *g = kmodjit->global_value;
 	kArray *stack = get_stack(kctx, g);
@@ -147,7 +147,7 @@ static KMETHOD System_setValue(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 //## void  System.clearValue();
-static KMETHOD System_clearValue(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_clearValue(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kArray *g = kmodjit->global_value;
 	kArray *stack = get_stack(kctx, g);
@@ -155,7 +155,7 @@ static KMETHOD System_clearValue(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 //## Module System.getModule();
-static KMETHOD System_getModule(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_getModule(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kArray  *g = kmodjit->global_value;
 	kObject *o = g->list[1] ? g->list[1] : K_NULL;
@@ -163,95 +163,95 @@ static KMETHOD System_getModule(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 //## void System.setModule(Module m);
-static KMETHOD System_setModule(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_setModule(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	set_value(kctx, 1, sfp[1].o);
 	RETURNvoid_();
 }
 
 //## ExecutionEngine System.getExecutionEngine();
-static KMETHOD System_getExecutionEngine(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_getExecutionEngine(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kObject *o = get_value(kctx, 2);
 	RETURN_(o);
 }
 
 //## void System.setExecutionEngine(ExecutionEngine ee);
-static KMETHOD System_setExecutionEngine(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_setExecutionEngine(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	set_value(kctx, 2, sfp[1].o);
 	RETURNvoid_();
 }
 
 //## IRBuilder System.getBuilder();
-static KMETHOD System_getBuilder(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_getBuilder(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kObject *o = get_value(kctx, 3);
 	RETURN_(o);
 }
 
 //## void System.setBuilder(IRBuilder b);
-static KMETHOD System_setBuilder(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_setBuilder(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	set_value(kctx, 3, sfp[1].o);
 	RETURNvoid_();
 }
 
 //## Function System.getFunction();
-static KMETHOD System_getFunction(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_getFunction(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kObject *o = get_value(kctx, 4);
 	RETURN_(o);
 }
 
 //## void System.setFunction(Function f);
-static KMETHOD System_setFunction(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_setFunction(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	set_value(kctx, 4, sfp[1].o);
 	RETURNvoid_();
 }
 
 //## Value System.getKonohaContext *kctx();
-static KMETHOD System_getKonohaContext *kctx(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_getKonohaContext *kctx(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURN_(get_value(kctx, 5));
 }
 
 //## void  System.setKonohaContext *kctx(Value v);
-static KMETHOD System_setKonohaContext *kctx(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_setKonohaContext *kctx(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	set_value(kctx, 5, sfp[1].o);
 	RETURNvoid_();
 }
 
 //## Value System.getSFP();
-static KMETHOD System_getSFP(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_getSFP(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURN_(get_value(kctx, 6));
 }
 
 //## void  System.setSFP(Value v);
-static KMETHOD System_setSFP(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_setSFP(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	set_value(kctx, 6, sfp[1].o);
 	RETURNvoid_();
 }
 
 //## Value System.getRetVal();
-static KMETHOD System_getRetVal(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_getRetVal(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURN_(get_value(kctx, 7));
 }
 
 //## void  System.setRetVal(Value v);
-static KMETHOD System_setRetVal(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_setRetVal(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	set_value(kctx, 7, sfp[1].o);
 	RETURNvoid_();
 }
 
 //## void System.addConstPool(o);
-static KMETHOD System_addConstPool(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_addConstPool(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kObject *o = sfp[1].o;
 	kArray  *a = kmodjit->constPool;
@@ -287,7 +287,7 @@ static void jitcache_set(KonohaContext *kctx, kMethod *mtd, kObject *f)
 }
 
 //## Function System.getJITCache(Method mtd);
-static KMETHOD System_getJITCache(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_getJITCache(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kMethod *mtd = sfp[1].mtd;
 	kObject *o   = jitcache_get(kctx, mtd);
@@ -295,7 +295,7 @@ static KMETHOD System_getJITCache(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 //## void     System.setJITCache(Method mtd, Function f);
-static KMETHOD System_setJITCache(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_setJITCache(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kMethod *mtd = sfp[1].mtd;
 	kObject *o   = sfp[2].o;
@@ -304,131 +304,131 @@ static KMETHOD System_setJITCache(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 //## void System.setLLVMTYPE_HOBJECT(Type type);
-static KMETHOD System_setTyHObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_setTyHObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	set_value(kctx, 8, sfp[1].o);
 	RETURNvoid_();
 }
 
 //## void System.setLLVMTYPE_OBJECT(Type type);
-static KMETHOD System_setTyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_setTyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	set_value(kctx, 9, sfp[1].o);
 	RETURNvoid_();
 }
 
 //## void System.setLLVMTYPE_FUNCTION(Type type);
-static KMETHOD System_setTyFunction(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_setTyFunction(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	set_value(kctx, 10, sfp[1].o);
 	RETURNvoid_();
 }
 
 //## void System.setLLVMTYPE_FUNCTIONP(Type type);
-static KMETHOD System_setTyFunctionP(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_setTyFunctionP(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	set_value(kctx, 11, sfp[1].o);
 	RETURNvoid_();
 }
 
 //## void System.setLLVMTYPE_METHOD(Type type);
-static KMETHOD System_setTyMethod(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_setTyMethod(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	set_value(kctx, 12, sfp[1].o);
 	RETURNvoid_();
 }
 
 //## void System.setLLVMTYPE_CONTEXT(Type type);
-static KMETHOD System_setTyContext(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_setTyContext(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	set_value(kctx, 13, sfp[1].o);
 	RETURNvoid_();
 }
 
 //## void System.setLLVMTYPE_STACK(Type type);
-static KMETHOD System_setTyStack(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_setTyStack(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	set_value(kctx, 14, sfp[1].o);
 	RETURNvoid_();
 }
 
 //## Type System.getLLVMTYPE_HOBJECT();
-static KMETHOD System_getTyHObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_getTyHObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURN_(get_value(kctx, 8));
 }
 
 //## Type System.getLLVMTYPE_OBJECT();
-static KMETHOD System_getTyObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_getTyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURN_(get_value(kctx, 9));
 }
 
 //## Type System.getLLVMTYPE_FUNCTION();
-static KMETHOD System_getTyFunction(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_getTyFunction(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURN_(get_value(kctx, 10));
 }
 
 //## Type System.getLLVMTYPE_FUNCTIONP();
-static KMETHOD System_getTyFunctionP(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_getTyFunctionP(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURN_(get_value(kctx, 11));
 }
 
 //## Type System.getLLVMTYPE_METHOD();
-static KMETHOD System_getTyMethod(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_getTyMethod(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURN_(get_value(kctx, 12));
 }
 
 //## Type System.getLLVMTYPE_CONTEXT();
-static KMETHOD System_getTyContext(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_getTyContext(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURN_(get_value(kctx, 13));
 }
 
 //## Type System.getLLVMTYPE_STACK();
-static KMETHOD System_getTyStack(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_getTyStack(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURN_(get_value(kctx, 14));
 }
 
 
 //## int bk.getEspIndex();
-static KMETHOD Block_getEspIndex(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Block_getEspIndex(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kBlock *bk = (kBlock *) sfp[0].o;
 	RETURNi_(bk->esp->index);
 }
 
 //## Array Block.getBlocks();
-static KMETHOD Block_getBlocks(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Block_getBlocks(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kBlock *bk = (kBlock *) sfp[0].o;
 	RETURN_(bk->blocks);
 }
 
 //## int Array.getSize();
-static KMETHOD Array_getSize(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Array_getSize(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNi_(kArray_size(sfp[0].a));
 }
 
 //## int Stmt.getUline();
-static KMETHOD Stmt_getUline(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Stmt_getUline(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kStmt *stmt = (kStmt*) sfp[0].o;
 	RETURNi_(stmt->uline);
 }
 //## boolean Stmt.hasSyntax();
-static KMETHOD Stmt_hasSyntax(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Stmt_hasSyntax(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kStmt *stmt = (kStmt*) sfp[0].o;
 	RETURNb_(stmt->syn != NULL);
 }
 //## Object Stmt.getObjectNULL(int id);
-static KMETHOD Stmt_getObjectNULL(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Stmt_getObjectNULL(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kStmt *stmt = (kStmt*) sfp[0].o;
 	kObject *o = kObject_getObjectNULL(stmt, sfp[1].ivalue);
@@ -439,7 +439,7 @@ static KMETHOD Stmt_getObjectNULL(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 //## int Object.unbox()
-static KMETHOD Object_unbox(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Object_unbox(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kObject *o = sfp[0].o;
 	RETURNi_(O_unbox(o));
@@ -447,14 +447,14 @@ static KMETHOD Object_unbox(KonohaContext *kctx, ksfp_t *sfp _RIX)
 
 
 //FIXME TODO stupid down cast
-static KMETHOD Object_toStmt(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Object_toStmt(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	(void)kctx;
 	RETURN_(sfp[0].o);
 }
 
 //FIXME TODO stupid down cast
-static KMETHOD Object_toExpr(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Object_toExpr(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	(void)kctx;
 	RETURN_(sfp[0].o);
@@ -466,7 +466,7 @@ kObject *boxing_jit(KonohaContext *kctx, ktype_t cid, uintptr_t data)
 }
 
 // --------------------------------------------------------------------------
-static kArray *create_array(KonohaContext *kctx, ksfp_t *sfp, int n)
+static kArray *create_array(KonohaContext *kctx, KonohaStack *sfp, int n)
 {
 	int i;
 	kArray *a = new_(Array, 0);
@@ -478,28 +478,28 @@ static kArray *create_array(KonohaContext *kctx, ksfp_t *sfp, int n)
 
 // --------------------------------------------------------------------------
 //## static Array Array.new1(Object o1, Object o2, Object o3);
-static KMETHOD Array_new1(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Array_new1(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURN_(create_array(kctx, sfp, 1));
 }
 
 // --------------------------------------------------------------------------
 //## static Array Array.new2(Object o1, Object o2);
-static KMETHOD Array_new2(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Array_new2(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURN_(create_array(kctx, sfp, 2));
 }
 
 // --------------------------------------------------------------------------
 //## static Array Array.new3(Object o1, Object o2, Object o3);
-static KMETHOD Array_new3(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Array_new3(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURN_(create_array(kctx, sfp, 3));
 }
 
 // --------------------------------------------------------------------------
 //## static Array Array.newN(int n);
-static KMETHOD Array_newN(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Array_newN(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	int i, n = sfp[1].ivalue;
 	kArray *a = new_(Array, (uintptr_t)n);
@@ -511,7 +511,7 @@ static KMETHOD Array_newN(KonohaContext *kctx, ksfp_t *sfp _RIX)
 
 // --------------------------------------------------------------------------
 //## Array Array.getO();
-static KMETHOD Array_getO(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Array_getO(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kArray *a = sfp[0].a;
 	size_t n = check_index(kctx, sfp[1].ivalue, kArray_size(a), sfp[K_RTNIDX].uline);
@@ -519,7 +519,7 @@ static KMETHOD Array_getO(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 // --------------------------------------------------------------------------
 //## void Array.setO(int n, Object o);
-static KMETHOD Array_setO(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Array_setO(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kArray *a = sfp[0].a;
 	size_t n = check_index(kctx, sfp[1].ivalue, kArray_size(a), sfp[K_RTNIDX].uline);
@@ -528,7 +528,7 @@ static KMETHOD Array_setO(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 // Array Array.erase(int n);
-static KMETHOD Array_erase(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Array_erase(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kArray *src = sfp[0].a;
 	size_t n = check_index(kctx, sfp[1].ivalue, kArray_size(src), sfp[K_RTNIDX].uline);
@@ -545,14 +545,14 @@ static KMETHOD Array_erase(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 //## Int Method.getParamSize();
-static KMETHOD Method_getParamSize(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Method_getParamSize(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kMethod *mtd = sfp[0].mtd;
 	RETURNi_(kMethod_param(mtd)->psize);
 }
 
 //## Param Method.getParam(int n);
-static KMETHOD Method_getParam(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Method_getParam(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kMethod *mtd = sfp[0].mtd;
 	kParam *pa = kMethod_param(mtd);
@@ -560,7 +560,7 @@ static KMETHOD Method_getParam(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 //## int Param.getType(int n);
-static KMETHOD Param_getType(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Param_getType(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kParam *pa = (kParam *) sfp[0].o;
 	int n = sfp[1].ivalue;
@@ -568,7 +568,7 @@ static KMETHOD Param_getType(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 //## Int Method.getReturnType();
-static KMETHOD Method_getReturnType(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Method_getReturnType(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kMethod *mtd = sfp[0].mtd;
 	assert(IS_Method(mtd));
@@ -576,7 +576,7 @@ static KMETHOD Method_getReturnType(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 //## String mtd.getFname();
-static KMETHOD Method_getFname(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Method_getFname(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kMethod *mtd = sfp[0].mtd;
 	kwb_t wb;
@@ -587,7 +587,7 @@ static KMETHOD Method_getFname(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 //## String mtd.getCname();
-static KMETHOD Method_getCname(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Method_getCname(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kMethod *mtd = sfp[0].mtd;
 	ktype_t cid = mtd->cid;
@@ -596,7 +596,7 @@ static KMETHOD Method_getCname(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 //## Object System.knull(int type);
-static KMETHOD System_knull(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD System_knull(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	ktype_t cid = sfp[1].ivalue;
 	kObject *o = knull(CT_(cid));
@@ -604,7 +604,7 @@ static KMETHOD System_knull(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 //## boolean Method.isStatic();
-static KMETHOD Method_isStatic_(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Method_isStatic_(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kMethod *mtd = sfp[0].mtd;
 	kbool_t b = kMethod_isStatic(mtd);
@@ -612,7 +612,7 @@ static KMETHOD Method_isStatic_(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 //## boolean Method.isVirtual();
-static KMETHOD Method_isVirtual_(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Method_isVirtual_(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kMethod *mtd = sfp[0].mtd;
 	kbool_t b = kMethod_isVirtual(mtd);
@@ -626,7 +626,7 @@ static uintptr_t *get_addr(void *addr, intptr_t offset, intptr_t datasize)
 }
 #define PTR_SIZE (sizeof(void*)*8)
 //## int Pointer.get(int addr, int offset, int sizeof);
-static KMETHOD Pointer_get(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Pointer_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	intptr_t size   = sfp[3].ivalue;
 	uintptr_t *p = get_addr((void*)sfp[1].ivalue, sfp[2].ivalue, size);
@@ -635,7 +635,7 @@ static KMETHOD Pointer_get(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 //## void Pointer.set(int addr, int offset, int sizeof, int data);
-static KMETHOD Pointer_set(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Pointer_set(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	intptr_t size   = sfp[3].ivalue;
 	uintptr_t data  = sfp[4].ivalue;
@@ -647,14 +647,14 @@ static KMETHOD Pointer_set(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 //## int Object.getAddr();
-static KMETHOD Object_getAddr(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Object_getAddr(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	uintptr_t p = (uintptr_t)sfp[0].o;
 	RETURNi_(p);
 }
 
 //## var Pointer.toObject(int addr);
-static KMETHOD Pointer_toObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Pointer_toObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	uintptr_t addr = (uintptr_t) sfp[1].ivalue;
 	kObject *o = (kObject*)addr;
@@ -662,7 +662,7 @@ static KMETHOD Pointer_toObject(KonohaContext *kctx, ksfp_t *sfp _RIX)
 }
 
 ////FIXME TODO stupid down cast
-//static KMETHOD Object_toExpr(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD Object_toExpr(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //	(void)kctx;
 //	RETURN_(sfp[0].o);

@@ -166,7 +166,7 @@ static void dumpEval(KonohaContext *kctx, kwb_t *wb)
 	LocalRuntimeVar *base = kctx->stack;
 	ktype_t ty = base->evalty;
 	if(ty != TY_void) {
-		ksfp_t *lsfp = base->stack + base->evalidx;
+		KonohaStack *lsfp = base->stack + base->evalidx;
 		CT_(ty)->p(kctx, lsfp, 0, wb, P_DUMP);
 		fflush(stdout);
 		fprintf(stdout, "TYPE=%s EVAL=%s\n", TY_t(ty), kwb_top(wb,1));

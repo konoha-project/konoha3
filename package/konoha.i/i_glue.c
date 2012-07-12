@@ -60,7 +60,7 @@ static void MethodAttribute_p(KonohaContext *kctx, kMethod *mtd, kwb_t *wb)
 //	}
 }
 
-static void Method_p(KonohaContext *kctx, ksfp_t *sfp, int pos, kwb_t *wb, int level)
+static void Method_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int level)
 {
 	kMethod *mtd = sfp[pos].mtd;
 	kParam *pa = kMethod_param(mtd);
@@ -100,7 +100,7 @@ static void copyMethodList(KonohaContext *kctx, ktype_t cid, kArray *s, kArray *
 	}
 }
 
-static void dumpMethod(KonohaContext *kctx, ksfp_t *sfp, kMethod *mtd)
+static void dumpMethod(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd)
 {
 	kwb_t wb;
 	kwb_init(&(kctx->stack->cwb), &wb);
@@ -111,7 +111,7 @@ static void dumpMethod(KonohaContext *kctx, ksfp_t *sfp, kMethod *mtd)
 	return;
 }
 
-static void dumpMethodList(KonohaContext *kctx, ksfp_t *sfp, size_t start, kArray *list)
+static void dumpMethodList(KonohaContext *kctx, KonohaStack *sfp, size_t start, kArray *list)
 {
 	size_t i;
 	for(i = start; i < kArray_size(list); i++) {
@@ -119,7 +119,7 @@ static void dumpMethodList(KonohaContext *kctx, ksfp_t *sfp, size_t start, kArra
 	}
 }
 
-KMETHOD NameSpace_man(KonohaContext *kctx, ksfp_t *sfp _RIX)
+KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	INIT_GCSTACK();
 	kArray *list = kctx->stack->gcstack;

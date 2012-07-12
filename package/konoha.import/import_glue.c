@@ -26,7 +26,7 @@
 #include <minikonoha/sugar.h>
 #include <stdio.h>
 
-static KMETHOD StmtTyCheck_import(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	USING_SUGAR;
 	int ret = false;

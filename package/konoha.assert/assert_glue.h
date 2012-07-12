@@ -29,7 +29,7 @@
 //// --------------------------------------------------------------------------
 //
 ////## @Const @Static void System.assert(boolean x)
-//static KMETHOD System_assert(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD System_assert(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //	kbool_t cond = sfp[1].bvalue;
 //	kline_t pline  = sfp[K_RTNIDX].uline;
@@ -41,7 +41,7 @@
 //
 ////// --------------------------------------------------------------------------
 ////
-////static KMETHOD StmtTyCheck_assert(KonohaContext *kctx, ksfp_t *sfp _RIX)
+////static KMETHOD StmtTyCheck_assert(KonohaContext *kctx, KonohaStack *sfp _RIX)
 ////{
 ////	//FIXME
 //////	USING_SUGAR;

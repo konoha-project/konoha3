@@ -27,147 +27,147 @@
 #define Int_to(T, a)               ((T)a.ivalue)
 #define Float_to(T, a)             ((T)a.fvalue)
 
-static KMETHOD Math_abs(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_abs(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNi_(abs(Int_to(int, sfp[1])));
 }
 
-static KMETHOD Math_fabs(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_fabs(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(fabs(Float_to(double, sfp[1])));
 }
 
-static KMETHOD Math_pow(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_pow(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(pow(Float_to(double, sfp[1]),Float_to(double, sfp[2])));
 }
 
-static KMETHOD Math_ldexp(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_ldexp(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(ldexp(Float_to(double, sfp[1]), Int_to(int, sfp[2])));
 }
 
-static KMETHOD Math_modf(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_modf(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	double iprt = Float_to(double, sfp[2]);
 	RETURNf_(modf(Float_to(double, sfp[1]), &iprt));
 }
 
-static KMETHOD Math_frexp(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_frexp(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	int exp = Int_to(int, sfp[2]);
 	RETURNf_(frexp(Float_to(double, sfp[1]), &exp));
 }
 
-static KMETHOD Math_fmod(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_fmod(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(fmod(Float_to(double, sfp[1]),Float_to(double, sfp[2])));
 }
 
-static KMETHOD Math_ceil(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_ceil(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(ceil(Float_to(double, sfp[1])));
 }
 
 #ifdef K_USING_WIN32_
-static KMETHOD Math_round(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_round(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(round(Float_to(double, sfp[1])));
 }
 
-static KMETHOD Math_nearByInt(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_nearByInt(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(nearbyint(Float_to(double, sfp[1])));
 }
 #endif
 
-static KMETHOD Math_floor(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_floor(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(floor(Float_to(double, sfp[1])));
 }
 
-static KMETHOD Math_sqrt(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_sqrt(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(sqrt(Float_to(double, sfp[1])));
 }
 
-static KMETHOD Math_exp(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_exp(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(exp(Float_to(double, sfp[1])));
 }
 
-static KMETHOD Math_log10(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_log10(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(log10(Float_to(double, sfp[1])));
 }
 
-static KMETHOD Math_log(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_log(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(log(Float_to(double, sfp[1])));
 }
 
-static KMETHOD Math_sin(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_sin(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(sin(Float_to(double, sfp[1])));
 }
 
-static KMETHOD Math_cos(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_cos(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(cos(Float_to(double, sfp[1])));
 }
 
-static KMETHOD Math_tan(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_tan(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(tan(Float_to(double, sfp[1])));
 }
 
-static KMETHOD Math_asin(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_asin(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(asin(Float_to(double, sfp[1])));
 }
 
-static KMETHOD Math_acos(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_acos(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(acos(Float_to(double, sfp[1])));
 }
 
-static KMETHOD Math_atan(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_atan(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(atan(Float_to(double, sfp[1])));
 }
 
-static KMETHOD Math_atan2(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_atan2(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(atan2(Float_to(double, sfp[1]),Float_to(double, sfp[2])));
 }
 
-static KMETHOD Math_sinh(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_sinh(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(sinh(Float_to(double, sfp[1])));
 }
 
-static KMETHOD Math_cosh(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_cosh(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(cosh(Float_to(double, sfp[1])));
 }
 
-static KMETHOD Math_tanh(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_tanh(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(tanh(Float_to(double, sfp[1])));
 }
 
 #if defined(K_USING_WIN32_)
-static KMETHOD Math_asinh(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_asinh(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(asinh(Float_to(double, sfp[1])));
 }
 
-static KMETHOD Math_acosh(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_acosh(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(acosh(Float_to(double, sfp[1])));
 }
 
-static KMETHOD Math_atanh(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Math_atanh(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	RETURNf_(atanh(Float_to(double, sfp[1])));
 }

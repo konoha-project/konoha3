@@ -35,18 +35,18 @@ extern "C" {
 #endif
 
 
-static kbool_t Nothing_hasNext(KonohaContext *kctx, ksfp_t* sfp)
+static kbool_t Nothing_hasNext(KonohaContext *kctx, KonohaStack* sfp)
 {
 	return false;
 }
 
-static void Nothing_setNextResult(KonohaContext *kctx, ksfp_t* sfp _RIX)
+static void Nothing_setNextResult(KonohaContext *kctx, KonohaStack* sfp _RIX)
 {
 	kIterator *itr = (kIterator*)sfp[0].o;
 	RETURN_(itr->source);
 }
 
-static void Nothing_setNextResultUnbox(KonohaContext *kctx, ksfp_t* sfp _RIX)
+static void Nothing_setNextResultUnbox(KonohaContext *kctx, KonohaStack* sfp _RIX)
 {
 	RETURNi_(0);
 }
@@ -61,36 +61,36 @@ static void Iterator_init(KonohaContext *kctx, kObject *o, void *conf)
 	itr->setNextResult = isUnboxEntry ? Nothing_setNextResultUnbox : Nothing_setNextResult;
 }
 
-static void Iterator_p(KonohaContext *kctx, ksfp_t *sfp, int pos, kwb_t *wb, int level)
+static void Iterator_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int level)
 {
 //	kwb_printf(wb, KFLOAT_FMT, sfp[pos].fvalue);
 }
 
 /* ------------------------------------------------------------------------ */
 
-static KMETHOD Iterator_hasNext(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Iterator_hasNext(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kIterator *itr = sfp[0].itr;
 	RETURNb_(itr->hasNext(kctx, sfp));
 }
 
-static KMETHOD Iterator_next(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Iterator_next(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kIterator *itr = sfp[0].itr;
 	itr->setNextResult(kctx, sfp, K_RIX);
 }
 
-//static kbool_t callFuncHasNext(KonohaContext *kctx, ksfp_t *sfp)
+//static kbool_t callFuncHasNext(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	itr->funcHasNext;
 //}
 //
-//static kbool_t callFuncNext(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static kbool_t callFuncNext(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //
 //}
 //
-//static KMETHOD Iterator_new(KonohaContext *kctx, ksfp_t *sfp _RIX)
+//static KMETHOD Iterator_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //	kIterator *itr = (kIterator*)sfp[0].o;
 //	KSETv(itr->funcHasNext, sfp[1].fo);
@@ -100,13 +100,13 @@ static KMETHOD Iterator_next(KonohaContext *kctx, ksfp_t *sfp _RIX)
 //	RETURN_(itr);
 //}
 
-static kbool_t Array_hasNext(KonohaContext *kctx, ksfp_t* sfp)
+static kbool_t Array_hasNext(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kIterator *itr = (kIterator*)sfp[0].o;
 	return (itr->current_pos < kArray_size(itr->arrayList));
 }
 
-static void Array_setNextResult(KonohaContext *kctx, ksfp_t* sfp _RIX)
+static void Array_setNextResult(KonohaContext *kctx, KonohaStack* sfp _RIX)
 {
 	kIterator *itr = (kIterator*)sfp[0].o;
 	size_t n = itr->current_pos;
@@ -115,7 +115,7 @@ static void Array_setNextResult(KonohaContext *kctx, ksfp_t* sfp _RIX)
 	RETURN_(itr->arrayList->list[n]);
 }
 
-static void Array_setNextResultUnbox(KonohaContext *kctx, ksfp_t* sfp _RIX)
+static void Array_setNextResultUnbox(KonohaContext *kctx, KonohaStack* sfp _RIX)
 {
 	kIterator *itr = (kIterator*)sfp[0].o;
 	size_t n = itr->current_pos;
@@ -124,7 +124,7 @@ static void Array_setNextResultUnbox(KonohaContext *kctx, ksfp_t* sfp _RIX)
 	RETURN_(itr->arrayList->ilist[n]);
 }
 
-static KMETHOD Array_toIterator(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Array_toIterator(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kArray *a = sfp[0].a;
 	kclass_t *cIterator = CT_p0(kctx, CT_Iterator, O_ct(a)->p0);
@@ -156,14 +156,14 @@ static const char _utf8len[] = {
 		4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 0, 0,
 };
 
-static kbool_t String_hasNext(KonohaContext *kctx, ksfp_t* sfp)
+static kbool_t String_hasNext(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kIterator *itr = sfp[0].itr;
 	kString *s = (kString*)itr->source;
 	return (itr->current_pos < S_size(s));
 }
 
-static void String_setNextResult(KonohaContext *kctx, ksfp_t* sfp _RIX)
+static void String_setNextResult(KonohaContext *kctx, KonohaStack* sfp _RIX)
 {
 	kIterator *itr = sfp[0].itr;
 	kString *s = (kString*)itr->source;
@@ -173,7 +173,7 @@ static void String_setNextResult(KonohaContext *kctx, ksfp_t* sfp _RIX)
 	RETURN_(new_kString(t, charsize, (charsize == 1) ? SPOL_ASCII : SPOL_UTF8));
 }
 
-static KMETHOD String_toIterator(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD String_toIterator(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kIterator *itr = (kIterator*)new_kObject(CT_StringIterator, NULL);
 	KSETv(itr->source, sfp[0].o);

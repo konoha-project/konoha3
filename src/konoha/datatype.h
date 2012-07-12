@@ -94,7 +94,7 @@ static void Number_init(KonohaContext *kctx, kObject *o, void *conf)
 	n->ndata = (uintptr_t)conf;
 }
 
-static void Boolean_p(KonohaContext *kctx, ksfp_t *sfp, int pos, kwb_t *wb, int level)
+static void Boolean_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int level)
 {
 	kwb_printf(wb, sfp[pos].bvalue ? "true" : "false");
 }
@@ -104,7 +104,7 @@ static kObject* Boolean_fnull(KonohaContext *kctx, kclass_t *ct)
 	return (kObject*)K_FALSE;
 }
 
-static void Int_p(KonohaContext *kctx, ksfp_t *sfp, int pos, kwb_t *wb, int level)
+static void Int_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int level)
 {
 	kwb_printf(wb, KINT_FMT, sfp[pos].ivalue);
 }
@@ -126,7 +126,7 @@ static void String_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void String_p(KonohaContext *kctx, ksfp_t *sfp, int pos, kwb_t *wb, int level)
+static void String_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int level)
 {
 	if(level == 0) {
 		kwb_printf(wb, "%s", S_text(sfp[pos].o));
@@ -528,7 +528,7 @@ static void DEFAULT_free(KonohaContext *kctx, kObject *o)
 	(void)kctx;(void)o;
 }
 
-static void DEFAULT_p(KonohaContext *kctx, ksfp_t *sfp, int pos, kwb_t *wb, int level)
+static void DEFAULT_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int level)
 {
 	kwb_printf(wb, "&%p(:%s)", sfp[pos].o, TY_t(O_cid(sfp[pos].o)));
 }

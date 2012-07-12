@@ -57,7 +57,7 @@ static gmabuf_t *Gamma_pop(KonohaContext *kctx, kGamma *gma, gmabuf_t *oldone, g
 
 // --------------------------------------------------------------------------
 
-static KMETHOD UndefinedExprTyCheck(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD UndefinedExprTyCheck(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	if(Expr_isTerm(expr)) {
@@ -109,7 +109,7 @@ static kExpr *ExprTyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma 
 	return texpr;
 }
 
-static void Expr_putConstValue(KonohaContext *kctx, kExpr *expr, ksfp_t *sfp)
+static void Expr_putConstValue(KonohaContext *kctx, kExpr *expr, KonohaStack *sfp)
 {
 	if(expr->build == TEXPR_CONST) {
 		KSETv(sfp[0].o, expr->data);
@@ -236,33 +236,33 @@ static kbool_t Stmt_tyCheckExpr(KonohaContext *kctx, kStmt *stmt, ksymbol_t name
 
 /* ------------------------------------------------------------------------ */
 
-static KMETHOD ExprTyCheck_Text(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD ExprTyCheck_Text(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->tk;
 	RETURN_(kExpr_setConstValue(expr, TY_String, tk->text));
 }
 
-static KMETHOD ExprTyCheck_Type(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD ExprTyCheck_Type(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	DBG_ASSERT(TK_isType(expr->tk));
 	RETURN_(kExpr_setVariable(expr, NULL, expr->tk->ty, 0, gma));
 }
 
-static KMETHOD ExprTyCheck_true(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD ExprTyCheck_true(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	RETURN_(kExpr_setNConstValue(expr, TY_Boolean, (uintptr_t)1));
 }
 
-static KMETHOD ExprTyCheck_false(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD ExprTyCheck_false(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	RETURN_(kExpr_setNConstValue(expr, TY_Boolean, (uintptr_t)0));
 }
 
-static KMETHOD ExprTyCheck_Int(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD ExprTyCheck_Int(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->tk;
@@ -362,13 +362,13 @@ static kExpr* Expr_tyCheckVariable2(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 	return texpr;
 }
 
-static KMETHOD ExprTyCheck_Symbol(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD ExprTyCheck_Symbol(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	RETURN_(Expr_tyCheckVariable2(kctx, stmt, expr, gma, reqty));
 }
 
-static KMETHOD ExprTyCheck_Usymbol(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD ExprTyCheck_Usymbol(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->tk;
@@ -390,7 +390,7 @@ static KMETHOD ExprTyCheck_Usymbol(KonohaContext *kctx, ksfp_t *sfp _RIX)
 	RETURN_(texpr);
 }
 
-static KMETHOD StmtTyCheck_ConstDecl(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD StmtTyCheck_ConstDecl(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	VAR_StmtTyCheck(stmt, gma);
 	kbool_t r = false;
@@ -644,7 +644,7 @@ static kExpr *Expr_lookupMethod(KonohaContext *kctx, kStmt *stmt, kExpr *expr, k
 	return K_NULLEXPR;
 }
 
-static KMETHOD ExprTyCheck_MethodCall(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD ExprTyCheck_MethodCall(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kExpr *texpr = kExpr_tyCheckAt(stmt, expr, 1, gma, TY_var, 0);
@@ -722,7 +722,7 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kExpr *exprN, kGamm
 	}
 }
 
-static KMETHOD ExprTyCheck_FuncStyleCall(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD ExprTyCheck_FuncStyleCall(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	DBG_ASSERT(IS_Expr(kExpr_at(expr, 0)));
@@ -769,7 +769,7 @@ static kExpr *Expr_tyCheckFuncParams(KonohaContext *kctx, kStmt *stmt, kExpr *ex
 }
 
 
-static KMETHOD ExprTyCheck_AND(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD ExprTyCheck_AND(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	if(kExpr_tyCheckAt(stmt, expr, 1, gma, TY_Boolean, 0) != K_NULLEXPR) {
@@ -779,7 +779,7 @@ static KMETHOD ExprTyCheck_AND(KonohaContext *kctx, ksfp_t *sfp _RIX)
 	}
 }
 
-static KMETHOD ExprTyCheck_OR(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD ExprTyCheck_OR(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	if(kExpr_tyCheckAt(stmt, expr, 1, gma, TY_Boolean, 0) != K_NULLEXPR) {
@@ -789,7 +789,7 @@ static KMETHOD ExprTyCheck_OR(KonohaContext *kctx, ksfp_t *sfp _RIX)
 	}
 }
 
-static KMETHOD StmtTyCheck_Expr(KonohaContext *kctx, ksfp_t *sfp _RIX)  // $expr
+static KMETHOD StmtTyCheck_Expr(KonohaContext *kctx, KonohaStack *sfp _RIX)  // $expr
 {
 	VAR_StmtTyCheck(stmt, gma);
 	kbool_t r = Stmt_tyCheckExpr(kctx, stmt, KW_ExprPattern, gma, TY_var, TPOL_ALLOWVOID);
@@ -818,7 +818,7 @@ static int addGammaStack(KonohaContext *kctx, gstack_t *s, ktype_t ty, ksymbol_t
 	return index;
 }
 
-static KMETHOD UndefinedStmtTyCheck(KonohaContext *kctx, ksfp_t *sfp _RIX)  // $expr
+static KMETHOD UndefinedStmtTyCheck(KonohaContext *kctx, KonohaStack *sfp _RIX)  // $expr
 {
 	VAR_StmtTyCheck(stmt, gma);
 	const char *location = kGamma_isTOPLEVEL(gma) ? "at the top level" : "inside the function";
@@ -884,7 +884,7 @@ static kbool_t Block_tyCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
 	return result;
 }
 
-static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kExpr *texpr = K_NULLEXPR;
@@ -932,7 +932,7 @@ static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, ksfp_t *sfp _RIX)
 	RETURN_(texpr);
 }
 
-static KMETHOD StmtTyCheck_if(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD StmtTyCheck_if(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kbool_t r = 1;
 	VAR_StmtTyCheck(stmt, gma);
@@ -980,7 +980,7 @@ static kStmt* Stmt_lookupIfStmtNULL(KonohaContext *kctx, kStmt *stmt)
 	return NULL;
 }
 
-static KMETHOD StmtTyCheck_else(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD StmtTyCheck_else(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kbool_t r = 1;
 	VAR_StmtTyCheck(stmt, gma);
@@ -998,7 +998,7 @@ static KMETHOD StmtTyCheck_else(KonohaContext *kctx, ksfp_t *sfp _RIX)
 	RETURNb_(r);
 }
 
-static KMETHOD StmtTyCheck_return(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD StmtTyCheck_return(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	VAR_StmtTyCheck(stmt, gma);
 	kbool_t r = 1;
@@ -1080,7 +1080,7 @@ static kbool_t Expr_declType(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGam
 	return false;
 }
 
-static KMETHOD StmtTyCheck_TypeDecl(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD StmtTyCheck_TypeDecl(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	VAR_StmtTyCheck(stmt, gma);
 	kToken *tk  = kStmt_token(stmt, KW_TypePattern, NULL);
@@ -1144,9 +1144,9 @@ static kParam *Stmt_newMethodParamNULL(KonohaContext *kctx, kStmt *stmt, kGamma*
 
 static kbool_t Method_compile(KonohaContext *kctx, kMethod *mtd, kString *text, kline_t uline, kNameSpace *ks);
 
-static KMETHOD Fmethod_lazyCompilation(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD Fmethod_lazyCompilation(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	ksfp_t *esp = kctx->esp;
+	KonohaStack *esp = kctx->esp;
 	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
 	kString *text = mtd->tcode->text;
 	kline_t uline = mtd->tcode->uline;
@@ -1183,7 +1183,7 @@ static void Stmt_setMethodFunc(KonohaContext *kctx, kStmt *stmt, kNameSpace *ks,
 	}
 }
 
-static KMETHOD StmtTyCheck_MethodDecl(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD StmtTyCheck_MethodDecl(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	VAR_StmtTyCheck(stmt, gma);
 	kbool_t r = false;
@@ -1224,7 +1224,7 @@ static kbool_t StmtTypeDecl_setParam(KonohaContext *kctx, kStmt *stmt, int n, kp
 	return false;
 }
 
-static KMETHOD StmtTyCheck_ParamsDecl(KonohaContext *kctx, ksfp_t *sfp _RIX)
+static KMETHOD StmtTyCheck_ParamsDecl(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	VAR_StmtTyCheck(stmt, gma);
 	kToken *tkT = kStmt_token(stmt, KW_TypePattern, NULL); // type

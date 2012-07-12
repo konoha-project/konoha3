@@ -32,7 +32,7 @@ int main(int argc, const char *argv[])
     assert(sizeof(float) <= sizeof(void*));
     assert(sizeof(kint_t) == sizeof(kfloat_t));
     assert(sizeof(kint_t) == sizeof(void*));
-    assert(sizeof(ksfp_t) == sizeof(krbp_t) * 2);
+    assert(sizeof(KonohaStack) == sizeof(krbp_t) * 2);
     assert(sizeof(krbp_t) == sizeof(void*));
     assert(sizeof(intptr_t) == sizeof(kint_t));
     assert(sizeof(kshort_t) * 2 == sizeof(intptr_t));
