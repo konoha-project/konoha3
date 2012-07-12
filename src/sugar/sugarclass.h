@@ -256,12 +256,12 @@ static const char* KW_tSTMTPOST(ksymbol_t keyword)
 // USymbolTable
 static int comprKeyVal(const void *a, const void *b)
 {
-	int akey = SYMKEY_unbox(((kvs_t*)a)->key);
-	int bkey = SYMKEY_unbox(((kvs_t*)b)->key);
+	int akey = SYMKEY_unbox(((KUtilsKeyValue*)a)->key);
+	int bkey = SYMKEY_unbox(((KUtilsKeyValue*)b)->key);
 	return akey - bkey;
 }
 
-static kvs_t* NameSpace_getConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t ukey)
+static KUtilsKeyValue* NameSpace_getConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t ukey)
 {
 	size_t min = 0, max = KARRAYSIZE(ns->constTable.bytesize, kvs);
 	while(min < max) {
@@ -278,10 +278,10 @@ static kvs_t* NameSpace_getConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbo
 	return NULL;
 }
 
-static kbool_t checkConflictedConst(KonohaContext *kctx, kNameSpace *ns, kvs_t *kvs, kfileline_t pline)
+static kbool_t checkConflictedConst(KonohaContext *kctx, kNameSpace *ns, KUtilsKeyValue *kvs, kfileline_t pline)
 {
 	ksymbol_t ukey = kvs->key;
-	kvs_t* ksval = NameSpace_getConstNULL(kctx, ns, ukey);
+	KUtilsKeyValue* ksval = NameSpace_getConstNULL(kctx, ns, ukey);
 	if(ksval != NULL) {
 		if(kvs->ty == ksval->ty && kvs->uval == ksval->uval) {
 			return true;  // same value
@@ -292,30 +292,30 @@ static kbool_t checkConflictedConst(KonohaContext *kctx, kNameSpace *ns, kvs_t *
 	return false;
 }
 
-static void NameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, kvs_t *kvs, size_t nitems, kfileline_t pline)
+static void NameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, KUtilsKeyValue *kvs, size_t nitems, kfileline_t pline)
 {
 	size_t i, s = KARRAYSIZE(ns->constTable.bytesize, kvs);
 	if(s == 0) {
-		KLIB Karray_init(kctx, &ns->constTable, (nitems + 8) * sizeof(kvs_t));
-		memcpy(ns->constTable.kvs, kvs, nitems * sizeof(kvs_t));
+		KLIB Karray_init(kctx, &ns->constTable, (nitems + 8) * sizeof(KUtilsKeyValue));
+		memcpy(ns->constTable.kvs, kvs, nitems * sizeof(KUtilsKeyValue));
 	}
 	else {
 		KUtilsWriteBuffer wb;
 		KLIB Kwb_init(&(ctxsugar->errorMessageBuffer), &wb);
 		for(i = 0; i < nitems; i++) {
 			if(checkConflictedConst(kctx, ns, kvs+i, pline)) continue;
-			KLIB Kwb_write(kctx, &wb, (const char*)(kvs+i), sizeof(kvs_t));
+			KLIB Kwb_write(kctx, &wb, (const char*)(kvs+i), sizeof(KUtilsKeyValue));
 		}
-		kvs = (kvs_t*)KLIB Kwb_top(kctx, &wb, 0);
-		nitems = Kwb_bytesize(&wb)/sizeof(kvs_t);
+		kvs = (KUtilsKeyValue*)KLIB Kwb_top(kctx, &wb, 0);
+		nitems = Kwb_bytesize(&wb)/sizeof(KUtilsKeyValue);
 		if(nitems > 0) {
-			KLIB Karray_resize(kctx, &ns->constTable, (s + nitems + 8) * sizeof(kvs_t));
-			memcpy(ns->constTable.kvs + s, kvs, nitems * sizeof(kvs_t));
+			KLIB Karray_resize(kctx, &ns->constTable, (s + nitems + 8) * sizeof(KUtilsKeyValue));
+			memcpy(ns->constTable.kvs + s, kvs, nitems * sizeof(KUtilsKeyValue));
 		}
 		KLIB Kwb_free(&wb);
 	}
-	ns->constTable.bytesize = (s + nitems) * sizeof(kvs_t);
-	PLAT qsort_i(ns->constTable.kvs, s + nitems, sizeof(kvs_t), comprKeyVal);
+	ns->constTable.bytesize = (s + nitems) * sizeof(KUtilsKeyValue);
+	PLAT qsort_i(ns->constTable.kvs, s + nitems, sizeof(KUtilsKeyValue), comprKeyVal);
 }
 
 static size_t strlen_alnum(const char *p)
@@ -328,7 +328,7 @@ static size_t strlen_alnum(const char *p)
 static void NameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ns, const char **d, kfileline_t pline)
 {
 	INIT_GCSTACK();
-	kvs_t kv;
+	KUtilsKeyValue kv;
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	while(d[0] != NULL) {
@@ -347,12 +347,12 @@ static void NameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ns, const c
 		else {
 			kv.oval = (kObject*)d[2];
 		}
-		KLIB Kwb_write(kctx, &wb, (const char*)(&kv), sizeof(kvs_t));
+		KLIB Kwb_write(kctx, &wb, (const char*)(&kv), sizeof(KUtilsKeyValue));
 		d += 3;
 	}
-	size_t nitems = Kwb_bytesize(&wb) / sizeof(kvs_t);
+	size_t nitems = Kwb_bytesize(&wb) / sizeof(KUtilsKeyValue);
 	if(nitems > 0) {
-		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, (kvs_t*)KLIB Kwb_top(kctx, &wb, 0), nitems, pline);
+		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, (KUtilsKeyValue*)KLIB Kwb_top(kctx, &wb, 0), nitems, pline);
 	}
 	KLIB Kwb_free(&wb);
 	RESET_GCSTACK();
@@ -360,7 +360,7 @@ static void NameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ns, const c
 
 static void NameSpace_importClassName(KonohaContext *kctx, kNameSpace *ns, kpackage_t packageId, kfileline_t pline)
 {
-	kvs_t kv;
+	KUtilsKeyValue kv;
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	size_t i, size = KARRAYSIZE(kctx->share->classTable.bytesize, uintptr);
@@ -372,12 +372,12 @@ static void NameSpace_importClassName(KonohaContext *kctx, kNameSpace *ns, kpack
 			kv.key = ct->nameid;
 			kv.ty  = TY_TYPE;
 			kv.uval = (uintptr_t)ct;
-			KLIB Kwb_write(kctx, &wb, (const char*)(&kv), sizeof(kvs_t));
+			KLIB Kwb_write(kctx, &wb, (const char*)(&kv), sizeof(KUtilsKeyValue));
 		}
 	}
-	size_t nitems = Kwb_bytesize(&wb) / sizeof(kvs_t);
+	size_t nitems = Kwb_bytesize(&wb) / sizeof(KUtilsKeyValue);
 	if(nitems > 0) {
-		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, (kvs_t*)KLIB Kwb_top(kctx, &wb, 0), nitems, pline);
+		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, (KUtilsKeyValue*)KLIB Kwb_top(kctx, &wb, 0), nitems, pline);
 	}
 	KLIB Kwb_free(&wb);
 }
@@ -392,7 +392,7 @@ static KonohaClass *NameSpace_getCT(KonohaContext *kctx, kNameSpace *ns, KonohaC
 		uintptr_t hcode = longid(PN_konoha, un);
 		ct = (KonohaClass*)map_getu(kctx, kctx->share->longClassNameMapNN, hcode, 0);
 		if(ct == NULL) {
-			kvs_t *kvs = NameSpace_getConstNULL(kctx, ns, un);
+			KUtilsKeyValue *kvs = NameSpace_getConstNULL(kctx, ns, un);
 			DBG_P("kvs=%s, %p", name, kvs);
 			if(kvs != NULL && kvs->ty == TY_TYPE) {
 				return (KonohaClass*)kvs->uval;
@@ -872,7 +872,7 @@ static void Stmt_reftrace(KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
-static void _dumpToken(KonohaContext *kctx, void *arg, kvs_t *d)
+static void _dumpToken(KonohaContext *kctx, void *arg, KUtilsKeyValue *d)
 {
 	if((d->key & SYMKEY_BOXED) == SYMKEY_BOXED) {
 		ksymbol_t key = ~SYMKEY_BOXED & d->key;

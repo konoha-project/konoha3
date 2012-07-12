@@ -556,7 +556,7 @@ static void NameSpace_merge(KonohaContext *kctx, kNameSpace *ns, kNameSpace *tar
 		NameSpace_importClassName(kctx, ns, target->packageId, pline);
 	}
 	if(target->constTable.bytesize > 0) {
-		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, target->constTable.kvs, target->constTable.bytesize/sizeof(kvs_t), pline);
+		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, target->constTable.kvs, target->constTable.bytesize/sizeof(KUtilsKeyValue), pline);
 	}
 	size_t i;
 	for(i = 0; i < kArray_size(target->methodList); i++) {

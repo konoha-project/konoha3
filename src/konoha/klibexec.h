@@ -393,9 +393,9 @@ static KUtilsGrowingArray *new_karray(KonohaContext *kctx, size_t bytesize, size
 
 static inline KUtilsGrowingArray* kvproto_null(void)  // for proto_get safe null
 {
-	static kvs_t dnull[KVPROTO_DELTA] = {};
+	static KUtilsKeyValue dnull[KVPROTO_DELTA] = {};
 	static KUtilsGrowingArray pnull = {
-		.bytesize = sizeof(kvs_t), .bytemax = 0,
+		.bytesize = sizeof(KUtilsKeyValue), .bytemax = 0,
 	};
 	pnull.kvs = dnull;
 	return &pnull;
@@ -413,10 +413,10 @@ void KONOHA_freeObjectField(KonohaContext *kctx, kObjectVar *o)
 	ct->free(kctx, o);
 }
 
-static kvs_t* kvproto_get(KUtilsGrowingArray *p, ksymbol_t key)
+static KUtilsKeyValue* kvproto_get(KUtilsGrowingArray *p, ksymbol_t key)
 {
-	size_t psize = p->bytesize / sizeof(kvs_t);
-	kvs_t *d = p->kvs + (((size_t)key) % psize);
+	size_t psize = p->bytesize / sizeof(KUtilsKeyValue);
+	KUtilsKeyValue *d = p->kvs + (((size_t)key) % psize);
 	if(d->key == key) return d; else d++;  // 3
 	if(d->key == key) return d; else d++;
 	if(d->key == key) return d; else d++;
@@ -428,7 +428,7 @@ static kvs_t* kvproto_get(KUtilsGrowingArray *p, ksymbol_t key)
 	return NULL;
 }
 
-static inline void kvproto_findset(kvs_t *d, kvs_t *newd)
+static inline void kvproto_findset(KUtilsKeyValue *d, KUtilsKeyValue *newd)
 {
 	size_t i;
 	for(i = 0; i < KVPROTO_DELTA - 1; i++) {
@@ -442,13 +442,13 @@ static inline void kvproto_findset(kvs_t *d, kvs_t *newd)
 
 static void kvproto_rehash(KonohaContext *kctx, KUtilsGrowingArray *p)
 {
-	size_t i, pmax = (p->bytemax) / sizeof(kvs_t);
+	size_t i, pmax = (p->bytemax) / sizeof(KUtilsKeyValue);
 	size_t newpmax = pmax * 2, newpsize = newpmax - KVPROTO_DELTA;
-	kvs_t *newkvs = (kvs_t*)KCALLOC(sizeof(kvs_t), newpmax);
+	KUtilsKeyValue *newkvs = (KUtilsKeyValue*)KCALLOC(sizeof(KUtilsKeyValue), newpmax);
 	for(i = 0; i < pmax; i++) {
-		kvs_t *d = p->kvs + i;
+		KUtilsKeyValue *d = p->kvs + i;
 		if(d->key != 0) {
-			kvs_t *newd = newkvs + ((size_t)d->key) % newpsize;
+			KUtilsKeyValue *newd = newkvs + ((size_t)d->key) % newpsize;
 			if(newd->key == 0) {
 				*newd = *d;
 			}
@@ -458,20 +458,20 @@ static void kvproto_rehash(KonohaContext *kctx, KUtilsGrowingArray *p)
 		}
 	}
 	if(newpmax > 32) {
-		DBG_P("newpmax=%d, %d bytes", newpmax, newpmax * sizeof(kvs_t));
+		DBG_P("newpmax=%d, %d bytes", newpmax, newpmax * sizeof(KUtilsKeyValue));
 	}
-	KFREE(p->kvs, sizeof(kvs_t) * pmax);
+	KFREE(p->kvs, sizeof(KUtilsKeyValue) * pmax);
 	p->kvs = newkvs;
-	p->bytemax = newpmax * sizeof(kvs_t) ;
-	p->bytesize = newpsize * sizeof(kvs_t);
+	p->bytemax = newpmax * sizeof(KUtilsKeyValue) ;
+	p->bytesize = newpsize * sizeof(KUtilsKeyValue);
 }
 
 void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o)
 {
 	KonohaClass *ct = O_ct(o);
 	if(o->h.kvproto->bytemax > 0) {
-		size_t i, pmax = o->h.kvproto->bytemax / sizeof(kvs_t);
-		kvs_t *d = o->h.kvproto->kvs;
+		size_t i, pmax = o->h.kvproto->bytemax / sizeof(KUtilsKeyValue);
+		KUtilsKeyValue *d = o->h.kvproto->kvs;
 		BEGIN_REFTRACE(pmax);
 		for(i = 0; i < pmax; i++) {
 			if(SYMKEY_isBOXED(d->key)) {
@@ -488,12 +488,12 @@ static void kvproto_set(KonohaContext *kctx, KUtilsGrowingArray **pval, ksymbol_
 {
 	KUtilsGrowingArray *p = pval[0];
 	if(p->bytemax == 0) {
-		p = new_karray(kctx, (KVPROTO_INIT - KVPROTO_DELTA) * sizeof(kvs_t), KVPROTO_INIT * sizeof(kvs_t));
+		p = new_karray(kctx, (KVPROTO_INIT - KVPROTO_DELTA) * sizeof(KUtilsKeyValue), KVPROTO_INIT * sizeof(KUtilsKeyValue));
 		pval[0] = p;
 	}
 	do {
-		size_t i, psize = p->bytesize / sizeof(kvs_t);
-		kvs_t *d = p->kvs + (((size_t)key) % psize);
+		size_t i, psize = p->bytesize / sizeof(KUtilsKeyValue);
+		KUtilsKeyValue *d = p->kvs + (((size_t)key) % psize);
 		for(i = 0; i < KVPROTO_DELTA; i++) {
 			if(d->key == key || d->key == 0) {
 				d->key = key; d->ty = ty; d->uval = uval;
@@ -506,10 +506,10 @@ static void kvproto_set(KonohaContext *kctx, KUtilsGrowingArray **pval, ksymbol_
 	while(1);
 }
 
-static void KObject_protoEach(KonohaContext *kctx, kObject *o, void *thunk, void (*f)(KonohaContext *kctx, void *, kvs_t *d))
+static void KObject_protoEach(KonohaContext *kctx, kObject *o, void *thunk, void (*f)(KonohaContext *kctx, void *, KUtilsKeyValue *d))
 {
-	size_t i, pmax = o->h.kvproto->bytemax / sizeof(kvs_t);
-	kvs_t *d = o->h.kvproto->kvs;
+	size_t i, pmax = o->h.kvproto->bytemax / sizeof(KUtilsKeyValue);
+	KUtilsKeyValue *d = o->h.kvproto->kvs;
 	for (i = 0; i < pmax; ++i, ++d) {
 		f(kctx, thunk, d);
 	}
@@ -517,7 +517,7 @@ static void KObject_protoEach(KonohaContext *kctx, kObject *o, void *thunk, void
 
 static kObject* KObject_getObjectNULL(KonohaContext *kctx, kObject *o, ksymbol_t key, kObject *defval)
 {
-	kvs_t *d = kvproto_get(o->h.kvproto, key | SYMKEY_BOXED);
+	KUtilsKeyValue *d = kvproto_get(o->h.kvproto, key | SYMKEY_BOXED);
 	return (d != NULL) ? d->oval : defval;
 }
 
@@ -529,7 +529,7 @@ static void KObject_setObject(KonohaContext *kctx, kObject *o, ksymbol_t key, kt
 
 static uintptr_t KObject_getUnboxedValue(KonohaContext *kctx, kObject *o, ksymbol_t key, uintptr_t defval)
 {
-	kvs_t *d = kvproto_get(o->h.kvproto, key);
+	KUtilsKeyValue *d = kvproto_get(o->h.kvproto, key);
 	return (d != NULL) ? d->uval : defval;
 }
 
@@ -541,7 +541,7 @@ static void KObject_setUnboxedValue(KonohaContext *kctx, kObject *o, ksymbol_t k
 
 static void KObject_removeKey(KonohaContext *kctx, kObject *o, ksymbol_t key)
 {
-	kvs_t *d = kvproto_get(o->h.kvproto, key | SYMKEY_BOXED);
+	KUtilsKeyValue *d = kvproto_get(o->h.kvproto, key | SYMKEY_BOXED);
 	if(d != NULL) {
 		d->key = 0; d->ty = 0; d->uval = 0;
 	}

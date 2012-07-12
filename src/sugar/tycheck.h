@@ -345,7 +345,7 @@ static kExpr* Expr_tyCheckVariable2(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 		}
 	}
 	if(fn != SYM_NONAME) {
-		kvs_t *kv = NameSpace_getConstNULL(kctx, gma->genv->ns, fn);
+		KUtilsKeyValue *kv = NameSpace_getConstNULL(kctx, gma->genv->ns, fn);
 		if(kv != NULL) {
 			if(SYMKEY_isBOXED(kv->key)) {
 				kExpr_setConstValue(expr, kv->ty, kv->oval);
@@ -373,7 +373,7 @@ static KMETHOD ExprTyCheck_Usymbol(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kToken *tk = expr->tk;
 	ksymbol_t ukey = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NONAME);
 	if(ukey != SYM_NONAME) {
-		kvs_t *kv = NameSpace_getConstNULL(kctx, gma->genv->ns, ukey);
+		KUtilsKeyValue *kv = NameSpace_getConstNULL(kctx, gma->genv->ns, ukey);
 		if(kv != NULL) {
 			if(SYMKEY_isBOXED(kv->key)) {
 				kExpr_setConstValue(expr, kv->ty, kv->oval);
@@ -396,7 +396,7 @@ static KMETHOD StmtTyCheck_ConstDecl(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kNameSpace *ns = gma->genv->ns;
 	kToken *tk = kStmt_token(stmt, KW_UsymbolPattern, NULL);
 	ksymbol_t ukey = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
-	kvs_t *kv = NameSpace_getConstNULL(kctx, ns, ukey);
+	KUtilsKeyValue *kv = NameSpace_getConstNULL(kctx, ns, ukey);
 	if(kv != NULL) {
 		kStmt_p(stmt, ERR_, "already defined name: %s", kToken_s(tk));
 	}
@@ -404,7 +404,7 @@ static KMETHOD StmtTyCheck_ConstDecl(KonohaContext *kctx, KonohaStack *sfp _RIX)
 		r = Stmt_tyCheckExpr(kctx, stmt, KW_ExprPattern, gma, TY_var, TPOL_CONST);
 		if(r) {
 			kExpr *expr = kStmt_expr(stmt, KW_ExprPattern, NULL);
-			kvs_t kv = { ukey, expr->ty};
+			KUtilsKeyValue kv = { ukey, expr->ty};
 			if(expr->build == TEXPR_NULL) {
 				kv.ty = TY_TYPE;
 				kv.uval = (uintptr_t)(CT_(expr->ty));

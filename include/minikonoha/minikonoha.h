@@ -246,6 +246,64 @@ typedef uintptr_t                 kfileline_t;
 #define ULINE_fileid(line)            ((kfileid_t)(line >> (sizeof(kfileid_t) * 8)))
 #define ULINE_line(line)           (line & (kfileline_t)((kfileid_t)-1))
 
+// classdef_t
+
+typedef kushort_t       kpackage_t;     /* package id*/
+typedef kushort_t       ktype_t;     /* cid classid, ty type */
+typedef kushort_t       ksymbol_t;
+typedef kushort_t       kmethodn_t;
+typedef kushort_t       kparamid_t;
+
+/* ktype_t */
+#define CLASS_newid        ((ktype_t)-1)
+#define TY_unknown         ((ktype_t)-2)
+
+#define CT_(t)              (kctx->share->classTable.cts[t])
+#define CT_cparam(CT)       (kctx->share->paramdomList->params[(CT)->paramdom])
+#define TY_isUnbox(t)       FLAG_is(CT_(t)->cflag, kClass_UnboxType)
+#define CT_isUnbox(C)       FLAG_is(C->cflag, kClass_UnboxType)
+
+#define SYM_MAX            KFLAG_H3
+#define SYM_HEAD(sym)      (sym  & (KFLAG_H0|KFLAG_H1|KFLAG_H2))
+#define SYM_UNMASK(sym)    (sym & (~(KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3)))
+
+#define SYM_NONAME          ((ksymbol_t)-1)
+#define SYM_NEWID           ((ksymbol_t)-2)
+#define SYM_NEWRAW          ((ksymbol_t)-3)
+#define _NEWID              SYM_NEWID
+#define _NEWRAW             SYM_NEWRAW
+
+#define SYMKEY_BOXED            KFLAG_H3
+#define SYMKEY_unbox(sym)       (sym & ~(SYMKEY_BOXED))
+#define SYMKEY_isBOXED(sym)     ((sym & SYMKEY_BOXED) == SYMKEY_BOXED)
+
+#define FN_COERCION             KFLAG_H3
+#define FN_Coersion             FN_COERCION
+#define FN_isCOERCION(fn)       ((fn & FN_COERCION) == FN_COERCION)
+
+#define MN_ISBOOL     KFLAG_H0
+#define MN_GETTER     KFLAG_H1
+#define MN_SETTER     KFLAG_H2
+
+#define MN_Annotation (KFLAG_H1|KFLAG_H2)
+#define MN_isAnnotation(S)   ((S & KW_PATTERN) == MN_Annotation)
+
+#define MN_TOCID             (KFLAG_H0|KFLAG_H1)
+#define MN_ASCID             (KFLAG_H0|KFLAG_H1|KFLAG_H2)
+#define KW_PATTERN           (KFLAG_H0|KFLAG_H1|KFLAG_H2)
+#define KW_isPATTERN(S)      ((S & KW_PATTERN) == KW_PATTERN)
+
+#define MN_isISBOOL(mn)      (SYM_HEAD(mn) == MN_ISBOOL)
+#define MN_toISBOOL(mn)      ((SYM_UNMASK(mn)) | MN_ISBOOL)
+#define MN_isGETTER(mn)      (SYM_HEAD(mn) == MN_GETTER)
+#define MN_toGETTER(mn)      ((SYM_UNMASK(mn)) | MN_GETTER)
+#define MN_isSETTER(mn)      (SYM_HEAD(mn) == MN_SETTER)
+#define MN_toSETTER(mn)      ((SYM_UNMASK(mn)) | MN_SETTER)
+
+#define MN_to(cid)           ((CT_(cid)->nameid) | MN_TOCID)
+#define MN_isTOCID(mn)       ((SYM_UNMASK(mn)) == MN_TOCID)
+#define MN_as(cid)           ((CT_(cid)->nameid) | MN_ASCID)
+#define MN_isASCID(mn)       ((SYM_UNMASK(mn)) == MN_ASCID)
 
 /* ------------------------------------------------------------------------ */
 
@@ -297,6 +355,16 @@ typedef struct KonohaStack              KonohaStackVar;
 
 /* ------------------------------------------------------------------------ */
 
+typedef struct KUtilsKeyValue {
+	ksymbol_t key;
+	ktype_t   ty;
+	union {
+		uintptr_t                uval;
+		kObject                 *oval;
+		kString                 *sval;
+	};
+} KUtilsKeyValue;
+
 #define COMMON_BYTEARRAY \
 		size_t bytesize;\
 		union {\
@@ -312,9 +380,9 @@ typedef struct KonohaStack              KonohaStackVar;
 typedef struct KUtilsGrowingArray {
 	size_t bytesize;
 	union {
-		char            *bytebuf;
-		KonohaClass    **cts;
-		struct kvs_t    *kvs;
+		char              *bytebuf;
+		KonohaClass      **cts;
+		KUtilsKeyValue    *kvs;
 		struct VirtualMachineInstruction   *opl;
 		kObject        **objects;
 		kObjectVar     **refhead;  // stack->ref
@@ -353,64 +421,6 @@ struct KUtilsHashMap {
 	size_t hmax;
 };
 
-// classdef_t
-
-typedef kushort_t       kpackage_t;     /* package id*/
-typedef kushort_t       ktype_t;     /* cid classid, ty type */
-typedef kushort_t       ksymbol_t;
-typedef kushort_t       kmethodn_t;
-typedef kushort_t       kparamid_t;
-
-/* ktype_t */
-#define CLASS_newid        ((ktype_t)-1)
-#define TY_unknown         ((ktype_t)-2)
-
-#define CT_(t)              (kctx->share->classTable.cts[t])
-#define CT_cparam(CT)       (kctx->share->paramdomList->params[(CT)->paramdom])
-#define TY_isUnbox(t)       FLAG_is(CT_(t)->cflag, kClass_UnboxType)
-#define CT_isUnbox(C)       FLAG_is(C->cflag, kClass_UnboxType)
-
-#define SYM_MAX            KFLAG_H3
-#define SYM_HEAD(sym)      (sym  & (KFLAG_H0|KFLAG_H1|KFLAG_H2))
-#define SYM_UNMASK(sym)    (sym & (~(KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3)))
-
-#define SYM_NONAME          ((ksymbol_t)-1)
-#define SYM_NEWID           ((ksymbol_t)-2)
-#define SYM_NEWRAW          ((ksymbol_t)-3)
-#define _NEWID              SYM_NEWID
-#define _NEWRAW             SYM_NEWRAW
-
-#define SYMKEY_BOXED            KFLAG_H3
-#define SYMKEY_unbox(sym)       (sym & ~(SYMKEY_BOXED))
-#define SYMKEY_isBOXED(sym)     ((sym & SYMKEY_BOXED) == SYMKEY_BOXED)
-
-#define FN_COERCION             KFLAG_H3
-#define FN_Coersion             FN_COERCION
-#define FN_isCOERCION(fn)       ((fn & FN_COERCION) == FN_COERCION)
-
-#define MN_ISBOOL     KFLAG_H0
-#define MN_GETTER     KFLAG_H1
-#define MN_SETTER     KFLAG_H2
-
-#define MN_Annotation (KFLAG_H1|KFLAG_H2)
-#define MN_isAnnotation(S)   ((S & KW_PATTERN) == MN_Annotation)
-
-#define MN_TOCID      (KFLAG_H0|KFLAG_H1)
-#define MN_ASCID      (KFLAG_H0|KFLAG_H1|KFLAG_H2)
-#define KW_PATTERN    (KFLAG_H0|KFLAG_H1|KFLAG_H2)
-#define KW_isPATTERN(S)      ((S & KW_PATTERN) == KW_PATTERN)
-
-#define MN_isISBOOL(mn)   (SYM_HEAD(mn) == MN_ISBOOL)
-#define MN_toISBOOL(mn)   ((SYM_UNMASK(mn)) | MN_ISBOOL)
-#define MN_isGETTER(mn)   (SYM_HEAD(mn) == MN_GETTER)
-#define MN_toGETTER(mn)   ((SYM_UNMASK(mn)) | MN_GETTER)
-#define MN_isSETTER(mn)   (SYM_HEAD(mn) == MN_SETTER)
-#define MN_toSETTER(mn)   ((SYM_UNMASK(mn)) | MN_SETTER)
-
-#define MN_to(cid)        ((CT_(cid)->nameid) | MN_TOCID)
-#define MN_isTOCID(mn)    ((SYM_UNMASK(mn)) == MN_TOCID)
-#define MN_as(cid)        ((CT_(cid)->nameid) | MN_ASCID)
-#define MN_isASCID(mn)    ((SYM_UNMASK(mn)) == MN_ASCID)
 
 /* ------------------------------------------------------------------------ */
 
@@ -612,7 +622,7 @@ typedef uintptr_t kmagicflag_t;
 
 struct KonohaClassVar {
 	KCLASSSPI;
-	kpackage_t   packageId;       kpackage_t   packageDomain;
+	kpackage_t   packageId;  kpackage_t   packageDomain;
 	ktype_t   cid;           kshortflag_t  cflag;
 	ktype_t   bcid;          ktype_t   supcid;
 	ktype_t  p0;            kparamid_t paramdom;
@@ -621,8 +631,7 @@ struct KonohaClassVar {
 	KonohaClassField  *fields;
 	kushort_t  fsize;         kushort_t fallocsize;
 	const char               *DBG_NAME;
-	ksymbol_t                 nameid;
-	kushort_t                 optvalue;
+	ksymbol_t   nameid;       kushort_t   optvalue;
 
 	kArray     *methodList;
 	kString    *shortNameNULL;
@@ -631,8 +640,8 @@ struct KonohaClassVar {
 		kObjectVar        *nulvalNULL_;
 	};
 	KUtilsHashMap            *constPoolMapNO;
-	KonohaClass                 *searchSimilarClassNULL;
-	KonohaClass                 *searchSuperMethodClassNULL;
+	KonohaClass              *searchSimilarClassNULL;
+	KonohaClass              *searchSuperMethodClassNULL;
 } ;
 
 struct KonohaClassField {
@@ -777,16 +786,6 @@ struct kObjectVar {
 		uintptr_t ndata[4];
 	};
 };
-
-typedef struct kvs_t {
-	ksymbol_t key;
-	ktype_t   ty;
-	union {
-		uintptr_t                uval;
-		kObject                 *oval;
-		kString   *sval;
-	};
-} kvs_t;
 
 #define O_ct(o)             ((o)->h.ct)
 #define O_cid(o)            (O_ct(o)->cid)
@@ -1208,7 +1207,7 @@ struct LibKonohaApiVar {
 	void            (*KObject_setObject)(KonohaContext*, kObject *, ksymbol_t, ktype_t, kObject *);
 	uintptr_t       (*KObject_getUnboxedValue)(KonohaContext*, kObject *, ksymbol_t, uintptr_t);
 	void            (*KObject_setUnboxedValue)(KonohaContext*, kObject *, ksymbol_t, ktype_t, uintptr_t);
-	void            (*KObject_protoEach)(KonohaContext*, kObject *, void *thunk, void (*f)(KonohaContext*, void *, kvs_t *d));
+	void            (*KObject_protoEach)(KonohaContext*, kObject *, void *thunk, void (*f)(KonohaContext*, void *, KUtilsKeyValue *d));
 	void            (*KObject_removeKey)(KonohaContext*, kObject *, ksymbol_t);
 
 	kString*    (*Knew_String)(KonohaContext*, const char *, size_t, int);
@@ -1293,7 +1292,6 @@ struct LibKonohaApiVar {
 
 #define ksymbolA(T, L, DEF)       (KPI)->Ksymbol2(kctx, T, L, SPOL_ASCII, DEF)
 #define ksymbolSPOL(T, L, SPOL, DEF)       (KPI)->Ksymbol2(kctx, T, L, SPOL, DEF)
-#define ksymbol(T)
 #define SYM_(T)                   (KPI)->Ksymbol2(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
 #define FN_(T)                    (KPI)->Ksymbol2(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
 #define MN_(T)                    (KPI)->Ksymbol2(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
@@ -1322,7 +1320,7 @@ struct LibKonohaApiVar {
 #define new_kStringf(P, FMT, ...) (KPI)->Knew_Stringf(kctx, P, FMT, ## __VA_ARGS__)
 
 #define kArray_size(A)            (((A)->bytesize)/sizeof(void*))
-#define kArray_setsize(A, N)  ((kArrayVar*)A)->bytesize = N * sizeof(void*)
+#define kArray_setsize(A, N)      ((kArrayVar*)A)->bytesize = N * sizeof(void*)
 #define kArray_add(A, V)          (KPI)->KArray_add(kctx, A, UPCAST(V))
 #define kArray_insert(A, N, V)    (KPI)->KArray_insert(kctx, A, N, UPCAST(V))
 #define kArray_clear(A, S)        (KPI)->KArray_clear(kctx, A, S)
