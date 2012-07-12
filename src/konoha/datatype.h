@@ -392,7 +392,7 @@ typedef kbool_t (*equalsP)(ktype_t rtype, int psize, kparam_t *p, kParam *pa);
 
 static kparamid_t Kmap_getparamid(KonohaContext *kctx, KUtilsHashMap *kmp, kArray *list, uintptr_t hcode, equalsP f, ktype_t rtype, int psize, kparam_t *p)
 {
-	KUtilsHashMapEntry *e = kmap_get(kmp, hcode);
+	KUtilsHashMapEntry *e = KLIB Kmap_get(kctx, kmp, hcode);
 	while(e != NULL) {
 		if(e->hcode == hcode && f(rtype, psize, p, e->paramkey)) {
 			return (kparamid_t)e->uvalue;
@@ -402,7 +402,7 @@ static kparamid_t Kmap_getparamid(KonohaContext *kctx, KUtilsHashMap *kmp, kArra
 	kParam *pa = new_Param(kctx, rtype, psize, p);
 	uintptr_t paramid = kArray_size(list);
 	kArray_add(list, pa);
-	e = kmap_newentry(kmp, hcode);
+	e = KLIB Kmap_newentry(kctx, kmp, hcode);
 	KINITv(e->paramkey, pa);
 	e->uvalue = paramid;
 	return (kparamid_t)paramid;
@@ -888,17 +888,17 @@ static void KCLASSTABLE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	KCLASSTABLE_initkklib((LibKonohaApiVar*)kctx->klib);
 	KARRAY_INIT(&share->classTable, K_CLASSTABLE_INIT * sizeof(KonohaClass));
 	loadInitStructData(kctx);
-	share->longClassNameMapNN = kmap_init(0);
+	share->longClassNameMapNN = KLIB Kmap_init(kctx, 0);
 	KINITv(share->fileidList, new_(StringArray, 8));
-	share->fileidMapNN = kmap_init(0);
+	share->fileidMapNN = KLIB Kmap_init(kctx, 0);
 	KINITv(share->packList, new_(StringArray, 8));
-	share->packMapNN = kmap_init(0);
+	share->packMapNN = KLIB Kmap_init(kctx, 0);
 	KINITv(share->symbolList, new_(StringArray, 32));
-	share->symbolMapNN = kmap_init(0);
+	share->symbolMapNN = KLIB Kmap_init(kctx, 0);
 
-	share->paramMapNN = kmap_init(0);
+	share->paramMapNN = KLIB Kmap_init(kctx, 0);
 	KINITv(share->paramList, new_(Array, 32));
-	share->paramdomMapNN = kmap_init(0);
+	share->paramdomMapNN = KLIB Kmap_init(kctx, 0);
 	KINITv(share->paramdomList, new_(Array, 32));
 	//
 	KINITv(share->constNull, new_(Object, NULL));
@@ -941,7 +941,7 @@ static void kshare_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 			KREFTRACEn(ct->nulvalNULL);
 			END_REFTRACE();
 		}
-		if (ct->constPoolMapNO) kmap_reftrace(ct->constPoolMapNO, val_reftrace);
+		if (ct->constPoolMapNO) KLIB Kmap_reftrace(kctx, ct->constPoolMapNO, val_reftrace);
 	}
 
 	BEGIN_REFTRACE(10);
@@ -974,12 +974,12 @@ static void CLASSTABLE_freeCT(KonohaContext *kctx)
 static void CLASSTABLE_free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	KonohaSharedRuntimeVar *share = ctx->share;
-	kmap_free(share->longClassNameMapNN, NULL);
-	kmap_free(share->fileidMapNN, NULL);
-	kmap_free(share->packMapNN, NULL);
-	kmap_free(share->symbolMapNN, NULL);
-	kmap_free(share->paramMapNN, NULL);
-	kmap_free(share->paramdomMapNN, NULL);
+	KLIB Kmap_free(kctx, share->longClassNameMapNN, NULL);
+	KLIB Kmap_free(kctx, share->fileidMapNN, NULL);
+	KLIB Kmap_free(kctx, share->packMapNN, NULL);
+	KLIB Kmap_free(kctx, share->symbolMapNN, NULL);
+	KLIB Kmap_free(kctx, share->paramMapNN, NULL);
+	KLIB Kmap_free(kctx, share->paramdomMapNN, NULL);
 	CLASSTABLE_freeCT(kctx);
 	KARRAY_FREE(&share->classTable);
 	KFREE(share, sizeof(SharedRuntime));

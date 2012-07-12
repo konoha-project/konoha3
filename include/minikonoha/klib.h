@@ -143,13 +143,13 @@ static kinline KonohaClass *CT_p0(KonohaContext *kctx, KonohaClass *ct, ktype_t 
 #define uNULL   ((uintptr_t)NULL)
 static kinline void map_addu(KonohaContext *kctx, KUtilsHashMap *kmp, uintptr_t hcode, uintptr_t uvalue)
 {
-	KUtilsHashMapEntry *e = kmap_newentry(kmp, hcode);
+	KUtilsHashMapEntry *e = KLIB Kmap_newentry(kctx, kmp, hcode);
 	e->uvalue = uvalue;
 }
 
 static kinline uintptr_t map_getu(KonohaContext *kctx, KUtilsHashMap *kmp, uintptr_t hcode, uintptr_t def)
 {
-	KUtilsHashMapEntry *e = kmap_get(kmp, hcode);
+	KUtilsHashMapEntry *e = KLIB Kmap_get(kctx, kmp, hcode);
 	while(e != NULL) {
 		if(e->hcode == hcode) return e->uvalue;
 	}

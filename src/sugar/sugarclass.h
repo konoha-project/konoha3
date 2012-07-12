@@ -54,7 +54,7 @@ static void NameSpace_reftrace(KonohaContext *kctx, kObject *o)
 {
 	kNameSpace *ns = (kNameSpace*)o;
 	if(ns->syntaxMapNN != NULL) {
-		kmap_reftrace(ns->syntaxMapNN, syntax_reftrace);
+		KLIB Kmap_reftrace(kctx, ns->syntaxMapNN, syntax_reftrace);
 	}
 	size_t i, size = KARRAYSIZE(ns->constTable.bytesize, kvs);
 	BEGIN_REFTRACE(size);
@@ -78,7 +78,7 @@ static void NameSpace_free(KonohaContext *kctx, kObject *o)
 {
 	kNameSpaceVar *ns = (kNameSpaceVar*)o;
 	if(ns->syntaxMapNN != NULL) {
-		kmap_free(ns->syntaxMapNN, syntax_free);
+		KLIB Kmap_free(kctx, ns->syntaxMapNN, syntax_free);
 	}
 	if(ns->tokenMatrix != NULL) {
 		KFREE((void*)ns->tokenMatrix, SIZEOF_TOKENMATRIX);
@@ -98,7 +98,7 @@ static SugarSyntax* NameSpace_syn(KonohaContext *kctx, kNameSpace *ns0, ksymbol_
 	assert(ns0 != NULL);  /* scan-build: remove warning */
 	while(ns != NULL) {
 		if(ns->syntaxMapNN != NULL) {
-			KUtilsHashMapEntry *e = kmap_get(ns->syntaxMapNN, hcode);
+			KUtilsHashMapEntry *e = KLIB Kmap_get(kctx, ns->syntaxMapNN, hcode);
 			while(e != NULL) {
 				if(e->hcode == hcode) {
 					parent = (SugarSyntax*)e->uvalue;
@@ -113,9 +113,9 @@ static SugarSyntax* NameSpace_syn(KonohaContext *kctx, kNameSpace *ns0, ksymbol_
 	L_NEW:;
 	if(isNew == 1) {
 		if(ns0->syntaxMapNN == NULL) {
-			((kNameSpaceVar*)ns0)->syntaxMapNN = kmap_init(0);
+			((kNameSpaceVar*)ns0)->syntaxMapNN = KLIB Kmap_init(kctx, 0);
 		}
-		KUtilsHashMapEntry *e = kmap_newentry(ns0->syntaxMapNN, hcode);
+		KUtilsHashMapEntry *e = KLIB Kmap_newentry(kctx, ns0->syntaxMapNN, hcode);
 		SugarSyntaxVar *syn = (SugarSyntaxVar*)KCALLOC(sizeof(SugarSyntax), 1);
 		e->uvalue = (uintptr_t)syn;
 

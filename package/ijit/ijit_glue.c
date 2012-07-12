@@ -69,13 +69,13 @@ static void kmodjit_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
 	KREFTRACEv(mod->global_value);
 	KREFTRACEv(mod->constPool);
 	END_REFTRACE();
-	kmap_reftrace(mod->jitcache, val_reftrace);
+	KLIB Kmap_reftrace(kctx, mod->jitcache, val_reftrace);
 }
 
 static void kmodjit_free(KonohaContext *kctx, struct kmodshare_t *baseh)
 {
 	kmodjit_t *modshare = (kmodjit_t*) baseh;
-	kmap_free(modshare->jitcache, NULL);
+	KLIB Kmap_free(kctx, modshare->jitcache, NULL);
 	KFREE(baseh, sizeof(kmodjit_t));
 }
 
@@ -270,7 +270,7 @@ static kObject *jitcache_get(KonohaContext *kctx, kMethod *mtd)
 {
 	uintptr_t hcode = jitcache_hash(mtd);
 	KUtilsHashMap *map = kmodjit->jitcache;
-	KUtilsHashMapEntry *e = kmap_get(map, hcode);
+	KUtilsHashMapEntry *e = KLIB Kmap_get(kctx, map, hcode);
 	if (e) {
 		return (kObject*) e->uvalue;
 	} else {
@@ -282,7 +282,7 @@ static void jitcache_set(KonohaContext *kctx, kMethod *mtd, kObject *f)
 {
 	uintptr_t hcode = jitcache_hash(mtd);
 	KUtilsHashMap *map = kmodjit->jitcache;
-	KUtilsHashMapEntry *newe = kmap_newentry(map, hcode);
+	KUtilsHashMapEntry *newe = KLIB Kmap_newentry(kctx, map, hcode);
 	newe->uvalue = (uintptr_t) f;
 }
 
@@ -694,7 +694,7 @@ static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	base->h.reftrace = kmodjit_reftrace;
 	base->h.free     = kmodjit_free;
 	base->defaultCodeGen = kctx->klib->KMethod_genCode;
-	base->jitcache = kmap_init(0);
+	base->jitcache = KLIB Kmap_init(kctx, 0);
 	KINITv(base->global_value, new_(Array, 18));
 	KINITv(base->constPool, new_(Array, 0));
 

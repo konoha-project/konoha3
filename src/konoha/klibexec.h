@@ -256,7 +256,7 @@ static void Kmap_free(KonohaContext *kctx, KUtilsHashMap *kmap, void (*f)(Konoha
 	KFREE(kmap, sizeof(KUtilsHashMap));
 }
 
-static KUtilsHashMapEntry *Kmap_getentry(KUtilsHashMap* kmap, kuint_t hcode)
+static KUtilsHashMapEntry *Kmap_getentry(KonohaContext *kctx, KUtilsHashMap* kmap, kuint_t hcode)
 {
 	KUtilsHashMapEntry **hlist = kmap->hentry;
 	size_t idx = hcode % kmap->hmax;
@@ -298,14 +298,14 @@ static void Kmap_remove(KUtilsHashMap* kmap, KUtilsHashMapEntry *oe)
 
 static void map_addStringUnboxValue(KonohaContext *kctx, KUtilsHashMap *kmp, uintptr_t hcode, kString *skey, uintptr_t uvalue)
 {
-	KUtilsHashMapEntry *e = kmap_newentry(kmp, hcode);
+	KUtilsHashMapEntry *e = KLIB Kmap_newentry(kctx, kmp, hcode);
 	KINITv(e->skey, skey);
 	e->uvalue = uvalue;
 }
 
 static ksymbol_t Kmap_getcode(KonohaContext *kctx, KUtilsHashMap *kmp, kArray *list, const char *name, size_t len, uintptr_t hcode, int spol, ksymbol_t def)
 {
-	KUtilsHashMapEntry *e = kmap_get(kmp, hcode);
+	KUtilsHashMapEntry *e = KLIB Kmap_get(kctx, kmp, hcode);
 	while(e != NULL) {
 		if(e->hcode == hcode && len == S_size(e->skey) && strncmp(S_text(e->skey), name, len) == 0) {
 			return (ksymbol_t)e->uvalue;

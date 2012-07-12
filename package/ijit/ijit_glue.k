@@ -1190,7 +1190,7 @@ void jit_init() {
 
 	System.setModule(m);
 	System.setExecutionEngine(ee);
-	//base.jitcache = kmap_init(0);
+	//base.jitcache = KLIB Kmap_init(kctx, 0);
 }
 
 void System.genCode(Method mtd, Block bk) {

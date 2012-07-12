@@ -188,7 +188,7 @@ static void pack_free(KonohaContext *kctx, void *p)
 static void kmodsugar_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
 {
 	KModuleSugar *base = (KModuleSugar*)baseh;
-	kmap_reftrace(base->packageMapNO, pack_reftrace);
+	KLIB Kmap_reftrace(kctx, base->packageMapNO, pack_reftrace);
 	BEGIN_REFTRACE(6);
 	KREFTRACEv(base->packageList);
 	KREFTRACEv(base->UndefinedParseExpr);
@@ -202,7 +202,7 @@ static void kmodsugar_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
 static void kmodsugar_free(KonohaContext *kctx, struct kmodshare_t *baseh)
 {
 	KModuleSugar *base = (KModuleSugar*)baseh;
-	kmap_free(base->packageMapNO, pack_free);
+	KLIB Kmap_free(kctx, base->packageMapNO, pack_free);
 	KFREE(baseh, sizeof(KModuleSugar));
 }
 
@@ -223,7 +223,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	l->NameSpace_syncMethods    = NameSpace_syncMethods;
 
 	KINITv(base->packageList, new_(Array, 8));
-	base->packageMapNO = kmap_init(0);
+	base->packageMapNO = KLIB Kmap_init(kctx, 0);
 
 	KDEFINE_CLASS defNameSpace = {
 		STRUCTNAME(NameSpace),

@@ -37,7 +37,7 @@ struct _kHashMap {
 static void HashMap_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct _kHashMap *map = (struct _kHashMap *)o;
-	map->map = kmap_init(4);
+	map->map = KLIB Kmap_init(kctx, 4);
 	map->map = kctx->klib->Kmap_init(kctx, 4);
 }
 
@@ -45,7 +45,7 @@ static void HashMap_free(KonohaContext *kctx, kObject *o)
 {
 	struct _kHashMap *map = (struct _kHashMap *)o;
 	if (map->map != NULL) {
-		kmap_free(map->map, NULL);
+		KLIB Kmap_free(kctx, map->map, NULL);
 	}
 }
 
@@ -66,7 +66,7 @@ static KMETHOD HashMap_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kParam *cparam = CT_cparam(ct);
 	kparam_t p1 = cparam->p[0];
 	uintptr_t hcode = strhash(S_text(key), S_size(key));
-	KUtilsHashMapEntry *e = kmap_get(map, hcode);
+	KUtilsHashMapEntry *e = KLIB Kmap_get(kctx, map, hcode);
 
 	if (p1.ty == TY_Int || p1.ty == TY_Boolean || p1.ty == TY_Float) {
 		RETURNd_((uintptr_t)e->uvalue);
@@ -86,7 +86,7 @@ static KMETHOD HashMap_set(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kParam *cparam = CT_cparam(ct);
 	kparam_t p1 = cparam->p[0];
 	uintptr_t hcode = strhash(S_text(key), S_size(key));
-	KUtilsHashMapEntry *e = kmap_newentry(map, hcode);
+	KUtilsHashMapEntry *e = KLIB Kmap_newentry(kctx, map, hcode);
 	if (p1.ty == TY_Int || p1.ty == TY_Boolean || p1.ty == TY_Float) {  // FIXME
 		e->uvalue =(uintptr_t)sfp[2].ivalue;
 	} else {

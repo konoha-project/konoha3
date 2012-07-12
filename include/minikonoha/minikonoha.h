@@ -110,7 +110,7 @@ typedef const struct LibKonohaApiVar LibKonohaApi;
 typedef struct LibKonohaApiVar       LibKonohaApiVar;
 
 #define PLAT (kctx->plat)->
-#define KLIB (kctx->kklib)->
+#define KLIB (kctx->klib)->
 
 struct PlatformApiVar {
 	// settings
@@ -1184,13 +1184,13 @@ struct LibKonohaApiVar {
 	const char* (*Kwb_top)(KonohaContext *kctx, KUtilsWriteBuffer *, int);
 	void (*Kwb_free)(KUtilsWriteBuffer *);
 
-	KUtilsHashMap*  (*Kmap_init)(KonohaContext *kctx, size_t);
+	KUtilsHashMap*      (*Kmap_init)(KonohaContext *kctx, size_t);
 	KUtilsHashMapEntry* (*Kmap_newentry)(KonohaContext *kctx, KUtilsHashMap *, uintptr_t);
-	KUtilsHashMapEntry* (*Kmap_get)(KUtilsHashMap *, uintptr_t);
-	void (*Kmap_remove)(KUtilsHashMap *, KUtilsHashMapEntry *);
-	void (*Kmap_reftrace)(KonohaContext *kctx, KUtilsHashMap *, void (*)(KonohaContext *kctx, KUtilsHashMapEntry*));
-	void (*Kmap_free)(KonohaContext *kctx, KUtilsHashMap *, void (*)(KonohaContext *kctx, void *));
-	ksymbol_t (*Kmap_getcode)(KonohaContext *kctx, KUtilsHashMap *, kArray *, const char *, size_t, uintptr_t, int, ksymbol_t);
+	KUtilsHashMapEntry* (*Kmap_get)(KonohaContext *kctx, KUtilsHashMap *, uintptr_t);
+	void                (*Kmap_remove)(KUtilsHashMap *, KUtilsHashMapEntry *);
+	void                (*Kmap_reftrace)(KonohaContext *kctx, KUtilsHashMap *, void (*)(KonohaContext *kctx, KUtilsHashMapEntry*));
+	void                (*Kmap_free)(KonohaContext *kctx, KUtilsHashMap *, void (*)(KonohaContext *kctx, void *));
+	ksymbol_t           (*Kmap_getcode)(KonohaContext *kctx, KUtilsHashMap *, kArray *, const char *, size_t, uintptr_t, int, ksymbol_t);
 
 
 	kfileline_t     (*Kfileid)(KonohaContext *kctx, const char *, size_t, int spol, ksymbol_t def);
@@ -1273,13 +1273,13 @@ struct LibKonohaApiVar {
 #define kwb_bytesize(W)          (((W)->m)->bytesize - (W)->pos)
 #define kwb_free(W)              (KPI)->Kwb_free(W)
 
-#define kmap_init(INIT)           (KPI)->Kmap_init(kctx, INIT)
-#define kmap_newentry(M, H)       (KPI)->Kmap_newentry(kctx, M, H)
-#define kmap_get(M, K)            (KPI)->Kmap_get(M, K)
-#define kmap_remove(M, E)         (KPI)->Kmap_remove(kctx, M, E)
-#define kmap_reftrace(M, F)       (KPI)->Kmap_reftrace(kctx, M, F)
-#define kmap_free(M, F)           (KPI)->Kmap_free(kctx, M, F)
-#define kmap_getcode(M,L,N,NL,H,POL,DEF)  (KPI)->Kmap_getcode(kctx, M, L, N, NL, H, POL, DEF)
+//#define KLIB Kmap_init(kctx, INIT)           (KPI)->Kmap_init(kctx, INIT)
+//#define KLIB Kmap_newentry(kctx, M, H)       (KPI)->Kmap_newentry(kctx, M, H)
+//#define KLIB Kmap_get(kctx, M, K)            (KPI)->Kmap_get(M, K)
+//#define KLIB Kmap_remove(kctx, M, E)         (KPI)->Kmap_remove(kctx, M, E)
+//#define KLIB Kmap_reftrace(kctx, M, F)       (KPI)->Kmap_reftrace(kctx, M, F)
+//#define KLIB Kmap_free(kctx, M, F)           (KPI)->Kmap_free(kctx, M, F)
+//#define KLIB Kmap_getcode(kctx, M,L,N,NL,H,POL,DEF)  (KPI)->Kmap_getcode(kctx, M, L, N, NL, H, POL, DEF)
 
 #define kclass(CID, UL)           (KPI)->Kclass(kctx, CID, UL)
 

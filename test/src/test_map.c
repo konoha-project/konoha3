@@ -49,7 +49,7 @@ void test_Kmap(KonohaContext *kctx)
         entry->uvalue = i;
     }
     for (i = 0; i < 10; ++i) {
-        KUtilsHashMapEntry *entry = kctx->klib->Kmap_get(map, i);
+        KUtilsHashMapEntry *entry = kctx->klib->Kmap_get(kctx, map, i);
         assert(entry != NULL);
         assert(entry->uvalue == i);
     }
@@ -58,16 +58,16 @@ void test_Kmap(KonohaContext *kctx)
     assert(_sum_ == 45);
 
     for (i = 0; i < 10; i+=2) {
-        KUtilsHashMapEntry *entry = kctx->klib->Kmap_get(map, i);
+        KUtilsHashMapEntry *entry = kctx->klib->Kmap_get(kctx, map, i);
         assert(entry != NULL);
         kctx->klib->Kmap_remove(map, entry);
     }
     for (i = 0; i < 10; i+=2) {
-        KUtilsHashMapEntry *entry = kctx->klib->Kmap_get(map, i);
+        KUtilsHashMapEntry *entry = kctx->klib->Kmap_get(kctx, map, i);
         assert(entry == NULL);
     }
     for (i = 0; i < 10; ++i) {
-        KUtilsHashMapEntry *entry = kctx->klib->Kmap_get(map, i);
+        KUtilsHashMapEntry *entry = kctx->klib->Kmap_get(kctx, map, i);
         if (i % 2 == 0) {
             assert(entry == NULL);
         } else {
