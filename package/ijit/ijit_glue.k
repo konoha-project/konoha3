@@ -1177,7 +1177,7 @@ void jit_init() {
 	kMethodTy.set(6, Type.getInt32Ty() /* paramid */ );
 	kMethodTy.set(7, Type.getInt32Ty() /* paramdom */ );
 	kMethodTy.set(8, Type.getInt32Ty() /* delta */ );
-	kMethodTy.set(9, Type.getInt32Ty() /* packid */ );
+	kMethodTy.set(9, Type.getInt32Ty() /* packageId */ );
 	kMethodTy.set(10, PointerType.get(kObject) /* tcode */ );
 	kMethodTy.set(11, PointerType.get(kObject) /* objdata */ /*union*/);
 	kMethodTy.set(12, PointerType.get(kObject) /* proceedNUL */ );

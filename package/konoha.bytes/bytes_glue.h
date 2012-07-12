@@ -353,7 +353,7 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, 
 		.init    = Bytes_init,
 		.p       = Bytes_p,
 	};
-	base->cBytes = Konoha_addClassDef(ks->packid, PN_konoha, NULL, &defBytes, pline);
+	base->cBytes = Konoha_addClassDef(ks->packageId, PN_konoha, NULL, &defBytes, pline);
 	int FN_encoding = FN_("encoding");
 	int FN_x = FN_("x");
 	int FN_c = FN_("c");

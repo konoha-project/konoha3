@@ -615,7 +615,7 @@ typedef uintptr_t kmagicflag_t;
 
 struct KonohaClassVar {
 	KCLASSSPI;
-	kpackage_t   packid;       kpackage_t   packdom;
+	kpackage_t   packageId;       kpackage_t   packdom;
 	ktype_t   cid;           kshortflag_t  cflag;
 	ktype_t   bcid;          ktype_t   supcid;
 	ktype_t  p0;            kparamid_t paramdom;
@@ -1058,7 +1058,7 @@ struct kMethodVar {
 	uintptr_t         flag;
 	ktype_t            cid;      kmethodn_t  mn;
 	kparamid_t        paramid;  kparamid_t paramdom;
-	kshort_t          delta;    kpackage_t packid;
+	kshort_t          delta;    kpackage_t packageId;
 	kToken        *tcode;
 	union {
 		kObject              *objdata;
@@ -1233,13 +1233,13 @@ struct LibKonohaApiVar {
 	kbool_t    (*KsetModule)(KonohaContext *kctx, int, struct kmodshare_t *, kline_t);
 	KonohaClass*  (*KaddClassDef)(KonohaContext *kctx, kpackage_t, kpackage_t, kString *, KDEFINE_CLASS *, kline_t);
 
-	KonohaClass*  (*KS_getCT)(KonohaContext *kctx, kNameSpace *, KonohaClass *, const char *, size_t, ktype_t def);
-	void       (*KS_loadMethodData)(KonohaContext *kctx, kNameSpace *, intptr_t *d);
-	void       (*KS_loadConstData)(KonohaContext *kctx, kNameSpace *, const char **d, kline_t);
-	kMethod*   (*KS_getMethodNULL)(KonohaContext *kctx, kNameSpace *ks, ktype_t cid, kmethodn_t mn);
-	kMethod*   (*KS_getGetterMethodNULL)(KonohaContext *kctx, kNameSpace *, ktype_t cid, ksymbol_t sym);
+	KonohaClass*  (*NameSpace_getCT)(KonohaContext *kctx, kNameSpace *, KonohaClass *, const char *, size_t, ktype_t def);
+	void       (*NameSpace_loadMethodData)(KonohaContext *kctx, kNameSpace *, intptr_t *d);
+	void       (*NameSpace_loadConstData)(KonohaContext *kctx, kNameSpace *, const char **d, kline_t);
+	kMethod*   (*NameSpace_getMethodNULL)(KonohaContext *kctx, kNameSpace *ks, ktype_t cid, kmethodn_t mn);
+	kMethod*   (*NameSpace_getGetterMethodNULL)(KonohaContext *kctx, kNameSpace *, ktype_t cid, ksymbol_t sym);
 
-	void       (*KS_syncMethods)(KonohaContext *kctx);
+	void       (*NameSpace_syncMethods)(KonohaContext *kctx);
 	void       (*KCodeGen)(KonohaContext *kctx, kMethod *, kBlock *);
 	void       (*Kreportf)(KonohaContext *kctx, kinfotag_t, kline_t, const char *fmt, ...);
 	void       (*Kraise)(KonohaContext *kctx, int isContinue);     // module
@@ -1347,11 +1347,11 @@ struct LibKonohaApiVar {
 #define kClassTable_Generics(CT, RTY, PSIZE, P)    (KPI)->KCT_Generics(kctx, CT, RTY, PSIZE, P)
 #define Konoha_setModule(N,D,P)              (KPI)->KsetModule(kctx, N, D, P)
 #define Konoha_addClassDef(PAC, DOM, NAME, DEF, UL)    (KPI)->KaddClassDef(kctx, PAC, DOM, NAME, DEF, UL)
-#define kNameSpace_getCT(NS, THIS, S, L, C)      (KPI)->KS_getCT(kctx, NS, THIS, S, L, C)
-#define kNameSpace_loadMethodData(NS, DEF)       (KPI)->KS_loadMethodData(kctx, NS, DEF)
-#define kNameSpace_loadConstData(KS, DEF, UL)    (KPI)->KS_loadConstData(kctx, KS, (const char**)&(DEF), UL)
-#define kNameSpace_getMethodNULL(KS, CID, MN)    (KPI)->KS_getMethodNULL(kctx, KS, CID, MN)
-#define kNameSpace_syncMethods()    (KPI)->KS_syncMethods(kctx)
+#define kNameSpace_getCT(NS, THIS, S, L, C)      (KPI)->NameSpace_getCT(kctx, NS, THIS, S, L, C)
+#define kNameSpace_loadMethodData(NS, DEF)       (KPI)->NameSpace_loadMethodData(kctx, NS, DEF)
+#define kNameSpace_loadConstData(KS, DEF, UL)    (KPI)->NameSpace_loadConstData(kctx, KS, (const char**)&(DEF), UL)
+#define kNameSpace_getMethodNULL(KS, CID, MN)    (KPI)->NameSpace_getMethodNULL(kctx, KS, CID, MN)
+#define kNameSpace_syncMethods()    (KPI)->NameSpace_syncMethods(kctx)
 
 typedef intptr_t  KDEFINE_METHOD;
 

@@ -436,7 +436,7 @@ static	kbool_t jansson_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc
 		.free = Jansson_free,
 		.p    = Jansson_p,
 	};
-	KonohaClass *cJson = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &defJson, pline);
+	KonohaClass *cJson = Konoha_addClassDef(ks->packageId, ks->packdom, NULL, &defJson, pline);
 	//KonohaClassVar *ct = (KonohaClassVar *)CT_Json;
 	//ct->p0 = TY_String; // default
 

@@ -176,7 +176,7 @@ static void pack_reftrace(KonohaContext *kctx, kmape_t *p)
 {
 	KonohaPackage *pack = (KonohaPackage*)p->uvalue;
 	BEGIN_REFTRACE(1);
-	KREFTRACEn(pack->ks);
+	KREFTRACEn(pack->packageNameSpace);
 	END_REFTRACE();
 }
 
@@ -216,11 +216,11 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	Konoha_setModule(MOD_sugar, (kmodshare_t*)base, 0);
 
 	LibKonohaApiVar* l = (LibKonohaApiVar*)ctx->lib2;
-	l->KS_getCT   = NameSpace_getCT;
-	l->KS_loadMethodData = NameSpace_loadMethodData;
-	l->KS_loadConstData  = NameSpace_loadConstData;
-	l->KS_getMethodNULL  = NameSpace_getMethodNULL;
-	l->KS_syncMethods    = NameSpace_syncMethods;
+	l->NameSpace_getCT   = NameSpace_getCT;
+	l->NameSpace_loadMethodData = NameSpace_loadMethodData;
+	l->NameSpace_loadConstData  = NameSpace_loadConstData;
+	l->NameSpace_getMethodNULL  = NameSpace_getMethodNULL;
+	l->NameSpace_syncMethods    = NameSpace_syncMethods;
 
 	KINITv(base->packageList, new_(Array, 8));
 	base->packageMapNO = kmap_init(0);
@@ -416,7 +416,7 @@ static kline_t uline_init(KonohaContext *kctx, const char *path, size_t len, int
 	return uline;
 }
 
-static kstatus_t NameSpace_loadscript(KonohaContext *kctx, kNameSpace *ks, const char *path, size_t len, kline_t pline)
+static kstatus_t NameSpace_loadScript(KonohaContext *kctx, kNameSpace *ns, const char *path, size_t len, kline_t pline)
 {
 	kstatus_t status = K_BREAK;
 //	if(path[0] == '-' && path[1] == 0) {
@@ -427,7 +427,7 @@ static kstatus_t NameSpace_loadscript(KonohaContext *kctx, kNameSpace *ks, const
 		FILE_i *fp = PLAT fopen_i(path, "r");
 		if(fp != NULL) {
 			kline_t uline = uline_init(kctx, path, len, 1, 1);
-			status = NameSpace_loadstream(kctx, ks, fp, uline, pline);
+			status = NameSpace_loadstream(kctx, ns, fp, uline, pline);
 			PLAT fclose_i(fp);
 		}
 		else {
@@ -437,7 +437,7 @@ static kstatus_t NameSpace_loadscript(KonohaContext *kctx, kNameSpace *ks, const
 	return status;
 }
 
-kstatus_t MODSUGAR_loadscript(KonohaContext *kctx, const char *path, size_t len, kline_t pline)
+kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, kline_t pline)
 {
 	if (ctxsugar == NULL) {
 		kmodsugar->h.setup(kctx, (kmodshare_t*)kmodsugar, 0/*lazy*/);
@@ -445,7 +445,7 @@ kstatus_t MODSUGAR_loadscript(KonohaContext *kctx, const char *path, size_t len,
 	INIT_GCSTACK();
 	kNameSpace *ns = new_(NameSpace, KNULL(NameSpace));
 	PUSH_GCSTACK(ns);
-	kstatus_t result = NameSpace_loadscript(kctx, ns, path, len, pline);
+	kstatus_t result = NameSpace_loadScript(kctx, ns, path, len, pline);
 	RESET_GCSTACK();
 	return result;
 }
@@ -471,10 +471,9 @@ static KDEFINE_PACKAGE PKGDEFNULL = {
 	.konoha_revision = 0,
 };
 
-static KDEFINE_PACKAGE *NameSpace_openGlueHandler(KonohaContext *kctx, kNameSpace *ks, char *pathbuf, size_t bufsiz, const char *pname, kline_t pline)
+static KDEFINE_PACKAGE *NameSpace_openGlueHandler(KonohaContext *kctx, kNameSpace *ns, char *pathbuf, size_t bufsiz, const char *pname, kline_t pline)
 {
 	char *p = strrchr(pathbuf, '.');
-//	snprintf(p, bufsiz - (p  - pathbuf), "%s", K_OSDLLEXT);
 	strncpy(p, K_OSDLLEXT, bufsiz - (p  - pathbuf));
 	void *gluehdr = dlopen(pathbuf, KonohaContext_isCompileOnly(kctx) ? RTLD_NOW : RTLD_LAZY);  // FIXME
 	if(gluehdr != NULL) {
@@ -482,8 +481,8 @@ static KDEFINE_PACKAGE *NameSpace_openGlueHandler(KonohaContext *kctx, kNameSpac
 		PLAT snprintf_i(funcbuf, sizeof(funcbuf), "%s_init", packname(pname));
 		PackageLoadFunc f = (PackageLoadFunc)dlsym(gluehdr, funcbuf);
 		if(f != NULL) {
-			KDEFINE_PACKAGE *packdef = f();
-			return (packdef != NULL) ? packdef : &PKGDEFNULL;
+			KDEFINE_PACKAGE *packageLoadApi = f();
+			return (packageLoadApi != NULL) ? packageLoadApi : &PKGDEFNULL;
 		}
 		else {
 			kreportf(WARN_, pline, "package loader: %s has no %s function", pathbuf, funcbuf);
@@ -495,39 +494,39 @@ static KDEFINE_PACKAGE *NameSpace_openGlueHandler(KonohaContext *kctx, kNameSpac
 	return &PKGDEFNULL;
 }
 
-static kNameSpace* new_NameSpace(KonohaContext *kctx, kpackage_t packdom, kpackage_t packid)
+static kNameSpace* new_NameSpace(KonohaContext *kctx, kpackage_t packdom, kpackage_t packageId)
 {
 	kNameSpaceVar *ks = new_Var(NameSpace, KNULL(NameSpace));
-	ks->packid = packid;
-	ks->packdom = packid;
+	ks->packageId = packageId;
+	ks->packdom = packageId;
 	return (kNameSpace*)ks;
 }
 
-static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackage_t packid, kline_t pline)
+static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackage_t packageId, kline_t pline)
 {
 	char fbuf[256];
-	const char *path = PLAT packagepath(fbuf, sizeof(fbuf), S_text(PN_s(packid)));
+	const char *path = PLAT packagepath(fbuf, sizeof(fbuf), S_text(PN_s(packageId)));
 	FILE_i *fp = PLAT fopen_i(path, "r");
 	KonohaPackage *pack = NULL;
 	if(fp != NULL) {
 		INIT_GCSTACK();
-		kNameSpace *ks = new_NameSpace(kctx, packid, packid);
-		PUSH_GCSTACK(ks);
+		kNameSpace *ns = new_NameSpace(kctx, packageId, packageId);
+		PUSH_GCSTACK(ns);
 		kline_t uline = uline_init(kctx, path, strlen(path), 1, 1);
-		KDEFINE_PACKAGE *packdef = NameSpace_openGlueHandler(kctx, ks, fbuf, sizeof(fbuf), PN_t(packid), pline);
-		if(packdef->initPackage != NULL) {
-			packdef->initPackage(kctx, ks, 0, NULL, pline);
+		KDEFINE_PACKAGE *packageLoadApi = NameSpace_openGlueHandler(kctx, ns, fbuf, sizeof(fbuf), PN_t(packageId), pline);
+		if(packageLoadApi->initPackage != NULL) {
+			packageLoadApi->initPackage(kctx, ns, 0, NULL, pline);
 		}
-		if(NameSpace_loadstream(kctx, ks, fp, uline, pline) == K_CONTINUE) {
-			if(packdef->initPackage != NULL) {
-				packdef->setupPackage(kctx, ks, pline);
+		if(NameSpace_loadstream(kctx, ns, fp, uline, pline) == K_CONTINUE) {
+			if(packageLoadApi->initPackage != NULL) {
+				packageLoadApi->setupPackage(kctx, ns, pline);
 			}
 			pack = (KonohaPackage*)KCALLOC(sizeof(KonohaPackage), 1);
-			pack->packid = packid;
-			KINITv(pack->ks, ks);
-			pack->packdef = packdef;
-			if(PLAT exportpath(fbuf, sizeof(fbuf), PN_t(packid)) != NULL) {
-				pack->export_script = kfileid(fbuf, strlen(fbuf), 0, _NEWID) | 1;
+			pack->packageId = packageId;
+			KINITv(pack->packageNameSpace, ns);
+			pack->packageLoadApi = packageLoadApi;
+			if(PLAT exportpath(fbuf, sizeof(fbuf), PN_t(packageId)) != NULL) {
+				pack->exportScriptUri = kfileid(fbuf, strlen(fbuf), 0, _NEWID) | 1;
 			}
 			return pack;
 		}
@@ -535,57 +534,57 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackage_t packid, kl
 		RESET_GCSTACK();
 	}
 	else {
-		kreportf(CRIT_, pline, "package not found: %s path=%s", PN_t(packid), path);
+		kreportf(CRIT_, pline, "package not found: %s path=%s", PN_t(packageId), path);
 	}
 	return NULL;
 }
 
-static KonohaPackage *getPackageNULL(KonohaContext *kctx, kpackage_t packid, kline_t pline)
+static KonohaPackage *getPackageNULL(KonohaContext *kctx, kpackage_t packageId, kline_t pline)
 {
-	KonohaPackage *pack = (KonohaPackage*)map_getu(kctx, kmodsugar->packageMapNO, packid, uNULL);
+	KonohaPackage *pack = (KonohaPackage*)map_getu(kctx, kmodsugar->packageMapNO, packageId, uNULL);
 	if(pack != NULL) return pack;
-	pack = loadPackageNULL(kctx, packid, pline);
+	pack = loadPackageNULL(kctx, packageId, pline);
 	if(pack != NULL) {
-		map_addu(kctx, kmodsugar->packageMapNO, packid, (uintptr_t)pack);
+		map_addu(kctx, kmodsugar->packageMapNO, packageId, (uintptr_t)pack);
 	}
 	return pack;
 }
 
-static void NameSpace_merge(KonohaContext *kctx, kNameSpace *ks, kNameSpace *target, kline_t pline)
+static void NameSpace_merge(KonohaContext *kctx, kNameSpace *ns, kNameSpace *target, kline_t pline)
 {
-	if(target->packid != PN_konoha) {
-		NameSpace_importClassName(kctx, ks, target->packid, pline);
+	if(target->packageId != PN_konoha) {
+		NameSpace_importClassName(kctx, ns, target->packageId, pline);
 	}
 	if(target->cl.bytesize > 0) {
-		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ks, target->cl.kvs, target->cl.bytesize/sizeof(kvs_t), pline);
+		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, target->cl.kvs, target->cl.bytesize/sizeof(kvs_t), pline);
 	}
 	size_t i;
 	for(i = 0; i < kArray_size(target->methods); i++) {
 		kMethod *mtd = target->methods->methods[i];
-		if(kMethod_isPublic(mtd) && mtd->packid == target->packid) {
-			kArray_add(ks->methods, mtd);
+		if(kMethod_isPublic(mtd) && mtd->packageId == target->packageId) {
+			kArray_add(ns->methods, mtd);
 		}
 	}
 }
 
-static kbool_t NameSpace_importPackage(KonohaContext *kctx, kNameSpace *ks, const char *name, kline_t pline)
+static kbool_t NameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, const char *name, kline_t pline)
 {
 	kbool_t res = 0;
-	kpackage_t packid = kpack(name, strlen(name), 0, _NEWID);
-	KonohaPackage *pack = getPackageNULL(kctx, packid, pline);
+	kpackage_t packageId = kpack(name, strlen(name), 0, _NEWID);
+	KonohaPackage *pack = getPackageNULL(kctx, packageId, pline);
 	if(pack != NULL) {
 		res = 1;
-		if(ks != NULL) {
-			NameSpace_merge(kctx, ks, pack->ks, pline);
-			if(pack->packdef->initNameSpace != NULL) {
-				res = pack->packdef->initNameSpace(kctx, ks, pline);
+		if(ns != NULL) {
+			NameSpace_merge(kctx, ns, pack->packageNameSpace, pline);
+			if(pack->packageLoadApi->initNameSpace != NULL) {
+				res = pack->packageLoadApi->initNameSpace(kctx, ns, pline);
 			}
-			if(res && pack->export_script != 0) {
-				kString *fname = SS_s(pack->export_script);
-				kline_t uline = pack->export_script | (kline_t)1;
+			if(res && pack->exportScriptUri != 0) {
+				kString *fname = SS_s(pack->exportScriptUri);
+				kline_t uline = pack->exportScriptUri | (kline_t)1;
 				FILE_i *fp = PLAT fopen_i(S_text(fname), "r");
 				if(fp != NULL) {
-					res = (NameSpace_loadstream(kctx, ks, fp, uline, pline) == K_CONTINUE);
+					res = (NameSpace_loadstream(kctx, ns, fp, uline, pline) == K_CONTINUE);
 					PLAT fclose_i(fp);
 				}
 				else {
@@ -593,8 +592,8 @@ static kbool_t NameSpace_importPackage(KonohaContext *kctx, kNameSpace *ks, cons
 					res = 0;
 				}
 			}
-			if(res && pack->packdef->setupNameSpace != NULL) {
-				res = pack->packdef->setupNameSpace(kctx, ks, pline);
+			if(res && pack->packageLoadApi->setupNameSpace != NULL) {
+				res = pack->packageLoadApi->setupNameSpace(kctx, ns, pline);
 			}
 		}
 	}
@@ -628,25 +627,16 @@ static KMETHOD NameSpace_loadScript_(KonohaContext *kctx, KonohaStack *sfp _RIX)
 #define _Static kMethod_Static
 #define _F(F)   (intptr_t)(F)
 #define TY_NameSpace  (CT_NameSpace)->cid
-KDEFINE_PACKAGE* konoha_init(void);
 
 void MODSUGAR_loadMethod(KonohaContext *kctx)
 {
 	KDEFINE_METHOD MethodData[] = {
-//		_Public, _F(NameSpace_importPackage_), TY_Boolean, TY_NameSpace, MN_("importPackage"), 1, TY_String, FN_pkgname,
 		_Public, _F(NameSpace_importPackage_), TY_Boolean, TY_NameSpace, MN_("import"), 1, TY_String, FN_("name"),
 		_Public, _F(NameSpace_loadScript_), TY_Boolean, TY_NameSpace, MN_("load"), 1, TY_String, FN_("path"),
 		DEND,
 	};
 	kNameSpace_loadMethodData(NULL, MethodData);
 	KSET_KLIB2(importPackage, NameSpace_importPackage, 0);
-//#ifdef WITH_ECLIPSE
-//	KDEFINE_PACKAGE *d = konoha_init();
-//	d->initPackage(kctx, KNULL(NameSpace), 0, NULL, 0);
-//	d->setupPackage(kctx, KNULL(NameSpace), 0);
-//	d->initNameSpace(kctx, KNULL(NameSpace), 0);
-//	d->setupNameSpace(kctx, KNULL(NameSpace), 0);
-//#endif
 }
 
 #ifdef __cplusplus

@@ -656,7 +656,7 @@ static kbool_t pcre_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 		.free = Regex_free,
 		.p    = Regex_p,
 	};
-	base->cRegex = Konoha_addClassDef(ks->packid, PN_konoha, NULL, &RegexDef, pline);
+	base->cRegex = Konoha_addClassDef(ks->packageId, PN_konoha, NULL, &RegexDef, pline);
 
 	kparam_t p = { .ty = TY_String,  };
 	KonohaClass *cStrArray = kClassTable_Generics(CT_(TY_Array), TY_void, 1, &p);

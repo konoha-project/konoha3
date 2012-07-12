@@ -34,7 +34,7 @@ static int parseINDENT(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, i
 {
 	int ch, indent = 0;
 	while((ch = tenv->source[pos++]) != 0) {
-		if(ch == '\t') { indent += tenv->indent_tab; }
+		if(ch == '\t') { indent += tenv->tabsize; }
 		else if(ch == ' ') { indent += 1; }
 		break;
 	}
@@ -384,7 +384,7 @@ static int callFuncTokenize(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, Token
 	// The above string operation is bad thing. Don't repeat it
 	kStringVar *preparedString = (kStringVar*)tenv->preparedString;
 	preparedString->text = tenv->source + tok_start;
-	preparedString->bytesize = tenv->source_length - tok_start;
+	preparedString->bytesize = tenv->sourceLength - tok_start;
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
 	KSETv(lsfp[K_CALLDELTA+0].o, fo->self);
 	KSETv(lsfp[K_CALLDELTA+1].o, (kObject*)tk);
@@ -529,14 +529,14 @@ static void NameSpace_tokenize(KonohaContext *kctx, kNameSpace *ns, const char *
 	size_t i, pos = kArray_size(a);
 	TokenizerEnv tenv = {
 		.source = source,
-		.source_length = strlen(source),
+		.sourceLength = strlen(source),
 		.uline  = uline,
 		.list   = a,
-		.indent_tab = 4,
+		.tabsize = 4,
 		.cfunc   = (ns == NULL) ? MiniKonohaTokenMatrix : NameSpace_tokenMatrix(kctx, ns),
 	};
 	INIT_GCSTACK();
-	kString *preparedString = new_kString(tenv.source, tenv.source_length, SPOL_ASCII|SPOL_TEXT|SPOL_NOPOOL);
+	kString *preparedString = new_kString(tenv.source, tenv.sourceLength, SPOL_ASCII|SPOL_TEXT|SPOL_NOPOOL);
 	PUSH_GCSTACK(preparedString);
 	tenv.preparedString = preparedString;
 	if(ns != NULL) {

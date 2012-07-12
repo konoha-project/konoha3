@@ -1258,7 +1258,7 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc
 		.p     = Subproc_p,
 	};
 
-	base->cSubproc= Konoha_addClassDef(ks->packid, ks->packdom, NULL, &defSubproc, pline);
+	base->cSubproc= Konoha_addClassDef(ks->packageId, ks->packdom, NULL, &defSubproc, pline);
 
 	kparam_t ps = {TY_String, FN_("str")};
 	KonohaClass *CT_StringArray2 = kClassTable_Generics(CT_Array, TY_String, 1, &ps);

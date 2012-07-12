@@ -140,7 +140,7 @@ static KonohaClass* defineClass(KonohaContext *kctx, kNameSpace *ks, kshortflag_
 		.supcid = supct->cid,
 	};
 	setfield(kctx, &defNewClass, fsize, supct);
-	KonohaClass *ct = Konoha_addClassDef(ks->packid, ks->packdom, name, &defNewClass, pline);
+	KonohaClass *ct = Konoha_addClassDef(ks->packageId, ks->packdom, name, &defNewClass, pline);
 	ct->fnull(kctx, ct);  // create null object
 	return ct;
 }
@@ -380,7 +380,7 @@ static KonohaClassVar* defineClassName(KonohaContext *kctx, kNameSpace *ks, ksho
 		.supcid = supcid,
 //		.init   = ObjectField_init,
 	};
-	KonohaClass *ct = Konoha_addClassDef(ks->packid, ks->packdom, name, &defNewClass, pline);
+	KonohaClass *ct = Konoha_addClassDef(ks->packageId, ks->packdom, name, &defNewClass, pline);
 	KDEFINE_CLASS_CONST ClassData[] = {
 		{S_text(name), TY_TYPE, ct},
 		{NULL},

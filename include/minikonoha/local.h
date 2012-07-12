@@ -38,7 +38,7 @@ void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx);
 //void MODCODE_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk);
 
 void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx);
-kstatus_t MODSUGAR_loadscript(KonohaContext *kctx, const char *path, size_t len, kline_t pline);
+kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, kline_t pline);
 kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, kline_t uline);
 
 void MODLOGGER_init(KonohaContext *kctx, KonohaContextVar *ctx);

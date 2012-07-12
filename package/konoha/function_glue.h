@@ -94,7 +94,7 @@ static	kbool_t function_initPackage(KonohaContext *kctx, kNameSpace *ks, int arg
 		.init = Float_init,
 		.p     = Float_p,
 	};
-	base->cFloat = Konoha_addClassDef(ks->packid, PN_konoha, NULL, &defFloat, pline);
+	base->cFloat = Konoha_addClassDef(ks->packageId, PN_konoha, NULL, &defFloat, pline);
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
 //		_Public|_Const|_Im, _F(Float_opADD), TY_Float, TY_Float, MN_("opADD"), 1, TY_Float, FN_x,

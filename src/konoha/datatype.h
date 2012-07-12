@@ -701,7 +701,7 @@ static kString* CT_shortName(KonohaContext *kctx, KonohaClass *ct)
 static void CT_setName(KonohaContext *kctx, KonohaClassVar *ct, kline_t pline)
 {
 	uintptr_t lname = longid(ct->packdom, ct->nameid);
-	kreportf(DEBUG_, pline, "new class domain=%s, name='%s.%s'", PN_t(ct->packdom), PN_t(ct->packid), SYM_t(ct->nameid));
+	kreportf(DEBUG_, pline, "new class domain=%s, name='%s.%s'", PN_t(ct->packdom), PN_t(ct->packageId), SYM_t(ct->nameid));
 	KonohaClass *ct2 = (KonohaClass*)map_getu(kctx, kctx->share->lcnameMapNN, lname, (uintptr_t)NULL);
 	if(ct2 == NULL) {
 		map_addu(kctx, kctx->share->lcnameMapNN, lname, (uintptr_t)ct);
@@ -714,10 +714,10 @@ static void CT_setName(KonohaContext *kctx, KonohaClassVar *ct, kline_t pline)
 	}
 }
 
-static KonohaClass *addClassDef(KonohaContext *kctx, kpackage_t packid, kpackage_t packdom, kString *name, KDEFINE_CLASS *cdef, kline_t pline)
+static KonohaClass *addClassDef(KonohaContext *kctx, kpackage_t packageId, kpackage_t packdom, kString *name, KDEFINE_CLASS *cdef, kline_t pline)
 {
 	KonohaClassVar *ct = new_CT(kctx, NULL, cdef, pline);
-	ct->packid  = packid;
+	ct->packageId  = packageId;
 	ct->packdom = packdom;
 	if(name == NULL) {
 		const char *n = cdef->structname;

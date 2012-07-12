@@ -264,7 +264,7 @@ void konoha_close(KonohaContext* konoha)
 kbool_t konoha_load(KonohaContext* konoha, const char *scriptname)
 {
 	BEGIN_(konoha);
-	kbool_t res = (MODSUGAR_loadscript(konoha, scriptname, strlen(scriptname), 0) == K_CONTINUE);
+	kbool_t res = (MODSUGAR_loadScript(konoha, scriptname, strlen(scriptname), 0) == K_CONTINUE);
 	END_(konoha);
 	return res;
 }

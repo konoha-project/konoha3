@@ -270,7 +270,7 @@ static KMETHOD ExprTyCheck_Int(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 
-static kMethod* KS_getGetterMethodNULL(KonohaContext *kctx, kNameSpace *ks, ktype_t cid, ksymbol_t fn)
+static kMethod* NameSpace_getGetterMethodNULL(KonohaContext *kctx, kNameSpace *ks, ktype_t cid, ksymbol_t fn)
 {
 	kMethod *mtd = kNameSpace_getMethodNULL(ks, cid, MN_toGETTER(fn));
 	if(mtd == NULL) {
@@ -319,7 +319,7 @@ static kExpr* Expr_tyCheckVariable2(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 				return kExpr_setVariable(expr, FIELD, ct->fields[i].ty, longid((kshort_t)i, 0), gma);
 			}
 		}
-		kMethod *mtd = KS_getGetterMethodNULL(kctx, genv->ks, genv->this_cid, fn);
+		kMethod *mtd = NameSpace_getGetterMethodNULL(kctx, genv->ks, genv->this_cid, fn);
 		if(mtd != NULL) {
 			return new_GetterExpr(kctx, tk, mtd, new_Variable(LOCAL, genv->this_cid, 0, gma));
 		}
@@ -330,7 +330,7 @@ static kExpr* Expr_tyCheckVariable2(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 	}
 	{
 		ktype_t cid = O_cid(genv->ks->scrobj);
-		kMethod *mtd = KS_getGetterMethodNULL(kctx, genv->ks, cid, fn);
+		kMethod *mtd = NameSpace_getGetterMethodNULL(kctx, genv->ks, cid, fn);
 		if(mtd != NULL && cid != TY_System) {
 			return new_GetterExpr(kctx, tk, mtd, new_ConstValue(cid, genv->ks->scrobj));
 		}
@@ -695,7 +695,7 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kExpr *exprN, kGamm
 				}
 			}
 		}
-		mtd = KS_getGetterMethodNULL(kctx, genv->ks, genv->this_cid, fn);
+		mtd = NameSpace_getGetterMethodNULL(kctx, genv->ks, genv->this_cid, fn);
 		if(mtd != NULL && TY_isFunc(kMethod_rtype(mtd))) {
 			KSETv(exprN->cons->exprs[0], new_GetterExpr(kctx, tk, mtd, new_Variable(LOCAL, genv->this_cid, 0, gma)));
 			return NULL;
@@ -708,7 +708,7 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kExpr *exprN, kGamm
 			KSETv(exprN->cons->exprs[1], new_ConstValue(cid, genv->ks->scrobj));
 			return mtd;
 		}
-		mtd = KS_getGetterMethodNULL(kctx, genv->ks, cid, fn);
+		mtd = NameSpace_getGetterMethodNULL(kctx, genv->ks, cid, fn);
 		if(mtd != NULL && TY_isFunc(kMethod_rtype(mtd))) {
 			KSETv(exprN->cons->exprs[0], new_GetterExpr(kctx, tk, mtd, new_ConstValue(cid, genv->ks->scrobj)));
 			return NULL;

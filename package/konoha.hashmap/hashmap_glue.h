@@ -119,7 +119,7 @@ static	kbool_t hashmap_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc
 		.free = HashMap_free,
 		.p     = HashMap_p,
 	};
-	KonohaClass *cHashMap = Konoha_addClassDef(ks->packid, PN_konoha, NULL, &defHashMap, pline);
+	KonohaClass *cHashMap = Konoha_addClassDef(ks->packageId, PN_konoha, NULL, &defHashMap, pline);
 	KonohaClassVar *ct = (KonohaClassVar *)CT_HashMap;
 	ct->p0 = TY_String; // default
 	KDEFINE_METHOD MethodData[] = {

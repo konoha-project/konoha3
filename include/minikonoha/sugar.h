@@ -69,10 +69,10 @@ struct KDEFINE_PACKAGE_ {
 typedef struct KonohaPackageVar KonohaPackage;
 
 struct KonohaPackageVar {
-	kpackage_t                   packid;
-	kNameSpace  *ks;
-	KDEFINE_PACKAGE             *packdef;
-	kline_t                      export_script;
+	kpackage_t                   packageId;
+	kNameSpace                  *packageNameSpace;
+	KDEFINE_PACKAGE             *packageLoadApi;
+	kline_t                      exportScriptUri;
 };
 
 // Tokenizer
@@ -82,17 +82,17 @@ typedef struct TokenizerEnv TokenizerEnv;
 typedef int (*TokenizeFunc)(KonohaContext *, kTokenVar *, TokenizerEnv *, int);
 
 struct TokenizerEnv {
-	const char   *source;
-	size_t        source_length;
-	kline_t       uline;
-	kArray       *list;
-	int           indent_tab;
+	const char         *source;
+	size_t              sourceLength;
+	kline_t             uline;
+	kArray             *list;
+	int                 tabsize;
 	const TokenizeFunc *cfunc;
 	union {
-		kFunc  **func;
-		kArray **funcList;
+		kFunc         **func;
+		kArray        **funcList;
 	};
-	kString *preparedString;
+	kString            *preparedString;
 };
 
 /******
@@ -200,7 +200,7 @@ typedef struct KDEFINE_SYNTAX {
 struct kNameSpaceVar {
 	KonohaObjectHeader h;
 	kNameSpace   *parentNULL;
-	kpackage_t packid;  	kpackage_t packdom;
+	kpackage_t packageId;  	kpackage_t packdom;
 	const TokenizeFunc *tokenMatrix;
 	struct kmap_t       *syntaxMapNN;
 	//

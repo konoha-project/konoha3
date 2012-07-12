@@ -103,9 +103,9 @@ static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc,
 	base->h.reftrace = kapacheshare_reftrace;
 	base->h.free     = kapacheshare_free;
 	Konoha_setModule(MOD_APACHE, &base->h, pline);
-	base->cRequest = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &Def, 0);
-	base->cAprTable = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &aprTableDef, 0);
-	base->cAprTableEntry = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &aprTableEntryDef, 0);
+	base->cRequest = Konoha_addClassDef(ks->packageId, ks->packdom, NULL, &Def, 0);
+	base->cAprTable = Konoha_addClassDef(ks->packageId, ks->packdom, NULL, &aprTableDef, 0);
+	base->cAprTableEntry = Konoha_addClassDef(ks->packageId, ks->packdom, NULL, &aprTableEntryDef, 0);
 	KDEFINE_INT_CONST IntData[] = {
 #define DEFINE_KEYWORD(KW) {#KW, TY_Int, KW}
 		{"APACHE_OK", TY_Int, OK},

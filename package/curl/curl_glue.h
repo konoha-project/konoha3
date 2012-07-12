@@ -408,7 +408,7 @@ static	kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 		.init = Curl_init,
 		.free = Curl_free,
 	};
-	KonohaClass *cCurl = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &defCurl, pline);
+	KonohaClass *cCurl = Konoha_addClassDef(ks->packageId, ks->packdom, NULL, &defCurl, pline);
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im, _F(Curl_new), TY_Curl, TY_Curl, MN_("new"), 0,

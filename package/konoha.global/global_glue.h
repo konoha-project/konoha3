@@ -274,7 +274,7 @@ static kbool_t global_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_
 			.cflag = kClass_Singleton|kClass_Final,
 			.cstruct_size = sizeof(kScript),
 		};
-		KonohaClass *cScript = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &defScript, pline);
+		KonohaClass *cScript = Konoha_addClassDef(ks->packageId, ks->packdom, NULL, &defScript, pline);
 		KSETv(((kNameSpaceVar*)ks)->scrobj, knull(cScript));
 	}
 	return true;

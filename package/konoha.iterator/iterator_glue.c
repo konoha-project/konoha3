@@ -209,7 +209,7 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 		.init   = Iterator_init,
 		.p      = Iterator_p,
 	};
-	base->cIterator = Konoha_addClassDef(ns->packid, PN_konoha, NULL, &defIterator, pline);
+	base->cIterator = Konoha_addClassDef(ns->packageId, PN_konoha, NULL, &defIterator, pline);
 	base->cStringIterator = CT_p0(kctx, base->cIterator, TY_String);
 	base->cGenericIterator = CT_p0(kctx, base->cIterator, TY_0);
 	KDEFINE_METHOD MethodData[] = {

@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 
-#define PACKSUGAR    .packid = 1, .packdom = 1
+#define PACKSUGAR    .packageId = 1, .packdom = 1
 
 /* --------------- */
 /* NameSpace */
@@ -358,7 +358,7 @@ static void NameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ks, const c
 	RESET_GCSTACK();
 }
 
-static void NameSpace_importClassName(KonohaContext *kctx, kNameSpace *ks, kpackage_t packid, kline_t pline)
+static void NameSpace_importClassName(KonohaContext *kctx, kNameSpace *ks, kpackage_t packageId, kline_t pline)
 {
 	kvs_t kv;
 	kwb_t wb;
@@ -367,8 +367,8 @@ static void NameSpace_importClassName(KonohaContext *kctx, kNameSpace *ks, kpack
 	for(i = 0; i < size; i++) {
 		KonohaClass *ct = CT_(i);
 		if(CT_isPrivate(ct)) continue;
-		if(ct->packid == packid) {
-			DBG_P("importing packid=%s.%s, %s..", PN_t(ct->packid), SYM_t(ct->nameid), PN_t(packid));
+		if(ct->packageId == packageId) {
+			DBG_P("importing packageId=%s.%s, %s..", PN_t(ct->packageId), SYM_t(ct->nameid), PN_t(packageId));
 			kv.key = ct->nameid;
 			kv.ty  = TY_TYPE;
 			kv.uval = (uintptr_t)ct;
@@ -493,8 +493,8 @@ static kbool_t NameSpace_defineMethod(KonohaContext *kctx, kNameSpace *ks, kMeth
 	//		return 0;
 	//	}
 	//}
-	if(mtd->packid == 0) {
-		((kMethodVar*)mtd)->packid = ks->packid;
+	if(mtd->packageId == 0) {
+		((kMethodVar*)mtd)->packageId = ks->packageId;
 	}
 	KonohaClass *ct = CT_(mtd->cid);
 	if(ct->packdom == ks->packdom && kMethod_isPublic(mtd)) {
