@@ -814,7 +814,7 @@ static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pl
 	};
 	kNameSpace_loadMethodData(ks, MethodData);
 
-	struct _klib2 *l = (struct _klib2*)kctx->lib2;
+	LibKonohaApiVar *l = (LibKonohaApiVar*)kctx->lib2;
 	l->KMethod_genCode = GenCodeDefault;
 	kNameSpace_syncMethods();
 	l->KMethod_genCode = KMethod_genCode;

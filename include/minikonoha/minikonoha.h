@@ -90,7 +90,6 @@
 /* ------------------------------------------------------------------------ */
 /* platform */
 
-#define PLAT (kctx->plat)->
 
 typedef enum {
 	CritTag, ErrTag, WarnTag, NoticeTag, InfoTag, DebugTag, NoneTag
@@ -107,8 +106,11 @@ typedef void FILE_i;
 
 typedef const struct PlatformApiVar  PlatformApi;
 typedef struct PlatformApiVar        PlatformApiVar;
-typedef const struct LibKonohaAPIVar LibKonohaAPI;
-typedef struct LibKonohaAPIVar       LibKonohaAPIVar;
+typedef const struct LibKonohaApiVar LibKonohaApi;
+typedef struct LibKonohaApiVar       LibKonohaApiVar;
+
+#define PLAT (kctx->plat)->
+#define KLIB (kctx->klib2)->
 
 struct PlatformApiVar {
 	// settings
@@ -406,7 +408,7 @@ typedef kushort_t       kparamid_t;
 struct KonohaContextVar {
 	int						          safepoint; // set to 1
 	KonohaStack                      *esp;
-	const struct _klib2              *lib2;
+	LibKonohaApi                     *lib2;
 	PlatformApi                      *plat;
 	/* TODO(imasahiro)
 	 * checking modgc performance and remove
@@ -564,13 +566,6 @@ typedef struct krbp_t {
 	};
 } krbp_t;
 
-struct KonohaClassField {
-	kshortflag_t    flag    ;
-	kshort_t   isobj   ;
-	ktype_t    ty      ;
-	ksymbol_t  fn      ;
-};
-
 #define P_STR    0
 #define P_DUMP   1
 
@@ -630,6 +625,13 @@ struct KonohaClassVar {
 	KonohaClass                 *searchSimilarClassNULL;
 	KonohaClass                 *searchSuperMethodClassNULL;
 } ;
+
+struct KonohaClassField {
+	kshortflag_t    flag;
+	kshort_t        isobj;
+	ktype_t         ty;
+	ksymbol_t       fn;
+};
 
 /* ----------------------------------------------------------------------- */
 /* CLASS */
@@ -800,8 +802,10 @@ typedef struct kvs_t {
 			kfloat_t   fvalue;\
 		}\
 
-typedef const struct _kNumber kNumber;
-struct _kNumber {
+typedef const struct kNumberVar kNumber;
+typedef struct kNumberVar       kNumberVar;
+
+struct kNumberVar {
 	KonohaObjectHeader h;
 	ABSTRACT_NUMBER;
 };
@@ -1019,12 +1023,12 @@ struct kParamVar {
 #ifdef K_USING_WIN32_
 //#define KMETHOD  void CC_EXPORT
 //#define ITRNEXT int   CC_EXPORT
-//typedef void (CC_EXPORT *knh_Fmethod)(KonohaContext *kctx, KonohaStack* _RIX);
+//typedef void (CC_EXPORT *MethodFunc)(KonohaContext *kctx, KonohaStack* _RIX);
 //typedef int  (CC_EXPORT *knh_Fitrnext)(KonohaContext *kctx, KonohaStack * _RIX);
 #else
 #define KMETHOD    void  /*CC_FASTCALL_*/
 #define KMETHODCC  int  /*CC_FASTCALL_*/
-typedef KMETHOD   (*knh_Fmethod)(KonohaContext *kctx, KonohaStack* _RIX);
+typedef KMETHOD   (*MethodFunc)(KonohaContext *kctx, KonohaStack* _RIX);
 typedef KMETHOD   (*FmethodFastCall)(KonohaContext *kctx, KonohaStack * _KFASTCALL);
 typedef KMETHODCC (*FmethodCallCC)(KonohaContext *kctx, KonohaStack *, int, int, struct kopl_t*);
 #endif
@@ -1032,7 +1036,7 @@ typedef KMETHODCC (*FmethodCallCC)(KonohaContext *kctx, KonohaStack *, int, int,
 struct kMethodVar {
 	KonohaObjectHeader     h;
 	union {
-		knh_Fmethod          fcall_1;
+		MethodFunc          fcall_1;
 		FmethodFastCall      fastcall_1;
 	};
 	union {/* body*/
@@ -1154,8 +1158,7 @@ struct _kSystem {
 struct _kNameSpace;
 struct klogconf_t;
 
-typedef const struct _klib2  klib2_t;
-struct _klib2 {
+struct LibKonohaApiVar {
 	void* (*Kmalloc)(KonohaContext *kctx, size_t);
 	void* (*Kzmalloc)(KonohaContext *kctx, size_t);
 	void  (*Kfree)(KonohaContext *kctx, void *, size_t);
@@ -1210,9 +1213,9 @@ struct _klib2 {
 	void (*KArray_clear)(KonohaContext *kctx, kArray *, size_t);
 
 //	kParam *   (*Knew_Param)(KonohaContext *kctx, ktype_t, int, kparam_t *);
-	kMethod *  (*Knew_Method)(KonohaContext *kctx, uintptr_t, ktype_t, kmethodn_t, knh_Fmethod);
+	kMethod *  (*Knew_Method)(KonohaContext *kctx, uintptr_t, ktype_t, kmethodn_t, MethodFunc);
 	kParam*    (*KMethod_setParam)(KonohaContext *kctx, kMethod *, ktype_t, int, kparam_t *);
-	void       (*KMethod_setFunc)(KonohaContext *kctx, kMethod*, knh_Fmethod);
+	void       (*KMethod_setFunc)(KonohaContext *kctx, kMethod*, MethodFunc);
 	void       (*KMethod_genCode)(KonohaContext *kctx, kMethod*, const struct _kBlock *bk);
 	intptr_t   (*KMethod_indexOfField)(kMethod *);
 
@@ -1370,7 +1373,7 @@ typedef struct {
 
 #define KSET_KLIB(T, UL)   do {\
 		void *func = kctx->lib2->K##T;\
-		((struct _klib2*)kctx->lib2)->K##T = K##T;\
+		((LibKonohaApiVar*)kctx->lib2)->K##T = K##T;\
 		if(func != NULL) {\
 			kreportf(DEBUG_, UL, "override of klib2->" #T ", file=%s, line=%d", __FILE__, __LINE__);\
 		}\
@@ -1378,7 +1381,7 @@ typedef struct {
 
 #define KSET_KLIB2(T, F, UL)   do {\
 		void *func = kctx->lib2->K##T;\
-		((struct _klib2*)kctx->lib2)->K##T = F;\
+		((LibKonohaApiVar*)kctx->lib2)->K##T = F;\
 		if(func != NULL) {\
 			kreportf(DEBUG_, UL, "override of klib2->" #T ", file=%s, line=%d", __FILE__, __LINE__);\
 		}\

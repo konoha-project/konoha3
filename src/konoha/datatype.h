@@ -90,7 +90,7 @@ static uintptr_t Number_unbox(KonohaContext *kctx, kObject *o)
 // Boolean
 static void Number_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	kNumberVar *n = (kNumberVar*)o;
+	kIntVar *n = (kIntVar*)o;
 	n->ndata = (uintptr_t)conf;
 }
 
@@ -862,7 +862,7 @@ static void initStructData(KonohaContext *kctx)
 	}
 }
 
-static void KCLASSTABLE_initklib2(struct _klib2 *l)
+static void KCLASSTABLE_initklib2(LibKonohaApiVar *l)
 {
 	l->Kclass   = Kclass;
 	l->Knew_Object = new_Object;
@@ -885,7 +885,7 @@ static void KCLASSTABLE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	SharedRuntimeVar *share = (SharedRuntimeVar*)KCALLOC(sizeof(SharedRuntime), 1);
 	ctx->share = share;
-	KCLASSTABLE_initklib2((struct _klib2*)kctx->lib2);
+	KCLASSTABLE_initklib2((LibKonohaApiVar*)kctx->lib2);
 	KARRAY_INIT(&share->ca, K_CLASSTABLE_INIT * sizeof(KonohaClass));
 	loadInitStructData(kctx);
 	share->lcnameMapNN = kmap_init(0);

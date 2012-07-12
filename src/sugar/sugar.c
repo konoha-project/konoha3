@@ -215,7 +215,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	base->h.free     = kmodsugar_free;
 	Konoha_setModule(MOD_sugar, (kmodshare_t*)base, 0);
 
-	struct _klib2* l = (struct _klib2*)ctx->lib2;
+	LibKonohaApiVar* l = (LibKonohaApiVar*)ctx->lib2;
 	l->KS_getCT   = NameSpace_getCT;
 	l->KS_loadMethodData = NameSpace_loadMethodData;
 	l->KS_loadConstData  = NameSpace_loadConstData;

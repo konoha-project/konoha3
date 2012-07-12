@@ -126,10 +126,10 @@ static KonohaContextVar* new_context(KonohaContext *kctx, const PlatformApi *pla
 	static volatile size_t ctxid_counter = 0;
 	ctxid_counter++;
 	if(kctx == NULL) {  // NULL means first one
-		struct _klib2 *klib2 = (struct _klib2*)calloc(sizeof(klib2_t) + sizeof(KonohaContextVar), 1);
+		LibKonohaApiVar *klib2 = (LibKonohaApiVar*)calloc(sizeof(LibKonohaApi) + sizeof(KonohaContextVar), 1);
 		klib2_init(klib2);
 		newctx = (KonohaContextVar*)(klib2 + 1);
-		newctx->lib2 = (klib2_t*)klib2;
+		newctx->lib2 = (LibKonohaApi*)klib2;
 		newctx->plat = plat;
 		kctx = (KonohaContext*)newctx;
 		newctx->modshare = (kmodshare_t**)calloc(sizeof(kmodshare_t*), MOD_MAX);
@@ -203,7 +203,7 @@ static void kcontext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	}
 	KRUNTIME_free(kctx, ctx);
 	if(IS_RootKonohaContext(kctx)){  // share
-		struct _klib2 *klib2 = (struct _klib2*)ctx - 1;
+		LibKonohaApiVar *klib2 = (LibKonohaApiVar*)ctx - 1;
 		for(i = 0; i < MOD_MAX; i++) {
 			kmodshare_t *p = ctx->modshare[i];
 			if(p != NULL && p->free != NULL) {
@@ -216,7 +216,7 @@ static void kcontext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 		MODLOGGER_free(kctx, ctx);
 		free(kctx->modlocal);
 		free(kctx->modshare);
-		free(klib2/*, sizeof(klib2_t) + sizeof(KonohaContextVar)*/);
+		free(klib2/*, sizeof(LibKonohaApi) + sizeof(KonohaContextVar)*/);
 	}
 	else {
 		MODGC_free(kctx, ctx);

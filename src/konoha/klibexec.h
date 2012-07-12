@@ -593,7 +593,7 @@ static void Kraise(KonohaContext *kctx, int param)
 
 static kbool_t KRUNTIME_setModule(KonohaContext *kctx, int x, kmodshare_t *d, kline_t pline);
 
-static void klib2_init(struct _klib2 *l)
+static void klib2_init(LibKonohaApiVar *l)
 {
 	l->Karray_init   = karray_init;
 	l->Karray_resize = karray_resize;

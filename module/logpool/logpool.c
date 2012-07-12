@@ -125,6 +125,6 @@ void MODLOGGER_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		kmodlogpool_setup(kctx, (kmodshare_t*)base, 1);
 	}
 	Konoha_setModule(MOD_logger, (kmodshare_t*)base, 0);
-	((struct _klib2*)kctx->lib2)->Ktrace = logpool_Ktrace;
+	((LibKonohaApiVar*)kctx->lib2)->Ktrace = logpool_Ktrace;
 }
 
