@@ -1,0 +1,2 @@
+// written by kimio
+"konoha"

@@ -1,0 +1,5 @@
+ - (IntOperatorCmpMoreThanEqual.k:7) false
+ - (IntOperatorCmpMoreThanEqual.k:8) true
+ - (IntOperatorCmpMoreThanEqual.k:9) true
+ - (IntOperatorCmpMoreThanEqual.k:10) false
+Q.E.D.

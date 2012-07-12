@@ -1,0 +1,5 @@
+ - (TokenFuncDoNothing.k:6) source=''
+
+
+ - (error) (TokenFuncDoNothing.k:12) undefined token character: ' (ascii=27)
+Q.E.D.

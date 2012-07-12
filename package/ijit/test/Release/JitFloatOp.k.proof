@@ -1,0 +1,11 @@
+ - (JitFloatOp.k:5) 1.000000
+ - (JitFloatOp.k:6) 3.000000
+ - (JitFloatOp.k:7) -1.000000
+ - (JitFloatOp.k:8) 2.000000
+ - (JitFloatOp.k:9) false
+ - (JitFloatOp.k:10) true
+ - (JitFloatOp.k:11) true
+ - (JitFloatOp.k:12) true
+ - (JitFloatOp.k:13) false
+ - (JitFloatOp.k:14) false
+ Q.E.D

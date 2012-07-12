@@ -1,0 +1,11 @@
+ - (StringSubstring.k:6) foo
+ - (StringSubstring.k:7) bar
+ - (StringSubstring.k:8) bar
+ - (StringSubstring.k:9) oobar
+ - (StringSubstring.k:12) obar
+ - (StringSubstring.k:13) aあi
+ - (StringSubstring.k:14) いuう
+ - (StringSubstring.k:15) いuう
+ - (StringSubstring.k:16) あiいuう
+ - (StringSubstring.k:19) iいuう
+Q.E.D.

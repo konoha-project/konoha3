@@ -1,0 +1,1 @@
+#define o(v) (v)

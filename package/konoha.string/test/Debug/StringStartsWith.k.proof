@@ -1,0 +1,8 @@
+ - (StringStartsWith.k:6) true
+ - (StringStartsWith.k:7) true
+ - (StringStartsWith.k:8) false
+ - (StringStartsWith.k:9) true
+ - (StringStartsWith.k:10) true
+ - (StringStartsWith.k:11) false
+ - (StringStartsWith.k:12) true
+Q.E.D.

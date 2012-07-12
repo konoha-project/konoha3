@@ -1,0 +1,61 @@
+KONOHA SCRIPTING LANGUAGE
+=========================
+
+WHAT IS MINIKONOHA?
+---------------
+
+Konoha is a scripting language, characterized by: 
+
+ * simple
+ * static
+ * syntax extensible
+
+The language is based on C-like grammar, not new for everybody.
+You will extend your needed grammar as you like.
+(To be announced)
+
+INSTALL AND TRY
+---------------
+
+At first, you'll download the latest konoha.
+
+	$ git clone git://github.com/konoha-project/konoha.git
+
+You'll have to make a few steps. Type in:
+
+	$ mkdir build
+	$ cd build
+	$ cmake ..
+	$ make
+	$ sudo make install
+
+NOTE: To build konoha, you need cmake build system. For further
+information, you will ckeck at: http://www.cmake.org/
+
+If Konoha is installed successfully, you can try Konoha as 
+an interactive mode.
+
+	$ konoha
+	Konoha 2.0-alpha (Miyajima) (593, May 11 2012)
+	[gcc 4.2.1 (Apple Inc. build 5666) (dot 3)]
+	options: bmgc minivm sugar
+	>>> System.p("hello world");
+	 - ((shell):1) hello world
+
+DO YOU WANT TO KNOW MORE?
+-------------------------
+
+For now, there are very few manuals for programming Konoha. To get 
+any kinds of useful information about Konoha, you'll at first visit
+the following sites:
+
+	http://konohascript.org
+	http://github.com/konoha-project/
+
+We recommend you to join one of the following groups. 
+Any comment and questions are welcome!!
+
+	http://groups.google.com/group/konoha-users
+
+Thank you for downloading and trying Konoha!!
+

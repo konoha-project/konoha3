@@ -1,0 +1,2 @@
+
+int mn_opNEG;

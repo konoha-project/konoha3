@@ -1,0 +1,12 @@
+[HOT TO USE IT]
+
+1. install Jansson
+Jansson is one of a json c library.
+download at http://www.digip.org/jansson/
+
+2. add json package in /path/to/konoha/CMakeLists.txt.
+
+3. install konoha
+  $ mkdir /path/to/konoha/build
+  $ cmake ..
+  $ make && sudo make install

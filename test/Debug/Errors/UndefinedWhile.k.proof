@@ -1,0 +1,3 @@
+ - (warning) (UndefinedWhile.k:6) ignored tokens: {... }
+ - (error) (UndefinedWhile.k:6) undefined function: while
+Q.E.D.

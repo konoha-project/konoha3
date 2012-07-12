@@ -1,0 +1,11 @@
+ - (StringLastIndexOf.k:6) 0
+ - (StringLastIndexOf.k:7) 2
+ - (StringLastIndexOf.k:8) -1
+ - (StringLastIndexOf.k:9) 9
+ - (StringLastIndexOf.k:10) -1
+ - (StringLastIndexOf.k:11) 0
+ - (StringLastIndexOf.k:12) 1
+ - (StringLastIndexOf.k:13) -1
+ - (StringLastIndexOf.k:14) 3
+ - (StringLastIndexOf.k:15) -1
+Q.E.D.

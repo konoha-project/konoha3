@@ -1,0 +1,28 @@
+[mod_konoha]
+konoha apache module.
+
+[HOW to Use]
+1. Compile
+   make -f macosx.mk
+
+2. Install
+   make -f macosx.mk install
+
+3. Settings
+* Add to /etc/apache2/httpd.conf
+   LoadModule konoha_module modules/mod_konoha.so
+   AddHandler konoha-script .k
+
+4. Apache restart
+   make reload
+
+[Example]
+* Create /path/to/document_root/hello.k
+  K.import("apache");
+  
+  int System.handler(Request r) {
+      r.puts("<strong>hello world!</strong>")
+      return APACHE_OK;
+  }
+
+* Access to http://localhost/hello.k

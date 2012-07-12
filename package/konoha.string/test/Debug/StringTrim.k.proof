@@ -1,0 +1,6 @@
+ - (StringTrim.k:6) foo 	
+ bar
+ - (StringTrim.k:7) aあi 	
+ いuう
+ - (StringTrim.k:8) 
+Q.E.D.
