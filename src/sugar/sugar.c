@@ -174,7 +174,7 @@ static void kmodsugar_setup(KonohaContext *kctx, struct kmodshare_t *def, int ne
 
 static void pack_reftrace(KonohaContext *kctx, kmape_t *p)
 {
-	kpackage_t *pack = (kpackage_t*)p->uvalue;
+	KonohaPackage *pack = (KonohaPackage*)p->uvalue;
 	BEGIN_REFTRACE(1);
 	KREFTRACEn(pack->ks);
 	END_REFTRACE();
@@ -182,7 +182,7 @@ static void pack_reftrace(KonohaContext *kctx, kmape_t *p)
 
 static void pack_free(KonohaContext *kctx, void *p)
 {
-	KFREE(p, sizeof(kpackage_t));
+	KFREE(p, sizeof(KonohaPackage));
 }
 
 static void kmodsugar_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
@@ -480,7 +480,7 @@ static KDEFINE_PACKAGE *NameSpace_openGlueHandler(KonohaContext *kctx, kNameSpac
 	if(gluehdr != NULL) {
 		char funcbuf[80];
 		PLAT snprintf_i(funcbuf, sizeof(funcbuf), "%s_init", packname(pname));
-		Fpackageinit f = (Fpackageinit)dlsym(gluehdr, funcbuf);
+		PackageLoadFunc f = (PackageLoadFunc)dlsym(gluehdr, funcbuf);
 		if(f != NULL) {
 			KDEFINE_PACKAGE *packdef = f();
 			return (packdef != NULL) ? packdef : &PKGDEFNULL;
@@ -503,12 +503,12 @@ static kNameSpace* new_NameSpace(KonohaContext *kctx, kpack_t packdom, kpack_t p
 	return (kNameSpace*)ks;
 }
 
-static kpackage_t *loadPackageNULL(KonohaContext *kctx, kpack_t packid, kline_t pline)
+static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpack_t packid, kline_t pline)
 {
 	char fbuf[256];
 	const char *path = PLAT packagepath(fbuf, sizeof(fbuf), S_text(PN_s(packid)));
 	FILE_i *fp = PLAT fopen_i(path, "r");
-	kpackage_t *pack = NULL;
+	KonohaPackage *pack = NULL;
 	if(fp != NULL) {
 		INIT_GCSTACK();
 		kNameSpace *ks = new_NameSpace(kctx, packid, packid);
@@ -522,7 +522,7 @@ static kpackage_t *loadPackageNULL(KonohaContext *kctx, kpack_t packid, kline_t 
 			if(packdef->initPackage != NULL) {
 				packdef->setupPackage(kctx, ks, pline);
 			}
-			pack = (kpackage_t*)KCALLOC(sizeof(kpackage_t), 1);
+			pack = (KonohaPackage*)KCALLOC(sizeof(KonohaPackage), 1);
 			pack->packid = packid;
 			KINITv(pack->ks, ks);
 			pack->packdef = packdef;
@@ -540,9 +540,9 @@ static kpackage_t *loadPackageNULL(KonohaContext *kctx, kpack_t packid, kline_t 
 	return NULL;
 }
 
-static kpackage_t *getPackageNULL(KonohaContext *kctx, kpack_t packid, kline_t pline)
+static KonohaPackage *getPackageNULL(KonohaContext *kctx, kpack_t packid, kline_t pline)
 {
-	kpackage_t *pack = (kpackage_t*)map_getu(kctx, kmodsugar->packageMapNO, packid, uNULL);
+	KonohaPackage *pack = (KonohaPackage*)map_getu(kctx, kmodsugar->packageMapNO, packid, uNULL);
 	if(pack != NULL) return pack;
 	pack = loadPackageNULL(kctx, packid, pline);
 	if(pack != NULL) {
@@ -572,7 +572,7 @@ static kbool_t NameSpace_importPackage(KonohaContext *kctx, kNameSpace *ks, cons
 {
 	kbool_t res = 0;
 	kpack_t packid = kpack(name, strlen(name), 0, _NEWID);
-	kpackage_t *pack = getPackageNULL(kctx, packid, pline);
+	KonohaPackage *pack = getPackageNULL(kctx, packid, pline);
 	if(pack != NULL) {
 		res = 1;
 		if(ks != NULL) {

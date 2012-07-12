@@ -49,7 +49,10 @@ extern "C" {
 #define KPACKLIB(N, V) \
 	.libname = N, .libversion = V
 
-typedef struct {
+typedef const struct KDEFINE_PACKAGE KDEFINE_PACKAGE;
+typedef KDEFINE_PACKAGE* (*PackageLoadFunc)(void);
+
+struct KDEFINE_PACKAGE {
 	int konoha_checksum;
 	const char *name;
 	const char *version;
@@ -61,25 +64,24 @@ typedef struct {
 	kbool_t (*initNameSpace)(KonohaContext *kctx, kNameSpace *, kline_t);
 	kbool_t (*setupNameSpace)(KonohaContext *kctx, kNameSpace *, kline_t);
 	int konoha_revision;
-} KDEFINE_PACKAGE_;
+};
 
-typedef const KDEFINE_PACKAGE_ KDEFINE_PACKAGE;
-typedef KDEFINE_PACKAGE* (*Fpackageinit)(void);
+typedef struct KonohaPackageVar KonohaPackage;
 
-typedef struct _kpackage kpackage_t;
-struct _kpackage {
+struct KonohaPackageVar {
 	kpack_t                      packid;
 	kNameSpace  *ks;
 	KDEFINE_PACKAGE             *packdef;
 	kline_t                      export_script;
 };
 
-// tokenizer
-#define KCHAR_MAX  41
-struct TokenizerEnv;
-typedef int (*TokenizeFunc)(KonohaContext *, kTokenVar *, struct TokenizerEnv *, int);
+// Tokenizer
 
-typedef struct TokenizerEnv {
+#define KCHAR_MAX  41
+typedef struct TokenizerEnv TokenizerEnv;
+typedef int (*TokenizeFunc)(KonohaContext *, kTokenVar *, TokenizerEnv *, int);
+
+struct TokenizerEnv {
 	const char   *source;
 	size_t        source_length;
 	kline_t       uline;
@@ -91,7 +93,7 @@ typedef struct TokenizerEnv {
 		kArray **funcList;
 	};
 	kString *preparedString;
-} TokenizerEnv;
+};
 
 /******
 // ParseToken
