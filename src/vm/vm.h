@@ -32,17 +32,20 @@
 extern "C" {
 #endif
 
-typedef struct kBasicBlockVar     kBasicBlock;
+typedef struct kBasicBlockVar         kBasicBlock;
+typedef const struct kByteCodeVar     kByteCode;
+typedef struct kByteCodeVar           kByteCodeVar;
+
 
 #define K_USING_THCODE_
 
 #define ctxcode          ((ctxcode_t*)kctx->modlocal[MOD_code])
 #define kmodcode         ((kmodcode_t*)kctx->modshare[MOD_code])
 #define CT_BasicBlock    kmodcode->cBasicBlock
-#define CT_KonohaCode    kmodcode->cKonohaCode
+#define CT_ByteCode    kmodcode->cByteCode
 
 #define IS_BasicBlock(O)  ((O)->h.ct == CT_BasicBlock)
-#define IS_KonohaCode(O)  ((O)->h.ct == CT_KonohaCode)
+#define IS_ByteCode(O)  ((O)->h.ct == CT_ByteCode)
 
 #define CODE_ENTER   kmodcode->PRECOMPILED_ENTER
 #define CODE_NCALL   kmodcode->PRECOMPILED_NCALL
@@ -50,8 +53,8 @@ typedef struct kBasicBlockVar     kBasicBlock;
 typedef struct {
 	kmodshare_t     h;
 	KonohaClass    *cBasicBlock;
-	KonohaClass    *cKonohaCode;
-	const struct   _kKonohaCode *codeNull;
+	KonohaClass    *cByteCode;
+	const struct   _kByteCode *codeNull;
 	struct VirtualMachineInstruction  *PRECOMPILED_ENTER;
 	struct VirtualMachineInstruction  *PRECOMPILED_NCALL;
 } kmodcode_t;
@@ -144,11 +147,10 @@ struct kBasicBlockVar {
 };
 
 /* ------------------------------------------------------------------------ */
-//## class KonohaCode Object;
-//## flag KonohaCode NativeCompiled  1 - is set  *   *;
+//## class ByteCode Object;
+//## flag ByteCode NativeCompiled  1 - is set  *   *;
 
-typedef const struct _kKonohaCode kKonohaCode;
-struct _kKonohaCode {
+struct kByteCodeVar {
 	KonohaObjectHeader h;
 	VirtualMachineInstruction*   code;
 	size_t    codesize;

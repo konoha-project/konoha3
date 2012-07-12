@@ -1059,7 +1059,7 @@ struct kMethodVar {
 	kToken        *tcode;
 	union {
 		kObject              *objdata;
-		const struct _kKonohaCode   *kcode;
+		const struct kByteCodeVar    *kcode;
 		kNameSpace  *lazyns;       // lazy compilation
 	};
 	kMethod           *proceedNUL;   // proceed
@@ -1133,8 +1133,8 @@ struct _kSystem {
 #define klr_setesp(kctx, newesp)  ((KonohaContextVar*)kctx)->esp = (newesp)
 #define klr_setmtdNC(sfpA, mtdO)   sfpA.mtdNC = mtdO
 
-//#define Method_isKonohaCode(mtd) ((mtd)->fcall_1 == Fmethod_runVM)
-#define Method_isKonohaCode(mtd) (0)
+//#define Method_isByteCode(mtd) ((mtd)->fcall_1 == MethodFunc_runVirtualMachine)
+#define Method_isByteCode(mtd) (0)
 
 #define BEGIN_LOCAL(V,N) \
 	KonohaStack *V = kctx->esp, *esp_ = kctx->esp; (void)V;((KonohaContextVar*)kctx)->esp = esp_+N;\
