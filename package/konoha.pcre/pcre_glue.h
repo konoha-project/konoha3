@@ -479,7 +479,7 @@ static KMETHOD Regex_new(KonohaContext *kctx, ksfp_t *sfp _RIX)
 static KMETHOD String_search(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	kRegex *re = sfp[1].re;
-	kindex_t loc = -1;
+	intptr_t loc = -1;
 	if(!IS_NULL(re) && S_size(re->pattern) > 0) {
 		kregmatch_t pmatch[2]; // modified by @utrhira
 		const char *str = S_text(sfp[0].s);  // necessary

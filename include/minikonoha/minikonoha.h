@@ -201,7 +201,6 @@ typedef uintptr_t        kuint_t;
 
 #endif/*K_USING_SYS64_*/
 
-typedef intptr_t         kindex_t;
 typedef kushort_t        kflag_t;    /* flag field */
 
 #define KFLAG_H(N)               ((sizeof(kflag_t)*8)-N)

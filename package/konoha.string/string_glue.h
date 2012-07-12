@@ -140,7 +140,7 @@ static KMETHOD String_lastIndexOf(KonohaContext *kctx, ksfp_t *sfp _RIX)
 	kString *s1 = sfp[1].s;
 	const char *t0 = S_text(s0);
 	const char *t1 = S_text(s1);
-	kindex_t loc = S_size(s0) - S_size(s1);
+	intptr_t loc = S_size(s0) - S_size(s1);
 	int len = S_size(s1);
 	if(S_size(s1) == 0) loc--;
 	for(; loc >= 0; loc--) {
