@@ -29,7 +29,7 @@
 
 static int _sum_  = 0;
 static int _sum2_ = 0;
-static void reftrace(KonohaContext *kctx, kmape_t *e)
+static void reftrace(KonohaContext *kctx, KonohaSimpleMapEntry *e)
 {
     _sum_ += e->uvalue;
 }
@@ -41,15 +41,15 @@ static void reftrace2(KonohaContext *kctx, void *e)
 void test_Kmap(KonohaContext *kctx)
 {
     int i;
-    kmap_t* map = kctx->lib2->Kmap_init(kctx, 4);
+    KonohaSimpleMap* map = kctx->lib2->Kmap_init(kctx, 4);
     for (i = 0; i < 10; ++i) {
-        kmape_t *entry = kctx->lib2->Kmap_newentry(kctx, map, i);
+        KonohaSimpleMapEntry *entry = kctx->lib2->Kmap_newentry(kctx, map, i);
         assert(entry->hcode == i);
         entry->ukey = i*2;
         entry->uvalue = i;
     }
     for (i = 0; i < 10; ++i) {
-        kmape_t *entry = kctx->lib2->Kmap_get(map, i);
+        KonohaSimpleMapEntry *entry = kctx->lib2->Kmap_get(map, i);
         assert(entry != NULL);
         assert(entry->uvalue == i);
     }
@@ -58,16 +58,16 @@ void test_Kmap(KonohaContext *kctx)
     assert(_sum_ == 45);
 
     for (i = 0; i < 10; i+=2) {
-        kmape_t *entry = kctx->lib2->Kmap_get(map, i);
+        KonohaSimpleMapEntry *entry = kctx->lib2->Kmap_get(map, i);
         assert(entry != NULL);
         kctx->lib2->Kmap_remove(map, entry);
     }
     for (i = 0; i < 10; i+=2) {
-        kmape_t *entry = kctx->lib2->Kmap_get(map, i);
+        KonohaSimpleMapEntry *entry = kctx->lib2->Kmap_get(map, i);
         assert(entry == NULL);
     }
     for (i = 0; i < 10; ++i) {
-        kmape_t *entry = kctx->lib2->Kmap_get(map, i);
+        KonohaSimpleMapEntry *entry = kctx->lib2->Kmap_get(map, i);
         if (i % 2 == 0) {
             assert(entry == NULL);
         } else {

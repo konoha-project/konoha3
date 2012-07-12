@@ -523,7 +523,7 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, co
 		CLASS_newid/*cid*/,  0/*cflag*/,
 		0/*bcid*/, 0/*supcid*/, 0/*cstruct_size*/,
 		0/*fields*/, 0/*fsize*/, 0/*fallocsize*/,
-		0/*packageId*/, 0/*packdom*/,
+		0/*packageId*/, 0/*packageDomain*/,
 		0/*init*/,
 		0/*reftrace*/,
 		0/*free*/,
@@ -539,7 +539,7 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, co
 		CLASS_newid/*cid*/,  0/*cflag*/,
 		0/*bcid*/, 0/*supcid*/, 0/*cstruct_size*/,
 		0/*fields*/, 0/*fsize*/, 0/*fallocsize*/,
-		0/*packageId*/, 0/*packdom*/,
+		0/*packageId*/, 0/*packageDomain*/,
 		0/*init*/,
 		0/*reftrace*/,
 		0/*free*/,
@@ -555,7 +555,7 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, co
 		CLASS_newid/*cid*/,  0/*cflag*/,
 		0/*bcid*/, 0/*supcid*/, 0/*cstruct_size*/,
 		0/*fields*/, 0/*fsize*/, 0/*fallocsize*/,
-		0/*packageId*/, 0/*packdom*/,
+		0/*packageId*/, 0/*packageDomain*/,
 		0/*init*/,
 		0/*reftrace*/,
 		MPIRequest_ptr_free/*free*/,
@@ -571,7 +571,7 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, co
 		CLASS_newid/*cid*/,  0/*cflag*/,
 		0/*bcid*/, 0/*supcid*/, 0/*cstruct_size*/,
 		0/*fields*/, 0/*fsize*/, 0/*fallocsize*/,
-		0/*packageId*/, 0/*packdom*/,
+		0/*packageId*/, 0/*packageDomain*/,
 		0/*init*/,
 		0/*reftrace*/,
 		MPIData_ptr_free/*free*/,
@@ -587,7 +587,7 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, co
 	//	CLASS_newid/*cid*/,  0/*cflag*/,
 	//	0/*bcid*/, 0/*supcid*/, 0/*cstruct_size*/,
 	//	0/*fields*/, 0/*fsize*/, 0/*fallocsize*/,
-	//	0/*packageId*/, 0/*packdom*/,
+	//	0/*packageId*/, 0/*packageDomain*/,
 	//	0/*init*/,
 	//	0/*reftrace*/,
 	//	0/*free*/,
@@ -598,11 +598,11 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, co
 	//	0/*hashCode*/,
 	//	0/*initdef*/
 	//};
-	KonohaClass *CT_MPI = Konoha_addClassDef(ks->packageId, ks->packdom, NULL, &MPIDef, pline);
-	KonohaClass *CT_MPIComm = Konoha_addClassDef(ks->packageId, ks->packdom, NULL, &MPICommDef, pline);
-	KonohaClass *CT_MPIRequest = Konoha_addClassDef(ks->packageId, ks->packdom, NULL, &MPIRequestDef, pline);
-	KonohaClass *CT_MPIData = Konoha_addClassDef(ks->packageId, ks->packdom, NULL, &MPIDataDef, pline);
-	//KonohaClass *CT_MPIOp = Konoha_addClassDef(ks->packageId, ks->packdom, NULL, &MPIOpDef, pline);
+	KonohaClass *CT_MPI = Konoha_addClassDef(ks->packageId, ks->packageDomain, NULL, &MPIDef, pline);
+	KonohaClass *CT_MPIComm = Konoha_addClassDef(ks->packageId, ks->packageDomain, NULL, &MPICommDef, pline);
+	KonohaClass *CT_MPIRequest = Konoha_addClassDef(ks->packageId, ks->packageDomain, NULL, &MPIRequestDef, pline);
+	KonohaClass *CT_MPIData = Konoha_addClassDef(ks->packageId, ks->packageDomain, NULL, &MPIDataDef, pline);
+	//KonohaClass *CT_MPIOp = Konoha_addClassDef(ks->packageId, ks->packageDomain, NULL, &MPIOpDef, pline);
 #define TY_MPI         (CT_MPI->cid)
 #define TY_MPIComm     (CT_MPIComm->cid)
 #define TY_MPIRequest  (CT_MPIRequest->cid)

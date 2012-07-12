@@ -217,7 +217,7 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 		.p     = File_p,
 	};
 
-	KonohaClass *cFile = Konoha_addClassDef(ks->packageId, ks->packdom, NULL, &defFile, pline);
+	KonohaClass *cFile = Konoha_addClassDef(ks->packageId, ks->packageDomain, NULL, &defFile, pline);
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im, _F(System_fopen), TY_File, TY_System, MN_("fopen"), 2, TY_String, FN_("path"), TY_String, FN_("mode"),
 		_Public|_Const|_Im, _F(File_close), TY_void, TY_File, MN_("close"), 0,

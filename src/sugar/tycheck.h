@@ -329,10 +329,10 @@ static kExpr* Expr_tyCheckVariable2(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 //		}
 	}
 	{
-		ktype_t cid = O_cid(genv->ks->scrobj);
+		ktype_t cid = O_cid(genv->ks->scriptObject);
 		kMethod *mtd = NameSpace_getGetterMethodNULL(kctx, genv->ks, cid, fn);
 		if(mtd != NULL && cid != TY_System) {
-			return new_GetterExpr(kctx, tk, mtd, new_ConstValue(cid, genv->ks->scrobj));
+			return new_GetterExpr(kctx, tk, mtd, new_ConstValue(cid, genv->ks->scriptObject));
 		}
 		mtd = kNameSpace_getMethodNULL(genv->ks, cid, fn);
 		if(mtd != NULL) {
@@ -340,7 +340,7 @@ static kExpr* Expr_tyCheckVariable2(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 			KonohaClass *ct = kClassTable_Generics(CT_Func, pa->rtype, pa->psize, (kparam_t*)pa->p);
 			kFuncVar *fo = (kFuncVar*)new_kObject(ct, mtd);
 			PUSH_GCSTACK(fo);
-			KSETv(fo->self, genv->ks->scrobj);
+			KSETv(fo->self, genv->ks->scriptObject);
 			return new_ConstValue(ct->cid, fo);
 		}
 	}
@@ -702,15 +702,15 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kExpr *exprN, kGamm
 		}
 	}
 	{
-		ktype_t cid = O_cid(genv->ks->scrobj);
+		ktype_t cid = O_cid(genv->ks->scriptObject);
 		kMethod *mtd = kNameSpace_getMethodNULL(genv->ks, cid, fn);
 		if(mtd != NULL) {
-			KSETv(exprN->cons->exprs[1], new_ConstValue(cid, genv->ks->scrobj));
+			KSETv(exprN->cons->exprs[1], new_ConstValue(cid, genv->ks->scriptObject));
 			return mtd;
 		}
 		mtd = NameSpace_getGetterMethodNULL(kctx, genv->ks, cid, fn);
 		if(mtd != NULL && TY_isFunc(kMethod_rtype(mtd))) {
-			KSETv(exprN->cons->exprs[0], new_GetterExpr(kctx, tk, mtd, new_ConstValue(cid, genv->ks->scrobj)));
+			KSETv(exprN->cons->exprs[0], new_GetterExpr(kctx, tk, mtd, new_ConstValue(cid, genv->ks->scriptObject)));
 			return NULL;
 		}
 		mtd = kNameSpace_getMethodNULL(genv->ks, TY_System, fn);
@@ -1188,7 +1188,7 @@ static KMETHOD StmtTyCheck_MethodDecl(KonohaContext *kctx, KonohaStack *sfp _RIX
 	kbool_t r = false;
 	kNameSpace *ks = gma->genv->ks;
 	uintptr_t flag   =  Stmt_flag(kctx, stmt, MethodDeclFlag, 0);
-	ktype_t cid       =  Stmt_getcid(kctx, stmt, ks, KW_UsymbolPattern, O_cid(ks->scrobj));
+	ktype_t cid       =  Stmt_getcid(kctx, stmt, ks, KW_UsymbolPattern, O_cid(ks->scriptObject));
 	kmethodn_t mn    = Stmt_getmn(kctx, stmt, ks, KW_SymbolPattern, MN_new);
 	kParam *pa       = Stmt_newMethodParamNULL(kctx, stmt, gma);
 	if(TY_isSingleton(cid)) flag |= kMethod_Static;

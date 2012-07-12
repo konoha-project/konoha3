@@ -97,7 +97,7 @@ static kbool_t openssl_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc
 	int i;
 	for (i = 0; i < 2; i++) {
 		Def.structname = names[i];
-		tbls[i] = Konoha_addClassDef(ks->packageId, ks->packdom, NULL, &Def, pline);
+		tbls[i] = Konoha_addClassDef(ks->packageId, ks->packageDomain, NULL, &Def, pline);
 	}
 
 	int FN_x = FN_("x");

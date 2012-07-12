@@ -390,9 +390,9 @@ static kbool_t equalsParam(ktype_t rtype, int psize, kparam_t *p, kParam *pa)
 
 typedef kbool_t (*equalsP)(ktype_t rtype, int psize, kparam_t *p, kParam *pa);
 
-static kparamid_t Kmap_getparamid(KonohaContext *kctx, kmap_t *kmp, kArray *list, uintptr_t hcode, equalsP f, ktype_t rtype, int psize, kparam_t *p)
+static kparamid_t Kmap_getparamid(KonohaContext *kctx, KonohaSimpleMap *kmp, kArray *list, uintptr_t hcode, equalsP f, ktype_t rtype, int psize, kparam_t *p)
 {
-	kmape_t *e = kmap_get(kmp, hcode);
+	KonohaSimpleMapEntry *e = kmap_get(kmp, hcode);
 	while(e != NULL) {
 		if(e->hcode == hcode && f(rtype, psize, p, e->paramkey)) {
 			return (kparamid_t)e->uvalue;
@@ -700,8 +700,8 @@ static kString* CT_shortName(KonohaContext *kctx, KonohaClass *ct)
 
 static void CT_setName(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t pline)
 {
-	uintptr_t lname = longid(ct->packdom, ct->nameid);
-	kreportf(DEBUG_, pline, "new class domain=%s, name='%s.%s'", PN_t(ct->packdom), PN_t(ct->packageId), SYM_t(ct->nameid));
+	uintptr_t lname = longid(ct->packageDomain, ct->nameid);
+	kreportf(DEBUG_, pline, "new class domain=%s, name='%s.%s'", PN_t(ct->packageDomain), PN_t(ct->packageId), SYM_t(ct->nameid));
 	KonohaClass *ct2 = (KonohaClass*)map_getu(kctx, kctx->share->lcnameMapNN, lname, (uintptr_t)NULL);
 	if(ct2 == NULL) {
 		map_addu(kctx, kctx->share->lcnameMapNN, lname, (uintptr_t)ct);
@@ -714,11 +714,11 @@ static void CT_setName(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t plin
 	}
 }
 
-static KonohaClass *addClassDef(KonohaContext *kctx, kpackage_t packageId, kpackage_t packdom, kString *name, KDEFINE_CLASS *cdef, kfileline_t pline)
+static KonohaClass *addClassDef(KonohaContext *kctx, kpackage_t packageId, kpackage_t packageDomain, kString *name, KDEFINE_CLASS *cdef, kfileline_t pline)
 {
 	KonohaClassVar *ct = new_CT(kctx, NULL, cdef, pline);
 	ct->packageId  = packageId;
-	ct->packdom = packdom;
+	ct->packageDomain = packageDomain;
 	if(name == NULL) {
 		const char *n = cdef->structname;
 		assert(n != NULL); // structname must be set;
@@ -920,7 +920,7 @@ static void KCLASSTABLE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	initStructData(kctx);
 }
 
-static void val_reftrace(KonohaContext *kctx, kmape_t *p)
+static void val_reftrace(KonohaContext *kctx, KonohaSimpleMapEntry *p)
 {
 	BEGIN_REFTRACE(1);
 	KREFTRACEv(p->ovalue);

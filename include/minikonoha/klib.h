@@ -128,9 +128,9 @@ static kinline kbool_t sym_equals(KonohaContext *kctx, ksymbol_t s1, ksymbol_t s
 }
 
 
-static kinline uintptr_t longid(kushort_t packdom, kushort_t un)
+static kinline uintptr_t longid(kushort_t packageDomain, kushort_t un)
 {
-	uintptr_t hcode = packdom;
+	uintptr_t hcode = packageDomain;
 	return (hcode << (sizeof(kshort_t)*8)) | un;
 }
 
@@ -141,15 +141,15 @@ static kinline KonohaClass *CT_p0(KonohaContext *kctx, KonohaClass *ct, ktype_t 
 }
 
 #define uNULL   ((uintptr_t)NULL)
-static kinline void map_addu(KonohaContext *kctx, kmap_t *kmp, uintptr_t hcode, uintptr_t uvalue)
+static kinline void map_addu(KonohaContext *kctx, KonohaSimpleMap *kmp, uintptr_t hcode, uintptr_t uvalue)
 {
-	kmape_t *e = kmap_newentry(kmp, hcode);
+	KonohaSimpleMapEntry *e = kmap_newentry(kmp, hcode);
 	e->uvalue = uvalue;
 }
 
-static kinline uintptr_t map_getu(KonohaContext *kctx, kmap_t *kmp, uintptr_t hcode, uintptr_t def)
+static kinline uintptr_t map_getu(KonohaContext *kctx, KonohaSimpleMap *kmp, uintptr_t hcode, uintptr_t def)
 {
-	kmape_t *e = kmap_get(kmp, hcode);
+	KonohaSimpleMapEntry *e = kmap_get(kmp, hcode);
 	while(e != NULL) {
 		if(e->hcode == hcode) return e->uvalue;
 	}

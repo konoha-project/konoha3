@@ -29,7 +29,7 @@
 typedef const struct _kHashMap kHashMap;
 struct _kHashMap {
 	KonohaObjectHeader h;
-	kmap_t *map;
+	KonohaSimpleMap *map;
 };
 
 /* ------------------------------------------------------------------------ */
@@ -60,13 +60,13 @@ static void HashMap_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb,
 static KMETHOD HashMap_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	struct _kHashMap *m = (struct _kHashMap *)sfp[0].o;
-	kmap_t *map = m->map;
+	KonohaSimpleMap *map = m->map;
 	kString *key = sfp[1].s;
 	KonohaClass *ct = m->h.ct;
 	kParam *cparam = CT_cparam(ct);
 	kparam_t p1 = cparam->p[0];
 	uintptr_t hcode = strhash(S_text(key), S_size(key));
-	kmape_t *e = kmap_get(map, hcode);
+	KonohaSimpleMapEntry *e = kmap_get(map, hcode);
 
 	if (p1.ty == TY_Int || p1.ty == TY_Boolean || p1.ty == TY_Float) {
 		RETURNd_((uintptr_t)e->uvalue);
@@ -78,7 +78,7 @@ static KMETHOD HashMap_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static KMETHOD HashMap_set(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	struct _kHashMap *m = (struct _kHashMap *)sfp[0].o;
-	kmap_t *map = m->map;
+	KonohaSimpleMap *map = m->map;
 	kString *key = sfp[1].s;
 
 	// want to know p1
@@ -86,7 +86,7 @@ static KMETHOD HashMap_set(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kParam *cparam = CT_cparam(ct);
 	kparam_t p1 = cparam->p[0];
 	uintptr_t hcode = strhash(S_text(key), S_size(key));
-	kmape_t *e = kmap_newentry(map, hcode);
+	KonohaSimpleMapEntry *e = kmap_newentry(map, hcode);
 	if (p1.ty == TY_Int || p1.ty == TY_Boolean || p1.ty == TY_Float) {  // FIXME
 		e->uvalue =(uintptr_t)sfp[2].ivalue;
 	} else {

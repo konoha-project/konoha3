@@ -920,7 +920,7 @@ static void Method_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 /* ------------------------------------------------------------------------ */
 /* [datatype] */
 
-//#define PACKSUGAR    .packageId = 1, .packdom = 1
+//#define PACKSUGAR    .packageId = 1, .packageDomain = 1
 
 static void BasicBlock_init(KonohaContext *kctx, kObject *o, void *conf)
 {

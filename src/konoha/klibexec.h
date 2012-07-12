@@ -140,13 +140,13 @@ static void Kwb_free(kwb_t *wb)
 }
 
 // -------------------------------------------------------------------------
-// kmap_t
+// KonohaSimpleMap
 
 #define HMAP_INIT 83
 
-static void kmap_makeFreeList(kmap_t *kmap, size_t s, size_t e)
+static void kmap_makeFreeList(KonohaSimpleMap *kmap, size_t s, size_t e)
 {
-	bzero(kmap->arena + s, (e - s) * sizeof(kmape_t));
+	bzero(kmap->arena + s, (e - s) * sizeof(KonohaSimpleMapEntry));
 	kmap->unused = kmap->arena + s;
 	size_t i;
 	for(i = s; i < e - 1; i++) {
@@ -159,45 +159,45 @@ static void kmap_makeFreeList(kmap_t *kmap, size_t s, size_t e)
 	DBG_ASSERT(kmap->arena[e-1].next == NULL);
 }
 
-static void kmap_rehash(KonohaContext *kctx, kmap_t *kmap)
+static void kmap_rehash(KonohaContext *kctx, KonohaSimpleMap *kmap)
 {
 	size_t i, newhmax = kmap->hmax * 2 + 1;
-	kmape_t **newhentry = (kmape_t**)KCALLOC(newhmax, sizeof(kmape_t*));
+	KonohaSimpleMapEntry **newhentry = (KonohaSimpleMapEntry**)KCALLOC(newhmax, sizeof(KonohaSimpleMapEntry*));
 	for(i = 0; i < kmap->arenasize / 2; i++) {
-		kmape_t *e = kmap->arena + i;
+		KonohaSimpleMapEntry *e = kmap->arena + i;
 		kuint_t ni = e->hcode % newhmax;
 		e->next = newhentry[ni];
 		newhentry[ni] = e;
 	}
-	KFREE(kmap->hentry, kmap->hmax * sizeof(kmape_t*));
+	KFREE(kmap->hentry, kmap->hmax * sizeof(KonohaSimpleMapEntry*));
 	kmap->hentry = newhentry;
 	kmap->hmax = newhmax;
 }
 
-static void kmap_shiftptr(kmap_t *kmap, intptr_t shift)
+static void kmap_shiftptr(KonohaSimpleMap *kmap, intptr_t shift)
 {
 	size_t i, size = kmap->arenasize / 2;
 	for(i = 0; i < size; i++) {
-		kmape_t *e = kmap->arena + i;
+		KonohaSimpleMapEntry *e = kmap->arena + i;
 		if(e->next != NULL) {
-			e->next = (kmape_t*)(((char*)e->next) + shift);
+			e->next = (KonohaSimpleMapEntry*)(((char*)e->next) + shift);
 			DBG_ASSERT(kmap->arena <= e->next && e->next < kmap->arena + size);
 		}
 	}
 }
 
-static kmape_t *Kmap_newentry(KonohaContext *kctx, kmap_t *kmap, kuint_t hcode)
+static KonohaSimpleMapEntry *Kmap_newentry(KonohaContext *kctx, KonohaSimpleMap *kmap, kuint_t hcode)
 {
-	kmape_t *e;
+	KonohaSimpleMapEntry *e;
 	if(kmap->unused == NULL) {
 		size_t oarenasize = kmap->arenasize;
 		char *oarena = (char*)kmap->arena;
 		kmap->arenasize *= 2;
-		kmap->arena = KMALLOC(kmap->arenasize * sizeof(kmape_t));
-		memcpy(kmap->arena, oarena, kmap->arenasize * sizeof(kmape_t));
+		kmap->arena = KMALLOC(kmap->arenasize * sizeof(KonohaSimpleMapEntry));
+		memcpy(kmap->arena, oarena, kmap->arenasize * sizeof(KonohaSimpleMapEntry));
 		kmap_shiftptr(kmap, (char*)kmap->arena - oarena);
 		kmap_makeFreeList(kmap, oarenasize, kmap->arenasize);
-		KFREE(oarena, oarenasize * sizeof(kmape_t));
+		KFREE(oarena, oarenasize * sizeof(KonohaSimpleMapEntry));
 		kmap_rehash(kctx, kmap);
 	}
 	e = kmap->unused;
@@ -206,7 +206,7 @@ static kmape_t *Kmap_newentry(KonohaContext *kctx, kmap_t *kmap, kuint_t hcode)
 	e->next = NULL;
 	kmap->size++;
 	{
-		kmape_t **hlist = kmap->hentry;
+		KonohaSimpleMapEntry **hlist = kmap->hentry;
 		size_t idx = e->hcode % kmap->hmax;
 		e->next = hlist[idx];
 		hlist[idx] = e;
@@ -214,24 +214,24 @@ static kmape_t *Kmap_newentry(KonohaContext *kctx, kmap_t *kmap, kuint_t hcode)
 	return e;
 }
 
-static kmap_t *Kmap_init(KonohaContext *kctx, size_t init)
+static KonohaSimpleMap *Kmap_init(KonohaContext *kctx, size_t init)
 {
-	kmap_t *kmap = (kmap_t*)KCALLOC(sizeof(kmap_t), 1);
+	KonohaSimpleMap *kmap = (KonohaSimpleMap*)KCALLOC(sizeof(KonohaSimpleMap), 1);
 	if(init < HMAP_INIT) init = HMAP_INIT;
 	kmap->arenasize = (init * 3) / 4;
-	kmap->arena = (kmape_t*)KMALLOC(kmap->arenasize * sizeof(kmape_t));
+	kmap->arena = (KonohaSimpleMapEntry*)KMALLOC(kmap->arenasize * sizeof(KonohaSimpleMapEntry));
 	kmap_makeFreeList(kmap, 0, kmap->arenasize);
-	kmap->hentry = (kmape_t**)KCALLOC(init, sizeof(kmape_t*));
+	kmap->hentry = (KonohaSimpleMapEntry**)KCALLOC(init, sizeof(KonohaSimpleMapEntry*));
 	kmap->hmax = init;
 	kmap->size = 0;
-	return (kmap_t*)kmap;
+	return (KonohaSimpleMap*)kmap;
 }
 
-static void Kmap_reftrace(KonohaContext *kctx, kmap_t *kmap, void (*f)(KonohaContext *kctx, kmape_t *))
+static void Kmap_reftrace(KonohaContext *kctx, KonohaSimpleMap *kmap, void (*f)(KonohaContext *kctx, KonohaSimpleMapEntry *))
 {
 	size_t i;
 	for(i = 0; i < kmap->hmax; i++) {
-		kmape_t *e = kmap->hentry[i];
+		KonohaSimpleMapEntry *e = kmap->hentry[i];
 		while(e != NULL) {
 			f(kctx, e);
 			e = e->next;
@@ -239,28 +239,28 @@ static void Kmap_reftrace(KonohaContext *kctx, kmap_t *kmap, void (*f)(KonohaCon
 	}
 }
 
-static void Kmap_free(KonohaContext *kctx, kmap_t *kmap, void (*f)(KonohaContext *kctx, void *))
+static void Kmap_free(KonohaContext *kctx, KonohaSimpleMap *kmap, void (*f)(KonohaContext *kctx, void *))
 {
 	if(f != NULL) {
 		size_t i;
 		for(i = 0; i < kmap->hmax; i++) {
-			kmape_t *e = kmap->hentry[i];
+			KonohaSimpleMapEntry *e = kmap->hentry[i];
 			while(e != NULL) {
 				f(kctx, e->pvalue);
 				e = e->next;
 			}
 		}
 	}
-	KFREE(kmap->arena, sizeof(kmape_t)*(kmap->arenasize));
-	KFREE(kmap->hentry, sizeof(kmape_t*)*(kmap->hmax));
-	KFREE(kmap, sizeof(kmap_t));
+	KFREE(kmap->arena, sizeof(KonohaSimpleMapEntry)*(kmap->arenasize));
+	KFREE(kmap->hentry, sizeof(KonohaSimpleMapEntry*)*(kmap->hmax));
+	KFREE(kmap, sizeof(KonohaSimpleMap));
 }
 
-static kmape_t *Kmap_getentry(kmap_t* kmap, kuint_t hcode)
+static KonohaSimpleMapEntry *Kmap_getentry(KonohaSimpleMap* kmap, kuint_t hcode)
 {
-	kmape_t **hlist = kmap->hentry;
+	KonohaSimpleMapEntry **hlist = kmap->hentry;
 	size_t idx = hcode % kmap->hmax;
-	kmape_t *e = hlist[idx];
+	KonohaSimpleMapEntry *e = hlist[idx];
 	while(e != NULL) {
 		if(e->hcode == hcode) return e;
 		e = e->next;
@@ -268,7 +268,7 @@ static kmape_t *Kmap_getentry(kmap_t* kmap, kuint_t hcode)
 	return NULL;
 }
 
-static void kmap_unuse(kmap_t *kmap, kmape_t *e)
+static void kmap_unuse(KonohaSimpleMap *kmap, KonohaSimpleMapEntry *e)
 {
 	e->next = kmap->unused;
 	kmap->unused = e;
@@ -277,11 +277,11 @@ static void kmap_unuse(kmap_t *kmap, kmape_t *e)
 	kmap->size--;
 }
 
-static void Kmap_remove(kmap_t* kmap, kmape_t *oe)
+static void Kmap_remove(KonohaSimpleMap* kmap, KonohaSimpleMapEntry *oe)
 {
-	kmape_t **hlist = kmap->hentry;
+	KonohaSimpleMapEntry **hlist = kmap->hentry;
 	size_t idx = oe->hcode % kmap->hmax;
-	kmape_t *e = hlist[idx];
+	KonohaSimpleMapEntry *e = hlist[idx];
 	while(e != NULL) {
 		if(e->next == oe) {
 			e->next = oe->next;
@@ -296,16 +296,16 @@ static void Kmap_remove(kmap_t* kmap, kmape_t *oe)
 
 // key management
 
-static void map_addStringUnboxValue(KonohaContext *kctx, kmap_t *kmp, uintptr_t hcode, kString *skey, uintptr_t uvalue)
+static void map_addStringUnboxValue(KonohaContext *kctx, KonohaSimpleMap *kmp, uintptr_t hcode, kString *skey, uintptr_t uvalue)
 {
-	kmape_t *e = kmap_newentry(kmp, hcode);
+	KonohaSimpleMapEntry *e = kmap_newentry(kmp, hcode);
 	KINITv(e->skey, skey);
 	e->uvalue = uvalue;
 }
 
-static ksymbol_t Kmap_getcode(KonohaContext *kctx, kmap_t *kmp, kArray *list, const char *name, size_t len, uintptr_t hcode, int spol, ksymbol_t def)
+static ksymbol_t Kmap_getcode(KonohaContext *kctx, KonohaSimpleMap *kmp, kArray *list, const char *name, size_t len, uintptr_t hcode, int spol, ksymbol_t def)
 {
-	kmape_t *e = kmap_get(kmp, hcode);
+	KonohaSimpleMapEntry *e = kmap_get(kmp, hcode);
 	while(e != NULL) {
 		if(e->hcode == hcode && len == S_size(e->skey) && strncmp(S_text(e->skey), name, len) == 0) {
 			return (ksymbol_t)e->uvalue;

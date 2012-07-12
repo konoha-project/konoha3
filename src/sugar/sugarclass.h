@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 
-#define PACKSUGAR    .packageId = 1, .packdom = 1
+#define PACKSUGAR    .packageId = 1, .packageDomain = 1
 
 /* --------------- */
 /* NameSpace */
@@ -34,10 +34,10 @@ static void NameSpace_init(KonohaContext *kctx, kObject *o, void *conf)
 	bzero(&ks->parentNULL, sizeof(kNameSpace) - sizeof(KonohaObjectHeader));
 	ks->parentNULL = conf;
 	KINITv(ks->methods, K_EMPTYARRAY);
-	KINITv(ks->scrobj, knull(CT_System));
+	KINITv(ks->scriptObject, knull(CT_System));
 }
 
-static void syntax_reftrace(KonohaContext *kctx, kmape_t *p)
+static void syntax_reftrace(KonohaContext *kctx, KonohaSimpleMapEntry *p)
 {
 	SugarSyntax *syn = (SugarSyntax*)p->uvalue;
 	BEGIN_REFTRACE(6);
@@ -64,7 +64,7 @@ static void NameSpace_reftrace(KonohaContext *kctx, kObject *o)
 		}
 	}
 	KREFTRACEn(ks->parentNULL);
-	KREFTRACEv(ks->scrobj);
+	KREFTRACEv(ks->scriptObject);
 	KREFTRACEv(ks->methods);
 	END_REFTRACE();
 }
@@ -98,7 +98,7 @@ static SugarSyntax* NameSpace_syn(KonohaContext *kctx, kNameSpace *ks0, ksymbol_
 	assert(ks0 != NULL);  /* scan-build: remove warning */
 	while(ks != NULL) {
 		if(ks->syntaxMapNN != NULL) {
-			kmape_t *e = kmap_get(ks->syntaxMapNN, hcode);
+			KonohaSimpleMapEntry *e = kmap_get(ks->syntaxMapNN, hcode);
 			while(e != NULL) {
 				if(e->hcode == hcode) {
 					parent = (SugarSyntax*)e->uvalue;
@@ -115,7 +115,7 @@ static SugarSyntax* NameSpace_syn(KonohaContext *kctx, kNameSpace *ks0, ksymbol_
 		if(ks0->syntaxMapNN == NULL) {
 			((kNameSpaceVar*)ks0)->syntaxMapNN = kmap_init(0);
 		}
-		kmape_t *e = kmap_newentry(ks0->syntaxMapNN, hcode);
+		KonohaSimpleMapEntry *e = kmap_newentry(ks0->syntaxMapNN, hcode);
 		SugarSyntaxVar *syn = (SugarSyntaxVar*)KCALLOC(sizeof(SugarSyntax), 1);
 		e->uvalue = (uintptr_t)syn;
 
@@ -456,7 +456,7 @@ static kMethod* NameSpace_getMethodNULL(KonohaContext *kctx, kNameSpace *ns, kty
 //static kMethod* NameSpace_getStaticMethodNULL(KonohaContext *kctx, kNameSpace *ks, kmethodn_t mn)
 //{
 //	while(ks != NULL) {
-//		kMethod *mtd = kNameSpace_getMethodNULL(ks, O_cid(ks->scrobj), mn);
+//		kMethod *mtd = kNameSpace_getMethodNULL(ks, O_cid(ks->scriptObject), mn);
 //		if(mtd != NULL && kMethod_isStatic(mtd)) {
 //			return mtd;
 //		}
@@ -497,7 +497,7 @@ static kbool_t NameSpace_defineMethod(KonohaContext *kctx, kNameSpace *ks, kMeth
 		((kMethodVar*)mtd)->packageId = ks->packageId;
 	}
 	KonohaClass *ct = CT_(mtd->cid);
-	if(ct->packdom == ks->packdom && kMethod_isPublic(mtd)) {
+	if(ct->packageDomain == ks->packageDomain && kMethod_isPublic(mtd)) {
 		CT_addMethod(kctx, ct, mtd);
 	}
 	else {

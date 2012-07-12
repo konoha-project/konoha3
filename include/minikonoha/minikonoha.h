@@ -329,9 +329,9 @@ typedef struct kwb_t {
 
 // kmap
 
-typedef struct kmape_t {
+typedef struct KonohaSimpleMapEntry {
 	uintptr_t hcode;
-	struct kmape_t *next;
+	struct KonohaSimpleMapEntry *next;
 	union {
 		kString  *skey;
 		kParam   *paramkey;
@@ -343,16 +343,17 @@ typedef struct kmape_t {
 		void            *pvalue;
 		uintptr_t        uvalue;
 	};
-} kmape_t;
+} KonohaSimpleMapEntry;
 
-typedef struct kmap_t {
-	kmape_t *arena;
-	kmape_t *unused;
-	kmape_t **hentry;
+typedef struct KonohaSimpleMap KonohaSimpleMap;
+struct KonohaSimpleMap {
+	KonohaSimpleMapEntry *arena;
+	KonohaSimpleMapEntry *unused;
+	KonohaSimpleMapEntry **hentry;
 	size_t arenasize;
 	size_t size;
 	size_t hmax;
-} kmap_t;
+};
 
 // classdef_t
 
@@ -439,7 +440,7 @@ struct KonohaContextVar {
 
 struct SharedRuntimeVar {
 	karray_t ca;
-	struct kmap_t               *lcnameMapNN;
+	KonohaSimpleMap               *lcnameMapNN;
 	/* system shared const */
 	kObject       *constNull;
 	kBoolean      *constTrue;
@@ -448,15 +449,15 @@ struct SharedRuntimeVar {
 	kArray        *emptyArray;
 
 	kArray         *fileidList;    // file, http://
-	struct kmap_t                *fileidMapNN;   //
+	KonohaSimpleMap                *fileidMapNN;   //
 	kArray         *packList;
-	struct kmap_t                *packMapNN;
+	KonohaSimpleMap                *packMapNN;
 	kArray         *symbolList;  // NAME, Name, INT_MAX Int_MAX
-	struct kmap_t                *symbolMapNN;
+	KonohaSimpleMap                *symbolMapNN;
 	kArray         *paramList;
-	struct kmap_t                *paramMapNN;
+	KonohaSimpleMap                *paramMapNN;
 	kArray         *paramdomList;
-	struct kmap_t                *paramdomMapNN;
+	KonohaSimpleMap                *paramdomMapNN;
 };
 
 
@@ -615,7 +616,7 @@ typedef uintptr_t kmagicflag_t;
 
 struct KonohaClassVar {
 	KCLASSSPI;
-	kpackage_t   packageId;       kpackage_t   packdom;
+	kpackage_t   packageId;       kpackage_t   packageDomain;
 	ktype_t   cid;           kshortflag_t  cflag;
 	ktype_t   bcid;          ktype_t   supcid;
 	ktype_t  p0;            kparamid_t paramdom;
@@ -633,7 +634,7 @@ struct KonohaClassVar {
 		kObject  *nulvalNULL;
 		kObjectVar        *nulvalNULL_;
 	};
-	struct kmap_t            *constPoolMapNO;
+	KonohaSimpleMap            *constPoolMapNO;
 	KonohaClass                 *searchSimilarClassNULL;
 	KonohaClass                 *searchSuperMethodClassNULL;
 } ;
@@ -1187,14 +1188,13 @@ struct LibKonohaApiVar {
 	const char* (*Kwb_top)(KonohaContext *kctx, kwb_t *, int);
 	void (*Kwb_free)(kwb_t *);
 
-	kmap_t*  (*Kmap_init)(KonohaContext *kctx, size_t);
-	kmape_t* (*Kmap_newentry)(KonohaContext *kctx, kmap_t *, uintptr_t);
-	kmape_t* (*Kmap_get)(kmap_t *, uintptr_t);
-//	void (*Kmap_add)(kmap_t *, kmape_t *);
-	void (*Kmap_remove)(kmap_t *, kmape_t *);
-	void (*Kmap_reftrace)(KonohaContext *kctx, kmap_t *, void (*)(KonohaContext *kctx, kmape_t*));
-	void (*Kmap_free)(KonohaContext *kctx, kmap_t *, void (*)(KonohaContext *kctx, void *));
-	ksymbol_t (*Kmap_getcode)(KonohaContext *kctx, kmap_t *, kArray *, const char *, size_t, uintptr_t, int, ksymbol_t);
+	KonohaSimpleMap*  (*Kmap_init)(KonohaContext *kctx, size_t);
+	KonohaSimpleMapEntry* (*Kmap_newentry)(KonohaContext *kctx, KonohaSimpleMap *, uintptr_t);
+	KonohaSimpleMapEntry* (*Kmap_get)(KonohaSimpleMap *, uintptr_t);
+	void (*Kmap_remove)(KonohaSimpleMap *, KonohaSimpleMapEntry *);
+	void (*Kmap_reftrace)(KonohaContext *kctx, KonohaSimpleMap *, void (*)(KonohaContext *kctx, KonohaSimpleMapEntry*));
+	void (*Kmap_free)(KonohaContext *kctx, KonohaSimpleMap *, void (*)(KonohaContext *kctx, void *));
+	ksymbol_t (*Kmap_getcode)(KonohaContext *kctx, KonohaSimpleMap *, kArray *, const char *, size_t, uintptr_t, int, ksymbol_t);
 
 
 	kfileline_t     (*Kfileid)(KonohaContext *kctx, const char *, size_t, int spol, ksymbol_t def);

@@ -199,21 +199,21 @@ typedef struct KDEFINE_SYNTAX {
 
 struct kNameSpaceVar {
 	KonohaObjectHeader h;
-	kNameSpace   *parentNULL;
-	kpackage_t packageId;  	kpackage_t packdom;
-	const TokenizeFunc *tokenMatrix;
-	struct kmap_t       *syntaxMapNN;
+	kpackage_t packageId;  	kpackage_t packageDomain;
+	kNameSpace           *parentNULL;
+	const TokenizeFunc   *tokenMatrix;
+	KonohaSimpleMap        *syntaxMapNN;
 	//
-	kObject             *scrobj;
-	kArray*              methods;   // default K_EMPTYARRAY
-	karray_t             cl;        // const variable
+	kObject              *scriptObject;
+	kArray*               methods;   // default K_EMPTYARRAY
+	karray_t              cl;        // const variable
 };
 
 typedef kshort_t    kexpr_t;
 
 struct kTokenVar {
 	KonohaObjectHeader h;
-	ksymbol_t     keyword;  // keywordSymbolId
+	ksymbol_t     keyword;
 	union {
 		kushort_t indent;       // indent when kw
 		ksymbol_t patternKey;   // pattern name for 'setting key in Stmt'
@@ -451,7 +451,7 @@ typedef struct {
 	KonohaClass *cTokenArray;
 
 	kArray         *packageList;
-	struct kmap_t         *packageMapNO;
+	KonohaSimpleMap         *packageMapNO;
 
 	kFunc *UndefinedParseExpr;
 	kFunc *UndefinedStmtTyCheck;

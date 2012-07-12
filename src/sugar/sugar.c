@@ -172,7 +172,7 @@ static void kmodsugar_setup(KonohaContext *kctx, struct kmodshare_t *def, int ne
 	}
 }
 
-static void pack_reftrace(KonohaContext *kctx, kmape_t *p)
+static void pack_reftrace(KonohaContext *kctx, KonohaSimpleMapEntry *p)
 {
 	KonohaPackage *pack = (KonohaPackage*)p->uvalue;
 	BEGIN_REFTRACE(1);
@@ -494,11 +494,11 @@ static KDEFINE_PACKAGE *NameSpace_openGlueHandler(KonohaContext *kctx, kNameSpac
 	return &PKGDEFNULL;
 }
 
-static kNameSpace* new_NameSpace(KonohaContext *kctx, kpackage_t packdom, kpackage_t packageId)
+static kNameSpace* new_NameSpace(KonohaContext *kctx, kpackage_t packageDomain, kpackage_t packageId)
 {
 	kNameSpaceVar *ks = new_Var(NameSpace, KNULL(NameSpace));
 	ks->packageId = packageId;
-	ks->packdom = packageId;
+	ks->packageDomain = packageId;
 	return (kNameSpace*)ks;
 }
 
