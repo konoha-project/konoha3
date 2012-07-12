@@ -160,11 +160,11 @@ const PlatformApi* platform_kernel(void)
 
 static void KonohaContext_evalScript(KonohaContext *kctx, char *data, size_t len)
 {
-	kwb_t wb;
+	KUtilsWriteBuffer wb;
 	kwb_init(&(kctx->stack->cwb), &wb);
 	kwb_write(&wb,data,len);
 	kfileline_t uline = FILEID_("(kernel)") | 1;
-	konoha_eval((KonohaContext*)kctx, kwb_top(&wb,1),uline);
+	konoha_eval((KonohaContext*)kctx, KUtilsWriteBufferop(&wb,1),uline);
 	kwb_free(&wb);
 }
 //EXPORT_SYMBOL(KonohaContext_evalScript);

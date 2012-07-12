@@ -49,7 +49,7 @@ static kString* vperrorf(KonohaContext *kctx, int pe, kfileline_t uline, int lpo
 		const char *msg = TAG_t(pe);
 		size_t errref = ((size_t)-1);
 		ctxsugar_t *base = ctxsugar;
-		kwb_t wb;
+		KUtilsWriteBuffer wb;
 		kwb_init(&base->cwb, &wb);
 		size_t pos = wb.m->bytesize;
 		if(uline > 0) {
@@ -61,7 +61,7 @@ static kString* vperrorf(KonohaContext *kctx, int pe, kfileline_t uline, int lpo
 		}
 		size_t len = wb.m->bytesize - pos;
 		kwb_vprintf(&wb, fmt, ap);
-		msg = kwb_top(&wb, 1);
+		msg = KUtilsWriteBufferop(&wb, 1);
 		kreportf(pe, uline, "%s", msg + len);
 		kString *emsg = new_kString(msg, strlen(msg), 0);
 		errref = kArray_size(base->errors);
@@ -177,13 +177,13 @@ static void WARN_Ignored(KonohaContext *kctx, kArray *tls, int s, int e)
 {
 	if(s < e) {
 		int i = s;
-		kwb_t wb;
+		KUtilsWriteBuffer wb;
 		kwb_init(&(kctx->stack->cwb), &wb);
 		kwb_printf(&wb, "%s", kToken_s(tls->toks[i])); i++;
 		while(i < e) {
 			kwb_printf(&wb, " %s", kToken_s(tls->toks[i])); i++;
 		}
-		pWARN(tls->toks[s]->uline, "ignored tokens: %s", kwb_top(&wb, 1));
+		pWARN(tls->toks[s]->uline, "ignored tokens: %s", KUtilsWriteBufferop(&wb, 1));
 		kwb_free(&wb);
 	}
 }

@@ -35,9 +35,9 @@
 #define KNH_NTRACE2(...) KNH_TODO("ntrace")
  #define knh_stack_argc(kctx, sfp)   (kctx->esp - (sfp))
 
-static kString *kwb_newString(KonohaContext *kctx, kwb_t *wb, int flg)
+static kString *kwb_newString(KonohaContext *kctx, KUtilsWriteBuffer *wb, int flg)
 {
-	return new_kString(kwb_top(wb, flg), kwb_bytesize(wb), SPOL_POOL);
+	return new_kString(KUtilsWriteBufferop(wb, flg), kwb_bytesize(wb), SPOL_POOL);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -92,11 +92,11 @@ struct kio_t {
 		int  fd;
 		void *handler;
 		FILE *fp;
-		kwb_t wb;
+		KUtilsWriteBuffer wb;
 	};
 	void *handler2; // NULL
 	int  isRunning;
-	karray_t buffer;
+	KUtilsGrowingArray buffer;
 	size_t top; size_t tail;
 	kbool_t (*_read)(KonohaContext *kctx, struct kio_t *);
 	size_t  (*_write)(KonohaContext *kctx, struct kio_t *, const char *buf, size_t bufsiz);
@@ -564,7 +564,7 @@ size_t io2_read(KonohaContext *kctx, kio_t *io2, char *buf, size_t bufsiz)
 	return rsize;
 }
 
-static kString *kwb_newLine(KonohaContext *kctx, kwb_t *wb)
+static kString *kwb_newLine(KonohaContext *kctx, KUtilsWriteBuffer *wb)
 {
 	if(kwb_bytesize(wb) > 0) {
 		if(wb->w->buf[wb->w->size - 1] == '\r') {
@@ -579,7 +579,7 @@ static kString *kwb_newLine(KonohaContext *kctx, kwb_t *wb)
 
 kString* io2_readLine(KonohaContext *kctx, kio_t *io2)
 {
-	kwb_t wb;
+	KUtilsWriteBuffer wb;
 	kwb_init(&kctx->stack->cwb, &wb);
 	while(io2->isRunning) {
 		size_t i, start, hasUTF8 = 0;
@@ -828,11 +828,11 @@ static KMETHOD OutputStream_print(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kOutputStream *w = sfp[0].w;
 	KonohaStack *v = sfp + 1;
 	size_t i, ac = knh_stack_argc(kctx, v);
-	kwb_t wb;
+	KUtilsWriteBuffer wb;
 	kwb_init(&kctx->stack->cwb, &wb);
 	for(i = 0; i < ac; i++) {
 		O_ct(v[i].o)->p(kctx, v, i, &wb, 0);
-		io2_write(kctx, w->io2, kwb_top(&wb, 1), kwb_bytesize(&wb));
+		io2_write(kctx, w->io2, KUtilsWriteBufferop(&wb, 1), kwb_bytesize(&wb));
 	}
 	RETURNvoid_();
 }
@@ -845,11 +845,11 @@ static KMETHOD OutputStream_println(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kOutputStream *w = sfp[0].w;
 	KonohaStack *v = sfp + 1;
 	size_t i, ac = knh_stack_argc(kctx, v);
-	kwb_t wb;
+	KUtilsWriteBuffer wb;
 	kwb_init(&kctx->stack->cwb, &wb);
 	for(i = 0; i < ac; i++) {
 		O_ct(v[i].o)->p(kctx, v, i, &wb, 0);
-		io2_write(kctx, w->io2, kwb_top(&wb, 1), kwb_bytesize(&wb));
+		io2_write(kctx, w->io2, KUtilsWriteBufferop(&wb, 1), kwb_bytesize(&wb));
 	}
 	knh_write_EOL(kctx, w);
 	RETURNvoid_();

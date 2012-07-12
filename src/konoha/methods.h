@@ -28,10 +28,10 @@ extern "C" {
 /* String */
 static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kwb_t wb;
+	KUtilsWriteBuffer wb;
 	kwb_init(&(kctx->stack->cwb), &wb);
 	O_ct(sfp[0].o)->p(kctx, sfp, 0, &wb, 0);
-	kString* s = new_kString(kwb_top(&wb, 1), kwb_bytesize(&wb), 0);
+	kString* s = new_kString(KUtilsWriteBufferop(&wb, 1), kwb_bytesize(&wb), 0);
 	kwb_free(&wb);
 	RETURN_(s);
 }

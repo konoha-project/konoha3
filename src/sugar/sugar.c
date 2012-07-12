@@ -172,7 +172,7 @@ static void kmodsugar_setup(KonohaContext *kctx, struct kmodshare_t *def, int ne
 	}
 }
 
-static void pack_reftrace(KonohaContext *kctx, KonohaSimpleMapEntry *p)
+static void pack_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p)
 {
 	KonohaPackage *pack = (KonohaPackage*)p->uvalue;
 	BEGIN_REFTRACE(1);
@@ -291,7 +291,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 #define EOF (-1)
 #endif
 
-static kfileline_t readquote(KonohaContext *kctx, FILE_i *fp, kfileline_t line, kwb_t *wb, int quote)
+static kfileline_t readquote(KonohaContext *kctx, FILE_i *fp, kfileline_t line, KUtilsWriteBuffer *wb, int quote)
 {
 	int ch, prev = quote;
 	while((ch = PLAT fgetc_i(fp)) != EOF) {
@@ -306,7 +306,7 @@ static kfileline_t readquote(KonohaContext *kctx, FILE_i *fp, kfileline_t line, 
 	return line;
 }
 
-static kfileline_t readcomment(KonohaContext *kctx, FILE_i *fp, kfileline_t line, kwb_t *wb)
+static kfileline_t readcomment(KonohaContext *kctx, FILE_i *fp, kfileline_t line, KUtilsWriteBuffer *wb)
 {
 	int ch, prev = 0, level = 1;
 	while((ch = PLAT fgetc_i(fp)) != EOF) {
@@ -321,7 +321,7 @@ static kfileline_t readcomment(KonohaContext *kctx, FILE_i *fp, kfileline_t line
 	return line;
 }
 
-static kfileline_t readchunk(KonohaContext *kctx, FILE_i *fp, kfileline_t line, kwb_t *wb)
+static kfileline_t readchunk(KonohaContext *kctx, FILE_i *fp, kfileline_t line, KUtilsWriteBuffer *wb)
 {
 	int ch;
 	int prev = 0, isBLOCK = 0;
@@ -363,13 +363,13 @@ static int isemptychunk(const char *t, size_t len)
 static kstatus_t NameSpace_loadstream(KonohaContext *kctx, kNameSpace *ns, FILE_i *fp, kfileline_t uline, kfileline_t pline)
 {
 	kstatus_t status = K_CONTINUE;
-	kwb_t wb;
+	KUtilsWriteBuffer wb;
 	char *p;
 	kwb_init(&(kctx->stack->cwb), &wb);
 	while(! PLAT feof_i(fp)) {
 		kfileline_t chunkheadline = uline;
 		uline = readchunk(kctx, fp, uline, &wb);
-		const char *script = kwb_top(&wb, 1);
+		const char *script = KUtilsWriteBufferop(&wb, 1);
 		size_t len = kwb_bytesize(&wb);
 		if (len > 2 && script[0] == '#' && script[1] == '!') {
 			if ((p = strstr(script, "konoha")) != 0) {

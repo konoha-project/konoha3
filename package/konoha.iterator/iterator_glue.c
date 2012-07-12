@@ -61,7 +61,7 @@ static void Iterator_init(KonohaContext *kctx, kObject *o, void *conf)
 	itr->setNextResult = isUnboxEntry ? Nothing_setNextResultUnbox : Nothing_setNextResult;
 }
 
-static void Iterator_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int level)
+static void Iterator_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
 //	kwb_printf(wb, KFLOAT_FMT, sfp[pos].fvalue);
 }

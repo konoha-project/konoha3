@@ -1104,7 +1104,7 @@ void jit_init() {
 	Array a0 = Array.newN(0);
 	Type klib2 = StructType.create(a0, "klib2", false);
 	Type kclass = StructType.create(a0, "kclass", false);
-	Type karray_t = StructType.create(a0, "karray_t", false);
+	Type KUtilsGrowingArray = StructType.create(a0, "KUtilsGrowingArray", false);
 	Type PlatformApi = StructType.create(a0, "PlatformApi", false);
 	Type SharedRuntime = StructType.create(a0, "SharedRuntime", false);
 	Type klocal_t = StructType.create(a0, "klocal_t", false);
@@ -1120,7 +1120,7 @@ void jit_init() {
 	KonohaObjectHeaderTy.set(0, getLongTy() /* magicflag */ );
 	KonohaObjectHeaderTy.set(1, PointerType.get(kclass) /* ct */ );
 	KonohaObjectHeaderTy.set(2, getLongTy() /* refc */ /*union*/);
-	KonohaObjectHeaderTy.set(3, PointerType.get(karray_t) /* kvproto */ );
+	KonohaObjectHeaderTy.set(3, PointerType.get(KUtilsGrowingArray) /* kvproto */ );
 	Type KonohaObjectHeader = StructType.create(KonohaObjectHeaderTy, "KonohaObjectHeader", false)
 	System.setTyHObject(KonohaObjectHeader);
 

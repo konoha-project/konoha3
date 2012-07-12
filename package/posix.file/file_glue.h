@@ -64,7 +64,7 @@ static void File_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void File_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int level)
+static void File_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
 	kFILE *file = (kFILE*)sfp[pos].o;
 	FILE *fp = file->fp;

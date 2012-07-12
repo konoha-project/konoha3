@@ -94,7 +94,7 @@ static void Number_init(KonohaContext *kctx, kObject *o, void *conf)
 	n->ndata = (uintptr_t)conf;
 }
 
-static void Boolean_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int level)
+static void Boolean_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
 	kwb_printf(wb, sfp[pos].bvalue ? "true" : "false");
 }
@@ -104,7 +104,7 @@ static kObject* Boolean_fnull(KonohaContext *kctx, KonohaClass *ct)
 	return (kObject*)K_FALSE;
 }
 
-static void Int_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int level)
+static void Int_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
 	kwb_printf(wb, KINT_FMT, sfp[pos].ivalue);
 }
@@ -126,7 +126,7 @@ static void String_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void String_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int level)
+static void String_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
 	if(level == 0) {
 		kwb_printf(wb, "%s", S_text(sfp[pos].o));
@@ -210,7 +210,7 @@ static kString* new_String(KonohaContext *kctx, const char *text, size_t len, in
 
 static kString* new_Stringf(KonohaContext *kctx, int spol, const char *fmt, ...)
 {
-	kwb_t wb;
+	KUtilsWriteBuffer wb;
 	Kwb_init(&(kctx->stack->cwb), &wb);
 	va_list ap;
 	va_start(ap, fmt);
@@ -225,7 +225,7 @@ static kString* new_Stringf(KonohaContext *kctx, int spol, const char *fmt, ...)
 // Array
 struct _kAbstractArray {
 	KonohaObjectHeader h;
-	karray_t a;
+	KUtilsGrowingArray a;
 } ;
 
 static void Array_init(KonohaContext *kctx, kObject *o, void *conf)
@@ -390,9 +390,9 @@ static kbool_t equalsParam(ktype_t rtype, int psize, kparam_t *p, kParam *pa)
 
 typedef kbool_t (*equalsP)(ktype_t rtype, int psize, kparam_t *p, kParam *pa);
 
-static kparamid_t Kmap_getparamid(KonohaContext *kctx, KonohaSimpleMap *kmp, kArray *list, uintptr_t hcode, equalsP f, ktype_t rtype, int psize, kparam_t *p)
+static kparamid_t Kmap_getparamid(KonohaContext *kctx, KUtilsHashMap *kmp, kArray *list, uintptr_t hcode, equalsP f, ktype_t rtype, int psize, kparam_t *p)
 {
-	KonohaSimpleMapEntry *e = kmap_get(kmp, hcode);
+	KUtilsHashMapEntry *e = kmap_get(kmp, hcode);
 	while(e != NULL) {
 		if(e->hcode == hcode && f(rtype, psize, p, e->paramkey)) {
 			return (kparamid_t)e->uvalue;
@@ -528,7 +528,7 @@ static void DEFAULT_free(KonohaContext *kctx, kObject *o)
 	(void)kctx;(void)o;
 }
 
-static void DEFAULT_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int level)
+static void DEFAULT_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
 	kwb_printf(wb, "&%p(:%s)", sfp[pos].o, TY_t(O_cid(sfp[pos].o)));
 }
@@ -671,7 +671,7 @@ static kString* CT_shortName(KonohaContext *kctx, KonohaClass *ct)
 		else {
 			size_t i, c = 0;
 			kParam *cparam = CT_cparam(ct);
-			kwb_t wb;
+			KUtilsWriteBuffer wb;
 			CT_shortName(kctx, CT_(ct->p0));
 			for(i = 0; i < cparam->psize; i++) {
 				CT_shortName(kctx, CT_(cparam->p[i].ty));
@@ -920,7 +920,7 @@ static void KCLASSTABLE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	initStructData(kctx);
 }
 
-static void val_reftrace(KonohaContext *kctx, KonohaSimpleMapEntry *p)
+static void val_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p)
 {
 	BEGIN_REFTRACE(1);
 	KREFTRACEv(p->ovalue);

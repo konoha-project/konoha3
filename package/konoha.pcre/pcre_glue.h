@@ -119,9 +119,9 @@ static kArray *kStringToCharArray(KonohaContext *kctx, kString *bs, int istrim)
 	return a;
 }
 
-static kString *kwb_newString(KonohaContext *kctx, kwb_t *wb, int flg)
+static kString *kwb_newString(KonohaContext *kctx, KUtilsWriteBuffer *wb, int flg)
 {
-	return new_kString(kwb_top(wb, flg), kwb_bytesize(wb), SPOL_POOL);
+	return new_kString(KUtilsWriteBufferop(wb, flg), kwb_bytesize(wb), SPOL_POOL);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -401,7 +401,7 @@ static size_t knh_regex_matched(kregmatch_t* r, size_t maxmatch)
 	return n;
 }
 
-static void WB_write_regexfmt(KonohaContext *kctx, kwb_t *wb, kbytes_t *fmt, const char *base, kregmatch_t *r, size_t matched)
+static void WB_write_regexfmt(KonohaContext *kctx, KUtilsWriteBuffer *wb, kbytes_t *fmt, const char *base, kregmatch_t *r, size_t matched)
 {
 	const char *ch = fmt->text;
 	const char *eof = ch + fmt->len; // end of fmt
@@ -448,7 +448,7 @@ static void Regex_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void Regex_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int level)
+static void Regex_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
 	kwb_printf(wb, "/%s/", S_text(sfp[pos].re->pattern));
 }
@@ -555,7 +555,7 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kbytes_t fmt = {S_size(sfp[2].s), {S_text(sfp[2].s)}};
 	kString *s = s0;
 	if(IS_NOTNULL(re) && S_size(re->pattern) > 0) {
-		kwb_t wb;
+		KUtilsWriteBuffer wb;
 		kwb_init(&(kctx->stack->cwb), &wb);
 		const char *str = S_text(s0);  // necessary
 		const char *base = str;

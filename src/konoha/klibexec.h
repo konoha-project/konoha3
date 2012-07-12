@@ -22,14 +22,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-static void karray_init(KonohaContext *kctx, karray_t *m, size_t bytemax)
+static void karray_init(KonohaContext *kctx, KUtilsGrowingArray *m, size_t bytemax)
 {
 	m->bytesize = 0;
 	m->bytemax  = bytemax;
 	m->bytebuf = (char*)KCALLOC(bytemax, 1);
 }
 
-static void karray_resize(KonohaContext *kctx, karray_t *m, size_t newsize)
+static void karray_resize(KonohaContext *kctx, KUtilsGrowingArray *m, size_t newsize)
 {
 	size_t oldsize = m->bytemax;
 	char *newbody = (char*)KMALLOC(newsize);
@@ -45,7 +45,7 @@ static void karray_resize(KonohaContext *kctx, karray_t *m, size_t newsize)
 	m->bytemax = newsize;
 }
 
-static void karray_expand(KonohaContext *kctx, karray_t *m, size_t minsize)
+static void karray_expand(KonohaContext *kctx, KUtilsGrowingArray *m, size_t minsize)
 {
 	if(m->bytemax == 0) {
 		if(minsize > 0) karray_init(kctx, m, minsize);
@@ -57,7 +57,7 @@ static void karray_expand(KonohaContext *kctx, karray_t *m, size_t minsize)
 	}
 }
 
-static void karray_free(KonohaContext *kctx, karray_t *m)
+static void karray_free(KonohaContext *kctx, KUtilsGrowingArray *m)
 {
 	if(m->bytemax > 0) {
 		KFREE(m->bytebuf, m->bytemax);
@@ -67,15 +67,15 @@ static void karray_free(KonohaContext *kctx, karray_t *m)
 	}
 }
 
-static void Kwb_init(karray_t *m, kwb_t *wb)
+static void Kwb_init(KUtilsGrowingArray *m, KUtilsWriteBuffer *wb)
 {
 	wb->m = m;
 	wb->pos = m->bytesize;
 }
 
-static void Kwb_write(KonohaContext *kctx, kwb_t *wb, const char *data, size_t bytelen)
+static void Kwb_write(KonohaContext *kctx, KUtilsWriteBuffer *wb, const char *data, size_t bytelen)
 {
-	karray_t *m = wb->m;
+	KUtilsGrowingArray *m = wb->m;
 	if(!(m->bytesize + bytelen < m->bytemax)) {
 		karray_expand(kctx, m, m->bytesize + bytelen);
 	}
@@ -83,7 +83,7 @@ static void Kwb_write(KonohaContext *kctx, kwb_t *wb, const char *data, size_t b
 	m->bytesize += bytelen;
 }
 
-static void Kwb_putc(KonohaContext *kctx, kwb_t *wb, ...)
+static void Kwb_putc(KonohaContext *kctx, KUtilsWriteBuffer *wb, ...)
 {
 	char buf[256];
 	int ch, len = 0;
@@ -97,11 +97,11 @@ static void Kwb_putc(KonohaContext *kctx, kwb_t *wb, ...)
 	va_end(ap);
 }
 
-static void Kwb_vprintf(KonohaContext *kctx, kwb_t *wb, const char *fmt, va_list ap)
+static void Kwb_vprintf(KonohaContext *kctx, KUtilsWriteBuffer *wb, const char *fmt, va_list ap)
 {
 	va_list ap2;
 	va_copy(ap2, ap);
-	karray_t *m = wb->m;
+	KUtilsGrowingArray *m = wb->m;
 	size_t s = m->bytesize;
 	size_t n = PLAT vsnprintf_i( m->bytebuf + s, m->bytemax - s, fmt, ap);
 	if(n >= (m->bytemax - s)) {
@@ -112,7 +112,7 @@ static void Kwb_vprintf(KonohaContext *kctx, kwb_t *wb, const char *fmt, va_list
 	m->bytesize += n;
 }
 
-static void Kwb_printf(KonohaContext *kctx, kwb_t *wb, const char *fmt, ...)
+static void Kwb_printf(KonohaContext *kctx, KUtilsWriteBuffer *wb, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -120,9 +120,9 @@ static void Kwb_printf(KonohaContext *kctx, kwb_t *wb, const char *fmt, ...)
 	va_end(ap);
 }
 
-static const char* Kwb_top(KonohaContext *kctx, kwb_t *wb, int ensureZero)
+static const char* Kwb_top(KonohaContext *kctx, KUtilsWriteBuffer *wb, int ensureZero)
 {
-	karray_t *m = wb->m;
+	KUtilsGrowingArray *m = wb->m;
 	if(ensureZero) {
 		if(!(m->bytesize + 1 < m->bytemax)) {
 			karray_expand(kctx, m, m->bytesize + 1);
@@ -132,21 +132,21 @@ static const char* Kwb_top(KonohaContext *kctx, kwb_t *wb, int ensureZero)
 	return (const char*)m->bytebuf + wb->pos;
 }
 
-static void Kwb_free(kwb_t *wb)
+static void Kwb_free(KUtilsWriteBuffer *wb)
 {
-	karray_t *m = wb->m;
+	KUtilsGrowingArray *m = wb->m;
 	bzero(m->bytebuf + wb->pos, m->bytesize - wb->pos);
 	m->bytesize = wb->pos;
 }
 
 // -------------------------------------------------------------------------
-// KonohaSimpleMap
+// KUtilsHashMap
 
 #define HMAP_INIT 83
 
-static void kmap_makeFreeList(KonohaSimpleMap *kmap, size_t s, size_t e)
+static void kmap_makeFreeList(KUtilsHashMap *kmap, size_t s, size_t e)
 {
-	bzero(kmap->arena + s, (e - s) * sizeof(KonohaSimpleMapEntry));
+	bzero(kmap->arena + s, (e - s) * sizeof(KUtilsHashMapEntry));
 	kmap->unused = kmap->arena + s;
 	size_t i;
 	for(i = s; i < e - 1; i++) {
@@ -159,45 +159,45 @@ static void kmap_makeFreeList(KonohaSimpleMap *kmap, size_t s, size_t e)
 	DBG_ASSERT(kmap->arena[e-1].next == NULL);
 }
 
-static void kmap_rehash(KonohaContext *kctx, KonohaSimpleMap *kmap)
+static void kmap_rehash(KonohaContext *kctx, KUtilsHashMap *kmap)
 {
 	size_t i, newhmax = kmap->hmax * 2 + 1;
-	KonohaSimpleMapEntry **newhentry = (KonohaSimpleMapEntry**)KCALLOC(newhmax, sizeof(KonohaSimpleMapEntry*));
+	KUtilsHashMapEntry **newhentry = (KUtilsHashMapEntry**)KCALLOC(newhmax, sizeof(KUtilsHashMapEntry*));
 	for(i = 0; i < kmap->arenasize / 2; i++) {
-		KonohaSimpleMapEntry *e = kmap->arena + i;
+		KUtilsHashMapEntry *e = kmap->arena + i;
 		kuint_t ni = e->hcode % newhmax;
 		e->next = newhentry[ni];
 		newhentry[ni] = e;
 	}
-	KFREE(kmap->hentry, kmap->hmax * sizeof(KonohaSimpleMapEntry*));
+	KFREE(kmap->hentry, kmap->hmax * sizeof(KUtilsHashMapEntry*));
 	kmap->hentry = newhentry;
 	kmap->hmax = newhmax;
 }
 
-static void kmap_shiftptr(KonohaSimpleMap *kmap, intptr_t shift)
+static void kmap_shiftptr(KUtilsHashMap *kmap, intptr_t shift)
 {
 	size_t i, size = kmap->arenasize / 2;
 	for(i = 0; i < size; i++) {
-		KonohaSimpleMapEntry *e = kmap->arena + i;
+		KUtilsHashMapEntry *e = kmap->arena + i;
 		if(e->next != NULL) {
-			e->next = (KonohaSimpleMapEntry*)(((char*)e->next) + shift);
+			e->next = (KUtilsHashMapEntry*)(((char*)e->next) + shift);
 			DBG_ASSERT(kmap->arena <= e->next && e->next < kmap->arena + size);
 		}
 	}
 }
 
-static KonohaSimpleMapEntry *Kmap_newentry(KonohaContext *kctx, KonohaSimpleMap *kmap, kuint_t hcode)
+static KUtilsHashMapEntry *Kmap_newentry(KonohaContext *kctx, KUtilsHashMap *kmap, kuint_t hcode)
 {
-	KonohaSimpleMapEntry *e;
+	KUtilsHashMapEntry *e;
 	if(kmap->unused == NULL) {
 		size_t oarenasize = kmap->arenasize;
 		char *oarena = (char*)kmap->arena;
 		kmap->arenasize *= 2;
-		kmap->arena = KMALLOC(kmap->arenasize * sizeof(KonohaSimpleMapEntry));
-		memcpy(kmap->arena, oarena, kmap->arenasize * sizeof(KonohaSimpleMapEntry));
+		kmap->arena = KMALLOC(kmap->arenasize * sizeof(KUtilsHashMapEntry));
+		memcpy(kmap->arena, oarena, kmap->arenasize * sizeof(KUtilsHashMapEntry));
 		kmap_shiftptr(kmap, (char*)kmap->arena - oarena);
 		kmap_makeFreeList(kmap, oarenasize, kmap->arenasize);
-		KFREE(oarena, oarenasize * sizeof(KonohaSimpleMapEntry));
+		KFREE(oarena, oarenasize * sizeof(KUtilsHashMapEntry));
 		kmap_rehash(kctx, kmap);
 	}
 	e = kmap->unused;
@@ -206,7 +206,7 @@ static KonohaSimpleMapEntry *Kmap_newentry(KonohaContext *kctx, KonohaSimpleMap 
 	e->next = NULL;
 	kmap->size++;
 	{
-		KonohaSimpleMapEntry **hlist = kmap->hentry;
+		KUtilsHashMapEntry **hlist = kmap->hentry;
 		size_t idx = e->hcode % kmap->hmax;
 		e->next = hlist[idx];
 		hlist[idx] = e;
@@ -214,24 +214,24 @@ static KonohaSimpleMapEntry *Kmap_newentry(KonohaContext *kctx, KonohaSimpleMap 
 	return e;
 }
 
-static KonohaSimpleMap *Kmap_init(KonohaContext *kctx, size_t init)
+static KUtilsHashMap *Kmap_init(KonohaContext *kctx, size_t init)
 {
-	KonohaSimpleMap *kmap = (KonohaSimpleMap*)KCALLOC(sizeof(KonohaSimpleMap), 1);
+	KUtilsHashMap *kmap = (KUtilsHashMap*)KCALLOC(sizeof(KUtilsHashMap), 1);
 	if(init < HMAP_INIT) init = HMAP_INIT;
 	kmap->arenasize = (init * 3) / 4;
-	kmap->arena = (KonohaSimpleMapEntry*)KMALLOC(kmap->arenasize * sizeof(KonohaSimpleMapEntry));
+	kmap->arena = (KUtilsHashMapEntry*)KMALLOC(kmap->arenasize * sizeof(KUtilsHashMapEntry));
 	kmap_makeFreeList(kmap, 0, kmap->arenasize);
-	kmap->hentry = (KonohaSimpleMapEntry**)KCALLOC(init, sizeof(KonohaSimpleMapEntry*));
+	kmap->hentry = (KUtilsHashMapEntry**)KCALLOC(init, sizeof(KUtilsHashMapEntry*));
 	kmap->hmax = init;
 	kmap->size = 0;
-	return (KonohaSimpleMap*)kmap;
+	return (KUtilsHashMap*)kmap;
 }
 
-static void Kmap_reftrace(KonohaContext *kctx, KonohaSimpleMap *kmap, void (*f)(KonohaContext *kctx, KonohaSimpleMapEntry *))
+static void Kmap_reftrace(KonohaContext *kctx, KUtilsHashMap *kmap, void (*f)(KonohaContext *kctx, KUtilsHashMapEntry *))
 {
 	size_t i;
 	for(i = 0; i < kmap->hmax; i++) {
-		KonohaSimpleMapEntry *e = kmap->hentry[i];
+		KUtilsHashMapEntry *e = kmap->hentry[i];
 		while(e != NULL) {
 			f(kctx, e);
 			e = e->next;
@@ -239,28 +239,28 @@ static void Kmap_reftrace(KonohaContext *kctx, KonohaSimpleMap *kmap, void (*f)(
 	}
 }
 
-static void Kmap_free(KonohaContext *kctx, KonohaSimpleMap *kmap, void (*f)(KonohaContext *kctx, void *))
+static void Kmap_free(KonohaContext *kctx, KUtilsHashMap *kmap, void (*f)(KonohaContext *kctx, void *))
 {
 	if(f != NULL) {
 		size_t i;
 		for(i = 0; i < kmap->hmax; i++) {
-			KonohaSimpleMapEntry *e = kmap->hentry[i];
+			KUtilsHashMapEntry *e = kmap->hentry[i];
 			while(e != NULL) {
 				f(kctx, e->pvalue);
 				e = e->next;
 			}
 		}
 	}
-	KFREE(kmap->arena, sizeof(KonohaSimpleMapEntry)*(kmap->arenasize));
-	KFREE(kmap->hentry, sizeof(KonohaSimpleMapEntry*)*(kmap->hmax));
-	KFREE(kmap, sizeof(KonohaSimpleMap));
+	KFREE(kmap->arena, sizeof(KUtilsHashMapEntry)*(kmap->arenasize));
+	KFREE(kmap->hentry, sizeof(KUtilsHashMapEntry*)*(kmap->hmax));
+	KFREE(kmap, sizeof(KUtilsHashMap));
 }
 
-static KonohaSimpleMapEntry *Kmap_getentry(KonohaSimpleMap* kmap, kuint_t hcode)
+static KUtilsHashMapEntry *Kmap_getentry(KUtilsHashMap* kmap, kuint_t hcode)
 {
-	KonohaSimpleMapEntry **hlist = kmap->hentry;
+	KUtilsHashMapEntry **hlist = kmap->hentry;
 	size_t idx = hcode % kmap->hmax;
-	KonohaSimpleMapEntry *e = hlist[idx];
+	KUtilsHashMapEntry *e = hlist[idx];
 	while(e != NULL) {
 		if(e->hcode == hcode) return e;
 		e = e->next;
@@ -268,7 +268,7 @@ static KonohaSimpleMapEntry *Kmap_getentry(KonohaSimpleMap* kmap, kuint_t hcode)
 	return NULL;
 }
 
-static void kmap_unuse(KonohaSimpleMap *kmap, KonohaSimpleMapEntry *e)
+static void kmap_unuse(KUtilsHashMap *kmap, KUtilsHashMapEntry *e)
 {
 	e->next = kmap->unused;
 	kmap->unused = e;
@@ -277,11 +277,11 @@ static void kmap_unuse(KonohaSimpleMap *kmap, KonohaSimpleMapEntry *e)
 	kmap->size--;
 }
 
-static void Kmap_remove(KonohaSimpleMap* kmap, KonohaSimpleMapEntry *oe)
+static void Kmap_remove(KUtilsHashMap* kmap, KUtilsHashMapEntry *oe)
 {
-	KonohaSimpleMapEntry **hlist = kmap->hentry;
+	KUtilsHashMapEntry **hlist = kmap->hentry;
 	size_t idx = oe->hcode % kmap->hmax;
-	KonohaSimpleMapEntry *e = hlist[idx];
+	KUtilsHashMapEntry *e = hlist[idx];
 	while(e != NULL) {
 		if(e->next == oe) {
 			e->next = oe->next;
@@ -296,16 +296,16 @@ static void Kmap_remove(KonohaSimpleMap* kmap, KonohaSimpleMapEntry *oe)
 
 // key management
 
-static void map_addStringUnboxValue(KonohaContext *kctx, KonohaSimpleMap *kmp, uintptr_t hcode, kString *skey, uintptr_t uvalue)
+static void map_addStringUnboxValue(KonohaContext *kctx, KUtilsHashMap *kmp, uintptr_t hcode, kString *skey, uintptr_t uvalue)
 {
-	KonohaSimpleMapEntry *e = kmap_newentry(kmp, hcode);
+	KUtilsHashMapEntry *e = kmap_newentry(kmp, hcode);
 	KINITv(e->skey, skey);
 	e->uvalue = uvalue;
 }
 
-static ksymbol_t Kmap_getcode(KonohaContext *kctx, KonohaSimpleMap *kmp, kArray *list, const char *name, size_t len, uintptr_t hcode, int spol, ksymbol_t def)
+static ksymbol_t Kmap_getcode(KonohaContext *kctx, KUtilsHashMap *kmp, kArray *list, const char *name, size_t len, uintptr_t hcode, int spol, ksymbol_t def)
 {
-	KonohaSimpleMapEntry *e = kmap_get(kmp, hcode);
+	KUtilsHashMapEntry *e = kmap_get(kmp, hcode);
 	while(e != NULL) {
 		if(e->hcode == hcode && len == S_size(e->skey) && strncmp(S_text(e->skey), name, len) == 0) {
 			return (ksymbol_t)e->uvalue;
@@ -376,9 +376,9 @@ static ksymbol_t Ksymbol2(KonohaContext *kctx, const char *name, size_t len, int
 // -------------------------------------------------------------------------
 // library
 
-static karray_t *new_karray(KonohaContext *kctx, size_t bytesize, size_t bytemax)
+static KUtilsGrowingArray *new_karray(KonohaContext *kctx, size_t bytesize, size_t bytemax)
 {
-	karray_t *m = (karray_t*)KCALLOC(sizeof(karray_t), 1);
+	KUtilsGrowingArray *m = (KUtilsGrowingArray*)KCALLOC(sizeof(KUtilsGrowingArray), 1);
 	DBG_ASSERT(bytesize <= bytemax);
 	if(bytemax > 0) {
 		m->bytebuf = (char*)KCALLOC(bytemax, 1);
@@ -391,10 +391,10 @@ static karray_t *new_karray(KonohaContext *kctx, size_t bytesize, size_t bytemax
 #define KVPROTO_INIT  8
 #define KVPROTO_DELTA 7
 
-static inline karray_t* kvproto_null(void)  // for proto_get safe null
+static inline KUtilsGrowingArray* kvproto_null(void)  // for proto_get safe null
 {
 	static kvs_t dnull[KVPROTO_DELTA] = {};
-	static karray_t pnull = {
+	static KUtilsGrowingArray pnull = {
 		.bytesize = sizeof(kvs_t), .bytemax = 0,
 	};
 	pnull.kvs = dnull;
@@ -405,15 +405,15 @@ void KONOHA_freeObjectField(KonohaContext *kctx, kObjectVar *o)
 {
 	KonohaClass *ct = O_ct(o);
 	if(o->h.kvproto->bytemax > 0) {
-		karray_t *p = o->h.kvproto;
+		KUtilsGrowingArray *p = o->h.kvproto;
 		KFREE(p->bytebuf, p->bytemax);
-		KFREE(p, sizeof(karray_t));
+		KFREE(p, sizeof(KUtilsGrowingArray));
 		o->h.kvproto = kvproto_null();
 	}
 	ct->free(kctx, o);
 }
 
-static kvs_t* kvproto_get(karray_t *p, ksymbol_t key)
+static kvs_t* kvproto_get(KUtilsGrowingArray *p, ksymbol_t key)
 {
 	size_t psize = p->bytesize / sizeof(kvs_t);
 	kvs_t *d = p->kvs + (((size_t)key) % psize);
@@ -440,7 +440,7 @@ static inline void kvproto_findset(kvs_t *d, kvs_t *newd)
 	}
 }
 
-static void kvproto_rehash(KonohaContext *kctx, karray_t *p)
+static void kvproto_rehash(KonohaContext *kctx, KUtilsGrowingArray *p)
 {
 	size_t i, pmax = (p->bytemax) / sizeof(kvs_t);
 	size_t newpmax = pmax * 2, newpsize = newpmax - KVPROTO_DELTA;
@@ -484,9 +484,9 @@ void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o)
 	ct->reftrace(kctx, o);
 }
 
-static void kvproto_set(KonohaContext *kctx, karray_t **pval, ksymbol_t key, ktype_t ty, uintptr_t uval)
+static void kvproto_set(KonohaContext *kctx, KUtilsGrowingArray **pval, ksymbol_t key, ktype_t ty, uintptr_t uval)
 {
-	karray_t *p = pval[0];
+	KUtilsGrowingArray *p = pval[0];
 	if(p->bytemax == 0) {
 		p = new_karray(kctx, (KVPROTO_INIT - KVPROTO_DELTA) * sizeof(kvs_t), KVPROTO_INIT * sizeof(kvs_t));
 		pval[0] = p;

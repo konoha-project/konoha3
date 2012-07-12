@@ -202,11 +202,11 @@ struct kNameSpaceVar {
 	kpackage_t packageId;  	kpackage_t packageDomain;
 	kNameSpace           *parentNULL;
 	const TokenizeFunc   *tokenMatrix;
-	KonohaSimpleMap      *syntaxMapNN;
+	KUtilsHashMap      *syntaxMapNN;
 	//
 	kObject              *scriptObject;
 	kArray*               methodList;   // default K_EMPTYARRAY
-	karray_t              constTable;        // const variable
+	KUtilsGrowingArray              constTable;        // const variable
 };
 
 typedef kshort_t    kexpr_t;
@@ -451,7 +451,7 @@ typedef struct {
 	KonohaClass *cTokenArray;
 
 	kArray         *packageList;
-	KonohaSimpleMap         *packageMapNO;
+	KUtilsHashMap         *packageMapNO;
 
 	kFunc *UndefinedParseExpr;
 	kFunc *UndefinedStmtTyCheck;
@@ -535,7 +535,7 @@ typedef struct {
 typedef struct {
 	kmodlocal_t h;
 	kArray *tokens;
-	karray_t cwb;
+	KUtilsGrowingArray cwb;
 	int     err_count;
 	kArray *errors;
 	kBlock *singleBlock;

@@ -202,7 +202,7 @@ static int parseSLASH(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, in
 
 static int parseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
 {
-	kwb_t wb;
+	KUtilsWriteBuffer wb;
 	kwb_init(&(kctx->stack->cwb), &wb);
 	int ch, prev = '"', pos = tok_start + 1, next;
 	while((ch = tenv->source[pos++]) != 0) {
@@ -212,7 +212,7 @@ static int parseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, TokenizerEn
 		if(ch == '"' && prev != '\\') {
 			if(IS_NOTNULL(tk)) {
 				size_t length = kwb_bytesize(&wb);
-				KSETv(tk->text, new_kString(kwb_top(&wb, 1), length, 0));
+				KSETv(tk->text, new_kString(KUtilsWriteBufferop(&wb, 1), length, 0));
 				tk->keyword = TK_TEXT;
 			}
 			kwb_free(&wb);

@@ -35,7 +35,7 @@ static void Float_init(KonohaContext *kctx, kObject *o, void *conf)
 	n->ndata = (uintptr_t)conf;  // conf is unboxed data
 }
 
-static void Float_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int level)
+static void Float_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
 	kwb_printf(wb, KFLOAT_FMT, sfp[pos].fvalue);
 }

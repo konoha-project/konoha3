@@ -53,7 +53,7 @@ typedef int    (*ficonv_close)(kiconv_t);
 typedef struct {
     kmodshare_t h;
     KonohaClass     *cBytes;
-    kbool_t      (*encode)(const char* from, const char* to, const char* text, size_t len, kwb_t* wb);
+    kbool_t      (*encode)(const char* from, const char* to, const char* text, size_t len, KUtilsWriteBuffer* wb);
     const char*  fmt;
     const char*  locale;
     kiconv_t     (*ficonv_open)(const char *, const char*);

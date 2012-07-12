@@ -110,7 +110,7 @@ static void Bytes_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void Bytes_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int level)
+static void Bytes_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
 	kBytes *ba = (kBytes*)sfp[pos].o;
 	DBG_P("level:%d", level);
@@ -163,7 +163,7 @@ static void kmodiconv_free(KonohaContext *kctx, struct kmodshare_t *baseh)
 #define CONV_BUFSIZE 4096 // 4K
 #define MAX_STORE_BUFSIZE (CONV_BUFSIZE * 1024)// 4M
 
-//static kbool_t encodeFromTo (const char *from, const char *to, const char *text, size_t len, kwb_t *wb)
+//static kbool_t encodeFromTo (const char *from, const char *to, const char *text, size_t len, KUtilsWriteBuffer *wb)
 //{
 //
 //}
@@ -171,7 +171,7 @@ static void kmodiconv_free(KonohaContext *kctx, struct kmodshare_t *baseh)
 static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromCoding, const char *toCoding)
 {
 	kiconv_t conv;
-	kwb_t wb;
+	KUtilsWriteBuffer wb;
 
 	char convBuf[CONV_BUFSIZE] = {'\0'};
 	const char *presentPtrFrom = fromBa->text;
@@ -199,7 +199,7 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 	size_t iconv_ret = -1;
 	size_t processedSize = 0;
 	size_t processedTotalSize = processedSize;
-//	karray_t *buf = new_karray(kctx, 0, 64);
+//	KUtilsGrowingArray *buf = new_karray(kctx, 0, 64);
 	kwb_init(&(kctx->stack->cwb), &wb);
 	while (inBytesLeft > 0 && iconv_ret == -1) {
 		iconv_ret = kmodiconv->ficonv(conv, inbuf, &inBytesLeft, outbuf, &outBytesLeft);
@@ -230,10 +230,10 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 	} /* end of converting loop */
 	kmodiconv->ficonv_close(conv);
 
-	const char *kwb_topChar = kwb_top(&wb, 1);
-	DBG_P("kwb:'%s'", kwb_topChar);
+	const char *KUtilsWriteBufferopChar = KUtilsWriteBufferop(&wb, 1);
+	DBG_P("kwb:'%s'", KUtilsWriteBufferopChar);
 	kBytes *toBa = (kBytes*)new_kObject(CT_Bytes, (void*)processedTotalSize+1);
-	memcpy(toBa->buf, kwb_topChar, processedTotalSize+1); // including NUL terminate by ensuredZeo
+	memcpy(toBa->buf, KUtilsWriteBufferopChar, processedTotalSize+1); // including NUL terminate by ensuredZeo
 	return toBa;
 }
 

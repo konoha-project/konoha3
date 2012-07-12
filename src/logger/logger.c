@@ -35,7 +35,7 @@
 
 typedef struct  {
 	kmodlocal_t h;
-	karray_t logbuf;
+	KUtilsGrowingArray logbuf;
 
 } ctxlogger_t;
 

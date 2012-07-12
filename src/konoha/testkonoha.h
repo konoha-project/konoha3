@@ -75,11 +75,11 @@ static int test_kwb(KonohaContext *kctx)
 {
 	const char *t= "0123456789012345678901234567890123456789";
 	size_t i = 0;
-	karray_t *buf = new_karray(kctx, 0, 64);
-	kwb_t wb;
+	KUtilsGrowingArray *buf = new_karray(kctx, 0, 64);
+	KUtilsWriteBuffer wb;
 	kwb_init(buf, &wb);
 	kwb_printf(&wb, "%s%s%s%s", t, t, t, t);
-	t = kwb_top(&wb, 1);
+	t = KUtilsWriteBufferop(&wb, 1);
 	while(*t != 0) {
 //		DBG_P("i=%d, ch='%c', '%c'", i, *t, '0' + (i % 10));
 		assert(*t == '0' + (i % 10));
@@ -88,7 +88,7 @@ static int test_kwb(KonohaContext *kctx)
 	assert(i == kwb_bytesize(&wb));
 	kwb_free(&wb);
 	KARRAY_FREE(buf);
-	KFREE(buf, sizeof(karray_t));
+	KFREE(buf, sizeof(KUtilsGrowingArray));
 	return 0;
 }
 

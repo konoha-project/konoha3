@@ -38,7 +38,7 @@ typedef struct {
 	kArray  *constPool;
 	kArray  *global_value;
 	FgenCode defaultCodeGen;
-	KonohaSimpleMap *jitcache;
+	KUtilsHashMap *jitcache;
 	kfileline_t uline;
 	KonohaClass *cPointer;
 } kmodjit_t;
@@ -54,7 +54,7 @@ static void kmodjit_setup(KonohaContext *kctx, struct kmodshare_t *def, int newc
 
 extern kObjectVar **KONOHA_reftail(KonohaContext *kctx, size_t size);
 
-static void val_reftrace(KonohaContext *kctx, KonohaSimpleMapEntry *p)
+static void val_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p)
 {
 	BEGIN_REFTRACE(1);
 	KREFTRACEv(p->ovalue);
@@ -269,8 +269,8 @@ static uintptr_t jitcache_hash(kMethod *mtd)
 static kObject *jitcache_get(KonohaContext *kctx, kMethod *mtd)
 {
 	uintptr_t hcode = jitcache_hash(mtd);
-	KonohaSimpleMap *map = kmodjit->jitcache;
-	KonohaSimpleMapEntry *e = kmap_get(map, hcode);
+	KUtilsHashMap *map = kmodjit->jitcache;
+	KUtilsHashMapEntry *e = kmap_get(map, hcode);
 	if (e) {
 		return (kObject*) e->uvalue;
 	} else {
@@ -281,8 +281,8 @@ static kObject *jitcache_get(KonohaContext *kctx, kMethod *mtd)
 static void jitcache_set(KonohaContext *kctx, kMethod *mtd, kObject *f)
 {
 	uintptr_t hcode = jitcache_hash(mtd);
-	KonohaSimpleMap *map = kmodjit->jitcache;
-	KonohaSimpleMapEntry *newe = kmap_newentry(map, hcode);
+	KUtilsHashMap *map = kmodjit->jitcache;
+	KUtilsHashMapEntry *newe = kmap_newentry(map, hcode);
 	newe->uvalue = (uintptr_t) f;
 }
 
@@ -579,10 +579,10 @@ static KMETHOD Method_getReturnType(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static KMETHOD Method_getFname(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kMethod *mtd = sfp[0].mtd;
-	kwb_t wb;
+	KUtilsWriteBuffer wb;
 	kwb_init(&(kctx->stack->cwb), &wb);
 	kwb_printf(&wb, "%s%s", T_mn(mtd->mn));
-	kString *fname = new_kString(kwb_top(&wb, 0), kwb_bytesize(&wb), SPOL_POOL);
+	kString *fname = new_kString(KUtilsWriteBufferop(&wb, 0), kwb_bytesize(&wb), SPOL_POOL);
 	RETURN_(fname);
 }
 

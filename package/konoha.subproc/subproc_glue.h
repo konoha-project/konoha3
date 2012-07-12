@@ -1228,7 +1228,7 @@ static void Subproc_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void Subproc_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int level)
+static void Subproc_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
 
 }

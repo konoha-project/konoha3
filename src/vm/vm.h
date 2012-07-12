@@ -140,7 +140,7 @@ typedef const struct _kBasicBlock kBasicBlock;
 struct _kBasicBlock {
 	KonohaObjectHeader h;
 	kushort_t id;     kushort_t incoming;
-	karray_t op;
+	KUtilsGrowingArray op;
 	union {
 		const struct _kBasicBlock *nextNC;
 		struct _kBasicBlock *WnextNC;

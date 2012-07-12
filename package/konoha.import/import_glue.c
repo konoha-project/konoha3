@@ -35,7 +35,7 @@ static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	if (tls == NULL) {
 		RETURNb_(false);
 	}
-	kwb_t wb;
+	KUtilsWriteBuffer wb;
 	kwb_init(&(kctx->stack->cwb), &wb);
 	int i = 0;
 	if (i + 2 < kArray_size(tls)) {
@@ -51,7 +51,7 @@ static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	}
 	kString *name = tls->toks[i]->text;
 	kwb_write(&wb, S_text(name), S_size(name));
-	kString *pkgname = new_kString(kwb_top(&wb, 1), kwb_bytesize(&wb), 0);
+	kString *pkgname = new_kString(KUtilsWriteBufferop(&wb, 1), kwb_bytesize(&wb), 0);
 	kNameSpace *ks = (kNameSpace *) gma->genv->ks;
 	SugarSyntaxVar *syn1 = (SugarSyntaxVar*) SYN_(ks, KW_ExprMethodCall);
 	kTokenVar *tkImport = new_Var(Token, 0);

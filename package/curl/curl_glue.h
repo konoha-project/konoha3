@@ -62,7 +62,7 @@ typedef struct curl_context_t {
 static size_t write_String(char *buffer, size_t size, size_t nitems, void *string)
 {
 	KonohaContext_t kctx = (KonohaContext_t)ctx;
-	kwb_t wb;
+	KUtilsWriteBuffer wb;
 	kwb_init(&(kctx->stack->cwb), &wb);
 	kStringVar *res = (kStringVar *)string;
 	kString *str;
@@ -72,7 +72,7 @@ static size_t write_String(char *buffer, size_t size, size_t nitems, void *strin
 	}
 	size *= nitems;
 	kwb_write(&wb, buffer, size);
-	str = new_kString(kwb_top(&wb, 0), kwb_bytesize(&wb), SPOL_POOL);
+	str = new_kString(KUtilsWriteBufferop(&wb, 0), kwb_bytesize(&wb), SPOL_POOL);
 	res->ubuf = str->ubuf + res->bytesize;// - str->ubuf;
 	res->bytesize = str->bytesize - res->bytesize;// - str->bytesize;
 	KSETv(res, (kStringVar*)str);

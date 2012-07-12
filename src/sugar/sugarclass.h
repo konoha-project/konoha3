@@ -37,7 +37,7 @@ static void NameSpace_init(KonohaContext *kctx, kObject *o, void *conf)
 	KINITv(ns->scriptObject, knull(CT_System));
 }
 
-static void syntax_reftrace(KonohaContext *kctx, KonohaSimpleMapEntry *p)
+static void syntax_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p)
 {
 	SugarSyntax *syn = (SugarSyntax*)p->uvalue;
 	BEGIN_REFTRACE(6);
@@ -98,7 +98,7 @@ static SugarSyntax* NameSpace_syn(KonohaContext *kctx, kNameSpace *ns0, ksymbol_
 	assert(ns0 != NULL);  /* scan-build: remove warning */
 	while(ns != NULL) {
 		if(ns->syntaxMapNN != NULL) {
-			KonohaSimpleMapEntry *e = kmap_get(ns->syntaxMapNN, hcode);
+			KUtilsHashMapEntry *e = kmap_get(ns->syntaxMapNN, hcode);
 			while(e != NULL) {
 				if(e->hcode == hcode) {
 					parent = (SugarSyntax*)e->uvalue;
@@ -115,7 +115,7 @@ static SugarSyntax* NameSpace_syn(KonohaContext *kctx, kNameSpace *ns0, ksymbol_
 		if(ns0->syntaxMapNN == NULL) {
 			((kNameSpaceVar*)ns0)->syntaxMapNN = kmap_init(0);
 		}
-		KonohaSimpleMapEntry *e = kmap_newentry(ns0->syntaxMapNN, hcode);
+		KUtilsHashMapEntry *e = kmap_newentry(ns0->syntaxMapNN, hcode);
 		SugarSyntaxVar *syn = (SugarSyntaxVar*)KCALLOC(sizeof(SugarSyntax), 1);
 		e->uvalue = (uintptr_t)syn;
 
@@ -300,13 +300,13 @@ static void NameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, kvs
 		memcpy(ns->constTable.kvs, kvs, nitems * sizeof(kvs_t));
 	}
 	else {
-		kwb_t wb;
+		KUtilsWriteBuffer wb;
 		kwb_init(&(ctxsugar->cwb), &wb);
 		for(i = 0; i < nitems; i++) {
 			if(checkConflictedConst(kctx, ns, kvs+i, pline)) continue;
 			kwb_write(&wb, (const char*)(kvs+i), sizeof(kvs_t));
 		}
-		kvs = (kvs_t*)kwb_top(&wb, 0);
+		kvs = (kvs_t*)KUtilsWriteBufferop(&wb, 0);
 		nitems = kwb_bytesize(&wb)/sizeof(kvs_t);
 		if(nitems > 0) {
 			KARRAY_RESIZE(&ns->constTable, (s + nitems + 8) * sizeof(kvs_t));
@@ -329,7 +329,7 @@ static void NameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ns, const c
 {
 	INIT_GCSTACK();
 	kvs_t kv;
-	kwb_t wb;
+	KUtilsWriteBuffer wb;
 	kwb_init(&(kctx->stack->cwb), &wb);
 	while(d[0] != NULL) {
 		//DBG_P("key='%s'", d[0]);
@@ -352,7 +352,7 @@ static void NameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ns, const c
 	}
 	size_t nitems = kwb_bytesize(&wb) / sizeof(kvs_t);
 	if(nitems > 0) {
-		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, (kvs_t*)kwb_top(&wb, 0), nitems, pline);
+		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, (kvs_t*)KUtilsWriteBufferop(&wb, 0), nitems, pline);
 	}
 	kwb_free(&wb);
 	RESET_GCSTACK();
@@ -361,7 +361,7 @@ static void NameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ns, const c
 static void NameSpace_importClassName(KonohaContext *kctx, kNameSpace *ns, kpackage_t packageId, kfileline_t pline)
 {
 	kvs_t kv;
-	kwb_t wb;
+	KUtilsWriteBuffer wb;
 	kwb_init(&(kctx->stack->cwb), &wb);
 	size_t i, size = KARRAYSIZE(kctx->share->ca.bytesize, uintptr);
 	for(i = 0; i < size; i++) {
@@ -377,7 +377,7 @@ static void NameSpace_importClassName(KonohaContext *kctx, kNameSpace *ns, kpack
 	}
 	size_t nitems = kwb_bytesize(&wb) / sizeof(kvs_t);
 	if(nitems > 0) {
-		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, (kvs_t*)kwb_top(&wb, 0), nitems, pline);
+		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, (kvs_t*)KUtilsWriteBufferop(&wb, 0), nitems, pline);
 	}
 	kwb_free(&wb);
 }

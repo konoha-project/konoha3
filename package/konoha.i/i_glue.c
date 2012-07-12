@@ -43,7 +43,7 @@ static struct fn attrs[] = {
 	{0, NULL}
 };
 
-static void MethodAttribute_p(KonohaContext *kctx, kMethod *mtd, kwb_t *wb)
+static void MethodAttribute_p(KonohaContext *kctx, kMethod *mtd, KUtilsWriteBuffer *wb)
 {
 	uintptr_t i;
 	for(i = 0; i < 30; i++) {
@@ -60,7 +60,7 @@ static void MethodAttribute_p(KonohaContext *kctx, kMethod *mtd, kwb_t *wb)
 //	}
 }
 
-static void Method_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int level)
+static void Method_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
 	kMethod *mtd = sfp[pos].mtd;
 	kParam *pa = kMethod_param(mtd);
@@ -102,11 +102,11 @@ static void copyMethodList(KonohaContext *kctx, ktype_t cid, kArray *s, kArray *
 
 static void dumpMethod(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd)
 {
-	kwb_t wb;
+	KUtilsWriteBuffer wb;
 	kwb_init(&(kctx->stack->cwb), &wb);
 	KSETv(sfp[2].mtd, mtd);
 	O_ct(mtd)->p(kctx, sfp, 2, &wb, 1);
-	PLAT printf_i("%s\n", kwb_top(&wb, 1));
+	PLAT printf_i("%s\n", KUtilsWriteBufferop(&wb, 1));
 	kwb_free(&wb);
 	return;
 }

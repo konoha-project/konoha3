@@ -50,7 +50,7 @@ static void PyObject_init(KonohaContext *kctx, kObject *o, void *conf)
 	}
 }
 
-static void PyObject_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int level)
+static void PyObject_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
 	// Now, level value has no effect.
 	PyObject *pyo =  ((kPyObject*)sfp[pos].o)->self;
@@ -145,14 +145,14 @@ static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //static KMETHOD PyObject_toBytes(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //	kPyObject *po = (kPyObject*)sfp[0].o;
-//	kwb_t wb;
+//	KUtilsWriteBuffer wb;
 //	if(po->self == NULL) {
 //		// [TODO] throw Exception
 //	}
 //	kwb_init(&(kctx->stack->cwb), &wb);
 //	O_ct(sfp[0].o)->p(kctx, sfp, 0, &wb, 0);
 //	struct _kBytes* ba = (struct _kBytes*)new_Bytes(kctx, kwb_bytesize(&wb));
-//	ba->buf = kwb_top(&wb, 1);
+//	ba->buf = KUtilsWriteBufferop(&wb, 1);
 //	kwb_free(&wb);
 //	RETURN_(ba);
 //}
@@ -176,12 +176,12 @@ static KMETHOD String_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kPyObject *po = (kPyObject*)sfp[0].o;
-	kwb_t wb;
+	KUtilsWriteBuffer wb;
 	// assert
 	DBG_ASSERT(po->self != NULL);
 	kwb_init(&(kctx->stack->cwb), &wb);
 	O_ct(sfp[0].o)->p(kctx, sfp, 0, &wb, 0);
-	kString* s = new_kString(kwb_top(&wb, 1), kwb_bytesize(&wb), 0);
+	kString* s = new_kString(KUtilsWriteBufferop(&wb, 1), kwb_bytesize(&wb), 0);
 	kwb_free(&wb);
 	RETURN_(s);
 	//if (PyString_Check(po->self)) {
@@ -202,10 +202,10 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	//	RETURN_(new_kString(t, strlen(t), 0));
 	//}
 	//else {
-	//	kwb_t wb;
+	//	KUtilsWriteBuffer wb;
 	//	kwb_init(&(kctx->stack->cwb), &wb);
 	//	O_ct(sfp[0].o)->p(kctx, sfp, 0, &wb, 0);
-	//	kString* s = new_kString(kwb_top(&wb, 1), kwb_bytesize(&wb), 0);
+	//	kString* s = new_kString(KUtilsWriteBufferop(&wb, 1), kwb_bytesize(&wb), 0);
 	//	kwb_free(&wb);
 	//	RETURN_(s);
 	//}

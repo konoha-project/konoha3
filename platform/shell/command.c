@@ -125,7 +125,7 @@ static int checkstmt(const char *t, size_t len)
 	return 1;
 }
 
-static kstatus_t readstmt(KonohaContext *kctx, kwb_t *wb, kfileline_t *uline)
+static kstatus_t readstmt(KonohaContext *kctx, KUtilsWriteBuffer *wb, kfileline_t *uline)
 {
 	int line = 1;
 	kstatus_t status = K_CONTINUE;
@@ -141,7 +141,7 @@ static kstatus_t readstmt(KonohaContext *kctx, kwb_t *wb, kfileline_t *uline)
 		if(line > 1) kwb_putc(wb, '\n');
 		kwb_write(wb, ln, strlen(ln));
 		free(ln);
-		if((check = checkstmt(kwb_top(wb, 0), kwb_bytesize(wb))) > 0) {
+		if((check = checkstmt(KUtilsWriteBufferop(wb, 0), kwb_bytesize(wb))) > 0) {
 			uline[0]++;
 			line++;
 			continue;
@@ -153,7 +153,7 @@ static kstatus_t readstmt(KonohaContext *kctx, kwb_t *wb, kfileline_t *uline)
 		break;
 	}
 	if(kwb_bytesize(wb) > 0) {
-		kadd_history(kwb_top(wb, 1));
+		kadd_history(KUtilsWriteBufferop(wb, 1));
 	}
 //	fputs(TERM_EBOLD(kctx), stdout);
 	fflush(stdout);
@@ -161,7 +161,7 @@ static kstatus_t readstmt(KonohaContext *kctx, kwb_t *wb, kfileline_t *uline)
 	return status;
 }
 
-static void dumpEval(KonohaContext *kctx, kwb_t *wb)
+static void dumpEval(KonohaContext *kctx, KUtilsWriteBuffer *wb)
 {
 	LocalRuntimeVar *base = kctx->stack;
 	ktype_t ty = base->evalty;
@@ -169,20 +169,20 @@ static void dumpEval(KonohaContext *kctx, kwb_t *wb)
 		KonohaStack *lsfp = base->stack + base->evalidx;
 		CT_(ty)->p(kctx, lsfp, 0, wb, P_DUMP);
 		fflush(stdout);
-		fprintf(stdout, "TYPE=%s EVAL=%s\n", TY_t(ty), kwb_top(wb,1));
+		fprintf(stdout, "TYPE=%s EVAL=%s\n", TY_t(ty), KUtilsWriteBufferop(wb,1));
 	}
 }
 
 static void shell(KonohaContext *kctx)
 {
-	kwb_t wb;
+	KUtilsWriteBuffer wb;
 	kwb_init(&(kctx->stack->cwb), &wb);
 	kfileline_t uline = FILEID_("(shell)") | 1;
 	while(1) {
 		kfileline_t inc = 0;
 		kstatus_t status = readstmt(kctx, &wb, &inc);
 		if(status == K_CONTINUE && kwb_bytesize(&wb) > 0) {
-			status = konoha_eval((KonohaContext*)kctx, kwb_top(&wb, 1), uline);
+			status = konoha_eval((KonohaContext*)kctx, KUtilsWriteBufferop(&wb, 1), uline);
 			uline += inc;
 			kwb_free(&wb);
 			if(status != K_FAILED) {

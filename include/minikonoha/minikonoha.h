@@ -309,47 +309,45 @@ typedef struct KonohaStack              KonohaStackVar;
 
 #define KARRAYSIZE(BS, T)   ((BS)/sizeof(T##_t))
 
-typedef struct karray_t {
+typedef struct KUtilsGrowingArray {
 	size_t bytesize;
 	union {
-		char  *bytebuf;
-		KonohaClass **cts;
-		struct kvs_t          *kvs;
-		struct kopl_t          *opl;
-		kObject **objects;
-		kObjectVar       **refhead;  // stack->ref
+		char            *bytebuf;
+		KonohaClass    **cts;
+		struct kvs_t    *kvs;
+		struct kopl_t   *opl;
+		kObject        **objects;
+		kObjectVar     **refhead;  // stack->ref
 	};
 	size_t bytemax;
-} karray_t ;
+} KUtilsGrowingArray;
 
-typedef struct kwb_t {
-	karray_t *m;
+typedef struct KUtilsWriteBuffer {
+	KUtilsGrowingArray *m;
 	size_t pos;
-} kwb_t;
+} KUtilsWriteBuffer;
 
-// kmap
-
-typedef struct KonohaSimpleMapEntry {
+typedef struct KUtilsHashMapEntry {
 	uintptr_t hcode;
-	struct KonohaSimpleMapEntry *next;
+	struct KUtilsHashMapEntry *next;
 	union {
-		kString  *skey;
-		kParam   *paramkey;
+		kString         *skey;
+		kParam          *paramkey;
 		uintptr_t        ukey;
 		void            *pkey;
 	};
 	union {
-		kObject  *ovalue;
+		kObject         *ovalue;
 		void            *pvalue;
 		uintptr_t        uvalue;
 	};
-} KonohaSimpleMapEntry;
+} KUtilsHashMapEntry;
 
-typedef struct KonohaSimpleMap KonohaSimpleMap;
-struct KonohaSimpleMap {
-	KonohaSimpleMapEntry *arena;
-	KonohaSimpleMapEntry *unused;
-	KonohaSimpleMapEntry **hentry;
+typedef struct KUtilsHashMap KUtilsHashMap;
+struct KUtilsHashMap {
+	KUtilsHashMapEntry *arena;
+	KUtilsHashMapEntry *unused;
+	KUtilsHashMapEntry **hentry;
 	size_t arenasize;
 	size_t size;
 	size_t hmax;
@@ -416,8 +414,6 @@ typedef kushort_t       kparamid_t;
 
 /* ------------------------------------------------------------------------ */
 
-
-
 struct KonohaContextVar {
 	int						          safepoint; // set to 1
 	KonohaStack                      *esp;
@@ -439,25 +435,25 @@ struct KonohaContextVar {
 // share, local
 
 struct SharedRuntimeVar {
-	karray_t ca;
-	KonohaSimpleMap               *lcnameMapNN;
+	KUtilsGrowingArray ca;
+	KUtilsHashMap   *lcnameMapNN;
 	/* system shared const */
-	kObject       *constNull;
-	kBoolean      *constTrue;
-	kBoolean      *constFalse;
-	kString       *emptyString;
-	kArray        *emptyArray;
+	kObject         *constNull;
+	kBoolean        *constTrue;
+	kBoolean        *constFalse;
+	kString         *emptyString;
+	kArray          *emptyArray;
 
-	kArray         *fileidList;    // file, http://
-	KonohaSimpleMap                *fileidMapNN;   //
-	kArray         *packList;
-	KonohaSimpleMap                *packMapNN;
-	kArray         *symbolList;  // NAME, Name, INT_MAX Int_MAX
-	KonohaSimpleMap                *symbolMapNN;
-	kArray         *paramList;
-	KonohaSimpleMap                *paramMapNN;
-	kArray         *paramdomList;
-	KonohaSimpleMap                *paramdomMapNN;
+	kArray          *fileidList;    // file, http://
+	KUtilsHashMap   *fileidMapNN;   //
+	kArray          *packList;
+	KUtilsHashMap   *packMapNN;
+	kArray          *symbolList;  // NAME, Name, INT_MAX Int_MAX
+	KUtilsHashMap   *symbolMapNN;
+	kArray          *paramList;
+	KUtilsHashMap   *paramMapNN;
+	kArray          *paramdomList;
+	KUtilsHashMap   *paramdomMapNN;
 };
 
 
@@ -475,12 +471,12 @@ struct LocalRuntimeVar {
 	size_t                       stacksize;
 	KonohaStack*               stack_uplimit;
 	kArray        *gcstack;
-	karray_t                     cwb;
+	KUtilsGrowingArray                     cwb;
 	// local info
 	kshortflag_t                      flag;
 	KonohaContext               *rootctx;
 	void*                        cstack_bottom;  // for GC
-	karray_t                     ref;   // reftrace
+	KUtilsGrowingArray                     ref;   // reftrace
 	kObjectVar**            reftail;
 	ktype_t   evalty;
 	kushort_t evalidx;
@@ -587,7 +583,7 @@ typedef struct krbp_t {
 		void (*reftrace)(KonohaContext *kctx, kObject*);\
 		void (*free)(KonohaContext *kctx, kObject*);\
 		kObject* (*fnull)(KonohaContext *kctx, KonohaClass*);\
-		void (*p)(KonohaContext *kctx, KonohaStack *, int, kwb_t *, int);\
+		void (*p)(KonohaContext *kctx, KonohaStack *, int, KUtilsWriteBuffer *, int);\
 		uintptr_t (*unbox)(KonohaContext *kctx, kObject*);\
 		int  (*compareTo)(kObject*, kObject*);\
 		void (*initdef)(KonohaContext *kctx, KonohaClassVar*, kfileline_t);\
@@ -634,7 +630,7 @@ struct KonohaClassVar {
 		kObject  *nulvalNULL;
 		kObjectVar        *nulvalNULL_;
 	};
-	KonohaSimpleMap            *constPoolMapNO;
+	KUtilsHashMap            *constPoolMapNO;
 	KonohaClass                 *searchSimilarClassNULL;
 	KonohaClass                 *searchSuperMethodClassNULL;
 } ;
@@ -770,7 +766,7 @@ typedef struct KonohaObjectHeader {
 		void *gcinfo;
 		uintptr_t hashcode; // reserved
 	};
-	karray_t *kvproto;
+	KUtilsGrowingArray *kvproto;
 } KonohaObjectHeader ;
 
 
@@ -1175,26 +1171,26 @@ struct LibKonohaApiVar {
 	void* (*Kzmalloc)(KonohaContext *kctx, size_t);
 	void  (*Kfree)(KonohaContext *kctx, void *, size_t);
 
-	void  (*Karray_init)(KonohaContext *kctx, karray_t *, size_t);
-	void  (*Karray_resize)(KonohaContext *kctx, karray_t *, size_t);
-	void  (*Karray_expand)(KonohaContext *kctx, karray_t *, size_t);
-	void  (*Karray_free)(KonohaContext *kctx, karray_t *);
+	void  (*Karray_init)(KonohaContext *kctx, KUtilsGrowingArray *, size_t);
+	void  (*Karray_resize)(KonohaContext *kctx, KUtilsGrowingArray *, size_t);
+	void  (*Karray_expand)(KonohaContext *kctx, KUtilsGrowingArray *, size_t);
+	void  (*Karray_free)(KonohaContext *kctx, KUtilsGrowingArray *);
 
-	void (*Kwb_init)(karray_t *, kwb_t *);
-	void (*Kwb_write)(KonohaContext *kctx, kwb_t *, const char *, size_t);
-	void (*Kwb_putc)(KonohaContext *kctx, kwb_t *, ...);
-	void (*Kwb_vprintf)(KonohaContext *kctx, kwb_t *, const char *fmt, va_list ap);
-	void (*Kwb_printf)(KonohaContext *kctx, kwb_t *, const char *fmt, ...);
-	const char* (*Kwb_top)(KonohaContext *kctx, kwb_t *, int);
-	void (*Kwb_free)(kwb_t *);
+	void (*Kwb_init)(KUtilsGrowingArray *, KUtilsWriteBuffer *);
+	void (*Kwb_write)(KonohaContext *kctx, KUtilsWriteBuffer *, const char *, size_t);
+	void (*Kwb_putc)(KonohaContext *kctx, KUtilsWriteBuffer *, ...);
+	void (*Kwb_vprintf)(KonohaContext *kctx, KUtilsWriteBuffer *, const char *fmt, va_list ap);
+	void (*Kwb_printf)(KonohaContext *kctx, KUtilsWriteBuffer *, const char *fmt, ...);
+	const char* (*Kwb_top)(KonohaContext *kctx, KUtilsWriteBuffer *, int);
+	void (*Kwb_free)(KUtilsWriteBuffer *);
 
-	KonohaSimpleMap*  (*Kmap_init)(KonohaContext *kctx, size_t);
-	KonohaSimpleMapEntry* (*Kmap_newentry)(KonohaContext *kctx, KonohaSimpleMap *, uintptr_t);
-	KonohaSimpleMapEntry* (*Kmap_get)(KonohaSimpleMap *, uintptr_t);
-	void (*Kmap_remove)(KonohaSimpleMap *, KonohaSimpleMapEntry *);
-	void (*Kmap_reftrace)(KonohaContext *kctx, KonohaSimpleMap *, void (*)(KonohaContext *kctx, KonohaSimpleMapEntry*));
-	void (*Kmap_free)(KonohaContext *kctx, KonohaSimpleMap *, void (*)(KonohaContext *kctx, void *));
-	ksymbol_t (*Kmap_getcode)(KonohaContext *kctx, KonohaSimpleMap *, kArray *, const char *, size_t, uintptr_t, int, ksymbol_t);
+	KUtilsHashMap*  (*Kmap_init)(KonohaContext *kctx, size_t);
+	KUtilsHashMapEntry* (*Kmap_newentry)(KonohaContext *kctx, KUtilsHashMap *, uintptr_t);
+	KUtilsHashMapEntry* (*Kmap_get)(KUtilsHashMap *, uintptr_t);
+	void (*Kmap_remove)(KUtilsHashMap *, KUtilsHashMapEntry *);
+	void (*Kmap_reftrace)(KonohaContext *kctx, KUtilsHashMap *, void (*)(KonohaContext *kctx, KUtilsHashMapEntry*));
+	void (*Kmap_free)(KonohaContext *kctx, KUtilsHashMap *, void (*)(KonohaContext *kctx, void *));
+	ksymbol_t (*Kmap_getcode)(KonohaContext *kctx, KUtilsHashMap *, kArray *, const char *, size_t, uintptr_t, int, ksymbol_t);
 
 
 	kfileline_t     (*Kfileid)(KonohaContext *kctx, const char *, size_t, int spol, ksymbol_t def);
@@ -1275,7 +1271,7 @@ struct LibKonohaApiVar {
 #define kwb_vprintf(W,FMT,ARG)   (KPI)->Kwb_vprintf(kctx,W, FMT, ARG)
 #define kwb_printf(W,FMT,...)    (KPI)->Kwb_printf(kctx, W, FMT, ## __VA_ARGS__)
 
-#define kwb_top(W,IS)            (KPI)->Kwb_top(kctx, W, IS)
+#define KUtilsWriteBufferop(W,IS)            (KPI)->Kwb_top(kctx, W, IS)
 #define kwb_bytesize(W)          (((W)->m)->bytesize - (W)->pos)
 #define kwb_free(W)              (KPI)->Kwb_free(W)
 

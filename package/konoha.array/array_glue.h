@@ -81,7 +81,7 @@ static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp _RIX)
 // Array
 struct _kAbstractArray {
 	KonohaObjectHeader h;
-	karray_t a;
+	KUtilsGrowingArray a;
 };
 
 static void NArray_ensureMinimumSize(KonohaContext *kctx, struct _kAbstractArray *a, size_t min)
