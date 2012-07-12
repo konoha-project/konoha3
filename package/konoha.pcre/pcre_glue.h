@@ -688,9 +688,9 @@ static int parseREGEX(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, in
 	if(tenv->source[pos] == '*' || tenv->source[pos] == '/') {
 		return parseSLASH(kctx, tk, tenv, tok_start);
 	}
-	int tlsize = kArray_size(tenv->list);
+	int tlsize = kArray_size(tenv->tokenList);
 	if(tlsize > 0) {
-		kToken *tkPrev = tenv->list->toks[tlsize - 1];
+		kToken *tkPrev = tenv->tokenList->toks[tlsize - 1];
 		if(tkPrev->kw == TK_INT ||
 			(kToken_topch(tkPrev) != '(' && tkPrev->kw == TK_SYMBOL)) {
 			return parseSLASH(kctx, tk, tenv, tok_start);

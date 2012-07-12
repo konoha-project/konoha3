@@ -84,13 +84,13 @@ typedef int (*TokenizeFunc)(KonohaContext *, kTokenVar *, TokenizerEnv *, int);
 struct TokenizerEnv {
 	const char         *source;
 	size_t              sourceLength;
-	kfileline_t             uline;
-	kArray             *list;
+	kfileline_t         currentLine;
+	kArray             *tokenList;
 	int                 tabsize;
-	const TokenizeFunc *cfunc;
+	const TokenizeFunc *cfuncs;
 	union {
-		kFunc         **func;
-		kArray        **funcList;
+		kFunc         **funcs;
+		kArray        **funcLists;
 	};
 	kString            *preparedString;
 };

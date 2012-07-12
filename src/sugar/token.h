@@ -48,7 +48,7 @@ static int parseINDENT(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, i
 
 static int parseNL(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int pos)
 {
-	tenv->uline += 1;
+	tenv->currentLine += 1;
 	return parseINDENT(kctx, tk, tenv, pos+1);
 }
 
@@ -167,12 +167,12 @@ static int parseCOMMENT(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, 
 	int ch, prev = 0, level = 1, pos = tok_start + 2;
 	/*@#nnnn is line number */
 	if(tenv->source[pos] == '@' && tenv->source[pos+1] == '#' && isdigit(tenv->source[pos+2])) {
-		tenv->uline >>= (sizeof(kshort_t)*8);
-		tenv->uline = (tenv->uline<<(sizeof(kshort_t)*8))  | (kshort_t)strtoll(tenv->source + pos + 2, NULL, 10);
+		tenv->currentLine >>= (sizeof(kshort_t)*8);
+		tenv->currentLine = (tenv->currentLine<<(sizeof(kshort_t)*8))  | (kshort_t)strtoll(tenv->source + pos + 2, NULL, 10);
 	}
 	while((ch = tenv->source[pos++]) != 0) {
 		if(ch == '\n') {
-			tenv->uline += 1;
+			tenv->currentLine += 1;
 		}
 		if(prev == '*' && ch == '/') {
 			level--;
@@ -396,7 +396,7 @@ static int callFuncTokenize(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, Token
 		int i;
 		const char *t = tenv->source;
 		for(i = tok_start; i < pos; i++) {
-			if(t[0] == '\n') tenv->uline += 1;
+			if(t[0] == '\n') tenv->currentLine += 1;
 		}
 	}
 	return pos;
@@ -405,8 +405,8 @@ static int callFuncTokenize(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, Token
 static int tokenizeEach(KonohaContext *kctx, int kchar, kTokenVar* tk, TokenizerEnv *tenv, int tok_start)
 {
 	int pos;
-	if(tenv->func != NULL && tenv->func[kchar] != NULL) {
-		kFunc *fo = tenv->func[kchar];
+	if(tenv->funcs != NULL && tenv->funcs[kchar] != NULL) {
+		kFunc *fo = tenv->funcs[kchar];
 		if(IS_Array(fo)) {
 			kArray *a = (kArray*)fo;
 			int i;
@@ -419,7 +419,7 @@ static int tokenizeEach(KonohaContext *kctx, int kchar, kTokenVar* tk, Tokenizer
 		pos = callFuncTokenize(kctx, fo, tk, tenv, tok_start);
 		if(pos > tok_start) return pos;
 	}
-	pos = tenv->cfunc[kchar](kctx, tk, tenv, tok_start);
+	pos = tenv->cfuncs[kchar](kctx, tk, tenv, tok_start);
 	return pos;
 }
 
@@ -427,20 +427,20 @@ static void tokenize(KonohaContext *kctx, TokenizerEnv *tenv)
 {
 	int ch, pos = 0;
 	kTokenVar *tk = new_Var(Token, 0);
-	tk->uline = tenv->uline;
+	tk->uline = tenv->currentLine;
 	pos = parseINDENT(kctx, tk, tenv, pos);
 	while((ch = kchar(tenv->source, pos)) != 0) {
 		if(tk->kw != 0) {
-			kArray_add(tenv->list, tk);
+			kArray_add(tenv->tokenList, tk);
 			tk = new_Var(Token, 0);
-			tk->uline = tenv->uline;
+			tk->uline = tenv->currentLine;
 		}
 		int pos2 = tokenizeEach(kctx, ch, tk, tenv, pos);
 		assert(pos2 > pos);
 		pos = pos2;
 	}
 	if(tk->kw != 0) {  // FIXME: Memory Leaks ???
-		kArray_add(tenv->list, tk);
+		kArray_add(tenv->tokenList, tk);
 	}
 }
 
@@ -530,17 +530,17 @@ static void NameSpace_tokenize(KonohaContext *kctx, kNameSpace *ns, const char *
 	TokenizerEnv tenv = {
 		.source = source,
 		.sourceLength = strlen(source),
-		.uline  = uline,
-		.list   = a,
+		.currentLine  = uline,
+		.tokenList   = a,
 		.tabsize = 4,
-		.cfunc   = (ns == NULL) ? MiniKonohaTokenMatrix : NameSpace_tokenMatrix(kctx, ns),
+		.cfuncs   = (ns == NULL) ? MiniKonohaTokenMatrix : NameSpace_tokenMatrix(kctx, ns),
 	};
 	INIT_GCSTACK();
 	kString *preparedString = new_kString(tenv.source, tenv.sourceLength, SPOL_ASCII|SPOL_TEXT|SPOL_NOPOOL);
 	PUSH_GCSTACK(preparedString);
 	tenv.preparedString = preparedString;
 	if(ns != NULL) {
-		tenv.func = NameSpace_tokenFuncMatrix(kctx, ns);
+		tenv.funcs = NameSpace_tokenFuncMatrix(kctx, ns);
 	}
 	tokenize(kctx, &tenv);
 	RESET_GCSTACK();
