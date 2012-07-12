@@ -39,7 +39,7 @@ static void NameSpace_init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void syntax_reftrace(KonohaContext *kctx, kmape_t *p)
 {
-	ksyntax_t *syn = (ksyntax_t*)p->uvalue;
+	SugarSyntax *syn = (SugarSyntax*)p->uvalue;
 	BEGIN_REFTRACE(6);
 	KREFTRACEn(syn->syntaxRuleNULL);
 	KREFTRACEv(syn->PatternMatch);
@@ -71,7 +71,7 @@ static void NameSpace_reftrace(KonohaContext *kctx, kObject *o)
 
 static void syntax_free(KonohaContext *kctx, void *p)
 {
-	KFREE(p, sizeof(ksyntax_t));
+	KFREE(p, sizeof(SugarSyntax));
 }
 
 static void NameSpace_free(KonohaContext *kctx, kObject *o)
@@ -90,18 +90,18 @@ static void NameSpace_free(KonohaContext *kctx, kObject *o)
 static void checkFuncArray(KonohaContext *kctx, kFunc **synp);
 static void parseSyntaxRule(KonohaContext *kctx, const char *rule, kline_t pline, kArray *a);
 
-static ksyntax_t* NameSpace_syn(KonohaContext *kctx, kNameSpace *ks0, ksymbol_t kw, int isnew)
+static SugarSyntax* NameSpace_syn(KonohaContext *kctx, kNameSpace *ks0, ksymbol_t kw, int isnew)
 {
 	kNameSpace *ks = ks0;
 	uintptr_t hcode = kw;
-	ksyntax_t *parent = NULL;
+	SugarSyntax *parent = NULL;
 	assert(ks0 != NULL);  /* scan-build: remove warning */
 	while(ks != NULL) {
 		if(ks->syntaxMapNN != NULL) {
 			kmape_t *e = kmap_get(ks->syntaxMapNN, hcode);
 			while(e != NULL) {
 				if(e->hcode == hcode) {
-					parent = (ksyntax_t*)e->uvalue;
+					parent = (SugarSyntax*)e->uvalue;
 					if(isnew && ks0 != ks) goto L_NEW;
 					return parent;
 				}
@@ -116,11 +116,11 @@ static ksyntax_t* NameSpace_syn(KonohaContext *kctx, kNameSpace *ks0, ksymbol_t 
 			((kNameSpaceVar*)ks0)->syntaxMapNN = kmap_init(0);
 		}
 		kmape_t *e = kmap_newentry(ks0->syntaxMapNN, hcode);
-		struct _ksyntax *syn = (struct _ksyntax*)KCALLOC(sizeof(ksyntax_t), 1);
+		SugarSyntaxVar *syn = (SugarSyntaxVar*)KCALLOC(sizeof(SugarSyntax), 1);
 		e->uvalue = (uintptr_t)syn;
 
 		if(parent != NULL) {  // TODO: RCGC
-			memcpy(syn, parent, sizeof(ksyntax_t));
+			memcpy(syn, parent, sizeof(SugarSyntax));
 			checkFuncArray(kctx, &(syn->PatternMatch));
 			checkFuncArray(kctx, &(syn->ParseExpr));
 			checkFuncArray(kctx, &(syn->TopStmtTyCheck));
@@ -157,7 +157,7 @@ static void checkFuncArray(KonohaContext *kctx, kFunc **synp)
 
 static void SYN_setSugarFunc(KonohaContext *kctx, kNameSpace *ks, ksymbol_t kw, size_t idx, kFunc *fo)
 {
-	struct _ksyntax *syn = (struct _ksyntax *)NameSpace_syn(kctx, ks, kw, 1/*new*/);
+	SugarSyntaxVar *syn = (SugarSyntaxVar *)NameSpace_syn(kctx, ks, kw, 1/*new*/);
 	kFunc **synp = &(syn->PatternMatch);
 	DBG_ASSERT(idx <= SYNIDX_ExprTyCheck);
 	KSETv(synp[idx], fo);
@@ -165,7 +165,7 @@ static void SYN_setSugarFunc(KonohaContext *kctx, kNameSpace *ks, ksymbol_t kw, 
 
 static void SYN_addSugarFunc(KonohaContext *kctx, kNameSpace *ks, ksymbol_t kw, size_t idx, kFunc *fo)
 {
-	struct _ksyntax *syn = (struct _ksyntax *)NameSpace_syn(kctx, ks, kw, 1/*new*/);
+	SugarSyntaxVar *syn = (SugarSyntaxVar *)NameSpace_syn(kctx, ks, kw, 1/*new*/);
 	kFunc **synp = &(syn->PatternMatch);
 	DBG_ASSERT(idx <= SYNIDX_ExprTyCheck);
 	if(synp[idx] == kmodsugar->UndefinedParseExpr || synp[idx] == kmodsugar->UndefinedStmtTyCheck || synp[idx] == kmodsugar->UndefinedExprTyCheck) {
@@ -197,7 +197,7 @@ static void NameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ks, KDEFINE_
 	MethodFunc pPatternMatch = NULL, pParseExpr = NULL, pStmtTyCheck = NULL, pExprTyCheck = NULL;
 	kFunc *mPatternMatch = NULL, *mParseExpr = NULL, *mStmtTyCheck = NULL, *mExprTyCheck = NULL;
 	while(syndef->kw != KW_END) {
-		struct _ksyntax* syn = (struct _ksyntax*)NameSpace_syn(kctx, ks, syndef->kw, 1/*isnew*/);
+		SugarSyntaxVar* syn = (SugarSyntaxVar*)NameSpace_syn(kctx, ks, syndef->kw, 1/*isnew*/);
 		syn->flag  |= ((kshortflag_t)syndef->flag);
 		if(syndef->type != 0) {
 			syn->ty = syndef->type;
@@ -670,7 +670,7 @@ static void Expr_init(KonohaContext *kctx, kObject *o, void *conf)
 	expr->ty         =   TY_var;
 	KINITv(expr->tk, K_NULLTOKEN);
 	KINITv(expr->data, K_NULL);
-	expr->syn = (ksyntax_t*)conf;
+	expr->syn = (SugarSyntax*)conf;
 }
 
 static void Expr_reftrace(KonohaContext *kctx, kObject *o)
@@ -698,7 +698,7 @@ static kExprVar* Expr_vadd(KonohaContext *kctx, kExprVar *expr, int n, va_list a
 	return expr;
 }
 
-static kExpr* new_ConsExpr(KonohaContext *kctx, ksyntax_t *syn, int n, ...)
+static kExpr* new_ConsExpr(KonohaContext *kctx, SugarSyntax *syn, int n, ...)
 {
 	va_list ap;
 	va_start(ap, n);

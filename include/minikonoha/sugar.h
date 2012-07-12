@@ -76,10 +76,10 @@ struct _kpackage {
 
 // tokenizer
 #define KCHAR_MAX  41
-struct tenv_t;
-typedef int (*TokenizeFunc)(KonohaContext *kctx, kTokenVar *, struct tenv_t *, int);
+struct TokenizerEnv;
+typedef int (*TokenizeFunc)(KonohaContext *, kTokenVar *, struct TokenizerEnv *, int);
 
-typedef struct tenv_t {
+typedef struct TokenizerEnv {
 	const char   *source;
 	size_t        source_length;
 	kline_t       uline;
@@ -91,7 +91,7 @@ typedef struct tenv_t {
 		kArray **funcList;
 	};
 	kString *preparedString;
-} tenv_t;
+} TokenizerEnv;
 
 /******
 // ParseToken
@@ -114,7 +114,7 @@ typedef struct tenv_t {
 
 // Expr ParseExpr(Stmt stmt, Token[] tls, int s, int c, int e)
 #define VAR_ParseExpr(STMT, TLS, S, C, E) \
-		ksyntax_t *syn = (ksyntax_t*)sfp[0].ndata;\
+		SugarSyntax *syn = (SugarSyntax*)sfp[0].ndata;\
 		kStmt *STMT = (kStmt*)sfp[1].o;\
 		kArray *TLS = (kArray*)sfp[2].o;\
 		int S = (int)sfp[3].ivalue;\
@@ -136,8 +136,10 @@ typedef struct tenv_t {
 		ktype_t TY = (ktype_t)sfp[4].ivalue;\
 		(void)STMT; (void)EXPR; (void)GMA; (void)TY;\
 
-typedef const struct _ksyntax ksyntax_t;
-struct _ksyntax {
+typedef const struct SugarSyntaxVar   SugarSyntax;
+typedef struct SugarSyntaxVar         SugarSyntaxVar;
+
+struct SugarSyntaxVar {
 	ksymbol_t  kw; 	kshortflag_t flag;
 	kArray   *syntaxRuleNULL;
 	kFunc    *PatternMatch;
@@ -263,7 +265,7 @@ struct kExprVar {
 		kBlock* block;
 	};
 	union {
-		ksyntax_t *syn;
+		SugarSyntax *syn;
 		kint_t     ivalue;
 		kfloat_t   fvalue;
 		uintptr_t  ndata;
@@ -284,7 +286,7 @@ struct kExprVar {
 struct kStmtVar {
 	KonohaObjectHeader h;
 	kline_t uline;
-	ksyntax_t *syn;
+	SugarSyntax *syn;
 	kBlock *parentNULL;
 	kushort_t build;
 };
@@ -475,7 +477,7 @@ typedef struct {
 	kExpr *    (*new_TypedMethodCall)(KonohaContext *kctx, kStmt *, ktype_t ty, kMethod *mtd, kGamma *gma, int n, ...);
 	void       (*Stmt_toExprCall)(KonohaContext *kctx, kStmt *stmt, kMethod *mtd, int n, ...);
 
-	ksyntax_t* (*NameSpace_syn)(KonohaContext *kctx, kNameSpace *, ksymbol_t, int);
+	SugarSyntax* (*NameSpace_syn)(KonohaContext *kctx, kNameSpace *, ksymbol_t, int);
 	void       (*NameSpace_defineSyntax)(KonohaContext *kctx, kNameSpace *, KDEFINE_SYNTAX *);
 	void       (*SYN_setSugarFunc)(KonohaContext *kctx, kNameSpace *ks, ksymbol_t kw, size_t idx, kFunc *fo);
 	void       (*SYN_addSugarFunc)(KonohaContext *kctx, kNameSpace *ks, ksymbol_t kw, size_t idx, kFunc *fo);
@@ -485,7 +487,7 @@ typedef struct {
 	void       (*Block_insertAfter)(KonohaContext *kctx, kBlock *bk, kStmt *target, kStmt *stmt);
 
 	kExpr*     (*Stmt_newExpr2)(KonohaContext *kctx, kStmt *stmt, kArray *tls, int s, int e);
-	kExpr*     (*new_ConsExpr)(KonohaContext *kctx, ksyntax_t *syn, int n, ...);
+	kExpr*     (*new_ConsExpr)(KonohaContext *kctx, SugarSyntax *syn, int n, ...);
 	kExpr *    (*Stmt_addExprParams)(KonohaContext *kctx, kStmt *, kExpr *, kArray *tls, int s, int e, int allowEmpty);
 	kExpr *    (*Expr_rightJoin)(KonohaContext *kctx, kExpr *, kStmt *, kArray *, int, int, int);
 
@@ -580,7 +582,7 @@ typedef struct {
 
 //#define KW_(T)                               _e->keyword(kctx, T, sizeof(T)-1, SYM_NONAME)
 #define SYN_(KS, KW)                         _e->NameSpace_syn(kctx, KS, KW, 0)
-#define NEWSYN_(KS, KW)                      (struct _ksyntax*)_e->NameSpace_syn(kctx, KS, KW, 1)
+#define NEWSYN_(KS, KW)                      (SugarSyntaxVar*)_e->NameSpace_syn(kctx, KS, KW, 1)
 
 #define kStmt_token(STMT, KW, DEF)           _e->Stmt_token(kctx, STMT, KW, DEF)
 #define kStmt_expr(STMT, KW, DEF)            _e->Stmt_expr(kctx, STMT, KW, DEF)
@@ -613,7 +615,7 @@ static inline kNameSpace *Stmt_ks(KonohaContext *kctx, kStmt *stmt)
 
 #define kStmt_setsyn(STMT, S)  Stmt_setsyn(kctx, STMT, S)
 #define kStmt_done(STMT)       Stmt_setsyn(kctx, STMT, NULL)
-static inline void Stmt_setsyn(KonohaContext *kctx, kStmt *stmt, ksyntax_t *syn)
+static inline void Stmt_setsyn(KonohaContext *kctx, kStmt *stmt, SugarSyntax *syn)
 {
 //	if(syn == NULL && stmt->syn != NULL) {
 //		DBG_P("DONE: STMT='%s'", KW_t(syn->kw));
@@ -629,7 +631,7 @@ static inline void Stmt_typed(kStmt *stmt, int build)
 	}
 }
 
-static inline void kExpr_setsyn(kExpr *expr, ksyntax_t *syn)
+static inline void kExpr_setsyn(kExpr *expr, SugarSyntax *syn)
 {
 	((kExprVar*)expr)->syn = syn;
 }

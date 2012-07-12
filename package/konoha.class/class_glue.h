@@ -230,7 +230,7 @@ static kbool_t class_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t p
 
 // --------------------------------------------------------------------------
 
-static kExpr* NewExpr(KonohaContext *kctx, ksyntax_t *syn, kToken *tk, ktype_t ty, uintptr_t val)
+static kExpr* NewExpr(KonohaContext *kctx, SugarSyntax *syn, kToken *tk, ktype_t ty, uintptr_t val)
 {
 	kExprVar *expr = new_Var(Expr, syn);
 	KSETv(expr->tk, tk);
@@ -258,13 +258,13 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 		}
 
 		if(TK_isType(tk1) && tk2->kw == AST_PARENTHESIS) {  // new C (...)
-			ksyntax_t *syn = SYN_(kStmt_ks(stmt), KW_ExprMethodCall);
+			SugarSyntax *syn = SYN_(kStmt_ks(stmt), KW_ExprMethodCall);
 			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, tkNEW, NewExpr(kctx, syn, tk1, TK_type(tk1), 0));
 			tkNEW->kw = MN_new;
 			RETURN_(expr);
 		}
 		if(TK_isType(tk1) && tk2->kw == AST_BRACKET) {     // new C [...]
-			ksyntax_t *syn = SYN_(kStmt_ks(stmt), KW_new);
+			SugarSyntax *syn = SYN_(kStmt_ks(stmt), KW_new);
 			KonohaClass *ct = CT_p0(kctx, CT_Array, TK_type(tk1));
 			tkNEW->kw = MN_("newArray");
 			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, tkNEW, NewExpr(kctx, syn, tk1, ct->cid, 0));

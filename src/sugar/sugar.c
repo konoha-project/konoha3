@@ -94,9 +94,9 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ks)
 		{ .kw = KW_END, },
 	};
 	NameSpace_defineSyntax(kctx, ks, SYNTAX);
-	struct _ksyntax *syn = (struct _ksyntax*)SYN_(ks, KW_void);
+	SugarSyntaxVar *syn = (SugarSyntaxVar*)SYN_(ks, KW_void);
 	syn->ty = TY_void; // it's not cool, but necessary
-	syn = (struct _ksyntax*)SYN_(ks, KW_UsymbolPattern);
+	syn = (SugarSyntaxVar*)SYN_(ks, KW_UsymbolPattern);
 	KINITv(syn->syntaxRuleNULL, new_(TokenArray, 0));
 	parseSyntaxRule(kctx, "$USYMBOL \"=\" $expr", 0, syn->syntaxRuleNULL);
 }

@@ -836,7 +836,7 @@ static kbool_t Stmt_TyCheckFunc(KonohaContext *kctx, kFunc *fo, kStmt *stmt, kGa
 	return lsfp[0].bvalue;
 }
 
-static kbool_t Stmt_TyCheck(KonohaContext *kctx, ksyntax_t *syn, kStmt *stmt, kGamma *gma)
+static kbool_t Stmt_TyCheck(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, kGamma *gma)
 {
 	kFunc *fo = kGamma_isTOPLEVEL(gma) ? syn->TopStmtTyCheck : syn->StmtTyCheck;
 	kbool_t result;
@@ -864,7 +864,7 @@ static kbool_t Block_tyCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
 	int i, result = true, lvarsize = gma->genv->l.varsize;
 	for(i = 0; i < kArray_size(bk->blocks); i++) {
 		kStmt *stmt = (kStmt*)bk->blocks->list[i];
-		ksyntax_t *syn = stmt->syn;
+		SugarSyntax *syn = stmt->syn;
 		dumpStmt(kctx, stmt);
 		if(syn == NULL) continue; /* This means 'done' */
 		if(kStmt_isERR(stmt) || !Stmt_TyCheck(kctx, syn, stmt, gma)) {
@@ -1131,7 +1131,7 @@ static kParam *Stmt_newMethodParamNULL(KonohaContext *kctx, kStmt *stmt, kGamma*
 {
 	kParam *pa = (kParam*)kObject_getObjectNULL(stmt, KW_ParamsPattern);
 	if(pa == NULL || !IS_Param(pa)) {
-		ksyntax_t *syn = SYN_(kStmt_ks(stmt), KW_ParamsPattern);
+		SugarSyntax *syn = SYN_(kStmt_ks(stmt), KW_ParamsPattern);
 		if(!Stmt_TyCheck(kctx, syn, stmt, gma)) {
 			return NULL;
 		}

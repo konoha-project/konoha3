@@ -62,7 +62,7 @@ static kbool_t Token_resolved(KonohaContext *kctx, kNameSpace *ks, kTokenVar *tk
 {
 	ksymbol_t kw = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NONAME);
 	if(kw != SYM_NONAME) {
-		ksyntax_t *syn = SYN_(ks, kw);
+		SugarSyntax *syn = SYN_(ks, kw);
 		if(syn != NULL) {
 			if(syn->ty != TY_unknown) {
 				tk->kw = KW_TypePattern;
@@ -329,7 +329,7 @@ static int PatternMatchFunc(KonohaContext *kctx, kFunc *fo, kStmt *stmt, ksymbol
 	return (int)lsfp[0].ivalue;
 }
 
-static int PatternMatch(KonohaContext *kctx, ksyntax_t *syn, kStmt *stmt, ksymbol_t name, kArray *tls, int s, int e)
+static int PatternMatch(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, ksymbol_t name, kArray *tls, int s, int e)
 {
 	kFunc *fo = syn->PatternMatch;
 	int next;
@@ -377,7 +377,7 @@ static int matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *rules, kArr
 		kToken *rule = rules->toks[ri];
 		kToken *tk = tls->toks[ti];
 		if(KW_isPATTERN(rule->kw)) {
-			ksyntax_t *syn = SYN_(kStmt_ks(stmt), rule->kw);
+			SugarSyntax *syn = SYN_(kStmt_ks(stmt), rule->kw);
 			if(syn == NULL || syn->PatternMatch == kmodsugar->UndefinedParseExpr/*NULL*/) {
 				kToken_p(stmt, tk, ERR_, "unknown syntax pattern: %s%s", KW_t(rule->kw));
 				return -1;
@@ -442,7 +442,7 @@ static inline kToken* TokenArray_nextToken(KonohaContext *kctx, kArray *tls, int
 	return (s < e) ? tls->toks[s] : K_NULLTOKEN;
 }
 
-static ksyntax_t* NameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ks, kArray *tls, int s, int e)
+static SugarSyntax* NameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ks, kArray *tls, int s, int e)
 {
 	kToken *tk = tls->toks[s];
 	if(TK_isType(tk)) {
@@ -467,7 +467,7 @@ static ksyntax_t* NameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ks, k
 		}
 		return SYN_(ks, KW_ExprPattern);
 	}
-	ksyntax_t *syn = SYN_(ks, tk->kw);
+	SugarSyntax *syn = SYN_(ks, tk->kw);
 	DBG_P("tk->kw=%d,%d, tk->kw=%s%s, syn=%p", tk->kw, SYM_UNMASK(tk->kw), KW_t(tk->kw), syn);
 	DBG_ASSERT(syn != NULL);
 	if(syn->syntaxRuleNULL == NULL) {
@@ -488,7 +488,7 @@ static ksyntax_t* NameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ks, k
 static kbool_t Stmt_parseSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *tls, int s, int e)
 {
 	kbool_t ret = false;
-	ksyntax_t *syn = NameSpace_getSyntaxRule(kctx, kStmt_ks(stmt), tls, s, e);
+	SugarSyntax *syn = NameSpace_getSyntaxRule(kctx, kStmt_ks(stmt), tls, s, e);
 	DBG_ASSERT(syn != NULL);
 	if(syn->syntaxRuleNULL != NULL) {
 		((kStmtVar*)stmt)->syn = syn;
@@ -523,7 +523,7 @@ static KMETHOD UndefinedParseExpr(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kStmt_p(stmt, ERR_, "undefined expression parser for '%s'", kToken_s(tls->toks[c]));
 }
 
-static kExpr *ParseExprFunc(KonohaContext *kctx, ksyntax_t *syn, kFunc *fo, kStmt *stmt, kArray *tls, int s, int c, int e)
+static kExpr *ParseExprFunc(KonohaContext *kctx, SugarSyntax *syn, kFunc *fo, kStmt *stmt, kArray *tls, int s, int c, int e)
 {
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 6);
 	KSETv(lsfp[K_CALLDELTA+0].o, fo->self);
@@ -539,7 +539,7 @@ static kExpr *ParseExprFunc(KonohaContext *kctx, ksyntax_t *syn, kFunc *fo, kStm
 	return lsfp[0].expr;
 }
 
-static kExpr *ParseExpr(KonohaContext *kctx, ksyntax_t *syn, kStmt *stmt, kArray *tls, int s, int c, int e)
+static kExpr *ParseExpr(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, kArray *tls, int s, int c, int e)
 {
 	kFunc *fo = (syn == NULL || syn->ParseExpr == NULL) ? kmodsugar->UndefinedParseExpr : syn->ParseExpr;
 	kExpr *texpr;
@@ -565,7 +565,7 @@ static kExpr *ParseExpr(KonohaContext *kctx, ksyntax_t *syn, kStmt *stmt, kArray
 
 static kbool_t Stmt_isUnaryOp(KonohaContext *kctx, kStmt *stmt, kToken *tk)
 {
-	ksyntax_t *syn = SYN_(kStmt_ks(stmt), tk->kw);
+	SugarSyntax *syn = SYN_(kStmt_ks(stmt), tk->kw);
 	return (syn->op1 != SYM_NONAME);
 }
 
@@ -579,12 +579,12 @@ static int Stmt_skipUnaryOp(KonohaContext *kctx, kStmt *stmt, kArray *tls, int s
 	return i;
 }
 
-static int Stmt_findBinaryOp(KonohaContext *kctx, kStmt *stmt, kArray *tls, int s, int e, ksyntax_t **synRef)
+static int Stmt_findBinaryOp(KonohaContext *kctx, kStmt *stmt, kArray *tls, int s, int e, SugarSyntax **synRef)
 {
 	int idx = -1, i, prif = 0;
 	for(i = Stmt_skipUnaryOp(kctx, stmt, tls, s, e) + 1; i < e; i++) {
 		kToken *tk = tls->toks[i];
-		ksyntax_t *syn = SYN_(kStmt_ks(stmt), tk->kw);
+		SugarSyntax *syn = SYN_(kStmt_ks(stmt), tk->kw);
 		if(syn->priority > 0) {
 			if(prif < syn->priority || (prif == syn->priority && !(FLAG_is(syn->flag, SYNFLAG_ExprLeftJoinOp2)) )) {
 				prif = syn->priority;
@@ -620,7 +620,7 @@ static kExpr* Stmt_newExpr2(KonohaContext *kctx, kStmt *stmt, kArray *tls, int s
 {
 	if(!kStmt_isERR(stmt)) {
 		if(s < e) {
-			ksyntax_t *syn = NULL;
+			SugarSyntax *syn = NULL;
 			int idx = Stmt_findBinaryOp(kctx, stmt, tls, s, e, &syn);
 			if(idx != -1) {
 				//DBG_P("** Found BinaryOp: s=%d, idx=%d, e=%d, '%s'**", s, idx, e, kToken_s(tls->toks[idx]));

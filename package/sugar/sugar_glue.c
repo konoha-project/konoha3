@@ -138,14 +138,14 @@ static KMETHOD Stmt_printError(KonohaContext *kctx, KonohaStack *sfp _RIX)
 // --------------------------------------------------------------------------
 // AST Method
 
-//static ksyntax_t* get_syntax(KonohaContext *kctx, kNameSpace *ks, kString *key)
+//static SugarSyntax* get_syntax(KonohaContext *kctx, kNameSpace *ks, kString *key)
 //{
 //	USING_SUGAR;
 //	symbol_t kw = KW_s(key);
 //	if(kw == SYM_NONAME) {
 //		kreportf(CRIT_, "undefined keyword: %s", S_text(key));
 //	}
-//	ksyntax_t *syn = SYN_(ks, kw);
+//	SugarSyntax *syn = SYN_(ks, kw);
 //	if(syn == NULL) {
 //		kreportf(CRIT_, "undefined syntax: %s", S_text(key));
 //	}
@@ -308,7 +308,7 @@ static kbool_t isSubKeyword(KonohaContext *kctx, kArray *tls, int s, int e)
 	return 0;
 }
 
-static struct _ksyntax *toks_syntax(KonohaContext *kctx, kNameSpace *ks, kArray *tls)
+static SugarSyntaxVar *toks_syntax(KonohaContext *kctx, kNameSpace *ks, kArray *tls)
 {
 	USING_SUGAR;
 	int s = 0, e = kArray_size(tls);
@@ -323,7 +323,7 @@ static struct _ksyntax *toks_syntax(KonohaContext *kctx, kNameSpace *ks, kArray 
 			else {
 				kw = ksymbolA(S_text(tls->toks[s]->text), S_size(tls->toks[s]->text), SYM_NEWID);
 			}
-			return (struct _ksyntax*)NEWSYN_(ks, kw);
+			return (SugarSyntaxVar*)NEWSYN_(ks, kw);
 		}
 	}
 	return NULL;
@@ -336,7 +336,7 @@ static KMETHOD StmtTyCheck_sugar(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	VAR_StmtTyCheck(stmt, gma);
 	kTokenArray *tls = (kTokenArray*)kObject_getObject(stmt, KW_ToksPattern, NULL);
 	if(tls != NULL) {
-		struct _ksyntax *syn = toks_syntax(kctx, gma->genv->ks, tls);
+		SugarSyntaxVar *syn = toks_syntax(kctx, gma->genv->ks, tls);
 		if(syn != NULL) {
 			if(syn->syntaxRuleNULL != NULL) {
 				SUGAR Stmt_p(kctx, stmt, NULL, WARN_, "overriding syntax rule: %s", KW_t(syn->kw));

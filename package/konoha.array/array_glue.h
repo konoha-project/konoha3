@@ -164,7 +164,7 @@ static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp _RIX)
 			kTokenVar *tkN = new_Var(Token, 0);
 			tkN->kw = MN_toGETTER(0);
 			tkN->uline = tk->uline;
-			ksyntax_t *syn = SYN_(kStmt_ks(stmt), KW_ExprMethodCall);
+			SugarSyntax *syn = SYN_(kStmt_ks(stmt), KW_ExprMethodCall);
 			lexpr  = SUGAR new_ConsExpr(kctx, syn, 2, tkN, lexpr);
 			lexpr = SUGAR Stmt_addExprParams(kctx, stmt, lexpr, tk->sub, 0, kArray_size(tk->sub), 1/*allowEmpty*/);
 		}

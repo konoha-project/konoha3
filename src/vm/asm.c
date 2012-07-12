@@ -836,7 +836,7 @@ static void LoopStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx
 
 static void JumpStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
-	ksyntax_t *syn = stmt->syn;
+	SugarSyntax *syn = stmt->syn;
 	kStmt *jump = (kStmt*)kObject_getObject(stmt, syn->kw, NULL);
 	DBG_ASSERT(jump != NULL);
 	DBG_ASSERT(IS_Stmt(jump));
