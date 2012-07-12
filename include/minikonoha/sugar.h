@@ -138,7 +138,7 @@ typedef struct tenv_t {
 
 typedef const struct _ksyntax ksyntax_t;
 struct _ksyntax {
-	ksymbol_t  kw; 	kflag_t flag;
+	ksymbol_t  kw; 	kshortflag_t flag;
 	kArray   *syntaxRuleNULL;
 	kFunc    *PatternMatch;
 	kFunc    *ParseExpr;
@@ -166,17 +166,17 @@ struct _ksyntax {
 #define _OP       .flag = SYNFLAG_ExprOp
 #define _OPLeft   .flag = (SYNFLAG_ExprOp|SYNFLAG_ExprLeftJoinOp2)
 
-#define SYNFLAG_ExprTerm           ((kflag_t)1)
-#define SYNFLAG_ExprOp             ((kflag_t)1 << 1)
-#define SYNFLAG_ExprLeftJoinOp2    ((kflag_t)1 << 2)
-#define SYNFLAG_ExprPostfixOp2     ((kflag_t)1 << 3)
+#define SYNFLAG_ExprTerm           ((kshortflag_t)1)
+#define SYNFLAG_ExprOp             ((kshortflag_t)1 << 1)
+#define SYNFLAG_ExprLeftJoinOp2    ((kshortflag_t)1 << 2)
+#define SYNFLAG_ExprPostfixOp2     ((kshortflag_t)1 << 3)
 
-#define SYNFLAG_StmtBreakExec      ((kflag_t)1 << 8)  /* return, throw */
-#define SYNFLAG_StmtJumpAhead      ((kflag_t)1 << 9)  /* continue */
-#define SYNFLAG_StmtJumpSkip       ((kflag_t)1 << 10)  /* break */
+#define SYNFLAG_StmtBreakExec      ((kshortflag_t)1 << 8)  /* return, throw */
+#define SYNFLAG_StmtJumpAhead      ((kshortflag_t)1 << 9)  /* continue */
+#define SYNFLAG_StmtJumpSkip       ((kshortflag_t)1 << 10)  /* break */
 
 typedef struct KDEFINE_SYNTAX {
-	ksymbol_t kw;  kflag_t flag;
+	ksymbol_t kw;  kshortflag_t flag;
 	const char *rule;
 	const char *op2;
 	const char *op1;
@@ -308,11 +308,11 @@ typedef struct {
 	ktype_t    ty;    ksymbol_t  fn;
 } gammastack_t ;
 
-#define kGamma_TOPLEVEL        (kflag_t)(1)
-#define kGamma_isTOPLEVEL(GMA)  TFLAG_is(kflag_t, GMA->genv->flag, kGamma_TOPLEVEL)
-#define kGamma_ERROR           (kflag_t)(1<<1)
-#define kGamma_isERROR(GMA)    TFLAG_is(kflag_t, GMA->genv->flag, kGamma_ERROR)
-#define kGamma_setERROR(GMA,B) TFLAG_set(kflag_t, GMA->genv->flag, kGamma_ERROR, B)
+#define kGamma_TOPLEVEL        (kshortflag_t)(1)
+#define kGamma_isTOPLEVEL(GMA)  TFLAG_is(kshortflag_t, GMA->genv->flag, kGamma_TOPLEVEL)
+#define kGamma_ERROR           (kshortflag_t)(1<<1)
+#define kGamma_isERROR(GMA)    TFLAG_is(kshortflag_t, GMA->genv->flag, kGamma_ERROR)
+#define kGamma_setERROR(GMA,B) TFLAG_set(kshortflag_t, GMA->genv->flag, kGamma_ERROR, B)
 
 typedef struct {
 	gammastack_t *vars;
@@ -322,7 +322,7 @@ typedef struct {
 } gstack_t ;
 
 typedef struct gmabuf_t {
-	kflag_t  flag;    kflag_t  cflag;
+	kshortflag_t  flag;    kshortflag_t  cflag;
 	kNameSpace        *ks;
 	ktype_t            this_cid;
 	ktype_t            static_cid;

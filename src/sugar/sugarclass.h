@@ -198,7 +198,7 @@ static void NameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ks, KDEFINE_
 	kFunc *mPatternMatch = NULL, *mParseExpr = NULL, *mStmtTyCheck = NULL, *mExprTyCheck = NULL;
 	while(syndef->kw != KW_END) {
 		struct _ksyntax* syn = (struct _ksyntax*)NameSpace_syn(kctx, ks, syndef->kw, 1/*isnew*/);
-		syn->flag  |= ((kflag_t)syndef->flag);
+		syn->flag  |= ((kshortflag_t)syndef->flag);
 		if(syndef->type != 0) {
 			syn->ty = syndef->type;
 		}

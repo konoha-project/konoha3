@@ -131,7 +131,7 @@ static void setfield(KonohaContext *kctx, KDEFINE_CLASS *ct, int fctsize, kclass
 	}
 }
 
-static kclass_t* defineClass(KonohaContext *kctx, kNameSpace *ks, kflag_t cflag, kString *name, kclass_t *supct, int fsize, kline_t pline)
+static kclass_t* defineClass(KonohaContext *kctx, kNameSpace *ks, kshortflag_t cflag, kString *name, kclass_t *supct, int fsize, kline_t pline)
 {
 	KDEFINE_CLASS defNewClass = {
 		.cflag  = cflag,
@@ -186,7 +186,7 @@ static void defineField(KonohaContext *kctx, struct _kclass *ct, int flag, ktype
 static KMETHOD NameSpace_defineClassField(KonohaContext *kctx, ksfp_t *sfp _RIX)
 {
 	ktype_t cid = (ktype_t)sfp[1].ivalue;
-	kflag_t flag = (kflag_t)sfp[2].ivalue;
+	kshortflag_t flag = (kshortflag_t)sfp[2].ivalue;
 	ktype_t ty = (ktype_t)sfp[3].ivalue;
 	kString *name = sfp[4].s;
 	kObject *value = sfp[5].o;
@@ -371,7 +371,7 @@ static void ObjectField_reftrace (KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
-static struct _kclass* defineClassName(KonohaContext *kctx, kNameSpace *ks, kflag_t cflag, kString *name, ktype_t supcid, kline_t pline)
+static struct _kclass* defineClassName(KonohaContext *kctx, kNameSpace *ks, kshortflag_t cflag, kString *name, ktype_t supcid, kline_t pline)
 {
 	KDEFINE_CLASS defNewClass = {
 		.cflag  = cflag,
@@ -437,7 +437,7 @@ static void CT_initField(KonohaContext *kctx, struct _kclass *ct, kclass_t *supc
 	}
 }
 
-static kbool_t CT_declType(KonohaContext *kctx, struct _kclass *ct, kGamma *gma, kStmt *stmt, kExpr *expr, kflag_t flag, ktype_t ty, kline_t pline)
+static kbool_t CT_declType(KonohaContext *kctx, struct _kclass *ct, kGamma *gma, kStmt *stmt, kExpr *expr, kshortflag_t flag, ktype_t ty, kline_t pline)
 {
 	USING_SUGAR;
 	if(Expr_isTerm(expr)) {
@@ -486,7 +486,7 @@ static kbool_t CT_addClassFields(KonohaContext *kctx, struct _kclass *ct, kGamma
 	for(i = 0; i < kArray_size(bk->blocks); i++) {
 		kStmt *stmt = bk->blocks->stmts[i];
 		if(stmt->syn->kw == KW_StmtTypeDecl) {
-			kflag_t flag = kField_Getter | kField_Setter;
+			kshortflag_t flag = kField_Getter | kField_Setter;
 			kToken *tk  = kStmt_token(stmt, KW_TypePattern, NULL);
 			kExpr *expr = kStmt_expr(stmt, KW_ExprPattern, NULL);
 			if(!CT_declType(kctx, ct, gma, stmt, expr, flag, TK_type(tk), pline)) {
@@ -524,7 +524,7 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, ksfp_t *sfp _RIX)
 	VAR_StmtTyCheck(stmt, gma);
 	kToken *tkC = kStmt_token(stmt, KW_UsymbolPattern, NULL);
 	kToken *tkE= kStmt_token(stmt, SYM_("extends"), NULL);
-	kflag_t cflag = 0;
+	kshortflag_t cflag = 0;
 	ktype_t supcid = TY_Object;
 	kclass_t *supct = CT_Object;
 	if (tkE) {

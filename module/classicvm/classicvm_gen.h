@@ -1085,7 +1085,7 @@ typedef struct klr_CHKIDXC_t {
 #define _DEF   (1<<2)
 typedef struct {
 	const char *name;
-	kflag_t   flag;
+	kshortflag_t   flag;
 	kushort_t size;
 	kushort_t types[6];
 } kOPDATA_t;

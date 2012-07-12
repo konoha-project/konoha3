@@ -201,26 +201,26 @@ typedef uintptr_t        kuint_t;
 
 #endif/*K_USING_SYS64_*/
 
-typedef kushort_t        kflag_t;    /* flag field */
+typedef kushort_t        kshortflag_t;    /* flag field */
 
-#define KFLAG_H(N)               ((sizeof(kflag_t)*8)-N)
-#define KFLAG_H0                 ((kflag_t)(1 << KFLAG_H(1)))
-#define KFLAG_H1                 ((kflag_t)(1 << KFLAG_H(2)))
-#define KFLAG_H2                 ((kflag_t)(1 << KFLAG_H(3)))
-#define KFLAG_H3                 ((kflag_t)(1 << KFLAG_H(4)))
-#define KFLAG_H4                 ((kflag_t)(1 << KFLAG_H(5)))
-#define KFLAG_H5                 ((kflag_t)(1 << KFLAG_H(6)))
-#define KFLAG_H6                 ((kflag_t)(1 << KFLAG_H(7)))
-#define KFLAG_H7                 ((kflag_t)(1 << KFLAG_H(8)))
+#define KFLAG_H(N)               ((sizeof(kshortflag_t)*8)-N)
+#define KFLAG_H0                 ((kshortflag_t)(1 << KFLAG_H(1)))
+#define KFLAG_H1                 ((kshortflag_t)(1 << KFLAG_H(2)))
+#define KFLAG_H2                 ((kshortflag_t)(1 << KFLAG_H(3)))
+#define KFLAG_H3                 ((kshortflag_t)(1 << KFLAG_H(4)))
+#define KFLAG_H4                 ((kshortflag_t)(1 << KFLAG_H(5)))
+#define KFLAG_H5                 ((kshortflag_t)(1 << KFLAG_H(6)))
+#define KFLAG_H6                 ((kshortflag_t)(1 << KFLAG_H(7)))
+#define KFLAG_H7                 ((kshortflag_t)(1 << KFLAG_H(8)))
 
 #define TFLAG_is(T,f,op)          (((T)(f) & (T)(op)) == (T)(op))
 #define TFLAG_set1(T,f,op)        f = (((T)(f)) | ((T)(op)))
 #define TFLAG_set0(T,f,op)        f = (((T)(f)) & (~((T)(op))))
 #define TFLAG_set(T,f,op,b)       if(b) {TFLAG_set1(T,f,op);} else {TFLAG_set0(T,f,op);}
 
-#define FLAG_set(f,op)            TFLAG_set1(kflag_t,f,op)
-#define FLAG_unset(f,op)          TFLAG_set0(kflag_t,f,op)
-#define FLAG_is(f,op)             TFLAG_is(kflag_t,f,op)
+#define FLAG_set(f,op)            TFLAG_set1(kshortflag_t,f,op)
+#define FLAG_unset(f,op)          TFLAG_set0(kshortflag_t,f,op)
+#define FLAG_is(f,op)             TFLAG_is(kshortflag_t,f,op)
 
 /* uline */
 
@@ -417,7 +417,7 @@ typedef struct kstack_t {
 	const struct _kArray        *gcstack;
 	karray_t                     cwb;
 	// local info
-	kflag_t                      flag;
+	kshortflag_t                      flag;
 	KonohaContext               *rootctx;
 	void*                        cstack_bottom;  // for GC
 	karray_t                     ref;   // reftrace
@@ -460,14 +460,14 @@ typedef struct kmodshare_t {
 	void (*free)(KonohaContext *kctx, struct kmodshare_t *);
 } kmodshare_t;
 
-#define kContext_Debug          ((kflag_t)(1<<0))
-#define kContext_Interactive    ((kflag_t)(1<<1))
-#define kContext_CompileOnly    ((kflag_t)(1<<2))
+#define kContext_Debug          ((kshortflag_t)(1<<0))
+#define kContext_Interactive    ((kshortflag_t)(1<<1))
+#define kContext_CompileOnly    ((kshortflag_t)(1<<2))
 
-#define KonohaContext_isInteractive(X)  (TFLAG_is(kflag_t,(X)->stack->flag, kContext_Interactive))
-#define KonohaContext_isCompileOnly(X)  (TFLAG_is(kflag_t,(X)->stack->flag, kContext_CompileOnly))
-#define KonohaContext_setInteractive(X)  TFLAG_set1(kflag_t, (X)->stack->flag, kContext_Interactive)
-#define KonohaContext_setCompileOnly(X)  TFLAG_set1(kflag_t, (X)->stack->flag, kContext_CompileOnly)
+#define KonohaContext_isInteractive(X)  (TFLAG_is(kshortflag_t,(X)->stack->flag, kContext_Interactive))
+#define KonohaContext_isCompileOnly(X)  (TFLAG_is(kshortflag_t,(X)->stack->flag, kContext_CompileOnly))
+#define KonohaContext_setInteractive(X)  TFLAG_set1(kshortflag_t, (X)->stack->flag, kContext_Interactive)
+#define KonohaContext_setCompileOnly(X)  TFLAG_set1(kshortflag_t, (X)->stack->flag, kContext_CompileOnly)
 
 
 #define K_FRAME_NCMEMBER \
@@ -533,7 +533,7 @@ typedef struct krbp_t {
 
 
 typedef struct kfield_t {
-	kflag_t    flag    ;
+	kshortflag_t    flag    ;
 	kshort_t   isobj   ;
 	ktype_t    ty      ;
 	ksymbol_t  fn      ;
@@ -558,7 +558,7 @@ struct _kclass;
 
 typedef struct KDEFINE_CLASS {
 	const char *structname;
-	ktype_t     cid;         kflag_t    cflag;
+	ktype_t     cid;         kshortflag_t    cflag;
 	ktype_t     bcid;        ktype_t     supcid;
 	ktype_t    rtype;       kushort_t  psize;
 	struct kparam_t   *cparams;
@@ -582,7 +582,7 @@ typedef const struct _kclass kclass_t;
 struct _kclass {
 	KCLASSSPI;
 	kpack_t   packid;       kpack_t   packdom;
-	ktype_t   cid;           kflag_t  cflag;
+	ktype_t   cid;           kshortflag_t  cflag;
 	ktype_t   bcid;          ktype_t   supcid;
 	ktype_t  p0;            kparamid_t paramdom;
 	kmagicflag_t magicflag;
@@ -635,33 +635,33 @@ struct _kclass {
 #define CT_MethodArray          CT_Array
 #define kMethodArray            kArray
 
-#define kClass_Ref              ((kflag_t)(1<<0))
-#define kClass_Prototype        ((kflag_t)(1<<1))
-#define kClass_Immutable        ((kflag_t)(1<<2))
-#define kClass_Private          ((kflag_t)(1<<4))
-#define kClass_Final            ((kflag_t)(1<<5))
-#define kClass_Singleton        ((kflag_t)(1<<6))
-#define kClass_UnboxType        ((kflag_t)(1<<7))
-#define kClass_Interface        ((kflag_t)(1<<8))
-#define kClass_TypeVar          ((kflag_t)(1<<9))
-#define kClass_Forward          ((kflag_t)(1<<10))
+#define kClass_Ref              ((kshortflag_t)(1<<0))
+#define kClass_Prototype        ((kshortflag_t)(1<<1))
+#define kClass_Immutable        ((kshortflag_t)(1<<2))
+#define kClass_Private          ((kshortflag_t)(1<<4))
+#define kClass_Final            ((kshortflag_t)(1<<5))
+#define kClass_Singleton        ((kshortflag_t)(1<<6))
+#define kClass_UnboxType        ((kshortflag_t)(1<<7))
+#define kClass_Interface        ((kshortflag_t)(1<<8))
+#define kClass_TypeVar          ((kshortflag_t)(1<<9))
+#define kClass_Forward          ((kshortflag_t)(1<<10))
 
-#define CT_isPrivate(ct)      (TFLAG_is(kflag_t,(ct)->cflag, kClass_Private))
+#define CT_isPrivate(ct)      (TFLAG_is(kshortflag_t,(ct)->cflag, kClass_Private))
 
-#define TY_isSingleton(T)     (TFLAG_is(kflag_t,(CT_(T))->cflag, kClass_Singleton))
-#define CT_isSingleton(ct)    (TFLAG_is(kflag_t,(ct)->cflag, kClass_Singleton))
+#define TY_isSingleton(T)     (TFLAG_is(kshortflag_t,(CT_(T))->cflag, kClass_Singleton))
+#define CT_isSingleton(ct)    (TFLAG_is(kshortflag_t,(ct)->cflag, kClass_Singleton))
 
-#define TY_isForward(T)     (TFLAG_is(kflag_t,(CT_(T))->cflag, kClass_Forward))
-#define CT_isForward(ct)    (TFLAG_is(kflag_t,(ct)->cflag, kClass_Forward))
+#define TY_isForward(T)     (TFLAG_is(kshortflag_t,(CT_(T))->cflag, kClass_Forward))
+#define CT_isForward(ct)    (TFLAG_is(kshortflag_t,(ct)->cflag, kClass_Forward))
 
-#define CT_isFinal(ct)         (TFLAG_is(kflag_t,(ct)->cflag, kClass_Final))
+#define CT_isFinal(ct)         (TFLAG_is(kshortflag_t,(ct)->cflag, kClass_Final))
 
 // this is used in konoha.class
 #define CT_isDefined(ct)  ((ct)->fallocsize == 0 || (ct)->fsize == (ct)->fallocsize)
 
-//#define TY_isUnboxType(t)    (TFLAG_is(kflag_t,(ClassTBL(t))->cflag, kClass_UnboxType))
-//#define T_isInterface(t)    (TFLAG_is(kflag_t,(ClassTBL(t))->cflag, kClass_Interface))
-//#define T_isTypeVar(t)      (TFLAG_is(kflag_t,(ClassTBL(t))->cflag, kClass_TypeVar))
+//#define TY_isUnboxType(t)    (TFLAG_is(kshortflag_t,(ClassTBL(t))->cflag, kClass_UnboxType))
+//#define T_isInterface(t)    (TFLAG_is(kshortflag_t,(ClassTBL(t))->cflag, kClass_Interface))
+//#define T_isTypeVar(t)      (TFLAG_is(kshortflag_t,(ClassTBL(t))->cflag, kClass_TypeVar))
 
 #define TY_isFunc(T)    (CT_(T)->bcid == CLASS_Func)
 
@@ -680,14 +680,14 @@ struct _kclass {
 #define kObject_is(O,A)            (TFLAG_is(kmagicflag_t,(O)->h.magicflag,A))
 #define kObject_set(O,A,B)         TFLAG_set(kmagicflag_t,(O)->h.magicflag,A,B)
 
-#define kField_Hidden          ((kflag_t)(1<<0))
-#define kField_Protected       ((kflag_t)(1<<1))
-#define kField_Getter          ((kflag_t)(1<<2))
-#define kField_Setter          ((kflag_t)(1<<3))
-#define kField_Key             ((kflag_t)(1<<4))
-#define kField_Volatile        ((kflag_t)(1<<5))
-#define kField_ReadOnly        ((kflag_t)(1<<6))
-#define kField_Property        ((kflag_t)(1<<7))
+#define kField_Hidden          ((kshortflag_t)(1<<0))
+#define kField_Protected       ((kshortflag_t)(1<<1))
+#define kField_Getter          ((kshortflag_t)(1<<2))
+#define kField_Setter          ((kshortflag_t)(1<<3))
+#define kField_Key             ((kshortflag_t)(1<<4))
+#define kField_Volatile        ((kshortflag_t)(1<<5))
+#define kField_ReadOnly        ((kshortflag_t)(1<<6))
+#define kField_Property        ((kshortflag_t)(1<<7))
 
 /* ------------------------------------------------------------------------ */
 /* Type Variable */
@@ -715,7 +715,7 @@ struct _kclass {
 
 #define K_FASTMALLOC_SIZE  (sizeof(void*) * 8)
 
-#define K_OBJECT_MAGIC           (578L << ((sizeof(kflag_t)*8)))
+#define K_OBJECT_MAGIC           (578L << ((sizeof(kshortflag_t)*8)))
 #define K_CFLAGMASK              (FLAG_Object_Ref)
 #define KNH_MAGICFLAG(f)         (K_OBJECT_MAGIC | ((kmagicflag_t)(f) & K_CFLAGMASK))
 #define DBG_ASSERT_ISOBJECT(o)   DBG_ASSERT(TFLAG_is(uintptr_t,(o)->h.magicflag, K_OBJECT_MAGIC))
