@@ -32,20 +32,20 @@ void test_kString(KonohaContext *kctx)
     intptr_t i;
     kString *s;
     for (i = 0; i < 100; ++i) {
-        s = kctx->lib2->Knew_String(kctx, "abcd", 4, 0);
+        s = kctx->klib->Knew_String(kctx, "abcd", 4, 0);
         assert(strcmp(S_text(s), "abcd") == 0);
         assert(S_size(s) == 4);
         assert(S_isASCII(s) == 1);
     }
     for (i = 0; i < 100; ++i) {
-        s = kctx->lib2->Knew_String(kctx, "abcd", 4, 0);
+        s = kctx->klib->Knew_String(kctx, "abcd", 4, 0);
         assert(strcmp(S_text(s), "abcd") == 0);
         assert(S_size(s) == 4);
         assert(S_text(s) == (char*)s->inline_text);
     }
     for (i = 0; i < 100; ++i) {
         static const char *text = "12345678901234567890";
-        s = kctx->lib2->Knew_String(kctx, text, 20, SPOL_TEXT | SPOL_UTF8);
+        s = kctx->klib->Knew_String(kctx, text, 20, SPOL_TEXT | SPOL_UTF8);
         assert(strcmp(S_text(s), text) == 0);
         assert(S_size(s) == 20);
         assert(S_text(s) == text);

@@ -181,7 +181,7 @@ static inline void do_free(void *ptr, size_t size)
 	free(ptr);
 }
 
-static ssize_t klib2_malloced = 0;
+static ssize_t kklib_malloced = 0;
 
 static void* Kmalloc(KonohaContext *kctx, size_t s)
 {
@@ -191,17 +191,17 @@ static void* Kmalloc(KonohaContext *kctx, size_t s)
 				KEYVALUE_s("!",  "OutOfMemory"),
 				KEYVALUE_s("at", "malloc"),
 				KEYVALUE_u("size", s),
-				KEYVALUE_u("malloced_size", klib2_malloced)
+				KEYVALUE_u("malloced_size", kklib_malloced)
 		  );
 	}
 	p[0] = s;
-	klib2_malloced += s;
+	kklib_malloced += s;
 	return (void*)(p+1);
 }
 
 static void* Kzmalloc(KonohaContext *kctx, size_t s)
 {
-	klib2_malloced += s;
+	kklib_malloced += s;
 	size_t *p = (size_t*)do_malloc(s + sizeof(size_t));
 	p[0] = s;
 	do_bzero(p+1, s);
@@ -213,7 +213,7 @@ static void Kfree(KonohaContext *kctx, void *p, size_t s)
 	size_t *pp = (size_t*)p;
 	DBG_ASSERT(pp[-1] == s);
 	do_free(pp - 1, s + sizeof(size_t));
-	klib2_malloced -= s;
+	kklib_malloced -= s;
 }
 
 /* ------------------------------------------------------- */

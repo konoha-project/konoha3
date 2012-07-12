@@ -1102,7 +1102,7 @@ void jit_init() {
 	ExecutionEngine ee = m.createExecutionEngine(2);
 
 	Array a0 = Array.newN(0);
-	Type klib2 = StructType.create(a0, "klib2", false);
+	Type kklib = StructType.create(a0, "kklib", false);
 	Type kclass = StructType.create(a0, "kclass", false);
 	Type KUtilsGrowingArray = StructType.create(a0, "KUtilsGrowingArray", false);
 	Type PlatformApi = StructType.create(a0, "PlatformApi", false);
@@ -1142,7 +1142,7 @@ void jit_init() {
 	Array KonohaContextVarTy = Array.newN(12);
 	KonohaContextVarTy.set(0, Type.getInt32Ty() /* safepoint */ );
 	KonohaContextVarTy.set(1, PointerType.get(KonohaStack) /* esp */ );
-	KonohaContextVarTy.set(2, PointerType.get(klib2) /* lib2 */ );
+	KonohaContextVarTy.set(2, PointerType.get(kklib) /* klib */ );
 	KonohaContextVarTy.set(3, PointerType.get(PlatformApi) /* plat */ );
 	KonohaContextVarTy.set(4, PointerType.get(kmemshare_t) /* memshare */ );
 	KonohaContextVarTy.set(5, PointerType.get(kmemlocal_t) /* memlocal */ );

@@ -31,7 +31,7 @@ int main(int argc, const char *argv[])
 {
     LibKonohaApi *lib;
     KonohaContext* konoha = konoha_open((const PlatformApi*)&plat);
-    lib = konoha->lib2;
+    lib = konoha->klib;
     int i;
     void *malloced[100];
     for (i = 0; i < 100; ++i) {

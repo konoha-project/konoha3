@@ -41,40 +41,40 @@ static void reftrace2(KonohaContext *kctx, void *e)
 void test_Kmap(KonohaContext *kctx)
 {
     int i;
-    KUtilsHashMap* map = kctx->lib2->Kmap_init(kctx, 4);
+    KUtilsHashMap* map = kctx->klib->Kmap_init(kctx, 4);
     for (i = 0; i < 10; ++i) {
-        KUtilsHashMapEntry *entry = kctx->lib2->Kmap_newentry(kctx, map, i);
+        KUtilsHashMapEntry *entry = kctx->klib->Kmap_newentry(kctx, map, i);
         assert(entry->hcode == i);
         entry->ukey = i*2;
         entry->uvalue = i;
     }
     for (i = 0; i < 10; ++i) {
-        KUtilsHashMapEntry *entry = kctx->lib2->Kmap_get(map, i);
+        KUtilsHashMapEntry *entry = kctx->klib->Kmap_get(map, i);
         assert(entry != NULL);
         assert(entry->uvalue == i);
     }
-    kctx->lib2->Kmap_reftrace(kctx, map, reftrace);
+    kctx->klib->Kmap_reftrace(kctx, map, reftrace);
     fprintf(stderr, "%d\n", _sum_);
     assert(_sum_ == 45);
 
     for (i = 0; i < 10; i+=2) {
-        KUtilsHashMapEntry *entry = kctx->lib2->Kmap_get(map, i);
+        KUtilsHashMapEntry *entry = kctx->klib->Kmap_get(map, i);
         assert(entry != NULL);
-        kctx->lib2->Kmap_remove(map, entry);
+        kctx->klib->Kmap_remove(map, entry);
     }
     for (i = 0; i < 10; i+=2) {
-        KUtilsHashMapEntry *entry = kctx->lib2->Kmap_get(map, i);
+        KUtilsHashMapEntry *entry = kctx->klib->Kmap_get(map, i);
         assert(entry == NULL);
     }
     for (i = 0; i < 10; ++i) {
-        KUtilsHashMapEntry *entry = kctx->lib2->Kmap_get(map, i);
+        KUtilsHashMapEntry *entry = kctx->klib->Kmap_get(map, i);
         if (i % 2 == 0) {
             assert(entry == NULL);
         } else {
             assert(entry->uvalue == i);
         }
     }
-    kctx->lib2->Kmap_free(kctx, map, reftrace2);
+    kctx->klib->Kmap_free(kctx, map, reftrace2);
     assert(_sum2_ == 25);
     fprintf(stderr, "%d\n", _sum2_);
     _sum_ = _sum2_ = 0;

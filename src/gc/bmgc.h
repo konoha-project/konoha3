@@ -695,7 +695,7 @@ static inline void do_free(void *ptr, size_t size)
 	free(ptr);
 }
 
-static ssize_t klib2_malloced = 0;
+static ssize_t kklib_malloced = 0;
 
 static void* Kmalloc(KonohaContext *kctx, size_t s)
 {
@@ -705,7 +705,7 @@ static void* Kmalloc(KonohaContext *kctx, size_t s)
 			KEYVALUE_s("!",  "OutOfMemory"),
 			KEYVALUE_s("at", "malloc"),
 			KEYVALUE_u("size", s),
-			KEYVALUE_u("malloced_size", klib2_malloced)
+			KEYVALUE_u("malloced_size", kklib_malloced)
 		);
 	}
 #if GCDEBUG
@@ -716,13 +716,13 @@ static void* Kmalloc(KonohaContext *kctx, size_t s)
 			KEYVALUE_u("size", s));
 #endif
 	p[0] = s;
-	klib2_malloced += s;
+	kklib_malloced += s;
 	return (void*)(p+1);
 }
 
 static void* Kzmalloc(KonohaContext *kctx, size_t s)
 {
-	klib2_malloced += s;
+	kklib_malloced += s;
 	size_t *p = (size_t*)do_malloc(s + sizeof(size_t));
 	p[0] = s;
 	do_bzero(p+1, s);
@@ -741,13 +741,13 @@ static void Kfree(KonohaContext *kctx, void *p, size_t s)
 			KEYVALUE_p("to", ((char*)p)+s),
 			KEYVALUE_u("size", s));
 #endif
-	klib2_malloced -= s;
+	kklib_malloced -= s;
 }
 
 void MODGC_check_malloced_size(void)
 {
 	if(verbose_gc) {
-		fprintf(stdout, "\nklib:memory leaked=%ld\n", klib2_malloced);
+		fprintf(stdout, "\nklib:memory leaked=%ld\n", kklib_malloced);
 #ifdef GCDEBUG
 		DUMP_P("sys :memory leaked=%ld\n", malloced_size);
 #endif

@@ -1084,7 +1084,7 @@ void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		kArray_clear(ctxcode->insts, 0);
 		RESET_GCSTACK();
 	}
-	LibKonohaApiVar *l = (LibKonohaApiVar*)kctx->lib2;
+	LibKonohaApiVar *l = (LibKonohaApiVar*)kctx->klib;
 	l->KMethod_setFunc = Method_setFunc;
 	l->KMethod_genCode = Method_genCode;
 }

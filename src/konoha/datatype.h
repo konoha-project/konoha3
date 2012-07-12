@@ -862,7 +862,7 @@ static void initStructData(KonohaContext *kctx)
 	}
 }
 
-static void KCLASSTABLE_initklib2(LibKonohaApiVar *l)
+static void KCLASSTABLE_initkklib(LibKonohaApiVar *l)
 {
 	l->Kclass   = Kclass;
 	l->Knew_Object = new_Object;
@@ -885,7 +885,7 @@ static void KCLASSTABLE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	KonohaSharedRuntimeVar *share = (KonohaSharedRuntimeVar*)KCALLOC(sizeof(SharedRuntime), 1);
 	ctx->share = share;
-	KCLASSTABLE_initklib2((LibKonohaApiVar*)kctx->lib2);
+	KCLASSTABLE_initkklib((LibKonohaApiVar*)kctx->klib);
 	KARRAY_INIT(&share->classTable, K_CLASSTABLE_INIT * sizeof(KonohaClass));
 	loadInitStructData(kctx);
 	share->longClassNameMapNN = kmap_init(0);

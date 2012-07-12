@@ -38,7 +38,7 @@ static void HashMap_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct _kHashMap *map = (struct _kHashMap *)o;
 	map->map = kmap_init(4);
-	map->map = kctx->lib2->Kmap_init(kctx, 4);
+	map->map = kctx->klib->Kmap_init(kctx, 4);
 }
 
 static void HashMap_free(KonohaContext *kctx, kObject *o)

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import os, sys
 import copy
-from pygenlib2 import *
+from pygenklib import *
 
 #------------------------------------------------------------------------------
 

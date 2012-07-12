@@ -693,7 +693,7 @@ static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 	base->h.setup    = kmodjit_setup;
 	base->h.reftrace = kmodjit_reftrace;
 	base->h.free     = kmodjit_free;
-	base->defaultCodeGen = kctx->lib2->KMethod_genCode;
+	base->defaultCodeGen = kctx->klib->KMethod_genCode;
 	base->jitcache = kmap_init(0);
 	KINITv(base->global_value, new_(Array, 18));
 	KINITv(base->constPool, new_(Array, 0));
@@ -814,7 +814,7 @@ static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_
 	};
 	kNameSpace_loadMethodData(ks, MethodData);
 
-	LibKonohaApiVar *l = (LibKonohaApiVar*)kctx->lib2;
+	LibKonohaApiVar *l = (LibKonohaApiVar*)kctx->klib;
 	l->KMethod_genCode = GenCodeDefault;
 	kNameSpace_syncMethods();
 	l->KMethod_genCode = KMethod_genCode;

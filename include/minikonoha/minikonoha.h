@@ -110,7 +110,7 @@ typedef const struct LibKonohaApiVar LibKonohaApi;
 typedef struct LibKonohaApiVar       LibKonohaApiVar;
 
 #define PLAT (kctx->plat)->
-#define KLIB (kctx->klib2)->
+#define KLIB (kctx->kklib)->
 
 struct PlatformApiVar {
 	// settings
@@ -417,7 +417,7 @@ typedef kushort_t       kparamid_t;
 struct KonohaContextVar {
 	int						          safepoint; // set to 1
 	KonohaStack                      *esp;
-	LibKonohaApi                     *lib2;
+	LibKonohaApi                     *klib;
 	PlatformApi                      *plat;
 	/* TODO(imasahiro)
 	 * checking modgc performance and remove
@@ -1162,7 +1162,7 @@ struct _kSystem {
 
 
 /* ----------------------------------------------------------------------- */
-// klib2
+// kklib
 
 struct klogconf_t;
 
@@ -1254,7 +1254,7 @@ struct LibKonohaApiVar {
 #define W(T, V)           struct _##T*const W##V = (struct _##T*const)(V); int _check##V
 #define WASSERT(V)        DBG_ASSERT((void*)V == (void*)W##V); (void)_check##V
 
-#define KPI                     (kctx->lib2)
+#define KPI                     (kctx->klib)
 
 #define KMALLOC(size)          (KPI)->Kmalloc(kctx, size)
 #define KCALLOC(size, item)    (KPI)->Kzmalloc(kctx, ((size) * (item)))
@@ -1379,18 +1379,18 @@ typedef struct {
 #define kraise(PARAM)                  (KPI)->Kraise(kctx, PARAM)
 
 #define KSET_KLIB(T, UL)   do {\
-		void *func = kctx->lib2->K##T;\
-		((LibKonohaApiVar*)kctx->lib2)->K##T = K##T;\
+		void *func = kctx->klib->K##T;\
+		((LibKonohaApiVar*)kctx->klib)->K##T = K##T;\
 		if(func != NULL) {\
-			kreportf(DEBUG_, UL, "override of klib2->" #T ", file=%s, line=%d", __FILE__, __LINE__);\
+			kreportf(DEBUG_, UL, "override of kklib->" #T ", file=%s, line=%d", __FILE__, __LINE__);\
 		}\
 	}while(0)\
 
 #define KSET_KLIB2(T, F, UL)   do {\
-		void *func = kctx->lib2->K##T;\
-		((LibKonohaApiVar*)kctx->lib2)->K##T = F;\
+		void *func = kctx->klib->K##T;\
+		((LibKonohaApiVar*)kctx->klib)->K##T = F;\
 		if(func != NULL) {\
-			kreportf(DEBUG_, UL, "override of klib2->" #T ", file=%s, line=%d", __FILE__, __LINE__);\
+			kreportf(DEBUG_, UL, "override of kklib->" #T ", file=%s, line=%d", __FILE__, __LINE__);\
 		}\
 	}while(0)\
 
