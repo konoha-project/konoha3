@@ -35,7 +35,7 @@ void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o);  // called from MOD
 void KONOHA_freeObjectField(KonohaContext *kctx, kObjectVar *o);       // callled from MODGC
 
 void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx);
-//void MODCODE_genCode(KonohaContext *kctx, kMethod *mtd, const struct _kBlock *bk);
+//void MODCODE_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk);
 
 void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx);
 kstatus_t MODSUGAR_loadscript(KonohaContext *kctx, const char *path, size_t len, kline_t pline);

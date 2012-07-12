@@ -85,7 +85,7 @@ static kString* sugar_p(KonohaContext *kctx, int pe, kline_t uline, int lpos, co
 	return errmsg;
 }
 
-static void Token_pERR(KonohaContext *kctx, struct _kToken *tk, const char *fmt, ...)
+static void Token_pERR(KonohaContext *kctx, kTokenVar *tk, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -102,14 +102,14 @@ static ksyntax_t* NameSpace_syn(KonohaContext *kctx, kNameSpace *ks0, ksymbol_t 
 
 static void Stmt_toERR(KonohaContext *kctx, kStmt *stmt, kString *errmsg)
 {
-	((struct _kStmt*)stmt)->syn   = SYN_(kStmt_ks(stmt), KW_ERR);
-	((struct _kStmt*)stmt)->build = TSTMT_ERR;
+	((kStmtVar*)stmt)->syn   = SYN_(kStmt_ks(stmt), KW_ERR);
+	((kStmtVar*)stmt)->build = TSTMT_ERR;
 	kObject_setObject(stmt, KW_ERR, errmsg);
 }
 
 static inline void kStmt_errline(kStmt *stmt, kline_t uline)
 {
-	((struct _kStmt*)stmt)->uline = uline;
+	((kStmtVar*)stmt)->uline = uline;
 }
 
 static kline_t Expr_uline(KonohaContext *kctx, kExpr *expr, kline_t uline)

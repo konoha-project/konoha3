@@ -30,7 +30,7 @@ extern "C" {
 
 /* ------------------------------------------------------------------------ */
 
-static int parseINDENT(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, int pos)
+static int parseINDENT(KonohaContext *kctx, kTokenVar *tk, tenv_t *tenv, int pos)
 {
 	int ch, indent = 0;
 	while((ch = tenv->source[pos++]) != 0) {
@@ -46,13 +46,13 @@ static int parseINDENT(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, in
 	return pos-1;
 }
 
-static int parseNL(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, int pos)
+static int parseNL(KonohaContext *kctx, kTokenVar *tk, tenv_t *tenv, int pos)
 {
 	tenv->uline += 1;
 	return parseINDENT(kctx, tk, tenv, pos+1);
 }
 
-static int parseNUM(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, int tok_start)
+static int parseNUM(KonohaContext *kctx, kTokenVar *tk, tenv_t *tenv, int tok_start)
 {
 	int ch, pos = tok_start, dot = 0;
 	const char *ts = tenv->source;
@@ -102,7 +102,7 @@ static kbool_t isUpperCaseSymbol(const char *t)
 	return false;
 }
 
-static void Token_setSymbolText(KonohaContext *kctx, struct _kToken *tk, const char *t, size_t len)
+static void Token_setSymbolText(KonohaContext *kctx, kTokenVar *tk, const char *t, size_t len)
 {
 	if(IS_NOTNULL(tk)) {
 		ksymbol_t kw = ksymbolA(t, len, SYM_NONAME);
@@ -117,7 +117,7 @@ static void Token_setSymbolText(KonohaContext *kctx, struct _kToken *tk, const c
 	}
 }
 
-static int parseSYMBOL(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, int tok_start)
+static int parseSYMBOL(KonohaContext *kctx, kTokenVar *tk, tenv_t *tenv, int tok_start)
 {
 	int ch, pos = tok_start;
 	const char *ts = tenv->source;
@@ -129,13 +129,13 @@ static int parseSYMBOL(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, in
 	return pos - 1;  // next
 }
 
-static int parseOP1(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, int tok_start)
+static int parseOP1(KonohaContext *kctx, kTokenVar *tk, tenv_t *tenv, int tok_start)
 {
 	Token_setSymbolText(kctx, tk,  tenv->source + tok_start, 1);
 	return tok_start+1;
 }
 
-static int parseOP(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, int tok_start)
+static int parseOP(KonohaContext *kctx, kTokenVar *tk, tenv_t *tenv, int tok_start)
 {
 	int ch, pos = tok_start;
 	while((ch = tenv->source[pos++]) != 0) {
@@ -153,7 +153,7 @@ static int parseOP(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, int to
 	return pos-1;
 }
 
-static int parseLINE(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, int tok_start)
+static int parseLINE(KonohaContext *kctx, kTokenVar *tk, tenv_t *tenv, int tok_start)
 {
 	int ch, pos = tok_start;
 	while((ch = tenv->source[pos++]) != 0) {
@@ -162,7 +162,7 @@ static int parseLINE(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, int 
 	return pos-1;/*EOF*/
 }
 
-static int parseCOMMENT(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, int tok_start)
+static int parseCOMMENT(KonohaContext *kctx, kTokenVar *tk, tenv_t *tenv, int tok_start)
 {
 	int ch, prev = 0, level = 1, pos = tok_start + 2;
 	/*@#nnnn is line number */
@@ -188,7 +188,7 @@ static int parseCOMMENT(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, i
 	return pos-1;/*EOF*/
 }
 
-static int parseSLASH(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, int tok_start)
+static int parseSLASH(KonohaContext *kctx, kTokenVar *tk, tenv_t *tenv, int tok_start)
 {
 	const char *ts = tenv->source + tok_start;
 	if(ts[1] == '/') {
@@ -200,7 +200,7 @@ static int parseSLASH(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, int
 	return parseOP(kctx, tk, tenv, tok_start);
 }
 
-static int parseDoubleQuotedText(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, int tok_start)
+static int parseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, tenv_t *tenv, int tok_start)
 {
 	kwb_t wb;
 	kwb_init(&(kctx->stack->cwb), &wb);
@@ -237,12 +237,12 @@ static int parseDoubleQuotedText(KonohaContext *kctx, struct _kToken *tk, tenv_t
 	return pos-1;
 }
 
-static int parseSKIP(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, int tok_start)
+static int parseSKIP(KonohaContext *kctx, kTokenVar *tk, tenv_t *tenv, int tok_start)
 {
 	return tok_start+1;
 }
 
-static int parseUndefinedToken(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, int tok_start)
+static int parseUndefinedToken(KonohaContext *kctx, kTokenVar *tk, tenv_t *tenv, int tok_start)
 {
 	if(IS_NOTNULL(tk)) {
 		Token_pERR(kctx, tk, "undefined token character: %c (ascii=%x)", tenv->source[tok_start], tenv->source[tok_start]);
@@ -251,9 +251,9 @@ static int parseUndefinedToken(KonohaContext *kctx, struct _kToken *tk, tenv_t *
 	return tok_start;
 }
 
-static int parseLazyBlock(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, int tok_start);
+static int parseLazyBlock(KonohaContext *kctx, kTokenVar *tk, tenv_t *tenv, int tok_start);
 
-static const CFuncTokenize MiniKonohaTokenMatrix[] = {
+static const TokenizeFunc MiniKonohaTokenMatrix[] = {
 #define _NULL      0
 	parseSKIP,
 #define _UNDEF     1
@@ -379,7 +379,7 @@ static int kchar(const char *t, int pos)
 }
 
 
-static int callFuncTokenize(KonohaContext *kctx, kFunc *fo, struct _kToken *tk, tenv_t *tenv, int tok_start)
+static int callFuncTokenize(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, tenv_t *tenv, int tok_start)
 {
 	// The above string operation is bad thing. Don't repeat it
 	kStringVar *preparedString = (kStringVar*)tenv->preparedString;
@@ -402,7 +402,7 @@ static int callFuncTokenize(KonohaContext *kctx, kFunc *fo, struct _kToken *tk, 
 	return pos;
 }
 
-static int tokenizeEach(KonohaContext *kctx, int kchar, struct _kToken* tk, tenv_t *tenv, int tok_start)
+static int tokenizeEach(KonohaContext *kctx, int kchar, kTokenVar* tk, tenv_t *tenv, int tok_start)
 {
 	int pos;
 	if(tenv->func != NULL && tenv->func[kchar] != NULL) {
@@ -426,13 +426,13 @@ static int tokenizeEach(KonohaContext *kctx, int kchar, struct _kToken* tk, tenv
 static void tokenize(KonohaContext *kctx, tenv_t *tenv)
 {
 	int ch, pos = 0;
-	struct _kToken *tk = new_W(Token, 0);
+	kTokenVar *tk = new_Var(Token, 0);
 	tk->uline = tenv->uline;
 	pos = parseINDENT(kctx, tk, tenv, pos);
 	while((ch = kchar(tenv->source, pos)) != 0) {
 		if(tk->kw != 0) {
 			kArray_add(tenv->list, tk);
-			tk = new_W(Token, 0);
+			tk = new_Var(Token, 0);
 			tk->uline = tenv->uline;
 		}
 		int pos2 = tokenizeEach(kctx, ch, tk, tenv, pos);
@@ -444,7 +444,7 @@ static void tokenize(KonohaContext *kctx, tenv_t *tenv)
 	}
 }
 
-static int parseLazyBlock(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, int tok_start)
+static int parseLazyBlock(KonohaContext *kctx, kTokenVar *tk, tenv_t *tenv, int tok_start)
 {
 	int ch, level = 1, pos = tok_start + 1;
 	while((ch = kchar(tenv->source, pos)) != 0) {
@@ -463,7 +463,7 @@ static int parseLazyBlock(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv,
 			level++; pos++;
 		}
 		else {
-			pos = tokenizeEach(kctx, ch, (struct _kToken*)K_NULLTOKEN, tenv, pos);
+			pos = tokenizeEach(kctx, ch, (kTokenVar*)K_NULLTOKEN, tenv, pos);
 		}
 	}
 	if(IS_NOTNULL(tk)) {
@@ -472,11 +472,11 @@ static int parseLazyBlock(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv,
 	return pos-1;
 }
 
-static const CFuncTokenize *NameSpace_tokenMatrix(KonohaContext *kctx, kNameSpace *ns)
+static const TokenizeFunc *NameSpace_tokenMatrix(KonohaContext *kctx, kNameSpace *ns)
 {
 	if(ns->tokenMatrix == NULL) {
-		DBG_ASSERT(KCHAR_MAX * sizeof(CFuncTokenize) == sizeof(MiniKonohaTokenMatrix));
-		CFuncTokenize *tokenMatrix = (CFuncTokenize*)KMALLOC(SIZEOF_TOKENMATRIX);
+		DBG_ASSERT(KCHAR_MAX * sizeof(TokenizeFunc) == sizeof(MiniKonohaTokenMatrix));
+		TokenizeFunc *tokenMatrix = (TokenizeFunc*)KMALLOC(SIZEOF_TOKENMATRIX);
 		if(ns->parentNULL != NULL && ns->parentNULL->tokenMatrix != NULL) {
 			memcpy(tokenMatrix, ns->parentNULL->tokenMatrix, SIZEOF_TOKENMATRIX);
 		}
@@ -484,7 +484,7 @@ static const CFuncTokenize *NameSpace_tokenMatrix(KonohaContext *kctx, kNameSpac
 			memcpy(tokenMatrix, MiniKonohaTokenMatrix, sizeof(MiniKonohaTokenMatrix));
 			bzero(tokenMatrix + KCHAR_MAX, sizeof(MiniKonohaTokenMatrix));
 		}
-		((struct _kNameSpace*)ns)->tokenMatrix = (const CFuncTokenize*)tokenMatrix;
+		((kNameSpaceVar*)ns)->tokenMatrix = (const TokenizeFunc*)tokenMatrix;
 	}
 	return ns->tokenMatrix;
 }
@@ -495,11 +495,11 @@ static kFunc **NameSpace_tokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns)
 	return funcMatrix + KCHAR_MAX;
 }
 
-static void NameSpace_setTokenizeFunc(KonohaContext *kctx, kNameSpace *ns, int ch, CFuncTokenize cfunc, kFunc *funcTokenize, int isAddition)
+static void NameSpace_setTokenizeFunc(KonohaContext *kctx, kNameSpace *ns, int ch, TokenizeFunc cfunc, kFunc *funcTokenize, int isAddition)
 {
 	int kchar = (ch < 0) ? _MULTI : cMatrix[ch];
 	if(cfunc != NULL) {
-		CFuncTokenize *funcMatrix = (CFuncTokenize *)NameSpace_tokenMatrix(kctx, ns);
+		TokenizeFunc *funcMatrix = (TokenizeFunc *)NameSpace_tokenMatrix(kctx, ns);
 		funcMatrix[kchar] = cfunc;
 	}
 	else {
@@ -569,7 +569,7 @@ static int findCloseChar(KonohaContext *kctx, kArray *tls, int s, int e, ksymbol
 static kbool_t checkNestedSyntax(KonohaContext *kctx, kArray *tls, int *s, int e, ksymbol_t astkw, int opench, int closech)
 {
 	int i = *s;
-	struct _kToken *tk = tls->Wtoks[i];
+	kTokenVar *tk = tls->Wtoks[i];
 	int topch = kToken_topch2(tk->kw, tk);
 	if(topch == opench) {
 		int ne = findCloseChar(kctx, tls, i+1, e, tk->kw, closech);
@@ -588,7 +588,7 @@ static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tls, int s, int e, kA
 	ksymbol_t patternKey = 0;
 //	dumpTokenArray(kctx, 0, tls, s, e);
 	for(i = s; i < e; i++) {
-		struct _kToken *tk = tls->Wtoks[i];
+		kTokenVar *tk = tls->Wtoks[i];
 		int topch = kToken_topch(tk);
 		if(tk->kw == TK_INDENT) continue;
 		if(tk->kw == TK_TEXT) {

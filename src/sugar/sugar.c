@@ -497,7 +497,7 @@ static KDEFINE_PACKAGE *NameSpace_openGlueHandler(KonohaContext *kctx, kNameSpac
 
 static kNameSpace* new_NameSpace(KonohaContext *kctx, kpack_t packdom, kpack_t packid)
 {
-	struct _kNameSpace *ks = new_W(NameSpace, KNULL(NameSpace));
+	kNameSpaceVar *ks = new_Var(NameSpace, KNULL(NameSpace));
 	ks->packid = packid;
 	ks->packdom = packid;
 	return (kNameSpace*)ks;
@@ -557,7 +557,7 @@ static void NameSpace_merge(KonohaContext *kctx, kNameSpace *ks, kNameSpace *tar
 		NameSpace_importClassName(kctx, ks, target->packid, pline);
 	}
 	if(target->cl.bytesize > 0) {
-		NameSpace_mergeConstData(kctx, (struct _kNameSpace*)ks, target->cl.kvs, target->cl.bytesize/sizeof(kvs_t), pline);
+		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ks, target->cl.kvs, target->cl.bytesize/sizeof(kvs_t), pline);
 	}
 	size_t i;
 	for(i = 0; i < kArray_size(target->methods); i++) {

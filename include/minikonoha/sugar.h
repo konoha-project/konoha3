@@ -56,10 +56,10 @@ typedef struct {
 	const char *libname;
 	const char *libversion;
 	const char *note;
-	kbool_t (*initPackage)(KonohaContext *kctx, const struct _kNameSpace *, int, const char**, kline_t);
-	kbool_t (*setupPackage)(KonohaContext *kctx, const struct _kNameSpace *, kline_t);
-	kbool_t (*initNameSpace)(KonohaContext *kctx, const struct _kNameSpace *, kline_t);
-	kbool_t (*setupNameSpace)(KonohaContext *kctx, const struct _kNameSpace *, kline_t);
+	kbool_t (*initPackage)(KonohaContext *kctx, kNameSpace *, int, const char**, kline_t);
+	kbool_t (*setupPackage)(KonohaContext *kctx, kNameSpace *, kline_t);
+	kbool_t (*initNameSpace)(KonohaContext *kctx, kNameSpace *, kline_t);
+	kbool_t (*setupNameSpace)(KonohaContext *kctx, kNameSpace *, kline_t);
 	int konoha_revision;
 } KDEFINE_PACKAGE_;
 
@@ -69,7 +69,7 @@ typedef KDEFINE_PACKAGE* (*Fpackageinit)(void);
 typedef struct _kpackage kpackage_t;
 struct _kpackage {
 	kpack_t                      packid;
-	const struct _kNameSpace  *ks;
+	kNameSpace  *ks;
 	KDEFINE_PACKAGE             *packdef;
 	kline_t                      export_script;
 };
@@ -77,7 +77,7 @@ struct _kpackage {
 // tokenizer
 #define KCHAR_MAX  41
 struct tenv_t;
-typedef int (*CFuncTokenize)(KonohaContext *kctx, struct _kToken *, struct tenv_t *, int);
+typedef int (*TokenizeFunc)(KonohaContext *kctx, kTokenVar *, struct tenv_t *, int);
 
 typedef struct tenv_t {
 	const char   *source;
@@ -85,7 +85,7 @@ typedef struct tenv_t {
 	kline_t       uline;
 	kArray       *list;
 	int           indent_tab;
-	const CFuncTokenize *cfunc;
+	const TokenizeFunc *cfunc;
 	union {
 		kFunc  **func;
 		kArray **funcList;
@@ -96,7 +96,7 @@ typedef struct tenv_t {
 /******
 // ParseToken
 #define VAR_ParseToken(TK, STR, UL) \
-		struct _kToken *TK = (struct _kToken*)sfp[0].o;\
+		kTokenVar *TK = (kTokenVar*)sfp[0].o;\
 		kString *STR = sfp[1].s;\
 		int UL = (int)sfp[2].ivalue;\
 		(void)TK; (void)STR; (void)UL;\
@@ -191,14 +191,13 @@ typedef struct KDEFINE_SYNTAX {
 
 #define new_SugarFunc(F)     new_(Func, new_kMethod(0, 0, 0, F))
 
-#define SIZEOF_TOKENMATRIX (KCHAR_MAX * sizeof(CFuncTokenize) * 2)
+#define SIZEOF_TOKENMATRIX (KCHAR_MAX * sizeof(TokenizeFunc) * 2)
 
-typedef const struct _kNameSpace kNameSpace;
-struct _kNameSpace {
+struct kNameSpaceVar {
 	KonohaObjectHeader h;
-	const struct     _kNameSpace   *parentNULL;
+	kNameSpace   *parentNULL;
 	kpack_t packid;  	kpack_t packdom;
-	const CFuncTokenize *tokenMatrix;
+	const TokenizeFunc *tokenMatrix;
 	struct kmap_t       *syntaxMapNN;
 	//
 	kObject             *scrobj;
@@ -208,8 +207,7 @@ struct _kNameSpace {
 
 typedef kshort_t    kexpr_t;
 
-typedef const struct _kToken kToken;
-struct _kToken {
+struct kTokenVar {
 	KonohaObjectHeader h;
 	ksymbol_t     kw;  // keywordSymbolId
 	union {
@@ -254,8 +252,7 @@ struct _kToken {
 #define Expr_setTerm(o,B)   TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,B)
 #define kExpr_at(E,N)        ((E)->cons->exprs[(N)])
 
-typedef const struct _kExpr kExpr;
-struct _kExpr {
+struct kExprVar {
 	KonohaObjectHeader h;
 	ktype_t ty; kexpr_t build;
 	kToken *tk;     // Term
@@ -263,7 +260,7 @@ struct _kExpr {
 		kObject* data;
 		kArray*  cons;  // Cons
 		kExpr*   single;
-		const struct _kBlock* block;
+		kBlock* block;
 	};
 	union {
 		ksyntax_t *syn;
@@ -284,25 +281,21 @@ struct _kExpr {
 #define TSTMT_LOOP           6
 #define TSTMT_JUMP           7
 
-typedef const struct _kStmt kStmt;
-struct _kStmt {
+struct kStmtVar {
 	KonohaObjectHeader h;
 	kline_t uline;
 	ksyntax_t *syn;
-	const struct _kBlock *parentNULL;
+	kBlock *parentNULL;
 	kushort_t build;
 };
 
-typedef const struct _kBlock kBlock;
-struct _kBlock {
+struct kBlockVar {
 	KonohaObjectHeader h;
 	kNameSpace          *ks;
 	kStmt               *parentNULL;
 	kArray              *blocks;
 	kExpr               *esp;
 };
-
-typedef struct _kGamma kGamma;
 
 typedef struct {
 	ktype_t    ty;    ksymbol_t  fn;
@@ -333,7 +326,7 @@ typedef struct gmabuf_t {
 	size_t lvarlst_top;
 } gmabuf_t;
 
-struct _kGamma {
+struct kGammaVar {
 	KonohaObjectHeader h;
 	struct gmabuf_t *genv;
 };
@@ -441,8 +434,6 @@ struct _kGamma {
 #define KW_new       (8+KW_void)
 #define FN_this      FN_("this")
 
-struct _kNameSpace;
-
 #define kNameSpace_defineSyntax(L, S)  kmodsugar->KNameSpace_defineSyntax(kctx, L, S)
 
 typedef struct {
@@ -465,7 +456,7 @@ typedef struct {
 	kFunc *ParseExpr_Op;
 
 	// export
-	void (*NameSpace_setTokenizeFunc)(KonohaContext *kctx, kNameSpace *, int ch, CFuncTokenize, kFunc *, int isAddition);
+	void (*NameSpace_setTokenizeFunc)(KonohaContext *kctx, kNameSpace *, int ch, TokenizeFunc, kFunc *, int isAddition);
 	void (*NameSpace_tokenize)(KonohaContext *kctx, kNameSpace *, const char *, kline_t, kArray *);
 
 	kExpr* (*Expr_setConstValue)(KonohaContext *kctx, kExpr *expr, ktype_t ty, kObject *o);
@@ -498,7 +489,7 @@ typedef struct {
 	kExpr *    (*Stmt_addExprParams)(KonohaContext *kctx, kStmt *, kExpr *, kArray *tls, int s, int e, int allowEmpty);
 	kExpr *    (*Expr_rightJoin)(KonohaContext *kctx, kExpr *, kStmt *, kArray *, int, int, int);
 
-	void       (*Token_pERR)(KonohaContext *kctx, struct _kToken *tk, const char *fmt, ...);
+	void       (*Token_pERR)(KonohaContext *kctx, kTokenVar *tk, const char *fmt, ...);
 	kExpr *    (*Stmt_p)(KonohaContext *kctx, kStmt *stmt, kToken *tk, int pe, const char *fmt, ...);
 
 } kmodsugar_t;
@@ -627,27 +618,27 @@ static inline void Stmt_setsyn(KonohaContext *kctx, kStmt *stmt, ksyntax_t *syn)
 //	if(syn == NULL && stmt->syn != NULL) {
 //		DBG_P("DONE: STMT='%s'", KW_t(syn->kw));
 //	}
-	((struct _kStmt*)stmt)->syn = syn;
+	((kStmtVar*)stmt)->syn = syn;
 }
 
 #define kStmt_typed(STMT, T)  Stmt_typed(STMT, TSTMT_##T)
 static inline void Stmt_typed(kStmt *stmt, int build)
 {
 	if(stmt->build != TSTMT_ERR) {
-		((struct _kStmt*)stmt)->build = build;
+		((kStmtVar*)stmt)->build = build;
 	}
 }
 
 static inline void kExpr_setsyn(kExpr *expr, ksyntax_t *syn)
 {
-	((struct _kExpr*)expr)->syn = syn;
+	((kExprVar*)expr)->syn = syn;
 }
 
 #define kExpr_typed(E, B, TY)   Expr_typed(E, TEXPR_##B, TY)
 static inline kExpr *Expr_typed(kExpr *expr, int build, ktype_t ty)
 {
-	((struct _kExpr*)expr)->build = build;
-	((struct _kExpr*)expr)->ty = ty;
+	((kExprVar*)expr)->build = build;
+	((kExprVar*)expr)->ty = ty;
 	return expr;
 }
 

@@ -151,15 +151,14 @@ static kbool_t CT_isa(KonohaContext *kctx, ktype_t cid1, ktype_t cid2)
 static kExpr *new_BoxingExpr(KonohaContext *kctx, kExpr *expr, ktype_t reqty)
 {
 	if(expr->build == TEXPR_NCONST) {
-		W(kExpr, expr);
+		kExprVar *Wexpr = (kExprVar*)expr;
 		Wexpr->build = TEXPR_CONST;
 		KINITv(Wexpr->data, new_kObject(CT_(Wexpr->ty), Wexpr->ndata));
 		Wexpr->ty = reqty;
-		WASSERT(expr);
 		return expr;
 	}
 	else {
-		struct _kExpr *texpr = new_W(Expr, NULL);
+		kExprVar *texpr = new_Var(Expr, NULL);
 		PUSH_GCSTACK(texpr);
 		KINITv(texpr->single, expr);
 		texpr->build = TEXPR_BOX;
@@ -282,7 +281,7 @@ static kMethod* KS_getGetterMethodNULL(KonohaContext *kctx, kNameSpace *ks, ktyp
 
 static kExpr* new_GetterExpr(KonohaContext *kctx, kToken *tkU, kMethod *mtd, kExpr *expr)
 {
-	struct _kExpr *expr1 = (struct _kExpr *)new_TypedConsExpr(kctx, TEXPR_CALL, kMethod_rtype(mtd), 2, mtd, expr);
+	kExprVar *expr1 = (kExprVar *)new_TypedConsExpr(kctx, TEXPR_CALL, kMethod_rtype(mtd), 2, mtd, expr);
 	KSETv(expr1->tk, tkU); // for uline
 	return (kExpr*)expr1;
 }
@@ -421,7 +420,7 @@ static KMETHOD StmtTyCheck_ConstDecl(KonohaContext *kctx, KonohaStack *sfp _RIX)
 				expr = NULL;
 			}
 			if(expr == NULL) {
-				NameSpace_mergeConstData(kctx, (struct _kNameSpace*)ks, &kv, 1, stmt->uline);
+				NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ks, &kv, 1, stmt->uline);
 			}
 			else {
 				kStmt_p(stmt, ERR_, "constant value is expected");
@@ -617,7 +616,7 @@ static const char* MethodType_t(KonohaContext *kctx, kmethodn_t mn, size_t psize
 static kExpr *Expr_lookupMethod(KonohaContext *kctx, kStmt *stmt, kExpr *expr, ktype_t this_cid, kGamma *gma, ktype_t reqty)
 {
 	kNameSpace *ks = gma->genv->ks;
-	struct _kToken *tkMN = expr->cons->Wtoks[0];
+	kTokenVar *tkMN = expr->cons->Wtoks[0];
 	DBG_ASSERT(IS_Token(tkMN));
 	if(tkMN->kw == TK_SYMBOL) {
 		tkMN->kw = ksymbolA(S_text(tkMN->text), S_size(tkMN->text), SYM_NEWID);
@@ -915,7 +914,7 @@ static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, KonohaStack *sfp _RIX)
 			texpr = kExpr_setVariable(expr, BLOCK_, ty, lvarsize, gma);
 		}
 		for(i = atop; i < kArray_size(gma->genv->lvarlst); i++) {
-			struct _kExpr *v = gma->genv->lvarlst->Wexprs[i];
+			kExprVar *v = gma->genv->lvarlst->Wexprs[i];
 			if(v->build == TEXPR_LOCAL_ && v->index >= lvarsize) {
 				v->build = TEXPR_STACKTOP; v->index = v->index - lvarsize;
 				//DBG_P("v->index=%d", v->index);
@@ -1289,7 +1288,7 @@ static void Gamma_shiftBlockIndex(KonohaContext *kctx, gmabuf_t *genv)
 	size_t i, size = kArray_size(a);
 	int shift = genv->f.varsize;
 	for(i = genv->lvarlst_top; i < size; i++) {
-		struct _kExpr *expr = a->Wexprs[i];
+		kExprVar *expr = a->Wexprs[i];
 		if(expr->build == TEXPR_STACKTOP) continue;
 		//DBG_ASSERT(expr->build < TEXPR_UNTYPED);
 		if(expr->build < TEXPR_UNTYPED) {
@@ -1427,7 +1426,7 @@ static kstatus_t Block_eval(KonohaContext *kctx, kBlock *bk)
 	if((jmpresult = PLAT setjmp_i(*base->evaljmpbuf)) == 0) {
 		for(i = 0; i < kArray_size(bk->blocks); i++) {
 			KSETv(bk1->blocks->list[0], bk->blocks->list[i]);
-			KSETv(((struct _kBlock*)bk1)->ks, bk->ks);
+			KSETv(((kBlockVar*)bk1)->ks, bk->ks);
 			kArray_clear(bk1->blocks, 1);
 			result = SingleBlock_eval(kctx, bk1, mtd, bk->ks);
 			if(result == K_FAILED) break;

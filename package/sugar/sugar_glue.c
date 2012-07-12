@@ -47,7 +47,7 @@ static KMETHOD Stmt_getBuild(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## void Stmt.setBuild(int buildid);
 static KMETHOD Stmt_setBuild(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	struct _kStmt *stmt = (struct _kStmt *) sfp[0].stmt;
+	kStmtVar *stmt = (kStmtVar *) sfp[0].stmt;
 	stmt->build = sfp[1].ivalue;
 }
 
@@ -193,7 +193,7 @@ static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //	kStmt *stmt  = sfp[0].stmt;
 //	kToken *tk   = sfp[1].tk;
 //	assert(tk->kw != 0);
-//	struct _kExpr *expr = new_W(Expr, SYN_(kStmt_ks(stmt), tk->kw));
+//	kExprVar *expr = new_Var(Expr, SYN_(kStmt_ks(stmt), tk->kw));
 //	KSETv(expr->tk, tk);
 //	KSETv(expr->cons, new_(Array, 8));
 //	RETURN_(expr);

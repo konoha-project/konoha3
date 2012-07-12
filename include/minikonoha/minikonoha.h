@@ -259,7 +259,6 @@ typedef const struct kStringVar         kString;
 typedef struct kStringVar               kStringVar;
 typedef const struct kArrayVar          kArray;
 typedef struct kArrayVar                kArrayVar;
-
 typedef const struct kParamVar          kParam;
 typedef struct kParamVar                kParamVar;
 typedef const struct kMethodVar         kMethod;
@@ -267,6 +266,19 @@ typedef struct kMethodVar               kMethodVar;
 typedef const struct kFuncVar           kFunc;
 typedef struct kFuncVar                 kFuncVar;
 
+/* sugar.h */
+typedef const struct kNameSpaceVar      kNameSpace;
+typedef struct kNameSpaceVar            kNameSpaceVar;
+typedef const struct kTokenVar          kToken;
+typedef struct kTokenVar                kTokenVar;
+typedef const struct kExprVar           kExpr;
+typedef struct kExprVar                 kExprVar;
+typedef const struct kStmtVar           kStmt;
+typedef struct kStmtVar                 kStmtVar;
+typedef const struct kBlockVar          kBlock;
+typedef struct kBlockVar                kBlockVar;
+typedef struct kGammaVar                kGamma;
+typedef struct kGammaVar                kGammaVar;
 
 typedef const struct KonohaContextVar   KonohaContext;
 typedef struct KonohaContextVar         KonohaContextVar;
@@ -526,12 +538,12 @@ typedef struct kmodshare_t {
 		kFunc         *fo; \
 		const struct _kFloat  *f; \
 		const struct _kBytes  *ba; \
-		const struct _kNameSpace             *ks;\
-		const struct _kToken             *tk;\
-		const struct _kStmt              *stmt;\
-		const struct _kExpr              *expr;\
-		const struct _kBlock             *bk;\
-		struct _kGamma  *gma;   \
+		kNameSpace             *ks;\
+		kToken             *tk;\
+		kStmt              *stmt;\
+		kExpr              *expr;\
+		kBlock             *bk;\
+		kGamma  *gma;   \
 		struct _kIterator *itr; \
 		struct kClass  *c; \
 		struct kDate *dt;\
@@ -926,12 +938,12 @@ struct kArrayVar {
 		kParam         **params;
 		kMethod        **methods;
 		kFunc          **funcs;
-		const struct _kToken         **toks;
-		struct _kToken        **Wtoks;
-		const struct _kExpr          **exprs;
-		struct _kExpr         **Wexprs;
-		const struct _kStmt          **stmts;
-		struct _kStmt         **Wstmts;
+		kToken         **toks;
+		kTokenVar        **Wtoks;
+		kExpr          **exprs;
+		kExprVar         **Wexprs;
+		kStmt          **stmts;
+		kStmtVar         **Wstmts;
 	};
 	size_t bytemax;
 };
@@ -1047,11 +1059,11 @@ struct kMethodVar {
 	ktype_t            cid;      kmethodn_t  mn;
 	kparamid_t        paramid;  kparamid_t paramdom;
 	kshort_t          delta;    kpack_t packid;
-	const struct _kToken        *tcode;
+	kToken        *tcode;
 	union {
 		kObject              *objdata;
 		const struct _kKonohaCode   *kcode;
-		const struct _kNameSpace  *lazyns;       // lazy compilation
+		kNameSpace  *lazyns;       // lazy compilation
 	};
 	kMethod           *proceedNUL;   // proceed
 };
@@ -1155,7 +1167,6 @@ struct _kSystem {
 /* ----------------------------------------------------------------------- */
 // klib2
 
-struct _kNameSpace;
 struct klogconf_t;
 
 struct LibKonohaApiVar {
@@ -1190,7 +1201,7 @@ struct LibKonohaApiVar {
 	kpack_t     (*Kpack)(KonohaContext *kctx, const char *, size_t, int spol, ksymbol_t def);
 	ksymbol_t   (*Ksymbol2)(KonohaContext *kctx, const char*, size_t, int spol, ksymbol_t def);
 
-	kbool_t     (*KimportPackage)(KonohaContext *kctx, const struct _kNameSpace*, const char *, kline_t);
+	kbool_t     (*KimportPackage)(KonohaContext *kctx, kNameSpace*, const char *, kline_t);
 	KonohaClass*   (*Kclass)(KonohaContext *kctx, ktype_t, kline_t);
 	kString*    (*KCT_shortName)(KonohaContext *kctx, KonohaClass *ct);
 	KonohaClass*   (*KCT_Generics)(KonohaContext *kctx, KonohaClass *ct, ktype_t rty, int psize, kparam_t *p);
@@ -1216,20 +1227,20 @@ struct LibKonohaApiVar {
 	kMethod *  (*Knew_Method)(KonohaContext *kctx, uintptr_t, ktype_t, kmethodn_t, MethodFunc);
 	kParam*    (*KMethod_setParam)(KonohaContext *kctx, kMethod *, ktype_t, int, kparam_t *);
 	void       (*KMethod_setFunc)(KonohaContext *kctx, kMethod*, MethodFunc);
-	void       (*KMethod_genCode)(KonohaContext *kctx, kMethod*, const struct _kBlock *bk);
+	void       (*KMethod_genCode)(KonohaContext *kctx, kMethod*, kBlock *bk);
 	intptr_t   (*KMethod_indexOfField)(kMethod *);
 
 	kbool_t    (*KsetModule)(KonohaContext *kctx, int, struct kmodshare_t *, kline_t);
 	KonohaClass*  (*KaddClassDef)(KonohaContext *kctx, kpack_t, kpack_t, kString *, KDEFINE_CLASS *, kline_t);
 
-	KonohaClass*  (*KS_getCT)(KonohaContext *kctx, const struct _kNameSpace *, KonohaClass *, const char *, size_t, ktype_t def);
-	void       (*KS_loadMethodData)(KonohaContext *kctx, const struct _kNameSpace *, intptr_t *d);
-	void       (*KS_loadConstData)(KonohaContext *kctx, const struct _kNameSpace *, const char **d, kline_t);
-	kMethod*   (*KS_getMethodNULL)(KonohaContext *kctx, const struct _kNameSpace *ks, ktype_t cid, kmethodn_t mn);
-	kMethod*   (*KS_getGetterMethodNULL)(KonohaContext *kctx, const struct _kNameSpace *, ktype_t cid, ksymbol_t sym);
+	KonohaClass*  (*KS_getCT)(KonohaContext *kctx, kNameSpace *, KonohaClass *, const char *, size_t, ktype_t def);
+	void       (*KS_loadMethodData)(KonohaContext *kctx, kNameSpace *, intptr_t *d);
+	void       (*KS_loadConstData)(KonohaContext *kctx, kNameSpace *, const char **d, kline_t);
+	kMethod*   (*KS_getMethodNULL)(KonohaContext *kctx, kNameSpace *ks, ktype_t cid, kmethodn_t mn);
+	kMethod*   (*KS_getGetterMethodNULL)(KonohaContext *kctx, kNameSpace *, ktype_t cid, ksymbol_t sym);
 
 	void       (*KS_syncMethods)(KonohaContext *kctx);
-	void       (*KCodeGen)(KonohaContext *kctx, kMethod *, const struct _kBlock *);
+	void       (*KCodeGen)(KonohaContext *kctx, kMethod *, kBlock *);
 	void       (*Kreportf)(KonohaContext *kctx, kinfotag_t, kline_t, const char *fmt, ...);
 	void       (*Kraise)(KonohaContext *kctx, int isContinue);     // module
 

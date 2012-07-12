@@ -37,8 +37,8 @@ static KMETHOD ExprTyCheck_assignment(KonohaContext *kctx, KonohaStack *sfp _RIX
 	if(rexpr != K_NULLEXPR && lexpr != K_NULLEXPR) {
 		if(rexpr != K_NULLEXPR) {
 			if(lexpr->build == TEXPR_LOCAL || lexpr->build == TEXPR_LOCAL_ || lexpr->build == TEXPR_FIELD) {
-				((struct _kExpr*)expr)->build = TEXPR_LET;
-				((struct _kExpr*)rexpr)->ty = lexpr->ty;
+				((kExprVar*)expr)->build = TEXPR_LET;
+				((kExprVar*)rexpr)->ty = lexpr->ty;
 				RETURN_(expr);
 			}
 			if(lexpr->build == TEXPR_CALL) {  // check getter and transform to setter
@@ -83,13 +83,13 @@ static KMETHOD StmtTyCheck_DefaultAssignment(KonohaContext *kctx, KonohaStack *s
 
 static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int c, int e)
 {
-	struct _kToken *tkNew, *tkNewOp;
+	kTokenVar *tkNew, *tkNewOp;
 	kToken *tmp, *tkHead;
 	int newc, news = e;
 	int i = s;
 
 	while (i < c) {
-		tkNew = new_W(Token, 0);
+		tkNew = new_Var(Token, 0);
 		tmp = tls->toks[i];
 		setToken(tkNew, S_text(tmp->text), S_size(tmp->text), tmp->kw);
 		kArray_add(tls, tkNew);
@@ -97,7 +97,7 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 	}
 
 	// check operator
-	tkNewOp = new_W(Token, 0);
+	tkNewOp = new_Var(Token, 0);
 	tmp = tls->toks[c];
 	const char* opr = S_text(tmp->text);
 	int osize = S_size(tmp->text);
@@ -109,12 +109,12 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 	newopr[osize-1] = '\0';
 	setToken(tkNewOp, newopr, osize, SYM_(newopr));
 
-	tkNew = new_W(Token, 0);
+	tkNew = new_Var(Token, 0);
 	setToken(tkNew, "=", 1, KW_LET);
 	kArray_add(tls, tkNew);
 	newc = kArray_size(tls)-1;
 
-	struct _kToken *newtk = new_W(Token, 0);
+	kTokenVar *newtk = new_Var(Token, 0);
 	tkHead = tls->toks[e+1];
 	newtk->kw = AST_PARENTHESIS;
 	newtk->uline = tkHead->uline;
@@ -123,7 +123,7 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 	i = news;
 
 	while (i < newc) {
-		tkNew = new_W(Token, 0);
+		tkNew = new_Var(Token, 0);
 		tmp = tls->toks[i];
 		setToken(tkNew, S_text(tmp->text), S_size(tmp->text), tmp->kw);
 		kArray_add(newtk->sub, tkNew);
@@ -133,10 +133,10 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 
 	kArray_add(tls, tkNewOp);
 
-	tkNew = new_W(Token, 0);
+	tkNew = new_Var(Token, 0);
 	i = c+1;
 	while (i < news) {
-		tkNew = new_W(Token, 0);
+		tkNew = new_Var(Token, 0);
 		tmp = tls->toks[i];
 		setToken(tkNew, S_text(tmp->text), S_size(tmp->text), tmp->kw);
 		kArray_add(tls, tkNew);

@@ -232,7 +232,7 @@ static kbool_t class_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t p
 
 static kExpr* NewExpr(KonohaContext *kctx, ksyntax_t *syn, kToken *tk, ktype_t ty, uintptr_t val)
 {
-	struct _kExpr *expr = new_W(Expr, syn);
+	kExprVar *expr = new_Var(Expr, syn);
 	KSETv(expr->tk, tk);
 	Expr_setTerm(expr, 1);
 	expr->build = TEXPR_NEW;
@@ -246,7 +246,7 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	USING_SUGAR;
 	VAR_ParseExpr(stmt, tls, s, c, e);
 	DBG_ASSERT(s == c);
-	struct _kToken *tkNEW = tls->Wtoks[s];
+	kTokenVar *tkNEW = tls->Wtoks[s];
 	if(s + 2 < kArray_size(tls)) {
 		kToken *tk1 = tls->toks[s+1];
 		kToken *tk2 = tls->toks[s+2];
@@ -317,7 +317,7 @@ static void Stmt_parseClassBlock(KonohaContext *kctx, kStmt *stmt, kToken *tkC)
 			int topch = kToken_topch(tk);
 			DBG_P("cname='%s'", cname);
 			if(topch == '(' && tkP->kw == TK_SYMBOL && strcmp(cname, S_text(tkP->text)) == 0) {
-				struct _kToken *tkNEW = new_W(Token, 0);
+				kTokenVar *tkNEW = new_Var(Token, 0);
 				tkNEW->kw = TK_SYMBOL;
 				KSETv(tkNEW->text, SYM_s(MN_new));
 				tkNEW->uline = tkP->uline;
@@ -548,8 +548,8 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	} else {
 		ct = defineClassName(kctx, gma->genv->ks, cflag, tkC->text, supcid, stmt->uline);
 	}
-	((struct _kToken*)tkC)->kw = KW_TypePattern;
-	((struct _kToken*)tkC)->ty = ct->cid;
+	((kTokenVar*)tkC)->kw = KW_TypePattern;
+	((kTokenVar*)tkC)->ty = ct->cid;
 	Stmt_parseClassBlock(kctx, stmt, tkC);
 	kBlock *bk = kStmt_block(stmt, KW_BlockPattern, K_NULLBLOCK);
 	if (ct->nulvalNULL == NULL) {

@@ -275,7 +275,7 @@ static kbool_t global_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_
 			.cstruct_size = sizeof(kScript),
 		};
 		KonohaClass *cScript = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &defScript, pline);
-		KSETv(((struct _kNameSpace*)ks)->scrobj, knull(cScript));
+		KSETv(((kNameSpaceVar*)ks)->scrobj, knull(cScript));
 	}
 	return true;
 }

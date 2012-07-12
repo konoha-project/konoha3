@@ -680,9 +680,9 @@ static kbool_t pcre_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pl
 	return true;
 }
 
-static CFuncTokenize parseSLASH;
+static TokenizeFunc parseSLASH;
 
-static int parseREGEX(KonohaContext *kctx, struct _kToken *tk, tenv_t *tenv, int tok_start)
+static int parseREGEX(KonohaContext *kctx, kTokenVar *tk, tenv_t *tenv, int tok_start)
 {
 	int ch, prev = '/', pos = tok_start + 1;
 	if(tenv->source[pos] == '*' || tenv->source[pos] == '/') {
