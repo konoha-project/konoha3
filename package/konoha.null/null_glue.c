@@ -43,19 +43,19 @@ static KMETHOD Object_isNotNull(KonohaContext *kctx, KonohaStack *sfp _RIX)
 // --------------------------------------------------------------------------
 
 #define _F(F) (intptr_t)(F)
-static kbool_t null_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
+static kbool_t null_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	intptr_t MethodData[] = {
 		kMethod_Public, _F(Object_isNull), TY_Boolean, TY_Object, MN_("isNull"), 0,
 		kMethod_Public, _F(Object_isNotNull), TY_Boolean, TY_Object, MN_("isNotNull"), 0,
 		DEND,
 	};
-	kNameSpace_loadMethodData(ks, MethodData);
+	kNameSpace_loadMethodData(ns, MethodData);
 
 	return true;
 }
 
-static kbool_t null_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t null_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
@@ -69,18 +69,18 @@ static KMETHOD ExprTyCheck_null(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURN_(kExpr_setVariable(expr, NULL, reqty, 0, gma));
 }
 
-static kbool_t null_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
+static kbool_t null_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("null"), _TERM, ExprTyCheck_(null), },
 		{ .keyword = KW_END, },
 	};
-	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
+	SUGAR NameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t null_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t null_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

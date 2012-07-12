@@ -506,7 +506,7 @@ static void kmodmpi_free(KonohaContext *kctx, struct kmodshare_t *baseh)
 
 #define MOD_mpi 19/*TODO*/
 
-static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
+static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	kmodmpi_t *base = (kmodmpi_t*)KCALLOC(sizeof(kmodmpi_t), 1);
 	base->h.name     = "mpi";
@@ -598,11 +598,11 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, co
 	//	0/*hashCode*/,
 	//	0/*initdef*/
 	//};
-	KonohaClass *CT_MPI = Konoha_addClassDef(ks->packageId, ks->packageDomain, NULL, &MPIDef, pline);
-	KonohaClass *CT_MPIComm = Konoha_addClassDef(ks->packageId, ks->packageDomain, NULL, &MPICommDef, pline);
-	KonohaClass *CT_MPIRequest = Konoha_addClassDef(ks->packageId, ks->packageDomain, NULL, &MPIRequestDef, pline);
-	KonohaClass *CT_MPIData = Konoha_addClassDef(ks->packageId, ks->packageDomain, NULL, &MPIDataDef, pline);
-	//KonohaClass *CT_MPIOp = Konoha_addClassDef(ks->packageId, ks->packageDomain, NULL, &MPIOpDef, pline);
+	KonohaClass *CT_MPI = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &MPIDef, pline);
+	KonohaClass *CT_MPIComm = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &MPICommDef, pline);
+	KonohaClass *CT_MPIRequest = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &MPIRequestDef, pline);
+	KonohaClass *CT_MPIData = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &MPIDataDef, pline);
+	//KonohaClass *CT_MPIOp = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &MPIOpDef, pline);
 #define TY_MPI         (CT_MPI->cid)
 #define TY_MPIComm     (CT_MPIComm->cid)
 #define TY_MPIRequest  (CT_MPIRequest->cid)
@@ -679,21 +679,21 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, co
 			{"BXOR", TY_MPIOp, (kint_t)MPI_BXOR},
 			{}
 	};
-	kNameSpace_loadConstData(ks, OpData, pline);
+	kNameSpace_loadConstData(ns, OpData, pline);
 	return true;
 }
 
-static kbool_t mpi_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t mpi_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t mpi_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t mpi_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t mpi_setupLingo(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t mpi_setupLingo(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

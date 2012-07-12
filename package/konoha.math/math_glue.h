@@ -182,14 +182,14 @@ static KMETHOD Math_atanh(KonohaContext *kctx, KonohaStack *sfp _RIX)
 #define _KVf(T) "MATH_" #T, TY_Float, M_##T
 #define TY_Math  (cMath->cid)
 
-static	kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
+static	kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	KREQUIRE_PACKAGE("konoha.float", pline);
 	static KDEFINE_CLASS MathDef = {
 			.structname = "Math"/*structname*/,
 			.cid = CLASS_newid/*cid*/,
 	};
-	KonohaClass *cMath = Konoha_addClassDef(ks->packageId, ks->packageDomain, NULL, &MathDef, pline);
+	KonohaClass *cMath = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &MathDef, pline);
 	int FN_x = FN_("x");
 	int FN_y = FN_("y");
 	KDEFINE_METHOD MethodData[] = {
@@ -227,7 +227,7 @@ static	kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 #endif
 			DEND,
 	};
-	kNameSpace_loadMethodData(ks, MethodData);
+	kNameSpace_loadMethodData(ns, MethodData);
 
 	KDEFINE_FLOAT_CONST FloatData[] = {
 			{_KVf(E)},
@@ -239,22 +239,22 @@ static	kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 			{_KVf(SQRT2)},
 			{}
 	};
-	kNameSpace_loadConstData(ks, FloatData, 0);
+	kNameSpace_loadConstData(ns, FloatData, 0);
 	return true;
 }
 
-static kbool_t math_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t math_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t math_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
+static kbool_t math_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
-	KEXPORT_PACKAGE("konoha.float", ks, pline);
+	KEXPORT_PACKAGE("konoha.float", ns, pline);
 	return true;
 }
 
-static kbool_t math_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t math_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

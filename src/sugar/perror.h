@@ -98,7 +98,7 @@ static void Token_pERR(KonohaContext *kctx, kTokenVar *tk, const char *fmt, ...)
 
 #define kStmt_toERR(STMT, ENO)  Stmt_toERR(kctx, STMT, ENO)
 #define kStmt_isERR(STMT)       ((STMT)->build == TSTMT_ERR)
-static SugarSyntax* NameSpace_syn(KonohaContext *kctx, kNameSpace *ks0, ksymbol_t kw, int isnew);
+static SugarSyntax* NameSpace_syn(KonohaContext *kctx, kNameSpace *ns0, ksymbol_t kw, int isnew);
 
 static void Stmt_toERR(KonohaContext *kctx, kStmt *stmt, kString *errmsg)
 {

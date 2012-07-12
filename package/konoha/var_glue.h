@@ -27,12 +27,12 @@
 
 // --------------------------------------------------------------------------
 
-static	kbool_t var_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
+static	kbool_t var_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t var_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t var_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
@@ -42,7 +42,7 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, syn, gma);
 //	DBG_P("global assignment .. ");
-//	kObject *scr = gma->genv->ks->scrNUL;
+//	kObject *scr = gma->genv->ns->scrNUL;
 //	if(scr == NULL) {
 //		SUGAR p(kctx, ERR_, stmt->uline, -1, " global variables are not available");
 //		RETURNb_(false);
@@ -60,7 +60,7 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //		RETURNb_(false);
 //	}
 //	/*kExpr **/expr = kStmt_expr(stmt, KW_ExprPattern, K_NULLEXPR);
-//	kMethod *mtd = Object_newProtoSetterNULL(kctx, scr, gma->genv->ks, expr->ty, fn, stmt->uline);
+//	kMethod *mtd = Object_newProtoSetterNULL(kctx, scr, gma->genv->ns, expr->ty, fn, stmt->uline);
 //	if(mtd == NULL) {
 //		RETURNb_(false);
 //	}
@@ -73,19 +73,19 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 // ---------------------------------------------------------------------------
 
-static kbool_t var_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
+static kbool_t var_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ TOKEN("var"), StmtTyCheck_(var), .rule = "\"var\" var: $expr \"=\" $expr", },
 		{ .keyword = KW_END, },
 	};
-	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
+	SUGAR NameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
 
-static kbool_t var_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t var_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

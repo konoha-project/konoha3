@@ -52,13 +52,13 @@ static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kString *name = tls->toks[i]->text;
 	kwb_write(&wb, S_text(name), S_size(name));
 	kString *pkgname = new_kString(KUtilsWriteBufferop(&wb, 1), kwb_bytesize(&wb), 0);
-	kNameSpace *ks = (kNameSpace *) gma->genv->ks;
-	SugarSyntaxVar *syn1 = (SugarSyntaxVar*) SYN_(ks, KW_ExprMethodCall);
+	kNameSpace *ns = gma->genv->ns;
+	SugarSyntaxVar *syn1 = (SugarSyntaxVar*) SYN_(ns, KW_ExprMethodCall);
 	kTokenVar *tkImport = new_Var(Token, 0);
 	kExpr *ePKG = new_ConstValue(TY_String, pkgname);
 	tkImport->keyword = MN_("import");
 	kExpr *expr = SUGAR new_ConsExpr(kctx, syn1, 3,
-			tkImport, new_ConstValue(O_cid(ks), ks), ePKG);
+			tkImport, new_ConstValue(O_cid(ns), ns), ePKG);
 	kObject_setObject(stmt, KW_ExprPattern, expr);
 	ret = SUGAR Stmt_tyCheckExpr(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0);
 	if (ret) {
@@ -69,28 +69,28 @@ static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 // --------------------------------------------------------------------------
 
-static kbool_t import_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
+static kbool_t import_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t import_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t import_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t import_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t import_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("import"), .rule = "\"import\" $toks", TopStmtTyCheck_(import)},
 		{ .keyword = KW_END, },
 	};
-	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
+	SUGAR NameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t import_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t import_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

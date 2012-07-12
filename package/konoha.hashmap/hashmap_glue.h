@@ -110,7 +110,7 @@ static KMETHOD HashMap_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 #define CT_HashMap cHashMap
 #define TY_HashMap cHashMap->cid
-static	kbool_t hashmap_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
+static	kbool_t hashmap_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	KDEFINE_CLASS defHashMap = {
 		STRUCTNAME(HashMap),
@@ -119,7 +119,7 @@ static	kbool_t hashmap_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc
 		.free = HashMap_free,
 		.p     = HashMap_p,
 	};
-	KonohaClass *cHashMap = Konoha_addClassDef(ks->packageId, PN_konoha, NULL, &defHashMap, pline);
+	KonohaClass *cHashMap = Konoha_addClassDef(ns->packageId, PN_konoha, NULL, &defHashMap, pline);
 	KonohaClassVar *ct = (KonohaClassVar *)CT_HashMap;
 	ct->p0 = TY_String; // default
 	KDEFINE_METHOD MethodData[] = {
@@ -128,18 +128,18 @@ static	kbool_t hashmap_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc
 		_Public, _F(HashMap_new), TY_HashMap, TY_HashMap, MN_("new"), 0,
 		DEND,
 	};
-	kNameSpace_loadMethodData(ks, MethodData);
+	kNameSpace_loadMethodData(ns, MethodData);
 	return true;
 }
 
-static kbool_t hashmap_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t hashmap_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
 //----------------------------------------------------------------------------
 
-static kbool_t hashmap_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
+static kbool_t hashmap_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	// TODO: map literal
 	USING_SUGAR;
@@ -147,11 +147,11 @@ static kbool_t hashmap_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfile
 
 			{ .keyword = KW_END, },
 	};
-	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
+	SUGAR NameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t hashmap_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t hashmap_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

@@ -301,9 +301,9 @@ static KMETHOD Rope_opADD(KonohaContext *kctx, KonohaStack *sfp _RIX)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t rope_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
+static kbool_t rope_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	kMethod *mtd = kNameSpace_getMethodNULL(ks, TY_String, MN_("opADD"));
+	kMethod *mtd = kNameSpace_getMethodNULL(ns, TY_String, MN_("opADD"));
 	if (mtd) {
 		kMethod_setFunc(mtd, Rope_opADD);
 	} else {
@@ -312,7 +312,7 @@ static kbool_t rope_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 			_Public|_Const, _F(Rope_opADD), TY_String, TY_String, MN_("opADD"), 1, TY_String, FN_x,
 			DEND
 		};
-		kNameSpace_loadMethodData(ks, MethodData);
+		kNameSpace_loadMethodData(ns, MethodData);
 	}
 	KSET_CLASSFUNC(CT_String, unbox, String2, pline);
 	KSET_CLASSFUNC(CT_String, free, String2, pline);
@@ -321,17 +321,17 @@ static kbool_t rope_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 	return true;
 }
 
-static kbool_t rope_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t rope_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t rope_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t rope_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t rope_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t rope_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

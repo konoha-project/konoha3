@@ -40,7 +40,7 @@
 
 // --------------------------------------------------------------------------
 
-static	kbool_t konoha_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
+static	kbool_t konoha_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	KREQUIRE_PACKAGE("konoha.assignment", pline);
 	KREQUIRE_PACKAGE("konoha.while", pline);
@@ -57,28 +57,28 @@ static	kbool_t konoha_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc,
 	return true;
 }
 
-static kbool_t konoha_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t konoha_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t konoha_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t konoha_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
-	KEXPORT_PACKAGE("konoha.assignment", ks, pline);
-	KEXPORT_PACKAGE("konoha.while", ks, pline);
-	KEXPORT_PACKAGE("konoha.class", ks, pline);
-	KEXPORT_PACKAGE("konoha.global", ks, pline);
+	KEXPORT_PACKAGE("konoha.assignment", ns, pline);
+	KEXPORT_PACKAGE("konoha.while", ns, pline);
+	KEXPORT_PACKAGE("konoha.class", ns, pline);
+	KEXPORT_PACKAGE("konoha.global", ns, pline);
 
-	KEXPORT_PACKAGE("konoha.null", ks, pline);
-	KEXPORT_PACKAGE("konoha.int", ks, pline);
+	KEXPORT_PACKAGE("konoha.null", ns, pline);
+	KEXPORT_PACKAGE("konoha.int", ns, pline);
 	if(kctx->modshare[MOD_float] != NULL) {
-		KEXPORT_PACKAGE("konoha.float", ks, pline);
+		KEXPORT_PACKAGE("konoha.float", ns, pline);
 	}
-	KEXPORT_PACKAGE("konoha.array", ks, pline);
+	KEXPORT_PACKAGE("konoha.array", ns, pline);
 	return true;
 }
 
-static kbool_t konoha_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t konoha_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

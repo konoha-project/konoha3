@@ -481,7 +481,7 @@ static int python_init_count = 0;
 #define _Im       kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-static	kbool_t python_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
+static	kbool_t python_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	python_init_count++;
 	if(python_init_count == 1) {
@@ -496,7 +496,7 @@ static	kbool_t python_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc,
 			.p    = PyObject_p,
 	};
 
-	KonohaClass *cPython = Konoha_addClassDef(ks->packageId, ks->packageDomain, NULL, &PythonDef, pline);
+	KonohaClass *cPython = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &PythonDef, pline);
 	int TY_PyObject = cPython->cid;
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im|_Coercion, _F(PyObject_toBoolean), TY_Boolean, TY_PyObject, MN_to(TY_Boolean), 0,
@@ -551,29 +551,29 @@ static	kbool_t python_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc,
 		_Public|_Im, _F(PyObject_), TY_PyObject, TY_PyObject, 0, 1, TY_PyObject, 0,
 		DEND,
 	};
-	kNameSpace_loadMethodData(ks, MethodData);
+	kNameSpace_loadMethodData(ns, MethodData);
 	if(IS_defineFloat()) {
 		KDEFINE_METHOD MethodData[] = {
 			_Public|_Const|_Im|_Coercion, _F(PyObject_toFloat), TY_Float, TY_PyObject, MN_to(TY_Float), 0,
 			_Public|_Const|_Im|_Coercion, _F(Float_toPyObject), TY_PyObject, TY_Float, MN_to(TY_PyObject), 0,
 			DEND,
 		};
-		kNameSpace_loadMethodData(ks, MethodData);
+		kNameSpace_loadMethodData(ns, MethodData);
 	}
 	return true;
 }
 
-static kbool_t python_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t python_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t python_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
+static kbool_t python_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t python_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t python_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

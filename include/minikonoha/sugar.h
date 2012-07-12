@@ -303,7 +303,7 @@ struct kBlockVar {
 
 typedef struct {
 	ktype_t    ty;    ksymbol_t  fn;
-} gammastack_t ;
+} GammaStackDecl ;
 
 #define kGamma_TOPLEVEL        (kshortflag_t)(1)
 #define kGamma_isTOPLEVEL(GMA)  TFLAG_is(kshortflag_t, GMA->genv->flag, kGamma_TOPLEVEL)
@@ -312,27 +312,26 @@ typedef struct {
 #define kGamma_setERROR(GMA,B) TFLAG_set(kshortflag_t, GMA->genv->flag, kGamma_ERROR, B)
 
 typedef struct {
-	gammastack_t *vars;
+	GammaStackDecl *vars;
 	size_t varsize;
 	size_t capacity;
 	size_t allocsize;
-} gstack_t ;
+} GammaStack ;
 
-typedef struct gmabuf_t {
-	kshortflag_t  flag;    kshortflag_t  cflag;
-	kNameSpace        *ks;
-	ktype_t            this_cid;
-	ktype_t            static_cid;
-	kMethod*          mtd;
-	gstack_t f;
-	gstack_t l;
-	kArray           *lvarlst;
-	size_t lvarlst_top;
-} gmabuf_t;
+typedef struct  {
+	kshortflag_t  flag;      kshortflag_t  cflag;
+	ktype_t       this_cid;  ktype_t       static_cid;
+	kNameSpace   *ns;
+	kMethod      *mtd;
+	GammaStack    f;
+	GammaStack    l;
+	kArray       *lvarlst;
+	size_t        lvarlst_top;
+} GammaAllocaData;
 
 struct kGammaVar {
 	KonohaObjectHeader h;
-	struct gmabuf_t *genv;
+	GammaAllocaData *genv;
 };
 
 /* ------------------------------------------------------------------------ */
@@ -481,8 +480,8 @@ typedef struct {
 
 	SugarSyntax* (*NameSpace_syn)(KonohaContext *kctx, kNameSpace *, ksymbol_t, int);
 	void       (*NameSpace_defineSyntax)(KonohaContext *kctx, kNameSpace *, KDEFINE_SYNTAX *);
-	void       (*SYN_setSugarFunc)(KonohaContext *kctx, kNameSpace *ks, ksymbol_t kw, size_t idx, kFunc *fo);
-	void       (*SYN_addSugarFunc)(KonohaContext *kctx, kNameSpace *ks, ksymbol_t kw, size_t idx, kFunc *fo);
+	void       (*SYN_setSugarFunc)(KonohaContext *kctx, kNameSpace *ns, ksymbol_t kw, size_t idx, kFunc *fo);
+	void       (*SYN_addSugarFunc)(KonohaContext *kctx, kNameSpace *ns, ksymbol_t kw, size_t idx, kFunc *fo);
 
 	kbool_t    (*makeSyntaxRule)(KonohaContext *kctx, kArray*, int, int, kArray *);
 	kBlock*    (*new_Block)(KonohaContext *kctx, kNameSpace *, kStmt *, kArray *, int, int, int);

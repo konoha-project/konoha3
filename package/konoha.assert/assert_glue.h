@@ -49,10 +49,10 @@
 //////	VAR_StmtTyCheck(stmt, syn, gma);
 //////	if((r = SUGAR Stmt_tyCheckExpr(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0))) {
 //////		kExpr *expr = kStmt_expr(stmt, KW_ExprPattern, NULL);
-//////		kMethod *mtd = kNameSpace_getMethodNULL(gma->genv->ks, TY_NameSpace, MN_("assert"));
+//////		kMethod *mtd = kNameSpace_getMethodNULL(gma->genv->ns, TY_NameSpace, MN_("assert"));
 //////		assert(expr != NULL);
 //////		assert(mtd != NULL);
-//////		kStmt_toExprCall(stmt, mtd, 2, gma->genv->ks, expr);
+//////		kStmt_toExprCall(stmt, mtd, 2, gma->genv->ns, expr);
 //////		expr = kStmt_expr(stmt, KW_ExprPattern, NULL);
 //////		expr->build = TEXPR_CALL;
 //////	}
@@ -66,7 +66,7 @@
 //#define _Coercion kMethod_Coercion
 //#define _F(F)   (intptr_t)(F)
 //
-//static kbool_t assert_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
+//static kbool_t assert_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 //{
 //	USING_SUGAR;
 //	int FN_cond = FN_("cond");
@@ -74,31 +74,31 @@
 //		_Static|_Public, _F(NameSpace_assert), TY_Int, TY_NameSpace, MN_("assert"), 1, TY_Boolean, FN_cond,
 //		DEND,
 //	};
-//	kNameSpace_loadMethodData(ks, MethodData);
+//	kNameSpace_loadMethodData(ns, MethodData);
 //	return true;
 //}
 //
-//static kbool_t assert_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+//static kbool_t assert_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 //{
 //	return true;
 //}
 //
 //#define TOKEN(T)  .name = T/*, .namelen = (sizeof(T)-1)*/
 //
-//static kbool_t assert_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
+//static kbool_t assert_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 //{
 //	USING_SUGAR;
 //	KDEFINE_SYNTAX SYNTAX[] = {
 //		{ TOKEN("assert"), .rule = "'assert' '(' $expr ')'", .TopStmtTyCheck = StmtTyCheck_assert, .StmtTyCheck = StmtTyCheck_assert},
 //		{ .keyword = KW_END, },
 //	};
-//	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
+//	SUGAR NameSpace_defineSyntax(kctx, ns, SYNTAX);
 //
 //	return true;
 //}
 //
 //
-//static kbool_t assert_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+//static kbool_t assert_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 //{
 //	return true;
 //}

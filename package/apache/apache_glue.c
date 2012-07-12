@@ -77,7 +77,7 @@ static void kapacheshare_free(KonohaContext *kctx, struct kmodshare_t *baseh)
 }
 
 
-static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
+static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	static KDEFINE_CLASS Def = {
 		STRUCTNAME(Request),
@@ -103,9 +103,9 @@ static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc,
 	base->h.reftrace = kapacheshare_reftrace;
 	base->h.free     = kapacheshare_free;
 	Konoha_setModule(MOD_APACHE, &base->h, pline);
-	base->cRequest = Konoha_addClassDef(ks->packageId, ks->packageDomain, NULL, &Def, 0);
-	base->cAprTable = Konoha_addClassDef(ks->packageId, ks->packageDomain, NULL, &aprTableDef, 0);
-	base->cAprTableEntry = Konoha_addClassDef(ks->packageId, ks->packageDomain, NULL, &aprTableEntryDef, 0);
+	base->cRequest = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &Def, 0);
+	base->cAprTable = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &aprTableDef, 0);
+	base->cAprTableEntry = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &aprTableEntryDef, 0);
 	KDEFINE_INT_CONST IntData[] = {
 #define DEFINE_KEYWORD(KW) {#KW, TY_Int, KW}
 		{"APACHE_OK", TY_Int, OK},
@@ -119,21 +119,21 @@ static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc,
 		{"APLOG_DEBUG", TY_Int, APLOG_DEBUG},
 		{NULL, 0, 0}
 	};
-	kNameSpace_loadConstData(ks, IntData, 0);
+	kNameSpace_loadConstData(ns, IntData, 0);
 	return true;
 }
 
-static kbool_t apache_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t apache_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t apache_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
+static kbool_t apache_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t apache_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t apache_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

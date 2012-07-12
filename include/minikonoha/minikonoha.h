@@ -1232,7 +1232,7 @@ struct LibKonohaApiVar {
 	KonohaClass*  (*NameSpace_getCT)(KonohaContext *kctx, kNameSpace *, KonohaClass *, const char *, size_t, ktype_t def);
 	void       (*NameSpace_loadMethodData)(KonohaContext *kctx, kNameSpace *, intptr_t *d);
 	void       (*NameSpace_loadConstData)(KonohaContext *kctx, kNameSpace *, const char **d, kfileline_t);
-	kMethod*   (*NameSpace_getMethodNULL)(KonohaContext *kctx, kNameSpace *ks, ktype_t cid, kmethodn_t mn);
+	kMethod*   (*NameSpace_getMethodNULL)(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, kmethodn_t mn);
 	kMethod*   (*NameSpace_getGetterMethodNULL)(KonohaContext *kctx, kNameSpace *, ktype_t cid, ksymbol_t sym);
 
 	void       (*NameSpace_syncMethods)(KonohaContext *kctx);

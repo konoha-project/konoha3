@@ -333,7 +333,7 @@ static KMETHOD Bytes_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
+static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	kmodiconv_t *base = (kmodiconv_t*)KCALLOC(sizeof(kmodiconv_t), 1);
 #ifdef _ICONV_H
@@ -353,7 +353,7 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, 
 		.init    = Bytes_init,
 		.p       = Bytes_p,
 	};
-	base->cBytes = Konoha_addClassDef(ks->packageId, PN_konoha, NULL, &defBytes, pline);
+	base->cBytes = Konoha_addClassDef(ns->packageId, PN_konoha, NULL, &defBytes, pline);
 	int FN_encoding = FN_("encoding");
 	int FN_x = FN_("x");
 	int FN_c = FN_("c");
@@ -374,7 +374,7 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, 
 	return true;
 }
 
-static kbool_t bytes_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t bytes_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
@@ -418,19 +418,19 @@ static KMETHOD ExprTyCheck_Squote(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURN_(K_NULLEXPR);
 }
 
-static kbool_t bytes_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
+static kbool_t bytes_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	USING_SUGAR;
-	SUGAR NameSpace_setTokenizeFunc(kctx, ks, '\'', parseSQUOTE, NULL, 0);
+	SUGAR NameSpace_setTokenizeFunc(kctx, ns, '\'', parseSQUOTE, NULL, 0);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("$SingleQuote"), _TERM, ExprTyCheck_(Squote)},
 		{ .keyword = KW_END, },
 	};
-	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
+	SUGAR NameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t bytes_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t bytes_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

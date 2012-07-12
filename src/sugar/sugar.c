@@ -47,7 +47,7 @@ int verbose_sugar = 0;
 #define PATTERN(T)  .keyword = KW_##T##Pattern
 #define TOKEN(T)    .keyword = KW_##T
 
-static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ks)
+static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ TOKEN(ERR), .flag = SYNFLAG_StmtBreakExec, },
@@ -93,10 +93,10 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ks)
 		{ TOKEN(return), .rule ="\"return\" [$expr]", .flag = SYNFLAG_StmtBreakExec, StmtTyCheck_(return), },
 		{ .keyword = KW_END, },
 	};
-	NameSpace_defineSyntax(kctx, ks, SYNTAX);
-	SugarSyntaxVar *syn = (SugarSyntaxVar*)SYN_(ks, KW_void);
+	NameSpace_defineSyntax(kctx, ns, SYNTAX);
+	SugarSyntaxVar *syn = (SugarSyntaxVar*)SYN_(ns, KW_void);
 	syn->ty = TY_void; // it's not cool, but necessary
-	syn = (SugarSyntaxVar*)SYN_(ks, KW_UsymbolPattern);
+	syn = (SugarSyntaxVar*)SYN_(ns, KW_UsymbolPattern);
 	KINITv(syn->syntaxRuleNULL, new_(TokenArray, 0));
 	parseSyntaxRule(kctx, "$USYMBOL \"=\" $expr", 0, syn->syntaxRuleNULL);
 }
@@ -104,7 +104,7 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ks)
 /* ------------------------------------------------------------------------ */
 /* ctxsugar_t global functions */
 
-static kstatus_t NameSpace_eval(KonohaContext *kctx, kNameSpace *ks, const char *script, kfileline_t uline)
+static kstatus_t NameSpace_eval(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline)
 {
 	kstatus_t result;
 	kmodsugar->h.setup(kctx, (kmodshare_t*)kmodsugar, 0/*lazy*/);
@@ -112,8 +112,8 @@ static kstatus_t NameSpace_eval(KonohaContext *kctx, kNameSpace *ks, const char 
 		INIT_GCSTACK();
 		kArray *tls = ctxsugar->tokens;
 		size_t pos = kArray_size(tls);
-		NameSpace_tokenize(kctx, ks, script, uline, tls);
-		kBlock *bk = new_Block(kctx, ks, NULL, tls, pos, kArray_size(tls), ';');
+		NameSpace_tokenize(kctx, ns, script, uline, tls);
+		kBlock *bk = new_Block(kctx, ns, NULL, tls, pos, kArray_size(tls), ';');
 		kArray_clear(tls, pos);
 		result = Block_eval(kctx, bk);
 		RESET_GCSTACK();
@@ -496,10 +496,10 @@ static KDEFINE_PACKAGE *NameSpace_openGlueHandler(KonohaContext *kctx, kNameSpac
 
 static kNameSpace* new_NameSpace(KonohaContext *kctx, kpackage_t packageDomain, kpackage_t packageId)
 {
-	kNameSpaceVar *ks = new_Var(NameSpace, KNULL(NameSpace));
-	ks->packageId = packageId;
-	ks->packageDomain = packageId;
-	return (kNameSpace*)ks;
+	kNameSpaceVar *ns = new_Var(NameSpace, KNULL(NameSpace));
+	ns->packageId = packageId;
+	ns->packageDomain = packageId;
+	return (kNameSpace*)ns;
 }
 
 static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackage_t packageId, kfileline_t pline)

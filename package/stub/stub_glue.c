@@ -40,7 +40,7 @@
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static	kbool_t stub_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
+static	kbool_t stub_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 //	KDEFINE_METHOD MethodData[] = {
 //		_Public, _F(Stmt_setBuild), TY_void, TY_Stmt, MN_("setBuild"), 1, TY_Int, FN_buildid,
@@ -55,12 +55,12 @@ static	kbool_t stub_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 	return true;
 }
 
-static kbool_t stub_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t stub_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t stub_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t stub_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 //	USING_SUGAR;
 //	KDEFINE_SYNTAX SYNTAX[] = {
@@ -69,11 +69,11 @@ static kbool_t stub_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline
 //		{ TOKEN("$FLOAT"), .keyword = KW_TK(TK_FLOAT), .ExprTyCheck = ExprTyCheck_FLOAT, },
 //		{ .keyword = KW_END, },
 //	};
-//	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
+//	SUGAR NameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t stub_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t stub_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

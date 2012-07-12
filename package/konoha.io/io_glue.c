@@ -880,7 +880,7 @@ static KMETHOD OutputStream_close(KonohaContext *kctx, KonohaStack *sfp _RIX)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t io_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
+static kbool_t io_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	kioshare_t *base = (kioshare_t*)KCALLOC(sizeof(kioshare_t));
 	base->h.name     = "io";
@@ -914,17 +914,17 @@ static kbool_t io_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, con
 	return true;
 }
 
-static kbool_t io_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t io_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t io_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t io_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t io_setupLingo(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t io_setupLingo(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

@@ -124,12 +124,12 @@ KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	INIT_GCSTACK();
 	kArray *list = kctx->stack->gcstack;
 	size_t start = kArray_size(list);
-	kNameSpace *ks = sfp[0].ks;
+	kNameSpace *ns = sfp[0].ks;
 	KonohaClass *ct = O_ct(sfp[1].o);
 	DBG_P("*** man %s", TY_t(ct->cid));
-	while(ks != NULL) {
-		copyMethodList(kctx, ct->cid, ks->methodList, list);
-		ks = ks->parentNULL;
+	while(ns != NULL) {
+		copyMethodList(kctx, ct->cid, ns->methodList, list);
+		ns = ns->parentNULL;
 	}
 	copyMethodList(kctx, ct->cid, ct->methodList, list);
 	dumpMethodList(kctx, sfp, start, list);
@@ -143,7 +143,7 @@ KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp _RIX)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static	kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
+static	kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	USING_SUGAR;
 	KonohaClass *ct = kclass(TY_Method, pline);
@@ -152,16 +152,16 @@ static	kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, cons
 		_Public, _F(NameSpace_man), TY_void, TY_NameSpace, MN_("man"), 1, TY_Object, FN_("x") | FN_COERCION,
 		DEND,
 	};
-	kNameSpace_loadMethodData(ks, MethodData);
+	kNameSpace_loadMethodData(ns, MethodData);
 	return true;
 }
 
-static kbool_t i_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t i_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t i_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
+static kbool_t i_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 //	USING_SUGAR;
 //	KDEFINE_SYNTAX SYNTAX[] = {
@@ -170,11 +170,11 @@ static kbool_t i_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t
 //		{ TOKEN("$FLOAT"), .keyword = KW_TK(TK_FLOAT), .ExprTyCheck = ExprTyCheck_FLOAT, },
 //		{ .keyword = KW_END, },
 //	};
-//	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
+//	SUGAR NameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t i_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t i_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

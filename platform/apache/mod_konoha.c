@@ -268,7 +268,7 @@ KonohaContext* konoha_create(KonohaClass **cRequest)
 {
 	KonohaContext* konoha = konoha_open(&apache_platform);
 	KonohaContext_t kctx = konoha;
-	kNameSpace *ks = KNULL(NameSpace);
+	kNameSpace *ns = KNULL(NameSpace);
 	KREQUIRE_PACKAGE("apache", 0);
 	*cRequest = CT_Request;
 #define _P    kMethod_Public
@@ -301,7 +301,7 @@ KonohaContext* konoha_create(KonohaClass **cRequest)
 		_P, _F(AprTableEntry_getVal), TY_String, TY_TblEntry, MN_("getVal"), 0,
 		DEND,
 	};
-	kNameSpace_loadMethodData(ks, MethodData);
+	kNameSpace_loadMethodData(ns, MethodData);
 	return konoha;
 }
 
@@ -325,8 +325,8 @@ static int konoha_handler(request_rec *r)
 	}
 
 	KonohaContext_t kctx = (KonohaContext_t) konoha;
-	kNameSpace *ks = KNULL(NameSpace);
-	kMethod *mtd = kNameSpace_getMethodNULL(ks, TY_System, MN_("handler"));
+	kNameSpace *ns = KNULL(NameSpace);
+	kMethod *mtd = kNameSpace_getMethodNULL(ns, TY_System, MN_("handler"));
 	if (mtd == NULL) {
 		ap_log_rerror(APLOG_MARK, APLOG_CRIT, 0, r, "System.handler() not found");
 		return -1;

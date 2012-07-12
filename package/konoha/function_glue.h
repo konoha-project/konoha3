@@ -79,7 +79,7 @@ static KMETHOD Func_invoke(KonohaContext *kctx, KonohaStack *sfp _RIX)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static	kbool_t function_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
+static	kbool_t function_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	kmodfunction_t *base = (kmodfunction_t*)KCALLOC(sizeof(kmodfunction_t), 1);
 	base->h.name     = "function";
@@ -94,7 +94,7 @@ static	kbool_t function_initPackage(KonohaContext *kctx, kNameSpace *ks, int arg
 		.init = Float_init,
 		.p     = Float_p,
 	};
-	base->cFloat = Konoha_addClassDef(ks->packageId, PN_konoha, NULL, &defFloat, pline);
+	base->cFloat = Konoha_addClassDef(ns->packageId, PN_konoha, NULL, &defFloat, pline);
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
 //		_Public|_Const|_Im, _F(Float_opADD), TY_Float, TY_Float, MN_("opADD"), 1, TY_Float, FN_x,
@@ -113,16 +113,16 @@ static	kbool_t function_initPackage(KonohaContext *kctx, kNameSpace *ks, int arg
 //		_Public|_Const|_Im, _F(String_toFloat), TY_Float, TY_String, MN_to(TY_Float), 0,
 //		DEND,
 	};
-	kNameSpace_loadMethodData(ks, MethodData);
+	kNameSpace_loadMethodData(ns, MethodData);
 	KDEFINE_FLOAT_CONST FloatData[] = {
 		{"FLOAT_EPSILON", TY_Float, DBL_EPSILON},
 		{}
 	};
-	kNameSpace_loadConstData(ks, FloatData, pline);
+	kNameSpace_loadConstData(ns, FloatData, pline);
 	return true;
 }
 
-static kbool_t function_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t function_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
@@ -138,7 +138,7 @@ static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURN_(kExpr_setNConstValue(expr, TY_Float, sfp[4].ndata));
 }
 
-static kbool_t function_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
+static kbool_t function_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
@@ -148,11 +148,11 @@ static kbool_t function_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfil
 		{ TOKEN("$param"), ExprTyCheck_(FuncStyleCall), },
 		{ .keyword = KW_END, },
 	};
-	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
+	SUGAR NameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t function_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t function_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

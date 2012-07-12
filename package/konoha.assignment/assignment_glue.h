@@ -46,7 +46,7 @@ static KMETHOD ExprTyCheck_assignment(KonohaContext *kctx, KonohaStack *sfp _RIX
 				DBG_ASSERT(IS_Method(mtd));
 				if((MN_isGETTER(mtd->mn) || MN_isISBOOL(mtd->mn)) && !kMethod_isStatic(mtd)) {
 					ktype_t cid = lexpr->cons->exprs[1]->ty;
-					mtd = kNameSpace_getMethodNULL(gma->genv->ks, cid, MN_toSETTER(mtd->mn));
+					mtd = kNameSpace_getMethodNULL(gma->genv->ns, cid, MN_toSETTER(mtd->mn));
 					if(mtd != NULL) {
 						KSETv(lexpr->cons->methodList[0], mtd);
 						kArray_add(lexpr->cons, rexpr);
@@ -62,12 +62,12 @@ static KMETHOD ExprTyCheck_assignment(KonohaContext *kctx, KonohaStack *sfp _RIX
 
 // --------------------------------------------------------------------------
 
-static	kbool_t assignment_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
+static	kbool_t assignment_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t assignment_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t assignment_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
@@ -156,7 +156,7 @@ static KMETHOD ParseExpr_OprAssignment(KonohaContext *kctx, KonohaStack *sfp _RI
 	RETURN_(expr);
 }
 
-static kbool_t assignment_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
+static kbool_t assignment_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
@@ -168,11 +168,11 @@ static kbool_t assignment_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kf
 		{ .keyword = SYM_("%="), _OPLeft, /*.priority_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .priority_op2 = 4096,},
 		{ .keyword = KW_END, },
 	};
-	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
+	SUGAR NameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t assignment_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t assignment_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

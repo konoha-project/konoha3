@@ -207,7 +207,7 @@ static KMETHOD File_putC(KonohaContext *kctx, KonohaStack *sfp _RIX)
 #define TY_File         cFile->cid
 #define IS_File(O)      ((O)->h.ct == CT_File)
 
-static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
+static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	KDEFINE_CLASS defFile = {
 		STRUCTNAME(FILE),
@@ -217,7 +217,7 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 		.p     = File_p,
 	};
 
-	KonohaClass *cFile = Konoha_addClassDef(ks->packageId, ks->packageDomain, NULL, &defFile, pline);
+	KonohaClass *cFile = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &defFile, pline);
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im, _F(System_fopen), TY_File, TY_System, MN_("fopen"), 2, TY_String, FN_("path"), TY_String, FN_("mode"),
 		_Public|_Const|_Im, _F(File_close), TY_void, TY_File, MN_("close"), 0,
@@ -225,7 +225,7 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 		_Public|_Const|_Im, _F(File_putC), TY_Boolean, TY_File, MN_("putC"), 1, TY_Int, FN_("ch"),
 		DEND,
 	};
-	kNameSpace_loadMethodData(ks, MethodData);
+	kNameSpace_loadMethodData(ns, MethodData);
 	if (IS_defineBytes()) {
 		// the function below uses Bytes
 		KDEFINE_METHOD MethodData2[] = {
@@ -233,24 +233,24 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 			_Public|_Const, _F(File_read), TY_Int, TY_File, MN_("read"), 3, TY_Bytes, FN_("buf"), TY_Int, FN_("offset"), TY_Int, FN_("len"),
 			DEND,
 		};
-		kNameSpace_loadMethodData(ks, MethodData2);
+		kNameSpace_loadMethodData(ns, MethodData2);
 	} else {
 		kreportf(INFO_, pline, "konoha.bytes package hasn't imported. Some features are still disabled.");
 	}
 	return true;
 }
 
-static kbool_t file_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t file_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t file_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t file_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t file_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t file_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

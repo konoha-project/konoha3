@@ -398,7 +398,7 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 #define _KVi(T)  #T, TY_Int, T
 
-static	kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
+static	kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	ctx = (struct KonohaContextVar *)kctx;
 
@@ -408,7 +408,7 @@ static	kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 		.init = Curl_init,
 		.free = Curl_free,
 	};
-	KonohaClass *cCurl = Konoha_addClassDef(ks->packageId, ks->packageDomain, NULL, &defCurl, pline);
+	KonohaClass *cCurl = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &defCurl, pline);
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im, _F(Curl_new), TY_Curl, TY_Curl, MN_("new"), 0,
@@ -418,7 +418,7 @@ static	kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 		_Public|_Const|_Im, _F(Curl_getInfo), TY_Object/*FIXME TY_Dynamic*/, TY_Curl, MN_("getInfo"), 1, TY_Int, FN_("type"),
 		DEND,
 	};
-	kNameSpace_loadMethodData(ks, MethodData);
+	kNameSpace_loadMethodData(ns, MethodData);
 
 	KDEFINE_INT_CONST IntData[] = {
 		{_KVi(CURLOPT_AUTOREFERER)},
@@ -519,21 +519,21 @@ static	kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 		{_KVi(CURLINFO_CONTENT_TYPE)},
 		{} // end of const data
 	};
-	kNameSpace_loadConstData(ks, IntData, pline);
+	kNameSpace_loadConstData(ns, IntData, pline);
 	return true;
 }
 
-static kbool_t curl_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t curl_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t curl_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
+static kbool_t curl_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t curl_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
+static kbool_t curl_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

@@ -453,15 +453,15 @@ static kMethod* NameSpace_getMethodNULL(KonohaContext *kctx, kNameSpace *ns, kty
 	return CT_findMethodNULL(kctx, CT_(cid), mn);
 }
 
-//static kMethod* NameSpace_getStaticMethodNULL(KonohaContext *kctx, kNameSpace *ks, kmethodn_t mn)
+//static kMethod* NameSpace_getStaticMethodNULL(KonohaContext *kctx, kNameSpace *ns, kmethodn_t mn)
 //{
 //	while(ks != NULL) {
-//		kMethod *mtd = kNameSpace_getMethodNULL(ks, O_cid(ks->scriptObject), mn);
+//		kMethod *mtd = kNameSpace_getMethodNULL(ns, O_cid(ks->scriptObject), mn);
 //		if(mtd != NULL && kMethod_isStatic(mtd)) {
 //			return mtd;
 //		}
 //		if(ks->static_cid != TY_unknown) {
-//			kMethod *mtd = kNameSpace_getMethodNULL(ks, ks->static_cid, mn);
+//			kMethod *mtd = kNameSpace_getMethodNULL(ns, ks->static_cid, mn);
 //			if(mtd != NULL && kMethod_isStatic(mtd)) {
 //				return mtd;
 //			}
@@ -535,7 +535,7 @@ static void NameSpace_loadMethodData(KonohaContext *kctx, kNameSpace *ns, intptr
 
 //#define kNameSpace_loadGlueFunc(NS, F, OPT, UL)  NameSpace_loadGlueFunc(kctx, NS, F, OPT, UL)
 //
-//static MethodFunc NameSpace_loadGlueFunc(KonohaContext *kctx, kNameSpace *ks, const char *funcname, int DOPTION, kfileline_t pline)
+//static MethodFunc NameSpace_loadGlueFunc(KonohaContext *kctx, kNameSpace *ns, const char *funcname, int DOPTION, kfileline_t pline)
 //{
 //	void *f = NULL;
 //	if(ks->gluehdr != NULL) {
