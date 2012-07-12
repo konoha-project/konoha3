@@ -298,7 +298,7 @@ static size_t BasicBlock_size(KonohaContext *kctx, kBasicBlock *bb, size_t c)
 	}
 	if(bb->branchBlock != NULL) {
 		DBG_ASSERT(bb->nextBlock == NULL);
-		kBasicBlock_add((kBasicBlock*)bb, JMP);
+		kBasicBlock_add(bb, JMP);
 		c = BasicBlock_peephole(kctx, bb) + c;
 		bb = bb->branchBlock;
 		goto L_TAIL;
@@ -626,7 +626,7 @@ static void EXPR_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int esp
 	}
 }
 
-static KMETHOD Fmethod_abstract(KonohaContext *kctx, KonohaStack *sfp _RIX);
+static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack *sfp _RIX);
 
 static void CALL_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espidx)
 {
@@ -951,7 +951,7 @@ static void ByteCode_free(KonohaContext *kctx, kObject *o)
 	KFREE(b->code, b->codesize);
 }
 
-static KMETHOD Fmethod_abstract(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 //	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
 //	ktype_t rtype = mtd->pa->rtype;
@@ -974,10 +974,9 @@ static KMETHOD Fmethod_abstract(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static void Method_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
 {
-	func = (func == NULL) ? Fmethod_abstract : func;
+	func = (func == NULL) ? MethodFunc_invokeAbstractMethod : func;
 	((kMethodVar*)mtd)->fcall_1 = func;
 	((kMethodVar*)mtd)->pc_start = CODE_NCALL;
-
 }
 
 /* ------------------------------------------------------------------------ */
@@ -1012,7 +1011,7 @@ static void kmodcode_setup(KonohaContext *kctx, struct kmodshare_t *def, int new
 
 static void kmodcode_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
 {
-	kmodcode_t *base = (kmodcode_t*)baseh;
+	KModuleByteCode *base = (KModuleByteCode*)baseh;
 	BEGIN_REFTRACE(1);
 	KREFTRACEn(base->codeNull);
 	END_REFTRACE();
@@ -1020,13 +1019,13 @@ static void kmodcode_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
 
 static void kmodcode_free(KonohaContext *kctx, struct kmodshare_t *baseh)
 {
-//	kmodcode_t *base = (kmodcode_t*)baseh;
-	KFREE(baseh, sizeof(kmodcode_t));
+//	KModuleByteCode *base = (KModuleByteCode*)baseh;
+	KFREE(baseh, sizeof(KModuleByteCode));
 }
 
 void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
-	kmodcode_t *base = (kmodcode_t*)KCALLOC(sizeof(kmodcode_t), 1);
+	KModuleByteCode *base = (KModuleByteCode*)KCALLOC(sizeof(KModuleByteCode), 1);
 	opcode_check();
 	base->h.name     = "minivm";
 	base->h.setup    = kmodcode_setup;

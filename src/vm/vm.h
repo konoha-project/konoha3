@@ -32,32 +32,31 @@
 extern "C" {
 #endif
 
+#define K_USING_THCODE_
+
 typedef struct kBasicBlockVar         kBasicBlock;
 typedef const struct kByteCodeVar     kByteCode;
 typedef struct kByteCodeVar           kByteCodeVar;
 
-
-#define K_USING_THCODE_
-
 #define ctxcode          ((ctxcode_t*)kctx->modlocal[MOD_code])
-#define kmodcode         ((kmodcode_t*)kctx->modshare[MOD_code])
+#define kmodcode         ((KModuleByteCode*)kctx->modshare[MOD_code])
 #define CT_BasicBlock    kmodcode->cBasicBlock
-#define CT_ByteCode    kmodcode->cByteCode
+#define CT_ByteCode      kmodcode->cByteCode
 
 #define IS_BasicBlock(O)  ((O)->h.ct == CT_BasicBlock)
-#define IS_ByteCode(O)  ((O)->h.ct == CT_ByteCode)
+#define IS_ByteCode(O)    ((O)->h.ct == CT_ByteCode)
 
-#define CODE_ENTER   kmodcode->PRECOMPILED_ENTER
-#define CODE_NCALL   kmodcode->PRECOMPILED_NCALL
+#define CODE_ENTER        kmodcode->PRECOMPILED_ENTER
+#define CODE_NCALL        kmodcode->PRECOMPILED_NCALL
 
 typedef struct {
 	kmodshare_t     h;
 	KonohaClass    *cBasicBlock;
 	KonohaClass    *cByteCode;
-	const struct   _kByteCode *codeNull;
+	kByteCode      *codeNull;
 	struct VirtualMachineInstruction  *PRECOMPILED_ENTER;
 	struct VirtualMachineInstruction  *PRECOMPILED_NCALL;
-} kmodcode_t;
+} KModuleByteCode;
 
 typedef struct {
 	kmodlocal_t      h;
@@ -116,22 +115,7 @@ typedef struct VirtualMachineInstruction {
 	};
 } VirtualMachineInstruction;
 
-#define K_CALLDELTA   4
-#define K_RTNIDX    (-4)
-#define K_SHIFTIDX  (-3)
-#define K_PCIDX     (-2)
-#define K_MTDIDX    (-1)
-#define K_TMRIDX    (0)
-#define K_SELFIDX   0
-#define K_NEXTIDX    2
-#define K_SHIFTIDX2  (-5)
-#define K_PCIDX2     (-3)
-#define K_MTDIDX2    (-1)
-
 /* ------------------------------------------------------------------------ */
-//## class BasicBlock Object;
-//## flag BasicBlock Visited  1 - is set  *   *;
-//## flag BasicBlock StackChecked 2 - is set * *;
 
 #define BasicBlock_isVisited(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
 #define BasicBlock_setVisited(o,B)   TFLAG_set(uintptr_t,((kObjectVar*)o)->h.magicflag,kObject_Local1,B)
@@ -146,9 +130,6 @@ struct kBasicBlockVar {
 	VirtualMachineInstruction *opjmp;
 };
 
-/* ------------------------------------------------------------------------ */
-//## class ByteCode Object;
-//## flag ByteCode NativeCompiled  1 - is set  *   *;
 
 struct kByteCodeVar {
 	KonohaObjectHeader h;
