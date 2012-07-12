@@ -74,14 +74,14 @@ static kinline kString* PN_s_(KonohaContext *kctx, kpackage_t packageId)
 #define CT_t(X)   S_text(CT_s_(kctx, X))
 static kinline kString* CT_s_(KonohaContext *kctx, KonohaClass *ct)
 {
-	return kctx->lib2->KCT_shortName(kctx, ct);
+	return kctx->lib2->KonohaClass_shortName(kctx, ct);
 }
 
 #define TY_s(X)   TY_s_(kctx, X)
 #define TY_t(X)   S_text(TY_s(X))
 static kinline kString* TY_s_(KonohaContext *kctx, ktype_t ty)
 {
-	DBG_ASSERT(ty < KARRAYSIZE(kctx->share->ca.bytemax, intptr));
+	DBG_ASSERT(ty < KARRAYSIZE(kctx->share->classTable.bytemax, intptr));
 	return CT_s_(kctx, CT_(ty));
 }
 

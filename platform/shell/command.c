@@ -163,7 +163,7 @@ static kstatus_t readstmt(KonohaContext *kctx, KUtilsWriteBuffer *wb, kfileline_
 
 static void dumpEval(KonohaContext *kctx, KUtilsWriteBuffer *wb)
 {
-	LocalRuntimeVar *base = kctx->stack;
+	KonohaLocalRuntimeVar *base = kctx->stack;
 	ktype_t ty = base->evalty;
 	if(ty != TY_void) {
 		KonohaStack *lsfp = base->stack + base->evalidx;

@@ -1112,7 +1112,7 @@ void jit_init() {
 	Type kmemlocal_t = StructType.create(a0, "kmemlocal_t", false);
 	Type kmodshare_t = StructType.create(a0, "kmodshare_t", false);
 	Type kmodlocal_t = StructType.create(a0, "kmodlocal_t", false);
-	Type LocalRuntimeVar = StructType.create(a0, "LocalRuntimeVar", false);
+	Type KonohaLocalRuntimeVar = StructType.create(a0, "KonohaLocalRuntimeVar", false);
 	Type klogger_t = StructType.create(a0, "klogger_t", false);
 	Type kopl_t = StructType.create(a0, "kopl_t", false);
 	/*------- KonohaObjectHeader ------*/
@@ -1148,7 +1148,7 @@ void jit_init() {
 	KonohaContextVarTy.set(5, PointerType.get(kmemlocal_t) /* memlocal */ );
 	KonohaContextVarTy.set(6, PointerType.get(SharedRuntime) /* share */ );
 	KonohaContextVarTy.set(7, PointerType.get(klocal_t) /* local */ );
-	KonohaContextVarTy.set(8, PointerType.get(LocalRuntimeVar) /* stack */ );
+	KonohaContextVarTy.set(8, PointerType.get(KonohaLocalRuntimeVar) /* stack */ );
 	KonohaContextVarTy.set(9, PointerType.get(klogger_t) /* logger */ );
 	KonohaContextVarTy.set(10, PointerType.get(PointerType.get(kmodshare_t)) /* modshare */ );
 	KonohaContextVarTy.set(11, PointerType.get(PointerType.get(kmodlocal_t)) /* modlocal */ );

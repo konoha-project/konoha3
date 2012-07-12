@@ -363,7 +363,7 @@ static void NameSpace_importClassName(KonohaContext *kctx, kNameSpace *ns, kpack
 	kvs_t kv;
 	KUtilsWriteBuffer wb;
 	kwb_init(&(kctx->stack->cwb), &wb);
-	size_t i, size = KARRAYSIZE(kctx->share->ca.bytesize, uintptr);
+	size_t i, size = KARRAYSIZE(kctx->share->classTable.bytesize, uintptr);
 	for(i = 0; i < size; i++) {
 		KonohaClass *ct = CT_(i);
 		if(CT_isPrivate(ct)) continue;
@@ -390,7 +390,7 @@ static KonohaClass *NameSpace_getCT(KonohaContext *kctx, kNameSpace *ns, KonohaC
 	ksymbol_t un = ksymbolA(name, len, SYM_NONAME);
 	if(un != SYM_NONAME) {
 		uintptr_t hcode = longid(PN_konoha, un);
-		ct = (KonohaClass*)map_getu(kctx, kctx->share->lcnameMapNN, hcode, 0);
+		ct = (KonohaClass*)map_getu(kctx, kctx->share->longClassNameMapNN, hcode, 0);
 		if(ct == NULL) {
 			kvs_t *kvs = NameSpace_getConstNULL(kctx, ns, un);
 			DBG_P("kvs=%s, %p", name, kvs);

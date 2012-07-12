@@ -288,10 +288,10 @@ typedef struct KonohaClassField         KonohaClassField;
 typedef struct KonohaClassField         KonohaClassFieldVar;
 
 
-typedef const struct SharedRuntimeVar   SharedRuntime;
-typedef struct SharedRuntimeVar         SharedRuntimeVar;
-typedef const struct LocalRuntimeVar    LocalRuntime;
-typedef struct LocalRuntimeVar          LocalRuntimeVar;
+typedef const struct KonohaSharedRuntimeVar   SharedRuntime;
+typedef struct KonohaSharedRuntimeVar         KonohaSharedRuntimeVar;
+typedef const struct KonohaLocalRuntimeVar    LocalRuntime;
+typedef struct KonohaLocalRuntimeVar          KonohaLocalRuntimeVar;
 typedef struct KonohaStack              KonohaStack;
 typedef struct KonohaStack              KonohaStackVar;
 
@@ -365,7 +365,7 @@ typedef kushort_t       kparamid_t;
 #define CLASS_newid        ((ktype_t)-1)
 #define TY_unknown         ((ktype_t)-2)
 
-#define CT_(t)              (kctx->share->ca.cts[t])
+#define CT_(t)              (kctx->share->classTable.cts[t])
 #define CT_cparam(CT)       (kctx->share->paramdomList->params[(CT)->paramdom])
 #define TY_isUnbox(t)       FLAG_is(CT_(t)->cflag, kClass_UnboxType)
 #define CT_isUnbox(C)       FLAG_is(C->cflag, kClass_UnboxType)
@@ -423,8 +423,8 @@ struct KonohaContextVar {
 	 * checking modgc performance and remove
 	 * memshare/memlocal from context
 	 */
-	SharedRuntimeVar                  *share;
-	LocalRuntimeVar                   *stack;
+	KonohaSharedRuntimeVar                  *share;
+	KonohaLocalRuntimeVar                   *stack;
 	struct kmemshare_t                *memshare;
 	struct kmemlocal_t                *memlocal;
 	struct kmodshare_t               **modshare;
@@ -434,26 +434,26 @@ struct KonohaContextVar {
 
 // share, local
 
-struct SharedRuntimeVar {
-	KUtilsGrowingArray ca;
-	KUtilsHashMap   *lcnameMapNN;
+struct KonohaSharedRuntimeVar {
+	KUtilsGrowingArray        classTable;
+	KUtilsHashMap            *longClassNameMapNN;
 	/* system shared const */
-	kObject         *constNull;
-	kBoolean        *constTrue;
-	kBoolean        *constFalse;
-	kString         *emptyString;
-	kArray          *emptyArray;
+	kObject                  *constNull;
+	kBoolean                 *constTrue;
+	kBoolean                 *constFalse;
+	kString                  *emptyString;
+	kArray                   *emptyArray;
 
-	kArray          *fileidList;    // file, http://
-	KUtilsHashMap   *fileidMapNN;   //
-	kArray          *packList;
-	KUtilsHashMap   *packMapNN;
-	kArray          *symbolList;  // NAME, Name, INT_MAX Int_MAX
-	KUtilsHashMap   *symbolMapNN;
-	kArray          *paramList;
-	KUtilsHashMap   *paramMapNN;
-	kArray          *paramdomList;
-	KUtilsHashMap   *paramdomMapNN;
+	kArray                   *fileidList;    // file, http://
+	KUtilsHashMap            *fileidMapNN;   //
+	kArray                   *packList;
+	KUtilsHashMap            *packMapNN;
+	kArray                   *symbolList;  // NAME, Name, INT_MAX Int_MAX
+	KUtilsHashMap            *symbolMapNN;
+	kArray                   *paramList;
+	KUtilsHashMap            *paramMapNN;
+	kArray                   *paramdomList;
+	KUtilsHashMap            *paramdomMapNN;
 };
 
 
@@ -466,21 +466,21 @@ struct SharedRuntimeVar {
 #define KonohaContext_setInteractive(X)  TFLAG_set1(kshortflag_t, (X)->stack->flag, kContext_Interactive)
 #define KonohaContext_setCompileOnly(X)  TFLAG_set1(kshortflag_t, (X)->stack->flag, kContext_CompileOnly)
 
-struct LocalRuntimeVar {
+struct KonohaLocalRuntimeVar {
 	KonohaStack*               stack;
-	size_t                       stacksize;
+	size_t                     stacksize;
 	KonohaStack*               stack_uplimit;
-	kArray        *gcstack;
-	KUtilsGrowingArray                     cwb;
+	kArray                    *gcstack;
+	KUtilsGrowingArray         cwb;
 	// local info
-	kshortflag_t                      flag;
-	KonohaContext               *rootctx;
-	void*                        cstack_bottom;  // for GC
-	KUtilsGrowingArray                     ref;   // reftrace
-	kObjectVar**            reftail;
-	ktype_t   evalty;
-	kushort_t evalidx;
-	jmpbuf_i  *evaljmpbuf;
+	kshortflag_t               flag;
+	KonohaContext             *rootctx;
+	void*                      cstack_bottom;  // for GC
+	KUtilsGrowingArray         ref;   // reftrace
+	kObjectVar**               reftail;
+	ktype_t                    evalty;
+	kushort_t                  evalidx;
+	jmpbuf_i                  *evaljmpbuf;
 };
 
 // module
@@ -1199,8 +1199,8 @@ struct LibKonohaApiVar {
 
 	kbool_t     (*KimportPackage)(KonohaContext *kctx, kNameSpace*, const char *, kfileline_t);
 	KonohaClass*   (*Kclass)(KonohaContext *kctx, ktype_t, kfileline_t);
-	kString*    (*KCT_shortName)(KonohaContext *kctx, KonohaClass *ct);
-	KonohaClass*   (*KCT_Generics)(KonohaContext *kctx, KonohaClass *ct, ktype_t rty, int psize, kparam_t *p);
+	kString*    (*KonohaClass_shortName)(KonohaContext *kctx, KonohaClass *ct);
+	KonohaClass*   (*KonohaClass_Generics)(KonohaContext *kctx, KonohaClass *ct, ktype_t rty, int psize, kparam_t *p);
 
 	kObject*    (*Knew_Object)(KonohaContext *kctx, KonohaClass *, void *);
 	kObject*    (*Knull)(KonohaContext *kctx, KonohaClass *);
@@ -1340,7 +1340,7 @@ struct LibKonohaApiVar {
 #define KEXPORT_PACKAGE(NAME, KS, UL)                (KPI)->KimportPackage(kctx, KS, NAME, UL)
 
 #define KCLASS(cid)                          S_text(CT(cid)->name)
-#define kClassTable_Generics(CT, RTY, PSIZE, P)    (KPI)->KCT_Generics(kctx, CT, RTY, PSIZE, P)
+#define kClassTable_Generics(CT, RTY, PSIZE, P)    (KPI)->KonohaClass_Generics(kctx, CT, RTY, PSIZE, P)
 #define Konoha_setModule(N,D,P)              (KPI)->KsetModule(kctx, N, D, P)
 #define Konoha_addClassDef(PAC, DOM, NAME, DEF, UL)    (KPI)->KaddClassDef(kctx, PAC, DOM, NAME, DEF, UL)
 #define kNameSpace_getCT(NS, THIS, S, L, C)      (KPI)->NameSpace_getCT(kctx, NS, THIS, S, L, C)

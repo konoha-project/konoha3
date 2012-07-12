@@ -1656,7 +1656,7 @@ static void bmgc_gc_mark(KonohaContext *kctx, HeapManager *mng)
 {
 	long i;
 	knh_ostack_t ostackbuf, *ostack = ostack_init(kctx, &ostackbuf);
-	LocalRuntimeVar *stack = kctx->stack;
+	KonohaLocalRuntimeVar *stack = kctx->stack;
 	kObject *ref = NULL;
 
 	context_reset_refs(kctx);
