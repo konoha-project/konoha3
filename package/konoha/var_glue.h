@@ -27,12 +27,12 @@
 
 // --------------------------------------------------------------------------
 
-static	kbool_t var_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static	kbool_t var_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t var_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t var_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
@@ -73,7 +73,7 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 // ---------------------------------------------------------------------------
 
-static kbool_t var_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
+static kbool_t var_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
@@ -85,7 +85,7 @@ static kbool_t var_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t p
 }
 
 
-static kbool_t var_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t var_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }

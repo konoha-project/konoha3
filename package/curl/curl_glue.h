@@ -398,7 +398,7 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 #define _KVi(T)  #T, TY_Int, T
 
-static	kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static	kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 {
 	ctx = (struct KonohaContextVar *)kctx;
 
@@ -523,17 +523,17 @@ static	kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 	return true;
 }
 
-static kbool_t curl_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t curl_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t curl_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
+static kbool_t curl_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t curl_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t curl_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }

@@ -56,7 +56,7 @@ typedef struct {
 
 typedef struct {
 	kmodlocal_t h;
-	kline_t uline;
+	kfileline_t uline;
 	kArray *insts;
 	const struct _kBasicBlock *lbEND;  // ON GCSTACK
 	kArray *constPools;
@@ -163,7 +163,7 @@ struct _kKonohaCode {
 	kopl_t*   code;
 	size_t    codesize;
 	kString  *source;
-	kline_t   fileid;
+	kfileline_t   fileid;
 };
 
 //-------------------------------------------------------------------------

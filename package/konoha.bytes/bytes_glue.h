@@ -57,7 +57,7 @@ static const char *getSystemEncoding(void)
 #endif /* HAVE_ICONV_H */
 
 #ifdef _ICONV_H
-static kbool_t kloadIconv(KonohaContext *kctx, kmodiconv_t *base, kline_t pline)
+static kbool_t kloadIconv(KonohaContext *kctx, kmodiconv_t *base, kfileline_t pline)
 {
 	base->ficonv_open = (ficonv_open)iconv_open;
 	base->ficonv = (ficonv)iconv;
@@ -66,7 +66,7 @@ static kbool_t kloadIconv(KonohaContext *kctx, kmodiconv_t *base, kline_t pline)
 	return true;
 }
 #else
-static kbool_t klinkDynamicIconv(KonohaContext *kctx, kmodiconv_t *base, kline_t pline)
+static kbool_t klinkDynamicIconv(KonohaContext *kctx, kmodiconv_t *base, kfileline_t pline)
 {
 	void *handler = dlopen("libiconv" K_OSDLLEXT, RTLD_LAZY);
 	void *f = NULL;
@@ -333,7 +333,7 @@ static KMETHOD Bytes_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 {
 	kmodiconv_t *base = (kmodiconv_t*)KCALLOC(sizeof(kmodiconv_t), 1);
 #ifdef _ICONV_H
@@ -374,7 +374,7 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, 
 	return true;
 }
 
-static kbool_t bytes_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t bytes_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
@@ -418,7 +418,7 @@ static KMETHOD ExprTyCheck_Squote(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURN_(K_NULLEXPR);
 }
 
-static kbool_t bytes_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
+static kbool_t bytes_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
 {
 	USING_SUGAR;
 	SUGAR NameSpace_setTokenizeFunc(kctx, ks, '\'', parseSQUOTE, NULL, 0);
@@ -430,7 +430,7 @@ static kbool_t bytes_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t
 	return true;
 }
 
-static kbool_t bytes_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t bytes_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }

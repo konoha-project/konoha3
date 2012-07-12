@@ -197,7 +197,7 @@ static KMETHOD System_assert(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kbool_t cond = sfp[1].bvalue;
 	if (cond == false) {
-		kline_t pline  = sfp[K_RTNIDX].uline;
+		kfileline_t pline  = sfp[K_RTNIDX].uline;
 		konoha_AssertResult = 1;
 		kreportf(CRIT_, pline, "Assert!!");
 	}
@@ -206,7 +206,7 @@ static KMETHOD System_assert(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## method void System.p(@Coercion String msg);
 static KMETHOD System_p(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kline_t uline = sfp[K_RTNIDX].uline;
+	kfileline_t uline = sfp[K_RTNIDX].uline;
 	kreportf(PRINT_, uline, "%s", S_text(sfp[1].s));
 }
 

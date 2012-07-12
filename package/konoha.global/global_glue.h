@@ -27,12 +27,12 @@
 
 // --------------------------------------------------------------------------
 
-static	kbool_t global_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static	kbool_t global_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t global_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t global_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
@@ -258,7 +258,7 @@ struct _kScript {
 	KonohaObjectHeader h;
 };
 
-static kbool_t global_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
+static kbool_t global_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
@@ -280,7 +280,7 @@ static kbool_t global_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_
 	return true;
 }
 
-static kbool_t global_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t global_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }

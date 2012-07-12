@@ -54,7 +54,7 @@ static void ObjectX_init(KonohaContext *kctx, kObject *o, void *conf)
 	memcpy(of->fields, ct->nulvalNULL->fields, ct->cstruct_size - sizeof(KonohaObjectHeader));
 }
 
-static void Object_initdef(KonohaContext *kctx, KonohaClassVar *ct, kline_t pline)
+static void Object_initdef(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t pline)
 {
 	if(ct->cid == TY_Object) return;
 	DBG_P("new object initialization ct->cstruct_size=%d", ct->cstruct_size);
@@ -503,7 +503,7 @@ static KonohaClass *T_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass
 
 // ---------------
 
-static KonohaClass* Kclass(KonohaContext *kctx, ktype_t cid, kline_t pline)
+static KonohaClass* Kclass(KonohaContext *kctx, ktype_t cid, kfileline_t pline)
 {
 	SharedRuntime *share = kctx->share;
 	if(cid < (share->ca.bytesize/sizeof(KonohaClassVar*))) {
@@ -574,7 +574,7 @@ static kObject *CT_null(KonohaContext *kctx, KonohaClass *ct)
 	return ct->fnull(kctx, ct);
 }
 
-static KonohaClassVar* new_CT(KonohaContext *kctx, KonohaClass *bct, KDEFINE_CLASS *s, kline_t pline)
+static KonohaClassVar* new_CT(KonohaContext *kctx, KonohaClass *bct, KDEFINE_CLASS *s, kfileline_t pline)
 {
 	SharedRuntimeVar *share = kctx->share;
 	ktype_t newid = share->ca.bytesize / sizeof(KonohaClassVar*);
@@ -698,7 +698,7 @@ static kString* CT_shortName(KonohaContext *kctx, KonohaClass *ct)
 	return ct->shortNameNULL;
 }
 
-static void CT_setName(KonohaContext *kctx, KonohaClassVar *ct, kline_t pline)
+static void CT_setName(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t pline)
 {
 	uintptr_t lname = longid(ct->packdom, ct->nameid);
 	kreportf(DEBUG_, pline, "new class domain=%s, name='%s.%s'", PN_t(ct->packdom), PN_t(ct->packageId), SYM_t(ct->nameid));
@@ -714,7 +714,7 @@ static void CT_setName(KonohaContext *kctx, KonohaClassVar *ct, kline_t pline)
 	}
 }
 
-static KonohaClass *addClassDef(KonohaContext *kctx, kpackage_t packageId, kpackage_t packdom, kString *name, KDEFINE_CLASS *cdef, kline_t pline)
+static KonohaClass *addClassDef(KonohaContext *kctx, kpackage_t packageId, kpackage_t packdom, kString *name, KDEFINE_CLASS *cdef, kfileline_t pline)
 {
 	KonohaClassVar *ct = new_CT(kctx, NULL, cdef, pline);
 	ct->packageId  = packageId;

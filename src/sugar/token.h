@@ -524,7 +524,7 @@ static void NameSpace_setTokenizeFunc(KonohaContext *kctx, kNameSpace *ns, int c
 	}
 }
 
-static void NameSpace_tokenize(KonohaContext *kctx, kNameSpace *ns, const char *source, kline_t uline, kArray *a)
+static void NameSpace_tokenize(KonohaContext *kctx, kNameSpace *ns, const char *source, kfileline_t uline, kArray *a)
 {
 	size_t i, pos = kArray_size(a);
 	TokenizerEnv tenv = {
@@ -632,7 +632,7 @@ static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tls, int s, int e, kA
 	return true;
 }
 
-static void parseSyntaxRule(KonohaContext *kctx, const char *rule, kline_t uline, kArray *a)
+static void parseSyntaxRule(KonohaContext *kctx, const char *rule, kfileline_t uline, kArray *a)
 {
 	kArray *tls = ctxsugar->tokens;
 	size_t pos = kArray_size(tls);

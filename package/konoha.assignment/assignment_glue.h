@@ -62,12 +62,12 @@ static KMETHOD ExprTyCheck_assignment(KonohaContext *kctx, KonohaStack *sfp _RIX
 
 // --------------------------------------------------------------------------
 
-static	kbool_t assignment_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static	kbool_t assignment_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t assignment_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t assignment_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
@@ -156,7 +156,7 @@ static KMETHOD ParseExpr_OprAssignment(KonohaContext *kctx, KonohaStack *sfp _RI
 	RETURN_(expr);
 }
 
-static kbool_t assignment_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
+static kbool_t assignment_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
@@ -172,7 +172,7 @@ static kbool_t assignment_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kl
 	return true;
 }
 
-static kbool_t assignment_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t assignment_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }

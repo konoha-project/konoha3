@@ -356,7 +356,7 @@ static KMETHOD LogPool_loadFile(KonohaContext *kctx, KonohaStack *sfp _RIX)
 #define TY_Logpool  (ct0->cid)
 #define TY_Log      (ct1->cid)
 
-static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 {
 	int i;
 	static KDEFINE_CLASS Def0 = {
@@ -441,17 +441,17 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc
 	return true;
 }
 
-static kbool_t logpool_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t logpool_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t logpool_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
+static kbool_t logpool_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t logpool_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t logpool_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }

@@ -613,7 +613,7 @@ static KMETHOD SockAddr_new (KonohaContext *kctx, KonohaStack *sfp _RIX)
 #define TY_SockAddr         cSockAddr->cid
 #define IS_SockAddr(O)      ((O)->h.ct == CT_SockAddr)
 
-static	kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static	kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 {
 	KDEFINE_CLASS defSockAddr = {
 		STRUCTNAME(SockAddr),
@@ -718,17 +718,17 @@ static	kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc,
 	return true;
 }
 
-static kbool_t socket_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t socket_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t socket_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
+static kbool_t socket_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t socket_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t socket_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }

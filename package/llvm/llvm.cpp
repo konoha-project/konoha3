@@ -4613,7 +4613,7 @@ static void kmodllvm_free(KonohaContext *kctx, struct kmodshare_t *baseh)
 #define _Im       kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char **args, kline_t pline)
+static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char **args, kfileline_t pline)
 {
 	(void)argc;(void)args;
 	kmodllvm_t *base = (kmodllvm_t*)KCALLOC(sizeof(kmodllvm_t), 1);
@@ -5256,19 +5256,19 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 	return true;
 }
 
-static kbool_t llvm_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t llvm_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	(void)kctx;(void)ks;(void)pline;
 	return true;
 }
 
-static kbool_t llvm_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
+static kbool_t llvm_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
 {
 	(void)kctx;(void)ks;(void)pline;
 	return true;
 }
 
-static kbool_t llvm_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t llvm_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	(void)kctx;(void)ks;(void)pline;
 	return true;

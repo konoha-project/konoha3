@@ -506,7 +506,7 @@ static void kmodmpi_free(KonohaContext *kctx, struct kmodshare_t *baseh)
 
 #define MOD_mpi 19/*TODO*/
 
-static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 {
 	kmodmpi_t *base = (kmodmpi_t*)KCALLOC(sizeof(kmodmpi_t), 1);
 	base->h.name     = "mpi";
@@ -683,17 +683,17 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, co
 	return true;
 }
 
-static kbool_t mpi_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t mpi_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t mpi_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t mpi_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t mpi_setupLingo(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t mpi_setupLingo(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }

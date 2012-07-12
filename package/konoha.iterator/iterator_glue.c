@@ -194,7 +194,7 @@ static void kmoditerator_free(KonohaContext *kctx, struct kmodshare_t *baseh) { 
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kline_t pline)
+static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	kmoditerator_t *base = (kmoditerator_t*)KCALLOC(sizeof(kmoditerator_t), 1);
 	base->h.name     = "iterator";
@@ -225,12 +225,12 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 	return true;
 }
 
-static kbool_t iterator_setupPackage(KonohaContext *kctx, kNameSpace *ns, kline_t pline)
+static kbool_t iterator_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t iterator_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kline_t pline)
+static kbool_t iterator_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
@@ -244,7 +244,7 @@ static kbool_t iterator_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, klin
 	return true;
 }
 
-static kbool_t iterator_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kline_t pline)
+static kbool_t iterator_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

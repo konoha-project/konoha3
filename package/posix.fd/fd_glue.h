@@ -329,7 +329,7 @@ static KMETHOD System_fsync(KonohaContext *kctx, KonohaStack *sfp _RIX)
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 {
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im, _F(System_lseek), TY_Int, TY_System, MN_("lseek"), 3, TY_Int, FN_("fd"), TY_Int, FN_("offset"), TY_Int, FN_("whence"),
@@ -354,17 +354,17 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, con
 	return true;
 }
 
-static kbool_t fd_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t fd_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t fd_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t fd_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t fd_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t fd_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }

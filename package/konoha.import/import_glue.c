@@ -69,17 +69,17 @@ static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 // --------------------------------------------------------------------------
 
-static kbool_t import_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static kbool_t import_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t import_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t import_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t import_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t import_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
@@ -90,7 +90,7 @@ static kbool_t import_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t
 	return true;
 }
 
-static kbool_t import_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t import_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }

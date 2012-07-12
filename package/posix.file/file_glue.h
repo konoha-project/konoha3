@@ -103,7 +103,7 @@ static KMETHOD File_read(KonohaContext *kctx, KonohaStack *sfp _RIX)
 		size_t len = (size_t)sfp[3].ivalue;
 		size = ba->bytesize;
 		if(!(offset < size)) {
-			kline_t uline = sfp[K_RTNIDX].uline;
+			kfileline_t uline = sfp[K_RTNIDX].uline;
 			kreportf(CRIT_, uline, "OutOfRange!!, offset=%d, size=%d", offset, size);
 		}
 		if(len == 0) len = size - offset;
@@ -207,7 +207,7 @@ static KMETHOD File_putC(KonohaContext *kctx, KonohaStack *sfp _RIX)
 #define TY_File         cFile->cid
 #define IS_File(O)      ((O)->h.ct == CT_File)
 
-static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 {
 	KDEFINE_CLASS defFile = {
 		STRUCTNAME(FILE),
@@ -240,17 +240,17 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 	return true;
 }
 
-static kbool_t file_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t file_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t file_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t file_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t file_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t file_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }

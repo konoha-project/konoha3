@@ -77,7 +77,7 @@ static void kapacheshare_free(KonohaContext *kctx, struct kmodshare_t *baseh)
 }
 
 
-static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 {
 	static KDEFINE_CLASS Def = {
 		STRUCTNAME(Request),
@@ -123,17 +123,17 @@ static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc,
 	return true;
 }
 
-static kbool_t apache_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t apache_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t apache_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
+static kbool_t apache_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t apache_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t apache_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }

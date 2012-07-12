@@ -322,10 +322,10 @@ static ksymbol_t Kmap_getcode(KonohaContext *kctx, kmap_t *kmp, kArray *list, co
 	return def;
 }
 
-static kline_t Kfileid(KonohaContext *kctx, const char *name, size_t len, int spol, ksymbol_t def)
+static kfileline_t Kfileid(KonohaContext *kctx, const char *name, size_t len, int spol, ksymbol_t def)
 {
 	uintptr_t hcode = strhash(name, len);
-	kline_t uline = Kmap_getcode(kctx, kctx->share->fileidMapNN, kctx->share->fileidList, name, len, hcode, spol, def);
+	kfileline_t uline = Kmap_getcode(kctx, kctx->share->fileidMapNN, kctx->share->fileidList, name, len, hcode, spol, def);
 	//DBG_P("name='%s', fileid=%d", name, uline);
 	return uline << (sizeof(kshort_t) * 8);
 }
@@ -556,7 +556,7 @@ static void KObject_removeKey(KonohaContext *kctx, kObject *o, ksymbol_t key)
 /* debug mode */
 int verbose_debug = 0;
 
-static void Kreportf(KonohaContext *kctx, kinfotag_t level, kline_t pline, const char *fmt, ...)
+static void Kreportf(KonohaContext *kctx, kinfotag_t level, kfileline_t pline, const char *fmt, ...)
 {
 	if(level == DEBUG_ && !verbose_debug) return;
 	va_list ap;
@@ -591,7 +591,7 @@ static void Kraise(KonohaContext *kctx, int param)
 
 // -------------------------------------------------------------------------
 
-static kbool_t KRUNTIME_setModule(KonohaContext *kctx, int x, kmodshare_t *d, kline_t pline);
+static kbool_t KRUNTIME_setModule(KonohaContext *kctx, int x, kmodshare_t *d, kfileline_t pline);
 
 static void klib2_init(LibKonohaApiVar *l)
 {

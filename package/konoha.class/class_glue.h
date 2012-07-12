@@ -131,7 +131,7 @@ static void setfield(KonohaContext *kctx, KDEFINE_CLASS *ct, int fctsize, Konoha
 	}
 }
 
-static KonohaClass* defineClass(KonohaContext *kctx, kNameSpace *ks, kshortflag_t cflag, kString *name, KonohaClass *supct, int fsize, kline_t pline)
+static KonohaClass* defineClass(KonohaContext *kctx, kNameSpace *ks, kshortflag_t cflag, kString *name, KonohaClass *supct, int fsize, kfileline_t pline)
 {
 	KDEFINE_CLASS defNewClass = {
 		.cflag  = cflag,
@@ -208,7 +208,7 @@ static KMETHOD NameSpace_defineClassField(KonohaContext *kctx, KonohaStack *sfp 
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static	kbool_t class_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static	kbool_t class_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 {
 	USING_SUGAR;
 	int FN_flag = FN_("flag"), FN_cid = FN_("cid"), FN_name = FN_("name"), FN_defval = FN_("defval");
@@ -223,7 +223,7 @@ static	kbool_t class_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, 
 	return true;
 }
 
-static kbool_t class_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t class_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
@@ -371,7 +371,7 @@ static void ObjectField_reftrace (KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
-static KonohaClassVar* defineClassName(KonohaContext *kctx, kNameSpace *ks, kshortflag_t cflag, kString *name, ktype_t supcid, kline_t pline)
+static KonohaClassVar* defineClassName(KonohaContext *kctx, kNameSpace *ks, kshortflag_t cflag, kString *name, ktype_t supcid, kfileline_t pline)
 {
 	KDEFINE_CLASS defNewClass = {
 		.cflag  = cflag,
@@ -437,7 +437,7 @@ static void CT_initField(KonohaContext *kctx, KonohaClassVar *ct, KonohaClass *s
 	}
 }
 
-static kbool_t CT_declType(KonohaContext *kctx, KonohaClassVar *ct, kGamma *gma, kStmt *stmt, kExpr *expr, kshortflag_t flag, ktype_t ty, kline_t pline)
+static kbool_t CT_declType(KonohaContext *kctx, KonohaClassVar *ct, kGamma *gma, kStmt *stmt, kExpr *expr, kshortflag_t flag, ktype_t ty, kfileline_t pline)
 {
 	USING_SUGAR;
 	if(Expr_isTerm(expr)) {
@@ -479,7 +479,7 @@ static kbool_t CT_declType(KonohaContext *kctx, KonohaClassVar *ct, kGamma *gma,
 	return false;
 }
 
-static kbool_t CT_addClassFields(KonohaContext *kctx, KonohaClassVar *ct, kGamma *gma, kBlock *bk, kline_t pline)
+static kbool_t CT_addClassFields(KonohaContext *kctx, KonohaClassVar *ct, kGamma *gma, kBlock *bk, kfileline_t pline)
 {
 	USING_SUGAR;
 	size_t i;
@@ -573,7 +573,7 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNb_(true);
 }
 
-static kbool_t class_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
+static kbool_t class_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
@@ -587,7 +587,7 @@ static kbool_t class_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t
 	return true;
 }
 
-static kbool_t class_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t class_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }

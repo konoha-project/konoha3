@@ -143,7 +143,7 @@ KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp _RIX)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static	kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static	kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 {
 	USING_SUGAR;
 	KonohaClass *ct = kclass(TY_Method, pline);
@@ -156,12 +156,12 @@ static	kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, cons
 	return true;
 }
 
-static kbool_t i_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t i_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t i_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
+static kbool_t i_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
 {
 //	USING_SUGAR;
 //	KDEFINE_SYNTAX SYNTAX[] = {
@@ -174,7 +174,7 @@ static kbool_t i_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pli
 	return true;
 }
 
-static kbool_t i_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t i_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }

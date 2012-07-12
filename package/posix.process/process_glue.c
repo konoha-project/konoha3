@@ -138,7 +138,7 @@ static KMETHOD System_setgroups(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 #define _KVi(T) #T, TY_Int, T
 
-static	kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static	kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 {
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Static, _F(System_getpid), TY_Int, TY_System, MN_("getpid"), 0,
@@ -170,17 +170,17 @@ static	kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc
 	return true;
 }
 
-static kbool_t process_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t process_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t process_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
+static kbool_t process_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t process_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t process_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }

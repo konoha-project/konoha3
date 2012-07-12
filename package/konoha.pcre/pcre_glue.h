@@ -637,7 +637,7 @@ static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp _RIX)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t pcre_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static kbool_t pcre_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 {
 	if(!knh_linkDynamicPCRE(kctx)) {
 		return false; // libpcre open fail
@@ -675,7 +675,7 @@ static kbool_t pcre_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 	return true;
 }
 
-static kbool_t pcre_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t pcre_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
@@ -732,7 +732,7 @@ static KMETHOD ExprTyCheck_Regex(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 #define _SLASH     30//FIXME (from src/sugar/token.h)
-static kbool_t pcre_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t pcre_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	USING_SUGAR;
 	SUGAR NameSpace_setTokenizeFunc(kctx, ks, '/', parseREGEX, NULL, 0);
@@ -744,7 +744,7 @@ static kbool_t pcre_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t p
 	return true;
 }
 
-static kbool_t pcre_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t pcre_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }

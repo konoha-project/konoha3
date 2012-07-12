@@ -30,6 +30,7 @@
 #define konoha_t  KonohaContext*
 #define ksfp_t    KonohaStack
 
-#define kcid_t ktype_t
+#define kcid_t  ktype_t
+#define kline_t kfileline_t
 
 #endif /* OLDKONOHA_H_ */

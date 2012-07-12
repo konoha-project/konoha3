@@ -182,7 +182,7 @@ static KMETHOD Math_atanh(KonohaContext *kctx, KonohaStack *sfp _RIX)
 #define _KVf(T) "MATH_" #T, TY_Float, M_##T
 #define TY_Math  (cMath->cid)
 
-static	kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static	kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 {
 	KREQUIRE_PACKAGE("konoha.float", pline);
 	static KDEFINE_CLASS MathDef = {
@@ -243,18 +243,18 @@ static	kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 	return true;
 }
 
-static kbool_t math_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t math_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t math_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
+static kbool_t math_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
 {
 	KEXPORT_PACKAGE("konoha.float", ks, pline);
 	return true;
 }
 
-static kbool_t math_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t math_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }

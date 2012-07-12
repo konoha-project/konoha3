@@ -888,7 +888,7 @@ static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kExpr *texpr = K_NULLEXPR;
 	kStmt *lastExpr = NULL;
-	kline_t uline = expr->tk->uline;
+	kfileline_t uline = expr->tk->uline;
 	kBlock *bk = expr->block;
 	DBG_ASSERT(IS_Block(bk));
 	if(kArray_size(bk->blocks) > 0) {
@@ -1141,14 +1141,14 @@ static kParam *Stmt_newMethodParamNULL(KonohaContext *kctx, kStmt *stmt, kGamma*
 	return pa;
 }
 
-static kbool_t Method_compile(KonohaContext *kctx, kMethod *mtd, kString *text, kline_t uline, kNameSpace *ks);
+static kbool_t Method_compile(KonohaContext *kctx, kMethod *mtd, kString *text, kfileline_t uline, kNameSpace *ks);
 
 static KMETHOD Fmethod_lazyCompilation(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	KonohaStack *esp = kctx->esp;
 	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
 	kString *text = mtd->tcode->text;
-	kline_t uline = mtd->tcode->uline;
+	kfileline_t uline = mtd->tcode->uline;
 	kNameSpace *ns = mtd->lazyns;
 	Method_compile(kctx, mtd, text, uline, ns);
 	((KonohaContextVar*)kctx)->esp = esp;
@@ -1162,7 +1162,7 @@ static void NameSpace_syncMethods(KonohaContext *kctx)
 		kMethod *mtd = ctxsugar->definedMethods->methods[i];
 		if (mtd->fcall_1 == Fmethod_lazyCompilation) {
 			kString *text = mtd->tcode->text;
-			kline_t uline = mtd->tcode->uline;
+			kfileline_t uline = mtd->tcode->uline;
 			kNameSpace *ns = mtd->lazyns;
 			Method_compile(kctx, mtd, text, uline, ns);
 			assert(mtd->fcall_1 != Fmethod_lazyCompilation);
@@ -1252,7 +1252,7 @@ static KMETHOD StmtTyCheck_ParamsDecl(KonohaContext *kctx, KonohaStack *sfp _RIX
 	RETURNb_(false);
 }
 
-static kBlock* Method_newBlock(KonohaContext *kctx, kMethod *mtd, kString *source, kline_t uline)
+static kBlock* Method_newBlock(KonohaContext *kctx, kMethod *mtd, kString *source, kfileline_t uline)
 {
 	const char *script = S_text(source);
 	if(IS_NULL(source) || script[0] == 0) {
@@ -1298,7 +1298,7 @@ static void Gamma_shiftBlockIndex(KonohaContext *kctx, gmabuf_t *genv)
 	}
 }
 
-static kbool_t Method_compile(KonohaContext *kctx, kMethod *mtd, kString *text, kline_t uline, kNameSpace *ks)
+static kbool_t Method_compile(KonohaContext *kctx, kMethod *mtd, kString *text, kfileline_t uline, kNameSpace *ks)
 {
 	INIT_GCSTACK();
 	kGamma *gma = ctxsugar->gma;

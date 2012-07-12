@@ -32,7 +32,7 @@
 //static KMETHOD NameSpace_assert(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //	kbool_t cond = sfp[1].bvalue;
-//	kline_t fileid  = sfp[K_RTNIDX].uline;
+//	kfileline_t fileid  = sfp[K_RTNIDX].uline;
 //	if (cond == false) {
 //		const char *fname = SS_t(fileid);
 //		uintptr_t line = ULINE_line(fileid);
@@ -68,7 +68,7 @@
 //#define _Coercion kMethod_Coercion
 //#define _F(F)   (intptr_t)(F)
 //
-//static kbool_t assert_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+//static kbool_t assert_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 //{
 //	USING_SUGAR;
 //	int FN_cond = FN_("cond");
@@ -80,12 +80,12 @@
 //	return true;
 //}
 //
-//static kbool_t assert_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+//static kbool_t assert_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 //{
 //	return true;
 //}
 //
-//static kbool_t assert_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
+//static kbool_t assert_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
 //{
 //	USING_SUGAR;
 //	KDEFINE_SYNTAX SYNTAX[] = {
@@ -98,7 +98,7 @@
 //}
 //
 //
-//static kbool_t assert_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+//static kbool_t assert_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 //{
 //	return true;
 //}

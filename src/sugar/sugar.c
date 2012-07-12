@@ -104,7 +104,7 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ks)
 /* ------------------------------------------------------------------------ */
 /* ctxsugar_t global functions */
 
-static kstatus_t NameSpace_eval(KonohaContext *kctx, kNameSpace *ks, const char *script, kline_t uline)
+static kstatus_t NameSpace_eval(KonohaContext *kctx, kNameSpace *ks, const char *script, kfileline_t uline)
 {
 	kstatus_t result;
 	kmodsugar->h.setup(kctx, (kmodshare_t*)kmodsugar, 0/*lazy*/);
@@ -121,7 +121,7 @@ static kstatus_t NameSpace_eval(KonohaContext *kctx, kNameSpace *ks, const char 
 	return result;
 }
 
-kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, kline_t uline)
+kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, kfileline_t uline)
 {
 	if(verbose_sugar) {
 		DUMP_P("\n>>>----\n'%s'\n------\n", script);
@@ -291,7 +291,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 #define EOF (-1)
 #endif
 
-static kline_t readquote(KonohaContext *kctx, FILE_i *fp, kline_t line, kwb_t *wb, int quote)
+static kfileline_t readquote(KonohaContext *kctx, FILE_i *fp, kfileline_t line, kwb_t *wb, int quote)
 {
 	int ch, prev = quote;
 	while((ch = PLAT fgetc_i(fp)) != EOF) {
@@ -306,7 +306,7 @@ static kline_t readquote(KonohaContext *kctx, FILE_i *fp, kline_t line, kwb_t *w
 	return line;
 }
 
-static kline_t readcomment(KonohaContext *kctx, FILE_i *fp, kline_t line, kwb_t *wb)
+static kfileline_t readcomment(KonohaContext *kctx, FILE_i *fp, kfileline_t line, kwb_t *wb)
 {
 	int ch, prev = 0, level = 1;
 	while((ch = PLAT fgetc_i(fp)) != EOF) {
@@ -321,7 +321,7 @@ static kline_t readcomment(KonohaContext *kctx, FILE_i *fp, kline_t line, kwb_t 
 	return line;
 }
 
-static kline_t readchunk(KonohaContext *kctx, FILE_i *fp, kline_t line, kwb_t *wb)
+static kfileline_t readchunk(KonohaContext *kctx, FILE_i *fp, kfileline_t line, kwb_t *wb)
 {
 	int ch;
 	int prev = 0, isBLOCK = 0;
@@ -360,14 +360,14 @@ static int isemptychunk(const char *t, size_t len)
 	return 0;
 }
 
-static kstatus_t NameSpace_loadstream(KonohaContext *kctx, kNameSpace *ns, FILE_i *fp, kline_t uline, kline_t pline)
+static kstatus_t NameSpace_loadstream(KonohaContext *kctx, kNameSpace *ns, FILE_i *fp, kfileline_t uline, kfileline_t pline)
 {
 	kstatus_t status = K_CONTINUE;
 	kwb_t wb;
 	char *p;
 	kwb_init(&(kctx->stack->cwb), &wb);
 	while(! PLAT feof_i(fp)) {
-		kline_t chunkheadline = uline;
+		kfileline_t chunkheadline = uline;
 		uline = readchunk(kctx, fp, uline, &wb);
 		const char *script = kwb_top(&wb, 1);
 		size_t len = kwb_bytesize(&wb);
@@ -399,9 +399,9 @@ static kstatus_t NameSpace_loadstream(KonohaContext *kctx, kNameSpace *ns, FILE_
 #define PATH_MAX 1024
 #endif
 
-static kline_t uline_init(KonohaContext *kctx, const char *path, size_t len, int line, int isreal)
+static kfileline_t uline_init(KonohaContext *kctx, const char *path, size_t len, int line, int isreal)
 {
-	kline_t uline = line;
+	kfileline_t uline = line;
 	if(isreal) {
 		char buf[PATH_MAX];
 		char *ptr = PLAT realpath_i(path, buf);
@@ -416,17 +416,17 @@ static kline_t uline_init(KonohaContext *kctx, const char *path, size_t len, int
 	return uline;
 }
 
-static kstatus_t NameSpace_loadScript(KonohaContext *kctx, kNameSpace *ns, const char *path, size_t len, kline_t pline)
+static kstatus_t NameSpace_loadScript(KonohaContext *kctx, kNameSpace *ns, const char *path, size_t len, kfileline_t pline)
 {
 	kstatus_t status = K_BREAK;
 //	if(path[0] == '-' && path[1] == 0) {
-//		kline_t uline = FILEID_("<stdin>") | 1;
+//		kfileline_t uline = FILEID_("<stdin>") | 1;
 //		status = NameSpace_loadstream(kctx, ks, stdin, uline, pline);
 //	}
 //	else {
 		FILE_i *fp = PLAT fopen_i(path, "r");
 		if(fp != NULL) {
-			kline_t uline = uline_init(kctx, path, len, 1, 1);
+			kfileline_t uline = uline_init(kctx, path, len, 1, 1);
 			status = NameSpace_loadstream(kctx, ns, fp, uline, pline);
 			PLAT fclose_i(fp);
 		}
@@ -437,7 +437,7 @@ static kstatus_t NameSpace_loadScript(KonohaContext *kctx, kNameSpace *ns, const
 	return status;
 }
 
-kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, kline_t pline)
+kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, kfileline_t pline)
 {
 	if (ctxsugar == NULL) {
 		kmodsugar->h.setup(kctx, (kmodshare_t*)kmodsugar, 0/*lazy*/);
@@ -471,7 +471,7 @@ static KDEFINE_PACKAGE PKGDEFNULL = {
 	.konoha_revision = 0,
 };
 
-static KDEFINE_PACKAGE *NameSpace_openGlueHandler(KonohaContext *kctx, kNameSpace *ns, char *pathbuf, size_t bufsiz, const char *pname, kline_t pline)
+static KDEFINE_PACKAGE *NameSpace_openGlueHandler(KonohaContext *kctx, kNameSpace *ns, char *pathbuf, size_t bufsiz, const char *pname, kfileline_t pline)
 {
 	char *p = strrchr(pathbuf, '.');
 	strncpy(p, K_OSDLLEXT, bufsiz - (p  - pathbuf));
@@ -502,7 +502,7 @@ static kNameSpace* new_NameSpace(KonohaContext *kctx, kpackage_t packdom, kpacka
 	return (kNameSpace*)ks;
 }
 
-static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackage_t packageId, kline_t pline)
+static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackage_t packageId, kfileline_t pline)
 {
 	char fbuf[256];
 	const char *path = PLAT packagepath(fbuf, sizeof(fbuf), S_text(PN_s(packageId)));
@@ -512,7 +512,7 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackage_t packageId,
 		INIT_GCSTACK();
 		kNameSpace *ns = new_NameSpace(kctx, packageId, packageId);
 		PUSH_GCSTACK(ns);
-		kline_t uline = uline_init(kctx, path, strlen(path), 1, 1);
+		kfileline_t uline = uline_init(kctx, path, strlen(path), 1, 1);
 		KDEFINE_PACKAGE *packageLoadApi = NameSpace_openGlueHandler(kctx, ns, fbuf, sizeof(fbuf), PN_t(packageId), pline);
 		if(packageLoadApi->initPackage != NULL) {
 			packageLoadApi->initPackage(kctx, ns, 0, NULL, pline);
@@ -539,7 +539,7 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackage_t packageId,
 	return NULL;
 }
 
-static KonohaPackage *getPackageNULL(KonohaContext *kctx, kpackage_t packageId, kline_t pline)
+static KonohaPackage *getPackageNULL(KonohaContext *kctx, kpackage_t packageId, kfileline_t pline)
 {
 	KonohaPackage *pack = (KonohaPackage*)map_getu(kctx, kmodsugar->packageMapNO, packageId, uNULL);
 	if(pack != NULL) return pack;
@@ -550,7 +550,7 @@ static KonohaPackage *getPackageNULL(KonohaContext *kctx, kpackage_t packageId, 
 	return pack;
 }
 
-static void NameSpace_merge(KonohaContext *kctx, kNameSpace *ns, kNameSpace *target, kline_t pline)
+static void NameSpace_merge(KonohaContext *kctx, kNameSpace *ns, kNameSpace *target, kfileline_t pline)
 {
 	if(target->packageId != PN_konoha) {
 		NameSpace_importClassName(kctx, ns, target->packageId, pline);
@@ -567,7 +567,7 @@ static void NameSpace_merge(KonohaContext *kctx, kNameSpace *ns, kNameSpace *tar
 	}
 }
 
-static kbool_t NameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, const char *name, kline_t pline)
+static kbool_t NameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, const char *name, kfileline_t pline)
 {
 	kbool_t res = 0;
 	kpackage_t packageId = kpack(name, strlen(name), 0, _NEWID);
@@ -581,7 +581,7 @@ static kbool_t NameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, cons
 			}
 			if(res && pack->exportScriptUri != 0) {
 				kString *fname = SS_s(pack->exportScriptUri);
-				kline_t uline = pack->exportScriptUri | (kline_t)1;
+				kfileline_t uline = pack->exportScriptUri | (kfileline_t)1;
 				FILE_i *fp = PLAT fopen_i(S_text(fname), "r");
 				if(fp != NULL) {
 					res = (NameSpace_loadstream(kctx, ns, fp, uline, pline) == K_CONTINUE);
@@ -609,10 +609,10 @@ static KMETHOD NameSpace_importPackage_(KonohaContext *kctx, KonohaStack *sfp _R
 // boolean NameSpace.loadScript(String path);
 static KMETHOD NameSpace_loadScript_(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kline_t pline = sfp[K_RTNIDX].uline;
+	kfileline_t pline = sfp[K_RTNIDX].uline;
 	FILE_i *fp = PLAT fopen_i(S_text(sfp[1].s), "r");
 	if(fp != NULL) {
-		kline_t uline = uline_init(kctx, S_text(sfp[1].s), S_size(sfp[1].s), 1, 1);
+		kfileline_t uline = uline_init(kctx, S_text(sfp[1].s), S_size(sfp[1].s), 1, 1);
 		kstatus_t status = NameSpace_loadstream(kctx, sfp[0].ks, fp, uline, 0);
 		PLAT fclose_i(fp);
 		RETURNb_(status == K_CONTINUE);

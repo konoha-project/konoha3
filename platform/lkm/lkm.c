@@ -163,7 +163,7 @@ static void KonohaContext_evalScript(KonohaContext *kctx, char *data, size_t len
 	kwb_t wb;
 	kwb_init(&(kctx->stack->cwb), &wb);
 	kwb_write(&wb,data,len);
-	kline_t uline = FILEID_("(kernel)") | 1;
+	kfileline_t uline = FILEID_("(kernel)") | 1;
 	konoha_eval((KonohaContext*)kctx, kwb_top(&wb,1),uline);
 	kwb_free(&wb);
 }

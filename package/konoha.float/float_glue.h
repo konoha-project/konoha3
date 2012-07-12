@@ -178,7 +178,7 @@ static KMETHOD Float_random(KonohaContext *kctx, KonohaStack *sfp _RIX)
 #define _Static   kMethod_Static
 #define _F(F)   (intptr_t)(F)
 
-static	kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static	kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 {
 	kmodfloat_t *base = (kmodfloat_t*)KCALLOC(sizeof(kmodfloat_t), 1);
 	base->h.name     = "float";
@@ -223,7 +223,7 @@ static	kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, 
 	return true;
 }
 
-static kbool_t float_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t float_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
@@ -239,7 +239,7 @@ static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURN_(kExpr_setNConstValue(expr, TY_Float, sfp[4].ndata));
 }
 
-static kbool_t float_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
+static kbool_t float_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
@@ -252,7 +252,7 @@ static kbool_t float_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t
 	return true;
 }
 
-static kbool_t float_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t float_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }

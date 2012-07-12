@@ -59,10 +59,10 @@ struct KDEFINE_PACKAGE_ {
 	const char *libname;
 	const char *libversion;
 	const char *note;
-	kbool_t (*initPackage)(KonohaContext *kctx, kNameSpace *, int, const char**, kline_t);
-	kbool_t (*setupPackage)(KonohaContext *kctx, kNameSpace *, kline_t);
-	kbool_t (*initNameSpace)(KonohaContext *kctx, kNameSpace *, kline_t);
-	kbool_t (*setupNameSpace)(KonohaContext *kctx, kNameSpace *, kline_t);
+	kbool_t (*initPackage)(KonohaContext *kctx, kNameSpace *, int, const char**, kfileline_t);
+	kbool_t (*setupPackage)(KonohaContext *kctx, kNameSpace *, kfileline_t);
+	kbool_t (*initNameSpace)(KonohaContext *kctx, kNameSpace *, kfileline_t);
+	kbool_t (*setupNameSpace)(KonohaContext *kctx, kNameSpace *, kfileline_t);
 	int konoha_revision;
 };
 
@@ -72,7 +72,7 @@ struct KonohaPackageVar {
 	kpackage_t                   packageId;
 	kNameSpace                  *packageNameSpace;
 	KDEFINE_PACKAGE             *packageLoadApi;
-	kline_t                      exportScriptUri;
+	kfileline_t                  exportScriptUri;
 };
 
 // Tokenizer
@@ -84,7 +84,7 @@ typedef int (*TokenizeFunc)(KonohaContext *, kTokenVar *, TokenizerEnv *, int);
 struct TokenizerEnv {
 	const char         *source;
 	size_t              sourceLength;
-	kline_t             uline;
+	kfileline_t             uline;
 	kArray             *list;
 	int                 tabsize;
 	const TokenizeFunc *cfunc;
@@ -223,7 +223,7 @@ struct kTokenVar {
 		kString *text;
 		kArray  *sub;
 	};
-	kline_t     uline;
+	kfileline_t     uline;
 };
 
 #define kToken_needsKeywordResolved(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
@@ -287,7 +287,7 @@ struct kExprVar {
 
 struct kStmtVar {
 	KonohaObjectHeader h;
-	kline_t uline;
+	kfileline_t uline;
 	SugarSyntax *syn;
 	kBlock *parentNULL;
 	kushort_t build;
@@ -461,7 +461,7 @@ typedef struct {
 
 	// export
 	void (*NameSpace_setTokenizeFunc)(KonohaContext *kctx, kNameSpace *, int ch, TokenizeFunc, kFunc *, int isAddition);
-	void (*NameSpace_tokenize)(KonohaContext *kctx, kNameSpace *, const char *, kline_t, kArray *);
+	void (*NameSpace_tokenize)(KonohaContext *kctx, kNameSpace *, const char *, kfileline_t, kArray *);
 
 	kExpr* (*Expr_setConstValue)(KonohaContext *kctx, kExpr *expr, ktype_t ty, kObject *o);
 	kExpr* (*Expr_setNConstValue)(KonohaContext *kctx, kExpr *expr, ktype_t ty, uintptr_t ndata);

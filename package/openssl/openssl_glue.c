@@ -79,7 +79,7 @@ static KMETHOD kSHA1_Final(KonohaContext *kctx, KonohaStack *sfp _RIX)
 #define TY_openssl  (ct0->cid)
 #define TY_Log      (ct1->cid)
 
-static kbool_t openssl_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static kbool_t openssl_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 {
 	static const char *names[] = {
 		"MD5",
@@ -115,17 +115,17 @@ static kbool_t openssl_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc
 	return true;
 }
 
-static kbool_t openssl_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t openssl_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t openssl_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
+static kbool_t openssl_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t openssl_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t openssl_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }

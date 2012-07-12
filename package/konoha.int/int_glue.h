@@ -56,7 +56,7 @@ static KMETHOD Int_opRSHIFT (KonohaContext *kctx, KonohaStack *sfp _RIX)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t int_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kline_t pline)
+static kbool_t int_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
@@ -76,12 +76,12 @@ static kbool_t int_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	return true;
 }
 
-static kbool_t int_setupPackage(KonohaContext *kctx, kNameSpace *ns, kline_t pline)
+static kbool_t int_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t int_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kline_t pline)
+static kbool_t int_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
@@ -95,7 +95,7 @@ static kbool_t int_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kline_t p
 	return true;
 }
 
-static kbool_t int_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kline_t pline)
+static kbool_t int_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

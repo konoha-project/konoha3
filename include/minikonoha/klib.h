@@ -55,9 +55,9 @@ static kinline const char* shortfilename(const char *str)
 #define SS_s(X)  SS_s_(kctx, X)
 #define SS_t(X)  S_text(SS_s_(kctx, X))
 
-static kinline kString* SS_s_(KonohaContext *kctx, kline_t fileid)
+static kinline kString* SS_s_(KonohaContext *kctx, kfileline_t fileid)
 {
-	kline_t n = (fileid >> (sizeof(kshort_t) * 8));
+	kfileline_t n = (fileid >> (sizeof(kshort_t) * 8));
 	DBG_ASSERT(n < kArray_size(kctx->share->fileidList));
 	return kctx->share->fileidList->strings[n];
 }
@@ -171,7 +171,7 @@ static kinline const char* TAG_t(kinfotag_t t)
 	return tags[(int)t];
 }
 
-static kinline size_t check_index(KonohaContext *kctx, kint_t n, size_t max, kline_t pline)
+static kinline size_t check_index(KonohaContext *kctx, kint_t n, size_t max, kfileline_t pline)
 {
 	size_t n1 = (size_t)n;
 	if(unlikely(!(n1 < max))) {

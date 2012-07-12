@@ -364,7 +364,7 @@ static KMETHOD String_toLower(KonohaContext *kctx, KonohaStack *sfp _RIX)
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 {
 	int FN_s = FN_("s");
 	int FN_n = FN_("n");
@@ -386,17 +386,17 @@ static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc,
 	return true;
 }
 
-static kbool_t string_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t string_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t string_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t string_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t string_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t string_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }

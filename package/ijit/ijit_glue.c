@@ -39,7 +39,7 @@ typedef struct {
 	kArray  *global_value;
 	FgenCode defaultCodeGen;
 	kmap_t *jitcache;
-	kline_t uline;
+	kfileline_t uline;
 	KonohaClass *cPointer;
 } kmodjit_t;
 
@@ -680,7 +680,7 @@ static void KMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	END_LOCAL();
 }
 
-static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 {
 	KREQUIRE_PACKAGE("sugar", pline);
 	KREQUIRE_PACKAGE("konoha.float", pline);
@@ -717,7 +717,7 @@ static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 	return true;
 }
 
-static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	USING_SUGAR;
 
@@ -823,12 +823,12 @@ static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pl
 	return true;
 }
 
-static kbool_t ijit_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
+static kbool_t ijit_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t ijit_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t ijit_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }

@@ -37,8 +37,8 @@
 extern "C" {
 #endif
 
-kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, size_t len, kline_t uline);
-kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, kline_t pline);
+kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, size_t len, kfileline_t uline);
+kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, kfileline_t pline);
 
 PlatformApi* platform_shell(void);
 
@@ -125,7 +125,7 @@ static int checkstmt(const char *t, size_t len)
 	return 1;
 }
 
-static kstatus_t readstmt(KonohaContext *kctx, kwb_t *wb, kline_t *uline)
+static kstatus_t readstmt(KonohaContext *kctx, kwb_t *wb, kfileline_t *uline)
 {
 	int line = 1;
 	kstatus_t status = K_CONTINUE;
@@ -177,9 +177,9 @@ static void shell(KonohaContext *kctx)
 {
 	kwb_t wb;
 	kwb_init(&(kctx->stack->cwb), &wb);
-	kline_t uline = FILEID_("(shell)") | 1;
+	kfileline_t uline = FILEID_("(shell)") | 1;
 	while(1) {
-		kline_t inc = 0;
+		kfileline_t inc = 0;
 		kstatus_t status = readstmt(kctx, &wb, &inc);
 		if(status == K_CONTINUE && kwb_bytesize(&wb) > 0) {
 			status = konoha_eval((KonohaContext*)kctx, kwb_top(&wb, 1), uline);

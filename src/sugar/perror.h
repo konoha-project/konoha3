@@ -43,7 +43,7 @@ static int isPRINT(KonohaContext *kctx, int pe)
 	return true;
 }
 
-static kString* vperrorf(KonohaContext *kctx, int pe, kline_t uline, int lpos, const char *fmt, va_list ap)
+static kString* vperrorf(KonohaContext *kctx, int pe, kfileline_t uline, int lpos, const char *fmt, va_list ap)
 {
 	if(isPRINT(kctx, pe)) {
 		const char *msg = TAG_t(pe);
@@ -76,7 +76,7 @@ static kString* vperrorf(KonohaContext *kctx, int pe, kline_t uline, int lpos, c
 
 #define pWARN(UL, FMT, ...) sugar_p(kctx, WARN_, UL, -1, FMT, ## __VA_ARGS__)
 
-static kString* sugar_p(KonohaContext *kctx, int pe, kline_t uline, int lpos, const char *fmt, ...)
+static kString* sugar_p(KonohaContext *kctx, int pe, kfileline_t uline, int lpos, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -107,12 +107,12 @@ static void Stmt_toERR(KonohaContext *kctx, kStmt *stmt, kString *errmsg)
 	kObject_setObject(stmt, KW_ERR, errmsg);
 }
 
-static inline void kStmt_errline(kStmt *stmt, kline_t uline)
+static inline void kStmt_errline(kStmt *stmt, kfileline_t uline)
 {
 	((kStmtVar*)stmt)->uline = uline;
 }
 
-static kline_t Expr_uline(KonohaContext *kctx, kExpr *expr, kline_t uline)
+static kfileline_t Expr_uline(KonohaContext *kctx, kExpr *expr, kfileline_t uline)
 {
 	kToken *tk = expr->tk;
 	DBG_ASSERT(IS_Expr(expr));
@@ -143,7 +143,7 @@ static kExpr* Stmt_p(KonohaContext *kctx, kStmt *stmt, kToken *tk, int pe, const
 {
 	va_list ap;
 	va_start(ap, fmt);
-	kline_t uline = stmt->uline;
+	kfileline_t uline = stmt->uline;
 	if(tk != NULL && pe <= ERR_ ) {
 		if(IS_Token(tk)) {
 			uline = tk->uline;

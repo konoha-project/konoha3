@@ -239,12 +239,12 @@ typedef kushort_t                 kfileid_t;
 #define URI__(fileid) S_text(knh_getURN(kctx, fileid))
 #define shortfilename__(fileid) knh_sfile(URI__(fileid))
 
-typedef uintptr_t                 kline_t;
+typedef uintptr_t                 kfileline_t;
 #define NOPLINE                   0
-#define new_ULINE(fileid, line)       ((((kline_t)fileid) << (sizeof(kfileid_t) * 8)) | ((kushort_t)line))
-#define ULINE_setURI(line, fileid)    line |= (((kline_t)fileid) << (sizeof(kfileid_t) * 8))
+#define new_ULINE(fileid, line)       ((((kfileline_t)fileid) << (sizeof(kfileid_t) * 8)) | ((kushort_t)line))
+#define ULINE_setURI(line, fileid)    line |= (((kfileline_t)fileid) << (sizeof(kfileid_t) * 8))
 #define ULINE_fileid(line)            ((kfileid_t)(line >> (sizeof(kfileid_t) * 8)))
-#define ULINE_line(line)           (line & (kline_t)((kfileid_t)-1))
+#define ULINE_line(line)           (line & (kfileline_t)((kfileid_t)-1))
 
 
 /* ------------------------------------------------------------------------ */
@@ -589,7 +589,7 @@ typedef struct krbp_t {
 		void (*p)(KonohaContext *kctx, KonohaStack *, int, kwb_t *, int);\
 		uintptr_t (*unbox)(KonohaContext *kctx, kObject*);\
 		int  (*compareTo)(kObject*, kObject*);\
-		void (*initdef)(KonohaContext *kctx, KonohaClassVar*, kline_t);\
+		void (*initdef)(KonohaContext *kctx, KonohaClassVar*, kfileline_t);\
 		kbool_t (*isSubType)(KonohaContext *kctx, KonohaClass*, KonohaClass*);\
 		KonohaClass* (*realtype)(KonohaContext *kctx, KonohaClass*, KonohaClass*)
 
@@ -1197,12 +1197,12 @@ struct LibKonohaApiVar {
 	ksymbol_t (*Kmap_getcode)(KonohaContext *kctx, kmap_t *, kArray *, const char *, size_t, uintptr_t, int, ksymbol_t);
 
 
-	kline_t     (*Kfileid)(KonohaContext *kctx, const char *, size_t, int spol, ksymbol_t def);
+	kfileline_t     (*Kfileid)(KonohaContext *kctx, const char *, size_t, int spol, ksymbol_t def);
 	kpackage_t     (*Kpack)(KonohaContext *kctx, const char *, size_t, int spol, ksymbol_t def);
 	ksymbol_t   (*Ksymbol2)(KonohaContext *kctx, const char*, size_t, int spol, ksymbol_t def);
 
-	kbool_t     (*KimportPackage)(KonohaContext *kctx, kNameSpace*, const char *, kline_t);
-	KonohaClass*   (*Kclass)(KonohaContext *kctx, ktype_t, kline_t);
+	kbool_t     (*KimportPackage)(KonohaContext *kctx, kNameSpace*, const char *, kfileline_t);
+	KonohaClass*   (*Kclass)(KonohaContext *kctx, ktype_t, kfileline_t);
 	kString*    (*KCT_shortName)(KonohaContext *kctx, KonohaClass *ct);
 	KonohaClass*   (*KCT_Generics)(KonohaContext *kctx, KonohaClass *ct, ktype_t rty, int psize, kparam_t *p);
 
@@ -1230,18 +1230,18 @@ struct LibKonohaApiVar {
 	void       (*KMethod_genCode)(KonohaContext *kctx, kMethod*, kBlock *bk);
 	intptr_t   (*KMethod_indexOfField)(kMethod *);
 
-	kbool_t    (*KsetModule)(KonohaContext *kctx, int, struct kmodshare_t *, kline_t);
-	KonohaClass*  (*KaddClassDef)(KonohaContext *kctx, kpackage_t, kpackage_t, kString *, KDEFINE_CLASS *, kline_t);
+	kbool_t    (*KsetModule)(KonohaContext *kctx, int, struct kmodshare_t *, kfileline_t);
+	KonohaClass*  (*KaddClassDef)(KonohaContext *kctx, kpackage_t, kpackage_t, kString *, KDEFINE_CLASS *, kfileline_t);
 
 	KonohaClass*  (*NameSpace_getCT)(KonohaContext *kctx, kNameSpace *, KonohaClass *, const char *, size_t, ktype_t def);
 	void       (*NameSpace_loadMethodData)(KonohaContext *kctx, kNameSpace *, intptr_t *d);
-	void       (*NameSpace_loadConstData)(KonohaContext *kctx, kNameSpace *, const char **d, kline_t);
+	void       (*NameSpace_loadConstData)(KonohaContext *kctx, kNameSpace *, const char **d, kfileline_t);
 	kMethod*   (*NameSpace_getMethodNULL)(KonohaContext *kctx, kNameSpace *ks, ktype_t cid, kmethodn_t mn);
 	kMethod*   (*NameSpace_getGetterMethodNULL)(KonohaContext *kctx, kNameSpace *, ktype_t cid, ksymbol_t sym);
 
 	void       (*NameSpace_syncMethods)(KonohaContext *kctx);
 	void       (*KCodeGen)(KonohaContext *kctx, kMethod *, kBlock *);
-	void       (*Kreportf)(KonohaContext *kctx, kinfotag_t, kline_t, const char *fmt, ...);
+	void       (*Kreportf)(KonohaContext *kctx, kinfotag_t, kfileline_t, const char *fmt, ...);
 	void       (*Kraise)(KonohaContext *kctx, int isContinue);     // module
 
 	uintptr_t  (*Ktrace)(KonohaContext *kctx, struct klogconf_t *logconf, ...);
@@ -1505,7 +1505,7 @@ typedef struct {
 extern KonohaContext* konoha_open(const PlatformApi *);
 extern void konoha_close(KonohaContext* konoha);
 extern kbool_t konoha_load(KonohaContext* konoha, const char *scriptfile);
-extern kbool_t konoha_eval(KonohaContext* konoha, const char *script, kline_t uline);
+extern kbool_t konoha_eval(KonohaContext* konoha, const char *script, kfileline_t uline);
 extern kbool_t konoha_run(KonohaContext* konoha);  // TODO
 
 #ifdef USE_BUILTINTEST

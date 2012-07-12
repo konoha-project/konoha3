@@ -105,7 +105,7 @@ static void KRUNTIME_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	KFREE(kctx->stack, sizeof(LocalRuntimeVar));
 }
 
-static kbool_t KRUNTIME_setModule(KonohaContext *kctx, int x, kmodshare_t *d, kline_t pline)
+static kbool_t KRUNTIME_setModule(KonohaContext *kctx, int x, kmodshare_t *d, kfileline_t pline)
 {
 	if(kctx->modshare[x] == NULL) {
 		kctx->modshare[x] = d;
@@ -269,7 +269,7 @@ kbool_t konoha_load(KonohaContext* konoha, const char *scriptname)
 	return res;
 }
 
-kbool_t konoha_eval(KonohaContext* konoha, const char *script, kline_t uline)
+kbool_t konoha_eval(KonohaContext* konoha, const char *script, kfileline_t uline)
 {
 	BEGIN_(konoha);
 	kbool_t res = (MODSUGAR_eval(konoha, script, uline) == K_CONTINUE);

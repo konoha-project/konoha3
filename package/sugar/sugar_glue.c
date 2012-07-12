@@ -240,7 +240,7 @@ static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp _RIX)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static	kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
+static	kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kfileline_t pline)
 {
 	USING_SUGAR;
 	int FN_buildid = FN_("buildid"), FN_key = FN_("key"), FN_defval = FN_("defval");
@@ -292,7 +292,7 @@ static	kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, 
 	return true;
 }
 
-static kbool_t sugar_setupPackage(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t sugar_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }
@@ -357,7 +357,7 @@ static KMETHOD StmtTyCheck_sugar(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNb_(r);
 }
 
-static kbool_t sugar_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
+static kbool_t sugar_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline_t pline)
 {
 	USING_SUGAR;
 	KDEFINE_INT_CONST IntData[] = {
@@ -409,7 +409,7 @@ static kbool_t sugar_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t
 	return true;
 }
 
-static kbool_t sugar_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t pline)
+static kbool_t sugar_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline_t pline)
 {
 	return true;
 }

@@ -88,7 +88,7 @@ static void NameSpace_free(KonohaContext *kctx, kObject *o)
 
 // syntax
 static void checkFuncArray(KonohaContext *kctx, kFunc **synp);
-static void parseSyntaxRule(KonohaContext *kctx, const char *rule, kline_t pline, kArray *a);
+static void parseSyntaxRule(KonohaContext *kctx, const char *rule, kfileline_t pline, kArray *a);
 
 static SugarSyntax* NameSpace_syn(KonohaContext *kctx, kNameSpace *ks0, ksymbol_t kw, int isnew)
 {
@@ -278,7 +278,7 @@ static kvs_t* NameSpace_getConstNULL(KonohaContext *kctx, kNameSpace *ks, ksymbo
 	return NULL;
 }
 
-static kbool_t checkConflictedConst(KonohaContext *kctx, kNameSpace *ks, kvs_t *kvs, kline_t pline)
+static kbool_t checkConflictedConst(KonohaContext *kctx, kNameSpace *ks, kvs_t *kvs, kfileline_t pline)
 {
 	ksymbol_t ukey = kvs->key;
 	kvs_t* ksval = NameSpace_getConstNULL(kctx, ks, ukey);
@@ -292,7 +292,7 @@ static kbool_t checkConflictedConst(KonohaContext *kctx, kNameSpace *ks, kvs_t *
 	return false;
 }
 
-static void NameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ks, kvs_t *kvs, size_t nitems, kline_t pline)
+static void NameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ks, kvs_t *kvs, size_t nitems, kfileline_t pline)
 {
 	size_t i, s = KARRAYSIZE(ks->cl.bytesize, kvs);
 	if(s == 0) {
@@ -325,7 +325,7 @@ static size_t strlen_alnum(const char *p)
 	return len;
 }
 
-static void NameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ks, const char **d, kline_t pline)
+static void NameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ks, const char **d, kfileline_t pline)
 {
 	INIT_GCSTACK();
 	kvs_t kv;
@@ -358,7 +358,7 @@ static void NameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ks, const c
 	RESET_GCSTACK();
 }
 
-static void NameSpace_importClassName(KonohaContext *kctx, kNameSpace *ks, kpackage_t packageId, kline_t pline)
+static void NameSpace_importClassName(KonohaContext *kctx, kNameSpace *ks, kpackage_t packageId, kfileline_t pline)
 {
 	kvs_t kv;
 	kwb_t wb;
@@ -483,7 +483,7 @@ static kMethod* NameSpace_getCastMethodNULL(KonohaContext *kctx, kNameSpace *ks,
 
 #define kNameSpace_defineMethod(NS,MTD,UL)  NameSpace_defineMethod(kctx, NS, MTD, UL)
 
-static kbool_t NameSpace_defineMethod(KonohaContext *kctx, kNameSpace *ks, kMethod *mtd, kline_t pline)
+static kbool_t NameSpace_defineMethod(KonohaContext *kctx, kNameSpace *ks, kMethod *mtd, kfileline_t pline)
 {
 	//if(pline != 0) {
 	//	kMethod *mtdOLD = NameSpace_getMethodNULL(kctx, ks, mtd->cid, mtd->mn);
@@ -535,7 +535,7 @@ static void NameSpace_loadMethodData(KonohaContext *kctx, kNameSpace *ks, intptr
 
 //#define kNameSpace_loadGlueFunc(NS, F, OPT, UL)  NameSpace_loadGlueFunc(kctx, NS, F, OPT, UL)
 //
-//static MethodFunc NameSpace_loadGlueFunc(KonohaContext *kctx, kNameSpace *ks, const char *funcname, int DOPTION, kline_t pline)
+//static MethodFunc NameSpace_loadGlueFunc(KonohaContext *kctx, kNameSpace *ks, const char *funcname, int DOPTION, kfileline_t pline)
 //{
 //	void *f = NULL;
 //	if(ks->gluehdr != NULL) {
@@ -859,7 +859,7 @@ static kExpr *Expr_setVariable(KonohaContext *kctx, kExpr *expr, int build, ktyp
 static void Stmt_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kStmtVar *stmt = (kStmtVar*)o;
-	stmt->uline      =   (kline_t)conf;
+	stmt->uline      =   (kfileline_t)conf;
 	stmt->syn = NULL;
 	stmt->parentNULL = NULL;
 }
