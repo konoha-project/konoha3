@@ -5,7 +5,7 @@
 #define OPENSSL_GLUE_H_
 
 typedef struct kRawPtr {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	void *rawptr;
 } kRawPtr;
 #define RawPtr(o) (((kRawPtr*)o)->rawptr)

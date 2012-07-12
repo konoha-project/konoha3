@@ -71,11 +71,11 @@
 #define STAT_dmem(kctx, SIZE)  KNH_ATOMIC_SUB((kctx->stat)->usedMemorySize, (SIZE))
 
 #define STAT_Object(kctx, ct) do { \
-	((struct _kclass*)ct)->count += 1; \
-	((struct _kclass*)ct)->total += 1; \
+	((KonohaClassVar*)ct)->count += 1; \
+	((KonohaClassVar*)ct)->total += 1; \
 } while (0)
 
-#define STAT_dObject(kctx, ct) ((struct _kclass*)ct)->count -= 1
+#define STAT_dObject(kctx, ct) ((KonohaClassVar*)ct)->count -= 1
 
 #else
 #define STAT_(stmt)

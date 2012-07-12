@@ -55,7 +55,7 @@ typedef struct klogconf_t {
 	void *ptr; // for precompiled formattings
 	union {
 		const char *func;
-		const struct _kMethod *mtd;
+		kMethod *mtd;
 	};
 } klogconf_t ;
 

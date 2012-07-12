@@ -57,7 +57,7 @@ static kMethod *new_FieldGetter(KonohaContext *kctx, ktype_t cid, ksymbol_t sym,
 	knh_Fmethod f = (TY_isUnbox(ty)) ? Fmethod_FieldGetterN : Fmethod_FieldGetter;
 	kMethod *mtd = new_kMethod(kMethod_Public|kMethod_Immutable, cid, mn, f);
 	kMethod_setParam(mtd, ty, 0, NULL);
-	((struct _kMethod*)mtd)->delta = idx;  // FIXME
+	((kMethodVar*)mtd)->delta = idx;  // FIXME
 	return mtd;
 }
 
@@ -68,7 +68,7 @@ static kMethod *new_FieldSetter(KonohaContext *kctx, ktype_t cid, kmethodn_t sym
 	kparam_t p = {ty, FN_("x")};
 	kMethod *mtd = new_kMethod(kMethod_Public, cid, mn, f);
 	kMethod_setParam(mtd, ty, 1, &p);
-	((struct _kMethod*)mtd)->delta = idx;   // FIXME
+	((kMethodVar*)mtd)->delta = idx;   // FIXME
 	return mtd;
 }
 
@@ -81,15 +81,15 @@ static intptr_t KLIB2_Method_indexOfField(kMethod *mtd)
 	return -1;
 }
 
-static void CT_addMethod(KonohaContext *kctx, kclass_t *ct, kMethod *mtd)
+static void CT_addMethod(KonohaContext *kctx, KonohaClass *ct, kMethod *mtd)
 {
 	if(unlikely(ct->methods == K_EMPTYARRAY)) {
-		KINITv(((struct _kclass*)ct)->methods, new_(MethodArray, 8));
+		KINITv(((KonohaClassVar*)ct)->methods, new_(MethodArray, 8));
 	}
 	kArray_add(ct->methods, mtd);
 }
 
-static void KLIB2_setGetterSetter(KonohaContext *kctx, kclass_t *ct)
+static void KLIB2_setGetterSetter(KonohaContext *kctx, KonohaClass *ct)
 {
 	size_t i, fsize = ct->fsize;
 	for(i=0; i < fsize; i++) {
@@ -111,15 +111,15 @@ static void KLIB2_setGetterSetter(KonohaContext *kctx, kclass_t *ct)
 // int NameSpace.getCid(String name, int defval)
 static KMETHOD NameSpace_getCid(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kclass_t *ct = kNameSpace_getCT(sfp[0].ks, NULL/*fixme*/, S_text(sfp[1].s), S_size(sfp[1].s), (ktype_t)sfp[2].ivalue);
+	KonohaClass *ct = kNameSpace_getCT(sfp[0].ks, NULL/*fixme*/, S_text(sfp[1].s), S_size(sfp[1].s), (ktype_t)sfp[2].ivalue);
 	kint_t cid = ct != NULL ? ct->cid : sfp[2].ivalue;
 	RETURNi_(cid);
 }
 
-static void setfield(KonohaContext *kctx, KDEFINE_CLASS *ct, int fctsize, kclass_t *supct)
+static void setfield(KonohaContext *kctx, KDEFINE_CLASS *ct, int fctsize, KonohaClass *supct)
 {
 	size_t fsize = supct->fsize + fctsize;
-	ct->cstruct_size = fctsize * sizeof(kObject*); //size64((fsize * sizeof(void*)) + sizeof(kObjectHeader));
+	ct->cstruct_size = fctsize * sizeof(kObject*); //size64((fsize * sizeof(void*)) + sizeof(KonohaObjectHeader));
 	//DBG_P("supct->fsize=%d, fctsize=%d, cstruct_size=%d", supct->fsize, fctsize, ct->cstruct_size);
 	if(fsize > 0) {
 		ct->fields = (kfield_t*)KCALLOC(fsize, sizeof(kfield_t));
@@ -131,7 +131,7 @@ static void setfield(KonohaContext *kctx, KDEFINE_CLASS *ct, int fctsize, kclass
 	}
 }
 
-static kclass_t* defineClass(KonohaContext *kctx, kNameSpace *ks, kshortflag_t cflag, kString *name, kclass_t *supct, int fsize, kline_t pline)
+static KonohaClass* defineClass(KonohaContext *kctx, kNameSpace *ks, kshortflag_t cflag, kString *name, KonohaClass *supct, int fsize, kline_t pline)
 {
 	KDEFINE_CLASS defNewClass = {
 		.cflag  = cflag,
@@ -140,7 +140,7 @@ static kclass_t* defineClass(KonohaContext *kctx, kNameSpace *ks, kshortflag_t c
 		.supcid = supct->cid,
 	};
 	setfield(kctx, &defNewClass, fsize, supct);
-	kclass_t *ct = Konoha_addClassDef(ks->packid, ks->packdom, name, &defNewClass, pline);
+	KonohaClass *ct = Konoha_addClassDef(ks->packid, ks->packdom, name, &defNewClass, pline);
 	ct->fnull(kctx, ct);  // create null object
 	return ct;
 }
@@ -149,18 +149,18 @@ static kclass_t* defineClass(KonohaContext *kctx, kNameSpace *ks, kshortflag_t c
 static KMETHOD NameSpace_defineClass(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	ktype_t supcid = sfp[3].ivalue == 0 ? TY_Object :(ktype_t)sfp[3].ivalue;
-	kclass_t *supct = kclass(supcid, sfp[K_RTNIDX].uline);
+	KonohaClass *supct = kclass(supcid, sfp[K_RTNIDX].uline);
 	if(CT_isFinal(supct)) {
 		kreportf(CRIT_, sfp[K_RTNIDX].uline, "%s is final", TY_t(supcid));
 	}
 	if(!CT_isDefined(supct)) {
 		kreportf(CRIT_, sfp[K_RTNIDX].uline, "%s has undefined field(s)", TY_t(supcid));
 	}
-	kclass_t *ct = defineClass(kctx, sfp[0].ks, sfp[1].ivalue, sfp[2].s, supct, sfp[4].ivalue, sfp[K_RTNIDX].uline);
+	KonohaClass *ct = defineClass(kctx, sfp[0].ks, sfp[1].ivalue, sfp[2].s, supct, sfp[4].ivalue, sfp[K_RTNIDX].uline);
 	RETURNi_(ct->cid);
 }
 
-static void defineField(KonohaContext *kctx, struct _kclass *ct, int flag, ktype_t ty, kString *name, kObject *value, uintptr_t uvalue)
+static void defineField(KonohaContext *kctx, KonohaClassVar *ct, int flag, ktype_t ty, kString *name, kObject *value, uintptr_t uvalue)
 {
 	int pos = ct->fsize;
 	ct->fsize += 1;
@@ -190,7 +190,7 @@ static KMETHOD NameSpace_defineClassField(KonohaContext *kctx, KonohaStack *sfp 
 	ktype_t ty = (ktype_t)sfp[3].ivalue;
 	kString *name = sfp[4].s;
 	kObject *value = sfp[5].o;
-	struct _kclass *ct = (struct _kclass*)kclass(cid, sfp[K_RTNIDX].uline);
+	KonohaClassVar *ct = (KonohaClassVar*)kclass(cid, sfp[K_RTNIDX].uline);
 	if(CT_isDefined(ct)) {
 		kreportf(CRIT_, sfp[K_RTNIDX].uline, "%s has no undefined field", TY_t(ct->cid));
 	}
@@ -250,7 +250,7 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	if(s + 2 < kArray_size(tls)) {
 		kToken *tk1 = tls->toks[s+1];
 		kToken *tk2 = tls->toks[s+2];
-		kclass_t *ct = CT_(TK_type(tk1));
+		KonohaClass *ct = CT_(TK_type(tk1));
 		if (ct->cid == CLASS_Tvoid) {
 			RETURN_(SUGAR Stmt_p(kctx, stmt, tk1, ERR_, "undefined class: %s", S_text(tk1->text)));
 		} else if (CT_isForward(ct)) {
@@ -265,7 +265,7 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 		}
 		if(TK_isType(tk1) && tk2->kw == AST_BRACKET) {     // new C [...]
 			ksyntax_t *syn = SYN_(kStmt_ks(stmt), KW_new);
-			kclass_t *ct = CT_p0(kctx, CT_Array, TK_type(tk1));
+			KonohaClass *ct = CT_p0(kctx, CT_Array, TK_type(tk1));
 			tkNEW->kw = MN_("newArray");
 			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, tkNEW, NewExpr(kctx, syn, tk1, ct->cid, 0));
 			RETURN_(expr);
@@ -344,12 +344,12 @@ static void Stmt_parseClassBlock(KonohaContext *kctx, kStmt *stmt, kToken *tkC)
 typedef struct {
 	const char *key;
 	uintptr_t ty;
-	kclass_t *ct;
+	KonohaClass *ct;
 } KDEFINE_CLASS_CONST;
 
 static void ObjectField_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	kclass_t *ct = O_ct(o);
+	KonohaClass *ct = O_ct(o);
 	DBG_ASSERT(ct->nulvalNULL != NULL);
 	size_t fsize = ct->fsize;
 	memcpy(((kObjectVar *)o)->fields, ct->nulvalNULL->fields, fsize * sizeof(void*));
@@ -359,7 +359,7 @@ extern kObjectVar** KONOHA_reftail(KonohaContext *kctx, size_t size);
 
 static void ObjectField_reftrace (KonohaContext *kctx, kObject *o)
 {
-	kclass_t *ct =O_ct(o);
+	KonohaClass *ct =O_ct(o);
 	kfield_t *fields = ct->fields;
 	size_t i, fsize = ct->fsize;
 	BEGIN_REFTRACE(fsize);
@@ -371,7 +371,7 @@ static void ObjectField_reftrace (KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
-static struct _kclass* defineClassName(KonohaContext *kctx, kNameSpace *ks, kshortflag_t cflag, kString *name, ktype_t supcid, kline_t pline)
+static KonohaClassVar* defineClassName(KonohaContext *kctx, kNameSpace *ks, kshortflag_t cflag, kString *name, ktype_t supcid, kline_t pline)
 {
 	KDEFINE_CLASS defNewClass = {
 		.cflag  = cflag,
@@ -380,7 +380,7 @@ static struct _kclass* defineClassName(KonohaContext *kctx, kNameSpace *ks, ksho
 		.supcid = supcid,
 //		.init   = ObjectField_init,
 	};
-	kclass_t *ct = Konoha_addClassDef(ks->packid, ks->packdom, name, &defNewClass, pline);
+	KonohaClass *ct = Konoha_addClassDef(ks->packid, ks->packdom, name, &defNewClass, pline);
 	KDEFINE_CLASS_CONST ClassData[] = {
 		{S_text(name), TY_TYPE, ct},
 		{NULL},
@@ -389,7 +389,7 @@ static struct _kclass* defineClassName(KonohaContext *kctx, kNameSpace *ks, ksho
 //	kMethod *mtd = new_kMethod(_Public/*flag*/, ct->cid, MN_new, NULL);
 //	kMethod_setParam(mtd, ct->cid, 0, NULL);
 //	CT_addMethod(kctx, ct, mtd);
-	return (struct _kclass*)ct;
+	return (KonohaClassVar*)ct;
 }
 
 static size_t checkFieldSize(KonohaContext *kctx, kBlock *bk)
@@ -412,7 +412,7 @@ static size_t checkFieldSize(KonohaContext *kctx, kBlock *bk)
 	return c;
 }
 
-static void CT_setField(KonohaContext *kctx, struct _kclass *ct, kclass_t *supct, int fctsize)
+static void CT_setField(KonohaContext *kctx, KonohaClassVar *ct, KonohaClass *supct, int fctsize)
 {
 	size_t fsize = supct->fsize + fctsize;
 	ct->fields = (kfield_t*)KCALLOC(fsize, sizeof(kfield_t));
@@ -424,10 +424,10 @@ static void CT_setField(KonohaContext *kctx, struct _kclass *ct, kclass_t *supct
 	}
 }
 
-static void CT_initField(KonohaContext *kctx, struct _kclass *ct, kclass_t *supct, int fctsize)
+static void CT_initField(KonohaContext *kctx, KonohaClassVar *ct, KonohaClass *supct, int fctsize)
 {
 	size_t fsize = supct->fsize + fctsize;
-	ct->cstruct_size = size64(fctsize * sizeof(kObject*) + sizeof(kObjectHeader));
+	ct->cstruct_size = size64(fctsize * sizeof(kObject*) + sizeof(KonohaObjectHeader));
 	DBG_P("supct->fsize=%d, fctsize=%d, cstruct_size=%d", supct->fsize, fctsize, ct->cstruct_size);
 	if(fsize > 0) {
 		ct->fnull(kctx, ct);
@@ -437,7 +437,7 @@ static void CT_initField(KonohaContext *kctx, struct _kclass *ct, kclass_t *supc
 	}
 }
 
-static kbool_t CT_declType(KonohaContext *kctx, struct _kclass *ct, kGamma *gma, kStmt *stmt, kExpr *expr, kshortflag_t flag, ktype_t ty, kline_t pline)
+static kbool_t CT_declType(KonohaContext *kctx, KonohaClassVar *ct, kGamma *gma, kStmt *stmt, kExpr *expr, kshortflag_t flag, ktype_t ty, kline_t pline)
 {
 	USING_SUGAR;
 	if(Expr_isTerm(expr)) {
@@ -479,7 +479,7 @@ static kbool_t CT_declType(KonohaContext *kctx, struct _kclass *ct, kGamma *gma,
 	return false;
 }
 
-static kbool_t CT_addClassFields(KonohaContext *kctx, struct _kclass *ct, kGamma *gma, kBlock *bk, kline_t pline)
+static kbool_t CT_addClassFields(KonohaContext *kctx, KonohaClassVar *ct, kGamma *gma, kBlock *bk, kline_t pline)
 {
 	USING_SUGAR;
 	size_t i;
@@ -526,7 +526,7 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kToken *tkE= kStmt_token(stmt, SYM_("extends"), NULL);
 	kshortflag_t cflag = 0;
 	ktype_t supcid = TY_Object;
-	kclass_t *supct = CT_Object;
+	KonohaClass *supct = CT_Object;
 	if (tkE) {
 		supcid = TK_type(tkE);
 		supct = CT_(supcid);
@@ -539,7 +539,7 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp _RIX)
 			RETURNb_(false);
 		}
 	}
-	struct _kclass *ct = (struct _kclass*)kNameSpace_getCT(gma->genv->ks, NULL/*FIXME*/, S_text(tkC->text), S_size(tkC->text), TY_unknown);
+	KonohaClassVar *ct = (KonohaClassVar*)kNameSpace_getCT(gma->genv->ks, NULL/*FIXME*/, S_text(tkC->text), S_size(tkC->text), TY_unknown);
 	if (ct != NULL) {
 		if (!CT_isForward(ct)) {
 			SUGAR Stmt_p(kctx, stmt, NULL, ERR_, "%s is already defined", CT_t(ct));

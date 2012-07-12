@@ -39,9 +39,9 @@
 
 typedef struct {
 	kmodshare_t h;
-	kclass_t *cIterator;
-	kclass_t *cStringIterator;
-	kclass_t *cGenericIterator;
+	KonohaClass *cIterator;
+	KonohaClass *cStringIterator;
+	KonohaClass *cGenericIterator;
 } kmoditerator_t;
 
 typedef struct {
@@ -51,7 +51,7 @@ typedef struct {
 typedef struct _kIterator kIterator;
 
 struct _kIterator {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	kbool_t (*hasNext)(KonohaContext *kctx, KonohaStack *);
 	void (*setNextResult)(KonohaContext *kctx, KonohaStack* _RIX);
 	size_t current_pos;

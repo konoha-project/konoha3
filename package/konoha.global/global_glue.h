@@ -76,7 +76,7 @@ static kMethod *new_ProtoGetter(KonohaContext *kctx, ktype_t cid, ksymbol_t sym,
 	knh_Fmethod f = (TY_isUnbox(ty)) ? Fmethod_ProtoGetterN : Fmethod_ProtoGetter;
 	kMethod *mtd = new_kMethod(kMethod_Public|kMethod_Immutable, cid, mn, f);
 	kMethod_setParam(mtd, ty, 0, NULL);
-	((struct _kMethod*)mtd)->delta = sym;
+	((kMethodVar*)mtd)->delta = sym;
 	return mtd;
 }
 
@@ -87,14 +87,14 @@ static kMethod *new_ProtoSetter(KonohaContext *kctx, ktype_t cid, ksymbol_t sym,
 	kparam_t p = {ty, FN_("x")};
 	kMethod *mtd = new_kMethod(kMethod_Public, cid, mn, f);
 	kMethod_setParam(mtd, ty, 1, &p);
-	((struct _kMethod*)mtd)->delta = sym;
+	((kMethodVar*)mtd)->delta = sym;
 	return mtd;
 }
 
-static void CT_addMethod2(KonohaContext *kctx, kclass_t *ct, kMethod *mtd)
+static void CT_addMethod2(KonohaContext *kctx, KonohaClass *ct, kMethod *mtd)
 {
 	if(unlikely(ct->methods == K_EMPTYARRAY)) {
-		KINITv(((struct _kclass*)ct)->methods, new_(MethodArray, 8));
+		KINITv(((KonohaClassVar*)ct)->methods, new_(MethodArray, 8));
 	}
 	kArray_add(ct->methods, mtd);
 }
@@ -255,7 +255,7 @@ static KMETHOD StmtTyCheck_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp 
 typedef const struct _kScript kScript;
 
 struct _kScript {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 };
 
 static kbool_t global_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_t pline)
@@ -274,7 +274,7 @@ static kbool_t global_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kline_
 			.cflag = kClass_Singleton|kClass_Final,
 			.cstruct_size = sizeof(kScript),
 		};
-		kclass_t *cScript = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &defScript, pline);
+		KonohaClass *cScript = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &defScript, pline);
 		KSETv(((struct _kNameSpace*)ks)->scrobj, knull(cScript));
 	}
 	return true;

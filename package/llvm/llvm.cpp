@@ -106,7 +106,7 @@
 #include <stdio.h>
 
 struct kRawPtr {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	void *rawptr;
 };
 
@@ -118,7 +118,7 @@ struct kRawPtr {
 
 typedef struct {
 	kmodshare_t h;
-	kclass_t *cValue;
+	KonohaClass *cValue;
 } kmodllvm_t;
 
 typedef struct {
@@ -206,7 +206,7 @@ static void Type_free(KonohaContext *kctx _UNUSED_, kObject *po)
 	konoha::SetRawPtr(po, NULL);
 }
 
-static inline kObject *new_CppObject(KonohaContext *kctx, const kclass_t *ct, void *ptr)
+static inline kObject *new_CppObject(KonohaContext *kctx, const KonohaClass *ct, void *ptr)
 {
 	kObject *ret = new_kObject(ct, ptr);
 	konoha::SetRawPtr(ret, ptr);
@@ -4649,8 +4649,8 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 		"ArrayType",
 		"StructType"
 	};
-	kclass_t *CT_TypeTBL[6];
-	kclass_t *CT_BasicBlock, *CT_IRBuilder;
+	KonohaClass *CT_TypeTBL[6];
+	KonohaClass *CT_BasicBlock, *CT_IRBuilder;
 #define TY_BasicBlock  (CT_BasicBlock)->cid
 #define TY_IRBuilder   (CT_IRBuilder)->cid
 #define TY_Type         (CT_TypeTBL[0])->cid
@@ -4722,7 +4722,7 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 		0/*hashCode*/,
 		0/*initdef*/
 	};
-	kclass_t *CT_PassManagerBuilder = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &PassManagerBuilderDef, pline);
+	KonohaClass *CT_PassManagerBuilder = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &PassManagerBuilderDef, pline);
 #define TY_PassManagerBuilder         (CT_PassManagerBuilder)->cid
 #endif
 	static KDEFINE_CLASS PassManagerDef = {
@@ -4757,9 +4757,9 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 		0/*hashCode*/,
 		0/*initdef*/
 	};
-	kclass_t *CT_PassManager = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &PassManagerDef, pline);
-	kclass_t *CT_FunctionPassManager = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &FunctionPassManagerDef, pline);
-	kclass_t *CT_InstTBL[21];
+	KonohaClass *CT_PassManager = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &PassManagerDef, pline);
+	KonohaClass *CT_FunctionPassManager = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &FunctionPassManagerDef, pline);
+	KonohaClass *CT_InstTBL[21];
 	{
 		static const char *InstDefName[] = {
 			"Instruction",
@@ -4819,7 +4819,7 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 #define TY_DynamicLibrary      (CT_InstTBL[19])->cid
 #define TY_Intrinsic           (CT_InstTBL[20])->cid
 
-	kclass_t *CT_PassTBL[4];
+	KonohaClass *CT_PassTBL[4];
 	{
 		static const char *PassDefName[] = {
 			"Pass",

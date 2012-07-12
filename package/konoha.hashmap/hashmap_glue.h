@@ -28,7 +28,7 @@
 
 typedef const struct _kHashMap kHashMap;
 struct _kHashMap {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	kmap_t *map;
 };
 
@@ -62,7 +62,7 @@ static KMETHOD HashMap_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	struct _kHashMap *m = (struct _kHashMap *)sfp[0].o;
 	kmap_t *map = m->map;
 	kString *key = sfp[1].s;
-	kclass_t *ct = m->h.ct;
+	KonohaClass *ct = m->h.ct;
 	kParam *cparam = CT_cparam(ct);
 	kparam_t p1 = cparam->p[0];
 	uintptr_t hcode = strhash(S_text(key), S_size(key));
@@ -82,7 +82,7 @@ static KMETHOD HashMap_set(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kString *key = sfp[1].s;
 
 	// want to know p1
-	kclass_t *ct = m->h.ct;
+	KonohaClass *ct = m->h.ct;
 	kParam *cparam = CT_cparam(ct);
 	kparam_t p1 = cparam->p[0];
 	uintptr_t hcode = strhash(S_text(key), S_size(key));
@@ -119,8 +119,8 @@ static	kbool_t hashmap_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc
 		.free = HashMap_free,
 		.p     = HashMap_p,
 	};
-	kclass_t *cHashMap = Konoha_addClassDef(ks->packid, PN_konoha, NULL, &defHashMap, pline);
-	struct _kclass *ct = (struct _kclass *)CT_HashMap;
+	KonohaClass *cHashMap = Konoha_addClassDef(ks->packid, PN_konoha, NULL, &defHashMap, pline);
+	KonohaClassVar *ct = (KonohaClassVar *)CT_HashMap;
 	ct->p0 = TY_String; // default
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(HashMap_get), TY_T0, TY_HashMap, MN_("get"), 1, TY_String, FN_("key"),

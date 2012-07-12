@@ -172,7 +172,7 @@ static KMETHOD String_opNEQ(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## This Func.new(Object self, Method mtd);
 static KMETHOD Func_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	struct _kFunc *fo = (struct _kFunc*)sfp[0].fo;
+	kFuncVar *fo = (kFuncVar*)sfp[0].fo;
 	KSETv(fo->self, sfp[1].o);
 	KSETv(fo->mtd,  sfp[2].mtd);
 	RETURN_(fo);

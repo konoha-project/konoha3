@@ -80,7 +80,7 @@ static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 // Array
 struct _kAbstractArray {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	karray_t a;
 };
 

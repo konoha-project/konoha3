@@ -27,9 +27,9 @@
 
 #include<float.h>
 
-typedef const struct _kFunc kFunc;
-struct _kFunc {
-	kObjectHeader h;
+typedef kFunc kFunc;
+kFuncVar {
+	KonohaObjectHeader h;
 	kObject *self;
 	kMethod *mtd;
 };
@@ -37,7 +37,7 @@ struct _kFunc {
 // Int
 static void Func_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct _kFunc *fo = (struct _kFunc*)o;
+	kFuncVar *fo = (kFuncVar*)o;
 	KINITv(fo->self, K_NULL);
 	KINITv(fo->mtd, conf != NULL ? KNULL(Method) : (kMethod*)conf);
 }

@@ -42,7 +42,7 @@ extern "C" {
 
 typedef const struct _kSockAddr kSockAddr;
 struct _kSockAddr {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	struct sockaddr_in *sockaddr_in;
 };
 
@@ -621,9 +621,9 @@ static	kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc,
 		.init = SockAddr_init,
 		.free = SockAddr_free,
 	};
-	kclass_t *cSockAddr = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &defSockAddr, pline);
+	KonohaClass *cSockAddr = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &defSockAddr, pline);
 	kparam_t pi = {TY_Int, FN_("ivalue")};
-	kclass_t *CT_IntArray = kClassTable_Generics(CT_Array, TY_Int, 1, &pi);
+	KonohaClass *CT_IntArray = kClassTable_Generics(CT_Array, TY_Int, 1, &pi);
 	ktype_t TY_IntArray = CT_IntArray->cid;
 
 	KDEFINE_METHOD MethodData[] = {

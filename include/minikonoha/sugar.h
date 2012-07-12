@@ -195,7 +195,7 @@ typedef struct KDEFINE_SYNTAX {
 
 typedef const struct _kNameSpace kNameSpace;
 struct _kNameSpace {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	const struct     _kNameSpace   *parentNULL;
 	kpack_t packid;  	kpack_t packdom;
 	const CFuncTokenize *tokenMatrix;
@@ -210,7 +210,7 @@ typedef kshort_t    kexpr_t;
 
 typedef const struct _kToken kToken;
 struct _kToken {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	ksymbol_t     kw;  // keywordSymbolId
 	union {
 		kushort_t indent;       // indent when kw
@@ -256,7 +256,7 @@ struct _kToken {
 
 typedef const struct _kExpr kExpr;
 struct _kExpr {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	ktype_t ty; kexpr_t build;
 	kToken *tk;     // Term
 	union {
@@ -286,7 +286,7 @@ struct _kExpr {
 
 typedef const struct _kStmt kStmt;
 struct _kStmt {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	kline_t uline;
 	ksyntax_t *syn;
 	const struct _kBlock *parentNULL;
@@ -295,7 +295,7 @@ struct _kStmt {
 
 typedef const struct _kBlock kBlock;
 struct _kBlock {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	kNameSpace          *ks;
 	kStmt               *parentNULL;
 	kArray              *blocks;
@@ -334,7 +334,7 @@ typedef struct gmabuf_t {
 } gmabuf_t;
 
 struct _kGamma {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	struct gmabuf_t *genv;
 };
 
@@ -447,13 +447,13 @@ struct _kNameSpace;
 
 typedef struct {
 	kmodshare_t h;
-	kclass_t *cToken;
-	kclass_t *cExpr;
-	kclass_t *cStmt;
-	kclass_t *cBlock;
-	kclass_t *cNameSpace;
-	kclass_t *cGamma;
-	kclass_t *cTokenArray;
+	KonohaClass *cToken;
+	KonohaClass *cExpr;
+	KonohaClass *cStmt;
+	KonohaClass *cBlock;
+	KonohaClass *cNameSpace;
+	KonohaClass *cGamma;
+	KonohaClass *cTokenArray;
 
 	kArray         *packageList;
 	struct kmap_t         *packageMapNO;

@@ -144,7 +144,7 @@ static kExpr* ExprCall_toConstValue(KonohaContext *kctx, kExpr *expr, kArray *co
 static kbool_t CT_isa(KonohaContext *kctx, ktype_t cid1, ktype_t cid2)
 {
 	DBG_ASSERT(cid1 != cid2); // should be checked
-	kclass_t *ct = CT_(cid1), *t = CT_(cid2);
+	KonohaClass *ct = CT_(cid1), *t = CT_(cid2);
 	return ct->isSubType(kctx, ct, t);
 }
 
@@ -314,7 +314,7 @@ static kExpr* Expr_tyCheckVariable2(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 	}
 	if(genv->f.vars[0].ty != TY_void) {
 		DBG_ASSERT(genv->this_cid == genv->f.vars[0].ty);
-		kclass_t *ct = CT_(genv->this_cid);
+		KonohaClass *ct = CT_(genv->this_cid);
 		for(i = ct->fsize; i >= 0; i--) {
 			if(ct->fields[i].fn == fn && ct->fields[i].ty != TY_void) {
 				return kExpr_setVariable(expr, FIELD, ct->fields[i].ty, longid((kshort_t)i, 0), gma);
@@ -338,8 +338,8 @@ static kExpr* Expr_tyCheckVariable2(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 		mtd = kNameSpace_getMethodNULL(genv->ks, cid, fn);
 		if(mtd != NULL) {
 			kParam *pa = kMethod_param(mtd);
-			kclass_t *ct = kClassTable_Generics(CT_Func, pa->rtype, pa->psize, (kparam_t*)pa->p);
-			struct _kFunc *fo = (struct _kFunc*)new_kObject(ct, mtd);
+			KonohaClass *ct = kClassTable_Generics(CT_Func, pa->rtype, pa->psize, (kparam_t*)pa->p);
+			kFuncVar *fo = (kFuncVar*)new_kObject(ct, mtd);
 			PUSH_GCSTACK(fo);
 			KSETv(fo->self, genv->ks->scrobj);
 			return new_ConstValue(ct->cid, fo);
@@ -432,9 +432,9 @@ static KMETHOD StmtTyCheck_ConstDecl(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNb_(r);
 }
 
-static ktype_t ktype_var(KonohaContext *kctx, ktype_t ty, kclass_t *this_ct)
+static ktype_t ktype_var(KonohaContext *kctx, ktype_t ty, KonohaClass *this_ct)
 {
-	kclass_t *ct = CT_(ty);
+	KonohaClass *ct = CT_(ty);
 	ct = ct->realtype(kctx, ct, this_ct);
 	return ct->cid;
 }
@@ -462,7 +462,7 @@ static int param_policy(ksymbol_t fn)
 //		}
 //		ks = ks->parentNULL;
 //	}
-//	kclass_t *ct = CT_(cid);
+//	KonohaClass *ct = CT_(cid);
 //	while(ct != NULL) {
 //		size_t i;
 //		kArray *a = ct->methods;
@@ -476,7 +476,7 @@ static int param_policy(ksymbol_t fn)
 //	}
 //}
 //
-//static kbool_t kParam_equals(KonohaContext *kctx, kParam *pa, kclass_t *thisct, int psize, kparam_t *p)
+//static kbool_t kParam_equals(KonohaContext *kctx, kParam *pa, KonohaClass *thisct, int psize, kparam_t *p)
 //{
 //	int i;
 //	for(i = 0; i < psize; i++) {
@@ -486,7 +486,7 @@ static int param_policy(ksymbol_t fn)
 //	return true;
 //}
 //
-//static kbool_t kParam_match(KonohaContext *kctx, kParam *pa, kclass_t *thisct, int psize, kparam_t *p)
+//static kbool_t kParam_match(KonohaContext *kctx, kParam *pa, KonohaClass *thisct, int psize, kparam_t *p)
 //{
 ////	int i;
 ////	for(i = 0; i < psize; i++) {
@@ -497,7 +497,7 @@ static int param_policy(ksymbol_t fn)
 //}
 //
 ///* NameSpace/Class/Method */
-//static kMethod* Array_lookupMethod(KonohaContext *kctx, kArray *a, int s, int e, kclass_t *thisct, int psize, kparam_t *p)
+//static kMethod* Array_lookupMethod(KonohaContext *kctx, kArray *a, int s, int e, KonohaClass *thisct, int psize, kparam_t *p)
 //{
 //	int i;
 //	for(i = s; i < e; i++) {
@@ -515,7 +515,7 @@ static int param_policy(ksymbol_t fn)
 //	return NULL;
 //}
 //
-//static kMethod *kExpr_lookUpOverloadMethod(KonohaContext *kctx, kExpr *expr, kMethod *mtd, kGamma *gma, kclass_t *thisct)
+//static kMethod *kExpr_lookUpOverloadMethod(KonohaContext *kctx, kExpr *expr, kMethod *mtd, kGamma *gma, KonohaClass *thisct)
 //{
 //	kArray *abuf = kctx->stack->gcstack;
 //	int i, psize = kArray_size(expr->cons) - 2, atop = kArray_size(abuf);
@@ -523,7 +523,7 @@ static int param_policy(ksymbol_t fn)
 //	for(i = 0; i < psize; i++) {
 //		p[i].ty = expr->cons->exprs[i+2]->ty;
 //	}
-//	kclass_t *ct = thisct;
+//	KonohaClass *ct = thisct;
 //	while(1) {
 //		NameSpace_lookupMethods(kctx, gma->genv->ks, ct->cid, mtd->mn, abuf);
 //		kMethod *mtd2 = Array_lookupMethod(kctx, abuf, atop, kArray_size(abuf), thisct, psize, p);
@@ -553,7 +553,7 @@ static kExpr *Expr_tyCheckCallParams(KonohaContext *kctx, kStmt *stmt, kExpr *ex
 	kArray *cons = expr->cons;
 	size_t i, size = kArray_size(cons);
 	kExpr *expr1 = cons->exprs[1];
-	kclass_t *this_ct = CT_(expr1->ty);
+	KonohaClass *this_ct = CT_(expr1->ty);
 	DBG_ASSERT(IS_Method(mtd));
 	DBG_ASSERT(this_ct->cid != TY_var);
 	if(!TY_isUnbox(mtd->cid) && CT_isUnbox(this_ct)) {
@@ -654,7 +654,7 @@ static KMETHOD ExprTyCheck_MethodCall(KonohaContext *kctx, KonohaStack *sfp _RIX
 	}
 }
 
-static kExpr *Expr_tyCheckFuncParams(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kclass_t *ct, kGamma *gma);
+static kExpr *Expr_tyCheckFuncParams(KonohaContext *kctx, kStmt *stmt, kExpr *expr, KonohaClass *ct, kGamma *gma);
 
 static kbool_t Expr_isSymbol(kExpr *expr)
 {
@@ -687,7 +687,7 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kExpr *exprN, kGamm
 			KSETv(exprN->cons->exprs[1], new_Variable(LOCAL, gma->genv->this_cid, 0, gma));
 			return mtd;
 		}
-		kclass_t *ct = CT_(genv->this_cid);
+		KonohaClass *ct = CT_(genv->this_cid);
 		if (ct->fsize) {
 			for(i = ct->fsize; i >= 0; i--) {
 				if(ct->fields[i].fn == fn && TY_isFunc(ct->fields[i].ty)) {
@@ -747,7 +747,7 @@ static KMETHOD ExprTyCheck_FuncStyleCall(KonohaContext *kctx, KonohaStack *sfp _
 	RETURN_(Expr_tyCheckFuncParams(kctx, stmt, expr, CT_(kExpr_at(expr, 0)->ty), gma));
 }
 
-static kExpr *Expr_tyCheckFuncParams(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kclass_t *ct, kGamma *gma)
+static kExpr *Expr_tyCheckFuncParams(KonohaContext *kctx, kStmt *stmt, kExpr *expr, KonohaClass *ct, kGamma *gma)
 {
 	ktype_t rtype = ct->p0;
 	kParam *pa = CT_cparam(ct);
@@ -1176,8 +1176,8 @@ static void Stmt_setMethodFunc(KonohaContext *kctx, kStmt *stmt, kNameSpace *ks,
 {
 	kToken *tcode = kStmt_token(stmt, KW_BlockPattern, NULL);
 	if(tcode != NULL && tcode->kw == TK_CODE) {
-		KSETv(((struct _kMethod*)mtd)->tcode, tcode);  //FIXME
-		KSETv(((struct _kMethod*)mtd)->lazyns, ks);
+		KSETv(((kMethodVar*)mtd)->tcode, tcode);  //FIXME
+		KSETv(((kMethodVar*)mtd)->lazyns, ks);
 		kMethod_setFunc(mtd, Fmethod_lazyCompilation);
 		kArray_add(ctxsugar->definedMethods, mtd);
 	}

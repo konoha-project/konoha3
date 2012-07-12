@@ -438,7 +438,7 @@ static KMETHOD Fmethod_runVM(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static void Method_threadCode(KonohaContext *kctx, kMethod *mtd, kKonohaCode *kcode)
 {
-	W(kMethod, mtd);
+	kMethodVar *Wmtd = (kMethodVar*)mtd;
 	kMethod_setFunc(mtd, Fmethod_runVM);
 	KSETv(Wmtd->kcode, kcode);
 	Wmtd->pc_start = VirtualMachine_run(kctx, kctx->esp + 1, kcode->code);
@@ -453,7 +453,6 @@ static void Method_threadCode(KonohaContext *kctx, kMethod *mtd, kKonohaCode *kc
 			pc++;
 		}
 	}
-	WASSERT(mtd);
 }
 
 static void BUILD_compile(KonohaContext *kctx, kMethod *mtd, kBasicBlock *bb, kBasicBlock *bbRET)
@@ -974,7 +973,7 @@ static KMETHOD Fmethod_abstract(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //		if (TY_isUnbox(rtype)) {
 //			RETURNi_(0);
 //		} else {
-//			kclass_t *ct = CT_(rtype);
+//			KonohaClass *ct = CT_(rtype);
 //			kObject *nulval = ct->nulvalNULL;
 //			RETURN_(nulval);
 //		}
@@ -990,8 +989,8 @@ static KMETHOD Fmethod_abstract(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static void Method_setFunc(KonohaContext *kctx, kMethod *mtd, knh_Fmethod func)
 {
 	func = (func == NULL) ? Fmethod_abstract : func;
-	((struct _kMethod*)mtd)->fcall_1 = func;
-	((struct _kMethod*)mtd)->pc_start = CODE_NCALL;
+	((kMethodVar*)mtd)->fcall_1 = func;
+	((kMethodVar*)mtd)->pc_start = CODE_NCALL;
 
 }
 

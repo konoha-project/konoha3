@@ -22,7 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-static kObject* DEFAULT_fnull(KonohaContext *kctx, kclass_t *ct);
+static kObject* DEFAULT_fnull(KonohaContext *kctx, KonohaClass *ct);
 
 static void Object_init(KonohaContext *kctx, kObject *o, void *conf)
 {
@@ -34,7 +34,7 @@ static void Object_init(KonohaContext *kctx, kObject *o, void *conf)
 static void Object_reftrace(KonohaContext *kctx, kObject *o)
 {
 	kObject *of = (kObject*)o;
-	kclass_t *ct = O_ct(of);
+	KonohaClass *ct = O_ct(of);
 	BEGIN_REFTRACE(ct->fsize);
 	size_t i;
 	for(i = 0; i < ct->fsize; i++) {
@@ -48,19 +48,19 @@ static void Object_reftrace(KonohaContext *kctx, kObject *o)
 static void ObjectX_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kObjectVar *of = (kObjectVar*)o;
-	kclass_t *ct = O_ct(of);
+	KonohaClass *ct = O_ct(of);
 	assert(CT_isDefined(ct));
 	assert(ct->nulvalNULL != NULL);
-	memcpy(of->fields, ct->nulvalNULL->fields, ct->cstruct_size - sizeof(kObjectHeader));
+	memcpy(of->fields, ct->nulvalNULL->fields, ct->cstruct_size - sizeof(KonohaObjectHeader));
 }
 
-static void Object_initdef(KonohaContext *kctx, struct _kclass *ct, kline_t pline)
+static void Object_initdef(KonohaContext *kctx, KonohaClassVar *ct, kline_t pline)
 {
 	if(ct->cid == TY_Object) return;
 	DBG_P("new object initialization ct->cstruct_size=%d", ct->cstruct_size);
 	KSETv(ct->nulvalNULL, new_kObject(ct, NULL));
 	if(ct->fsize > 0) {  // this is size of super class
-		kclass_t *supct = CT_(ct->supcid);
+		KonohaClass *supct = CT_(ct->supcid);
 		assert(ct->fsize == supct->fsize);
 		memcpy(ct->nulvalNULL_->fields, supct->nulvalNULL->fields, sizeof(kObject*) * ct->fsize);
 	}
@@ -70,7 +70,7 @@ static void Object_initdef(KonohaContext *kctx, struct _kclass *ct, kline_t plin
 	ct->fnull = DEFAULT_fnull;
 }
 
-static kObject *new_Object(KonohaContext *kctx, kclass_t *ct, void *conf)
+static kObject *new_Object(KonohaContext *kctx, KonohaClass *ct, void *conf)
 {
 	DBG_ASSERT(ct->cstruct_size > 0);
 	kObjectVar *o = (kObjectVar*) MODGC_omalloc(kctx, ct->cstruct_size);
@@ -99,7 +99,7 @@ static void Boolean_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb,
 	kwb_printf(wb, sfp[pos].bvalue ? "true" : "false");
 }
 
-static kObject* Boolean_fnull(KonohaContext *kctx, kclass_t *ct)
+static kObject* Boolean_fnull(KonohaContext *kctx, KonohaClass *ct)
 {
 	return (kObject*)K_FALSE;
 }
@@ -160,7 +160,7 @@ static void String_checkASCII(KonohaContext *kctx, kString *s)
 
 static kString* new_String(KonohaContext *kctx, const char *text, size_t len, int spol)
 {
-	kclass_t *ct = CT_(CLASS_String);
+	KonohaClass *ct = CT_(CLASS_String);
 	kStringVar *s = NULL; //knh_PtrMap_getS(kctx, ct->constPoolMapNULL, text, len);
 	if(s != NULL) return s;
 	if(TFLAG_is(int, spol, SPOL_TEXT)) {
@@ -224,7 +224,7 @@ static kString* new_Stringf(KonohaContext *kctx, int spol, const char *fmt, ...)
 
 // Array
 struct _kAbstractArray {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	karray_t a;
 } ;
 
@@ -324,20 +324,20 @@ static void Array_clear(KonohaContext *kctx, kArray *o, size_t n)
 // ---------------
 // Param
 
-static kclass_t *CT_body(KonohaContext *kctx, kclass_t *ct, size_t head, size_t body);
+static KonohaClass *CT_body(KonohaContext *kctx, KonohaClass *ct, size_t head, size_t body);
 
 static void Param_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct _kParam *pa = (struct _kParam*)o;
+	kParamVar *pa = (kParamVar*)o;
 	pa->psize = 0;
 	pa->rtype = TY_void;
 }
 
 static kParam *new_Param(KonohaContext *kctx, ktype_t rtype, int psize, kparam_t *p)
 {
-	kclass_t *ct = CT_(CLASS_Param);
+	KonohaClass *ct = CT_(CLASS_Param);
 	ct = CT_body(kctx, ct, sizeof(void*), psize * sizeof(kparam_t));
-	struct _kParam *pa = (struct _kParam*)new_Object(kctx, ct, (void*)0);
+	kParamVar *pa = (kParamVar*)new_Object(kctx, ct, (void*)0);
 	pa->rtype = rtype;
 	pa->psize = psize;
 	if(psize > 0) {
@@ -425,8 +425,8 @@ static kparamid_t Kparamdom(KonohaContext *kctx, int psize, kparam_t *p)
 
 static void Method_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct _kMethod *mtd = (struct _kMethod*)o;
-	bzero(&mtd->fcall_1, sizeof(kMethod) - sizeof(kObjectHeader));
+	kMethodVar *mtd = (kMethodVar*)o;
+	bzero(&mtd->fcall_1, sizeof(kMethod) - sizeof(KonohaObjectHeader));
 	KINITv(mtd->tcode, (struct kToken*)K_NULL);
 	KINITv(mtd->kcode, K_NULL);
 }
@@ -443,7 +443,7 @@ static void Method_reftrace(KonohaContext *kctx, kObject *o)
 
 static kMethod* new_Method(KonohaContext *kctx, uintptr_t flag, ktype_t cid, kmethodn_t mn, knh_Fmethod func)
 {
-	struct _kMethod* mtd = new_W(Method, NULL);
+	kMethodVar* mtd = new_Var(Method, NULL);
 	mtd->flag    = flag;
 	mtd->cid     = cid;
 	mtd->mn      = mn;
@@ -455,7 +455,7 @@ static kParam* KMethod_setParam(KonohaContext *kctx, kMethod *mtd_, ktype_t rtyp
 {
 	kparamid_t paramid = Kparam(kctx, rtype, psize, p);
 	if(mtd_ != NULL) {
-		struct _kMethod* mtd = (struct _kMethod*)mtd_;
+		kMethodVar* mtd = (kMethodVar*)mtd_;
 		mtd->paramdom = Kparamdom(kctx, psize, p);
 		mtd->paramid  = paramid;
 	}
@@ -472,7 +472,7 @@ static intptr_t STUB_Method_indexOfField(kMethod *mtd)
 
 static void Func_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct _kFunc *fo = (struct _kFunc*)o;
+	kFuncVar *fo = (kFuncVar*)o;
 	KINITv(fo->self, K_NULL);
 	KINITv(fo->mtd, conf == NULL ? KNULL(Method) : (kMethod*)conf);
 }
@@ -493,20 +493,20 @@ static void Func_reftrace(KonohaContext *kctx, kObject *o)
 
 // ---------------
 
-static kclass_t *T_realtype(KonohaContext *kctx, kclass_t *ct, kclass_t *self)
+static KonohaClass *T_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass *self)
 {
 	kParam *cparam = CT_cparam(self);
 	DBG_ASSERT(ct->optvalue < cparam->psize);
-	kclass_t *pct = CT_(cparam->p[ct->optvalue].ty);
+	KonohaClass *pct = CT_(cparam->p[ct->optvalue].ty);
 	return pct->realtype(kctx, pct, self);
 }
 
 // ---------------
 
-static kclass_t* Kclass(KonohaContext *kctx, ktype_t cid, kline_t pline)
+static KonohaClass* Kclass(KonohaContext *kctx, ktype_t cid, kline_t pline)
 {
 	SharedRuntime *share = kctx->share;
-	if(cid < (share->ca.bytesize/sizeof(struct _kclass*))) {
+	if(cid < (share->ca.bytesize/sizeof(KonohaClassVar*))) {
 		return share->ca.cts[cid];
 	}
 	kreportf(CRIT_, pline, "invalid cid=%d", (int)cid);
@@ -538,7 +538,7 @@ static uintptr_t DEFAULT_unbox(KonohaContext *kctx, kObject *o)
 	return 0;
 }
 
-static kbool_t DEFAULT_isSubType(KonohaContext *kctx, kclass_t* ct, kclass_t *t)
+static kbool_t DEFAULT_isSubType(KonohaContext *kctx, KonohaClass* ct, KonohaClass *t)
 {
 	if(t->cid == CLASS_Object) return true;
 	while(ct->supcid != CLASS_Object) {
@@ -548,45 +548,45 @@ static kbool_t DEFAULT_isSubType(KonohaContext *kctx, kclass_t* ct, kclass_t *t)
 	return false;
 }
 
-static kclass_t* DEFAULT_realtype(KonohaContext *kctx, kclass_t* c, kclass_t *self)
+static KonohaClass* DEFAULT_realtype(KonohaContext *kctx, KonohaClass* c, KonohaClass *self)
 {
 	return c;
 }
 
-static kObject* DEFAULT_fnull(KonohaContext *kctx, kclass_t *ct)
+static kObject* DEFAULT_fnull(KonohaContext *kctx, KonohaClass *ct)
 {
 	DBG_ASSERT(ct->nulvalNULL != NULL);
 	return ct->nulvalNULL;
 }
 
-static kObject* DEFAULT_fnullinit(KonohaContext *kctx, kclass_t *ct)
+static kObject* DEFAULT_fnullinit(KonohaContext *kctx, KonohaClass *ct)
 {
 	assert(ct->nulvalNULL == NULL);
 	DBG_P("creating new nulval for %s", CT_t(ct));
-	KINITv(((struct _kclass*)ct)->nulvalNULL, new_kObject(ct, 0));
+	KINITv(((KonohaClassVar*)ct)->nulvalNULL, new_kObject(ct, 0));
 	kObject_setNullObject(ct->nulvalNULL, 1);
-	((struct _kclass*)ct)->fnull = DEFAULT_fnull;
+	((KonohaClassVar*)ct)->fnull = DEFAULT_fnull;
 	return ct->nulvalNULL;
 }
 
-static kObject *CT_null(KonohaContext *kctx, kclass_t *ct)
+static kObject *CT_null(KonohaContext *kctx, KonohaClass *ct)
 {
 	return ct->fnull(kctx, ct);
 }
 
-static struct _kclass* new_CT(KonohaContext *kctx, kclass_t *bct, KDEFINE_CLASS *s, kline_t pline)
+static KonohaClassVar* new_CT(KonohaContext *kctx, KonohaClass *bct, KDEFINE_CLASS *s, kline_t pline)
 {
 	SharedRuntimeVar *share = kctx->share;
-	ktype_t newid = share->ca.bytesize / sizeof(struct _kclass*);
+	ktype_t newid = share->ca.bytesize / sizeof(KonohaClassVar*);
 	if(share->ca.bytesize == share->ca.bytemax) {
 		KARRAY_EXPAND(&share->ca, share->ca.bytemax * 2);
 	}
-	share->ca.bytesize += sizeof(struct _kclass*);
-	struct _kclass *ct = (struct _kclass*)KCALLOC(sizeof(kclass_t), 1);
-	share->ca.cts[newid] = (kclass_t*)ct;
+	share->ca.bytesize += sizeof(KonohaClassVar*);
+	KonohaClassVar *ct = (KonohaClassVar*)KCALLOC(sizeof(KonohaClass), 1);
+	share->ca.cts[newid] = (KonohaClass*)ct;
 	if(bct != NULL) {
 		DBG_ASSERT(s == NULL);
-		memcpy(ct, bct, offsetof(kclass_t, methods));
+		memcpy(ct, bct, offsetof(KonohaClass, methods));
 		ct->cid = newid;
 		if(ct->fnull == DEFAULT_fnull) ct->fnull =  DEFAULT_fnullinit;
 	}
@@ -623,26 +623,26 @@ static struct _kclass* new_CT(KonohaContext *kctx, kclass_t *bct, KDEFINE_CLASS 
 	return ct;
 }
 
-static kclass_t *CT_body(KonohaContext *kctx, kclass_t *ct, size_t head, size_t body)
+static KonohaClass *CT_body(KonohaContext *kctx, KonohaClass *ct, size_t head, size_t body)
 {
-	kclass_t *bct = ct;
-	while(ct->cstruct_size < sizeof(kObjectHeader) + head + body) {
+	KonohaClass *bct = ct;
+	while(ct->cstruct_size < sizeof(KonohaObjectHeader) + head + body) {
 		if(ct->searchSimilarClassNULL == NULL) {
-			struct _kclass *newct = new_CT(kctx, bct, NULL, NOPLINE);
+			KonohaClassVar *newct = new_CT(kctx, bct, NULL, NOPLINE);
 			newct->cflag |= kClass_Private;
 			newct->cstruct_size = ct->cstruct_size * 2;
 			KINITv(newct->methods, ct->methods);
-			((struct _kclass*)ct)->searchSimilarClassNULL = (kclass_t*)newct;
+			((KonohaClassVar*)ct)->searchSimilarClassNULL = (KonohaClass*)newct;
 		}
 		ct = ct->searchSimilarClassNULL;
 	}
 	return ct;
 }
 
-static kclass_t *CT_Generics(KonohaContext *kctx, kclass_t *ct, ktype_t rtype, int psize, kparam_t *p)
+static KonohaClass *CT_Generics(KonohaContext *kctx, KonohaClass *ct, ktype_t rtype, int psize, kparam_t *p)
 {
 	kparamid_t paramdom = Kparamdom(kctx, psize, p);
-	kclass_t *ct0 = ct;
+	KonohaClass *ct0 = ct;
 	int isNotFuncClass = (ct->bcid != CLASS_Func);
 	do {
 		if(ct->paramdom == paramdom && (isNotFuncClass || ct->p0 == rtype)) {
@@ -651,22 +651,22 @@ static kclass_t *CT_Generics(KonohaContext *kctx, kclass_t *ct, ktype_t rtype, i
 		if(ct->searchSimilarClassNULL == NULL) break;
 		ct = ct->searchSimilarClassNULL;
 	} while(ct != NULL);
-	struct _kclass *newct = new_CT(kctx, ct0, NULL, NOPLINE);
+	KonohaClassVar *newct = new_CT(kctx, ct0, NULL, NOPLINE);
 	newct->paramdom = paramdom;
 	newct->p0 = isNotFuncClass ? p[0].ty : rtype;
 	KINITv(newct->methods, K_EMPTYARRAY);
 	if(newct->searchSuperMethodClassNULL == NULL) {
 		newct->searchSuperMethodClassNULL = ct0;
 	}
-	((struct _kclass*)ct)->searchSimilarClassNULL = (kclass_t*)newct;
+	((KonohaClassVar*)ct)->searchSimilarClassNULL = (KonohaClass*)newct;
 	return ct->searchSimilarClassNULL;
 }
 
-static kString* CT_shortName(KonohaContext *kctx, kclass_t *ct)
+static kString* CT_shortName(KonohaContext *kctx, KonohaClass *ct)
 {
 	if(ct->shortNameNULL == NULL) {
 		if(ct->paramdom == 0 && ct->bcid != CLASS_Func) {
-			KINITv(((struct _kclass*)ct)->shortNameNULL, SYM_s(ct->nameid));
+			KINITv(((KonohaClassVar*)ct)->shortNameNULL, SYM_s(ct->nameid));
 		}
 		else {
 			size_t i, c = 0;
@@ -691,18 +691,18 @@ static kString* CT_shortName(KonohaContext *kctx, kclass_t *ct)
 			}
 			kwb_putc(&wb, ']');
 			const char *text = Kwb_top(kctx, &wb, 1);
-			KINITv(((struct _kclass*)ct)->shortNameNULL, new_String(kctx, text, kwb_bytesize(&wb), SPOL_ASCII));
+			KINITv(((KonohaClassVar*)ct)->shortNameNULL, new_String(kctx, text, kwb_bytesize(&wb), SPOL_ASCII));
 			kwb_free(&wb);
 		}
 	}
 	return ct->shortNameNULL;
 }
 
-static void CT_setName(KonohaContext *kctx, struct _kclass *ct, kline_t pline)
+static void CT_setName(KonohaContext *kctx, KonohaClassVar *ct, kline_t pline)
 {
 	uintptr_t lname = longid(ct->packdom, ct->nameid);
 	kreportf(DEBUG_, pline, "new class domain=%s, name='%s.%s'", PN_t(ct->packdom), PN_t(ct->packid), SYM_t(ct->nameid));
-	kclass_t *ct2 = (kclass_t*)map_getu(kctx, kctx->share->lcnameMapNN, lname, (uintptr_t)NULL);
+	KonohaClass *ct2 = (KonohaClass*)map_getu(kctx, kctx->share->lcnameMapNN, lname, (uintptr_t)NULL);
 	if(ct2 == NULL) {
 		map_addu(kctx, kctx->share->lcnameMapNN, lname, (uintptr_t)ct);
 	}
@@ -714,9 +714,9 @@ static void CT_setName(KonohaContext *kctx, struct _kclass *ct, kline_t pline)
 	}
 }
 
-static kclass_t *addClassDef(KonohaContext *kctx, kpack_t packid, kpack_t packdom, kString *name, KDEFINE_CLASS *cdef, kline_t pline)
+static KonohaClass *addClassDef(KonohaContext *kctx, kpack_t packid, kpack_t packdom, kString *name, KDEFINE_CLASS *cdef, kline_t pline)
 {
-	struct _kclass *ct = new_CT(kctx, NULL, cdef, pline);
+	KonohaClassVar *ct = new_CT(kctx, NULL, cdef, pline);
 	ct->packid  = packid;
 	ct->packdom = packdom;
 	if(name == NULL) {
@@ -728,7 +728,7 @@ static kclass_t *addClassDef(KonohaContext *kctx, kpack_t packid, kpack_t packdo
 		ct->nameid = ksymbolA(S_text(name), S_size(name), _NEWID);
 	}
 	CT_setName(kctx, ct, pline);
-	return (kclass_t*)ct;
+	return (KonohaClass*)ct;
 }
 
 #define TYPENAME(C) \
@@ -827,7 +827,7 @@ static void loadInitStructData(KonohaContext *kctx)
 		new_CT(kctx, NULL, dd[cid], 0);
 		cid++;
 	}
-	struct _kclass *ct = (struct _kclass *)CT_Array;
+	KonohaClassVar *ct = (KonohaClassVar *)CT_Array;
 	ct->p0 = TY_Object;
 }
 
@@ -852,10 +852,10 @@ static void defineDefaultKeywordSymbol(KonohaContext *kctx)
 
 static void initStructData(KonohaContext *kctx)
 {
-	kclass_t **ctt = (kclass_t**)kctx->share->ca.cts;
-	size_t i;//, size = kctx->share->ca.bytesize/sizeof(struct _kclass*);
+	KonohaClass **ctt = (KonohaClass**)kctx->share->ca.cts;
+	size_t i;//, size = kctx->share->ca.bytesize/sizeof(KonohaClassVar*);
 	for(i = 0; i <= CLASS_T0; i++) {
-		struct _kclass *ct = (struct _kclass *)ctt[i];
+		KonohaClassVar *ct = (KonohaClassVar *)ctt[i];
 		const char *name = ct->DBG_NAME;
 		ct->nameid = ksymbolSPOL(name, strlen(name), SPOL_ASCII|SPOL_POOL|SPOL_TEXT, _NEWID);
 		CT_setName(kctx, ct, 0);
@@ -886,7 +886,7 @@ static void KCLASSTABLE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	SharedRuntimeVar *share = (SharedRuntimeVar*)KCALLOC(sizeof(SharedRuntime), 1);
 	ctx->share = share;
 	KCLASSTABLE_initklib2((struct _klib2*)kctx->lib2);
-	KARRAY_INIT(&share->ca, K_CLASSTABLE_INIT * sizeof(kclass_t));
+	KARRAY_INIT(&share->ca, K_CLASSTABLE_INIT * sizeof(KonohaClass));
 	loadInitStructData(kctx);
 	share->lcnameMapNN = kmap_init(0);
 	KINITv(share->fileidList, new_(StringArray, 8));
@@ -930,10 +930,10 @@ static void val_reftrace(KonohaContext *kctx, kmape_t *p)
 static void kshare_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	SharedRuntime *share = ctx->share;
-	kclass_t **cts = (kclass_t**)kctx->share->ca.cts;
-	size_t i, size = kctx->share->ca.bytesize/sizeof(struct _kclass*);
+	KonohaClass **cts = (KonohaClass**)kctx->share->ca.cts;
+	size_t i, size = kctx->share->ca.bytesize/sizeof(KonohaClassVar*);
 	for(i = 0; i < size; i++) {
-		kclass_t *ct = cts[i];
+		KonohaClass *ct = cts[i];
 		{
 			BEGIN_REFTRACE(4);
 			KREFTRACEv(ct->methods);
@@ -961,13 +961,13 @@ static void kshare_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 
 static void CLASSTABLE_freeCT(KonohaContext *kctx)
 {
-	struct _kclass **cts = (struct _kclass**)kctx->share->ca.cts;
-	size_t i, size = kctx->share->ca.bytesize/sizeof(struct _kclass*);
+	KonohaClassVar **cts = (KonohaClassVar**)kctx->share->ca.cts;
+	size_t i, size = kctx->share->ca.bytesize/sizeof(KonohaClassVar*);
 	for(i = 0; i < size; i++) {
 		if(cts[i]->fallocsize > 0) {
 			KFREE(cts[i]->fields, cts[i]->fallocsize * sizeof(kfield_t));
 		}
-		KFREE(cts[i], sizeof(kclass_t));
+		KFREE(cts[i], sizeof(KonohaClass));
 	}
 }
 

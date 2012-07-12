@@ -35,7 +35,7 @@ extern "C" {
 
 typedef const struct _kJson kJson;
 struct _kJson {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	json_t *obj;
 };
 
@@ -436,12 +436,12 @@ static	kbool_t jansson_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc
 		.free = Jansson_free,
 		.p    = Jansson_p,
 	};
-	kclass_t *cJson = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &defJson, pline);
-	//struct _kclass *ct = (struct _kclass *)CT_Json;
+	KonohaClass *cJson = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &defJson, pline);
+	//KonohaClassVar *ct = (KonohaClassVar *)CT_Json;
 	//ct->p0 = TY_String; // default
 
 	kparam_t ps = {TY_Json, FN_("json")};
-	kclass_t *CT_JsonArray = kClassTable_Generics(CT_Array, TY_Json, 1, &ps);
+	KonohaClass *CT_JsonArray = kClassTable_Generics(CT_Array, TY_Json, 1, &ps);
 	ktype_t TY_JsonArray = CT_JsonArray->cid;
 
 	KDEFINE_METHOD MethodData[] = {

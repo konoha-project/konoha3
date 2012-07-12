@@ -91,7 +91,7 @@ static struct _kToken* TokenType_resolveGenerics(KonohaContext *kctx, kNameSpace
 		}
 		return NULL; // new int[10];  // not generics
 	}
-	kclass_t *ct = NULL;
+	KonohaClass *ct = NULL;
 	if(psize > 0) {
 		ct = CT_(TK_type(tk));
 		if(ct->bcid == CLASS_Func) {
@@ -120,7 +120,7 @@ static int appendKeyword(KonohaContext *kctx, kNameSpace *ks, kArray *tls, int s
 		if(!Token_resolved(kctx, ks, tk)) {
 			const char *t = S_text(tk->text);
 			if(isalpha(t[0])) {
-				kclass_t *ct = kNameSpace_getCT(ks, NULL/*FIXME*/, S_text(tk->text), S_size(tk->text), TY_unknown);
+				KonohaClass *ct = kNameSpace_getCT(ks, NULL/*FIXME*/, S_text(tk->text), S_size(tk->text), TY_unknown);
 				if(ct != NULL) {
 					tk->kw = KW_TypePattern;
 					tk->ty = ct->cid;

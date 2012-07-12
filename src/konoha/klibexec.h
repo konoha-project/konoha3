@@ -403,7 +403,7 @@ static inline karray_t* kvproto_null(void)  // for proto_get safe null
 
 void KONOHA_freeObjectField(KonohaContext *kctx, kObjectVar *o)
 {
-	kclass_t *ct = O_ct(o);
+	KonohaClass *ct = O_ct(o);
 	if(o->h.kvproto->bytemax > 0) {
 		karray_t *p = o->h.kvproto;
 		KFREE(p->bytebuf, p->bytemax);
@@ -468,7 +468,7 @@ static void kvproto_rehash(KonohaContext *kctx, karray_t *p)
 
 void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o)
 {
-	kclass_t *ct = O_ct(o);
+	KonohaClass *ct = O_ct(o);
 	if(o->h.kvproto->bytemax > 0) {
 		size_t i, pmax = o->h.kvproto->bytemax / sizeof(kvs_t);
 		kvs_t *d = o->h.kvproto->kvs;

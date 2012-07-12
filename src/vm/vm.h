@@ -47,8 +47,8 @@ extern "C" {
 
 typedef struct {
 	kmodshare_t h;
-	kclass_t *cBasicBlock;
-	kclass_t *cKonohaCode;
+	KonohaClass *cBasicBlock;
+	KonohaClass *cKonohaCode;
 	const struct _kKonohaCode *codeNull;
 	struct kopl_t  *PRECOMPILED_ENTER;
 	struct kopl_t  *PRECOMPILED_NCALL;
@@ -109,7 +109,7 @@ typedef struct kopl_t {
 		intptr_t data[5];
 		void *p[5];
 		kObject *o[5];
-		kclass_t *ct[5];
+		KonohaClass *ct[5];
 		char *u[5];
 	};
 } kopl_t;
@@ -138,7 +138,7 @@ typedef struct kopl_t {
 typedef const struct _kBasicBlock kBasicBlock;
 
 struct _kBasicBlock {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	kushort_t id;     kushort_t incoming;
 	karray_t op;
 	union {
@@ -159,7 +159,7 @@ struct _kBasicBlock {
 
 typedef const struct _kKonohaCode kKonohaCode;
 struct _kKonohaCode {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	kopl_t*   code;
 	size_t    codesize;
 	kString  *source;
@@ -585,7 +585,7 @@ struct _kKonohaCode {
 #define OPEXEC_TCAST(kctx, rtnidx, thisidx, rix, espidx, tmr)  { \
 		kTypeMap *tmr_ = tmr; \
 		KonohaStack *sfp_ = SFP(rshift(rbp,thisidx));\
-		kclass_t scid = SP(tmr_)->scid, this_cid = O_cid(sfp_[0].o);\
+		KonohaClass scid = SP(tmr_)->scid, this_cid = O_cid(sfp_[0].o);\
 		if(this_cid != scid) {\
 			tmr_ = knh_findTypeMapNULL(kctx, scid, SP(tmr)->tcid);\
 			KSETv(((klr_TCAST_t*)op)->cast, tmr_);\
@@ -596,9 +596,9 @@ struct _kKonohaCode {
 
 #define OPEXEC_ACAST(rtnidx, thisidx, rix, espidx, tmr)  { \
 		kTypeMap *tmr_ = tmr; \
-		kclass_t tcid = SP(tmr_)->tcid, this_cid = O_cid(Ro_(thisidx));\
+		KonohaClass tcid = SP(tmr_)->tcid, this_cid = O_cid(Ro_(thisidx));\
 		if(!class_isa(this_cid, tcid)) {\
-			kclass_t scid = SP(tmr_)->scid;\
+			KonohaClass scid = SP(tmr_)->scid;\
 			if(this_cid != scid) {\
 				tmr_ = knh_findTypeMapNULL(kctx, scid, tcid);\
 				KNH_SETv(((klr_ACAST_t*)op)->cast, tmr_);\

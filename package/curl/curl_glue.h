@@ -39,7 +39,7 @@ extern struct KonohaContextVar *ctx;
 
 typedef const struct _kCurl kCurl;
 struct _kCurl {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	struct curl_slist *headers;
 	FILE* fp;
 	CURL *curl;
@@ -408,7 +408,7 @@ static	kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 		.init = Curl_init,
 		.free = Curl_free,
 	};
-	kclass_t *cCurl = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &defCurl, pline);
+	KonohaClass *cCurl = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &defCurl, pline);
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im, _F(Curl_new), TY_Curl, TY_Curl, MN_("new"), 0,
@@ -818,12 +818,12 @@ static kbool_t curl_setupNameSpace(KonohaContext *kctx, kNameSpace *ks, kline_t 
 //    return (kuintptr_t)1;
 //}
 //
-//static kbool_t CURL_isTyped(KonohaContext *kctx ctx, kclass_t cid)
+//static kbool_t CURL_isTyped(KonohaContext *kctx ctx, KonohaClass cid)
 //{
 //	return PATH_isTyped(cid);
 //}
 //
-//static Object* newObjectNULL(KonohaContext *kctx ctx, kclass_t cid, kString *s, kNameSpace *n)
+//static Object* newObjectNULL(KonohaContext *kctx ctx, KonohaClass cid, kString *s, kNameSpace *n)
 //{
 //    return (Object*)s;
 //}

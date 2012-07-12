@@ -37,7 +37,7 @@ extern "C" {
 
 #define S_len(s) ((s)->length)
 typedef struct StringBase {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	size_t length;
 } StringBase;
 

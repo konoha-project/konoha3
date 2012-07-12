@@ -29,7 +29,7 @@ typedef struct klr_NSET_t {
 	KCODE_HEAD;
 	kreg_t a;
 	kint_t n;
-	kclass_t* ty;
+	KonohaClass* ty;
 } klr_NSET_t;
 
 #define OPCODE_NMOV ((kopcode_t)5)
@@ -37,7 +37,7 @@ typedef struct klr_NMOV_t {
 	KCODE_HEAD;
 	kreg_t a;
 	kreg_t b;
-	kclass_t* ty;
+	KonohaClass* ty;
 } klr_NMOV_t;
 
 #define OPCODE_NMOVx ((kopcode_t)6)
@@ -46,7 +46,7 @@ typedef struct klr_NMOVx_t {
 	kreg_t a;
 	kreg_t b;
 	uintptr_t bx;
-	kclass_t* ty;
+	KonohaClass* ty;
 } klr_NMOVx_t;
 
 #define OPCODE_XNMOV ((kopcode_t)7)
@@ -55,7 +55,7 @@ typedef struct klr_XNMOV_t {
 	kreg_t a;
 	uintptr_t ax;
 	kreg_t b;
-	kclass_t* ty;
+	KonohaClass* ty;
 } klr_XNMOV_t;
 
 #define OPCODE_NEW ((kopcode_t)8)
@@ -63,14 +63,14 @@ typedef struct klr_NEW_t {
 	KCODE_HEAD;
 	kreg_t a;
 	uintptr_t p;
-	kclass_t* ty;
+	KonohaClass* ty;
 } klr_NEW_t;
 
 #define OPCODE_NULL ((kopcode_t)9)
 typedef struct klr_NULL_t {
 	KCODE_HEAD;
 	kreg_t a;
-	kclass_t* ty;
+	KonohaClass* ty;
 } klr_NULL_t;
 
 #define OPCODE_BOX ((kopcode_t)10)
@@ -78,7 +78,7 @@ typedef struct klr_BOX_t {
 	KCODE_HEAD;
 	kreg_t a;
 	kreg_t b;
-	kclass_t* ty;
+	KonohaClass* ty;
 } klr_BOX_t;
 
 #define OPCODE_UNBOX ((kopcode_t)11)
@@ -86,7 +86,7 @@ typedef struct klr_UNBOX_t {
 	KCODE_HEAD;
 	kreg_t a;
 	kreg_t b;
-	kclass_t* ty;
+	KonohaClass* ty;
 } klr_UNBOX_t;
 
 #define OPCODE_CALL ((kopcode_t)12)

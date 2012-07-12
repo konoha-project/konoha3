@@ -53,8 +53,8 @@ static kString *kwb_newString(KonohaContext *kctx, kwb_t *wb, int flg)
 
 typedef struct {
 	kmodshare_t h;
-	kclass_t *cInputStream;
-	kclass_t *cOutputStream;
+	KonohaClass *cInputStream;
+	KonohaClass *cOutputStream;
 } kioshare_t;
 
 typedef struct {
@@ -123,7 +123,7 @@ typedef struct knh_PathDPI_t {
 } knh_PathDPI_t;
 
 struct kPath {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	const char              *ospath;
 	size_t                   asize;
 	struct kString          *urn;
@@ -143,7 +143,7 @@ struct kPath {
 
 typedef struct kInputStream kInputStream;
 struct kInputStream {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	kio_t *io2;
 	kString *path;
 	struct kStringDecoder* decNULL;
@@ -167,7 +167,7 @@ struct kInputStream {
 typedef struct kOutputStream kOutputStream;
 
 struct kOutputStream {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	kio_t *io2;
 	struct kString *path;
 	struct kBytes *bufferNULL;

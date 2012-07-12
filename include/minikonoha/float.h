@@ -37,7 +37,7 @@
 
 typedef struct {
 	kmodshare_t h;
-	kclass_t *cFloat;
+	KonohaClass *cFloat;
 } kmodfloat_t;
 
 typedef struct {
@@ -46,7 +46,7 @@ typedef struct {
 
 typedef const struct _kFloat kFloat;
 struct _kFloat {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	kfloat_t fvalue;
 };
 

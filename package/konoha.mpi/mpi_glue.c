@@ -37,7 +37,7 @@ extern "C" {
 kMPIComm *g_comm_world;
 
 typedef struct {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	void *rawptr;
 } kRawPtr;
 
@@ -486,7 +486,7 @@ static KMETHOD MPIData_seti(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 typedef struct {
 	kmodshare_t h;
-	kclass_t *cValue;
+	KonohaClass *cValue;
 } kmodmpi_t;
 
 static void kmodmpi_setup(KonohaContext *kctx, struct kmodshare_t *def, int newctx)
@@ -598,11 +598,11 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, co
 	//	0/*hashCode*/,
 	//	0/*initdef*/
 	//};
-	kclass_t *CT_MPI = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &MPIDef, pline);
-	kclass_t *CT_MPIComm = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &MPICommDef, pline);
-	kclass_t *CT_MPIRequest = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &MPIRequestDef, pline);
-	kclass_t *CT_MPIData = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &MPIDataDef, pline);
-	//kclass_t *CT_MPIOp = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &MPIOpDef, pline);
+	KonohaClass *CT_MPI = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &MPIDef, pline);
+	KonohaClass *CT_MPIComm = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &MPICommDef, pline);
+	KonohaClass *CT_MPIRequest = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &MPIRequestDef, pline);
+	KonohaClass *CT_MPIData = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &MPIDataDef, pline);
+	//KonohaClass *CT_MPIOp = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &MPIOpDef, pline);
 #define TY_MPI         (CT_MPI->cid)
 #define TY_MPIComm     (CT_MPIComm->cid)
 #define TY_MPIRequest  (CT_MPIRequest->cid)

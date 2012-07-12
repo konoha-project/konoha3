@@ -34,7 +34,7 @@
 
 typedef const struct _kPyObject kPyObject;
 struct _kPyObject {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	PyObject *self;  // don't set NULL
 };
 
@@ -496,7 +496,7 @@ static	kbool_t python_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc,
 			.p    = PyObject_p,
 	};
 
-	kclass_t *cPython = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &PythonDef, pline);
+	KonohaClass *cPython = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &PythonDef, pline);
 	int TY_PyObject = cPython->cid;
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im|_Coercion, _F(PyObject_toBoolean), TY_Boolean, TY_PyObject, MN_to(TY_Boolean), 0,

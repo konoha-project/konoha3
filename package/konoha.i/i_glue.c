@@ -125,7 +125,7 @@ KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kArray *list = kctx->stack->gcstack;
 	size_t start = kArray_size(list);
 	kNameSpace *ks = sfp[0].ks;
-	kclass_t *ct = O_ct(sfp[1].o);
+	KonohaClass *ct = O_ct(sfp[1].o);
 	DBG_P("*** man %s", TY_t(ct->cid));
 	while(ks != NULL) {
 		copyMethodList(kctx, ct->cid, ks->methods, list);
@@ -146,7 +146,7 @@ KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static	kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, const char**args, kline_t pline)
 {
 	USING_SUGAR;
-	kclass_t *ct = kclass(TY_Method, pline);
+	KonohaClass *ct = kclass(TY_Method, pline);
 	KSET_CLASSFUNC(ct, p, Method, pline);
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(NameSpace_man), TY_void, TY_NameSpace, MN_("man"), 1, TY_Object, FN_("x") | FN_COERCION,

@@ -1115,18 +1115,18 @@ void jit_init() {
 	Type LocalRuntimeVar = StructType.create(a0, "LocalRuntimeVar", false);
 	Type klogger_t = StructType.create(a0, "klogger_t", false);
 	Type kopl_t = StructType.create(a0, "kopl_t", false);
-	/*------- kObjectHeader ------*/
-	Array kObjectHeaderTy = Array.newN(4);
-	kObjectHeaderTy.set(0, getLongTy() /* magicflag */ );
-	kObjectHeaderTy.set(1, PointerType.get(kclass) /* ct */ );
-	kObjectHeaderTy.set(2, getLongTy() /* refc */ /*union*/);
-	kObjectHeaderTy.set(3, PointerType.get(karray_t) /* kvproto */ );
-	Type kObjectHeader = StructType.create(kObjectHeaderTy, "kObjectHeader", false)
-	System.setTyHObject(kObjectHeader);
+	/*------- KonohaObjectHeader ------*/
+	Array KonohaObjectHeaderTy = Array.newN(4);
+	KonohaObjectHeaderTy.set(0, getLongTy() /* magicflag */ );
+	KonohaObjectHeaderTy.set(1, PointerType.get(kclass) /* ct */ );
+	KonohaObjectHeaderTy.set(2, getLongTy() /* refc */ /*union*/);
+	KonohaObjectHeaderTy.set(3, PointerType.get(karray_t) /* kvproto */ );
+	Type KonohaObjectHeader = StructType.create(KonohaObjectHeaderTy, "KonohaObjectHeader", false)
+	System.setTyHObject(KonohaObjectHeader);
 
 	/*------- _kObject ------*/
 	Array kObjectTy = Array.newN(2);
-	kObjectTy.set(0, kObjectHeader /* h */ );
+	kObjectTy.set(0, KonohaObjectHeader /* h */ );
 	kObjectTy.set(1, PointerType.get(getLongTy()) /* fields */ /*union*/);
 	Type kObject = StructType.create(kObjectTy, "kObject", false)
 	System.setTyObject(PointerType.get(kObject));
@@ -1156,7 +1156,7 @@ void jit_init() {
 
 	/*------- _kArray ------*/
 	Array kArrayTy = Array.newN(4);
-	kArrayTy.set(0, kObjectHeader /* h */ );
+	kArrayTy.set(0, KonohaObjectHeader /* h */ );
 	kArrayTy.set(1, getLongTy() /* bytesize */ );
 	kArrayTy.set(2, PointerType.get(getLongTy()) /* ndata */ /*union*/);
 	kArrayTy.set(3, getLongTy() /* bytemax */ );
@@ -1168,7 +1168,7 @@ void jit_init() {
 
 	/*------- _kMethod ------*/
 	Array kMethodTy = Array.newN(13);
-	kMethodTy.set(0, kObjectHeader /* h */ );
+	kMethodTy.set(0, KonohaObjectHeader /* h */ );
 	kMethodTy.set(1, PointerType.get(funcTy) /* fcall_1 */ /*union*/);
 	kMethodTy.set(2, PointerType.get(kopl_t) /* pc_start */ /*union*/);
 	kMethodTy.set(3, getLongTy() /* flag */ );

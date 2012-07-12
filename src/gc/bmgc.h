@@ -1873,7 +1873,7 @@ static kbool_t knh_isObject(KonohaContext *kctx, kObject *o)
 #define K_OZERO(o) ((kObjectVar*)o)->h.ct = NULL
 static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o)
 {
-	kclass_t *ct = O_ct(o);
+	KonohaClass *ct = O_ct(o);
 	if (ct) {
 #if GCDEBUG
 		ktrace(LOGPOL_DEBUG,

@@ -72,7 +72,7 @@ static kinline kString* PN_s_(KonohaContext *kctx, kpack_t packid)
 
 #define CT_s(X)   CT_s_(kctx, X)
 #define CT_t(X)   S_text(CT_s_(kctx, X))
-static kinline kString* CT_s_(KonohaContext *kctx, kclass_t *ct)
+static kinline kString* CT_s_(KonohaContext *kctx, KonohaClass *ct)
 {
 	return kctx->lib2->KCT_shortName(kctx, ct);
 }
@@ -134,7 +134,7 @@ static kinline uintptr_t longid(kushort_t packdom, kushort_t un)
 	return (hcode << (sizeof(kshort_t)*8)) | un;
 }
 
-static kinline kclass_t *CT_p0(KonohaContext *kctx, kclass_t *ct, ktype_t ty)
+static kinline KonohaClass *CT_p0(KonohaContext *kctx, KonohaClass *ct, ktype_t ty)
 {
 	kparam_t p = {ty, 0};
 	return kClassTable_Generics(ct, TY_void, 1, &p);
@@ -208,7 +208,7 @@ static kinline void Method_setProceedMethod(KonohaContext *kctx, kMethod *mtd, k
 {
 	DBG_ASSERT(mtd != mtd2);
 	DBG_ASSERT(mtd->proceedNUL == NULL);
-	KINITv(((struct _kMethod*)mtd)->proceedNUL, mtd2);
+	KINITv(((kMethodVar*)mtd)->proceedNUL, mtd2);
 }
 
 #endif /* KONOHA2_INLINELIBS_H_ */

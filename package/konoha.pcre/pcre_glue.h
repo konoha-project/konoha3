@@ -217,12 +217,12 @@ typedef struct {
 
 typedef struct {
 	kmodshare_t h;
-	kclass_t *cRegex;
+	KonohaClass *cRegex;
 } kregexshare_t;
 
 typedef struct kRegex kRegex;
 struct kRegex {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	kregex_t *reg;
 	int eflags;      // regex flag
 	kString *pattern;
@@ -659,7 +659,7 @@ static kbool_t pcre_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 	base->cRegex = Konoha_addClassDef(ks->packid, PN_konoha, NULL, &RegexDef, pline);
 
 	kparam_t p = { .ty = TY_String,  };
-	kclass_t *cStrArray = kClassTable_Generics(CT_(TY_Array), TY_void, 1, &p);
+	KonohaClass *cStrArray = kClassTable_Generics(CT_(TY_Array), TY_void, 1, &p);
 #define TY_StrArray (cStrArray->cid)
 	int FN_x = FN_("x");
 	int FN_y = FN_("y");

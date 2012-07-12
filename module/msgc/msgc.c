@@ -44,7 +44,7 @@ static inline void  do_bzero(void *ptr, size_t size);
 #define K_ARENATBL_INITSIZE     32
 
 typedef struct kGCObject0 {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	struct kGCObject0 *ref;
 	void *ref2_unused;
 	void *ref3_unused;
@@ -52,7 +52,7 @@ typedef struct kGCObject0 {
 } kGCObject0;
 
 typedef struct kGCObject1 {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	struct kGCObject1 *ref;
 	void *ref2_unused;
 	void *ref3_unused;
@@ -61,7 +61,7 @@ typedef struct kGCObject1 {
 } kGCObject1;
 
 typedef struct kGCObject2 {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	struct kGCObject2 *ref;
 	void *ref2_unused;
 	void *ref3_unused;

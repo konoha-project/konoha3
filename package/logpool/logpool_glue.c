@@ -32,7 +32,7 @@
 #include <logpool/message.idl.data.h>
 
 typedef struct kRawPtr {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	void *rawptr;
 } kRawPtr;
 
@@ -83,7 +83,7 @@ static void Log_p(KonohaContext *kctx, KonohaStack *sfp, int pos, kwb_t *wb, int
 	kwb_printf(wb, "}");
 }
 
-//static kObject *new_RawPtr(KonohaContext *kctx, const kclass_t *ct, void *ptr)
+//static kObject *new_RawPtr(KonohaContext *kctx, const KonohaClass *ct, void *ptr)
 //{
 //	kObject *ret = new_kObject(ct, ptr);
 //	RawPtr_init(kctx, ret, ptr);
@@ -365,7 +365,7 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc
 		.init = RawPtr_init,
 		.free = Logpool_free,
 	};
-	kclass_t *ct0 = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &Def0, pline);
+	KonohaClass *ct0 = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &Def0, pline);
 
 	static KDEFINE_CLASS Def1 = {
 		.structname = "Log"/*structname*/,
@@ -374,7 +374,7 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc
 		.free = Log_free,
 		.p    = Log_p,
 	};
-	kclass_t *ct1 = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &Def1, pline);
+	KonohaClass *ct1 = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &Def1, pline);
 
 	static KDEFINE_CLASS Def2 = {
 		.structname = "PoolPlugin",
@@ -382,7 +382,7 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc
 		.init = RawPtr_init,
 		.free = RawPtr_free,
 	};
-	kclass_t *ct2 = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &Def2, pline);
+	KonohaClass *ct2 = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &Def2, pline);
 #define TY_Plugin ct2->cid
 	static KDEFINE_CLASS Def3 = {
 		.structname = "",
@@ -401,7 +401,7 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc
 		"Copy",
 		"Response",
 	};
-	kclass_t *tbls[8];
+	KonohaClass *tbls[8];
 #define TY_Printer   tbls[0]->cid
 #define TY_KeyFilter tbls[1]->cid
 #define TY_ValFilter tbls[2]->cid

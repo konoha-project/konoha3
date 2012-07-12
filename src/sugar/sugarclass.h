@@ -31,7 +31,7 @@
 static void NameSpace_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct _kNameSpace *ks = (struct _kNameSpace*)o;
-	bzero(&ks->parentNULL, sizeof(kNameSpace) - sizeof(kObjectHeader));
+	bzero(&ks->parentNULL, sizeof(kNameSpace) - sizeof(KonohaObjectHeader));
 	ks->parentNULL = conf;
 	KINITv(ks->methods, K_EMPTYARRAY);
 	KINITv(ks->scrobj, knull(CT_System));
@@ -365,7 +365,7 @@ static void NameSpace_importClassName(KonohaContext *kctx, kNameSpace *ks, kpack
 	kwb_init(&(kctx->stack->cwb), &wb);
 	size_t i, size = KARRAYSIZE(kctx->share->ca.bytesize, uintptr);
 	for(i = 0; i < size; i++) {
-		kclass_t *ct = CT_(i);
+		KonohaClass *ct = CT_(i);
 		if(CT_isPrivate(ct)) continue;
 		if(ct->packid == packid) {
 			DBG_P("importing packid=%s.%s, %s..", PN_t(ct->packid), SYM_t(ct->nameid), PN_t(packid));
@@ -384,28 +384,28 @@ static void NameSpace_importClassName(KonohaContext *kctx, kNameSpace *ks, kpack
 
 // NameSpace
 
-static kclass_t *NameSpace_getCT(KonohaContext *kctx, kNameSpace *ks, kclass_t *thisct/*NULL*/, const char *name, size_t len, ktype_t def)
+static KonohaClass *NameSpace_getCT(KonohaContext *kctx, kNameSpace *ks, KonohaClass *thisct/*NULL*/, const char *name, size_t len, ktype_t def)
 {
-	kclass_t *ct = NULL;
+	KonohaClass *ct = NULL;
 	ksymbol_t un = ksymbolA(name, len, SYM_NONAME);
 	if(un != SYM_NONAME) {
 		uintptr_t hcode = longid(PN_konoha, un);
-		ct = (kclass_t*)map_getu(kctx, kctx->share->lcnameMapNN, hcode, 0);
+		ct = (KonohaClass*)map_getu(kctx, kctx->share->lcnameMapNN, hcode, 0);
 		if(ct == NULL) {
 			kvs_t *kvs = NameSpace_getConstNULL(kctx, ks, un);
 			DBG_P("kvs=%s, %p", name, kvs);
 			if(kvs != NULL && kvs->ty == TY_TYPE) {
-				return (kclass_t*)kvs->uval;
+				return (KonohaClass*)kvs->uval;
 			}
 		}
 	}
 	return (ct != NULL) ? ct : ((def >= 0) ? NULL : CT_(def));
 }
 
-static void CT_addMethod(KonohaContext *kctx, kclass_t *ct, kMethod *mtd)
+static void CT_addMethod(KonohaContext *kctx, KonohaClass *ct, kMethod *mtd)
 {
 	if(unlikely(ct->methods == K_EMPTYARRAY)) {
-		KINITv(((struct _kclass*)ct)->methods, new_(MethodArray, 8));
+		KINITv(((KonohaClassVar*)ct)->methods, new_(MethodArray, 8));
 	}
 	kArray_add(ct->methods, mtd);
 }
@@ -419,7 +419,7 @@ static void NameSpace_addMethod(KonohaContext *kctx, kNameSpace *ks, kMethod *mt
 }
 
 /* NameSpace/Class/Method */
-static kMethod* CT_findMethodNULL(KonohaContext *kctx, kclass_t *ct, kmethodn_t mn)
+static kMethod* CT_findMethodNULL(KonohaContext *kctx, KonohaClass *ct, kmethodn_t mn)
 {
 	while(ct != NULL) {
 		size_t i;
@@ -494,9 +494,9 @@ static kbool_t NameSpace_defineMethod(KonohaContext *kctx, kNameSpace *ks, kMeth
 	//	}
 	//}
 	if(mtd->packid == 0) {
-		((struct _kMethod*)mtd)->packid = ks->packid;
+		((kMethodVar*)mtd)->packid = ks->packid;
 	}
-	kclass_t *ct = CT_(mtd->cid);
+	KonohaClass *ct = CT_(mtd->cid);
 	if(ct->packdom == ks->packdom && kMethod_isPublic(mtd)) {
 		CT_addMethod(kctx, ct, mtd);
 	}

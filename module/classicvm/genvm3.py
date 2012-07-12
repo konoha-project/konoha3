@@ -216,7 +216,7 @@ CTYPE = {
 	'sfpidx' :  'intptr_t',
 	'int':      'kint_t',
 	'float':    'kfloat_t',
-	'cid':      'kclass_t*',
+	'cid':      'KonohaClass*',
 	'co':       'kObject*',
 	'hcache':   'kcachedata_t',
 	'addr':     'knh_KLRInst_t*',

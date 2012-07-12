@@ -40,7 +40,7 @@ typedef struct {
 	FgenCode defaultCodeGen;
 	kmap_t *jitcache;
 	kline_t uline;
-	kclass_t *cPointer;
+	KonohaClass *cPointer;
 } kmodjit_t;
 
 typedef struct {
@@ -699,7 +699,7 @@ static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc, c
 	KINITv(base->constPool, new_(Array, 0));
 
 	typedef struct kPointer {
-		kObjectHeader h;
+		KonohaObjectHeader h;
 	} kPointer;
 	static KDEFINE_CLASS PointerDef = {
 		STRUCTNAME(Pointer)

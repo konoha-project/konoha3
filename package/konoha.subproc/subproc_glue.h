@@ -40,7 +40,7 @@ extern int sigignore (int __sig);
 
 typedef struct {
 	kmodshare_t h;
-	kclass_t     *cSubproc;
+	KonohaClass     *cSubproc;
 } kmodsubproc_t;
 
 typedef struct {
@@ -74,7 +74,7 @@ typedef struct {
 
 typedef const struct _kSubproc kSubproc;
 struct _kSubproc {
-	kObjectHeader h;
+	KonohaObjectHeader h;
 	subprocData_t *spd;
 };
 
@@ -204,7 +204,7 @@ static int spSplit(char* str, char* args[]) {
 /**
  * @return "konoha.posix.File" class id
  */
-//static kclass_t khn_getFileClass(KonohaContext *kctx) {
+//static KonohaClass khn_getFileClass(KonohaContext *kctx) {
 //	char *name = "konoha.posix.File";
 //	kbytes_t lname;
 //	lname.ubuf = (kchar_t*)name;
@@ -1261,7 +1261,7 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ks, int argc
 	base->cSubproc= Konoha_addClassDef(ks->packid, ks->packdom, NULL, &defSubproc, pline);
 
 	kparam_t ps = {TY_String, FN_("str")};
-	kclass_t *CT_StringArray2 = kClassTable_Generics(CT_Array, TY_String, 1, &ps);
+	KonohaClass *CT_StringArray2 = kClassTable_Generics(CT_Array, TY_String, 1, &ps);
 	ktype_t TY_StringArray = CT_StringArray2->cid;
 
 	KDEFINE_METHOD MethodData[] = {

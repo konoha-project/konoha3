@@ -264,7 +264,7 @@ static KMETHOD AprTableEntry_getVal(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 // class methods end ==============================================================================================
 
-KonohaContext* konoha_create(kclass_t **cRequest)
+KonohaContext* konoha_create(KonohaClass **cRequest)
 {
 	KonohaContext* konoha = konoha_open(&apache_platform);
 	KonohaContext_t kctx = konoha;
@@ -278,7 +278,7 @@ KonohaContext* konoha_create(kclass_t **cRequest)
 #define TY_TblEntry  (CT_AprTableEntry->cid)
 
 	kparam_t ps = {TY_TblEntry, FN_("aprTableEntry")};
-	kclass_t *CT_TblEntryArray = kClassTable_Generics(CT_Array, TY_TblEntry, 1, &ps);
+	KonohaClass *CT_TblEntryArray = kClassTable_Generics(CT_Array, TY_TblEntry, 1, &ps);
 	ktype_t TY_TblEntryArray = CT_TblEntryArray->cid;
 
 	int FN_x = FN_("x");
@@ -316,7 +316,7 @@ static int konoha_handler(request_rec *r)
 	// 	 TODO 
 	// 	return HTTP_METHOD_NOT_ALLOWED;
 	// }
-	kclass_t *cRequest;
+	KonohaClass *cRequest;
 	KonohaContext* konoha = konoha_create(&cRequest);
 	//assert(cRequest != NULL);
 	r->content_encoding = "utf-8";
