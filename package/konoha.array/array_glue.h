@@ -156,13 +156,13 @@ static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp _RIX)
 		if(lexpr == K_NULLEXPR) {
 			RETURN_(lexpr);
 		}
-		if(lexpr->syn->kw == KW_new) {  // new int[100]
+		if(lexpr->syn->keyword == KW_new) {  // new int[100]
 			kExpr_setsyn(lexpr, SYN_(kStmt_ks(stmt), KW_ExprMethodCall));
 			lexpr = SUGAR Stmt_addExprParams(kctx, stmt, lexpr, tk->sub, 0, kArray_size(tk->sub), 0/*allowEmpty*/);
 		}
 		else {   // X[1] => get X 1
 			kTokenVar *tkN = new_Var(Token, 0);
-			tkN->kw = MN_toGETTER(0);
+			tkN->keyword = MN_toGETTER(0);
 			tkN->uline = tk->uline;
 			SugarSyntax *syn = SYN_(kStmt_ks(stmt), KW_ExprMethodCall);
 			lexpr  = SUGAR new_ConsExpr(kctx, syn, 2, tkN, lexpr);
@@ -176,8 +176,8 @@ static kbool_t array_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileli
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .kw = SYM_("[]"), .flag = SYNFLAG_ExprPostfixOp2, ParseExpr_(BRACKET), .priority_op2 = 16, },  //AST_BRACKET
-		{ .kw = KW_END, },
+		{ .keyword = SYM_("[]"), .flag = SYNFLAG_ExprPostfixOp2, ParseExpr_(BRACKET), .priority_op2 = 16, },  //AST_BRACKET
+		{ .keyword = KW_END, },
 	};
 	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	return true;

@@ -128,7 +128,7 @@ static SugarSyntax* NameSpace_syn(KonohaContext *kctx, kNameSpace *ks0, ksymbol_
 			checkFuncArray(kctx, &(syn->ExprTyCheck));
 		}
 		else {
-			syn->kw  = kw;
+			syn->keyword  = kw;
 			syn->ty  = TY_unknown;
 			syn->op1 = SYM_NONAME;
 			syn->op2 = SYM_NONAME;
@@ -196,8 +196,8 @@ static void NameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ks, KDEFINE_
 {
 	MethodFunc pPatternMatch = NULL, pParseExpr = NULL, pStmtTyCheck = NULL, pExprTyCheck = NULL;
 	kFunc *mPatternMatch = NULL, *mParseExpr = NULL, *mStmtTyCheck = NULL, *mExprTyCheck = NULL;
-	while(syndef->kw != KW_END) {
-		SugarSyntaxVar* syn = (SugarSyntaxVar*)NameSpace_syn(kctx, ks, syndef->kw, 1/*isnew*/);
+	while(syndef->keyword != KW_END) {
+		SugarSyntaxVar* syn = (SugarSyntaxVar*)NameSpace_syn(kctx, ks, syndef->keyword, 1/*isnew*/);
 		syn->flag  |= ((kshortflag_t)syndef->flag);
 		if(syndef->type != 0) {
 			syn->ty = syndef->type;
@@ -228,7 +228,7 @@ static void NameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ks, KDEFINE_
 				KSETv(syn->ParseExpr, kmodsugar->ParseExpr_Term);
 			}
 		}
-		DBG_ASSERT(syn == SYN_(ks, syndef->kw));
+		DBG_ASSERT(syn == SYN_(ks, syndef->keyword));
 		syndef++;
 	}
 	//DBG_P("syntax size=%d, hmax=%d", ks->syntaxMapNN->size, ks->syntaxMapNN->hmax);
@@ -559,7 +559,7 @@ static void Token_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kTokenVar *tk = (kTokenVar*)o;
 	tk->uline     =   0;
-	tk->kw        =   (ksymbol_t)(intptr_t)conf;
+	tk->keyword        =   (ksymbol_t)(intptr_t)conf;
 	KINITv(tk->text, TS_EMPTY);
 }
 
@@ -605,7 +605,7 @@ static void Token_reftrace(KonohaContext *kctx, kObject *o)
 static void dumpToken(KonohaContext *kctx, kToken *tk)
 {
 	if(verbose_sugar) {
-		DUMP_P("%s%s %d: kw=%s%s '%s'\n", KW_t(tk->kw), (short)tk->uline, KW_t(tk->kw), kToken_s(tk));
+		DUMP_P("%s%s %d: kw=%s%s '%s'\n", KW_t(tk->keyword), (short)tk->uline, KW_t(tk->keyword), kToken_s(tk));
 	}
 }
 
@@ -619,7 +619,7 @@ static void dumpIndent(KonohaContext *kctx, int nest)
 
 static int kTokenList_beginChar(kToken *tk)
 {
-	switch(tk->kw) {
+	switch(tk->keyword) {
 	case AST_PARENTHESIS: return '(';
 	case AST_BRACE: return '{';
 	case AST_BRACKET: return '[';
@@ -629,7 +629,7 @@ static int kTokenList_beginChar(kToken *tk)
 
 static int kTokenList_endChar(kToken *tk)
 {
-	switch(tk->kw) {
+	switch(tk->keyword) {
 	case AST_PARENTHESIS: return ')';
 	case AST_BRACE: return '}';
 	case AST_BRACKET: return ']';
@@ -760,7 +760,7 @@ static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
 			DUMP_P("[%d] ExprTerm: null", n);
 		}
 		else if(Expr_isTerm(expr)) {
-			DUMP_P("[%d] ExprTerm: kw='%s%s' %s", n, KW_t(expr->tk->kw), kToken_s(expr->tk));
+			DUMP_P("[%d] ExprTerm: kw='%s%s' %s", n, KW_t(expr->tk->keyword), kToken_s(expr->tk));
 			if(expr->ty != TY_var) {
 
 			}
@@ -772,7 +772,7 @@ static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
 				DUMP_P("[%d] Cons: kw=NULL, size=%ld", n, kArray_size(expr->cons));
 			}
 			else {
-				DUMP_P("[%d] Cons: kw='%s%s', size=%ld", n, KW_t(expr->syn->kw), kArray_size(expr->cons));
+				DUMP_P("[%d] Cons: kw='%s%s', size=%ld", n, KW_t(expr->syn->keyword), kArray_size(expr->cons));
 			}
 			if(expr->ty != TY_var) {
 
@@ -892,7 +892,7 @@ static void dumpStmt(KonohaContext *kctx, kStmt *stmt)
 			DUMP_P("STMT (DONE)\n");
 		}
 		else {
-			DUMP_P("STMT %s%s {\n", T_statement(stmt->syn->kw));
+			DUMP_P("STMT %s%s {\n", T_statement(stmt->syn->keyword));
 			kObject_protoEach(stmt, NULL, _dumpToken);
 			DUMP_P("\n}\n");
 		}
@@ -970,10 +970,10 @@ static kBlock* Stmt_block(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw, kBlock
 	if(bk != NULL) {
 		if(IS_Token(bk)) {
 			kToken *tk = (kToken*)bk;
-			if (tk->kw == TK_CODE) {
+			if (tk->keyword == TK_CODE) {
 				Token_toBRACE(kctx, (kTokenVar*)tk, kStmt_ks(stmt));
 			}
-			if (tk->kw == AST_BRACE) {
+			if (tk->keyword == AST_BRACE) {
 				bk = new_Block(kctx, kStmt_ks(stmt), stmt, tk->sub, 0, kArray_size(tk->sub), ';');
 				kObject_setObject(stmt, kw, bk);
 			}

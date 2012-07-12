@@ -73,8 +73,8 @@ static kbool_t null_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfilelin
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .kw = SYM_("null"), _TERM, ExprTyCheck_(null), },
-		{ .kw = KW_END, },
+		{ .keyword = SYM_("null"), _TERM, ExprTyCheck_(null), },
+		{ .keyword = KW_END, },
 	};
 	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	return true;

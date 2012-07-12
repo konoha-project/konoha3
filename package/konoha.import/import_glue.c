@@ -43,8 +43,8 @@ static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp _RIX)
 			/* name . */
 			kToken *tk  = tls->toks[i+0];
 			kToken *dot = tls->toks[i+1];
-			assert(tk->kw  == TK_SYMBOL);
-			assert(dot->kw == KW_DOT);
+			assert(tk->keyword  == TK_SYMBOL);
+			assert(dot->keyword == KW_DOT);
 			kwb_write(&wb, S_text(tk->text), S_size(tk->text));
 			kwb_putc(&wb, '.');
 		}
@@ -56,7 +56,7 @@ static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	SugarSyntaxVar *syn1 = (SugarSyntaxVar*) SYN_(ks, KW_ExprMethodCall);
 	kTokenVar *tkImport = new_Var(Token, 0);
 	kExpr *ePKG = new_ConstValue(TY_String, pkgname);
-	tkImport->kw = MN_("import");
+	tkImport->keyword = MN_("import");
 	kExpr *expr = SUGAR new_ConsExpr(kctx, syn1, 3,
 			tkImport, new_ConstValue(O_cid(ks), ks), ePKG);
 	kObject_setObject(stmt, KW_ExprPattern, expr);
@@ -83,8 +83,8 @@ static kbool_t import_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileli
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .kw = SYM_("import"), .rule = "\"import\" $toks", TopStmtTyCheck_(import)},
-		{ .kw = KW_END, },
+		{ .keyword = SYM_("import"), .rule = "\"import\" $toks", TopStmtTyCheck_(import)},
+		{ .keyword = KW_END, },
 	};
 	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	return true;

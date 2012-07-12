@@ -40,7 +40,7 @@ static int parseINDENT(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, i
 	}
 	if(IS_NOTNULL(tk)) {
 		kToken_setUnresolved(tk, true);  // to avoid indent within tree tokens
-		tk->kw = TK_INDENT;
+		tk->keyword = TK_INDENT;
 		tk->indent = 0; /* indent FIXME: Debug/Parser/LineNumber.k (Failed) */
 	}
 	return pos-1;
@@ -73,7 +73,7 @@ static int parseNUM(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int 
 	}
 	if(IS_NOTNULL(tk)) {
 		KSETv(tk->text, new_kString(ts + tok_start, (pos-1)-tok_start, SPOL_ASCII));
-		tk->kw = (dot == 0) ? TK_INT : TK_FLOAT;
+		tk->keyword = (dot == 0) ? TK_INT : TK_FLOAT;
 	}
 	return pos - 1;  // next
 }
@@ -113,7 +113,7 @@ static void Token_setSymbolText(KonohaContext *kctx, kTokenVar *tk, const char *
 		else {
 			KSETv(tk->text, new_kString(t, len, SPOL_ASCII));
 		}
-		tk->kw = TK_SYMBOL;
+		tk->keyword = TK_SYMBOL;
 	}
 }
 
@@ -213,7 +213,7 @@ static int parseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, TokenizerEn
 			if(IS_NOTNULL(tk)) {
 				size_t length = kwb_bytesize(&wb);
 				KSETv(tk->text, new_kString(kwb_top(&wb, 1), length, 0));
-				tk->kw = TK_TEXT;
+				tk->keyword = TK_TEXT;
 			}
 			kwb_free(&wb);
 			return pos;
@@ -430,7 +430,7 @@ static void tokenize(KonohaContext *kctx, TokenizerEnv *tenv)
 	tk->uline = tenv->currentLine;
 	pos = parseINDENT(kctx, tk, tenv, pos);
 	while((ch = kchar(tenv->source, pos)) != 0) {
-		if(tk->kw != 0) {
+		if(tk->keyword != 0) {
 			kArray_add(tenv->tokenList, tk);
 			tk = new_Var(Token, 0);
 			tk->uline = tenv->currentLine;
@@ -439,7 +439,7 @@ static void tokenize(KonohaContext *kctx, TokenizerEnv *tenv)
 		assert(pos2 > pos);
 		pos = pos2;
 	}
-	if(tk->kw != 0) {  // FIXME: Memory Leaks ???
+	if(tk->keyword != 0) {  // FIXME: Memory Leaks ???
 		kArray_add(tenv->tokenList, tk);
 	}
 }
@@ -453,7 +453,7 @@ static int parseLazyBlock(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv
 			if(level == 0) {
 				if(IS_NOTNULL(tk)) {
 					KSETv(tk->text, new_kString(tenv->source + tok_start + 1, ((pos-2)-(tok_start)+1), 0));
-					tk->kw = TK_CODE;
+					tk->keyword = TK_CODE;
 				}
 				return pos + 1;
 			}
@@ -554,7 +554,7 @@ static void NameSpace_tokenize(KonohaContext *kctx, kNameSpace *ns, const char *
 // --------------------------------------------------------------------------
 
 static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tls, int s, int e, kArray *adst);
-#define kToken_topch2(tt, tk) ((tk->kw == tt && (S_size((tk)->text) == 1)) ? S_text((tk)->text)[0] : 0)
+#define kToken_topch2(tt, tk) ((tk->keyword == tt && (S_size((tk)->text) == 1)) ? S_text((tk)->text)[0] : 0)
 
 static int findCloseChar(KonohaContext *kctx, kArray *tls, int s, int e, ksymbol_t tt, int closech)
 {
@@ -570,10 +570,10 @@ static kbool_t checkNestedSyntax(KonohaContext *kctx, kArray *tls, int *s, int e
 {
 	int i = *s;
 	kTokenVar *tk = tls->Wtoks[i];
-	int topch = kToken_topch2(tk->kw, tk);
+	int topch = kToken_topch2(tk->keyword, tk);
 	if(topch == opench) {
-		int ne = findCloseChar(kctx, tls, i+1, e, tk->kw, closech);
-		tk->kw = astkw;
+		int ne = findCloseChar(kctx, tls, i+1, e, tk->keyword, closech);
+		tk->keyword = astkw;
 		KSETv(tk->sub, new_(TokenArray, 0));
 		makeSyntaxRule(kctx, tls, i+1, ne, tk->sub);
 		*s = ne;
@@ -590,24 +590,24 @@ static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tls, int s, int e, kA
 	for(i = s; i < e; i++) {
 		kTokenVar *tk = tls->Wtoks[i];
 		int topch = kToken_topch(tk);
-		if(tk->kw == TK_INDENT) continue;
-		if(tk->kw == TK_TEXT) {
+		if(tk->keyword == TK_INDENT) continue;
+		if(tk->keyword == TK_TEXT) {
 			if(checkNestedSyntax(kctx, tls, &i, e, AST_PARENTHESIS, '(', ')') ||
 				checkNestedSyntax(kctx, tls, &i, e, AST_BRACKET, '[', ']') ||
 				checkNestedSyntax(kctx, tls, &i, e, AST_BRACE, '{', '}')) {
 			}
 			else {
 				// FIXME: tk->tt = TK_CODE;
-				tk->kw = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
+				tk->keyword = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
 			}
 			kArray_add(adst, tk);
 			continue;
 		}
 		if(topch == '$' && i+1 < e) {
 			tk = tls->Wtoks[++i];
-			if(tk->kw == TK_SYMBOL) {
-				tk->kw = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWRAW) | KW_PATTERN;
-				if(patternKey == 0) patternKey = tk->kw;
+			if(tk->keyword == TK_SYMBOL) {
+				tk->keyword = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWRAW) | KW_PATTERN;
+				if(patternKey == 0) patternKey = tk->keyword;
 				tk->patternKey = patternKey;
 				patternKey = 0;
 				kArray_add(adst, tk);
@@ -621,7 +621,7 @@ static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tls, int s, int e, kA
 			}
 			return false;
 		}
-		if(tk->kw == TK_SYMBOL && i + 1 < e && kToken_topch(tls->toks[i+1]) == ':') {
+		if(tk->keyword == TK_SYMBOL && i + 1 < e && kToken_topch(tls->toks[i+1]) == ':') {
 			patternKey = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWRAW);
 			i++;
 			continue;

@@ -203,7 +203,7 @@ endif(TEST_COVERAGE)
 
 # for .k script test
 enable_testing()
-set(TEST_BIN ${CMAKE_CURRENT_BINARY_DIR}/konoha)
+set(TEST_BIN ${CMAKE_CURRENT_BINARY_DIR}/minikonoha)
 set(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 macro(add_konoha_test test_name)

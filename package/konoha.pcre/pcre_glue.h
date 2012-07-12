@@ -691,8 +691,8 @@ static int parseREGEX(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, in
 	int tlsize = kArray_size(tenv->tokenList);
 	if(tlsize > 0) {
 		kToken *tkPrev = tenv->tokenList->toks[tlsize - 1];
-		if(tkPrev->kw == TK_INT ||
-			(kToken_topch(tkPrev) != '(' && tkPrev->kw == TK_SYMBOL)) {
+		if(tkPrev->keyword == TK_INT ||
+			(kToken_topch(tkPrev) != '(' && tkPrev->keyword == TK_SYMBOL)) {
 			return parseSLASH(kctx, tk, tenv, tok_start);
 		}
 	}
@@ -708,7 +708,7 @@ static int parseREGEX(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, in
 				kArray_add(a, new_kString(tenv->source + tok_start + 1, (pos0-1) - (tok_start+1), 0));
 				kArray_add(a, new_kString(tenv->source + pos0, pos-pos0, 0));
 				tk->sub = a;
-				tk->kw = SYM_("$regex");
+				tk->keyword = SYM_("$regex");
 			}
 			return pos;
 		}
@@ -737,8 +737,8 @@ static kbool_t pcre_initNameSpace(KonohaContext *kctx, kNameSpace *ks, kfileline
 	USING_SUGAR;
 	SUGAR NameSpace_setTokenizeFunc(kctx, ks, '/', parseREGEX, NULL, 0);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .kw = SYM_("$regex"), _TERM, ExprTyCheck_(Regex), },
-		{ .kw = KW_END, },
+		{ .keyword = SYM_("$regex"), _TERM, ExprTyCheck_(Regex), },
+		{ .keyword = KW_END, },
 	};
 	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	return true;

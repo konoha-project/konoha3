@@ -85,11 +85,11 @@ static kbool_t int_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
-			{ .kw = SYM_("<<"), _OP, .op2 = "opLSHIFT", .priority_op2 = 128,},
-			{ .kw = SYM_(">>"), _OP, .op2 = "opRSHIFT", .priority_op2 = 128,},
+			{ .keyword = SYM_("<<"), _OP, .op2 = "opLSHIFT", .priority_op2 = 128,},
+			{ .keyword = SYM_(">>"), _OP, .op2 = "opRSHIFT", .priority_op2 = 128,},
 //			{ TOKEN("++"), _OP, .op1 = "opINC", .priority_op2 = 16, .flag = SYNFLAG_ExprPostfixOp2, },
 //			{ TOKEN("--"), _OP, .op1 = "opDEC", .priority_op2 = 16, .flag = SYNFLAG_ExprPostfixOp2,},
-			{ .kw = KW_END, },
+			{ .keyword = KW_END, },
 	};
 	SUGAR NameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;

@@ -146,7 +146,7 @@ static kbool_t function_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfil
 			rule = "function $SYMBOL $params $block",
 			TopStmtTyCheck_(FunctionDecl), ParseExpr_(function), },
 		{ TOKEN("$param"), ExprTyCheck_(FuncStyleCall), },
-		{ .kw = KW_END, },
+		{ .keyword = KW_END, },
 	};
 	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	return true;

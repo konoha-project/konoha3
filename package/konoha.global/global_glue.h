@@ -128,7 +128,7 @@ static ksymbol_t tosymbol(KonohaContext *kctx, kExpr *expr)
 {
 	if(Expr_isTerm(expr)) {
 		kToken *tk = expr->tk;
-		if(tk->kw == TK_SYMBOL) {
+		if(tk->keyword == TK_SYMBOL) {
 			return ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
 		}
 	}
@@ -172,9 +172,9 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static kMethod* ExprTerm_getSetterNULL(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kObject *scr, kGamma *gma, ktype_t ty)
 {
 	USING_SUGAR;
-	if(Expr_isTerm(expr) && expr->tk->kw == TK_SYMBOL) {
+	if(Expr_isTerm(expr) && expr->tk->keyword == TK_SYMBOL) {
 		kToken *tk = expr->tk;
-		if(tk->kw != KW_SymbolPattern) {
+		if(tk->keyword != KW_SymbolPattern) {
 			SUGAR Stmt_p(kctx, stmt, NULL, ERR_, "%s is keyword", S_text(tk->text));
 			return NULL;
 		}
@@ -215,7 +215,7 @@ static kbool_t Expr_declType(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGam
 		}
 		return false;
 	}
-	else if(expr->syn->kw == KW_LET) {
+	else if(expr->syn->keyword == KW_LET) {
 		kExpr *lexpr = kExpr_at(expr, 1);
 		if(SUGAR Expr_tyCheckAt(kctx, stmt, expr, 2, gma, ty, 0) == K_NULLEXPR) {
 			// this is neccesarry to avoid 'int a = a + 1;';
@@ -228,7 +228,7 @@ static kbool_t Expr_declType(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGam
 			return appendSetterStmt(kctx, expr, lastStmtRef);
 		}
 		return false;
-	} else if(expr->syn->kw == KW_COMMA) {
+	} else if(expr->syn->keyword == KW_COMMA) {
 		size_t i;
 		for(i = 1; i < kArray_size(expr->cons); i++) {
 			if(!Expr_declType(kctx, stmt, kExpr_at(expr, i), gma, ty, lastStmtRef)) return false;
@@ -262,8 +262,8 @@ static kbool_t global_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfilel
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .kw = SYM_("var"), TopStmtTyCheck_(var), .rule = "\"var\" var: $expr \"=\" $expr", },
-		{ .kw = KW_END, },
+		{ .keyword = SYM_("var"), TopStmtTyCheck_(var), .rule = "\"var\" var: $expr \"=\" $expr", },
+		{ .keyword = KW_END, },
 	};
 	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	SUGAR SYN_setSugarFunc(kctx, ks, KW_StmtTypeDecl, SYNIDX_TopStmtTyCheck, new_SugarFunc(StmtTyCheck_GlobalTypeDecl));

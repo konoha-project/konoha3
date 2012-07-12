@@ -35,7 +35,7 @@ static KMETHOD Token_isTypeName(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## boolean Token.isParenthesis();
 static KMETHOD Token_isParenthesis(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	RETURNb_(sfp[0].tk->kw == AST_PARENTHESIS);
+	RETURNb_(sfp[0].tk->keyword == AST_PARENTHESIS);
 }
 
 //## int Stmt.getBuild();
@@ -192,8 +192,8 @@ static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //	USING_SUGAR;
 //	kStmt *stmt  = sfp[0].stmt;
 //	kToken *tk   = sfp[1].tk;
-//	assert(tk->kw != 0);
-//	kExprVar *expr = new_Var(Expr, SYN_(kStmt_ks(stmt), tk->kw));
+//	assert(tk->keyword != 0);
+//	kExprVar *expr = new_Var(Expr, SYN_(kStmt_ks(stmt), tk->keyword));
 //	KSETv(expr->tk, tk);
 //	KSETv(expr->cons, new_(Array, 8));
 //	RETURN_(expr);
@@ -299,7 +299,7 @@ static kbool_t sugar_setupPackage(KonohaContext *kctx, kNameSpace *ks, kfileline
 
 static kbool_t isSubKeyword(KonohaContext *kctx, kArray *tls, int s, int e)
 {
-	if(s+1 < e && tls->toks[s+1]->kw == TK_TEXT) {
+	if(s+1 < e && tls->toks[s+1]->keyword == TK_TEXT) {
 		const char *t = S_text(tls->toks[s+1]->text);
 		if(isalpha(t[0]) || t[0] < 0 /* multibytes char */) {
 			return 1;
@@ -313,7 +313,7 @@ static SugarSyntaxVar *toks_syntax(KonohaContext *kctx, kNameSpace *ks, kArray *
 	USING_SUGAR;
 	int s = 0, e = kArray_size(tls);
 	if(s < e) {
-		if(tls->toks[s]->kw == TK_TEXT) {
+		if(tls->toks[s]->keyword == TK_TEXT) {
 			ksymbol_t kw;
 			if(isSubKeyword(kctx, tls, s, e)) {
 				char buf[256];
@@ -339,7 +339,7 @@ static KMETHOD StmtTyCheck_sugar(KonohaContext *kctx, KonohaStack *sfp _RIX)
 		SugarSyntaxVar *syn = toks_syntax(kctx, gma->genv->ks, tls);
 		if(syn != NULL) {
 			if(syn->syntaxRuleNULL != NULL) {
-				SUGAR Stmt_p(kctx, stmt, NULL, WARN_, "overriding syntax rule: %s", KW_t(syn->kw));
+				SUGAR Stmt_p(kctx, stmt, NULL, WARN_, "overriding syntax rule: %s", KW_t(syn->keyword));
 				kArray_clear(syn->syntaxRuleNULL, 0);
 			}
 			else {
@@ -402,8 +402,8 @@ static kbool_t sugar_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileli
 	};
 	kNameSpace_loadConstData(ks, IntData, pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .kw = SYM_("sugar"), .rule ="\"sugar\" $toks", TopStmtTyCheck_(sugar), },
-		{ .kw = KW_END, },
+		{ .keyword = SYM_("sugar"), .rule ="\"sugar\" $toks", TopStmtTyCheck_(sugar), },
+		{ .keyword = KW_END, },
 	};
 	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	return true;

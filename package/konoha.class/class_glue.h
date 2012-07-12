@@ -257,16 +257,16 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 			SUGAR Stmt_p(kctx, stmt, NULL, ERR_, "invalid application of 'new' to incomplete class %s", CT_t(ct));
 		}
 
-		if(TK_isType(tk1) && tk2->kw == AST_PARENTHESIS) {  // new C (...)
+		if(TK_isType(tk1) && tk2->keyword == AST_PARENTHESIS) {  // new C (...)
 			SugarSyntax *syn = SYN_(kStmt_ks(stmt), KW_ExprMethodCall);
 			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, tkNEW, NewExpr(kctx, syn, tk1, TK_type(tk1), 0));
-			tkNEW->kw = MN_new;
+			tkNEW->keyword = MN_new;
 			RETURN_(expr);
 		}
-		if(TK_isType(tk1) && tk2->kw == AST_BRACKET) {     // new C [...]
+		if(TK_isType(tk1) && tk2->keyword == AST_BRACKET) {     // new C [...]
 			SugarSyntax *syn = SYN_(kStmt_ks(stmt), KW_new);
 			KonohaClass *ct = CT_p0(kctx, CT_Array, TK_type(tk1));
-			tkNEW->kw = MN_("newArray");
+			tkNEW->keyword = MN_("newArray");
 			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, tkNEW, NewExpr(kctx, syn, tk1, ct->cid, 0));
 			RETURN_(expr);
 		}
@@ -275,7 +275,7 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static ksymbol_t tosymbolUM(KonohaContext *kctx, kToken *tk)
 {
-	DBG_ASSERT(tk->kw == TK_SYMBOL);
+	DBG_ASSERT(tk->keyword == TK_SYMBOL);
 	return ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
 }
 
@@ -306,7 +306,7 @@ static void Stmt_parseClassBlock(KonohaContext *kctx, kStmt *stmt, kToken *tkC)
 {
 	USING_SUGAR;
 	kToken *tkP = (kToken*)kObject_getObject(stmt, KW_BlockPattern, NULL);
-	if(tkP != NULL && tkP->kw == TK_CODE) {
+	if(tkP != NULL && tkP->keyword == TK_CODE) {
 		kArray *a = ctxsugar->tokens;
 		size_t atop = kArray_size(a), s, i;
 		SUGAR NameSpace_tokenize(kctx, kStmt_ks(stmt), S_text(tkP->text), tkP->uline, a);
@@ -316,9 +316,9 @@ static void Stmt_parseClassBlock(KonohaContext *kctx, kStmt *stmt, kToken *tkC)
 			kToken *tk = a->toks[i];
 			int topch = kToken_topch(tk);
 			DBG_P("cname='%s'", cname);
-			if(topch == '(' && tkP->kw == TK_SYMBOL && strcmp(cname, S_text(tkP->text)) == 0) {
+			if(topch == '(' && tkP->keyword == TK_SYMBOL && strcmp(cname, S_text(tkP->text)) == 0) {
 				kTokenVar *tkNEW = new_Var(Token, 0);
-				tkNEW->kw = TK_SYMBOL;
+				tkNEW->keyword = TK_SYMBOL;
 				KSETv(tkNEW->text, SYM_s(MN_new));
 				tkNEW->uline = tkP->uline;
 				kArray_add(a, tkNEW);
@@ -329,7 +329,7 @@ static void Stmt_parseClassBlock(KonohaContext *kctx, kStmt *stmt, kToken *tkC)
 		kBlock *bk = SUGAR new_Block(kctx, kStmt_ks(stmt), stmt, a, s, kArray_size(a), ';');
 		for (i = 0; i < kArray_size(bk->blocks); i++) {
 			kStmt *methodDecl = bk->blocks->stmts[i];
-			if(methodDecl->syn->kw == KW_StmtMethodDecl) {
+			if(methodDecl->syn->keyword == KW_StmtMethodDecl) {
 				kObject_setObject(methodDecl, KW_UsymbolPattern, tkC);
 			}
 		}
@@ -398,13 +398,13 @@ static size_t checkFieldSize(KonohaContext *kctx, kBlock *bk)
 	size_t i, c = 0;
 	for(i = 0; i < kArray_size(bk->blocks); i++) {
 		kStmt *stmt = bk->blocks->stmts[i];
-		DBG_P("stmt->kw=%s", KW_t(stmt->syn->kw));
-		if(stmt->syn->kw == KW_StmtTypeDecl) {
+		DBG_P("stmt->keyword=%s", KW_t(stmt->syn->keyword));
+		if(stmt->syn->keyword == KW_StmtTypeDecl) {
 			kExpr *expr = kStmt_expr(stmt, KW_ExprPattern, NULL);
-			if(expr->syn->kw == KW_COMMA) {
+			if(expr->syn->keyword == KW_COMMA) {
 				c += (kArray_size(expr->cons) - 1);
 			}
-			else if(expr->syn->kw == KW_LET || Expr_isTerm(expr)) {
+			else if(expr->syn->keyword == KW_LET || Expr_isTerm(expr)) {
 				c++;
 			}
 		}
@@ -445,7 +445,7 @@ static kbool_t CT_declType(KonohaContext *kctx, KonohaClassVar *ct, kGamma *gma,
 		defineField(kctx, ct, flag, ty, name, knull(CT_(ty)), 0);
 		return true;
 	}
-	else if(expr->syn->kw == KW_LET) {
+	else if(expr->syn->keyword == KW_LET) {
 		kExpr *lexpr = kExpr_at(expr, 1);
 		if(Expr_isTerm(lexpr)) {
 			kExpr *vexpr = SUGAR Expr_tyCheckAt(kctx, stmt, expr, 2, gma, ty, 0);
@@ -468,7 +468,7 @@ static kbool_t CT_declType(KonohaContext *kctx, KonohaClassVar *ct, kGamma *gma,
 			}
 			return true;
 		}
-	} else if(expr->syn->kw == KW_COMMA) {
+	} else if(expr->syn->keyword == KW_COMMA) {
 		size_t i;
 		for(i = 1; i < kArray_size(expr->cons); i++) {
 			if(!CT_declType(kctx, ct, gma, stmt, kExpr_at(expr, i), flag, ty, pline)) return false;
@@ -485,7 +485,7 @@ static kbool_t CT_addClassFields(KonohaContext *kctx, KonohaClassVar *ct, kGamma
 	size_t i;
 	for(i = 0; i < kArray_size(bk->blocks); i++) {
 		kStmt *stmt = bk->blocks->stmts[i];
-		if(stmt->syn->kw == KW_StmtTypeDecl) {
+		if(stmt->syn->keyword == KW_StmtTypeDecl) {
 			kshortflag_t flag = kField_Getter | kField_Setter;
 			kToken *tk  = kStmt_token(stmt, KW_TypePattern, NULL);
 			kExpr *expr = kStmt_expr(stmt, KW_ExprPattern, NULL);
@@ -506,14 +506,14 @@ static void CT_checkMethodDecl(KonohaContext *kctx, kToken *tkC, kBlock *bk, kSt
 	size_t i;
 	for(i = 0; i < kArray_size(bk->blocks); i++) {
 		kStmt *stmt = bk->blocks->stmts[i];
-		if(stmt->syn->kw == KW_StmtTypeDecl) continue;
-		if(stmt->syn->kw == KW_StmtMethodDecl) {
+		if(stmt->syn->keyword == KW_StmtTypeDecl) continue;
+		if(stmt->syn->keyword == KW_StmtMethodDecl) {
 			kStmt *lastStmt = lastStmtRef[0];
 			SUGAR Block_insertAfter(kctx, lastStmt->parentNULL, lastStmt, stmt);
 			lastStmtRef[0] = stmt;
 		}
 		else {
-			SUGAR Stmt_p(kctx, stmt, NULL, WARN_, "%s is not available within the class clause", KW_t(stmt->syn->kw));
+			SUGAR Stmt_p(kctx, stmt, NULL, WARN_, "%s is not available within the class clause", KW_t(stmt->syn->keyword));
 		}
 	}
 }
@@ -548,7 +548,7 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	} else {
 		ct = defineClassName(kctx, gma->genv->ks, cflag, tkC->text, supcid, stmt->uline);
 	}
-	((kTokenVar*)tkC)->kw = KW_TypePattern;
+	((kTokenVar*)tkC)->keyword = KW_TypePattern;
 	((kTokenVar*)tkC)->ty = ct->cid;
 	Stmt_parseClassBlock(kctx, stmt, tkC);
 	kBlock *bk = kStmt_block(stmt, KW_BlockPattern, K_NULLBLOCK);
@@ -577,11 +577,11 @@ static kbool_t class_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileli
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .kw = SYM_("new"), ParseExpr_(new), },
-		{ .kw = SYM_("class"), .rule = "\"class\" $USYMBOL [\"extends\" extends: $type] [$block]", TopStmtTyCheck_(class), },
-		{ .kw = SYM_("extends"), .rule = "\"extends\" $type", },
-		{ .kw = SYM_("."), ExprTyCheck_(Getter) },
-		{ .kw = KW_END, },
+		{ .keyword = SYM_("new"), ParseExpr_(new), },
+		{ .keyword = SYM_("class"), .rule = "\"class\" $USYMBOL [\"extends\" extends: $type] [$block]", TopStmtTyCheck_(class), },
+		{ .keyword = SYM_("extends"), .rule = "\"extends\" $type", },
+		{ .keyword = SYM_("."), ExprTyCheck_(Getter) },
+		{ .keyword = KW_END, },
 	};
 	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	return true;

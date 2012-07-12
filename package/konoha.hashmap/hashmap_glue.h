@@ -145,7 +145,7 @@ static kbool_t hashmap_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfile
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
 
-			{ .kw = KW_END, },
+			{ .keyword = KW_END, },
 	};
 	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	return true;

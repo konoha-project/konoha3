@@ -837,10 +837,10 @@ static void LoopStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx
 static void JumpStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
 	SugarSyntax *syn = stmt->syn;
-	kStmt *jump = (kStmt*)kObject_getObject(stmt, syn->kw, NULL);
+	kStmt *jump = (kStmt*)kObject_getObject(stmt, syn->keyword, NULL);
 	DBG_ASSERT(jump != NULL);
 	DBG_ASSERT(IS_Stmt(jump));
-	kBasicBlock* lbJUMP = (kBasicBlock*)kObject_getObject(jump, syn->kw, NULL);
+	kBasicBlock* lbJUMP = (kBasicBlock*)kObject_getObject(jump, syn->keyword, NULL);
 	DBG_ASSERT(lbJUMP != NULL);
 	DBG_ASSERT(IS_BasicBlock(lbJUMP));
 	ASM_JMP(kctx, lbJUMP);
@@ -848,7 +848,7 @@ static void JumpStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx
 
 static void UndefinedStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
-	DBG_ABORT("undefined asm syntax kw='%s'", SYM_t(stmt->syn->kw));
+	DBG_ABORT("undefined asm syntax kw='%s'", SYM_t(stmt->syn->keyword));
 }
 
 static void BLOCK_asm(KonohaContext *kctx, kBlock *bk, int shift)

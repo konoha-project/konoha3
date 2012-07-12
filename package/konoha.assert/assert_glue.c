@@ -89,8 +89,8 @@
 //{
 //	USING_SUGAR;
 //	KDEFINE_SYNTAX SYNTAX[] = {
-//		{ .kw = SYM_("assert"), .rule = "'assert' '(' $expr ')'", .TopStmtTyCheck = StmtTyCheck_assert, .StmtTyCheck = StmtTyCheck_assert},
-//		{ .kw = KW_END, },
+//		{ .keyword = SYM_("assert"), .rule = "'assert' '(' $expr ')'", .TopStmtTyCheck = StmtTyCheck_assert, .StmtTyCheck = StmtTyCheck_assert},
+//		{ .keyword = KW_END, },
 //	};
 //	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 //

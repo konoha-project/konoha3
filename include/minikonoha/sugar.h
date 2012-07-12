@@ -142,16 +142,16 @@ typedef const struct SugarSyntaxVar   SugarSyntax;
 typedef struct SugarSyntaxVar         SugarSyntaxVar;
 
 struct SugarSyntaxVar {
-	ksymbol_t  kw; 	kshortflag_t flag;
-	kArray   *syntaxRuleNULL;
-	kFunc    *PatternMatch;
-	kFunc    *ParseExpr;
-	kFunc    *TopStmtTyCheck;
-	kFunc    *StmtTyCheck;
-	kFunc    *ExprTyCheck;
+	ksymbol_t  keyword;               kshortflag_t  flag;
+	kArray                           *syntaxRuleNULL;
+	kFunc                            *PatternMatch;
+	kFunc                            *ParseExpr;
+	kFunc                            *TopStmtTyCheck;
+	kFunc                            *StmtTyCheck;
+	kFunc                            *ExprTyCheck;
 	// binary
-	kshort_t   priority;  ktype_t  ty;
-	kmethodn_t op2;  kmethodn_t op1;      // & a
+	kshort_t   priority;              ktype_t  ty;
+	kmethodn_t op2;                   kmethodn_t op1;
 };
 
 #define SYNIDX_PatternMatch   0
@@ -180,7 +180,7 @@ struct SugarSyntaxVar {
 #define SYNFLAG_StmtJumpSkip       ((kshortflag_t)1 << 10)  /* break */
 
 typedef struct KDEFINE_SYNTAX {
-	ksymbol_t kw;  kshortflag_t flag;
+	ksymbol_t keyword;  kshortflag_t flag;
 	const char *rule;
 	const char *op2;
 	const char *op1;
@@ -213,7 +213,7 @@ typedef kshort_t    kexpr_t;
 
 struct kTokenVar {
 	KonohaObjectHeader h;
-	ksymbol_t     kw;  // keywordSymbolId
+	ksymbol_t     keyword;  // keywordSymbolId
 	union {
 		kushort_t indent;       // indent when kw
 		ksymbol_t patternKey;   // pattern name for 'setting key in Stmt'
@@ -228,7 +228,7 @@ struct kTokenVar {
 
 #define kToken_needsKeywordResolved(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
 #define kToken_setUnresolved(o, B)          TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,B)
-#define kToken_topch(tk)                    ((tk)->kw != TK_TEXT && (S_size((tk)->text) == 1) ? S_text((tk)->text)[0] : 0)
+#define kToken_topch(tk)                    ((tk)->keyword != TK_TEXT && (S_size((tk)->text) == 1) ? S_text((tk)->text)[0] : 0)
 
 #define TEXPR_LOCAL_   -4   /*THIS IS NEVER PASSED*/
 #define TEXPR_BLOCK_   -3   /*THIS IS NEVER PASSED*/
@@ -606,7 +606,7 @@ typedef struct {
 ///* ------------------------------------------------------------------------ */
 
 // In future, typeof operator is introduced
-#define TK_isType(TK)    ((TK)->kw == KW_TypePattern)
+#define TK_isType(TK)    ((TK)->keyword == KW_TypePattern)
 #define TK_type(TK)       (TK)->ty
 
 #define kStmt_ks(STMT)   Stmt_ks(kctx, STMT)
@@ -620,7 +620,7 @@ static inline kNameSpace *Stmt_ks(KonohaContext *kctx, kStmt *stmt)
 static inline void Stmt_setsyn(KonohaContext *kctx, kStmt *stmt, SugarSyntax *syn)
 {
 //	if(syn == NULL && stmt->syn != NULL) {
-//		DBG_P("DONE: STMT='%s'", KW_t(syn->kw));
+//		DBG_P("DONE: STMT='%s'", KW_t(syn->keyword));
 //	}
 	((kStmtVar*)stmt)->syn = syn;
 }

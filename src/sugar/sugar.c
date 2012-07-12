@@ -44,8 +44,8 @@ int verbose_sugar = 0;
 #include "ast.h"
 #include "tycheck.h"
 
-#define PATTERN(T)  .kw = KW_##T##Pattern
-#define TOKEN(T)  .kw = KW_##T
+#define PATTERN(T)  .keyword = KW_##T##Pattern
+#define TOKEN(T)    .keyword = KW_##T
 
 static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ks)
 {
@@ -91,7 +91,7 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ks)
 		{ TOKEN(if), .rule ="\"if\" \"(\" $expr \")\" $block [\"else\" else: $block]", TopStmtTyCheck_(if), StmtTyCheck_(if), },
 		{ TOKEN(else), .rule = "\"else\" $block", TopStmtTyCheck_(else), StmtTyCheck_(else), },
 		{ TOKEN(return), .rule ="\"return\" [$expr]", .flag = SYNFLAG_StmtBreakExec, StmtTyCheck_(return), },
-		{ .kw = KW_END, },
+		{ .keyword = KW_END, },
 	};
 	NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	SugarSyntaxVar *syn = (SugarSyntaxVar*)SYN_(ks, KW_void);

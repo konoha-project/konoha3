@@ -390,7 +390,7 @@ static int parseSQUOTE(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, i
 		if(ch == '\'' && prev != '\\') {
 			if(IS_NOTNULL(tk)) {
 				KSETv(tk->text, new_kString(tenv->source + tok_start + 1, (pos-1)- (tok_start+1), 0));
-				tk->kw = SYM_("$SingleQuote");
+				tk->keyword = SYM_("$SingleQuote");
 			}
 			return pos;
 		}
@@ -423,8 +423,8 @@ static kbool_t bytes_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileli
 	USING_SUGAR;
 	SUGAR NameSpace_setTokenizeFunc(kctx, ks, '\'', parseSQUOTE, NULL, 0);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .kw = SYM_("$SingleQuote"), _TERM, ExprTyCheck_(Squote)},
-		{ .kw = KW_END, },
+		{ .keyword = SYM_("$SingleQuote"), _TERM, ExprTyCheck_(Squote)},
+		{ .keyword = KW_END, },
 	};
 	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	return true;

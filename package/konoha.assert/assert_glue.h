@@ -90,7 +90,7 @@
 //	USING_SUGAR;
 //	KDEFINE_SYNTAX SYNTAX[] = {
 //		{ TOKEN("assert"), .rule = "'assert' '(' $expr ')'", .TopStmtTyCheck = StmtTyCheck_assert, .StmtTyCheck = StmtTyCheck_assert},
-//		{ .kw = KW_END, },
+//		{ .keyword = KW_END, },
 //	};
 //	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 //

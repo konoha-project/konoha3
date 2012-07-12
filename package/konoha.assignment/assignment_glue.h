@@ -78,7 +78,7 @@ static KMETHOD StmtTyCheck_DefaultAssignment(KonohaContext *kctx, KonohaStack *s
 
 #define setToken(tk, str, size, k) {\
 		KSETv(tk->text, new_kString(str, size, 0));\
-		tk->kw = k;\
+		tk->keyword = k;\
 	}
 
 static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int c, int e)
@@ -91,7 +91,7 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 	while (i < c) {
 		tkNew = new_Var(Token, 0);
 		tmp = tls->toks[i];
-		setToken(tkNew, S_text(tmp->text), S_size(tmp->text), tmp->kw);
+		setToken(tkNew, S_text(tmp->text), S_size(tmp->text), tmp->keyword);
 		kArray_add(tls, tkNew);
 		i++;
 	}
@@ -116,7 +116,7 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 
 	kTokenVar *newtk = new_Var(Token, 0);
 	tkHead = tls->toks[e+1];
-	newtk->kw = AST_PARENTHESIS;
+	newtk->keyword = AST_PARENTHESIS;
 	newtk->uline = tkHead->uline;
 	//newtk->topch = tkHead->topch; newtk->lpos = tkHead->closech;
 	KSETv(newtk->sub, new_(TokenArray, 0));
@@ -125,7 +125,7 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 	while (i < newc) {
 		tkNew = new_Var(Token, 0);
 		tmp = tls->toks[i];
-		setToken(tkNew, S_text(tmp->text), S_size(tmp->text), tmp->kw);
+		setToken(tkNew, S_text(tmp->text), S_size(tmp->text), tmp->keyword);
 		kArray_add(newtk->sub, tkNew);
 		i++;
 	}
@@ -138,7 +138,7 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 	while (i < news) {
 		tkNew = new_Var(Token, 0);
 		tmp = tls->toks[i];
-		setToken(tkNew, S_text(tmp->text), S_size(tmp->text), tmp->kw);
+		setToken(tkNew, S_text(tmp->text), S_size(tmp->text), tmp->keyword);
 		kArray_add(tls, tkNew);
 		i++;
 	}
@@ -160,13 +160,13 @@ static kbool_t assignment_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kf
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .kw = SYM_("="), /*.op2 = "*", .priority_op2 = 4096,*/ ExprTyCheck_(assignment)},
-		{ .kw = SYM_("+="), _OPLeft, /*.priority_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .priority_op2 = 4096,},
-		{ .kw = SYM_("-="), _OPLeft, /*.priority_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .priority_op2 = 4096,},
-		{ .kw = SYM_("*="), _OPLeft, /*.priority_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .priority_op2 = 4096,},
-		{ .kw = SYM_("/="), _OPLeft, /*.priority_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .priority_op2 = 4096,},
-		{ .kw = SYM_("%="), _OPLeft, /*.priority_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .priority_op2 = 4096,},
-		{ .kw = KW_END, },
+		{ .keyword = SYM_("="), /*.op2 = "*", .priority_op2 = 4096,*/ ExprTyCheck_(assignment)},
+		{ .keyword = SYM_("+="), _OPLeft, /*.priority_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .priority_op2 = 4096,},
+		{ .keyword = SYM_("-="), _OPLeft, /*.priority_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .priority_op2 = 4096,},
+		{ .keyword = SYM_("*="), _OPLeft, /*.priority_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .priority_op2 = 4096,},
+		{ .keyword = SYM_("/="), _OPLeft, /*.priority_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .priority_op2 = 4096,},
+		{ .keyword = SYM_("%="), _OPLeft, /*.priority_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .priority_op2 = 4096,},
+		{ .keyword = KW_END, },
 	};
 	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	return true;

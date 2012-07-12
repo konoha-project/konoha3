@@ -54,7 +54,7 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //		RETURNb_(false);
 //	}
 //	kExpr *expr = kStmt_expr(stmt, KW_ExprPattern, K_NULLEXPR);
-//	DBG_P("expr kw='%s'", KW_t(expr->syn->kw));
+//	DBG_P("expr kw='%s'", KW_t(expr->syn->keyword));
 //	if(!SUGAR Stmt_tyCheckExpr(kctx, stmt, KW_ExprPattern, gma, TY_var, 0)) {
 //		SUGAR p(kctx, ERR_, stmt->uline, -1, "type error");
 //		RETURNb_(false);
@@ -78,7 +78,7 @@ static kbool_t var_initNameSpace(KonohaContext *kctx,  kNameSpace *ks, kfileline
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ TOKEN("var"), StmtTyCheck_(var), .rule = "\"var\" var: $expr \"=\" $expr", },
-		{ .kw = KW_END, },
+		{ .keyword = KW_END, },
 	};
 	SUGAR NameSpace_defineSyntax(kctx, ks, SYNTAX);
 	return true;
