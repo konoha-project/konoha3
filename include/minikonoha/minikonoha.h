@@ -1251,8 +1251,6 @@ struct LibKonohaApiVar {
 #define TS_EMPTY          (kctx->share->emptyString)
 
 #define UPCAST(o)         ((kObject*)o)
-#define W(T, V)           struct _##T*const W##V = (struct _##T*const)(V); int _check##V
-#define WASSERT(V)        DBG_ASSERT((void*)V == (void*)W##V); (void)_check##V
 
 #define KPI                     (kctx->klib)
 

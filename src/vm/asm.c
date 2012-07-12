@@ -90,15 +90,15 @@ int verbose_code = 0;  // global variable
 
 static void EXPR_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espidx);
 
-static struct _kBasicBlock* new_BasicBlockLABEL(KonohaContext *kctx)
+static kBasicBlockVar* new_BasicBlockLABEL(KonohaContext *kctx)
 {
-	struct _kBasicBlock *bb = new_W(BasicBlock, 0);
+	kBasicBlockVar *bb = new_Var(BasicBlock, 0);
 	bb->id = kArray_size(ctxcode->insts);
 	kArray_add(ctxcode->insts, bb);
 	return bb;
 }
 
-static void BasicBlock_add(KonohaContext *kctx, struct _kBasicBlock *bb, kushort_t line, kopl_t *op, size_t size)
+static void BasicBlock_add(KonohaContext *kctx, kBasicBlockVar *bb, kushort_t line, kopl_t *op, size_t size)
 {
 	if(bb->op.bytemax == 0) {
 		KARRAY_INIT(&(bb->op), 1 * sizeof(kopl_t));
@@ -120,7 +120,7 @@ static void BUILD_asm(KonohaContext *kctx, kopl_t *op, size_t opsize)
 
 static int BUILD_asmJMPF(KonohaContext *kctx, klr_JMPF_t *op)
 {
-	struct _kBasicBlock *bb = ctxcode->WcurbbNC;
+	kBasicBlockVar *bb = ctxcode->WcurbbNC;
 	DBG_ASSERT(op->opcode == OPCODE_JMPF);
 	int swap = 0;
 #ifdef _CLASSICVM
@@ -141,14 +141,14 @@ static inline kopcode_t BasicBlock_opcode(kBasicBlock *bb)
 	return bb->op.opl->opcode;
 }
 
-static void BasicBlock_strip0(KonohaContext *kctx, struct _kBasicBlock *bb)
+static void BasicBlock_strip0(KonohaContext *kctx, kBasicBlockVar *bb)
 {
 	L_TAIL:;
 	if(BasicBlock_isVisited(bb)) return;
 	BasicBlock_setVisited(bb, 1);
 	if(bb->jumpNC != NULL) {
 		L_JUMP:;
-		struct _kBasicBlock *bbJ = (struct _kBasicBlock*)bb->jumpNC;
+		kBasicBlockVar *bbJ = (kBasicBlockVar*)bb->jumpNC;
 		if(bbJ->op.bytesize == 0 && bbJ->jumpNC != NULL && bbJ->nextNC == NULL) {
 			//DBG_P("DIRECT JMP id=%d JMP to id=%d", bbJ->id, DP(bbJ->jumpNC)->id);
 			bbJ->incoming -= 1;
@@ -179,7 +179,7 @@ static void BasicBlock_strip0(KonohaContext *kctx, struct _kBasicBlock *bb)
 	}
 	L_NEXT:;
 	if(bb->nextNC != NULL) {
-		struct _kBasicBlock *bbN = bb->WnextNC;
+		kBasicBlockVar *bbN = bb->WnextNC;
 		if(bbN->op.bytesize == 0 && bbN->nextNC != NULL && bbN->jumpNC == NULL) {
 			//DBG_P("DIRECT NEXT id=%d to NEXT id=%d", bbN->id, DP(bbN->nextNC)->id);
 			bbN->incoming -= 1;
@@ -200,7 +200,7 @@ static void BasicBlock_strip0(KonohaContext *kctx, struct _kBasicBlock *bb)
 	}
 }
 
-static void BasicBlock_join(KonohaContext *kctx, struct _kBasicBlock *bb, struct _kBasicBlock *bbN)
+static void BasicBlock_join(KonohaContext *kctx, kBasicBlockVar *bb, kBasicBlockVar *bbN)
 {
 	//DBG_P("join %d(%s) size=%d and %d(%s) size=%d", bb->id, BB(bb), bb->size, bbN->id, BB(bbN), bbN->size);
 	bb->nextNC = bbN->nextNC;
@@ -224,7 +224,7 @@ static void BasicBlock_join(KonohaContext *kctx, struct _kBasicBlock *bb, struct
 	KARRAY_FREE(&bbN->op);
 }
 
-static void BasicBlock_strip1(KonohaContext *kctx, struct _kBasicBlock *bb)
+static void BasicBlock_strip1(KonohaContext *kctx, kBasicBlockVar *bb)
 {
 	L_TAIL:;
 	if(!BasicBlock_isVisited(bb)) return;
@@ -242,7 +242,7 @@ static void BasicBlock_strip1(KonohaContext *kctx, struct _kBasicBlock *bb)
 		}
 	}
 	if(bb->nextNC != NULL) {
-		struct _kBasicBlock *bbN = bb->WnextNC;
+		kBasicBlockVar *bbN = bb->WnextNC;
 		if(bbN->incoming == 1 && BasicBlock_opcode(bbN) != OPCODE_RET) {
 			BasicBlock_join(kctx, bb, bbN);
 			BasicBlock_setVisited(bb, 1);
@@ -275,7 +275,7 @@ static size_t BasicBlock_peephole(KonohaContext *kctx, kBasicBlock *bb)
 			}
 			opD++;
 		}
-		((struct _kBasicBlock*)bb)->op.bytesize = bbsize * sizeof(kopl_t);
+		((kBasicBlockVar*)bb)->op.bytesize = bbsize * sizeof(kopl_t);
 	}
 	return BBSIZE(bb); /*bbsize*/;
 }
@@ -289,9 +289,9 @@ static size_t BasicBlock_size(KonohaContext *kctx, kBasicBlock *bb, size_t c)
 	BasicBlock_setVisited(bb, 1);
 	if(bb->nextNC != NULL) {
 		if(BasicBlock_isVisited(bb) || BasicBlock_opcode(bb->nextNC) == OPCODE_RET) {
-			struct _kBasicBlock *bb2 = (struct _kBasicBlock*)new_BasicBlockLABEL(kctx);
+			kBasicBlockVar *bb2 = (kBasicBlockVar*)new_BasicBlockLABEL(kctx);
 			bb2->jumpNC = bb->nextNC;
-			((struct _kBasicBlock*)bb)->WnextNC = bb2;
+			((kBasicBlockVar*)bb)->WnextNC = bb2;
 		}
 	}
 	if(bb->jumpNC != NULL && bb->nextNC != NULL) {
@@ -301,7 +301,7 @@ static size_t BasicBlock_size(KonohaContext *kctx, kBasicBlock *bb, size_t c)
 	}
 	if(bb->jumpNC != NULL) {
 		DBG_ASSERT(bb->nextNC == NULL);
-		kBasicBlock_add((struct _kBasicBlock*)bb, JMP);
+		kBasicBlock_add((kBasicBlockVar*)bb, JMP);
 		c = BasicBlock_peephole(kctx, bb) + c;
 		bb = bb->jumpNC;
 		goto L_TAIL;
@@ -311,7 +311,7 @@ static size_t BasicBlock_size(KonohaContext *kctx, kBasicBlock *bb, size_t c)
 	goto L_TAIL;
 }
 
-static kopl_t* BasicBlock_copy(KonohaContext *kctx, kopl_t *dst, struct _kBasicBlock *bb, struct _kBasicBlock **prev)
+static kopl_t* BasicBlock_copy(KonohaContext *kctx, kopl_t *dst, kBasicBlockVar *bb, kBasicBlockVar **prev)
 {
 	BasicBlock_setVisited(bb, 0);
 	DBG_ASSERT(!BasicBlock_isVisited(bb));
@@ -347,12 +347,12 @@ static kopl_t* BasicBlock_copy(KonohaContext *kctx, kopl_t *dst, struct _kBasicB
 	return dst;
 }
 
-static void BasicBlock_setjump(struct _kBasicBlock *bb)
+static void BasicBlock_setjump(kBasicBlockVar *bb)
 {
 	while(bb != NULL) {
 		BasicBlock_setVisited(bb, 1);
 		if(bb->jumpNC != NULL) {
-			struct _kBasicBlock *bbJ = bb->WjumpNC;
+			kBasicBlockVar *bbJ = bb->WjumpNC;
 			klr_JMP_t *j = (klr_JMP_t*)bb->opjmp;
 			j->jumppc = bbJ->code;
 			bb->jumpNC = NULL;
@@ -368,9 +368,9 @@ static void BasicBlock_setjump(struct _kBasicBlock *bb)
 static kKonohaCode* new_KonohaCode(KonohaContext *kctx, kBasicBlock *bb, kBasicBlock *bbRET)
 {
 	struct _kKonohaCode *kcode = new_W(KonohaCode, NULL);
-	struct _kBasicBlock *prev[1] = {};
-	W(kBasicBlock, bb);
-	W(kBasicBlock, bbRET);
+	kBasicBlockVar *prev[1] = {};
+	kBasicBlockVar *Wbb = (kBasicBlockVar*)bb;
+	kBasicBlockVar *WbbRET = (kBasicBlockVar*)bbRET;
 	kcode->fileid = ctxcode->uline; //TODO
 	kcode->codesize = BasicBlock_size(kctx, bb, 0) * sizeof(kopl_t);
 	kcode->code = (kopl_t*)KCALLOC(kcode->codesize, 1);
@@ -382,7 +382,6 @@ static kKonohaCode* new_KonohaCode(KonohaContext *kctx, kBasicBlock *bb, kBasicB
 		BasicBlock_copy(kctx, op, WbbRET, prev);
 		BasicBlock_setjump(Wbb);
 	}
-	WASSERT(bb); WASSERT(bbRET);
 	return kcode;
 }
 
@@ -457,20 +456,19 @@ static void Method_threadCode(KonohaContext *kctx, kMethod *mtd, kKonohaCode *kc
 
 static void BUILD_compile(KonohaContext *kctx, kMethod *mtd, kBasicBlock *bb, kBasicBlock *bbRET)
 {
-	W(kBasicBlock, bb);
+	kBasicBlockVar *Wbb = (kBasicBlockVar*)bb;
 	BasicBlock_strip0(kctx, Wbb);
 	BasicBlock_strip1(kctx, Wbb);
 	kKonohaCode *kcode = new_KonohaCode(kctx, bb, bbRET);
 	Method_threadCode(kctx, mtd, kcode);
 	kArray_clear(ctxcode->insts, 0);
-	WASSERT(bb);
 }
 
 static void ASM_LABEL(KonohaContext *kctx, kBasicBlock *label)
 {
-	W(kBasicBlock, label);
+	kBasicBlockVar *Wlabel = (kBasicBlockVar*)label;
 	if(label != NULL) {
-		struct _kBasicBlock *bb = ctxcode->WcurbbNC;
+		kBasicBlockVar *bb = ctxcode->WcurbbNC;
 		if(bb != NULL) {
 			bb->nextNC = Wlabel;
 			bb->jumpNC = NULL;
@@ -478,26 +476,24 @@ static void ASM_LABEL(KonohaContext *kctx, kBasicBlock *label)
 		}
 		ctxcode->WcurbbNC = Wlabel;
 	}
-	WASSERT(label);
 }
 
 static void ASM_JMP(KonohaContext *kctx, kBasicBlock *label)
 {
-	struct _kBasicBlock *bb = ctxcode->WcurbbNC;
+	kBasicBlockVar *bb = ctxcode->WcurbbNC;
 	if(bb != NULL) {
-		W(kBasicBlock, label);
+		kBasicBlockVar *Wlabel = (kBasicBlockVar*)label;
 		bb->nextNC = NULL;
 		bb->jumpNC = label;
 		Wlabel->incoming += 1;
-		WASSERT(label);
 	}
 	ctxcode->curbbNC = NULL;
 }
 
 static kBasicBlock* ASM_JMPF(KonohaContext *kctx, int flocal, kBasicBlock *lbJUMP)
 {
-	struct _kBasicBlock *bb = ctxcode->WcurbbNC;
-	struct _kBasicBlock *lbNEXT = new_BasicBlockLABEL(kctx);
+	kBasicBlockVar *bb = ctxcode->WcurbbNC;
+	kBasicBlockVar *lbNEXT = new_BasicBlockLABEL(kctx);
 	klr_JMPF_t op = {TADDR, OPCODE_JMPF, ASMLINE, NULL, NC_(flocal)};
 	if(BUILD_asmJMPF(kctx, &op)) {
 		bb->jumpNC = lbNEXT;
@@ -509,9 +505,8 @@ static kBasicBlock* ASM_JMPF(KonohaContext *kctx, int flocal, kBasicBlock *lbJUM
 	}
 	lbNEXT->incoming += 1;
 	ctxcode->WcurbbNC = lbNEXT;
-	W(kBasicBlock, lbJUMP);
+	kBasicBlockVar *WlbJUMP = (kBasicBlockVar*)lbJUMP;
 	WlbJUMP->incoming += 1;
-	WASSERT(lbJUMP);
 	return lbJUMP;
 }
 
@@ -924,7 +919,7 @@ static void Method_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 
 static void BasicBlock_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct _kBasicBlock *bb = (struct _kBasicBlock*)o;
+	kBasicBlockVar *bb = (kBasicBlockVar*)o;
 	bb->op.bytemax = 0;
 	bb->op.bytesize = 0;
 	bb->code = NULL;
@@ -938,7 +933,7 @@ static void BasicBlock_init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void BasicBlock_free(KonohaContext *kctx, kObject *o)
 {
-	struct _kBasicBlock *bb = (struct _kBasicBlock*)o;
+	kBasicBlockVar *bb = (kBasicBlockVar*)o;
 	KARRAY_FREE(&bb->op);
 }
 
@@ -1066,8 +1061,8 @@ void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	kmodcode_setup(kctx, &base->h, 0/*lazy*/);
 	{
 		INIT_GCSTACK();
-		struct _kBasicBlock* ia = (struct _kBasicBlock*)new_(BasicBlock, 0);
-		struct _kBasicBlock* ib = (struct _kBasicBlock*)new_(BasicBlock, 0);
+		kBasicBlockVar* ia = (kBasicBlockVar*)new_(BasicBlock, 0);
+		kBasicBlockVar* ib = (kBasicBlockVar*)new_(BasicBlock, 0);
 		PUSH_GCSTACK(ia);
 		PUSH_GCSTACK(ib);
 		kBasicBlock_add(ia, THCODE, _THCODE);

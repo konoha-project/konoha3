@@ -3,7 +3,7 @@
 #define CLASSICVM_H_
 
 static void EXPR_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espidx);
-static struct _kBasicBlock* new_BasicBlockLABEL(KonohaContext *kctx);
+static kBasicBlockVar* new_BasicBlockLABEL(KonohaContext *kctx);
 
 static void BUILD_asm(KonohaContext *kctx, kopl_t *op, size_t opsize);
 #define MN_isNotNull MN_("isNotNull")
@@ -38,7 +38,7 @@ static kbool_t CLASSICVM_BUILD_asmJMPF(KonohaContext *kctx, kBasicBlock *bb, klr
 			//DBG_P("REWRITE JMPF index %d => %d", op->a, opN->a);
 			op->a = opN->a;
 			*swap = (*swap == 0) ? 1 : 0;
-			((struct _kBasicBlock *)bb)->op.bytesize -= sizeof(kopl_t);
+			((kBasicBlockVar *)bb)->op.bytesize -= sizeof(kopl_t);
 			continue;
 		}
 		if(OPCODE_iEQ <= opP->opcode && opP->opcode <= OPCODE_iGTE) {

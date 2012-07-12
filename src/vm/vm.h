@@ -32,9 +32,13 @@
 extern "C" {
 #endif
 
+typedef const struct kBasicBlockVar     kBasicBlock;
+typedef struct kBasicBlockVar           kBasicBlockVar;
+
+
 #define K_USING_THCODE_
 
-#define ctxcode    ((ctxcode_t*)kctx->modlocal[MOD_code])
+#define ctxcode          ((ctxcode_t*)kctx->modlocal[MOD_code])
 #define kmodcode         ((kmodcode_t*)kctx->modshare[MOD_code])
 #define CT_BasicBlock    kmodcode->cBasicBlock
 #define CT_KonohaCode    kmodcode->cKonohaCode
@@ -55,14 +59,14 @@ typedef struct {
 } kmodcode_t;
 
 typedef struct {
-	kmodlocal_t h;
-	kfileline_t uline;
-	kArray *insts;
-	const struct _kBasicBlock *lbEND;  // ON GCSTACK
-	kArray *constPools;
+	kmodlocal_t    h;
+	kfileline_t    uline;
+	kArray        *insts;
+	kBasicBlock   *lbEND;  // ON GCSTACK
+	kArray        *constPools;
 	union {
-		const struct _kBasicBlock *curbbNC;
-		struct _kBasicBlock *WcurbbNC;
+		kBasicBlock     *curbbNC;
+		kBasicBlockVar *WcurbbNC;
 	};
 } ctxcode_t;
 
@@ -126,7 +130,6 @@ typedef struct kopl_t {
 #define K_PCIDX2     (-3)
 #define K_MTDIDX2    (-1)
 
-
 /* ------------------------------------------------------------------------ */
 //## class BasicBlock Object;
 //## flag BasicBlock Visited  1 - is set  *   *;
@@ -135,19 +138,17 @@ typedef struct kopl_t {
 #define BasicBlock_isVisited(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
 #define BasicBlock_setVisited(o,B)   TFLAG_set(uintptr_t,((kObjectVar*)o)->h.magicflag,kObject_Local1,B)
 
-typedef const struct _kBasicBlock kBasicBlock;
-
-struct _kBasicBlock {
+struct kBasicBlockVar {
 	KonohaObjectHeader h;
 	kushort_t id;     kushort_t incoming;
 	KUtilsGrowingArray op;
 	union {
-		const struct _kBasicBlock *nextNC;
-		struct _kBasicBlock *WnextNC;
+		kBasicBlock     *nextNC;
+		kBasicBlockVar *WnextNC;
 	};
 	union {
-		const struct _kBasicBlock *jumpNC;
-		struct _kBasicBlock *WjumpNC;
+		kBasicBlock     *jumpNC;
+		kBasicBlockVar *WjumpNC;
 	};
 	kopl_t *code;
 	kopl_t *opjmp;
