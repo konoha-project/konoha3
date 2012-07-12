@@ -32,9 +32,7 @@
 extern "C" {
 #endif
 
-typedef const struct kBasicBlockVar     kBasicBlock;
-typedef struct kBasicBlockVar           kBasicBlockVar;
-
+typedef struct kBasicBlockVar     kBasicBlock;
 
 #define K_USING_THCODE_
 
@@ -50,24 +48,21 @@ typedef struct kBasicBlockVar           kBasicBlockVar;
 #define CODE_NCALL   kmodcode->PRECOMPILED_NCALL
 
 typedef struct {
-	kmodshare_t h;
-	KonohaClass *cBasicBlock;
-	KonohaClass *cKonohaCode;
-	const struct _kKonohaCode *codeNull;
-	struct kopl_t  *PRECOMPILED_ENTER;
-	struct kopl_t  *PRECOMPILED_NCALL;
+	kmodshare_t     h;
+	KonohaClass    *cBasicBlock;
+	KonohaClass    *cKonohaCode;
+	const struct   _kKonohaCode *codeNull;
+	struct VirtualMachineInstruction  *PRECOMPILED_ENTER;
+	struct VirtualMachineInstruction  *PRECOMPILED_NCALL;
 } kmodcode_t;
 
 typedef struct {
-	kmodlocal_t    h;
-	kfileline_t    uline;
-	kArray        *insts;
-	kBasicBlock   *lbEND;  // ON GCSTACK
-	kArray        *constPools;
-	union {
-		kBasicBlock     *curbbNC;
-		kBasicBlockVar *WcurbbNC;
-	};
+	kmodlocal_t      h;
+	kfileline_t      uline;
+	kArray          *codeList;
+	kBasicBlock     *lbEND;  // ON GCSTACK
+	kArray          *constPools;
+	kBasicBlock     *currentWorkingBlock;
 } ctxcode_t;
 
 /* ------------------------------------------------------------------------ */
@@ -84,7 +79,7 @@ typedef struct ksfx_t {
 } ksfx_t;
 
 struct klr_LDMTD_t;
-typedef void (*klr_Fth)(KonohaContext *kctx, struct kopl_t *, void**);
+typedef void (*klr_Fth)(KonohaContext *kctx, struct VirtualMachineInstruction *, void**);
 typedef void (*klr_Floadmtd)(KonohaContext *kctx, KonohaStack *, struct klr_LDMTD_t *);
 typedef kbool_t (*Fcallcc)(KonohaContext *kctx, KonohaStack *, int, int, void *);
 
@@ -107,7 +102,7 @@ typedef struct {
 
 #endif/*K_USING_THCODE_*/
 
-typedef struct kopl_t {
+typedef struct VirtualMachineInstruction {
 	KCODE_HEAD;
 	union {
 		intptr_t data[5];
@@ -116,7 +111,7 @@ typedef struct kopl_t {
 		KonohaClass *ct[5];
 		char *u[5];
 	};
-} kopl_t;
+} VirtualMachineInstruction;
 
 #define K_CALLDELTA   4
 #define K_RTNIDX    (-4)
@@ -141,17 +136,11 @@ typedef struct kopl_t {
 struct kBasicBlockVar {
 	KonohaObjectHeader h;
 	kushort_t id;     kushort_t incoming;
-	KUtilsGrowingArray op;
-	union {
-		kBasicBlock     *nextNC;
-		kBasicBlockVar *WnextNC;
-	};
-	union {
-		kBasicBlock     *jumpNC;
-		kBasicBlockVar *WjumpNC;
-	};
-	kopl_t *code;
-	kopl_t *opjmp;
+	KUtilsGrowingArray codeTable;
+	kBasicBlock        *nextBlock;
+	kBasicBlock        *branchBlock;
+	VirtualMachineInstruction *code;
+	VirtualMachineInstruction *opjmp;
 };
 
 /* ------------------------------------------------------------------------ */
@@ -161,7 +150,7 @@ struct kBasicBlockVar {
 typedef const struct _kKonohaCode kKonohaCode;
 struct _kKonohaCode {
 	KonohaObjectHeader h;
-	kopl_t*   code;
+	VirtualMachineInstruction*   code;
 	size_t    codesize;
 	kString  *source;
 	kfileline_t   fileid;
@@ -184,7 +173,7 @@ struct _kKonohaCode {
 
 #define OPEXEC_ENTER() {\
 		(void)op;\
-		kopl_t *vpc = PC_NEXT(pc);\
+		VirtualMachineInstruction *vpc = PC_NEXT(pc);\
 		pc = (rbp[K_MTDIDX2].mtdNC)->pc_start;\
 		rbp[K_SHIFTIDX2].shift = 0;\
 		rbp[K_PCIDX2].pc = vpc;\
@@ -265,7 +254,7 @@ struct _kKonohaCode {
 #define OPEXEC_RET() { \
 		(void)op;\
 		intptr_t vshift = rbp[K_SHIFTIDX2].shift;\
-		kopl_t *vpc = rbp[K_PCIDX2].pc;\
+		VirtualMachineInstruction *vpc = rbp[K_PCIDX2].pc;\
 		rbp[K_MTDIDX2].mtdNC = NULL;\
 		rbp = rshift(rbp, -vshift); \
 		pc = vpc; \
@@ -561,7 +550,7 @@ struct _kKonohaCode {
 	} \
 
 #define OPEXEC_VEXEC() {\
-		kopl_t *vpc = PC_NEXT(pc);\
+		VirtualMachineInstruction *vpc = PC_NEXT(pc);\
 		pc = (rbp[K_MTDIDX2].mtdNC)->pc_start;\
 		rbp[K_SHIFTIDX2].shift = 0;\
 		rbp[K_PCIDX2].pc = vpc;\

@@ -151,13 +151,13 @@ typedef struct klr_BNOT_t {
 #define OPCODE_JMP ((kopcode_t)17)
 typedef struct klr_JMP_t {
 	KCODE_HEAD;
-	kopl_t  *jumppc;
+	VirtualMachineInstruction  *jumppc;
 } klr_JMP_t;
 
 #define OPCODE_JMPF ((kopcode_t)18)
 typedef struct klr_JMPF_t {
 	KCODE_HEAD;
-	kopl_t  *jumppc;
+	VirtualMachineInstruction  *jumppc;
 	kreg_t a;
 } klr_JMPF_t;
 
@@ -247,28 +247,28 @@ static const kOPDATA_t OPDATA[] = {
 
 static void opcode_check(void)
 {
-	assert(sizeof(klr_NOP_t) <= sizeof(kopl_t));
-	assert(sizeof(klr_THCODE_t) <= sizeof(kopl_t));
-	assert(sizeof(klr_ENTER_t) <= sizeof(kopl_t));
-	assert(sizeof(klr_EXIT_t) <= sizeof(kopl_t));
-	assert(sizeof(klr_NSET_t) <= sizeof(kopl_t));
-	assert(sizeof(klr_NMOV_t) <= sizeof(kopl_t));
-	assert(sizeof(klr_NMOVx_t) <= sizeof(kopl_t));
-	assert(sizeof(klr_XNMOV_t) <= sizeof(kopl_t));
-	assert(sizeof(klr_NEW_t) <= sizeof(kopl_t));
-	assert(sizeof(klr_NULL_t) <= sizeof(kopl_t));
-	assert(sizeof(klr_BOX_t) <= sizeof(kopl_t));
-	assert(sizeof(klr_UNBOX_t) <= sizeof(kopl_t));
-	assert(sizeof(klr_CALL_t) <= sizeof(kopl_t));
-	assert(sizeof(klr_SCALL_t) <= sizeof(kopl_t));
-	assert(sizeof(klr_RET_t) <= sizeof(kopl_t));
-	assert(sizeof(klr_NCALL_t) <= sizeof(kopl_t));
-	assert(sizeof(klr_BNOT_t) <= sizeof(kopl_t));
-	assert(sizeof(klr_JMP_t) <= sizeof(kopl_t));
-	assert(sizeof(klr_JMPF_t) <= sizeof(kopl_t));
-	assert(sizeof(klr_SAFEPOINT_t) <= sizeof(kopl_t));
-	assert(sizeof(klr_ERROR_t) <= sizeof(kopl_t));
-	assert(sizeof(klr_VCALL_t) <= sizeof(kopl_t));
+	assert(sizeof(klr_NOP_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(klr_THCODE_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(klr_ENTER_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(klr_EXIT_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(klr_NSET_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(klr_NMOV_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(klr_NMOVx_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(klr_XNMOV_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(klr_NEW_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(klr_NULL_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(klr_BOX_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(klr_UNBOX_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(klr_CALL_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(klr_SCALL_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(klr_RET_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(klr_NCALL_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(klr_BNOT_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(klr_JMP_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(klr_JMPF_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(klr_SAFEPOINT_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(klr_ERROR_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(klr_VCALL_t) <= sizeof(VirtualMachineInstruction));
 }
 
 static const char *T_opcode(kopcode_t opcode)
@@ -329,7 +329,7 @@ static kbool_t kopcode_hasjump(kopcode_t opcode)
 #define GOTO_PC(pc)         GOTO_NEXT()
 #endif/*K_USING_THCODE_*/
 
-static kopl_t* VirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, kopl_t *pc)
+static VirtualMachineInstruction* VirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, VirtualMachineInstruction *pc)
 {
 #ifdef K_USING_THCODE_
 	static void *OPJUMP[] = {

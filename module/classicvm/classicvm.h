@@ -5,7 +5,7 @@
 static void EXPR_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espidx);
 static kBasicBlockVar* new_BasicBlockLABEL(KonohaContext *kctx);
 
-static void BUILD_asm(KonohaContext *kctx, kopl_t *op, size_t opsize);
+static void BUILD_asm(KonohaContext *kctx, VirtualMachineInstruction *op, size_t opsize);
 #define MN_isNotNull MN_("isNotNull")
 #define MN_isNull    MN_("isNull")
 #define MN_get    MN_("get")
@@ -32,13 +32,13 @@ static void BUILD_asm(KonohaContext *kctx, kopl_t *op, size_t opsize);
 static kbool_t CLASSICVM_BUILD_asmJMPF(KonohaContext *kctx, kBasicBlock *bb, klr_JMPF_t *op, int *swap)
 {
 	while(bb->op.bytesize > 0) {
-		kopl_t *opP = BBOP(bb) + (BBSIZE(bb) - 1);
+		VirtualMachineInstruction *opP = BBOP(bb) + (BBSIZE(bb) - 1);
 		if(opP->opcode == OPCODE_BNOT) {
 			klr_BNOT_t *opN = (klr_BNOT_t*)opP;
 			//DBG_P("REWRITE JMPF index %d => %d", op->a, opN->a);
 			op->a = opN->a;
 			*swap = (*swap == 0) ? 1 : 0;
-			((kBasicBlockVar *)bb)->op.bytesize -= sizeof(kopl_t);
+			((kBasicBlockVar *)bb)->op.bytesize -= sizeof(VirtualMachineInstruction);
 			continue;
 		}
 		if(OPCODE_iEQ <= opP->opcode && opP->opcode <= OPCODE_iGTE) {
@@ -92,8 +92,8 @@ static void CLASSICVM_BasicBlock_peephole(KonohaContext *kctx, kBasicBlock *bb)
 {
 	size_t i;
 	for(i = 1; i < BBSIZE(bb); i++) {
-		kopl_t *opP = BBOP(bb) + (i - 1);
-		kopl_t *op  = BBOP(bb) + (i);
+		VirtualMachineInstruction *opP = BBOP(bb) + (i - 1);
+		VirtualMachineInstruction *op  = BBOP(bb) + (i);
 		if((op->opcode == OPCODE_fCAST || op->opcode == OPCODE_iCAST) && opP->opcode == OPCODE_NMOV) {
 			klr_fCAST_t *opCAST = (klr_fCAST_t*)op;
 			klr_NMOV_t *opNMOV = (klr_NMOV_t*)opP;
@@ -214,7 +214,7 @@ static void CLASSICVM_BasicBlock_peephole(KonohaContext *kctx, kBasicBlock *bb)
 static void ASM_CHKIDX(KonohaContext *kctx, int aidx, int nidx)
 {
 	long i;
-	kBasicBlock *bb = ctxcode->curbbNC;
+	kBasicBlock *bb = ctxcode->currentWorkingBlock;
 	for(i = (long)BBSIZE(bb) - 1; i >= 0; i--) {
 		klr_CHKIDX_t *op = (klr_CHKIDX_t*)(BBOP(bb) + i);
 		kopcode_t opcode = op->opcode;
@@ -228,7 +228,7 @@ static void ASM_CHKIDX(KonohaContext *kctx, int aidx, int nidx)
 
 static void ASM_CHKIDXC(KonohaContext *kctx, int aidx, int n)
 {
-	kBasicBlock *bb = ctxcode->curbbNC;
+	kBasicBlock *bb = ctxcode->currentWorkingBlock;
 	long i;
 	for(i = (long)BBSIZE(bb) - 1; i >= 0; i--) {
 		klr_CHKIDXC_t *op = (klr_CHKIDXC_t*)(BBOP(bb) + i);

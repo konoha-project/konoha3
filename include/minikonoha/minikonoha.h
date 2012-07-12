@@ -315,7 +315,7 @@ typedef struct KUtilsGrowingArray {
 		char            *bytebuf;
 		KonohaClass    **cts;
 		struct kvs_t    *kvs;
-		struct kopl_t   *opl;
+		struct VirtualMachineInstruction   *opl;
 		kObject        **objects;
 		kObjectVar     **refhead;  // stack->ref
 	};
@@ -521,7 +521,7 @@ typedef struct kmodshare_t {
 		kfloat_t    fvalue; \
 		intptr_t    shift;  \
 		uintptr_t   uline; \
-		struct kopl_t  *pc; \
+		struct VirtualMachineInstruction  *pc; \
 		kMethod *mtdNC; \
 		const char     *fname \
 
@@ -1039,7 +1039,7 @@ struct kParamVar {
 #define KMETHODCC  int  /*CC_FASTCALL_*/
 typedef KMETHOD   (*MethodFunc)(KonohaContext *kctx, KonohaStack* _RIX);
 typedef KMETHOD   (*FmethodFastCall)(KonohaContext *kctx, KonohaStack * _KFASTCALL);
-typedef KMETHODCC (*FmethodCallCC)(KonohaContext *kctx, KonohaStack *, int, int, struct kopl_t*);
+typedef KMETHODCC (*FmethodCallCC)(KonohaContext *kctx, KonohaStack *, int, int, struct VirtualMachineInstruction*);
 #endif
 
 struct kMethodVar {
@@ -1049,7 +1049,7 @@ struct kMethodVar {
 		FmethodFastCall      fastcall_1;
 	};
 	union {/* body*/
-		struct kopl_t        *pc_start;
+		struct VirtualMachineInstruction        *pc_start;
 		FmethodCallCC         callcc_1;
 	};
 	uintptr_t         flag;
