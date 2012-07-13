@@ -98,8 +98,8 @@ struct TokenizerEnv {
 /******
 // ParseToken
 #define VAR_ParseToken(TK, STR, UL) \
-		kTokenVar *TK = (kTokenVar*)sfp[0].o;\
-		kString *STR = sfp[1].s;\
+		kTokenVar *TK = (kTokenVar*)sfp[0].toObject;\
+		kString *STR = sfp[1].toString;\
 		int UL = (int)sfp[2].ivalue;\
 		(void)TK; (void)STR; (void)UL;\
 
@@ -107,7 +107,7 @@ struct TokenizerEnv {
 
 // int PatternMatch(Stmt stmt, int nameid, Token[] toks, int s, int e)
 #define VAR_PatternMatch(STMT, NAME, TLS, S, E) \
-		kStmt *STMT = (kStmt*)sfp[1].o;\
+		kStmt *STMT = (kStmt*)sfp[1].toObject;\
 		ksymbol_t NAME = (ksymbol_t)sfp[2].ivalue;\
 		kArray *TLS = (kArray*)sfp[3].o;\
 		int S = (int)sfp[4].ivalue;\
@@ -117,7 +117,7 @@ struct TokenizerEnv {
 // Expr ParseExpr(Stmt stmt, Token[] tls, int s, int c, int e)
 #define VAR_ParseExpr(STMT, TLS, S, C, E) \
 		SugarSyntax *syn = (SugarSyntax*)sfp[0].ndata;\
-		kStmt *STMT = (kStmt*)sfp[1].o;\
+		kStmt *STMT = (kStmt*)sfp[1].toObject;\
 		kArray *TLS = (kArray*)sfp[2].o;\
 		int S = (int)sfp[3].ivalue;\
 		int C = (int)sfp[4].ivalue;\
@@ -126,13 +126,13 @@ struct TokenizerEnv {
 
 // boolean StmtTyCheck(Stmt stmt, Gamma gma)
 #define VAR_StmtTyCheck(STMT, GMA) \
-		kStmt *STMT = (kStmt*)sfp[1].o;\
+		kStmt *STMT = (kStmt*)sfp[1].toObject;\
 		kGamma *GMA = (kGamma*)sfp[2].o;\
 		(void)STMT; (void)GMA;\
 
 // Expr ExprTyCheck(Stmt stmt, Expr expr, Gamma gma, int typeid)
 #define VAR_ExprTyCheck(STMT, EXPR, GMA, TY) \
-		kStmt *STMT = (kStmt*)sfp[1].o;\
+		kStmt *STMT = (kStmt*)sfp[1].toObject;\
 		kExpr *EXPR = (kExpr*)sfp[2].o;\
 		kGamma *GMA = (kGamma*)sfp[3].o;\
 		ktype_t TY = (ktype_t)sfp[4].ivalue;\

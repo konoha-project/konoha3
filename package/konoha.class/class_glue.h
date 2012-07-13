@@ -31,23 +31,23 @@
 static KMETHOD Fmethod_FieldGetter(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	size_t delta = sfp[K_MTDIDX].mtdNC->delta;
-	RETURN_((sfp[0].o)->fieldObjectItems[delta]);
+	RETURN_((sfp[0].toObject)->fieldObjectItems[delta]);
 }
 static KMETHOD Fmethod_FieldGetterN(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	size_t delta = sfp[K_MTDIDX].mtdNC->delta;
-	RETURNd_((sfp[0].o)->fieldUnboxItems[delta]);
+	RETURNd_((sfp[0].toObject)->fieldUnboxItems[delta]);
 }
 static KMETHOD Fmethod_FieldSetter(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	size_t delta = sfp[K_MTDIDX].mtdNC->delta;
-	KSETv((sfp[0].Wo)->fieldObjectItems[delta], sfp[1].o);
-	RETURN_(sfp[1].o);
+	KSETv((sfp[0].toObjectVar)->fieldObjectItems[delta], sfp[1].toObject);
+	RETURN_(sfp[1].toObject);
 }
 static KMETHOD Fmethod_FieldSetterN(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	size_t delta = sfp[K_MTDIDX].mtdNC->delta;
-	(sfp[0].Wo)->fieldUnboxItems[delta] = sfp[1].ndata;
+	(sfp[0].toObjectVar)->fieldUnboxItems[delta] = sfp[1].ndata;
 	RETURNd_(sfp[1].ndata);
 }
 
@@ -111,7 +111,7 @@ static void KLIB2_setGetterSetter(KonohaContext *kctx, KonohaClass *ct)
 // int NameSpace.getCid(String name, int defval)
 static KMETHOD NameSpace_getCid(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	KonohaClass *ct = kNameSpace_getCT(sfp[0].ks, NULL/*fixme*/, S_text(sfp[1].s), S_size(sfp[1].s), (ktype_t)sfp[2].ivalue);
+	KonohaClass *ct = kNameSpace_getCT(sfp[0].toNameSpace, NULL/*fixme*/, S_text(sfp[1].toString), S_size(sfp[1].toString), (ktype_t)sfp[2].ivalue);
 	kint_t cid = ct != NULL ? ct->cid : sfp[2].ivalue;
 	RETURNi_(cid);
 }
@@ -156,7 +156,7 @@ static KMETHOD NameSpace_defineClass(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	if(!CT_isDefined(supct)) {
 		kreportf(CRIT_, sfp[K_RTNIDX].uline, "%s has undefined field(s)", TY_t(supcid));
 	}
-	KonohaClass *ct = defineClass(kctx, sfp[0].ks, sfp[1].ivalue, sfp[2].s, supct, sfp[4].ivalue, sfp[K_RTNIDX].uline);
+	KonohaClass *ct = defineClass(kctx, sfp[0].toNameSpace, sfp[1].ivalue, sfp[2].s, supct, sfp[4].ivalue, sfp[K_RTNIDX].uline);
 	RETURNi_(ct->cid);
 }
 
@@ -246,7 +246,7 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	USING_SUGAR;
 	VAR_ParseExpr(stmt, tls, s, c, e);
 	DBG_ASSERT(s == c);
-	kTokenVar *tkNEW = tls->toksVar[s];
+	kTokenVar *tkNEW = tls->tokenVarItems[s];
 	if(s + 2 < kArray_size(tls)) {
 		kToken *tk1 = tls->tokenItems[s+1];
 		kToken *tk2 = tls->tokenItems[s+2];

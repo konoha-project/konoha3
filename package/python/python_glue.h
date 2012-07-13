@@ -102,7 +102,7 @@ static KMETHOD Int_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static KMETHOD PyObject_toInt(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kPyObject *po = (kPyObject*)sfp[0].o;
+	kPyObject *po = (kPyObject*)sfp[0].toObject;
 	long v = PyInt_AsLong(po->self);
 	if(PyErr_Occurred()) {
 		v = 0;
@@ -117,7 +117,7 @@ static KMETHOD Boolean_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static KMETHOD PyObject_toBoolean(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kPyObject *po = (kPyObject*)sfp[0].o;
+	kPyObject *po = (kPyObject*)sfp[0].toObject;
 	RETURNb_(po->self == Py_True ? 1 : 0);
 }
 
@@ -128,7 +128,7 @@ static KMETHOD Float_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kPyObject *po = (kPyObject*)sfp[0].o;
+	kPyObject *po = (kPyObject*)sfp[0].toObject;
 	double v = PyFloat_AsDouble(po->self);
 	if(PyErr_Occurred()) {
 		v = 0;
@@ -144,13 +144,13 @@ static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //
 //static KMETHOD PyObject_toBytes(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
-//	kPyObject *po = (kPyObject*)sfp[0].o;
+//	kPyObject *po = (kPyObject*)sfp[0].toObject;
 //	KUtilsWriteBuffer wb;
 //	if(po->self == NULL) {
 //		// [TODO] throw Exception
 //	}
 //	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-//	O_ct(sfp[0].o)->p(kctx, sfp, 0, &wb, 0);
+//	O_ct(sfp[0].toObject)->p(kctx, sfp, 0, &wb, 0);
 //	struct _kBytes* ba = (struct _kBytes*)new_Bytes(kctx, Kwb_bytesize(&wb));
 //	ba->buf = KLIB Kwb_top(kctx, &wb, 1);
 //	KLIB Kwb_free(&wb);
@@ -164,7 +164,7 @@ static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //
 //static KMETHOD PyObject_toComplex(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
-//	//kPyObject *po = (kPyObject*)sfp[0].o;
+//	//kPyObject *po = (kPyObject*)sfp[0].toObject;
 //	//RETURNb_(po->self == Py_True ? 1 : 0);
 //}
 
@@ -175,12 +175,12 @@ static KMETHOD String_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kPyObject *po = (kPyObject*)sfp[0].o;
+	kPyObject *po = (kPyObject*)sfp[0].toObject;
 	KUtilsWriteBuffer wb;
 	// assert
 	DBG_ASSERT(po->self != NULL);
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	O_ct(sfp[0].o)->p(kctx, sfp, 0, &wb, 0);
+	O_ct(sfp[0].toObject)->p(kctx, sfp, 0, &wb, 0);
 	kString* s = new_kString(KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
 	KLIB Kwb_free(&wb);
 	RETURN_(s);
@@ -204,7 +204,7 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	//else {
 	//	KUtilsWriteBuffer wb;
 	//	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	//	O_ct(sfp[0].o)->p(kctx, sfp, 0, &wb, 0);
+	//	O_ct(sfp[0].toObject)->p(kctx, sfp, 0, &wb, 0);
 	//	kString* s = new_kString(KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
 	//	KLIB Kwb_free(&wb);
 	//	RETURN_(s);
@@ -253,7 +253,7 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 //static KMETHOD PyObject_toList(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
-//	//kPyObject *po = (kPyObject*)sfp[0].o;
+//	//kPyObject *po = (kPyObject*)sfp[0].toObject;
 //	//RETURNb_(po->self == Py_True ? 1 : 0);
 //}
 
@@ -382,7 +382,7 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## Boolean Python.eval(String script);
 static KMETHOD Python_eval(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	RETURNb_(PyRun_SimpleString(S_text(sfp[1].s)) == 0);
+	RETURNb_(PyRun_SimpleString(S_text(sfp[1].toString)) == 0);
 }
 
 #define DEFAULT_SIZE 16
@@ -440,7 +440,7 @@ static KMETHOD PyObject_import(KonohaContext *kctx, KonohaStack *sfp _RIX)
 		free(pathes);
 	}
 	PySys_SetObject("path", (PyObject*)ppath);
-	RETURN_PyObject(PyImport_ImportModule(S_text(sfp[1].s)));
+	RETURN_PyObject(PyImport_ImportModule(S_text(sfp[1].toString)));
 }
 
 //## PyObject PyObject.(PyObject o);
@@ -451,7 +451,7 @@ static KMETHOD PyObject_(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	// [TODO] Support class method.
 	//
 	int argc = kctx->esp - sfp - 2;   // believe me
-	kPyObject *pmod = (kPyObject*)sfp[0].o;
+	kPyObject *pmod = (kPyObject*)sfp[0].toObject;
 	PyObject  *pFunc = PyObject_GetAttrString(pmod->self, S_text(kctx->esp[-1].s));
 	PyObject  *pArgs = NULL, *pValue = NULL;
 	if(pFunc != NULL) {

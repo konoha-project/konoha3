@@ -115,7 +115,7 @@ static kTokenVar* TokenType_resolveGenerics(KonohaContext *kctx, kNameSpace *ns,
 static int appendKeyword(KonohaContext *kctx, kNameSpace *ns, kArray *tls, int s, int e, kArray *dst, kToken **tkERR)
 {
 	int next = s; // don't add
-	kTokenVar *tk = tls->toksVar[s];
+	kTokenVar *tk = tls->tokenVarItems[s];
 	if(tk->keyword == TK_SYMBOL) {
 		if(!Token_resolved(kctx, ns, tk)) {
 			const char *t = S_text(tk->text);
@@ -232,12 +232,12 @@ static int selectStmtLine(KonohaContext *kctx, kNameSpace *ns, int *indent, kArr
 	dumpTokenArray(kctx, 0, tls, s, e);
 	for(; i < e - 1; i++) {
 		kToken *tk = tls->tokenItems[i];
-		kTokenVar *tk1 = tls->toksVar[i+1];
+		kTokenVar *tk1 = tls->tokenVarItems[i+1];
 		int topch = kToken_topch(tk);
 		if(topch == '@' && (tk1->keyword == TK_SYMBOL)) {
 			tk1->keyword = ksymbolA(S_text(tk1->text), S_size(tk1->text), SYM_NEWID) | MN_Annotation;
 			kArray_add(tlsdst, tk1); i++;
-			tk1 = tls->toksVar[i+1];
+			tk1 = tls->tokenVarItems[i+1];
 			topch = kToken_topch(tk1);
 			if(i + 1 < e && topch == '(') {
 				i = makeTree(kctx, ns, AST_PARENTHESIS, tls, i+1, e, ')', tlsdst, tkERRRef);
@@ -535,7 +535,7 @@ static kExpr *ParseExprFunc(KonohaContext *kctx, SugarSyntax *syn, kFunc *fo, kS
 	lsfp[K_CALLDELTA+5].ivalue = e;
 	KCALL(lsfp, 0, fo->mtd, 5, K_NULLEXPR);
 	END_LOCAL();
-	DBG_ASSERT(IS_Expr(lsfp[0].o));
+	DBG_ASSERT(IS_Expr(lsfp[0].toObject));
 	return lsfp[0].expr;
 }
 
@@ -668,7 +668,7 @@ static KMETHOD ParseExpr_Term(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static KMETHOD ParseExpr_Op(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	VAR_ParseExpr(stmt, tls, s, c, e);
-	kTokenVar *tk = tls->toksVar[c];
+	kTokenVar *tk = tls->tokenVarItems[c];
 	kExpr *expr, *rexpr = Stmt_newExpr2(kctx, stmt, tls, c+1, e);
 	kmethodn_t mn = (s == c) ? syn->op1 : syn->op2;
 	if(mn != SYM_NONAME && syn->ExprTyCheck == kmodsugar->UndefinedExprTyCheck) {

@@ -258,7 +258,7 @@ typedef kushort_t       kparamid_t;
 #define CLASS_newid        ((ktype_t)-1)
 #define TY_unknown         ((ktype_t)-2)
 
-#define CT_(t)              (kctx->share->classTable.cts[t])
+#define CT_(t)              (kctx->share->classTable.classItems[t])
 #define CT_cparam(CT)       (kctx->share->paramdomList->paramItems[(CT)->paramdom])
 #define TY_isUnbox(t)       FLAG_is(CT_(t)->cflag, kClass_UnboxType)
 #define CT_isUnbox(C)       FLAG_is(C->cflag, kClass_UnboxType)
@@ -381,10 +381,10 @@ typedef struct KUtilsGrowingArray {
 	size_t bytesize;
 	union {
 		char              *bytebuf;
-		KonohaClass      **cts;
-		KUtilsKeyValue    *kvs;
-		struct VirtualMachineInstruction   *opl;
-		kObject        **objects;
+		KonohaClass      **classItems;
+		KUtilsKeyValue    *keyvalueItems;
+		struct VirtualMachineInstruction   *codeItems;
+		kObject        **objectItems;
 		kObjectVar     **refhead;  // stack->ref
 	};
 	size_t bytemax;
@@ -535,16 +535,19 @@ typedef struct kmodshare_t {
 		const char     *fname \
 
 #define K_FRAME_MEMBER \
-		kObject *o;  \
-		kObjectVar       *Wo; \
+		kObject    *o;\
+		kObject    *toObject;\
+		kObjectVar *toObjectVar; \
 		kInt    *i; \
 		kString *s; \
+		kString *toString;\
 		kArray  *a; \
-		kMethod            *mtd;\
+		kArray  *toArray;\
+		kMethod       *mtd;\
 		kFunc         *fo; \
 		const struct _kFloat  *f; \
 		const struct _kBytes  *ba; \
-		kNameSpace             *ks;\
+		kNameSpace  *toNameSpace;\
 		kToken             *tk;\
 		kStmt              *stmt;\
 		kExpr              *expr;\
@@ -627,7 +630,7 @@ struct KonohaClassVar {
 	ktype_t  p0;            kparamid_t paramdom;
 	kmagicflag_t magicflag;
 	size_t     cstruct_size;
-	KonohaClassField  *fieldItems;
+	KonohaClassField         *fieldItems;
 	kushort_t  fsize;         kushort_t fallocsize;
 	const char               *DBG_NAME;
 	ksymbol_t   nameid;       kushort_t   optvalue;
@@ -840,7 +843,6 @@ struct kBooleanVar /* extends kNumber */ {
 struct kIntVar /* extends kNumber */ {
 	KonohaObjectHeader h;
 	ABSTRACT_NUMBER;
-	void *bignum;  /* reserved */
 };
 
 /* ------------------------------------------------------------------------ */
@@ -862,6 +864,7 @@ struct kIntVar /* extends kNumber */ {
  * 010xxxxxxxxxxxxx InlinedString
  * 100xxxxxxxxxxxxx RopeString
  */
+
 #define S_FLAG_MASK_BASE (13)
 #define S_FLAG_LINER     ((1UL << (0)))
 #define S_FLAG_NOFREE    ((1UL << (1)))
@@ -934,11 +937,11 @@ struct kArrayVar {
 		kMethod        **methodItems;
 		kFunc          **funcItems;
 		kToken         **tokenItems;
-		kTokenVar      **toksVar;
+		kTokenVar      **tokenVarItems;
 		kExpr          **exprItems;
-		kExprVar       **exprItemsVar;
+		kExprVar       **exprVarItems;
 		kStmt          **stmtItems;
-		kStmtVar       **stmtItemsVar;
+		kStmtVar       **stmtVarItems;
 	};
 	size_t bytemax;
 };

@@ -277,8 +277,8 @@ static void Array_add(KonohaContext *kctx, kArray *o, kObject *value)
 	size_t asize = kArray_size(o);
 	struct _kAbstractArray *a = (struct _kAbstractArray*)o;
 	Array_ensureMinimumSize(kctx, a, asize+1);
-	DBG_ASSERT(a->a.objects[asize] == NULL);
-	KINITv(a->a.objects[asize], value);
+	DBG_ASSERT(a->a.objectItems[asize] == NULL);
+	KINITv(a->a.objectItems[asize], value);
 	a->a.bytesize = (asize+1) * sizeof(void*);
 }
 
@@ -291,8 +291,8 @@ static void Array_insert(KonohaContext *kctx, kArray *o, size_t n, kObject *v)
 	}
 	else {
 		Array_ensureMinimumSize(kctx, a, asize+1);
-		memmove(a->a.objects+(n+1), a->a.objects+n, sizeof(kObject*) * (asize - n));
-		KINITv(a->a.objects[n], v);
+		memmove(a->a.objectItems+(n+1), a->a.objectItems+n, sizeof(kObject*) * (asize - n));
+		KINITv(a->a.objectItems[n], v);
 		a->a.bytesize = (asize+1) * sizeof(void*);
 	}
 }
@@ -316,7 +316,7 @@ static void Array_clear(KonohaContext *kctx, kArray *o, size_t n)
 	struct _kAbstractArray *a = (struct _kAbstractArray*)o;
 	DBG_ASSERT(asize >= n);
 	if(asize > n) {
-		bzero(a->a.objects + n, sizeof(void*) * (asize - n));  // RCGC
+		bzero(a->a.objectItems + n, sizeof(void*) * (asize - n));  // RCGC
 		a->a.bytesize = (n) * sizeof(void*);
 	}
 }
@@ -507,10 +507,10 @@ static KonohaClass* Kclass(KonohaContext *kctx, ktype_t cid, kfileline_t pline)
 {
 	SharedRuntime *share = kctx->share;
 	if(cid < (share->classTable.bytesize/sizeof(KonohaClassVar*))) {
-		return share->classTable.cts[cid];
+		return share->classTable.classItems[cid];
 	}
 	kreportf(CRIT_, pline, "invalid cid=%d", (int)cid);
-	return share->classTable.cts[0];
+	return share->classTable.classItems[0];
 }
 
 static void DEFAULT_init(KonohaContext *kctx, kObject *o, void *conf)
@@ -583,7 +583,7 @@ static KonohaClassVar* new_CT(KonohaContext *kctx, KonohaClass *bct, KDEFINE_CLA
 	}
 	share->classTable.bytesize += sizeof(KonohaClassVar*);
 	KonohaClassVar *ct = (KonohaClassVar*)KCALLOC(sizeof(KonohaClass), 1);
-	share->classTable.cts[newid] = (KonohaClass*)ct;
+	share->classTable.classItems[newid] = (KonohaClass*)ct;
 	if(bct != NULL) {
 		DBG_ASSERT(s == NULL);
 		memcpy(ct, bct, offsetof(KonohaClass, methodList));
@@ -852,7 +852,7 @@ static void defineDefaultKeywordSymbol(KonohaContext *kctx)
 
 static void initStructData(KonohaContext *kctx)
 {
-	KonohaClass **ctt = (KonohaClass**)kctx->share->classTable.cts;
+	KonohaClass **ctt = (KonohaClass**)kctx->share->classTable.classItems;
 	size_t i;//, size = kctx->share->classTable.bytesize/sizeof(KonohaClassVar*);
 	for(i = 0; i <= CLASS_T0; i++) {
 		KonohaClassVar *ct = (KonohaClassVar *)ctt[i];
@@ -930,7 +930,7 @@ static void val_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p)
 static void kshare_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	SharedRuntime *share = ctx->share;
-	KonohaClass **cts = (KonohaClass**)kctx->share->classTable.cts;
+	KonohaClass **cts = (KonohaClass**)kctx->share->classTable.classItems;
 	size_t i, size = kctx->share->classTable.bytesize/sizeof(KonohaClassVar*);
 	for(i = 0; i < size; i++) {
 		KonohaClass *ct = cts[i];
@@ -961,7 +961,7 @@ static void kshare_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 
 static void CLASSTABLE_freeCT(KonohaContext *kctx)
 {
-	KonohaClassVar **cts = (KonohaClassVar**)kctx->share->classTable.cts;
+	KonohaClassVar **cts = (KonohaClassVar**)kctx->share->classTable.classItems;
 	size_t i, size = kctx->share->classTable.bytesize/sizeof(KonohaClassVar*);
 	for(i = 0; i < size; i++) {
 		if(cts[i]->fallocsize > 0) {

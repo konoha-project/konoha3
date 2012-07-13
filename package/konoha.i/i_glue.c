@@ -124,8 +124,8 @@ KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	INIT_GCSTACK();
 	kArray *list = kctx->stack->gcstack;
 	size_t start = kArray_size(list);
-	kNameSpace *ns = sfp[0].ks;
-	KonohaClass *ct = O_ct(sfp[1].o);
+	kNameSpace *ns = sfp[0].toNameSpace;
+	KonohaClass *ct = O_ct(sfp[1].toObject);
 	DBG_P("*** man %s", TY_t(ct->cid));
 	while(ns != NULL) {
 		copyMethodList(kctx, ct->cid, ns->methodList, list);

@@ -75,7 +75,7 @@ static void File_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBu
 //## @Native @Throwable FILE System.fopen(String path, String mode);
 static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kString *s = sfp[1].s;
+	kString *s = sfp[1].toString;
 	const char *mode = IS_NULL(sfp[2].s) ? "r" : S_text(sfp[2].s);
 	FILE *fp = fopen(S_text(s), mode);
 	if (fp == NULL) {
@@ -94,7 +94,7 @@ static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## @Native int File.read(Bytes buf, int offset, int len);
 static KMETHOD File_read(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kFILE *file = (kFILE*)sfp[0].o;
+	kFILE *file = (kFILE*)sfp[0].toObject;
 	FILE *fp = file->fp;
 	size_t size = 0;
 	if(fp != NULL) {
@@ -122,7 +122,7 @@ static KMETHOD File_read(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## @Native int File.write(Bytes buf, int offset, int len);
 static KMETHOD File_write(KonohaContext *kctx , KonohaStack *sfp _RIX)
 {
-	kFILE *file = (kFILE*)sfp[0].o;
+	kFILE *file = (kFILE*)sfp[0].toObject;
 	FILE *fp = file->fp;
 	size_t size = 0;
 	if(fp != NULL) {
@@ -146,7 +146,7 @@ static KMETHOD File_write(KonohaContext *kctx , KonohaStack *sfp _RIX)
 //## @Native void File.close();
 static KMETHOD File_close(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	struct _kFILE *file = (struct _kFILE*)sfp[0].o;
+	struct _kFILE *file = (struct _kFILE*)sfp[0].toObject;
 	FILE *fp = file->fp;
 	if(fp != NULL) {
 		int ret = fclose(fp);
@@ -164,7 +164,7 @@ static KMETHOD File_close(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## @Native int File.getC();
 static KMETHOD File_getC(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	FILE *fp = ((kFILE*)sfp[0].o)->fp;
+	FILE *fp = ((kFILE*)sfp[0].toObject)->fp;
 	int ch = EOF;
 	if (fp != NULL) {
 		ch = fgetc(fp);
@@ -181,7 +181,7 @@ static KMETHOD File_getC(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## @Native boolean File.putC(int ch);
 static KMETHOD File_putC(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	FILE *fp = ((kFILE*)sfp[0].o)->fp;
+	FILE *fp = ((kFILE*)sfp[0].toObject)->fp;
 	if (fp != NULL) {
 		int ch = fputc(sfp[1].ivalue, fp);
 		if (ch == EOF) {

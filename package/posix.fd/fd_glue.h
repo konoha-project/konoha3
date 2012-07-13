@@ -106,7 +106,7 @@ static KMETHOD System_chown(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## @Native int File.ioctl(int request, String[] args)
 //staic KMETHOD File_ioctl(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
-//	kFile *file = (kFile*)sfp[0].o;
+//	kFile *file = (kFile*)sfp[0].toObject;
 //	FILE *fp = file->fp;
 //	int request  = Int_to(int, sfp[1]);
 //	char *argp = String_to(char*, sfp[2]);
@@ -154,7 +154,7 @@ static KMETHOD System_sync(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static KMETHOD System_link(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kString *s1 = sfp[1].s;
+	kString *s1 = sfp[1].toString;
 	kString *s2 = sfp[2].s;
 	const char *oldpath = S_text(s1);
 	const char *newpath = S_text(s2);
@@ -172,7 +172,7 @@ static KMETHOD System_link(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static KMETHOD System_unlink(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kString *s = sfp[1].s;
+	kString *s = sfp[1].toString;
 	const char *pathname = S_text(s);
 	int ret = unlink(pathname);
 	if (ret == -1) {
@@ -187,7 +187,7 @@ static KMETHOD System_unlink(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static KMETHOD System_rename(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kString *s1 = sfp[1].s;
+	kString *s1 = sfp[1].toString;
 	kString *s2 = sfp[2].s;
 	const char *oldpath = S_text(s1);
 	const char *newpath = S_text(s2);
@@ -205,7 +205,7 @@ static KMETHOD System_rename(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static KMETHOD System_rmdir(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kString *s = sfp[1].s;
+	kString *s = sfp[1].toString;
 	const char *pathname = S_text(s);
 	int ret = rmdir(pathname);
 	if (ret == -1) {
@@ -220,7 +220,7 @@ static KMETHOD System_rmdir(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static KMETHOD System_symlink(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kString *s1 = sfp[1].s;
+	kString *s1 = sfp[1].toString;
 	kString *s2 = sfp[2].s;
 	const char *oldpath = S_text(s1);
 	const char *newpath = S_text(s2);
@@ -238,7 +238,7 @@ static KMETHOD System_symlink(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static KMETHOD System_readlink(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kString *s1 = sfp[1].s;
+	kString *s1 = sfp[1].toString;
 	kString *s2 = sfp[2].s;
 	const char *pathname = S_text(s1);
 	const char *buf = S_text(s2);
@@ -258,7 +258,7 @@ static KMETHOD System_readlink(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static KMETHOD System_lchown(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kString *s = sfp[1].s;
+	kString *s = sfp[1].toString;
 	const char *pathname = S_text(s);
 	uid_t owner = sfp[2].ivalue;
 	gid_t group = sfp[3].ivalue;
@@ -294,7 +294,7 @@ static KMETHOD System_fchown(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static KMETHOD System_access(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kString *s = sfp[1].s;
+	kString *s = sfp[1].toString;
 	const char *pathname = S_text(s);
 	int mode = sfp[2].ivalue;
 	int ret = access(pathname, mode);

@@ -41,7 +41,7 @@
 #define RIX_(rix)      rix
 
 #define BasicBlock_codesize(BB)  ((BB)->codeTable.bytesize / sizeof(VirtualMachineInstruction))
-#define BBOP(BB)     (BB)->codeTable.opl
+#define BBOP(BB)     (BB)->codeTable.codeItems
 #define GammaBuilderLabel(n)   (kBasicBlock*)(ctxcode->lstacks->objectItems[n])
 
 #define ASM(T, ...) do {\
@@ -106,7 +106,7 @@ static void BasicBlock_add(KonohaContext *kctx, kBasicBlock *bb, kushort_t line,
 	else if(bb->codeTable.bytesize == bb->codeTable.bytemax) {
 		KLIB Karray_expand(kctx, &(bb->codeTable), 4 * sizeof(VirtualMachineInstruction));
 	}
-	VirtualMachineInstruction *tailcode = bb->codeTable.opl + (bb->codeTable.bytesize/sizeof(VirtualMachineInstruction));
+	VirtualMachineInstruction *tailcode = bb->codeTable.codeItems + (bb->codeTable.bytesize/sizeof(VirtualMachineInstruction));
 	memcpy(tailcode, op, size == 0 ? sizeof(VirtualMachineInstruction) : size);
 	tailcode->line = line;
 	bb->codeTable.bytesize += sizeof(VirtualMachineInstruction);
@@ -138,7 +138,7 @@ static int BUILD_asmJMPF(KonohaContext *kctx, klr_JMPF_t *op)
 static inline kopcode_t BasicBlock_opcode(kBasicBlock *bb)
 {
 	if(bb->codeTable.bytesize == 0) return OPCODE_NOP;
-	return bb->codeTable.opl->opcode;
+	return bb->codeTable.codeItems->opcode;
 }
 
 static void BasicBlock_strip0(KonohaContext *kctx, kBasicBlock *bb)
@@ -210,7 +210,7 @@ static void BasicBlock_join(KonohaContext *kctx, kBasicBlock *bb, kBasicBlock *b
 	if(bb->codeTable.bytesize == 0) {
 		DBG_ASSERT(bb->codeTable.bytemax == 0);
 		bb->codeTable = bbN->codeTable;
-		bbN->codeTable.opl = NULL;
+		bbN->codeTable.codeItems = NULL;
 		bbN->codeTable.bytemax = 0;
 		bbN->codeTable.bytesize = 0;
 		return;
@@ -918,7 +918,7 @@ static void BasicBlock_init(KonohaContext *kctx, kObject *o, void *conf)
 	bb->incoming = 0;
 	bb->nextBlock  = NULL;
 	bb->branchBlock  = NULL;
-	bb->codeTable.opl = NULL;
+	bb->codeTable.codeItems = NULL;
 	bb->opjmp = NULL;
 }
 

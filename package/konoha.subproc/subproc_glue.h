@@ -624,11 +624,11 @@ static void killWait(int pid) {
 //## Subproc Subproc.new(String cmd, boolean closefds);
 static KMETHOD Subproc_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	if ( p != NULL ) {
 		initData(kctx, p);
-		p->command = (S_size(sfp[1].s) > 0) ? new_kString(S_text(sfp[1].s), S_size(sfp[1].s), 0)
+		p->command = (S_size(sfp[1].toString) > 0) ? new_kString(S_text(sfp[1].toString), S_size(sfp[1].toString), 0)
 											: KNULL(String);
 		p->closefds = sfp[2].bvalue;
 	}
@@ -638,7 +638,7 @@ static KMETHOD Subproc_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## boolean Subproc.bg();
 static KMETHOD Subproc_bg(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	int ret = -1;
 	if (PREEXEC(p)) {
@@ -654,7 +654,7 @@ static KMETHOD Subproc_bg(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## @Throwable int Subproc.fg();
 KMETHOD Subproc_fg(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	int ret = S_PREEXECUTION;
 	if ( PREEXEC(p) ) {
@@ -672,12 +672,12 @@ KMETHOD Subproc_fg(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## @Throwable String Subproc.exec(String data);
 KMETHOD Subproc_exec(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	kString *ret_s = KNULL(String);
 	if(PREEXEC(p)) {
 		p->timeoutKill = 0;
-		kString *command = (S_size(sfp[1].s) > 0) ? new_kString(S_text(sfp[1].s),S_size(sfp[1].s), 0) :
+		kString *command = (S_size(sfp[1].toString) > 0) ? new_kString(S_text(sfp[1].toString),S_size(sfp[1].toString), 0) :
 													 KNULL(String);
 		int pid = knh_popen(kctx, command, p, M_PIPE );
 		if(pid > 0 ) {
@@ -716,7 +716,7 @@ KMETHOD Subproc_exec(KonohaContext *kctx, KonohaStack *sfp _RIX)
 				clearFd(&p->e);
 			}else if (p->r.mode == M_FILE) {
 				char *msg = " will be ignored.";
-				char *cmd = (char*)S_text(sfp[1].s);
+				char *cmd = (char*)S_text(sfp[1].toString);
 				char mbuf[strlen(msg)+strlen(cmd)+1];
 				snprintf(mbuf, sizeof(mbuf), "'%s'%s", cmd, msg);
 			}
@@ -740,11 +740,11 @@ KMETHOD Subproc_exec(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kArray *ret_a = KNULL(Array);
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	if(ONEXEC(p)) {
-		if((p->w.mode == M_PIPE) && (S_size(sfp[1].s) > 0)) {
-			kString *s = sfp[1].s;
+		if((p->w.mode == M_PIPE) && (S_size(sfp[1].toString) > 0)) {
+			kString *s = sfp[1].toString;
 			// The measure against panic,
 			// if "Broken Pipe" is detected at the time of writing.
 #ifndef __APPLE__
@@ -823,7 +823,7 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## @Restricted boolean Subproc.enableShellmode(boolean isShellmode);
 KMETHOD Subproc_enableShellmode(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	int ret = PREEXEC(p);
 	if(ret) {
@@ -835,11 +835,11 @@ KMETHOD Subproc_enableShellmode(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## boolean Subproc.setEnv(Map env);
 //KMETHOD Subproc_setEnv(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
-//	kSubproc *sp = (kSubproc*)sfp[0].o;
+//	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 //	subprocData_t *p = sp->spd;
 //	int ret = PREEXEC(p);
 //	if ( ret ) {
-//		kDictMap *env = (kDictMap *)sfp[1].o;
+//		kDictMap *env = (kDictMap *)sfp[1].toObject;
 //		int i;
 //		size_t msize = env->spi->size(ctx, env->mapptr);
 //		if ( p->env != (kArray*)KNH_NULVAL(CLASS_Array) ) {
@@ -860,11 +860,11 @@ KMETHOD Subproc_enableShellmode(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## boolean Subproc.setCwd(String cwd);
 KMETHOD Subproc_setCwd(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	int ret = PREEXEC(p);
 	if(ret) {
-		p->cwd = new_kString(S_text(sfp[1].s), S_size(sfp[1].s), 0);
+		p->cwd = new_kString(S_text(sfp[1].toString), S_size(sfp[1].toString), 0);
 	}
 	RETURNb_( ret );
 }
@@ -872,7 +872,7 @@ KMETHOD Subproc_setCwd(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## boolean Subproc.setBufsize(int size);
 KMETHOD Subproc_setBufsize(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	int ret = PREEXEC(p);
 	if(ret) {
@@ -884,7 +884,7 @@ KMETHOD Subproc_setBufsize(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## boolean Subproc.setFileIN(File in);
 //KMETHOD Subproc_setFileIN(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
-//	kSubproc *sp = (kSubproc*)sfp[0].o;
+//	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 //	subprocData_t *p = sp->spd;
 //	int ret = PREEXEC(p);
 //	if(ret) {
@@ -899,7 +899,7 @@ KMETHOD Subproc_setBufsize(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## boolean Subproc.setFileOUT(File out);
 //KMETHOD Subproc_setFileOUT(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
-//	kSubproc *sp = (kSubproc*)sfp[0].o;
+//	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 //	subprocData_t *p = sp->spd;
 //	int ret = PREEXEC(p);
 //	if(ret) {
@@ -979,7 +979,7 @@ KMETHOD Subproc_setBufsize(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## int Subproc.getPid();
 KMETHOD Subproc_getPid(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	RETURNi_( (p!= NULL) ? p->cpid : -1 );
 }
@@ -987,7 +987,7 @@ KMETHOD Subproc_getPid(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## int Subproc.getTimeout();
 KMETHOD Subproc_getTimeout(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	RETURNi_( (p!= NULL) ? p->timeout : -1 );
 }
@@ -995,7 +995,7 @@ KMETHOD Subproc_getTimeout(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## int Subproc.getReturncode();
 KMETHOD Subproc_getReturncode(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	RETURNi_( (p!= NULL) ? p->status : -1 );
 }
@@ -1003,7 +1003,7 @@ KMETHOD Subproc_getReturncode(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## boolean Subproc.enablePipemodeIN(Boolean isPipemode);
 KMETHOD Subproc_enablePipemodeIN(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	int ret = PREEXEC(p);
 	if(ret) {
@@ -1021,7 +1021,7 @@ KMETHOD Subproc_enablePipemodeIN(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## boolean Subproc.enablePipemodeOUT(Boolean isPipemode);
 KMETHOD Subproc_enablePipemodeOUT(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	int ret = PREEXEC(p);
 	if(ret) {
@@ -1039,7 +1039,7 @@ KMETHOD Subproc_enablePipemodeOUT(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## boolean Subproc.enablePipemodeERR(Boolean isPipemode);
 KMETHOD Subproc_enablePipemodeERR(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	int ret = PREEXEC(p);
 	if(ret) {
@@ -1058,7 +1058,7 @@ KMETHOD Subproc_enablePipemodeERR(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## boolean Subproc.enableStandardIN(Boolean isStandard);
 KMETHOD Subproc_enableStandardIN(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	int ret = PREEXEC(p);
 	if(ret) {
@@ -1077,7 +1077,7 @@ KMETHOD Subproc_enableStandardIN(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## boolean Subproc.enableStandardOUT(Boolean isStandard);
 KMETHOD Subproc_enableStandardOUT(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	int ret = PREEXEC(p);
 	if(ret) {
@@ -1095,7 +1095,7 @@ KMETHOD Subproc_enableStandardOUT(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## boolean Subproc.enableStandardERR(Boolean isStandard);
 KMETHOD Subproc_enableStandardERR(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	int ret = PREEXEC(p);
 	if(ret) {
@@ -1113,7 +1113,7 @@ KMETHOD Subproc_enableStandardERR(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## boolean Subproc.enableERR2StdOUT(Boolean isStdout);
 KMETHOD Subproc_enableERR2StdOUT(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	int ret = PREEXEC(p);
 	if(ret) {
@@ -1131,7 +1131,7 @@ KMETHOD Subproc_enableERR2StdOUT(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## boolean Subproc.isShellmode();
 KMETHOD Subproc_isShellmode(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	RETURNb_((p != NULL) ? (p->shell == 1) : 0);
 }
@@ -1139,7 +1139,7 @@ KMETHOD Subproc_isShellmode(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## boolean Subproc.isPipemodeIN();
 KMETHOD Subproc_isPipemodeIN(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	RETURNb_((p != NULL) ? (p->w.mode == M_PIPE) : 0);
 }
@@ -1147,7 +1147,7 @@ KMETHOD Subproc_isPipemodeIN(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## boolean Subproc.isPipemodeOUT();
 KMETHOD Subproc_isPipemodeOUT(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	RETURNb_((p != NULL) ? (p->r.mode == M_PIPE) : 0);
 }
@@ -1155,7 +1155,7 @@ KMETHOD Subproc_isPipemodeOUT(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## boolean Subproc.isPipemodeERR();
 KMETHOD Subproc_isPipemodeERR(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	RETURNb_((p != NULL) ? (p->e.mode == M_PIPE) : 0);
 }
@@ -1163,7 +1163,7 @@ KMETHOD Subproc_isPipemodeERR(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## boolean Subproc.isStandardIN();
 KMETHOD Subproc_isStandardIN(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	RETURNb_((p != NULL) ? (p->w.mode == M_NREDIRECT) : 0);
 }
@@ -1171,7 +1171,7 @@ KMETHOD Subproc_isStandardIN(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## boolean Subproc.isStandardOUT();
 KMETHOD Subproc_isStandardOUT(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	RETURNb_((p != NULL) ? (p->r.mode == M_NREDIRECT) : 0);
 }
@@ -1179,7 +1179,7 @@ KMETHOD Subproc_isStandardOUT(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## boolean Subproc.isStandardERR();
 KMETHOD Subproc_isStandardERR(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	RETURNb_((p != NULL) ? (p->e.mode == M_NREDIRECT) : 0);
 }
@@ -1187,7 +1187,7 @@ KMETHOD Subproc_isStandardERR(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## boolean Subproc.isERR2StdOUT();
 KMETHOD Subproc_isERR2StdOUT(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kSubproc *sp = (kSubproc*)sfp[0].o;
+	kSubproc *sp = (kSubproc*)sfp[0].toObject;
 	subprocData_t *p = sp->spd;
 	RETURNb_((p != NULL) ? (p->e.mode == M_STDOUT) : 0);
 }

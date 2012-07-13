@@ -241,7 +241,7 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 static KMETHOD Bytes_encodeTo(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kBytes *ba = sfp[0].ba;
-	kString *toCoding = sfp[1].s;
+	kString *toCoding = sfp[1].toString;
 	RETURN_(convFromTo(kctx, ba, "UTF-8", S_text(toCoding)));
 }
 
@@ -249,7 +249,7 @@ static KMETHOD Bytes_encodeTo(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kBytes* fromBa = sfp[0].ba;
-	kString*fromCoding = sfp[1].s;
+	kString*fromCoding = sfp[1].toString;
 	kBytes *toBa;
 	if (fromCoding != (kString*)(CT_String->nulvalNULL)) {
 		toBa = convFromTo(kctx, fromBa, S_text(fromCoding), "UTF-8");

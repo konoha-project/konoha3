@@ -556,7 +556,7 @@ static void NameSpace_merge(KonohaContext *kctx, kNameSpace *ns, kNameSpace *tar
 		NameSpace_importClassName(kctx, ns, target->packageId, pline);
 	}
 	if(target->constTable.bytesize > 0) {
-		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, target->constTable.kvs, target->constTable.bytesize/sizeof(KUtilsKeyValue), pline);
+		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, target->constTable.keyvalueItems, target->constTable.bytesize/sizeof(KUtilsKeyValue), pline);
 	}
 	size_t i;
 	for(i = 0; i < kArray_size(target->methodList); i++) {
@@ -603,22 +603,22 @@ static kbool_t NameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, cons
 // boolean NameSpace.importPackage(String pkgname);
 static KMETHOD NameSpace_importPackage_(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	RETURNb_(NameSpace_importPackage(kctx, sfp[0].ks, S_text(sfp[1].s), sfp[K_RTNIDX].uline));
+	RETURNb_(NameSpace_importPackage(kctx, sfp[0].toNameSpace, S_text(sfp[1].toString), sfp[K_RTNIDX].uline));
 }
 
 // boolean NameSpace.loadScript(String path);
 static KMETHOD NameSpace_loadScript_(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kfileline_t pline = sfp[K_RTNIDX].uline;
-	FILE_i *fp = PLAT fopen_i(S_text(sfp[1].s), "r");
+	FILE_i *fp = PLAT fopen_i(S_text(sfp[1].toString), "r");
 	if(fp != NULL) {
-		kfileline_t uline = uline_init(kctx, S_text(sfp[1].s), S_size(sfp[1].s), 1, 1);
-		kstatus_t status = NameSpace_loadstream(kctx, sfp[0].ks, fp, uline, 0);
+		kfileline_t uline = uline_init(kctx, S_text(sfp[1].toString), S_size(sfp[1].toString), 1, 1);
+		kstatus_t status = NameSpace_loadstream(kctx, sfp[0].toNameSpace, fp, uline, 0);
 		PLAT fclose_i(fp);
 		RETURNb_(status == K_CONTINUE);
 	}
 	else {
-		kreportf(ERR_, pline, "script not found: %s", S_text(sfp[1].s));
+		kreportf(ERR_, pline, "script not found: %s", S_text(sfp[1].toString));
 		RETURNb_(0);
 	}
 }

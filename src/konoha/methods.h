@@ -30,7 +30,7 @@ static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	O_ct(sfp[0].o)->p(kctx, sfp, 0, &wb, 0);
+	O_ct(sfp[0].toObject)->p(kctx, sfp, 0, &wb, 0);
 	kString* s = new_kString(KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
 	KLIB Kwb_free(&wb);
 	RETURN_(s);
@@ -139,7 +139,7 @@ static KMETHOD String_toInt(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## @Const @Immutable method String String.opAdd(@Coercion String x);
 static KMETHOD String_opADD(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kString *lhs = sfp[0].s, *rhs = sfp[1].s;
+	kString *lhs = sfp[0].s, *rhs = sfp[1].toString;
 	int spol = (S_isASCII(lhs) && S_isASCII(rhs)) ? SPOL_ASCII : SPOL_UTF8;
 	kString *s = new_kString(NULL, S_size(lhs)+S_size(rhs), spol|SPOL_NOCOPY);
 	memcpy(s->buf, S_text(lhs), S_size(lhs));
@@ -152,7 +152,7 @@ static KMETHOD String_opADD(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static KMETHOD String_opEQ(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kString *s0 = sfp[0].s;
-	kString *s1 = sfp[1].s;
+	kString *s1 = sfp[1].toString;
 	if(S_size(s0) == S_size(s1)) {
 		RETURNb_(strncmp(S_text(s0), S_text(s1), S_size(s0)) == 0);
 	}
@@ -162,7 +162,7 @@ static KMETHOD String_opEQ(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static KMETHOD String_opNEQ(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kString *s0 = sfp[0].s;
-	kString *s1 = sfp[1].s;
+	kString *s1 = sfp[1].toString;
 	if(S_size(s0) == S_size(s1)) {
 		RETURNb_(strncmp(S_text(s0), S_text(s1), S_size(s0)) != 0);
 	}
@@ -173,7 +173,7 @@ static KMETHOD String_opNEQ(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static KMETHOD Func_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kFuncVar *fo = (kFuncVar*)sfp[0].fo;
-	KSETv(fo->self, sfp[1].o);
+	KSETv(fo->self, sfp[1].toObject);
 	KSETv(fo->mtd,  sfp[2].mtd);
 	RETURN_(fo);
 }
@@ -186,7 +186,7 @@ static KMETHOD Func_invoke(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	DBG_ASSERT(IS_Func(fo));
 	DBG_ASSERT(IS_Method(fo->mtd));
 	DBG_P("fo->mtd->fcall_1 == %p", fo->mtd->fcall_1);
-	KSETv(sfp[0].o, fo->self);
+	KSETv(sfp[0].toObject, fo->self);
 	KSELFCALL(sfp, fo->mtd);
 }
 
@@ -207,7 +207,7 @@ static KMETHOD System_assert(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static KMETHOD System_p(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kfileline_t uline = sfp[K_RTNIDX].uline;
-	kreportf(PRINT_, uline, "%s", S_text(sfp[1].s));
+	kreportf(PRINT_, uline, "%s", S_text(sfp[1].toString));
 }
 
 //## method void System.gc();

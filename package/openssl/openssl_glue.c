@@ -20,21 +20,21 @@ static KMETHOD kMD5_Init(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	MD5state_st* c = malloc(sizeof(*c));
 	int ret_ = MD5_Init(c);
-	RawPtr_init(kctx, sfp[0].o, c);
-	RETURN_(sfp[0].o);
+	RawPtr_init(kctx, sfp[0].toObject, c);
+	RETURN_(sfp[0].toObject);
 }
 static KMETHOD kMD5_Update(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	MD5state_st* c = RawPtr(sfp[0].o);
-	unsigned char* data = (unsigned char *) S_text(sfp[1].s);
-	unsigned long len = S_size(sfp[1].s);
+	MD5state_st* c = RawPtr(sfp[0].toObject);
+	unsigned char* data = (unsigned char *) S_text(sfp[1].toString);
+	unsigned long len = S_size(sfp[1].toString);
 	int ret_ = MD5_Update(c, data, len);
 	RETURNi_(ret_);
 }
 static KMETHOD kMD5_Final(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	unsigned char MD[MD5_DIGEST_LENGTH];
-	MD5state_st* c = RawPtr(sfp[0].o);
+	MD5state_st* c = RawPtr(sfp[0].toObject);
 	int ret_ = MD5_Final(MD, c);
 	int i;
 	char MD_S[MD5_DIGEST_LENGTH*2+1];
@@ -47,21 +47,21 @@ static KMETHOD kSHA1_Init(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	SHAstate_st* c = malloc(sizeof(*c));
 	int ret_ = SHA1_Init(c);
-	RawPtr_init(kctx, sfp[0].o, c);
-	RETURN_(sfp[0].o);
+	RawPtr_init(kctx, sfp[0].toObject, c);
+	RETURN_(sfp[0].toObject);
 }
 static KMETHOD kSHA1_Update(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	SHAstate_st* c = RawPtr(sfp[0].o);
-	unsigned char* data = (unsigned char *) S_text(sfp[1].s);
-	unsigned long len = S_size(sfp[1].s);
+	SHAstate_st* c = RawPtr(sfp[0].toObject);
+	unsigned char* data = (unsigned char *) S_text(sfp[1].toString);
+	unsigned long len = S_size(sfp[1].toString);
 	int ret_ = SHA1_Update(c, data, len);
 	RETURNi_(ret_);
 }
 static KMETHOD kSHA1_Final(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	unsigned char SHA[SHA_DIGEST_LENGTH];
-	SHAstate_st* c = RawPtr(sfp[0].o);
+	SHAstate_st* c = RawPtr(sfp[0].toObject);
 	int ret_ = SHA1_Final(SHA, c);
 	int i;
 	char SHA_S[SHA_DIGEST_LENGTH*2+1];

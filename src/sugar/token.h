@@ -546,7 +546,7 @@ static void NameSpace_tokenize(KonohaContext *kctx, kNameSpace *ns, const char *
 	RESET_GCSTACK();
 	if(uline == 0) {
 		for(i = pos; i < kArray_size(a); i++) {
-			a->toksVar[i]->uline = 0;
+			a->tokenVarItems[i]->uline = 0;
 		}
 	}
 }
@@ -569,7 +569,7 @@ static int findCloseChar(KonohaContext *kctx, kArray *tls, int s, int e, ksymbol
 static kbool_t checkNestedSyntax(KonohaContext *kctx, kArray *tls, int *s, int e, ksymbol_t astkw, int opench, int closech)
 {
 	int i = *s;
-	kTokenVar *tk = tls->toksVar[i];
+	kTokenVar *tk = tls->tokenVarItems[i];
 	int topch = kToken_topch2(tk->keyword, tk);
 	if(topch == opench) {
 		int ne = findCloseChar(kctx, tls, i+1, e, tk->keyword, closech);
@@ -588,7 +588,7 @@ static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tls, int s, int e, kA
 	ksymbol_t patternKey = 0;
 //	dumpTokenArray(kctx, 0, tls, s, e);
 	for(i = s; i < e; i++) {
-		kTokenVar *tk = tls->toksVar[i];
+		kTokenVar *tk = tls->tokenVarItems[i];
 		int topch = kToken_topch(tk);
 		if(tk->keyword == TK_INDENT) continue;
 		if(tk->keyword == TK_TEXT) {
@@ -604,7 +604,7 @@ static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tls, int s, int e, kA
 			continue;
 		}
 		if(topch == '$' && i+1 < e) {
-			tk = tls->toksVar[++i];
+			tk = tls->tokenVarItems[++i];
 			if(tk->keyword == TK_SYMBOL) {
 				tk->keyword = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWRAW) | KW_PATTERN;
 				if(patternKey == 0) patternKey = tk->keyword;

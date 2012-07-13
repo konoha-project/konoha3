@@ -42,7 +42,7 @@ static kbool_t Nothing_hasNext(KonohaContext *kctx, KonohaStack* sfp)
 
 static void Nothing_setNextResult(KonohaContext *kctx, KonohaStack* sfp _RIX)
 {
-	kIterator *itr = (kIterator*)sfp[0].o;
+	kIterator *itr = (kIterator*)sfp[0].toObject;
 	RETURN_(itr->source);
 }
 
@@ -92,7 +92,7 @@ static KMETHOD Iterator_next(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //
 //static KMETHOD Iterator_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
-//	kIterator *itr = (kIterator*)sfp[0].o;
+//	kIterator *itr = (kIterator*)sfp[0].toObject;
 //	KSETv(itr->funcHasNext, sfp[1].fo);
 //	KSETv(itr->funcNext,sfp[2].fo);
 //	itr->hasNext = callFuncHasNext;
@@ -102,13 +102,13 @@ static KMETHOD Iterator_next(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static kbool_t Array_hasNext(KonohaContext *kctx, KonohaStack* sfp)
 {
-	kIterator *itr = (kIterator*)sfp[0].o;
+	kIterator *itr = (kIterator*)sfp[0].toObject;
 	return (itr->current_pos < kArray_size(itr->arrayList));
 }
 
 static void Array_setNextResult(KonohaContext *kctx, KonohaStack* sfp _RIX)
 {
-	kIterator *itr = (kIterator*)sfp[0].o;
+	kIterator *itr = (kIterator*)sfp[0].toObject;
 	size_t n = itr->current_pos;
 	itr->current_pos += 1;
 	DBG_ASSERT(n < kArray_size(itr->arrayList));
@@ -117,7 +117,7 @@ static void Array_setNextResult(KonohaContext *kctx, KonohaStack* sfp _RIX)
 
 static void Array_setNextResultUnbox(KonohaContext *kctx, KonohaStack* sfp _RIX)
 {
-	kIterator *itr = (kIterator*)sfp[0].o;
+	kIterator *itr = (kIterator*)sfp[0].toObject;
 	size_t n = itr->current_pos;
 	itr->current_pos += 1;
 	DBG_ASSERT(n < kArray_size(itr->arrayList));
@@ -176,7 +176,7 @@ static void String_setNextResult(KonohaContext *kctx, KonohaStack* sfp _RIX)
 static KMETHOD String_toIterator(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kIterator *itr = (kIterator*)new_kObject(CT_StringIterator, NULL);
-	KSETv(itr->source, sfp[0].o);
+	KSETv(itr->source, sfp[0].toObject);
 	itr->hasNext = String_hasNext;
 	itr->setNextResult = String_setNextResult;
 	RETURN_(itr);

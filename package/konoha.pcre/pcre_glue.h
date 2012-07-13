@@ -469,8 +469,8 @@ static void Regex_set(KonohaContext *kctx, kRegex *re, kString *ptns, kString *o
 
 static KMETHOD Regex_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	Regex_set(kctx, sfp[0].re, sfp[1].s, sfp[2].s);
-	RETURN_(sfp[0].o);
+	Regex_set(kctx, sfp[0].re, sfp[1].toString, sfp[2].s);
+	RETURN_(sfp[0].toObject);
 }
 
 /* ------------------------------------------------------------------------ */

@@ -89,7 +89,7 @@ static KMETHOD String_getSize(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static KMETHOD String_startsWith(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	// @TEST "A".startsWith("ABC");
-	RETURNb_(strncmp(S_text(sfp[0].s), S_text(sfp[1].s), S_size(sfp[1].s)) == 0);
+	RETURNb_(strncmp(S_text(sfp[0].s), S_text(sfp[1].toString), S_size(sfp[1].toString)) == 0);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -98,7 +98,7 @@ static KMETHOD String_startsWith(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static KMETHOD String_endsWith(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kString *s0 = sfp[0].s;
-	kString *s1 =  sfp[1].s;
+	kString *s1 =  sfp[1].toString;
 	int ret;
 	if (S_size(s0) < S_size(s1)) {
 		ret = 0;
@@ -115,7 +115,7 @@ static KMETHOD String_endsWith(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static KMETHOD String_indexOf(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kString *s0 = sfp[0].s, *s1 = sfp[1].s;
+	kString *s0 = sfp[0].s, *s1 = sfp[1].toString;
 	long loc = -1;
 	if (IS_NOTNULL(s1)) {
 		const char *t0 = S_text(s0);
@@ -137,7 +137,7 @@ static KMETHOD String_indexOf(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static KMETHOD String_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kString *s0 = sfp[0].s;
-	kString *s1 = sfp[1].s;
+	kString *s1 = sfp[1].toString;
 	const char *t0 = S_text(s0);
 	const char *t1 = S_text(s1);
 	intptr_t loc = S_size(s0) - S_size(s1);
@@ -186,7 +186,7 @@ static KMETHOD String_trim(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static KMETHOD String_opHAS(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	RETURNb_(strstr(S_text(sfp[0].s), S_text(sfp[1].s)) != NULL);
+	RETURNb_(strstr(S_text(sfp[0].s), S_text(sfp[1].toString)) != NULL);
 }
 
 /* ------------------------------------------------------------------------ */

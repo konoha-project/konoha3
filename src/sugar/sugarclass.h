@@ -59,8 +59,8 @@ static void NameSpace_reftrace(KonohaContext *kctx, kObject *o)
 	size_t i, size = ns->constTable.bytesize / sizeof(KUtilsKeyValue);
 	BEGIN_REFTRACE(size);
 	for(i = 0; i < size; i++) {
-		if(SYMKEY_isBOXED(ns->constTable.kvs[i].key)) {
-			KREFTRACEv(ns->constTable.kvs[i].oval);
+		if(SYMKEY_isBOXED(ns->constTable.keyvalueItems[i].key)) {
+			KREFTRACEv(ns->constTable.keyvalueItems[i].oval);
 		}
 	}
 	KREFTRACEn(ns->parentNULL);
@@ -266,8 +266,8 @@ static KUtilsKeyValue* NameSpace_getConstNULL(KonohaContext *kctx, kNameSpace *n
 	size_t min = 0, max = ns->constTable.bytesize / sizeof(KUtilsKeyValue);
 	while(min < max) {
 		size_t p = (max + min) / 2;
-		ksymbol_t key = SYMKEY_unbox(ns->constTable.kvs[p].key);
-		if(key == ukey) return ns->constTable.kvs + p;
+		ksymbol_t key = SYMKEY_unbox(ns->constTable.keyvalueItems[p].key);
+		if(key == ukey) return ns->constTable.keyvalueItems + p;
 		if(key < ukey) {
 			min = p + 1;
 		}
@@ -297,7 +297,7 @@ static void NameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, KUt
 	size_t i, s = ns->constTable.bytesize / sizeof(KUtilsKeyValue);
 	if(s == 0) {
 		KLIB Karray_init(kctx, &ns->constTable, (nitems + 8) * sizeof(KUtilsKeyValue));
-		memcpy(ns->constTable.kvs, kvs, nitems * sizeof(KUtilsKeyValue));
+		memcpy(ns->constTable.keyvalueItems, kvs, nitems * sizeof(KUtilsKeyValue));
 	}
 	else {
 		KUtilsWriteBuffer wb;
@@ -310,12 +310,12 @@ static void NameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, KUt
 		nitems = Kwb_bytesize(&wb)/sizeof(KUtilsKeyValue);
 		if(nitems > 0) {
 			KLIB Karray_resize(kctx, &ns->constTable, (s + nitems + 8) * sizeof(KUtilsKeyValue));
-			memcpy(ns->constTable.kvs + s, kvs, nitems * sizeof(KUtilsKeyValue));
+			memcpy(ns->constTable.keyvalueItems + s, kvs, nitems * sizeof(KUtilsKeyValue));
 		}
 		KLIB Kwb_free(&wb);
 	}
 	ns->constTable.bytesize = (s + nitems) * sizeof(KUtilsKeyValue);
-	PLAT qsort_i(ns->constTable.kvs, s + nitems, sizeof(KUtilsKeyValue), comprKeyVal);
+	PLAT qsort_i(ns->constTable.keyvalueItems, s + nitems, sizeof(KUtilsKeyValue), comprKeyVal);
 }
 
 static size_t strlen_alnum(const char *p)

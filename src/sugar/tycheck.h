@@ -81,8 +81,8 @@ static kExpr *ExprTyCheckFunc(KonohaContext *kctx, kFunc *fo, kStmt *stmt, kExpr
 	KCALL(lsfp, 0, fo->mtd, 5, K_NULLEXPR);
 	END_LOCAL();
 	RESET_GCSTACK();
-	DBG_ASSERT(IS_Expr(lsfp[0].o));
-	return (kExpr*)lsfp[0].o;
+	DBG_ASSERT(IS_Expr(lsfp[0].toObject));
+	return (kExpr*)lsfp[0].toObject;
 }
 
 static kExpr *ExprTyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, int reqty)
@@ -112,15 +112,15 @@ static kExpr *ExprTyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma 
 static void Expr_putConstValue(KonohaContext *kctx, kExpr *expr, KonohaStack *sfp)
 {
 	if(expr->build == TEXPR_CONST) {
-		KSETv(sfp[0].o, expr->data);
+		KSETv(sfp[0].toObject, expr->data);
 		sfp[0].ndata = O_unbox(expr->data);
 	}else if(expr->build == TEXPR_NCONST) {
 		sfp[0].ndata = expr->ndata;
 	}else if(expr->build == TEXPR_NEW) {
-		KSETv(sfp[0].o, new_kObject(CT_(expr->ty), expr->ndata /*FIXME*/));
+		KSETv(sfp[0].toObject, new_kObject(CT_(expr->ty), expr->ndata /*FIXME*/));
 	}else {
 		assert(expr->build == TEXPR_NULL);
-		KSETv(sfp[0].o, knull(CT_(expr->ty)));
+		KSETv(sfp[0].toObject, knull(CT_(expr->ty)));
 		sfp[0].ndata = 0;
 	}
 }
@@ -138,7 +138,7 @@ static kExpr* ExprCall_toConstValue(KonohaContext *kctx, kExpr *expr, kArray *co
 	if(TY_isUnbox(rtype) || rtype == TY_void) {
 		return kExpr_setNConstValue(expr, rtype, lsfp[0].ndata);
 	}
-	return kExpr_setConstValue(expr, rtype, lsfp[0].o);
+	return kExpr_setConstValue(expr, rtype, lsfp[0].toObject);
 }
 
 static kbool_t CT_isa(KonohaContext *kctx, ktype_t cid1, ktype_t cid2)
@@ -616,7 +616,7 @@ static const char* MethodType_t(KonohaContext *kctx, kmethodn_t mn, size_t psize
 static kExpr *Expr_lookupMethod(KonohaContext *kctx, kStmt *stmt, kExpr *expr, ktype_t this_cid, kGamma *gma, ktype_t reqty)
 {
 	kNameSpace *ns = gma->genv->ns;
-	kTokenVar *tkMN = expr->cons->toksVar[0];
+	kTokenVar *tkMN = expr->cons->tokenVarItems[0];
 	DBG_ASSERT(IS_Token(tkMN));
 	if(tkMN->keyword == TK_SYMBOL) {
 		tkMN->keyword = ksymbolA(S_text(tkMN->text), S_size(tkMN->text), SYM_NEWID);
@@ -914,7 +914,7 @@ static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, KonohaStack *sfp _RIX)
 			texpr = kExpr_setVariable(expr, BLOCK_, ty, lvarsize, gma);
 		}
 		for(i = atop; i < kArray_size(gma->genv->lvarlst); i++) {
-			kExprVar *v = gma->genv->lvarlst->exprItemsVar[i];
+			kExprVar *v = gma->genv->lvarlst->exprVarItems[i];
 			if(v->build == TEXPR_LOCAL_ && v->index >= lvarsize) {
 				v->build = TEXPR_STACKTOP; v->index = v->index - lvarsize;
 				//DBG_P("v->index=%d", v->index);
@@ -1288,7 +1288,7 @@ static void Gamma_shiftBlockIndex(KonohaContext *kctx, GammaAllocaData *genv)
 	size_t i, size = kArray_size(a);
 	int shift = genv->f.varsize;
 	for(i = genv->lvarlst_top; i < size; i++) {
-		kExprVar *expr = a->exprItemsVar[i];
+		kExprVar *expr = a->exprVarItems[i];
 		if(expr->build == TEXPR_STACKTOP) continue;
 		//DBG_ASSERT(expr->build < TEXPR_UNTYPED);
 		if(expr->build < TEXPR_UNTYPED) {

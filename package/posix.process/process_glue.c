@@ -76,7 +76,7 @@ static KMETHOD System_setpgid(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static KMETHOD System_chdir(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kString *s = sfp[1].s;
+	kString *s = sfp[1].toString;
 	const char *dir = S_text(s);
 	int ret = chdir(dir);
 	RETURNi_(ret);
@@ -90,7 +90,7 @@ static KMETHOD System_fchdir(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static KMETHOD System_chroot(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kString *s = sfp[1].s;
+	kString *s = sfp[1].toString;
 	const char *root = S_text(s);
 	int ret = chroot(root);
 	RETURNi_(ret);

@@ -778,7 +778,7 @@ static KMETHOD OutputStream_isClosed(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static KMETHOD InputStream_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	//kInputStream *in = sfp[0].in;
-	kString *pth = sfp[1].s;
+	kString *pth = sfp[1].toString;
 	const char *mode = IS_NULL(sfp[2].s) ? "r" : S_text(sfp[2].s);
 	//KSETv(in->path, pth);
 	kio_t *io2 = FILE_openNULL(kctx, pth, mode, NULL);
@@ -810,7 +810,7 @@ static KMETHOD InputStream_readLine(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static KMETHOD OutputStream_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	//kOutputStream *w = sfp[0].w;
-	kString *pth = sfp[1].s;
+	kString *pth = sfp[1].toString;
 	const char *mode = IS_NULL(sfp[2].s) ? "w" : S_text(sfp[2].s);
 	//KSETv(w->path, pth);
 	kio_t *io2 = FILE_openNULL(kctx, pth, mode, NULL);

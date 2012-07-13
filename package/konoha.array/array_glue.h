@@ -63,7 +63,7 @@ static KMETHOD Array_getSize(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kArrayVar *a = (kArrayVar *)sfp[0].o;
+	kArrayVar *a = (kArrayVar *)sfp[0].toObject;
 	size_t asize = (size_t)sfp[1].ivalue;
 	a->bytemax = asize * sizeof(void*);
 	kArray_setsize((kArray*)a, asize);
@@ -98,7 +98,7 @@ static void NArray_add(KonohaContext *kctx, kArray *o, uintptr_t value)
 	size_t asize = kArray_size(o);
 	struct _kAbstractArray *a = (struct _kAbstractArray*)o;
 	NArray_ensureMinimumSize(kctx, a, asize+1);
-	DBG_ASSERT(a->a.objects[asize] == NULL);
+	DBG_ASSERT(a->a.objectItems[asize] == NULL);
 	kArrayVar *a2 = (kArrayVar *)a;
 	a2->unboxItems[asize] = value;
 	kArray_setsize(a2, (asize+1));
@@ -106,11 +106,11 @@ static void NArray_add(KonohaContext *kctx, kArray *o, uintptr_t value)
 
 static KMETHOD Array_add1(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kArray *a = (kArray *)sfp[0].o;
+	kArray *a = (kArray *)sfp[0].toObject;
 	if (kArray_isUnboxData(a)) {
 		NArray_add(kctx, a, sfp[1].ndata);
 	} else {
-		kArray_add(a, sfp[1].o);
+		kArray_add(a, sfp[1].toObject);
 	}
 }
 
