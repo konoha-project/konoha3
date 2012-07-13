@@ -104,16 +104,17 @@ static inline void  do_free(void *ptr, size_t size);
 
 /* ARRAY */
 #define ARRAY(T) ARRAY_##T##_t
-#define DEF_ARRAY_STRUCT(T) \
-	struct ARRAY(T) {\
-		T *list;\
-		int size;  \
-		int capacity;  \
-	}
+#define DEF_ARRAY_STRUCT_(T, SizeTy) \
+struct ARRAY(T) {\
+	T *list;\
+	SizeTy size;\
+	SizeTy capacity;\
+}
+#define DEF_ARRAY_STRUCT(T)  DEF_ARRAY_STRUCT_(T, int)
 
-#define DEF_ARRAY_T(T)              \
-struct ARRAY(T);                    \
-typedef struct ARRAY(T) ARRAY(T);   \
+#define DEF_ARRAY_T(T)\
+struct ARRAY(T);\
+typedef struct ARRAY(T) ARRAY(T);\
 DEF_ARRAY_STRUCT(T)
 
 #define DEF_ARRAY_OP(T)\
@@ -123,19 +124,19 @@ static inline ARRAY(T) *ARRAY_init_##T (ARRAY(T) *a) {\
 	a->size  = 0;\
 	return a;\
 }\
+static inline T ARRAY_##T##_get(ARRAY(T) *a, int idx) {\
+	return a->list[idx];\
+}\
+static inline void ARRAY_##T##_set(ARRAY(T) *a, int idx, T v){ \
+	a->list[idx] = v;\
+}\
 static inline void ARRAY_##T##_add(ARRAY(T) *a, T v) {\
 	if (a->size + 1 >= a->capacity) {\
 		size_t os = sizeof(T) * a->capacity;\
 		a->capacity *= 2;\
 		a->list = (T*)do_realloc(a->list, os, sizeof(T) * a->capacity);\
 	}\
-	a->list[a->size++] = v;\
-}\
-static inline T ARRAY_##T##_get(ARRAY(T) *a, int idx) {\
-	return a->list[idx];\
-}\
-static inline void ARRAY_##T##_set(ARRAY(T) *a, int idx, T v){ \
-	a->list[idx] = v;\
+	ARRAY_##T##_set(a, a->size++, v);\
 }\
 static inline void ARRAY_##T##_dispose(ARRAY(T) *a) {\
 	do_free(a->list, sizeof(T) * a->capacity);\
@@ -290,7 +291,6 @@ struct BM11 { struct bm2   m0; struct bm1 S;struct bm1 m1;};
 struct BM12 { struct bm1   m0;};
 #endif
 
-
 #define _BLOCK_(size)  struct blk##size{uint8_t m[size];} \
 	b##size [SEGMENT_SIZE/(sizeof(struct blk##size))]
 union AllocationBlock {
@@ -307,6 +307,15 @@ static const size_t SegmentBlockCount[] = {
 	SEGMENT_BLOCK_COUNT(7 ), SEGMENT_BLOCK_COUNT(8 ),
 	SEGMENT_BLOCK_COUNT(9 ), SEGMENT_BLOCK_COUNT(10),
 	SEGMENT_BLOCK_COUNT(11), SEGMENT_BLOCK_COUNT(12),
+};
+
+static const unsigned int SegmentBlockCount_GC_MARGIN[] = {
+	0, 0, 0,
+	CEIL(SEGMENT_BLOCK_COUNT(3 )*0.98), CEIL(SEGMENT_BLOCK_COUNT(4 )*0.98),
+	CEIL(SEGMENT_BLOCK_COUNT(5 )*0.98), CEIL(SEGMENT_BLOCK_COUNT(6 )*0.98),
+	CEIL(SEGMENT_BLOCK_COUNT(7 )*0.98), CEIL(SEGMENT_BLOCK_COUNT(8 )*0.98),
+	CEIL(SEGMENT_BLOCK_COUNT(9 )*0.98), CEIL(SEGMENT_BLOCK_COUNT(10)*0.98),
+	CEIL(SEGMENT_BLOCK_COUNT(11)*0.98), CEIL(SEGMENT_BLOCK_COUNT(12)*0.98),
 };
 
 #if SIZEOF_VOIDP*8 == 64
@@ -1059,12 +1068,12 @@ static void BitPtr0_inc(AllocationPointer *p)
 	BP(p, 0).mask = (bpmask << 1) | rot;
 }
 
-static void inc(AllocationPointer *p, SubHeap *h)
+static bool inc(AllocationPointer *p, SubHeap *h)
 {
 	int size = KlassBlockSize(h->heap_klass);
 	p->blkptr = (AllocationBlock*)((char*)p->blkptr+size);
 	BitPtr0_inc(p);
-	p->seg->live_count++;
+	return ++p->seg->live_count == SegmentBlockCount_GC_MARGIN[h->heap_klass];
 }
 
 static bool isMarked(AllocationPointer *p)
@@ -1155,7 +1164,7 @@ static bool findNextFreeBlock(AllocationPointer *p)
 	return true;
 }
 
-static void *tryAlloc(HeapManager *mng, SubHeap *h)
+static void *tryAlloc(KonohaContext *kctx, HeapManager *mng, SubHeap *h)
 {
 	AllocationPointer *p = &h->p;
 	void *temp;
@@ -1169,13 +1178,10 @@ static void *tryAlloc(HeapManager *mng, SubHeap *h)
 	temp = p->blkptr;
 	prefetch_(temp, 0, 0);
 	inc(p, h);
-#define GC_SAFEPOINT(ctx) do {\
-	ctx->stat->gcObjectCount -=1;\
-	if(ctx->stat->gcObjectCount == 0) {\
-		SAFEPOINT_SETGC(ctx);\
-	}\
-} while(0)
-
+	bool isEmpty = inc(p, h);
+	if (mng->segmentList == NULL && h->freelist == NULL && isEmpty) {
+		KNH_SAFEPOINT(_ctx, _ctx->esp);
+	}
 	return temp;
 }
 
@@ -1409,11 +1415,11 @@ static kObject *bm_malloc_internal(KonohaContext *kctx, HeapManager *mng, size_t
 	if (n > SUBHEAP_KLASS_SIZE_MAX)
 		return do_malloc(n);
 	h = findSubHeapBySize(mng, n);
-	temp = tryAlloc(mng, h);
+	temp = tryAlloc(kctx, mng, h);
 
 	if (unlikely(temp == NULL)) {
 		bitmapMarkingGC(kctx, mng);
-		temp = tryAlloc(mng, h);
+		temp = tryAlloc(kctx, mng, h);
 		if (unlikely(temp == NULL)) {
 			THROW_OutOfMemory(kctx, n);
 		}
