@@ -902,8 +902,8 @@ struct kStringVar /* extends _Bytes */ {
 #define SPOL_NOPOOL        (1<<5)
 #define SPOL_NOCOPY        (1<<4)
 
-#define new_T(t)            KLIB new_kString(kctx, t, knh_strlen(t), SPOL_TEXT|SPOL_ASCII|SPOL_POOL)
-#define new_S(T, L)         KLIB new_kString(kctx, T, L, SPOL_ASCII|SPOL_POOL)
+#define new_T(t)            (KLIB new_kString(kctx, t, knh_strlen(t), SPOL_TEXT|SPOL_ASCII|SPOL_POOL))
+#define new_S(T, L)         (KLIB new_kString(kctx, T, L, SPOL_ASCII|SPOL_POOL))
 #define S_text(s)           ((const char*) (O_ct(s)->unbox(kctx, (kObject*)s)))
 #define S_size(s)           ((s)->bytesize)
 
@@ -1320,7 +1320,6 @@ struct LibKonohaApiVar {
 //#define KLIB kMethod_setParam(kctx, M, R, PSIZE, P)      (KPI)->KLIB kMethod_setParam(kctx, kctx, M, R, PSIZE, P)
 #define new_kParam(CTX, R, PSIZE, P)       (KLIB kMethod_setParam(CTX, NULL, R, PSIZE, P))
 //#define KLIB kMethod_setFunc(kctx, M,F)     (KPI)->KLIB kMethod_setFunc(kctx, kctx, M, F)
-#define kMethod_genCode(M, BLOCK) (KPI)->kMethod_genCode(kctx, M, BLOCK)
 
 #define KREQUIRE_PACKAGE(NAME, UL)                   (KPI)->KimportPackage(kctx, NULL, NAME, UL)
 #define KEXPORT_PACKAGE(NAME, KS, UL)                (KPI)->KimportPackage(kctx, KS, NAME, UL)

@@ -870,7 +870,7 @@ static void _THCODE(KonohaContext *kctx, VirtualMachineInstruction *pc, void **c
 #endif
 }
 
-static void Method_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
+static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 {
 	DBG_P("START CODE GENERATION..");
 	INIT_GCSTACK();
@@ -971,7 +971,7 @@ static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack 
 //	return (mtd->invokeMethodFunc == MethodFunc_abstract);
 //}
 
-static void Method_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
+static void kMethod_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
 {
 	func = (func == NULL) ? MethodFunc_invokeAbstractMethod : func;
 	((kMethodVar*)mtd)->invokeMethodFunc = func;
@@ -1069,8 +1069,8 @@ void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		RESET_GCSTACK();
 	}
 	LibKonohaApiVar *l = (LibKonohaApiVar*)kctx->klib;
-	l->kMethod_setFunc = Method_setFunc;
-	l->kMethod_genCode = Method_genCode;
+	l->kMethod_setFunc = kMethod_setFunc;
+	l->kMethod_genCode = kMethod_genCode;
 }
 
 /* ------------------------------------------------------------------------ */

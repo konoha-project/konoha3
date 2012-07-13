@@ -1314,7 +1314,7 @@ static kbool_t Method_compile(KonohaContext *kctx, kMethod *mtd, kString *text, 
 	Gamma_initParam(kctx, &newgma, kMethod_param(mtd));
 	Block_tyCheckAll(kctx, bk, gma);
 	Gamma_shiftBlockIndex(kctx, &newgma);
-	kMethod_genCode(mtd, bk);
+	KLIB kMethod_genCode(kctx, mtd, bk);
 	GAMMA_POP(gma, &newgma);
 	RESET_GCSTACK();
 	return 1;
@@ -1374,7 +1374,7 @@ static ktype_t Gamma_evalMethod(KonohaContext *kctx, kGamma *gma, kBlock *bk, kM
 	}
 	if(stmt->syn->keyword == KW_ERR) return K_FAILED;
 	ktype_t rtype = Stmt_checkReturnType(kctx, stmt);
-	kMethod_genCode(mtd, bk);
+	KLIB kMethod_genCode(kctx, mtd, bk);
 	return Method_runEval(kctx, mtd, rtype);
 }
 
