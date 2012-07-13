@@ -217,7 +217,7 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		.p     = File_p,
 	};
 
-	KonohaClass *cFile = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &defFile, pline);
+	KonohaClass *cFile = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defFile, pline);
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im, _F(System_fopen), TY_File, TY_System, MN_("fopen"), 2, TY_String, FN_("path"), TY_String, FN_("mode"),
 		_Public|_Const|_Im, _F(File_close), TY_void, TY_File, MN_("close"), 0,
@@ -225,7 +225,7 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public|_Const|_Im, _F(File_putC), TY_Boolean, TY_File, MN_("putC"), 1, TY_Int, FN_("ch"),
 		DEND,
 	};
-	kNameSpace_loadMethodData(ns, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	if (IS_defineBytes()) {
 		// the function below uses Bytes
 		KDEFINE_METHOD MethodData2[] = {
@@ -233,7 +233,7 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 			_Public|_Const, _F(File_read), TY_Int, TY_File, MN_("read"), 3, TY_Bytes, FN_("buf"), TY_Int, FN_("offset"), TY_Int, FN_("len"),
 			DEND,
 		};
-		kNameSpace_loadMethodData(ns, MethodData2);
+		KLIB kNameSpace_loadMethodData(kctx, ns, MethodData2);
 	} else {
 		kreportf(INFO_, pline, "konoha.bytes package hasn't imported. Some features are still disabled.");
 	}

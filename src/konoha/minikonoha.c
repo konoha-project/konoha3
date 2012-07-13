@@ -105,7 +105,7 @@ static void KRUNTIME_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	KFREE(kctx->stack, sizeof(KonohaLocalRuntimeVar));
 }
 
-static kbool_t KRUNTIME_setModule(KonohaContext *kctx, int x, kmodshare_t *d, kfileline_t pline)
+static kbool_t Konoha_setModule(KonohaContext *kctx, int x, kmodshare_t *d, kfileline_t pline)
 {
 	if(kctx->modshare[x] == NULL) {
 		kctx->modshare[x] = d;
@@ -126,10 +126,11 @@ static KonohaContextVar* new_context(KonohaContext *kctx, const PlatformApi *pla
 	static volatile size_t ctxid_counter = 0;
 	ctxid_counter++;
 	if(kctx == NULL) {  // NULL means first one
-		LibKonohaApiVar *kklib = (LibKonohaApiVar*)calloc(sizeof(LibKonohaApi) + sizeof(KonohaContextVar), 1);
-		kklib_init(kklib);
-		newctx = (KonohaContextVar*)(kklib + 1);
-		newctx->klib = (LibKonohaApi*)kklib;
+		LibKonohaApiVar *klib = (LibKonohaApiVar*)calloc(sizeof(LibKonohaApi) + sizeof(KonohaContextVar), 1);
+		klib_init(klib);
+		klib->Konoha_setModule    = Konoha_setModule;
+		newctx = (KonohaContextVar*)(klib + 1);
+		newctx->klib = (LibKonohaApi*)klib;
 		newctx->plat = plat;
 		kctx = (KonohaContext*)newctx;
 		newctx->modshare = (kmodshare_t**)calloc(sizeof(kmodshare_t*), MOD_MAX);

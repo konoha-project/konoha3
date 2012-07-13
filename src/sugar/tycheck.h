@@ -272,9 +272,9 @@ static KMETHOD ExprTyCheck_Int(KonohaContext *kctx, KonohaStack *sfp)
 
 static kMethod* NameSpace_getGetterMethodNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ksymbol_t fn)
 {
-	kMethod *mtd = kNameSpace_getMethodNULL(ns, cid, MN_toGETTER(fn));
+	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toGETTER(fn));
 	if(mtd == NULL) {
-		mtd = kNameSpace_getMethodNULL(ns, cid, MN_toISBOOL(fn));
+		mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toISBOOL(fn));
 	}
 	return mtd;
 }
@@ -323,7 +323,7 @@ static kExpr* Expr_tyCheckVariable2(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 		if(mtd != NULL) {
 			return new_GetterExpr(kctx, tk, mtd, new_Variable(LOCAL, genv->this_cid, 0, gma));
 		}
-//		mtd = kNameSpace_getMethodNULL(genv->ns, genv->this_cid, fn);
+//		mtd = KLIB kNameSpace_getMethodNULL(kctx, genv->ns, genv->this_cid, fn);
 //		if(mtd != NULL) {
 //			return new_FuncValue(kctx, mtd, 0);
 //		}
@@ -334,10 +334,10 @@ static kExpr* Expr_tyCheckVariable2(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 		if(mtd != NULL && cid != TY_System) {
 			return new_GetterExpr(kctx, tk, mtd, new_ConstValue(cid, genv->ns->scriptObject));
 		}
-		mtd = kNameSpace_getMethodNULL(genv->ns, cid, fn);
+		mtd = KLIB kNameSpace_getMethodNULL(kctx, genv->ns, cid, fn);
 		if(mtd != NULL) {
 			kParam *pa = kMethod_param(mtd);
-			KonohaClass *ct = kClassTable_Generics(CT_Func, pa->rtype, pa->psize, (kparam_t*)pa->p);
+			KonohaClass *ct = KLIB KonohaClass_Generics(kctx, CT_Func, pa->rtype, pa->psize, (kparam_t*)pa->p);
 			kFuncVar *fo = (kFuncVar*)KLIB new_kObjectOnGCSTACK(kctx, ct, (uintptr_t)mtd);
 			KSETv(fo->self, genv->ns->scriptObject);
 			return new_ConstValue(ct->cid, fo);
@@ -620,10 +620,10 @@ static kExpr *Expr_lookupMethod(KonohaContext *kctx, kStmt *stmt, kExpr *expr, k
 	if(tkMN->keyword == TK_SYMBOL) {
 		tkMN->keyword = ksymbolA(S_text(tkMN->text), S_size(tkMN->text), SYM_NEWID);
 	}
-	kMethod *mtd = kNameSpace_getMethodNULL(ns, this_cid, tkMN->keyword);
+	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, this_cid, tkMN->keyword);
 	if(mtd == NULL) {
 		if(tkMN->text != TS_EMPTY) {  // Dynamic Call
-			mtd = kNameSpace_getMethodNULL(ns, this_cid, 0);
+			mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, this_cid, 0);
 			if(mtd != NULL) {
 				return Expr_tyCheckDynamicCallParams(kctx, stmt, expr, mtd, gma, tkMN->text, tkMN->keyword, reqty);
 			}
@@ -680,7 +680,7 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kExpr *exprN, kGamm
 	}
 	if(genv->f.vars[0].ty != TY_void) {
 		DBG_ASSERT(genv->this_cid == genv->f.vars[0].ty);
-		kMethod *mtd = kNameSpace_getMethodNULL(genv->ns, genv->this_cid, fn);
+		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, genv->ns, genv->this_cid, fn);
 		if(mtd != NULL) {
 			KSETv(exprN->cons->exprItems[1], new_Variable(LOCAL, gma->genv->this_cid, 0, gma));
 			return mtd;
@@ -702,7 +702,7 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kExpr *exprN, kGamm
 	}
 	{
 		ktype_t cid = O_cid(genv->ns->scriptObject);
-		kMethod *mtd = kNameSpace_getMethodNULL(genv->ns, cid, fn);
+		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, genv->ns, cid, fn);
 		if(mtd != NULL) {
 			KSETv(exprN->cons->exprItems[1], new_ConstValue(cid, genv->ns->scriptObject));
 			return mtd;
@@ -712,7 +712,7 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kExpr *exprN, kGamm
 			KSETv(exprN->cons->exprItems[0], new_GetterExpr(kctx, tk, mtd, new_ConstValue(cid, genv->ns->scriptObject)));
 			return NULL;
 		}
-		mtd = kNameSpace_getMethodNULL(genv->ns, TY_System, fn);
+		mtd = KLIB kNameSpace_getMethodNULL(kctx, genv->ns, TY_System, fn);
 		if(mtd != NULL) {
 			KSETv(exprN->cons->exprItems[1], new_Variable(NULL, TY_System, 0, gma));
 		}
@@ -760,7 +760,7 @@ static kExpr *Expr_tyCheckFuncParams(KonohaContext *kctx, kStmt *stmt, kExpr *ex
 			return texpr;
 		}
 	}
-	kMethod *mtd = kNameSpace_getMethodNULL(gma->genv->ns, CLASS_Func, MN_("invoke"));
+	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, gma->genv->ns, CLASS_Func, MN_("invoke"));
 	DBG_ASSERT(mtd != NULL);
 	KSETv(expr->cons->exprItems[1], expr->cons->exprItems[0]);
 	return Expr_typedWithMethod(kctx, expr, mtd, rtype);
@@ -1154,7 +1154,7 @@ static KMETHOD MethodFunc_lazyCompilation(KonohaContext *kctx, KonohaStack *sfp)
 	mtd->invokeMethodFunc(kctx, sfp); // call again;
 }
 
-static void NameSpace_syncMethods(KonohaContext *kctx)
+static void kNameSpace_syncMethods(KonohaContext *kctx)
 {
 	size_t i, size = kArray_size(ctxsugar->definedMethodList);
 	for (i = 0; i < size; ++i) {

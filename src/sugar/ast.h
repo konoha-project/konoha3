@@ -95,14 +95,14 @@ static kTokenVar* TokenType_resolveGenerics(KonohaContext *kctx, kNameSpace *ns,
 	if(psize > 0) {
 		ct = CT_(TK_type(tk));
 		if(ct->bcid == CLASS_Func) {
-			ct = kClassTable_Generics(ct, p[0].ty, psize-1, p+1);
+			ct = KLIB KonohaClass_Generics(kctx, ct, p[0].ty, psize-1, p+1);
 		}
 		else if(ct->p0 == TY_void) {
 			Token_pERR(kctx, tk, "not generic type: %s", TY_t(TK_type(tk)));
 			return tk;
 		}
 		else {
-			ct = kClassTable_Generics(ct, TY_void, psize, p);
+			ct = KLIB KonohaClass_Generics(kctx, ct, TY_void, psize, p);
 		}
 	}
 	else {
@@ -120,7 +120,7 @@ static int appendKeyword(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList,
 		if(!Token_resolved(kctx, ns, tk)) {
 			const char *t = S_text(tk->text);
 			if(isalpha(t[0])) {
-				KonohaClass *ct = kNameSpace_getCT(ns, NULL/*FIXME*/, S_text(tk->text), S_size(tk->text), TY_unknown);
+				KonohaClass *ct = KLIB kNameSpace_getCT(kctx, ns, NULL/*FIXME*/, S_text(tk->text), S_size(tk->text), TY_unknown);
 				if(ct != NULL) {
 					tk->keyword = KW_TypePattern;
 					tk->ty = ct->cid;

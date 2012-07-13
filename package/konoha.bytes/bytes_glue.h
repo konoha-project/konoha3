@@ -344,7 +344,7 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	base->h.setup    = kmodiconv_setup;
 	base->h.reftrace = kmodiconv_reftrace;
 	base->h.free     = kmodiconv_free;
-	Konoha_setModule(MOD_iconv, &base->h, pline);
+	KLIB Konoha_setModule(kctx, MOD_iconv, &base->h, pline);
 
 	KDEFINE_CLASS defBytes = {
 		STRUCTNAME(Bytes),
@@ -353,7 +353,7 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		.init    = Bytes_init,
 		.p       = Bytes_p,
 	};
-	base->cBytes = Konoha_addClassDef(ns->packageId, PN_konoha, NULL, &defBytes, pline);
+	base->cBytes = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &defBytes, pline);
 	int FN_encoding = FN_("encoding");
 	int FN_x = FN_("x");
 	int FN_c = FN_("c");
@@ -370,7 +370,7 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public|_Const|_Im,     _F(Bytes_new), TY_Bytes, TY_Bytes, MN_("new"), 1, TY_Int, FN_size,
 		DEND,
 	};
-	kNameSpace_loadMethodData(NULL, methoddata);
+	KLIB kNameSpace_loadMethodData(kctx, NULL, methoddata);
 	return true;
 }
 

@@ -189,7 +189,7 @@ static	kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 			.structname = "Math"/*structname*/,
 			.cid = CLASS_newid/*cid*/,
 	};
-	KonohaClass *cMath = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &MathDef, pline);
+	KonohaClass *cMath = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &MathDef, pline);
 	int FN_x = FN_("x");
 	int FN_y = FN_("y");
 	KDEFINE_METHOD MethodData[] = {
@@ -227,7 +227,7 @@ static	kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 #endif
 			DEND,
 	};
-	kNameSpace_loadMethodData(ns, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 
 	KDEFINE_FLOAT_CONST FloatData[] = {
 			{_KVf(E)},
@@ -239,7 +239,7 @@ static	kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 			{_KVf(SQRT2)},
 			{}
 	};
-	kNameSpace_loadConstData(ns, FloatData, 0);
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(FloatData), 0);
 	return true;
 }
 

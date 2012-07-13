@@ -325,7 +325,7 @@ static size_t strlen_alnum(const char *p)
 	return len;
 }
 
-static void NameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ns, const char **d, kfileline_t pline)
+static void kNameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ns, const char **d, kfileline_t pline)
 {
 	INIT_GCSTACK();
 	KUtilsKeyValue kv;
@@ -384,7 +384,7 @@ static void NameSpace_importClassName(KonohaContext *kctx, kNameSpace *ns, kpack
 
 // NameSpace
 
-static KonohaClass *NameSpace_getCT(KonohaContext *kctx, kNameSpace *ns, KonohaClass *thisct/*NULL*/, const char *name, size_t len, ktype_t def)
+static KonohaClass *kNameSpace_getCT(KonohaContext *kctx, kNameSpace *ns, KonohaClass *thisct/*NULL*/, const char *name, size_t len, ktype_t def)
 {
 	KonohaClass *ct = NULL;
 	ksymbol_t un = ksymbolA(name, len, SYM_NONAME);
@@ -437,7 +437,7 @@ static kMethod* CT_findMethodNULL(KonohaContext *kctx, KonohaClass *ct, kmethodn
 
 #define kNameSpace_getStaticMethodNULL(ns, mn)   NameSpace_getStaticMethodNULL(kctx, ns, mn)
 
-static kMethod* NameSpace_getMethodNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, kmethodn_t mn)
+static kMethod* kNameSpace_getMethodNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, kmethodn_t mn)
 {
 	while(ns != NULL) {
 		size_t i;
@@ -456,12 +456,12 @@ static kMethod* NameSpace_getMethodNULL(KonohaContext *kctx, kNameSpace *ns, kty
 //static kMethod* NameSpace_getStaticMethodNULL(KonohaContext *kctx, kNameSpace *ns, kmethodn_t mn)
 //{
 //	while(ks != NULL) {
-//		kMethod *mtd = kNameSpace_getMethodNULL(ns, O_cid(ks->scriptObject), mn);
+//		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, O_cid(ks->scriptObject), mn);
 //		if(mtd != NULL && kMethod_isStatic(mtd)) {
 //			return mtd;
 //		}
 //		if(ks->static_cid != TY_unknown) {
-//			kMethod *mtd = kNameSpace_getMethodNULL(ns, ks->static_cid, mn);
+//			kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, ks->static_cid, mn);
 //			if(mtd != NULL && kMethod_isStatic(mtd)) {
 //				return mtd;
 //			}
@@ -474,9 +474,9 @@ static kMethod* NameSpace_getMethodNULL(KonohaContext *kctx, kNameSpace *ns, kty
 #define kNameSpace_getCastMethodNULL(ns, cid, tcid)     NameSpace_getCastMethodNULL(kctx, ns, cid, tcid)
 static kMethod* NameSpace_getCastMethodNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ktype_t tcid)
 {
-	kMethod *mtd = NameSpace_getMethodNULL(kctx, ns, cid, MN_to(tcid));
+	kMethod *mtd = kNameSpace_getMethodNULL(kctx, ns, cid, MN_to(tcid));
 	if(mtd == NULL) {
-		mtd = NameSpace_getMethodNULL(kctx, ns, cid, MN_as(tcid));
+		mtd = kNameSpace_getMethodNULL(kctx, ns, cid, MN_as(tcid));
 	}
 	return mtd;
 }
@@ -506,7 +506,7 @@ static kbool_t NameSpace_defineMethod(KonohaContext *kctx, kNameSpace *ns, kMeth
 	return 1;
 }
 
-static void NameSpace_loadMethodData(KonohaContext *kctx, kNameSpace *ns, intptr_t *data)
+static void kNameSpace_loadMethodData(KonohaContext *kctx, kNameSpace *ns, intptr_t *data)
 {
 	intptr_t *d = data;
 	while(d[0] != -1) {

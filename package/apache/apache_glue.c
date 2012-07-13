@@ -102,10 +102,11 @@ static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	base->h.setup    = kapacheshare_setup;
 	base->h.reftrace = kapacheshare_reftrace;
 	base->h.free     = kapacheshare_free;
-	Konoha_setModule(MOD_APACHE, &base->h, pline);
-	base->cRequest = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &Def, 0);
-	base->cAprTable = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &aprTableDef, 0);
-	base->cAprTableEntry = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &aprTableEntryDef, 0);
+	KLIB Konoha_setModule(kctx, MOD_APACHE, &base->h, pline);
+	base->cRequest = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &Def, 0);
+	base->cAprTable = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &aprTableDef, 0);
+	base->cAprTableEntry = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &aprTableEntryDef, 0);
+
 	KDEFINE_INT_CONST IntData[] = {
 #define DEFINE_KEYWORD(KW) {#KW, TY_Int, KW}
 		{"APACHE_OK", TY_Int, OK},
@@ -119,7 +120,7 @@ static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		{"APLOG_DEBUG", TY_Int, APLOG_DEBUG},
 		{NULL, 0, 0}
 	};
-	kNameSpace_loadConstData(ns, IntData, 0);
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), 0);
 	return true;
 }
 

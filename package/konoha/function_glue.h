@@ -94,7 +94,7 @@ static	kbool_t function_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 		.init = Float_init,
 		.p     = Float_p,
 	};
-	base->cFloat = Konoha_addClassDef(ns->packageId, PN_konoha, NULL, &defFloat, pline);
+	base->cFloat = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &defFloat, pline);
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
 //		_Public|_Const|_Im, _F(Float_opADD), TY_Float, TY_Float, MN_("opADD"), 1, TY_Float, FN_x,
@@ -113,12 +113,12 @@ static	kbool_t function_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 //		_Public|_Const|_Im, _F(String_toFloat), TY_Float, TY_String, MN_to(TY_Float), 0,
 //		DEND,
 	};
-	kNameSpace_loadMethodData(ns, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	KDEFINE_FLOAT_CONST FloatData[] = {
 		{"FLOAT_EPSILON", TY_Float, DBL_EPSILON},
 		{}
 	};
-	kNameSpace_loadConstData(ns, FloatData, pline);
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(FloatData), pline);
 	return true;
 }
 

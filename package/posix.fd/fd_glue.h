@@ -350,7 +350,7 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		_Public|_Const|_Im, _F(System_fsync), TY_Int, TY_System, MN_("fsync"), 1, TY_Int, FN_("fd"),
 		DEND,
 	};
-	kNameSpace_loadMethodData(ns, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	return true;
 }
 

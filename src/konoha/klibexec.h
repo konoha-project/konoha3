@@ -591,9 +591,7 @@ static void Kraise(KonohaContext *kctx, int param)
 
 // -------------------------------------------------------------------------
 
-static kbool_t KRUNTIME_setModule(KonohaContext *kctx, int x, kmodshare_t *d, kfileline_t pline);
-
-static void kklib_init(LibKonohaApiVar *l)
+static void klib_init(LibKonohaApiVar *l)
 {
 	l->Karray_init   = Karray_init;
 	l->Karray_resize = Karray_resize;
@@ -624,5 +622,4 @@ static void kklib_init(LibKonohaApiVar *l)
 	l->Ksymbol       = Ksymbol;
 	l->Kreportf      = Kreportf;
 	l->Kraise        = Kraise;
-	l->KsetModule    = KRUNTIME_setModule;
 }

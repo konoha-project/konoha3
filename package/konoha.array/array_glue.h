@@ -132,7 +132,7 @@ static	kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public,     _F(Array_add1), TY_void, TY_Array, MN_("add"), 1, TY_T0, FN_("value"),
 		DEND,
 	};
-	kNameSpace_loadMethodData(ns, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	return true;
 }
 

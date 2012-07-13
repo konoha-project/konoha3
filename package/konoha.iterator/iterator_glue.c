@@ -201,7 +201,7 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 	base->h.setup    = kmoditerator_setup;
 	base->h.reftrace = kmoditerator_reftrace;
 	base->h.free     = kmoditerator_free;
-	Konoha_setModule(MOD_iterator, &base->h, pline);
+	KLIB Konoha_setModule(kctx, MOD_iterator, &base->h, pline);
 
 	KDEFINE_CLASS defIterator = {
 		STRUCTNAME(Iterator),
@@ -209,7 +209,7 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 		.init   = Iterator_init,
 		.p      = Iterator_p,
 	};
-	base->cIterator = Konoha_addClassDef(ns->packageId, PN_konoha, NULL, &defIterator, pline);
+	base->cIterator = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &defIterator, pline);
 	base->cStringIterator = CT_p0(kctx, base->cIterator, TY_String);
 	base->cGenericIterator = CT_p0(kctx, base->cIterator, TY_0);
 	KDEFINE_METHOD MethodData[] = {
@@ -221,7 +221,7 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 //		_Public|_Const|_Im, _F(Int_opDEC), TY_Int, TY_Int, MN_‘("opDEC"), 0,
 		DEND,
 	};
-	kNameSpace_loadMethodData(ns, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	return true;
 }
 

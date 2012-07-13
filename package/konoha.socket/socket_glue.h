@@ -621,9 +621,9 @@ static	kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		.init = SockAddr_init,
 		.free = SockAddr_free,
 	};
-	KonohaClass *cSockAddr = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &defSockAddr, pline);
+	KonohaClass *cSockAddr = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defSockAddr, pline);
 	kparam_t pi = {TY_Int, FN_("ivalue")};
-	KonohaClass *CT_IntArray = kClassTable_Generics(CT_Array, TY_Int, 1, &pi);
+	KonohaClass *CT_IntArray = KLIB KonohaClass_Generics(kctx, CT_Array, TY_Int, 1, &pi);
 	ktype_t TY_IntArray = CT_IntArray->cid;
 
 	KDEFINE_METHOD MethodData[] = {
@@ -644,7 +644,7 @@ static	kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		_Public|_Const|_Im, _F(SockAddr_new), TY_SockAddr, TY_SockAddr, MN_("new"), 0,
 		DEND,
 	};
-	kNameSpace_loadMethodData(ns, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	if(IS_defineBytes()) {
 		KDEFINE_METHOD MethodData2[] = {
 				_Public|_Const|_Im, _F(System_sendto), TY_Int, TY_System, MN_("sendto"), 6, TY_Int, FN_("socket"), TY_Bytes, FN_("msg"), TY_Int, FN_("flag"), TY_String, FN_("dstIP"), TY_Int, FN_("dstPort"), TY_Int, FN_("family"),
@@ -653,7 +653,7 @@ static	kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 				_Public|_Const|_Im, _F(System_send), TY_Int, TY_System, MN_("send"), 3, TY_Int, FN_("fd"), TY_Bytes, FN_("msg"), TY_Int, FN_("flags"),
 				DEND,
 			};
-		kNameSpace_loadMethodData(ns, MethodData2);
+		KLIB kNameSpace_loadMethodData(kctx, ns, MethodData2);
 	}
 	else {
 		kreportf(INFO_, pline, "konoha.bytes package hasn't imported. Some features are still disabled.");
@@ -714,7 +714,7 @@ static	kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 			{"SHUT_RDWR", TY_Int, SHUT_RDWR},
 			{}
 	};
-	kNameSpace_loadConstData(ns, IntData, pline);
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
 	return true;
 }
 

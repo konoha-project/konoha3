@@ -119,7 +119,7 @@ static	kbool_t hashmap_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		.free = HashMap_free,
 		.p     = HashMap_p,
 	};
-	KonohaClass *cHashMap = Konoha_addClassDef(ns->packageId, PN_konoha, NULL, &defHashMap, pline);
+	KonohaClass *cHashMap = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &defHashMap, pline);
 	KonohaClassVar *ct = (KonohaClassVar *)CT_HashMap;
 	ct->p0 = TY_String; // default
 	KDEFINE_METHOD MethodData[] = {
@@ -128,7 +128,7 @@ static	kbool_t hashmap_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public, _F(HashMap_new), TY_HashMap, TY_HashMap, MN_("new"), 0,
 		DEND,
 	};
-	kNameSpace_loadMethodData(ns, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	return true;
 }
 

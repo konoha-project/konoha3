@@ -436,12 +436,12 @@ static	kbool_t jansson_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		.free = Jansson_free,
 		.p    = Jansson_p,
 	};
-	KonohaClass *cJson = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &defJson, pline);
+	KonohaClass *cJson = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defJson, pline);
 	//KonohaClassVar *ct = (KonohaClassVar *)CT_Json;
 	//ct->p0 = TY_String; // default
 
 	kparam_t ps = {TY_Json, FN_("json")};
-	KonohaClass *CT_JsonArray = kClassTable_Generics(CT_Array, TY_Json, 1, &ps);
+	KonohaClass *CT_JsonArray = KLIB KonohaClass_Generics(kctx, CT_Array, TY_Json, 1, &ps);
 	ktype_t TY_JsonArray = CT_JsonArray->cid;
 
 	KDEFINE_METHOD MethodData[] = {
@@ -469,7 +469,7 @@ static	kbool_t jansson_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public|_Const|_Im, _F(JsonArray_append),    TY_void,           TY_JsonArray, MN_("append"),   1, TY_Json, FN_("data"),
 		DEND,
 	};
-	kNameSpace_loadMethodData(ns, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	return true;
 }
 

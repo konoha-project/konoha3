@@ -4639,7 +4639,7 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		0/*hashCode*/,
 		0/*initdef*/
 	};
-	base->cValue = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &ValueDef, pline);
+	base->cValue = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &ValueDef, pline);
 
 	static const char *TypeDefName[] = {
 		"Type",
@@ -4667,7 +4667,7 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		TypeDef.free = Type_free;
 		for (int i = 0; i < 6; i++) {
 			TypeDef.structname = TypeDefName[i];
-			CT_TypeTBL[i] = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &TypeDef, 0);
+			CT_TypeTBL[i] = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &TypeDef, 0);
 		}
 	}
 	static KDEFINE_CLASS BasicBlockDef = {
@@ -4686,7 +4686,7 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		0/*hashCode*/,
 		0/*initdef*/
 	};
-	CT_BasicBlock = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &BasicBlockDef, pline);
+	CT_BasicBlock = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &BasicBlockDef, pline);
 
 	static KDEFINE_CLASS IRBuilderDef = {
 		"IRBuilder"/*structname*/,
@@ -4704,7 +4704,7 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		0/*hashCode*/,
 		0/*initdef*/
 	};
-	CT_IRBuilder = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &IRBuilderDef, pline);
+	CT_IRBuilder = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &IRBuilderDef, pline);
 #if LLVM_VERSION >= 300
 	static KDEFINE_CLASS PassManagerBuilderDef = {
 		"PassManagerBuilder"/*structname*/,
@@ -4722,7 +4722,7 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		0/*hashCode*/,
 		0/*initdef*/
 	};
-	KonohaClass *CT_PassManagerBuilder = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &PassManagerBuilderDef, pline);
+	KonohaClass *CT_PassManagerBuilder = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &PassManagerBuilderDef, pline);
 #define TY_PassManagerBuilder         (CT_PassManagerBuilder)->cid
 #endif
 	static KDEFINE_CLASS PassManagerDef = {
@@ -4757,8 +4757,8 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		0/*hashCode*/,
 		0/*initdef*/
 	};
-	KonohaClass *CT_PassManager = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &PassManagerDef, pline);
-	KonohaClass *CT_FunctionPassManager = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &FunctionPassManagerDef, pline);
+	KonohaClass *CT_PassManager = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &PassManagerDef, pline);
+	KonohaClass *CT_FunctionPassManager = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &FunctionPassManagerDef, pline);
 	KonohaClass *CT_InstTBL[21];
 	{
 		static const char *InstDefName[] = {
@@ -4794,7 +4794,7 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		//InstDef.free = Inst_free;
 		for (unsigned int i = 0; i < ARRAY_SIZE(InstDefName); i++) {
 			InstDef.structname = InstDefName[i];
-			CT_InstTBL[i] = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &InstDef, pline);
+			CT_InstTBL[i] = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &InstDef, pline);
 		}
 	}
 #define TY_Instruction         (CT_InstTBL[ 0])->cid
@@ -4834,7 +4834,7 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		//InstDef.free = Inst_free;
 		for (int i = 0; i < 4; i++) {
 			PassDef.structname = PassDefName[i];
-			CT_PassTBL[i] = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &PassDef, pline);
+			CT_PassTBL[i] = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &PassDef, pline);
 		}
 	}
 #define TY_Pass          (CT_PassTBL[0])->cid
@@ -5248,10 +5248,10 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public|_Const|_Coercion|_Im, _F(Object_toLLVMBasicBlock), TY_BasicBlock, TY_Object, MN_to(TY_BasicBlock), 0,
 		DEND,
 	};
-	kNameSpace_loadMethodData(NULL, methoddata);
-	kNameSpace_loadConstData(ns, IntAttributes, 0);
-	kNameSpace_loadConstData(ns, IntIntrinsic, 0);
-	kNameSpace_loadConstData(ns, IntGlobalVariable, 0);
+	KLIB kNameSpace_loadMethodData(kctx, NULL, methoddata);
+	KLIB kNameSpace_loadConstData(kctx, ns, IntAttributes, 0);
+	KLIB kNameSpace_loadConstData(kctx, ns, IntIntrinsic, 0);
+	KLIB kNameSpace_loadConstData(kctx, ns, IntGlobalVariable, 0);
 
 	return true;
 }

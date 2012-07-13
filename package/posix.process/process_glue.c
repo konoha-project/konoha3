@@ -158,7 +158,7 @@ static	kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public|_Static, _F(System_setgroups), TY_Int, TY_System, MN_("setgroups"), 2, TY_Int, FN_("size"), TY_Array, FN_("*list"),
 		DEND,
 	};
-	kNameSpace_loadMethodData(ns, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	KDEFINE_INT_CONST IntData[] = {
 		{_KVi(SIGHUP)},
 		{_KVi(SIGINT)},
@@ -166,7 +166,7 @@ static	kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		{_KVi(SIGKILL)},
 		{}
 	};
-	kNameSpace_loadConstData(ns, IntData, 0);
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), 0);
 	return true;
 }
 

@@ -580,7 +580,7 @@ static kObject* DEFAULT_fnullinit(KonohaContext *kctx, KonohaClass *ct)
 	return ct->nulvalNULL;
 }
 
-static kObject *CT_null(KonohaContext *kctx, KonohaClass *ct)
+static kObject *Knull(KonohaContext *kctx, KonohaClass *ct)
 {
 	return ct->fnull(kctx, ct);
 }
@@ -650,7 +650,7 @@ static KonohaClass *CT_body(KonohaContext *kctx, KonohaClass *ct, size_t head, s
 	return ct;
 }
 
-static KonohaClass *CT_Generics(KonohaContext *kctx, KonohaClass *ct, ktype_t rtype, int psize, kparam_t *p)
+static KonohaClass *KonohaClass_Generics(KonohaContext *kctx, KonohaClass *ct, ktype_t rtype, int psize, kparam_t *p)
 {
 	kparamid_t paramdom = Kparamdom(kctx, psize, p);
 	KonohaClass *ct0 = ct;
@@ -673,7 +673,7 @@ static KonohaClass *CT_Generics(KonohaContext *kctx, KonohaClass *ct, ktype_t rt
 	return ct->searchSimilarClassNULL;
 }
 
-static kString* CT_shortName(KonohaContext *kctx, KonohaClass *ct)
+static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 {
 	if(ct->shortNameNULL == NULL) {
 		if(ct->paramdom == 0 && ct->bcid != CLASS_Func) {
@@ -683,21 +683,21 @@ static kString* CT_shortName(KonohaContext *kctx, KonohaClass *ct)
 			size_t i, c = 0;
 			kParam *cparam = CT_cparam(ct);
 			KUtilsWriteBuffer wb;
-			CT_shortName(kctx, CT_(ct->p0));
+			KonohaClass_shortName(kctx, CT_(ct->p0));
 			for(i = 0; i < cparam->psize; i++) {
-				CT_shortName(kctx, CT_(cparam->p[i].ty));
+				KonohaClass_shortName(kctx, CT_(cparam->p[i].ty));
 			}
 			Kwb_init(&(kctx->stack->cwb), &wb);
 			kString *s = SYM_s(ct->nameid);
 			KLIB Kwb_write(kctx, &wb, S_text(s), S_size(s));
 			kwb_putc(&wb, '[');
 			if(ct->bcid == CLASS_Func) {
-				s = CT_shortName(kctx, CT_(ct->p0));
+				s = KonohaClass_shortName(kctx, CT_(ct->p0));
 				KLIB Kwb_write(kctx, &wb, S_text(s), S_size(s)); c++;
 			}
 			for(i = 0; i < cparam->psize; i++) {
 				if(c > 0) kwb_putc(&wb, ',');
-				s = CT_shortName(kctx, CT_(cparam->p[i].ty));
+				s = KonohaClass_shortName(kctx, CT_(cparam->p[i].ty));
 				KLIB Kwb_write(kctx, &wb, S_text(s), S_size(s));
 			}
 			kwb_putc(&wb, ']');
@@ -725,7 +725,7 @@ static void CT_setName(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t plin
 	}
 }
 
-static KonohaClass *addClassDef(KonohaContext *kctx, kpackage_t packageId, kpackage_t packageDomain, kString *name, KDEFINE_CLASS *cdef, kfileline_t pline)
+static KonohaClass *Konoha_defineClass(KonohaContext *kctx, kpackage_t packageId, kpackage_t packageDomain, kString *name, KDEFINE_CLASS *cdef, kfileline_t pline)
 {
 	KonohaClassVar *ct = new_CT(kctx, NULL, cdef, pline);
 	ct->packageId  = packageId;
@@ -887,10 +887,10 @@ static void KCLASSTABLE_initkklib(LibKonohaApiVar *l)
 	l->new_kMethod          = new_kMethod;
 	l->kMethod_setParam     = kMethod_setParam;
 	l->kMethod_indexOfField = STUB_Method_indexOfField;
-	l->KaddClassDef  = addClassDef;
-	l->Knull = CT_null;
-	l->KonohaClass_shortName = CT_shortName;
-	l->KonohaClass_Generics = CT_Generics;
+	l->Konoha_defineClass    = Konoha_defineClass;
+	l->Knull = Knull;
+	l->KonohaClass_shortName = KonohaClass_shortName;
+	l->KonohaClass_Generics = KonohaClass_Generics;
 }
 
 static void KCLASSTABLE_init(KonohaContext *kctx, KonohaContextVar *ctx)
@@ -1041,5 +1041,5 @@ static void KCLASSTABLE_loadMethod(KonohaContext *kctx)
 		_Static|_Public|_Immutable, _F(System_gc), TY_void, TY_System, MN_("gc"), 0,
 		DEND,
 	};
-	kNameSpace_loadMethodData(NULL, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);
 }

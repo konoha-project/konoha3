@@ -475,16 +475,16 @@ static void konoha_define(KonohaContext *kctx, char *keyvalue)
 	if(p != NULL) {
 		if(isdigit(p[1])) {
 			long n = strtol(p+1, NULL, 0);
-			KDEFINE_INT_CONST ConstData[] = {
+			KDEFINE_INT_CONST IntData[] = {
 				{keyvalue, TY_Int, n}, {}
 			};
-			kNameSpace_loadConstData(KNULL(NameSpace), ConstData, 0);
+			KLIB kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(IntData), 0);
 		}
 		else {
-			KDEFINE_TEXT_CONST ConstData[] = {
+			KDEFINE_TEXT_CONST TextData[] = {
 				{keyvalue, TY_TEXT, p+1}, {}
 			};
-			kNameSpace_loadConstData(KNULL(NameSpace), ConstData, 0);
+			KLIB kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(TextData), 0);
 		}
 	}
 	else {
@@ -530,11 +530,11 @@ static void konoha_commandline(KonohaContext *kctx, int argc, char** argv)
 		DBG_P("argv=%d, '%s'", i, argv[i]);
 		KLIB kArray_add(kctx, a, KLIB new_kString(kctx, argv[i], strlen(argv[i]), SPOL_TEXT));
 	}
-	KDEFINE_OBJECT_CONST ConstData[] = {
+	KDEFINE_OBJECT_CONST ObjectData[] = {
 			{"SCRIPT_ARGV", CT_StringArray0->cid, (kObject*)a},
 			{}
 	};
-	kNameSpace_loadConstData(KNULL(NameSpace), ConstData, 0);
+	KLIB kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(ObjectData), 0);
 }
 
 static struct option long_options2[] = {

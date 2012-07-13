@@ -382,7 +382,7 @@ static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		_Public|_Const|_Im, _F(String_substring),   TY_String, TY_String, MN_("substring"), 2, TY_Int, FN_("offset"), TY_Int, FN_("length"),
 		DEND,
 	};
-	kNameSpace_loadMethodData(ns, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	return true;
 }
 

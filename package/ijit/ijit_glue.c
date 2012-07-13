@@ -704,14 +704,14 @@ static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	static KDEFINE_CLASS PointerDef = {
 		STRUCTNAME(Pointer)
 	};
-	base->cPointer = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &PointerDef, pline);
+	base->cPointer = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &PointerDef, pline);
 
 	//FIXME
 	//KDEFINE_INT_CONST IntData[] = {
 	//	{"PTRSIZE", TY_Int, sizeof(void*)},
 	//	{NULL},
 	//};
-	//kNameSpace_loadConstData(ns, IntData, pline);
+	//KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
 
 	Konoha_setModule(MOD_jit, &base->h, pline);
 	return true;
@@ -721,7 +721,7 @@ static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_
 {
 	USING_SUGAR;
 
-	kMethod *mtd = kNameSpace_getMethodNULL(ns, TY_System, MN_("genCode"));
+	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_System, MN_("genCode"));
 	KINITv(kmodjit->genCode, mtd);
 #define TY_Pointer kmodjit->cPointer->cid
 #define _Public   kMethod_Public
@@ -812,7 +812,7 @@ static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_
 
 		DEND,
 	};
-	kNameSpace_loadMethodData(ns, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 
 	LibKonohaApiVar *l = (LibKonohaApiVar*)kctx->klib;
 	l->kMethod_genCode = GenCodeDefault;

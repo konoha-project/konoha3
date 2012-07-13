@@ -103,14 +103,14 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kObject *o, kStmt
 {
 	USING_SUGAR;
 	ktype_t cid = O_cid(o);
-	kMethod *mtd = kNameSpace_getMethodNULL(ns, cid, MN_toSETTER(fn));
+	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(fn));
 	if(mtd != NULL) {
 		SUGAR Stmt_p(kctx, stmt, NULL, ERR_, "already defined name: %s.%s", CT_t(O_ct(o)), SYM_t(fn));
 		return NULL;
 	}
-	mtd = kNameSpace_getMethodNULL(ns, cid, MN_toGETTER(fn));
+	mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toGETTER(fn));
 	if(mtd == NULL) {
-		mtd = kNameSpace_getMethodNULL(ns, cid, MN_toISBOOL(fn));
+		mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toISBOOL(fn));
 	}
 	if(mtd != NULL && kMethod_rtype(mtd) != ty) {
 		SUGAR Stmt_p(kctx, stmt, NULL, ERR_, "differently defined getter: %s.%s", CT_t(O_ct(o)), SYM_t(fn));
@@ -274,7 +274,7 @@ static kbool_t global_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfilel
 			.cflag = kClass_Singleton|kClass_Final,
 			.cstruct_size = sizeof(kScript),
 		};
-		KonohaClass *cScript = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &defScript, pline);
+		KonohaClass *cScript = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defScript, pline);
 		KSETv(((kNameSpaceVar*)ns)->scriptObject, knull(cScript));
 	}
 	return true;

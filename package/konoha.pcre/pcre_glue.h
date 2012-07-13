@@ -647,7 +647,7 @@ static kbool_t pcre_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	base->h.setup    = kregexshare_setup;
 	base->h.reftrace = kregexshare_reftrace;
 	base->h.free     = kregexshare_free;
-	Konoha_setModule(MOD_REGEX, &base->h, pline);
+	KLIB Konoha_setModule(kctx, MOD_REGEX, &base->h, pline);
 
 	KDEFINE_CLASS RegexDef = {
 		STRUCTNAME(Regex),
@@ -656,10 +656,10 @@ static kbool_t pcre_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		.free = Regex_free,
 		.p    = Regex_p,
 	};
-	base->cRegex = Konoha_addClassDef(ns->packageId, PN_konoha, NULL, &RegexDef, pline);
+	base->cRegex = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &RegexDef, pline);
 
 	kparam_t p = { .ty = TY_String,  };
-	KonohaClass *cStrArray = kClassTable_Generics(CT_(TY_Array), TY_void, 1, &p);
+	KonohaClass *cStrArray = KLIB KonohaClass_Generics(kctx, CT_(TY_Array), TY_void, 1, &p);
 #define TY_StrArray (cStrArray->cid)
 	int FN_x = FN_("x");
 	int FN_y = FN_("y");
@@ -671,7 +671,7 @@ static kbool_t pcre_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public|_Const, _F(String_split),  TY_StrArray, TY_String, MN_("split"), 1, TY_Regex, FN_x,
 		DEND,
 	};
-	kNameSpace_loadMethodData(ns, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	return true;
 }
 

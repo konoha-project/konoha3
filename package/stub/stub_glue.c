@@ -51,7 +51,7 @@ static	kbool_t stub_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 //		_Public, _F(NameSpace_defineStmtTyCheck), TY_void, TY_NameSpace, MN_("defineStmtTyCheck"), 2, TY_String, FN_key, TY_String, FN_methodname,
 //		DEND,
 //	};
-//	kNameSpace_loadMethodData(NULL, MethodData);
+//	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);
 	return true;
 }
 

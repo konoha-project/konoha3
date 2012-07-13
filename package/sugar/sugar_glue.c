@@ -250,19 +250,19 @@ static	kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 
 	/* Func[Int, Token, String] */
 	kparam_t P_FuncTokenize[] = {{TY_Token}, {TY_String}};
-	int TY_FuncTokenize = (kClassTable_Generics(CT_Func, TY_Int, 2, P_FuncTokenize))->cid;
+	int TY_FuncTokenize = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_Int, 2, P_FuncTokenize))->cid;
 	/* Func[Int, Stmt, Int, Token[], Int, Int] */
 	kparam_t P_FuncPatternMatch[] = {{TY_Stmt}, {TY_Int}, {TY_TokenArray}, {TY_Int}, {TY_Int}};
-	int TY_FuncPatternMatch = (kClassTable_Generics(CT_Func, TY_Int, 5, P_FuncPatternMatch))->cid;
+	int TY_FuncPatternMatch = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_Int, 5, P_FuncPatternMatch))->cid;
 	/* Func[Expr, Stmt, Token[], Int, Int, Int] */
 	kparam_t P_FuncParseExpr[] = {{TY_Stmt}, {TY_TokenArray}, {TY_Int}, {TY_Int}, {TY_Int}};
-	int TY_FuncParseExpr = (kClassTable_Generics(CT_Func, TY_Expr, 5, P_FuncParseExpr))->cid;
+	int TY_FuncParseExpr = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_Expr, 5, P_FuncParseExpr))->cid;
 	/* Func[Boolean, Stmt, Gamma] */
 	kparam_t P_FuncStmtTyCheck[] = {{TY_Stmt}, {TY_Gamma}};
-	int TY_FuncStmtTyCheck = (kClassTable_Generics(CT_Func, TY_Boolean, 2, P_FuncStmtTyCheck))->cid;
+	int TY_FuncStmtTyCheck = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_Boolean, 2, P_FuncStmtTyCheck))->cid;
 	/* Func[Expr, Stmt, Expr, Gamma, Int] */
 	kparam_t P_FuncExprTyCheck[] = {{TY_Stmt}, {TY_Expr}, {TY_Gamma}, {TY_Int}};
-	int TY_FuncExprTyCheck = (kClassTable_Generics(CT_Func, TY_Expr, 4, P_FuncExprTyCheck))->cid;
+	int TY_FuncExprTyCheck = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_Expr, 4, P_FuncExprTyCheck))->cid;
 	//DBG_P("func=%s", TY_t(TY_FuncExprTyCheck));
 
 	KDEFINE_METHOD MethodData[] = {
@@ -288,7 +288,7 @@ static	kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 //		_Public, _F(Stmt_parsedExpr), TY_Expr, TY_Stmt, MN_("parseExpr"), 3, TY_TokenArray, FN_tls, TY_Int, FN_s, TY_Int, FN_e,
 		DEND,
 	};
-	kNameSpace_loadMethodData(NULL, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);
 	return true;
 }
 
@@ -400,7 +400,7 @@ static kbool_t sugar_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileli
 #undef DEFINE_KEYWORD
 		{NULL},
 	};
-	kNameSpace_loadConstData(ns, IntData, pline);
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("sugar"), .rule ="\"sugar\" $toks", TopStmtTyCheck_(sugar), },
 		{ .keyword = KW_END, },

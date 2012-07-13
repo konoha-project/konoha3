@@ -50,7 +50,7 @@ static kbool_t null_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		kMethod_Public, _F(Object_isNotNull), TY_Boolean, TY_Object, MN_("isNotNull"), 0,
 		DEND,
 	};
-	kNameSpace_loadMethodData(ns, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 
 	return true;
 }

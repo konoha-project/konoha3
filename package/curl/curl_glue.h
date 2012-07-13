@@ -408,7 +408,7 @@ static	kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		.init = Curl_init,
 		.free = Curl_free,
 	};
-	KonohaClass *cCurl = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &defCurl, pline);
+	KonohaClass *cCurl = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defCurl, pline);
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im, _F(Curl_new), TY_Curl, TY_Curl, MN_("new"), 0,
@@ -418,7 +418,7 @@ static	kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public|_Const|_Im, _F(Curl_getInfo), TY_Object/*FIXME TY_Dynamic*/, TY_Curl, MN_("getInfo"), 1, TY_Int, FN_("type"),
 		DEND,
 	};
-	kNameSpace_loadMethodData(ns, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 
 	KDEFINE_INT_CONST IntData[] = {
 		{_KVi(CURLOPT_AUTOREFERER)},
@@ -519,7 +519,7 @@ static	kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		{_KVi(CURLINFO_CONTENT_TYPE)},
 		{} // end of const data
 	};
-	kNameSpace_loadConstData(ns, IntData, pline);
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
 	return true;
 }
 

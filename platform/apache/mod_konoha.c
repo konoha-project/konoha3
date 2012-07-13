@@ -278,7 +278,7 @@ KonohaContext* konoha_create(KonohaClass **cRequest)
 #define TY_TblEntry  (CT_AprTableEntry->cid)
 
 	kparam_t ps = {TY_TblEntry, FN_("aprTableEntry")};
-	KonohaClass *CT_TblEntryArray = kClassTable_Generics(CT_Array, TY_TblEntry, 1, &ps);
+	KonohaClass *CT_TblEntryArray = KLIB KonohaClass_Generics(kctx, CT_Array, TY_TblEntry, 1, &ps);
 	ktype_t TY_TblEntryArray = CT_TblEntryArray->cid;
 
 	int FN_x = FN_("x");
@@ -301,7 +301,7 @@ KonohaContext* konoha_create(KonohaClass **cRequest)
 		_P, _F(AprTableEntry_getVal), TY_String, TY_TblEntry, MN_("getVal"), 0,
 		DEND,
 	};
-	kNameSpace_loadMethodData(ns, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	return konoha;
 }
 
@@ -326,7 +326,7 @@ static int konoha_handler(request_rec *r)
 
 	KonohaContext_t kctx = (KonohaContext_t) konoha;
 	kNameSpace *ns = KNULL(NameSpace);
-	kMethod *mtd = kNameSpace_getMethodNULL(ns, TY_System, MN_("handler"));
+	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_System, MN_("handler"));
 	if (mtd == NULL) {
 		ap_log_rerror(APLOG_MARK, APLOG_CRIT, 0, r, "System.handler() not found");
 		return -1;

@@ -49,7 +49,7 @@
 //////	VAR_StmtTyCheck(stmt, syn, gma);
 //////	if((r = SUGAR Stmt_tyCheckExpr(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0))) {
 //////		kExpr *expr = kStmt_expr(stmt, KW_ExprPattern, NULL);
-//////		kMethod *mtd = kNameSpace_getMethodNULL(gma->genv->ns, TY_NameSpace, MN_("assert"));
+//////		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, gma->genv->ns, TY_NameSpace, MN_("assert"));
 //////		assert(expr != NULL);
 //////		assert(mtd != NULL);
 //////		kStmt_toExprCall(stmt, mtd, 2, gma->genv->ns, expr);
@@ -74,7 +74,7 @@
 //		_Static|_Public, _F(NameSpace_assert), TY_Int, TY_NameSpace, MN_("assert"), 1, TY_Boolean, FN_cond,
 //		DEND,
 //	};
-//	kNameSpace_loadMethodData(ns, MethodData);
+//	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 //	return true;
 //}
 //

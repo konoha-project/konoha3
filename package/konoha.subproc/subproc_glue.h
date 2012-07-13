@@ -1258,10 +1258,10 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		.p     = Subproc_p,
 	};
 
-	base->cSubproc= Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &defSubproc, pline);
+	base->cSubproc= KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defSubproc, pline);
 
 	kparam_t ps = {TY_String, FN_("str")};
-	KonohaClass *CT_StringArray2 = kClassTable_Generics(CT_Array, TY_String, 1, &ps);
+	KonohaClass *CT_StringArray2 = KLIB KonohaClass_Generics(kctx, CT_Array, TY_String, 1, &ps);
 	ktype_t TY_StringArray = CT_StringArray2->cid;
 
 	KDEFINE_METHOD MethodData[] = {
@@ -1292,7 +1292,7 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public|_Const|_Im, _F(Subproc_isERR2StdOUT), TY_Boolean, TY_Subproc, MN_("isERR2StdOUT"), 0,
 		DEND,
 	};
-	kNameSpace_loadMethodData(ns, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	return true;
 }
 

@@ -598,11 +598,11 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	//	0/*hashCode*/,
 	//	0/*initdef*/
 	//};
-	KonohaClass *CT_MPI = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &MPIDef, pline);
-	KonohaClass *CT_MPIComm = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &MPICommDef, pline);
-	KonohaClass *CT_MPIRequest = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &MPIRequestDef, pline);
-	KonohaClass *CT_MPIData = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &MPIDataDef, pline);
-	//KonohaClass *CT_MPIOp = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &MPIOpDef, pline);
+	KonohaClass *CT_MPI = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &MPIDef, pline);
+	KonohaClass *CT_MPIComm = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &MPICommDef, pline);
+	KonohaClass *CT_MPIRequest = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &MPIRequestDef, pline);
+	KonohaClass *CT_MPIData = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &MPIDataDef, pline);
+	//KonohaClass *CT_MPIOp = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &MPIOpDef, pline);
 #define TY_MPI         (CT_MPI->cid)
 #define TY_MPIComm     (CT_MPIComm->cid)
 #define TY_MPIRequest  (CT_MPIRequest->cid)
@@ -665,7 +665,7 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		_Public, _F(MPIData_getSize), TY_Int, TY_MPIData, MN_("getSize"), 0, 
 		DEND,
 	};
-	kNameSpace_loadMethodData(NULL, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);
 	KDEFINE_INT_CONST OpData[] = {
 			{"MAX",  TY_MPIOp, (kint_t)MPI_MAX},
 			{"MIN",  TY_MPIOp, (kint_t)MPI_MIN},
@@ -679,7 +679,7 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 			{"BXOR", TY_MPIOp, (kint_t)MPI_BXOR},
 			{}
 	};
-	kNameSpace_loadConstData(ns, OpData, pline);
+	KLIB kNameSpace_loadConstData(kctx, ns, OpData, pline);
 	return true;
 }
 

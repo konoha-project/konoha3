@@ -152,7 +152,7 @@ static	kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, cons
 		_Public, _F(NameSpace_man), TY_void, TY_NameSpace, MN_("man"), 1, TY_Object, FN_("x") | FN_COERCION,
 		DEND,
 	};
-	kNameSpace_loadMethodData(ns, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	return true;
 }
 

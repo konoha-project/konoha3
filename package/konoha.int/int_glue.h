@@ -66,13 +66,13 @@ static kbool_t int_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 //		_Public|_Const|_Im, _F(Int_opDEC), TY_Int, TY_Int, MN_‘("opDEC"), 0,
 		DEND,
 	};
-	kNameSpace_loadMethodData(ns, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	KDEFINE_INT_CONST IntData[] = {
 			{"INT_MAX", TY_Int, KINT_MAX},
 			{"INT_MIN", TY_Int, KINT_MIN},
 			{NULL},
 	};
-	kNameSpace_loadConstData(ns, IntData, pline);
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
 	return true;
 }
 

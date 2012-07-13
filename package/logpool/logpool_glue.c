@@ -365,7 +365,7 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		.init = RawPtr_init,
 		.free = Logpool_free,
 	};
-	KonohaClass *ct0 = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &Def0, pline);
+	KonohaClass *ct0 = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &Def0, pline);
 
 	static KDEFINE_CLASS Def1 = {
 		.structname = "Log"/*structname*/,
@@ -374,7 +374,7 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		.free = Log_free,
 		.p    = Log_p,
 	};
-	KonohaClass *ct1 = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &Def1, pline);
+	KonohaClass *ct1 = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &Def1, pline);
 
 	static KDEFINE_CLASS Def2 = {
 		.structname = "PoolPlugin",
@@ -382,7 +382,7 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		.init = RawPtr_init,
 		.free = RawPtr_free,
 	};
-	KonohaClass *ct2 = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &Def2, pline);
+	KonohaClass *ct2 = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &Def2, pline);
 #define TY_Plugin ct2->cid
 	static KDEFINE_CLASS Def3 = {
 		.structname = "",
@@ -413,7 +413,7 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 
 	for (i = 0; i < 8; i++) {
 		Def3.structname = names[i];
-		tbls[i] = Konoha_addClassDef(ns->packageId, ns->packageDomain, NULL, &Def3, pline);
+		tbls[i] = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &Def3, pline);
 	}
 
 	int FN_x = FN_("x");
@@ -437,7 +437,7 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_P   , _F(PoolPlugin_failed), TY_void,  TY_Plugin   , MN_("failed"), 1, TY_Plugin, FN_x,
 		DEND,
 	};
-	kNameSpace_loadMethodData(ns, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	return true;
 }
 
