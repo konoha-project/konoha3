@@ -544,14 +544,14 @@ typedef struct kmodshare_t {
 		kArray     *toArray;\
 		kMethod    *toMethod;\
 		kFunc      *toFunc; \
-		const struct _kFloat  *f; \
-		const struct _kBytes  *ba; \
 		kNameSpace  *toNameSpace;\
 		kToken             *tk;\
 		kStmt              *stmt;\
 		kExpr              *expr;\
 		kBlock             *bk;\
 		kGamma  *gma;   \
+		const struct _kFloat  *f; \
+		const struct _kBytes  *ba; \
 		struct _kIterator *itr; \
 		struct kClass  *c; \
 		struct kDate *dt;\
