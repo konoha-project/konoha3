@@ -131,7 +131,7 @@ static KMETHOD Stmt_printError(KonohaContext *kctx, KonohaStack *sfp)
 	USING_SUGAR;
 	kStmt   *stmt  = sfp[0].stmt;
 	kString *msg   = sfp[1].toString;
-	SUGAR Stmt_p(kctx, stmt, NULL, ERR_, "%s", S_text(msg));
+	SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "%s", S_text(msg));
 	RETURN_(K_NULLEXPR);
 }
 
@@ -143,11 +143,11 @@ static KMETHOD Stmt_printError(KonohaContext *kctx, KonohaStack *sfp)
 //	USING_SUGAR;
 //	symbol_t kw = KW_s(key);
 //	if(kw == SYM_NONAME) {
-//		kreportf(CRIT_, "undefined keyword: %s", S_text(key));
+//		kreportf(CritTag, "undefined keyword: %s", S_text(key));
 //	}
 //	SugarSyntax *syn = SYN_(ks, kw);
 //	if(syn == NULL) {
-//		kreportf(CRIT_, "undefined syntax: %s", S_text(key));
+//		kreportf(CritTag, "undefined syntax: %s", S_text(key));
 //	}
 //	return syn;
 //}
@@ -158,10 +158,10 @@ static KMETHOD Stmt_printError(KonohaContext *kctx, KonohaStack *sfp)
 //	USING_SUGAR;
 //	kToken *tk  = sfp[0].tk;
 //	if(IS_String(tk->text)) {
-//		SUGAR p(kctx, ERR_, tk->uline, tk->lpos, "syntax error: %s", S_text(tk->text));
+//		SUGAR p(kctx, ErrTag, tk->uline, tk->lpos, "syntax error: %s", S_text(tk->text));
 //	}
 //	else {
-//		SUGAR p(kctx, ERR_, tk->uline, tk->lpos, "syntax error");
+//		SUGAR p(kctx, ErrTag, tk->uline, tk->lpos, "syntax error");
 //	}
 //	RETURN_(K_NULLEXPR);
 //}
@@ -207,7 +207,7 @@ static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp)
 //	kExpr *expr  = sfp[1].expr;
 //	kToken *tk     = sfp[2].tk;
 //	if(tk->tt != AST_PARENTHESIS || tk->tt != AST_BRACKET) {
-//		SUGAR p(kctx, WARN_, tk->uline, tk->lpos, "not parameter token");
+//		SUGAR p(kctx, WarnTag, tk->uline, tk->lpos, "not parameter token");
 //		kObject_setNullObject(expr, 1);
 //	}
 //	if(IS_NOTNULL(expr)) {
@@ -339,7 +339,7 @@ static KMETHOD StmtTyCheck_sugar(KonohaContext *kctx, KonohaStack *sfp)
 		SugarSyntaxVar *syn = toks_syntax(kctx, gma->genv->ns, tls);
 		if(syn != NULL) {
 			if(syn->syntaxRuleNULL != NULL) {
-				SUGAR Stmt_p(kctx, stmt, NULL, WARN_, "overriding syntax rule: %s", KW_t(syn->keyword));
+				SUGAR Stmt_p(kctx, stmt, NULL, WarnTag, "overriding syntax rule: %s", KW_t(syn->keyword));
 				KLIB kArray_clear(kctx, syn->syntaxRuleNULL, 0);
 			}
 			else {

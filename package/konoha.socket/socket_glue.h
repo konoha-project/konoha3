@@ -615,7 +615,7 @@ static KMETHOD SockAddr_new (KonohaContext *kctx, KonohaStack *sfp)
 
 static	kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KDEFINE_CLASS defSockAddr = {
+	KDEFINE_TY defSockAddr = {
 		STRUCTNAME(SockAddr),
 		.cflag = kClass_Final,
 		.init = SockAddr_init,
@@ -656,7 +656,7 @@ static	kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		KLIB kNameSpace_loadMethodData(kctx, ns, MethodData2);
 	}
 	else {
-		kreportf(INFO_, pline, "konoha.bytes package hasn't imported. Some features are still disabled.");
+		kreportf(InfoTag, pline, "konoha.bytes package hasn't imported. Some features are still disabled.");
 	}
 	KDEFINE_INT_CONST IntData[] = {
 			{"PF_LOCAL",TY_Int, PF_LOCAL},

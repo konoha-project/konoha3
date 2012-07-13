@@ -27,20 +27,20 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/logger.h>
 #include <minikonoha/local.h>
-#ifndef PLATFORM_KERNEL
+#ifndef PLATAPIFORM_KERNEL
 #include <syslog.h>
-#endif /* PLATFORM_KERNEL */
+#endif /* PLATAPIFORM_KERNEL */
 /* ------------------------------------------------------------------------ */
 /* [logger] */
 
 typedef struct  {
-	kmodlocal_t h;
+	KonohaContextModule h;
 	KUtilsGrowingArray logbuf;
 
 } ctxlogger_t;
 
 typedef struct  {
-	kmodshare_t h;
+	KonohaModule h;
 } kmodlogger_t;
 
 #define kmodlogger  ((kmodlogger_t*)kctx->modshare[MOD_logger])
@@ -135,7 +135,7 @@ static uintptr_t Ktrace_p(KonohaContext *kctx, klogconf_t *logconf, va_list ap)
 	}
 	p[0] = '}'; p++;
 	p[0] = '\0';
-	PLAT syslog_i(LOG_INFO, "%s", buf);
+	PLATAPI syslog_i(LOG_INFO, "%s", buf);
 	return 0;// FIXME reference to log
 }
 
@@ -152,27 +152,27 @@ static uintptr_t Ktrace(KonohaContext *kctx, klogconf_t *logconf, ...)
 	return ref;
 }
 
-static void ctxlogger_reftrace(KonohaContext *kctx, struct kmodlocal_t *baseh)
+static void ctxlogger_reftrace(KonohaContext *kctx, struct KonohaContextModule *baseh)
 {
 //	ctxlogger_t *base = (ctxlogger_t*)baseh;
 }
-static void ctxlogger_free(KonohaContext *kctx, struct kmodlocal_t *baseh)
+static void ctxlogger_free(KonohaContext *kctx, struct KonohaContextModule *baseh)
 {
 	ctxlogger_t *base = (ctxlogger_t*)baseh;
 	KFREE(base, sizeof(ctxlogger_t));
 }
 
-static void kmodlogger_setup(KonohaContext *kctx, struct kmodshare_t *def, int newctx)
+static void kmodlogger_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
 {
 	if(newctx) {
 		ctxlogger_t *base = (ctxlogger_t*)KCALLOC(sizeof(ctxlogger_t), 1);
 		base->h.reftrace = ctxlogger_reftrace;
 		base->h.free     = ctxlogger_free;
-		kctx->modlocal[MOD_logger] = (kmodlocal_t*)base;
+		kctx->modlocal[MOD_logger] = (KonohaContextModule*)base;
 	}
 }
 
-static void kmodlogger_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
+static void kmodlogger_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 
 }
@@ -180,7 +180,7 @@ static void kmodlogger_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
 void MODLOGGER_free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	if(IS_RootKonohaContext(ctx)) {
-		free(kmodlogger/*, sizeof(kmodshare_t)*/);
+		free(kmodlogger/*, sizeof(KonohaModule)*/);
 	}
 }
 
@@ -191,7 +191,7 @@ void MODLOGGER_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	base->h.setup    = kmodlogger_setup;
 	base->h.reftrace = kmodlogger_reftrace;
 	//base->h.free     = kmodlogger_free;
-	KLIB Konoha_setModule(kctx, MOD_logger, (kmodshare_t*)base, 0);
+	KLIB Konoha_setModule(kctx, MOD_logger, (KonohaModule*)base, 0);
 	KSET_KLIB(Ktrace, 0);
 }
 

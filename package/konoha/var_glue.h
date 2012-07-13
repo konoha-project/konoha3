@@ -44,19 +44,19 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp)
 //	DBG_P("global assignment .. ");
 //	kObject *scr = gma->genv->ns->scrNUL;
 //	if(scr == NULL) {
-//		SUGAR p(kctx, ERR_, stmt->uline, -1, " global variables are not available");
+//		SUGAR p(kctx, ErrTag, stmt->uline, -1, " global variables are not available");
 //		RETURNb_(false);
 //	}
 //	kExpr *vexpr = kStmt_expr(stmt, KW_("var"), K_NULLEXPR);
 //	ksymbol_t fn = tosymbol(kctx, vexpr);
 //	if(fn == SYM_NONAME) {
-//		SUGAR p(kctx, ERR_, stmt->uline, -1, "not variable name");
+//		SUGAR p(kctx, ErrTag, stmt->uline, -1, "not variable name");
 //		RETURNb_(false);
 //	}
 //	kExpr *expr = kStmt_expr(stmt, KW_ExprPattern, K_NULLEXPR);
 //	DBG_P("expr kw='%s'", KW_t(expr->syn->keyword));
 //	if(!SUGAR Stmt_tyCheckExpr(kctx, stmt, KW_ExprPattern, gma, TY_var, 0)) {
-//		SUGAR p(kctx, ERR_, stmt->uline, -1, "type error");
+//		SUGAR p(kctx, ErrTag, stmt->uline, -1, "type error");
 //		RETURNb_(false);
 //	}
 //	/*kExpr **/expr = kStmt_expr(stmt, KW_ExprPattern, K_NULLEXPR);
@@ -64,7 +64,7 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp)
 //	if(mtd == NULL) {
 //		RETURNb_(false);
 //	}
-//	SUGAR p(kctx, INFO_, stmt->uline, -1, "%s has type %s", SYM_t(fn), TY_t(expr->ty));
+//	SUGAR p(kctx, InfoTag, stmt->uline, -1, "%s has type %s", SYM_t(fn), TY_t(expr->ty));
 //	expr = SUGAR new_TypedMethodCall(kctx, TY_void, mtd, gma, 2, new_ConstValue(O_cid(scr), scr), expr);
 //	KLIB kObject_setObject(kctx, stmt, KW_ExprPattern, expr);
 //	kStmt_typed(stmt, EXPR);

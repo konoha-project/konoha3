@@ -314,9 +314,9 @@ static kbool_t rope_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		};
 		KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	}
-	KSET_CLASSFUNC(CT_String, unbox, String2, pline);
-	KSET_CLASSFUNC(CT_String, free, String2, pline);
-	KSET_CLASSFUNC(CT_String, reftrace, String2, pline);
+	KSET_TYFUNC(CT_String, unbox, String2, pline);
+	KSET_TYFUNC(CT_String, free, String2, pline);
+	KSET_TYFUNC(CT_String, reftrace, String2, pline);
 	KSET_KLIB(new_kString, pline);
 	return true;
 }

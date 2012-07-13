@@ -52,13 +52,13 @@ static kString *kwb_newString(KonohaContext *kctx, KUtilsWriteBuffer *wb, int fl
 #define IS_io(O)      ((O)->h.ct == CT_io)
 
 typedef struct {
-	kmodshare_t h;
+	KonohaModule h;
 	KonohaClass *cInputStream;
 	KonohaClass *cOutputStream;
 } kioshare_t;
 
 typedef struct {
-	kmodlocal_t h;
+	KonohaContextModule h;
 } kiomod_t;
 
 /* ------------------------------------------------------------------------ */
@@ -212,14 +212,14 @@ static void OutputStream_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static KDEFINE_CLASS InputStreamDef = {
+static KDEFINE_TY InputStreamDef = {
 	STRUCTNAME(InputStream),
 	.cflag = 0,
 	.init = Stream_init,
 	.free = Stream_free,
 };
 
-static KDEFINE_CLASS OutputStreamDef = {
+static KDEFINE_TY OutputStreamDef = {
 	STRUCTNAME(OutputStream),
 	.cflag = 0,
 	.init = Stream_init,
@@ -227,15 +227,15 @@ static KDEFINE_CLASS OutputStreamDef = {
 };
 
 
-static void kioshare_setup(KonohaContext *kctx, struct kmodshare_t *def)
+static void kioshare_setup(KonohaContext *kctx, struct KonohaModule *def)
 {
 }
 
-static void kioshare_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
+static void kioshare_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 }
 
-static void kioshare_free(KonohaContext *kctx, struct kmodshare_t *baseh)
+static void kioshare_free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 	KFREE(baseh, sizeof(kioshare_t));
 }

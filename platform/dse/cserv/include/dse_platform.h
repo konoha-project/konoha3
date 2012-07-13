@@ -24,8 +24,8 @@
 
 /* ************************************************************************ */
 
-#ifndef DSE_PLATFORM_H_
-#define DSE_PLATFORM_H_
+#ifndef DSE_PLATAPIFORM_H_
+#define DSE_PLATAPIFORM_H_
 
 #include <setjmp.h>
 #include <syslog.h>
@@ -131,4 +131,4 @@ PlatformApi *platform_dse(void)
 
 
 
-#endif /* DSE_PLATFORM_H_ */
+#endif /* DSE_PLATAPIFORM_H_ */

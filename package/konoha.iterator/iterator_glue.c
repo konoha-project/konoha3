@@ -184,9 +184,9 @@ static KMETHOD String_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ------------------------------------------------------------------------ */
 
-static void kmoditerator_setup(KonohaContext *kctx, struct kmodshare_t *def, int newctx) {}
-static void kmoditerator_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh) { }
-static void kmoditerator_free(KonohaContext *kctx, struct kmodshare_t *baseh) { KFREE(baseh, sizeof(kmoditerator_t)); }
+static void kmoditerator_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx) {}
+static void kmoditerator_reftrace(KonohaContext *kctx, struct KonohaModule *baseh) { }
+static void kmoditerator_free(KonohaContext *kctx, struct KonohaModule *baseh) { KFREE(baseh, sizeof(kmoditerator_t)); }
 
 #define _Public   kMethod_Public
 #define _Const    kMethod_Const
@@ -203,7 +203,7 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 	base->h.free     = kmoditerator_free;
 	KLIB Konoha_setModule(kctx, MOD_iterator, &base->h, pline);
 
-	KDEFINE_CLASS defIterator = {
+	KDEFINE_TY defIterator = {
 		STRUCTNAME(Iterator),
 		.cflag  = CFLAG_Iterator,
 		.init   = Iterator_init,

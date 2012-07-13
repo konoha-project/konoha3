@@ -25,14 +25,14 @@ typedef struct kAprTableEntry {
 } kAprTableEntry;
 
 typedef struct {
-	kmodshare_t h;
+	KonohaModule h;
 	KonohaClass *cRequest;
 	KonohaClass *cAprTable;
 	KonohaClass *cAprTableEntry;
 } kapacheshare_t;
 
 typedef struct {
-	kmodlocal_t h;
+	KonohaContextModule h;
 	//kRequest *req;
 } ctxapache_t;
 

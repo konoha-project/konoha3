@@ -69,9 +69,9 @@ static void AprTableEntry_free(KonohaContext *kctx, kObject *po)
 	((kAprTableEntry*)po)->entry = NULL;
 }
 
-static void kapacheshare_setup(KonohaContext *kctx, struct kmodshare_t *def, int newctx) {}
-static void kapacheshare_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh) {}
-static void kapacheshare_free(KonohaContext *kctx, struct kmodshare_t *baseh)
+static void kapacheshare_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx) {}
+static void kapacheshare_reftrace(KonohaContext *kctx, struct KonohaModule *baseh) {}
+static void kapacheshare_free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 	KFREE(baseh, sizeof(kapacheshare_t));
 }
@@ -79,19 +79,19 @@ static void kapacheshare_free(KonohaContext *kctx, struct kmodshare_t *baseh)
 
 static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	static KDEFINE_CLASS Def = {
+	static KDEFINE_TY Def = {
 		STRUCTNAME(Request),
 		.init = Request_init,
 		.free = Request_free,
 	};
 
-	static KDEFINE_CLASS aprTableDef = {
+	static KDEFINE_TY aprTableDef = {
 		STRUCTNAME(AprTable),
 		.init = AprTable_init,
 		.free = AprTable_free,
 	};
 
-	static KDEFINE_CLASS aprTableEntryDef = {
+	static KDEFINE_TY aprTableEntryDef = {
 		STRUCTNAME(AprTableEntry),
 		.init = AprTableEntry_init,
 		.free = AprTableEntry_free,

@@ -39,12 +39,12 @@ extern int sigignore (int __sig);
 #define MOD_subproc 23
 
 typedef struct {
-	kmodshare_t h;
+	KonohaModule h;
 	KonohaClass     *cSubproc;
 } kmodsubproc_t;
 
 typedef struct {
-	kmodlocal_t h;
+	KonohaContextModule h;
 } ctxsubproc_t;
 
 typedef struct {
@@ -572,7 +572,7 @@ static void setFd(KonohaContext *kctx, pfd_t *p, int changeMode, FILE* ptr) {
 		// warning of the pipe or file mode overwrite
 		//char *msg = (p->mode == M_PIPE) ? "pipe has already set, but we overwrite it." :
 		//"file has already set, but we overwrite it." ;
-		//WARN_PackageMessage(kctx, msg );
+		//WarnTagPackageMessage(kctx, msg );
 		//fprintf(stderr, "%s\n", msg);
 	}
 	p->mode = changeMode;
@@ -842,10 +842,10 @@ KMETHOD Subproc_enableShellmode(KonohaContext *kctx, KonohaStack *sfp)
 //		kDictMap *env = (kDictMap *)sfp[1].toObject;
 //		int i;
 //		size_t msize = env->spi->size(ctx, env->mapptr);
-//		if ( p->env != (kArray*)KNH_NULVAL(CLASS_Array) ) {
+//		if ( p->env != (kArray*)KNH_NULVAL(TY_Array) ) {
 //			knh_Array_clear( ctx, p->env, 0 );
 //		}
-//		p->env = new_Array(ctx, CLASS_String, msize);
+//		p->env = new_Array(ctx, TY_String, msize);
 //		for (i = 0; i < msize; i++) {
 //			kString *key = (kString *)knh_DictMap_keyAt(env, i);
 //			kString *val = (kString *)knh_DictMap_valueAt(env, i);
@@ -941,7 +941,7 @@ KMETHOD Subproc_setBufsize(KonohaContext *kctx, KonohaStack *sfp)
 //KMETHOD Subproc_getIn(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	subprocData_t *p = (subprocData_t*)sfp[0].p->rawptr;
-//	kRawPtr *po = (kRawPtr*)KNH_NULVAL(CLASS_Tvoid);
+//	kRawPtr *po = (kRawPtr*)KNH_NULVAL(TY_void);
 //	if(ONEXEC(p)) {
 //		if( p->w.mode == M_PIPE ) {
 //			po = new_RawPtr(ctx, ClassTBL(khn_getFileClass(ctx)), p->w.fp);
@@ -954,7 +954,7 @@ KMETHOD Subproc_setBufsize(KonohaContext *kctx, KonohaStack *sfp)
 //KMETHOD Subproc_getOut(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	subprocData_t *p = (subprocData_t*)sfp[0].p->rawptr;
-//	kRawPtr *po = (kRawPtr*)KNH_NULVAL(CLASS_Tvoid);
+//	kRawPtr *po = (kRawPtr*)KNH_NULVAL(TY_void);
 //	if(ONEXEC(p)) {
 //		if( p->r.mode == M_PIPE ) {
 //			po = new_RawPtr(ctx, ClassTBL(khn_getFileClass(ctx)), p->r.fp);
@@ -967,7 +967,7 @@ KMETHOD Subproc_setBufsize(KonohaContext *kctx, KonohaStack *sfp)
 //KMETHOD Subproc_getErr(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	subprocData_t *p = (subprocData_t*)sfp[0].p->rawptr;
-//	kRawPtr *po = KNULL(CLASS_Tvoid);
+//	kRawPtr *po = KNULL(TY_void);
 //	if(ONEXEC(p)) {
 //		if( p->e.mode == M_PIPE ) {
 //			po = new_RawPtr(ctx, ClassTBL(khn_getFileClass(ctx)), p->e.fp);
@@ -1194,15 +1194,15 @@ KMETHOD Subproc_isERR2StdOUT(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ------------------------------------------------------------------------ */
 
-static void kmodsubproc_setup(KonohaContext *kctx, struct kmodshare_t *def, int newctx)
+static void kmodsubproc_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
 {
 }
 
-static void kmodsubproc_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
+static void kmodsubproc_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 }
 
-static void kmodsubproc_free(KonohaContext *kctx, struct kmodshare_t *baseh)
+static void kmodsubproc_free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 	KFREE(baseh, sizeof(kmodsubproc_t));
 }
@@ -1250,7 +1250,7 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	base->h.free     = kmodsubproc_free;
 	Konoha_setModule(MOD_subproc, &base->h, pline);
 
-	KDEFINE_CLASS defSubproc = {
+	KDEFINE_TY defSubproc = {
 		STRUCTNAME(Subproc),
 		.cflag = kClass_Final,
 		.init  = Subproc_init,

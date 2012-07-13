@@ -125,11 +125,11 @@ static KMETHOD Array_add1(KonohaContext *kctx, KonohaStack *sfp)
 static	kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Im, _F(Array_get), TY_T0,   TY_Array, MN_("get"), 1, TY_Int, FN_("index"),
-		_Public,     _F(Array_set), TY_void, TY_Array, MN_("set"), 2, TY_Int, FN_("index"),  TY_T0, FN_("value"),
+		_Public|_Im, _F(Array_get), TY_0,   TY_Array, MN_("get"), 1, TY_Int, FN_("index"),
+		_Public,     _F(Array_set), TY_void, TY_Array, MN_("set"), 2, TY_Int, FN_("index"),  TY_0, FN_("value"),
 		_Public,     _F(Array_getSize), TY_Int, TY_Array, MN_("getSize"), 0,
 		_Public,     _F(Array_newArray), TY_Array, TY_Array, MN_("newArray"), 1, TY_Int, FN_("size"),
-		_Public,     _F(Array_add1), TY_void, TY_Array, MN_("add"), 1, TY_T0, FN_("value"),
+		_Public,     _F(Array_add1), TY_void, TY_Array, MN_("add"), 1, TY_0, FN_("value"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);

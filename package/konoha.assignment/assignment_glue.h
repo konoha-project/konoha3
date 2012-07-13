@@ -54,7 +54,7 @@ static KMETHOD ExprTyCheck_assignment(KonohaContext *kctx, KonohaStack *sfp)
 					}
 				}
 			}
-			SUGAR Stmt_p(kctx, stmt, (kToken*)expr, ERR_, "variable name is expected");
+			SUGAR Stmt_p(kctx, stmt, (kToken*)expr, ErrTag, "variable name is expected");
 		}
 	}
 	RETURN_(K_NULLEXPR);

@@ -33,7 +33,7 @@
 
 typedef void (*FgenCode)(KonohaContext *kctx, kMethod *mtd, kBlock *bk);
 typedef struct {
-	kmodshare_t h;
+	KonohaModule h;
 	kMethod *genCode;
 	kArray  *constPool;
 	kArray  *global_value;
@@ -44,10 +44,10 @@ typedef struct {
 } kmodjit_t;
 
 typedef struct {
-	kmodlocal_t h;
+	KonohaContextModule h;
 } kjitmod_t;
 
-static void kmodjit_setup(KonohaContext *kctx, struct kmodshare_t *def, int newctx)
+static void kmodjit_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
 {
 	(void)kctx;(void)def;(void)newctx;
 }
@@ -61,7 +61,7 @@ static void val_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p)
 	END_REFTRACE();
 }
 
-static void kmodjit_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
+static void kmodjit_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 	kmodjit_t *mod = (kmodjit_t *) baseh;
 	BEGIN_REFTRACE(3);
@@ -72,7 +72,7 @@ static void kmodjit_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
 	KLIB Kmap_reftrace(kctx, mod->jitcache, val_reftrace);
 }
 
-static void kmodjit_free(KonohaContext *kctx, struct kmodshare_t *baseh)
+static void kmodjit_free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 	kmodjit_t *modshare = (kmodjit_t*) baseh;
 	KLIB Kmap_free(kctx, modshare->jitcache, NULL);
@@ -701,7 +701,7 @@ static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	typedef struct kPointer {
 		KonohaObjectHeader h;
 	} kPointer;
-	static KDEFINE_CLASS PointerDef = {
+	static KDEFINE_TY PointerDef = {
 		STRUCTNAME(Pointer)
 	};
 	base->cPointer = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &PointerDef, pline);
@@ -814,7 +814,7 @@ static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 
-	LibKonohaApiVar *l = (LibKonohaApiVar*)kctx->klib;
+	KonohaLibVar *l = (KonohaLibVar*)kctx->klib;
 	l->kMethod_genCode = GenCodeDefault;
 	kNameSpace_syncMethods();
 	l->kMethod_genCode = _kMethod_genCode;

@@ -286,7 +286,7 @@ static kbool_t checkConflictedConst(KonohaContext *kctx, kNameSpace *ns, KUtilsK
 		if(kvs->ty == ksval->ty && kvs->uval == ksval->uval) {
 			return true;  // same value
 		}
-		kreportf(WARN_, pline, "conflicted name: %s", SYM_t(SYMKEY_unbox(ukey)));
+		kreportf(WarnTag, pline, "conflicted name: %s", SYM_t(SYMKEY_unbox(ukey)));
 		return true;
 	}
 	return false;
@@ -315,7 +315,7 @@ static void NameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, KUt
 		KLIB Kwb_free(&wb);
 	}
 	ns->constTable.bytesize = (s + nitems) * sizeof(KUtilsKeyValue);
-	PLAT qsort_i(ns->constTable.keyvalueItems, s + nitems, sizeof(KUtilsKeyValue), comprKeyVal);
+	PLATAPI qsort_i(ns->constTable.keyvalueItems, s + nitems, sizeof(KUtilsKeyValue), comprKeyVal);
 }
 
 static size_t strlen_alnum(const char *p)
@@ -489,7 +489,7 @@ static kbool_t NameSpace_defineMethod(KonohaContext *kctx, kNameSpace *ns, kMeth
 	//	kMethod *mtdOLD = NameSpace_getMethodNULL(kctx, ks, mtd->cid, mtd->mn);
 	//	if(mtdOLD != NULL) {
 	//		char mbuf[128];
-	//		kreportf(ERR_, pline, "method %s.%s is already defined", TY_t(mtd->cid), T_mn(mbuf, mtd->mn));
+	//		kreportf(ErrTag, pline, "method %s.%s is already defined", TY_t(mtd->cid), T_mn(mbuf, mtd->mn));
 	//		return 0;
 	//	}
 	//}
@@ -547,7 +547,7 @@ static void kNameSpace_loadMethodData(KonohaContext *kctx, kNameSpace *ns, intpt
 //		if(f == NULL) {
 //			f = dlsym(ks->gluehdr, (const char*)namebuf+1);
 //		}
-//		kreportf(WARN_, pline, "glue method function is not found: %s", namebuf + 1);
+//		kreportf(WarnTag, pline, "glue method function is not found: %s", namebuf + 1);
 //	}
 //	return f;
 //}

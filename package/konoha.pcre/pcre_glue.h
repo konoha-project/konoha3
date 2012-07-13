@@ -101,7 +101,7 @@ static kArray *kStringToCharArray(KonohaContext *kctx, kString *bs, int istrim)
 {
 	kbytes_t base = {S_size(bs), {S_text(bs)}};
 	size_t i, n = base.len;
-	kArray *a = new_(Array, n); //TODO new_Array(kctx, CLASS_String, n);
+	kArray *a = new_(Array, n); //TODO new_Array(kctx, TY_String, n);
 	if(S_isASCII(bs)) {
 		for(i = 0; i < n; i++) {
 			if(istrim && isspace(base.utext[i])) continue;
@@ -169,23 +169,23 @@ typedef void pcre_extra;
 #define PCRE_NOTEMPTY_ATSTART   0x10000000  /* Exec, DFA exec */
 #define PCRE_UCP                0x20000000  /* Compile */
 
-#define PCRE_INFO_OPTIONS            0
-#define PCRE_INFO_SIZE               1
-#define PCRE_INFO_CAPTURECOUNT       2
-#define PCRE_INFO_BACKREFMAX         3
-#define PCRE_INFO_FIRSTBYTE          4
-#define PCRE_INFO_FIRSTCHAR          4  /* For backwards compatibility */
-#define PCRE_INFO_FIRSTTABLE         5
-#define PCRE_INFO_LASTLITERAL        6
-#define PCRE_INFO_NAMEENTRYSIZE      7
-#define PCRE_INFO_NAMECOUNT          8
-#define PCRE_INFO_NAMETABLE          9
-#define PCRE_INFO_STUDYSIZE         10
-#define PCRE_INFO_DEFAULT_TABLES    11
-#define PCRE_INFO_OKPARTIAL         12
-#define PCRE_INFO_JCHANGED          13
-#define PCRE_INFO_HASCRORLF         14
-#define PCRE_INFO_MINLENGTH         15
+#define PCRE_InfoTagOPTIONS            0
+#define PCRE_InfoTagSIZE               1
+#define PCRE_InfoTagCAPTURECOUNT       2
+#define PCRE_InfoTagBACKREFMAX         3
+#define PCRE_InfoTagFIRSTBYTE          4
+#define PCRE_InfoTagFIRSTCHAR          4  /* For backwards compatibility */
+#define PCRE_InfoTagFIRSTTABLE         5
+#define PCRE_InfoTagLASTLITERAL        6
+#define PCRE_InfoTagNAMEENTRYSIZE      7
+#define PCRE_InfoTagNAMECOUNT          8
+#define PCRE_InfoTagNAMETABLE          9
+#define PCRE_InfoTagSTUDYSIZE         10
+#define PCRE_InfoTagDEFAULT_TABLES    11
+#define PCRE_InfoTagOKPARTIAL         12
+#define PCRE_InfoTagJCHANGED          13
+#define PCRE_InfoTagHASCRORLF         14
+#define PCRE_InfoTagMINLENGTH         15
 
 /* Request types for pcre_config(). Do not re-arrange, in order to remain
  * compatible. */
@@ -216,7 +216,7 @@ typedef struct {
 #define IS_Regex(O)      ((O)->h.ct == CT_Regex)
 
 typedef struct {
-	kmodshare_t h;
+	KonohaModule h;
 	KonohaClass *cRegex;
 } kregexshare_t;
 
@@ -273,7 +273,7 @@ static int pcre_nmatchsize(KonohaContext *kctx, kregex_t *reg)
 {
 	PCRE_regex_t *preg = (PCRE_regex_t*)reg;
 	int capsize = 0;
-	if (_pcre_fullinfo(preg->re, NULL, PCRE_INFO_CAPTURECOUNT, &capsize) != 0) {
+	if (_pcre_fullinfo(preg->re, NULL, PCRE_InfoTagCAPTURECOUNT, &capsize) != 0) {
 		return KREGEX_MATCHSIZE;
 	}
 	return capsize + 1;
@@ -348,12 +348,12 @@ static int pcre_regexec(KonohaContext *kctx, kregex_t *reg, const char *str, siz
 		}
 		p[idx].rm_so = -1;
 		nm_count = 0;
-		_pcre_fullinfo(preg->re, NULL, PCRE_INFO_NAMECOUNT, &nm_count);
+		_pcre_fullinfo(preg->re, NULL, PCRE_InfoTagNAMECOUNT, &nm_count);
 		if (nm_count > 0) {
 			unsigned char *nm_table;
 			int nm_entry_size = 0;
-			_pcre_fullinfo(preg->re, NULL, PCRE_INFO_NAMETABLE, &nm_table);
-			_pcre_fullinfo(preg->re, NULL, PCRE_INFO_NAMEENTRYSIZE, &nm_entry_size);
+			_pcre_fullinfo(preg->re, NULL, PCRE_InfoTagNAMETABLE, &nm_table);
+			_pcre_fullinfo(preg->re, NULL, PCRE_InfoTagNAMEENTRYSIZE, &nm_entry_size);
 			unsigned char *tbl_ptr = nm_table;
 			for (idx = 0; idx < nm_count; idx++) {
 				int n_idx = (tbl_ptr[0] << 8) | tbl_ptr[1];
@@ -368,15 +368,15 @@ static int pcre_regexec(KonohaContext *kctx, kregex_t *reg, const char *str, siz
 }
 
 /* ------------------------------------------------------------------------ */
-static void kregexshare_setup(KonohaContext *kctx, struct kmodshare_t *def, int newctx)
+static void kregexshare_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
 {
 }
 
-static void kregexshare_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
+static void kregexshare_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 }
 
-static void kregexshare_free(KonohaContext *kctx, struct kmodshare_t *baseh)
+static void kregexshare_free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 	KFREE(baseh, sizeof(kregexshare_t));
 }
@@ -514,7 +514,7 @@ static KMETHOD String_match(KonohaContext *kctx, KonohaStack *sfp)
 		size_t nmatch = pcre_nmatchsize(kctx, re->reg);
 		kregmatch_t *p, pmatch[nmatch+1];
 		int i, isGlobalOption = Regex_isGlobalOption(re);
-		a = new_(Array, nmatch);/*TODO new_Array(CLASS_String)*/
+		a = new_(Array, nmatch);/*TODO new_Array(TY_String)*/
 		BEGIN_LOCAL(lsfp, 1);
 		KSETv(lsfp[0].toArray, a);
 		do {
@@ -539,7 +539,7 @@ static KMETHOD String_match(KonohaContext *kctx, KonohaStack *sfp)
 		END_LOCAL();
 	}
 	else {
-		a = new_(Array, 0);/*TODO new_Array(CLASS_String)*/
+		a = new_(Array, 0);/*TODO new_Array(TY_String)*/
 	}
 	RETURN_(a);
 /*new_(O_ct(sfp[K_RTNIDX].o), 0);  // USE THIS; */
@@ -602,7 +602,7 @@ static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp)
 		const char *eos = str + S_size(s0);
 		kregmatch_t pmatch[KREGEX_MATCHSIZE+1];
 		if (str < eos) {
-			a = new_(Array, 0); // TODO new_Array(kctx, CLASS_String, 0);
+			a = new_(Array, 0); // TODO new_Array(kctx, TY_String, 0);
 			BEGIN_LOCAL(lsfp, 1);
 			KSETv(lsfp[0].toArray, a);
 			while (str <= eos) {
@@ -649,7 +649,7 @@ static kbool_t pcre_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	base->h.free     = kregexshare_free;
 	KLIB Konoha_setModule(kctx, MOD_REGEX, &base->h, pline);
 
-	KDEFINE_CLASS RegexDef = {
+	KDEFINE_TY RegexDef = {
 		STRUCTNAME(Regex),
 		.cflag = 0,
 		.init = Regex_init,
@@ -715,7 +715,7 @@ static int parseREGEX(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, in
 		prev = ch;
 	}
 	if(IS_NOTNULL(tk)) {
-		kreportf(ERR_, tk->uline, "must close with /");
+		kreportf(ErrTag, tk->uline, "must close with /");
 	}
 	return pos-1;
 }

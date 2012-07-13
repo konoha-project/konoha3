@@ -36,12 +36,12 @@
 #define IS_Float(O)      ((O)->h.ct == CT_Float)
 
 typedef struct {
-	kmodshare_t h;
+	KonohaModule h;
 	KonohaClass *cFloat;
 } kmodfloat_t;
 
 typedef struct {
-	kmodlocal_t h;
+	KonohaContextModule h;
 } kfloatmod_t;
 
 typedef const struct _kFloat kFloat;

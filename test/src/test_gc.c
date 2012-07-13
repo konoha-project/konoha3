@@ -56,7 +56,7 @@ static void Dummy_free(KonohaContext *kctx, kObject *o)
     __free__++;
 }
 
-static KDEFINE_CLASS DummyDef = {
+static KDEFINE_TY DummyDef = {
     .structname   = "Dummy",
     .cid          = 100,
     .cflag        = 0,

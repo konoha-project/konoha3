@@ -34,7 +34,7 @@ extern "C" {
 static int isPRINT(KonohaContext *kctx, int pe)
 {
 	if(verbose_sugar) return true;
-	if(pe == INFO_) {
+	if(pe == InfoTag) {
 		if(KonohaContext_isInteractive(kctx) || KonohaContext_isCompileOnly(kctx)) {
 			return true;
 		}
@@ -66,7 +66,7 @@ static kString* vperrorf(KonohaContext *kctx, int pe, kfileline_t uline, int lpo
 		kString *emsg = KLIB new_kString(kctx, msg, strlen(msg), 0);
 		errref = kArray_size(base->errorMessageList);
 		KLIB kArray_add(kctx, base->errorMessageList, emsg);
-		if(pe == ERR_ || pe == CRIT_) {
+		if(pe == ErrTag || pe == CritTag) {
 			base->errorMessageCount ++;
 		}
 		return emsg;
@@ -74,7 +74,7 @@ static kString* vperrorf(KonohaContext *kctx, int pe, kfileline_t uline, int lpo
 	return NULL;
 }
 
-#define pWARN(UL, FMT, ...) sugar_p(kctx, WARN_, UL, -1, FMT, ## __VA_ARGS__)
+#define pWARN(UL, FMT, ...) sugar_p(kctx, WarnTag, UL, -1, FMT, ## __VA_ARGS__)
 
 static kString* sugar_p(KonohaContext *kctx, int pe, kfileline_t uline, int lpos, const char *fmt, ...)
 {
@@ -89,7 +89,7 @@ static void Token_pERR(KonohaContext *kctx, kTokenVar *tk, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
-	kString *errmsg = vperrorf(kctx, ERR_, tk->uline, -1, fmt, ap);
+	kString *errmsg = vperrorf(kctx, ErrTag, tk->uline, -1, fmt, ap);
 	va_end(ap);
 	KSETv(tk->text, errmsg);
 	tk->keyword = TK_ERR;
@@ -144,7 +144,7 @@ static kExpr* Stmt_p(KonohaContext *kctx, kStmt *stmt, kToken *tk, int pe, const
 	va_list ap;
 	va_start(ap, fmt);
 	kfileline_t uline = stmt->uline;
-	if(tk != NULL && pe <= ERR_ ) {
+	if(tk != NULL && pe <= ErrTag ) {
 		if(IS_Token(tk)) {
 			uline = tk->uline;
 		}
@@ -153,7 +153,7 @@ static kExpr* Stmt_p(KonohaContext *kctx, kStmt *stmt, kToken *tk, int pe, const
 		}
 	}
 	kString *errmsg = vperrorf(kctx, pe, uline, -1, fmt, ap);
-	if(pe <= ERR_ && !kStmt_isERR(stmt)) {
+	if(pe <= ErrTag && !kStmt_isERR(stmt)) {
 		kStmt_toERR(stmt, errmsg);
 	}
 	va_end(ap);
@@ -173,7 +173,7 @@ static const char *kToken_s_(KonohaContext *kctx, kToken *tk)
 	}
 }
 
-static void WARN_Ignored(KonohaContext *kctx, kArray *tls, int s, int e)
+static void WarnTagIgnored(KonohaContext *kctx, kArray *tls, int s, int e)
 {
 	if(s < e) {
 		int i = s;

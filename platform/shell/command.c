@@ -163,7 +163,7 @@ static kstatus_t readstmt(KonohaContext *kctx, KUtilsWriteBuffer *wb, kfileline_
 
 static void dumpEval(KonohaContext *kctx, KUtilsWriteBuffer *wb)
 {
-	KonohaLocalRuntimeVar *base = kctx->stack;
+	KonohaContextRuntimeVar *base = kctx->stack;
 	ktype_t ty = base->evalty;
 	if(ty != TY_void) {
 		KonohaStack *lsfp = base->stack + base->evalidx;
@@ -413,9 +413,9 @@ static int KonohaContext_test(KonohaContext *kctx, const char *testname)
 	char script_file[256];
 	char correct_file[256];
 	char result_file[256];
-	PLAT snprintf_i(script_file, 256,  "%s", testname);
-	PLAT snprintf_i(correct_file, 256, "%s.proof", script_file);
-	PLAT snprintf_i(result_file, 256,  "%s.tested", script_file);
+	PLATAPI snprintf_i(script_file, 256,  "%s", testname);
+	PLATAPI snprintf_i(correct_file, 256, "%s.proof", script_file);
+	PLATAPI snprintf_i(result_file, 256,  "%s.tested", script_file);
 	FILE *fp = fopen(correct_file, "r");
 	if (fp == NULL) {
 		fprintf(stdout, "no proof file: %s\n", testname);
@@ -498,7 +498,7 @@ static void konoha_import(KonohaContext *kctx, char *packagename)
 	char bufname[len];
 	memcpy(bufname, packagename, len);
 	if(!KREQUIRE_PACKAGE(bufname, 0)) {
-		PLAT exit_i(EXIT_FAILURE);
+		PLATAPI exit_i(EXIT_FAILURE);
 	}
 	KEXPORT_PACKAGE(bufname, KNULL(NameSpace), 0);
 }
@@ -517,7 +517,7 @@ static void konoha_startup(KonohaContext *kctx, const char *startup_script)
 	}
 	snprintf(buf, sizeof(buf), "%s%s/%s.k", path, local, startup_script);
 	if(!konoha_load((KonohaContext*)kctx, (const char*)buf)) {
-		PLAT exit_i(EXIT_FAILURE);
+		PLATAPI exit_i(EXIT_FAILURE);
 	}
 }
 

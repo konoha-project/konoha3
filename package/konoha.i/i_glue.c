@@ -106,7 +106,7 @@ static void dumpMethod(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd)
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	KSETv(sfp[2].toMethod, mtd);
 	O_ct(mtd)->p(kctx, sfp, 2, &wb, 1);
-	PLAT printf_i("%s\n", KLIB Kwb_top(kctx, &wb, 1));
+	PLATAPI printf_i("%s\n", KLIB Kwb_top(kctx, &wb, 1));
 	KLIB Kwb_free(&wb);
 	return;
 }
@@ -147,7 +147,7 @@ static	kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, cons
 {
 	USING_SUGAR;
 	KonohaClass *ct = kclass(TY_Method, pline);
-	KSET_CLASSFUNC(ct, p, Method, pline);
+	KSET_TYFUNC(ct, p, Method, pline);
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(NameSpace_man), TY_void, TY_NameSpace, MN_("man"), 1, TY_Object, FN_("x") | FN_COERCION,
 		DEND,

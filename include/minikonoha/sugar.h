@@ -448,7 +448,7 @@ struct kGammaVar {
 #define kNameSpace_defineSyntax(L, S)  kmodsugar->KNameSpace_defineSyntax(kctx, L, S)
 
 typedef struct {
-	kmodshare_t  h;
+	KonohaModule  h;
 	KonohaClass *cToken;
 	KonohaClass *cExpr;
 	KonohaClass *cStmt;
@@ -540,7 +540,7 @@ typedef struct {
 
 
 typedef struct {
-	kmodlocal_t h;
+	KonohaContextModule h;
 	kArray            *preparedTokenList;
 	KUtilsGrowingArray errorMessageBuffer;
 	int                errorMessageCount;

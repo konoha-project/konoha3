@@ -24,8 +24,8 @@
 
 /* ************************************************************************ */
 
-#ifndef DSE_DEBUG_H_
-#define DSE_DEBUG_H_
+#ifndef DSE_DebugTagH_
+#define DSE_DebugTagH_
 
 #include <assert.h>
 #define DSE_DEBUG 1
@@ -39,4 +39,4 @@
 
 
 
-#endif /* DSE_DEBUG_H_ */
+#endif /* DSE_DebugTagH_ */

@@ -105,7 +105,7 @@ typedef struct objpageTBL_t {
 #define K_ARENA_COUNT 3
 
 typedef struct kmemlocal_t {
-	kmodlocal_t     h;
+	KonohaContextModule     h;
 	objpageTBL_t  *ObjectArenaTBL[K_ARENA_COUNT];
 	kGCObject     *freeObjectList[K_ARENA_COUNT];
 	kGCObject     *freeObjectTail[K_ARENA_COUNT];
@@ -117,7 +117,7 @@ typedef struct kmemlocal_t {
 } kmemlocal_t;
 
 typedef struct kmemshare_t {
-	kmodshare_t     h;
+	KonohaModule     h;
 	objpageTBL_t   *ObjectArenaTBL[K_ARENA_COUNT];
 	size_t          sizeObjectArenaTBL[K_ARENA_COUNT];
 	size_t          capacityObjectArenaTBL[K_ARENA_COUNT];
@@ -592,7 +592,7 @@ static void gc_mark(KonohaContext *kctx)
 {
 	long i;
 	knh_ostack_t ostackbuf, *ostack = ostack_init(kctx, &ostackbuf);
-	KonohaLocalRuntimeVar *stack = kctx->stack;
+	KonohaContextRuntimeVar *stack = kctx->stack;
 	kObject *ref = NULL;
 	marked = 0;
 
@@ -702,9 +702,9 @@ static void gc_sweep(KonohaContext *kctx)
 }
 
 /* --------------------------------------------------------------- */
-static void MSGC_local_reftrace(KonohaContext *kctx, struct kmodlocal_t *baseh) {}
+static void MSGC_local_reftrace(KonohaContext *kctx, struct KonohaContextModule *baseh) {}
 
-static void MSGC_local_free(KonohaContext *kctx, struct kmodlocal_t *baseh)
+static void MSGC_local_free(KonohaContext *kctx, struct KonohaContextModule *baseh)
 {
 	kmemlocal_t *local = (kmemlocal_t *) baseh;
 	if(local->queue_capacity > 0) {
@@ -723,23 +723,23 @@ static void MSGC_local_free(KonohaContext *kctx, struct kmodlocal_t *baseh)
 	/*base->freeObjectListSize[i] = K_ARENASIZE/K_PAGEOBJECTSIZE(i);*/\
 }while(0)
 
-static void MSGC_setup(KonohaContext *kctx, struct kmodshare_t *def, int newctx)
+static void MSGC_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
 {
 	if(memlocal(kctx) == NULL) {
 		kmemlocal_t *base = do_malloc(sizeof(kmemlocal_t));
 		//do_bzero(base, sizeof(kmemlocal_t));
 		base->h.reftrace = MSGC_local_reftrace;
 		base->h.free     = MSGC_local_free;
-		kctx->modlocal[MOD_gc] = (kmodlocal_t*)base;
+		kctx->modlocal[MOD_gc] = (KonohaContextModule*)base;
 		MSGC_SETUP(0);
 		MSGC_SETUP(1);
 		MSGC_SETUP(2);
 	}
 }
 
-static void MSGC_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh) {}
+static void MSGC_reftrace(KonohaContext *kctx, struct KonohaModule *baseh) {}
 
-static void MSGC_free(KonohaContext *kctx, struct kmodshare_t *baseh)
+static void MSGC_free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 	do_free(baseh, sizeof(kmemshare_t));
 	kctx->modshare[MOD_gc] = NULL;
@@ -758,14 +758,14 @@ void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		KSET_KLIB(free, 0);
 		Konoha_setModule(MOD_gc, &base->h, 0);
 	}
-	MSGC_setup(ctx, (kmodshare_t*) memshare(kctx), 1);
+	MSGC_setup(ctx, (KonohaModule*) memshare(kctx), 1);
 }
 
 void MODGC_free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	assert(memlocal(ctx) == NULL);
 	if(IS_RootKonohaContext(ctx)) {
-		MSGC_free(kctx, (kmodshare_t*) memshare(kctx));
+		MSGC_free(kctx, (KonohaModule*) memshare(kctx));
 		Konoha_setModule(MOD_gc, NULL, 0);
 	}
 }

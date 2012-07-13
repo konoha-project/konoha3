@@ -103,10 +103,10 @@ static void Kwb_vprintf(KonohaContext *kctx, KUtilsWriteBuffer *wb, const char *
 	va_copy(ap2, ap);
 	KUtilsGrowingArray *m = wb->m;
 	size_t s = m->bytesize;
-	size_t n = PLAT vsnprintf_i( m->bytebuf + s, m->bytemax - s, fmt, ap);
+	size_t n = PLATAPI vsnprintf_i( m->bytebuf + s, m->bytemax - s, fmt, ap);
 	if(n >= (m->bytemax - s)) {
 		Karray_expand(kctx, m, n + 1);
-		n = PLAT vsnprintf_i(m->bytebuf + s, m->bytemax - s, fmt, ap2);
+		n = PLATAPI vsnprintf_i(m->bytebuf + s, m->bytemax - s, fmt, ap2);
 	}
 	va_end(ap2);
 	m->bytesize += n;
@@ -558,22 +558,22 @@ int verbose_debug = 0;
 
 static void Kreportf(KonohaContext *kctx, kinfotag_t level, kfileline_t pline, const char *fmt, ...)
 {
-	if(level == DEBUG_ && !verbose_debug) return;
+	if(level == DebugTag && !verbose_debug) return;
 	va_list ap;
 	va_start(ap , fmt);
-	const char *B = PLAT begin(level);
-	const char *E = PLAT end(level);
+	const char *B = PLATAPI begin(level);
+	const char *E = PLATAPI end(level);
 	if(pline != 0) {
 		const char *file = SS_t(pline);
-		PLAT printf_i("%s - %s(%s:%d) " , B, TAG_t(level), shortfilename(file), (kushort_t)pline);
+		PLATAPI printf_i("%s - %s(%s:%d) " , B, TAG_t(level), shortfilename(file), (kushort_t)pline);
 	}
 	else {
-		PLAT printf_i("%s - %s" , B, TAG_t(level));
+		PLATAPI printf_i("%s - %s" , B, TAG_t(level));
 	}
-	PLAT vprintf_i(fmt, ap);
-	PLAT printf_i("%s\n", E);
+	PLATAPI vprintf_i(fmt, ap);
+	PLATAPI printf_i("%s\n", E);
 	va_end(ap);
-	if(level == CRIT_) {
+	if(level == CritTag) {
 		kraise(0);
 	}
 }
@@ -582,16 +582,16 @@ static void Kreportf(KonohaContext *kctx, kinfotag_t level, kfileline_t pline, c
 
 static void Kraise(KonohaContext *kctx, int param)
 {
-	KonohaLocalRuntimeVar *base = kctx->stack;
+	KonohaContextRuntimeVar *base = kctx->stack;
 	if(base->evaljmpbuf != NULL) {
-		PLAT longjmp_i(*base->evaljmpbuf, param+1);  // in setjmp 0 means good
+		PLATAPI longjmp_i(*base->evaljmpbuf, param+1);  // in setjmp 0 means good
 	}
-	PLAT exit_i(EXIT_FAILURE);
+	PLATAPI exit_i(EXIT_FAILURE);
 }
 
 // -------------------------------------------------------------------------
 
-static void klib_init(LibKonohaApiVar *l)
+static void klib_init(KonohaLibVar *l)
 {
 	l->Karray_init   = Karray_init;
 	l->Karray_resize = Karray_resize;

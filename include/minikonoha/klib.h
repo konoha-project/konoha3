@@ -175,7 +175,7 @@ static kinline size_t check_index(KonohaContext *kctx, kint_t n, size_t max, kfi
 {
 	size_t n1 = (size_t)n;
 	if(unlikely(!(n1 < max))) {
-		kreportf(CRIT_, pline, "Script!!: out of array index %ld < %lu", n, max);
+		kreportf(CritTag, pline, "Script!!: out of array index %ld < %lu", n, max);
 	}
 	return n1;
 }

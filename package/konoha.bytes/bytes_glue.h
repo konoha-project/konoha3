@@ -80,7 +80,7 @@ static kbool_t klinkDynamicIconv(KonohaContext *kctx, kmodiconv_t *base, kfileli
 			return true;
 		}
 	}
-	kreportf(WARN_, pline, "cannot find libiconv");
+	kreportf(WarnTag, pline, "cannot find libiconv");
 	return false;
 }
 #endif /* _ICONV_H */
@@ -145,15 +145,15 @@ static void Bytes_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteB
 	}
 }
 
-static void kmodiconv_setup(KonohaContext *kctx, struct kmodshare_t *def, int newctx)
+static void kmodiconv_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
 {
 }
 
-static void kmodiconv_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
+static void kmodiconv_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 }
 
-static void kmodiconv_free(KonohaContext *kctx, struct kmodshare_t *baseh)
+static void kmodiconv_free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 	KFREE(baseh, sizeof(kmodiconv_t));
 }
@@ -346,7 +346,7 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	base->h.free     = kmodiconv_free;
 	KLIB Konoha_setModule(kctx, MOD_iconv, &base->h, pline);
 
-	KDEFINE_CLASS defBytes = {
+	KDEFINE_TY defBytes = {
 		STRUCTNAME(Bytes),
 		.cflag   = kClass_Final,
 		.free    = Bytes_free,
@@ -397,7 +397,7 @@ static int parseSQUOTE(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, i
 		prev = ch;
 	}
 	if(IS_NOTNULL(tk)) {
-		kreportf(ERR_, tk->uline, "must close with \'");
+		kreportf(ErrTag, tk->uline, "must close with \'");
 	}
 	return pos-1;
 }
@@ -413,7 +413,7 @@ static KMETHOD ExprTyCheck_Squote(KonohaContext *kctx, KonohaStack *sfp)
 		int ch = S_text(s)[0];
 		RETURN_(kExpr_setNConstValue(expr, TY_Int, ch));
 	} else {
-		SUGAR Stmt_p(kctx, stmt, (kToken*)expr, ERR_, "single quote doesn't accept multi characters, '%s'", S_text(s));
+		SUGAR Stmt_p(kctx, stmt, (kToken*)expr, ErrTag, "single quote doesn't accept multi characters, '%s'", S_text(s));
 	}
 	RETURN_(K_NULLEXPR);
 }

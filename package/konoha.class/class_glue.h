@@ -22,8 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#ifndef CLASS_GLUE_H_
-#define CLASS_GLUE_H_
+#ifndef TY_GLUE_H_
+#define TY_GLUE_H_
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
@@ -116,7 +116,7 @@ static KMETHOD NameSpace_getCid(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(cid);
 }
 
-static void setfield(KonohaContext *kctx, KDEFINE_CLASS *ct, int fctsize, KonohaClass *supct)
+static void setfield(KonohaContext *kctx, KDEFINE_TY *ct, int fctsize, KonohaClass *supct)
 {
 	size_t fsize = supct->fsize + fctsize;
 	ct->cstruct_size = fctsize * sizeof(kObject*); //size64((fsize * sizeof(void*)) + sizeof(KonohaObjectHeader));
@@ -133,10 +133,10 @@ static void setfield(KonohaContext *kctx, KDEFINE_CLASS *ct, int fctsize, Konoha
 
 static KonohaClass* defineClass(KonohaContext *kctx, kNameSpace *ns, kshortflag_t cflag, kString *name, KonohaClass *supct, int fsize, kfileline_t pline)
 {
-	KDEFINE_CLASS defNewClass = {
+	KDEFINE_TY defNewClass = {
 		.cflag  = cflag,
-		.cid    = CLASS_newid,
-		.bcid   = CLASS_Object,
+		.cid    = TY_newid,
+		.bcid   = TY_Object,
 		.supcid = supct->cid,
 	};
 	setfield(kctx, &defNewClass, fsize, supct);
@@ -151,10 +151,10 @@ static KMETHOD NameSpace_defineClass(KonohaContext *kctx, KonohaStack *sfp)
 	ktype_t supcid = sfp[3].ivalue == 0 ? TY_Object :(ktype_t)sfp[3].ivalue;
 	KonohaClass *supct = kclass(supcid, sfp[K_RTNIDX].uline);
 	if(CT_isFinal(supct)) {
-		kreportf(CRIT_, sfp[K_RTNIDX].uline, "%s is final", TY_t(supcid));
+		kreportf(CritTag, sfp[K_RTNIDX].uline, "%s is final", TY_t(supcid));
 	}
 	if(!CT_isDefined(supct)) {
-		kreportf(CRIT_, sfp[K_RTNIDX].uline, "%s has undefined field(s)", TY_t(supcid));
+		kreportf(CritTag, sfp[K_RTNIDX].uline, "%s has undefined field(s)", TY_t(supcid));
 	}
 	KonohaClass *ct = defineClass(kctx, sfp[0].toNameSpace, sfp[1].ivalue, sfp[2].s, supct, sfp[4].ivalue, sfp[K_RTNIDX].uline);
 	RETURNi_(ct->cid);
@@ -192,7 +192,7 @@ static KMETHOD NameSpace_defineClassField(KonohaContext *kctx, KonohaStack *sfp)
 	kObject *value = sfp[5].o;
 	KonohaClassVar *ct = (KonohaClassVar*)kclass(cid, sfp[K_RTNIDX].uline);
 	if(CT_isDefined(ct)) {
-		kreportf(CRIT_, sfp[K_RTNIDX].uline, "%s has no undefined field", TY_t(ct->cid));
+		kreportf(CritTag, sfp[K_RTNIDX].uline, "%s has no undefined field", TY_t(ct->cid));
 	}
 	defineField(kctx, ct, flag, ty, name, value, 0);
 	if(CT_isDefined(ct)) {
@@ -251,10 +251,10 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp)
 		kToken *tk1 = tls->tokenItems[s+1];
 		kToken *tk2 = tls->tokenItems[s+2];
 		KonohaClass *ct = CT_(TK_type(tk1));
-		if (ct->cid == CLASS_Tvoid) {
-			RETURN_(SUGAR Stmt_p(kctx, stmt, tk1, ERR_, "undefined class: %s", S_text(tk1->text)));
+		if (ct->cid == TY_void) {
+			RETURN_(SUGAR Stmt_p(kctx, stmt, tk1, ErrTag, "undefined class: %s", S_text(tk1->text)));
 		} else if (CT_isForward(ct)) {
-			SUGAR Stmt_p(kctx, stmt, NULL, ERR_, "invalid application of 'new' to incomplete class %s", CT_t(ct));
+			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "invalid application of 'new' to incomplete class %s", CT_t(ct));
 		}
 
 		if(TK_isType(tk1) && tk2->keyword == AST_PARENTHESIS) {  // new C (...)
@@ -295,7 +295,7 @@ static KMETHOD ExprTyCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 			KSETv(expr->cons->methodItems[0], mtd);
 			RETURN_(SUGAR Expr_tyCheckCallParams(kctx, stmt, expr, mtd, gma, reqty));
 		}
-		SUGAR Stmt_p(kctx, stmt, tkN, ERR_, "undefined field: %s", S_text(tkN->text));
+		SUGAR Stmt_p(kctx, stmt, tkN, ErrTag, "undefined field: %s", S_text(tkN->text));
 	}
 	RETURN_(K_NULLEXPR);
 }
@@ -345,7 +345,7 @@ typedef struct {
 	const char *key;
 	uintptr_t ty;
 	KonohaClass *ct;
-} KDEFINE_CLASS_CONST;
+} KDEFINE_TY_CONST;
 
 static void ObjectField_init(KonohaContext *kctx, kObject *o, void *conf)
 {
@@ -373,15 +373,15 @@ static void ObjectField_reftrace (KonohaContext *kctx, kObject *o)
 
 static KonohaClassVar* defineClassName(KonohaContext *kctx, kNameSpace *ns, kshortflag_t cflag, kString *name, ktype_t supcid, kfileline_t pline)
 {
-	KDEFINE_CLASS defNewClass = {
+	KDEFINE_TY defNewClass = {
 		.cflag  = cflag,
-		.cid    = CLASS_newid,
-		.bcid   = CLASS_Object,
+		.cid    = TY_newid,
+		.bcid   = TY_Object,
 		.supcid = supcid,
 //		.init   = ObjectField_init,
 	};
 	KonohaClass *ct = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, name, &defNewClass, pline);
-	KDEFINE_CLASS_CONST ClassData[] = {
+	KDEFINE_TY_CONST ClassData[] = {
 		{S_text(name), TY_TYPE, ct},
 		{NULL},
 	};
@@ -463,7 +463,7 @@ static kbool_t CT_declType(KonohaContext *kctx, KonohaClassVar *ct, kGamma *gma,
 				defineField(kctx, ct, flag, ty, name, knull(CT_(ty)), 0);
 			}
 			else {
-				SUGAR Stmt_p(kctx, stmt, NULL, ERR_, "const value is expected as the field initial value: %s", S_text(name));
+				SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "const value is expected as the field initial value: %s", S_text(name));
 				return false;
 			}
 			return true;
@@ -475,7 +475,7 @@ static kbool_t CT_declType(KonohaContext *kctx, KonohaClassVar *ct, kGamma *gma,
 		}
 		return true;
 	}
-	SUGAR Stmt_p(kctx, stmt, NULL, ERR_, "field name is expected");
+	SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "field name is expected");
 	return false;
 }
 
@@ -513,7 +513,7 @@ static void CT_checkMethodDecl(KonohaContext *kctx, kToken *tkC, kBlock *bk, kSt
 			lastStmtRef[0] = stmt;
 		}
 		else {
-			SUGAR Stmt_p(kctx, stmt, NULL, WARN_, "%s is not available within the class clause", KW_t(stmt->syn->keyword));
+			SUGAR Stmt_p(kctx, stmt, NULL, WarnTag, "%s is not available within the class clause", KW_t(stmt->syn->keyword));
 		}
 	}
 }
@@ -531,18 +531,18 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 		supcid = TK_type(tkE);
 		supct = CT_(supcid);
 		if(CT_isFinal(supct)) {
-			SUGAR Stmt_p(kctx, stmt, NULL, ERR_, "%s is final", CT_t(supct));
+			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "%s is final", CT_t(supct));
 			RETURNb_(false);
 		}
 		if(!CT_isDefined(supct)) {
-			SUGAR Stmt_p(kctx, stmt, NULL, ERR_, "%s has undefined field(s)", CT_t(supct));
+			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "%s has undefined field(s)", CT_t(supct));
 			RETURNb_(false);
 		}
 	}
 	KonohaClassVar *ct = (KonohaClassVar*)KLIB kNameSpace_getCT(kctx, gma->genv->ns, NULL/*FIXME*/, S_text(tkC->text), S_size(tkC->text), TY_unknown);
 	if (ct != NULL) {
 		if (!CT_isForward(ct)) {
-			SUGAR Stmt_p(kctx, stmt, NULL, ERR_, "%s is already defined", CT_t(ct));
+			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "%s is already defined", CT_t(ct));
 			RETURNb_(false);
 		}
 	} else {
@@ -592,4 +592,4 @@ static kbool_t class_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileli
 	return true;
 }
 
-#endif /* CLASS_GLUE_H_ */
+#endif /* TY_GLUE_H_ */

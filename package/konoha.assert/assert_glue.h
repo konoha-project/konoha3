@@ -34,7 +34,7 @@
 //	kbool_t cond = sfp[1].bvalue;
 //	kfileline_t pline  = sfp[K_RTNIDX].uline;
 //	if (cond == false) {
-//		kreportf(CRIT_, pline, "Assert!!");
+//		kreportf(CritTag, pline, "Assert!!");
 //	}
 //	RETURNvoid_();
 //}

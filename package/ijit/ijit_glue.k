@@ -16,7 +16,7 @@ K.import("konoha.class");
 //	/*TY_CHAR*/7,
 //	/*TY_BOOL*/8,
 //	/*TY_STRING*/9,
-//	/*TY_CLASS*/10,
+//	/*TY_TY*/10,
 //	/*TY_METHOD*/11,
 //	/*TY_OBJECT*/12,
 //	/*TY_HOBJECT*/13,
@@ -127,7 +127,7 @@ Type ctype2Type(int ctype) {
 	if (ctype == /*TY_STRING*/9) {
 		return Type.getInt8PtrTy();
 	}
-	if (ctype == /*TY_CLASS*/10) {
+	if (ctype == /*TY_TY*/10) {
 		//TODO
 		return Type.getInt8PtrTy();
 	}
@@ -1110,9 +1110,9 @@ void jit_init() {
 	Type klocal_t = StructType.create(a0, "klocal_t", false);
 	Type kmemshare_t = StructType.create(a0, "kmemshare_t", false);
 	Type kmemlocal_t = StructType.create(a0, "kmemlocal_t", false);
-	Type kmodshare_t = StructType.create(a0, "kmodshare_t", false);
-	Type kmodlocal_t = StructType.create(a0, "kmodlocal_t", false);
-	Type KonohaLocalRuntimeVar = StructType.create(a0, "KonohaLocalRuntimeVar", false);
+	Type KonohaModule = StructType.create(a0, "KonohaModule", false);
+	Type KonohaContextModule = StructType.create(a0, "KonohaContextModule", false);
+	Type KonohaContextRuntimeVar = StructType.create(a0, "KonohaContextRuntimeVar", false);
 	Type klogger_t = StructType.create(a0, "klogger_t", false);
 	Type VirtualMachineInstruction = StructType.create(a0, "VirtualMachineInstruction", false);
 	/*------- KonohaObjectHeader ------*/
@@ -1148,10 +1148,10 @@ void jit_init() {
 	KonohaContextVarTy.set(5, PointerType.get(kmemlocal_t) /* memlocal */ );
 	KonohaContextVarTy.set(6, PointerType.get(SharedRuntime) /* share */ );
 	KonohaContextVarTy.set(7, PointerType.get(klocal_t) /* local */ );
-	KonohaContextVarTy.set(8, PointerType.get(KonohaLocalRuntimeVar) /* stack */ );
+	KonohaContextVarTy.set(8, PointerType.get(KonohaContextRuntimeVar) /* stack */ );
 	KonohaContextVarTy.set(9, PointerType.get(klogger_t) /* logger */ );
-	KonohaContextVarTy.set(10, PointerType.get(PointerType.get(kmodshare_t)) /* modshare */ );
-	KonohaContextVarTy.set(11, PointerType.get(PointerType.get(kmodlocal_t)) /* modlocal */ );
+	KonohaContextVarTy.set(10, PointerType.get(PointerType.get(KonohaModule)) /* modshare */ );
+	KonohaContextVarTy.set(11, PointerType.get(PointerType.get(KonohaContextModule)) /* modlocal */ );
 	Type KonohaContextVar = StructType.create(KonohaContextVarTy, "KonohaContextVar", false)
 
 	/*------- _kArray ------*/

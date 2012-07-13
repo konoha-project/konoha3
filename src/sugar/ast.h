@@ -94,7 +94,7 @@ static kTokenVar* TokenType_resolveGenerics(KonohaContext *kctx, kNameSpace *ns,
 	KonohaClass *ct = NULL;
 	if(psize > 0) {
 		ct = CT_(TK_type(tk));
-		if(ct->bcid == CLASS_Func) {
+		if(ct->bcid == TY_Func) {
 			ct = KLIB KonohaClass_Generics(kctx, ct, p[0].ty, psize-1, p+1);
 		}
 		else if(ct->p0 == TY_void) {
@@ -362,7 +362,7 @@ static int lookAheadKeyword(kArray *tokenList, int beginidx, int endidx, kToken 
 static int kStmt_printExpectedRule(KonohaContext *kctx, kStmt *stmt, kToken *tk, kToken *rule, int beginidx, int canRollBack)
 {
 	if(canRollBack) return beginidx;
-	kToken_p(stmt, tk, ERR_, "%s%s expects %s%s", T_statement(stmt->syn->keyword), KW_t(rule->keyword));
+	kToken_p(stmt, tk, ErrTag, "%s%s expects %s%s", T_statement(stmt->syn->keyword), KW_t(rule->keyword));
 	return -1;
 }
 
@@ -379,7 +379,7 @@ static int matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *rules, kArr
 		if(KW_isPATTERN(rule->keyword)) {
 			SugarSyntax *syn = SYN_(kStmt_nameSpace(stmt), rule->keyword);
 			if(syn == NULL || syn->PatternMatch == kmodsugar->UndefinedParseExpr/*NULL*/) {
-				kToken_p(stmt, tk, ERR_, "unknown syntax pattern: %s%s", KW_t(rule->keyword));
+				kToken_p(stmt, tk, ErrTag, "unknown syntax pattern: %s%s", KW_t(rule->keyword));
 				return -1;
 			}
 			int c = endidx;
@@ -425,12 +425,12 @@ static int matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *rules, kArr
 		for(; ruleidx < rulesize; ruleidx++) {
 			kToken *rule = rules->tokenItems[ruleidx];
 			if(rule->keyword != AST_OPTIONAL) {
-				kStmt_p(stmt, ERR_, "%s%s needs syntax pattern: %s%s", T_statement(stmt->syn->keyword), KW_t(rule->keyword));
+				kStmt_p(stmt, ErrTag, "%s%s needs syntax pattern: %s%s", T_statement(stmt->syn->keyword), KW_t(rule->keyword));
 				return -1;
 			}
 		}
 		if(tokenidx < endidx) {
-			kStmt_p(stmt, ERR_, "%s%s: unexpected token %s", T_statement(stmt->syn->keyword), kToken_s(tokenList->tokenItems[tokenidx]));
+			kStmt_p(stmt, ErrTag, "%s%s: unexpected token %s", T_statement(stmt->syn->keyword), kToken_s(tokenList->tokenItems[tokenidx]));
 			return -1;
 		}
 	}
@@ -495,7 +495,7 @@ static kbool_t Stmt_parseSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *to
 		ret = (matchSyntaxRule(kctx, stmt, syn->syntaxRuleNULL, tokenList, beginidx, endidx, 0) != -1);
 	}
 	else {
-		kStmt_p(stmt, ERR_, "undefined syntax rule for '%s%s'", KW_t(syn->keyword));
+		kStmt_p(stmt, ErrTag, "undefined syntax rule for '%s%s'", KW_t(syn->keyword));
 	}
 	return ret;
 }
@@ -520,7 +520,7 @@ static void Block_addStmtLine(KonohaContext *kctx, kBlock *bk, kArray *tokenList
 static KMETHOD UndefinedParseExpr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ParseExpr(stmt, tls, s, c, e);
-	kStmt_p(stmt, ERR_, "undefined expression parser for '%s'", kToken_s(tls->tokenItems[c]));
+	kStmt_p(stmt, ErrTag, "undefined expression parser for '%s'", kToken_s(tls->tokenItems[c]));
 }
 
 static kExpr *ParseExprFunc(KonohaContext *kctx, SugarSyntax *syn, kFunc *fo, kStmt *stmt, kArray *tls, int s, int c, int e)
@@ -556,7 +556,7 @@ static kExpr *ParseExpr(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, kArr
 	DBG_ASSERT(IS_Func(fo));
 	texpr = ParseExprFunc(kctx, syn, fo, stmt, tls, s, c, e);
 	if(texpr == K_NULLEXPR && !kStmt_isERR(stmt)) {
-		kStmt_p(stmt, ERR_, "syntax error: operator %s", kToken_s(tls->tokenItems[c]));
+		kStmt_p(stmt, ErrTag, "syntax error: operator %s", kToken_s(tls->tokenItems[c]));
 	}
 	return texpr;
 }
@@ -631,13 +631,13 @@ static kExpr* Stmt_newExpr2(KonohaContext *kctx, kStmt *stmt, kArray *tls, int s
 			return ParseExpr(kctx, syn, stmt, tls, c, c, e);
 		}
 		if (0 < s - 1) {
-			kStmt_p(stmt, ERR_, "expected expression after %s", kToken_s(tls->tokenItems[s-1]));
+			kStmt_p(stmt, ErrTag, "expected expression after %s", kToken_s(tls->tokenItems[s-1]));
 		}
 		else if(e < kArray_size(tls)) {
-			kStmt_p(stmt, ERR_, "expected expression before %s", kToken_s(tls->tokenItems[e]));
+			kStmt_p(stmt, ErrTag, "expected expression before %s", kToken_s(tls->tokenItems[e]));
 		}
 		else {
-			kStmt_p(stmt, ERR_, "expected expression");
+			kStmt_p(stmt, ErrTag, "expected expression");
 		}
 	}
 	return K_NULLEXPR;
@@ -648,7 +648,7 @@ static kExpr* Stmt_newExpr2(KonohaContext *kctx, kStmt *stmt, kArray *tls, int s
 static kExpr *Expr_rightJoin(KonohaContext *kctx, kExpr *expr, kStmt *stmt, kArray *tls, int s, int c, int e)
 {
 	if(c < e && expr != K_NULLEXPR && !kStmt_isERR(stmt)) {
-		WARN_Ignored(kctx, tls, c, e);
+		WarnTagIgnored(kctx, tls, c, e);
 	}
 	return expr;
 }

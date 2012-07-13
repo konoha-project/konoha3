@@ -112,7 +112,7 @@ static KMETHOD HashMap_new(KonohaContext *kctx, KonohaStack *sfp)
 #define TY_HashMap cHashMap->cid
 static	kbool_t hashmap_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KDEFINE_CLASS defHashMap = {
+	KDEFINE_TY defHashMap = {
 		STRUCTNAME(HashMap),
 		.cflag = kClass_Final,
 		.init = HashMap_init,
@@ -123,8 +123,8 @@ static	kbool_t hashmap_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	KonohaClassVar *ct = (KonohaClassVar *)CT_HashMap;
 	ct->p0 = TY_String; // default
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(HashMap_get), TY_T0, TY_HashMap, MN_("get"), 1, TY_String, FN_("key"),
-		_Public, _F(HashMap_set), TY_void, TY_HashMap, MN_("set"), 2, TY_String, FN_("key"), TY_T0, FN_("value"),
+		_Public, _F(HashMap_get), TY_0, TY_HashMap, MN_("get"), 1, TY_String, FN_("key"),
+		_Public, _F(HashMap_set), TY_void, TY_HashMap, MN_("set"), 2, TY_String, FN_("key"), TY_0, FN_("value"),
 		_Public, _F(HashMap_new), TY_HashMap, TY_HashMap, MN_("new"), 0,
 		DEND,
 	};

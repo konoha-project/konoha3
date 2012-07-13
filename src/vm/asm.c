@@ -68,7 +68,7 @@
 	BasicBlock_add(kctx, bb, 0, &tmp_.op, sizeof(klr_##T##_t));\
 } while (0)
 
-#ifdef _CLASSICVM
+#ifdef _TYICVM
 #include "../../module/classicvm/classicvm_gen.h"
 #include "../../module/classicvm/classicvm.h"
 #else
@@ -123,8 +123,8 @@ static int BUILD_asmJMPF(KonohaContext *kctx, klr_JMPF_t *op)
 	kBasicBlock *bb = ctxcode->currentWorkingBlock;
 	DBG_ASSERT(op->opcode == OPCODE_JMPF);
 	int swap = 0;
-#ifdef _CLASSICVM
-	if (CLASSICVM_BUILD_asmJMPF(kctx, bb, op, &swap)) {
+#ifdef _TYICVM
+	if (TYICVM_BUILD_asmJMPF(kctx, bb, op, &swap)) {
 		return swap;
 	}
 #endif
@@ -253,8 +253,8 @@ static void BasicBlock_strip1(KonohaContext *kctx, kBasicBlock *bb)
 static size_t BasicBlock_peephole(KonohaContext *kctx, kBasicBlock *bb)
 {
 	size_t i, bbsize = BasicBlock_codesize(bb);
-#ifdef _CLASSICVM
-	CLASSICVM_BasicBlock_peephole(kctx, bb);
+#ifdef _TYICVM
+	TYICVM_BasicBlock_peephole(kctx, bb);
 #endif
 	for(i = 0; i < BasicBlock_codesize(bb); i++) {
 		VirtualMachineInstruction *op = BBOP(bb) + i;
@@ -632,8 +632,8 @@ static void CALL_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int esp
 	kMethod *mtd = expr->cons->methodItems[0];
 	DBG_ASSERT(IS_Method(mtd));
 	int i, s = kMethod_isStatic(mtd) ? 2 : 1, thisidx = espidx + K_CALLDELTA;
-#ifdef _CLASSICVM
-	if (CLASSICVM_CALL_asm(kctx, mtd, expr, shift, espidx)) {
+#ifdef _TYICVM
+	if (TYICVM_CALL_asm(kctx, mtd, expr, shift, espidx)) {
 		return;
 	}
 #endif
@@ -981,7 +981,7 @@ static void kMethod_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
 /* ------------------------------------------------------------------------ */
 /* [ctxcode] */
 
-static void ctxcode_reftrace(KonohaContext *kctx, struct kmodlocal_t *baseh)
+static void ctxcode_reftrace(KonohaContext *kctx, struct KonohaContextModule *baseh)
 {
 	ctxcode_t *base = (ctxcode_t*)baseh;
 	BEGIN_REFTRACE(2);
@@ -989,13 +989,13 @@ static void ctxcode_reftrace(KonohaContext *kctx, struct kmodlocal_t *baseh)
 	KREFTRACEv(base->constPools);
 	END_REFTRACE();
 }
-static void ctxcode_free(KonohaContext *kctx, struct kmodlocal_t *baseh)
+static void ctxcode_free(KonohaContext *kctx, struct KonohaContextModule *baseh)
 {
 	ctxcode_t *base = (ctxcode_t*)baseh;
 	KFREE(base, sizeof(ctxcode_t));
 }
 
-static void kmodcode_setup(KonohaContext *kctx, struct kmodshare_t *def, int newctx)
+static void kmodcode_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
 {
 	if(!newctx) { // lazy setup
 		assert(kctx->modlocal[MOD_code] == NULL);
@@ -1004,11 +1004,11 @@ static void kmodcode_setup(KonohaContext *kctx, struct kmodshare_t *def, int new
 		base->h.free     = ctxcode_free;
 		KINITv(base->codeList, new_(Array, K_PAGESIZE/sizeof(void*)));
 		KINITv(base->constPools, new_(Array, 64));
-		kctx->modlocal[MOD_code] = (kmodlocal_t*)base;
+		kctx->modlocal[MOD_code] = (KonohaContextModule*)base;
 	}
 }
 
-static void kmodcode_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
+static void kmodcode_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 	KModuleByteCode *base = (KModuleByteCode*)baseh;
 	BEGIN_REFTRACE(1);
@@ -1016,7 +1016,7 @@ static void kmodcode_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
 	END_REFTRACE();
 }
 
-static void kmodcode_free(KonohaContext *kctx, struct kmodshare_t *baseh)
+static void kmodcode_free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 //	KModuleByteCode *base = (KModuleByteCode*)baseh;
 	KFREE(baseh, sizeof(KModuleByteCode));
@@ -1032,13 +1032,13 @@ void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	base->h.free     = kmodcode_free;
 	KLIB Konoha_setModule(kctx, MOD_code, &base->h, 0);
 
-	KDEFINE_CLASS defBasicBlock = {
+	KDEFINE_TY defBasicBlock = {
 		STRUCTNAME(BasicBlock),
 		.init = BasicBlock_init,
 		.free = BasicBlock_free,
 	};
 
-	KDEFINE_CLASS defByteCode = {
+	KDEFINE_TY defByteCode = {
 		STRUCTNAME(ByteCode),
 		.init = ByteCode_init,
 		.reftrace = ByteCode_reftrace,
@@ -1068,7 +1068,7 @@ void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		KLIB kArray_clear(kctx, ctxcode->codeList, 0);
 		RESET_GCSTACK();
 	}
-	LibKonohaApiVar *l = (LibKonohaApiVar*)kctx->klib;
+	KonohaLibVar *l = (KonohaLibVar*)kctx->klib;
 	l->kMethod_setFunc = kMethod_setFunc;
 	l->kMethod_genCode = kMethod_genCode;
 }

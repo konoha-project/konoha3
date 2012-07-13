@@ -30,11 +30,11 @@
 //#define kgcshare      ((kgcshare_t*)kctx->modshare[MOD_GC])
 //
 //typedef struct {
-//	kmodshare_t h;
+//	KonohaModule h;
 //} kgcshare_t;
 //
 //typedef struct {
-//	kmodlocal_t h;
+//	KonohaContextModule h;
 //} kgcmod_t;
 
 extern void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx);

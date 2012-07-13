@@ -71,7 +71,7 @@ static KMETHOD Int_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kint_t n = sfp[1].ivalue;
 	if(unlikely(n == 0)) {
-		kreportf(CRIT_, sfp[K_RTNIDX].uline, "Script!!: zero divided");
+		kreportf(CritTag, sfp[K_RTNIDX].uline, "Script!!: zero divided");
 	}
 	RETURNi_(sfp[0].ivalue / n);
 }
@@ -81,7 +81,7 @@ static KMETHOD Int_opMOD(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kint_t n = sfp[1].ivalue;
 	if(unlikely(n == 0)) {
-		kreportf(CRIT_, sfp[K_RTNIDX].uline, "Script!!: zero divided");
+		kreportf(CritTag, sfp[K_RTNIDX].uline, "Script!!: zero divided");
 	}
 	RETURNi_(sfp[0].ivalue % n);
 }
@@ -126,7 +126,7 @@ static KMETHOD Int_opGTE(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Int_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	char buf[40];
-	PLAT snprintf_i(buf, sizeof(buf), "%ld", (intptr_t)sfp[0].ivalue);
+	PLATAPI snprintf_i(buf, sizeof(buf), "%ld", (intptr_t)sfp[0].ivalue);
 	RETURN_(KLIB new_kString(kctx, buf, strlen(buf), SPOL_ASCII));
 }
 
@@ -199,7 +199,7 @@ static KMETHOD System_assert(KonohaContext *kctx, KonohaStack *sfp)
 	if (cond == false) {
 		kfileline_t pline  = sfp[K_RTNIDX].uline;
 		konoha_AssertResult = 1;
-		kreportf(CRIT_, pline, "Assert!!");
+		kreportf(CritTag, pline, "Assert!!");
 	}
 }
 
@@ -207,7 +207,7 @@ static KMETHOD System_assert(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD System_p(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kfileline_t uline = sfp[K_RTNIDX].uline;
-	kreportf(PRINT_, uline, "%s", S_text(sfp[1].toString));
+	kreportf(NoneTag, uline, "%s", S_text(sfp[1].toString));
 }
 
 //## method void System.gc();

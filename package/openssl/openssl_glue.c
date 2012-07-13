@@ -86,9 +86,9 @@ static kbool_t openssl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		"SHA1",
 	};
 	KonohaClass *tbls[2];
-	static KDEFINE_CLASS Def = {
+	static KDEFINE_TY Def = {
 			.structname = "",
-			.cid = CLASS_newid,
+			.cid = TY_newid,
 			.init = RawPtr_init,
 			.free = RawPtr_free,
 	};

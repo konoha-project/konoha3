@@ -331,11 +331,11 @@ def SAFE_cname(t) :
 	t = t.replace(':', '__')
 	return t	
 
-def CLASS_cname(cname) :
+def TY_cname(cname) :
 	prefix = ''
 	if cname.endswith('[]'): prefix = 'A'
 	if cname.endswith('..'): prefix = 'I'
-	return '%sCLASS_%s' % (prefix, SAFE_cname(cname))
+	return '%sTY_%s' % (prefix, SAFE_cname(cname))
 
 def T_cname(t) :
 	prefix = ''
@@ -345,8 +345,8 @@ def T_cname(t) :
 	if t.endswith('..'): prefix = 'NNI'
 	return '%sT_%s' % (prefix, SAFE_cname(t))
 
-def DEBUG_cname(cname):
-	return 'DEBUG_%s' % cname
+def DebugTagcname(cname):
+	return 'DebugTag%s' % cname
 
 def FN_name(fn):
     return 'FN_%s' % fn

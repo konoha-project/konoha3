@@ -104,7 +104,7 @@ static KMETHOD File_read(KonohaContext *kctx, KonohaStack *sfp)
 		size = ba->bytesize;
 		if(!(offset < size)) {
 			kfileline_t uline = sfp[K_RTNIDX].uline;
-			kreportf(CRIT_, uline, "OutOfRange!!, offset=%d, size=%d", offset, size);
+			kreportf(CritTag, uline, "OutOfRange!!, offset=%d, size=%d", offset, size);
 		}
 		if(len == 0) len = size - offset;
 		size = fread(ba->buf + offset, 1, len, fp);
@@ -209,7 +209,7 @@ static KMETHOD File_putC(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KDEFINE_CLASS defFile = {
+	KDEFINE_TY defFile = {
 		STRUCTNAME(FILE),
 		.cflag = kClass_Final,
 		.init  = File_init,
@@ -235,7 +235,7 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		};
 		KLIB kNameSpace_loadMethodData(kctx, ns, MethodData2);
 	} else {
-		kreportf(INFO_, pline, "konoha.bytes package hasn't imported. Some features are still disabled.");
+		kreportf(InfoTag, pline, "konoha.bytes package hasn't imported. Some features are still disabled.");
 	}
 	return true;
 }

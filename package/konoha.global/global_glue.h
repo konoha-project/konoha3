@@ -105,7 +105,7 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kObject *o, kStmt
 	ktype_t cid = O_cid(o);
 	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(fn));
 	if(mtd != NULL) {
-		SUGAR Stmt_p(kctx, stmt, NULL, ERR_, "already defined name: %s.%s", CT_t(O_ct(o)), SYM_t(fn));
+		SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "already defined name: %s.%s", CT_t(O_ct(o)), SYM_t(fn));
 		return NULL;
 	}
 	mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toGETTER(fn));
@@ -113,7 +113,7 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kObject *o, kStmt
 		mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toISBOOL(fn));
 	}
 	if(mtd != NULL && kMethod_rtype(mtd) != ty) {
-		SUGAR Stmt_p(kctx, stmt, NULL, ERR_, "differently defined getter: %s.%s", CT_t(O_ct(o)), SYM_t(fn));
+		SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "differently defined getter: %s.%s", CT_t(O_ct(o)), SYM_t(fn));
 		return NULL;
 	}
 	if(mtd == NULL) { // no getter
@@ -142,13 +142,13 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_P("global assignment .. ");
 	kObject *scr = gma->genv->ns->scriptObject;
 	if(O_cid(scr) == TY_System) {
-		SUGAR Stmt_p(kctx, stmt, NULL, ERR_, " global variables are not available");
+		SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, " global variables are not available");
 		RETURNb_(false);
 	}
 	kExpr *vexpr = kStmt_expr(stmt, SYM_("var"), K_NULLEXPR);
 	ksymbol_t fn = tosymbol(kctx, vexpr);
 	if(fn == SYM_NONAME) {
-		SUGAR Stmt_p(kctx, stmt, NULL, ERR_, "variable name is expected");
+		SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "variable name is expected");
 		RETURNb_(false);
 	}
 	kExpr *expr = kStmt_expr(stmt, KW_ExprPattern, K_NULLEXPR);
@@ -160,7 +160,7 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp)
 	if(mtd == NULL) {
 		RETURNb_(false);
 	}
-	SUGAR Stmt_p(kctx, stmt, NULL, INFO_, "%s has type %s", SYM_t(fn), TY_t(expr->ty));
+	SUGAR Stmt_p(kctx, stmt, NULL, InfoTag, "%s has type %s", SYM_t(fn), TY_t(expr->ty));
 	expr = SUGAR new_TypedMethodCall(kctx, stmt, TY_void, mtd, gma, 2, new_ConstValue(O_cid(scr), scr), expr);
 	KLIB kObject_setObject(kctx, stmt, KW_ExprPattern, TY_Expr, expr);
 	kStmt_typed(stmt, EXPR);
@@ -175,13 +175,13 @@ static kMethod* ExprTerm_getSetterNULL(KonohaContext *kctx, kStmt *stmt, kExpr *
 	if(Expr_isTerm(expr) && expr->tk->keyword == TK_SYMBOL) {
 		kToken *tk = expr->tk;
 		if(tk->keyword != KW_SymbolPattern) {
-			SUGAR Stmt_p(kctx, stmt, NULL, ERR_, "%s is keyword", S_text(tk->text));
+			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "%s is keyword", S_text(tk->text));
 			return NULL;
 		}
 		ksymbol_t fn = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
 		return Object_newProtoSetterNULL(kctx, scr, stmt, gma->genv->ns, ty, fn);
 	}
-	SUGAR Stmt_p(kctx, stmt, NULL, ERR_, "variable name is expected");
+	SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "variable name is expected");
 	return NULL;
 }
 
@@ -202,7 +202,7 @@ static kbool_t Expr_declType(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGam
 	USING_SUGAR;
 	kObject *scr = gma->genv->ns->scriptObject;
 	if(O_cid(scr) == TY_System) {
-		SUGAR Stmt_p(kctx, stmt, NULL, ERR_, " global variables are not available");
+		SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, " global variables are not available");
 		return false;
 	}
 	if(Expr_isTerm(expr)) {
@@ -235,7 +235,7 @@ static kbool_t Expr_declType(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGam
 		}
 		return true;
 	}
-	SUGAR Stmt_p(kctx, stmt, NULL, ERR_, "variable name is expected");
+	SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "variable name is expected");
 	return false;
 }
 
@@ -268,9 +268,9 @@ static kbool_t global_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfilel
 	SUGAR NameSpace_defineSyntax(kctx, ns, SYNTAX);
 	SUGAR SYN_setSugarFunc(kctx, ns, KW_StmtTypeDecl, SYNIDX_TopStmtTyCheck, new_SugarFunc(StmtTyCheck_GlobalTypeDecl));
 	if(O_cid(ns->scriptObject) == TY_System) {
-		KDEFINE_CLASS defScript = {
+		KDEFINE_TY defScript = {
 			.structname = "Script",
-			.cid = CLASS_newid,
+			.cid = TY_newid,
 			.cflag = kClass_Singleton|kClass_Final,
 			.cstruct_size = sizeof(kScript),
 		};

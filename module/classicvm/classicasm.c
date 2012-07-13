@@ -24,6 +24,6 @@
 
 /* ************************************************************************ */
 
-#define _CLASSICVM 1
+#define _TYICVM 1
 #define OPOLD 1
 #include "../../src/vm/asm.c"

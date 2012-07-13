@@ -51,7 +51,7 @@ typedef struct kByteCodeVar           kByteCodeVar;
 #define CODE_NCALL        kmodcode->PRECOMPILED_NCALL
 
 typedef struct {
-	kmodshare_t     h;
+	KonohaModule     h;
 	KonohaClass    *cBasicBlock;
 	KonohaClass    *cByteCode;
 	kByteCode      *codeNull;
@@ -60,7 +60,7 @@ typedef struct {
 } KModuleByteCode;
 
 typedef struct {
-	kmodlocal_t      h;
+	KonohaContextModule      h;
 	kfileline_t      uline;
 	kArray          *codeList;
 	kBasicBlock     *lbEND;  // ON GCSTACK
@@ -189,7 +189,7 @@ struct kByteCodeVar {
 
 #define OPEXEC_CHKSTACK(UL) \
 	if(unlikely(kctx->esp > kctx->stack->stack_uplimit)) {\
-		kreportf(CRIT_, UL, "stack overflow");\
+		kreportf(CritTag, UL, "stack overflow");\
 	}\
 
 

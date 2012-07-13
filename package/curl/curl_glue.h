@@ -348,28 +348,28 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 	if(curl != NULL) {
 		kint_t curlinfo = Int_to(int , sfp[1]);
 		switch(curlinfo) {
-		case CURLINFO_HEADER_SIZE:
-		case CURLINFO_REQUEST_SIZE:
+		case CURLInfoTagHEADER_SIZE:
+		case CURLInfoTagREQUEST_SIZE:
 			curl_easy_getinfo(curl, curlinfo, &lngptr);
 			// RETURN_(new_Int(ctx, lngptr));
 			RETURNi_(lngptr);
 			break;
-		case CURLINFO_REDIRECT_TIME:
-		case CURLINFO_TOTAL_TIME:
-		case CURLINFO_NAMELOOKUP_TIME:
-		case CURLINFO_CONNECT_TIME:
-		case CURLINFO_PRETRANSFER_TIME:
-		case CURLINFO_STARTTRANSFER_TIME:
-		case CURLINFO_SIZE_UPLOAD:
-		case CURLINFO_SIZE_DOWNLOAD:
-		case CURLINFO_SPEED_DOWNLOAD:
-		case CURLINFO_SPEED_UPLOAD:
+		case CURLInfoTagREDIRECT_TIME:
+		case CURLInfoTagTOTAL_TIME:
+		case CURLInfoTagNAMELOOKUP_TIME:
+		case CURLInfoTagCONNECT_TIME:
+		case CURLInfoTagPRETRANSFER_TIME:
+		case CURLInfoTagSTARTTRANSFER_TIME:
+		case CURLInfoTagSIZE_UPLOAD:
+		case CURLInfoTagSIZE_DOWNLOAD:
+		case CURLInfoTagSPEED_DOWNLOAD:
+		case CURLInfoTagSPEED_UPLOAD:
 			curl_easy_getinfo(curl, curlinfo, &dblptr);
 			// RETURN_(new_Float(ctx, dblptr));
 			RETURNf_(dblptr);
 			break;
-		case CURLINFO_EFFECTIVE_URL:
-		case CURLINFO_CONTENT_TYPE:
+		case CURLInfoTagEFFECTIVE_URL:
+		case CURLInfoTagCONTENT_TYPE:
 			curl_easy_getinfo(curl, curlinfo, &strptr);
 			RETURN_(KLIB new_kString(kctx, strptr, strlen(strptr), 0));
 			// RETURN_(new_String(ctx, strptr));
@@ -402,7 +402,7 @@ static	kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 {
 	ctx = (struct KonohaContextVar *)kctx;
 
-	KDEFINE_CLASS defCurl = {
+	KDEFINE_TY defCurl = {
 		STRUCTNAME(Curl),
 		.cflag = kClass_Final,
 		.init = Curl_init,
@@ -503,20 +503,20 @@ static	kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		{_KVi(CURLOPT_READDATA)},
 		{_KVi(CURLOPT_STDERR)},
 		{_KVi(CURLOPT_WRITEHEADER)},
-		{_KVi(CURLINFO_HEADER_SIZE)},
-		{_KVi(CURLINFO_REQUEST_SIZE)},
-		{_KVi(CURLINFO_REDIRECT_TIME)},
-		{_KVi(CURLINFO_TOTAL_TIME)},
-		{_KVi(CURLINFO_NAMELOOKUP_TIME)},
-		{_KVi(CURLINFO_CONNECT_TIME)},
-		{_KVi(CURLINFO_PRETRANSFER_TIME)},
-		{_KVi(CURLINFO_STARTTRANSFER_TIME)},
-		{_KVi(CURLINFO_SIZE_UPLOAD)},
-		{_KVi(CURLINFO_SIZE_DOWNLOAD)},
-		{_KVi(CURLINFO_SPEED_DOWNLOAD)},
-		{_KVi(CURLINFO_SPEED_UPLOAD)},
-		{_KVi(CURLINFO_EFFECTIVE_URL)},
-		{_KVi(CURLINFO_CONTENT_TYPE)},
+		{_KVi(CURLInfoTagHEADER_SIZE)},
+		{_KVi(CURLInfoTagREQUEST_SIZE)},
+		{_KVi(CURLInfoTagREDIRECT_TIME)},
+		{_KVi(CURLInfoTagTOTAL_TIME)},
+		{_KVi(CURLInfoTagNAMELOOKUP_TIME)},
+		{_KVi(CURLInfoTagCONNECT_TIME)},
+		{_KVi(CURLInfoTagPRETRANSFER_TIME)},
+		{_KVi(CURLInfoTagSTARTTRANSFER_TIME)},
+		{_KVi(CURLInfoTagSIZE_UPLOAD)},
+		{_KVi(CURLInfoTagSIZE_DOWNLOAD)},
+		{_KVi(CURLInfoTagSPEED_DOWNLOAD)},
+		{_KVi(CURLInfoTagSPEED_UPLOAD)},
+		{_KVi(CURLInfoTagEFFECTIVE_URL)},
+		{_KVi(CURLInfoTagCONTENT_TYPE)},
 		{} // end of const data
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
@@ -582,7 +582,7 @@ static kbool_t curl_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfilelin
 //	url->buffer_pos += size;
 //	if(url->contenttype == NULL){
 //		char *type = NULL;
-//		curl_easy_getinfo(url->curl, CURLINFO_CONTENT_TYPE, &type);
+//		curl_easy_getinfo(url->curl, CURLInfoTagCONTENT_TYPE, &type);
 //		if(type != NULL){
 //			char *charset = NULL;
 //			charset = strrchr(type, '=');
@@ -830,6 +830,6 @@ static kbool_t curl_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfilelin
 //
 //static knh_PathDSPI_t CURLDSPI_PATH = {
 //	K_DSPI_PATH, "libcurl",
-//	CLASS_InputStream, CLASS_Tvoid,
+//	TY_InputStream, TY_void,
 //	CURL_exists, CURL_isTyped, newObjectNULL
 //};

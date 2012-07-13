@@ -29,7 +29,7 @@
 
 int main(int argc, const char *argv[])
 {
-    LibKonohaApi *lib;
+    KonohaLib *lib;
     KonohaContext* konoha = konoha_open((const PlatformApi*)&plat);
     lib = konoha->klib;
     int i;

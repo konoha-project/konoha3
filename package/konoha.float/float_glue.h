@@ -40,15 +40,15 @@ static void Float_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteB
 	KLIB Kwb_printf(kctx, wb, KFLOAT_FMT, sfp[pos].fvalue);
 }
 
-static void kmodfloat_setup(KonohaContext *kctx, struct kmodshare_t *def, int newctx)
+static void kmodfloat_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
 {
 }
 
-static void kmodfloat_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
+static void kmodfloat_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 }
 
-static void kmodfloat_free(KonohaContext *kctx, struct kmodshare_t *baseh)
+static void kmodfloat_free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 	KFREE(baseh, sizeof(kmodfloat_t));
 }
@@ -78,7 +78,7 @@ static KMETHOD Float_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kfloat_t n = sfp[1].fvalue;
 	if(unlikely(n == 0.0)) {
-		kreportf(CRIT_, sfp[K_RTNIDX].uline, "Script!!: zero divided");
+		kreportf(CritTag, sfp[K_RTNIDX].uline, "Script!!: zero divided");
 	}
 	RETURNf_(sfp[0].fvalue / n);
 }
@@ -135,7 +135,7 @@ static KMETHOD Int_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Float_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	char buf[40];
-	PLAT snprintf_i(buf, sizeof(buf), KFLOAT_FMT, sfp[0].fvalue);
+	PLATAPI snprintf_i(buf, sizeof(buf), KFLOAT_FMT, sfp[0].fvalue);
 	RETURN_(KLIB new_kString(kctx, buf, strlen(buf), SPOL_ASCII));
 }
 
@@ -187,7 +187,7 @@ static	kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	base->h.free     = kmodfloat_free;
 	KLIB Konoha_setModule(kctx, MOD_float, &base->h, pline);
 
-	KDEFINE_CLASS defFloat = {
+	KDEFINE_TY defFloat = {
 		STRUCTNAME(Float),
 		.cflag = CFLAG_Int,
 		.init = Float_init,

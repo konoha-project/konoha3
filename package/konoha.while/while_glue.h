@@ -84,7 +84,7 @@ static KMETHOD StmtTyCheck_break(KonohaContext *kctx, KonohaStack *sfp)
 			RETURNb_(true);
 		}
 	}
-	SUGAR Stmt_p(kctx, stmt, NULL, ERR_, "break statement not within a loop");
+	SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "break statement not within a loop");
 	RETURNb_(false);
 }
 
@@ -101,7 +101,7 @@ static KMETHOD StmtTyCheck_continue(KonohaContext *kctx, KonohaStack *sfp)
 			RETURNb_(true);
 		}
 	}
-	SUGAR Stmt_p(kctx, stmt, NULL, ERR_, "continue statement not within a loop");
+	SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "continue statement not within a loop");
 	RETURNb_((false));
 }
 

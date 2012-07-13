@@ -359,34 +359,34 @@ static KMETHOD LogPool_loadFile(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	int i;
-	static KDEFINE_CLASS Def0 = {
+	static KDEFINE_TY Def0 = {
 		.structname = "LogPool"/*structname*/,
-		.cid = CLASS_newid/*cid*/,
+		.cid = TY_newid/*cid*/,
 		.init = RawPtr_init,
 		.free = Logpool_free,
 	};
 	KonohaClass *ct0 = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &Def0, pline);
 
-	static KDEFINE_CLASS Def1 = {
+	static KDEFINE_TY Def1 = {
 		.structname = "Log"/*structname*/,
-		.cid = CLASS_newid/*cid*/,
+		.cid = TY_newid/*cid*/,
 		.init = RawPtr_init,
 		.free = Log_free,
 		.p    = Log_p,
 	};
 	KonohaClass *ct1 = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &Def1, pline);
 
-	static KDEFINE_CLASS Def2 = {
+	static KDEFINE_TY Def2 = {
 		.structname = "PoolPlugin",
-		.cid = CLASS_newid,
+		.cid = TY_newid,
 		.init = RawPtr_init,
 		.free = RawPtr_free,
 	};
 	KonohaClass *ct2 = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &Def2, pline);
 #define TY_Plugin ct2->cid
-	static KDEFINE_CLASS Def3 = {
+	static KDEFINE_TY Def3 = {
 		.structname = "",
-		.cid = CLASS_newid,
+		.cid = TY_newid,
 		.init = RawPtr_init,
 		.free = RawPtr_free,
 	};

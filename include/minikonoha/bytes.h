@@ -51,7 +51,7 @@ typedef size_t (*ficonv)(kiconv_t, const char **, size_t *, char **, size_t *);
 typedef int    (*ficonv_close)(kiconv_t);
 
 typedef struct {
-    kmodshare_t h;
+    KonohaModule h;
     KonohaClass     *cBytes;
     kbool_t      (*encode)(const char* from, const char* to, const char* text, size_t len, KUtilsWriteBuffer* wb);
     const char*  fmt;
@@ -62,6 +62,6 @@ typedef struct {
 } kmodiconv_t;
 
 typedef struct {
-    kmodlocal_t h;
+    KonohaContextModule h;
 } ctxiconv_t;
 #endif /* MODICONV_H_ */

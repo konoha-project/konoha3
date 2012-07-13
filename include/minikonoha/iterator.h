@@ -38,14 +38,14 @@
 #define IS_Iterator(O)         (O_ct(O)->bcid == TY_Iterator)
 
 typedef struct {
-	kmodshare_t h;
+	KonohaModule h;
 	KonohaClass *cIterator;
 	KonohaClass *cStringIterator;
 	KonohaClass *cGenericIterator;
 } kmoditerator_t;
 
 typedef struct {
-	kmodlocal_t h;
+	KonohaContextModule h;
 } kiteratormod_t;
 
 typedef struct _kIterator kIterator;

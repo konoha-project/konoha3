@@ -429,7 +429,7 @@ static	kbool_t jansson_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 {
 	KREQUIRE_PACKAGE("konoha.float", pline);
 	//KREQUIRE_PACKAGE("konoha.string", pline);
-	KDEFINE_CLASS defJson = {
+	KDEFINE_TY defJson = {
 		STRUCTNAME(Json),
 		.cflag = kClass_Final,
 		.init = Jansson_init,

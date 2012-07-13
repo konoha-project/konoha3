@@ -1,6 +1,6 @@
 #include <minikonoha/float.h>
-#ifndef CLASSICVM_H_
-#define CLASSICVM_H_
+#ifndef TYICVM_H_
+#define TYICVM_H_
 
 static void EXPR_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espidx);
 static kBasicBlockVar* new_BasicBlockLABEL(KonohaContext *kctx);
@@ -29,7 +29,7 @@ static void BUILD_asm(KonohaContext *kctx, VirtualMachineInstruction *op, size_t
 #define MN_opLSFT MN_("opLSFT")
 #define MN_opRSFT MN_("opRSFT")
 
-static kbool_t CLASSICVM_BUILD_asmJMPF(KonohaContext *kctx, kBasicBlock *bb, klr_JMPF_t *op, int *swap)
+static kbool_t TYICVM_BUILD_asmJMPF(KonohaContext *kctx, kBasicBlock *bb, klr_JMPF_t *op, int *swap)
 {
 	while(bb->op.bytesize > 0) {
 		VirtualMachineInstruction *opP = BBOP(bb) + (BBSIZE(bb) - 1);
@@ -88,7 +88,7 @@ static kbool_t CLASSICVM_BUILD_asmJMPF(KonohaContext *kctx, kBasicBlock *bb, klr
 #define _REMOVE2(opX, opX2)       TONOP(opX); _REMOVE(opX2)
 #define _REMOVE3(opX, opX2, opX3) TONOP(opX); _REMOVE2(opX2, opX3)
 
-static void CLASSICVM_BasicBlock_peephole(KonohaContext *kctx, kBasicBlock *bb)
+static void TYICVM_BasicBlock_peephole(KonohaContext *kctx, kBasicBlock *bb)
 {
 	size_t i;
 	for(i = 1; i < BBSIZE(bb); i++) {
@@ -308,13 +308,13 @@ static kbool_t OPR_hasCONST(KonohaContext *kctx, kExpr *expr, kmethodn_t *mn, in
 	return isCONST;
 }
 
-static kbool_t CLASSICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr, int shift, int espidx)
+static kbool_t TYICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr, int shift, int espidx)
 {
 	ktype_t mtd_cid = (mtd)->cid;
 	kmethodn_t mtd_mn = (mtd)->mn;
 	int a = espidx + 1;
 #if 1/*TODO*/
-	if(mtd_cid == CLASS_Array) {
+	if(mtd_cid == TY_Array) {
 		ktype_t p1 = 0;//C_p1(cid);
 		if(mtd_mn == MN_get) {
 			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
@@ -378,7 +378,7 @@ static kbool_t CLASSICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr
 	}
 #endif
 #if defined(OPCODE_BGETIDX)
-	if(mtd_cid == CLASS_Bytes) {
+	if(mtd_cid == TY_Bytes) {
 		if(mtd_mn == MN_get) {
 			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
 			if(kExpr_at(expr, 2)->build == TEXPR_NCONST) {
@@ -418,7 +418,7 @@ static kbool_t CLASSICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr
 #endif
 
 #ifdef OPCODE_bNUL
-	if(mtd_cid == CLASS_Object) {
+	if(mtd_cid == TY_Object) {
 		if(mtd_mn == MN_isNull) {
 			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
 			ASM(bNUL, NC_(espidx), OC_(a));
@@ -434,12 +434,12 @@ static kbool_t CLASSICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr
 	kopcode_t opcode;
 	ktype_t cid    = mtd_cid;
 	kmethodn_t mn = mtd_mn;
-	if(mtd_cid == CLASS_Boolean && mtd_mn == MN_opNOT) {
+	if(mtd_cid == TY_Boolean && mtd_mn == MN_opNOT) {
 		EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
 		ASM(bNN, NC_(espidx), NC_(a));
 		return 1;
 	}
-	if(mtd_cid == CLASS_Int && ((opcode = OPimn(kctx, mn, 0)) != OPCODE_NOP)) {
+	if(mtd_cid == TY_Int && ((opcode = OPimn(kctx, mn, 0)) != OPCODE_NOP)) {
 		int swap = 1;
 		if(mn == MN_opNEG) {
 			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
@@ -454,7 +454,7 @@ static kbool_t CLASSICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr
 			if(b == 0 && (mn == MN_opDIV || mn == MN_opMOD)) {
 				b = 1;
 				//TODO
-				//WARN_DividedByZero(kctx);
+				//WarnTagDividedByZero(kctx);
 			}
 			opcode = OPimn(kctx, mn, (OPCODE_iADDC - OPCODE_iADD));
 			ASMop(iADDC, opcode, NC_(espidx), NC_(espidx+1), b);
@@ -466,7 +466,7 @@ static kbool_t CLASSICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr
 			ASMop(iADD, opcode, NC_(espidx), NC_(a), NC_(b));
 		}
 		return 1;
-	} /* CLASS_Int */
+	} /* TY_Int */
 	if(IS_defineFloat() && cid == TY_Float && ((opcode = OPfmn(kctx, mn, 0)) != OPCODE_NOP)) {
 		int swap = 1;
 		if(mn == MN_opNEG) {
@@ -486,7 +486,7 @@ static kbool_t CLASSICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr
 			if(b == KFLOAT_ZERO && mn == MN_opDIV) {
 				b = KFLOAT_ONE;
 				//TODO
-				//WARN_DividedByZero(kctx);
+				//WarnTagDividedByZero(kctx);
 			}
 			opcode = OPfmn(kctx, mn, (OPCODE_fADDC - OPCODE_fADD));
 			ASMop(fADDC, opcode, NC_(espidx), NC_(a), b);

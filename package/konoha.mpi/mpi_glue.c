@@ -485,21 +485,21 @@ static KMETHOD MPIData_seti(KonohaContext *kctx, KonohaStack *sfp)
 #define _F(F)   (intptr_t)(F)
 
 typedef struct {
-	kmodshare_t h;
+	KonohaModule h;
 	KonohaClass *cValue;
 } kmodmpi_t;
 
-static void kmodmpi_setup(KonohaContext *kctx, struct kmodshare_t *def, int newctx)
+static void kmodmpi_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
 {
 	(void)kctx;(void)def;(void)newctx;
 }
 
-static void kmodmpi_reftrace(KonohaContext *kctx, struct kmodshare_t *baseh)
+static void kmodmpi_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 	(void)kctx;(void)baseh;
 }
 
-static void kmodmpi_free(KonohaContext *kctx, struct kmodshare_t *baseh)
+static void kmodmpi_free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 	MPI_Finalize();
 }
@@ -518,9 +518,9 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	MPI_Init(&argc, (char ***)&args);
 	g_comm_world = (kMPIComm *)KMALLOC(sizeof(kMPIComm));
 	g_comm_world->comm = MPI_COMM_WORLD;
-	static KDEFINE_CLASS MPIDef = {
+	static KDEFINE_TY MPIDef = {
 		"MPI"/*structname*/,
-		CLASS_newid/*cid*/,  0/*cflag*/,
+		TY_newid/*cid*/,  0/*cflag*/,
 		0/*bcid*/, 0/*supcid*/, 0/*cstruct_size*/,
 		0/*fields*/, 0/*fsize*/, 0/*fallocsize*/,
 		0/*packageId*/, 0/*packageDomain*/,
@@ -534,9 +534,9 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		0/*hashCode*/,
 		0/*initdef*/
 	};
-	static KDEFINE_CLASS MPICommDef = {
+	static KDEFINE_TY MPICommDef = {
 		"MPIComm"/*structname*/,
-		CLASS_newid/*cid*/,  0/*cflag*/,
+		TY_newid/*cid*/,  0/*cflag*/,
 		0/*bcid*/, 0/*supcid*/, 0/*cstruct_size*/,
 		0/*fields*/, 0/*fsize*/, 0/*fallocsize*/,
 		0/*packageId*/, 0/*packageDomain*/,
@@ -550,9 +550,9 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		0/*hashCode*/,
 		0/*initdef*/
 	};
-	static KDEFINE_CLASS MPIRequestDef = {
+	static KDEFINE_TY MPIRequestDef = {
 		"MPIRequest"/*structname*/,
-		CLASS_newid/*cid*/,  0/*cflag*/,
+		TY_newid/*cid*/,  0/*cflag*/,
 		0/*bcid*/, 0/*supcid*/, 0/*cstruct_size*/,
 		0/*fields*/, 0/*fsize*/, 0/*fallocsize*/,
 		0/*packageId*/, 0/*packageDomain*/,
@@ -566,9 +566,9 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		0/*hashCode*/,
 		0/*initdef*/
 	};
-	static KDEFINE_CLASS MPIDataDef = {
+	static KDEFINE_TY MPIDataDef = {
 		"MPIData"/*structname*/,
-		CLASS_newid/*cid*/,  0/*cflag*/,
+		TY_newid/*cid*/,  0/*cflag*/,
 		0/*bcid*/, 0/*supcid*/, 0/*cstruct_size*/,
 		0/*fields*/, 0/*fsize*/, 0/*fallocsize*/,
 		0/*packageId*/, 0/*packageDomain*/,
@@ -582,9 +582,9 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		0/*hashCode*/,
 		0/*initdef*/
 	};
-	//static KDEFINE_CLASS MPIOpDef = {
+	//static KDEFINE_TY MPIOpDef = {
 	//	"MPIOp"/*structname*/,
-	//	CLASS_newid/*cid*/,  0/*cflag*/,
+	//	TY_newid/*cid*/,  0/*cflag*/,
 	//	0/*bcid*/, 0/*supcid*/, 0/*cstruct_size*/,
 	//	0/*fields*/, 0/*fsize*/, 0/*fallocsize*/,
 	//	0/*packageId*/, 0/*packageDomain*/,
