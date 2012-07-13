@@ -56,7 +56,7 @@ static void NameSpace_reftrace(KonohaContext *kctx, kObject *o)
 	if(ns->syntaxMapNN != NULL) {
 		KLIB Kmap_reftrace(kctx, ns->syntaxMapNN, syntax_reftrace);
 	}
-	size_t i, size = KARRAYSIZE(ns->constTable.bytesize, kvs);
+	size_t i, size = ns->constTable.bytesize / sizeof(KUtilsKeyValue);
 	BEGIN_REFTRACE(size);
 	for(i = 0; i < size; i++) {
 		if(SYMKEY_isBOXED(ns->constTable.kvs[i].key)) {
@@ -149,7 +149,7 @@ static void checkFuncArray(KonohaContext *kctx, kFunc **synp)
 		size_t i;
 		kArray *newa = new_(Array, 8), *a = (kArray*)synp[0];
 		for(i = 0; i < kArray_size(a); i++) {
-			kArray_add(newa, a->list[i]);
+			kArray_add(newa, a->objectItems[i]);
 		}
 		KSETv(synp[0], (kFunc*)newa);
 	}
@@ -263,7 +263,7 @@ static int comprKeyVal(const void *a, const void *b)
 
 static KUtilsKeyValue* NameSpace_getConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t ukey)
 {
-	size_t min = 0, max = KARRAYSIZE(ns->constTable.bytesize, kvs);
+	size_t min = 0, max = ns->constTable.bytesize / sizeof(KUtilsKeyValue);
 	while(min < max) {
 		size_t p = (max + min) / 2;
 		ksymbol_t key = SYMKEY_unbox(ns->constTable.kvs[p].key);
@@ -294,7 +294,7 @@ static kbool_t checkConflictedConst(KonohaContext *kctx, kNameSpace *ns, KUtilsK
 
 static void NameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, KUtilsKeyValue *kvs, size_t nitems, kfileline_t pline)
 {
-	size_t i, s = KARRAYSIZE(ns->constTable.bytesize, kvs);
+	size_t i, s = ns->constTable.bytesize / sizeof(KUtilsKeyValue);
 	if(s == 0) {
 		KLIB Karray_init(kctx, &ns->constTable, (nitems + 8) * sizeof(KUtilsKeyValue));
 		memcpy(ns->constTable.kvs, kvs, nitems * sizeof(KUtilsKeyValue));
@@ -425,7 +425,7 @@ static kMethod* CT_findMethodNULL(KonohaContext *kctx, KonohaClass *ct, kmethodn
 		size_t i;
 		kArray *a = ct->methodList;
 		for(i = 0; i < kArray_size(a); i++) {
-			kMethod *mtd = a->methodList[i];
+			kMethod *mtd = a->methodItems[i];
 			if((mtd)->mn == mn) {
 				return mtd;
 			}
@@ -443,7 +443,7 @@ static kMethod* NameSpace_getMethodNULL(KonohaContext *kctx, kNameSpace *ns, kty
 		size_t i;
 		kArray *a = ns->methodList;
 		for(i = 0; i < kArray_size(a); i++) {
-			kMethod *mtd = a->methodList[i];
+			kMethod *mtd = a->methodItems[i];
 			if(mtd->cid == cid && mtd->mn == mn) {
 				return mtd;
 			}
@@ -642,7 +642,7 @@ static void dumpTokenArray(KonohaContext *kctx, int nest, kArray *a, int s, int 
 	if(verbose_sugar) {
 		if(nest == 0) DUMP_P("\n");
 		while(s < e) {
-			kToken *tk = a->toks[s];
+			kToken *tk = a->tokenItems[s];
 			dumpIndent(kctx, nest);
 			if(IS_Array(tk->sub)) {
 				DUMP_P("%c\n", kTokenList_beginChar(tk));
@@ -779,7 +779,7 @@ static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
 			}
 			DUMP_P("\n");
 			for(i=0; i < kArray_size(expr->cons); i++) {
-				kObject *o = expr->cons->list[i];
+				kObject *o = expr->cons->objectItems[i];
 				if(O_ct(o) == CT_Expr) {
 					dumpExpr(kctx, i, nest+1, (kExpr*)o);
 				}
@@ -1013,7 +1013,7 @@ static void Block_insertAfter(KonohaContext *kctx, kBlock *bk, kStmt *target, kS
 	KSETv(((kStmtVar*)stmt)->parentBlockNULL, bk);
 	size_t i;
 	for(i = 0; i < kArray_size(bk->stmtList); i++) {
-		if(bk->stmtList->stmts[i] == target) {
+		if(bk->stmtList->stmtItems[i] == target) {
 			kArray_insert(bk->stmtList, i+1, stmt);
 			return;
 		}

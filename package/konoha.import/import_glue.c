@@ -41,15 +41,15 @@ static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	if (i + 2 < kArray_size(tls)) {
 		for (; i < kArray_size(tls)-1; i+=2) {
 			/* name . */
-			kToken *tk  = tls->toks[i+0];
-			kToken *dot = tls->toks[i+1];
+			kToken *tk  = tls->tokenItems[i+0];
+			kToken *dot = tls->tokenItems[i+1];
 			assert(tk->keyword  == TK_SYMBOL);
 			assert(dot->keyword == KW_DOT);
 			KLIB Kwb_write(kctx, &wb, S_text(tk->text), S_size(tk->text));
 			kwb_putc(&wb, '.');
 		}
 	}
-	kString *name = tls->toks[i]->text;
+	kString *name = tls->tokenItems[i]->text;
 	KLIB Kwb_write(kctx, &wb, S_text(name), S_size(name));
 	kString *pkgname = new_kString(KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
 	kNameSpace *ns = gma->genv->ns;

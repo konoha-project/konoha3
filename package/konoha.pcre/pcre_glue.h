@@ -690,7 +690,7 @@ static int parseREGEX(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, in
 	}
 	int tlsize = kArray_size(tenv->tokenList);
 	if(tlsize > 0) {
-		kToken *tkPrev = tenv->tokenList->toks[tlsize - 1];
+		kToken *tkPrev = tenv->tokenList->tokenItems[tlsize - 1];
 		if(tkPrev->keyword == TK_INT ||
 			(kToken_topch(tkPrev) != '(' && tkPrev->keyword == TK_SYMBOL)) {
 			return parseSLASH(kctx, tk, tenv, tok_start);
@@ -727,7 +727,7 @@ static KMETHOD ExprTyCheck_Regex(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kToken *tk = expr->tk;
 	kRegex *r = new_(Regex, NULL);
 	DBG_ASSERT(kArray_size(tk->sub) == 2);
-	Regex_set(kctx, r, tk->sub->strings[0], tk->sub->strings[1]);
+	Regex_set(kctx, r, tk->sub->stringItems[0], tk->sub->stringItems[1]);
 	RETURN_(kExpr_setConstValue(expr, TY_Regex, r));
 }
 

@@ -259,7 +259,7 @@ typedef kushort_t       kparamid_t;
 #define TY_unknown         ((ktype_t)-2)
 
 #define CT_(t)              (kctx->share->classTable.cts[t])
-#define CT_cparam(CT)       (kctx->share->paramdomList->params[(CT)->paramdom])
+#define CT_cparam(CT)       (kctx->share->paramdomList->paramItems[(CT)->paramdom])
 #define TY_isUnbox(t)       FLAG_is(CT_(t)->cflag, kClass_UnboxType)
 #define CT_isUnbox(C)       FLAG_is(C->cflag, kClass_UnboxType)
 
@@ -420,7 +420,6 @@ struct KUtilsHashMap {
 	size_t size;
 	size_t hmax;
 };
-
 
 /* ------------------------------------------------------------------------ */
 
@@ -628,7 +627,7 @@ struct KonohaClassVar {
 	ktype_t  p0;            kparamid_t paramdom;
 	kmagicflag_t magicflag;
 	size_t     cstruct_size;
-	KonohaClassField  *fields;
+	KonohaClassField  *fieldItems;
 	kushort_t  fsize;         kushort_t fallocsize;
 	const char               *DBG_NAME;
 	ksymbol_t   nameid;       kushort_t   optvalue;
@@ -782,8 +781,8 @@ typedef struct KonohaObjectHeader {
 struct kObjectVar {
 	KonohaObjectHeader h;
 	union {
-		kObject *fields[4];
-		uintptr_t ndata[4];
+		kObject  *fieldObjectItems[4];
+		uintptr_t fieldUnboxItems[4];
 	};
 };
 
@@ -924,22 +923,22 @@ struct kArrayVar {
 	KonohaObjectHeader h;
 	size_t bytesize;
 	union {
-		uintptr_t              *ndata;
-		kint_t                 *ilist;
-#ifdef K_USING_FLOAT
-		kfloat_t               *flist;
+		uintptr_t              *unboxItems;
+		kint_t                 *kintItems;
+#ifndef K_USING_NOFLOAT
+		kfloat_t               *kfloatItems;
 #endif
-		kObject        **list;
-		kString        **strings;
-		kParam         **params;
-		kMethod        **methodList;
-		kFunc          **funcs;
-		kToken         **toks;
-		kTokenVar        **Wtoks;
-		kExpr          **exprs;
-		kExprVar         **Wexprs;
-		kStmt          **stmts;
-		kStmtVar         **Wstmts;
+		kObject        **objectItems;
+		kString        **stringItems;
+		kParam         **paramItems;
+		kMethod        **methodItems;
+		kFunc          **funcItems;
+		kToken         **tokenItems;
+		kTokenVar      **toksVar;
+		kExpr          **exprItems;
+		kExprVar       **exprItemsVar;
+		kStmt          **stmtItems;
+		kStmtVar       **stmtItemsVar;
 	};
 	size_t bytemax;
 };
@@ -1008,7 +1007,7 @@ struct kParamVar {
 //#define kMethod_isOverload(o)  (TFLAG_is(uintptr_t,DP(o)->flag,kMethod_Overload))
 //#define kMethod_setOverload(o,b) TFLAG_set(uintptr_t,DP(o)->flag,kMethod_Overload,b)
 
-#define kMethod_param(mtd)        kctx->share->paramList->params[mtd->paramid]
+#define kMethod_param(mtd)        kctx->share->paramList->paramItems[mtd->paramid]
 #define kMethod_rtype(mtd)        (kMethod_param(mtd))->rtype
 
 /* method data */
@@ -1245,7 +1244,7 @@ struct LibKonohaApiVar {
 #define K_NULL            (kctx->share->constNull)
 #define K_TRUE            (kctx->share->constTrue)
 #define K_FALSE           (kctx->share->constFalse)
-#define K_NULLPARAM       (kctx->share->paramList->params[0])
+#define K_NULLPARAM       (kctx->share->paramList->paramItems[0])
 #define K_EMPTYARRAY      (kctx->share->emptyArray)
 #define TS_EMPTY          (kctx->share->emptyString)
 

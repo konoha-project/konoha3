@@ -299,8 +299,8 @@ static kbool_t sugar_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline
 
 static kbool_t isSubKeyword(KonohaContext *kctx, kArray *tls, int s, int e)
 {
-	if(s+1 < e && tls->toks[s+1]->keyword == TK_TEXT) {
-		const char *t = S_text(tls->toks[s+1]->text);
+	if(s+1 < e && tls->tokenItems[s+1]->keyword == TK_TEXT) {
+		const char *t = S_text(tls->tokenItems[s+1]->text);
 		if(isalpha(t[0]) || t[0] < 0 /* multibytes char */) {
 			return 1;
 		}
@@ -313,15 +313,15 @@ static SugarSyntaxVar *toks_syntax(KonohaContext *kctx, kNameSpace *ns, kArray *
 	USING_SUGAR;
 	int s = 0, e = kArray_size(tls);
 	if(s < e) {
-		if(tls->toks[s]->keyword == TK_TEXT) {
+		if(tls->tokenItems[s]->keyword == TK_TEXT) {
 			ksymbol_t kw;
 			if(isSubKeyword(kctx, tls, s, e)) {
 				char buf[256];
-				snprintf(buf, sizeof(buf), "%s %s", S_text(tls->toks[s]->text), S_text(tls->toks[s+1]->text));
+				snprintf(buf, sizeof(buf), "%s %s", S_text(tls->tokenItems[s]->text), S_text(tls->tokenItems[s+1]->text));
 				kw = ksymbolA((const char*)buf, strlen(buf), SYM_NEWID);
 			}
 			else {
-				kw = ksymbolA(S_text(tls->toks[s]->text), S_size(tls->toks[s]->text), SYM_NEWID);
+				kw = ksymbolA(S_text(tls->tokenItems[s]->text), S_size(tls->tokenItems[s]->text), SYM_NEWID);
 			}
 			return (SugarSyntaxVar*)NEWSYN_(ns, kw);
 		}

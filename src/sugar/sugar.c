@@ -560,7 +560,7 @@ static void NameSpace_merge(KonohaContext *kctx, kNameSpace *ns, kNameSpace *tar
 	}
 	size_t i;
 	for(i = 0; i < kArray_size(target->methodList); i++) {
-		kMethod *mtd = target->methodList->methodList[i];
+		kMethod *mtd = target->methodList->methodItems[i];
 		if(kMethod_isPublic(mtd) && mtd->packageId == target->packageId) {
 			kArray_add(ns->methodList, mtd);
 		}

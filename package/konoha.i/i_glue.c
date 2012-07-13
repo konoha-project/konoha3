@@ -94,7 +94,7 @@ static void copyMethodList(KonohaContext *kctx, ktype_t cid, kArray *s, kArray *
 {
 	size_t i;
 	for(i = 0; i < kArray_size(s); i++) {
-		kMethod *mtd = s->methodList[i];
+		kMethod *mtd = s->methodItems[i];
 		if(mtd->cid != cid) continue;
 		kArray_add(d, mtd);
 	}
@@ -115,7 +115,7 @@ static void dumpMethodList(KonohaContext *kctx, KonohaStack *sfp, size_t start, 
 {
 	size_t i;
 	for(i = start; i < kArray_size(list); i++) {
-		dumpMethod(kctx, sfp, list->methodList[i]);
+		dumpMethod(kctx, sfp, list->methodItems[i]);
 	}
 }
 

@@ -372,7 +372,7 @@ static int knh_popen(KonohaContext *kctx, kString* command, subprocData_t *spd, 
 			char *envs[num+1];
 			int i;
 			for(i = 0 ; i<num ; i++) {
-				envs[i] = (char*)S_text(a->strings[i]);
+				envs[i] = (char*)S_text(a->stringItems[i]);
 			}
 			envs[num] = NULL;
 			// exec load new process image if success.

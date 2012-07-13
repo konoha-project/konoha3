@@ -31,23 +31,23 @@
 static KMETHOD Fmethod_FieldGetter(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	size_t delta = sfp[K_MTDIDX].mtdNC->delta;
-	RETURN_((sfp[0].o)->fields[delta]);
+	RETURN_((sfp[0].o)->fieldObjectItems[delta]);
 }
 static KMETHOD Fmethod_FieldGetterN(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	size_t delta = sfp[K_MTDIDX].mtdNC->delta;
-	RETURNd_((sfp[0].o)->ndata[delta]);
+	RETURNd_((sfp[0].o)->fieldUnboxItems[delta]);
 }
 static KMETHOD Fmethod_FieldSetter(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	size_t delta = sfp[K_MTDIDX].mtdNC->delta;
-	KSETv((sfp[0].Wo)->fields[delta], sfp[1].o);
+	KSETv((sfp[0].Wo)->fieldObjectItems[delta], sfp[1].o);
 	RETURN_(sfp[1].o);
 }
 static KMETHOD Fmethod_FieldSetterN(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	size_t delta = sfp[K_MTDIDX].mtdNC->delta;
-	(sfp[0].Wo)->ndata[delta] = sfp[1].ndata;
+	(sfp[0].Wo)->fieldUnboxItems[delta] = sfp[1].ndata;
 	RETURNd_(sfp[1].ndata);
 }
 
@@ -93,14 +93,14 @@ static void KLIB2_setGetterSetter(KonohaContext *kctx, KonohaClass *ct)
 {
 	size_t i, fsize = ct->fsize;
 	for(i=0; i < fsize; i++) {
-		if(FLAG_is(ct->fields[i].flag, kField_Getter)) {
-			FLAG_unset(ct->fields[i].flag, kField_Getter);
-			kMethod *mtd = new_FieldGetter(kctx, ct->cid, ct->fields[i].fn, ct->fields[i].ty, i);
+		if(FLAG_is(ct->fieldItems[i].flag, kField_Getter)) {
+			FLAG_unset(ct->fieldItems[i].flag, kField_Getter);
+			kMethod *mtd = new_FieldGetter(kctx, ct->cid, ct->fieldItems[i].fn, ct->fieldItems[i].ty, i);
 			CT_addMethod(kctx, ct, mtd);
 		}
-		if(FLAG_is(ct->fields[i].flag, kField_Setter)) {
-			FLAG_unset(ct->fields[i].flag, kField_Setter);
-			kMethod *mtd = new_FieldSetter(kctx, ct->cid, ct->fields[i].fn, ct->fields[i].ty, i);
+		if(FLAG_is(ct->fieldItems[i].flag, kField_Setter)) {
+			FLAG_unset(ct->fieldItems[i].flag, kField_Setter);
+			kMethod *mtd = new_FieldSetter(kctx, ct->cid, ct->fieldItems[i].fn, ct->fieldItems[i].ty, i);
 			CT_addMethod(kctx, ct, mtd);
 		}
 	}
@@ -126,7 +126,7 @@ static void setfield(KonohaContext *kctx, KDEFINE_CLASS *ct, int fctsize, Konoha
 		ct->fsize = supct->fsize;
 		ct->fallocsize = fsize;
 		if(supct->fsize > 0) {
-			memcpy(ct->fields, supct->fields, sizeof(KonohaClassField)*ct->fsize);
+			memcpy(ct->fields, supct->fieldItems, sizeof(KonohaClassField)*ct->fsize);
 		}
 	}
 }
@@ -164,21 +164,21 @@ static void defineField(KonohaContext *kctx, KonohaClassVar *ct, int flag, ktype
 {
 	int pos = ct->fsize;
 	ct->fsize += 1;
-	ct->fields[pos].flag = flag;
-	ct->fields[pos].ty = ty;
-	ct->fields[pos].fn = ksymbolA(S_text(name), S_size(name), SYM_NEWID);
+	ct->fieldItems[pos].flag = flag;
+	ct->fieldItems[pos].ty = ty;
+	ct->fieldItems[pos].fn = ksymbolA(S_text(name), S_size(name), SYM_NEWID);
 	if(TY_isUnbox(ty)) {
 		if(value != NULL) {
-			ct->nulvalNULL_->ndata[pos] = O_unbox(value);
+			ct->nulvalNULL_->fieldUnboxItems[pos] = O_unbox(value);
 		}
 		else {
-			ct->nulvalNULL_->ndata[pos] = uvalue;
+			ct->nulvalNULL_->fieldUnboxItems[pos] = uvalue;
 		}
 	}
 	else {
 		kObject *v = (IS_NULL(value)) ? knull(O_ct(value)) : value;
-		KSETv(ct->nulvalNULL_->fields[pos], v);
-		ct->fields[pos].isobj = 1;
+		KSETv(ct->nulvalNULL_->fieldObjectItems[pos], v);
+		ct->fieldItems[pos].isobj = 1;
 	}
 }
 
@@ -246,10 +246,10 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	USING_SUGAR;
 	VAR_ParseExpr(stmt, tls, s, c, e);
 	DBG_ASSERT(s == c);
-	kTokenVar *tkNEW = tls->Wtoks[s];
+	kTokenVar *tkNEW = tls->toksVar[s];
 	if(s + 2 < kArray_size(tls)) {
-		kToken *tk1 = tls->toks[s+1];
-		kToken *tk2 = tls->toks[s+2];
+		kToken *tk1 = tls->tokenItems[s+1];
+		kToken *tk2 = tls->tokenItems[s+2];
 		KonohaClass *ct = CT_(TK_type(tk1));
 		if (ct->cid == CLASS_Tvoid) {
 			RETURN_(SUGAR Stmt_p(kctx, stmt, tk1, ERR_, "undefined class: %s", S_text(tk1->text)));
@@ -283,7 +283,7 @@ static KMETHOD ExprTyCheck_Getter(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	kToken *tkN = expr->cons->toks[0];
+	kToken *tkN = expr->cons->tokenItems[0];
 	ksymbol_t fn = tosymbolUM(kctx, tkN);
 	kExpr *self = SUGAR Expr_tyCheckAt(kctx, stmt, expr, 1, gma, TY_var, 0);
 	if(self != K_NULLEXPR) {
@@ -292,7 +292,7 @@ static KMETHOD ExprTyCheck_Getter(KonohaContext *kctx, KonohaStack *sfp _RIX)
 			mtd = kNameSpace_getMethodNULL(gma->genv->ns, self->ty, MN_toISBOOL(fn));
 		}
 		if(mtd != NULL) {
-			KSETv(expr->cons->methodList[0], mtd);
+			KSETv(expr->cons->methodItems[0], mtd);
 			RETURN_(SUGAR Expr_tyCheckCallParams(kctx, stmt, expr, mtd, gma, reqty));
 		}
 		SUGAR Stmt_p(kctx, stmt, tkN, ERR_, "undefined field: %s", S_text(tkN->text));
@@ -313,7 +313,7 @@ static void Stmt_parseClassBlock(KonohaContext *kctx, kStmt *stmt, kToken *tkC)
 		s = kArray_size(a);
 		const char *cname = S_text(tkC->text);
 		for(i = atop; i < s; i++) {
-			kToken *tk = a->toks[i];
+			kToken *tk = a->tokenItems[i];
 			int topch = kToken_topch(tk);
 			DBG_P("cname='%s'", cname);
 			if(topch == '(' && tkP->keyword == TK_SYMBOL && strcmp(cname, S_text(tkP->text)) == 0) {
@@ -328,7 +328,7 @@ static void Stmt_parseClassBlock(KonohaContext *kctx, kStmt *stmt, kToken *tkC)
 		}
 		kBlock *bk = SUGAR new_Block(kctx, kStmt_nameSpace(stmt), stmt, a, s, kArray_size(a), ';');
 		for (i = 0; i < kArray_size(bk->stmtList); i++) {
-			kStmt *methodDecl = bk->stmtList->stmts[i];
+			kStmt *methodDecl = bk->stmtList->stmtItems[i];
 			if(methodDecl->syn->keyword == KW_StmtMethodDecl) {
 				kObject_setObject(methodDecl, KW_UsymbolPattern, tkC);
 			}
@@ -352,7 +352,7 @@ static void ObjectField_init(KonohaContext *kctx, kObject *o, void *conf)
 	KonohaClass *ct = O_ct(o);
 	DBG_ASSERT(ct->nulvalNULL != NULL);
 	size_t fsize = ct->fsize;
-	memcpy(((kObjectVar *)o)->fields, ct->nulvalNULL->fields, fsize * sizeof(void*));
+	memcpy(((kObjectVar *)o)->fieldObjectItems, ct->nulvalNULL->fieldObjectItems, fsize * sizeof(void*));
 }
 
 extern kObjectVar** KONOHA_reftail(KonohaContext *kctx, size_t size);
@@ -360,12 +360,12 @@ extern kObjectVar** KONOHA_reftail(KonohaContext *kctx, size_t size);
 static void ObjectField_reftrace (KonohaContext *kctx, kObject *o)
 {
 	KonohaClass *ct =O_ct(o);
-	KonohaClassField *fields = ct->fields;
+	KonohaClassField *fieldItems = ct->fieldItems;
 	size_t i, fsize = ct->fsize;
 	BEGIN_REFTRACE(fsize);
 	for (i = 0; i < fsize; i++) {
-		if (fields[i].isobj) {
-			KREFTRACEn(o->fields[i]);
+		if (fieldItems[i].isobj) {
+			KREFTRACEn(o->fieldObjectItems[i]);
 		}
 	}
 	END_REFTRACE();
@@ -397,7 +397,7 @@ static size_t checkFieldSize(KonohaContext *kctx, kBlock *bk)
 	USING_SUGAR;
 	size_t i, c = 0;
 	for(i = 0; i < kArray_size(bk->stmtList); i++) {
-		kStmt *stmt = bk->stmtList->stmts[i];
+		kStmt *stmt = bk->stmtList->stmtItems[i];
 		DBG_P("stmt->keyword=%s", KW_t(stmt->syn->keyword));
 		if(stmt->syn->keyword == KW_StmtTypeDecl) {
 			kExpr *expr = kStmt_expr(stmt, KW_ExprPattern, NULL);
@@ -415,11 +415,11 @@ static size_t checkFieldSize(KonohaContext *kctx, kBlock *bk)
 static void CT_setField(KonohaContext *kctx, KonohaClassVar *ct, KonohaClass *supct, int fctsize)
 {
 	size_t fsize = supct->fsize + fctsize;
-	ct->fields = (KonohaClassField*)KCALLOC(fsize, sizeof(KonohaClassField));
+	ct->fieldItems = (KonohaClassField*)KCALLOC(fsize, sizeof(KonohaClassField));
 	ct->fsize = supct->fsize;
 	ct->fallocsize = fsize;
 	if(supct->fsize > 0) {
-		memcpy(ct->fields, supct->fields, sizeof(KonohaClassField)*supct->fsize);
+		memcpy(ct->fieldItems, supct->fieldItems, sizeof(KonohaClassField)*supct->fsize);
 		memcpy(ct->nulvalNULL_, supct->nulvalNULL_, sizeof(kObject*) * supct->fsize);
 	}
 }
@@ -484,7 +484,7 @@ static kbool_t CT_addClassFields(KonohaContext *kctx, KonohaClassVar *ct, kGamma
 	USING_SUGAR;
 	size_t i;
 	for(i = 0; i < kArray_size(bk->stmtList); i++) {
-		kStmt *stmt = bk->stmtList->stmts[i];
+		kStmt *stmt = bk->stmtList->stmtItems[i];
 		if(stmt->syn->keyword == KW_StmtTypeDecl) {
 			kshortflag_t flag = kField_Getter | kField_Setter;
 			kToken *tk  = kStmt_token(stmt, KW_TypePattern, NULL);
@@ -505,7 +505,7 @@ static void CT_checkMethodDecl(KonohaContext *kctx, kToken *tkC, kBlock *bk, kSt
 	USING_SUGAR;
 	size_t i;
 	for(i = 0; i < kArray_size(bk->stmtList); i++) {
-		kStmt *stmt = bk->stmtList->stmts[i];
+		kStmt *stmt = bk->stmtList->stmtItems[i];
 		if(stmt->syn->keyword == KW_StmtTypeDecl) continue;
 		if(stmt->syn->keyword == KW_StmtMethodDecl) {
 			kStmt *lastStmt = lastStmtRef[0];

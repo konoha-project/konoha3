@@ -139,7 +139,7 @@ inline void convert_array(std::vector<T> &vec, kArray *a)
 {
 	size_t size = kArray_size(a);
 	for (size_t i=0; i < size; i++) {
-		T v = konoha::object_cast<T>(a->list[i]);
+		T v = konoha::object_cast<T>(a->objectItems[i]);
 		vec.push_back(v);
 	}
 }

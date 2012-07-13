@@ -87,10 +87,10 @@ struct TokenizerEnv {
 	kfileline_t         currentLine;
 	kArray             *tokenList;
 	int                 tabsize;
-	const TokenizeFunc *cfuncs;
+	const TokenizeFunc *cfuncItems;
 	union {
-		kFunc         **funcs;
-		kArray        **funcLists;
+		kFunc         **funcItems;
+		kArray        **funcListItems;
 	};
 	kString            *preparedString;
 };
@@ -254,7 +254,7 @@ struct kTokenVar {
 #define Expr_isCONST(o)     (TEXPR_CONST <= (o)->build && (o)->build <= TEXPR_NCONST)
 #define Expr_isTerm(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
 #define Expr_setTerm(o,B)   TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,B)
-#define kExpr_at(E,N)        ((E)->cons->exprs[(N)])
+#define kExpr_at(E,N)        ((E)->cons->exprItems[(N)])
 
 struct kExprVar {
 	KonohaObjectHeader h;

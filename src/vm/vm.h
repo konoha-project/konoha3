@@ -176,8 +176,8 @@ struct kByteCodeVar {
 
 #define OPEXEC_NSET(A, N, CT) rbp[(A)].ndata = N
 #define OPEXEC_NMOV(A, B, CT) rbp[(A)].ndata = rbp[(B)].ndata
-#define OPEXEC_NMOVx(A, B, BX, CT) rbp[(A)].o = (rbp[(B)].Wo)->fields[(BX)]
-#define OPEXEC_XNMOV(A, AX, B, CT) (rbp[(A)].Wo)->fields[AX] = rbp[(B)].o
+#define OPEXEC_NMOVx(A, B, BX, CT) rbp[(A)].o = (rbp[(B)].Wo)->fieldObjectItems[(BX)]
+#define OPEXEC_XNMOV(A, AX, B, CT) (rbp[(A)].Wo)->fieldObjectItems[AX] = rbp[(B)].o
 
 #define OPEXEC_NEW(A, P, CT)   KSETv(rbp[(A)].o, new_kObject(CT, P))
 #define OPEXEC_NULL(A, CT)     KSETv(rbp[(A)].o, knull(CT))
@@ -303,7 +303,7 @@ struct kByteCodeVar {
 #define Ra_(x)    (rshift(rbp,x)->a)
 #define Rx_(x)    (rshift(rbp,x)->ox)
 
-#define RXo_(x)    (Rx_(x.i)->fields[x.n])
+#define RXo_(x)    (Rx_(x.i)->fieldObjectItems[x.n])
 //#define RXd_(x)   (*((kunbox_t*) Rx_(x.i)->fields+x.n))
 #define RXd_(x)   (*((kint_t*) Rx_(x.i)->fields+x.n))
 #define SFP(rbp)  ((KonohaStack*)(rbp))
@@ -888,7 +888,7 @@ struct kByteCodeVar {
 		kArray *a_ = Ra_(aidx);\
 		size_t n_ = klr_array_index(N, kArray_size(a_));\
 		klr_array_check(n_, kArray_size(a_));\
-		kObject *v_ = (a_)->list[n_];\
+		kObject *v_ = (a_)->objectItems[n_];\
 		klr_mov(Ro_(cidx), v_);\
 	}\
 
@@ -898,7 +898,7 @@ struct kByteCodeVar {
 		kArray *a_ = Ra_(aidx);\
 		size_t n_ = klr_array_index(N, kArray_size(a_));\
 		klr_array_check(n_, kArray_size(a_));\
-		klr_mov((a_)->list[n_], Ro_(vidx));\
+		klr_mov((a_)->objectItems[n_], Ro_(vidx));\
 		klr_mov(Ro_(cidx), Ro_(vidx));\
 	}\
 
@@ -908,7 +908,7 @@ struct kByteCodeVar {
 		kArray *a_ = Ra_(aidx);\
 		size_t n_ = klr_array_index(N, kArray_size(a_));\
 		klr_array_check(n_, kArray_size(a_));\
-		Rn_(cidx) = (a_)->ndata[n_];\
+		Rn_(cidx) = (a_)->unboxItems[n_];\
 	}\
 
 #define OPEXEC_NGETIDX(cidx, aidx, nidx) OPEXEC_NGETIDXC(cidx, aidx, Ri_(nidx))
@@ -917,7 +917,7 @@ struct kByteCodeVar {
 		kArray *a_ = Ra_(aidx);\
 		size_t n_ = klr_array_index(N, kArray_size(a_));\
 		klr_array_check(n_, kArray_size(a_));\
-		Rn_(cidx) = (a_)->ndata[n_] = Rn_(vidx);\
+		Rn_(cidx) = (a_)->unboxItems[n_] = Rn_(vidx);\
 	}\
 
 #define OPEXEC_NSETIDX(cidx, aidx, nidx, vidx) OPEXEC_NSETIDXC(cidx, aidx, Ri_(nidx), vidx)

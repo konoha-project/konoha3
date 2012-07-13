@@ -856,7 +856,7 @@ Expr Stmt.getExpr(int id, Expr def) {
 	return expr;
 }
 
-void exprstmt_asm(Stmt stmt, int espidx) {
+void exprItemstmt_asm(Stmt stmt, int espidx) {
 	Expr expr = stmt.getObjectNULL(KW_ExprPattern);
 	if(isExpr(expr)) {
 		expr_asm(espidx, expr, espidx);
@@ -938,7 +938,7 @@ int block_asm2(Block bk, int i, int espidx) {
 				errstmt_asm(stmt, espidx);
 				return 0;
 			} else if (stmt.getBuild() == TSTMT_EXPR) {
-				exprstmt_asm(stmt, espidx);
+				exprItemstmt_asm(stmt, espidx);
 			} else if (stmt.getBuild() == TSTMT_BLOCK) {
 				stmtListtmt_asm(stmt, espidx);
 			} else if (stmt.getBuild() == TSTMT_RETURN) {

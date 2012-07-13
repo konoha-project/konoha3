@@ -832,7 +832,7 @@ void MODGC_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	o->h.magicflag = 0;\
 	o->h.ct = NULL;\
 	o->h.gcinfo = NULL;\
-	o->fields[0] = NULL;\
+	o->fieldObjectItems[0] = NULL;\
 } while(0)
 
 kObject *MODGC_omalloc(KonohaContext *kctx, size_t size)

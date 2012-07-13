@@ -59,7 +59,7 @@ static kinline kString* SS_s_(KonohaContext *kctx, kfileline_t fileid)
 {
 	kfileline_t n = (fileid >> (sizeof(kshort_t) * 8));
 	DBG_ASSERT(n < kArray_size(kctx->share->fileidList));
-	return kctx->share->fileidList->strings[n];
+	return kctx->share->fileidList->stringItems[n];
 }
 
 #define PN_s(X)    PN_s_(kctx, X)
@@ -67,7 +67,7 @@ static kinline kString* SS_s_(KonohaContext *kctx, kfileline_t fileid)
 static kinline kString* PN_s_(KonohaContext *kctx, kpackage_t packageId)
 {
 	DBG_ASSERT(packageId < kArray_size(kctx->share->packList));
-	return kctx->share->packList->strings[packageId];
+	return kctx->share->packList->stringItems[packageId];
 }
 
 #define CT_s(X)   CT_s_(kctx, X)
@@ -94,7 +94,7 @@ static kinline kString* SYM_s_(KonohaContext *kctx, ksymbol_t sym)
 //		DBG_P("index=%d, size=%d", index, kArray_size(kctx->share->symbolList));
 //	}
 	DBG_ASSERT(index < kArray_size(kctx->share->symbolList));
-	return kctx->share->symbolList->strings[index];
+	return kctx->share->symbolList->stringItems[index];
 }
 
 static kinline const char* SYM_PRE(ksymbol_t sym)
@@ -112,8 +112,8 @@ static kinline const char* SYM_PRE(ksymbol_t sym)
 static kinline kbool_t sym_equals(KonohaContext *kctx, ksymbol_t s1, ksymbol_t s2)
 {
 	if(SYM_HEAD(s1) == SYM_HEAD(s2)) {
-		const char *t1 = S_text(kctx->share->symbolList->strings[SYM_UNMASK(s1)]);
-		const char *t2 = S_text(kctx->share->symbolList->strings[SYM_UNMASK(s2)]);
+		const char *t1 = S_text(kctx->share->symbolList->stringItems[SYM_UNMASK(s1)]);
+		const char *t2 = S_text(kctx->share->symbolList->stringItems[SYM_UNMASK(s2)]);
 		while(1) {
 			if(t1[0] != t2[0]) {
 				if(t1[0] == '_') { t1++; continue; }

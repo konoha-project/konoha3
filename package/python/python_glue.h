@@ -239,13 +239,13 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //	if (kArray_isUnboxData(a)) {
 //		for (i = 0; i < pa_size; i++) {
 //			// [TODO] transfer array element to PyObject
-//			PyList_SetItem(pa, i, PyInt_FromLong(a->ndata[n]));
+//			PyList_SetItem(pa, i, PyInt_FromLong(a->unboxItems[n]));
 //		}
 //	}
 //	else {
 //		for (i = 0; i < pa_size; i++) {
 //			// [TODO] transfer array element to PyObject
-//			//PyList_Append(pa, i, a->list[n]);
+//			//PyList_Append(pa, i, a->objectItems[n]);
 //		}
 //	}
 //	RETURN_PyObject(pa);

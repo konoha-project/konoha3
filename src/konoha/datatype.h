@@ -27,8 +27,8 @@ static kObject* DEFAULT_fnull(KonohaContext *kctx, KonohaClass *ct);
 static void Object_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kObjectVar *of = (kObjectVar*)o;
-	of->ndata[0] = 0;
-	of->ndata[1] = 0;
+	of->fieldUnboxItems[0] = 0;
+	of->fieldUnboxItems[1] = 0;
 }
 
 static void Object_reftrace(KonohaContext *kctx, kObject *o)
@@ -38,8 +38,8 @@ static void Object_reftrace(KonohaContext *kctx, kObject *o)
 	BEGIN_REFTRACE(ct->fsize);
 	size_t i;
 	for(i = 0; i < ct->fsize; i++) {
-		if(ct->fields[i].isobj) {
-			KREFTRACEv(of->fields[i]);
+		if(ct->fieldItems[i].isobj) {
+			KREFTRACEv(of->fieldObjectItems[i]);
 		}
 	}
 	END_REFTRACE();
@@ -51,7 +51,7 @@ static void ObjectX_init(KonohaContext *kctx, kObject *o, void *conf)
 	KonohaClass *ct = O_ct(of);
 	assert(CT_isDefined(ct));
 	assert(ct->nulvalNULL != NULL);
-	memcpy(of->fields, ct->nulvalNULL->fields, ct->cstruct_size - sizeof(KonohaObjectHeader));
+	memcpy(of->fieldObjectItems, ct->nulvalNULL->fieldObjectItems, ct->cstruct_size - sizeof(KonohaObjectHeader));
 }
 
 static void Object_initdef(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t pline)
@@ -62,7 +62,7 @@ static void Object_initdef(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t 
 	if(ct->fsize > 0) {  // this is size of super class
 		KonohaClass *supct = CT_(ct->supcid);
 		assert(ct->fsize == supct->fsize);
-		memcpy(ct->nulvalNULL_->fields, supct->nulvalNULL->fields, sizeof(kObject*) * ct->fsize);
+		memcpy(ct->nulvalNULL_->fieldObjectItems, supct->nulvalNULL->fieldObjectItems, sizeof(kObject*) * ct->fsize);
 	}
 	if(ct->fallocsize > 0) {
 		ct->init = ObjectX_init;
@@ -249,7 +249,7 @@ static void Array_reftrace(KonohaContext *kctx, kObject *o)
 		size_t i;
 		BEGIN_REFTRACE(kArray_size(a));
 		for(i = 0; i < kArray_size(a); i++) {
-			KREFTRACEv(a->list[i]);
+			KREFTRACEv(a->objectItems[i]);
 		}
 		END_REFTRACE();
 	}
@@ -303,7 +303,7 @@ static void Array_insert(KonohaContext *kctx, kArray *o, size_t n, kObject *v)
 //	if (kArray_isUnboxData(a)) {
 //		knh_memmove(a->nlist+n, a->nlist+(n+1), sizeof(kunbox_t) * (a->size - n - 1));
 //	} else {
-//		KNH_FINALv(kctx, a->list[n]);
+//		KNH_FINALv(kctx, a->objectItems[n]);
 //		knh_memmove(a->list+n, a->list+(n+1), sizeof(kObject*) * (a->size - n - 1));
 //	}
 //	a->size--;
@@ -459,7 +459,7 @@ static kParam* KMethod_setParam(KonohaContext *kctx, kMethod *mtd_, ktype_t rtyp
 		mtd->paramdom = Kparamdom(kctx, psize, p);
 		mtd->paramid  = paramid;
 	}
-	return kctx->share->paramList->params[paramid];
+	return kctx->share->paramList->paramItems[paramid];
 }
 
 static intptr_t STUB_Method_indexOfField(kMethod *mtd)
@@ -596,7 +596,7 @@ static KonohaClassVar* new_CT(KonohaContext *kctx, KonohaClass *bct, KDEFINE_CLA
 		ct->cid     = newid;
 		ct->bcid    = (s->bcid == 0) ? newid : s->bcid;
 		ct->supcid  = (s->supcid == 0) ? CLASS_Object : s->supcid;
-		ct->fields = s->fields;
+		ct->fieldItems = s->fields;
 		ct->fsize  = s->fsize;
 		ct->fallocsize = s->fallocsize;
 		ct->cstruct_size = size64(s->cstruct_size);
@@ -965,7 +965,7 @@ static void CLASSTABLE_freeCT(KonohaContext *kctx)
 	size_t i, size = kctx->share->classTable.bytesize/sizeof(KonohaClassVar*);
 	for(i = 0; i < size; i++) {
 		if(cts[i]->fallocsize > 0) {
-			KFREE(cts[i]->fields, cts[i]->fallocsize * sizeof(KonohaClassField));
+			KFREE(cts[i]->fieldItems, cts[i]->fallocsize * sizeof(KonohaClassField));
 		}
 		KFREE(cts[i], sizeof(KonohaClass));
 	}

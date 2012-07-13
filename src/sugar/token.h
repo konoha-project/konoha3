@@ -405,21 +405,21 @@ static int callFuncTokenize(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, Token
 static int tokenizeEach(KonohaContext *kctx, int kchar, kTokenVar* tk, TokenizerEnv *tenv, int tok_start)
 {
 	int pos;
-	if(tenv->funcs != NULL && tenv->funcs[kchar] != NULL) {
-		kFunc *fo = tenv->funcs[kchar];
+	if(tenv->funcItems != NULL && tenv->funcItems[kchar] != NULL) {
+		kFunc *fo = tenv->funcItems[kchar];
 		if(IS_Array(fo)) {
 			kArray *a = (kArray*)fo;
 			int i;
 			for(i = kArray_size(a); i >= 0; i--) {
-				pos = callFuncTokenize(kctx, a->funcs[i], tk, tenv, tok_start);
+				pos = callFuncTokenize(kctx, a->funcItems[i], tk, tenv, tok_start);
 				if(pos > tok_start) return pos;
 			}
-			fo = a->funcs[0];
+			fo = a->funcItems[0];
 		}
 		pos = callFuncTokenize(kctx, fo, tk, tenv, tok_start);
 		if(pos > tok_start) return pos;
 	}
-	pos = tenv->cfuncs[kchar](kctx, tk, tenv, tok_start);
+	pos = tenv->cfuncItems[kchar](kctx, tk, tenv, tok_start);
 	return pos;
 }
 
@@ -533,20 +533,20 @@ static void NameSpace_tokenize(KonohaContext *kctx, kNameSpace *ns, const char *
 		.currentLine  = uline,
 		.tokenList   = a,
 		.tabsize = 4,
-		.cfuncs   = (ns == NULL) ? MiniKonohaTokenMatrix : NameSpace_tokenMatrix(kctx, ns),
+		.cfuncItems   = (ns == NULL) ? MiniKonohaTokenMatrix : NameSpace_tokenMatrix(kctx, ns),
 	};
 	INIT_GCSTACK();
 	kString *preparedString = new_kString(tenv.source, tenv.sourceLength, SPOL_ASCII|SPOL_TEXT|SPOL_NOPOOL);
 	PUSH_GCSTACK(preparedString);
 	tenv.preparedString = preparedString;
 	if(ns != NULL) {
-		tenv.funcs = NameSpace_tokenFuncMatrix(kctx, ns);
+		tenv.funcItems = NameSpace_tokenFuncMatrix(kctx, ns);
 	}
 	tokenize(kctx, &tenv);
 	RESET_GCSTACK();
 	if(uline == 0) {
 		for(i = pos; i < kArray_size(a); i++) {
-			a->Wtoks[i]->uline = 0;
+			a->toksVar[i]->uline = 0;
 		}
 	}
 }
@@ -560,7 +560,7 @@ static int findCloseChar(KonohaContext *kctx, kArray *tls, int s, int e, ksymbol
 {
 	int i;
 	for(i = s; i < e; i++) {
-		kToken *tk = tls->toks[i];
+		kToken *tk = tls->tokenItems[i];
 		if(kToken_topch2(tt, tk) == closech) return i;
 	}
 	return e;
@@ -569,7 +569,7 @@ static int findCloseChar(KonohaContext *kctx, kArray *tls, int s, int e, ksymbol
 static kbool_t checkNestedSyntax(KonohaContext *kctx, kArray *tls, int *s, int e, ksymbol_t astkw, int opench, int closech)
 {
 	int i = *s;
-	kTokenVar *tk = tls->Wtoks[i];
+	kTokenVar *tk = tls->toksVar[i];
 	int topch = kToken_topch2(tk->keyword, tk);
 	if(topch == opench) {
 		int ne = findCloseChar(kctx, tls, i+1, e, tk->keyword, closech);
@@ -588,7 +588,7 @@ static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tls, int s, int e, kA
 	ksymbol_t patternKey = 0;
 //	dumpTokenArray(kctx, 0, tls, s, e);
 	for(i = s; i < e; i++) {
-		kTokenVar *tk = tls->Wtoks[i];
+		kTokenVar *tk = tls->toksVar[i];
 		int topch = kToken_topch(tk);
 		if(tk->keyword == TK_INDENT) continue;
 		if(tk->keyword == TK_TEXT) {
@@ -604,7 +604,7 @@ static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tls, int s, int e, kA
 			continue;
 		}
 		if(topch == '$' && i+1 < e) {
-			tk = tls->Wtoks[++i];
+			tk = tls->toksVar[++i];
 			if(tk->keyword == TK_SYMBOL) {
 				tk->keyword = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWRAW) | KW_PATTERN;
 				if(patternKey == 0) patternKey = tk->keyword;
@@ -621,7 +621,7 @@ static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tls, int s, int e, kA
 			}
 			return false;
 		}
-		if(tk->keyword == TK_SYMBOL && i + 1 < e && kToken_topch(tls->toks[i+1]) == ':') {
+		if(tk->keyword == TK_SYMBOL && i + 1 < e && kToken_topch(tls->tokenItems[i+1]) == ':') {
 			patternKey = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWRAW);
 			i++;
 			continue;

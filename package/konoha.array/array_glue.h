@@ -33,10 +33,10 @@ static KMETHOD Array_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kArray *a = sfp[0].a;
 	size_t n = check_index(kctx, sfp[1].ivalue, kArray_size(a), sfp[K_RTNIDX].uline);
 	if(kArray_isUnboxData(a)) {
-		RETURNd_(a->ndata[n]);
+		RETURNd_(a->unboxItems[n]);
 	}
 	else {
-		RETURN_(a->list[n]);
+		RETURN_(a->objectItems[n]);
 	}
 }
 
@@ -46,10 +46,10 @@ static KMETHOD Array_set(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kArray *a = sfp[0].a;
 	size_t n = check_index(kctx, sfp[1].ivalue, kArray_size(a), sfp[K_RTNIDX].uline);
 	if(kArray_isUnboxData(a)) {
-		a->ndata[n] = sfp[2].ndata;
+		a->unboxItems[n] = sfp[2].ndata;
 	}
 	else {
-		KSETv(a->list[n], sfp[2].o);
+		KSETv(a->objectItems[n], sfp[2].o);
 	}
 }
 
@@ -67,12 +67,12 @@ static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	size_t asize = (size_t)sfp[1].ivalue;
 	a->bytemax = asize * sizeof(void*);
 	kArray_setsize((kArray*)a, asize);
-	a->list = (kObject**)KCALLOC(a->bytemax, 1);
+	a->objectItems = (kObject**)KCALLOC(a->bytemax, 1);
 	if(!kArray_isUnboxData(a)) {
 		size_t i;
 		kObject *null = knull(CT_(O_p0(a)));
 		for(i = 0; i < asize; i++) {
-			KSETv(a->list[i], null);
+			KSETv(a->objectItems[i], null);
 		}
 	}
 	RETURN_(a);
@@ -100,7 +100,7 @@ static void NArray_add(KonohaContext *kctx, kArray *o, uintptr_t value)
 	NArray_ensureMinimumSize(kctx, a, asize+1);
 	DBG_ASSERT(a->a.objects[asize] == NULL);
 	kArrayVar *a2 = (kArrayVar *)a;
-	a2->ndata[asize] = value;
+	a2->unboxItems[asize] = value;
 	kArray_setsize(a2, (asize+1));
 }
 
@@ -146,7 +146,7 @@ static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	USING_SUGAR;
 	VAR_ParseExpr(stmt, tls, s, c, e);
 	DBG_P("parse bracket!!");
-	kToken *tk = tls->toks[c];
+	kToken *tk = tls->tokenItems[c];
 	if(s == c) { // TODO
 		kExpr *expr = SUGAR Stmt_newExpr2(kctx, stmt, tk->sub, 0, kArray_size(tk->sub));
 		RETURN_(SUGAR Expr_rightJoin(kctx, expr, stmt, tls, s+1, c+1, e));

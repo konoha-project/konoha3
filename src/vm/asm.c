@@ -42,7 +42,7 @@
 
 #define BasicBlock_codesize(BB)  ((BB)->codeTable.bytesize / sizeof(VirtualMachineInstruction))
 #define BBOP(BB)     (BB)->codeTable.opl
-#define GammaBuilderLabel(n)   (kBasicBlock*)(ctxcode->lstacks->list[n])
+#define GammaBuilderLabel(n)   (kBasicBlock*)(ctxcode->lstacks->objectItems[n])
 
 #define ASM(T, ...) do {\
 	klr_##T##_t op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};\
@@ -630,7 +630,7 @@ static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack 
 
 static void CALL_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espidx)
 {
-	kMethod *mtd = expr->cons->methodList[0];
+	kMethod *mtd = expr->cons->methodItems[0];
 	DBG_ASSERT(IS_Method(mtd));
 	int i, s = kMethod_isStatic(mtd) ? 2 : 1, thisidx = espidx + K_CALLDELTA;
 #ifdef _CLASSICVM
@@ -842,7 +842,7 @@ static void BLOCK_asm(KonohaContext *kctx, kBlock *bk, int shift)
 	int i, espidx = (bk->esp->build == TEXPR_STACKTOP) ? shift + bk->esp->index : bk->esp->index;
 	//DBG_P("shift=%d, espidx=%d build=%d", shift, espidx, bk->esp->build);
 	for(i = 0; i < kArray_size(bk->stmtList); i++) {
-		kStmt *stmt = bk->stmtList->stmts[i];
+		kStmt *stmt = bk->stmtList->stmtItems[i];
 		if(stmt->syn == NULL) continue;
 		ctxcode->uline = stmt->uline;
 		switch(stmt->build) {

@@ -96,7 +96,7 @@ static fd_set* toFd(fd_set* s, kArray *a )
 	int indx;
 	int fd;
 	for(indx = 0; indx < kArray_size(a); indx++ ) {
-		fd = WORD2INT(a->ilist[indx]);
+		fd = WORD2INT(a->kintItems[indx]);
 		if((fd >= 0) && (fd < FD_SETSIZE)) {
 			FD_SET(fd, s);
 		}
@@ -110,7 +110,7 @@ static void fromFd(KonohaContext *kctx, fd_set* s, kArray *a )
 	if(s != NULL && kArray_size(a) > 0 ) {
 		int indx;
 		for(indx = 0; indx < kArray_size(a) ; indx++ ) {
-			if(!FD_ISSET(WORD2INT(a->ilist[indx]), s) ) {
+			if(!FD_ISSET(WORD2INT(a->kintItems[indx]), s) ) {
 //				kArray_remove(a, indx);
 			}
 		}
@@ -125,7 +125,7 @@ static int getArrayMax(kArray *a)
 		int cnt;
 		int fd;
 		for(cnt = 0; cnt < kArray_size(a); cnt++) {
-			if((fd = WORD2INT(a->ilist[cnt])) > ret) {
+			if((fd = WORD2INT(a->kintItems[cnt])) > ret) {
 				ret = fd;
 			}
 		}
@@ -579,8 +579,8 @@ static KMETHOD System_socketpair(KonohaContext *kctx, KonohaStack* sfp _RIX)
 				WORD2INT(sfp[2].ivalue),
 				WORD2INT(sfp[3].ivalue),
 				pairFd)) == 0) {
-			a->ilist[0] = pairFd[0];
-			a->ilist[1] = pairFd[1];
+			a->kintItems[0] = pairFd[0];
+			a->kintItems[1] = pairFd[1];
 		}
 		else {
 			ktrace(_SystemFault,
