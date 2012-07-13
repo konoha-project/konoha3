@@ -62,7 +62,7 @@ static void MethodAttribute_p(KonohaContext *kctx, kMethod *mtd, KUtilsWriteBuff
 
 static void Method_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
-	kMethod *mtd = sfp[pos].mtd;
+	kMethod *mtd = sfp[pos].toMethod;
 	kParam *pa = kMethod_param(mtd);
 	DBG_ASSERT(IS_Method(mtd));
 	if(level != 0) {
@@ -104,7 +104,7 @@ static void dumpMethod(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd)
 {
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	KSETv(sfp[2].mtd, mtd);
+	KSETv(sfp[2].toMethod, mtd);
 	O_ct(mtd)->p(kctx, sfp, 2, &wb, 1);
 	PLAT printf_i("%s\n", KLIB Kwb_top(kctx, &wb, 1));
 	KLIB Kwb_free(&wb);

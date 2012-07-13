@@ -542,7 +542,7 @@ typedef struct kmodshare_t {
 		kString *s; \
 		kString *toString;\
 		kArray  *toArray;\
-		kMethod       *mtd;\
+		kMethod  *toMethod;\
 		kFunc         *fo; \
 		const struct _kFloat  *f; \
 		const struct _kBytes  *ba; \

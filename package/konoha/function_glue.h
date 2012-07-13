@@ -58,7 +58,7 @@ static KMETHOD Func_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kFunc *fo = sfp[0].fo;
 	KSETv(fo->self, sfp[1].toObject);
-	KSETv(fo->mtd, sfp[2].mtd);
+	KSETv(fo->mtd, sfp[2].toMethod);
 	RETURN_(fo);
 }
 
