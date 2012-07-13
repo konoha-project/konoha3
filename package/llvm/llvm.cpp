@@ -208,7 +208,7 @@ static void Type_free(KonohaContext *kctx _UNUSED_, kObject *po)
 
 static inline kObject *new_CppObject(KonohaContext *kctx, const KonohaClass *ct, void *ptr)
 {
-	kObject *ret = new_kObject(ct, ptr);
+	kObject *ret = KLIB new_kObject(kctx, ct, ptr);
 	konoha::SetRawPtr(ret, ptr);
 	return ret;
 }
@@ -216,7 +216,7 @@ static inline kObject *new_CppObject(KonohaContext *kctx, const KonohaClass *ct,
 static inline kObject *new_ReturnCppObject(KonohaContext *kctx, KonohaStack *sfp, void *ptr _RIX)
 {
 	kObject *defobj = sfp[K_RIX].o;
-	kObject *ret = new_kObject(O_ct(defobj), ptr);
+	kObject *ret = KLIB new_kObject(kctx, O_ct(defobj), ptr);
 	konoha::SetRawPtr(ret, ptr);
 	return ret;
 }
@@ -2505,7 +2505,7 @@ static KMETHOD Method_setFunction(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kObject *po = sfp[1].toObject;
 	union anyptr { void *p; MethodFunc f;} ptr;
 	ptr.p = konoha::object_cast<void*>(po);
-	kMethod_setFunc(mtd, ptr.f);
+	KLIB kMethod_setFunc(kctx, mtd, ptr.f);
 	RETURNvoid_();
 }
 
@@ -2522,7 +2522,7 @@ static KMETHOD Function_getArguments(KonohaContext *kctx, KonohaStack *sfp _RIX)
 			I != E; ++I) {
 		Value *v = I;
 		kObject *o = new_CppObject(kctx, CT_(cid)/*"Value"*/, WRAP(v));
-		kArray_add(a, o);
+		KLIB kArray_add(kctx, a, o);
 	}
 	RETURN_(a);
 }

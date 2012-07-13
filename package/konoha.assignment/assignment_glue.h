@@ -49,7 +49,7 @@ static KMETHOD ExprTyCheck_assignment(KonohaContext *kctx, KonohaStack *sfp _RIX
 					mtd = kNameSpace_getMethodNULL(gma->genv->ns, cid, MN_toSETTER(mtd->mn));
 					if(mtd != NULL) {
 						KSETv(lexpr->cons->methodItems[0], mtd);
-						kArray_add(lexpr->cons, rexpr);
+						KLIB kArray_add(kctx, lexpr->cons, rexpr);
 						RETURN_(SUGAR Expr_tyCheckCallParams(kctx, stmt, lexpr, mtd, gma, reqty));
 					}
 				}
@@ -77,7 +77,7 @@ static KMETHOD StmtTyCheck_DefaultAssignment(KonohaContext *kctx, KonohaStack *s
 }
 
 #define setToken(tk, str, size, k) {\
-		KSETv(tk->text, new_kString(str, size, 0));\
+		KSETv(tk->text, KLIB new_kString(kctx, str, size, 0));\
 		tk->keyword = k;\
 	}
 
@@ -92,7 +92,7 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 		tkNew = new_Var(Token, 0);
 		tmp = tls->tokenItems[i];
 		setToken(tkNew, S_text(tmp->text), S_size(tmp->text), tmp->keyword);
-		kArray_add(tls, tkNew);
+		KLIB kArray_add(kctx, tls, tkNew);
 		i++;
 	}
 
@@ -111,7 +111,7 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 
 	tkNew = new_Var(Token, 0);
 	setToken(tkNew, "=", 1, KW_LET);
-	kArray_add(tls, tkNew);
+	KLIB kArray_add(kctx, tls, tkNew);
 	newc = kArray_size(tls)-1;
 
 	kTokenVar *newtk = new_Var(Token, 0);
@@ -126,12 +126,12 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 		tkNew = new_Var(Token, 0);
 		tmp = tls->tokenItems[i];
 		setToken(tkNew, S_text(tmp->text), S_size(tmp->text), tmp->keyword);
-		kArray_add(newtk->sub, tkNew);
+		KLIB kArray_add(kctx, newtk->sub, tkNew);
 		i++;
 	}
-	kArray_add(tls, newtk);
+	KLIB kArray_add(kctx, tls, newtk);
 
-	kArray_add(tls, tkNewOp);
+	KLIB kArray_add(kctx, tls, tkNewOp);
 
 	tkNew = new_Var(Token, 0);
 	i = c+1;
@@ -139,7 +139,7 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 		tkNew = new_Var(Token, 0);
 		tmp = tls->tokenItems[i];
 		setToken(tkNew, S_text(tmp->text), S_size(tmp->text), tmp->keyword);
-		kArray_add(tls, tkNew);
+		KLIB kArray_add(kctx, tls, tkNew);
 		i++;
 	}
 	return news;
@@ -152,7 +152,7 @@ static KMETHOD ParseExpr_OprAssignment(KonohaContext *kctx, KonohaStack *sfp _RI
 	size_t atop = kArray_size(tls);
 	s = transform_oprAssignment(kctx, tls, s, c, e);
 	kExpr *expr = SUGAR Stmt_newExpr2(kctx, stmt, tls, s, kArray_size(tls));
-	kArray_clear(tls, atop);
+	KLIB kArray_clear(kctx, tls, atop);
 	RETURN_(expr);
 }
 

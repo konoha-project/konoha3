@@ -31,7 +31,7 @@ static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	O_ct(sfp[0].toObject)->p(kctx, sfp, 0, &wb, 0);
-	kString* s = new_kString(KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
+	kString* s = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
 	KLIB Kwb_free(&wb);
 	RETURN_(s);
 }
@@ -127,7 +127,7 @@ static KMETHOD Int_toString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	char buf[40];
 	PLAT snprintf_i(buf, sizeof(buf), "%ld", (intptr_t)sfp[0].ivalue);
-	RETURN_(new_kString(buf, strlen(buf), SPOL_ASCII));
+	RETURN_(KLIB new_kString(kctx, buf, strlen(buf), SPOL_ASCII));
 }
 
 //## @Const method String String.toInt();
@@ -141,7 +141,7 @@ static KMETHOD String_opADD(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kString *lhs = sfp[0].s, *rhs = sfp[1].toString;
 	int spol = (S_isASCII(lhs) && S_isASCII(rhs)) ? SPOL_ASCII : SPOL_UTF8;
-	kString *s = new_kString(NULL, S_size(lhs)+S_size(rhs), spol|SPOL_NOCOPY);
+	kString *s = KLIB new_kString(kctx, NULL, S_size(lhs)+S_size(rhs), spol|SPOL_NOCOPY);
 	memcpy(s->buf, S_text(lhs), S_size(lhs));
 	memcpy(s->buf+S_size(lhs), S_text(rhs), S_size(rhs));
 	RETURN_(s);

@@ -37,7 +37,7 @@
 
 static kString *kwb_newString(KonohaContext *kctx, KUtilsWriteBuffer *wb, int flg)
 {
-	return new_kString(KLIB Kwb_top(kctx, wb, flg), Kwb_bytesize(wb), SPOL_POOL);
+	return KLIB new_kString(kctx, KLIB Kwb_top(kctx, wb, flg), Kwb_bytesize(wb), SPOL_POOL);
 }
 
 /* ------------------------------------------------------------------------ */

@@ -66,7 +66,7 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //	}
 //	SUGAR p(kctx, INFO_, stmt->uline, -1, "%s has type %s", SYM_t(fn), TY_t(expr->ty));
 //	expr = SUGAR new_TypedMethodCall(kctx, TY_void, mtd, gma, 2, new_ConstValue(O_cid(scr), scr), expr);
-//	kObject_setObject(stmt, KW_ExprPattern, expr);
+//	KLIB kObject_setObject(kctx, stmt, KW_ExprPattern, expr);
 //	kStmt_typed(stmt, EXPR);
 //	RETURNb_(true);
 }

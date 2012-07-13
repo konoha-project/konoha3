@@ -226,7 +226,7 @@ static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //		kObject_setNullObject(expr, 1);
 //	}
 //	if(IS_NOTNULL(expr)) {
-//		kArray_add(expr->cons, o);
+//		KLIB kArray_add(kctx, expr->cons, o);
 //	}
 //	RETURN_(expr);
 //}
@@ -334,13 +334,13 @@ static KMETHOD StmtTyCheck_sugar(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	USING_SUGAR;
 	kbool_t r = 0;
 	VAR_StmtTyCheck(stmt, gma);
-	kTokenArray *tls = (kTokenArray*)kObject_getObject(stmt, KW_ToksPattern, NULL);
+	kTokenArray *tls = (kTokenArray*)kStmt_getObject(kctx, stmt, KW_ToksPattern, NULL);
 	if(tls != NULL) {
 		SugarSyntaxVar *syn = toks_syntax(kctx, gma->genv->ns, tls);
 		if(syn != NULL) {
 			if(syn->syntaxRuleNULL != NULL) {
 				SUGAR Stmt_p(kctx, stmt, NULL, WARN_, "overriding syntax rule: %s", KW_t(syn->keyword));
-				kArray_clear(syn->syntaxRuleNULL, 0);
+				KLIB kArray_clear(kctx, syn->syntaxRuleNULL, 0);
 			}
 			else {
 				KINITv(syn->syntaxRuleNULL, new_(Array, 8));
@@ -349,7 +349,7 @@ static KMETHOD StmtTyCheck_sugar(KonohaContext *kctx, KonohaStack *sfp _RIX)
 				r = 1;
 			}
 			else {
-				kArray_clear(syn->syntaxRuleNULL, 0);
+				KLIB kArray_clear(kctx, syn->syntaxRuleNULL, 0);
 			}
 		}
 		kStmt_done(stmt);

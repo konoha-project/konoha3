@@ -434,9 +434,9 @@ static KMETHOD System_select(KonohaContext *kctx, KonohaStack* sfp _RIX)
 			);
 		}
 		// TODO::error or timeout is socket list all clear [pending]
-		kArray_clear(a1, 0);
-		kArray_clear(a2, 0);
-		kArray_clear(a3, 0);
+		KLIB kArray_clear(kctx, a1, 0);
+		KLIB kArray_clear(kctx, a2, 0);
+		KLIB kArray_clear(kctx, a3, 0);
 	}
 	RETURNi_(ret);
 }
@@ -598,7 +598,7 @@ static KMETHOD System_socketpair(KonohaContext *kctx, KonohaStack* sfp _RIX)
 
 static KMETHOD SockAddr_new (KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	RETURN_(new_kObject(O_ct(sfp[K_RTNIDX].o), 0));
+	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0));
 }
 
 // --------------------------------------------------------------------------

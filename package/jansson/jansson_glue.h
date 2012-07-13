@@ -83,7 +83,7 @@ static void Jansson_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWrit
 //## Json Json.new();
 static KMETHOD Json_new (KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	RETURN_(new_kObject(O_ct(sfp[K_RTNIDX].o), NULL));
+	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), NULL));
 }
 
 //## @Static Json Json.parse(String str);
@@ -117,7 +117,7 @@ static KMETHOD Json_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
 		RETURN_(K_NULL);
 	}
 	ret = json_incref(ret);
-	struct _kJson *json = (struct _kJson*)new_kObject(O_ct(sfp[K_RTNIDX].o), NULL);
+	struct _kJson *json = (struct _kJson*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), NULL);
 	json->obj = ret;
 	RETURN_(json);
 }
@@ -138,7 +138,7 @@ static KMETHOD Json_getArray(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	if (!json_is_array(ja)) {
 		RETURN_(K_NULL);
 	}
-	kArrayVar* a = (kArrayVar*)new_kObject(CT_Array, NULL);
+	kArrayVar* a = (kArrayVar*)KLIB new_kObject(kctx, CT_Array, NULL);
 	a->list = (kObject**)ja;
 	RETURN_(a);
 }
@@ -211,7 +211,7 @@ static KMETHOD Json_getString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	}
 	ret = json_incref(ret);
 	const char* str = json_string_value(ret);
-	RETURN_(new_kString(str, strlen(str), 0));
+	RETURN_(KLIB new_kString(kctx, str, strlen(str), 0));
 }
 
 //## void Json.set(String key, Json value);
@@ -351,7 +351,7 @@ static KMETHOD Json_dump(KonohaContext *kctx, KonohaStack *sfp _RIX)
 		RETURNvoid_();
 	}
 	char* data = json_dumps(obj, JSON_ENSURE_ASCII);
-	RETURN_(new_kString(data, strlen(data), 0));
+	RETURN_(KLIB new_kString(kctx, data, strlen(data), 0));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -395,7 +395,7 @@ static KMETHOD JsonArray_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kArray *a = sfp[0].toArray;
 	json_t *ja = (json_t*)a->list;
-	struct _kJson *json = (struct _kJson*)new_kObject(O_ct(sfp[K_RTNIDX].o), NULL);
+	struct _kJson *json = (struct _kJson*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), NULL);
 	json->obj = json_array_get(ja, sfp[1].ivalue);
 	RETURN_(json);
 }

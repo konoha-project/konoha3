@@ -105,7 +105,7 @@ static kArray *kStringToCharArray(KonohaContext *kctx, kString *bs, int istrim)
 	if(S_isASCII(bs)) {
 		for(i = 0; i < n; i++) {
 			if(istrim && isspace(base.utext[i])) continue;
-			kArray_add(a, new_kString(base.text+i, 1, _ALWAYS|_ASCII));
+			KLIB kArray_add(kctx, a, KLIB new_kString(kctx, base.text+i, 1, _ALWAYS|_ASCII));
 		}
 	}
 	else {
@@ -113,7 +113,7 @@ static kArray *kStringToCharArray(KonohaContext *kctx, kString *bs, int istrim)
 		for(i = 0; i < n; i++) {
 			if(istrim && isspace(base.utext[i])) continue;
 			kbytes_t sub = knh_bytes_mofflen(base, i, 1);
-			kArray_add(a, new_kString(sub.text, sub.len, _ALWAYS|((sub.len == 1) ? _ASCII:_UTF8)));
+			KLIB kArray_add(kctx, a, KLIB new_kString(kctx, sub.text, sub.len, _ALWAYS|((sub.len == 1) ? _ASCII:_UTF8)));
 		}
 	}
 	return a;
@@ -121,7 +121,7 @@ static kArray *kStringToCharArray(KonohaContext *kctx, kString *bs, int istrim)
 
 static kString *kwb_newString(KonohaContext *kctx, KUtilsWriteBuffer *wb, int flg)
 {
-	return new_kString(KLIB Kwb_top(kctx, wb, flg), Kwb_bytesize(wb), SPOL_POOL);
+	return KLIB new_kString(kctx, KLIB Kwb_top(kctx, wb, flg), Kwb_bytesize(wb), SPOL_POOL);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -528,7 +528,7 @@ static KMETHOD String_match(KonohaContext *kctx, KonohaStack *sfp _RIX)
 				if (p->rm_so == -1) break;
 				//DBG_P("[%d], rm_so=%d, rm_eo=%d", i, p->rm_so, p->rm_eo);
 				kbytes_t sub = {((p->rm_eo) - (p->rm_so)), {str + (p->rm_so)}};
-				kArray_add(a, new_kString(sub.text, sub.len, _SUB(s0)));
+				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, sub.text, sub.len, _SUB(s0)));
 			}
 			if(isGlobalOption) {
 				size_t eo = pmatch[0].rm_eo; // shift matched pattern
@@ -611,17 +611,17 @@ static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp _RIX)
 					size_t len = pmatch[0].rm_eo;
 					if (len > 0) {
 						kbytes_t sub = {pmatch[0].rm_so, {str}};
-						kArray_add(a, new_kString(sub.text, sub.len, _SUB(s0)));
+						KLIB kArray_add(kctx, a, KLIB new_kString(kctx, sub.text, sub.len, _SUB(s0)));
 						str += len;
 						continue;
 					}
 				}
-				kArray_add(a, new_kString(str, strlen(str), SPOL_POOL)); // append remaining string to array
+				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, str, strlen(str), SPOL_POOL)); // append remaining string to array
 				break;
 			}
 			END_LOCAL();
 		} else { // for 0-length patterh
-			a = kStringToCharArray(kctx, new_kString(str, S_size(s0), SPOL_POOL), 0);
+			a = kStringToCharArray(kctx, KLIB new_kString(kctx, str, S_size(s0), SPOL_POOL), 0);
 		}
 	}
 	else {
@@ -705,8 +705,8 @@ static int parseREGEX(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, in
 			while(isalpha(tenv->source[pos])) pos++;
 			if(IS_NOTNULL(tk)) {
 				kArray *a = new_(Array, 2);
-				kArray_add(a, new_kString(tenv->source + tok_start + 1, (pos0-1) - (tok_start+1), 0));
-				kArray_add(a, new_kString(tenv->source + pos0, pos-pos0, 0));
+				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, tenv->source + tok_start + 1, (pos0-1) - (tok_start+1), 0));
+				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, tenv->source + pos0, pos-pos0, 0));
 				tk->sub = a;
 				tk->keyword = SYM_("$regex");
 			}

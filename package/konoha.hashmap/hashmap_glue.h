@@ -98,7 +98,7 @@ static KMETHOD HashMap_set(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static KMETHOD HashMap_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	RETURN_(new_kObject(O_ct(sfp[K_RTNIDX].o), NULL));
+	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), NULL));
 }
 /* ------------------------------------------------------------------------ */
 

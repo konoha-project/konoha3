@@ -86,7 +86,7 @@ static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp _RIX)
 				KEYVALUE_s("errstr", strerror(errno))
 		);
 	}
-	struct _kFILE *file = (struct _kFILE*)new_kObject(O_ct(sfp[K_RTNIDX].o), fp);
+	struct _kFILE *file = (struct _kFILE*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), fp);
 	file->realpath = realpath(S_text(s), NULL);
 	RETURN_(file);
 }

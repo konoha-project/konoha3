@@ -110,7 +110,7 @@ static KMETHOD Array_add1(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	if (kArray_isUnboxData(a)) {
 		NArray_add(kctx, a, sfp[1].ndata);
 	} else {
-		kArray_add(a, sfp[1].toObject);
+		KLIB kArray_add(kctx, a, sfp[1].toObject);
 	}
 }
 

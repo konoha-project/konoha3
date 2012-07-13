@@ -232,7 +232,7 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 
 	const char *KUtilsWriteBufferopChar = KLIB Kwb_top(kctx, &wb, 1);
 	DBG_P("kwb:'%s'", KUtilsWriteBufferopChar);
-	kBytes *toBa = (kBytes*)new_kObject(CT_Bytes, (void*)processedTotalSize+1);
+	kBytes *toBa = (kBytes*)KLIB new_kObject(kctx, CT_Bytes, processedTotalSize+1);
 	memcpy(toBa->buf, KUtilsWriteBufferopChar, processedTotalSize+1); // including NUL terminate by ensuredZeo
 	return toBa;
 }
@@ -257,14 +257,14 @@ static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, KonohaStack *sfp _RIX)
 		// conv from default encoding
 		toBa = convFromTo(kctx, fromBa, getSystemEncoding(), "UTF-8");
 	}
-	RETURN_(new_kString(toBa->buf,toBa->bytesize, 0));
+	RETURN_(KLIB new_kString(kctx, toBa->buf,toBa->bytesize, 0));
 }
 
 //## @Const method Bytes String.toBytes();
 static KMETHOD String_toBytes(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kString* s = sfp[0].s;
-	kBytes* ba = (kBytes*)new_kObject(CT_Bytes, S_size(s));
+	kBytes* ba = (kBytes*)KLIB new_kObject(kctx, CT_Bytes, S_size(s));
 	if (S_size(s) != 0) {
 		memcpy(ba->buf, s->utext, S_size(s)+1); // including NUL char
 	}
@@ -282,7 +282,7 @@ static KMETHOD Bytes_toString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kBytes *to = convFromTo(kctx, from, getSystemEncoding(), "UTF-8");
 	//calculate strlen
 	size_t strsize = strlen(to->buf);
-	RETURN_(new_kString(to->buf, strsize, 0));
+	RETURN_(KLIB new_kString(kctx, to->buf, strsize, 0));
 }
 
 //## Int Bytes.get(Int n);
@@ -322,7 +322,7 @@ static KMETHOD Bytes_getSize(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static KMETHOD Bytes_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	DBG_P("bytes new called, with size=%d", sfp[1].ivalue);
-	RETURN_(new_kObject(O_ct(sfp[K_RTNIDX].o), sfp[1].ivalue));
+	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), sfp[1].ivalue));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -389,7 +389,7 @@ static int parseSQUOTE(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, i
 		}
 		if(ch == '\'' && prev != '\\') {
 			if(IS_NOTNULL(tk)) {
-				KSETv(tk->text, new_kString(tenv->source + tok_start + 1, (pos-1)- (tok_start+1), 0));
+				KSETv(tk->text, KLIB new_kString(kctx, tenv->source + tok_start + 1, (pos-1)- (tok_start+1), 0));
 				tk->keyword = SYM_("$SingleQuote");
 			}
 			return pos;

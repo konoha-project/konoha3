@@ -63,9 +63,9 @@ static kString* vperrorf(KonohaContext *kctx, int pe, kfileline_t uline, int lpo
 		KLIB Kwb_vprintf(kctx, &wb, fmt, ap);
 		msg = KLIB Kwb_top(kctx, &wb, 1);
 		kreportf(pe, uline, "%s", msg + len);
-		kString *emsg = new_kString(msg, strlen(msg), 0);
+		kString *emsg = KLIB new_kString(kctx, msg, strlen(msg), 0);
 		errref = kArray_size(base->errorMessageList);
-		kArray_add(base->errorMessageList, emsg);
+		KLIB kArray_add(kctx, base->errorMessageList, emsg);
 		if(pe == ERR_ || pe == CRIT_) {
 			base->errorMessageCount ++;
 		}
@@ -104,7 +104,7 @@ static void Stmt_toERR(KonohaContext *kctx, kStmt *stmt, kString *errmsg)
 {
 	((kStmtVar*)stmt)->syn   = SYN_(kStmt_nameSpace(stmt), KW_ERR);
 	((kStmtVar*)stmt)->build = TSTMT_ERR;
-	kObject_setObject(stmt, KW_ERR, errmsg);
+	KLIB kObject_setObject(kctx, stmt, KW_ERR, TY_String, errmsg);
 }
 
 static inline void kStmt_errline(kStmt *stmt, kfileline_t uline)

@@ -94,7 +94,7 @@ static kBasicBlock* new_BasicBlockLABEL(KonohaContext *kctx)
 {
 	kBasicBlock *bb = new_(BasicBlock, 0);
 	bb->id = kArray_size(ctxcode->codeList);
-	kArray_add(ctxcode->codeList, bb);
+	KLIB kArray_add(kctx, ctxcode->codeList, bb);
 	return bb;
 }
 
@@ -433,7 +433,7 @@ static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sf
 static void Method_threadCode(KonohaContext *kctx, kMethod *mtd, kByteCode *kcode)
 {
 	kMethodVar *Wmtd = (kMethodVar*)mtd;
-	kMethod_setFunc(mtd, MethodFunc_runVirtualMachine);
+	KLIB kMethod_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
 	KSETv(Wmtd->kcode, kcode);
 	Wmtd->pc_start = VirtualMachine_run(kctx, kctx->esp + 1, kcode->code);
 	if(verbose_code) {
@@ -455,7 +455,7 @@ static void BUILD_compile(KonohaContext *kctx, kMethod *mtd, kBasicBlock *beginB
 	BasicBlock_strip1(kctx, beginBlock);
 	kByteCode *kcode = new_ByteCode(kctx, beginBlock, endBlock);
 	Method_threadCode(kctx, mtd, kcode);
-	kArray_clear(ctxcode->codeList, 0);
+	KLIB kArray_clear(kctx, ctxcode->codeList, 0);
 }
 
 static void ASM_LABEL(KonohaContext *kctx, kBasicBlock *labelBlock)
@@ -517,7 +517,7 @@ static kBasicBlock* EXPR_asmJMPIF(KonohaContext *kctx, int a, kExpr *expr, int i
 
 static kObject* BUILD_addConstPool(KonohaContext *kctx, kObject *o)
 {
-	kArray_add(ctxcode->constPools, o);
+	KLIB kArray_add(kctx, ctxcode->constPools, o);
 	return o;
 }
 
@@ -757,14 +757,14 @@ static void ASM_SAFEPOINT(KonohaContext *kctx, int espidx)
 
 static void ErrStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
-	kString *msg = (kString*)kObject_getObjectNULL(stmt, KW_ERR);
+	kString *msg = (kString*)kStmt_getObjectNULL(kctx, stmt, KW_ERR);
 	DBG_ASSERT(IS_String(msg));
 	ASM(ERROR, SFP_(espidx), msg);
 }
 
 static void ExprStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
-	kExpr *expr = (kExpr*)kObject_getObjectNULL(stmt, KW_ExprPattern);
+	kExpr *expr = (kExpr*)kStmt_getObjectNULL(kctx, stmt, KW_ExprPattern);
 	if(IS_Expr(expr)) {
 		EXPR_asm(kctx, espidx, expr, shift, espidx);
 	}
@@ -795,7 +795,7 @@ static void IfStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 
 static void ReturnStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
-	kExpr *expr = (kExpr*)kObject_getObjectNULL(stmt, KW_ExprPattern);
+	kExpr *expr = (kExpr*)kStmt_getObjectNULL(kctx, stmt, KW_ExprPattern);
 	if(expr != NULL && IS_Expr(expr) && expr->ty != TY_void) {
 		EXPR_asm(kctx, K_RTNIDX, expr, shift, espidx);
 	}
@@ -808,8 +808,8 @@ static void LoopStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx
 	kBasicBlock* lbCONTINUE = new_BasicBlockLABEL(kctx);
 	kBasicBlock* lbBREAK = new_BasicBlockLABEL(kctx);
 //	BUILD_pushLABEL(kctx, stmt, lbCONTINUE, lbBREAK);
-	kObject_setObject(stmt, SYM_("continue"), lbCONTINUE);
-	kObject_setObject(stmt, SYM_("break"), lbBREAK);
+	KLIB kObject_setObject(kctx, stmt, SYM_("continue"), TY_BasicBlock, lbCONTINUE);
+	KLIB kObject_setObject(kctx, stmt, SYM_("break"), TY_BasicBlock, lbBREAK);
 	ASM_LABEL(kctx, lbCONTINUE);
 	ASM_SAFEPOINT(kctx, espidx);
 	EXPR_asmJMPIF(kctx, espidx, kStmt_expr(stmt, KW_ExprPattern, NULL), 0/*FALSE*/, lbBREAK, shift, espidx);
@@ -823,10 +823,10 @@ static void LoopStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx
 static void JumpStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
 	SugarSyntax *syn = stmt->syn;
-	kStmt *jump = (kStmt*)kObject_getObject(stmt, syn->keyword, NULL);
+	kStmt *jump = (kStmt*)kStmt_getObject(kctx, stmt, syn->keyword, NULL);
 	DBG_ASSERT(jump != NULL);
 	DBG_ASSERT(IS_Stmt(jump));
-	kBasicBlock* lbJUMP = (kBasicBlock*)kObject_getObject(jump, syn->keyword, NULL);
+	kBasicBlock* lbJUMP = (kBasicBlock*)KLIB kObject_getObject(kctx, jump, syn->keyword, NULL);
 	DBG_ASSERT(lbJUMP != NULL);
 	DBG_ASSERT(IS_BasicBlock(lbJUMP));
 	ASM_JMP(kctx, lbJUMP);
@@ -878,7 +878,7 @@ static void Method_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	if(ctxcode == NULL) {
 		kmodcode->h.setup(kctx, NULL, 0);
 	}
-	kMethod_setFunc(mtd, MethodFunc_runVirtualMachine);
+	KLIB kMethod_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
 	DBG_ASSERT(kArray_size(ctxcode->codeList) == 0);
 	kBasicBlock* lbINIT  = new_BasicBlockLABEL(kctx);
 	kBasicBlock* lbBEGIN = new_BasicBlockLABEL(kctx);
@@ -1066,12 +1066,12 @@ void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		VirtualMachineInstruction *pc = VirtualMachine_run(kctx, kctx->esp, kcode->code);
 		CODE_ENTER = pc;
 		CODE_ENTER = pc+1;
-		kArray_clear(ctxcode->codeList, 0);
+		KLIB kArray_clear(kctx, ctxcode->codeList, 0);
 		RESET_GCSTACK();
 	}
 	LibKonohaApiVar *l = (LibKonohaApiVar*)kctx->klib;
-	l->KMethod_setFunc = Method_setFunc;
-	l->KMethod_genCode = Method_genCode;
+	l->kMethod_setFunc = Method_setFunc;
+	l->kMethod_genCode = Method_genCode;
 }
 
 /* ------------------------------------------------------------------------ */

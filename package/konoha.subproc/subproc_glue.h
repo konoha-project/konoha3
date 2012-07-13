@@ -628,7 +628,7 @@ static KMETHOD Subproc_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	subprocData_t *p = sp->spd;
 	if ( p != NULL ) {
 		initData(kctx, p);
-		p->command = (S_size(sfp[1].toString) > 0) ? new_kString(S_text(sfp[1].toString), S_size(sfp[1].toString), 0)
+		p->command = (S_size(sfp[1].toString) > 0) ? KLIB new_kString(kctx, S_text(sfp[1].toString), S_size(sfp[1].toString), 0)
 											: KNULL(String);
 		p->closefds = sfp[2].bvalue;
 	}
@@ -677,7 +677,7 @@ KMETHOD Subproc_exec(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kString *ret_s = KNULL(String);
 	if(PREEXEC(p)) {
 		p->timeoutKill = 0;
-		kString *command = (S_size(sfp[1].toString) > 0) ? new_kString(S_text(sfp[1].toString),S_size(sfp[1].toString), 0) :
+		kString *command = (S_size(sfp[1].toString) > 0) ? KLIB new_kString(kctx, S_text(sfp[1].toString),S_size(sfp[1].toString), 0) :
 													 KNULL(String);
 		int pid = knh_popen(kctx, command, p, M_PIPE );
 		if(pid > 0 ) {
@@ -696,7 +696,7 @@ KMETHOD Subproc_exec(KonohaContext *kctx, KonohaStack *sfp _RIX)
 			else if ( (p->r.mode == M_PIPE) || (p->r.mode == M_DEFAULT) ) {
 				char buf[BUFSIZE] = {0};
 				if(fread(buf, sizeof(char), sizeof(buf)-1, p->r.fp) > 0) {
-					ret_s = new_kString(buf, strlen(buf), 0);
+					ret_s = KLIB new_kString(kctx, buf, strlen(buf), 0);
 				}
 				else {
 					if(ferror(p->r.fp)) {
@@ -753,7 +753,7 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp _RIX)
 			sig_t oldset = signal(SIGPIPE, SIG_IGN);
 #endif
 			// WARN??
-			kBytes* ba = (kBytes*)new_kObject(CT_Bytes, S_size(s));
+			kBytes* ba = (kBytes*)KLIB new_kObject(kctx, CT_Bytes, S_size(s));
 			memcpy(ba->buf, s->utext, S_size(s));
 			if(fwrite(ba->buf, sizeof(char), ba->bytesize, p->w.fp) > 0) {
 				fputc('\n', p->w.fp);
@@ -780,16 +780,16 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp _RIX)
 					KEYVALUE_s("errstr", strerror(errno))
 			);
 		}else {
-			ret_a = (kArray*)new_kObject(CT_Array, NULL);
+			ret_a = (kArray*)KLIB new_kObject(kctx, CT_Array, NULL);
 			if(p->r.mode == M_PIPE) {
 				char buf[BUFSIZE];
 				memset(buf, 0x00, sizeof(buf));
 				// what if there's more than bufsize output?!
 				if(fread(buf, sizeof(char), sizeof(buf)-1, p->r.fp) > 0) {
-					kArray_add(ret_a, new_kString(buf, BUFSIZE, 0));//TODO!
+					KLIB kArray_add(kctx, ret_a, KLIB new_kString(kctx, buf, BUFSIZE, 0));//TODO!
 				}
 				else {
-					kArray_add(ret_a, KNULL(String));
+					KLIB kArray_add(kctx, ret_a, KNULL(String));
 					ktrace(_SystemFault,
 							KEYVALUE_s("@", "fread"),
 							KEYVALUE_u("errno", errno),
@@ -799,20 +799,20 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp _RIX)
 				}
 			}
 			else {
-				kArray_add( ret_a, KNULL(String));
+				KLIB kArray_add(kctx,  ret_a, KNULL(String));
 			}
 			if(p->e.mode == M_PIPE) {
 				char buf[BUFSIZE];
 				memset(buf, 0x00, sizeof(buf));
 				if(fread(buf, sizeof(char), sizeof(buf)-1, p->e.fp) > 0) {
-					kArray_add(ret_a, new_kString(buf, BUFSIZE, 0)); // TODO!
+					KLIB kArray_add(kctx, ret_a, KLIB new_kString(kctx, buf, BUFSIZE, 0)); // TODO!
 				} else {
-					kArray_add(ret_a, KNULL(String));
+					KLIB kArray_add(kctx, ret_a, KNULL(String));
 //					KNH_NTRACE2(ctx, "package.subprocess.communicate.fread ", K_PERROR, KNH_LDATA0);
 				}
 			}
 			else {
-				kArray_add(ret_a, KNULL(Object));
+				KLIB kArray_add(kctx, ret_a, KNULL(Object));
 			}
 		}
 	}
@@ -864,7 +864,7 @@ KMETHOD Subproc_setCwd(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	subprocData_t *p = sp->spd;
 	int ret = PREEXEC(p);
 	if(ret) {
-		p->cwd = new_kString(S_text(sfp[1].toString), S_size(sfp[1].toString), 0);
+		p->cwd = KLIB new_kString(kctx, S_text(sfp[1].toString), S_size(sfp[1].toString), 0);
 	}
 	RETURNb_( ret );
 }

@@ -58,7 +58,7 @@ static void Object_initdef(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t 
 {
 	if(ct->cid == TY_Object) return;
 	DBG_P("new object initialization ct->cstruct_size=%d", ct->cstruct_size);
-	KSETv(ct->nulvalNULL, new_kObject(ct, NULL));
+	KSETv(ct->nulvalNULL, KLIB new_kObject(kctx, ct, NULL));
 	if(ct->fsize > 0) {  // this is size of super class
 		KonohaClass *supct = CT_(ct->supcid);
 		assert(ct->fsize == supct->fsize);
@@ -70,14 +70,25 @@ static void Object_initdef(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t 
 	ct->fnull = DEFAULT_fnull;
 }
 
-static kObject *new_Object(KonohaContext *kctx, KonohaClass *ct, void *conf)
+static kObject *new_kObjectOnGCSTACK(KonohaContext *kctx, KonohaClass *ct, uintptr_t conf)
+{
+	kObjectVar *o = (kObjectVar*) MODGC_omalloc(kctx, ct->cstruct_size);
+	o->h.magicflag = ct->magicflag;
+	o->h.ct = ct;
+	o->h.kvproto = kvproto_null();
+	ct->init(kctx, (kObject*)o, (void*)conf);
+	PUSH_GCSTACK(o);  // GCSAFE
+	return (kObject*)o;
+}
+
+static kObject *new_kObject(KonohaContext *kctx, KonohaClass *ct, uintptr_t conf)
 {
 	DBG_ASSERT(ct->cstruct_size > 0);
 	kObjectVar *o = (kObjectVar*) MODGC_omalloc(kctx, ct->cstruct_size);
 	o->h.magicflag = ct->magicflag;
 	o->h.ct = ct;
 	o->h.kvproto = kvproto_null();
-	ct->init(kctx, (kObject*)o, conf);
+	ct->init(kctx, (kObject*)o, (void*)conf);
 	return (kObject*)o;
 }
 
@@ -158,19 +169,19 @@ static void String_checkASCII(KonohaContext *kctx, kString *s)
 	S_setASCII(s, (ch < 128));
 }
 
-static kString* new_String(KonohaContext *kctx, const char *text, size_t len, int spol)
+static kString* new_kString(KonohaContext *kctx, const char *text, size_t len, int spol)
 {
 	KonohaClass *ct = CT_(CLASS_String);
 	kStringVar *s = NULL; //knh_PtrMap_getS(kctx, ct->constPoolMapNULL, text, len);
 	if(s != NULL) return s;
 	if(TFLAG_is(int, spol, SPOL_TEXT)) {
-		s = (kStringVar*)new_Object(kctx, ct, NULL);
+		s = (kStringVar*)new_kObject(kctx, ct, 0);
 		s->text = text;
 		s->bytesize = len;
 		S_setTextSgm(s, 1);
 	}
 	else if(len + 1 < sizeof(void*) * 2) {
-		s = (kStringVar*)new_Object(kctx, ct, NULL);
+		s = (kStringVar*)new_kObject(kctx, ct, 0);
 		s->text = s->inline_text;
 		s->bytesize = len;
 		S_setTextSgm(s, 1);
@@ -181,7 +192,7 @@ static kString* new_String(KonohaContext *kctx, const char *text, size_t len, in
 		s->buf[len] = '\0';
 	}
 	else {
-		s = (kStringVar*)new_Object(kctx, ct, NULL);
+		s = (kStringVar*)new_kObject(kctx, ct, 0);
 		s->bytesize = len;
 		s->buf = (char*)KMALLOC(len+1);
 		S_setTextSgm(s, 0);
@@ -208,7 +219,7 @@ static kString* new_String(KonohaContext *kctx, const char *text, size_t len, in
 	return s;
 }
 
-static kString* new_Stringf(KonohaContext *kctx, int spol, const char *fmt, ...)
+static kString* new_kStringf(KonohaContext *kctx, int spol, const char *fmt, ...)
 {
 	KUtilsWriteBuffer wb;
 	Kwb_init(&(kctx->stack->cwb), &wb);
@@ -217,7 +228,7 @@ static kString* new_Stringf(KonohaContext *kctx, int spol, const char *fmt, ...)
 	Kwb_vprintf(kctx, &wb, fmt, ap);
 	va_end(ap);
 	const char *text = Kwb_top(kctx, &wb, 1);
-	kString *s = new_String(kctx, text, Kwb_bytesize(&wb), spol);
+	kString *s = new_kString(kctx, text, Kwb_bytesize(&wb), spol);
 	KLIB Kwb_free(&wb);
 	return s;
 }
@@ -272,7 +283,7 @@ static void Array_ensureMinimumSize(KonohaContext *kctx, struct _kAbstractArray 
 
 //#define Array_setsize(A, N)  ((kArrayVar*)A)->size = N
 
-static void Array_add(KonohaContext *kctx, kArray *o, kObject *value)
+static void kArray_add(KonohaContext *kctx, kArray *o, kObject *value)
 {
 	size_t asize = kArray_size(o);
 	struct _kAbstractArray *a = (struct _kAbstractArray*)o;
@@ -282,12 +293,12 @@ static void Array_add(KonohaContext *kctx, kArray *o, kObject *value)
 	a->a.bytesize = (asize+1) * sizeof(void*);
 }
 
-static void Array_insert(KonohaContext *kctx, kArray *o, size_t n, kObject *v)
+static void kArray_insert(KonohaContext *kctx, kArray *o, size_t n, kObject *v)
 {
 	size_t asize = kArray_size(o);
 	struct _kAbstractArray *a = (struct _kAbstractArray*)o;
 	if(!(n < asize)) {
-		Array_add(kctx, o, v);
+		kArray_add(kctx, o, v);
 	}
 	else {
 		Array_ensureMinimumSize(kctx, a, asize+1);
@@ -309,7 +320,7 @@ static void Array_insert(KonohaContext *kctx, kArray *o, size_t n, kObject *v)
 //	a->size--;
 //}
 
-static void Array_clear(KonohaContext *kctx, kArray *o, size_t n)
+static void kArray_clear(KonohaContext *kctx, kArray *o, size_t n)
 {
 	DBG_ASSERT(IS_Array(o));
 	size_t asize = kArray_size(o);
@@ -337,7 +348,7 @@ static kParam *new_Param(KonohaContext *kctx, ktype_t rtype, int psize, kparam_t
 {
 	KonohaClass *ct = CT_(CLASS_Param);
 	ct = CT_body(kctx, ct, sizeof(void*), psize * sizeof(kparam_t));
-	kParamVar *pa = (kParamVar*)new_Object(kctx, ct, (void*)0);
+	kParamVar *pa = (kParamVar*)new_kObject(kctx, ct, 0);
 	pa->rtype = rtype;
 	pa->psize = psize;
 	if(psize > 0) {
@@ -401,7 +412,7 @@ static kparamid_t Kmap_getparamid(KonohaContext *kctx, KUtilsHashMap *kmp, kArra
 	}
 	kParam *pa = new_Param(kctx, rtype, psize, p);
 	uintptr_t paramid = kArray_size(list);
-	kArray_add(list, pa);
+	KLIB kArray_add(kctx, list, pa);
 	e = KLIB Kmap_newentry(kctx, kmp, hcode);
 	KINITv(e->paramkey, pa);
 	e->uvalue = paramid;
@@ -441,17 +452,17 @@ static void Method_reftrace(KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
-static kMethod* new_Method(KonohaContext *kctx, uintptr_t flag, ktype_t cid, kmethodn_t mn, MethodFunc func)
+static kMethod* new_kMethod(KonohaContext *kctx, uintptr_t flag, ktype_t cid, kmethodn_t mn, MethodFunc func)
 {
 	kMethodVar* mtd = new_Var(Method, NULL);
 	mtd->flag    = flag;
 	mtd->cid     = cid;
 	mtd->mn      = mn;
-	kMethod_setFunc(mtd, func);
+	KLIB kMethod_setFunc(kctx, mtd, func);
 	return mtd;
 }
 
-static kParam* KMethod_setParam(KonohaContext *kctx, kMethod *mtd_, ktype_t rtype, int psize, kparam_t *p)
+static kParam* kMethod_setParam(KonohaContext *kctx, kMethod *mtd_, ktype_t rtype, int psize, kparam_t *p)
 {
 	kparamid_t paramid = Kparam(kctx, rtype, psize, p);
 	if(mtd_ != NULL) {
@@ -563,7 +574,7 @@ static kObject* DEFAULT_fnullinit(KonohaContext *kctx, KonohaClass *ct)
 {
 	assert(ct->nulvalNULL == NULL);
 	DBG_P("creating new nulval for %s", CT_t(ct));
-	KINITv(((KonohaClassVar*)ct)->nulvalNULL, new_kObject(ct, 0));
+	KINITv(((KonohaClassVar*)ct)->nulvalNULL, KLIB new_kObject(kctx, ct, 0));
 	kObject_setNullObject(ct->nulvalNULL, 1);
 	((KonohaClassVar*)ct)->fnull = DEFAULT_fnull;
 	return ct->nulvalNULL;
@@ -691,7 +702,7 @@ static kString* CT_shortName(KonohaContext *kctx, KonohaClass *ct)
 			}
 			kwb_putc(&wb, ']');
 			const char *text = Kwb_top(kctx, &wb, 1);
-			KINITv(((KonohaClassVar*)ct)->shortNameNULL, new_String(kctx, text, Kwb_bytesize(&wb), SPOL_ASCII));
+			KINITv(((KonohaClassVar*)ct)->shortNameNULL, new_kString(kctx, text, Kwb_bytesize(&wb), SPOL_ASCII));
 			KLIB Kwb_free(&wb);
 		}
 	}
@@ -865,16 +876,17 @@ static void initStructData(KonohaContext *kctx)
 static void KCLASSTABLE_initkklib(LibKonohaApiVar *l)
 {
 	l->Kclass   = Kclass;
-	l->Knew_Object = new_Object;
-	l->Knew_String   = new_String;
-	l->Knew_Stringf  = new_Stringf;
+	l->new_kObjectOnGCSTACK    = new_kObjectOnGCSTACK;
+	l->new_kObject             = new_kObject;
+	l->new_kString             = new_kString;
+	l->new_kStringf            = new_kStringf;
 	//l->Kconv  = conv;
-	l->KArray_add    = Array_add;
-	l->KArray_insert = Array_insert;
-	l->KArray_clear  = Array_clear;
-	l->Knew_Method   = new_Method;
-	l->KMethod_setParam = KMethod_setParam;
-	l->KMethod_indexOfField = STUB_Method_indexOfField;
+	l->kArray_add           = (typeof(l->kArray_add))kArray_add;
+	l->kArray_insert        = (typeof(l->kArray_add))kArray_insert;
+	l->kArray_clear         = kArray_clear;
+	l->new_kMethod          = new_kMethod;
+	l->kMethod_setParam     = kMethod_setParam;
+	l->kMethod_indexOfField = STUB_Method_indexOfField;
 	l->KaddClassDef  = addClassDef;
 	l->Knull = CT_null;
 	l->KonohaClass_shortName = CT_shortName;

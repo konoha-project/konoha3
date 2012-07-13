@@ -72,7 +72,7 @@ static size_t write_String(char *buffer, size_t size, size_t nitems, void *strin
 	}
 	size *= nitems;
 	KLIB Kwb_write(kctx, &wb, buffer, size);
-	str = new_kString(KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), SPOL_POOL);
+	str = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), SPOL_POOL);
 	res->ubuf = str->ubuf + res->bytesize;// - str->ubuf;
 	res->bytesize = str->bytesize - res->bytesize;// - str->bytesize;
 	KSETv(res, (kStringVar*)str);
@@ -124,7 +124,7 @@ static void Curl_free(KonohaContext *kctx, kObject *o)
 //## Curl Curl.new();
 static KMETHOD Curl_new (KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	RETURN_(new_kObject(O_ct(sfp[K_RTNIDX].o), 0));
+	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0));
 }
 
 //##  void Curl.setOpt(int type, dynamic data);
@@ -371,7 +371,7 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp _RIX)
 		case CURLINFO_EFFECTIVE_URL:
 		case CURLINFO_CONTENT_TYPE:
 			curl_easy_getinfo(curl, curlinfo, &strptr);
-			RETURN_(new_kString(strptr, strlen(strptr), 0));
+			RETURN_(KLIB new_kString(kctx, strptr, strlen(strptr), 0));
 			// RETURN_(new_String(ctx, strptr));
 			break;
 		default: {

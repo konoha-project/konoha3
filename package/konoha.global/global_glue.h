@@ -43,21 +43,21 @@ static KMETHOD Fmethod_ProtoGetter(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
-	RETURN_(kObject_getObject(sfp[0].toObject, key, sfp[K_RTNIDX].o));
+	RETURN_(KLIB kObject_getObject(kctx, sfp[0].toObject, key, sfp[K_RTNIDX].o));
 }
 
 static KMETHOD Fmethod_ProtoGetterN(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
-	RETURNd_(kObject_getUnboxedValue(sfp[0].toObject, key, 0));
+	RETURNd_(KLIB kObject_getUnboxValue(kctx, sfp[0].toObject, key, 0));
 }
 
 static KMETHOD Fmethod_ProtoSetter(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
-	kObject_setObject(sfp[0].toObject, key, sfp[1].toObject);
+	KLIB kObject_setObject(kctx, sfp[0].toObject, key, O_cid(sfp[1].toObject), sfp[1].toObject);
 	RETURN_(sfp[1].toObject);
 }
 
@@ -66,7 +66,7 @@ static KMETHOD Fmethod_ProtoSetterN(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
 	kParam *pa = kMethod_param(mtd);
-	kObject_setUnboxedValue(sfp[0].toObject, key, pa->p[0].ty, sfp[1].ndata);
+	KLIB kObject_setUnboxValue(kctx, sfp[0].toObject, key, pa->p[0].ty, sfp[1].ndata);
 	RETURNd_(sfp[1].ndata);
 }
 
@@ -74,8 +74,8 @@ static kMethod *new_ProtoGetter(KonohaContext *kctx, ktype_t cid, ksymbol_t sym,
 {
 	kmethodn_t mn = ty == TY_Boolean ? MN_toISBOOL(sym) : MN_toGETTER(sym);
 	MethodFunc f = (TY_isUnbox(ty)) ? Fmethod_ProtoGetterN : Fmethod_ProtoGetter;
-	kMethod *mtd = new_kMethod(kMethod_Public|kMethod_Immutable, cid, mn, f);
-	kMethod_setParam(mtd, ty, 0, NULL);
+	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Public|kMethod_Immutable, cid, mn, f);
+	KLIB kMethod_setParam(kctx, mtd, ty, 0, NULL);
 	((kMethodVar*)mtd)->delta = sym;
 	return mtd;
 }
@@ -85,8 +85,8 @@ static kMethod *new_ProtoSetter(KonohaContext *kctx, ktype_t cid, ksymbol_t sym,
 	kmethodn_t mn = MN_toSETTER(sym);
 	MethodFunc f = (TY_isUnbox(ty)) ? Fmethod_ProtoSetterN : Fmethod_ProtoSetter;
 	kparam_t p = {ty, FN_("x")};
-	kMethod *mtd = new_kMethod(kMethod_Public, cid, mn, f);
-	kMethod_setParam(mtd, ty, 1, &p);
+	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Public, cid, mn, f);
+	KLIB kMethod_setParam(kctx, mtd, ty, 1, &p);
 	((kMethodVar*)mtd)->delta = sym;
 	return mtd;
 }
@@ -96,7 +96,7 @@ static void CT_addMethod2(KonohaContext *kctx, KonohaClass *ct, kMethod *mtd)
 	if(unlikely(ct->methodList == K_EMPTYARRAY)) {
 		KINITv(((KonohaClassVar*)ct)->methodList, new_(MethodArray, 8));
 	}
-	kArray_add(ct->methodList, mtd);
+	KLIB kArray_add(kctx, ct->methodList, mtd);
 }
 
 static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kObject *o, kStmt *stmt, kNameSpace *ns, ktype_t ty, ksymbol_t fn)
@@ -162,7 +162,7 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	}
 	SUGAR Stmt_p(kctx, stmt, NULL, INFO_, "%s has type %s", SYM_t(fn), TY_t(expr->ty));
 	expr = SUGAR new_TypedMethodCall(kctx, stmt, TY_void, mtd, gma, 2, new_ConstValue(O_cid(scr), scr), expr);
-	kObject_setObject(stmt, KW_ExprPattern, expr);
+	KLIB kObject_setObject(kctx, stmt, KW_ExprPattern, TY_Expr, expr);
 	kStmt_typed(stmt, EXPR);
 	RETURNb_(true);
 }
@@ -192,7 +192,7 @@ static kbool_t appendSetterStmt(KonohaContext *kctx, kExpr *expr, kStmt **lastSt
 	kStmt *newstmt = new_(Stmt, lastStmt->uline);
 	SUGAR Block_insertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, newstmt);
 	kStmt_setsyn(newstmt, SYN_(kStmt_nameSpace(newstmt), KW_ExprPattern));
-	kObject_setObject(newstmt, KW_ExprPattern, expr);
+	KLIB kObject_setObject(kctx, newstmt, KW_ExprPattern, TY_Expr, expr);
 	lastStmtRef[0] = newstmt;
 	return true;
 }

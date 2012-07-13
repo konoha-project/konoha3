@@ -43,7 +43,7 @@ typedef struct {
 
 static inline kObject *new_ReturnCppObject(KonohaContext *kctx,KonohaStack *sfp, void *ptr _RIX) {
 	kObject *defobj = sfp[K_RIX].o;
-	kObject *ret = new_kObject(O_ct(defobj), ptr);
+	kObject *ret = KLIB new_kObject(kctx, O_ct(defobj), ptr);
 	((kRawPtr *)ret)->rawptr = ptr;
 	return ret;
 }
@@ -65,7 +65,7 @@ static void MPIData_extend(KonohaContext *kctx, kMPIData *p, int size) {
 	if(p->size < newSize) {
 		switch(p->cid) {
 		case KMPI_BYTES: {
-			kBytes *b = (kBytes *)new_kObject(CT_Bytes, (void *)newSize);
+			kBytes *b = (kBytes *)KLIB new_kObject(kctx, CT_Bytes, (void *)newSize);
 			memcpy(b->buf, p->b->buf, p->size);
 			p->b = b;
 			p->size = newSize;

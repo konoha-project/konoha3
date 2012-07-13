@@ -31,7 +31,7 @@ static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	USING_SUGAR;
 	int ret = false;
 	VAR_StmtTyCheck(stmt, gma);
-	kTokenArray *tls = (kTokenArray *) kObject_getObjectNULL(stmt, KW_ToksPattern);
+	kTokenArray *tls = (kTokenArray *) kStmt_getObjectNULL(kctx, stmt, KW_ToksPattern);
 	if (tls == NULL) {
 		RETURNb_(false);
 	}
@@ -51,7 +51,7 @@ static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	}
 	kString *name = tls->tokenItems[i]->text;
 	KLIB Kwb_write(kctx, &wb, S_text(name), S_size(name));
-	kString *pkgname = new_kString(KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
+	kString *pkgname = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
 	kNameSpace *ns = gma->genv->ns;
 	SugarSyntaxVar *syn1 = (SugarSyntaxVar*) SYN_(ns, KW_ExprMethodCall);
 	kTokenVar *tkImport = new_Var(Token, 0);
@@ -59,7 +59,7 @@ static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	tkImport->keyword = MN_("import");
 	kExpr *expr = SUGAR new_ConsExpr(kctx, syn1, 3,
 			tkImport, new_ConstValue(O_cid(ns), ns), ePKG);
-	kObject_setObject(stmt, KW_ExprPattern, expr);
+	KLIB kObject_setObject(kctx, stmt, KW_ExprPattern, TY_Expr, expr);
 	ret = SUGAR Stmt_tyCheckExpr(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0);
 	if (ret) {
 		kStmt_typed(stmt, EXPR);

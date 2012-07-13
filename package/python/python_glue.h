@@ -78,7 +78,7 @@ static void PyObject_free(KonohaContext *kctx, kObject *o)
 static void RETURN_PyObject_(KonohaContext *kctx, KonohaStack *sfp, PyObject *pyo _RIX)
 {
 	if(pyo != NULL) {
-    	RETURN_(new_kObject(O_ct(sfp[K_RTNIDX].o), pyo));
+    	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), pyo));
 	}
 	else {
 		// ERROR if python object is NULL
@@ -181,31 +181,31 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	DBG_ASSERT(po->self != NULL);
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	O_ct(sfp[0].toObject)->p(kctx, sfp, 0, &wb, 0);
-	kString* s = new_kString(KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
+	kString* s = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
 	KLIB Kwb_free(&wb);
 	RETURN_(s);
 	//if (PyString_Check(po->self)) {
 	//	//dec
 	//	t = PyString_AsString(po->self);
-	//	RETURN_(new_kString(t, strlen(t), 0));
+	//	RETURN_(KLIB new_kString(kctx, t, strlen(t), 0));
 	//}
 	//else if (PyUnicode_Check(po->self)) {
 	//	//dec
 	//	PyObject* s = PyUnicode_AsUTF8String(po->self);
 	//	// [TODO] there is no t's NULL check. Is it OK?
 	//	t = PyString_AsString(s);
-	//	RETURN_(new_kString(t, strlen(t), 0));
+	//	RETURN_(KLIB new_kString(kctx, t, strlen(t), 0));
 	//}
 	//else if (PyByteArray_Check(po->self)) {
 	//	//dec
 	//	t = PyByteArray_AsString(po->self);
-	//	RETURN_(new_kString(t, strlen(t), 0));
+	//	RETURN_(KLIB new_kString(kctx, t, strlen(t), 0));
 	//}
 	//else {
 	//	KUtilsWriteBuffer wb;
 	//	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	//	O_ct(sfp[0].toObject)->p(kctx, sfp, 0, &wb, 0);
-	//	kString* s = new_kString(KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
+	//	kString* s = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
 	//	KLIB Kwb_free(&wb);
 	//	RETURN_(s);
 	//}

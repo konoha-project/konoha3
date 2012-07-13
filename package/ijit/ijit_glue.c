@@ -82,7 +82,7 @@ static void kmodjit_free(KonohaContext *kctx, struct kmodshare_t *baseh)
 static void check_stack_size(KonohaContext *kctx, kArray *stack, int n)
 {
 	while (n >= kArray_size(stack)) {
-		kArray_add(stack, K_NULL);
+		KLIB kArray_add(kctx, stack, K_NULL);
 	}
 }
 
@@ -151,7 +151,7 @@ static KMETHOD System_clearValue(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kArray *g = kmodjit->global_value;
 	kArray *stack = get_stack(kctx, g);
-	kArray_clear(stack, 0);
+	KLIB kArray_clear(kctx, stack, 0);
 }
 
 //## Module System.getModule();
@@ -255,7 +255,7 @@ static KMETHOD System_addConstPool(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kObject *o = sfp[1].toObject;
 	kArray  *a = kmodjit->constPool;
-	kArray_add(a, o);
+	KLIB kArray_add(kctx, a, o);
 	RETURNvoid_();
 }
 
@@ -431,7 +431,7 @@ static KMETHOD Stmt_hasSyntax(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static KMETHOD Stmt_getObjectNULL(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	kStmt *stmt = (kStmt*) sfp[0].toObject;
-	kObject *o = kObject_getObjectNULL(stmt, sfp[1].ivalue);
+	kObject *o = kStmt_getObjectNULL(kctx, stmt, sfp[1].ivalue);
 	if (!o) {
 		o = K_NULL;
 	}
@@ -462,7 +462,7 @@ static KMETHOD Object_toExpr(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 kObject *boxing_jit(KonohaContext *kctx, ktype_t cid, uintptr_t data)
 {
-	return new_kObject(CT_(cid), data);
+	return KLIB new_kObject(kctx, CT_(cid), data);
 }
 
 // --------------------------------------------------------------------------
@@ -471,7 +471,7 @@ static kArray *create_array(KonohaContext *kctx, KonohaStack *sfp, int n)
 	int i;
 	kArray *a = new_(Array, 0);
 	for (i = 1; i <= n; ++i) {
-		kArray_add(a, sfp[i].o);
+		KLIB kArray_add(kctx, a, sfp[i].o);
 	}
 	return a;
 }
@@ -504,7 +504,7 @@ static KMETHOD Array_newN(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	int i, n = sfp[1].ivalue;
 	kArray *a = new_(Array, (uintptr_t)n);
 	for (i = 0; i < n; ++i) {
-		kArray_add(a, sfp[i].o);
+		KLIB kArray_add(kctx, a, sfp[i].o);
 	}
 	RETURN_(a);
 }
@@ -582,7 +582,7 @@ static KMETHOD Method_getFname(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	KLIB Kwb_printf(kctx, &wb, "%s%s", T_mn(mtd->mn));
-	kString *fname = new_kString(KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), SPOL_POOL);
+	kString *fname = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), SPOL_POOL);
 	RETURN_(fname);
 }
 
@@ -592,7 +592,7 @@ static KMETHOD Method_getCname(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kMethod *mtd = sfp[0].mtd;
 	ktype_t cid = mtd->cid;
 	const char *cname = TY_t(cid);
-	RETURN_(new_kString(cname, strlen(cname), 0));
+	RETURN_(KLIB new_kString(kctx, cname, strlen(cname), 0));
 }
 
 //## Object System.knull(int type);
@@ -669,7 +669,7 @@ static KMETHOD Pointer_toObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //}
 
 /****************************************************************/
-static void KMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
+static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 {
 	DBG_P("START CODE GENERATION..");
 	BEGIN_LOCAL(lsfp, 8);
@@ -693,7 +693,7 @@ static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	base->h.setup    = kmodjit_setup;
 	base->h.reftrace = kmodjit_reftrace;
 	base->h.free     = kmodjit_free;
-	base->defaultCodeGen = kctx->klib->KMethod_genCode;
+	base->defaultCodeGen = kctx->klib->kMethod_genCode;
 	base->jitcache = KLIB Kmap_init(kctx, 0);
 	KINITv(base->global_value, new_(Array, 18));
 	KINITv(base->constPool, new_(Array, 0));
@@ -815,9 +815,9 @@ static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_
 	kNameSpace_loadMethodData(ns, MethodData);
 
 	LibKonohaApiVar *l = (LibKonohaApiVar*)kctx->klib;
-	l->KMethod_genCode = GenCodeDefault;
+	l->kMethod_genCode = GenCodeDefault;
 	kNameSpace_syncMethods();
-	l->KMethod_genCode = KMethod_genCode;
+	l->kMethod_genCode = kMethod_genCode;
 	//KSET_KLIB(Method_genCode, pline);
 
 	return true;

@@ -801,9 +801,9 @@ void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		base->gcObjectCount = 0;
 		base->latestGcTime  = knh_getTimeMilliSecond();
 		base->gcHeapMng = BMGC_init(ctx);
-		KSET_KLIB(malloc, 0);
-		KSET_KLIB(zmalloc, 0);
-		KSET_KLIB(free, 0);
+		KSET_KLIB(Kmalloc, 0);
+		KSET_KLIB(Kzmalloc, 0);
+		KSET_KLIB(Kfree, 0);
 		Konoha_setModule(MOD_gc, &base->h, 0);
 	}
 	kmodgc_setup(ctx, (kmodshare_t*) memshare(kctx), 1);

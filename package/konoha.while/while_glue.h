@@ -79,7 +79,7 @@ static KMETHOD StmtTyCheck_break(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kStmt *p = stmt;
 	while((p = kStmt_getParentNULL(p)) != NULL) {
 		if(FLAG_is(p->syn->flag, SYNFLAG_StmtJumpSkip)) {
-			kObject_setObject(stmt, stmt->syn->keyword, p);
+			KLIB kObject_setObject(kctx, stmt, stmt->syn->keyword, TY_Stmt, p);
 			kStmt_typed(stmt, JUMP);
 			RETURNb_(true);
 		}
@@ -96,7 +96,7 @@ static KMETHOD StmtTyCheck_continue(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	kStmt *p = stmt;
 	while((p = kStmt_getParentNULL(p)) != NULL) {
 		if(FLAG_is(p->syn->flag, SYNFLAG_StmtJumpAhead)) {
-			kObject_setObject(stmt, stmt->syn->keyword, p);
+			KLIB kObject_setObject(kctx, stmt, stmt->syn->keyword, TY_Stmt, p);
 			kStmt_typed(stmt, JUMP);
 			RETURNb_(true);
 		}

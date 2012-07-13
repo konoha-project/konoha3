@@ -307,6 +307,7 @@ typedef kushort_t       kparamid_t;
 
 /* ------------------------------------------------------------------------ */
 
+#define kAbstractObject                 const void
 typedef const struct kObjectVar         kObject;
 typedef struct kObjectVar               kObjectVar;
 typedef const struct kBooleanVar        kBoolean;
@@ -637,7 +638,7 @@ struct KonohaClassVar {
 	kArray     *methodList;
 	kString    *shortNameNULL;
 	union {   // default value
-		kObject  *nulvalNULL;
+		kObject           *nulvalNULL;
 		kObjectVar        *nulvalNULL_;
 	};
 	KUtilsHashMap            *constPoolMapNO;
@@ -901,8 +902,8 @@ struct kStringVar /* extends _Bytes */ {
 #define SPOL_NOPOOL        (1<<5)
 #define SPOL_NOCOPY        (1<<4)
 
-#define new_T(t)            new_kString(t, knh_strlen(t), SPOL_TEXT|SPOL_ASCII|SPOL_POOL)
-#define new_S(T, L)         new_kString(T, L, SPOL_ASCII|SPOL_POOL)
+#define new_T(t)            KLIB new_kString(kctx, t, knh_strlen(t), SPOL_TEXT|SPOL_ASCII|SPOL_POOL)
+#define new_S(T, L)         KLIB new_kString(kctx, T, L, SPOL_ASCII|SPOL_POOL)
 #define S_text(s)           ((const char*) (O_ct(s)->unbox(kctx, (kObject*)s)))
 #define S_size(s)           ((s)->bytesize)
 
@@ -1202,29 +1203,30 @@ struct LibKonohaApiVar {
 	kString*        (*KonohaClass_shortName)(KonohaContext*, KonohaClass *ct);
 	KonohaClass*    (*KonohaClass_Generics)(KonohaContext*, KonohaClass *ct, ktype_t rty, int psize, kparam_t *p);
 
-	kObject*        (*Knew_Object)(KonohaContext*, KonohaClass *, void *);
+	kObject*        (*new_kObject)(KonohaContext*, KonohaClass *, uintptr_t);  // GCUNSAFE
+	kObject*        (*new_kObjectOnGCSTACK)(KonohaContext*, KonohaClass *, uintptr_t);
 	kObject*        (*Knull)(KonohaContext*, KonohaClass *);
-	kObject*        (*KObject_getObject)(KonohaContext*, kObject *, ksymbol_t, kObject *);
-	void            (*KObject_setObject)(KonohaContext*, kObject *, ksymbol_t, ktype_t, kObject *);
-	uintptr_t       (*KObject_getUnboxedValue)(KonohaContext*, kObject *, ksymbol_t, uintptr_t);
-	void            (*KObject_setUnboxedValue)(KonohaContext*, kObject *, ksymbol_t, ktype_t, uintptr_t);
-	void            (*KObject_protoEach)(KonohaContext*, kObject *, void *thunk, void (*f)(KonohaContext*, void *, KUtilsKeyValue *d));
-	void            (*KObject_removeKey)(KonohaContext*, kObject *, ksymbol_t);
+	kObject*        (*kObject_getObject)(KonohaContext*, kAbstractObject *, ksymbol_t, kAbstractObject *);
+	void            (*kObject_setObject)(KonohaContext*, kAbstractObject *, ksymbol_t, ktype_t, kAbstractObject *);
+	uintptr_t       (*kObject_getUnboxValue)(KonohaContext*, kAbstractObject *, ksymbol_t, uintptr_t);
+	void            (*kObject_setUnboxValue)(KonohaContext*, kAbstractObject *, ksymbol_t, ktype_t, uintptr_t);
+	void            (*kObject_protoEach)(KonohaContext*, kAbstractObject *, void *thunk, void (*f)(KonohaContext*, void *, KUtilsKeyValue *d));
+	void            (*kObject_removeKey)(KonohaContext*, kObject *, ksymbol_t);
 
-	kString*    (*Knew_String)(KonohaContext*, const char *, size_t, int);
-	kString*    (*Knew_Stringf)(KonohaContext*, int, const char *, ...);
-	kString*    (*KString)(KonohaContext*, int, kString *, kString *);
+	kString*    (*new_kString)(KonohaContext*, const char *, size_t, int);
+	kString*    (*new_kStringf)(KonohaContext*, int, const char *, ...);
+//	kString*    (*KString)(KonohaContext*, int, kString *, kString *);
 
-	void (*KArray_add)(KonohaContext*, kArray *, kObject *);
-	void (*KArray_insert)(KonohaContext*, kArray *, size_t, kObject *);
-	void (*KArray_clear)(KonohaContext*, kArray *, size_t);
+	void (*kArray_add)(KonohaContext*, kArray *, kAbstractObject *);
+	void (*kArray_insert)(KonohaContext*, kArray *, size_t, kAbstractObject *);
+	void (*kArray_clear)(KonohaContext*, kArray *, size_t);
 
 //	kParam *   (*Knew_Param)(KonohaContext*, ktype_t, int, kparam_t *);
-	kMethod *  (*Knew_Method)(KonohaContext*, uintptr_t, ktype_t, kmethodn_t, MethodFunc);
-	kParam*    (*KMethod_setParam)(KonohaContext*, kMethod *, ktype_t, int, kparam_t *);
-	void       (*KMethod_setFunc)(KonohaContext*, kMethod*, MethodFunc);
-	void       (*KMethod_genCode)(KonohaContext*, kMethod*, kBlock *bk);
-	intptr_t   (*KMethod_indexOfField)(kMethod *);
+	kMethod *  (*new_kMethod)(KonohaContext*, uintptr_t, ktype_t, kmethodn_t, MethodFunc);
+	kParam*    (*kMethod_setParam)(KonohaContext*, kMethod *, ktype_t, int, kparam_t *);
+	void       (*kMethod_setFunc)(KonohaContext*, kMethod*, MethodFunc);
+	void       (*kMethod_genCode)(KonohaContext*, kMethod*, kBlock *bk);
+	intptr_t   (*kMethod_indexOfField)(kMethod *);
 
 	kbool_t    (*KsetModule)(KonohaContext*, int, struct kmodshare_t *, kfileline_t);
 	KonohaClass*  (*KaddClassDef)(KonohaContext*, kpackage_t, kpackage_t, kString *, KDEFINE_CLASS *, kfileline_t);
@@ -1234,8 +1236,8 @@ struct LibKonohaApiVar {
 	void       (*NameSpace_loadConstData)(KonohaContext*, kNameSpace *, const char **d, kfileline_t);
 	kMethod*   (*NameSpace_getMethodNULL)(KonohaContext*, kNameSpace *ns, ktype_t cid, kmethodn_t mn);
 	kMethod*   (*NameSpace_getGetterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ksymbol_t sym);
-
 	void       (*NameSpace_syncMethods)(KonohaContext *kctx);
+
 	void       (*KCodeGen)(KonohaContext*, kMethod *, kBlock *);
 	void       (*Kreportf)(KonohaContext*, kinfotag_t, kfileline_t, const char *fmt, ...);
 	void       (*Kraise)(KonohaContext*, int isContinue);     // module
@@ -1301,37 +1303,24 @@ struct LibKonohaApiVar {
 // #define KW_new (((ksymbol_t)39)|0) /*new*/
 #define MN_new                    39  /* @see */
 
-#define new_kObject(C, A)         (KPI)->Knew_Object(kctx, C, (void*)(A))
-#define new_(C, A)                (k##C*)(KPI)->Knew_Object(kctx, CT_##C, (void*)(A))
-#define new_W(C, A)               (struct _k##C*)(KPI)->Knew_Object(kctx, CT_##C, (void*)(A))
-#define new_Var(C,A)              (k##C##Var*)(KPI)->Knew_Object(kctx, CT_##C, (void*)(A))
+#define new_(C, A)                (k##C*)(KLIB new_kObject(kctx,      CT_##C, ((uintptr_t)A)))
+#define new_Var(C,A)              (k##C##Var*)(KLIB new_kObject(kctx, CT_##C, ((uintptr_t)A)))
+
 #define knull(C)                  (KPI)->Knull(kctx, C)
 #define KNULL(C)                  (k##C*)(KPI)->Knull(kctx, CT_##C)
 
-#define kObject_getObjectNULL(O, K)            (KPI)->KObject_getObject(kctx, UPCAST(O), K, NULL)
-#define kObject_getObject(O, K, DEF)           (KPI)->KObject_getObject(kctx, UPCAST(O), K, DEF)
-#define kObject_setObject(O, K, V)             (KPI)->KObject_setObject(kctx, UPCAST(O), K, O_cid(V), UPCAST(V))
-#define kObject_getUnboxedValue(O, K, DEF)     (KPI)->KObject_getUnboxedValue(kctx, UPCAST(O), K, DEF)
-#define kObject_setUnboxedValue(O, K, T, V)    (KPI)->KObject_setUnboxedValue(kctx, UPCAST(O), K, T, V)
-#define kObject_removeKey(O, K)                (KPI)->KObject_removeKey(kctx, UPCAST(O), K)
-#define kObject_protoEach(O, THUNK, F)         (KPI)->KObject_protoEach(kctx, UPCAST(O), THUNK, F)
-
-
-#define new_kString(T,S,P)        (KPI)->Knew_String(kctx, T, S, P)
-#define new_kStringf(P, FMT, ...) (KPI)->Knew_Stringf(kctx, P, FMT, ## __VA_ARGS__)
-
 #define kArray_size(A)            (((A)->bytesize)/sizeof(void*))
 #define kArray_setsize(A, N)      ((kArrayVar*)A)->bytesize = N * sizeof(void*)
-#define kArray_add(A, V)          (KPI)->KArray_add(kctx, A, UPCAST(V))
-#define kArray_insert(A, N, V)    (KPI)->KArray_insert(kctx, A, N, UPCAST(V))
-#define kArray_clear(A, S)        (KPI)->KArray_clear(kctx, A, S)
+//#define KLIB kArray_add(kctx, A, V)          (KPI)->KLIB kArray_add(kctx, kctx, A, UPCAST(V))
+//#define KLIB kArray_insert(kctx, A, N, V)    (KPI)->KLIB kArray_insert(kctx, kctx, A, N, UPCAST(V))
+//#define KLIB kArray_clear(kctx, A, S)        (KPI)->KLIB kArray_clear(kctx, kctx, A, S)
 
-#define new_kParam(R,S,P)        (KPI)->Knew_Method(kctx, R, S, P)
-#define new_kMethod(F,C,M,FF)  (KPI)->Knew_Method(kctx, F, C, M, FF)
-#define kMethod_setParam(M, R, PSIZE, P)      (KPI)->KMethod_setParam(kctx, M, R, PSIZE, P)
-#define new_kParam2(R, PSIZE, P)  (KPI)->KMethod_setParam(kctx, NULL, R, PSIZE, P)
-#define kMethod_setFunc(M,F)     (KPI)->KMethod_setFunc(kctx, M, F)
-#define kMethod_genCode(M, BLOCK) (KPI)->KMethod_genCode(kctx, M, BLOCK)
+//#define new_kParam(R,S,P)        (KPI)->Knew_Method(kctx, R, S, P)
+//#define KLIB new_kMethod(kctx, F,C,M,FF)  (KPI)->Knew_Method(kctx, F, C, M, FF)
+//#define KLIB kMethod_setParam(kctx, M, R, PSIZE, P)      (KPI)->KLIB kMethod_setParam(kctx, kctx, M, R, PSIZE, P)
+#define new_kParam(CTX, R, PSIZE, P)       (KLIB kMethod_setParam(CTX, NULL, R, PSIZE, P))
+//#define KLIB kMethod_setFunc(kctx, M,F)     (KPI)->KLIB kMethod_setFunc(kctx, kctx, M, F)
+#define kMethod_genCode(M, BLOCK) (KPI)->kMethod_genCode(kctx, M, BLOCK)
 
 #define KREQUIRE_PACKAGE(NAME, UL)                   (KPI)->KimportPackage(kctx, NULL, NAME, UL)
 #define KEXPORT_PACKAGE(NAME, KS, UL)                (KPI)->KimportPackage(kctx, KS, NAME, UL)
@@ -1376,16 +1365,16 @@ typedef struct {
 #define kraise(PARAM)                  (KPI)->Kraise(kctx, PARAM)
 
 #define KSET_KLIB(T, UL)   do {\
-		void *func = kctx->klib->K##T;\
-		((LibKonohaApiVar*)kctx->klib)->K##T = K##T;\
+		void *func = kctx->klib->T;\
+		((LibKonohaApiVar*)kctx->klib)->T = T;\
 		if(func != NULL) {\
-			kreportf(DEBUG_, UL, "override of kklib->" #T ", file=%s, line=%d", __FILE__, __LINE__);\
+			kreportf(DEBUG_, UL, "override of klib->" #T ", file=%s, line=%d", __FILE__, __LINE__);\
 		}\
 	}while(0)\
 
 #define KSET_KLIB2(T, F, UL)   do {\
-		void *func = kctx->klib->K##T;\
-		((LibKonohaApiVar*)kctx->klib)->K##T = F;\
+		void *func = kctx->klib->T;\
+		((LibKonohaApiVar*)kctx->klib)->T = F;\
 		if(func != NULL) {\
 			kreportf(DEBUG_, UL, "override of kklib->" #T ", file=%s, line=%d", __FILE__, __LINE__);\
 		}\
@@ -1412,8 +1401,8 @@ typedef struct {
 
 
 #define INIT_GCSTACK()         size_t gcstack_ = kArray_size(kctx->stack->gcstack)
-#define PUSH_GCSTACK(o)        kArray_add(kctx->stack->gcstack, o)
-#define RESET_GCSTACK()        kArray_clear(kctx->stack->gcstack, gcstack_)
+#define PUSH_GCSTACK(o)        KLIB kArray_add(kctx, kctx->stack->gcstack, o)
+#define RESET_GCSTACK()        KLIB kArray_clear(kctx, kctx->stack->gcstack, gcstack_)
 
 #define KINITv(VAR, VAL)   OBJECT_SET(VAR, VAL)
 #define KSETv(VAR, VAL)    /*OBJECT_SET(VAR, VAL)*/ VAR = VAL

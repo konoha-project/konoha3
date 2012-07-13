@@ -72,7 +72,7 @@ static int parseNUM(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int 
 		if(!isalnum(ch)) break;
 	}
 	if(IS_NOTNULL(tk)) {
-		KSETv(tk->text, new_kString(ts + tok_start, (pos-1)-tok_start, SPOL_ASCII));
+		KSETv(tk->text, KLIB new_kString(kctx, ts + tok_start, (pos-1)-tok_start, SPOL_ASCII));
 		tk->keyword = (dot == 0) ? TK_INT : TK_FLOAT;
 	}
 	return pos - 1;  // next
@@ -111,7 +111,7 @@ static void Token_setSymbolText(KonohaContext *kctx, kTokenVar *tk, const char *
 			KSETv(tk->text, SYM_s(kw));
 		}
 		else {
-			KSETv(tk->text, new_kString(t, len, SPOL_ASCII));
+			KSETv(tk->text, KLIB new_kString(kctx, t, len, SPOL_ASCII));
 		}
 		tk->keyword = TK_SYMBOL;
 	}
@@ -212,7 +212,7 @@ static int parseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, TokenizerEn
 		if(ch == '"' && prev != '\\') {
 			if(IS_NOTNULL(tk)) {
 				size_t length = Kwb_bytesize(&wb);
-				KSETv(tk->text, new_kString(KLIB Kwb_top(kctx, &wb, 1), length, 0));
+				KSETv(tk->text, KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), length, 0));
 				tk->keyword = TK_TEXT;
 			}
 			KLIB Kwb_free(&wb);
@@ -431,7 +431,7 @@ static void tokenize(KonohaContext *kctx, TokenizerEnv *tenv)
 	pos = parseINDENT(kctx, tk, tenv, pos);
 	while((ch = kchar(tenv->source, pos)) != 0) {
 		if(tk->keyword != 0) {
-			kArray_add(tenv->tokenList, tk);
+			KLIB kArray_add(kctx, tenv->tokenList, tk);
 			tk = new_Var(Token, 0);
 			tk->uline = tenv->currentLine;
 		}
@@ -440,7 +440,7 @@ static void tokenize(KonohaContext *kctx, TokenizerEnv *tenv)
 		pos = pos2;
 	}
 	if(tk->keyword != 0) {  // FIXME: Memory Leaks ???
-		kArray_add(tenv->tokenList, tk);
+		KLIB kArray_add(kctx, tenv->tokenList, tk);
 	}
 }
 
@@ -452,7 +452,7 @@ static int parseLazyBlock(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv
 			level--;
 			if(level == 0) {
 				if(IS_NOTNULL(tk)) {
-					KSETv(tk->text, new_kString(tenv->source + tok_start + 1, ((pos-2)-(tok_start)+1), 0));
+					KSETv(tk->text, KLIB new_kString(kctx, tenv->source + tok_start + 1, ((pos-2)-(tok_start)+1), 0));
 					tk->keyword = TK_CODE;
 				}
 				return pos + 1;
@@ -512,10 +512,10 @@ static void NameSpace_setTokenizeFunc(KonohaContext *kctx, kNameSpace *ns, int c
 				kArray *a = (kArray*)funcMatrix[kchar];
 				if(!IS_Array(a)) {
 					a = new_(Array, 0);
-					kArray_add(a, funcMatrix[kchar]);
+					KLIB kArray_add(kctx, a, funcMatrix[kchar]);
 					KSETv(funcMatrix[kchar], (kFunc*)a);
 				}
-				kArray_add(a, funcTokenize);
+				KLIB kArray_add(kctx, a, funcTokenize);
 			}
 			else {
 				KSETv(funcMatrix[kchar], funcTokenize);
@@ -536,7 +536,7 @@ static void NameSpace_tokenize(KonohaContext *kctx, kNameSpace *ns, const char *
 		.cfuncItems   = (ns == NULL) ? MiniKonohaTokenMatrix : NameSpace_tokenMatrix(kctx, ns),
 	};
 	INIT_GCSTACK();
-	kString *preparedString = new_kString(tenv.source, tenv.sourceLength, SPOL_ASCII|SPOL_TEXT|SPOL_NOPOOL);
+	kString *preparedString = KLIB new_kString(kctx, tenv.source, tenv.sourceLength, SPOL_ASCII|SPOL_TEXT|SPOL_NOPOOL);
 	PUSH_GCSTACK(preparedString);
 	tenv.preparedString = preparedString;
 	if(ns != NULL) {
@@ -600,7 +600,7 @@ static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tls, int s, int e, kA
 				// FIXME: tk->tt = TK_CODE;
 				tk->keyword = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
 			}
-			kArray_add(adst, tk);
+			KLIB kArray_add(kctx, adst, tk);
 			continue;
 		}
 		if(topch == '$' && i+1 < e) {
@@ -610,13 +610,13 @@ static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tls, int s, int e, kA
 				if(patternKey == 0) patternKey = tk->keyword;
 				tk->patternKey = patternKey;
 				patternKey = 0;
-				kArray_add(adst, tk);
+				KLIB kArray_add(kctx, adst, tk);
 				continue;
 			}
 		}
 		else if(topch == '[') {
 			if(checkNestedSyntax(kctx, tls, &i, e, AST_OPTIONAL, '[', ']')) {
-				kArray_add(adst, tk);
+				KLIB kArray_add(kctx, adst, tk);
 				continue;
 			}
 			return false;
@@ -638,7 +638,7 @@ static void parseSyntaxRule(KonohaContext *kctx, const char *rule, kfileline_t u
 	size_t pos = kArray_size(tls);
 	NameSpace_tokenize(kctx, NULL, rule, uline, tls);
 	makeSyntaxRule(kctx, tls, pos, kArray_size(tls), a);
-	kArray_clear(tls, pos);
+	KLIB kArray_clear(kctx, tls, pos);
 }
 
 /* ------------------------------------------------------------------------ */

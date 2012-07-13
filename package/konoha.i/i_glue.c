@@ -96,7 +96,7 @@ static void copyMethodList(KonohaContext *kctx, ktype_t cid, kArray *s, kArray *
 	for(i = 0; i < kArray_size(s); i++) {
 		kMethod *mtd = s->methodItems[i];
 		if(mtd->cid != cid) continue;
-		kArray_add(d, mtd);
+		KLIB kArray_add(kctx, d, mtd);
 	}
 }
 

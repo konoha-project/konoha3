@@ -193,7 +193,7 @@ typedef struct KDEFINE_SYNTAX {
 	MethodFunc ExprTyCheck;
 } KDEFINE_SYNTAX;
 
-#define new_SugarFunc(F)     new_(Func, new_kMethod(0, 0, 0, F))
+#define new_SugarFunc(F)     new_(Func, KLIB new_kMethod(kctx, 0, 0, 0, F))
 
 #define SIZEOF_TOKENMATRIX (KCHAR_MAX * sizeof(TokenizeFunc) * 2)
 
@@ -292,6 +292,14 @@ struct kStmtVar {
 	kBlock            *parentBlockNULL;
 	kushort_t          build;
 };
+
+#define kStmt_getObjectNULL(CTX, O, K)            (KLIB kObject_getObject(CTX, UPCAST(O), K, NULL))
+#define kStmt_getObject(CTX, O, K, DEF)           (KLIB kObject_getObject(CTX, UPCAST(O), K, DEF))
+#define kStmt_setObject(CTX, O, K, V)             KLIB kObject_setObject(CTX, UPCAST(O), K, O_cid(V), UPCAST(V))
+#define kStmt_getUnboxValue(CTX, O, K, DEF)       (KLIB kObject_getUnboxValue(CTX, UPCAST(O), K, DEF))
+#define kStmt_setUnboxValue(CTX, O, K, T, V)      KLIB kObject_setUnboxValue(CTX, UPCAST(O), K, T, V)
+#define kStmt_removeKey(CTX, O, K)                KLIB kObject_removeKey(CTX, UPCAST(O), K)
+#define kStmt_protoEach(CTX, O, THUNK, F)         KLIB kObject_protoEach(CTX, UPCAST(O), THUNK, F)
 
 struct kBlockVar {
 	KonohaObjectHeader   h;
@@ -549,6 +557,14 @@ typedef struct {
 #define TPOL_CONST          (1 << 4)
 
 #ifdef USING_SUGAR_AS_BUILTIN
+
+#define TY_NameSpace                       kmodsugar->cNameSpace->cid
+#define TY_Token                           kmodsugar->cToken->cid
+#define TY_Stmt                            kmodsugar->cStmt->cid
+#define TY_Block                           kmodsugar->cBlock->cid
+#define TY_Expr                            kmodsugar->cExpr->cid
+#define TY_Gamma                           kmodsugar->cGamma->cid
+#define TY_TokenArray                      kmodsugar->cTokenArray->cid
 
 #define SYN_(KS, KW)                NameSpace_syn(kctx, KS, KW, 0)
 

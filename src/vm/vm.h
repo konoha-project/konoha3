@@ -41,6 +41,7 @@ typedef struct kByteCodeVar           kByteCodeVar;
 #define ctxcode          ((ctxcode_t*)kctx->modlocal[MOD_code])
 #define kmodcode         ((KModuleByteCode*)kctx->modshare[MOD_code])
 #define CT_BasicBlock    kmodcode->cBasicBlock
+#define TY_BasicBlock    kmodcode->cBasicBlock->cid
 #define CT_ByteCode      kmodcode->cByteCode
 
 #define IS_BasicBlock(O)  ((O)->h.ct == CT_BasicBlock)
@@ -179,9 +180,9 @@ struct kByteCodeVar {
 #define OPEXEC_NMOVx(A, B, BX, CT) rbp[(A)].o = (rbp[(B)].toObjectVar)->fieldObjectItems[(BX)]
 #define OPEXEC_XNMOV(A, AX, B, CT) (rbp[(A)].toObjectVar)->fieldObjectItems[AX] = rbp[(B)].o
 
-#define OPEXEC_NEW(A, P, CT)   KSETv(rbp[(A)].o, new_kObject(CT, P))
+#define OPEXEC_NEW(A, P, CT)   KSETv(rbp[(A)].o, KLIB new_kObject(kctx, CT, P))
 #define OPEXEC_NULL(A, CT)     KSETv(rbp[(A)].o, knull(CT))
-#define OPEXEC_BOX(A, B, CT)   KSETv(rbp[(A)].o, new_kObject(CT, rbp[(B)].ivalue))
+#define OPEXEC_BOX(A, B, CT)   KSETv(rbp[(A)].o, KLIB new_kObject(kctx, CT, rbp[(B)].ivalue))
 #define OPEXEC_UNBOX(A, B, CT) rbp[(A)].ivalue = N_toint(rbp[B].o)
 
 #define PC_NEXT(pc)   pc+1

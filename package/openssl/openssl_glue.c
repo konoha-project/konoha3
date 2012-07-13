@@ -41,7 +41,7 @@ static KMETHOD kMD5_Final(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	for (i = 0; i < MD5_DIGEST_LENGTH; i++) {
 		snprintf(MD_S+i*2, MD5_DIGEST_LENGTH*2+1, "%02x", MD[i]);
 	}
-	RETURN_(new_kString(MD_S, MD5_DIGEST_LENGTH*2, SPOL_ASCII));
+	RETURN_(KLIB new_kString(kctx, MD_S, MD5_DIGEST_LENGTH*2, SPOL_ASCII));
 }
 static KMETHOD kSHA1_Init(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
@@ -68,7 +68,7 @@ static KMETHOD kSHA1_Final(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	for (i = 0; i < SHA_DIGEST_LENGTH; i++) {
 		snprintf(SHA_S+i*2, SHA_DIGEST_LENGTH*2+1, "%02x", SHA[i]);
 	}
-	RETURN_(new_kString(SHA_S, SHA_DIGEST_LENGTH*2, SPOL_ASCII));
+	RETURN_(KLIB new_kString(kctx, SHA_S, SHA_DIGEST_LENGTH*2, SPOL_ASCII));
 }
 // --------------------------------------------------------------------------
 

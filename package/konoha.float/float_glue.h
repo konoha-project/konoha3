@@ -136,7 +136,7 @@ static KMETHOD Float_toString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	char buf[40];
 	PLAT snprintf_i(buf, sizeof(buf), KFLOAT_FMT, sfp[0].fvalue);
-	RETURN_(new_kString(buf, strlen(buf), SPOL_ASCII));
+	RETURN_(KLIB new_kString(kctx, buf, strlen(buf), SPOL_ASCII));
 }
 
 /* String to float */

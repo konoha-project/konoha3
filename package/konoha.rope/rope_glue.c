@@ -154,7 +154,7 @@ static LinerString *RopeString_toLinerString(RopeString *o, char *text, size_t l
 	return s;
 }
 
-static kString *Knew_String(KonohaContext *kctx, const char *text, size_t len, int policy)
+static kString *new_kString(KonohaContext *kctx, const char *text, size_t len, int policy)
 {
 	StringBase *s = (StringBase *) new_StringBase(kctx, 0);
 	if (len < SIZEOF_INLINETEXT)
@@ -305,7 +305,7 @@ static kbool_t rope_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 {
 	kMethod *mtd = kNameSpace_getMethodNULL(ns, TY_String, MN_("opADD"));
 	if (mtd) {
-		kMethod_setFunc(mtd, Rope_opADD);
+		KLIB kMethod_setFunc(kctx, mtd, Rope_opADD);
 	} else {
 		int FN_x = FN_("x");
 		KDEFINE_METHOD MethodData[] = {
@@ -317,7 +317,7 @@ static kbool_t rope_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	KSET_CLASSFUNC(CT_String, unbox, String2, pline);
 	KSET_CLASSFUNC(CT_String, free, String2, pline);
 	KSET_CLASSFUNC(CT_String, reftrace, String2, pline);
-	KSET_KLIB(new_String, pline);
+	KSET_KLIB(new_kString, pline);
 	return true;
 }
 

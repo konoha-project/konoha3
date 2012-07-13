@@ -55,8 +55,8 @@ static kMethod *new_FieldGetter(KonohaContext *kctx, ktype_t cid, ksymbol_t sym,
 {
 	kmethodn_t mn = ty == TY_Boolean ? MN_toISBOOL(sym) : MN_toGETTER(sym);
 	MethodFunc f = (TY_isUnbox(ty)) ? Fmethod_FieldGetterN : Fmethod_FieldGetter;
-	kMethod *mtd = new_kMethod(kMethod_Public|kMethod_Immutable, cid, mn, f);
-	kMethod_setParam(mtd, ty, 0, NULL);
+	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Public|kMethod_Immutable, cid, mn, f);
+	KLIB kMethod_setParam(kctx, mtd, ty, 0, NULL);
 	((kMethodVar*)mtd)->delta = idx;  // FIXME
 	return mtd;
 }
@@ -66,8 +66,8 @@ static kMethod *new_FieldSetter(KonohaContext *kctx, ktype_t cid, kmethodn_t sym
 	kmethodn_t mn = /*(ty == TY_Boolean) ? MN_toISBOOL(sym) :*/ MN_toSETTER(sym);
 	MethodFunc f = (TY_isUnbox(ty)) ? Fmethod_FieldSetterN : Fmethod_FieldSetter;
 	kparam_t p = {ty, FN_("x")};
-	kMethod *mtd = new_kMethod(kMethod_Public, cid, mn, f);
-	kMethod_setParam(mtd, ty, 1, &p);
+	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Public, cid, mn, f);
+	KLIB kMethod_setParam(kctx, mtd, ty, 1, &p);
 	((kMethodVar*)mtd)->delta = idx;   // FIXME
 	return mtd;
 }
@@ -86,7 +86,7 @@ static void CT_addMethod(KonohaContext *kctx, KonohaClass *ct, kMethod *mtd)
 	if(unlikely(ct->methodList == K_EMPTYARRAY)) {
 		KINITv(((KonohaClassVar*)ct)->methodList, new_(MethodArray, 8));
 	}
-	kArray_add(ct->methodList, mtd);
+	KLIB kArray_add(kctx, ct->methodList, mtd);
 }
 
 static void KLIB2_setGetterSetter(KonohaContext *kctx, KonohaClass *ct)
@@ -219,7 +219,7 @@ static	kbool_t class_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		DEND,
 	};
 	kNameSpace_loadMethodData(ns, MethodData);
-	KSET_KLIB2(Method_indexOfField, KLIB2_Method_indexOfField, pline);
+	KSET_KLIB2(kMethod_indexOfField, KLIB2_Method_indexOfField, pline);
 	return true;
 }
 
@@ -305,7 +305,7 @@ static KMETHOD ExprTyCheck_Getter(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static void Stmt_parseClassBlock(KonohaContext *kctx, kStmt *stmt, kToken *tkC)
 {
 	USING_SUGAR;
-	kToken *tkP = (kToken*)kObject_getObject(stmt, KW_BlockPattern, NULL);
+	kToken *tkP = (kToken*)kStmt_getObject(kctx, stmt, KW_BlockPattern, NULL);
 	if(tkP != NULL && tkP->keyword == TK_CODE) {
 		kArray *a = ctxsugar->preparedTokenList;
 		size_t atop = kArray_size(a), s, i;
@@ -321,20 +321,20 @@ static void Stmt_parseClassBlock(KonohaContext *kctx, kStmt *stmt, kToken *tkC)
 				tkNEW->keyword = TK_SYMBOL;
 				KSETv(tkNEW->text, SYM_s(MN_new));
 				tkNEW->uline = tkP->uline;
-				kArray_add(a, tkNEW);
+				KLIB kArray_add(kctx, a, tkNEW);
 			}
-			kArray_add(a, tk);
+			KLIB kArray_add(kctx, a, tk);
 			tkP = tk;
 		}
 		kBlock *bk = SUGAR new_Block(kctx, kStmt_nameSpace(stmt), stmt, a, s, kArray_size(a), ';');
 		for (i = 0; i < kArray_size(bk->stmtList); i++) {
 			kStmt *methodDecl = bk->stmtList->stmtItems[i];
 			if(methodDecl->syn->keyword == KW_StmtMethodDecl) {
-				kObject_setObject(methodDecl, KW_UsymbolPattern, tkC);
+				KLIB kObject_setObject(kctx, methodDecl, KW_UsymbolPattern, TY_Token, tkC);
 			}
 		}
-		kObject_setObject(stmt, KW_BlockPattern, bk);
-		kArray_clear(a, atop);
+		KLIB kObject_setObject(kctx, stmt, KW_BlockPattern, TY_Block, bk);
+		KLIB kArray_clear(kctx, a, atop);
 	}
 }
 
@@ -386,8 +386,8 @@ static KonohaClassVar* defineClassName(KonohaContext *kctx, kNameSpace *ns, ksho
 		{NULL},
 	};
 	kNameSpace_loadConstData(ns, ClassData, 0); // add class name to this namespace
-//	kMethod *mtd = new_kMethod(_Public/*flag*/, ct->cid, MN_new, NULL);
-//	kMethod_setParam(mtd, ct->cid, 0, NULL);
+//	kMethod *mtd = KLIB new_kMethod(kctx, _Public/*flag*/, ct->cid, MN_new, NULL);
+//	KLIB kMethod_setParam(kctx, mtd, ct->cid, 0, NULL);
 //	CT_addMethod(kctx, ct, mtd);
 	return (KonohaClassVar*)ct;
 }

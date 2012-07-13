@@ -114,7 +114,7 @@ static kstatus_t NameSpace_eval(KonohaContext *kctx, kNameSpace *ns, const char 
 		size_t pos = kArray_size(tls);
 		NameSpace_tokenize(kctx, ns, script, uline, tls);
 		kBlock *bk = new_Block(kctx, ns, NULL, tls, pos, kArray_size(tls), ';');
-		kArray_clear(tls, pos);
+		KLIB kArray_clear(kctx, tls, pos);
 		result = Block_eval(kctx, bk);
 		RESET_GCSTACK();
 	}
@@ -166,7 +166,7 @@ static void kmodsugar_setup(KonohaContext *kctx, struct kmodshare_t *def, int ne
 
 		KINITv(base->gma, new_(Gamma, NULL));
 		KINITv(base->singleBlock, new_(Block, NULL));
-		kArray_add(base->singleBlock->stmtList, K_NULL);
+		KLIB kArray_add(kctx, base->singleBlock->stmtList, K_NULL);
 		KLIB Karray_init(kctx, &base->errorMessageBuffer, K_PAGESIZE);
 		kctx->modlocal[MOD_sugar] = (kmodlocal_t*)base;
 	}
@@ -562,7 +562,7 @@ static void NameSpace_merge(KonohaContext *kctx, kNameSpace *ns, kNameSpace *tar
 	for(i = 0; i < kArray_size(target->methodList); i++) {
 		kMethod *mtd = target->methodList->methodItems[i];
 		if(kMethod_isPublic(mtd) && mtd->packageId == target->packageId) {
-			kArray_add(ns->methodList, mtd);
+			KLIB kArray_add(kctx, ns->methodList, mtd);
 		}
 	}
 }
@@ -626,7 +626,6 @@ static KMETHOD NameSpace_loadScript_(KonohaContext *kctx, KonohaStack *sfp _RIX)
 #define _Public kMethod_Public
 #define _Static kMethod_Static
 #define _F(F)   (intptr_t)(F)
-#define TY_NameSpace  (CT_NameSpace)->cid
 
 void MODSUGAR_loadMethod(KonohaContext *kctx)
 {
@@ -636,7 +635,7 @@ void MODSUGAR_loadMethod(KonohaContext *kctx)
 		DEND,
 	};
 	kNameSpace_loadMethodData(NULL, MethodData);
-	KSET_KLIB2(importPackage, NameSpace_importPackage, 0);
+	KSET_KLIB2(KimportPackage, NameSpace_importPackage, 0);
 }
 
 #ifdef __cplusplus
