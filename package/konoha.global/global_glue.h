@@ -39,21 +39,21 @@ static kbool_t global_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfilelin
 
 // --------------------------------------------------------------------------
 
-static KMETHOD MethodFunc_ProtoGetter(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD MethodFunc_ProtoGetter(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
 	RETURN_(KLIB kObject_getObject(kctx, sfp[0].toObject, key, sfp[K_RTNIDX].o));
 }
 
-static KMETHOD MethodFunc_ProtoGetterN(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD MethodFunc_ProtoGetterN(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
 	RETURNd_(KLIB kObject_getUnboxValue(kctx, sfp[0].toObject, key, 0));
 }
 
-static KMETHOD MethodFunc_ProtoSetter(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD MethodFunc_ProtoSetter(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
@@ -61,7 +61,7 @@ static KMETHOD MethodFunc_ProtoSetter(KonohaContext *kctx, KonohaStack *sfp _RIX
 	RETURN_(sfp[1].toObject);
 }
 
-static KMETHOD MethodFunc_ProtoSetterN(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD MethodFunc_ProtoSetterN(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
@@ -135,7 +135,7 @@ static ksymbol_t tosymbol(KonohaContext *kctx, kExpr *expr)
 	return SYM_NONAME;
 }
 
-static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp)
 {
 	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, gma);
@@ -239,7 +239,7 @@ static kbool_t Expr_declType(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGam
 	return false;
 }
 
-static KMETHOD StmtTyCheck_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD StmtTyCheck_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, gma);

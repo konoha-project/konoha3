@@ -423,9 +423,8 @@ static void dumpOPCODE(KonohaContext *kctx, VirtualMachineInstruction *c, Virtua
 	DUMP_P("\n");
 }
 
-static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 {
-	DBG_ASSERT(K_RIX == K_RTNIDX);
 	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].mtdNC));
 	VirtualMachine_run(kctx, sfp, CODE_ENTER);
 }
@@ -626,7 +625,7 @@ static void EXPR_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int esp
 	}
 }
 
-static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack *sfp _RIX);
+static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack *sfp);
 
 static void CALL_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espidx)
 {
@@ -644,7 +643,7 @@ static void CALL_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int esp
 		EXPR_asm(kctx, thisidx + i - 1, exprN, shift, thisidx + i - 1);
 	}
 	int argc = kArray_size(expr->cons) - 2;
-//	if (mtd->mn == MN_new && mtd->fcall_1 == MethodFunc_abstract) {
+//	if (mtd->mn == MN_new && mtd->invokeMethodFunc == MethodFunc_abstract) {
 //		/* do nothing */
 //	} else
 	if(kMethod_isVirtual(mtd)) {
@@ -652,7 +651,7 @@ static void CALL_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int esp
 		ASM(CALL, ctxcode->uline, SFP_(thisidx), ESP_(espidx, argc), knull(CT_(expr->ty)));
 	}
 	else {
-		if(mtd->fcall_1 != MethodFunc_runVirtualMachine) {
+		if(mtd->invokeMethodFunc != MethodFunc_runVirtualMachine) {
 			ASM(SCALL, ctxcode->uline, SFP_(thisidx), ESP_(espidx, argc), mtd, knull(CT_(expr->ty)));
 		}
 		else {
@@ -951,7 +950,7 @@ static void ByteCode_free(KonohaContext *kctx, kObject *o)
 	KFREE(b->code, b->codesize);
 }
 
-static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack *sfp)
 {
 //	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
 //	ktype_t rtype = mtd->pa->rtype;
@@ -969,13 +968,13 @@ static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack 
 
 //static kbool_t Method_isAbstract(kMethod *mtd)
 //{
-//	return (mtd->fcall_1 == MethodFunc_abstract);
+//	return (mtd->invokeMethodFunc == MethodFunc_abstract);
 //}
 
 static void Method_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
 {
 	func = (func == NULL) ? MethodFunc_invokeAbstractMethod : func;
-	((kMethodVar*)mtd)->fcall_1 = func;
+	((kMethodVar*)mtd)->invokeMethodFunc = func;
 	((kMethodVar*)mtd)->pc_start = CODE_NCALL;
 }
 

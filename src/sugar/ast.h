@@ -517,7 +517,7 @@ static void Block_addStmtLine(KonohaContext *kctx, kBlock *bk, kArray *tokenList
 
 /* ------------------------------------------------------------------------ */
 
-static KMETHOD UndefinedParseExpr(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD UndefinedParseExpr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ParseExpr(stmt, tls, s, c, e);
 	kStmt_p(stmt, ERR_, "undefined expression parser for '%s'", kToken_s(tls->tokenItems[c]));
@@ -653,7 +653,7 @@ static kExpr *Expr_rightJoin(KonohaContext *kctx, kExpr *expr, kStmt *stmt, kArr
 	return expr;
 }
 
-static KMETHOD ParseExpr_Term(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD ParseExpr_Term(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ParseExpr(stmt, tls, s, c, e);
 	DBG_ASSERT(s == c);
@@ -665,7 +665,7 @@ static KMETHOD ParseExpr_Term(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURN_(kExpr_rightJoin(expr, stmt, tls, s+1, c+1, e));
 }
 
-static KMETHOD ParseExpr_Op(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD ParseExpr_Op(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ParseExpr(stmt, tls, s, c, e);
 	kTokenVar *tk = tls->tokenVarItems[c];
@@ -693,7 +693,7 @@ static inline kbool_t isFieldName(kArray *tls, int c, int e)
 	}
 	return false;
 }
-static KMETHOD ParseExpr_DOT(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD ParseExpr_DOT(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ParseExpr(stmt, tls, s, c, e);
 	if(s < c && isFieldName(tls, c, e)) {
@@ -703,7 +703,7 @@ static KMETHOD ParseExpr_DOT(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	}
 }
 
-static KMETHOD ParseExpr_Parenthesis(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD ParseExpr_Parenthesis(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ParseExpr(stmt, tls, s, c, e);
 	kToken *tk = tls->tokenItems[c];
@@ -728,7 +728,7 @@ static KMETHOD ParseExpr_Parenthesis(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	}
 }
 
-static KMETHOD ParseExpr_COMMA(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD ParseExpr_COMMA(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ParseExpr(stmt, tls, s, c, e);
 	kExpr *expr = new_ConsExpr(kctx, syn, 1, tls->tokenItems[c]);
@@ -736,7 +736,7 @@ static KMETHOD ParseExpr_COMMA(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURN_(expr);
 }
 
-static KMETHOD ParseExpr_DOLLAR(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD ParseExpr_DOLLAR(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ParseExpr(stmt, tls, s, c, e);
 	if(s == c && c + 1 < e) {
@@ -757,7 +757,7 @@ static KMETHOD ParseExpr_DOLLAR(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 /* ------------------------------------------------------------------------ */
 
-static KMETHOD PatternMatch_Expr(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD PatternMatch_Expr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tls, s, e);
 	INIT_GCSTACK();
@@ -773,7 +773,7 @@ static KMETHOD PatternMatch_Expr(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNi_(r);
 }
 
-static KMETHOD PatternMatch_Type(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD PatternMatch_Type(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tls, s, e);
 	int r = -1;
@@ -785,7 +785,7 @@ static KMETHOD PatternMatch_Type(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNi_(r);
 }
 
-static KMETHOD PatternMatch_Usymbol(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD PatternMatch_Usymbol(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tls, s, e);
 	int r = -1;
@@ -797,7 +797,7 @@ static KMETHOD PatternMatch_Usymbol(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNi_(r);
 }
 
-static KMETHOD PatternMatch_Symbol(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD PatternMatch_Symbol(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tls, s, e);
 	int r = -1;
@@ -809,7 +809,7 @@ static KMETHOD PatternMatch_Symbol(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNi_(r);
 }
 
-static KMETHOD PatternMatch_Params(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD PatternMatch_Params(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tls, s, e);
 	int r = -1;
@@ -825,7 +825,7 @@ static KMETHOD PatternMatch_Params(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNi_(r);
 }
 
-static KMETHOD PatternMatch_Block(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD PatternMatch_Block(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tls, s, e);
 	kToken *tk = tls->tokenItems[s];
@@ -847,7 +847,7 @@ static KMETHOD PatternMatch_Block(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNi_(-1); // ERROR
 }
 
-static KMETHOD PatternMatch_Toks(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD PatternMatch_Toks(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tls, s, e);
 	if(s < e) {

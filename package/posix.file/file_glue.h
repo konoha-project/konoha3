@@ -73,7 +73,7 @@ static void File_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBu
 
 /* ------------------------------------------------------------------------ */
 //## @Native @Throwable FILE System.fopen(String path, String mode);
-static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s = sfp[1].toString;
 	const char *mode = IS_NULL(sfp[2].s) ? "r" : S_text(sfp[2].s);
@@ -92,7 +92,7 @@ static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## @Native int File.read(Bytes buf, int offset, int len);
-static KMETHOD File_read(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD File_read(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFILE *file = (kFILE*)sfp[0].toObject;
 	FILE *fp = file->fp;
@@ -120,7 +120,7 @@ static KMETHOD File_read(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## @Native int File.write(Bytes buf, int offset, int len);
-static KMETHOD File_write(KonohaContext *kctx , KonohaStack *sfp _RIX)
+static KMETHOD File_write(KonohaContext *kctx , KonohaStack *sfp)
 {
 	kFILE *file = (kFILE*)sfp[0].toObject;
 	FILE *fp = file->fp;
@@ -144,7 +144,7 @@ static KMETHOD File_write(KonohaContext *kctx , KonohaStack *sfp _RIX)
 }
 
 //## @Native void File.close();
-static KMETHOD File_close(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD File_close(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kFILE *file = (struct _kFILE*)sfp[0].toObject;
 	FILE *fp = file->fp;
@@ -162,7 +162,7 @@ static KMETHOD File_close(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## @Native int File.getC();
-static KMETHOD File_getC(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD File_getC(KonohaContext *kctx, KonohaStack *sfp)
 {
 	FILE *fp = ((kFILE*)sfp[0].toObject)->fp;
 	int ch = EOF;
@@ -179,7 +179,7 @@ static KMETHOD File_getC(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## @Native boolean File.putC(int ch);
-static KMETHOD File_putC(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD File_putC(KonohaContext *kctx, KonohaStack *sfp)
 {
 	FILE *fp = ((kFILE*)sfp[0].toObject)->fp;
 	if (fp != NULL) {

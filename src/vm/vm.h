@@ -165,7 +165,7 @@ struct kByteCodeVar {
 
 #define OPEXEC_NCALL() { \
 		(void)op;\
-		(rbp[K_MTDIDX2].mtdNC)->fastcall_1(kctx, SFP(rbp) K_RIXPARAM);\
+		(rbp[K_MTDIDX2].mtdNC)->invokeMethodFunc(kctx, SFP(rbp));\
 		OPEXEC_RET();\
 	} \
 
@@ -221,7 +221,7 @@ struct kByteCodeVar {
 
 #define OPEXEC_SCALL(UL, thisidx, espshift, mtdO, CTO) { \
 		kMethod *mtd_ = mtdO;\
-		/*prefetch((mtd_)->fcall_1);*/\
+		/*prefetch((mtd_)->invokeMethodFunc);*/\
 		KonohaStack *sfp_ = SFP(rshift(rbp, thisidx)); \
 		sfp_[K_RTNIDX].o = CTO;\
 		sfp_[K_RTNIDX].uline = UL;\
@@ -229,7 +229,7 @@ struct kByteCodeVar {
 		sfp_[K_PCIDX].pc = PC_NEXT(pc);\
 		sfp_[K_MTDIDX].mtdNC = mtd_;\
 		klr_setesp(kctx, SFP(rshift(rbp, espshift)));\
-		(mtd_)->fcall_1(kctx, sfp_ K_RIXPARAM); \
+		(mtd_)->invokeMethodFunc(kctx, sfp_); \
 		sfp_[K_MTDIDX].mtdNC = NULL;\
 	} \
 
@@ -528,7 +528,7 @@ struct kByteCodeVar {
 	} \
 
 #define OPEXEC_FUNCCALL() { \
-		(rbp[K_MTDIDX2].mtdNC)->fcall_1(kctx, SFP(rbp), K_RTNIDX);\
+		(rbp[K_MTDIDX2].mtdNC)->invokeMethodFunc(kctx, SFP(rbp), K_RTNIDX);\
 		KLR_RET();\
 	} \
 

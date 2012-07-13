@@ -27,14 +27,14 @@
 
 // --------------------------------------------------------------------------
 //## Boolean Object.isNull();
-static KMETHOD Object_isNull(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Object_isNull(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kObject *o = sfp[0].toObject;
 	RETURNb_(IS_NULL(o));
 }
 
 //## Boolean Object.isNotNull();
-static KMETHOD Object_isNotNull(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Object_isNotNull(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kObject *o = sfp[0].toObject;
 	RETURNb_(!IS_NULL(o));
@@ -60,7 +60,7 @@ static kbool_t null_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_
 	return true;
 }
 
-static KMETHOD ExprTyCheck_null(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD ExprTyCheck_null(KonohaContext *kctx, KonohaStack *sfp)
 {
 	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);

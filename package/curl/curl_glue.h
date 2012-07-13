@@ -122,13 +122,13 @@ static void Curl_free(KonohaContext *kctx, kObject *o)
 }
 
 //## Curl Curl.new();
-static KMETHOD Curl_new (KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Curl_new (KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0));
 }
 
 //##  void Curl.setOpt(int type, dynamic data);
-static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	CURL* curl = toCURL(sfp[0].toObject);
 	long curlopt = Int_to(long, sfp[1]);
@@ -311,7 +311,7 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## void Curl.appendHeader();
-static KMETHOD Curl_appendHeader(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Curl_appendHeader(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kCurl* kcurl = (struct _kCurl*)sfp[0].toObject;
 	char *h = String_to(char*,sfp[1]);
@@ -320,7 +320,7 @@ static KMETHOD Curl_appendHeader(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## boolean Curl.perform();
-static KMETHOD Curl_perform(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Curl_perform(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kCurl* kcurl = (kCurl*)sfp[0].toObject;
 	CURL* curl = toCURL(sfp[0].toObject);
@@ -339,7 +339,7 @@ static KMETHOD Curl_perform(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 ////## dynamic Curl.getInfo(int type);
-static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 {
 	CURL* curl = toCURL(sfp[0].toObject);
 	char *strptr = NULL;

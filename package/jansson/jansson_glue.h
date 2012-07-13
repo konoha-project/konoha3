@@ -81,13 +81,13 @@ static void Jansson_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWrit
 /* [API methodList] */
 
 //## Json Json.new();
-static KMETHOD Json_new (KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Json_new (KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), NULL));
 }
 
 //## @Static Json Json.parse(String str);
-static KMETHOD Json_parse(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Json_parse(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kJson *json = (struct _kJson*)sfp[0].toObject;
 	const char *buf = S_text(sfp[1].toString);
@@ -105,7 +105,7 @@ static KMETHOD Json_parse(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## Json Json.get(String key);
-static KMETHOD Json_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Json_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	json_t* obj = ((struct _kJson*)sfp[0].toObject)->obj;
 	if (!json_is_object(obj)) {
@@ -123,7 +123,7 @@ static KMETHOD Json_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## Array Json.getArray();
-static KMETHOD Json_getArray(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Json_getArray(KonohaContext *kctx, KonohaStack *sfp)
 {
 	json_t* obj = ((struct _kJson*)sfp[0].toObject)->obj;
 	const char *key = S_text(sfp[1].toString);
@@ -144,7 +144,7 @@ static KMETHOD Json_getArray(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## String Json.getBool(String key);
-static KMETHOD Json_getBool(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Json_getBool(KonohaContext *kctx, KonohaStack *sfp)
 {
 	json_t* obj = ((struct _kJson*)sfp[0].toObject)->obj;
 	if (!json_is_object(obj)) {
@@ -165,7 +165,7 @@ static KMETHOD Json_getBool(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## float Json.getFloat(String key);
-static KMETHOD Json_getFloat(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Json_getFloat(KonohaContext *kctx, KonohaStack *sfp)
 {
 	json_t* obj = ((struct _kJson*)sfp[0].toObject)->obj;
 	if (!json_is_object(obj)) {
@@ -182,7 +182,7 @@ static KMETHOD Json_getFloat(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## String Json.getInt(String key);
-static KMETHOD Json_getInt(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Json_getInt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	json_t* obj = ((struct _kJson*)sfp[0].toObject)->obj;
 	if (!json_is_object(obj)) {
@@ -198,7 +198,7 @@ static KMETHOD Json_getInt(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## String Json.getString(String key);
-static KMETHOD Json_getString(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Json_getString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	json_t* obj = ((struct _kJson*)sfp[0].toObject)->obj;
 	if (!json_is_object(obj)) {
@@ -215,7 +215,7 @@ static KMETHOD Json_getString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## void Json.set(String key, Json value);
-static KMETHOD Json_set(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Json_set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	json_t* obj = ((struct _kJson*)sfp[0].toObject)->obj;
 	if (!json_is_object(obj)) {
@@ -236,7 +236,7 @@ static KMETHOD Json_set(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## void Json.setArray(String key, Json[] a);
-static KMETHOD Json_setArray(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Json_setArray(KonohaContext *kctx, KonohaStack *sfp)
 {
 	json_t* obj = ((struct _kJson*)sfp[0].toObject)->obj;
 	if (!json_is_object(obj)) {
@@ -250,7 +250,7 @@ static KMETHOD Json_setArray(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## void Json.setBool(String key, String value);
-static KMETHOD Json_setBool(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Json_setBool(KonohaContext *kctx, KonohaStack *sfp)
 {
 	json_t* obj = ((struct _kJson*)sfp[0].toObject)->obj;
 	if (!json_is_object(obj)) {
@@ -274,7 +274,7 @@ static KMETHOD Json_setBool(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## void Json.setFloat(String key, String value);
-static KMETHOD Json_setFloat(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Json_setFloat(KonohaContext *kctx, KonohaStack *sfp)
 {
 	json_t* obj = ((struct _kJson*)sfp[0].toObject)->obj;
 	if (!json_is_object(obj)) {
@@ -296,7 +296,7 @@ static KMETHOD Json_setFloat(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## void Json.setInt(String key, int value);
-static KMETHOD Json_setInt(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Json_setInt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	json_t* obj = ((struct _kJson*)sfp[0].toObject)->obj;
 	if (!json_is_object(obj)) {
@@ -318,7 +318,7 @@ static KMETHOD Json_setInt(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## void Json.setString(String key, String value);
-static KMETHOD Json_setString(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Json_setString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	json_t* obj = ((struct _kJson*)sfp[0].toObject)->obj;
 	if (!json_is_object(obj)) {
@@ -343,7 +343,7 @@ static KMETHOD Json_setString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## String Json.dump();
-static KMETHOD Json_dump(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Json_dump(KonohaContext *kctx, KonohaStack *sfp)
 {
 	json_t* obj = ((struct _kJson*)sfp[0].toObject)->obj;
 	if (!json_is_object(obj)) {
@@ -356,7 +356,7 @@ static KMETHOD Json_dump(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 /* ------------------------------------------------------------------------ */
 
-static KMETHOD JsonArray_newArray(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD JsonArray_newArray(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArrayVar *a = (kArrayVar *)sfp[0].toObject;
 	size_t asize = (size_t)sfp[1].ivalue;
@@ -368,7 +368,7 @@ static KMETHOD JsonArray_newArray(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## void Json[].add(Json json);
-static KMETHOD JsonArray_add(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD JsonArray_add(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArrayVar *a = (kArrayVar *)sfp[0].toObject;
 	json_t* ja = (json_t*)a->list;
@@ -384,14 +384,14 @@ static KMETHOD JsonArray_add(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## int Json[].getSize();
-static KMETHOD JsonArray_getSize(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD JsonArray_getSize(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].toArray;
 	const json_t *ja = (json_t*)a->list;
 	RETURNi_(json_array_size(ja));
 }
 
-static KMETHOD JsonArray_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD JsonArray_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].toArray;
 	json_t *ja = (json_t*)a->list;
@@ -400,7 +400,7 @@ static KMETHOD JsonArray_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURN_(json);
 }
 
-static KMETHOD JsonArray_append(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD JsonArray_append(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].toArray;
 	json_t *ja = (json_t*)a->list;
@@ -409,17 +409,17 @@ static KMETHOD JsonArray_append(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNvoid_();
 }
 ////## void Json[].set(Json json);
-//static KMETHOD Json_set(KonohaContext *kctx, KonohaStack *sfp _RIX)
+//static KMETHOD Json_set(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //}
 //
 ////## void Json[].insert(Json json);
-//static KMETHOD Json_insert(KonohaContext *kctx, KonohaStack *sfp _RIX)
+//static KMETHOD Json_insert(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //}
 //
 ////## void Json[].delete(Json json);
-//static KMETHOD Json_delete(KonohaContext *kctx, KonohaStack *sfp _RIX)
+//static KMETHOD Json_delete(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //}
 

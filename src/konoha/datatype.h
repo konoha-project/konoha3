@@ -437,7 +437,7 @@ static kparamid_t Kparamdom(KonohaContext *kctx, int psize, kparam_t *p)
 static void Method_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kMethodVar *mtd = (kMethodVar*)o;
-	bzero(&mtd->fcall_1, sizeof(kMethod) - sizeof(KonohaObjectHeader));
+	bzero(&mtd->invokeMethodFunc, sizeof(kMethod) - sizeof(KonohaObjectHeader));
 	KINITv(mtd->tcode, (struct kToken*)K_NULL);
 	KINITv(mtd->kcode, K_NULL);
 }

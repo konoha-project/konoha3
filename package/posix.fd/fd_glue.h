@@ -34,7 +34,7 @@
 // TODO: functions below will return integer which indecates file descriptor
 
 //## @Native int System.lseek(int fd, int offset, int whence)
-static KMETHOD System_lseek(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD System_lseek(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int fd = sfp[1].ivalue;
 	int offset = sfp[2].ivalue;
@@ -52,7 +52,7 @@ static KMETHOD System_lseek(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## boolean System.truncate(int fd, int length)
-static KMETHOD System_truncate(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD System_truncate(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int fd = sfp[1].ivalue;
 	int length = sfp[2].ivalue;
@@ -68,7 +68,7 @@ static KMETHOD System_truncate(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## boolean System.chmod(int fd, int length)
-static KMETHOD System_chmod(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD System_chmod(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int fd = sfp[1].ivalue;
 	int mode = sfp[2].ivalue;
@@ -84,7 +84,7 @@ static KMETHOD System_chmod(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## boolean System.chown(int fd, int owner, int group)
-static KMETHOD System_chown(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD System_chown(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int fd = sfp[1].ivalue;
 	uid_t owner = (uid_t)sfp[2].ivalue;
@@ -104,7 +104,7 @@ static KMETHOD System_chown(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 // TODO: isn't ioctl difficult for script users? should we support this?
 //## @Native int File.ioctl(int request, String[] args)
-//staic KMETHOD File_ioctl(KonohaContext *kctx, KonohaStack *sfp _RIX)
+//staic KMETHOD File_ioctl(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kFile *file = (kFile*)sfp[0].toObject;
 //	FILE *fp = file->fp;
@@ -123,7 +123,7 @@ static KMETHOD System_chown(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 // NOTE: sys_flock can use for a file, only for
 //## @Native boolean System.flock(int fd, int opretaion);
-static KMETHOD System_flock(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD System_flock(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int fd = sfp[1].ivalue;
 	int operation = sfp[2].ivalue;
@@ -139,7 +139,7 @@ static KMETHOD System_flock(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## @Native boolean System.sync(int fd);
-static KMETHOD System_sync(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD System_sync(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int fd = sfp[1].ivalue;
 	int ret =  fsync(fd);
@@ -152,7 +152,7 @@ static KMETHOD System_sync(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNb_(ret == 0);
 }
 
-static KMETHOD System_link(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD System_link(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s1 = sfp[1].toString;
 	kString *s2 = sfp[2].s;
@@ -170,7 +170,7 @@ static KMETHOD System_link(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNi_(ret);
 }
 
-static KMETHOD System_unlink(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD System_unlink(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s = sfp[1].toString;
 	const char *pathname = S_text(s);
@@ -185,7 +185,7 @@ static KMETHOD System_unlink(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNi_(ret);
 }
 
-static KMETHOD System_rename(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD System_rename(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s1 = sfp[1].toString;
 	kString *s2 = sfp[2].s;
@@ -203,7 +203,7 @@ static KMETHOD System_rename(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNi_(ret);
 }
 
-static KMETHOD System_rmdir(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD System_rmdir(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s = sfp[1].toString;
 	const char *pathname = S_text(s);
@@ -218,7 +218,7 @@ static KMETHOD System_rmdir(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNi_(ret);
 }
 
-static KMETHOD System_symlink(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD System_symlink(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s1 = sfp[1].toString;
 	kString *s2 = sfp[2].s;
@@ -236,7 +236,7 @@ static KMETHOD System_symlink(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNi_(ret);
 }
 
-static KMETHOD System_readlink(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD System_readlink(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s1 = sfp[1].toString;
 	kString *s2 = sfp[2].s;
@@ -256,7 +256,7 @@ static KMETHOD System_readlink(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNi_(ret);
 }
 
-static KMETHOD System_lchown(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD System_lchown(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s = sfp[1].toString;
 	const char *pathname = S_text(s);
@@ -275,7 +275,7 @@ static KMETHOD System_lchown(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNi_(ret);
 }
 
-static KMETHOD System_fchown(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD System_fchown(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int fd = sfp[1].ivalue;
 	uid_t owner = sfp[2].ivalue;
@@ -292,7 +292,7 @@ static KMETHOD System_fchown(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNi_(ret);
 }
 
-static KMETHOD System_access(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD System_access(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s = sfp[1].toString;
 	const char *pathname = S_text(s);
@@ -309,7 +309,7 @@ static KMETHOD System_access(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNi_(ret);
 }
 
-static KMETHOD System_fsync(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD System_fsync(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int fd = sfp[1].ivalue;
 	int ret = fsync(fd);

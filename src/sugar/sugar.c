@@ -601,13 +601,13 @@ static kbool_t NameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, cons
 }
 
 // boolean NameSpace.importPackage(String pkgname);
-static KMETHOD NameSpace_importPackage_(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD NameSpace_importPackage_(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNb_(NameSpace_importPackage(kctx, sfp[0].toNameSpace, S_text(sfp[1].toString), sfp[K_RTNIDX].uline));
 }
 
 // boolean NameSpace.loadScript(String path);
-static KMETHOD NameSpace_loadScript_(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD NameSpace_loadScript_(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kfileline_t pline = sfp[K_RTNIDX].uline;
 	FILE_i *fp = PLAT fopen_i(S_text(sfp[1].toString), "r");

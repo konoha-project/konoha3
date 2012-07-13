@@ -1016,38 +1016,38 @@ struct kParamVar {
 /* method data */
 #define DEND     (-1)
 
-#if 1
-#define _RIX         ,long _rix
-#define K_RIX        _rix
-#define K_RIXPARAM    ,K_RTNIDX
-#define _KFASTCALL   ,long _rix
-#define K_FASTRIX    _rix
-#else
-#define _RIX
-#define K_RIX (-4)
-#define K_RIXPARAM
-#define _KFASTCALL
-#define K_FASTRIX K_RIXPARAM
-#endif
+//#if 1
+//#define _RIX         ,long _rix
+//#define (-(K_CALLDELTA))        _rix
+//#define    ,K_RTNIDX
+//#define _KFASTCALL   ,long _rix
+//#define K_FASTRIX    _rix
+//#else
+//#define _RIX
+//#define (-(K_CALLDELTA)) (-4)
+//#define
+//#define _KFASTCALL
+//#define K_FASTRIX
+//#endif
 
 #ifdef K_USING_WIN32_
 //#define KMETHOD  void CC_EXPORT
 //#define ITRNEXT int   CC_EXPORT
-//typedef void (CC_EXPORT *MethodFunc)(KonohaContext*, KonohaStack* _RIX);
-//typedef int  (CC_EXPORT *knh_Fitrnext)(KonohaContext*, KonohaStack * _RIX);
+//typedef void (CC_EXPORT *MethodFunc)(KonohaContext*, KonohaStack*);
+//typedef int  (CC_EXPORT *knh_Fitrnext)(KonohaContext*, KonohaStack *);
 #else
 #define KMETHOD    void  /*CC_FASTCALL_*/
 #define KMETHODCC  int  /*CC_FASTCALL_*/
-typedef KMETHOD   (*MethodFunc)(KonohaContext*, KonohaStack* _RIX);
-typedef KMETHOD   (*FmethodFastCall)(KonohaContext*, KonohaStack * _KFASTCALL);
+typedef KMETHOD   (*MethodFunc)(KonohaContext*, KonohaStack*);
+typedef KMETHOD   (*FastCallMethodFunc)(KonohaContext*, KonohaStack * _KFASTCALL);
 typedef KMETHODCC (*FmethodCallCC)(KonohaContext*, KonohaStack *, int, int, struct VirtualMachineInstruction*);
 #endif
 
 struct kMethodVar {
 	KonohaObjectHeader     h;
 	union {
-		MethodFunc          fcall_1;
-		FmethodFastCall      fastcall_1;
+		MethodFunc              invokeMethodFunc;
+		FastCallMethodFunc      invokeFastCallMethodFunc;
 	};
 	union {/* body*/
 		struct VirtualMachineInstruction        *pc_start;
@@ -1059,9 +1059,9 @@ struct kMethodVar {
 	kshort_t          delta;    kpackage_t packageId;
 	kToken        *tcode;
 	union {
-		kObject              *objdata;
+		kObject      *objdata;
 		const struct kByteCodeVar    *kcode;
-		kNameSpace  *lazyns;       // lazy compilation
+		kNameSpace   *lazyns;       // lazy compilation
 	};
 	kMethod           *proceedNUL;   // proceed
 };
@@ -1134,7 +1134,7 @@ struct _kSystem {
 #define klr_setesp(kctx, newesp)  ((KonohaContextVar*)kctx)->esp = (newesp)
 #define klr_setmtdNC(sfpA, mtdO)   sfpA.mtdNC = mtdO
 
-//#define Method_isByteCode(mtd) ((mtd)->fcall_1 == MethodFunc_runVirtualMachine)
+//#define Method_isByteCode(mtd) ((mtd)->invokeMethodFunc == MethodFunc_runVirtualMachine)
 #define Method_isByteCode(mtd) (0)
 
 #define BEGIN_LOCAL(V,N) \
@@ -1150,14 +1150,14 @@ struct _kSystem {
 		KSETv(tsfp[K_RTNIDX].o, ((kObject*)DEFVAL));\
 		tsfp[K_RTNIDX].uline = __LINE__;\
 		klr_setesp(kctx, tsfp + ARGC + 1);\
-		(MTD)->fcall_1(kctx, tsfp K_RIXPARAM);\
+		(MTD)->invokeMethodFunc(kctx, tsfp);\
 		tsfp[K_MTDIDX].mtdNC = NULL;\
 	} \
 
 #define KSELFCALL(TSFP, MTD) { \
 		KonohaStack *tsfp = TSFP;\
 		tsfp[K_MTDIDX].mtdNC = MTD;\
-		(MTD)->fcall_1(kctx, tsfp K_RIXPARAM);\
+		(MTD)->invokeMethodFunc(kctx, tsfp);\
 		tsfp[K_MTDIDX].mtdNC = NULL;\
 	} \
 
@@ -1431,33 +1431,32 @@ typedef struct {
 #define KNH_SAFEPOINT(kctx, sfp)
 
 #define RETURN_(vv) do {\
-	KSETv(sfp[K_RIX].o, ((kObject*)vv));\
+	KSETv(sfp[(-(K_CALLDELTA))].o, ((kObject*)vv));\
 	KNH_SAFEPOINT(kctx, sfp);\
 	return; \
 } while (0)
 
 #define RETURNd_(d) do {\
-	sfp[K_RIX].ndata = d; \
+	sfp[(-(K_CALLDELTA))].ndata = d; \
 	return; \
 } while (0)
 
 #define RETURNb_(c) do {\
-	sfp[K_RIX].bvalue = c; \
+	sfp[(-(K_CALLDELTA))].bvalue = c; \
 	return; \
 } while(0)
 
 #define RETURNi_(c) do {\
-	sfp[K_RIX].ivalue = c; \
+	sfp[(-(K_CALLDELTA))].ivalue = c; \
 	return; \
 } while (0)
 
 #define RETURNf_(c) do {\
-	sfp[K_RIX].fvalue = c; \
+	sfp[(-(K_CALLDELTA))].fvalue = c; \
 	return; \
 } while (0)
 
 #define RETURNvoid_() do {\
-	(void)_rix;\
 	return; \
 } while (0)
 

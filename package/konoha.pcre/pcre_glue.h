@@ -467,7 +467,7 @@ static void Regex_set(KonohaContext *kctx, kRegex *re, kString *ptns, kString *o
 /* ------------------------------------------------------------------------ */
 //## @Const method Regex Regex.new(String pattern, String option);
 
-static KMETHOD Regex_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Regex_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Regex_set(kctx, sfp[0].re, sfp[1].toString, sfp[2].s);
 	RETURN_(sfp[0].toObject);
@@ -476,7 +476,7 @@ static KMETHOD Regex_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## @Const method Int String.search(Regex re);
 
-static KMETHOD String_search(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD String_search(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRegex *re = sfp[1].re;
 	intptr_t loc = -1;
@@ -502,7 +502,7 @@ static KMETHOD String_search(KonohaContext *kctx, KonohaStack *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## @Const method String[] String.match(Regex re);
 
-static KMETHOD String_match(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD String_match(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s0 = sfp[0].s;
 	kRegex *re = sfp[1].re;
@@ -548,7 +548,7 @@ static KMETHOD String_match(KonohaContext *kctx, KonohaStack *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## @Const method String String.replace(Regex re, String s);
 
-static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s0 = sfp[0].s;
 	kRegex *re = sfp[1].re;
@@ -592,7 +592,7 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## @Const method String[] String.split(Regex re);
 
-static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s0 = sfp[0].s;
 	kRegex *re = sfp[1].re;
@@ -720,7 +720,7 @@ static int parseREGEX(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, in
 	return pos-1;
 }
 
-static KMETHOD ExprTyCheck_Regex(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD ExprTyCheck_Regex(KonohaContext *kctx, KonohaStack *sfp)
 {
 	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);

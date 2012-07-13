@@ -1169,7 +1169,7 @@ void jit_init() {
 	/*------- _kMethod ------*/
 	Array kMethodTy = Array.newN(13);
 	kMethodTy.set(0, KonohaObjectHeader /* h */ );
-	kMethodTy.set(1, PointerType.get(funcTy) /* fcall_1 */ /*union*/);
+	kMethodTy.set(1, PointerType.get(funcTy) /* invokeMethodFunc */ /*union*/);
 	kMethodTy.set(2, PointerType.get(VirtualMachineInstruction) /* pc_start */ /*union*/);
 	kMethodTy.set(3, getLongTy() /* flag */ );
 	kMethodTy.set(4, Type.getInt32Ty() /* cid */ );

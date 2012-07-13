@@ -745,21 +745,21 @@ static void knh_OutputStream_putc(KonohaContext *kctx, kOutputStream *w, int ch)
 //
 /* ------------------------------------------------------------------------ */
 //## method @public Int InputStream.getByte()
-static KMETHOD InputStream_getByte(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD InputStream_getByte(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNi_(io2_getc(kctx, (sfp[0].in)->io2));
 }
 
 /* ------------------------------------------------------------------------ */
 //## method @public boolean InputStream.isClosed()
-static KMETHOD InputStream_isClosed(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD InputStream_isClosed(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNb_(io2_isClosed(kctx, (sfp[0].in)->io2));
 }
 
 /* ------------------------------------------------------------------------ */
 //## method @public void OutputStream.putByte(int ch)
-static KMETHOD OutputStream_putByte(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD OutputStream_putByte(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kOutputStream *w = sfp[0].w;
 	knh_OutputStream_putc(kctx, w, (int)(sfp[1].ivalue));
@@ -768,14 +768,14 @@ static KMETHOD OutputStream_putByte(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 /* ------------------------------------------------------------------------ */
 //## method @public boolean OutputStream.isClosed()
-static KMETHOD OutputStream_isClosed(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD OutputStream_isClosed(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNb_(io2_isClosed(kctx, (sfp[0].in)->io2));
 }
 /* ------------------------------------------------------------------------ */
 //## method @Throwable InputStream InputStream.new(String urn, String mode);
 
-static KMETHOD InputStream_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD InputStream_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	//kInputStream *in = sfp[0].in;
 	kString *pth = sfp[1].toString;
@@ -791,7 +791,7 @@ static KMETHOD InputStream_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## method void InputStream.close();
 
-static KMETHOD InputStream_close(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD InputStream_close(KonohaContext *kctx, KonohaStack *sfp)
 {
 	io2_close(kctx, (sfp[0].in)->io2);
 }
@@ -799,7 +799,7 @@ static KMETHOD InputStream_close(KonohaContext *kctx, KonohaStack *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## method @Iterative String InputStream.readLine();
 
-static KMETHOD InputStream_readLine(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD InputStream_readLine(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURN_(io2_readLine(kctx, (sfp[0].in)->io2));
 }
@@ -807,7 +807,7 @@ static KMETHOD InputStream_readLine(KonohaContext *kctx, KonohaStack *sfp _RIX)
 /* [OutputStream] */
 
 //## method @Throwable OutputStream OutputStream.new(String path, String mode);
-static KMETHOD OutputStream_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD OutputStream_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	//kOutputStream *w = sfp[0].w;
 	kString *pth = sfp[1].toString;
@@ -823,7 +823,7 @@ static KMETHOD OutputStream_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## method void OutputStream.print(Object value, ...);
 
-static KMETHOD OutputStream_print(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD OutputStream_print(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kOutputStream *w = sfp[0].w;
 	KonohaStack *v = sfp + 1;
@@ -840,7 +840,7 @@ static KMETHOD OutputStream_print(KonohaContext *kctx, KonohaStack *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## method void OutputStream.println(Object value, ...);
 
-static KMETHOD OutputStream_println(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD OutputStream_println(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kOutputStream *w = sfp[0].w;
 	KonohaStack *v = sfp + 1;
@@ -858,7 +858,7 @@ static KMETHOD OutputStream_println(KonohaContext *kctx, KonohaStack *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## method void OutputStream.flush();
 
-static KMETHOD OutputStream_flush(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD OutputStream_flush(KonohaContext *kctx, KonohaStack *sfp)
 {
 	knh_OutputStream_flush(kctx, sfp[0].w);
 	RETURNvoid_();
@@ -867,7 +867,7 @@ static KMETHOD OutputStream_flush(KonohaContext *kctx, KonohaStack *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## method void OutputStream.close();
 
-static KMETHOD OutputStream_close(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD OutputStream_close(KonohaContext *kctx, KonohaStack *sfp)
 {
 	io2_close(kctx, sfp[0].w->io2);
 	RETURNvoid_();

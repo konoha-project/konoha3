@@ -57,7 +57,7 @@ static void HashMap_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWrit
 #include <minikonoha/klib.h>
 /* ------------------------------------------------------------------------ */
 
-static KMETHOD HashMap_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD HashMap_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kHashMap *m = (struct _kHashMap *)sfp[0].toObject;
 	KUtilsHashMap *map = m->map;
@@ -75,7 +75,7 @@ static KMETHOD HashMap_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	}
 }
 
-static KMETHOD HashMap_set(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD HashMap_set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kHashMap *m = (struct _kHashMap *)sfp[0].toObject;
 	KUtilsHashMap *map = m->map;
@@ -96,7 +96,7 @@ static KMETHOD HashMap_set(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNvoid_();
 }
 
-static KMETHOD HashMap_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD HashMap_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0));
 }

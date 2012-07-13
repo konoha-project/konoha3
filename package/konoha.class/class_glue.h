@@ -28,23 +28,23 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 
-static KMETHOD MethodFunc_FieldGetter(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD MethodFunc_FieldGetter(KonohaContext *kctx, KonohaStack *sfp)
 {
 	size_t delta = sfp[K_MTDIDX].mtdNC->delta;
 	RETURN_((sfp[0].toObject)->fieldObjectItems[delta]);
 }
-static KMETHOD MethodFunc_FieldGetterN(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD MethodFunc_FieldGetterN(KonohaContext *kctx, KonohaStack *sfp)
 {
 	size_t delta = sfp[K_MTDIDX].mtdNC->delta;
 	RETURNd_((sfp[0].toObject)->fieldUnboxItems[delta]);
 }
-static KMETHOD MethodFunc_FieldSetter(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD MethodFunc_FieldSetter(KonohaContext *kctx, KonohaStack *sfp)
 {
 	size_t delta = sfp[K_MTDIDX].mtdNC->delta;
 	KSETv((sfp[0].toObjectVar)->fieldObjectItems[delta], sfp[1].toObject);
 	RETURN_(sfp[1].toObject);
 }
-static KMETHOD MethodFunc_FieldSetterN(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD MethodFunc_FieldSetterN(KonohaContext *kctx, KonohaStack *sfp)
 {
 	size_t delta = sfp[K_MTDIDX].mtdNC->delta;
 	(sfp[0].toObjectVar)->fieldUnboxItems[delta] = sfp[1].ndata;
@@ -74,7 +74,7 @@ static kMethod *new_FieldSetter(KonohaContext *kctx, ktype_t cid, kmethodn_t sym
 
 static intptr_t KLIB2_Method_indexOfField(kMethod *mtd)
 {
-	MethodFunc f = mtd->fcall_1;
+	MethodFunc f = mtd->invokeMethodFunc;
 	if(f== MethodFunc_FieldGetter || f == MethodFunc_FieldGetterN || f == MethodFunc_FieldSetter || f == MethodFunc_FieldSetterN) {
 		return (intptr_t)mtd->delta;
 	}
@@ -109,7 +109,7 @@ static void KLIB2_setGetterSetter(KonohaContext *kctx, KonohaClass *ct)
 // --------------------------------------------------------------------------
 
 // int NameSpace.getCid(String name, int defval)
-static KMETHOD NameSpace_getCid(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD NameSpace_getCid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KonohaClass *ct = kNameSpace_getCT(sfp[0].toNameSpace, NULL/*fixme*/, S_text(sfp[1].toString), S_size(sfp[1].toString), (ktype_t)sfp[2].ivalue);
 	kint_t cid = ct != NULL ? ct->cid : sfp[2].ivalue;
@@ -146,7 +146,7 @@ static KonohaClass* defineClass(KonohaContext *kctx, kNameSpace *ns, kshortflag_
 }
 
 // int NameSpace.defineClass(int flag, String name, int supcid, int fieldsize);
-static KMETHOD NameSpace_defineClass(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD NameSpace_defineClass(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ktype_t supcid = sfp[3].ivalue == 0 ? TY_Object :(ktype_t)sfp[3].ivalue;
 	KonohaClass *supct = kclass(supcid, sfp[K_RTNIDX].uline);
@@ -183,7 +183,7 @@ static void defineField(KonohaContext *kctx, KonohaClassVar *ct, int flag, ktype
 }
 
 // int NameSpace.defineClassField(int cid, int flag, int ty, String name, Object *value);
-static KMETHOD NameSpace_defineClassField(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD NameSpace_defineClassField(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ktype_t cid = (ktype_t)sfp[1].ivalue;
 	kshortflag_t flag = (kshortflag_t)sfp[2].ivalue;
@@ -241,7 +241,7 @@ static kExpr* NewExpr(KonohaContext *kctx, SugarSyntax *syn, kToken *tk, ktype_t
 	return (kExpr*)expr;
 }
 
-static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	USING_SUGAR;
 	VAR_ParseExpr(stmt, tls, s, c, e);
@@ -279,7 +279,7 @@ static ksymbol_t tosymbolUM(KonohaContext *kctx, kToken *tk)
 	return ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
 }
 
-static KMETHOD ExprTyCheck_Getter(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD ExprTyCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 {
 	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
@@ -518,7 +518,7 @@ static void CT_checkMethodDecl(KonohaContext *kctx, kToken *tkC, kBlock *bk, kSt
 	}
 }
 
-static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 {
 	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, gma);

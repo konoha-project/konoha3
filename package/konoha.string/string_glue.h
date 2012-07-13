@@ -76,7 +76,7 @@ static size_t text_mlen(const char *s_text, size_t s_size)
 /* ------------------------------------------------------------------------ */
 //## method @Const Int String.getSize();
 
-static KMETHOD String_getSize(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD String_getSize(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s = sfp[0].s;
 	size_t size = (S_isASCII(s) ? S_size(s) : text_mlen(S_text(s), S_size(s)));
@@ -86,7 +86,7 @@ static KMETHOD String_getSize(KonohaContext *kctx, KonohaStack *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## @Const method Boolean String.startsWith(String s);
 
-static KMETHOD String_startsWith(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD String_startsWith(KonohaContext *kctx, KonohaStack *sfp)
 {
 	// @TEST "A".startsWith("ABC");
 	RETURNb_(strncmp(S_text(sfp[0].s), S_text(sfp[1].toString), S_size(sfp[1].toString)) == 0);
@@ -95,7 +95,7 @@ static KMETHOD String_startsWith(KonohaContext *kctx, KonohaStack *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## @Const method Boolean String.endsWith(String s);
 
-static KMETHOD String_endsWith(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD String_endsWith(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s0 = sfp[0].s;
 	kString *s1 =  sfp[1].toString;
@@ -113,7 +113,7 @@ static KMETHOD String_endsWith(KonohaContext *kctx, KonohaStack *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## @Const method Int String.indexOf(String s);
 
-static KMETHOD String_indexOf(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD String_indexOf(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s0 = sfp[0].s, *s1 = sfp[1].toString;
 	long loc = -1;
@@ -134,7 +134,7 @@ static KMETHOD String_indexOf(KonohaContext *kctx, KonohaStack *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## @Const method Int String.lastIndexOf(String s);
 
-static KMETHOD String_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD String_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s0 = sfp[0].s;
 	kString *s1 = sfp[1].toString;
@@ -157,7 +157,7 @@ static KMETHOD String_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## @Const method String String.trim();
 
-static KMETHOD String_trim(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD String_trim(KonohaContext *kctx, KonohaStack *sfp)
 {
 	const char *s = S_text(sfp[0].s);
 	int len = S_size(sfp[0].s);
@@ -184,7 +184,7 @@ static KMETHOD String_trim(KonohaContext *kctx, KonohaStack *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## @Const method Boolean String.opHAS(String s);
 
-static KMETHOD String_opHAS(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD String_opHAS(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNb_(strstr(S_text(sfp[0].s), S_text(sfp[1].toString)) != NULL);
 }
@@ -215,7 +215,7 @@ static kString *S_mget(KonohaContext *kctx, kString *s, size_t n)
 	return ret;
 }
 
-static KMETHOD String_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD String_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s = sfp[0].s;
 	size_t n = (size_t)sfp[1].ivalue;
@@ -272,7 +272,7 @@ static kString *S_msubstring(KonohaContext *kctx, kString *s, size_t moff, size_
 	return ret;
 }
 
-static KMETHOD String_substring(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD String_substring(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s0 = sfp[0].s;
 	size_t offset = (size_t)sfp[1].ivalue;
@@ -313,7 +313,7 @@ static kString* S_toupper(KonohaContext *kctx, kString *s0, size_t start)
 }
 
 //## @Const method String String.toLower()
-static KMETHOD String_toUpper(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD String_toUpper(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s0 = sfp[0].s;
 	size_t i, size = S_size(s0);
@@ -343,7 +343,7 @@ static kString* S_tolower(KonohaContext *kctx, kString *s0, size_t start)
 }
 
 //## @Const method String String.toLower()
-static KMETHOD String_toLower(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD String_toLower(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s0 = sfp[0].s;
 	size_t i, size = S_size(s0);

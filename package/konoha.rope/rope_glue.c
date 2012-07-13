@@ -288,7 +288,7 @@ static StringBase *StringBase_concat(KonohaContext *kctx, kString *s0, kString *
 //## @Const method String String.concat(String rhs);
 //## @Const method String String.opADD(String rhs);
 
-static KMETHOD Rope_opADD(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Rope_opADD(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *lhs = sfp[0].s, *rhs = sfp[1].toString;
 	RETURN_(StringBase_concat(kctx, lhs, rhs));

@@ -56,25 +56,25 @@ static void kmodfloat_free(KonohaContext *kctx, struct kmodshare_t *baseh)
 // --------------------------------------------------------------------------
 
 /* float + float */
-static KMETHOD Float_opADD(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Float_opADD(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNf_(sfp[0].fvalue + sfp[1].fvalue);
 }
 
 /* float - float */
-static KMETHOD Float_opSUB(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Float_opSUB(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNf_(sfp[0].fvalue - sfp[1].fvalue);
 }
 
 /* float * float */
-static KMETHOD Float_opMUL(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Float_opMUL(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNf_(sfp[0].fvalue * sfp[1].fvalue);
 }
 
 /* float / float */
-static KMETHOD Float_opDIV(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Float_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kfloat_t n = sfp[1].fvalue;
 	if(unlikely(n == 0.0)) {
@@ -84,55 +84,55 @@ static KMETHOD Float_opDIV(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 /* float == float */
-static KMETHOD Float_opEQ(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Float_opEQ(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNb_(sfp[0].fvalue == sfp[1].fvalue);
 }
 
 /* float != float */
-static KMETHOD Float_opNEQ(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Float_opNEQ(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNb_(sfp[0].fvalue != sfp[1].fvalue);
 }
 
 /* float < float */
-static KMETHOD Float_opLT(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Float_opLT(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNb_(sfp[0].fvalue < sfp[1].fvalue);
 }
 
 /* float <= float */
-static KMETHOD Float_opLTE(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Float_opLTE(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNb_(sfp[0].fvalue <= sfp[1].fvalue);
 }
 
 /* float > float */
-static KMETHOD Float_opGT(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Float_opGT(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNb_(sfp[0].fvalue > sfp[1].fvalue);
 }
 
 /* float >= float */
-static KMETHOD Float_opGTE(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Float_opGTE(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNb_(sfp[0].fvalue >= sfp[1].fvalue);
 }
 
 /* float to int */
-static KMETHOD Float_toInt(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Float_toInt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNi_((kint_t)sfp[0].fvalue);
 }
 
 /* float >= float */
-static KMETHOD Int_toFloat(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Int_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNf_((kfloat_t)sfp[0].ivalue);
 }
 
 /* float to String */
-static KMETHOD Float_toString(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Float_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	char buf[40];
 	PLAT snprintf_i(buf, sizeof(buf), KFLOAT_FMT, sfp[0].fvalue);
@@ -140,13 +140,13 @@ static KMETHOD Float_toString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 /* String to float */
-static KMETHOD String_toFloat(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD String_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNf_((kfloat_t)strtod(S_text(sfp[0].s), NULL));
 }
 
 //## @Const method Int Int.opMINUS();
-static KMETHOD Float_opMINUS(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Float_opMINUS(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNf_(-(sfp[0].fvalue));
 }
@@ -164,7 +164,7 @@ static kfloat_t kfloat_rand(void)
 #endif
 }
 
-static KMETHOD Float_random(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Float_random(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNf_(kfloat_rand());
 }
@@ -230,7 +230,7 @@ static kbool_t float_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline
 
 //----------------------------------------------------------------------------
 
-static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 {
 	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);

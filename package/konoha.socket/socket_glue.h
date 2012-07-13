@@ -155,7 +155,7 @@ static int getNfd(kArray *a1, kArray *a2, kArray *a3)
 // [KMETHODS]
 
 //## int System.accept(int socket, Map remoteInfo);
-//KMETHOD System_accept(KonohaContext *kctx, KonohaStack* sfp _RIX)
+//KMETHOD System_accept(KonohaContext *kctx, KonohaStack* sfp)
 //{
 //	struct sockaddr_in addr;
 //	int addrLen = sizeof(addr);
@@ -179,7 +179,7 @@ static int getNfd(kArray *a1, kArray *a2, kArray *a3)
 //}
 
 //## int System.accept(int socket, SockAddr remoteInfo);
-KMETHOD System_accept(KonohaContext *kctx, KonohaStack* sfp _RIX)
+KMETHOD System_accept(KonohaContext *kctx, KonohaStack* sfp)
 {
 	struct _kSockAddr *sa = (struct _kSockAddr*)sfp[2].o;
 	struct sockaddr_in *addr = sa->sockaddr_in;
@@ -204,7 +204,7 @@ KMETHOD System_accept(KonohaContext *kctx, KonohaStack* sfp _RIX)
 }
 
 //## int System.bind(int socket, String srcIP, int srcPort, int family);
-KMETHOD System_bind(KonohaContext *kctx, KonohaStack* sfp _RIX)
+KMETHOD System_bind(KonohaContext *kctx, KonohaStack* sfp)
 {
 	struct sockaddr_in addr;
 	toSockaddr(&addr,
@@ -227,7 +227,7 @@ KMETHOD System_bind(KonohaContext *kctx, KonohaStack* sfp _RIX)
 }
 
 //## int System.close(int fd);
-KMETHOD System_close(KonohaContext *kctx, KonohaStack* sfp _RIX)
+KMETHOD System_close(KonohaContext *kctx, KonohaStack* sfp)
 {
 	int ret = close(WORD2INT(sfp[1].ivalue) );
 
@@ -242,7 +242,7 @@ KMETHOD System_close(KonohaContext *kctx, KonohaStack* sfp _RIX)
 }
 
 //## int System.connect(int socket, String dstIP, int dstPort, int family);
-KMETHOD System_connect(KonohaContext *kctx, KonohaStack* sfp _RIX)
+KMETHOD System_connect(KonohaContext *kctx, KonohaStack* sfp)
 {
 	struct sockaddr_in addr;
 	toSockaddr(&addr,
@@ -266,7 +266,7 @@ KMETHOD System_connect(KonohaContext *kctx, KonohaStack* sfp _RIX)
 }
 
 //## int System.listen(int socket, int backlog);
-KMETHOD System_listen(KonohaContext *kctx, KonohaStack* sfp _RIX)
+KMETHOD System_listen(KonohaContext *kctx, KonohaStack* sfp)
 {
 	int ret = listen(WORD2INT(sfp[1].ivalue), WORD2INT(sfp[2].ivalue));
 	if(ret != 0) {
@@ -280,7 +280,7 @@ KMETHOD System_listen(KonohaContext *kctx, KonohaStack* sfp _RIX)
 }
 
 //## String System.getsockname(int socket);
-//KMETHOD System_getsockname(KonohaContext *kctx, KonohaStack *sfp _RIX)
+//KMETHOD System_getsockname(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	struct sockaddr_in addr;
 //	int addrLen = sizeof(addr);
@@ -299,7 +299,7 @@ KMETHOD System_listen(KonohaContext *kctx, KonohaStack* sfp _RIX)
 //}
 
 //## int System.getsockopt(int socket, int option);
-KMETHOD System_getsockopt(KonohaContext *kctx, KonohaStack* sfp _RIX)
+KMETHOD System_getsockopt(KonohaContext *kctx, KonohaStack* sfp)
 {
 	int val;
 	int valLen = sizeof(val);
@@ -325,7 +325,7 @@ KMETHOD System_getsockopt(KonohaContext *kctx, KonohaStack* sfp _RIX)
 }
 
 //## int System.setsockopt(int socket, int option, int value);
-KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack* sfp _RIX)
+KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack* sfp)
 {
 	int ret = setsockopt(
 			WORD2INT(sfp[1].ivalue),
@@ -345,7 +345,7 @@ KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack* sfp _RIX)
 }
 
 //## Map System.getpeername(int socket);
-//KMETHOD System_getpeername(KonohaContext *kctx, KonohaStack* sfp _RIX)
+//KMETHOD System_getpeername(KonohaContext *kctx, KonohaStack* sfp)
 //{
 //	struct sockaddr_in addr;
 //	int addrLen = sizeof(addr);
@@ -365,7 +365,7 @@ KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack* sfp _RIX)
 //}
 
 //## int System.recv(int socket, byte[] buffer, int flags);
-static KMETHOD System_recv(KonohaContext *kctx, KonohaStack* sfp _RIX)
+static KMETHOD System_recv(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kBytes *ba  = sfp[2].ba;
 	int ret = recv(WORD2INT(sfp[1].ivalue),
@@ -382,7 +382,7 @@ static KMETHOD System_recv(KonohaContext *kctx, KonohaStack* sfp _RIX)
 }
 
 //## int System.recvfrom(int socket, byte[] buffer, int flags, Map remoteInfo);
-//static KMETHOD System_recvfrom(KonohaContext *kctx, KonohaStack* sfp _RIX)
+//static KMETHOD System_recvfrom(KonohaContext *kctx, KonohaStack* sfp)
 //{
 //	struct sockaddr_in addr;
 //	int addrLen = sizeof(addr);
@@ -404,7 +404,7 @@ static KMETHOD System_recv(KonohaContext *kctx, KonohaStack* sfp _RIX)
 //}
 
 //## int System.select(int[] readsock, int[] writesock, int[] exceptsock, long timeoutSec, long timeoutUSec);
-static KMETHOD System_select(KonohaContext *kctx, KonohaStack* sfp _RIX)
+static KMETHOD System_select(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kArray *a1 = sfp[1].toArray;
 	kArray *a2 = sfp[2].toArray;
@@ -442,7 +442,7 @@ static KMETHOD System_select(KonohaContext *kctx, KonohaStack* sfp _RIX)
 }
 
 //## int System.send(int socket, byte[] message, int flags);
-static KMETHOD System_send(KonohaContext *kctx, KonohaStack* sfp _RIX)
+static KMETHOD System_send(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kBytes *ba = sfp[2].ba;
 	// Broken Pipe Signal Mask
@@ -482,7 +482,7 @@ static KMETHOD System_send(KonohaContext *kctx, KonohaStack* sfp _RIX)
 }
 
 //## int System.sendto(int socket, Bytes message, int flags, String dstIP, int dstPort, int family);
-static KMETHOD System_sendto(KonohaContext *kctx, KonohaStack* sfp _RIX)
+static KMETHOD System_sendto(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kBytes *ba = sfp[2].ba;
 	struct sockaddr_in addr;
@@ -525,7 +525,7 @@ static KMETHOD System_sendto(KonohaContext *kctx, KonohaStack* sfp _RIX)
 }
 
 //## int System.shutdown(int socket, int how);
-KMETHOD System_shutdown(KonohaContext *kctx, KonohaStack* sfp _RIX)
+KMETHOD System_shutdown(KonohaContext *kctx, KonohaStack* sfp)
 {
 	int ret = shutdown(WORD2INT(sfp[1].ivalue), WORD2INT(sfp[2].ivalue));
 	if(ret != 0) {
@@ -539,7 +539,7 @@ KMETHOD System_shutdown(KonohaContext *kctx, KonohaStack* sfp _RIX)
 }
 
 //## int System.sockatmark(int socket);
-KMETHOD System_sockatmark(KonohaContext *kctx, KonohaStack* sfp _RIX)
+KMETHOD System_sockatmark(KonohaContext *kctx, KonohaStack* sfp)
 {
 	int ret = sockatmark(WORD2INT(sfp[1].ivalue));
 	if(ret < 0) {
@@ -553,7 +553,7 @@ KMETHOD System_sockatmark(KonohaContext *kctx, KonohaStack* sfp _RIX)
 }
 
 //## int System.socket(int family, int type, int protocol);
-KMETHOD System_socket(KonohaContext *kctx, KonohaStack* sfp _RIX)
+KMETHOD System_socket(KonohaContext *kctx, KonohaStack* sfp)
 {
 	int ret = socket(WORD2INT(sfp[1].ivalue),
 					WORD2INT(sfp[2].ivalue),
@@ -569,7 +569,7 @@ KMETHOD System_socket(KonohaContext *kctx, KonohaStack* sfp _RIX)
 }
 
 //## int System.socketpair(int family, int type, int protocol, int[] pairCSock);
-static KMETHOD System_socketpair(KonohaContext *kctx, KonohaStack* sfp _RIX)
+static KMETHOD System_socketpair(KonohaContext *kctx, KonohaStack* sfp)
 {
 	int ret = -2;
 	kArray *a = sfp[4].toArray;
@@ -596,7 +596,7 @@ static KMETHOD System_socketpair(KonohaContext *kctx, KonohaStack* sfp _RIX)
 
 // --------------------------------------------------------------------------
 
-static KMETHOD SockAddr_new (KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD SockAddr_new (KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0));
 }

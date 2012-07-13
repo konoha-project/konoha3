@@ -28,7 +28,7 @@
 /* ------------------------------------------------------------------------ */
 
 //## @Immutable method T0 Array.get(Int n);
-static KMETHOD Array_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Array_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].toArray;
 	size_t n = check_index(kctx, sfp[1].ivalue, kArray_size(a), sfp[K_RTNIDX].uline);
@@ -41,7 +41,7 @@ static KMETHOD Array_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## method void Array.set(Int n, T0 v);
-static KMETHOD Array_set(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Array_set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].toArray;
 	size_t n = check_index(kctx, sfp[1].ivalue, kArray_size(a), sfp[K_RTNIDX].uline);
@@ -54,14 +54,14 @@ static KMETHOD Array_set(KonohaContext *kctx, KonohaStack *sfp _RIX)
 }
 
 //## method int Array.getSize();
-static KMETHOD Array_getSize(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Array_getSize(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].toArray;
 	RETURNi_(kArray_size(a));
 }
 
 
-static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArrayVar *a = (kArrayVar *)sfp[0].toObject;
 	size_t asize = (size_t)sfp[1].ivalue;
@@ -104,7 +104,7 @@ static void NArray_add(KonohaContext *kctx, kArray *o, uintptr_t value)
 	kArray_setsize(a2, (asize+1));
 }
 
-static KMETHOD Array_add1(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Array_add1(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = (kArray *)sfp[0].toObject;
 	if (kArray_isUnboxData(a)) {
@@ -141,7 +141,7 @@ static kbool_t array_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline
 	return true;
 }
 
-static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 {
 	USING_SUGAR;
 	VAR_ParseExpr(stmt, tls, s, c, e);

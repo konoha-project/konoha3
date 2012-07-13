@@ -54,7 +54,7 @@ static void Func_reftrace(KonohaContext *kctx, kObject *o)
 /* ------------------------------------------------------------------------ */
 //## This Func.new(Object self, Method mtd);
 
-static KMETHOD Func_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Func_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFunc *fo = sfp[0].fo;
 	KSETv(fo->self, sfp[1].toObject);
@@ -65,12 +65,12 @@ static KMETHOD Func_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 /* ------------------------------------------------------------------------ */
 //## @Hidden T0 Func.invoke();
 
-static KMETHOD Func_invoke(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD Func_invoke(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFunc* fo = sfp[0].fo;
 	KSETv(sfp[0].toObject, fo->self);
 	klr_setmtdNC(kctx, sfp[K_MTDIDX], fo->mtd);
-	KCALL(kctx, sfp, fo->mtd, K_RIX);
+	KCALL(kctx, sfp, fo->mtd, (-(K_CALLDELTA)));
 }
 
 #define _Public   kMethod_Public
@@ -129,7 +129,7 @@ static kbool_t function_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfilel
 
 //----------------------------------------------------------------------------
 
-static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 {
 	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);

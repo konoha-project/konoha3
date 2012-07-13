@@ -39,7 +39,7 @@ static kbool_t while_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline
 
 // --------------------------------------------------------------------------
 
-static KMETHOD StmtTyCheck_while(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD StmtTyCheck_while(KonohaContext *kctx, KonohaStack *sfp)
 {
 	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, gma);
@@ -53,7 +53,7 @@ static KMETHOD StmtTyCheck_while(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNb_(ret);
 }
 
-static KMETHOD StmtTyCheck_for(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD StmtTyCheck_for(KonohaContext *kctx, KonohaStack *sfp)
 {
 	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, gma);
@@ -72,7 +72,7 @@ static inline kStmt* kStmt_getParentNULL(kStmt *stmt)
 	return stmt->parentBlockNULL->parentStmtNULL;
 }
 
-static KMETHOD StmtTyCheck_break(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD StmtTyCheck_break(KonohaContext *kctx, KonohaStack *sfp)
 {
 	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, gma);
@@ -88,7 +88,7 @@ static KMETHOD StmtTyCheck_break(KonohaContext *kctx, KonohaStack *sfp _RIX)
 	RETURNb_(false);
 }
 
-static KMETHOD StmtTyCheck_continue(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD StmtTyCheck_continue(KonohaContext *kctx, KonohaStack *sfp)
 {
 	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, gma);
