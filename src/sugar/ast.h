@@ -320,7 +320,7 @@ static int PatternMatchFunc(KonohaContext *kctx, kFunc *fo, kStmt *stmt, ksymbol
 	KSETv(lsfp[K_CALLDELTA+0].o, fo->self);
 	KSETv(lsfp[K_CALLDELTA+1].o, (kObject*)stmt);
 	lsfp[K_CALLDELTA+2].ivalue = name;
-	KSETv(lsfp[K_CALLDELTA+3].a, tls);
+	KSETv(lsfp[K_CALLDELTA+3].toArray, tls);
 	lsfp[K_CALLDELTA+4].ivalue = s;
 	lsfp[K_CALLDELTA+5].ivalue = e;
 	KCALL(lsfp, 0, fo->mtd, 5, knull(CT_Int));
@@ -529,7 +529,7 @@ static kExpr *ParseExprFunc(KonohaContext *kctx, SugarSyntax *syn, kFunc *fo, kS
 	KSETv(lsfp[K_CALLDELTA+0].o, fo->self);
 	lsfp[K_CALLDELTA+0].ndata = (uintptr_t)syn;
 	KSETv(lsfp[K_CALLDELTA+1].o, (kObject*)stmt);
-	KSETv(lsfp[K_CALLDELTA+2].a, tls);
+	KSETv(lsfp[K_CALLDELTA+2].toArray, tls);
 	lsfp[K_CALLDELTA+3].ivalue = s;
 	lsfp[K_CALLDELTA+4].ivalue = c;
 	lsfp[K_CALLDELTA+5].ivalue = e;

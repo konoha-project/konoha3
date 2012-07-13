@@ -369,7 +369,7 @@ static KMETHOD MPIData_fromBytes(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //	d->type = MPI_LONG;
 //	d->size = 0;
 //	d->offset = 0;
-//	d->a = sfp[1].a;
+//	d->a = sfp[1].toArray;
 //	d->cid = KMPI_IARRAY;
 //	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(d) K_RIXPARAM));
 //}
@@ -381,7 +381,7 @@ static KMETHOD MPIData_fromBytes(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //	d->type = MPI_DOUBLE;
 //	d->size = 0;
 //	d->offset = 0;
-//	d->a = sfp[1].a;
+//	d->a = sfp[1].toArray;
 //	d->cid = KMPI_FARRAY;
 //	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(d) K_RIXPARAM));
 //}

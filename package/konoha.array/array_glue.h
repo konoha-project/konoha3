@@ -30,7 +30,7 @@
 //## @Immutable method T0 Array.get(Int n);
 static KMETHOD Array_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kArray *a = sfp[0].a;
+	kArray *a = sfp[0].toArray;
 	size_t n = check_index(kctx, sfp[1].ivalue, kArray_size(a), sfp[K_RTNIDX].uline);
 	if(kArray_isUnboxData(a)) {
 		RETURNd_(a->unboxItems[n]);
@@ -43,7 +43,7 @@ static KMETHOD Array_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## method void Array.set(Int n, T0 v);
 static KMETHOD Array_set(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kArray *a = sfp[0].a;
+	kArray *a = sfp[0].toArray;
 	size_t n = check_index(kctx, sfp[1].ivalue, kArray_size(a), sfp[K_RTNIDX].uline);
 	if(kArray_isUnboxData(a)) {
 		a->unboxItems[n] = sfp[2].ndata;
@@ -56,7 +56,7 @@ static KMETHOD Array_set(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## method int Array.getSize();
 static KMETHOD Array_getSize(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kArray *a = sfp[0].a;
+	kArray *a = sfp[0].toArray;
 	RETURNi_(kArray_size(a));
 }
 

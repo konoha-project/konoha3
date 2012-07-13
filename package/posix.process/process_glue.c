@@ -116,16 +116,16 @@ static KMETHOD System_setpriority(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 static KMETHOD System_getgroups(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	int size = kArray_size(sfp[2].a);
-	kArray *list = sfp[2].a;
+	int size = kArray_size(sfp[2].toArray);
+	kArray *list = sfp[2].toArray;
 	int ret = getgroups(size, list);
 	RETURNi_(ret);
 }
 
 static KMETHOD System_setgroups(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	int size = kArray_size(sfp[2].a);
-	kArray *list = sfp[2].a;
+	int size = kArray_size(sfp[2].toArray);
+	kArray *list = sfp[2].toArray;
 	int ret = setgroups(size, list);
 	RETURNi_(ret);
 }

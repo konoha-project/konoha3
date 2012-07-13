@@ -406,9 +406,9 @@ static KMETHOD System_recv(KonohaContext *kctx, KonohaStack* sfp _RIX)
 //## int System.select(int[] readsock, int[] writesock, int[] exceptsock, long timeoutSec, long timeoutUSec);
 static KMETHOD System_select(KonohaContext *kctx, KonohaStack* sfp _RIX)
 {
-	kArray *a1 = sfp[1].a;
-	kArray *a2 = sfp[2].a;
-	kArray *a3 = sfp[3].a;
+	kArray *a1 = sfp[1].toArray;
+	kArray *a2 = sfp[2].toArray;
+	kArray *a3 = sfp[3].toArray;
 	int nfd = getNfd(a1, a2, a3 );
 
 	fd_set rfds, wfds, efds;
@@ -572,7 +572,7 @@ KMETHOD System_socket(KonohaContext *kctx, KonohaStack* sfp _RIX)
 static KMETHOD System_socketpair(KonohaContext *kctx, KonohaStack* sfp _RIX)
 {
 	int ret = -2;
-	kArray *a = sfp[4].a;
+	kArray *a = sfp[4].toArray;
 	if(kArray_size(a)) {
 		int pairFd[2];
 		if((ret = socketpair(WORD2INT(sfp[1].ivalue),

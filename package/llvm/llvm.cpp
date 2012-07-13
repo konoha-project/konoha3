@@ -578,7 +578,7 @@ static KMETHOD IRBuilder_createInvoke3(KonohaContext *kctx, KonohaStack *sfp _RI
 //	Value *Callee = konoha::object_cast<Value *>(sfp[1].toObject);
 //	BasicBlock *NormalDest = konoha::object_cast<BasicBlock *>(sfp[2].o);
 //	BasicBlock *UnwindDest = konoha::object_cast<BasicBlock *>(sfp[3].o);
-//	kArray *Args = (sfp[4].a);
+//	kArray *Args = (sfp[4].toArray);
 //	std::vector<Value*> List;
 //	konoha::convert_array(List, Args);
 //	InvokeInst *ptr = self->CreateInvoke(Callee, NormalDest, UnwindDest, List.begin(), List.end());
@@ -1039,7 +1039,7 @@ static KMETHOD StoreInst_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static KMETHOD GetElementPtrInst_create(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	Value *Ptr = konoha::object_cast<Value *>(sfp[1].toObject);
-	kArray *IdxList = sfp[2].a;
+	kArray *IdxList = sfp[2].toArray;
 	std::vector<Value*> List;
 	konoha::convert_array(List, IdxList);
 
@@ -1052,7 +1052,7 @@ static KMETHOD GetElementPtrInst_create(KonohaContext *kctx, KonohaStack *sfp _R
 static KMETHOD GetElementPtrInst_createInBounds(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	Value *Ptr = konoha::object_cast<Value *>(sfp[1].toObject);
-	kArray *IdxList = sfp[2].a;
+	kArray *IdxList = sfp[2].toArray;
 	std::vector<Value*> List;
 	konoha::convert_array(List, IdxList);
 	GetElementPtrInst *ptr = GetElementPtrInst::CreateInBounds(Ptr, _ITERATOR(List));
@@ -1065,7 +1065,7 @@ static KMETHOD IRBuilder_createGEP(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].toObject);
 	Value *Ptr = konoha::object_cast<Value *>(sfp[1].toObject);
-	kArray *IdxList = sfp[2].a;
+	kArray *IdxList = sfp[2].toArray;
 	std::vector<Value*> List;
 	konoha::convert_array(List, IdxList);
 	Value *ptr = self->CreateGEP(Ptr, _ITERATOR(List));
@@ -1078,7 +1078,7 @@ static KMETHOD IRBuilder_createInBoundsGEP(KonohaContext *kctx, KonohaStack *sfp
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].toObject);
 	Value *Ptr = konoha::object_cast<Value *>(sfp[1].toObject);
-	kArray *IdxList = sfp[2].a;
+	kArray *IdxList = sfp[2].toArray;
 	std::vector<Value*> List;
 	konoha::convert_array(List, IdxList);
 	Value *ptr = self->CreateInBoundsGEP(Ptr, _ITERATOR(List));
@@ -1790,7 +1790,7 @@ static KMETHOD IRBuilder_createCall(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].toObject);
 	Value *Callee = konoha::object_cast<Value *>(sfp[1].toObject);
-	kArray *Args = sfp[2].a;
+	kArray *Args = sfp[2].toArray;
 	std::vector<Value*> List;
 	konoha::convert_array(List, Args);
 	CallInst *ptr = self->CreateCall(Callee, _ITERATOR(List));
@@ -1861,7 +1861,7 @@ static KMETHOD IRBuilder_createShuffleVector(KonohaContext *kctx, KonohaStack *s
 //{
 //	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].toObject);
 //	Value *Agg = konoha::object_cast<Value *>(sfp[1].toObject);
-//	kArray *Idxs = sfp[2].a;
+//	kArray *Idxs = sfp[2].toArray;
 //	std::vector<int> List;
 //	konoha::convert_array_int(List, Idxs);
 //	Value *ptr = self->CreateExtractValue(Agg, List.begin(), List.end());
@@ -1875,7 +1875,7 @@ static KMETHOD IRBuilder_createShuffleVector(KonohaContext *kctx, KonohaStack *s
 //	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].toObject);
 //	Value *Agg = konoha::object_cast<Value *>(sfp[1].toObject);
 //	Value *Val = konoha::object_cast<Value *>(sfp[2].o);
-//	kArray *Idxs = sfp[2].a;
+//	kArray *Idxs = sfp[2].toArray;
 //	std::vector<int> List;
 //	konoha::convert_array_int(List, Idxs);
 //	Value *ptr = self->CreateInsertValue(Agg, Val, List.begin(), List.end());
@@ -2175,7 +2175,7 @@ static KMETHOD BasicBlock_create(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static KMETHOD FunctionType_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	Type *retTy = konoha::object_cast<Type *>(sfp[1].toObject);
-	kArray * args = sfp[2].a;
+	kArray * args = sfp[2].toArray;
 	kbool_t b = sfp[3].bvalue;
 #if LLVM_VERSION <= 209
 	std::vector<const Type*> List;
@@ -2221,7 +2221,7 @@ static KMETHOD ConstantPointerNull_get(KonohaContext *kctx, KonohaStack *sfp _RI
 static KMETHOD ConstantStruct_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	StructType *type  = konoha::object_cast<StructType *>(sfp[1].toObject);
-	kArray *args = sfp[2].a;
+	kArray *args = sfp[2].toArray;
 	std::vector<Constant*> List;
 	konoha::convert_array(List, args);
 	Value *ptr = ConstantStruct::get(type, List);
@@ -2232,7 +2232,7 @@ static KMETHOD ConstantStruct_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## @Static StructType.get(Array<Type> args, boolean isPacked);
 static KMETHOD StructType_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kArray *args = sfp[1].a;
+	kArray *args = sfp[1].toArray;
 	kbool_t isPacked = sfp[2].bvalue;
 #if LLVM_VERSION <= 209
 	std::vector<const Type*> List;
@@ -2248,7 +2248,7 @@ static KMETHOD StructType_get(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## @Static @Native StructType.create(Array<Type> args, String name, boolean isPacked);
 static KMETHOD StructType_create(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kArray *args = sfp[1].a;
+	kArray *args = sfp[1].toArray;
 #if LLVM_VERSION > 209
 	kString *name = sfp[2].s;
 #endif
@@ -2302,7 +2302,7 @@ static KMETHOD StructType_setBody(KonohaContext *kctx _UNUSED_, KonohaStack *sfp
 	LLVM_TODO("NO SUPPORT");
 #else
 	StructType *type  = konoha::object_cast<StructType *>(sfp[0].toObject);
-	kArray *args = sfp[1].a;
+	kArray *args = sfp[1].toArray;
 	kbool_t isPacked = sfp[2].bvalue;
 	std::vector<Type*> List;
 	konoha::convert_array(List, args);
@@ -3487,7 +3487,7 @@ static KMETHOD ConstantExpr_getSelect(KonohaContext *kctx, KonohaStack *sfp _RIX
 //static KMETHOD ConstantExpr_getElementPtr(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //	Constant* c = konoha::object_cast<Constant*>(sfp[1].toObject);
-//	kArray* _list = sfp[2].a;
+//	kArray* _list = sfp[2].toArray;
 //	std::vector<Constant*> IdxList;
 //	konoha::convert_array(IdxList, _list);
 //	bool InBounds = sfp[3].bvalue;
@@ -3517,7 +3517,7 @@ static KMETHOD ConstantExpr_getElementPtr0(KonohaContext *kctx, KonohaStack *sfp
 static KMETHOD ConstantExpr_getElementPtr(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].toObject);
-	kArray* _list = sfp[2].a;
+	kArray* _list = sfp[2].toArray;
 	std::vector<Value*> IdxList;
 	konoha::convert_array(IdxList, _list);
 	Constant* ptr;
@@ -3537,7 +3537,7 @@ static KMETHOD ConstantExpr_getElementPtr(KonohaContext *kctx, KonohaStack *sfp 
 //static KMETHOD ConstantExpr_getInBoundsGetElementPtr(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //	Constant* c = konoha::object_cast<Constant*>(sfp[1].toObject);
-//	kArray* _list = sfp[2].a;
+//	kArray* _list = sfp[2].toArray;
 //	std::vector<Constant*> IdxList;
 //	konoha::convert_array(IdxList, _list);
 //	Constant* ptr = ConstantExpr::getInBoundsGetElementPtr(c, IdxList);
@@ -3565,7 +3565,7 @@ static KMETHOD ConstantExpr_getInBoundsGetElementPtr0(KonohaContext *kctx, Konoh
 static KMETHOD ConstantExpr_getInBoundsGetElementPtr(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].toObject);
-	kArray* _list = sfp[2].a;
+	kArray* _list = sfp[2].toArray;
 	std::vector<Value*> idxList;
 	konoha::convert_array(idxList, _list);
 	Constant* ptr;
@@ -3616,7 +3616,7 @@ static KMETHOD ConstantExpr_getShuffleVector(KonohaContext *kctx, KonohaStack *s
 static KMETHOD ConstantExpr_getExtractValue(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	Constant* Agg = konoha::object_cast<Constant*>(sfp[1].toObject);
-	kArray* _list = sfp[2].a;
+	kArray* _list = sfp[2].toArray;
 	std::vector<unsigned> idxs(_list->ilist, _list->ilist+kArray_size(_list));
 	Constant* ptr;
 #if LLVM_VERSION <= 209
@@ -3634,7 +3634,7 @@ static KMETHOD ConstantExpr_getInsertValue(KonohaContext *kctx, KonohaStack *sfp
 {
 	Constant* Agg = konoha::object_cast<Constant*>(sfp[1].toObject);
 	Constant* val = konoha::object_cast<Constant*>(sfp[2].o);
-	kArray* _list = sfp[3].a;
+	kArray* _list = sfp[3].toArray;
 	std::vector<unsigned> idxs(_list->ilist, _list->ilist+kArray_size(_list));
 	Constant* ptr;
 #if LLVM_VERSION <= 209
@@ -4349,7 +4349,7 @@ static KMETHOD LLVM_createBBVectorizePass(KonohaContext *kctx, KonohaStack *sfp 
 static KMETHOD Intrinsic_getType(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	Intrinsic::ID id = (Intrinsic::ID) sfp[1].ivalue;
-	kArray *args = sfp[2].a;
+	kArray *args = sfp[2].toArray;
 #if LLVM_VERSION <= 209
 	const FunctionType *ptr;
 	ptr = Intrinsic::getType(getGlobalContext(), id, (const Type **) args->list);
@@ -4368,7 +4368,7 @@ static KMETHOD Intrinsic_getDeclaration(KonohaContext *kctx, KonohaStack *sfp _R
 {
 	Module *m = konoha::object_cast<Module *>(sfp[1].toObject);
 	Intrinsic::ID id = (Intrinsic::ID) sfp[2].ivalue;
-	kArray *args = sfp[3].a;
+	kArray *args = sfp[3].toArray;
 	Function *ptr;
 #if LLVM_VERSION <= 209
 	ptr = Intrinsic::getDeclaration(m, id, (const Type **) args->list);

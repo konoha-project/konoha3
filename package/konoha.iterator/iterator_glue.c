@@ -126,7 +126,7 @@ static void Array_setNextResultUnbox(KonohaContext *kctx, KonohaStack* sfp _RIX)
 
 static KMETHOD Array_toIterator(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kArray *a = sfp[0].a;
+	kArray *a = sfp[0].toArray;
 	KonohaClass *cIterator = CT_p0(kctx, CT_Iterator, O_ct(a)->p0);
 	kIterator *itr = (kIterator*)new_kObject(cIterator, NULL);
 	KSETv(itr->arrayList, a);

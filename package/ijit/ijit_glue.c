@@ -412,7 +412,7 @@ static KMETHOD Block_getBlocks(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## int Array.getSize();
 static KMETHOD Array_getSize(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	RETURNi_(kArray_size(sfp[0].a));
+	RETURNi_(kArray_size(sfp[0].toArray));
 }
 
 //## int Stmt.getUline();
@@ -513,7 +513,7 @@ static KMETHOD Array_newN(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## Array Array.getO();
 static KMETHOD Array_getO(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kArray *a = sfp[0].a;
+	kArray *a = sfp[0].toArray;
 	size_t n = check_index(kctx, sfp[1].ivalue, kArray_size(a), sfp[K_RTNIDX].uline);
 	RETURN_(a->objectItems[n]);
 }
@@ -521,7 +521,7 @@ static KMETHOD Array_getO(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## void Array.setO(int n, Object o);
 static KMETHOD Array_setO(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kArray *a = sfp[0].a;
+	kArray *a = sfp[0].toArray;
 	size_t n = check_index(kctx, sfp[1].ivalue, kArray_size(a), sfp[K_RTNIDX].uline);
 	KSETv(a->objectItems[n], sfp[2].o);
 	RETURNvoid_();
@@ -530,7 +530,7 @@ static KMETHOD Array_setO(KonohaContext *kctx, KonohaStack *sfp _RIX)
 // Array Array.erase(int n);
 static KMETHOD Array_erase(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kArray *src = sfp[0].a;
+	kArray *src = sfp[0].toArray;
 	size_t n = check_index(kctx, sfp[1].ivalue, kArray_size(src), sfp[K_RTNIDX].uline);
 	size_t asize = kArray_size(src);
 	size_t i, j = 0;

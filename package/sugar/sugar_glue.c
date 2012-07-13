@@ -171,7 +171,7 @@ static KMETHOD Stmt_printError(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //	USING_SUGAR;
 //	kStmt *stmt  = sfp[0].stmt;
-//	kArray *tls  = sfp[1].a;
+//	kArray *tls  = sfp[1].toArray;
 //	int s = sfp[2].ivalue, e = sfp[3].ivalue;
 //	RETURN_(SUGAR new_Block(kctx, kStmt_nameSpace(stmt), stmt, tls, s, e, ';'));
 //}
@@ -181,7 +181,7 @@ static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	USING_SUGAR;
 	kStmt *stmt  = sfp[0].stmt;
-	kArray *tls  = sfp[1].a;
+	kArray *tls  = sfp[1].toArray;
 	int s = sfp[2].ivalue, e = sfp[3].ivalue;
 	RETURN_(SUGAR Stmt_newExpr2(kctx, stmt, tls, s, e));
 }

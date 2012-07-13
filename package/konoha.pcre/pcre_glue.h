@@ -516,7 +516,7 @@ static KMETHOD String_match(KonohaContext *kctx, KonohaStack *sfp _RIX)
 		int i, isGlobalOption = Regex_isGlobalOption(re);
 		a = new_(Array, nmatch);/*TODO new_Array(CLASS_String)*/
 		BEGIN_LOCAL(lsfp, 1);
-		KSETv(lsfp[0].a, a);
+		KSETv(lsfp[0].toArray, a);
 		do {
 			int res = pcre_regexec(kctx, re->reg, str, nmatch, pmatch, re->eflags);
 			if(res != 0) {
@@ -604,7 +604,7 @@ static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp _RIX)
 		if (str < eos) {
 			a = new_(Array, 0); // TODO new_Array(kctx, CLASS_String, 0);
 			BEGIN_LOCAL(lsfp, 1);
-			KSETv(lsfp[0].a, a);
+			KSETv(lsfp[0].toArray, a);
 			while (str <= eos) {
 				int res = pcre_regexec(kctx, re->reg, str, KREGEX_MATCHSIZE, pmatch, re->eflags);
 				if (res == 0) {

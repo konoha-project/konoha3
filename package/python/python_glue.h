@@ -232,7 +232,7 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp _RIX)
 
 //static KMETHOD Array_toPyObject(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
-//	kArray *a = sfp[0].a;
+//	kArray *a = sfp[0].toArray;
 //	size_t i, n = kArray_size(a);
 //	Py_ssize_t pa_size = (n < PY_SSIZE_MAX)? n : PY_SSIZE_MAX - 1;
 //	PyObject* pa = PyList_New((Py_ssize_t)n);
