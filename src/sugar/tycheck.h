@@ -1142,7 +1142,7 @@ static kParam *Stmt_newMethodParamNULL(KonohaContext *kctx, kStmt *stmt, kGamma*
 
 static kbool_t Method_compile(KonohaContext *kctx, kMethod *mtd, kString *text, kfileline_t uline, kNameSpace *ns);
 
-static KMETHOD Fmethod_lazyCompilation(KonohaContext *kctx, KonohaStack *sfp _RIX)
+static KMETHOD MethodFunc_lazyCompilation(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	KonohaStack *esp = kctx->esp;
 	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
@@ -1159,12 +1159,12 @@ static void NameSpace_syncMethods(KonohaContext *kctx)
 	size_t i, size = kArray_size(ctxsugar->definedMethodList);
 	for (i = 0; i < size; ++i) {
 		kMethod *mtd = ctxsugar->definedMethodList->methodItems[i];
-		if (mtd->fcall_1 == Fmethod_lazyCompilation) {
+		if (mtd->fcall_1 == MethodFunc_lazyCompilation) {
 			kString *text = mtd->tcode->text;
 			kfileline_t uline = mtd->tcode->uline;
 			kNameSpace *ns = mtd->lazyns;
 			Method_compile(kctx, mtd, text, uline, ns);
-			assert(mtd->fcall_1 != Fmethod_lazyCompilation);
+			assert(mtd->fcall_1 != MethodFunc_lazyCompilation);
 		}
 	}
 	KLIB kArray_clear(kctx, ctxsugar->definedMethodList, 0);
@@ -1176,7 +1176,7 @@ static void Stmt_setMethodFunc(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns,
 	if(tcode != NULL && tcode->keyword == TK_CODE) {
 		KSETv(((kMethodVar*)mtd)->tcode, tcode);  //FIXME
 		KSETv(((kMethodVar*)mtd)->lazyns, ns);
-		KLIB kMethod_setFunc(kctx, mtd, Fmethod_lazyCompilation);
+		KLIB kMethod_setFunc(kctx, mtd, MethodFunc_lazyCompilation);
 		KLIB kArray_add(kctx, ctxsugar->definedMethodList, mtd);
 	}
 }

@@ -644,7 +644,7 @@ static void CALL_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int esp
 		EXPR_asm(kctx, thisidx + i - 1, exprN, shift, thisidx + i - 1);
 	}
 	int argc = kArray_size(expr->cons) - 2;
-//	if (mtd->mn == MN_new && mtd->fcall_1 == Fmethod_abstract) {
+//	if (mtd->mn == MN_new && mtd->fcall_1 == MethodFunc_abstract) {
 //		/* do nothing */
 //	} else
 	if(kMethod_isVirtual(mtd)) {
@@ -969,7 +969,7 @@ static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack 
 
 //static kbool_t Method_isAbstract(kMethod *mtd)
 //{
-//	return (mtd->fcall_1 == Fmethod_abstract);
+//	return (mtd->fcall_1 == MethodFunc_abstract);
 //}
 
 static void Method_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
