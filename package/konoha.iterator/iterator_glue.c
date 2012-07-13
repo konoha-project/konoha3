@@ -94,7 +94,7 @@ static KMETHOD Iterator_next(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //{
 //	kIterator *itr = (kIterator*)sfp[0].toObject;
 //	KSETv(itr->funcHasNext, sfp[1].fo);
-//	KSETv(itr->funcNext,sfp[2].fo);
+//	KSETv(itr->funcNext,sfp[2].toFunc);
 //	itr->hasNext = callFuncHasNext;
 //	itr->setNextResult = callFuncNext;
 //	RETURN_(itr);

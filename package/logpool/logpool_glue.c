@@ -271,7 +271,7 @@ static KMETHOD Statics_create(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	struct pool_plugin_statics *p = POOL_PLUGIN_CLONE(pool_plugin_statics);
 	kRawPtr *ret = (kRawPtr *) new_kObject(O_ct(sfp[K_RTNIDX].o), p);
-	p->context = (uintptr_t)statics_init(kctx, sfp[1].fo, sfp[2].fo, sfp[3].fo);
+	p->context = (uintptr_t)statics_init(kctx, sfp[1].fo, sfp[2].toFunc, sfp[3].fo);
 	p->finit = p_init;
 	p->fexit = p_exit;
 	p->function = p_func;

@@ -538,12 +538,12 @@ typedef struct kmodshare_t {
 		kObject    *o;\
 		kObject    *toObject;\
 		kObjectVar *toObjectVar; \
-		kInt    *i; \
-		kString *s; \
-		kString *toString;\
-		kArray  *toArray;\
-		kMethod  *toMethod;\
-		kFunc         *fo; \
+		kInt       *i; \
+		kString    *s; \
+		kString    *toString;\
+		kArray     *toArray;\
+		kMethod    *toMethod;\
+		kFunc      *toFunc; \
 		const struct _kFloat  *f; \
 		const struct _kBytes  *ba; \
 		kNameSpace  *toNameSpace;\

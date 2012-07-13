@@ -172,7 +172,7 @@ static KMETHOD String_opNEQ(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## This Func.new(Object self, Method mtd);
 static KMETHOD Func_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kFuncVar *fo = (kFuncVar*)sfp[0].fo;
+	kFuncVar *fo = (kFuncVar*)sfp[0].toFunc;
 	KSETv(fo->self, sfp[1].toObject);
 	KSETv(fo->mtd,  sfp[2].toMethod);
 	RETURN_(fo);
@@ -181,7 +181,7 @@ static KMETHOD Func_new(KonohaContext *kctx, KonohaStack *sfp _RIX)
 //## @Hidden T0 Func.invoke();
 static KMETHOD Func_invoke(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
-	kFunc* fo = sfp[0].fo;
+	kFunc* fo = sfp[0].toFunc;
 	DBG_P("fo=%s", CT_t(O_ct(fo)));
 	DBG_ASSERT(IS_Func(fo));
 	DBG_ASSERT(IS_Method(fo->mtd));

@@ -80,7 +80,7 @@ static KMETHOD Block_tyCheckAll(KonohaContext *kctx, KonohaStack *sfp _RIX)
 static KMETHOD NameSpace_addTokenizeFunc(KonohaContext *kctx, KonohaStack *sfp _RIX)
 {
 	USING_SUGAR;
-	SUGAR NameSpace_setTokenizeFunc(kctx, sfp[0].toNameSpace, S_text(sfp[1].toString)[0], NULL, sfp[2].fo, 1/*isAddition*/);
+	SUGAR NameSpace_setTokenizeFunc(kctx, sfp[0].toNameSpace, S_text(sfp[1].toString)[0], NULL, sfp[2].toFunc, 1/*isAddition*/);
 }
 
 //## void NameSpace.addPatternMatch(String keyword, Func f);
@@ -88,7 +88,7 @@ static KMETHOD NameSpace_addPatternMatch(KonohaContext *kctx, KonohaStack *sfp _
 {
 	USING_SUGAR;
 	kString *key = sfp[1].toString;
-	SUGAR SYN_addSugarFunc(kctx, sfp[0].toNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SYNIDX_PatternMatch, sfp[2].fo);
+	SUGAR SYN_addSugarFunc(kctx, sfp[0].toNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SYNIDX_PatternMatch, sfp[2].toFunc);
 }
 
 //## void NameSpace.addParseExpr(String keyword, Func f);
@@ -96,7 +96,7 @@ static KMETHOD NameSpace_addParseExpr(KonohaContext *kctx, KonohaStack *sfp _RIX
 {
 	USING_SUGAR;
 	kString *key = sfp[1].toString;
-	SUGAR SYN_addSugarFunc(kctx, sfp[0].toNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SYNIDX_ParseExpr, sfp[2].fo);
+	SUGAR SYN_addSugarFunc(kctx, sfp[0].toNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SYNIDX_ParseExpr, sfp[2].toFunc);
 }
 
 //## void NameSpace.addStmtTyCheck(String keyword, Func f);
@@ -104,7 +104,7 @@ static KMETHOD NameSpace_addStmtTyCheck(KonohaContext *kctx, KonohaStack *sfp _R
 {
 	USING_SUGAR;
 	kString *key = sfp[1].toString;
-	SUGAR SYN_addSugarFunc(kctx, sfp[0].toNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SYNIDX_StmtTyCheck, sfp[2].fo);
+	SUGAR SYN_addSugarFunc(kctx, sfp[0].toNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SYNIDX_StmtTyCheck, sfp[2].toFunc);
 }
 
 
@@ -113,7 +113,7 @@ static KMETHOD NameSpace_addTopStmtTyCheck(KonohaContext *kctx, KonohaStack *sfp
 {
 	USING_SUGAR;
 	kString *key = sfp[1].toString;
-	SUGAR SYN_addSugarFunc(kctx, sfp[0].toNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SYNIDX_TopStmtTyCheck, sfp[2].fo);
+	SUGAR SYN_addSugarFunc(kctx, sfp[0].toNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SYNIDX_TopStmtTyCheck, sfp[2].toFunc);
 }
 
 //## void NameSpace.addExprTyCheck(String keyword, Func f);
@@ -121,7 +121,7 @@ static KMETHOD NameSpace_addExprTyCheck(KonohaContext *kctx, KonohaStack *sfp _R
 {
 	USING_SUGAR;
 	kString *key = sfp[1].toString;
-	SUGAR SYN_addSugarFunc(kctx, sfp[0].toNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SYNIDX_ExprTyCheck, sfp[2].fo);
+	SUGAR SYN_addSugarFunc(kctx, sfp[0].toNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SYNIDX_ExprTyCheck, sfp[2].toFunc);
 }
 
 
