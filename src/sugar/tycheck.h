@@ -117,7 +117,7 @@ static void Expr_putConstValue(KonohaContext *kctx, kExpr *expr, KonohaStack *sf
 	}else if(expr->build == TEXPR_NCONST) {
 		sfp[0].ndata = expr->ndata;
 	}else if(expr->build == TEXPR_NEW) {
-		KSETv(sfp[0].toObject, KLIB new_kObject(kctx, CT_(expr->ty), (void*)expr->ndata /*FIXME*/));
+		KSETv(sfp[0].toObject, KLIB new_kObject(kctx, CT_(expr->ty), expr->ndata /*FIXME*/));
 	}else {
 		assert(expr->build == TEXPR_NULL);
 		KSETv(sfp[0].toObject, knull(CT_(expr->ty)));
@@ -153,7 +153,7 @@ static kExpr *new_BoxingExpr(KonohaContext *kctx, kExpr *expr, ktype_t reqty)
 	if(expr->build == TEXPR_NCONST) {
 		kExprVar *Wexpr = (kExprVar*)expr;
 		Wexpr->build = TEXPR_CONST;
-		KINITv(Wexpr->data, KLIB new_kObject(kctx, CT_(Wexpr->ty), (void*)Wexpr->ndata));
+		KINITv(Wexpr->data, KLIB new_kObject(kctx, CT_(Wexpr->ty), Wexpr->ndata));
 		Wexpr->ty = reqty;
 		return expr;
 	}
@@ -338,8 +338,7 @@ static kExpr* Expr_tyCheckVariable2(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 		if(mtd != NULL) {
 			kParam *pa = kMethod_param(mtd);
 			KonohaClass *ct = kClassTable_Generics(CT_Func, pa->rtype, pa->psize, (kparam_t*)pa->p);
-			kFuncVar *fo = (kFuncVar*)KLIB new_kObject(kctx, ct, (void*)mtd);
-			PUSH_GCSTACK(fo);
+			kFuncVar *fo = (kFuncVar*)KLIB new_kObjectOnGCSTACK(kctx, ct, (uintptr_t)mtd);
 			KSETv(fo->self, genv->ns->scriptObject);
 			return new_ConstValue(ct->cid, fo);
 		}

@@ -360,9 +360,9 @@ typedef struct KUtilsKeyValue {
 	ksymbol_t key;
 	ktype_t   ty;
 	union {
-		uintptr_t                uval;
-		kObject                 *oval;
-		kString                 *sval;
+		uintptr_t                uval;  //unboxValue
+		kObject                 *oval;  //objectValue
+		kString                 *sval;  //stringValue
 	};
 } KUtilsKeyValue;
 
@@ -1196,7 +1196,7 @@ struct LibKonohaApiVar {
 
 	kfileline_t     (*Kfileid)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
 	kpackage_t      (*Kpack)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
-	ksymbol_t       (*Ksymbol2)(KonohaContext*, const char*, size_t, int spol, ksymbol_t def);
+	ksymbol_t       (*Ksymbol)(KonohaContext*, const char*, size_t, int spol, ksymbol_t def);
 
 	kbool_t         (*KimportPackage)(KonohaContext*, kNameSpace*, const char *, kfileline_t);
 	KonohaClass*    (*Kclass)(KonohaContext*, ktype_t, kfileline_t);
@@ -1211,7 +1211,7 @@ struct LibKonohaApiVar {
 	uintptr_t       (*kObject_getUnboxValue)(KonohaContext*, kAbstractObject *, ksymbol_t, uintptr_t);
 	void            (*kObject_setUnboxValue)(KonohaContext*, kAbstractObject *, ksymbol_t, ktype_t, uintptr_t);
 	void            (*kObject_protoEach)(KonohaContext*, kAbstractObject *, void *thunk, void (*f)(KonohaContext*, void *, KUtilsKeyValue *d));
-	void            (*kObject_removeKey)(KonohaContext*, kObject *, ksymbol_t);
+	void            (*kObject_removeKey)(KonohaContext*, kAbstractObject *, ksymbol_t);
 
 	kString*    (*new_kString)(KonohaContext*, const char *, size_t, int);
 	kString*    (*new_kStringf)(KonohaContext*, int, const char *, ...);
@@ -1293,11 +1293,11 @@ struct LibKonohaApiVar {
 #define PN_(T)                    (KPI)->Kpack(kctx, T, sizeof(T)-1, SPOL_TEXT|SPOL_ASCII|SPOL_POOL, _NEWID)
 #define kpack(T,L,SPOL,DEF)       (KPI)->Kpack(kctx, T, L, SPOL, DEF)
 
-#define ksymbolA(T, L, DEF)       (KPI)->Ksymbol2(kctx, T, L, SPOL_ASCII, DEF)
-#define ksymbolSPOL(T, L, SPOL, DEF)       (KPI)->Ksymbol2(kctx, T, L, SPOL, DEF)
-#define SYM_(T)                   (KPI)->Ksymbol2(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
-#define FN_(T)                    (KPI)->Ksymbol2(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
-#define MN_(T)                    (KPI)->Ksymbol2(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
+#define ksymbolA(T, L, DEF)       (KPI)->Ksymbol(kctx, T, L, SPOL_ASCII, DEF)
+#define ksymbolSPOL(T, L, SPOL, DEF)       (KPI)->Ksymbol(kctx, T, L, SPOL, DEF)
+#define SYM_(T)                   (KPI)->Ksymbol(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
+#define FN_(T)                    (KPI)->Ksymbol(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
+#define MN_(T)                    (KPI)->Ksymbol(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
 #define T_mn(X)                   SYM_PRE(X), SYM_t(X)
 
 // #define KW_new (((ksymbol_t)39)|0) /*new*/

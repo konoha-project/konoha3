@@ -336,7 +336,7 @@ static kpackage_t Kpack(KonohaContext *kctx, const char *name, size_t len, int s
 	return Kmap_getcode(kctx, kctx->share->packMapNN, kctx->share->packList, name, len, hcode, spol | SPOL_ASCII, def);
 }
 
-static ksymbol_t Ksymbol2(KonohaContext *kctx, const char *name, size_t len, int spol, ksymbol_t def)
+static ksymbol_t Ksymbol(KonohaContext *kctx, const char *name, size_t len, int spol, ksymbol_t def)
 {
 	ksymbol_t mask = 0;
 	int ch0 = name[0], ch1 = name[1];
@@ -622,7 +622,7 @@ static void kklib_init(LibKonohaApiVar *l)
 	l->kObject_protoEach = (typeof(l->kObject_protoEach))kObject_protoEach;
 	l->Kfileid       = Kfileid;
 	l->Kpack         = Kpack;
-	l->Ksymbol2      = Ksymbol2;
+	l->Ksymbol      = Ksymbol;
 	l->Kreportf      = Kreportf;
 	l->Kraise        = Kraise;
 	l->KsetModule    = KRUNTIME_setModule;

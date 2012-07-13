@@ -524,7 +524,7 @@ static void konoha_startup(KonohaContext *kctx, const char *startup_script)
 static void konoha_commandline(KonohaContext *kctx, int argc, char** argv)
 {
 	KonohaClass *CT_StringArray0 = CT_p0(kctx, CT_Array, TY_String);
-	kArray *a = (kArray*)KLIB new_kObject(kctx, CT_StringArray0, NULL);
+	kArray *a = (kArray*)KLIB new_kObject(kctx, CT_StringArray0, 0);
 	int i;
 	for(i = 0; i < argc; i++) {
 		DBG_P("argv=%d, '%s'", i, argv[i]);

@@ -58,7 +58,7 @@ static void Object_initdef(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t 
 {
 	if(ct->cid == TY_Object) return;
 	DBG_P("new object initialization ct->cstruct_size=%d", ct->cstruct_size);
-	KSETv(ct->nulvalNULL, KLIB new_kObject(kctx, ct, NULL));
+	KSETv(ct->nulvalNULL, KLIB new_kObject(kctx, ct, 0));
 	if(ct->fsize > 0) {  // this is size of super class
 		KonohaClass *supct = CT_(ct->supcid);
 		assert(ct->fsize == supct->fsize);
@@ -70,17 +70,6 @@ static void Object_initdef(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t 
 	ct->fnull = DEFAULT_fnull;
 }
 
-static kObject *new_kObjectOnGCSTACK(KonohaContext *kctx, KonohaClass *ct, uintptr_t conf)
-{
-	kObjectVar *o = (kObjectVar*) MODGC_omalloc(kctx, ct->cstruct_size);
-	o->h.magicflag = ct->magicflag;
-	o->h.ct = ct;
-	o->h.kvproto = kvproto_null();
-	ct->init(kctx, (kObject*)o, (void*)conf);
-	PUSH_GCSTACK(o);  // GCSAFE
-	return (kObject*)o;
-}
-
 static kObject *new_kObject(KonohaContext *kctx, KonohaClass *ct, uintptr_t conf)
 {
 	DBG_ASSERT(ct->cstruct_size > 0);
@@ -89,6 +78,17 @@ static kObject *new_kObject(KonohaContext *kctx, KonohaClass *ct, uintptr_t conf
 	o->h.ct = ct;
 	o->h.kvproto = kvproto_null();
 	ct->init(kctx, (kObject*)o, (void*)conf);
+	return (kObject*)o;
+}
+
+static kObject *new_kObjectOnGCSTACK(KonohaContext *kctx, KonohaClass *ct, uintptr_t conf)
+{
+	kObjectVar *o = (kObjectVar*) MODGC_omalloc(kctx, ct->cstruct_size);
+	o->h.magicflag = ct->magicflag;
+	o->h.ct = ct;
+	o->h.kvproto = kvproto_null();
+	ct->init(kctx, (kObject*)o, (void*)conf);
+	PUSH_GCSTACK(o);  // GCSAFE
 	return (kObject*)o;
 }
 
@@ -875,14 +875,14 @@ static void initStructData(KonohaContext *kctx)
 
 static void KCLASSTABLE_initkklib(LibKonohaApiVar *l)
 {
-	l->Kclass   = Kclass;
-	l->new_kObjectOnGCSTACK    = new_kObjectOnGCSTACK;
+	l->Kclass                  = Kclass;
 	l->new_kObject             = new_kObject;
+	l->new_kObjectOnGCSTACK    = new_kObjectOnGCSTACK;
 	l->new_kString             = new_kString;
 	l->new_kStringf            = new_kStringf;
 	//l->Kconv  = conv;
 	l->kArray_add           = (typeof(l->kArray_add))kArray_add;
-	l->kArray_insert        = (typeof(l->kArray_add))kArray_insert;
+	l->kArray_insert        = (typeof(l->kArray_insert))kArray_insert;
 	l->kArray_clear         = kArray_clear;
 	l->new_kMethod          = new_kMethod;
 	l->kMethod_setParam     = kMethod_setParam;
@@ -953,16 +953,16 @@ static void kshare_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 			KREFTRACEn(ct->nulvalNULL);
 			END_REFTRACE();
 		}
-		if (ct->constPoolMapNO) KLIB Kmap_reftrace(kctx, ct->constPoolMapNO, val_reftrace);
+		if (ct->constPoolMapNO) {
+			KLIB Kmap_reftrace(kctx, ct->constPoolMapNO, val_reftrace);
+		}
 	}
-
 	BEGIN_REFTRACE(10);
 	KREFTRACEv(share->constNull);
 	KREFTRACEv(share->constTrue);
 	KREFTRACEv(share->constFalse);
 	KREFTRACEv(share->emptyString);
 	KREFTRACEv(share->emptyArray);
-
 	KREFTRACEv(share->fileidList);
 	KREFTRACEv(share->packList);
 	KREFTRACEv(share->symbolList);
