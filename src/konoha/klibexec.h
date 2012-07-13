@@ -22,14 +22,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-static void karray_init(KonohaContext *kctx, KUtilsGrowingArray *m, size_t bytemax)
+static void Karray_init(KonohaContext *kctx, KUtilsGrowingArray *m, size_t bytemax)
 {
 	m->bytesize = 0;
 	m->bytemax  = bytemax;
 	m->bytebuf = (char*)KCALLOC(bytemax, 1);
 }
 
-static void karray_resize(KonohaContext *kctx, KUtilsGrowingArray *m, size_t newsize)
+static void Karray_resize(KonohaContext *kctx, KUtilsGrowingArray *m, size_t newsize)
 {
 	size_t oldsize = m->bytemax;
 	char *newbody = (char*)KMALLOC(newsize);
@@ -45,19 +45,19 @@ static void karray_resize(KonohaContext *kctx, KUtilsGrowingArray *m, size_t new
 	m->bytemax = newsize;
 }
 
-static void karray_expand(KonohaContext *kctx, KUtilsGrowingArray *m, size_t minsize)
+static void Karray_expand(KonohaContext *kctx, KUtilsGrowingArray *m, size_t minsize)
 {
 	if(m->bytemax == 0) {
-		if(minsize > 0) karray_init(kctx, m, minsize);
+		if(minsize > 0) Karray_init(kctx, m, minsize);
 	}
 	else {
 		size_t oldsize = m->bytemax, newsize = oldsize * 2;
 		if(minsize > newsize) newsize = minsize;
-		karray_resize(kctx, m, newsize);
+		Karray_resize(kctx, m, newsize);
 	}
 }
 
-static void karray_free(KonohaContext *kctx, KUtilsGrowingArray *m)
+static void Karray_free(KonohaContext *kctx, KUtilsGrowingArray *m)
 {
 	if(m->bytemax > 0) {
 		KFREE(m->bytebuf, m->bytemax);
@@ -77,7 +77,7 @@ static void Kwb_write(KonohaContext *kctx, KUtilsWriteBuffer *wb, const char *da
 {
 	KUtilsGrowingArray *m = wb->m;
 	if(!(m->bytesize + bytelen < m->bytemax)) {
-		karray_expand(kctx, m, m->bytesize + bytelen);
+		Karray_expand(kctx, m, m->bytesize + bytelen);
 	}
 	memcpy(m->bytebuf + m->bytesize, data, bytelen);
 	m->bytesize += bytelen;
@@ -105,7 +105,7 @@ static void Kwb_vprintf(KonohaContext *kctx, KUtilsWriteBuffer *wb, const char *
 	size_t s = m->bytesize;
 	size_t n = PLAT vsnprintf_i( m->bytebuf + s, m->bytemax - s, fmt, ap);
 	if(n >= (m->bytemax - s)) {
-		karray_expand(kctx, m, n + 1);
+		Karray_expand(kctx, m, n + 1);
 		n = PLAT vsnprintf_i(m->bytebuf + s, m->bytemax - s, fmt, ap2);
 	}
 	va_end(ap2);
@@ -125,7 +125,7 @@ static const char* Kwb_top(KonohaContext *kctx, KUtilsWriteBuffer *wb, int ensur
 	KUtilsGrowingArray *m = wb->m;
 	if(ensureZero) {
 		if(!(m->bytesize + 1 < m->bytemax)) {
-			karray_expand(kctx, m, m->bytesize + 1);
+			Karray_expand(kctx, m, m->bytesize + 1);
 		}
 		m->bytebuf[m->bytesize] = 0;
 	}
@@ -322,15 +322,14 @@ static ksymbol_t Kmap_getcode(KonohaContext *kctx, KUtilsHashMap *kmp, kArray *l
 	return def;
 }
 
-static kfileline_t Kfileid(KonohaContext *kctx, const char *name, size_t len, int spol, ksymbol_t def)
+static kfileline_t KfileId(KonohaContext *kctx, const char *name, size_t len, int spol, ksymbol_t def)
 {
 	uintptr_t hcode = strhash(name, len);
 	kfileline_t uline = Kmap_getcode(kctx, kctx->share->fileidMapNN, kctx->share->fileidList, name, len, hcode, spol, def);
-	//DBG_P("name='%s', fileid=%d", name, uline);
 	return uline << (sizeof(kshort_t) * 8);
 }
 
-static kpackage_t Kpack(KonohaContext *kctx, const char *name, size_t len, int spol, ksymbol_t def)
+static kpackage_t KpackageId(KonohaContext *kctx, const char *name, size_t len, int spol, ksymbol_t def)
 {
 	uintptr_t hcode = strhash(name, len);
 	return Kmap_getcode(kctx, kctx->share->packMapNN, kctx->share->packList, name, len, hcode, spol | SPOL_ASCII, def);
@@ -596,10 +595,10 @@ static kbool_t KRUNTIME_setModule(KonohaContext *kctx, int x, kmodshare_t *d, kf
 
 static void kklib_init(LibKonohaApiVar *l)
 {
-	l->Karray_init   = karray_init;
-	l->Karray_resize = karray_resize;
-	l->Karray_expand = karray_expand;
-	l->Karray_free   = karray_free;
+	l->Karray_init   = Karray_init;
+	l->Karray_resize = Karray_resize;
+	l->Karray_expand = Karray_expand;
+	l->Karray_free   = Karray_free;
 	l->Kwb_init      = Kwb_init;
 	l->Kwb_write     = Kwb_write;
 	l->Kwb_putc      = Kwb_putc;
@@ -620,9 +619,9 @@ static void kklib_init(LibKonohaApiVar *l)
 	l->kObject_setUnboxValue = (typeof(l->kObject_setUnboxValue))kObject_setUnboxValue;
 	l->kObject_removeKey = (typeof(l->kObject_removeKey))kObject_removeKey;
 	l->kObject_protoEach = (typeof(l->kObject_protoEach))kObject_protoEach;
-	l->Kfileid       = Kfileid;
-	l->Kpack         = Kpack;
-	l->Ksymbol      = Ksymbol;
+	l->KfileId       = KfileId;
+	l->KpackageId    = KpackageId;
+	l->Ksymbol       = Ksymbol;
 	l->Kreportf      = Kreportf;
 	l->Kraise        = Kraise;
 	l->KsetModule    = KRUNTIME_setModule;

@@ -405,13 +405,13 @@ static kfileline_t uline_init(KonohaContext *kctx, const char *path, size_t len,
 	if(isreal) {
 		char buf[PATH_MAX];
 		char *ptr = PLAT realpath_i(path, buf);
-		uline |= kfileid((const char*)buf, strlen(ptr), 0, _NEWID);
+		uline |= KLIB KfileId(kctx, (const char*)buf, strlen(ptr), 0, _NEWID);
 		if(ptr != buf && ptr != NULL) {
 			PLAT free_i(ptr);
 		}
 	}
 	else {
-		uline |= kfileid(path, len, 0, _NEWID);
+		uline |= KLIB KfileId(kctx, path, len, 0, _NEWID);
 	}
 	return uline;
 }
@@ -526,7 +526,7 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackage_t packageId,
 			KINITv(pack->packageNameSpace, ns);
 			pack->packageLoadApi = packageLoadApi;
 			if(PLAT exportpath(fbuf, sizeof(fbuf), PN_t(packageId)) != NULL) {
-				pack->exportScriptUri = kfileid(fbuf, strlen(fbuf), 0, _NEWID) | 1;
+				pack->exportScriptUri = KLIB KfileId(kctx, fbuf, strlen(fbuf), 0, _NEWID) | 1;
 			}
 			return pack;
 		}
@@ -570,7 +570,7 @@ static void NameSpace_merge(KonohaContext *kctx, kNameSpace *ns, kNameSpace *tar
 static kbool_t NameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, const char *name, kfileline_t pline)
 {
 	kbool_t res = 0;
-	kpackage_t packageId = kpack(name, strlen(name), 0, _NEWID);
+	kpackage_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
 	KonohaPackage *pack = getPackageNULL(kctx, packageId, pline);
 	if(pack != NULL) {
 		res = 1;

@@ -1194,8 +1194,8 @@ struct LibKonohaApiVar {
 	ksymbol_t           (*Kmap_getcode)(KonohaContext*, KUtilsHashMap *, kArray *, const char *, size_t, uintptr_t, int, ksymbol_t);
 
 
-	kfileline_t     (*Kfileid)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
-	kpackage_t      (*Kpack)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
+	kfileline_t     (*KfileId)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
+	kpackage_t      (*KpackageId)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
 	ksymbol_t       (*Ksymbol)(KonohaContext*, const char*, size_t, int spol, ksymbol_t def);
 
 	kbool_t         (*KimportPackage)(KonohaContext*, kNameSpace*, const char *, kfileline_t);
@@ -1260,38 +1260,16 @@ struct LibKonohaApiVar {
 #define KCALLOC(size, item)    (KPI)->Kzmalloc(kctx, ((size) * (item)))
 #define KFREE(p, size)         (KPI)->Kfree(kctx, p, size)
 
-//#define KLIB Karray_init(kctx, VAR, init)           (KPI)->Karray_init(kctx, VAR, (init))
-//#define KLIB Karray_resize(kctx, VAR, newsize)      (KPI)->Karray_resize(kctx, VAR, (newsize))
-//#define KLIB Karray_expand(kctx, VAR, min)          (KPI)->Karray_expand(kctx, VAR, (min))
-//#define KLIB Karray_free(kctx, VAR)                 (KPI)->Karray_free(kctx, VAR)
-
-//#define KLIB Kwb_init(M,W)            (KPI)->Kwb_init(M,W)
-//#define KLIB Kwb_write(kctx, W,B,S)         (KPI)->Kwb_write(kctx,W,B,S)
 #define kwb_putc(W,...)          (KPI)->Kwb_putc(kctx,W, ## __VA_ARGS__, -1)
-//#define KLIB Kwb_vprintf(kctx, W,FMT,ARG)   (KPI)->Kwb_vprintf(kctx,W, FMT, ARG)
-//#define KLIB Kwb_printf(kctx, W,FMT,...)    (KPI)->Kwb_printf(kctx, W, FMT, ## __VA_ARGS__)
-//
-//#define KLIB Kwb_top(kctx, W,IS)            (KPI)->Kwb_top(kctx, W, IS)
-#define Kwb_bytesize(W)          (((W)->m)->bytesize - (W)->pos)
-//#define KLIB Kwb_free(W)              (KPI)->Kwb_free(W)
-
-//#define KLIB Kmap_init(kctx, INIT)           (KPI)->Kmap_init(kctx, INIT)
-//#define KLIB Kmap_newentry(kctx, M, H)       (KPI)->Kmap_newentry(kctx, M, H)
-//#define KLIB Kmap_get(kctx, M, K)            (KPI)->Kmap_get(M, K)
-//#define KLIB Kmap_remove(kctx, M, E)         (KPI)->Kmap_remove(kctx, M, E)
-//#define KLIB Kmap_reftrace(kctx, M, F)       (KPI)->Kmap_reftrace(kctx, M, F)
-//#define KLIB Kmap_free(kctx, M, F)           (KPI)->Kmap_free(kctx, M, F)
-//#define KLIB Kmap_getcode(kctx, M,L,N,NL,H,POL,DEF)  (KPI)->Kmap_getcode(kctx, M, L, N, NL, H, POL, DEF)
+#define Kwb_bytesize(W)                 (((W)->m)->bytesize - (W)->pos)
 
 #define kclass(CID, UL)           (KPI)->Kclass(kctx, CID, UL)
 
-#define FILEID_NATIVE             0
-#define FILEID_(T)                (KPI)->Kfileid(kctx, T, sizeof(T)-1, SPOL_TEXT|SPOL_ASCII, _NEWID)
-#define kfileid(T,L,SPOL,DEF)          (KPI)->Kfileid(kctx, T, L, SPOL, DEF)
+#define FILEID_(T)                KLIB KfileId(kctx, T, sizeof(T)-1, SPOL_TEXT|SPOL_ASCII, _NEWID)
+
 #define PN_konoha                 0
 #define PN_sugar                  1
-#define PN_(T)                    (KPI)->Kpack(kctx, T, sizeof(T)-1, SPOL_TEXT|SPOL_ASCII|SPOL_POOL, _NEWID)
-#define kpack(T,L,SPOL,DEF)       (KPI)->Kpack(kctx, T, L, SPOL, DEF)
+#define PN_(T)                    KLIB KpackageId(kctx, T, sizeof(T)-1, SPOL_TEXT|SPOL_ASCII|SPOL_POOL, _NEWID)
 
 #define ksymbolA(T, L, DEF)       (KPI)->Ksymbol(kctx, T, L, SPOL_ASCII, DEF)
 #define ksymbolSPOL(T, L, SPOL, DEF)       (KPI)->Ksymbol(kctx, T, L, SPOL, DEF)
