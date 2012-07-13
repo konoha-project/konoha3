@@ -3617,7 +3617,7 @@ static KMETHOD ConstantExpr_getExtractValue(KonohaContext *kctx, KonohaStack *sf
 {
 	Constant* Agg = konoha::object_cast<Constant*>(sfp[1].toObject);
 	kArray* _list = sfp[2].toArray;
-	std::vector<unsigned> idxs(_list->ilist, _list->ilist+kArray_size(_list));
+	std::vector<unsigned> idxs(_list->kintItems, _list->kintItems+kArray_size(_list));
 	Constant* ptr;
 #if LLVM_VERSION <= 209
 	ptr = ConstantExpr::getExtractValue(Agg, (const unsigned *) &idxs[0], 0);
@@ -3635,7 +3635,7 @@ static KMETHOD ConstantExpr_getInsertValue(KonohaContext *kctx, KonohaStack *sfp
 	Constant* Agg = konoha::object_cast<Constant*>(sfp[1].toObject);
 	Constant* val = konoha::object_cast<Constant*>(sfp[2].o);
 	kArray* _list = sfp[3].toArray;
-	std::vector<unsigned> idxs(_list->ilist, _list->ilist+kArray_size(_list));
+	std::vector<unsigned> idxs(_list->kintItems, _list->kintItems+kArray_size(_list));
 	Constant* ptr;
 #if LLVM_VERSION <= 209
 	ptr = ConstantExpr::getInsertValue(Agg, val, (const unsigned *) &idxs[0], 0);
@@ -5258,19 +5258,19 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 
 static kbool_t llvm_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
-	(void)kctx;(void)ks;(void)pline;
+	(void)kctx;(void)ns;(void)pline;
 	return true;
 }
 
 static kbool_t llvm_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
-	(void)kctx;(void)ks;(void)pline;
+	(void)kctx;(void)ns;(void)pline;
 	return true;
 }
 
 static kbool_t llvm_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
-	(void)kctx;(void)ks;(void)pline;
+	(void)kctx;(void)ns;(void)pline;
 	return true;
 }
 

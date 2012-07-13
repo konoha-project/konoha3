@@ -56,7 +56,7 @@ extern "C" {
 /* memory config */
 #define GC_USE_DEFERREDSWEEP 1
 #define SUBHEAP_DEFAULT_SEGPOOL_SIZE (128)/* 128 * SEGMENT_SIZE(128k) = 16MB*/
-#define SUBHEAP_KLASS_MIN  6 /* 1 <<  6 == 64 */
+#define SUBHEAP_KLASS_MIN  5 /* 1 <<  5 == 32 */
 #define SUBHEAP_KLASS_MAX 12 /* 1 << 12 == 4096 */
 #define MIN_ALIGN (ONE << SUBHEAP_KLASS_MIN)
 
