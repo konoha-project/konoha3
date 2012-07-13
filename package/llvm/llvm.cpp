@@ -208,7 +208,7 @@ static void Type_free(KonohaContext *kctx _UNUSED_, kObject *po)
 
 static inline kObject *new_CppObject(KonohaContext *kctx, const KonohaClass *ct, void *ptr)
 {
-	kObject *ret = KLIB new_kObject(kctx, ct, ptr);
+	kObject *ret = KLIB new_kObject(kctx, ct, (uintptr_t)ptr);
 	konoha::SetRawPtr(ret, ptr);
 	return ret;
 }
@@ -216,7 +216,7 @@ static inline kObject *new_CppObject(KonohaContext *kctx, const KonohaClass *ct,
 static inline kObject *new_ReturnCppObject(KonohaContext *kctx, KonohaStack *sfp, void *ptr)
 {
 	kObject *defobj = sfp[(-(K_CALLDELTA))].o;
-	kObject *ret = KLIB new_kObject(kctx, O_ct(defobj), ptr);
+	kObject *ret = KLIB new_kObject(kctx, O_ct(defobj), (uintptr_t)ptr);
 	konoha::SetRawPtr(ret, ptr);
 	return ret;
 }

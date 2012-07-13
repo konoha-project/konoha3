@@ -669,7 +669,7 @@ static KMETHOD Pointer_toObject(KonohaContext *kctx, KonohaStack *sfp)
 //}
 
 /****************************************************************/
-static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
+static void _kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 {
 	DBG_P("START CODE GENERATION..");
 	BEGIN_LOCAL(lsfp, 8);
@@ -817,7 +817,7 @@ static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_
 	LibKonohaApiVar *l = (LibKonohaApiVar*)kctx->klib;
 	l->kMethod_genCode = GenCodeDefault;
 	kNameSpace_syncMethods();
-	l->kMethod_genCode = kMethod_genCode;
+	l->kMethod_genCode = _kMethod_genCode;
 	//KSET_KLIB(Method_genCode, pline);
 
 	return true;
