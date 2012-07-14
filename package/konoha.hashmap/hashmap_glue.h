@@ -64,7 +64,7 @@ static KMETHOD HashMap_get(KonohaContext *kctx, KonohaStack *sfp)
 	kString *key = sfp[1].toString;
 	KonohaClass *ct = m->h.ct;
 	kParam *cparam = CT_cparam(ct);
-	kparam_t p1 = cparam->p[0];
+	kparamtype_t p1 = cparam->paramtypeItems[0];
 	uintptr_t hcode = strhash(S_text(key), S_size(key));
 	KUtilsHashMapEntry *e = KLIB Kmap_get(kctx, map, hcode);
 
@@ -84,7 +84,7 @@ static KMETHOD HashMap_set(KonohaContext *kctx, KonohaStack *sfp)
 	// want to know p1
 	KonohaClass *ct = m->h.ct;
 	kParam *cparam = CT_cparam(ct);
-	kparam_t p1 = cparam->p[0];
+	kparamtype_t p1 = cparam->paramtypeItems[0];
 	uintptr_t hcode = strhash(S_text(key), S_size(key));
 	KUtilsHashMapEntry *e = KLIB Kmap_newentry(kctx, map, hcode);
 	if (p1.ty == TY_Int || p1.ty == TY_Boolean || p1.ty == TY_Float) {  // FIXME
@@ -109,10 +109,10 @@ static KMETHOD HashMap_new(KonohaContext *kctx, KonohaStack *sfp)
 #define _F(F)   (intptr_t)(F)
 
 #define CT_HashMap cHashMap
-#define TY_HashMap cHashMap->cid
+#define TY_HashMap cHashMap->classId
 static	kbool_t hashmap_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KDEFINE_TY defHashMap = {
+	KDEFINE_CLASS defHashMap = {
 		STRUCTNAME(HashMap),
 		.cflag = kClass_Final,
 		.init = HashMap_init,

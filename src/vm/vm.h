@@ -41,7 +41,7 @@ typedef struct kByteCodeVar           kByteCodeVar;
 #define ctxcode          ((ctxcode_t*)kctx->modlocal[MOD_code])
 #define kmodcode         ((KModuleByteCode*)kctx->modshare[MOD_code])
 #define CT_BasicBlock    kmodcode->cBasicBlock
-#define TY_BasicBlock    kmodcode->cBasicBlock->cid
+#define TY_BasicBlock    kmodcode->cBasicBlock->classId
 #define CT_ByteCode      kmodcode->cByteCode
 
 #define IS_BasicBlock(O)  ((O)->h.ct == CT_BasicBlock)
@@ -558,7 +558,7 @@ struct kByteCodeVar {
 #define OPEXEC_TCAST(kctx, rtnidx, thisidx, rix, espidx, tmr)  { \
 		kTypeMap *tmr_ = tmr; \
 		KonohaStack *sfp_ = SFP(rshift(rbp,thisidx));\
-		KonohaClass scid = SP(tmr_)->scid, this_cid = O_cid(sfp_[0].o);\
+		KonohaClass scid = SP(tmr_)->scid, this_cid = O_classId(sfp_[0].o);\
 		if(this_cid != scid) {\
 			tmr_ = knh_findTypeMapNULL(kctx, scid, SP(tmr)->tcid);\
 			KSETv(((klr_TCAST_t*)op)->cast, tmr_);\
@@ -569,7 +569,7 @@ struct kByteCodeVar {
 
 #define OPEXEC_ACAST(rtnidx, thisidx, rix, espidx, tmr)  { \
 		kTypeMap *tmr_ = tmr; \
-		KonohaClass tcid = SP(tmr_)->tcid, this_cid = O_cid(Ro_(thisidx));\
+		KonohaClass tcid = SP(tmr_)->tcid, this_cid = O_classId(Ro_(thisidx));\
 		if(!class_isa(this_cid, tcid)) {\
 			KonohaClass scid = SP(tmr_)->scid;\
 			if(this_cid != scid) {\

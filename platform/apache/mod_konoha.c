@@ -273,13 +273,13 @@ KonohaContext* konoha_create(KonohaClass **cRequest)
 	*cRequest = CT_Request;
 #define _P    kMethod_Public
 #define _F(F) (intptr_t)(F)
-#define TY_Req  (CT_Request->cid)
-#define TY_Tbl  (CT_AprTable->cid)
-#define TY_TblEntry  (CT_AprTableEntry->cid)
+#define TY_Req  (CT_Request->classId)
+#define TY_Tbl  (CT_AprTable->classId)
+#define TY_TblEntry  (CT_AprTableEntry->classId)
 
-	kparam_t ps = {TY_TblEntry, FN_("aprTableEntry")};
+	kparamtype_t ps = {TY_TblEntry, FN_("aprTableEntry")};
 	KonohaClass *CT_TblEntryArray = KLIB KonohaClass_Generics(kctx, CT_Array, TY_TblEntry, 1, &ps);
-	ktype_t TY_TblEntryArray = CT_TblEntryArray->cid;
+	ktype_t TY_TblEntryArray = CT_TblEntryArray->classId;
 
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {

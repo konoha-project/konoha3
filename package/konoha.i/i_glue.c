@@ -68,7 +68,7 @@ static void Method_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWrite
 	if(level != 0) {
 		MethodAttribute_p(kctx, mtd, wb);
 	}
-	KLIB Kwb_printf(kctx, wb, "%s %s.%s%s", TY_t(pa->rtype), TY_t(mtd->cid), T_mn(mtd->mn));
+	KLIB Kwb_printf(kctx, wb, "%s %s.%s%s", TY_t(pa->rtype), TY_t(mtd->classId), T_mn(mtd->mn));
 	if(level != 0) {
 		size_t i;
 		kwb_putc(wb, '(');
@@ -76,10 +76,10 @@ static void Method_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWrite
 			if(i > 0) {
 				kwb_putc(wb, ',', ' ');
 			}
-			if(FN_isCOERCION(pa->p[i].fn)) {
+			if(FN_isCOERCION(pa->paramtypeItems[i].fn)) {
 				KLIB Kwb_printf(kctx, wb, "@Coercion ");
 			}
-			KLIB Kwb_printf(kctx, wb, "%s %s", TY_t(pa->p[i].ty), SYM_t(pa->p[i].fn));
+			KLIB Kwb_printf(kctx, wb, "%s %s", TY_t(pa->paramtypeItems[i].ty), SYM_t(pa->paramtypeItems[i].fn));
 		}
 //		if(Param_isVARGs(DP(mtd)->mp)) {
 //			knh_write_delimdots(kctx, w);
@@ -95,7 +95,7 @@ static void copyMethodList(KonohaContext *kctx, ktype_t cid, kArray *s, kArray *
 	size_t i;
 	for(i = 0; i < kArray_size(s); i++) {
 		kMethod *mtd = s->methodItems[i];
-		if(mtd->cid != cid) continue;
+		if(mtd->classId != cid) continue;
 		KLIB kArray_add(kctx, d, mtd);
 	}
 }
@@ -126,12 +126,12 @@ KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp)
 	size_t start = kArray_size(list);
 	kNameSpace *ns = sfp[0].toNameSpace;
 	KonohaClass *ct = O_ct(sfp[1].toObject);
-	DBG_P("*** man %s", TY_t(ct->cid));
+	DBG_P("*** man %s", TY_t(ct->classId));
 	while(ns != NULL) {
-		copyMethodList(kctx, ct->cid, ns->methodList, list);
+		copyMethodList(kctx, ct->classId, ns->methodList, list);
 		ns = ns->parentNULL;
 	}
-	copyMethodList(kctx, ct->cid, ct->methodList, list);
+	copyMethodList(kctx, ct->classId, ct->methodList, list);
 	dumpMethodList(kctx, sfp, start, list);
 	RESET_GCSTACK();
 }

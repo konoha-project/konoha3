@@ -303,7 +303,7 @@ struct kStmtVar {
 
 #define kStmt_getObjectNULL(CTX, O, K)            (KLIB kObject_getObject(CTX, UPCAST(O), K, NULL))
 #define kStmt_getObject(CTX, O, K, DEF)           (KLIB kObject_getObject(CTX, UPCAST(O), K, DEF))
-#define kStmt_setObject(CTX, O, K, V)             KLIB kObject_setObject(CTX, UPCAST(O), K, O_cid(V), UPCAST(V))
+#define kStmt_setObject(CTX, O, K, V)             KLIB kObject_setObject(CTX, UPCAST(O), K, O_classId(V), UPCAST(V))
 #define kStmt_getUnboxValue(CTX, O, K, DEF)       (KLIB kObject_getUnboxValue(CTX, UPCAST(O), K, DEF))
 #define kStmt_setUnboxValue(CTX, O, K, T, V)      KLIB kObject_setUnboxValue(CTX, UPCAST(O), K, T, V)
 #define kStmt_removeKey(CTX, O, K)                KLIB kObject_removeKey(CTX, UPCAST(O), K)
@@ -381,9 +381,9 @@ struct kGammaVar {
 #define IS_Block(O)  ((O)->h.ct == CT_Block)
 #define IS_Gamma(O)  ((O)->h.ct == CT_Gamma)
 
-#define K_NULLTOKEN  (kToken*)((CT_Token)->nulvalNULL)
-#define K_NULLEXPR   (kExpr*)((CT_Expr)->nulvalNULL)
-#define K_NULLBLOCK  (kBlock*)((CT_Block)->nulvalNULL)
+#define K_NULLTOKEN  (kToken*)((CT_Token)->defaultValueAsNull)
+#define K_NULLEXPR   (kExpr*)((CT_Expr)->defaultValueAsNull)
+#define K_NULLBLOCK  (kBlock*)((CT_Block)->defaultValueAsNull)
 
 #define TK_ERR      KW_ToksPattern
 #define TK_CODE     KW_BlockPattern
@@ -583,13 +583,13 @@ static kExpr* kExpr_setConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, 
 static kExpr* kExpr_setUnboxConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, uintptr_t unboxValue);
 static kExpr* kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, int build, ktype_t ty, intptr_t index);
 
-#define TY_NameSpace                       kmodsugar->cNameSpace->cid
-#define TY_Token                           kmodsugar->cToken->cid
-#define TY_Stmt                            kmodsugar->cStmt->cid
-#define TY_Block                           kmodsugar->cBlock->cid
-#define TY_Expr                            kmodsugar->cExpr->cid
-#define TY_Gamma                           kmodsugar->cGamma->cid
-#define TY_TokenArray                      kmodsugar->cTokenArray->cid
+#define TY_NameSpace                       kmodsugar->cNameSpace->classId
+#define TY_Token                           kmodsugar->cToken->classId
+#define TY_Stmt                            kmodsugar->cStmt->classId
+#define TY_Block                           kmodsugar->cBlock->classId
+#define TY_Expr                            kmodsugar->cExpr->classId
+#define TY_Gamma                           kmodsugar->cGamma->classId
+#define TY_TokenArray                      kmodsugar->cTokenArray->classId
 
 #define SYN_(KS, KW)                NameSpace_syn(kctx, KS, KW, 0)
 
@@ -606,13 +606,13 @@ static kExpr* kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, i
 
 
 #define SUGAR        ((const KModuleSugar *)kmodsugar)->
-#define TY_NameSpace                         SUGAR cNameSpace->cid
-#define TY_Token                             SUGAR cToken->cid
-#define TY_Stmt                              SUGAR cStmt->cid
-#define TY_Block                             SUGAR cBlock->cid
-#define TY_Expr                              SUGAR cExpr->cid
-#define TY_Gamma                             SUGAR cGamma->cid
-#define TY_TokenArray                        SUGAR cTokenArray->cid
+#define TY_NameSpace                         SUGAR cNameSpace->classId
+#define TY_Token                             SUGAR cToken->classId
+#define TY_Stmt                              SUGAR cStmt->classId
+#define TY_Block                             SUGAR cBlock->classId
+#define TY_Expr                              SUGAR cExpr->classId
+#define TY_Gamma                             SUGAR cGamma->classId
+#define TY_TokenArray                        SUGAR cTokenArray->classId
 
 //#define KW_(T)                               _e->keyword(kctx, T, sizeof(T)-1, SYM_NONAME)
 #define SYN_(KS, KW)                         SUGAR NameSpace_syn(kctx, KS, KW, 0)

@@ -203,7 +203,7 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 	base->h.free     = kmoditerator_free;
 	KLIB Konoha_setModule(kctx, MOD_iterator, &base->h, pline);
 
-	KDEFINE_TY defIterator = {
+	KDEFINE_CLASS defIterator = {
 		STRUCTNAME(Iterator),
 		.cflag  = CFLAG_Iterator,
 		.init   = Iterator_init,
@@ -215,7 +215,7 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Iterator_hasNext), TY_Boolean, TY_Iterator, MN_("hasNext"), 0,
 		_Public, _F(Iterator_next), TY_0, TY_Iterator, MN_("next"), 0,
-		_Public, _F(Array_toIterator),  base->cGenericIterator->cid, TY_Array, MN_("toIterator"), 0,
+		_Public, _F(Array_toIterator),  base->cGenericIterator->classId, TY_Array, MN_("toIterator"), 0,
 		_Public, _F(String_toIterator), TY_StringIterator, TY_String, MN_("toIterator"), 0,
 //		_Public|_Const|_Im, _F(Int_opINC), TY_Int, TY_Int, MN_("opINC"), 0,
 //		_Public|_Const|_Im, _F(Int_opDEC), TY_Int, TY_Int, MN_‘("opDEC"), 0,

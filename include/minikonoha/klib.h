@@ -136,7 +136,7 @@ static kinline uintptr_t longid(kushort_t packageDomain, kushort_t un)
 
 static kinline KonohaClass *CT_p0(KonohaContext *kctx, KonohaClass *ct, ktype_t ty)
 {
-	kparam_t p = {ty, 0};
+	kparamtype_t p = {ty, 0};
 	return KLIB KonohaClass_Generics(kctx, ct, TY_void, 1, &p);
 }
 

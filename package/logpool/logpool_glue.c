@@ -353,44 +353,44 @@ static KMETHOD LogPool_loadFile(KonohaContext *kctx, KonohaStack *sfp)
 #define _C kMethod_Const
 #define _S kMethod_Static
 #define _F(F)   (intptr_t)(F)
-#define TY_Logpool  (ct0->cid)
-#define TY_Log      (ct1->cid)
+#define TY_Logpool  (ct0->classId)
+#define TY_Log      (ct1->classId)
 
 static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	int i;
-	static KDEFINE_TY Def0 = {
+	static KDEFINE_CLASS Def0 = {
 		.structname = "LogPool"/*structname*/,
-		.cid = TY_newid/*cid*/,
+		.classId = TY_newid/*cid*/,
 		.init = RawPtr_init,
 		.free = Logpool_free,
 	};
 	KonohaClass *ct0 = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &Def0, pline);
 
-	static KDEFINE_TY Def1 = {
+	static KDEFINE_CLASS Def1 = {
 		.structname = "Log"/*structname*/,
-		.cid = TY_newid/*cid*/,
+		.classId = TY_newid/*cid*/,
 		.init = RawPtr_init,
 		.free = Log_free,
 		.p    = Log_p,
 	};
 	KonohaClass *ct1 = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &Def1, pline);
 
-	static KDEFINE_TY Def2 = {
+	static KDEFINE_CLASS Def2 = {
 		.structname = "PoolPlugin",
-		.cid = TY_newid,
+		.classId = TY_newid,
 		.init = RawPtr_init,
 		.free = RawPtr_free,
 	};
 	KonohaClass *ct2 = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &Def2, pline);
-#define TY_Plugin ct2->cid
-	static KDEFINE_TY Def3 = {
+#define TY_Plugin ct2->classId
+	static KDEFINE_CLASS Def3 = {
 		.structname = "",
-		.cid = TY_newid,
+		.classId = TY_newid,
 		.init = RawPtr_init,
 		.free = RawPtr_free,
 	};
-	Def3.supcid = ct2->cid;
+	Def3.superclassId = ct2->classId;
 	static const char *names[] = {
 		"Printer",
 		"KeyFilter",
@@ -402,14 +402,14 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		"Response",
 	};
 	KonohaClass *tbls[8];
-#define TY_Printer   tbls[0]->cid
-#define TY_KeyFilter tbls[1]->cid
-#define TY_ValFilter tbls[2]->cid
-#define TY_React     tbls[3]->cid
-#define TY_Timer     tbls[4]->cid
-#define TY_Statics   tbls[5]->cid
-#define TY_Copy      tbls[6]->cid
-#define TY_Response  tbls[7]->cid
+#define TY_Printer   tbls[0]->classId
+#define TY_KeyFilter tbls[1]->classId
+#define TY_ValFilter tbls[2]->classId
+#define TY_React     tbls[3]->classId
+#define TY_Timer     tbls[4]->classId
+#define TY_Statics   tbls[5]->classId
+#define TY_Copy      tbls[6]->classId
+#define TY_Response  tbls[7]->classId
 
 	for (i = 0; i < 8; i++) {
 		Def3.structname = names[i];

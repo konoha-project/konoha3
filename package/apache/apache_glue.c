@@ -79,19 +79,19 @@ static void kapacheshare_free(KonohaContext *kctx, struct KonohaModule *baseh)
 
 static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	static KDEFINE_TY Def = {
+	static KDEFINE_CLASS Def = {
 		STRUCTNAME(Request),
 		.init = Request_init,
 		.free = Request_free,
 	};
 
-	static KDEFINE_TY aprTableDef = {
+	static KDEFINE_CLASS aprTableDef = {
 		STRUCTNAME(AprTable),
 		.init = AprTable_init,
 		.free = AprTable_free,
 	};
 
-	static KDEFINE_TY aprTableEntryDef = {
+	static KDEFINE_CLASS aprTableEntryDef = {
 		STRUCTNAME(AprTableEntry),
 		.init = AprTableEntry_init,
 		.free = AprTableEntry_free,

@@ -892,7 +892,7 @@ static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	BLOCK_asm(kctx, bk, 0);
 	ASM_LABEL(kctx, ctxcode->lbEND);
 	if (mtd->mn == MN_new) {
-		ASM(NMOV, OC_(K_RTNIDX), OC_(0), CT_(mtd->cid));   // FIXME: Type 'This' must be resolved
+		ASM(NMOV, OC_(K_RTNIDX), OC_(0), CT_(mtd->classId));   // FIXME: Type 'This' must be resolved
 	}
 	ASM(RET);
 	assert(ctxcode->lbEND);/* scan-build: remove warning */
@@ -959,7 +959,7 @@ static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack 
 //			RETURNi_(0);
 //		} else {
 //			KonohaClass *ct = CT_(rtype);
-//			kObject *nulval = ct->nulvalNULL;
+//			kObject *nulval = ct->defaultValueAsNull;
 //			RETURN_(nulval);
 //		}
 //	}
@@ -1032,13 +1032,13 @@ void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	base->h.free     = kmodcode_free;
 	KLIB Konoha_setModule(kctx, MOD_code, &base->h, 0);
 
-	KDEFINE_TY defBasicBlock = {
+	KDEFINE_CLASS defBasicBlock = {
 		STRUCTNAME(BasicBlock),
 		.init = BasicBlock_init,
 		.free = BasicBlock_free,
 	};
 
-	KDEFINE_TY defByteCode = {
+	KDEFINE_CLASS defByteCode = {
 		STRUCTNAME(ByteCode),
 		.init = ByteCode_init,
 		.reftrace = ByteCode_reftrace,

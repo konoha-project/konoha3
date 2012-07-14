@@ -261,7 +261,7 @@ static KMETHOD System_addConstPool(KonohaContext *kctx, KonohaStack *sfp)
 
 static uintptr_t jitcache_hash(kMethod *mtd)
 {
-	ktype_t cid = mtd->cid;
+	ktype_t cid = mtd->classId;
 	kmethodn_t mn = mtd->mn;
 	return (cid << sizeof(short)*8) | mn;
 }
@@ -590,7 +590,7 @@ static KMETHOD Method_getFname(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Method_getCname(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].toMethod;
-	ktype_t cid = mtd->cid;
+	ktype_t cid = mtd->classId;
 	const char *cname = TY_t(cid);
 	RETURN_(KLIB new_kString(kctx, cname, strlen(cname), 0));
 }
@@ -701,7 +701,7 @@ static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	typedef struct kPointer {
 		KonohaObjectHeader h;
 	} kPointer;
-	static KDEFINE_TY PointerDef = {
+	static KDEFINE_CLASS PointerDef = {
 		STRUCTNAME(Pointer)
 	};
 	base->cPointer = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &PointerDef, pline);
@@ -723,7 +723,7 @@ static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_
 
 	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_System, MN_("genCode"));
 	KINITv(kmodjit->genCode, mtd);
-#define TY_Pointer kmodjit->cPointer->cid
+#define TY_Pointer kmodjit->cPointer->classId
 #define _Public   kMethod_Public
 #define _Static   kMethod_Static
 #define _Coercion kMethod_Coercion

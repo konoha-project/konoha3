@@ -393,7 +393,7 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 #define _F(F)   (intptr_t)(F)
 
 #define CT_Curl     cCurl
-#define TY_Curl     cCurl->cid
+#define TY_Curl     cCurl->classId
 #define IS_Curl(O)  ((O)->h.ct == CT_Curl)
 
 #define _KVi(T)  #T, TY_Int, T
@@ -402,7 +402,7 @@ static	kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 {
 	ctx = (struct KonohaContextVar *)kctx;
 
-	KDEFINE_TY defCurl = {
+	KDEFINE_CLASS defCurl = {
 		STRUCTNAME(Curl),
 		.cflag = kClass_Final,
 		.init = Curl_init,

@@ -204,12 +204,12 @@ static KMETHOD File_putC(KonohaContext *kctx, KonohaStack *sfp)
 #define _F(F)   (intptr_t)(F)
 
 #define CT_File         cFile
-#define TY_File         cFile->cid
+#define TY_File         cFile->classId
 #define IS_File(O)      ((O)->h.ct == CT_File)
 
 static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KDEFINE_TY defFile = {
+	KDEFINE_CLASS defFile = {
 		STRUCTNAME(FILE),
 		.cflag = kClass_Final,
 		.init  = File_init,

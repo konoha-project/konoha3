@@ -220,7 +220,7 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 				KEYVALUE_s("to", toCoding),
 				KEYVALUE_s("error", strerror(errno))
 			);
-			return (kBytes*)(CT_Bytes->nulvalNULL);
+			return (kBytes*)(CT_Bytes->defaultValueAsNull);
 		} else {
 			// finished. iconv_ret != -1
 			processedSize = CONV_BUFSIZE - outBytesLeft;
@@ -251,7 +251,7 @@ static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, KonohaStack *sfp)
 	kBytes* fromBa = sfp[0].ba;
 	kString*fromCoding = sfp[1].toString;
 	kBytes *toBa;
-	if (fromCoding != (kString*)(CT_String->nulvalNULL)) {
+	if (fromCoding != (kString*)(CT_String->defaultValueAsNull)) {
 		toBa = convFromTo(kctx, fromBa, S_text(fromCoding), "UTF-8");
 	} else {
 		// conv from default encoding
@@ -346,7 +346,7 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	base->h.free     = kmodiconv_free;
 	KLIB Konoha_setModule(kctx, MOD_iconv, &base->h, pline);
 
-	KDEFINE_TY defBytes = {
+	KDEFINE_CLASS defBytes = {
 		STRUCTNAME(Bytes),
 		.cflag   = kClass_Final,
 		.free    = Bytes_free,

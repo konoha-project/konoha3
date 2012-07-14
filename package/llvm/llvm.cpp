@@ -114,7 +114,7 @@ struct kRawPtr {
 #define kllvmmod ((kllvmmod_t*)kctx->mod[MOD_llvm])
 #define kmodllvm ((kmodllvm_t*)kctx->modshare[MOD_llvm])
 #define CT_Value (kmodllvm)->cValue
-#define TY_Value (CT_Value)->cid
+#define TY_Value (CT_Value)->classId
 
 typedef struct {
 	KonohaModule h;
@@ -4623,10 +4623,10 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	base->h.free     = kmodllvm_free;
 	Konoha_setModule(MOD_llvm, &base->h, pline);
 
-	static KDEFINE_TY ValueDef = {
+	static KDEFINE_CLASS ValueDef = {
 		"Value"/*structname*/,
 		TY_newid/*cid*/,  0/*cflag*/,
-		0/*bcid*/, 0/*supcid*/,0/*rtype*/,0/*psize*/,NULL/*cparams*/,
+		0/*baseclassId*/, 0/*superclassId*/,0/*rtype*/,0/*psize*/,NULL/*cparams*/,
 		sizeof(kRawPtr)/*cstruct_size*/,
 		NULL/*fields*/, 0/*fsize*/, 0/*fallocsize*/,
 		0/*init*/,
@@ -4651,18 +4651,18 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	};
 	KonohaClass *CT_TypeTBL[6];
 	KonohaClass *CT_BasicBlock, *CT_IRBuilder;
-#define TY_BasicBlock  (CT_BasicBlock)->cid
-#define TY_IRBuilder   (CT_IRBuilder)->cid
-#define TY_Type         (CT_TypeTBL[0])->cid
-#define TY_IntegerType  (CT_TypeTBL[1])->cid
-#define TY_PointerType  (CT_TypeTBL[2])->cid
-#define TY_FunctionType (CT_TypeTBL[3])->cid
-#define TY_ArrayType    (CT_TypeTBL[4])->cid
-#define TY_StructType   (CT_TypeTBL[5])->cid
+#define TY_BasicBlock  (CT_BasicBlock)->classId
+#define TY_IRBuilder   (CT_IRBuilder)->classId
+#define TY_Type         (CT_TypeTBL[0])->classId
+#define TY_IntegerType  (CT_TypeTBL[1])->classId
+#define TY_PointerType  (CT_TypeTBL[2])->classId
+#define TY_FunctionType (CT_TypeTBL[3])->classId
+#define TY_ArrayType    (CT_TypeTBL[4])->classId
+#define TY_StructType   (CT_TypeTBL[5])->classId
 	{
-		static KDEFINE_TY TypeDef;
-		bzero(&TypeDef, sizeof(KDEFINE_TY));
-		TypeDef.cid  = TY_newid;
+		static KDEFINE_CLASS TypeDef;
+		bzero(&TypeDef, sizeof(KDEFINE_CLASS));
+		TypeDef.classId  = TY_newid;
 		TypeDef.init = Type_init;
 		TypeDef.free = Type_free;
 		for (int i = 0; i < 6; i++) {
@@ -4670,10 +4670,10 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 			CT_TypeTBL[i] = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &TypeDef, 0);
 		}
 	}
-	static KDEFINE_TY BasicBlockDef = {
+	static KDEFINE_CLASS BasicBlockDef = {
 		"LLVMBasicBlock"/*structname*/,
 		TY_newid/*cid*/,  0/*cflag*/,
-		0/*bcid*/, 0/*supcid*/,0/*rtype*/,0/*psize*/,NULL/*cparams*/,
+		0/*baseclassId*/, 0/*superclassId*/,0/*rtype*/,0/*psize*/,NULL/*cparams*/,
 		0/*cstruct_size*/,
 		NULL/*fields*/, 0/*fsize*/, 0/*fallocsize*/,
 		0/*init*/,
@@ -4688,10 +4688,10 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	};
 	CT_BasicBlock = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &BasicBlockDef, pline);
 
-	static KDEFINE_TY IRBuilderDef = {
+	static KDEFINE_CLASS IRBuilderDef = {
 		"IRBuilder"/*structname*/,
 		TY_newid/*cid*/,  0/*cflag*/,
-		0/*bcid*/, 0/*supcid*/,0/*rtype*/,0/*psize*/,NULL/*cparams*/,
+		0/*baseclassId*/, 0/*superclassId*/,0/*rtype*/,0/*psize*/,NULL/*cparams*/,
 		0/*cstruct_size*/,
 		NULL/*fields*/, 0/*fsize*/, 0/*fallocsize*/,
 		0/*init*/,
@@ -4706,10 +4706,10 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	};
 	CT_IRBuilder = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &IRBuilderDef, pline);
 #if LLVM_VERSION >= 300
-	static KDEFINE_TY PassManagerBuilderDef = {
+	static KDEFINE_CLASS PassManagerBuilderDef = {
 		"PassManagerBuilder"/*structname*/,
 		TY_newid/*cid*/,  0/*cflag*/,
-		0/*bcid*/, 0/*supcid*/,0/*rtype*/,0/*psize*/,NULL/*cparams*/,
+		0/*baseclassId*/, 0/*superclassId*/,0/*rtype*/,0/*psize*/,NULL/*cparams*/,
 		0/*cstruct_size*/,
 		NULL/*fields*/, 0/*fsize*/, 0/*fallocsize*/,
 		PassManagerBuilder_ptr_init/*init*/,
@@ -4723,12 +4723,12 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		0/*initdef*/
 	};
 	KonohaClass *CT_PassManagerBuilder = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &PassManagerBuilderDef, pline);
-#define TY_PassManagerBuilder         (CT_PassManagerBuilder)->cid
+#define TY_PassManagerBuilder         (CT_PassManagerBuilder)->classId
 #endif
-	static KDEFINE_TY PassManagerDef = {
+	static KDEFINE_CLASS PassManagerDef = {
 		"PassManager"/*structname*/,
 		TY_newid/*cid*/,  0/*cflag*/,
-		0/*bcid*/, 0/*supcid*/,0/*rtype*/,0/*psize*/,NULL/*cparams*/,
+		0/*baseclassId*/, 0/*superclassId*/,0/*rtype*/,0/*psize*/,NULL/*cparams*/,
 		0/*cstruct_size*/,
 		NULL/*fields*/, 0/*fsize*/, 0/*fallocsize*/,
 		PassManager_ptr_init/*init*/,
@@ -4741,10 +4741,10 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		0/*hashCode*/,
 		0/*initdef*/
 	};
-	static KDEFINE_TY FunctionPassManagerDef = {
+	static KDEFINE_CLASS FunctionPassManagerDef = {
 		"FunctionPassManager"/*structname*/,
 		TY_newid/*cid*/,  0/*cflag*/,
-		0/*bcid*/, 0/*supcid*/,0/*rtype*/,0/*psize*/,NULL/*cparams*/,
+		0/*baseclassId*/, 0/*superclassId*/,0/*rtype*/,0/*psize*/,NULL/*cparams*/,
 		0/*cstruct_size*/,
 		NULL/*fields*/, 0/*fsize*/, 0/*fallocsize*/,
 		FunctionPassManager_ptr_init/*init*/,
@@ -4784,9 +4784,9 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 			"DynamicLibrary",
 			"Intrinsic",
 		};
-		static KDEFINE_TY InstDef;
-		bzero(&InstDef, sizeof(KDEFINE_TY));
-		InstDef.cid  = TY_newid;
+		static KDEFINE_CLASS InstDef;
+		bzero(&InstDef, sizeof(KDEFINE_CLASS));
+		InstDef.classId  = TY_newid;
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 #endif
@@ -4797,27 +4797,27 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 			CT_InstTBL[i] = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &InstDef, pline);
 		}
 	}
-#define TY_Instruction         (CT_InstTBL[ 0])->cid
-#define TY_AllocaInst          (CT_InstTBL[ 1])->cid
-#define TY_LoadInst            (CT_InstTBL[ 2])->cid
-#define TY_StoreInst           (CT_InstTBL[ 3])->cid
-#define TY_GetElementPtrInst   (CT_InstTBL[ 4])->cid
-#define TY_PHINode             (CT_InstTBL[ 5])->cid
-#define TY_Module              (CT_InstTBL[ 6])->cid
-#define TY_Function            (CT_InstTBL[ 7])->cid
-#define TY_ExecutionEngine     (CT_InstTBL[ 8])->cid
-#define TY_GlobalVariable      (CT_InstTBL[ 9])->cid
-#define TY_Argument            (CT_InstTBL[10])->cid
-#define TY_Constant            (CT_InstTBL[11])->cid
-#define TY_ConstantInt         (CT_InstTBL[12])->cid
-#define TY_ConstantFP          (CT_InstTBL[13])->cid
-#define TY_ConstantStruct      (CT_InstTBL[14])->cid
-#define TY_ConstantPointerNull (CT_InstTBL[15])->cid
-#define TY_ConstantExpr        (CT_InstTBL[16])->cid
-#define TY_LLVM                (CT_InstTBL[17])->cid
-#define TY_LibCallInfo         (CT_InstTBL[18])->cid
-#define TY_DynamicLibrary      (CT_InstTBL[19])->cid
-#define TY_Intrinsic           (CT_InstTBL[20])->cid
+#define TY_Instruction         (CT_InstTBL[ 0])->classId
+#define TY_AllocaInst          (CT_InstTBL[ 1])->classId
+#define TY_LoadInst            (CT_InstTBL[ 2])->classId
+#define TY_StoreInst           (CT_InstTBL[ 3])->classId
+#define TY_GetElementPtrInst   (CT_InstTBL[ 4])->classId
+#define TY_PHINode             (CT_InstTBL[ 5])->classId
+#define TY_Module              (CT_InstTBL[ 6])->classId
+#define TY_Function            (CT_InstTBL[ 7])->classId
+#define TY_ExecutionEngine     (CT_InstTBL[ 8])->classId
+#define TY_GlobalVariable      (CT_InstTBL[ 9])->classId
+#define TY_Argument            (CT_InstTBL[10])->classId
+#define TY_Constant            (CT_InstTBL[11])->classId
+#define TY_ConstantInt         (CT_InstTBL[12])->classId
+#define TY_ConstantFP          (CT_InstTBL[13])->classId
+#define TY_ConstantStruct      (CT_InstTBL[14])->classId
+#define TY_ConstantPointerNull (CT_InstTBL[15])->classId
+#define TY_ConstantExpr        (CT_InstTBL[16])->classId
+#define TY_LLVM                (CT_InstTBL[17])->classId
+#define TY_LibCallInfo         (CT_InstTBL[18])->classId
+#define TY_DynamicLibrary      (CT_InstTBL[19])->classId
+#define TY_Intrinsic           (CT_InstTBL[20])->classId
 
 	KonohaClass *CT_PassTBL[4];
 	{
@@ -4827,9 +4827,9 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 			"FunctionPass",
 			"ModulePass",
 		};
-		static KDEFINE_TY PassDef;
-		bzero(&PassDef, sizeof(KDEFINE_TY));
-		PassDef.cid  = TY_newid;
+		static KDEFINE_CLASS PassDef;
+		bzero(&PassDef, sizeof(KDEFINE_CLASS));
+		PassDef.classId  = TY_newid;
 		//InstDef.init = Inst_init;
 		//InstDef.free = Inst_free;
 		for (int i = 0; i < 4; i++) {
@@ -4837,13 +4837,13 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 			CT_PassTBL[i] = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &PassDef, pline);
 		}
 	}
-#define TY_Pass          (CT_PassTBL[0])->cid
-#define TY_ImmutablePass (CT_PassTBL[1])->cid
-#define TY_FunctionPass  (CT_PassTBL[2])->cid
-#define TY_ModulePass    (CT_PassTBL[3])->cid
+#define TY_Pass          (CT_PassTBL[0])->classId
+#define TY_ImmutablePass (CT_PassTBL[1])->classId
+#define TY_FunctionPass  (CT_PassTBL[2])->classId
+#define TY_ModulePass    (CT_PassTBL[3])->classId
 
-#define TY_PassManager         (CT_PassManager)->cid
-#define TY_FunctionPassManager (CT_FunctionPassManager)->cid
+#define TY_PassManager         (CT_PassManager)->classId
+#define TY_FunctionPassManager (CT_FunctionPassManager)->classId
 	/* TODO */
 #define TY_Array_Value    (TY_Array)
 #define TY_Array_Type     (TY_Array)

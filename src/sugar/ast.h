@@ -79,7 +79,7 @@ static kbool_t Token_resolved(KonohaContext *kctx, kNameSpace *ns, kTokenVar *tk
 static kTokenVar* TokenType_resolveGenerics(KonohaContext *kctx, kNameSpace *ns, kTokenVar *tk, kToken *tkP)
 {
 	size_t i, psize= 0, size = kArray_size(tkP->sub);
-	kparam_t p[size];
+	kparamtype_t p[size];
 	for(i = 0; i < size; i++) {
 		kToken *tkT = tkP->sub->tokenItems[i];
 		if(tkT->keyword == KW_COMMA) continue;
@@ -93,7 +93,7 @@ static kTokenVar* TokenType_resolveGenerics(KonohaContext *kctx, kNameSpace *ns,
 	KonohaClass *ct = NULL;
 	if(psize > 0) {
 		ct = CT_(TK_type(tk));
-		if(ct->bcid == TY_Func) {
+		if(ct->baseclassId == TY_Func) {
 			ct = KLIB KonohaClass_Generics(kctx, ct, p[0].ty, psize-1, p+1);
 		}
 		else if(ct->p0 == TY_void) {
@@ -107,7 +107,7 @@ static kTokenVar* TokenType_resolveGenerics(KonohaContext *kctx, kNameSpace *ns,
 	else {
 		ct = CT_p0(kctx, CT_Array, TK_type(tk));
 	}
-	tk->ty = ct->cid;
+	tk->ty = ct->classId;
 	return tk;
 }
 
@@ -122,7 +122,7 @@ static int appendKeyword(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList,
 				KonohaClass *ct = KLIB kNameSpace_getCT(kctx, ns, NULL/*FIXME*/, S_text(tk->text), S_size(tk->text), TY_unknown);
 				if(ct != NULL) {
 					tk->keyword = KW_TypePattern;
-					tk->ty = ct->cid;
+					tk->ty = ct->classId;
 				}
 			}
 			else {
@@ -305,7 +305,7 @@ static int Stmt_addAnnotation(KonohaContext *kctx, kStmt *stmt, kArray *tokenLis
 				i++;
 			}
 			if(value != NULL) {
-				KLIB kObject_setObject(kctx, stmt, tk->keyword, O_cid(value), value);
+				KLIB kObject_setObject(kctx, stmt, tk->keyword, O_classId(value), value);
 			}
 		}
 	}
@@ -761,7 +761,7 @@ static KMETHOD PatternMatch_Expr(KonohaContext *kctx, KonohaStack *sfp)
 	kExpr *expr = Stmt_newExpr2(kctx, stmt, tls, s, e);
 	if(expr != K_NULLEXPR) {
 		dumpExpr(kctx, 0, 0, expr);
-		KLIB kObject_setObject(kctx, stmt, name, O_cid(expr), expr);
+		KLIB kObject_setObject(kctx, stmt, name, O_classId(expr), expr);
 		r = e;
 	}
 	RESET_GCSTACK();
@@ -774,7 +774,7 @@ static KMETHOD PatternMatch_Type(KonohaContext *kctx, KonohaStack *sfp)
 	int r = -1;
 	kToken *tk = tls->tokenItems[s];
 	if(TK_isType(tk)) {
-		KLIB kObject_setObject(kctx, stmt, name, O_cid(tk), tk);
+		KLIB kObject_setObject(kctx, stmt, name, O_classId(tk), tk);
 		r = s + 1;
 	}
 	RETURNi_(r);
@@ -786,7 +786,7 @@ static KMETHOD PatternMatch_Usymbol(KonohaContext *kctx, KonohaStack *sfp)
 	int r = -1;
 	kToken *tk = tls->tokenItems[s];
 	if(tk->keyword == TK_SYMBOL && isUpperCaseSymbol(S_text(tk->text))) {
-		KLIB kObject_setObject(kctx, stmt, name, O_cid(tk), tk);
+		KLIB kObject_setObject(kctx, stmt, name, O_classId(tk), tk);
 		r = s + 1;
 	}
 	RETURNi_(r);
@@ -798,7 +798,7 @@ static KMETHOD PatternMatch_Symbol(KonohaContext *kctx, KonohaStack *sfp)
 	int r = -1;
 	kToken *tk = tls->tokenItems[s];
 	if(tk->keyword == TK_SYMBOL) {
-		KLIB kObject_setObject(kctx, stmt, name, O_cid(tk), tk);
+		KLIB kObject_setObject(kctx, stmt, name, O_classId(tk), tk);
 		r = s + 1;
 	}
 	RETURNi_(r);
@@ -814,7 +814,7 @@ static KMETHOD PatternMatch_Params(KonohaContext *kctx, KonohaStack *sfp)
 		int ss = 0, ee = kArray_size(tls);
 		if(0 < ee && tls->tokenItems[0]->keyword == KW_void) ss = 1;  //  f(void) = > f()
 		kBlock *bk = new_Block(kctx, kStmt_nameSpace(stmt), stmt, tls, ss, ee, ',');
-		KLIB kObject_setObject(kctx, stmt, name, O_cid(bk), bk);
+		KLIB kObject_setObject(kctx, stmt, name, O_classId(bk), bk);
 		r = s + 1;
 	}
 	RETURNi_(r);
@@ -826,7 +826,7 @@ static KMETHOD PatternMatch_Block(KonohaContext *kctx, KonohaStack *sfp)
 	kToken *tk = tls->tokenItems[s];
 	dumpTokenArray(kctx, 0, tls, s, e);
 	if(tk->keyword == TK_CODE) {
-		KLIB kObject_setObject(kctx, stmt, name, O_cid(tk), tk);
+		KLIB kObject_setObject(kctx, stmt, name, O_classId(tk), tk);
 		RETURNi_(s+1);
 	}
 //	else if(tk->keyword == AST_BRACE) {
@@ -836,7 +836,7 @@ static KMETHOD PatternMatch_Block(KonohaContext *kctx, KonohaStack *sfp)
 //	}
 	else {
 		kBlock *bk = new_Block(kctx, kStmt_nameSpace(stmt), stmt, tls, s, e, ';');
-		KLIB kObject_setObject(kctx, stmt, name, O_cid(bk), bk);
+		KLIB kObject_setObject(kctx, stmt, name, O_classId(bk), bk);
 		RETURNi_(e);
 	}
 	RETURNi_(-1); // ERROR
@@ -851,7 +851,7 @@ static KMETHOD PatternMatch_Toks(KonohaContext *kctx, KonohaStack *sfp)
 			KLIB kArray_add(kctx, a, tls->tokenItems[s]);
 			s++;
 		}
-		KLIB kObject_setObject(kctx, stmt, name, O_cid(a), a);
+		KLIB kObject_setObject(kctx, stmt, name, O_classId(a), a);
 		RETURNi_(e);
 	}
 	RETURNi_(-1);

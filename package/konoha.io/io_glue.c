@@ -45,9 +45,9 @@ static kString *kwb_newString(KonohaContext *kctx, KUtilsWriteBuffer *wb, int fl
 #define kiomod        ((kiomod_t*)kctx->mod[MOD_IO])
 #define kioshare      ((kioshare_t*)kctx->modshare[MOD_IO])
 #define CT_InputStream       kioshare->cInputStream
-#define TY_InputStream       kioshare->cInputStream->cid
+#define TY_InputStream       kioshare->cInputStream->classId
 #define CT_OutputStream      kioshare->cOutputStream
-#define TY_OutputStream      kioshare->cOutputStream->cid
+#define TY_OutputStream      kioshare->cOutputStream->classId
 
 #define IS_io(O)      ((O)->h.ct == CT_io)
 
@@ -212,14 +212,14 @@ static void OutputStream_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static KDEFINE_TY InputStreamDef = {
+static KDEFINE_CLASS InputStreamDef = {
 	STRUCTNAME(InputStream),
 	.cflag = 0,
 	.init = Stream_init,
 	.free = Stream_free,
 };
 
-static KDEFINE_TY OutputStreamDef = {
+static KDEFINE_CLASS OutputStreamDef = {
 	STRUCTNAME(OutputStream),
 	.cflag = 0,
 	.init = Stream_init,

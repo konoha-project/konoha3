@@ -211,7 +211,7 @@ typedef struct {
 /* ------------------------------------------------------------------------ */
 #define kregexshare      ((kregexshare_t*)kctx->modshare[MOD_REGEX])
 #define CT_Regex         kregexshare->cRegex
-#define TY_Regex         kregexshare->cRegex->cid
+#define TY_Regex         kregexshare->cRegex->classId
 
 #define IS_Regex(O)      ((O)->h.ct == CT_Regex)
 
@@ -649,7 +649,7 @@ static kbool_t pcre_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	base->h.free     = kregexshare_free;
 	KLIB Konoha_setModule(kctx, MOD_REGEX, &base->h, pline);
 
-	KDEFINE_TY RegexDef = {
+	KDEFINE_CLASS RegexDef = {
 		STRUCTNAME(Regex),
 		.cflag = 0,
 		.init = Regex_init,
@@ -658,9 +658,9 @@ static kbool_t pcre_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	};
 	base->cRegex = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &RegexDef, pline);
 
-	kparam_t p = { .ty = TY_String,  };
+	kparamtype_t p = { .ty = TY_String,  };
 	KonohaClass *cStrArray = KLIB KonohaClass_Generics(kctx, CT_(TY_Array), TY_void, 1, &p);
-#define TY_StrArray (cStrArray->cid)
+#define TY_StrArray (cStrArray->classId)
 	int FN_x = FN_("x");
 	int FN_y = FN_("y");
 	KDEFINE_METHOD MethodData[] = {

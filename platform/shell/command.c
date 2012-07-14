@@ -531,7 +531,7 @@ static void konoha_commandline(KonohaContext *kctx, int argc, char** argv)
 		KLIB kArray_add(kctx, a, KLIB new_kString(kctx, argv[i], strlen(argv[i]), SPOL_TEXT));
 	}
 	KDEFINE_OBJECT_CONST ObjectData[] = {
-			{"SCRIPT_ARGV", CT_StringArray0->cid, (kObject*)a},
+			{"SCRIPT_ARGV", CT_StringArray0->classId, (kObject*)a},
 			{}
 	};
 	KLIB kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(ObjectData), 0);

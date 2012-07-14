@@ -180,14 +180,14 @@ static KMETHOD Math_atanh(KonohaContext *kctx, KonohaStack *sfp)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 #define _KVf(T) "MATH_" #T, TY_Float, M_##T
-#define TY_Math  (cMath->cid)
+#define TY_Math  (cMath->classId)
 
 static	kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	KREQUIRE_PACKAGE("konoha.float", pline);
-	static KDEFINE_TY MathDef = {
+	static KDEFINE_CLASS MathDef = {
 			.structname = "Math"/*structname*/,
-			.cid = TY_newid/*cid*/,
+			.classId = TY_newid/*cid*/,
 	};
 	KonohaClass *cMath = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &MathDef, pline);
 	int FN_x = FN_("x");

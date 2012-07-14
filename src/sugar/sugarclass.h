@@ -444,7 +444,7 @@ static kMethod* kNameSpace_getMethodNULL(KonohaContext *kctx, kNameSpace *ns, kt
 		kArray *a = ns->methodList;
 		for(i = 0; i < kArray_size(a); i++) {
 			kMethod *mtd = a->methodItems[i];
-			if(mtd->cid == cid && mtd->mn == mn) {
+			if(mtd->classId == cid && mtd->mn == mn) {
 				return mtd;
 			}
 		}
@@ -456,7 +456,7 @@ static kMethod* kNameSpace_getMethodNULL(KonohaContext *kctx, kNameSpace *ns, kt
 //static kMethod* NameSpace_getStaticMethodNULL(KonohaContext *kctx, kNameSpace *ns, kmethodn_t mn)
 //{
 //	while(ks != NULL) {
-//		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, O_cid(ks->scriptObject), mn);
+//		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, O_classId(ks->scriptObject), mn);
 //		if(mtd != NULL && kMethod_isStatic(mtd)) {
 //			return mtd;
 //		}
@@ -486,17 +486,17 @@ static kMethod* NameSpace_getCastMethodNULL(KonohaContext *kctx, kNameSpace *ns,
 static kbool_t NameSpace_defineMethod(KonohaContext *kctx, kNameSpace *ns, kMethod *mtd, kfileline_t pline)
 {
 	//if(pline != 0) {
-	//	kMethod *mtdOLD = NameSpace_getMethodNULL(kctx, ks, mtd->cid, mtd->mn);
+	//	kMethod *mtdOLD = NameSpace_getMethodNULL(kctx, ks, mtd->classId, mtd->mn);
 	//	if(mtdOLD != NULL) {
 	//		char mbuf[128];
-	//		kreportf(ErrTag, pline, "method %s.%s is already defined", TY_t(mtd->cid), T_mn(mbuf, mtd->mn));
+	//		kreportf(ErrTag, pline, "method %s.%s is already defined", TY_t(mtd->classId), T_mn(mbuf, mtd->mn));
 	//		return 0;
 	//	}
 	//}
 	if(mtd->packageId == 0) {
 		((kMethodVar*)mtd)->packageId = ns->packageId;
 	}
-	KonohaClass *ct = CT_(mtd->cid);
+	KonohaClass *ct = CT_(mtd->classId);
 	if(ct->packageDomain == ns->packageDomain && kMethod_isPublic(mtd)) {
 		CT_addMethod(kctx, ct, mtd);
 	}
@@ -516,7 +516,7 @@ static void kNameSpace_loadMethodData(KonohaContext *kctx, kNameSpace *ns, intpt
 		ktype_t cid  = (ktype_t)d[3];
 		kmethodn_t mn = (kmethodn_t)d[4];
 		size_t i, psize = (size_t)d[5];
-		kparam_t p[psize+1];
+		kparamtype_t p[psize+1];
 		d = d + 6;
 		for(i = 0; i < psize; i++) {
 			p[i].ty = (ktype_t)d[0];

@@ -85,7 +85,7 @@ struct _kSubproc {
 #define kmodsubproc        ((kmodsubproc_t*)kctx->modshare[MOD_subproc])
 #define IS_defineSubproc() (kctx->modshare[MOD_subproc] != NULL)
 #define CT_Subproc         kmodsubproc->cSubproc
-#define TY_Subproc         kmodsubproc->cSubproc->cid
+#define TY_Subproc         kmodsubproc->cSubproc->classId
 
 #define IS_Subproc(O)      ((O)->h.ct == CT_Subproc)
 
@@ -1250,7 +1250,7 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	base->h.free     = kmodsubproc_free;
 	Konoha_setModule(MOD_subproc, &base->h, pline);
 
-	KDEFINE_TY defSubproc = {
+	KDEFINE_CLASS defSubproc = {
 		STRUCTNAME(Subproc),
 		.cflag = kClass_Final,
 		.init  = Subproc_init,
@@ -1260,9 +1260,9 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 
 	base->cSubproc= KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defSubproc, pline);
 
-	kparam_t ps = {TY_String, FN_("str")};
+	kparamtype_t ps = {TY_String, FN_("str")};
 	KonohaClass *CT_StringArray2 = KLIB KonohaClass_Generics(kctx, CT_Array, TY_String, 1, &ps);
-	ktype_t TY_StringArray = CT_StringArray2->cid;
+	ktype_t TY_StringArray = CT_StringArray2->classId;
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im, _F(Subproc_new), TY_Subproc, TY_Subproc,MN_("new"), 2, TY_String, FN_("path"), TY_Boolean, FN_("mode"),

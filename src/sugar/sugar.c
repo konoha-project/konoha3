@@ -170,33 +170,33 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	KINITv(base->packageList, new_(Array, 8));
 	base->packageMapNO = KLIB Kmap_init(kctx, 0);
 
-	KDEFINE_TY defNameSpace = {
+	KDEFINE_CLASS defNameSpace = {
 		STRUCTNAME(NameSpace),
 		.init = NameSpace_init,
 		.reftrace = NameSpace_reftrace,
 		.free = NameSpace_free,
 	};
-	KDEFINE_TY defToken = {
+	KDEFINE_CLASS defToken = {
 		STRUCTNAME(Token),
 		.init = Token_init,
 		.reftrace = Token_reftrace,
 	};
-	KDEFINE_TY defExpr = {
+	KDEFINE_CLASS defExpr = {
 		STRUCTNAME(Expr),
 		.init = Expr_init,
 		.reftrace = Expr_reftrace,
 	};
-	KDEFINE_TY defStmt = {
+	KDEFINE_CLASS defStmt = {
 		STRUCTNAME(Stmt),
 		.init = Stmt_init,
 		.reftrace = Stmt_reftrace,
 	};
-	KDEFINE_TY defBlock = {
+	KDEFINE_CLASS defBlock = {
 		STRUCTNAME(Block),
 		.init = Block_init,
 		.reftrace = Block_reftrace,
 	};
-	KDEFINE_TY defGamma = {
+	KDEFINE_CLASS defGamma = {
 		STRUCTNAME(Gamma),
 		.init = Gamma_init,
 	};
@@ -206,7 +206,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	base->cStmt  = KLIB Konoha_defineClass(kctx, PN_sugar, PN_sugar, NULL, &defStmt, 0);
 	base->cBlock = KLIB Konoha_defineClass(kctx, PN_sugar, PN_sugar, NULL, &defBlock, 0);
 	base->cGamma = KLIB Konoha_defineClass(kctx, PN_sugar, PN_sugar, NULL, &defGamma, 0);
-	base->cTokenArray = CT_p0(kctx, CT_Array, base->cToken->cid);
+	base->cTokenArray = CT_p0(kctx, CT_Array, base->cToken->classId);
 
 	KLIB Knull(kctx, base->cNameSpace);
 	KLIB Knull(kctx, base->cToken);

@@ -31,11 +31,11 @@
 
 #define CFLAG_Iterator         kClass_Final
 #define CT_Iterator            kmoditerator->cIterator
-#define TY_Iterator            kmoditerator->cIterator->cid
+#define TY_Iterator            kmoditerator->cIterator->classId
 #define CT_StringIterator      kmoditerator->cStringIterator
-#define TY_StringIterator      kmoditerator->cStringIterator->cid
+#define TY_StringIterator      kmoditerator->cStringIterator->classId
 
-#define IS_Iterator(O)         (O_ct(O)->bcid == TY_Iterator)
+#define IS_Iterator(O)         (O_ct(O)->baseclassId == TY_Iterator)
 
 typedef struct {
 	KonohaModule h;

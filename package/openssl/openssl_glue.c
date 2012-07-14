@@ -76,8 +76,8 @@ static KMETHOD kSHA1_Final(KonohaContext *kctx, KonohaStack *sfp)
 #define _C kMethod_Const
 #define _S kMethod_Static
 #define _F(F)   (intptr_t)(F)
-#define TY_openssl  (ct0->cid)
-#define TY_Log      (ct1->cid)
+#define TY_openssl  (ct0->classId)
+#define TY_Log      (ct1->classId)
 
 static kbool_t openssl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
@@ -86,14 +86,14 @@ static kbool_t openssl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		"SHA1",
 	};
 	KonohaClass *tbls[2];
-	static KDEFINE_TY Def = {
+	static KDEFINE_CLASS Def = {
 			.structname = "",
-			.cid = TY_newid,
+			.classId = TY_newid,
 			.init = RawPtr_init,
 			.free = RawPtr_free,
 	};
-#define TY_MD5  tbls[0]->cid
-#define TY_SHA1 tbls[1]->cid
+#define TY_MD5  tbls[0]->classId
+#define TY_SHA1 tbls[1]->classId
 	int i;
 	for (i = 0; i < 2; i++) {
 		Def.structname = names[i];

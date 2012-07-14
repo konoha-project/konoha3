@@ -187,7 +187,7 @@ static	kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	base->h.free     = kmodfloat_free;
 	KLIB Konoha_setModule(kctx, MOD_float, &base->h, pline);
 
-	KDEFINE_TY defFloat = {
+	KDEFINE_CLASS defFloat = {
 		STRUCTNAME(Float),
 		.cflag = CFLAG_Int,
 		.init = Float_init,
