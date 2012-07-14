@@ -28,29 +28,6 @@ extern "C" {
 
 /* ------------------------------------------------------------------------ */
 
-static GammaAllocaData *Gamma_push(KonohaContext *kctx, kGamma *gma, GammaAllocaData *newone)
-{
-	GammaAllocaData *oldone = gma->genv;
-	gma->genv = newone;
-	return oldone;
-}
-
-static GammaAllocaData *Gamma_pop(KonohaContext *kctx, kGamma *gma, GammaAllocaData *oldone, GammaAllocaData *checksum)
-{
-	GammaAllocaData *newone = gma->genv;
-	assert(checksum == newone);
-	gma->genv = oldone;
-	if(newone->localScope.allocsize > 0) {
-		KFREE(newone->localScope.vars, newone->localScope.allocsize);
-	}
-	return newone;
-}
-
-#define GAMMA_PUSH(G,B) GammaAllocaData *oldbuf_ = Gamma_push(kctx, G, B)
-#define GAMMA_POP(G,B)  Gamma_pop(kctx, G, oldbuf_, B)
-
-// --------------------------------------------------------------------------
-
 static KMETHOD UndefinedExprTyCheck(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
@@ -296,6 +273,29 @@ static kbool_t Block_tyCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
 }
 
 /* ------------------------------------------------------------------------ */
+
+static GammaAllocaData *Gamma_push(KonohaContext *kctx, kGamma *gma, GammaAllocaData *newone)
+{
+	GammaAllocaData *oldone = gma->genv;
+	gma->genv = newone;
+	return oldone;
+}
+
+static GammaAllocaData *Gamma_pop(KonohaContext *kctx, kGamma *gma, GammaAllocaData *oldone, GammaAllocaData *checksum)
+{
+	GammaAllocaData *newone = gma->genv;
+	assert(checksum == newone);
+	gma->genv = oldone;
+	if(newone->localScope.allocsize > 0) {
+		KFREE(newone->localScope.vars, newone->localScope.allocsize);
+	}
+	return newone;
+}
+
+#define GAMMA_PUSH(G,B) GammaAllocaData *oldbuf_ = Gamma_push(kctx, G, B)
+#define GAMMA_POP(G,B)  Gamma_pop(kctx, G, oldbuf_, B)
+
+// --------------------------------------------------------------------------
 
 static kBlock* Method_newBlock(KonohaContext *kctx, kMethod *mtd, kString *source, kfileline_t uline)
 {
