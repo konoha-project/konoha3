@@ -43,63 +43,8 @@ int verbose_sugar = 0;
 #include "token.h"
 #include "ast.h"
 #include "tycheck.h"
+#include "sugarfunc.h"
 
-#define PATTERN(T)  .keyword = KW_##T##Pattern
-#define TOKEN(T)    .keyword = KW_##T
-
-static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
-{
-	KDEFINE_SYNTAX SYNTAX[] = {
-		{ TOKEN(ERR), .flag = SYNFLAG_StmtBreakExec, },
-		{ PATTERN(Expr), .rule ="$expr", PatternMatch_(Expr), TopStmtTyCheck_(Expr), StmtTyCheck_(Expr),  },
-		{ PATTERN(Symbol),  _TERM, PatternMatch_(Symbol),  ExprTyCheck_(Symbol),},
-		{ PATTERN(Usymbol), _TERM, PatternMatch_(Usymbol), /* .rule = "$USYMBOL \"=\" $expr",*/ TopStmtTyCheck_(ConstDecl), ExprTyCheck_(Usymbol),},
-		{ PATTERN(Text), _TERM, ExprTyCheck_(Text),},
-		{ PATTERN(Int), _TERM, ExprTyCheck_(Int),},
-		{ PATTERN(Float), _TERM, },
-		{ PATTERN(Type), _TERM, PatternMatch_(Type), .rule = "$type $expr", StmtTyCheck_(TypeDecl), ExprTyCheck_(Type), },
-		{ PATTERN(Parenthesis), .flag = SYNFLAG_ExprPostfixOp2, ParseExpr_(Parenthesis), .priority_op2 = 16, ExprTyCheck_(FuncStyleCall),}, //AST_PARENTHESIS
-		{ PATTERN(Bracket),  },  //AST_BRACKET
-		{ PATTERN(Brace),  }, // AST_BRACE
-		{ PATTERN(Block), PatternMatch_(Block), ExprTyCheck_(Block), },
-		{ PATTERN(Params), PatternMatch_(Params), TopStmtTyCheck_(ParamsDecl), ExprTyCheck_(MethodCall),},
-		{ PATTERN(Toks), PatternMatch_(Toks), },
-		{ TOKEN(DOT), ParseExpr_(DOT), .priority_op2 = 16, },
-		{ TOKEN(DIV), _OP, .op2 = "opDIV", .priority_op2 = 32, },
-		{ TOKEN(MOD), _OP, .op2 = "opMOD", .priority_op2 = 32, },
-		{ TOKEN(MUL), _OP, .op2 = "opMUL", .priority_op2 = 32, },
-		{ TOKEN(ADD), _OP, .op1 = "opPLUS", .op2 = "opADD", .priority_op2 = 64, },
-		{ TOKEN(SUB), _OP, .op1 = "opMINUS", .op2 = "opSUB", .priority_op2 = 64, },
-		{ TOKEN(LT), _OP, .op2 = "opLT", .priority_op2 = 256, },
-		{ TOKEN(LTE), _OP, .op2 = "opLTE", .priority_op2 = 256, },
-		{ TOKEN(GT), _OP, .op2 = "opGT", .priority_op2 = 256, },
-		{ TOKEN(GTE), _OP, .op2 = "opGTE", .priority_op2 = 256, },
-		{ TOKEN(EQ), _OP, .op2 = "opEQ", .priority_op2 = 512, },
-		{ TOKEN(NEQ), _OP, .op2 = "opNEQ", .priority_op2 = 512, },
-		{ TOKEN(AND), _OP, /*.op2 = ""unused*/ .priority_op2 = 1024, ExprTyCheck_(AND)},
-		{ TOKEN(OR), _OP, /*.op2 = ""unused*/ .priority_op2 = 2048, ExprTyCheck_(OR)},
-		{ TOKEN(NOT), _OP, .op1 = "opNOT", },
-//		{ TOKEN(":"),  _OP,  .priority_op2 = 3072,},
-		{ TOKEN(LET),  _OPLeft, /*.op2 = "*"*/ .priority_op2 = 4096, },
-		{ TOKEN(COMMA), ParseExpr_(COMMA), .op2 = "*", .priority_op2 = 8192, /*.flag = SYNFLAG_ExprLeftJoinOP2,*/ },
-		{ TOKEN(DOLLAR), ParseExpr_(DOLLAR), },
-		{ TOKEN(void), .type = TY_void, .rule ="$type [$type \".\"] $SYMBOL $params [$block]", TopStmtTyCheck_(MethodDecl)},
-		{ TOKEN(boolean), .type = TY_Boolean, },
-		{ TOKEN(int),     .type = TY_Int, },
-		{ TOKEN(true),  _TERM, ExprTyCheck_(true),},
-		{ TOKEN(false),  _TERM, ExprTyCheck_(false),},
-		{ TOKEN(if), .rule ="\"if\" \"(\" $expr \")\" $block [\"else\" else: $block]", TopStmtTyCheck_(if), StmtTyCheck_(if), },
-		{ TOKEN(else), .rule = "\"else\" $block", TopStmtTyCheck_(else), StmtTyCheck_(else), },
-		{ TOKEN(return), .rule ="\"return\" [$expr]", .flag = SYNFLAG_StmtBreakExec, StmtTyCheck_(return), },
-		{ .keyword = KW_END, },
-	};
-	NameSpace_defineSyntax(kctx, ns, SYNTAX);
-	SugarSyntaxVar *syn = (SugarSyntaxVar*)SYN_(ns, KW_void);
-	syn->ty = TY_void; // it's not cool, but necessary
-	syn = (SugarSyntaxVar*)SYN_(ns, KW_UsymbolPattern);
-	KINITv(syn->syntaxRuleNULL, new_(TokenArray, 0));
-	parseSyntaxRule(kctx, "$USYMBOL \"=\" $expr", 0, syn->syntaxRuleNULL);
-}
 
 /* ------------------------------------------------------------------------ */
 /* SugarContext global functions */
