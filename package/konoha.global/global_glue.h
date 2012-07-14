@@ -188,7 +188,7 @@ static kbool_t appendSetterStmt(KonohaContext *kctx, kExpr *expr, kStmt **lastSt
 {
 	kStmt *lastStmt = lastStmtRef[0];
 	kStmt *newstmt = new_(Stmt, lastStmt->uline);
-	SUGAR Block_insertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, newstmt);
+	SUGAR kBlock_insertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, newstmt);
 	kStmt_setsyn(newstmt, SYN_(kStmt_nameSpace(newstmt), KW_ExprPattern));
 	KLIB kObject_setObject(kctx, newstmt, KW_ExprPattern, TY_Expr, expr);
 	lastStmtRef[0] = newstmt;
@@ -262,7 +262,7 @@ static kbool_t global_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfilel
 		{ .keyword = KW_END, },
 	};
 	SUGAR NameSpace_defineSyntax(kctx, ns, SYNTAX);
-	SUGAR SYN_setSugarFunc(kctx, ns, KW_StmtTypeDecl, SYNIDX_TopStmtTyCheck, new_SugarFunc(StmtTyCheck_GlobalTypeDecl));
+	SUGAR kNameSpace_setSugarFunc(kctx, ns, KW_StmtTypeDecl, SYNIDX_TopStmtTyCheck, new_SugarFunc(StmtTyCheck_GlobalTypeDecl));
 	if(O_classId(ns->scriptObject) == TY_System) {
 		KDEFINE_CLASS defScript = {
 			.structname = "Script",

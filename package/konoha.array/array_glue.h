@@ -147,11 +147,11 @@ static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_P("parse bracket!!");
 	kToken *tk = tokenArray->tokenItems[c];
 	if(s == c) { // TODO
-		kExpr *expr = SUGAR Stmt_newExpr2(kctx, stmt, tk->sub, 0, kArray_size(tk->sub));
-		RETURN_(SUGAR Expr_rightJoin(kctx, expr, stmt, tokenArray, s+1, c+1, e));
+		kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, tk->sub, 0, kArray_size(tk->sub));
+		RETURN_(SUGAR kStmt_rightJoinExpr(kctx, stmt, expr, tokenArray, c+1, e));
 	}
 	else {
-		kExpr *lexpr = SUGAR Stmt_newExpr2(kctx, stmt, tokenArray, s, c);
+		kExpr *lexpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenArray, s, c);
 		if(lexpr == K_NULLEXPR) {
 			RETURN_(lexpr);
 		}
@@ -167,11 +167,11 @@ static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 			lexpr  = SUGAR new_ConsExpr(kctx, syn, 2, tkN, lexpr);
 			lexpr = SUGAR Stmt_addExprParams(kctx, stmt, lexpr, tk->sub, 0, kArray_size(tk->sub), 1/*allowEmpty*/);
 		}
-		RETURN_(SUGAR Expr_rightJoin(kctx, lexpr, stmt, tokenArray, s+1, c+1, e));
+		RETURN_(SUGAR kStmt_rightJoinExpr(kctx, stmt, lexpr, tokenArray, c+1, e));
 	}
 }
 
-static kbool_t array_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
+static kbool_t array_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("[]"), .flag = SYNFLAG_ExprPostfixOp2, ParseExpr_(BRACKET), .priority_op2 = 16, },  //AST_BRACKET

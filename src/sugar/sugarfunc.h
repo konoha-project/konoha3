@@ -759,7 +759,7 @@ static kbool_t appendAssignmentStmt(KonohaContext *kctx, kExpr *expr, kStmt **la
 {
 	kStmt *lastStmt = lastStmtRef[0];
 	kStmt *newstmt = new_(Stmt, lastStmt->uline);
-	Block_insertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, newstmt);
+	kBlock_insertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, newstmt);
 	kStmt_setsyn(newstmt, SYN_(kStmt_nameSpace(newstmt), KW_ExprPattern));
 	kExpr_typed(expr, LET, TY_void);
 	KLIB kObject_setObject(kctx, newstmt, KW_ExprPattern, TY_Expr, expr);

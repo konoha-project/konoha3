@@ -155,7 +155,7 @@ static void checkFuncArray(KonohaContext *kctx, kFunc **synp)
 	}
 }
 
-static void SYN_setSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, size_t idx, kFunc *fo)
+static void kNameSpace_setSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, size_t idx, kFunc *fo)
 {
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)NameSpace_syn(kctx, ns, keyword, 1/*new*/);
 	kFunc **synp = &(syn->PatternMatch);
@@ -163,7 +163,7 @@ static void SYN_setSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyw
 	KSETv(synp[idx], fo);
 }
 
-static void SYN_addSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, size_t idx, kFunc *fo)
+static void kNameSpace_addSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, size_t idx, kFunc *fo)
 {
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)NameSpace_syn(kctx, ns, keyword, 1/*new*/);
 	kFunc **synp = &(syn->PatternMatch);
@@ -988,7 +988,7 @@ static void Block_reftrace(KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
-static void Block_insertAfter(KonohaContext *kctx, kBlock *bk, kStmt *target, kStmt *stmt)
+static void kBlock_insertAfter(KonohaContext *kctx, kBlock *bk, kStmt *target, kStmt *stmt)
 {
 	//DBG_ASSERT(stmt->parentNULL == NULL);
 	KSETv(((kStmtVar*)stmt)->parentBlockNULL, bk);

@@ -200,16 +200,14 @@ typedef struct KDEFINE_SYNTAX {
 struct kNameSpaceVar {
 	KonohaObjectHeader h;
 	kpackage_t packageId;  	kpackage_t packageDomain;
-	kNameSpace           *parentNULL;
-	const TokenizeFunc   *tokenMatrix;
-	KUtilsHashMap        *syntaxMapNN;
+	kNameSpace                        *parentNULL;
+	const TokenizeFunc                *tokenMatrix;
+	KUtilsHashMap                     *syntaxMapNN;
 	//
-	kObject              *scriptObject;
-	kArray*               methodList;   // default K_EMPTYARRAY
-	KUtilsGrowingArray    constTable;        // const variable
+	kObject                           *scriptObject;
+	kArray*                            methodList;   // default K_EMPTYARRAY
+	KUtilsGrowingArray                 constTable;        // const variable
 };
-
-typedef kshort_t    kexpr_t;
 
 struct kTokenVar {
 	KonohaObjectHeader h;
@@ -230,10 +228,6 @@ struct kTokenVar {
 #define kToken_setUnresolved(o, B)          TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,B)
 #define kToken_topch(tk)                    ((tk)->keyword != TK_TEXT && (S_size((tk)->text) == 1) ? S_text((tk)->text)[0] : 0)
 
-//#define TEXPR_LOCAL_   -4   /*THIS IS NEVER PASSED*/
-//#define TEXPR_BLOCK_   -3   /*THIS IS NEVER PASSED*/
-//#define TEXPR_FIELD_   -2   /*THIS IS NEVER PASSED*/
-//#define TEXPR_shift    (TEXPR_LOCAL - (TEXPR_LOCAL_))
 #define TEXPR_UNTYPED       -1   /*THIS MUST NOT HAPPEN*/
 #define TEXPR_CONST          0
 #define TEXPR_NEW            1
@@ -260,6 +254,8 @@ struct kTokenVar {
 
 #define kExpr_at(E,N)        ((E)->cons->exprItems[(N)])
 
+typedef kshort_t    kexpr_t;
+
 struct kExprVar {
 	KonohaObjectHeader h;
 	SugarSyntax *syn;
@@ -273,9 +269,7 @@ struct kExprVar {
 	union {
 		kObject*   objectConstValue;
 		uintptr_t  unboxConstValue;
-		kfloat_t   unboxConstValueAs_float;
 		intptr_t   index;
-		uintptr_t  cid;
 	};
 };
 
@@ -399,9 +393,6 @@ struct kGammaVar {
 #define KW_IntPattern (((ksymbol_t)5)|KW_PATTERN) /*$INT*/
 #define KW_FloatPattern (((ksymbol_t)6)|KW_PATTERN) /*$FLOAT*/
 #define KW_TypePattern (((ksymbol_t)7)|KW_PATTERN) /*$type*/
-//#define KW_ParenthesisPattern (((ksymbol_t)8)|KW_PATTERN) /*$()*/
-//#define KW_BracketPattern  (((ksymbol_t)9)|KW_PATTERN) /*$[]*/
-//#define KW_BracePattern (((ksymbol_t)10)|KW_PATTERN) /*${}*/
 #define KW_ParenthesisPattern (((ksymbol_t)8)) /*()*/
 #define KW_BracketPattern     (((ksymbol_t)9)) /*[]*/
 #define KW_BracePattern       (((ksymbol_t)10)) /*{}*/
@@ -474,41 +465,41 @@ typedef struct {
 	kFunc *ParseExpr_Op;
 
 	// export
-	void   (*NameSpace_setTokenizeFunc)(KonohaContext *kctx, kNameSpace *, int ch, TokenizeFunc, kFunc *, int isAddition);
-	void   (*NameSpace_tokenize)(KonohaContext *kctx, kNameSpace *, const char *, kfileline_t, kArray *);
+	void   (*NameSpace_setTokenizeFunc)(KonohaContext *, kNameSpace *, int ch, TokenizeFunc, kFunc *, int isAddition);
+	void   (*NameSpace_tokenize)(KonohaContext *, kNameSpace *, const char *, kfileline_t, kArray *);
 
-	kExpr* (*kExpr_setConstValue)(KonohaContext *kctx, kExpr *expr, ktype_t ty, kObject *o);
-	kExpr* (*kExpr_setUnboxConstValue)(KonohaContext *kctx, kExpr *expr, ktype_t ty, uintptr_t unboxValue);
-	kExpr* (*kExpr_setVariable)(KonohaContext *kctx, kExpr *expr, kGamma *gma, kexpr_t build, ktype_t ty, intptr_t index);
+	kExpr* (*kExpr_setConstValue)(KonohaContext *, kExpr *, ktype_t ty, kObject *o);
+	kExpr* (*kExpr_setUnboxConstValue)(KonohaContext *, kExpr *, ktype_t ty, uintptr_t unboxValue);
+	kExpr* (*kExpr_setVariable)(KonohaContext *, kExpr *, kGamma *, kexpr_t build, ktype_t ty, intptr_t index);
 
-	kToken* (*Stmt_token)(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw, kToken *def);
-	kExpr* (*Stmt_expr)(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw, kExpr *def);
-	const char* (*Stmt_text)(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw, const char *def);
-	kBlock* (*Stmt_block)(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw, kBlock *def);
+	kToken* (*Stmt_token)(KonohaContext *, kStmt *, ksymbol_t kw, kToken *def);
+	kExpr* (*Stmt_expr)(KonohaContext *, kStmt *, ksymbol_t kw, kExpr *def);
+	const char* (*Stmt_text)(KonohaContext *, kStmt *, ksymbol_t kw, const char *def);
+	kBlock* (*Stmt_block)(KonohaContext *, kStmt *, ksymbol_t kw, kBlock *def);
 
-	kExpr*     (*Expr_tyCheckAt)(KonohaContext *kctx, kStmt *, kExpr *, size_t, kGamma *, ktype_t, int);
-	kbool_t    (*Stmt_tyCheckExpr)(KonohaContext *kctx, kStmt*, ksymbol_t, kGamma *, ktype_t, int);
-	kbool_t    (*Block_tyCheckAll)(KonohaContext *kctx, kBlock *, kGamma *);
-	kExpr *    (*Expr_tyCheckCallParams)(KonohaContext *kctx, kStmt *, kExpr *, kMethod *, kGamma *, ktype_t);
-	kExpr *    (*new_TypedMethodCall)(KonohaContext *kctx, kStmt *, ktype_t ty, kMethod *mtd, kGamma *gma, int n, ...);
-	void       (*Stmt_toExprCall)(KonohaContext *kctx, kStmt *stmt, kMethod *mtd, int n, ...);
+	kExpr*     (*Expr_tyCheckAt)(KonohaContext *, kStmt *, kExpr *, size_t, kGamma *, ktype_t, int);
+	kbool_t    (*Stmt_tyCheckExpr)(KonohaContext *, kStmt*, ksymbol_t, kGamma *, ktype_t, int);
+	kbool_t    (*Block_tyCheckAll)(KonohaContext *, kBlock *, kGamma *);
+	kExpr *    (*Expr_tyCheckCallParams)(KonohaContext *, kStmt *, kExpr *, kMethod *, kGamma *, ktype_t);
+	kExpr *    (*new_TypedMethodCall)(KonohaContext *, kStmt *, ktype_t ty, kMethod *mtd, kGamma *, int n, ...);
+//	void       (*Stmt_toExprCall)(KonohaContext *, kStmt *, kMethod *mtd, int n, ...);
 
-	SugarSyntax* (*NameSpace_syn)(KonohaContext *kctx, kNameSpace *, ksymbol_t, int);
-	void       (*NameSpace_defineSyntax)(KonohaContext *kctx, kNameSpace *, KDEFINE_SYNTAX *);
-	void       (*SYN_setSugarFunc)(KonohaContext *kctx, kNameSpace *ns, ksymbol_t kw, size_t idx, kFunc *fo);
-	void       (*SYN_addSugarFunc)(KonohaContext *kctx, kNameSpace *ns, ksymbol_t kw, size_t idx, kFunc *fo);
+	SugarSyntax* (*NameSpace_syn)(KonohaContext *, kNameSpace *, ksymbol_t, int);
+	void       (*NameSpace_defineSyntax)(KonohaContext *, kNameSpace *, KDEFINE_SYNTAX *);
+	void       (*kNameSpace_setSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
+	void       (*kNameSpace_addSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
 
-	kbool_t    (*makeSyntaxRule)(KonohaContext *kctx, kArray*, int, int, kArray *);
-	kBlock*    (*new_Block)(KonohaContext *kctx, kNameSpace *, kStmt *, kArray *, int, int, int);
-	void       (*Block_insertAfter)(KonohaContext *kctx, kBlock *bk, kStmt *target, kStmt *stmt);
+	kbool_t    (*makeSyntaxRule)(KonohaContext *, kArray*, int, int, kArray *);
+	kBlock*    (*new_Block)(KonohaContext *, kNameSpace *, kStmt *, kArray *, int, int, int);
+	void       (*kBlock_insertAfter)(KonohaContext *, kBlock *, kStmt *target, kStmt *);
 
-	kExpr*     (*Stmt_newExpr2)(KonohaContext *kctx, kStmt *stmt, kArray *tokenArray, int s, int e);
-	kExpr*     (*new_ConsExpr)(KonohaContext *kctx, SugarSyntax *syn, int n, ...);
-	kExpr *    (*Stmt_addExprParams)(KonohaContext *kctx, kStmt *, kExpr *, kArray *tokenArray, int s, int e, int allowEmpty);
-	kExpr *    (*Expr_rightJoin)(KonohaContext *kctx, kExpr *, kStmt *, kArray *, int, int, int);
+	kExpr*     (*kStmt_parseExpr)(KonohaContext *, kStmt *, kArray *tokenArray, int s, int e);
+	kExpr*     (*new_ConsExpr)(KonohaContext *, SugarSyntax *syn, int n, ...);
+	kExpr *    (*Stmt_addExprParams)(KonohaContext *, kStmt *, kExpr *, kArray *tokenArray, int, int, int allowEmpty);
+	kExpr *    (*kStmt_rightJoinExpr)(KonohaContext *, kStmt *, kExpr *, kArray *, int, int);
 
-	void       (*Token_pERR)(KonohaContext *kctx, kTokenVar *tk, const char *fmt, ...);
-	kExpr *    (*Stmt_p)(KonohaContext *kctx, kStmt *stmt, kToken *tk, int pe, const char *fmt, ...);
+	void       (*Token_pERR)(KonohaContext *, kTokenVar *, const char *fmt, ...);
+	kExpr *    (*Stmt_p)(KonohaContext *, kStmt *, kToken *, int pe, const char *fmt, ...);
 
 } KModuleSugar;
 
@@ -532,15 +523,15 @@ typedef struct {
 	base->NameSpace_defineSyntax  = NameSpace_defineSyntax;\
 	base->NameSpace_syn           = NameSpace_syn;\
 	base->makeSyntaxRule     = makeSyntaxRule;\
-	base->SYN_setSugarFunc   = SYN_setSugarFunc;\
-	base->SYN_addSugarFunc   = SYN_addSugarFunc;\
+	base->kNameSpace_setSugarFunc   = kNameSpace_setSugarFunc;\
+	base->kNameSpace_addSugarFunc   = kNameSpace_addSugarFunc;\
 	/*ast*/\
 	base->new_Block          = new_Block;\
-	base->Block_insertAfter  = Block_insertAfter;\
-	base->Stmt_newExpr2      = Stmt_newExpr2;\
+	base->kBlock_insertAfter  = kBlock_insertAfter;\
+	base->kStmt_parseExpr      = kStmt_parseExpr;\
 	base->new_ConsExpr       = new_ConsExpr;\
 	base->Stmt_addExprParams = Stmt_addExprParams;\
-	base->Expr_rightJoin     = Expr_rightJoin;\
+	base->kStmt_rightJoinExpr     = kStmt_rightJoinExpr;\
 	/*perror*/\
 	base->Token_pERR         = Token_pERR;\
 	base->Stmt_p             = Stmt_p;\

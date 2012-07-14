@@ -501,7 +501,7 @@ static void CT_checkMethodDecl(KonohaContext *kctx, kToken *tkC, kBlock *bk, kSt
 		if(stmt->syn->keyword == KW_StmtTypeDecl) continue;
 		if(stmt->syn->keyword == KW_StmtMethodDecl) {
 			kStmt *lastStmt = lastStmtRef[0];
-			SUGAR Block_insertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, stmt);
+			SUGAR kBlock_insertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, stmt);
 			lastStmtRef[0] = stmt;
 		}
 		else {

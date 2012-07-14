@@ -150,7 +150,7 @@ static KMETHOD ParseExpr_OprAssignment(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ParseExpr(stmt, tokenArray, s, c, e);
 	size_t atop = kArray_size(tokenArray);
 	s = transform_oprAssignment(kctx, tokenArray, s, c, e);
-	kExpr *expr = SUGAR Stmt_newExpr2(kctx, stmt, tokenArray, s, kArray_size(tokenArray));
+	kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, tokenArray, s, kArray_size(tokenArray));
 	KLIB kArray_clear(kctx, tokenArray, atop);
 	RETURN_(expr);
 }
