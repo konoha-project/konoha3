@@ -569,7 +569,7 @@ static void EXPR_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int esp
 		break;
 	}
 	case TEXPR_NCONST : {
-		ASM(NSET, NC_(a), expr->ndata, CT_(expr->ty));
+		ASM(NSET, NC_(a), expr->unboxConstValue, CT_(expr->ty));
 		break;
 	}
 	case TEXPR_LOCAL : {

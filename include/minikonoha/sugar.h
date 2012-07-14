@@ -272,9 +272,8 @@ struct kExprVar {
 	ktype_t ty;    kexpr_t build;
 	union {
 		kObject*   objectConstValue;
-		kint_t     ivalue;
-		kfloat_t   fvalue;
-		uintptr_t  ndata;
+		uintptr_t  unboxConstValue;
+		kfloat_t   unboxConstValueAs_float;
 		intptr_t   index;
 		uintptr_t  cid;
 	};
@@ -487,7 +486,7 @@ typedef struct {
 	void (*NameSpace_tokenize)(KonohaContext *kctx, kNameSpace *, const char *, kfileline_t, kArray *);
 
 	kExpr* (*Expr_setConstValue)(KonohaContext *kctx, kExpr *expr, ktype_t ty, kObject *o);
-	kExpr* (*Expr_setNConstValue)(KonohaContext *kctx, kExpr *expr, ktype_t ty, uintptr_t ndata);
+	kExpr* (*Expr_setUnboxConstValue)(KonohaContext *kctx, kExpr *expr, ktype_t ty, uintptr_t ndata);
 	kExpr* (*Expr_setVariable)(KonohaContext *kctx, kExpr *expr, kexpr_t build, ktype_t ty, intptr_t index, kGamma *gma);
 
 	kToken* (*Stmt_token)(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw, kToken *def);
@@ -529,7 +528,7 @@ typedef struct {
 	base->Stmt_expr           = Stmt_expr;\
 	base->Stmt_text           = Stmt_text;\
 	base->Expr_setConstValue  = Expr_setConstValue;\
-	base->Expr_setNConstValue  = Expr_setNConstValue;\
+	base->Expr_setUnboxConstValue  = Expr_setUnboxConstValue;\
 	base->Expr_setVariable    = Expr_setVariable;\
 	base->Expr_tyCheckAt      = Expr_tyCheckAt;\
 	base->Stmt_tyCheckExpr    = Stmt_tyCheckExpr;\
@@ -592,8 +591,8 @@ typedef struct {
 #define kExpr_uline(EXPR)           Expr_uline(kctx, EXPR, 0)
 #define new_ConstValue(T, O)  Expr_setConstValue(kctx, NULL, T, UPCAST(O))
 #define kExpr_setConstValue(EXPR, T, O)  Expr_setConstValue(kctx, EXPR, T, UPCAST(O))
-#define new_NConstValue(T, D)  Expr_setNConstValue(kctx, NULL, T, D)
-#define kExpr_setNConstValue(EXPR, T, D)  Expr_setNConstValue(kctx, EXPR, T, D)
+#define new_NConstValue(T, D)  Expr_setUnboxConstValue(kctx, NULL, T, D)
+#define kExpr_setUnboxConstValue(EXPR, T, D)  Expr_setUnboxConstValue(kctx, EXPR, T, D)
 #define new_Variable(B, T, I, G)          Expr_setVariable(kctx, NULL, TEXPR_##B, T, I, G)
 #define kExpr_setVariable(E, B, T, I, G)  Expr_setVariable(kctx, E, TEXPR_##B, T, I, G)
 #define kExpr_tyCheckAt(STMT, E, N, GMA, T, P)     Expr_tyCheckAt(kctx, STMT, E, N, GMA, T, P)
@@ -622,8 +621,8 @@ typedef struct {
 #define kExpr_uline(EXPR)                    _e->Expr_uline(kctx, EXPR, 0)
 #define new_ConstValue(T, O)                 _e->Expr_setConstValue(kctx, NULL, T, UPCAST(O))
 #define kExpr_setConstValue(EXPR, T, O)      _e->Expr_setConstValue(kctx, EXPR, T, UPCAST(O))
-#define new_NConstValue(T, D)                _e->Expr_setNConstValue(kctx, NULL, T, D)
-#define kExpr_setNConstValue(EXPR, T, D)     _e->Expr_setNConstValue(kctx, EXPR, T, D)
+#define new_NConstValue(T, D)                _e->Expr_setUnboxConstValue(kctx, NULL, T, D)
+#define kExpr_setUnboxConstValue(EXPR, T, D)     _e->Expr_setUnboxConstValue(kctx, EXPR, T, D)
 #define new_Variable(B, T, I, G)             _e->Expr_setVariable(kctx, NULL, TEXPR_##B, T, I, G)
 #define kExpr_setVariable(E, B, T, I, G)     _e->Expr_setVariable(kctx, E, TEXPR_##B, T, I, G)
 #define kExpr_tyCheckAt(STMT, E, N, GMA, T, P)     _e->Expr_tyCheckAt(kctx, STMT, E, N, GMA, T, P)

@@ -46,13 +46,13 @@ static KMETHOD ExprTyCheck_Type(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ExprTyCheck_true(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	RETURN_(kExpr_setNConstValue(expr, TY_Boolean, (uintptr_t)1));
+	RETURN_(kExpr_setUnboxConstValue(expr, TY_Boolean, (uintptr_t)1));
 }
 
 static KMETHOD ExprTyCheck_false(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	RETURN_(kExpr_setNConstValue(expr, TY_Boolean, (uintptr_t)0));
+	RETURN_(kExpr_setUnboxConstValue(expr, TY_Boolean, (uintptr_t)0));
 }
 
 static KMETHOD ExprTyCheck_Int(KonohaContext *kctx, KonohaStack *sfp)
@@ -60,7 +60,7 @@ static KMETHOD ExprTyCheck_Int(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
 	long long n = strtoll(S_text(tk->text), NULL, 0);
-	RETURN_(kExpr_setNConstValue(expr, TY_Int, (uintptr_t)n));
+	RETURN_(kExpr_setUnboxConstValue(expr, TY_Int, (uintptr_t)n));
 }
 
 static KMETHOD ExprTyCheck_AND(KonohaContext *kctx, KonohaStack *sfp)
@@ -228,7 +228,7 @@ static kExpr* Expr_tyCheckVariable2(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 				kExpr_setConstValue(expr, kv->ty, kv->oval);
 			}
 			else {
-				kExpr_setNConstValue(expr, kv->ty, kv->uval);
+				kExpr_setUnboxConstValue(expr, kv->ty, kv->uval);
 			}
 			return expr;
 		}
@@ -256,7 +256,7 @@ static KMETHOD ExprTyCheck_Usymbol(KonohaContext *kctx, KonohaStack *sfp)
 				kExpr_setConstValue(expr, kv->ty, kv->oval);
 			}
 			else {
-				kExpr_setNConstValue(expr, kv->ty, kv->uval);
+				kExpr_setUnboxConstValue(expr, kv->ty, kv->uval);
 			}
 			RETURN_(expr);
 		}
@@ -293,7 +293,7 @@ static KMETHOD StmtTyCheck_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 				expr = NULL;
 			}
 			else if(expr->build == TEXPR_NCONST) {
-				kv.uval = (uintptr_t)expr->ndata;
+				kv.uval = expr->unboxConstValue;
 				expr = NULL;
 			}
 			if(expr == NULL) {

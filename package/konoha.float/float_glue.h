@@ -236,7 +236,7 @@ static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
 	sfp[4].fvalue = strtod(S_text(tk->text), NULL);
-	RETURN_(kExpr_setNConstValue(expr, TY_Float, sfp[4].ndata));
+	RETURN_(kExpr_setUnboxConstValue(expr, TY_Float, sfp[4].ndata));
 }
 
 static kbool_t float_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)

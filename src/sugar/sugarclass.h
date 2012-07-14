@@ -810,7 +810,7 @@ static kExpr* Expr_setConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, k
 	Wexpr->ty = ty;
 	if(TY_isUnbox(ty)) {
 		Wexpr->build = TEXPR_NCONST;
-		Wexpr->ndata = N_toint(o);
+		Wexpr->unboxConstValue = N_toint(o);
 	}
 	else {
 		Wexpr->build = TEXPR_CONST;
@@ -820,7 +820,7 @@ static kExpr* Expr_setConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, k
 	return expr;
 }
 
-static kExpr* Expr_setNConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, uintptr_t ndata)
+static kExpr* Expr_setUnboxConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, uintptr_t ndata)
 {
 	if(expr == NULL) {
 		expr = new_(Expr, 0);
@@ -828,7 +828,7 @@ static kExpr* Expr_setNConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, 
 	}
 	kExprVar *Wexpr = (kExprVar*)expr;
 	Wexpr->build = TEXPR_NCONST;
-	Wexpr->ndata = ndata;
+	Wexpr->unboxConstValue = ndata;
 	Wexpr->ty = ty;
 	return expr;
 }

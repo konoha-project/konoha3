@@ -230,14 +230,13 @@ static kbool_t class_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline
 
 // --------------------------------------------------------------------------
 
-static kExpr* NewExpr(KonohaContext *kctx, SugarSyntax *syn, kToken *tk, ktype_t ty, uintptr_t val)
+static kExpr* NewExpr(KonohaContext *kctx, SugarSyntax *syn, kToken *tk, ktype_t ty)
 {
 	kExprVar *expr = GCSAFE_new(ExprVar, syn);
 	KSETv(expr->termToken, tk);
 	Expr_setTerm(expr, 1);
 	expr->build = TEXPR_NEW;
 	expr->ty = ty;
-	expr->ndata = val;
 	return (kExpr*)expr;
 }
 
@@ -259,7 +258,7 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp)
 
 		if(TK_isType(tk1) && tk2->keyword == AST_PARENTHESIS) {  // new C (...)
 			SugarSyntax *syn = SYN_(kStmt_nameSpace(stmt), KW_ExprMethodCall);
-			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, tkNEW, NewExpr(kctx, syn, tk1, TK_type(tk1), 0));
+			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, tkNEW, NewExpr(kctx, syn, tk1, TK_type(tk1)));
 			tkNEW->keyword = MN_new;
 			RETURN_(expr);
 		}
@@ -267,7 +266,7 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp)
 			SugarSyntax *syn = SYN_(kStmt_nameSpace(stmt), KW_new);
 			KonohaClass *ct = CT_p0(kctx, CT_Array, TK_type(tk1));
 			tkNEW->keyword = MN_("newArray");
-			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, tkNEW, NewExpr(kctx, syn, tk1, ct->cid, 0));
+			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, tkNEW, NewExpr(kctx, syn, tk1, ct->cid));
 			RETURN_(expr);
 		}
 	}
@@ -457,7 +456,7 @@ static kbool_t CT_declType(KonohaContext *kctx, KonohaClassVar *ct, kGamma *gma,
 				defineField(kctx, ct, flag, ty, name, vexpr->objectConstValue, 0);
 			}
 			else if(vexpr->build == TEXPR_NCONST) {
-				defineField(kctx, ct, flag, ty, name, NULL, vexpr->ndata);
+				defineField(kctx, ct, flag, ty, name, NULL, vexpr->unboxConstValue);
 			}
 			else if(vexpr->build == TEXPR_NULL) {
 				defineField(kctx, ct, flag, ty, name, KLIB Knull(kctx, CT_(ty)), 0);
