@@ -47,8 +47,8 @@ static KMETHOD MethodFunc_FieldSetter(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD MethodFunc_FieldSetterN(KonohaContext *kctx, KonohaStack *sfp)
 {
 	size_t delta = sfp[K_MTDIDX].mtdNC->delta;
-	(sfp[0].toObjectVar)->fieldUnboxItems[delta] = sfp[1].ndata;
-	RETURNd_(sfp[1].ndata);
+	(sfp[0].toObjectVar)->fieldUnboxItems[delta] = sfp[1].unboxValue;
+	RETURNd_(sfp[1].unboxValue);
 }
 
 static kMethod *new_FieldGetter(KonohaContext *kctx, ktype_t cid, ksymbol_t sym, ktype_t ty, int idx)

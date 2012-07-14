@@ -84,15 +84,15 @@ static void Expr_putConstValue(KonohaContext *kctx, kExpr *expr, KonohaStack *sf
 {
 	if(expr->build == TEXPR_CONST) {
 		KSETv(sfp[0].toObject, expr->objectConstValue);
-		sfp[0].ndata = O_unbox(expr->objectConstValue);
+		sfp[0].unboxValue = O_unbox(expr->objectConstValue);
 	}else if(expr->build == TEXPR_NCONST) {
-		sfp[0].ndata = expr->unboxConstValue;
+		sfp[0].unboxValue = expr->unboxConstValue;
 	}else if(expr->build == TEXPR_NEW) {
 		KSETv(sfp[0].toObject, KLIB new_kObject(kctx, CT_(expr->ty), 0));
 	}else {
 		assert(expr->build == TEXPR_NULL);
 		KSETv(sfp[0].toObject, KLIB Knull(kctx, CT_(expr->ty)));
-		sfp[0].ndata = 0;
+		sfp[0].unboxValue = 0;
 	}
 }
 
@@ -107,7 +107,7 @@ static kExpr* ExprCall_toConstValue(KonohaContext *kctx, kExpr *expr, kArray *co
 	KCALL(lsfp, 0, mtd, psize, KLIB Knull(kctx, CT_(expr->ty)));
 	END_LOCAL();
 	if(TY_isUnbox(rtype) || rtype == TY_void) {
-		return kExpr_setUnboxConstValue(expr, rtype, lsfp[0].ndata);
+		return kExpr_setUnboxConstValue(expr, rtype, lsfp[0].unboxValue);
 	}
 	return kExpr_setConstValue(expr, rtype, lsfp[0].toObject);
 }

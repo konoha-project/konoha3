@@ -500,7 +500,7 @@ struct KonohaModule {
 };
 
 #define K_FRAME_NCMEMBER \
-		uintptr_t   ndata;  \
+		uintptr_t   unboxValue;  \
 		kbool_t     bvalue; \
 		kint_t      ivalue; \
 		kuint_t     uvalue; \
@@ -784,7 +784,7 @@ struct kObjectVar {
 
 #define ABSTRACT_NUMBER \
 		union {\
-			uintptr_t  ndata;\
+			uintptr_t  unboxValue;\
 			kbool_t    bvalue;\
 			kint_t     ivalue;\
 			kuint_t    uvalue;\
@@ -1338,7 +1338,7 @@ typedef struct {
 } while (0)
 
 #define RETURNd_(d) do {\
-	sfp[(-(K_CALLDELTA))].ndata = d; \
+	sfp[(-(K_CALLDELTA))].unboxValue = d; \
 	return; \
 } while (0)
 

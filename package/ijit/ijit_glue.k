@@ -392,7 +392,7 @@ Value expr_asm(int a, Expr expr, int espidx) {
 	}
 	else if(expr.getBuild() == TEXPR_NCONST) {
 		return asm_nset(expr.getNdata(), expr.getType(), a);
-		//ASM(NSET, nc(a), expr.ndata, CT_(expr.getType()));
+		//ASM(NSET, nc(a), expr.unboxValue, CT_(expr.getType()));
 	}
 	else if(expr.getBuild() == TEXPR_LOCAL) {
 		//System.p("type="+expr.getType()+",index="+expr.getIndex());
@@ -490,8 +490,8 @@ void prepare_call_stack(int thisidx, Value vsfp, Object def, Method mtd, int uli
 	if ((def).getCid() != K.getCid("void", -1)) {
 		Value vsfp0 = loadsfp(builder, vsfp, (def).getCid(), rtnidx);
 		if (ty_isUnbox(def.getCid())) {
-			int ndata = def.unbox();
-			Value vdef  = createConstValue(cid2ctype(def.getCid()), null, ndata, 0);
+			int unboxValue = def.unbox();
+			Value vdef  = createConstValue(cid2ctype(def.getCid()), null, unboxValue, 0);
 			builder.createStore(vdef, vsfp0, false);
 		} else {
 			Value vdef  = createConstValue(/*TY_OBJECT*/12, (def), 0, 0);
@@ -1134,7 +1134,7 @@ void jit_init() {
 	/*------- KonohaStack ------*/
 	Array KonohaStackTy = Array.newN(2);
 	KonohaStackTy.set(0, PointerType.get(kObject) /* o */ /*union*/);
-	KonohaStackTy.set(1, getLongTy() /* ndata */ /*union*/);
+	KonohaStackTy.set(1, getLongTy() /* unboxValue */ /*union*/);
 	Type KonohaStack = StructType.create(KonohaStackTy, "KonohaStack", false)
 	System.setTyStack(PointerType.get(KonohaStack));
 
@@ -1158,7 +1158,7 @@ void jit_init() {
 	Array kArrayTy = Array.newN(4);
 	kArrayTy.set(0, KonohaObjectHeader /* h */ );
 	kArrayTy.set(1, getLongTy() /* bytesize */ );
-	kArrayTy.set(2, PointerType.get(getLongTy()) /* ndata */ /*union*/);
+	kArrayTy.set(2, PointerType.get(getLongTy()) /* unboxValue */ /*union*/);
 	kArrayTy.set(3, getLongTy() /* bytemax */ );
 	Type kArray = StructType.create(kArrayTy, "kArray", false)
 

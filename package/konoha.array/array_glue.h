@@ -46,7 +46,7 @@ static KMETHOD Array_set(KonohaContext *kctx, KonohaStack *sfp)
 	kArray *a = sfp[0].toArray;
 	size_t n = check_index(kctx, sfp[1].ivalue, kArray_size(a), sfp[K_RTNIDX].uline);
 	if(kArray_isUnboxData(a)) {
-		a->unboxItems[n] = sfp[2].ndata;
+		a->unboxItems[n] = sfp[2].unboxValue;
 	}
 	else {
 		KSETv(a->objectItems[n], sfp[2].o);
@@ -108,7 +108,7 @@ static KMETHOD Array_add1(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = (kArray *)sfp[0].toObject;
 	if (kArray_isUnboxData(a)) {
-		NArray_add(kctx, a, sfp[1].ndata);
+		NArray_add(kctx, a, sfp[1].unboxValue);
 	} else {
 		KLIB kArray_add(kctx, a, sfp[1].toObject);
 	}

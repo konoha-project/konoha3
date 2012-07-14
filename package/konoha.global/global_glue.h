@@ -66,8 +66,8 @@ static KMETHOD MethodFunc_ProtoSetterN(KonohaContext *kctx, KonohaStack *sfp)
 	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
 	kParam *pa = kMethod_param(mtd);
-	KLIB kObject_setUnboxValue(kctx, sfp[0].toObject, key, pa->p[0].ty, sfp[1].ndata);
-	RETURNd_(sfp[1].ndata);
+	KLIB kObject_setUnboxValue(kctx, sfp[0].toObject, key, pa->p[0].ty, sfp[1].unboxValue);
+	RETURNd_(sfp[1].unboxValue);
 }
 
 static kMethod *new_ProtoGetter(KonohaContext *kctx, ktype_t cid, ksymbol_t sym, ktype_t ty)

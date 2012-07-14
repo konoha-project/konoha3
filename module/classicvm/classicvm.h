@@ -319,7 +319,7 @@ static kbool_t TYICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr, i
 		if(mtd_mn == MN_get) {
 			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
 			if(kExpr_at(expr, 2)->build == TEXPR_NCONST) {
-				intptr_t n = kExpr_at(expr, 2)->ndata;
+				intptr_t n = kExpr_at(expr, 2)->unboxValue;
 				if(n < 0) {
 					return 0;
 				}
@@ -349,7 +349,7 @@ static kbool_t TYICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr, i
 			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
 			EXPR_asm(kctx, v, kExpr_at(expr, 3), shift, v);
 			if(kExpr_at(expr, 2)->build == TEXPR_NCONST) {
-				intptr_t n = kExpr_at(expr, 2)->ndata;
+				intptr_t n = kExpr_at(expr, 2)->unboxValue;
 				if(n < 0) {
 					return 0;
 				}
@@ -382,7 +382,7 @@ static kbool_t TYICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr, i
 		if(mtd_mn == MN_get) {
 			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
 			if(kExpr_at(expr, 2)->build == TEXPR_NCONST) {
-				intptr_t n = kExpr_at(expr, 2)->ndata;
+				intptr_t n = kExpr_at(expr, 2)->unboxValue;
 				ASM_CHKIDXC(kctx, OC_(a), n);
 				ASM(BGETIDXC, NC_(espidx), OC_(a), n);
 			}
@@ -399,7 +399,7 @@ static kbool_t TYICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr, i
 			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
 			EXPR_asm(kctx, v, kExpr_at(expr, 3), shift, v);
 			if(kExpr_at(expr, 2)->build == TEXPR_NCONST) {
-				intptr_t n = kExpr_at(expr, 2)->ndata;
+				intptr_t n = kExpr_at(expr, 2)->unboxValue;
 				if(n < 0) {
 					return 0;
 				}
@@ -450,7 +450,7 @@ static kbool_t TYICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr, i
 				mn == MN_opLSFT || mn == MN_opRSFT) swap = 0;
 		if(OPR_hasCONST(kctx, expr, &mn, swap)) {
 			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
-			kint_t b = kExpr_at(expr, 2)->ndata;
+			kint_t b = kExpr_at(expr, 2)->unboxValue;
 			if(b == 0 && (mn == MN_opDIV || mn == MN_opMOD)) {
 				b = 1;
 				//TODO
@@ -477,8 +477,8 @@ static kbool_t TYICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr, i
 		if(mn == MN_opSUB || mn == MN_opDIV || mn == MN_opMOD) swap = 0;
 		if(OPR_hasCONST(kctx, expr, &mn, swap)) {
 			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
-			union { uintptr_t ndata; kfloat_t fvalue; } v;
-			v.ndata = kExpr_at(expr, 2)->ndata;
+			union { uintptr_t unboxValue; kfloat_t fvalue; } v;
+			v.unboxValue = kExpr_at(expr, 2)->unboxValue;
 			kfloat_t b = v.fvalue;
 			/* TODO */
 #define KFLOAT_ZERO 0.0

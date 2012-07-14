@@ -32,7 +32,7 @@
 static void Float_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kNumberVar *n = (kNumberVar*)o;  // kFloat has the same structure
-	n->ndata = (uintptr_t)conf;  // conf is unboxed data
+	n->unboxValue = (uintptr_t)conf;  // conf is unboxed data
 }
 
 static void Float_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
@@ -236,7 +236,7 @@ static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
 	sfp[4].fvalue = strtod(S_text(tk->text), NULL);
-	RETURN_(kExpr_setUnboxConstValue(expr, TY_Float, sfp[4].ndata));
+	RETURN_(kExpr_setUnboxConstValue(expr, TY_Float, sfp[4].unboxValue));
 }
 
 static kbool_t float_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)

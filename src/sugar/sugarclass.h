@@ -820,7 +820,7 @@ static kExpr* Expr_setConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, k
 	return expr;
 }
 
-static kExpr* Expr_setUnboxConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, uintptr_t ndata)
+static kExpr* Expr_setUnboxConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, uintptr_t unboxValue)
 {
 	if(expr == NULL) {
 		expr = new_(Expr, 0);
@@ -828,7 +828,7 @@ static kExpr* Expr_setUnboxConstValue(KonohaContext *kctx, kExpr *expr, ktype_t 
 	}
 	kExprVar *Wexpr = (kExprVar*)expr;
 	Wexpr->build = TEXPR_NCONST;
-	Wexpr->unboxConstValue = ndata;
+	Wexpr->unboxConstValue = unboxValue;
 	Wexpr->ty = ty;
 	return expr;
 }

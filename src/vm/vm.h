@@ -175,8 +175,8 @@ struct kByteCodeVar {
 		goto L_RETURN;\
 	}\
 
-#define OPEXEC_NSET(A, N, CT) rbp[(A)].ndata = N
-#define OPEXEC_NMOV(A, B, CT) rbp[(A)].ndata = rbp[(B)].ndata
+#define OPEXEC_NSET(A, N, CT) rbp[(A)].unboxValue = N
+#define OPEXEC_NMOV(A, B, CT) rbp[(A)].unboxValue = rbp[(B)].unboxValue
 #define OPEXEC_NMOVx(A, B, BX, CT) rbp[(A)].o = (rbp[(B)].toObjectVar)->fieldObjectItems[(BX)]
 #define OPEXEC_XNMOV(A, AX, B, CT) (rbp[(A)].toObjectVar)->fieldObjectItems[AX] = rbp[(B)].o
 
@@ -294,7 +294,7 @@ struct kByteCodeVar {
 /* KCODE */
 
 #define R_NEXTIDX (K_NEXTIDX)
-#define Rn_(x)    (rshift(rbp,x)->ndata)
+#define Rn_(x)    (rshift(rbp,x)->unboxValue)
 #define Ri_(x)    (rshift(rbp,x)->ivalue)
 #define Rf_(x)    (rshift(rbp,x)->fvalue)
 #define Rb_(x)    (rshift(rbp,x)->bvalue)

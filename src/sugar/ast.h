@@ -526,7 +526,7 @@ static kExpr *ParseExprFunc(KonohaContext *kctx, SugarSyntax *syn, kFunc *fo, kS
 {
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 6);
 	KSETv(lsfp[K_CALLDELTA+0].o, fo->self);
-	lsfp[K_CALLDELTA+0].ndata = (uintptr_t)syn;
+	lsfp[K_CALLDELTA+0].unboxValue = (uintptr_t)syn;
 	KSETv(lsfp[K_CALLDELTA+1].o, (kObject*)stmt);
 	KSETv(lsfp[K_CALLDELTA+2].toArray, tls);
 	lsfp[K_CALLDELTA+3].ivalue = s;

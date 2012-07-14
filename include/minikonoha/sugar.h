@@ -116,7 +116,7 @@ struct TokenizerEnv {
 
 // Expr ParseExpr(Stmt stmt, Token[] tls, int s, int c, int e)
 #define VAR_ParseExpr(STMT, TLS, S, C, E) \
-		SugarSyntax *syn = (SugarSyntax*)sfp[0].ndata;\
+		SugarSyntax *syn = (SugarSyntax*)sfp[0].unboxValue;\
 		kStmt *STMT = (kStmt*)sfp[1].toObject;\
 		kArray *TLS = (kArray*)sfp[2].o;\
 		int S = (int)sfp[3].ivalue;\
@@ -486,7 +486,7 @@ typedef struct {
 	void (*NameSpace_tokenize)(KonohaContext *kctx, kNameSpace *, const char *, kfileline_t, kArray *);
 
 	kExpr* (*Expr_setConstValue)(KonohaContext *kctx, kExpr *expr, ktype_t ty, kObject *o);
-	kExpr* (*Expr_setUnboxConstValue)(KonohaContext *kctx, kExpr *expr, ktype_t ty, uintptr_t ndata);
+	kExpr* (*Expr_setUnboxConstValue)(KonohaContext *kctx, kExpr *expr, ktype_t ty, uintptr_t unboxValue);
 	kExpr* (*Expr_setVariable)(KonohaContext *kctx, kExpr *expr, kexpr_t build, ktype_t ty, intptr_t index, kGamma *gma);
 
 	kToken* (*Stmt_token)(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw, kToken *def);
