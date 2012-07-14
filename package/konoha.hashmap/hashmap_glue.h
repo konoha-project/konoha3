@@ -59,9 +59,9 @@ static void HashMap_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWrit
 
 static KMETHOD HashMap_get(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kHashMap *m = (struct _kHashMap *)sfp[0].toObject;
+	struct _kHashMap *m = (struct _kHashMap *)sfp[0].asObject;
 	KUtilsHashMap *map = m->map;
-	kString *key = sfp[1].toString;
+	kString *key = sfp[1].asString;
 	KonohaClass *ct = m->h.ct;
 	kParam *cparam = CT_cparam(ct);
 	kparamtype_t p1 = cparam->paramtypeItems[0];
@@ -77,9 +77,9 @@ static KMETHOD HashMap_get(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD HashMap_set(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kHashMap *m = (struct _kHashMap *)sfp[0].toObject;
+	struct _kHashMap *m = (struct _kHashMap *)sfp[0].asObject;
 	KUtilsHashMap *map = m->map;
-	kString *key = sfp[1].toString;
+	kString *key = sfp[1].asString;
 
 	// want to know p1
 	KonohaClass *ct = m->h.ct;

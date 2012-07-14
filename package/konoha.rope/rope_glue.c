@@ -290,7 +290,7 @@ static StringBase *StringBase_concat(KonohaContext *kctx, kString *s0, kString *
 
 static KMETHOD Rope_opADD(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kString *lhs = sfp[0].s, *rhs = sfp[1].toString;
+	kString *lhs = sfp[0].s, *rhs = sfp[1].asString;
 	RETURN_(StringBase_concat(kctx, lhs, rhs));
 }
 

@@ -29,14 +29,14 @@
 //## Boolean Object.isNull();
 static KMETHOD Object_isNull(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kObject *o = sfp[0].toObject;
+	kObject *o = sfp[0].asObject;
 	RETURNb_(IS_NULL(o));
 }
 
 //## Boolean Object.isNotNull();
 static KMETHOD Object_isNotNull(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kObject *o = sfp[0].toObject;
+	kObject *o = sfp[0].asObject;
 	RETURNb_(!IS_NULL(o));
 }
 

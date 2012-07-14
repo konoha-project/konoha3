@@ -241,7 +241,7 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 static KMETHOD Bytes_encodeTo(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *ba = sfp[0].ba;
-	kString *toCoding = sfp[1].toString;
+	kString *toCoding = sfp[1].asString;
 	RETURN_(convFromTo(kctx, ba, "UTF-8", S_text(toCoding)));
 }
 
@@ -249,7 +249,7 @@ static KMETHOD Bytes_encodeTo(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes* fromBa = sfp[0].ba;
-	kString*fromCoding = sfp[1].toString;
+	kString*fromCoding = sfp[1].asString;
 	kBytes *toBa;
 	if (fromCoding != (kString*)(CT_String->defaultValueAsNull)) {
 		toBa = convFromTo(kctx, fromBa, S_text(fromCoding), "UTF-8");
@@ -275,7 +275,7 @@ static KMETHOD String_toBytes(KonohaContext *kctx, KonohaStack *sfp)
 // this methodList needs string_glue.h for counting mlen...
 //#include "../konoha.string/string_glue.h"
 
-//## @Const method String Bytes.toString();
+//## @Const method String Bytes.asString();
 static KMETHOD Bytes_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *from = sfp[0].ba;

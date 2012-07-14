@@ -58,7 +58,7 @@ Array Expr.getCons() {
 	int ptr = System.getPointer(x, 48, 64);
 	return System.convertToArray(ptr);
 }
-Method Object.toMethod() {
+Method Object.asMethod() {
 	int ptr = this.getAddr();
 	return System.convertToMethod(ptr);
 }
@@ -657,7 +657,7 @@ void asm_scall(int uline, int sfpidx, int espidx, Method mtd, Object defval) {
 
 Value call_asm(int a, Expr expr, int espidx) {
 	Array cons = expr.getCons();
-	Method mtd = cons.get(0).toMethod();
+	Method mtd = cons.get(0).asMethod();
 	int s = tri(mtd.isStatic(), 2, 1);
 	int thisidx = espidx + /*K_CALLDELTA*/4;
 	int argc = (cons).getSize() - 2;

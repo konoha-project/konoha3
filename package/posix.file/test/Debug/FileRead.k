@@ -15,10 +15,10 @@ void f () {
 		buf.setAll(0); // zero clear
 		ret = f.read(buf, 0, bufsize);
 		if (ret < bufsize) {
-			String tmp = buf.toString();
+			String tmp = buf.asString();
 			str = str + tmp.substring(0, ret);
 		} else {
-			str = str + buf.toString();
+			str = str + buf.asString();
 		}
 	}
 	p(str);

@@ -62,7 +62,7 @@ static void MethodAttribute_p(KonohaContext *kctx, kMethod *mtd, KUtilsWriteBuff
 
 static void Method_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
-	kMethod *mtd = sfp[pos].toMethod;
+	kMethod *mtd = sfp[pos].asMethod;
 	kParam *pa = kMethod_param(mtd);
 	DBG_ASSERT(IS_Method(mtd));
 	if(level != 0) {
@@ -104,7 +104,7 @@ static void dumpMethod(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd)
 {
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	KSETv(sfp[2].toMethod, mtd);
+	KSETv(sfp[2].asMethod, mtd);
 	O_ct(mtd)->p(kctx, sfp, 2, &wb, 1);
 	PLATAPI printf_i("%s\n", KLIB Kwb_top(kctx, &wb, 1));
 	KLIB Kwb_free(&wb);
@@ -124,8 +124,8 @@ KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp)
 	INIT_GCSTACK();
 	kArray *list = kctx->stack->gcstack;
 	size_t start = kArray_size(list);
-	kNameSpace *ns = sfp[0].toNameSpace;
-	KonohaClass *ct = O_ct(sfp[1].toObject);
+	kNameSpace *ns = sfp[0].asNameSpace;
+	KonohaClass *ct = O_ct(sfp[1].asObject);
 	DBG_P("*** man %s", TY_t(ct->classId));
 	while(ns != NULL) {
 		copyMethodList(kctx, ct->classId, ns->methodList, list);

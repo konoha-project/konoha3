@@ -52,8 +52,8 @@ static kExpr *ExprTyCheckFunc(KonohaContext *kctx, kFunc *fo, kStmt *stmt, kExpr
 	KCALL(lsfp, 0, fo->mtd, 5, K_NULLEXPR);
 	END_LOCAL();
 	RESET_GCSTACK();
-	DBG_ASSERT(IS_Expr(lsfp[0].toObject));
-	return (kExpr*)lsfp[0].toObject;
+	DBG_ASSERT(IS_Expr(lsfp[0].asObject));
+	return (kExpr*)lsfp[0].asObject;
 }
 
 static kExpr *ExprTyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, int reqty)
@@ -83,15 +83,15 @@ static kExpr *ExprTyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma 
 static void Expr_putConstValue(KonohaContext *kctx, kExpr *expr, KonohaStack *sfp)
 {
 	if(expr->build == TEXPR_CONST) {
-		KSETv(sfp[0].toObject, expr->objectConstValue);
+		KSETv(sfp[0].asObject, expr->objectConstValue);
 		sfp[0].unboxValue = O_unbox(expr->objectConstValue);
 	}else if(expr->build == TEXPR_NCONST) {
 		sfp[0].unboxValue = expr->unboxConstValue;
 	}else if(expr->build == TEXPR_NEW) {
-		KSETv(sfp[0].toObject, KLIB new_kObject(kctx, CT_(expr->ty), 0));
+		KSETv(sfp[0].asObject, KLIB new_kObject(kctx, CT_(expr->ty), 0));
 	}else {
 		assert(expr->build == TEXPR_NULL);
-		KSETv(sfp[0].toObject, KLIB Knull(kctx, CT_(expr->ty)));
+		KSETv(sfp[0].asObject, KLIB Knull(kctx, CT_(expr->ty)));
 		sfp[0].unboxValue = 0;
 	}
 }
@@ -109,7 +109,7 @@ static kExpr* ExprCall_toConstValue(KonohaContext *kctx, kExpr *expr, kArray *co
 	if(TY_isUnbox(rtype) || rtype == TY_void) {
 		return SUGAR kExpr_setUnboxConstValue(kctx, expr, rtype, lsfp[0].unboxValue);
 	}
-	return SUGAR kExpr_setConstValue(kctx, expr, rtype, lsfp[0].toObject);
+	return SUGAR kExpr_setConstValue(kctx, expr, rtype, lsfp[0].asObject);
 }
 
 static kbool_t CT_isa(KonohaContext *kctx, ktype_t cid1, ktype_t cid2)

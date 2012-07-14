@@ -512,20 +512,20 @@ struct KonohaModule {
 
 #define K_FRAME_MEMBER \
 		kObject    *o;\
-		kObject    *toObject;\
-		kObjectVar *toObjectVar; \
-		kInt       *i; \
-		kString    *s; \
-		kString    *toString;\
-		kArray     *toArray;\
-		kMethod    *toMethod;\
-		kFunc      *toFunc; \
-		kNameSpace  *toNameSpace;\
-		kToken             *tk;\
-		kStmt              *stmt;\
-		kExpr              *expr;\
-		kBlock             *bk;\
-		kGamma  *gma;   \
+		kObject     *asObject;\
+		kObjectVar  *asObjectVar; \
+		kInt        *i; \
+		kString     *s; \
+		kString     *asString;\
+		kArray      *asArray;\
+		kMethod     *asMethod;\
+		kFunc       *asFunc; \
+		kNameSpace  *asNameSpace;\
+		kToken      *asToken;\
+		kStmt       *asStmt;\
+		kExpr       *asExpr;\
+		kBlock      *asBlock;\
+		kGamma      *asGamma;\
 		const struct _kFloat  *f; \
 		const struct _kBytes  *ba; \
 		struct _kIterator *itr; \

@@ -57,8 +57,8 @@ static void Func_reftrace(KonohaContext *kctx, kObject *o)
 static KMETHOD Func_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFunc *fo = sfp[0].fo;
-	KSETv(fo->self, sfp[1].toObject);
-	KSETv(fo->mtd, sfp[2].toMethod);
+	KSETv(fo->self, sfp[1].asObject);
+	KSETv(fo->mtd, sfp[2].asMethod);
 	RETURN_(fo);
 }
 
@@ -68,7 +68,7 @@ static KMETHOD Func_new(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Func_invoke(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFunc* fo = sfp[0].fo;
-	KSETv(sfp[0].toObject, fo->self);
+	KSETv(sfp[0].asObject, fo->self);
 	klr_setmtdNC(kctx, sfp[K_MTDIDX], fo->mtd);
 	KCALL(kctx, sfp, fo->mtd, (-(K_CALLDELTA)));
 }

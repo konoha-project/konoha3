@@ -8,7 +8,7 @@ void test_bytes() {
 	Bytes b = "hello".toBytes();
 	MPIData d = MPIData.fromBytes(b);
 	Bytes b2 = d.toBytes();
-	p(b2.toString());
+	p(b2.asString());
 }
 
 void test_farray() {

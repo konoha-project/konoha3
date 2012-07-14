@@ -76,7 +76,7 @@ static KMETHOD System_setpgid(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD System_chdir(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kString *s = sfp[1].toString;
+	kString *s = sfp[1].asString;
 	const char *dir = S_text(s);
 	int ret = chdir(dir);
 	RETURNi_(ret);
@@ -90,7 +90,7 @@ static KMETHOD System_fchdir(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD System_chroot(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kString *s = sfp[1].toString;
+	kString *s = sfp[1].asString;
 	const char *root = S_text(s);
 	int ret = chroot(root);
 	RETURNi_(ret);
@@ -116,16 +116,16 @@ static KMETHOD System_setpriority(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD System_getgroups(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int size = kArray_size(sfp[2].toArray);
-	kArray *list = sfp[2].toArray;
+	int size = kArray_size(sfp[2].asArray);
+	kArray *list = sfp[2].asArray;
 	int ret = getgroups(size, list);
 	RETURNi_(ret);
 }
 
 static KMETHOD System_setgroups(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int size = kArray_size(sfp[2].toArray);
-	kArray *list = sfp[2].toArray;
+	int size = kArray_size(sfp[2].asArray);
+	kArray *list = sfp[2].asArray;
 	int ret = setgroups(size, list);
 	RETURNi_(ret);
 }

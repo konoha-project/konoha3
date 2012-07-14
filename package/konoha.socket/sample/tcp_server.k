@@ -26,7 +26,7 @@ void main () {
 	
 	Bytes buf = new Bytes(32);
 	ret = recv(dstFd, buf, 0);
-	p(buf.toString());
+	p(buf.asString());
 	close(dstFd);
 	close(fd);
 }

@@ -42,7 +42,7 @@ static kbool_t Nothing_hasNext(KonohaContext *kctx, KonohaStack* sfp)
 
 static void Nothing_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 {
-	kIterator *itr = (kIterator*)sfp[0].toObject;
+	kIterator *itr = (kIterator*)sfp[0].asObject;
 	RETURN_(itr->source);
 }
 
@@ -92,9 +92,9 @@ static KMETHOD Iterator_next(KonohaContext *kctx, KonohaStack *sfp)
 //
 //static KMETHOD Iterator_new(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	kIterator *itr = (kIterator*)sfp[0].toObject;
+//	kIterator *itr = (kIterator*)sfp[0].asObject;
 //	KSETv(itr->funcHasNext, sfp[1].fo);
-//	KSETv(itr->funcNext,sfp[2].toFunc);
+//	KSETv(itr->funcNext,sfp[2].asFunc);
 //	itr->hasNext = callFuncHasNext;
 //	itr->setNextResult = callFuncNext;
 //	RETURN_(itr);
@@ -102,13 +102,13 @@ static KMETHOD Iterator_next(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t Array_hasNext(KonohaContext *kctx, KonohaStack* sfp)
 {
-	kIterator *itr = (kIterator*)sfp[0].toObject;
+	kIterator *itr = (kIterator*)sfp[0].asObject;
 	return (itr->current_pos < kArray_size(itr->arrayList));
 }
 
 static void Array_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 {
-	kIterator *itr = (kIterator*)sfp[0].toObject;
+	kIterator *itr = (kIterator*)sfp[0].asObject;
 	size_t n = itr->current_pos;
 	itr->current_pos += 1;
 	DBG_ASSERT(n < kArray_size(itr->arrayList));
@@ -117,7 +117,7 @@ static void Array_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 
 static void Array_setNextResultUnbox(KonohaContext *kctx, KonohaStack* sfp)
 {
-	kIterator *itr = (kIterator*)sfp[0].toObject;
+	kIterator *itr = (kIterator*)sfp[0].asObject;
 	size_t n = itr->current_pos;
 	itr->current_pos += 1;
 	DBG_ASSERT(n < kArray_size(itr->arrayList));
@@ -126,7 +126,7 @@ static void Array_setNextResultUnbox(KonohaContext *kctx, KonohaStack* sfp)
 
 static KMETHOD Array_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kArray *a = sfp[0].toArray;
+	kArray *a = sfp[0].asArray;
 	KonohaClass *cIterator = CT_p0(kctx, CT_Iterator, O_ct(a)->p0);
 	kIterator *itr = (kIterator*)KLIB new_kObject(kctx, cIterator, 0);
 	KSETv(itr->arrayList, a);
@@ -176,7 +176,7 @@ static void String_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 static KMETHOD String_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kIterator *itr = (kIterator*)KLIB new_kObject(kctx, CT_StringIterator, 0);
-	KSETv(itr->source, sfp[0].toObject);
+	KSETv(itr->source, sfp[0].asObject);
 	itr->hasNext = String_hasNext;
 	itr->setNextResult = String_setNextResult;
 	RETURN_(itr);

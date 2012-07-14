@@ -177,8 +177,8 @@ struct kByteCodeVar {
 
 #define OPEXEC_NSET(A, N, CT) rbp[(A)].unboxValue = N
 #define OPEXEC_NMOV(A, B, CT) rbp[(A)].unboxValue = rbp[(B)].unboxValue
-#define OPEXEC_NMOVx(A, B, BX, CT) rbp[(A)].o = (rbp[(B)].toObjectVar)->fieldObjectItems[(BX)]
-#define OPEXEC_XNMOV(A, AX, B, CT) (rbp[(A)].toObjectVar)->fieldObjectItems[AX] = rbp[(B)].o
+#define OPEXEC_NMOVx(A, B, BX, CT) rbp[(A)].o = (rbp[(B)].asObjectVar)->fieldObjectItems[(BX)]
+#define OPEXEC_XNMOV(A, AX, B, CT) (rbp[(A)].asObjectVar)->fieldObjectItems[AX] = rbp[(B)].o
 
 #define OPEXEC_NEW(A, P, CT)   KSETv(rbp[(A)].o, KLIB new_kObject(kctx, CT, P))
 #define OPEXEC_NULL(A, CT)     KSETv(rbp[(A)].o, KLIB Knull(kctx, CT))

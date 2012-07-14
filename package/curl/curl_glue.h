@@ -130,7 +130,7 @@ static KMETHOD Curl_new (KonohaContext *kctx, KonohaStack *sfp)
 //##  void Curl.setOpt(int type, dynamic data);
 static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 {
-	CURL* curl = toCURL(sfp[0].toObject);
+	CURL* curl = toCURL(sfp[0].asObject);
 	long curlopt = Int_to(long, sfp[1]);
 //	FILE* fp = NULL;
 	switch(curlopt) {
@@ -285,7 +285,7 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 //				}
 	case CURLOPT_READDATA:
 		if (IS_String(sfp[2].o)) {
-			FILE* fp = ((kCurl*)sfp[0].toObject)->fp;
+			FILE* fp = ((kCurl*)sfp[0].asObject)->fp;
 			if ((fp = tmpfile()) == NULL) {
 				ktrace(_DataFault,   // FIXME
 						KEYVALUE_s("Curl.setOpt", "Could not set body CURLOPT.READDATA"),
@@ -313,7 +313,7 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 //## void Curl.appendHeader();
 static KMETHOD Curl_appendHeader(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kCurl* kcurl = (struct _kCurl*)sfp[0].toObject;
+	struct _kCurl* kcurl = (struct _kCurl*)sfp[0].asObject;
 	char *h = String_to(char*,sfp[1]);
 	kcurl->headers = curl_slist_append(kcurl->headers, h);
 	RETURNvoid_();
@@ -322,8 +322,8 @@ static KMETHOD Curl_appendHeader(KonohaContext *kctx, KonohaStack *sfp)
 //## boolean Curl.perform();
 static KMETHOD Curl_perform(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kCurl* kcurl = (kCurl*)sfp[0].toObject;
-	CURL* curl = toCURL(sfp[0].toObject);
+	kCurl* kcurl = (kCurl*)sfp[0].asObject;
+	CURL* curl = toCURL(sfp[0].asObject);
 	if (kcurl->headers) {
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, kcurl->headers);
 	}
@@ -341,7 +341,7 @@ static KMETHOD Curl_perform(KonohaContext *kctx, KonohaStack *sfp)
 ////## dynamic Curl.getInfo(int type);
 static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 {
-	CURL* curl = toCURL(sfp[0].toObject);
+	CURL* curl = toCURL(sfp[0].asObject);
 	char *strptr = NULL;
 	long lngptr = 0;
 	double dblptr = 0;

@@ -469,8 +469,8 @@ static void Regex_set(KonohaContext *kctx, kRegex *re, kString *ptns, kString *o
 
 static KMETHOD Regex_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	Regex_set(kctx, sfp[0].re, sfp[1].toString, sfp[2].s);
-	RETURN_(sfp[0].toObject);
+	Regex_set(kctx, sfp[0].re, sfp[1].asString, sfp[2].s);
+	RETURN_(sfp[0].asObject);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -516,7 +516,7 @@ static KMETHOD String_match(KonohaContext *kctx, KonohaStack *sfp)
 		int i, isGlobalOption = Regex_isGlobalOption(re);
 		a = new_(Array, nmatch);/*TODO new_Array(TY_String)*/
 		BEGIN_LOCAL(lsfp, 1);
-		KSETv(lsfp[0].toArray, a);
+		KSETv(lsfp[0].asArray, a);
 		do {
 			int res = pcre_regexec(kctx, re->reg, str, nmatch, pmatch, re->eflags);
 			if(res != 0) {
@@ -604,7 +604,7 @@ static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp)
 		if (str < eos) {
 			a = new_(Array, 0); // TODO new_Array(kctx, TY_String, 0);
 			BEGIN_LOCAL(lsfp, 1);
-			KSETv(lsfp[0].toArray, a);
+			KSETv(lsfp[0].asArray, a);
 			while (str <= eos) {
 				int res = pcre_regexec(kctx, re->reg, str, KREGEX_MATCHSIZE, pmatch, re->eflags);
 				if (res == 0) {

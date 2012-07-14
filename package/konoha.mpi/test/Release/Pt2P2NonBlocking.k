@@ -15,7 +15,7 @@ void test_bytes() {
 		MPIRequest req = w.iRecv(d, 6, 0, 0);
 		req.wait();
 		d.setOffset(0);
-		p(d.toBytes().toString());
+		p(d.toBytes().asString());
 	}
 }
 

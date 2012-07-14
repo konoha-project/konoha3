@@ -15,7 +15,7 @@ void test_bytes() {
 		d.setOffset(6);
 		w.recv(d, 6, 0, 0);
 		d.setOffset(0);
-		p(d.toBytes().toString());
+		p(d.toBytes().asString());
 	}
 }
 

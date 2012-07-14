@@ -31,23 +31,23 @@
 static KMETHOD MethodFunc_FieldGetter(KonohaContext *kctx, KonohaStack *sfp)
 {
 	size_t delta = sfp[K_MTDIDX].mtdNC->delta;
-	RETURN_((sfp[0].toObject)->fieldObjectItems[delta]);
+	RETURN_((sfp[0].asObject)->fieldObjectItems[delta]);
 }
 static KMETHOD MethodFunc_FieldGetterN(KonohaContext *kctx, KonohaStack *sfp)
 {
 	size_t delta = sfp[K_MTDIDX].mtdNC->delta;
-	RETURNd_((sfp[0].toObject)->fieldUnboxItems[delta]);
+	RETURNd_((sfp[0].asObject)->fieldUnboxItems[delta]);
 }
 static KMETHOD MethodFunc_FieldSetter(KonohaContext *kctx, KonohaStack *sfp)
 {
 	size_t delta = sfp[K_MTDIDX].mtdNC->delta;
-	KSETv((sfp[0].toObjectVar)->fieldObjectItems[delta], sfp[1].toObject);
-	RETURN_(sfp[1].toObject);
+	KSETv((sfp[0].asObjectVar)->fieldObjectItems[delta], sfp[1].asObject);
+	RETURN_(sfp[1].asObject);
 }
 static KMETHOD MethodFunc_FieldSetterN(KonohaContext *kctx, KonohaStack *sfp)
 {
 	size_t delta = sfp[K_MTDIDX].mtdNC->delta;
-	(sfp[0].toObjectVar)->fieldUnboxItems[delta] = sfp[1].unboxValue;
+	(sfp[0].asObjectVar)->fieldUnboxItems[delta] = sfp[1].unboxValue;
 	RETURNd_(sfp[1].unboxValue);
 }
 
@@ -111,7 +111,7 @@ static void KLIB2_setGetterSetter(KonohaContext *kctx, KonohaClass *ct)
 // int NameSpace.getCid(String name, int defval)
 static KMETHOD NameSpace_getCid(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KonohaClass *ct = KLIB kNameSpace_getCT(kctx, sfp[0].toNameSpace, NULL/*fixme*/, S_text(sfp[1].toString), S_size(sfp[1].toString), (ktype_t)sfp[2].ivalue);
+	KonohaClass *ct = KLIB kNameSpace_getCT(kctx, sfp[0].asNameSpace, NULL/*fixme*/, S_text(sfp[1].asString), S_size(sfp[1].asString), (ktype_t)sfp[2].ivalue);
 	kint_t cid = ct != NULL ? ct->classId : sfp[2].ivalue;
 	RETURNi_(cid);
 }
@@ -156,7 +156,7 @@ static KMETHOD NameSpace_defineClass(KonohaContext *kctx, KonohaStack *sfp)
 	if(!CT_isDefined(supct)) {
 		kreportf(CritTag, sfp[K_RTNIDX].uline, "%s has undefined field(s)", TY_t(superclassId));
 	}
-	KonohaClass *ct = defineClass(kctx, sfp[0].toNameSpace, sfp[1].ivalue, sfp[2].s, supct, sfp[4].ivalue, sfp[K_RTNIDX].uline);
+	KonohaClass *ct = defineClass(kctx, sfp[0].asNameSpace, sfp[1].ivalue, sfp[2].s, supct, sfp[4].ivalue, sfp[K_RTNIDX].uline);
 	RETURNi_(ct->classId);
 }
 

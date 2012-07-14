@@ -547,22 +547,22 @@ static kbool_t NameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, cons
 // boolean NameSpace.importPackage(String pkgname);
 static KMETHOD NameSpace_importPackage_(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(NameSpace_importPackage(kctx, sfp[0].toNameSpace, S_text(sfp[1].toString), sfp[K_RTNIDX].uline));
+	RETURNb_(NameSpace_importPackage(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), sfp[K_RTNIDX].uline));
 }
 
 // boolean NameSpace.loadScript(String path);
 static KMETHOD NameSpace_loadScript_(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kfileline_t pline = sfp[K_RTNIDX].uline;
-	FILE_i *fp = PLATAPI fopen_i(S_text(sfp[1].toString), "r");
+	FILE_i *fp = PLATAPI fopen_i(S_text(sfp[1].asString), "r");
 	if(fp != NULL) {
-		kfileline_t uline = uline_init(kctx, S_text(sfp[1].toString), S_size(sfp[1].toString), 1, 1);
-		kstatus_t status = NameSpace_loadstream(kctx, sfp[0].toNameSpace, fp, uline, 0);
+		kfileline_t uline = uline_init(kctx, S_text(sfp[1].asString), S_size(sfp[1].asString), 1, 1);
+		kstatus_t status = NameSpace_loadstream(kctx, sfp[0].asNameSpace, fp, uline, 0);
 		PLATAPI fclose_i(fp);
 		RETURNb_(status == K_CONTINUE);
 	}
 	else {
-		kreportf(ErrTag, pline, "script not found: %s", S_text(sfp[1].toString));
+		kreportf(ErrTag, pline, "script not found: %s", S_text(sfp[1].asString));
 		RETURNb_(0);
 	}
 }
