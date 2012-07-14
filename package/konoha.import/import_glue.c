@@ -28,7 +28,6 @@
 
 static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp)
 {
-	USING_SUGAR;
 	int ret = false;
 	VAR_StmtTyCheck(stmt, gma);
 	kTokenArray *tls = (kTokenArray *) kStmt_getObjectNULL(kctx, stmt, KW_ToksPattern);
@@ -80,7 +79,6 @@ static kbool_t import_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfilelin
 
 static kbool_t import_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
-	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("import"), .rule = "\"import\" $toks", TopStmtTyCheck_(import)},
 		{ .keyword = KW_END, },

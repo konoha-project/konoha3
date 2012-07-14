@@ -727,13 +727,12 @@ static KMETHOD ExprTyCheck_Regex(KonohaContext *kctx, KonohaStack *sfp)
 	kRegex *r = new_(Regex, NULL);
 	DBG_ASSERT(kArray_size(tk->sub) == 2);
 	Regex_set(kctx, r, tk->sub->stringItems[0], tk->sub->stringItems[1]);
-	RETURN_(SUGARAPI kExpr_setConstValue(kctx, expr, TY_Regex, UPCAST(r)));
+	RETURN_(SUGAR kExpr_setConstValue(kctx, expr, TY_Regex, UPCAST(r)));
 }
 
 #define _SLASH     30//FIXME (from src/sugar/token.h)
 static kbool_t pcre_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
-	USING_SUGAR;
 	SUGAR NameSpace_setTokenizeFunc(kctx, ns, '/', parseREGEX, NULL, 0);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("$regex"), _TERM, ExprTyCheck_(Regex), },

@@ -235,12 +235,11 @@ static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
 	sfp[4].fvalue = strtod(S_text(tk->text), NULL);   // just using tramsformation float
-	RETURN_(SUGARAPI kExpr_setUnboxConstValue(kctx, expr, TY_Float, sfp[4].unboxValue));
+	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_Float, sfp[4].unboxValue));
 }
 
 static kbool_t float_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
-	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("float"), .type = TY_Float, },
 		{ .keyword = SYM_("double"), .type = TY_Float, },

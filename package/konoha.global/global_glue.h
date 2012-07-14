@@ -101,7 +101,6 @@ static void CT_addMethod2(KonohaContext *kctx, KonohaClass *ct, kMethod *mtd)
 
 static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kObject *o, kStmt *stmt, kNameSpace *ns, ktype_t ty, ksymbol_t fn)
 {
-	USING_SUGAR;
 	ktype_t cid = O_cid(o);
 	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(fn));
 	if(mtd != NULL) {
@@ -137,7 +136,6 @@ static ksymbol_t tosymbol(KonohaContext *kctx, kExpr *expr)
 
 static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp)
 {
-	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, gma);
 	DBG_P("global assignment .. ");
 	kObject *scr = gma->genv->ns->scriptObject;
@@ -171,7 +169,6 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp)
 
 static kMethod* ExprTerm_getSetterNULL(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kObject *scr, kGamma *gma, ktype_t ty)
 {
-	USING_SUGAR;
 	if(Expr_isTerm(expr) && expr->termToken->keyword == TK_SYMBOL) {
 		kToken *tk = expr->termToken;
 		if(tk->keyword != KW_SymbolPattern) {
@@ -187,7 +184,6 @@ static kMethod* ExprTerm_getSetterNULL(KonohaContext *kctx, kStmt *stmt, kExpr *
 
 static kbool_t appendSetterStmt(KonohaContext *kctx, kExpr *expr, kStmt **lastStmtRef)
 {
-	USING_SUGAR;
 	kStmt *lastStmt = lastStmtRef[0];
 	kStmt *newstmt = new_(Stmt, lastStmt->uline);
 	SUGAR Block_insertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, newstmt);
@@ -199,7 +195,6 @@ static kbool_t appendSetterStmt(KonohaContext *kctx, kExpr *expr, kStmt **lastSt
 
 static kbool_t Expr_declType(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, ktype_t ty, kStmt **lastStmtRef)
 {
-	USING_SUGAR;
 	kObject *scr = gma->genv->ns->scriptObject;
 	if(O_cid(scr) == TY_System) {
 		SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, " global variables are not available");
@@ -241,7 +236,6 @@ static kbool_t Expr_declType(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGam
 
 static KMETHOD StmtTyCheck_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
-	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, gma);
 	kToken *tk  = kStmt_token(stmt, KW_TypePattern, NULL);
 	kExpr  *expr = kStmt_expr(stmt, KW_ExprPattern, NULL);
@@ -260,7 +254,6 @@ struct _kScript {
 
 static kbool_t global_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
-	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("var"), TopStmtTyCheck_(var), .rule = "\"var\" var: $expr \"=\" $expr", },
 		{ .keyword = KW_END, },

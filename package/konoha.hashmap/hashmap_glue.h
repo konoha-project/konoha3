@@ -142,7 +142,6 @@ static kbool_t hashmap_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileli
 static kbool_t hashmap_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	// TODO: map literal
-	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
 
 			{ .keyword = KW_END, },

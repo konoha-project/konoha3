@@ -33,26 +33,26 @@ static KMETHOD ExprTyCheck_Text(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
-	RETURN_(SUGARAPI kExpr_setConstValue(kctx, expr, TY_String, UPCAST(tk->text)));
+	RETURN_(SUGAR kExpr_setConstValue(kctx, expr, TY_String, UPCAST(tk->text)));
 }
 
 static KMETHOD ExprTyCheck_Type(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	DBG_ASSERT(TK_isType(expr->termToken));
-	RETURN_(SUGARAPI kExpr_setVariable(kctx, expr, gma, TEXPR_NULL, expr->termToken->ty, 0));
+	RETURN_(SUGAR kExpr_setVariable(kctx, expr, gma, TEXPR_NULL, expr->termToken->ty, 0));
 }
 
 static KMETHOD ExprTyCheck_true(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	RETURN_(SUGARAPI kExpr_setUnboxConstValue(kctx, expr, TY_Boolean, (uintptr_t)1));
+	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_Boolean, (uintptr_t)1));
 }
 
 static KMETHOD ExprTyCheck_false(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	RETURN_(SUGARAPI kExpr_setUnboxConstValue(kctx, expr, TY_Boolean, (uintptr_t)0));
+	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_Boolean, (uintptr_t)0));
 }
 
 static KMETHOD ExprTyCheck_Int(KonohaContext *kctx, KonohaStack *sfp)
@@ -60,7 +60,7 @@ static KMETHOD ExprTyCheck_Int(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
 	long long n = strtoll(S_text(tk->text), NULL, 0);
-	RETURN_(SUGARAPI kExpr_setUnboxConstValue(kctx, expr, TY_Int, (uintptr_t)n));
+	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_Int, (uintptr_t)n));
 }
 
 static KMETHOD ExprTyCheck_AND(KonohaContext *kctx, KonohaStack *sfp)
@@ -132,7 +132,7 @@ static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, KonohaStack *sfp)
 		if(ty != TY_void) {
 			kExpr *letexpr = new_TypedConsExpr(kctx, TEXPR_LET, TY_void, 3, K_NULL, lvar, rexpr);
 			KLIB kObject_setObject(kctx, lastExpr, KW_ExprPattern, TY_Expr, letexpr);
-			texpr = SUGARAPI kExpr_setVariable(kctx, expr, gma, TEXPR_BLOCK, ty, lvarsize);
+			texpr = SUGAR kExpr_setVariable(kctx, expr, gma, TEXPR_BLOCK, ty, lvarsize);
 		}
 		//         FIXME:
 		//             for(i = atop; i < kArray_size(gma->genv->lvarlst); i++) {
@@ -186,7 +186,7 @@ static kExpr* Expr_tyCheckVariable2(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 	GammaAllocaData *genv = gma->genv;
 	for(i = genv->localScope.varsize - 1; i >= 0; i--) {
 		if(genv->localScope.vars[i].fn == fn) {
-			return SUGARAPI kExpr_setVariable(kctx, expr, gma, TEXPR_LOCAL, genv->localScope.vars[i].ty, i);
+			return SUGAR kExpr_setVariable(kctx, expr, gma, TEXPR_LOCAL, genv->localScope.vars[i].ty, i);
 		}
 	}
 	if(genv->localScope.vars[0].ty != TY_void) {
@@ -194,7 +194,7 @@ static kExpr* Expr_tyCheckVariable2(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 		KonohaClass *ct = CT_(genv->this_cid);
 		for(i = ct->fsize; i >= 0; i--) {
 			if(ct->fieldItems[i].fn == fn && ct->fieldItems[i].ty != TY_void) {
-				return SUGARAPI kExpr_setVariable(kctx, expr, gma, TEXPR_FIELD, ct->fieldItems[i].ty, longid((kshort_t)i, 0));
+				return SUGAR kExpr_setVariable(kctx, expr, gma, TEXPR_FIELD, ct->fieldItems[i].ty, longid((kshort_t)i, 0));
 			}
 		}
 		kMethod *mtd = NameSpace_getGetterMethodNULL(kctx, genv->ns, genv->this_cid, fn);
@@ -225,16 +225,16 @@ static kExpr* Expr_tyCheckVariable2(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 		KUtilsKeyValue *kv = NameSpace_getConstNULL(kctx, gma->genv->ns, fn);
 		if(kv != NULL) {
 			if(SYMKEY_isBOXED(kv->key)) {
-				SUGARAPI kExpr_setConstValue(kctx, expr, kv->ty, kv->oval);
+				SUGAR kExpr_setConstValue(kctx, expr, kv->ty, kv->oval);
 			}
 			else {
-				SUGARAPI kExpr_setUnboxConstValue(kctx, expr, kv->ty, kv->uval);
+				SUGAR kExpr_setUnboxConstValue(kctx, expr, kv->ty, kv->uval);
 			}
 			return expr;
 		}
 	}
 	kObject *v = NameSpace_getSymbolValueNULL(kctx, gma->genv->ns, S_text(tk->text), S_size(tk->text));
-	kExpr *texpr = (v == NULL) ? kToken_p(stmt, tk, ErrTag, "undefined name: %s", kToken_s(tk)) : SUGARAPI kExpr_setConstValue(kctx, expr, O_cid(v), v);
+	kExpr *texpr = (v == NULL) ? kToken_p(stmt, tk, ErrTag, "undefined name: %s", kToken_s(tk)) : SUGAR kExpr_setConstValue(kctx, expr, O_cid(v), v);
 	return texpr;
 }
 
@@ -253,16 +253,16 @@ static KMETHOD ExprTyCheck_Usymbol(KonohaContext *kctx, KonohaStack *sfp)
 		KUtilsKeyValue *kv = NameSpace_getConstNULL(kctx, gma->genv->ns, ukey);
 		if(kv != NULL) {
 			if(SYMKEY_isBOXED(kv->key)) {
-				SUGARAPI kExpr_setConstValue(kctx, expr, kv->ty, kv->oval);
+				SUGAR kExpr_setConstValue(kctx, expr, kv->ty, kv->oval);
 			}
 			else {
-				SUGARAPI kExpr_setUnboxConstValue(kctx, expr, kv->ty, kv->uval);
+				SUGAR kExpr_setUnboxConstValue(kctx, expr, kv->ty, kv->uval);
 			}
 			RETURN_(expr);
 		}
 	}
 	kObject *v = NameSpace_getSymbolValueNULL(kctx, gma->genv->ns, S_text(tk->text), S_size(tk->text));
-	kExpr *texpr = (v == NULL) ? kToken_p(stmt, tk, ErrTag, "undefined name: %s", kToken_s(tk)) : SUGARAPI kExpr_setConstValue(kctx, expr, O_cid(v), v);
+	kExpr *texpr = (v == NULL) ? kToken_p(stmt, tk, ErrTag, "undefined name: %s", kToken_s(tk)) : SUGAR kExpr_setConstValue(kctx, expr, O_cid(v), v);
 	RETURN_(texpr);
 }
 
@@ -546,7 +546,7 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kExpr *exprN, kGamm
 	GammaAllocaData *genv = gma->genv;
 	for(i = genv->localScope.varsize - 1; i >= 0; i--) {
 		if(genv->localScope.vars[i].fn == fn && TY_isFunc(genv->localScope.vars[i].ty)) {
-			SUGARAPI kExpr_setVariable(kctx, expr, gma, TEXPR_LOCAL, genv->localScope.vars[i].ty, i);
+			SUGAR kExpr_setVariable(kctx, expr, gma, TEXPR_LOCAL, genv->localScope.vars[i].ty, i);
 			return NULL;
 		}
 	}
@@ -561,7 +561,7 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kExpr *exprN, kGamm
 		if (ct->fsize) {
 			for(i = ct->fsize; i >= 0; i--) {
 				if(ct->fieldItems[i].fn == fn && TY_isFunc(ct->fieldItems[i].ty)) {
-					SUGARAPI kExpr_setVariable(kctx, expr, gma, TEXPR_FIELD, ct->fieldItems[i].ty, longid((kshort_t)i, 0));
+					SUGAR kExpr_setVariable(kctx, expr, gma, TEXPR_FIELD, ct->fieldItems[i].ty, longid((kshort_t)i, 0));
 					return NULL;
 				}
 			}
@@ -747,7 +747,7 @@ static kbool_t ExprTerm_toVariable(KonohaContext *kctx, kStmt *stmt, kExpr *expr
 		}
 		ksymbol_t fn = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
 		int index = addGammaStack(kctx, &gma->genv->localScope, ty, fn);
-		SUGARAPI kExpr_setVariable(kctx, expr, gma, TEXPR_LOCAL, ty, index);
+		SUGAR kExpr_setVariable(kctx, expr, gma, TEXPR_LOCAL, ty, index);
 		return true;
 	}
 	return false;

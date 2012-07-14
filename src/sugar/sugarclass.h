@@ -800,7 +800,7 @@ static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
 	}
 }
 
-static kExpr* SUGARAPI kExpr_setConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, kObject *o)
+static kExpr* SUGAR kExpr_setConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, kObject *o)
 {
 	kExprVar *Wexpr = (expr == NULL) ? GCSAFE_new(ExprVar, 0) : (kExprVar*)expr;
 	Wexpr->ty = ty;
@@ -816,7 +816,7 @@ static kExpr* SUGARAPI kExpr_setConstValue(KonohaContext *kctx, kExpr *expr, kty
 	return (kExpr*)Wexpr;
 }
 
-static kExpr* SUGARAPI kExpr_setUnboxConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, uintptr_t unboxValue)
+static kExpr* SUGAR kExpr_setUnboxConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, uintptr_t unboxValue)
 {
 	kExprVar *Wexpr = (expr == NULL) ? GCSAFE_new(ExprVar, 0) : (kExprVar*)expr;
 	Wexpr->build = TEXPR_NCONST;
@@ -825,7 +825,7 @@ static kExpr* SUGARAPI kExpr_setUnboxConstValue(KonohaContext *kctx, kExpr *expr
 	return (kExpr*)Wexpr;
 }
 
-static kExpr* SUGARAPI kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, int build, ktype_t ty, intptr_t index)
+static kExpr* SUGAR kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, int build, ktype_t ty, intptr_t index)
 {
 	kExprVar *Wexpr = (expr == NULL) ? GCSAFE_new(ExprVar, 0) : (kExprVar*)expr;
 	Wexpr->build = build;

@@ -41,7 +41,6 @@ static kbool_t while_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline
 
 static KMETHOD StmtTyCheck_while(KonohaContext *kctx, KonohaStack *sfp)
 {
-	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, gma);
 	DBG_P("while statement .. ");
 	int ret = false;
@@ -55,7 +54,6 @@ static KMETHOD StmtTyCheck_while(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD StmtTyCheck_for(KonohaContext *kctx, KonohaStack *sfp)
 {
-	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, gma);
 	DBG_P("for statement .. ");
 	int ret = false;
@@ -74,7 +72,6 @@ static inline kStmt* kStmt_getParentNULL(kStmt *stmt)
 
 static KMETHOD StmtTyCheck_break(KonohaContext *kctx, KonohaStack *sfp)
 {
-	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, gma);
 	kStmt *p = stmt;
 	while((p = kStmt_getParentNULL(p)) != NULL) {
@@ -90,7 +87,6 @@ static KMETHOD StmtTyCheck_break(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD StmtTyCheck_continue(KonohaContext *kctx, KonohaStack *sfp)
 {
-	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, gma);
 	DBG_P("continue statement .. ");
 	kStmt *p = stmt;
@@ -109,7 +105,6 @@ static KMETHOD StmtTyCheck_continue(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t while_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
-	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("while"), _LOOP, StmtTyCheck_(while), .rule = "\"while\" \"(\" $expr \")\" $block", },
 		{ .keyword = SYM_("break"), StmtTyCheck_(break), .rule = "\"break\" [ $USYMBOL ]", },

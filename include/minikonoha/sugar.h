@@ -571,13 +571,13 @@ typedef struct {
 #define TPOL_COERCION       (1 << 2)
 #define TPOL_CONST          (1 << 4)
 
-#define new_ConstValueExpr(CTX, T, O)              SUGARAPI kExpr_setConstValue(CTX, NULL, T, O)
-#define new_UnboxConstValueExpr(CTX, T, D)         SUGARAPI kExpr_setUnboxConstValue(CTX, NULL, T, D)
-#define new_VariableExpr(CTX, GMA, BLD, TY, IDX)   SUGARAPI kExpr_setVariable(CTX, NULL, GMA, BLD, TY, IDX)
+#define new_ConstValueExpr(CTX, T, O)              SUGAR kExpr_setConstValue(CTX, NULL, T, O)
+#define new_UnboxConstValueExpr(CTX, T, D)         SUGAR kExpr_setUnboxConstValue(CTX, NULL, T, D)
+#define new_VariableExpr(CTX, GMA, BLD, TY, IDX)   SUGAR kExpr_setVariable(CTX, NULL, GMA, BLD, TY, IDX)
 
 #ifdef USING_SUGAR_AS_BUILTIN
 
-#define SUGARAPI
+#define SUGAR
 
 static kExpr* kExpr_setConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, kObject *o);
 static kExpr* kExpr_setUnboxConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, uintptr_t unboxValue);
@@ -605,30 +605,26 @@ static kExpr* kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, i
 #else/*SUGAR_EXPORTS*/
 
 
-#define SUGARAPI        ((const KModuleSugar *)kmodsugar)->
-
-#define USING_SUGAR                          const KModuleSugar *_e = (const KModuleSugar *)kmodsugar
-#define SUGAR                                _e->
-#define TY_NameSpace                         _e->cNameSpace->cid
-#define TY_Token                             _e->cToken->cid
-#define TY_Stmt                              _e->cStmt->cid
-#define TY_Block                             _e->cBlock->cid
-#define TY_Expr                              _e->cExpr->cid
-#define TY_Gamma                             _e->cGamma->cid
-#define TY_TokenArray                        _e->cTokenArray->cid
+#define SUGAR        ((const KModuleSugar *)kmodsugar)->
+#define TY_NameSpace                         SUGAR cNameSpace->cid
+#define TY_Token                             SUGAR cToken->cid
+#define TY_Stmt                              SUGAR cStmt->cid
+#define TY_Block                             SUGAR cBlock->cid
+#define TY_Expr                              SUGAR cExpr->cid
+#define TY_Gamma                             SUGAR cGamma->cid
+#define TY_TokenArray                        SUGAR cTokenArray->cid
 
 //#define KW_(T)                               _e->keyword(kctx, T, sizeof(T)-1, SYM_NONAME)
-#define SYN_(KS, KW)                         _e->NameSpace_syn(kctx, KS, KW, 0)
-#define NEWSYN_(KS, KW)                      (SugarSyntaxVar*)_e->NameSpace_syn(kctx, KS, KW, 1)
+#define SYN_(KS, KW)                         SUGAR NameSpace_syn(kctx, KS, KW, 0)
+#define NEWSYN_(KS, KW)                      (SugarSyntaxVar*)(SUGAR NameSpace_syn(kctx, KS, KW, 1))
 
-#define kStmt_token(STMT, KW, DEF)           _e->Stmt_token(kctx, STMT, KW, DEF)
-#define kStmt_expr(STMT, KW, DEF)            _e->Stmt_expr(kctx, STMT, KW, DEF)
-#define kStmt_text(STMT, KW, DEF)            _e->Stmt_text(kctx, STMT, KW, DEF)
-#define kStmt_block(STMT, KW, DEF)           _e->Stmt_block(kctx, STMT, KW, DEF)
+#define kStmt_token(STMT, KW, DEF)           SUGAR Stmt_token(kctx, STMT, KW, DEF)
+#define kStmt_expr(STMT, KW, DEF)            SUGAR Stmt_expr(kctx, STMT, KW, DEF)
+#define kStmt_text(STMT, KW, DEF)            SUGAR Stmt_text(kctx, STMT, KW, DEF)
+#define kStmt_block(STMT, KW, DEF)           SUGAR Stmt_block(kctx, STMT, KW, DEF)
 
-#define kExpr_uline(EXPR)                    _e->Expr_uline(kctx, EXPR, 0)
-#define kExpr_tyCheckAt(STMT, E, N, GMA, T, P)     _e->Expr_tyCheckAt(kctx, STMT, E, N, GMA, T, P)
-//#define kStmt_tyCheck(E, NI, GMA, T, P)      _e->Stmt_tyCheck(kctx, STMT, NI, GMA, T, P)
+#define kExpr_uline(EXPR)                    SUGAR Expr_uline(kctx, EXPR, 0)
+#define kExpr_tyCheckAt(STMT, E, N, GMA, T, P)     SUGAR Expr_tyCheckAt(kctx, STMT, E, N, GMA, T, P)
 
 #endif/*SUGAR_EXPORTS*/
 

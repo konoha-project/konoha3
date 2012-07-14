@@ -145,7 +145,6 @@ KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp)
 
 static	kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	USING_SUGAR;
 	KonohaClass *ct = kclass(TY_Method, pline);
 	KSET_TYFUNC(ct, p, Method, pline);
 	KDEFINE_METHOD MethodData[] = {

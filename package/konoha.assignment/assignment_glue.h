@@ -30,7 +30,6 @@
 // Expr Expr.tyCheckStub(Gamma gma, int reqtyid);
 static KMETHOD ExprTyCheck_assignment(KonohaContext *kctx, KonohaStack *sfp)
 {
-	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kExpr *lexpr = kExpr_tyCheckAt(stmt, expr, 1, gma, TY_var, TPOL_ALLOWVOID);
 	kExpr *rexpr = kExpr_tyCheckAt(stmt, expr, 2, gma, lexpr->ty, 0);
@@ -147,7 +146,6 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 
 static KMETHOD ParseExpr_OprAssignment(KonohaContext *kctx, KonohaStack *sfp)
 {
-	USING_SUGAR;
 	VAR_ParseExpr(stmt, tls, s, c, e);
 	size_t atop = kArray_size(tls);
 	s = transform_oprAssignment(kctx, tls, s, c, e);
@@ -158,7 +156,6 @@ static KMETHOD ParseExpr_OprAssignment(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t assignment_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
-	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("="), /*.op2 = "*", .priority_op2 = 4096,*/ ExprTyCheck_(assignment)},
 		{ .keyword = SYM_("+="), _OPLeft, /*.priority_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .priority_op2 = 4096,},

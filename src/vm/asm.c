@@ -774,13 +774,11 @@ static void ExprStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx
 
 static void BlockStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
-	USING_SUGAR;
 	BLOCK_asm(kctx, kStmt_block(stmt, KW_BlockPattern, K_NULLBLOCK), shift);
 }
 
 static void IfStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
-	USING_SUGAR;
 	kBasicBlock*  lbELSE = new_BasicBlockLABEL(kctx);
 	kBasicBlock*  lbEND  = new_BasicBlockLABEL(kctx);
 	/* if */
@@ -806,7 +804,6 @@ static void ReturnStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espi
 
 static void LoopStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
-	USING_SUGAR;
 	kBasicBlock* lbCONTINUE = new_BasicBlockLABEL(kctx);
 	kBasicBlock* lbBREAK = new_BasicBlockLABEL(kctx);
 //	BUILD_pushLABEL(kctx, stmt, lbCONTINUE, lbBREAK);

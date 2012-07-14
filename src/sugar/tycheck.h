@@ -107,9 +107,9 @@ static kExpr* ExprCall_toConstValue(KonohaContext *kctx, kExpr *expr, kArray *co
 	KCALL(lsfp, 0, mtd, psize, KLIB Knull(kctx, CT_(expr->ty)));
 	END_LOCAL();
 	if(TY_isUnbox(rtype) || rtype == TY_void) {
-		return SUGARAPI kExpr_setUnboxConstValue(kctx, expr, rtype, lsfp[0].unboxValue);
+		return SUGAR kExpr_setUnboxConstValue(kctx, expr, rtype, lsfp[0].unboxValue);
 	}
-	return SUGARAPI kExpr_setConstValue(kctx, expr, rtype, lsfp[0].toObject);
+	return SUGAR kExpr_setConstValue(kctx, expr, rtype, lsfp[0].toObject);
 }
 
 static kbool_t CT_isa(KonohaContext *kctx, ktype_t cid1, ktype_t cid2)
@@ -263,7 +263,7 @@ static kbool_t Block_tyCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
 		}
 	}
 	if(bk != K_NULLBLOCK) {
-		SUGARAPI kExpr_setVariable(kctx, bk->esp, gma, TEXPR_LOCAL, TY_void, gma->genv->localScope.varsize);
+		SUGAR kExpr_setVariable(kctx, bk->esp, gma, TEXPR_LOCAL, TY_void, gma->genv->localScope.varsize);
 	}
 	if(lvarsize < gma->genv->localScope.varsize) {
 		gma->genv->localScope.varsize = lvarsize;

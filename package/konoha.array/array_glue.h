@@ -143,7 +143,6 @@ static kbool_t array_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline
 
 static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 {
-	USING_SUGAR;
 	VAR_ParseExpr(stmt, tls, s, c, e);
 	DBG_P("parse bracket!!");
 	kToken *tk = tls->tokenItems[c];
@@ -174,7 +173,6 @@ static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t array_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
-	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("[]"), .flag = SYNFLAG_ExprPostfixOp2, ParseExpr_(BRACKET), .priority_op2 = 16, },  //AST_BRACKET
 		{ .keyword = KW_END, },

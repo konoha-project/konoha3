@@ -210,7 +210,6 @@ static KMETHOD NameSpace_defineClassField(KonohaContext *kctx, KonohaStack *sfp)
 
 static	kbool_t class_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	USING_SUGAR;
 	int FN_flag = FN_("flag"), FN_cid = FN_("cid"), FN_name = FN_("name"), FN_defval = FN_("defval");
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(NameSpace_getCid), TY_Int, TY_NameSpace, MN_toGETTER(MN_("getCid")), 2, TY_String, FN_name, TY_Int, FN_defval,
@@ -242,7 +241,6 @@ static kExpr* NewExpr(KonohaContext *kctx, SugarSyntax *syn, kToken *tk, ktype_t
 
 static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	USING_SUGAR;
 	VAR_ParseExpr(stmt, tls, s, c, e);
 	DBG_ASSERT(s == c);
 	kTokenVar *tkNEW = tls->tokenVarItems[s];
@@ -280,7 +278,6 @@ static ksymbol_t tosymbolUM(KonohaContext *kctx, kToken *tk)
 
 static KMETHOD ExprTyCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 {
-	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tkN = expr->cons->tokenItems[0];
 	ksymbol_t fn = tosymbolUM(kctx, tkN);
@@ -303,7 +300,6 @@ static KMETHOD ExprTyCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 
 static void Stmt_parseClassBlock(KonohaContext *kctx, kStmt *stmt, kToken *tkC)
 {
-	USING_SUGAR;
 	kToken *tkP = (kToken*)kStmt_getObject(kctx, stmt, KW_BlockPattern, NULL);
 	if(tkP != NULL && tkP->keyword == TK_CODE) {
 		kArray *a = ctxsugar->preparedTokenList;
@@ -393,7 +389,6 @@ static KonohaClassVar* defineClassName(KonohaContext *kctx, kNameSpace *ns, ksho
 
 static size_t checkFieldSize(KonohaContext *kctx, kBlock *bk)
 {
-	USING_SUGAR;
 	size_t i, c = 0;
 	for(i = 0; i < kArray_size(bk->stmtList); i++) {
 		kStmt *stmt = bk->stmtList->stmtItems[i];
@@ -438,7 +433,6 @@ static void CT_initField(KonohaContext *kctx, KonohaClassVar *ct, KonohaClass *s
 
 static kbool_t CT_declType(KonohaContext *kctx, KonohaClassVar *ct, kGamma *gma, kStmt *stmt, kExpr *expr, kshortflag_t flag, ktype_t ty, kfileline_t pline)
 {
-	USING_SUGAR;
 	if(Expr_isTerm(expr)) {
 		kString *name = expr->termToken->text;
 		defineField(kctx, ct, flag, ty, name, KLIB Knull(kctx, CT_(ty)), 0);
@@ -480,7 +474,6 @@ static kbool_t CT_declType(KonohaContext *kctx, KonohaClassVar *ct, kGamma *gma,
 
 static kbool_t CT_addClassFields(KonohaContext *kctx, KonohaClassVar *ct, kGamma *gma, kBlock *bk, kfileline_t pline)
 {
-	USING_SUGAR;
 	size_t i;
 	for(i = 0; i < kArray_size(bk->stmtList); i++) {
 		kStmt *stmt = bk->stmtList->stmtItems[i];
@@ -501,7 +494,6 @@ static kbool_t CT_addClassFields(KonohaContext *kctx, KonohaClassVar *ct, kGamma
 
 static void CT_checkMethodDecl(KonohaContext *kctx, kToken *tkC, kBlock *bk, kStmt **lastStmtRef)
 {
-	USING_SUGAR;
 	size_t i;
 	for(i = 0; i < kArray_size(bk->stmtList); i++) {
 		kStmt *stmt = bk->stmtList->stmtItems[i];
@@ -519,7 +511,6 @@ static void CT_checkMethodDecl(KonohaContext *kctx, kToken *tkC, kBlock *bk, kSt
 
 static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 {
-	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, gma);
 	kToken *tkC = kStmt_token(stmt, KW_UsymbolPattern, NULL);
 	kToken *tkE= kStmt_token(stmt, SYM_("extends"), NULL);
@@ -574,7 +565,6 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t class_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
-	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("new"), ParseExpr_(new), },
 		{ .keyword = SYM_("class"), .rule = "\"class\" $USYMBOL [\"extends\" extends: $type] [$block]", TopStmtTyCheck_(class), },

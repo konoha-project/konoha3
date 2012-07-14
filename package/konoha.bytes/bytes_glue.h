@@ -405,13 +405,12 @@ static int parseSQUOTE(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, i
 
 static KMETHOD ExprTyCheck_Squote(KonohaContext *kctx, KonohaStack *sfp)
 {
-	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
 	kString *s = tk->text;
 	if (S_size(s) == 1) {
 		int ch = S_text(s)[0];
-		RETURN_(SUGARAPI kExpr_setUnboxConstValue(kctx, expr, TY_Int, ch));
+		RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_Int, ch));
 	} else {
 		SUGAR Stmt_p(kctx, stmt, (kToken*)expr, ErrTag, "single quote doesn't accept multi characters, '%s'", S_text(s));
 	}
@@ -420,7 +419,6 @@ static KMETHOD ExprTyCheck_Squote(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t bytes_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
-	USING_SUGAR;
 	SUGAR NameSpace_setTokenizeFunc(kctx, ns, '\'', parseSQUOTE, NULL, 0);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("$SingleQuote"), _TERM, ExprTyCheck_(Squote)},
