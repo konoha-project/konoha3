@@ -881,20 +881,21 @@ static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, KonohaStack *sfp)
 		uline = stmt->uline;
 	}
 	if(lastExpr != NULL) {
-//		int lvarsize = gma->genv->localScope.varsize;
-//		size_t i, atop = kArray_size(gma->genv->lvarlst);
-//		kExpr *lvar = new_Variable(LOCAL_, TY_var, addGammaStack(kctx, &gma->genv->l, TY_var, 0/*FN_*/), gma);
-//		if(!Block_tyCheckAll(kctx, bk, gma)) {
-//			RETURN_(texpr);
-//		}
-//		kExpr *rexpr = kStmt_expr(lastExpr, KW_ExprPattern, NULL);
-//		DBG_ASSERT(rexpr != NULL);
-//		ktype_t ty = rexpr->ty;
-//		if(ty != TY_void) {
-//			kExpr *letexpr = new_TypedConsExpr(kctx, TEXPR_LET, TY_void, 3, K_NULL, lvar, rexpr);
-//			KLIB kObject_setObject(kctx, lastExpr, KW_ExprPattern, TY_Expr, letexpr);
-//			texpr = kExpr_setVariable(expr, BLOCK_, ty, lvarsize, gma);
-//		}
+		int lvarsize = gma->genv->localScope.varsize;
+		//size_t i, atop = kArray_size(gma->genv->lvarlst);
+		if(!Block_tyCheckAll(kctx, bk, gma)) {
+			RETURN_(texpr);
+		}
+		kExpr *lvar = new_Variable(LOCAL, TY_var, addGammaStack(kctx, &gma->genv->localScope, TY_var, 0/*FN_*/), gma);
+		kExpr *rexpr = kStmt_expr(lastExpr, KW_ExprPattern, NULL);
+		DBG_ASSERT(rexpr != NULL);
+		ktype_t ty = rexpr->ty;
+		if(ty != TY_void) {
+			kExpr *letexpr = new_TypedConsExpr(kctx, TEXPR_LET, TY_void, 3, K_NULL, lvar, rexpr);
+			KLIB kObject_setObject(kctx, lastExpr, KW_ExprPattern, TY_Expr, letexpr);
+			texpr = kExpr_setVariable(expr, BLOCK, ty, lvarsize, gma);
+		}
+//	    FIXME:
 //		for(i = atop; i < kArray_size(gma->genv->lvarlst); i++) {
 //			kExprVar *v = gma->genv->lvarlst->exprVarItems[i];
 //			if(v->build == TEXPR_LOCAL_ && v->index >= lvarsize) {
@@ -902,9 +903,9 @@ static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, KonohaStack *sfp)
 //				//DBG_P("v->index=%d", v->index);
 //			}
 //		}
-//		if(lvarsize < gma->genv->localScope.varsize) {
-//			gma->genv->localScope.varsize = lvarsize;
-//		}
+		if(lvarsize < gma->genv->localScope.varsize) {
+			gma->genv->localScope.varsize = lvarsize;
+		}
 	}
 	if(texpr == K_NULLEXPR) {
 		kStmt_errline(stmt, uline);
