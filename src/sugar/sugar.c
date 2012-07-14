@@ -55,11 +55,11 @@ static kstatus_t NameSpace_eval(KonohaContext *kctx, kNameSpace *ns, const char 
 	kmodsugar->h.setup(kctx, (KonohaModule*)kmodsugar, 0/*lazy*/);
 	{
 		INIT_GCSTACK();
-		kArray *tls = ctxsugar->preparedTokenList;
-		size_t pos = kArray_size(tls);
-		NameSpace_tokenize(kctx, ns, script, uline, tls);
-		kBlock *bk = new_Block(kctx, ns, NULL, tls, pos, kArray_size(tls), ';');
-		KLIB kArray_clear(kctx, tls, pos);
+		kArray *tokenArray = ctxsugar->preparedTokenList;
+		size_t pos = kArray_size(tokenArray);
+		NameSpace_tokenize(kctx, ns, script, uline, tokenArray);
+		kBlock *bk = new_Block(kctx, ns, NULL, tokenArray, pos, kArray_size(tokenArray), ';');
+		KLIB kArray_clear(kctx, tokenArray, pos);
 		result = Block_eval(kctx, bk);
 		RESET_GCSTACK();
 	}

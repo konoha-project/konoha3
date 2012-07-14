@@ -304,11 +304,11 @@ static kBlock* Method_newBlock(KonohaContext *kctx, kMethod *mtd, kString *sourc
 		script = S_text(mtd->tcode->text);
 		uline = mtd->tcode->uline;
 	}
-	kArray *tls = ctxsugar->preparedTokenList;
-	size_t pos = kArray_size(tls);
-	NameSpace_tokenize(kctx, KNULL(NameSpace), script, uline, tls); //FIXME: ks
-	kBlock *bk = new_Block(kctx, KNULL(NameSpace), NULL, tls, pos, kArray_size(tls), ';');
-	KLIB kArray_clear(kctx, tls, pos);
+	kArray *tokenArray = ctxsugar->preparedTokenList;
+	size_t pos = kArray_size(tokenArray);
+	NameSpace_tokenize(kctx, KNULL(NameSpace), script, uline, tokenArray); //FIXME: ks
+	kBlock *bk = new_Block(kctx, KNULL(NameSpace), NULL, tokenArray, pos, kArray_size(tokenArray), ';');
+	KLIB kArray_clear(kctx, tokenArray, pos);
 	return bk;
 }
 

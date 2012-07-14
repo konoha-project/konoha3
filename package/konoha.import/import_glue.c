@@ -30,25 +30,25 @@ static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int ret = false;
 	VAR_StmtTyCheck(stmt, gma);
-	kTokenArray *tls = (kTokenArray *) kStmt_getObjectNULL(kctx, stmt, KW_ToksPattern);
-	if (tls == NULL) {
+	kTokenArray *tokenArray = (kTokenArray *) kStmt_getObjectNULL(kctx, stmt, KW_ToksPattern);
+	if (tokenArray == NULL) {
 		RETURNb_(false);
 	}
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	int i = 0;
-	if (i + 2 < kArray_size(tls)) {
-		for (; i < kArray_size(tls)-1; i+=2) {
+	if (i + 2 < kArray_size(tokenArray)) {
+		for (; i < kArray_size(tokenArray)-1; i+=2) {
 			/* name . */
-			kToken *tk  = tls->tokenItems[i+0];
-			kToken *dot = tls->tokenItems[i+1];
+			kToken *tk  = tokenArray->tokenItems[i+0];
+			kToken *dot = tokenArray->tokenItems[i+1];
 			assert(tk->keyword  == TK_SYMBOL);
 			assert(dot->keyword == KW_DOT);
 			KLIB Kwb_write(kctx, &wb, S_text(tk->text), S_size(tk->text));
 			kwb_putc(&wb, '.');
 		}
 	}
-	kString *name = tls->tokenItems[i]->text;
+	kString *name = tokenArray->tokenItems[i]->text;
 	KLIB Kwb_write(kctx, &wb, S_text(name), S_size(name));
 	kString *pkgname = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
 	kNameSpace *ns = gma->genv->ns;

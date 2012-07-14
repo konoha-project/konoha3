@@ -553,48 +553,48 @@ static void NameSpace_tokenize(KonohaContext *kctx, kNameSpace *ns, const char *
 
 // --------------------------------------------------------------------------
 
-static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tls, int s, int e, kArray *adst);
+static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tokenArray, int s, int e, kArray *adst);
 #define kToken_topch2(tt, tk) ((tk->keyword == tt && (S_size((tk)->text) == 1)) ? S_text((tk)->text)[0] : 0)
 
-static int findCloseChar(KonohaContext *kctx, kArray *tls, int s, int e, ksymbol_t tt, int closech)
+static int findCloseChar(KonohaContext *kctx, kArray *tokenArray, int s, int e, ksymbol_t tt, int closech)
 {
 	int i;
 	for(i = s; i < e; i++) {
-		kToken *tk = tls->tokenItems[i];
+		kToken *tk = tokenArray->tokenItems[i];
 		if(kToken_topch2(tt, tk) == closech) return i;
 	}
 	return e;
 }
 
-static kbool_t checkNestedSyntax(KonohaContext *kctx, kArray *tls, int *s, int e, ksymbol_t astkw, int opench, int closech)
+static kbool_t checkNestedSyntax(KonohaContext *kctx, kArray *tokenArray, int *s, int e, ksymbol_t astkw, int opench, int closech)
 {
 	int i = *s;
-	kTokenVar *tk = tls->tokenVarItems[i];
+	kTokenVar *tk = tokenArray->tokenVarItems[i];
 	int topch = kToken_topch2(tk->keyword, tk);
 	if(topch == opench) {
-		int ne = findCloseChar(kctx, tls, i+1, e, tk->keyword, closech);
+		int ne = findCloseChar(kctx, tokenArray, i+1, e, tk->keyword, closech);
 		tk->keyword = astkw;
 		KSETv(tk->sub, new_(TokenArray, 0));
-		makeSyntaxRule(kctx, tls, i+1, ne, tk->sub);
+		makeSyntaxRule(kctx, tokenArray, i+1, ne, tk->sub);
 		*s = ne;
 		return true;
 	}
 	return false;
 }
 
-static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tls, int s, int e, kArray *adst)
+static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tokenArray, int s, int e, kArray *adst)
 {
 	int i;
 	ksymbol_t patternKey = 0;
-//	dumpTokenArray(kctx, 0, tls, s, e);
+//	dumpTokenArray(kctx, 0, tokenArray, s, e);
 	for(i = s; i < e; i++) {
-		kTokenVar *tk = tls->tokenVarItems[i];
+		kTokenVar *tk = tokenArray->tokenVarItems[i];
 		int topch = kToken_topch(tk);
 		if(tk->keyword == TK_INDENT) continue;
 		if(tk->keyword == TK_TEXT) {
-			if(checkNestedSyntax(kctx, tls, &i, e, AST_PARENTHESIS, '(', ')') ||
-				checkNestedSyntax(kctx, tls, &i, e, AST_BRACKET, '[', ']') ||
-				checkNestedSyntax(kctx, tls, &i, e, AST_BRACE, '{', '}')) {
+			if(checkNestedSyntax(kctx, tokenArray, &i, e, AST_PARENTHESIS, '(', ')') ||
+				checkNestedSyntax(kctx, tokenArray, &i, e, AST_BRACKET, '[', ']') ||
+				checkNestedSyntax(kctx, tokenArray, &i, e, AST_BRACE, '{', '}')) {
 			}
 			else {
 				// FIXME: tk->tt = TK_CODE;
@@ -604,7 +604,7 @@ static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tls, int s, int e, kA
 			continue;
 		}
 		if(topch == '$' && i+1 < e) {
-			tk = tls->tokenVarItems[++i];
+			tk = tokenArray->tokenVarItems[++i];
 			if(tk->keyword == TK_SYMBOL) {
 				tk->keyword = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWRAW) | KW_PATTERN;
 				if(patternKey == 0) patternKey = tk->keyword;
@@ -615,13 +615,13 @@ static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tls, int s, int e, kA
 			}
 		}
 		else if(topch == '[') {
-			if(checkNestedSyntax(kctx, tls, &i, e, AST_OPTIONAL, '[', ']')) {
+			if(checkNestedSyntax(kctx, tokenArray, &i, e, AST_OPTIONAL, '[', ']')) {
 				KLIB kArray_add(kctx, adst, tk);
 				continue;
 			}
 			return false;
 		}
-		if(tk->keyword == TK_SYMBOL && i + 1 < e && kToken_topch(tls->tokenItems[i+1]) == ':') {
+		if(tk->keyword == TK_SYMBOL && i + 1 < e && kToken_topch(tokenArray->tokenItems[i+1]) == ':') {
 			patternKey = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWRAW);
 			i++;
 			continue;
@@ -634,11 +634,11 @@ static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tls, int s, int e, kA
 
 static void parseSyntaxRule(KonohaContext *kctx, const char *rule, kfileline_t uline, kArray *a)
 {
-	kArray *tls = ctxsugar->preparedTokenList;
-	size_t pos = kArray_size(tls);
-	NameSpace_tokenize(kctx, NULL, rule, uline, tls);
-	makeSyntaxRule(kctx, tls, pos, kArray_size(tls), a);
-	KLIB kArray_clear(kctx, tls, pos);
+	kArray *tokenArray = ctxsugar->preparedTokenList;
+	size_t pos = kArray_size(tokenArray);
+	NameSpace_tokenize(kctx, NULL, rule, uline, tokenArray);
+	makeSyntaxRule(kctx, tokenArray, pos, kArray_size(tokenArray), a);
+	KLIB kArray_clear(kctx, tokenArray, pos);
 }
 
 /* ------------------------------------------------------------------------ */

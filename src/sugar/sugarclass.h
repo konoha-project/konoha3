@@ -944,7 +944,7 @@ static const char* Stmt_text(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw, con
 }
 
 static kbool_t Token_toBRACE(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns);
-static kBlock *new_Block(KonohaContext *kctx, kNameSpace* ns, kStmt *stmt, kArray *tls, int s, int e, int delim);
+static kBlock *new_Block(KonohaContext *kctx, kNameSpace* ns, kStmt *stmt, kArray *tokenArray, int s, int e, int delim);
 static kBlock* Stmt_block(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw, kBlock *def)
 {
 	kBlock *bk = (kBlock*)kStmt_getObjectNULL(kctx, stmt, kw);

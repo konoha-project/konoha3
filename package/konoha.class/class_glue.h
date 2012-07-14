@@ -241,12 +241,12 @@ static kExpr* NewExpr(KonohaContext *kctx, SugarSyntax *syn, kToken *tk, ktype_t
 
 static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_ParseExpr(stmt, tls, s, c, e);
+	VAR_ParseExpr(stmt, tokenArray, s, c, e);
 	DBG_ASSERT(s == c);
-	kTokenVar *tkNEW = tls->tokenVarItems[s];
-	if(s + 2 < kArray_size(tls)) {
-		kToken *tk1 = tls->tokenItems[s+1];
-		kToken *tk2 = tls->tokenItems[s+2];
+	kTokenVar *tkNEW = tokenArray->tokenVarItems[s];
+	if(s + 2 < kArray_size(tokenArray)) {
+		kToken *tk1 = tokenArray->tokenItems[s+1];
+		kToken *tk2 = tokenArray->tokenItems[s+2];
 		KonohaClass *ct = CT_(TK_type(tk1));
 		if (ct->classId == TY_void) {
 			RETURN_(SUGAR Stmt_p(kctx, stmt, tk1, ErrTag, "undefined class: %s", S_text(tk1->text)));

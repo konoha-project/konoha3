@@ -80,7 +80,7 @@ static KMETHOD StmtTyCheck_DefaultAssignment(KonohaContext *kctx, KonohaStack *s
 		tk->keyword = k;\
 	}
 
-static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int c, int e)
+static int transform_oprAssignment(KonohaContext *kctx, kArray* tokenArray, int s, int c, int e)
 {
 	kTokenVar *tkNew, *tkNewOp;
 	kToken *tmp, *tkHead;
@@ -89,15 +89,15 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 
 	while (i < c) {
 		tkNew = GCSAFE_new(TokenVar, 0);
-		tmp = tls->tokenItems[i];
+		tmp = tokenArray->tokenItems[i];
 		setToken(tkNew, S_text(tmp->text), S_size(tmp->text), tmp->keyword);
-		KLIB kArray_add(kctx, tls, tkNew);
+		KLIB kArray_add(kctx, tokenArray, tkNew);
 		i++;
 	}
 
 	// check operator
 	tkNewOp = GCSAFE_new(TokenVar, 0);
-	tmp = tls->tokenItems[c];
+	tmp = tokenArray->tokenItems[c];
 	const char* opr = S_text(tmp->text);
 	int osize = S_size(tmp->text);
 	int j = 0;
@@ -110,11 +110,11 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 
 	tkNew = GCSAFE_new(TokenVar, 0);
 	setToken(tkNew, "=", 1, KW_LET);
-	KLIB kArray_add(kctx, tls, tkNew);
-	newc = kArray_size(tls)-1;
+	KLIB kArray_add(kctx, tokenArray, tkNew);
+	newc = kArray_size(tokenArray)-1;
 
 	kTokenVar *newtk = GCSAFE_new(TokenVar, 0);
-	tkHead = tls->tokenItems[e+1];
+	tkHead = tokenArray->tokenItems[e+1];
 	newtk->keyword = AST_PARENTHESIS;
 	newtk->uline = tkHead->uline;
 	//newtk->topch = tkHead->topch; newtk->lpos = tkHead->closech;
@@ -123,22 +123,22 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 
 	while (i < newc) {
 		tkNew = GCSAFE_new(TokenVar, 0);
-		tmp = tls->tokenItems[i];
+		tmp = tokenArray->tokenItems[i];
 		setToken(tkNew, S_text(tmp->text), S_size(tmp->text), tmp->keyword);
 		KLIB kArray_add(kctx, newtk->sub, tkNew);
 		i++;
 	}
-	KLIB kArray_add(kctx, tls, newtk);
+	KLIB kArray_add(kctx, tokenArray, newtk);
 
-	KLIB kArray_add(kctx, tls, tkNewOp);
+	KLIB kArray_add(kctx, tokenArray, tkNewOp);
 
 	tkNew = GCSAFE_new(TokenVar, 0);
 	i = c+1;
 	while (i < news) {
 		tkNew = GCSAFE_new(TokenVar, 0);
-		tmp = tls->tokenItems[i];
+		tmp = tokenArray->tokenItems[i];
 		setToken(tkNew, S_text(tmp->text), S_size(tmp->text), tmp->keyword);
-		KLIB kArray_add(kctx, tls, tkNew);
+		KLIB kArray_add(kctx, tokenArray, tkNew);
 		i++;
 	}
 	return news;
@@ -146,11 +146,11 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 
 static KMETHOD ParseExpr_OprAssignment(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_ParseExpr(stmt, tls, s, c, e);
-	size_t atop = kArray_size(tls);
-	s = transform_oprAssignment(kctx, tls, s, c, e);
-	kExpr *expr = SUGAR Stmt_newExpr2(kctx, stmt, tls, s, kArray_size(tls));
-	KLIB kArray_clear(kctx, tls, atop);
+	VAR_ParseExpr(stmt, tokenArray, s, c, e);
+	size_t atop = kArray_size(tokenArray);
+	s = transform_oprAssignment(kctx, tokenArray, s, c, e);
+	kExpr *expr = SUGAR Stmt_newExpr2(kctx, stmt, tokenArray, s, kArray_size(tokenArray));
+	KLIB kArray_clear(kctx, tokenArray, atop);
 	RETURN_(expr);
 }
 

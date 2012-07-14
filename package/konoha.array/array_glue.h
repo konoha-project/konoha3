@@ -143,15 +143,15 @@ static kbool_t array_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline
 
 static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_ParseExpr(stmt, tls, s, c, e);
+	VAR_ParseExpr(stmt, tokenArray, s, c, e);
 	DBG_P("parse bracket!!");
-	kToken *tk = tls->tokenItems[c];
+	kToken *tk = tokenArray->tokenItems[c];
 	if(s == c) { // TODO
 		kExpr *expr = SUGAR Stmt_newExpr2(kctx, stmt, tk->sub, 0, kArray_size(tk->sub));
-		RETURN_(SUGAR Expr_rightJoin(kctx, expr, stmt, tls, s+1, c+1, e));
+		RETURN_(SUGAR Expr_rightJoin(kctx, expr, stmt, tokenArray, s+1, c+1, e));
 	}
 	else {
-		kExpr *lexpr = SUGAR Stmt_newExpr2(kctx, stmt, tls, s, c);
+		kExpr *lexpr = SUGAR Stmt_newExpr2(kctx, stmt, tokenArray, s, c);
 		if(lexpr == K_NULLEXPR) {
 			RETURN_(lexpr);
 		}
@@ -167,7 +167,7 @@ static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 			lexpr  = SUGAR new_ConsExpr(kctx, syn, 2, tkN, lexpr);
 			lexpr = SUGAR Stmt_addExprParams(kctx, stmt, lexpr, tk->sub, 0, kArray_size(tk->sub), 1/*allowEmpty*/);
 		}
-		RETURN_(SUGAR Expr_rightJoin(kctx, lexpr, stmt, tls, s+1, c+1, e));
+		RETURN_(SUGAR Expr_rightJoin(kctx, lexpr, stmt, tokenArray, s+1, c+1, e));
 	}
 }
 

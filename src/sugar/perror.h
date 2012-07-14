@@ -173,17 +173,17 @@ static const char *kToken_s_(KonohaContext *kctx, kToken *tk)
 	}
 }
 
-static void WarnTagIgnored(KonohaContext *kctx, kArray *tls, int s, int e)
+static void WarnTagIgnored(KonohaContext *kctx, kArray *tokenArray, int s, int e)
 {
 	if(s < e) {
 		int i = s;
 		KUtilsWriteBuffer wb;
 		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-		KLIB Kwb_printf(kctx, &wb, "%s", kToken_s(tls->tokenItems[i])); i++;
+		KLIB Kwb_printf(kctx, &wb, "%s", kToken_s(tokenArray->tokenItems[i])); i++;
 		while(i < e) {
-			KLIB Kwb_printf(kctx, &wb, " %s", kToken_s(tls->tokenItems[i])); i++;
+			KLIB Kwb_printf(kctx, &wb, " %s", kToken_s(tokenArray->tokenItems[i])); i++;
 		}
-		pWARN(tls->tokenItems[s]->uline, "ignored tokens: %s", KLIB Kwb_top(kctx, &wb, 1));
+		pWARN(tokenArray->tokenItems[s]->uline, "ignored tokens: %s", KLIB Kwb_top(kctx, &wb, 1));
 		KLIB Kwb_free(&wb);
 	}
 }

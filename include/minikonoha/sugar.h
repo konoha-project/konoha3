@@ -114,7 +114,7 @@ struct TokenizerEnv {
 		int E = (int)sfp[5].ivalue;\
 		(void)STMT; (void)NAME; (void)TLS; (void)S; (void)E;\
 
-// Expr ParseExpr(Stmt stmt, Token[] tls, int s, int c, int e)
+// Expr ParseExpr(Stmt stmt, Token[] tokenArray, int s, int c, int e)
 #define VAR_ParseExpr(STMT, TLS, S, C, E) \
 		SugarSyntax *syn = (SugarSyntax*)sfp[0].unboxValue;\
 		kStmt *STMT = (kStmt*)sfp[1].asObject;\
@@ -510,9 +510,9 @@ typedef struct {
 	kBlock*    (*new_Block)(KonohaContext *kctx, kNameSpace *, kStmt *, kArray *, int, int, int);
 	void       (*Block_insertAfter)(KonohaContext *kctx, kBlock *bk, kStmt *target, kStmt *stmt);
 
-	kExpr*     (*Stmt_newExpr2)(KonohaContext *kctx, kStmt *stmt, kArray *tls, int s, int e);
+	kExpr*     (*Stmt_newExpr2)(KonohaContext *kctx, kStmt *stmt, kArray *tokenArray, int s, int e);
 	kExpr*     (*new_ConsExpr)(KonohaContext *kctx, SugarSyntax *syn, int n, ...);
-	kExpr *    (*Stmt_addExprParams)(KonohaContext *kctx, kStmt *, kExpr *, kArray *tls, int s, int e, int allowEmpty);
+	kExpr *    (*Stmt_addExprParams)(KonohaContext *kctx, kStmt *, kExpr *, kArray *tokenArray, int s, int e, int allowEmpty);
 	kExpr *    (*Expr_rightJoin)(KonohaContext *kctx, kExpr *, kStmt *, kArray *, int, int, int);
 
 	void       (*Token_pERR)(KonohaContext *kctx, kTokenVar *tk, const char *fmt, ...);
