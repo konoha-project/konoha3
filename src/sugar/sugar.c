@@ -45,7 +45,6 @@ int verbose_sugar = 0;
 #include "tycheck.h"
 #include "sugarfunc.h"
 
-
 /* ------------------------------------------------------------------------ */
 /* SugarContext global functions */
 

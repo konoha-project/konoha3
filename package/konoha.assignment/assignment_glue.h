@@ -31,6 +31,7 @@
 static KMETHOD ExprTyCheck_assignment(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
+	kNameSpace *ns = kStmt_nameSpace(stmt);
 	kExpr *lexpr = kExpr_tyCheckAt(stmt, expr, 1, gma, TY_var, TPOL_ALLOWVOID);
 	kExpr *rexpr = kExpr_tyCheckAt(stmt, expr, 2, gma, lexpr->ty, 0);
 	if(rexpr != K_NULLEXPR && lexpr != K_NULLEXPR) {
@@ -45,7 +46,7 @@ static KMETHOD ExprTyCheck_assignment(KonohaContext *kctx, KonohaStack *sfp)
 				DBG_ASSERT(IS_Method(mtd));
 				if((MN_isGETTER(mtd->mn) || MN_isISBOOL(mtd->mn)) && !kMethod_isStatic(mtd)) {
 					ktype_t cid = lexpr->cons->exprItems[1]->ty;
-					mtd = KLIB kNameSpace_getMethodNULL(kctx, gma->genv->ns, cid, MN_toSETTER(mtd->mn));
+					mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(mtd->mn));
 					if(mtd != NULL) {
 						KSETv(lexpr->cons->methodItems[0], mtd);
 						KLIB kArray_add(kctx, lexpr->cons, rexpr);

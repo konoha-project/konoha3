@@ -1022,7 +1022,7 @@ struct kMethodVar {
 	union {
 		kObject      *objdata;
 		const struct kByteCodeVar    *kcode;
-		kNameSpace   *lazyns;       // lazy compilation
+		kNameSpace   *lazyCompileNameSpace;       // lazy compilation
 	};
 	kMethod           *proceedNUL;   // proceed
 };

@@ -138,7 +138,8 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_StmtTyCheck(stmt, gma);
 	DBG_P("global assignment .. ");
-	kObject *scr = gma->genv->ns->scriptObject;
+	kNameSpace *ns = kStmt_nameSpace(stmt);
+	kObject *scr = ns->scriptObject;
 	if(O_classId(scr) == TY_System) {
 		SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, " global variables are not available");
 		RETURNb_(false);
@@ -154,7 +155,7 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp)
 		RETURNb_(false);
 	}
 	/*kExpr **/expr = kStmt_expr(stmt, KW_ExprPattern, K_NULLEXPR);
-	kMethod *mtd = Object_newProtoSetterNULL(kctx, scr, stmt, gma->genv->ns, expr->ty, fn);
+	kMethod *mtd = Object_newProtoSetterNULL(kctx, scr, stmt, ns, expr->ty, fn);
 	if(mtd == NULL) {
 		RETURNb_(false);
 	}
@@ -169,6 +170,7 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp)
 
 static kMethod* ExprTerm_getSetterNULL(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kObject *scr, kGamma *gma, ktype_t ty)
 {
+	kNameSpace *ns = kStmt_nameSpace(stmt);
 	if(Expr_isTerm(expr) && expr->termToken->keyword == TK_SYMBOL) {
 		kToken *tk = expr->termToken;
 		if(tk->keyword != KW_SymbolPattern) {
@@ -176,7 +178,7 @@ static kMethod* ExprTerm_getSetterNULL(KonohaContext *kctx, kStmt *stmt, kExpr *
 			return NULL;
 		}
 		ksymbol_t fn = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
-		return Object_newProtoSetterNULL(kctx, scr, stmt, gma->genv->ns, ty, fn);
+		return Object_newProtoSetterNULL(kctx, scr, stmt, ns, ty, fn);
 	}
 	SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "variable name is expected");
 	return NULL;
@@ -195,7 +197,8 @@ static kbool_t appendSetterStmt(KonohaContext *kctx, kExpr *expr, kStmt **lastSt
 
 static kbool_t Expr_declType(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, ktype_t ty, kStmt **lastStmtRef)
 {
-	kObject *scr = gma->genv->ns->scriptObject;
+	kNameSpace *ns = kStmt_nameSpace(stmt);
+	kObject *scr = ns->scriptObject;
 	if(O_classId(scr) == TY_System) {
 		SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, " global variables are not available");
 		return false;

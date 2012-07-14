@@ -279,11 +279,6 @@ struct kExprVar {
 	};
 };
 
-
-
-
-
-
 #define TSTMT_UNDEFINED      0
 #define TSTMT_ERR            1
 #define TSTMT_EXPR           2
@@ -328,21 +323,17 @@ typedef struct {
 #define kGamma_setERROR(GMA,B) TFLAG_set(kshortflag_t, GMA->genv->flag, kGamma_ERROR, B)
 
 typedef struct {
-	GammaStackDecl *vars;
+	GammaStackDecl *varItems;
 	size_t varsize;
 	size_t capacity;
-	size_t allocsize;
+	size_t allocsize;  // set size if not allocated  (by default on stack)
 } GammaStack ;
 
 typedef struct  {
 	kshortflag_t  flag;      kshortflag_t  cflag;
 	ktype_t       this_cid;  ktype_t       static_cid;
-	kNameSpace   *ns;
-	kMethod      *mtd;
-//	GammaStack    f;
+	kMethod      *currentWorkingMethod;
 	GammaStack    localScope;
-//	kArray       *lvarlst;
-//	size_t        lvarlst_top;
 } GammaAllocaData;
 
 struct kGammaVar {
@@ -375,6 +366,7 @@ struct kGammaVar {
 #define CT_StmtArray            CT_Array
 #define kStmtArray              kArray
 
+#define IS_NameSpace(O)  ((O)->h.ct == CT_NameSpace)
 #define IS_Token(O)  ((O)->h.ct == CT_Token)
 #define IS_Expr(O)   ((O)->h.ct == CT_Expr)
 #define IS_Stmt(O)   ((O)->h.ct == CT_Stmt)

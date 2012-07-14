@@ -166,7 +166,7 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 			}
 			return texpr;
 		}
-		kMethod *mtd = kNameSpace_getCastMethodNULL(gma->genv->ns, texpr->ty, reqty);
+		kMethod *mtd = kNameSpace_getCastMethodNULL(kStmt_nameSpace(stmt), texpr->ty, reqty);
 		DBG_P("finding cast %s => %s: %p", TY_t(texpr->ty), TY_t(reqty), mtd);
 		if(mtd != NULL && (kMethod_isCoercion(mtd) || FLAG_is(pol, TPOL_COERCION))) {
 			return new_TypedMethodCall(kctx, stmt, reqty, mtd, gma, 1, texpr);
@@ -286,7 +286,7 @@ static GammaAllocaData *Gamma_pop(KonohaContext *kctx, kGamma *gma, GammaAllocaD
 	assert(checksum == newone);
 	gma->genv = oldone;
 	if(newone->localScope.allocsize > 0) {
-		KFREE(newone->localScope.vars, newone->localScope.allocsize);
+		KFREE(newone->localScope.varItems, newone->localScope.allocsize);
 	}
 	return newone;
 }
@@ -306,8 +306,9 @@ static kBlock* Method_newBlock(KonohaContext *kctx, kMethod *mtd, kString *sourc
 	}
 	kArray *tokenArray = ctxsugar->preparedTokenList;
 	size_t pos = kArray_size(tokenArray);
-	NameSpace_tokenize(kctx, KNULL(NameSpace), script, uline, tokenArray); //FIXME: ks
-	kBlock *bk = new_Block(kctx, KNULL(NameSpace), NULL, tokenArray, pos, kArray_size(tokenArray), ';');
+	DBG_ASSERT(IS_NameSpace(mtd->lazyCompileNameSpace));
+	NameSpace_tokenize(kctx, mtd->lazyCompileNameSpace/*KNULL(NameSpace)*/, script, uline, tokenArray);
+	kBlock *bk = new_Block(kctx, mtd->lazyCompileNameSpace/*KNULL(NameSpace)*/, NULL, tokenArray, pos, kArray_size(tokenArray), ';');
 	KLIB kArray_clear(kctx, tokenArray, pos);
 	return bk;
 }
@@ -316,12 +317,12 @@ static void Gamma_initParam(KonohaContext *kctx, GammaAllocaData *genv, kParam *
 {
 	int i, psize = (pa->psize + 1 < genv->localScope.capacity) ? pa->psize : genv->localScope.capacity - 1;
 	for(i = 0; i < psize; i++) {
-		genv->localScope.vars[i+1].fn = pa->paramtypeItems[i].fn;
-		genv->localScope.vars[i+1].ty = pa->paramtypeItems[i].ty;
+		genv->localScope.varItems[i+1].fn = pa->paramtypeItems[i].fn;
+		genv->localScope.varItems[i+1].ty = pa->paramtypeItems[i].ty;
 	}
-	if(!kMethod_isStatic(genv->mtd)) {
-		genv->localScope.vars[0].fn = FN_this;
-		genv->localScope.vars[0].ty = genv->this_cid;
+	if(!kMethod_isStatic(genv->currentWorkingMethod)) {
+		genv->localScope.varItems[0].fn = FN_this;
+		genv->localScope.varItems[0].ty = genv->this_cid;
 	}
 	genv->localScope.varsize = psize+1;
 }
@@ -331,12 +332,11 @@ static kbool_t Method_compile(KonohaContext *kctx, kMethod *mtd, kString *text, 
 	INIT_GCSTACK();
 	kGamma *gma = ctxsugar->gma;
 	kBlock *bk = Method_newBlock(kctx, mtd, text, uline);
-	GammaStackDecl lvars[32] = {};
+	GammaStackDecl lvarItems[32] = {};
 	GammaAllocaData newgma = {
-		.mtd = mtd,
-		.ns = ns,
+		.currentWorkingMethod = mtd,
 		.this_cid = (mtd)->classId,
-		.localScope.vars = lvars, .localScope.capacity = 32, .localScope.varsize = 0, .localScope.allocsize = 0,
+		.localScope.varItems = lvarItems, .localScope.capacity = 32, .localScope.varsize = 0, .localScope.allocsize = 0,
 	};
 	GAMMA_PUSH(gma, &newgma);
 	Gamma_initParam(kctx, &newgma, kMethod_param(mtd));
@@ -355,8 +355,8 @@ static void Gamma_initIt(KonohaContext *kctx, GammaAllocaData *genv, kParam *pa)
 	KonohaContextRuntimeVar *base = kctx->stack;
 	genv->localScope.varsize = 0;
 	if(base->evalty != TY_void) {
-		genv->localScope.vars[1].fn = FN_("it");
-		genv->localScope.vars[1].ty = base->evalty;
+		genv->localScope.varItems[1].fn = FN_("it");
+		genv->localScope.varItems[1].ty = base->evalty;
 		genv->localScope.varsize = 1;
 	}
 }
@@ -409,13 +409,12 @@ static kstatus_t SingleBlock_eval(KonohaContext *kctx, kBlock *bk, kMethod *mtd,
 {
 	kstatus_t result;
 	kGamma *gma = ctxsugar->gma;
-	GammaStackDecl lvars[32] = {};
+	GammaStackDecl lvarItems[32] = {};
 	GammaAllocaData newgma = {
 		.flag = kGamma_TOPLEVEL,
-		.mtd = mtd,
-		.ns = ns,
+		.currentWorkingMethod = mtd,
 		.this_cid     = TY_System,
-		.localScope.vars = lvars, .localScope.capacity = 32, .localScope.varsize = 0, .localScope.allocsize = 0,
+		.localScope.varItems = lvarItems, .localScope.capacity = 32, .localScope.varsize = 0, .localScope.allocsize = 0,
 	};
 	GAMMA_PUSH(gma, &newgma);
 	Gamma_initIt(kctx, &newgma, kMethod_param(mtd));

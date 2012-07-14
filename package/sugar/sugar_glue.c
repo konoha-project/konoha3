@@ -322,7 +322,7 @@ static KMETHOD StmtTyCheck_sugar(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_StmtTyCheck(stmt, gma);
 	kTokenArray *tokenArray = (kTokenArray*)kStmt_getObject(kctx, stmt, KW_ToksPattern, NULL);
 	if(tokenArray != NULL) {
-		SugarSyntaxVar *syn = toks_syntax(kctx, gma->genv->ns, tokenArray);
+		SugarSyntaxVar *syn = toks_syntax(kctx, kStmt_nameSpace(stmt), tokenArray);
 		if(syn != NULL) {
 			if(syn->syntaxRuleNULL != NULL) {
 				SUGAR Stmt_p(kctx, stmt, NULL, WarnTag, "overriding syntax rule: %s", KW_t(syn->keyword));

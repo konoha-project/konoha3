@@ -51,7 +51,7 @@ static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp)
 	kString *name = tokenArray->tokenItems[i]->text;
 	KLIB Kwb_write(kctx, &wb, S_text(name), S_size(name));
 	kString *pkgname = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
-	kNameSpace *ns = gma->genv->ns;
+	kNameSpace *ns = kStmt_nameSpace(stmt);
 	SugarSyntaxVar *syn1 = (SugarSyntaxVar*) SYN_(ns, KW_ExprMethodCall);
 	kTokenVar *tkImport = GCSAFE_new(TokenVar, 0);
 	kExpr *ePKG = new_ConstValueExpr(kctx, TY_String, UPCAST(pkgname));

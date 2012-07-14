@@ -282,10 +282,11 @@ static KMETHOD ExprTyCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 	kToken *tkN = expr->cons->tokenItems[0];
 	ksymbol_t fn = tosymbolUM(kctx, tkN);
 	kExpr *self = SUGAR Expr_tyCheckAt(kctx, stmt, expr, 1, gma, TY_var, 0);
+	kNameSpace *ns = kStmt_nameSpace(stmt);
 	if(self != K_NULLEXPR) {
-		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, gma->genv->ns, self->ty, MN_toGETTER(fn));
+		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, self->ty, MN_toGETTER(fn));
 		if(mtd == NULL) {
-			mtd = KLIB kNameSpace_getMethodNULL(kctx, gma->genv->ns, self->ty, MN_toISBOOL(fn));
+			mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, self->ty, MN_toISBOOL(fn));
 		}
 		if(mtd != NULL) {
 			KSETv(expr->cons->methodItems[0], mtd);
@@ -529,14 +530,15 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 			RETURNb_(false);
 		}
 	}
-	KonohaClassVar *ct = (KonohaClassVar*)KLIB kNameSpace_getCT(kctx, gma->genv->ns, NULL/*FIXME*/, S_text(tkC->text), S_size(tkC->text), TY_unknown);
+	kNameSpace *ns = kStmt_nameSpace(stmt);
+	KonohaClassVar *ct = (KonohaClassVar*)KLIB kNameSpace_getCT(kctx, ns, NULL/*FIXME*/, S_text(tkC->text), S_size(tkC->text), TY_unknown);
 	if (ct != NULL) {
 		if (!CT_isForward(ct)) {
 			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "%s is already defined", CT_t(ct));
 			RETURNb_(false);
 		}
 	} else {
-		ct = defineClassName(kctx, gma->genv->ns, cflag, tkC->text, superclassId, stmt->uline);
+		ct = defineClassName(kctx, ns, cflag, tkC->text, superclassId, stmt->uline);
 	}
 	((kTokenVar*)tkC)->keyword = KW_TypePattern;
 	((kTokenVar*)tkC)->ty = ct->classId;
