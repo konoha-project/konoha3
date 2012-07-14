@@ -387,7 +387,7 @@ Value expr_asm(int a, Expr expr, int espidx) {
 			return asm_nset(0, (expr.getType()), a);
 		}
 		else {
-			return asm_oset(System.knull(expr.getType()), expr.getType(), a);
+			return asm_oset(System.KLIB Knull(kctx, expr.getType()), expr.getType(), a);
 		}
 	}
 	else if(expr.getBuild() == TEXPR_NCONST) {
@@ -665,7 +665,7 @@ Value call_asm(int a, Expr expr, int espidx) {
 		System.p("TODO");
 		assert(false);
 		//ASM(NSET, nc(thisidx-1), (intptr_t)mtd, CT_Method);
-		//ASM(CALL, kmodjit.uline, sfp(thisidx), esp(espidx, argc), System.knull(expr.getType()));
+		//ASM(CALL, kmodjit.uline, sfp(thisidx), esp(espidx, argc), System.KLIB Knull(kctx, expr.getType()));
 	}
 	else {
 		if (mtd.getCid() == K.getCid("Int", -1)) {
@@ -686,7 +686,7 @@ Value call_asm(int a, Expr expr, int espidx) {
 		if(f.isNull()) {
 			//System.p(method2string(mtd));
 			emit_param(mtd, expr, thisidx, s);
-			asm_scall(System.getUline(), sfp(thisidx), esp(espidx, argc), mtd, System.knull(expr.getType()));
+			asm_scall(System.getUline(), sfp(thisidx), esp(espidx, argc), mtd, System.KLIB Knull(kctx, expr.getType()));
 		}
 		else {
 			Value v = asm_function_call(System.getUline(), expr, thisidx, s, f);
@@ -1213,7 +1213,7 @@ void System.genCode(Method mtd, Block bk) {
 		if (rtype == K.getCid("void", -1)) {
 			builder.createRetVoid();
 		} else {
-			Value v = createConstValue(cid2ctype(rtype), System.knull(rtype), 0, 0.0);
+			Value v = createConstValue(cid2ctype(rtype), System.KLIB Knull(kctx, rtype), 0, 0.0);
 			builder.createRet(v);
 		}
 	}

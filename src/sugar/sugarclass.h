@@ -34,7 +34,7 @@ static void NameSpace_init(KonohaContext *kctx, kObject *o, void *conf)
 	bzero(&ns->parentNULL, sizeof(kNameSpace) - sizeof(KonohaObjectHeader));
 	ns->parentNULL = conf;
 	KINITv(ns->methodList, K_EMPTYARRAY);
-	KINITv(ns->scriptObject, knull(CT_System));
+	KINITv(ns->scriptObject, KLIB Knull(kctx, CT_System));
 }
 
 static void syntax_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p)

@@ -208,10 +208,10 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	base->cGamma = KLIB Konoha_defineClass(kctx, PN_sugar, PN_sugar, NULL, &defGamma, 0);
 	base->cTokenArray = CT_p0(kctx, CT_Array, base->cToken->cid);
 
-	knull(base->cNameSpace);
-	knull(base->cToken);
-	knull(base->cExpr);
-	knull(base->cBlock);
+	KLIB Knull(kctx, base->cNameSpace);
+	KLIB Knull(kctx, base->cToken);
+	KLIB Knull(kctx, base->cExpr);
+	KLIB Knull(kctx, base->cBlock);
 	kmodsugar_setup(kctx, &base->h, 0);
 
 	KINITv(base->UndefinedParseExpr,   new_SugarFunc(UndefinedParseExpr));

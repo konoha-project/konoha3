@@ -91,7 +91,7 @@ static void Expr_putConstValue(KonohaContext *kctx, kExpr *expr, KonohaStack *sf
 		KSETv(sfp[0].toObject, KLIB new_kObject(kctx, CT_(expr->ty), expr->ndata /*FIXME*/));
 	}else {
 		assert(expr->build == TEXPR_NULL);
-		KSETv(sfp[0].toObject, knull(CT_(expr->ty)));
+		KSETv(sfp[0].toObject, KLIB Knull(kctx, CT_(expr->ty)));
 		sfp[0].ndata = 0;
 	}
 }
@@ -104,7 +104,7 @@ static kExpr* ExprCall_toConstValue(KonohaContext *kctx, kExpr *expr, kArray *co
 	for(i = 1; i < size; i++) {
 		Expr_putConstValue(kctx, cons->exprItems[i], lsfp + K_CALLDELTA + i - 1);
 	}
-	KCALL(lsfp, 0, mtd, psize, knull(CT_(expr->ty)));
+	KCALL(lsfp, 0, mtd, psize, KLIB Knull(kctx, CT_(expr->ty)));
 	END_LOCAL();
 	if(TY_isUnbox(rtype) || rtype == TY_void) {
 		return kExpr_setNConstValue(expr, rtype, lsfp[0].ndata);
@@ -371,7 +371,7 @@ static kstatus_t Method_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtype
 		KSETv(lsfp[K_CALLDELTA+1].o, base->stack[base->evalidx].o);
 		lsfp[K_CALLDELTA+1].ivalue = base->stack[base->evalidx].ivalue;
 	}
-	KCALL(lsfp, 0, mtd, 0, knull(CT_(rtype)));
+	KCALL(lsfp, 0, mtd, 0, KLIB Knull(kctx, CT_(rtype)));
 	base->evalty = rtype;
 	base->evalidx = (lsfp - kctx->stack->stack);
 	END_LOCAL();

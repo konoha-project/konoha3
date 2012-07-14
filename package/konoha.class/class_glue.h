@@ -176,7 +176,7 @@ static void defineField(KonohaContext *kctx, KonohaClassVar *ct, int flag, ktype
 		}
 	}
 	else {
-		kObject *v = (IS_NULL(value)) ? knull(O_ct(value)) : value;
+		kObject *v = (IS_NULL(value)) ? KLIB Knull(kctx, O_ct(value)) : value;
 		KSETv(ct->nulvalNULL_->fieldObjectItems[pos], v);
 		ct->fieldItems[pos].isobj = 1;
 	}
@@ -442,7 +442,7 @@ static kbool_t CT_declType(KonohaContext *kctx, KonohaClassVar *ct, kGamma *gma,
 	USING_SUGAR;
 	if(Expr_isTerm(expr)) {
 		kString *name = expr->tk->text;
-		defineField(kctx, ct, flag, ty, name, knull(CT_(ty)), 0);
+		defineField(kctx, ct, flag, ty, name, KLIB Knull(kctx, CT_(ty)), 0);
 		return true;
 	}
 	else if(expr->syn->keyword == KW_LET) {
@@ -460,7 +460,7 @@ static kbool_t CT_declType(KonohaContext *kctx, KonohaClassVar *ct, kGamma *gma,
 				defineField(kctx, ct, flag, ty, name, NULL, vexpr->ndata);
 			}
 			else if(vexpr->build == TEXPR_NULL) {
-				defineField(kctx, ct, flag, ty, name, knull(CT_(ty)), 0);
+				defineField(kctx, ct, flag, ty, name, KLIB Knull(kctx, CT_(ty)), 0);
 			}
 			else {
 				SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "const value is expected as the field initial value: %s", S_text(name));

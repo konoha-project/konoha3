@@ -70,7 +70,7 @@ static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
 	a->objectItems = (kObject**)KCALLOC(a->bytemax, 1);
 	if(!kArray_isUnboxData(a)) {
 		size_t i;
-		kObject *null = knull(CT_(O_p0(a)));
+		kObject *null = KLIB Knull(kctx, CT_(O_p0(a)));
 		for(i = 0; i < asize; i++) {
 			KSETv(a->objectItems[i], null);
 		}

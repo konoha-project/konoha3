@@ -595,11 +595,11 @@ static KMETHOD Method_getCname(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(KLIB new_kString(kctx, cname, strlen(cname), 0));
 }
 
-//## Object System.knull(int type);
-static KMETHOD System_knull(KonohaContext *kctx, KonohaStack *sfp)
+//## Object System.KLIB Knull(kctx, int type);
+static KMETHOD System_KLIB Knull(kctx, KonohaContext *kctx, KonohaStack *sfp)
 {
 	ktype_t cid = sfp[1].ivalue;
-	kObject *o = knull(CT_(cid));
+	kObject *o = KLIB Knull(kctx, CT_(cid));
 	RETURN_(o);
 }
 

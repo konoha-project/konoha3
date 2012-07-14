@@ -95,8 +95,9 @@ typedef struct PlatformApiVar        PlatformApiVar;
 typedef const struct KonohaLibVar    KonohaLib;
 typedef struct KonohaLibVar          KonohaLibVar;
 
-#define PLATAPI (kctx->plat)->
+#define PLATAPI (kctx->platApi)->
 #define KLIB    (kctx->klib)->
+#define SUGARAPI  (kctx->sugarApi)->
 
 typedef void FILE_i;
 
@@ -401,15 +402,18 @@ typedef struct KonohaContextRuntimeVar          KonohaContextRuntimeVar;
 typedef struct KonohaStack              KonohaStack;
 typedef struct KonohaStack              KonohaStackVar;
 
+typedef struct KonohaModule        KonohaModule;
+typedef struct KonohaContextModule KonohaContextModule;
+
 struct KonohaContextVar {
 	int						          safepoint; // set to 1
 	KonohaStack                      *esp;
+	PlatformApi                      *platApi;
 	KonohaLib                        *klib;
-	PlatformApi                      *plat;
-	KonohaRuntimeVar                  *share;
-	KonohaContextRuntimeVar                   *stack;
-	struct KonohaModule               **modshare;
-	struct KonohaContextModule               **modlocal;
+	KonohaRuntimeVar                 *share;
+	KonohaContextRuntimeVar          *stack;
+	KonohaModule                    **modshare;
+	KonohaContextModule             **modlocal;
 	/* TODO(imasahiro)
 	 * checking modgc performance and remove
 	 * memshare/memlocal from context
@@ -481,21 +485,19 @@ struct KonohaContextRuntimeVar {
 //#define MOD_llvm    15
 //#define MOD_REGEX   16
 
-struct KonohaContextModule;
-typedef struct KonohaContextModule {
+struct KonohaContextModule {
 	uintptr_t unique;
 	void (*reftrace)(KonohaContext*, struct KonohaContextModule *);
 	void (*free)(KonohaContext*, struct KonohaContextModule *);
-} KonohaContextModule;
+};
 
-struct KonohaModule;
-typedef struct KonohaModule {
+struct KonohaModule {
 	const char *name;
 	int mod_id;
 	void (*setup)(KonohaContext*, struct KonohaModule *, int newctx);
 	void (*reftrace)(KonohaContext*, struct KonohaModule *);
 	void (*free)(KonohaContext*, struct KonohaModule *);
-} KonohaModule;
+};
 
 #define K_FRAME_NCMEMBER \
 		uintptr_t   ndata;  \
@@ -1221,29 +1223,15 @@ struct KonohaLibVar {
 #define new_(C, A)                (k##C*)(KLIB new_kObject(kctx, CT_##C, ((uintptr_t)A)))
 #define GCSAFE_new(C, A)          (k##C*)(KLIB new_kObjectOnGCSTACK(kctx, CT_##C, ((uintptr_t)A)))
 
-#define knull(C)                  (KPI)->Knull(kctx, C)
 #define KNULL(C)                  (k##C*)(KPI)->Knull(kctx, CT_##C)
 
 #define kArray_size(A)            (((A)->bytesize)/sizeof(void*))
 #define kArray_setsize(A, N)      ((kArrayVar*)A)->bytesize = N * sizeof(void*)
-//#define KLIB kArray_add(kctx, A, V)          (KPI)->KLIB kArray_add(kctx, kctx, A, UPCAST(V))
-//#define KLIB kArray_insert(kctx, A, N, V)    (KPI)->KLIB kArray_insert(kctx, kctx, A, N, UPCAST(V))
-//#define KLIB kArray_clear(kctx, A, S)        (KPI)->KLIB kArray_clear(kctx, kctx, A, S)
-
-//#define new_kParam(R,S,P)        (KPI)->Knew_Method(kctx, R, S, P)
-//#define KLIB new_kMethod(kctx, F,C,M,FF)  (KPI)->Knew_Method(kctx, F, C, M, FF)
-//#define KLIB kMethod_setParam(kctx, M, R, PSIZE, P)      (KPI)->KLIB kMethod_setParam(kctx, kctx, M, R, PSIZE, P)
 #define new_kParam(CTX, R, PSIZE, P)       (KLIB kMethod_setParam(CTX, NULL, R, PSIZE, P))
-//#define KLIB kMethod_setFunc(kctx, M,F)     (KPI)->KLIB kMethod_setFunc(kctx, kctx, M, F)
 
 #define KREQUIRE_PACKAGE(NAME, UL)                   (KPI)->KimportPackage(kctx, NULL, NAME, UL)
 #define KEXPORT_PACKAGE(NAME, KS, UL)                (KPI)->KimportPackage(kctx, KS, NAME, UL)
 
-//#define KTY(cid)                          S_text(CT(cid)->name)
-//#define onohaClass_Generics(kctx, CT, RTY, PSIZE, P)    (KPI)->KonohaClass_Generics(kctx, CT, RTY, PSIZE, P)
-
-//#define kNameSpace_getCT(NS, THIS, S, L, C)      (KPI)->NameSpace_getCT(kctx, NS, THIS, S, L, C)
-//#define kNameSpace_syncMethods()    (KPI)->NameSpace_syncMethods(kctx)
 
 typedef intptr_t  KDEFINE_METHOD;
 

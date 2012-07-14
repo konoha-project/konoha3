@@ -120,7 +120,7 @@ static kbool_t Konoha_setModule(KonohaContext *kctx, int x, KonohaModule *d, kfi
 /* ------------------------------------------------------------------------ */
 /* [kcontext] */
 
-static KonohaContextVar* new_context(KonohaContext *kctx, const PlatformApi *plat)
+static KonohaContextVar* new_context(KonohaContext *kctx, const PlatformApi *platApi)
 {
 	KonohaContextVar *newctx;
 	static volatile size_t ctxid_counter = 0;
@@ -131,7 +131,7 @@ static KonohaContextVar* new_context(KonohaContext *kctx, const PlatformApi *pla
 		klib->Konoha_setModule    = Konoha_setModule;
 		newctx = (KonohaContextVar*)(klib + 1);
 		newctx->klib = (KonohaLib*)klib;
-		newctx->plat = plat;
+		newctx->platApi = platApi;
 		kctx = (KonohaContext*)newctx;
 		newctx->modshare = (KonohaModule**)calloc(sizeof(KonohaModule*), MOD_MAX);
 		newctx->modlocal = (KonohaContextModule**)calloc(sizeof(KonohaContextModule*), MOD_MAX);
@@ -143,14 +143,14 @@ static KonohaContextVar* new_context(KonohaContext *kctx, const PlatformApi *pla
 	else {   // others take ctx as its parent
 		newctx = (KonohaContextVar*)KCALLOC(sizeof(KonohaContextVar), 1);
 		newctx->klib = kctx->klib;
-		newctx->plat = kctx->plat;
+		newctx->platApi = kctx->platApi;
 		newctx->share = kctx->share;
 		newctx->modshare = kctx->modshare;
 		newctx->modlocal = (KonohaContextModule**)KCALLOC(sizeof(KonohaContextModule*), MOD_MAX);
 		MODGC_init(kctx, newctx);
 //		MODLOGGER_init(kctx, newctx);
 	}
-	KRUNTIME_init(kctx, newctx, plat->stacksize);
+	KRUNTIME_init(kctx, newctx, platApi->stacksize);
 	if(IS_RootKonohaContext(newctx)) {
 		MODCODE_init(kctx, newctx);
 		MODSUGAR_init(kctx, newctx);

@@ -322,7 +322,7 @@ static int PatternMatchFunc(KonohaContext *kctx, kFunc *fo, kStmt *stmt, ksymbol
 	KSETv(lsfp[K_CALLDELTA+3].toArray, tokenList);
 	lsfp[K_CALLDELTA+4].ivalue = beginidx;
 	lsfp[K_CALLDELTA+5].ivalue = endidx;
-	KCALL(lsfp, 0, fo->mtd, 5, knull(CT_Int));
+	KCALL(lsfp, 0, fo->mtd, 5, KLIB Knull(kctx, CT_Int));
 	END_LOCAL();
 	RESET_GCSTACK();
 	return (int)lsfp[0].ivalue;
