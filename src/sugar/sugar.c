@@ -304,7 +304,7 @@ static int isemptychunk(const char *t, size_t len)
 	return 0;
 }
 
-static kstatus_t NameSpace_loadstream(KonohaContext *kctx, kNameSpace *ns, FILE_i *fp, kfileline_t uline, kfileline_t pline)
+static kstatus_t NameSpace_loadStream(KonohaContext *kctx, kNameSpace *ns, FILE_i *fp, kfileline_t uline, kfileline_t pline)
 {
 	kstatus_t status = K_CONTINUE;
 	KUtilsWriteBuffer wb;
@@ -365,13 +365,13 @@ static kstatus_t NameSpace_loadScript(KonohaContext *kctx, kNameSpace *ns, const
 	kstatus_t status = K_BREAK;
 //	if(path[0] == '-' && path[1] == 0) {
 //		kfileline_t uline = FILEID_("<stdin>") | 1;
-//		status = NameSpace_loadstream(kctx, ks, stdin, uline, pline);
+//		status = NameSpace_loadStream(kctx, ks, stdin, uline, pline);
 //	}
 //	else {
 		FILE_i *fp = PLATAPI fopen_i(path, "r");
 		if(fp != NULL) {
 			kfileline_t uline = uline_init(kctx, path, len, 1, 1);
-			status = NameSpace_loadstream(kctx, ns, fp, uline, pline);
+			status = NameSpace_loadStream(kctx, ns, fp, uline, pline);
 			PLATAPI fclose_i(fp);
 		}
 		else {
@@ -460,7 +460,7 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackage_t packageId,
 		if(packageLoadApi->initPackage != NULL) {
 			packageLoadApi->initPackage(kctx, ns, 0, NULL, pline);
 		}
-		if(NameSpace_loadstream(kctx, ns, fp, uline, pline) == K_CONTINUE) {
+		if(NameSpace_loadStream(kctx, ns, fp, uline, pline) == K_CONTINUE) {
 			if(packageLoadApi->initPackage != NULL) {
 				packageLoadApi->setupPackage(kctx, ns, pline);
 			}
@@ -527,7 +527,7 @@ static kbool_t NameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, cons
 				kfileline_t uline = pack->exportScriptUri | (kfileline_t)1;
 				FILE_i *fp = PLATAPI fopen_i(S_text(fname), "r");
 				if(fp != NULL) {
-					res = (NameSpace_loadstream(kctx, ns, fp, uline, pline) == K_CONTINUE);
+					res = (NameSpace_loadStream(kctx, ns, fp, uline, pline) == K_CONTINUE);
 					PLATAPI fclose_i(fp);
 				}
 				else {
@@ -556,7 +556,7 @@ static KMETHOD NameSpace_loadScript_(KonohaContext *kctx, KonohaStack *sfp)
 	FILE_i *fp = PLATAPI fopen_i(S_text(sfp[1].asString), "r");
 	if(fp != NULL) {
 		kfileline_t uline = uline_init(kctx, S_text(sfp[1].asString), S_size(sfp[1].asString), 1, 1);
-		kstatus_t status = NameSpace_loadstream(kctx, sfp[0].asNameSpace, fp, uline, 0);
+		kstatus_t status = NameSpace_loadStream(kctx, sfp[0].asNameSpace, fp, uline, 0);
 		PLATAPI fclose_i(fp);
 		RETURNb_(status == K_CONTINUE);
 	}
