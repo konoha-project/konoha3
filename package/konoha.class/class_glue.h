@@ -233,7 +233,7 @@ static kbool_t class_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline
 static kExpr* NewExpr(KonohaContext *kctx, SugarSyntax *syn, kToken *tk, ktype_t ty, uintptr_t val)
 {
 	kExprVar *expr = GCSAFE_new(ExprVar, syn);
-	KSETv(expr->tk, tk);
+	KSETv(expr->termToken, tk);
 	Expr_setTerm(expr, 1);
 	expr->build = TEXPR_NEW;
 	expr->ty = ty;
@@ -441,7 +441,7 @@ static kbool_t CT_declType(KonohaContext *kctx, KonohaClassVar *ct, kGamma *gma,
 {
 	USING_SUGAR;
 	if(Expr_isTerm(expr)) {
-		kString *name = expr->tk->text;
+		kString *name = expr->termToken->text;
 		defineField(kctx, ct, flag, ty, name, KLIB Knull(kctx, CT_(ty)), 0);
 		return true;
 	}
@@ -452,9 +452,9 @@ static kbool_t CT_declType(KonohaContext *kctx, KonohaClassVar *ct, kGamma *gma,
 			if(vexpr == K_NULLEXPR) {
 				return false;
 			}
-			kString *name = expr->tk->text;
+			kString *name = expr->termToken->text;
 			if(vexpr->build == TEXPR_CONST) {
-				defineField(kctx, ct, flag, ty, name, vexpr->data, 0);
+				defineField(kctx, ct, flag, ty, name, vexpr->objectConstValue, 0);
 			}
 			else if(vexpr->build == TEXPR_NCONST) {
 				defineField(kctx, ct, flag, ty, name, NULL, vexpr->ndata);

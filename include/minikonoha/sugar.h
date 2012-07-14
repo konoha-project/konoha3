@@ -254,20 +254,24 @@ struct kTokenVar {
 #define Expr_isCONST(o)     (TEXPR_CONST <= (o)->build && (o)->build <= TEXPR_NCONST)
 #define Expr_isTerm(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
 #define Expr_setTerm(o,B)   TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,B)
+
+#define Expr_hasObjectConstValue(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local2))
+#define Expr_setObjectConstValue(o,B)   TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local2,B)
+
 #define kExpr_at(E,N)        ((E)->cons->exprItems[(N)])
 
 struct kExprVar {
 	KonohaObjectHeader h;
-	ktype_t ty; kexpr_t build;
-	kToken *tk;     // Term
+	SugarSyntax *syn;
 	union {
-		kObject* data;
-		kArray*  cons;  // Cons
+		kToken  *termToken;     // Term
+		kArray*  cons;          // Cons
 		kExpr*   single;
 		kBlock*  block;
 	};
+	ktype_t ty;    kexpr_t build;
 	union {
-		SugarSyntax *syn;
+		kObject*   objectConstValue;
 		kint_t     ivalue;
 		kfloat_t   fvalue;
 		uintptr_t  ndata;
@@ -275,6 +279,11 @@ struct kExprVar {
 		uintptr_t  cid;
 	};
 };
+
+
+
+
+
 
 #define TSTMT_UNDEFINED      0
 #define TSTMT_ERR            1

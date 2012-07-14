@@ -658,7 +658,7 @@ static KMETHOD ParseExpr_Term(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_ASSERT(s == c);
 	kToken *tk = tls->tokenItems[c];
 	kExprVar *expr = new_(ExprVar, SYN_(kStmt_nameSpace(stmt), tk->keyword));
-	KSETv(expr->tk, tk);
+	KSETv(expr->termToken, tk);
 	Expr_setTerm(expr, 1);
 	RETURN_(kExpr_rightJoin(expr, stmt, tls, s+1, c+1, e));
 }
@@ -744,8 +744,6 @@ static KMETHOD ParseExpr_DOLLAR(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		if(tk->keyword == AST_BRACE) {
 			kExprVar *expr = GCSAFE_new(ExprVar, SYN_(kStmt_nameSpace(stmt), KW_BlockPattern));
-			Expr_setTerm(expr, 1);
-			KSETv(expr->tk, tk);
 			KSETv(expr->block, new_Block(kctx, kStmt_nameSpace(stmt), stmt, tk->sub, 0, kArray_size(tk->sub), ';'));
 			RETURN_(expr);
 		}

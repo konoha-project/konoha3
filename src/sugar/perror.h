@@ -114,9 +114,9 @@ static inline void kStmt_errline(kStmt *stmt, kfileline_t uline)
 
 static kfileline_t Expr_uline(KonohaContext *kctx, kExpr *expr, kfileline_t uline)
 {
-	kToken *tk = expr->tk;
+	kToken *tk = expr->termToken;
 	DBG_ASSERT(IS_Expr(expr));
-	if(IS_Token(tk) && tk->uline >= uline) {
+	if(IS_Token(tk) && tk != K_NULLTOKEN && tk->uline >= uline) {
 		return tk->uline;
 	}
 	kArray *a = expr->cons;

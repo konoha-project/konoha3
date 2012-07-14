@@ -407,7 +407,7 @@ static KMETHOD ExprTyCheck_Squote(KonohaContext *kctx, KonohaStack *sfp)
 {
 	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	kToken *tk = expr->tk;
+	kToken *tk = expr->termToken;
 	kString *s = tk->text;
 	if (S_size(s) == 1) {
 		int ch = S_text(s)[0];

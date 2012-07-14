@@ -724,7 +724,7 @@ static KMETHOD ExprTyCheck_Regex(KonohaContext *kctx, KonohaStack *sfp)
 {
 	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	kToken *tk = expr->tk;
+	kToken *tk = expr->termToken;
 	kRegex *r = new_(Regex, NULL);
 	DBG_ASSERT(kArray_size(tk->sub) == 2);
 	Regex_set(kctx, r, tk->sub->stringItems[0], tk->sub->stringItems[1]);

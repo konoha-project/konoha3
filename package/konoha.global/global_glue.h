@@ -127,7 +127,7 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kObject *o, kStmt
 static ksymbol_t tosymbol(KonohaContext *kctx, kExpr *expr)
 {
 	if(Expr_isTerm(expr)) {
-		kToken *tk = expr->tk;
+		kToken *tk = expr->termToken;
 		if(tk->keyword == TK_SYMBOL) {
 			return ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
 		}
@@ -172,8 +172,8 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp)
 static kMethod* ExprTerm_getSetterNULL(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kObject *scr, kGamma *gma, ktype_t ty)
 {
 	USING_SUGAR;
-	if(Expr_isTerm(expr) && expr->tk->keyword == TK_SYMBOL) {
-		kToken *tk = expr->tk;
+	if(Expr_isTerm(expr) && expr->termToken->keyword == TK_SYMBOL) {
+		kToken *tk = expr->termToken;
 		if(tk->keyword != KW_SymbolPattern) {
 			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "%s is keyword", S_text(tk->text));
 			return NULL;

@@ -668,8 +668,7 @@ static void Expr_init(KonohaContext *kctx, kObject *o, void *conf)
 	kExprVar *expr      =   (kExprVar*)o;
 	expr->build      =   TEXPR_UNTYPED;
 	expr->ty         =   TY_var;
-	KINITv(expr->tk, K_NULLTOKEN);
-	KINITv(expr->data, K_NULL);
+	KINITv(expr->termToken, K_NULLTOKEN);
 	expr->syn = (SugarSyntax*)conf;
 }
 
@@ -677,8 +676,10 @@ static void Expr_reftrace(KonohaContext *kctx, kObject *o)
 {
 	kExpr *expr = (kExpr*)o;
 	BEGIN_REFTRACE(2);
-	KREFTRACEv(expr->tk);
-	KREFTRACEv(expr->data);
+	KREFTRACEv(expr->termToken);
+	if(Expr_hasObjectConstValue(expr)) {
+		KREFTRACEv(expr->objectConstValue);
+	}
 	END_REFTRACE();
 }
 
@@ -704,7 +705,6 @@ static kExpr* new_ConsExpr(KonohaContext *kctx, SugarSyntax *syn, int n, ...)
 	va_start(ap, n);
 	DBG_ASSERT(syn != NULL);
 	kExprVar *expr = GCSAFE_new(ExprVar, syn);
-	PUSH_GCSTACK(expr);
 	expr = Expr_vadd(kctx, expr, n, ap);
 	va_end(ap);
 	return (kExpr*)expr;
@@ -758,7 +758,7 @@ static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
 			DUMP_P("[%d] ExprTerm: null", n);
 		}
 		else if(Expr_isTerm(expr)) {
-			DUMP_P("[%d] ExprTerm: kw='%s%s' %s", n, KW_t(expr->tk->keyword), kToken_s(expr->tk));
+			DUMP_P("[%d] ExprTerm: kw='%s%s' %s", n, KW_t(expr->termToken->keyword), kToken_s(expr->termToken));
 			if(expr->ty != TY_var) {
 
 			}
@@ -811,11 +811,11 @@ static kExpr* Expr_setConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, k
 	if(TY_isUnbox(ty)) {
 		Wexpr->build = TEXPR_NCONST;
 		Wexpr->ndata = N_toint(o);
-		KSETv(Wexpr->data, K_NULL);
 	}
 	else {
 		Wexpr->build = TEXPR_CONST;
-		KINITv(Wexpr->data, o);
+		KINITv(Wexpr->objectConstValue, o);
+		Expr_setObjectConstValue(Wexpr, 1);
 	}
 	return expr;
 }
@@ -829,7 +829,6 @@ static kExpr* Expr_setNConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, 
 	kExprVar *Wexpr = (kExprVar*)expr;
 	Wexpr->build = TEXPR_NCONST;
 	Wexpr->ndata = ndata;
-	KSETv(Wexpr->data, K_NULL);
 	Wexpr->ty = ty;
 	return expr;
 }
@@ -947,7 +946,7 @@ static const char* Stmt_text(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw, con
 	kExpr *expr = (kExpr*)kStmt_getObjectNULL(kctx, stmt, kw);
 	if(expr != NULL) {
 		if(IS_Expr(expr) && Expr_isTerm(expr)) {
-			return S_text(expr->tk->text);
+			return S_text(expr->termToken->text);
 		}
 		else if(IS_Token(expr)) {
 			kToken *tk = (kToken*)expr;

@@ -543,14 +543,16 @@ static void EXPR_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int esp
 	//DBG_P("a=%d, shift=%d, espidx=%d", a, shift, espidx);
 	switch(expr->build) {
 	case TEXPR_CONST : {
-		kObject *v = expr->data;
-		if(TY_isUnbox(expr->ty)) {
-			ASM(NSET, NC_(a), (uintptr_t)N_toint(v), CT_(expr->ty));
-		}
-		else {
-			v = BUILD_addConstPool(kctx, v);
-			ASM(NSET, OC_(a), (uintptr_t)v, CT_(expr->ty));
-		}
+		kObject *v = expr->objectConstValue;
+		DBG_ASSERT(!TY_isUnbox(expr->ty));
+		DBG_ASSERT(Expr_hasObjectConstValue(expr));
+//		if(TY_isUnbox(expr->ty)) {
+//			ASM(NSET, NC_(a), (uintptr_t)N_toint(v), CT_(expr->ty));
+//		}
+//		else {
+		v = BUILD_addConstPool(kctx, v);
+		ASM(NSET, OC_(a), (uintptr_t)v, CT_(expr->ty));
+//		}
 		break;
 	}
 	case TEXPR_NEW   : {

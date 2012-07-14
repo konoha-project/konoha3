@@ -32,7 +32,7 @@ static KMETHOD UndefinedExprTyCheck(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	if(Expr_isTerm(expr)) {
-		expr = kToken_p(stmt, expr->tk, ErrTag, "undefined token type checker: '%s'", kToken_s(expr->tk));
+		expr = kToken_p(stmt, expr->termToken, ErrTag, "undefined token type checker: '%s'", kToken_s(expr->termToken));
 	}
 	else {
 		expr = kStmt_p(stmt, ErrTag, "undefined operator type checker: %s%s",  KW_t(expr->syn->keyword));
@@ -83,8 +83,8 @@ static kExpr *ExprTyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma 
 static void Expr_putConstValue(KonohaContext *kctx, kExpr *expr, KonohaStack *sfp)
 {
 	if(expr->build == TEXPR_CONST) {
-		KSETv(sfp[0].toObject, expr->data);
-		sfp[0].ndata = O_unbox(expr->data);
+		KSETv(sfp[0].toObject, expr->objectConstValue);
+		sfp[0].ndata = O_unbox(expr->objectConstValue);
 	}else if(expr->build == TEXPR_NCONST) {
 		sfp[0].ndata = expr->ndata;
 	}else if(expr->build == TEXPR_NEW) {
@@ -124,7 +124,8 @@ static kExpr *new_BoxingExpr(KonohaContext *kctx, kExpr *expr, ktype_t reqty)
 	if(expr->build == TEXPR_NCONST) {
 		kExprVar *Wexpr = (kExprVar*)expr;
 		Wexpr->build = TEXPR_CONST;
-		KINITv(Wexpr->data, KLIB new_kObject(kctx, CT_(Wexpr->ty), Wexpr->ndata));
+		KINITv(Wexpr->objectConstValue, KLIB new_kObject(kctx, CT_(Wexpr->ty), Wexpr->ndata));
+		Expr_setObjectConstValue(Wexpr, 1);
 		Wexpr->ty = reqty;
 		return expr;
 	}
