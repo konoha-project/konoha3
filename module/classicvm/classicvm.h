@@ -1,6 +1,6 @@
 #include <minikonoha/float.h>
-#ifndef TYICVM_H_
-#define TYICVM_H_
+#ifndef CLASSICVM_H_
+#define CLASSICVM_H_
 
 static void EXPR_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espidx);
 static kBasicBlockVar* new_BasicBlockLABEL(KonohaContext *kctx);
@@ -29,7 +29,7 @@ static void BUILD_asm(KonohaContext *kctx, VirtualMachineInstruction *op, size_t
 #define MN_opLSFT MN_("opLSFT")
 #define MN_opRSFT MN_("opRSFT")
 
-static kbool_t TYICVM_BUILD_asmJMPF(KonohaContext *kctx, kBasicBlock *bb, klr_JMPF_t *op, int *swap)
+static kbool_t CLASSICVM_BUILD_asmJMPF(KonohaContext *kctx, kBasicBlock *bb, klr_JMPF_t *op, int *swap)
 {
 	while(bb->op.bytesize > 0) {
 		VirtualMachineInstruction *opP = BBOP(bb) + (BBSIZE(bb) - 1);
@@ -88,7 +88,7 @@ static kbool_t TYICVM_BUILD_asmJMPF(KonohaContext *kctx, kBasicBlock *bb, klr_JM
 #define _REMOVE2(opX, opX2)       TONOP(opX); _REMOVE(opX2)
 #define _REMOVE3(opX, opX2, opX3) TONOP(opX); _REMOVE2(opX2, opX3)
 
-static void TYICVM_BasicBlock_peephole(KonohaContext *kctx, kBasicBlock *bb)
+static void CLASSICVM_BasicBlock_peephole(KonohaContext *kctx, kBasicBlock *bb)
 {
 	size_t i;
 	for(i = 1; i < BBSIZE(bb); i++) {
@@ -308,7 +308,7 @@ static kbool_t OPR_hasCONST(KonohaContext *kctx, kExpr *expr, kmethodn_t *mn, in
 	return isCONST;
 }
 
-static kbool_t TYICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr, int shift, int espidx)
+static kbool_t CLASSICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr, int shift, int espidx)
 {
 	ktype_t mtd_cid = (mtd)->classId;
 	kmethodn_t mtd_mn = (mtd)->mn;

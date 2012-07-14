@@ -1,5 +1,5 @@
-#ifndef TYICVM_GEN_H
-#define TYICVM_GEN_H
+#ifndef CLASSICVM_GEN_H
+#define CLASSICVM_GEN_H
 // THIS FILE WAS AUTOMATICALLY GENERATED
 
 
@@ -2152,4 +2152,4 @@ static VirtualMachineInstruction* VirtualMachine_run(KonohaContext *kctx, Konoha
 	return pc;
 }
 
-#endif /* TYICVM_GEN_H */
+#endif /* CLASSICVM_GEN_H */

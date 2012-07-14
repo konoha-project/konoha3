@@ -68,7 +68,7 @@
 	BasicBlock_add(kctx, bb, 0, &tmp_.op, sizeof(klr_##T##_t));\
 } while (0)
 
-#ifdef _TYICVM
+#ifdef _CLASSICVM
 #include "../../module/classicvm/classicvm_gen.h"
 #include "../../module/classicvm/classicvm.h"
 #else
@@ -123,8 +123,8 @@ static int BUILD_asmJMPF(KonohaContext *kctx, klr_JMPF_t *op)
 	kBasicBlock *bb = ctxcode->currentWorkingBlock;
 	DBG_ASSERT(op->opcode == OPCODE_JMPF);
 	int swap = 0;
-#ifdef _TYICVM
-	if (TYICVM_BUILD_asmJMPF(kctx, bb, op, &swap)) {
+#ifdef _CLASSICVM
+	if (CLASSICVM_BUILD_asmJMPF(kctx, bb, op, &swap)) {
 		return swap;
 	}
 #endif
@@ -253,8 +253,8 @@ static void BasicBlock_strip1(KonohaContext *kctx, kBasicBlock *bb)
 static size_t BasicBlock_peephole(KonohaContext *kctx, kBasicBlock *bb)
 {
 	size_t i, bbsize = BasicBlock_codesize(bb);
-#ifdef _TYICVM
-	TYICVM_BasicBlock_peephole(kctx, bb);
+#ifdef _CLASSICVM
+	CLASSICVM_BasicBlock_peephole(kctx, bb);
 #endif
 	for(i = 0; i < BasicBlock_codesize(bb); i++) {
 		VirtualMachineInstruction *op = BBOP(bb) + i;
@@ -635,8 +635,8 @@ static void CALL_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int esp
 	kMethod *mtd = expr->cons->methodItems[0];
 	DBG_ASSERT(IS_Method(mtd));
 	int i, s = kMethod_isStatic(mtd) ? 2 : 1, thisidx = espidx + K_CALLDELTA;
-#ifdef _TYICVM
-	if (TYICVM_CALL_asm(kctx, mtd, expr, shift, espidx)) {
+#ifdef _CLASSICVM
+	if (CLASSICVM_CALL_asm(kctx, mtd, expr, shift, espidx)) {
 		return;
 	}
 #endif
