@@ -97,7 +97,6 @@ typedef struct KonohaLibVar          KonohaLibVar;
 
 #define PLATAPI (kctx->platApi)->
 #define KLIB    (kctx->klib)->
-#define SUGARAPI  (kctx->sugarApi)->
 
 typedef void FILE_i;
 

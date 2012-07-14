@@ -722,13 +722,12 @@ static int parseREGEX(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, in
 
 static KMETHOD ExprTyCheck_Regex(KonohaContext *kctx, KonohaStack *sfp)
 {
-	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
 	kRegex *r = new_(Regex, NULL);
 	DBG_ASSERT(kArray_size(tk->sub) == 2);
 	Regex_set(kctx, r, tk->sub->stringItems[0], tk->sub->stringItems[1]);
-	RETURN_(kExpr_setConstValue(expr, TY_Regex, r));
+	RETURN_(SUGARAPI kExpr_setConstValue(kctx, expr, TY_Regex, UPCAST(r)));
 }
 
 #define _SLASH     30//FIXME (from src/sugar/token.h)

@@ -107,9 +107,9 @@ static kExpr* ExprCall_toConstValue(KonohaContext *kctx, kExpr *expr, kArray *co
 	KCALL(lsfp, 0, mtd, psize, KLIB Knull(kctx, CT_(expr->ty)));
 	END_LOCAL();
 	if(TY_isUnbox(rtype) || rtype == TY_void) {
-		return kExpr_setUnboxConstValue(expr, rtype, lsfp[0].unboxValue);
+		return SUGARAPI kExpr_setUnboxConstValue(kctx, expr, rtype, lsfp[0].unboxValue);
 	}
-	return kExpr_setConstValue(expr, rtype, lsfp[0].toObject);
+	return SUGARAPI kExpr_setConstValue(kctx, expr, rtype, lsfp[0].toObject);
 }
 
 static kbool_t CT_isa(KonohaContext *kctx, ktype_t cid1, ktype_t cid2)
@@ -144,8 +144,7 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 	if(kStmt_isERR(stmt)) texpr = K_NULLEXPR;
 	if(expr->ty == TY_var && expr != K_NULLEXPR) {
 		if(!IS_Expr(expr)) {
-			expr = new_ConstValue(O_cid(expr), expr);
-			PUSH_GCSTACK(expr);
+			expr = new_ConstValueExpr(kctx, O_cid(expr), UPCAST(expr));
 		}
 		texpr = ExprTyCheck(kctx, stmt, expr, gma, reqty);
 	}
@@ -264,7 +263,7 @@ static kbool_t Block_tyCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
 		}
 	}
 	if(bk != K_NULLBLOCK) {
-		kExpr_setVariable(bk->esp, LOCAL, TY_void, gma->genv->localScope.varsize, gma);
+		SUGARAPI kExpr_setVariable(kctx, bk->esp, gma, TEXPR_LOCAL, TY_void, gma->genv->localScope.varsize);
 	}
 	if(lvarsize < gma->genv->localScope.varsize) {
 		gma->genv->localScope.varsize = lvarsize;

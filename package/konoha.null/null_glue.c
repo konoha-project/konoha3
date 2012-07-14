@@ -62,11 +62,10 @@ static kbool_t null_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_
 
 static KMETHOD ExprTyCheck_null(KonohaContext *kctx, KonohaStack *sfp)
 {
-	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	DBG_P("typing null as %s", TY_t(reqty));
 	if(reqty == TY_var) reqty = TY_Object;
-	RETURN_(kExpr_setVariable(expr, NULL, reqty, 0, gma));
+	RETURN_(SUGARAPI kExpr_setVariable(kctx, expr, gma, TEXPR_NULL, reqty, 0));
 }
 
 static kbool_t null_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)

@@ -232,11 +232,10 @@ static kbool_t float_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline
 
 static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 {
-	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
-	sfp[4].fvalue = strtod(S_text(tk->text), NULL);
-	RETURN_(kExpr_setUnboxConstValue(expr, TY_Float, sfp[4].unboxValue));
+	sfp[4].fvalue = strtod(S_text(tk->text), NULL);   // just using tramsformation float
+	RETURN_(SUGARAPI kExpr_setUnboxConstValue(kctx, expr, TY_Float, sfp[4].unboxValue));
 }
 
 static kbool_t float_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)

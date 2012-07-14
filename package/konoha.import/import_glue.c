@@ -55,10 +55,9 @@ static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp)
 	kNameSpace *ns = gma->genv->ns;
 	SugarSyntaxVar *syn1 = (SugarSyntaxVar*) SYN_(ns, KW_ExprMethodCall);
 	kTokenVar *tkImport = GCSAFE_new(TokenVar, 0);
-	kExpr *ePKG = new_ConstValue(TY_String, pkgname);
+	kExpr *ePKG = new_ConstValueExpr(kctx, TY_String, UPCAST(pkgname));
 	tkImport->keyword = MN_("import");
-	kExpr *expr = SUGAR new_ConsExpr(kctx, syn1, 3,
-			tkImport, new_ConstValue(O_cid(ns), ns), ePKG);
+	kExpr *expr = SUGAR new_ConsExpr(kctx, syn1, 3, tkImport, new_ConstValueExpr(kctx, O_cid(ns), UPCAST(ns)), ePKG);
 	KLIB kObject_setObject(kctx, stmt, KW_ExprPattern, TY_Expr, expr);
 	ret = SUGAR Stmt_tyCheckExpr(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0);
 	if (ret) {

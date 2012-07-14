@@ -482,12 +482,12 @@ typedef struct {
 	kFunc *ParseExpr_Op;
 
 	// export
-	void (*NameSpace_setTokenizeFunc)(KonohaContext *kctx, kNameSpace *, int ch, TokenizeFunc, kFunc *, int isAddition);
-	void (*NameSpace_tokenize)(KonohaContext *kctx, kNameSpace *, const char *, kfileline_t, kArray *);
+	void   (*NameSpace_setTokenizeFunc)(KonohaContext *kctx, kNameSpace *, int ch, TokenizeFunc, kFunc *, int isAddition);
+	void   (*NameSpace_tokenize)(KonohaContext *kctx, kNameSpace *, const char *, kfileline_t, kArray *);
 
-	kExpr* (*Expr_setConstValue)(KonohaContext *kctx, kExpr *expr, ktype_t ty, kObject *o);
-	kExpr* (*Expr_setUnboxConstValue)(KonohaContext *kctx, kExpr *expr, ktype_t ty, uintptr_t unboxValue);
-	kExpr* (*Expr_setVariable)(KonohaContext *kctx, kExpr *expr, kexpr_t build, ktype_t ty, intptr_t index, kGamma *gma);
+	kExpr* (*kExpr_setConstValue)(KonohaContext *kctx, kExpr *expr, ktype_t ty, kObject *o);
+	kExpr* (*kExpr_setUnboxConstValue)(KonohaContext *kctx, kExpr *expr, ktype_t ty, uintptr_t unboxValue);
+	kExpr* (*kExpr_setVariable)(KonohaContext *kctx, kExpr *expr, kGamma *gma, kexpr_t build, ktype_t ty, intptr_t index);
 
 	kToken* (*Stmt_token)(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw, kToken *def);
 	kExpr* (*Stmt_expr)(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw, kExpr *def);
@@ -527,9 +527,9 @@ typedef struct {
 	base->Stmt_block          = Stmt_block;\
 	base->Stmt_expr           = Stmt_expr;\
 	base->Stmt_text           = Stmt_text;\
-	base->Expr_setConstValue  = Expr_setConstValue;\
-	base->Expr_setUnboxConstValue  = Expr_setUnboxConstValue;\
-	base->Expr_setVariable    = Expr_setVariable;\
+	base->kExpr_setConstValue  = kExpr_setConstValue;\
+	base->kExpr_setUnboxConstValue  = kExpr_setUnboxConstValue;\
+	base->kExpr_setVariable    = kExpr_setVariable;\
 	base->Expr_tyCheckAt      = Expr_tyCheckAt;\
 	base->Stmt_tyCheckExpr    = Stmt_tyCheckExpr;\
 	base->Block_tyCheckAll    = Block_tyCheckAll;\
@@ -571,7 +571,17 @@ typedef struct {
 #define TPOL_COERCION       (1 << 2)
 #define TPOL_CONST          (1 << 4)
 
+#define new_ConstValueExpr(CTX, T, O)              SUGARAPI kExpr_setConstValue(CTX, NULL, T, O)
+#define new_UnboxConstValueExpr(CTX, T, D)         SUGARAPI kExpr_setUnboxConstValue(CTX, NULL, T, D)
+#define new_VariableExpr(CTX, GMA, BLD, TY, IDX)   SUGARAPI kExpr_setVariable(CTX, NULL, GMA, BLD, TY, IDX)
+
 #ifdef USING_SUGAR_AS_BUILTIN
+
+#define SUGARAPI
+
+static kExpr* kExpr_setConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, kObject *o);
+static kExpr* kExpr_setUnboxConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, uintptr_t unboxValue);
+static kExpr* kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, int build, ktype_t ty, intptr_t index);
 
 #define TY_NameSpace                       kmodsugar->cNameSpace->cid
 #define TY_Token                           kmodsugar->cToken->cid
@@ -589,19 +599,17 @@ typedef struct {
 #define kStmt_block(STMT, KW, DEF)  Stmt_block(kctx, STMT, KW, DEF)
 
 #define kExpr_uline(EXPR)           Expr_uline(kctx, EXPR, 0)
-#define new_ConstValue(T, O)  Expr_setConstValue(kctx, NULL, T, UPCAST(O))
-#define kExpr_setConstValue(EXPR, T, O)  Expr_setConstValue(kctx, EXPR, T, UPCAST(O))
-#define new_NConstValue(T, D)  Expr_setUnboxConstValue(kctx, NULL, T, D)
-#define kExpr_setUnboxConstValue(EXPR, T, D)  Expr_setUnboxConstValue(kctx, EXPR, T, D)
-#define new_Variable(B, T, I, G)          Expr_setVariable(kctx, NULL, TEXPR_##B, T, I, G)
-#define kExpr_setVariable(E, B, T, I, G)  Expr_setVariable(kctx, E, TEXPR_##B, T, I, G)
 #define kExpr_tyCheckAt(STMT, E, N, GMA, T, P)     Expr_tyCheckAt(kctx, STMT, E, N, GMA, T, P)
 //#define kStmt_tyCheck(E, NI, GMA, T, P)      Stmt_tyCheck(kctx, STMT, NI, GMA, T, P)
 
 #else/*SUGAR_EXPORTS*/
+
+
+#define SUGARAPI        ((const KModuleSugar *)kmodsugar)->
+
 #define USING_SUGAR                          const KModuleSugar *_e = (const KModuleSugar *)kmodsugar
 #define SUGAR                                _e->
-#define TY_NameSpace                       _e->cNameSpace->cid
+#define TY_NameSpace                         _e->cNameSpace->cid
 #define TY_Token                             _e->cToken->cid
 #define TY_Stmt                              _e->cStmt->cid
 #define TY_Block                             _e->cBlock->cid
@@ -619,12 +627,6 @@ typedef struct {
 #define kStmt_block(STMT, KW, DEF)           _e->Stmt_block(kctx, STMT, KW, DEF)
 
 #define kExpr_uline(EXPR)                    _e->Expr_uline(kctx, EXPR, 0)
-#define new_ConstValue(T, O)                 _e->Expr_setConstValue(kctx, NULL, T, UPCAST(O))
-#define kExpr_setConstValue(EXPR, T, O)      _e->Expr_setConstValue(kctx, EXPR, T, UPCAST(O))
-#define new_NConstValue(T, D)                _e->Expr_setUnboxConstValue(kctx, NULL, T, D)
-#define kExpr_setUnboxConstValue(EXPR, T, D)     _e->Expr_setUnboxConstValue(kctx, EXPR, T, D)
-#define new_Variable(B, T, I, G)             _e->Expr_setVariable(kctx, NULL, TEXPR_##B, T, I, G)
-#define kExpr_setVariable(E, B, T, I, G)     _e->Expr_setVariable(kctx, E, TEXPR_##B, T, I, G)
 #define kExpr_tyCheckAt(STMT, E, N, GMA, T, P)     _e->Expr_tyCheckAt(kctx, STMT, E, N, GMA, T, P)
 //#define kStmt_tyCheck(E, NI, GMA, T, P)      _e->Stmt_tyCheck(kctx, STMT, NI, GMA, T, P)
 

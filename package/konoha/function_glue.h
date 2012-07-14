@@ -135,7 +135,7 @@ static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->tk;
 	sfp[4].fvalue = strtod(S_text(tk->text), NULL);
-	RETURN_(kExpr_setUnboxConstValue(expr, TY_Float, sfp[4].unboxValue));
+	RETURN_(SUGARAPI kExpr_setUnboxConstValue(kctx, expr, TY_Float, sfp[4].unboxValue));
 }
 
 static kbool_t function_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
