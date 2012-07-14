@@ -36,7 +36,7 @@ static KMETHOD ExprTyCheck_assignment(KonohaContext *kctx, KonohaStack *sfp)
 	kExpr *rexpr = kExpr_tyCheckAt(stmt, expr, 2, gma, lexpr->ty, 0);
 	if(rexpr != K_NULLEXPR && lexpr != K_NULLEXPR) {
 		if(rexpr != K_NULLEXPR) {
-			if(lexpr->build == TEXPR_LOCAL || lexpr->build == TEXPR_LOCAL_ || lexpr->build == TEXPR_FIELD) {
+			if(lexpr->build == TEXPR_LOCAL || lexpr->build == TEXPR_FIELD) {
 				((kExprVar*)expr)->build = TEXPR_LET;
 				((kExprVar*)rexpr)->ty = lexpr->ty;
 				RETURN_(expr);

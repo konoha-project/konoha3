@@ -230,10 +230,10 @@ struct kTokenVar {
 #define kToken_setUnresolved(o, B)          TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,B)
 #define kToken_topch(tk)                    ((tk)->keyword != TK_TEXT && (S_size((tk)->text) == 1) ? S_text((tk)->text)[0] : 0)
 
-#define TEXPR_LOCAL_   -4   /*THIS IS NEVER PASSED*/
-#define TEXPR_BLOCK_   -3   /*THIS IS NEVER PASSED*/
-#define TEXPR_FIELD_   -2   /*THIS IS NEVER PASSED*/
-#define TEXPR_shift    (TEXPR_LOCAL - (TEXPR_LOCAL_))
+//#define TEXPR_LOCAL_   -4   /*THIS IS NEVER PASSED*/
+//#define TEXPR_BLOCK_   -3   /*THIS IS NEVER PASSED*/
+//#define TEXPR_FIELD_   -2   /*THIS IS NEVER PASSED*/
+//#define TEXPR_shift    (TEXPR_LOCAL - (TEXPR_LOCAL_))
 #define TEXPR_UNTYPED       -1   /*THIS MUST NOT HAPPEN*/
 #define TEXPR_CONST          0
 #define TEXPR_NEW            1
@@ -331,10 +331,10 @@ typedef struct  {
 	ktype_t       this_cid;  ktype_t       static_cid;
 	kNameSpace   *ns;
 	kMethod      *mtd;
-	GammaStack    f;
-	GammaStack    l;
-	kArray       *lvarlst;
-	size_t        lvarlst_top;
+//	GammaStack    f;
+	GammaStack    localScope;
+//	kArray       *lvarlst;
+//	size_t        lvarlst_top;
 } GammaAllocaData;
 
 struct kGammaVar {

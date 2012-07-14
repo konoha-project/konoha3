@@ -847,9 +847,6 @@ static kExpr *Expr_setVariable(KonohaContext *kctx, kExpr *expr, int build, ktyp
 	Wexpr->ty = ty;
 	Wexpr->index = index;
 	// KSETv(Wexpr->data, K_NULL);  block need unclear
-	if(build < TEXPR_UNTYPED) {
-		KLIB kArray_add(kctx, gma->genv->lvarlst, Wexpr);
-	}
 	return expr;
 }
 

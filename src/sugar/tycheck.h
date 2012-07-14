@@ -32,8 +32,6 @@ static GammaAllocaData *Gamma_push(KonohaContext *kctx, kGamma *gma, GammaAlloca
 {
 	GammaAllocaData *oldone = gma->genv;
 	gma->genv = newone;
-	newone->lvarlst = ctxsugar->lvarlst;
-	newone->lvarlst_top = kArray_size(ctxsugar->lvarlst);
 	return oldone;
 }
 
@@ -42,12 +40,8 @@ static GammaAllocaData *Gamma_pop(KonohaContext *kctx, kGamma *gma, GammaAllocaD
 	GammaAllocaData *newone = gma->genv;
 	assert(checksum == newone);
 	gma->genv = oldone;
-	KLIB kArray_clear(kctx, newone->lvarlst, newone->lvarlst_top);
-	if(newone->l.allocsize > 0) {
-		KFREE(newone->l.vars, newone->l.allocsize);
-	}
-	if(newone->f.allocsize > 0) {
-		KFREE(newone->f.vars, newone->f.allocsize);
+	if(newone->localScope.allocsize > 0) {
+		KFREE(newone->localScope.vars, newone->localScope.allocsize);
 	}
 	return newone;
 }
@@ -301,18 +295,13 @@ static kExpr* Expr_tyCheckVariable2(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 	ksymbol_t fn = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NONAME);
 	int i;
 	GammaAllocaData *genv = gma->genv;
-	for(i = genv->l.varsize - 1; i >= 0; i--) {
-		if(genv->l.vars[i].fn == fn) {
-			return kExpr_setVariable(expr, LOCAL_, genv->l.vars[i].ty, i, gma);
+	for(i = genv->localScope.varsize - 1; i >= 0; i--) {
+		if(genv->localScope.vars[i].fn == fn) {
+			return kExpr_setVariable(expr, LOCAL, genv->localScope.vars[i].ty, i, gma);
 		}
 	}
-	for(i = genv->f.varsize - 1; i >= 0; i--) {
-		if(genv->f.vars[i].fn == fn) {
-			return kExpr_setVariable(expr, LOCAL, genv->f.vars[i].ty, i, gma);
-		}
-	}
-	if(genv->f.vars[0].ty != TY_void) {
-		DBG_ASSERT(genv->this_cid == genv->f.vars[0].ty);
+	if(genv->localScope.vars[0].ty != TY_void) {
+		DBG_ASSERT(genv->this_cid == genv->localScope.vars[0].ty);
 		KonohaClass *ct = CT_(genv->this_cid);
 		for(i = ct->fsize; i >= 0; i--) {
 			if(ct->fieldItems[i].fn == fn && ct->fieldItems[i].ty != TY_void) {
@@ -666,20 +655,14 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kExpr *exprN, kGamm
 	ksymbol_t fn = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NONAME);
 	int i;
 	GammaAllocaData *genv = gma->genv;
-	for(i = genv->l.varsize - 1; i >= 0; i--) {
-		if(genv->l.vars[i].fn == fn && TY_isFunc(genv->l.vars[i].ty)) {
-			kExpr_setVariable(expr, LOCAL_, genv->l.vars[i].ty, i, gma);
+	for(i = genv->localScope.varsize - 1; i >= 0; i--) {
+		if(genv->localScope.vars[i].fn == fn && TY_isFunc(genv->localScope.vars[i].ty)) {
+			kExpr_setVariable(expr, LOCAL, genv->localScope.vars[i].ty, i, gma);
 			return NULL;
 		}
 	}
-	for(i = genv->f.varsize - 1; i >= 0; i--) {
-		if(genv->f.vars[i].fn == fn && TY_isFunc(genv->l.vars[i].ty)) {
-			kExpr_setVariable(expr, LOCAL, genv->f.vars[i].ty, i, gma);
-			return NULL;
-		}
-	}
-	if(genv->f.vars[0].ty != TY_void) {
-		DBG_ASSERT(genv->this_cid == genv->f.vars[0].ty);
+	if(genv->localScope.vars[0].ty != TY_void) {
+		DBG_ASSERT(genv->this_cid == genv->localScope.vars[0].ty);
 		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, genv->ns, genv->this_cid, fn);
 		if(mtd != NULL) {
 			KSETv(exprN->cons->exprItems[1], new_Variable(LOCAL, gma->genv->this_cid, 0, gma));
@@ -860,7 +843,7 @@ static kbool_t Stmt_TyCheck(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, 
 
 static kbool_t Block_tyCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
 {
-	int i, result = true, lvarsize = gma->genv->l.varsize;
+	int i, result = true, lvarsize = gma->genv->localScope.varsize;
 	for(i = 0; i < kArray_size(bk->stmtList); i++) {
 		kStmt *stmt = (kStmt*)bk->stmtList->objectItems[i];
 		SugarSyntax *syn = stmt->syn;
@@ -874,10 +857,10 @@ static kbool_t Block_tyCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
 		}
 	}
 	if(bk != K_NULLBLOCK) {
-		kExpr_setVariable(bk->esp, LOCAL_, TY_void, gma->genv->l.varsize, gma);
+		kExpr_setVariable(bk->esp, LOCAL, TY_void, gma->genv->localScope.varsize, gma);
 	}
-	if(lvarsize < gma->genv->l.varsize) {
-		gma->genv->l.varsize = lvarsize;
+	if(lvarsize < gma->genv->localScope.varsize) {
+		gma->genv->localScope.varsize = lvarsize;
 	}
 	return result;
 }
@@ -898,30 +881,30 @@ static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, KonohaStack *sfp)
 		uline = stmt->uline;
 	}
 	if(lastExpr != NULL) {
-		int lvarsize = gma->genv->l.varsize;
-		size_t i, atop = kArray_size(gma->genv->lvarlst);
-		kExpr *lvar = new_Variable(LOCAL_, TY_var, addGammaStack(kctx, &gma->genv->l, TY_var, 0/*FN_*/), gma);
-		if(!Block_tyCheckAll(kctx, bk, gma)) {
-			RETURN_(texpr);
-		}
-		kExpr *rexpr = kStmt_expr(lastExpr, KW_ExprPattern, NULL);
-		DBG_ASSERT(rexpr != NULL);
-		ktype_t ty = rexpr->ty;
-		if(ty != TY_void) {
-			kExpr *letexpr = new_TypedConsExpr(kctx, TEXPR_LET, TY_void, 3, K_NULL, lvar, rexpr);
-			KLIB kObject_setObject(kctx, lastExpr, KW_ExprPattern, TY_Expr, letexpr);
-			texpr = kExpr_setVariable(expr, BLOCK_, ty, lvarsize, gma);
-		}
-		for(i = atop; i < kArray_size(gma->genv->lvarlst); i++) {
-			kExprVar *v = gma->genv->lvarlst->exprVarItems[i];
-			if(v->build == TEXPR_LOCAL_ && v->index >= lvarsize) {
-				v->build = TEXPR_STACKTOP; v->index = v->index - lvarsize;
-				//DBG_P("v->index=%d", v->index);
-			}
-		}
-		if(lvarsize < gma->genv->l.varsize) {
-			gma->genv->l.varsize = lvarsize;
-		}
+//		int lvarsize = gma->genv->localScope.varsize;
+//		size_t i, atop = kArray_size(gma->genv->lvarlst);
+//		kExpr *lvar = new_Variable(LOCAL_, TY_var, addGammaStack(kctx, &gma->genv->l, TY_var, 0/*FN_*/), gma);
+//		if(!Block_tyCheckAll(kctx, bk, gma)) {
+//			RETURN_(texpr);
+//		}
+//		kExpr *rexpr = kStmt_expr(lastExpr, KW_ExprPattern, NULL);
+//		DBG_ASSERT(rexpr != NULL);
+//		ktype_t ty = rexpr->ty;
+//		if(ty != TY_void) {
+//			kExpr *letexpr = new_TypedConsExpr(kctx, TEXPR_LET, TY_void, 3, K_NULL, lvar, rexpr);
+//			KLIB kObject_setObject(kctx, lastExpr, KW_ExprPattern, TY_Expr, letexpr);
+//			texpr = kExpr_setVariable(expr, BLOCK_, ty, lvarsize, gma);
+//		}
+//		for(i = atop; i < kArray_size(gma->genv->lvarlst); i++) {
+//			kExprVar *v = gma->genv->lvarlst->exprVarItems[i];
+//			if(v->build == TEXPR_LOCAL_ && v->index >= lvarsize) {
+//				v->build = TEXPR_STACKTOP; v->index = v->index - lvarsize;
+//				//DBG_P("v->index=%d", v->index);
+//			}
+//		}
+//		if(lvarsize < gma->genv->localScope.varsize) {
+//			gma->genv->localScope.varsize = lvarsize;
+//		}
 	}
 	if(texpr == K_NULLEXPR) {
 		kStmt_errline(stmt, uline);
@@ -1026,8 +1009,8 @@ static kbool_t ExprTerm_toVariable(KonohaContext *kctx, kStmt *stmt, kExpr *expr
 			return false;
 		}
 		ksymbol_t fn = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
-		int index = addGammaStack(kctx, &gma->genv->l, ty, fn);
-		kExpr_setVariable(expr, LOCAL_, ty, index, gma);
+		int index = addGammaStack(kctx, &gma->genv->localScope, ty, fn);
+		kExpr_setVariable(expr, LOCAL, ty, index, gma);
 		return true;
 	}
 	return false;
@@ -1269,32 +1252,16 @@ static kBlock* Method_newBlock(KonohaContext *kctx, kMethod *mtd, kString *sourc
 
 static void Gamma_initParam(KonohaContext *kctx, GammaAllocaData *genv, kParam *pa)
 {
-	int i, psize = (pa->psize + 1 < genv->f.capacity) ? pa->psize : genv->f.capacity - 1;
+	int i, psize = (pa->psize + 1 < genv->localScope.capacity) ? pa->psize : genv->localScope.capacity - 1;
 	for(i = 0; i < psize; i++) {
-		genv->f.vars[i+1].fn = pa->p[i].fn;
-		genv->f.vars[i+1].ty = pa->p[i].ty;
+		genv->localScope.vars[i+1].fn = pa->p[i].fn;
+		genv->localScope.vars[i+1].ty = pa->p[i].ty;
 	}
 	if(!kMethod_isStatic(genv->mtd)) {
-		genv->f.vars[0].fn = FN_this;
-		genv->f.vars[0].ty = genv->this_cid;
+		genv->localScope.vars[0].fn = FN_this;
+		genv->localScope.vars[0].ty = genv->this_cid;
 	}
-	genv->f.varsize = psize+1;
-}
-
-static void Gamma_shiftBlockIndex(KonohaContext *kctx, GammaAllocaData *genv)
-{
-	kArray *a = genv->lvarlst;
-	size_t i, size = kArray_size(a);
-	int shift = genv->f.varsize;
-	for(i = genv->lvarlst_top; i < size; i++) {
-		kExprVar *expr = a->exprVarItems[i];
-		if(expr->build == TEXPR_STACKTOP) continue;
-		//DBG_ASSERT(expr->build < TEXPR_UNTYPED);
-		if(expr->build < TEXPR_UNTYPED) {
-			expr->index += shift;
-			expr->build += TEXPR_shift;
-		}
-	}
+	genv->localScope.varsize = psize+1;
 }
 
 static kbool_t Method_compile(KonohaContext *kctx, kMethod *mtd, kString *text, kfileline_t uline, kNameSpace *ns)
@@ -1302,18 +1269,16 @@ static kbool_t Method_compile(KonohaContext *kctx, kMethod *mtd, kString *text, 
 	INIT_GCSTACK();
 	kGamma *gma = ctxsugar->gma;
 	kBlock *bk = Method_newBlock(kctx, mtd, text, uline);
-	GammaStackDecl fvars[32] = {}, lvars[32] = {};
+	GammaStackDecl lvars[32] = {};
 	GammaAllocaData newgma = {
 		.mtd = mtd,
 		.ns = ns,
 		.this_cid = (mtd)->cid,
-		.f.vars = fvars, .f.capacity = 32, .f.varsize = 0, .f.allocsize = 0,
-		.l.vars = lvars, .l.capacity = 32, .l.varsize = 0, .l.allocsize = 0,
+		.localScope.vars = lvars, .localScope.capacity = 32, .localScope.varsize = 0, .localScope.allocsize = 0,
 	};
 	GAMMA_PUSH(gma, &newgma);
 	Gamma_initParam(kctx, &newgma, kMethod_param(mtd));
 	Block_tyCheckAll(kctx, bk, gma);
-	Gamma_shiftBlockIndex(kctx, &newgma);
 	KLIB kMethod_genCode(kctx, mtd, bk);
 	GAMMA_POP(gma, &newgma);
 	RESET_GCSTACK();
@@ -1326,11 +1291,11 @@ static kbool_t Method_compile(KonohaContext *kctx, kMethod *mtd, kString *text, 
 static void Gamma_initIt(KonohaContext *kctx, GammaAllocaData *genv, kParam *pa)
 {
 	KonohaContextRuntimeVar *base = kctx->stack;
-	genv->f.varsize = 0;
+	genv->localScope.varsize = 0;
 	if(base->evalty != TY_void) {
-		genv->f.vars[1].fn = FN_("it");
-		genv->f.vars[1].ty = base->evalty;
-		genv->f.varsize = 1;
+		genv->localScope.vars[1].fn = FN_("it");
+		genv->localScope.vars[1].ty = base->evalty;
+		genv->localScope.varsize = 1;
 	}
 }
 
@@ -1382,14 +1347,13 @@ static kstatus_t SingleBlock_eval(KonohaContext *kctx, kBlock *bk, kMethod *mtd,
 {
 	kstatus_t result;
 	kGamma *gma = ctxsugar->gma;
-	GammaStackDecl fvars[32] = {}, lvars[32] = {};
+	GammaStackDecl lvars[32] = {};
 	GammaAllocaData newgma = {
 		.flag = kGamma_TOPLEVEL,
 		.mtd = mtd,
 		.ns = ns,
 		.this_cid     = TY_System,
-		.f.vars = fvars, .f.capacity = 32, .f.varsize = 0, .f.allocsize = 0,
-		.l.vars = lvars, .l.capacity = 32, .l.varsize = 0, .l.allocsize = 0,
+		.localScope.vars = lvars, .localScope.capacity = 32, .localScope.varsize = 0, .localScope.allocsize = 0,
 	};
 	GAMMA_PUSH(gma, &newgma);
 	Gamma_initIt(kctx, &newgma, kMethod_param(mtd));
@@ -1399,7 +1363,6 @@ static kstatus_t SingleBlock_eval(KonohaContext *kctx, kBlock *bk, kMethod *mtd,
 		kctx->stack->evalty = TY_void;
 	}
 	else {
-		Gamma_shiftBlockIndex(kctx, &newgma);
 		result = Gamma_evalMethod(kctx, gma, bk, mtd);
 	}
 	GAMMA_POP(gma, &newgma);
