@@ -441,7 +441,7 @@ static KDEFINE_PACKAGE *NameSpace_openGlueHandler(KonohaContext *kctx, kNameSpac
 
 static kNameSpace* new_NameSpace(KonohaContext *kctx, kpackage_t packageDomain, kpackage_t packageId)
 {
-	kNameSpaceVar *ns = new_Var(NameSpace, KNULL(NameSpace));
+	kNameSpaceVar *ns = GCSAFE_new(NameSpaceVar, KNULL(NameSpace));
 	ns->packageId = packageId;
 	ns->packageDomain = packageId;
 	return (kNameSpace*)ns;
@@ -456,7 +456,6 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackage_t packageId,
 	if(fp != NULL) {
 		INIT_GCSTACK();
 		kNameSpace *ns = new_NameSpace(kctx, packageId, packageId);
-		PUSH_GCSTACK(ns);
 		kfileline_t uline = uline_init(kctx, path, strlen(path), 1, 1);
 		KDEFINE_PACKAGE *packageLoadApi = NameSpace_openGlueHandler(kctx, ns, fbuf, sizeof(fbuf), PN_t(packageId), pline);
 		if(packageLoadApi->initPackage != NULL) {

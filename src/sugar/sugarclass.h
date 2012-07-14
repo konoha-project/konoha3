@@ -703,7 +703,7 @@ static kExpr* new_ConsExpr(KonohaContext *kctx, SugarSyntax *syn, int n, ...)
 	va_list ap;
 	va_start(ap, n);
 	DBG_ASSERT(syn != NULL);
-	kExprVar *expr = new_Var(Expr, syn);
+	kExprVar *expr = GCSAFE_new(ExprVar, syn);
 	PUSH_GCSTACK(expr);
 	expr = Expr_vadd(kctx, expr, n, ap);
 	va_end(ap);
@@ -714,8 +714,7 @@ static kExpr* new_TypedConsExpr(KonohaContext *kctx, int build, ktype_t ty, int 
 {
 	va_list ap;
 	va_start(ap, n);
-	kExprVar *expr = new_Var(Expr, NULL);
-	PUSH_GCSTACK(expr);
+	kExprVar *expr = GCSAFE_new(ExprVar, NULL);
 	expr = Expr_vadd(kctx, expr, n, ap);
 	va_end(ap);
 	expr->build = build;
@@ -729,8 +728,7 @@ static kExpr* new_TypedMethodCall(KonohaContext *kctx, kStmt *stmt, ktype_t ty, 
 {
 	va_list ap;
 	va_start(ap, n);
-	kExprVar *expr = new_Var(Expr, NULL);
-	PUSH_GCSTACK(expr);
+	kExprVar *expr = GCSAFE_new(ExprVar, NULL);
 	KSETv(expr->cons, new_(Array, 8));
 	KLIB kArray_add(kctx, expr->cons, mtd);
 	expr = Expr_vadd(kctx, expr, n, ap);

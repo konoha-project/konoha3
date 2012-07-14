@@ -353,6 +353,13 @@ struct kGammaVar {
 #define CT_NameSpace    kmodsugar->cNameSpace
 #define CT_Gamma    kmodsugar->cGamma
 
+#define CT_TokenVar    kmodsugar->cToken
+#define CT_ExprVar     kmodsugar->cExpr
+#define CT_StmtVar     kmodsugar->cStmt
+#define CT_BlockVar    kmodsugar->cBlock
+#define CT_NameSpaceVar    kmodsugar->cNameSpace
+#define CT_GammaVar    kmodsugar->cGamma
+
 #define CT_TokenArray           kmodsugar->cTokenArray
 #define kTokenArray             kArray
 #define CT_ExprArray            CT_Array

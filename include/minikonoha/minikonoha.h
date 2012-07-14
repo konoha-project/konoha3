@@ -1218,8 +1218,8 @@ struct KonohaLibVar {
 // #define KW_new (((ksymbol_t)39)|0) /*new*/
 #define MN_new                    39  /* @see */
 
-#define new_(C, A)                (k##C*)(KLIB new_kObject(kctx,      CT_##C, ((uintptr_t)A)))
-#define new_Var(C,A)              (k##C##Var*)(KLIB new_kObject(kctx, CT_##C, ((uintptr_t)A)))
+#define new_(C, A)                (k##C*)(KLIB new_kObject(kctx, CT_##C, ((uintptr_t)A)))
+#define GCSAFE_new(C, A)          (k##C*)(KLIB new_kObject(kctx, CT_##C, ((uintptr_t)A)))
 
 #define knull(C)                  (KPI)->Knull(kctx, C)
 #define KNULL(C)                  (k##C*)(KPI)->Knull(kctx, CT_##C)

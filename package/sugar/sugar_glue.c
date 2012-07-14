@@ -193,7 +193,7 @@ static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp)
 //	kStmt *stmt  = sfp[0].stmt;
 //	kToken *tk   = sfp[1].tk;
 //	assert(tk->keyword != 0);
-//	kExprVar *expr = new_Var(Expr, SYN_(kStmt_nameSpace(stmt), tk->keyword));
+//	kExprVar *expr = GCSAFE_new(ExprVar, SYN_(kStmt_nameSpace(stmt), tk->keyword));
 //	KSETv(expr->tk, tk);
 //	KSETv(expr->cons, new_(Array, 8));
 //	RETURN_(expr);

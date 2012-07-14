@@ -129,8 +129,7 @@ static kExpr *new_BoxingExpr(KonohaContext *kctx, kExpr *expr, ktype_t reqty)
 		return expr;
 	}
 	else {
-		kExprVar *texpr = new_Var(Expr, NULL);
-		PUSH_GCSTACK(texpr);
+		kExprVar *texpr = GCSAFE_new(ExprVar, NULL);
 		KINITv(texpr->single, expr);
 		texpr->build = TEXPR_BOX;
 		texpr->ty = reqty;

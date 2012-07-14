@@ -89,7 +89,7 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 	int i = s;
 
 	while (i < c) {
-		tkNew = new_Var(Token, 0);
+		tkNew = GCSAFE_new(TokenVar, 0);
 		tmp = tls->tokenItems[i];
 		setToken(tkNew, S_text(tmp->text), S_size(tmp->text), tmp->keyword);
 		KLIB kArray_add(kctx, tls, tkNew);
@@ -97,7 +97,7 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 	}
 
 	// check operator
-	tkNewOp = new_Var(Token, 0);
+	tkNewOp = GCSAFE_new(TokenVar, 0);
 	tmp = tls->tokenItems[c];
 	const char* opr = S_text(tmp->text);
 	int osize = S_size(tmp->text);
@@ -109,12 +109,12 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 	newopr[osize-1] = '\0';
 	setToken(tkNewOp, newopr, osize, SYM_(newopr));
 
-	tkNew = new_Var(Token, 0);
+	tkNew = GCSAFE_new(TokenVar, 0);
 	setToken(tkNew, "=", 1, KW_LET);
 	KLIB kArray_add(kctx, tls, tkNew);
 	newc = kArray_size(tls)-1;
 
-	kTokenVar *newtk = new_Var(Token, 0);
+	kTokenVar *newtk = GCSAFE_new(TokenVar, 0);
 	tkHead = tls->tokenItems[e+1];
 	newtk->keyword = AST_PARENTHESIS;
 	newtk->uline = tkHead->uline;
@@ -123,7 +123,7 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 	i = news;
 
 	while (i < newc) {
-		tkNew = new_Var(Token, 0);
+		tkNew = GCSAFE_new(TokenVar, 0);
 		tmp = tls->tokenItems[i];
 		setToken(tkNew, S_text(tmp->text), S_size(tmp->text), tmp->keyword);
 		KLIB kArray_add(kctx, newtk->sub, tkNew);
@@ -133,10 +133,10 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tls, int s, int 
 
 	KLIB kArray_add(kctx, tls, tkNewOp);
 
-	tkNew = new_Var(Token, 0);
+	tkNew = GCSAFE_new(TokenVar, 0);
 	i = c+1;
 	while (i < news) {
-		tkNew = new_Var(Token, 0);
+		tkNew = GCSAFE_new(TokenVar, 0);
 		tmp = tls->tokenItems[i];
 		setToken(tkNew, S_text(tmp->text), S_size(tmp->text), tmp->keyword);
 		KLIB kArray_add(kctx, tls, tkNew);

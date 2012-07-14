@@ -39,8 +39,7 @@ static int makeTree(KonohaContext *kctx, kNameSpace *ns, ksymbol_t tt, kArray *t
 
 static kBlock *new_Block(KonohaContext *kctx, kNameSpace *ns, kStmt *parent, kArray *tokenList, int beginidx, int endidx, int delim)
 {
-	kBlockVar *bk = new_Var(Block, ns);
-	PUSH_GCSTACK(bk);
+	kBlockVar *bk = GCSAFE_new(BlockVar, ns);
 	if(parent != NULL) {
 		KINITv(bk->parentStmtNULL, parent);
 	}
@@ -183,7 +182,7 @@ static int makeTree(KonohaContext *kctx, kNameSpace *ns, ksymbol_t astkw, kArray
 {
 	int i, probablyCloseBefore = endidx - 1;
 	kToken *tk = tokenList->tokenItems[beginidx];
-	kTokenVar *tkP = new_Var(Token, 0);
+	kTokenVar *tkP = new_(TokenVar, 0);
 	KLIB kArray_add(kctx, tlsdst, tkP);
 	tkP->keyword = astkw;
 	tkP->uline = tk->uline;
@@ -502,7 +501,7 @@ static kbool_t Stmt_parseSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *to
 
 static void Block_addStmtLine(KonohaContext *kctx, kBlock *bk, kArray *tokenList, int beginidx, int endidx, kToken *tkERR)
 {
-	kStmtVar *stmt = new_Var(Stmt, tokenList->tokenItems[beginidx]->uline);
+	kStmtVar *stmt = new_(StmtVar, tokenList->tokenItems[beginidx]->uline);
 	KLIB kArray_add(kctx, bk->stmtList, stmt);
 	KINITv(stmt->parentBlockNULL, bk);
 	if(tkERR != NULL) {
@@ -658,10 +657,9 @@ static KMETHOD ParseExpr_Term(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ParseExpr(stmt, tls, s, c, e);
 	DBG_ASSERT(s == c);
 	kToken *tk = tls->tokenItems[c];
-	kExprVar *expr = new_Var(Expr, SYN_(kStmt_nameSpace(stmt), tk->keyword));
-	PUSH_GCSTACK(expr);
-	Expr_setTerm(expr, 1);
+	kExprVar *expr = new_(ExprVar, SYN_(kStmt_nameSpace(stmt), tk->keyword));
 	KSETv(expr->tk, tk);
+	Expr_setTerm(expr, 1);
 	RETURN_(kExpr_rightJoin(expr, stmt, tls, s+1, c+1, e));
 }
 
@@ -745,8 +743,7 @@ static KMETHOD ParseExpr_DOLLAR(KonohaContext *kctx, KonohaStack *sfp)
 			Token_toBRACE(kctx, (kTokenVar*)tk, kStmt_nameSpace(stmt));
 		}
 		if(tk->keyword == AST_BRACE) {
-			kExprVar *expr = new_Var(Expr, SYN_(kStmt_nameSpace(stmt), KW_BlockPattern));
-			PUSH_GCSTACK(expr);
+			kExprVar *expr = GCSAFE_new(ExprVar, SYN_(kStmt_nameSpace(stmt), KW_BlockPattern));
 			Expr_setTerm(expr, 1);
 			KSETv(expr->tk, tk);
 			KSETv(expr->block, new_Block(kctx, kStmt_nameSpace(stmt), stmt, tk->sub, 0, kArray_size(tk->sub), ';'));

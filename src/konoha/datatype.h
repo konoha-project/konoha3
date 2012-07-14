@@ -454,7 +454,8 @@ static void Method_reftrace(KonohaContext *kctx, kObject *o)
 
 static kMethod* new_kMethod(KonohaContext *kctx, uintptr_t flag, ktype_t cid, kmethodn_t mn, MethodFunc func)
 {
-	kMethodVar* mtd = new_Var(Method, NULL);
+#define CT_MethodVar CT_Method
+	kMethodVar* mtd = new_(MethodVar, NULL);
 	mtd->flag    = flag;
 	mtd->cid     = cid;
 	mtd->mn      = mn;

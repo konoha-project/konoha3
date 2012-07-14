@@ -426,13 +426,13 @@ static int tokenizeEach(KonohaContext *kctx, int kchar, kTokenVar* tk, Tokenizer
 static void tokenize(KonohaContext *kctx, TokenizerEnv *tenv)
 {
 	int ch, pos = 0;
-	kTokenVar *tk = new_Var(Token, 0);
+	kTokenVar *tk = GCSAFE_new(TokenVar, 0);
 	tk->uline = tenv->currentLine;
 	pos = parseINDENT(kctx, tk, tenv, pos);
 	while((ch = kchar(tenv->source, pos)) != 0) {
 		if(tk->keyword != 0) {
 			KLIB kArray_add(kctx, tenv->tokenList, tk);
-			tk = new_Var(Token, 0);
+			tk = GCSAFE_new(TokenVar, 0);
 			tk->uline = tenv->currentLine;
 		}
 		int pos2 = tokenizeEach(kctx, ch, tk, tenv, pos);

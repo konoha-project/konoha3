@@ -364,7 +364,8 @@ static void BasicBlock_setjump(kBasicBlock *bb)
 
 static kByteCode* new_ByteCode(KonohaContext *kctx, kBasicBlock *beginBlock, kBasicBlock *endBlock)
 {
-	kByteCodeVar *kcode = new_Var(ByteCode, NULL);
+#define CT_ByteCodeVar CT_ByteCode
+	kByteCodeVar *kcode = GCSAFE_new(ByteCodeVar, NULL);
 	kBasicBlock *prev[1] = {};
 	kcode->fileid = ctxcode->uline; //TODO
 	kcode->codesize = BasicBlock_size(kctx, beginBlock, 0) * sizeof(VirtualMachineInstruction);

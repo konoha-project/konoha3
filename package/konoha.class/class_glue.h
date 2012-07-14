@@ -232,7 +232,7 @@ static kbool_t class_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline
 
 static kExpr* NewExpr(KonohaContext *kctx, SugarSyntax *syn, kToken *tk, ktype_t ty, uintptr_t val)
 {
-	kExprVar *expr = new_Var(Expr, syn);
+	kExprVar *expr = GCSAFE_new(ExprVar, syn);
 	KSETv(expr->tk, tk);
 	Expr_setTerm(expr, 1);
 	expr->build = TEXPR_NEW;
@@ -317,7 +317,7 @@ static void Stmt_parseClassBlock(KonohaContext *kctx, kStmt *stmt, kToken *tkC)
 			int topch = kToken_topch(tk);
 			DBG_P("cname='%s'", cname);
 			if(topch == '(' && tkP->keyword == TK_SYMBOL && strcmp(cname, S_text(tkP->text)) == 0) {
-				kTokenVar *tkNEW = new_Var(Token, 0);
+				kTokenVar *tkNEW = GCSAFE_new(TokenVar, 0);
 				tkNEW->keyword = TK_SYMBOL;
 				KSETv(tkNEW->text, SYM_s(MN_new));
 				tkNEW->uline = tkP->uline;
