@@ -26,6 +26,34 @@
 #include <minikonoha/sugar.h>
 #include <stdio.h>
 
+//## void Token.setKeyword(String keywork);
+static KMETHOD Token_setKeyword(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
+	kString *key = sfp[1].asString;
+	ksymbol_t keyword = ksymbolA(S_text(key), S_size(key), _NEWID);
+	tk->keyword = keyword;
+	RETURNvoid_();
+}
+
+//## void Token.setText(String text);
+static KMETHOD Token_setText(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
+	kString *text = sfp[1].asString;
+	KSETv(tk->text, text);
+	RETURNvoid_();
+}
+
+//## void Token.setSubArray(String[] sub);
+static KMETHOD Token_setSubArray(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
+	kArray *sub = sfp[1].asArray;
+	KSETv(tk->sub, sub);
+	RETURNvoid_();
+}
+
 //## boolean Token.isTypeName();
 static KMETHOD Token_isTypeName(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -229,13 +257,17 @@ static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static	kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	int FN_buildid = FN_("buildid"), FN_key = FN_("key"), FN_defval = FN_("defval");
 	int FN_typeid = FN_("typeid"), FN_gma = FN_("gma"), FN_pol = FN_("pol");
 	int FN_func = FN_("func"), FN_msg = FN_("msg");
+	int FN_x = FN_("x");
 //	int FN_tokenArray = FN_("tokens"), FN_s = FN_("s"), FN_e = FN_("e");
 
+	/* Array[String] */
+	kparamtype_t P_StringArray[] = {{TY_String}};
+	int TY_StringArray = (KLIB KonohaClass_Generics(kctx, CT_Array, TY_void, 1, P_StringArray))->classId;
 	/* Func[Int, Token, String] */
 	kparamtype_t P_FuncTokenize[] = {{TY_Token}, {TY_String}};
 	int TY_FuncTokenize = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_Int, 2, P_FuncTokenize))->classId;
@@ -254,6 +286,9 @@ static	kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	//DBG_P("func=%s", TY_t(TY_FuncExprTyCheck));
 
 	KDEFINE_METHOD MethodData[] = {
+		_Public, _F(Token_setKeyword),  TY_void, TY_Token, MN_("setKeyword"),  1, TY_String, FN_x,
+		_Public, _F(Token_setText),  TY_void, TY_Token, MN_("setText"),  1, TY_String, FN_x,
+		_Public, _F(Token_setSubArray), TY_void, TY_Token, MN_("setSubArray"), 1, TY_StringArray, FN_x,
 		_Public, _F(Token_isTypeName), TY_Boolean, TY_Token, MN_("isTypeName"), 0,
 		_Public, _F(Token_isParenthesis), TY_Boolean, TY_Token, MN_("isParenthesis"), 0,
 

@@ -1,4 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
+find_library(HAVE_LIBPCRE NAMES pcre)
+if(HAVE_LIBPCRE)
+set(PACKAGE_EXTRA_LIBRARY ${HAVE_LIBPCRE})
 set(PACKAGE_SOURCE_CODE pcre_glue.c)
 set(PACKAGE_SCRIPT_CODE pcre_glue.k)
 add_konoha_package(konoha.pcre)
+endif(HAVE_LIBPCRE)
