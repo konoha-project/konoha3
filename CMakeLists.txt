@@ -121,7 +121,6 @@ set(PACKAGES
 	konoha.pcre
 ##	konoha.io
 	konoha.i
-##	konoha.assert
 	posix.process
 	posix.file
 	posix.fd
