@@ -34,6 +34,7 @@ static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp)
 	if (tokenArray == NULL) {
 		RETURNb_(false);
 	}
+	ksymbol_t dotast = SYM_(".*");
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	int i = 0;
@@ -43,6 +44,9 @@ static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp)
 			kToken *tk  = tokenArray->tokenItems[i+0];
 			kToken *dot = tokenArray->tokenItems[i+1];
 			assert(tk->keyword  == TK_SYMBOL);
+			if (dot->keyword == dotast) {
+				break;
+			}
 			assert(dot->keyword == KW_DOT);
 			KLIB Kwb_write(kctx, &wb, S_text(tk->text), S_size(tk->text));
 			kwb_putc(&wb, '.');
@@ -80,7 +84,8 @@ static kbool_t import_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfilelin
 static kbool_t import_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("import"), .rule = "\"import\" $toks", TopStmtTyCheck_(import)},
+		{ .keyword = SYM_("import"), .rule = "\"import\" $toks [ \".*\"] ", TopStmtTyCheck_(import)},
+		{ .keyword = SYM_(".*")},
 		{ .keyword = KW_END, },
 	};
 	SUGAR NameSpace_defineSyntax(kctx, ns, SYNTAX);
