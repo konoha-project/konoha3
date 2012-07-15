@@ -9,7 +9,7 @@ void f () {
 	FILE f = System.fopen("../../../package/posix.file/test/Debug/newfile.txt", "w");
 	String contents = "hello world";
 	int len = contents.getSize();
-	f.write(contents.toBytes(), 0, len);
+	f.write(contents.asBytes(), 0, len);
 	f.close();
 }
 
