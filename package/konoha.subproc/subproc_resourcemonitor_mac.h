@@ -154,12 +154,11 @@ static int attach_resourcemonitor_for_child(KonohaContext *kctx, subproc_resourc
 }
 
 static int fetch_resourcemonitor_about(KonohaContext *kctx, subproc_resource_mon_t *mon, enum e_resource res) {
-	mach_msg_type_number_t t_info_count = TASK_BASIC_InfoTagCOUNT;
+	mach_msg_type_number_t t_info_count = TASK_BASIC_INFO_COUNT;
 	struct task_basic_info t_info;
 	int mem = 0;
 	switch(res) {
 	case R_MEMORY:
-
 		do {
 			if (KERN_SUCCESS != task_info(mon->task, TASK_BASIC_INFO, (task_info_t)&t_info, &t_info_count))
 					break;
