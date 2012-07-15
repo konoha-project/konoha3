@@ -780,7 +780,7 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 					KEYVALUE_s("errstr", strerror(errno))
 			);
 		}else {
-			ret_a = (kArray*)KLIB new_kObject(kctx, CT_Array, NULL);
+			ret_a = (kArray*)KLIB new_kObject(kctx, CT_Array, 0);
 			if(p->r.mode == M_PIPE) {
 				char buf[BUFSIZE];
 				memset(buf, 0x00, sizeof(buf));
@@ -1248,7 +1248,7 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	base->h.setup    = kmodsubproc_setup;
 	base->h.reftrace = kmodsubproc_reftrace;
 	base->h.free     = kmodsubproc_free;
-	Konoha_setModule(MOD_subproc, &base->h, pline);
+	KLIB Konoha_setModule(kctx, MOD_subproc, &base->h, pline);
 
 	KDEFINE_CLASS defSubproc = {
 		STRUCTNAME(Subproc),
