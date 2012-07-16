@@ -203,11 +203,16 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 	base->h.free     = kmoditerator_free;
 	KLIB Konoha_setModule(kctx, MOD_iterator, &base->h, pline);
 
+	kparamtype_t IteratorParam = {
+		.ty = TY_Object,
+	};
 	KDEFINE_CLASS defIterator = {
 		STRUCTNAME(Iterator),
 		.cflag  = CFLAG_Iterator,
 		.init   = Iterator_init,
 		.p      = Iterator_p,
+		.cparamsize  = 1,
+		.cparamItems = &IteratorParam,
 	};
 	base->cIterator = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &defIterator, pline);
 	base->cStringIterator = CT_p0(kctx, base->cIterator, TY_String);

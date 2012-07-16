@@ -91,8 +91,8 @@ static void KonohaClass_addMethod(KonohaContext *kctx, KonohaClass *ct, kMethod 
 
 static void KLIB2_setGetterSetter(KonohaContext *kctx, KonohaClass *ct)
 {
-	size_t i, fsize = ct->fsize;
-	for(i=0; i < fsize; i++) {
+	size_t i, fieldsize = ct->fieldsize;
+	for(i=0; i < fieldsize; i++) {
 		if(FLAG_is(ct->fieldItems[i].flag, kField_Getter)) {
 			FLAG_unset(ct->fieldItems[i].flag, kField_Getter);
 			kMethod *mtd = new_FieldGetter(kctx, ct->classId, ct->fieldItems[i].fn, ct->fieldItems[i].ty, i);
@@ -118,20 +118,20 @@ static KMETHOD NameSpace_getCid(KonohaContext *kctx, KonohaStack *sfp)
 
 static void setfield(KonohaContext *kctx, KDEFINE_CLASS *ct, int fctsize, KonohaClass *supct)
 {
-	size_t fsize = supct->fsize + fctsize;
-	ct->cstruct_size = fctsize * sizeof(kObject*); //size64((fsize * sizeof(void*)) + sizeof(KonohaObjectHeader));
-	//DBG_P("supct->fsize=%d, fctsize=%d, cstruct_size=%d", supct->fsize, fctsize, ct->cstruct_size);
-	if(fsize > 0) {
-		ct->fields = (KonohaClassField*)KCALLOC(fsize, sizeof(KonohaClassField));
-		ct->fsize = supct->fsize;
-		ct->fallocsize = fsize;
-		if(supct->fsize > 0) {
-			memcpy(ct->fields, supct->fieldItems, sizeof(KonohaClassField)*ct->fsize);
+	size_t fieldsize = supct->fieldsize + fctsize;
+	ct->cstruct_size = fctsize * sizeof(kObject*); //size64((fieldsize * sizeof(void*)) + sizeof(KonohaObjectHeader));
+	//DBG_P("supct->fieldsize=%d, fctsize=%d, cstruct_size=%d", supct->fieldsize, fctsize, ct->cstruct_size);
+	if(fieldsize > 0) {
+		ct->fieldItems = (KonohaClassField*)KCALLOC(fieldsize, sizeof(KonohaClassField));
+		ct->fieldsize = supct->fieldsize;
+		ct->fieldAllocSize = fieldsize;
+		if(supct->fieldsize > 0) {
+			memcpy(ct->fieldItems, supct->fieldItems, sizeof(KonohaClassField)*ct->fieldsize);
 		}
 	}
 }
 
-static KonohaClass* defineClass(KonohaContext *kctx, kNameSpace *ns, kshortflag_t cflag, kString *name, KonohaClass *supct, int fsize, kfileline_t pline)
+static KonohaClass* defineClass(KonohaContext *kctx, kNameSpace *ns, kshortflag_t cflag, kString *name, KonohaClass *supct, int fieldsize, kfileline_t pline)
 {
 	KDEFINE_CLASS defNewClass = {
 		.cflag  = cflag,
@@ -139,7 +139,7 @@ static KonohaClass* defineClass(KonohaContext *kctx, kNameSpace *ns, kshortflag_
 		.baseclassId   = TY_Object,
 		.superclassId = supct->classId,
 	};
-	setfield(kctx, &defNewClass, fsize, supct);
+	setfield(kctx, &defNewClass, fieldsize, supct);
 	KonohaClass *ct = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, name, &defNewClass, pline);
 	ct->fnull(kctx, ct);  // create null object
 	return ct;
@@ -162,8 +162,8 @@ static KMETHOD NameSpace_defineClass(KonohaContext *kctx, KonohaStack *sfp)
 
 static void defineField(KonohaContext *kctx, KonohaClassVar *ct, int flag, ktype_t ty, kString *name, kObject *value, uintptr_t uvalue)
 {
-	int pos = ct->fsize;
-	ct->fsize += 1;
+	int pos = ct->fieldsize;
+	ct->fieldsize += 1;
 	ct->fieldItems[pos].flag = flag;
 	ct->fieldItems[pos].ty = ty;
 	ct->fieldItems[pos].fn = ksymbolA(S_text(name), S_size(name), SYM_NEWID);
@@ -344,8 +344,8 @@ static void ObjectField_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	KonohaClass *ct = O_ct(o);
 	DBG_ASSERT(ct->defaultValueAsNull != NULL);
-	size_t fsize = ct->fsize;
-	memcpy(((kObjectVar *)o)->fieldObjectItems, ct->defaultValueAsNull->fieldObjectItems, fsize * sizeof(void*));
+	size_t fieldsize = ct->fieldsize;
+	memcpy(((kObjectVar *)o)->fieldObjectItems, ct->defaultValueAsNull->fieldObjectItems, fieldsize * sizeof(void*));
 }
 
 extern kObjectVar** KONOHA_reftail(KonohaContext *kctx, size_t size);
@@ -354,9 +354,9 @@ static void ObjectField_reftrace (KonohaContext *kctx, kObject *o)
 {
 	KonohaClass *ct =O_ct(o);
 	KonohaClassField *fieldItems = ct->fieldItems;
-	size_t i, fsize = ct->fsize;
-	BEGIN_REFTRACE(fsize);
-	for (i = 0; i < fsize; i++) {
+	size_t i, fieldsize = ct->fieldsize;
+	BEGIN_REFTRACE(fieldsize);
+	for (i = 0; i < fieldsize; i++) {
 		if (fieldItems[i].isobj) {
 			KREFTRACEn(o->fieldObjectItems[i]);
 		}
@@ -406,22 +406,22 @@ static size_t checkFieldSize(KonohaContext *kctx, kBlock *bk)
 
 static void CT_setField(KonohaContext *kctx, KonohaClassVar *ct, KonohaClass *supct, int fctsize)
 {
-	size_t fsize = supct->fsize + fctsize;
-	ct->fieldItems = (KonohaClassField*)KCALLOC(fsize, sizeof(KonohaClassField));
-	ct->fsize = supct->fsize;
-	ct->fallocsize = fsize;
-	if(supct->fsize > 0) {
-		memcpy(ct->fieldItems, supct->fieldItems, sizeof(KonohaClassField)*supct->fsize);
-		memcpy(ct->defaultValueAsNull_, supct->defaultValueAsNull_, sizeof(kObject*) * supct->fsize);
+	size_t fieldsize = supct->fieldsize + fctsize;
+	ct->fieldItems = (KonohaClassField*)KCALLOC(fieldsize, sizeof(KonohaClassField));
+	ct->fieldsize = supct->fieldsize;
+	ct->fieldAllocSize = fieldsize;
+	if(supct->fieldsize > 0) {
+		memcpy(ct->fieldItems, supct->fieldItems, sizeof(KonohaClassField)*supct->fieldsize);
+		memcpy(ct->defaultValueAsNull_, supct->defaultValueAsNull_, sizeof(kObject*) * supct->fieldsize);
 	}
 }
 
 static void CT_initField(KonohaContext *kctx, KonohaClassVar *ct, KonohaClass *supct, int fctsize)
 {
-	size_t fsize = supct->fsize + fctsize;
+	size_t fieldsize = supct->fieldsize + fctsize;
 	ct->cstruct_size = size64(fctsize * sizeof(kObject*) + sizeof(KonohaObjectHeader));
-	DBG_P("supct->fsize=%d, fctsize=%d, cstruct_size=%d", supct->fsize, fctsize, ct->cstruct_size);
-	if(fsize > 0) {
+	DBG_P("supct->fieldsize=%d, fctsize=%d, cstruct_size=%d", supct->fieldsize, fctsize, ct->cstruct_size);
+	if(fieldsize > 0) {
 		ct->fnull(kctx, ct);
 		ct->init = ObjectField_init;
 		ct->reftrace = ObjectField_reftrace;
@@ -484,7 +484,7 @@ static kbool_t CT_addClassFields(KonohaContext *kctx, KonohaClassVar *ct, kGamma
 			}
 		}
 	}
-	DBG_ASSERT(ct->fsize == ct->fallocsize);
+	DBG_ASSERT(ct->fieldsize == ct->fieldAllocSize);
 	DBG_P("all fields are set");
 	KLIB2_setGetterSetter(kctx, ct);
 	return true;
@@ -545,8 +545,8 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 		/* ct is created at this time */
 		CT_initField(kctx, ct, supct, checkFieldSize(kctx, bk));
 	} else {
-		size_t fsize = checkFieldSize(kctx, bk);
-		CT_setField(kctx, ct, supct, fsize);
+		size_t fieldsize = checkFieldSize(kctx, bk);
+		CT_setField(kctx, ct, supct, fieldsize);
 	}
 	if (bk == K_NULLBLOCK) {
 		/* forward declaration, do nothing */

@@ -7,14 +7,14 @@ K.import("posix.file");
 
 void f () {
 	FILE f = System.fopen("../../../package/posix.file/test/Debug/helloworld.txt", "r");
-	int bufsize = 32;
-	Bytes buf = Bytes.new(bufsize);
-	int ret = bufsize;
+	int bufieldsize = 32;
+	Bytes buf = Bytes.new(bufieldsize);
+	int ret = bufieldsize;
 	String str = "";
-	while(ret == bufsize) {
+	while(ret == bufieldsize) {
 		buf.setAll(0); // zero clear
-		ret = f.read(buf, 0, bufsize);
-		if (ret < bufsize) {
+		ret = f.read(buf, 0, bufieldsize);
+		if (ret < bufieldsize) {
 			String tmp = buf.asString();
 			str = str + tmp.substring(0, ret);
 		} else {

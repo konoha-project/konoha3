@@ -49,7 +49,7 @@ using konoha.posix.*; // FILEクラスのインポート及び、SIGNAL番号再
 @Restricted @Native boolean Subproc.enableShellmode(boolean isShellmode);
 @Native boolean Subproc.setEnv(Map env);
 @Native boolean Subproc.setCwd(String cwd);
-// @Native boolean Subproc.setBufsize(int size);
+// @Native boolean Subproc.setBufieldsize(int size);
 @Native boolean Subproc.setFileIN(File in);
 @Native boolean Subproc.setFileOUT(File out);
 @Native boolean Subproc.setFileERR(File err);

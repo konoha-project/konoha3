@@ -35,9 +35,9 @@ static void Object_reftrace(KonohaContext *kctx, kObject *o)
 {
 	kObject *of = (kObject*)o;
 	KonohaClass *ct = O_ct(of);
-	BEGIN_REFTRACE(ct->fsize);
+	BEGIN_REFTRACE(ct->fieldsize);
 	size_t i;
-	for(i = 0; i < ct->fsize; i++) {
+	for(i = 0; i < ct->fieldsize; i++) {
 		if(ct->fieldItems[i].isobj) {
 			KREFTRACEv(of->fieldObjectItems[i]);
 		}
@@ -59,12 +59,12 @@ static void Object_initdef(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t 
 	if(ct->classId == TY_Object) return;
 	DBG_P("new object initialization ct->cstruct_size=%d", ct->cstruct_size);
 	KSETv(ct->defaultValueAsNull, KLIB new_kObject(kctx, ct, 0));
-	if(ct->fsize > 0) {  // this is size of super class
+	if(ct->fieldsize > 0) {  // this is size of super class
 		KonohaClass *supct = CT_(ct->superclassId);
-		assert(ct->fsize == supct->fsize);
-		memcpy(ct->defaultValueAsNull_->fieldObjectItems, supct->defaultValueAsNull->fieldObjectItems, sizeof(kObject*) * ct->fsize);
+		assert(ct->fieldsize == supct->fieldsize);
+		memcpy(ct->defaultValueAsNull_->fieldObjectItems, supct->defaultValueAsNull->fieldObjectItems, sizeof(kObject*) * ct->fieldsize);
 	}
-	if(ct->fallocsize > 0) {
+	if(ct->fieldAllocSize > 0) {
 		ct->init = ObjectX_init;
 	}
 	ct->fnull = DEFAULT_fnull;
@@ -586,7 +586,7 @@ static kObject *Knull(KonohaContext *kctx, KonohaClass *ct)
 	return ct->fnull(kctx, ct);
 }
 
-static KonohaClassVar* new_CT(KonohaContext *kctx, KonohaClass *bct, KDEFINE_CLASS *s, kfileline_t pline)
+static KonohaClassVar* new_KonohaClass(KonohaContext *kctx, KonohaClass *bct, KDEFINE_CLASS *s, kfileline_t pline)
 {
 	KonohaRuntimeVar *share = kctx->share;
 	ktype_t newid = share->classTable.bytesize / sizeof(KonohaClassVar*);
@@ -608,15 +608,15 @@ static KonohaClassVar* new_CT(KonohaContext *kctx, KonohaClass *bct, KDEFINE_CLA
 		ct->classId     = newid;
 		ct->baseclassId    = (s->baseclassId == 0) ? newid : s->baseclassId;
 		ct->superclassId  = (s->superclassId == 0) ? TY_Object : s->superclassId;
-		ct->fieldItems = s->fields;
-		ct->fsize  = s->fsize;
-		ct->fallocsize = s->fallocsize;
+		ct->fieldItems = s->fieldItems;
+		ct->fieldsize  = s->fieldsize;
+		ct->fieldAllocSize = s->fieldAllocSize;
 		ct->cstruct_size = size64(s->cstruct_size);
 		DBG_ASSERT(ct->cstruct_size <= 128);
 		ct->DBG_NAME = (s->structname != NULL) ? s->structname : "N/A";
-		if(s->psize > 0 && s->cparams != NULL) {
-			ct->p0 = s->cparams[0].ty;
-			ct->paramdom = Kparamdom(kctx, /*s->rtype,*/ s->psize, s->cparams);
+		if(s->cparamsize > 0 && s->cparamItems != NULL) {
+			ct->p0 = s->cparamItems[0].ty;
+			ct->cparamdom = Kparamdom(kctx, s->cparamsize, s->cparamItems);
 		}
 		// function
 		ct->init = (s->init != NULL) ? s->init : DEFAULT_init;
@@ -640,7 +640,7 @@ static KonohaClass *CT_body(KonohaContext *kctx, KonohaClass *ct, size_t head, s
 	KonohaClass *bct = ct;
 	while(ct->cstruct_size < sizeof(KonohaObjectHeader) + head + body) {
 		if(ct->searchSimilarClassNULL == NULL) {
-			KonohaClassVar *newct = new_CT(kctx, bct, NULL, NOPLINE);
+			KonohaClassVar *newct = new_KonohaClass(kctx, bct, NULL, NOPLINE);
 			newct->cflag |= kClass_Private;
 			newct->cstruct_size = ct->cstruct_size * 2;
 			KINITv(newct->methodList, ct->methodList);
@@ -657,14 +657,14 @@ static KonohaClass *KonohaClass_Generics(KonohaContext *kctx, KonohaClass *ct, k
 	KonohaClass *ct0 = ct;
 	int isNotFuncClass = (ct->baseclassId != TY_Func);
 	do {
-		if(ct->paramdom == paramdom && (isNotFuncClass || ct->p0 == rtype)) {
+		if(ct->cparamdom == paramdom && (isNotFuncClass || ct->p0 == rtype)) {
 			return ct;
 		}
 		if(ct->searchSimilarClassNULL == NULL) break;
 		ct = ct->searchSimilarClassNULL;
 	} while(ct != NULL);
-	KonohaClassVar *newct = new_CT(kctx, ct0, NULL, NOPLINE);
-	newct->paramdom = paramdom;
+	KonohaClassVar *newct = new_KonohaClass(kctx, ct0, NULL, NOPLINE);
+	newct->cparamdom = paramdom;
 	newct->p0 = isNotFuncClass ? p[0].ty : rtype;
 	KINITv(newct->methodList, K_EMPTYARRAY);
 	if(newct->searchSuperMethodClassNULL == NULL) {
@@ -677,7 +677,7 @@ static KonohaClass *KonohaClass_Generics(KonohaContext *kctx, KonohaClass *ct, k
 static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 {
 	if(ct->shortNameNULL == NULL) {
-		if(ct->paramdom == 0 && ct->baseclassId != TY_Func) {
+		if(ct->cparamdom == 0 && ct->baseclassId != TY_Func) {
 			KINITv(((KonohaClassVar*)ct)->shortNameNULL, SYM_s(ct->nameid));
 		}
 		else {
@@ -728,7 +728,7 @@ static void CT_setName(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t plin
 
 static KonohaClass *Konoha_defineClass(KonohaContext *kctx, kpackage_t packageId, kpackage_t packageDomain, kString *name, KDEFINE_CLASS *cdef, kfileline_t pline)
 {
-	KonohaClassVar *ct = new_CT(kctx, NULL, cdef, pline);
+	KonohaClassVar *ct = new_KonohaClass(kctx, NULL, cdef, pline);
 	ct->packageId  = packageId;
 	ct->packageDomain = packageDomain;
 	if(name == NULL) {
@@ -836,7 +836,7 @@ static void loadInitStructData(KonohaContext *kctx)
 	int cid = 0;
 	while(dd[cid] != NULL) {
 		DBG_ASSERT(dd[cid]->classId == cid);
-		new_CT(kctx, NULL, dd[cid], 0);
+		new_KonohaClass(kctx, NULL, dd[cid], 0);
 		cid++;
 	}
 	KonohaClassVar *ct = (KonohaClassVar *)CT_Array;
@@ -977,8 +977,8 @@ static void TYTABLE_freeCT(KonohaContext *kctx)
 	KonohaClassVar **cts = (KonohaClassVar**)kctx->share->classTable.classItems;
 	size_t i, size = kctx->share->classTable.bytesize/sizeof(KonohaClassVar*);
 	for(i = 0; i < size; i++) {
-		if(cts[i]->fallocsize > 0) {
-			KFREE(cts[i]->fieldItems, cts[i]->fallocsize * sizeof(KonohaClassField));
+		if(cts[i]->fieldAllocSize > 0) {
+			KFREE(cts[i]->fieldItems, cts[i]->fieldAllocSize * sizeof(KonohaClassField));
 		}
 		KFREE(cts[i], sizeof(KonohaClass));
 	}

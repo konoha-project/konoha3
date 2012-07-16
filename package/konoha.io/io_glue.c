@@ -114,7 +114,7 @@ typedef struct kDictMap kDictMap;
 typedef struct knh_PathDPI_t {
 	int type;
 	const char   *name;
-	size_t       wbufsiz;  // write bufsize
+	size_t       wbufsiz;  // write bufieldsize
 	kbool_t     (*existsSPI)(KonohaContext *kctx, struct kPath *);
 	void        (*ospath)(KonohaContext *kctx, struct kPath *, struct kNameSpace *);
 	// stream

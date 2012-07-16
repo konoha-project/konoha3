@@ -225,7 +225,7 @@ typedef kushort_t        kshortflag_t;    /* flag field */
 typedef uintptr_t                     kfileline_t;
 #define NOPLINE                       0
 
-// halfsize id
+// halfieldsize id
 typedef kushort_t       kpackage_t;     /* package id*/
 typedef kushort_t       ktype_t;        /* cid classid, ty type */
 typedef kushort_t       ksymbol_t;
@@ -237,7 +237,7 @@ typedef kushort_t       kparamid_t;
 #define TY_unknown         ((ktype_t)-2)
 
 #define CT_(t)              (kctx->share->classTable.classItems[t])
-#define CT_cparam(CT)       (kctx->share->paramdomList->paramItems[(CT)->paramdom])
+#define CT_cparam(CT)       (kctx->share->paramdomList->paramItems[(CT)->cparamdom])
 #define TY_isUnbox(t)       FLAG_is(CT_(t)->cflag, kClass_UnboxType)
 #define CT_isUnbox(C)       FLAG_is(C->cflag, kClass_UnboxType)
 
@@ -564,7 +564,7 @@ typedef struct krbp_t {
 #define P_STR    0
 #define P_DUMP   1
 
-#define KTYSPI \
+#define CLASSAPI \
 		void (*init)(KonohaContext*, kObject*, void *conf);\
 		void (*reftrace)(KonohaContext*, kObject*);\
 		void (*free)(KonohaContext*, kObject*);\
@@ -580,12 +580,12 @@ typedef struct KDEFINE_CLASS {
 	const char *structname;
 	ktype_t     classId;         kshortflag_t    cflag;
 	ktype_t     baseclassId;        ktype_t     superclassId;
-	ktype_t    rtype;        kushort_t  psize;
-	struct kparamtype_t   *cparams;
+	ktype_t    rtype;        kushort_t  cparamsize;
+	struct kparamtype_t   *cparamItems;
 	size_t     cstruct_size;
-	KonohaClassField   *fields;
-	kushort_t  fsize;       kushort_t fallocsize;
-	KTYSPI;
+	KonohaClassField   *fieldItems;
+	kushort_t  fieldsize;       kushort_t fieldAllocSize;
+	CLASSAPI;
 } KDEFINE_CLASS;
 
 #define STRUCTNAME(C) \
@@ -597,15 +597,15 @@ typedef struct KDEFINE_CLASS {
 typedef uintptr_t kmagicflag_t;
 
 struct KonohaClassVar {
-	KTYSPI;
+	CLASSAPI;
 	kpackage_t   packageId;  kpackage_t   packageDomain;
 	ktype_t   classId;       kshortflag_t  cflag;
 	ktype_t   baseclassId;   ktype_t   superclassId;
-	ktype_t  p0;             kparamid_t paramdom;
+	ktype_t   p0;             kparamid_t cparamdom;
 	kmagicflag_t magicflag;
 	size_t     cstruct_size;
 	KonohaClassField         *fieldItems;
-	kushort_t  fsize;         kushort_t fallocsize;
+	kushort_t  fieldsize;         kushort_t fieldAllocSize;
 	const char               *DBG_NAME;
 	ksymbol_t   nameid;       kushort_t   optvalue;
 
@@ -693,7 +693,7 @@ struct KonohaClassField {
 
 
 // this is used in konoha.class
-#define CT_isDefined(ct)  ((ct)->fallocsize == 0 || (ct)->fsize == (ct)->fallocsize)
+#define CT_isDefined(ct)  ((ct)->fieldAllocSize == 0 || (ct)->fieldsize == (ct)->fieldAllocSize)
 
 //#define TY_isUnboxType(t)    (TFLAG_is(kshortflag_t,(ClassTBL(t))->cflag, kClass_UnboxType))
 //#define T_isInterface(t)    (TFLAG_is(kshortflag_t,(ClassTBL(t))->cflag, kClass_Interface))
