@@ -4621,7 +4621,7 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	base->h.setup    = kmodllvm_setup;
 	base->h.reftrace = kmodllvm_reftrace;
 	base->h.free     = kmodllvm_free;
-	Konoha_setModule(MOD_llvm, &base->h, pline);
+	KLIB Konoha_setModule(kctx, MOD_llvm, &base->h, pline);
 
 	static KDEFINE_CLASS ValueDef = {
 		"Value"/*structname*/,
@@ -5249,9 +5249,9 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, NULL, methoddata);
-	KLIB kNameSpace_loadConstData(kctx, ns, IntAttributes, 0);
-	KLIB kNameSpace_loadConstData(kctx, ns, IntIntrinsic, 0);
-	KLIB kNameSpace_loadConstData(kctx, ns, IntGlobalVariable, 0);
+	KLIB kNameSpace_loadConstData(kctx, ns, (const char **)IntAttributes, 0);
+	KLIB kNameSpace_loadConstData(kctx, ns, (const char **)IntIntrinsic, 0);
+	KLIB kNameSpace_loadConstData(kctx, ns, (const char **)IntGlobalVariable, 0);
 
 	return true;
 }

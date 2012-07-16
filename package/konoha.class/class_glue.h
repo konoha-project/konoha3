@@ -22,8 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#ifndef TY_GLUE_H_
-#define TY_GLUE_H_
+#ifndef CLASS_GLUE_H_
+#define CLASS_GLUE_H_
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
@@ -580,4 +580,4 @@ static kbool_t class_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileli
 	return true;
 }
 
-#endif /* TY_GLUE_H_ */
+#endif /* CLASS_GLUE_H_ */

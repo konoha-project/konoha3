@@ -260,8 +260,8 @@ static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(KLIB new_kString(kctx, toBa->buf,toBa->bytesize, 0));
 }
 
-//## @Const method Bytes String.toBytes();
-static KMETHOD String_toBytes(KonohaContext *kctx, KonohaStack *sfp)
+//## @Const method Bytes String.asBytes();
+static KMETHOD String_asBytes(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString* s = sfp[0].s;
 	kBytes* ba = (kBytes*)KLIB new_kObject(kctx, CT_Bytes, S_size(s));
@@ -276,7 +276,7 @@ static KMETHOD String_toBytes(KonohaContext *kctx, KonohaStack *sfp)
 //#include "../konoha.string/string_glue.h"
 
 //## @Const method String Bytes.asString();
-static KMETHOD Bytes_toString(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Bytes_asString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *from = sfp[0].ba;
 	kBytes *to = convFromTo(kctx, from, getSystemEncoding(), "UTF-8");
@@ -359,8 +359,8 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	int FN_c = FN_("c");
 	int FN_size = FN_("size");
 	intptr_t methoddata[] = {
-		_Public|_Im|_Coercion, _F(String_toBytes), TY_Bytes,  TY_String, MN_("toBytes"),   0,
-		_Public|_Const|_Im|_Coercion, _F(Bytes_toString), TY_String, TY_Bytes,  MN_("toString"),  0,
+		_Public|_Im|_Coercion, _F(String_asBytes), TY_Bytes,  TY_String, MN_("asBytes"),   0,
+		_Public|_Const|_Im|_Coercion, _F(Bytes_asString), TY_String, TY_Bytes,  MN_("asString"),  0,
 		_Public|_Const,     _F(Bytes_encodeTo),   TY_Bytes,  TY_Bytes,  MN_("encodeTo"),    1, TY_String, FN_encoding,
 		_Public|_Const,     _F(Bytes_decodeFrom),   TY_String, TY_Bytes,  MN_("decodeFrom"),    1, TY_String, FN_encoding,
 		_Public|_Const|_Im,     _F(Bytes_get), TY_Int, TY_Bytes, MN_("get"), 1, TY_Int, FN_x,

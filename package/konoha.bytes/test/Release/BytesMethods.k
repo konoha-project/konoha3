@@ -6,7 +6,7 @@ void global_setup() {
 global_setup();
 
 boolean test_decode() {
-	Bytes b = "".toBytes();
+	Bytes b = "".asBytes();
 	String s = b.decodeFrom("");
 	System.p(s);
 }

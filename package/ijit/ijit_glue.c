@@ -564,7 +564,7 @@ static KMETHOD Param_getType(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kParam *pa = (kParam *) sfp[0].asObject;
 	int n = sfp[1].ivalue;
-	RETURNi_(pa->p[n].ty);
+	RETURNi_(pa->paramtypeItems[n].ty);
 }
 
 //## Int Method.getReturnType();
@@ -595,8 +595,8 @@ static KMETHOD Method_getCname(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(KLIB new_kString(kctx, cname, strlen(cname), 0));
 }
 
-//## Object System.KLIB Knull(kctx, int type);
-static KMETHOD System_KLIB Knull(kctx, KonohaContext *kctx, KonohaStack *sfp)
+//## Object System.getNULL(kctx, int type);
+static KMETHOD System_getNULL(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ktype_t cid = sfp[1].ivalue;
 	kObject *o = KLIB Knull(kctx, CT_(cid));
@@ -713,14 +713,12 @@ static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	//};
 	//KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
 
-	Konoha_setModule(MOD_jit, &base->h, pline);
+	KLIB Konoha_setModule(kctx, MOD_jit, &base->h, pline);
 	return true;
 }
 
 static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
-	USING_SUGAR;
-
 	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_System, MN_("genCode"));
 	KINITv(kmodjit->genCode, mtd);
 #define TY_Pointer kmodjit->cPointer->classId
@@ -791,7 +789,7 @@ static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_
 		_Public, _F(Method_getReturnType), TY_Int, TY_Method, MN_("getReturnType"), 0,
 		_Public, _F(Method_getCname), TY_String, TY_Method, MN_("getCname"), 0,
 		_Public, _F(Method_getFname), TY_String, TY_Method, MN_("getFname"), 0,
-		_Public|_Static, _F(System_knull), TY_Object, TY_System, MN_("knull"), 1, TY_Int, FN_x,
+		_Public|_Static, _F(System_getNULL), TY_Object, TY_System, MN_("getNULL"), 1, TY_Int, FN_x,
 		_Public, _F(Method_isStatic_), TY_Boolean, TY_Method, MN_("isStatic"), 0,
 		_Public, _F(Method_isVirtual_), TY_Boolean, TY_Method, MN_("isVirtual"), 0,
 		_Public|_Coercion, _F(Object_toStmt), TY_Stmt, TY_Object, MN_to(TY_Stmt), 0,
@@ -816,9 +814,12 @@ static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_
 
 	KonohaLibVar *l = (KonohaLibVar*)kctx->klib;
 	l->kMethod_genCode = GenCodeDefault;
+<<<<<<< HEAD
 	kNameSpace_compileAllDefinedMethods();
+=======
+	KLIB kNameSpace_syncMethods(kctx);
+>>>>>>> 58796c9ad23fcc0d1f1800a052d6f7347897a2b6
 	l->kMethod_genCode = _kMethod_genCode;
-	//KSET_KLIB(Method_genCode, pline);
 
 	return true;
 }

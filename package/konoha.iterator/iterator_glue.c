@@ -218,7 +218,7 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public, _F(Array_toIterator),  base->cGenericIterator->classId, TY_Array, MN_("toIterator"), 0,
 		_Public, _F(String_toIterator), TY_StringIterator, TY_String, MN_("toIterator"), 0,
 //		_Public|_Const|_Im, _F(Int_opINC), TY_Int, TY_Int, MN_("opINC"), 0,
-//		_Public|_Const|_Im, _F(Int_opDEC), TY_Int, TY_Int, MN_‘("opDEC"), 0,
+//		_Public|_Const|_Im, _F(Int_opDEC), TY_Int, TY_Int, MN_("opDEC"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
