@@ -719,7 +719,7 @@ static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 
 static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
-	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_System, MN_("genCode"));
+	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_System, MN_("genCode"), 0, MPOL_FIRST);
 	KINITv(kmodjit->genCode, mtd);
 #define TY_Pointer kmodjit->cPointer->classId
 #define _Public   kMethod_Public
@@ -814,11 +814,7 @@ static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_
 
 	KonohaLibVar *l = (KonohaLibVar*)kctx->klib;
 	l->kMethod_genCode = GenCodeDefault;
-<<<<<<< HEAD
-	kNameSpace_compileAllDefinedMethods();
-=======
-	KLIB kNameSpace_syncMethods(kctx);
->>>>>>> 58796c9ad23fcc0d1f1800a052d6f7347897a2b6
+	KLIB kNameSpace_compileAllDefinedMethods(kctx);
 	l->kMethod_genCode = _kMethod_genCode;
 
 	return true;
