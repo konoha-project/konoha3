@@ -344,7 +344,7 @@ static void Param_init(KonohaContext *kctx, kObject *o, void *conf)
 	pa->rtype = TY_void;
 }
 
-static kParam *new_Param(KonohaContext *kctx, ktype_t rtype, int psize, kparamtype_t *p)
+static kParam *new_Param(KonohaContext *kctx, ktype_t rtype, int psize, const kparamtype_t *p)
 {
 	KonohaClass *ct = CT_(TY_Param);
 	ct = CT_body(kctx, ct, sizeof(void*), psize * sizeof(kparamtype_t));
@@ -357,7 +357,7 @@ static kParam *new_Param(KonohaContext *kctx, ktype_t rtype, int psize, kparamty
 	return pa;
 }
 
-static uintptr_t hashparamdom(int psize, kparamtype_t *p)
+static uintptr_t hashparamdom(int psize, const kparamtype_t *p)
 {
 	uintptr_t i, hcode = 0;
 	for(i = 0; i < psize; i++) {
@@ -366,7 +366,7 @@ static uintptr_t hashparamdom(int psize, kparamtype_t *p)
 	return hcode;
 }
 
-static uintptr_t hashparam(ktype_t rtype, int psize, kparamtype_t *p)
+static uintptr_t hashparam(ktype_t rtype, int psize, const kparamtype_t *p)
 {
 	uintptr_t i, hcode = rtype;
 	for(i = 0; i < psize; i++) {
@@ -375,7 +375,7 @@ static uintptr_t hashparam(ktype_t rtype, int psize, kparamtype_t *p)
 	return hcode;
 }
 
-static kbool_t equalsParamDom(ktype_t rtype, int psize, kparamtype_t *p, kParam *pa)
+static kbool_t equalsParamDom(ktype_t rtype, int psize, const kparamtype_t *p, kParam *pa)
 {
 	if(psize == pa->psize) {
 		int i;
@@ -387,7 +387,7 @@ static kbool_t equalsParamDom(ktype_t rtype, int psize, kparamtype_t *p, kParam 
 	return false;
 }
 
-static kbool_t equalsParam(ktype_t rtype, int psize, kparamtype_t *p, kParam *pa)
+static kbool_t equalsParam(ktype_t rtype, int psize, const kparamtype_t *p, kParam *pa)
 {
 	if(rtype == pa->rtype && psize == pa->psize) {
 		int i;
@@ -399,9 +399,9 @@ static kbool_t equalsParam(ktype_t rtype, int psize, kparamtype_t *p, kParam *pa
 	return false;
 }
 
-typedef kbool_t (*equalsP)(ktype_t rtype, int psize, kparamtype_t *p, kParam *pa);
+typedef kbool_t (*equalsP)(ktype_t rtype, int psize, const kparamtype_t *p, kParam *pa);
 
-static kparamid_t Kmap_getparamid(KonohaContext *kctx, KUtilsHashMap *kmp, kArray *list, uintptr_t hcode, equalsP f, ktype_t rtype, int psize, kparamtype_t *p)
+static kparamid_t Kmap_getparamid(KonohaContext *kctx, KUtilsHashMap *kmp, kArray *list, uintptr_t hcode, equalsP f, ktype_t rtype, int psize, const kparamtype_t *p)
 {
 	KUtilsHashMapEntry *e = KLIB Kmap_get(kctx, kmp, hcode);
 	while(e != NULL) {
@@ -419,13 +419,13 @@ static kparamid_t Kmap_getparamid(KonohaContext *kctx, KUtilsHashMap *kmp, kArra
 	return (kparamid_t)paramid;
 }
 
-static kparamid_t Kparam(KonohaContext *kctx, ktype_t rtype, int psize, kparamtype_t *p)
+static kparamid_t Kparam(KonohaContext *kctx, ktype_t rtype, int psize, const kparamtype_t *p)
 {
 	uintptr_t hcode = hashparam(rtype, psize, p);
 	return Kmap_getparamid(kctx, kctx->share->paramMapNN, kctx->share->paramList, hcode, equalsParam, rtype, psize, p);
 }
 
-static kparamid_t Kparamdom(KonohaContext *kctx, int psize, kparamtype_t *p)
+static kparamid_t Kparamdom(KonohaContext *kctx, int psize, const kparamtype_t *p)
 {
 	uintptr_t hcode = hashparamdom(psize, p);
 	return Kmap_getparamid(kctx, kctx->share->paramdomMapNN, kctx->share->paramdomList, hcode, equalsParamDom, TY_void, psize, p);
@@ -438,7 +438,7 @@ static void Method_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kMethodVar *mtd = (kMethodVar*)o;
 	bzero(&mtd->invokeMethodFunc, sizeof(kMethod) - sizeof(KonohaObjectHeader));
-	KINITv(mtd->tcode, (struct kToken*)K_NULL);
+	KINITv(mtd->sourceCodeToken, (struct kToken*)K_NULL);
 	KINITv(mtd->kcode, K_NULL);
 }
 
@@ -446,7 +446,7 @@ static void Method_reftrace(KonohaContext *kctx, kObject *o)
 {
 	BEGIN_REFTRACE(3);
 	kMethod *mtd = (kMethod*)o;
-	KREFTRACEv(mtd->tcode);
+	KREFTRACEv(mtd->sourceCodeToken);
 	KREFTRACEv(mtd->kcode);
 	KREFTRACEn(mtd->proceedNUL);
 	END_REFTRACE();
@@ -459,19 +459,19 @@ static kMethod* new_kMethod(KonohaContext *kctx, uintptr_t flag, ktype_t cid, km
 	mtd->flag    = flag;
 	mtd->classId     = cid;
 	mtd->mn      = mn;
-	KLIB kMethod_setFunc(kctx, mtd, func);
+	KLIB Method_setFunc(kctx, mtd, func);
 	return mtd;
 }
 
-static kParam* kMethod_setParam(KonohaContext *kctx, kMethod *mtd_, ktype_t rtype, int psize, kparamtype_t *p)
+static kParam* Method_setParam(KonohaContext *kctx, kMethod *mtd_, ktype_t rtype, int psize, const kparamtype_t *p)
 {
-	kparamid_t paramid = Kparam(kctx, rtype, psize, p);
+	kparamid_t paramId = Kparam(kctx, rtype, psize, p);
 	if(mtd_ != NULL) {
 		kMethodVar* mtd = (kMethodVar*)mtd_;
 		mtd->paramdom = Kparamdom(kctx, psize, p);
-		mtd->paramid  = paramid;
+		mtd->paramid  = paramId;
 	}
-	return kctx->share->paramList->paramItems[paramid];
+	return kctx->share->paramList->paramItems[paramId];
 }
 
 static intptr_t STUB_Method_indexOfField(kMethod *mtd)
@@ -886,7 +886,7 @@ static void KTYTABLE_initkklib(KonohaLibVar *l)
 	l->kArray_insert        = (typeof(l->kArray_insert))kArray_insert;
 	l->kArray_clear         = kArray_clear;
 	l->new_kMethod          = new_kMethod;
-	l->kMethod_setParam     = kMethod_setParam;
+	l->Method_setParam     = Method_setParam;
 	l->kMethod_indexOfField = STUB_Method_indexOfField;
 	l->Konoha_defineClass    = Konoha_defineClass;
 	l->Knull = Knull;
@@ -1009,7 +1009,7 @@ static void TYTABLE_free(KonohaContext *kctx, KonohaContextVar *ctx)
 #define _Hidden    kMethod_Hidden
 #define _F(F)      (intptr_t)(F)
 
-static void KTYTABLE_loadMethod(KonohaContext *kctx)
+static void Konoha_loadDefaultMethod(KonohaContext *kctx)
 {
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
@@ -1036,7 +1036,7 @@ static void KTYTABLE_loadMethod(KonohaContext *kctx)
 		_Public|_Immutable|_Const|_Coercion, _F(String_toInt), TY_Int, TY_String, MN_to(TY_Int), 0,
 		_Public|_Immutable|_Const, _F(String_opADD), TY_String, TY_String, MN_("opADD"), 1, TY_String, FN_x | FN_COERCION,
 		_Public|_Const|_Hidden, _F(Func_new), TY_Func, TY_Func, MN_new, 2, TY_Object, FN_x, TY_Method, FN_x,
-		kMethod_SmartReturn|_Hidden, _F(Func_invoke), TY_Object, TY_Func, MN_("invoke"), 0,
+		_Public|kMethod_SmartReturn|_Hidden, _F(Func_invoke), TY_Object, TY_Func, MN_("invoke"), 0,
 		_Static|_Public|_Immutable, _F(System_assert), TY_void, TY_System, MN_("assert"), 1, TY_Boolean, FN_x,
 		_Static|_Public|_Immutable, _F(System_p), TY_void, TY_System, MN_("p"), 1, TY_String, FN_("s") | FN_COERCION,
 		_Static|_Public|_Immutable, _F(System_gc), TY_void, TY_System, MN_("gc"), 0,

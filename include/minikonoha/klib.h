@@ -85,8 +85,8 @@ static kinline kString* TY_s_(KonohaContext *kctx, ktype_t ty)
 	return CT_s_(kctx, CT_(ty));
 }
 
-#define SYM_s(fn)   SYM_s_(kctx, fn)
-#define SYM_t(fn)   S_text(SYM_s_(kctx, fn))
+#define SYM_s(sym)   SYM_s_(kctx, sym)
+#define SYM_t(sym)   S_text(SYM_s_(kctx, sym))
 static kinline kString* SYM_s_(KonohaContext *kctx, ksymbol_t sym)
 {
 	size_t index = (size_t) SYM_UNMASK(sym);
@@ -97,6 +97,7 @@ static kinline kString* SYM_s_(KonohaContext *kctx, ksymbol_t sym)
 	return kctx->share->symbolList->stringItems[index];
 }
 
+#define PSYM_t(sym)   SYM_PRE(sym),S_text(SYM_s_(kctx, sym))
 static kinline const char* SYM_PRE(ksymbol_t sym)
 {
 	size_t mask = ((size_t)(SYM_HEAD(sym)) >> ((sizeof(ksymbol_t) * 8)-3));

@@ -261,7 +261,7 @@ static int comprKeyVal(const void *a, const void *b)
 	return akey - bkey;
 }
 
-static KUtilsKeyValue* NameSpace_getConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t ukey)
+static KUtilsKeyValue* kNameSpace_getConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t ukey)
 {
 	size_t min = 0, max = ns->constTable.bytesize / sizeof(KUtilsKeyValue);
 	while(min < max) {
@@ -281,7 +281,7 @@ static KUtilsKeyValue* NameSpace_getConstNULL(KonohaContext *kctx, kNameSpace *n
 static kbool_t checkConflictedConst(KonohaContext *kctx, kNameSpace *ns, KUtilsKeyValue *kvs, kfileline_t pline)
 {
 	ksymbol_t ukey = kvs->key;
-	KUtilsKeyValue* ksval = NameSpace_getConstNULL(kctx, ns, ukey);
+	KUtilsKeyValue* ksval = kNameSpace_getConstNULL(kctx, ns, ukey);
 	if(ksval != NULL) {
 		if(kvs->ty == ksval->ty && kvs->uval == ksval->uval) {
 			return true;  // same value
@@ -292,7 +292,7 @@ static kbool_t checkConflictedConst(KonohaContext *kctx, kNameSpace *ns, KUtilsK
 	return false;
 }
 
-static void NameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, KUtilsKeyValue *kvs, size_t nitems, kfileline_t pline)
+static void kNameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, KUtilsKeyValue *kvs, size_t nitems, kfileline_t pline)
 {
 	size_t i, s = ns->constTable.bytesize / sizeof(KUtilsKeyValue);
 	if(s == 0) {
@@ -352,13 +352,13 @@ static void kNameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ns, const 
 	}
 	size_t nitems = Kwb_bytesize(&wb) / sizeof(KUtilsKeyValue);
 	if(nitems > 0) {
-		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, (KUtilsKeyValue*)KLIB Kwb_top(kctx, &wb, 0), nitems, pline);
+		kNameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, (KUtilsKeyValue*)KLIB Kwb_top(kctx, &wb, 0), nitems, pline);
 	}
 	KLIB Kwb_free(&wb);
 	RESET_GCSTACK();
 }
 
-static void NameSpace_importClassName(KonohaContext *kctx, kNameSpace *ns, kpackage_t packageId, kfileline_t pline)
+static void kNameSpace_importClassName(KonohaContext *kctx, kNameSpace *ns, kpackage_t packageId, kfileline_t pline)
 {
 	KUtilsKeyValue kv;
 	KUtilsWriteBuffer wb;
@@ -377,7 +377,7 @@ static void NameSpace_importClassName(KonohaContext *kctx, kNameSpace *ns, kpack
 	}
 	size_t nitems = Kwb_bytesize(&wb) / sizeof(KUtilsKeyValue);
 	if(nitems > 0) {
-		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, (KUtilsKeyValue*)KLIB Kwb_top(kctx, &wb, 0), nitems, pline);
+		kNameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, (KUtilsKeyValue*)KLIB Kwb_top(kctx, &wb, 0), nitems, pline);
 	}
 	KLIB Kwb_free(&wb);
 }
@@ -392,7 +392,7 @@ static KonohaClass *kNameSpace_getClass(KonohaContext *kctx, kNameSpace *ns, Kon
 		uintptr_t hcode = longid(PN_konoha, un);
 		ct = (KonohaClass*)map_getu(kctx, kctx->share->longClassNameMapNN, hcode, 0);
 		if(ct == NULL) {
-			KUtilsKeyValue *kvs = NameSpace_getConstNULL(kctx, ns, un);
+			KUtilsKeyValue *kvs = kNameSpace_getConstNULL(kctx, ns, un);
 			DBG_P("kvs=%s, %p", name, kvs);
 			if(kvs != NULL && kvs->ty == TY_TYPE) {
 				return (KonohaClass*)kvs->uval;
@@ -407,7 +407,7 @@ static KonohaClass *kNameSpace_getClass(KonohaContext *kctx, kNameSpace *ns, Kon
 #define MPOL_PARAMSIZE   (1<<1)
 #define MPOL_SIGNATURE   (1<<2)
 
-static kMethod* MethodList_getMethodNULL(KonohaContext *kctx, kArray *methodList, size_t beginIdx, ktype_t classId, ksymbol_t mn, int option, int policy)
+static kMethod* kMethodList_getMethodNULL(KonohaContext *kctx, kArray *methodList, size_t beginIdx, ktype_t classId, ksymbol_t mn, int option, int policy)
 {
 	size_t i;
 	kMethod *foundMethod = NULL;
@@ -438,7 +438,7 @@ static void MethodList_findMethodList(KonohaContext *kctx, kArray *methodList, k
 		kMethod *mtd = methodList->methodItems[i];
 		if(mtd->mn != mn) continue;
 		if(classId != TY_var && mtd->classId != classId) continue;
-		kMethod *foundMethod = MethodList_getMethodNULL(kctx, resultList, beginIdx, classId, mn, 0, MPOL_FIRST);
+		kMethod *foundMethod = kMethodList_getMethodNULL(kctx, resultList, beginIdx, classId, mn, 0, MPOL_FIRST);
 		if(foundMethod == NULL) {
 			KLIB kArray_add(kctx, resultList, mtd);
 		}
@@ -461,7 +461,7 @@ static void NameSpace_findMethodList(KonohaContext *kctx, kNameSpace *ns, ktype_
 static kMethod* KonohaClass_getMethodNULL(KonohaContext *kctx, KonohaClass *ct, kmethodn_t mn, int option, int policy)
 {
 	while(ct != NULL) {
-		kMethod *mtd = MethodList_getMethodNULL(kctx, ct->methodList, 0, TY_var, mn, option, policy);
+		kMethod *mtd = kMethodList_getMethodNULL(kctx, ct->methodList, 0, TY_var, mn, option, policy);
 		if(mtd != NULL) return mtd;
 		ct = ct->searchSuperMethodClassNULL;
 	}
@@ -473,7 +473,7 @@ static kMethod* kNameSpace_getFirstMethodNULL(KonohaContext *kctx, kNameSpace *n
 	if(ns != NULL) {
 		kMethod *mtd = kNameSpace_getFirstMethodNULL(kctx, ns->parentNULL, classId, mn, option, policy);
 		if(mtd != NULL) return mtd;
-		mtd = MethodList_getMethodNULL(kctx, ns->methodList, 0, classId, mn, option, policy);
+		mtd = kMethodList_getMethodNULL(kctx, ns->methodList, 0, classId, mn, option, policy);
 		return mtd;
 	}
 	return NULL;
@@ -483,7 +483,7 @@ static kMethod* kNameSpace_getMethodNULL(KonohaContext *kctx, kNameSpace *ns, kt
 {
 	if(TFLAG_is(int, policy, MPOL_LATEST)) {
 		while(ns != NULL) {
-			kMethod *mtd = MethodList_getMethodNULL(kctx, ns->methodList, 0, classId, mn, option, policy);
+			kMethod *mtd = kMethodList_getMethodNULL(kctx, ns->methodList, 0, classId, mn, option, policy);
 			if(mtd != NULL) return mtd;
 			ns = ns->parentNULL;
 		}
@@ -496,7 +496,7 @@ static kMethod* kNameSpace_getMethodNULL(KonohaContext *kctx, kNameSpace *ns, kt
 	}
 }
 
-static kMethod* NameSpace_addMethod(KonohaContext *kctx, kNameSpace *ns, kMethod *mtd)
+static kMethod* kNameSpace_addMethod(KonohaContext *kctx, kNameSpace *ns, kMethod *mtd)
 {
 	KonohaClass *ct = CT_(mtd->classId);
 	if(mtd->packageId == 0 && ns != NULL) {
@@ -592,7 +592,7 @@ static void kNameSpace_loadMethodData(KonohaContext *kctx, kNameSpace *ns, intpt
 		if(ns == NULL || Method_isPublic(mtd)) {
 			KonohaClass_addMethod(kctx, CT_(cid), mtd);
 		} else {
-			NameSpace_addMethod(kctx, ns, mtd);
+			kNameSpace_addMethod(kctx, ns, mtd);
 		}
 	}
 }
@@ -896,13 +896,13 @@ static void dumpStmt(KonohaContext *kctx, kStmt *stmt)
 
 #define AKEY(T)   T, (sizeof(T)-1)
 
-typedef struct flagop_t {
+typedef struct KDEFINE_FLAGNAME {
 	const char *key;
 	size_t keysize;
 	uintptr_t flag;
-} flagop_t ;
+} KDEFINE_FLAGNAME ;
 
-static uintptr_t Stmt_flag(KonohaContext *kctx, kStmt *stmt, flagop_t *fop, uintptr_t flag)
+static uintptr_t kStmt_parseFlags(KonohaContext *kctx, kStmt *stmt, KDEFINE_FLAGNAME *fop, uintptr_t flag)
 {
 	while(fop->key != NULL) {
 		ksymbol_t kw = ksymbolA(fop->key, fop->keysize, SYM_NONAME);

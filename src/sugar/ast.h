@@ -119,7 +119,7 @@ static int appendKeyword(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList,
 		if(!Token_resolved(kctx, ns, tk)) {
 			const char *t = S_text(tk->text);
 			if(isalpha(t[0])) {
-				KonohaClass *ct = KLIB kNameSpace_getCT(kctx, ns, NULL/*FIXME*/, S_text(tk->text), S_size(tk->text), TY_unknown);
+				KonohaClass *ct = KLIB kNameSpace_getClass(kctx, ns, NULL/*FIXME*/, S_text(tk->text), S_size(tk->text), TY_unknown);
 				if(ct != NULL) {
 					tk->keyword = KW_TypePattern;
 					tk->ty = ct->classId;
@@ -169,7 +169,7 @@ static kbool_t Token_toBRACE(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns)
 		INIT_GCSTACK();
 		kArray *a = new_(TokenArray, 0);
 		PUSH_GCSTACK(a);
-		NameSpace_tokenize(kctx, ns, S_text(tk->text), tk->uline, a);
+		kNameSpace_tokenize(kctx, ns, S_text(tk->text), tk->uline, a);
 		tk->keyword = AST_BRACE;
 		KSETv(tk->sub, a);
 		RESET_GCSTACK();

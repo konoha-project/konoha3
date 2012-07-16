@@ -548,14 +548,14 @@ static KMETHOD Array_erase(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Method_getParamSize(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].asMethod;
-	RETURNi_(kMethod_param(mtd)->psize);
+	RETURNi_(Method_param(mtd)->psize);
 }
 
 //## Param Method.getParam(int n);
 static KMETHOD Method_getParam(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].asMethod;
-	kParam *pa = kMethod_param(mtd);
+	kParam *pa = Method_param(mtd);
 	RETURN_(pa);
 }
 
@@ -572,7 +572,7 @@ static KMETHOD Method_getReturnType(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].asMethod;
 	assert(IS_Method(mtd));
-	RETURNi_(kMethod_param(mtd)->rtype);
+	RETURNi_(Method_param(mtd)->rtype);
 }
 
 //## String mtd.getFname();
@@ -607,7 +607,7 @@ static KMETHOD System_KLIB Knull(kctx, KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Method_isStatic_(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].asMethod;
-	kbool_t b = kMethod_isStatic(mtd);
+	kbool_t b = Method_isStatic(mtd);
 	RETURNb_(b);
 }
 
@@ -615,7 +615,7 @@ static KMETHOD Method_isStatic_(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Method_isVirtual_(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].asMethod;
-	kbool_t b = kMethod_isVirtual(mtd);
+	kbool_t b = Method_isVirtual(mtd);
 	RETURNb_(b);
 }
 
@@ -816,7 +816,7 @@ static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_
 
 	KonohaLibVar *l = (KonohaLibVar*)kctx->klib;
 	l->kMethod_genCode = GenCodeDefault;
-	kNameSpace_syncMethods();
+	kNameSpace_compileAllDefinedMethods();
 	l->kMethod_genCode = _kMethod_genCode;
 	//KSET_KLIB(Method_genCode, pline);
 

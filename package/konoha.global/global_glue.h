@@ -65,7 +65,7 @@ static KMETHOD MethodFunc_ProtoSetterN(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
-	kParam *pa = kMethod_param(mtd);
+	kParam *pa = Method_param(mtd);
 	KLIB kObject_setUnboxValue(kctx, sfp[0].asObject, key, pa->paramtypeItems[0].ty, sfp[1].unboxValue);
 	RETURNd_(sfp[1].unboxValue);
 }
@@ -75,7 +75,7 @@ static kMethod *new_ProtoGetter(KonohaContext *kctx, ktype_t cid, ksymbol_t sym,
 	kmethodn_t mn = ty == TY_Boolean ? MN_toISBOOL(sym) : MN_toGETTER(sym);
 	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_ProtoGetterN : MethodFunc_ProtoGetter;
 	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Public|kMethod_Immutable, cid, mn, f);
-	KLIB kMethod_setParam(kctx, mtd, ty, 0, NULL);
+	KLIB Method_setParam(kctx, mtd, ty, 0, NULL);
 	((kMethodVar*)mtd)->delta = sym;
 	return mtd;
 }
@@ -86,12 +86,12 @@ static kMethod *new_ProtoSetter(KonohaContext *kctx, ktype_t cid, ksymbol_t sym,
 	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_ProtoSetterN : MethodFunc_ProtoSetter;
 	kparamtype_t p = {ty, FN_("x")};
 	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Public, cid, mn, f);
-	KLIB kMethod_setParam(kctx, mtd, ty, 1, &p);
+	KLIB Method_setParam(kctx, mtd, ty, 1, &p);
 	((kMethodVar*)mtd)->delta = sym;
 	return mtd;
 }
 
-static void CT_addMethod2(KonohaContext *kctx, KonohaClass *ct, kMethod *mtd)
+static void KonohaClass_addMethod2(KonohaContext *kctx, KonohaClass *ct, kMethod *mtd)
 {
 	if(unlikely(ct->methodList == K_EMPTYARRAY)) {
 		KINITv(((KonohaClassVar*)ct)->methodList, new_(MethodArray, 8));
@@ -102,24 +102,21 @@ static void CT_addMethod2(KonohaContext *kctx, KonohaClass *ct, kMethod *mtd)
 static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kObject *o, kStmt *stmt, kNameSpace *ns, ktype_t ty, ksymbol_t fn)
 {
 	ktype_t cid = O_classId(o);
-	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(fn));
+	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(fn), ty, MPOL_SETTER);
 	if(mtd != NULL) {
 		SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "already defined name: %s.%s", CT_t(O_ct(o)), SYM_t(fn));
 		return NULL;
 	}
-	mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toGETTER(fn));
-	if(mtd == NULL) {
-		mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toISBOOL(fn));
-	}
-	if(mtd != NULL && kMethod_rtype(mtd) != ty) {
+	mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toGETTER(fn), 0, MPOL_GETTER);
+	if(mtd != NULL && Method_returnType(mtd) != ty) {
 		SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "differently defined getter: %s.%s", CT_t(O_ct(o)), SYM_t(fn));
 		return NULL;
 	}
 	if(mtd == NULL) { // no getter
-		CT_addMethod2(kctx, O_ct(o), new_ProtoGetter(kctx, cid, fn, ty));
+		KonohaClass_addMethod2(kctx, O_ct(o), new_ProtoGetter(kctx, cid, fn, ty));
 	}
 	mtd = new_ProtoSetter(kctx, cid, fn, ty);
-	CT_addMethod2(kctx, O_ct(o), mtd);
+	KonohaClass_addMethod2(kctx, O_ct(o), mtd);
 	return mtd;
 }
 

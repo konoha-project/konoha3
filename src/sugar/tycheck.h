@@ -166,9 +166,9 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 			}
 			return texpr;
 		}
-		kMethod *mtd = kNameSpace_getCastMethodNULL(kStmt_nameSpace(stmt), texpr->ty, reqty);
+		kMethod *mtd = kNameSpace_getCastMethodNULL(kctx, kStmt_nameSpace(stmt), texpr->ty, reqty);
 		DBG_P("finding cast %s => %s: %p", TY_t(texpr->ty), TY_t(reqty), mtd);
-		if(mtd != NULL && (kMethod_isCoercion(mtd) || FLAG_is(pol, TPOL_COERCION))) {
+		if(mtd != NULL && (Method_isCoercion(mtd) || FLAG_is(pol, TPOL_COERCION))) {
 			return new_TypedMethodCall(kctx, stmt, reqty, mtd, gma, 1, texpr);
 		}
 		return kExpr_p(stmt, expr, ErrTag, "%s is requested, but %s is given", TY_t(reqty), TY_t(texpr->ty));
@@ -296,19 +296,18 @@ static GammaAllocaData *Gamma_pop(KonohaContext *kctx, kGamma *gma, GammaAllocaD
 
 // --------------------------------------------------------------------------
 
-static kBlock* Method_newBlock(KonohaContext *kctx, kMethod *mtd, kString *source, kfileline_t uline)
+static kBlock* Method_newBlock(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns, kString *source, kfileline_t uline)
 {
 	const char *script = S_text(source);
 	if(IS_NULL(source) || script[0] == 0) {
-		DBG_ASSERT(IS_Token(mtd->tcode));
-		script = S_text(mtd->tcode->text);
-		uline = mtd->tcode->uline;
+		DBG_ASSERT(IS_Token(mtd->sourceCodeToken));
+		script = S_text(mtd->sourceCodeToken->text);
+		uline = mtd->sourceCodeToken->uline;
 	}
 	kArray *tokenArray = ctxsugar->preparedTokenList;
 	size_t pos = kArray_size(tokenArray);
-	DBG_ASSERT(IS_NameSpace(mtd->lazyCompileNameSpace));
-	NameSpace_tokenize(kctx, mtd->lazyCompileNameSpace/*KNULL(NameSpace)*/, script, uline, tokenArray);
-	kBlock *bk = new_Block(kctx, mtd->lazyCompileNameSpace/*KNULL(NameSpace)*/, NULL, tokenArray, pos, kArray_size(tokenArray), ';');
+	kNameSpace_tokenize(kctx, ns, script, uline, tokenArray);
+	kBlock *bk = new_Block(kctx, ns, NULL, tokenArray, pos, kArray_size(tokenArray), ';');
 	KLIB kArray_clear(kctx, tokenArray, pos);
 	return bk;
 }
@@ -320,18 +319,18 @@ static void Gamma_initParam(KonohaContext *kctx, GammaAllocaData *genv, kParam *
 		genv->localScope.varItems[i+1].fn = pa->paramtypeItems[i].fn;
 		genv->localScope.varItems[i+1].ty = pa->paramtypeItems[i].ty;
 	}
-	if(!kMethod_isStatic(genv->currentWorkingMethod)) {
+	if(!Method_isStatic(genv->currentWorkingMethod)) {
 		genv->localScope.varItems[0].fn = FN_this;
 		genv->localScope.varItems[0].ty = genv->this_cid;
 	}
 	genv->localScope.varsize = psize+1;
 }
 
-static kbool_t Method_compile(KonohaContext *kctx, kMethod *mtd, kString *text, kfileline_t uline, kNameSpace *ns)
+static kbool_t kMethod_compile(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns, kString *text, kfileline_t uline)
 {
 	INIT_GCSTACK();
 	kGamma *gma = ctxsugar->gma;
-	kBlock *bk = Method_newBlock(kctx, mtd, text, uline);
+	kBlock *bk = Method_newBlock(kctx, mtd, ns, text, uline);
 	GammaStackDecl lvarItems[32] = {};
 	GammaAllocaData newgma = {
 		.currentWorkingMethod = mtd,
@@ -339,7 +338,7 @@ static kbool_t Method_compile(KonohaContext *kctx, kMethod *mtd, kString *text, 
 		.localScope.varItems = lvarItems, .localScope.capacity = 32, .localScope.varsize = 0, .localScope.allocsize = 0,
 	};
 	GAMMA_PUSH(gma, &newgma);
-	Gamma_initParam(kctx, &newgma, kMethod_param(mtd));
+	Gamma_initParam(kctx, &newgma, Method_param(mtd));
 	Block_tyCheckAll(kctx, bk, gma);
 	KLIB kMethod_genCode(kctx, mtd, bk);
 	GAMMA_POP(gma, &newgma);
@@ -417,7 +416,7 @@ static kstatus_t SingleBlock_eval(KonohaContext *kctx, kBlock *bk, kMethod *mtd,
 		.localScope.varItems = lvarItems, .localScope.capacity = 32, .localScope.varsize = 0, .localScope.allocsize = 0,
 	};
 	GAMMA_PUSH(gma, &newgma);
-	Gamma_initIt(kctx, &newgma, kMethod_param(mtd));
+	Gamma_initIt(kctx, &newgma, Method_param(mtd));
 	Block_tyCheckAll(kctx, bk, gma);
 	if(kGamma_isERROR(gma)) {
 		result = K_BREAK;
@@ -437,7 +436,7 @@ static kstatus_t Block_eval(KonohaContext *kctx, kBlock *bk)
 	kBlock *bk1 = ctxsugar->singleBlock;
 	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Static, 0, 0, NULL);
 	PUSH_GCSTACK(mtd);
-	KLIB kMethod_setParam(kctx, mtd, TY_Object, 0, NULL);
+	KLIB Method_setParam(kctx, mtd, TY_Object, 0, NULL);
 	int i, jmpresult;
 	kstatus_t result = K_CONTINUE;
 	KonohaContextRuntimeVar *base = kctx->stack;

@@ -433,7 +433,7 @@ static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sf
 static void Method_threadCode(KonohaContext *kctx, kMethod *mtd, kByteCode *kcode)
 {
 	kMethodVar *Wmtd = (kMethodVar*)mtd;
-	KLIB kMethod_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
+	KLIB Method_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
 	KSETv(Wmtd->kcode, kcode);
 	Wmtd->pc_start = VirtualMachine_run(kctx, kctx->esp + 1, kcode->code);
 	if(verbose_code) {
@@ -634,7 +634,7 @@ static void CALL_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int esp
 {
 	kMethod *mtd = expr->cons->methodItems[0];
 	DBG_ASSERT(IS_Method(mtd));
-	int i, s = kMethod_isStatic(mtd) ? 2 : 1, thisidx = espidx + K_CALLDELTA;
+	int i, s = Method_isStatic(mtd) ? 2 : 1, thisidx = espidx + K_CALLDELTA;
 #ifdef _TYICVM
 	if (TYICVM_CALL_asm(kctx, mtd, expr, shift, espidx)) {
 		return;
@@ -649,7 +649,7 @@ static void CALL_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int esp
 //	if (mtd->mn == MN_new && mtd->invokeMethodFunc == MethodFunc_abstract) {
 //		/* do nothing */
 //	} else
-	if(kMethod_isVirtual(mtd)) {
+	if(Method_isVirtual(mtd)) {
 		ASM(NSET, NC_(thisidx-1), (intptr_t)mtd, CT_Method);
 		ASM(CALL, ctxcode->uline, SFP_(thisidx), ESP_(espidx, argc), KLIB Knull(kctx, CT_(expr->ty)));
 	}
@@ -877,7 +877,7 @@ static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	if(ctxcode == NULL) {
 		kmodcode->h.setup(kctx, NULL, 0);
 	}
-	KLIB kMethod_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
+	KLIB Method_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
 	DBG_ASSERT(kArray_size(ctxcode->codeList) == 0);
 	kBasicBlock* lbINIT  = new_BasicBlockLABEL(kctx);
 	kBasicBlock* lbBEGIN = new_BasicBlockLABEL(kctx);
@@ -971,7 +971,7 @@ static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack 
 //	return (mtd->invokeMethodFunc == MethodFunc_abstract);
 //}
 
-static void kMethod_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
+static void Method_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
 {
 	func = (func == NULL) ? MethodFunc_invokeAbstractMethod : func;
 	((kMethodVar*)mtd)->invokeMethodFunc = func;
@@ -1069,7 +1069,7 @@ void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		RESET_GCSTACK();
 	}
 	KonohaLibVar *l = (KonohaLibVar*)kctx->klib;
-	l->kMethod_setFunc = kMethod_setFunc;
+	l->Method_setFunc = Method_setFunc;
 	l->kMethod_genCode = kMethod_genCode;
 }
 

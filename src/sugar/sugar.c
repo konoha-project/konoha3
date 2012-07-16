@@ -56,7 +56,7 @@ static kstatus_t NameSpace_eval(KonohaContext *kctx, kNameSpace *ns, const char 
 		INIT_GCSTACK();
 		kArray *tokenArray = ctxsugar->preparedTokenList;
 		size_t pos = kArray_size(tokenArray);
-		NameSpace_tokenize(kctx, ns, script, uline, tokenArray);
+		kNameSpace_tokenize(kctx, ns, script, uline, tokenArray);
 		kBlock *bk = new_Block(kctx, ns, NULL, tokenArray, pos, kArray_size(tokenArray), ';');
 		KLIB kArray_clear(kctx, tokenArray, pos);
 		result = Block_eval(kctx, bk);
@@ -160,11 +160,11 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	KLIB Konoha_setModule(kctx, MOD_sugar, (KonohaModule*)base, 0);
 
 	KonohaLibVar* l = (KonohaLibVar*)ctx->klib;
-	l->kNameSpace_getCT   = kNameSpace_getCT;
+	l->kNameSpace_getClass   = kNameSpace_getClass;
 	l->kNameSpace_loadMethodData = kNameSpace_loadMethodData;
 	l->kNameSpace_loadConstData  = kNameSpace_loadConstData;
 	l->kNameSpace_getMethodNULL  = kNameSpace_getMethodNULL;
-	l->kNameSpace_syncMethods    = kNameSpace_syncMethods;
+	l->kNameSpace_compileAllDefinedMethods    = kNameSpace_compileAllDefinedMethods;
 
 	KINITv(base->packageList, new_(Array, 8));
 	base->packageMapNO = KLIB Kmap_init(kctx, 0);
@@ -496,15 +496,15 @@ static KonohaPackage *getPackageNULL(KonohaContext *kctx, kpackage_t packageId, 
 static void NameSpace_merge(KonohaContext *kctx, kNameSpace *ns, kNameSpace *target, kfileline_t pline)
 {
 	if(target->packageId != PN_konoha) {
-		NameSpace_importClassName(kctx, ns, target->packageId, pline);
+		kNameSpace_importClassName(kctx, ns, target->packageId, pline);
 	}
 	if(target->constTable.bytesize > 0) {
-		NameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, target->constTable.keyvalueItems, target->constTable.bytesize/sizeof(KUtilsKeyValue), pline);
+		kNameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, target->constTable.keyvalueItems, target->constTable.bytesize/sizeof(KUtilsKeyValue), pline);
 	}
 	size_t i;
 	for(i = 0; i < kArray_size(target->methodList); i++) {
 		kMethod *mtd = target->methodList->methodItems[i];
-		if(kMethod_isPublic(mtd) && mtd->packageId == target->packageId) {
+		if(Method_isPublic(mtd) && mtd->packageId == target->packageId) {
 			KLIB kArray_add(kctx, ns->methodList, mtd);
 		}
 	}

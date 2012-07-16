@@ -52,10 +52,10 @@ static void MethodAttribute_p(KonohaContext *kctx, kMethod *mtd, KUtilsWriteBuff
 			KLIB Kwb_printf(kctx, wb, "@%s ", attrs[i].aname);
 		}
 	}
-	if(kMethod_isCast(mtd)) {
+	if(Method_isCast(mtd)) {
 		KLIB Kwb_printf(kctx, wb, "@Cast ");
 	}
-//	if(kMethod_isTransCast(mtd)) {
+//	if(Method_isTransCast(mtd)) {
 //		KLIB Kwb_printf(kctx, wb, "@T ");
 //	}
 }
@@ -63,7 +63,7 @@ static void MethodAttribute_p(KonohaContext *kctx, kMethod *mtd, KUtilsWriteBuff
 static void Method_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
 	kMethod *mtd = sfp[pos].asMethod;
-	kParam *pa = kMethod_param(mtd);
+	kParam *pa = Method_param(mtd);
 	DBG_ASSERT(IS_Method(mtd));
 	if(level != 0) {
 		MethodAttribute_p(kctx, mtd, wb);
