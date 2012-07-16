@@ -118,7 +118,7 @@ set(PACKAGES
 	konoha.class
 	konoha.global
 	llvm
-	konoha.pcre
+##	konoha.pcre
 ##	konoha.io
 	konoha.i
 	posix.process

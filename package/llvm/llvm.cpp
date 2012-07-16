@@ -5235,7 +5235,7 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public|_Static, _F(ConstantExpr_getShuffleVector), TY_Constant, TY_ConstantExpr, MN_("getShuffleVector"), 3,TY_Constant, FN_("v1"), TY_Constant, FN_("v2"), TY_Constant, FN_("mask"),
 		_Public|_Static, _F(ConstantExpr_getExtractValue), TY_Constant, TY_ConstantExpr, MN_("getExtractValue"), 2,TY_Constant, FN_("Agg"), TY_Array_Int, FN_("idxs"),
 		_Public|_Static, _F(ConstantExpr_getInsertValue), TY_Constant, TY_ConstantExpr, MN_("getInsertValue"), 3,TY_Constant, FN_("Agg"), TY_Constant, FN_("val"), TY_Array_Int, FN_("idxs"),
-		_Public, _F(Type_opEQ), TY_Boolean, TY_Type, MN_("opEQ"), 1,TY_Type, FN_("t"),
+		_Public, _F(Type_opEQ), TY_Boolean, TY_Type, MN_("=="), 1,TY_Type, FN_("t"),
 		//FIXME
 	//_Public|_Const|_Im|_Coercion, _F(Float_toInt), TY_Int, TY_Float, MN_to(TY_Int), 0,
 		_Public|_Const|_Coercion|_Im, _F(Object_toValue), TY_Value, TY_Object, MN_to(TY_Value), 0,

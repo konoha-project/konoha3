@@ -532,22 +532,22 @@ boolean check_asm_int_op(String mn, int argc) {
 		}
 	}
 	if (argc == 1) {
-		if(mn == "opADD" ) { return true; }
-		if(mn == "opSUB" ) { return true; }
-		if(mn == "opMUL" ) { return true; }
-		if(mn == "opDIV" ) { return true; }
-		if(mn == "opMOD" ) { return true; }
-		if(mn == "opEQ"  ) { return true; }
-		if(mn == "opNE"  ) { return true; }
-		if(mn == "opLT"  ) { return true; }
-		if(mn == "opLTE" ) { return true; }
-		if(mn == "opGT"  ) { return true; }
-		if(mn == "opGTE" ) { return true; }
-		if(mn == "opLAND") { return true; }
-		if(mn == "opLOR" ) { return true; }
-		if(mn == "opLXOR") { return true; }
-		if(mn == "opLSFT") { return true; }
-		if(mn == "opRSFT") { return true; }
+		if(mn == "+" ) { return true; }
+		if(mn == "-" ) { return true; }
+		if(mn == "*" ) { return true; }
+		if(mn == "/" ) { return true; }
+		if(mn == "%" ) { return true; }
+		if(mn == "=="  ) { return true; }
+		if(mn == "!="  ) { return true; }
+		if(mn == "<"  ) { return true; }
+		if(mn == "<=" ) { return true; }
+		if(mn == ">"  ) { return true; }
+		if(mn == ">=" ) { return true; }
+		if(mn == "&") { return true; }
+		if(mn == "|" ) { return true; }
+		if(mn == "^") { return true; }
+		if(mn == "<<") { return true; }
+		if(mn == ">>") { return true; }
 	}
 	return false;
 }
@@ -560,22 +560,22 @@ Value asm_int_op(String mn, Expr exprN, int local) {
 	} else {
 		Value va = expr_asm(local+0, exprN.at(1), local+0);
 		Value vb = expr_asm(local+1, exprN.at(2), local+1);
-		if(mn == "opADD" ) { return builder.createAdd(va, vb);}
-		if(mn == "opSUB" ) { return builder.createSub(va, vb);}
-		if(mn == "opMUL" ) { return builder.createMul(va, vb);}
-		if(mn == "opDIV" ) { return builder.createSDiv(va, vb);}
-		if(mn == "opMOD" ) { return builder.createSRem(va, vb);}
-		if(mn == "opEQ"  ) { return builder.createICmpEQ(va, vb);}
-		if(mn == "opNE"  ) { return builder.createICmpNE(va, vb);}
-		if(mn == "opLT"  ) { return builder.createICmpSLT(va, vb);}
-		if(mn == "opLTE" ) { return builder.createICmpSLE(va, vb);}
-		if(mn == "opGT"  ) { return builder.createICmpSGT(va, vb);}
-		if(mn == "opGTE" ) { return builder.createICmpSGE(va, vb);}
-		if(mn == "opLAND") { return builder.createAnd( va, vb);}
-		if(mn == "opLOR" ) { return builder.createOr(va, vb);}
-		if(mn == "opLXOR") { return builder.createXor(va, vb);}
-		if(mn == "opLSFT") { return builder.createShl(va, vb);}
-		if(mn == "opRSFT") { return builder.createAShr(va, vb);}
+		if(mn == "+" ) { return builder.createAdd(va, vb);}
+		if(mn == "-" ) { return builder.createSub(va, vb);}
+		if(mn == "*" ) { return builder.createMul(va, vb);}
+		if(mn == "/" ) { return builder.createSDiv(va, vb);}
+		if(mn == "%" ) { return builder.createSRem(va, vb);}
+		if(mn == "=="  ) { return builder.createICmpEQ(va, vb);}
+		if(mn == "!="  ) { return builder.createICmpNE(va, vb);}
+		if(mn == "<"  ) { return builder.createICmpSLT(va, vb);}
+		if(mn == "<=" ) { return builder.createICmpSLE(va, vb);}
+		if(mn == ">"  ) { return builder.createICmpSGT(va, vb);}
+		if(mn == ">=" ) { return builder.createICmpSGE(va, vb);}
+		if(mn == "&") { return builder.createAnd( va, vb);}
+		if(mn == "|" ) { return builder.createOr(va, vb);}
+		if(mn == "^") { return builder.createXor(va, vb);}
+		if(mn == "<<") { return builder.createShl(va, vb);}
+		if(mn == ">>") { return builder.createAShr(va, vb);}
 	}
 	return null;
 }
@@ -587,16 +587,16 @@ boolean check_asm_float_op(String mn, int argc) {
 		}
 	}
 	if (argc == 1) {
-		if(mn == "opADD" ) { return true; }
-		if(mn == "opSUB" ) { return true; }
-		if(mn == "opMUL" ) { return true; }
-		if(mn == "opDIV" ) { return true; }
-		if(mn == "opEQ"  ) { return true; }
-		if(mn == "opNE"  ) { return true; }
-		if(mn == "opLT"  ) { return true; }
-		if(mn == "opLTE" ) { return true; }
-		if(mn == "opGT"  ) { return true; }
-		if(mn == "opGTE" ) { return true; }
+		if(mn == "+" ) { return true; }
+		if(mn == "-" ) { return true; }
+		if(mn == "*" ) { return true; }
+		if(mn == "/" ) { return true; }
+		if(mn == "=="  ) { return true; }
+		if(mn == "!="  ) { return true; }
+		if(mn == "<"  ) { return true; }
+		if(mn == "<=" ) { return true; }
+		if(mn == ">"  ) { return true; }
+		if(mn == ">=" ) { return true; }
 	}
 	return false;
 }
@@ -609,16 +609,16 @@ Value asm_float_op(String mn, Expr exprN, int local) {
 	} else {
 		Value va = expr_asm(local+0, exprN.at(1), local+0);
 		Value vb = expr_asm(local+1, exprN.at(2), local+1);
-		if(mn == "opADD" ) { return builder.createFAdd(va, vb);}
-		if(mn == "opSUB" ) { return builder.createFSub(va, vb);}
-		if(mn == "opMUL" ) { return builder.createFMul(va, vb);}
-		if(mn == "opDIV" ) { return builder.createFDiv(va, vb);}
-		if(mn == "opEQ"  ) { return builder.createFCmpOEQ(va, vb);}
-		if(mn == "opNE"  ) { return builder.createFCmpONE(va, vb);}
-		if(mn == "opLT"  ) { return builder.createFCmpOLT(va, vb);}
-		if(mn == "opLTE" ) { return builder.createFCmpOLE(va, vb);}
-		if(mn == "opGT"  ) { return builder.createFCmpOGT(va, vb);}
-		if(mn == "opGTE" ) { return builder.createFCmpOGE(va, vb);}
+		if(mn == "+" ) { return builder.createFAdd(va, vb);}
+		if(mn == "-" ) { return builder.createFSub(va, vb);}
+		if(mn == "*" ) { return builder.createFMul(va, vb);}
+		if(mn == "/" ) { return builder.createFDiv(va, vb);}
+		if(mn == "=="  ) { return builder.createFCmpOEQ(va, vb);}
+		if(mn == "!="  ) { return builder.createFCmpONE(va, vb);}
+		if(mn == "<"  ) { return builder.createFCmpOLT(va, vb);}
+		if(mn == "<=" ) { return builder.createFCmpOLE(va, vb);}
+		if(mn == ">"  ) { return builder.createFCmpOGT(va, vb);}
+		if(mn == ">=" ) { return builder.createFCmpOGE(va, vb);}
 	}
 	System.p("hi");
 	return null;
