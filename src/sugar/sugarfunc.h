@@ -33,7 +33,7 @@ static kString *resolveEscapeSequence(KonohaContext *kctx, kString *s, size_t st
 {
 	const char *text = S_text(s) + start;
 	size_t i;
-	int ch, next;
+	int ch, next = 0;
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	KLIB Kwb_write(kctx, &wb, S_text(s), start);
