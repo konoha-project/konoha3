@@ -35,7 +35,6 @@ int regexToken(Token tk, String source) {
             regs.set(1, opt);
             tk.setKeyword("$regex");
             tk.setSubArray(regs);
-            "FIXME"
             return end;
         }
         i = i + 1;
