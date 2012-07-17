@@ -244,7 +244,7 @@ static kbool_t iterator_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfil
 //			{ TOKEN("--"), _OP, .op1 = "opDEC", .priority_op2 = 16, .flag = SYNFLAG_ExprPostfixOp2,},
 			{ .keyword = KW_END, },
 	};
-	SUGAR NameSpace_defineSyntax(kctx, ns, SYNTAX);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 

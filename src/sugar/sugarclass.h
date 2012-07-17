@@ -69,7 +69,7 @@ static void NameSpace_reftrace(KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
-static void syntax_free(KonohaContext *kctx, void *p)
+static void syntaxMap_free(KonohaContext *kctx, void *p)
 {
 	KFREE(p, sizeof(SugarSyntax));
 }
@@ -78,7 +78,7 @@ static void NameSpace_free(KonohaContext *kctx, kObject *o)
 {
 	kNameSpaceVar *ns = (kNameSpaceVar*)o;
 	if(ns->syntaxMapNN != NULL) {
-		KLIB Kmap_free(kctx, ns->syntaxMapNN, syntax_free);
+		KLIB Kmap_free(kctx, ns->syntaxMapNN, syntaxMap_free);
 	}
 	if(ns->tokenMatrix != NULL) {
 		KFREE((void*)ns->tokenMatrix, SIZEOF_TOKENMATRIX);
@@ -115,7 +115,7 @@ static SugarSyntax* NameSpace_syn(KonohaContext *kctx, kNameSpace *ns0, ksymbol_
 		if(ns0->syntaxMapNN == NULL) {
 			((kNameSpaceVar*)ns0)->syntaxMapNN = KLIB Kmap_init(kctx, 0);
 		}
-		KUtilsHashMapEntry *e = KLIB Kmap_newentry(kctx, ns0->syntaxMapNN, hcode);
+		KUtilsHashMapEntry *e = KLIB Kmap_newEntry(kctx, ns0->syntaxMapNN, hcode);
 		SugarSyntaxVar *syn = (SugarSyntaxVar*)KCALLOC(sizeof(SugarSyntax), 1);
 		e->uvalue = (uintptr_t)syn;
 
@@ -192,7 +192,7 @@ static void setSugarFunc(KonohaContext *kctx, MethodFunc f, kFunc **funcItems, M
 	}
 }
 
-static void NameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE_SYNTAX *syndef)
+static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE_SYNTAX *syndef)
 {
 	MethodFunc pPatternMatch = NULL, pParseExpr = NULL, pStmtTyCheck = NULL, pExprTyCheck = NULL;
 	kFunc *mPatternMatch = NULL, *mParseExpr = NULL, *mStmtTyCheck = NULL, *mExprTyCheck = NULL;
@@ -233,9 +233,9 @@ static void NameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE_
 	}
 }
 
-#define T_statement(kw)  KW_tSTMT_(kctx, kw), KW_tSTMTPOST(kw)
+#define T_statement(kw)  StatementName(kctx, kw), StatementType(kw)
 
-static const char* KW_tSTMT_(KonohaContext *kctx, ksymbol_t keyword)
+static const char* StatementName(KonohaContext *kctx, ksymbol_t keyword)
 {
 	const char *statement = SYM_t(keyword);
 	if(keyword == KW_ExprPattern) statement = "expression";
@@ -244,7 +244,7 @@ static const char* KW_tSTMT_(KonohaContext *kctx, ksymbol_t keyword)
 	return statement;
 }
 
-static const char* KW_tSTMTPOST(ksymbol_t keyword)
+static const char* StatementType(ksymbol_t keyword)
 {
 	const char *postfix = " statement";
 	if(keyword == KW_ExprPattern) postfix = "";
@@ -277,7 +277,7 @@ static KUtilsKeyValue* kNameSpace_getConstNULL(KonohaContext *kctx, kNameSpace *
 	return NULL;
 }
 
-static kbool_t checkConflictedConst(KonohaContext *kctx, kNameSpace *ns, KUtilsKeyValue *kvs, kfileline_t pline)
+static kbool_t checkConstConflict(KonohaContext *kctx, kNameSpace *ns, KUtilsKeyValue *kvs, kfileline_t pline)
 {
 	ksymbol_t ukey = kvs->key;
 	KUtilsKeyValue* ksval = kNameSpace_getConstNULL(kctx, ns, ukey);
@@ -302,7 +302,7 @@ static void kNameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, KU
 		KUtilsWriteBuffer wb;
 		KLIB Kwb_init(&(ctxsugar->errorMessageBuffer), &wb);
 		for(i = 0; i < nitems; i++) {
-			if(checkConflictedConst(kctx, ns, kvs+i, pline)) continue;
+			if(checkConstConflict(kctx, ns, kvs+i, pline)) continue;
 			KLIB Kwb_write(kctx, &wb, (const char*)(kvs+i), sizeof(KUtilsKeyValue));
 		}
 		kvs = (KUtilsKeyValue*)KLIB Kwb_top(kctx, &wb, 0);
@@ -555,7 +555,6 @@ static void kNameSpace_loadMethodData(KonohaContext *kctx, kNameSpace *ns, intpt
 	}
 }
 
-
 static kMethod* kNameSpace_getCastMethodNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ktype_t tcid)
 {
 	kMethod *mtd = kNameSpace_getMethodNULL(kctx, ns, cid, MN_to(tcid), 0, MPOL_PARAMSIZE|MPOL_FIRST);
@@ -564,7 +563,6 @@ static kMethod* kNameSpace_getCastMethodNULL(KonohaContext *kctx, kNameSpace *ns
 	}
 	return mtd;
 }
-
 
 /* --------------- */
 /* Token */
@@ -585,63 +583,6 @@ static void Token_reftrace(KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
-static void dumpToken(KonohaContext *kctx, kToken *tk)
-{
-	if(verbose_sugar) {
-		DUMP_P("%s%s %d: kw=%s%s '%s'\n", KW_t(tk->keyword), (short)tk->uline, KW_t(tk->keyword), kToken_s(tk));
-	}
-}
-
-static void dumpIndent(KonohaContext *kctx, int nest)
-{
-	int i;
-	for(i = 0; i < nest; i++) {
-		DUMP_P("  ");
-	}
-}
-
-static int kTokenList_beginChar(kToken *tk)
-{
-	switch(tk->keyword) {
-	case AST_PARENTHESIS: return '(';
-	case AST_BRACE: return '{';
-	case AST_BRACKET: return '[';
-	}
-	return '<';
-}
-
-static int kTokenList_endChar(kToken *tk)
-{
-	switch(tk->keyword) {
-	case AST_PARENTHESIS: return ')';
-	case AST_BRACE: return '}';
-	case AST_BRACKET: return ']';
-	}
-	return '>';
-}
-
-static void dumpTokenArray(KonohaContext *kctx, int nest, kArray *a, int s, int e)
-{
-	if(verbose_sugar) {
-		if(nest == 0) DUMP_P("\n");
-		while(s < e) {
-			kToken *tk = a->tokenItems[s];
-			dumpIndent(kctx, nest);
-			if(IS_Array(tk->sub)) {
-				DUMP_P("%c\n", kTokenList_beginChar(tk));
-				dumpTokenArray(kctx, nest+1, tk->sub, 0, kArray_size(tk->sub));
-				dumpIndent(kctx, nest);
-				DUMP_P("%c\n", kTokenList_endChar(tk));
-			}
-			else {
-				DUMP_P("TK(%d) ", s);
-				dumpToken(kctx, tk);
-			}
-			s++;
-		}
-		if(nest == 0) DUMP_P("====\n");
-	}
-}
 
 /* --------------- */
 /* Expr */
@@ -732,57 +673,6 @@ static kExpr* Expr_add(KonohaContext *kctx, kExpr *expr, kExpr *e)
 	return K_NULLEXPR;
 }
 
-static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
-{
-	if(verbose_sugar) {
-		if(nest == 0) DUMP_P("\n");
-		dumpIndent(kctx, nest);
-		if(expr == K_NULLEXPR) {
-			DUMP_P("[%d] ExprTerm: null", n);
-		}
-		else if(Expr_isTerm(expr)) {
-			DUMP_P("[%d] ExprTerm: kw='%s%s' %s", n, KW_t(expr->termToken->keyword), kToken_s(expr->termToken));
-			if(expr->ty != TY_var) {
-
-			}
-			DUMP_P("\n");
-		}
-		else {
-			int i;
-			if(expr->syn == NULL) {
-				DUMP_P("[%d] Cons: kw=NULL, size=%ld", n, kArray_size(expr->cons));
-			}
-			else {
-				DUMP_P("[%d] Cons: kw='%s%s', size=%ld", n, KW_t(expr->syn->keyword), kArray_size(expr->cons));
-			}
-			if(expr->ty != TY_var) {
-
-			}
-			DUMP_P("\n");
-			for(i=0; i < kArray_size(expr->cons); i++) {
-				kObject *o = expr->cons->objectItems[i];
-				if(O_ct(o) == CT_Expr) {
-					dumpExpr(kctx, i, nest+1, (kExpr*)o);
-				}
-				else {
-					dumpIndent(kctx, nest+1);
-					if(O_ct(o) == CT_Token) {
-						kToken *tk = (kToken*)o;
-						DUMP_P("[%d] O: %s ", i, CT_t(o->h.ct));
-						dumpToken(kctx, tk);
-					}
-					else if(o == K_NULL) {
-						DUMP_P("[%d] O: null\n", i);
-					}
-					else {
-						DUMP_P("[%d] O: %s\n", i, CT_t(o->h.ct));
-					}
-				}
-			}
-		}
-	}
-}
-
 static kExpr* SUGAR kExpr_setConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, kObject *o)
 {
 	kExprVar *Wexpr = (expr == NULL) ? GCSAFE_new(ExprVar, 0) : (kExprVar*)expr;
@@ -836,32 +726,6 @@ static void Stmt_reftrace(KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
-static void _dumpToken(KonohaContext *kctx, void *arg, KUtilsKeyValue *d)
-{
-	if((d->key & SYMKEY_BOXED) == SYMKEY_BOXED) {
-		ksymbol_t key = ~SYMKEY_BOXED & d->key;
-		DUMP_P("key='%s%s': ", KW_t(key));
-		if(IS_Token(d->oval)) {
-			dumpToken(kctx, (kToken*)d->oval);
-		} else if (IS_Expr(d->oval)) {
-			dumpExpr(kctx, 0, 0, (kExpr *) d->oval);
-		}
-	}
-}
-
-static void dumpStmt(KonohaContext *kctx, kStmt *stmt)
-{
-	if(verbose_sugar) {
-		if(stmt->syn == NULL) {
-			DUMP_P("STMT (DONE)\n");
-		}
-		else {
-			DUMP_P("STMT %s%s {\n", T_statement(stmt->syn->keyword));
-			KLIB kObject_protoEach(kctx, stmt, NULL, _dumpToken);
-			DUMP_P("\n}\n");
-		}
-	}
-}
 
 #define AKEY(T)   T, (sizeof(T)-1)
 

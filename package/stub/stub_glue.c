@@ -47,7 +47,7 @@ static	kbool_t stub_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 //		_Public, _F(Stmt_getBlock), TY_Block, TY_Stmt, MN_("getBlock"), 2, TY_String, FN_key, TY_Block, FN_defval,
 //		_Public, _F(Stmt_tyCheckExpr), TY_Boolean, TY_Stmt, MN_("tyCheckExpr"), 4, TY_String, FN_key, TY_Gamma, FN_gma, TY_Int, FN_typeid, TY_Int, FN_pol,
 //		_Public, _F(Block_tyCheckAll), TY_Boolean, TY_Block, MN_("tyCheckAll"), 1, TY_Gamma, FN_gma,
-//		_Public, _F(NameSpace_defineSyntaxRule), TY_void, TY_NameSpace, MN_("defineSyntaxRule"),   2, TY_String, FN_key, TY_String, FN_("rule"),
+//		_Public, _F(kNameSpace_defineSyntaxRule), TY_void, TY_NameSpace, MN_("defineSyntaxRule"),   2, TY_String, FN_key, TY_String, FN_("rule"),
 //		_Public, _F(NameSpace_defineStmtTyCheck), TY_void, TY_NameSpace, MN_("defineStmtTyCheck"), 2, TY_String, FN_key, TY_String, FN_methodname,
 //		DEND,
 //	};
@@ -69,7 +69,7 @@ static kbool_t stub_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline
 //		{ TOKEN("$FLOAT"), .keyword = KW_TK(TK_FLOAT), .ExprTyCheck = ExprTyCheck_FLOAT, },
 //		{ .keyword = KW_END, },
 //	};
-//	SUGAR NameSpace_defineSyntax(kctx, ns, SYNTAX);
+//	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 

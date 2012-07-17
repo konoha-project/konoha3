@@ -1002,7 +1002,7 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(return), .rule ="\"return\" [$expr]", .flag = SYNFLAG_StmtBreakExec, StmtTyCheck_(return), },
 		{ .keyword = KW_END, },
 	};
-	NameSpace_defineSyntax(kctx, ns, SYNTAX);
+	kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	SugarSyntaxVar *syn = (SugarSyntaxVar*)SYN_(ns, KW_void);
 	syn->ty = TY_void; // it's not cool, but necessary
 	syn = (SugarSyntaxVar*)SYN_(ns, KW_UsymbolPattern);

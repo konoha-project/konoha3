@@ -43,7 +43,7 @@ void test_Kmap(KonohaContext *kctx)
     int i;
     KUtilsHashMap* map = kctx->klib->Kmap_init(kctx, 4);
     for (i = 0; i < 10; ++i) {
-        KUtilsHashMapEntry *entry = kctx->klib->Kmap_newentry(kctx, map, i);
+        KUtilsHashMapEntry *entry = kctx->klib->Kmap_newEntry(kctx, map, i);
         assert(entry->hcode == i);
         entry->ukey = i*2;
         entry->uvalue = i;

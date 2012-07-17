@@ -413,7 +413,7 @@ static kparamid_t Kmap_getparamid(KonohaContext *kctx, KUtilsHashMap *kmp, kArra
 	kParam *pa = new_Param(kctx, rtype, psize, p);
 	uintptr_t paramid = kArray_size(list);
 	KLIB kArray_add(kctx, list, pa);
-	e = KLIB Kmap_newentry(kctx, kmp, hcode);
+	e = KLIB Kmap_newEntry(kctx, kmp, hcode);
 	KINITv(e->paramkey, pa);
 	e->uvalue = paramid;
 	return (kparamid_t)paramid;

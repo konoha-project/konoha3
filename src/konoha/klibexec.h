@@ -186,7 +186,7 @@ static void kmap_shiftptr(KUtilsHashMap *kmap, intptr_t shift)
 	}
 }
 
-static KUtilsHashMapEntry *Kmap_newentry(KonohaContext *kctx, KUtilsHashMap *kmap, kuint_t hcode)
+static KUtilsHashMapEntry *Kmap_newEntry(KonohaContext *kctx, KUtilsHashMap *kmap, kuint_t hcode)
 {
 	KUtilsHashMapEntry *e;
 	if(kmap->unused == NULL) {
@@ -298,7 +298,7 @@ static void Kmap_remove(KUtilsHashMap* kmap, KUtilsHashMapEntry *oe)
 
 static void map_addStringUnboxValue(KonohaContext *kctx, KUtilsHashMap *kmp, uintptr_t hcode, kString *skey, uintptr_t uvalue)
 {
-	KUtilsHashMapEntry *e = KLIB Kmap_newentry(kctx, kmp, hcode);
+	KUtilsHashMapEntry *e = KLIB Kmap_newEntry(kctx, kmp, hcode);
 	KINITv(e->skey, skey);
 	e->uvalue = uvalue;
 }
@@ -607,7 +607,7 @@ static void klib_init(KonohaLibVar *l)
 	l->Kmap_init     = Kmap_init;
 	l->Kmap_free     = Kmap_free;
 	l->Kmap_reftrace = Kmap_reftrace;
-	l->Kmap_newentry = Kmap_newentry;
+	l->Kmap_newEntry = Kmap_newEntry;
 	l->Kmap_get      = Kmap_getentry;
 	l->Kmap_remove   = Kmap_remove;
 	l->Kmap_getcode  = Kmap_getcode;

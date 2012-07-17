@@ -86,7 +86,7 @@ static KMETHOD HashMap_set(KonohaContext *kctx, KonohaStack *sfp)
 	kParam *cparam = CT_cparam(ct);
 	kparamtype_t p1 = cparam->paramtypeItems[0];
 	uintptr_t hcode = strhash(S_text(key), S_size(key));
-	KUtilsHashMapEntry *e = KLIB Kmap_newentry(kctx, map, hcode);
+	KUtilsHashMapEntry *e = KLIB Kmap_newEntry(kctx, map, hcode);
 	if (p1.ty == TY_Int || p1.ty == TY_Boolean || p1.ty == TY_Float) {  // FIXME
 		e->uvalue =(uintptr_t)sfp[2].ivalue;
 	} else {
@@ -146,7 +146,7 @@ static kbool_t hashmap_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfile
 
 			{ .keyword = KW_END, },
 	};
-	SUGAR NameSpace_defineSyntax(kctx, ns, SYNTAX);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 

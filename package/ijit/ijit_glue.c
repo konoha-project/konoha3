@@ -282,7 +282,7 @@ static void jitcache_set(KonohaContext *kctx, kMethod *mtd, kObject *f)
 {
 	uintptr_t hcode = jitcache_hash(mtd);
 	KUtilsHashMap *map = kmodjit->jitcache;
-	KUtilsHashMapEntry *newe = KLIB Kmap_newentry(kctx, map, hcode);
+	KUtilsHashMapEntry *newe = KLIB Kmap_newEntry(kctx, map, hcode);
 	newe->uvalue = (uintptr_t) f;
 }
 

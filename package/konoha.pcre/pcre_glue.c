@@ -642,7 +642,7 @@ static kbool_t pcre_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline
 		{ .keyword = SYM_("$regex"), _TERM, ExprTyCheck_(Regex), },
 		{ .keyword = KW_END, },
 	};
-	SUGAR NameSpace_defineSyntax(kctx, ns, SYNTAX);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 

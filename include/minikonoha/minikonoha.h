@@ -1124,7 +1124,7 @@ struct KonohaLibVar {
 	void                (*Kwb_free)(KUtilsWriteBuffer *);
 
 	KUtilsHashMap*      (*Kmap_init)(KonohaContext*, size_t);
-	KUtilsHashMapEntry* (*Kmap_newentry)(KonohaContext*, KUtilsHashMap *, uintptr_t);
+	KUtilsHashMapEntry* (*Kmap_newEntry)(KonohaContext*, KUtilsHashMap *, uintptr_t);
 	KUtilsHashMapEntry* (*Kmap_get)(KonohaContext*, KUtilsHashMap *, uintptr_t);
 	void                (*Kmap_remove)(KUtilsHashMap *, KUtilsHashMapEntry *);
 	void                (*Kmap_reftrace)(KonohaContext*, KUtilsHashMap *, void (*)(KonohaContext*, KUtilsHashMapEntry*));

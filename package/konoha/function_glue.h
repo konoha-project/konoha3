@@ -148,7 +148,7 @@ static kbool_t function_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfil
 		{ TOKEN("$param"), ExprTyCheck_(FuncStyleCall), },
 		{ .keyword = KW_END, },
 	};
-	SUGAR NameSpace_defineSyntax(kctx, ns, SYNTAX);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 

@@ -169,7 +169,7 @@ static kbool_t i_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t
 //		{ TOKEN("$FLOAT"), .keyword = KW_TK(TK_FLOAT), .ExprTyCheck = ExprTyCheck_FLOAT, },
 //		{ .keyword = KW_END, },
 //	};
-//	SUGAR NameSpace_defineSyntax(kctx, ns, SYNTAX);
+//	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 

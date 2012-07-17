@@ -443,7 +443,7 @@ struct kGammaVar {
 #define KW_new       (8+KW_void)
 #define FN_this      FN_("this")
 
-#define kNameSpace_defineSyntax(L, S)  kmodsugar->KNameSpace_defineSyntax(kctx, L, S)
+#define kkNameSpace_defineSyntax(L, S)  kmodsugar->KkNameSpace_defineSyntax(kctx, L, S)
 
 typedef struct {
 	KonohaModule  h;
@@ -485,7 +485,7 @@ typedef struct {
 //	void       (*Stmt_toExprCall)(KonohaContext *, kStmt *, kMethod *mtd, int n, ...);
 
 	SugarSyntax* (*NameSpace_syn)(KonohaContext *, kNameSpace *, ksymbol_t, int);
-	void       (*NameSpace_defineSyntax)(KonohaContext *, kNameSpace *, KDEFINE_SYNTAX *);
+	void       (*kNameSpace_defineSyntax)(KonohaContext *, kNameSpace *, KDEFINE_SYNTAX *);
 	void       (*kNameSpace_setSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
 	void       (*kNameSpace_addSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
 
@@ -520,7 +520,7 @@ typedef struct {
 	base->new_TypedMethodCall = new_TypedMethodCall;\
 	/*base->Stmt_toExprCall     = Stmt_toExprCall;*/\
 	/*syntax*/\
-	base->NameSpace_defineSyntax  = NameSpace_defineSyntax;\
+	base->kNameSpace_defineSyntax  = kNameSpace_defineSyntax;\
 	base->NameSpace_syn           = NameSpace_syn;\
 	base->makeSyntaxRule     = makeSyntaxRule;\
 	base->kNameSpace_setSugarFunc   = kNameSpace_setSugarFunc;\

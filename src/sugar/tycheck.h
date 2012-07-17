@@ -253,7 +253,7 @@ static kbool_t Block_tyCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
 	for(i = 0; i < kArray_size(bk->stmtList); i++) {
 		kStmt *stmt = (kStmt*)bk->stmtList->objectItems[i];
 		SugarSyntax *syn = stmt->syn;
-		dumpStmt(kctx, stmt);
+		KdumpStmt(kctx, stmt);
 		if(syn == NULL) continue; /* This means 'done' */
 		if(kStmt_isERR(stmt) || !Stmt_TyCheck(kctx, syn, stmt, gma)) {
 			DBG_ASSERT(kStmt_isERR(stmt));
