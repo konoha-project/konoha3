@@ -3,17 +3,17 @@
 K.import("konoha.string");
 
 void test() {
-	System.p("hoge".opNEQ("hog"));
-	System.p("hoge".opNEQ("oge"));
-	System.p("hoge".opNEQ("hoge"));
-	System.p("hoge".opNEQ("0hoge"));
-	System.p("hoge".opNEQ("hoge0"));
-	System.p("aあiいuう".opNEQ("aあiいu"));
-	System.p("aあiいuう".opNEQ("あiいuう"));
-	System.p("aあiいuう".opNEQ("aあiいuう"));
-	System.p("aあiいuう".opNEQ("0aあiいuう"));
-	System.p("aあiいuう".opNEQ("aあiいuう0"));
-	System.p("".opNEQ(""));
+	System.p("hoge" != ("hog"));
+	System.p("hoge" != ("oge"));
+	System.p("hoge" != ("hoge"));
+	System.p("hoge" != ("0hoge"));
+	System.p("hoge" != ("hoge0"));
+	System.p("aあiいuう" != ("aあiいu"));
+	System.p("aあiいuう" != ("あiいuう"));
+	System.p("aあiいuう" != ("aあiいuう"));
+	System.p("aあiいuう" != ("0aあiいuう"));
+	System.p("aあiいuう" != ("aあiいuう0"));
+	System.p("" != (""));
 }
 
 test();
