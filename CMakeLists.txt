@@ -128,7 +128,7 @@ set(PACKAGES
 	konoha.rope
 ##	konoha.subproc
 ##	konoha.mpi
-##	konoha.curl
+##	curl
 	ijit
 ##	jansson
 	python
