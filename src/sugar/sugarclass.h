@@ -226,6 +226,10 @@ static kExpr* SUGAR kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *
 	Wexpr->build = build;
 	Wexpr->ty = ty;
 	Wexpr->index = index;
+	if(build == TEXPR_LOCAL && gma->genv->blockScopeShiftSize > 0 && index >= gma->genv->blockScopeShiftSize) {
+		Wexpr->build = TEXPR_STACKTOP;
+		Wexpr->index -= gma->genv->blockScopeShiftSize;
+	}
 	return (kExpr*)Wexpr;
 }
 

@@ -121,7 +121,8 @@ static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	if(lastExpr != NULL) {
 		int lvarsize = gma->genv->localScope.varsize;
-		//size_t i, atop = kArray_size(gma->genv->lvarlst);
+		int popBlockScopeShiftSize = gma->genv->blockScopeShiftSize;
+		gma->genv->blockScopeShiftSize = lvarsize;
 		if(!kBlock_tyCheckAll(kctx, bk, gma)) {
 			RETURN_(texpr);
 		}
@@ -134,6 +135,7 @@ static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, KonohaStack *sfp)
 			KLIB kObject_setObject(kctx, lastExpr, KW_ExprPattern, TY_Expr, letexpr);
 			texpr = SUGAR kExpr_setVariable(kctx, expr, gma, TEXPR_BLOCK, ty, lvarsize);
 		}
+
 		//         FIXME:
 		//             for(i = atop; i < kArray_size(gma->genv->lvarlst); i++) {
 			//                     kExprVar *v = gma->genv->lvarlst->exprVarItems[i];
@@ -142,6 +144,7 @@ static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, KonohaStack *sfp)
 		//                             //DBG_P("v->index=%d", v->index);
 		//                     }
 		//             }
+		gma->genv->blockScopeShiftSize = popBlockScopeShiftSize;
 		if(lvarsize < gma->genv->localScope.varsize) {
 			gma->genv->localScope.varsize = lvarsize;
 		}

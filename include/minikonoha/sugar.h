@@ -328,6 +328,7 @@ typedef struct  {
 	ktype_t       this_cid;  ktype_t       static_cid;
 	kMethod      *currentWorkingMethod;
 	GammaStack    localScope;
+	int           blockScopeShiftSize;
 } GammaAllocaData;
 
 struct kGammaVar {
