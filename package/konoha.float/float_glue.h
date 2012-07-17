@@ -210,7 +210,7 @@ static	kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public|_Const|_Im|_Coercion, _F(Int_toFloat), TY_Float, TY_Int, MN_to(TY_Float), 0,
 		_Public|_Const|_Im, _F(Float_toString), TY_String, TY_Float, MN_to(TY_String), 0,
 		_Public|_Const|_Im, _F(String_toFloat), TY_Float, TY_String, MN_to(TY_Float), 0,
-		_Public|_Const|_Im, _F(Float_opMINUS), TY_Float, TY_Float, MN_("opMINUS"), 0,
+		_Public|_Const|_Im, _F(Float_opMINUS), TY_Float, TY_Float, MN_("-"), 0,
 		_Public|_Static|_Im, _F(Float_random), TY_Float, TY_Float, MN_("random"), 0,
 		DEND,
 	};
