@@ -56,7 +56,7 @@ static const char* StatementType(ksymbol_t keyword)
 
 static void dumpToken(KonohaContext *kctx, kToken *tk)
 {
-	DUMP_P("%s%s %d: kw=%s%s '%s'\n", KW_t(tk->keyword), (short)tk->uline, KW_t(tk->keyword), kToken_s(tk));
+	DUMP_P("%s%s %d: kw=%s%s '%s'\n", KW_t(tk->keyword), (short)tk->uline, KW_t(tk->keyword), Token_text(tk));
 }
 
 static void dumpIndent(KonohaContext *kctx, int nest)
@@ -119,7 +119,7 @@ static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
 			DUMP_P("[%d] ExprTerm: null", n);
 		}
 		else if(Expr_isTerm(expr)) {
-			DUMP_P("[%d] ExprTerm: kw='%s%s' %s", n, KW_t(expr->termToken->keyword), kToken_s(expr->termToken));
+			DUMP_P("[%d] ExprTerm: kw='%s%s' %s", n, KW_t(expr->termToken->keyword), Token_text(expr->termToken));
 			if(expr->ty != TY_var) {
 
 			}

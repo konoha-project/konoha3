@@ -93,14 +93,14 @@ static void Token_pERR(KonohaContext *kctx, kTokenVar *tk, const char *fmt, ...)
 	va_end(ap);
 	KSETv(tk->text, errmsg);
 	tk->keyword = TK_ERR;
-	kToken_setUnresolved(tk, true);
+	Token_textetUnresolved(tk, true);
 }
 
-#define kStmt_toERR(STMT, ENO)  Stmt_toERR(kctx, STMT, ENO)
-#define kStmt_isERR(STMT)       ((STMT)->build == TSTMT_ERR)
+//#define kStmt_toERR(STMT, ENO)  Stmt_toERR(kctx, STMT, ENO)
+#define Stmt_isERR(STMT)       ((STMT)->build == TSTMT_ERR)
 static SugarSyntax* NameSpace_syn(KonohaContext *kctx, kNameSpace *ns0, ksymbol_t kw, int isnew);
 
-static void Stmt_toERR(KonohaContext *kctx, kStmt *stmt, kString *errmsg)
+static void kStmt_toERR(KonohaContext *kctx, kStmt *stmt, kString *errmsg)
 {
 	((kStmtVar*)stmt)->syn   = SYN_(Stmt_nameSpace(stmt), KW_ERR);
 	((kStmtVar*)stmt)->build = TSTMT_ERR;
@@ -112,7 +112,7 @@ static inline void kStmt_errline(kStmt *stmt, kfileline_t uline)
 	((kStmtVar*)stmt)->uline = uline;
 }
 
-static kfileline_t Expr_uline(KonohaContext *kctx, kExpr *expr, kfileline_t uline)
+static kfileline_t kExpr_uline(KonohaContext *kctx, kExpr *expr, kfileline_t uline)
 {
 	kToken *tk = expr->termToken;
 	DBG_ASSERT(IS_Expr(expr));
@@ -128,7 +128,7 @@ static kfileline_t Expr_uline(KonohaContext *kctx, kExpr *expr, kfileline_t ulin
 				return tk->uline;
 			}
 			if(IS_Expr(tk)) {
-				return Expr_uline(kctx, a->exprItems[i], uline);
+				return kExpr_uline(kctx, a->exprItems[i], uline);
 			}
 		}
 	}
@@ -149,19 +149,19 @@ static kExpr* Stmt_p(KonohaContext *kctx, kStmt *stmt, kToken *tk, int pe, const
 			uline = tk->uline;
 		}
 		else if(IS_Expr(tk)) {
-			uline = Expr_uline(kctx, (kExpr*)tk, uline);
+			uline = kExpr_uline(kctx, (kExpr*)tk, uline);
 		}
 	}
 	kString *errmsg = vperrorf(kctx, pe, uline, -1, fmt, ap);
-	if(pe <= ErrTag && !kStmt_isERR(stmt)) {
-		kStmt_toERR(stmt, errmsg);
+	if(pe <= ErrTag && !Stmt_isERR(stmt)) {
+		kStmt_toERR(kctx, stmt, errmsg);
 	}
 	va_end(ap);
 	return K_NULLEXPR;
 }
 
-#define kToken_s(tk) kToken_s_(kctx, tk)
-static const char *kToken_s_(KonohaContext *kctx, kToken *tk)
+#define Token_text(tk) kToken_t_(kctx, tk)
+static const char *kToken_t_(KonohaContext *kctx, kToken *tk)
 {
 	switch((int)tk->keyword) {
 	case TK_INDENT: return "indent";
@@ -179,9 +179,9 @@ static void WarnTagIgnored(KonohaContext *kctx, kArray *tokenArray, int s, int e
 		int i = s;
 		KUtilsWriteBuffer wb;
 		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-		KLIB Kwb_printf(kctx, &wb, "%s", kToken_s(tokenArray->tokenItems[i])); i++;
+		KLIB Kwb_printf(kctx, &wb, "%s", Token_text(tokenArray->tokenItems[i])); i++;
 		while(i < e) {
-			KLIB Kwb_printf(kctx, &wb, " %s", kToken_s(tokenArray->tokenItems[i])); i++;
+			KLIB Kwb_printf(kctx, &wb, " %s", Token_text(tokenArray->tokenItems[i])); i++;
 		}
 		pWARN(tokenArray->tokenItems[s]->uline, "ignored tokens: %s", KLIB Kwb_top(kctx, &wb, 1));
 		KLIB Kwb_free(&wb);

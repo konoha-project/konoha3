@@ -32,7 +32,7 @@ static KMETHOD UndefinedExprTyCheck(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	if(Expr_isTerm(expr)) {
-		expr = kToken_p(stmt, expr->termToken, ErrTag, "undefined token type checker: '%s'", kToken_s(expr->termToken));
+		expr = kToken_p(stmt, expr->termToken, ErrTag, "undefined token type checker: '%s'", Token_text(expr->termToken));
 	}
 	else {
 		expr = kStmt_p(stmt, ErrTag, "undefined operator type checker: %s%s",  KW_t(expr->syn->keyword));
@@ -65,14 +65,14 @@ static kExpr *ExprTyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma 
 		kArray *a = (kArray*)fo;
 		for(i = kArray_size(a) - 1; i > 0; i--) {
 			texpr = ExprTyCheckFunc(kctx, a->funcItems[i], stmt, expr, gma, reqty);
-			if(kStmt_isERR(stmt)) return K_NULLEXPR;
+			if(Stmt_isERR(stmt)) return K_NULLEXPR;
 			if(texpr->ty != TY_var) return texpr;
 		}
 		fo = a->funcItems[0];
 	}
 	DBG_ASSERT(IS_Func(fo));
 	texpr = ExprTyCheckFunc(kctx, fo, stmt, expr, gma, reqty);
-	if(kStmt_isERR(stmt)) return K_NULLEXPR;
+	if(Stmt_isERR(stmt)) return K_NULLEXPR;
 //	FIXME: CHECK ALL VAR_ExprTyCheck
 //	if(texpr->ty == TY_var && texpr != K_NULLEXPR) {
 //		texpr = kExpr_p(stmt, expr, ErrTag, "typing error");
@@ -141,14 +141,14 @@ static kExpr *new_BoxingExpr(KonohaContext *kctx, kExpr *expr, ktype_t reqty)
 static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, ktype_t reqty, int pol)
 {
 	kExpr *texpr = expr;
-	if(kStmt_isERR(stmt)) texpr = K_NULLEXPR;
+	if(Stmt_isERR(stmt)) texpr = K_NULLEXPR;
 	if(expr->ty == TY_var && expr != K_NULLEXPR) {
 		if(!IS_Expr(expr)) {
 			expr = new_ConstValueExpr(kctx, O_classId(expr), UPCAST(expr));
 		}
 		texpr = ExprTyCheck(kctx, stmt, expr, gma, reqty);
 	}
-	if(kStmt_isERR(stmt)) texpr = K_NULLEXPR;
+	if(Stmt_isERR(stmt)) texpr = K_NULLEXPR;
 	if(texpr != K_NULLEXPR) {
 		//DBG_P("type=%s, reqty=%s", TY_t(expr->ty), TY_t(reqty));
 		if(texpr->ty == TY_void) {
@@ -255,8 +255,8 @@ static kbool_t kBlock_tyCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
 		SugarSyntax *syn = stmt->syn;
 		KdumpStmt(kctx, stmt);
 		if(syn == NULL) continue; /* This means 'done' */
-		if(kStmt_isERR(stmt) || !Stmt_TyCheck(kctx, syn, stmt, gma)) {
-			DBG_ASSERT(kStmt_isERR(stmt));
+		if(Stmt_isERR(stmt) || !Stmt_TyCheck(kctx, syn, stmt, gma)) {
+			DBG_ASSERT(Stmt_isERR(stmt));
 			kGamma_setERROR(gma, 1);
 			result = false;
 			break;
