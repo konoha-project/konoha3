@@ -699,6 +699,7 @@ struct KonohaClassField {
 //#define T_isInterface(t)    (TFLAG_is(kshortflag_t,(ClassTBL(t))->cflag, kClass_Interface))
 //#define T_isTypeVar(t)      (TFLAG_is(kshortflag_t,(ClassTBL(t))->cflag, kClass_TypeVar))
 
+#define TY_isTypeVar(t)      (TFLAG_is(kshortflag_t,(CT_(t))->cflag, kClass_TypeVar))
 #define TY_isFunc(T)    (CT_(T)->baseclassId == TY_Func)
 
 /* magic flag */

@@ -651,6 +651,40 @@ static KonohaClass *CT_body(KonohaContext *kctx, KonohaClass *ct, size_t head, s
 	return ct;
 }
 
+static KonohaClass *Generics_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass *self)
+{
+	DBG_P("trying resolve generic type: %s %s", CT_t(ct), CT_t(self));
+	KonohaClass *cReturn = CT_(ct->p0);
+	ktype_t rtype = cReturn->realtype(kctx, cReturn, self)->classId;
+	kParam *param = CT_cparam(ct);
+	int i;
+	kparamtype_t p[param->psize];
+	for(i = 0; i < param->psize; i++) {
+		KonohaClass *cParam = CT_(param->paramtypeItems[i].ty);
+		p[i].ty = cParam->realtype(kctx, cParam, self)->classId;
+	}
+	return KLIB KonohaClass_Generics(kctx, ct, rtype, param->psize, p);
+}
+
+#define TY_isTypeVar2(T)   (T != TY_void && TY_isTypeVar(T))
+
+static void checkTypeVar(KonohaContext *kctx, KonohaClassVar *newct, ktype_t rtype, int psize, kparamtype_t *p)
+{
+	int i, isTypeVar = TY_isTypeVar2(rtype);
+	if(!isTypeVar) {
+		for(i = 0; i < psize; i++) {
+			if(TY_isTypeVar(p[i].ty)) {
+				isTypeVar = true;
+			}
+		}
+	}
+	if(isTypeVar) {
+		DBG_P("Generics %s has TypeVar", CT_t(newct));
+		newct->cflag |= kClass_TypeVar;
+		newct->realtype = Generics_realtype;
+	}
+}
+
 static KonohaClass *KonohaClass_Generics(KonohaContext *kctx, KonohaClass *ct, ktype_t rtype, int psize, kparamtype_t *p)
 {
 	kparamid_t paramdom = Kparamdom(kctx, psize, p);
@@ -670,6 +704,7 @@ static KonohaClass *KonohaClass_Generics(KonohaContext *kctx, KonohaClass *ct, k
 	if(newct->searchSuperMethodClassNULL == NULL) {
 		newct->searchSuperMethodClassNULL = ct0;
 	}
+	checkTypeVar(kctx, newct, rtype, psize, p);
 	((KonohaClassVar*)ct)->searchSimilarClassNULL = (KonohaClass*)newct;
 	return ct->searchSimilarClassNULL;
 }

@@ -173,15 +173,6 @@ static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, KonohaStack *sfp)
 			KLIB kObject_setObject(kctx, lastExpr, KW_ExprPattern, TY_Expr, letexpr);
 			texpr = SUGAR kExpr_setVariable(kctx, expr, gma, TEXPR_BLOCK, ty, lvarsize);
 		}
-
-		//         FIXME:
-		//             for(i = atop; i < kArray_size(gma->genv->lvarlst); i++) {
-			//                     kExprVar *v = gma->genv->lvarlst->exprVarItems[i];
-		//                     if(v->build == TEXPR_LOCAL_ && v->index >= lvarsize) {
-		//                             v->build = TEXPR_STACKTOP; v->index = v->index - lvarsize;
-		//                             //DBG_P("v->index=%d", v->index);
-		//                     }
-		//             }
 		gma->genv->blockScopeShiftSize = popBlockScopeShiftSize;
 		if(lvarsize < gma->genv->localScope.varsize) {
 			gma->genv->localScope.varsize = lvarsize;
@@ -401,13 +392,13 @@ static kMethod *lookupOverloadedMethod(KonohaContext *kctx, kStmt *stmt, kExpr *
 
 static kExpr* Expr_typedWithMethod(KonohaContext *kctx, kExpr *expr, kMethod *mtd, ktype_t reqty)
 {
-	kExpr *expr1 = kExpr_at(expr, 1);
+	kExpr *thisExpr = kExpr_at(expr, 1);
 	KSETv(expr->cons->methodItems[0], mtd);
-	if(expr1->build == TEXPR_NEW) {
-		kExpr_typed(expr, CALL, expr1->ty);
+	if(thisExpr->build == TEXPR_NEW) {
+		kExpr_typed(expr, CALL, thisExpr->ty);
 	}
 	else {
-		kExpr_typed(expr, CALL, Method_isSmartReturn(mtd) ? reqty : ktype_var(kctx, Method_returnType(mtd), CT_(expr1->ty)));
+		kExpr_typed(expr, CALL, Method_isSmartReturn(mtd) ? reqty : ktype_var(kctx, Method_returnType(mtd), CT_(thisExpr->ty)));
 	}
 	return expr;
 }
