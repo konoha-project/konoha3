@@ -32,16 +32,14 @@ extern "C" {
 static kString *resolveEscapeSequence(KonohaContext *kctx, kString *s, size_t start)
 {
 	const char *text = S_text(s) + start;
-	size_t i;
-	int ch, next;
+	const char *end  = S_text(s) + S_size(s);
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	KLIB Kwb_write(kctx, &wb, S_text(s), start);
-	for (i = start; next != '\0'; i++) {
-		ch = text[0];
-		next = text[1];
-		if(ch == '\\' && next != '\0') {
-			switch (next) {
+	while (text < end) {
+		int ch = *text;
+		if(ch == '\\' && *(text+1) != '\0') {
+			switch (*(text+1)) {
 			case 'n':  ch = '\n'; text++; break;
 			case 't':  ch = '\t'; text++; break;
 			case 'r':  ch = '\r'; text++; break;
@@ -49,7 +47,7 @@ static kString *resolveEscapeSequence(KonohaContext *kctx, kString *s, size_t st
 			case '"':  ch = '\"'; text++; break;
 			}
 		}
-		KLIB Kwb_putc(kctx, &wb, ch);
+		kwb_putc(&wb, ch);
 		text++;
 	}
 	s = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);

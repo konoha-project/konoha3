@@ -387,7 +387,7 @@ static int callFuncTokenize(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, Token
 		int i;
 		const char *t = tenv->source;
 		for(i = tok_start; i < pos; i++) {
-			if(t[0] == '\n') tenv->currentLine += 1;
+			if(t[i] == '\n') tenv->currentLine += 1;
 		}
 	}
 	return pos;
