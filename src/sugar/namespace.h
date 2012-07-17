@@ -416,6 +416,18 @@ static kMethod* kNameSpace_getMethodNULL(KonohaContext *kctx, kNameSpace *ns, kt
 	}
 }
 
+static kMethod* kMethod_replaceWith(KonohaContext *kctx, kMethodVar *oldMethod, kMethodVar *newMethod)
+{
+	if(Method_isOverride(newMethod)) {
+		kMethodVar tempMethod;
+		tempMethod = *oldMethod;
+		*oldMethod = *newMethod;
+		*newMethod = tempMethod;
+		return NULL;  // when it succeed
+	}
+	return oldMethod;
+}
+
 static kMethod* kNameSpace_addMethod(KonohaContext *kctx, kNameSpace *ns, kMethod *mtd)
 {
 	KonohaClass *ct = CT_(mtd->classId);
@@ -429,7 +441,17 @@ static kMethod* kNameSpace_addMethod(KonohaContext *kctx, kNameSpace *ns, kMetho
 			if(foundMethod->classId == mtd->classId) {
 				DBG_P("duplicated method %s.%s%s", Method_t(foundMethod));
 				PUSH_GCSTACK(mtd);  // avoid memory leaking
-				return foundMethod;
+				return kMethod_replaceWith(kctx, (kMethodVar*)foundMethod, (kMethodVar*)mtd);
+			}
+			else {
+				if(!Method_isFinal(foundMethod)) {
+					DBG_P("Changing Virtual method %s.%s%s by %s.%s%s....", Method_t(foundMethod), Method_t(mtd));
+					// FIXME: Method_setVirtual(foundMethod, true);
+				}
+				if(!Method_isVirtual(foundMethod) || Method_isFinal(foundMethod)) {
+					DBG_P("Can't override method %s.%s%s <: %s.%s%s ....", Method_t(mtd), Method_t(foundMethod));
+					return NULL;
+				}
 			}
 		}
 		else {
@@ -452,19 +474,25 @@ static kMethod* kNameSpace_addMethod(KonohaContext *kctx, kNameSpace *ns, kMetho
 			if(foundMethod->classId == mtd->classId && foundMethod->mn == mtd->mn && foundMethod->paramdom == mtd->paramdom) {
 				DBG_P("duplicated method %s.%s%s", Method_t(foundMethod));
 				PUSH_GCSTACK(mtd);  // avoid memory leaking
-				return foundMethod;
+				return kMethod_replaceWith(kctx, (kMethodVar*)foundMethod, (kMethodVar*)mtd);
 			}
 		}
 		kArray *matchedMethodList = kctx->stack->gcstack;
 		size_t popMatchedMethodListSize = kArray_size(matchedMethodList);
 		kNameSpace_findMethodList(kctx, ns, mtd->classId, mtd->mn, matchedMethodList, popMatchedMethodListSize);
 		if(popMatchedMethodListSize < kArray_size(matchedMethodList)) {
-			DBG_P("set overloading method %s.%s%s", Method_t(mtd));
+			int count = 0;
 			for(i = popMatchedMethodListSize; i < kArray_size(matchedMethodList); i++) {
 				kMethod *foundMethod = matchedMethodList->methodItems[i];
-				Method_setOverloaded(foundMethod, true);
+				if(Method_paramsize(foundMethod) == Method_paramsize(mtd)) {
+					Method_setOverloaded(foundMethod, true);
+					count++;
+				}
 			}
-			Method_setOverloaded(mtd, true);
+			if(count > 0) {
+				DBG_P("set overloading method %s.%s%s", Method_t(mtd));
+				Method_setOverloaded(mtd, true);
+			}
 			KLIB kArray_clear(kctx, matchedMethodList, popMatchedMethodListSize);
 		}
 		if(ns->methodList == K_EMPTYARRAY) {

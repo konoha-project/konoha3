@@ -1043,6 +1043,7 @@ static void TYTABLE_free(KonohaContext *kctx, KonohaContextVar *ctx)
 #define _Immutable kMethod_Immutable
 #define _Coercion  kMethod_Coercion
 #define _Hidden    kMethod_Hidden
+#define _Override  kMethod_Override
 #define _F(F)      (intptr_t)(F)
 
 static void Konoha_loadDefaultMethod(KonohaContext *kctx)

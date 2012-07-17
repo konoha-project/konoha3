@@ -35,10 +35,10 @@ struct fn {
 
 static struct fn attrs[] = {
 	{_P(Public)}, {_P(Static)}, {_P(Const)}, {_P(Abstract)},
-	{_P(Virtual)}, {_P(Overloaded)},
-	{_P(Coercion)},
-	{_P(D)}, {_P(Restricted)}, {_P(Immutable)},
-	{_P(FASTCALL)}, {_P(CALLCC)},
+	{_P(Virtual)}, {_P(Final)}, /*{_P(Overloaded)},*/
+	{_P(Coercion)}, {_P(SmartReturn)},
+	{_P(Restricted)}, {_P(Immutable)},
+//	{_P(FASTCALL)}, {_P(CALLCC)},
 	{_P(Hidden)},
 	{0, NULL}
 };

@@ -519,8 +519,8 @@ static kbool_t Expr_isSymbol(kExpr *expr)
 static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kExpr *exprN, kGamma *gma, ktype_t reqty)
 {
 	kExpr *firstExpr = kExpr_at(exprN, 0);
-	kToken *tk = firstExpr->termToken;
-	ksymbol_t fn = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NONAME);
+	kToken *termToken = firstExpr->termToken;
+	ksymbol_t fn = ksymbolA(S_text(termToken->text), S_size(termToken->text), SYM_NONAME);
 	GammaAllocaData *genv = gma->genv;
 	int i;
 	for(i = genv->localScope.varsize - 1; i >= 0; i--) {
@@ -547,7 +547,7 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kEx
 		}
 		mtd = NameSpace_getGetterMethodNULL(kctx, ns, genv->this_cid, fn);
 		if(mtd != NULL && TY_isFunc(Method_returnType(mtd))) {
-			KSETv(exprN->cons->exprItems[0], new_GetterExpr(kctx, tk, mtd, new_VariableExpr(kctx, gma, TEXPR_LOCAL, genv->this_cid, 0)));
+			KSETv(exprN->cons->exprItems[0], new_GetterExpr(kctx, termToken, mtd, new_VariableExpr(kctx, gma, TEXPR_LOCAL, genv->this_cid, 0)));
 			return NULL;
 		}
 	}
@@ -561,7 +561,7 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kEx
 		}
 		mtd = NameSpace_getGetterMethodNULL(kctx, ns, cid, fn);
 		if(mtd != NULL && TY_isFunc(Method_returnType(mtd))) {
-			KSETv(exprN->cons->exprItems[0], new_GetterExpr(kctx, tk, mtd, new_ConstValueExpr(kctx, cid, ns->scriptObject)));
+			KSETv(exprN->cons->exprItems[0], new_GetterExpr(kctx, termToken, mtd, new_ConstValueExpr(kctx, cid, ns->scriptObject)));
 			return NULL;
 		}
 		mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_System, fn, paramsize, MPOL_FIRST|MPOL_PARAMSIZE);
@@ -836,15 +836,6 @@ static void kNameSpace_compileAllDefinedMethods(KonohaContext *kctx)
 	KLIB kArray_clear(kctx, ctxsugar->definedMethodList, 0);
 }
 
-static kbool_t kMethod_replaceWith(KonohaContext *kctx, kMethodVar *oldMethod, kMethodVar *newMethod)
-{
-	kMethodVar tempMethod;
-	tempMethod = *oldMethod;
-	*oldMethod = *newMethod;
-	*newMethod = tempMethod;
-	return true;
-}
-
 ///* ------------------------------------------------------------------------ */
 ///* [ParamUtils] */
 
@@ -911,17 +902,13 @@ static KMETHOD StmtTyCheck_ParamsDecl(KonohaContext *kctx, KonohaStack *sfp)
 ///* [MethodDecl] */
 
 static KDEFINE_FLAGNAME MethodDeclFlag[] = {
-	{AKEY("@Virtual"),    kMethod_Virtual},
 	{AKEY("@Public"),     kMethod_Public},
+	{AKEY("@Virtual"),    kMethod_Virtual},
+	{AKEY("@Final"),      kMethod_Final},
 	{AKEY("@Const"),      kMethod_Const},
 	{AKEY("@Static"),     kMethod_Static},
 	{AKEY("@Restricted"), kMethod_Restricted},
-	{NULL},
-};
-
-#define kMethodStmt_Override      1
-static KDEFINE_FLAGNAME MethodStmtFlag[] = {
-	{AKEY("@Override"),   1},
+	{AKEY("@Override"),   kMethod_Override},
 	{NULL},
 };
 
@@ -960,27 +947,21 @@ static KMETHOD StmtTyCheck_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 	if(TY_isSingleton(classId)) {
 		flag |= kMethod_Static;
 	}
+	if(TY_isFinal(classId)) {
+		flag |= kMethod_Final;
+	}
 	if(pa != NULL) {  // if pa is NULL, error is printed out.
 		kMethod *mtd = KLIB new_kMethod(kctx, flag, classId, mn, NULL);
 		PUSH_GCSTACK(mtd);
 		KLIB Method_setParam(kctx, mtd, pa->rtype, pa->psize, (kparamtype_t*)pa->paramtypeItems);
 		kMethod *foundMethod = kNameSpace_addMethod(kctx, ns, mtd);
 		if(foundMethod != NULL) {
-			uintptr_t stmtflag = kStmt_parseFlags(kctx, stmt, MethodStmtFlag, 0);
+			pa = NULL;
 			if(mtd->classId == foundMethod->classId) {
-				if(!TFLAG_is(uintptr_t, stmtflag, kMethodStmt_Override)) {
-					kStmt_p(stmt, ErrTag, "Method %s.%s%s has already defined", Method_t(mtd));
-					pa = NULL;
-				}
-				if(!kMethod_replaceWith(kctx, (kMethodVar*)mtd, (kMethodVar*)foundMethod)) {
-					kStmt_p(stmt, WarnTag, "Method %s.%s%s is differently defined", Method_t(mtd));
-				}
+				kStmt_p(stmt, ErrTag, "method %s.%s%s has already defined", Method_t(mtd));
 			}
 			else {
-				if(!Method_isVirtual(foundMethod)) {
-					kStmt_p(stmt, WarnTag, "Method %s.%s%s is not virtual", Method_t(mtd));
-					Method_setVirtual(foundMethod, true);
-				}
+				kStmt_p(stmt, ErrTag, "method %s.%s%s is final", Method_t(mtd));
 			}
 		}
 		if(pa != NULL) {

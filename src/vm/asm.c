@@ -649,17 +649,17 @@ static void CALL_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int esp
 //	if (mtd->mn == MN_new && mtd->invokeMethodFunc == MethodFunc_abstract) {
 //		/* do nothing */
 //	} else
-	if(Method_isVirtual(mtd)) {
-		ASM(NSET, NC_(thisidx-1), (intptr_t)mtd, CT_Method);
-		ASM(CALL, ctxcode->uline, SFP_(thisidx), ESP_(espidx, argc), KLIB Knull(kctx, CT_(expr->ty)));
+	if(Method_isFinal(mtd) || !Method_isVirtual(mtd)) {
+//		if(mtd->invokeMethodFunc != MethodFunc_runVirtualMachine) {
+		ASM(SCALL, ctxcode->uline, SFP_(thisidx), ESP_(espidx, argc), mtd, KLIB Knull(kctx, CT_(expr->ty)));
+//		}
+//		else {
+//			ASM(VCALL, ctxcode->uline, SFP_(thisidx), ESP_(espidx, argc), mtd, KLIB Knull(kctx, CT_(expr->ty)));
+//		}
 	}
 	else {
-		if(mtd->invokeMethodFunc != MethodFunc_runVirtualMachine) {
-			ASM(SCALL, ctxcode->uline, SFP_(thisidx), ESP_(espidx, argc), mtd, KLIB Knull(kctx, CT_(expr->ty)));
-		}
-		else {
-			ASM(VCALL, ctxcode->uline, SFP_(thisidx), ESP_(espidx, argc), mtd, KLIB Knull(kctx, CT_(expr->ty)));
-		}
+		ASM(NSET, NC_(thisidx-1), (intptr_t)mtd, CT_Method);
+		ASM(CALL, ctxcode->uline, SFP_(thisidx), ESP_(espidx, argc), KLIB Knull(kctx, CT_(expr->ty)));
 	}
 }
 
