@@ -53,7 +53,7 @@ static KMETHOD MethodFunc_FieldSetterN(KonohaContext *kctx, KonohaStack *sfp)
 
 static kMethod *new_FieldGetter(KonohaContext *kctx, ktype_t cid, ksymbol_t sym, ktype_t ty, int idx)
 {
-	kmethodn_t mn = ty == TY_Boolean ? MN_toISBOOL(sym) : MN_toGETTER(sym);
+	kmethodn_t mn = /*ty == TY_Boolean ? MN_toISBOOL(sym) : */ MN_toGETTER(sym);
 	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_FieldGetterN : MethodFunc_FieldGetter;
 	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Public|kMethod_Immutable, cid, mn, f);
 	KLIB Method_setParam(kctx, mtd, ty, 0, NULL);
