@@ -437,7 +437,7 @@ static kExpr *Expr_lookupMethod(KonohaContext *kctx, kStmt *stmt, kExpr *expr, k
 		tkMN->keyword = ksymbolA(S_text(tkMN->text), S_size(tkMN->text), SYM_NEWID);
 	}
 	size_t psize = kArray_size(expr->cons) - 2;
-	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, this_cid, tkMN->keyword, 0, MPOL_FIRST);
+	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, this_cid, tkMN->keyword, psize, MPOL_LATEST|MPOL_PARAMSIZE);
 	if(mtd == NULL) {
 		if(tkMN->text != TS_EMPTY) {  // find Dynamic Call ..
 			mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, this_cid, 0/*NONAME*/, 1, MPOL_FIRST|MPOL_PARAMSIZE);

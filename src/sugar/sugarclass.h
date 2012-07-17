@@ -513,7 +513,7 @@ static kMethod* kNameSpace_addMethod(KonohaContext *kctx, kNameSpace *ns, kMetho
 		}
 		else {
 			foundMethod = KonohaClass_getMethodNULL(kctx, ct, mtd->mn, mtd->paramdom, MPOL_FIRST);
-			if(foundMethod != NULL) {
+			if(foundMethod != NULL && Method_paramsize(mtd) == Method_paramsize(foundMethod)) {
 				DBG_P("set overloading method %s.%s%s", Method_t(foundMethod));
 				Method_setOverloaded(foundMethod, true);
 				Method_setOverloaded(mtd, true);

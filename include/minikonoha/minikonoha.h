@@ -972,7 +972,8 @@ struct kParamVar {
 
 
 #define Method_param(mtd)        kctx->share->paramList->paramItems[mtd->paramid]
-#define Method_returnType(mtd)   (Method_param(mtd))->rtype
+#define Method_returnType(mtd)   ((Method_param(mtd))->rtype)
+#define Method_paramsize(mtd)    ((Method_param(mtd))->psize)
 #define Method_t(mtd)            TY_t((mtd)->classId),PSYM_t((mtd)->mn)
 
 /* method data */
