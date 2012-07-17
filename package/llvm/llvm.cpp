@@ -4845,11 +4845,17 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 #define TY_PassManager         (CT_PassManager)->classId
 #define TY_FunctionPassManager (CT_FunctionPassManager)->classId
 	/* TODO */
-#define TY_Array_Value    (TY_Array)
-#define TY_Array_Type     (TY_Array)
+	kparamtype_t P_TypeArray[] = {{TY_Type}};
+	int TY_TypeArray = (KLIB KonohaClass_Generics(kctx, CT_Array, TY_void, 1, P_TypeArray))->classId;
+
+	kparamtype_t P_ValueArray[] = {{TY_Value}};
+	int TY_ValueArray = (KLIB KonohaClass_Generics(kctx, CT_Array, TY_void, 1, P_ValueArray))->classId;
+#define TY_Array_Value    (TY_ValueArray)
+#define TY_Array_Type     (TY_TypeArray)
 #define TY_Array_Constant (TY_Array)
 #define TY_Array_Int      (TY_Array)
 #define TY_NativeFunction (TY_Int)
+
 	assert(CT_Float != NULL && "please import konoha.float PACKAGE first");
 	intptr_t methoddata[] = {
 		_Public|_Static, _F(Type_getVoidTy), TY_Type, TY_Type, MN_("getVoidTy"), 0,

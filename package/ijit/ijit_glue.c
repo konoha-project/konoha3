@@ -110,6 +110,12 @@ static KMETHOD System_getUline(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(kmodjit->uline);
 }
 
+static KMETHOD Expr_getCons(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kExpr *expr = (kExpr *) sfp[0].asObject;
+	RETURN_(expr->cons);
+}
+
 static KMETHOD Expr_getSingle(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kExpr *expr = (kExpr *) sfp[0].asObject;
@@ -544,6 +550,13 @@ static KMETHOD Array_erase(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(dst);
 }
 
+//## Int Method.getCid();
+static KMETHOD Method_getCid(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMethod *mtd = sfp[0].asMethod;
+	RETURNi_((mtd)->classId);
+}
+
 //## Int Method.getParamSize();
 static KMETHOD Method_getParamSize(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -653,6 +666,12 @@ static KMETHOD Object_getAddr(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(p);
 }
 
+//## Int Object.getCid();
+static KMETHOD Object_getCid(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNi_((sfp[0].asObject)->h.ct->classId);
+}
+
 //## var Pointer.asObject(int addr);
 static KMETHOD Pointer_toObject(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -719,6 +738,10 @@ static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 
 static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
+	/* Array[Expr] */
+	kparamtype_t P_ExprArray[] = {{TY_Expr}};
+	int TY_ExprArray = (KLIB KonohaClass_Generics(kctx, CT_Array, TY_void, 1, P_ExprArray))->classId;
+
 	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_System, MN_("genCode"), 0, MPOL_FIRST);
 	KINITv(kmodjit->genCode, mtd);
 #define TY_Pointer kmodjit->cPointer->classId
@@ -795,11 +818,14 @@ static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_
 		_Public|_Coercion, _F(Object_toStmt), TY_Stmt, TY_Object, MN_to(TY_Stmt), 0,
 		_Public|_Coercion, _F(Object_toExpr), TY_Expr, TY_Object, MN_to(TY_Expr), 0,
 		_Public, _F(Expr_getSingle), TY_Expr, TY_Expr, MN_("getSingle"), 0,
+		_Public, _F(Expr_getCons), TY_ExprArray, TY_Expr, MN_("getCons"), 0,
 
 
 		_Public|_Static, _F(Pointer_get), TY_Int,  TY_System, MN_("getPointer"),3, TY_Int, FN_x, TY_Int, FN_y, TY_Int, FN_z,
 		_Public|_Static, _F(Pointer_set), TY_void, TY_System, MN_("setPointer"),4, TY_Int, FN_x, TY_Int, FN_y, TY_Int, FN_z,TY_Int, FN_w,
 		_Public|_Coercion, _F(Object_getAddr), TY_Int, TY_O, MN_("getAddr"), 0,
+		_Public, _F(Object_getCid), TY_Int, TY_O, MN_("getCid"), 0,
+		_Public, _F(Method_getCid), TY_Int, TY_Method, MN_("getCid"), 0,
 		//_Public|_Coercion, _F(Object_toStmt), TY_Stmt, TY_Object, MN_to(TY_Stmt), 0,
 
 #define TO(T) _Public|_Static, _F(Pointer_toObject), TY_##T, TY_System, MN_("convertTo" # T), 1, TY_Int, FN_x
