@@ -446,7 +446,7 @@ static kMethod* kNameSpace_addMethod(KonohaContext *kctx, kNameSpace *ns, kMetho
 			else {
 				if(!Method_isFinal(foundMethod)) {
 					DBG_P("Changing Virtual method %s.%s%s by %s.%s%s....", Method_t(foundMethod), Method_t(mtd));
-					// FIXME: Method_setVirtual(foundMethod, true);
+					Method_setVirtual(foundMethod, true);  // FIXME
 				}
 				if(!Method_isVirtual(foundMethod) || Method_isFinal(foundMethod)) {
 					DBG_P("Can't override method %s.%s%s <: %s.%s%s ....", Method_t(mtd), Method_t(foundMethod));
