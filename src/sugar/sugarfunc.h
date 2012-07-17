@@ -29,11 +29,49 @@ extern "C" {
 /* ------------------------------------------------------------------------ */
 /* Expression TyCheck */
 
+static kString *resolveEscapeSequence(KonohaContext *kctx, kString *s, size_t start)
+{
+	const char *text = S_text(s) + start;
+	size_t i;
+	int ch, next;
+	KUtilsWriteBuffer wb;
+	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_write(kctx, &wb, S_text(s), start);
+	for (i = start; next != '\0'; i++) {
+		ch = text[0];
+		next = text[1];
+		if(ch == '\\' && next != '\0') {
+			switch (next) {
+			case 'n':  ch = '\n'; text++; break;
+			case 't':  ch = '\t'; text++; break;
+			case 'r':  ch = '\r'; text++; break;
+			case '\\': ch = '\\'; text++; break;
+			case '"':  ch = '\"'; text++; break;
+			}
+		}
+		KLIB Kwb_putc(kctx, &wb, ch);
+		text++;
+	}
+	s = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
+	KLIB Kwb_free(&wb);
+	return s;
+}
+
+
 static KMETHOD ExprTyCheck_Text(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
-	RETURN_(SUGAR kExpr_setConstValue(kctx, expr, TY_String, UPCAST(tk->text)));
+	kString *text = tk->text;
+	size_t i, size = S_size(text);
+	for(i = 0; i < size; i++) {
+		int ch = text->buf[i];
+		if(ch == '\\') {
+			text = resolveEscapeSequence(kctx, text, i);
+			break;
+		}
+	}
+	RETURN_(SUGAR kExpr_setConstValue(kctx, expr, TY_String, UPCAST(text)));
 }
 
 static KMETHOD ExprTyCheck_Type(KonohaContext *kctx, KonohaStack *sfp)
