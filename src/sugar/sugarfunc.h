@@ -322,92 +322,41 @@ static int param_policy(ksymbol_t fn)
 	return pol;
 }
 
-///* @Overloading */
-//static void NameSpace_lookupMethods(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, kmethodn_t mn, kArray *abuf)
-//{
-//	while(ks != NULL) {
-//		size_t i;
-//		kArray *a = ks->methodList;
-//		for(i = 0; i < kArray_size(a); i++) {
-//			kMethod *mtd = a->methodItems[i];
-//			if(mtd->classId == cid && mtd->mn == mn) {
-//				KLIB kArray_add(kctx, abuf, mtd);
-//			}
-//		}
-//		ks = ks->parentNULL;
-//	}
-//	KonohaClass *ct = CT_(cid);
-//	while(ct != NULL) {
-//		size_t i;
-//		kArray *a = ct->methodList;
-//		for(i = 0; i < kArray_size(a); i++) {
-//			kMethod *mtd = a->methodItems[i];
-//			if(mtd->mn == mn) {
-//				KLIB kArray_add(kctx, abuf, mtd);
-//			}
-//		}
-//		ct = ct->searchSuperMethodClassNULL;
-//	}
-//}
-//
-//static kbool_t kParam_equals(KonohaContext *kctx, kParam *pa, KonohaClass *thisct, int psize, kparamtype_t *p)
-//{
-//	int i;
-//	for(i = 0; i < psize; i++) {
-//		if(pa->paramtypeItems[i].ty == p[i].ty) continue;
-//		if(ktype_var(kctx, pa->paramtypeItems[i].ty, thisct) != p[i].ty) return false;
-//	}
-//	return true;
-//}
-//
-//static kbool_t kParam_match(KonohaContext *kctx, kParam *pa, KonohaClass *thisct, int psize, kparamtype_t *p)
-//{
-////	int i;
-////	for(i = 0; i < psize; i++) {
-////		if(pa->paramtypeItems[i].ty != p[i].ty) return false;
-////	}
-////	return true;
-//	return false;
-//}
-//
-///* NameSpace/Class/Method */
-//static kMethod* Array_lookupMethod(KonohaContext *kctx, kArray *a, int s, int e, KonohaClass *thisct, int psize, kparamtype_t *p)
-//{
-//	int i;
-//	for(i = s; i < e; i++) {
-//		kParam *pa = Method_param(a->methodItems[i]);
-//		if(pa->psize == psize && kParam_equals(kctx, pa, thisct, psize, p)) {
-//			return a->methodItems[i];
-//		}
-//	}
-//	for(i = s; i < e; i++) {
-//		kParam *pa = Method_param(a->methodItems[i]);
-//		if(kParam_match(kctx, pa, thisct, psize, p)) {
-//			return a->methodItems[i];
-//		}
-//	}
-//	return NULL;
-//}
-//
-//static kMethod *kExpr_lookUpOverloadMethod(KonohaContext *kctx, kExpr *expr, kMethod *mtd, kGamma *gma, KonohaClass *thisct)
-//{
-//	kArray *abuf = kctx->stack->gcstack;
-//	int i, psize = kArray_size(expr->cons) - 2, atop = kArray_size(abuf);
-//	kparamtype_t p[psize];
-//	for(i = 0; i < psize; i++) {
-//		p[i].ty = expr->cons->exprItems[i+2]->ty;
-//	}
-//	KonohaClass *ct = thisct;
-//	while(1) {
-//		NameSpace_lookupMethods(kctx, gma->ns, ct->classId, mtd->mn, abuf);
-//		kMethod *mtd2 = Array_lookupMethod(kctx, abuf, atop, kArray_size(abuf), thisct, psize, p);
-//		KLIB kArray_clear(kctx, abuf, atop);
-//		if(mtd2 != NULL) return mtd2;
-//		if(ct->classId == TY_Object) break;
-//		ct = CT_(ct->superclassId);
-//	}
-//	return mtd;
-//}
+static kMethod *lookupOverloadedMethod(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kMethod *mtd, kGamma *gma)
+{
+	KonohaClass *thisClass = CT_(expr->cons->exprItems[1]->ty);
+	size_t i, psize = kArray_size(expr->cons) - 2;
+	kparamtype_t p[psize];
+	kParam *pa = Method_param(mtd);
+	for(i = 0; i < psize; i++) {
+		size_t n = i + 2;
+		ktype_t paramType = (i < pa->psize) ? ktype_var(kctx, pa->paramtypeItems[i].ty, thisClass) : TY_var;
+		kExpr *texpr = kExpr_tyCheckAt(stmt, expr, n, gma, paramType, TPOL_NOCHECK);
+		if(texpr == K_NULLEXPR) {
+			return NULL;
+		}
+		p[i].ty = expr->cons->exprItems[i+2]->ty;
+	}
+	kNameSpace *ns = kStmt_nameSpace(stmt);
+	kparamid_t paramdom = KLIB Kparamdom(kctx, psize, p);
+	kMethod *foundMethod = kNameSpace_getMethodNULL(kctx, ns, thisClass->classId, mtd->mn, paramdom, MPOL_SIGNATURE);
+	if(foundMethod == NULL) {
+		kArray *abuf = kctx->stack->gcstack;
+		size_t atop = kArray_size(abuf);
+		kNameSpace_findMethodList(kctx, ns, thisClass->classId, mtd->mn, abuf, atop);
+		for(i = atop; kArray_size(abuf); i++) {
+			foundMethod = abuf->methodItems[i];
+			kParam *pa = Method_param(foundMethod);
+			if(pa->psize != psize) continue;
+			// TODO; check parameter;
+		}
+		KLIB kArray_clear(kctx, abuf, atop);
+		if(foundMethod == NULL) {
+			foundMethod = mtd;
+		}
+	}
+	return foundMethod;
+}
 
 static kExpr* Expr_typedWithMethod(KonohaContext *kctx, kExpr *expr, kMethod *mtd, ktype_t reqty)
 {
@@ -422,52 +371,46 @@ static kExpr* Expr_typedWithMethod(KonohaContext *kctx, kExpr *expr, kMethod *mt
 	return expr;
 }
 
+static kExpr* getBoxedThisExpr(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kMethod *mtd)
+{
+	kExpr *thisExpr = expr->cons->exprItems[1];
+	KonohaClass *thisClass = CT_(thisExpr->ty);
+	DBG_ASSERT(IS_Method(mtd));
+	DBG_ASSERT(thisClass->classId != TY_var);
+	if(!TY_isUnbox(mtd->classId) && CT_isUnbox(thisClass)) {
+		thisExpr = new_BoxingExpr(kctx, expr->cons->exprItems[1], thisClass->classId);
+		KSETv(expr->cons->exprItems[1], thisExpr);
+	}
+	return thisExpr;
+}
+
 static kExpr *Expr_tyCheckCallParams(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kMethod *mtd, kGamma *gma, ktype_t reqty)
 {
-	kArray *cons = expr->cons;
-	size_t i, size = kArray_size(cons);
-	kExpr *expr1 = cons->exprItems[1];
-	KonohaClass *this_ct = CT_(expr1->ty);
-	DBG_ASSERT(IS_Method(mtd));
-	DBG_ASSERT(this_ct->classId != TY_var);
-	if(!TY_isUnbox(mtd->classId) && CT_isUnbox(this_ct)) {
-		expr1 = new_BoxingExpr(kctx, cons->exprItems[1], this_ct->classId);
-		KSETv(cons->exprItems[1], expr1);
-	}
-	int isConst = (Expr_isCONST(expr1)) ? 1 : 0;
-	//	if(rtype == TY_var && gma->genv->mtd == mtd) {
-	//		return ERROR_Unsupported(kctx, "type inference of recursive calls", TY_unknown, NULL);
-	//	}
-	for(i = 2; i < size; i++) {
-		kExpr *texpr = kExpr_tyCheckAt(stmt, expr, i, gma, TY_var, 0);
-		if(texpr == K_NULLEXPR) {
-			return texpr;
-		}
-	}
-//	mtd = kExpr_lookUpOverloadMethod(kctx, expr, mtd, gma, this_ct);
+	kExpr *thisExpr = getBoxedThisExpr(kctx, stmt, expr, mtd);
+	KonohaClass *thisClass = CT_(thisExpr->ty);
+	int isConst = (Expr_isCONST(thisExpr)) ? 1 : 0;
 	kParam *pa = Method_param(mtd);
-	if(pa->psize + 2 != size) {
-		return kExpr_p(stmt, expr, ErrTag, "%s.%s%s takes %d parameter(s), but given %d parameter(s)", CT_t(this_ct), T_mn(mtd->mn), (int)pa->psize, (int)size-2);
-	}
+	size_t i;
+	DBG_ASSERT(pa->psize +2 == kArray_size(expr->cons));
 	for(i = 0; i < pa->psize; i++) {
 		size_t n = i + 2;
-		ktype_t ptype = ktype_var(kctx, pa->paramtypeItems[i].ty, this_ct);
-		int pol = param_policy(pa->paramtypeItems[i].fn);
-		kExpr *texpr = kExpr_tyCheckAt(stmt, expr, n, gma, ptype, pol);
+		ktype_t paramType = ktype_var(kctx, pa->paramtypeItems[i].ty, thisClass);
+		int tycheckPolicy = param_policy(pa->paramtypeItems[i].fn);
+		kExpr *texpr = kExpr_tyCheckAt(stmt, expr, n, gma, paramType, tycheckPolicy);
 		if(texpr == K_NULLEXPR) {
-			return kExpr_p(stmt, expr, ErrTag, "%s.%s%s accepts %s at the parameter %d", CT_t(this_ct), T_mn(mtd->mn), TY_t(ptype), (int)i+1);
+			return kExpr_p(stmt, expr, ErrTag, "%s.%s%s accepts %s at the parameter %d", Method_t(mtd), TY_t(paramType), (int)i+1);
 		}
-		if(!Expr_isCONST(expr)) isConst = 0;
+		if(!Expr_isCONST(texpr)) isConst = 0;
 	}
 	expr = Expr_typedWithMethod(kctx, expr, mtd, reqty);
 	if(isConst && Method_isConst(mtd)) {
-		ktype_t rtype = ktype_var(kctx, pa->rtype, this_ct);
-		return ExprCall_toConstValue(kctx, expr, cons, rtype);
+		ktype_t rtype = ktype_var(kctx, pa->rtype, thisClass);
+		return ExprCall_toConstValue(kctx, expr, expr->cons, rtype);
 	}
 	return expr;
 }
 
-static kExpr* Expr_tyCheckDynamicCallParams(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kMethod *mtd, kGamma *gma, kString *name, kmethodn_t mn, ktype_t reqty)
+static kExpr* tyCheckDynamicCallParams(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kMethod *mtd, kGamma *gma, kString *name, kmethodn_t mn, ktype_t reqty)
 {
 	int i;
 	kParam *pa = Method_param(mtd);
@@ -482,9 +425,6 @@ static kExpr* Expr_tyCheckDynamicCallParams(KonohaContext *kctx, kStmt *stmt, kE
 
 static const char* MethodType_t(KonohaContext *kctx, kmethodn_t mn, size_t psize)
 {
-//	static const char *mnname[3] = {"method", "unary operator", "binary operator"};
-//	DBG_ASSERT(mn_type <= (size_t)MNTYPE_binary);
-//	return mnname[mn_type];
 	return "method";
 }
 
@@ -496,15 +436,15 @@ static kExpr *Expr_lookupMethod(KonohaContext *kctx, kStmt *stmt, kExpr *expr, k
 	if(tkMN->keyword == TK_SYMBOL) {
 		tkMN->keyword = ksymbolA(S_text(tkMN->text), S_size(tkMN->text), SYM_NEWID);
 	}
+	size_t psize = kArray_size(expr->cons) - 2;
 	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, this_cid, tkMN->keyword, 0, MPOL_FIRST);
 	if(mtd == NULL) {
 		if(tkMN->text != TS_EMPTY) {  // find Dynamic Call ..
 			mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, this_cid, 0/*NONAME*/, 1, MPOL_FIRST|MPOL_PARAMSIZE);
 			if(mtd != NULL) {
-				return Expr_tyCheckDynamicCallParams(kctx, stmt, expr, mtd, gma, tkMN->text, tkMN->keyword, reqty);
+				return tyCheckDynamicCallParams(kctx, stmt, expr, mtd, gma, tkMN->text, tkMN->keyword, reqty);
 			}
 		}
-		size_t psize = kArray_size(expr->cons) - 2;
 		if(tkMN->keyword == MN_new && psize == 0 && CT_(kExpr_at(expr, 1)->ty)->baseclassId == TY_Object) {
 			//DBG_P("baseclassId=%s", TY_t(CT_(kExpr_at(expr, 1)->ty)->baseclassId));
 			DBG_ASSERT(kExpr_at(expr, 1)->ty != TY_var);
@@ -513,6 +453,9 @@ static kExpr *Expr_lookupMethod(KonohaContext *kctx, kStmt *stmt, kExpr *expr, k
 		kToken_p(stmt, tkMN, ErrTag, "undefined %s: %s.%s%s", MethodType_t(kctx, tkMN->keyword, psize), TY_t(this_cid), KW_t(tkMN->keyword));
 	}
 	if(mtd != NULL) {
+		if(Method_isOverloaded(mtd)) {
+			mtd = lookupOverloadedMethod(kctx, stmt, expr, mtd, gma);
+		}
 		return Expr_tyCheckCallParams(kctx, stmt, expr, mtd, gma, reqty);
 	}
 	return K_NULLEXPR;
@@ -527,6 +470,9 @@ static KMETHOD ExprTyCheck_MethodCall(KonohaContext *kctx, KonohaStack *sfp)
 		RETURN_(Expr_lookupMethod(kctx, stmt, expr, this_cid, gma, reqty));
 	}
 }
+
+// --------------------------------------------------------------------------
+// FuncStyleCall
 
 static kExpr *Expr_tyCheckFuncParams(KonohaContext *kctx, kStmt *stmt, kExpr *expr, KonohaClass *ct, kGamma *gma);
 

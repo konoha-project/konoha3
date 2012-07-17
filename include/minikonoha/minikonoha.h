@@ -1157,6 +1157,7 @@ struct KonohaLibVar {
 	void (*kArray_insert)(KonohaContext*, kArray *, size_t, kAbstractObject *);
 	void (*kArray_clear)(KonohaContext*, kArray *, size_t);
 
+	kparamid_t (*Kparamdom)(KonohaContext*, int, const kparamtype_t *);
 	kMethod *  (*new_kMethod)(KonohaContext*, uintptr_t, ktype_t, kmethodn_t, MethodFunc);
 	kParam*    (*Method_setParam)(KonohaContext*, kMethod *, ktype_t, int, const kparamtype_t *);
 	void       (*Method_setFunc)(KonohaContext*, kMethod*, MethodFunc);

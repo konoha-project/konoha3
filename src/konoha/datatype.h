@@ -886,6 +886,7 @@ static void KTYTABLE_initkklib(KonohaLibVar *l)
 	l->kArray_insert        = (typeof(l->kArray_insert))kArray_insert;
 	l->kArray_clear         = kArray_clear;
 	l->new_kMethod          = new_kMethod;
+	l->Kparamdom            = Kparamdom;
 	l->Method_setParam     = Method_setParam;
 	l->kMethod_indexOfField = STUB_Method_indexOfField;
 	l->Konoha_defineClass    = Konoha_defineClass;
