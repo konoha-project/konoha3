@@ -984,7 +984,7 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(GT), _OP, .op2 = ">", .priority_op2 = 256, },
 		{ TOKEN(GTE), _OP, .op2 = ">=", .priority_op2 = 256, },
 		{ TOKEN(EQ), _OP, .op2 = "==", .priority_op2 = 512, },
-		{ TOKEN(NEQ), _OP, .op2 = "opNEQ", .priority_op2 = 512, },
+		{ TOKEN(NEQ), _OP, .op2 = "!=", .priority_op2 = 512, },
 		{ TOKEN(AND), _OP, /*.op2 = ""unused*/ .priority_op2 = 1024, ExprTyCheck_(AND)},
 		{ TOKEN(OR), _OP, /*.op2 = ""unused*/ .priority_op2 = 2048, ExprTyCheck_(OR)},
 		{ TOKEN(NOT), _OP, .op1 = "!", },

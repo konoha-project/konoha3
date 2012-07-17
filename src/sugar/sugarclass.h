@@ -87,7 +87,7 @@ static void NameSpace_free(KonohaContext *kctx, kObject *o)
 }
 
 // syntax
-static void checkFuncArray(KonohaContext *kctx, kFunc **synp);
+static void checkFuncArray(KonohaContext *kctx, kFunc **funcItems);
 static void parseSyntaxRule(KonohaContext *kctx, const char *rule, kfileline_t pline, kArray *a);
 
 static SugarSyntax* NameSpace_syn(KonohaContext *kctx, kNameSpace *ns0, ksymbol_t keyword, int isNew)
@@ -143,15 +143,15 @@ static SugarSyntax* NameSpace_syn(KonohaContext *kctx, kNameSpace *ns0, ksymbol_
 	return NULL;
 }
 
-static void checkFuncArray(KonohaContext *kctx, kFunc **synp)
+static void checkFuncArray(KonohaContext *kctx, kFunc **funcItems)
 {
-	if(synp[0] != NULL && IS_Array(synp[0])) {
+	if(funcItems[0] != NULL && IS_Array(funcItems[0])) {
 		size_t i;
-		kArray *newa = new_(Array, 8), *a = (kArray*)synp[0];
+		kArray *newa = new_(Array, 8), *a = (kArray*)funcItems[0];
 		for(i = 0; i < kArray_size(a); i++) {
 			KLIB kArray_add(kctx, newa, a->objectItems[i]);
 		}
-		KSETv(synp[0], (kFunc*)newa);
+		KSETv(funcItems[0], (kFunc*)newa);
 	}
 }
 
@@ -181,14 +181,14 @@ static void kNameSpace_addSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol
 	KLIB kArray_add(kctx, a, fo);
 }
 
-static void setSugarFunc(KonohaContext *kctx, MethodFunc f, kFunc **synp, MethodFunc *p, kFunc **mp)
+static void setSugarFunc(KonohaContext *kctx, MethodFunc f, kFunc **funcItems, MethodFunc *p, kFunc **mp)
 {
 	if(f != NULL) {
 		if(f != p[0]) {
 			p[0] = f;
 			mp[0] = new_SugarFunc(f);
 		}
-		KINITv(synp[0], mp[0]);
+		KINITv(funcItems[0], mp[0]);
 	}
 }
 
@@ -231,7 +231,6 @@ static void NameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE_
 		DBG_ASSERT(syn == SYN_(ns, syndef->keyword));
 		syndef++;
 	}
-	//DBG_P("syntax size=%d, hmax=%d", ks->syntaxMapNN->size, ks->syntaxMapNN->hmax);
 }
 
 #define T_statement(kw)  KW_tSTMT_(kctx, kw), KW_tSTMTPOST(kw)

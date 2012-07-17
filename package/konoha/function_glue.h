@@ -102,7 +102,7 @@ static	kbool_t function_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 //		_Public|_Const|_Im, _F(Float_opMUL), TY_Float, TY_Float, MN_("*"), 1, TY_Float, FN_x,
 //		_Public|_Im, _F(Float_opDIV), TY_Float, TY_Float, MN_("/"), 1, TY_Float, FN_x,
 //		_Public|_Const|_Im, _F(Float_opEQ),  TY_Boolean, TY_Float, MN_("=="), 1, TY_Float, FN_x,
-//		_Public|_Const|_Im, _F(Float_opNEQ), TY_Boolean, TY_Float, MN_("opNEQ"), 1, TY_Float, FN_x,
+//		_Public|_Const|_Im, _F(Float_opNEQ), TY_Boolean, TY_Float, MN_("!="), 1, TY_Float, FN_x,
 //		_Public|_Const|_Im, _F(Float_opLT),  TY_Boolean, TY_Float, MN_("<"), 1, TY_Float, FN_x,
 //		_Public|_Const|_Im, _F(Float_opLTE), TY_Boolean, TY_Float, MN_("<="), 1, TY_Float, FN_x,
 //		_Public|_Const|_Im, _F(Float_opGT),  TY_Boolean, TY_Float, MN_(">"), 1, TY_Float, FN_x,
