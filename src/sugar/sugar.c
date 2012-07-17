@@ -40,6 +40,7 @@ int verbose_sugar = 0;
 
 #include "perror.h"
 #include "sugarclass.h"
+#include "namespace.h"
 #include "sugardump.h"
 #include "token.h"
 #include "ast.h"

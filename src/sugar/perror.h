@@ -102,7 +102,7 @@ static SugarSyntax* NameSpace_syn(KonohaContext *kctx, kNameSpace *ns0, ksymbol_
 
 static void Stmt_toERR(KonohaContext *kctx, kStmt *stmt, kString *errmsg)
 {
-	((kStmtVar*)stmt)->syn   = SYN_(kStmt_nameSpace(stmt), KW_ERR);
+	((kStmtVar*)stmt)->syn   = SYN_(Stmt_nameSpace(stmt), KW_ERR);
 	((kStmtVar*)stmt)->build = TSTMT_ERR;
 	KLIB kObject_setObject(kctx, stmt, KW_ERR, TY_String, errmsg);
 }

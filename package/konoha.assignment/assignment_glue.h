@@ -31,9 +31,9 @@
 static KMETHOD ExprTyCheck_assignment(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	kNameSpace *ns = kStmt_nameSpace(stmt);
-	kExpr *lexpr = kExpr_tyCheckAt(stmt, expr, 1, gma, TY_var, TPOL_ALLOWVOID);
-	kExpr *rexpr = kExpr_tyCheckAt(stmt, expr, 2, gma, lexpr->ty, 0);
+	kNameSpace *ns = Stmt_nameSpace(stmt);
+	kExpr *lexpr = SUGAR kkStmt_tyCheckByNameAt(kctx, stmt, expr, 1, gma, TY_var, TPOL_ALLOWVOID);
+	kExpr *rexpr = SUGAR kkStmt_tyCheckByNameAt(kctx, stmt, expr, 2, gma, lexpr->ty, 0);
 	if(rexpr != K_NULLEXPR && lexpr != K_NULLEXPR) {
 		if(rexpr != K_NULLEXPR) {
 			if(lexpr->build == TEXPR_LOCAL || lexpr->build == TEXPR_FIELD) {
@@ -50,7 +50,7 @@ static KMETHOD ExprTyCheck_assignment(KonohaContext *kctx, KonohaStack *sfp)
 					if(mtd != NULL) {
 						KSETv(lexpr->cons->methodItems[0], mtd);
 						KLIB kArray_add(kctx, lexpr->cons, rexpr);
-						RETURN_(SUGAR Expr_tyCheckCallParams(kctx, stmt, lexpr, mtd, gma, reqty));
+						RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, lexpr, mtd, gma, reqty));
 					}
 				}
 			}

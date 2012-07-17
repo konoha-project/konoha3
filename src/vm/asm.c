@@ -774,7 +774,7 @@ static void ExprStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx
 
 static void BlockStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
-	BLOCK_asm(kctx, kStmt_block(stmt, KW_BlockPattern, K_NULLBLOCK), shift);
+	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, KW_BlockPattern, K_NULLBLOCK), shift);
 }
 
 static void IfStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
@@ -782,13 +782,13 @@ static void IfStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 	kBasicBlock*  lbELSE = new_BasicBlockLABEL(kctx);
 	kBasicBlock*  lbEND  = new_BasicBlockLABEL(kctx);
 	/* if */
-	lbELSE = EXPR_asmJMPIF(kctx, espidx, kStmt_expr(stmt, KW_ExprPattern, NULL), 0/*FALSE*/, lbELSE, shift, espidx);
+	lbELSE = EXPR_asmJMPIF(kctx, espidx, SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL), 0/*FALSE*/, lbELSE, shift, espidx);
 	/* then */
-	BLOCK_asm(kctx, kStmt_block(stmt, KW_BlockPattern, K_NULLBLOCK), shift);
+	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, KW_BlockPattern, K_NULLBLOCK), shift);
 	ASM_JMP(kctx, lbEND);
 	/* else */
 	ASM_LABEL(kctx, lbELSE);
-	BLOCK_asm(kctx, kStmt_block(stmt, KW_else, K_NULLBLOCK), shift);
+	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, KW_else, K_NULLBLOCK), shift);
 	/* endif */
 	ASM_LABEL(kctx, lbEND);
 }
@@ -811,9 +811,9 @@ static void LoopStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx
 	KLIB kObject_setObject(kctx, stmt, SYM_("break"), TY_BasicBlock, lbBREAK);
 	ASM_LABEL(kctx, lbCONTINUE);
 	ASM_SAFEPOINT(kctx, espidx);
-	EXPR_asmJMPIF(kctx, espidx, kStmt_expr(stmt, KW_ExprPattern, NULL), 0/*FALSE*/, lbBREAK, shift, espidx);
-	//BLOCK_asm(kctx, kStmt_block(stmt, KW_("iteration"), K_NULLBLOCK));
-	BLOCK_asm(kctx, kStmt_block(stmt, KW_BlockPattern, K_NULLBLOCK), shift);
+	EXPR_asmJMPIF(kctx, espidx, SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL), 0/*FALSE*/, lbBREAK, shift, espidx);
+	//BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, KW_("iteration"), K_NULLBLOCK));
+	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, KW_BlockPattern, K_NULLBLOCK), shift);
 	ASM_JMP(kctx, lbCONTINUE);
 	ASM_LABEL(kctx, lbBREAK);
 //	BUILD_popLABEL(kctx);
