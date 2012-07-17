@@ -61,10 +61,20 @@ static KMETHOD Float_opADD(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNf_(sfp[0].fvalue + sfp[1].fvalue);
 }
 
+static KMETHOD Int_opADD(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNf_(sfp[0].ivalue + sfp[1].fvalue);
+}
+
 /* float - float */
 static KMETHOD Float_opSUB(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNf_(sfp[0].fvalue - sfp[1].fvalue);
+}
+
+static KMETHOD Int_opSUB(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNf_(sfp[0].ivalue - sfp[1].fvalue);
 }
 
 /* float * float */
@@ -81,6 +91,21 @@ static KMETHOD Float_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 		kreportf(CritTag, sfp[K_RTNIDX].uline, "Script!!: zero divided");
 	}
 	RETURNf_(sfp[0].fvalue / n);
+}
+
+static KMETHOD Int_opMUL(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNf_(sfp[0].ivalue * sfp[1].fvalue);
+}
+
+/* float / float */
+static KMETHOD Int_opDIV(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kfloat_t n = sfp[1].fvalue;
+	if(unlikely(n == 0.0)) {
+		kreportf(CritTag, sfp[K_RTNIDX].uline, "Script!!: zero divided");
+	}
+	RETURNf_(sfp[0].ivalue / n);
 }
 
 /* float == float */
@@ -118,6 +143,45 @@ static KMETHOD Float_opGTE(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNb_(sfp[0].fvalue >= sfp[1].fvalue);
 }
+
+//////
+
+static KMETHOD Int_opEQ(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNb_(sfp[0].ivalue == sfp[1].fvalue);
+}
+
+/* float != float */
+static KMETHOD Int_opNEQ(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNb_(sfp[0].ivalue != sfp[1].fvalue);
+}
+
+
+/* float < float */
+static KMETHOD Int_opLT(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNb_(sfp[0].ivalue < sfp[1].fvalue);
+}
+
+/* float <= float */
+static KMETHOD Int_opLTE(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNb_(sfp[0].ivalue <= sfp[1].fvalue);
+}
+
+/* float > float */
+static KMETHOD Int_opGT(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNb_(sfp[0].ivalue > sfp[1].fvalue);
+}
+
+/* float >= float */
+static KMETHOD Int_opGTE(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNb_(sfp[0].ivalue >= sfp[1].fvalue);
+}
+
 
 /* float to int */
 static KMETHOD Float_toInt(KonohaContext *kctx, KonohaStack *sfp)
@@ -197,7 +261,9 @@ static	kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im, _F(Float_opADD), TY_Float, TY_Float, MN_("+"), 1, TY_Float, FN_x,
+		_Public|_Const|_Im, _F(Int_opADD), TY_Float, TY_Int, MN_("+"), 1, TY_Float, FN_x,
 		_Public|_Const|_Im, _F(Float_opSUB), TY_Float, TY_Float, MN_("-"), 1, TY_Float, FN_x,
+		_Public|_Const|_Im, _F(Int_opSUB), TY_Float, TY_Int, MN_("+"), 1, TY_Float, FN_x,
 		_Public|_Const|_Im, _F(Float_opMUL), TY_Float, TY_Float, MN_("*"), 1, TY_Float, FN_x,
 		_Public|_Im, _F(Float_opDIV), TY_Float, TY_Float, MN_("/"), 1, TY_Float, FN_x,
 		_Public|_Const|_Im, _F(Float_opEQ),  TY_Boolean, TY_Float, MN_("=="), 1, TY_Float, FN_x,
@@ -206,6 +272,15 @@ static	kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public|_Const|_Im, _F(Float_opLTE), TY_Boolean, TY_Float, MN_("<="), 1, TY_Float, FN_x,
 		_Public|_Const|_Im, _F(Float_opGT),  TY_Boolean, TY_Float, MN_(">"), 1, TY_Float, FN_x,
 		_Public|_Const|_Im, _F(Float_opGTE), TY_Boolean, TY_Float, MN_(">="), 1, TY_Float, FN_x,
+		_Public|_Const|_Im, _F(Int_opMUL), TY_Float, TY_Int, MN_("*"), 1, TY_Float, FN_x,
+		_Public|_Im, _F(Int_opDIV), TY_Float, TY_Int, MN_("/"), 1, TY_Float, FN_x,
+		_Public|_Const|_Im, _F(Int_opEQ),  TY_Boolean, TY_Int, MN_("=="), 1, TY_Float, FN_x,
+		_Public|_Const|_Im, _F(Int_opNEQ), TY_Boolean, TY_Int, MN_("opNEQ"), 1, TY_Float, FN_x,
+		_Public|_Const|_Im, _F(Int_opLT),  TY_Boolean, TY_Int, MN_("<"), 1, TY_Float, FN_x,
+		_Public|_Const|_Im, _F(Int_opLTE), TY_Boolean, TY_Int, MN_("<="), 1, TY_Float, FN_x,
+		_Public|_Const|_Im, _F(Int_opGT),  TY_Boolean, TY_Int, MN_(">"), 1, TY_Float, FN_x,
+		_Public|_Const|_Im, _F(Int_opGTE), TY_Boolean, TY_Int, MN_(">="), 1, TY_Float, FN_x,
+
 		_Public|_Const|_Im|_Coercion, _F(Float_toInt), TY_Int, TY_Float, MN_to(TY_Int), 0,
 		_Public|_Const|_Im|_Coercion, _F(Int_toFloat), TY_Float, TY_Int, MN_to(TY_Float), 0,
 		_Public|_Const|_Im, _F(Float_toString), TY_String, TY_Float, MN_to(TY_String), 0,
