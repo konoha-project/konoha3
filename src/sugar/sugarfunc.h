@@ -32,16 +32,14 @@ extern "C" {
 static kString *resolveEscapeSequence(KonohaContext *kctx, kString *s, size_t start)
 {
 	const char *text = S_text(s) + start;
-	size_t i;
-	int ch, next;
+	const char *end  = S_text(s) + S_size(s);
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	KLIB Kwb_write(kctx, &wb, S_text(s), start);
-	for (i = start; next != '\0'; i++) {
-		ch = text[0];
-		next = text[1];
-		if(ch == '\\' && next != '\0') {
-			switch (next) {
+	while (text < end) {
+		int ch = *text;
+		if(ch == '\\' && *(text+1) != '\0') {
+			switch (*(text+1)) {
 			case 'n':  ch = '\n'; text++; break;
 			case 't':  ch = '\t'; text++; break;
 			case 'r':  ch = '\r'; text++; break;
@@ -49,7 +47,7 @@ static kString *resolveEscapeSequence(KonohaContext *kctx, kString *s, size_t st
 			case '"':  ch = '\"'; text++; break;
 			}
 		}
-		KLIB Kwb_putc(kctx, &wb, ch);
+		kwb_putc(&wb, ch);
 		text++;
 	}
 	s = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
@@ -941,7 +939,7 @@ static KMETHOD StmtTyCheck_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_StmtTyCheck(stmt, gma);
 	kNameSpace *ns    = Stmt_nameSpace(stmt);
 	uintptr_t flag    = kStmt_parseFlags(kctx, stmt, MethodDeclFlag, 0);
-	ktype_t classId   = kStmt_getClassId(kctx, stmt, ns, KW_UsymbolPattern, O_classId(ns->scriptObject));
+	ktype_t classId   = kStmt_getClassId(kctx, stmt, ns, SYM_("type"), O_classId(ns->scriptObject));
 	kmethodn_t mn     = kStmt_getMethodSymbol(kctx, stmt, ns, KW_SymbolPattern, MN_new);
 	kParam *pa        = kStmt_newMethodParamNULL(kctx, stmt, gma);
 	if(TY_isSingleton(classId)) {
@@ -1013,7 +1011,7 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(LET),  _OPLeft, /*.op2 = "*"*/ .priority_op2 = 4096, },
 		{ TOKEN(COMMA), ParseExpr_(COMMA), .op2 = "*", .priority_op2 = 8192, /*.flag = SYNFLAG_ExprLeftJoinOP2,*/ },
 		{ TOKEN(DOLLAR), ParseExpr_(DOLLAR), },
-		{ TOKEN(void), .type = TY_void, .rule ="$type [$type \".\"] $SYMBOL $params [$block]", TopStmtTyCheck_(MethodDecl)},
+		{ TOKEN(void), .type = TY_void, .rule ="$type [type: $type \".\"] $SYMBOL $params [$block]", TopStmtTyCheck_(MethodDecl)},
 		{ TOKEN(boolean), .type = TY_Boolean, },
 		{ TOKEN(int),     .type = TY_Int, },
 		{ TOKEN(true),  _TERM, ExprTyCheck_(true),},
