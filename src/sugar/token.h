@@ -204,12 +204,12 @@ static int parseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, TokenizerEn
 {
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	int ch, prev = '"', pos = tok_start + 1, next;
+	int ch, prev = '"', prev2 = '\0', pos = tok_start + 1, next;
 	while((ch = tenv->source[pos++]) != 0) {
 		if(ch == '\n') {
 			break;
 		}
-		if(ch == '"' && prev != '\\') {
+		if(ch == '"' && (prev != '\\' || (prev == '\\' && prev2 == '\\'))) {
 			if(IS_NOTNULL(tk)) {
 				size_t length = Kwb_bytesize(&wb);
 				KSETv(tk->text, KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), length, 0));
@@ -218,6 +218,7 @@ static int parseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, TokenizerEn
 			KLIB Kwb_free(&wb);
 			return pos;
 		}
+		prev2 = prev;
 		prev = ch;
 		kwb_putc(&wb, ch);
 	}
@@ -382,7 +383,7 @@ static int callFuncTokenize(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, Token
 	KSETv(lsfp[K_CALLDELTA+2].s, preparedString);
 	KCALL(lsfp, 0, fo->mtd, 2, KLIB Knull(kctx, CT_Int));
 	END_LOCAL();
-	int pos = lsfp[0].ivalue;
+	int pos = lsfp[0].ivalue + tok_start;
 	if(pos > tok_start) { // check new lines
 		int i;
 		const char *t = tenv->source;
