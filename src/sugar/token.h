@@ -218,15 +218,6 @@ static int parseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, TokenizerEn
 			KLIB Kwb_free(&wb);
 			return pos;
 		}
-		if(ch == '\\' && (next = tenv->source[pos]) != 0) {
-			switch (next) {
-			case 'n':  ch = '\n'; pos++; break;
-			case 't':  ch = '\t'; pos++; break;
-			case 'r':  ch = '\r'; pos++; break;
-			case '\\': ch = '\\'; pos++; break;
-			case '"':  ch = '\"'; pos++; break;
-			}
-		}
 		prev = ch;
 		kwb_putc(&wb, ch);
 	}
