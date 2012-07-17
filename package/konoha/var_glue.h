@@ -47,19 +47,19 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp)
 //		SUGAR p(kctx, ErrTag, stmt->uline, -1, " global variables are not available");
 //		RETURNb_(false);
 //	}
-//	kExpr *vexpr = kStmt_expr(stmt, KW_("var"), K_NULLEXPR);
+//	kExpr *vexpr = SUGAR kStmt_getExpr(kctx, stmt, KW_("var"), K_NULLEXPR);
 //	ksymbol_t fn = tosymbol(kctx, vexpr);
 //	if(fn == SYM_NONAME) {
 //		SUGAR p(kctx, ErrTag, stmt->uline, -1, "not variable name");
 //		RETURNb_(false);
 //	}
-//	kExpr *expr = kStmt_expr(stmt, KW_ExprPattern, K_NULLEXPR);
+//	kExpr *expr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, K_NULLEXPR);
 //	DBG_P("expr kw='%s'", KW_t(expr->syn->keyword));
-//	if(!SUGAR Stmt_tyCheckExpr(kctx, stmt, KW_ExprPattern, gma, TY_var, 0)) {
+//	if(!SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, 0)) {
 //		SUGAR p(kctx, ErrTag, stmt->uline, -1, "type error");
 //		RETURNb_(false);
 //	}
-//	/*kExpr **/expr = kStmt_expr(stmt, KW_ExprPattern, K_NULLEXPR);
+//	/*kExpr **/expr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, K_NULLEXPR);
 //	kMethod *mtd = Object_newProtoSetterNULL(kctx, scr, gma->genv->ns, expr->ty, fn, stmt->uline);
 //	if(mtd == NULL) {
 //		RETURNb_(false);

@@ -255,13 +255,13 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp)
 		}
 
 		if(TK_isType(tk1) && tk2->keyword == AST_PARENTHESIS) {  // new C (...)
-			SugarSyntax *syn = SYN_(kStmt_nameSpace(stmt), KW_ExprMethodCall);
+			SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
 			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, tkNEW, NewExpr(kctx, syn, tk1, TK_type(tk1)));
 			tkNEW->keyword = MN_new;
 			RETURN_(expr);
 		}
 		if(TK_isType(tk1) && tk2->keyword == AST_BRACKET) {     // new C [...]
-			SugarSyntax *syn = SYN_(kStmt_nameSpace(stmt), KW_new);
+			SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_new);
 			KonohaClass *ct = CT_p0(kctx, CT_Array, TK_type(tk1));
 			tkNEW->keyword = MN_("newArray");
 			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, tkNEW, NewExpr(kctx, syn, tk1, ct->classId));
@@ -281,13 +281,13 @@ static KMETHOD ExprTyCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tkN = expr->cons->tokenItems[0];
 	ksymbol_t fn = tosymbolUM(kctx, tkN);
-	kExpr *self = SUGAR Expr_tyCheckAt(kctx, stmt, expr, 1, gma, TY_var, 0);
-	kNameSpace *ns = kStmt_nameSpace(stmt);
+	kExpr *self = SUGAR kkStmt_tyCheckByNameAt(kctx, stmt, expr, 1, gma, TY_var, 0);
+	kNameSpace *ns = Stmt_nameSpace(stmt);
 	if(self != K_NULLEXPR) {
 		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, self->ty, MN_toGETTER(fn), 0, MPOL_GETTER);
 		if(mtd != NULL) {
 			KSETv(expr->cons->methodItems[0], mtd);
-			RETURN_(SUGAR Expr_tyCheckCallParams(kctx, stmt, expr, mtd, gma, reqty));
+			RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, reqty));
 		}
 		SUGAR Stmt_p(kctx, stmt, tkN, ErrTag, "undefined field: %s", S_text(tkN->text));
 	}
@@ -302,7 +302,7 @@ static void Stmt_parseClassBlock(KonohaContext *kctx, kStmt *stmt, kToken *tkC)
 	if(tkP != NULL && tkP->keyword == TK_CODE) {
 		kArray *a = ctxsugar->preparedTokenList;
 		size_t atop = kArray_size(a), s, i;
-		SUGAR kNameSpace_tokenize(kctx, kStmt_nameSpace(stmt), S_text(tkP->text), tkP->uline, a);
+		SUGAR kNameSpace_tokenize(kctx, Stmt_nameSpace(stmt), S_text(tkP->text), tkP->uline, a);
 		s = kArray_size(a);
 		const char *cname = S_text(tkC->text);
 		for(i = atop; i < s; i++) {
@@ -319,7 +319,7 @@ static void Stmt_parseClassBlock(KonohaContext *kctx, kStmt *stmt, kToken *tkC)
 			KLIB kArray_add(kctx, a, tk);
 			tkP = tk;
 		}
-		kBlock *bk = SUGAR new_Block(kctx, kStmt_nameSpace(stmt), stmt, a, s, kArray_size(a), ';');
+		kBlock *bk = SUGAR new_Block(kctx, Stmt_nameSpace(stmt), stmt, a, s, kArray_size(a), ';');
 		for (i = 0; i < kArray_size(bk->stmtList); i++) {
 			kStmt *methodDecl = bk->stmtList->stmtItems[i];
 			if(methodDecl->syn->keyword == KW_StmtMethodDecl) {
@@ -392,7 +392,7 @@ static size_t checkFieldSize(KonohaContext *kctx, kBlock *bk)
 		kStmt *stmt = bk->stmtList->stmtItems[i];
 		DBG_P("stmt->keyword=%s", KW_t(stmt->syn->keyword));
 		if(stmt->syn->keyword == KW_StmtTypeDecl) {
-			kExpr *expr = kStmt_expr(stmt, KW_ExprPattern, NULL);
+			kExpr *expr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL);
 			if(expr->syn->keyword == KW_COMMA) {
 				c += (kArray_size(expr->cons) - 1);
 			}
@@ -439,7 +439,7 @@ static kbool_t CT_declType(KonohaContext *kctx, KonohaClassVar *ct, kGamma *gma,
 	else if(expr->syn->keyword == KW_LET) {
 		kExpr *lexpr = kExpr_at(expr, 1);
 		if(Expr_isTerm(lexpr)) {
-			kExpr *vexpr = SUGAR Expr_tyCheckAt(kctx, stmt, expr, 2, gma, ty, 0);
+			kExpr *vexpr = SUGAR kkStmt_tyCheckByNameAt(kctx, stmt, expr, 2, gma, ty, 0);
 			if(vexpr == K_NULLEXPR) {
 				return false;
 			}
@@ -477,8 +477,8 @@ static kbool_t CT_addClassFields(KonohaContext *kctx, KonohaClassVar *ct, kGamma
 		kStmt *stmt = bk->stmtList->stmtItems[i];
 		if(stmt->syn->keyword == KW_StmtTypeDecl) {
 			kshortflag_t flag = kField_Getter | kField_Setter;
-			kToken *tk  = kStmt_token(stmt, KW_TypePattern, NULL);
-			kExpr *expr = kStmt_expr(stmt, KW_ExprPattern, NULL);
+			kToken *tk  = SUGAR kStmt_getToken(kctx, stmt, KW_TypePattern, NULL);
+			kExpr *expr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL);
 			if(!CT_declType(kctx, ct, gma, stmt, expr, flag, TK_type(tk), pline)) {
 				return false;
 			}
@@ -510,8 +510,8 @@ static void CT_checkMethodDecl(KonohaContext *kctx, kToken *tkC, kBlock *bk, kSt
 static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_StmtTyCheck(stmt, gma);
-	kToken *tkC = kStmt_token(stmt, KW_UsymbolPattern, NULL);
-	kToken *tkE= kStmt_token(stmt, SYM_("extends"), NULL);
+	kToken *tkC = SUGAR kStmt_getToken(kctx, stmt, KW_UsymbolPattern, NULL);
+	kToken *tkE= SUGAR kStmt_getToken(kctx, stmt, SYM_("extends"), NULL);
 	kshortflag_t cflag = 0;
 	ktype_t superclassId = TY_Object;
 	KonohaClass *supct = CT_Object;
@@ -527,7 +527,7 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 			RETURNb_(false);
 		}
 	}
-	kNameSpace *ns = kStmt_nameSpace(stmt);
+	kNameSpace *ns = Stmt_nameSpace(stmt);
 	KonohaClassVar *ct = (KonohaClassVar*)KLIB kNameSpace_getClass(kctx, ns, NULL/*FIXME*/, S_text(tkC->text), S_size(tkC->text), TY_unknown);
 	if (ct != NULL) {
 		if (!CT_isForward(ct)) {
@@ -540,7 +540,7 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 	((kTokenVar*)tkC)->keyword = KW_TypePattern;
 	((kTokenVar*)tkC)->ty = ct->classId;
 	Stmt_parseClassBlock(kctx, stmt, tkC);
-	kBlock *bk = kStmt_block(stmt, KW_BlockPattern, K_NULLBLOCK);
+	kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, KW_BlockPattern, K_NULLBLOCK);
 	if (ct->defaultValueAsNull == NULL) {
 		/* ct is created at this time */
 		CT_initField(kctx, ct, supct, checkFieldSize(kctx, bk));

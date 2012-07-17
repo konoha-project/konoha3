@@ -637,7 +637,7 @@ static KMETHOD ExprTyCheck_Regex(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t pcre_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
-	SUGAR NameSpace_setTokenizeFunc(kctx, ns, '/', parseREGEX, NULL, 0);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '/', parseREGEX, NULL, 0);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("$regex"), _TERM, ExprTyCheck_(Regex), },
 		{ .keyword = KW_END, },

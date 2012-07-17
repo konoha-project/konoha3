@@ -22,6 +22,24 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+#define T_statement(kw)  StatementName(kctx, kw), StatementType(kw)
+
+static const char* StatementName(KonohaContext *kctx, ksymbol_t keyword)
+{
+	const char *statement = SYM_t(keyword);
+	if(keyword == KW_ExprPattern) statement = "expression";
+	else if(keyword == KW_StmtTypeDecl) statement = "variable";
+	else if(keyword == KW_StmtMethodDecl) statement =  "function";
+	return statement;
+}
+
+static const char* StatementType(ksymbol_t keyword)
+{
+	const char *postfix = " statement";
+	if(keyword == KW_ExprPattern) postfix = "";
+	else if(keyword == KW_StmtTypeDecl || keyword == KW_StmtMethodDecl) postfix = " declaration";
+	return postfix;
+}
 
 #ifdef USE_SMALLBUILD
 #define KdumpTokenArray(CTX, TLS, S, E)

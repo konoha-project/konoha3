@@ -419,7 +419,7 @@ static KMETHOD ExprTyCheck_Squote(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t bytes_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
-	SUGAR NameSpace_setTokenizeFunc(kctx, ns, '\'', parseSQUOTE, NULL, 0);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '\'', parseSQUOTE, NULL, 0);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("$SingleQuote"), _TERM, ExprTyCheck_(Squote)},
 		{ .keyword = KW_END, },
