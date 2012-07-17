@@ -374,7 +374,7 @@ static int matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *rules, kArr
 	dumpTokenArray(kctx, 0, rules, 0, rulesize);
 	tokenidx = beginIdx;
 	for(ruleidx = 0; ruleidx < rulesize && tokenidx < endIdx; ruleidx++) {
-		DBG_P("matching token=%d<%d, rule=%d<%d", tokenidx, endIdx, ruleidx, rulesize);
+		//DBG_P("matching token=%d<%d, rule=%d<%d", tokenidx, endIdx, ruleidx, rulesize);
 		kToken *rule = rules->tokenItems[ruleidx];
 		kToken *tk = tokenList->tokenItems[tokenidx];
 		if(KW_isPATTERN(rule->keyword)) {
@@ -386,19 +386,19 @@ static int matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *rules, kArr
 			int c = endIdx;
 			kToken *rule1 = rules->tokenItems[ruleidx+1];
 			if(ruleidx + 1 < rulesize && (!KW_isPATTERN(rule1->keyword) && rule1->keyword != AST_OPTIONAL)) {
-				DBG_P("NEXT rule=%s%s, rule_size=%d,%d", KW_t(rule1->keyword), ruleidx+1, rulesize);
+				//DBG_P("NEXT rule=%s%s, rule_size=%d,%d", KW_t(rule1->keyword), ruleidx+1, rulesize);
 				c = lookAheadKeyword(tokenList, tokenidx+1, endIdx, rule1);
 				if(c == -1) {
-					DBG_P("@");
+					//DBG_P("@");
 					return kStmt_printExpectedRule(kctx, stmt, tk, rule, beginIdx, canRollBack);
 				}
 				ruleidx++;
 			}
-			DBG_P("syntax rule=%s%s", KW_t(syn->keyword));
+			//DBG_P("syntax rule=%s%s", KW_t(syn->keyword));
 			int next = PatternMatch(kctx, syn, stmt, rule->patternKey, tokenList, tokenidx, c);
-			DBG_P("matched '%s%s' patternKey='%s%s', next=%d=>%d", KW_t(rule->keyword), KW_t(rule->patternKey), tokenidx, next);
+			//DBG_P("matched '%s%s' patternKey='%s%s', next=%d=>%d", KW_t(rule->keyword), KW_t(rule->patternKey), tokenidx, next);
 			if(next == -1) {
-				DBG_P("@");
+				//DBG_P("@");
 				return kStmt_printExpectedRule(kctx, stmt, tk, rule, beginIdx, canRollBack);
 			}
 			tokenidx = (c == endIdx) ? next : c + 1;
@@ -411,7 +411,7 @@ static int matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *rules, kArr
 		else {
 			if(rule->keyword != tk->keyword) {
 				//DBG_P("matching rule=%d,%s%s token=%d,%s%s", ri,  KW_t(rule->keyword), ti-s, KW_t(tk->keyword));
-				DBG_P("@");
+				//DBG_P("@");
 				return kStmt_printExpectedRule(kctx, stmt, tk, rule, beginIdx, canRollBack);
 			}
 			if(rule->keyword == AST_PARENTHESIS || rule->keyword == AST_BRACKET) {
@@ -420,7 +420,7 @@ static int matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *rules, kArr
 			}
 			tokenidx++;
 		}
-		DBG_P("matching next token=%d<%d, rule=%d<%d", tokenidx, endIdx, ruleidx+1, rulesize);
+		//DBG_P("matching next token=%d<%d, rule=%d<%d", tokenidx, endIdx, ruleidx+1, rulesize);
 	}
 	if(!canRollBack) {
 		for(; ruleidx < rulesize; ruleidx++) {

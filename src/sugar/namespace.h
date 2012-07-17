@@ -312,7 +312,6 @@ static KonohaClass *kNameSpace_getClass(KonohaContext *kctx, kNameSpace *ns, Kon
 		ct = (KonohaClass*)map_getu(kctx, kctx->share->longClassNameMapNN, hcode, 0);
 		if(ct == NULL) {
 			KUtilsKeyValue *kvs = kNameSpace_getConstNULL(kctx, ns, un);
-			DBG_P("kvs=%s, %p", name, kvs);
 			if(kvs != NULL && kvs->ty == TY_TYPE) {
 				return (KonohaClass*)kvs->uval;
 			}
@@ -434,7 +433,7 @@ static kMethod* kNameSpace_addMethod(KonohaContext *kctx, kNameSpace *ns, kMetho
 			}
 		}
 		else {
-			foundMethod = KonohaClass_getMethodNULL(kctx, ct, mtd->mn, mtd->paramdom, MPOL_FIRST);
+			foundMethod = KonohaClass_getMethodNULL(kctx, ct, mtd->mn, 0, MPOL_FIRST);
 			if(foundMethod != NULL && Method_paramsize(mtd) == Method_paramsize(foundMethod)) {
 				DBG_P("set overloading method %s.%s%s", Method_t(foundMethod));
 				Method_setOverloaded(foundMethod, true);
@@ -447,6 +446,27 @@ static kMethod* kNameSpace_addMethod(KonohaContext *kctx, kNameSpace *ns, kMetho
 		KLIB kArray_add(kctx, ct->methodList, mtd);
 	}
 	else {
+		size_t i;
+		for(i = 0; i < kArray_size(ns->methodList); i++) {
+			kMethod *foundMethod = ns->methodList->methodItems[i];
+			if(foundMethod->classId == mtd->classId && foundMethod->mn == mtd->mn && foundMethod->paramdom == mtd->paramdom) {
+				DBG_P("duplicated method %s.%s%s", Method_t(foundMethod));
+				PUSH_GCSTACK(mtd);  // avoid memory leaking
+				return foundMethod;
+			}
+		}
+		kArray *matchedMethodList = kctx->stack->gcstack;
+		size_t popMatchedMethodListSize = kArray_size(matchedMethodList);
+		kNameSpace_findMethodList(kctx, ns, mtd->classId, mtd->mn, matchedMethodList, popMatchedMethodListSize);
+		if(popMatchedMethodListSize < kArray_size(matchedMethodList)) {
+			DBG_P("set overloading method %s.%s%s", Method_t(mtd));
+			for(i = popMatchedMethodListSize; i < kArray_size(matchedMethodList); i++) {
+				kMethod *foundMethod = matchedMethodList->methodItems[i];
+				Method_setOverloaded(foundMethod, true);
+			}
+			Method_setOverloaded(mtd, true);
+			KLIB kArray_clear(kctx, matchedMethodList, popMatchedMethodListSize);
+		}
 		if(ns->methodList == K_EMPTYARRAY) {
 			KINITv(((kNameSpaceVar*)ns)->methodList, new_(MethodArray, 8));
 		}
