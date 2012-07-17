@@ -61,7 +61,7 @@ typedef struct curl_context_t {
 /*String call back*/
 static size_t write_String(char *buffer, size_t size, size_t nitems, void *string)
 {
-	KonohaContext_t kctx = (KonohaContext_t)ctx;
+	KonohaContext *kctx = (KonohaContext *)ctx;
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	kStringVar *res = (kStringVar *)string;
@@ -348,28 +348,28 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 	if(curl != NULL) {
 		kint_t curlinfo = Int_to(int , sfp[1]);
 		switch(curlinfo) {
-		case CURLInfoTagHEADER_SIZE:
-		case CURLInfoTagREQUEST_SIZE:
+		case CURLINFO_HEADER_SIZE:
+		case CURLINFO_REQUEST_SIZE:
 			curl_easy_getinfo(curl, curlinfo, &lngptr);
 			// RETURN_(new_Int(ctx, lngptr));
 			RETURNi_(lngptr);
 			break;
-		case CURLInfoTagREDIRECT_TIME:
-		case CURLInfoTagTOTAL_TIME:
-		case CURLInfoTagNAMELOOKUP_TIME:
-		case CURLInfoTagCONNECT_TIME:
-		case CURLInfoTagPRETRANSFER_TIME:
-		case CURLInfoTagSTARTTRANSFER_TIME:
-		case CURLInfoTagSIZE_UPLOAD:
-		case CURLInfoTagSIZE_DOWNLOAD:
-		case CURLInfoTagSPEED_DOWNLOAD:
-		case CURLInfoTagSPEED_UPLOAD:
+		case CURLINFO_REDIRECT_TIME:
+		case CURLINFO_TOTAL_TIME:
+		case CURLINFO_NAMELOOKUP_TIME:
+		case CURLINFO_CONNECT_TIME:
+		case CURLINFO_PRETRANSFER_TIME:
+		case CURLINFO_STARTTRANSFER_TIME:
+		case CURLINFO_SIZE_UPLOAD:
+		case CURLINFO_SIZE_DOWNLOAD:
+		case CURLINFO_SPEED_DOWNLOAD:
+		case CURLINFO_SPEED_UPLOAD:
 			curl_easy_getinfo(curl, curlinfo, &dblptr);
 			// RETURN_(new_Float(ctx, dblptr));
 			RETURNf_(dblptr);
 			break;
-		case CURLInfoTagEFFECTIVE_URL:
-		case CURLInfoTagCONTENT_TYPE:
+		case CURLINFO_EFFECTIVE_URL:
+		case CURLINFO_CONTENT_TYPE:
 			curl_easy_getinfo(curl, curlinfo, &strptr);
 			RETURN_(KLIB new_kString(kctx, strptr, strlen(strptr), 0));
 			// RETURN_(new_String(ctx, strptr));
