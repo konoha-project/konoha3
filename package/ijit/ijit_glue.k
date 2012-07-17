@@ -1,6 +1,7 @@
 K.import("sugar");
 K.import("konoha.float");
 K.import("llvm");
+K.import("konoha.array");
 K.import("konoha.assignment");
 K.import("konoha.null");
 K.import("konoha.string");
@@ -28,60 +29,43 @@ K.import("konoha.class");
 //};
 
 int Expr.getBuild() {
-	int x = this.getAddr();
+	int x = getAddr();
 	return System.getPointer(x, 36, 16);
 }
 
 Object Expr.getData() {
-	int x = this.getAddr();
+	int x = getAddr();
 	int addr = System.getPointer(x, 48, 64);
 	return System.convertToObject(addr);
 }
 
 int Expr.getIndex() {
-	int x = this.getAddr();
+	int x = getAddr();
 	return System.getPointer(x, 56, 64);
 }
 
 int Expr.getNdata() {
-	int x = this.getAddr();
+	int x = getAddr();
 	return System.getPointer(x, 56, 64);
 }
 
 int Expr.getType() {
-	int x = this.getAddr();
+	int x = getAddr();
 	return System.getPointer(x, 32, 16);
 }
 
-Array Expr.getCons() {
-	int x = this.getAddr();
-	int ptr = System.getPointer(x, 48, 64);
-	return System.convertToArray(ptr);
-}
 Method Object.asMethod() {
-	int ptr = this.getAddr();
+	int ptr = getAddr();
 	return System.convertToMethod(ptr);
 }
 
-int Method.getCid() {
-	int x = this.getAddr();
-	return System.getPointer(x, 56, 16);
-}
-
-int Object.getCid() {
-	int x = this.getAddr();
-	int ct = System.getPointer(x, 8, 64);
-	int cid = System.getPointer(ct, 88, 16);
-	return cid;
-}
-
-Expr Expr.at(int i) {
-	Array a = this.getCons();
+Expr at(Expr expr, int i) {
+	Array[Expr] a = expr.getCons();
 	return a.get(i);
 }
 
 void Method.setFunc(int faddr) {
-	int x = this.getAddr();
+	int x = getAddr();
 	System.setPointer(x, 32, 64, faddr);
 }
 
@@ -233,7 +217,7 @@ boolean isBoxTy(int cid) {
 }
 
 Value getvctx() {
-	Value v = System.getKonohaContext *kctx();
+	Value v = System.getCTX();
 	Type  t = v.getType();
 	return v;
 }
@@ -246,16 +230,16 @@ Value getvsfp() {
 Value boxing(Value v) {
 	Module m = System.getModule();
 	IRBuilder builder = System.getBuilder();
-	Array argsTy = Array.newN(3);
+	Array[Type] argsTy = new Type[3];
 	argsTy.set(0, ctype2Type(/*TY_CONTEXT*/16));
 	argsTy.set(1, ctype2Type(/*TY_INT*/3));
 	argsTy.set(2, ctype2Type(/*TY_INT*/3));
 	FunctionType fnTy = FunctionType.get(ctype2Type(/*TY_OBJECT*/12), argsTy, false);
 	Function box = m.getOrInsertFunction("boxing_jit", fnTy);
-	Array args = box.getArguments();
+	Array[Value] args = box.getArguments();
 
 	int cid = type2cid(v.getType());
-	Array params = Array.newN(3);
+	Array[Value] params = new Value[3];
 	params.set(0, getvctx());
 	params.set(1, createConstValue(/*TY_INT*/3, null, cid, 0.0));
 	if (v.getType() == ctype2Type(/*TY_INT*/3)) {
@@ -306,14 +290,14 @@ int esp(int sfpidx, int args) { return  sfp(sfpidx + args + /*K_CALLDELTA*/4 + 1
 Value create_object(int a, int index, int cid) {
 	Module m = System.getModule();
 	IRBuilder builder = System.getBuilder();
-	Array argsTy = Array.newN(2);
+	Array[Type] argsTy = new Type[2];
 	argsTy.set(0, ctype2Type(/*TY_CONTEXT*/16));
 	argsTy.set(1, ctype2Type(/*TY_INT*/3));
 	FunctionType fnTy = FunctionType.get(ctype2Type(/*TY_OBJECT*/12), argsTy, false);
 	Function fnew = m.getOrInsertFunction("new_object_jit", fnTy);
-	Array args = fnew.getArguments();
+	Array[Value] args = fnew.getArguments();
 
-	Array params = Array.newN(2);
+	Array[Value] params = new Value[2];
 	Value vctx = getvctx();
 	Value arg1 = createConstValue(/*TY_INT*/3, null, cid, 0.0);
 	arg1.dump();
@@ -459,12 +443,12 @@ void storesfp(Value val, int reqtype, int sfpidx) {
 }
 
 void emit_param(Method mtd, Expr expr, int thisidx, int i) {
-	Array cons = expr.getCons();
+	Array[Expr] cons = expr.getCons();
 	Method orig_mtd = mtd;
 	int size = cons.getSize();
 	int idx = thisidx + i - 1;
 	if (i < cons.getSize()) {
-		Expr exprN = expr.at(i);
+		Expr exprN = at(expr,i);
 		Value v = expr_asm(idx, exprN, idx);
 		storesfp(v, exprN.getType(), idx);
 		emit_param(orig_mtd, expr, thisidx, i+1);
@@ -511,13 +495,13 @@ void prepare_call_stack(int thisidx, Value vsfp, Object def, Method mtd, int uli
 void param_setCtxSfp(Array params, int sfpidx) {
 	IRBuilder builder = System.getBuilder();
 	Function f = System.getFunction();
-	Array args = f.getArguments();
+	Array[Value] args = f.getArguments();
 	Value vctx = args.get(0);
 	Value vsfp = args.get(1);
 
 	params.set(0, vctx);
 	if (sfpidx > 0) {
-		Array arg0 = Array.new1(llvm_getInt(sfpidx));
+		Array[Int] arg0 = new Int[1]; arg0.set(0, llvm_getInt(sfpidx));
 		Value vsfp1 = builder.createGEP(vsfp, arg0);
 		params.set(1, vsfp1);
 	} else {
@@ -555,11 +539,11 @@ boolean check_asm_int_op(String mn, int argc) {
 Value asm_int_op(String mn, Expr exprN, int local) {
 	IRBuilder builder = System.getBuilder();
 	if(mn == "opNEG") {
-		Value va = expr_asm(local+0, exprN.at(1), local+0);
+		Value va = expr_asm(local+0, at(exprN,1), local+0);
 		return builder.createNeg(va);
 	} else {
-		Value va = expr_asm(local+0, exprN.at(1), local+0);
-		Value vb = expr_asm(local+1, exprN.at(2), local+1);
+		Value va = expr_asm(local+0, at(exprN,1), local+0);
+		Value vb = expr_asm(local+1, at(exprN,2), local+1);
 		if(mn == "+" ) { return builder.createAdd(va, vb);}
 		if(mn == "-" ) { return builder.createSub(va, vb);}
 		if(mn == "*" ) { return builder.createMul(va, vb);}
@@ -604,11 +588,11 @@ boolean check_asm_float_op(String mn, int argc) {
 Value asm_float_op(String mn, Expr exprN, int local) {
 	IRBuilder builder = System.getBuilder();
 	if(mn == "opNEG") {
-		Value va = expr_asm(local+0, exprN.at(1), local+0);
+		Value va = expr_asm(local+0, at(exprN,1), local+0);
 		return builder.createNeg(va);
 	} else {
-		Value va = expr_asm(local+0, exprN.at(1), local+0);
-		Value vb = expr_asm(local+1, exprN.at(2), local+1);
+		Value va = expr_asm(local+0, at(exprN,1), local+0);
+		Value vb = expr_asm(local+1, at(exprN,2), local+1);
 		if(mn == "+" ) { return builder.createFAdd(va, vb);}
 		if(mn == "-" ) { return builder.createFSub(va, vb);}
 		if(mn == "*" ) { return builder.createFMul(va, vb);}
@@ -625,15 +609,15 @@ Value asm_float_op(String mn, Expr exprN, int local) {
 }
 void push_back_args(Array args, Expr expr, int local, int s, int i, int n) {
 	if (i < n) {
-		Value v = expr_asm(local+i, (expr).at(i), local+i);
+		Value v = expr_asm(local+i, at(expr,i), local+i);
 		args.set(i - s + 2, v);
 		push_back_args(args, expr, local, s, i+1, n);
 	}
 }
 
 Value asm_function_call(int uline, Expr expr, int thisidx, int s, Function f) {
-	Array cons = expr.getCons();
-	Array args = Array.newN(cons.getSize());
+	Array[Expr] cons = expr.getCons();
+	Array[Value] args = new Value[cons.getSize()];
 	IRBuilder builder = System.getBuilder();
 	args.set(0, getvctx());
 	args.set(1, getvsfp());
@@ -648,7 +632,7 @@ void asm_scall(int uline, int sfpidx, int espidx, Method mtd, Object defval) {
 	Value funcp = builder.createStructGEP(vmtd, 1);
 	Value func  = builder.createLoad(funcp, false);
 	prepare_call_stack(thisidx, getvsfp(), defval, mtd, uline);
-	Array params = Array.newN(3);
+	Array[Value] params = new Value[3];
 	param_setCtxSfp(params, thisidx);
 	params.set(2, llvm_getInt(/*K_RTNIDX*/-4));
 	asm_shift_esp(espidx);
@@ -730,14 +714,14 @@ void bool_createPHI(Array stmtList, PHINode phi, Value vfirst, Value vlast, int 
 	}
 }
 
-void or_asm_helper(Expr expr, Array stmtList, LLVMBasicBlock merge, int i, int size, int espidx) {
+void or_asm_helper(Expr expr, Array[LLVMBasicBlock] stmtList, LLVMBasicBlock merge, int i, int size, int espidx) {
 	IRBuilder builder = System.getBuilder();
 	if (i < size) {
 		LLVMBasicBlock next = LLVMBasicBlock.create(System.getFunction(), "bbOrExprCond");
 		builder.setInsertPoint(stmtList.get(i-1));
 		stmtList.set(i, next);
-		Expr e = expr.at(i);
-		Value cond = expr_asm(espidx+1, expr.at(i), espidx+1);
+		Expr e = at(expr,i);
+		Value cond = expr_asm(espidx+1, at(expr,i), espidx+1);
 		builder.createCondBr(cond, next, merge);
 		and_asm_helper(expr, stmtList, merge, i+1, size, espidx);
 	} else {
@@ -753,7 +737,7 @@ Value or_asm(int a, Expr expr, int espidx) {
 	IRBuilder builder = System.getBuilder();
 	LLVMBasicBlock bbMerge = LLVMBasicBlock.create(System.getFunction(), "bbOrExprMerge");
 	LLVMBasicBlock bbCond = LLVMBasicBlock.create(System.getFunction(), "bbOrExprCond");
-	Array stmtList = Array.newN(size);
+	Array[LLVMBasicBlock] stmtList = new LLVMBasicBlock[size];
 	builder.createBr(bbCond);
 	builder.setInsertPoint(bbMerge);
 	stmtList.set(0, bbCond);
@@ -764,14 +748,14 @@ Value or_asm(int a, Expr expr, int espidx) {
 	return phi;
 }
 
-void and_asm_helper(Expr expr, Array stmtList, LLVMBasicBlock merge, int i, int size, int espidx) {
+void and_asm_helper(Expr expr, Array[LLVMBasicBlock] stmtList, LLVMBasicBlock merge, int i, int size, int espidx) {
 	IRBuilder builder = System.getBuilder();
 	if (i < size) {
 		LLVMBasicBlock next = LLVMBasicBlock.create(System.getFunction(), "bbAndExprCond");
 		builder.setInsertPoint(stmtList.get(i-1));
 		stmtList.set(i, next);
-		Expr e = expr.at(i);
-		Value cond = expr_asm(espidx+1, expr.at(i), espidx+1);
+		Expr e = at(expr,i);
+		Value cond = expr_asm(espidx+1, at(expr,i), espidx+1);
 		builder.createCondBr(cond, next, merge);
 		and_asm_helper(expr, stmtList, merge, i+1, size, espidx);
 	} else {
@@ -787,7 +771,7 @@ Value and_asm(int a, Expr expr, int espidx) {
 	IRBuilder builder = System.getBuilder();
 	LLVMBasicBlock bbMerge = LLVMBasicBlock.create(System.getFunction(), "bbAndExprMerge");
 	LLVMBasicBlock bbCond = LLVMBasicBlock.create(System.getFunction(), "bbAndExprCond");
-	Array stmtList = Array.newN(size);
+	Array[LLVMBasicBlock] stmtList = new LLVMBasicBlock[size];
 	builder.createBr(bbCond);
 	builder.setInsertPoint(bbMerge);
 	stmtList.set(0, bbCond);
@@ -799,8 +783,8 @@ Value and_asm(int a, Expr expr, int espidx) {
 }
 
 Value letexpr_asm(int a, Expr expr, int espidx) {
-	Expr exprL = expr.at(1);
-	Expr exprR = expr.at(2);
+	Expr exprL = at(expr,1);
+	Expr exprR = at(expr,2);
 	if(exprL.getBuild() == TEXPR_LOCAL) {
 		Value v = expr_asm(exprL.getIndex(), exprR, espidx);
 		if(a != espidx) {
@@ -849,7 +833,7 @@ Boolean isExpr(Expr expr) {
 	return cid == K.getCid("Expr", -1);
 }
 Expr Stmt.getExpr(int id, Expr def) {
-	Expr expr = this.getObjectNULL(id);
+	Expr expr = getObjectNULL(id);
 	if (expr.isNull()) {
 		return def;
 	}
@@ -1021,7 +1005,7 @@ Function build_wrapper_func(Method mtd, Module m, Function f) {
 
 	builder.setInsertPoint(bb);
 	/* load konoha args from sfp and build call params*/
-	Array params = Array.newN(2+mtd.getParamSize());
+	Array[Value] params = new Value[(2+mtd.getParamSize())];
 	params.set(0, argkctx);
 	params.set(1, arg_sfp);
 	push_back_params(params, builder, arg_sfp, pa, 0, mtd.getParamSize());
@@ -1058,7 +1042,7 @@ Function create_function(Module m, Method mtd) {
 	int psize = mtd.getParamSize();
 	int rtype = mtd.getReturnType();
 	int argc  = 2 + psize;
-	Array argsTy = Array.newN(argc);
+	Array[Type] argsTy = new Type[(argc)];
 	argsTy.set(0, ctype2Type(/*TY_CONTEXT*/16));
 	argsTy.set(1, ctype2Type(/*TY_STACK*/17));
 	construct_args(argsTy, mtd.getParam(), 0, psize);
@@ -1073,10 +1057,10 @@ Function create_function(Module m, Method mtd) {
 	vctx.setName("lctx");
 	vsfp.setName("lsfp");
 
-	System.setKonohaContext *kctx(vctx);
+	System.setCTX(vctx);
 	System.setSFP(vsfp);
 
-	Array a = Array.newN(psize);
+	Array[Value] a = new Value[psize];
 	push_back_fparams(a, args, 0, psize);
 	function_set_params(m, a, mtd.getParam(), 0, psize);
 	return f;
@@ -1101,7 +1085,7 @@ void jit_init() {
 	Module m = Module.new("test");
 	ExecutionEngine ee = m.createExecutionEngine(2);
 
-	Array a0 = Array.newN(0);
+	Array[Type] a0 = new Type[0];
 	Type kklib = StructType.create(a0, "kklib", false);
 	Type kclass = StructType.create(a0, "kclass", false);
 	Type KUtilsGrowingArray = StructType.create(a0, "KUtilsGrowingArray", false);
@@ -1116,7 +1100,7 @@ void jit_init() {
 	Type klogger_t = StructType.create(a0, "klogger_t", false);
 	Type VirtualMachineInstruction = StructType.create(a0, "VirtualMachineInstruction", false);
 	/*------- KonohaObjectHeader ------*/
-	Array KonohaObjectHeaderTy = Array.newN(4);
+	Array[Type] KonohaObjectHeaderTy = new Type[4];
 	KonohaObjectHeaderTy.set(0, getLongTy() /* magicflag */ );
 	KonohaObjectHeaderTy.set(1, PointerType.get(kclass) /* ct */ );
 	KonohaObjectHeaderTy.set(2, getLongTy() /* refc */ /*union*/);
@@ -1125,21 +1109,21 @@ void jit_init() {
 	System.setTyHObject(KonohaObjectHeader);
 
 	/*------- _kObject ------*/
-	Array kObjectTy = Array.newN(2);
+	Array[Type] kObjectTy = new Type[2];
 	kObjectTy.set(0, KonohaObjectHeader /* h */ );
 	kObjectTy.set(1, PointerType.get(getLongTy()) /* fields */ /*union*/);
 	Type kObject = StructType.create(kObjectTy, "kObject", false)
 	System.setTyObject(PointerType.get(kObject));
 
 	/*------- KonohaStack ------*/
-	Array KonohaStackTy = Array.newN(2);
+	Array[Type] KonohaStackTy = new Type[2];
 	KonohaStackTy.set(0, PointerType.get(kObject) /* o */ /*union*/);
 	KonohaStackTy.set(1, getLongTy() /* unboxValue */ /*union*/);
 	Type KonohaStack = StructType.create(KonohaStackTy, "KonohaStack", false)
 	System.setTyStack(PointerType.get(KonohaStack));
 
 	/*------- KonohaContextVar ------*/
-	Array KonohaContextVarTy = Array.newN(12);
+	Array[Type] KonohaContextVarTy = new Type[12];
 	KonohaContextVarTy.set(0, Type.getInt32Ty() /* safepoint */ );
 	KonohaContextVarTy.set(1, PointerType.get(KonohaStack) /* esp */ );
 	KonohaContextVarTy.set(2, PointerType.get(kklib) /* klib */ );
@@ -1155,7 +1139,7 @@ void jit_init() {
 	Type KonohaContextVar = StructType.create(KonohaContextVarTy, "KonohaContextVar", false)
 
 	/*------- _kArray ------*/
-	Array kArrayTy = Array.newN(4);
+	Array[Type] kArrayTy = new Type[4];
 	kArrayTy.set(0, KonohaObjectHeader /* h */ );
 	kArrayTy.set(1, getLongTy() /* bytesize */ );
 	kArrayTy.set(2, PointerType.get(getLongTy()) /* unboxValue */ /*union*/);
@@ -1163,11 +1147,13 @@ void jit_init() {
 	Type kArray = StructType.create(kArrayTy, "kArray", false)
 
 
-	Array argsTy = Array.new3(PointerType.get(KonohaContextVar), PointerType.get(KonohaStack), getLongTy());
+	Array[Type] argsTy = new Type[2];
+	argsTy.set(0, PointerType.get(KonohaContextVar));
+	argsTy.set(1, PointerType.get(KonohaStack));
 	FunctionType funcTy = FunctionType.get(Type.getVoidTy(), argsTy, false);
 
 	/*------- _kMethod ------*/
-	Array kMethodTy = Array.newN(13);
+	Array[Type] kMethodTy = new Type[13];
 	kMethodTy.set(0, KonohaObjectHeader /* h */ );
 	kMethodTy.set(1, PointerType.get(funcTy) /* invokeMethodFunc */ /*union*/);
 	kMethodTy.set(2, PointerType.get(VirtualMachineInstruction) /* pc_start */ /*union*/);

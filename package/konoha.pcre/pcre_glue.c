@@ -226,10 +226,10 @@ static int pcre_parseeflags(KonohaContext *kctx, const char *option)
 	return eflags;
 }
 
-//static size_t pcre_regerror(int res, kregex_t *reg, char *ebuf, size_t ebufieldsize)
+//static size_t pcre_regerror(int res, kregex_t *reg, char *ebuf, size_t ebufsize)
 //{
 //	PCRE_regex_t *pcre = (PCRE_regex_t*)reg;
-//	snprintf(ebuf, ebufieldsize, "[%d]: %s", pcre->erroffset, pcre->err);
+//	snprintf(ebuf, ebufsize, "[%d]: %s", pcre->erroffset, pcre->err);
 //	return (pcre->err != NULL) ? strlen(pcre->err) : 0;
 //}
 

@@ -784,7 +784,7 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 			if(p->r.mode == M_PIPE) {
 				char buf[BUFSIZE];
 				memset(buf, 0x00, sizeof(buf));
-				// what if there's more than bufieldsize output?!
+				// what if there's more than bufsize output?!
 				if(fread(buf, sizeof(char), sizeof(buf)-1, p->r.fp) > 0) {
 					KLIB kArray_add(kctx, ret_a, KLIB new_kString(kctx, buf, BUFSIZE, 0));//TODO!
 				}
@@ -869,8 +869,8 @@ KMETHOD Subproc_setCwd(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNb_( ret );
 }
 
-//## boolean Subproc.setBufieldsize(int size);
-KMETHOD Subproc_setBufieldsize(KonohaContext *kctx, KonohaStack *sfp)
+//## boolean Subproc.setBufsize(int size);
+KMETHOD Subproc_setBufsize(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubproc *sp = (kSubproc*)sfp[0].asObject;
 	subprocData_t *p = sp->spd;

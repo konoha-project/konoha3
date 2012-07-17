@@ -242,14 +242,14 @@ static KMETHOD System_readlink(KonohaContext *kctx, KonohaStack *sfp)
 	kString *s2 = sfp[2].s;
 	const char *pathname = S_text(s1);
 	const char *buf = S_text(s2);
-	size_t bufieldsize = strlen(buf);
-	ssize_t ret = readlink(pathname, (char *)buf, bufieldsize);
+	size_t bufsize = strlen(buf);
+	ssize_t ret = readlink(pathname, (char *)buf, bufsize);
 	if (ret == -1) {
 		ktrace(_SystemFault,
 			   KEYVALUE_s("@", "readlink"),
 			   KEYVALUE_s("pathname", pathname),
 			   KEYVALUE_s("buf", buf),
-			   KEYVALUE_u("bufieldsize", bufieldsize),
+			   KEYVALUE_u("bufsize", bufsize),
 			   KEYVALUE_p("errstr", strerror(errno))
 			);
 	}
@@ -343,7 +343,7 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		_Public|_Const|_Im, _F(System_rename), TY_Int, TY_System, MN_("rename"), 2, TY_String, FN_("oldpath"), TY_String, FN_("newpath"),
 		_Public|_Const|_Im, _F(System_rmdir), TY_Int, TY_System, MN_("rmdir"), 1, TY_String, FN_("pathname"),
 		_Public|_Const|_Im, _F(System_symlink), TY_Int, TY_System, MN_("symlink"), 2, TY_String, FN_("oldpath"), TY_String, FN_("newpath"),
-		_Public|_Const|_Im, _F(System_readlink), TY_Int, TY_System, MN_("readlink"), 3, TY_String, FN_("pathname"), TY_String, FN_("buf"), TY_Int, FN_("bufieldsize"),
+		_Public|_Const|_Im, _F(System_readlink), TY_Int, TY_System, MN_("readlink"), 3, TY_String, FN_("pathname"), TY_String, FN_("buf"), TY_Int, FN_("bufsize"),
 		_Public|_Const|_Im, _F(System_lchown), TY_Int, TY_System, MN_("lchown"), 3, TY_String, FN_("pathname"), TY_Int, FN_("owner"), TY_Int, FN_("group"),
 		_Public|_Const|_Im, _F(System_fchown), TY_Int, TY_System, MN_("fchown"), 3, TY_Int, FN_("pd"), TY_Int, FN_("owner"), TY_Int, FN_("group"),
 		_Public|_Const|_Im, _F(System_access), TY_Int, TY_System, MN_("access"), 2, TY_String, FN_("pathname"), TY_Int, FN_("mode"),
