@@ -81,14 +81,13 @@ typedef struct ksfx_t {
 	ksfpidx_t n;
 } ksfx_t;
 
-struct klr_LDMTD_t;
-typedef void (*klr_Fth)(KonohaContext *kctx, struct VirtualMachineInstruction *, void**);
-typedef void (*klr_Floadmtd)(KonohaContext *kctx, KonohaStack *, struct klr_LDMTD_t *);
-typedef kbool_t (*Fcallcc)(KonohaContext *kctx, KonohaStack *, int, int, void *);
+typedef void (*ThreadCodeFunc)(KonohaContext *kctx, struct VirtualMachineInstruction *, void**);
+typedef void (*TraceFunc)(KonohaContext *kctx, KonohaStack *sfp, kfileline_t pline);
 
 typedef struct {
-	ktype_t cid; kmethodn_t mn;
-} kcachedata_t;
+	kMethod *mtd;
+	ktype_t classId; kparamid_t signature;
+} kMethodInlineCache;
 
 #if defined(K_USING_THCODE_)
 #define KCODE_HEAD \
@@ -141,6 +140,44 @@ struct kByteCodeVar {
 
 //-------------------------------------------------------------------------
 
+static void kNameSpace_lookupMethodWithInlineCache(KonohaContext *kctx, KonohaStack *sfp, kNameSpace *ns, kMethod **cache)
+{
+	ktype_t classId = O_classId(sfp[0].asObject);
+	kMethod *mtd = cache[0];
+	if(mtd->classId != classId) {
+		mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, classId, mtd->mn, mtd->paramdom, MPOL_LATEST|MPOL_SIGNATURE);
+		cache[0] = mtd;
+	}
+	sfp[K_MTDIDX].mtdNC = mtd;
+}
+
+static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *, KonohaStack *, VirtualMachineInstruction *);
+
+static VirtualMachineInstruction *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStack *sfp, VirtualMachineInstruction *pc)
+{
+	int jmpresult;
+	INIT_GCSTACK();
+	KonohaContextRuntimeVar *base = kctx->stack;
+	jmpbuf_i lbuf = {};
+	if(base->evaljmpbuf == NULL) {
+		base->evaljmpbuf = (jmpbuf_i*)KCALLOC(sizeof(jmpbuf_i), 1);
+	}
+	memcpy(&lbuf, base->evaljmpbuf, sizeof(jmpbuf_i));
+	if((jmpresult = PLATAPI setjmp_i(*base->evaljmpbuf)) == 0) {
+		pc = KonohaVirtualMachine_run(kctx, sfp, pc);
+	}
+	else {
+		DBG_P("Catch eval exception jmpresult=%d", jmpresult);
+		//KSETv(sfp[exceptionIdx].e, ..);
+		pc = NULL;
+	}
+	memcpy(base->evaljmpbuf, &lbuf, sizeof(jmpbuf_i));
+	RESET_GCSTACK();
+	return pc;
+}
+
+//-------------------------------------------------------------------------
+
 #define rshift(rbp, x_) (rbp+(x_))
 #define SFP(rbp)  ((KonohaStack*)(rbp))
 #define SFPIDX(n) ((n)/2)
@@ -169,6 +206,11 @@ struct kByteCodeVar {
 		OPEXEC_RET();\
 	} \
 
+#define OPEXEC_YIELD() {\
+		(void)op;\
+		return pc;\
+	}\
+
 #define OPEXEC_EXIT() {\
 		(void)op;\
 		pc = NULL; \
@@ -183,7 +225,7 @@ struct kByteCodeVar {
 #define OPEXEC_NEW(A, P, CT)   KSETv(rbp[(A)].o, KLIB new_kObject(kctx, CT, P))
 #define OPEXEC_NULL(A, CT)     KSETv(rbp[(A)].o, KLIB Knull(kctx, CT))
 #define OPEXEC_BOX(A, B, CT)   KSETv(rbp[(A)].o, KLIB new_kObject(kctx, CT, rbp[(B)].ivalue))
-#define OPEXEC_UNBOX(A, B, CT) rbp[(A)].ivalue = N_toint(rbp[B].o)
+#define OPEXEC_UNBOX(A, B, CT) rbp[(A)].unboxValue = N_toint(rbp[B].o)
 
 #define PC_NEXT(pc)   pc+1
 
@@ -192,6 +234,9 @@ struct kByteCodeVar {
 		kreportf(CritTag, UL, "stack overflow");\
 	}\
 
+#define OPEXEC_LOOKUP(THIS, NS, MTD) { \
+		kNameSpace_lookupMethodWithInlineCache(kctx, SFP(rshift(rbp, THIS)), NS, (kMethod**)&MTD);\
+	} \
 
 #define OPEXEC_CALL(UL, THIS, espshift, CTO) { \
 		kMethod *mtd_ = rbp[THIS+K_MTDIDX2].mtdNC;\
@@ -259,20 +304,30 @@ struct kByteCodeVar {
 		OPEXEC_JMP(PC, JUMP); \
 	} \
 
+#define OPEXEC_TRYJMP(PC, JUMP) \
+	pc = KonohaVirtualMachine_tryJump(kctx, (KonohaStack*)rbp, PC+1);\
+	if(pc == NULL) {\
+		OPEXEC_JMP(PC, JUMP); \
+	} \
+
 #define OPEXEC_BNOT(c, a)     rbp[c].bvalue = !(rbp[a].bvalue)
 
+#define OPEXEC_TRACE(UL, THIS, F) { \
+		F(kctx, SFP(rshift(rbp, THIS)), UL);\
+	} \
+
 #ifdef K_USING_SAFEPOINT
-#define KLR_SAFEPOINT(espidx) \
+#define KLR_SAFEPOINT(UL, espidx) \
 	if(kctx->safepoint != 0) { \
 		klr_setesp(kctx, SFP(rshift(rbp, espidx)));\
 		knh_checkSafePoint(kctx, (KonohaStack*)rbp, __FILE__, __LINE__); \
 	} \
 
 #else
-#define OPEXEC_SAFEPOINT(RS)   klr_setesp(kctx, SFP(rshift(rbp, RS)));
+#define OPEXEC_SAFEPOINT(UL, RS)   klr_setesp(kctx, SFP(rshift(rbp, RS)));
 #endif
 
-#define OPEXEC_ERROR(start, msg) {\
+#define OPEXEC_ERROR(UL, msg, ESP) {\
 		kreportf(NoneTag, 0, "RuntimeScriptException: %s", S_text(msg));\
 		kraise(0);\
 	}\

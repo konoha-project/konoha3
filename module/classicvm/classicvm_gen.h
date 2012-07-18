@@ -11,7 +11,7 @@ typedef struct klr_NOP_t {
 #define OPCODE_THCODE ((kopcode_t)1)
 typedef struct klr_THCODE_t {
 	KCODE_HEAD;
-	klr_Fth th;
+	ThreadCodeFunc th;
 } klr_THCODE_t;
 
 #define OPCODE_ENTER ((kopcode_t)2)
@@ -1434,7 +1434,7 @@ static kbool_t kopcode_hasjump(kopcode_t opcode)
 #define GOTO_PC(pc)         GOTO_NEXT()
 #endif/*K_USING_THCODE_*/
 
-static VirtualMachineInstruction* VirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, VirtualMachineInstruction *pc)
+static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, VirtualMachineInstruction *pc)
 {
 #ifdef K_USING_THCODE_
 	static void *OPJUMP[] = {

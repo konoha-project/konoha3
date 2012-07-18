@@ -578,7 +578,6 @@ static kExpr* kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, i
 
 #else/*SUGAR_EXPORTS*/
 
-
 #define SUGAR        ((const KModuleSugar *)kmodsugar)->
 #define TY_NameSpace                         SUGAR cNameSpace->classId
 #define TY_Token                             SUGAR cToken->classId

@@ -45,27 +45,27 @@
 #define GammaBuilderLabel(n)   (kBasicBlock*)(ctxcode->lstacks->objectItems[n])
 
 #define ASM(T, ...) do {\
-	klr_##T##_t op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};\
-	union { VirtualMachineInstruction op; klr_##T##_t op_; } tmp_; tmp_.op_ = op_;\
-	BUILD_asm(kctx, &tmp_.op, sizeof(klr_##T##_t));\
+	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};\
+	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_;\
+	BUILD_asm(kctx, &tmp_.op, sizeof(OP##T));\
 } while (0)
 
 #define ASMop(T, OP, ...) do {\
-	klr_##T##_t op_ = {TADDR, OP, ASMLINE, ## __VA_ARGS__};\
-	union { VirtualMachineInstruction op; klr_##T##_t op_; } tmp_; tmp_.op_ = op_;\
-	BUILD_asm(kctx, &tmp_.op, sizeof(klr_##T##_t));\
+	OP##T op_ = {TADDR, OP, ASMLINE, ## __VA_ARGS__};\
+	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_;\
+	BUILD_asm(kctx, &tmp_.op, sizeof(OP##T));\
 } while (0)
 
 #define ASMbranch(T, lb, ...) do {\
-	klr_##T##_t op_ = {TADDR, OPCODE_##T, ASMLINE, NULL, ## __VA_ARGS__};\
-	union { VirtualMachineInstruction op; klr_##T##_t op_; } tmp_; tmp_.op_ = op_;\
-	ASM_BRANCH_(kctx, lb, &tmp_.op, sizeof(klr_##T##_t)); \
+	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, NULL, ## __VA_ARGS__};\
+	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_;\
+	ASM_BRANCH_(kctx, lb, &tmp_.op, sizeof(OP##T)); \
 } while (0)
 
 #define kBasicBlock_add(bb, T, ...) do { \
-	klr_##T##_t op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};\
-	union { VirtualMachineInstruction op; klr_##T##_t op_; } tmp_; tmp_.op_ = op_;\
-	BasicBlock_add(kctx, bb, 0, &tmp_.op, sizeof(klr_##T##_t));\
+	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};\
+	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_;\
+	BasicBlock_add(kctx, bb, 0, &tmp_.op, sizeof(OP##T));\
 } while (0)
 
 #ifdef _CLASSICVM
@@ -118,7 +118,7 @@ static void BUILD_asm(KonohaContext *kctx, VirtualMachineInstruction *op, size_t
 	BasicBlock_add(kctx, ctxcode->currentWorkingBlock, ctxcode->uline, op, opsize);
 }
 
-static int BUILD_asmJMPF(KonohaContext *kctx, klr_JMPF_t *op)
+static int BUILD_asmJMPF(KonohaContext *kctx, OPJMPF *op)
 {
 	kBasicBlock *bb = ctxcode->currentWorkingBlock;
 	DBG_ASSERT(op->opcode == OPCODE_JMPF);
@@ -350,7 +350,7 @@ static void BasicBlock_setjump(kBasicBlock *bb)
 		BasicBlock_setVisited(bb, 1);
 		if(bb->branchBlock != NULL) {
 			kBasicBlock *bbJ = bb->branchBlock;
-			klr_JMP_t *j = (klr_JMP_t*)bb->opjmp;
+			OPJMP *j = (OPJMP*)bb->opjmp;
 			j->jumppc = bbJ->code;
 			bb->branchBlock = NULL;
 			if(!BasicBlock_isVisited(bbJ)) {
@@ -427,7 +427,7 @@ static void dumpOPCODE(KonohaContext *kctx, VirtualMachineInstruction *c, Virtua
 static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 {
 	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].mtdNC));
-	VirtualMachine_run(kctx, sfp, CODE_ENTER);
+	KonohaVirtualMachine_run(kctx, sfp, CODE_ENTER);
 }
 
 static void Method_threadCode(KonohaContext *kctx, kMethod *mtd, kByteCode *kcode)
@@ -435,7 +435,7 @@ static void Method_threadCode(KonohaContext *kctx, kMethod *mtd, kByteCode *kcod
 	kMethodVar *Wmtd = (kMethodVar*)mtd;
 	KLIB Method_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
 	KSETv(Wmtd->kcode, kcode);
-	Wmtd->pc_start = VirtualMachine_run(kctx, kctx->esp + 1, kcode->code);
+	Wmtd->pc_start = KonohaVirtualMachine_run(kctx, kctx->esp + 1, kcode->code);
 	if(verbose_code) {
 		DBG_P("DUMP CODE");
 		VirtualMachineInstruction *pc = mtd->pc_start;
@@ -486,7 +486,7 @@ static kBasicBlock* ASM_JMPF(KonohaContext *kctx, int flocal, kBasicBlock *lbJUM
 {
 	kBasicBlock *bb = ctxcode->currentWorkingBlock;
 	kBasicBlock *lbNEXT = new_BasicBlockLABEL(kctx);
-	klr_JMPF_t op = {TADDR, OPCODE_JMPF, ASMLINE, NULL, NC_(flocal)};
+	OPJMPF op = {TADDR, OPCODE_JMPF, ASMLINE, NULL, NC_(flocal)};
 	if(BUILD_asmJMPF(kctx, &op)) {
 		bb->branchBlock = lbNEXT;
 		bb->nextBlock = lbJUMP;
@@ -1062,7 +1062,7 @@ void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		ia->nextBlock = ib;
 		kByteCode *kcode = new_ByteCode(kctx, ia, ib);
 		KINITv(kmodcode->codeNull, kcode);
-		VirtualMachineInstruction *pc = VirtualMachine_run(kctx, kctx->esp, kcode->code);
+		VirtualMachineInstruction *pc = KonohaVirtualMachine_run(kctx, kctx->esp, kcode->code);
 		CODE_ENTER = pc;
 		CODE_ENTER = pc+1;
 		KLIB kArray_clear(kctx, ctxcode->codeList, 0);

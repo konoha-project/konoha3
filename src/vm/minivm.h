@@ -27,181 +27,191 @@
 
 
 #define OPCODE_NOP ((kopcode_t)0)
-typedef struct klr_NOP_t {
+typedef struct OPNOP {
 	KCODE_HEAD;
-} klr_NOP_t;
+} OPNOP;
 
 #define OPCODE_THCODE ((kopcode_t)1)
-typedef struct klr_THCODE_t {
+typedef struct OPTHCODE {
 	KCODE_HEAD;
-	klr_Fth th;
-} klr_THCODE_t;
+	ThreadCodeFunc threadCode;
+} OPTHCODE;
 
 #define OPCODE_ENTER ((kopcode_t)2)
-typedef struct klr_ENTER_t {
+typedef struct OPENTER {
 	KCODE_HEAD;
-} klr_ENTER_t;
+} OPENTER;
 
 #define OPCODE_EXIT ((kopcode_t)3)
-typedef struct klr_EXIT_t {
+typedef struct OPEXIT {
 	KCODE_HEAD;
-} klr_EXIT_t;
+} OPEXIT;
 
 #define OPCODE_NSET ((kopcode_t)4)
-typedef struct klr_NSET_t {
+typedef struct OPNSET {
 	KCODE_HEAD;
 	kreg_t a;
 	kint_t n;
 	KonohaClass* ty;
-} klr_NSET_t;
+} OPNSET;
 
 #define OPCODE_NMOV ((kopcode_t)5)
-typedef struct klr_NMOV_t {
+typedef struct OPNMOV {
 	KCODE_HEAD;
 	kreg_t a;
 	kreg_t b;
 	KonohaClass* ty;
-} klr_NMOV_t;
+} OPNMOV;
 
 #define OPCODE_NMOVx ((kopcode_t)6)
-typedef struct klr_NMOVx_t {
+typedef struct OPNMOVx {
 	KCODE_HEAD;
 	kreg_t a;
 	kreg_t b;
 	uintptr_t bx;
 	KonohaClass* ty;
-} klr_NMOVx_t;
+} OPNMOVx;
 
 #define OPCODE_XNMOV ((kopcode_t)7)
-typedef struct klr_XNMOV_t {
+typedef struct OPXNMOV {
 	KCODE_HEAD;
 	kreg_t a;
 	uintptr_t ax;
 	kreg_t b;
 	KonohaClass* ty;
-} klr_XNMOV_t;
+} OPXNMOV;
 
 #define OPCODE_NEW ((kopcode_t)8)
-typedef struct klr_NEW_t {
+typedef struct OPNEW {
 	KCODE_HEAD;
 	kreg_t a;
 	uintptr_t p;
 	KonohaClass* ty;
-} klr_NEW_t;
+} OPNEW;
 
 #define OPCODE_NULL ((kopcode_t)9)
-typedef struct klr_NULL_t {
+typedef struct OPNULL {
 	KCODE_HEAD;
 	kreg_t a;
 	KonohaClass* ty;
-} klr_NULL_t;
+} OPNULL;
 
 #define OPCODE_BOX ((kopcode_t)10)
-typedef struct klr_BOX_t {
+typedef struct OPBOX {
 	KCODE_HEAD;
 	kreg_t a;
 	kreg_t b;
 	KonohaClass* ty;
-} klr_BOX_t;
+} OPBOX;
 
 #define OPCODE_UNBOX ((kopcode_t)11)
-typedef struct klr_UNBOX_t {
+typedef struct OPUNBOX {
 	KCODE_HEAD;
 	kreg_t a;
 	kreg_t b;
 	KonohaClass* ty;
-} klr_UNBOX_t;
+} OPUNBOX;
 
-#define OPCODE_CALL ((kopcode_t)12)
-typedef struct klr_CALL_t {
+#define OPCODE_LOOKUP ((kopcode_t)12)
+typedef struct OPLOOKUP {
 	KCODE_HEAD;
-	uintptr_t uline;
 	kreg_t thisidx;
-	kreg_t espshift;
-	kObject* tyo;
-} klr_CALL_t;
-
-#define OPCODE_SCALL ((kopcode_t)13)
-typedef struct klr_SCALL_t {
-	KCODE_HEAD;
-	uintptr_t uline;
-	kreg_t thisidx;
-	kreg_t espshift;
+	kNameSpace* ns;
 	kMethod* mtd;
+} OPLOOKUP;
+
+#define OPCODE_CALL ((kopcode_t)13)
+typedef struct OPCALL {
+	KCODE_HEAD;
+	uintptr_t uline;
+	kreg_t thisidx;
+	kreg_t espshift;
 	kObject* tyo;
-} klr_SCALL_t;
+} OPCALL;
 
 #define OPCODE_RET ((kopcode_t)14)
-typedef struct klr_RET_t {
+typedef struct OPRET {
 	KCODE_HEAD;
-} klr_RET_t;
+} OPRET;
 
 #define OPCODE_NCALL ((kopcode_t)15)
-typedef struct klr_NCALL_t {
+typedef struct OPNCALL {
 	KCODE_HEAD;
-} klr_NCALL_t;
+} OPNCALL;
 
 #define OPCODE_BNOT ((kopcode_t)16)
-typedef struct klr_BNOT_t {
+typedef struct OPBNOT {
 	KCODE_HEAD;
 	kreg_t c;
 	kreg_t a;
-} klr_BNOT_t;
+} OPBNOT;
 
 #define OPCODE_JMP ((kopcode_t)17)
-typedef struct klr_JMP_t {
+typedef struct OPJMP {
 	KCODE_HEAD;
 	VirtualMachineInstruction  *jumppc;
-} klr_JMP_t;
+} OPJMP;
 
 #define OPCODE_JMPF ((kopcode_t)18)
-typedef struct klr_JMPF_t {
+typedef struct OPJMPF {
 	KCODE_HEAD;
 	VirtualMachineInstruction  *jumppc;
 	kreg_t a;
-} klr_JMPF_t;
+} OPJMPF;
 
-#define OPCODE_SAFEPOINT ((kopcode_t)19)
-typedef struct klr_SAFEPOINT_t {
+#define OPCODE_TRYJMP ((kopcode_t)19)
+typedef struct OPTRYJMP {
 	KCODE_HEAD;
-	kreg_t espshift;
-} klr_SAFEPOINT_t;
+	VirtualMachineInstruction  *jumppc;
+} OPTRYJMP;
 
-#define OPCODE_ERROR ((kopcode_t)20)
-typedef struct klr_ERROR_t {
+#define OPCODE_YIELD ((kopcode_t)20)
+typedef struct OPYIELD {
 	KCODE_HEAD;
-	kreg_t start;
+} OPYIELD;
+
+#define OPCODE_ERROR ((kopcode_t)21)
+typedef struct OPERROR {
+	KCODE_HEAD;
+	uintptr_t uline;
 	kString* msg;
-} klr_ERROR_t;
+	kreg_t esp;
+} OPERROR;
 
-#define OPCODE_VCALL ((kopcode_t)21)
-typedef struct klr_VCALL_t {
+#define OPCODE_SAFEPOINT ((kopcode_t)22)
+typedef struct OPSAFEPOINT {
+	KCODE_HEAD;
+	uintptr_t uline;
+	kreg_t esp;
+} OPSAFEPOINT;
+
+#define OPCODE_TRACE ((kopcode_t)23)
+typedef struct OPTRACE {
 	KCODE_HEAD;
 	uintptr_t uline;
 	kreg_t thisidx;
-	kreg_t espshift;
-	kMethod* mtd;
-	kObject* tyo;
-} klr_VCALL_t;
+	TraceFunc trace;
+} OPTRACE;
 
 	
-#define KOPCODE_MAX ((kopcode_t)22)
+#define KOPCODE_MAX ((kopcode_t)24)
 
-#define VMT_VOID     0
-#define VMT_ADDR     1
-#define VMT_R        2
-#define VMT_RN       2
-#define VMT_RO       2
-#define VMT_U        3
-#define VMT_I        4
-#define VMT_CID      5
-#define VMT_CO       6
-#define VMT_INT      7
-#define VMT_FLOAT    8
-#define VMT_HCACHE   9
-#define VMT_F        10/*function*/
-#define VMT_STRING   11
-#define VMT_METHOD   12
+#define VMT_VOID       0
+#define VMT_ADDR       1
+#define VMT_R          2
+#define VMT_RN         2
+#define VMT_RO         2
+#define VMT_U          3
+#define VMT_I          4
+#define VMT_CID        5
+#define VMT_CO         6
+#define VMT_INT        7
+#define VMT_FLOAT      8
+#define VMT_HCACHE     9
+#define VMT_F         10/*function*/
+#define VMT_STRING    11
+#define VMT_METHOD    12
+#define VMT_NAMESPACE 13
 
 
 /* ------------------------------------------------------------------------ */
@@ -233,47 +243,50 @@ static const kOPDATA_t OPDATA[] = {
 	{"NULL", 0, 2, { VMT_RO, VMT_CID, VMT_VOID}}, 
 	{"BOX", 0, 3, { VMT_RO, VMT_RN, VMT_CID, VMT_VOID}}, 
 	{"UNBOX", 0, 3, { VMT_RN, VMT_RO, VMT_CID, VMT_VOID}}, 
+	{"LOOKUP", 0, 3, { VMT_RO, VMT_NAMESPACE, VMT_METHOD, VMT_VOID}}, 
 	{"CALL", 0, 4, { VMT_U, VMT_RO, VMT_RO, VMT_CO, VMT_VOID}}, 
-	{"SCALL", 0, 5, { VMT_U, VMT_RO, VMT_RO, VMT_METHOD, VMT_CO, VMT_VOID}}, 
 	{"RET", 0, 0, { VMT_VOID}}, 
 	{"NCALL", 0, 0, { VMT_VOID}}, 
 	{"BNOT", 0, 2, { VMT_RN, VMT_RN, VMT_VOID}}, 
 	{"JMP", 0, 1, { VMT_ADDR, VMT_VOID}}, 
 	{"JMPF", 0, 2, { VMT_ADDR, VMT_RN, VMT_VOID}}, 
-	{"SAFEPOINT", 0, 1, { VMT_RO, VMT_VOID}}, 
-	{"ERROR", 0, 2, { VMT_RO, VMT_STRING, VMT_VOID}}, 
-	{"VCALL", 0, 5, { VMT_U, VMT_RO, VMT_RO, VMT_METHOD, VMT_CO, VMT_VOID}}, 
+	{"TRYJMP", 0, 1, { VMT_ADDR, VMT_VOID}}, 
+	{"YIELD", 0, 0, { VMT_VOID}}, 
+	{"ERROR", 0, 3, { VMT_U, VMT_STRING, VMT_RO, VMT_VOID}}, 
+	{"SAFEPOINT", 0, 2, { VMT_U, VMT_RO, VMT_VOID}}, 
+	{"TRACE", 0, 3, { VMT_U, VMT_RO, VMT_F, VMT_VOID}}, 
 };
 
 static void opcode_check(void)
 {
-	assert(sizeof(klr_NOP_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_THCODE_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_ENTER_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_EXIT_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_NSET_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_NMOV_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_NMOVx_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_XNMOV_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_NEW_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_NULL_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_BOX_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_UNBOX_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_CALL_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_SCALL_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_RET_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_NCALL_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_BNOT_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_JMP_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_JMPF_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_SAFEPOINT_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_ERROR_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_VCALL_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPNOP) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPTHCODE) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPENTER) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPEXIT) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPNSET) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPNMOV) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPNMOVx) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPXNMOV) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPNEW) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPNULL) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPBOX) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPUNBOX) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPLOOKUP) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPCALL) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPRET) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPNCALL) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPBNOT) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPJMP) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPJMPF) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPTRYJMP) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPYIELD) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPERROR) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPSAFEPOINT) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPTRACE) <= sizeof(VirtualMachineInstruction));
 }
 
 static const char *T_opcode(kopcode_t opcode)
 {
-	DBG_ASSERT(opcode < KOPCODE_MAX);
 	return OPDATA[opcode].name;
 }
 
@@ -329,129 +342,139 @@ static kbool_t kopcode_hasjump(kopcode_t opcode)
 #define GOTO_PC(pc)         GOTO_NEXT()
 #endif/*K_USING_THCODE_*/
 
-static VirtualMachineInstruction* VirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, VirtualMachineInstruction *pc)
+static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, VirtualMachineInstruction *pc)
 {
 #ifdef K_USING_THCODE_
 	static void *OPJUMP[] = {
 		&&L_NOP, &&L_THCODE, &&L_ENTER, &&L_EXIT, 
 		&&L_NSET, &&L_NMOV, &&L_NMOVx, &&L_XNMOV, 
 		&&L_NEW, &&L_NULL, &&L_BOX, &&L_UNBOX, 
-		&&L_CALL, &&L_SCALL, &&L_RET, &&L_NCALL, 
-		&&L_BNOT, &&L_JMP, &&L_JMPF, &&L_SAFEPOINT, 
-		&&L_ERROR, &&L_VCALL, 
+		&&L_LOOKUP, &&L_CALL, &&L_RET, &&L_NCALL, 
+		&&L_BNOT, &&L_JMP, &&L_JMPF, &&L_TRYJMP, 
+		&&L_YIELD, &&L_ERROR, &&L_SAFEPOINT, &&L_TRACE, 
 	};
 #endif
 	krbp_t *rbp = (krbp_t*)sfp0;
 	DISPATCH_START(pc);
 
 	CASE(NOP) {
-		klr_NOP_t *op = (klr_NOP_t*)pc;
+		OPNOP *op = (OPNOP*)pc;
 		OPEXEC_NOP(); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(THCODE) {
-		klr_THCODE_t *op = (klr_THCODE_t*)pc;
-		OPEXEC_THCODE(op->th); pc++;
+		OPTHCODE *op = (OPTHCODE*)pc;
+		OPEXEC_THCODE(op->threadCode); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(ENTER) {
-		klr_ENTER_t *op = (klr_ENTER_t*)pc;
+		OPENTER *op = (OPENTER*)pc;
 		OPEXEC_ENTER(); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(EXIT) {
-		klr_EXIT_t *op = (klr_EXIT_t*)pc;
+		OPEXIT *op = (OPEXIT*)pc;
 		OPEXEC_EXIT(); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(NSET) {
-		klr_NSET_t *op = (klr_NSET_t*)pc;
+		OPNSET *op = (OPNSET*)pc;
 		OPEXEC_NSET(op->a, op->n, op->ty); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(NMOV) {
-		klr_NMOV_t *op = (klr_NMOV_t*)pc;
+		OPNMOV *op = (OPNMOV*)pc;
 		OPEXEC_NMOV(op->a, op->b, op->ty); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(NMOVx) {
-		klr_NMOVx_t *op = (klr_NMOVx_t*)pc;
+		OPNMOVx *op = (OPNMOVx*)pc;
 		OPEXEC_NMOVx(op->a, op->b, op->bx, op->ty); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(XNMOV) {
-		klr_XNMOV_t *op = (klr_XNMOV_t*)pc;
+		OPXNMOV *op = (OPXNMOV*)pc;
 		OPEXEC_XNMOV(op->a, op->ax, op->b, op->ty); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(NEW) {
-		klr_NEW_t *op = (klr_NEW_t*)pc;
+		OPNEW *op = (OPNEW*)pc;
 		OPEXEC_NEW(op->a, op->p, op->ty); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(NULL) {
-		klr_NULL_t *op = (klr_NULL_t*)pc;
+		OPNULL *op = (OPNULL*)pc;
 		OPEXEC_NULL(op->a, op->ty); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(BOX) {
-		klr_BOX_t *op = (klr_BOX_t*)pc;
+		OPBOX *op = (OPBOX*)pc;
 		OPEXEC_BOX(op->a, op->b, op->ty); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(UNBOX) {
-		klr_UNBOX_t *op = (klr_UNBOX_t*)pc;
+		OPUNBOX *op = (OPUNBOX*)pc;
 		OPEXEC_UNBOX(op->a, op->b, op->ty); pc++;
 		GOTO_NEXT();
 	} 
+	CASE(LOOKUP) {
+		OPLOOKUP *op = (OPLOOKUP*)pc;
+		OPEXEC_LOOKUP(op->thisidx, op->ns, op->mtd); pc++;
+		GOTO_NEXT();
+	} 
 	CASE(CALL) {
-		klr_CALL_t *op = (klr_CALL_t*)pc;
+		OPCALL *op = (OPCALL*)pc;
 		OPEXEC_CALL(op->uline, op->thisidx, op->espshift, op->tyo); pc++;
 		GOTO_NEXT();
 	} 
-	CASE(SCALL) {
-		klr_SCALL_t *op = (klr_SCALL_t*)pc;
-		OPEXEC_SCALL(op->uline, op->thisidx, op->espshift, op->mtd, op->tyo); pc++;
-		GOTO_NEXT();
-	} 
 	CASE(RET) {
-		klr_RET_t *op = (klr_RET_t*)pc;
+		OPRET *op = (OPRET*)pc;
 		OPEXEC_RET(); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(NCALL) {
-		klr_NCALL_t *op = (klr_NCALL_t*)pc;
+		OPNCALL *op = (OPNCALL*)pc;
 		OPEXEC_NCALL(); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(BNOT) {
-		klr_BNOT_t *op = (klr_BNOT_t*)pc;
+		OPBNOT *op = (OPBNOT*)pc;
 		OPEXEC_BNOT(op->c, op->a); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(JMP) {
-		klr_JMP_t *op = (klr_JMP_t*)pc;
+		OPJMP *op = (OPJMP*)pc;
 		OPEXEC_JMP(pc = op->jumppc, JUMP); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(JMPF) {
-		klr_JMPF_t *op = (klr_JMPF_t*)pc;
+		OPJMPF *op = (OPJMPF*)pc;
 		OPEXEC_JMPF(pc = op->jumppc, JUMP, op->a); pc++;
 		GOTO_NEXT();
 	} 
-	CASE(SAFEPOINT) {
-		klr_SAFEPOINT_t *op = (klr_SAFEPOINT_t*)pc;
-		OPEXEC_SAFEPOINT(op->espshift); pc++;
+	CASE(TRYJMP) {
+		OPTRYJMP *op = (OPTRYJMP*)pc;
+		OPEXEC_TRYJMP(pc = op->jumppc, JUMP); pc++;
+		GOTO_NEXT();
+	} 
+	CASE(YIELD) {
+		OPYIELD *op = (OPYIELD*)pc;
+		OPEXEC_YIELD(); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(ERROR) {
-		klr_ERROR_t *op = (klr_ERROR_t*)pc;
-		OPEXEC_ERROR(op->start, op->msg); pc++;
+		OPERROR *op = (OPERROR*)pc;
+		OPEXEC_ERROR(op->uline, op->msg, op->esp); pc++;
 		GOTO_NEXT();
 	} 
-	CASE(VCALL) {
-		klr_VCALL_t *op = (klr_VCALL_t*)pc;
-		OPEXEC_VCALL(op->uline, op->thisidx, op->espshift, op->mtd, op->tyo); pc++;
+	CASE(SAFEPOINT) {
+		OPSAFEPOINT *op = (OPSAFEPOINT*)pc;
+		OPEXEC_SAFEPOINT(op->uline, op->esp); pc++;
+		GOTO_NEXT();
+	} 
+	CASE(TRACE) {
+		OPTRACE *op = (OPTRACE*)pc;
+		OPEXEC_TRACE(op->uline, op->thisidx, op->trace); pc++;
 		GOTO_NEXT();
 	} 
 	DISPATCH_END(pc);

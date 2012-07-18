@@ -1,14 +1,14 @@
 #!/usr/bin/python
 import os, sys
 import copy
-from pygenklib import *
+from pygenlib2 import *
 
 #------------------------------------------------------------------------------
 
 INSTRUCTIONS = """
 # OP       FLAG              ARGS
 NOP        0
-THCODE     0                  th:f
+THCODE     0                  threadCode:f
 ENTER      0
 EXIT       0
 
@@ -22,19 +22,23 @@ NULL       0                  a:ro ty:cid
 BOX        0                  a:ro b:rn ty:cid
 UNBOX      0                  a:rn b:ro ty:cid
 
+LOOKUP     0                  thisidx:ro ns:NameSpace mtd:Method
 CALL       0                  uline:u thisidx:ro espshift:ro tyo:co
-SCALL      0                  uline:u thisidx:ro espshift:ro mtd:Method  tyo:co
 RET        0
 NCALL      0
 
 BNOT       0                  c:rn a:rn
 JMP        0                  addr:addr
 JMPF       0                  addr:addr a:rn
-SAFEPOINT  0                  espshift:ro
+TRYJMP     0                  addr:addr
+YIELD      0                  
 
-ERROR      0                  start:ro msg:String
+ERROR      0                  uline:u msg:String esp:ro
+SAFEPOINT  0                  uline:u esp:ro
+TRACE      0                  uline:u thisidx:ro trace:f
 
-VCALL      0                  uline:u thisidx:ro espshift:ro mtd:Method  tyo:co
+#SCALL      0                 uline:u thisidx:ro espshift:ro mtd:Method  tyo:co
+#VCALL      0                  uline:u thisidx:ro espshift:ro mtd:Method  tyo:co
 
 #P          _CONST            print:f flag:u  msg:String n:sfpidx2
 #PROBE      0                 sfpidx:sfpidx2 probe:f n:u n2:u
@@ -221,7 +225,7 @@ CTYPE = {
 	'cid':      'KonohaClass*',
 	'co':       'kObject*',
 	'hcache':   'kcachedata_t',
-	'addr':     'knh_KLRInst_t*',
+#	'addr':     'knh_KLRInst_t*',
 	'u':        'uintptr_t',
 	'i':        'intptr_t',
 	'rn':       'kreg_t',
@@ -229,9 +233,12 @@ CTYPE = {
 	'r':        'kreg_t',
 }
 
+def cap(t):
+    return t[0].upper() + t[1:] 
+
 def getctype(t, v):
 	if CTYPE.has_key(t): return CTYPE[t]
-	if t == 'f': return 'klr_F%s' % (v)
+	if t == 'f': return '%sFunc' % (cap(v))
 	return 'k%s*' % t
 
 def getVMT(t):
@@ -253,7 +260,8 @@ class KCODE:
 		self.opcode = opcode
 		self.OPCODE = 'OPCODE_%s' % self.name
 		self.OPLABEL = 'L_%s' % self.name
-		self.ctype = 'klr_%s_t' % self.name		
+#		self.ctype = 'klr_%s_t' % self.name		
+		self.ctype = 'OP%s' % self.name		
 		self.level=''
 		self.ifdef = 'CASE'
 		self.size = '%d' % len(self.tokens[2:])
@@ -317,21 +325,22 @@ def write_define_h(f):
 	
 #define KOPCODE_MAX ((kopcode_t)%d)
 
-#define VMT_VOID     0
-#define VMT_ADDR     1
-#define VMT_R        2
-#define VMT_RN       2
-#define VMT_RO       2
-#define VMT_U        3
-#define VMT_I        4
-#define VMT_CID      5
-#define VMT_CO       6
-#define VMT_INT      7
-#define VMT_FLOAT    8
-#define VMT_HCACHE   9
-#define VMT_F        10/*function*/
-#define VMT_STRING   11
-#define VMT_METHOD   12
+#define VMT_VOID       0
+#define VMT_ADDR       1
+#define VMT_R          2
+#define VMT_RN         2
+#define VMT_RO         2
+#define VMT_U          3
+#define VMT_I          4
+#define VMT_CID        5
+#define VMT_CO         6
+#define VMT_INT        7
+#define VMT_FLOAT      8
+#define VMT_HCACHE     9
+#define VMT_F         10/*function*/
+#define VMT_STRING    11
+#define VMT_METHOD    12
+#define VMT_NAMESPACE 13
 
 ''' % (n))
 
@@ -372,13 +381,7 @@ static void opcode_check(void)
 
 static const char *T_opcode(kopcode_t opcode)
 {
-	if(opcode < KOPCODE_MAX) {
-		return OPDATA[opcode].name;
-	}
-	else {
-		fprintf(stderr, "opcode=%d\\n", (int)opcode);
-		return "OPCODE_??";
-	}
+	return OPDATA[opcode].name;
 }
 
 #ifdef OLD
@@ -453,7 +456,7 @@ def write_exec(f):
 #define GOTO_PC(pc)         GOTO_NEXT()
 #endif/*K_USING_THCODE_*/
 
-static VirtualMachineInstruction* VirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, VirtualMachineInstruction *pc)
+static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, VirtualMachineInstruction *pc)
 {
 #ifdef K_USING_THCODE_
 	static void *OPJUMP[] = {''')
