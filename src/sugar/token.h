@@ -204,7 +204,7 @@ static int parseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, TokenizerEn
 {
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	int ch, prev = '"', prev2 = '\0', pos = tok_start + 1, next;
+	int ch, prev = '"', prev2 = '\0', pos = tok_start + 1;
 	while((ch = tenv->source[pos++]) != 0) {
 		if(ch == '\n') {
 			break;
@@ -402,7 +402,7 @@ static int tokenizeEach(KonohaContext *kctx, int kchar, kTokenVar* tk, Tokenizer
 		if(IS_Array(fo)) {
 			kArray *a = (kArray*)fo;
 			int i;
-			for(i = kArray_size(a); i >= 0; i--) {
+			for(i = kArray_size(a) - 1; i >= 0; i--) {
 				pos = callFuncTokenize(kctx, a->funcItems[i], tk, tenv, tok_start);
 				if(pos > tok_start) return pos;
 			}
