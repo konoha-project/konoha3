@@ -86,6 +86,13 @@ static KMETHOD Stmt_getBlock(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(SUGAR kStmt_getBlock(kctx, sfp[0].asStmt, ksymbolA(S_text(key), S_size(key), _NEWID), sfp[2].asBlock));
 }
 
+//## void Stmt.setType(int build);
+static KMETHOD Stmt_setType(KonohaContext *kctx, KonohaStack *sfp)
+{
+	Stmt_typed(sfp[0].asStmt, sfp[1].ivalue);
+	RETURNvoid_();
+}
+
 //## boolean Stmt.tyCheckExpr(String key, Gamma gma, int typeid, int pol);
 static KMETHOD kStmt_tyCheckByName(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -315,6 +322,7 @@ static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public, _F(Stmt_printError), TY_Expr, TY_Stmt, MN_("printError"), 1, TY_String, FN_msg,
 
 		_Public, _F(Stmt_newExpr), TY_Expr, TY_Stmt, MN_("newExpr"), 1, TY_String, FN_key,
+		_Public, _F(Stmt_setType), TY_void, TY_Stmt, MN_("setType"), 1, TY_Int, FN_x,
 //		_Public, _F(Stmt_parsedExpr), TY_Expr, TY_Stmt, MN_("parseExpr"), 3, TY_TokenArray, FN_tokenArray, TY_Int, FN_s, TY_Int, FN_e,
 		DEND,
 	};
