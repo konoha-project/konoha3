@@ -892,6 +892,7 @@ static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	ctxcode->currentWorkingBlock = lbINIT;
 //	BUILD_pushLABEL(kctx, NULL, lbBEGIN, lbEND);
 	ASM(THCODE, _THCODE);
+	ASM(CHKSTACK, 0);
 	ASM_LABEL(kctx, lbBEGIN);
 	BLOCK_asm(kctx, bk, 0);
 	ASM_LABEL(kctx, ctxcode->lbEND);

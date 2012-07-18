@@ -176,6 +176,11 @@ static VirtualMachineInstruction *KonohaVirtualMachine_tryJump(KonohaContext *kc
 	return pc;
 }
 
+static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *sfp, kfileline_t pline)
+{
+
+}
+
 //-------------------------------------------------------------------------
 
 #define rshift(rbp, x_) (rbp+(x_))
@@ -228,11 +233,6 @@ static VirtualMachineInstruction *KonohaVirtualMachine_tryJump(KonohaContext *kc
 #define OPEXEC_UNBOX(A, B, CT) rbp[(A)].unboxValue = N_toint(rbp[B].o)
 
 #define PC_NEXT(pc)   pc+1
-
-#define OPEXEC_CHKSTACK(UL) \
-	if(unlikely(kctx->esp > kctx->stack->stack_uplimit)) {\
-		kreportf(CritTag, UL, "stack overflow");\
-	}\
 
 #define OPEXEC_LOOKUP(THIS, NS, MTD) { \
 		kNameSpace_lookupMethodWithInlineCache(kctx, SFP(rshift(rbp, THIS)), NS, (kMethod**)&MTD);\
@@ -316,16 +316,22 @@ static VirtualMachineInstruction *KonohaVirtualMachine_tryJump(KonohaContext *kc
 		F(kctx, SFP(rshift(rbp, THIS)), UL);\
 	} \
 
-#ifdef K_USING_SAFEPOINT
-#define KLR_SAFEPOINT(UL, espidx) \
+#define OPEXEC_CHKSTACK(UL) \
+	if(unlikely(kctx->esp > kctx->stack->stack_uplimit)) {\
+		kfileline_t uline = (UL == 0) ? rbp[K_ULINEIDX2].uline : UL;\
+		kreportf(CritTag, UL, "stack overflow");\
+	}\
 	if(kctx->safepoint != 0) { \
-		klr_setesp(kctx, SFP(rshift(rbp, espidx)));\
-		knh_checkSafePoint(kctx, (KonohaStack*)rbp, __FILE__, __LINE__); \
+		kfileline_t uline = (UL == 0) ? rbp[K_ULINEIDX2].uline : UL;\
+		KonohaVirtualMachine_onSafePoint(kctx, (KonohaStack*)rbp, UL); \
 	} \
 
-#else
-#define OPEXEC_SAFEPOINT(UL, RS)   klr_setesp(kctx, SFP(rshift(rbp, RS)));
-#endif
+
+#define OPEXEC_SAFEPOINT(UL, espidx) \
+	if(kctx->safepoint != 0) { \
+		klr_setesp(kctx, SFP(rshift(rbp, espidx)));\
+		KonohaVirtualMachine_onSafePoint(kctx, (KonohaStack*)rbp, UL); \
+	} \
 
 #define OPEXEC_ERROR(UL, msg, ESP) {\
 		kreportf(NoneTag, 0, "RuntimeScriptException: %s", S_text(msg));\

@@ -185,7 +185,13 @@ typedef struct OPSAFEPOINT {
 	kreg_t esp;
 } OPSAFEPOINT;
 
-#define OPCODE_TRACE ((kopcode_t)23)
+#define OPCODE_CHKSTACK ((kopcode_t)23)
+typedef struct OPCHKSTACK {
+	KCODE_HEAD;
+	uintptr_t uline;
+} OPCHKSTACK;
+
+#define OPCODE_TRACE ((kopcode_t)24)
 typedef struct OPTRACE {
 	KCODE_HEAD;
 	uintptr_t uline;
@@ -194,7 +200,7 @@ typedef struct OPTRACE {
 } OPTRACE;
 
 	
-#define KOPCODE_MAX ((kopcode_t)24)
+#define KOPCODE_MAX ((kopcode_t)25)
 
 #define VMT_VOID       0
 #define VMT_ADDR       1
@@ -254,6 +260,7 @@ static const kOPDATA_t OPDATA[] = {
 	{"YIELD", 0, 0, { VMT_VOID}}, 
 	{"ERROR", 0, 3, { VMT_U, VMT_STRING, VMT_RO, VMT_VOID}}, 
 	{"SAFEPOINT", 0, 2, { VMT_U, VMT_RO, VMT_VOID}}, 
+	{"CHKSTACK", 0, 1, { VMT_U, VMT_VOID}}, 
 	{"TRACE", 0, 3, { VMT_U, VMT_RO, VMT_F, VMT_VOID}}, 
 };
 
@@ -282,6 +289,7 @@ static void opcode_check(void)
 	assert(sizeof(OPYIELD) <= sizeof(VirtualMachineInstruction));
 	assert(sizeof(OPERROR) <= sizeof(VirtualMachineInstruction));
 	assert(sizeof(OPSAFEPOINT) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPCHKSTACK) <= sizeof(VirtualMachineInstruction));
 	assert(sizeof(OPTRACE) <= sizeof(VirtualMachineInstruction));
 }
 
@@ -351,7 +359,8 @@ static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *kctx, 
 		&&L_NEW, &&L_NULL, &&L_BOX, &&L_UNBOX, 
 		&&L_LOOKUP, &&L_CALL, &&L_RET, &&L_NCALL, 
 		&&L_BNOT, &&L_JMP, &&L_JMPF, &&L_TRYJMP, 
-		&&L_YIELD, &&L_ERROR, &&L_SAFEPOINT, &&L_TRACE, 
+		&&L_YIELD, &&L_ERROR, &&L_SAFEPOINT, &&L_CHKSTACK, 
+		&&L_TRACE, 
 	};
 #endif
 	krbp_t *rbp = (krbp_t*)sfp0;
@@ -470,6 +479,11 @@ static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *kctx, 
 	CASE(SAFEPOINT) {
 		OPSAFEPOINT *op = (OPSAFEPOINT*)pc;
 		OPEXEC_SAFEPOINT(op->uline, op->esp); pc++;
+		GOTO_NEXT();
+	} 
+	CASE(CHKSTACK) {
+		OPCHKSTACK *op = (OPCHKSTACK*)pc;
+		OPEXEC_CHKSTACK(op->uline); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(TRACE) {
