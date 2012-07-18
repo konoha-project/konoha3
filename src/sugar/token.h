@@ -52,6 +52,22 @@ static int parseNL(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int p
 	return parseINDENT(kctx, tk, tenv, pos+1);
 }
 
+#ifdef USE_SCRIPT_TOKENER
+static int parseNUM(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
+{
+	int ch, pos = tok_start;
+	const char *ts = tenv->source;
+	while((ch = ts[pos++]) != 0) {
+		if(ch == '_') continue; // nothing
+		if(!isalnum(ch)) break;
+	}
+	if(IS_NOTNULL(tk)) {
+		KSETv(tk->text, KLIB new_kString(kctx, ts + tok_start, (pos-1)-tok_start, SPOL_ASCII));
+		tk->keyword = TK_INT;
+	}
+	return pos - 1;  // next
+}
+#else
 static int parseNUM(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
 {
 	int ch, pos = tok_start, dot = 0;
@@ -77,6 +93,7 @@ static int parseNUM(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int 
 	}
 	return pos - 1;  // next
 }
+#endif
 
 /**static kbool_t isLowerCaseSymbol(const char *t)
 {
@@ -204,7 +221,7 @@ static int parseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, TokenizerEn
 {
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	int ch, prev = '"', prev2 = '\0', pos = tok_start + 1, next;
+	int ch, prev = '"', prev2 = '\0', pos = tok_start + 1;
 	while((ch = tenv->source[pos++]) != 0) {
 		if(ch == '\n') {
 			break;
@@ -402,7 +419,7 @@ static int tokenizeEach(KonohaContext *kctx, int kchar, kTokenVar* tk, Tokenizer
 		if(IS_Array(fo)) {
 			kArray *a = (kArray*)fo;
 			int i;
-			for(i = kArray_size(a); i >= 0; i--) {
+			for(i = kArray_size(a) - 1; i >= 0; i--) {
 				pos = callFuncTokenize(kctx, a->funcItems[i], tk, tenv, tok_start);
 				if(pos > tok_start) return pos;
 			}

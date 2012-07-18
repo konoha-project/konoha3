@@ -189,6 +189,14 @@ static KMETHOD String_opHAS(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNb_(strstr(S_text(sfp[0].s), S_text(sfp[1].asString)) != NULL);
 }
 
+//## @Const method String String.charCodeAt(Int n);
+static KMETHOD String_charCodeAt(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kString *s = sfp[0].asString;
+	int index = check_index(kctx, sfp[1].ivalue, S_size(s), sfp[K_RTNIDX].uline);
+	RETURNi_(S_text(s)[index]);
+}
+
 /* ------------------------------------------------------------------------ */
 //## @Const method String String.get(Int n);
 
@@ -380,6 +388,8 @@ static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		_Public|_Const|_Im, _F(String_toUpper),     TY_String, TY_String, MN_("toUpper"), 0,
 		_Public|_Const|_Im, _F(String_toLower),     TY_String, TY_String, MN_("toLower"), 0,
 		_Public|_Const|_Im, _F(String_substring),   TY_String, TY_String, MN_("substring"), 2, TY_Int, FN_("offset"), TY_Int, FN_("length"),
+		_Public|_Const|_Im, _F(String_charCodeAt),   TY_Int, TY_String, MN_("charCodeAt"), 1, TY_Int, FN_("index"),
+
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);

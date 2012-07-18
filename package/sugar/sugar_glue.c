@@ -86,6 +86,13 @@ static KMETHOD Stmt_getBlock(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(SUGAR kStmt_getBlock(kctx, sfp[0].asStmt, ksymbolA(S_text(key), S_size(key), _NEWID), sfp[2].asBlock));
 }
 
+//## void Stmt.setType(int build);
+static KMETHOD Stmt_setType(KonohaContext *kctx, KonohaStack *sfp)
+{
+	Stmt_typed(sfp[0].asStmt, sfp[1].ivalue);
+	RETURNvoid_();
+}
+
 //## boolean Stmt.tyCheckExpr(String key, Gamma gma, int typeid, int pol);
 static KMETHOD kStmt_tyCheckByName(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -105,6 +112,12 @@ static KMETHOD kBlock_tyCheckAll(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD NameSpace_addTokenizeFunc(KonohaContext *kctx, KonohaStack *sfp)
 {
 	SUGAR kNameSpace_setTokenizeFunc(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString)[0], NULL, sfp[2].asFunc, 1/*isAddition*/);
+}
+
+//## void NameSpace.compileAllDefinedMethods();
+static KMETHOD NameSpace_compileAllDefinedMethods(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KLIB kNameSpace_compileAllDefinedMethods(kctx);
 }
 
 //## void NameSpace.addPatternMatch(String keyword, Func f);
@@ -298,6 +311,7 @@ static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public, _F(kStmt_tyCheckByName), TY_Boolean, TY_Stmt, MN_("tyCheckExpr"), 4, TY_String, FN_key, TY_Gamma, FN_gma, TY_Int, FN_typeid, TY_Int, FN_pol,
 		_Public, _F(kBlock_tyCheckAll), TY_Boolean, TY_Block, MN_("tyCheckAll"), 1, TY_Gamma, FN_gma,
 
+		_Public, _F(NameSpace_compileAllDefinedMethods), TY_void, TY_NameSpace, MN_("compileAllDefinedMethods"), 0,
 		_Public, _F(NameSpace_addTokenizeFunc), TY_void, TY_NameSpace, MN_("addTokenizeFunc"), 2, TY_String, FN_key, TY_FuncTokenize, FN_func,
 		_Public, _F(NameSpace_addPatternMatch), TY_void, TY_NameSpace, MN_("addPatternMatch"), 2, TY_String, FN_key, TY_FuncPatternMatch, FN_func,
 		_Public, _F(NameSpace_addParseExpr), TY_void, TY_NameSpace, MN_("addParseExpr"), 2, TY_String, FN_key, TY_FuncParseExpr, FN_func,
@@ -308,6 +322,7 @@ static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public, _F(Stmt_printError), TY_Expr, TY_Stmt, MN_("printError"), 1, TY_String, FN_msg,
 
 		_Public, _F(Stmt_newExpr), TY_Expr, TY_Stmt, MN_("newExpr"), 1, TY_String, FN_key,
+		_Public, _F(Stmt_setType), TY_void, TY_Stmt, MN_("setType"), 1, TY_Int, FN_x,
 //		_Public, _F(Stmt_parsedExpr), TY_Expr, TY_Stmt, MN_("parseExpr"), 3, TY_TokenArray, FN_tokenArray, TY_Int, FN_s, TY_Int, FN_e,
 		DEND,
 	};

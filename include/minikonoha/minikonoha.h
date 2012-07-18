@@ -1310,7 +1310,7 @@ typedef struct {
 #define RESET_GCSTACK()        KLIB kArray_clear(kctx, kctx->stack->gcstack, gcstack_)
 
 #define KINITv(VAR, VAL)   OBJECT_SET(VAR, VAL)
-#define KSETv(VAR, VAL)    /*OBJECT_SET(VAR, VAL)*/ VAR = VAL
+#define KSETv(VAR, VAL)    /*OBJECT_SET(VAR, VAL)*/ VAR = (VAL)
 #define KINITp(parent, v, o) KINITv(v, o)
 #define KSETp(parent,  v, o) KSETv(v, o)
 #define KUNUSEv(V)         (V)->h.ct->free(kctx, (V))
