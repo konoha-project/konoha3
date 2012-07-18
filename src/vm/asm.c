@@ -88,7 +88,7 @@ extern "C" {
 
 int verbose_code = 0;  // global variable
 
-static void EXPR_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espidx);
+static void EXPR_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int shift, int espidx);
 
 static kBasicBlock* new_BasicBlockLABEL(KonohaContext *kctx)
 {
@@ -501,9 +501,9 @@ static kBasicBlock* ASM_JMPF(KonohaContext *kctx, int flocal, kBasicBlock *lbJUM
 	return lbJUMP;
 }
 
-static kBasicBlock* EXPR_asmJMPIF(KonohaContext *kctx, int a, kExpr *expr, int isTRUE, kBasicBlock* label, int shift, int espidx)
+static kBasicBlock* EXPR_asmJMPIF(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int isTRUE, kBasicBlock* label, int shift, int espidx)
 {
-	EXPR_asm(kctx, a, expr, shift, espidx);
+	EXPR_asm(kctx, stmt, a, expr, shift, espidx);
 	if(isTRUE) {
 		ASM(BNOT, NC_(a), NC_(a));
 	}
@@ -522,10 +522,10 @@ static kObject* BUILD_addConstPool(KonohaContext *kctx, kObject *o)
 }
 
 static void BLOCK_asm(KonohaContext *kctx, kBlock *bk, int shift);
-static void CALL_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espidx);
-static void AND_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espidx);
-static void OR_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espidx);
-static void LETEXPR_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espidx);
+static void CALL_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int shift, int espidx);
+static void AND_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int shift, int espidx);
+static void OR_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int shift, int espidx);
+static void LETEXPR_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int shift, int espidx);
 
 static void NMOV_asm(KonohaContext *kctx, int a, ktype_t ty, int b)
 {
@@ -537,7 +537,7 @@ static void NMOV_asm(KonohaContext *kctx, int a, ktype_t ty, int b)
 	}
 }
 
-static void EXPR_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espidx)
+static void EXPR_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int shift, int espidx)
 {
 	DBG_ASSERT(expr != NULL);
 	//DBG_P("a=%d, shift=%d, espidx=%d", a, shift, espidx);
@@ -595,7 +595,7 @@ static void EXPR_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int esp
 	}
 	case TEXPR_BOX   : {
 		DBG_ASSERT(IS_Expr(expr->single));
-		EXPR_asm(kctx, a, expr->single, shift, espidx);
+		EXPR_asm(kctx, stmt, a, expr->single, shift, espidx);
 		ASM(BOX, OC_(a), NC_(a), CT_(expr->single->ty));
 		break;
 	}
@@ -604,19 +604,19 @@ static void EXPR_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int esp
 		break;
 	}
 	case TEXPR_CALL  :
-		CALL_asm(kctx, a, expr, shift, espidx);
+		CALL_asm(kctx, stmt, a, expr, shift, espidx);
 		if(a != espidx) {
 			NMOV_asm(kctx, a, expr->ty, espidx);
 		}
 		break;
 	case TEXPR_AND  :
-		AND_asm(kctx, a, expr, shift, espidx);
+		AND_asm(kctx, stmt, a, expr, shift, espidx);
 		break;
 	case TEXPR_OR  :
-		OR_asm(kctx, a, expr, shift, espidx);
+		OR_asm(kctx, stmt, a, expr, shift, espidx);
 		break;
 	case TEXPR_LET  :
-		LETEXPR_asm(kctx, a, expr, shift, espidx);
+		LETEXPR_asm(kctx, stmt, a, expr, shift, espidx);
 		break;
 	case TEXPR_STACKTOP  :
 		//DBG_P("STACKTOP mov %d, %d, < %d", a, expr->index + shift, espidx);
@@ -630,7 +630,7 @@ static void EXPR_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int esp
 
 static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack *sfp);
 
-static void CALL_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espidx)
+static void CALL_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int shift, int espidx)
 {
 	kMethod *mtd = expr->cons->methodItems[0];
 	DBG_ASSERT(IS_Method(mtd));
@@ -643,7 +643,7 @@ static void CALL_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int esp
 	for(i = s; i < kArray_size(expr->cons); i++) {
 		kExpr *exprN = kExpr_at(expr, i);
 		DBG_ASSERT(IS_Expr(exprN));
-		EXPR_asm(kctx, thisidx + i - 1, exprN, shift, thisidx + i - 1);
+		EXPR_asm(kctx, stmt, thisidx + i - 1, exprN, shift, thisidx + i - 1);
 	}
 	int argc = kArray_size(expr->cons) - 2;
 //	if (mtd->mn == MN_new && mtd->invokeMethodFunc == MethodFunc_abstract) {
@@ -658,18 +658,22 @@ static void CALL_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int esp
 //		}
 //	}
 //	else {
+	if(Method_isFinal(mtd) || !Method_isVirtual(mtd)) {
 		ASM(NSET, NC_(thisidx-1), (intptr_t)mtd, CT_Method);
-		ASM(CALL, ctxcode->uline, SFP_(thisidx), ESP_(espidx, argc), KLIB Knull(kctx, CT_(expr->ty)));
-//	}
+	}
+	else {
+		ASM(LOOKUP, SFP_(thisidx), Stmt_nameSpace(stmt), mtd);
+	}
+	ASM(CALL, ctxcode->uline, SFP_(thisidx), ESP_(espidx, argc), KLIB Knull(kctx, CT_(expr->ty)));
 }
 
-static void OR_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espidx)
+static void OR_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int shift, int espidx)
 {
 	int i, size = kArray_size(expr->cons);
 	kBasicBlock*  lbTRUE = new_BasicBlockLABEL(kctx);
 	kBasicBlock*  lbFALSE = new_BasicBlockLABEL(kctx);
 	for(i = 1; i < size; i++) {
-		EXPR_asmJMPIF(kctx, a, kExpr_at(expr, i), 1/*TRUE*/, lbTRUE, shift, espidx);
+		EXPR_asmJMPIF(kctx, stmt, a, kExpr_at(expr, i), 1/*TRUE*/, lbTRUE, shift, espidx);
 	}
 	ASM(NSET, NC_(a), 0/*O_data(K_FALSE)*/, CT_Boolean);
 	ASM_JMP(kctx, lbFALSE);
@@ -678,13 +682,13 @@ static void OR_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espid
 	ASM_LABEL(kctx, lbFALSE); // false
 }
 
-static void AND_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espidx)
+static void AND_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int shift, int espidx)
 {
 	int i, size = kArray_size(expr->cons);
 	kBasicBlock*  lbTRUE = new_BasicBlockLABEL(kctx);
 	kBasicBlock*  lbFALSE = new_BasicBlockLABEL(kctx);
 	for(i = 1; i < size; i++) {
-		EXPR_asmJMPIF(kctx, a, kExpr_at(expr, i), 0/*FALSE*/, lbFALSE, shift, espidx);
+		EXPR_asmJMPIF(kctx, stmt, a, kExpr_at(expr, i), 0/*FALSE*/, lbFALSE, shift, espidx);
 	}
 	ASM(NSET, NC_(a), 1/*O_data(K_TRUE)*/, CT_Boolean);
 	ASM_JMP(kctx, lbTRUE);
@@ -693,26 +697,26 @@ static void AND_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espi
 	ASM_LABEL(kctx, lbTRUE);   // TRUE
 }
 
-static void LETEXPR_asm(KonohaContext *kctx, int a, kExpr *expr, int shift, int espidx)
+static void LETEXPR_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int shift, int espidx)
 {
 	kExpr *exprL = kExpr_at(expr, 1);
 	kExpr *exprR = kExpr_at(expr, 2);
 	if(exprL->build == TEXPR_LOCAL) {
-		EXPR_asm(kctx, exprL->index, exprR, shift, espidx);
+		EXPR_asm(kctx, stmt, exprL->index, exprR, shift, espidx);
 		if(a != espidx) {
 			NMOV_asm(kctx, a, exprL->ty, espidx);
 		}
 	}
 	else if(exprL->build == TEXPR_STACKTOP) {
 		DBG_P("LET TEXPR_STACKTOP a=%d, exprL->index=%d, espidx=%d", a, exprL->index, espidx);
-		EXPR_asm(kctx, exprL->index + shift, exprR, shift, espidx);
+		EXPR_asm(kctx, stmt, exprL->index + shift, exprR, shift, espidx);
 		if(a != espidx) {
 			NMOV_asm(kctx, a, exprL->ty, exprL->index + espidx);
 		}
 	}
 	else{
 		assert(exprL->build == TEXPR_FIELD);
-		EXPR_asm(kctx, espidx, exprR, shift, espidx);
+		EXPR_asm(kctx, stmt, espidx, exprR, shift, espidx);
 		kshort_t index = (kshort_t)exprL->index;
 		kshort_t xindex = (kshort_t)(exprL->index >> (sizeof(kshort_t)*8));
 		if(TY_isUnbox(exprR->ty)) {
@@ -768,7 +772,7 @@ static void ExprStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx
 {
 	kExpr *expr = (kExpr*)kStmt_getObjectNULL(kctx, stmt, KW_ExprPattern);
 	if(IS_Expr(expr)) {
-		EXPR_asm(kctx, espidx, expr, shift, espidx);
+		EXPR_asm(kctx, stmt, espidx, expr, shift, espidx);
 	}
 }
 
@@ -782,7 +786,7 @@ static void IfStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 	kBasicBlock*  lbELSE = new_BasicBlockLABEL(kctx);
 	kBasicBlock*  lbEND  = new_BasicBlockLABEL(kctx);
 	/* if */
-	lbELSE = EXPR_asmJMPIF(kctx, espidx, SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL), 0/*FALSE*/, lbELSE, shift, espidx);
+	lbELSE = EXPR_asmJMPIF(kctx, stmt, espidx, SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL), 0/*FALSE*/, lbELSE, shift, espidx);
 	/* then */
 	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, KW_BlockPattern, K_NULLBLOCK), shift);
 	ASM_JMP(kctx, lbEND);
@@ -797,7 +801,7 @@ static void ReturnStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espi
 {
 	kExpr *expr = (kExpr*)kStmt_getObjectNULL(kctx, stmt, KW_ExprPattern);
 	if(expr != NULL && IS_Expr(expr) && expr->ty != TY_void) {
-		EXPR_asm(kctx, K_RTNIDX, expr, shift, espidx);
+		EXPR_asm(kctx, stmt, K_RTNIDX, expr, shift, espidx);
 	}
 	ASM_JMP(kctx, ctxcode->lbEND);  // RET
 }
@@ -811,7 +815,7 @@ static void LoopStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx
 	KLIB kObject_setObject(kctx, stmt, SYM_("break"), TY_BasicBlock, lbBREAK);
 	ASM_LABEL(kctx, lbCONTINUE);
 	ASM_SAFEPOINT(kctx, espidx);
-	EXPR_asmJMPIF(kctx, espidx, SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL), 0/*FALSE*/, lbBREAK, shift, espidx);
+	EXPR_asmJMPIF(kctx, stmt, espidx, SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL), 0/*FALSE*/, lbBREAK, shift, espidx);
 	//BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, KW_("iteration"), K_NULLBLOCK));
 	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, KW_BlockPattern, K_NULLBLOCK), shift);
 	ASM_JMP(kctx, lbCONTINUE);
