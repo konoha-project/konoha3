@@ -319,11 +319,11 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #define OPEXEC_CHKSTACK(UL) \
 	if(unlikely(kctx->esp > kctx->stack->stack_uplimit)) {\
 		kfileline_t uline = (UL == 0) ? rbp[K_ULINEIDX2].uline : UL;\
-		kreportf(CritTag, UL, "stack overflow");\
+		kreportf(CritTag, uline, "stack overflow");\
 	}\
 	if(kctx->safepoint != 0) { \
 		kfileline_t uline = (UL == 0) ? rbp[K_ULINEIDX2].uline : UL;\
-		KonohaVirtualMachine_onSafePoint(kctx, (KonohaStack*)rbp, UL); \
+		KonohaVirtualMachine_onSafePoint(kctx, (KonohaStack*)rbp, uline);\
 	} \
 
 
