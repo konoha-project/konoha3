@@ -375,7 +375,7 @@ static kMethod *lookupOverloadedMethod(KonohaContext *kctx, kStmt *stmt, kExpr *
 		kArray *abuf = kctx->stack->gcstack;
 		size_t atop = kArray_size(abuf);
 		kNameSpace_findMethodList(kctx, ns, thisClass->classId, mtd->mn, abuf, atop);
-		for(i = atop; kArray_size(abuf); i++) {
+		for(i = atop; i < kArray_size(abuf); i++) {
 			foundMethod = abuf->methodItems[i];
 			kParam *pa = Method_param(foundMethod);
 			if(pa->psize != psize) continue;
