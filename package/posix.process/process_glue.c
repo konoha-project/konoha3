@@ -26,7 +26,10 @@
 #include<minikonoha/sugar.h>
 #include <unistd.h>
 #include <signal.h>
-
+#include <sys/types.h>
+#include <sys/resource.h>
+#include <sys/time.h>
+#include <grp.h>
 //## @Static @Public Int System.getpid();
 
 static KMETHOD System_getpid(KonohaContext *kctx, KonohaStack *sfp)
@@ -116,17 +119,17 @@ static KMETHOD System_setpriority(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD System_getgroups(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int size = kArray_size(sfp[2].asArray);
+	int size = sfp[1].ivalue;
 	kArray *list = sfp[2].asArray;
-	int ret = getgroups(size, list);
+	int ret = getgroups(size, (gid_t *)(list->kintItems));
 	RETURNi_(ret);
 }
 
 static KMETHOD System_setgroups(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int size = kArray_size(sfp[2].asArray);
+	int size = sfp[1].ivalue;
 	kArray *list = sfp[2].asArray;
-	int ret = setgroups(size, list);
+	int ret = setgroups(size, (const gid_t *)(list->kintItems));
 	RETURNi_(ret);
 }
 
@@ -140,6 +143,11 @@ static KMETHOD System_setgroups(KonohaContext *kctx, KonohaStack *sfp)
 
 static	kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
+	kparamtype_t p = { .ty = TY_Int,  };
+	KonohaClass *cIntArray = KLIB KonohaClass_Generics(kctx, CT_(TY_Array), TY_void, 1, &p);
+#define TY_IntArray (cIntArray->classId)
+
+
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Static, _F(System_getpid), TY_Int, TY_System, MN_("getpid"), 0,
 		_Public|_Static, _F(System_getppid), TY_Int, TY_System, MN_("getppid"), 0,
@@ -154,8 +162,8 @@ static	kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public|_Static, _F(System_chroot), TY_Int, TY_System, MN_("chroot"), 1, TY_String, FN_("pathname"),
 		_Public|_Static, _F(System_getpriority), TY_Int, TY_System, MN_("getpriority"), 2, TY_Int, FN_("which"), TY_Int, FN_("who"),
 		_Public|_Static, _F(System_setpriority), TY_Int, TY_System, MN_("setpriority"), 3, TY_Int, FN_("which"), TY_Int, FN_("who"), TY_Int, FN_("priority"),
-		_Public|_Static, _F(System_getgroups), TY_Int, TY_System, MN_("getgroups"), 2, TY_Int, FN_("size"), TY_Array, FN_("list[]"),
-		_Public|_Static, _F(System_setgroups), TY_Int, TY_System, MN_("setgroups"), 2, TY_Int, FN_("size"), TY_Array, FN_("*list"),
+		_Public|_Static, _F(System_getgroups), TY_Int, TY_System, MN_("getgroups"), 2, TY_Int, FN_("size"), TY_IntArray, FN_("list[]"),
+		_Public|_Static, _F(System_setgroups), TY_Int, TY_System, MN_("setgroups"), 2, TY_Int, FN_("size"), TY_IntArray, FN_("*list"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
