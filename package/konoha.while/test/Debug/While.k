@@ -12,4 +12,13 @@ int f() {
 }
 
 assert(f() == 10);
- 
+
+void test() {
+    int i;
+    while(i < 10) {
+        i = i + 1;
+        System.p(""+i);
+    }
+}
+
+test();

@@ -24,15 +24,107 @@
 
 /* ************************************************************************ */
 
-#include<minikonoha/minikonoha.h>
-#include<minikonoha/sugar.h>
-#include<minikonoha/float.h>
-
-#include "while_glue.h"
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+// --------------------------------------------------------------------------
+
+static kbool_t while_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+{
+	return true;
+}
+
+static kbool_t while_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+{
+	return true;
+}
+
+// --------------------------------------------------------------------------
+//
+//static KMETHOD StmtTyCheck_while(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	VAR_StmtTyCheck(stmt, gma);
+//	DBG_P("while statement .. ");
+//	int ret = false;
+//	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0)) {
+//		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, KW_BlockPattern, K_NULLBLOCK);
+//		ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
+//		kStmt_typed(stmt, LOOP);
+//	}
+//	RETURNb_(ret);
+//}
+
+static KMETHOD StmtTyCheck_for(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_StmtTyCheck(stmt, gma);
+	DBG_P("for statement .. ");
+	int ret = false;
+	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0)) {
+		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, KW_BlockPattern, K_NULLBLOCK);
+		ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
+		kStmt_typed(stmt, LOOP);
+	}
+	RETURNb_(ret);
+}
+
+static inline kStmt* kStmt_getParentNULL(kStmt *stmt)
+{
+	return stmt->parentBlockNULL->parentStmtNULL;
+}
+
+static KMETHOD StmtTyCheck_break(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_StmtTyCheck(stmt, gma);
+	kStmt *p = stmt;
+	while((p = kStmt_getParentNULL(p)) != NULL) {
+		if(FLAG_is(p->syn->flag, SYNFLAG_StmtJumpSkip)) {
+			KLIB kObject_setObject(kctx, stmt, stmt->syn->keyword, TY_Stmt, p);
+			kStmt_typed(stmt, JUMP);
+			RETURNb_(true);
+		}
+	}
+	SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "break statement not within a loop");
+	RETURNb_(false);
+}
+
+static KMETHOD StmtTyCheck_continue(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_StmtTyCheck(stmt, gma);
+	DBG_P("continue statement .. ");
+	kStmt *p = stmt;
+	while((p = kStmt_getParentNULL(p)) != NULL) {
+		if(FLAG_is(p->syn->flag, SYNFLAG_StmtJumpAhead)) {
+			KLIB kObject_setObject(kctx, stmt, stmt->syn->keyword, TY_Stmt, p);
+			kStmt_typed(stmt, JUMP);
+			RETURNb_(true);
+		}
+	}
+	SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "continue statement not within a loop");
+	RETURNb_((false));
+}
+
+#define _LOOP .flag = (SYNFLAG_StmtJumpAhead|SYNFLAG_StmtJumpSkip)
+
+static kbool_t while_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
+{
+	KDEFINE_SYNTAX SYNTAX[] = {
+		{ .keyword = SYM_("while"), _LOOP},
+		{ .keyword = SYM_("break"), StmtTyCheck_(break), .rule = "\"break\" [ $USYMBOL ]", },
+		{ .keyword = SYM_("continue"), StmtTyCheck_(continue), .rule = "\"continue\" [ $USYMBOL ]", },
+		{ .keyword = SYM_("for"), _LOOP, StmtTyCheck_(for), .rule = "\"for\" \"(\" var: $block \";\" $expr \";\" each: $block \")\" $block", },
+		{ .keyword = KW_END, },
+	};
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
+	return true;
+}
+
+static kbool_t while_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+{
+	return true;
+}
 
 KDEFINE_PACKAGE* while_init(void)
 {

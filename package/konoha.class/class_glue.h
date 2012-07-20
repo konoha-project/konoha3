@@ -443,7 +443,7 @@ static kbool_t CT_declType(KonohaContext *kctx, KonohaClassVar *ct, kGamma *gma,
 			if(vexpr == K_NULLEXPR) {
 				return false;
 			}
-			kString *name = expr->termToken->text;
+			kString *name = lexpr->termToken->text;
 			if(vexpr->build == TEXPR_CONST) {
 				defineField(kctx, ct, flag, ty, name, vexpr->objectConstValue, 0);
 			}
