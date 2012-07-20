@@ -437,7 +437,7 @@ static kstatus_t Block_eval(KonohaContext *kctx, kBlock *bk)
 	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Static, 0, 0, NULL);
 	PUSH_GCSTACK(mtd);
 	KLIB Method_setParam(kctx, mtd, TY_Object, 0, NULL);
-	int i, jmpresult;
+	int i, jumpResult;
 	kstatus_t result = K_CONTINUE;
 	KonohaContextRuntimeVar *base = kctx->stack;
 	jmpbuf_i lbuf = {};
@@ -445,7 +445,7 @@ static kstatus_t Block_eval(KonohaContext *kctx, kBlock *bk)
 		base->evaljmpbuf = (jmpbuf_i*)KCALLOC(sizeof(jmpbuf_i), 1);
 	}
 	memcpy(&lbuf, base->evaljmpbuf, sizeof(jmpbuf_i));
-	if((jmpresult = PLATAPI setjmp_i(*base->evaljmpbuf)) == 0) {
+	if((jumpResult = PLATAPI setjmp_i(*base->evaljmpbuf)) == 0) {
 		for(i = 0; i < kArray_size(bk->stmtList); i++) {
 			KSETv(bk1->stmtList->objectItems[0], bk->stmtList->objectItems[i]);
 			KSETv(((kBlockVar*)bk1)->blockNameSpace, bk->blockNameSpace);
@@ -455,10 +455,10 @@ static kstatus_t Block_eval(KonohaContext *kctx, kBlock *bk)
 		}
 	}
 	else {
-		DBG_P("Catch eval exception jmpresult=%d", jmpresult);
-		base->evalty = TY_void;
-		result = K_BREAK; //K_FAILED;
-		result = K_FAILED;
+		//KLIB reportException(kctx);
+		DBG_P("Catch eval exception jumpResult=%d", jumpResult);
+		base->evalty = TY_void;  // no value
+		result = K_BREAK;        // message must be dumpted;
 	}
 	memcpy(base->evaljmpbuf, &lbuf, sizeof(jmpbuf_i));
 	END_LOCAL();
