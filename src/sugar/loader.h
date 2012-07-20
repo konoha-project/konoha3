@@ -79,12 +79,6 @@ kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len,
 // ---------------------------------------------------------------------------
 // package
 
-//static const char* packname(const char *packageName)
-//{
-//	char *p = strrchr(packageName, '.');
-//	return (p == NULL) ? packageName : (const char*)p+1;
-//}
-
 static kNameSpace* new_NameSpace(KonohaContext *kctx, kpackage_t packageDomain, kpackage_t packageId)
 {
 	kNameSpaceVar *ns = GCSAFE_new(NameSpaceVar, KNULL(NameSpace));
@@ -116,7 +110,7 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackage_t packageId,
 	pack->packageId = packageId;
 	KINITv(pack->packageNameSpace, ns);
 	pack->packageHandler = packageHandler;
-	path = PLATAPI formatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_export.k");
+	path = PLATAPI formatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_exports.k");
 	if(path != NULL) {
 		pack->exportScriptUri = KLIB KfileId(kctx, pathbuf, strlen(pathbuf), 0, _NEWID) | 1;
 	}

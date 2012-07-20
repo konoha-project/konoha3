@@ -457,6 +457,7 @@ static kstatus_t Block_eval(KonohaContext *kctx, kBlock *bk)
 	else {
 		DBG_P("Catch eval exception jmpresult=%d", jmpresult);
 		base->evalty = TY_void;
+		result = K_BREAK; //K_FAILED;
 		result = K_FAILED;
 	}
 	memcpy(base->evaljmpbuf, &lbuf, sizeof(jmpbuf_i));

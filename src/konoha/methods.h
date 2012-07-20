@@ -190,15 +190,16 @@ static KMETHOD Func_invoke(KonohaContext *kctx, KonohaStack *sfp)
 	KSELFCALL(sfp, fo->mtd);
 }
 
-int konoha_AssertResult = 0;
+int konoha_detectFailedAssert = false;
 
 //## @Const @Static void System.assert(boolean x)
 static KMETHOD System_assert(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kbool_t cond = sfp[1].bvalue;
+//	konoha_detectFailedAssert = false;
 	if (cond == false) {
 		kfileline_t pline  = sfp[K_RTNIDX].uline;
-		konoha_AssertResult = 1;
+		konoha_detectFailedAssert = true;
 		kreportf(CritTag, pline, "Assert!!");
 	}
 }

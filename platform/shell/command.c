@@ -543,7 +543,7 @@ static int check_result(FILE *fp0, FILE *fp1)
 	return 0; //OK
 }
 
-extern int konoha_AssertResult;
+extern int konoha_detectFailedAssert;
 
 static int KonohaContext_test(KonohaContext *kctx, const char *testname)
 {
@@ -571,7 +571,7 @@ static int KonohaContext_test(KonohaContext *kctx, const char *testname)
 		}
 		else {
 			fprintf(stdout, "[FAIL]: %s\n", testname);
-			konoha_AssertResult = 1;
+			konoha_detectFailedAssert = 1;
 		}
 		fclose(fp);
 		fclose(fp2);
@@ -791,7 +791,7 @@ int main(int argc, char *argv[])
 	ret = konoha_parseopt(konoha, (PlatformApiVar*)plat, argc, argv);
 	konoha_close(konoha);
 	MODGC_check_malloced_size();
-	return ret ? konoha_AssertResult: 0;
+	return ret ? konoha_detectFailedAssert: 0;
 }
 
 #ifdef __cplusplus
