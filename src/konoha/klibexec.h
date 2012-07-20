@@ -561,10 +561,10 @@ static void Kreportf(KonohaContext *kctx, kinfotag_t level, kfileline_t pline, c
 	if(level == DebugTag && !verbose_debug) return;
 	va_list ap;
 	va_start(ap , fmt);
-	const char *B = PLATAPI begin(level);
-	const char *E = PLATAPI end(level);
+	const char *B = PLATAPI beginTag(level);
+	const char *E = PLATAPI endTag(level);
 	if(pline != 0) {
-		const char *file = SS_t(pline);
+		const char *file = FileId_t(pline);
 		PLATAPI printf_i("%s - %s(%s:%d) " , B, TAG_t(level), shortfilename(file), (kushort_t)pline);
 	}
 	else {

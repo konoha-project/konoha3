@@ -208,7 +208,7 @@ DEF_TYPE(TS_status_info_st);
 DEF_TYPE(TS_respkctx);
 DEF_TYPE(ESS_issuer_serial);
 DEF_TYPE(ESS_cert_id);
-DEF_TYPE(ESS_signing_cert);
+DEF_TYPE(EFileId_signing_cert);
 DEF_TYPE(X509_POLICY_NODE_st);
 DEF_TYPE(x509_store_st);
 DEF_TYPE(x509_st);

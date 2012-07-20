@@ -202,12 +202,12 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		STRUCTNAME(Gamma),
 		.init = Gamma_init,
 	};
-	base->cNameSpace = KLIB Konoha_defineClass(kctx, PN_sugar, PN_sugar, NULL, &defNameSpace, 0);
-	base->cToken = KLIB Konoha_defineClass(kctx, PN_sugar, PN_sugar, NULL, &defToken, 0);
-	base->cExpr  = KLIB Konoha_defineClass(kctx, PN_sugar, PN_sugar, NULL, &defExpr, 0);
-	base->cStmt  = KLIB Konoha_defineClass(kctx, PN_sugar, PN_sugar, NULL, &defStmt, 0);
-	base->cBlock = KLIB Konoha_defineClass(kctx, PN_sugar, PN_sugar, NULL, &defBlock, 0);
-	base->cGamma = KLIB Konoha_defineClass(kctx, PN_sugar, PN_sugar, NULL, &defGamma, 0);
+	base->cNameSpace = KLIB Konoha_defineClass(kctx, PackageId_sugar, PackageId_sugar, NULL, &defNameSpace, 0);
+	base->cToken = KLIB Konoha_defineClass(kctx, PackageId_sugar, PackageId_sugar, NULL, &defToken, 0);
+	base->cExpr  = KLIB Konoha_defineClass(kctx, PackageId_sugar, PackageId_sugar, NULL, &defExpr, 0);
+	base->cStmt  = KLIB Konoha_defineClass(kctx, PackageId_sugar, PackageId_sugar, NULL, &defStmt, 0);
+	base->cBlock = KLIB Konoha_defineClass(kctx, PackageId_sugar, PackageId_sugar, NULL, &defBlock, 0);
+	base->cGamma = KLIB Konoha_defineClass(kctx, PackageId_sugar, PackageId_sugar, NULL, &defGamma, 0);
 	base->cTokenArray = CT_p0(kctx, CT_Array, base->cToken->classId);
 
 	KLIB Knull(kctx, base->cNameSpace);
@@ -232,28 +232,16 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	EXPORT_SUGAR(base);
 }
 
-
 // boolean NameSpace.importPackage(String pkgname);
-static KMETHOD NameSpace_importPackage_(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD NameSpace_importPackage(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(NameSpace_importPackage(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), sfp[K_RTNIDX].uline));
+	RETURNb_(kNameSpace_importPackage(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), sfp[K_RTNIDX].uline));
 }
 
 // boolean NameSpace.loadScript(String path);
-static KMETHOD NameSpace_loadScript_(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD NameSpace_loadScript(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kfileline_t pline = sfp[K_RTNIDX].uline;
-	FILE_i *fp = PLATAPI fopen_i(S_text(sfp[1].asString), "r");
-	if(fp != NULL) {
-		kfileline_t uline = uline_init(kctx, S_text(sfp[1].asString), S_size(sfp[1].asString), 1, 1);
-		kstatus_t status = kNameSpace_loadStream(kctx, sfp[0].asNameSpace, fp, uline, 0);
-		PLATAPI fclose_i(fp);
-		RETURNb_(status == K_CONTINUE);
-	}
-	else {
-		kreportf(ErrTag, pline, "script not found: %s", S_text(sfp[1].asString));
-		RETURNb_(0);
-	}
+	RETURNb_(kNameSpace_loadScript(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), sfp[K_RTNIDX].uline));
 }
 
 #define _Public kMethod_Public
@@ -263,12 +251,12 @@ static KMETHOD NameSpace_loadScript_(KonohaContext *kctx, KonohaStack *sfp)
 void MODSUGAR_loadMethod(KonohaContext *kctx)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(NameSpace_importPackage_), TY_Boolean, TY_NameSpace, MN_("import"), 1, TY_String, FN_("name"),
-		_Public, _F(NameSpace_loadScript_), TY_Boolean, TY_NameSpace, MN_("load"), 1, TY_String, FN_("path"),
+		_Public, _F(NameSpace_importPackage), TY_Boolean, TY_NameSpace, MN_("import"), 1, TY_String, FN_("name"),
+		_Public, _F(NameSpace_loadScript), TY_Boolean, TY_NameSpace, MN_("load"), 1, TY_String, FN_("path"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);
-	KSET_KLIB2(KimportPackage, NameSpace_importPackage, 0);
+	KSET_KLIB2(KimportPackage, kNameSpace_importPackage, 0);
 }
 
 #ifdef __cplusplus

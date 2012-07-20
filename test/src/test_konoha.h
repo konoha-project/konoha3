@@ -49,7 +49,7 @@ static const char* exportpath(char *pathbuf, size_t bufsiz, const char *pname)
 
 static const char* begin(kinfotag_t t) { return ""; }
 static const char* end(kinfotag_t t) { return ""; }
-static void dbg_p(const char *file, const char *func, int line, const char *fmt, ...) {}
+static void debugPrintf(const char *file, const char *func, int line, const char *fmt, ...) {}
 
 
 static PlatformApi plat = {
@@ -58,11 +58,11 @@ static PlatformApi plat = {
 	free,
 	ksetjmp,
 	klongjmp,
-	realpath,
-	(FILE_i* (*)(const char*, const char*))fopen,
-	(int     (*)(FILE_i *))fgetc,
-	(int     (*)(FILE_i *))feof,
-	(int     (*)(FILE_i *))fclose,
+//	realpath,
+//	(FILE_i* (*)(const char*, const char*))fopen,
+//	(int     (*)(FILE_i *))fgetc,
+//	(int     (*)(FILE_i *))feof,
+//	(int     (*)(FILE_i *))fclose,
 	syslog,
 	vsyslog,
 	printf,
@@ -75,7 +75,7 @@ static PlatformApi plat = {
 	exportpath,
 	begin,
 	end,
-	dbg_p,
+	debugPrintf,
 };
 
 #endif /* end of include guard */

@@ -100,7 +100,7 @@ static const char* shell_exportpath(char *buf, size_t bufsiz, const char *pname)
 static const char* begin(kinfotag_t t) { (void)t; return ""; }
 static const char* end(kinfotag_t t) { (void)t; return ""; }
 
-static void dbg_p(const char *file, const char *func, int L, const char *fmt, ...)
+static void debugPrintf(const char *file, const char *func, int L, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap , fmt);
@@ -136,7 +136,7 @@ static const PlatformApi apache_platform = {
 	.exportpath  = shell_exportpath,
 	.begin       = begin,
 	.end         = end,
-	.dbg_p       = dbg_p,
+	.debugPrintf       = debugPrintf,
 };
 
 // class methodList start ==============================================================================================

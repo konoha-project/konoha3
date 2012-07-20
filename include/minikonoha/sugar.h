@@ -49,19 +49,16 @@ extern "C" {
 #define KPACKLIB(N, V) \
 	.libname = N, .libversion = V
 
-typedef const struct KDEFINE_PACKAGE_ KDEFINE_PACKAGE;
-typedef KDEFINE_PACKAGE* (*PackageLoadFunc)(void);
-
-struct KDEFINE_PACKAGE_ {
+struct KonohaPackageHandlerVar {
 	int konoha_checksum;
 	const char *name;
 	const char *version;
 	const char *libname;
 	const char *libversion;
 	const char *note;
-	kbool_t (*initPackage)(KonohaContext *kctx, kNameSpace *, int, const char**, kfileline_t);
-	kbool_t (*setupPackage)(KonohaContext *kctx, kNameSpace *, kfileline_t);
-	kbool_t (*initNameSpace)(KonohaContext *kctx, kNameSpace *, kfileline_t);
+	kbool_t (*initPackage)(KonohaContext *kctx,    kNameSpace *, int, const char**, kfileline_t);
+	kbool_t (*setupPackage)(KonohaContext *kctx,   kNameSpace *, kfileline_t);
+	kbool_t (*initNameSpace)(KonohaContext *kctx,  kNameSpace *, kfileline_t);
 	kbool_t (*setupNameSpace)(KonohaContext *kctx, kNameSpace *, kfileline_t);
 	int konoha_revision;
 };
@@ -71,7 +68,7 @@ typedef struct KonohaPackageVar KonohaPackage;
 struct KonohaPackageVar {
 	kpackage_t                   packageId;
 	kNameSpace                  *packageNameSpace;
-	KDEFINE_PACKAGE             *packageLoadApi;
+	KonohaPackageHandler        *packageHandler;
 	kfileline_t                  exportScriptUri;
 };
 

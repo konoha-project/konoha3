@@ -1050,8 +1050,8 @@ void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		.free = ByteCode_free,
 	};
 
-	base->cBasicBlock = KLIB Konoha_defineClass(kctx, PN_sugar, PN_sugar, NULL, &defBasicBlock, 0);
-	base->cByteCode = KLIB Konoha_defineClass(kctx, PN_sugar, PN_sugar, NULL, &defByteCode, 0);
+	base->cBasicBlock = KLIB Konoha_defineClass(kctx, PackageId_sugar, PackageId_sugar, NULL, &defBasicBlock, 0);
+	base->cByteCode = KLIB Konoha_defineClass(kctx, PackageId_sugar, PackageId_sugar, NULL, &defByteCode, 0);
 	kmodcode_setup(kctx, &base->h, 0/*lazy*/);
 	{
 		INIT_GCSTACK();

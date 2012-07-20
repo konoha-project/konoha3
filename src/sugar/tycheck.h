@@ -451,7 +451,7 @@ static kstatus_t Block_eval(KonohaContext *kctx, kBlock *bk)
 			KSETv(((kBlockVar*)bk1)->blockNameSpace, bk->blockNameSpace);
 			KLIB kArray_clear(kctx, bk1->stmtList, 1);
 			result = SingleBlock_eval(kctx, bk1, mtd, bk->blockNameSpace);
-			if(result == K_FAILED) break;
+			if(result != K_CONTINUE) break;
 		}
 	}
 	else {

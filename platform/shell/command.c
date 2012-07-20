@@ -226,6 +226,133 @@ static kbool_t konoha_shell(KonohaContext* konoha)
 }
 
 // -------------------------------------------------------------------------
+
+typedef struct {
+	char   *buffer;
+	size_t  size;
+	size_t  allocSize;
+} SimpleBuffer;
+
+static void SimpleBuffer_putc(SimpleBuffer *simpleBuffer, int ch)
+{
+	if(!(simpleBuffer->size < simpleBuffer->allocSize)) {
+		simpleBuffer->allocSize *= 2;
+		simpleBuffer->buffer = realloc(simpleBuffer->buffer, simpleBuffer->allocSize);
+	}
+	simpleBuffer->buffer[simpleBuffer->size] = ch;
+	simpleBuffer->size += 1;
+}
+
+static kfileline_t readQuote(FILE *fp, kfileline_t line, SimpleBuffer *simpleBuffer, int quote)
+{
+	int ch, prev = quote;
+	while((ch = fgetc(fp)) != EOF) {
+		if(ch == '\r') continue;
+		if(ch == '\n') line++;
+		SimpleBuffer_putc(simpleBuffer, ch);
+		if(ch == quote && prev != '\\') {
+			return line;
+		}
+		prev = ch;
+	}
+	return line;
+}
+
+static kfileline_t readComment(FILE *fp, kfileline_t line, SimpleBuffer *simpleBuffer)
+{
+	int ch, prev = 0, level = 1;
+	while((ch = fgetc(fp)) != EOF) {
+		if(ch == '\r') continue;
+		if(ch == '\n') line++;
+		SimpleBuffer_putc(simpleBuffer, ch);
+		if(prev == '*' && ch == '/') level--;
+		if(prev == '/' && ch == '*') level++;
+		if(level == 0) return line;
+		prev = ch;
+	}
+	return line;
+}
+
+static kfileline_t readChunk(FILE *fp, kfileline_t line, SimpleBuffer *simpleBuffer)
+{
+	int ch;
+	int prev = 0, isBLOCK = 0;
+	while((ch = fgetc(fp)) != EOF) {
+		if(ch == '\r') continue;
+		if(ch == '\n') line++;
+		SimpleBuffer_putc(simpleBuffer, ch);
+		if(prev == '/' && ch == '*') {
+			line = readComment(fp, line, simpleBuffer);
+			continue;
+		}
+		if(ch == '\'' || ch == '"' || ch == '`') {
+			line = readQuote(fp, line, simpleBuffer, ch);
+			continue;
+		}
+		if(isBLOCK != 1 && prev == '\n' && ch == '\n') {
+			break;
+		}
+		if(prev == '{') {
+			isBLOCK = 1;
+		}
+		if(prev == '\n' && ch == '}') {
+			isBLOCK = 0;
+		}
+		prev = ch;
+	}
+	return line;
+}
+
+static int isEmptyChunk(const char *t, size_t len)
+{
+	size_t i;
+	for(i = 0; i < len; i++) {
+		if(!isspace(t[i])) return true;
+	}
+	return false;
+}
+
+static int loadScript(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *))
+{
+	int isSuccessfullyLoading = false;
+	FILE *fp = fopen(filePath, "r");
+	if(fp != NULL) {
+		SimpleBuffer simpleBuffer;
+		simpleBuffer.buffer = (char*)malloc(K_PAGESIZE);
+		simpleBuffer.allocSize = K_PAGESIZE;
+		isSuccessfullyLoading = true;
+		while(!feof(fp)) {
+			kfileline_t chunkheadline = uline;
+			bzero(simpleBuffer.buffer, simpleBuffer.allocSize);
+			simpleBuffer.size = 0;
+			uline = readChunk(fp, uline, &simpleBuffer);
+			const char *script = (const char*)simpleBuffer.buffer;
+//			char *p;
+//			if (len > 2 && script[0] == '#' && script[1] == '!') {
+//				if ((p = strstr(script, "konoha")) != 0) {
+//					p += 6;
+//					script = p;
+//				} else {
+//					//FIXME: its not konoha shell, need to exec??
+//					kreportf(ErrTag, pline, "it may not konoha script: %s", FileId_t(uline));
+//					status = K_FAILED;
+//					break;
+//				}
+//			}
+			if(isEmptyChunk(script, simpleBuffer.size)) {
+				int isBreak = false;
+				isSuccessfullyLoading = evalFunc(script, chunkheadline, &isBreak, thunk);
+				if(!isSuccessfullyLoading|| isBreak) {
+					break;
+				}
+			}
+		}
+	}
+	fprintf(stdout, "loadScript: %s fp=%p", filePath, fp);
+	return isSuccessfullyLoading;
+}
+
+// -------------------------------------------------------------------------
 // platform api
 
 #ifndef K_PREFIX
@@ -238,8 +365,9 @@ static const char* packname(const char *str)
 	return (p == NULL) ? str : (const char*)p+1;
 }
 
-static const char* packagepath(char *buf, size_t bufsiz, const char *fname)
+static const char* formatPackagePath(char *buf, size_t bufsiz, const char *packageName, const char *ext)
 {
+	FILE *fp = NULL;
 	char *path = getenv("KONOHA_PACKAGEPATH"), *local = "";
 	if(path == NULL) {
 		path = getenv("KONOHA_HOME");
@@ -249,27 +377,36 @@ static const char* packagepath(char *buf, size_t bufsiz, const char *fname)
 		path = getenv("HOME");
 		local = "/.minikonoha/package";
 	}
-	snprintf(buf, bufsiz, "%s%s/%s/%s_glue.k", path, local, fname, packname(fname));
+	snprintf(buf, bufsiz, "%s%s/%s/%s%s", path, local, packageName, packname(packageName), ext);
 #ifdef K_PREFIX
-	FILE *fp = fopen(buf, "r");
+	fp = fopen(buf, "r");
 	if(fp != NULL) {
 		fclose(fp);
+		return (const char*)buf;
 	}
-	else {
-		snprintf(buf, bufsiz, K_PREFIX "/minikonoha/package" "/%s/%s_glue.k", fname, packname(fname));
-	}
+	snprintf(buf, bufsiz, K_PREFIX "/minikonoha/package" "/%s/%s%s", packageName, packname(packageName), ext);
 #endif
-	return (const char*)buf;
+	fp = fopen(buf, "r");
+	if(fp != NULL) {
+		fclose(fp);
+		return (const char*)buf;
+	}
+	return NULL;
 }
 
-static const char* exportpath(char *pathbuf, size_t bufsiz, const char *pname)
+static KonohaPackageHandler *loadPackageHandler(const char *packageName)
 {
-	char *p = strrchr(pathbuf, '/');
-	snprintf(p, bufsiz - (p  - pathbuf), "/%s_exports.k", packname(pname));
-	FILE *fp = fopen(pathbuf, "r");
-	if(fp != NULL) {
-		fclose(fp);
-		return (const char*)pathbuf;
+	char pathbuf[256];
+	formatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_glue" K_OSDLLEXT);
+	void *gluehdr = dlopen(pathbuf, RTLD_LAZY);
+	fprintf(stderr, "pathbuf=%s, gluehdr=%p", pathbuf, gluehdr);
+	if(gluehdr != NULL) {
+		char funcbuf[80];
+		snprintf(funcbuf, sizeof(funcbuf), "%s_init", packname(packageName));
+		PackageLoadFunc f = (PackageLoadFunc)dlsym(gluehdr, funcbuf);
+		if(f != NULL) {
+			return f();
+		}
 	}
 	return NULL;
 }
@@ -304,7 +441,7 @@ static const char* end(kinfotag_t t)
 	return tags[(int)t];
 }
 
-static void dbg_p(const char *file, const char *func, int line, const char *fmt, ...)
+static void debugPrintf(const char *file, const char *func, int line, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap , fmt);
@@ -315,7 +452,7 @@ static void dbg_p(const char *file, const char *func, int line, const char *fmt,
 	va_end(ap);
 }
 
-static void NOP_dbg_p(const char *file, const char *func, int line, const char *fmt, ...)
+static void NOP_debugPrintf(const char *file, const char *func, int line, const char *fmt, ...)
 {
 }
 
@@ -330,10 +467,10 @@ PlatformApi* platform_shell(void)
 		.longjmp_i       = klongjmp,
 
 		.realpath_i      = realpath,
-		.fopen_i         = (FILE_i* (*)(const char*, const char*))fopen,
-		.fgetc_i         = (int     (*)(FILE_i *))fgetc,
-		.feof_i          = (int     (*)(FILE_i *))feof,
-		.fclose_i        = (int     (*)(FILE_i *))fclose,
+//		.fopen_i         = (FILE_i* (*)(const char*, const char*))fopen,
+//		.fgetc_i         = (int     (*)(FILE_i *))fgetc,
+//		.feof_i          = (int     (*)(FILE_i *))feof,
+//		.fclose_i        = (int     (*)(FILE_i *))fclose,
 		.syslog_i        = syslog,
 		.vsyslog_i       = vsyslog,
 		.printf_i        = printf,
@@ -343,14 +480,15 @@ PlatformApi* platform_shell(void)
 		.qsort_i         = qsort,
 		.exit_i          = exit,
 		// high level
-		.packagepath     = packagepath,
-		.exportpath      = exportpath,
-		.begin           = begin,
-		.end             = end,
-		.dbg_p           = dbg_p,
+		.formatPackagePath  = formatPackagePath,
+		.loadPackageHandler = loadPackageHandler,
+		.loadScript         = loadScript,
+		.beginTag           = begin,
+		.endTag             = end,
+		.debugPrintf        = debugPrintf,
 	};
 	if(!verbose_debug) {
-		plat.dbg_p = NOP_dbg_p;
+		plat.debugPrintf = NOP_debugPrintf;
 	}
 	return (PlatformApi*)(&plat);
 }
@@ -605,11 +743,11 @@ static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc
 			verbose_sugar = 0;
 			verbose_gc    = 0;
 			verbose_code  = 0;
-			plat->dbg_p = NOP_dbg_p;
+			plat->debugPrintf = NOP_debugPrintf;
 			plat->printf_i  = TEST_printf;
 			plat->vprintf_i = TEST_vprintf;
-			plat->begin  = TEST_begin;
-			plat->end    = TEST_end;
+			plat->beginTag  = TEST_begin;
+			plat->endTag    = TEST_end;
 			return KonohaContext_test(konoha, optarg);
 
 		case '?':
@@ -655,8 +793,6 @@ int main(int argc, char *argv[])
 	MODGC_check_malloced_size();
 	return ret ? konoha_AssertResult: 0;
 }
-
-
 
 #ifdef __cplusplus
 }

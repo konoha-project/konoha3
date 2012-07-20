@@ -153,7 +153,7 @@ const PlatformApi* platform_kernel(void)
 		.exportpath  = NULL,
 		.begin       = kbegin,
 		.end         = kend,
-		.dbg_p       = kdbg_p
+		.debugPrintf       = kdebugPrintf
 	};
 	return (const PlatformApi*)(&plat);
 }

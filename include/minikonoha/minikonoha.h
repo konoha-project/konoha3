@@ -82,9 +82,9 @@
 #include <stdarg.h>
 
 #ifdef __GCC__
-#define __NoneTagFMT(idx1, idx2) __attribute__((format(printf, idx1, idx2)))
+#define __PRINTFMT(idx1, idx2) __attribute__((format(printf, idx1, idx2)))
 #else
-#define __NoneTagFMT(idx1, idx2)
+#define __PRINTFMT(idx1, idx2)
 #endif
 
 /* ------------------------------------------------------------------------ */
@@ -100,6 +100,10 @@ typedef struct KonohaLibVar          KonohaLibVar;
 
 typedef void FILE_i;
 
+#define KDEFINE_PACKAGE KonohaPackageHandler
+typedef const struct KonohaPackageHandlerVar KonohaPackageHandler;
+typedef KonohaPackageHandler* (*PackageLoadFunc)(void);
+
 typedef enum {
 	CritTag, ErrTag, WarnTag, NoticeTag, InfoTag, DebugTag, NoneTag
 } kinfotag_t;
@@ -108,6 +112,7 @@ struct PlatformApiVar {
 	// settings
 	const char *name;
 	size_t  stacksize;
+
 	// low-level functions
 	void*   (*malloc_i)(size_t);
 	void    (*free_i)(void *);
@@ -120,9 +125,9 @@ struct PlatformApiVar {
 	int     (*feof_i)(FILE_i *);
 	int     (*fclose_i)(FILE_i *);
 	//
-	void    (*syslog_i)(int priority, const char *message, ...) __NoneTagFMT(2, 3);
+	void    (*syslog_i)(int priority, const char *message, ...) __PRINTFMT(2, 3);
 	void    (*vsyslog_i)(int priority, const char *message, va_list args);
-	int     (*printf_i)(const char *fmt, ...) __NoneTagFMT(2, 3);
+	int     (*printf_i)(const char *fmt, ...) __PRINTFMT(2, 3);
 	int     (*vprintf_i)(const char *fmt, va_list args);
 	int     (*snprintf_i)(char *str, size_t size, const char *fmt, ...);
 	int     (*vsnprintf_i)(char *str, size_t size, const char *fmt, va_list args);
@@ -131,11 +136,12 @@ struct PlatformApiVar {
 	void    (*exit_i)(int p);
 
 	// high-level functions
-	const char* (*packagepath)(char *buf, size_t bufsiz, const char *pkgname);
-	const char* (*exportpath)(char *buf, size_t bufsiz, const char *pkgname);
-	const char* (*begin)(kinfotag_t);
-	const char* (*end)(kinfotag_t);
-	void  (*dbg_p)(const char *file, const char *func, int line, const char *fmt, ...) __NoneTagFMT(4, 5);
+	const char* (*formatPackagePath)(char *buf, size_t bufsiz, const char *packageName, const char *ext);
+	KonohaPackageHandler* (*loadPackageHandler)(const char *packageName);
+	int (*loadScript)(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *));
+	const char* (*beginTag)(kinfotag_t);
+	const char* (*endTag)(kinfotag_t);
+	void  (*debugPrintf)(const char *file, const char *func, int line, const char *fmt, ...) __PRINTFMT(4, 5);
 };
 
 /* ------------------------------------------------------------------------ */
@@ -1211,7 +1217,7 @@ struct KonohaLibVar {
 #define FILEID_(T)                KLIB KfileId(kctx, T, sizeof(T)-1, SPOL_TEXT|SPOL_ASCII, _NEWID)
 
 #define PN_konoha                 0
-#define PN_sugar                  1
+#define PackageId_sugar                  1
 #define PN_(T)                    KLIB KpackageId(kctx, T, sizeof(T)-1, SPOL_TEXT|SPOL_ASCII|SPOL_POOL, _NEWID)
 
 #define ksymbolA(T, L, DEF)       (KPI)->Ksymbol(kctx, T, L, SPOL_ASCII, DEF)
@@ -1369,8 +1375,8 @@ typedef struct {
 #define KNH_ASSERT(a)       assert(a)
 #define DBG_ASSERT(a)       assert(a)
 #define TODO_ASSERT(a)      assert(a)
-#define DBG_P(fmt, ...)     PLATAPI dbg_p(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__)
-#define DBG_ABORT(fmt, ...) PLATAPI dbg_p(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__); PLATAPI exit_i(EXIT_FAILURE)
+#define DBG_P(fmt, ...)     PLATAPI debugPrintf(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__)
+#define DBG_ABORT(fmt, ...) PLATAPI debugPrintf(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__); PLATAPI exit_i(EXIT_FAILURE)
 #define DUMP_P(fmt, ...)    PLATAPI printf_i(fmt, ## __VA_ARGS__)
 //#else
 //#define KNH_ASSERT(a)

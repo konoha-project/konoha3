@@ -52,19 +52,18 @@ static kinline const char* shortfilename(const char *str)
 	return (p == NULL) ? str : (const char*)p+1;
 }
 
-#define SS_s(X)  SS_s_(kctx, X)
-#define SS_t(X)  S_text(SS_s_(kctx, X))
-
-static kinline kString* SS_s_(KonohaContext *kctx, kfileline_t fileid)
+#define FileId_s(X)  FileId_s_(kctx, X)
+#define FileId_t(X)  S_text(FileId_s_(kctx, X))
+static kinline kString* FileId_s_(KonohaContext *kctx, kfileline_t fileid)
 {
 	kfileline_t n = (fileid >> (sizeof(kshort_t) * 8));
 	DBG_ASSERT(n < kArray_size(kctx->share->fileidList));
 	return kctx->share->fileidList->stringItems[n];
 }
 
-#define PN_s(X)    PN_s_(kctx, X)
-#define PN_t(X)    S_text(PN_s_(kctx, X))
-static kinline kString* PN_s_(KonohaContext *kctx, kpackage_t packageId)
+#define PackageId_s(X)    PackageId_s_(kctx, X)
+#define PackageId_t(X)    S_text(PackageId_s_(kctx, X))
+static kinline kString* PackageId_s_(KonohaContext *kctx, kpackage_t packageId)
 {
 	DBG_ASSERT(packageId < kArray_size(kctx->share->packList));
 	return kctx->share->packList->stringItems[packageId];

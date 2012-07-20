@@ -78,7 +78,7 @@ static const char* _exportpath(char *pathbuf, size_t bufsiz, const char *pname)
 static const char* _begin(kinfotag_t t) { (void)t; return ""; }
 static const char* _end(kinfotag_t t) { (void)t; return ""; }
 
-static void _dbg_p(const char *file, const char *func, int L, const char *fmt, ...)
+static void _debugPrintf(const char *file, const char *func, int L, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap , fmt);
@@ -89,7 +89,7 @@ static void _dbg_p(const char *file, const char *func, int L, const char *fmt, .
 	va_end(ap);
 }
 
-static void _NOP_dbg_p(const char *file, const char *func, int line, const char *fmt, ...)
+static void _NOP_debugPrintf(const char *file, const char *func, int line, const char *fmt, ...)
 {
 }
 
@@ -121,10 +121,10 @@ PlatformApi *platform_dse(void)
 		.exportpath = _exportpath,
 		.begin			= _begin,
 		.end			= _end,
-		.dbg_p			= _NOP_dbg_p,
+		.debugPrintf			= _NOP_debugPrintf,
 	};
 	if(getenv("KONOHA_DEBUG") != NULL) {
-		dse.dbg_p = _dbg_p;
+		dse.debugPrintf = _debugPrintf;
 	}
 	return (&dse);
 }

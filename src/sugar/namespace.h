@@ -289,7 +289,7 @@ static void kNameSpace_importClassName(KonohaContext *kctx, kNameSpace *ns, kpac
 		KonohaClass *ct = CT_(i);
 		if(CT_isPrivate(ct)) continue;
 		if(ct->packageId == packageId) {
-			DBG_P("importing packageId=%s.%s, %s..", PN_t(ct->packageId), SYM_t(ct->nameid), PN_t(packageId));
+			DBG_P("importing packageId=%s.%s, %s..", PackageId_t(ct->packageId), SYM_t(ct->nameid), PackageId_t(packageId));
 			kv.key = ct->nameid;
 			kv.ty  = TY_TYPE;
 			kv.uval = (uintptr_t)ct;
