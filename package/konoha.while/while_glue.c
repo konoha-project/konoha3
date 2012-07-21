@@ -44,18 +44,18 @@ static kbool_t while_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline
 
 // --------------------------------------------------------------------------
 //
-//static KMETHOD StmtTyCheck_while(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	VAR_StmtTyCheck(stmt, gma);
-//	DBG_P("while statement .. ");
-//	int ret = false;
-//	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0)) {
-//		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, KW_BlockPattern, K_NULLBLOCK);
-//		ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
-//		kStmt_typed(stmt, LOOP);
-//	}
-//	RETURNb_(ret);
-//}
+static KMETHOD StmtTyCheck_while(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_StmtTyCheck(stmt, gma);
+	DBG_P("while statement .. ");
+	int ret = false;
+	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0)) {
+		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, KW_BlockPattern, K_NULLBLOCK);
+		ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
+		kStmt_typed(stmt, LOOP);
+	}
+	RETURNb_(ret);
+}
 
 static KMETHOD StmtTyCheck_for(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -111,7 +111,7 @@ static KMETHOD StmtTyCheck_continue(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t while_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("while"), _LOOP},
+		{ .keyword = SYM_("while"), _LOOP, StmtTyCheck_(while), .rule = "\"while\" \"(\" $expr \")\" $block",},
 		{ .keyword = SYM_("break"), StmtTyCheck_(break), .rule = "\"break\" [ $USYMBOL ]", },
 		{ .keyword = SYM_("continue"), StmtTyCheck_(continue), .rule = "\"continue\" [ $USYMBOL ]", },
 		{ .keyword = SYM_("for"), _LOOP, StmtTyCheck_(for), .rule = "\"for\" \"(\" var: $block \";\" $expr \";\" each: $block \")\" $block", },
