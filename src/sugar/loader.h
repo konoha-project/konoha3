@@ -136,7 +136,6 @@ static KonohaPackage *getPackageNULL(KonohaContext *kctx, kpackage_t packageId, 
 static kbool_t kNameSpace_isImported(KonohaContext *kctx, kNameSpace *ns, kNameSpace *target, kfileline_t pline)
 {
 	KUtilsKeyValue* value = kNameSpace_getConstNULL(kctx, ns, target->packageId | KW_PATTERN);
-	DBG_P("key=%s, value=%p", PackageId_t(target->packageId), value);
 	if(value != NULL) {
 		kreportf(DebugTag, pline, "package %s has already imported in %s", PackageId_t(ns->packageId), PackageId_t(target->packageId));
 		return true;

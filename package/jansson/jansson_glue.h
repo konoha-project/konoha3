@@ -326,10 +326,10 @@ static KMETHOD Json_setString(KonohaContext *kctx, KonohaStack *sfp)
 		RETURNvoid_();
 	}
 	const char *key = S_text(sfp[1].asString);
-	const char *sval = S_text(sfp[2].s);
+	const char *stringValue = S_text(sfp[2].s);
 	//fprintf(stderr, "key='%s'\n", key);
-	//fprintf(stderr, "val='%s'\n", sval);
-	json_t* val = json_string(sval);
+	//fprintf(stderr, "val='%s'\n", stringValue);
+	json_t* val = json_string(stringValue);
 	if (!json_is_string(val)) {
 		DBG_P("ERROR: Value is not Json object.");
 		RETURNvoid_();

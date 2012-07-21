@@ -14,12 +14,12 @@ int f() {
 }
 
 class B {
-	String sval;
+	String stringValue;
 }
 
 String g() {
     B b = new B();
-    return b.sval;
+    return b.stringValue;
 }
 
 class C {

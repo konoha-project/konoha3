@@ -252,10 +252,10 @@ static kExpr* Expr_tyCheckVariable2(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 		KUtilsKeyValue *kv = kNameSpace_getConstNULL(kctx, ns, fn);
 		if(kv != NULL) {
 			if(SYMKEY_isBOXED(kv->key)) {
-				SUGAR kExpr_setConstValue(kctx, expr, kv->ty, kv->oval);
+				SUGAR kExpr_setConstValue(kctx, expr, kv->ty, kv->objectValue);
 			}
 			else {
-				SUGAR kExpr_setUnboxConstValue(kctx, expr, kv->ty, kv->uval);
+				SUGAR kExpr_setUnboxConstValue(kctx, expr, kv->ty, kv->unboxValue);
 			}
 			return expr;
 		}
@@ -275,16 +275,16 @@ static KMETHOD ExprTyCheck_Usymbol(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
-	ksymbol_t ukey = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NONAME);
+	ksymbol_t unboxKey = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NONAME);
 	kNameSpace *ns = Stmt_nameSpace(stmt);
-	if(ukey != SYM_NONAME) {
-		KUtilsKeyValue *kv = kNameSpace_getConstNULL(kctx, ns, ukey);
+	if(unboxKey != SYM_NONAME) {
+		KUtilsKeyValue *kv = kNameSpace_getConstNULL(kctx, ns, unboxKey);
 		if(kv != NULL) {
 			if(SYMKEY_isBOXED(kv->key)) {
-				SUGAR kExpr_setConstValue(kctx, expr, kv->ty, kv->oval);
+				SUGAR kExpr_setConstValue(kctx, expr, kv->ty, kv->objectValue);
 			}
 			else {
-				SUGAR kExpr_setUnboxConstValue(kctx, expr, kv->ty, kv->uval);
+				SUGAR kExpr_setUnboxConstValue(kctx, expr, kv->ty, kv->unboxValue);
 			}
 			RETURN_(expr);
 		}
@@ -300,8 +300,8 @@ static KMETHOD StmtTyCheck_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 	kbool_t r = false;
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	kToken *tk = SUGAR kStmt_getToken(kctx, stmt, KW_UsymbolPattern, NULL);
-	ksymbol_t ukey = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
-	KUtilsKeyValue *kv = kNameSpace_getConstNULL(kctx, ns, ukey);
+	ksymbol_t unboxKey = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
+	KUtilsKeyValue *kv = kNameSpace_getConstNULL(kctx, ns, unboxKey);
 	if(kv != NULL) {
 		kStmt_p(stmt, ErrTag, "already defined name: %s", Token_text(tk));
 	}
@@ -309,19 +309,19 @@ static KMETHOD StmtTyCheck_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 		r = kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, TPOL_CONST);
 		if(r) {
 			kExpr *expr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL);
-			KUtilsKeyValue kv = { ukey, expr->ty};
+			KUtilsKeyValue kv = { unboxKey, expr->ty};
 			if(expr->build == TEXPR_NULL) {
 				kv.ty = TY_TYPE;
-				kv.uval = (uintptr_t)(CT_(expr->ty));
+				kv.unboxValue = (uintptr_t)(CT_(expr->ty));
 				expr = NULL;
 			}
 			else if(expr->build == TEXPR_CONST) {
-				kv.key = ukey | SYMKEY_BOXED;
-				kv.oval = expr->objectConstValue;
+				kv.key = unboxKey | SYMKEY_BOXED;
+				kv.objectValue = expr->objectConstValue;
 				expr = NULL;
 			}
 			else if(expr->build == TEXPR_NCONST) {
-				kv.uval = expr->unboxConstValue;
+				kv.unboxValue = expr->unboxConstValue;
 				expr = NULL;
 			}
 			if(expr == NULL) {

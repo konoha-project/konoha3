@@ -121,7 +121,7 @@ static void SugarModule_setup(KonohaContext *kctx, struct KonohaModule *def, int
 
 static void pack_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p)
 {
-	KonohaPackage *pack = (KonohaPackage*)p->uvalue;
+	KonohaPackage *pack = (KonohaPackage*)p->unboxValue;
 	BEGIN_REFTRACE(1);
 	KREFTRACEn(pack->packageNameSpace);
 	END_REFTRACE();

@@ -88,15 +88,15 @@ static void reverse(char *const start, char *const end, const int len)
 	}
 }
 
-static char *write_uint_toebuf(uintptr_t uvalue, char *const p, const char *const end)
+static char *write_uint_toebuf(uintptr_t unboxValue, char *const p, const char *const end)
 {
 	int i = 0;
 	while (p + i < end) {
-		int tmp = uvalue % 10;
-		uvalue /= 10;
+		int tmp = unboxValue % 10;
+		unboxValue /= 10;
 		p[i] = '0' + tmp;
 		++i;
-		if (uvalue == 0)
+		if (unboxValue == 0)
 			break;
 	}
 	reverse(p, p + i, i);

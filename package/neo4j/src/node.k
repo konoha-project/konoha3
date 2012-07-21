@@ -70,13 +70,13 @@ class Node {
 	}
 
 	void setPropertyInt(String key, int value) {
-		String svalue = "" + value
-		Stirng str = _post(this.properties + "/" + key, svalue);
+		String stringValueue = "" + value
+		Stirng str = _post(this.properties + "/" + key, stringValueue);
 	}
 
 	void setPropertyFloat(String key, Float value) {
-		String svalue = "" + value
-		String str = _post(this.properties + "/" + key, svalue);
+		String stringValueue = "" + value
+		String str = _post(this.properties + "/" + key, stringValueue);
 	}
 
 	void setPropertyBool(String key, Boolean value) {

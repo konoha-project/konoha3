@@ -405,8 +405,8 @@ static kparamid_t Kmap_getparamid(KonohaContext *kctx, KUtilsHashMap *kmp, kArra
 {
 	KUtilsHashMapEntry *e = KLIB Kmap_get(kctx, kmp, hcode);
 	while(e != NULL) {
-		if(e->hcode == hcode && f(rtype, psize, p, e->paramkey)) {
-			return (kparamid_t)e->uvalue;
+		if(e->hcode == hcode && f(rtype, psize, p, e->paramKey)) {
+			return (kparamid_t)e->unboxValue;
 		}
 		e = e->next;
 	}
@@ -414,8 +414,8 @@ static kparamid_t Kmap_getparamid(KonohaContext *kctx, KUtilsHashMap *kmp, kArra
 	uintptr_t paramid = kArray_size(list);
 	KLIB kArray_add(kctx, list, pa);
 	e = KLIB Kmap_newEntry(kctx, kmp, hcode);
-	KINITv(e->paramkey, pa);
-	e->uvalue = paramid;
+	KINITv(e->paramKey, pa);
+	e->unboxValue = paramid;
 	return (kparamid_t)paramid;
 }
 
@@ -972,7 +972,7 @@ static void KTYTABLE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 static void val_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p)
 {
 	BEGIN_REFTRACE(1);
-	KREFTRACEv(p->ovalue);
+	KREFTRACEv(p->objectValue);
 	END_REFTRACE();
 }
 

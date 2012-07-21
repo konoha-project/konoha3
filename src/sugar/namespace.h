@@ -40,7 +40,7 @@ static SugarSyntax* NameSpace_syn(KonohaContext *kctx, kNameSpace *ns0, ksymbol_
 			KUtilsHashMapEntry *e = KLIB Kmap_get(kctx, ns->syntaxMapNN, hcode);
 			while(e != NULL) {
 				if(e->hcode == hcode) {
-					parent = (SugarSyntax*)e->uvalue;
+					parent = (SugarSyntax*)e->unboxValue;
 					if(isNew && ns0 != ns) goto L_NEW;
 					return parent;
 				}
@@ -56,7 +56,7 @@ static SugarSyntax* NameSpace_syn(KonohaContext *kctx, kNameSpace *ns0, ksymbol_
 		}
 		KUtilsHashMapEntry *e = KLIB Kmap_newEntry(kctx, ns0->syntaxMapNN, hcode);
 		SugarSyntaxVar *syn = (SugarSyntaxVar*)KCALLOC(sizeof(SugarSyntax), 1);
-		e->uvalue = (uintptr_t)syn;
+		e->unboxValue = (uintptr_t)syn;
 
 		if(parent != NULL) {  // TODO: RCGC
 			memcpy(syn, parent, sizeof(SugarSyntax));
@@ -182,14 +182,14 @@ static int comprKeyVal(const void *a, const void *b)
 	return akey - bkey;
 }
 
-static KUtilsKeyValue* kNameSpace_getConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t ukey)
+static KUtilsKeyValue* kNameSpace_getConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t unboxKey)
 {
 	size_t min = 0, max = ns->constTable.bytesize / sizeof(KUtilsKeyValue);
 	while(min < max) {
 		size_t p = (max + min) / 2;
 		ksymbol_t key = SYMKEY_unbox(ns->constTable.keyvalueItems[p].key);
-		if(key == ukey) return ns->constTable.keyvalueItems + p;
-		if(key < ukey) {
+		if(key == unboxKey) return ns->constTable.keyvalueItems + p;
+		if(key < unboxKey) {
 			min = p + 1;
 		}
 		else {
@@ -201,13 +201,13 @@ static KUtilsKeyValue* kNameSpace_getConstNULL(KonohaContext *kctx, kNameSpace *
 
 static kbool_t checkConstConflict(KonohaContext *kctx, kNameSpace *ns, KUtilsKeyValue *kvs, kfileline_t pline)
 {
-	ksymbol_t ukey = kvs->key;
-	KUtilsKeyValue* ksval = kNameSpace_getConstNULL(kctx, ns, ukey);
-	if(ksval != NULL) {
-		if(kvs->ty == ksval->ty && kvs->uval == ksval->uval) {
+	ksymbol_t unboxKey = kvs->key;
+	KUtilsKeyValue* kstringValue = kNameSpace_getConstNULL(kctx, ns, unboxKey);
+	if(kstringValue != NULL) {
+		if(kvs->ty == kstringValue->ty && kvs->unboxValue == kstringValue->unboxValue) {
 			return true;  // same value
 		}
-		kreportf(WarnTag, pline, "conflicted name: %s", SYM_t(SYMKEY_unbox(ukey)));
+		kreportf(WarnTag, pline, "conflicted name: %s", SYM_t(SYMKEY_unbox(unboxKey)));
 		return true;
 	}
 	return false;
@@ -240,17 +240,17 @@ static kbool_t kNameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns,
 	return true;  // FIXME
 }
 
-static kbool_t kNameSpace_setConstData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t key, ktype_t ty, uintptr_t uvalue)
+static kbool_t kNameSpace_setConstData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t key, ktype_t ty, uintptr_t unboxValue)
 {
 	KUtilsKeyValue kv;
 	kv.key = key | SYMKEY_BOXED;
 	kv.ty = ty;
-	kv.uval = uvalue;
+	kv.unboxValue = unboxValue;
 	if(ty == TY_TEXT) {
-		const char *textData = (const char*)uvalue;
+		const char *textData = (const char*)unboxValue;
 		kv.ty = TY_String;
-		kv.sval = KLIB new_kString(kctx, textData, strlen(textData), SPOL_TEXT);
-		PUSH_GCSTACK(kv.oval);
+		kv.stringValue = KLIB new_kString(kctx, textData, strlen(textData), SPOL_TEXT);
+		PUSH_GCSTACK(kv.objectValue);
 	}
 	else if(TY_isUnbox(kv.ty) || kv.ty == TY_TYPE) {
 		kv.key = key;
@@ -277,15 +277,15 @@ static void kNameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ns, const 
 		kv.ty  = (ktype_t)(uintptr_t)d[1];
 		if(kv.ty == TY_TEXT) {
 			kv.ty = TY_String;
-			kv.sval = KLIB new_kString(kctx, d[2], strlen(d[2]), SPOL_TEXT);
-			PUSH_GCSTACK(kv.oval);
+			kv.stringValue = KLIB new_kString(kctx, d[2], strlen(d[2]), SPOL_TEXT);
+			PUSH_GCSTACK(kv.objectValue);
 		}
 		else if(TY_isUnbox(kv.ty) || kv.ty == TY_TYPE) {
 			kv.key = SYMKEY_unbox(kv.key);
-			kv.uval = (uintptr_t)d[2];
+			kv.unboxValue = (uintptr_t)d[2];
 		}
 		else {
-			kv.oval = (kObject*)d[2];
+			kv.objectValue = (kObject*)d[2];
 		}
 		KLIB Kwb_write(kctx, &wb, (const char*)(&kv), sizeof(KUtilsKeyValue));
 		d += 3;
@@ -311,7 +311,7 @@ static void kNameSpace_importClassName(KonohaContext *kctx, kNameSpace *ns, kpac
 			DBG_P("importing packageId=%s.%s, %s..", PackageId_t(ct->packageId), SYM_t(ct->nameid), PackageId_t(packageId));
 			kv.key = ct->nameid;
 			kv.ty  = TY_TYPE;
-			kv.uval = (uintptr_t)ct;
+			kv.unboxValue = (uintptr_t)ct;
 			KLIB Kwb_write(kctx, &wb, (const char*)(&kv), sizeof(KUtilsKeyValue));
 		}
 	}
@@ -332,7 +332,7 @@ static KonohaClass *kNameSpace_getClass(KonohaContext *kctx, kNameSpace *ns, Kon
 		if(ct == NULL) {
 			KUtilsKeyValue *kvs = kNameSpace_getConstNULL(kctx, ns, un);
 			if(kvs != NULL && kvs->ty == TY_TYPE) {
-				return (KonohaClass*)kvs->uval;
+				return (KonohaClass*)kvs->unboxValue;
 			}
 		}
 	}

@@ -39,7 +39,7 @@ static void NameSpace_init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void syntax_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p)
 {
-	SugarSyntax *syn = (SugarSyntax*)p->uvalue;
+	SugarSyntax *syn = (SugarSyntax*)p->unboxValue;
 	BEGIN_REFTRACE(6);
 	KREFTRACEn(syn->syntaxRuleNULL);
 	KREFTRACEv(syn->PatternMatch);
@@ -60,7 +60,7 @@ static void NameSpace_reftrace(KonohaContext *kctx, kObject *o)
 	BEGIN_REFTRACE(size);
 	for(i = 0; i < size; i++) {
 		if(SYMKEY_isBOXED(ns->constTable.keyvalueItems[i].key)) {
-			KREFTRACEv(ns->constTable.keyvalueItems[i].oval);
+			KREFTRACEv(ns->constTable.keyvalueItems[i].objectValue);
 		}
 	}
 	KREFTRACEn(ns->parentNULL);

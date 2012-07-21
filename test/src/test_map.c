@@ -33,7 +33,7 @@ static int _sum_  = 0;
 static int _sum2_ = 0;
 static void reftrace(KonohaContext *kctx, KUtilsHashMapEntry *e)
 {
-    _sum_ += e->uvalue;
+    _sum_ += e->unboxValue;
 }
 static void reftrace2(KonohaContext *kctx, void *e)
 {
@@ -47,13 +47,13 @@ void test_Kmap(KonohaContext *kctx)
     for (i = 0; i < 10; ++i) {
         KUtilsHashMapEntry *entry = kctx->klib->Kmap_newEntry(kctx, map, i);
         assert(entry->hcode == i);
-        entry->ukey = i*2;
-        entry->uvalue = i;
+        entry->unboxKey = i*2;
+        entry->unboxValue = i;
     }
     for (i = 0; i < 10; ++i) {
         KUtilsHashMapEntry *entry = kctx->klib->Kmap_get(kctx, map, i);
         assert(entry != NULL);
-        assert(entry->uvalue == i);
+        assert(entry->unboxValue == i);
     }
     kctx->klib->Kmap_reftrace(kctx, map, reftrace);
     fprintf(stderr, "%d\n", _sum_);
@@ -73,7 +73,7 @@ void test_Kmap(KonohaContext *kctx)
         if (i % 2 == 0) {
             assert(entry == NULL);
         } else {
-            assert(entry->uvalue == i);
+            assert(entry->unboxValue == i);
         }
     }
     kctx->klib->Kmap_free(kctx, map, reftrace2);

@@ -57,7 +57,7 @@ extern kObjectVar **KONOHA_reftail(KonohaContext *kctx, size_t size);
 static void val_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p)
 {
 	BEGIN_REFTRACE(1);
-	KREFTRACEv(p->ovalue);
+	KREFTRACEv(p->objectValue);
 	END_REFTRACE();
 }
 
@@ -278,7 +278,7 @@ static kObject *jitcache_get(KonohaContext *kctx, kMethod *mtd)
 	KUtilsHashMap *map = kmodjit->jitcache;
 	KUtilsHashMapEntry *e = KLIB Kmap_get(kctx, map, hcode);
 	if (e) {
-		return (kObject*) e->uvalue;
+		return (kObject*) e->unboxValue;
 	} else {
 		return K_NULL;
 	}
@@ -289,7 +289,7 @@ static void jitcache_set(KonohaContext *kctx, kMethod *mtd, kObject *f)
 	uintptr_t hcode = jitcache_hash(mtd);
 	KUtilsHashMap *map = kmodjit->jitcache;
 	KUtilsHashMapEntry *newe = KLIB Kmap_newEntry(kctx, map, hcode);
-	newe->uvalue = (uintptr_t) f;
+	newe->unboxValue = (uintptr_t) f;
 }
 
 //## Function System.getJITCache(Method mtd);

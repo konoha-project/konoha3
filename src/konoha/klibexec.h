@@ -151,11 +151,11 @@ static void kmap_makeFreeList(KUtilsHashMap *kmap, size_t s, size_t e)
 	size_t i;
 	for(i = s; i < e - 1; i++) {
 		kmap->arena[i].hcode = ((uintptr_t)-1);
-		kmap->arena[i].uvalue = 0;
+		kmap->arena[i].unboxValue = 0;
 		kmap->arena[i].next = kmap->arena + i + 1;
 	}
 	kmap->arena[e-1].hcode = ((uintptr_t)-1);
-	kmap->arena[e-1].uvalue = 0;
+	kmap->arena[e-1].unboxValue = 0;
 	DBG_ASSERT(kmap->arena[e-1].next == NULL);
 }
 
@@ -246,7 +246,7 @@ static void Kmap_free(KonohaContext *kctx, KUtilsHashMap *kmap, void (*f)(Konoha
 		for(i = 0; i < kmap->hmax; i++) {
 			KUtilsHashMapEntry *e = kmap->hentry[i];
 			while(e != NULL) {
-				f(kctx, e->pvalue);
+				f(kctx, e->ptrValue);
 				e = e->next;
 			}
 		}
@@ -273,7 +273,7 @@ static void kmap_unuse(KUtilsHashMap *kmap, KUtilsHashMapEntry *e)
 	e->next = kmap->unused;
 	kmap->unused = e;
 	e->hcode = ((uintptr_t)-1);
-	e->uvalue  = 0;
+	e->unboxValue  = 0;
 	kmap->size--;
 }
 
@@ -296,27 +296,27 @@ static void Kmap_remove(KUtilsHashMap* kmap, KUtilsHashMapEntry *oe)
 
 // key management
 
-static void map_addStringUnboxValue(KonohaContext *kctx, KUtilsHashMap *kmp, uintptr_t hcode, kString *skey, uintptr_t uvalue)
+static void map_addStringUnboxValue(KonohaContext *kctx, KUtilsHashMap *kmp, uintptr_t hcode, kString *stringKey, uintptr_t unboxValue)
 {
 	KUtilsHashMapEntry *e = KLIB Kmap_newEntry(kctx, kmp, hcode);
-	KINITv(e->skey, skey);
-	e->uvalue = uvalue;
+	KINITv(e->stringKey, stringKey);
+	e->unboxValue = unboxValue;
 }
 
 static ksymbol_t Kmap_getcode(KonohaContext *kctx, KUtilsHashMap *kmp, kArray *list, const char *name, size_t len, uintptr_t hcode, int spol, ksymbol_t def)
 {
 	KUtilsHashMapEntry *e = KLIB Kmap_get(kctx, kmp, hcode);
 	while(e != NULL) {
-		if(e->hcode == hcode && len == S_size(e->skey) && strncmp(S_text(e->skey), name, len) == 0) {
-			return (ksymbol_t)e->uvalue;
+		if(e->hcode == hcode && len == S_size(e->stringKey) && strncmp(S_text(e->stringKey), name, len) == 0) {
+			return (ksymbol_t)e->unboxValue;
 		}
 		e = e->next;
 	}
 	if(def == SYM_NEWID) {
-		kString *skey = KLIB new_kString(kctx, name, len, spol);
+		kString *stringKey = KLIB new_kString(kctx, name, len, spol);
 		uintptr_t sym = kArray_size(list);
-		KLIB kArray_add(kctx, list, skey);
-		map_addStringUnboxValue(kctx, kmp, hcode, skey, sym);
+		KLIB kArray_add(kctx, list, stringKey);
+		map_addStringUnboxValue(kctx, kmp, hcode, stringKey, sym);
 		return (ksymbol_t)sym;
 	}
 	return def;
@@ -474,7 +474,7 @@ void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o)
 		BEGIN_REFTRACE(pmax);
 		for(i = 0; i < pmax; i++) {
 			if(SYMKEY_isBOXED(d->key)) {
-				KREFTRACEv(d->oval);
+				KREFTRACEv(d->objectValue);
 			}
 			d++;
 		}
@@ -483,7 +483,7 @@ void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o)
 	ct->reftrace(kctx, o);
 }
 
-static void kvproto_set(KonohaContext *kctx, KUtilsGrowingArray **pval, ksymbol_t key, ktype_t ty, uintptr_t uval)
+static void kvproto_set(KonohaContext *kctx, KUtilsGrowingArray **pval, ksymbol_t key, ktype_t ty, uintptr_t unboxValue)
 {
 	KUtilsGrowingArray *p = pval[0];
 	if(p->bytemax == 0) {
@@ -495,7 +495,7 @@ static void kvproto_set(KonohaContext *kctx, KUtilsGrowingArray **pval, ksymbol_
 		KUtilsKeyValue *d = p->keyvalueItems + (((size_t)key) % psize);
 		for(i = 0; i < KVPROTO_DELTA; i++) {
 			if(d->key == key || d->key == 0) {
-				d->key = key; d->ty = ty; d->uval = uval;
+				d->key = key; d->ty = ty; d->unboxValue = unboxValue;
 				return;
 			}
 			d++;
@@ -518,7 +518,7 @@ static void kObject_protoEach(KonohaContext *kctx, kObject *o, void *thunk, void
 static kObject* kObject_getObjectNULL(KonohaContext *kctx, kObject *o, ksymbol_t key, kObject *defval)
 {
 	KUtilsKeyValue *d = kvproto_get(o->h.kvproto, key | SYMKEY_BOXED);
-	return (d != NULL) ? d->oval : defval;
+	return (d != NULL) ? d->objectValue : defval;
 }
 
 static void kObject_setObject(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, ktype_t ty, kObject *val)
@@ -530,24 +530,24 @@ static void kObject_setObject(KonohaContext *kctx, kAbstractObject *o, ksymbol_t
 static uintptr_t kObject_getUnboxValue(KonohaContext *kctx, kObject *o, ksymbol_t key, uintptr_t defval)
 {
 	KUtilsKeyValue *d = kvproto_get(o->h.kvproto, key);
-	return (d != NULL) ? d->uval : defval;
+	return (d != NULL) ? d->unboxValue : defval;
 }
 
-static void kObject_setUnboxValue(KonohaContext *kctx, kObject *o, ksymbol_t key, ktype_t ty, uintptr_t uval)
+static void kObject_setUnboxValue(KonohaContext *kctx, kObject *o, ksymbol_t key, ktype_t ty, uintptr_t unboxValue)
 {
 	kObjectVar *v = (kObjectVar*)o;
-	kvproto_set(kctx, &v->h.kvproto, key, ty, uval);
+	kvproto_set(kctx, &v->h.kvproto, key, ty, unboxValue);
 }
 
 static void kObject_removeKey(KonohaContext *kctx, kObject *o, ksymbol_t key)
 {
 	KUtilsKeyValue *d = kvproto_get(o->h.kvproto, key | SYMKEY_BOXED);
 	if(d != NULL) {
-		d->key = 0; d->ty = 0; d->uval = 0;
+		d->key = 0; d->ty = 0; d->unboxValue = 0;
 	}
 	d = kvproto_get(o->h.kvproto, key);
 	if(d != NULL) {
-		d->key = 0; d->ty = 0; d->uval = 0;
+		d->key = 0; d->ty = 0; d->unboxValue = 0;
 	}
 }
 

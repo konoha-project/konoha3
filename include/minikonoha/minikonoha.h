@@ -329,9 +329,9 @@ typedef struct KUtilsKeyValue {
 	ksymbol_t key;
 	ktype_t   ty;
 	union {
-		uintptr_t                uval;  //unboxValue
-		kObject                 *oval;  //objectValue
-		kString                 *sval;  //stringValue
+		uintptr_t                unboxValue;  //unboxValue
+		kObject                 *objectValue;  //objectValue
+		kString                 *stringValue;  //stringValue
 	};
 } KUtilsKeyValue;
 
@@ -369,15 +369,16 @@ typedef struct KUtilsHashMapEntry {
 	uintptr_t hcode;
 	struct KUtilsHashMapEntry *next;
 	union {
-		kString         *skey;
-		kParam          *paramkey;
-		uintptr_t        ukey;
+		uintptr_t        key;
+		uintptr_t        unboxKey;
+		kString         *stringKey;
+		kParam          *paramKey;
 		void            *pkey;
 	};
 	union {
-		kObject         *ovalue;
-		void            *pvalue;
-		uintptr_t        uvalue;
+		kObject         *objectValue;
+		uintptr_t        unboxValue;
+		void            *ptrValue;
 	};
 } KUtilsHashMapEntry;
 
@@ -505,16 +506,15 @@ struct KonohaModule {
 };
 
 #define K_FRAME_NCMEMBER \
-		uintptr_t   unboxValue;  \
+		uintptr_t   unboxValue;\
 		kbool_t     bvalue; \
 		kint_t      ivalue; \
-		kuint_t     uvalue; \
 		kfloat_t    fvalue; \
 		intptr_t    shift;  \
 		uintptr_t   uline; \
 		struct VirtualMachineInstruction  *pc; \
-		kMethod *mtdNC; \
-		const char     *fname \
+		kMethod     *mtdNC; \
+		const char  *fname \
 
 #define K_FRAME_MEMBER \
 		kObject    *o;\
@@ -794,7 +794,6 @@ struct kObjectVar {
 			uintptr_t  unboxValue;\
 			kbool_t    bvalue;\
 			kint_t     ivalue;\
-			kuint_t    uvalue;\
 			kfloat_t   fvalue;\
 		}\
 

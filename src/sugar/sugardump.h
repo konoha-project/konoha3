@@ -166,10 +166,10 @@ static void dumpEntry(KonohaContext *kctx, void *arg, KUtilsKeyValue *d)
 	if((d->key & SYMKEY_BOXED) == SYMKEY_BOXED) {
 		ksymbol_t key = ~SYMKEY_BOXED & d->key;
 		DUMP_P("key='%s%s': ", KW_t(key));
-		if(IS_Token(d->oval)) {
-			dumpToken(kctx, (kToken*)d->oval);
-		} else if (IS_Expr(d->oval)) {
-			dumpExpr(kctx, 0, 0, (kExpr *) d->oval);
+		if(IS_Token(d->objectValue)) {
+			dumpToken(kctx, (kToken*)d->objectValue);
+		} else if (IS_Expr(d->objectValue)) {
+			dumpExpr(kctx, 0, 0, (kExpr *) d->objectValue);
 		}
 	}
 }

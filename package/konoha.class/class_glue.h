@@ -160,7 +160,7 @@ static KMETHOD NameSpace_defineClass(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(ct->classId);
 }
 
-static void defineField(KonohaContext *kctx, KonohaClassVar *ct, int flag, ktype_t ty, kString *name, kObject *value, uintptr_t uvalue)
+static void defineField(KonohaContext *kctx, KonohaClassVar *ct, int flag, ktype_t ty, kString *name, kObject *value, uintptr_t unboxValue)
 {
 	int pos = ct->fieldsize;
 	ct->fieldsize += 1;
@@ -172,7 +172,7 @@ static void defineField(KonohaContext *kctx, KonohaClassVar *ct, int flag, ktype
 			ct->defaultValueAsNull_->fieldUnboxItems[pos] = O_unbox(value);
 		}
 		else {
-			ct->defaultValueAsNull_->fieldUnboxItems[pos] = uvalue;
+			ct->defaultValueAsNull_->fieldUnboxItems[pos] = unboxValue;
 		}
 	}
 	else {
