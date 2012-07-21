@@ -213,7 +213,7 @@ static kbool_t checkConstConflict(KonohaContext *kctx, kNameSpace *ns, KUtilsKey
 	return false;
 }
 
-static void kNameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, KUtilsKeyValue *kvs, size_t nitems, kfileline_t pline)
+static kbool_t kNameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, KUtilsKeyValue *kvs, size_t nitems, kfileline_t pline)
 {
 	size_t i, s = ns->constTable.bytesize / sizeof(KUtilsKeyValue);
 	if(s == 0) {
@@ -237,6 +237,25 @@ static void kNameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, KU
 	}
 	ns->constTable.bytesize = (s + nitems) * sizeof(KUtilsKeyValue);
 	PLATAPI qsort_i(ns->constTable.keyvalueItems, s + nitems, sizeof(KUtilsKeyValue), comprKeyVal);
+	return true;  // FIXME
+}
+
+static kbool_t kNameSpace_setConstData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t key, ktype_t ty, uintptr_t uvalue)
+{
+	KUtilsKeyValue kv;
+	kv.key = key | SYMKEY_BOXED;
+	kv.ty = ty;
+	kv.uval = uvalue;
+	if(ty == TY_TEXT) {
+		const char *textData = (const char*)uvalue;
+		kv.ty = TY_String;
+		kv.sval = KLIB new_kString(kctx, textData, strlen(textData), SPOL_TEXT);
+		PUSH_GCSTACK(kv.oval);
+	}
+	else if(TY_isUnbox(kv.ty) || kv.ty == TY_TYPE) {
+		kv.key = key;
+	}
+	return kNameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, &kv, 1, 0);
 }
 
 static size_t strlen_alnum(const char *p)
