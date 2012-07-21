@@ -399,7 +399,7 @@ static KonohaPackageHandler *loadPackageHandler(const char *packageName)
 	char pathbuf[256];
 	formatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_glue" K_OSDLLEXT);
 	void *gluehdr = dlopen(pathbuf, RTLD_LAZY);
-	fprintf(stderr, "pathbuf=%s, gluehdr=%p", pathbuf, gluehdr);
+	//fprintf(stderr, "pathbuf=%s, gluehdr=%p", pathbuf, gluehdr);
 	if(gluehdr != NULL) {
 		char funcbuf[80];
 		snprintf(funcbuf, sizeof(funcbuf), "%s_init", packname(packageName));
