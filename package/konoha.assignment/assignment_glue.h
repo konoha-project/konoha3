@@ -67,7 +67,7 @@ static	kbool_t assignment_initPackage(KonohaContext *kctx, kNameSpace *ns, int a
 	return true;
 }
 
-static kbool_t assignment_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t assignment_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
 {
 	return true;
 }

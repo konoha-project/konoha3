@@ -49,6 +49,8 @@ extern "C" {
 #define KPACKLIB(N, V) \
 	.libname = N, .libversion = V
 
+typedef enum {  Nope, isFirstTime } isFirstTime_t;
+
 struct KonohaPackageHandlerVar {
 	int konoha_checksum;
 	const char *name;
@@ -56,9 +58,9 @@ struct KonohaPackageHandlerVar {
 	const char *libname;
 	const char *libversion;
 	const char *note;
-	kbool_t (*initPackage)(KonohaContext *kctx,    kNameSpace *, int, const char**, kfileline_t);
-	kbool_t (*setupPackage)(KonohaContext *kctx,   kNameSpace *, kfileline_t);
-	kbool_t (*initNameSpace)(KonohaContext *kctx,  kNameSpace *, kfileline_t);
+	kbool_t (*initPackage)   (KonohaContext *kctx, kNameSpace *, int, const char**, kfileline_t);
+	kbool_t (*setupPackage)  (KonohaContext *kctx, kNameSpace *, isFirstTime_t, kfileline_t);
+	kbool_t (*initNameSpace) (KonohaContext *kctx, kNameSpace *, kfileline_t);
 	kbool_t (*setupNameSpace)(KonohaContext *kctx, kNameSpace *, kfileline_t);
 	int konoha_revision;
 };

@@ -683,7 +683,7 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	return true;
 }
 
-static kbool_t mpi_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t mpi_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
 {
 	return true;
 }

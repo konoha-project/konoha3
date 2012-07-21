@@ -914,7 +914,7 @@ static kbool_t io_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 	return true;
 }
 
-static kbool_t io_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t io_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
 {
 	return true;
 }

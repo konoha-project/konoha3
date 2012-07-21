@@ -120,13 +120,15 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackage_t packageId,
 static KonohaPackage *getPackageNULL(KonohaContext *kctx, kpackage_t packageId, kfileline_t pline)
 {
 	KonohaPackage *pack = (KonohaPackage*)map_getu(kctx, kmodsugar->packageMapNO, packageId, uNULL);
+	isFirstTime_t flag = isFirstTime;
 	if(pack == NULL) {
 		pack = loadPackageNULL(kctx, packageId, pline);
 		if(pack == NULL) return NULL;
 		map_addu(kctx, kmodsugar->packageMapNO, packageId, (uintptr_t)pack);
+		flag = Nope;
 	}
 	if(pack->packageHandler != NULL && pack->packageHandler->setupPackage != NULL) {
-		pack->packageHandler->setupPackage(kctx, pack->packageNameSpace, pline);
+		pack->packageHandler->setupPackage(kctx, pack->packageNameSpace, flag, pline);
 	}
 	return pack;
 }

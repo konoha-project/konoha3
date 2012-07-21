@@ -37,7 +37,7 @@ static kbool_t while_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	return true;
 }
 
-static kbool_t while_setupPackage(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t while_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
 {
 	return true;
 }
