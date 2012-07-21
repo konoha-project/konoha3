@@ -25,11 +25,13 @@
 #include <stdio.h>
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/gc.h"
-#include "test_konoha.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+extern int verbose_debug;
+#include <minikonoha/platform_posix.h>
 
 typedef struct Dummy {
     int x;
@@ -98,7 +100,7 @@ void test_gc(KonohaContext *kctx)
 int main(int argc, const char *argv[])
 {
     int ret = 0;
-    KonohaContext* konoha = konoha_open((const PlatformApi*)&plat);
+    KonohaContext* konoha = konoha_open(KonohaUtils_getDefaultPlatformApi());
     test_gc(konoha);
     konoha_close(konoha);
     assert(__free__ == __init__);

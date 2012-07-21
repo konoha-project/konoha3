@@ -25,7 +25,9 @@
 #include <stdio.h>
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/gc.h"
-#include "test_konoha.h"
+
+extern int verbose_debug;
+#include <minikonoha/platform_posix.h>
 
 void test_kString(KonohaContext *kctx)
 {
@@ -55,7 +57,7 @@ void test_kString(KonohaContext *kctx)
 
 int main(int argc, const char *argv[])
 {
-    KonohaContext* konoha = konoha_open((const PlatformApi*)&plat);
+    KonohaContext* konoha = konoha_open(KonohaUtils_getDefaultPlatformApi());
     int i;
     for (i = 0; i < 100; ++i) {
         test_kString(konoha);

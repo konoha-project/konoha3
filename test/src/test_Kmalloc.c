@@ -25,12 +25,14 @@
 #include <stdio.h>
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/gc.h"
-#include "test_konoha.h"
+
+extern int verbose_debug;
+#include <minikonoha/platform_posix.h>
 
 int main(int argc, const char *argv[])
 {
     KonohaLib *lib;
-    KonohaContext* konoha = konoha_open((const PlatformApi*)&plat);
+    KonohaContext* konoha = konoha_open(KonohaUtils_getDefaultPlatformApi());
     lib = konoha->klib;
     int i;
     void *malloced[100];
