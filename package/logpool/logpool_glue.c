@@ -95,7 +95,7 @@ static KMETHOD LogPool_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRawPtr *ret = (kRawPtr *) sfp[0].asObject;
 	char *host = (char *) S_text(sfp[1].asString);
-	int   port = sfp[2].ivalue;
+	int   port = sfp[2].intValue;
 	RawPtr_init(kctx, sfp[0].asObject, logpool_open_client(NULL, host, port));
 	RETURN_(ret);
 }
@@ -158,7 +158,7 @@ static uintptr_t p_exit(uintptr_t context)
 	END_LOCAL();
 	bzero(c, sizeof(*c));
 	free(c);
-	return lsfp[0].ivalue;
+	return lsfp[0].intValue;
 }
 
 static kRawPtr *Log_new(KonohaContext *kctx, struct Log *e)
@@ -241,10 +241,10 @@ static KMETHOD Timer_create(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct pool_plugin_timer *p = POOL_PLUGIN_CLONE(pool_plugin_timer);
 	kRawPtr *ret = (kRawPtr *) KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), p);
-	p->timer = sfp[1].ivalue;
-	p->flag_start  = sfp[2].ivalue;
-	p->flag_cont   = sfp[3].ivalue;
-	p->flag_finish = sfp[4].ivalue;
+	p->timer = sfp[1].intValue;
+	p->flag_start  = sfp[2].intValue;
+	p->flag_cont   = sfp[3].intValue;
+	p->flag_finish = sfp[4].intValue;
 	RETURN_(ret);
 }
 

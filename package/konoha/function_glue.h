@@ -121,7 +121,7 @@ static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 	USING_SUGAR;
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->tk;
-	sfp[4].fvalue = strtod(S_text(tk->text), NULL);
+	sfp[4].floatValue = strtod(S_text(tk->text), NULL);
 	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_Float, sfp[4].unboxValue));
 }
 

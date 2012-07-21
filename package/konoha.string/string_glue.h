@@ -193,7 +193,7 @@ static KMETHOD String_opHAS(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD String_charCodeAt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s = sfp[0].asString;
-	int index = check_index(kctx, sfp[1].ivalue, S_size(s), sfp[K_RTNIDX].uline);
+	int index = check_index(kctx, sfp[1].intValue, S_size(s), sfp[K_RTNIDX].uline);
 	RETURNi_(S_text(s)[index]);
 }
 
@@ -226,9 +226,9 @@ static kString *S_mget(KonohaContext *kctx, kString *s, size_t n)
 static KMETHOD String_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s = sfp[0].s;
-	size_t n = (size_t)sfp[1].ivalue;
+	size_t n = (size_t)sfp[1].intValue;
 	if (S_isASCII(s)) {
-		n = check_index(kctx, sfp[1].ivalue, S_size(s), sfp[K_RTNIDX].uline);
+		n = check_index(kctx, sfp[1].intValue, S_size(s), sfp[K_RTNIDX].uline);
 		s = KLIB new_kString(kctx, S_text(s) + n, 1, SPOL_POOL|SPOL_ASCII);
 	}
 	else {
@@ -283,8 +283,8 @@ static kString *S_msubstring(KonohaContext *kctx, kString *s, size_t moff, size_
 static KMETHOD String_substring(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s0 = sfp[0].s;
-	size_t offset = (size_t)sfp[1].ivalue;
-	size_t length = (size_t)sfp[2].ivalue;
+	size_t offset = (size_t)sfp[1].intValue;
+	size_t length = (size_t)sfp[2].intValue;
 	kString *ret = NULL;
 	if (S_isASCII(s0)) {
 		offset = check_index(kctx, offset, S_size(s0), sfp[K_RTNIDX].uline);

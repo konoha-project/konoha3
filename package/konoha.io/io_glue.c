@@ -762,7 +762,7 @@ static KMETHOD InputStream_isClosed(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD OutputStream_putByte(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kOutputStream *w = sfp[0].w;
-	knh_OutputStream_putc(kctx, w, (int)(sfp[1].ivalue));
+	knh_OutputStream_putc(kctx, w, (int)(sfp[1].intValue));
 	RETURNvoid_();
 }
 

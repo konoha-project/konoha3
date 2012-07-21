@@ -318,14 +318,14 @@ static int PatternMatchFunc(KonohaContext *kctx, kFunc *fo, kStmt *stmt, ksymbol
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
 	KSETv(lsfp[K_CALLDELTA+0].o, fo->self);
 	KSETv(lsfp[K_CALLDELTA+1].o, (kObject*)stmt);
-	lsfp[K_CALLDELTA+2].ivalue = name;
+	lsfp[K_CALLDELTA+2].intValue = name;
 	KSETv(lsfp[K_CALLDELTA+3].asArray, tokenList);
-	lsfp[K_CALLDELTA+4].ivalue = beginIdx;
-	lsfp[K_CALLDELTA+5].ivalue = endIdx;
+	lsfp[K_CALLDELTA+4].intValue = beginIdx;
+	lsfp[K_CALLDELTA+5].intValue = endIdx;
 	KCALL(lsfp, 0, fo->mtd, 5, KLIB Knull(kctx, CT_Int));
 	END_LOCAL();
 	RESET_GCSTACK();
-	return (int)lsfp[0].ivalue;
+	return (int)lsfp[0].intValue;
 }
 
 static int PatternMatch(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, ksymbol_t name, kArray *tokenList, int beginIdx, int endIdx)
@@ -531,9 +531,9 @@ static kExpr *ParseExprFunc(KonohaContext *kctx, SugarSyntax *syn, kFunc *fo, kS
 	lsfp[K_CALLDELTA+0].unboxValue = (uintptr_t)syn;
 	KSETv(lsfp[K_CALLDELTA+1].o, (kObject*)stmt);
 	KSETv(lsfp[K_CALLDELTA+2].asArray, tokenArray);
-	lsfp[K_CALLDELTA+3].ivalue = s;
-	lsfp[K_CALLDELTA+4].ivalue = c;
-	lsfp[K_CALLDELTA+5].ivalue = e;
+	lsfp[K_CALLDELTA+3].intValue = s;
+	lsfp[K_CALLDELTA+4].intValue = c;
+	lsfp[K_CALLDELTA+5].intValue = e;
 	KCALL(lsfp, 0, fo->mtd, 5, K_NULLEXPR);
 	END_LOCAL();
 	DBG_ASSERT(IS_Expr(lsfp[0].asObject));

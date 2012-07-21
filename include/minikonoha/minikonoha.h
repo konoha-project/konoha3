@@ -507,9 +507,9 @@ struct KonohaModule {
 
 #define K_FRAME_NCMEMBER \
 		uintptr_t   unboxValue;\
-		kbool_t     bvalue; \
-		kint_t      ivalue; \
-		kfloat_t    fvalue; \
+		kbool_t     boolValue; \
+		kint_t      intValue; \
+		kfloat_t    floatValue; \
 		intptr_t    shift;  \
 		uintptr_t   uline; \
 		struct VirtualMachineInstruction  *pc; \
@@ -548,8 +548,8 @@ struct KonohaModule {
 		struct kConverter         *conv;\
 		struct kContext           *cx;\
 		struct kScript            *scr;\
-		kint_t     dummy_ivalue;\
-		kfloat_t   dummy_fvalue \
+		kint_t     dummy_intValue;\
+		kfloat_t   dummy_floatValue \
 
 struct KonohaStack {
 	union {
@@ -792,9 +792,9 @@ struct kObjectVar {
 #define ABSTRACT_NUMBER \
 		union {\
 			uintptr_t  unboxValue;\
-			kbool_t    bvalue;\
-			kint_t     ivalue;\
-			kfloat_t   fvalue;\
+			kbool_t    boolValue;\
+			kint_t     intValue;\
+			kfloat_t   floatValue;\
 		}\
 
 typedef const struct kNumberVar kNumber;
@@ -814,9 +814,9 @@ struct kBooleanVar /* extends kNumber */ {
 #define IS_TRUE(o)                 (O_baseclassId(o) == TY_Boolean && N_tobool(o))
 #define IS_FALSE(o)                (O_baseclassId(o) == TY_Boolean && N_tobool(o) == 0)
 #define new_Boolean(kctx, c)       ((c) ? K_TRUE : K_FALSE)
-#define N_toint(o)                 (((kBoolean*)o)->ivalue)
-#define N_tofloat(o)               (((kBoolean*)o)->fvalue)
-#define N_tobool(o)                (((kBoolean*)o)->bvalue)
+#define N_toint(o)                 (((kBoolean*)o)->intValue)
+#define N_tofloat(o)               (((kBoolean*)o)->floatValue)
+#define N_tobool(o)                (((kBoolean*)o)->boolValue)
 
 /* ------------------------------------------------------------------------ */
 /* Int */
@@ -1352,17 +1352,17 @@ typedef struct {
 } while (0)
 
 #define RETURNb_(c) do {\
-	sfp[(-(K_CALLDELTA))].bvalue = c; \
+	sfp[(-(K_CALLDELTA))].boolValue = c; \
 	return; \
 } while(0)
 
 #define RETURNi_(c) do {\
-	sfp[(-(K_CALLDELTA))].ivalue = c; \
+	sfp[(-(K_CALLDELTA))].intValue = c; \
 	return; \
 } while (0)
 
 #define RETURNf_(c) do {\
-	sfp[(-(K_CALLDELTA))].fvalue = c; \
+	sfp[(-(K_CALLDELTA))].floatValue = c; \
 	return; \
 } while (0)
 

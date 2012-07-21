@@ -99,8 +99,8 @@ static KMETHOD File_read(KonohaContext *kctx, KonohaStack *sfp)
 	size_t size = 0;
 	if(fp != NULL) {
 		kBytes *ba = sfp[1].ba;
-		size_t offset = (size_t)sfp[2].ivalue;
-		size_t len = (size_t)sfp[3].ivalue;
+		size_t offset = (size_t)sfp[2].intValue;
+		size_t len = (size_t)sfp[3].intValue;
 		size = ba->bytesize;
 		if(!(offset < size)) {
 			kfileline_t uline = sfp[K_RTNIDX].uline;
@@ -127,8 +127,8 @@ static KMETHOD File_write(KonohaContext *kctx , KonohaStack *sfp)
 	size_t size = 0;
 	if(fp != NULL) {
 		kBytes *ba = sfp[1].ba;
-		size_t offset = (size_t)sfp[2].ivalue;
-		size_t len = (size_t)sfp[3].ivalue;
+		size_t offset = (size_t)sfp[2].intValue;
+		size_t len = (size_t)sfp[3].intValue;
 		size = ba->bytesize;
 		if(len == 0) len = size - offset;
 		size = fwrite(ba->buf + offset, 1, len, fp);
@@ -183,7 +183,7 @@ static KMETHOD File_putC(KonohaContext *kctx, KonohaStack *sfp)
 {
 	FILE *fp = ((kFILE*)sfp[0].asObject)->fp;
 	if (fp != NULL) {
-		int ch = fputc(sfp[1].ivalue, fp);
+		int ch = fputc(sfp[1].intValue, fp);
 		if (ch == EOF) {
 			ktrace(LOGPOL_DEBUG | _DataFault,
 					KEYVALUE_s("@", "fputc"),

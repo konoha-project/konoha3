@@ -400,7 +400,7 @@ static int callFuncTokenize(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, Token
 	KSETv(lsfp[K_CALLDELTA+2].s, preparedString);
 	KCALL(lsfp, 0, fo->mtd, 2, KLIB Knull(kctx, CT_Int));
 	END_LOCAL();
-	int pos = lsfp[0].ivalue + tok_start;
+	int pos = lsfp[0].intValue + tok_start;
 	if(pos > tok_start) { // check new lines
 		int i;
 		const char *t = tenv->source;

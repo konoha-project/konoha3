@@ -31,7 +31,7 @@
 static KMETHOD Array_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	size_t n = check_index(kctx, sfp[1].ivalue, kArray_size(a), sfp[K_RTNIDX].uline);
+	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].uline);
 	if(kArray_isUnboxData(a)) {
 		RETURNd_(a->unboxItems[n]);
 	}
@@ -44,7 +44,7 @@ static KMETHOD Array_get(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	size_t n = check_index(kctx, sfp[1].ivalue, kArray_size(a), sfp[K_RTNIDX].uline);
+	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].uline);
 	if(kArray_isUnboxData(a)) {
 		a->unboxItems[n] = sfp[2].unboxValue;
 	}
@@ -64,7 +64,7 @@ static KMETHOD Array_getSize(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
-	size_t asize = (size_t)sfp[1].ivalue;
+	size_t asize = (size_t)sfp[1].intValue;
 	a->bytemax = asize * sizeof(void*);
 	kArray_setsize((kArray*)a, asize);
 	a->objectItems = (kObject**)KCALLOC(a->bytemax, 1);

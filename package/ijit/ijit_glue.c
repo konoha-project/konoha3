@@ -101,7 +101,7 @@ static kObject *get_value(KonohaContext *kctx, int index)
 //## void System.setUline(int uline);
 static KMETHOD System_setUline(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kmodjit->uline = sfp[1].ivalue;
+	kmodjit->uline = sfp[1].intValue;
 	RETURNvoid_();
 }
 //## void System.getUline();
@@ -136,7 +136,7 @@ static KMETHOD System_getValue(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *g = kmodjit->global_value;
 	kArray *stack = get_stack(kctx, g);
-	int index = sfp[1].ivalue;
+	int index = sfp[1].intValue;
 	RETURN_(stack->objectItems[index]);
 }
 
@@ -145,7 +145,7 @@ static KMETHOD System_setValue(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *g = kmodjit->global_value;
 	kArray *stack = get_stack(kctx, g);
-	int index = sfp[1].ivalue;
+	int index = sfp[1].intValue;
 	check_stack_size(kctx, stack, index);
 	kObject *o = sfp[2].o;
 	KSETv(stack->objectItems[index], o);
@@ -437,7 +437,7 @@ static KMETHOD Stmt_hasSyntax(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Stmt_getObjectNULL(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kStmt *stmt = (kStmt*) sfp[0].asObject;
-	kObject *o = kStmt_getObjectNULL(kctx, stmt, sfp[1].ivalue);
+	kObject *o = kStmt_getObjectNULL(kctx, stmt, sfp[1].intValue);
 	if (!o) {
 		o = K_NULL;
 	}
@@ -507,7 +507,7 @@ static KMETHOD Array_new3(KonohaContext *kctx, KonohaStack *sfp)
 //## static Array Array.newN(int n);
 static KMETHOD Array_newN(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int i, n = sfp[1].ivalue;
+	int i, n = sfp[1].intValue;
 	kArray *a = new_(Array, (uintptr_t)n);
 	for (i = 0; i < n; ++i) {
 		KLIB kArray_add(kctx, a, sfp[i].o);
@@ -520,7 +520,7 @@ static KMETHOD Array_newN(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_getO(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	size_t n = check_index(kctx, sfp[1].ivalue, kArray_size(a), sfp[K_RTNIDX].uline);
+	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].uline);
 	RETURN_(a->objectItems[n]);
 }
 // --------------------------------------------------------------------------
@@ -528,7 +528,7 @@ static KMETHOD Array_getO(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_setO(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	size_t n = check_index(kctx, sfp[1].ivalue, kArray_size(a), sfp[K_RTNIDX].uline);
+	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].uline);
 	KSETv(a->objectItems[n], sfp[2].o);
 	RETURNvoid_();
 }
@@ -537,7 +537,7 @@ static KMETHOD Array_setO(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_erase(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *src = sfp[0].asArray;
-	size_t n = check_index(kctx, sfp[1].ivalue, kArray_size(src), sfp[K_RTNIDX].uline);
+	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(src), sfp[K_RTNIDX].uline);
 	size_t asize = kArray_size(src);
 	size_t i, j = 0;
 	kArray *dst = new_(Array, (asize-1));
@@ -576,7 +576,7 @@ static KMETHOD Method_getParam(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Param_getType(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kParam *pa = (kParam *) sfp[0].asObject;
-	int n = sfp[1].ivalue;
+	int n = sfp[1].intValue;
 	RETURNi_(pa->paramtypeItems[n].ty);
 }
 
@@ -611,7 +611,7 @@ static KMETHOD Method_getCname(KonohaContext *kctx, KonohaStack *sfp)
 //## Object System.getNULL(kctx, int type);
 static KMETHOD System_getNULL(KonohaContext *kctx, KonohaStack *sfp)
 {
-	ktype_t cid = sfp[1].ivalue;
+	ktype_t cid = sfp[1].intValue;
 	kObject *o = KLIB Knull(kctx, CT_(cid));
 	RETURN_(o);
 }
@@ -641,8 +641,8 @@ static uintptr_t *get_addr(void *addr, intptr_t offset, intptr_t datasize)
 //## int Pointer.get(int addr, int offset, int sizeof);
 static KMETHOD Pointer_get(KonohaContext *kctx, KonohaStack *sfp)
 {
-	intptr_t size   = sfp[3].ivalue;
-	uintptr_t *p = get_addr((void*)sfp[1].ivalue, sfp[2].ivalue, size);
+	intptr_t size   = sfp[3].intValue;
+	uintptr_t *p = get_addr((void*)sfp[1].intValue, sfp[2].intValue, size);
 	assert(size <= PTR_SIZE);
 	RETURNi_(*p & (~0UL >> (PTR_SIZE - size)));
 }
@@ -650,9 +650,9 @@ static KMETHOD Pointer_get(KonohaContext *kctx, KonohaStack *sfp)
 //## void Pointer.set(int addr, int offset, int sizeof, int data);
 static KMETHOD Pointer_set(KonohaContext *kctx, KonohaStack *sfp)
 {
-	intptr_t size   = sfp[3].ivalue;
-	uintptr_t data  = sfp[4].ivalue;
-	uintptr_t *p = get_addr((void*)sfp[1].ivalue, sfp[2].ivalue, sfp[3].ivalue);
+	intptr_t size   = sfp[3].intValue;
+	uintptr_t data  = sfp[4].intValue;
+	uintptr_t *p = get_addr((void*)sfp[1].intValue, sfp[2].intValue, sfp[3].intValue);
 	uintptr_t mask = (~0UL >> (PTR_SIZE - size));
 	*p = (data & mask) | (*p & ~mask);
 	assert(size <= PTR_SIZE);
@@ -675,7 +675,7 @@ static KMETHOD Object_getCid(KonohaContext *kctx, KonohaStack *sfp)
 //## var Pointer.asObject(int addr);
 static KMETHOD Pointer_toObject(KonohaContext *kctx, KonohaStack *sfp)
 {
-	uintptr_t addr = (uintptr_t) sfp[1].ivalue;
+	uintptr_t addr = (uintptr_t) sfp[1].intValue;
 	kObject *o = (kObject*)addr;
 	RETURN_(o);
 }

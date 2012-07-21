@@ -84,7 +84,7 @@ static KMETHOD Stmt_getBuild(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Stmt_setBuild(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kStmtVar *stmt = (kStmtVar *) sfp[0].asStmt;
-	stmt->build = sfp[1].ivalue;
+	stmt->build = sfp[1].intValue;
 }
 
 //## Block Stmt.getBlock(String key, Block def);
@@ -97,7 +97,7 @@ static KMETHOD Stmt_getBlock(KonohaContext *kctx, KonohaStack *sfp)
 //## void Stmt.setType(int build);
 static KMETHOD Stmt_setType(KonohaContext *kctx, KonohaStack *sfp)
 {
-	Stmt_typed(sfp[0].asStmt, sfp[1].ivalue);
+	Stmt_typed(sfp[0].asStmt, sfp[1].intValue);
 	RETURNvoid_();
 }
 
@@ -105,7 +105,7 @@ static KMETHOD Stmt_setType(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD kStmt_tyCheckByName(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *key = sfp[1].asString;
-	RETURNb_(SUGAR kStmt_tyCheckByName(kctx, sfp[0].asStmt, ksymbolA(S_text(key), S_size(key), _NEWID), sfp[2].asGamma, (ktype_t)sfp[3].ivalue, (int)sfp[4].ivalue));
+	RETURNb_(SUGAR kStmt_tyCheckByName(kctx, sfp[0].asStmt, ksymbolA(S_text(key), S_size(key), _NEWID), sfp[2].asGamma, (ktype_t)sfp[3].intValue, (int)sfp[4].intValue));
 }
 
 //## boolean Blook.tyCheckAll(Gamma gma);
@@ -129,8 +129,8 @@ static KMETHOD Expr_getTermToken(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Expr_setUnboxConstValue(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kExpr *expr = sfp[0].asExpr;
-	ktype_t tid = sfp[1].ivalue;
-	int value = sfp[2].ivalue;
+	ktype_t tid = sfp[1].intValue;
+	int value = sfp[2].intValue;
 	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, tid, value));
 }
 // --------------------------------------------------------------------------
@@ -238,7 +238,7 @@ static KMETHOD Stmt_printError(KonohaContext *kctx, KonohaStack *sfp)
 //	USING_SUGAR;
 //	kStmt *stmt  = sfp[0].asStmt;
 //	kArray *tokenArray  = sfp[1].asArray;
-//	int s = sfp[2].ivalue, e = sfp[3].ivalue;
+//	int s = sfp[2].intValue, e = sfp[3].intValue;
 //	RETURN_(SUGAR new_Block(kctx, Stmt_nameSpace(stmt), stmt, tokenArray, s, e, ';'));
 //}
 
@@ -247,7 +247,7 @@ static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kStmt *stmt  = sfp[0].asStmt;
 	kArray *tokenArray  = sfp[1].asArray;
-	int s = sfp[2].ivalue, e = sfp[3].ivalue;
+	int s = sfp[2].intValue, e = sfp[3].intValue;
 	RETURN_(SUGAR kStmt_parseExpr(kctx, stmt, tokenArray, s, e));
 }
 

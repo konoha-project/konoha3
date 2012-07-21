@@ -47,7 +47,7 @@ typedef struct {
 typedef const struct _kFloat kFloat;
 struct _kFloat {
 	KonohaObjectHeader h;
-	kfloat_t fvalue;
+	kfloat_t floatValue;
 };
 
 #endif /* MODFLOAT_H_ */

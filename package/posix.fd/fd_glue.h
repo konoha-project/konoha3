@@ -36,9 +36,9 @@
 //## @Native int System.lseek(int fd, int offset, int whence)
 static KMETHOD System_lseek(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int fd = sfp[1].ivalue;
-	int offset = sfp[2].ivalue;
-	int whence = sfp[3].ivalue;
+	int fd = sfp[1].intValue;
+	int offset = sfp[2].intValue;
+	int whence = sfp[3].intValue;
 	off_t ret_offset = lseek(fd, offset, whence);
 	if (ret_offset == -1) {
 		ktrace(_DataFault,
@@ -54,8 +54,8 @@ static KMETHOD System_lseek(KonohaContext *kctx, KonohaStack *sfp)
 //## boolean System.truncate(int fd, int length)
 static KMETHOD System_truncate(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int fd = sfp[1].ivalue;
-	int length = sfp[2].ivalue;
+	int fd = sfp[1].intValue;
+	int length = sfp[2].intValue;
 	int ret = ftruncate(fd, length);
 	if (ret != 0) {
 		ktrace(_SystemFault,
@@ -70,8 +70,8 @@ static KMETHOD System_truncate(KonohaContext *kctx, KonohaStack *sfp)
 //## boolean System.chmod(int fd, int length)
 static KMETHOD System_chmod(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int fd = sfp[1].ivalue;
-	int mode = sfp[2].ivalue;
+	int fd = sfp[1].intValue;
+	int mode = sfp[2].intValue;
 	int ret = fchmod(fd, mode);
 	if (ret != -1) {
 		ktrace(_SystemFault,
@@ -86,9 +86,9 @@ static KMETHOD System_chmod(KonohaContext *kctx, KonohaStack *sfp)
 //## boolean System.chown(int fd, int owner, int group)
 static KMETHOD System_chown(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int fd = sfp[1].ivalue;
-	uid_t owner = (uid_t)sfp[2].ivalue;
-	gid_t group = (gid_t)sfp[3].ivalue;
+	int fd = sfp[1].intValue;
+	uid_t owner = (uid_t)sfp[2].intValue;
+	gid_t group = (gid_t)sfp[3].intValue;
 
 	int ret = fchown(fd, owner, group);
 	if (ret != -1) {
@@ -125,8 +125,8 @@ static KMETHOD System_chown(KonohaContext *kctx, KonohaStack *sfp)
 //## @Native boolean System.flock(int fd, int opretaion);
 static KMETHOD System_flock(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int fd = sfp[1].ivalue;
-	int operation = sfp[2].ivalue;
+	int fd = sfp[1].intValue;
+	int operation = sfp[2].intValue;
 	int ret = flock(fd, operation);
 	if (ret == -1) {
 		ktrace(_SystemFault,
@@ -141,7 +141,7 @@ static KMETHOD System_flock(KonohaContext *kctx, KonohaStack *sfp)
 //## @Native boolean System.sync(int fd);
 static KMETHOD System_sync(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int fd = sfp[1].ivalue;
+	int fd = sfp[1].intValue;
 	int ret =  fsync(fd);
 	if (ret == -1) {
 		ktrace(_SystemFault,
@@ -260,8 +260,8 @@ static KMETHOD System_lchown(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s = sfp[1].asString;
 	const char *pathname = S_text(s);
-	uid_t owner = sfp[2].ivalue;
-	gid_t group = sfp[3].ivalue;
+	uid_t owner = sfp[2].intValue;
+	gid_t group = sfp[3].intValue;
 	int ret = lchown(pathname, owner, group);
 	if (ret == -1) {
 		ktrace(_SystemFault,
@@ -277,9 +277,9 @@ static KMETHOD System_lchown(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD System_fchown(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int fd = sfp[1].ivalue;
-	uid_t owner = sfp[2].ivalue;
-	gid_t group = sfp[3].ivalue;
+	int fd = sfp[1].intValue;
+	uid_t owner = sfp[2].intValue;
+	gid_t group = sfp[3].intValue;
 	int ret = fchown(fd, owner, group);
 	if (ret == -1) {
 		ktrace(_SystemFault,
@@ -296,7 +296,7 @@ static KMETHOD System_access(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s = sfp[1].asString;
 	const char *pathname = S_text(s);
-	int mode = sfp[2].ivalue;
+	int mode = sfp[2].intValue;
 	int ret = access(pathname, mode);
 	if (ret == -1) {
 		ktrace(_SystemFault,
@@ -311,7 +311,7 @@ static KMETHOD System_access(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD System_fsync(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int fd = sfp[1].ivalue;
+	int fd = sfp[1].intValue;
 	int ret = fsync(fd);
 	if (ret == -1) {
 		ktrace(_SystemFault,

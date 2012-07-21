@@ -289,7 +289,7 @@ static KMETHOD Bytes_asString(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Bytes_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *ba = sfp[0].ba;
-	size_t n = check_index(kctx, sfp[1].ivalue, ba->bytesize, sfp[K_RTNIDX].uline);
+	size_t n = check_index(kctx, sfp[1].intValue, ba->bytesize, sfp[K_RTNIDX].uline);
 	RETURNi_(ba->utext[n]);
 }
 
@@ -297,8 +297,8 @@ static KMETHOD Bytes_get(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Bytes_set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *ba = sfp[0].ba;
-	size_t n = check_index(kctx, sfp[1].ivalue, ba->bytesize, sfp[K_RTNIDX].uline);
-	ba->buf[n] = sfp[2].ivalue;
+	size_t n = check_index(kctx, sfp[1].intValue, ba->bytesize, sfp[K_RTNIDX].uline);
+	ba->buf[n] = sfp[2].intValue;
 	RETURNi_(ba->utext[n]);
 }
 
@@ -308,7 +308,7 @@ static KMETHOD Bytes_setAll(KonohaContext *kctx, KonohaStack *sfp)
 	int bytesize = ba->bytesize;
 	int i;
 	for (i = 0; i < bytesize; i++) {
-		ba->buf[i] = sfp[2].ivalue;
+		ba->buf[i] = sfp[2].intValue;
 	}
 	RETURNvoid_();
 
@@ -321,8 +321,8 @@ static KMETHOD Bytes_getSize(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Bytes_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	DBG_P("bytes new called, with size=%d", sfp[1].ivalue);
-	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), sfp[1].ivalue));
+	DBG_P("bytes new called, with size=%d", sfp[1].intValue);
+	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), sfp[1].intValue));
 }
 
 /* ------------------------------------------------------------------------ */

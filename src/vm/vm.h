@@ -229,7 +229,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 
 #define OPEXEC_NEW(A, P, CT)   KSETv(rbp[(A)].o, KLIB new_kObject(kctx, CT, P))
 #define OPEXEC_NULL(A, CT)     KSETv(rbp[(A)].o, KLIB Knull(kctx, CT))
-#define OPEXEC_BOX(A, B, CT)   KSETv(rbp[(A)].o, KLIB new_kObject(kctx, CT, rbp[(B)].ivalue))
+#define OPEXEC_BOX(A, B, CT)   KSETv(rbp[(A)].o, KLIB new_kObject(kctx, CT, rbp[(B)].intValue))
 #define OPEXEC_UNBOX(A, B, CT) rbp[(A)].unboxValue = N_toint(rbp[B].o)
 
 #define PC_NEXT(pc)   pc+1
@@ -295,12 +295,12 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 }\
 
 #define OPEXEC_JMPT(PC, JUMP, N) \
-	if(rbp[N].bvalue) {\
+	if(rbp[N].boolValue) {\
 		OPEXEC_JMP(PC, JUMP); \
 	} \
 
 #define OPEXEC_JMPF(PC, JUMP, N) \
-	if(!rbp[N].bvalue) {\
+	if(!rbp[N].boolValue) {\
 		OPEXEC_JMP(PC, JUMP); \
 	} \
 
@@ -310,7 +310,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 		OPEXEC_JMP(PC, JUMP); \
 	} \
 
-#define OPEXEC_BNOT(c, a)     rbp[c].bvalue = !(rbp[a].bvalue)
+#define OPEXEC_BNOT(c, a)     rbp[c].boolValue = !(rbp[a].boolValue)
 
 #define OPEXEC_TRACE(UL, THIS, F) { \
 		F(kctx, SFP(rshift(rbp, THIS)), UL);\
@@ -356,9 +356,9 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 
 #define R_NEXTIDX (K_NEXTIDX)
 #define Rn_(x)    (rshift(rbp,x)->unboxValue)
-#define Ri_(x)    (rshift(rbp,x)->ivalue)
-#define Rf_(x)    (rshift(rbp,x)->fvalue)
-#define Rb_(x)    (rshift(rbp,x)->bvalue)
+#define Ri_(x)    (rshift(rbp,x)->intValue)
+#define Rf_(x)    (rshift(rbp,x)->floatValue)
+#define Rb_(x)    (rshift(rbp,x)->boolValue)
 #define Ro_(x)    (rshift(rbp,x)->o)
 #define Rh_(x)    (rshift(rbp,x)->hdr)
 #define Rba_(x)   (rshift(rbp,x)->ba)

@@ -162,7 +162,7 @@ static int getNfd(kArray *a1, kArray *a2, kArray *a3)
 //	memset(&addr, 0, addrLen);
 //
 //	int ret = accept(
-//			WORD2INT(sfp[1].ivalue),
+//			WORD2INT(sfp[1].intValue),
 //			(struct sockaddr*)&addr,
 //			(socklen_t*)&addrLen
 //	);
@@ -186,7 +186,7 @@ KMETHOD System_accept(KonohaContext *kctx, KonohaStack* sfp)
 	int addrLen = sizeof(struct sockaddr_in);
 
 	int ret = accept(
-			WORD2INT(sfp[1].ivalue),
+			WORD2INT(sfp[1].intValue),
 			(struct sockaddr *)addr,
 			(socklen_t*)&addrLen
 	);
@@ -209,10 +209,10 @@ KMETHOD System_bind(KonohaContext *kctx, KonohaStack* sfp)
 	struct sockaddr_in addr;
 	toSockaddr(&addr,
 			(char*)sfp[2].s,
-			WORD2INT(sfp[3].ivalue),
-			WORD2INT(sfp[4].ivalue)
+			WORD2INT(sfp[3].intValue),
+			WORD2INT(sfp[4].intValue)
 	);
-	int ret = bind(WORD2INT(sfp[1].ivalue),
+	int ret = bind(WORD2INT(sfp[1].intValue),
 			(struct sockaddr*)&addr,
 			sizeof(addr)
 	);
@@ -229,7 +229,7 @@ KMETHOD System_bind(KonohaContext *kctx, KonohaStack* sfp)
 //## int System.close(int fd);
 KMETHOD System_close(KonohaContext *kctx, KonohaStack* sfp)
 {
-	int ret = close(WORD2INT(sfp[1].ivalue) );
+	int ret = close(WORD2INT(sfp[1].intValue) );
 
 	if(ret != 0 ) {
 		ktrace(_SystemFault,
@@ -247,11 +247,11 @@ KMETHOD System_connect(KonohaContext *kctx, KonohaStack* sfp)
 	struct sockaddr_in addr;
 	toSockaddr(&addr,
 				(char*)S_text(sfp[2].s),
-				WORD2INT(sfp[3].ivalue),
-				WORD2INT(sfp[4].ivalue)
+				WORD2INT(sfp[3].intValue),
+				WORD2INT(sfp[4].intValue)
 	);
 
-	int ret = connect(WORD2INT(sfp[1].ivalue),
+	int ret = connect(WORD2INT(sfp[1].intValue),
 			(struct sockaddr*)&addr,
 			sizeof(addr)
 	);
@@ -268,7 +268,7 @@ KMETHOD System_connect(KonohaContext *kctx, KonohaStack* sfp)
 //## int System.listen(int socket, int backlog);
 KMETHOD System_listen(KonohaContext *kctx, KonohaStack* sfp)
 {
-	int ret = listen(WORD2INT(sfp[1].ivalue), WORD2INT(sfp[2].ivalue));
+	int ret = listen(WORD2INT(sfp[1].intValue), WORD2INT(sfp[2].intValue));
 	if(ret != 0) {
 		ktrace(_SystemFault,
 			KEYVALUE_s("@", "listen"),
@@ -287,7 +287,7 @@ KMETHOD System_listen(KonohaContext *kctx, KonohaStack* sfp)
 //	memset(&addr, 0, addrLen);
 //
 //	kMap *ret_s = KNH_TNULL(Map);
-//	if(getsockname(WORD2INT(sfp[1].ivalue),
+//	if(getsockname(WORD2INT(sfp[1].intValue),
 //					   (struct sockaddr*)&addr,
 //					   (socklen_t*)&addrLen ) == 0 ) {
 //		ret_s = new_DataMap(ctx);
@@ -305,9 +305,9 @@ KMETHOD System_getsockopt(KonohaContext *kctx, KonohaStack* sfp)
 	int valLen = sizeof(val);
 
 	int ret = getsockopt(
-			WORD2INT(sfp[1].ivalue),
+			WORD2INT(sfp[1].intValue),
 			SOL_SOCKET,
-			(int)sfp[2].ivalue,
+			(int)sfp[2].intValue,
 			&val,
 			(socklen_t*)&valLen
 	);
@@ -328,11 +328,11 @@ KMETHOD System_getsockopt(KonohaContext *kctx, KonohaStack* sfp)
 KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack* sfp)
 {
 	int ret = setsockopt(
-			WORD2INT(sfp[1].ivalue),
+			WORD2INT(sfp[1].intValue),
 			SOL_SOCKET,
-			(int)sfp[2].ivalue,
-			&sfp[3].ivalue,
-			sizeof(sfp[3].ivalue)
+			(int)sfp[2].intValue,
+			&sfp[3].intValue,
+			sizeof(sfp[3].intValue)
 	);
 	if(ret != 0) {
 		ktrace(_SystemFault,
@@ -352,7 +352,7 @@ KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack* sfp)
 //	memset(&addr, 0, addrLen);
 //
 //	kMap *ret_s = KNH_TNULL(Map);
-//	if(getpeername(WORD2INT(sfp[1].ivalue),
+//	if(getpeername(WORD2INT(sfp[1].intValue),
 //					   (struct sockaddr*)&addr,
 //					   (socklen_t*)&addrLen ) == 0 ) {
 //		ret_s = new_DataMap(ctx);
@@ -368,10 +368,10 @@ KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack* sfp)
 static KMETHOD System_recv(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kBytes *ba  = sfp[2].ba;
-	int ret = recv(WORD2INT(sfp[1].ivalue),
+	int ret = recv(WORD2INT(sfp[1].intValue),
 					  ba->buf,
 					  ba->bytesize,
-					  (int)sfp[3].ivalue );
+					  (int)sfp[3].intValue );
 	if(ret < 0 ) {
 		ktrace(_SystemFault,
 				KEYVALUE_s("@", "recv"),
@@ -389,10 +389,10 @@ static KMETHOD System_recv(KonohaContext *kctx, KonohaStack* sfp)
 //	memset(&addr, 0, addrLen);
 //
 //	kBytes *ba  = sfp[2].ba;
-//	int ret = recvfrom(WORD2INT(sfp[1].ivalue),
+//	int ret = recvfrom(WORD2INT(sfp[1].intValue),
 //			  	  	  	   ba->buf,
 //			  	  	  	   ba->bytesize,
-//			  	  	  	   (int)sfp[3].ivalue,
+//			  	  	  	   (int)sfp[3].intValue,
 //			  	  	  	   (struct sockaddr *)&addr,
 //			  	  	  	   (socklen_t*)&addrLen );
 //	if(ret >= 0 ) {
@@ -417,8 +417,8 @@ static KMETHOD System_select(KonohaContext *kctx, KonohaStack* sfp)
 	fd_set *efd = toFd(&efds, a3 );
 
 	struct timeval tv;
-	tv.tv_sec  = (long)sfp[4].ivalue;
-	tv.tv_usec = (long)sfp[5].ivalue;
+	tv.tv_sec  = (long)sfp[4].intValue;
+	tv.tv_usec = (long)sfp[5].intValue;
 
 	int ret = select(nfd+1, rfd, wfd, efd, &tv );
 	if(ret > 0) {
@@ -459,10 +459,10 @@ static KMETHOD System_send(KonohaContext *kctx, KonohaStack* sfp)
 				KEYVALUE_s("perror", strerror(errno))
 		);
 	}
-	int ret = send(WORD2INT(sfp[1].ivalue),
+	int ret = send(WORD2INT(sfp[1].intValue),
 					  ba->buf,
 					  ba->bytesize,
-					  (int)sfp[3].ivalue );
+					  (int)sfp[3].intValue );
 	if(ret < 0) {
 		ktrace(_DataFault,
 				KEYVALUE_s("@", "send"),
@@ -487,7 +487,7 @@ static KMETHOD System_sendto(KonohaContext *kctx, KonohaStack* sfp)
 	kBytes *ba = sfp[2].ba;
 	struct sockaddr_in addr;
 	kString* s = sfp[4].s;
-	toSockaddr(&addr, (char*)S_text(s), WORD2INT(sfp[5].ivalue), WORD2INT(sfp[6].ivalue));
+	toSockaddr(&addr, (char*)S_text(s), WORD2INT(sfp[5].intValue), WORD2INT(sfp[6].intValue));
 	// Broken Pipe Signal Mask
 #ifndef __APPLE__
 	__sighandler_t oldset = signal(SIGPIPE, SIG_IGN);
@@ -497,10 +497,10 @@ static KMETHOD System_sendto(KonohaContext *kctx, KonohaStack* sfp)
 	sig_t ret_signal = SIG_ERR;
 #endif
 	int ret = sendto(
-			WORD2INT(sfp[1].ivalue),
+			WORD2INT(sfp[1].intValue),
 			ba->buf,
 			ba->bytesize,
-			(int)sfp[3].ivalue,
+			(int)sfp[3].intValue,
 			(struct sockaddr *)&addr,
 			sizeof(struct sockaddr)
 	);
@@ -527,7 +527,7 @@ static KMETHOD System_sendto(KonohaContext *kctx, KonohaStack* sfp)
 //## int System.shutdown(int socket, int how);
 KMETHOD System_shutdown(KonohaContext *kctx, KonohaStack* sfp)
 {
-	int ret = shutdown(WORD2INT(sfp[1].ivalue), WORD2INT(sfp[2].ivalue));
+	int ret = shutdown(WORD2INT(sfp[1].intValue), WORD2INT(sfp[2].intValue));
 	if(ret != 0) {
 		ktrace(_SystemFault,
 			KEYVALUE_s("@", "shutdown"),
@@ -541,7 +541,7 @@ KMETHOD System_shutdown(KonohaContext *kctx, KonohaStack* sfp)
 //## int System.sockatmark(int socket);
 KMETHOD System_sockatmark(KonohaContext *kctx, KonohaStack* sfp)
 {
-	int ret = sockatmark(WORD2INT(sfp[1].ivalue));
+	int ret = sockatmark(WORD2INT(sfp[1].intValue));
 	if(ret < 0) {
 		ktrace(_SystemFault,
 			KEYVALUE_s("@", "sockadmark"),
@@ -555,9 +555,9 @@ KMETHOD System_sockatmark(KonohaContext *kctx, KonohaStack* sfp)
 //## int System.socket(int family, int type, int protocol);
 KMETHOD System_socket(KonohaContext *kctx, KonohaStack* sfp)
 {
-	int ret = socket(WORD2INT(sfp[1].ivalue),
-					WORD2INT(sfp[2].ivalue),
-					WORD2INT(sfp[3].ivalue));
+	int ret = socket(WORD2INT(sfp[1].intValue),
+					WORD2INT(sfp[2].intValue),
+					WORD2INT(sfp[3].intValue));
 	if(ret < 0) {
 		ktrace(_SystemFault,
 				KEYVALUE_s("@", "socket"),
@@ -575,9 +575,9 @@ static KMETHOD System_socketpair(KonohaContext *kctx, KonohaStack* sfp)
 	kArray *a = sfp[4].asArray;
 	if(kArray_size(a)) {
 		int pairFd[2];
-		if((ret = socketpair(WORD2INT(sfp[1].ivalue),
-				WORD2INT(sfp[2].ivalue),
-				WORD2INT(sfp[3].ivalue),
+		if((ret = socketpair(WORD2INT(sfp[1].intValue),
+				WORD2INT(sfp[2].intValue),
+				WORD2INT(sfp[3].intValue),
 				pairFd)) == 0) {
 			a->kintItems[0] = pairFd[0];
 			a->kintItems[1] = pairFd[1];
@@ -622,7 +622,7 @@ static	kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		.free = SockAddr_free,
 	};
 	KonohaClass *cSockAddr = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defSockAddr, pline);
-	kparamtype_t pi = {TY_Int, FN_("ivalue")};
+	kparamtype_t pi = {TY_Int, FN_("intValue")};
 	KonohaClass *CT_IntArray = KLIB KonohaClass_Generics(kctx, CT_Array, TY_Int, 1, &pi);
 	ktype_t TY_IntArray = CT_IntArray->classId;
 

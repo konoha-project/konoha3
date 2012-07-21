@@ -477,9 +477,9 @@ static kbool_t CLASSICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr
 		if(mn == MN_opSUB || mn == MN_opDIV || mn == MN_opMOD) swap = 0;
 		if(OPR_hasCONST(kctx, expr, &mn, swap)) {
 			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
-			union { uintptr_t unboxValue; kfloat_t fvalue; } v;
+			union { uintptr_t unboxValue; kfloat_t floatValue; } v;
 			v.unboxValue = kExpr_at(expr, 2)->unboxValue;
-			kfloat_t b = v.fvalue;
+			kfloat_t b = v.floatValue;
 			/* TODO */
 #define KFLOAT_ZERO 0.0
 #define KFLOAT_ONE  1.0

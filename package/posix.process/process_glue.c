@@ -64,15 +64,15 @@ static KMETHOD System_getegid(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD System_getpgid(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int pid = sfp[1].ivalue;
+	int pid = sfp[1].intValue;
 	int ret = getpgid(pid);
 	RETURNi_(ret);
 }
 
 static KMETHOD System_setpgid(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int pid = sfp[1].ivalue;
-	int pgid = sfp[2].ivalue;
+	int pid = sfp[1].intValue;
+	int pgid = sfp[2].intValue;
 	int ret = setpgid(pid, pgid);
 	RETURNi_(ret);
 }
@@ -87,7 +87,7 @@ static KMETHOD System_chdir(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD System_fchdir(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int ch = fchdir(sfp[1].ivalue);
+	int ch = fchdir(sfp[1].intValue);
 	RETURNi_(ch);
 }
 
@@ -102,24 +102,24 @@ static KMETHOD System_chroot(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD System_getpriority(KonohaContext *kctx, KonohaStack *sfp)
 {
 
-	int which = sfp[1].ivalue;
-	int who = sfp[2].ivalue;
+	int which = sfp[1].intValue;
+	int who = sfp[2].intValue;
 	int ret = getpriority(which, who);
 	RETURNi_(ret);
 }
 
 static KMETHOD System_setpriority(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int which = sfp[1].ivalue;
-	int who = sfp[2].ivalue;
-	int priority = sfp[3].ivalue;
+	int which = sfp[1].intValue;
+	int who = sfp[2].intValue;
+	int priority = sfp[3].intValue;
 	int ret = setpriority(which, who, priority);
 	RETURNi_(ret);
 }
 
 static KMETHOD System_getgroups(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int size = sfp[1].ivalue;
+	int size = sfp[1].intValue;
 	kArray *list = sfp[2].asArray;
 	int ret = getgroups(size, (gid_t *)(list->kintItems));
 	RETURNi_(ret);
@@ -127,7 +127,7 @@ static KMETHOD System_getgroups(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD System_setgroups(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int size = sfp[1].ivalue;
+	int size = sfp[1].intValue;
 	kArray *list = sfp[2].asArray;
 	int ret = setgroups(size, (const gid_t *)(list->kintItems));
 	RETURNi_(ret);

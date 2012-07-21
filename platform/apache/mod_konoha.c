@@ -199,8 +199,8 @@ static KMETHOD Request_setContentEncoding(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Request_logError(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRequest *self = (kRequest *) sfp[0].asObject;
-	int level = sfp[1].ivalue;
-	apr_status_t status = (apr_status_t)sfp[2].ivalue;
+	int level = sfp[1].intValue;
+	apr_status_t status = (apr_status_t)sfp[2].intValue;
 	const char *msg = S_text(sfp[3].s);
 	ap_log_rerror(APLOG_MARK, level, status, self->r, msg, NULL);
 	RETURNvoid_();
@@ -339,7 +339,7 @@ static int konoha_handler(request_rec *r)
 	KSETv(lsfp[K_CALLDELTA+1].o, req_obj);
 	KCALL(lsfp, 0, mtd, 1, KLIB Knull(kctx, CT_Int));
 	END_LOCAL();
-	return lsfp[0].ivalue;
+	return lsfp[0].intValue;
 }
 
 static int mod_konoha_init(apr_pool_t *p, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)

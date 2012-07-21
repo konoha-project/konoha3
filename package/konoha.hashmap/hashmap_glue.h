@@ -88,7 +88,7 @@ static KMETHOD HashMap_set(KonohaContext *kctx, KonohaStack *sfp)
 	uintptr_t hcode = strhash(S_text(key), S_size(key));
 	KUtilsHashMapEntry *e = KLIB Kmap_newEntry(kctx, map, hcode);
 	if (p1.ty == TY_Int || p1.ty == TY_Boolean || p1.ty == TY_Float) {  // FIXME
-		e->unboxValue =(uintptr_t)sfp[2].ivalue;
+		e->unboxValue =(uintptr_t)sfp[2].intValue;
 	} else {
 		// object;
 		e->unboxValue = (uintptr_t)sfp[2].o;

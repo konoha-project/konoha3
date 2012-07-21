@@ -38,32 +38,32 @@ extern "C" {
 
 static KMETHOD Int_opLSHIFT (KonohaContext *kctx, KonohaStack *sfp)
 {
-	int lshift = sfp[1].ivalue;
-	RETURNi_(sfp[0].ivalue << lshift);
+	int lshift = sfp[1].intValue;
+	RETURNi_(sfp[0].intValue << lshift);
 }
 
 static KMETHOD Int_opRSHIFT (KonohaContext *kctx, KonohaStack *sfp)
 {
-	int rshift = sfp[1].ivalue;
-	RETURNi_(sfp[0].ivalue >> rshift);
+	int rshift = sfp[1].intValue;
+	RETURNi_(sfp[0].intValue >> rshift);
 }
 
 static KMETHOD Int_opAND(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int lshift = sfp[1].ivalue;
-	RETURNi_(sfp[0].ivalue & lshift);
+	int lshift = sfp[1].intValue;
+	RETURNi_(sfp[0].intValue & lshift);
 }
 
 static KMETHOD Int_opOR(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int rshift = sfp[1].ivalue;
-	RETURNi_(sfp[0].ivalue | rshift);
+	int rshift = sfp[1].intValue;
+	RETURNi_(sfp[0].intValue | rshift);
 }
 
 static KMETHOD Int_opXOR(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int rshift = sfp[1].ivalue;
-	RETURNi_(sfp[0].ivalue ^ rshift);
+	int rshift = sfp[1].intValue;
+	RETURNi_(sfp[0].intValue ^ rshift);
 }
 
 /* ------------------------------------------------------------------------ */

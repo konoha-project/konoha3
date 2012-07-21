@@ -97,7 +97,7 @@ static size_t write_Bytes(char *buffer, size_t size, size_t nitems, void *bytes)
 
 /* ------------------------------------------------------------------------ */
 
-#define Int_to(T, a)      ((T)a.ivalue)
+#define Int_to(T, a)      ((T)a.intValue)
 #define String_to(T, a)   ((T)S_text(a.s))
 #define toCURL(o)         ((kCurl *)o)->curl
 
@@ -166,13 +166,13 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 	case CURLOPT_UNRESTRICTED_AUTH:
 	case CURLOPT_UPLOAD:
 	case CURLOPT_VERBOSE: {
-		int bvalue = 1;
+		int boolValue = 1;
 		if(IS_NULL(sfp[2].o) ||
-				((IS_Boolean(sfp[2].o) && sfp[2].bvalue == 0)) ||
+				((IS_Boolean(sfp[2].o) && sfp[2].boolValue == 0)) ||
 				((IS_Int(sfp[2].o) && Int_to(int, sfp[2]) == 0))) {
-			bvalue = 0;
+			boolValue = 0;
 		}
-		curl_easy_setopt(curl, curlopt, bvalue);
+		curl_easy_setopt(curl, curlopt, boolValue);
 		break;
 	}
 	case CURLOPT_BUFFERSIZE:

@@ -97,7 +97,7 @@ static void RETURN_PyObject_(KonohaContext *kctx, KonohaStack *sfp, PyObject *py
 
 static KMETHOD Int_toPyObject(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_PyObject(PyInt_FromLong(sfp[0].ivalue));
+	RETURN_PyObject(PyInt_FromLong(sfp[0].intValue));
 }
 
 static KMETHOD PyObject_toInt(KonohaContext *kctx, KonohaStack *sfp)
@@ -112,7 +112,7 @@ static KMETHOD PyObject_toInt(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Boolean_toPyObject(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_PyObject(PyBool_FromLong(sfp[0].ivalue));
+	RETURN_PyObject(PyBool_FromLong(sfp[0].intValue));
 }
 
 static KMETHOD PyObject_toBoolean(KonohaContext *kctx, KonohaStack *sfp)
@@ -123,7 +123,7 @@ static KMETHOD PyObject_toBoolean(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Float_toPyObject(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_PyObject(PyFloat_FromDouble(sfp[0].fvalue));
+	RETURN_PyObject(PyFloat_FromDouble(sfp[0].floatValue));
 }
 
 static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp)
@@ -159,7 +159,7 @@ static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 
 //static KMETHOD Complex_toPyObject(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	//RETURN_PyObject(PyBool_FromLong(sfp[0].ivalue));
+//	//RETURN_PyObject(PyBool_FromLong(sfp[0].intValue));
 //}
 //
 //static KMETHOD PyObject_toComplex(KonohaContext *kctx, KonohaStack *sfp)

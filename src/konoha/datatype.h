@@ -107,7 +107,7 @@ static void Number_init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void Boolean_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
-	KLIB Kwb_printf(kctx, wb, sfp[pos].bvalue ? "true" : "false");
+	KLIB Kwb_printf(kctx, wb, sfp[pos].boolValue ? "true" : "false");
 }
 
 static kObject* Boolean_fnull(KonohaContext *kctx, KonohaClass *ct)
@@ -117,7 +117,7 @@ static kObject* Boolean_fnull(KonohaContext *kctx, KonohaClass *ct)
 
 static void Int_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
-	KLIB Kwb_printf(kctx, wb, KINT_FMT, sfp[pos].ivalue);
+	KLIB Kwb_printf(kctx, wb, KINT_FMT, sfp[pos].intValue);
 }
 
 // String

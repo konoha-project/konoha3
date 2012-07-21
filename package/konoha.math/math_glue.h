@@ -24,8 +24,8 @@
 
 #include<math.h>
 
-#define Int_to(T, a)               ((T)a.ivalue)
-#define Float_to(T, a)             ((T)a.fvalue)
+#define Int_to(T, a)               ((T)a.intValue)
+#define Float_to(T, a)             ((T)a.floatValue)
 
 static KMETHOD Math_abs(KonohaContext *kctx, KonohaStack *sfp)
 {
