@@ -458,7 +458,7 @@ static kstatus_t Block_eval(KonohaContext *kctx, kBlock *bk)
 		//KLIB reportException(kctx);
 		DBG_P("Catch eval exception jumpResult=%d", jumpResult);
 		base->evalty = TY_void;  // no value
-		result = K_BREAK;        // message must be dumpted;
+		result = K_BREAK;        // message must be dumped;
 	}
 	memcpy(base->evaljmpbuf, &lbuf, sizeof(jmpbuf_i));
 	END_LOCAL();
