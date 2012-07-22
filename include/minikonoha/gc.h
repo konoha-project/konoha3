@@ -50,5 +50,6 @@ extern void KRUNTIME_reftraceAll(KonohaContext *kctx);
 
 extern void MODGC_gc_invoke(KonohaContext *kctx, int needsCStackTrace);
 extern void MODGC_check_malloced_size(void);
+extern kbool_t MODGC_kObject_isManaged(KonohaContext *kctx, void *ptr);
 
 #endif /* MODGC_H_ */
