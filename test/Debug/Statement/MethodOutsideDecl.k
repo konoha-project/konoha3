@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-void String System.myname() {
+String System.myname() {
 	return "minikonoha";
 }
 
