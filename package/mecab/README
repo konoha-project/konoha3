@@ -1,0 +1,39 @@
+# This README tells you how to install and use MeCab and konoha mecab bind.
+#
+# Author: Motoki Yoan (July, 9, 2012)
+
+konoha mecab bind requires followings.
+  1. konoha2 (git://github.com/konoha-project/konoha.git)
+  2. Mecab   (http://mecab.googlecode.com/svn/trunk/mecab/doc/index.html)
+
+############## 1. HOW TO INSTALL ##############
+
+1.1 Install MeCab
+
+  $ cd /path/to/konoha/package/mecab
+  $ tar zxvf libs/mecab-xxx.tar.gz
+  $ cd mecab-xxx
+  $ ./configure --enable-utf8-only
+  $ make && sudo make install
+
+1.2 Install IPA dictionary
+
+  $ cd /path/to/konoha/package/mecab
+  $ tar zxvf libs/mecab-ipadic-xxx.tar.gz
+  $ cd mecab-ipadic-xxx
+  $ ./configure --with-charset=utf8
+  $ make && sudo make install
+
+1.3 Install konoha MeCab bind.
+
+  $ vi CMakeLists.txt // add mecab package
+  $ mkdir build
+  $ cd build
+  $ cmake .. && make && sudo make install
+
+
+############## 2. SAMPLES ##############
+
+  $ cd /path/to/konoha/package/mecab/test/Debug
+  $ konoha example.k
+  $ konoha getNoun.k
