@@ -165,7 +165,6 @@ static const char *formatTransparentPath(char *buf, size_t bufsiz, const char *p
 		if(len < bufsiz) {
 			memcpy(buf, parentPath, len);
 			snprintf(buf + len, bufsiz - len, "%s", path);
-			fprintf(stderr, "path='%s'", buf);
 			return (const char*)buf;
 		}
 	}
