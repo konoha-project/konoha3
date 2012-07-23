@@ -647,7 +647,7 @@ static kExpr* kStmt_parseExpr(KonohaContext *kctx, kStmt *stmt, kArray *tokenArr
 static kExpr *kStmt_rightJoinExpr(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kArray *tokenArray, int c, int e)
 {
 	if(c < e && expr != K_NULLEXPR && !Stmt_isERR(stmt)) {
-		WarnTagIgnored(kctx, tokenArray, c, e);
+		WARN_IgnoredTokens(kctx, tokenArray, c, e);
 	}
 	return expr;
 }
