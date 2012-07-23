@@ -22,9 +22,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include<minikonoha/minikonoha.h>
-#include<minikonoha/sugar.h>
-#include<minikonoha/float.h>
+#include<konoha2/konoha2.h>
+#include<konoha2/sugar.h>
+#include<konoha2/float.h>
 
 #include "jansson_glue.h"
 
@@ -32,7 +32,7 @@
 extern "C" {
 #endif
 
-struct KonohaContextVar *ctx;
+struct kcontext_t *ctx;
 
 KDEFINE_PACKAGE* jansson_init(void)
 {

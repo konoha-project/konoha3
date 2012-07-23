@@ -1,9 +1,8 @@
-K.import("jansson");
 K.import("konoha");
+K.import("jansson");
 
 void main() {
 	String sample = "{\"int\": 10, \"float\": 1.0, \"string\": \"hoge\", \"bool\": true, \"array\": [{\"foo\": \"bar\"}, {\"hoge\": \"huga\"}], \"json\": {\"foo\": \"bar\", \"hoge\": \"huga\"}}"
-
 	/*
 	sample = {
 		"int": 10,
@@ -34,6 +33,12 @@ void main() {
 		i += 1;
 	}
 	p(parsed.get("json"));
+	String[] keys = parsed.getKeys();
+	i = 0;
+	while(i < keys.getSize()) {
+		p(keys[i]);
+		i += 1;
+	}
 }
 
 main();

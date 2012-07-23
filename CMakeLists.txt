@@ -130,7 +130,7 @@ set(PACKAGES
 ##	konoha.mpi
 ##	curl
 	ijit
-##	jansson
+	jansson
 	python
 	apache
 	konoha.import
