@@ -83,7 +83,7 @@ static void Jansson_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWrit
 //## Json Json.new();
 static KMETHOD Json_new (KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), NULL));
+	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0));
 }
 
 //## @Static Json Json.parse(String str);
@@ -117,7 +117,7 @@ static KMETHOD Json_get(KonohaContext *kctx, KonohaStack *sfp)
 		RETURN_(K_NULL);
 	}
 	ret = json_incref(ret);
-	struct _kJson *json = (struct _kJson*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), NULL);
+	struct _kJson *json = (struct _kJson*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
 	json->obj = ret;
 	RETURN_(json);
 }
@@ -138,8 +138,8 @@ static KMETHOD Json_getArray(KonohaContext *kctx, KonohaStack *sfp)
 	if (!json_is_array(ja)) {
 		RETURN_(K_NULL);
 	}
-	kArrayVar* a = (kArrayVar*)KLIB new_kObject(kctx, CT_Array, NULL);
-	a->list = (kObject**)ja;
+	kArrayVar* a = (kArrayVar*)KLIB new_kObject(kctx, CT_Array, 0);
+	a->objectItems= (kObject**)ja;
 	RETURN_(a);
 }
 
@@ -244,7 +244,7 @@ static KMETHOD Json_setArray(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	const char *key = S_text(sfp[1].asString);
 	kArrayVar* a = (kArrayVar*)sfp[2].asArray;
-	json_t *ja = (json_t*)a->list;
+	json_t *ja = (json_t*)a->objectItems;
 	json_object_set(obj, key, ja);
 	RETURNvoid_();
 }
@@ -363,7 +363,7 @@ static KMETHOD JsonArray_newArray(KonohaContext *kctx, KonohaStack *sfp)
 	a->bytemax = asize * sizeof(void*);
 	kArray_setsize((kArray*)a, asize);
 	//a->list = (kObject**)KCALLOC(a->bytemax, 1);
-	a->list = (kObject**)json_array();
+	a->objectItems = (kObject**)json_array();
 	RETURN_(a);
 }
 
@@ -371,7 +371,7 @@ static KMETHOD JsonArray_newArray(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD JsonArray_add(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
-	json_t* ja = (json_t*)a->list;
+	json_t* ja = (json_t*)a->objectItems;
 
 	if (!json_is_array(ja)) {
 		// error
@@ -387,15 +387,15 @@ static KMETHOD JsonArray_add(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD JsonArray_getSize(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	const json_t *ja = (json_t*)a->list;
+	const json_t *ja = (json_t*)a->objectItems;
 	RETURNi_(json_array_size(ja));
 }
 
 static KMETHOD JsonArray_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	json_t *ja = (json_t*)a->list;
-	struct _kJson *json = (struct _kJson*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), NULL);
+	json_t *ja = (json_t*)a->objectItems;
+	struct _kJson *json = (struct _kJson*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
 	json->obj = json_array_get(ja, sfp[1].intValue);
 	RETURN_(json);
 }
@@ -403,7 +403,7 @@ static KMETHOD JsonArray_get(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD JsonArray_append(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	json_t *ja = (json_t*)a->list;
+	json_t *ja = (json_t*)a->objectItems;
 	kJson *json = (kJson*)sfp[1].asObject;
 	json_array_append(ja, json->obj);
 	RETURNvoid_();
@@ -429,17 +429,16 @@ static	kbool_t jansson_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 {
 	KREQUIRE_PACKAGE("konoha.float", pline);
 	//KREQUIRE_PACKAGE("konoha.string", pline);
-	KDEFINE_CLASS defJson = {
-		STRUCTNAME(Json),
+	KDEFINE_CLASS JsonDef = {
+		//STRUCTNAME(Json),
+		.structname = "Json",
+		.classId = TY_newid,
 		.cflag = kClass_Final,
 		.init = Jansson_init,
 		.free = Jansson_free,
 		.p    = Jansson_p,
 	};
-	KonohaClass *cJson = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defJson, pline);
-	//KonohaClassVar *ct = (KonohaClassVar *)CT_Json;
-	//ct->p0 = TY_String; // default
-
+	KonohaClass *cJson = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &JsonDef, pline);
 	kparamtype_t ps = {TY_Json, FN_("json")};
 	KonohaClass *CT_JsonArray = KLIB KonohaClass_Generics(kctx, CT_Array, TY_Json, 1, &ps);
 	ktype_t TY_JsonArray = CT_JsonArray->classId;
@@ -480,8 +479,8 @@ static kbool_t jansson_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirst
 
 static kbool_t jansson_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
-	//KEXPORT_PACKAGE("konoha.string", ks,  pline);
-	//KEXPORT_PACKAGE("konoha.float", ks, pline);
+	//KEXPORT_PACKAGE("konoha.string", ns,  pline);
+	//KEXPORT_PACKAGE("konoha.float", ns, pline);
 	return true;
 }
 
