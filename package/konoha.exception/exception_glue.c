@@ -66,25 +66,35 @@ typedef struct {
 
 static void kException_addStackTrace(KonohaContext *kctx, KonohaStack *sfp, kException *e)
 {
-//	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
+	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
+	KUtilsWriteBuffer wb;
+	KLIB Kwb_init(&kctx->stack->cwb, &wb);
+	kfileline_t uline = sfp[K_RTNIDX].uline;
+	if(uline > 0) {
+		const char *file = FileId_t(uline);
+		KLIB Kwb_printf(kctx, &wb, "(%s:%d) %s.%s%s" , shortfilename(file), (kushort_t)uline, Method_t(mtd));
+	}
+	int i = 0, psize = Method_paramsize(mtd);
+	kParam *pa = Method_param(mtd);
+	KonohaClass *thisClass = O_cid(sfp[0]);
+	for(i = 0; i < psize; i++) {
+		pa->paramtypeItems[0].ty;
+		if(i > 0) {
+			knh_putc(ctx, cwb->w, ',');
+		}
+		knh_write_fn(ctx, cwb->w, p->fn);
+		knh_putc(ctx, cwb->w, '=');
+		knh_write_sfp(ctx, cwb->w, type, &sfp[i+1], FMT_line);
+	}
+	const char *msg = KLIB Kwb_top(kctx, &wb, 1);
+	KLIB kArray_add(kctx, e->stackTraceList, KLIB new_kString(kctx, msg, strlen(msg), 0));
 //	if((mtd)->mn != MN_LAMBDA) {
-//		int i = 0, psize = knh_Method_psize(mtd);
 //		knh_uline_t uline = knh_stack_uline(ctx, sfp);
 //		knh_write_uline(ctx, cwb->w, uline);
 //		knh_write_type(ctx, cwb->w, (mtd)->cid);
 //		knh_putc(ctx, cwb->w, '.');
 //		knh_write_mn(ctx, cwb->w, (mtd)->mn);
 //		knh_putc(ctx, cwb->w, '(');
-//		for(i = 0; i < psize; i++) {
-//			knh_param_t *p = knh_ParamArray_get(DP(mtd)->mp, i);
-//			knh_type_t type = knh_type_tocid(ctx, p->type, O_cid(sfp[0].o));
-//			if(i > 0) {
-//				knh_putc(ctx, cwb->w, ',');
-//			}
-//			knh_write_fn(ctx, cwb->w, p->fn);
-//			knh_putc(ctx, cwb->w, '=');
-//			knh_write_sfp(ctx, cwb->w, type, &sfp[i+1], FMT_line);
-//		}
 //		knh_putc(ctx, cwb->w, ')');
 //		if(DP(e)->tracesNULL == NULL) {
 //			KNH_INITv(DP(e)->tracesNULL, new_Array(ctx, CLASS_String, 0));
@@ -187,7 +197,6 @@ static void kModuleException_free(KonohaContext *kctx, KonohaModule *baseh)
 {
 	KFREE(baseh, sizeof(KonohaExceptionModule));
 }
-
 
 static	kbool_t exception_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {

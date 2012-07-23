@@ -154,7 +154,6 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 			}
 		}
 	}
-	fprintf(stdout, "loadScript: %s fp=%p", filePath, fp);
 	return isSuccessfullyLoading;
 }
 
