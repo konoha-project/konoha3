@@ -914,6 +914,7 @@ static void KTYTABLE_initkklib(KonohaLibVar *l)
 	l->Kclass                  = Kclass;
 	l->new_kObject             = new_kObject;
 	l->new_kObjectOnGCSTACK    = new_kObjectOnGCSTACK;
+	l->kObject_isManaged       = MODGC_kObject_isManaged;
 	l->new_kString             = new_kString;
 	l->new_kStringf            = new_kStringf;
 	//l->Kconv  = conv;

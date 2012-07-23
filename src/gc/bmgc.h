@@ -544,9 +544,7 @@ static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o);
 static bool findNextFreeBlock(AllocationPointer *p);
 static HeapManager *BMGC_init(KonohaContext *kctx);
 static void BMGC_exit(KonohaContext *kctx, HeapManager *mng);
-#ifdef GCDEBUG
-static kbool_t knh_isObject(KonohaContext *kctx, kObject *o);
-#endif
+kbool_t MODGC_kObject_isManaged(KonohaContext *kctx, void *ptr);
 
 typedef struct kmemlocal_t {
 	KonohaContextModule   h;
@@ -1846,9 +1844,9 @@ static void bitmapMarkingGC(KonohaContext *kctx, HeapManager *mng)
 /* ------------------------------------------------------------------------ */
 /* [Object] */
 
-#ifdef GCDEBUG
-static kbool_t knh_isObject(KonohaContext *kctx, kObject *o)
+kbool_t MODGC_kObject_isManaged(KonohaContext *kctx, void *ptr)
 {
+	kObject *o = (kObject *) ptr;
 	HeapManager *mng = (HeapManager*) HeapMng(kctx);
 
 	size_t i;
@@ -1872,7 +1870,6 @@ static kbool_t knh_isObject(KonohaContext *kctx, kObject *o)
 	}
 	return false;
 }
-#endif
 
 /* ------------------------------------------------------------------------ */
 

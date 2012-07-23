@@ -1157,6 +1157,7 @@ struct KonohaLibVar {
 
 	kObject*        (*new_kObject)(KonohaContext*, KonohaClass *, uintptr_t);  // GCUNSAFE
 	kObject*        (*new_kObjectOnGCSTACK)(KonohaContext*, KonohaClass *, uintptr_t);
+	kbool_t         (*kObject_isManaged)(KonohaContext*, void *ptr);
 	kObject*        (*Knull)(KonohaContext*, KonohaClass *);
 	kObject*        (*kObject_getObject)(KonohaContext*, kAbstractObject *, ksymbol_t, kAbstractObject *);
 	void            (*kObject_setObject)(KonohaContext*, kAbstractObject *, ksymbol_t, ktype_t, kAbstractObject *);

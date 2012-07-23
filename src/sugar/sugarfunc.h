@@ -939,7 +939,7 @@ static KMETHOD StmtTyCheck_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_StmtTyCheck(stmt, gma);
 	kNameSpace *ns    = Stmt_nameSpace(stmt);
 	uintptr_t flag    = kStmt_parseFlags(kctx, stmt, MethodDeclFlag, 0);
-	ktype_t classId   = kStmt_getClassId(kctx, stmt, ns, KW_UsymbolPattern, O_classId(ns->scriptObject));
+	ktype_t classId   = kStmt_getClassId(kctx, stmt, ns, SYM_("type"), O_classId(ns->scriptObject));
 	kmethodn_t mn     = kStmt_getMethodSymbol(kctx, stmt, ns, KW_SymbolPattern, MN_new);
 	kParam *pa        = kStmt_newMethodParamNULL(kctx, stmt, gma);
 	if(TY_isSingleton(classId)) {
@@ -1011,7 +1011,7 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(LET),  _OPLeft, /*.op2 = "*"*/ .priority_op2 = 4096, },
 		{ TOKEN(COMMA), ParseExpr_(COMMA), .op2 = "*", .priority_op2 = 8192, /*.flag = SYNFLAG_ExprLeftJoinOP2,*/ },
 		{ TOKEN(DOLLAR), ParseExpr_(DOLLAR), },
-		{ TOKEN(void), .type = TY_void, .rule ="$type [$USYMBOL \".\"] $SYMBOL $params [$block]", TopStmtTyCheck_(MethodDecl)},
+		{ TOKEN(void), .type = TY_void, .rule ="$type [type: $type \".\"] $SYMBOL $params [$block]", TopStmtTyCheck_(MethodDecl)},
 		{ TOKEN(boolean), .type = TY_Boolean, },
 		{ TOKEN(int),     .type = TY_Int, },
 		{ TOKEN(true),  _TERM, ExprTyCheck_(true),},

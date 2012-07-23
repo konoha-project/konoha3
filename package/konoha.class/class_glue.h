@@ -323,7 +323,7 @@ static void Stmt_parseClassBlock(KonohaContext *kctx, kStmt *stmt, kToken *tkC)
 		for (i = 0; i < kArray_size(bk->stmtList); i++) {
 			kStmt *methodDecl = bk->stmtList->stmtItems[i];
 			if(methodDecl->syn->keyword == KW_StmtMethodDecl) {
-				KLIB kObject_setObject(kctx, methodDecl, KW_UsymbolPattern, TY_Token, tkC);
+				KLIB kObject_setObject(kctx, methodDecl, SYM_("type"), TY_Token, tkC);
 			}
 		}
 		KLIB kObject_setObject(kctx, stmt, KW_BlockPattern, TY_Block, bk);
