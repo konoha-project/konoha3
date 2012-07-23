@@ -403,7 +403,7 @@ static kMethod* kMethodList_getCanonicalMethodNULL(KonohaContext *kctx, kArray *
 	const char *name = SYM_t(SYM_UNMASK(mn));
 	char canonicalName[80], methodCanonicalName[80];
 	int firstChar = tolower(name[0]), namesize = formatLowerCanonicalName(canonicalName, sizeof(canonicalName), name);
-	DBG_P("canonicalName='%s'", canonicalName);
+	DBG_P("canonicalName=%s.'%s'", TY_t(classId), canonicalName);
 	kMethod *foundMethod = NULL;
 	for(i = beginIdx; i < kArray_size(methodList); i++) {
 		kMethod *mtd = methodList->methodItems[i];
@@ -412,29 +412,29 @@ static kMethod* kMethodList_getCanonicalMethodNULL(KonohaContext *kctx, kArray *
 		const char *n = SYM_t(SYM_UNMASK(mtd->mn));
 		if(firstChar == tolower(n[0]) && namesize == formatLowerCanonicalName(methodCanonicalName, sizeof(methodCanonicalName), n)) {
 			if(strcmp(canonicalName, methodCanonicalName) != 0) continue;
+			DBG_P("@@@@@@ %s %s", name, n);
+			if(policy > 1 && !checkMethodPolicyOption(kctx, mtd, option, policy)) {
+				continue;
+			}
+			if(TFLAG_is(int, policy, MPOL_LATEST)) {
+				foundMethod = mtd;
+				continue;
+			}
+			return mtd;  // first one;
 		}
-		if(policy > 1 && !checkMethodPolicyOption(kctx, mtd, option, policy)) {
-			continue;
-		}
-		if(TFLAG_is(int, policy, MPOL_LATEST)) {
-			foundMethod = mtd;
-			continue;
-		}
-		return mtd;  // first one;
 	}
 	return foundMethod;
 }
 
-
 static kMethod* kMethodList_getMethodNULL(KonohaContext *kctx, kArray *methodList, size_t beginIdx, ktype_t classId, ksymbol_t mn, int option, int policy)
 {
-	size_t i;
 	kMethod *foundMethod = NULL;
+	int i, filteredPolicy = policy & (~(MPOL_CANONICAL));
 	for(i = beginIdx; i < kArray_size(methodList); i++) {
 		kMethod *mtd = methodList->methodItems[i];
 		if(mtd->mn != mn) continue;
 		if(classId != TY_var && mtd->classId != classId) continue;
-		if(policy > 1 && !checkMethodPolicyOption(kctx, mtd, option, policy)) {
+		if(filteredPolicy > 1 && !checkMethodPolicyOption(kctx, mtd, option, filteredPolicy)) {
 			continue;
 		}
 		foundMethod = mtd;
@@ -443,7 +443,12 @@ static kMethod* kMethodList_getMethodNULL(KonohaContext *kctx, kArray *methodLis
 		}
 	}
 	if(foundMethod == NULL && TFLAG_is(int, policy, MPOL_CANONICAL)) {
-		foundMethod = kMethodList_getCanonicalMethodNULL(kctx, methodList, beginIdx, classId, mn, option, policy);
+		foundMethod = kMethodList_getCanonicalMethodNULL(kctx, methodList, beginIdx, classId, mn, option, filteredPolicy);
+		DBG_P("canonicalName=%s.%s'%s', mtd=%p", TY_t(classId), PSYM_t(mn), foundMethod);
+		if(foundMethod != NULL) {
+			DBG_P("method=%s.%s%s, mtd=%p", Method_t(foundMethod));
+		}
+		DBG_ASSERT(foundMethod == NULL);
 	}
 	return foundMethod;
 }
