@@ -365,24 +365,55 @@ static KonohaClass *kNameSpace_getClass(KonohaContext *kctx, kNameSpace *ns, con
 // --------------------------------------------------------------------------
 // Method Management
 
-static kMethod* kMethodList_getMethodNULL(KonohaContext *kctx, kArray *methodList, size_t beginIdx, ktype_t classId, ksymbol_t mn, int option, int policy)
+static int formatLowerCanonicalName(char *buf, size_t bufsiz, const char *name)
+{
+	size_t i = 0;
+	const char* p = name;
+	while(p[0] != 0) {
+		if(p[0] != '_') {
+			buf[i] = tolower(p[0]);
+		}
+		i++;
+		p++;
+		if(!(i < bufsiz)) break;
+	}
+	buf[i] = 0;
+	return i;
+}
+
+static kbool_t checkMethodPolicyOption(KonohaContext *kctx, kMethod *mtd, int option, int policy)
+{
+	if(TFLAG_is(int, policy, MPOL_PARAMSIZE)) {
+		kParam *param = Method_param(mtd);
+		if(param->psize != option) return false;
+	}
+	if(TFLAG_is(int, policy, MPOL_SIGNATURE)) {
+		if(mtd->paramdom != option) return false;
+	}
+	if(TFLAG_is(int, policy, MPOL_SETTER)) {
+		kParam *param = Method_param(mtd);
+		if(param->psize != 1 && param->paramtypeItems[0].ty != (ktype_t)option) return false;
+	}
+	return true;
+}
+
+static kMethod* kMethodList_getCanonicalMethodNULL(KonohaContext *kctx, kArray *methodList, size_t beginIdx, ktype_t classId, ksymbol_t mn, int option, int policy)
 {
 	size_t i;
+	const char *name = SYM_t(SYM_UNMASK(mn));
+	char canonicalName[80], methodCanonicalName[80];
+	int firstChar = tolower(name[0]), namesize = formatLowerCanonicalName(canonicalName, sizeof(canonicalName), name);
 	kMethod *foundMethod = NULL;
 	for(i = beginIdx; i < kArray_size(methodList); i++) {
 		kMethod *mtd = methodList->methodItems[i];
-		if(mtd->mn != mn) continue;
+		if(SYM_HEAD(mtd->mn) != SYM_HEAD(mn)) continue;
 		if(classId != TY_var && mtd->classId != classId) continue;
-		if(TFLAG_is(int, policy, MPOL_PARAMSIZE)) {
-			kParam *param = Method_param(mtd);
-			if(param->psize != option) continue;
+		const char *n = SYM_t(SYM_UNMASK(mtd->mn));
+		if(firstChar == tolower(n[0]) && namesize == formatLowerCanonicalName(methodCanonicalName, sizeof(methodCanonicalName), n)) {
+			if(strcmp(canonicalName, methodCanonicalName) != 0) continue;
 		}
-		if(TFLAG_is(int, policy, MPOL_SIGNATURE)) {
-			if(mtd->paramdom != option) continue;
-		}
-		if(TFLAG_is(int, policy, MPOL_SETTER)) {
-			kParam *param = Method_param(mtd);
-			if(param->psize != 1 && param->paramtypeItems[0].ty != (ktype_t)option) continue;
+		if(policy > 1 && !checkMethodPolicyOption(kctx, mtd, option, policy)) {
+			continue;
 		}
 		if(TFLAG_is(int, policy, MPOL_LATEST)) {
 			foundMethod = mtd;
@@ -392,6 +423,30 @@ static kMethod* kMethodList_getMethodNULL(KonohaContext *kctx, kArray *methodLis
 	}
 	return foundMethod;
 }
+
+
+static kMethod* kMethodList_getMethodNULL(KonohaContext *kctx, kArray *methodList, size_t beginIdx, ktype_t classId, ksymbol_t mn, int option, int policy)
+{
+	size_t i;
+	kMethod *foundMethod = NULL;
+	for(i = beginIdx; i < kArray_size(methodList); i++) {
+		kMethod *mtd = methodList->methodItems[i];
+		if(mtd->mn != mn) continue;
+		if(classId != TY_var && mtd->classId != classId) continue;
+		if(policy > 1 && !checkMethodPolicyOption(kctx, mtd, option, policy)) {
+			continue;
+		}
+		foundMethod = mtd;
+		if(!TFLAG_is(int, policy, MPOL_LATEST)) {
+			break;
+		}
+	}
+	if(foundMethod == NULL && TFLAG_is(int, policy, MPOL_CANONICAL)) {
+		foundMethod = kMethodList_getCanonicalMethodNULL(kctx, methodList, beginIdx, classId, mn, option, policy);
+	}
+	return foundMethod;
+}
+
 
 static void kMethodList_findMethodList(KonohaContext *kctx, kArray *methodList, ktype_t classId, ksymbol_t mn, kArray *resultList, int beginIdx)
 {

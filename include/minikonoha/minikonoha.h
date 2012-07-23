@@ -1037,8 +1037,8 @@ struct kMethodVar {
 #define MPOL_PARAMSIZE   (1<<1)
 #define MPOL_SIGNATURE   (1<<2)
 #define MPOL_SETTER      (1<<3)
-#define MPOL_GETTER      MPOL_PARAMSIZE|MPOL_FIRST
-
+#define MPOL_CANONICAL   (1<<5)
+#define MPOL_GETTER      MPOL_PARAMSIZE|MPOL_FIRST|MPOL_CANONICAL
 
 #define K_CALLDELTA   4
 #define K_RTNIDX    (-4)
