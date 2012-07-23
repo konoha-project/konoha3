@@ -403,6 +403,7 @@ static kMethod* kMethodList_getCanonicalMethodNULL(KonohaContext *kctx, kArray *
 	const char *name = SYM_t(SYM_UNMASK(mn));
 	char canonicalName[80], methodCanonicalName[80];
 	int firstChar = tolower(name[0]), namesize = formatLowerCanonicalName(canonicalName, sizeof(canonicalName), name);
+	DBG_P("canonicalName='%s'", canonicalName);
 	kMethod *foundMethod = NULL;
 	for(i = beginIdx; i < kArray_size(methodList); i++) {
 		kMethod *mtd = methodList->methodItems[i];
