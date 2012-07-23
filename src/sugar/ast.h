@@ -119,7 +119,7 @@ static int appendKeyword(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList,
 		if(!Token_resolved(kctx, ns, tk)) {
 			const char *t = S_text(tk->text);
 			if(isalpha(t[0])) {
-				KonohaClass *ct = KLIB kNameSpace_getClass(kctx, ns, NULL/*FIXME*/, S_text(tk->text), S_size(tk->text), TY_unknown);
+				KonohaClass *ct = KLIB kNameSpace_getClass(kctx, ns, S_text(tk->text), S_size(tk->text), NULL);
 				if(ct != NULL) {
 					tk->keyword = KW_TypePattern;
 					tk->ty = ct->classId;

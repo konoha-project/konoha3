@@ -111,7 +111,7 @@ static void KLIB2_setGetterSetter(KonohaContext *kctx, KonohaClass *ct)
 // int NameSpace.getCid(String name, int defval)
 static KMETHOD NameSpace_getCid(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KonohaClass *ct = KLIB kNameSpace_getClass(kctx, sfp[0].asNameSpace, NULL/*fixme*/, S_text(sfp[1].asString), S_size(sfp[1].asString), (ktype_t)sfp[2].intValue);
+	KonohaClass *ct = KLIB kNameSpace_getClass(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), S_size(sfp[1].asString), NULL);
 	kint_t cid = ct != NULL ? ct->classId : sfp[2].intValue;
 	RETURNi_(cid);
 }
@@ -528,7 +528,7 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	}
 	kNameSpace *ns = Stmt_nameSpace(stmt);
-	KonohaClassVar *ct = (KonohaClassVar*)KLIB kNameSpace_getClass(kctx, ns, NULL/*FIXME*/, S_text(tkC->text), S_size(tkC->text), TY_unknown);
+	KonohaClassVar *ct = (KonohaClassVar*)KLIB kNameSpace_getClass(kctx, ns, S_text(tkC->text), S_size(tkC->text), NULL);
 	if (ct != NULL) {
 		if (!CT_isForward(ct)) {
 			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "%s is already defined", CT_t(ct));

@@ -96,7 +96,6 @@ static void Token_pERR(KonohaContext *kctx, kTokenVar *tk, const char *fmt, ...)
 	Token_textetUnresolved(tk, true);
 }
 
-//#define kStmt_toERR(STMT, ENO)  Stmt_toERR(kctx, STMT, ENO)
 #define Stmt_isERR(STMT)       ((STMT)->build == TSTMT_ERR)
 static SugarSyntax* NameSpace_syn(KonohaContext *kctx, kNameSpace *ns0, ksymbol_t kw, int isnew);
 
@@ -187,6 +186,8 @@ static void WARN_IgnoredTokens(KonohaContext *kctx, kArray *tokenArray, int begi
 		KLIB Kwb_free(&wb);
 	}
 }
+
+
 
 #ifdef __cplusplus
 }

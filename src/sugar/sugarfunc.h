@@ -249,7 +249,7 @@ static kExpr* Expr_tyCheckVariable2(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 		}
 	}
 	if(fn != SYM_NONAME) {
-		KUtilsKeyValue *kv = kNameSpace_getConstNULL(kctx, ns, fn);
+		KUtilsKeyValue *kv = kNameSpace_getLocalConstNULL(kctx, ns, fn);
 		if(kv != NULL) {
 			if(SYMKEY_isBOXED(kv->key)) {
 				SUGAR kExpr_setConstValue(kctx, expr, kv->ty, kv->objectValue);
@@ -278,7 +278,7 @@ static KMETHOD ExprTyCheck_Usymbol(KonohaContext *kctx, KonohaStack *sfp)
 	ksymbol_t unboxKey = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NONAME);
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	if(unboxKey != SYM_NONAME) {
-		KUtilsKeyValue *kv = kNameSpace_getConstNULL(kctx, ns, unboxKey);
+		KUtilsKeyValue *kv = kNameSpace_getLocalConstNULL(kctx, ns, unboxKey);
 		if(kv != NULL) {
 			if(SYMKEY_isBOXED(kv->key)) {
 				SUGAR kExpr_setConstValue(kctx, expr, kv->ty, kv->objectValue);
@@ -301,7 +301,7 @@ static KMETHOD StmtTyCheck_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	kToken *tk = SUGAR kStmt_getToken(kctx, stmt, KW_UsymbolPattern, NULL);
 	ksymbol_t unboxKey = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
-	KUtilsKeyValue *kv = kNameSpace_getConstNULL(kctx, ns, unboxKey);
+	KUtilsKeyValue *kv = kNameSpace_getLocalConstNULL(kctx, ns, unboxKey);
 	if(kv != NULL) {
 		kStmt_p(stmt, ErrTag, "already defined name: %s", Token_text(tk));
 	}
