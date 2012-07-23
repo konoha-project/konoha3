@@ -119,11 +119,11 @@ struct PlatformApiVar {
 	int     (*setjmp_i)(jmpbuf_i);
 	void    (*longjmp_i)(jmpbuf_i, int);
 
-	char*   (*realpath_i)(const char*, char*);
-	FILE_i* (*fopen_i)(const char*, const char*);
-	int     (*fgetc_i)(FILE_i *);
-	int     (*feof_i)(FILE_i *);
-	int     (*fclose_i)(FILE_i *);
+//	char*   (*realpath_i)(const char*, char*);
+//	FILE_i* (*fopen_i)(const char*, const char*);
+//	int     (*fgetc_i)(FILE_i *);
+//	int     (*feof_i)(FILE_i *);
+//	int     (*fclose_i)(FILE_i *);
 	//
 	void    (*syslog_i)(int priority, const char *message, ...) __PRINTFMT(2, 3);
 	void    (*vsyslog_i)(int priority, const char *message, va_list args);
@@ -137,6 +137,7 @@ struct PlatformApiVar {
 
 	// high-level functions
 	const char* (*formatPackagePath)(char *buf, size_t bufsiz, const char *packageName, const char *ext);
+	const char* (*formatTransparentPath)(char *buf, size_t bufsiz, const char *parent, const char *path);
 	KonohaPackageHandler* (*loadPackageHandler)(const char *packageName);
 	int (*loadScript)(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *));
 	const char* (*beginTag)(kinfotag_t);

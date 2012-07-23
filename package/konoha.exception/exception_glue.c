@@ -74,18 +74,18 @@ static void kException_addStackTrace(KonohaContext *kctx, KonohaStack *sfp, kExc
 		const char *file = FileId_t(uline);
 		KLIB Kwb_printf(kctx, &wb, "(%s:%d) %s.%s%s" , shortfilename(file), (kushort_t)uline, Method_t(mtd));
 	}
-	int i = 0, psize = Method_paramsize(mtd);
-	kParam *pa = Method_param(mtd);
-	KonohaClass *thisClass = O_cid(sfp[0]);
-	for(i = 0; i < psize; i++) {
-		pa->paramtypeItems[0].ty;
-		if(i > 0) {
-			knh_putc(ctx, cwb->w, ',');
-		}
-		knh_write_fn(ctx, cwb->w, p->fn);
-		knh_putc(ctx, cwb->w, '=');
-		knh_write_sfp(ctx, cwb->w, type, &sfp[i+1], FMT_line);
-	}
+//	int i = 0, psize = Method_paramsize(mtd);
+//	kParam *pa = Method_param(mtd);
+//	KonohaClass *thisClass = O_cid(sfp[0]);
+//	for(i = 0; i < psize; i++) {
+//		pa->paramtypeItems[0].ty;
+//		if(i > 0) {
+//			knh_putc(ctx, cwb->w, ',');
+//		}
+//		knh_write_fn(ctx, cwb->w, p->fn);
+//		knh_putc(ctx, cwb->w, '=');
+//		knh_write_sfp(ctx, cwb->w, type, &sfp[i+1], FMT_line);
+//	}
 	const char *msg = KLIB Kwb_top(kctx, &wb, 1);
 	KLIB kArray_add(kctx, e->stackTraceList, KLIB new_kString(kctx, msg, strlen(msg), 0));
 //	if((mtd)->mn != MN_LAMBDA) {

@@ -157,6 +157,20 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 	return isSuccessfullyLoading;
 }
 
+static const char *formatTransparentPath(char *buf, size_t bufsiz, const char *parentPath, const char *path)
+{
+	const char *p = strrchr(parentPath, '/');
+	if(p != NULL && path[0] != '/') {
+		size_t len = (p - parentPath) + 1;
+		if(len < bufsiz) {
+			memcpy(buf, parentPath, len);
+			snprintf(buf + len, bufsiz - len, "%s", path);
+			fprintf(stderr, "path='%s'", buf);
+			return (const char*)buf;
+		}
+	}
+	return path;
+}
 
 #ifndef K_PREFIX
 #define K_PREFIX  "/usr/local"
@@ -269,7 +283,6 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 		.setjmp_i        = ksetjmp,
 		.longjmp_i       = klongjmp,
 
-		.realpath_i      = realpath,
 		.syslog_i        = syslog,
 		.vsyslog_i       = vsyslog,
 		.printf_i        = printf,
@@ -280,6 +293,7 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 		.exit_i          = exit,
 		// high level
 		.formatPackagePath  = formatPackagePath,
+		.formatTransparentPath = formatTransparentPath,
 		.loadPackageHandler = loadPackageHandler,
 		.loadScript         = loadScript,
 		.beginTag           = beginTag,

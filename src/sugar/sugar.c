@@ -232,17 +232,20 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	EXPORT_SUGAR(base);
 }
 
+// boolean NameSpace.loadScript(String path);
+static KMETHOD NameSpace_loadScript(KonohaContext *kctx, KonohaStack *sfp)
+{
+	char pathbuf[256];
+	const char *path = PLATAPI formatTransparentPath(pathbuf, sizeof(pathbuf), FileId_t(sfp[K_RTNIDX].uline), S_text(sfp[1].asString));
+	RETURNb_(kNameSpace_loadScript(kctx, sfp[0].asNameSpace, path, sfp[K_RTNIDX].uline));
+}
+
 // boolean NameSpace.importPackage(String pkgname);
 static KMETHOD NameSpace_importPackage(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNb_(kNameSpace_importPackage(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), sfp[K_RTNIDX].uline));
 }
 
-// boolean NameSpace.loadScript(String path);
-static KMETHOD NameSpace_loadScript(KonohaContext *kctx, KonohaStack *sfp)
-{
-	RETURNb_(kNameSpace_loadScript(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), sfp[K_RTNIDX].uline));
-}
 
 #define _Public kMethod_Public
 #define _Static kMethod_Static
