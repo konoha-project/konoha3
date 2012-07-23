@@ -440,11 +440,13 @@ static kstatus_t Block_eval(KonohaContext *kctx, kBlock *bk)
 	int i, jumpResult;
 	kstatus_t result = K_CONTINUE;
 	KonohaContextRuntimeVar *base = kctx->stack;
+	KonohaStack *jump_bottom = base->jump_bottom;
 	jmpbuf_i lbuf = {};
 	if(base->evaljmpbuf == NULL) {
 		base->evaljmpbuf = (jmpbuf_i*)KCALLOC(sizeof(jmpbuf_i), 1);
 	}
 	memcpy(&lbuf, base->evaljmpbuf, sizeof(jmpbuf_i));
+	base->jump_bottom = kctx->esp + K_CALLDELTA; // FIXME ??
 	if((jumpResult = PLATAPI setjmp_i(*base->evaljmpbuf)) == 0) {
 		for(i = 0; i < kArray_size(bk->stmtList); i++) {
 			KSETv(bk1->stmtList->objectItems[0], bk->stmtList->objectItems[i]);
@@ -458,8 +460,9 @@ static kstatus_t Block_eval(KonohaContext *kctx, kBlock *bk)
 		//KLIB reportException(kctx);
 		DBG_P("Catch eval exception jumpResult=%d", jumpResult);
 		base->evalty = TY_void;  // no value
-		result = K_BREAK;        // message must be dumped;
+		result = K_BREAK;        // message must be reported;
 	}
+	base->jump_bottom = jump_bottom;
 	memcpy(base->evaljmpbuf, &lbuf, sizeof(jmpbuf_i));
 	END_LOCAL();
 	RESET_GCSTACK();
