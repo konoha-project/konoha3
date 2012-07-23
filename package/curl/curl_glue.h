@@ -73,9 +73,9 @@ static size_t write_String(char *buffer, size_t size, size_t nitems, void *strin
 	size *= nitems;
 	KLIB Kwb_write(kctx, &wb, buffer, size);
 	str = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), SPOL_POOL);
-	res->ubuf = str->ubuf + res->bytesize;// - str->ubuf;
-	res->bytesize = str->bytesize - res->bytesize;// - str->bytesize;
-	KSETv(res, (kStringVar*)str);
+//TODO handle SPOL and inline_text
+	res->ubuf = str->ubuf;
+	res->bytesize = str->bytesize;
 	KLIB Kwb_free(&wb);
 	return size;
 }
