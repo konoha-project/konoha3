@@ -217,6 +217,17 @@ static KMETHOD System_gc(KonohaContext *kctx, KonohaStack *sfp)
 	MODGC_gc_invoke(kctx, 1/* needsCStackTrace */);
 }
 
+#include <time.h>
+#include <sys/time.h>
+
+//## method Int System.getTime();
+static KMETHOD System_getTime(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	RETURNi_(tv.tv_sec * 1000 + tv.tv_usec / 1000);
+}
+
 #ifdef __cplusplus
 }
 #endif
