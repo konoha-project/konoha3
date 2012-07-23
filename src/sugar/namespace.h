@@ -189,7 +189,7 @@ static KUtilsKeyValue* kNameSpace_getLocalConstNULL(KonohaContext *kctx, kNameSp
 		size_t p = (max + min) / 2;
 		ksymbol_t key = SYMKEY_unbox(ns->constTable.keyvalueItems[p].key);
 		if(key == unboxKey) return ns->constTable.keyvalueItems + p;
-		if(key < unboxKey) {
+		if((int)key < (int)unboxKey) {
 			min = p + 1;
 		}
 		else {
