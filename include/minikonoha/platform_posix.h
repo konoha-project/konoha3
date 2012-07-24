@@ -178,7 +178,7 @@ static const char *formatTransparentPath(char *buf, size_t bufsiz, const char *p
 
 static const char* packname(const char *str)
 {
-	char *p = strrchr(str, '.');
+	char *p = (char *) strrchr(str, '.');
 	return (p == NULL) ? str : (const char*)p+1;
 }
 
