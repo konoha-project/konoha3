@@ -43,7 +43,7 @@ static void SimpleBuffer_putc(SimpleBuffer *simpleBuffer, int ch)
 {
 	if(!(simpleBuffer->size < simpleBuffer->allocSize)) {
 		simpleBuffer->allocSize *= 2;
-		simpleBuffer->buffer = realloc(simpleBuffer->buffer, simpleBuffer->allocSize);
+		simpleBuffer->buffer = (char *)realloc(simpleBuffer->buffer, simpleBuffer->allocSize);
 	}
 	simpleBuffer->buffer[simpleBuffer->size] = ch;
 	simpleBuffer->size += 1;
@@ -171,7 +171,8 @@ static const char* packname(const char *str)
 static const char* formatPackagePath(char *buf, size_t bufsiz, const char *packageName, const char *ext)
 {
 	FILE *fp = NULL;
-	char *path = getenv("KONOHA_PACKAGEPATH"), *local = "";
+	char *path = (char *)getenv("KONOHA_PACKAGEPATH");
+	const char *local = "";
 	if(path == NULL) {
 		path = getenv("KONOHA_HOME");
 		local = "/package";
@@ -262,29 +263,39 @@ static void NOP_debugPrintf(const char *file, const char *func, int line, const 
 static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 {
 	static PlatformApiVar plat = {
-		.name            = "shell",
-		.stacksize       = K_PAGESIZE * 4,
-		.malloc_i        = malloc,
-		.free_i          = free,
-		.setjmp_i        = ksetjmp,
-		.longjmp_i       = klongjmp,
+#ifdef __cplusplus
+#define FIELD_DECL(FILED, VAL) (VAL)
+#else
+#define FIELD_DECL(FILED, VAL) FILED = (VAL)
+#endif
+		FIELD_DECL(.name            , "shell"),
+		FIELD_DECL(.stacksize       , K_PAGESIZE * 4),
+		FIELD_DECL(.malloc_i        , malloc),
+		FIELD_DECL(.free_i          , free),
+		FIELD_DECL(.setjmp_i        , ksetjmp),
+		FIELD_DECL(.longjmp_i       , klongjmp),
 
-		.realpath_i      = realpath,
-		.syslog_i        = syslog,
-		.vsyslog_i       = vsyslog,
-		.printf_i        = printf,
-		.vprintf_i       = vprintf,
-		.snprintf_i      = snprintf,  // avoid to use Xsnprintf
-		.vsnprintf_i     = vsnprintf, // retreating..
-		.qsort_i         = qsort,
-		.exit_i          = exit,
+		FIELD_DECL(.realpath_i      , realpath),
+		FIELD_DECL(.fopen_i         , 0),
+		FIELD_DECL(.fgetc_i         , 0),
+		FIELD_DECL(.feof_i          , 0),
+		FIELD_DECL(.fclose_i        , 0),
+		FIELD_DECL(.syslog_i        , syslog),
+		FIELD_DECL(.vsyslog_i       , vsyslog),
+		FIELD_DECL(.printf_i        , printf),
+		FIELD_DECL(.vprintf_i       , vprintf),
+		FIELD_DECL(.snprintf_i      , snprintf),  // avoid to use Xsnprintf
+		FIELD_DECL(.vsnprintf_i     , vsnprintf), // retreating..
+		FIELD_DECL(.qsort_i         , qsort),
+		FIELD_DECL(.exit_i          , exit),
 		// high level
-		.formatPackagePath  = formatPackagePath,
-		.loadPackageHandler = loadPackageHandler,
-		.loadScript         = loadScript,
-		.beginTag           = beginTag,
-		.endTag             = endTag,
-		.debugPrintf        = debugPrintf,
+		FIELD_DECL(.formatPackagePath  , formatPackagePath),
+		FIELD_DECL(.loadPackageHandler , loadPackageHandler),
+		FIELD_DECL(.loadScript         , loadScript),
+		FIELD_DECL(.beginTag           , beginTag),
+		FIELD_DECL(.endTag             , endTag),
+		FIELD_DECL(.debugPrintf        , debugPrintf),
+#undef FIELD_DECL
 	};
 	if(!verbose_debug) {
 		plat.debugPrintf = NOP_debugPrintf;
