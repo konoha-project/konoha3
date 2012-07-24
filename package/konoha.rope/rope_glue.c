@@ -305,7 +305,7 @@ static kbool_t rope_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 {
 	// FIXME: This must be enabled by new loadMethodData
 	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_String, MN_("+"), 2, MPOL_PARAMSIZE|MPOL_FIRST);
-	if (mtd == NULL) {
+	if (mtd != NULL) {
 		KLIB Method_setFunc(kctx, mtd, Rope_opADD);
 	} else {
 		int FN_x = FN_("x");

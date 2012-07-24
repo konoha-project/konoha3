@@ -4615,6 +4615,7 @@ static void kmodllvm_free(KonohaContext *kctx, struct KonohaModule *baseh)
 
 static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char **args, kfileline_t pline)
 {
+	KREQUIRE_PACKAGE("konoha.float", pline);
 	(void)argc;(void)args;
 	kmodllvm_t *base = (kmodllvm_t*)KCALLOC(sizeof(kmodllvm_t), 1);
 	base->h.name     = "llvm";
