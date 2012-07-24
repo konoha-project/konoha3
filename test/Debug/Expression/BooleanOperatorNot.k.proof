@@ -1,0 +1,5 @@
+ - (BooleanOperatorNot.k:6) true
+ - (BooleanOperatorNot.k:7) false
+ - (BooleanOperatorNot.k:8) false
+ - (BooleanOperatorNot.k:9) true
+Q.E.D.
