@@ -136,11 +136,12 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 		isSuccessfullyLoading = true;
 		while(!feof(fp)) {
 			kfileline_t chunkheadline = uline;
+			kshort_t sline = (kshort_t)uline;
 			bzero(simpleBuffer.buffer, simpleBuffer.allocSize);
 			simpleBuffer.size = 0;
 			uline = readChunk(fp, uline, &simpleBuffer);
 			const char *script = (const char*)simpleBuffer.buffer;
-			if(/*uline == 0 && */simpleBuffer.size > 2 && script[0] == '#' && script[1] == '!') {
+			if(sline == 1 && simpleBuffer.size > 2 && script[0] == '#' && script[1] == '!') {
 				// fall through this line
 				simpleBuffer.size = 0;
 				//TODO: do we increment uline??
