@@ -469,10 +469,10 @@ static kExpr *Expr_lookupMethod(KonohaContext *kctx, kStmt *stmt, kExpr *expr, k
 		tkMN->keyword = ksymbolA(S_text(tkMN->text), S_size(tkMN->text), SYM_NEWID);
 	}
 	size_t psize = kArray_size(expr->cons) - 2;
-	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, this_cid, tkMN->keyword, psize, MPOL_LATEST|MPOL_PARAMSIZE);
+	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, this_cid, tkMN->keyword, psize, MPOL_LATEST|MPOL_PARAMSIZE|MPOL_CANONICAL);
 	if(mtd == NULL) {
 		if(tkMN->text != TS_EMPTY) {  // find Dynamic Call ..
-			mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, this_cid, 0/*NONAME*/, 1, MPOL_FIRST|MPOL_PARAMSIZE);
+			mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, this_cid, 0/*NONAME*/, 0, MPOL_FIRST);
 			if(mtd != NULL) {
 				return tyCheckDynamicCallParams(kctx, stmt, expr, mtd, gma, tkMN->text, tkMN->keyword, reqty);
 			}
@@ -553,7 +553,7 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kEx
 	{
 		ktype_t cid = O_classId(ns->scriptObject);
 		int paramsize = kArray_size(exprN->cons) - 2;
-		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, fn, paramsize, MPOL_FIRST|MPOL_PARAMSIZE);
+		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, fn, paramsize, MPOL_FIRST|MPOL_PARAMSIZE|MPOL_CANONICAL);
 		if(mtd != NULL) {
 			KSETv(exprN->cons->exprItems[1], new_ConstValueExpr(kctx, cid, ns->scriptObject));
 			return mtd;
@@ -563,7 +563,7 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kEx
 			KSETv(exprN->cons->exprItems[0], new_GetterExpr(kctx, termToken, mtd, new_ConstValueExpr(kctx, cid, ns->scriptObject)));
 			return NULL;
 		}
-		mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_System, fn, paramsize, MPOL_FIRST|MPOL_PARAMSIZE);
+		mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_System, fn, paramsize, MPOL_FIRST|MPOL_PARAMSIZE|MPOL_CANONICAL);
 		if(mtd != NULL) {
 			KSETv(exprN->cons->exprItems[1], new_VariableExpr(kctx, gma, TEXPR_NULL, TY_System, 0));
 		}
