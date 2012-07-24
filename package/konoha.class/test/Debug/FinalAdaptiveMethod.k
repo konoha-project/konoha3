@@ -4,7 +4,7 @@ K.import("konoha.class");
 
 class C {
 	int x;
-	@Final int succ() {
+	int succ() {
 		return x;
 	}
 }
@@ -19,7 +19,7 @@ void test() {
 	C c = new C();
 	D d = new D();
 	assert(c.succ() == 0);
-	assert(d.succ() == 0);
+	assert(d.succ() == 1);
 }
 
 test();

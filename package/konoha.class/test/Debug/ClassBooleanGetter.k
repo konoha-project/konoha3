@@ -6,17 +6,20 @@ K.import("konoha.assignment");
 class Person {
 	String name;
 	int age;
+	boolean child;
 	Person(String name, int age) {
 		this.name = name;
 		this.age = age;
+	}
+	boolean isChild() {
+		return child;
 	}
 }
 
 void f() {
 	Person p = new Person("naruto", 17);
-	assert(p.getAge() == 17);
-	p.setAge(18);
-	assert(p.age == 18);
+	assert(p.getChild() == false);
+	assert(p.isChild());
 }
 
 f();
