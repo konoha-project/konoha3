@@ -140,18 +140,11 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 			simpleBuffer.size = 0;
 			uline = readChunk(fp, uline, &simpleBuffer);
 			const char *script = (const char*)simpleBuffer.buffer;
-//			char *p;
-//			if (len > 2 && script[0] == '#' && script[1] == '!') {
-//				if ((p = strstr(script, "konoha")) != 0) {
-//					p += 6;
-//					script = p;
-//				} else {
-//					//FIXME: its not konoha shell, need to exec??
-//					kreportf(ErrTag, pline, "it may not konoha script: %s", FileId_t(uline));
-//					status = K_FAILED;
-//					break;
-//				}
-//			}
+			if(/*uline == 0 && */simpleBuffer.size > 2 && script[0] == '#' && script[1] == '!') {
+				// fall through this line
+				simpleBuffer.size = 0;
+				//TODO: do we increment uline??
+			}
 			if(isEmptyChunk(script, simpleBuffer.size)) {
 				int isBreak = false;
 				isSuccessfullyLoading = evalFunc(script, chunkheadline, &isBreak, thunk);
