@@ -59,9 +59,7 @@ static void Tagger_init(KonohaContext *kctx, kObject *o, void *conf)
 	char* dummy = "dummy"; // dummy
 	char** argv = &dummy;  // dummy
 	mecab->mecab = mecab_new(argc, argv);
-	if (!mecab->mecab) {
-		fprintf (stderr, "Exception:%s\n", mecab_strerror (mecab->mecab)); \
-	}
+	DBG_ASSERT(mecab->mecab != NULL);
 }
 
 static void Tagger_free(KonohaContext *kctx, kObject *o)
@@ -91,23 +89,18 @@ static void Tagger_free(KonohaContext *kctx, kObject *o)
 /* [API methods] */
 /* Tagger class  */
 
-#define CHECK(mecab, eval) if (! eval) { \
-		fprintf (stderr, "Exception:%s\n", mecab_strerror (mecab)); \
-		mecab_destroy(mecab); \
-	}
-
 //#define getMecab(O) ((mecab_t *)((kTagger*)(O)->mecab))
 
 // Tagger Tagger.new();
 static KMETHOD Tagger_new (KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0));
+	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0));
 }
 
 // String Tagger.parse(String input)
 static KMETHOD Tagger_parse(KonohaContext *kctx, KonohaStack *sfp)
 {
-	mecab_t * mecab = ((struct _kTagger*)(sfp[0].o))->mecab;
+	mecab_t * mecab = ((struct _kTagger*)(sfp[0].asObject))->mecab;
 	const char *input = S_text(sfp[1].asString);
 	const char* result = mecab_sparse_tostr(mecab, input);
 	RETURN_(KLIB new_kString(kctx, result, strlen(result), 0));
@@ -116,7 +109,7 @@ static KMETHOD Tagger_parse(KonohaContext *kctx, KonohaStack *sfp)
 // String Tagger.NBestParse(int n, String input)
 static KMETHOD Tagger_NBestParse(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kTagger *mecab = (struct _kTagger*)sfp[0].o;
+	struct _kTagger *mecab = (struct _kTagger*)sfp[0].asObject;
 	kint_t ival = sfp[1].intValue;
 	const char *input = S_text(sfp[2].asString);
 	const char* result = mecab_nbest_sparse_tostr(mecab->mecab, ival, input);
@@ -126,7 +119,7 @@ static KMETHOD Tagger_NBestParse(KonohaContext *kctx, KonohaStack *sfp)
 // Boolean Tagger.NBestInit(String input)
 static KMETHOD Tagger_NBestInit(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kTagger *mecab = (struct _kTagger*)sfp[0].o;
+	struct _kTagger *mecab = (struct _kTagger*)sfp[0].asObject;
 	const char *input = S_text(sfp[1].asString);
 	RETURNb_(mecab_nbest_init(mecab->mecab, input));
 }
@@ -134,7 +127,7 @@ static KMETHOD Tagger_NBestInit(KonohaContext *kctx, KonohaStack *sfp)
 // String Tagger.NBestNext()
 static KMETHOD Tagger_NBestNext(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kTagger *mecab = (struct _kTagger*)sfp[0].o;
+	struct _kTagger *mecab = (struct _kTagger*)sfp[0].asObject;
 	const char* next = mecab_nbest_next_tostr(mecab->mecab);
 	RETURN_(KLIB new_kString(kctx, next, strlen(next), 0));
 }
@@ -142,10 +135,10 @@ static KMETHOD Tagger_NBestNext(KonohaContext *kctx, KonohaStack *sfp)
 // MecabNode Tagger.ParseToNode(String input)
 static KMETHOD Tagger_parseToNode(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kTagger *mecab = (struct _kTagger*)sfp[0].o;
+	struct _kTagger *mecab = (struct _kTagger*)sfp[0].asObject;
 	const char *input = S_text(sfp[1].asString);
 	const mecab_node_t* node = mecab_sparse_tonode(mecab->mecab, input);
-	struct _kMecabNode* ret = (struct _kMecabNode*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+	struct _kMecabNode* ret = (struct _kMecabNode*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 	ret->node = node;
 	RETURN_(ret);
 }
@@ -153,7 +146,7 @@ static KMETHOD Tagger_parseToNode(KonohaContext *kctx, KonohaStack *sfp)
 // void Tagger.destory()
 static KMETHOD Tagger_destroy(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kTagger *mecab = (struct _kTagger*)sfp[0].o;
+	struct _kTagger *mecab = (struct _kTagger*)sfp[0].asObject;
 	mecab_destroy(mecab->mecab);
 }
 
@@ -171,11 +164,11 @@ static void MecabNode_free(KonohaContext *kctx, kObject *o)
 // MecabNode MecabNode.next()
 static KMETHOD MecabNode_next(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].o;
+	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].asObject;
 	mecab_node_t* next = node->node->next;
 	struct _kMecabNode* ret;
 	if (next != NULL) {
-		ret = (struct _kMecabNode*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+		ret = (struct _kMecabNode*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 		ret->node = next;
 	}
 	else {
@@ -187,11 +180,11 @@ static KMETHOD MecabNode_next(KonohaContext *kctx, KonohaStack *sfp)
 // MecabNode MecabNode.prev()
 static KMETHOD MecabNode_prev(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].o;
+	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].asObject;
 	mecab_node_t* prev = node->node->prev;
 	struct _kMecabNode* ret;
 	if (node != NULL) {
-		ret = (struct _kMecabNode*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+		ret = (struct _kMecabNode*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 		ret->node = prev;
 	}
 	else {
@@ -203,11 +196,11 @@ static KMETHOD MecabNode_prev(KonohaContext *kctx, KonohaStack *sfp)
 // MecabNode MecabNode.enext()
 static KMETHOD MecabNode_enext(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].o;
+	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].asObject;
 	mecab_node_t* enext = node->node->enext;
 	struct _kMecabNode* ret;
 	if (node != NULL) {
-		ret = (struct _kMecabNode*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+		ret = (struct _kMecabNode*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 		ret->node = enext;
 	}
 	else {
@@ -219,15 +212,12 @@ static KMETHOD MecabNode_enext(KonohaContext *kctx, KonohaStack *sfp)
 // MecabNode MecabNode.bnext()
 static KMETHOD MecabNode_bnext(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].o;
+	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].asObject;
 	mecab_node_t* bnext = node->node->bnext;
-	struct _kMecabNode* ret;
+	struct _kMecabNode* ret = NULL;
 	if (node != NULL) {
-		ret = (struct _kMecabNode*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+		ret = (struct _kMecabNode*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 		ret->node = bnext;
-	}
-	else {
-		ret = NULL;
 	}
 	RETURN_(ret);
 }
@@ -235,7 +225,7 @@ static KMETHOD MecabNode_bnext(KonohaContext *kctx, KonohaStack *sfp)
 // String MecabNode.getSurface()
 static KMETHOD MecabNode_getSurface(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].o;
+	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].asObject;
 	const char* ret = node->node->surface;
 	RETURN_(KLIB new_kString(kctx, ret, strlen(ret), 0));
 }
@@ -243,7 +233,7 @@ static KMETHOD MecabNode_getSurface(KonohaContext *kctx, KonohaStack *sfp)
 // String MecabNode.getFeature()
 static KMETHOD MecabNode_getFeature(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].o;
+	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].asObject;
 	const char* ret = node->node->feature;
 	RETURN_(KLIB new_kString(kctx, ret, strlen(ret), 0));
 }
@@ -251,7 +241,7 @@ static KMETHOD MecabNode_getFeature(KonohaContext *kctx, KonohaStack *sfp)
 // int MecabNode.getLength()
 static KMETHOD MecabNode_getLength(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].o;
+	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].asObject;
 	unsigned int ret = node->node->length;
 	RETURNi_(ret);
 }
@@ -259,7 +249,7 @@ static KMETHOD MecabNode_getLength(KonohaContext *kctx, KonohaStack *sfp)
 // int MecabNode.getRLength()
 static KMETHOD MecabNode_getRLength(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].o;
+	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].asObject;
 	unsigned int ret = node->node->rlength;
 	RETURNi_(ret);
 }
@@ -267,7 +257,7 @@ static KMETHOD MecabNode_getRLength(KonohaContext *kctx, KonohaStack *sfp)
 // int MecabNode.getID()
 static KMETHOD MecabNode_getID(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].o;
+	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].asObject;
 	unsigned int ret = node->node->id;
 	RETURNi_(ret);
 }
@@ -275,7 +265,7 @@ static KMETHOD MecabNode_getID(KonohaContext *kctx, KonohaStack *sfp)
 // int MecabNode.getRCAttr()
 static KMETHOD MecabNode_getRCAttr(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].o;
+	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].asObject;
 	short ret = node->node->rcAttr;
 	RETURNi_(ret);
 }
@@ -283,7 +273,7 @@ static KMETHOD MecabNode_getRCAttr(KonohaContext *kctx, KonohaStack *sfp)
 // int MecabNode.getLCAttr()
 static KMETHOD MecabNode_getLCAttr(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].o;
+	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].asObject;
 	short ret = node->node->lcAttr;
 	RETURNi_(ret);
 }
@@ -291,7 +281,7 @@ static KMETHOD MecabNode_getLCAttr(KonohaContext *kctx, KonohaStack *sfp)
 // int MecabNode.getCharType()
 static KMETHOD MecabNode_getCharType(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].o;
+	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].asObject;
 	unsigned int ret = node->node->char_type;
 	RETURNi_(ret);
 }
@@ -299,7 +289,7 @@ static KMETHOD MecabNode_getCharType(KonohaContext *kctx, KonohaStack *sfp)
 // int MecabNode.getStat()
 static KMETHOD MecabNode_getStat(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].o;
+	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].asObject;
 	unsigned int ret = node->node->stat;
 	RETURNi_(ret);
 }
@@ -307,7 +297,7 @@ static KMETHOD MecabNode_getStat(KonohaContext *kctx, KonohaStack *sfp)
 // Boolean MecabNode.isBest()
 static KMETHOD MecabNode_isBest(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].o;
+	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].asObject;
 	unsigned int ret = node->node->isbest;
 	RETURNb_(ret);
 }
@@ -315,7 +305,7 @@ static KMETHOD MecabNode_isBest(KonohaContext *kctx, KonohaStack *sfp)
 //// float MecabNode.alpha()
 //static KMETHOD MecabNode_alpha(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].o;
+//	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].asObject;
 //	float ret = node->node->alpha;
 //	RETURNf_(ret);
 //}
@@ -323,7 +313,7 @@ static KMETHOD MecabNode_isBest(KonohaContext *kctx, KonohaStack *sfp)
 //// float MecabNode.beta()
 //static KMETHOD MecabNode_beta(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].o;
+//	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].asObject;
 //	float ret = node->node->beta;
 //	RETURNf_(ret);
 //}
@@ -331,7 +321,7 @@ static KMETHOD MecabNode_isBest(KonohaContext *kctx, KonohaStack *sfp)
 //// float MecabNode.prob()
 //static KMETHOD MecabNode_prob(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].o;
+//	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].asObject;
 //	float ret = node->node->prob;
 //	RETURNf_(ret);
 //}
@@ -339,7 +329,7 @@ static KMETHOD MecabNode_isBest(KonohaContext *kctx, KonohaStack *sfp)
 // int MecabNode.wcost()
 static KMETHOD MecabNode_wcost(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].o;
+	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].asObject;
 	short ret = node->node->wcost;
 	RETURNi_(ret);
 }
@@ -347,7 +337,7 @@ static KMETHOD MecabNode_wcost(KonohaContext *kctx, KonohaStack *sfp)
 // int MecabNode.cost()
 static KMETHOD MecabNode_cost(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].o;
+	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].asObject;
 	long ret = node->node->cost;
 	RETURNi_(ret);
 }
@@ -356,25 +346,24 @@ static KMETHOD MecabNode_cost(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t mecab_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	fprintf(stderr, "hoge\n");
 	ctx = (struct KonohaContextVar *)kctx;
 
-	static KDEFINE_CLASS defTagger = {
+	static KDEFINE_CLASS TaggerDef = {
 		STRUCTNAME(Tagger),
 		.cflag = kClass_Final,
 		.init = Tagger_init,
 		.free = Tagger_free,
 	};
 
-	static KDEFINE_CLASS defMecabNode = {
+	static KDEFINE_CLASS MecabNodeDef = {
 		STRUCTNAME(MecabNode),
 		.cflag = kClass_Final,
 		.init = MecabNode_init,
 		.free = MecabNode_free,
 	};
 
-	KonohaClass *cTagger = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defTagger, pline);
-	KonohaClass *cMecabNode = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defMecabNode, pline);
+	KonohaClass *cTagger = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &TaggerDef, pline);
+	KonohaClass *cMecabNode = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &MecabNodeDef, pline);
 
 	intptr_t MethodData[] = {
 		_Public|_Const, _F(Tagger_new),         TY_Tagger,  TY_Tagger, MN_("new"),   0,
