@@ -131,7 +131,7 @@ set(PACKAGES
 ##	curl
 	ijit
 ##	jansson
-	mecab
+##	mecab
 	python
 	apache
 	konoha.import
