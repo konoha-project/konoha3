@@ -108,9 +108,8 @@ static KMETHOD Tagger_new (KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Tagger_parse(KonohaContext *kctx, KonohaStack *sfp)
 {
 	mecab_t * mecab = ((struct _kTagger*)(sfp[0].o))->mecab;
-	const char *input = sfp[1].asString;
+	const char *input = S_text(sfp[1].asString);
 	const char* result = mecab_sparse_tostr(mecab, input);
-	//fprintf(stderr, "result='\n%s' @ parse\n", result);
 	RETURN_(KLIB new_kString(kctx, result, strlen(result), 0));
 }
 
@@ -119,9 +118,8 @@ static KMETHOD Tagger_NBestParse(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kTagger *mecab = (struct _kTagger*)sfp[0].o;
 	kint_t ival = sfp[1].intValue;
-	const char *input = sfp[2].asString;
+	const char *input = S_text(sfp[2].asString);
 	const char* result = mecab_nbest_sparse_tostr(mecab->mecab, ival, input);
-	//fprintf(stderr, "result='%s' @ NBestParse\n", result);
 	RETURN_(KLIB new_kString(kctx, result, strlen(result), 0));
 }
 
@@ -129,7 +127,7 @@ static KMETHOD Tagger_NBestParse(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Tagger_NBestInit(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kTagger *mecab = (struct _kTagger*)sfp[0].o;
-	const char *input = sfp[1].asString;
+	const char *input = S_text(sfp[1].asString);
 	RETURNb_(mecab_nbest_init(mecab->mecab, input));
 }
 
@@ -138,7 +136,6 @@ static KMETHOD Tagger_NBestNext(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kTagger *mecab = (struct _kTagger*)sfp[0].o;
 	const char* next = mecab_nbest_next_tostr(mecab->mecab);
-	//fprintf(stderr, "next='%s' @ NBestNext\n", next);
 	RETURN_(KLIB new_kString(kctx, next, strlen(next), 0));
 }
 
@@ -146,7 +143,7 @@ static KMETHOD Tagger_NBestNext(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Tagger_parseToNode(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kTagger *mecab = (struct _kTagger*)sfp[0].o;
-	const char *input = sfp[1].asString;
+	const char *input = S_text(sfp[1].asString);
 	const mecab_node_t* node = mecab_sparse_tonode(mecab->mecab, input);
 	struct _kMecabNode* ret = (struct _kMecabNode*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
 	ret->node = node;
