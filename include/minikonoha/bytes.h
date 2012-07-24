@@ -25,6 +25,21 @@
 #ifndef MODICONV_H_
 #define MODICONV_H_
 
+#ifndef MINIOKNOHA_H_
+#error Do not include bytes.h without minikonoha.h.
+#endif
+
+#include <string.h>
+#include <langinfo.h>
+#include <locale.h>
+#ifdef K_USING_ICONV
+#include <iconv.h>
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* ------------------------------------------------------------------------ */
 /* [class defs] */
 
@@ -36,11 +51,7 @@
 
 #define IS_Bytes(O)      ((O)->h.ct == CT_Bytes)
 
-#include <string.h>
-#include <langinfo.h>
-#include <locale.h>
 #ifdef K_USING_ICONV
-#include <iconv.h>
 typedef iconv_t kiconv_t;
 #else
 typedef long    kiconv_t;
@@ -64,4 +75,9 @@ typedef struct {
 typedef struct {
     KonohaContextModule h;
 } ctxiconv_t;
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
 #endif /* MODICONV_H_ */

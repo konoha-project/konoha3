@@ -22,11 +22,15 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#ifndef KONOHA2_H_
-#define KONOHA2_H_
+#ifndef MINIOKNOHA_H_
+#define MINIOKNOHA_H_
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 #ifndef K_OSDLLEXT
@@ -476,17 +480,19 @@ struct KonohaContextRuntimeVar {
 	ktype_t                    evalty;
 	kushort_t                  evalidx;
 	jmpbuf_i                  *evaljmpbuf;
+	KonohaStack               *jump_bottom;
 };
 
 // module
 #define MOD_MAX    32
-#define MOD_logger   0
-#define MOD_gc       1
-#define MOD_code     2
-#define MOD_sugar    3
-#define MOD_float     11
-#define MOD_iterator  12
-#define MOD_iconv   13
+#define MOD_logger     0
+#define MOD_gc         1
+#define MOD_code       2
+#define MOD_sugar      3
+#define MOD_exception  5
+#define MOD_float      11
+#define MOD_iterator   12
+#define MOD_iconv      13
 //#define MOD_IO      14
 //#define MOD_llvm    15
 #define MOD_REGEX   16
@@ -532,6 +538,7 @@ struct KonohaModule {
 		kExpr       *asExpr;\
 		kBlock      *asBlock;\
 		kGamma      *asGamma;\
+		const struct kExceptionVar  *asException;\
 		const struct _kFloat  *f; \
 		const struct _kBytes  *ba; \
 		struct _kIterator *itr; \
@@ -1015,9 +1022,9 @@ struct kMethodVar {
 	};
 	uintptr_t         flag;
 	ktype_t           classId;      kmethodn_t  mn;
-	kparamid_t        paramid;  kparamid_t paramdom;
-	kshort_t          delta;    kpackage_t packageId;
-	kToken        *sourceCodeToken;
+	kparamid_t        paramid;      kparamid_t paramdom;
+	kshort_t          delta;        kpackage_t packageId;
+	kToken           *sourceCodeToken;
 	union {
 		kObject      *objdata;
 		const struct kByteCodeVar    *kcode;
@@ -1408,6 +1415,10 @@ typedef struct DEFINE_TESTFUNC {
 } DEFINE_TESTFUNC ;
 #endif
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
 #include "logger.h"
 
-#endif /* KONOHA2_H_ */
+#endif /* MINIOKNOHA_H_ */

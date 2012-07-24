@@ -22,23 +22,18 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <stdio.h>
-
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/klib.h"
 #include "minikonoha/sugar.h"
 #include "minikonoha/float.h"
 #include "minikonoha/gc.h"
-
-//extern int verbose_debug;
-//extern int verbose_code;
-//extern int verbose_sugar;
-//extern int verbose_gc;
-//
-//#include <minikonoha/platform_posix.h>
+extern int verbose_debug;
+#include "minikonoha/platform_posix.h"
 
 /* checking header files can compile at g++ */
 int main(int argc, char const* argv[])
 {
-    return 1;  // ERR: please update this
+    KonohaContext* konoha = konoha_open(KonohaUtils_getDefaultPlatformApi());
+    konoha_close(konoha);
+    return 0;
 }

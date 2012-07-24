@@ -25,6 +25,14 @@
 #ifndef MODITERATOR_H_
 #define MODITERATOR_H_
 
+#ifndef MINIOKNOHA_H_
+#error Do not include iterator.h without minikonoha.h.
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define kiteratormod           ((kiteratormod_t*)kctx->mod[MOD_iterator])
 #define kmoditerator           ((kmoditerator_t*)kctx->modshare[MOD_iterator])
 #define IS_defineIterator()    (kctx->modshare[MOD_iterator] != NULL)
@@ -63,4 +71,7 @@ struct _kIterator {
 	kFunc        *funcNext;
 };
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 #endif /* MODITERATOR_H_ */
