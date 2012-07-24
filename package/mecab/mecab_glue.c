@@ -22,8 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include<konoha2/konoha2.h>
-#include<konoha2/sugar.h>
+#include<minikonoha/minikonoha.h>
+#include<minikonoha/sugar.h>
 
 #include "mecab_glue.h"
 
@@ -31,16 +31,16 @@
 extern "C" {
 #endif
 
-struct kcontext_t *ctx;
+struct KonohaContextVar *ctx;
 
 KDEFINE_PACKAGE* mecab_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("mecab", "1.0"),
-		.initPackage =    mecab_initPackage,
-		.setupPackage =   mecab_setupPackage,
-		.initKonohaSpace =  mecab_initNameSpace,
-		.setupKonohaSpace = mecab_setupNameSpace,
+		.initPackage = mecab_initPackage,
+		.setupPackage = mecab_setupPackage,
+		.initNameSpace = mecab_initNameSpace,
+		.setupNameSpace = mecab_setupNameSpace,
 	};
 	return &d;
 }
