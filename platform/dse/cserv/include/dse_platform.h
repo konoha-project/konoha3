@@ -24,24 +24,24 @@
 
 /* ************************************************************************ */
 
-#ifndef DSE_PLATAPIFORM_H_
-#define DSE_PLATAPIFORM_H_
+#ifndef DSE_PLATFORM_H_
+#define DSE_PLATFORM_H_
 
 #include <setjmp.h>
 #include <syslog.h>
 #include <minikonoha/minikonoha.h>
 
-typedef PlatformApi dse_platform_t_h;
-
-static const char* _packname(const char *str)
+static const char* dse_packname(const char *str)
 {
 	char *p = strrchr(str, '.');
 	return (p == NULL) ? str : (const char*)p+1;
 }
 
-static const char* _packagepath(char *buf, size_t bufsiz, const char *fname)
+static const char* dse_formatPackagePath(char *buf, size_t bufsiz, const char *packageName, const char *ext)
 {
-	char *path = getenv("KONOHA_PACKAGEPATH"), *local = "";
+	FILE *fp = NULL;
+	char *path = (char *)getenv("KONOHA_PACKAGEPATH");
+	const char *local = "";
 	if(path == NULL) {
 		path = getenv("KONOHA_HOME");
 		local = "/package";
@@ -50,35 +50,41 @@ static const char* _packagepath(char *buf, size_t bufsiz, const char *fname)
 		path = getenv("HOME");
 		local = "/.minikonoha/package";
 	}
-	snprintf(buf, bufsiz, "%s%s/%s/%s_glue.k", path, local, fname, _packname(fname));
+	snprintf(buf, bufsiz, "%s%s/%s/%s%s", path, local, packageName, dse_packname(packageName), ext);
 #ifdef K_PREFIX
-	FILE *fp = fopen(buf, "r");
+	fp = fopen(buf, "r");
 	if(fp != NULL) {
 		fclose(fp);
+		return (const char*)buf;
 	}
-	else {
-		snprintf(buf, bufsiz, K_PREFIX "/minikonoha/package" "/%s/%s_glue.k", fname, _packname(fname));
-	}
+	snprintf(buf, bufsiz, K_PREFIX "/minikonoha/package" "/%s/%s%s", packageName, dse_packname(packageName), ext);
 #endif
-	return (const char*)buf;
-}
-
-static const char* _exportpath(char *pathbuf, size_t bufsiz, const char *pname)
-{
-	char *p = strrchr(pathbuf, '/');
-	snprintf(p, bufsiz - (p  - pathbuf), "/%s_exports.k", _packname(pname));
-	FILE *fp = fopen(pathbuf, "r");
+	fp = fopen(buf, "r");
 	if(fp != NULL) {
 		fclose(fp);
-		return (const char*)pathbuf;
+		return (const char*)buf;
 	}
 	return NULL;
 }
 
-static const char* _begin(kinfotag_t t) { (void)t; return ""; }
-static const char* _end(kinfotag_t t) { (void)t; return ""; }
+static const char* dse_formatTransparentPath(char *buf, size_t bufsiz, const char *parentPath, const char *path)
+{
+	const char *p = strrchr(parentPath, '/');
+	if(p != NULL && path[0] != '/') {
+		size_t len = (p - parentPath) + 1;
+		if(len < bufsiz) {
+			memcpy(buf, parentPath, len);
+			snprintf(buf + len, bufsiz - len, "%s", path);
+			return (const char*)buf;
+		}
+	}
+	return path;
+}
 
-static void _debugPrintf(const char *file, const char *func, int L, const char *fmt, ...)
+static const char* dse_beginTag(kinfotag_t t) { (void)t; return ""; }
+static const char* dse_endTag(kinfotag_t t) { (void)t; return ""; }
+
+static void dse_debugPrintf(const char *file, const char *func, int L, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap , fmt);
@@ -89,25 +95,19 @@ static void _debugPrintf(const char *file, const char *func, int L, const char *
 	va_end(ap);
 }
 
-static void _NOP_debugPrintf(const char *file, const char *func, int line, const char *fmt, ...)
+static void dse_NOP_debugPrintf(const char *file, const char *func, int line, const char *fmt, ...)
 {
 }
 
-PlatformApi *platform_dse(void)
+static PlatformApi *platform_dse(void)
 {
-	static PlatformApi dse = {
+	static PlatformApiVar dse = {
 		.name			= "dse",
 		.stacksize		= 4096,
 		.malloc_i		= malloc,
 		.free_i			= free,
 		.setjmp_i		= ksetjmp,
 		.longjmp_i		= klongjmp,
-
-		.realpath_i = realpath,
-		.fopen_i		= (FILE_i * (*)(const char *, const char *))fopen,
-		.fgetc_i		= (int (*)(FILE_i *))fgetc,
-		.feof_i			= (int (*)(FILE_i *))feof,
-		.fclose_i		= (int (*)(FILE_i *))fclose,
 		.syslog_i		= syslog,
 		.vsyslog_i		= vsyslog,
 		.printf_i		= printf,
@@ -117,18 +117,16 @@ PlatformApi *platform_dse(void)
 		.qsort_i		= qsort,
 		.exit_i			= exit,
 		// high level
-		.packagepath = _packagepath,
-		.exportpath = _exportpath,
-		.begin			= _begin,
-		.end			= _end,
-		.debugPrintf			= _NOP_debugPrintf,
+		.formatPackagePath	= dse_formatPackagePath,
+		.formatTransparentPath		= dse_formatTransparentPath,
+		.beginTag		= dse_beginTag,
+		.endTag			= dse_endTag,
+		.debugPrintf	= dse_NOP_debugPrintf,
 	};
 	if(getenv("KONOHA_DEBUG") != NULL) {
-		dse.debugPrintf = _debugPrintf;
+		dse.debugPrintf = dse_debugPrintf;
 	}
-	return (&dse);
+	return (PlatformApi*)(&dse);
 }
 
-
-
-#endif /* DSE_PLATAPIFORM_H_ */
+#endif /* DSE_PLATFORM_H_ */
