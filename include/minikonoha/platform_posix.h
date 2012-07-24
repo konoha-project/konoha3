@@ -24,12 +24,19 @@
 
 #ifndef PLATFORM_POSIX_H_
 #define PLATFORM_POSIX_H_
+#ifndef MINIOKNOHA_H_
+#error Do not include platform_posix.h without minikonoha.h.
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <setjmp.h>
 #include <syslog.h>
 #include <dlfcn.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // -------------------------------------------------------------------------
 
@@ -303,4 +310,7 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	return (PlatformApi*)(&plat);
 }
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 #endif /* PLATFORM_POSIX_H_ */

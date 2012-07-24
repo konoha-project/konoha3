@@ -22,8 +22,16 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#ifndef KONOHA2_INLINELIBS_H_
-#define KONOHA2_INLINELIBS_H_
+#ifndef MINIOKNOHA_INLINELIBS_H_
+#define MINIOKNOHA_INLINELIBS_H_
+
+#ifndef MINIOKNOHA_H_
+#error Do not include klib.h without minikonoha.h.
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define kinline __attribute__((unused))
 
@@ -211,4 +219,7 @@ static kinline void Method_setProceedMethod(KonohaContext *kctx, kMethod *mtd, k
 	KINITv(((kMethodVar*)mtd)->proceedNUL, mtd2);
 }
 
-#endif /* KONOHA2_INLINELIBS_H_ */
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+#endif /* MINIOKNOHA_INLINELIBS_H_ */
