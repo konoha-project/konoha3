@@ -155,7 +155,7 @@ static KMETHOD System_sync(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD System_link(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s1 = sfp[1].asString;
-	kString *s2 = sfp[2].s;
+	kString *s2 = sfp[2].asString;
 	const char *oldpath = S_text(s1);
 	const char *newpath = S_text(s2);
 	int ret = link(oldpath, newpath);
@@ -188,7 +188,7 @@ static KMETHOD System_unlink(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD System_rename(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s1 = sfp[1].asString;
-	kString *s2 = sfp[2].s;
+	kString *s2 = sfp[2].asString;
 	const char *oldpath = S_text(s1);
 	const char *newpath = S_text(s2);
 	int ret = rename(oldpath, newpath);
@@ -221,7 +221,7 @@ static KMETHOD System_rmdir(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD System_symlink(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s1 = sfp[1].asString;
-	kString *s2 = sfp[2].s;
+	kString *s2 = sfp[2].asString;
 	const char *oldpath = S_text(s1);
 	const char *newpath = S_text(s2);
 	int ret = symlink(oldpath, newpath);
@@ -239,7 +239,7 @@ static KMETHOD System_symlink(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD System_readlink(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s1 = sfp[1].asString;
-	kString *s2 = sfp[2].s;
+	kString *s2 = sfp[2].asString;
 	const char *pathname = S_text(s1);
 	const char *buf = S_text(s2);
 	size_t bufsize = strlen(buf);
