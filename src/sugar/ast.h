@@ -33,9 +33,9 @@ extern "C" {
 /* ------------------------------------------------------------------------ */
 // Block
 
-static int selectStmtLine(KonohaContext *kctx, kNameSpace *ns, int *indent, kArray *tokenList, int beginIdx, int endIdx, int delim, kArray *tokenArraydst, kToken **tkERRRef);
-static void Block_addStmtLine(KonohaContext *kctx, kBlock *bk, kArray *tokenList, int beginIdx, int end, kToken *tkERR);
-static int makeTree(KonohaContext *kctx, kNameSpace *ns, ksymbol_t tt, kArray *tokenList, int beginIdx, int endIdx, int closech, kArray *tokenArraydst, kToken **tkERRRef);
+static int selectStmtLine(KonohaContext *kctx, kNameSpace *ns, int *indent, kArray *tokenList, int beginIdx, int endIdx, int delim, kArray *tokenArraydst, kToken **errTokenRef);
+static void Block_addStmtLine(KonohaContext *kctx, kBlock *bk, kArray *tokenList, int beginIdx, int end, kToken *errToken);
+static int makeTree(KonohaContext *kctx, kNameSpace *ns, ksymbol_t tt, kArray *tokenList, int beginIdx, int endIdx, int closech, kArray *tokenArraydst, kToken **errTokenRef);
 
 static kBlock *new_Block(KonohaContext *kctx, kNameSpace *ns, kStmt *parent, kArray *tokenList, int beginIdx, int endIdx, int delim)
 {
@@ -45,12 +45,12 @@ static kBlock *new_Block(KonohaContext *kctx, kNameSpace *ns, kStmt *parent, kAr
 	}
 	int i = beginIdx, indent = 0, atop = kArray_size(tokenList);
 	while(i < endIdx) {
-		kToken *tkERR = NULL;
+		kToken *errToken = NULL;
 		DBG_ASSERT(atop == kArray_size(tokenList));
-		i = selectStmtLine(kctx, ns, &indent, tokenList, i, endIdx, delim, tokenList, &tkERR);
+		i = selectStmtLine(kctx, ns, &indent, tokenList, i, endIdx, delim, tokenList, &errToken);
 		int asize = kArray_size(tokenList);
 		if(asize > atop) {
-			Block_addStmtLine(kctx, bk, tokenList, atop, asize, tkERR);
+			Block_addStmtLine(kctx, bk, tokenList, atop, asize, errToken);
 			KLIB kArray_clear(kctx, tokenList, atop);
 		}
 	}
@@ -111,7 +111,7 @@ static kTokenVar* TokenType_resolveGenerics(KonohaContext *kctx, kNameSpace *ns,
 	return tk;
 }
 
-static int appendKeyword(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, kArray *dst, kToken **tkERR)
+static int appendKeyword(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, kArray *dst, kToken **errToken)
 {
 	int next = beginIdx; // don't add
 	kTokenVar *tk = tokenList->tokenVarItems[beginIdx];
@@ -127,7 +127,7 @@ static int appendKeyword(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList,
 			}
 			else {
 				Token_pERR(kctx, tk, "undefined token: %s", Token_text(tk));
-				tkERR[0] = tk;
+				errToken[0] = tk;
 				return endIdx;
 			}
 		}
@@ -141,7 +141,7 @@ static int appendKeyword(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList,
 			if(topch != '[') break;
 			kArray *abuf = ctxsugar->preparedTokenList;
 			size_t atop = kArray_size(abuf);
-			next = makeTree(kctx, ns, AST_BRACKET, tokenList,  next+1, endIdx, ']', abuf, tkERR);
+			next = makeTree(kctx, ns, AST_BRACKET, tokenList,  next+1, endIdx, ']', abuf, errToken);
 			if(!(kArray_size(abuf) > atop)) return next;
 			tkB = abuf->tokenItems[atop];
 			if(tkB->keyword == AST_BRACKET) {
@@ -178,7 +178,7 @@ static kbool_t Token_toBRACE(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns)
 	return 0;
 }
 
-static int makeTree(KonohaContext *kctx, kNameSpace *ns, ksymbol_t astkw, kArray *tokenList, int beginIdx, int endIdx, int closech, kArray *tokenArraydst, kToken **tkERRRef)
+static int makeTree(KonohaContext *kctx, kNameSpace *ns, ksymbol_t astkw, kArray *tokenList, int beginIdx, int endIdx, int closech, kArray *tokenArraydst, kToken **errTokenRef)
 {
 	int i, probablyCloseBefore = endIdx - 1;
 	kToken *tk = tokenList->tokenItems[beginIdx];
@@ -197,11 +197,11 @@ static int makeTree(KonohaContext *kctx, kNameSpace *ns, ksymbol_t astkw, kArray
 		int topch = kToken_topch(tk);
 		DBG_ASSERT(topch != '{');
 		if(topch == '(') {
-			i = makeTree(kctx, ns, AST_PARENTHESIS, tokenList, i, endIdx, ')', tkP->sub, tkERRRef);
+			i = makeTree(kctx, ns, AST_PARENTHESIS, tokenList, i, endIdx, ')', tkP->sub, errTokenRef);
 			continue;
 		}
 		if(topch == '[') {
-			i = makeTree(kctx, ns, AST_BRACKET, tokenList, i, endIdx, ']', tkP->sub, tkERRRef);
+			i = makeTree(kctx, ns, AST_BRACKET, tokenList, i, endIdx, ']', tkP->sub, errTokenRef);
 			continue;
 		}
 		if(topch == closech) {
@@ -211,7 +211,7 @@ static int makeTree(KonohaContext *kctx, kNameSpace *ns, ksymbol_t astkw, kArray
 			if(tk->keyword == TK_INDENT) continue; // remove INDENT from tokens;
 			if(tk->keyword == TK_CODE) probablyCloseBefore = i;
 		}
-		i = appendKeyword(kctx, ns, tokenList, i, endIdx, tkP->sub, tkERRRef);
+		i = appendKeyword(kctx, ns, tokenList, i, endIdx, tkP->sub, errTokenRef);
 	}
 	if(tk->keyword != TK_ERR) {
 		Token_pERR(kctx, tkP, "'%c' is expected (probably before %s)", closech, Token_text(tokenList->tokenItems[probablyCloseBefore]));
@@ -220,11 +220,11 @@ static int makeTree(KonohaContext *kctx, kNameSpace *ns, ksymbol_t astkw, kArray
 		tkP->keyword = TK_ERR;
 		KSETv(tkP->text, tk->text);
 	}
-	tkERRRef[0] = tkP;
+	errTokenRef[0] = tkP;
 	return endIdx;
 }
 
-static int selectStmtLine(KonohaContext *kctx, kNameSpace *ns, int *indent, kArray *tokenList, int beginIdx, int endIdx, int delim, kArray *tokenArraydst, kToken **tkERRRef)
+static int selectStmtLine(KonohaContext *kctx, kNameSpace *ns, int *indent, kArray *tokenList, int beginIdx, int endIdx, int delim, kArray *tokenArraydst, kToken **errTokenRef)
 {
 	int i = beginIdx;
 	DBG_ASSERT(endIdx <= kArray_size(tokenList));
@@ -239,7 +239,7 @@ static int selectStmtLine(KonohaContext *kctx, kNameSpace *ns, int *indent, kArr
 			tk1 = tokenList->tokenVarItems[i+1];
 			topch = kToken_topch(tk1);
 			if(i + 1 < endIdx && topch == '(') {
-				i = makeTree(kctx, ns, AST_PARENTHESIS, tokenList, i+1, endIdx, ')', tokenArraydst, tkERRRef);
+				i = makeTree(kctx, ns, AST_PARENTHESIS, tokenList, i+1, endIdx, ')', tokenArraydst, errTokenRef);
 			}
 			continue;
 		}
@@ -261,7 +261,7 @@ static int selectStmtLine(KonohaContext *kctx, kNameSpace *ns, int *indent, kArr
 			return i+1;
 		}
 		if(tk->keyword == TK_ERR) {
-			tkERRRef[0] = tk;
+			errTokenRef[0] = tk;
 			continue;
 		}
 		if(tk->keyword == TK_INDENT) {
@@ -272,14 +272,14 @@ static int selectStmtLine(KonohaContext *kctx, kNameSpace *ns, int *indent, kArr
 		}
 		if(kToken_needsKeywordResolved(tk)) {
 			if(topch == '(') {
-				i = makeTree(kctx, ns, AST_PARENTHESIS, tokenList,  i, endIdx, ')', tokenArraydst, tkERRRef);
+				i = makeTree(kctx, ns, AST_PARENTHESIS, tokenList,  i, endIdx, ')', tokenArraydst, errTokenRef);
 				continue;
 			}
 			else if(topch == '[') {
-				i = makeTree(kctx, ns, AST_BRACKET, tokenList, i, endIdx, ']', tokenArraydst, tkERRRef);
+				i = makeTree(kctx, ns, AST_BRACKET, tokenList, i, endIdx, ']', tokenArraydst, errTokenRef);
 				continue;
 			}
-			i = appendKeyword(kctx, ns, tokenList, i, endIdx, tokenArraydst, tkERRRef);
+			i = appendKeyword(kctx, ns, tokenList, i, endIdx, tokenArraydst, errTokenRef);
 		}
 		else {
 			KLIB kArray_add(kctx, tokenArraydst, tk);
@@ -501,13 +501,13 @@ static kbool_t Stmt_parseSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *to
 	return ret;
 }
 
-static void Block_addStmtLine(KonohaContext *kctx, kBlock *bk, kArray *tokenList, int beginIdx, int endIdx, kToken *tkERR)
+static void Block_addStmtLine(KonohaContext *kctx, kBlock *bk, kArray *tokenList, int beginIdx, int endIdx, kToken *errToken)
 {
 	kStmtVar *stmt = new_(StmtVar, tokenList->tokenItems[beginIdx]->uline);
 	KLIB kArray_add(kctx, bk->stmtList, stmt);
 	KINITv(stmt->parentBlockNULL, bk);
-	if(tkERR != NULL) {
-		kStmt_toERR(kctx, stmt, tkERR->text);
+	if(errToken != NULL) {
+		kStmt_toERR(kctx, stmt, errToken->text);
 	}
 	else {
 		int c = Stmt_addAnnotation(kctx, stmt, tokenList, beginIdx, endIdx);
