@@ -22,11 +22,15 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#ifndef KONOHA2_H_
-#define KONOHA2_H_
+#ifndef MINIOKNOHA_H_
+#define MINIOKNOHA_H_
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 #ifndef K_OSDLLEXT
@@ -1412,6 +1416,10 @@ typedef struct DEFINE_TESTFUNC {
 } DEFINE_TESTFUNC ;
 #endif
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
 #include "logger.h"
 
-#endif /* KONOHA2_H_ */
+#endif /* MINIOKNOHA_H_ */

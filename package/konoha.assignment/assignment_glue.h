@@ -46,7 +46,7 @@ static KMETHOD ExprTyCheck_assignment(KonohaContext *kctx, KonohaStack *sfp)
 				DBG_ASSERT(IS_Method(mtd));
 				if((MN_isGETTER(mtd->mn) || MN_isISBOOL(mtd->mn)) && !Method_isStatic(mtd)) {
 					ktype_t cid = lexpr->cons->exprItems[1]->ty;
-					mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(mtd->mn), lexpr->ty, MPOL_SETTER);
+					mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(mtd->mn), lexpr->ty, MPOL_SETTER|MPOL_CANONICAL);
 					if(mtd != NULL) {
 						KSETv(lexpr->cons->methodItems[0], mtd);
 						KLIB kArray_add(kctx, lexpr->cons, rexpr);

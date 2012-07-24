@@ -24,6 +24,13 @@
 
 #ifndef EVIDENCE_H_
 #define EVIDENCE_H_
+#ifndef MINIOKNOHA_H_
+#error Do not include logger.h without minikonoha.h.
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define LOGPOL_RECORD       (1<<0) /* logger works only with this flag */
 
@@ -76,4 +83,7 @@ typedef struct klogconf_t {
 		}\
 	}while(0)\
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 #endif /* EVIDENCE_H_ */

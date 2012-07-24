@@ -102,7 +102,7 @@ static void KonohaClass_addMethod2(KonohaContext *kctx, KonohaClass *ct, kMethod
 static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kObject *o, kStmt *stmt, kNameSpace *ns, ktype_t ty, ksymbol_t fn)
 {
 	ktype_t cid = O_classId(o);
-	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(fn), ty, MPOL_SETTER);
+	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(fn), ty, MPOL_SETTER|MPOL_CANONICAL);
 	if(mtd != NULL) {
 		SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "already defined name: %s.%s", CT_t(O_ct(o)), SYM_t(fn));
 		return NULL;

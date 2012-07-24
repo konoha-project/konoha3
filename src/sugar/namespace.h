@@ -412,7 +412,6 @@ static kMethod* kMethodList_getCanonicalMethodNULL(KonohaContext *kctx, kArray *
 		const char *n = SYM_t(SYM_UNMASK(mtd->mn));
 		if(firstChar == tolower(n[0]) && namesize == formatLowerCanonicalName(methodCanonicalName, sizeof(methodCanonicalName), n)) {
 			if(strcmp(canonicalName, methodCanonicalName) != 0) continue;
-			DBG_P("@@@@@@ %s %s", name, n);
 			if(policy > 1 && !checkMethodPolicyOption(kctx, mtd, option, policy)) {
 				continue;
 			}
@@ -444,11 +443,11 @@ static kMethod* kMethodList_getMethodNULL(KonohaContext *kctx, kArray *methodLis
 	}
 	if(foundMethod == NULL && TFLAG_is(int, policy, MPOL_CANONICAL)) {
 		foundMethod = kMethodList_getCanonicalMethodNULL(kctx, methodList, beginIdx, classId, mn, option, filteredPolicy);
-		DBG_P("canonicalName=%s.%s'%s', mtd=%p", TY_t(classId), PSYM_t(mn), foundMethod);
-		if(foundMethod != NULL) {
-			DBG_P("method=%s.%s%s, mtd=%p", Method_t(foundMethod));
-		}
-		DBG_ASSERT(foundMethod == NULL);
+//		DBG_P("canonicalName=%s.%s'%s', mtd=%p", TY_t(classId), PSYM_t(mn), foundMethod);
+//		if(foundMethod != NULL) {
+//			DBG_P("method=%s.%s%s, mtd=%p", Method_t(foundMethod));
+//		}
+//		DBG_ASSERT(foundMethod == NULL);
 	}
 	return foundMethod;
 }

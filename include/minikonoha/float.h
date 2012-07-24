@@ -25,6 +25,14 @@
 #ifndef MODFLOAT_H_
 #define MODFLOAT_H_
 
+#ifndef MINIOKNOHA_H_
+#error Do not include float.h without minikonoha.h.
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define KFLOAT_FMT             "%.6f"
 
 #define kfloatmod        ((kfloatmod_t*)kctx->mod[MOD_float])
@@ -50,4 +58,7 @@ struct _kFloat {
 	kfloat_t floatValue;
 };
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 #endif /* MODFLOAT_H_ */
