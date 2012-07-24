@@ -167,7 +167,8 @@ static kString *new_kString(KonohaContext *kctx, const char *text, size_t len, i
 static void String2_free(KonohaContext *kctx, kObject *o)
 {
 	StringBase *base = (StringBase*) o;
-	if (S_isMallocText(base)) {
+	if ((S_flag(base) & S_FLAG_EXTERNAL) == S_FLAG_LINER) {
+		assert(((LinerString *)base)->text == ((kString*)base)->buf);
 		KFREE(((LinerString *)base)->text, S_len(base)+1);
 	}
 }
@@ -305,7 +306,7 @@ static kbool_t rope_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 {
 	// FIXME: This must be enabled by new loadMethodData
 	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_String, MN_("+"), 2, MPOL_PARAMSIZE|MPOL_FIRST);
-	if (mtd == NULL) {
+	if (mtd != NULL) {
 		KLIB Method_setFunc(kctx, mtd, Rope_opADD);
 	} else {
 		int FN_x = FN_("x");

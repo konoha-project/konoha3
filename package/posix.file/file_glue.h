@@ -66,7 +66,7 @@ static void File_free(KonohaContext *kctx, kObject *o)
 
 static void File_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
-	kFILE *file = (kFILE*)sfp[pos].o;
+	kFILE *file = (kFILE*)sfp[pos].asObject;
 	FILE *fp = file->fp;
 	KLIB Kwb_printf(kctx, wb, "FILE :%p, path=%s", fp, file->realpath);
 }
@@ -76,7 +76,7 @@ static void File_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBu
 static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s = sfp[1].asString;
-	const char *mode = IS_NULL(sfp[2].s) ? "r" : S_text(sfp[2].s);
+	const char *mode = IS_NULL(sfp[2].asString) ? "r" : S_text(sfp[2].asString);
 	FILE *fp = fopen(S_text(s), mode);
 	if (fp == NULL) {
 		ktrace(_SystemFault|_ScriptFault,
@@ -86,7 +86,7 @@ static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp)
 				KEYVALUE_s("errstr", strerror(errno))
 		);
 	}
-	struct _kFILE *file = (struct _kFILE*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), fp);
+	struct _kFILE *file = (struct _kFILE*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), fp);
 	file->realpath = realpath(S_text(s), NULL);
 	RETURN_(file);
 }
