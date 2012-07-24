@@ -1,4 +1,1 @@
- - (error) (BooleanOperatorNotIs.k:10) undefined method: System.!
- - (error) (BooleanOperatorNotIs.k:10) System.assert accepts Boolean at the parameter 1
- - RuntimeScriptException: (error) (BooleanOperatorNotIs.k:10) undefined method: System.!
 Q.E.D.
