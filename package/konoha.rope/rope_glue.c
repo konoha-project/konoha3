@@ -167,7 +167,8 @@ static kString *new_kString(KonohaContext *kctx, const char *text, size_t len, i
 static void String2_free(KonohaContext *kctx, kObject *o)
 {
 	StringBase *base = (StringBase*) o;
-	if (S_isMallocText(base)) {
+	if ((S_flag(base) & S_FLAG_EXTERNAL) == S_FLAG_LINER) {
+		assert(((LinerString *)base)->text == ((kString*)base)->buf);
 		KFREE(((LinerString *)base)->text, S_len(base)+1);
 	}
 }
