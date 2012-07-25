@@ -278,7 +278,6 @@ extern int konoha_detectFailedAssert;
 static int KonohaContext_test(KonohaContext *kctx, const char *testname)
 {
 	int ret = 1; //FAILED
-	int noproof = 0;
 	char script_file[256];
 	char correct_file[256];
 	char result_file[256];
@@ -305,8 +304,15 @@ static int KonohaContext_test(KonohaContext *kctx, const char *testname)
 		fclose(fp2);
 	}
 	else {
-		if(stdlog_count > 0) return 0; // OK
+		//fprintf(stdout, "stdlog_count: %d\n", stdlog_count);
+		if(stdlog_count == 0) {
+			fprintf(stdout, "[PASS]: %s\n", testname);
+			return 0; // OK
+		}
 		fprintf(stdout, "no proof file: %s\n", testname);
+		fprintf(stdout, "[FAIL]: %s\n", testname);
+		konoha_detectFailedAssert = 1;
+		return 1;
 	}
 	return ret;
 }
