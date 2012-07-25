@@ -136,6 +136,7 @@ set(PACKAGES
 	apache
 	konoha.import
 #	openssl
+#	logpool
 )
 
 find_library(HAVE_LIBDL NAMES dl)
