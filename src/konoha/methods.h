@@ -42,6 +42,12 @@ static KMETHOD Boolean_opNOT(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNb_(!sfp[0].boolValue);
 }
 
+//## @Const method Boolean Boolean.opEQ(Boolean x);
+static KMETHOD Boolean_opEQ(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNb_(sfp[0].boolValue == sfp[1].boolValue);
+}
+
 //## @Const method Int Int.opMINUS();
 static KMETHOD Int_opMINUS(KonohaContext *kctx, KonohaStack *sfp)
 {
