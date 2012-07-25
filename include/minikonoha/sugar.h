@@ -485,7 +485,7 @@ typedef struct {
 	kExpr *     (*kStmt_tyCheckCallParamExpr)(KonohaContext *, kStmt *, kExpr *, kMethod *, kGamma *, ktype_t);
 	kExpr *     (*new_TypedMethodCall)(KonohaContext *, kStmt *, ktype_t ty, kMethod *mtd, kGamma *, int n, ...);
 
-	SugarSyntax* (*NameSpace_syn)(KonohaContext *, kNameSpace *, ksymbol_t, int);
+	SugarSyntax* (*kNameSpace_getSyntax)(KonohaContext *, kNameSpace *, ksymbol_t, int);
 	void       (*kNameSpace_defineSyntax)(KonohaContext *, kNameSpace *, KDEFINE_SYNTAX *);
 	void       (*kNameSpace_setSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
 	void       (*kNameSpace_addSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
@@ -521,7 +521,7 @@ typedef struct {
 	base->new_TypedMethodCall = new_TypedMethodCall;\
 	/*syntax*/\
 	base->kNameSpace_defineSyntax  = kNameSpace_defineSyntax;\
-	base->NameSpace_syn           = NameSpace_syn;\
+	base->kNameSpace_getSyntax           = kNameSpace_getSyntax;\
 	base->makeSyntaxRule     = makeSyntaxRule;\
 	base->kNameSpace_setSugarFunc   = kNameSpace_setSugarFunc;\
 	base->kNameSpace_addSugarFunc   = kNameSpace_addSugarFunc;\
@@ -574,7 +574,7 @@ static kExpr* kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, i
 #define TY_Gamma                           kmodsugar->cGamma->classId
 #define TY_TokenArray                      kmodsugar->cTokenArray->classId
 
-#define SYN_(KS, KW)                NameSpace_syn(kctx, KS, KW, 0)
+#define SYN_(KS, KW)                kNameSpace_getSyntax(kctx, KS, KW, 0)
 
 
 #else/*SUGAR_EXPORTS*/
@@ -589,8 +589,8 @@ static kExpr* kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, i
 #define TY_TokenArray                        SUGAR cTokenArray->classId
 
 //#define KW_(T)                               _e->keyword(kctx, T, sizeof(T)-1, SYM_NONAME)
-#define SYN_(KS, KW)                         SUGAR NameSpace_syn(kctx, KS, KW, 0)
-#define NEWSYN_(KS, KW)                      (SugarSyntaxVar*)(SUGAR NameSpace_syn(kctx, KS, KW, 1))
+#define SYN_(KS, KW)                         SUGAR kNameSpace_getSyntax(kctx, KS, KW, 0)
+#define NEWSYN_(KS, KW)                      (SugarSyntaxVar*)(SUGAR kNameSpace_getSyntax(kctx, KS, KW, 1))
 
 #endif/*SUGAR_EXPORTS*/
 

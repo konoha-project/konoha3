@@ -29,7 +29,7 @@
 static void checkFuncArray(KonohaContext *kctx, kFunc **funcItems);
 static void parseSyntaxRule(KonohaContext *kctx, const char *rule, kfileline_t pline, kArray *a);
 
-static SugarSyntax* NameSpace_syn(KonohaContext *kctx, kNameSpace *ns0, ksymbol_t keyword, int isNew)
+static SugarSyntax* kNameSpace_getSyntax(KonohaContext *kctx, kNameSpace *ns0, ksymbol_t keyword, int isNew)
 {
 	kNameSpace *ns = ns0;
 	uintptr_t hcode = keyword;
@@ -96,7 +96,7 @@ static void checkFuncArray(KonohaContext *kctx, kFunc **funcItems)
 
 static void kNameSpace_setSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, size_t idx, kFunc *fo)
 {
-	SugarSyntaxVar *syn = (SugarSyntaxVar *)NameSpace_syn(kctx, ns, keyword, 1/*new*/);
+	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_getSyntax(kctx, ns, keyword, 1/*new*/);
 	kFunc **synp = &(syn->PatternMatch);
 	DBG_ASSERT(idx <= SYNIDX_ExprTyCheck);
 	KSETv(synp[idx], fo);
@@ -104,7 +104,7 @@ static void kNameSpace_setSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol
 
 static void kNameSpace_addSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, size_t idx, kFunc *fo)
 {
-	SugarSyntaxVar *syn = (SugarSyntaxVar *)NameSpace_syn(kctx, ns, keyword, 1/*new*/);
+	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_getSyntax(kctx, ns, keyword, 1/*new*/);
 	kFunc **synp = &(syn->PatternMatch);
 	DBG_ASSERT(idx <= SYNIDX_ExprTyCheck);
 	if(synp[idx] == kmodsugar->UndefinedParseExpr || synp[idx] == kmodsugar->UndefinedStmtTyCheck || synp[idx] == kmodsugar->UndefinedExprTyCheck) {
@@ -136,7 +136,7 @@ static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 	MethodFunc pPatternMatch = NULL, pParseExpr = NULL, pStmtTyCheck = NULL, pExprTyCheck = NULL;
 	kFunc *mPatternMatch = NULL, *mParseExpr = NULL, *mStmtTyCheck = NULL, *mExprTyCheck = NULL;
 	while(syndef->keyword != KW_END) {
-		SugarSyntaxVar* syn = (SugarSyntaxVar*)NameSpace_syn(kctx, ns, syndef->keyword, 1/*isnew*/);
+		SugarSyntaxVar* syn = (SugarSyntaxVar*)kNameSpace_getSyntax(kctx, ns, syndef->keyword, 1/*isnew*/);
 		syn->flag  |= ((kshortflag_t)syndef->flag);
 		if(syndef->type != 0) {
 			syn->ty = syndef->type;

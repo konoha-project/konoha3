@@ -36,6 +36,12 @@ extern "C" {
 
 /* ------------------------------------------------------------------------ */
 
+//## @Const method Int Int.opPlus();
+static KMETHOD Int_opPlus(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNi_(+(sfp[0].intValue));
+}
+
 static KMETHOD Int_opCompl (KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNi_(~sfp[0].intValue);
@@ -80,6 +86,7 @@ static kbool_t int_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 {
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
+		_Public|_Const|_Im, _F(Int_opPlus), TY_Int, TY_Int, MN_("+"), 1, TY_Int, FN_x,
 		_Public|_Const|_Im, _F(Int_opCompl), TY_Int, TY_Int, MN_("~"), 1, TY_Int, FN_x,
 		_Public|_Const|_Im, _F(Int_opLSHIFT), TY_Int, TY_Int, MN_("<<"), 1, TY_Int, FN_x,
 		_Public|_Const|_Im, _F(Int_opRSHIFT), TY_Int, TY_Int, MN_(">>"), 1, TY_Int, FN_x,
@@ -119,6 +126,10 @@ static kbool_t int_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline
 			{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
+	SugarSyntaxVar *syn = (SugarSyntaxVar*)SUGAR kNameSpace_getSyntax(kctx, ns, SYM_("+"), 0);
+	if(syn != NULL) {
+		syn->precedence_op1  = 16;
+	}
 	return true;
 }
 
