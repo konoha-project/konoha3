@@ -86,8 +86,8 @@ static kbool_t int_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 {
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Im, _F(Int_opPlus), TY_Int, TY_Int, MN_("+"), 1, TY_Int, FN_x,
-		_Public|_Const|_Im, _F(Int_opCompl), TY_Int, TY_Int, MN_("~"), 1, TY_Int, FN_x,
+		_Public|_Const|_Im, _F(Int_opPlus), TY_Int, TY_Int, MN_("+"), 0,
+		_Public|_Const|_Im, _F(Int_opCompl), TY_Int, TY_Int, MN_("~"), 0,
 		_Public|_Const|_Im, _F(Int_opLSHIFT), TY_Int, TY_Int, MN_("<<"), 1, TY_Int, FN_x,
 		_Public|_Const|_Im, _F(Int_opRSHIFT), TY_Int, TY_Int, MN_(">>"), 1, TY_Int, FN_x,
 		_Public|_Const|_Im, _F(Int_opAND), TY_Int, TY_Int, MN_("&"), 1, TY_Int, FN_x,

@@ -585,21 +585,30 @@ static int skipUnaryOp(KonohaContext *kctx, kArray *tokenArray, int beginIdx, in
 
 static int Stmt_findBinaryOp(KonohaContext *kctx, kStmt *stmt, kArray *tokenArray, int beginIdx, int endIdx, SugarSyntax **synRef)
 {
+	int isHead = true;
 	int idx = beginIdx, i, precedence = 0;
 	kNameSpace *ns = Stmt_nameSpace(stmt);
-	if(!isUnaryOp(kctx, tokenArray->tokenItems[beginIdx], ns, &precedence, synRef)) {
-		for(i = beginIdx; i < endIdx; i++) {
-			kToken *tk = tokenArray->tokenItems[i];
-			SugarSyntax *syn = SYN_(ns, tk->keyword);
+	synRef[0] = SYN_(ns, (tokenArray->tokenItems[beginIdx])->keyword);
+	for(i = beginIdx; i < endIdx; i++) {
+		kToken *tk = tokenArray->tokenItems[i];
+		SugarSyntax *syn = SYN_(ns, tk->keyword);
+		if(isHead) {
+			if(syn->precedence_op1 > 0) {
+				if(precedence < syn->precedence_op1) {
+					precedence = syn->precedence_op1;
+					idx = i; *synRef = syn;
+				}
+				continue;
+			}
+			isHead = false;
+		}
+		else {
 			if(syn->precedence_op2 > 0) {
 				if(precedence < syn->precedence_op2 || (precedence == syn->precedence_op2 && !(FLAG_is(syn->flag, SYNFLAG_ExprLeftJoinOp2)) )) {
 					precedence = syn->precedence_op2;
-					idx = i;
-					*synRef = syn;
+					idx = i;*synRef = syn;
 				}
-//				if(!FLAG_is(syn->flag, SYNFLAG_ExprPostfixOp2)) {  /* check if real binary operator to parse f() + 1 */
-//					i = skipUnaryOp(kctx, tokenArray, i+1, endIdx, ns) - 1;
-//				}
+				isHead = true;
 			}
 		}
 	}
@@ -625,7 +634,7 @@ static kExpr* kStmt_parseExpr(KonohaContext *kctx, kStmt *stmt, kArray *tokenArr
 			else if(endIdx < kArray_size(tokenArray)) {
 				where = " before "; token = Token_text(tokenArray->tokenItems[endIdx]);
 			}
-			kStmt_p(stmt, ErrTag, "expected expression%beginIdx%beginIdx", where, token);
+			kStmt_p(stmt, ErrTag, "expected expression%s%s", where, token);
 		}
 	}
 	return K_NULLEXPR;
