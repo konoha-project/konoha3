@@ -755,9 +755,9 @@ void MODGC_check_malloced_size(void)
 {
 	if(verbose_gc) {
 		fprintf(stdout, "\nklib:memory leaked=%ld\n", kklib_malloced);
-#ifdef GCDEBUG
-		DUMP_P("sys :memory leaked=%ld\n", malloced_size);
-#endif
+//#ifdef GCDEBUG
+//		DUMP_P("sys :memory leaked=%ld\n", malloced_size);
+//#endif
 	}
 }
 
@@ -1071,7 +1071,7 @@ static bool inc(AllocationPointer *p, SubHeap *h)
 	int size = KlassBlockSize(h->heap_klass);
 	p->blkptr = (AllocationBlock*)((char*)p->blkptr+size);
 	BitPtr0_inc(p);
-	return ++p->seg->live_count == SegmentBlockCount_GC_MARGIN[h->heap_klass];
+	return ++p->seg->live_count > SegmentBlockCount_GC_MARGIN[h->heap_klass];
 }
 
 static bool isMarked(AllocationPointer *p)
@@ -1116,9 +1116,9 @@ static BlkPtr *blockAddress(Segment *s, uintptr_t idx, uintptr_t mask)
 #if GCDEBUG
 #define DBG_ALLOCATION_POINTER(p) do {\
 	kObject *o = blockAddress(p->seg, BP(p, 0).idx, BP(p, 0).mask);\
-	if (o->h.meta == NULL) {\
+	if (o->h.gcinfo == NULL) {\
 		fprintf(stderr, "o=%p, seg=%p\n", o, p->seg);\
-		assert(o->h.meta == NULL);\
+		assert(o->h.gcinfo == NULL);\
 	}\
 } while(0)
 #else
@@ -1178,7 +1178,7 @@ static void *tryAlloc(KonohaContext *kctx, HeapManager *mng, SubHeap *h)
 	inc(p, h);
 	bool isEmpty = inc(p, h);
 	if (mng->segmentList == NULL && h->freelist == NULL && isEmpty) {
-		KNH_SAFEPOINT(_ctx, _ctx->esp);
+		((KonohaContextVar*)kctx)->safepoint = 1;
 	}
 	return temp;
 }
@@ -1328,7 +1328,7 @@ static SubHeap *findSubHeapBySize(HeapManager *mng, size_t n)
 
 
 #ifdef GCDEBUG
-#define CLEAR_GCINFO(o) (o)->h.gcinfo = NULL
+#define CLEAR_GCINFO(o) ((kObjectVar*)o)->h.gcinfo = NULL
 #else
 #define CLEAR_GCINFO(o)
 #endif
@@ -1649,14 +1649,14 @@ static void mark_ostack(KonohaContext *kctx, HeapManager *mng, kObject *o, knh_o
 		global_gc_stat.marked[klass]++;
 #endif
 #if GCDEBUG
-		o->h.meta = (void*)((uintptr_t)o->h.meta + 0x1);
+		((kObjectVar*)o)->h.gcinfo = (void*)((uintptr_t)o->h.gcinfo + 0x1);
 #endif
 	}
 }
 
 #define context_reset_refs(kctx) kctx->stack->reftail = kctx->stack->ref.refhead
 
-static void bmgc_gc_mark(KonohaContext *kctx, HeapManager *mng)
+static void bmgc_gc_mark(KonohaContext *kctx, HeapManager *mng, KonohaStack *esp)
 {
 	long i;
 	knh_ostack_t ostackbuf, *ostack = ostack_init(kctx, &ostackbuf);
@@ -1809,7 +1809,7 @@ static void bitmapMarkingGC(KonohaContext *kctx, HeapManager *mng)
 		uint64_t mark_time = 0;
 	);
 
-	bmgc_gc_mark(kctx, mng);
+	bmgc_gc_mark(kctx, mng, kctx->esp);
 
 	STAT_(mark_time = knh_getTimeMilliSecond());
 
@@ -1886,7 +1886,7 @@ static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o)
 				KEYVALUE_u("cid", ct->classId));
 		MEMLOG(ctx, "~Object", K_NOTICE, KNH_LDATA(LOG_p("ptr", o), LOG_i("cid", ct->classId)));
 #endif
-		//gc_info("~Object ptr=%p, cid=%d, o->h.meta=%p", o, ct->classId, o->h.meta);
+		gc_info("~Object ptr=%p, cid=%d, o->h.meta=%p", o, ct->classId, o->h.gcinfo);
 		KONOHA_freeObjectField(kctx, (kObjectVar*)o);
 		//ctx->stat->gcObjectCount += 1;
 		K_OZERO(o);
@@ -1900,43 +1900,44 @@ static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static bool stop_the_world(KonohaContext *kctx)
-{
-	return true;
-}
-
-static bool start_the_world(KonohaContext *kctx)
-{
-	return true;
-}
+//static bool stop_the_world(KonohaContext *kctx)
+//{
+//	return true;
+//}
+//
+//static bool start_the_world(KonohaContext *kctx)
+//{
+//	return true;
+//}
 
 /* ------------------------------------------------------------------------ */
 
-void MODGC_gc_invoke(KonohaContext *kctx, int needsCStackTrace)
+void MODGC_gc_invoke(KonohaContext *kctx, KonohaStack *esp)
 {
-	uint64_t start_time = knh_getTimeMilliSecond(), mark_time = 0, intval;
-	if(stop_the_world(kctx)) {
-#if GCDEBUG
-		ktrace(LOGPOL_DEBUG, KEYVALUE_s("@", "gc_start"));
-#endif
-		bmgc_gc_init(kctx, HeapMng(kctx));
-		bmgc_gc_mark(kctx, HeapMng(kctx));
-		mark_time = knh_getTimeMilliSecond();
-		start_the_world(kctx);
-	}
-	bmgc_gc_sweep(kctx, HeapMng(kctx));
-	intval = start_time - memshare(kctx)->latestGcTime;
-	memshare(kctx)->gcCount++;
-	memshare(kctx)->markingTime += (mark_time-start_time);
-	memshare(kctx)->latestGcTime = knh_getTimeMilliSecond();
-	memshare(kctx)->gcTime += (memshare(kctx)->latestGcTime - start_time);
-	memshare(kctx)->collectedObject = 0;
-#if GCDEBUG
-	ktrace(LOGPOL_DEBUG,
-			KEYVALUE_s("@", "gc_finish"),
-			KEYVALUE_u("markingTime", (mark_time-start_time)),
-			KEYVALUE_u("gcTime", (memshare(kctx)->latestGcTime - start_time)));
-#endif
+	bitmapMarkingGC(kctx, HeapMng(kctx));
+//	uint64_t start_time = knh_getTimeMilliSecond(), mark_time = 0, intval;
+//	if(stop_the_world(kctx)) {
+//#if GCDEBUG
+//		ktrace(LOGPOL_DEBUG, KEYVALUE_s("@", "gc_start"));
+//#endif
+//		bmgc_gc_init(kctx, HeapMng(kctx));
+//		bmgc_gc_mark(kctx, HeapMng(kctx), esp);
+//		mark_time = knh_getTimeMilliSecond();
+//		start_the_world(kctx);
+//	}
+//	bmgc_gc_sweep(kctx, HeapMng(kctx));
+//	intval = start_time - memshare(kctx)->latestGcTime;
+//	memshare(kctx)->gcCount++;
+//	memshare(kctx)->markingTime += (mark_time-start_time);
+//	memshare(kctx)->latestGcTime = knh_getTimeMilliSecond();
+//	memshare(kctx)->gcTime += (memshare(kctx)->latestGcTime - start_time);
+//	memshare(kctx)->collectedObject = 0;
+//#if GCDEBUG
+//	ktrace(LOGPOL_DEBUG,
+//			KEYVALUE_s("@", "gc_finish"),
+//			KEYVALUE_u("markingTime", (mark_time-start_time)),
+//			KEYVALUE_u("gcTime", (memshare(kctx)->latestGcTime - start_time)));
+//#endif
 }
 
 /* ------------------------------------------------------------------------ */

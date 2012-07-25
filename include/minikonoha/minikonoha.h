@@ -1345,7 +1345,11 @@ typedef struct {
 	}\
 } while (0)
 
-#define KNH_SAFEPOINT(kctx, sfp)
+#define KNH_SAFEPOINT(kctx, sfp) do {\
+	if (kctx->safepoint != 0) {\
+		MODGC_gc_invoke(kctx, sfp);\
+	}\
+} while (0)
 
 // method macro
 
@@ -1421,5 +1425,6 @@ typedef struct DEFINE_TESTFUNC {
 #endif
 
 #include "logger.h"
+#include "gc.h"
 
 #endif /* MINIOKNOHA_H_ */
