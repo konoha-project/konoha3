@@ -608,7 +608,7 @@ static int Stmt_findBinaryOp(KonohaContext *kctx, kStmt *stmt, kArray *tokenArra
 					precedence = syn->precedence_op2;
 					idx = i;*synRef = syn;
 				}
-				isHead = true;
+				if(!FLAG_is(syn->flag, SYNFLAG_ExprPostfixOp2)) isHead = true;
 			}
 		}
 	}
