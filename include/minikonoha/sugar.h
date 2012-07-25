@@ -222,10 +222,11 @@ struct kTokenVar {
 		kArray  *sub;
 	};
 	kfileline_t     uline;
+	SugarSyntax *syn;
 };
 
 #define kToken_needsKeywordResolved(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
-#define Token_textetUnresolved(o, B)          TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,B)
+#define Token_setUnresolved(o, B)          TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,B)
 #define kToken_topch(tk)                    ((tk)->keyword != TK_TEXT && (S_size((tk)->text) == 1) ? S_text((tk)->text)[0] : 0)
 
 #define TEXPR_UNTYPED       -1   /*THIS MUST NOT HAPPEN*/

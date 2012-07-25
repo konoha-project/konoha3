@@ -39,7 +39,7 @@ static int parseINDENT(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, i
 		break;
 	}
 	if(IS_NOTNULL(tk)) {
-		Token_textetUnresolved(tk, true);  // to avoid indent within tree tokens
+		Token_setUnresolved(tk, true);  // to avoid indent within tree tokens
 		tk->keyword = TK_INDENT;
 		tk->indent = 0; /* indent FIXME: Debug/Parser/LineNumber.k (Failed) */
 	}
@@ -123,7 +123,7 @@ static void Token_setSymbolText(KonohaContext *kctx, kTokenVar *tk, const char *
 {
 	if(IS_NOTNULL(tk)) {
 		ksymbol_t kw = ksymbolA(t, len, SYM_NONAME);
-		Token_textetUnresolved(tk, true);
+		Token_setUnresolved(tk, true);
 		if(kw == SYM_UNMASK(kw)) {
 			KSETv(tk->text, SYM_s(kw));
 		}

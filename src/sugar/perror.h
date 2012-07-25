@@ -93,7 +93,7 @@ static void Token_pERR(KonohaContext *kctx, kTokenVar *tk, const char *fmt, ...)
 	va_end(ap);
 	KSETv(tk->text, errmsg);
 	tk->keyword = TK_ERR;
-	Token_textetUnresolved(tk, true);
+	Token_setUnresolved(tk, true);
 }
 
 #define Stmt_isERR(STMT)       ((STMT)->build == TSTMT_ERR)

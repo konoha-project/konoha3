@@ -57,7 +57,7 @@ static kBlock *new_Block(KonohaContext *kctx, kNameSpace *ns, kStmt *parent, kAr
 	return (kBlock*)bk;
 }
 
-static kbool_t Token_resolved(KonohaContext *kctx, kNameSpace *ns, kTokenVar *tk)
+static kbool_t resolveSymbolToken(KonohaContext *kctx, kNameSpace *ns, kTokenVar *tk)
 {
 	ksymbol_t kw = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NONAME);
 	if(kw != SYM_NONAME) {
@@ -116,7 +116,7 @@ static int appendKeyword(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList,
 	int next = beginIdx; // don't add
 	kTokenVar *tk = tokenList->tokenVarItems[beginIdx];
 	if(tk->keyword == TK_SYMBOL) {
-		if(!Token_resolved(kctx, ns, tk)) {
+		if(!resolveSymbolToken(kctx, ns, tk)) {
 			const char *t = S_text(tk->text);
 			if(isalpha(t[0])) {
 				KonohaClass *ct = KLIB kNameSpace_getClass(kctx, ns, S_text(tk->text), S_size(tk->text), NULL);
@@ -132,7 +132,7 @@ static int appendKeyword(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList,
 			}
 		}
 	}
-	Token_textetUnresolved(tk, false);
+	Token_setUnresolved(tk, false);
 	if(TK_isType(tk)) {   // trying to resolve Type[Type, Type]
 		KLIB kArray_add(kctx, dst, tk);
 		while(next + 1 < endIdx) {
@@ -672,8 +672,8 @@ static KMETHOD ParseExpr_Op(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ParseExpr(stmt, tokenArray, s, c, e);
 	kTokenVar *tk = tokenArray->tokenVarItems[c];
 	kExpr *expr, *rexpr = kStmt_parseExpr(kctx, stmt, tokenArray, c+1, e);
-//	kmethodn_t mn = tk->keyword ; // (s == c) ? syn->op1 : syn->op2;
-	if(syn->ExprTyCheck == kmodsugar->UndefinedExprTyCheck) {
+	if(syn->keyword != KW_LET && syn->ExprTyCheck == kmodsugar->UndefinedExprTyCheck) {
+		DBG_P("switching type checker ..");
 		syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);  // switch type checker
 	}
 	if(s == c) { // unary operator

@@ -751,7 +751,8 @@ static kbool_t appendAssignmentStmt(KonohaContext *kctx, kExpr *expr, kStmt **la
 static kbool_t Expr_declType(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, ktype_t ty, kStmt **lastStmtRef)
 {
 	DBG_ASSERT(IS_Expr(expr));
-	if(Expr_isTerm(expr)) {
+	DBG_P("isTerm=%d, expr->syn->keyword=%s%s", Expr_isTerm(expr), PSYM_t(expr->syn->keyword));
+	if(Expr_isTerm(expr) /*&& expr->termToken->keyword == TK_SYMBOL*/) {
 		if(ExprTerm_toVariable(kctx, stmt, expr, gma, ty)) {
 			kExpr *vexpr = new_VariableExpr(kctx, gma, TEXPR_NULL, ty, 0);
 			expr = new_TypedConsExpr(kctx, TEXPR_LET, TY_void, 3, K_NULL, expr, vexpr);
@@ -1009,7 +1010,7 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(OR), _OP,  .precedence_op2 = 2048, ExprTyCheck_(OR)},
 		{ TOKEN(NOT), _OP, .precedence_op1 = 16},
 //		{ TOKEN(":"),  _OP,  .precedence_op2 = 3072,},
-		{ TOKEN(LET),  _OPLeft, .precedence_op2 = 4096, },
+		{ TOKEN(LET),  .flag = SYNFLAG_ExprLeftJoinOp2, ParseExpr_(Op), .precedence_op2 = 4096, },
 		{ TOKEN(COMMA), ParseExpr_(COMMA), .precedence_op2 = 8192, },
 		{ TOKEN(DOLLAR), ParseExpr_(DOLLAR), },
 		{ TOKEN(void), .type = TY_void, .rule ="$type [type: $type \".\"] $SYMBOL $params [$block]", TopStmtTyCheck_(MethodDecl)},
