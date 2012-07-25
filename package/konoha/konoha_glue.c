@@ -67,7 +67,7 @@ static kbool_t konoha_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileli
 	KEXPORT_PACKAGE("konoha.assignment", ns, pline);
 	KEXPORT_PACKAGE("konoha.while", ns, pline);
 	KEXPORT_PACKAGE("konoha.class", ns, pline);
-	KEXPORT_PACKAGE("konoha.global", ns, pline);
+	//KEXPORT_PACKAGE("konoha.global", ns, pline);
 
 	KEXPORT_PACKAGE("konoha.null", ns, pline);
 	KEXPORT_PACKAGE("konoha.int", ns, pline);
