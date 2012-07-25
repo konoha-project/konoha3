@@ -225,6 +225,7 @@ static kbool_t konoha_shell(KonohaContext* konoha)
 // KonohaContext*est
 
 static FILE *stdlog;
+static int   stdlog_count = 0;
 
 static const char* TEST_begin(kinfotag_t t)
 {
@@ -238,6 +239,7 @@ static const char* TEST_end(kinfotag_t t)
 
 static int TEST_vprintf(const char *fmt, va_list ap)
 {
+	stdlog_count++;
 	return vfprintf(stdlog, fmt, ap);
 }
 
@@ -276,6 +278,7 @@ extern int konoha_detectFailedAssert;
 static int KonohaContext_test(KonohaContext *kctx, const char *testname)
 {
 	int ret = 1; //FAILED
+	int noproof = 0;
 	char script_file[256];
 	char correct_file[256];
 	char result_file[256];
@@ -283,9 +286,6 @@ static int KonohaContext_test(KonohaContext *kctx, const char *testname)
 	PLATAPI snprintf_i(correct_file, 256, "%s.proof", script_file);
 	PLATAPI snprintf_i(result_file, 256,  "%s.tested", script_file);
 	FILE *fp = fopen(correct_file, "r");
-	if (fp == NULL) {
-		fprintf(stdout, "no proof file: %s\n", testname);
-	}
 	stdlog = fopen(result_file, "w");
 	konoha_load((KonohaContext*)kctx, script_file);
 	fprintf(stdlog, "Q.E.D.\n");   // Q.E.D.
@@ -303,6 +303,10 @@ static int KonohaContext_test(KonohaContext *kctx, const char *testname)
 		}
 		fclose(fp);
 		fclose(fp2);
+	}
+	else {
+		if(stdlog_count > 0) return 0; // OK
+		fprintf(stdout, "no proof file: %s\n", testname);
 	}
 	return ret;
 }
