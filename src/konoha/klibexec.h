@@ -194,7 +194,7 @@ static KUtilsHashMapEntry *Kmap_newEntry(KonohaContext *kctx, KUtilsHashMap *kma
 		char *oarena = (char*)kmap->arena;
 		kmap->arenasize *= 2;
 		kmap->arena = KMALLOC(kmap->arenasize * sizeof(KUtilsHashMapEntry));
-		memcpy(kmap->arena, oarena, kmap->arenasize * sizeof(KUtilsHashMapEntry));
+		memcpy(kmap->arena, oarena, oarenasize * sizeof(KUtilsHashMapEntry));
 		kmap_shiftptr(kmap, (char*)kmap->arena - oarena);
 		kmap_makeFreeList(kmap, oarenasize, kmap->arenasize);
 		KFREE(oarena, oarenasize * sizeof(KUtilsHashMapEntry));
