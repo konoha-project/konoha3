@@ -597,9 +597,9 @@ static int Stmt_findBinaryOp(KonohaContext *kctx, kStmt *stmt, kArray *tokenArra
 					idx = i;
 					*synRef = syn;
 				}
-				if(!FLAG_is(syn->flag, SYNFLAG_ExprPostfixOp2)) {  /* check if real binary operator to parse f() + 1 */
-					i = skipUnaryOp(kctx, tokenArray, i+1, endIdx, ns) - 1;
-				}
+//				if(!FLAG_is(syn->flag, SYNFLAG_ExprPostfixOp2)) {  /* check if real binary operator to parse f() + 1 */
+//					i = skipUnaryOp(kctx, tokenArray, i+1, endIdx, ns) - 1;
+//				}
 			}
 		}
 	}
@@ -672,9 +672,8 @@ static KMETHOD ParseExpr_Op(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ParseExpr(stmt, tokenArray, s, c, e);
 	kTokenVar *tk = tokenArray->tokenVarItems[c];
 	kExpr *expr, *rexpr = kStmt_parseExpr(kctx, stmt, tokenArray, c+1, e);
-	kmethodn_t mn = tk->keyword ; // (s == c) ? syn->op1 : syn->op2;
-	if(mn != SYM_NONAME && syn->ExprTyCheck == kmodsugar->UndefinedExprTyCheck) {
-		tk->keyword = mn;
+//	kmethodn_t mn = tk->keyword ; // (s == c) ? syn->op1 : syn->op2;
+	if(syn->ExprTyCheck == kmodsugar->UndefinedExprTyCheck) {
 		syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);  // switch type checker
 	}
 	if(s == c) { // unary operator

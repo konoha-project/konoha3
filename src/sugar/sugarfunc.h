@@ -983,10 +983,10 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ PATTERN(Expr), .rule ="$expr", PatternMatch_(Expr), TopStmtTyCheck_(Expr), StmtTyCheck_(Expr),  },
 		{ PATTERN(Symbol),  _TERM, PatternMatch_(Symbol),  ExprTyCheck_(Symbol),},
 		{ PATTERN(Usymbol), _TERM, PatternMatch_(Usymbol), /* .rule = "$USYMBOL \"=\" $expr",*/ TopStmtTyCheck_(ConstDecl), ExprTyCheck_(Usymbol),},
-		{ PATTERN(Text), _TERM, ExprTyCheck_(Text),},
-		{ PATTERN(Int), _TERM, ExprTyCheck_(Int),},
-		{ PATTERN(Float), _TERM, },
-		{ PATTERN(Type), _TERM, PatternMatch_(Type), .rule = "$type $expr", StmtTyCheck_(TypeDecl), ExprTyCheck_(Type), },
+		{ PATTERN(Text),    _TERM, ExprTyCheck_(Text),},
+		{ PATTERN(Int),     _TERM, ExprTyCheck_(Int),},
+		{ PATTERN(Float),   _TERM, },
+		{ PATTERN(Type),    _TERM, PatternMatch_(Type), .rule = "$type $expr", StmtTyCheck_(TypeDecl), ExprTyCheck_(Type), },
 		{ PATTERN(Parenthesis), .flag = SYNFLAG_ExprPostfixOp2, ParseExpr_(Parenthesis), .precedence_op2 = 8, ExprTyCheck_(FuncStyleCall),}, //AST_PARENTHESIS
 		{ PATTERN(Bracket),  },  //AST_BRACKET
 		{ PATTERN(Brace),  }, // AST_BRACE
