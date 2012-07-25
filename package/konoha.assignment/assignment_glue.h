@@ -158,12 +158,12 @@ static KMETHOD ParseExpr_OprAssignment(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t assignment_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("="), /*.op2 = "*", .priority_op2 = 4096,*/ ExprTyCheck_(assignment)},
-		{ .keyword = SYM_("+="), _OPLeft, /*.priority_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .priority_op2 = 4096,},
-		{ .keyword = SYM_("-="), _OPLeft, /*.priority_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .priority_op2 = 4096,},
-		{ .keyword = SYM_("*="), _OPLeft, /*.priority_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .priority_op2 = 4096,},
-		{ .keyword = SYM_("/="), _OPLeft, /*.priority_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .priority_op2 = 4096,},
-		{ .keyword = SYM_("%="), _OPLeft, /*.priority_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .priority_op2 = 4096,},
+		{ .keyword = SYM_("="), /*.op2 = "*", .precedence_op2 = 4096,*/ ExprTyCheck_(assignment)},
+		{ .keyword = SYM_("+="), _OPLeft, /*.precedence_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .precedence_op2 = 4096,},
+		{ .keyword = SYM_("-="), _OPLeft, /*.precedence_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .precedence_op2 = 4096,},
+		{ .keyword = SYM_("*="), _OPLeft, /*.precedence_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .precedence_op2 = 4096,},
+		{ .keyword = SYM_("/="), _OPLeft, /*.precedence_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .precedence_op2 = 4096,},
+		{ .keyword = SYM_("%="), _OPLeft, /*.precedence_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .precedence_op2 = 4096,},
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);

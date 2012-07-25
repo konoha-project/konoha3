@@ -69,8 +69,8 @@ static SugarSyntax* NameSpace_syn(KonohaContext *kctx, kNameSpace *ns0, ksymbol_
 		else {
 			syn->keyword  = keyword;
 			syn->ty  = TY_unknown;
-			syn->op1 = SYM_NONAME;
-			syn->op2 = SYM_NONAME;
+			syn->precedence_op1 = 0;
+			syn->precedence_op2 = 0;
 			KINITv(syn->PatternMatch, kmodsugar->UndefinedParseExpr);  // never called and avoid nullcheck
 			KINITv(syn->ParseExpr, kmodsugar->UndefinedParseExpr);
 			KINITv(syn->TopStmtTyCheck, kmodsugar->UndefinedStmtTyCheck);
@@ -141,14 +141,11 @@ static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 		if(syndef->type != 0) {
 			syn->ty = syndef->type;
 		}
-		if(syndef->op1 != NULL) {
-			syn->op1 = ksymbolA(syndef->op1, strlen(syndef->op1), SYM_NEWID);
+		if(syndef->precedence_op2 > 0) {
+			syn->precedence_op2 = syndef->precedence_op2;
 		}
-		if(syndef->op2 != NULL) {
-			syn->op2 = ksymbolA(syndef->op2, strlen(syndef->op2), SYM_NEWID);
-		}
-		if(syndef->priority_op2 > 0) {
-			syn->priority = syndef->priority_op2;
+		if(syndef->precedence_op1 > 0) {
+			syn->precedence_op1 = syndef->precedence_op1;
 		}
 		if(syndef->rule != NULL) {
 			KINITv(syn->syntaxRuleNULL, new_(TokenArray, 0));

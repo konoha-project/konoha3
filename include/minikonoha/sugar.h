@@ -149,8 +149,8 @@ struct SugarSyntaxVar {
 	kFunc                            *StmtTyCheck;
 	kFunc                            *ExprTyCheck;
 	// binary
-	kshort_t   priority;              ktype_t  ty;
-	kmethodn_t op2;                   kmethodn_t op1;
+	ktype_t  ty;
+	kmethodn_t precedence_op2;        kshort_t precedence_op1;
 };
 
 #define SYNIDX_PatternMatch   0
@@ -181,9 +181,10 @@ struct SugarSyntaxVar {
 typedef struct KDEFINE_SYNTAX {
 	ksymbol_t keyword;  kshortflag_t flag;
 	const char *rule;
-	const char *op2;
-	const char *op1;
-	int priority_op2;
+//	const char *op2;
+//	const char *op1;
+	int precedence_op2;
+	int precedence_op1;
 	int type;
 	MethodFunc PatternMatch;
 	MethodFunc ParseExpr;

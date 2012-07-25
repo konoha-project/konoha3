@@ -238,10 +238,10 @@ static kbool_t iterator_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirs
 static kbool_t iterator_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-//			{ .keyword = SYM_("<<"), _OP, .op2 = "opLSHIFT", .priority_op2 = 128,},
-//			{ .keyword = SYM_(">>"), _OP, .op2 = "opRSHIFT", .priority_op2 = 128,},
-//			{ TOKEN("++"), _OP, .op1 = "opINC", .priority_op2 = 16, .flag = SYNFLAG_ExprPostfixOp2, },
-//			{ TOKEN("--"), _OP, .op1 = "opDEC", .priority_op2 = 16, .flag = SYNFLAG_ExprPostfixOp2,},
+//			{ .keyword = SYM_("<<"), _OP, .op2 = "opLSHIFT", .precedence_op2 = 128,},
+//			{ .keyword = SYM_(">>"), _OP, .op2 = "opRSHIFT", .precedence_op2 = 128,},
+//			{ TOKEN("++"), _OP, .op1 = "opINC", .precedence_op2 = 16, .flag = SYNFLAG_ExprPostfixOp2, },
+//			{ TOKEN("--"), _OP, .op1 = "opDEC", .precedence_op2 = 16, .flag = SYNFLAG_ExprPostfixOp2,},
 			{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);

@@ -477,7 +477,7 @@ static SugarSyntax* NameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns,
 			tk = tokenList->tokenItems[i];
 			syn = SYN_(ns, tk->keyword);
 			//DBG_P("@ tk->keyword=%s%s, syn=%p", KW_t(tk->keyword), syn);
-			if(syn->syntaxRuleNULL != NULL && syn->priority > 0) {
+			if(syn->syntaxRuleNULL != NULL && syn->precedence_op2 > 0) {
 				return syn;
 			}
 		}
@@ -564,11 +564,12 @@ static kExpr *ParseExpr(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, kArr
 
 /* ------------------------------------------------------------------------ */
 
-static kbool_t isUnaryOp(KonohaContext *kctx, kToken *tk, kNameSpace *ns, SugarSyntax **synRef)
+static kbool_t isUnaryOp(KonohaContext *kctx, kToken *tk, kNameSpace *ns, int *precedenceRef, SugarSyntax **synRef)
 {
 	SugarSyntax *syn = SYN_(ns, tk->keyword);
 	synRef[0] = syn;
-	return (syn->op1 != SYM_NONAME);
+	precedenceRef[0] = syn->precedence_op1;
+	return (syn->precedence_op1 > 0);
 }
 
 static int skipUnaryOp(KonohaContext *kctx, kArray *tokenArray, int beginIdx, int endIdx, kNameSpace *ns)
@@ -577,22 +578,22 @@ static int skipUnaryOp(KonohaContext *kctx, kArray *tokenArray, int beginIdx, in
 	for(i = beginIdx; i < endIdx; i++) {
 		kToken *tk = tokenArray->tokenItems[i];
 		SugarSyntax *syn = SYN_(ns, tk->keyword);
-		if(syn->op1 == SYM_NONAME) break;
+		if(syn->precedence_op1 > 0) break;
 	}
 	return i;
 }
 
 static int Stmt_findBinaryOp(KonohaContext *kctx, kStmt *stmt, kArray *tokenArray, int beginIdx, int endIdx, SugarSyntax **synRef)
 {
-	int idx = beginIdx, i, priority = 0;
+	int idx = beginIdx, i, precedence = 0;
 	kNameSpace *ns = Stmt_nameSpace(stmt);
-	if(!isUnaryOp(kctx, tokenArray->tokenItems[beginIdx], ns, synRef)) {
+	if(!isUnaryOp(kctx, tokenArray->tokenItems[beginIdx], ns, &precedence, synRef)) {
 		for(i = beginIdx; i < endIdx; i++) {
 			kToken *tk = tokenArray->tokenItems[i];
 			SugarSyntax *syn = SYN_(ns, tk->keyword);
-			if(syn->priority > 0) {
-				if(priority < syn->priority || (priority == syn->priority && !(FLAG_is(syn->flag, SYNFLAG_ExprLeftJoinOp2)) )) {
-					priority = syn->priority;
+			if(syn->precedence_op2 > 0) {
+				if(precedence < syn->precedence_op2 || (precedence == syn->precedence_op2 && !(FLAG_is(syn->flag, SYNFLAG_ExprLeftJoinOp2)) )) {
+					precedence = syn->precedence_op2;
 					idx = i;
 					*synRef = syn;
 				}
@@ -671,7 +672,7 @@ static KMETHOD ParseExpr_Op(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ParseExpr(stmt, tokenArray, s, c, e);
 	kTokenVar *tk = tokenArray->tokenVarItems[c];
 	kExpr *expr, *rexpr = kStmt_parseExpr(kctx, stmt, tokenArray, c+1, e);
-	kmethodn_t mn = (s == c) ? syn->op1 : syn->op2;
+	kmethodn_t mn = tk->keyword ; // (s == c) ? syn->op1 : syn->op2;
 	if(mn != SYM_NONAME && syn->ExprTyCheck == kmodsugar->UndefinedExprTyCheck) {
 		tk->keyword = mn;
 		syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);  // switch type checker

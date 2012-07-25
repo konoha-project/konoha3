@@ -36,6 +36,11 @@ extern "C" {
 
 /* ------------------------------------------------------------------------ */
 
+static KMETHOD Int_opCompl (KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNi_(~sfp[0].intValue);
+}
+
 static KMETHOD Int_opLSHIFT (KonohaContext *kctx, KonohaStack *sfp)
 {
 	int lshift = sfp[1].intValue;
@@ -50,20 +55,17 @@ static KMETHOD Int_opRSHIFT (KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Int_opAND(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int lshift = sfp[1].intValue;
-	RETURNi_(sfp[0].intValue & lshift);
+	RETURNi_(sfp[0].intValue & sfp[1].intValue);
 }
 
 static KMETHOD Int_opOR(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int rshift = sfp[1].intValue;
-	RETURNi_(sfp[0].intValue | rshift);
+	RETURNi_(sfp[0].intValue | sfp[1].intValue);
 }
 
 static KMETHOD Int_opXOR(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int rshift = sfp[1].intValue;
-	RETURNi_(sfp[0].intValue ^ rshift);
+	RETURNi_(sfp[0].intValue ^ sfp[1].intValue);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -78,11 +80,12 @@ static kbool_t int_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 {
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Im, _F(Int_opLSHIFT), TY_Int, TY_Int, MN_("opLSHIFT"), 1, TY_Int, FN_x,
-		_Public|_Const|_Im, _F(Int_opRSHIFT), TY_Int, TY_Int, MN_("opRSHIFT"), 1, TY_Int, FN_x,
-		_Public|_Const|_Im, _F(Int_opAND), TY_Int, TY_Int, MN_("opAND"), 1, TY_Int, FN_x,
-		_Public|_Const|_Im, _F(Int_opOR ), TY_Int, TY_Int, MN_("opOR"), 1, TY_Int, FN_x,
-		_Public|_Const|_Im, _F(Int_opXOR), TY_Int, TY_Int, MN_("opXOR"), 1, TY_Int, FN_x,
+		_Public|_Const|_Im, _F(Int_opCompl), TY_Int, TY_Int, MN_("~"), 1, TY_Int, FN_x,
+		_Public|_Const|_Im, _F(Int_opLSHIFT), TY_Int, TY_Int, MN_("<<"), 1, TY_Int, FN_x,
+		_Public|_Const|_Im, _F(Int_opRSHIFT), TY_Int, TY_Int, MN_(">>"), 1, TY_Int, FN_x,
+		_Public|_Const|_Im, _F(Int_opAND), TY_Int, TY_Int, MN_("&"), 1, TY_Int, FN_x,
+		_Public|_Const|_Im, _F(Int_opOR ), TY_Int, TY_Int, MN_("|"), 1, TY_Int, FN_x,
+		_Public|_Const|_Im, _F(Int_opXOR), TY_Int, TY_Int, MN_("^"), 1, TY_Int, FN_x,
 //		_Public|_Const|_Im, _F(Int_opINC), TY_Int, TY_Int, MN_("opINC"), 0,
 //		_Public|_Const|_Im, _F(Int_opDEC), TY_Int, TY_Int, MN_("opDEC"), 0,
 		DEND,
@@ -105,13 +108,14 @@ static kbool_t int_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime
 static kbool_t int_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-			{ .keyword = SYM_("<<"), _OP, .op2 = "opLSHIFT", .priority_op2 = 128,},
-			{ .keyword = SYM_(">>"), _OP, .op2 = "opRSHIFT", .priority_op2 = 128,},
-			{ .keyword = SYM_("&"), _OP, .op2 = "opAND", .priority_op2 = 128,},
-			{ .keyword = SYM_("|"), _OP, .op2 = "opOR",  .priority_op2 = 128,},
-			{ .keyword = SYM_("^"), _OP, .op2 = "opXOR", .priority_op2 = 128,},
-//			{ TOKEN("++"), _OP, .op1 = "opINC", .priority_op2 = 16, .flag = SYNFLAG_ExprPostfixOp2, },
-//			{ TOKEN("--"), _OP, .op1 = "opDEC", .priority_op2 = 16, .flag = SYNFLAG_ExprPostfixOp2,},
+			{ .keyword = SYM_("~"), _OP, .precedence_op1  = 16,},
+			{ .keyword = SYM_("<<"), _OP, .precedence_op2 = 128,},
+			{ .keyword = SYM_(">>"), _OP, .precedence_op2 = 128,},
+			{ .keyword = SYM_("&"), _OP,  .precedence_op2 = 640,},
+			{ .keyword = SYM_("|"), _OP,  .precedence_op2 = 768,},
+			{ .keyword = SYM_("^"), _OP,  .precedence_op2 = 896,},
+//			{ TOKEN("++"), _OP, .op1 = "opINC", .precedence_op2 = 16, .flag = SYNFLAG_ExprPostfixOp2, },
+//			{ TOKEN("--"), _OP, .op1 = "opDEC", .precedence_op2 = 16, .flag = SYNFLAG_ExprPostfixOp2,},
 			{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
