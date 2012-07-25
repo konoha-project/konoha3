@@ -57,7 +57,7 @@ static void NameSpace_reftrace(KonohaContext *kctx, kObject *o)
 		KLIB Kmap_reftrace(kctx, ns->syntaxMapNN, syntax_reftrace);
 	}
 	size_t i, size = ns->constTable.bytesize / sizeof(KUtilsKeyValue);
-	BEGIN_REFTRACE(size);
+	BEGIN_REFTRACE(size+3);
 	for(i = 0; i < size; i++) {
 		if(SYMKEY_isBOXED(ns->constTable.keyvalueItems[i].key)) {
 			KREFTRACEv(ns->constTable.keyvalueItems[i].objectValue);

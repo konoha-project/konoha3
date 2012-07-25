@@ -491,7 +491,7 @@ static void Func_init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void Func_reftrace(KonohaContext *kctx, kObject *o)
 {
-	BEGIN_REFTRACE(4);
+	BEGIN_REFTRACE(2);
 	kFunc *fo = (kFunc*)o;
 	KREFTRACEv(fo->self);
 	KREFTRACEv(fo->mtd);
@@ -985,7 +985,7 @@ static void kshare_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 	for(i = 0; i < size; i++) {
 		KonohaClass *ct = cts[i];
 		{
-			BEGIN_REFTRACE(4);
+			BEGIN_REFTRACE(3);
 			KREFTRACEv(ct->methodList);
 			KREFTRACEn(ct->shortNameNULL);
 			KREFTRACEn(ct->defaultValueAsNull);

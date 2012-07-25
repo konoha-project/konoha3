@@ -83,7 +83,7 @@ kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, kfileline_t uli
 static void SugarContext_reftrace(KonohaContext *kctx, struct KonohaContextModule *baseh)
 {
 	SugarContext *base = (SugarContext*)baseh;
-	BEGIN_REFTRACE(7);
+	BEGIN_REFTRACE(6);
 	KREFTRACEv(base->preparedTokenList);
 	KREFTRACEv(base->errorMessageList);
 	KREFTRACEv(base->gma);
