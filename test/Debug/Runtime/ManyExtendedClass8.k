@@ -1,0 +1,29 @@
+// written by kimio kuramitsu
+
+K.import("konoha");
+
+class C0 { int x0; }
+
+class C1 extends C0 {int x1; }
+class C2 extends C1 {int x2; }
+class C3 extends C2 {int x3; }
+class C4 extends C3 {int x4; }
+class C5 extends C4 {int x5; }
+class C6 extends C5 {int x6; }
+class C7 extends C6 {int x7; }
+
+
+void test() {
+	C7 c = new C7();
+	assert(c.x0 == 0);
+	assert(c.x1 == 0);
+	assert(c.x2 == 0);
+	assert(c.x3 == 0);
+	assert(c.x4 == 0);
+	assert(c.x5 == 0);
+	assert(c.x6 == 0);
+	assert(c.x7 == 0);
+
+}
+
+test();
