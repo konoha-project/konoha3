@@ -305,10 +305,10 @@ static void Stmt_parseClassBlock(KonohaContext *kctx, kStmt *stmt, kToken *tkC)
 		SUGAR kNameSpace_tokenize(kctx, Stmt_nameSpace(stmt), S_text(tkP->text), tkP->uline, a);
 		s = kArray_size(a);
 		const char *cname = S_text(tkC->text);
+		DBG_P("cname='%s'", cname);
 		for(i = atop; i < s; i++) {
 			kToken *tk = a->tokenItems[i];
 			int topch = kToken_topch(tk);
-			DBG_P("cname='%s'", cname);
 			if(topch == '(' && tkP->keyword == TK_SYMBOL && strcmp(cname, S_text(tkP->text)) == 0) {
 				kTokenVar *tkNEW = GCSAFE_new(TokenVar, 0);
 				tkNEW->keyword = TK_SYMBOL;
@@ -390,7 +390,7 @@ static size_t checkFieldSize(KonohaContext *kctx, kBlock *bk)
 	size_t i, c = 0;
 	for(i = 0; i < kArray_size(bk->stmtList); i++) {
 		kStmt *stmt = bk->stmtList->stmtItems[i];
-		DBG_P("stmt->keyword=%s", KW_t(stmt->syn->keyword));
+		DBG_P("stmt->keyword=%s%s", KW_t(stmt->syn->keyword));
 		if(stmt->syn->keyword == KW_StmtTypeDecl) {
 			kExpr *expr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL);
 			if(expr->syn->keyword == KW_COMMA) {
@@ -515,9 +515,18 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 	kshortflag_t cflag = 0;
 	ktype_t superclassId = TY_Object;
 	KonohaClass *supct = CT_Object;
+	kNameSpace *ns = Stmt_nameSpace(stmt);
 	if (tkE) {
-		superclassId = TK_type(tkE);
-		supct = CT_(superclassId);
+		if(TK_isType(tkE)) {
+			superclassId = TK_type(tkE);
+			supct = CT_(superclassId);
+		}
+		else {
+			supct = KLIB kNameSpace_getClass(kctx, ns, S_text(tkE->text), S_size(tkE->text), NULL);
+			DBG_ASSERT(supct != NULL);
+			superclassId = supct->classId;
+		}
+
 		if(CT_isFinal(supct)) {
 			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "%s is final", CT_t(supct));
 			RETURNb_(false);
@@ -527,7 +536,6 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 			RETURNb_(false);
 		}
 	}
-	kNameSpace *ns = Stmt_nameSpace(stmt);
 	KonohaClassVar *ct = (KonohaClassVar*)KLIB kNameSpace_getClass(kctx, ns, S_text(tkC->text), S_size(tkC->text), NULL);
 	if (ct != NULL) {
 		if (!CT_isForward(ct)) {
@@ -567,6 +575,7 @@ static kbool_t class_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileli
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("new"), ParseExpr_(new), },
 		{ .keyword = SYM_("class"), .rule = "\"class\" $USYMBOL [\"extends\" extends: $type] [$block]", TopStmtTyCheck_(class), },
+		{ .keyword = SYM_("class"), .rule = "\"class\" $USYMBOL [\"extends\" extends: $USYMBOL] [$block]", TopStmtTyCheck_(class), },
 		{ .keyword = SYM_("extends"), .rule = "\"extends\" $type", },
 		{ .keyword = SYM_("."), ExprTyCheck_(Getter) },
 		{ .keyword = KW_END, },
