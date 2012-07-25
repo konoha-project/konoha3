@@ -574,8 +574,7 @@ static kbool_t class_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileli
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("new"), ParseExpr_(new), },
-		{ .keyword = SYM_("class"), .rule = "\"class\" $USYMBOL [\"extends\" extends: $type] [$block]", TopStmtTyCheck_(class), },
-		{ .keyword = SYM_("class"), .rule = "\"class\" $USYMBOL [\"extends\" extends: $USYMBOL] [$block]", TopStmtTyCheck_(class), },
+		{ .keyword = SYM_("class"), .rule = "\"class\" $USYMBOL [\"extends\" extends: $type] [\"extends\" extends: $USYMBOL] [$block]", TopStmtTyCheck_(class), },
 		{ .keyword = SYM_("extends"), .rule = "\"extends\" $type", },
 		{ .keyword = SYM_("."), ExprTyCheck_(Getter) },
 		{ .keyword = KW_END, },
