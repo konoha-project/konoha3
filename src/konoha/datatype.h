@@ -1053,8 +1053,8 @@ static void Konoha_loadDefaultMethod(KonohaContext *kctx)
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Immutable|_Const, _F(Object_toString), TY_String, TY_Object, MN_to(TY_String), 0,
 		_Public|_Immutable|_Const, _F(Boolean_opNOT), TY_Boolean, TY_Boolean, MN_("!"), 0,
+		_Public|_Immutable|_Const, _F(Boolean_opEQ), TY_Boolean, TY_Boolean, MN_("=="), 1, TY_Boolean, FN_x,
 		_Public|_Immutable|_Const, _F(Int_opNEQ), TY_Boolean, TY_Boolean, MN_("!="), 1, TY_Boolean, FN_x,
-		_Public|_Immutable|_Const, _F(Int_opEQ), TY_Boolean, TY_Boolean, MN_("=="), 1, TY_Boolean, FN_x,
 		_Public|_Immutable|_Const, _F(Int_opMINUS), TY_Int, TY_Int, MN_("-"), 0,
 		_Public|_Immutable|_Const, _F(Int_opADD), TY_Int, TY_Int, MN_("+"), 1, TY_Int, FN_x,
 		_Public|_Immutable|_Const, _F(Int_opSUB), TY_Int, TY_Int, MN_("-"), 1, TY_Int, FN_x,
