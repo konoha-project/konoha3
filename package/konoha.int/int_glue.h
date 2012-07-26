@@ -115,14 +115,14 @@ static kbool_t int_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime
 static kbool_t int_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-			{ .keyword = SYM_("~"), _OP, .precedence_op1  = 16,},
-			{ .keyword = SYM_("<<"), _OP, .precedence_op2 = 128,},
-			{ .keyword = SYM_(">>"), _OP, .precedence_op2 = 128,},
-			{ .keyword = SYM_("&"), _OP,  .precedence_op2 = 128,},
-			{ .keyword = SYM_("|"), _OP,  .precedence_op2 = 2048,},
-			{ .keyword = SYM_("^"), _OP,  .precedence_op2 = 1024,},
-//			{ TOKEN("++"), _OP, .op1 = "opINC", .precedence_op2 = 16, .flag = SYNFLAG_ExprPostfixOp2, },
-//			{ TOKEN("--"), _OP, .op1 = "opDEC", .precedence_op2 = 16, .flag = SYNFLAG_ExprPostfixOp2,},
+			{ .keyword = SYM_("~"), _OP, .precedence_op1  = 400,},
+			{ .keyword = SYM_("<<"), _OP, .precedence_op2 = 700,},
+			{ .keyword = SYM_(">>"), _OP, .precedence_op2 = 700,},
+			{ .keyword = SYM_("&"), _OP,  .precedence_op2 = 1000,},
+			{ .keyword = SYM_("|"), _OP,  .precedence_op2 = 1200,},
+			{ .keyword = SYM_("^"), _OP,  .precedence_op2 = 1100,},
+//			{ TOKEN("++"), _OP, .op1 = "opINC", .precedence_op2 = 400, .flag = SYNFLAG_ExprPostfixOp2, },
+//			{ TOKEN("--"), _OP, .op1 = "opDEC", .precedence_op2 = 400, .flag = SYNFLAG_ExprPostfixOp2,},
 			{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
