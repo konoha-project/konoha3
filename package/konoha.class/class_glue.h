@@ -517,15 +517,15 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 	KonohaClass *supct = CT_Object;
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	if (tkE) {
-		if(TK_isType(tkE)) {
+		//if(TK_isType(tkE)) {
 			superclassId = TK_type(tkE);
 			supct = CT_(superclassId);
-		}
-		else {
-			supct = KLIB kNameSpace_getClass(kctx, ns, S_text(tkE->text), S_size(tkE->text), NULL);
-			DBG_ASSERT(supct != NULL);
-			superclassId = supct->classId;
-		}
+		//}
+		//else {
+		//	supct = KLIB kNameSpace_getClass(kctx, ns, S_text(tkE->text), S_size(tkE->text), NULL);
+		//	DBG_ASSERT(supct != NULL);
+		//	superclassId = supct->classId;
+		//}
 
 		if(CT_isFinal(supct)) {
 			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "%s is final", CT_t(supct));
@@ -570,26 +570,11 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNb_(true);
 }
 
-static KMETHOD ExprTyCheck_Test(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	kToken *tk = expr->termToken;
-	kString *s = tk->text;
-	//if (S_size(s) == 1) {
-	//	int ch = S_text(s)[0];
-	//	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_Int, ch));
-	//} else {
-	//	SUGAR Stmt_p(kctx, stmt, (kToken*)expr, ErrTag, "single quote doesn't accept multi characters, '%s'", S_text(s));
-	//}
-	RETURN_(K_NULLEXPR);
-}
-
-
 static kbool_t class_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("new"), ParseExpr_(new), },
-		{ .keyword = SYM_("class"), .rule = "\"class\" $USYMBOL [\"extends\" $USYMBOL] [$block]", TopStmtTyCheck_(class), },
+		{ .keyword = SYM_("class"), .rule = "\"class\" $USYMBOL [\"extends\" extends: $type] [$block]", TopStmtTyCheck_(class), },
 		{ .keyword = SYM_("extends"), .rule = "\"extends\" $type", },
 		{ .keyword = SYM_("."), ExprTyCheck_(Getter) },
 		{ .keyword = KW_END, },
