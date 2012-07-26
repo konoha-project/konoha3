@@ -360,23 +360,6 @@ static void Gamma_initIt(KonohaContext *kctx, GammaAllocaData *genv, kParam *pa)
 	}
 }
 
-static kstatus_t Method_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtype)
-{
-	BEGIN_LOCAL(lsfp, K_CALLDELTA);
-	KonohaContextRuntimeVar *base = kctx->stack;
-	kstatus_t result = K_CONTINUE;
-	//DBG_P("TY=%s, running EVAL..", TY_t(rtype));
-	if(base->evalty != TY_void) {
-		KSETv(lsfp[K_CALLDELTA+1].o, base->stack[base->evalidx].o);
-		lsfp[K_CALLDELTA+1].intValue = base->stack[base->evalidx].intValue;
-	}
-	KCALL(lsfp, 0, mtd, 0, KLIB Knull(kctx, CT_(rtype)));
-	base->evalty = rtype;
-	base->evalidx = (lsfp - kctx->stack->stack);
-	END_LOCAL();
-	return result;
-}
-
 static ktype_t Stmt_checkReturnType(KonohaContext *kctx, kStmt *stmt)
 {
 	if(stmt->syn->keyword == KW_ExprPattern) {
@@ -391,22 +374,10 @@ static ktype_t Stmt_checkReturnType(KonohaContext *kctx, kStmt *stmt)
 	return TY_void;
 }
 
-static ktype_t Gamma_evalMethod(KonohaContext *kctx, kGamma *gma, kBlock *bk, kMethod *mtd)
-{
-	kStmt *stmt = bk->stmtList->stmtItems[0];
-	if(stmt->syn == NULL) {
-		kctx->stack->evalty = TY_void;
-		return K_CONTINUE;
-	}
-	if(stmt->syn->keyword == KW_ERR) return K_FAILED;
-	ktype_t rtype = Stmt_checkReturnType(kctx, stmt);
-	KLIB kMethod_genCode(kctx, mtd, bk);
-	return Method_runEval(kctx, mtd, rtype);
-}
+static kstatus_t kMethod_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtype);
 
-static kstatus_t SingleBlock_eval(KonohaContext *kctx, kBlock *bk, kMethod *mtd, kNameSpace *ns)
+static kstatus_t kBlock_genEvalCode(KonohaContext *kctx, kBlock *bk, kMethod *mtd)
 {
-	kstatus_t result;
 	kGamma *gma = ctxsugar->gma;
 	GammaStackDecl lvarItems[32] = {};
 	GammaAllocaData newgma = {
@@ -418,56 +389,89 @@ static kstatus_t SingleBlock_eval(KonohaContext *kctx, kBlock *bk, kMethod *mtd,
 	GAMMA_PUSH(gma, &newgma);
 	Gamma_initIt(kctx, &newgma, Method_param(mtd));
 	kBlock_tyCheckAll(kctx, bk, gma);
-	if(kGamma_isERROR(gma)) {
-		result = K_BREAK;
+	GAMMA_POP(gma, &newgma);
+
+	kStmt *stmt = bk->stmtList->stmtItems[0];
+	if(stmt->syn == NULL) {  // done
 		kctx->stack->evalty = TY_void;
+		return K_CONTINUE;
 	}
 	else {
-		result = Gamma_evalMethod(kctx, gma, bk, mtd);
+		if(stmt->syn->keyword == KW_ERR) return K_FAILED;
+		ktype_t rtype = Stmt_checkReturnType(kctx, stmt);
+		KLIB kMethod_genCode(kctx, mtd, bk);
+		return kMethod_runEval(kctx, mtd, rtype);
 	}
-	GAMMA_POP(gma, &newgma);
-	return result;
 }
 
-static kstatus_t Block_eval(KonohaContext *kctx, kBlock *bk)
+static kstatus_t kMethod_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtype)
 {
-	INIT_GCSTACK();
-	BEGIN_LOCAL(lsfp, 0);
-	kBlock *bk1 = ctxsugar->singleBlock;
-	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Static, 0, 0, NULL);
-	PUSH_GCSTACK(mtd);
-	KLIB Method_setParam(kctx, mtd, TY_Object, 0, NULL);
-	int i, jumpResult;
 	kstatus_t result = K_CONTINUE;
-	KonohaContextRuntimeVar *base = kctx->stack;
-	KonohaStack *jump_bottom = base->jump_bottom;
-	jmpbuf_i lbuf = {};
-	if(base->evaljmpbuf == NULL) {
-		base->evaljmpbuf = (jmpbuf_i*)KCALLOC(sizeof(jmpbuf_i), 1);
-	}
-	memcpy(&lbuf, base->evaljmpbuf, sizeof(jmpbuf_i));
-	base->jump_bottom = kctx->esp + K_CALLDELTA; // FIXME ??
-	if((jumpResult = PLATAPI setjmp_i(*base->evaljmpbuf)) == 0) {
-		for(i = 0; i < kArray_size(bk->stmtList); i++) {
-			KSETv(bk1->stmtList->objectItems[0], bk->stmtList->objectItems[i]);
-			KSETv(((kBlockVar*)bk1)->blockNameSpace, bk->blockNameSpace);
-			KLIB kArray_clear(kctx, bk1->stmtList, 1);
-			result = SingleBlock_eval(kctx, bk1, mtd, bk->blockNameSpace);
-			if(result != K_CONTINUE) break;
+	INIT_GCSTACK();
+	BEGIN_LOCAL(lsfp, K_CALLDELTA);
+	{
+		int jumpResult;
+		KonohaContextRuntimeVar *base = kctx->stack;
+		KonohaStack *jump_bottom = base->jump_bottom;
+		jmpbuf_i lbuf = {};
+		if(base->evaljmpbuf == NULL) {
+			base->evaljmpbuf = (jmpbuf_i*)KCALLOC(sizeof(jmpbuf_i), 1);
 		}
+		memcpy(&lbuf, base->evaljmpbuf, sizeof(jmpbuf_i));
+		base->jump_bottom = lsfp + K_CALLDELTA; // FIXME ??
+		if((jumpResult = PLATAPI setjmp_i(*base->evaljmpbuf)) == 0) {
+			//DBG_P("TY=%s, running EVAL..", TY_t(rtype));
+			if(base->evalty != TY_void) {
+				KSETv(lsfp[K_CALLDELTA+1].o, base->stack[base->evalidx].o);
+				lsfp[K_CALLDELTA+1].intValue = base->stack[base->evalidx].intValue;
+			}
+			KCALL(lsfp, 0, mtd, 0, KLIB Knull(kctx, CT_(rtype)));
+			base->evalty = rtype;
+			base->evalidx = (lsfp - kctx->stack->stack);
+		}
+		else {
+			//KLIB reportException(kctx);
+			DBG_P("Catch eval exception jumpResult=%d", jumpResult);
+			base->evalty = TY_void;  // no value
+			result = K_BREAK;        // message must be reported;
+		}
+		base->jump_bottom = jump_bottom;
+		memcpy(base->evaljmpbuf, &lbuf, sizeof(jmpbuf_i));
 	}
-	else {
-		//KLIB reportException(kctx);
-		DBG_P("Catch eval exception jumpResult=%d", jumpResult);
-		base->evalty = TY_void;  // no value
-		result = K_BREAK;        // message must be reported;
-	}
-	base->jump_bottom = jump_bottom;
-	memcpy(base->evaljmpbuf, &lbuf, sizeof(jmpbuf_i));
 	END_LOCAL();
 	RESET_GCSTACK();
 	return result;
 }
+
+static kstatus_t kTokenArray_eval(KonohaContext *kctx, kArray *tokenList, int beginIdx, int endIdx, kNameSpace *ns)
+{
+	kstatus_t status = K_CONTINUE;
+	INIT_GCSTACK();
+	ASTEnv env = {ns, tokenList, beginIdx, endIdx, tokenList, NULL};
+	env.symbolSyntaxInfo = SYN_(ns, TK_SYMBOL);
+	int i = beginIdx, indent = 0, atop = kArray_size(tokenList);
+	kBlock *singleBlock = ctxsugar->singleBlock;
+	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Static, 0, 0, NULL);
+	PUSH_GCSTACK(mtd);
+	KLIB Method_setParam(kctx, mtd, TY_Object, 0, NULL);
+
+	while(i < endIdx) {
+		env.beginIdx = i;
+		i = kNameSpace_selectStmtTokenList(kctx, &env, &indent, SemiColon);
+		int asize = kArray_size(tokenList);
+		if(asize > atop) {
+			KSETv(((kBlockVar*)singleBlock)->blockNameSpace, ns);
+			KLIB kArray_clear(kctx, singleBlock->stmtList, 0);
+			kBlock_addNewStmt(kctx, singleBlock, tokenList, atop, asize, env.errToken);
+			KLIB kArray_clear(kctx, tokenList, atop);
+			status = kBlock_genEvalCode(kctx, singleBlock, mtd);
+			if(status != K_CONTINUE) break;
+		}
+	}
+	RESET_GCSTACK();
+	return status;
+}
+
 
 /* ------------------------------------------------------------------------ */
 

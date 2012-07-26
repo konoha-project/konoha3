@@ -51,20 +51,20 @@ int verbose_sugar = 0;
 /* ------------------------------------------------------------------------ */
 /* Sugar Global Functions */
 
+
 static kstatus_t kNameSpace_eval(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline)
 {
 	kstatus_t result;
 	kmodsugar->h.setup(kctx, (KonohaModule*)kmodsugar, 0/*lazy*/);
+	INIT_GCSTACK();
 	{
-		INIT_GCSTACK();
 		kArray *tokenArray = ctxsugar->preparedTokenList;
 		size_t popAlreadyUsed = kArray_size(tokenArray);
 		kNameSpace_tokenize(kctx, ns, script, uline, tokenArray);
-		kBlock *bk = new_Block(kctx, ns, NULL, tokenArray, popAlreadyUsed, kArray_size(tokenArray), SemiColon);
+		result = kTokenArray_eval(kctx, tokenArray, popAlreadyUsed, kArray_size(tokenArray), ns);
 		KLIB kArray_clear(kctx, tokenArray, popAlreadyUsed);
-		result = Block_eval(kctx, bk);
-		RESET_GCSTACK();
 	}
+	RESET_GCSTACK();
 	return result;
 }
 
