@@ -23,32 +23,31 @@
  ***************************************************************************/
 
 /* ************************************************************************ */
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
+#ifndef DSE_UTIL_H_
+#define DSE_UTIL_H_
 
-#include "../include/dse.h"
-
-#define HTTPD_ADDR "0.0.0.0"
-#define HTTPD_PORT 8080
-
-struct dDserv *gdserv;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int main(int argc, char **av)
+#include "debug.h"
+size_t gTotalMalloc;
+void *dse_malloc(size_t size)
 {
-	gdserv = NULL;
-	dse_logpool_init();
-	gdserv = dserv_new();
-	dserv_start(gdserv, HTTPD_ADDR, HTTPD_PORT);
-	dserv_close(gdserv);
-	dse_logpool_exit();
-	return 0;
+	void *ptr = malloc(size);
+	if (ptr == NULL) {
+		D_("malloc failed");
+		size = 0;
+	}
+	gTotalMalloc += size;
+
+	return ptr;
 }
 
-#ifdef __cplusplus
+void dse_free(void *ptr, size_t size)
+{
+	free(ptr);
+	gTotalMalloc -= size;
+	A_(gTotalMalloc >= 0);
 }
-#endif
+
+
+
+
+#endif /* DSE_UTIL_H_ */
