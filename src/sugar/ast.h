@@ -687,6 +687,7 @@ static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *token
 
 static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
 {
+	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
 	int nextIdx = kStmt_parseTypePattern(kctx, NULL, ns, tokenList, beginIdx, endIdx, NULL);
 	if(nextIdx != -1) {
 		kToken *tk = TokenArray_nextToken(kctx, tokenList, nextIdx, endIdx);
@@ -703,15 +704,14 @@ static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns
 	}
 	kToken *tk = tokenList->tokenItems[beginIdx];
 	if(tk->keyword == TK_SYMBOL && isUpperCaseSymbol(S_text(tk->text))) {
-		tk = TokenArray_nextToken(kctx, tokenList, beginIdx+1, endIdx);
-		if(tk->keyword == KW_LET) {
+		kToken *tk1 = TokenArray_nextToken(kctx, tokenList, beginIdx+1, endIdx);
+		if(tk1->keyword == KW_LET) {
 			DBG_P("Const");
 			return SYN_(ns, KW_StmtConstDecl);  // CONSTVAL = ...
 		}
-//		return SYN_(ns, KW_ExprPattern);
 	}
 	SugarSyntax *syn = tk->resolvedSyntaxInfo;
-	DBG_P("tk->kw=%s%s syn=%p", KW_t(tk->keyword), syn);
+	DBG_P("tk->kw=%d,%s%s '%s' syn=%p", tk->keyword, KW_t(tk->keyword), Token_text(tk), syn);
 	if(syn->syntaxRuleNULL == NULL) {
 //		int i;
 //		for(i = beginIdx + 1; i < endIdx; i++) {
