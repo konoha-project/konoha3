@@ -511,7 +511,7 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_StmtTyCheck(stmt, gma);
 	kToken *tkC = SUGAR kStmt_getToken(kctx, stmt, KW_UsymbolPattern, NULL);
-	kToken *tkE= SUGAR kStmt_getToken(kctx, stmt, SYM_("extends"), NULL);
+	kToken *tkE = SUGAR kStmt_getToken(kctx, stmt, SYM_("extends"), NULL);
 	kshortflag_t cflag = 0;
 	ktype_t superclassId = TY_Object;
 	KonohaClass *supct = CT_Object;
@@ -570,12 +570,26 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNb_(true);
 }
 
+static KMETHOD ExprTyCheck_Test(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_ExprTyCheck(stmt, expr, gma, reqty);
+	kToken *tk = expr->termToken;
+	kString *s = tk->text;
+	//if (S_size(s) == 1) {
+	//	int ch = S_text(s)[0];
+	//	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_Int, ch));
+	//} else {
+	//	SUGAR Stmt_p(kctx, stmt, (kToken*)expr, ErrTag, "single quote doesn't accept multi characters, '%s'", S_text(s));
+	//}
+	RETURN_(K_NULLEXPR);
+}
+
+
 static kbool_t class_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("new"), ParseExpr_(new), },
-		{ .keyword = SYM_("class"), .rule = "\"class\" $USYMBOL [\"extends\" extends: $type] [$block]", TopStmtTyCheck_(class), },
-		{ .keyword = SYM_("class"), .rule = "\"class\" $USYMBOL [\"extends\" extends: $USYMBOL] [$block]", TopStmtTyCheck_(class), },
+		{ .keyword = SYM_("class"), .rule = "\"class\" $USYMBOL [\"extends\" $USYMBOL] [$block]", TopStmtTyCheck_(class), },
 		{ .keyword = SYM_("extends"), .rule = "\"extends\" $type", },
 		{ .keyword = SYM_("."), ExprTyCheck_(Getter) },
 		{ .keyword = KW_END, },
