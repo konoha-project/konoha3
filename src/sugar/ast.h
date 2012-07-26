@@ -371,7 +371,7 @@ static kExpr *ParseExpr(KonohaContext *kctx, kStmt *stmt, kArray *tokenArray, in
 		int i;
 		kArray *a = (kArray*)fo;
 		for(i = kArray_size(a) - 1; i > 0; i--) {
-			texpr = ParseExprFunc(kctx, syn, fo, stmt, tokenArray, beginIdx, currentIdx, endIdx);
+			texpr = ParseExprFunc(kctx, syn, a->funcItems[i], stmt, tokenArray, beginIdx, currentIdx, endIdx);
 			if(Stmt_isERR(stmt)) return K_NULLEXPR;
 			if(texpr != K_NULLEXPR) return texpr;
 		}
@@ -585,7 +585,7 @@ static int PatternMatch(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, ksym
 		int i;
 		kArray *a = (kArray*)fo;
 		for(i = kArray_size(a) - 1; i > 0; i--) {
-			next = PatternMatchFunc(kctx, fo, stmt, name, tokenList, beginIdx, endIdx);
+			next = PatternMatchFunc(kctx, a->funcItems[i], stmt, name, tokenList, beginIdx, endIdx);
 			if(Stmt_isERR(stmt)) return -1;
 			if(next > beginIdx) return next;
 		}
@@ -679,8 +679,8 @@ static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *token
 	if(currentTokenIdx < endIdx) {
 		if(!canRollBack) {
 			kStmt_p(stmt, ErrTag, "%s%s: unexpected token %s", T_statement(stmt->syn->keyword), Token_text(tokenList->tokenItems[currentTokenIdx]));
+			return returnIdx;
 		}
-		return returnIdx;
 	}
 	return currentTokenIdx;
 }
