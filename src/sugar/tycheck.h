@@ -396,8 +396,10 @@ static kstatus_t kBlock_genEvalCode(KonohaContext *kctx, kBlock *bk, kMethod *mt
 		kctx->stack->evalty = TY_void;
 		return K_CONTINUE;
 	}
+	else if(stmt->syn->keyword == KW_ERR) {
+		return K_BREAK;
+	}
 	else {
-		if(stmt->syn->keyword == KW_ERR) return K_FAILED;
 		ktype_t rtype = Stmt_checkReturnType(kctx, stmt);
 		KLIB kMethod_genCode(kctx, mtd, bk);
 		return kMethod_runEval(kctx, mtd, rtype);
