@@ -28,6 +28,7 @@
 #define DSE_DEBUG_H_
 
 #include <assert.h>
+
 #define DSE_DEBUG 1
 #if defined(DSE_DEBUG)
 #define D_(fmt, ...) fprintf(stderr, fmt "\n", ##__VA_ARGS__)

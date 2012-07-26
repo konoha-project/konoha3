@@ -23,32 +23,68 @@
  ***************************************************************************/
 
 /* ************************************************************************ */
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
 
-#include "../include/dse.h"
+#ifndef DSE_PROTOCOL_H_
+#define DSE_PROTOCOL_H_
 
-#define HTTPD_ADDR "0.0.0.0"
-#define HTTPD_PORT 8080
+struct dReq {
+	struct evhttp_request *req;
+	int method;
+	int context;
+	int taskid;
+	char logpoolip[16];
+	char *scriptfilepath;
+};
 
-struct dDserv *gdserv;
+struct dRes {
+	int taskid;
+	int status;
+	char *status_symbol;
+	char *status_detail;
+};
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+enum {
+	E_METHOD_EVAL,
+	E_METHOD_TYCHECK,
+	E_STATUS_OK,
+};
 
-int main(int argc, char **av)
+#define DSE_FILEPATH_SIZE 128
+
+static struct dReq *newDReq()
 {
-	gdserv = NULL;
-	dse_logpool_init();
-	gdserv = dserv_new();
-	dserv_start(gdserv, HTTPD_ADDR, HTTPD_PORT);
-	dserv_close(gdserv);
-	dse_logpool_exit();
-	return 0;
+	struct dReq *ret = (struct dReq *)malloc(sizeof(struct dReq));
+	ret->method = 0;
+	ret->context = 0;
+	ret->taskid = 0;
+	memset(ret->logpoolip, 16, 0);
+	ret->scriptfilepath = (char*)dse_malloc(DSE_FILEPATH_SIZE);
+	memset(ret->scriptfilepath, 128, 0);
+	return ret;
 }
 
-#ifdef __cplusplus
+static void deleteDReq(struct dReq *req)
+{
+	if (req == NULL) return;
+	dse_free(req->scriptfilepath, DSE_FILEPATH_SIZE);
+	dse_free(req, sizeof(struct dReq));
 }
-#endif
+
+static struct dRes *newDRes()
+{
+	struct dRes *ret = (struct dRes *)dse_malloc(sizeof(struct dRes));
+	ret->taskid = 0;
+	ret->status = 0;
+	ret->status_detail = NULL;
+	ret->status_symbol = NULL;
+	return ret;
+}
+
+static void deleteDRes (struct dRes *res)
+{
+	// check if satus_* is set
+	if (res == NULL) return;
+	dse_free(res, sizeof(struct dRes));
+}
+
+#endif /* DSE_PROTOCOL_H_ */

@@ -23,31 +23,58 @@
  ***************************************************************************/
 
 /* ************************************************************************ */
-#ifndef DSE_UTIL_H_
-#define DSE_UTIL_H_
 
-#include "dse_debug.h"
-size_t gTotalMalloc;
-void *dse_malloc(size_t size)
+#ifndef DSE_SCHEDULER_H_
+#define DSE_SCHEDULER_H_
+
+#include <pthread.h>
+
+#define DREQ_QUEUE_SIZE 16
+#define next(index) (((index) + 1) % DREQ_QUEUE_SIZE)
+
+struct dScheduler {
+	struct dReq *dReqQueue[DREQ_QUEUE_SIZE];
+	int front;
+	int last;
+	pthread_mutex_t lock;
+	pthread_cond_t cond;
+};
+
+static struct dScheduler *newDScheduler(void)
 {
-	void *ptr = malloc(size);
-	if (ptr == NULL) {
-		D_("malloc failed");
-		size = 0;
-	}
-	gTotalMalloc += size;
-
-	return ptr;
+	struct dScheduler *dscd = dse_malloc(sizeof(struct dScheduler));
+	dscd->front = 0;
+	dscd->last = 0;
+	pthread_mutex_init(&dscd->lock, NULL);
+	pthread_cond_init(&dscd->cond, NULL);
+	return dscd;
 }
 
-void dse_free(void *ptr, size_t size)
+static void deleteDScheduler(struct dScheduler *dscd)
 {
-	free(ptr);
-	gTotalMalloc -= size;
-	A_(gTotalMalloc >= 0);
+	pthread_mutex_destroy(&dscd->lock);
+	pthread_cond_destroy(&dscd->cond);
+	dse_free(dscd, sizeof(struct dScheduler));
 }
 
+static bool dse_enqueue(struct dScheduler *dscd, struct dReq *dreq)
+{
+	int front = dscd->front;
+	int last = dscd->last;
+	if(next(front) == last) return false;
+	dscd->dReqQueue[front] = dreq;
+	dscd->front = next(front);
+	return true;
+}
 
+static struct dReq *dse_dequeue(struct dScheduler *dscd)
+{
+	int front = dscd->front;
+	int last = dscd->last;
+	if(front == last) return NULL;
+	struct dReq *dreq = dscd->dReqQueue[last];
+	dscd->last = next(last);
+	return dreq;
+}
 
-
-#endif /* DSE_UTIL_H_ */
+#endif /* DSE_SCHEDULER_H_ */
