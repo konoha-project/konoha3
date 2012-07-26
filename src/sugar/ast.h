@@ -524,7 +524,7 @@ static int kStmt_parseTypePattern(KonohaContext *kctx, kStmt *stmt, kNameSpace *
 	if(foundClass != NULL) {
 		int isAllowedGenerics = true;
 		while(nextIdx < endIdx) {
-			kToken *tk = tokenList->tokenItems[beginIdx];
+			kToken *tk = tokenList->tokenItems[nextIdx];
 			if(tk->keyword != AST_BRACKET) break;
 			int psize = kArray_size(tk->sub);
 			if(isAllowedGenerics &&  psize > 0) {
