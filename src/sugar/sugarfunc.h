@@ -1133,8 +1133,9 @@ static ktype_t kStmt_getClassId(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns
 		return defcid;
 	}
 	else {
-		DBG_ASSERT(TK_isType(tk));
-		return TK_type(tk);
+		KonohaClass *ct = kNameSpace_getClass(kctx, ns, S_text(tk->text), S_size(tk->text), NULL);
+		DBG_ASSERT(ct != NULL);
+		return ct->classId;
 	}
 }
 
@@ -1227,8 +1228,8 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(LET),  .flag = SYNFLAG_ExprLeftJoinOp2, ParseExpr_(Op), .precedence_op2 = 4096, },
 		{ TOKEN(COMMA), ParseExpr_(COMMA), .precedence_op2 = 8192, },
 		{ TOKEN(DOLLAR), ParseExpr_(DOLLAR), },
-//		{ TOKEN(void), .type = TY_void, .rule ="$type [type: $type \".\"] $SYMBOL $params [$block]", TopStmtTyCheck_(MethodDecl)},
-		{ TOKEN(void), .type = TY_void, .rule ="$type $SYMBOL $params [$block]", TopStmtTyCheck_(MethodDecl)},
+		{ TOKEN(void), .type = TY_void, .rule ="$type [type: $SYMBOL \".\"] $SYMBOL $params [$block]", TopStmtTyCheck_(MethodDecl)},
+//		{ TOKEN(void), .type = TY_void, .rule ="$type $SYMBOL $params [$block]", TopStmtTyCheck_(MethodDecl)},
 		{ TOKEN(boolean), .type = TY_Boolean, },
 		{ TOKEN(int),     .type = TY_Int, },
 		{ TOKEN(true),  _TERM, ExprTyCheck_(true),},

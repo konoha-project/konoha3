@@ -247,22 +247,26 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp)
 	if(s + 2 < kArray_size(tokenArray)) {
 		kToken *tk1 = tokenArray->tokenItems[s+1];
 		kToken *tk2 = tokenArray->tokenItems[s+2];
-		KonohaClass *ct = CT_(TK_type(tk1));
+		//KonohaClass *ct = CT_(TK_type(tk1));
+		kNameSpace *ns = Stmt_nameSpace(stmt);
+		KonohaClass *ct = KLIB kNameSpace_getClass(kctx, ns, S_text(tk1->text), S_size(tk1->text), NULL);
+		DBG_ASSERT(ct != NULL);
+		ktype_t tk1ty = ct->classId;
 		if (ct->classId == TY_void) {
 			RETURN_(SUGAR Stmt_p(kctx, stmt, tk1, ErrTag, "undefined class: %s", S_text(tk1->text)));
 		} else if (CT_isForward(ct)) {
 			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "invalid application of 'new' to incomplete class %s", CT_t(ct));
 		}
 
-		if(TK_isType(tk1) && tk2->keyword == AST_PARENTHESIS) {  // new C (...)
+		if(tk2->keyword == AST_PARENTHESIS) {  // new C (...)
 			SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
-			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, tkNEW, NewExpr(kctx, syn, tk1, TK_type(tk1)));
+			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, tkNEW, NewExpr(kctx, syn, tk1, tk1ty));
 			tkNEW->keyword = MN_new;
 			RETURN_(expr);
 		}
-		if(TK_isType(tk1) && tk2->keyword == AST_BRACKET) {     // new C [...]
+		if(tk2->keyword == AST_BRACKET) {     // new C [...]
 			SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_new);
-			KonohaClass *ct = CT_p0(kctx, CT_Array, TK_type(tk1));
+			KonohaClass *ct = CT_p0(kctx, CT_Array, tk1ty);
 			tkNEW->keyword = MN_("newArray");
 			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, tkNEW, NewExpr(kctx, syn, tk1, ct->classId));
 			RETURN_(expr);
