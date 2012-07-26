@@ -684,6 +684,7 @@ static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *token
 static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
 {
 	int nextIdx = kStmt_parseTypePattern(kctx, NULL, ns, tokenList, beginIdx, endIdx, NULL);
+	DBG_P("nextIdx=%d", nextIdx);
 	if(nextIdx != -1) {
 		kToken *tk = TokenArray_nextToken(kctx, tokenList, nextIdx, endIdx);
 		if(tk->keyword == TK_SYMBOL) {
@@ -695,6 +696,7 @@ static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns
 			DBG_P("TypeDecl");
 			return SYN_(ns, KW_StmtTypeDecl);  //
 		}
+		return SYN_(ns, KW_ExprPattern);
 	}
 	kToken *tk = tokenList->tokenItems[beginIdx];
 	if(tk->keyword == TK_SYMBOL && isUpperCaseSymbol(S_text(tk->text))) {
@@ -706,6 +708,7 @@ static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns
 //		return SYN_(ns, KW_ExprPattern);
 	}
 	SugarSyntax *syn = tk->resolvedSyntaxInfo;
+	DBG_P("tk->kw=%s%s syn=%p", KW_t(tk->keyword), syn);
 	if(syn->syntaxRuleNULL == NULL) {
 //		int i;
 //		for(i = beginIdx + 1; i < endIdx; i++) {
@@ -789,11 +792,10 @@ static int kNameSpace_selectStmtTokenList(KonohaContext *kctx, ASTEnv *env, int 
 {
 	int currentIdx, beginIdxOfStmtTokenList = kArray_size(env->stmtTokenList);
 	for(currentIdx = env->beginIdx; currentIdx < env->endIdx; currentIdx++) {
-		kToken *tk = env->tokenList->tokenItems[currentIdx];
-		kToken *prefetchedToken = (currentIdx+1 < env->endIdx) ? env->tokenList->tokenItems[currentIdx+1] : NULL;
-		if(isEndOfStmt(kctx, tk, prefetchedToken, optionRef, env->stmtTokenList, beginIdxOfStmtTokenList)) {
+		if(isEndOfStmt(kctx, env->tokenList, &currentIdx, env->endIdx, optionRef, env->stmtTokenList, beginIdxOfStmtTokenList)) {
 			return currentIdx;
 		}
+		kToken *tk = env->tokenList->tokenItems[currentIdx];
 		if(tk->resolvedSyntaxInfo != NULL) {
 			KLIB kArray_add(kctx, env->stmtTokenList, tk);
 		}
@@ -805,15 +807,16 @@ static int kNameSpace_selectStmtTokenList(KonohaContext *kctx, ASTEnv *env, int 
 	return currentIdx;
 }
 
-static kbool_t checkEndOfParenthesis(KonohaContext *kctx, kToken *tk, kToken *prefetched, int *probablyCloseBeforeRef, kArray *tokenList, int beginIdx)
+static kbool_t checkEndOfParenthesis(KonohaContext *kctx, kArray *tokenList, int *currentIdx, int endIdx, int *probablyCloseBeforeRef, kArray *stmtTokenList, int beginIdx)
 {
+	kToken *tk = tokenList->tokenItems[*currentIdx];
 	int topch = Token_topch(tk);
-//	if(tk->keyword == TK_CODE) probablyCloseBeforeRef[0] = i;
 	return (topch == ')');
 }
 
-static kbool_t checkEndOfBracket(KonohaContext *kctx, kToken *tk, kToken *prefetched, int *optionRef, kArray *tokenList, int beginIdx)
+static kbool_t checkEndOfBracket(KonohaContext *kctx, kArray *tokenList, int *currentIdx, int endIdx, int *probablyCloseBeforeRef, kArray *stmtTokenList, int beginIdx)
 {
+	kToken *tk = tokenList->tokenItems[*currentIdx];
 	int topch = Token_topch(tk);
 	return (topch == ']');
 }
@@ -880,16 +883,29 @@ static kStmt* kBlock_addNewStmt(KonohaContext *kctx, kBlock *bk, kArray *tokenLi
 	return stmt;
 }
 
-static kbool_t SemiColon(KonohaContext *kctx, kToken *tk, kToken *prefetched, int *indentRef, kArray *tokenList, int beginIdx)
+static kbool_t SemiColon(KonohaContext *kctx, kArray *tokenList, int *currentIdx, int endIdx, int *indentRef, kArray *stmtTokenList, int beginIdx)
 {
-	int topch = Token_topch(tk);
-	return (topch == ';');
+	kbool_t found = false;
+	kToken *tk = tokenList->tokenItems[*currentIdx];
+	if(Token_topch(tk) == ';') {
+		found = true;
+		do {
+			*currentIdx += 1;
+			if(!(*currentIdx < endIdx)) break;
+			tk = tokenList->tokenItems[*currentIdx];
+		}while(Token_topch(tk) == ';');
+	}
+	return found;
 }
 
-static kbool_t Comma(KonohaContext *kctx, kToken *tk, kToken *prefetched, int *optionRef, kArray *tokenList, int beginIdx)
+static kbool_t Comma(KonohaContext *kctx, kArray *tokenList, int *currentIdx, int endIdx, int *optionRef, kArray *stmtTokenList, int beginIdx)
 {
-	int topch = Token_topch(tk);
-	return (topch == ',');
+	kToken *tk = tokenList->tokenItems[*currentIdx];
+	if(Token_topch(tk) == ',') {
+		*currentIdx += 1;
+		return true;
+	}
+	return false;
 }
 
 static kBlock *new_Block(KonohaContext *kctx, kNameSpace *ns, kStmt *parent, kArray *tokenList, int beginIdx, int endIdx, CheckEndOfStmtFunc isEndOfStmt)

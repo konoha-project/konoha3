@@ -307,7 +307,7 @@ struct kBlockVar {
 	kExpr               *esp;
 };
 
-typedef kbool_t (*CheckEndOfStmtFunc)(KonohaContext *, kToken *tk, kToken *prefetched, int *indentRef, kArray *tokenList, int beginIdx);
+typedef kbool_t (*CheckEndOfStmtFunc)(KonohaContext *, kArray *, int *currentIdxRef, int endIdx, int *indentRef, kArray *tokenList, int beginIdx);
 
 typedef struct {
 	ktype_t    ty;    ksymbol_t  fn;
