@@ -31,7 +31,7 @@ static KMETHOD PatternMatch_Expr(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_PatternMatch(stmt, name, tokenArray, beginIdx, endIdx);
 	INIT_GCSTACK();
 	int returnIdx = -1;
-	dumpTokenArray(kctx, 0, tokenArray, beginIdx, endIdx);
+	KdumpTokenArray(kctx, tokenArray, beginIdx, endIdx);
 	kExpr *expr = kStmt_parseExpr(kctx, stmt, tokenArray, beginIdx, endIdx);
 	if(expr != K_NULLEXPR) {
 		KdumpExpr(kctx, expr);
@@ -53,6 +53,7 @@ static KMETHOD PatternMatch_Type(KonohaContext *kctx, KonohaStack *sfp)
 		tk->ty = foundClass->classId;
 		tk->resolvedSyntaxInfo = SYN_(Stmt_nameSpace(stmt), KW_TypePattern);
 		KLIB kObject_setObject(kctx, stmt, name, O_classId(tk), tk);
+		DBG_P("PATTERN tk->kw=%s%s '%s' beginIdx=%d, returnIdx=%d", KW_t(tk->keyword), Token_text(tk), beginIdx, returnIdx);
 	}
 	RETURNi_(returnIdx);
 }
@@ -78,6 +79,7 @@ static KMETHOD PatternMatch_Symbol(KonohaContext *kctx, KonohaStack *sfp)
 		KLIB kObject_setObject(kctx, stmt, name, O_classId(tk), tk);
 		returnIdx = beginIdx + 1;
 	}
+	DBG_P("PATTERN tk->kw=%s%s '%s' beginIdx=%d returnIdx=%d", KW_t(tk->keyword), Token_text(tk), beginIdx, returnIdx);
 	RETURNi_(returnIdx);
 }
 
@@ -101,9 +103,10 @@ static KMETHOD PatternMatch_Block(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tokenArray, beginIdx, endIdx);
 	kToken *tk = tokenArray->tokenItems[beginIdx];
-	dumpTokenArray(kctx, 0, tokenArray, beginIdx, endIdx);
+	KdumpTokenArray(kctx, tokenArray, beginIdx, endIdx);
 	if(tk->keyword == TK_CODE) {
 		KLIB kObject_setObject(kctx, stmt, name, O_classId(tk), tk);
+		DBG_P("PATTERN tk->kw=%s%s '%s' beginIdx=%d returnIdx=%d", KW_t(tk->keyword), Token_text(tk), beginIdx, beginIdx+1);
 		RETURNi_(beginIdx+1);
 	}
 	kBlock *bk = new_Block(kctx, Stmt_nameSpace(stmt), stmt, tokenArray, beginIdx, endIdx, SemiColon);
@@ -1224,7 +1227,8 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(LET),  .flag = SYNFLAG_ExprLeftJoinOp2, ParseExpr_(Op), .precedence_op2 = 4096, },
 		{ TOKEN(COMMA), ParseExpr_(COMMA), .precedence_op2 = 8192, },
 		{ TOKEN(DOLLAR), ParseExpr_(DOLLAR), },
-		{ TOKEN(void), .type = TY_void, .rule ="$type [type: $type \".\"] $SYMBOL $params [$block]", TopStmtTyCheck_(MethodDecl)},
+//		{ TOKEN(void), .type = TY_void, .rule ="$type [type: $type \".\"] $SYMBOL $params [$block]", TopStmtTyCheck_(MethodDecl)},
+		{ TOKEN(void), .type = TY_void, .rule ="$type $SYMBOL $params [$block]", TopStmtTyCheck_(MethodDecl)},
 		{ TOKEN(boolean), .type = TY_Boolean, },
 		{ TOKEN(int),     .type = TY_Int, },
 		{ TOKEN(true),  _TERM, ExprTyCheck_(true),},

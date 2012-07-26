@@ -620,13 +620,13 @@ static int kStmt_printMismatchedRule(KonohaContext *kctx, kStmt *stmt, kToken *t
 static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *tokenList, int beginIdx, int endIdx, RuleEnv *rule, int canRollBack)
 {
 	int currentRuleIdx, currentTokenIdx = beginIdx, returnIdx = (canRollBack ? beginIdx : -1);
-	DBG_P("Input tokens:");
-	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
-	DBG_P("Syntax rules:");
-	KdumpTokenArray(kctx, rule->tokenList, rule->beginIdx, rule->endIdx);
+//	DBG_P("Input tokens:");
+//	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
+//	DBG_P("Syntax rules:");
+//	KdumpTokenArray(kctx, rule->tokenList, rule->beginIdx, rule->endIdx);
 	for(currentRuleIdx = rule->beginIdx; currentRuleIdx < rule->endIdx && currentTokenIdx < endIdx; currentRuleIdx++) {
 		kToken *ruleToken = rule->tokenList->tokenItems[currentRuleIdx];
-		currentTokenIdx = kTokenArray_skip(tokenList, beginIdx, endIdx);
+		currentTokenIdx = kTokenArray_skip(tokenList, currentTokenIdx, endIdx);
 		if(KW_isPATTERN(ruleToken->keyword)) {
 			int patternEndIdx = endIdx;
 			kToken *prefetchedRuleToken = rule->tokenList->tokenItems[currentRuleIdx+1];
@@ -678,13 +678,12 @@ static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *token
 			return returnIdx;
 		}
 	}
-	return returnIdx;
+	return currentTokenIdx;
 }
 
 static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
 {
 	int nextIdx = kStmt_parseTypePattern(kctx, NULL, ns, tokenList, beginIdx, endIdx, NULL);
-	DBG_P("nextIdx=%d", nextIdx);
 	if(nextIdx != -1) {
 		kToken *tk = TokenArray_nextToken(kctx, tokenList, nextIdx, endIdx);
 		if(tk->keyword == TK_SYMBOL) {

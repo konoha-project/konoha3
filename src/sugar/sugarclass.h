@@ -106,7 +106,6 @@ static void Token_reftrace(KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
-
 /* --------------- */
 /* Expr */
 
