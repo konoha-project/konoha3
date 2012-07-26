@@ -307,7 +307,7 @@ static kBlock* Method_newBlock(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns
 	kArray *tokenArray = ctxsugar->preparedTokenList;
 	size_t pos = kArray_size(tokenArray);
 	kNameSpace_tokenize(kctx, ns, script, uline, tokenArray);
-	kBlock *bk = new_Block(kctx, ns, NULL, tokenArray, pos, kArray_size(tokenArray), ';');
+	kBlock *bk = new_Block(kctx, ns, NULL, tokenArray, pos, kArray_size(tokenArray), SemiColon);
 	KLIB kArray_clear(kctx, tokenArray, pos);
 	return bk;
 }

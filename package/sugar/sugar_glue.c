@@ -55,11 +55,11 @@ static KMETHOD Token_setSubArray(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNvoid_();
 }
 
-//## boolean Token.isTypeName();
-static KMETHOD Token_isTypeName(KonohaContext *kctx, KonohaStack *sfp)
-{
-	RETURNb_(TK_isType(sfp[0].asToken));
-}
+////## boolean Token.isTypeName();
+//static KMETHOD Token_isTypeName(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	RETURNb_(TK_isType(sfp[0].asToken));
+//}
 
 //## boolean Token.isParenthesis();
 static KMETHOD Token_isParenthesis(KonohaContext *kctx, KonohaStack *sfp)
@@ -343,7 +343,7 @@ static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public, _F(Token_setKeyword),  TY_void, TY_Token, MN_("setKeyword"),  1, TY_String, FN_x,
 		_Public, _F(Token_setText),  TY_void, TY_Token, MN_("setText"),  1, TY_String, FN_x,
 		_Public, _F(Token_setSubArray), TY_void, TY_Token, MN_("setSubArray"), 1, TY_StringArray, FN_x,
-		_Public, _F(Token_isTypeName), TY_Boolean, TY_Token, MN_("isTypeName"), 0,
+//		_Public, _F(Token_isTypeName), TY_Boolean, TY_Token, MN_("isTypeName"), 0,
 		_Public, _F(Token_isParenthesis), TY_Boolean, TY_Token, MN_("isParenthesis"), 0,
 		_Public, _F(Token_getText), TY_String, TY_Token, MN_("getText"), 0,
 

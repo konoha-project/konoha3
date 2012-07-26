@@ -308,7 +308,7 @@ static void Stmt_parseClassBlock(KonohaContext *kctx, kStmt *stmt, kToken *tkC)
 		DBG_P("cname='%s'", cname);
 		for(i = atop; i < s; i++) {
 			kToken *tk = a->tokenItems[i];
-			int topch = kToken_topch(tk);
+			int topch = Token_topch(tk);
 			if(topch == '(' && tkP->keyword == TK_SYMBOL && strcmp(cname, S_text(tkP->text)) == 0) {
 				kTokenVar *tkNEW = GCSAFE_new(TokenVar, 0);
 				tkNEW->keyword = TK_SYMBOL;
@@ -319,7 +319,7 @@ static void Stmt_parseClassBlock(KonohaContext *kctx, kStmt *stmt, kToken *tkC)
 			KLIB kArray_add(kctx, a, tk);
 			tkP = tk;
 		}
-		kBlock *bk = SUGAR new_Block(kctx, Stmt_nameSpace(stmt), stmt, a, s, kArray_size(a), ';');
+		kBlock *bk = SUGAR new_Block(kctx, Stmt_nameSpace(stmt), stmt, a, s, kArray_size(a), NULL);
 		for (i = 0; i < kArray_size(bk->stmtList); i++) {
 			kStmt *methodDecl = bk->stmtList->stmtItems[i];
 			if(methodDecl->syn->keyword == KW_StmtMethodDecl) {

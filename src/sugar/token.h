@@ -563,14 +563,14 @@ static void kNameSpace_tokenize(KonohaContext *kctx, kNameSpace *ns, const char 
 // --------------------------------------------------------------------------
 
 static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tokenArray, int s, int e, kArray *adst);
-#define kToken_topch2(tt, tk) ((tk->keyword == tt && (S_size((tk)->text) == 1)) ? S_text((tk)->text)[0] : 0)
+#define Token_topch2(tt, tk) ((tk->keyword == tt && (S_size((tk)->text) == 1)) ? S_text((tk)->text)[0] : 0)
 
 static int findCloseChar(KonohaContext *kctx, kArray *tokenArray, int s, int e, ksymbol_t tt, int closech)
 {
 	int i;
 	for(i = s; i < e; i++) {
 		kToken *tk = tokenArray->tokenItems[i];
-		if(kToken_topch2(tt, tk) == closech) return i;
+		if(Token_topch2(tt, tk) == closech) return i;
 	}
 	return e;
 }
@@ -579,7 +579,7 @@ static kbool_t checkNestedSyntax(KonohaContext *kctx, kArray *tokenArray, int *s
 {
 	int i = *s;
 	kTokenVar *tk = tokenArray->tokenVarItems[i];
-	int topch = kToken_topch2(tk->keyword, tk);
+	int topch = Token_topch2(tk->keyword, tk);
 	if(topch == opench) {
 		int ne = findCloseChar(kctx, tokenArray, i+1, e, tk->keyword, closech);
 		tk->keyword = astkw;
@@ -598,7 +598,7 @@ static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tokenArray, int s, in
 //	dumpTokenArray(kctx, 0, tokenArray, s, e);
 	for(i = s; i < e; i++) {
 		kTokenVar *tk = tokenArray->tokenVarItems[i];
-		int topch = kToken_topch(tk);
+		int topch = Token_topch(tk);
 		if(tk->keyword == TK_INDENT) continue;
 		if(tk->keyword == TK_TEXT) {
 			if(checkNestedSyntax(kctx, tokenArray, &i, e, AST_PARENTHESIS, '(', ')') ||
@@ -630,7 +630,7 @@ static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tokenArray, int s, in
 			}
 			return false;
 		}
-		if(tk->keyword == TK_SYMBOL && i + 1 < e && kToken_topch(tokenArray->tokenItems[i+1]) == ':') {
+		if(tk->keyword == TK_SYMBOL && i + 1 < e && Token_topch(tokenArray->tokenItems[i+1]) == ':') {
 			patternKey = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWRAW);
 			i++;
 			continue;

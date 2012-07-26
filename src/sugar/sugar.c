@@ -58,10 +58,10 @@ static kstatus_t kNameSpace_eval(KonohaContext *kctx, kNameSpace *ns, const char
 	{
 		INIT_GCSTACK();
 		kArray *tokenArray = ctxsugar->preparedTokenList;
-		size_t popAlreadUsed = kArray_size(tokenArray);
+		size_t popAlreadyUsed = kArray_size(tokenArray);
 		kNameSpace_tokenize(kctx, ns, script, uline, tokenArray);
-		kBlock *bk = new_Block(kctx, ns, NULL, tokenArray, popAlreadUsed, kArray_size(tokenArray), ';');
-		KLIB kArray_clear(kctx, tokenArray, popAlreadUsed);
+		kBlock *bk = new_Block(kctx, ns, NULL, tokenArray, popAlreadyUsed, kArray_size(tokenArray), SemiColon);
+		KLIB kArray_clear(kctx, tokenArray, popAlreadyUsed);
 		result = Block_eval(kctx, bk);
 		RESET_GCSTACK();
 	}

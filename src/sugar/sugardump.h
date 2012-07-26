@@ -56,7 +56,7 @@ static const char* StatementType(ksymbol_t keyword)
 
 static void dumpToken(KonohaContext *kctx, kToken *tk)
 {
-	DUMP_P("%s%s %d: kw=%s%s '%s'\n", KW_t(tk->keyword), (short)tk->uline, KW_t(tk->keyword), Token_text(tk));
+	DUMP_P("kw=%s%s syn=%p '%s' indent(or ty)=%d\n", KW_t(tk->keyword), tk->resolvedSyntaxInfo, Token_text(tk), tk->indent);
 }
 
 static void dumpIndent(KonohaContext *kctx, int nest)

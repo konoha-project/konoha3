@@ -95,6 +95,7 @@ static void Token_init(KonohaContext *kctx, kObject *o, void *conf)
 	tk->uline     =   0;
 	tk->keyword        =   (ksymbol_t)(intptr_t)conf;
 	KINITv(tk->text, TS_EMPTY);
+	tk->resolvedSyntaxInfo = NULL;
 }
 
 static void Token_reftrace(KonohaContext *kctx, kObject *o)
@@ -312,27 +313,6 @@ static const char* kStmt_getText(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw,
 			kToken *tk = (kToken*)expr;
 			if(IS_String(tk->text)) return S_text(tk->text);
 		}
-	}
-	return def;
-}
-
-static kbool_t Token_toBRACE(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns);
-static kBlock *new_Block(KonohaContext *kctx, kNameSpace* ns, kStmt *stmt, kArray *tokenArray, int s, int e, int delim);
-static kBlock* kStmt_getBlock(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw, kBlock *def)
-{
-	kBlock *bk = (kBlock*)kStmt_getObjectNULL(kctx, stmt, kw);
-	if(bk != NULL) {
-		if(IS_Token(bk)) {
-			kToken *tk = (kToken*)bk;
-			if (tk->keyword == TK_CODE) {
-				Token_toBRACE(kctx, (kTokenVar*)tk, Stmt_nameSpace(stmt));
-			}
-			if (tk->keyword == AST_BRACE) {
-				bk = new_Block(kctx, Stmt_nameSpace(stmt), stmt, tk->sub, 0, kArray_size(tk->sub), ';');
-				KLIB kObject_setObject(kctx, stmt, kw, TY_Block, bk);
-			}
-		}
-		if(IS_Block(bk)) return bk;
 	}
 	return def;
 }
