@@ -713,15 +713,6 @@ static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns
 	SugarSyntax *syn = tk->resolvedSyntaxInfo;
 	DBG_P("tk->kw=%d,%s%s '%s' syn=%p", tk->keyword, KW_t(tk->keyword), Token_text(tk), syn);
 	if(syn->syntaxRuleNULL == NULL) {
-//		int i;
-//		for(i = beginIdx + 1; i < endIdx; i++) {
-//			tk = tokenList->tokenItems[i];
-//			syn = SYN_(ns, tk->keyword);
-//			//DBG_P("@ tk->keyword=%s%s, syn=%p", KW_t(tk->keyword), syn);
-//			if(syn->syntaxRuleNULL != NULL && syn->precedence_op2 > 0) {
-//				return syn;
-//			}
-//		}
 		return SYN_(ns, KW_ExprPattern);
 	}
 	return syn;

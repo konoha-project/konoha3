@@ -471,6 +471,7 @@ typedef struct {
 	// export
 	void   (*kNameSpace_setTokenizeFunc)(KonohaContext *, kNameSpace *, int ch, TokenizeFunc, kFunc *, int isAddition);
 	void   (*kNameSpace_tokenize)(KonohaContext *, kNameSpace *, const char *, kfileline_t, kArray *);
+	int (*kStmt_parseTypePattern)(KonohaContext *, kStmt *, kNameSpace *, kArray *, int , int , KonohaClass **classRef);
 
 	kExpr* (*kExpr_setConstValue)(KonohaContext *, kExpr *, ktype_t ty, kObject *o);
 	kExpr* (*kExpr_setUnboxConstValue)(KonohaContext *, kExpr *, ktype_t ty, uintptr_t unboxValue);
@@ -509,6 +510,7 @@ typedef struct {
 #define EXPORT_SUGAR(base) \
 	base->kNameSpace_setTokenizeFunc = kNameSpace_setTokenizeFunc;\
 	base->kNameSpace_tokenize = kNameSpace_tokenize;\
+	base->kStmt_parseTypePattern = kStmt_parseTypePattern;\
 	base->kStmt_getToken          = kStmt_getToken;\
 	base->kStmt_getBlock          = kStmt_getBlock;\
 	base->kStmt_getExpr           = kStmt_getExpr;\
