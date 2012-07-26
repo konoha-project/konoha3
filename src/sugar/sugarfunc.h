@@ -1186,13 +1186,13 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ PATTERN(Int),     _TERM, ExprTyCheck_(Int),},
 		{ PATTERN(Float),   _TERM, },
 		{ PATTERN(Type),    _TERM, PatternMatch_(Type), .rule = "$type $expr", StmtTyCheck_(TypeDecl), ExprTyCheck_(Type), },
-		{ PATTERN(Parenthesis), .flag = SYNFLAG_ExprPostfixOp2, ParseExpr_(Parenthesis), .precedence_op2 = 16, ExprTyCheck_(FuncStyleCall),}, //AST_PARENTHESIS
+		{ PATTERN(Parenthesis), .flag = SYNFLAG_ExprPostfixOp2, ParseExpr_(Parenthesis), .precedence_op2 = 300, ExprTyCheck_(FuncStyleCall),}, //AST_PARENTHESIS
 		{ PATTERN(Bracket),  },  //AST_BRACKET
 		{ PATTERN(Brace),  }, // AST_BRACE
 		{ PATTERN(Block), PatternMatch_(Block), ExprTyCheck_(Block), },
 		{ PATTERN(Params), PatternMatch_(Params), TopStmtTyCheck_(ParamsDecl), ExprTyCheck_(MethodCall),},
 		{ PATTERN(Toks), PatternMatch_(Toks), },
-		{ TOKEN(DOT), ParseExpr_(DOT), .precedence_op2 = 300 },
+		{ TOKEN(DOT), ParseExpr_(DOT), .precedence_op2 = 300, },
 		{ TOKEN(DIV), _OP, .precedence_op2 = 500, },
 		{ TOKEN(MOD), _OP, .precedence_op2 = 500, },
 		{ TOKEN(MUL), _OP, .precedence_op2 = 500, },
