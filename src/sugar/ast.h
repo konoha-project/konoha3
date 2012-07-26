@@ -620,10 +620,10 @@ static int kStmt_printMismatchedRule(KonohaContext *kctx, kStmt *stmt, kToken *t
 static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *tokenList, int beginIdx, int endIdx, RuleEnv *rule, int canRollBack)
 {
 	int currentRuleIdx, currentTokenIdx = beginIdx, returnIdx = (canRollBack ? beginIdx : -1);
-//	DBG_P("Input tokens:");
-//	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
-//	DBG_P("Syntax rules:");
-//	KdumpTokenArray(kctx, rule->tokenList, rule->beginIdx, rule->endIdx);
+	DBG_P("Input tokens:");
+	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
+	DBG_P("Syntax rules:");
+	KdumpTokenArray(kctx, rule->tokenList, rule->beginIdx, rule->endIdx);
 	for(currentRuleIdx = rule->beginIdx; currentRuleIdx < rule->endIdx && currentTokenIdx < endIdx; currentRuleIdx++) {
 		kToken *ruleToken = rule->tokenList->tokenItems[currentRuleIdx];
 		currentTokenIdx = kTokenArray_skip(tokenList, currentTokenIdx, endIdx);
@@ -665,18 +665,22 @@ static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *token
 			currentTokenIdx++;
 		}
 	}
-	if(!canRollBack) {
-		for(; currentRuleIdx < rule->endIdx; currentRuleIdx++) {
-			kToken *ruleToken = rule->tokenList->tokenItems[currentRuleIdx];
-			if(ruleToken->keyword != AST_OPTIONAL) {
+	DBG_P("rollback=%d, returnIdx=%d, currentTokenIdx=%d < %d", canRollBack, returnIdx, currentTokenIdx, endIdx);
+	for(; currentRuleIdx < rule->endIdx; currentRuleIdx++) {
+		kToken *ruleToken = rule->tokenList->tokenItems[currentRuleIdx];
+		if(ruleToken->keyword != AST_OPTIONAL) {
+			if(!canRollBack) {
 				kStmt_p(stmt, ErrTag, "%s%s needs syntax pattern: %s%s", T_statement(stmt->syn->keyword), KW_t(ruleToken->keyword));
 				return returnIdx;
 			}
 		}
-		if(currentTokenIdx < endIdx) {
+		return returnIdx;
+	}
+	if(currentTokenIdx < endIdx) {
+		if(!canRollBack) {
 			kStmt_p(stmt, ErrTag, "%s%s: unexpected token %s", T_statement(stmt->syn->keyword), Token_text(tokenList->tokenItems[currentTokenIdx]));
-			return returnIdx;
 		}
+		return returnIdx;
 	}
 	return currentTokenIdx;
 }
@@ -893,6 +897,10 @@ static kbool_t SemiColon(KonohaContext *kctx, kArray *tokenList, int *currentIdx
 			if(!(*currentIdx < endIdx)) break;
 			tk = tokenList->tokenItems[*currentIdx];
 		}while(Token_topch(tk) == ';');
+	}
+	if(tk->keyword == TK_INDENT) {
+		DBG_P("!! previous=%d, indent=%d", indentRef[0], tk->indent);
+		found = (kArray_size(stmtTokenList) > beginIdx);
 	}
 	return found;
 }
