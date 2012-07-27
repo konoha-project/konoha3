@@ -49,25 +49,23 @@ static void ObjectX_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kObjectVar *of = (kObjectVar*)o;
 	KonohaClass *ct = O_ct(of);
-	assert(CT_isDefined(ct));
-	assert(ct->defaultValueAsNull != NULL);
 	memcpy(of->fieldObjectItems, ct->defaultValueAsNull->fieldObjectItems, ct->cstruct_size - sizeof(KonohaObjectHeader));
 }
 
 static void Object_initdef(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t pline)
 {
-	if(ct->classId == TY_Object) return;
-	DBG_P("new object initialization ct->cstruct_size=%d", ct->cstruct_size);
-	KSETv(ct->defaultValueAsNull, KLIB new_kObject(kctx, ct, 0));
-	if(ct->fieldsize > 0) {  // this is size of super class
-		KonohaClass *supct = CT_(ct->superclassId);
-		assert(ct->fieldsize == supct->fieldsize);
-		memcpy(ct->defaultValueAsNull_->fieldObjectItems, supct->defaultValueAsNull->fieldObjectItems, sizeof(kObject*) * ct->fieldsize);
-	}
-	if(ct->fieldAllocSize > 0) {
-		ct->init = ObjectX_init;
-	}
-	ct->fnull = DEFAULT_fnull;
+//	if(ct->classId == TY_Object) return;
+//	DBG_P("new object initialization ct->cstruct_size=%d", ct->cstruct_size);
+//	KSETv(ct->defaultValueAsNull, KLIB new_kObject(kctx, ct, 0));
+//	if(ct->fieldsize > 0) {  // this is size of super class
+//		KonohaClass *supct = CT_(ct->superclassId);
+//		assert(ct->fieldsize == supct->fieldsize);
+//		memcpy(ct->defaultValueAsNullVar->fieldObjectItems, supct->defaultValueAsNull->fieldObjectItems, sizeof(kObject*) * ct->fieldsize);
+//	}
+//	if(ct->fieldAllocSize > 0) {
+//		ct->init = ObjectX_init;
+//	}
+//	ct->fnull = DEFAULT_fnull;
 }
 
 static kObject *new_kObject(KonohaContext *kctx, KonohaClass *ct, uintptr_t conf)
