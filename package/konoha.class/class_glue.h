@@ -322,7 +322,7 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp)
 		KonohaClass *ct = CT_(Token_typeLiteral(tk1));
 		if (ct->classId == TY_void) {
 			RETURN_(SUGAR Stmt_p(kctx, stmt, tk1, ErrTag, "undefined class: %s", S_text(tk1->text)));
-		} else if (CT_isForward(ct)) {
+		} else if (CT_isVirtual(ct)) {
 			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "invalid application of 'new' to incomplete class %s", CT_t(ct));
 		}
 
@@ -578,40 +578,14 @@ static inline size_t initFieldSizeOfVirtualClass(KonohaClass *superClass)
 static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_StmtTyCheck(stmt, gma);
-//<<<<<<< HEAD
 	kToken *tokenClassName = SUGAR kStmt_getToken(kctx, stmt, KW_UsymbolPattern, NULL);
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	KonohaClassVar *definedClass = (KonohaClassVar*)KLIB kNameSpace_getClass(kctx, ns, S_text(tokenClassName->text), S_size(tokenClassName->text), NULL);
 	kBlock *bk = kStmt_parseClassBlockNULL(kctx, stmt, tokenClassName);
 	size_t declsize = kBlock_countFieldSize(kctx, bk);
 	if (definedClass != NULL) {
-		if(declsize > 0 && !CT_isForward(definedClass)) {
+		if(declsize > 0 && !CT_isVirtual(definedClass)) {
 			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "%s has already defined", CT_t(definedClass));
-//=======
-//	kToken *tkC = SUGAR kStmt_getToken(kctx, stmt, KW_UsymbolPattern, NULL);
-//	kToken *tkE = SUGAR kStmt_getToken(kctx, stmt, SYM_("extends"), NULL);
-//	kshortflag_t cflag = 0;
-//	ktype_t superclassId = TY_Object;
-//	KonohaClass *supct = CT_Object;
-//	kNameSpace *ns = Stmt_nameSpace(stmt);
-//	if (tkE) {
-//		//if(TK_isType(tkE)) {
-//			superclassId = TK_type(tkE);
-//			supct = CT_(superclassId);
-//		//}
-//		//else {
-//		//	supct = KLIB kNameSpace_getClass(kctx, ns, S_text(tkE->text), S_size(tkE->text), NULL);
-//		//	DBG_ASSERT(supct != NULL);
-//		//	superclassId = supct->classId;
-//		//}
-//
-//		if(CT_isFinal(supct)) {
-//			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "%s is final", CT_t(supct));
-//			RETURNb_(false);
-//		}
-//		if(!CT_isDefined(supct)) {
-//			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "%s has undefined field(s)", CT_t(supct));
-//>>>>>>> ae5daa82da8036b20e286ad09718511207fcd89f
 			RETURNb_(false);
 		}
 	}
@@ -619,14 +593,14 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 		kshortflag_t cflag = 0;
 		KonohaClass *superClass = CT_Object;
 		kToken *tokenSuperClass= SUGAR kStmt_getToken(kctx, stmt, SYM_("extends"), NULL);
-		if (tokenSuperClass == NULL) {
+		if (tokenSuperClass != NULL) {
 			DBG_ASSERT(Token_isVirtualTypeLiteral(tokenSuperClass));
 			superClass = CT_(Token_typeLiteral(tokenSuperClass));
 			if(CT_isFinal(superClass)) {
 				SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "%s is final", CT_t(superClass));
 				RETURNb_(false);
 			}
-			if(CT_isForward(superClass)) {
+			if(CT_isVirtual(superClass)) {
 				SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "%s is still virtual", CT_t(superClass));
 				RETURNb_(false);
 			}

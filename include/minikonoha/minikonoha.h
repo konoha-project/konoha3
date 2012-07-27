@@ -680,7 +680,7 @@ struct KonohaClassField {
 #define kClass_UnboxType        ((kshortflag_t)(1<<7))
 #define kClass_Interface        ((kshortflag_t)(1<<8))
 #define kClass_TypeVar          ((kshortflag_t)(1<<9))
-#define kClass_Forward          ((kshortflag_t)(1<<10))
+#define kClass_Virtual          ((kshortflag_t)(1<<10))
 
 #define CFLAG_void              kClass_TypeVar|kClass_UnboxType|kClass_Singleton|kClass_Final
 #define CFLAG_var               kClass_TypeVar|kClass_UnboxType|kClass_Singleton|kClass_Final
@@ -703,8 +703,8 @@ struct KonohaClassField {
 #define CT_isFinal(ct)         (TFLAG_is(kshortflag_t,(ct)->cflag, kClass_Final))
 #define TY_isFinal(ct)         (TFLAG_is(kshortflag_t,CT_(ct)->cflag, kClass_Final))
 
-#define TY_isForward(T)     (TFLAG_is(kshortflag_t,(CT_(T))->cflag, kClass_Forward))
-#define CT_isForward(ct)    (TFLAG_is(kshortflag_t,(ct)->cflag, kClass_Forward))
+#define TY_isVirtual(T)     (TFLAG_is(kshortflag_t,(CT_(T))->cflag, kClass_Virtual))
+#define CT_isVirtual(ct)    (TFLAG_is(kshortflag_t,(ct)->cflag, kClass_Virtual))
 
 
 // this is used in konoha.class
