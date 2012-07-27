@@ -318,7 +318,7 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp)
 	kTokenVar *newToken = tokenArray->tokenVarItems[beginIdx];   // new Class (
 	KonohaClass *foundClass = NULL;
 	int nextIdx = SUGAR kStmt_parseTypePattern(kctx, stmt, Stmt_nameSpace(stmt), tokenArray, beginIdx + 1, endIdx, &foundClass);
-	if(nextIdx != -1 && nextIdx < endIdx) {
+	if(nextIdx != -1 && nextIdx < kArray_size(tokenArray)) {
 		kToken *nextTokenAfterClassName = tokenArray->tokenItems[nextIdx];
 //		if (ct->classId == TY_void) {
 //			RETURN_(SUGAR Stmt_p(kctx, stmt, tk1, ErrTag, "undefined class: %s", S_text(tk1->text)));
