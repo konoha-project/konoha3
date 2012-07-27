@@ -26,18 +26,22 @@
 #ifndef DSE_H_
 #define DSE_H_
 
+#include <stdbool.h>
+#include <unistd.h>
 #include <event.h>
 #include <evhttp.h>
 #include <event2/buffer.h>
 #include <sys/queue.h>
-//#include <actor/actor.h>
+#include <sys/wait.h>
 #include <jansson.h>
-#include <minikonoha/minikonoha.h>
-#include "dse_util.h"
-#include "dse_logger.h"
-#include "dse_platform.h"
-#include "dse_protocol.h"
-#include "dse_scheduler.h"
+#include "util.h"
+#include "logger.h"
+#include "protocol.h"
+#include "scheduler.h"
+
+struct dDserv;
+
+extern struct dDserv *gdserv;
 
 struct dDserv {
 	struct event_base *base;
@@ -92,54 +96,20 @@ static struct dReq *dse_parseJson(const char *input)
 	// replace "'" --> "\"";
 	size_t script_len = strlen(str_script);
 //	char ch;
-	int idx = 0;
-	for (idx = 0; idx < script_len; idx++) {
-		if (str_script[idx] == '\'') {
-			str_script[idx] ='"';
-		} else if (str_script[idx] == '@') {
-			str_script[idx] = '\n';
-		}
-
-	}
+//	int idx = 0;
+//	for (idx = 0; idx < script_len; idx++) {
+//		if (str_script[idx] == '\'') {
+//			str_script[idx] ='"';
+//		} else if (str_script[idx] == '@') {
+//			str_script[idx] = '\n';
+//		}
+//	}
 	fwrite(str_script, script_len, 1, fp);
 	fflush(fp);
 	fclose(fp);
 	json_decref(root);
 	return ret;
 }
-
-//static void eval_actor_init(Actor *a) { /* do nothing */ }
-//static void eval_actor_exit(Actor *a) { /* do nothing */ }
-//
-//static int eval_actor_act(Actor *a, Message *message)
-//{
-//	if (JSON_type(message) == JSON_String) {
-//		char *filepath = JSONString_get(a->self, 6);
-//		filepath[5] = '\0';
-//		konoha_t konoha = konoha_open();
-//		int ret = konoha_load(konoha, filepath);
-//		konoha_close(konoha);
-//	}
-//	return 0;
-//}
-//
-//static const struct actor_api eval_actor_api = {
-//	eval_actor_act,
-//	eval_actor_init,
-//	eval_actor_exit
-//};
-//
-//static void eval_actor(struct dReq *req)
-//{
-//	if (ActorStage_init(1, 1)) {
-//		D_("ActorStageinit, failed");
-//	}
-//
-//	JSON message = JSONInt_new(1);
-//	Actor *a = Actor_new(message, &eval_actor_api);
-//	Actor_act(a);
-//	Actor_send(a, JSONString_new(req->scriptfilepath, strlen(req->scriptfilepath)));
-//}
 
 /* ************************************************************************ */
 
@@ -156,6 +126,8 @@ void dump_http_header(struct evhttp_request *req, struct evbuffer *evb, void *ct
 
 	evhttp_send_reply(req, HTTP_OK, "OK", evb);
 }
+
+static void *dse_dispatch(void *arg);
 
 #define THREAD_SIZE 8
 
@@ -197,9 +169,6 @@ void dse_req_handler(struct evhttp_request *req, void *arg)
 		}
 		pthread_mutex_unlock(&dscd->lock);
 		evhttp_send_error(req, HTTP_BADREQUEST, "DSE server's request queue is full");
-//		dse_dispatch(dreq);
-		//evbuffer_add_printf(buf, "Reqested POSPOS: %s\n", evhttp_request_uri(req));
-		//evhttp_send_reply(req, HTTP_OK, "OK", buf);
 	}
 	else{
 		evhttp_send_error(req, HTTP_BADREQUEST, "Available POST only");
@@ -232,6 +201,100 @@ static void dserv_close(struct dDserv *dserv)
 	event_base_free(dserv->base);
 	deleteDScheduler(dserv->dscd);
 	dse_free(dserv, sizeof(struct dDserv));
+}
+
+//static void dse_send_reply(struct evhttp_request *req, struct dRes *dres)
+//{
+//	struct evbuffer *buf = evbuffer_new();
+//	switch(dres->status){
+//		case E_STATUS_OK:
+//			evhttp_send_reply(req, HTTP_OK, "OK", buf);
+//			break;
+//		default:
+//			evhttp_send_reply(req, HTTP_OK, "FAIL", buf);
+//			break;
+//	}
+//	evbuffer_free(buf);
+//}
+
+static void *dse_dispatch(void *arg)
+{
+	struct dScheduler *dscd = (struct dScheduler *)arg;
+	struct dReq *dreq;
+	struct dRes *dres;
+	char cmd_konoha[] = "minikonoha";
+	char cmd_opt_tycheck[] = "-c";
+	char cmd_sh[] = "sh";
+	pid_t pid;
+	int status = 0;
+	logpool_t *lp;
+	void *logpool_args;
+	while(true) {
+		pthread_mutex_lock(&dscd->lock);
+		if(!(dreq = dse_dequeue(dscd))) {
+			pthread_cond_wait(&dscd->cond, &dscd->lock);
+			dreq = dse_dequeue(dscd);
+		}
+		pthread_mutex_unlock(&dscd->lock);
+		D_("scriptpath:%s", dreq->scriptfilepath);
+		dres = newDRes();
+		pid = fork();
+		switch(pid) {
+			case -1:
+				dserv_close(gdserv);
+				D_("error in fork()");
+				exit(1);
+			case 0:
+				switch (dreq->method){
+					case E_METHOD_EVAL: case E_METHOD_TYCHECK:
+						lp = dse_openlog(dreq->logpoolip);
+						dse_record(lp, &logpool_args, "dtask",
+								KEYVALUE_u("context", dreq->context),
+								KEYVALUE_s("status", "start"),
+								KEYVALUE_u("pid", getpid()),
+								LOG_END);
+						execlp(cmd_konoha, cmd_konoha, dreq->scriptfilepath, NULL);
+						dse_record(lp, &logpool_args, "dtask",
+								KEYVALUE_u("context", dreq->context),
+								KEYVALUE_s("status", "failed"),
+								LOG_END);
+						dse_closelog(lp);
+//						if(ret == 1) {
+						// ok;
+//							dres->status = E_STATUS_OK;
+//						}
+						break;
+						//case E_METHOD_TYCHECK:
+						//	break;
+					default:
+						D_("there's no such method");
+						break;
+				}
+//				dse_send_reply(dreq->req, dres);
+				deleteDReq(dreq);
+				deleteDRes(dres);
+				exit(1);
+			default:
+				D_("pid: %d", pid);
+				waitpid(pid, &status, 0);
+				lp = dse_openlog(dreq->logpoolip);
+				if(WIFEXITED(status)) {
+					dse_record(lp, &logpool_args, "dtask",
+							KEYVALUE_u("context", dreq->context),
+							KEYVALUE_s("status", "done"),
+							KEYVALUE_u("exit status", WEXITSTATUS(status)),
+							LOG_END);
+				} else {
+					dse_record(lp, &logpool_args, "dtask",
+							KEYVALUE_u("context", dreq->context),
+							KEYVALUE_s("status", "failed"),
+							KEYVALUE_u("exit status", WEXITSTATUS(status)),
+							LOG_END);
+				}
+				dse_closelog(lp);
+				break;
+		}
+	}
 }
 
 #endif /* DSE_H_ */

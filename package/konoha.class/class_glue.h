@@ -578,6 +578,7 @@ static inline size_t initFieldSizeOfVirtualClass(KonohaClass *superClass)
 static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_StmtTyCheck(stmt, gma);
+//<<<<<<< HEAD
 	kToken *tokenClassName = SUGAR kStmt_getToken(kctx, stmt, KW_UsymbolPattern, NULL);
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	KonohaClassVar *definedClass = (KonohaClassVar*)KLIB kNameSpace_getClass(kctx, ns, S_text(tokenClassName->text), S_size(tokenClassName->text), NULL);
@@ -586,6 +587,31 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 	if (definedClass != NULL) {
 		if(declsize > 0 && !CT_isForward(definedClass)) {
 			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "%s has already defined", CT_t(definedClass));
+//=======
+//	kToken *tkC = SUGAR kStmt_getToken(kctx, stmt, KW_UsymbolPattern, NULL);
+//	kToken *tkE = SUGAR kStmt_getToken(kctx, stmt, SYM_("extends"), NULL);
+//	kshortflag_t cflag = 0;
+//	ktype_t superclassId = TY_Object;
+//	KonohaClass *supct = CT_Object;
+//	kNameSpace *ns = Stmt_nameSpace(stmt);
+//	if (tkE) {
+//		//if(TK_isType(tkE)) {
+//			superclassId = TK_type(tkE);
+//			supct = CT_(superclassId);
+//		//}
+//		//else {
+//		//	supct = KLIB kNameSpace_getClass(kctx, ns, S_text(tkE->text), S_size(tkE->text), NULL);
+//		//	DBG_ASSERT(supct != NULL);
+//		//	superclassId = supct->classId;
+//		//}
+//
+//		if(CT_isFinal(supct)) {
+//			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "%s is final", CT_t(supct));
+//			RETURNb_(false);
+//		}
+//		if(!CT_isDefined(supct)) {
+//			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "%s has undefined field(s)", CT_t(supct));
+//>>>>>>> ae5daa82da8036b20e286ad09718511207fcd89f
 			RETURNb_(false);
 		}
 	}
@@ -624,8 +650,6 @@ static kbool_t class_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileli
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("new"), ParseExpr_(new), },
 		{ .keyword = SYM_("class"), .rule = "\"class\" $USYMBOL [\"extends\" extends: $type] [$block]", TopStmtTyCheck_(class), },
-//		{ .keyword = SYM_("class"), .rule = "\"class\" $USYMBOL [\"extends\" extends: $USYMBOL] [$block]", TopStmtTyCheck_(class), },
-//		{ .keyword = SYM_("extends"), .rule = "\"extends\" $type", },
 		{ .keyword = SYM_("."), ExprTyCheck_(Getter) },
 		{ .keyword = KW_END, },
 	};
