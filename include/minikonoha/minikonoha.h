@@ -773,11 +773,6 @@ struct KonohaClassField {
 typedef struct KonohaObjectHeader {
 	kmagicflag_t magicflag;
 	KonohaClass *ct;  //@RENAME
-	union {
-		uintptr_t refc;  // RCGC
-		void *gcinfo;
-		uintptr_t hashcode; // reserved
-	};
 	KUtilsGrowingArray *kvproto;
 } KonohaObjectHeader ;
 
