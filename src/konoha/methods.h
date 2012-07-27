@@ -220,7 +220,7 @@ static KMETHOD System_p(KonohaContext *kctx, KonohaStack *sfp)
 //## method void System.gc();
 static KMETHOD System_gc(KonohaContext *kctx, KonohaStack *sfp)
 {
-	MODGC_gc_invoke(kctx, 1/* needsCStackTrace */);
+	MODGC_gc_invoke(kctx, NULL);
 }
 
 #ifdef __cplusplus

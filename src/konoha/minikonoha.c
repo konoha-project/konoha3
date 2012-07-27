@@ -36,6 +36,7 @@ extern "C" {
 
 #include "minikonoha/local.h"
 
+#include "protomap.h"
 #include "klibexec.h"
 #include "datatype.h"
 

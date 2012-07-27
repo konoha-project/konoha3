@@ -74,18 +74,14 @@ static kObject *new_kObject(KonohaContext *kctx, KonohaClass *ct, uintptr_t conf
 	kObjectVar *o = (kObjectVar*) MODGC_omalloc(kctx, ct->cstruct_size);
 	o->h.magicflag = ct->magicflag;
 	o->h.ct = ct;
-	o->h.kvproto = kvproto_null();
+	o->h.kvproto = (KUtilsGrowingArray*)protomap_new(0);
 	ct->init(kctx, (kObject*)o, (void*)conf);
 	return (kObject*)o;
 }
 
 static kObject *new_kObjectOnGCSTACK(KonohaContext *kctx, KonohaClass *ct, uintptr_t conf)
 {
-	kObjectVar *o = (kObjectVar*) MODGC_omalloc(kctx, ct->cstruct_size);
-	o->h.magicflag = ct->magicflag;
-	o->h.ct = ct;
-	o->h.kvproto = kvproto_null();
-	ct->init(kctx, (kObject*)o, (void*)conf);
+	kObject *o = new_kObject(kctx, ct, conf);
 	PUSH_GCSTACK(o);  // GCSAFE
 	return (kObject*)o;
 }
