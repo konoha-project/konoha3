@@ -113,7 +113,7 @@ set(PACKAGES
 	konoha.array
 	konoha.iterator
 	konoha.hashmap
-	konoha.assignment
+	konoha.assign
 	konoha.while
 	konoha.class
 	konoha.global
