@@ -51,14 +51,14 @@ static KMETHOD Token_setSubArray(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
 	kArray *sub = sfp[1].asArray;
-	KSETv(tk->sub, sub);
+	KSETv(tk->subTokenList, sub);
 	RETURNvoid_();
 }
 
 ////## boolean Token.isTypeName();
 //static KMETHOD Token_isTypeName(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	RETURNb_(TK_isType(sfp[0].asToken));
+//	RETURNb_(Token_isVirtualTypeLiteral(sfp[0].asToken));
 //}
 
 //## boolean Token.isParenthesis();
@@ -282,8 +282,8 @@ static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp)
 //		kObject_setNullObject(expr, 1);
 //	}
 //	if(IS_NOTNULL(expr)) {
-//		assert(IS_Array(tk->sub));
-//		expr = SUGAR kStmt_addExprParam(kctx, stmt, expr, tk->sub, 0, kArray_size(tk->sub), 1/*allowEmpty*/);
+//		assert(IS_Array(tk->subTokenList));
+//		expr = SUGAR kStmt_addExprParam(kctx, stmt, expr, tk->subTokenList, 0, kArray_size(tk->subTokenList), 1/*allowEmpty*/);
 //	}
 //	RETURN_(expr);
 //}

@@ -611,7 +611,7 @@ static int parseREGEX(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, in
 				kArray *a = new_(Array, 2);
 				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, tenv->source + tok_start + 1, (pos0-1) - (tok_start+1), 0));
 				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, tenv->source + pos0, pos-pos0, 0));
-				tk->sub = a;
+				tk->subTokenList = a;
 				tk->keyword = SYM_("$regex");
 			}
 			return pos;
@@ -629,8 +629,8 @@ static KMETHOD ExprTyCheck_Regex(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
 	kRegex *r = new_(Regex, NULL);
-	DBG_ASSERT(kArray_size(tk->sub) == 2);
-	Regex_set(kctx, r, tk->sub->stringItems[0], tk->sub->stringItems[1]);
+	DBG_ASSERT(kArray_size(tk->subTokenList) == 2);
+	Regex_set(kctx, r, tk->subTokenList->stringItems[0], tk->subTokenList->stringItems[1]);
 	RETURN_(SUGAR kExpr_setConstValue(kctx, expr, TY_Regex, UPCAST(r)));
 }
 

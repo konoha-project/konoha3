@@ -39,7 +39,6 @@ static int parseINDENT(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, i
 		break;
 	}
 	if(IS_NOTNULL(tk)) {
-		Token_setUnresolved(tk, true);  // to avoid indent within tree tokens
 		tk->keyword = TK_INDENT;
 		tk->indent = 0; /* indent FIXME: Debug/Parser/LineNumber.k (Failed) */
 	}
@@ -123,7 +122,6 @@ static void Token_setSymbolText(KonohaContext *kctx, kTokenVar *tk, const char *
 {
 	if(IS_NOTNULL(tk)) {
 		ksymbol_t kw = ksymbolA(t, len, SYM_NONAME);
-		Token_setUnresolved(tk, true);
 		if(kw == SYM_UNMASK(kw)) {
 			KSETv(tk->text, SYM_s(kw));
 		}
@@ -583,8 +581,8 @@ static kbool_t checkNestedSyntax(KonohaContext *kctx, kArray *tokenArray, int *s
 	if(topch == opench) {
 		int ne = findCloseChar(kctx, tokenArray, i+1, e, tk->keyword, closech);
 		tk->keyword = astkw;
-		KSETv(tk->sub, new_(TokenArray, 0));
-		makeSyntaxRule(kctx, tokenArray, i+1, ne, tk->sub);
+		KSETv(tk->subTokenList, new_(TokenArray, 0));
+		makeSyntaxRule(kctx, tokenArray, i+1, ne, tk->subTokenList);
 		*s = ne;
 		return true;
 	}

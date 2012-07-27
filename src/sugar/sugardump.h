@@ -94,9 +94,9 @@ static void dumpTokenArray(KonohaContext *kctx, int nest, kArray *a, int s, int 
 		while(s < e) {
 			kToken *tk = a->tokenItems[s];
 			dumpIndent(kctx, nest);
-			if(IS_Array(tk->sub)) {
+			if(IS_Array(tk->subTokenList)) {
 				DUMP_P("%c\n", dumpBeginTokenList(tk));
-				dumpTokenArray(kctx, nest+1, tk->sub, 0, kArray_size(tk->sub));
+				dumpTokenArray(kctx, nest+1, tk->subTokenList, 0, kArray_size(tk->subTokenList));
 				dumpIndent(kctx, nest);
 				DUMP_P("%c\n", dumpEndTokenList(tk));
 			}

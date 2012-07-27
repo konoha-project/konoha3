@@ -119,14 +119,14 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tokenArray, int 
 	newtk->keyword = AST_PARENTHESIS;
 	newtk->uline = tkHead->uline;
 	//newtk->topch = tkHead->topch; newtk->lpos = tkHead->closech;
-	KSETv(newtk->sub, new_(TokenArray, 0));
+	KSETv(newtk->subTokenList, new_(TokenArray, 0));
 	i = news;
 
 	while (i < newc) {
 		tkNew = GCSAFE_new(TokenVar, 0);
 		tmp = tokenArray->tokenItems[i];
 		setToken(tkNew, S_text(tmp->text), S_size(tmp->text), tmp->keyword);
-		KLIB kArray_add(kctx, newtk->sub, tkNew);
+		KLIB kArray_add(kctx, newtk->subTokenList, tkNew);
 		i++;
 	}
 	KLIB kArray_add(kctx, tokenArray, newtk);

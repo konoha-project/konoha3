@@ -40,6 +40,79 @@ extern "C" {
 
 #define KW_t(X)   SYM_PRE(X),SYM_t(X)
 
+#define TK_ERR      KW_ToksPattern
+#define TK_CODE     KW_BlockPattern
+#define TK_NONE 0
+#define TK_INDENT 1
+#define TK_SYMBOL  KW_SymbolPattern
+//#define TK_USYMBOL KW_UsymbolPattern
+#define TK_TEXT  KW_TextPattern
+#define TK_INT   KW_IntPattern
+#define TK_FLOAT KW_FloatPattern
+#define TK_TYPE  KW_TypePattern
+#define TK_MN           KW_ParamsPattern
+#define TK_METANAME     KW_ATMARK
+
+#define KW_END  ((ksymbol_t)-1)
+#define KW_ERR  (((ksymbol_t)0)|0) /**/
+#define KW_ExprPattern (((ksymbol_t)1)|KW_PATTERN) /*$expr*/
+#define KW_SymbolPattern (((ksymbol_t)2)|KW_PATTERN) /*$SYMBOL*/
+#define KW_UsymbolPattern (((ksymbol_t)3)|KW_PATTERN) /*$USYMBOL*/
+#define KW_TextPattern (((ksymbol_t)4)|KW_PATTERN) /*$TEXT*/
+#define KW_IntPattern (((ksymbol_t)5)|KW_PATTERN) /*$INT*/
+#define KW_FloatPattern (((ksymbol_t)6)|KW_PATTERN) /*$FLOAT*/
+#define KW_TypePattern (((ksymbol_t)7)|KW_PATTERN) /*$type*/
+#define KW_ParenthesisPattern (((ksymbol_t)8)) /*()*/
+#define KW_BracketPattern     (((ksymbol_t)9)) /*[]*/
+#define KW_BracePattern       (((ksymbol_t)10)) /*{}*/
+#define AST_PARENTHESIS KW_ParenthesisPattern
+#define AST_BRACKET     KW_BracketPattern
+#define AST_OPTIONAL    (((ksymbol_t)9)|KW_ATMARK)  /*@[]*/
+#define AST_BRACE       KW_BracePattern
+#define KW_BlockPattern (((ksymbol_t)11)|KW_PATTERN) /*$block*/
+#define KW_ParamsPattern (((ksymbol_t)12)|KW_PATTERN) /*$params*/
+#define KW_ToksPattern (((ksymbol_t)13)|KW_PATTERN) /*$toks*/
+
+#define KW_StmtConstDecl   KW_UsymbolPattern
+#define KW_StmtTypeDecl    KW_TypePattern
+#define KW_ExprMethodCall  KW_ParamsPattern
+#define KW_StmtMethodDecl  KW_void
+
+#define KW_DOT     14
+#define KW_DIV     (1+KW_DOT)
+#define KW_MOD     (2+KW_DOT)
+#define KW_MUL     (3+KW_DOT)
+#define KW_ADD     (4+KW_DOT)
+#define KW_SUB     (5+KW_DOT)
+#define KW_LT      (6+KW_DOT)
+#define KW_LTE     (7+KW_DOT)
+#define KW_GT      (8+KW_DOT)
+#define KW_GTE     (9+KW_DOT)
+#define KW_EQ      (10+KW_DOT)
+#define KW_NEQ     (11+KW_DOT)
+#define KW_AND     (12+KW_DOT)
+#define KW_OR      (13+KW_DOT)
+#define KW_NOT     (14+KW_DOT)
+#define KW_LET     (15+KW_DOT)
+#define KW_COMMA   (16+KW_DOT)
+#define KW_DOLLAR  KW_PATTERN
+#define KW_ATMARK  MN_Annotation
+
+// #define KW_void (((ksymbol_t)32)|0) /*void*/
+
+#define KW_void      31
+#define KW_boolean   (1+KW_void)
+#define KW_int       (2+KW_void)
+#define KW_true      (3+KW_void)
+#define KW_false     (4+KW_void)
+#define KW_if        (5+KW_void)
+#define KW_else      (6+KW_void)
+#define KW_return    (7+KW_void)
+// reserved
+#define KW_new       (8+KW_void)
+#define FN_this      FN_("this")
+
+
 #define kflag_clear(flag)  (flag) = 0
 #define K_CHECKSUM 1
 
@@ -209,25 +282,29 @@ struct kNameSpaceVar {
 	KUtilsGrowingArray                 constTable;        // const variable
 };
 
+/* Token */
+
 struct kTokenVar {
 	KonohaObjectHeader h;
 	ksymbol_t     keyword;
 	union {
-		kushort_t indent;       // indent when kw
-		ksymbol_t patternKey;   // pattern name for 'setting key in Stmt'
-		ktype_t   ty;           // if kw == KW_TypePattern
+		kushort_t indent;               // indent when kw == TK_INDENT
+		ksymbol_t patternKey;           // pattern name for 'setting key in Stmt'
+		ktype_t   virtualTypeLiteral;   // if kw == KW_TypePattern
 	};
 	union {
 		kString *text;
-		kArray  *sub;
+		kArray  *subTokenList;
 	};
 	kfileline_t     uline;
-	SugarSyntax *resolvedSyntaxInfo;
+	SugarSyntax    *resolvedSyntaxInfo;
 };
 
-#define kToken_needsKeywordResolved(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
-#define Token_setUnresolved(o, B)          TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,B)
 #define Token_topch(tk)                    ((tk)->keyword != TK_TEXT && (S_size((tk)->text) == 1) ? S_text((tk)->text)[0] : 0)
+#define Token_isVirtualTypeLiteral(TK)     ((TK)->keyword == KW_TypePattern)
+#define Token_typeLiteral(TK)              (TK)->virtualTypeLiteral
+
+
 
 #define TEXPR_UNTYPED       -1   /*THIS MUST NOT HAPPEN*/
 #define TEXPR_CONST          0
@@ -375,79 +452,6 @@ struct kGammaVar {
 #define K_NULLEXPR   (kExpr*)((CT_Expr)->defaultValueAsNull)
 #define K_NULLBLOCK  (kBlock*)((CT_Block)->defaultValueAsNull)
 
-#define TK_ERR      KW_ToksPattern
-#define TK_CODE     KW_BlockPattern
-#define TK_NONE 0
-#define TK_INDENT 1
-#define TK_SYMBOL  KW_SymbolPattern
-//#define TK_USYMBOL KW_UsymbolPattern
-#define TK_TEXT  KW_TextPattern
-#define TK_INT   KW_IntPattern
-#define TK_FLOAT KW_FloatPattern
-#define TK_TYPE  KW_TypePattern
-#define TK_MN           KW_ParamsPattern
-#define TK_METANAME     KW_ATMARK
-
-#define KW_END  ((ksymbol_t)-1)
-#define KW_ERR  (((ksymbol_t)0)|0) /**/
-#define KW_ExprPattern (((ksymbol_t)1)|KW_PATTERN) /*$expr*/
-#define KW_SymbolPattern (((ksymbol_t)2)|KW_PATTERN) /*$SYMBOL*/
-#define KW_UsymbolPattern (((ksymbol_t)3)|KW_PATTERN) /*$USYMBOL*/
-#define KW_TextPattern (((ksymbol_t)4)|KW_PATTERN) /*$TEXT*/
-#define KW_IntPattern (((ksymbol_t)5)|KW_PATTERN) /*$INT*/
-#define KW_FloatPattern (((ksymbol_t)6)|KW_PATTERN) /*$FLOAT*/
-#define KW_TypePattern (((ksymbol_t)7)|KW_PATTERN) /*$type*/
-#define KW_ParenthesisPattern (((ksymbol_t)8)) /*()*/
-#define KW_BracketPattern     (((ksymbol_t)9)) /*[]*/
-#define KW_BracePattern       (((ksymbol_t)10)) /*{}*/
-#define AST_PARENTHESIS KW_ParenthesisPattern
-#define AST_BRACKET     KW_BracketPattern
-#define AST_OPTIONAL    (((ksymbol_t)9)|KW_ATMARK)  /*@[]*/
-#define AST_BRACE       KW_BracePattern
-#define KW_BlockPattern (((ksymbol_t)11)|KW_PATTERN) /*$block*/
-#define KW_ParamsPattern (((ksymbol_t)12)|KW_PATTERN) /*$params*/
-#define KW_ToksPattern (((ksymbol_t)13)|KW_PATTERN) /*$toks*/
-
-#define KW_StmtConstDecl   KW_UsymbolPattern
-#define KW_StmtTypeDecl    KW_TypePattern
-#define KW_ExprMethodCall  KW_ParamsPattern
-#define KW_StmtMethodDecl  KW_void
-
-#define KW_DOT     14
-#define KW_DIV     (1+KW_DOT)
-#define KW_MOD     (2+KW_DOT)
-#define KW_MUL     (3+KW_DOT)
-#define KW_ADD     (4+KW_DOT)
-#define KW_SUB     (5+KW_DOT)
-#define KW_LT      (6+KW_DOT)
-#define KW_LTE     (7+KW_DOT)
-#define KW_GT      (8+KW_DOT)
-#define KW_GTE     (9+KW_DOT)
-#define KW_EQ      (10+KW_DOT)
-#define KW_NEQ     (11+KW_DOT)
-#define KW_AND     (12+KW_DOT)
-#define KW_OR      (13+KW_DOT)
-#define KW_NOT     (14+KW_DOT)
-#define KW_LET     (15+KW_DOT)
-#define KW_COMMA   (16+KW_DOT)
-#define KW_DOLLAR  KW_PATTERN
-#define KW_ATMARK  MN_Annotation
-
-// #define KW_void (((ksymbol_t)32)|0) /*void*/
-
-#define KW_void      31
-#define KW_boolean   (1+KW_void)
-#define KW_int       (2+KW_void)
-#define KW_true      (3+KW_void)
-#define KW_false     (4+KW_void)
-#define KW_if        (5+KW_void)
-#define KW_else      (6+KW_void)
-#define KW_return    (7+KW_void)
-// reserved
-#define KW_new       (8+KW_void)
-#define FN_this      FN_("this")
-
-#define kkNameSpace_defineSyntax(L, S)  kmodsugar->KkNameSpace_defineSyntax(kctx, L, S)
 
 typedef struct {
 	KonohaModule  h;
@@ -578,12 +582,12 @@ static kExpr* kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, i
 #define TY_Gamma                           kmodsugar->cGamma->classId
 #define TY_TokenArray                      kmodsugar->cTokenArray->classId
 
-#define SYN_(KS, KW)                kNameSpace_getSyntax(kctx, KS, KW, 0)
+#define SYN_(KS, KW)                       kNameSpace_getSyntax(kctx, KS, KW, 0)
 
 
 #else/*SUGAR_EXPORTS*/
 
-#define SUGAR        ((const KModuleSugar *)kmodsugar)->
+#define SUGAR        ((const KModuleSugar*)kmodsugar)->
 #define TY_NameSpace                         SUGAR cNameSpace->classId
 #define TY_Token                             SUGAR cToken->classId
 #define TY_Stmt                              SUGAR cStmt->classId
@@ -600,10 +604,12 @@ static kExpr* kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, i
 
 ///* ------------------------------------------------------------------------ */
 
-// In future, typeof operator is introduced
-
-#define TK_isType(TK)     ((TK)->keyword == KW_TypePattern)
-#define TK_type(TK)       (TK)->ty
+static inline void kToken_setVirtualTypeLiteral(KonohaContext *kctx, kToken *tk, kNameSpace *ns, ktype_t type)
+{
+	((kTokenVar*)tk)->keyword = KW_TypePattern;
+	((kTokenVar*)tk)->virtualTypeLiteral = type;
+	((kTokenVar*)tk)->resolvedSyntaxInfo = kmodsugar->kNameSpace_getSyntax(kctx, ns, KW_TypePattern, 0);
+}
 
 #define Stmt_nameSpace(STMT)   kStmt_nameSpace(kctx, STMT)
 static inline kNameSpace *kStmt_nameSpace(KonohaContext *kctx, kStmt *stmt)
