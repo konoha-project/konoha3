@@ -669,8 +669,8 @@ static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *token
 	if(currentTokenIdx < endIdx) {
 		if(!canRollBack) {
 			kStmt_p(stmt, ErrTag, "%s%s: unexpected token %s", T_statement(stmt->syn->keyword), Token_text(tokenList->tokenItems[currentTokenIdx]));
+			return returnIdx;
 		}
-		return returnIdx;
 	}
 	return currentTokenIdx;
 }
