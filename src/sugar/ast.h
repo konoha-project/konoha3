@@ -529,6 +529,7 @@ static int kStmt_parseTypePattern(KonohaContext *kctx, kStmt *stmt, kNameSpace *
 			int sizeofBracketTokens = kArray_size(tk->subTokenList);
 			if(isAllowedGenerics &&  sizeofBracketTokens > 0) {  // C[T][]
 				KonohaClass *foundGenericClass = kStmt_parseGenerics(kctx, stmt, ns, foundClass, tk->subTokenList, 0, sizeofBracketTokens);
+				DBG_P("foundGenericClass=%p", foundGenericClass);
 				if(foundGenericClass == NULL) break;
 				foundClass = foundGenericClass;
 			}
