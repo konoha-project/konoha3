@@ -23,8 +23,8 @@ static void show_timer(struct timeval *timer, const char *s)
 }
 
 #define EACH  4
-#define COUNT 20000000
-#define SUM   199999990000000
+#define COUNT 20000
+#define SUM   199990000
 
 static void each(KonohaContext *kctx, void *thunk, KUtilsKeyValue *d)
 {
