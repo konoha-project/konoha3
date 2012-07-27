@@ -514,37 +514,37 @@ typedef struct {
 
 #define EXPORT_SUGAR(base) \
 	base->kNameSpace_setTokenizeFunc = kNameSpace_setTokenizeFunc;\
-	base->kNameSpace_tokenize = kNameSpace_tokenize;\
-	base->kStmt_parseTypePattern = kStmt_parseTypePattern;\
-	base->kStmt_getToken          = kStmt_getToken;\
-	base->kStmt_getBlock          = kStmt_getBlock;\
-	base->kStmt_getExpr           = kStmt_getExpr;\
-	base->kStmt_getText           = kStmt_getText;\
-	base->kExpr_setConstValue  = kExpr_setConstValue;\
-	base->kExpr_setUnboxConstValue  = kExpr_setUnboxConstValue;\
-	base->kExpr_setVariable    = kExpr_setVariable;\
+	base->kNameSpace_tokenize        = kNameSpace_tokenize;\
+	base->kStmt_parseTypePattern     = kStmt_parseTypePattern;\
+	base->kStmt_getToken             = kStmt_getToken;\
+	base->kStmt_getBlock             = kStmt_getBlock;\
+	base->kStmt_getExpr              = kStmt_getExpr;\
+	base->kStmt_getText              = kStmt_getText;\
+	base->kExpr_setConstValue        = kExpr_setConstValue;\
+	base->kExpr_setUnboxConstValue   = kExpr_setUnboxConstValue;\
+	base->kExpr_setVariable          = kExpr_setVariable;\
 	base->kStmt_tyCheckByNameAt      = kStmt_tyCheckByNameAt;\
-	base->kStmt_tyCheckByName    = kStmt_tyCheckByName;\
-	base->kBlock_tyCheckAll    = kBlock_tyCheckAll;\
+	base->kStmt_tyCheckByName        = kStmt_tyCheckByName;\
+	base->kBlock_tyCheckAll          = kBlock_tyCheckAll;\
 	base->kStmt_tyCheckCallParamExpr = kStmt_tyCheckCallParamExpr;\
-	base->new_TypedMethodCall = new_TypedMethodCall;\
+	base->new_TypedMethodCall        = new_TypedMethodCall;\
 	/*syntax*/\
-	base->kNameSpace_defineSyntax  = kNameSpace_defineSyntax;\
-	base->kNameSpace_getSyntax           = kNameSpace_getSyntax;\
-	base->makeSyntaxRule     = makeSyntaxRule;\
-	base->kNameSpace_setSugarFunc   = kNameSpace_setSugarFunc;\
-	base->kNameSpace_addSugarFunc   = kNameSpace_addSugarFunc;\
+	base->kNameSpace_defineSyntax    = kNameSpace_defineSyntax;\
+	base->kNameSpace_getSyntax       = kNameSpace_getSyntax;\
+	base->makeSyntaxRule             = makeSyntaxRule;\
+	base->kNameSpace_setSugarFunc    = kNameSpace_setSugarFunc;\
+	base->kNameSpace_addSugarFunc    = kNameSpace_addSugarFunc;\
 	/*ast*/\
-	base->new_Block          = new_Block;\
-	base->kBlock_insertAfter  = kBlock_insertAfter;\
-	base->kStmt_parseExpr      = kStmt_parseExpr;\
-	base->kStmt_parseOperatorExpr = kStmt_parseOperatorExpr;\
-	base->new_ConsExpr       = new_ConsExpr;\
-	base->kStmt_addExprParam = kStmt_addExprParam;\
-	base->kStmt_rightJoinExpr     = kStmt_rightJoinExpr;\
+	base->new_Block                  = new_Block;\
+	base->kBlock_insertAfter         = kBlock_insertAfter;\
+	base->kStmt_parseExpr            = kStmt_parseExpr;\
+	base->kStmt_parseOperatorExpr    = kStmt_parseOperatorExpr;\
+	base->new_ConsExpr               = new_ConsExpr;\
+	base->kStmt_addExprParam         = kStmt_addExprParam;\
+	base->kStmt_rightJoinExpr        = kStmt_rightJoinExpr;\
 	/*perror*/\
-	base->Token_pERR         = Token_pERR;\
-	base->Stmt_p             = Stmt_p;\
+	base->Token_pERR                 = Token_pERR;\
+	base->Stmt_p                     = Stmt_p;\
 
 
 typedef struct {
