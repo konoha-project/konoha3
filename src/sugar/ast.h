@@ -526,25 +526,15 @@ static int kStmt_parseTypePattern(KonohaContext *kctx, kStmt *stmt, kNameSpace *
 		while(nextIdx < endIdx) {
 			kToken *tk = tokenList->tokenItems[nextIdx];
 			if(tk->keyword != AST_BRACKET) break;
-			int psize = kArray_size(tk->subTokenList);
-			if(isAllowedGenerics &&  psize > 0) {
-				foundClass = kStmt_parseGenerics(kctx, stmt, ns, foundClass, tk->subTokenList, 0, psize);
-				if(foundClass == NULL) {
-					if(stmt != NULL) {
-						kToken_p(stmt, tk, ErrTag, "invalid generic type");
-					}
-					break;
-				}
+			int sizeofBracketTokens = kArray_size(tk->subTokenList);
+			if(isAllowedGenerics &&  sizeofBracketTokens > 0) {  // C[T][]
+				KonohaClass *foundGenericClass = kStmt_parseGenerics(kctx, stmt, ns, foundClass, tk->subTokenList, 0, sizeofBracketTokens);
+				if(foundGenericClass == NULL) break;
+				foundClass = foundGenericClass;
 			}
 			else {
-				if(psize > 0) {
-					if(stmt != NULL) {
-						kToken_p(stmt, tk, ErrTag, "syntax error: array type must be %s[]", CT_t(foundClass));
-					}
-					foundClass = NULL;
-					break;
-				}
-				foundClass = CT_p0(kctx, CT_Array, foundClass->classId);
+				if(sizeofBracketTokens > 0) break;   // C[100] is treated as C  and the token [100] is set to nextIdx;
+				foundClass = CT_p0(kctx, CT_Array, foundClass->classId);  // C[] => Array[C]
 			}
 			isAllowedGenerics = false;
 			nextIdx++;

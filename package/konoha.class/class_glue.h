@@ -313,30 +313,29 @@ static kExpr* NewExpr(KonohaContext *kctx, SugarSyntax *syn, kToken *tk, ktype_t
 
 static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_ParseExpr(stmt, tokenArray, s, c, e);
-	DBG_ASSERT(s == c);
-	kTokenVar *tkNEW = tokenArray->tokenVarItems[s];
-	if(s + 2 < kArray_size(tokenArray)) {
-		kToken *tk1 = tokenArray->tokenItems[s+1];
-		kToken *tk2 = tokenArray->tokenItems[s+2];
-		KonohaClass *ct = CT_(Token_typeLiteral(tk1));
-		if (ct->classId == TY_void) {
-			RETURN_(SUGAR Stmt_p(kctx, stmt, tk1, ErrTag, "undefined class: %s", S_text(tk1->text)));
-		} else if (CT_isVirtual(ct)) {
-			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "invalid application of 'new' to incomplete class %s", CT_t(ct));
-		}
-
-		if(Token_isVirtualTypeLiteral(tk1) && tk2->keyword == AST_PARENTHESIS) {  // new C (...)
+	VAR_ParseExpr(stmt, tokenArray, beginIdx, currentIdx, endIdx);
+	DBG_ASSERT(beginIdx == currentIdx);
+	kTokenVar *newToken = tokenArray->tokenVarItems[beginIdx];   // new Class (
+	KonohaClass *foundClass = NULL;
+	int nextIdx = SUGAR kStmt_parseTypePattern(kctx, stmt, Stmt_nameSpace(stmt), tokenArray, beginIdx + 1, endIdx, &foundClass);
+	if(nextIdx != -1 && nextIdx < endIdx) {
+		kToken *nextTokenAfterClassName = tokenArray->tokenItems[nextIdx];
+//		if (ct->classId == TY_void) {
+//			RETURN_(SUGAR Stmt_p(kctx, stmt, tk1, ErrTag, "undefined class: %s", S_text(tk1->text)));
+//		} else if (CT_isVirtual(ct)) {
+//			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "invalid application of 'new' to incomplete class %s", CT_t(ct));
+//		}
+		if(nextTokenAfterClassName->keyword == AST_PARENTHESIS) {  // new C (...)
 			SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
-			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, tkNEW, NewExpr(kctx, syn, tk1, Token_typeLiteral(tk1)));
-			tkNEW->keyword = MN_new;
+			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, newToken, NewExpr(kctx, syn, tokenArray->tokenVarItems[beginIdx+1], foundClass->classId));
+			newToken->keyword = MN_new;
 			RETURN_(expr);
 		}
-		if(Token_isVirtualTypeLiteral(tk1) && tk2->keyword == AST_BRACKET) {     // new C [...]
+		if(nextTokenAfterClassName->keyword == AST_BRACKET) {     // new int [100]
 			SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_new);
-			KonohaClass *ct = CT_p0(kctx, CT_Array, Token_typeLiteral(tk1));
-			tkNEW->keyword = MN_("newArray");
-			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, tkNEW, NewExpr(kctx, syn, tk1, ct->classId));
+			KonohaClass *arrayClass = CT_p0(kctx, CT_Array, foundClass->classId);
+			newToken->keyword = MN_("newArray");
+			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, newToken, NewExpr(kctx, syn, tokenArray->tokenVarItems[beginIdx+1], arrayClass->classId));
 			RETURN_(expr);
 		}
 	}
