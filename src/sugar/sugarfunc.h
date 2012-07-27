@@ -946,7 +946,7 @@ static kbool_t ExprTerm_toVariable(KonohaContext *kctx, kStmt *stmt, kExpr *expr
 	return false;
 }
 
-static kbool_t appendAssignmentStmt(KonohaContext *kctx, kExpr *expr, kStmt **lastStmtRef)
+static kbool_t appendAssignStmt(KonohaContext *kctx, kExpr *expr, kStmt **lastStmtRef)
 {
 	kStmt *lastStmt = lastStmtRef[0];
 	kStmt *newstmt = new_(Stmt, lastStmt->uline);
@@ -966,7 +966,7 @@ static kbool_t Expr_declType(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGam
 		if(ExprTerm_toVariable(kctx, stmt, expr, gma, ty)) {
 			kExpr *vexpr = new_VariableExpr(kctx, gma, TEXPR_NULL, ty, 0);
 			expr = new_TypedConsExpr(kctx, TEXPR_LET, TY_void, 3, K_NULL, expr, vexpr);
-			return appendAssignmentStmt(kctx, expr, lastStmtRef);
+			return appendAssignStmt(kctx, expr, lastStmtRef);
 		}
 	}
 	else if(expr->syn->keyword == KW_LET) {
@@ -977,7 +977,7 @@ static kbool_t Expr_declType(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGam
 		}
 		if(ExprTerm_toVariable(kctx, stmt, lexpr, gma, ty)) {
 			if(SUGAR kStmt_tyCheckByNameAt(kctx, stmt, expr, 2, gma, ty, 0) != K_NULLEXPR) {
-				return appendAssignmentStmt(kctx, expr, lastStmtRef);
+				return appendAssignStmt(kctx, expr, lastStmtRef);
 			}
 			return false;
 		}

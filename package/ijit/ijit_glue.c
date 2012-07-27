@@ -704,7 +704,7 @@ static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	KREQUIRE_PACKAGE("sugar", pline);
 	KREQUIRE_PACKAGE("konoha.float", pline);
 	KREQUIRE_PACKAGE("llvm", pline);
-	KREQUIRE_PACKAGE("konoha.assignment", pline);
+	KREQUIRE_PACKAGE("konoha.assign", pline);
 	KREQUIRE_PACKAGE("konoha.null", pline);
 	KREQUIRE_PACKAGE("konoha.string", pline);
 	kmodjit_t *base  = (kmodjit_t*)KCALLOC(sizeof(kmodjit_t), 1);

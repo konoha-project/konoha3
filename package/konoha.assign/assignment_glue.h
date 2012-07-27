@@ -28,7 +28,7 @@
 // --------------------------------------------------------------------------
 
 // Expr Expr.tyCheckStub(Gamma gma, int reqtyid);
-static KMETHOD ExprTyCheck_assignment(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD ExprTyCheck_assign(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kNameSpace *ns = Stmt_nameSpace(stmt);
@@ -62,17 +62,17 @@ static KMETHOD ExprTyCheck_assignment(KonohaContext *kctx, KonohaStack *sfp)
 
 // --------------------------------------------------------------------------
 
-static	kbool_t assignment_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static	kbool_t assign_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t assignment_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t assign_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
 {
 	return true;
 }
 
-static KMETHOD StmtTyCheck_DefaultAssignment(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD StmtTyCheck_DefaultAssign(KonohaContext *kctx, KonohaStack *sfp)
 {
 }
 
@@ -81,7 +81,7 @@ static KMETHOD StmtTyCheck_DefaultAssignment(KonohaContext *kctx, KonohaStack *s
 		tk->keyword = k;\
 	}
 
-static int transform_oprAssignment(KonohaContext *kctx, kArray* tokenArray, int s, int c, int e)
+static int transform_oprAssign(KonohaContext *kctx, kArray* tokenArray, int s, int c, int e)
 {
 	kTokenVar *tkNew, *tkNewOp;
 	kToken *tmp, *tkHead;
@@ -145,32 +145,32 @@ static int transform_oprAssignment(KonohaContext *kctx, kArray* tokenArray, int 
 	return news;
 }
 
-static KMETHOD ParseExpr_OprAssignment(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD ParseExpr_OprAssign(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ParseExpr(stmt, tokenArray, s, c, e);
 	size_t atop = kArray_size(tokenArray);
-	s = transform_oprAssignment(kctx, tokenArray, s, c, e);
+	s = transform_oprAssign(kctx, tokenArray, s, c, e);
 	kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, tokenArray, s, kArray_size(tokenArray));
 	KLIB kArray_clear(kctx, tokenArray, atop);
 	RETURN_(expr);
 }
 
-static kbool_t assignment_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
+static kbool_t assign_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("="), /*.op2 = "*", .precedence_op2 = 4096,*/ ExprTyCheck_(assignment)},
-		{ .keyword = SYM_("+="), _OPLeft, /*.precedence_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .precedence_op2 = 4096,},
-		{ .keyword = SYM_("-="), _OPLeft, /*.precedence_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .precedence_op2 = 4096,},
-		{ .keyword = SYM_("*="), _OPLeft, /*.precedence_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .precedence_op2 = 4096,},
-		{ .keyword = SYM_("/="), _OPLeft, /*.precedence_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .precedence_op2 = 4096,},
-		{ .keyword = SYM_("%="), _OPLeft, /*.precedence_op2 =*/ StmtTyCheck_(DefaultAssignment), ParseExpr_(OprAssignment), .precedence_op2 = 4096,},
+		{ .keyword = SYM_("="), /*.op2 = "*", .precedence_op2 = 4096,*/ ExprTyCheck_(assign)},
+		{ .keyword = SYM_("+="), _OPLeft, /*.precedence_op2 =*/ StmtTyCheck_(DefaultAssign), ParseExpr_(OprAssign), .precedence_op2 = 4096,},
+		{ .keyword = SYM_("-="), _OPLeft, /*.precedence_op2 =*/ StmtTyCheck_(DefaultAssign), ParseExpr_(OprAssign), .precedence_op2 = 4096,},
+		{ .keyword = SYM_("*="), _OPLeft, /*.precedence_op2 =*/ StmtTyCheck_(DefaultAssign), ParseExpr_(OprAssign), .precedence_op2 = 4096,},
+		{ .keyword = SYM_("/="), _OPLeft, /*.precedence_op2 =*/ StmtTyCheck_(DefaultAssign), ParseExpr_(OprAssign), .precedence_op2 = 4096,},
+		{ .keyword = SYM_("%="), _OPLeft, /*.precedence_op2 =*/ StmtTyCheck_(DefaultAssign), ParseExpr_(OprAssign), .precedence_op2 = 4096,},
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t assignment_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t assign_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

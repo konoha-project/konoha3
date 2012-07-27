@@ -7,11 +7,11 @@ class A{
 	}
 }
 
-void test_oprAssignment(A a) {
+void test_oprAssign(A a) {
 	a.num += 1;
 	p(a.num);
 }
 
 A a = new A();
 p(a.num);
-test_oprAssignment(a);
+test_oprAssign(a);

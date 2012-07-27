@@ -1,5 +1,5 @@
 /* written by shinpei */
-K.import("konoha.assignment");
+K.import("konoha.assign");
 K.import("konoha.while");
 K.import("konoha.string");
 K.import("konoha.bytes");

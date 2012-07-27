@@ -1,6 +1,6 @@
-K.import("konoha.assignment");
+K.import("konoha.assign");
 
-void test_oprAssignment() {
+void test_oprAssign() {
 	int i = 10;
 	i += 1;
 	p(i);
@@ -14,4 +14,4 @@ void test_oprAssignment() {
 	p(i);
 }
 
-test_oprAssignment();
+test_oprAssign();

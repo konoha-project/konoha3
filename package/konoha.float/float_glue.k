@@ -1,7 +1,7 @@
 // K.import("sugar");
 // K.import("konoha.while");
 // K.import("konoha.string");
-// K.import("konoha.assignment");
+// K.import("konoha.assign");
 
 // int floatToken(Token tk, String source) {
 //     int i = 0;

@@ -27,7 +27,7 @@
 //#include<minikonoha/float.h>
 
 // operator only
-//#include"assignment_glue.h"
+//#include"assign_glue.h"
 //#include"while_glue.h"
 
 // class and operator
@@ -42,7 +42,7 @@
 
 static	kbool_t konoha_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KREQUIRE_PACKAGE("konoha.assignment", pline);
+	KREQUIRE_PACKAGE("konoha.assign", pline);
 	KREQUIRE_PACKAGE("konoha.while", pline);
 
 	KREQUIRE_PACKAGE("konoha.class", pline);
@@ -64,7 +64,7 @@ static kbool_t konoha_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 
 static kbool_t konoha_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
-	KEXPORT_PACKAGE("konoha.assignment", ns, pline);
+	KEXPORT_PACKAGE("konoha.assign", ns, pline);
 	KEXPORT_PACKAGE("konoha.while", ns, pline);
 	KEXPORT_PACKAGE("konoha.class", ns, pline);
 	KEXPORT_PACKAGE("konoha.global", ns, pline);

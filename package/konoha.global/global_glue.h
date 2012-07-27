@@ -134,7 +134,7 @@ static ksymbol_t tosymbol(KonohaContext *kctx, kExpr *expr)
 static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_StmtTyCheck(stmt, gma);
-	DBG_P("global assignment .. ");
+	DBG_P("global assign .. ");
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	kObject *scr = ns->scriptObject;
 	if(O_classId(scr) == TY_System) {

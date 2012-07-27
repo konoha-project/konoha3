@@ -25,16 +25,16 @@
 #include<minikonoha/minikonoha.h>
 #include<minikonoha/sugar.h>
 
-#include"assignment_glue.h"
+#include"assign_glue.h"
 
-KDEFINE_PACKAGE* assignment_init(void)
+KDEFINE_PACKAGE* assign_init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("assignment", "1.0"),
-		.initPackage = assignment_initPackage,
-		.setupPackage = assignment_setupPackage,
-		.initNameSpace = assignment_initNameSpace,
-		.setupNameSpace = assignment_setupNameSpace,
+		KPACKNAME("assign", "1.0"),
+		.initPackage = assign_initPackage,
+		.setupPackage = assign_setupPackage,
+		.initNameSpace = assign_initNameSpace,
+		.setupNameSpace = assign_setupNameSpace,
 	};
 	return &d;
 }

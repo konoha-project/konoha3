@@ -578,7 +578,7 @@ static kbool_t SemiColon(KonohaContext *kctx, kArray *tokenList, int *currentIdx
 		}while(Token_topch(tk) == ';');
 	}
 	if(tk->keyword == TK_INDENT) {
-		DBG_P("!! previous=%d, indent=%d", indentRef[0], tk->indent);
+//		DBG_P("!! previous=%d, indent=%d", indentRef[0], tk->indent);
 		found = (kArray_size(stmtTokenList) > beginIdx);
 	}
 	return found;

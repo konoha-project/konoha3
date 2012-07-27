@@ -41,7 +41,7 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp)
 {
 	USING_SUGAR;
 	VAR_StmtTyCheck(stmt, syn, gma);
-//	DBG_P("global assignment .. ");
+//	DBG_P("global assign .. ");
 //	kObject *scr = gma->genv->ns->scrNUL;
 //	if(scr == NULL) {
 //		SUGAR p(kctx, ErrTag, stmt->uline, -1, " global variables are not available");

@@ -1,7 +1,7 @@
 // K.import("sugar")
 // K.import("konoha.while")
 // K.import("konoha.string")
-// K.import("konoha.assignment")
+// K.import("konoha.assign")
 
 // Expr squareBracketParseExpr (Stmt stmt, Array[Token] tokenArray, int s, int c,	int e) {
 // 	Token tk = tokenArray[c];
