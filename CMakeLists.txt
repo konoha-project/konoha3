@@ -336,6 +336,7 @@ add_clib_test(test_Kwb     ./test/src/test_Kwb.c)
 add_clib_test(test_map     ./test/src/test_map.c)
 add_clib_test(test_string  ./test/src/test_string.c)
 add_clib_test(test_cpp     ./test/src/test_cpp.cpp)
+add_clib_test(test_proto   ./test/src/test_proto.c)
 
 macro(add_builtin_test test_name)
 	add_test_with_property(Builtin/${test_name} ${ARGN})
