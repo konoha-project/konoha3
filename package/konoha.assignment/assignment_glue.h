@@ -32,8 +32,8 @@ static KMETHOD ExprTyCheck_assignment(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kNameSpace *ns = Stmt_nameSpace(stmt);
-	kExpr *lexpr = SUGAR kkStmt_tyCheckByNameAt(kctx, stmt, expr, 1, gma, TY_var, TPOL_ALLOWVOID);
-	kExpr *rexpr = SUGAR kkStmt_tyCheckByNameAt(kctx, stmt, expr, 2, gma, lexpr->ty, 0);
+	kExpr *lexpr = SUGAR kStmt_tyCheckByNameAt(kctx, stmt, expr, 1, gma, TY_var, TPOL_ALLOWVOID);
+	kExpr *rexpr = SUGAR kStmt_tyCheckByNameAt(kctx, stmt, expr, 2, gma, lexpr->ty, 0);
 	if(rexpr != K_NULLEXPR && lexpr != K_NULLEXPR) {
 		if(rexpr != K_NULLEXPR) {
 			if(lexpr->build == TEXPR_LOCAL || lexpr->build == TEXPR_FIELD) {

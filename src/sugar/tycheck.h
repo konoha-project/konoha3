@@ -176,7 +176,7 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 	return texpr;
 }
 
-static kExpr* kkStmt_tyCheckByNameAt(KonohaContext *kctx, kStmt *stmt, kExpr *exprP, size_t pos, kGamma *gma, ktype_t reqty, int pol)
+static kExpr* kStmt_tyCheckByNameAt(KonohaContext *kctx, kStmt *stmt, kExpr *exprP, size_t pos, kGamma *gma, ktype_t reqty, int pol)
 {
 	if(!Expr_isTerm(exprP) && pos < kArray_size(exprP->cons)) {
 		kExpr *expr = exprP->cons->exprItems[pos];

@@ -488,7 +488,7 @@ typedef struct {
 
 	kbool_t     (*kBlock_tyCheckAll)(KonohaContext *, kBlock *, kGamma *);
 	kbool_t     (*kStmt_tyCheckByName)(KonohaContext *, kStmt*, ksymbol_t, kGamma *, ktype_t, int);
-	kExpr*      (*kkStmt_tyCheckByNameAt)(KonohaContext *, kStmt *, kExpr *, size_t, kGamma *, ktype_t, int);
+	kExpr*      (*kStmt_tyCheckByNameAt)(KonohaContext *, kStmt *, kExpr *, size_t, kGamma *, ktype_t, int);
 	kExpr *     (*kStmt_tyCheckCallParamExpr)(KonohaContext *, kStmt *, kExpr *, kMethod *, kGamma *, ktype_t);
 	kExpr *     (*new_TypedMethodCall)(KonohaContext *, kStmt *, ktype_t ty, kMethod *mtd, kGamma *, int n, ...);
 
@@ -502,6 +502,7 @@ typedef struct {
 	void       (*kBlock_insertAfter)(KonohaContext *, kBlock *, kStmt *target, kStmt *);
 
 	kExpr*     (*kStmt_parseExpr)(KonohaContext *, kStmt *, kArray *tokenArray, int s, int e);
+	kExpr*     (*kStmt_parseOperatorExpr)(KonohaContext *, kStmt *, kArray *tokenArray, int beginIdx, int operatorIdx, int endIdx);
 	kExpr*     (*new_ConsExpr)(KonohaContext *, SugarSyntax *syn, int n, ...);
 	kExpr *    (*kStmt_addExprParam)(KonohaContext *, kStmt *, kExpr *, kArray *tokenArray, int, int, int allowEmpty);
 	kExpr *    (*kStmt_rightJoinExpr)(KonohaContext *, kStmt *, kExpr *, kArray *, int, int);
@@ -522,7 +523,7 @@ typedef struct {
 	base->kExpr_setConstValue  = kExpr_setConstValue;\
 	base->kExpr_setUnboxConstValue  = kExpr_setUnboxConstValue;\
 	base->kExpr_setVariable    = kExpr_setVariable;\
-	base->kkStmt_tyCheckByNameAt      = kkStmt_tyCheckByNameAt;\
+	base->kStmt_tyCheckByNameAt      = kStmt_tyCheckByNameAt;\
 	base->kStmt_tyCheckByName    = kStmt_tyCheckByName;\
 	base->kBlock_tyCheckAll    = kBlock_tyCheckAll;\
 	base->kStmt_tyCheckCallParamExpr = kStmt_tyCheckCallParamExpr;\
@@ -537,6 +538,7 @@ typedef struct {
 	base->new_Block          = new_Block;\
 	base->kBlock_insertAfter  = kBlock_insertAfter;\
 	base->kStmt_parseExpr      = kStmt_parseExpr;\
+	base->kStmt_parseOperatorExpr = kStmt_parseOperatorExpr;\
 	base->new_ConsExpr       = new_ConsExpr;\
 	base->kStmt_addExprParam = kStmt_addExprParam;\
 	base->kStmt_rightJoinExpr     = kStmt_rightJoinExpr;\

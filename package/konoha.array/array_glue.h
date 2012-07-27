@@ -321,7 +321,7 @@ static KMETHOD ExprTyCheck_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 	}
 //	DBG_P("expr->cons=%d", kArray_size(expr->cons));
 	for (i = 1; i < kArray_size(a1); i++) {
-		kExpr *rexpr = SUGAR kkStmt_tyCheckByNameAt(kctx, stmt, expr, i, gma, pt0, TPOL_ALLOWVOID);
+		kExpr *rexpr = SUGAR kStmt_tyCheckByNameAt(kctx, stmt, expr, i, gma, pt0, TPOL_ALLOWVOID);
 		if (rexpr == K_NULLEXPR) {
 			RETURN_(K_NULLEXPR);
 		}
@@ -413,7 +413,7 @@ static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 		lexpr = SUGAR kStmt_addExprParam(kctx, stmt, lexpr, tk->subTokenList, 0, kArray_size(tk->subTokenList), 1);
 		RETURN_(lexpr);
 	}
-	else {
+	else {  // Func [int]
 		kExpr *lexpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenArray, beginIdx, currentIdx);
 		if(lexpr == K_NULLEXPR) {
 			RETURN_(lexpr);
