@@ -489,6 +489,25 @@ static int kNameSpace_selectStmtTokenList(KonohaContext *kctx, ASTEnv *env, int 
 	return currentIdx;
 }
 
+static kbool_t kNameSpace_resolveTokenArray(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, kArray *resolvedTokenList)
+{
+	int i;
+	ASTEnv env = {
+		ns, tokenList, beginIdx, endIdx, resolvedTokenList, NULL, SYN_(ns, KW_SymbolPattern)
+	};
+	for(i = beginIdx; i < endIdx; i++) {
+		kToken *tk = tokenList->tokenItems[i];
+		if(tk->resolvedSyntaxInfo != NULL) {
+			KLIB kArray_add(kctx, resolvedTokenList, tk);
+		}
+		else {
+			env.beginIdx = i;
+			i = kNameSpace_addResolvedToken(kctx, &env);
+		}
+	}
+	return (env.errToken == NULL);
+}
+
 static kbool_t checkEndOfParenthesis(KonohaContext *kctx, kArray *tokenList, int *currentIdx, int endIdx, int *probablyCloseBeforeRef, kArray *stmtTokenList, int beginIdx)
 {
 	kToken *tk = tokenList->tokenItems[*currentIdx];
