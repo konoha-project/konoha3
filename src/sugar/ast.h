@@ -203,7 +203,7 @@ static int kStmt_parseTypePattern(KonohaContext *kctx, kStmt *stmt, kNameSpace *
 	kToken *tk = tokenList->tokenItems[beginIdx];
 	KonohaClass *foundClass = NULL;
 	if(tk->resolvedSyntaxInfo->keyword == KW_TypePattern) {
-		foundClass = CT_(tk->resolvedSyntaxInfo->ty);
+		foundClass = CT_(tk->resolvedTypeId);
 		nextIdx = beginIdx + 1;
 	}
 	if(foundClass != NULL) {
@@ -214,7 +214,6 @@ static int kStmt_parseTypePattern(KonohaContext *kctx, kStmt *stmt, kNameSpace *
 			int sizeofBracketTokens = kArray_size(tk->subTokenList);
 			if(isAllowedGenerics &&  sizeofBracketTokens > 0) {  // C[T][]
 				KonohaClass *foundGenericClass = kStmt_parseGenerics(kctx, stmt, ns, foundClass, tk->subTokenList, 0, sizeofBracketTokens);
-				DBG_P("foundGenericClass=%p", foundGenericClass);
 				if(foundGenericClass == NULL) break;
 				foundClass = foundGenericClass;
 			}
@@ -365,11 +364,10 @@ static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns
 {
 	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
 	int nextIdx = kStmt_parseTypePattern(kctx, NULL, ns, tokenList, beginIdx, endIdx, NULL);
-	if(nextIdx != -1) {
-		kToken *tk = TokenArray_nextToken(kctx, tokenList, nextIdx, endIdx);
+	if(nextIdx != -1 && nextIdx < endIdx) {
+		kToken *tk = tokenList->tokenItems[nextIdx];
 		if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern) {
-			tk = TokenArray_nextToken(kctx, tokenList, nextIdx+1, endIdx);
-			if(tk->resolvedSyntaxInfo->keyword == AST_PARENTHESIS) {
+			if(nextIdx+1 < endIdx && tokenList->tokenItems[nextIdx+1]->resolvedSyntaxInfo->keyword == AST_PARENTHESIS) {
 				DBG_P("MethodDecl");
 				return SYN_(ns, KW_StmtMethodDecl); //
 			}
@@ -377,11 +375,8 @@ static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns
 			return SYN_(ns, KW_StmtTypeDecl);  //
 		}
 		if(tk->resolvedSyntaxInfo->keyword == KW_TypePattern) {
-			tk = TokenArray_nextToken(kctx, tokenList, nextIdx+1, endIdx);
-			if(tk->resolvedSyntaxInfo->keyword == KW_DOT) {
-				DBG_P("MethodDecl");
-				return SYN_(ns, KW_StmtMethodDecl); //
-			}
+			DBG_P("MethodDecl");
+			return SYN_(ns, KW_StmtMethodDecl); //
 		}
 		return SYN_(ns, KW_ExprPattern);
 	}
