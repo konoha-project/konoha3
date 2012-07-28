@@ -120,13 +120,10 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kObject *o, kStmt
 	return mtd;
 }
 
-static ksymbol_t tosymbol(KonohaContext *kctx, kExpr *expr)
+static inline ksymbol_t tosymbol(KonohaContext *kctx, kExpr *expr)
 {
-	if(Expr_isTerm(expr)) {
-		kToken *tk = expr->termToken;
-		if(tk->keyword == TK_SYMBOL) {
-			return ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
-		}
+	if(Expr_isSymbolTerm(expr)) {
+		return expr->termToken->resolvedSymbol;
 	}
 	return SYM_NONAME;
 }
@@ -168,14 +165,8 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp)
 static kMethod* ExprTerm_getSetterNULL(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kObject *scr, kGamma *gma, ktype_t ty)
 {
 	kNameSpace *ns = Stmt_nameSpace(stmt);
-	if(Expr_isTerm(expr) && expr->termToken->keyword == TK_SYMBOL) {
-		kToken *tk = expr->termToken;
-		if(tk->keyword != KW_SymbolPattern) {
-			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "%s is keyword", S_text(tk->text));
-			return NULL;
-		}
-		ksymbol_t fn = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
-		return Object_newProtoSetterNULL(kctx, scr, stmt, ns, ty, fn);
+	if(Expr_isSymbolTerm(expr)) {
+		return Object_newProtoSetterNULL(kctx, scr, stmt, ns, ty, expr->termToken->resolvedSymbol);
 	}
 	SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "variable name is expected");
 	return NULL;

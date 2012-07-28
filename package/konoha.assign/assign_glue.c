@@ -86,8 +86,7 @@ static KMETHOD StmtTyCheck_DefaultAssign(KonohaContext *kctx, KonohaStack *sfp)
 
 static inline void kToken_copy(KonohaContext *kctx, kTokenVar *destToken, kToken *origToken)
 {
-	destToken->keyword = origToken->keyword;
-	destToken->virtualTypeLiteral = origToken->virtualTypeLiteral;
+	destToken->resolvedSymbol = origToken->resolvedSymbol;
 	KSETv(destToken->text, origToken->text);
 	destToken->uline = origToken->uline;
 	destToken->resolvedSyntaxInfo = origToken->resolvedSyntaxInfo;
@@ -114,7 +113,7 @@ static KMETHOD ParseExpr_SelfAssign(KonohaContext *kctx, KonohaStack *sfp)
 		KLIB kArray_add(kctx, tokenList, tk);
 	}
 	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+2]);
-	kTokenVar *opToken = GCSAFE_new(TokenVar, TK_SYMBOL);
+	kTokenVar *opToken = GCSAFE_new(TokenVar, TokenType_SYMBOL);
 	KSETv(opToken->text, KLIB new_kString(kctx, S_text(selfAssignToken->text), S_size(selfAssignToken->text) - 1, SPOL_ASCII));
 	KLIB kArray_add(kctx, tokenList, opToken);
 	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+3]);

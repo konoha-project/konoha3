@@ -594,8 +594,8 @@ static int parseREGEX(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, in
 	int tokenArrayize = kArray_size(tenv->tokenList);
 	if(tokenArrayize > 0) {
 		kToken *tkPrev = tenv->tokenList->tokenItems[tokenArrayize - 1];
-		if(tkPrev->keyword == TK_INT ||
-			(Token_topch(tkPrev) != '(' && tkPrev->keyword == TK_SYMBOL)) {
+		if(tkPrev->keyword == TokenType_INT ||
+			(Token_topch(tkPrev) != '(' && tkPrev->keyword == TokenType_SYMBOL)) {
 			//FIXME
 			return 0;
 		}
