@@ -326,6 +326,7 @@ macro(add_clib_test test_name)
 	add_executable(${test_name} ${ARGN})
 	target_link_libraries(${test_name} ${ExtraLibs})
 	add_test(Clib/Release/${test_name} ${test_name})
+	set_tests_properties(Clib/Release/${test_name} PROPERTIES TIMEOUT 5)
 endmacro(add_clib_test sources)
 
 add_clib_test(test_sizeof  ./test/src/test_sizeof.c)

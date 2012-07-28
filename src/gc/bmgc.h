@@ -838,7 +838,6 @@ void MODGC_free(KonohaContext *kctx, KonohaContextVar *ctx)
 #define OBJECT_INIT(o) do {\
 	o->h.magicflag = 0;\
 	o->h.ct = NULL;\
-	o->h.gcinfo = NULL;\
 	o->fieldObjectItems[0] = NULL;\
 } while(0)
 
@@ -1113,18 +1112,6 @@ static BlkPtr *blockAddress(Segment *s, uintptr_t idx, uintptr_t mask)
 	bpmask = mask;\
 } while(0)
 
-#if GCDEBUG
-#define DBG_ALLOCATION_POINTER(p) do {\
-	kObject *o = blockAddress(p->seg, BP(p, 0).idx, BP(p, 0).mask);\
-	if (o->h.gcinfo == NULL) {\
-		fprintf(stderr, "o=%p, seg=%p\n", o, p->seg);\
-		assert(o->h.gcinfo == NULL);\
-	}\
-} while(0)
-#else
-#define DBG_ALLOCATION_POINTER(p)
-#endif
-
 static bool findNextFreeBlock(AllocationPointer *p)
 {
 	uintptr_t i, idx = BP(p, 0).idx;
@@ -1155,7 +1142,6 @@ static bool findNextFreeBlock(AllocationPointer *p)
 			gc_info("klass=%d, level=%lu idx=%ld mask=%lx",
 					p->seg->heap_klass, i, BP(p, i).idx, BP(p, i).mask);
 			DBG_ASSERT(BP(p, i).mask != 0);
-			DBG_ALLOCATION_POINTER(p);
 		} while(i > 0);
 	}
 	p->blkptr = blockAddress(p->seg, BP(p, 0).idx, BP(p, 0).mask);
@@ -1326,48 +1312,6 @@ static SubHeap *findSubHeapBySize(HeapManager *mng, size_t n)
 	return &(mng->heaps)[klass];
 }
 
-
-#ifdef GCDEBUG
-#define CLEAR_GCINFO(o) ((kObjectVar*)o)->h.gcinfo = NULL
-#else
-#define CLEAR_GCINFO(o)
-#endif
-
-#if GCDEBUG
-static bool CHECK_OBJECT(SubHeap *h, kObject *o, size_t request_size)
-{
-	short *gcinfo = (short*) &o->h.gcinfo;
-	if (gcinfo[0] > 0) {
-		short x = gcinfo[0];
-		short y = gcinfo[1];
-		fprintf(stderr, "size=%lu temp=%p, [0]=%d, [1]=%d\n",
-				KlassBlockSize(h->heap_klass), gcinfo, x, y);
-		return true;
-	}
-	return false;
-}
-#else
-#define CHECK_OBJECT(h, o, request_size)
-#endif
-
-#if GCDEBUG
-static void DBG_CHECK_OBJECT(SubHeap *h, kObject *o, size_t request_size, bool write)
-{
-	short *gcinfo = (short*) &o->h.gcinfo;
-	if (CHECK_OBJECT(h, o, request_size)) {
-		short x = gcinfo[0];
-		short y = gcinfo[1];
-		assert(x==0&&y==0);
-	}
-	if (write) {
-		gcinfo[0] = global_gc_stat.object_count[h->heap_klass];
-		gcinfo[1] = request_size;
-	}
-}
-#else
-#define DBG_CHECK_OBJECT(h, o, request_size, write)
-#endif
-
 #if GCDEBUG
 static bool DBG_CHECK_OBJECT_IN_SEGMENT(kObject *o, Segment *seg)
 {
@@ -1395,7 +1339,6 @@ static void deferred_sweep(KonohaContext *kctx, kObject *o)
 #ifdef GC_USE_DEFERREDSWEEP
 	memshare(kctx)->collectedObject++;
 	bmgc_Object_free(kctx, o);
-	CLEAR_GCINFO(o);
 #else
 	assert(O_ct(o) == NULL);
 #endif
@@ -1429,7 +1372,6 @@ static kObject *bm_malloc_internal(KonohaContext *kctx, HeapManager *mng, size_t
 	global_gc_stat.object_count[h->heap_klass]++;
 #endif
 	deferred_sweep(kctx, temp);
-	DBG_CHECK_OBJECT(h, temp, n, true);
 	return temp;
 }
 
@@ -1648,9 +1590,6 @@ static void mark_ostack(KonohaContext *kctx, HeapManager *mng, kObject *o, knh_o
 #ifdef GCSTAT
 		global_gc_stat.marked[klass]++;
 #endif
-#if GCDEBUG
-		((kObjectVar*)o)->h.gcinfo = (void*)((uintptr_t)o->h.gcinfo + 0x1);
-#endif
 	}
 }
 
@@ -1702,7 +1641,6 @@ void bm_free(KonohaContext *kctx, void *ptr, size_t n)
 		seg->live_count -= 1;
 		// TODO(); FIXME
 		bitmap_mark(*bm, seg, bpidx, bpmask);
-		CLEAR_GCINFO((kObject*)ptr);
 	} else {
 		do_free(ptr, n);
 	}
@@ -1886,7 +1824,7 @@ static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o)
 				KEYVALUE_u("cid", ct->classId));
 		MEMLOG(ctx, "~Object", K_NOTICE, KNH_LDATA(LOG_p("ptr", o), LOG_i("cid", ct->classId)));
 #endif
-		gc_info("~Object ptr=%p, cid=%d, o->h.meta=%p", o, ct->classId, o->h.gcinfo);
+		gc_info("~Object ptr=%p, cid=%d", o, ct->classId);
 		KONOHA_freeObjectField(kctx, (kObjectVar*)o);
 		//ctx->stat->gcObjectCount += 1;
 		K_OZERO(o);
