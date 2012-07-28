@@ -594,8 +594,8 @@ static int parseREGEX(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, in
 	int tokenArrayize = kArray_size(tenv->tokenList);
 	if(tokenArrayize > 0) {
 		kToken *tkPrev = tenv->tokenList->tokenItems[tokenArrayize - 1];
-		if(tkPrev->keyword == TokenType_INT ||
-			(Token_topch(tkPrev) != '(' && tkPrev->keyword == TokenType_SYMBOL)) {
+		if(tkPrev->unresolvedTokenType == TokenType_INT ||
+			(tkPrev->topCharHint != '(' && tkPrev->unresolvedTokenType == TokenType_SYMBOL)) {
 			//FIXME
 			return 0;
 		}
@@ -612,7 +612,7 @@ static int parseREGEX(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, in
 				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, tenv->source + tok_start + 1, (pos0-1) - (tok_start+1), 0));
 				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, tenv->source + pos0, pos-pos0, 0));
 				tk->subTokenList = a;
-				tk->keyword = SYM_("$regex");
+				tk->unresolvedTokenType = SYM_("$regex");
 			}
 			return pos;
 		}
