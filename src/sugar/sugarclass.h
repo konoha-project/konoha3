@@ -93,8 +93,14 @@ static void Token_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kTokenVar *tk = (kTokenVar*)o;
 	tk->uline     =   0;
-	tk->keyword        =   (ksymbol_t)(intptr_t)conf;
-	KINITv(tk->text, TS_EMPTY);
+	tk->unresolvedTokenType = (ksymbol_t)(intptr_t)conf;
+	if(tk->unresolvedTokenType == 0  || SYM_UNMASK(tk->unresolvedTokenType) != tk->unresolvedTokenType) {
+		KINITv(tk->text, TS_EMPTY);
+	}
+	else {
+		KINITv(tk->text, SYM_s(tk->unresolvedTokenType));
+		DBG_P("symbol=%d, '%s'", tk->unresolvedTokenType, S_text(tk->text));
+	}
 	tk->resolvedSyntaxInfo = NULL;
 }
 

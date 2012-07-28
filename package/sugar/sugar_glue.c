@@ -26,16 +26,16 @@
 #include <minikonoha/sugar.h>
 #include <stdio.h>
 
-//## void Token.setKeyword(String keywork);
-static KMETHOD Token_setKeyword(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
-	kString *key = sfp[1].asString;
-	ksymbol_t keyword = ksymbolA(S_text(key), S_size(key), _NEWID);
-	tk->keyword = keyword;
-	DBG_P("setkeyword=%s%s", KW_t(keyword));
-	RETURNvoid_();
-}
+////## void Token.setKeyword(String keywork);
+//static KMETHOD Token_setKeyword(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
+//	kString *key = sfp[1].asString;
+//	ksymbol_t keyword = ksymbolA(S_text(key), S_size(key), _NEWID);
+//	tk->keyword = keyword;
+//	DBG_P("setkeyword=%s%s", KW_t(keyword));
+//	RETURNvoid_();
+//}
 
 //## void Token.setText(String text);
 static KMETHOD Token_setText(KonohaContext *kctx, KonohaStack *sfp)
@@ -60,12 +60,12 @@ static KMETHOD Token_setSubArray(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	RETURNb_(Token_isVirtualTypeLiteral(sfp[0].asToken));
 //}
-
-//## boolean Token.isParenthesis();
-static KMETHOD Token_isParenthesis(KonohaContext *kctx, KonohaStack *sfp)
-{
-	RETURNb_(sfp[0].asToken->keyword == AST_PARENTHESIS);
-}
+//
+////## boolean Token.isParenthesis();
+//static KMETHOD Token_isParenthesis(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	RETURNb_(sfp[0].asToken->keyword == AST_PARENTHESIS);
+//}
 
 //## String Token.getText();
 static KMETHOD Token_getText(KonohaContext *kctx, KonohaStack *sfp)
@@ -340,11 +340,11 @@ static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	//DBG_P("func=%s", TY_t(TY_FuncExprTyCheck));
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Token_setKeyword),  TY_void, TY_Token, MN_("setKeyword"),  1, TY_String, FN_x,
+//		_Public, _F(Token_setKeyword),  TY_void, TY_Token, MN_("setKeyword"),  1, TY_String, FN_x,
 		_Public, _F(Token_setText),  TY_void, TY_Token, MN_("setText"),  1, TY_String, FN_x,
 		_Public, _F(Token_setSubArray), TY_void, TY_Token, MN_("setSubArray"), 1, TY_StringArray, FN_x,
 //		_Public, _F(Token_isTypeName), TY_Boolean, TY_Token, MN_("isTypeName"), 0,
-		_Public, _F(Token_isParenthesis), TY_Boolean, TY_Token, MN_("isParenthesis"), 0,
+//		_Public, _F(Token_isParenthesis), TY_Boolean, TY_Token, MN_("isParenthesis"), 0,
 		_Public, _F(Token_getText), TY_String, TY_Token, MN_("getText"), 0,
 
 		_Public, _F(Stmt_getBuild), TY_Int, TY_Stmt,  MN_("getBuild"), 0,
@@ -382,7 +382,7 @@ static kbool_t sugar_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 
 static kbool_t isSubKeyword(KonohaContext *kctx, kArray *tokenArray, int s, int e)
 {
-	if(s+1 < e && tokenArray->tokenItems[s+1]->keyword == TK_TEXT) {
+	if(s+1 < e && tokenArray->tokenItems[s+1]->resolvedSyntaxInfo->keyword == TokenType_TEXT) {
 		const char *t = S_text(tokenArray->tokenItems[s+1]->text);
 		if(isalpha(t[0]) || t[0] < 0 /* multibytes char */) {
 			return 1;
@@ -395,7 +395,7 @@ static SugarSyntaxVar *toks_syntax(KonohaContext *kctx, kNameSpace *ns, kArray *
 {
 	int s = 0, e = kArray_size(tokenArray);
 	if(s < e) {
-		if(tokenArray->tokenItems[s]->keyword == TK_TEXT) {
+		if(tokenArray->tokenItems[s]->resolvedSyntaxInfo->keyword == TokenType_TEXT) {
 			ksymbol_t kw;
 			if(isSubKeyword(kctx, tokenArray, s, e)) {
 				char buf[256];

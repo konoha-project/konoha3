@@ -390,7 +390,7 @@ static int parseSQUOTE(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, i
 		if(ch == '\'' && prev != '\\') {
 			if(IS_NOTNULL(tk)) {
 				KSETv(tk->text, KLIB new_kString(kctx, tenv->source + tok_start + 1, (pos-1)- (tok_start+1), 0));
-				tk->keyword = SYM_("$SingleQuote");
+				tk->unresolvedTokenType = SYM_("$SingleQuote");
 			}
 			return pos;
 		}

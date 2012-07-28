@@ -147,126 +147,126 @@ static kbool_t array_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 	return true;
 }
 
-
-#define Token_text(tk) kToken_t_(kctx, tk)
-static const char *kToken_t_(KonohaContext *kctx, kToken *tk)
-{
-	switch((int)tk->keyword) {
-	case TK_INDENT: return "indent";
-	case TK_CODE: ;
-	case AST_BRACE: return "{... }";
-	case AST_PARENTHESIS: return "(... )";
-	case AST_BRACKET: return "[... ]";
-	default:  return S_text(tk->text);
-	}
-}
-
-#define KdumpTokenArray(CTX, TLS, S, E) 	dumpTokenArray(CTX, 0, TLS, S, E)
-#define KdumpExpr(CTX, EXPR)                dumpExpr(CTX, 0, 0, EXPR)
-
-static void dumpToken(KonohaContext *kctx, kToken *tk)
-{
-	DUMP_P("%s%s %d: kw=%s%s '%s'\n", KW_t(tk->keyword), (short)tk->uline, KW_t(tk->keyword), Token_text(tk));
-}
-
-static void dumpIndent(KonohaContext *kctx, int nest)
-{
-	int i;
-	for(i = 0; i < nest; i++) {
-		DUMP_P("  ");
-	}
-}
-
-static int dumpBeginTokenList(kToken *tk)
-{
-	switch(tk->keyword) {
-	case AST_PARENTHESIS: return '(';
-	case AST_BRACE: return '{';
-	case AST_BRACKET: return '[';
-	}
-	return '<';
-}
-
-static int dumpEndTokenList(kToken *tk)
-{
-	switch(tk->keyword) {
-	case AST_PARENTHESIS: return ')';
-	case AST_BRACE: return '}';
-	case AST_BRACKET: return ']';
-	}
-	return '>';
-}
-
-static void dumpTokenArray(KonohaContext *kctx, int nest, kArray *a, int s, int e)
-{
-	if(nest == 0) DUMP_P("\n");
-	while(s < e) {
-		kToken *tk = a->tokenItems[s];
-		dumpIndent(kctx, nest);
-		if(IS_Array(tk->subTokenList)) {
-			DUMP_P("%c\n", dumpBeginTokenList(tk));
-			dumpTokenArray(kctx, nest+1, tk->subTokenList, 0, kArray_size(tk->subTokenList));
-			dumpIndent(kctx, nest);
-			DUMP_P("%c\n", dumpEndTokenList(tk));
-		}
-		else {
-			DUMP_P("TK(%d) ", s);
-			dumpToken(kctx, tk);
-		}
-		s++;
-	}
-	if(nest == 0) DUMP_P("====\n");
-}
-
-
-static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
-{
-	if(nest == 0) DUMP_P("\n");
-	dumpIndent(kctx, nest);
-	if(expr == K_NULLEXPR) {
-		DUMP_P("[%d] ExprTerm: null", n);
-	}
-	else if(Expr_isTerm(expr)) {
-		DUMP_P("[%d] ExprTerm: kw='%s%s' %s", n, KW_t(expr->termToken->keyword), Token_text(expr->termToken));
-		if(expr->ty != TY_var) {
-
-		}
-		DUMP_P("\n");
-	}
-	else {
-		int i;
-		if(expr->syn == NULL) {
-			DUMP_P("[%d] Cons: kw=NULL, size=%ld", n, kArray_size(expr->cons));
-		}
-		else {
-			DUMP_P("[%d] Cons: kw='%s%s', size=%ld", n, KW_t(expr->syn->keyword), kArray_size(expr->cons));
-		}
-		if(expr->ty != TY_var) {
-
-		}
-		DUMP_P("\n");
-		for(i=0; i < kArray_size(expr->cons); i++) {
-			kObject *o = expr->cons->objectItems[i];
-			if(O_ct(o) == CT_Expr) {
-				dumpExpr(kctx, i, nest+1, (kExpr*)o);
-			}
-			else {
-				dumpIndent(kctx, nest+1);
-				if(O_ct(o) == CT_Token) {
-					kToken *tk = (kToken*)o;
-					DUMP_P("[%d] O: %s ", i, CT_t(o->h.ct));
-					dumpToken(kctx, tk);
-				}
-				else if(o == K_NULL) {
-					DUMP_P("[%d] O: null\n", i);
-				}
-				else {
-					DUMP_P("[%d] O: %s\n", i, CT_t(o->h.ct));
-				}
-			}
-		}
-	}
-}
+//
+//#define Token_text(tk) kToken_t_(kctx, tk)
+//static const char *kToken_t_(KonohaContext *kctx, kToken *tk)
+//{
+//	switch((int)tk->keyword) {
+//	case TokenType_INDENT: return "indent";
+//	case TokenType_CODE: ;
+//	case AST_BRACE: return "{... }";
+//	case AST_PARENTHESIS: return "(... )";
+//	case AST_BRACKET: return "[... ]";
+//	default:  return S_text(tk->text);
+//	}
+//}
+//
+//#define KdumpTokenArray(CTX, TLS, S, E) 	dumpTokenArray(CTX, 0, TLS, S, E)
+//#define KdumpExpr(CTX, EXPR)                dumpExpr(CTX, 0, 0, EXPR)
+//
+//static void dumpToken(KonohaContext *kctx, kToken *tk)
+//{
+//	DUMP_P("%s%s %d: kw=%s%s '%s'\n", KW_t(tk->keyword), (short)tk->uline, KW_t(tk->keyword), Token_text(tk));
+//}
+//
+//static void dumpIndent(KonohaContext *kctx, int nest)
+//{
+//	int i;
+//	for(i = 0; i < nest; i++) {
+//		DUMP_P("  ");
+//	}
+//}
+//
+//static int dumpBeginTokenList(kToken *tk)
+//{
+//	switch(tk->keyword) {
+//	case AST_PARENTHESIS: return '(';
+//	case AST_BRACE: return '{';
+//	case AST_BRACKET: return '[';
+//	}
+//	return '<';
+//}
+//
+//static int dumpEndTokenList(kToken *tk)
+//{
+//	switch(tk->keyword) {
+//	case AST_PARENTHESIS: return ')';
+//	case AST_BRACE: return '}';
+//	case AST_BRACKET: return ']';
+//	}
+//	return '>';
+//}
+//
+//static void dumpTokenArray(KonohaContext *kctx, int nest, kArray *a, int s, int e)
+//{
+//	if(nest == 0) DUMP_P("\n");
+//	while(s < e) {
+//		kToken *tk = a->tokenItems[s];
+//		dumpIndent(kctx, nest);
+//		if(IS_Array(tk->subTokenList)) {
+//			DUMP_P("%c\n", dumpBeginTokenList(tk));
+//			dumpTokenArray(kctx, nest+1, tk->subTokenList, 0, kArray_size(tk->subTokenList));
+//			dumpIndent(kctx, nest);
+//			DUMP_P("%c\n", dumpEndTokenList(tk));
+//		}
+//		else {
+//			DUMP_P("TK(%d) ", s);
+//			dumpToken(kctx, tk);
+//		}
+//		s++;
+//	}
+//	if(nest == 0) DUMP_P("====\n");
+//}
+//
+//
+//static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
+//{
+//	if(nest == 0) DUMP_P("\n");
+//	dumpIndent(kctx, nest);
+//	if(expr == K_NULLEXPR) {
+//		DUMP_P("[%d] ExprTerm: null", n);
+//	}
+//	else if(Expr_isTerm(expr)) {
+//		DUMP_P("[%d] ExprTerm: kw='%s%s' %s", n, KW_t(expr->termToken->keyword), Token_text(expr->termToken));
+//		if(expr->ty != TY_var) {
+//
+//		}
+//		DUMP_P("\n");
+//	}
+//	else {
+//		int i;
+//		if(expr->syn == NULL) {
+//			DUMP_P("[%d] Cons: kw=NULL, size=%ld", n, kArray_size(expr->cons));
+//		}
+//		else {
+//			DUMP_P("[%d] Cons: kw='%s%s', size=%ld", n, KW_t(expr->syn->keyword), kArray_size(expr->cons));
+//		}
+//		if(expr->ty != TY_var) {
+//
+//		}
+//		DUMP_P("\n");
+//		for(i=0; i < kArray_size(expr->cons); i++) {
+//			kObject *o = expr->cons->objectItems[i];
+//			if(O_ct(o) == CT_Expr) {
+//				dumpExpr(kctx, i, nest+1, (kExpr*)o);
+//			}
+//			else {
+//				dumpIndent(kctx, nest+1);
+//				if(O_ct(o) == CT_Token) {
+//					kToken *tk = (kToken*)o;
+//					DUMP_P("[%d] O: %s ", i, CT_t(o->h.ct));
+//					dumpToken(kctx, tk);
+//				}
+//				else if(o == K_NULL) {
+//					DUMP_P("[%d] O: null\n", i);
+//				}
+//				else {
+//					DUMP_P("[%d] O: %s\n", i, CT_t(o->h.ct));
+//				}
+//			}
+//		}
+//	}
+//}
 
 /*
 http://www.amazon.co.jp/exec/obidos/ASIN/0201914654/
@@ -332,7 +332,7 @@ static KMETHOD ExprTyCheck_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 	//kToken *tkMethod = expr->cons->tokenItems[0];
 	kTokenVar *tkType = a2->tokenVarItems[1];
 	//kTokenVar *tkInt = expr->cons->tokenVarItems[2];
-	tkType->virtualTypeLiteral = TY_Int; // tmp
+	tkType->resolvedTypeId = TY_Int; // tmp
 	tkType->text = KLIB new_kString(kctx, "int", sizeof("int"), SPOL_POOL|SPOL_ASCII);
 	kExpr *exprType = SUGAR kStmt_parseExpr(kctx, stmt, a2, 1, 2);
 	kExpr *exprInt = SUGAR kStmt_parseExpr(kctx, stmt, a2, 2, 3);
@@ -347,7 +347,7 @@ static KMETHOD ExprTyCheck_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 	lexpr->ty = reqty;
 	lexpr->cons = a2;
 	lexpr->build = TEXPR_NEW;
-	KdumpExpr(kctx, lexpr);
+	//KdumpExpr(kctx, lexpr);
 
 	RETURN_(lexpr);
 }
@@ -358,60 +358,60 @@ static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 //	DBG_P("parse bracket!!, s=%d, c=%d, e=%d", beginIdx, currentIdx, endIdx);
 	kToken *tk = tokenArray->tokenItems[currentIdx];
 	if(beginIdx == currentIdx) { // TODO
-		// $type $symbol = [1,2,3];
-		// --> 1. $variable = $type.newArray(0);
-		//     2. $variable.add(1);
-		//     3. $variable.add(2);
-		//     4. $variable.add(3);
-		kToken *symTk = tokenArray->tokenItems[currentIdx - 2]; // symbol name
-		if(symTk->keyword != KW_SymbolPattern) {
-			RETURN_(K_NULLEXPR);
-		}
-		// line1
-		kTokenVar *tk1 = GCSAFE_new(TokenVar, 0);
-		tk1->keyword = MN_("newArray");
-		tk1->uline = tk->uline;
-		tk1->text = KLIB new_kString(kctx, "new", sizeof("new"), SPOL_POOL|SPOL_ASCII);
-		// empty $type
-		kTokenVar *tk2 = GCSAFE_new(TokenVar, 0);
-		tk2->keyword = KW_TypePattern;
-		tk2->uline = tk->uline;
-		tk2->resolvedSyntaxInfo = SYN_(Stmt_nameSpace(stmt), KW_TypePattern);
-		// token without typing
-		kTokenVar *tk3 = GCSAFE_new(TokenVar, 0);
-		tk3->keyword = TK_INT;
-		tk3->text = KLIB new_kString(kctx, "0", sizeof("0"), SPOL_POOL|SPOL_ASCII);
-		tk3->resolvedSyntaxInfo = SYN_(Stmt_nameSpace(stmt), KW_IntPattern);
-
-		SugarSyntax *methodSyntax = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
-		kExpr *methodExpr = SUGAR new_ConsExpr(kctx, methodSyntax,3, tk1, tk2, tk3);
-
-		// line2
-		kTokenVar *tk4 = GCSAFE_new(TokenVar, 0);
-		tk4->keyword = MN_("add");
-		tk4->uline = tk->uline;
-		tk4->text = KLIB new_kString(kctx, "add", sizeof("add"), SPOL_POOL|SPOL_ASCII);
-
-		kTokenVar *tk5 = GCSAFE_new(TokenVar, 0);
-		tk5->keyword = KW_SymbolPattern;
-		tk5->uline = tk->uline;
-		tk5->text = KLIB new_kString(kctx, S_text(symTk->text), S_size(symTk->text), SPOL_POOL|SPOL_ASCII);
-
-		kTokenVar *tk6 = GCSAFE_new(TokenVar, 0);
-		kToken_setVirtualTypeLiteral(kctx, tk6, Stmt_nameSpace(stmt), TY_Object);
-		//tk6->keyword = KW_TypePattern; // tmporary
-		//tk6->uline = tk->uline;
-		//tk6->resolvedSyntaxInfo = SYN_(Stmt_nameSpace(stmt), KW_TypePattern);
-
-		SugarSyntax *addSyntax = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
-		kExpr *addExpr = SUGAR new_ConsExpr(kctx, addSyntax, 3, tk4, tk5, tk6);
-
-		SugarSyntax *bracketSyntax = SYN_(Stmt_nameSpace(stmt),  SYM_("[]"));
-
-		kExpr *lexpr = SUGAR new_ConsExpr(kctx, bracketSyntax, 2, methodExpr, addExpr);
-
-		lexpr = SUGAR kStmt_addExprParam(kctx, stmt, lexpr, tk->subTokenList, 0, kArray_size(tk->subTokenList), 1);
-		RETURN_(lexpr);
+//		// $type $symbol = [1,2,3];
+//		// --> 1. $variable = $type.newArray(0);
+//		//     2. $variable.add(1);
+//		//     3. $variable.add(2);
+//		//     4. $variable.add(3);
+//		kToken *symTk = tokenArray->tokenItems[currentIdx - 2]; // symbol name
+//		if(symTk->keyword != KW_SymbolPattern) {
+//			RETURN_(K_NULLEXPR);
+//		}
+//		// line1
+//		kTokenVar *tk1 = GCSAFE_new(TokenVar, 0);
+//		tk1->keyword = MN_("newArray");
+//		tk1->uline = tk->uline;
+//		tk1->text = KLIB new_kString(kctx, "new", sizeof("new"), SPOL_POOL|SPOL_ASCII);
+//		// empty $type
+//		kTokenVar *tk2 = GCSAFE_new(TokenVar, 0);
+//		tk2->keyword = KW_TypePattern;
+//		tk2->uline = tk->uline;
+//		tk2->resolvedSyntaxInfo = SYN_(Stmt_nameSpace(stmt), KW_TypePattern);
+//		// token without typing
+//		kTokenVar *tk3 = GCSAFE_new(TokenVar, 0);
+//		tk3->keyword = TokenType_INT;
+//		tk3->text = KLIB new_kString(kctx, "0", sizeof("0"), SPOL_POOL|SPOL_ASCII);
+//		tk3->resolvedSyntaxInfo = SYN_(Stmt_nameSpace(stmt), KW_IntPattern);
+//
+//		SugarSyntax *methodSyntax = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
+//		kExpr *methodExpr = SUGAR new_ConsExpr(kctx, methodSyntax,3, tk1, tk2, tk3);
+//
+//		// line2
+//		kTokenVar *tk4 = GCSAFE_new(TokenVar, 0);
+//		tk4->keyword = MN_("add");
+//		tk4->uline = tk->uline;
+//		tk4->text = KLIB new_kString(kctx, "add", sizeof("add"), SPOL_POOL|SPOL_ASCII);
+//
+//		kTokenVar *tk5 = GCSAFE_new(TokenVar, 0);
+//		tk5->keyword = KW_SymbolPattern;
+//		tk5->uline = tk->uline;
+//		tk5->text = KLIB new_kString(kctx, S_text(symTk->text), S_size(symTk->text), SPOL_POOL|SPOL_ASCII);
+//
+//		kTokenVar *tk6 = GCSAFE_new(TokenVar, 0);
+//		kToken_setVirtualTypeLiteral(kctx, tk6, Stmt_nameSpace(stmt), TY_Object);
+//		//tk6->keyword = KW_TypePattern; // tmporary
+//		//tk6->uline = tk->uline;
+//		//tk6->resolvedSyntaxInfo = SYN_(Stmt_nameSpace(stmt), KW_TypePattern);
+//
+//		SugarSyntax *addSyntax = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
+//		kExpr *addExpr = SUGAR new_ConsExpr(kctx, addSyntax, 3, tk4, tk5, tk6);
+//
+//		SugarSyntax *bracketSyntax = SYN_(Stmt_nameSpace(stmt),  SYM_("[]"));
+//
+//		kExpr *lexpr = SUGAR new_ConsExpr(kctx, bracketSyntax, 2, methodExpr, addExpr);
+//
+//		lexpr = SUGAR kStmt_addExprParam(kctx, stmt, lexpr, tk->subTokenList, 0, kArray_size(tk->subTokenList), 1);
+//		RETURN_(lexpr);
 	}
 	else {  // Func [int]
 		kExpr *lexpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenArray, beginIdx, currentIdx);
@@ -424,7 +424,7 @@ static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		else {   // X[1] => get X 1
 			kTokenVar *tkN = GCSAFE_new(TokenVar, 0);
-			tkN->keyword = MN_toGETTER(0);
+			tkN->resolvedSymbol = MN_toGETTER(0);
 			tkN->uline = tk->uline;
 			SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
 			lexpr  = SUGAR new_ConsExpr(kctx, syn, 2, tkN, lexpr);

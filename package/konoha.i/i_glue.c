@@ -166,7 +166,7 @@ static kbool_t i_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t
 //	KDEFINE_SYNTAX SYNTAX[] = {
 //		{ TOKEN("float"), .type = TY_Float, },
 //		{ TOKEN("double"), .type = TY_Float, },
-//		{ TOKEN("$FLOAT"), .keyword = KW_TK(TK_FLOAT), .ExprTyCheck = ExprTyCheck_FLOAT, },
+//		{ TOKEN("$FLOAT"), .keyword = KW_TK(TokenType_FLOAT), .ExprTyCheck = ExprTyCheck_FLOAT, },
 //		{ .keyword = KW_END, },
 //	};
 //	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);

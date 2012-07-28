@@ -40,18 +40,18 @@ extern "C" {
 
 #define KW_t(X)   SYM_PRE(X),SYM_t(X)
 
-#define TK_ERR      KW_ToksPattern
-#define TK_CODE     KW_BlockPattern
-#define TK_NONE 0
-#define TK_INDENT 1
-#define TK_SYMBOL  KW_SymbolPattern
-//#define TK_USYMBOL KW_UsymbolPattern
-#define TK_TEXT  KW_TextPattern
-#define TK_INT   KW_IntPattern
-#define TK_FLOAT KW_FloatPattern
-#define TK_TYPE  KW_TypePattern
-#define TK_MN           KW_ParamsPattern
-#define TK_METANAME     KW_ATMARK
+#define TokenType_ERR      KW_ToksPattern
+#define TokenType_CODE     KW_BlockPattern
+#define TokenType_NONE 0
+#define TokenType_INDENT 1
+#define TokenType_SYMBOL  KW_SymbolPattern
+//#define TokenType_USYMBOL KW_UsymbolPattern
+#define TokenType_TEXT  KW_TextPattern
+#define TokenType_INT   KW_IntPattern
+#define TokenType_FLOAT KW_FloatPattern
+#define TokenType_TYPE  KW_TypePattern
+#define TokenType_MN           KW_ParamsPattern
+#define TokenType_METANAME     KW_ATMARK
 
 #define KW_END  ((ksymbol_t)-1)
 #define KW_ERR  (((ksymbol_t)0)|0) /**/
@@ -286,19 +286,26 @@ struct kNameSpaceVar {
 
 struct kTokenVar {
 	KonohaObjectHeader h;
-	ksymbol_t     keyword;
-	union {
-		kushort_t indent;               // indent when kw == TK_INDENT
-		ksymbol_t patternKey;           // pattern name for 'setting key in Stmt'
-		ktype_t   virtualTypeLiteral;   // if kw == KW_TypePattern
-	};
 	union {
 		kString *text;
 		kArray  *subTokenList;
 	};
 	kfileline_t     uline;
 	SugarSyntax    *resolvedSyntaxInfo;
+	union {
+		ksymbol_t   unresolvedTokenType; // (resolvedSyntaxInfo == NULL)
+		ksymbol_t   resolvedSymbol;      // symbol (resolvedSyntaxInfo != NULL)
+		ktype_t     resolvedTypeId;      // typeid if KW_TypePattern
+	};
+	union {
+		kushort_t   indent;               // indent when kw == TokenType_INDENT
+		kshort_t    topCharHint;
+		ksymbol_t   stmtEntryKey;         // pattern name for 'setting key in Stmt'
+	};
 };
+
+#define Token_isRule(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
+#define Token_setRule(o,B)   TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,B)
 
 typedef struct TokenChunk {
 	kArray *tokenList;
@@ -306,11 +313,9 @@ typedef struct TokenChunk {
 	int endIdx;
 } TokenChunk;
 
-#define Token_topch(tk)                    ((tk)->keyword != TK_TEXT && (S_size((tk)->text) == 1) ? S_text((tk)->text)[0] : 0)
-#define Token_isVirtualTypeLiteral(TK)     ((TK)->keyword == KW_TypePattern)
-#define Token_typeLiteral(TK)              (TK)->virtualTypeLiteral
-
-
+#define Token_topch(tk)                    K
+#define Token_isVirtualTypeLiteral(TK)     ((TK)->resolvedSyntaxInfo->keyword == KW_TypePattern)
+#define Token_typeLiteral(TK)              (TK)->resolvedTypeId
 
 #define TEXPR_UNTYPED       -1   /*THIS MUST NOT HAPPEN*/
 #define TEXPR_CONST          0
@@ -616,8 +621,7 @@ static kExpr* kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, i
 
 static inline void kToken_setVirtualTypeLiteral(KonohaContext *kctx, kToken *tk, kNameSpace *ns, ktype_t type)
 {
-	((kTokenVar*)tk)->keyword = KW_TypePattern;
-	((kTokenVar*)tk)->virtualTypeLiteral = type;
+	((kTokenVar*)tk)->resolvedTypeId = type;
 	((kTokenVar*)tk)->resolvedSyntaxInfo = kmodsugar->kNameSpace_getSyntax(kctx, ns, KW_TypePattern, 0);
 }
 
@@ -643,6 +647,12 @@ static inline void Stmt_typed(kStmt *stmt, int build)
 	if(stmt->build != TSTMT_ERR) {
 		((kStmtVar*)stmt)->build = build;
 	}
+}
+
+
+static inline kbool_t Expr_isSymbolTerm(kExpr *expr)
+{
+	return (Expr_isTerm(expr) && (expr->termToken->resolvedSyntaxInfo->keyword == KW_SymbolPattern));
 }
 
 static inline void kExpr_setsyn(kExpr *expr, SugarSyntax *syn)

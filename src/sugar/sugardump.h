@@ -54,9 +54,26 @@ static const char* StatementType(ksymbol_t keyword)
 /* --------------- */
 /* Token */
 
-static void dumpToken(KonohaContext *kctx, kToken *tk)
+static void dumpToken(KonohaContext *kctx, kToken *tk, int n)
 {
-	DUMP_P("kw=%s%s syn=%p '%s' indent(or ty)=%d\n", KW_t(tk->keyword), tk->resolvedSyntaxInfo, Token_text(tk), tk->indent);
+	if (n < 0) n = (short)tk->uline;
+	if(tk->resolvedSyntaxInfo == NULL) {
+		if(Token_isRule(tk)) {
+			DUMP_P("RuleToken(%d) resolvedSymbol=%s%s stmtEntryKey=%s%s\n", n, Token_text(tk), tk->stmtEntryKey);
+		}
+		else if(tk->unresolvedTokenType == TokenType_INDENT) {
+			DUMP_P("Token(%d) '%s' TokenType=%s%s indent=%d\n", n, Token_text(tk), PSYM_t(tk->unresolvedTokenType), tk->indent);
+		}
+		else {
+			DUMP_P("Token(%d) '%s' TokenType=%s%s topch='%c'\n", n, Token_text(tk), PSYM_t(tk->unresolvedTokenType), tk->indent);
+		}
+	}
+	else if(tk->resolvedSyntaxInfo->keyword == KW_TypePattern) {
+		DUMP_P("Token(%d) '%s' type=%s\n", n, Token_text(tk), TY_t(tk->resolvedTypeId));
+	}
+	else {
+		DUMP_P("Token(%d) '%s' syntax=%s%s, symbol=%s%s\n", n, Token_text(tk), PSYM_t(tk->resolvedSyntaxInfo->keyword), PSYM_t(tk->resolvedSymbol));
+	}
 }
 
 static void dumpIndent(KonohaContext *kctx, int nest)
@@ -67,9 +84,9 @@ static void dumpIndent(KonohaContext *kctx, int nest)
 	}
 }
 
-static int dumpBeginTokenList(kToken *tk)
+static int dumpBeginTokenList(int closure)
 {
-	switch(tk->keyword) {
+	switch(closure) {
 	case AST_PARENTHESIS: return '(';
 	case AST_BRACE: return '{';
 	case AST_BRACKET: return '[';
@@ -77,9 +94,9 @@ static int dumpBeginTokenList(kToken *tk)
 	return '<';
 }
 
-static int dumpEndTokenList(kToken *tk)
+static int dumpEndTokenList(int closure)
 {
-	switch(tk->keyword) {
+	switch(closure) {
 	case AST_PARENTHESIS: return ')';
 	case AST_BRACE: return '}';
 	case AST_BRACKET: return ']';
@@ -90,19 +107,18 @@ static int dumpEndTokenList(kToken *tk)
 static void dumpTokenArray(KonohaContext *kctx, int nest, kArray *a, int s, int e)
 {
 	if(verbose_sugar) {
-		if(nest == 0) DUMP_P("\n");
 		while(s < e) {
 			kToken *tk = a->tokenItems[s];
 			dumpIndent(kctx, nest);
 			if(IS_Array(tk->subTokenList)) {
-				DUMP_P("%c\n", dumpBeginTokenList(tk));
+				ksymbol_t closure = (tk->resolvedSyntaxInfo == NULL) ? tk->resolvedSymbol : tk->resolvedSyntaxInfo->keyword;
+				DUMP_P("%c\n", dumpBeginTokenList(closure));
 				dumpTokenArray(kctx, nest+1, tk->subTokenList, 0, kArray_size(tk->subTokenList));
 				dumpIndent(kctx, nest);
-				DUMP_P("%c\n", dumpEndTokenList(tk));
+				DUMP_P("%c\n", dumpEndTokenList(closure));
 			}
 			else {
-				DUMP_P("TK(%d) ", s);
-				dumpToken(kctx, tk);
+				dumpToken(kctx, tk, s);
 			}
 			s++;
 		}
@@ -116,14 +132,11 @@ static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
 		if(nest == 0) DUMP_P("\n");
 		dumpIndent(kctx, nest);
 		if(expr == K_NULLEXPR) {
-			DUMP_P("[%d] ExprTerm: null", n);
+			DUMP_P("[%d] NullObject", n);
 		}
 		else if(Expr_isTerm(expr)) {
-			DUMP_P("[%d] ExprTerm: kw='%s%s' %s", n, KW_t(expr->termToken->keyword), Token_text(expr->termToken));
-			if(expr->ty != TY_var) {
-
-			}
-			DUMP_P("\n");
+			DUMP_P("[%d] TermExpr: ", n);
+			dumpToken(kctx, expr->termToken, -1);
 		}
 		else {
 			int i;
@@ -147,7 +160,7 @@ static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
 					if(O_ct(o) == CT_Token) {
 						kToken *tk = (kToken*)o;
 						DUMP_P("[%d] O: %s ", i, CT_t(o->h.ct));
-						dumpToken(kctx, tk);
+						dumpToken(kctx, tk, -1);
 					}
 					else if(o == K_NULL) {
 						DUMP_P("[%d] O: null\n", i);
@@ -167,9 +180,12 @@ static void dumpEntry(KonohaContext *kctx, void *arg, KUtilsKeyValue *d)
 		ksymbol_t key = ~SYMKEY_BOXED & d->key;
 		DUMP_P("key='%s%s': ", KW_t(key));
 		if(IS_Token(d->objectValue)) {
-			dumpToken(kctx, (kToken*)d->objectValue);
+			dumpToken(kctx, (kToken*)d->objectValue, -1);
 		} else if (IS_Expr(d->objectValue)) {
 			dumpExpr(kctx, 0, 0, (kExpr *) d->objectValue);
+		}
+		else {
+			DUMP_P("ObjectType %s\n", CT_t(O_ct(d->objectValue)));
 		}
 	}
 }
