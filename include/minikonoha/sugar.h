@@ -300,6 +300,12 @@ struct kTokenVar {
 	SugarSyntax    *resolvedSyntaxInfo;
 };
 
+typedef struct TokenChunk {
+	kArray *tokenList;
+	int beginIdx;
+	int endIdx;
+} TokenChunk;
+
 #define Token_topch(tk)                    ((tk)->keyword != TK_TEXT && (S_size((tk)->text) == 1) ? S_text((tk)->text)[0] : 0)
 #define Token_isVirtualTypeLiteral(TK)     ((TK)->keyword == KW_TypePattern)
 #define Token_typeLiteral(TK)              (TK)->virtualTypeLiteral

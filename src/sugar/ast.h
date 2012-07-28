@@ -171,12 +171,6 @@ typedef struct {
 	SugarSyntax *symbolSyntaxInfo;
 } ASTEnv;
 
-typedef struct {
-	kArray *tokenList;
-	int beginIdx;
-	int endIdx;
-} RuleEnv;
-
 static int kStmt_parseTypePattern(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KonohaClass **classRef);
 
 static KonohaClass* kStmt_parseGenerics(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, KonohaClass *baseClass, kArray *tokenList, int beginIdx, int endIdx)
@@ -305,7 +299,7 @@ static int kStmt_printMismatchedRule(KonohaContext *kctx, kStmt *stmt, kToken *t
 
 #define kTokenArray_skip(TLS, S, E)  S
 
-static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *tokenList, int beginIdx, int endIdx, RuleEnv *rule, int canRollBack)
+static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *tokenList, int beginIdx, int endIdx, TokenChunk *rule, int canRollBack)
 {
 	int currentRuleIdx, currentTokenIdx = beginIdx, returnIdx = (canRollBack ? beginIdx : -1);
 	DBG_P("Input tokens:");
@@ -335,7 +329,7 @@ static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *token
 			currentTokenIdx = (patternEndIdx == endIdx) ? next : patternEndIdx + 1;
 		}
 		else if(ruleToken->keyword == AST_OPTIONAL) {
-			RuleEnv nrule = {ruleToken->subTokenList, 0, kArray_size(ruleToken->subTokenList)};
+			TokenChunk nrule = {ruleToken->subTokenList, 0, kArray_size(ruleToken->subTokenList)};
 			int next = kStmt_matchSyntaxRule(kctx, stmt, tokenList, currentTokenIdx, endIdx, &nrule, 1/*roolback*/);
 			if(next == -1) return returnIdx;
 			currentTokenIdx = next;
@@ -346,7 +340,7 @@ static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *token
 				return kStmt_printMismatchedRule(kctx, stmt, tk, ruleToken, beginIdx, canRollBack);
 			}
 			if(ruleToken->keyword == AST_PARENTHESIS || ruleToken->keyword == AST_BRACKET) {
-				RuleEnv nrule = {ruleToken->subTokenList, 0, kArray_size(ruleToken->subTokenList)};
+				TokenChunk nrule = {ruleToken->subTokenList, 0, kArray_size(ruleToken->subTokenList)};
 				int next = kStmt_matchSyntaxRule(kctx, stmt, tk->subTokenList, 0, kArray_size(tk->subTokenList), &nrule, 0/*not rollbck*/);
 				if(next == -1) return returnIdx;
 			}
@@ -410,7 +404,7 @@ static kbool_t kStmt_parseBySyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray 
 {
 	kbool_t ret = false;
 	SugarSyntax *syn = kNameSpace_getSyntaxRule(kctx, Stmt_nameSpace(stmt), tokenList, beginIdx, endIdx);
-	RuleEnv nrule = {syn->syntaxRuleNULL, 0, kArray_size(syn->syntaxRuleNULL)};
+	TokenChunk nrule = {syn->syntaxRuleNULL, 0, kArray_size(syn->syntaxRuleNULL)};
 	DBG_ASSERT(syn->syntaxRuleNULL != NULL);
 	((kStmtVar*)stmt)->syn = syn;
 	ret = (kStmt_matchSyntaxRule(kctx, stmt, tokenList, beginIdx, endIdx, &nrule, 0) != -1);
