@@ -252,7 +252,7 @@ static int TEST_printf(const char *fmt, ...)
 	return res;
 }
 
-static int check_result(FILE *fp0, FILE *fp1)
+static int check_result2(FILE *fp0, FILE *fp1)
 {
 	char buf0[128];
 	char buf1[128];
@@ -271,6 +271,62 @@ static int check_result(FILE *fp0, FILE *fp1)
 		}
 	}
 	return 0; //OK
+}
+
+static int check_result0(FILE *fp0, FILE *fp1)
+{
+	char buf0[4096];
+	char buf1[4096];
+	while (fgets(buf0, sizeof(buf0), fp0) != NULL) {
+		char *p = fgets(buf1, sizeof(buf1), fp1);
+		if(p == NULL) return 1;//FAILED
+		if((p = strstr(buf0, "(error) (")) != NULL) {
+			p = strstr(p+8, ")");
+			if(strncmp(buf0, buf1, p - buf1 + 1) != 0) return 1; //FAILED;
+			continue;
+		}
+		if((p = strstr(buf0, "(warning) (")) != NULL) {
+			p = strstr(p+10, ")");
+			if(strncmp(buf0, buf1, p - buf1 + 1) != 0) return 1; //FAILED;
+			continue;
+		}
+		if (strcmp(buf0, buf1) != 0) {
+			return 1;//FAILED
+		}
+	}
+	return 0; //OK
+}
+
+static void make_report(const char *testname)
+{
+	char report_file[256];
+	char script_file[256];
+	char correct_file[256];
+	char result_file[256];
+	snprintf(report_file, 256,  "REPORT_%s.txt", shortfilename(testname));
+	snprintf(script_file, 256,  "%s", testname);
+	snprintf(correct_file, 256, "%s.proof", script_file);
+	snprintf(result_file, 256,  "%s.tested", script_file);
+	FILE *fp = fopen(report_file, "w");
+	FILE *fp2 = fopen(script_file, "r");
+	int ch;
+	while((ch = fgetc(fp2)) != EOF) {
+		fputc(ch, fp);
+	}
+	fclose(fp2);
+	fprintf(fp, "Expected Result (in %s)\n=====\n", shortfilename(result_file));
+	fp2 = fopen(correct_file, "r");
+	while((ch = fgetc(fp2)) != EOF) {
+		fputc(ch, fp);
+	}
+	fclose(fp2);
+	fprintf(fp, "Result (in %s)\n=====\n", shortfilename(result_file));
+	fp2 = fopen(result_file, "r");
+	while((ch = fgetc(fp2)) != EOF) {
+		fputc(ch, fp);
+	}
+	fclose(fp2);
+	fclose(fp);
 }
 
 extern int konoha_detectFailedAssert;
@@ -292,12 +348,13 @@ static int KonohaContext_test(KonohaContext *kctx, const char *testname)
 
 	if(fp != NULL) {
 		FILE *fp2 = fopen(result_file, "r");
-		ret = check_result(fp, fp2);
+		ret = check_result2(fp, fp2);
 		if(ret == 0) {
 			fprintf(stdout, "[PASS]: %s\n", testname);
 		}
 		else {
 			fprintf(stdout, "[FAIL]: %s\n", testname);
+			make_report(testname);
 			konoha_detectFailedAssert = 1;
 		}
 		fclose(fp);
