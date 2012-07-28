@@ -105,22 +105,22 @@ static KMETHOD ParseExpr_SelfAssign(KonohaContext *kctx, KonohaStack *sfp)
 	for(i = beginIdx; i < operatorIdx; i++) {
 		KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[i]);
 	}
-	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+0]);
-	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+1]);
+	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+1]); // template: =
+	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+2]); // template; (
 	for(i = beginIdx; i < operatorIdx; i++) {
 		kTokenVar *tk = GCSAFE_new(TokenVar, 0);
 		kToken_copy(kctx, tk, tokenList->tokenItems[i]);
 		KLIB kArray_add(kctx, tokenList, tk);
 	}
-	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+2]);
+	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+3]); // template: )
 	kTokenVar *opToken = GCSAFE_new(TokenVar, TokenType_SYMBOL);
 	KSETv(opToken->text, KLIB new_kString(kctx, S_text(selfAssignToken->text), S_size(selfAssignToken->text) - 1, SPOL_ASCII));
 	KLIB kArray_add(kctx, tokenList, opToken);
-	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+3]);
+	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+4]); // template: (
 	for(i = operatorIdx+1; i < endIdx; i++) {
 		KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[i]);
 	}
-	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+4]);
+	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+5]); // template: )
 
 	size_t beginResolovedIdx = kArray_size(tokenList);
 	if(SUGAR kNameSpace_resolveTokenArray(kctx, ns, tokenList, beginNewIdx, beginResolovedIdx, tokenList)) {
