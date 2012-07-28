@@ -33,6 +33,7 @@
 #include <setjmp.h>
 #include <syslog.h>
 #include <dlfcn.h>
+#include <sys/stat.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -125,9 +126,21 @@ static int isEmptyChunk(const char *t, size_t len)
 	return false;
 }
 
+static int isDir(const char *path)
+{
+	struct stat buf;
+	if (stat(path, &buf) == 0) {
+		return S_ISDIR(buf.st_mode);
+	}
+	return 0;
+}
+
 static int loadScript(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *))
 {
 	int isSuccessfullyLoading = false;
+	if (isDir(filePath)) {
+		return isSuccessfullyLoading;
+	}
 	FILE *fp = fopen(filePath, "r");
 	if(fp != NULL) {
 		SimpleBuffer simpleBuffer;
