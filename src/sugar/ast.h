@@ -374,7 +374,8 @@ static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns
 			DBG_P("TypeDecl");
 			return SYN_(ns, KW_StmtTypeDecl);  //
 		}
-		if(tk->resolvedSyntaxInfo->keyword == KW_TypePattern || tk->resolvedSyntaxInfo->precedence_op1 > 0 || tk->resolvedSyntaxInfo->precedence_op2 > 0) {
+		if(tk->resolvedSyntaxInfo->keyword == KW_TypePattern
+			|| ((tk->resolvedSyntaxInfo->precedence_op1 > 0 || tk->resolvedSyntaxInfo->precedence_op2 > 0) && tk->resolvedSyntaxInfo->keyword != KW_DOT)) {
 			DBG_P("MethodDecl");
 			return SYN_(ns, KW_StmtMethodDecl); //
 		}

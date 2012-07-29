@@ -48,8 +48,6 @@ extern "C" {
 #define TokenType_INT          KW_NumberPattern
 #define TokenType_FLOAT        KW_FloatPattern
 #define TokenType_CODE         KW_BlockPattern
-//#define TokenType_TYPE         KW_TypePattern
-//#define TokenType_METANAME     KW_ATMARK
 
 #define KW_END  ((ksymbol_t)-1)
 #define KW_ERR  (((ksymbol_t)0)|0) /**/
@@ -68,8 +66,8 @@ extern "C" {
 #define KW_TypeParamGroup   (((ksymbol_t)9)|KW_PATTERN) /*$[]*/
 #define KW_OptionalGroupGroup   (((ksymbol_t)9)|KW_ATMARK)  /*@[]*/
 #define KW_BlockPattern    (((ksymbol_t)11)|KW_PATTERN) /*$Block*/
-#define KW_ParamPattern   (((ksymbol_t)12)|KW_PATTERN) /*$Param*/
-#define KW_TokenPattern   (((ksymbol_t)13)|KW_PATTERN) /*$Token*/
+#define KW_ParamPattern    (((ksymbol_t)12)|KW_PATTERN) /*$Param*/
+#define KW_TokenPattern    (((ksymbol_t)13)|KW_PATTERN) /*$Token*/
 
 #define KW_StmtConstDecl   KW_ConstPattern
 #define KW_StmtTypeDecl    KW_TypePattern
