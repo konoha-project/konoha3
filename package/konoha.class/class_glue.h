@@ -569,7 +569,7 @@ static kbool_t kBlock_declClassField(KonohaContext *kctx, kBlock *bk, kGamma *gm
 	return !(failedOnce);
 }
 
-static void kBlock_addMethodDeclStmt(KonohaContext *kctx, kBlock *bk, kToken *tokenClassName, kStmt **lastStmtRef)
+static void kBlock_addMethodDeclStmt(KonohaContext *kctx, kBlock *bk, kToken *tokenClassName, kStmt *classStmt)
 {
 	if(bk != NULL) {
 		size_t i;
@@ -577,10 +577,10 @@ static void kBlock_addMethodDeclStmt(KonohaContext *kctx, kBlock *bk, kToken *to
 			kStmt *stmt = bk->stmtList->stmtItems[i];
 			if(stmt->syn->keyword == KW_StmtTypeDecl) continue;
 			if(stmt->syn->keyword == KW_StmtMethodDecl) {
-				kStmt *lastStmt = lastStmtRef[0];
+				kStmt *lastStmt = classStmt;
 				KLIB kObject_setObject(kctx, stmt, SYM_("type"), TY_Token, tokenClassName);
 				SUGAR kBlock_insertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, stmt);
-				lastStmtRef[0] = stmt;
+				lastStmt = stmt;
 			}
 			else {
 				SUGAR Stmt_p(kctx, stmt, NULL, WarnTag, "%s is not available within the class clause", KW_t(stmt->syn->keyword));
@@ -639,7 +639,7 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	}
 	kToken_setVirtualTypeLiteral(kctx, tokenClassName, ns, definedClass->classId);
-	kBlock_addMethodDeclStmt(kctx, bk, tokenClassName, &stmt);
+	kBlock_addMethodDeclStmt(kctx, bk, tokenClassName, stmt);
 	kStmt_done(stmt);
 	RETURNb_(true);
 }

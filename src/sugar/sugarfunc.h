@@ -31,7 +31,7 @@ static KMETHOD PatternMatch_Expr(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_PatternMatch(stmt, name, tokenArray, beginIdx, endIdx);
 	INIT_GCSTACK();
 	int returnIdx = -1;
-	KdumpTokenArray(kctx, tokenArray, beginIdx, endIdx);
+//	KdumpTokenArray(kctx, tokenArray, beginIdx, endIdx);
 	kExpr *expr = kStmt_parseExpr(kctx, stmt, tokenArray, beginIdx, endIdx);
 	if(expr != K_NULLEXPR) {
 		KdumpExpr(kctx, expr);
@@ -99,7 +99,7 @@ static KMETHOD PatternMatch_Block(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tokenArray, beginIdx, endIdx);
 	kToken *tk = tokenArray->tokenItems[beginIdx];
-	KdumpTokenArray(kctx, tokenArray, beginIdx, endIdx);
+//	KdumpTokenArray(kctx, tokenArray, beginIdx, endIdx);
 	if(tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
 		KLIB kObject_setObject(kctx, stmt, name, O_classId(tk), tk);
 		RETURNi_(beginIdx+1);
@@ -1137,12 +1137,8 @@ static KMETHOD StmtTyCheck_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 	ktype_t classId   = kStmt_getClassId(kctx, stmt, ns, SYM_("type"), O_classId(ns->scriptObject));
 	kmethodn_t mn     = kStmt_getMethodSymbol(kctx, stmt, ns, KW_SymbolPattern, MN_new);
 	kParam *pa        = kStmt_newMethodParamNULL(kctx, stmt, gma);
-	if(TY_isSingleton(classId)) {
-		flag |= kMethod_Static;
-	}
-	if(TY_isFinal(classId)) {
-		flag |= kMethod_Final;
-	}
+	if(TY_isSingleton(classId)) { flag |= kMethod_Static; }
+	if(TY_isFinal(classId)) { flag |= kMethod_Final; }
 	if(pa != NULL) {  // if pa is NULL, error is printed out.
 		kMethod *mtd = KLIB new_kMethod(kctx, flag, classId, mn, NULL);
 		PUSH_GCSTACK(mtd);

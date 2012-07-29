@@ -362,7 +362,7 @@ static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *token
 
 static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
 {
-	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
+//	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
 	int nextIdx = kStmt_parseTypePattern(kctx, NULL, ns, tokenList, beginIdx, endIdx, NULL);
 //	DBG_P("nextIdx=%d, endIdx=%d", nextIdx, endIdx);
 	if(nextIdx != -1 && nextIdx < endIdx) {

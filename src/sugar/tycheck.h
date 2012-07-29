@@ -389,6 +389,7 @@ static kstatus_t kBlock_genEvalCode(KonohaContext *kctx, kBlock *bk, kMethod *mt
 	GAMMA_PUSH(gma, &newgma);
 	Gamma_initIt(kctx, &newgma, Method_param(mtd));
 	kBlock_tyCheckAll(kctx, bk, gma);
+	DBG_P("@@@@@@@@@@@ SIZE=%d ", kArray_size(bk->stmtList));
 	GAMMA_POP(gma, &newgma);
 
 	kStmt *stmt = bk->stmtList->stmtItems[0];

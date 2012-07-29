@@ -1,6 +1,7 @@
 // written by kimio
 
-K.import("konoha");
+K.import("konoha.assign");
+K.import("konoha.class");
 
 class Counter {
 	int count;
