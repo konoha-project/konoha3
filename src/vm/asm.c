@@ -837,7 +837,7 @@ static void JumpStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx
 
 static void UndefinedStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
-	DBG_ABORT("undefined asm syntax kw='%s'", SYM_t(stmt->syn->keyword));
+	DBG_P("undefined asm syntax kw='%s'", SYM_t(stmt->syn->keyword));
 }
 
 static void BLOCK_asm(KonohaContext *kctx, kBlock *bk, int shift)

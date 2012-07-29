@@ -647,7 +647,7 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t class_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("new"), ParseExpr_(new), },
+		{ .keyword = SYM_("new"), ParseExpr_(new), .precedence_op1 = 300},
 		{ .keyword = SYM_("class"), .rule = "\"class\" $Const [\"extends\" extends: $Type] [$Block]", TopStmtTyCheck_(class), },
 		{ .keyword = SYM_("."), ExprTyCheck_(Getter) },
 		{ .keyword = KW_END, },

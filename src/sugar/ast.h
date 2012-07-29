@@ -295,10 +295,10 @@ static int kStmt_printMismatchedRule(KonohaContext *kctx, kStmt *stmt, kToken *t
 static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *tokenList, int beginIdx, int endIdx, TokenChunk *rule, int canRollBack)
 {
 	int currentRuleIdx, currentTokenIdx = beginIdx, returnIdx = (canRollBack ? beginIdx : -1);
-	DBG_P("Input tokens:");
-	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
-	DBG_P("Syntax rules:");
-	KdumpTokenArray(kctx, rule->tokenList, rule->beginIdx, rule->endIdx);
+//	DBG_P("Input tokens:");
+//	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
+//	DBG_P("Syntax rules:");
+//	KdumpTokenArray(kctx, rule->tokenList, rule->beginIdx, rule->endIdx);
 	for(currentRuleIdx = rule->beginIdx; currentRuleIdx < rule->endIdx && currentTokenIdx < endIdx; currentRuleIdx++) {
 		kToken *ruleToken = rule->tokenList->tokenItems[currentRuleIdx];
 		currentTokenIdx = kTokenArray_skip(tokenList, currentTokenIdx, endIdx);
@@ -340,7 +340,7 @@ static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *token
 			currentTokenIdx++;
 		}
 	}
-	DBG_P("rollback=%d, returnIdx=%d, currentTokenIdx=%d < %d", canRollBack, returnIdx, currentTokenIdx, endIdx);
+//	DBG_P("rollback=%d, returnIdx=%d, currentTokenIdx=%d < %d", canRollBack, returnIdx, currentTokenIdx, endIdx);
 	for(; currentRuleIdx < rule->endIdx; currentRuleIdx++) {
 		kToken *ruleToken = rule->tokenList->tokenItems[currentRuleIdx];
 		if(ruleToken->resolvedSymbol != KW_OptionalGroupGroup) {
@@ -364,8 +364,10 @@ static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns
 {
 	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
 	int nextIdx = kStmt_parseTypePattern(kctx, NULL, ns, tokenList, beginIdx, endIdx, NULL);
+//	DBG_P("nextIdx=%d, endIdx=%d", nextIdx, endIdx);
 	if(nextIdx != -1 && nextIdx < endIdx) {
 		kToken *tk = tokenList->tokenItems[nextIdx];
+//		dumpToken(kctx, tk, -1);
 		if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern) {
 			if(nextIdx+1 < endIdx && tokenList->tokenItems[nextIdx+1]->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
 				DBG_P("MethodDecl");
