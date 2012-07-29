@@ -65,7 +65,7 @@ static void dumpToken(KonohaContext *kctx, kToken *tk, int n)
 			DUMP_P("Token(%d) '%s' TokenType=%s%s indent=%d\n", n, Token_text(tk), PSYM_t(tk->unresolvedTokenType), tk->indent);
 		}
 		else {
-			DUMP_P("Token(%d) '%s' TokenType=%s%s topch='%c'\n", n, Token_text(tk), PSYM_t(tk->unresolvedTokenType), tk->indent);
+			DUMP_P("Token(%d) '%s' TokenType=%s%s'\n", n, Token_text(tk), PSYM_t(tk->unresolvedTokenType));
 		}
 	}
 	else if(tk->resolvedSyntaxInfo->keyword == KW_TypePattern) {
