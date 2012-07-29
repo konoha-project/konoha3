@@ -77,7 +77,7 @@ static kbool_t var_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline
 {
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ TOKEN("var"), StmtTyCheck_(var), .rule = "\"var\" var: $expr \"=\" $expr", },
+		{ TOKEN("var"), StmtTyCheck_(var), .rule = "\"var\" var: $Expr \"=\" $Expr", },
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);

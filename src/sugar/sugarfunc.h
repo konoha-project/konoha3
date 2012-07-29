@@ -55,7 +55,7 @@ static KMETHOD PatternMatch_Type(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(returnIdx);
 }
 
-static KMETHOD PatternMatch_Usymbol(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD PatternMatch_ConstName(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tokenArray, beginIdx, endIdx);
 	int returnIdx = -1;
@@ -67,12 +67,12 @@ static KMETHOD PatternMatch_Usymbol(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(returnIdx);
 }
 
-static KMETHOD PatternMatch_Symbol(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD PatternMatch_MethodName(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tokenArray, beginIdx, endIdx);
 	kTokenVar *tk = tokenArray->tokenVarItems[beginIdx];
 	int returnIdx = -1;
-	if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern) {
+	if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern || tk->resolvedSyntaxInfo->precedence_op1 > 0 || tk->resolvedSyntaxInfo->precedence_op2 > 0) {
 		KLIB kObject_setObject(kctx, stmt, name, O_classId(tk), tk);
 		returnIdx = beginIdx + 1;
 	}
@@ -84,7 +84,7 @@ static KMETHOD PatternMatch_Params(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_PatternMatch(stmt, name, tokenArray, beginIdx, endIdx);
 	int returnIdx = -1;
 	kToken *tk = tokenArray->tokenItems[beginIdx];
-	if(tk->resolvedSyntaxInfo->keyword == AST_PARENTHESIS) {
+	if(tk->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
 		kArray *tokenArray = tk->subTokenList;
 		int ss = 0, ee = kArray_size(tokenArray);
 		if(0 < ee && tokenArray->tokenItems[0]->resolvedSyntaxInfo->keyword == KW_void) ss = 1;  //  f(void) = > f()
@@ -201,7 +201,7 @@ static KMETHOD ParseExpr_Parenthesis(KonohaContext *kctx, KonohaStack *sfp)
 			((kExprVar*)lexpr)->syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall); // CALL
 		}
 		else if(lexpr->syn->keyword != KW_ExprMethodCall) {
-			syn = SYN_(Stmt_nameSpace(stmt), KW_ParenthesisPattern);    // (f null ())
+			syn = SYN_(Stmt_nameSpace(stmt), KW_ParenthesisGroup);    // (f null ())
 			lexpr  = new_ConsExpr(kctx, syn, 2, lexpr, K_NULL);
 		}
 		lexpr = kStmt_addExprParam(kctx, stmt, lexpr, tk->subTokenList, 0, kArray_size(tk->subTokenList), 1/*allowEmpty*/);
@@ -225,7 +225,7 @@ static KMETHOD ParseExpr_DOLLAR(KonohaContext *kctx, KonohaStack *sfp)
 		if(tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
 			Token_toBRACE(kctx, (kTokenVar*)tk, Stmt_nameSpace(stmt));
 		}
-		if(tk->resolvedSyntaxInfo->keyword == AST_BRACE) {
+		if(tk->resolvedSyntaxInfo->keyword == KW_BraceGroup) {
 			kExprVar *expr = GCSAFE_new(ExprVar, SYN_(Stmt_nameSpace(stmt), KW_BlockPattern));
 			KSETv(expr->block, new_Block(kctx, Stmt_nameSpace(stmt), stmt, tk->subTokenList, 0, kArray_size(tk->subTokenList), SemiColon));
 			RETURN_(expr);
@@ -507,7 +507,7 @@ static KMETHOD StmtTyCheck_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_StmtTyCheck(stmt, gma);
 	kbool_t r = false;
 	kNameSpace *ns = Stmt_nameSpace(stmt);
-	kToken *tk = SUGAR kStmt_getToken(kctx, stmt, KW_UsymbolPattern, NULL);
+	kToken *tk = SUGAR kStmt_getToken(kctx, stmt, KW_ConstPattern, NULL);
 	ksymbol_t unboxKey = tk->resolvedSymbol;
 	KUtilsKeyValue *kv = kNameSpace_getLocalConstNULL(kctx, ns, unboxKey);
 	if(kv != NULL) {
@@ -824,7 +824,7 @@ static kExpr *Expr_tyCheckFuncParams(KonohaContext *kctx, kStmt *stmt, kExpr *ex
 // ---------------------------------------------------------------------------
 // Statement Expr
 
-static KMETHOD StmtTyCheck_Expr(KonohaContext *kctx, KonohaStack *sfp)  // $expr
+static KMETHOD StmtTyCheck_Expr(KonohaContext *kctx, KonohaStack *sfp)  // $Expr
 {
 	VAR_StmtTyCheck(stmt, gma);
 	kbool_t r = kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, TPOL_ALLOWVOID);
@@ -1051,14 +1051,14 @@ static kbool_t StmtTypeDecl_setParam(KonohaContext *kctx, kStmt *stmt, int n, kp
 
 static kParam *kStmt_newMethodParamNULL(KonohaContext *kctx, kStmt *stmt, kGamma* gma)
 {
-	kParam *pa = (kParam*)kStmt_getObjectNULL(kctx, stmt, KW_ParamsPattern);
+	kParam *pa = (kParam*)kStmt_getObjectNULL(kctx, stmt, KW_ParamPattern);
 	if(pa == NULL || !IS_Param(pa)) {
-		SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ParamsPattern);
+		SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ParamPattern);
 		if(!Stmt_TyCheck(kctx, syn, stmt, gma)) {
 			return NULL;
 		}
 	}
-	pa = (kParam*)kStmt_getObjectNULL(kctx, stmt, KW_ParamsPattern);
+	pa = (kParam*)kStmt_getObjectNULL(kctx, stmt, KW_ParamPattern);
 	DBG_ASSERT(IS_Param(pa));
 	return pa;
 }
@@ -1069,7 +1069,7 @@ static KMETHOD StmtTyCheck_ParamsDecl(KonohaContext *kctx, KonohaStack *sfp)
 	kToken *tkT = SUGAR kStmt_getToken(kctx, stmt, KW_TypePattern, NULL); // type
 	ktype_t rtype =  tkT == NULL ? TY_void : Token_typeLiteral(tkT);
 	kParam *pa = NULL;
-	kBlock *params = (kBlock*)kStmt_getObjectNULL(kctx, stmt, KW_ParamsPattern);
+	kBlock *params = (kBlock*)kStmt_getObjectNULL(kctx, stmt, KW_ParamPattern);
 	if(params == NULL) {
 		pa = new_kParam(kctx, rtype, 0, NULL);
 	}
@@ -1079,14 +1079,14 @@ static KMETHOD StmtTyCheck_ParamsDecl(KonohaContext *kctx, KonohaStack *sfp)
 		for(i = 0; i < psize; i++) {
 			kStmt *stmt = params->stmtList->stmtItems[i];
 			if(stmt->syn->keyword != KW_StmtTypeDecl || !StmtTypeDecl_setParam(kctx, stmt, i, p)) {
-				kStmt_p(stmt, ErrTag, "parameter declaration must be a $type $name form");
+				kStmt_p(stmt, ErrTag, "parameter declaration must be a $Type $name form");
 				RETURNb_(false);
 			}
 		}
 		pa = new_kParam(kctx, rtype, psize, p);
 	}
 	if(IS_Param(pa)) {
-		KLIB kObject_setObject(kctx, stmt, KW_ParamsPattern, TY_Param, pa);
+		KLIB kObject_setObject(kctx, stmt, KW_ParamPattern, TY_Param, pa);
 		RETURNb_(true);
 	}
 	RETURNb_(false);
@@ -1168,25 +1168,26 @@ static KMETHOD StmtTyCheck_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 /* ------------------------------------------------------------------------ */
 
 #define PATTERN(T)  .keyword = KW_##T##Pattern
+#define GROUP(T)    .keyword = KW_##T##Group
 #define TOKEN(T)    .keyword = KW_##T
 
 static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ TOKEN(ERR), .flag = SYNFLAG_StmtBreakExec, },
-		{ PATTERN(Expr), .rule ="$expr", PatternMatch_(Expr), TopStmtTyCheck_(Expr), StmtTyCheck_(Expr),  },
-		{ PATTERN(Symbol),  _TERM, PatternMatch_(Symbol),  ExprTyCheck_(Symbol),},
-		{ PATTERN(Usymbol), _TERM, PatternMatch_(Usymbol), /* .rule = "$USYMBOL \"=\" $expr",*/ TopStmtTyCheck_(ConstDecl), ExprTyCheck_(Usymbol),},
+		{ PATTERN(Expr), .rule ="$Expr", PatternMatch_(Expr), TopStmtTyCheck_(Expr), StmtTyCheck_(Expr),  },
+		{ PATTERN(Symbol),  _TERM, PatternMatch_(MethodName), ExprTyCheck_(Symbol),},
+		{ PATTERN(Const), _TERM, PatternMatch_(ConstName), /* .rule = "$Const \"=\" $Expr",*/ TopStmtTyCheck_(ConstDecl), ExprTyCheck_(Usymbol),},
 		{ PATTERN(Text),    _TERM, ExprTyCheck_(Text),},
-		{ PATTERN(Int),     _TERM, ExprTyCheck_(Int),},
+		{ PATTERN(Number),     _TERM, ExprTyCheck_(Int),},
 		{ PATTERN(Float),   _TERM, },
-		{ PATTERN(Type),    _TERM, PatternMatch_(Type), .rule = "$type $expr", StmtTyCheck_(TypeDecl), ExprTyCheck_(Type), },
-		{ PATTERN(Parenthesis), .flag = SYNFLAG_ExprPostfixOp2, ParseExpr_(Parenthesis), .precedence_op2 = 300, ExprTyCheck_(FuncStyleCall),}, //AST_PARENTHESIS
-		{ PATTERN(Bracket),  },  //AST_BRACKET
-		{ PATTERN(Brace),  }, // AST_BRACE
+		{ PATTERN(Type),    _TERM, PatternMatch_(Type), .rule = "$Type $Expr", StmtTyCheck_(TypeDecl), ExprTyCheck_(Type), },
+		{ GROUP(Parenthesis), .flag = SYNFLAG_ExprPostfixOp2, ParseExpr_(Parenthesis), .precedence_op2 = 300, ExprTyCheck_(FuncStyleCall),}, //KW_ParenthesisGroup
+		{ GROUP(Bracket),  },  //KW_BracketGroup
+		{ GROUP(Brace),  }, // KW_BraceGroup
 		{ PATTERN(Block), PatternMatch_(Block), ExprTyCheck_(Block), },
-		{ PATTERN(Params), PatternMatch_(Params), TopStmtTyCheck_(ParamsDecl), ExprTyCheck_(MethodCall),},
-		{ PATTERN(Toks), PatternMatch_(Toks), },
+		{ PATTERN(Param), PatternMatch_(Params), TopStmtTyCheck_(ParamsDecl), ExprTyCheck_(MethodCall),},
+		{ PATTERN(Token), PatternMatch_(Toks), },
 		{ TOKEN(DOT), ParseExpr_(DOT), .precedence_op2 = 300, },
 		{ TOKEN(DIV), _OP, .precedence_op2 = 500, },
 		{ TOKEN(MOD), _OP, .precedence_op2 = 500, },
@@ -1206,23 +1207,22 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(LET),  .flag = SYNFLAG_ExprLeftJoinOp2, ParseExpr_(Op), .precedence_op2 = 4096, },
 		{ TOKEN(COMMA), ParseExpr_(COMMA), .precedence_op2 = 8192, },
 		{ TOKEN(DOLLAR), ParseExpr_(DOLLAR), },
-//		{ TOKEN(void), .type = TY_void, .rule ="$type [type: $type \".\"] $SYMBOL $params [$block]", TopStmtTyCheck_(MethodDecl)},
-		{ TOKEN(void), .type = TY_void, .rule ="$type [type: $type \".\"] $SYMBOL $params [$block]", TopStmtTyCheck_(MethodDecl)},
+		{ TOKEN(void), .type = TY_void, .rule ="$Type [type: $Type \".\"] $Symbol $Param [$Block]", TopStmtTyCheck_(MethodDecl)},
 		{ TOKEN(boolean), .type = TY_Boolean, },
 		{ TOKEN(int),     .type = TY_Int, },
-		{ TOKEN(true),  _TERM, ExprTyCheck_(true),},
-		{ TOKEN(false),  _TERM, ExprTyCheck_(false),},
-		{ TOKEN(if), .rule ="\"if\" \"(\" $expr \")\" $block [\"else\" else: $block]", TopStmtTyCheck_(if), StmtTyCheck_(if), },
-		{ TOKEN(else), .rule = "\"else\" $block", TopStmtTyCheck_(else), StmtTyCheck_(else), },
-		{ TOKEN(return), .rule ="\"return\" [$expr]", .flag = SYNFLAG_StmtBreakExec, StmtTyCheck_(return), },
+		{ TOKEN(true),    _TERM, ExprTyCheck_(true),},
+		{ TOKEN(false),   _TERM, ExprTyCheck_(false),},
+		{ TOKEN(if), .rule ="\"if\" \"(\" $Expr \")\" $Block [\"else\" else: $Block]", TopStmtTyCheck_(if), StmtTyCheck_(if), },
+		{ TOKEN(else), .rule = "\"else\" $Block", TopStmtTyCheck_(else), StmtTyCheck_(else), },
+		{ TOKEN(return), .rule ="\"return\" [$Expr]", .flag = SYNFLAG_StmtBreakExec, StmtTyCheck_(return), },
 		{ .keyword = KW_END, },
 	};
 	kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	SugarSyntaxVar *syn = (SugarSyntaxVar*)SYN_(ns, KW_void);
 	syn->ty = TY_void; // it's not cool, but necessary
-	syn = (SugarSyntaxVar*)SYN_(ns, KW_UsymbolPattern);
+	syn = (SugarSyntaxVar*)SYN_(ns, KW_ConstPattern);
 	KINITv(syn->syntaxRuleNULL, new_(TokenArray, 0));
-	parseSyntaxRule(kctx, "$USYMBOL \"=\" $expr", 0, syn->syntaxRuleNULL);
+	parseSyntaxRule(kctx, "$Const \"=\" $Expr", 0, syn->syntaxRuleNULL);
 }
 
 /* ------------------------------------------------------------------------ */

@@ -40,42 +40,40 @@ extern "C" {
 
 #define KW_t(X)   SYM_PRE(X),SYM_t(X)
 
-#define TokenType_ERR      KW_ToksPattern
-#define TokenType_CODE     KW_BlockPattern
-#define TokenType_NONE 0
-#define TokenType_INDENT 1
-#define TokenType_SYMBOL  KW_SymbolPattern
-//#define TokenType_USYMBOL KW_UsymbolPattern
-#define TokenType_TEXT  KW_TextPattern
-#define TokenType_INT   KW_IntPattern
-#define TokenType_FLOAT KW_FloatPattern
-#define TokenType_TYPE  KW_TypePattern
-#define TokenType_MN           KW_ParamsPattern
-#define TokenType_METANAME     KW_ATMARK
+#define TokenType_ERR          KW_TokenPattern
+#define TokenType_NONE         0
+#define TokenType_INDENT       1
+#define TokenType_SYMBOL       KW_SymbolPattern
+#define TokenType_TEXT         KW_TextPattern
+#define TokenType_INT          KW_NumberPattern
+#define TokenType_FLOAT        KW_FloatPattern
+#define TokenType_CODE         KW_BlockPattern
+//#define TokenType_TYPE         KW_TypePattern
+//#define TokenType_METANAME     KW_ATMARK
 
 #define KW_END  ((ksymbol_t)-1)
 #define KW_ERR  (((ksymbol_t)0)|0) /**/
-#define KW_ExprPattern (((ksymbol_t)1)|KW_PATTERN) /*$expr*/
-#define KW_SymbolPattern (((ksymbol_t)2)|KW_PATTERN) /*$SYMBOL*/
-#define KW_UsymbolPattern (((ksymbol_t)3)|KW_PATTERN) /*$USYMBOL*/
-#define KW_TextPattern (((ksymbol_t)4)|KW_PATTERN) /*$TEXT*/
-#define KW_IntPattern (((ksymbol_t)5)|KW_PATTERN) /*$INT*/
-#define KW_FloatPattern (((ksymbol_t)6)|KW_PATTERN) /*$FLOAT*/
-#define KW_TypePattern (((ksymbol_t)7)|KW_PATTERN) /*$type*/
-#define KW_ParenthesisPattern (((ksymbol_t)8)) /*()*/
-#define KW_BracketPattern     (((ksymbol_t)9)) /*[]*/
-#define KW_BracePattern       (((ksymbol_t)10)) /*{}*/
-#define AST_PARENTHESIS KW_ParenthesisPattern
-#define AST_BRACKET     KW_BracketPattern
-#define AST_OPTIONAL    (((ksymbol_t)9)|KW_ATMARK)  /*@[]*/
-#define AST_BRACE       KW_BracePattern
-#define KW_BlockPattern (((ksymbol_t)11)|KW_PATTERN) /*$block*/
-#define KW_ParamsPattern (((ksymbol_t)12)|KW_PATTERN) /*$params*/
-#define KW_ToksPattern (((ksymbol_t)13)|KW_PATTERN) /*$toks*/
+#define KW_ExprPattern      (((ksymbol_t)1)|KW_PATTERN) /*$Expr*/
+#define KW_SymbolPattern    (((ksymbol_t)2)|KW_PATTERN) /*$Symbol*/
+#define KW_ConstPattern     (((ksymbol_t)3)|KW_PATTERN) /*$Const*/
+#define KW_TextPattern      (((ksymbol_t)4)|KW_PATTERN) /*$Text*/
+#define KW_NumberPattern    (((ksymbol_t)5)|KW_PATTERN) /*$Number*/
+#define KW_FloatPattern     (((ksymbol_t)6)|KW_PATTERN) /*$Float*/
+#define KW_TypePattern      (((ksymbol_t)7)|KW_PATTERN) /*$Type*/
 
-#define KW_StmtConstDecl   KW_UsymbolPattern
+#define KW_ParenthesisGroup (((ksymbol_t)8)) /*()*/
+#define KW_BracketGroup     (((ksymbol_t)9)) /*[]*/
+#define KW_BraceGroup       (((ksymbol_t)10)) /*{}*/
+#define KW_TypeCastGroup    (((ksymbol_t)8)|KW_PATTERN) /*$()*/
+#define KW_TypeParamGroup   (((ksymbol_t)9)|KW_PATTERN) /*$[]*/
+#define KW_OptionalGroupGroup   (((ksymbol_t)9)|KW_ATMARK)  /*@[]*/
+#define KW_BlockPattern    (((ksymbol_t)11)|KW_PATTERN) /*$Block*/
+#define KW_ParamPattern   (((ksymbol_t)12)|KW_PATTERN) /*$Param*/
+#define KW_TokenPattern   (((ksymbol_t)13)|KW_PATTERN) /*$Token*/
+
+#define KW_StmtConstDecl   KW_ConstPattern
 #define KW_StmtTypeDecl    KW_TypePattern
-#define KW_ExprMethodCall  KW_ParamsPattern
+#define KW_ExprMethodCall  KW_ParamPattern
 #define KW_StmtMethodDecl  KW_void
 
 #define KW_DOT     14

@@ -27,7 +27,7 @@
 //     }
 //     if (c != ".".charCodeAt(0) && c != che && c != che2) {
 //         String intText = source.substring(0, i);
-//         tk.setKeyword("$INT");
+//         tk.setKeyword("$Number");
 //         tk.setText(intText);
 //         return i;
 //     }
@@ -52,7 +52,7 @@
 //         }
 //     }
 //     String floatText = source.substring(0, i);
-//     tk.setKeyword("$FLOAT");
+//     tk.setKeyword("$Float");
 //     tk.setText(floatText);
 //     return i;
 // }

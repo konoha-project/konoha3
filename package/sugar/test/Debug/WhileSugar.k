@@ -3,11 +3,11 @@
 K.import("sugar");
 K.import("konoha.null");
 
-sugar "while" "(" $expr ")" $block
+sugar "while" "(" $Expr ")" $Block
 
 boolean tyCheckWhile(Stmt stmt, Gamma gma) {
-	if(stmt.tyCheckExpr("$expr", gma, 3/*TY_Boolean*/, 0)) {
-		return (stmt.getBlock("$block", null)).tyCheckAll(gma);
+	if(stmt.tyCheckExpr("$Expr", gma, 3/*TY_Boolean*/, 0)) {
+		return (stmt.getBlock("$Block", null)).tyCheckAll(gma);
 	}
 	return false;
 }

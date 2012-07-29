@@ -130,7 +130,7 @@ static kbool_t function_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfil
 	USING_SUGAR;
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ TOKEN("function"), .
-			rule = "function $SYMBOL $params $block",
+			rule = "function $Symbol $Param $Block",
 			TopStmtTyCheck_(FunctionDecl), ParseExpr_(function), },
 		{ TOKEN("$param"), ExprTyCheck_(FuncStyleCall), },
 		{ .keyword = KW_END, },

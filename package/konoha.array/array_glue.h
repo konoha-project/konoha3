@@ -154,9 +154,9 @@ static kbool_t array_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 //	switch((int)tk->keyword) {
 //	case TokenType_INDENT: return "indent";
 //	case TokenType_CODE: ;
-//	case AST_BRACE: return "{... }";
-//	case AST_PARENTHESIS: return "(... )";
-//	case AST_BRACKET: return "[... ]";
+//	case KW_BraceGroup: return "{... }";
+//	case KW_ParenthesisGroup: return "(... )";
+//	case KW_BracketGroup: return "[... ]";
 //	default:  return S_text(tk->text);
 //	}
 //}
@@ -180,9 +180,9 @@ static kbool_t array_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 //static int dumpBeginTokenList(kToken *tk)
 //{
 //	switch(tk->keyword) {
-//	case AST_PARENTHESIS: return '(';
-//	case AST_BRACE: return '{';
-//	case AST_BRACKET: return '[';
+//	case KW_ParenthesisGroup: return '(';
+//	case KW_BraceGroup: return '{';
+//	case KW_BracketGroup: return '[';
 //	}
 //	return '<';
 //}
@@ -190,9 +190,9 @@ static kbool_t array_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 //static int dumpEndTokenList(kToken *tk)
 //{
 //	switch(tk->keyword) {
-//	case AST_PARENTHESIS: return ')';
-//	case AST_BRACE: return '}';
-//	case AST_BRACKET: return ']';
+//	case KW_ParenthesisGroup: return ')';
+//	case KW_BraceGroup: return '}';
+//	case KW_BracketGroup: return ']';
 //	}
 //	return '>';
 //}
@@ -358,8 +358,8 @@ static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 //	DBG_P("parse bracket!!, s=%d, c=%d, e=%d", beginIdx, currentIdx, endIdx);
 	kToken *tk = tokenArray->tokenItems[currentIdx];
 	if(beginIdx == currentIdx) { // TODO
-//		// $type $symbol = [1,2,3];
-//		// --> 1. $variable = $type.newArray(0);
+//		// $Type $symbol = [1,2,3];
+//		// --> 1. $variable = $Type.newArray(0);
 //		//     2. $variable.add(1);
 //		//     3. $variable.add(2);
 //		//     4. $variable.add(3);
@@ -372,7 +372,7 @@ static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 //		tk1->keyword = MN_("newArray");
 //		tk1->uline = tk->uline;
 //		tk1->text = KLIB new_kString(kctx, "new", sizeof("new"), SPOL_POOL|SPOL_ASCII);
-//		// empty $type
+//		// empty $Type
 //		kTokenVar *tk2 = GCSAFE_new(TokenVar, 0);
 //		tk2->keyword = KW_TypePattern;
 //		tk2->uline = tk->uline;
@@ -381,7 +381,7 @@ static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 //		kTokenVar *tk3 = GCSAFE_new(TokenVar, 0);
 //		tk3->keyword = TokenType_INT;
 //		tk3->text = KLIB new_kString(kctx, "0", sizeof("0"), SPOL_POOL|SPOL_ASCII);
-//		tk3->resolvedSyntaxInfo = SYN_(Stmt_nameSpace(stmt), KW_IntPattern);
+//		tk3->resolvedSyntaxInfo = SYN_(Stmt_nameSpace(stmt), KW_NumberPattern);
 //
 //		SugarSyntax *methodSyntax = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
 //		kExpr *methodExpr = SUGAR new_ConsExpr(kctx, methodSyntax,3, tk1, tk2, tk3);
@@ -437,7 +437,7 @@ static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t array_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("[]"), .flag = SYNFLAG_ExprPostfixOp2, ExprTyCheck_(BRACKET), ParseExpr_(BRACKET), .precedence_op2 = 300 },  //AST_BRACKET
+		{ .keyword = SYM_("[]"), .flag = SYNFLAG_ExprPostfixOp2, ExprTyCheck_(BRACKET), ParseExpr_(BRACKET), .precedence_op2 = 300 },  //KW_BracketGroup
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);

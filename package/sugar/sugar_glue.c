@@ -64,7 +64,7 @@ static KMETHOD Token_setSubArray(KonohaContext *kctx, KonohaStack *sfp)
 ////## boolean Token.isParenthesis();
 //static KMETHOD Token_isParenthesis(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	RETURNb_(sfp[0].asToken->keyword == AST_PARENTHESIS);
+//	RETURNb_(sfp[0].asToken->keyword == KW_ParenthesisGroup);
 //}
 
 //## String Token.getText();
@@ -277,7 +277,7 @@ static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp)
 //	kStmt *stmt  = sfp[0].asStmt;
 //	kExpr *expr  = sfp[1].asExpr;
 //	kToken *tk     = sfp[2].asToken;
-//	if(tk->tt != AST_PARENTHESIS || tk->tt != AST_BRACKET) {
+//	if(tk->tt != KW_ParenthesisGroup || tk->tt != KW_BracketGroup) {
 //		SUGAR p(kctx, WarnTag, tk->uline, tk->lpos, "not parameter token");
 //		kObject_setNullObject(expr, 1);
 //	}
@@ -415,7 +415,7 @@ static KMETHOD StmtTyCheck_sugar(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kbool_t r = 0;
 	VAR_StmtTyCheck(stmt, gma);
-	kTokenArray *tokenArray = (kTokenArray*)kStmt_getObject(kctx, stmt, KW_ToksPattern, NULL);
+	kTokenArray *tokenArray = (kTokenArray*)kStmt_getObject(kctx, stmt, KW_TokenPattern, NULL);
 	if(tokenArray != NULL) {
 		SugarSyntaxVar *syn = toks_syntax(kctx, Stmt_nameSpace(stmt), tokenArray);
 		if(syn != NULL) {
@@ -444,17 +444,17 @@ static kbool_t sugar_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileli
 #define DEFINE_KEYWORD(KW) {#KW, TY_Int, KW}
 		DEFINE_KEYWORD(KW_ExprPattern),
 		DEFINE_KEYWORD(KW_SymbolPattern),
-		DEFINE_KEYWORD(KW_UsymbolPattern),
+		DEFINE_KEYWORD(KW_ConstPattern),
 		DEFINE_KEYWORD(KW_TextPattern),
-		DEFINE_KEYWORD(KW_IntPattern),
+		DEFINE_KEYWORD(KW_NumberPattern),
 		DEFINE_KEYWORD(KW_FloatPattern),
 		DEFINE_KEYWORD(KW_TypePattern),
-		DEFINE_KEYWORD(KW_ParenthesisPattern),
-		DEFINE_KEYWORD(KW_BracketPattern),
-		DEFINE_KEYWORD(KW_BracePattern),
+		DEFINE_KEYWORD(KW_ParenthesisGroup),
+		DEFINE_KEYWORD(KW_BracketGroup),
+		DEFINE_KEYWORD(KW_BraceGroup),
 		DEFINE_KEYWORD(KW_BlockPattern),
-		DEFINE_KEYWORD(KW_ParamsPattern),
-		DEFINE_KEYWORD(KW_ToksPattern),
+		DEFINE_KEYWORD(KW_ParamPattern),
+		DEFINE_KEYWORD(KW_TokenPattern),
 		DEFINE_KEYWORD(TSTMT_UNDEFINED),
 		DEFINE_KEYWORD(TSTMT_ERR),
 		DEFINE_KEYWORD(TSTMT_EXPR),
@@ -482,7 +482,7 @@ static kbool_t sugar_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileli
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("sugar"), .rule ="\"sugar\" $toks", TopStmtTyCheck_(sugar), },
+		{ .keyword = SYM_("sugar"), .rule ="\"sugar\" $Token", TopStmtTyCheck_(sugar), },
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);

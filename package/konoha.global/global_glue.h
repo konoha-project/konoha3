@@ -246,7 +246,7 @@ struct _kScript {
 static kbool_t global_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("var"), TopStmtTyCheck_(var), .rule = "\"var\" var: $expr \"=\" $expr", },
+		{ .keyword = SYM_("var"), TopStmtTyCheck_(var), .rule = "\"var\" var: $Expr \"=\" $Expr", },
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);

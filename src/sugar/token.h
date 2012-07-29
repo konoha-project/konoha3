@@ -599,9 +599,9 @@ static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tokenArray, int s, in
 		Token_setRule(tk, true);
 		if(tk->unresolvedTokenType == TokenType_INDENT) continue;
 		if(tk->unresolvedTokenType == TokenType_TEXT) {
-			if(checkNestedSyntax(kctx, tokenArray, &i, e, AST_PARENTHESIS, '(', ')') ||
-				checkNestedSyntax(kctx, tokenArray, &i, e, AST_BRACKET, '[', ']') ||
-				checkNestedSyntax(kctx, tokenArray, &i, e, AST_BRACE, '{', '}')) {
+			if(checkNestedSyntax(kctx, tokenArray, &i, e, KW_ParenthesisGroup, '(', ')') ||
+				checkNestedSyntax(kctx, tokenArray, &i, e, KW_BracketGroup, '[', ']') ||
+				checkNestedSyntax(kctx, tokenArray, &i, e, KW_BraceGroup, '{', '}')) {
 			}
 			else {
 				tk->resolvedSymbol = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
@@ -621,7 +621,7 @@ static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tokenArray, int s, in
 			}
 		}
 		else if(tk->topCharHint == '[') {
-			if(checkNestedSyntax(kctx, tokenArray, &i, e, AST_OPTIONAL, '[', ']')) {
+			if(checkNestedSyntax(kctx, tokenArray, &i, e, KW_OptionalGroupGroup, '[', ']')) {
 				KLIB kArray_add(kctx, adst, tk);
 				continue;
 			}

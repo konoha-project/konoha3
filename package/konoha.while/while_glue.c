@@ -111,10 +111,10 @@ static KMETHOD StmtTyCheck_continue(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t while_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("while"), _LOOP, StmtTyCheck_(while), .rule = "\"while\" \"(\" $expr \")\" $block",},
-		{ .keyword = SYM_("break"), StmtTyCheck_(break), .rule = "\"break\" [ $USYMBOL ]", },
-		{ .keyword = SYM_("continue"), StmtTyCheck_(continue), .rule = "\"continue\" [ $USYMBOL ]", },
-		{ .keyword = SYM_("for"), _LOOP, StmtTyCheck_(for), .rule = "\"for\" \"(\" var: $block \";\" $expr \";\" each: $block \")\" $block", },
+		{ .keyword = SYM_("while"), _LOOP, StmtTyCheck_(while), .rule = "\"while\" \"(\" $Expr \")\" $Block",},
+		{ .keyword = SYM_("break"), StmtTyCheck_(break), .rule = "\"break\" [ $Const ]", },
+		{ .keyword = SYM_("continue"), StmtTyCheck_(continue), .rule = "\"continue\" [ $Const ]", },
+		{ .keyword = SYM_("for"), _LOOP, StmtTyCheck_(for), .rule = "\"for\" \"(\" var: $Block \";\" $Expr \";\" each: $Block \")\" $Block", },
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);

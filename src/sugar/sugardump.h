@@ -47,7 +47,7 @@ static const char* StatementType(ksymbol_t keyword)
 #define KdumpExpr(CTX, EXPR)
 
 #else
-#define KdumpTokenArray(CTX, TLS, S, E) 	dumpTokenArray(CTX, 0, TLS, S, E)
+#define KdumpTokenArray(CTX, TLS, S, E) 	DBG_P("@"); dumpTokenArray(CTX, 1, TLS, S, E)
 #define KdumpStmt(CTX, STMT) 		        dumpStmt(CTX, STMT)
 #define KdumpExpr(CTX, EXPR)                dumpExpr(CTX, 0, 0, EXPR)
 
@@ -59,7 +59,7 @@ static void dumpToken(KonohaContext *kctx, kToken *tk, int n)
 	if (n < 0) n = (short)tk->uline;
 	if(tk->resolvedSyntaxInfo == NULL) {
 		if(Token_isRule(tk)) {
-			DUMP_P("RuleToken(%d) resolvedSymbol=%s%s stmtEntryKey=%s%s\n", n, Token_text(tk), tk->stmtEntryKey);
+			DUMP_P("RuleToken(%d) '%s' resolvedSymbol=%s%s\n", n, Token_text(tk), PSYM_t(tk->resolvedSymbol));
 		}
 		else if(tk->unresolvedTokenType == TokenType_INDENT) {
 			DUMP_P("Token(%d) '%s' TokenType=%s%s indent=%d\n", n, Token_text(tk), PSYM_t(tk->unresolvedTokenType), tk->indent);
@@ -87,9 +87,9 @@ static void dumpIndent(KonohaContext *kctx, int nest)
 static int dumpBeginTokenList(int closure)
 {
 	switch(closure) {
-	case AST_PARENTHESIS: return '(';
-	case AST_BRACE: return '{';
-	case AST_BRACKET: return '[';
+	case KW_ParenthesisGroup: return '(';
+	case KW_BraceGroup: return '{';
+	case KW_BracketGroup: return '[';
 	}
 	return '<';
 }
@@ -97,9 +97,9 @@ static int dumpBeginTokenList(int closure)
 static int dumpEndTokenList(int closure)
 {
 	switch(closure) {
-	case AST_PARENTHESIS: return ')';
-	case AST_BRACE: return '}';
-	case AST_BRACKET: return ']';
+	case KW_ParenthesisGroup: return ')';
+	case KW_BraceGroup: return '}';
+	case KW_BracketGroup: return ']';
 	}
 	return '>';
 }

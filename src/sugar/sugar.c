@@ -223,7 +223,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	KINITv(base->ParseExpr_Term, new_SugarFunc(ParseExpr_Term));
 
 	defineDefaultSyntax(kctx, KNULL(NameSpace));
-	DBG_ASSERT(SYM_("$params") == KW_ParamsPattern);
+	DBG_ASSERT(SYM_("$Param") == KW_ParamPattern);
 	DBG_ASSERT(SYM_(".") == KW_DOT);
 	DBG_ASSERT(SYM_(",") == KW_COMMA);
 	DBG_ASSERT(SYM_("void") == KW_void);

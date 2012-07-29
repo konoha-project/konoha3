@@ -848,7 +848,7 @@ void exprItemstmt_asm(Stmt stmt, int espidx) {
 }
 
 void stmtListtmt_asm(Stmt stmt, int espidx) {
-	Block bk = stmt.getBlock("$block", null);
+	Block bk = stmt.getBlock("$Block", null);
 	block_asm(bk);
 }
 
@@ -864,7 +864,7 @@ void ifstmt_asm(Stmt stmt, int espidx) {
 
 	/* bbThen codegen */
 	builder.setInsertPoint(bbThen);
-	block_asm(stmt.getBlock("$block", null));
+	block_asm(stmt.getBlock("$Block", null));
 	//bbThen = builder.getInsertBlock();
 	if (builder.getInsertBlock().getTerminator().isNull()) {
 		builder.createBr(bbMerge);

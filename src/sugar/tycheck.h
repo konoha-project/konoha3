@@ -205,7 +205,7 @@ static kbool_t kStmt_tyCheckByName(KonohaContext *kctx, kStmt *stmt, ksymbol_t n
 
 /* ------------------------------------------------------------------------ */
 
-static KMETHOD UndefinedStmtTyCheck(KonohaContext *kctx, KonohaStack *sfp)  // $expr
+static KMETHOD UndefinedStmtTyCheck(KonohaContext *kctx, KonohaStack *sfp)  // $Expr
 {
 	VAR_StmtTyCheck(stmt, gma);
 	const char *location = kGamma_isTOPLEVEL(gma) ? "at the top level" : "inside the function";

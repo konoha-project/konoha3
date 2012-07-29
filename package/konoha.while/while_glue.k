@@ -1,11 +1,11 @@
 // K.import("sugar");
 // K.import("konoha.null");
 
-// sugar "while" "(" $expr ")" $block
+// sugar "while" "(" $Expr ")" $Block
 
 // boolean tyCheckWhile(Stmt stmt, Gamma gma) {
-//     if(stmt.tyCheckExpr("$expr", gma, 3/*TY_Boolean*/, 0)) {
-//         Block block = stmt.getBlock("$block", null);
+//     if(stmt.tyCheckExpr("$Expr", gma, 3/*TY_Boolean*/, 0)) {
+//         Block block = stmt.getBlock("$Block", null);
 //         boolean ret = block.tyCheckAll(gma);
 //         stmt.setType(TSTMT_LOOP);
 //         return ret;

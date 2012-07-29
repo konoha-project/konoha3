@@ -210,7 +210,7 @@ static int kStmt_parseTypePattern(KonohaContext *kctx, kStmt *stmt, kNameSpace *
 		int isAllowedGenerics = true;
 		while(nextIdx < endIdx) {
 			kToken *tk = tokenList->tokenItems[nextIdx];
-			if(tk->resolvedSyntaxInfo->keyword != AST_BRACKET) break;
+			if(tk->resolvedSyntaxInfo->keyword != KW_BracketGroup) break;
 			int sizeofBracketTokens = kArray_size(tk->subTokenList);
 			if(isAllowedGenerics &&  sizeofBracketTokens > 0) {  // C[T][]
 				KonohaClass *foundGenericClass = kStmt_parseGenerics(kctx, stmt, ns, foundClass, tk->subTokenList, 0, sizeofBracketTokens);
@@ -305,7 +305,7 @@ static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *token
 		if(KW_isPATTERN(ruleToken->resolvedSymbol)) {
 			int patternEndIdx = endIdx;
 			kToken *prefetchedRuleToken = rule->tokenList->tokenItems[currentRuleIdx+1];
-			if(currentRuleIdx + 1 < rule->endIdx && (!KW_isPATTERN(prefetchedRuleToken->resolvedSymbol) && prefetchedRuleToken->resolvedSymbol != AST_OPTIONAL)) {
+			if(currentRuleIdx + 1 < rule->endIdx && (!KW_isPATTERN(prefetchedRuleToken->resolvedSymbol) && prefetchedRuleToken->resolvedSymbol != KW_OptionalGroupGroup)) {
 				patternEndIdx = TokenArray_findPrefetchedRuleToken(tokenList, currentTokenIdx+1, endIdx, prefetchedRuleToken);
 				if(patternEndIdx == -1) {
 					kToken *tk = tokenList->tokenItems[currentTokenIdx];
@@ -321,7 +321,7 @@ static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *token
 			}
 			currentTokenIdx = (patternEndIdx == endIdx) ? next : patternEndIdx + 1;
 		}
-		else if(ruleToken->resolvedSymbol == AST_OPTIONAL) {
+		else if(ruleToken->resolvedSymbol == KW_OptionalGroupGroup) {
 			TokenChunk nrule = {ruleToken->subTokenList, 0, kArray_size(ruleToken->subTokenList)};
 			int next = kStmt_matchSyntaxRule(kctx, stmt, tokenList, currentTokenIdx, endIdx, &nrule, 1/*roolback*/);
 			if(next == -1) return returnIdx;
@@ -332,7 +332,7 @@ static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *token
 			if(ruleToken->resolvedSymbol != tk->resolvedSymbol) {
 				return kStmt_printMismatchedRule(kctx, stmt, tk, ruleToken, beginIdx, canRollBack);
 			}
-			if(ruleToken->resolvedSymbol == AST_PARENTHESIS || ruleToken->resolvedSymbol == AST_BRACKET) {
+			if(ruleToken->resolvedSymbol == KW_ParenthesisGroup || ruleToken->resolvedSymbol == KW_BracketGroup) {
 				TokenChunk nrule = {ruleToken->subTokenList, 0, kArray_size(ruleToken->subTokenList)};
 				int next = kStmt_matchSyntaxRule(kctx, stmt, tk->subTokenList, 0, kArray_size(tk->subTokenList), &nrule, 0/*not rollbck*/);
 				if(next == -1) return returnIdx;
@@ -343,7 +343,7 @@ static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *token
 	DBG_P("rollback=%d, returnIdx=%d, currentTokenIdx=%d < %d", canRollBack, returnIdx, currentTokenIdx, endIdx);
 	for(; currentRuleIdx < rule->endIdx; currentRuleIdx++) {
 		kToken *ruleToken = rule->tokenList->tokenItems[currentRuleIdx];
-		if(ruleToken->resolvedSymbol != AST_OPTIONAL) {
+		if(ruleToken->resolvedSymbol != KW_OptionalGroupGroup) {
 			if(!canRollBack) {
 				kStmt_p(stmt, ErrTag, "%s%s needs syntax pattern: %s%s", T_statement(stmt->syn->keyword), KW_t(ruleToken->resolvedSymbol));
 				return returnIdx;
@@ -367,14 +367,14 @@ static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns
 	if(nextIdx != -1 && nextIdx < endIdx) {
 		kToken *tk = tokenList->tokenItems[nextIdx];
 		if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern) {
-			if(nextIdx+1 < endIdx && tokenList->tokenItems[nextIdx+1]->resolvedSyntaxInfo->keyword == AST_PARENTHESIS) {
+			if(nextIdx+1 < endIdx && tokenList->tokenItems[nextIdx+1]->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
 				DBG_P("MethodDecl");
 				return SYN_(ns, KW_StmtMethodDecl); //
 			}
 			DBG_P("TypeDecl");
 			return SYN_(ns, KW_StmtTypeDecl);  //
 		}
-		if(tk->resolvedSyntaxInfo->keyword == KW_TypePattern) {
+		if(tk->resolvedSyntaxInfo->keyword == KW_TypePattern || tk->resolvedSyntaxInfo->precedence_op1 > 0 || tk->resolvedSyntaxInfo->precedence_op2 > 0) {
 			DBG_P("MethodDecl");
 			return SYN_(ns, KW_StmtMethodDecl); //
 		}
@@ -467,10 +467,10 @@ static int kNameSpace_addResolvedToken(KonohaContext *kctx, ASTEnv *env)
 		return env->endIdx;  // resolved no more
 	}
 	if(tk->topCharHint == '(') {
-		return kNameSpace_addStrucuredToken(kctx, env, AST_PARENTHESIS);
+		return kNameSpace_addStrucuredToken(kctx, env, KW_ParenthesisGroup);
 	}
 	if(tk->topCharHint == '[') {
-		return kNameSpace_addStrucuredToken(kctx, env, AST_BRACKET);
+		return kNameSpace_addStrucuredToken(kctx, env, KW_BracketGroup);
 	}
 	if(tk->topCharHint == '@' && env->beginIdx + 1 < env->endIdx) {
 		kTokenVar *tk1 = env->tokenList->tokenVarItems[env->beginIdx+1];
@@ -554,10 +554,10 @@ static int kNameSpace_addStrucuredToken(KonohaContext *kctx, ASTEnv *env, ksymbo
 	newenv = *env;
 	newenv.beginIdx = env->beginIdx + 1;
 	newenv.stmtTokenList = astToken->subTokenList;
-	CheckEndOfStmtFunc f = (AST_type == AST_PARENTHESIS) ? checkEndOfParenthesis : checkEndOfBracket;
+	CheckEndOfStmtFunc f = (AST_type == KW_ParenthesisGroup) ? checkEndOfParenthesis : checkEndOfBracket;
 	int returnIdx = kNameSpace_selectStmtTokenList(kctx, &newenv, &probablyCloseBefore, f);
 	if(returnIdx == env->endIdx && env->errToken != NULL) {
-		int closech = (AST_type == AST_PARENTHESIS) ? ')': ']';
+		int closech = (AST_type == KW_ParenthesisGroup) ? ')': ']';
 		Token_pERR(kctx, astToken, "'%c' is expected (probably before %s)", closech, Token_text(env->tokenList->tokenItems[probablyCloseBefore]));
 		env->errToken = astToken;
 	}
@@ -573,7 +573,7 @@ static int kStmt_addAnnotation(KonohaContext *kctx, kStmt *stmt, kArray *tokenLi
 		if(i + 1 < endIdx) {
 			kToken *tk1 = tokenList->tokenItems[i+1];
 			kObject *value = UPCAST(K_TRUE);
-			if(tk1->resolvedSyntaxInfo->keyword == AST_PARENTHESIS) {
+			if(tk1->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
 				value = (kObject*)kStmt_parseExpr(kctx, stmt, tk1->subTokenList, 0, kArray_size(tk1->subTokenList));
 				i++;
 			}
@@ -663,7 +663,7 @@ static void Token_toBRACE(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns)
 		kArray *a = GCSAFE_new(TokenArray, 0);
 		kNameSpace_tokenize(kctx, ns, S_text(tk->text), tk->uline, a);
 		KSETv(tk->subTokenList, a);
-		tk->resolvedSyntaxInfo = SYN_(ns, AST_BRACE);
+		tk->resolvedSyntaxInfo = SYN_(ns, KW_BraceGroup);
 	}
 }
 
@@ -676,7 +676,7 @@ static kBlock* kStmt_getBlock(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw, kB
 		if (tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
 			Token_toBRACE(kctx, (kTokenVar*)tk, Stmt_nameSpace(stmt));
 		}
-		if (tk->resolvedSyntaxInfo->keyword == AST_BRACE) {
+		if (tk->resolvedSyntaxInfo->keyword == KW_BraceGroup) {
 			bk = new_Block(kctx, Stmt_nameSpace(stmt), stmt, tk->subTokenList, 0, kArray_size(tk->subTokenList), SemiColon);
 			KLIB kObject_setObject(kctx, stmt, kw, TY_Block, bk);
 		}

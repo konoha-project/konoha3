@@ -2,4 +2,4 @@
 
 K.import("sugar");
 
-sugar "while" "(" $expr ")" $block;
+sugar "while" "(" $Expr ")" $Block;

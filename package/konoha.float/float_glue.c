@@ -323,7 +323,7 @@ static kbool_t float_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileli
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("float"), .type = TY_Float, },
 		{ .keyword = SYM_("double"), .type = TY_Float, },
-		{ .keyword = SYM_("$FLOAT"), ExprTyCheck_(Float), },
+		{ .keyword = SYM_("$Float"), ExprTyCheck_(Float), },
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);

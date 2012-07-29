@@ -30,7 +30,7 @@ static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int ret = false;
 	VAR_StmtTyCheck(stmt, gma);
-	kTokenArray *tokenArray = (kTokenArray *) kStmt_getObjectNULL(kctx, stmt, KW_ToksPattern);
+	kTokenArray *tokenArray = (kTokenArray *) kStmt_getObjectNULL(kctx, stmt, KW_TokenPattern);
 	if (tokenArray == NULL) {
 		RETURNb_(false);
 	}
@@ -87,7 +87,7 @@ static kbool_t import_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 static kbool_t import_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("import"), .rule = "\"import\" $toks [ \".*\"] ", TopStmtTyCheck_(import)},
+		{ .keyword = SYM_("import"), .rule = "\"import\" $Token [ \".*\"] ", TopStmtTyCheck_(import)},
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);

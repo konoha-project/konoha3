@@ -165,9 +165,9 @@ static const char *kToken_t_(KonohaContext *kctx, kToken *tk)
 	switch((int)tk->unresolvedTokenType) {
 	case TokenType_INDENT: return "indent";
 	case TokenType_CODE: ;
-	case AST_BRACE: return "{... }";
-	case AST_PARENTHESIS: return "(... )";
-	case AST_BRACKET: return "[... ]";
+	case KW_BraceGroup: return "{... }";
+	case KW_ParenthesisGroup: return "(... )";
+	case KW_BracketGroup: return "[... ]";
 	default:  return S_text(tk->text);
 	}
 }
