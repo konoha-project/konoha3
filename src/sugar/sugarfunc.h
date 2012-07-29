@@ -1095,17 +1095,6 @@ static KMETHOD StmtTyCheck_ParamsDecl(KonohaContext *kctx, KonohaStack *sfp)
 ///* ------------------------------------------------------------------------ */
 ///* [MethodDecl] */
 
-static KDEFINE_FLAGNAME MethodDeclFlag[] = {
-	{AKEY("@Public"),     kMethod_Public},
-	{AKEY("@Virtual"),    kMethod_Virtual},
-	{AKEY("@Final"),      kMethod_Final},
-	{AKEY("@Const"),      kMethod_Const},
-	{AKEY("@Static"),     kMethod_Static},
-	{AKEY("@Restricted"), kMethod_Restricted},
-	{AKEY("@Override"),   kMethod_Override},
-	{NULL},
-};
-
 static ktype_t kStmt_getClassId(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, ksymbol_t kw, ktype_t defcid)
 {
 	kToken *tk = (kToken*)kStmt_getObjectNULL(kctx, stmt, kw);
@@ -1132,8 +1121,22 @@ static ksymbol_t kStmt_getMethodSymbol(KonohaContext *kctx, kStmt *stmt, kNameSp
 static KMETHOD StmtTyCheck_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_StmtTyCheck(stmt, gma);
+	static KonohaFlagSymbolData MethodDeclFlag[] = {
+		{kMethod_Public}, {kMethod_Const}, {kMethod_Static},
+		{kMethod_Virtual}, {kMethod_Final}, {kMethod_Override},
+		{kMethod_Restricted},
+	};
+	if(MethodDeclFlag[0].symbol == 0) {
+		MethodDeclFlag[0].symbol = SYM_("@Public");
+		MethodDeclFlag[1].symbol = SYM_("@Const");
+		MethodDeclFlag[2].symbol = SYM_("@Static");
+		MethodDeclFlag[3].symbol = SYM_("@Virtual");
+		MethodDeclFlag[4].symbol = SYM_("@Final");
+		MethodDeclFlag[5].symbol = SYM_("@Override");
+		MethodDeclFlag[6].symbol = SYM_("@Restricted");
+	}
+	uintptr_t flag    = kStmt_parseFlag(kctx, stmt, MethodDeclFlag, 0);
 	kNameSpace *ns    = Stmt_nameSpace(stmt);
-	uintptr_t flag    = kStmt_parseFlags(kctx, stmt, MethodDeclFlag, 0);
 	ktype_t classId   = kStmt_getClassId(kctx, stmt, ns, SYM_("type"), O_classId(ns->scriptObject));
 	kmethodn_t mn     = kStmt_getMethodSymbol(kctx, stmt, ns, KW_SymbolPattern, MN_new);
 	kParam *pa        = kStmt_newMethodParamNULL(kctx, stmt, gma);

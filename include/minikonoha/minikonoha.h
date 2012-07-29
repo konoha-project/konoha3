@@ -243,6 +243,11 @@ typedef kushort_t       ksymbol_t;
 typedef kushort_t       kmethodn_t;
 typedef kushort_t       kparamid_t;
 
+typedef struct {
+	uintptr_t flag;
+	ksymbol_t symbol;
+} KonohaFlagSymbolData;
+
 /* ktype_t */
 #define TY_newid        ((ktype_t)-1)
 #define TY_unknown         ((ktype_t)-2)

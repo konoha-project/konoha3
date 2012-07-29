@@ -258,26 +258,14 @@ static void Stmt_reftrace(KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
-
-#define AKEY(T)   T, (sizeof(T)-1)
-
-typedef struct {
-	const char *key;
-	size_t keysize;
-	uintptr_t flag;
-} KDEFINE_FLAGNAME ;
-
-static uintptr_t kStmt_parseFlags(KonohaContext *kctx, kStmt *stmt, KDEFINE_FLAGNAME *fop, uintptr_t flag)
+static uintptr_t kStmt_parseFlag(KonohaContext *kctx, kStmt *stmt, KonohaFlagSymbolData *flagData, uintptr_t flag)
 {
-	while(fop->key != NULL) {
-		ksymbol_t kw = ksymbolA(fop->key, fop->keysize, SYM_NONAME);
-		if(kw != SYM_NONAME) {
-			kObject *op = kStmt_getObjectNULL(kctx, stmt, kw);
-			if(op != NULL) {
-				flag |= fop->flag;
-			}
+	while(flagData->flag != 0) {
+		kObject *op = kStmt_getObjectNULL(kctx, stmt, flagData->symbol);
+		if(op != NULL) {
+			flag |= flagData->flag;
 		}
-		fop++;
+		flagData++;
 	}
 	return flag;
 }
