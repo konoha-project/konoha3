@@ -687,6 +687,8 @@ struct KonohaClassField {
 #define kClass_TypeVar          ((kshortflag_t)(1<<9))
 #define kClass_Virtual          ((kshortflag_t)(1<<10))
 
+#define CFLAG_SUPERMASK         kClass_Prototype|kClass_Singleton
+
 #define CFLAG_void              kClass_TypeVar|kClass_UnboxType|kClass_Singleton|kClass_Final
 #define CFLAG_var               kClass_TypeVar|kClass_UnboxType|kClass_Singleton|kClass_Final
 #define CFLAG_Object            0
@@ -708,20 +710,12 @@ struct KonohaClassField {
 #define CT_isFinal(ct)         (TFLAG_is(kshortflag_t,(ct)->cflag, kClass_Final))
 #define TY_isFinal(ct)         (TFLAG_is(kshortflag_t,CT_(ct)->cflag, kClass_Final))
 
-#define TY_isVirtual(T)     (TFLAG_is(kshortflag_t,(CT_(T))->cflag, kClass_Virtual))
+//#define TY_isVirtual(T)     (TFLAG_is(kshortflag_t,(CT_(T))->cflag, kClass_Virtual))
 #define CT_isVirtual(ct)    (TFLAG_is(kshortflag_t,(ct)->cflag, kClass_Virtual))
-#define CT_setVirtual(C, B)   TFLAG_set(kshortflag_t, (C)->cflag, B)
-
-
-//// this is used in konoha.class
-//#define CT_isDefined(ct)  ((ct)->fieldAllocSize == 0 || (ct)->fieldsize == (ct)->fieldAllocSize)
-
-//#define TY_isUnboxType(t)    (TFLAG_is(kshortflag_t,(ClassTBL(t))->cflag, kClass_UnboxType))
-//#define T_isInterface(t)    (TFLAG_is(kshortflag_t,(ClassTBL(t))->cflag, kClass_Interface))
-//#define T_isTypeVar(t)      (TFLAG_is(kshortflag_t,(ClassTBL(t))->cflag, kClass_TypeVar))
+#define CT_setVirtual(C, B)   TFLAG_set(kshortflag_t, (C)->cflag, kClass_Virtual, B)
 
 #define TY_isTypeVar(t)      (TFLAG_is(kshortflag_t,(CT_(t))->cflag, kClass_TypeVar))
-#define TY_isFunc(T)    (CT_(T)->baseclassId == TY_Func)
+#define TY_isFunc(T)         (CT_(T)->baseclassId == TY_Func)
 
 /* magic flag */
 #define MAGICFLAG(f)             (K_OBJECT_MAGIC | ((kmagicflag_t)(f) & K_CFLAGMASK))

@@ -420,7 +420,7 @@ static int kNameSpace_addSymbolToken(KonohaContext *kctx, ASTEnv *env, kTokenVar
 	SugarSyntax *syn = SYN_(env->ns, symbol);
 	if(syn != NULL) {
 		if(syn->ty != TY_unknown) {
-			kToken_setVirtualTypeLiteral(kctx, tk, env->ns, syn->ty);
+			kToken_setTypeId(kctx, tk, env->ns, syn->ty);
 		}
 		else {
 			tk->resolvedSymbol     = symbol;
@@ -430,7 +430,7 @@ static int kNameSpace_addSymbolToken(KonohaContext *kctx, ASTEnv *env, kTokenVar
 	else {
 		KonohaClass *foundClass = KLIB kNameSpace_getClass(kctx, env->ns, t, S_size(tk->text), NULL);
 		if(foundClass != NULL) {
-			kToken_setVirtualTypeLiteral(kctx, tk, env->ns, foundClass->classId);
+			kToken_setTypeId(kctx, tk, env->ns, foundClass->classId);
 		}
 		else {
 			if(!isalpha(t[0])) {

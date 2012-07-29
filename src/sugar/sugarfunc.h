@@ -49,7 +49,7 @@ static KMETHOD PatternMatch_Type(KonohaContext *kctx, KonohaStack *sfp)
 	int returnIdx = kStmt_parseTypePattern(kctx, stmt, Stmt_nameSpace(stmt), tokenArray, beginIdx, endIdx, &foundClass);
 	if(foundClass != NULL) {
 		kToken *tk = tokenArray->tokenItems[beginIdx];
-		kToken_setVirtualTypeLiteral(kctx, tk, Stmt_nameSpace(stmt), foundClass->classId);
+		kToken_setTypeId(kctx, tk, Stmt_nameSpace(stmt), foundClass->classId);
 		KLIB kObject_setObject(kctx, stmt, name, O_classId(tk), tk);
 	}
 	RETURNi_(returnIdx);
@@ -134,7 +134,7 @@ static KMETHOD ParseExpr_Term(KonohaContext *kctx, KonohaStack *sfp)
 		KonohaClass *foundClass = NULL;
 		int nextIdx = kStmt_parseTypePattern(kctx, NULL, Stmt_nameSpace(stmt), tokenArray, beginIdx, endIdx, &foundClass);
 		if(foundClass != NULL) {
-			kToken_setVirtualTypeLiteral(kctx, tk, Stmt_nameSpace(stmt), foundClass->classId);
+			kToken_setTypeId(kctx, tk, Stmt_nameSpace(stmt), foundClass->classId);
 		}
 		else {
 			nextIdx = currentIdx + 1;
@@ -1126,7 +1126,7 @@ static KMETHOD StmtTyCheck_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 		{kMethod_Virtual}, {kMethod_Final}, {kMethod_Override},
 		{kMethod_Restricted},
 	};
-	if(MethodDeclFlag[0].symbol == 0) {
+	if(MethodDeclFlag[0].symbol == 0) {   // this is a tricky technique
 		MethodDeclFlag[0].symbol = SYM_("@Public");
 		MethodDeclFlag[1].symbol = SYM_("@Const");
 		MethodDeclFlag[2].symbol = SYM_("@Static");

@@ -398,7 +398,7 @@ static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 //		tk5->text = KLIB new_kString(kctx, S_text(symTk->text), S_size(symTk->text), SPOL_POOL|SPOL_ASCII);
 //
 //		kTokenVar *tk6 = GCSAFE_new(TokenVar, 0);
-//		kToken_setVirtualTypeLiteral(kctx, tk6, Stmt_nameSpace(stmt), TY_Object);
+//		kToken_setTypeId(kctx, tk6, Stmt_nameSpace(stmt), TY_Object);
 //		//tk6->keyword = KW_TypePattern; // tmporary
 //		//tk6->uline = tk->uline;
 //		//tk6->resolvedSyntaxInfo = SYN_(Stmt_nameSpace(stmt), KW_TypePattern);

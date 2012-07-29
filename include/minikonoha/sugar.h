@@ -219,7 +219,7 @@ struct SugarSyntaxVar {
 	kFunc                            *ExprTyCheck;
 	// binary
 	ktype_t  ty;
-	kmethodn_t precedence_op2;        kshort_t precedence_op1;
+	kshort_t precedence_op2;        kshort_t precedence_op1;
 };
 
 #define SYNIDX_PatternMatch   0
@@ -617,7 +617,7 @@ static kExpr* kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, i
 
 ///* ------------------------------------------------------------------------ */
 
-static inline void kToken_setVirtualTypeLiteral(KonohaContext *kctx, kToken *tk, kNameSpace *ns, ktype_t type)
+static inline void kToken_setTypeId(KonohaContext *kctx, kToken *tk, kNameSpace *ns, ktype_t type)
 {
 	((kTokenVar*)tk)->resolvedTypeId = type;
 	((kTokenVar*)tk)->resolvedSyntaxInfo = kmodsugar->kNameSpace_getSyntax(kctx, ns, KW_TypePattern, 0);
