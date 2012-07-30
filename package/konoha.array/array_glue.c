@@ -207,7 +207,7 @@ static KMETHOD ExprTyCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 		requestClass = NULL; // undefined
 	}
 	for(i = 2; i < kArray_size(expr->cons); i++) {
-		kExpr *typedExpr = SUGAR kStmt_tyCheckByNameAt(kctx, stmt, expr, i, gma, paramType, 0);
+		kExpr *typedExpr = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, i, gma, paramType, 0);
 		if(typedExpr == K_NULLEXPR) {
 			RETURN_(typedExpr);
 		}

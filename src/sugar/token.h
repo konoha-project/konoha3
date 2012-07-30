@@ -640,7 +640,7 @@ static kbool_t makeSyntaxRule(KonohaContext *kctx, kArray *tokenArray, int s, in
 
 static void parseSyntaxRule(KonohaContext *kctx, const char *rule, kfileline_t uline, kArray *a)
 {
-	kArray *tokenArray = ctxsugar->preparedTokenList;
+	kArray *tokenArray = KonohaContext_getSugarContext(kctx)->preparedTokenList;
 	size_t pos = kArray_size(tokenArray);
 	kNameSpace_tokenize(kctx, NULL, rule, uline, tokenArray);
 	makeSyntaxRule(kctx, tokenArray, pos, kArray_size(tokenArray), a);

@@ -425,7 +425,7 @@ struct kGammaVar {
 
 /* ------------------------------------------------------------------------ */
 
-#define ctxsugar    ((SugarContext*)kctx->modlocal[MOD_sugar])
+#define KonohaContext_getSugarContext(kctx)    ((SugarContext*)kctx->modlocal[MOD_sugar])
 #define kmodsugar  ((KModuleSugar*)kctx->modshare[MOD_sugar])
 #define CT_Token    kmodsugar->cToken
 #define CT_Expr     kmodsugar->cExpr
@@ -497,7 +497,7 @@ typedef struct {
 
 	kbool_t     (*kBlock_tyCheckAll)(KonohaContext *, kBlock *, kGamma *);
 	kbool_t     (*kStmt_tyCheckByName)(KonohaContext *, kStmt*, ksymbol_t, kGamma *, ktype_t, int);
-	kExpr*      (*kStmt_tyCheckByNameAt)(KonohaContext *, kStmt *, kExpr *, size_t, kGamma *, ktype_t, int);
+	kExpr*      (*kStmt_tyCheckExprAt)(KonohaContext *, kStmt *, kExpr *, size_t, kGamma *, ktype_t, int);
 	kExpr *     (*kStmt_tyCheckCallParamExpr)(KonohaContext *, kStmt *, kExpr *, kMethod *, kGamma *, ktype_t);
 	kExpr *     (*new_TypedMethodCall)(KonohaContext *, kStmt *, ktype_t ty, kMethod *mtd, kGamma *, int n, ...);
 
@@ -534,7 +534,7 @@ typedef struct {
 	base->kExpr_setConstValue        = kExpr_setConstValue;\
 	base->kExpr_setUnboxConstValue   = kExpr_setUnboxConstValue;\
 	base->kExpr_setVariable          = kExpr_setVariable;\
-	base->kStmt_tyCheckByNameAt      = kStmt_tyCheckByNameAt;\
+	base->kStmt_tyCheckExprAt      = kStmt_tyCheckExprAt;\
 	base->kStmt_tyCheckByName        = kStmt_tyCheckByName;\
 	base->kBlock_tyCheckAll          = kBlock_tyCheckAll;\
 	base->kStmt_tyCheckCallParamExpr = kStmt_tyCheckCallParamExpr;\
@@ -562,11 +562,12 @@ typedef struct {
 	KonohaContextModule h;
 	kArray            *preparedTokenList;
 	KUtilsGrowingArray errorMessageBuffer;
-	int                errorMessageCount;
 	kArray            *errorMessageList;
+	int                errorMessageCount;
+	kbool_t            isBlockingErrorMessage;
 	kBlock            *singleBlock;
 	kGamma            *gma;
-	kArray            *lvarlst;
+//	kArray            *lvarlst;
 	kArray            *definedMethodList;
 } SugarContext;
 

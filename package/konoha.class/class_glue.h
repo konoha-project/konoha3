@@ -288,8 +288,8 @@ static KMETHOD Object_instanceOf(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ExprTyCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	kExpr *selfExpr   = SUGAR kStmt_tyCheckByNameAt(kctx, stmt, expr, 1, gma, TY_var, 0);
-	kExpr *targetExpr = SUGAR kStmt_tyCheckByNameAt(kctx, stmt, expr, 2, gma, TY_var, 0);
+	kExpr *selfExpr   = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 1, gma, TY_var, 0);
+	kExpr *targetExpr = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 2, gma, TY_var, 0);
 	if(selfExpr != K_NULLEXPR && targetExpr != K_NULLEXPR) {
 		KonohaClass *selfClass = CT_(selfExpr->ty), *targetClass = CT_(targetExpr->ty);
 		if(CT_isFinal(selfClass)) {
@@ -322,8 +322,8 @@ static KMETHOD Object_as(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ExprTyCheck_As(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	kExpr *targetExpr = SUGAR kStmt_tyCheckByNameAt(kctx, stmt, expr, 2, gma, TY_var, 0);
-	kExpr *selfExpr   = SUGAR kStmt_tyCheckByNameAt(kctx, stmt, expr, 1, gma, targetExpr->ty, 0);
+	kExpr *targetExpr = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 2, gma, TY_var, 0);
+	kExpr *selfExpr   = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 1, gma, targetExpr->ty, 0);
 	if(selfExpr != K_NULLEXPR && targetExpr != K_NULLEXPR) {
 		KonohaClass *selfClass = CT_(selfExpr->ty), *targetClass = CT_(targetExpr->ty);
 		if(selfExpr->ty == targetExpr->ty || selfClass->isSubType(kctx, selfClass, targetClass)) {
@@ -380,7 +380,7 @@ static KMETHOD ExprTyCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tkN = expr->cons->tokenItems[0];
 	ksymbol_t fn = tkN->resolvedSymbol;
-	kExpr *self = SUGAR kStmt_tyCheckByNameAt(kctx, stmt, expr, 1, gma, TY_var, 0);
+	kExpr *self = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 1, gma, TY_var, 0);
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	if(self != K_NULLEXPR) {
 		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, self->ty, MN_toGETTER(fn), 0, MPOL_GETTER);
@@ -508,7 +508,7 @@ static kBlock* kStmt_parseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToke
 	kToken *blockToken = (kToken*)kStmt_getObject(kctx, stmt, KW_BlockPattern, NULL);
 	if(blockToken != NULL && blockToken->resolvedSyntaxInfo->keyword == KW_BlockPattern) {
 		const char *cname = S_text(tokenClassName->text);
-		kArray *a = ctxsugar->preparedTokenList;
+		kArray *a = KonohaContext_getSugarContext(kctx)->preparedTokenList;
 		size_t atop = kArray_size(a), s, i;
 		SUGAR kNameSpace_tokenize(kctx, Stmt_nameSpace(stmt), S_text(blockToken->text), blockToken->uline, a);
 		s = kArray_size(a);
@@ -565,7 +565,7 @@ static kbool_t kStmt_addClassField(KonohaContext *kctx, kStmt *stmt, kGamma *gma
 		if(Expr_isTerm(lexpr)) {
 			kString *name = lexpr->termToken->text;
 			ksymbol_t symbol = ksymbolA(S_text(name), S_size(name), SYM_NEWID);
-			kExpr *vexpr =  SUGAR kStmt_tyCheckByNameAt(kctx, stmt, expr, 2, gma, ty, 0);
+			kExpr *vexpr =  SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 2, gma, ty, 0);
 			if(vexpr == K_NULLEXPR) return false;
 			if(vexpr->build == TEXPR_CONST) {
 				KonohaClass_addField(kctx, definedClass, flag, ty, symbol);

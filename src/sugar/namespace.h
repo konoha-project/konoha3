@@ -229,7 +229,7 @@ static kbool_t kNameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns,
 	}
 	else {
 		KUtilsWriteBuffer wb;
-		KLIB Kwb_init(&(ctxsugar->errorMessageBuffer), &wb);
+		KLIB Kwb_init(&(KonohaContext_getSugarContext(kctx)->errorMessageBuffer), &wb);
 		for(i = 0; i < nitems; i++) {
 			if(checkLocalConflictedConstValue(kctx, ns, kvs+i, pline)) continue;
 			KLIB Kwb_write(kctx, &wb, (const char*)(kvs+i), sizeof(KUtilsKeyValue));

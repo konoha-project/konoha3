@@ -176,7 +176,7 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 	return texpr;
 }
 
-static kExpr* kStmt_tyCheckByNameAt(KonohaContext *kctx, kStmt *stmt, kExpr *exprP, size_t pos, kGamma *gma, ktype_t reqty, int pol)
+static kExpr* kStmt_tyCheckExprAt(KonohaContext *kctx, kStmt *stmt, kExpr *exprP, size_t pos, kGamma *gma, ktype_t reqty, int pol)
 {
 	if(!Expr_isTerm(exprP) && pos < kArray_size(exprP->cons)) {
 		kExpr *expr = exprP->cons->exprItems[pos];
@@ -304,7 +304,7 @@ static kBlock* Method_newBlock(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns
 		script = S_text(mtd->sourceCodeToken->text);
 		uline = mtd->sourceCodeToken->uline;
 	}
-	kArray *tokenArray = ctxsugar->preparedTokenList;
+	kArray *tokenArray = KonohaContext_getSugarContext(kctx)->preparedTokenList;
 	size_t pos = kArray_size(tokenArray);
 	kNameSpace_tokenize(kctx, ns, script, uline, tokenArray);
 	kBlock *bk = new_Block(kctx, ns, NULL, tokenArray, pos, kArray_size(tokenArray), SemiColon);
@@ -329,7 +329,7 @@ static void Gamma_initParam(KonohaContext *kctx, GammaAllocaData *genv, kParam *
 static kbool_t kMethod_compile(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns, kString *text, kfileline_t uline)
 {
 	INIT_GCSTACK();
-	kGamma *gma = ctxsugar->gma;
+	kGamma *gma = KonohaContext_getSugarContext(kctx)->gma;
 	kBlock *bk = Method_newBlock(kctx, mtd, ns, text, uline);
 	GammaStackDecl lvarItems[32] = {};
 	GammaAllocaData newgma = {
@@ -378,7 +378,7 @@ static kstatus_t kMethod_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtyp
 
 static kstatus_t kBlock_genEvalCode(KonohaContext *kctx, kBlock *bk, kMethod *mtd)
 {
-	kGamma *gma = ctxsugar->gma;
+	kGamma *gma = KonohaContext_getSugarContext(kctx)->gma;
 	GammaStackDecl lvarItems[32] = {};
 	GammaAllocaData newgma = {
 		.flag = kGamma_TOPLEVEL,
@@ -453,7 +453,7 @@ static kstatus_t kTokenArray_eval(KonohaContext *kctx, kArray *tokenList, int be
 	ASTEnv env = {ns, tokenList, beginIdx, endIdx, tokenList, NULL};
 	env.symbolSyntaxInfo = SYN_(ns, KW_SymbolPattern);
 	int i = beginIdx, indent = 0, atop = kArray_size(tokenList);
-	kBlock *singleBlock = ctxsugar->singleBlock;
+	kBlock *singleBlock = KonohaContext_getSugarContext(kctx)->singleBlock;
 	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Static, 0, 0, NULL);
 	PUSH_GCSTACK(mtd);
 	KLIB Method_setParam(kctx, mtd, TY_Object, 0, NULL);

@@ -58,7 +58,7 @@ static kstatus_t kNameSpace_eval(KonohaContext *kctx, kNameSpace *ns, const char
 	kmodsugar->h.setup(kctx, (KonohaModule*)kmodsugar, 0/*lazy*/);
 	INIT_GCSTACK();
 	{
-		kArray *tokenArray = ctxsugar->preparedTokenList;
+		kArray *tokenArray = KonohaContext_getSugarContext(kctx)->preparedTokenList;
 		size_t popAlreadyUsed = kArray_size(tokenArray);
 		kNameSpace_tokenize(kctx, ns, script, uline, tokenArray);
 		result = kTokenArray_eval(kctx, tokenArray, popAlreadyUsed, kArray_size(tokenArray), ns);
@@ -78,7 +78,7 @@ kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, kfileline_t uli
 }
 
 /* ------------------------------------------------------------------------ */
-/* [ctxsugar] */
+/* [KonohaContext_getSugarContext(kctx)] */
 
 static void SugarContext_reftrace(KonohaContext *kctx, struct KonohaContextModule *baseh)
 {
@@ -87,7 +87,6 @@ static void SugarContext_reftrace(KonohaContext *kctx, struct KonohaContextModul
 	KREFTRACEv(base->preparedTokenList);
 	KREFTRACEv(base->errorMessageList);
 	KREFTRACEv(base->gma);
-	KREFTRACEv(base->lvarlst);
 	KREFTRACEv(base->singleBlock);
 	KREFTRACEv(base->definedMethodList);
 	END_REFTRACE();
@@ -108,7 +107,6 @@ static void SugarModule_setup(KonohaContext *kctx, struct KonohaModule *def, int
 		KINITv(base->preparedTokenList, new_(TokenArray, K_PAGESIZE/sizeof(void*)));
 		base->errorMessageCount = 0;
 		KINITv(base->errorMessageList, new_(StringArray, 8));
-		KINITv(base->lvarlst, new_(ExprArray, K_PAGESIZE/sizeof(void*)));
 		KINITv(base->definedMethodList, new_(MethodArray, 8));
 
 		KINITv(base->gma, new_(Gamma, NULL));

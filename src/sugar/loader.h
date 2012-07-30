@@ -65,7 +65,7 @@ static kbool_t kNameSpace_loadScript(KonohaContext *kctx, kNameSpace *ns, const 
 
 kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, kfileline_t pline)
 {
-	if (ctxsugar == NULL) {
+	if (KonohaContext_getSugarContext(kctx) == NULL) {
 		kmodsugar->h.setup(kctx, (KonohaModule*)kmodsugar, 0/*lazy*/);
 	}
 	INIT_GCSTACK();

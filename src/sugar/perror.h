@@ -31,8 +31,9 @@ extern "C" {
 /* ------------------------------------------------------------------------ */
 /* [perror] */
 
-static int isPRINT(KonohaContext *kctx, int pe)
+static int isPRINT(KonohaContext *kctx, SugarContext *sugarContext, int pe)
 {
+	if(sugarContext->isBlockingErrorMessage) return false;
 	if(verbose_sugar) return true;
 	if(pe == InfoTag) {
 		if(KonohaContext_isInteractive(kctx) || KonohaContext_isCompileOnly(kctx)) {
@@ -45,12 +46,12 @@ static int isPRINT(KonohaContext *kctx, int pe)
 
 static kString* vperrorf(KonohaContext *kctx, int pe, kfileline_t uline, int lpos, const char *fmt, va_list ap)
 {
-	if(isPRINT(kctx, pe)) {
+	SugarContext *sugarContext = KonohaContext_getSugarContext(kctx);
+	if(isPRINT(kctx, sugarContext, pe)) {
 		const char *msg = TAG_t(pe);
 		size_t errref = ((size_t)-1);
-		SugarContext *base = ctxsugar;
 		KUtilsWriteBuffer wb;
-		KLIB Kwb_init(&base->errorMessageBuffer, &wb);
+		KLIB Kwb_init(&sugarContext->errorMessageBuffer, &wb);
 		size_t pos = wb.m->bytesize;
 		if(uline > 0) {
 			const char *file = FileId_t(uline);
@@ -64,10 +65,10 @@ static kString* vperrorf(KonohaContext *kctx, int pe, kfileline_t uline, int lpo
 		msg = KLIB Kwb_top(kctx, &wb, 1);
 		kreportf(pe, uline, "%s", msg + len);
 		kString *emsg = KLIB new_kString(kctx, msg, strlen(msg), 0);
-		errref = kArray_size(base->errorMessageList);
-		KLIB kArray_add(kctx, base->errorMessageList, emsg);
+		errref = kArray_size(sugarContext->errorMessageList);
+		KLIB kArray_add(kctx, sugarContext->errorMessageList, emsg);
 		if(pe == ErrTag || pe == CritTag) {
-			base->errorMessageCount ++;
+			sugarContext->errorMessageCount ++;
 		}
 		return emsg;
 	}
@@ -101,9 +102,11 @@ static SugarSyntax* kNameSpace_getSyntax(KonohaContext *kctx, kNameSpace *ns0, k
 
 static void kStmt_toERR(KonohaContext *kctx, kStmt *stmt, kString *errmsg)
 {
-	((kStmtVar*)stmt)->syn   = SYN_(Stmt_nameSpace(stmt), KW_ERR);
-	((kStmtVar*)stmt)->build = TSTMT_ERR;
-	KLIB kObject_setObject(kctx, stmt, KW_ERR, TY_String, errmsg);
+	if(errmsg != NULL) { // not in case of isBlockingErrorMessage
+		((kStmtVar*)stmt)->syn   = SYN_(Stmt_nameSpace(stmt), KW_ERR);
+		((kStmtVar*)stmt)->build = TSTMT_ERR;
+		KLIB kObject_setObject(kctx, stmt, KW_ERR, TY_String, errmsg);
+	}
 }
 
 static inline void kStmt_errline(kStmt *stmt, kfileline_t uline)

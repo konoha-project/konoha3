@@ -48,23 +48,51 @@ static KMETHOD ExprTyCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	size_t i;
 	kbool_t isDefined = true;
+	SugarContext *sugarContext = KonohaContext_getSugarContext(kctx);
+	int popIsBlockingErrorMessage = sugarContext->isBlockingErrorMessage;
+	sugarContext->isBlockingErrorMessage = true;
 	for(i = 1; i < kArray_size(expr->cons); i++) {
-		kExpr *typedExpr = SUGAR kStmt_tyCheckByNameAt(kctx, stmt, expr, i, gma, TY_var, 0);
+		kExpr *typedExpr = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, i, gma, TY_var, TPOL_ALLOWVOID);
 		if(typedExpr == K_NULLEXPR) {
 			isDefined = false;
+			break;
 		}
 	}
+	sugarContext->isBlockingErrorMessage = popIsBlockingErrorMessage;
 	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_Boolean, isDefined));
 }
+
+static void filterArrayList(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
+{
+	int i;
+	for(i = beginIdx; i < endIdx; i++) {
+		if(i + 1 == endIdx || tokenList->tokenItems[i+1]->resolvedSyntaxInfo->keyword == KW_COMMA) {
+			kTokenVar *tk = tokenList->tokenVarItems[i];
+			if(tk->resolvedSyntaxInfo->keyword != KW_SymbolPattern) {  // defined
+				tk->resolvedSyntaxInfo = SYN_(ns, KW_TextPattern);  // switch to text pattern
+			}
+			i++;
+		}
+		while(i < endIdx) {
+			kTokenVar *tk = tokenList->tokenVarItems[i];
+			i++;
+			if(tk->resolvedSyntaxInfo->keyword == KW_COMMA) break;
+		}
+	}
+}
+
 
 static KMETHOD ParseExpr_Defined(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ParseExpr(stmt, tokenArray, beginIdx, currentIdx, endIdx);
-	if(beginIdx + 1 == currentIdx) {
+	if(beginIdx == currentIdx && beginIdx + 1 < endIdx) {
 		kTokenVar *definedToken = tokenArray->tokenVarItems[beginIdx];   // defined
 		kTokenVar *pToken = tokenArray->tokenVarItems[beginIdx+1];
-		kExpr *expr = SUGAR new_ConsExpr(kctx, definedToken->resolvedSyntaxInfo, 1, definedToken);
-		RETURN_(SUGAR kStmt_addExprParam(kctx, stmt, expr, pToken->subTokenList, 0, kArray_size(pToken->subTokenList), 0/*isAllowEmpty*/));
+		if(IS_Array(pToken->subTokenList)) {
+			kExpr *expr = SUGAR new_ConsExpr(kctx, definedToken->resolvedSyntaxInfo, 1, definedToken);
+			filterArrayList(kctx, Stmt_nameSpace(stmt), pToken->subTokenList, 0, kArray_size(pToken->subTokenList));
+			RETURN_(SUGAR kStmt_addExprParam(kctx, stmt, expr, pToken->subTokenList, 0, kArray_size(pToken->subTokenList), 0/*isAllowEmpty*/));
+		}
 	}
 }
 
