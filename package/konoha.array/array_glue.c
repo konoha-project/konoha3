@@ -94,7 +94,7 @@ static void NArray_ensureMinimumSize(KonohaContext *kctx, struct _kAbstractArray
 	}
 }
 
-static void NArray_add(KonohaContext *kctx, kArray *o, uintptr_t value)
+static void UnboxArray_add(KonohaContext *kctx, kArray *o, uintptr_t value)
 {
 	size_t asize = kArray_size(o);
 	struct _kAbstractArray *a = (struct _kAbstractArray*)o;
@@ -109,7 +109,7 @@ static KMETHOD Array_add1(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = (kArray *)sfp[0].asObject;
 	if (kArray_isUnboxData(a)) {
-		NArray_add(kctx, a, sfp[1].unboxValue);
+		UnboxArray_add(kctx, a, sfp[1].unboxValue);
 	} else {
 		KLIB kArray_add(kctx, a, sfp[1].asObject);
 	}
@@ -124,6 +124,8 @@ static KMETHOD Array_add1(KonohaContext *kctx, KonohaStack *sfp)
 #define _Im       kMethod_Immutable
 #define _F(F)     (intptr_t)(F)
 
+static KMETHOD Array_newList(KonohaContext *kctx, KonohaStack *sfp);
+
 static	kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	KDEFINE_METHOD MethodData[] = {
@@ -132,6 +134,7 @@ static	kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public,     _F(Array_getSize), TY_Int, TY_Array, MN_("getSize"), 0,
 		_Public,     _F(Array_newArray), TY_Array, TY_Array, MN_("newArray"), 1, TY_Int, FN_("size"),
 		_Public,     _F(Array_add1), TY_void, TY_Array, MN_("add"), 1, TY_0, FN_("value"),
+		_Public|kMethod_Hidden, _F(Array_newList), TY_Array, TY_Array, MN_("newList"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
@@ -228,54 +231,71 @@ static KMETHOD ExprTyCheck_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(lexpr);
 }
 */
-static KMETHOD ExprTyCheck_newListLiteral(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-//	asm("int3");
-	// define method;
 
-	kExprVar *lexpr = expr;
-	SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
-	lexpr->syn = syn;
-	lexpr->ty = reqty;
-	lexpr->build = TEXPR_CALL;
-	RETURN_(lexpr);
+static KMETHOD Array_newList(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kArrayVar *a = (kArrayVar*)sfp[0].asObject;
+	KonohaStack *p = sfp+1;
+	if(!kArray_isUnboxData(a)) {
+		for(; p < kctx->esp; p++) {
+			KLIB kArray_add(kctx, a, p[0].asObject);
+		}
+	}
+	else {
+		for(; p < kctx->esp; p++) {
+			UnboxArray_add(kctx, a, p[0].unboxValue);
+		}
+	}
+	RETURN_(a);
 }
 
-static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD ExprTyCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_ExprTyCheck(stmt, expr, gma, reqty);
+	// [0] currentToken, [1] NULL, [2] ....
+	size_t i;
+	KonohaClass *requestClass = CT_(reqty);
+	ktype_t paramType = TY_var; // default
+	if(requestClass->baseclassId == TY_Array) {
+		paramType = requestClass->p0;
+	}
+	else {
+		requestClass = NULL; // undefined
+	}
+	for(i = 2; i < kArray_size(expr->cons); i++) {
+		kExpr *typedExpr = SUGAR kStmt_tyCheckByNameAt(kctx, stmt, expr, i, gma, paramType, 0);
+		if(typedExpr == K_NULLEXPR) {
+			RETURN_(typedExpr);
+		}
+		DBG_P("i=%d, paramType=%s, typedExpr->ty=%s", i, TY_t(paramType), TY_t(typedExpr->ty));
+		if(paramType == TY_var) {
+			paramType = typedExpr->ty;
+		}
+	}
+	if(requestClass == NULL) {
+		requestClass = (paramType == TY_var) ? CT_Array : CT_p0(kctx, CT_Array, paramType);
+	}
+	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, Stmt_nameSpace(stmt), TY_Array, MN_("newList"), 0, MPOL_FIRST);
+	DBG_ASSERT(mtd != NULL);
+	KSETv(expr->cons->methodItems[0], mtd);
+	KSETv(expr->cons->exprItems[1], SUGAR kExpr_setVariable(kctx, NULL, gma, TEXPR_NEW, requestClass->classId, 0));
+	RETURN_(Expr_typed(expr, TEXPR_CALL, requestClass->classId));
+}
+
+static KMETHOD ParseExpr_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ParseExpr(stmt, tokenList, beginIdx, currentIdx, endIdx);
 
 	KonohaClass *genericsClass = NULL;
 	int nextIdx = SUGAR kStmt_parseTypePattern(kctx, stmt, Stmt_nameSpace(stmt), tokenList, beginIdx, endIdx, &genericsClass);
-	if (nextIdx != -1) {
+	if (nextIdx != -1) {  // to avoid Func[T]
 		RETURN_(SUGAR kStmt_parseOperatorExpr(kctx, stmt, tokenList, beginIdx, beginIdx, endIdx));
 	}
-
 	kToken *currentToken = tokenList->tokenItems[currentIdx];
 	if(beginIdx == currentIdx) {
-		// $type $symbol = [ 1 , 2 , 3 ];
-		// s               c      e;
-		//  --> $type $symbol = newListLiteral(1,2,3);
-		//KdumpTokenArray(kctx, tokenList, currentIdx, endIdx);
-		kNameSpace *ns = Stmt_nameSpace(stmt);
-		size_t beginTemplateIdx = kArray_size(tokenList);
-		SUGAR kNameSpace_tokenize(kctx, ns, "newListLiteral()", currentToken->uline, tokenList);
-		size_t beginResolveIdx = kArray_size(tokenList);
-		if (!SUGAR kNameSpace_resolveTokenArray(kctx, ns, tokenList, beginTemplateIdx, beginResolveIdx, tokenList)) {
-			// TODO: output error
-			KLIB kArray_clear(kctx, tokenList, beginTemplateIdx);
-			RETURN_(K_NULLEXPR);
-		}
-
-		SugarSyntax *parenthesisSyntax = SYN_(ns, KW_ParenthesisGroup);
-		kExpr *leftExpr = SUGAR new_ConsExpr(kctx, parenthesisSyntax, 2, tokenList->tokenItems[beginResolveIdx], K_NULL);
-		leftExpr = SUGAR kStmt_addExprParam(kctx, stmt, leftExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), 1);
-		SugarSyntax *newListLiteralSyntax =SYN_(ns, SYM_("newListLiteral"));
-		leftExpr = SUGAR new_ConsExpr(kctx, newListLiteralSyntax, 1, leftExpr);
-		leftExpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenList, beginResolveIdx, kArray_size(tokenList));
-		KLIB kArray_clear(kctx, tokenList, beginTemplateIdx);
-		RETURN_(leftExpr);
+		DBG_ASSERT(currentToken->resolvedSyntaxInfo->keyword == KW_BracketGroup);
+		kExpr *arrayExpr = SUGAR new_ConsExpr(kctx, currentToken->resolvedSyntaxInfo, 2, currentToken, K_NULL);
+		RETURN_(SUGAR kStmt_addExprParam(kctx, stmt, arrayExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), /*allowEmpty*/1));
 	}
 	else {
 		kExpr *leftExpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, currentIdx);
@@ -303,8 +323,7 @@ static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t array_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ GROUP(Bracket), .flag = SYNFLAG_ExprPostfixOp2, /*ExprTyCheck_(BRACKET),*/ ParseExpr_(BRACKET), .precedence_op2 = 300, },
-		{ .keyword = SYM_("newListLiteral"), ExprTyCheck_(newListLiteral), },
+		{ GROUP(Bracket), .flag = SYNFLAG_ExprPostfixOp2, ExprTyCheck_(Bracket), ParseExpr_(Bracket), .precedence_op2 = 300, },
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);

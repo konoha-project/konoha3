@@ -51,9 +51,9 @@ static KMETHOD ExprTyCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 //	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_Float, sfp[4].unboxValue));
 }
 
-static KMETHOD ExprTyCheck_FuncStyleCall(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_ExprTyCheck(stmt, expr, gma, reqty);
+//static KMETHOD ExprTyCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 //	DBG_ASSERT(IS_Expr(kExpr_at(expr, 0)));
 //	DBG_ASSERT(expr->cons->objectItems[1] == K_NULL);
 //	if(Expr_isSymbolTerm(kExpr_at(expr, 0))) {
@@ -79,7 +79,7 @@ static KMETHOD ExprTyCheck_FuncStyleCall(KonohaContext *kctx, KonohaStack *sfp)
 //		}
 //	}
 //	RETURN_(Expr_tyCheckFuncParams(kctx, stmt, expr, CT_(kExpr_at(expr, 0)->ty), gma));
-}
+//}
 
 
 static kbool_t defined_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
