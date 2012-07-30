@@ -559,6 +559,17 @@ static kMethod* kNameSpace_addMethod(KonohaContext *kctx, kNameSpace *ns, kMetho
 				DBG_P("set overloading method %s.%s%s", Method_t(foundMethod));
 				Method_setOverloaded(foundMethod, true);
 				Method_setOverloaded(mtd, true);
+			} else {
+				// param size is different, though, there's still more candidate
+				kParam *pa = Method_param(mtd);
+				kparamtype_t p[pa->psize];
+				kparamid_t paramdom = KLIB Kparamdom(kctx, pa->psize, p);
+				foundMethod = kNameSpace_getMethodNULL(kctx, ns, ct->classId, mtd->mn, paramdom, MPOL_LATEST);
+				if (foundMethod != NULL && Method_paramsize(mtd) == Method_paramsize(foundMethod)) {
+					DBG_P("set overloading method %s.%s%s", Method_t(foundMethod));
+					Method_setOverloaded(foundMethod, true);
+					Method_setOverloaded(mtd, true);
+				}
 			}
 		}
 		if(unlikely(ct->methodList == K_EMPTYARRAY)) {
