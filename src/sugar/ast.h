@@ -365,21 +365,23 @@ static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns
 //	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
 	int nextIdx = kStmt_parseTypePattern(kctx, NULL, ns, tokenList, beginIdx, endIdx, NULL);
 //	DBG_P("nextIdx=%d, endIdx=%d", nextIdx, endIdx);
-	if(nextIdx != -1 && nextIdx < endIdx) {
-		kToken *tk = tokenList->tokenItems[nextIdx];
-//		dumpToken(kctx, tk, -1);
-		if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern) {
-			if(nextIdx+1 < endIdx && tokenList->tokenItems[nextIdx+1]->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
+	if(nextIdx != -1) {
+		if(nextIdx < endIdx) {
+			kToken *tk = tokenList->tokenItems[nextIdx];
+	//		dumpToken(kctx, tk, -1);
+			if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern) {
+				if(nextIdx+1 < endIdx && tokenList->tokenItems[nextIdx+1]->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
+					DBG_P("MethodDecl");
+					return SYN_(ns, KW_StmtMethodDecl); //
+				}
+				DBG_P("TypeDecl");
+				return SYN_(ns, KW_StmtTypeDecl);  //
+			}
+			if(tk->resolvedSyntaxInfo->keyword == KW_TypePattern
+				|| ((tk->resolvedSyntaxInfo->precedence_op1 > 0 || tk->resolvedSyntaxInfo->precedence_op2 > 0) && tk->resolvedSyntaxInfo->keyword != KW_DOT)) {
 				DBG_P("MethodDecl");
 				return SYN_(ns, KW_StmtMethodDecl); //
 			}
-			DBG_P("TypeDecl");
-			return SYN_(ns, KW_StmtTypeDecl);  //
-		}
-		if(tk->resolvedSyntaxInfo->keyword == KW_TypePattern
-			|| ((tk->resolvedSyntaxInfo->precedence_op1 > 0 || tk->resolvedSyntaxInfo->precedence_op2 > 0) && tk->resolvedSyntaxInfo->keyword != KW_DOT)) {
-			DBG_P("MethodDecl");
-			return SYN_(ns, KW_StmtMethodDecl); //
 		}
 		return SYN_(ns, KW_ExprPattern);
 	}
@@ -595,7 +597,6 @@ static kStmt* kBlock_addNewStmt(KonohaContext *kctx, kBlock *bk, kArray *tokenLi
 	kStmtVar *stmt = new_(StmtVar, 0);
 	KLIB kArray_add(kctx, bk->stmtList, stmt);
 	KINITv(stmt->parentBlockNULL, bk);
-	DBG_P("errToken=%p", errToken);
 	if(errToken != NULL) {
 		kStmt_toERR(kctx, stmt, errToken->text);
 	}
@@ -651,14 +652,14 @@ static kBlock *new_Block(KonohaContext *kctx, kNameSpace *ns, kStmt *parent, kAr
 		isEndOfStmt = SemiColon;
 	}
 	while(i < endIdx) {
-		DBG_ASSERT(atop == kArray_size(tokenList));
+//		DBG_ASSERT(atop == kArray_size(tokenList));
 		env.beginIdx = i;
 		i = kNameSpace_selectStmtTokenList(kctx, &env, &indent, isEndOfStmt);
 		int asize = kArray_size(tokenList);
-		if(asize > atop) {
+		if(asize > atop || env.errToken != NULL) {
 			kBlock_addNewStmt(kctx, bk, tokenList, atop, asize, env.errToken);
-			KLIB kArray_clear(kctx, tokenList, atop);
 		}
+		KLIB kArray_clear(kctx, tokenList, atop);
 	}
 	return (kBlock*)bk;
 }
