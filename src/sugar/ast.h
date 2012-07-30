@@ -387,8 +387,7 @@ static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns
 	}
 	kToken *tk = tokenList->tokenItems[beginIdx];
 	if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern && isUpperCaseSymbol(S_text(tk->text))) {
-		kToken *tk1 = TokenArray_nextToken(kctx, tokenList, beginIdx+1, endIdx);
-		if(tk1->resolvedSyntaxInfo->keyword == KW_LET) {
+		if(beginIdx+1 < endIdx && tokenList->tokenItems[beginIdx+1]->resolvedSyntaxInfo->keyword == KW_LET) {
 			DBG_P("Const");
 			return SYN_(ns, KW_StmtConstDecl);  // CONSTVAL = ...
 		}

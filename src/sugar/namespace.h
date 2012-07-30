@@ -372,7 +372,7 @@ static int formatLowerCanonicalName(char *buf, size_t bufsiz, const char *name)
 		}
 		i++;
 		p++;
-		if(!(i < bufsiz)) break;
+		if(!(i + 1 < bufsiz)) break;
 	}
 	buf[i] = 0;
 	return i;
