@@ -387,10 +387,10 @@ static kbool_t checkMethodPolicyOption(KonohaContext *kctx, kMethod *mtd, int op
 	if(TFLAG_is(int, policy, MPOL_SIGNATURE)) {
 		if(mtd->paramdom != option) return false;
 	}
-	if(TFLAG_is(int, policy, MPOL_SETTER)) {
-		kParam *param = Method_param(mtd);
-		if(param->psize != 1 && param->paramtypeItems[0].ty != (ktype_t)option) return false;
-	}
+//	if(TFLAG_is(int, policy, MPOL_SETTER)) {
+//		kParam *param = Method_param(mtd);
+//		if(param->psize > 0 && param->paramtypeItems[param->psize - 1].ty != (ktype_t)option) return false;
+//	}
 	return true;
 }
 

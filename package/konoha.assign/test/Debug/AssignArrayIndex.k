@@ -4,7 +4,7 @@ K.import("konoha.assign");
 K.import("konoha.array");
 
 void test() {
-	int[] a = new int[2];
+	int[] a = [0];
 	a[0] = 10;
 	assert(a[0] == 10);
 	a[0] = 0;
