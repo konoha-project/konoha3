@@ -116,6 +116,40 @@ static KMETHOD Array_add1(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 
+//static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
+//	size_t asize = (size_t)sfp[1].intValue;
+//	a->bytemax = asize * sizeof(void*);
+//	kArray_setsize((kArray*)a, asize);
+//	a->objectItems = (kObject**)KCALLOC(a->bytemax, 1);
+//	if(!kArray_isUnboxData(a)) {
+//		size_t i;
+//		kObject *null = KLIB Knull(kctx, CT_(O_p0(a)));
+//		for(i = 0; i < asize; i++) {
+//			KSETv(a->objectItems[i], null);
+//		}
+//	}
+//	RETURN_(a);
+//}
+static KMETHOD Array_new(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
+	//DBG_P("objitem=%p", a->objectItems);
+	size_t asize = (size_t)sfp[1].intValue;
+	a->bytemax = asize * sizeof(void*);
+	//kArray_setsize((kArray*)a, asize);
+	a->objectItems = (kObject**)KCALLOC(a->bytemax, 1);
+	if(!kArray_isUnboxData(a)) {
+		size_t i;
+		kObject *null = KLIB Knull(kctx, CT_(O_p0(a)));
+		for(i = 0; i < asize; i++) {
+			KSETv(a->objectItems[i], null);
+		}
+	}
+	RETURN_(a);
+}
+
 // --------------------------------------------------------------------------
 
 #define _Public   kMethod_Public
@@ -135,6 +169,7 @@ static	kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public,     _F(Array_newArray), TY_Array, TY_Array, MN_("newArray"), 1, TY_Int, FN_("size"),
 		_Public,     _F(Array_add1), TY_void, TY_Array, MN_("add"), 1, TY_0, FN_("value"),
 		_Public|kMethod_Hidden, _F(Array_newList), TY_Array, TY_Array, MN_("newList"), 0,
+		_Public|_Im, _F(Array_new), TY_void, TY_Array, MN_("new"), 1, TY_Int, FN_("size"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
@@ -145,92 +180,6 @@ static kbool_t array_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 {
 	return true;
 }
-
-/*
-http://www.amazon.co.jp/exec/obidos/ASIN/0201914654/
-*/
-
-//int numofbits(long bits) {
-//  bits = (bits & 0x55555555) + (bits >> 1 & 0x55555555);
-//  bits = (bits & 0x33333333) + (bits >> 2 & 0x33333333);
-//  bits = (bits & 0x0f0f0f0f) + (bits >> 4 & 0x0f0f0f0f);
-//  bits = (bits & 0x00ff00ff) + (bits >> 8 & 0x00ff00ff);
-//  return (bits & 0x0000ffff) + (bits >>16 & 0x0000ffff);
-//}
-//
-//static KonohaClass *kGetParamTypeFromExprCons(KonohaContext *kctx, kArray *exprCons, int beginIdx)
-//{
-//	size_t i = 0;
-//	DBG_ASSERT(beginIdx < kArray_size(exprCons));
-//	kint_t types = 0; // 64bits
-//	for (i = beginIdx; i < kArray_size(exprCons); i++) {
-//		kExpr* expr = exprCons->exprItems[i];
-//		ktype_t ty = expr->ty;
-//		DBG_P("ty='%s%s'", TY_t(ty));
-//		types |= 1 << ty;
-//
-//	}
-//	DBG_P("numofbits=%d",numofbits(types));
-//	return NULL;
-//}
-
-
-/*
-static KMETHOD ExprTyCheck_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	kArray *a1 = expr->cons;
-	kTokenVar *tkN = a1->tokenVarItems[0];
-	// tycheck first
-	int i;
-	KonohaClass *ct = CT_(reqty);
-	// var, or array[t1];
-	kParam *cparam = CT_cparam(ct);
-	DBG_ASSERT(cparam->psize < 2);
-	ktype_t pt0 = TY_var;
-	DBG_P("paramsize=%d", cparam->psize);
-	if (cparam->psize == 0){
-		// var or only Array
-		reqty = (CT_p0(kctx, CT_Array, TY_Object))->classId;
-	} else if(cparam->psize == 1) {
-		pt0 = cparam->paramtypeItems[0].ty;
-		DBG_P("param0 ty=%s", TY_t(pt0));
-	} else {
-		RETURN_(K_NULLEXPR);
-	}
-//	DBG_P("expr->cons=%d", kArray_size(expr->cons));
-	for (i = 1; i < kArray_size(a1); i++) {
-		kExpr *rexpr = SUGAR kStmt_tyCheckByNameAt(kctx, stmt, expr, i, gma, pt0, TPOL_ALLOWVOID);
-		if (rexpr == K_NULLEXPR) {
-			RETURN_(K_NULLEXPR);
-		}
-	}
-
-	// make newArray TK
-	kArray *a2 = tkN->subTokenList;
-	//kToken *tkMethod = expr->cons->tokenItems[0];
-	kTokenVar *tkType = a2->tokenVarItems[1];
-	//kTokenVar *tkInt = expr->cons->tokenVarItems[2];
-	tkType->resolvedTypeId = TY_Int; // tmp
-	tkType->text = KLIB new_kString(kctx, "int", sizeof("int"), SPOL_POOL|SPOL_ASCII);
-	kExpr *exprType = SUGAR kStmt_parseExpr(kctx, stmt, a2, 1, 2);
-	kExpr *exprInt = SUGAR kStmt_parseExpr(kctx, stmt, a2, 2, 3);
-	KLIB kArray_insert(kctx, a2, 1, exprType);
-	KLIB kArray_insert(kctx, a2, 2, exprInt);
-	KLIB kArray_clear(kctx, a2, 3);
-
-	// remove [] token
-	kExprVar *lexpr = (kExprVar*)expr;
-	SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
-	lexpr->syn = syn;
-	lexpr->ty = reqty;
-	lexpr->cons = a2;
-	lexpr->build = TEXPR_NEW;
-	//KdumpExpr(kctx, lexpr);
-
-	RETURN_(lexpr);
-}
-*/
 
 static KMETHOD Array_newList(KonohaContext *kctx, KonohaStack *sfp)
 {

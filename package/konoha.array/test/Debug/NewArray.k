@@ -1,7 +1,6 @@
 // written by kimio kuramitsu
 
 K.import("konoha.class")
-K.import("konoha.assign");
 K.import("konoha.array");
 
 void test() {
