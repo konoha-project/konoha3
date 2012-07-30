@@ -1,0 +1,15 @@
+// written by kimio kuramitsu
+
+K.import("konoha.assign");
+K.import("konoha.array");
+
+void test() {
+	int[] a = new int[2];
+	a[0] = 10;
+	assert(a[0] == 10);
+	a[0] = 0;
+	assert(a[0] == 0);
+}
+
+test();
+

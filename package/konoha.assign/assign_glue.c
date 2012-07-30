@@ -34,31 +34,30 @@
 static KMETHOD ExprTyCheck_assign(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	kNameSpace *ns = Stmt_nameSpace(stmt);
-	kExpr *lexpr = SUGAR kStmt_tyCheckByNameAt(kctx, stmt, expr, 1, gma, TY_var, TPOL_ALLOWVOID);
-	kExpr *rexpr = SUGAR kStmt_tyCheckByNameAt(kctx, stmt, expr, 2, gma, lexpr->ty, 0);
-	if(rexpr != K_NULLEXPR && lexpr != K_NULLEXPR) {
-		if(rexpr != K_NULLEXPR) {
-			if(lexpr->build == TEXPR_LOCAL || lexpr->build == TEXPR_FIELD) {
-				((kExprVar*)expr)->build = TEXPR_LET;
-				((kExprVar*)rexpr)->ty = lexpr->ty;
-				RETURN_(expr);
-			}
-			if(lexpr->build == TEXPR_CALL) {  // check getter and transform to setter
-				kMethod *mtd = lexpr->cons->methodItems[0];
-				DBG_ASSERT(IS_Method(mtd));
-				if((MN_isGETTER(mtd->mn) || MN_isISBOOL(mtd->mn)) && !Method_isStatic(mtd)) {
-					ktype_t cid = lexpr->cons->exprItems[1]->ty;
-					mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(mtd->mn), lexpr->ty, MPOL_SETTER|MPOL_CANONICAL);
-					if(mtd != NULL) {
-						KSETv(lexpr->cons->methodItems[0], mtd);
-						KLIB kArray_add(kctx, lexpr->cons, rexpr);
-						RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, lexpr, mtd, gma, reqty));
-					}
+	kNameSpace *ns = Stmt_nameSpace(stmt);  // leftHandExpr = rightHandExpr
+	kExpr *leftHandExpr = SUGAR kStmt_tyCheckByNameAt(kctx, stmt, expr, 1, gma, TY_var, TPOL_ALLOWVOID);
+	kExpr *rightHandExpr = SUGAR kStmt_tyCheckByNameAt(kctx, stmt, expr, 2, gma, leftHandExpr->ty, 0);
+	if(rightHandExpr != K_NULLEXPR && leftHandExpr != K_NULLEXPR) {
+		if(leftHandExpr->build == TEXPR_LOCAL || leftHandExpr->build == TEXPR_FIELD || leftHandExpr->build == TEXPR_STACKTOP) {
+			((kExprVar*)expr)->build = TEXPR_LET;
+			((kExprVar*)expr)->ty    = leftHandExpr->ty;
+			((kExprVar*)rightHandExpr)->ty = leftHandExpr->ty;
+			RETURN_(expr);
+		}
+		if(leftHandExpr->build == TEXPR_CALL) {  // check getter and transform to setter
+			kMethod *mtd = leftHandExpr->cons->methodItems[0];
+			DBG_ASSERT(IS_Method(mtd));
+			if((MN_isGETTER(mtd->mn) || MN_isISBOOL(mtd->mn)) && !Method_isStatic(mtd)) {
+				ktype_t cid = leftHandExpr->cons->exprItems[1]->ty;
+				mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(mtd->mn), leftHandExpr->ty, MPOL_SETTER|MPOL_CANONICAL);
+				if(mtd != NULL) {
+					KSETv(leftHandExpr->cons->methodItems[0], mtd);
+					KLIB kArray_add(kctx, leftHandExpr->cons, rightHandExpr);
+					RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, leftHandExpr, mtd, gma, reqty));
 				}
 			}
-			SUGAR Stmt_p(kctx, stmt, (kToken*)expr, ErrTag, "variable name is expected");
 		}
+		SUGAR Stmt_p(kctx, stmt, (kToken*)expr, ErrTag, "variable name is expected");
 	}
 	RETURN_(K_NULLEXPR);
 }

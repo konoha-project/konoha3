@@ -318,9 +318,9 @@ typedef struct TokenChunk {
 #define TEXPR_NEW            1
 #define TEXPR_NULL           2
 #define TEXPR_NCONST         3
-#define TEXPR_LOCAL          4
+#define TEXPR_LOCAL          4/*variable*/
 #define TEXPR_BLOCK          5
-#define TEXPR_FIELD          6
+#define TEXPR_FIELD          6/*variable*/
 #define TEXPR_BOX            7
 #define TEXPR_UNBOX          8
 #define TEXPR_CALL           9
