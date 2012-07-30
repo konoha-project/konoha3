@@ -1,13 +1,8 @@
-// written by shunsuke shida
-K.import("konoha");
+// written by kimio 
 
-class A {
-	int age;
-	A() {
-		age = 10;
-	}
+K.import("konoha.class");
+
+class C {
 }
 
-A a = new A();
-
-assert(a.age == 10);
+void f(C c);  // if C is undefined, ERR is reported
