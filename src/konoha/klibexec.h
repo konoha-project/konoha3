@@ -367,6 +367,9 @@ static ksymbol_t Ksymbol(KonohaContext *kctx, const char *name, size_t len, int 
 			mask = KW_PATTERN; // Pattern
 		}
 	}
+	else {
+		def = SYM_NEWID;
+	}
 	uintptr_t hcode = strhash(name, len);
 	ksymbol_t sym = Kmap_getcode(kctx, kctx->share->symbolMapNN, kctx->share->symbolList, name, len, hcode, spol | SPOL_ASCII, def);
 	return (sym == def) ? def : (sym | mask);

@@ -680,7 +680,7 @@ static inline size_t initFieldSizeOfVirtualClass(KonohaClass *superClass)
 static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_StmtTyCheck(stmt, gma);
-	kToken *tokenClassName = SUGAR kStmt_getToken(kctx, stmt, KW_ConstPattern, NULL);
+	kToken *tokenClassName = SUGAR kStmt_getToken(kctx, stmt, SYM_("$ClassName"), NULL);
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	int isNewlyDefinedClass = false;
 	KonohaClassVar *definedClass = (KonohaClassVar*)KLIB kNameSpace_getClass(kctx, ns, S_text(tokenClassName->text), S_size(tokenClassName->text), NULL);
@@ -715,7 +715,7 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 			RETURNb_(false);
 		}
 	}
-	if(declsize > 0) {
+	if(bk != NULL) {
 		if(!kBlock_declClassField(kctx, bk, gma, definedClass)) {
 			RETURNb_(false);
 		}
@@ -727,11 +727,24 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNb_(true);
 }
 
+static KMETHOD PatternMatch_ClassName(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_PatternMatch(stmt, name, tokenArray, beginIdx, endIdx);
+	kTokenVar *tk = tokenArray->tokenVarItems[beginIdx];
+	int returnIdx = -1;
+	if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern || tk->resolvedSyntaxInfo->keyword == KW_TypePattern) {
+		KLIB kObject_setObject(kctx, stmt, name, O_classId(tk), tk);
+		returnIdx = beginIdx + 1;
+	}
+	RETURNi_(returnIdx);
+}
+
 static kbool_t class_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("new"), ParseExpr_(new), .precedence_op1 = 300},
-		{ .keyword = SYM_("class"), .rule = "\"class\" $Symbol [\"extends\" extends: $Type] [$Block]", TopStmtTyCheck_(class), },
+		{ .keyword = SYM_("$ClassName"), PatternMatch_(ClassName), },
+		{ .keyword = SYM_("class"), .rule = "\"class\" $ClassName [\"extends\" extends: $Type] [$Block]", TopStmtTyCheck_(class), },
 		{ .keyword = SYM_("."), ExprTyCheck_(Getter) },
 		{ .keyword = SYM_("<:"), _OP, ExprTyCheck_(InstanceOf), .precedence_op2 = 500/*FIXME*/ },
 		{ .keyword = SYM_("as"), _OP, ExprTyCheck_(As), .precedence_op2 = 500/*FIXME*/ },
