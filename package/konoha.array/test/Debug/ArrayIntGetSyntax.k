@@ -1,11 +1,11 @@
-/* written by shinpei */
+// written by shinpei
 
-K.import("konoha");
+K.import("konoha.array");
 
 void f() {
-	Array[int] ia = new int[8];
-	ia.set(4, 4);
-	int x = ia[4];
-	assert(x == 4);
+	Array[int] ia = [1,2,3];
+	assert(ia[0] == 1);
+	assert(ia[1] == 2);
+	assert(ia[2] == 3);
 }
 f();
