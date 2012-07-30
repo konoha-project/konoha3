@@ -107,6 +107,7 @@ set(PACKAGES
 	konoha.assign
 	konoha.bytes
 	konoha.class
+	konoha.defined
 	konoha.float
 	konoha.global
 	konoha.hashmap
