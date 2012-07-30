@@ -115,6 +115,7 @@ set(PACKAGES
 	konoha.hashmap
 	konoha.assign
 	konoha.while
+	konoha.new
 	konoha.class
 	konoha.global
 	llvm
