@@ -355,7 +355,13 @@ static KMETHOD ExprTyCheck_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ParseExpr(stmt, tokenArray, beginIdx, currentIdx, endIdx);
-//	DBG_P("parse bracket!!, s=%d, c=%d, e=%d", beginIdx, currentIdx, endIdx);
+
+	KonohaClass *genericsClass = NULL;
+	int nextIdx = SUGAR kStmt_parseTypePattern(kctx, stmt, Stmt_nameSpace(stmt), tokenList, beginIdx, endIdx, &genericsClass);
+	if (nextIdx != -1) {
+		RETURN_(SUGAR kStmt_parseOperatorExpr(kctx, stmt, tokenList, beginIdx, beginIdx, endIdx));
+	}
+
 	kToken *tk = tokenArray->tokenItems[currentIdx];
 	if(beginIdx == currentIdx) { // TODO
 //		// $Type $symbol = [1,2,3];
