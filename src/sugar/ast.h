@@ -547,22 +547,24 @@ static kbool_t checkEndOfBracket(KonohaContext *kctx, kArray *tokenList, int *cu
 
 static int kNameSpace_addStrucuredToken(KonohaContext *kctx, ASTEnv *env, ksymbol_t AST_type)
 {
-	ASTEnv newenv;
+	ASTEnv newenv = *env;
 	int probablyCloseBefore = env->endIdx - 1;
 	kTokenVar *astToken = new_(TokenVar, AST_type);
 	KLIB kArray_add(kctx, env->stmtTokenList, astToken);
 	astToken->resolvedSyntaxInfo = SYN_(env->ns, AST_type);
 	KSETv(astToken->subTokenList, new_(TokenArray, 0));
 	astToken->uline = env->tokenList->tokenItems[env->beginIdx]->uline;
-	newenv = *env;
 	newenv.beginIdx = env->beginIdx + 1;
 	newenv.stmtTokenList = astToken->subTokenList;
 	CheckEndOfStmtFunc f = (AST_type == KW_ParenthesisGroup) ? checkEndOfParenthesis : checkEndOfBracket;
 	int returnIdx = kNameSpace_selectStmtTokenList(kctx, &newenv, &probablyCloseBefore, f);
-	if(returnIdx == env->endIdx && env->errToken != NULL) {
-		int closech = (AST_type == KW_ParenthesisGroup) ? ')': ']';
-		Token_pERR(kctx, astToken, "'%c' is expected (probably before %s)", closech, Token_text(env->tokenList->tokenItems[probablyCloseBefore]));
-		env->errToken = astToken;
+	if(newenv.errToken != NULL) {
+		if(returnIdx == env->endIdx) {
+			int closech = (AST_type == KW_ParenthesisGroup) ? ')': ']';
+			Token_pERR(kctx, astToken, "'%c' is expected (probably before %s)", closech, Token_text(env->tokenList->tokenItems[probablyCloseBefore]));
+			env->errToken = astToken;
+		}
+		env->errToken = newenv.errToken;
 	}
 	return returnIdx;
 }
@@ -593,6 +595,7 @@ static kStmt* kBlock_addNewStmt(KonohaContext *kctx, kBlock *bk, kArray *tokenLi
 	kStmtVar *stmt = new_(StmtVar, 0);
 	KLIB kArray_add(kctx, bk->stmtList, stmt);
 	KINITv(stmt->parentBlockNULL, bk);
+	DBG_P("errToken=%p", errToken);
 	if(errToken != NULL) {
 		kStmt_toERR(kctx, stmt, errToken->text);
 	}
