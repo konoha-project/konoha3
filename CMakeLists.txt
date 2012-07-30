@@ -105,7 +105,12 @@ set(PACKAGES
 	konoha
 	konoha.array
 	konoha.assign
+<<<<<<< HEAD
 	konoha.bytes
+=======
+	konoha.while
+	konoha.new
+>>>>>>> 8a3b27da2ed7ccb8b6aea4cfab1188c42912b227
 	konoha.class
 	konoha.float
 	konoha.global
