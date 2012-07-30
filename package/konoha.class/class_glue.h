@@ -661,7 +661,7 @@ static void kBlock_addMethodDeclStmt(KonohaContext *kctx, kBlock *bk, kToken *to
 			if(stmt->syn->keyword == KW_StmtTypeDecl) continue;
 			if(stmt->syn->keyword == KW_StmtMethodDecl) {
 				kStmt *lastStmt = classStmt;
-				KLIB kObject_setObject(kctx, stmt, SYM_("type"), TY_Token, tokenClassName);
+				KLIB kObject_setObject(kctx, stmt, SYM_("ClassName"), TY_Token, tokenClassName);
 				SUGAR kBlock_insertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, stmt);
 				lastStmt = stmt;
 			}
