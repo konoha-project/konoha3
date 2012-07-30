@@ -114,11 +114,6 @@ static KMETHOD Array_add1(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static KMETHOD Array_new(KonohaContext *kctx, KonohaStack *sfp)
-{
-
-	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0));
-}
 
 // --------------------------------------------------------------------------
 
@@ -272,30 +267,29 @@ static kbool_t array_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 http://www.amazon.co.jp/exec/obidos/ASIN/0201914654/
 */
 
-int numofbits(long bits) {
-  bits = (bits & 0x55555555) + (bits >> 1 & 0x55555555);
-  bits = (bits & 0x33333333) + (bits >> 2 & 0x33333333);
-  bits = (bits & 0x0f0f0f0f) + (bits >> 4 & 0x0f0f0f0f);
-  bits = (bits & 0x00ff00ff) + (bits >> 8 & 0x00ff00ff);
-  return (bits & 0x0000ffff) + (bits >>16 & 0x0000ffff);
-}
-
-static KonohaClass *kGetParamTypeFromExprCons(KonohaContext *kctx, kArray *exprCons, int beginIdx)
-{
-	size_t i = 0;
-	DBG_ASSERT(beginIdx < kArray_size(exprCons));
-	kint_t types = 0; // 64bits
-	for (i = beginIdx; i < kArray_size(exprCons); i++) {
-		kExpr* expr = exprCons->exprItems[i];
-		ktype_t ty = expr->ty;
-		DBG_P("ty='%s%s'", TY_t(ty));
-		types |= 1 << ty;
-
-	}
-	DBG_P("numofbits=%d",numofbits(types));
-	return NULL;
-}
-
+//int numofbits(long bits) {
+//  bits = (bits & 0x55555555) + (bits >> 1 & 0x55555555);
+//  bits = (bits & 0x33333333) + (bits >> 2 & 0x33333333);
+//  bits = (bits & 0x0f0f0f0f) + (bits >> 4 & 0x0f0f0f0f);
+//  bits = (bits & 0x00ff00ff) + (bits >> 8 & 0x00ff00ff);
+//  return (bits & 0x0000ffff) + (bits >>16 & 0x0000ffff);
+//}
+//
+//static KonohaClass *kGetParamTypeFromExprCons(KonohaContext *kctx, kArray *exprCons, int beginIdx)
+//{
+//	size_t i = 0;
+//	DBG_ASSERT(beginIdx < kArray_size(exprCons));
+//	kint_t types = 0; // 64bits
+//	for (i = beginIdx; i < kArray_size(exprCons); i++) {
+//		kExpr* expr = exprCons->exprItems[i];
+//		ktype_t ty = expr->ty;
+//		DBG_P("ty='%s%s'", TY_t(ty));
+//		types |= 1 << ty;
+//
+//	}
+//	DBG_P("numofbits=%d",numofbits(types));
+//	return NULL;
+//}
 
 static KMETHOD ExprTyCheck_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -341,7 +335,7 @@ static KMETHOD ExprTyCheck_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 	KLIB kArray_clear(kctx, a2, 3);
 
 	// remove [] token
-	kExprVar *lexpr = expr;
+	kExprVar *lexpr = (kExprVar*)expr;
 	SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
 	lexpr->syn = syn;
 	lexpr->ty = reqty;
@@ -354,7 +348,7 @@ static KMETHOD ExprTyCheck_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_ParseExpr(stmt, tokenArray, beginIdx, currentIdx, endIdx);
+	VAR_ParseExpr(stmt, tokenList, beginIdx, currentIdx, endIdx);
 
 	KonohaClass *genericsClass = NULL;
 	int nextIdx = SUGAR kStmt_parseTypePattern(kctx, stmt, Stmt_nameSpace(stmt), tokenList, beginIdx, endIdx, &genericsClass);
@@ -362,14 +356,14 @@ static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 		RETURN_(SUGAR kStmt_parseOperatorExpr(kctx, stmt, tokenList, beginIdx, beginIdx, endIdx));
 	}
 
-	kToken *tk = tokenArray->tokenItems[currentIdx];
+	kToken *tk = tokenList->tokenItems[currentIdx];
 	if(beginIdx == currentIdx) { // TODO
 //		// $Type $symbol = [1,2,3];
 //		// --> 1. $variable = $Type.newArray(0);
 //		//     2. $variable.add(1);
 //		//     3. $variable.add(2);
 //		//     4. $variable.add(3);
-//		kToken *symTk = tokenArray->tokenItems[currentIdx - 2]; // symbol name
+//		kToken *symTk = tokenList->tokenItems[currentIdx - 2]; // symbol name
 //		if(symTk->keyword != KW_SymbolPattern) {
 //			RETURN_(K_NULLEXPR);
 //		}
@@ -420,7 +414,7 @@ static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 //		RETURN_(lexpr);
 	}
 	else {  // Func [int]
-		kExpr *lexpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenArray, beginIdx, currentIdx);
+		kExpr *lexpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, currentIdx);
 		if(lexpr == K_NULLEXPR) {
 			RETURN_(lexpr);
 		}
@@ -436,7 +430,7 @@ static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
 			lexpr  = SUGAR new_ConsExpr(kctx, syn, 2, tkN, lexpr);
 			lexpr = SUGAR kStmt_addExprParam(kctx, stmt, lexpr, tk->subTokenList, 0, kArray_size(tk->subTokenList), 1/*allowEmpty*/);
 		}
-		RETURN_(SUGAR kStmt_rightJoinExpr(kctx, stmt, lexpr, tokenArray, currentIdx + 1, endIdx));
+		RETURN_(SUGAR kStmt_rightJoinExpr(kctx, stmt, lexpr, tokenList, currentIdx + 1, endIdx));
 	}
 }
 
