@@ -61,11 +61,18 @@ static KMETHOD Array_getSize(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(kArray_size(a));
 }
 
-
+#define KARRAY_LIST_SIZE_MAX 1024
 static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
 	size_t asize = (size_t)sfp[1].intValue;
+	if (asize < 0 || KARRAY_LIST_SIZE_MAX < asize) {
+		ktrace(_UserInputFault,
+				KEYVALUE_s("error", "Invalid argument"),
+				KEYVALUE_u("length", asize)
+		);
+		RETURN_(a);
+	}
 	a->bytemax = asize * sizeof(void*);
 	kArray_setsize((kArray*)a, asize);
 	a->objectItems = (kObject**)KCALLOC(a->bytemax, 1);
@@ -116,27 +123,14 @@ static KMETHOD Array_add1(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 
-//static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
-//	size_t asize = (size_t)sfp[1].intValue;
-//	a->bytemax = asize * sizeof(void*);
-//	kArray_setsize((kArray*)a, asize);
-//	a->objectItems = (kObject**)KCALLOC(a->bytemax, 1);
-//	if(!kArray_isUnboxData(a)) {
-//		size_t i;
-//		kObject *null = KLIB Knull(kctx, CT_(O_p0(a)));
-//		for(i = 0; i < asize; i++) {
-//			KSETv(a->objectItems[i], null);
-//		}
-//	}
-//	RETURN_(a);
-//}
 static KMETHOD Array_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
 	//DBG_P("objitem=%p", a->objectItems);
 	size_t asize = (size_t)sfp[1].intValue;
+	if (asize < 0) {
+
+	}
 	a->bytemax = asize * sizeof(void*);
 	//kArray_setsize((kArray*)a, asize);
 	a->objectItems = (kObject**)KCALLOC(a->bytemax, 1);
@@ -162,6 +156,7 @@ static KMETHOD Array_newList(KonohaContext *kctx, KonohaStack *sfp);
 
 static	kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
+	KREQUIRE_PACKAGE("konoha.new", pline);
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Im, _F(Array_get), TY_0,   TY_Array, MN_("get"), 1, TY_Int, FN_("index"),
 		_Public,     _F(Array_set), TY_void, TY_Array, MN_("set"), 2, TY_Int, FN_("index"),  TY_0, FN_("value"),

@@ -2,6 +2,7 @@
 
 K.import("konoha.class");
 K.import("konoha.array");
+K.import("konoha.assign");
 
 class Human {
 	int age;
@@ -16,8 +17,8 @@ void f() {
 	Human[] ha = new Human[2];
 	ha[0] = new Human(17);
 	ha[1] = new Human(22);
-	p(ha[0].age);
-	p(ha[1].age);
+	assert(ha[0].age == 17);
+	assert(ha[1].age == 22);
 
 }
 
