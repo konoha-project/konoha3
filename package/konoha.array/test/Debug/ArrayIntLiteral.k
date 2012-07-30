@@ -1,4 +1,5 @@
 // written by kimio kuramitsu
+K.import("konoha.array");
 
 K.import("konoha.array");
 
