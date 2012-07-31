@@ -27,7 +27,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-//#define USE_GENERATIONAL_GC 1
+#define USE_GENERATIONAL_GC 1
 #define K_USING_POSIX_
 #if defined(K_USING_POSIX_)
 #include <time.h>
@@ -60,7 +60,10 @@ extern "C" {
 #define SUBHEAP_KLASS_MIN  5 /* 1 <<  5 == 32 */
 #define SUBHEAP_KLASS_MAX 12 /* 1 << 12 == 4096 */
 #define MIN_ALIGN (ONE << SUBHEAP_KLASS_MIN)
+
+#ifdef USE_GENERATIONAL_GC
 #define MINOR_COUNT 4
+#endif
 
 #define SEGMENT_SIZE (SUBHEAP_DEFAULT_SEGPOOL_SIZE * KB_)
 #define SEGMENT_LEVEL 3
@@ -841,10 +844,6 @@ static void Kfree(KonohaContext *kctx, void *p, size_t s)
 }
 
 /* ------------------------------------------------------------------------ */
-/* bmgc */
-/* ------------------------------------------------------------------------ */
-
-/* ------------------------------------------------------------------------ */
 /* [ostack] */
 
 typedef struct knh_ostack_t {
@@ -1150,6 +1149,10 @@ static void *tryAlloc(KonohaContext *kctx, HeapManager *mng, SubHeap *h)
 	void *temp;
 	if (isMarked(p)) {
 		if (findNextFreeBlock(p) == false) {
+			if (((--h->minor_count) & (MINOR_COUNT-1)) == 0) {
+				/* TODO: set safepoint for invoking minor gc */
+				return NULL;
+			}
 			if (nextSegment(mng, h, p) == false) {
 				return NULL;
 			}
@@ -1159,9 +1162,7 @@ static void *tryAlloc(KonohaContext *kctx, HeapManager *mng, SubHeap *h)
 	prefetch_(temp, 0, 0);
 	inc(p, h);
 	bool isEmpty = inc(p, h);
-	if (mng->segmentList == NULL && h->freelist == NULL && isEmpty) {
-		((KonohaContextVar*)kctx)->safepoint = 1;
-	}
+	((KonohaContextVar*)kctx)->safepoint |= (mng->segmentList == NULL && h->freelist == NULL && isEmpty);
 	return temp;
 }
 
@@ -1877,6 +1878,7 @@ static void bitmapMarkingGC(KonohaContext *kctx, HeapManager *mng, int isMajorGC
 			(isMajorGC)?"major":"minor",
 			global_gc_stat.gc_count, (heap_size/MB_), collected, marked);
 #endif
+	((KonohaContextVar*)kctx)->safepoint = 0;
 }
 
 /* ------------------------------------------------------------------------ */
@@ -1906,10 +1908,7 @@ static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-/* ------------------------------------------------------------------------ */
-/* -----[MODGC API]-------------------------------------------------------- */
-/* ------------------------------------------------------------------------ */
-
+/* [MODGC API] */
 void MODGC_check_malloced_size(void)
 {
 	if(verbose_gc) {
@@ -2001,9 +2000,6 @@ static void kmodgc_free(KonohaContext *kctx, struct KonohaModule *baseh)
 void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	if(IS_RootKonohaContext(ctx)) {
-		fprintf(stderr, "%d\n", sizeof(SubHeap));
-		fprintf(stderr, "%d\n", sizeof(HeapManager));
-		fprintf(stderr, "%d\n", sizeof(Segment));
 		kmemshare_t *base = (kmemshare_t*) do_malloc(sizeof(kmemshare_t));
 		base->h.name     = "bmgc";
 		base->h.setup    = kmodgc_setup;
@@ -2040,7 +2036,6 @@ void MODGC_free(KonohaContext *kctx, KonohaContextVar *ctx)
 
 void MODGC_gc_invoke(KonohaContext *kctx, KonohaStack *esp)
 {
-	//fprintf(stderr, "%s:%d\n", __func__, __LINE__);
 	bitmapMarkingGC(kctx, HeapMng(kctx), 1);
 }
 

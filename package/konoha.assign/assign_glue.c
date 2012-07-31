@@ -53,7 +53,7 @@ static KMETHOD ExprTyCheck_assign(KonohaContext *kctx, KonohaStack *sfp)
 				mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(mtd->mn), paramType, MPOL_SETTER|MPOL_CANONICAL);
 				DBG_P("cid=%s, mtd=%p", TY_t(cid), mtd);
 				if(mtd != NULL) {
-					KSETv(leftHandExpr->cons->methodItems[0], mtd);
+					KSETv(leftHandExpr->cons, leftHandExpr->cons->methodItems[0], mtd);
 					KLIB kArray_add(kctx, leftHandExpr->cons, rightHandExpr);
 					RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, leftHandExpr, mtd, gma, reqty));
 				}
