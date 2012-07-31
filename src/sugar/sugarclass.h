@@ -247,6 +247,7 @@ static void Stmt_init(KonohaContext *kctx, kObject *o, void *conf)
 	kStmtVar *stmt = (kStmtVar*)o;
 	stmt->uline    = (kfileline_t)conf;
 	stmt->syn      = NULL;
+	stmt->build    = 0;
 	stmt->parentBlockNULL = NULL;
 }
 
