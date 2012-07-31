@@ -1,8 +1,10 @@
 // written by kimio kuramitsu
 
 void f(int n) {
-	assert(n == 123);
+	if(n > 0) assert(n > 0);
 }
 
-f(123);
+f(0);
+f(1);
 
+	
