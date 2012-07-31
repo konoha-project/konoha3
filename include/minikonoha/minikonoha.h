@@ -779,8 +779,8 @@ typedef struct KonohaObjectHeader {
 struct kObjectVar {
 	KonohaObjectHeader h;
 	union {
-		kObject  *fieldObjectItems[4];
-		uintptr_t fieldUnboxItems[4];
+		kObject  *fieldObjectItems[5];
+		uintptr_t fieldUnboxItems[5];
 	};
 };
 

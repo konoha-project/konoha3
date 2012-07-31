@@ -284,6 +284,7 @@ static void kArray_add(KonohaContext *kctx, kArray *o, kObject *value)
 	Array_ensureMinimumSize(kctx, a, asize+1);
 	DBG_ASSERT(a->a.objectItems[asize] == NULL);
 	KINITv(a->a.objectItems[asize], value);
+	KLIB Kwrite_barrier(kctx, a);
 	a->a.bytesize = (asize+1) * sizeof(void*);
 }
 
@@ -299,6 +300,7 @@ static void kArray_insert(KonohaContext *kctx, kArray *o, size_t n, kObject *v)
 		memmove(a->a.objectItems+(n+1), a->a.objectItems+n, sizeof(kObject*) * (asize - n));
 		KINITv(a->a.objectItems[n], v);
 		a->a.bytesize = (asize+1) * sizeof(void*);
+		KLIB Kwrite_barrier(kctx, a);
 	}
 }
 

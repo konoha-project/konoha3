@@ -360,13 +360,14 @@ static const size_t SegmentBlockCount[] = {
 	SEGMENT_BLOCK_COUNT(11), SEGMENT_BLOCK_COUNT(12),
 };
 
+#define GC_MARGINE_FACTOR 0.98
 static const unsigned int SegmentBlockCount_GC_MARGIN[] = {
 	0, 0, 0,
-	CEIL(SEGMENT_BLOCK_COUNT(3 )*0.98), CEIL(SEGMENT_BLOCK_COUNT(4 )*0.98),
-	CEIL(SEGMENT_BLOCK_COUNT(5 )*0.98), CEIL(SEGMENT_BLOCK_COUNT(6 )*0.98),
-	CEIL(SEGMENT_BLOCK_COUNT(7 )*0.98), CEIL(SEGMENT_BLOCK_COUNT(8 )*0.98),
-	CEIL(SEGMENT_BLOCK_COUNT(9 )*0.98), CEIL(SEGMENT_BLOCK_COUNT(10)*0.98),
-	CEIL(SEGMENT_BLOCK_COUNT(11)*0.98), CEIL(SEGMENT_BLOCK_COUNT(12)*0.98),
+	CEIL(SEGMENT_BLOCK_COUNT(3 )*GC_MARGINE_FACTOR), CEIL(SEGMENT_BLOCK_COUNT(4 )*GC_MARGINE_FACTOR),
+	CEIL(SEGMENT_BLOCK_COUNT(5 )*GC_MARGINE_FACTOR), CEIL(SEGMENT_BLOCK_COUNT(6 )*GC_MARGINE_FACTOR),
+	CEIL(SEGMENT_BLOCK_COUNT(7 )*GC_MARGINE_FACTOR), CEIL(SEGMENT_BLOCK_COUNT(8 )*GC_MARGINE_FACTOR),
+	CEIL(SEGMENT_BLOCK_COUNT(9 )*GC_MARGINE_FACTOR), CEIL(SEGMENT_BLOCK_COUNT(10)*GC_MARGINE_FACTOR),
+	CEIL(SEGMENT_BLOCK_COUNT(11)*GC_MARGINE_FACTOR), CEIL(SEGMENT_BLOCK_COUNT(12)*GC_MARGINE_FACTOR),
 };
 
 #if SIZEOF_VOIDP*8 == 64
@@ -623,8 +624,8 @@ static const unsigned BM_SIZE[] = {
 
 #define Object_setYoung(o)  TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_GCFlag,0)
 #define Object_setTenure(o) TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_GCFlag,1)
-#define Object_isYoung(o)  (TFLAG_is(uintptr_t,(o)->h.magicflag, kObject_GCFlag))
-#define Object_isTenure(o) (!Object_isYoung(o))
+#define Object_isYoung(o)  (!Object_isTenure(o))
+#define Object_isTenure(o) (TFLAG_is(uintptr_t,(o)->h.magicflag, kObject_GCFlag))
 
 enum gc_mode {
 #define GC_MINOR_FLAG 0
@@ -1400,43 +1401,6 @@ static kObject *bm_malloc_internal(KonohaContext *kctx, HeapManager *mng, size_t
 	return temp;
 }
 
-#ifdef USE_GENERATIONAL_GC
-static void RememberSet_add(KonohaContext *kctx, kObject *o)
-{
-	HeapManager* mng = HeapMng(kctx);
-	ARRAY_add(VoidPtr, &mng->remember_set, (void*)o);
-}
-
-static void RememberSet_reftrace(KonohaContext *kctx, HeapManager *mng)
-{
-	size_t i, size = ARRAY_size(mng->remember_set);
-	BEGIN_REFTRACE(size);
-	FOR_EACH_ARRAY_(mng->remember_set, i) {
-		kObject* o =  (kObject *)ARRAY_n(mng->remember_set, i);
-		KREFTRACEv(o);
-	}
-	END_REFTRACE();
-	fprintf(stderr, "remember_set=%ld\n", size);
-}
-
-static void RememberSet_clear(HeapManager *mng)
-{
-	ARRAY_clear(VoidPtr, &mng->remember_set);
-}
-
-#endif
-
-static void Kwrite_barrier(KonohaContext *kctx, kObject* parent)
-{
-#ifdef USE_GENERATIONAL_GC
-	if (Object_isTenure(parent)) {
-		Object_setTenure((kObjectVar*)parent);
-		RememberSet_add(kctx, parent);
-	}
-#endif
-}
-
-
 static void clearAllBitMapsAndCount(HeapManager *mng, SubHeap *h)
 {
 	size_t i;
@@ -1666,6 +1630,45 @@ static void mark_ostack(KonohaContext *kctx, HeapManager *mng, kObject *o, knh_o
 	}
 }
 
+#ifdef USE_GENERATIONAL_GC
+static void RememberSet_add(KonohaContext *kctx, kObject *o)
+{
+	HeapManager* mng = HeapMng(kctx);
+	size_t i;
+	for (i = 0; i < ARRAY_size(mng->remember_set); i++) {
+		void *ptr = ARRAY_n(mng->remember_set, i);
+		if (ptr == o) {
+			return;
+		}
+	}
+	ARRAY_add(VoidPtr, &mng->remember_set, (void*)o);
+}
+
+static void RememberSet_reftrace(KonohaContext *kctx, HeapManager *mng)
+{
+	size_t i, size = ARRAY_size(mng->remember_set);
+	FOR_EACH_ARRAY_(mng->remember_set, i) {
+		kObject* o =  (kObject *)ARRAY_n(mng->remember_set, i);
+		KONOHA_reftraceObject(kctx, o);
+	}
+}
+
+static void RememberSet_clear(HeapManager *mng)
+{
+	ARRAY_clear(VoidPtr, &mng->remember_set);
+}
+
+#endif
+
+static void Kwrite_barrier(KonohaContext *kctx, kObject *parent)
+{
+#ifdef USE_GENERATIONAL_GC
+	if (Object_isTenure(parent)) {
+		RememberSet_add(kctx, parent);
+	}
+#endif
+}
+
 #define context_reset_refs(kctx) kctx->stack->reftail = kctx->stack->ref.refhead
 
 static void bmgc_gc_mark(KonohaContext *kctx, HeapManager *mng, KonohaStack *esp, enum gc_mode mode)
@@ -1678,7 +1681,7 @@ static void bmgc_gc_mark(KonohaContext *kctx, HeapManager *mng, KonohaStack *esp
 	context_reset_refs(kctx);
 	KRUNTIME_reftraceAll(kctx);
 #ifdef USE_GENERATIONAL_GC
-	if (!(mode & GC_MAJOR)) {
+	if (mode & GC_MINOR) {
 		RememberSet_reftrace(kctx, mng);
 	}
 #endif
