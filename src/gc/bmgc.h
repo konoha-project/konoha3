@@ -165,7 +165,7 @@ static inline void ARRAY_##T##_clear(ARRAY(T) *a) {\
 #define ARRAY_init_1(T, a, e1) do {\
 	ARRAY_init(T, a);\
 	ARRAY_add(T, a, e1);\
-} while(0)
+} while (0)
 
 #define FOR_EACH_ARRAY_(a, i)  for(i=0; i < ARRAY_size(a); ++i)
 #define FOR_EACH_ARRAY(a, x, i) \
@@ -173,6 +173,7 @@ static inline void ARRAY_##T##_clear(ARRAY(T) *a) {\
 
 /* [bitmap ops] */
 typedef uintptr_t bitmap_t;
+
 static inline void bitmap_reset(bitmap_t *bm, bitmap_t val)
 {
 	*bm = val;
@@ -620,6 +621,15 @@ static const unsigned BM_SIZE[] = {
 #define Object_isYoung(o)  (TFLAG_is(uintptr_t,(o)->h.magicflag, kObject_GCFlag))
 #define Object_isTenure(o) (!Object_isYoung(o))
 
+enum gc_mode {
+#define GC_MINOR_FLAG 0
+#define GC_MAJOR_FLAG 1
+	GC_NOP   = 0,
+	GC_MINOR = 1 << GC_MINOR_FLAG,
+	GC_MAJOR = 1 << GC_MAJOR_FLAG,
+	GC_MAJOR_AND_MINOR = GC_MINOR|GC_MAJOR
+};
+
 /* ------------------------------------------------------------------------ */
 /* [BMGC API declaration] */
 /* ------------------------------------------------------------------------ */
@@ -629,7 +639,7 @@ void *bm_malloc(KonohaContext *kctx, size_t n);
 void *bm_realloc(KonohaContext *kctx, void *ptr, size_t os, size_t ns);
 void bm_free(KonohaContext *kctx, void *ptr, size_t n);
 static void BMGC_dump(HeapManager *mng);
-static void bitmapMarkingGC(KonohaContext *kctx, HeapManager *mng, int isMajorGC);
+static void bitmapMarkingGC(KonohaContext *kctx, HeapManager *mng, enum gc_mode mode);
 static void HeapManager_init(KonohaContext *kctx, HeapManager *mng, size_t heap_size);
 static void HeapManager_delete(KonohaContext *kctx, HeapManager *mng);
 static void HeapManager_final_free(KonohaContext *kctx, HeapManager *mng);
@@ -703,7 +713,7 @@ static void *call_malloc_aligned(KonohaContext *kctx, size_t size, size_t align)
 	void *block = NULL;
 #if defined(HAVE_POSIX_MEMALIGN)
 	int ret = posix_memalign(&block, align, size);
-	if(ret != 0)
+	if (ret != 0)
 		goto L_OutOfMemory;
 #elif defined(HAVE_MEMALIGN)
 	block = memalign(align, size);
@@ -717,7 +727,7 @@ static void *call_malloc_aligned(KonohaContext *kctx, size_t size, size_t align)
 	block = malloc(size + align);
 	if (unlikely(block == NULL))
 		goto L_OutOfMemory;
-	if((uintptr_t)block % align != 0) {
+	if ((uintptr_t)block % align != 0) {
 		char *t2 = (char*)((((uintptr_t)block / align) + 1) * align);
 		void **p = (void**)(t2 + size);
 		DBG_ASSERT((char*)p < ((char*)block) + size + align);
@@ -799,7 +809,7 @@ static ssize_t kklib_malloced = 0;
 static void* Kmalloc(KonohaContext *kctx, size_t s)
 {
 	size_t *p = (size_t*)do_malloc(s + sizeof(size_t));
-	if(unlikely(p == NULL)) {
+	if (unlikely(p == NULL)) {
 		ktrace(_ScriptFault|_SystemFault,
 			KEYVALUE_s("!",  "OutOfMemory"),
 			KEYVALUE_s("at", "malloc"),
@@ -859,7 +869,7 @@ static knh_ostack_t *ostack_init(KonohaContext *kctx, knh_ostack_t *ostack)
 	ostack->capacity = memlocal(kctx)->queue_capacity;
 	ostack->stack = memlocal(kctx)->queue;
 	ostack->capacity_log2  = memlocal(kctx)->queue_log2;
-	if(ostack->capacity == 0) {
+	if (ostack->capacity == 0) {
 		ostack->capacity_log2 = 12;
 		ostack->capacity = (1 << ostack->capacity_log2) - 1;
 		DBG_ASSERT(K_PAGESIZE == 1 << 12);
@@ -873,7 +883,7 @@ static knh_ostack_t *ostack_init(KonohaContext *kctx, knh_ostack_t *ostack)
 static void ostack_push(KonohaContext *kctx, knh_ostack_t *ostack, kObject *ref)
 {
 	size_t ntail = (ostack->tail + 1 ) & ostack->capacity;
-	if(unlikely(ntail == ostack->cur)) {
+	if (unlikely(ntail == ostack->cur)) {
 		size_t capacity = 1 << ostack->capacity_log2;
 		size_t stacksize = sizeof(kObject*) * capacity;
 		ostack->stack = (kObject**)do_realloc(ostack->stack, stacksize, stacksize * 2);
@@ -888,7 +898,7 @@ static void ostack_push(KonohaContext *kctx, knh_ostack_t *ostack, kObject *ref)
 static kObject *ostack_next(knh_ostack_t *ostack)
 {
 	kObject *ref = NULL;
-	if(likely(ostack->cur != ostack->tail)) {
+	if (likely(ostack->cur != ostack->tail)) {
 		ostack->tail -=1;
 		ref = ostack->stack[ostack->tail];
 		prefetch_(ref, 0, 0);
@@ -944,7 +954,7 @@ static inline size_t SizeToKlass(size_t n) {
 	DBG_ASSERT(seg != NULL);\
 	(list) = seg->next;\
 	seg->next = NULL;\
-} while(0)
+} while (0)
 
 #define BM_IS_FULL(BM) (~(BM) == 0)
 #define SEG_BITMAP_N(seg, n, idx) ((bitmap_t*)((seg->base[n])+idx))
@@ -1079,7 +1089,7 @@ static bool isMarked(AllocationPointer *p)
 #define BITPTR_INIT_(bpidx, bpmask, idx) do {\
 	bpidx  = idx / BITS;\
 	bpmask = ONE << (idx % BITS);\
-} while(0)
+} while (0)
 
 static BitPtr *BitPtr_init(BitPtr *bp, uintptr_t idx)
 {
@@ -1105,7 +1115,7 @@ static BlkPtr *blockAddress(Segment *s, uintptr_t idx, uintptr_t mask)
 	uintptr_t temp = *bm | (bpmask - ONE);\
 	uintptr_t mask = (temp + ONE) & ~temp;\
 	bpmask = mask;\
-} while(0)
+} while (0)
 
 static bool findNextFreeBlock(AllocationPointer *p)
 {
@@ -1137,7 +1147,7 @@ static bool findNextFreeBlock(AllocationPointer *p)
 			gc_info("klass=%d, level=%lu idx=%ld mask=%lx",
 					p->seg->heap_klass, i, BP(p, i).idx, BP(p, i).mask);
 			DBG_ASSERT(BP(p, i).mask != 0);
-		} while(i > 0);
+		} while (i > 0);
 	}
 	p->blkptr = blockAddress(p->seg, BP(p, 0).idx, BP(p, 0).mask);
 	return true;
@@ -1149,10 +1159,10 @@ static void *tryAlloc(KonohaContext *kctx, HeapManager *mng, SubHeap *h)
 	void *temp;
 	if (isMarked(p)) {
 		if (findNextFreeBlock(p) == false) {
-			if (((--h->minor_count) & (MINOR_COUNT-1)) == 0) {
-				/* TODO: set safepoint for invoking minor gc */
-				return NULL;
-			}
+#ifdef USE_GENERATIONAL_GC
+			bitmap_set(&((KonohaContextVar*)kctx)->safepoint, GC_MINOR_FLAG,
+					(uintptr_t)((--h->minor_count) & (MINOR_COUNT-1)) == 0);
+#endif
 			if (nextSegment(mng, h, p) == false) {
 				return NULL;
 			}
@@ -1162,7 +1172,9 @@ static void *tryAlloc(KonohaContext *kctx, HeapManager *mng, SubHeap *h)
 	prefetch_(temp, 0, 0);
 	inc(p, h);
 	bool isEmpty = inc(p, h);
-	((KonohaContextVar*)kctx)->safepoint |= (mng->segmentList == NULL && h->freelist == NULL && isEmpty);
+
+	bitmap_set(&((KonohaContextVar*)kctx)->safepoint, GC_MAJOR_FLAG,
+			(mng->segmentList == NULL && h->freelist == NULL && isEmpty));
 	return temp;
 }
 
@@ -1348,8 +1360,8 @@ static void deferred_sweep(KonohaContext *kctx, kObject *o)
 #endif
 }
 
-#define minorGC(kctx, mng) bitmapMarkingGC(kctx, mng, 0)
-#define majorGC(kctx, mng) bitmapMarkingGC(kctx, mng, 1)
+#define minorGC(kctx, mng) bitmapMarkingGC(kctx, mng, GC_MAJOR)
+#define majorGC(kctx, mng) bitmapMarkingGC(kctx, mng, GC_MINOR)
 
 static kObject *bm_malloc_internal(KonohaContext *kctx, HeapManager *mng, size_t n)
 {
@@ -1471,7 +1483,7 @@ static void setTenureBitMapsAndCount(HeapManager *mng, SubHeap *h)
 	temp = bm | (mask - ONE);\
 	mask = (temp + ONE) & ~temp;\
 	BM_SET(bm, mask);\
-} while(0)
+} while (0)
 
 static kObject *indexToAddr(Segment *seg, uintptr_t idx, uintptr_t mask)
 {
@@ -1608,16 +1620,15 @@ static void BMGC_dump(HeapManager *info) {}
 #define DBG_CHECK_BITMAP(seg, bm) true
 #endif
 
-static void bmgc_gc_init(KonohaContext *kctx, HeapManager *mng, int isMajorGC)
+static void bmgc_gc_init(KonohaContext *kctx, HeapManager *mng, enum gc_mode mode)
 {
 	size_t i;
 	SubHeap *h;
 
 #ifdef USE_GENERATIONAL_GC
 	void (*finit_bitmap) (HeapManager *mng, SubHeap *h);
-	finit_bitmap = (isMajorGC) ? clearAllBitMapsAndCount : setTenureBitMapsAndCount;
+	finit_bitmap = (mode & GC_MAJOR) ? clearAllBitMapsAndCount : setTenureBitMapsAndCount;
 #endif
-	STAT_(memshare(kctx)->markedObject = 0;)
 	BMGC_dump(mng);
 	for_each_heap(h, i, mng->heaps) {
 #ifdef USE_GENERATIONAL_GC
@@ -1636,7 +1647,7 @@ static void bmgc_gc_init(KonohaContext *kctx, HeapManager *mng, int isMajorGC)
 	seg   = head->seg;\
 	klass = head->klass;\
 	index = offset >> klass;\
-} while(0)
+} while (0)
 
 static void bitmap_mark(bitmap_t bm, Segment *seg, uintptr_t idx, uintptr_t mask)
 {
@@ -1674,7 +1685,6 @@ static void mark_ostack(KonohaContext *kctx, HeapManager *mng, kObject *o, knh_o
 		bitmap_mark(*bm, seg, bpidx, bpmask);
 		++(seg->live_count);
 		ostack_push(kctx, ostack, o);
-		STAT_(++(memshare(kctx)->markedObject););
 #ifdef GCSTAT
 		global_gc_stat.marked[klass]++;
 #endif
@@ -1683,7 +1693,7 @@ static void mark_ostack(KonohaContext *kctx, HeapManager *mng, kObject *o, knh_o
 
 #define context_reset_refs(kctx) kctx->stack->reftail = kctx->stack->ref.refhead
 
-static void bmgc_gc_mark(KonohaContext *kctx, HeapManager *mng, KonohaStack *esp, int isMajorGC)
+static void bmgc_gc_mark(KonohaContext *kctx, HeapManager *mng, KonohaStack *esp, enum gc_mode mode)
 {
 	long i;
 	knh_ostack_t ostackbuf, *ostack = ostack_init(kctx, &ostackbuf);
@@ -1693,17 +1703,17 @@ static void bmgc_gc_mark(KonohaContext *kctx, HeapManager *mng, KonohaStack *esp
 	context_reset_refs(kctx);
 	KRUNTIME_reftraceAll(kctx);
 #ifdef USE_GENERATIONAL_GC
-	if (!isMajorGC) {
+	if (!(mode & GC_MAJOR)) {
 		RememberSet_reftrace(kctx, mng);
 	}
 #endif
 	size_t ref_size = stack->reftail - stack->ref.refhead;
 	goto L_INLOOP;
-	while((ref = ostack_next(ostack)) != NULL) {
+	while ((ref = ostack_next(ostack)) != NULL) {
 		context_reset_refs(kctx);
 		KONOHA_reftraceObject(kctx, ref);
 		ref_size = stack->reftail - stack->ref.refhead;
-		if(ref_size > 0) {
+		if (ref_size > 0) {
 			L_INLOOP:;
 			for (i = ref_size-1; i >= 0; --i) {
 				mark_ostack(kctx, mng, stack->ref.refhead[i], ostack);
@@ -1745,9 +1755,9 @@ void bm_free(KonohaContext *kctx, void *ptr, size_t n)
 void *bm_realloc(KonohaContext *kctx, void *ptr, size_t os, size_t ns)
 {
 	HeapManager *mng = HeapMng(kctx);
-	if(os <= K_FASTMALLOC_SIZE) {
+	if (os <= K_FASTMALLOC_SIZE) {
 		void *newptr = (void *) bm_malloc_internal(kctx, mng, ns);
-		if(os > 0) {
+		if (os > 0) {
 			do_memcpy(newptr, ptr, os);
 			do_bzero((char*)newptr + os, ns - os);
 			bm_free(kctx, ptr, os);
@@ -1799,7 +1809,7 @@ static void rearrangeSegList(SubHeap *h, size_t klass, bitmap_t *checkFull)
 			(count_dead < SegmentBlockCount[klass] && h->freelist == NULL));
 }
 
-static void bmgc_gc_sweep(KonohaContext *kctx, HeapManager *mng, int isMajorGC)
+static void bmgc_gc_sweep(KonohaContext *kctx, HeapManager *mng)
 {
 	bitmap_t checkFull[1] = {0};
 	size_t i, j;
@@ -1832,38 +1842,19 @@ static void bmgc_gc_sweep(KonohaContext *kctx, HeapManager *mng, int isMajorGC)
 	}
 }
 
-static void bitmapMarkingGC(KonohaContext *kctx, HeapManager *mng, int isMajorGC)
+static void bitmapMarkingGC(KonohaContext *kctx, HeapManager *mng, enum gc_mode mode)
 {
 	DBG_P("GC starting");
-	bmgc_gc_init(kctx, mng, isMajorGC);
+	bmgc_gc_init(kctx, mng, mode);
 #ifdef GCSTAT
 	size_t i = 0, marked = 0, collected = 0, heap_size = 0;
 	FOR_EACH_ARRAY_(mng->heap_size_a, i) {
 		heap_size += ARRAY_n(mng->heap_size_a, i);
 	}
 #endif
-	STAT_(
-		uint64_t start_time = knh_getTimeMilliSecond();
-		uint64_t mark_time = 0;
-	);
+	bmgc_gc_mark(kctx, mng, kctx->esp, mode);
 
-	bmgc_gc_mark(kctx, mng, kctx->esp, isMajorGC);
-
-	STAT_(mark_time = knh_getTimeMilliSecond());
-
-	bmgc_gc_sweep(kctx, HeapMng(kctx), isMajorGC);
-
-	STAT_(
-		memshare(kctx)->gcCount++;
-		memshare(kctx)->markingTime += (mark_time-start_time);
-		memshare(kctx)->latestGcTime = knh_getTimeMilliSecond();
-		memshare(kctx)->gcTime += (memshare(kctx)->latestGcTime - start_time);
-		GC_LOG("GC(%dMb): marked:%d, collected:%d marking_time=%dms",
-			memshare(kctx)->usedMemorySize/ MB_,
-			memshare(kctx)->markedObject, memshare(kctx)->collectedObject, 
-			(int)(mark_time - start_time));
-		memshare(kctx)->collectedObject = 0;
-		);
+	bmgc_gc_sweep(kctx, HeapMng(kctx));
 
 #ifdef GCSTAT
 	SubHeap *h;
@@ -1875,10 +1866,10 @@ static void bitmapMarkingGC(KonohaContext *kctx, HeapManager *mng, int isMajorGC
 	}
 	global_gc_stat.gc_count += 1;
 	gc_stat("%sGC(%lu) HeapSize=%luMB, last_collected=%lu, marked=%lu",
-			(isMajorGC)?"major":"minor",
+			(mode & GC_MAJOR)?"major":"minor",
 			global_gc_stat.gc_count, (heap_size/MB_), collected, marked);
 #endif
-	((KonohaContextVar*)kctx)->safepoint = 0;
+	bitmap_reset(&((KonohaContextVar*)kctx)->safepoint, 0);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -1892,13 +1883,10 @@ static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o)
 				KEYVALUE_p("ptr", o),
 				KEYVALUE_u("size", ct->cstruct_size),
 				KEYVALUE_u("cid", ct->classId));
-		MEMLOG(ctx, "~Object", K_NOTICE, KNH_LDATA(LOG_p("ptr", o), LOG_i("cid", ct->classId)));
 #endif
 		gc_info("~Object ptr=%p, cid=%d", o, ct->classId);
 		KONOHA_freeObjectField(kctx, (kObjectVar*)o);
-		//ctx->stat->gcObjectCount += 1;
 		((kObjectVar*)o)->h.ct = NULL;
-		STAT_dObject(ctx, ct);
 #ifdef GCSTAT
 		Segment *seg;
 		uintptr_t klass, index;
@@ -1911,7 +1899,7 @@ static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o)
 /* [MODGC API] */
 void MODGC_check_malloced_size(void)
 {
-	if(verbose_gc) {
+	if (verbose_gc) {
 		fprintf(stdout, "\nklib:memory leaked=%ld\n", kklib_malloced);
 	}
 }
@@ -1920,7 +1908,7 @@ void MODGC_check_malloced_size(void)
 	o->h.magicflag = 0;\
 	o->h.ct = NULL;\
 	o->fieldObjectItems[0] = NULL;\
-} while(0)
+} while (0)
 
 kbool_t MODGC_kObject_isManaged(KonohaContext *kctx, void *ptr);
 kObject *MODGC_omalloc(KonohaContext *kctx, size_t size)
@@ -1969,7 +1957,7 @@ static void kmodgc_local_reftrace(KonohaContext *kctx, struct KonohaContextModul
 static void kmodgc_local_free(KonohaContext *kctx, struct KonohaContextModule *baseh)
 {
 	kmemlocal_t *local = (kmemlocal_t *) baseh;
-	if(local->queue_capacity > 0) {
+	if (local->queue_capacity > 0) {
 		do_free(local->queue,  (local->queue_capacity + 1) * sizeof(kObject*));
 		local->queue = NULL;
 		local->queue_capacity = 0;
@@ -1980,7 +1968,7 @@ static void kmodgc_local_free(KonohaContext *kctx, struct KonohaContextModule *b
 
 static void kmodgc_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
 {
-	if(memlocal(kctx) == NULL) {
+	if (memlocal(kctx) == NULL) {
 		kmemlocal_t *base = do_malloc(sizeof(kmemlocal_t));
 		do_bzero(base, sizeof(kmemlocal_t));
 		base->h.reftrace = kmodgc_local_reftrace;
@@ -1999,7 +1987,7 @@ static void kmodgc_free(KonohaContext *kctx, struct KonohaModule *baseh)
 
 void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
-	if(IS_RootKonohaContext(ctx)) {
+	if (IS_RootKonohaContext(ctx)) {
 		kmemshare_t *base = (kmemshare_t*) do_malloc(sizeof(kmemshare_t));
 		base->h.name     = "bmgc";
 		base->h.setup    = kmodgc_setup;
@@ -2028,7 +2016,7 @@ void MODGC_destoryAllObjects(KonohaContext *kctx, KonohaContextVar *ctx)
 void MODGC_free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	assert(memlocal(ctx) == NULL);
-	if(IS_RootKonohaContext(ctx)) {
+	if (IS_RootKonohaContext(ctx)) {
 		kmodgc_free(kctx, (KonohaModule*) memshare(kctx));
 		KLIB Konoha_setModule(kctx, MOD_gc, NULL, 0);
 	}
@@ -2036,7 +2024,10 @@ void MODGC_free(KonohaContext *kctx, KonohaContextVar *ctx)
 
 void MODGC_gc_invoke(KonohaContext *kctx, KonohaStack *esp)
 {
-	bitmapMarkingGC(kctx, HeapMng(kctx), 1);
+	enum gc_mode mode = kctx->safepoint & 0x3;
+	if (mode == GC_NOP)
+		mode = GC_MINOR;
+	bitmapMarkingGC(kctx, HeapMng(kctx), mode);
 }
 
 /* ------------------------------------------------------------------------ */

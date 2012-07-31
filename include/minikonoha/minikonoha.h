@@ -422,7 +422,7 @@ typedef struct KonohaModule        KonohaModule;
 typedef struct KonohaContextModule KonohaContextModule;
 
 struct KonohaContextVar {
-	int						          safepoint; // set to 1
+	uintptr_t                         safepoint; // set to 1
 	KonohaStack                      *esp;
 	PlatformApi                      *platApi;
 	KonohaLib                        *klib;
