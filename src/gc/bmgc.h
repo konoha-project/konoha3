@@ -27,7 +27,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#define USE_GENERATIONAL_GC 1
+//#define USE_GENERATIONAL_GC 1
 #define K_USING_POSIX_
 #if defined(K_USING_POSIX_)
 #include <time.h>
@@ -40,6 +40,7 @@
 #include <btron/event.h>
 #endif
 
+#include "minikonoha/minikonoha.h"
 #include "minikonoha/gc.h"
 #include "minikonoha/local.h"
 
@@ -49,7 +50,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#define GCSTAT
+
 #if defined(GCDEBUG) && !defined(GCSTAT)
 #define GCSTAT 1
 #endif
@@ -87,6 +88,10 @@ extern "C" {
 #define BM_SET(m, mask)  (m |= mask)
 #define BM_TEST(m, mask) (m  & mask)
 
+#define KB_   (1024)
+#define MB_   (KB_*1024)
+#define GB_   (MB_*1024)
+
 #ifdef unlikely
 #undef unlikely
 #endif
@@ -98,9 +103,6 @@ extern "C" {
 #define unlikely(x)   __builtin_expect(!!(x), 0)
 #define likely(x)     __builtin_expect(!!(x), 1)
 #define prefetch_(addr, rw, locality) __builtin_prefetch(addr, rw, locality)
-
-#define for_each_heap(H, I, HEAPS) \
-	for (I = SUBHEAP_KLASS_MIN, H = (HEAPS)+I; I <= SUBHEAP_KLASS_MAX; ++H, ++I)
 
 static inline void *do_malloc(size_t size);
 static inline void *do_realloc(void *ptr, size_t oldSize, size_t newSize);
@@ -233,6 +235,9 @@ struct SubHeap {
 	int seglist_size;
 	int seglist_max;
 };
+
+#define for_each_heap(H, I, HEAPS) \
+	for (I = SUBHEAP_KLASS_MIN, H = (HEAPS)+I; I <= SUBHEAP_KLASS_MAX; ++H, ++I)
 
 typedef Segment* SegmentPtr;
 typedef void* VoidPtr;
@@ -1220,8 +1225,6 @@ static Segment *SegmentPool_init(size_t size, AllocationBlock *blk)
 		seg->managed_heap = blk;
 		seg->managed_heap_end = blk+1;
 #endif
-		//gc_info("[%d] seg=%p, next=%p, blk=%p, %p", i, seg, next,
-		//        seg->managed_heap, seg->managed_heap_end);
 	}
 	tail->next = NULL;
 	return pool;
@@ -1339,11 +1342,7 @@ static bool DBG_CHECK_OBJECT_IN_SEGMENT(kObject *o, Segment *seg)
 static bool DBG_CHECK_OBJECT_IN_HEAP(kObject *o, SubHeap *h)
 {
 	Segment *seg = h->p.seg;
-	if (DBG_CHECK_OBJECT_IN_SEGMENT(o, seg))
-		return true;
-	/* TODO */
-	// search from seglist;
-	return false;
+	return (DBG_CHECK_OBJECT_IN_SEGMENT(o, seg))
 }
 #else
 #define DBG_CHECK_OBJECT_IN_SEGMENT(o, seg) true
@@ -1417,7 +1416,7 @@ static void RememberSet_reftrace(KonohaContext *kctx, HeapManager *mng)
 		KREFTRACEv(o);
 	}
 	END_REFTRACE();
-	//fprintf(stderr, "remember_set=%ld\n", size);
+	fprintf(stderr, "remember_set=%ld\n", size);
 }
 
 static void RememberSet_clear(HeapManager *mng)
@@ -1470,7 +1469,6 @@ static void setTenureBitMapsAndCount(HeapManager *mng, SubHeap *h)
 		ClearBitMap(s->bitmap, h->heap_klass);
 		LOAD_SNAPSHOT(s);
 		LOAD_LIVECOUNT(s);
-		//fprintf(stderr, "klass(%lu)[%lu] load livecount: %d\n", s->heap_klass, i, s->tenure_live_count);
 		BITMAP_SET_LIMIT_AND_CPY_BM(s->bitmap, s->snapshot, h->heap_klass);
 		gc_info("klass=%d, seg[%lu]=%p count=%d",
 				s->heap_klass, i, s, s->live_count);
@@ -1567,24 +1565,6 @@ static void Heap_dump(const SubHeap *h, enum heap_dump_mode mode)
 	gc_info("klass[%2d] object_count=%lu segment_list=(%d) ",
 			h->heap_klass, global_gc_stat.object_count[h->heap_klass],
 			h->seglist_size);
-	//for (i = 0; i < h->seglist_size; ++i) {
-	//    fprintf(stderr, "seg[%d]=%p ", i, h->seglist[i]);
-	//}
-	//fprintf(stderr, "\n");
-	//for (i = 0; i < SEGMENT_LEVEL; i++) {
-	//    BitPtr p = h->p.bitptrs[i];
-	//    fprintf(stderr, "bit_ptr[%lu]\nidx=%lu\n", i, p.idx);
-	//    dumpBM(p.mask);
-	//}
-	//if (mode == HEAP_DUMP_VERBOSE) {
-	//    fprintf(stderr, "current bitmap status\n");
-	//    for (i = 0; i < SEGMENT_LEVEL; i++) {
-	//        fprintf(stderr, "bitmap[%d]\n", i);
-	//        uintptr_t idx = h->p.bitptrs[i].idx;
-	//        bitmap_t *bm  = h->p.base[0]+idx;
-	//        dumpBM(*bm);
-	//    }
-	//}
 }
 
 #endif /* GCDEBUG */
@@ -1596,12 +1576,7 @@ static void BMGC_dump(HeapManager *mng)
 	gc_info("********************************");
 	gc_info("* Heap Information");
 	gc_info("********************************");
-	gc_info("total allocated object count=%lu",
-			global_gc_stat.total_object);
-	for (i = SUBHEAP_KLASS_MIN; i <= SUBHEAP_KLASS_MAX; i++) {
-	}
-	//gc_info("HeapManager=%p segment_pool_size=%lu",
-	//        mng, mng->segment_pool_size);
+	gc_info("total allocated object count=%lu", global_gc_stat.total_object);
 	for (i = SUBHEAP_KLASS_MIN; i <= SUBHEAP_KLASS_MAX; i++) {
 		SubHeap *h = mng->heaps + i;
 		Heap_dump(h, HEAP_DUMP_INFO);
@@ -1992,7 +1967,7 @@ void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		base->h.name     = "bmgc";
 		base->h.setup    = kmodgc_setup;
 		base->h.reftrace = kmodgc_reftrace;
-		// MODGC do not set 'free'
+		/* MODGC do not set 'free' */
 		base->h.free     = NULL;
 
 		base->gcObjectCount = 0;
