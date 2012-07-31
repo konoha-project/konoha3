@@ -341,4 +341,3 @@
  - (ExtendedIntOperatorAddBitwiseAnd.k:357) (5-3) + (5-3) & -minus(2): 0
  - (ExtendedIntOperatorAddBitwiseAnd.k:358) (5-3) + (5-3) & ~(-3): 0
  - (ExtendedIntOperatorAddBitwiseAnd.k:359) (5-3) + (5-3) & (5-3): 0
-Q.E.D.
