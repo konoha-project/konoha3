@@ -26,7 +26,7 @@
 // ---------------------------------------------------------------------------
 // Syntax Management
 
-static void checkFuncArray(KonohaContext *kctx, kFunc **funcItems);
+static void checkFuncArray(KonohaContext *kctx, kNameSpace *ns, kFunc **funcItems);
 static void parseSyntaxRule(KonohaContext *kctx, const char *rule, kfileline_t pline, kArray *a);
 
 static SugarSyntax* kNameSpace_getSyntax(KonohaContext *kctx, kNameSpace *ns0, ksymbol_t keyword, int isNew)
@@ -60,11 +60,11 @@ static SugarSyntax* kNameSpace_getSyntax(KonohaContext *kctx, kNameSpace *ns0, k
 
 		if(parent != NULL) {  // TODO: RCGC
 			memcpy(syn, parent, sizeof(SugarSyntax));
-			checkFuncArray(kctx, &(syn->PatternMatch));
-			checkFuncArray(kctx, &(syn->ParseExpr));
-			checkFuncArray(kctx, &(syn->TopStmtTyCheck));
-			checkFuncArray(kctx, &(syn->StmtTyCheck));
-			checkFuncArray(kctx, &(syn->ExprTyCheck));
+			checkFuncArray(kctx, ns0, &(syn->PatternMatch));
+			checkFuncArray(kctx, ns0, &(syn->ParseExpr));
+			checkFuncArray(kctx, ns0, &(syn->TopStmtTyCheck));
+			checkFuncArray(kctx, ns0, &(syn->StmtTyCheck));
+			checkFuncArray(kctx, ns0, &(syn->ExprTyCheck));
 		}
 		else {
 			syn->keyword  = keyword;
@@ -82,7 +82,7 @@ static SugarSyntax* kNameSpace_getSyntax(KonohaContext *kctx, kNameSpace *ns0, k
 	return NULL;
 }
 
-static void checkFuncArray(KonohaContext *kctx, kFunc **funcItems)
+static void checkFuncArray(KonohaContext *kctx, kNameSpace *ns, kFunc **funcItems)
 {
 	if(funcItems[0] != NULL && IS_Array(funcItems[0])) {
 		size_t i;
@@ -90,7 +90,7 @@ static void checkFuncArray(KonohaContext *kctx, kFunc **funcItems)
 		for(i = 0; i < kArray_size(a); i++) {
 			KLIB kArray_add(kctx, newa, a->objectItems[i]);
 		}
-		KSETv(funcItems[0], (kFunc*)newa);
+		KSETv(ns, funcItems[0], (kFunc*)newa);
 	}
 }
 
@@ -99,7 +99,7 @@ static void kNameSpace_setSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_getSyntax(kctx, ns, keyword, 1/*new*/);
 	kFunc **synp = &(syn->PatternMatch);
 	DBG_ASSERT(idx <= SYNIDX_ExprTyCheck);
-	KSETv(synp[idx], fo);
+	KSETv(ns, synp[idx], fo);
 }
 
 static void kNameSpace_addSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, size_t idx, kFunc *fo)
@@ -108,14 +108,14 @@ static void kNameSpace_addSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol
 	kFunc **synp = &(syn->PatternMatch);
 	DBG_ASSERT(idx <= SYNIDX_ExprTyCheck);
 	if(synp[idx] == kmodsugar->UndefinedParseExpr || synp[idx] == kmodsugar->UndefinedStmtTyCheck || synp[idx] == kmodsugar->UndefinedExprTyCheck) {
-		KSETv(synp[idx], fo);
+		KSETv(ns, synp[idx], fo);
 	}
 	kArray *a = (kArray*)synp[idx];
 	if(!IS_Array(a)) {
 		PUSH_GCSTACK(fo);
 		a = new_(Array, 0);
 		KLIB kArray_add(kctx, a, synp[idx]);
-		KSETv(synp[idx], (kFunc*)a);
+		KSETv(ns, synp[idx], (kFunc*)a);
 	}
 	KLIB kArray_add(kctx, a, fo);
 }
@@ -158,10 +158,10 @@ static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 		setSugarFunc(kctx, syndef->ExprTyCheck, &(syn->ExprTyCheck), &pExprTyCheck, &mExprTyCheck);
 		if(syn->ParseExpr == kmodsugar->UndefinedParseExpr) {
 			if(FLAG_is(syn->flag, SYNFLAG_ExprOp)) {
-				KSETv(syn->ParseExpr, kmodsugar->ParseExpr_Op);
+				KSETv(ns, syn->ParseExpr, kmodsugar->ParseExpr_Op);
 			}
 			else if(FLAG_is(syn->flag, SYNFLAG_ExprTerm)) {
-				KSETv(syn->ParseExpr, kmodsugar->ParseExpr_Term);
+				KSETv(ns, syn->ParseExpr, kmodsugar->ParseExpr_Term);
 			}
 		}
 		DBG_ASSERT(syn == SYN_(ns, syndef->keyword));

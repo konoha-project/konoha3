@@ -44,10 +44,10 @@ static kExpr *ExprTyCheckFunc(KonohaContext *kctx, kFunc *fo, kStmt *stmt, kExpr
 {
 	INIT_GCSTACK();
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KSETv(lsfp[K_CALLDELTA+0].o, fo->self);
-	KSETv(lsfp[K_CALLDELTA+1].o, (kObject*)stmt);
-	KSETv(lsfp[K_CALLDELTA+2].o, (kObject*)expr);
-	KSETv(lsfp[K_CALLDELTA+3].o, (kObject*)gma);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, fo->self, GC_NO_WRITE_BARRIER);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, (kObject*)stmt, GC_NO_WRITE_BARRIER);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+2].o, (kObject*)expr, GC_NO_WRITE_BARRIER);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+3].o, (kObject*)gma,  GC_NO_WRITE_BARRIER);
 	lsfp[K_CALLDELTA+4].intValue = reqty;
 	KCALL(lsfp, 0, fo->mtd, 5, K_NULLEXPR);
 	END_LOCAL();
@@ -83,15 +83,15 @@ static kExpr *ExprTyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma 
 static void Expr_putConstValue(KonohaContext *kctx, kExpr *expr, KonohaStack *sfp)
 {
 	if(expr->build == TEXPR_CONST) {
-		KSETv(sfp[0].asObject, expr->objectConstValue);
+		KSETv_AND_WRITE_BARRIER(NULL, sfp[0].asObject, expr->objectConstValue, GC_NO_WRITE_BARRIER);
 		sfp[0].unboxValue = O_unbox(expr->objectConstValue);
 	}else if(expr->build == TEXPR_NCONST) {
 		sfp[0].unboxValue = expr->unboxConstValue;
 	}else if(expr->build == TEXPR_NEW) {
-		KSETv(sfp[0].asObject, KLIB new_kObject(kctx, CT_(expr->ty), 0));
+		KSETv_AND_WRITE_BARRIER(NULL, sfp[0].asObject, KLIB new_kObject(kctx, CT_(expr->ty), 0), GC_NO_WRITE_BARRIER);
 	}else {
 		assert(expr->build == TEXPR_NULL);
-		KSETv(sfp[0].asObject, KLIB Knull(kctx, CT_(expr->ty)));
+		KSETv_AND_WRITE_BARRIER(NULL, sfp[0].asObject, KLIB Knull(kctx, CT_(expr->ty)), GC_NO_WRITE_BARRIER);
 		sfp[0].unboxValue = 0;
 	}
 }
@@ -181,7 +181,7 @@ static kExpr* kStmt_tyCheckExprAt(KonohaContext *kctx, kStmt *stmt, kExpr *exprP
 	if(!Expr_isTerm(exprP) && pos < kArray_size(exprP->cons)) {
 		kExpr *expr = exprP->cons->exprItems[pos];
 		expr = Expr_tyCheck(kctx, stmt, expr, gma, reqty, pol);
-		KSETv(exprP->cons->exprItems[pos], expr);
+		KSETv(exprP->cons, exprP->cons->exprItems[pos], expr);
 		return expr;
 	}
 	return K_NULLEXPR;
@@ -216,9 +216,9 @@ static KMETHOD UndefinedStmtTyCheck(KonohaContext *kctx, KonohaStack *sfp)  // $
 static kbool_t Stmt_TyCheckFunc(KonohaContext *kctx, kFunc *fo, kStmt *stmt, kGamma *gma)
 {
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 3);
-	KSETv(lsfp[K_CALLDELTA+0].o, (kObject*)fo->self);
-	KSETv(lsfp[K_CALLDELTA+1].o, (kObject*)stmt);
-	KSETv(lsfp[K_CALLDELTA+2].o, (kObject*)gma);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, (kObject*)fo->self, GC_NO_WRITE_BARRIER);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, (kObject*)stmt, GC_NO_WRITE_BARRIER);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+2].o, (kObject*)gma , GC_NO_WRITE_BARRIER);
 	KCALL(lsfp, 0, fo->mtd, 3, K_FALSE);
 	END_LOCAL();
 	return lsfp[0].boolValue;
@@ -425,7 +425,7 @@ static kstatus_t kMethod_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtyp
 		if((jumpResult = PLATAPI setjmp_i(*base->evaljmpbuf)) == 0) {
 			//DBG_P("TY=%s, running EVAL..", TY_t(rtype));
 			if(base->evalty != TY_void) {
-				KSETv(lsfp[K_CALLDELTA+1].o, base->stack[base->evalidx].o);
+				KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, base->stack[base->evalidx].o, GC_NO_WRITE_BARRIER);
 				lsfp[K_CALLDELTA+1].intValue = base->stack[base->evalidx].intValue;
 			}
 			KCALL(lsfp, 0, mtd, 0, KLIB Knull(kctx, CT_(rtype)));
@@ -463,7 +463,7 @@ static kstatus_t kTokenArray_eval(KonohaContext *kctx, kArray *tokenList, int be
 		i = kNameSpace_selectStmtTokenList(kctx, &env, &indent, SemiColon);
 		int asize = kArray_size(tokenList);
 		if(asize > atop) {
-			KSETv(((kBlockVar*)singleBlock)->blockNameSpace, ns);
+			KSETv(singleBlock, ((kBlockVar*)singleBlock)->blockNameSpace, ns);
 			KLIB kArray_clear(kctx, singleBlock->stmtList, 0);
 			kBlock_addNewStmt(kctx, singleBlock, tokenList, atop, asize, env.errToken);
 			KLIB kArray_clear(kctx, tokenList, atop);

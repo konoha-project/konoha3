@@ -227,9 +227,9 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #define OPEXEC_NMOVx(A, B, BX, CT) rbp[(A)].o = (rbp[(B)].asObjectVar)->fieldObjectItems[(BX)]
 #define OPEXEC_XNMOV(A, AX, B, CT) (rbp[(A)].asObjectVar)->fieldObjectItems[AX] = rbp[(B)].o
 
-#define OPEXEC_NEW(A, P, CT)   KSETv(rbp[(A)].o, KLIB new_kObject(kctx, CT, P))
-#define OPEXEC_NULL(A, CT)     KSETv(rbp[(A)].o, KLIB Knull(kctx, CT))
-#define OPEXEC_BOX(A, B, CT)   KSETv(rbp[(A)].o, KLIB new_kObject(kctx, CT, rbp[(B)].intValue))
+#define OPEXEC_NEW(A, P, CT)   KSETv_AND_WRITE_BARRIER(NULL, rbp[(A)].o, KLIB new_kObject(kctx, CT, P), GC_NO_WRITE_BARRIER)
+#define OPEXEC_NULL(A, CT)     KSETv_AND_WRITE_BARRIER(NULL, rbp[(A)].o, KLIB Knull(kctx, CT), GC_NO_WRITE_BARRIER)
+#define OPEXEC_BOX(A, B, CT)   KSETv_AND_WRITE_BARRIER(NULL, rbp[(A)].o, KLIB new_kObject(kctx, CT, rbp[(B)].intValue), GC_NO_WRITE_BARRIER)
 #define OPEXEC_UNBOX(A, B, CT) rbp[(A)].unboxValue = N_toint(rbp[B].o)
 
 #define PC_NEXT(pc)   pc+1

@@ -56,7 +56,7 @@ static void Object_initdef(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t 
 {
 //	if(ct->classId == TY_Object) return;
 //	DBG_P("new object initialization ct->cstruct_size=%d", ct->cstruct_size);
-//	KSETv(ct->defaultValueAsNull, KLIB new_kObject(kctx, ct, 0));
+//	KSETv_AND_WRITE_BARRIER(NULL, ct->defaultValueAsNull, KLIB new_kObject(kctx, ct, 0), GC_NO_WRITE_BARRIER);
 //	if(ct->fieldsize > 0) {  // this is size of super class
 //		KonohaClass *supct = CT_(ct->superclassId);
 //		assert(ct->fieldsize == supct->fieldsize);

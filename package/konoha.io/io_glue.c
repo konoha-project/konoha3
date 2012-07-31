@@ -679,7 +679,7 @@ static kInputStream *new_InputStream(KonohaContext *kctx, kio_t *io2, kString *p
 {
 	kInputStream* in = new_(InputStream, io2);
 	if(path != NULL) {
-		KSETv(in->path, path);
+		KSETv(in, in->path, path);
 		io2->DBG_NAME = S_text(path);
 		if(io2 == NULL) {
 			io2 = FILE_openNULL(kctx, path, "r", NULL);
@@ -697,7 +697,7 @@ static kOutputStream *new_OutputStream(KonohaContext *kctx,  kio_t *io2, kString
 {
 	kOutputStream* w = new_(OutputStream, io2);
 	if(path != NULL) {
-		KSETv(w->path, path);
+		KSETv(w, w->path, path);
 		io2->DBG_NAME = S_text(path);
 		if(io2 == NULL) {
 			io2 = FILE_openNULL(kctx, path, "a", NULL);
@@ -780,7 +780,7 @@ static KMETHOD InputStream_new(KonohaContext *kctx, KonohaStack *sfp)
 	//kInputStream *in = sfp[0].in;
 	kString *pth = sfp[1].asString;
 	const char *mode = IS_NULL(sfp[2].s) ? "r" : S_text(sfp[2].s);
-	//KSETv(in->path, pth);
+	//KSETv(in, in->path, pth);
 	kio_t *io2 = FILE_openNULL(kctx, pth, mode, NULL);
 	if(io2 != NULL) {
 		RETURN_(new_InputStream(kctx, io2, pth));
@@ -812,7 +812,7 @@ static KMETHOD OutputStream_new(KonohaContext *kctx, KonohaStack *sfp)
 	//kOutputStream *w = sfp[0].w;
 	kString *pth = sfp[1].asString;
 	const char *mode = IS_NULL(sfp[2].s) ? "w" : S_text(sfp[2].s);
-	//KSETv(w->path, pth);
+	//KSETv(w, w->path, pth);
 	kio_t *io2 = FILE_openNULL(kctx, pth, mode, NULL);
 	if(io2 != NULL) {
 		RETURN_(new_OutputStream(kctx, io2, pth));

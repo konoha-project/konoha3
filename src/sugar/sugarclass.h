@@ -139,7 +139,7 @@ static kExprVar* Expr_vadd(KonohaContext *kctx, kExprVar *expr, int n, va_list a
 {
 	int i;
 	if(!IS_Array(expr->cons)) {
-		KSETv(expr->cons, new_(Array, 8));
+		KSETv(expr, expr->cons, new_(Array, 8));
 	}
 	for(i = 0; i < n; i++) {
 		kObject *v =  (kObject*)va_arg(ap, kObject*);
@@ -181,7 +181,7 @@ static kExpr* new_TypedMethodCall(KonohaContext *kctx, kStmt *stmt, ktype_t ty, 
 	va_list ap;
 	va_start(ap, n);
 	kExprVar *expr = GCSAFE_new(ExprVar, NULL);
-	KSETv(expr->cons, new_(Array, 8));
+	KSETv(expr, expr->cons, new_(Array, 8));
 	KLIB kArray_add(kctx, expr->cons, mtd);
 	expr = Expr_vadd(kctx, expr, n, ap);
 	va_end(ap);
@@ -337,7 +337,7 @@ static void Block_reftrace(KonohaContext *kctx, kObject *o)
 static void kBlock_insertAfter(KonohaContext *kctx, kBlock *bk, kStmt *target, kStmt *stmt)
 {
 	//DBG_ASSERT(stmt->parentNULL == NULL);
-	KSETv(((kStmtVar*)stmt)->parentBlockNULL, bk);
+	KSETv(stmt, ((kStmtVar*)stmt)->parentBlockNULL, bk);
 	size_t i;
 	for(i = 0; i < kArray_size(bk->stmtList); i++) {
 		if(bk->stmtList->stmtItems[i] == target) {

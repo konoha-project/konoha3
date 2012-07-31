@@ -61,7 +61,7 @@ static int parseNUM(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int 
 		if(!isalnum(ch)) break;
 	}
 	if(IS_NOTNULL(tk)) {
-		KSETv(tk->text, KLIB new_kString(kctx, ts + tok_start, (pos-1)-tok_start, SPOL_ASCII));
+		KSETv(tk, tk->text, KLIB new_kString(kctx, ts + tok_start, (pos-1)-tok_start, SPOL_ASCII));
 		tk->unresolvedTokenType = TokenType_INT;
 	}
 	return pos - 1;  // next
@@ -87,7 +87,7 @@ static int parseNUM(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int 
 		if(!isalnum(ch)) break;
 	}
 	if(IS_NOTNULL(tk)) {
-		KSETv(tk->text, KLIB new_kString(kctx, ts + tok_start, (pos-1)-tok_start, SPOL_ASCII));
+		KSETv(tk, tk->text, KLIB new_kString(kctx, ts + tok_start, (pos-1)-tok_start, SPOL_ASCII));
 		tk->unresolvedTokenType = (dot == 0) ? TokenType_INT : TokenType_FLOAT;
 	}
 	return pos - 1;  // next
@@ -123,10 +123,10 @@ static void Token_setSymbolText(KonohaContext *kctx, kTokenVar *tk, const char *
 	if(IS_NOTNULL(tk)) {
 		ksymbol_t kw = ksymbolA(t, len, SYM_NONAME);
 		if(kw == SYM_UNMASK(kw)) {
-			KSETv(tk->text, SYM_s(kw));
+			KSETv(tk, tk->text, SYM_s(kw));
 		}
 		else {
-			KSETv(tk->text, KLIB new_kString(kctx, t, len, SPOL_ASCII));
+			KSETv(tk, tk->text, KLIB new_kString(kctx, t, len, SPOL_ASCII));
 		}
 		tk->unresolvedTokenType = TokenType_SYMBOL;
 		if(len == 1) {
@@ -230,7 +230,7 @@ static int parseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, TokenizerEn
 		if(ch == '"' && (prev != '\\' || (prev == '\\' && prev2 == '\\'))) {
 			if(IS_NOTNULL(tk)) {
 				size_t length = Kwb_bytesize(&wb);
-				KSETv(tk->text, KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), length, 0));
+				KSETv(tk, tk->text, KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), length, 0));
 				tk->unresolvedTokenType = TokenType_TEXT;
 			}
 			KLIB Kwb_free(&wb);
@@ -395,9 +395,9 @@ static int callFuncTokenize(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, Token
 	preparedString->text = tenv->source + tok_start;
 	preparedString->bytesize = tenv->sourceLength - tok_start;
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
-	KSETv(lsfp[K_CALLDELTA+0].o, fo->self);
-	KSETv(lsfp[K_CALLDELTA+1].o, (kObject*)tk);
-	KSETv(lsfp[K_CALLDELTA+2].s, preparedString);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, fo->self, GC_NO_WRITE_BARRIER);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, (kObject*)tk, GC_NO_WRITE_BARRIER);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+2].s, preparedString, GC_NO_WRITE_BARRIER);
 	KCALL(lsfp, 0, fo->mtd, 2, KLIB Knull(kctx, CT_Int));
 	END_LOCAL();
 	int pos = lsfp[0].intValue + tok_start;
@@ -459,7 +459,7 @@ static int parseLazyBlock(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv
 			level--;
 			if(level == 0) {
 				if(IS_NOTNULL(tk)) {
-					KSETv(tk->text, KLIB new_kString(kctx, tenv->source + tok_start + 1, ((pos-2)-(tok_start)+1), 0));
+					KSETv(tk, tk->text, KLIB new_kString(kctx, tenv->source + tok_start + 1, ((pos-2)-(tok_start)+1), 0));
 					tk->unresolvedTokenType = TokenType_CODE;
 				}
 				return pos + 1;
@@ -520,12 +520,12 @@ static void kNameSpace_setTokenizeFunc(KonohaContext *kctx, kNameSpace *ns, int 
 				if(!IS_Array(a)) {
 					a = new_(Array, 0);
 					KLIB kArray_add(kctx, a, funcMatrix[kchar]);
-					KSETv(funcMatrix[kchar], (kFunc*)a);
+					KSETv(ns, funcMatrix[kchar], (kFunc*)a);
 				}
 				KLIB kArray_add(kctx, a, funcTokenize);
 			}
 			else {
-				KSETv(funcMatrix[kchar], funcTokenize);
+				KSETv(ns, funcMatrix[kchar], funcTokenize);
 			}
 		}
 	}
@@ -581,7 +581,7 @@ static kbool_t checkNestedSyntax(KonohaContext *kctx, kArray *tokenArray, int *s
 	if(topch == opench) {
 		int ne = findCloseChar(kctx, tokenArray, i+1, e, tk->unresolvedTokenType, closech);
 		tk->resolvedSymbol = astkw;
-		KSETv(tk->subTokenList, new_(TokenArray, 0));
+		KSETv(tk, tk->subTokenList, new_(TokenArray, 0));
 		makeSyntaxRule(kctx, tokenArray, i+1, ne, tk->subTokenList);
 		*s = ne;
 		return true;

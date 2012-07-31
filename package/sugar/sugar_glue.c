@@ -42,7 +42,7 @@ static KMETHOD Token_setText(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
 	kString *text = sfp[1].asString;
-	KSETv(tk->text, text);
+	KSETv(tk, tk->text, text);
 	RETURNvoid_();
 }
 
@@ -51,7 +51,7 @@ static KMETHOD Token_setSubArray(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
 	kArray *sub = sfp[1].asArray;
-	KSETv(tk->subTokenList, sub);
+	KSETv(tk, tk->subTokenList, sub);
 	RETURNvoid_();
 }
 
@@ -265,8 +265,8 @@ static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp)
 //	kToken *tk   = sfp[1].asToken;
 //	assert(tk->keyword != 0);
 //	kExprVar *expr = GCSAFE_new(ExprVar, SYN_(Stmt_nameSpace(stmt), tk->keyword));
-//	KSETv(expr->tk, tk);
-//	KSETv(expr->cons, new_(Array, 8));
+//	KSETv(expr, expr->tk, tk);
+//	KSETv(expr, expr->cons, new_(Array, 8));
 //	RETURN_(expr);
 //}
 

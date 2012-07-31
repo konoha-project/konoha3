@@ -41,7 +41,7 @@ static KMETHOD MethodFunc_UnboxFieldGetter(KonohaContext *kctx, KonohaStack *sfp
 static KMETHOD MethodFunc_ObjectFieldSetter(KonohaContext *kctx, KonohaStack *sfp)
 {
 	size_t delta = sfp[K_MTDIDX].mtdNC->delta;
-	KSETv((sfp[0].asObjectVar)->fieldObjectItems[delta], sfp[1].asObject);
+	KSETv(sfp[0].asObjectVar, (sfp[0].asObjectVar)->fieldObjectItems[delta], sfp[1].asObject);
 	RETURN_(sfp[1].asObject);
 }
 static KMETHOD MethodFunc_UnboxFieldSetter(KonohaContext *kctx, KonohaStack *sfp)
@@ -152,7 +152,7 @@ static void KonohaClass_addField(KonohaContext *kctx, KonohaClassVar *definedCla
 			definedClass->defaultValueAsNullVar->fieldUnboxItems[pos] = 0;
 		}
 		else {
-			KSETv(definedClass->defaultValueAsNullVar->fieldObjectItems[pos], KLIB Knull(kctx, CT_(ty)));
+			KSETv(definedClass->defaultValueAsNullVar, definedClass->defaultValueAsNullVar->fieldObjectItems[pos], KLIB Knull(kctx, CT_(ty)));
 			definedClass->fieldItems[pos].isobj = 1;
 		}
 		if(FLAG_is(definedClass->fieldItems[pos].flag, kField_Getter)) {
@@ -179,7 +179,7 @@ static kbool_t KonohaClass_setClassFieldObjectValue(KonohaContext *kctx, KonohaC
 	int i;
 	for(i = definedClass->fieldsize; i >= 0; i--) {
 		if(definedClass->fieldItems[i].fn == sym  && O_ct(definedClass->defaultValueAsNullVar->fieldObjectItems[i]) == O_ct(objectValue)) {
-			KSETv(definedClass->defaultValueAsNullVar->fieldObjectItems[i], objectValue);
+			KSETv(definedClass->defaultValueAsNullVar, definedClass->defaultValueAsNullVar->fieldObjectItems[i], objectValue);
 			return true;
 		}
 	}
@@ -299,8 +299,8 @@ static KMETHOD ExprTyCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 		kNameSpace *ns = Stmt_nameSpace(stmt);
 		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_Object, MN_("<:"), 1, MPOL_PARAMSIZE);
 		DBG_ASSERT(mtd != NULL);
-		KSETv(expr->cons->methodItems[0], mtd);
-		KSETv(expr->cons->exprItems[2], SUGAR kExpr_setConstValue(kctx, expr, targetExpr->ty, KLIB Knull(kctx, targetClass)));
+		KSETv(expr->cons, expr->cons->methodItems[0], mtd);
+		KSETv(expr->cons, expr->cons->exprItems[2], SUGAR kExpr_setConstValue(kctx, expr, targetExpr->ty, KLIB Knull(kctx, targetClass)));
 		RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, TY_Boolean));
 	}
 }
@@ -332,8 +332,8 @@ static KMETHOD ExprTyCheck_As(KonohaContext *kctx, KonohaStack *sfp)
 		kNameSpace *ns = Stmt_nameSpace(stmt);
 		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_Object, MN_("as"), 0, 0);
 		DBG_ASSERT(mtd != NULL);
-		KSETv(expr->cons->methodItems[0], mtd);
-		KSETv(expr->cons->exprItems[2], SUGAR kExpr_setConstValue(kctx, expr, targetExpr->ty, KLIB Knull(kctx, targetClass)));
+		KSETv(expr->cons, expr->cons->methodItems[0], mtd);
+		KSETv(expr->cons, expr->cons->exprItems[2], SUGAR kExpr_setConstValue(kctx, expr, targetExpr->ty, KLIB Knull(kctx, targetClass)));
 		RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, targetClass->classId));
 	}
 }
@@ -385,7 +385,7 @@ static KMETHOD ExprTyCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 	if(self != K_NULLEXPR) {
 		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, self->ty, MN_toGETTER(fn), 0, MPOL_GETTER);
 		if(mtd != NULL) {
-			KSETv(expr->cons->methodItems[0], mtd);
+			KSETv(expr->cons, expr->cons->methodItems[0], mtd);
 			RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, reqty));
 		}
 		SUGAR Stmt_p(kctx, stmt, tkN, ErrTag, "undefined field: %s", S_text(tkN->text));
@@ -517,7 +517,7 @@ static kBlock* kStmt_parseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToke
 			kToken *tk = a->tokenItems[i];
 			if(tk->topCharHint == '(' && prevToken->unresolvedTokenType == TokenType_SYMBOL && strcmp(cname, S_text(prevToken->text)) == 0) {
 				kTokenVar *newToken = GCSAFE_new(TokenVar, TokenType_SYMBOL);
-				KSETv(newToken->text, SYM_s(MN_new));
+				KSETv(newToken, newToken->text, SYM_s(MN_new));
 				KLIB kArray_add(kctx, a, newToken);
 			}
 			KLIB kArray_add(kctx, a, tk);
