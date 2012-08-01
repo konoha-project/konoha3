@@ -39,7 +39,7 @@ extern "C" {
 #define kmodfloat        ((kmodfloat_t*)kctx->modshare[MOD_float])
 #define IS_defineFloat()    (kctx->modshare[MOD_float] != NULL)
 #define CT_Float         kmodfloat->cFloat
-#define TY_Float         kmodfloat->cFloat->classId
+#define TY_Float         kmodfloat->cFloat->typeId
 
 #define IS_Float(O)      ((O)->h.ct == CT_Float)
 

@@ -65,22 +65,22 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp)
 	int nextIdx = SUGAR kStmt_parseTypePattern(kctx, stmt, Stmt_nameSpace(stmt), tokenArray, beginIdx + 1, endIdx, &foundClass);
 	if(nextIdx != -1 && nextIdx < kArray_size(tokenArray)) {
 		kToken *nextTokenAfterClassName = tokenArray->tokenItems[nextIdx];
-//		if (ct->classId == TY_void) {
+//		if (ct->typeId == TY_void) {
 //			RETURN_(SUGAR Stmt_p(kctx, stmt, tk1, ErrTag, "undefined class: %s", S_text(tk1->text)));
 //		} else if (CT_isVirtual(ct)) {
 //			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "invalid application of 'new' to incomplete class %s", CT_t(ct));
 //		}
 		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {  // new C (...)
 			SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
-			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, newToken, NewExpr(kctx, syn, tokenArray->tokenVarItems[beginIdx+1], foundClass->classId));
+			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, newToken, NewExpr(kctx, syn, tokenArray->tokenVarItems[beginIdx+1], foundClass->typeId));
 			newToken->resolvedSymbol = MN_new;
 			RETURN_(expr);
 		}
 		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KW_BracketGroup) {     // new int [100]
 			SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_new);
-			KonohaClass *arrayClass = CT_p0(kctx, CT_Array, foundClass->classId);
+			KonohaClass *arrayClass = CT_p0(kctx, CT_Array, foundClass->typeId);
 			newToken->resolvedSymbol = MN_("newArray");
-			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, newToken, NewExpr(kctx, syn, tokenArray->tokenVarItems[beginIdx+1], arrayClass->classId));
+			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, newToken, NewExpr(kctx, syn, tokenArray->tokenVarItems[beginIdx+1], arrayClass->typeId));
 			RETURN_(expr);
 		}
 	}

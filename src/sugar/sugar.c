@@ -206,7 +206,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	base->cStmt  = KLIB Konoha_defineClass(kctx, PackageId_sugar, PackageId_sugar, NULL, &defStmt, 0);
 	base->cBlock = KLIB Konoha_defineClass(kctx, PackageId_sugar, PackageId_sugar, NULL, &defBlock, 0);
 	base->cGamma = KLIB Konoha_defineClass(kctx, PackageId_sugar, PackageId_sugar, NULL, &defGamma, 0);
-	base->cTokenArray = CT_p0(kctx, CT_Array, base->cToken->classId);
+	base->cTokenArray = CT_p0(kctx, CT_Array, base->cToken->typeId);
 
 	KLIB Knull(kctx, base->cNameSpace);
 	KLIB Knull(kctx, base->cToken);

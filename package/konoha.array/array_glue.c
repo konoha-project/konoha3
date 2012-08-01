@@ -200,7 +200,7 @@ static KMETHOD ExprTyCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 	size_t i;
 	KonohaClass *requestClass = CT_(reqty);
 	ktype_t paramType = TY_var; // default
-	if(requestClass->baseclassId == TY_Array) {
+	if(requestClass->baseTypeId == TY_Array) {
 		paramType = requestClass->p0;
 	}
 	else {
@@ -222,8 +222,8 @@ static KMETHOD ExprTyCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, Stmt_nameSpace(stmt), TY_Array, MN_("newList"), 0, MPOL_FIRST);
 	DBG_ASSERT(mtd != NULL);
 	KSETv(expr->cons->methodItems[0], mtd);
-	KSETv(expr->cons->exprItems[1], SUGAR kExpr_setVariable(kctx, NULL, gma, TEXPR_NEW, requestClass->classId, 0));
-	RETURN_(Expr_typed(expr, TEXPR_CALL, requestClass->classId));
+	KSETv(expr->cons->exprItems[1], SUGAR kExpr_setVariable(kctx, NULL, gma, TEXPR_NEW, requestClass->typeId, 0));
+	RETURN_(Expr_typed(expr, TEXPR_CALL, requestClass->typeId));
 }
 
 static KMETHOD ParseExpr_Bracket(KonohaContext *kctx, KonohaStack *sfp)

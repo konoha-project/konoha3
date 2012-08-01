@@ -610,7 +610,7 @@ static KMETHOD SockAddr_new (KonohaContext *kctx, KonohaStack *sfp)
 #define _F(F)   (intptr_t)(F)
 
 #define CT_SockAddr         cSockAddr
-#define TY_SockAddr         cSockAddr->classId
+#define TY_SockAddr         cSockAddr->typeId
 #define IS_SockAddr(O)      ((O)->h.ct == CT_SockAddr)
 
 static	kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
@@ -624,7 +624,7 @@ static	kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	KonohaClass *cSockAddr = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defSockAddr, pline);
 	kparamtype_t pi = {TY_Int, FN_("intValue")};
 	KonohaClass *CT_IntArray = KLIB KonohaClass_Generics(kctx, CT_Array, TY_Int, 1, &pi);
-	ktype_t TY_IntArray = CT_IntArray->classId;
+	ktype_t TY_IntArray = CT_IntArray->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im, _F(System_accept), TY_Int, TY_System, MN_("accept"), 2, TY_Int, FN_("fd"), TY_SockAddr, FN_("sockaddr"),

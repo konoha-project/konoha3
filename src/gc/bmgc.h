@@ -1821,10 +1821,10 @@ static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o)
 				KEYVALUE_s("@", "delete"),
 				KEYVALUE_p("ptr", o),
 				KEYVALUE_u("size", ct->cstruct_size),
-				KEYVALUE_u("cid", ct->classId));
-		MEMLOG(ctx, "~Object", K_NOTICE, KNH_LDATA(LOG_p("ptr", o), LOG_i("cid", ct->classId)));
+				KEYVALUE_u("cid", ct->typeId));
+		MEMLOG(ctx, "~Object", K_NOTICE, KNH_LDATA(LOG_p("ptr", o), LOG_i("cid", ct->typeId)));
 #endif
-		gc_info("~Object ptr=%p, cid=%d", o, ct->classId);
+		gc_info("~Object ptr=%p, cid=%d", o, ct->typeId);
 		KONOHA_freeObjectField(kctx, (kObjectVar*)o);
 		//ctx->stat->gcObjectCount += 1;
 		K_OZERO(o);

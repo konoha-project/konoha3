@@ -47,7 +47,7 @@ struct kExceptionVar {
 #define KonohaContext_getExceptionModule(kctx)           ((KonohaExceptionModule*)kctx->modshare[MOD_exception])
 #define KonohaContext_getExceptionContext(kctx)          ((KonohaExceptionContext*)kctx->modlocal[MOD_exception])
 #define CT_Exception         KonohaContext_getExceptionModule(kctx)->cException
-#define TY_Exception         KonohaContext_getExceptionModule(kctx)->cException->classId
+#define TY_Exception         KonohaContext_getExceptionModule(kctx)->cException->typeId
 #define IS_Exception(e)      (O_ct(e) == CT_Exception)
 
 typedef struct {

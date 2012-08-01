@@ -144,7 +144,7 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 	if(Stmt_isERR(stmt)) texpr = K_NULLEXPR;
 	if(expr->ty == TY_var && expr != K_NULLEXPR) {
 		if(!IS_Expr(expr)) {
-			expr = new_ConstValueExpr(kctx, O_classId(expr), UPCAST(expr));
+			expr = new_ConstValueExpr(kctx, O_typeId(expr), UPCAST(expr));
 		}
 		texpr = ExprTyCheck(kctx, stmt, expr, gma, reqty);
 	}
@@ -334,7 +334,7 @@ static kbool_t kMethod_compile(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns
 	GammaStackDecl lvarItems[32] = {};
 	GammaAllocaData newgma = {
 		.currentWorkingMethod = mtd,
-		.this_cid = (mtd)->classId,
+		.this_cid = (mtd)->typeId,
 		.localScope.varItems = lvarItems, .localScope.capacity = 32, .localScope.varsize = 0, .localScope.allocsize = 0,
 	};
 	GAMMA_PUSH(gma, &newgma);

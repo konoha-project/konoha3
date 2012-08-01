@@ -138,7 +138,7 @@ typedef struct {
 /* ------------------------------------------------------------------------ */
 #define kregexshare      ((kregexshare_t*)kctx->modshare[MOD_REGEX])
 #define CT_Regex         kregexshare->cRegex
-#define TY_Regex         kregexshare->cRegex->classId
+#define TY_Regex         kregexshare->cRegex->typeId
 
 #define IS_Regex(O)      ((O)->h.ct == CT_Regex)
 
@@ -564,7 +564,7 @@ static kbool_t pcre_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 
 	kparamtype_t p = { .ty = TY_String,  };
 	KonohaClass *cStrArray = KLIB KonohaClass_Generics(kctx, CT_(TY_Array), TY_void, 1, &p);
-#define TY_StrArray (cStrArray->classId)
+#define TY_StrArray (cStrArray->typeId)
 	int FN_x = FN_("x");
 	int FN_y = FN_("y");
 	KDEFINE_METHOD MethodData[] = {

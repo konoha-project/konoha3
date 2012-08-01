@@ -41,7 +41,7 @@ typedef struct kByteCodeVar           kByteCodeVar;
 #define ctxcode          ((ctxcode_t*)kctx->modlocal[MOD_code])
 #define kmodcode         ((KModuleByteCode*)kctx->modshare[MOD_code])
 #define CT_BasicBlock    kmodcode->cBasicBlock
-#define TY_BasicBlock    kmodcode->cBasicBlock->classId
+#define TY_BasicBlock    kmodcode->cBasicBlock->typeId
 #define CT_ByteCode      kmodcode->cByteCode
 
 #define IS_BasicBlock(O)  ((O)->h.ct == CT_BasicBlock)
@@ -86,7 +86,7 @@ typedef void (*TraceFunc)(KonohaContext *kctx, KonohaStack *sfp, kfileline_t pli
 
 typedef struct {
 	kMethod *mtd;
-	ktype_t classId; kparamid_t signature;
+	ktype_t typeId; kparamid_t signature;
 } kMethodInlineCache;
 
 #if defined(K_USING_THCODE_)
@@ -142,10 +142,10 @@ struct kByteCodeVar {
 
 static void kNameSpace_lookupMethodWithInlineCache(KonohaContext *kctx, KonohaStack *sfp, kNameSpace *ns, kMethod **cache)
 {
-	ktype_t classId = O_classId(sfp[0].asObject);
+	ktype_t typeId = O_typeId(sfp[0].asObject);
 	kMethod *mtd = cache[0];
-	if(mtd->classId != classId) {
-		mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, classId, mtd->mn, mtd->paramdom, MPOL_LATEST|MPOL_SIGNATURE);
+	if(mtd->typeId != typeId) {
+		mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, typeId, mtd->mn, mtd->paramdom, MPOL_LATEST|MPOL_SIGNATURE);
 		cache[0] = mtd;
 	}
 	sfp[K_MTDIDX].mtdNC = mtd;
@@ -619,7 +619,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #define OPEXEC_TCAST(kctx, rtnidx, thisidx, rix, espidx, tmr)  { \
 		kTypeMap *tmr_ = tmr; \
 		KonohaStack *sfp_ = SFP(rshift(rbp,thisidx));\
-		KonohaClass scid = SP(tmr_)->scid, this_cid = O_classId(sfp_[0].o);\
+		KonohaClass scid = SP(tmr_)->scid, this_cid = O_typeId(sfp_[0].o);\
 		if(this_cid != scid) {\
 			tmr_ = knh_findTypeMapNULL(kctx, scid, SP(tmr)->tcid);\
 			KSETv(((klr_TCAST_t*)op)->cast, tmr_);\
@@ -630,7 +630,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 
 #define OPEXEC_ACAST(rtnidx, thisidx, rix, espidx, tmr)  { \
 		kTypeMap *tmr_ = tmr; \
-		KonohaClass tcid = SP(tmr_)->tcid, this_cid = O_classId(Ro_(thisidx));\
+		KonohaClass tcid = SP(tmr_)->tcid, this_cid = O_typeId(Ro_(thisidx));\
 		if(!class_isa(this_cid, tcid)) {\
 			KonohaClass scid = SP(tmr_)->scid;\
 			if(this_cid != scid) {\

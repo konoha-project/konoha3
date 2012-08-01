@@ -310,7 +310,7 @@ static kbool_t OPR_hasCONST(KonohaContext *kctx, kExpr *expr, kmethodn_t *mn, in
 
 static kbool_t CLASSICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr, int shift, int espidx)
 {
-	ktype_t mtd_cid = (mtd)->classId;
+	ktype_t mtd_cid = (mtd)->typeId;
 	kmethodn_t mtd_mn = (mtd)->mn;
 	int a = espidx + 1;
 #if 1/*TODO*/

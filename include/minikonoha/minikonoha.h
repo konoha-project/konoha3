@@ -597,8 +597,8 @@ typedef struct krbp_t {
 
 typedef struct KDEFINE_CLASS {
 	const char *structname;
-	ktype_t     classId;         kshortflag_t    cflag;
-	ktype_t     baseclassId;        ktype_t     superclassId;
+	ktype_t     typeId;         kshortflag_t    cflag;
+	ktype_t     baseTypeId;        ktype_t     superTypeId;
 	ktype_t    rtype;        kushort_t  cparamsize;
 	struct kparamtype_t   *cparamItems;
 	size_t     cstruct_size;
@@ -609,7 +609,7 @@ typedef struct KDEFINE_CLASS {
 
 #define STRUCTNAME(C) \
 	.structname = #C,\
-	.classId = TY_newid,\
+	.typeId = TY_newid,\
 	.cstruct_size = sizeof(k##C)\
 
 //KonohaClassVar;
@@ -617,10 +617,10 @@ typedef uintptr_t kmagicflag_t;
 
 struct KonohaClassVar {
 	CLASSAPI;
-	kpackage_t   packageId;  kpackage_t   packageDomain;
-	ktype_t   classId;       kshortflag_t  cflag;
-	ktype_t   baseclassId;   ktype_t   superclassId;
-	ktype_t   p0;             kparamid_t cparamdom;
+	kpackage_t   packageId;    kpackage_t    packageDomain;
+	ktype_t      typeId;       kshortflag_t  cflag;
+	ktype_t      baseTypeId;   ktype_t       superTypeId;
+	ktype_t   p0;              kparamid_t    cparamdom;
 	kmagicflag_t magicflag;
 	size_t     cstruct_size;
 	KonohaClassField         *fieldItems;
@@ -715,7 +715,7 @@ struct KonohaClassField {
 #define CT_setVirtual(C, B)   TFLAG_set(kshortflag_t, (C)->cflag, kClass_Virtual, B)
 
 #define TY_isTypeVar(t)      (TFLAG_is(kshortflag_t,(CT_(t))->cflag, kClass_TypeVar))
-#define TY_isFunc(T)         (CT_(T)->baseclassId == TY_Func)
+#define TY_isFunc(T)         (CT_(T)->baseTypeId == TY_Func)
 
 /* magic flag */
 #define MAGICFLAG(f)             (K_OBJECT_MAGIC | ((kmagicflag_t)(f) & K_CFLAGMASK))
@@ -771,7 +771,7 @@ struct KonohaClassField {
 
 typedef struct KonohaObjectHeader {
 	kmagicflag_t magicflag;
-	KonohaClass *ct;  //@RENAME
+	KonohaClass *ct;
 	KUtilsGrowingArray *kvproto;
 } KonohaObjectHeader ;
 
@@ -784,8 +784,8 @@ struct kObjectVar {
 };
 
 #define O_ct(o)             ((o)->h.ct)
-#define O_classId(o)            (O_ct(o)->classId)
-#define O_baseclassId(o)           (O_ct(o)->baseclassId)
+#define O_typeId(o)         (O_ct(o)->typeId)
+#define O_baseTypeId(o)     (O_ct(o)->baseTypeId)
 #define O_unbox(o)          (O_ct(o)->unbox(kctx, o))
 #define O_p0(o)             (O_ct(o)->p0)
 
@@ -813,9 +813,9 @@ struct kBooleanVar /* extends kNumber */ {
 	ABSTRACT_NUMBER;
 };
 
-#define IS_Boolean(o)              (O_classId(o) == TY_Boolean)
-#define IS_TRUE(o)                 (O_baseclassId(o) == TY_Boolean && N_tobool(o))
-#define IS_FALSE(o)                (O_baseclassId(o) == TY_Boolean && N_tobool(o) == 0)
+#define IS_Boolean(o)              (O_typeId(o) == TY_Boolean)
+#define IS_TRUE(o)                 (O_baseTypeId(o) == TY_Boolean && N_tobool(o))
+#define IS_FALSE(o)                (O_baseTypeId(o) == TY_Boolean && N_tobool(o) == 0)
 #define new_Boolean(kctx, c)       ((c) ? K_TRUE : K_FALSE)
 #define N_toint(o)                 (((kBoolean*)o)->intValue)
 #define N_tofloat(o)               (((kBoolean*)o)->floatValue)
@@ -829,14 +829,14 @@ struct kIntVar /* extends kNumber */ {
 	ABSTRACT_NUMBER;
 };
 
-#define IS_Int(o)              (O_classId(o) == TY_Int)
+#define IS_Int(o)              (O_typeId(o) == TY_Int)
 
 /* ------------------------------------------------------------------------ */
 /* String */
 
 #define TY_TEXT                   TY_void    /*special use for const char*/
 #define TY_TYPE                   TY_var     /*special use for KonohaClass*/
-#define IS_String(o)              (O_classId(o) == TY_String)
+#define IS_String(o)              (O_typeId(o) == TY_String)
 
 /*
  * Bit encoding for Rope String
@@ -897,7 +897,7 @@ struct kStringVar /* extends _Bytes */ {
 /* ------------------------------------------------------------------------ */
 //## class Array   Object;
 
-#define IS_Array(o)              (O_baseclassId(o) == TY_Array)
+#define IS_Array(o)              (O_baseTypeId(o) == TY_Array)
 #define kArray_isUnboxData(o)    (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
 #define kArray_setUnboxData(o,b) TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,b)
 
@@ -928,7 +928,7 @@ struct kArrayVar {
 /* ------------------------------------------------------------------------ */
 /* Param */
 
-#define IS_Param(o)              (O_baseclassId(o) == TY_Param)
+#define IS_Param(o)              (O_baseTypeId(o) == TY_Param)
 
 typedef struct kparamtype_t {
 	ktype_t    ty;  ksymbol_t  fn;
@@ -943,7 +943,7 @@ struct kParamVar {
 /* ------------------------------------------------------------------------ */
 /* Method */
 
-#define IS_Method(o)              (O_baseclassId(o) == TY_Method)
+#define IS_Method(o)              (O_baseTypeId(o) == TY_Method)
 
 #define kMethod_Public               ((uintptr_t)(1<<0))
 #define kMethod_Hidden               ((uintptr_t)(1<<1))
@@ -988,7 +988,7 @@ struct kParamVar {
 #define Method_param(mtd)        kctx->share->paramList->paramItems[mtd->paramid]
 #define Method_returnType(mtd)   ((Method_param(mtd))->rtype)
 #define Method_paramsize(mtd)    ((Method_param(mtd))->psize)
-#define Method_t(mtd)            TY_t((mtd)->classId),PSYM_t((mtd)->mn)
+#define Method_t(mtd)            TY_t((mtd)->typeId),PSYM_t((mtd)->mn)
 
 /* method data */
 #define DEND     (-1)
@@ -1017,7 +1017,7 @@ struct kMethodVar {
 		FmethodCallCC         callcc_1;
 	};
 	uintptr_t         flag;
-	ktype_t           classId;      kmethodn_t  mn;
+	ktype_t           typeId;      kmethodn_t  mn;
 	kparamid_t        paramid;      kparamid_t paramdom;
 	kshort_t          delta;        kpackage_t packageId;
 	kToken           *sourceCodeToken;
@@ -1056,7 +1056,7 @@ struct kMethodVar {
 /* ------------------------------------------------------------------------ */
 /* Func */
 
-#define IS_Func(o)              (O_baseclassId(o) == TY_Func)
+#define IS_Func(o)              (O_baseTypeId(o) == TY_Func)
 
 struct kFuncVar {
 	KonohaObjectHeader h;
@@ -1067,7 +1067,7 @@ struct kFuncVar {
 /* ------------------------------------------------------------------------ */
 /* System */
 
-#define IS_System(o)              (O_classId(o) == TY_System)
+#define IS_System(o)              (O_typeId(o) == TY_System)
 
 typedef const struct _kSystem kSystem;
 

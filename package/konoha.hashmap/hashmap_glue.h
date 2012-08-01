@@ -109,7 +109,7 @@ static KMETHOD HashMap_new(KonohaContext *kctx, KonohaStack *sfp)
 #define _F(F)   (intptr_t)(F)
 
 #define CT_HashMap cHashMap
-#define TY_HashMap cHashMap->classId
+#define TY_HashMap cHashMap->typeId
 static	kbool_t hashmap_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	KDEFINE_CLASS defHashMap = {

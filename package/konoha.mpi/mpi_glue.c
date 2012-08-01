@@ -52,7 +52,7 @@ static inline kObject *new_ReturnCppObject(KonohaContext *kctx,KonohaStack *sfp,
 #define toRawPtr(type, o) ((type)((kRawPtr *)o)->rawptr)
 
 static void *getbuf(kMPIData *p) {
-	switch(p->classId) {
+	switch(p->typeId) {
 		case KMPI_BYTES:  return p->b->buf + p->offset;
 		case KMPI_FARRAY: return p->fa + p->offset;
 		case KMPI_IARRAY: return p->ia + p->offset;
@@ -63,7 +63,7 @@ static void *getbuf(kMPIData *p) {
 static void MPIData_extend(KonohaContext *kctx, kMPIData *p, int size) {
 	size_t newSize = p->offset + size;
 	if(p->size < newSize) {
-		switch(p->classId) {
+		switch(p->typeId) {
 		case KMPI_BYTES: {
 			kBytes *b = (kBytes *)KLIB new_kObject(kctx, CT_Bytes, (void *)newSize);
 			memcpy(b->buf, p->b->buf, p->size);
@@ -113,7 +113,7 @@ static void MPIRequest_ptr_free(KonohaContext *kctx , kObject *po)
 static void MPIData_ptr_free(KonohaContext *kctx , kObject *po)
 {
 	kMPIData *p = toRawPtr(kMPIData *, po);
-	switch(p->classId) {
+	switch(p->typeId) {
 		case KMPI_BYTES: break;
 		case KMPI_FARRAY: KFREE(p->fa, p->size * sizeof(kfloat_t)); break;
 		case KMPI_IARRAY: KFREE(p->ia, p->size * sizeof(kint_t)); break;
@@ -358,7 +358,7 @@ static KMETHOD MPIData_fromBytes(KonohaContext *kctx, KonohaStack *sfp)
 	d->b = sfp[1].ba;
 	d->size = sfp[1].ba->bytesize;
 	d->offset = 0;
-	d->classId = KMPI_BYTES;
+	d->typeId = KMPI_BYTES;
 	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(d)));
 }
 
@@ -370,7 +370,7 @@ static KMETHOD MPIData_fromBytes(KonohaContext *kctx, KonohaStack *sfp)
 //	d->size = 0;
 //	d->offset = 0;
 //	d->a = sfp[1].asArray;
-//	d->classId = KMPI_IARRAY;
+//	d->typeId = KMPI_IARRAY;
 //	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(d)));
 //}
 //
@@ -382,7 +382,7 @@ static KMETHOD MPIData_fromBytes(KonohaContext *kctx, KonohaStack *sfp)
 //	d->size = 0;
 //	d->offset = 0;
 //	d->a = sfp[1].asArray;
-//	d->classId = KMPI_FARRAY;
+//	d->typeId = KMPI_FARRAY;
 //	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(d)));
 //}
 
@@ -424,7 +424,7 @@ static KMETHOD MPIData_newFloatArray(KonohaContext *kctx, KonohaStack *sfp)
 	d->size = size;
 	d->offset = 0;
 	d->fa = KCALLOC(sizeof(kfloat_t), size);
-	d->classId = KMPI_FARRAY;
+	d->typeId = KMPI_FARRAY;
 	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(d)));
 }
 
@@ -437,7 +437,7 @@ static KMETHOD MPIData_newIntArray(KonohaContext *kctx, KonohaStack *sfp)
 	d->size = size;
 	d->offset = 0;
 	d->fa = KCALLOC(sizeof(kint_t), size);
-	d->classId = KMPI_IARRAY;
+	d->typeId = KMPI_IARRAY;
 	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(d)));
 }
 
@@ -521,7 +521,7 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	static KDEFINE_CLASS MPIDef = {
 		"MPI"/*structname*/,
 		TY_newid/*cid*/,  0/*cflag*/,
-		0/*baseclassId*/, 0/*superclassId*/, 0/*cstruct_size*/,
+		0/*baseTypeId*/, 0/*superTypeId*/, 0/*cstruct_size*/,
 		0/*fields*/, 0/*fieldsize*/, 0/*fieldAllocSize*/,
 		0/*packageId*/, 0/*packageDomain*/,
 		0/*init*/,
@@ -537,7 +537,7 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	static KDEFINE_CLASS MPICommDef = {
 		"MPIComm"/*structname*/,
 		TY_newid/*cid*/,  0/*cflag*/,
-		0/*baseclassId*/, 0/*superclassId*/, 0/*cstruct_size*/,
+		0/*baseTypeId*/, 0/*superTypeId*/, 0/*cstruct_size*/,
 		0/*fields*/, 0/*fieldsize*/, 0/*fieldAllocSize*/,
 		0/*packageId*/, 0/*packageDomain*/,
 		0/*init*/,
@@ -553,7 +553,7 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	static KDEFINE_CLASS MPIRequestDef = {
 		"MPIRequest"/*structname*/,
 		TY_newid/*cid*/,  0/*cflag*/,
-		0/*baseclassId*/, 0/*superclassId*/, 0/*cstruct_size*/,
+		0/*baseTypeId*/, 0/*superTypeId*/, 0/*cstruct_size*/,
 		0/*fields*/, 0/*fieldsize*/, 0/*fieldAllocSize*/,
 		0/*packageId*/, 0/*packageDomain*/,
 		0/*init*/,
@@ -569,7 +569,7 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	static KDEFINE_CLASS MPIDataDef = {
 		"MPIData"/*structname*/,
 		TY_newid/*cid*/,  0/*cflag*/,
-		0/*baseclassId*/, 0/*superclassId*/, 0/*cstruct_size*/,
+		0/*baseTypeId*/, 0/*superTypeId*/, 0/*cstruct_size*/,
 		0/*fields*/, 0/*fieldsize*/, 0/*fieldAllocSize*/,
 		0/*packageId*/, 0/*packageDomain*/,
 		0/*init*/,
@@ -585,7 +585,7 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	//static KDEFINE_CLASS MPIOpDef = {
 	//	"MPIOp"/*structname*/,
 	//	TY_newid/*cid*/,  0/*cflag*/,
-	//	0/*baseclassId*/, 0/*superclassId*/, 0/*cstruct_size*/,
+	//	0/*baseTypeId*/, 0/*superTypeId*/, 0/*cstruct_size*/,
 	//	0/*fields*/, 0/*fieldsize*/, 0/*fieldAllocSize*/,
 	//	0/*packageId*/, 0/*packageDomain*/,
 	//	0/*init*/,
@@ -603,11 +603,11 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	KonohaClass *CT_MPIRequest = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &MPIRequestDef, pline);
 	KonohaClass *CT_MPIData = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &MPIDataDef, pline);
 	//KonohaClass *CT_MPIOp = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &MPIOpDef, pline);
-#define TY_MPI         (CT_MPI->classId)
-#define TY_MPIComm     (CT_MPIComm->classId)
-#define TY_MPIRequest  (CT_MPIRequest->classId)
-#define TY_MPIData     (CT_MPIData->classId)
-#define TY_MPIOp       TY_Int //(CT_MPIOp->classId) // TODO
+#define TY_MPI         (CT_MPI->typeId)
+#define TY_MPIComm     (CT_MPIComm->typeId)
+#define TY_MPIRequest  (CT_MPIRequest->typeId)
+#define TY_MPIData     (CT_MPIData->typeId)
+#define TY_MPIOp       TY_Int //(CT_MPIOp->typeId) // TODO
 	KDEFINE_METHOD MethodData[] = {
 		/* class MPI */
 		_Public|_Static, _F(MPI_getWtime), TY_Float, TY_MPI, MN_("getWtime"), 0,

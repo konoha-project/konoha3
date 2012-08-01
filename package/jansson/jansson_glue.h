@@ -72,7 +72,7 @@ static void Jansson_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWrit
 #define _F(F)   (intptr_t)(F)
 
 #define CT_Json     cJson
-#define TY_Json     cJson->classId
+#define TY_Json     cJson->typeId
 #define IS_Json(O)  ((O)->h.ct == CT_Json)
 
 #define _KVi(T)  #T, TY_Int, T
@@ -432,7 +432,7 @@ static	kbool_t jansson_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	KDEFINE_CLASS JsonDef = {
 		//STRUCTNAME(Json),
 		.structname = "Json",
-		.classId = TY_newid,
+		.typeId = TY_newid,
 		.cflag = kClass_Final,
 		.init = Jansson_init,
 		.free = Jansson_free,
@@ -441,7 +441,7 @@ static	kbool_t jansson_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	KonohaClass *cJson = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &JsonDef, pline);
 	kparamtype_t ps = {TY_Json, FN_("json")};
 	KonohaClass *CT_JsonArray = KLIB KonohaClass_Generics(kctx, CT_Array, TY_Json, 1, &ps);
-	ktype_t TY_JsonArray = CT_JsonArray->classId;
+	ktype_t TY_JsonArray = CT_JsonArray->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im, _F(Json_dump),      TY_String,    TY_Json, MN_("dump"),         0,

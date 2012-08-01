@@ -45,9 +45,9 @@ static kString *kwb_newString(KonohaContext *kctx, KUtilsWriteBuffer *wb, int fl
 #define kiomod        ((kiomod_t*)kctx->mod[MOD_IO])
 #define kioshare      ((kioshare_t*)kctx->modshare[MOD_IO])
 #define CT_InputStream       kioshare->cInputStream
-#define TY_InputStream       kioshare->cInputStream->classId
+#define TY_InputStream       kioshare->cInputStream->typeId
 #define CT_OutputStream      kioshare->cOutputStream
-#define TY_OutputStream      kioshare->cOutputStream->classId
+#define TY_OutputStream      kioshare->cOutputStream->typeId
 
 #define IS_io(O)      ((O)->h.ct == CT_io)
 

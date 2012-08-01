@@ -183,13 +183,13 @@ static KonohaClass* kStmt_parseGenerics(KonohaContext *kctx, kStmt *stmt, kNameS
 		if(paramClass == NULL) {
 			return NULL;
 		}
-		p[psize].ty = paramClass->classId;
+		p[psize].ty = paramClass->typeId;
 		psize++;
 		if(i < endIdx && tokenList->tokenItems[i]->resolvedSyntaxInfo->keyword == KW_COMMA) {
 			i++;
 		}
 	}
-	if(baseClass->baseclassId == TY_Func) {
+	if(baseClass->baseTypeId == TY_Func) {
 		return KLIB KonohaClass_Generics(kctx, baseClass, p[0].ty, psize-1, p+1);
 	}
 	else {
@@ -219,7 +219,7 @@ static int kStmt_parseTypePattern(KonohaContext *kctx, kStmt *stmt, kNameSpace *
 			}
 			else {
 				if(sizeofBracketTokens > 0) break;   // C[100] is treated as C  and the token [100] is set to nextIdx;
-				foundClass = CT_p0(kctx, CT_Array, foundClass->classId);  // C[] => Array[C]
+				foundClass = CT_p0(kctx, CT_Array, foundClass->typeId);  // C[] => Array[C]
 			}
 			isAllowedGenerics = false;
 			nextIdx++;
@@ -431,7 +431,7 @@ static int kNameSpace_addSymbolToken(KonohaContext *kctx, ASTEnv *env, kTokenVar
 	else {
 		KonohaClass *foundClass = KLIB kNameSpace_getClass(kctx, env->ns, t, S_size(tk->text), NULL);
 		if(foundClass != NULL) {
-			kToken_setTypeId(kctx, tk, env->ns, foundClass->classId);
+			kToken_setTypeId(kctx, tk, env->ns, foundClass->typeId);
 		}
 		else {
 			if(!isalpha(t[0])) {
@@ -584,7 +584,7 @@ static int kStmt_addAnnotation(KonohaContext *kctx, kStmt *stmt, kArray *tokenLi
 				i++;
 			}
 			if(value != NULL) {
-				KLIB kObject_setObject(kctx, stmt, tk->resolvedSymbol, O_classId(value), value);
+				KLIB kObject_setObject(kctx, stmt, tk->resolvedSymbol, O_typeId(value), value);
 			}
 		}
 	}

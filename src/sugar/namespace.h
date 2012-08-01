@@ -394,18 +394,18 @@ static kbool_t checkMethodPolicyOption(KonohaContext *kctx, kMethod *mtd, int op
 	return true;
 }
 
-static kMethod* kMethodList_getCanonicalMethodNULL(KonohaContext *kctx, kArray *methodList, size_t beginIdx, ktype_t classId, ksymbol_t mn, int option, int policy)
+static kMethod* kMethodList_getCanonicalMethodNULL(KonohaContext *kctx, kArray *methodList, size_t beginIdx, ktype_t typeId, ksymbol_t mn, int option, int policy)
 {
 	size_t i;
 	const char *name = SYM_t(SYM_UNMASK(mn));
 	char canonicalName[80], methodCanonicalName[80];
 	int firstChar = tolower(name[0]), namesize = formatLowerCanonicalName(canonicalName, sizeof(canonicalName), name);
-	//DBG_P("canonicalName=%s.'%s'", TY_t(classId), canonicalName);
+	//DBG_P("canonicalName=%s.'%s'", TY_t(typeId), canonicalName);
 	kMethod *foundMethod = NULL;
 	for(i = beginIdx; i < kArray_size(methodList); i++) {
 		kMethod *mtd = methodList->methodItems[i];
 		if(SYM_HEAD(mtd->mn) != SYM_HEAD(mn)) continue;
-		if(classId != TY_var && mtd->classId != classId) continue;
+		if(typeId != TY_var && mtd->typeId != typeId) continue;
 		const char *n = SYM_t(SYM_UNMASK(mtd->mn));
 		if(firstChar == tolower(n[0]) && namesize == formatLowerCanonicalName(methodCanonicalName, sizeof(methodCanonicalName), n)) {
 			if(strcmp(canonicalName, methodCanonicalName) != 0) continue;
@@ -422,14 +422,14 @@ static kMethod* kMethodList_getCanonicalMethodNULL(KonohaContext *kctx, kArray *
 	return foundMethod;
 }
 
-static kMethod* kMethodList_getMethodNULL(KonohaContext *kctx, kArray *methodList, size_t beginIdx, ktype_t classId, ksymbol_t mn, int option, int policy)
+static kMethod* kMethodList_getMethodNULL(KonohaContext *kctx, kArray *methodList, size_t beginIdx, ktype_t typeId, ksymbol_t mn, int option, int policy)
 {
 	kMethod *foundMethod = NULL;
 	int i, filteredPolicy = policy & (~(MPOL_CANONICAL));
 	for(i = beginIdx; i < kArray_size(methodList); i++) {
 		kMethod *mtd = methodList->methodItems[i];
 		if(mtd->mn != mn) continue;
-		if(classId != TY_var && mtd->classId != classId) continue;
+		if(typeId != TY_var && mtd->typeId != typeId) continue;
 		if(filteredPolicy > 1 && !checkMethodPolicyOption(kctx, mtd, option, filteredPolicy)) {
 			continue;
 		}
@@ -439,8 +439,8 @@ static kMethod* kMethodList_getMethodNULL(KonohaContext *kctx, kArray *methodLis
 		}
 	}
 	if(foundMethod == NULL && TFLAG_is(int, policy, MPOL_CANONICAL)) {
-		foundMethod = kMethodList_getCanonicalMethodNULL(kctx, methodList, beginIdx, classId, mn, option, filteredPolicy);
-//		DBG_P("canonicalName=%s.%s'%s', mtd=%p", TY_t(classId), PSYM_t(mn), foundMethod);
+		foundMethod = kMethodList_getCanonicalMethodNULL(kctx, methodList, beginIdx, typeId, mn, option, filteredPolicy);
+//		DBG_P("canonicalName=%s.%s'%s', mtd=%p", TY_t(typeId), PSYM_t(mn), foundMethod);
 //		if(foundMethod != NULL) {
 //			DBG_P("method=%s.%s%s, mtd=%p", Method_t(foundMethod));
 //		}
@@ -450,25 +450,25 @@ static kMethod* kMethodList_getMethodNULL(KonohaContext *kctx, kArray *methodLis
 }
 
 
-static void kMethodList_findMethodList(KonohaContext *kctx, kArray *methodList, ktype_t classId, ksymbol_t mn, kArray *resultList, int beginIdx)
+static void kMethodList_findMethodList(KonohaContext *kctx, kArray *methodList, ktype_t typeId, ksymbol_t mn, kArray *resultList, int beginIdx)
 {
 	size_t i;
 	for(i = 0; i < kArray_size(methodList); i++) {
 		kMethod *mtd = methodList->methodItems[i];
 		if(mtd->mn != mn) continue;
-		if(classId != TY_var && mtd->classId != classId) continue;
-		kMethod *foundMethod = kMethodList_getMethodNULL(kctx, resultList, beginIdx, classId, mn, 0, MPOL_FIRST);
+		if(typeId != TY_var && mtd->typeId != typeId) continue;
+		kMethod *foundMethod = kMethodList_getMethodNULL(kctx, resultList, beginIdx, typeId, mn, 0, MPOL_FIRST);
 		if(foundMethod == NULL) {
 			KLIB kArray_add(kctx, resultList, mtd);
 		}
 	}
 }
 
-static void kNameSpace_findMethodList(KonohaContext *kctx, kNameSpace *ns, ktype_t classId, ksymbol_t mn, kArray *resultList, int beginIdx)
+static void kNameSpace_findMethodList(KonohaContext *kctx, kNameSpace *ns, ktype_t typeId, ksymbol_t mn, kArray *resultList, int beginIdx)
 {
-	KonohaClass *ct = CT_(classId);
+	KonohaClass *ct = CT_(typeId);
 	while(ns != NULL) {
-		kMethodList_findMethodList(kctx, ns->methodList, classId, mn, resultList, beginIdx);
+		kMethodList_findMethodList(kctx, ns->methodList, typeId, mn, resultList, beginIdx);
 		ns = ns->parentNULL;
 	}
 	while(ct != NULL) {
@@ -487,31 +487,31 @@ static kMethod* KonohaClass_getMethodNULL(KonohaContext *kctx, KonohaClass *ct, 
 	return NULL;
 }
 
-static kMethod* kNameSpace_getFirstMethodNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t classId, kmethodn_t mn, int option, int policy)
+static kMethod* kNameSpace_getFirstMethodNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t typeId, kmethodn_t mn, int option, int policy)
 {
 	if(ns != NULL) {
-		kMethod *mtd = kNameSpace_getFirstMethodNULL(kctx, ns->parentNULL, classId, mn, option, policy);
+		kMethod *mtd = kNameSpace_getFirstMethodNULL(kctx, ns->parentNULL, typeId, mn, option, policy);
 		if(mtd != NULL) return mtd;
-		mtd = kMethodList_getMethodNULL(kctx, ns->methodList, 0, classId, mn, option, policy);
+		mtd = kMethodList_getMethodNULL(kctx, ns->methodList, 0, typeId, mn, option, policy);
 		return mtd;
 	}
 	return NULL;
 }
 
-static kMethod* kNameSpace_getMethodNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t classId, kmethodn_t mn, int option, int policy)
+static kMethod* kNameSpace_getMethodNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t typeId, kmethodn_t mn, int option, int policy)
 {
 	if(TFLAG_is(int, policy, MPOL_LATEST)) {
 		while(ns != NULL) {
-			kMethod *mtd = kMethodList_getMethodNULL(kctx, ns->methodList, 0, classId, mn, option, policy);
+			kMethod *mtd = kMethodList_getMethodNULL(kctx, ns->methodList, 0, typeId, mn, option, policy);
 			if(mtd != NULL) return mtd;
 			ns = ns->parentNULL;
 		}
-		return KonohaClass_getMethodNULL(kctx, CT_(classId), mn, option, policy);
+		return KonohaClass_getMethodNULL(kctx, CT_(typeId), mn, option, policy);
 	}
 	else {
-		kMethod *mtd = KonohaClass_getMethodNULL(kctx, CT_(classId), mn, option, policy);
+		kMethod *mtd = KonohaClass_getMethodNULL(kctx, CT_(typeId), mn, option, policy);
 		if(mtd != NULL) return mtd;
-		return kNameSpace_getFirstMethodNULL(kctx, ns, classId, mn, option, policy);
+		return kNameSpace_getFirstMethodNULL(kctx, ns, typeId, mn, option, policy);
 	}
 }
 
@@ -529,7 +529,7 @@ static kMethod* kMethod_replaceWith(KonohaContext *kctx, kMethodVar *oldMethod, 
 
 static kMethod* kNameSpace_addMethod(KonohaContext *kctx, kNameSpace *ns, kMethod *mtd)
 {
-	KonohaClass *ct = CT_(mtd->classId);
+	KonohaClass *ct = CT_(mtd->typeId);
 	if(mtd->packageId == 0 && ns != NULL) {
 		((kMethodVar*)mtd)->packageId = ns->packageId;
 	}
@@ -537,7 +537,7 @@ static kMethod* kNameSpace_addMethod(KonohaContext *kctx, kNameSpace *ns, kMetho
 	if(Method_isPublic(mtd) /* && ct->packageDomain == ns->packageDomain*/) {
 		kMethod *foundMethod = KonohaClass_getMethodNULL(kctx, ct, mtd->mn, mtd->paramdom, MPOL_FIRST|MPOL_SIGNATURE);
 		if(foundMethod != NULL) {  // same signature
-			if(foundMethod->classId == mtd->classId) {
+			if(foundMethod->typeId == mtd->typeId) {
 				DBG_P("duplicated method %s.%s%s", Method_t(foundMethod));
 				PUSH_GCSTACK(mtd);  // avoid memory leaking
 				return kMethod_replaceWith(kctx, (kMethodVar*)foundMethod, (kMethodVar*)mtd);
@@ -570,7 +570,7 @@ static kMethod* kNameSpace_addMethod(KonohaContext *kctx, kNameSpace *ns, kMetho
 		size_t i;
 		for(i = 0; i < kArray_size(ns->methodList); i++) {
 			kMethod *foundMethod = ns->methodList->methodItems[i];
-			if(foundMethod->classId == mtd->classId && foundMethod->mn == mtd->mn && foundMethod->paramdom == mtd->paramdom) {
+			if(foundMethod->typeId == mtd->typeId && foundMethod->mn == mtd->mn && foundMethod->paramdom == mtd->paramdom) {
 				DBG_P("duplicated method %s.%s%s", Method_t(foundMethod));
 				PUSH_GCSTACK(mtd);  // avoid memory leaking
 				return kMethod_replaceWith(kctx, (kMethodVar*)foundMethod, (kMethodVar*)mtd);
@@ -578,7 +578,7 @@ static kMethod* kNameSpace_addMethod(KonohaContext *kctx, kNameSpace *ns, kMetho
 		}
 		kArray *matchedMethodList = kctx->stack->gcstack;
 		size_t popMatchedMethodListSize = kArray_size(matchedMethodList);
-		kNameSpace_findMethodList(kctx, ns, mtd->classId, mtd->mn, matchedMethodList, popMatchedMethodListSize);
+		kNameSpace_findMethodList(kctx, ns, mtd->typeId, mtd->mn, matchedMethodList, popMatchedMethodListSize);
 		if(popMatchedMethodListSize < kArray_size(matchedMethodList)) {
 			int count = 0;
 			for(i = popMatchedMethodListSize; i < kArray_size(matchedMethodList); i++) {

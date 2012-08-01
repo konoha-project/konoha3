@@ -267,7 +267,7 @@ static KMETHOD System_addConstPool(KonohaContext *kctx, KonohaStack *sfp)
 
 static uintptr_t jitcache_hash(kMethod *mtd)
 {
-	ktype_t cid = mtd->classId;
+	ktype_t cid = mtd->typeId;
 	kmethodn_t mn = mtd->mn;
 	return (cid << sizeof(short)*8) | mn;
 }
@@ -554,7 +554,7 @@ static KMETHOD Array_erase(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Method_getCid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].asMethod;
-	RETURNi_((mtd)->classId);
+	RETURNi_((mtd)->typeId);
 }
 
 //## Int Method.getParamSize();
@@ -603,7 +603,7 @@ static KMETHOD Method_getFname(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Method_getCname(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].asMethod;
-	ktype_t cid = mtd->classId;
+	ktype_t cid = mtd->typeId;
 	const char *cname = TY_t(cid);
 	RETURN_(KLIB new_kString(kctx, cname, strlen(cname), 0));
 }
@@ -669,7 +669,7 @@ static KMETHOD Object_getAddr(KonohaContext *kctx, KonohaStack *sfp)
 //## Int Object.getCid();
 static KMETHOD Object_getCid(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_((sfp[0].asObject)->h.ct->classId);
+	RETURNi_((sfp[0].asObject)->h.ct->typeId);
 }
 
 //## var Pointer.asObject(int addr);
@@ -740,11 +740,11 @@ static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 {
 	/* Array[Expr] */
 	kparamtype_t P_ExprArray[] = {{TY_Expr}};
-	int TY_ExprArray = (KLIB KonohaClass_Generics(kctx, CT_Array, TY_void, 1, P_ExprArray))->classId;
+	int TY_ExprArray = (KLIB KonohaClass_Generics(kctx, CT_Array, TY_void, 1, P_ExprArray))->typeId;
 
 	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_System, MN_("genCode"), 0, MPOL_FIRST);
 	KINITv(kmodjit->genCode, mtd);
-#define TY_Pointer kmodjit->cPointer->classId
+#define TY_Pointer kmodjit->cPointer->typeId
 #define _Public   kMethod_Public
 #define _Static   kMethod_Static
 #define _Coercion kMethod_Coercion

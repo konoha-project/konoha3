@@ -897,7 +897,7 @@ static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	BLOCK_asm(kctx, bk, 0);
 	ASM_LABEL(kctx, ctxcode->lbEND);
 	if (mtd->mn == MN_new) {
-		ASM(NMOV, OC_(K_RTNIDX), OC_(0), CT_(mtd->classId));   // FIXME: Type 'This' must be resolved
+		ASM(NMOV, OC_(K_RTNIDX), OC_(0), CT_(mtd->typeId));   // FIXME: Type 'This' must be resolved
 	}
 	ASM(RET);
 	assert(ctxcode->lbEND);/* scan-build: remove warning */

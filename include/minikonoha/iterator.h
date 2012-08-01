@@ -39,11 +39,11 @@ extern "C" {
 
 #define CFLAG_Iterator         kClass_Final
 #define CT_Iterator            kmoditerator->cIterator
-#define TY_Iterator            kmoditerator->cIterator->classId
+#define TY_Iterator            kmoditerator->cIterator->typeId
 #define CT_StringIterator      kmoditerator->cStringIterator
-#define TY_StringIterator      kmoditerator->cStringIterator->classId
+#define TY_StringIterator      kmoditerator->cStringIterator->typeId
 
-#define IS_Iterator(O)         (O_ct(O)->baseclassId == TY_Iterator)
+#define IS_Iterator(O)         (O_ct(O)->baseTypeId == TY_Iterator)
 
 typedef struct {
 	KonohaModule h;
