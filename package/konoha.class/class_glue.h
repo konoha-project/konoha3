@@ -667,6 +667,10 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 				RETURNb_(false);
 			}
 		}
+		if(superClass->classId > TY_Object) {
+			definedClass->superclassId = superClass->classId;
+			definedClass->searchSuperMethodClassNULL = superClass;
+		}
 		size_t initsize = (bk != NULL) ? declsize : initFieldSizeOfVirtualClass(superClass);
 		KonohaClass_initField(kctx, definedClass, superClass, initsize);
 	}
