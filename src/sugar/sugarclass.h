@@ -248,6 +248,7 @@ static void Stmt_init(KonohaContext *kctx, kObject *o, void *conf)
 	stmt->uline    = (kfileline_t)conf;
 	stmt->syn      = NULL;
 	stmt->parentBlockNULL = NULL;
+	stmt->build    = 0;
 }
 
 static void Stmt_reftrace(KonohaContext *kctx, kObject *o)
