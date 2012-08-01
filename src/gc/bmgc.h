@@ -84,9 +84,11 @@ extern "C" {
 #if _WIN64
 #define FFS(n) __builtin_ffsll(n)
 #define CLZ(n) __builtin_clzll(n)
+#define CTZ(x) __builtin_ctzll(x)
 #else
 #define FFS(n) __builtin_ffsl(n)
 #define CLZ(n) __builtin_clzl(n)
+#define CTZ(x) __builtin_ctzl(x)
 #endif
 #define BSR(n) CLZ(n)
 #define BM_SET(m, mask)  (m |= mask)
@@ -189,7 +191,7 @@ static inline int bitmap_get(bitmap_t *bm, unsigned index)
 
 static inline void bitmap_set(bitmap_t *bm, unsigned index, unsigned val)
 {
-	bitmap_t mask = val << (index % BITS);
+	bitmap_t mask = (uintptr_t)val << (index % BITS);
 	*bm |= mask;
 }
 
@@ -242,14 +244,19 @@ struct SubHeap {
 typedef Segment *SegmentPtr;
 typedef void *VoidPtr;
 typedef kObject *ObjectPtr;
+typedef bitmap_t *BitMapPtr;
 DEF_ARRAY_T_OP(SegmentPtr);
 DEF_ARRAY_T_OP(size_t);
 DEF_ARRAY_T_OP(VoidPtr);
 DEF_ARRAY_T_OP(ObjectPtr);
+DEF_ARRAY_T_OP(BitMapPtr);
 
 struct HeapManager {
 	long flags;
 	SubHeap heaps[SUBHEAP_KLASS_MAX+1];
+#ifdef USE_GENERATIONAL_GC
+	ARRAY(BitMapPtr)  remember_sets;
+#endif
 	Segment *segmentList;
 	ARRAY(SegmentPtr) segment_pool_a;
 	ARRAY(size_t)     segment_size_a;
@@ -272,6 +279,7 @@ struct Segment {
 	bitmap_t *snapshot;
 	bitmap_t *snapshot_base[SEGMENT_LEVEL];
 	int tenure_live_count;
+	bitmap_t *remember_set; /* for debug */
 #else
 	void *unused;
 #endif
@@ -283,7 +291,8 @@ struct Segment {
 
 typedef struct BlockHeader {
 	Segment *seg;
-	int klass;
+	long klass;
+	bitmap_t *remember_set;
 } BlockHeader;
 
 typedef struct gc_stat {
@@ -1234,6 +1243,24 @@ static Segment *SegmentPool_init(size_t size, AllocationBlock *blk)
 	return pool;
 }
 
+#ifdef USE_GENERATIONAL_GC
+static void dispatchRememberSet(HeapManager *mng, size_t heap_size, AllocationBlock *blk)
+{
+	BlockHeader *head;
+	Segment *seg = mng->segmentList;
+	bitmap_t *map = do_malloc(heap_size / (MIN_ALIGN) / sizeof(bitmap_t));
+	ARRAY_add(BitMapPtr,  &mng->remember_sets, map);
+	while (seg) {
+		head = (BlockHeader *) blk;
+		head->remember_set = map;
+		seg->remember_set  = map;
+		seg = seg->next;
+		map += SEGMENT_SIZE / MIN_ALIGN / BITS;
+		blk++;
+	}
+}
+#endif
+
 static void SegmentPool_dispose(Segment *pool, size_t size)
 {
 	Segment *seg = NULL;
@@ -1264,9 +1291,13 @@ static void HeapManager_expandHeap(KonohaContext *kctx, HeapManager *mng, size_t
 	segment_pool = SegmentPool_init(list_size, (AllocationBlock*) managed_heap);
 	mng->segmentList  = segment_pool;
 
+#ifdef USE_GENERATIONAL_GC
+	dispatchRememberSet(mng, heap_size, (AllocationBlock*) managed_heap);
+#endif
+
 	ARRAY_add(size_t,  &mng->heap_size_a, heap_size);
-	ARRAY_add(VoidPtr, &mng->managed_heap_a    , (void*)managed_heap);
-	ARRAY_add(VoidPtr, &mng->managed_heap_end_a, (void*)managed_heap_end);
+	ARRAY_add(VoidPtr, &mng->managed_heap_a    , managed_heap);
+	ARRAY_add(VoidPtr, &mng->managed_heap_end_a, managed_heap_end);
 
 	ARRAY_add(SegmentPtr, &mng->segment_pool_a, segment_pool);
 	ARRAY_add(size_t, &mng->segment_size_a, list_size);
@@ -1290,6 +1321,7 @@ static void HeapManager_init(KonohaContext *kctx, HeapManager *mng, size_t list_
 	ARRAY_init(size_t, &mng->segment_size_a);
 #ifdef USE_GENERATIONAL_GC
 	ARRAY_init(ObjectPtr, &mng->remember_set);
+	ARRAY_init(BitMapPtr, &mng->remember_sets);
 #endif
 
 	HeapManager_expandHeap(kctx, mng, list_size);
@@ -1642,15 +1674,42 @@ static void RememberSet_add(KonohaContext *kctx, kObject *o)
 		}
 	}
 	ARRAY_add(ObjectPtr, &mng->remember_set, o);
+	//uintptr_t addr   = ((uintptr_t)o & ~(SEGMENT_SIZE - ONE));
+	//uintptr_t offset = ((uintptr_t)o &  (SEGMENT_SIZE - ONE)) >> SUBHEAP_KLASS_MIN;
+	//BlockHeader *head = (BlockHeader*) addr;
+	//bitmap_t *map = head->remember_set;
+	//bitmap_set(map+(offset/BITS), offset%BITS, Object_isTenure(o));
 }
 
 static void RememberSet_reftrace(KonohaContext *kctx, HeapManager *mng)
 {
-	size_t i, size = ARRAY_size(mng->remember_set);
+	size_t i;
 	FOR_EACH_ARRAY_(mng->remember_set, i) {
 		kObject* o =  (kObject *)ARRAY_n(mng->remember_set, i);
 		KONOHA_reftraceObject(kctx, o);
 	}
+	//FOR_EACH_ARRAY_(mng->remember_sets, i) {
+	//	uintptr_t base_address = (uintptr_t) ARRAY_n(mng->managed_heap_a, i);
+	//	size_t bitmap_size = ARRAY_n(mng->heap_size_a, i) / (MIN_ALIGN * BITS);
+	//	bitmap_t *base = ARRAY_n(mng->remember_sets, i);
+	//	bitmap_t *m = base;
+	//	bitmap_t *e = m + bitmap_size;
+	//	for (; m != e; base+=BITS, base_address += SEGMENT_SIZE) {
+	//		for (; m < base + BITS; ++m) {
+	//			if (*m == 0)
+	//				continue;
+	//			bitmap_t b = (*m);
+	//			while (b != 0) {
+	//				unsigned index, offset;
+	//				b ^= 1UL << index;
+	//				index = CTZ(b);
+	//				offset = (m - base) * BITS + index;
+	//				kObject *o = (kObject*)(base_address + (offset << SUBHEAP_KLASS_MIN));
+	//			}
+	//			bitmap_reset(m, 0);
+	//		}
+	//	}
+	//}
 }
 
 static void RememberSet_clear(HeapManager *mng)
@@ -1888,7 +1947,6 @@ void MODGC_check_malloced_size(void)
 	o->fieldObjectItems[0] = NULL;\
 } while (0)
 
-kbool_t MODGC_kObject_isManaged(KonohaContext *kctx, void *ptr);
 kObject *MODGC_omalloc(KonohaContext *kctx, size_t size)
 {
 	kObjectVar *o = (kObjectVar*)bm_malloc_internal(kctx, HeapMng(kctx), size);
@@ -1981,6 +2039,8 @@ void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		KSET_KLIB(Kfree, 0);
 		KSET_KLIB(Kwrite_barrier, 0);
 		KLIB Konoha_setModule(kctx, MOD_gc, &base->h, 0);
+		assert(sizeof(BlockHeader) <= MIN_ALIGN
+				&& "Minimum size of Object may lager than sizeof BlockHeader");
 	}
 	kmodgc_setup(ctx, (KonohaModule*) memshare(kctx), 1);
 }
