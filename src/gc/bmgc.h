@@ -28,16 +28,16 @@
 #include <stdio.h>
 
 //#define USE_GENERATIONAL_GC 1
-#define K_USING_POSIX_
-#if defined(K_USING_POSIX_)
-#include <time.h>
+#if 1
 #include <sys/time.h>
-#elif defined(K_USING_WINDOWS_)
+#else
+#if defined(K_USING_WINDOWS_)
 #include <windows.h>
 #include <time.h>
 #elif defined(K_USING_BTRON)
 #include <btron/datetime.h>
 #include <btron/event.h>
+#endif
 #endif
 
 #include "minikonoha/minikonoha.h"
@@ -66,7 +66,11 @@ extern "C" {
 #define MINOR_COUNT 4
 #endif
 
-#define SEGMENT_SIZE (SUBHEAP_DEFAULT_SEGPOOL_SIZE * KB_)
+#define KB_   (1024)
+#define MB_   (KB_*1024)
+#define GB_   (MB_*1024)
+
+#define SEGMENT_SIZE (128 * KB_)
 #define SEGMENT_LEVEL 3
 #define ONE ((uintptr_t)1)
 #define KlassBlockSize(klass) (ONE << klass)
@@ -87,10 +91,6 @@ extern "C" {
 #define BSR(n) CLZ(n)
 #define BM_SET(m, mask)  (m |= mask)
 #define BM_TEST(m, mask) (m  & mask)
-
-#define KB_   (1024)
-#define MB_   (KB_*1024)
-#define GB_   (MB_*1024)
 
 #ifdef unlikely
 #undef unlikely
@@ -682,15 +682,15 @@ typedef struct kmemshare_t {
 
 /* ------------------------------------------------------------------------ */
 
-static inline uint64_t knh_getTimeMilliSecond(void)
+static inline uint64_t getTimeMilliSecond(void)
 {
-#if defined(K_USING_WINDOWS_)
-	DWORD tickCount = GetTickCount();
-	return (kint64_t)tickCount;
-#elif defined(K_USING_POSIX_)
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
 	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+#if 0
+#if defined(K_USING_WINDOWS_)
+	DWORD tickCount = GetTickCount();
+	return (kint64_t)tickCount;
 #elif defined(K_USING_BTRON)
 	/* FIXME: thread safety */
 	static volatile int first = 1;
@@ -704,6 +704,7 @@ static inline uint64_t knh_getTimeMilliSecond(void)
 	return (uint64_t)((current - start) & 0x7fffffff);
 #else
 	return 0;
+#endif
 #endif
 }
 
@@ -1973,7 +1974,7 @@ void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		base->h.free     = NULL;
 
 		base->gcObjectCount = 0;
-		base->latestGcTime  = knh_getTimeMilliSecond();
+		base->latestGcTime  = getTimeMilliSecond();
 		base->gcHeapMng = BMGC_init(ctx);
 		KSET_KLIB(Kmalloc, 0);
 		KSET_KLIB(Kzmalloc, 0);

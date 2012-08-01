@@ -57,3 +57,12 @@
 
 /* The size of `void*', as computed by sizeof. */
 #cmakedefine SIZEOF_VOIDP ${SIZEOF_VOIDP}
+
+/* Define to 1 if you have the `posix_memalign' function. */
+#cmakedefine HAVE_POSIX_MEMALIGN 1
+
+/* Define to 1 if you have the `memalign' function. */
+#cmakedefine HAVE_MEMALIGN 1
+
+/* Define to 1 if you have the `__builtin_ctzl' function. */
+#cmakedefine HAVE_BUILTIN_CTZL 1

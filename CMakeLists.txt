@@ -154,6 +154,25 @@ check_type_size(double   SIZEOF_DOUBLE)
 check_include_files(dlfcn.h HAVE_DLFCN_H)
 check_include_files(iconv.h HAVE_ICONV_H)
 
+set(_HEADERS stdio.h stdlib.h string.h ctype.h)
+if(UNIX)
+	set(_HEADERS ${_HEADERS} sys/mman.h unistd.h)
+endif(UNIX)
+
+if(APPLE)
+	set(_HEADERS ${_HEADERS} mach-o/dyld.h)
+endif(APPLE)
+
+if(CYGWIN)
+endif(CYGWIN)
+
+if(MSVC)
+endif(MSVC)
+
+check_symbol_exists(posix_memalign "${_HEADERS}" HAVE_POSIX_MEMALIGN)
+check_symbol_exists(memalign       "${_HEADERS}" HAVE_MEMALIGN)
+check_symbol_exists(__builtin_ctzl "${_HEADERS}" HAVE_BUILTIN_CTZL)
+
 FIND_FILE(HAS_DOTGIT .git PATHS "${CMAKE_CURRENT_SOURCE_DIR}")
 if("${HAS_DOTGIT}" MATCHES ".git")
 	find_package(Git)
