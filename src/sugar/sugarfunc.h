@@ -151,6 +151,7 @@ static KMETHOD ParseExpr_Op(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ParseExpr(stmt, tokenArray, beginIdx, currentIdx, endIdx);
 	kTokenVar *tk = tokenArray->tokenVarItems[currentIdx];
 	kExpr *expr, *rexpr = kStmt_parseExpr(kctx, stmt, tokenArray, currentIdx + 1, endIdx);
+	PUSH_GCSTACK(rexpr);
 	if(syn->keyword != KW_LET && syn->ExprTyCheck == kmodsugar->UndefinedExprTyCheck) {
 		DBG_P("switching type checker ..");
 		syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);  // switch type checker

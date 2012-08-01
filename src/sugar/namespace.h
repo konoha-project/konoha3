@@ -596,6 +596,7 @@ static kMethod* kNameSpace_addMethod(KonohaContext *kctx, kNameSpace *ns, kMetho
 		}
 		if(ns->methodList == K_EMPTYARRAY) {
 			KINITv(((kNameSpaceVar*)ns)->methodList, new_(MethodArray, 8));
+			KLIB Kwrite_barrier(kctx, UPCAST(ns));
 		}
 		KLIB kArray_add(kctx, ns->methodList, mtd);
 	}

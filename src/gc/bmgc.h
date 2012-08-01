@@ -254,8 +254,8 @@ struct HeapManager {
 	ARRAY(VoidPtr)    managed_heap_a;
 	ARRAY(VoidPtr)    managed_heap_end_a;
 	ARRAY(size_t)     heap_size_a;
-#ifdef USE_GENERATIONAL_GC
-	ARRAY(ObjectPtr)  remember_set;
+#if defined(USE_GENERATIONAL_GC) && defined(GCDEBUG)
+	ARRAY(ObjectPtr)  remember_set_debug;
 #endif
 };
 
@@ -1292,7 +1292,9 @@ static void HeapManager_init(KonohaContext *kctx, HeapManager *mng, size_t list_
 	ARRAY_init(SegmentPtr, &mng->segment_pool_a);
 	ARRAY_init(size_t, &mng->segment_size_a);
 #ifdef USE_GENERATIONAL_GC
-	ARRAY_init(ObjectPtr, &mng->remember_set);
+#ifdef GCDEBUG
+	ARRAY_init(ObjectPtr, &mng->remember_set_debug);
+#endif
 	ARRAY_init(BitMapPtr, &mng->remember_sets);
 #endif
 
@@ -1642,15 +1644,17 @@ static void mark_mstack(KonohaContext *kctx, HeapManager *mng, kObject *o, MarkS
 #ifdef USE_GENERATIONAL_GC
 static void RememberSet_add(KonohaContext *kctx, kObject *o)
 {
+#ifdef GCDEBUG
 	HeapManager* mng = HeapMng(kctx);
 	size_t i;
-	for (i = 0; i < ARRAY_size(mng->remember_set); i++) {
-		kObject *ptr = ARRAY_n(mng->remember_set, i);
+	for (i = 0; i < ARRAY_size(mng->remember_set_debug); i++) {
+		kObject *ptr = ARRAY_n(mng->remember_set_debug, i);
 		if (ptr == o) {
-			return;
+			break;
 		}
 	}
-	ARRAY_add(ObjectPtr, &mng->remember_set, o);
+	ARRAY_add(ObjectPtr, &mng->remember_set_debug, o);
+#endif
 	uintptr_t addr   = ((uintptr_t)o & ~(SEGMENT_SIZE - ONE));
 	uintptr_t offset = ((uintptr_t)o &  (SEGMENT_SIZE - ONE)) >> SUBHEAP_KLASS_MIN;
 	BlockHeader *head = (BlockHeader*) addr;
@@ -1679,12 +1683,12 @@ static void RememberSet_reftrace(KonohaContext *kctx, HeapManager *mng)
 					offset = (m - base) * BITS + index;
 					kObject *o = (kObject*)(base_address + (offset << SUBHEAP_KLASS_MIN));
 					KONOHA_reftraceObject(kctx, o);
-#if 1
+#ifdef GCDEBUG
 					{
 						size_t j;
 						int marked = 0;
-						FOR_EACH_ARRAY_(mng->remember_set, j) {
-							kObject* v =  (kObject *)ARRAY_n(mng->remember_set, j);
+						FOR_EACH_ARRAY_(mng->remember_set_debug, j) {
+							kObject* v =  (kObject *)ARRAY_n(mng->remember_set_debug, j);
 							if (o == v)
 								marked = 1;
 						}
@@ -1700,7 +1704,9 @@ static void RememberSet_reftrace(KonohaContext *kctx, HeapManager *mng)
 
 static void RememberSet_clear(HeapManager *mng)
 {
-	ARRAY_clear(ObjectPtr, &mng->remember_set);
+#ifdef GCDEBUG
+	ARRAY_clear(ObjectPtr, &mng->remember_set_debug);
+#endif
 }
 
 #endif
@@ -1910,6 +1916,10 @@ static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o)
 		gc_info("~Object ptr=%p, cid=%d", o, ct->classId);
 		KONOHA_freeObjectField(kctx, (kObjectVar*)o);
 		((kObjectVar*)o)->h.ct = NULL;
+#if GCDEBUG
+		memset((void*)o, 0xa, ct->cstruct_size);
+		((kObjectVar*)o)->h.magicflag = 5;
+#endif
 #ifdef GCSTAT
 		Segment *seg;
 		uintptr_t klass, index;
