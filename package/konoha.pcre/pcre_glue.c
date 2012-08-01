@@ -584,44 +584,45 @@ static kbool_t pcre_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 	return true;
 }
 
-static int parseREGEX(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
+static KMETHOD parseREGEX(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int ch, prev = '/', pos = tok_start + 1;
-	if(tenv->source[pos] == '*' || tenv->source[pos] == '/') {
-		//FIXME
-		return tok_start;
+	kTokenVar *tk = (kTokenVar *)sfp[1].o;
+	int ch, prev = '/', pos = 1;
+	const char *source = S_text(sfp[2].asString);
+	if(source[pos] == '*' || source[pos] == '/') {
+		RETURNi_(0);
 	}
-	int tokenArrayize = kArray_size(tenv->tokenList);
-	if(tokenArrayize > 0) {
-		kToken *tkPrev = tenv->tokenList->tokenItems[tokenArrayize - 1];
-		if(tkPrev->unresolvedTokenType == TokenType_INT ||
-			(tkPrev->topCharHint != '(' && tkPrev->unresolvedTokenType == TokenType_SYMBOL)) {
-			//FIXME
-			return 0;
-		}
-	}
-	while((ch = tenv->source[pos++]) != 0) {
+	/*FIXME: we need to care about context sensitive case*/
+	//int tokenArrayize = kArray_size(tenv->tokenList);
+	//if(tokenArrayize > 0) {
+	//	kToken *tkPrev = tenv->tokenList->tokenItems[tokenArrayize - 1];
+	//	if(tkPrev->unresolvedTokenType == TokenType_INT ||
+	//		(tkPrev->topCharHint != '(' && tkPrev->unresolvedTokenType == TokenType_SYMBOL)) {
+	//		RETURNi_(0);
+	//	}
+	//}
+	while((ch = source[pos++]) != 0) {
 		if(ch == '\n') {
 			break;
 		}
 		if(ch == '/' && prev != '\\') {
 			int pos0 = pos;
-			while(isalpha(tenv->source[pos])) pos++;
+			while(isalpha(source[pos])) pos++;
 			if(IS_NOTNULL(tk)) {
 				kArray *a = new_(Array, 2);
-				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, tenv->source + tok_start + 1, (pos0-1) - (tok_start+1), 0));
-				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, tenv->source + pos0, pos-pos0, 0));
+				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, source + 1, (pos0-2), 0));
+				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, source + pos0, pos-pos0, 0));
 				tk->subTokenList = a;
 				tk->unresolvedTokenType = SYM_("$regex");
 			}
-			return pos;
+			RETURNi_(pos);
 		}
 		prev = ch;
 	}
 	if(IS_NOTNULL(tk)) {
 		kreportf(ErrTag, tk->uline, "must close with /");
 	}
-	return pos-1;
+	RETURNi_(pos-1);
 }
 
 static KMETHOD ExprTyCheck_Regex(KonohaContext *kctx, KonohaStack *sfp)
@@ -636,7 +637,9 @@ static KMETHOD ExprTyCheck_Regex(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t pcre_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
-	//SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '/', parseREGEX, NULL, 0);
+	kMethod *mtd = KLIB new_kMethod(kctx, 0, 0, 0, parseREGEX);
+	kFunc *fo = GCSAFE_new(Func, (uintptr_t) mtd);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '/', NULL, fo, 0);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("$regex"), _TERM, ExprTyCheck_(Regex), },
 		{ .keyword = KW_END, },
@@ -649,7 +652,6 @@ static kbool_t pcre_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfilelin
 {
 	return true;
 }
-
 
 KDEFINE_PACKAGE* pcre_init(void)
 {
