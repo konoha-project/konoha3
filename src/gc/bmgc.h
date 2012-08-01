@@ -27,18 +27,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-//#define USE_GENERATIONAL_GC 1
-#if 1
+#define USE_GENERATIONAL_GC 1
 #include <sys/time.h>
-#else
-#if defined(K_USING_WINDOWS_)
-#include <windows.h>
-#include <time.h>
-#elif defined(K_USING_BTRON)
-#include <btron/datetime.h>
-#include <btron/event.h>
-#endif
-#endif
 
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/gc.h"
@@ -57,6 +47,7 @@ extern "C" {
 
 /* memory config */
 #define GC_USE_DEFERREDSWEEP 1
+#define USE_SAFEPOINT_POLICY 1
 #define SUBHEAP_DEFAULT_SEGPOOL_SIZE (128)/* 128 * SEGMENT_SIZE(128k) = 16MB*/
 #define SUBHEAP_KLASS_MIN  5 /* 1 <<  5 == 32 */
 #define SUBHEAP_KLASS_MAX 12 /* 1 << 12 == 4096 */
@@ -696,25 +687,6 @@ static inline uint64_t getTimeMilliSecond(void)
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
 	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
-#if 0
-#if defined(K_USING_WINDOWS_)
-	DWORD tickCount = GetTickCount();
-	return (kint64_t)tickCount;
-#elif defined(K_USING_BTRON)
-	/* FIXME: thread safety */
-	static volatile int first = 1;
-	static UW start = 0;
-	UW current;
-	if (first) {
-		get_etm(&start);
-		first = 0;
-	}
-	get_etm(&current);
-	return (uint64_t)((current - start) & 0x7fffffff);
-#else
-	return 0;
-#endif
-#endif
 }
 
 /* ------------------------------------------------------------------------ */
@@ -1412,15 +1384,20 @@ static kObject *bm_malloc_internal(KonohaContext *kctx, HeapManager *mng, size_t
 	h = findSubHeapBySize(mng, n);
 	temp = tryAlloc(kctx, mng, h);
 
-#ifdef USE_GENERATIONAL_GC
 	if (temp != NULL)
 		goto L_finaly;
+#ifdef USE_SAFEPOINT_POLICY
+	HeapManager_expandHeap(kctx, mng, SUBHEAP_DEFAULT_SEGPOOL_SIZE*2);
+	newSegment(mng, h);
+#else
+#ifdef USE_GENERATIONAL_GC
 	minorGC(kctx, mng);
 	temp = tryAlloc(kctx, mng, h);
 #endif
 	if (temp != NULL)
 		goto L_finaly;
 	majorGC(kctx, mng);
+#endif /* defined(USE_SAFEPOINT_POLICY) */
 	temp = tryAlloc(kctx, mng, h);
 	if (temp == NULL) {
 		THROW_OutOfMemory(kctx, n);
@@ -1674,42 +1651,51 @@ static void RememberSet_add(KonohaContext *kctx, kObject *o)
 		}
 	}
 	ARRAY_add(ObjectPtr, &mng->remember_set, o);
-	//uintptr_t addr   = ((uintptr_t)o & ~(SEGMENT_SIZE - ONE));
-	//uintptr_t offset = ((uintptr_t)o &  (SEGMENT_SIZE - ONE)) >> SUBHEAP_KLASS_MIN;
-	//BlockHeader *head = (BlockHeader*) addr;
-	//bitmap_t *map = head->remember_set;
-	//bitmap_set(map+(offset/BITS), offset%BITS, Object_isTenure(o));
+	uintptr_t addr   = ((uintptr_t)o & ~(SEGMENT_SIZE - ONE));
+	uintptr_t offset = ((uintptr_t)o &  (SEGMENT_SIZE - ONE)) >> SUBHEAP_KLASS_MIN;
+	BlockHeader *head = (BlockHeader*) addr;
+	bitmap_t *map = head->remember_set;
+	bitmap_set(map+(offset/BITS), offset%BITS, Object_isTenure(o));
 }
 
 static void RememberSet_reftrace(KonohaContext *kctx, HeapManager *mng)
 {
 	size_t i;
-	FOR_EACH_ARRAY_(mng->remember_set, i) {
-		kObject* o =  (kObject *)ARRAY_n(mng->remember_set, i);
-		KONOHA_reftraceObject(kctx, o);
+	FOR_EACH_ARRAY_(mng->remember_sets, i) {
+		uintptr_t base_address = (uintptr_t) ARRAY_n(mng->managed_heap_a, i);
+		size_t bitmap_size = ARRAY_n(mng->heap_size_a, i) / (MIN_ALIGN * BITS);
+		bitmap_t *base = ARRAY_n(mng->remember_sets, i);
+		bitmap_t *m = base;
+		bitmap_t *e = m + bitmap_size;
+		for (; m != e; base+=BITS, base_address += SEGMENT_SIZE) {
+			for (; m < base + BITS; ++m) {
+				if (*m == 0)
+					continue;
+				bitmap_t b = (*m);
+				while (b != 0) {
+					unsigned index, offset;
+					index = CTZ(b);
+					b ^= 1UL << index;
+					offset = (m - base) * BITS + index;
+					kObject *o = (kObject*)(base_address + (offset << SUBHEAP_KLASS_MIN));
+					KONOHA_reftraceObject(kctx, o);
+#if 1
+					{
+						size_t j;
+						int marked = 0;
+						FOR_EACH_ARRAY_(mng->remember_set, j) {
+							kObject* v =  (kObject *)ARRAY_n(mng->remember_set, j);
+							if (o == v)
+								marked = 1;
+						}
+						assert(marked == 1);
+					}
+#endif
+				}
+				bitmap_reset(m, 0);
+			}
+		}
 	}
-	//FOR_EACH_ARRAY_(mng->remember_sets, i) {
-	//	uintptr_t base_address = (uintptr_t) ARRAY_n(mng->managed_heap_a, i);
-	//	size_t bitmap_size = ARRAY_n(mng->heap_size_a, i) / (MIN_ALIGN * BITS);
-	//	bitmap_t *base = ARRAY_n(mng->remember_sets, i);
-	//	bitmap_t *m = base;
-	//	bitmap_t *e = m + bitmap_size;
-	//	for (; m != e; base+=BITS, base_address += SEGMENT_SIZE) {
-	//		for (; m < base + BITS; ++m) {
-	//			if (*m == 0)
-	//				continue;
-	//			bitmap_t b = (*m);
-	//			while (b != 0) {
-	//				unsigned index, offset;
-	//				b ^= 1UL << index;
-	//				index = CTZ(b);
-	//				offset = (m - base) * BITS + index;
-	//				kObject *o = (kObject*)(base_address + (offset << SUBHEAP_KLASS_MIN));
-	//			}
-	//			bitmap_reset(m, 0);
-	//		}
-	//	}
-	//}
 }
 
 static void RememberSet_clear(HeapManager *mng)

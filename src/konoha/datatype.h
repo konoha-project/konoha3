@@ -45,12 +45,12 @@ static void Object_reftrace(KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
-static void ObjectX_init(KonohaContext *kctx, kObject *o, void *conf)
-{
-	kObjectVar *of = (kObjectVar*)o;
-	KonohaClass *ct = O_ct(of);
-	memcpy(of->fieldObjectItems, ct->defaultValueAsNull->fieldObjectItems, ct->cstruct_size - sizeof(KonohaObjectHeader));
-}
+//static void ObjectX_init(KonohaContext *kctx, kObject *o, void *conf)
+//{
+//	kObjectVar *of = (kObjectVar*)o;
+//	KonohaClass *ct = O_ct(of);
+//	memcpy(of->fieldObjectItems, ct->defaultValueAsNull->fieldObjectItems, ct->cstruct_size - sizeof(KonohaObjectHeader));
+//}
 
 static void Object_initdef(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t pline)
 {
@@ -284,7 +284,7 @@ static void kArray_add(KonohaContext *kctx, kArray *o, kObject *value)
 	Array_ensureMinimumSize(kctx, a, asize+1);
 	DBG_ASSERT(a->a.objectItems[asize] == NULL);
 	KINITv(a->a.objectItems[asize], value);
-	KLIB Kwrite_barrier(kctx, a);
+	KLIB Kwrite_barrier(kctx, UPCAST(a));
 	a->a.bytesize = (asize+1) * sizeof(void*);
 }
 
@@ -300,7 +300,7 @@ static void kArray_insert(KonohaContext *kctx, kArray *o, size_t n, kObject *v)
 		memmove(a->a.objectItems+(n+1), a->a.objectItems+n, sizeof(kObject*) * (asize - n));
 		KINITv(a->a.objectItems[n], v);
 		a->a.bytesize = (asize+1) * sizeof(void*);
-		KLIB Kwrite_barrier(kctx, a);
+		KLIB Kwrite_barrier(kctx, UPCAST(a));
 	}
 }
 
