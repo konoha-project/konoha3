@@ -863,64 +863,64 @@ static void Kfree(KonohaContext *kctx, void *p, size_t s)
 }
 
 /* ------------------------------------------------------------------------ */
-/* [ostack] */
+/* [mstack] */
 
-typedef struct knh_ostack_t {
+typedef struct MarkStack {
 	kObject **stack;
 	size_t cur;
 	size_t tail;
 	size_t capacity;
 	size_t capacity_log2;
-} knh_ostack_t;
+} MarkStack;
 
-static knh_ostack_t *ostack_init(KonohaContext *kctx, knh_ostack_t *ostack)
+static MarkStack *mstack_init(KonohaContext *kctx, MarkStack *mstack)
 {
-	ostack->capacity = memlocal(kctx)->queue_capacity;
-	ostack->stack = memlocal(kctx)->queue;
-	ostack->capacity_log2  = memlocal(kctx)->queue_log2;
-	if (ostack->capacity == 0) {
-		ostack->capacity_log2 = 12;
-		ostack->capacity = (1 << ostack->capacity_log2) - 1;
+	mstack->capacity = memlocal(kctx)->queue_capacity;
+	mstack->stack = memlocal(kctx)->queue;
+	mstack->capacity_log2  = memlocal(kctx)->queue_log2;
+	if (mstack->capacity == 0) {
+		mstack->capacity_log2 = 12;
+		mstack->capacity = (1 << mstack->capacity_log2) - 1;
 		DBG_ASSERT(K_PAGESIZE == 1 << 12);
-		ostack->stack = (kObject**)do_malloc(sizeof(kObject*) * (ostack->capacity + 1));
+		mstack->stack = (kObject**)do_malloc(sizeof(kObject*) * (mstack->capacity + 1));
 	}
-	ostack->cur  = 0;
-	ostack->tail = 0;
-	return ostack;
+	mstack->cur  = 0;
+	mstack->tail = 0;
+	return mstack;
 }
 
-static void ostack_push(KonohaContext *kctx, knh_ostack_t *ostack, kObject *ref)
+static void mstack_push(KonohaContext *kctx, MarkStack *mstack, kObject *ref)
 {
-	size_t ntail = (ostack->tail + 1 ) & ostack->capacity;
-	if (unlikely(ntail == ostack->cur)) {
-		size_t capacity = 1 << ostack->capacity_log2;
+	size_t ntail = (mstack->tail + 1 ) & mstack->capacity;
+	if (unlikely(ntail == mstack->cur)) {
+		size_t capacity = 1 << mstack->capacity_log2;
 		size_t stacksize = sizeof(kObject*) * capacity;
-		ostack->stack = (kObject**)do_realloc(ostack->stack, stacksize, stacksize * 2);
-		ostack->capacity_log2 += 1;
-		ostack->capacity = (1 << ostack->capacity_log2) - 1;
-		ntail = (ostack->tail + 1) & ostack->capacity;
+		mstack->stack = (kObject**)do_realloc(mstack->stack, stacksize, stacksize * 2);
+		mstack->capacity_log2 += 1;
+		mstack->capacity = (1 << mstack->capacity_log2) - 1;
+		ntail = (mstack->tail + 1) & mstack->capacity;
 	}
-	ostack->stack[ostack->tail] = ref;
-	ostack->tail = ntail;
+	mstack->stack[mstack->tail] = ref;
+	mstack->tail = ntail;
 }
 
-static kObject *ostack_next(knh_ostack_t *ostack)
+static kObject *mstack_next(MarkStack *mstack)
 {
 	kObject *ref = NULL;
-	if (likely(ostack->cur != ostack->tail)) {
-		ostack->tail -=1;
-		ref = ostack->stack[ostack->tail];
+	if (likely(mstack->cur != mstack->tail)) {
+		mstack->tail -=1;
+		ref = mstack->stack[mstack->tail];
 		prefetch_(ref, 0, 0);
 	}
 	return ref;
 }
 
-static void ostack_free(KonohaContext *kctx, knh_ostack_t *ostack)
+static void mstack_free(KonohaContext *kctx, MarkStack *mstack)
 {
 	KonohaContextVar *wctx = (KonohaContextVar*) kctx;
-	memlocal(wctx)->queue_capacity = ostack->capacity;
-	memlocal(wctx)->queue = ostack->stack;
-	memlocal(wctx)->queue_log2 = ostack->capacity_log2;
+	memlocal(wctx)->queue_capacity = mstack->capacity;
+	memlocal(wctx)->queue = mstack->stack;
+	memlocal(wctx)->queue_log2 = mstack->capacity_log2;
 }
 
 static HeapManager *BMGC_init(KonohaContext *kctx)
@@ -1604,7 +1604,7 @@ static void bitmap_mark(bitmap_t bm, Segment *seg, uintptr_t idx, uintptr_t mask
 	}
 }
 
-static void mark_ostack(KonohaContext *kctx, HeapManager *mng, kObject *o, knh_ostack_t *ostack)
+static void mark_mstack(KonohaContext *kctx, HeapManager *mng, kObject *o, MarkStack *mstack)
 {
 	Segment *seg;
 	int index, klass;
@@ -1623,7 +1623,7 @@ static void mark_ostack(KonohaContext *kctx, HeapManager *mng, kObject *o, knh_o
 #endif
 		bitmap_mark(*bm, seg, bpidx, bpmask);
 		++(seg->live_count);
-		ostack_push(kctx, ostack, o);
+		mstack_push(kctx, mstack, o);
 #ifdef GCSTAT
 		global_gc_stat.marked[klass]++;
 #endif
@@ -1674,7 +1674,7 @@ static void Kwrite_barrier(KonohaContext *kctx, kObject *parent)
 static void bmgc_gc_mark(KonohaContext *kctx, HeapManager *mng, KonohaStack *esp, enum gc_mode mode)
 {
 	long i;
-	knh_ostack_t ostackbuf, *ostack = ostack_init(kctx, &ostackbuf);
+	MarkStack mstackbuf, *mstack = mstack_init(kctx, &mstackbuf);
 	KonohaContextRuntimeVar *stack = kctx->stack;
 	kObject *ref = NULL;
 
@@ -1687,21 +1687,21 @@ static void bmgc_gc_mark(KonohaContext *kctx, HeapManager *mng, KonohaStack *esp
 #endif
 	size_t ref_size = stack->reftail - stack->ref.refhead;
 	goto L_INLOOP;
-	while ((ref = ostack_next(ostack)) != NULL) {
+	while ((ref = mstack_next(mstack)) != NULL) {
 		context_reset_refs(kctx);
 		KONOHA_reftraceObject(kctx, ref);
 		ref_size = stack->reftail - stack->ref.refhead;
 		if (ref_size > 0) {
 			L_INLOOP:;
 			for (i = ref_size-1; i >= 0; --i) {
-				mark_ostack(kctx, mng, stack->ref.refhead[i], ostack);
+				mark_mstack(kctx, mng, stack->ref.refhead[i], mstack);
 			}
 		}
 	}
 #ifdef USE_GENERATIONAL_GC
 	RememberSet_clear(mng);
 #endif
-	ostack_free(kctx, ostack);
+	mstack_free(kctx, mstack);
 }
 
 void *bm_malloc(KonohaContext *kctx, size_t n)
