@@ -239,11 +239,13 @@ struct SubHeap {
 #define for_each_heap(H, I, HEAPS) \
 	for (I = SUBHEAP_KLASS_MIN, H = (HEAPS)+I; I <= SUBHEAP_KLASS_MAX; ++H, ++I)
 
-typedef Segment* SegmentPtr;
-typedef void* VoidPtr;
+typedef Segment *SegmentPtr;
+typedef void *VoidPtr;
+typedef kObject *ObjectPtr;
 DEF_ARRAY_T_OP(SegmentPtr);
 DEF_ARRAY_T_OP(size_t);
 DEF_ARRAY_T_OP(VoidPtr);
+DEF_ARRAY_T_OP(ObjectPtr);
 
 struct HeapManager {
 	long flags;
@@ -255,7 +257,7 @@ struct HeapManager {
 	ARRAY(VoidPtr)    managed_heap_end_a;
 	ARRAY(size_t)     heap_size_a;
 #ifdef USE_GENERATIONAL_GC
-	ARRAY(VoidPtr)    remember_set;
+	ARRAY(ObjectPtr)  remember_set;
 #endif
 };
 
@@ -269,7 +271,7 @@ struct Segment {
 #ifdef USE_GENERATIONAL_GC
 	bitmap_t *snapshot;
 	bitmap_t *snapshot_base[SEGMENT_LEVEL];
-	long tenure_live_count;
+	int tenure_live_count;
 #else
 	void *unused;
 #endif
@@ -1108,11 +1110,11 @@ static uintptr_t bitptrToIndex(uintptr_t bpidx, uintptr_t bpmask)
 	return bpidx * BITS + FFS(bpmask) - 1;
 }
 
-static BlkPtr *blockAddress(Segment *s, uintptr_t idx, uintptr_t mask)
+static BlkPtr *blockAddress(Segment *seg, uintptr_t idx, uintptr_t mask)
 {
-	size_t size = s->heap_klass;
+	size_t size = seg->heap_klass;
 	size_t offset = bitptrToIndex(idx, mask) << size;
-	const BlkPtr *ptr = s->blk;
+	const BlkPtr *ptr = seg->blk;
 	return (AllocationBlock*)((char*)ptr+offset);
 }
 
@@ -1286,7 +1288,7 @@ static void HeapManager_init(KonohaContext *kctx, HeapManager *mng, size_t list_
 	ARRAY_init(SegmentPtr, &mng->segment_pool_a);
 	ARRAY_init(size_t, &mng->segment_size_a);
 #ifdef USE_GENERATIONAL_GC
-	ARRAY_init(VoidPtr, &mng->remember_set);
+	ARRAY_init(ObjectPtr, &mng->remember_set);
 #endif
 
 	HeapManager_expandHeap(kctx, mng, list_size);
@@ -1343,7 +1345,7 @@ static bool DBG_CHECK_OBJECT_IN_SEGMENT(kObject *o, Segment *seg)
 static bool DBG_CHECK_OBJECT_IN_HEAP(kObject *o, SubHeap *h)
 {
 	Segment *seg = h->p.seg;
-	return (DBG_CHECK_OBJECT_IN_SEGMENT(o, seg))
+	return (DBG_CHECK_OBJECT_IN_SEGMENT(o, seg));
 }
 #else
 #define DBG_CHECK_OBJECT_IN_SEGMENT(o, seg) true
@@ -1401,41 +1403,67 @@ static kObject *bm_malloc_internal(KonohaContext *kctx, HeapManager *mng, size_t
 	return temp;
 }
 
+#ifdef GCDEBUG
+static void dumpBM(uintptr_t bm)
+{
+	int i;
+	uintptr_t mask;
+	fprintf(stderr, "                 ");
+	for (i = BITS-1; i >= 0; i--) {
+		if (i %10 == 0) {
+			fprintf(stderr, "%d", i / 10);
+		} else {
+			fprintf(stderr, " ");
+		}
+	}
+	fprintf(stderr, "\n");
+	fprintf(stderr, "%16lx ", bm);
+	for (i = BITS-1; i >= 0; i--) {
+		fprintf(stderr, "%d", i % 10);
+	}
+	fprintf(stderr, "\n                 ");
+	for (mask = ONE << (BITS-1); mask; mask >>= 1) {
+		fprintf(stderr, "%d", (bm & mask)?1:0);
+	}
+	fprintf(stderr, "\n");
+}
+#endif
+
 static void clearAllBitMapsAndCount(HeapManager *mng, SubHeap *h)
 {
 	size_t i;
 
 	for (i = 0; i < h->seglist_size; i++) {
-		Segment *s = h->seglist[i];
-		ClearBitMap(s->bitmap, h->heap_klass);
-		BITMAP_SET_LIMIT(s->bitmap, h->heap_klass);
+		Segment *seg = h->seglist[i];
+		ClearBitMap(seg->bitmap, h->heap_klass);
+		BITMAP_SET_LIMIT(seg->bitmap, h->heap_klass);
 		gc_info("klass=%d, seg[%lu]=%p count=%d",
-				s->heap_klass, i, s, s->live_count);
-		s->live_count = 0;
+				seg->heap_klass, i, seg, seg->live_count);
+		seg->live_count = 0;
 	}
 }
 
 #ifdef USE_GENERATIONAL_GC
-#define LOAD_SNAPSHOT(s)\
-	do_memcpy(s->bitmap, s->snapshot, BM_SIZE[s->heap_klass])
+#define LOAD_SNAPSHOT(seg)\
+	do_memcpy(seg->bitmap, seg->snapshot, BM_SIZE[seg->heap_klass])
 
-#define SAVE_SNAPSHOT(s)\
-	do_memcpy(s->snapshot, s->bitmap, BM_SIZE[s->heap_klass])
+#define SAVE_SNAPSHOT(seg)\
+	do_memcpy(seg->snapshot, seg->bitmap, BM_SIZE[seg->heap_klass])
 
-#define LOAD_LIVECOUNT(s) s->live_count = s->tenure_live_count
-#define SAVE_LIVECOUNT(s) s->tenure_live_count = s->live_count
+#define LOAD_LIVECOUNT(seg) seg->live_count = seg->tenure_live_count
+#define SAVE_LIVECOUNT(seg) seg->tenure_live_count = seg->live_count
 
 static void setTenureBitMapsAndCount(HeapManager *mng, SubHeap *h)
 {
 	size_t i;
 	for (i = 0; i < h->seglist_size; i++) {
-		Segment *s = h->seglist[i];
-		ClearBitMap(s->bitmap, h->heap_klass);
-		LOAD_SNAPSHOT(s);
-		LOAD_LIVECOUNT(s);
-		BITMAP_SET_LIMIT_AND_CPY_BM(s->bitmap, s->snapshot, h->heap_klass);
+		Segment *seg = h->seglist[i];
+		ClearBitMap(seg->bitmap, h->heap_klass);
+		LOAD_SNAPSHOT(seg);
+		LOAD_LIVECOUNT(seg);
+		BITMAP_SET_LIMIT_AND_CPY_BM(seg->bitmap, seg->snapshot, h->heap_klass);
 		gc_info("klass=%d, seg[%lu]=%p count=%d",
-				s->heap_klass, i, s, s->live_count);
+				seg->heap_klass, i, seg, seg->live_count);
 	}
 }
 #endif
@@ -1480,12 +1508,12 @@ static void HeapManager_final_free(KonohaContext *kctx, HeapManager *mng)
 	for_each_heap(h, j, mng->heaps) {
 		clearAllBitMapsAndCount(mng, h);
 		for (i = 0; i < h->seglist_size; i++) {
-			Segment *s = h->seglist[i];
+			Segment *seg = h->seglist[i];
 			bitmap_t *bm0;
-			bitmap_t *b0 = (bitmap_t *) s->base[0];
+			bitmap_t *b0 = (bitmap_t *) seg->base[0];
 			bitmap_t *l0 = b0 + SegmentBitMapCount[j];
 			for (bm0 = b0; bm0 < l0; ++bm0) {
-				b0_final_sweep(kctx, *bm0, bm0 - b0, s);
+				b0_final_sweep(kctx, *bm0, bm0 - b0, seg);
 			}
 		}
 		gc_info("heap[%d] collected %lu",
@@ -1495,36 +1523,7 @@ static void HeapManager_final_free(KonohaContext *kctx, HeapManager *mng)
 }
 
 #if GCDEBUG
-static void dumpBM(uintptr_t bm)
-{
-	int i;
-	uintptr_t mask;
-	fprintf(stderr, "                 ");
-	for (i = BITS-1; i >= 0; i--) {
-		if (i %10 == 0) {
-			fprintf(stderr, "%d", i / 10);
-		} else {
-			fprintf(stderr, " ");
-		}
-	}
-	fprintf(stderr, "\n");
-	fprintf(stderr, "%16lx ", bm);
-	for (i = BITS-1; i >= 0; i--) {
-		fprintf(stderr, "%d", i % 10);
-	}
-	fprintf(stderr, "\n                 ");
-	for (mask = ONE << (BITS-1); mask; mask >>= 1) {
-		fprintf(stderr, "%d", (bm & mask)?1:0);
-	}
-	fprintf(stderr, "\n");
-}
-
-enum heap_dump_mode {
-	HEAP_DUMP_INFO,
-	HEAP_DUMP_VERBOSE
-};
-
-static void Heap_dump(const SubHeap *h, enum heap_dump_mode mode)
+static void Heap_dump(const SubHeap *h)
 {
 	gc_info("klass[%2d] object_count=%lu segment_list=(%d) ",
 			h->heap_klass, global_gc_stat.object_count[h->heap_klass],
@@ -1543,7 +1542,7 @@ static void BMGC_dump(HeapManager *mng)
 	gc_info("total allocated object count=%lu", global_gc_stat.total_object);
 	for (i = SUBHEAP_KLASS_MIN; i <= SUBHEAP_KLASS_MAX; i++) {
 		SubHeap *h = mng->heaps + i;
-		Heap_dump(h, HEAP_DUMP_INFO);
+		Heap_dump(h);
 	}
 	gc_info("\n");
 }
@@ -1636,12 +1635,12 @@ static void RememberSet_add(KonohaContext *kctx, kObject *o)
 	HeapManager* mng = HeapMng(kctx);
 	size_t i;
 	for (i = 0; i < ARRAY_size(mng->remember_set); i++) {
-		void *ptr = ARRAY_n(mng->remember_set, i);
+		kObject *ptr = ARRAY_n(mng->remember_set, i);
 		if (ptr == o) {
 			return;
 		}
 	}
-	ARRAY_add(VoidPtr, &mng->remember_set, (void*)o);
+	ARRAY_add(ObjectPtr, &mng->remember_set, o);
 }
 
 static void RememberSet_reftrace(KonohaContext *kctx, HeapManager *mng)
@@ -1655,7 +1654,7 @@ static void RememberSet_reftrace(KonohaContext *kctx, HeapManager *mng)
 
 static void RememberSet_clear(HeapManager *mng)
 {
-	ARRAY_clear(VoidPtr, &mng->remember_set);
+	ARRAY_clear(ObjectPtr, &mng->remember_set);
 }
 
 #endif
@@ -1770,14 +1769,14 @@ static void rearrangeSegList(SubHeap *h, size_t klass, bitmap_t *checkFull)
 	if (h->seglist_size < 1)
 		return;
 	for (i = 0; i < h->seglist_size; i++) {
-		Segment *s = h->seglist[i];
-		size_t dead = SegmentBlockCount[klass] - s->live_count;
+		Segment *seg = h->seglist[i];
+		size_t dead = SegmentBlockCount[klass] - seg->live_count;
 		count_dead += dead;
 		if (dead > 0)
-			LIST_PUSH(unfilled_tail, s);
+			LIST_PUSH(unfilled_tail, seg);
 #ifdef USE_GENERATIONAL_GC
-		SAVE_SNAPSHOT(s);
-		SAVE_LIVECOUNT(s);
+		SAVE_SNAPSHOT(seg);
+		SAVE_LIVECOUNT(seg);
 #endif
 	}
 	*unfilled_tail = NULL;
@@ -1796,12 +1795,12 @@ static void bmgc_gc_sweep(KonohaContext *kctx, HeapManager *mng)
 	for_each_heap(h, j, mng->heaps) {
 #ifndef GC_USE_DEFERREDSWEEP
 		for (i = 0; i < h->seglist_size; i++) {
-			Segment *s = h->seglist[i];
+			Segment *seg = h->seglist[i];
 			bitmap_t *bm0;
-			bitmap_t *b0 = (bitmap_t *) s->base[0];
+			bitmap_t *b0 = (bitmap_t *) seg->base[0];
 			bitmap_t *l0 = b0 + SegmentBitMapCount[j];
 			for (bm0 = b0; bm0 < l0; ++bm0) {
-				b0_final_sweep(kctx, *bm0, bm0 - b0, s);
+				b0_final_sweep(kctx, *bm0, bm0 - b0, seg);
 			}
 		}
 		gc_info("heap[%d] collected %lu",
