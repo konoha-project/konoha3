@@ -393,7 +393,6 @@ static Segment segment_dummy = {};
 #define DEF_BM_OP0(N, L0, L1, L2)\
 static inline void BITPTRS_SET_BASE##N (bitmap_t **base)\
 {\
-	struct BM##N *bm = (struct BM##N *)base[0];\
 	base[1] = (bitmap_t*) bitmap_dummy;\
 	base[2] = (bitmap_t*) bitmap_dummy;\
 }\
