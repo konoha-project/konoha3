@@ -1714,9 +1714,7 @@ static void RememberSet_clear(HeapManager *mng)
 static void Kwrite_barrier(KonohaContext *kctx, kObject *parent)
 {
 #ifdef USE_GENERATIONAL_GC
-	if (Object_isTenure(parent)) {
-		RememberSet_add(kctx, parent);
-	}
+	RememberSet_add(kctx, parent);
 #endif
 }
 
