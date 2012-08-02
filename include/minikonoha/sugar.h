@@ -170,11 +170,10 @@ struct TokenizerEnv {
 		kString *STR = sfp[1].asString;\
 		int UL = (int)sfp[2].intValue;\
 		(void)TK; (void)STR; (void)UL;\
-
 *****/
 
 // int PatternMatch(Stmt stmt, int nameid, Token[] toks, int s, int e)
-#define VAR_PatternMatch(STMT, NAME, TLS, S, E) \
+#define VAR_PatternMatch(STMT, NAME, TLS, S, E)\
 		kStmt *STMT = (kStmt*)sfp[1].asObject;\
 		ksymbol_t NAME = (ksymbol_t)sfp[2].intValue;\
 		kArray *TLS = (kArray*)sfp[3].o;\
@@ -183,7 +182,7 @@ struct TokenizerEnv {
 		(void)STMT; (void)NAME; (void)TLS; (void)S; (void)E;\
 
 // Expr ParseExpr(Stmt stmt, Token[] tokenArray, int s, int c, int e)
-#define VAR_ParseExpr(STMT, TLS, S, C, E) \
+#define VAR_ParseExpr(STMT, TLS, S, C, E)\
 		SugarSyntax *syn = (SugarSyntax*)sfp[0].unboxValue;\
 		kStmt *STMT = (kStmt*)sfp[1].asObject;\
 		kArray *TLS = (kArray*)sfp[2].o;\
@@ -193,7 +192,7 @@ struct TokenizerEnv {
 		(void)syn; (void)STMT; (void)TLS; (void)S; (void)C; (void)E;\
 
 // boolean StmtTyCheck(Stmt stmt, Gamma gma)
-#define VAR_StmtTyCheck(STMT, GMA) \
+#define VAR_StmtTyCheck(STMT, GMA)\
 		kStmt *STMT = (kStmt*)sfp[1].asObject;\
 		kGamma *GMA = (kGamma*)sfp[2].o;\
 		(void)STMT; (void)GMA;\
@@ -488,6 +487,7 @@ typedef struct {
 	kbool_t (*kNameSpace_resolveTokenArray)(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, kArray *resolvedTokenList);
 	int (*kStmt_parseTypePattern)(KonohaContext *, kStmt *, kNameSpace *, kArray *, int , int , KonohaClass **classRef);
 
+
 	kExpr* (*kExpr_setConstValue)(KonohaContext *, kExpr *, ktype_t ty, kObject *o);
 	kExpr* (*kExpr_setUnboxConstValue)(KonohaContext *, kExpr *, ktype_t ty, uintptr_t unboxValue);
 	kExpr* (*kExpr_setVariable)(KonohaContext *, kExpr *, kGamma *, kexpr_t build, ktype_t ty, intptr_t index);
@@ -505,11 +505,11 @@ typedef struct {
 	kExpr *     (*new_TypedMethodCall)(KonohaContext *, kStmt *, ktype_t ty, kMethod *mtd, kGamma *, int n, ...);
 
 	SugarSyntax* (*kNameSpace_getSyntax)(KonohaContext *, kNameSpace *, ksymbol_t, int);
-	void       (*kNameSpace_defineSyntax)(KonohaContext *, kNameSpace *, KDEFINE_SYNTAX *);
-	void       (*kNameSpace_setSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
-	void       (*kNameSpace_addSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
+	void         (*kNameSpace_defineSyntax)(KonohaContext *, kNameSpace *, KDEFINE_SYNTAX *);
+	kbool_t      (*kArray_addSyntaxRule)(KonohaContext *, kArray *ruleList, TokenChunk *sourceChunk);
+	void         (*kNameSpace_setSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
+	void         (*kNameSpace_addSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
 
-	kbool_t    (*makeSyntaxRule)(KonohaContext *, kArray*, int, int, kArray *);
 	kBlock*    (*new_Block)(KonohaContext *, kNameSpace *, kStmt *, kArray *, int, int, CheckEndOfStmtFunc);
 	void       (*kBlock_insertAfter)(KonohaContext *, kBlock *, kStmt *target, kStmt *);
 
@@ -545,7 +545,7 @@ typedef struct {
 	/*syntax*/\
 	base->kNameSpace_defineSyntax    = kNameSpace_defineSyntax;\
 	base->kNameSpace_getSyntax       = kNameSpace_getSyntax;\
-	base->makeSyntaxRule             = makeSyntaxRule;\
+	base->kArray_addSyntaxRule       = kArray_addSyntaxRule;\
 	base->kNameSpace_setSugarFunc    = kNameSpace_setSugarFunc;\
 	base->kNameSpace_addSugarFunc    = kNameSpace_addSugarFunc;\
 	/*ast*/\
