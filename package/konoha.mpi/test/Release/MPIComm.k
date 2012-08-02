@@ -1,6 +1,4 @@
 // written by wakamatsu
-K.import("konoha.float");
-K.import("konoha.bytes");
 K.import("konoha.mpi");
 
 void test() {
