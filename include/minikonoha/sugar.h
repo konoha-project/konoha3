@@ -307,9 +307,12 @@ typedef struct TokenChunk {
 	kArray *tokenList;
 	int beginIdx;
 	int endIdx;
+	kNameSpace *ns;
+	kToken *errToken;
 } TokenChunk;
 
-#define Token_topch(tk)                    K
+typedef kbool_t (*CheckEndOfStmtFunc2)(KonohaContext *, TokenChunk *chunk, TokenChunk *sourceChunk, int *currentIdxRef, int *indentRef);
+
 #define Token_isVirtualTypeLiteral(TK)     ((TK)->resolvedSyntaxInfo->keyword == KW_TypePattern)
 #define Token_typeLiteral(TK)              (TK)->resolvedTypeId
 

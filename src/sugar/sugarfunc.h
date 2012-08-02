@@ -223,7 +223,7 @@ static KMETHOD ParseExpr_DOLLAR(KonohaContext *kctx, KonohaStack *sfp)
 	if(beginIdx == currentIdx && currentIdx +1 < endIdx) {
 		kToken *tk = tokenArray->tokenItems[currentIdx +1];
 		if(tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
-			Token_toBRACE(kctx, (kTokenVar*)tk, Stmt_nameSpace(stmt));
+			kToken_transformToBraceGroup(kctx, (kTokenVar*)tk, Stmt_nameSpace(stmt));
 		}
 		if(tk->resolvedSyntaxInfo->keyword == KW_BraceGroup) {
 			kExprVar *expr = GCSAFE_new(ExprVar, SYN_(Stmt_nameSpace(stmt), KW_BlockPattern));
@@ -1221,7 +1221,7 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 	syn->ty = TY_void; // it's not cool, but necessary
 	syn = (SugarSyntaxVar*)SYN_(ns, KW_ConstPattern);
 	KINITv(syn->syntaxRuleNULL, new_(TokenArray, 0));
-	parseSyntaxRule(kctx, "$Const \"=\" $Expr", 0, syn->syntaxRuleNULL);
+	kNameSpace_parseSugarRule(kctx, ns, "$Const \"=\" $Expr", 0, syn->syntaxRuleNULL);
 }
 
 /* ------------------------------------------------------------------------ */

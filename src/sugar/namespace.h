@@ -27,7 +27,7 @@
 // Syntax Management
 
 static void checkFuncArray(KonohaContext *kctx, kFunc **funcItems);
-static void parseSyntaxRule(KonohaContext *kctx, const char *rule, kfileline_t pline, kArray *a);
+static void kNameSpace_parseSugarRule(KonohaContext *kctx, kNameSpace *ns, const char *rule, kfileline_t pline, kArray *a);
 
 static SugarSyntax* kNameSpace_getSyntax(KonohaContext *kctx, kNameSpace *ns0, ksymbol_t keyword, int isNew)
 {
@@ -149,7 +149,7 @@ static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 		}
 		if(syndef->rule != NULL) {
 			KINITv(syn->syntaxRuleNULL, new_(TokenArray, 0));
-			parseSyntaxRule(kctx, syndef->rule, 0, syn->syntaxRuleNULL);
+			kNameSpace_parseSugarRule(kctx, ns, syndef->rule, 0, syn->syntaxRuleNULL);
 		}
 		setSugarFunc(kctx, syndef->PatternMatch, &(syn->PatternMatch), &pPatternMatch, &mPatternMatch);
 		setSugarFunc(kctx, syndef->ParseExpr, &(syn->ParseExpr), &pParseExpr, &mParseExpr);
