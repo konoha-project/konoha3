@@ -304,11 +304,10 @@ static kBlock* Method_newBlock(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns
 		script = S_text(mtd->sourceCodeToken->text);
 		uline = mtd->sourceCodeToken->uline;
 	}
-	kArray *tokenArray = KonohaContext_getSugarContext(kctx)->preparedTokenList;
-	size_t pos = kArray_size(tokenArray);
-	kNameSpace_tokenize(kctx, ns, script, uline, tokenArray);
-	kBlock *bk = new_Block(kctx, ns, NULL, tokenArray, pos, kArray_size(tokenArray), SemiColon);
-	KLIB kArray_clear(kctx, tokenArray, pos);
+	TokenRange rangeBuf, *range = new_TokenListRange(kctx, ns, KonohaContext_getSugarContext(kctx)->preparedTokenList, &rangeBuf);
+	TokenRange_tokenize(kctx, range, script, uline);
+	kBlock *bk = new_Block(kctx, NULL/*parentStmt*/, range, SemiColon);
+	TokenRange_pop(kctx, range);
 	return bk;
 }
 
@@ -389,7 +388,6 @@ static kstatus_t kBlock_genEvalCode(KonohaContext *kctx, kBlock *bk, kMethod *mt
 	GAMMA_PUSH(gma, &newgma);
 	Gamma_initIt(kctx, &newgma, Method_param(mtd));
 	kBlock_tyCheckAll(kctx, bk, gma);
-	DBG_P("@@@@@@@@@@@ SIZE=%d ", kArray_size(bk->stmtList));
 	GAMMA_POP(gma, &newgma);
 
 	kStmt *stmt = bk->stmtList->stmtItems[0];
@@ -446,32 +444,29 @@ static kstatus_t kMethod_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtyp
 	return result;
 }
 
-static kstatus_t kTokenArray_eval(KonohaContext *kctx, kArray *tokenList, int beginIdx, int endIdx, kNameSpace *ns)
+static kstatus_t TokenRange_eval(KonohaContext *kctx, TokenRange *sourceRange)
 {
 	kstatus_t status = K_CONTINUE;
-	INIT_GCSTACK();
-	ASTEnv env = {ns, tokenList, beginIdx, endIdx, tokenList, NULL};
-	env.symbolSyntaxInfo = SYN_(ns, KW_SymbolPattern);
-	int i = beginIdx, indent = 0, atop = kArray_size(tokenList);
-	kBlock *singleBlock = KonohaContext_getSugarContext(kctx)->singleBlock;
 	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Static, 0, 0, NULL);
 	PUSH_GCSTACK(mtd);
 	KLIB Method_setParam(kctx, mtd, TY_Object, 0, NULL);
-
-	while(i < endIdx) {
-		env.beginIdx = i;
-		i = kNameSpace_selectStmtTokenList(kctx, &env, &indent, SemiColon);
-		int asize = kArray_size(tokenList);
-		if(asize > atop) {
-			KSETv(((kBlockVar*)singleBlock)->blockNameSpace, ns);
+	int i = sourceRange->beginIdx, indent = 0;
+	kBlock *singleBlock = KonohaContext_getSugarContext(kctx)->singleBlock;
+	while(i < sourceRange->endIdx) {
+		TokenRange rangeBuf, *range = new_TokenStackRange(kctx, sourceRange, &rangeBuf);
+		sourceRange->beginIdx = i;
+		i = TokenRange_selectStmtToken(kctx, range, sourceRange, SemiColon, &indent);
+//		DBG_P("sourceRange->beginIdx=%d, i=%d, range=%d,%d", sourceRange->beginIdx, i, range->beginIdx, range->endIdx);
+		if(range->errToken != NULL) return K_BREAK;
+		if(range->endIdx > range->beginIdx) {
+			KSETv(((kBlockVar*)singleBlock)->blockNameSpace, sourceRange->ns);
 			KLIB kArray_clear(kctx, singleBlock->stmtList, 0);
-			kBlock_addNewStmt(kctx, singleBlock, tokenList, atop, asize, env.errToken);
-			KLIB kArray_clear(kctx, tokenList, atop);
+			kBlock_addNewStmt(kctx, singleBlock, range);
+			TokenRange_pop(kctx, range);
 			status = kBlock_genEvalCode(kctx, singleBlock, mtd);
 			if(status != K_CONTINUE) break;
 		}
 	}
-	RESET_GCSTACK();
 	return status;
 }
 

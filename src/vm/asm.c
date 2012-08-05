@@ -778,7 +778,7 @@ static void ExprStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx
 
 static void BlockStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
-	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, KW_BlockPattern, K_NULLBLOCK), shift);
+	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK), shift);
 }
 
 static void IfStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
@@ -788,11 +788,11 @@ static void IfStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 	/* if */
 	lbELSE = EXPR_asmJMPIF(kctx, stmt, espidx, SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL), 0/*FALSE*/, lbELSE, shift, espidx);
 	/* then */
-	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, KW_BlockPattern, K_NULLBLOCK), shift);
+	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK), shift);
 	ASM_JMP(kctx, lbEND);
 	/* else */
 	ASM_LABEL(kctx, lbELSE);
-	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, KW_else, K_NULLBLOCK), shift);
+	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_else, K_NULLBLOCK), shift);
 	/* endif */
 	ASM_LABEL(kctx, lbEND);
 }
@@ -817,7 +817,7 @@ static void LoopStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx
 	ASM_SAFEPOINT(kctx, espidx);
 	EXPR_asmJMPIF(kctx, stmt, espidx, SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL), 0/*FALSE*/, lbBREAK, shift, espidx);
 	//BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, KW_("iteration"), K_NULLBLOCK));
-	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, KW_BlockPattern, K_NULLBLOCK), shift);
+	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK), shift);
 	ASM_JMP(kctx, lbCONTINUE);
 	ASM_LABEL(kctx, lbBREAK);
 //	BUILD_popLABEL(kctx);

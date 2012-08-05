@@ -593,9 +593,9 @@ static KMETHOD parseREGEX(KonohaContext *kctx, KonohaStack *sfp)
 		RETURNi_(0);
 	}
 	/*FIXME: we need to care about context sensitive case*/
-	//int tokenArrayize = kArray_size(tenv->tokenList);
-	//if(tokenArrayize > 0) {
-	//	kToken *tkPrev = tenv->tokenList->tokenItems[tokenArrayize - 1];
+	//int tokenListize = kArray_size(tenv->tokenList);
+	//if(tokenListize > 0) {
+	//	kToken *tkPrev = tenv->tokenList->tokenItems[tokenListize - 1];
 	//	if(tkPrev->unresolvedTokenType == TokenType_INT ||
 	//		(tkPrev->topCharHint != '(' && tkPrev->unresolvedTokenType == TokenType_SYMBOL)) {
 	//		RETURNi_(0);

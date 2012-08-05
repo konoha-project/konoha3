@@ -45,12 +45,12 @@ static void Object_reftrace(KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
-static void ObjectX_init(KonohaContext *kctx, kObject *o, void *conf)
-{
-	kObjectVar *of = (kObjectVar*)o;
-	KonohaClass *ct = O_ct(of);
-	memcpy(of->fieldObjectItems, ct->defaultValueAsNull->fieldObjectItems, ct->cstruct_size - sizeof(KonohaObjectHeader));
-}
+//static void ObjectX_init(KonohaContext *kctx, kObject *o, void *conf)
+//{
+//	kObjectVar *of = (kObjectVar*)o;
+//	KonohaClass *ct = O_ct(of);
+//	memcpy(of->fieldObjectItems, ct->defaultValueAsNull->fieldObjectItems, ct->cstruct_size - sizeof(KonohaObjectHeader));
+//}
 
 static void Object_initdef(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t pline)
 {
@@ -879,7 +879,7 @@ static void defineDefaultKeywordSymbol(KonohaContext *kctx)
 		"", "$Expr", "$Symbol", "$Const", "$Text", "$Number", "$Float",
 		"$Type", "()", "[]", "{}", "$Block", "$Param", "$Token",
 		".", "/", "%", "*", "+", "-", "<", "<=", ">", ">=", "==", "!=",
-		"&&", "||", "!", "=", ",", "$", /*"@",*/
+		"&&", "||", "!", "=", ",", "$", ":", /*"@",*/
 		"void", "boolean", "int", "true", "false", "if", "else", "return", // syn
 		"new",
 	};

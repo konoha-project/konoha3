@@ -110,9 +110,9 @@ static int io_client_write(struct io *io, const void *data, uint32_t nbyte)
 
 static int io_client_read(struct io *io, const void *data, uint32_t nbyte)
 {
-    struct chunk_stream *cs;
+    struct range_stream *cs;
     if (io->cs == NULL) {
-        cs = chunk_stream_new(io, io->bev);
+        cs = range_stream_new(io, io->bev);
         io->cs = cs;
     } else {
         cs = io->cs;
@@ -121,13 +121,13 @@ static int io_client_read(struct io *io, const void *data, uint32_t nbyte)
         int log_size;
         struct Log *log;
         //L_redo:;
-        while (chunk_stream_empty(cs)) {
+        while (range_stream_empty(cs)) {
             if ((io->flags & IO_MODE_THREAD) == 0) {
                 break;
             }
             usleep(1);
         }
-        log = chunk_stream_get(cs, &log_size);
+        log = range_stream_get(cs, &log_size);
         if (log == NULL) {
             fprintf(stderr, "log is null\n");
             goto L_failed;

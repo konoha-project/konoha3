@@ -12,11 +12,11 @@ extern "C" {
 
 static void server_event_callback(struct bufferevent *bev, short events, void *ctx)
 {
-    struct chunk_stream *cs = (struct chunk_stream *) ctx;
+    struct range_stream *cs = (struct range_stream *) ctx;
     struct io *io = cs->io;
     if (events & BEV_EVENT_EOF) {
         debug_print(1, "client disconnect");
-        chunk_stream_delete(cs);
+        range_stream_delete(cs);
         pool_delete_connection(io->pool, bev);
         bufferevent_free(bev);
     } else if (events & BEV_EVENT_TIMEOUT) {
@@ -32,12 +32,12 @@ static void server_event_callback(struct bufferevent *bev, short events, void *c
 
 static void server_read_callback(struct bufferevent *bev, void *ctx)
 {
-    struct chunk_stream *cs = (struct chunk_stream *) ctx;
+    struct range_stream *cs = (struct range_stream *) ctx;
     struct io *io = cs->io;
     debug_print(0, "read_cb bev=%p", bev);
-    while (!chunk_stream_empty(cs)) {
+    while (!range_stream_empty(cs)) {
         int log_size;
-        struct Log *log = chunk_stream_get(cs, &log_size);
+        struct Log *log = range_stream_get(cs, &log_size);
         if (log == NULL) {
             break;
         }
@@ -93,7 +93,7 @@ static void server_accept_callback(struct evconnlistener *lev, evutil_socket_t f
         return;
     }
 
-    struct chunk_stream *cs = chunk_stream_new(io, bev);
+    struct range_stream *cs = range_stream_new(io, bev);
     bufferevent_setcb(bev, server_read_callback,
             server_write_callback, server_event_callback, cs);
 

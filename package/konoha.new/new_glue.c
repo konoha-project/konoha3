@@ -58,13 +58,13 @@ static kExpr* NewExpr(KonohaContext *kctx, SugarSyntax *syn, kToken *tk, ktype_t
 
 static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_ParseExpr(stmt, tokenArray, beginIdx, currentIdx, endIdx);
+	VAR_ParseExpr(stmt, tokenList, beginIdx, currentIdx, endIdx);
 	DBG_ASSERT(beginIdx == currentIdx);
-	kTokenVar *newToken = tokenArray->tokenVarItems[beginIdx];   // new Class (
+	kTokenVar *newToken = tokenList->tokenVarItems[beginIdx];   // new Class (
 	KonohaClass *foundClass = NULL;
-	int nextIdx = SUGAR kStmt_parseTypePattern(kctx, stmt, Stmt_nameSpace(stmt), tokenArray, beginIdx + 1, endIdx, &foundClass);
-	if(nextIdx != -1 && nextIdx < kArray_size(tokenArray)) {
-		kToken *nextTokenAfterClassName = tokenArray->tokenItems[nextIdx];
+	int nextIdx = SUGAR kStmt_parseTypePattern(kctx, stmt, Stmt_nameSpace(stmt), tokenList, beginIdx + 1, endIdx, &foundClass);
+	if(nextIdx != -1 && nextIdx < kArray_size(tokenList)) {
+		kToken *nextTokenAfterClassName = tokenList->tokenItems[nextIdx];
 //		if (ct->typeId == TY_void) {
 //			RETURN_(SUGAR Stmt_p(kctx, stmt, tk1, ErrTag, "undefined class: %s", S_text(tk1->text)));
 //		} else if (CT_isVirtual(ct)) {
@@ -72,7 +72,7 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp)
 //		}
 		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {  // new C (...)
 			SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
-			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, newToken, NewExpr(kctx, syn, tokenArray->tokenVarItems[beginIdx+1], foundClass->typeId));
+			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, newToken, NewExpr(kctx, syn, tokenList->tokenVarItems[beginIdx+1], foundClass->typeId));
 			newToken->resolvedSymbol = MN_new;
 			RETURN_(expr);
 		}
@@ -80,7 +80,7 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp)
 			SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_new);
 			KonohaClass *arrayClass = CT_p0(kctx, CT_Array, foundClass->typeId);
 			newToken->resolvedSymbol = MN_("newArray");
-			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, newToken, NewExpr(kctx, syn, tokenArray->tokenVarItems[beginIdx+1], arrayClass->typeId));
+			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, newToken, NewExpr(kctx, syn, tokenList->tokenVarItems[beginIdx+1], arrayClass->typeId));
 			RETURN_(expr);
 		}
 	}

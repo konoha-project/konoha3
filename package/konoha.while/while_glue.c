@@ -50,7 +50,7 @@ static KMETHOD StmtTyCheck_while(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_P("while statement .. ");
 	int ret = false;
 	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0)) {
-		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, KW_BlockPattern, K_NULLBLOCK);
+		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
 		ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
 		kStmt_typed(stmt, LOOP);
 	}
@@ -63,7 +63,7 @@ static KMETHOD StmtTyCheck_for(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_P("for statement .. ");
 	int ret = false;
 	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0)) {
-		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, KW_BlockPattern, K_NULLBLOCK);
+		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
 		ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
 		kStmt_typed(stmt, LOOP);
 	}

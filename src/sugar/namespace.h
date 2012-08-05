@@ -27,7 +27,8 @@
 // Syntax Management
 
 static void checkFuncArray(KonohaContext *kctx, kFunc **funcItems);
-static void kNameSpace_parseSugarRule(KonohaContext *kctx, kNameSpace *ns, const char *rule, kfileline_t pline, kArray *a);
+//static void kNameSpace_parseSugarRule(KonohaContext *kctx, kNameSpace *ns, const char *rule, kfileline_t pline, kArray *a);
+static void kNameSpace_parseSugarRule2(KonohaContext *kctx, kNameSpace *ns, const char *rule, kfileline_t uline, kArray *ruleList);
 
 static SugarSyntax* kNameSpace_getSyntax(KonohaContext *kctx, kNameSpace *ns0, ksymbol_t keyword, int isNew)
 {
@@ -141,21 +142,22 @@ static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 		if(syndef->type != 0) {
 			syn->ty = syndef->type;
 		}
-		if(syndef->precedence_op2 > 0) {
-			syn->precedence_op2 = syndef->precedence_op2;
-		}
 		if(syndef->precedence_op1 > 0) {
 			syn->precedence_op1 = syndef->precedence_op1;
 		}
+		if(syndef->precedence_op2 > 0) {
+			syn->precedence_op2 = syndef->precedence_op2;
+		}
 		if(syndef->rule != NULL) {
 			KINITv(syn->syntaxRuleNULL, new_(TokenArray, 0));
-			kNameSpace_parseSugarRule(kctx, ns, syndef->rule, 0, syn->syntaxRuleNULL);
+			kNameSpace_parseSugarRule2(kctx, ns, syndef->rule, 0, syn->syntaxRuleNULL);
 		}
-		setSugarFunc(kctx, syndef->PatternMatch, &(syn->PatternMatch), &pPatternMatch, &mPatternMatch);
-		setSugarFunc(kctx, syndef->ParseExpr, &(syn->ParseExpr), &pParseExpr, &mParseExpr);
+		setSugarFunc(kctx, syndef->PatternMatch,   &(syn->PatternMatch),   &pPatternMatch, &mPatternMatch);
+		setSugarFunc(kctx, syndef->ParseExpr,      &(syn->ParseExpr),      &pParseExpr, &mParseExpr);
 		setSugarFunc(kctx, syndef->TopStmtTyCheck, &(syn->TopStmtTyCheck), &pStmtTyCheck, &mStmtTyCheck);
-		setSugarFunc(kctx, syndef->StmtTyCheck, &(syn->StmtTyCheck), &pStmtTyCheck, &mStmtTyCheck);
-		setSugarFunc(kctx, syndef->ExprTyCheck, &(syn->ExprTyCheck), &pExprTyCheck, &mExprTyCheck);
+		setSugarFunc(kctx, syndef->StmtTyCheck,    &(syn->StmtTyCheck),    &pStmtTyCheck, &mStmtTyCheck);
+		setSugarFunc(kctx, syndef->ExprTyCheck,    &(syn->ExprTyCheck),    &pExprTyCheck, &mExprTyCheck);
+
 		if(syn->ParseExpr == kmodsugar->UndefinedParseExpr) {
 			if(FLAG_is(syn->flag, SYNFLAG_ExprOp)) {
 				KSETv(syn->ParseExpr, kmodsugar->ParseExpr_Op);

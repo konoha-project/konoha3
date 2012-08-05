@@ -25,7 +25,7 @@ struct io;
 typedef int (*io_cb)(struct io *io, const void *data, uint32_t nbyte);
 
 struct pool_list;
-struct chunk_stream;
+struct range_stream;
 struct bufferevent;
 
 struct io_api;
@@ -36,7 +36,7 @@ struct io {
     struct bufferevent *bev;
     struct pool_list *pool;
     struct event_base *base;
-    struct chunk_stream *cs; // use this at client
+    struct range_stream *cs; // use this at client
     pthread_t thread;
     pthread_mutex_t lock;
 };

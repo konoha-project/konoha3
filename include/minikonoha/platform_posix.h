@@ -87,7 +87,7 @@ static kfileline_t readComment(FILE *fp, kfileline_t line, SimpleBuffer *simpleB
 	return line;
 }
 
-static kfileline_t readChunk(FILE *fp, kfileline_t line, SimpleBuffer *simpleBuffer)
+static kfileline_t readRange(FILE *fp, kfileline_t line, SimpleBuffer *simpleBuffer)
 {
 	int ch;
 	int prev = 0, isBLOCK = 0;
@@ -117,7 +117,7 @@ static kfileline_t readChunk(FILE *fp, kfileline_t line, SimpleBuffer *simpleBuf
 	return line;
 }
 
-static int isEmptyChunk(const char *t, size_t len)
+static int isEmptyRange(const char *t, size_t len)
 {
 	size_t i;
 	for(i = 0; i < len; i++) {
@@ -148,20 +148,20 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 		simpleBuffer.allocSize = K_PAGESIZE;
 		isSuccessfullyLoading = true;
 		while(!feof(fp)) {
-			kfileline_t chunkheadline = uline;
+			kfileline_t rangeheadline = uline;
 			kshort_t sline = (kshort_t)uline;
 			bzero(simpleBuffer.buffer, simpleBuffer.allocSize);
 			simpleBuffer.size = 0;
-			uline = readChunk(fp, uline, &simpleBuffer);
+			uline = readRange(fp, uline, &simpleBuffer);
 			const char *script = (const char*)simpleBuffer.buffer;
 			if(sline == 1 && simpleBuffer.size > 2 && script[0] == '#' && script[1] == '!') {
 				// fall through this line
 				simpleBuffer.size = 0;
 				//TODO: do we increment uline??
 			}
-			if(isEmptyChunk(script, simpleBuffer.size)) {
+			if(isEmptyRange(script, simpleBuffer.size)) {
 				int isBreak = false;
-				isSuccessfullyLoading = evalFunc(script, chunkheadline, &isBreak, thunk);
+				isSuccessfullyLoading = evalFunc(script, rangeheadline, &isBreak, thunk);
 				if(!isSuccessfullyLoading|| isBreak) {
 					break;
 				}

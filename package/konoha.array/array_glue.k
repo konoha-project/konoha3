@@ -3,13 +3,13 @@
 // K.import("konoha.string")
 // K.import("konoha.assign")
 
-// Expr squareBracketParseExpr (Stmt stmt, Array[Token] tokenArray, int s, int c,	int e) {
-// 	Token tk = tokenArray[c];
+// Expr squareBracketParseExpr (Stmt stmt, Array[Token] tokenList, int s, int c,	int e) {
+// 	Token tk = tokenList[c];
 // 	if(s == c) { // TODO
 
 // 	}
 // 	else {
-// 		/*kExpr *lexpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenArray, s, c);
+// 		/*kExpr *lexpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenList, s, c);
 // 		if(lexpr == K_NULLEXPR) {
 // 			RETURN_(lexpr);
 // 		}
@@ -25,7 +25,7 @@
 // 			lexpr  = SUGAR new_ConsExpr(kctx, syn, 2, tkN, lexpr);
 // 			lexpr = SUGAR kStmt_addExprParam(kctx, stmt, lexpr, tk->subTokenList, 0, kArray_size(tk->subTokenList), 1/*allowEmpty*/);
 // 		}
-// 		RETURN_(SUGAR kStmt_rightJoinExpr(kctx, stmt, lexpr, tokenArray, c+1, e));
+// 		RETURN_(SUGAR kStmt_rightJoinExpr(kctx, stmt, lexpr, tokenList, c+1, e));
 // */
 // 	}
 

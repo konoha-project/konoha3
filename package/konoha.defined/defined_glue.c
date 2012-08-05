@@ -84,10 +84,10 @@ static void filterArrayList(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLi
 
 static KMETHOD ParseExpr_Defined(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_ParseExpr(stmt, tokenArray, beginIdx, currentIdx, endIdx);
+	VAR_ParseExpr(stmt, tokenList, beginIdx, currentIdx, endIdx);
 	if(beginIdx == currentIdx && beginIdx + 1 < endIdx) {
-		kTokenVar *definedToken = tokenArray->tokenVarItems[beginIdx];   // defined
-		kTokenVar *pToken = tokenArray->tokenVarItems[beginIdx+1];
+		kTokenVar *definedToken = tokenList->tokenVarItems[beginIdx];   // defined
+		kTokenVar *pToken = tokenList->tokenVarItems[beginIdx+1];
 		if(IS_Array(pToken->subTokenList)) {
 			kExpr *expr = SUGAR new_ConsExpr(kctx, definedToken->resolvedSyntaxInfo, 1, definedToken);
 			filterArrayList(kctx, Stmt_nameSpace(stmt), pToken->subTokenList, 0, kArray_size(pToken->subTokenList));

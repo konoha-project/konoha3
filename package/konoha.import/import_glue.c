@@ -30,23 +30,23 @@ static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int ret = false;
 	VAR_StmtTyCheck(stmt, gma);
-	kTokenArray *tokenArray = (kTokenArray *) kStmt_getObjectNULL(kctx, stmt, KW_TokenPattern);
-	if (tokenArray == NULL) {
+	kTokenArray *tokenList = (kTokenArray *) kStmt_getObjectNULL(kctx, stmt, KW_TokenPattern);
+	if (tokenList == NULL) {
 		RETURNb_(false);
 	}
 	ksymbol_t star = SYM_("*");
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	int i = 0;
-	if (i + 2 < kArray_size(tokenArray)) {
-		for (; i < kArray_size(tokenArray)-1; i+=2) {
+	if (i + 2 < kArray_size(tokenList)) {
+		for (; i < kArray_size(tokenList)-1; i+=2) {
 			/* name . */
-			kToken *tk  = tokenArray->tokenItems[i+0];
-			kToken *dot = tokenArray->tokenItems[i+1];
+			kToken *tk  = tokenList->tokenItems[i+0];
+			kToken *dot = tokenList->tokenItems[i+1];
 //			assert(tk->keyword  == TokenType_SYMBOL);
 //			assert(dot->keyword == KW_DOT);
-			if (i+2 < kArray_size(tokenArray)) {
-				kToken *startTk = tokenArray->tokenItems[i+2];
+			if (i+2 < kArray_size(tokenList)) {
+				kToken *startTk = tokenList->tokenItems[i+2];
 				if (startTk->resolvedSyntaxInfo->keyword == star) {
 					break;
 				}
@@ -55,7 +55,7 @@ static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp)
 			kwb_putc(&wb, '.');
 		}
 	}
-	kString *name = tokenArray->tokenItems[i]->text;
+	kString *name = tokenList->tokenItems[i]->text;
 	KLIB Kwb_write(kctx, &wb, S_text(name), S_size(name));
 	kString *pkgname = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
 	kNameSpace *ns = Stmt_nameSpace(stmt);

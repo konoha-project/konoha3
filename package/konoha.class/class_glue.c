@@ -505,30 +505,32 @@ static void KonohaClass_initField(KonohaContext *kctx, KonohaClassVar *definedCl
 
 static kBlock* kStmt_parseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToken *tokenClassName)
 {
+	kBlock *bk = NULL;
 	kToken *blockToken = (kToken*)kStmt_getObject(kctx, stmt, KW_BlockPattern, NULL);
 	if(blockToken != NULL && blockToken->resolvedSyntaxInfo->keyword == KW_BlockPattern) {
 		const char *cname = S_text(tokenClassName->text);
-		kArray *a = KonohaContext_getSugarContext(kctx)->preparedTokenList;
-		size_t atop = kArray_size(a), s, i;
-		SUGAR kNameSpace_tokenize(kctx, Stmt_nameSpace(stmt), S_text(blockToken->text), blockToken->uline, a);
-		s = kArray_size(a);
-		kToken *prevToken = blockToken;
-		for(i = atop; i < s; i++) {
-			kToken *tk = a->tokenItems[i];
-			if(tk->topCharHint == '(' && prevToken->unresolvedTokenType == TokenType_SYMBOL && strcmp(cname, S_text(prevToken->text)) == 0) {
-				kTokenVar *newToken = GCSAFE_new(TokenVar, TokenType_SYMBOL);
-				KSETv(newToken->text, SYM_s(MN_new));
-				KLIB kArray_add(kctx, a, newToken);
+		TokenRange rangeBuf, *range = SUGAR new_TokenListRange(kctx, Stmt_nameSpace(stmt), KonohaContext_getSugarContext(kctx)->preparedTokenList, &rangeBuf);
+		SUGAR TokenRange_tokenize(kctx, range,  S_text(blockToken->text), blockToken->uline);
+		{
+			kToken *prevToken = blockToken;
+			TokenRange sourceBuf, *sourceRange = SUGAR new_TokenStackRange(kctx, range, &sourceBuf);
+			int i;
+			for(i = range->beginIdx; i < range->endIdx; i++) {
+				kToken *tk = range->tokenList->tokenItems[i];
+				if(tk->topCharHint == '(' && prevToken->unresolvedTokenType == TokenType_SYMBOL && strcmp(cname, S_text(prevToken->text)) == 0) {
+					kTokenVar *newToken = GCSAFE_new(TokenVar, TokenType_SYMBOL);
+					KLIB kArray_add(kctx, sourceRange->tokenList, newToken);
+					KSETv(newToken->text, SYM_s(MN_new));
+				}
+				KLIB kArray_add(kctx, sourceRange->tokenList, tk);
+				prevToken = tk;
 			}
-			KLIB kArray_add(kctx, a, tk);
-			prevToken = tk;
+			bk = SUGAR new_Block(kctx, stmt/*parent*/, sourceRange, NULL);
+			KLIB kObject_setObject(kctx, stmt, KW_BlockPattern, TY_Block, bk);
 		}
-		kBlock *bk = SUGAR new_Block(kctx, Stmt_nameSpace(stmt), stmt, a, s, kArray_size(a), NULL);
-		KLIB kObject_setObject(kctx, stmt, KW_BlockPattern, TY_Block, bk);
-		KLIB kArray_clear(kctx, a, atop);
-		return bk;
+		TokenRange_pop(kctx, range);
 	}
-	return NULL;
+	return bk;
 }
 
 static size_t kBlock_countFieldSize(KonohaContext *kctx, kBlock *bk)
@@ -690,8 +692,8 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD PatternMatch_ClassName(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_PatternMatch(stmt, name, tokenArray, beginIdx, endIdx);
-	kTokenVar *tk = tokenArray->tokenVarItems[beginIdx];
+	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
+	kTokenVar *tk = tokenList->tokenVarItems[beginIdx];
 	int returnIdx = -1;
 	if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern || tk->resolvedSyntaxInfo->keyword == KW_TypePattern) {
 		KLIB kObject_setObject(kctx, stmt, name, O_typeId(tk), tk);
