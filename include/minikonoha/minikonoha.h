@@ -422,7 +422,7 @@ typedef struct KonohaModule        KonohaModule;
 typedef struct KonohaContextModule KonohaContextModule;
 
 struct KonohaContextVar {
-	int						          safepoint; // set to 1
+	uintptr_t                         safepoint; // set to 1
 	KonohaStack                      *esp;
 	PlatformApi                      *platApi;
 	KonohaLib                        *klib;
@@ -721,6 +721,7 @@ struct KonohaClassField {
 #define MAGICFLAG(f)             (K_OBJECT_MAGIC | ((kmagicflag_t)(f) & K_CFLAGMASK))
 
 #define kObject_NullObject       ((kmagicflag_t)(1<<0))
+#define kObject_GCFlag           ((kmagicflag_t)(1<<1))
 
 #define kObject_Local6           ((kmagicflag_t)(1<<10))
 #define kObject_Local5           ((kmagicflag_t)(1<<11))
@@ -1099,7 +1100,7 @@ struct _kSystem {
 		tsfp[K_MTDIDX].mtdNC = MTD;\
 		tsfp[K_PCIDX].fname = __FILE__;\
 		tsfp[K_SHIFTIDX].shift = 0;\
-		KSETv(tsfp[K_RTNIDX].o, ((kObject*)DEFVAL));\
+		KSETv_AND_WRITE_BARRIER(NULL, tsfp[K_RTNIDX].o, ((kObject*)DEFVAL), GC_NO_WRITE_BARRIER);\
 		tsfp[K_RTNIDX].uline = __LINE__;\
 		klr_setesp(kctx, tsfp + ARGC + 1);\
 		(MTD)->invokeMethodFunc(kctx, tsfp);\
@@ -1123,6 +1124,7 @@ struct KonohaLibVar {
 	void* (*Kmalloc)(KonohaContext*, size_t);
 	void* (*Kzmalloc)(KonohaContext*, size_t);
 	void  (*Kfree)(KonohaContext*, void *, size_t);
+	void  (*Kwrite_barrier)(KonohaContext *, kObject *);
 
 	void  (*Karray_init)(KonohaContext *, KUtilsGrowingArray *, size_t);
 	void  (*Karray_resize)(KonohaContext*, KUtilsGrowingArray *, size_t);
@@ -1318,10 +1320,24 @@ typedef struct {
 #define PUSH_GCSTACK(o)        KLIB kArray_add(kctx, kctx->stack->gcstack, o)
 #define RESET_GCSTACK()        KLIB kArray_clear(kctx, kctx->stack->gcstack, gcstack_)
 
+#define GC_EMIT_WRITE_BARRIER 1
+#define GC_NO_WRITE_BARRIER   0
+
+#define GC_WRITE_BARRIER(kctx, O)  (KLIB Kwrite_barrier(kctx, ((kObject*)(O))))
 #define KINITv(VAR, VAL)   OBJECT_SET(VAR, VAL)
-#define KSETv(VAR, VAL)    /*OBJECT_SET(VAR, VAL)*/ VAR = (VAL)
-#define KINITp(parent, v, o) KINITv(v, o)
-#define KSETp(parent,  v, o) KSETv(v, o)
+#define KINITp(PARENT, VAR, VAL)   do {\
+	KINITv(VAR, VAL);\
+	GC_WRITE_BARRIER(kctx, PARENT);\
+} while (0)
+
+#define KSETv(PARENT, VAR, VAL) KSETv_AND_WRITE_BARRIER(PARENT, VAR, VAL, GC_EMIT_WRITE_BARRIER)
+
+#define KSETv_AND_WRITE_BARRIER(PARENT, VAR, VAL, WB) do {\
+	(VAR) = (VAL);\
+	if (WB){ /* WB must be constant variable */\
+		GC_WRITE_BARRIER(kctx, PARENT);\
+	}\
+} while (0)
 #define KUNUSEv(V)         (V)->h.ct->free(kctx, (V))
 
 #define BEGIN_REFTRACE(SIZE)  int _ref_ = (SIZE); kObjectVar** _tail = KONOHA_reftail(kctx, (SIZE));
@@ -1349,7 +1365,7 @@ typedef struct {
 // method macro
 
 #define RETURN_(vv) do {\
-	KSETv(sfp[(-(K_CALLDELTA))].o, ((kObject*)vv));\
+	KSETv_AND_WRITE_BARRIER(NULL, sfp[(-(K_CALLDELTA))].o, ((kObject*)vv), GC_NO_WRITE_BARRIER);\
 	KNH_SAFEPOINT(kctx, sfp);\
 	return; \
 } while (0)

@@ -138,7 +138,7 @@ static void Kthrow(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD System_throw(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KonohaExceptionContext *ctx = KonohaContext_getExceptionContext(kctx);
-	KSETv(ctx->thrownException, sfp[1].asException);
+	KSETv_AND_WRITE_BARRIER(NULL, ctx->thrownException, sfp[1].asException, GC_NO_WRITE_BARRIER);
 	Kthrow(kctx, sfp);
 }
 

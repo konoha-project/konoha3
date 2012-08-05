@@ -142,7 +142,7 @@ static uintptr_t p_init(uintptr_t context)
 	memcpy(c, (struct konoha_context*) context, sizeof(*c));
 	KonohaContext *kctx = c->konoha;
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KSETv(lsfp[K_CALLDELTA+0].o, c->finit->self);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, c->finit->self, GC_NO_WRITE_BARRIER);
 	KCALL(lsfp, 0, c->finit->mtd, 0, K_NULL);
 	END_LOCAL();
 	return (uintptr_t) c;
@@ -153,7 +153,7 @@ static uintptr_t p_exit(uintptr_t context)
 	struct konoha_context *c = malloc(sizeof(struct konoha_context));
 	KonohaContext *kctx = c->konoha;
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KSETv(lsfp[K_CALLDELTA+0].o, c->fexit->self);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, c->fexit->self, GC_NO_WRITE_BARRIER);
 	KCALL(lsfp, 0, c->fexit->mtd, 0, K_NULL);
 	END_LOCAL();
 	bzero(c, sizeof(*c));
@@ -172,8 +172,8 @@ static uintptr_t p_func(uintptr_t context, struct LogEntry *e)
 	KonohaContext *kctx = c->konoha;
 	kObject *log = (kObject *) Log_new(kctx, (struct Log *) &e->data);
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KSETv(lsfp[K_CALLDELTA+0].o, c->func->self);
-	KSETv(lsfp[K_CALLDELTA+1].o, log);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, c->func->self, GC_NO_WRITE_BARRIER);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, log, GC_NO_WRITE_BARRIER);
 	KCALL(lsfp, 0, c->func->mtd, 0, K_NULL);
 	END_LOCAL();
 	return context;
@@ -260,9 +260,9 @@ static void *statics_init(KonohaContext *kctx, kFunc *initFo, kFunc *exitFo, kFu
 {
 	struct konoha_context *c = malloc(sizeof(struct konoha_context));
 	c->konoha = kctx;
-	KSETv(c->finit, initFo);
-	KSETv(c->fexit, exitFo);
-	KSETv(c->func,  funcFo);
+	KSETv_AND_WRITE_BARRIER(NULL, c->finit, initFo, GC_NO_WRITE_BARRIER);
+	KSETv_AND_WRITE_BARRIER(NULL, c->fexit, exitFo, GC_NO_WRITE_BARRIER);
+	KSETv_AND_WRITE_BARRIER(NULL, c->func,  funcFo, GC_NO_WRITE_BARRIER);
 	return (void*) c;
 }
 

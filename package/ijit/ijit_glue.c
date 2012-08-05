@@ -89,7 +89,7 @@ static void check_stack_size(KonohaContext *kctx, kArray *stack, int n)
 static void set_value(KonohaContext *kctx, int index, kObject *o)
 {
 	kArray  *g = kmodjit->global_value;
-	KSETv(g->objectItems[index], o);
+	KSETv(g, g->objectItems[index], o);
 }
 
 static kObject *get_value(KonohaContext *kctx, int index)
@@ -126,7 +126,7 @@ static KMETHOD Expr_getSingle(KonohaContext *kctx, KonohaStack *sfp)
 static kArray *get_stack(KonohaContext *kctx, kArray *g)
 {
 	if (!g->objectItems[0]) {
-		KSETv(g->objectItems[0], ((kObject*)new_(Array, 0)));
+		KSETv(g, g->objectItems[0], ((kObject*)new_(Array, 0)));
 	}
 	return (kArray*)g->objectItems[0];
 }
@@ -148,7 +148,7 @@ static KMETHOD System_setValue(KonohaContext *kctx, KonohaStack *sfp)
 	int index = sfp[1].intValue;
 	check_stack_size(kctx, stack, index);
 	kObject *o = sfp[2].o;
-	KSETv(stack->objectItems[index], o);
+	KSETv(stack, stack->objectItems[index], o);
 	RETURNvoid_();
 }
 
@@ -529,7 +529,7 @@ static KMETHOD Array_setO(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
 	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].uline);
-	KSETv(a->objectItems[n], sfp[2].o);
+	KSETv(a, a->objectItems[n], sfp[2].o);
 	RETURNvoid_();
 }
 
@@ -543,7 +543,7 @@ static KMETHOD Array_erase(KonohaContext *kctx, KonohaStack *sfp)
 	kArray *dst = new_(Array, (asize-1));
 	for (i = 0; i < asize; ++i) {
 		if (i != n) {
-			KSETv(dst->objectItems[j], src->objectItems[i]);
+			KSETv(dst, dst->objectItems[j], src->objectItems[i]);
 			++j;
 		}
 	}
@@ -693,8 +693,8 @@ static void _kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	DBG_P("START CODE GENERATION..");
 	BEGIN_LOCAL(lsfp, 8);
 
-	KSETv(lsfp[K_CALLDELTA+1].asMethod, mtd);
-	KSETv(lsfp[K_CALLDELTA+2].asObject, (kObject*)bk);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].asMethod, mtd, GC_NO_WRITE_BARRIER);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+2].asObject, (kObject*)bk, GC_NO_WRITE_BARRIER);
 	KCALL(lsfp, 0, GenCodeMtd, 2, K_NULL);
 	END_LOCAL();
 }
