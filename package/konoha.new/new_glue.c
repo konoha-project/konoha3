@@ -77,7 +77,7 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp)
 			RETURN_(expr);
 		}
 		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KW_BracketGroup) {     // new int [100]
-			SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_new);
+			SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), SYM_("new"));
 			KonohaClass *arrayClass = CT_p0(kctx, CT_Array, foundClass->typeId);
 			newToken->resolvedSymbol = MN_("newArray");
 			kExpr *expr = SUGAR new_ConsExpr(kctx, syn, 2, newToken, NewExpr(kctx, syn, tokenList->tokenVarItems[beginIdx+1], arrayClass->typeId));

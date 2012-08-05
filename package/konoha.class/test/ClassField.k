@@ -1,15 +1,18 @@
 // written by shunsuke shida
 // modified by kimio kuramitsu
 
-K.import("konoha");
+K.import("konoha.class");
 
-class A {
+class C {
 	int age;
-	A () {
+	C () {
 	}
 }
 
-A a = new A();
+void test() {
+	C c = new C();
+	assert(c.age == 0);
+}
 
-assert(a.age == 0);
+test();
 

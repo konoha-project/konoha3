@@ -1176,67 +1176,6 @@ static KMETHOD StmtTyCheck_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 #define GROUP(T)    .keyword = KW_##T##Group
 #define TOKEN(T)    .keyword = KW_##T
 
-//static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
-//{
-//	DBG_ASSERT(SYM_("$Param") == KW_ParamPattern);
-//	DBG_ASSERT(SYM_(".") == KW_DOT);
-//	DBG_ASSERT(SYM_(",") == KW_COMMA);
-//	DBG_ASSERT(SYM_("void") == KW_void);
-//	DBG_ASSERT(SYM_("return") == KW_return);
-//	DBG_ASSERT(SYM_("new") == KW_new);
-//
-//	KDEFINE_SYNTAX SYNTAX[] = {
-//		{ TOKEN(ERR), .flag = SYNFLAG_StmtBreakExec, },
-//		{ PATTERN(Expr), .rule ="$Expr", PatternMatch_(Expr), TopStmtTyCheck_(Expr), StmtTyCheck_(Expr),  },
-//		{ PATTERN(Symbol),  _TERM, PatternMatch_(MethodName), ExprTyCheck_(Symbol),},
-//		{ PATTERN(Const), _TERM, PatternMatch_(ConstName), /* .rule = "$Const \"=\" $Expr",*/ TopStmtTyCheck_(ConstDecl), ExprTyCheck_(Usymbol),},
-//		{ PATTERN(Text),    _TERM, ExprTyCheck_(Text),},
-//		{ PATTERN(Number),     _TERM, ExprTyCheck_(Int),},
-//		{ PATTERN(Float),   _TERM, },
-//		{ PATTERN(Type),    _TERM, PatternMatch_(Type), .rule = "$Type $Expr", StmtTyCheck_(TypeDecl), ExprTyCheck_(Type), },
-//		{ GROUP(Parenthesis), .flag = SYNFLAG_ExprPostfixOp2, ParseExpr_(Parenthesis), .precedence_op2 = 300, ExprTyCheck_(FuncStyleCall),}, //KW_ParenthesisGroup
-//		{ GROUP(Bracket),  },  //KW_BracketGroup
-//		{ GROUP(Brace),  }, // KW_BraceGroup
-//		{ PATTERN(Block), PatternMatch_(Block), ExprTyCheck_(Block), },
-//		{ PATTERN(Param), PatternMatch_(Params), TopStmtTyCheck_(ParamsDecl), ExprTyCheck_(MethodCall),},
-//		{ PATTERN(Token), PatternMatch_(Toks), },
-//		{ TOKEN(DOT), ParseExpr_(DOT), .precedence_op2 = 300, },
-//		{ TOKEN(DIV), _OP, .precedence_op2 = 500, },
-//		{ TOKEN(MOD), _OP, .precedence_op2 = 500, },
-//		{ TOKEN(MUL), _OP, .precedence_op2 = 500, },
-//		{ TOKEN(ADD), _OP, .precedence_op2 = 600, },
-//		{ TOKEN(SUB), _OP, .precedence_op2 = 600, .precedence_op1 = 400},
-//		{ TOKEN(LT), _OP,  .precedence_op2 = 800, },
-//		{ TOKEN(LTE), _OP, .precedence_op2 = 800, },
-//		{ TOKEN(GT), _OP,  .precedence_op2 = 800, },
-//		{ TOKEN(GTE), _OP, .precedence_op2 = 800, },
-//		{ TOKEN(EQ), _OP,  .precedence_op2 = 900, },
-//		{ TOKEN(NEQ), _OP, .precedence_op2 = 900, },
-//		{ TOKEN(AND), _OP, .precedence_op2 = 1300, ExprTyCheck_(AND)},
-//		{ TOKEN(OR), _OP,  .precedence_op2 = 1400, ExprTyCheck_(OR)},
-//		{ TOKEN(NOT), _OP, .precedence_op1 = 400},
-////		{ TOKEN(":"), _OP,  .precedence_op2 = 3072,},
-//		{ TOKEN(LET),   .flag = SYNFLAG_ExprLeftJoinOp2, ParseExpr_(Op), .precedence_op2 = 4096, },
-//		{ TOKEN(COMMA),  ParseExpr_(COMMA), .precedence_op2 = 8192, },
-//		{ TOKEN(DOLLAR), ParseExpr_(DOLLAR), },
-//		{ TOKEN(void), .type = TY_void, .rule ="$Type [ClassName: $Type \".\"] $Symbol $Param [$Block]", TopStmtTyCheck_(MethodDecl)},
-//		{ TOKEN(boolean), .type = TY_Boolean, },
-//		{ TOKEN(int),     .type = TY_Int, },
-//		{ TOKEN(true),    _TERM, ExprTyCheck_(true),},
-//		{ TOKEN(false),   _TERM, ExprTyCheck_(false),},
-//		{ TOKEN(if), .rule ="\"if\" \"(\" $Expr \")\" $Block [\"else\" else: $Block]", TopStmtTyCheck_(if), StmtTyCheck_(if), },
-//		{ TOKEN(else), .rule = "\"else\" $Block", TopStmtTyCheck_(else), StmtTyCheck_(else), },
-//		{ TOKEN(return), .rule ="\"return\" [$Expr]", .flag = SYNFLAG_StmtBreakExec, StmtTyCheck_(return), },
-//		{ .keyword = KW_END, },
-//	};
-//	kNameSpace_defineSyntax(kctx, ns, SYNTAX);
-//	SugarSyntaxVar *syn = (SugarSyntaxVar*)SYN_(ns, KW_void);
-//	syn->ty = TY_void; // it's not cool, but necessary
-//	syn = (SugarSyntaxVar*)SYN_(ns, KW_ConstPattern);
-//	KINITv(syn->syntaxRuleNULL, new_(TokenArray, 0));
-//	kNameSpace_parseSugarRule(kctx, ns, "$Const \"=\" $Expr", 0, syn->syntaxRuleNULL);
-//}
-
 static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 {
 	DBG_ASSERT(SYM_("$Param") == KW_ParamPattern);
@@ -1244,7 +1183,7 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 	DBG_ASSERT(SYM_(":") == KW_COLON);
 	DBG_ASSERT(SYM_("void") == KW_void);
 	DBG_ASSERT(SYM_("return") == KW_return);
-	DBG_ASSERT(SYM_("new") == KW_new);
+	DBG_ASSERT(SYM_("new") == MN_new);
 
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ TOKEN(ERR), .flag = SYNFLAG_StmtBreakExec, },

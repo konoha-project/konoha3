@@ -106,7 +106,7 @@ extern "C" {
 #define KW_else      (6+KW_void)
 #define KW_return    (7+KW_void)
 // reserved
-#define KW_new       (8+KW_void)
+//#define MN_new       (8+KW_void)
 #define FN_this      FN_("this")
 
 

@@ -246,7 +246,7 @@ static KMETHOD ParseExpr_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 		if(leftExpr == K_NULLEXPR) {
 			RETURN_(leftExpr);
 		}
-		if(leftExpr->syn->keyword == KW_new) {  // new int[100]
+		if(leftExpr->syn->keyword == SYM_("new")) {  // new int[100]
 			kExpr_setsyn(leftExpr, SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall));
 			leftExpr = SUGAR kStmt_addExprParam(kctx, stmt, leftExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), 0/*allowEmpty*/);
 		}

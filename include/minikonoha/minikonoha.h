@@ -1230,8 +1230,8 @@ struct KonohaLibVar {
 #define MN_(T)                    (KPI)->Ksymbol(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
 #define T_mn(X)                   SYM_PRE(X), SYM_t(X)
 
-// #define KW_new (((ksymbol_t)39)|0) /*new*/
-#define MN_new                    39  /* @see */
+// #define KW_new (((ksymbol_t)40)|0) /*new*/
+#define MN_new                    40  /* @see */
 
 #define new_(C, A)                (k##C*)(KLIB new_kObject(kctx, CT_##C, ((uintptr_t)A)))
 #define GCSAFE_new(C, A)          (k##C*)(KLIB new_kObjectOnGCSTACK(kctx, CT_##C, ((uintptr_t)A)))
