@@ -23,8 +23,11 @@
  ***************************************************************************/
 
 /* ************************************************************************ */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "commons.h"
+int verbose_gc = 0;
 
 #ifdef K_USING_RCGC
 #include "rcgc.h"
@@ -32,4 +35,8 @@
 #include "gbmgc.h"
 #else
 #include "bmgc.h"
+#endif
+
+#ifdef __cplusplus
+} /* extern "C" */
 #endif

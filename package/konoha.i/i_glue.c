@@ -104,7 +104,7 @@ static void dumpMethod(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd)
 {
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	KSETv(sfp[2].asMethod, mtd);
+	KSETv_AND_WRITE_BARRIER(NULL, sfp[2].asMethod, mtd, GC_NO_WRITE_BARRIER);
 	O_ct(mtd)->p(kctx, sfp, 2, &wb, 1);
 	PLATAPI printf_i("%s\n", KLIB Kwb_top(kctx, &wb, 1));
 	KLIB Kwb_free(&wb);
