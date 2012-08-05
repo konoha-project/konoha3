@@ -54,7 +54,7 @@ extern "C" {
 #define MIN_ALIGN (ONE << SUBHEAP_KLASS_MIN)
 
 #ifdef USE_GENERATIONAL_GC
-#define MINOR_COUNT 4
+#define MINOR_COUNT 16
 #endif
 
 #define KB_   (1024)
@@ -1025,7 +1025,7 @@ static bool fetchSegment(SubHeap *h, size_t klass)
 	return true;
 }
 
-static bool nextSegment(HeapManager *mng, SubHeap *h, AllocationPointer *p)
+static bool nextSegment(HeapManager *mng, SubHeap *h, AllocationPointer *p, KonohaContext *kctx)
 {
 	Segment *seg;
 	while (h->freelist != NULL) {
@@ -1038,6 +1038,10 @@ static bool nextSegment(HeapManager *mng, SubHeap *h, AllocationPointer *p)
 			return true;
 		}
 	}
+#ifdef USE_GENERATIONAL_GC
+	bitmap_set(&((KonohaContextVar*)kctx)->safepoint, GC_MINOR_FLAG,
+			(uintptr_t)((--h->minor_count) & (MINOR_COUNT-1)) == 0);
+#endif
 
 	if (newSegment(mng, h)) {
 		findNextFreeBlock(p);
@@ -1149,11 +1153,7 @@ static void *tryAlloc(KonohaContext *kctx, HeapManager *mng, SubHeap *h)
 	void *temp;
 	if (isMarked(p)) {
 		if (findNextFreeBlock(p) == false) {
-#ifdef USE_GENERATIONAL_GC
-			bitmap_set(&((KonohaContextVar*)kctx)->safepoint, GC_MINOR_FLAG,
-					(uintptr_t)((--h->minor_count) & (MINOR_COUNT-1)) == 0);
-#endif
-			if (nextSegment(mng, h, p) == false) {
+			if (nextSegment(mng, h, p, kctx) == false) {
 				return NULL;
 			}
 		}
@@ -1673,8 +1673,6 @@ static void RememberSet_reftrace(KonohaContext *kctx, HeapManager *mng)
 		bitmap_t *e = m + bitmap_size;
 		for (; m != e; base+=BITS, base_address += SEGMENT_SIZE) {
 			for (; m < base + BITS; ++m) {
-				if (*m == 0)
-					continue;
 				bitmap_t b = (*m);
 				while (b != 0) {
 					unsigned index, offset;
@@ -2057,8 +2055,7 @@ void MODGC_free(KonohaContext *kctx, KonohaContextVar *ctx)
 void MODGC_gc_invoke(KonohaContext *kctx, KonohaStack *esp)
 {
 	enum gc_mode mode = kctx->safepoint & 0x3;
-	if (mode == GC_NOP)
-		mode = GC_MINOR;
+	mode = (mode == GC_NOP) ? mode : GC_MINOR;
 	bitmapMarkingGC(kctx, HeapMng(kctx), mode);
 }
 
