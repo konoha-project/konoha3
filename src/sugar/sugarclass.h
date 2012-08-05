@@ -211,7 +211,7 @@ static kExpr* SUGAR kExpr_setConstValue(KonohaContext *kctx, kExpr *expr, ktype_
 	}
 	else {
 		Wexpr->build = TEXPR_CONST;
-		KINITv(Wexpr->objectConstValue, o);
+		KINITp(Wexpr, Wexpr->objectConstValue, o);
 		Expr_setObjectConstValue(Wexpr, 1);
 	}
 	return (kExpr*)Wexpr;

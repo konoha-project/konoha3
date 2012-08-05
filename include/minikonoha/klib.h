@@ -216,7 +216,7 @@ static kinline void Method_setProceedMethod(KonohaContext *kctx, kMethod *mtd, k
 {
 	DBG_ASSERT(mtd != mtd2);
 	DBG_ASSERT(mtd->proceedNUL == NULL);
-	KINITv(((kMethodVar*)mtd)->proceedNUL, mtd2);
+	KINITp(mtd, ((kMethodVar*)mtd)->proceedNUL, mtd2);
 }
 
 #ifdef __cplusplus

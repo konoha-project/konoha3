@@ -1325,6 +1325,11 @@ typedef struct {
 
 #define GC_WRITE_BARRIER(kctx, O)  (KLIB Kwrite_barrier(kctx, ((kObject*)(O))))
 #define KINITv(VAR, VAL)   OBJECT_SET(VAR, VAL)
+#define KINITp(PARENT, VAR, VAL)   do {\
+	KINITv(VAR, VAL);\
+	GC_WRITE_BARRIER(kctx, PARENT);\
+} while (0)
+
 #define KSETv(PARENT, VAR, VAL) KSETv_AND_WRITE_BARRIER(PARENT, VAR, VAL, GC_EMIT_WRITE_BARRIER)
 
 #define KSETv_AND_WRITE_BARRIER(PARENT, VAR, VAL, WB) do {\

@@ -512,7 +512,7 @@ static void kNameSpace_setTokenizeFunc(KonohaContext *kctx, kNameSpace *ns, int 
 	else {
 		kFunc ** funcMatrix = NameSpace_tokenFuncMatrix(kctx, ns);
 		if(funcMatrix[kchar] == NULL) {
-			KINITv(funcMatrix[kchar], funcTokenize);
+			KINITp(ns, funcMatrix[kchar], funcTokenize);
 		}
 		else {
 			if(isAddition) {

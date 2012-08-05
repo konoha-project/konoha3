@@ -124,7 +124,7 @@ static kExpr *new_BoxingExpr(KonohaContext *kctx, kExpr *expr, ktype_t reqty)
 	if(expr->build == TEXPR_NCONST) {
 		kExprVar *Wexpr = (kExprVar*)expr;
 		Wexpr->build = TEXPR_CONST;
-		KINITv(Wexpr->objectConstValue, KLIB new_kObject(kctx, CT_(Wexpr->ty), Wexpr->unboxConstValue));
+		KINITp(Wexpr, Wexpr->objectConstValue, KLIB new_kObject(kctx, CT_(Wexpr->ty), Wexpr->unboxConstValue));
 		Expr_setObjectConstValue(Wexpr, 1);
 		Wexpr->ty = reqty;
 		return expr;
