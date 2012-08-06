@@ -1,6 +1,7 @@
 // written by kimio kuramitsu
 
-K.import("konoha");
+K.import("konoha.assign");
+K.import("konoha.class");
 
 class Person {
 	String name;

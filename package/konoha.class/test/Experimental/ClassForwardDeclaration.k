@@ -1,4 +1,5 @@
-K.import("konoha");
+K.import("konoha.class");
+K.import("konoha.assign");
 
 class A;
 
@@ -23,8 +24,12 @@ class A {
 	}
 }
 
-B b = new B();
-assert(b.a.x == 1);
-assert(b.a.y == 2);
-assert(b.x == 3);
-assert(b.a.add() == 3);
+void test() {
+	B b = new B();
+	assert(b.a.x == 1);
+	assert(b.a.y == 2);
+	assert(b.x == 3);
+	assert(b.a.add() == 3);
+}
+
+test();
