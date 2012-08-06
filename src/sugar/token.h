@@ -717,6 +717,7 @@ static void kNameSpace_parseSugarRule2(KonohaContext *kctx, kNameSpace *ns, cons
 	TokenRange_tokenize(kctx, rawRange, rule, uline);
 	TokenRange sourceRangeBuf, *sourceRange = new_TokenStackRange(kctx, rawRange, &sourceRangeBuf);
 	TokenRange_resolved(kctx, sourceRange, rawRange);
+	KdumpTokenRange(kctx, "resolved", sourceRange);
 	kArray_addSyntaxRule(kctx, ruleList, sourceRange);
 	TokenRange_pop(kctx, rawRange);
 }

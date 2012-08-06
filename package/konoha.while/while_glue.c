@@ -114,7 +114,7 @@ static kbool_t while_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileli
 		{ .keyword = SYM_("while"), _LOOP, StmtTyCheck_(while), .rule = "\"while\" \"(\" $Expr \")\" $Block",},
 		{ .keyword = SYM_("break"), StmtTyCheck_(break), .rule = "\"break\" [ $Const ]", },
 		{ .keyword = SYM_("continue"), StmtTyCheck_(continue), .rule = "\"continue\" [ $Const ]", },
-		{ .keyword = SYM_("for"), _LOOP, StmtTyCheck_(for), .rule = "\"for\" \"(\" var: $Block \";\" $Expr \";\" each: $Block \")\" $Block", },
+//		{ .keyword = SYM_("for"), _LOOP, StmtTyCheck_(for), .rule = "\"for\" \"(\" var: $Block \";\" $Expr \";\" each: $Block \")\" $Block", },
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);

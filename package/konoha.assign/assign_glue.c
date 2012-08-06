@@ -95,7 +95,6 @@ static inline void kToken_copy(KonohaContext *kctx, kTokenVar *destToken, kToken
 	destToken->resolvedSyntaxInfo = origToken->resolvedSyntaxInfo;
 }
 
-
 static KMETHOD ParseExpr_SelfAssign(KonohaContext *kctx, KonohaStack *sfp)
 {
 //<<<<<<< HEAD
