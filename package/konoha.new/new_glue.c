@@ -49,7 +49,7 @@ static kbool_t new_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime
 static kExpr* NewExpr(KonohaContext *kctx, SugarSyntax *syn, kToken *tk, ktype_t ty)
 {
 	kExprVar *expr = GCSAFE_new(ExprVar, syn);
-	KSETv(expr->termToken, tk);
+	KSETv(expr, expr->termToken, tk);
 	Expr_setTerm(expr, 1);
 	expr->build = TEXPR_NEW;
 	expr->ty = ty;

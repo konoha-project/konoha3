@@ -425,6 +425,7 @@ static void kObject_setObject(KonohaContext *kctx, kAbstractObject *o, ksymbol_t
 {
 	kObjectVar *v = (kObjectVar*)o;
 	protomap_set((protomap_t**)&v->h.kvproto, key | SYMKEY_BOXED, ty, (void*)val);
+	KLIB Kwrite_barrier(kctx, v);
 }
 
 static uintptr_t kObject_getUnboxValue(KonohaContext *kctx, kObject *o, ksymbol_t key, uintptr_t defval)

@@ -22,6 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+#ifndef CLASS_GLUE_H_
+#define CLASS_GLUE_H_
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
@@ -39,8 +41,7 @@ static KMETHOD MethodFunc_UnboxFieldGetter(KonohaContext *kctx, KonohaStack *sfp
 static KMETHOD MethodFunc_ObjectFieldSetter(KonohaContext *kctx, KonohaStack *sfp)
 {
 	size_t delta = sfp[K_MTDIDX].mtdNC->delta;
-	kObjectVar *o = sfp[0].asObjectVar;
-	KSETv(o, o->fieldObjectItems[delta], sfp[1].asObject);
+	KSETv(sfp[0].asObjectVar, (sfp[0].asObjectVar)->fieldObjectItems[delta], sfp[1].asObject);
 	RETURN_(sfp[1].asObject);
 }
 static KMETHOD MethodFunc_UnboxFieldSetter(KonohaContext *kctx, KonohaStack *sfp)
@@ -97,7 +98,7 @@ static KMETHOD MethodFunc_ObjectPrototypeSetter(KonohaContext *kctx, KonohaStack
 {
 	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
-	KLIB kObject_setObject(kctx, sfp[0].asObject, key, O_typeId(sfp[1].asObject), sfp[1].asObject);
+	KLIB kObject_setObject(kctx, sfp[0].asObject, key, O_classId(sfp[1].asObject), sfp[1].asObject);
 	RETURN_(sfp[1].asObject);
 }
 
@@ -151,25 +152,24 @@ static void KonohaClass_addField(KonohaContext *kctx, KonohaClassVar *definedCla
 			definedClass->defaultValueAsNullVar->fieldUnboxItems[pos] = 0;
 		}
 		else {
-			kObjectVar *o = definedClass->defaultValueAsNullVar;
-			KSETv(o, o->fieldObjectItems[pos], KLIB Knull(kctx, CT_(ty)));
+			KSETv(definedClass->defaultValueAsNullVar, definedClass->defaultValueAsNullVar->fieldObjectItems[pos], KLIB Knull(kctx, CT_(ty)));
 			definedClass->fieldItems[pos].isobj = 1;
 		}
 		if(FLAG_is(definedClass->fieldItems[pos].flag, kField_Getter)) {
 			FLAG_unset(definedClass->fieldItems[pos].flag, kField_Getter);
-			kMethod *mtd = new_FieldGetter(kctx, definedClass->typeId, sym, ty, pos);
+			kMethod *mtd = new_FieldGetter(kctx, definedClass->classId, sym, ty, pos);
 			KonohaClass_addMethod(kctx, definedClass, mtd);
 		}
 		if(FLAG_is(definedClass->fieldItems[pos].flag, kField_Setter)) {
 			FLAG_unset(definedClass->fieldItems[pos].flag, kField_Setter);
-			kMethod *mtd = new_FieldSetter(kctx, definedClass->typeId, sym, ty, pos);
+			kMethod *mtd = new_FieldSetter(kctx, definedClass->classId, sym, ty, pos);
 			KonohaClass_addMethod(kctx, definedClass, mtd);
 		}
 	}
 	else {
-		kMethod *mtd = new_PrototypeGetter(kctx, definedClass->typeId, sym, ty);
+		kMethod *mtd = new_PrototypeGetter(kctx, definedClass->classId, sym, ty);
 		KonohaClass_addMethod(kctx, definedClass, mtd);
-		mtd = new_PrototypeSetter(kctx, definedClass->typeId, sym, ty);
+		mtd = new_PrototypeSetter(kctx, definedClass->classId, sym, ty);
 		KonohaClass_addMethod(kctx, definedClass, mtd);
 	}
 }
@@ -179,8 +179,7 @@ static kbool_t KonohaClass_setClassFieldObjectValue(KonohaContext *kctx, KonohaC
 	int i;
 	for(i = definedClass->fieldsize; i >= 0; i--) {
 		if(definedClass->fieldItems[i].fn == sym  && O_ct(definedClass->defaultValueAsNullVar->fieldObjectItems[i]) == O_ct(objectValue)) {
-			kObjectVar *o = definedClass->defaultValueAsNullVar;
-			KSETv(o, o->fieldObjectItems[i], objectValue);
+			KSETv(definedClass->defaultValueAsNullVar, definedClass->defaultValueAsNullVar->fieldObjectItems[i], objectValue);
 			return true;
 		}
 	}
@@ -205,7 +204,7 @@ static kbool_t KonohaClass_setClassFieldUnboxValue(KonohaContext *kctx, KonohaCl
 //static KMETHOD NameSpace_getCid(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	KonohaClass *ct = KLIB kNameSpace_getClass(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), S_size(sfp[1].asString), NULL);
-//	kint_t cid = ct != NULL ? ct->typeId : sfp[2].intValue;
+//	kint_t cid = ct != NULL ? ct->classId : sfp[2].intValue;
 //	RETURNi_(cid);
 //}
 //
@@ -228,9 +227,9 @@ static kbool_t KonohaClass_setClassFieldUnboxValue(KonohaContext *kctx, KonohaCl
 //{
 //	KDEFINE_CLASS defNewClass = {
 //		.cflag  = cflag,
-//		.typeId    = TY_newid,
-//		.baseTypeId   = TY_Object,
-//		.superTypeId = supct->typeId,
+//		.classId    = TY_newid,
+//		.baseclassId   = TY_Object,
+//		.superclassId = supct->classId,
 //	};
 //	setfield(kctx, &defNewClass, fieldsize, supct);
 //	KonohaClass *ct = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, name, &defNewClass, pline);
@@ -238,19 +237,19 @@ static kbool_t KonohaClass_setClassFieldUnboxValue(KonohaContext *kctx, KonohaCl
 //	return ct;
 //}
 //
-//// int NameSpace.defineClass(int flag, String name, int superTypeId, int fieldsize);
+//// int NameSpace.defineClass(int flag, String name, int superclassId, int fieldsize);
 //static KMETHOD NameSpace_defineClass(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	ktype_t superTypeId = sfp[3].intValue == 0 ? TY_Object :(ktype_t)sfp[3].intValue;
-//	KonohaClass *supct = kclass(superTypeId, sfp[K_RTNIDX].uline);
+//	ktype_t superclassId = sfp[3].intValue == 0 ? TY_Object :(ktype_t)sfp[3].intValue;
+//	KonohaClass *supct = kclass(superclassId, sfp[K_RTNIDX].uline);
 //	if(CT_isFinal(supct)) {
-//		kreportf(CritTag, sfp[K_RTNIDX].uline, "%s is final", TY_t(superTypeId));
+//		kreportf(CritTag, sfp[K_RTNIDX].uline, "%s is final", TY_t(superclassId));
 //	}
 //	if(!CT_isDefined(supct)) {
-//		kreportf(CritTag, sfp[K_RTNIDX].uline, "%s has undefined field(s)", TY_t(superTypeId));
+//		kreportf(CritTag, sfp[K_RTNIDX].uline, "%s has undefined field(s)", TY_t(superclassId));
 //	}
 //	KonohaClass *ct = defineClass(kctx, sfp[0].asNameSpace, sfp[1].intValue, sfp[2].s, supct, sfp[4].intValue, sfp[K_RTNIDX].uline);
-//	RETURNi_(ct->typeId);
+//	RETURNi_(ct->classId);
 //}
 //
 //
@@ -264,7 +263,7 @@ static kbool_t KonohaClass_setClassFieldUnboxValue(KonohaContext *kctx, KonohaCl
 //	kObject *value = sfp[5].o;
 //	KonohaClassVar *ct = (KonohaClassVar*)kclass(cid, sfp[K_RTNIDX].uline);
 //	if(CT_isDefined(ct)) {
-//		kreportf(CritTag, sfp[K_RTNIDX].uline, "%s has no undefined field", TY_t(ct->typeId));
+//		kreportf(CritTag, sfp[K_RTNIDX].uline, "%s has no undefined field", TY_t(ct->classId));
 //	}
 //	KonohaClass_addField(kctx, ct, flag, ty, name, value, 0);
 //	if(CT_isDefined(ct)) {
@@ -276,7 +275,7 @@ static kbool_t KonohaClass_setClassFieldUnboxValue(KonohaContext *kctx, KonohaCl
 // Object.getTypeId()
 static KMETHOD Object_getTypeId(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(O_ct(sfp[0].asObject)->typeId);
+	RETURNi_(O_ct(sfp[0].asObject)->classId);
 }
 
 // Object.instanceOf(Object o)
@@ -335,7 +334,7 @@ static KMETHOD ExprTyCheck_As(KonohaContext *kctx, KonohaStack *sfp)
 		DBG_ASSERT(mtd != NULL);
 		KSETv(expr->cons, expr->cons->methodItems[0], mtd);
 		KSETv(expr->cons, expr->cons->exprItems[2], SUGAR kExpr_setConstValue(kctx, expr, targetExpr->ty, KLIB Knull(kctx, targetClass)));
-		RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, targetClass->typeId));
+		RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, targetClass->classId));
 	}
 }
 
@@ -466,9 +465,9 @@ static KonohaClassVar* kNameSpace_defineClassName(KonohaContext *kctx, kNameSpac
 {
 	KDEFINE_CLASS defNewClass = {
 		.cflag         = cflag,
-		.typeId       = TY_newid,
-		.baseTypeId   = TY_Object,
-		.superTypeId  = TY_Object, //superClass->typeId,
+		.classId       = TY_newid,
+		.baseclassId   = TY_Object,
+		.superclassId  = TY_Object, //superClass->classId,
 		.init = Object_initToMakeDefaultValueAsNull, // dummy for first generation of DefaultValueAsNull
 	};
 	KonohaClassVar *definedClass = (KonohaClassVar*)KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, name, &defNewClass, pline);
@@ -499,8 +498,6 @@ static void KonohaClass_initField(KonohaContext *kctx, KonohaClassVar *definedCl
 	memcpy(definedClass->defaultValueAsNullVar->fieldObjectItems, superClass->defaultValueAsNullVar->fieldObjectItems, sizeof(kObject*) * superClass->fieldsize);
 	definedClass->init     = ObjectField_init;
 	definedClass->reftrace = ObjectField_reftrace;
-	definedClass->superTypeId = superClass->typeId;
-	definedClass->searchSuperMethodClassNULL = superClass;
 	// add other functions
 }
 
@@ -508,27 +505,9 @@ static void KonohaClass_initField(KonohaContext *kctx, KonohaClassVar *definedCl
 
 static kBlock* kStmt_parseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToken *tokenClassName)
 {
-	kBlock *bk = NULL;
 	kToken *blockToken = (kToken*)kStmt_getObject(kctx, stmt, KW_BlockPattern, NULL);
 	if(blockToken != NULL && blockToken->resolvedSyntaxInfo->keyword == KW_BlockPattern) {
 		const char *cname = S_text(tokenClassName->text);
-<<<<<<< HEAD
-		TokenRange rangeBuf, *range = SUGAR new_TokenListRange(kctx, Stmt_nameSpace(stmt), KonohaContext_getSugarContext(kctx)->preparedTokenList, &rangeBuf);
-		SUGAR TokenRange_tokenize(kctx, range,  S_text(blockToken->text), blockToken->uline);
-		{
-			kToken *prevToken = blockToken;
-			TokenRange sourceBuf, *sourceRange = SUGAR new_TokenStackRange(kctx, range, &sourceBuf);
-			int i;
-			for(i = range->beginIdx; i < range->endIdx; i++) {
-				kToken *tk = range->tokenList->tokenItems[i];
-				if(tk->topCharHint == '(' && prevToken->unresolvedTokenType == TokenType_SYMBOL && strcmp(cname, S_text(prevToken->text)) == 0) {
-					kTokenVar *newToken = GCSAFE_new(TokenVar, TokenType_SYMBOL);
-					KLIB kArray_add(kctx, sourceRange->tokenList, newToken);
-					KSETv(newToken->text, SYM_s(MN_new));
-				}
-				KLIB kArray_add(kctx, sourceRange->tokenList, tk);
-				prevToken = tk;
-=======
 		kArray *a = KonohaContext_getSugarContext(kctx)->preparedTokenList;
 		size_t atop = kArray_size(a), s, i;
 		SUGAR kNameSpace_tokenize(kctx, Stmt_nameSpace(stmt), S_text(blockToken->text), blockToken->uline, a);
@@ -540,15 +519,16 @@ static kBlock* kStmt_parseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToke
 				kTokenVar *newToken = GCSAFE_new(TokenVar, TokenType_SYMBOL);
 				KSETv(newToken, newToken->text, SYM_s(MN_new));
 				KLIB kArray_add(kctx, a, newToken);
->>>>>>> 5f3aeac03042048d3dd991fad03fe99d4edb8cbe
 			}
-			TokenRange_end(kctx, sourceRange);
-			bk = SUGAR new_Block(kctx, stmt/*parent*/, sourceRange, NULL);
-			KLIB kObject_setObject(kctx, stmt, KW_BlockPattern, TY_Block, bk);
+			KLIB kArray_add(kctx, a, tk);
+			prevToken = tk;
 		}
-		TokenRange_pop(kctx, range);
+		kBlock *bk = SUGAR new_Block(kctx, Stmt_nameSpace(stmt), stmt, a, s, kArray_size(a), NULL);
+		KLIB kObject_setObject(kctx, stmt, KW_BlockPattern, TY_Block, bk);
+		KLIB kArray_clear(kctx, a, atop);
+		return bk;
 	}
-	return bk;
+	return NULL;
 }
 
 static size_t kBlock_countFieldSize(KonohaContext *kctx, kBlock *bk)
@@ -702,7 +682,7 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		CT_setVirtual(definedClass, false);
 	}
-	kToken_setTypeId(kctx, tokenClassName, ns, definedClass->typeId);
+	kToken_setTypeId(kctx, tokenClassName, ns, definedClass->classId);
 	kBlock_addMethodDeclStmt(kctx, bk, tokenClassName, stmt);
 	kStmt_done(stmt);
 	RETURNb_(true);
@@ -710,11 +690,11 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD PatternMatch_ClassName(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
-	kTokenVar *tk = tokenList->tokenVarItems[beginIdx];
+	VAR_PatternMatch(stmt, name, tokenArray, beginIdx, endIdx);
+	kTokenVar *tk = tokenArray->tokenVarItems[beginIdx];
 	int returnIdx = -1;
 	if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern || tk->resolvedSyntaxInfo->keyword == KW_TypePattern) {
-		KLIB kObject_setObject(kctx, stmt, name, O_typeId(tk), tk);
+		KLIB kObject_setObject(kctx, stmt, name, O_classId(tk), tk);
 		returnIdx = beginIdx + 1;
 	}
 	RETURNi_(returnIdx);
@@ -741,16 +721,4 @@ static kbool_t class_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileli
 	return true;
 }
 
-// --------------------------------------------------------------------------
-
-KDEFINE_PACKAGE* class_init(void)
-{
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("class", "1.0"),
-		.initPackage = class_initPackage,
-		.setupPackage = class_setupPackage,
-		.initNameSpace = class_initNameSpace,
-		.setupNameSpace = class_setupNameSpace,
-	};
-	return &d;
-}
+#endif /* CLASS_GLUE_H_ */

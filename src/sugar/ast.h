@@ -41,10 +41,10 @@ static KMETHOD UndefinedParseExpr(KonohaContext *kctx, KonohaStack *sfp)
 static kExpr *callFuncParseExpr(KonohaContext *kctx, SugarSyntax *syn, kFunc *fo, kStmt *stmt, kArray *tokenList, int s, int c, int e)
 {
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 6);
-	KSETv(lsfp[K_CALLDELTA+0].o, fo->self);
 	lsfp[K_CALLDELTA+0].unboxValue = (uintptr_t)syn;
-	KSETv(lsfp[K_CALLDELTA+1].o, (kObject*)stmt);
-	KSETv(lsfp[K_CALLDELTA+2].asArray, tokenList);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, fo->self, GC_NO_WRITE_BARRIER);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, (kObject*)stmt, GC_NO_WRITE_BARRIER);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+2].asArray, tokenList, GC_NO_WRITE_BARRIER);
 	lsfp[K_CALLDELTA+3].intValue = s;
 	lsfp[K_CALLDELTA+4].intValue = c;
 	lsfp[K_CALLDELTA+5].intValue = e;
@@ -231,10 +231,10 @@ static int PatternMatchFunc(KonohaContext *kctx, kFunc *fo, kStmt *stmt, ksymbol
 {
 	INIT_GCSTACK();
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KSETv(lsfp[K_CALLDELTA+0].o, fo->self);
-	KSETv(lsfp[K_CALLDELTA+1].o, (kObject*)stmt);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, fo->self, GC_NO_WRITE_BARRIER);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, (kObject*)stmt, GC_NO_WRITE_BARRIER);
 	lsfp[K_CALLDELTA+2].intValue = name;
-	KSETv(lsfp[K_CALLDELTA+3].asArray, tokenList);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+3].asArray, tokenList, GC_NO_WRITE_BARRIER);
 	lsfp[K_CALLDELTA+4].intValue = beginIdx;
 	lsfp[K_CALLDELTA+5].intValue = endIdx;
 	KCALL(lsfp, 0, fo->mtd, 5, KLIB Knull(kctx, CT_Int));
@@ -448,7 +448,7 @@ static int TokenRange_addSymbolToken(KonohaContext *kctx, TokenRange *range, Tok
 //					KLIB kArray_add(kctx, range->stmtTokenList, splitToken);
 //					splitToken->resolvedSyntaxInfo = syn;
 //					splitToken->uline = tk->uline;
-//					KSETv(splitToken->text, SYM_s(op1));
+//					KSETv(splitToken, splitToken->text, SYM_s(op1));
 //					t++;
 //				}
 			}

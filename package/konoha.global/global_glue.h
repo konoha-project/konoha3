@@ -259,7 +259,7 @@ static kbool_t global_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfilel
 			.cstruct_size = sizeof(kScript),
 		};
 		KonohaClass *cScript = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defScript, pline);
-		KSETv(((kNameSpaceVar*)ns)->scriptObject, KLIB Knull(kctx, cScript));
+		KSETv(ns, ((kNameSpaceVar*)ns)->scriptObject, KLIB Knull(kctx, cScript));
 	}
 	return true;
 }

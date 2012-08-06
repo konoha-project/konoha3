@@ -365,7 +365,7 @@ static void Regex_set(KonohaContext *kctx, kRegex *re, kString *ptns, kString *o
 	const char *ptn = S_text(ptns);
 	const char *opt = S_text(opts);
 	knh_Regex_setGlobalOption(re, opt);
-	KSETv(re->pattern, ptns);
+	KSETv(re, re->pattern, ptns);
 	re->reg = pcre_regmalloc(kctx, ptns);
 	pcre_regcomp(kctx, re->reg, ptn, pcre_parsecflags(kctx, opt));
 	re->eflags = pcre_parseeflags(kctx, opt);
@@ -423,7 +423,7 @@ static KMETHOD String_match(KonohaContext *kctx, KonohaStack *sfp)
 		int i, isGlobalOption = Regex_isGlobalOption(re);
 		a = new_(Array, nmatch);/*TODO new_Array(TY_String)*/
 		BEGIN_LOCAL(lsfp, 1);
-		KSETv(lsfp[0].asArray, a);
+		KSETv_AND_WRITE_BARRIER(NULL, lsfp[0].asArray, a, GC_NO_WRITE_BARRIER);
 		do {
 			int res = pcre_regexec(kctx, re->reg, str, nmatch, pmatch, re->eflags);
 			if(res != 0) {
@@ -511,7 +511,7 @@ static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp)
 		if (str < eos) {
 			a = new_(Array, 0); // TODO new_Array(kctx, TY_String, 0);
 			BEGIN_LOCAL(lsfp, 1);
-			KSETv(lsfp[0].asArray, a);
+			KSETv_AND_WRITE_BARRIER(NULL, lsfp[0].asArray, a, GC_NO_WRITE_BARRIER);
 			while (str <= eos) {
 				int res = pcre_regexec(kctx, re->reg, str, KREGEX_MATCHSIZE, pmatch, re->eflags);
 				if (res == 0) {

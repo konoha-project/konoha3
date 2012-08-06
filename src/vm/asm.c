@@ -434,7 +434,7 @@ static void Method_threadCode(KonohaContext *kctx, kMethod *mtd, kByteCode *kcod
 {
 	kMethodVar *Wmtd = (kMethodVar*)mtd;
 	KLIB Method_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
-	KSETv(Wmtd->kcode, kcode);
+	KSETv(Wmtd, Wmtd->kcode, kcode);
 	Wmtd->pc_start = KonohaVirtualMachine_run(kctx, kctx->esp + 1, kcode->code);
 	if(verbose_code) {
 		DBG_P("DUMP CODE");

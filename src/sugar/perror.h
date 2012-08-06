@@ -92,7 +92,7 @@ static void Token_pERR(KonohaContext *kctx, kTokenVar *tk, const char *fmt, ...)
 	va_start(ap, fmt);
 	kString *errmsg = vperrorf(kctx, ErrTag, tk->uline, -1, fmt, ap);
 	va_end(ap);
-	KSETv(tk->text, errmsg);
+	KSETv(tk, tk->text, errmsg);
 	tk->unresolvedTokenType = TokenType_ERR;
 	tk->resolvedSyntaxInfo = NULL;
 }
