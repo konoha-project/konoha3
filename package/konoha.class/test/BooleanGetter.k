@@ -19,7 +19,7 @@ class Person {
 void f() {
 	Person p = new Person("naruto", 17);
 	assert(p.getChild() == false);
-	assert(p.isChild());
+	assert(p.isChild() == false);
 }
 
 f();
