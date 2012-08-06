@@ -233,7 +233,7 @@ static KMETHOD ParseExpr_DOLLAR(KonohaContext *kctx, KonohaStack *sfp)
 		if(tk->resolvedSyntaxInfo->keyword == KW_BraceGroup) {
 			kExprVar *expr = GCSAFE_new(ExprVar, SYN_(Stmt_nameSpace(stmt), KW_BlockPattern));
 			TokenRange range = {tk->subTokenList, 0, kArray_size(tk->subTokenList), Stmt_nameSpace(stmt)};
-			KSETv(expr->block, new_Block(kctx, stmt, &range, SemiColon));
+			KSETv(expr, expr->block, new_Block(kctx, stmt, &range, SemiColon));
 			RETURN_(expr);
 		}
 	}

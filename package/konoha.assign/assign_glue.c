@@ -98,7 +98,7 @@ static inline void kToken_copy(KonohaContext *kctx, kTokenVar *destToken, kToken
 
 static KMETHOD ParseExpr_SelfAssign(KonohaContext *kctx, KonohaStack *sfp)
 {
-<<<<<<< HEAD
+//<<<<<<< HEAD
 //	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
 //	kNameSpace *ns = Stmt_nameSpace(stmt);
 //	kToken *selfAssignToken = tokenList->tokenItems[operatorIdx];
@@ -134,43 +134,43 @@ static KMETHOD ParseExpr_SelfAssign(KonohaContext *kctx, KonohaStack *sfp)
 //		RETURN_(expr);
 //	}
 //	KLIB kArray_clear(kctx, tokenList, beginTemplateIdx);
-=======
-	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
-	kNameSpace *ns = Stmt_nameSpace(stmt);
-	kToken *selfAssignToken = tokenList->tokenItems[operatorIdx];
-
-	size_t i, beginTemplateIdx = kArray_size(tokenList);
-	SUGAR kNameSpace_tokenize(kctx, ns, "/*A*/ = ( /*A*/ ) /*+*/ ( /*B*/ )", selfAssignToken->uline, tokenList);
-
-	size_t beginNewIdx = kArray_size(tokenList);
-	for(i = beginIdx; i < operatorIdx; i++) {
-		KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[i]);
-	}
-	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+1]); // template: =
-	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+2]); // template; (
-	for(i = beginIdx; i < operatorIdx; i++) {
-		kTokenVar *tk = GCSAFE_new(TokenVar, 0);
-		kToken_copy(kctx, tk, tokenList->tokenItems[i]);
-		KLIB kArray_add(kctx, tokenList, tk);
-	}
-	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+3]); // template: )
-	kTokenVar *opToken = GCSAFE_new(TokenVar, TokenType_SYMBOL);
-	KSETv(opToken, opToken->text, KLIB new_kString(kctx, S_text(selfAssignToken->text), S_size(selfAssignToken->text) - 1, SPOL_ASCII));
-	KLIB kArray_add(kctx, tokenList, opToken);
-	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+4]); // template: (
-	for(i = operatorIdx+1; i < endIdx; i++) {
-		KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[i]);
-	}
-	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+5]); // template: )
-
-	size_t beginResolovedIdx = kArray_size(tokenList);
-	if(SUGAR kNameSpace_resolveTokenArray(kctx, ns, tokenList, beginNewIdx, beginResolovedIdx, tokenList)) {
-		kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, tokenList, beginResolovedIdx, kArray_size(tokenList));
-		KLIB kArray_clear(kctx, tokenList, beginTemplateIdx);
-		RETURN_(expr);
-	}
-	KLIB kArray_clear(kctx, tokenList, beginTemplateIdx);
->>>>>>> 5f3aeac03042048d3dd991fad03fe99d4edb8cbe
+//=======
+//	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
+//	kNameSpace *ns = Stmt_nameSpace(stmt);
+//	kToken *selfAssignToken = tokenList->tokenItems[operatorIdx];
+//
+//	size_t i, beginTemplateIdx = kArray_size(tokenList);
+//	SUGAR kNameSpace_tokenize(kctx, ns, "/*A*/ = ( /*A*/ ) /*+*/ ( /*B*/ )", selfAssignToken->uline, tokenList);
+//
+//	size_t beginNewIdx = kArray_size(tokenList);
+//	for(i = beginIdx; i < operatorIdx; i++) {
+//		KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[i]);
+//	}
+//	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+1]); // template: =
+//	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+2]); // template; (
+//	for(i = beginIdx; i < operatorIdx; i++) {
+//		kTokenVar *tk = GCSAFE_new(TokenVar, 0);
+//		kToken_copy(kctx, tk, tokenList->tokenItems[i]);
+//		KLIB kArray_add(kctx, tokenList, tk);
+//	}
+//	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+3]); // template: )
+//	kTokenVar *opToken = GCSAFE_new(TokenVar, TokenType_SYMBOL);
+//	KSETv(opToken, opToken->text, KLIB new_kString(kctx, S_text(selfAssignToken->text), S_size(selfAssignToken->text) - 1, SPOL_ASCII));
+//	KLIB kArray_add(kctx, tokenList, opToken);
+//	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+4]); // template: (
+//	for(i = operatorIdx+1; i < endIdx; i++) {
+//		KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[i]);
+//	}
+//	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+5]); // template: )
+//
+//	size_t beginResolovedIdx = kArray_size(tokenList);
+//	if(SUGAR kNameSpace_resolveTokenArray(kctx, ns, tokenList, beginNewIdx, beginResolovedIdx, tokenList)) {
+//		kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, tokenList, beginResolovedIdx, kArray_size(tokenList));
+//		KLIB kArray_clear(kctx, tokenList, beginTemplateIdx);
+//		RETURN_(expr);
+//	}
+//	KLIB kArray_clear(kctx, tokenList, beginTemplateIdx);
+//>>>>>>> 5f3aeac03042048d3dd991fad03fe99d4edb8cbe
 }
 
 static kbool_t assign_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)

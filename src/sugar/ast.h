@@ -500,7 +500,7 @@ static int TokenRange_addStrucuredToken(KonohaContext *kctx, TokenRange *range, 
 	kTokenVar *astToken = new_(TokenVar, AST_type);
 	KLIB kArray_add(kctx, range->tokenList, astToken);
 	astToken->resolvedSyntaxInfo = SYN_(range->ns, AST_type);
-	KSETv(astToken->subTokenList, new_(TokenArray, 0));
+	KSETv(astToken, astToken->subTokenList, new_(TokenArray, 0));
 	astToken->uline = sourceRange->tokenList->tokenItems[currentIdx]->uline;
 	{
 		TokenRange nestedRangeBuf, *nestedRange = new_TokenListRange(kctx, sourceRange->ns, astToken->subTokenList, &nestedRangeBuf);
@@ -674,7 +674,7 @@ static void kToken_transformToBraceGroup(KonohaContext *kctx, kTokenVar *tk, kNa
 		TokenRange range = {new_(TokenArray, 0), 0, 0, ns};
 		PUSH_GCSTACK(range.tokenList);
 		TokenRange_tokenize(kctx, &range, S_text(tk->text), tk->uline);
-		KSETv(tk->subTokenList, range.tokenList);
+		KSETv(tk, tk->subTokenList, range.tokenList);
 		tk->resolvedSyntaxInfo = SYN_(ns, KW_BraceGroup);
 		RESET_GCSTACK();
 	}

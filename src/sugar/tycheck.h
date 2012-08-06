@@ -459,7 +459,7 @@ static kstatus_t TokenRange_eval(KonohaContext *kctx, TokenRange *sourceRange)
 //		DBG_P("sourceRange->beginIdx=%d, i=%d, range=%d,%d", sourceRange->beginIdx, i, range->beginIdx, range->endIdx);
 		if(range->errToken != NULL) return K_BREAK;
 		if(range->endIdx > range->beginIdx) {
-			KSETv(((kBlockVar*)singleBlock)->blockNameSpace, sourceRange->ns);
+			KSETv(singleBlock, ((kBlockVar*)singleBlock)->blockNameSpace, sourceRange->ns);
 			KLIB kArray_clear(kctx, singleBlock->stmtList, 0);
 			kBlock_addNewStmt(kctx, singleBlock, range);
 			TokenRange_pop(kctx, range);

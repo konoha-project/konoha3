@@ -631,7 +631,7 @@ static int makeNestedSyntaxRule(KonohaContext *kctx, TokenRange *sourceRange, in
 	int ne = findCloseChar2(kctx, sourceRange, currentIdx+1, closech);
 	tk->resolvedSymbol = KW_AST;
 	tk->resolvedSyntaxInfo = SYN_(sourceRange->ns, KW_AST);
-	KSETv(tk->subTokenList, new_(TokenArray, 0));
+	KSETv(tk, tk->subTokenList, new_(TokenArray, 0));
 	TokenRange nestedSourceRange = {sourceRange->tokenList, currentIdx+1, ne, sourceRange->ns};
 	return kArray_addSyntaxRule(kctx, tk->subTokenList, &nestedSourceRange) ? ne : sourceRange->endIdx;
 }
@@ -662,7 +662,7 @@ static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, Token
 			TokenRange nestedSourceRange = {tk->subTokenList, 0, kArray_size(tk->subTokenList), sourceRange->ns};
 			tk->resolvedSymbol = KW_OptionalGroup;
 			PUSH_GCSTACK(tk->subTokenList);  // avoid gc
-			KSETv(tk->subTokenList, new_(TokenArray, 0));
+			KSETv(tk, tk->subTokenList, new_(TokenArray, 0));
 			kArray_addSyntaxRule(kctx, tk->subTokenList, &nestedSourceRange);
 			KLIB kArray_add(kctx, ruleList, tk);
 			continue;
