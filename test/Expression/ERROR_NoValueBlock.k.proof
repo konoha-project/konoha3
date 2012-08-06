@@ -1,0 +1,4 @@
+ - (error) (ERROR_NoValueBlock.k:13) block has no value
+ - (error) (ERROR_NoValueBlock.k:13) System.f accepts Int at the parameter 1
+ - RuntimeScriptException: (error) (ERROR_NoValueBlock.k:13) block has no value
+Q.E.D.

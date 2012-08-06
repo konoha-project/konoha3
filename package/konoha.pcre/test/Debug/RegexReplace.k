@@ -1,5 +1,5 @@
-K.import("konoha");
 K.import("konoha.pcre");
+
 
 System.p("hoge1234".replace(/123/, "xxx"));
 System.p("hoge1234".replace(/\d/, "xxx"));

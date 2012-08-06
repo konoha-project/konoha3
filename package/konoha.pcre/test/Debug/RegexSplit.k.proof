@@ -1,11 +1,11 @@
- - (RegexSplit.k:5) aa
- - (RegexSplit.k:6) bb
- - (RegexSplit.k:7) cc
- - (RegexSplit.k:8) dd
- - (RegexSplit.k:9) ee
- - (RegexSplit.k:11) 
- - (RegexSplit.k:12) o
- - (RegexSplit.k:13) e1234
- - (RegexSplit.k:14) o
- - (RegexSplit.k:15) e1234
+ - (RegexSplit.k:6) aa
+ - (RegexSplit.k:7) bb
+ - (RegexSplit.k:8) cc
+ - (RegexSplit.k:9) dd
+ - (RegexSplit.k:10) ee
+ - (RegexSplit.k:12) 
+ - (RegexSplit.k:13) o
+ - (RegexSplit.k:14) e1234
+ - (RegexSplit.k:15) o
+ - (RegexSplit.k:16) e1234
 Q.E.D.

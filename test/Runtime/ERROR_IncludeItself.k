@@ -1,4 +1,4 @@
 // written by kimio kuramitsu
 
-K.load("LoaderIncludeItself.k"); // Infinite Loop
+K.load("ERROR_IncludeItself.k"); // Infinite Loop
 

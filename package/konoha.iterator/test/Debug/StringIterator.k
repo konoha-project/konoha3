@@ -1,6 +1,7 @@
 // written by shinpei
 
 K.import("konoha.iterator")
+K.import("konoha.while")
 
 void iteratorTest () {
 	String str = "hello,world";

@@ -1,5 +1,6 @@
 // written by shinpei
-
+K.import("konoha.while");
+K.import("konoha.new");
 K.import("konoha.iterator");
 K.import("konoha.array");
 

@@ -1,5 +1,5 @@
 // written by okamoto
-
+K.import("konoha.new");
 K.import("konoha.array");
 
 void f () {
