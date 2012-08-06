@@ -1,4 +1,5 @@
-K.import("konoha");
+// written by unknown (maybe ide)
+
 void f() {
 	int i = 0;
 	String t = "longLived";

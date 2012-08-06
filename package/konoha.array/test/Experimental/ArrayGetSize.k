@@ -1,6 +1,6 @@
 // written by okamoto
 
-K.import("konoha");
+K.import("konoha.array");
 
 void f () {
 	int[] ia = new int[0];

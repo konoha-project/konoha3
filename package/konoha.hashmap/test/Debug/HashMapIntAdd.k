@@ -1,5 +1,5 @@
 K.import("konoha.hashmap");
-K.import("konoha");
+//K.import("konoha");
 
 HashMap[int] m = new HashMap[int]();
 m.set("hoge", 1);

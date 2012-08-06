@@ -1,4 +1,4 @@
-K.import("konoha");
+//K.import("konoha");
 K.import("konoha.hashmap");
 
 class Hoge {

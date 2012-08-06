@@ -1,6 +1,5 @@
 // written by shinpei
 
-K.import("konoha")
 K.import("konoha.iterator")
 
 void iteratorTest () {

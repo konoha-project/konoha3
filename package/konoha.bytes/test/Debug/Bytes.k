@@ -2,7 +2,8 @@
 
 
 K.import("konoha.bytes");
-K.import("konoha");
+//K.import("konoha");   // don't use konoha package in test
+
 /* byte */
 System.p("hoge".asBytes());
 

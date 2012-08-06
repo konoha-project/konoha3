@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-K.import("konoha");
+K.import("konoha.class");
 
 @Interface class Point {
 	int x;
