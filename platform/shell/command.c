@@ -252,28 +252,28 @@ static int TEST_printf(const char *fmt, ...)
 	return res;
 }
 
-static int check_result2(FILE *fp0, FILE *fp1)
-{
-	char buf0[128];
-	char buf1[128];
-	while (true) {
-		size_t len0, len1;
-		len0 = fread(buf0, 1, sizeof(buf0), fp0);
-		len1 = fread(buf1, 1, sizeof(buf1), fp1);
-		if (len0 != len1) {
-			return 1;//FAILED
-		}
-		if (len0 == 0) {
-			break;
-		}
-		if (memcmp(buf0, buf1, len0) != 0) {
-			return 1;//FAILED
-		}
-	}
-	return 0; //OK
-}
+//static int check_result2(FILE *fp0, FILE *fp1)
+//{
+//	char buf0[128];
+//	char buf1[128];
+//	while (true) {
+//		size_t len0, len1;
+//		len0 = fread(buf0, 1, sizeof(buf0), fp0);
+//		len1 = fread(buf1, 1, sizeof(buf1), fp1);
+//		if (len0 != len1) {
+//			return 1;//FAILED
+//		}
+//		if (len0 == 0) {
+//			break;
+//		}
+//		if (memcmp(buf0, buf1, len0) != 0) {
+//			return 1;//FAILED
+//		}
+//	}
+//	return 0; //OK
+//}
 
-static int check_result0(FILE *fp0, FILE *fp1)
+static int check_result2(FILE *fp0, FILE *fp1)
 {
 	char buf0[4096];
 	char buf1[4096];
@@ -299,34 +299,37 @@ static int check_result0(FILE *fp0, FILE *fp1)
 
 static void make_report(const char *testname)
 {
-	char report_file[256];
-	char script_file[256];
-	char correct_file[256];
-	char result_file[256];
-	snprintf(report_file, 256,  "REPORT_%s.txt", shortfilename(testname));
-	snprintf(script_file, 256,  "%s", testname);
-	snprintf(correct_file, 256, "%s.proof", script_file);
-	snprintf(result_file, 256,  "%s.tested", script_file);
-	FILE *fp = fopen(report_file, "w");
-	FILE *fp2 = fopen(script_file, "r");
-	int ch;
-	while((ch = fgetc(fp2)) != EOF) {
-		fputc(ch, fp);
+	char *path = getenv("KONOHA_REPORT");
+	if(path != NULL) {
+		char report_file[256];
+		char script_file[256];
+		char correct_file[256];
+		char result_file[256];
+		snprintf(report_file, 256,  "%s/REPORT_%s.txt", path, shortfilename(testname));
+		snprintf(script_file, 256,  "%s", testname);
+		snprintf(correct_file, 256, "%s.proof", script_file);
+		snprintf(result_file, 256,  "%s.tested", script_file);
+		FILE *fp = fopen(report_file, "w");
+		FILE *fp2 = fopen(script_file, "r");
+		int ch;
+		while((ch = fgetc(fp2)) != EOF) {
+			fputc(ch, fp);
+		}
+		fclose(fp2);
+		fprintf(fp, "Expected Result (in %s)\n=====\n", shortfilename(result_file));
+		fp2 = fopen(correct_file, "r");
+		while((ch = fgetc(fp2)) != EOF) {
+			fputc(ch, fp);
+		}
+		fclose(fp2);
+		fprintf(fp, "Result (in %s)\n=====\n", shortfilename(result_file));
+		fp2 = fopen(result_file, "r");
+		while((ch = fgetc(fp2)) != EOF) {
+			fputc(ch, fp);
+		}
+		fclose(fp2);
+		fclose(fp);
 	}
-	fclose(fp2);
-	fprintf(fp, "Expected Result (in %s)\n=====\n", shortfilename(result_file));
-	fp2 = fopen(correct_file, "r");
-	while((ch = fgetc(fp2)) != EOF) {
-		fputc(ch, fp);
-	}
-	fclose(fp2);
-	fprintf(fp, "Result (in %s)\n=====\n", shortfilename(result_file));
-	fp2 = fopen(result_file, "r");
-	while((ch = fgetc(fp2)) != EOF) {
-		fputc(ch, fp);
-	}
-	fclose(fp2);
-	fclose(fp);
 }
 
 extern int konoha_detectFailedAssert;

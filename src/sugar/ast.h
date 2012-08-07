@@ -432,10 +432,10 @@ static int TokenRange_addSymbolToken(KonohaContext *kctx, TokenRange *range, Tok
 			kToken_setTypeId(kctx, tk, range->ns, foundClass->typeId);
 		}
 		else {
-			if(!isalpha(t[0])) {
-				Token_pERR(kctx, tk, "undefined token: %s", Token_text(tk));
-				range->errToken = tk;
-				return sourceRange->endIdx;  // end
+//			if(!isalpha(t[0])) {
+//				Token_pERR(kctx, tk, "undefined token: %s", Token_text(tk));
+//				range->errToken = tk;
+//				return sourceRange->endIdx;  // end
 //				while(t[0] != 0) {
 //					ksymbol_t op1 = ksymbolA(t, 1, SYM_NEWID);
 //					syn = SYN_(range->ns, op1);
@@ -451,7 +451,7 @@ static int TokenRange_addSymbolToken(KonohaContext *kctx, TokenRange *range, Tok
 //					KSETv(splitToken, splitToken->text, SYM_s(op1));
 //					t++;
 //				}
-			}
+//			}
 			tk->resolvedSymbol = symbol;
 			tk->resolvedSyntaxInfo = SYN_(sourceRange->ns, KW_SymbolPattern);
 		}

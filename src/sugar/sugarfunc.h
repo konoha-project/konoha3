@@ -26,6 +26,7 @@
 extern "C" {
 #endif
 
+
 static KMETHOD PatternMatch_Expr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
@@ -330,6 +331,40 @@ static KMETHOD ExprTyCheck_OR(KonohaContext *kctx, KonohaStack *sfp)
 			RETURN_(kExpr_typed(expr, OR, TY_Boolean));
 		}
 	}
+}
+
+// Expr Expr.tyCheckStub(Gamma gma, int reqtyid);
+static KMETHOD ExprTyCheck_assign(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_ExprTyCheck(stmt, expr, gma, reqty);
+	kNameSpace *ns = Stmt_nameSpace(stmt);  // leftHandExpr = rightHandExpr
+	kExpr *leftHandExpr = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 1, gma, TY_var, TPOL_ALLOWVOID);
+	kExpr *rightHandExpr = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 2, gma, leftHandExpr->ty, 0);
+	if(rightHandExpr != K_NULLEXPR && leftHandExpr != K_NULLEXPR) {
+		if(leftHandExpr->build == TEXPR_LOCAL || leftHandExpr->build == TEXPR_FIELD || leftHandExpr->build == TEXPR_STACKTOP) {
+			((kExprVar*)expr)->build = TEXPR_LET;
+			((kExprVar*)expr)->ty    = leftHandExpr->ty;
+			((kExprVar*)rightHandExpr)->ty = leftHandExpr->ty;
+			RETURN_(expr);
+		}
+		if(leftHandExpr->build == TEXPR_CALL) {  // check getter and transform to setter
+			kMethod *mtd = leftHandExpr->cons->methodItems[0];
+			DBG_ASSERT(IS_Method(mtd));
+			if(MN_isGETTER(mtd->mn)) {
+				ktype_t cid = leftHandExpr->cons->exprItems[1]->ty;
+				ktype_t paramType = leftHandExpr->ty; //CT_(cid)->realtype(kctx, CT_(cid), CT_(leftHandExpr->ty));
+				mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(mtd->mn), paramType, MPOL_SETTER|MPOL_CANONICAL);
+				DBG_P("cid=%s, mtd=%p", TY_t(cid), mtd);
+				if(mtd != NULL) {
+					KSETv(leftHandExpr->cons, leftHandExpr->cons->methodItems[0], mtd);
+					KLIB kArray_add(kctx, leftHandExpr->cons, rightHandExpr);
+					RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, leftHandExpr, mtd, gma, reqty));
+				}
+			}
+		}
+		SUGAR Stmt_p(kctx, stmt, (kToken*)expr, ErrTag, "variable name is expected");
+	}
+	RETURN_(K_NULLEXPR);
 }
 
 static int addGammaStack(KonohaContext *kctx, GammaStack *s, ktype_t ty, ksymbol_t fn)
@@ -1214,7 +1249,7 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(OR), _OP,  .precedence_op2 = 1400, ExprTyCheck_(OR)},
 		{ TOKEN(NOT), _OP, .precedence_op1 = 400},
 		{ TOKEN(COLON), _OP, .precedence_op2 = 3072,},  // colon
-		{ TOKEN(LET),      .flag = SYNFLAG_ExprLeftJoinOp2, ParseExpr_(Op), .precedence_op2 = 4096, },
+		{ TOKEN(LET),      .flag = SYNFLAG_ExprLeftJoinOp2, ParseExpr_(Op), ExprTyCheck_(assign), .precedence_op2 = 4096, },
 		{ TOKEN(COMMA),    ParseExpr_(COMMA), .precedence_op2 = 8192, },
 		{ TOKEN(DOLLAR),   ParseExpr_(DOLLAR), },
 		{ TOKEN(boolean), .type = TY_Boolean, },

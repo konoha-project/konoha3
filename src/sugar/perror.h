@@ -165,13 +165,20 @@ static kExpr* Stmt_p(KonohaContext *kctx, kStmt *stmt, kToken *tk, int pe, const
 #define Token_text(tk) kToken_t_(kctx, tk)
 static const char *kToken_t_(KonohaContext *kctx, kToken *tk)
 {
-	switch((int)tk->unresolvedTokenType) {
-	case TokenType_INDENT: return "indent";
-	case TokenType_CODE: ;
-	case KW_BraceGroup: return "{... }";
-	case KW_ParenthesisGroup: return "(... )";
-	case KW_BracketGroup: return "[... ]";
-	default:  return S_text(tk->text);
+	if(IS_String(tk->text)) {
+		if(tk->unresolvedTokenType == TokenType_CODE) {
+			return "{... }";
+		}
+		return S_text(tk->text);
+	}
+	else {
+		switch(tk->resolvedSymbol) {
+			case TokenType_CODE: ;
+			case KW_BraceGroup: return "{... }";
+			case KW_ParenthesisGroup: return "(... )";
+			case KW_BracketGroup: return "[... ]";
+		}
+		return "";
 	}
 }
 

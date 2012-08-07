@@ -679,7 +679,7 @@ static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, Token
 				continue;
 			}
 		}
-		if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern && i + 1 < sourceRange->endIdx && sourceRange->tokenList->tokenItems[i+1]->topCharHint == ':') {
+		if(i + 1 < sourceRange->endIdx && sourceRange->tokenList->tokenItems[i+1]->topCharHint == ':' && IS_String(tk->text)) {
 			stmtEntryKey = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWRAW);
 			i++;
 			continue;
@@ -694,22 +694,22 @@ static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, Token
 
 static kbool_t TokenRange_resolved(KonohaContext *kctx, TokenRange *range, TokenRange *sourceRange);
 
-static void check(KonohaContext *kctx, kArray *a, int as, int ae, kArray *b, int bs, int be)
-{
-	DBG_ASSERT(ae-as==be-bs);
-	int i;
-	for(i = 0; i < ae-as; i++) {
-		kToken *tkA = a->tokenItems[as+i];
-		kToken *tkB = b->tokenItems[bs+i];
-		dumpToken(kctx, tkA, i);
-		dumpToken(kctx, tkB, i);
-		DBG_ASSERT(tkA->unresolvedTokenType == tkB->resolvedSymbol);
-		if(IS_Array(tkA->subTokenList)) {
-			DBG_ASSERT(IS_Array(tkB->subTokenList));
-			check(kctx, tkA->subTokenList, 0, kArray_size(tkA->subTokenList), tkB->subTokenList, 0, kArray_size(tkB->subTokenList));
-		}
-	}
-}
+//static void check(KonohaContext *kctx, kArray *a, int as, int ae, kArray *b, int bs, int be)
+//{
+//	DBG_ASSERT(ae-as==be-bs);
+//	int i;
+//	for(i = 0; i < ae-as; i++) {
+//		kToken *tkA = a->tokenItems[as+i];
+//		kToken *tkB = b->tokenItems[bs+i];
+//		dumpToken(kctx, tkA, i);
+//		dumpToken(kctx, tkB, i);
+//		DBG_ASSERT(tkA->unresolvedTokenType == tkB->resolvedSymbol);
+//		if(IS_Array(tkA->subTokenList)) {
+//			DBG_ASSERT(IS_Array(tkB->subTokenList));
+//			check(kctx, tkA->subTokenList, 0, kArray_size(tkA->subTokenList), tkB->subTokenList, 0, kArray_size(tkB->subTokenList));
+//		}
+//	}
+//}
 
 static void kNameSpace_parseSugarRule2(KonohaContext *kctx, kNameSpace *ns, const char *rule, kfileline_t uline, kArray *ruleList)
 {

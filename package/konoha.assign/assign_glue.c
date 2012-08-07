@@ -31,40 +31,38 @@
 // --------------------------------------------------------------------------
 
 // Expr Expr.tyCheckStub(Gamma gma, int reqtyid);
-static KMETHOD ExprTyCheck_assign(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	kNameSpace *ns = Stmt_nameSpace(stmt);  // leftHandExpr = rightHandExpr
-	kExpr *leftHandExpr = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 1, gma, TY_var, TPOL_ALLOWVOID);
-	kExpr *rightHandExpr = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 2, gma, leftHandExpr->ty, 0);
-	if(rightHandExpr != K_NULLEXPR && leftHandExpr != K_NULLEXPR) {
-		if(leftHandExpr->build == TEXPR_LOCAL || leftHandExpr->build == TEXPR_FIELD || leftHandExpr->build == TEXPR_STACKTOP) {
-			((kExprVar*)expr)->build = TEXPR_LET;
-			((kExprVar*)expr)->ty    = leftHandExpr->ty;
-			((kExprVar*)rightHandExpr)->ty = leftHandExpr->ty;
-			RETURN_(expr);
-		}
-		if(leftHandExpr->build == TEXPR_CALL) {  // check getter and transform to setter
-			kMethod *mtd = leftHandExpr->cons->methodItems[0];
-			DBG_ASSERT(IS_Method(mtd));
-			if(MN_isGETTER(mtd->mn)) {
-				ktype_t cid = leftHandExpr->cons->exprItems[1]->ty;
-				ktype_t paramType = leftHandExpr->ty; //CT_(cid)->realtype(kctx, CT_(cid), CT_(leftHandExpr->ty));
-				mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(mtd->mn), paramType, MPOL_SETTER|MPOL_CANONICAL);
-				DBG_P("cid=%s, mtd=%p", TY_t(cid), mtd);
-				if(mtd != NULL) {
-					KSETv(leftHandExpr->cons, leftHandExpr->cons->methodItems[0], mtd);
-					KLIB kArray_add(kctx, leftHandExpr->cons, rightHandExpr);
-					RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, leftHandExpr, mtd, gma, reqty));
-				}
-				SUGAR Stmt_p(kctx, stmt, (kToken*)expr, ErrTag, "setter is undefined");
-			}
-			SUGAR Stmt_p(kctx, stmt, (kToken*)expr, ErrTag, "getter is expected");
-		}
-		SUGAR Stmt_p(kctx, stmt, (kToken*)expr, ErrTag, "variable name is expected");
-	}
-	RETURN_(K_NULLEXPR);
-}
+//static KMETHOD ExprTyCheck_assign(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	VAR_ExprTyCheck(stmt, expr, gma, reqty);
+//	kNameSpace *ns = Stmt_nameSpace(stmt);  // leftHandExpr = rightHandExpr
+//	kExpr *leftHandExpr = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 1, gma, TY_var, TPOL_ALLOWVOID);
+//	kExpr *rightHandExpr = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 2, gma, leftHandExpr->ty, 0);
+//	if(rightHandExpr != K_NULLEXPR && leftHandExpr != K_NULLEXPR) {
+//		if(leftHandExpr->build == TEXPR_LOCAL || leftHandExpr->build == TEXPR_FIELD || leftHandExpr->build == TEXPR_STACKTOP) {
+//			((kExprVar*)expr)->build = TEXPR_LET;
+//			((kExprVar*)expr)->ty    = leftHandExpr->ty;
+//			((kExprVar*)rightHandExpr)->ty = leftHandExpr->ty;
+//			RETURN_(expr);
+//		}
+//		if(leftHandExpr->build == TEXPR_CALL) {  // check getter and transform to setter
+//			kMethod *mtd = leftHandExpr->cons->methodItems[0];
+//			DBG_ASSERT(IS_Method(mtd));
+//			if(MN_isGETTER(mtd->mn)) {
+//				ktype_t cid = leftHandExpr->cons->exprItems[1]->ty;
+//				ktype_t paramType = leftHandExpr->ty; //CT_(cid)->realtype(kctx, CT_(cid), CT_(leftHandExpr->ty));
+//				mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(mtd->mn), paramType, MPOL_SETTER|MPOL_CANONICAL);
+//				DBG_P("cid=%s, mtd=%p", TY_t(cid), mtd);
+//				if(mtd != NULL) {
+//					KSETv(leftHandExpr->cons, leftHandExpr->cons->methodItems[0], mtd);
+//					KLIB kArray_add(kctx, leftHandExpr->cons, rightHandExpr);
+//					RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, leftHandExpr, mtd, gma, reqty));
+//				}
+//			}
+//		}
+//		SUGAR Stmt_p(kctx, stmt, (kToken*)expr, ErrTag, "variable name is expected");
+//	}
+//	RETURN_(K_NULLEXPR);
+//}
 
 // --------------------------------------------------------------------------
 
@@ -78,9 +76,10 @@ static kbool_t assign_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 	return true;
 }
 
-static KMETHOD StmtTyCheck_DefaultAssign(KonohaContext *kctx, KonohaStack *sfp)
-{
-}
+//static KMETHOD StmtTyCheck_DefaultAssign(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//
+//}
 
 #define setToken(tk, str, size, k) {\
 		KSETv(tk, tk->text, KLIB new_kString(kctx, str, size, 0));\
@@ -175,7 +174,7 @@ static KMETHOD ParseExpr_SelfAssign(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t assign_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("="), ExprTyCheck_(assign)},
+//		{ .keyword = SYM_("="), ExprTyCheck_(assign)},
 		{ .keyword = SYM_("+="), _OPLeft, /*StmtTyCheck_(DefaultAssign),*/ ParseExpr_(SelfAssign), .precedence_op2 = 1600,},
 		{ .keyword = SYM_("-="), _OPLeft, /*StmtTyCheck_(DefaultAssign),*/ ParseExpr_(SelfAssign), .precedence_op2 = 1600,},
 		{ .keyword = SYM_("*="), _OPLeft, /*StmtTyCheck_(DefaultAssign),*/ ParseExpr_(SelfAssign), .precedence_op2 = 1600,},
