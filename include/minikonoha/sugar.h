@@ -308,7 +308,10 @@ typedef struct TokenRange {
 	int beginIdx;
 	int endIdx;
 	kNameSpace *ns;
-	kToken *errToken;
+	union {
+		kToken *errToken;
+		struct MacroSet *macroSet;
+	};
 } TokenRange;
 
 #define TokenRange_end(kctx, range)  	range->endIdx = kArray_size(range->tokenList);
@@ -316,6 +319,11 @@ typedef struct TokenRange {
 		KLIB kArray_clear(kctx, range->tokenList, range->beginIdx);\
 		range->endIdx = range->beginIdx;\
 	}\
+
+typedef struct MacroSet {
+	ksymbol_t   symbol;
+	TokenRange *macro;
+} MacroSet;
 
 typedef kbool_t (*CheckEndOfStmtFunc2)(KonohaContext *, TokenRange *range, TokenRange *sourceRange, int *currentIdxRef, int *indentRef);
 

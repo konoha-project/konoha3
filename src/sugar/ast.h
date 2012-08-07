@@ -411,11 +411,38 @@ static kbool_t kStmt_parseBySyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray 
 	return ret;
 }
 
+static int TokenRange_addResolvedToken(KonohaContext *kctx, TokenRange *range, TokenRange *sourceRange, int currentIdx);
+
+static kbool_t TokenRange_expandMacro(KonohaContext *kctx, TokenRange *range, ksymbol_t symbol, MacroSet *macro)
+{
+	while(macro->symbol != 0) {
+		if(macro->symbol == symbol) {
+			size_t i;
+			TokenRange *macroRange = macro->macro;
+			for(i = macroRange->beginIdx; i < macroRange->endIdx; i++) {
+				kToken *tk = macroRange->tokenList->tokenItems[i];
+				if(tk->resolvedSyntaxInfo != NULL) {
+					KLIB kArray_add(kctx, range->tokenList, tk);
+				}
+				else {
+					i = TokenRange_addResolvedToken(kctx, range, macroRange, i);
+				}
+			}
+			return true;
+		}
+		macro++;
+	}
+	return false;
+}
+
 static int TokenRange_addSymbolToken(KonohaContext *kctx, TokenRange *range, TokenRange *sourceRange, int i)
 {
 	kTokenVar *tk = sourceRange->tokenList->tokenVarItems[i];
 	const char *t = S_text(tk->text);
 	ksymbol_t symbol = ksymbolA(t, S_size(tk->text), SYM_NEWID);
+	if(sourceRange->macroSet != NULL && TokenRange_expandMacro(kctx, range, symbol, sourceRange->macroSet)) {
+		return i;
+	}
 	SugarSyntax *syn = SYN_(range->ns, symbol);
 	if(syn != NULL) {
 		if(syn->ty != TY_unknown) {
@@ -459,8 +486,6 @@ static int TokenRange_addSymbolToken(KonohaContext *kctx, TokenRange *range, Tok
 	KLIB kArray_add(kctx, range->tokenList, tk);
 	return i;
 }
-
-static int TokenRange_addResolvedToken(KonohaContext *kctx, TokenRange *range, TokenRange *sourceRange, int currentIdx);
 
 static int TokenRange_selectStmtToken(KonohaContext *kctx, TokenRange *range, TokenRange *sourceRange, CheckEndOfStmtFunc2 isEndOfStmt, int *optionRef)
 {

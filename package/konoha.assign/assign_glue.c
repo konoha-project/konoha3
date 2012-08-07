@@ -25,8 +25,8 @@
 #include<minikonoha/minikonoha.h>
 #include<minikonoha/sugar.h>
 
-#ifndef ASSIGN_GLUE_H_
-#define ASSIGN_GLUE_H_
+//int verbose_sugar = 1;
+//#include"../src/sugar/sugardump.h"
 
 // --------------------------------------------------------------------------
 
@@ -96,79 +96,37 @@ static inline void kToken_copy(KonohaContext *kctx, kTokenVar *destToken, kToken
 
 static KMETHOD ParseExpr_SelfAssign(KonohaContext *kctx, KonohaStack *sfp)
 {
-//<<<<<<< HEAD
-//	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
-//	kNameSpace *ns = Stmt_nameSpace(stmt);
-//	kToken *selfAssignToken = tokenList->tokenItems[operatorIdx];
-//	size_t i, beginTemplateIdx = kArray_size(tokenList);
-//	TokenRange macroRangeBuf, *macroRange = new_TokenListRange(kctx, Stmt_nameSpace(stmt), tokenList, &macroRangeBuf);
-//	SUGAR TokenRange_tokenize(kctx, macroRange, "/*A*/ = ( /*A*/ ) /*+*/ ( /*B*/ )", 0);
-//
-//	size_t beginNewIdx = kArray_size(tokenList);
-//	for(i = beginIdx; i < operatorIdx; i++) {
-//		KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[i]);
-//	}
-//	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+1]); // template: =
-//	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+2]); // template; (
-//	for(i = beginIdx; i < operatorIdx; i++) {
-//		kTokenVar *tk = GCSAFE_new(TokenVar, 0);
-//		kToken_copy(kctx, tk, tokenList->tokenItems[i]);
-//		KLIB kArray_add(kctx, tokenList, tk);
-//	}
-//	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+3]); // template: )
-//	kTokenVar *opToken = GCSAFE_new(TokenVar, TokenType_SYMBOL);
-//	KSETv(opToken->text, KLIB new_kString(kctx, S_text(selfAssignToken->text), S_size(selfAssignToken->text) - 1, SPOL_ASCII));
-//	KLIB kArray_add(kctx, tokenList, opToken);
-//	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+4]); // template: (
-//	for(i = operatorIdx+1; i < endIdx; i++) {
-//		KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[i]);
-//	}
-//	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+5]); // template: )
-//
-//	size_t beginResolovedIdx = kArray_size(tokenList);
-//	if(SUGAR TokenRange_resolved(kctx, ns, tokenList, beginNewIdx, beginResolovedIdx, tokenList)) {
-//		kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, tokenList, beginResolovedIdx, kArray_size(tokenList));
-//		KLIB kArray_clear(kctx, tokenList, beginTemplateIdx);
-//		RETURN_(expr);
-//	}
-//	KLIB kArray_clear(kctx, tokenList, beginTemplateIdx);
-//=======
-//	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
-//	kNameSpace *ns = Stmt_nameSpace(stmt);
-//	kToken *selfAssignToken = tokenList->tokenItems[operatorIdx];
-//
-//	size_t i, beginTemplateIdx = kArray_size(tokenList);
-//	SUGAR kNameSpace_tokenize(kctx, ns, "/*A*/ = ( /*A*/ ) /*+*/ ( /*B*/ )", selfAssignToken->uline, tokenList);
-//
-//	size_t beginNewIdx = kArray_size(tokenList);
-//	for(i = beginIdx; i < operatorIdx; i++) {
-//		KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[i]);
-//	}
-//	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+1]); // template: =
-//	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+2]); // template; (
-//	for(i = beginIdx; i < operatorIdx; i++) {
-//		kTokenVar *tk = GCSAFE_new(TokenVar, 0);
-//		kToken_copy(kctx, tk, tokenList->tokenItems[i]);
-//		KLIB kArray_add(kctx, tokenList, tk);
-//	}
-//	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+3]); // template: )
-//	kTokenVar *opToken = GCSAFE_new(TokenVar, TokenType_SYMBOL);
-//	KSETv(opToken, opToken->text, KLIB new_kString(kctx, S_text(selfAssignToken->text), S_size(selfAssignToken->text) - 1, SPOL_ASCII));
-//	KLIB kArray_add(kctx, tokenList, opToken);
-//	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+4]); // template: (
-//	for(i = operatorIdx+1; i < endIdx; i++) {
-//		KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[i]);
-//	}
-//	KLIB kArray_add(kctx, tokenList, tokenList->tokenItems[beginTemplateIdx+5]); // template: )
-//
-//	size_t beginResolovedIdx = kArray_size(tokenList);
-//	if(SUGAR kNameSpace_resolveTokenArray(kctx, ns, tokenList, beginNewIdx, beginResolovedIdx, tokenList)) {
-//		kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, tokenList, beginResolovedIdx, kArray_size(tokenList));
-//		KLIB kArray_clear(kctx, tokenList, beginTemplateIdx);
-//		RETURN_(expr);
-//	}
-//	KLIB kArray_clear(kctx, tokenList, beginTemplateIdx);
-//>>>>>>> 5f3aeac03042048d3dd991fad03fe99d4edb8cbe
+	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
+	kNameSpace *ns = Stmt_nameSpace(stmt);
+	kToken *selfAssignToken = tokenList->tokenItems[operatorIdx];
+	DBG_ASSERT(S_size(selfAssignToken->text) > 1);
+	ksymbol_t opSymbol = KLIB Ksymbol(kctx, S_text(selfAssignToken->text), S_size(selfAssignToken->text) - 1, SPOL_ASCII, _NEWID);
+	SugarSyntax *opSyntax = SYN_(ns, opSymbol);
+	if(opSyntax != NULL) {
+		TokenRange macroRangeBuf, *macroRange = SUGAR new_TokenListRange(kctx, Stmt_nameSpace(stmt), tokenList, &macroRangeBuf);
+		SUGAR TokenRange_tokenize(kctx, macroRange, "A = ( A ) + ( B )", 0);
+
+		TokenRange opRangeBuf, *opRange = SUGAR new_TokenStackRange(kctx, macroRange, &opRangeBuf);
+		kTokenVar *opToken = GCSAFE_new(TokenVar, TokenType_SYMBOL);
+		KSETv(opToken, opToken->text, SYM_s(opSymbol));
+		KLIB kArray_add(kctx, opRange->tokenList, opToken);
+		TokenRange_end(kctx, opRange);
+
+		TokenRange newexprRangeBuf, *newexprRange = SUGAR new_TokenStackRange(kctx, opRange, &newexprRangeBuf);
+		TokenRange A = {tokenList, beginIdx, operatorIdx, ns};
+		TokenRange B = {tokenList, operatorIdx+1, endIdx, ns};
+		MacroSet macros[] = {{SYM_("A"), &A}, {SYM_("B"), &B}, {SYM_("+"), opRange}, {0, NULL}/* necessary*/};
+		macroRange->macroSet = macros;
+		SUGAR TokenRange_resolved(kctx, newexprRange, macroRange);
+//		KdumpTokenRange(kctx, "replaced", newexprRange);
+
+		kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, newexprRange->tokenList, newexprRange->beginIdx, newexprRange->endIdx);
+		TokenRange_pop(kctx, macroRange);
+		RETURN_(expr);
+	}
+	else {
+		SUGAR Stmt_p(kctx, stmt, selfAssignToken, ErrTag, "undefined binary operator: %s", SYM_t(opSymbol));
+	}
 }
 
 static kbool_t assign_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
@@ -203,5 +161,4 @@ KDEFINE_PACKAGE* assign_init(void)
 	return &d;
 }
 
-#endif /* ASSIGN_GLUE_H_ */
 
