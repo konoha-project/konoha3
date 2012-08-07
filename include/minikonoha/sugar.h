@@ -539,7 +539,7 @@ typedef struct {
 	int                errorMessageCount;
 	kbool_t            isBlockingErrorMessage;
 	kBlock            *singleBlock;
-	kGamma            *gma;
+	kGamma            *preparedGamma;
 //	kArray            *lvarlst;
 	kArray            *definedMethodList;
 } SugarContext;

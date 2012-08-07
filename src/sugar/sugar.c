@@ -85,7 +85,7 @@ static void SugarContext_reftrace(KonohaContext *kctx, struct KonohaContextModul
 	BEGIN_REFTRACE(6);
 	KREFTRACEv(base->preparedTokenList);
 	KREFTRACEv(base->errorMessageList);
-	KREFTRACEv(base->gma);
+	KREFTRACEv(base->preparedGamma);
 	KREFTRACEv(base->singleBlock);
 	KREFTRACEv(base->definedMethodList);
 	END_REFTRACE();
@@ -108,7 +108,7 @@ static void SugarModule_setup(KonohaContext *kctx, struct KonohaModule *def, int
 		KINITv(base->errorMessageList, new_(StringArray, 8));
 		KINITv(base->definedMethodList, new_(MethodArray, 8));
 
-		KINITv(base->gma, new_(Gamma, NULL));
+		KINITv(base->preparedGamma, new_(Gamma, NULL));
 		KINITv(base->singleBlock, new_(Block, NULL));
 		KLIB kArray_add(kctx, base->singleBlock->stmtList, K_NULL);
 		KLIB Karray_init(kctx, &base->errorMessageBuffer, K_PAGESIZE);

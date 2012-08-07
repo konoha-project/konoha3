@@ -328,7 +328,7 @@ static void Gamma_initParam(KonohaContext *kctx, GammaAllocaData *genv, kParam *
 static kbool_t kMethod_compile(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns, kString *text, kfileline_t uline)
 {
 	INIT_GCSTACK();
-	kGamma *gma = KonohaContext_getSugarContext(kctx)->gma;
+	kGamma *gma = KonohaContext_getSugarContext(kctx)->preparedGamma;
 	kBlock *bk = Method_newBlock(kctx, mtd, ns, text, uline);
 	GammaStackDecl lvarItems[32] = {};
 	GammaAllocaData newgma = {
@@ -361,7 +361,7 @@ static void Gamma_initIt(KonohaContext *kctx, GammaAllocaData *genv, kParam *pa)
 
 static ktype_t Stmt_checkReturnType(KonohaContext *kctx, kStmt *stmt)
 {
-	if(stmt->syn->keyword == KW_ExprPattern) {
+	if(stmt->syn != NULL && stmt->syn->keyword == KW_ExprPattern) {
 		kExpr *expr = (kExpr*)kStmt_getObjectNULL(kctx, stmt, KW_ExprPattern);
 		DBG_ASSERT(expr != NULL);
 		if(expr->ty != TY_void) {
@@ -377,7 +377,7 @@ static kstatus_t kMethod_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtyp
 
 static kstatus_t kBlock_genEvalCode(KonohaContext *kctx, kBlock *bk, kMethod *mtd)
 {
-	kGamma *gma = KonohaContext_getSugarContext(kctx)->gma;
+	kGamma *gma = KonohaContext_getSugarContext(kctx)->preparedGamma;
 	GammaStackDecl lvarItems[32] = {};
 	GammaAllocaData newgma = {
 		.flag = kGamma_TOPLEVEL,
@@ -388,14 +388,15 @@ static kstatus_t kBlock_genEvalCode(KonohaContext *kctx, kBlock *bk, kMethod *mt
 	GAMMA_PUSH(gma, &newgma);
 	Gamma_initIt(kctx, &newgma, Method_param(mtd));
 	kBlock_tyCheckAll(kctx, bk, gma);
+	DBG_P("block size =%d", kArray_size(bk->stmtList));
 	GAMMA_POP(gma, &newgma);
 
 	kStmt *stmt = bk->stmtList->stmtItems[0];
-	if(stmt->syn == NULL) {  // done
+	if(stmt->syn == NULL && kArray_size(bk->stmtList) == 1) {
 		kctx->stack->evalty = TY_void;
 		return K_CONTINUE;
 	}
-	else if(stmt->syn->keyword == KW_ERR) {
+	if(stmt->syn != NULL && stmt->syn->keyword == KW_ERR) {
 		return K_BREAK;
 	}
 	else {
