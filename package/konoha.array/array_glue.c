@@ -250,7 +250,7 @@ static KMETHOD ParseExpr_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 			RETURN_(leftExpr);
 		}
 		if(leftExpr->syn->keyword == SYM_("new")) {  // new int[100], new int[]();
-			DBG_P("hoge, cur:%d, beg:%d, endIdx:%d", currentIdx, beginIdx, endIdx);
+			DBG_P("cur:%d, beg:%d, endIdx:%d", currentIdx, beginIdx, endIdx);
 			size_t subTokenSize = kArray_size(currentToken->subTokenList);
 			if (subTokenSize == 0) {
 				// 2 patterns, new int[(empty)], or new int[](x)
