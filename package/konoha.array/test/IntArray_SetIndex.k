@@ -11,6 +11,5 @@ void test() {
   assert(a.getSize() == 3);
 }
 
-
 test();
 
