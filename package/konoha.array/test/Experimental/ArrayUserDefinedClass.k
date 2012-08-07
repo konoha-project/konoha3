@@ -1,25 +1,28 @@
 // written by shinpei
-K.import("konoha.new");
-K.import("konoha.class");
-K.import("konoha.array");
-K.import("konoha.assign");
 
-class Human {
+K.import("konoha.array");
+K.import("konoha.class");
+
+class Person {
 	int age;
 	String name;
 
-	Human(int a) {
-		age = a;
+	Person(int age, String name) {
+		this.age = age;
+		this.name = name;
 	}
 }
 
-void f() {
-	Human[] ha = new Human[2];
-	ha[0] = new Human(17);
-	ha[1] = new Human(22);
-	assert(ha[0].age == 17);
-	assert(ha[1].age == 22);
-
+void test() {
+	Person[] pa = new Person[2];
+	pa[0] = new Person(17, "naruto");
+	pa[1] = new Person(22, "kakashi");
+	Person p1 = pa[0];
+	Person p2 = pa[1];
+	assert(p1.age == 17);
+	assert(p2.age == 22);
+	assert(p1.name == "naruto");
+	assert(p2.name == "kakashi");
 }
 
-f();
+test();
