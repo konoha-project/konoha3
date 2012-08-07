@@ -5,13 +5,13 @@ K.import("konoha.assign");
 
 class C {
 	int x;
-	@Final int succ() {
+	@Public @Final int succ() {
 		return x;
 	}
 }
 
 class D extends C {
-	@Override int succ() {
+	@Public @Override int succ() {
 		return x + 1;
 	}
 }
