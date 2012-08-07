@@ -247,6 +247,16 @@ struct SugarSyntaxVar {
 #define SYNFLAG_StmtJumpAhead      ((kshortflag_t)1 << 9)  /* continue */
 #define SYNFLAG_StmtJumpSkip       ((kshortflag_t)1 << 10)  /* break */
 
+// operator priority
+#define OP_PRIORITY_HIGHEST  200
+#define OP_PRIORITY_LOWEST  9900
+
+#define OP1_PRIORITY(x) \
+	.precedence_op1 = (OP_PRIORITY_HIGHEST + (x * 100))
+
+#define OP2_PRIORITY(x) \
+	.precedence_op2 = (OP_PRIORITY_HIGHEST + (x * 100))
+
 typedef struct KDEFINE_SYNTAX {
 	ksymbol_t keyword;  kshortflag_t flag;
 	const char *rule;
