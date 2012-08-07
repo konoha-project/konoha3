@@ -121,7 +121,7 @@ static void Array_setNextResultUnbox(KonohaContext *kctx, KonohaStack* sfp)
 	size_t n = itr->current_pos;
 	itr->current_pos += 1;
 	DBG_ASSERT(n < kArray_size(itr->arrayList));
-	RETURN_(itr->arrayList->kintItems[n]);
+	RETURNd_(itr->arrayList->kintItems[n]);
 }
 
 static KMETHOD Array_toIterator(KonohaContext *kctx, KonohaStack *sfp)

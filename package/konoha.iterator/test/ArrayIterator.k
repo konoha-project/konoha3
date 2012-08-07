@@ -5,7 +5,7 @@ K.import("konoha.iterator");
 K.import("konoha.array");
 
 void iteratorTest () {
-	Array[int] ia = new int[3];
+	Array[int] ia = [];
 	ia.add(3);
 	ia.add(4);
 	ia.add(5);
