@@ -3,7 +3,7 @@
 K.import("konoha.bytes");
 
 void test () {
-	 //p("'" + "ほげほげ".asBytes().encodeTo("SHIFT_JIS").decodeFrom("SHIFT_JIS") + "'");
+	 assert("hoge".asBytes().encodeTo("SHIFT_JIS").decodeFrom("SHIFT_JIS") == "hoge");
 	 assert("ほげほげ".asBytes().encodeTo("SHIFT_JIS").decodeFrom("SHIFT_JIS") == "ほげほげ");
 }
 
