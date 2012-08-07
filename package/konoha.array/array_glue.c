@@ -61,7 +61,7 @@ static KMETHOD Array_getSize(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(kArray_size(a));
 }
 
-#define KARRAY_LIST_SIZE_MAX 1024
+#define KARRAY_LIST_SIZE_MAX (1024 * 1024)
 static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
@@ -72,6 +72,9 @@ static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
 				KEYVALUE_u("length", asize)
 		);
 		RETURN_(a);
+	} else {
+		//TODO use mmap
+		DBG_P("too big array..");
 	}
 	a->bytemax = asize * sizeof(void*);
 	kArray_setsize((kArray*)a, asize);
@@ -132,7 +135,7 @@ static KMETHOD Array_new(KonohaContext *kctx, KonohaStack *sfp)
 
 	}
 	a->bytemax = asize * sizeof(void*);
-	//kArray_setsize((kArray*)a, asize);
+	kArray_setsize((kArray*)a, asize);
 	a->objectItems = (kObject**)KCALLOC(a->bytemax, 1);
 	if(!kArray_isUnboxData(a)) {
 		size_t i;
@@ -246,9 +249,22 @@ static KMETHOD ParseExpr_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 		if(leftExpr == K_NULLEXPR) {
 			RETURN_(leftExpr);
 		}
-		if(leftExpr->syn->keyword == SYM_("new")) {  // new int[100]
-			kExpr_setsyn(leftExpr, SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall));
-			leftExpr = SUGAR kStmt_addExprParam(kctx, stmt, leftExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), 0/*allowEmpty*/);
+		if(leftExpr->syn->keyword == SYM_("new")) {  // new int[100], new int[]();
+			DBG_P("hoge, cur:%d, beg:%d, endIdx:%d", currentIdx, beginIdx, endIdx);
+			size_t subTokenSize = kArray_size(currentToken->subTokenList);
+			if (subTokenSize == 0) {
+				// 2 patterns, new int[(empty)], or new int[](x)
+				//new int[](x) --> new int[x]
+				//kToken *nextToken = tokenList->tokenItems[currentIdx];
+				kExpr_setsyn(leftExpr, SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall));
+				//currentIdx += 1;
+				//leftExpr = SUGAR kStmt_addExprParam(kctx, stmt, leftExpr, nextToken->subTokenList, 0, kArray_size(nextToken->subTokenList), 0/*allowEmpty*/);
+				//RETURN_(leftExpr);
+			} else { // s > 0
+				kExpr_setsyn(leftExpr, SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall));
+				DBG_P("currentToken->subtoken:%d", kArray_size(currentToken->subTokenList));
+				leftExpr = SUGAR kStmt_addExprParam(kctx, stmt, leftExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), 0/*allowEmpty*/);
+			}
 		}
 		else {   // X[1] => get X 1
 			kTokenVar *tkN = GCSAFE_new(TokenVar, 0);
