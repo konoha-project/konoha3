@@ -133,11 +133,11 @@ static kbool_t assign_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfilel
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 //		{ .keyword = SYM_("="), ExprTyCheck_(assign)},
-		{ .keyword = SYM_("+="), _OPLeft, /*StmtTyCheck_(DefaultAssign),*/ ParseExpr_(SelfAssign), .precedence_op2 = 1600,},
-		{ .keyword = SYM_("-="), _OPLeft, /*StmtTyCheck_(DefaultAssign),*/ ParseExpr_(SelfAssign), .precedence_op2 = 1600,},
-		{ .keyword = SYM_("*="), _OPLeft, /*StmtTyCheck_(DefaultAssign),*/ ParseExpr_(SelfAssign), .precedence_op2 = 1600,},
-		{ .keyword = SYM_("/="), _OPLeft, /*StmtTyCheck_(DefaultAssign),*/ ParseExpr_(SelfAssign), .precedence_op2 = 1600,},
-		{ .keyword = SYM_("%="), _OPLeft, /*StmtTyCheck_(DefaultAssign),*/ ParseExpr_(SelfAssign), .precedence_op2 = 1600,},
+		{ .keyword = SYM_("+="), _OPLeft, /*StmtTyCheck_(DefaultAssign),*/ ParseExpr_(SelfAssign), OP2_PRIORITY(14),},
+		{ .keyword = SYM_("-="), _OPLeft, /*StmtTyCheck_(DefaultAssign),*/ ParseExpr_(SelfAssign), OP2_PRIORITY(14),},
+		{ .keyword = SYM_("*="), _OPLeft, /*StmtTyCheck_(DefaultAssign),*/ ParseExpr_(SelfAssign), OP2_PRIORITY(14),},
+		{ .keyword = SYM_("/="), _OPLeft, /*StmtTyCheck_(DefaultAssign),*/ ParseExpr_(SelfAssign), OP2_PRIORITY(14),},
+		{ .keyword = SYM_("%="), _OPLeft, /*StmtTyCheck_(DefaultAssign),*/ ParseExpr_(SelfAssign), OP2_PRIORITY(14),},
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);

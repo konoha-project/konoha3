@@ -1212,6 +1212,7 @@ static KMETHOD StmtTyCheck_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 #define GROUP(T)    .keyword = KW_##T##Group
 #define TOKEN(T)    .keyword = KW_##T
 
+
 static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 {
 	DBG_ASSERT(SYM_("$Param") == KW_ParamPattern);
@@ -1227,30 +1228,30 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ PATTERN(Text),    _TERM, ExprTyCheck_(Text),},
 		{ PATTERN(Number),     _TERM, ExprTyCheck_(Int),},
 		{ PATTERN(Float),   _TERM, },
-		{ GROUP(Parenthesis), .flag = SYNFLAG_ExprPostfixOp2, ParseExpr_(Parenthesis), .precedence_op2 = 300, ExprTyCheck_(FuncStyleCall),}, //KW_ParenthesisGroup
+		{ GROUP(Parenthesis), .flag = SYNFLAG_ExprPostfixOp2, ParseExpr_(Parenthesis), OP2_PRIORITY(1), ExprTyCheck_(FuncStyleCall),}, //KW_ParenthesisGroup
 		{ GROUP(Bracket),  },  //KW_BracketGroup
 		{ GROUP(Brace),  }, // KW_BraceGroup
 		{ PATTERN(Block), PatternMatch_(Block), ExprTyCheck_(Block), },
 		{ PATTERN(Param), PatternMatch_(Params), TopStmtTyCheck_(ParamsDecl), ExprTyCheck_(MethodCall),},
 		{ PATTERN(Token), PatternMatch_(Toks), },
-		{ TOKEN(DOT), ParseExpr_(DOT), .precedence_op2 = 300, },
-		{ TOKEN(DIV), _OP, .precedence_op2 = 500, },
-		{ TOKEN(MOD), _OP, .precedence_op2 = 500, },
-		{ TOKEN(MUL), _OP, .precedence_op2 = 500, },
-		{ TOKEN(ADD), _OP, .precedence_op2 = 600, },
-		{ TOKEN(SUB), _OP, .precedence_op2 = 600, .precedence_op1 = 400},
-		{ TOKEN(LT), _OP,  .precedence_op2 = 800, },
-		{ TOKEN(LTE), _OP, .precedence_op2 = 800, },
-		{ TOKEN(GT), _OP,  .precedence_op2 = 800, },
-		{ TOKEN(GTE), _OP, .precedence_op2 = 800, },
-		{ TOKEN(EQ), _OP,  .precedence_op2 = 900, },
-		{ TOKEN(NEQ), _OP, .precedence_op2 = 900, },
-		{ TOKEN(AND), _OP, .precedence_op2 = 1300, ExprTyCheck_(AND)},
-		{ TOKEN(OR), _OP,  .precedence_op2 = 1400, ExprTyCheck_(OR)},
-		{ TOKEN(NOT), _OP, .precedence_op1 = 400},
-		{ TOKEN(COLON), _OP, .precedence_op2 = 3072,},  // colon
-		{ TOKEN(LET),      .flag = SYNFLAG_ExprLeftJoinOp2, ParseExpr_(Op), ExprTyCheck_(assign), .precedence_op2 = 4096, },
-		{ TOKEN(COMMA),    ParseExpr_(COMMA), .precedence_op2 = 8192, },
+		{ TOKEN(DOT), ParseExpr_(DOT), OP2_PRIORITY(1), },
+		{ TOKEN(DIV), _OP, OP2_PRIORITY(3), },
+		{ TOKEN(MOD), _OP, OP2_PRIORITY(3), },
+		{ TOKEN(MUL), _OP, OP2_PRIORITY(3), },
+		{ TOKEN(ADD), _OP, OP2_PRIORITY(4), },
+		{ TOKEN(SUB), _OP, OP2_PRIORITY(4), OP1_PRIORITY(2)},
+		{ TOKEN(LT), _OP,  OP2_PRIORITY(6), },
+		{ TOKEN(LTE), _OP, OP2_PRIORITY(6), },
+		{ TOKEN(GT), _OP,  OP2_PRIORITY(6), },
+		{ TOKEN(GTE), _OP, OP2_PRIORITY(6), },
+		{ TOKEN(EQ), _OP,  OP2_PRIORITY(7), },
+		{ TOKEN(NEQ), _OP, OP2_PRIORITY(7), },
+		{ TOKEN(AND), _OP, OP2_PRIORITY(11), ExprTyCheck_(AND)},
+		{ TOKEN(OR), _OP,   OP2_PRIORITY(12), ExprTyCheck_(OR)},
+		{ TOKEN(NOT), _OP, OP1_PRIORITY(2)},
+		{ TOKEN(COLON), _OP, OP2_PRIORITY(30),},  // colon
+		{ TOKEN(LET),      .flag = SYNFLAG_ExprLeftJoinOp2, ParseExpr_(Op), ExprTyCheck_(assign), OP2_PRIORITY(49), },
+		{ TOKEN(COMMA),    ParseExpr_(COMMA), OP2_PRIORITY(82), },
 		{ TOKEN(DOLLAR),   ParseExpr_(DOLLAR), },
 		{ TOKEN(boolean), .type = TY_Boolean, },
 		{ TOKEN(int),     .type = TY_Int, },
