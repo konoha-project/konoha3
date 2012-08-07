@@ -1,5 +1,5 @@
 // written by shinpei
-
+K.import("konoha.new");
 K.import("konoha.class");
 K.import("konoha.array");
 K.import("konoha.assign");

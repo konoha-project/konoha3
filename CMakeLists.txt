@@ -133,7 +133,7 @@ set(PACKAGES
 ##	konoha.subproc
 	konoha.mpi
 ##	curl
-	ijit
+##	ijit
 ##	jansson
 ##	mecab
 	python

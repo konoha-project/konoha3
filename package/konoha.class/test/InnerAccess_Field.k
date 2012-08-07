@@ -1,5 +1,6 @@
 // written by kimio kuramitsu
 
+K.import("konoha.assign");
 K.import("konoha.class");
 
 class C {

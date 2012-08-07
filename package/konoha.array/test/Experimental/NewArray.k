@@ -1,5 +1,5 @@
 // written by kimio kuramitsu
-
+K.import("konoha.new")
 K.import("konoha.class")
 K.import("konoha.array");
 

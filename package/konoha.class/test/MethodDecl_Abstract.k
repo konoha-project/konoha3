@@ -1,6 +1,7 @@
 // written by kimio kuramitsu
 
 K.import("konoha.class");
+K.import("konoha.assign");
 
 class Person {
 	String name;
@@ -12,14 +13,9 @@ class Person {
 	boolean isChild();    // @Test Abstract Method
 }
 
-//boolean Person.isChild() {  // @Test Additional Definition
-//	return this.age < 20;
-//}
-
 void test() {
 	Person p = new Person("naruto", 17);
-	assert(p.isChild());
+	assert(p.isChild() == false);
 }
 
 test();
-
