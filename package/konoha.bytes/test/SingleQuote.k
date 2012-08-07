@@ -4,7 +4,7 @@ K.import("konoha.bytes");
 
 void f () {
 	int s = 'h';
-	p(s);
+	assert(s == 104);
 }
 f();
 
