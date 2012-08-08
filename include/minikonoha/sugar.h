@@ -248,31 +248,23 @@ struct SugarSyntaxVar {
 #define SYNFLAG_StmtJumpSkip       ((kshortflag_t)1 << 10)  /* break */
 
 // operator priority
-#define OP_PRIORITY_HIGHEST  200
-#define OP_PRIORITY_LOWEST  9900
 
-#define OP1_PRIORITY(x) \
-	.precedence_op1 = (OP_PRIORITY_HIGHEST + (x * 100))
-
-#define OP2_PRIORITY(x) \
-	.precedence_op2 = (OP_PRIORITY_HIGHEST + (x * 100))
-
-#define C_PRECEDENCE_CALL      100  /*x(), x[], x.x x->x x++ */
-#define C_PRECEDENCE_PREUNARY  200  /*++x, --x, sizeof x &x +x -x !x */
-#define C_PRECEDENCE_CAST      300  /* (T)x */
-#define C_PRECEDENCE_MUL       400  /* x * x, x / x, x % x*/
-#define C_PRECEDENCE_ADD       500  /* x + x, x - x */
-#define C_PRECEDENCE_SHIFT     600  /* x << x, x >> x */
-#define C_PRECEDNECE_COMPARE   700
-#define C_PRECEDENCE_EQUALS    800
-#define C_PRECEDENCE_BITAND    900
-#define C_PRECEDENCE_BITXOR    1000
-#define C_PRECEDENCE_BITOR     1100
-#define C_PRECEDENCE_AND       1200
-#define C_PRECEDENCE_OR        1300
-#define C_PRECEDENCE_TRINARY   1400  /* ? : */
-#define C_PRECEDENCE_ASSIGN    1500
-#define C_PRECEDENCE_COMMA     1600
+#define C_PRECEDENCE_CALL      300  /*x(), x[], x.x x->x x++ */
+#define C_PRECEDENCE_PREUNARY  400  /*++x, --x, sizeof x &x +x -x !x */
+#define C_PRECEDENCE_CAST      500  /* (T)x */
+#define C_PRECEDENCE_MUL       600  /* x * x, x / x, x % x*/
+#define C_PRECEDENCE_ADD       700  /* x + x, x - x */
+#define C_PRECEDENCE_SHIFT     800  /* x << x, x >> x */
+#define C_PRECEDENCE_COMPARE   900
+#define C_PRECEDENCE_EQUALS    1000
+#define C_PRECEDENCE_BITAND    1100
+#define C_PRECEDENCE_BITXOR    1200
+#define C_PRECEDENCE_BITOR     1300
+#define C_PRECEDENCE_AND       1400
+#define C_PRECEDENCE_OR        1500
+#define C_PRECEDENCE_TRINARY   1600  /* ? : */
+#define C_PRECEDENCE_ASSIGN    1700
+#define C_PRECEDENCE_COMMA     1800
 
 typedef struct KDEFINE_SYNTAX {
 	ksymbol_t keyword;  kshortflag_t flag;
