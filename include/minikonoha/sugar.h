@@ -503,6 +503,7 @@ struct kGammaVar {
 #define K_NULLEXPR   (kExpr*)((CT_Expr)->defaultValueAsNull)
 #define K_NULLBLOCK  (kBlock*)((CT_Block)->defaultValueAsNull)
 
+typedef kStmt* (*TypeDeclFunc)(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr, kExpr *vexpr);
 
 typedef struct {
 	KonohaModule  h;
@@ -545,6 +546,7 @@ typedef struct {
 	kExpr*      (*kStmt_tyCheckExprAt)(KonohaContext *, kStmt *, kExpr *, size_t, kGamma *, ktype_t, int);
 	kExpr *     (*kStmt_tyCheckCallParamExpr)(KonohaContext *, kStmt *, kExpr *, kMethod *, kGamma *, ktype_t);
 	kExpr *     (*new_TypedMethodCall)(KonohaContext *, kStmt *, ktype_t ty, kMethod *mtd, kGamma *, int n, ...);
+	kbool_t     (*kStmt_declType)(KonohaContext *, kStmt *, kGamma *, ktype_t, kExpr *, TypeDeclFunc, kStmt **);
 
 	SugarSyntax* (*kNameSpace_getSyntax)(KonohaContext *, kNameSpace *, ksymbol_t, int);
 	void         (*kNameSpace_defineSyntax)(KonohaContext *, kNameSpace *, KDEFINE_SYNTAX *);

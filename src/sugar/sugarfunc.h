@@ -961,31 +961,6 @@ static KMETHOD StmtTyCheck_return(KonohaContext *kctx, KonohaStack *sfp)
 
 ///* ------------------------------------------------------------------------ */
 
-//static kbool_t ExprTerm_toVariable(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, ktype_t ty)
-//{
-//	if(Expr_isSymbolTerm(expr)) {
-//		kToken *tk = expr->termToken;
-//		int index = addGammaStack(kctx, &gma->genv->localScope, ty, tk->resolvedSymbol);
-//		SUGAR kExpr_setVariable(kctx, expr, gma, TEXPR_LOCAL, ty, index);
-//		return true;
-//	}
-//	return false;
-//}
-//
-//static kbool_t appendAssignStmt(KonohaContext *kctx, kExpr *expr, kStmt **lastStmtRef)
-//{
-//	kStmt *lastStmt = lastStmtRef[0];
-//	kStmt *newstmt = new_(Stmt, lastStmt->uline);
-//	kBlock_insertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, newstmt);
-//	kStmt_setsyn(newstmt, SYN_(Stmt_nameSpace(newstmt), KW_ExprPattern));
-//	kExpr_typed(expr, LET, TY_void);
-//	KLIB kObject_setObject(kctx, newstmt, KW_ExprPattern, TY_Expr, expr);
-//	lastStmtRef[0] = newstmt;
-//	return true;
-//}
-
-typedef kStmt* (*TypeDeclFunc)(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr, kExpr *vexpr);
-
 static kStmt* TypeDeclLocalVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr, kExpr *vexpr)
 {
 	DBG_ASSERT(Expr_isSymbolTerm(termExpr));
@@ -1003,6 +978,9 @@ static kStmt* TypeDeclLocalVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gm
 static kbool_t kStmt_declType(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *declExpr, TypeDeclFunc TypeDecl, kStmt **lastStmtRef)
 {
 	kStmt *newstmt = NULL;
+	if(TypeDecl == NULL) {
+		TypeDecl = TypeDeclLocalVariable;
+	}
 	if(declExpr->syn->keyword == KW_COMMA) {
 		size_t i;
 		for(i = 1; i < kArray_size(declExpr->cons); i++) {
@@ -1034,40 +1012,6 @@ static kbool_t kStmt_declType(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kty
 	}
 	return false;
 }
-
-//static kbool_t kStmt_declType(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *expr, kStmt **lastStmtRef)
-//{
-//	DBG_ASSERT(IS_Expr(expr));
-//	DBG_P("isTerm=%d, expr->syn->keyword=%s%s", Expr_isTerm(expr), PSYM_t(expr->syn->keyword));
-//	if(Expr_isSymbolTerm(expr)) {
-//		if(ExprTerm_toVariable(kctx, stmt, expr, gma, ty)) {
-//			kExpr *vexpr = new_VariableExpr(kctx, gma, TEXPR_NULL, ty, 0);
-//			expr = new_TypedConsExpr(kctx, TEXPR_LET, TY_void, 3, K_NULL, expr, vexpr);
-//			return appendAssignStmt(kctx, expr, lastStmtRef);
-//		}
-//	}
-//	else if(expr->syn->keyword == KW_LET) {
-//		kExpr *lexpr = kExpr_at(expr, 1);
-//		if(SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 2, gma, ty, 0) == K_NULLEXPR) {
-//			// this is neccesarry to avoid 'int a = a + 1;';
-//			return false;
-//		}
-//		if(ExprTerm_toVariable(kctx, stmt, lexpr, gma, ty)) {
-//			if(SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 2, gma, ty, 0) != K_NULLEXPR) {
-//				return appendAssignStmt(kctx, expr, lastStmtRef);
-//			}
-//			return false;
-//		}
-//	} else if(expr->syn->keyword == KW_COMMA) {
-//		size_t i;
-//		for(i = 1; i < kArray_size(expr->cons); i++) {
-//			if(!kStmt_declType(kctx, stmt, gma, ty, kExpr_at(expr, i), lastStmtRef)) return false;
-//		}
-//		return true;
-//	}
-//	kStmt_p(stmt, ErrTag, "variable name is expected");
-//	return false;
-//}
 
 static KMETHOD StmtTyCheck_TypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 {

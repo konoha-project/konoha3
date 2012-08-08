@@ -120,6 +120,7 @@ set(PACKAGES
 	konoha.null
 	konoha.rope
 	konoha.string
+	konoha.var
 	konoha.while
 	sugar
 	llvm
