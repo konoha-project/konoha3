@@ -146,9 +146,9 @@ static kbool_t object_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfilel
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("."), ExprTyCheck_(Getter) },
-		{ .keyword = SYM_("<:"), _OP, ExprTyCheck_(InstanceOf), OP2_PRIORITY(3)/*FIXME*/ },
-		{ .keyword = SYM_("as"), _OP, ExprTyCheck_(As), OP2_PRIORITY(3)/*FIXME*/ },
-		{ .keyword = SYM_("to"), _OP, OP2_PRIORITY(3)/*FIXME*/ },
+		{ .keyword = SYM_("<:"), _OP, ExprTyCheck_(InstanceOf), .precedence_op2 = C_PRECEDENCE_MUL/*FIXME*/ },
+		{ .keyword = SYM_("as"), _OP, ExprTyCheck_(As), .precedence_op2 = C_PRECEDENCE_MUL/*FIXME*/ },
+		{ .keyword = SYM_("to"), _OP, .precedence_op2 = C_PRECEDENCE_MUL/*FIXME*/ },
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
