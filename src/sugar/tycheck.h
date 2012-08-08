@@ -413,32 +413,35 @@ static kstatus_t kMethod_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtyp
 	BEGIN_LOCAL(lsfp, K_CALLDELTA);
 	{
 		int jumpResult;
-		KonohaContextRuntimeVar *base = kctx->stack;
-		KonohaStack *jump_bottom = base->jump_bottom;
+		KonohaContextRuntimeVar *runtime = kctx->stack;
+		KonohaStack *jump_bottom = runtime->jump_bottom;
 		jmpbuf_i lbuf = {};
-		if(base->evaljmpbuf == NULL) {
-			base->evaljmpbuf = (jmpbuf_i*)KCALLOC(sizeof(jmpbuf_i), 1);
+		if(runtime->evaljmpbuf == NULL) {
+			runtime->evaljmpbuf = (jmpbuf_i*)KCALLOC(sizeof(jmpbuf_i), 1);
 		}
-		memcpy(&lbuf, base->evaljmpbuf, sizeof(jmpbuf_i));
-		base->jump_bottom = lsfp + K_CALLDELTA; // FIXME ??
-		if((jumpResult = PLATAPI setjmp_i(*base->evaljmpbuf)) == 0) {
+		memcpy(&lbuf, runtime->evaljmpbuf, sizeof(jmpbuf_i));
+		runtime->jump_bottom = lsfp + K_CALLDELTA; // FIXME ??
+		KSETv(K_NULL, runtime->optionalErrorMessage, TS_EMPTY);
+		runtime->thrownScriptLine = 0;
+		if((jumpResult = PLATAPI setjmp_i(*runtime->evaljmpbuf)) == 0) {
 			//DBG_P("TY=%s, running EVAL..", TY_t(rtype));
-			if(base->evalty != TY_void) {
-				KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, base->stack[base->evalidx].o, GC_NO_WRITE_BARRIER);
-				lsfp[K_CALLDELTA+1].intValue = base->stack[base->evalidx].intValue;
+			if(runtime->evalty != TY_void) {
+				KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, runtime->stack[runtime->evalidx].o, GC_NO_WRITE_BARRIER);
+				lsfp[K_CALLDELTA+1].intValue = runtime->stack[runtime->evalidx].intValue;
 			}
 			KCALL(lsfp, 0, mtd, 0, KLIB Knull(kctx, CT_(rtype)));
-			base->evalty = rtype;
-			base->evalidx = (lsfp - kctx->stack->stack);
+			runtime->evalty = rtype;
+			runtime->evalidx = (lsfp - kctx->stack->stack);
 		}
 		else {
 			//KLIB reportException(kctx);
-			DBG_P("Catch eval exception jumpResult=%d", jumpResult);
-			base->evalty = TY_void;  // no value
+			const char *file = shortfilename(FileId_t(runtime->thrownScriptLine));
+			PLATAPI reportCaughtException(SYM_t(jumpResult), file, (kushort_t)runtime->thrownScriptLine,  S_text(runtime->optionalErrorMessage));
+			runtime->evalty = TY_void;  // no value
 			result = K_BREAK;        // message must be reported;
 		}
-		base->jump_bottom = jump_bottom;
-		memcpy(base->evaljmpbuf, &lbuf, sizeof(jmpbuf_i));
+		runtime->jump_bottom = jump_bottom;
+		memcpy(runtime->evaljmpbuf, &lbuf, sizeof(jmpbuf_i));
 	}
 	END_LOCAL();
 	RESET_GCSTACK();

@@ -765,7 +765,7 @@ static void ErrStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
 	kString *msg = (kString*)kStmt_getObjectNULL(kctx, stmt, KW_ERR);
 	DBG_ASSERT(IS_String(msg));
-	ASM(ERROR, SFP_(espidx), msg);
+	ASM(ERROR, stmt->uline, msg);
 }
 
 static void ExprStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)

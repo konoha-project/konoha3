@@ -93,7 +93,7 @@ static KMETHOD Float_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kfloat_t n = sfp[1].floatValue;
 	if(unlikely(n == 0.0)) {
-		kreportf(CritTag, sfp[K_RTNIDX].uline, "Script!!: zero divided");
+		KLIB Kraise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].uline);
 	}
 	RETURNf_(sfp[0].floatValue / n);
 }
@@ -108,7 +108,7 @@ static KMETHOD Int_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kfloat_t n = sfp[1].floatValue;
 	if(unlikely(n == 0.0)) {
-		kreportf(CritTag, sfp[K_RTNIDX].uline, "Script!!: zero divided");
+		KLIB Kraise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].uline);
 	}
 	RETURNf_(sfp[0].intValue / n);
 }

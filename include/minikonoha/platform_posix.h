@@ -283,6 +283,27 @@ static void debugPrintf(const char *file, const char *func, int line, const char
 	va_end(ap);
 }
 
+static void reportCaughtException(const char *exceptionName, const char *scriptName, int line, const char *optionalMessage)
+{
+	if(line != 0) {
+		if(optionalMessage != NULL && optionalMessage[0] != 0) {
+			fprintf(stderr, " ** (%s:%d) %s: %s\n", scriptName, line, exceptionName, optionalMessage);
+		}
+		else {
+			fprintf(stderr, " ** (%s:%d) %s\n", scriptName, line, exceptionName);
+		}
+	}
+	else {
+		if(optionalMessage != NULL && optionalMessage[0] != 0) {
+			fprintf(stderr, " ** %s: %s\n", exceptionName, optionalMessage);
+		}
+		else {
+			fprintf(stderr, " ** %s\n", exceptionName);
+		}
+	}
+}
+
+
 static void NOP_debugPrintf(const char *file, const char *func, int line, const char *fmt, ...)
 {
 }
@@ -311,6 +332,7 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.loadScript         = loadScript;
 	plat.beginTag           = beginTag;
 	plat.endTag             = endTag;
+	plat.reportCaughtException = reportCaughtException;
 	plat.debugPrintf        = (!verbose_debug) ? NOP_debugPrintf : debugPrintf;
 	return (PlatformApi*)(&plat);
 }

@@ -512,11 +512,11 @@ static KonohaClass *T_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass
 static KonohaClass* Kclass(KonohaContext *kctx, ktype_t cid, kfileline_t pline)
 {
 	SharedRuntime *share = kctx->share;
-	if(cid < (share->classTable.bytesize/sizeof(KonohaClassVar*))) {
-		return share->classTable.classItems[cid];
+	if(!(cid < (share->classTable.bytesize/sizeof(KonohaClassVar*)))) {
+		kreportf(ErrTag, pline, "invalid typeId=%d", (int)cid);
+		KLIB Kraise(kctx, EXPT_("InvalidTypeId"), NULL, pline);
 	}
-	kreportf(CritTag, pline, "invalid cid=%d", (int)cid);
-	return share->classTable.classItems[0];
+	return share->classTable.classItems[cid];
 }
 
 static void DEFAULT_init(KonohaContext *kctx, kObject *o, void *conf)

@@ -129,7 +129,7 @@ static void Kthrow(KonohaContext *kctx, KonohaStack *sfp)
 			p--;
 		}
 	}
-	KLIB Kraise(kctx, 1);
+	//KLIB Kraise(kctx, 1);
 }
 
 /* ------------------------------------------------------------------------ */

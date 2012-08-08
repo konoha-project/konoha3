@@ -484,18 +484,17 @@ static void Kreportf(KonohaContext *kctx, kinfotag_t level, kfileline_t pline, c
 	PLATAPI vprintf_i(fmt, ap);
 	PLATAPI printf_i("%s\n", E);
 	va_end(ap);
-	if(level == CritTag) {
-		kraise(0);
-	}
 }
 
 // -------------------------------------------------------------------------
 
-static void Kraise(KonohaContext *kctx, int param)
+static void Kraise(KonohaContext *kctx, int symbol, KonohaStack *sfp, kfileline_t pline)
 {
 	KonohaContextRuntimeVar *base = kctx->stack;
+	KNH_ASSERT(symbol != 0);
 	if(base->evaljmpbuf != NULL) {
-		PLATAPI longjmp_i(*base->evaljmpbuf, param+1);  // in setjmp 0 means good
+		base->thrownScriptLine = pline;
+		PLATAPI longjmp_i(*base->evaljmpbuf, symbol);  // in setjmp 0 means good
 	}
 	PLATAPI exit_i(EXIT_FAILURE);
 }

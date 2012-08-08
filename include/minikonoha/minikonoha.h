@@ -146,6 +146,7 @@ struct PlatformApiVar {
 	int (*loadScript)(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *));
 	const char* (*beginTag)(kinfotag_t);
 	const char* (*endTag)(kinfotag_t);
+	void (*reportCaughtException)(const char *exceptionName, const char *scriptName, int line, const char *optionalMessage);
 	void  (*debugPrintf)(const char *file, const char *func, int line, const char *fmt, ...) __PRINTFMT(4, 5);
 };
 
@@ -485,6 +486,8 @@ struct KonohaContextRuntimeVar {
 	kObjectVar**               reftail;
 	ktype_t                    evalty;
 	kushort_t                  evalidx;
+	kfileline_t                thrownScriptLine;
+	kString                   *optionalErrorMessage;
 	jmpbuf_i                  *evaljmpbuf;
 	KonohaStack               *jump_bottom;
 };
@@ -1194,7 +1197,7 @@ struct KonohaLibVar {
 
 	void          (*KCodeGen)(KonohaContext*, kMethod *, kBlock *);
 	void          (*Kreportf)(KonohaContext*, kinfotag_t, kfileline_t, const char *fmt, ...);
-	void          (*Kraise)(KonohaContext*, int isContinue);     // module
+	void          (*Kraise)(KonohaContext*, int symbol, KonohaStack *, kfileline_t);
 
 	uintptr_t     (*Ktrace)(KonohaContext*, struct klogconf_t *logconf, ...);
 };
@@ -1228,6 +1231,7 @@ struct KonohaLibVar {
 #define ksymbolA(T, L, DEF)       (KPI)->Ksymbol(kctx, T, L, SPOL_ASCII, DEF)
 #define ksymbolSPOL(T, L, SPOL, DEF)       (KPI)->Ksymbol(kctx, T, L, SPOL, DEF)
 #define SYM_(T)                   (KPI)->Ksymbol(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
+#define EXPT_(T)                  (KPI)->Ksymbol(kctx, (T "Exception"), (sizeof(T "Exception")-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
 #define FN_(T)                    (KPI)->Ksymbol(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
 #define MN_(T)                    (KPI)->Ksymbol(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
 #define T_mn(X)                   SYM_PRE(X), SYM_t(X)

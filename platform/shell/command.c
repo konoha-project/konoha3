@@ -252,6 +252,16 @@ static int TEST_printf(const char *fmt, ...)
 	return res;
 }
 
+static void TEST_reportCaughtException(const char *exceptionName, const char *scriptName, int line, const char *optionalMessage)
+{
+	if(line != 0) {
+		fprintf(stdlog, " ** %s (%s:%d)\n", exceptionName, scriptName, line);
+	}
+	else {
+		fprintf(stdlog, " ** %s\n", exceptionName);
+	}
+}
+
 //static int check_result2(FILE *fp0, FILE *fp1)
 //{
 //	char buf0[128];
@@ -546,6 +556,7 @@ static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc
 			plat->vprintf_i = TEST_vprintf;
 			plat->beginTag  = TEST_begin;
 			plat->endTag    = TEST_end;
+			plat->reportCaughtException = TEST_reportCaughtException;
 			return KonohaContext_test(konoha, optarg);
 
 		case '?':

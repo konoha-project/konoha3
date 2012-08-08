@@ -678,7 +678,7 @@ static kExpr *kStmt_tyCheckCallParamExpr(KonohaContext *kctx, kStmt *stmt, kExpr
 		int tycheckPolicy = param_policy(pa->paramtypeItems[i].fn);
 		kExpr *texpr = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, n, gma, paramType, tycheckPolicy);
 		if(texpr == K_NULLEXPR) {
-			return kExpr_p(stmt, expr, ErrTag, "%s.%s%s accepts %s at the parameter %d", Method_t(mtd), TY_t(paramType), (int)i+1);
+			return kExpr_p(stmt, expr, InfoTag, "%s.%s%s accepts %s at the parameter %d", Method_t(mtd), TY_t(paramType), (int)i+1);
 		}
 		if(!Expr_isCONST(texpr)) isConst = 0;
 	}
