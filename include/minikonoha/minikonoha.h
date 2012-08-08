@@ -140,12 +140,14 @@ struct PlatformApiVar {
 	void    (*exit_i)(int p);
 
 	// high-level functions
+	const char* (*shortFilePath)(const char *path);
 	const char* (*formatPackagePath)(char *buf, size_t bufsiz, const char *packageName, const char *ext);
 	const char* (*formatTransparentPath)(char *buf, size_t bufsiz, const char *parent, const char *path);
 	KonohaPackageHandler* (*loadPackageHandler)(const char *packageName);
 	int (*loadScript)(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *));
 	const char* (*beginTag)(kinfotag_t);
 	const char* (*endTag)(kinfotag_t);
+	const char* (*shortText)(const char *msg);
 	void (*reportCaughtException)(const char *exceptionName, const char *scriptName, int line, const char *optionalMessage);
 	void  (*debugPrintf)(const char *file, const char *func, int line, const char *fmt, ...) __PRINTFMT(4, 5);
 };

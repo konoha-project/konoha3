@@ -435,7 +435,7 @@ static kstatus_t kMethod_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtyp
 		}
 		else {
 			//KLIB reportException(kctx);
-			const char *file = shortfilename(FileId_t(runtime->thrownScriptLine));
+			const char *file = PLATAPI shortFilePath(FileId_t(runtime->thrownScriptLine));
 			PLATAPI reportCaughtException(SYM_t(jumpResult), file, (kushort_t)runtime->thrownScriptLine,  S_text(runtime->optionalErrorMessage));
 			runtime->evalty = TY_void;  // no value
 			result = K_BREAK;        // message must be reported;

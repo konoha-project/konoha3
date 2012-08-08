@@ -476,7 +476,7 @@ static void Kreportf(KonohaContext *kctx, kinfotag_t level, kfileline_t pline, c
 	const char *E = PLATAPI endTag(level);
 	if(pline != 0) {
 		const char *file = FileId_t(pline);
-		PLATAPI printf_i("%s - %s(%s:%d) " , B, TAG_t(level), shortfilename(file), (kushort_t)pline);
+		PLATAPI printf_i("%s - %s(%s:%d) " , B, TAG_t(level), PLATAPI shortFilePath(file), (kushort_t)pline);
 	}
 	else {
 		PLATAPI printf_i("%s - %s" , B, TAG_t(level));

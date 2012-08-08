@@ -55,7 +55,7 @@ static kString* vperrorf(KonohaContext *kctx, int pe, kfileline_t uline, int lpo
 		size_t pos = wb.m->bytesize;
 		if(uline > 0) {
 			const char *file = FileId_t(uline);
-			KLIB Kwb_printf(kctx, &wb, "%s(%s:%d) " , msg, shortfilename(file), (kushort_t)uline);
+			KLIB Kwb_printf(kctx, &wb, "%s(%s:%d) " , msg, PLATAPI shortFilePath(file), (kushort_t)uline);
 		}
 		else {
 			KLIB Kwb_printf(kctx, &wb, "%s" , msg);

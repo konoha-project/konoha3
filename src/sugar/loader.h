@@ -57,7 +57,7 @@ static kbool_t kNameSpace_loadScript(KonohaContext *kctx, kNameSpace *ns, const 
 	SugarThunk thunk = {kctx, ns};
 	kfileline_t uline = uline_init(kctx, path, 1, true/*isRealPath*/);
 	if(!(PLATAPI loadScript(path, uline, (void*)&thunk, evalHookFunc))) {
-		kreportf(ErrTag, pline, "failed to load script: %s", path);
+		kreportf(ErrTag, pline, "failed to load script: %s", PLATAPI shortText(path));
 		return false;
 	}
 	return true;
@@ -94,7 +94,7 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackage_t packageId,
 	const char *path = PLATAPI formatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_glue.k");
 	KonohaPackageHandler *packageHandler = PLATAPI loadPackageHandler(packageName);
 	if(path == NULL && packageHandler == NULL) {
-		kreportf(ErrTag, pline, "package not found: %s path=%s", packageName, pathbuf);
+		kreportf(ErrTag, pline, "package not found: %s path=%s", packageName, PLATAPI shortText(pathbuf));
 		KLIB Kraise(kctx, EXPT_("PackageLoader"), NULL, pline);
 		return NULL;
 	}

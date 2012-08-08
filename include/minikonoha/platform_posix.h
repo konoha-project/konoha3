@@ -171,6 +171,17 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 	return isSuccessfullyLoading;
 }
 
+static const char* shortFilePath(const char *path)
+{
+	char *p = (char *) strrchr(path, '/');
+	return (p == NULL) ? path : (const char*)p+1;
+}
+
+static const char* shortText(const char *msg)
+{
+	return msg;
+}
+
 static const char *formatTransparentPath(char *buf, size_t bufsiz, const char *parentPath, const char *path)
 {
 	const char *p = strrchr(parentPath, '/');
@@ -326,12 +337,14 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.qsort_i         = qsort;
 	plat.exit_i          = exit;
 		// high level
+	plat.shortFilePath      = shortFilePath;
 	plat.formatPackagePath  = formatPackagePath;
 	plat.formatTransparentPath = formatTransparentPath;
 	plat.loadPackageHandler = loadPackageHandler;
 	plat.loadScript         = loadScript;
 	plat.beginTag           = beginTag;
 	plat.endTag             = endTag;
+	plat.shortText          = shortText;
 	plat.reportCaughtException = reportCaughtException;
 	plat.debugPrintf        = (!verbose_debug) ? NOP_debugPrintf : debugPrintf;
 	return (PlatformApi*)(&plat);

@@ -237,6 +237,11 @@ static const char* TEST_end(kinfotag_t t)
 	return "";
 }
 
+static const char* TEST_shortText(const char *msg)
+{
+	return "(omitted..)";
+}
+
 static int TEST_vprintf(const char *fmt, va_list ap)
 {
 	stdlog_count++;
@@ -315,7 +320,7 @@ static void make_report(const char *testname)
 		char script_file[256];
 		char correct_file[256];
 		char result_file[256];
-		snprintf(report_file, 256,  "%s/REPORT_%s.txt", path, shortfilename(testname));
+		snprintf(report_file, 256,  "%s/REPORT_%s.txt", path, shortFilePath(testname));
 		snprintf(script_file, 256,  "%s", testname);
 		snprintf(correct_file, 256, "%s.proof", script_file);
 		snprintf(result_file, 256,  "%s.tested", script_file);
@@ -326,13 +331,13 @@ static void make_report(const char *testname)
 			fputc(ch, fp);
 		}
 		fclose(fp2);
-		fprintf(fp, "Expected Result (in %s)\n=====\n", shortfilename(result_file));
+		fprintf(fp, "Expected Result (in %s)\n=====\n", result_file);
 		fp2 = fopen(correct_file, "r");
 		while((ch = fgetc(fp2)) != EOF) {
 			fputc(ch, fp);
 		}
 		fclose(fp2);
-		fprintf(fp, "Result (in %s)\n=====\n", shortfilename(result_file));
+		fprintf(fp, "Result (in %s)\n=====\n", result_file);
 		fp2 = fopen(result_file, "r");
 		while((ch = fgetc(fp2)) != EOF) {
 			fputc(ch, fp);
@@ -556,6 +561,7 @@ static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc
 			plat->vprintf_i = TEST_vprintf;
 			plat->beginTag  = TEST_begin;
 			plat->endTag    = TEST_end;
+			plat->shortText = TEST_shortText;
 			plat->reportCaughtException = TEST_reportCaughtException;
 			return KonohaContext_test(konoha, optarg);
 
