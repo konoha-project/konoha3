@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <setjmp.h>
+#include <sys/time.h>
 #include <syslog.h>
 #include <dlfcn.h>
 #include <sys/stat.h>
@@ -38,6 +39,22 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+// -------------------------------------------------------------------------
+
+static unsigned long long getTimeMilliSecond(void)
+{
+//#if defined(K_USING_WINDOWS)
+//	DWORD tickCount = GetTickCount();
+//	return (knh_int64_t)tickCount;
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+}
+
+// -------------------------------------------------------------------------
+
+
 
 // -------------------------------------------------------------------------
 
@@ -322,12 +339,13 @@ static void NOP_debugPrintf(const char *file, const char *func, int line, const 
 static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 {
 	static PlatformApiVar plat = {};
-	plat.name      = "shell";
-	plat.stacksize = K_PAGESIZE * 4;
-	plat.malloc_i  = malloc;
-	plat.free_i    = free;
-	plat.setjmp_i  = ksetjmp;
-	plat.longjmp_i = klongjmp;
+	plat.name            = "shell";
+	plat.stacksize       = K_PAGESIZE * 4;
+	plat.getenv_i        = getenv;
+	plat.malloc_i        = malloc;
+	plat.free_i          = free;
+	plat.setjmp_i        = ksetjmp;
+	plat.longjmp_i       = klongjmp;
 	plat.syslog_i        = syslog;
 	plat.vsyslog_i       = vsyslog;
 	plat.printf_i        = printf;
@@ -337,16 +355,17 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.qsort_i         = qsort;
 	plat.exit_i          = exit;
 		// high level
-	plat.shortFilePath      = shortFilePath;
-	plat.formatPackagePath  = formatPackagePath;
+	plat.getTimeMilliSecond  = getTimeMilliSecond;
+	plat.shortFilePath       = shortFilePath;
+	plat.formatPackagePath   = formatPackagePath;
 	plat.formatTransparentPath = formatTransparentPath;
-	plat.loadPackageHandler = loadPackageHandler;
-	plat.loadScript         = loadScript;
-	plat.beginTag           = beginTag;
-	plat.endTag             = endTag;
-	plat.shortText          = shortText;
+	plat.loadPackageHandler  = loadPackageHandler;
+	plat.loadScript          = loadScript;
+	plat.beginTag            = beginTag;
+	plat.endTag              = endTag;
+	plat.shortText           = shortText;
 	plat.reportCaughtException = reportCaughtException;
-	plat.debugPrintf        = (!verbose_debug) ? NOP_debugPrintf : debugPrintf;
+	plat.debugPrintf         = (!verbose_debug) ? NOP_debugPrintf : debugPrintf;
 	return (PlatformApi*)(&plat);
 }
 
