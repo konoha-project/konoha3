@@ -87,17 +87,15 @@ static kbool_t klinkDynamicIconv(KonohaContext *kctx, kmodiconv_t *base, kfileli
 
 /* ------------------------------------------------------------------------ */
 
-#define BYTES_BUFSIZE 256
-
 // Bytes_init
 static void Bytes_init(KonohaContext *kctx, kObject *o, void *conf)
 {
+	if ((size_t)conf <= 0) return ;
 	struct _kBytes *ba = (struct _kBytes*)o;
 	ba->byteptr = NULL;
-	ba->bytesize = (size_t)conf;
-	if(ba->bytesize > 0) {
-		ba->byteptr = (const char *)KCALLOC(ba->bytesize, 1);
-	}
+	ba->byteptr = (const char *)KCALLOC((size_t)conf, 1);
+	if (ba->byteptr != NULL)	ba->bytesize = (size_t)conf;
+	else ba->bytesize = 0;
 }
 
 static void Bytes_free(KonohaContext *kctx, kObject *o)
@@ -163,11 +161,6 @@ static void kmodiconv_free(KonohaContext *kctx, struct KonohaModule *baseh)
 #define CONV_BUFSIZE 4096 // 4K
 #define MAX_STORE_BUFSIZE (CONV_BUFSIZE * 1024)// 4M
 
-//static kbool_t encodeFromTo (const char *from, const char *to, const char *text, size_t len, KUtilsWriteBuffer *wb)
-//{
-//
-//}
-
 static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromCoding, const char *toCoding)
 {
 	kiconv_t conv;
@@ -219,7 +212,9 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 				KEYVALUE_s("to", toCoding),
 				KEYVALUE_s("error", strerror(errno))
 			);
+			KLIB Kwb_free(&wb);
 			return (kBytes*)(CT_Bytes->defaultValueAsNull);
+
 		} else {
 			// finished. iconv_ret != -1
 			processedSize = CONV_BUFSIZE - outBytesLeft;
@@ -233,9 +228,8 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 
 	const char *KUtilsWriteBufferopChar = KLIB Kwb_top(kctx, &wb, 1);
 	//DBG_P("kwb:'%s'", KUtilsWriteBufferopChar);
-	kBytes *toBa = (kBytes*)KLIB new_kObject(kctx, CT_Bytes, processedTotalSize); // ensure bytes ends with Zero
+	struct _kBytes *toBa = (struct _kBytes*)KLIB new_kObject(kctx, CT_Bytes, processedTotalSize+1); // ensure bytes ends with Zero
 	memcpy(toBa->buf, KUtilsWriteBufferopChar, processedTotalSize+1); // including NUL terminate by ensuredZeo
-
 	KLIB Kwb_free(&wb);
 	return toBa;
 }
@@ -264,7 +258,7 @@ static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, KonohaStack *sfp)
 		toBa = convFromTo(kctx, fromBa, getSystemEncoding(), "UTF-8");
 	}
 	DBG_P("size=%d, '%s'", toBa->bytesize, toBa->buf);
-	RETURN_(KLIB new_kString(kctx, toBa->buf,toBa->bytesize, 0));
+	RETURN_(KLIB new_kString(kctx, toBa->buf,toBa->bytesize-1, 0));
 }
 
 //## @Const method Bytes String.asBytes();
@@ -290,8 +284,8 @@ static KMETHOD Bytes_asString(KonohaContext *kctx, KonohaStack *sfp)
 	kBytes *to = convFromTo(kctx, from, getSystemEncoding(), "UTF-8");
 	//calculate strlen
 	// its ensures 0 terminated
-	size_t strsize = strlen(to->buf);
-	RETURN_(KLIB new_kString(kctx, to->buf, strsize, 0));
+	//DBG_ASSERT(to->buf[to->bytesize] == '\0');
+	RETURN_(KLIB new_kString(kctx, to->buf, to->bytesize-1, 0));
 }
 
 //## Int Bytes.get(Int n);
@@ -330,7 +324,6 @@ static KMETHOD Bytes_getSize(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Bytes_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	DBG_P("bytes new called, with size=%d", sfp[1].intValue);
 	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), sfp[1].intValue));
 }
 
