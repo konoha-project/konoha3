@@ -50,13 +50,13 @@ static const char* packname(const char *str)
 
 static const char* shell_packagepath(char *buf, size_t bufsiz, const char *fname)
 {
-	char *path = getenv("KONOHA_PACKAGEPATH"), *local = "";
+	char *path = PLATAPI getenv_i("KONOHA_PACKAGEPATH"), *local = "";
 	if(path == NULL) {
-		path = getenv("KONOHA_HOME");
+		path = PLATAPI getenv_i("KONOHA_HOME");
 		local = "/package";
 	}
 	if(path == NULL) {
-		path = getenv("HOME");
+		path = PLATAPI getenv_i("HOME");
 		local = "/.minikonoha/package";
 	}
 	snprintf(buf, bufsiz, "%s%s/%s/%s_glue.k", path, local, fname, packname(fname));

@@ -906,7 +906,7 @@ static HeapManager *BMGC_init(KonohaContext *kctx)
 #endif
 	size_t default_size = SUBHEAP_DEFAULT_SEGPOOL_SIZE;
 #ifdef GC_CONFIG
-	char *poolsize = knh_getenv("KONOHA_DEFAULT_MEMPOOL_SIZE");
+	char *poolsize = knh_PLATAPI getenv_i("KONOHA_DEFAULT_MEMPOOL_SIZE");
 	if (poolsize) {
 		kint_t tmp;
 		if (knh_bytes_parseint(B(poolsize), &tmp))

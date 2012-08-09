@@ -29,7 +29,7 @@ static int get_server_info(struct logpool_param_stream *pa, char *hostbuf)
         memcpy(hostbuf, pa->host, strlen(pa->host));
         return pa->port;
     }
-    char *serverinfo = getenv("LOGPOOL_SERVER");
+    char *serverinfo = PLATAPI getenv_i("LOGPOOL_SERVER");
     int  port = DEFAULT_PORT;
     if (serverinfo) {
         char *pos;

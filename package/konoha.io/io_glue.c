@@ -22,6 +22,150 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
+#include <stdio.h>
+#include <unistd.h>
+
+struct kio_t {
+	union {
+		int  fd;
+		void *handler;
+		FILE *fp;
+		KUtilsWriteBuffer wb;
+	};
+	void *handler2; // NULL
+	int  isRunning;
+	KUtilsGrowingArray buffer;
+	size_t top; size_t tail;
+	kbool_t (*_read)(KonohaContext *kctx, struct kio_t *);
+	size_t  (*_write)(KonohaContext *kctx, struct kio_t *, const char *buf, size_t bufsiz);
+	void    (*_close)(KonohaContext *kctx, struct kio_t *);
+	kbool_t (*_blockread)(KonohaContext *kctx, struct kio_t *);
+	kbool_t (*_unblockread)(KonohaContext *kctx, struct kio_t *);
+	size_t  (*_blockwrite)(KonohaContext *kctx, struct kio_t *, const char *buf, size_t bufsiz);
+	size_t  (*_unblockwrite)(KonohaContext *kctx, struct kio_t *, const char *buf, size_t bufsiz);
+	const char *DBG_NAME;  // unnecessary for free
+};
+
+typedef void FILE_i;
+
+typedef struct StreamApi {
+	size_t (*read_i)(KonohaContext *kctx, FILE_i *fp, char *buf, size_t);
+	size_t (*write_i)(KonohaContext *kctx, FILE_i *fp, char *buf, size_t);
+	kbool_t (*close_i)(KonohaContext *kctx, FILE_i *fp);
+	kbool_t (*isEndOfStream)(KonohaContext *kctx, FILE_i *fp);
+} StreamApi;
+
+typedef struct kInputStreamVar kInputStream;
+
+struct kInputStreamVar {
+	KonohaObjectHeader h;
+	FILE_i *fp;
+	StreamApi *streamApi;
+	KUtilsGrowingArray buffer;
+	size_t top;
+};
+
+typedef struct kOutputStreamVar kOutputStream;
+
+struct kOutputStreamVar {
+	KonohaObjectHeader h;
+	FILE *fp;
+	StreamApi *streamApi;
+	KUtilsGrowingArray buffer;
+	size_t top;
+};
+
+static void io2_free(KonohaContext *kctx, kio_t *io2);
+static void Stream_init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kInputStream *in = (kInputStream *) o;
+	in->io2 = (kio_t*) conf;;
+}
+
+static void Stream_free(KonohaContext *kctx, kObject *o)
+{
+	kInputStream *in = (kInputStream*)o;
+	if (in->io2) {
+		io2_free(kctx, in->io2);
+		in->io2 = NULL;
+	}
+}
+
+
+static void OutputStream_free(KonohaContext *kctx, kObject *o)
+{
+	kInputStream *in = (kInputStream*)o;
+	if (in->io2) {
+		io2_free(kctx, in->io2);
+		in->io2 = NULL;
+	}
+}
+
+static KDEFINE_CLASS InputStreamDef = {
+	STRUCTNAME(InputStream),
+	.cflag = 0,
+	.init = Stream_init,
+	.free = Stream_free,
+};
+
+static KDEFINE_CLASS OutputStreamDef = {
+	STRUCTNAME(OutputStream),
+	.cflag = 0,
+	.init = Stream_init,
+	.free = OutputStream_free,
+};
+
+static size_t kInputStream_readToBuffer(KonohaContext *kctx, kInputStream *in, KUtilsGrowingArray *buffer)
+{
+	if(!(buffer->bytesize + K_PAGESIZE < buffer->bytemax)) {
+		KLIB Karray_resize(kctx, buffer, buffer->bytesize + K_PAGESIZE);
+	}
+	size_t n = in->streamApi->read_i(kctx, buffer->bytebuf, K_PAGESIZE, in->fp);
+	buffer->bytesize += n;
+	return n;
+}
+
+static intptr_t findEndOfLine(KonohaContext *kctx, const char *buf, size_t offset, size_t max, int *hasMultiByteChar)
+{
+	size_t i;
+	for(i = offset; i < max; i++) {
+		int ch = buf[i];
+		if(ch == '\n') return i;
+		if(ch < 0) *hasMultiByteChar = true;
+	}
+	return -1; // not found
+}
+
+static kString* kInputStream_readLine(KonohaContext *kctx,  kInputStream *in)
+{
+	int hasMultiByteChar = false;
+	intptr_t endOfLineIndex;
+	while((endOfLineIdx = findEndOfLine(kctx, in->buffer.bytebuf, in->top, in->buffer.bytesize, &hasMultiByteChar)) == -1) {
+		size_t readbyte = kInputStream_readToBuffer(kctx, &in->buffer);
+		if(readbyte == 0) endOfLineIndex = in->buffer.bytesize;
+	}
+	kString *lineString;
+	if(!hasMultiByteChar) {
+		lineString = (endOfLineIdx - in->top == 0) ? K_NULL(String)
+			: KLIB new_kString(kctx, in->buffer.bytebuf + in->top, endOfLineIdx - in->top, SPOL_ASCII);
+	}
+	else {
+		lineString = KLIB new_kString(kctx, in->buffer.bytebuf + in->top, endOfLineIdx - in->top, SPOL_UTF8);
+	}
+	in->top += endOfLineIdx;
+	return lineString;
+}
+
+static uintptr_t kOutputStream_writeBuffer(KonohaContext *kctx, kOutputStream *out, KUtilsGrowingArray *buffer, size_t offset)
+{
+	return out->streamApi->write_i(buffer->bytebuf + offset, buffer->bytesize - offset, out->fp);
+}
+
+
+
+
 #if 0
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
@@ -186,45 +330,6 @@ struct kOutputStream {
 /* ------------------------------------------------------------------------ */
 
 // io
-static void io2_free(KonohaContext *kctx, kio_t *io2);
-static void Stream_init(KonohaContext *kctx, kObject *o, void *conf)
-{
-	kInputStream *in = (kInputStream *) o;
-	in->io2 = (kio_t*) conf;;
-}
-
-static void Stream_free(KonohaContext *kctx, kObject *o)
-{
-	kInputStream *in = (kInputStream*)o;
-	if (in->io2) {
-		io2_free(kctx, in->io2);
-		in->io2 = NULL;
-	}
-}
-
-
-static void OutputStream_free(KonohaContext *kctx, kObject *o)
-{
-	kInputStream *in = (kInputStream*)o;
-	if (in->io2) {
-		io2_free(kctx, in->io2);
-		in->io2 = NULL;
-	}
-}
-
-static KDEFINE_CLASS InputStreamDef = {
-	STRUCTNAME(InputStream),
-	.cflag = 0,
-	.init = Stream_init,
-	.free = Stream_free,
-};
-
-static KDEFINE_CLASS OutputStreamDef = {
-	STRUCTNAME(OutputStream),
-	.cflag = 0,
-	.init = Stream_init,
-	.free = OutputStream_free,
-};
 
 
 static void kioshare_setup(KonohaContext *kctx, struct KonohaModule *def)

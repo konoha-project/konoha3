@@ -69,7 +69,7 @@ static void kmodlogpool_setup(KonohaContext *kctx, struct KonohaModule *def, int
 {
 	if(newctx) {
 #define DEFAULT_SERVER "127.0.0.1"
-		char *serverinfo = getenv("LOGPOOL_SERVER");
+		char *serverinfo = PLATAPI getenv_i("LOGPOOL_SERVER");
 		char host[128] = {0};
 		int  port = 14801;
 		if (serverinfo) {

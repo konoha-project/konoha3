@@ -205,7 +205,7 @@ static KMETHOD System_assert(KonohaContext *kctx, KonohaStack *sfp)
 //	konoha_detectFailedAssert = false;
 	if (cond == false) {
 		konoha_detectFailedAssert = true;
-		KLIB Kraise(kctx, EXPT_("Assert"), sfp, sfp[K_RTNIDX].uline);
+		KLIB Kraise(kctx, EXPT_("Assertion"), sfp, sfp[K_RTNIDX].uline);
 	}
 }
 

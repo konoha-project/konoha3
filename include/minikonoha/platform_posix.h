@@ -226,7 +226,7 @@ static const char* packname(const char *str)
 static const char* formatPackagePath(char *buf, size_t bufsiz, const char *packageName, const char *ext)
 {
 	FILE *fp = NULL;
-	char *path = (char *)getenv("KONOHA_PACKAGEPATH");
+	char *path = getenv("KONOHA_PACKAGEPATH");
 	const char *local = "";
 	if(path == NULL) {
 		path = getenv("KONOHA_HOME");
@@ -341,7 +341,7 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	static PlatformApiVar plat = {};
 	plat.name            = "shell";
 	plat.stacksize       = K_PAGESIZE * 4;
-	plat.getenv_i        = getenv;
+	plat.getenv_i        =  (const char *(*)(const char*))getenv;
 	plat.malloc_i        = malloc;
 	plat.free_i          = free;
 	plat.setjmp_i        = ksetjmp;

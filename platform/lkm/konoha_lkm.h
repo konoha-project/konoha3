@@ -34,7 +34,7 @@ typedef long intptr_t;
 typedef intptr_t FILE;
 
 #define TODO_LKM
-#define getenv(a) NULL
+#define PLATAPI getenv_i(a) NULL
 #define stdin  ((FILE*)NULL)
 #define stdout KERN_INFO
 #define stderr KERN_ALERT

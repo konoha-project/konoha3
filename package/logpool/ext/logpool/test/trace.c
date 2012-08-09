@@ -13,7 +13,7 @@ static struct logpool_param_stream TRACE_API_PARAM = {
 #define LOGAPI STREAM_API
 static int get_count(int argc, const char **argv)
 {
-    char *env = getenv("LOGPOOL_TESTCASE_SIZE");
+    char *env = PLATAPI getenv_i("LOGPOOL_TESTCASE_SIZE");
     if (!env && argc > 1) {
         env = (char *) argv[1];
     }

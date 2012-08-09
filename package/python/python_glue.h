@@ -429,7 +429,7 @@ static KMETHOD PyObject_import(KonohaContext *kctx, KonohaStack *sfp)
 	PyListObject* ppath;
 	ppath = (PyListObject*)PyList_New(0);
 	PyList_Append((PyObject*)ppath, PyString_FromString("."));
-	char *path = getenv("PYTHONPATH"); // add home dir to python search path.
+	char *path = PLATAPI getenv_i("PYTHONPATH"); // add home dir to python search path.
 	if (path != NULL) {
 		size_t i;
 		char** pathes = pyenv_split(path, ':');

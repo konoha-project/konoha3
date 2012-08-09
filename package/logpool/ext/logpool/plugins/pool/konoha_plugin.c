@@ -19,13 +19,13 @@ extern int verbose_debug;
 //
 //static const char* l_packagepath(char *buf, size_t bufsiz, const char *fname)
 //{
-//	char *path = getenv("KONOHA_PACKAGEPATH"), *local = "";
+//	char *path = PLATAPI getenv_i("KONOHA_PACKAGEPATH"), *local = "";
 //	if(path == NULL) {
-//		path = getenv("KONOHA_HOME");
+//		path = PLATAPI getenv_i("KONOHA_HOME");
 //		local = "/package";
 //	}
 //	if(path == NULL) {
-//		path = getenv("HOME");
+//		path = PLATAPI getenv_i("HOME");
 //		local = "/.konoha2/package";
 //	}
 //	snprintf(buf, bufsiz, "%s%s/%s/%s_glue.k", path, local, fname, l_packname(fname));

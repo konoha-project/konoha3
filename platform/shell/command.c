@@ -457,13 +457,13 @@ static void konoha_import(KonohaContext *kctx, char *packagename)
 static void konoha_startup(KonohaContext *kctx, const char *startup_script)
 {
 	char buf[256];
-	char *path = getenv("KONOHA_SCRIPTPATH"), *local = "";
+	const char *path = PLATAPI getenv_i("KONOHA_SCRIPTPATH"), *local = "";
 	if(path == NULL) {
-		path = getenv("KONOHA_HOME");
+		path = PLATAPI getenv_i("KONOHA_HOME");
 		local = "/script";
 	}
 	if(path == NULL) {
-		path = getenv("HOME");
+		path = PLATAPI getenv_i("HOME");
 		local = "/.minikonoha/script";
 	}
 	snprintf(buf, sizeof(buf), "%s%s/%s.k", path, local, startup_script);
