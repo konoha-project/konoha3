@@ -185,15 +185,15 @@ static const char *kToken_t_(KonohaContext *kctx, kToken *tk)
 static void WARN_IgnoredTokens(KonohaContext *kctx, kArray *tokenList, int beginIdx, int endIdx)
 {
 	if(beginIdx < endIdx) {
-		int i = beginIdx;
-		KUtilsWriteBuffer wb;
-		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-		KLIB Kwb_printf(kctx, &wb, "%s", Token_text(tokenList->tokenItems[i])); i++;
-		while(i < endIdx) {
-			KLIB Kwb_printf(kctx, &wb, " %s", Token_text(tokenList->tokenItems[i])); i++;
-		}
-		pWARN(tokenList->tokenItems[beginIdx]->uline, "ignored tokens: %s", KLIB Kwb_top(kctx, &wb, 1));
-		KLIB Kwb_free(&wb);
+//		int i = beginIdx;
+//		KUtilsWriteBuffer wb;
+//		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+//		KLIB Kwb_printf(kctx, &wb, "%s", Token_text(tokenList->tokenItems[i])); i++;
+//		while(i < endIdx) {
+//			KLIB Kwb_printf(kctx, &wb, " %s", Token_text(tokenList->tokenItems[i])); i++;
+//		}
+//		pWARN(tokenList->tokenItems[beginIdx]->uline, "ignored tokens: %s", KLIB Kwb_top(kctx, &wb, 1));
+//		KLIB Kwb_free(&wb);
 	}
 }
 

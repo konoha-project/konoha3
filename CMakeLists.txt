@@ -112,6 +112,7 @@ set(PACKAGES
 	konoha.global
 	konoha.hashmap
 	konoha.i
+	konoha.io
 	konoha.import
 	konoha.int
 	konoha.iterator

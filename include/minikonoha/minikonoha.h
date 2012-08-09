@@ -102,8 +102,6 @@ typedef struct KonohaLibVar          KonohaLibVar;
 #define PLATAPI (kctx->platApi)->
 #define KLIB    (kctx->klib)->
 
-typedef void FILE_i;
-
 #define KDEFINE_PACKAGE KonohaPackageHandler
 typedef const struct KonohaPackageHandlerVar KonohaPackageHandler;
 typedef KonohaPackageHandler* (*PackageLoadFunc)(void);
