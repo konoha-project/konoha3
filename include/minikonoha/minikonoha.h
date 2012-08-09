@@ -85,6 +85,13 @@ extern "C" {
 #include <stddef.h>
 #include <stdarg.h>
 
+#ifndef __KERNEL__
+#include <limits.h>
+#include <float.h>
+#include <stdbool.h>
+#include <stdint.h>
+#endif
+
 #ifdef __GCC__
 #define __PRINTFMT(idx1, idx2) __attribute__((format(printf, idx1, idx2)))
 #else
@@ -170,13 +177,6 @@ struct PlatformApiVar {
 
 /* ------------------------------------------------------------------------ */
 /* type */
-
-#ifndef __KERNEL__
-#include <limits.h>
-#include <float.h>
-#include <stdbool.h>
-#include <stdint.h>
-#endif
 
 #if defined(__LP64__) || defined(_WIN64)
 #define K_USING_SYS64_    1
