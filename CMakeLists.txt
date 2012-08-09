@@ -230,12 +230,13 @@ endif(TEST_COVERAGE)
 enable_testing()
 set(TEST_BIN ${CMAKE_CURRENT_BINARY_DIR}/minikonoha)
 set(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(PARENT_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
 macro(add_test_with_property test_name)
 	add_test(${test_name} ${TEST_BIN} ${ARGN})
 	set_tests_properties(${test_name} PROPERTIES TIMEOUT 5)
 	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT
-		"KONOHA_PACKAGEPATH=${CMAKE_CURRENT_BINARY_DIR}/minikonoha/package")
+		"KONOHA_PACKAGEPATH=${PARENT_BINARY_DIR}/package")
 endmacro(add_test_with_property test_name)
 
 macro(add_konoha_test test_name test_file)

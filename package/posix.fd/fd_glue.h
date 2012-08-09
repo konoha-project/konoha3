@@ -51,6 +51,13 @@ static KMETHOD System_lseek(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_((int)ret_offset);
 }
 
+//## @Native String System.getCwd()
+static KMETHOD System_getCwd(KonohaContext *kctx, KonohaStack *sfp)
+{
+	char filepath[256] = {0};
+	char *cwd = getcwd(filepath, 256);
+	RETURN_(KLIB new_kString(kctx, cwd, strlen(cwd), 0));
+}
 //## boolean System.truncate(int fd, int length)
 static KMETHOD System_truncate(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -333,6 +340,7 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 {
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im, _F(System_lseek), TY_Int, TY_System, MN_("lseek"), 3, TY_Int, FN_("fd"), TY_Int, FN_("offset"), TY_Int, FN_("whence"),
+		_Public|_Const|_Im, _F(System_getCwd), TY_String, TY_System, MN_("getCwd"), 0,
 		_Public|_Const|_Im, _F(System_truncate), TY_Boolean, TY_System, MN_("truncate"), 2, TY_Int, FN_("fd"), TY_Int, FN_("length"),
 		_Public|_Const|_Im, _F(System_chmod), TY_Boolean, TY_System, MN_("chmod"), 2, TY_Int, FN_("fd"), TY_Int, FN_("length"),
 		_Public|_Const|_Im, _F(System_chown), TY_Boolean, TY_System, MN_("chown"), 3, TY_Int, FN_("fd"), TY_Int, FN_("owner"), TY_Int, FN_("group"),

@@ -5,4 +5,4 @@ int succ(int n) {
 }
 
 assert(succ(0) == 1);
-assert(succ(succ(1)) == 3);
+assert(succ(succ(0)) == 2);
