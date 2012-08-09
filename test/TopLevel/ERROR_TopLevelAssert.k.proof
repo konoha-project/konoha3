@@ -1,2 +1,2 @@
- - (error) (ERROR_TopLevelAssert.k:3) Assert!!
+ ** AssertionException (ERROR_TopLevelAssert.k:3)
 Q.E.D.

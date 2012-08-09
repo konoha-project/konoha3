@@ -1,2 +1,2 @@
- - (error) (AlwaysFailed.k:4) Assert!!
+ ** AssertionException (AlwaysFailed.k:4)
 Q.E.D.
