@@ -4350,13 +4350,13 @@ static KMETHOD Intrinsic_getType(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Intrinsic::ID id = (Intrinsic::ID) sfp[1].intValue;
 	kArray *args = sfp[2].asArray;
+	std::vector<LLVMTYPE*> List;
+	konoha::convert_array(List, args);
 #if LLVM_VERSION <= 209
 	const FunctionType *ptr;
-	ptr = Intrinsic::getType(getGlobalContext(), id, (const Type **) args->list);
+	ptr = Intrinsic::getType(getGlobalContext(), id, (const Type **) &List[0]);
 #else
-	std::vector<Type*> List;
 	FunctionType *ptr;
-	konoha::convert_array(List, args);
 	ptr = Intrinsic::getType(getGlobalContext(), id, List);
 #endif
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
@@ -4370,11 +4370,11 @@ static KMETHOD Intrinsic_getDeclaration(KonohaContext *kctx, KonohaStack *sfp)
 	Intrinsic::ID id = (Intrinsic::ID) sfp[2].intValue;
 	kArray *args = sfp[3].asArray;
 	Function *ptr;
-#if LLVM_VERSION <= 209
-	ptr = Intrinsic::getDeclaration(m, id, (const Type **) args->list);
-#else
-	std::vector<Type*> List;
+	std::vector<LLVMTYPE*> List;
 	konoha::convert_array(List, args);
+#if LLVM_VERSION <= 209
+	ptr = Intrinsic::getDeclaration(m, id, (const Type **) &List[0]);
+#else
 	ptr = Intrinsic::getDeclaration(m, id, List);
 #endif
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
