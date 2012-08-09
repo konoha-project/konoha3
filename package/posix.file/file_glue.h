@@ -109,7 +109,6 @@ static KMETHOD File_read(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		if(len == 0) len = size - offset;
 		size = fread(ba->buf + offset, 1, len, fp);
-		DBG_P("SHINPEI: size=%d", size);
 		if (size == 0 && ferror(fp) != 0){
 			ktrace(_SystemFault,
 					KEYVALUE_s("@", "fread"),
