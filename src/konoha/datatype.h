@@ -1071,6 +1071,7 @@ static void Konoha_loadDefaultMethod(KonohaContext *kctx)
 		_Static|_Public|_Immutable, _F(System_assert), TY_void, TY_System, MN_("assert"), 1, TY_Boolean, FN_x,
 		_Static|_Public|_Immutable, _F(System_p), TY_void, TY_System, MN_("p"), 1, TY_String, FN_("s") | FN_COERCION,
 		_Static|_Public|_Immutable, _F(System_gc), TY_void, TY_System, MN_("gc"), 0,
+		_Static|_Public|_Immutable, _F(System_getTime), TY_Int, TY_System, MN_("getTime"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);
