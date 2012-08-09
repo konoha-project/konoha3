@@ -78,6 +78,7 @@ static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp)
 	kString *s = sfp[1].asString;
 	const char *mode = IS_NULL(sfp[2].asString) ? "r" : S_text(sfp[2].asString);
 	FILE *fp = fopen(S_text(s), mode);
+	DBG_P("fp=%p, filepath=%s", fp, S_text(s));
 	if (fp == NULL) {
 		ktrace(_SystemFault|_ScriptFault,
 				KEYVALUE_s("@", "fopen"),
@@ -86,7 +87,7 @@ static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp)
 				KEYVALUE_s("errstr", strerror(errno))
 		);
 	}
-	struct _kFILE *file = (struct _kFILE*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), fp);
+	struct _kFILE *file = (struct _kFILE*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), (uintptr_t)fp);
 	file->realpath = realpath(S_text(s), NULL);
 	RETURN_(file);
 }
@@ -108,6 +109,7 @@ static KMETHOD File_read(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		if(len == 0) len = size - offset;
 		size = fread(ba->buf + offset, 1, len, fp);
+		DBG_P("SHINPEI: size=%d", size);
 		if (size == 0 && ferror(fp) != 0){
 			ktrace(_SystemFault,
 					KEYVALUE_s("@", "fread"),

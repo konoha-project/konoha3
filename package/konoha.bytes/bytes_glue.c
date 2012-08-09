@@ -226,10 +226,9 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 	} /* end of converting loop */
 	kmodiconv->ficonv_close(conv);
 
-	const char *KUtilsWriteBufferopChar = KLIB Kwb_top(kctx, &wb, 1);
-	//DBG_P("kwb:'%s'", KUtilsWriteBufferopChar);
-	struct _kBytes *toBa = (struct _kBytes*)KLIB new_kObject(kctx, CT_Bytes, processedTotalSize+1); // ensure bytes ends with Zero
-	memcpy(toBa->buf, KUtilsWriteBufferopChar, processedTotalSize+1); // including NUL terminate by ensuredZeo
+	const char *KUtilsWriteBufferopChar = KLIB Kwb_top(kctx, &wb, 0);
+	struct _kBytes *toBa = (struct _kBytes*)KLIB new_kObject(kctx, CT_Bytes, processedTotalSize); // ensure bytes ends with Zero
+	memcpy(toBa->buf, KUtilsWriteBufferopChar, processedTotalSize); // including NUL terminate by ensuredZeo
 	KLIB Kwb_free(&wb);
 	return toBa;
 }
@@ -282,10 +281,9 @@ static KMETHOD Bytes_asString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *from = sfp[0].ba;
 	kBytes *to = convFromTo(kctx, from, getSystemEncoding(), "UTF-8");
-	//calculate strlen
-	// its ensures 0 terminated
-	//DBG_ASSERT(to->buf[to->bytesize] == '\0');
-	RETURN_(KLIB new_kString(kctx, to->buf, to->bytesize-1, 0));
+
+	// now ensures 0
+	RETURN_(KLIB new_kString(kctx, to->buf, to->bytesize, 0));
 }
 
 //## Int Bytes.get(Int n);
