@@ -75,17 +75,6 @@ static kString* vperrorf(KonohaContext *kctx, int pe, kfileline_t uline, int lpo
 	return NULL;
 }
 
-#define pWARN(UL, FMT, ...) sugar_p(kctx, WarnTag, UL, -1, FMT, ## __VA_ARGS__)
-
-static kString* sugar_p(KonohaContext *kctx, int pe, kfileline_t uline, int lpos, const char *fmt, ...)
-{
-	va_list ap;
-	va_start(ap, fmt);
-	kString *errmsg = vperrorf(kctx, pe, uline, lpos, fmt, ap);
-	va_end(ap);
-	return errmsg;
-}
-
 static void Token_pERR(KonohaContext *kctx, kTokenVar *tk, const char *fmt, ...)
 {
 	va_list ap;
