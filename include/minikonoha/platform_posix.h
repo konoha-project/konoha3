@@ -40,6 +40,12 @@
 extern "C" {
 #endif
 
+#ifdef PATH_MAX
+#define K_PATHMAX PATH_MAX
+#else
+#define K_PATHMAX 256
+#endif
+
 // -------------------------------------------------------------------------
 
 static unsigned long long getTimeMilliSecond(void)
@@ -54,7 +60,25 @@ static unsigned long long getTimeMilliSecond(void)
 
 // -------------------------------------------------------------------------
 
+static const char* formatSystemPath(char *buf, size_t bufsiz, const char *path)
+{
+	return path;  // stub (in case of no conversion)
+}
 
+static const char* formatKonohaPath(char *buf, size_t bufsiz, const char *path)
+{
+	return path;  // stub (in case of no conversion)
+}
+
+static kbool_t isDir(const char *path)
+{
+	struct stat buf;
+	char pathbuf[K_PATHMAX];
+	if (stat(formatSystemPath(pathbuf, sizeof(pathbuf), path), &buf) == 0) {
+		return S_ISDIR(buf.st_mode);
+	}
+	return false;
+}
 
 // -------------------------------------------------------------------------
 
@@ -104,7 +128,7 @@ static kfileline_t readComment(FILE *fp, kfileline_t line, SimpleBuffer *simpleB
 	return line;
 }
 
-static kfileline_t readRange(FILE *fp, kfileline_t line, SimpleBuffer *simpleBuffer)
+static kfileline_t readChunk(FILE *fp, kfileline_t line, SimpleBuffer *simpleBuffer)
 {
 	int ch;
 	int prev = 0, isBLOCK = 0;
@@ -134,22 +158,13 @@ static kfileline_t readRange(FILE *fp, kfileline_t line, SimpleBuffer *simpleBuf
 	return line;
 }
 
-static int isEmptyRange(const char *t, size_t len)
+static int isEmptyChunk(const char *t, size_t len)
 {
 	size_t i;
 	for(i = 0; i < len; i++) {
 		if(!isspace(t[i])) return true;
 	}
 	return false;
-}
-
-static int isDir(const char *path)
-{
-	struct stat buf;
-	if (stat(path, &buf) == 0) {
-		return S_ISDIR(buf.st_mode);
-	}
-	return 0;
 }
 
 static int loadScript(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *))
@@ -169,14 +184,14 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 			kshort_t sline = (kshort_t)uline;
 			bzero(simpleBuffer.buffer, simpleBuffer.allocSize);
 			simpleBuffer.size = 0;
-			uline = readRange(fp, uline, &simpleBuffer);
+			uline = readChunk(fp, uline, &simpleBuffer);
 			const char *script = (const char*)simpleBuffer.buffer;
 			if(sline == 1 && simpleBuffer.size > 2 && script[0] == '#' && script[1] == '!') {
 				// fall through this line
 				simpleBuffer.size = 0;
 				//TODO: do we increment uline??
 			}
-			if(isEmptyRange(script, simpleBuffer.size)) {
+			if(isEmptyChunk(script, simpleBuffer.size)) {
 				int isBreak = false;
 				isSuccessfullyLoading = evalFunc(script, rangeheadline, &isBreak, thunk);
 				if(!isSuccessfullyLoading|| isBreak) {
@@ -354,6 +369,8 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.vsnprintf_i     = vsnprintf; // retreating..
 	plat.qsort_i         = qsort;
 	plat.exit_i          = exit;
+	plat.formatKonohaPath = formatKonohaPath;
+	plat.formatSystemPath = formatSystemPath;
 		// high level
 	plat.getTimeMilliSecond  = getTimeMilliSecond;
 	plat.shortFilePath       = shortFilePath;
