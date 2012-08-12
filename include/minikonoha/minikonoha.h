@@ -1384,6 +1384,10 @@ typedef struct {
 
 // method macro
 
+#define RETURN_DefaultObjectValue() do {\
+	return; \
+} while (0)
+
 #define RETURN_(vv) do {\
 	KSETv_AND_WRITE_BARRIER(NULL, sfp[(-(K_CALLDELTA))].o, ((kObject*)vv), GC_NO_WRITE_BARRIER);\
 	KNH_SAFEPOINT(kctx, sfp);\
