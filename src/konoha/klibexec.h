@@ -227,17 +227,29 @@ static KUtilsHashMap *Kmap_init(KonohaContext *kctx, size_t init)
 	return (KUtilsHashMap*)kmap;
 }
 
-static void Kmap_reftrace(KonohaContext *kctx, KUtilsHashMap *kmap, void (*f)(KonohaContext *kctx, KUtilsHashMapEntry *))
+static void Kmap_each(KonohaContext *kctx, KUtilsHashMap *kmap, void *thunk, void (*f)(KonohaContext *kctx, KUtilsHashMapEntry *, void *thunk))
 {
 	size_t i;
 	for(i = 0; i < kmap->hmax; i++) {
 		KUtilsHashMapEntry *e = kmap->hentry[i];
 		while(e != NULL) {
-			f(kctx, e);
+			f(kctx, e, thunk);
 			e = e->next;
 		}
 	}
 }
+
+//static void Kmap_each(KonohaContext *kctx, KUtilsHashMap *kmap, void (*f)(KonohaContext *kctx, KUtilsHashMapEntry *))
+//{
+//	size_t i;
+//	for(i = 0; i < kmap->hmax; i++) {
+//		KUtilsHashMapEntry *e = kmap->hentry[i];
+//		while(e != NULL) {
+//			f(kctx, e);
+//			e = e->next;
+//		}
+//	}
+//}
 
 static void Kmap_free(KonohaContext *kctx, KUtilsHashMap *kmap, void (*f)(KonohaContext *kctx, void *))
 {
@@ -516,7 +528,7 @@ static void klib_init(KonohaLibVar *l)
 	l->Kwb_free      = Kwb_free;
 	l->Kmap_init     = Kmap_init;
 	l->Kmap_free     = Kmap_free;
-	l->Kmap_reftrace = Kmap_reftrace;
+	l->Kmap_each = Kmap_each;
 	l->Kmap_newEntry = Kmap_newEntry;
 	l->Kmap_get      = Kmap_getentry;
 	l->Kmap_remove   = Kmap_remove;

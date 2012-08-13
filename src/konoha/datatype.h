@@ -963,7 +963,7 @@ static void KTYTABLE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	initStructData(kctx);
 }
 
-static void val_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p)
+static void constPoolMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p)
 {
 	BEGIN_REFTRACE(1);
 	KREFTRACEv(p->objectValue);
@@ -984,8 +984,8 @@ static void kshare_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 			KREFTRACEn(ct->defaultValueAsNull);
 			END_REFTRACE();
 		}
-		if (ct->constPoolMapNO) {
-			KLIB Kmap_reftrace(kctx, ct->constPoolMapNO, val_reftrace);
+		if (ct->constPoolMapNO != NULL) {
+			KLIB Kmap_each(kctx, ct->constPoolMapNO, NULL, constPoolMap_reftrace);
 		}
 	}
 	BEGIN_REFTRACE(10);

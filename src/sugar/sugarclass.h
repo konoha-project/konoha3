@@ -37,7 +37,7 @@ static void NameSpace_init(KonohaContext *kctx, kObject *o, void *conf)
 	KINITv(ns->scriptObject, KLIB Knull(kctx, CT_System));
 }
 
-static void syntax_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p)
+static void syntaxMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
 {
 	SugarSyntax *syn = (SugarSyntax*)p->unboxValue;
 	BEGIN_REFTRACE(6);
@@ -54,7 +54,7 @@ static void NameSpace_reftrace(KonohaContext *kctx, kObject *o)
 {
 	kNameSpace *ns = (kNameSpace*)o;
 	if(ns->syntaxMapNN != NULL) {
-		KLIB Kmap_reftrace(kctx, ns->syntaxMapNN, syntax_reftrace);
+		KLIB Kmap_each(kctx, ns->syntaxMapNN, NULL, syntaxMap_reftrace);
 	}
 	size_t i, size = ns->constTable.bytesize / sizeof(KUtilsKeyValue);
 	BEGIN_REFTRACE(size+3);

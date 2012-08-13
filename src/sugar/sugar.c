@@ -116,7 +116,7 @@ static void SugarModule_setup(KonohaContext *kctx, struct KonohaModule *def, int
 	}
 }
 
-static void pack_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p)
+static void packageMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
 {
 	KonohaPackage *pack = (KonohaPackage*)p->unboxValue;
 	BEGIN_REFTRACE(1);
@@ -124,7 +124,7 @@ static void pack_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p)
 	END_REFTRACE();
 }
 
-static void pack_free(KonohaContext *kctx, void *p)
+static void packageMap_free(KonohaContext *kctx, void *p)
 {
 	KFREE(p, sizeof(KonohaPackage));
 }
@@ -132,7 +132,7 @@ static void pack_free(KonohaContext *kctx, void *p)
 static void SugarModule_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 	KModuleSugar *base = (KModuleSugar*)baseh;
-	KLIB Kmap_reftrace(kctx, base->packageMapNO, pack_reftrace);
+	KLIB Kmap_each(kctx, base->packageMapNO, NULL, packageMap_reftrace);
 	BEGIN_REFTRACE(6);
 	KREFTRACEv(base->packageList);
 	KREFTRACEv(base->UndefinedParseExpr);
@@ -146,7 +146,7 @@ static void SugarModule_reftrace(KonohaContext *kctx, struct KonohaModule *baseh
 static void SugarModule_free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 	KModuleSugar *base = (KModuleSugar*)baseh;
-	KLIB Kmap_free(kctx, base->packageMapNO, pack_free);
+	KLIB Kmap_free(kctx, base->packageMapNO, packageMap_free);
 	KFREE(baseh, sizeof(KModuleSugar));
 }
 

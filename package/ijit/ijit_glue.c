@@ -69,7 +69,7 @@ static void kmodjit_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
 	KREFTRACEv(mod->global_value);
 	KREFTRACEv(mod->constPool);
 	END_REFTRACE();
-	KLIB Kmap_reftrace(kctx, mod->jitcache, val_reftrace);
+	KLIB Kmap_each(kctx, mod->jitcache, val_reftrace);
 }
 
 static void kmodjit_free(KonohaContext *kctx, struct KonohaModule *baseh)

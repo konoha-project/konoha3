@@ -55,7 +55,7 @@ void test_Kmap(KonohaContext *kctx)
         assert(entry != NULL);
         assert(entry->unboxValue == i);
     }
-    kctx->klib->Kmap_reftrace(kctx, map, reftrace);
+    kctx->klib->Kmap_each(kctx, map, reftrace);
     fprintf(stderr, "%d\n", _sum_);
     assert(_sum_ == 45);
 
