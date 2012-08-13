@@ -142,6 +142,7 @@ set(PACKAGES
 	apache
 #	openssl
 	logpool
+	konoha.date
 )
 
 find_library(HAVE_LIBDL NAMES dl)
