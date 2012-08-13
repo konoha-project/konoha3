@@ -31,7 +31,7 @@ extern int verbose_debug;
 
 static int _sum_  = 0;
 static int _sum2_ = 0;
-static void reftrace(KonohaContext *kctx, KUtilsHashMapEntry *e)
+static void reftrace(KonohaContext *kctx, KUtilsHashMapEntry *e, void *thunk)
 {
     _sum_ += e->unboxValue;
 }
@@ -55,7 +55,7 @@ void test_Kmap(KonohaContext *kctx)
         assert(entry != NULL);
         assert(entry->unboxValue == i);
     }
-    kctx->klib->Kmap_each(kctx, map, reftrace);
+    kctx->klib->Kmap_each(kctx, map, NULL, reftrace);
     fprintf(stderr, "%d\n", _sum_);
     assert(_sum_ == 45);
 
