@@ -246,7 +246,9 @@ macro(add_konoha_test test_name test_file)
 			set_tests_properties(${test_name} PROPERTIES TIMEOUT 10)
 		endif(TEST_STRESS)
 	else(test_name MATCHES "Stress")
-		add_test_with_property(${test_name} --test-with ${test_file})
+		if(NOT test_name MATCHES "Shell")
+			add_test_with_property(${test_name} --test-with ${test_file})
+		endif(NOT test_name MATCHES "Shell")
 	endif(test_name MATCHES "Stress")
 	if(TEST_IJIT)
 		add_test_with_property(ijit:${test_name} -Iijit --test-with ${test_file})
@@ -378,6 +380,21 @@ add_test(Shell/Release/Oneline
 add_test(Shell/Release/Multiline
 	${CMAKE_CURRENT_SOURCE_DIR}/test/test-multiline.sh ${TEST_BIN}
 	${CMAKE_CURRENT_SOURCE_DIR}/test/Release/Fibonacci.k)
+
+file(GLOB_RECURSE test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/Shell/*.sh)
+foreach(f ${test_files})
+	string(REPLACE // / f ${f})
+	string(REPLACE .sh .k TEST_SCRIPT ${f})
+	string(REPLACE ${CMAKE_CURRENT_SOURCE_DIR}/test/ "" test_name ${f})
+	if(EXISTS ${TEST_SCRIPT})
+		add_test(${test_name} sh +x ${f} ${TEST_BIN} ${TEST_SCRIPT})
+	else(EXISTS ${TEST_SCRIPT})
+		add_test(${test_name} sh +x ${f} ${TEST_BIN})
+	endif(EXISTS ${TEST_SCRIPT})
+	set_tests_properties(${test_name} PROPERTIES TIMEOUT 5)
+	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT
+		"KONOHA_PACKAGEPATH=${PARENT_BINARY_DIR}/package")
+endforeach(f ${test_files})
 
 install(TARGETS minikonoha minikonoha_bin
 		RUNTIME DESTINATION bin
