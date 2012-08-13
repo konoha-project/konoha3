@@ -570,7 +570,7 @@ struct KonohaModule {
 		struct _kIterator *itr; \
 		struct kClass  *c; \
 		struct kDate *dt;\
-		struct kRegex  *re; \
+		struct kRegExp  *re; \
 		struct kRange  *range; \
 		struct kIterator *it; \
 		struct kMap           *m;    \
