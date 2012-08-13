@@ -207,7 +207,7 @@ static KMETHOD Map_keys(KonohaContext *kctx, KonohaStack *sfp)
 
 #define CT_Map cMap
 #define TY_Map cMap->typeId
-static	kbool_t hashmap_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static	kbool_t map_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	KDEFINE_CLASS defMap = {
 		STRUCTNAME(Map),
@@ -229,12 +229,12 @@ static	kbool_t hashmap_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	return true;
 }
 
-static kbool_t hashmap_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t map_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t hashmap_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
+static kbool_t map_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	// TODO: map literal
 	KDEFINE_SYNTAX SYNTAX[] = {
@@ -244,20 +244,20 @@ static kbool_t hashmap_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfile
 	return true;
 }
 
-static kbool_t hashmap_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t map_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
 
-KDEFINE_PACKAGE* hashmap_init(void)
+KDEFINE_PACKAGE* map_init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("hashmap", "1.0"),
-		.initPackage = hashmap_initPackage,
-		.setupPackage = hashmap_setupPackage,
-		.initNameSpace = hashmap_initNameSpace,
-		.setupNameSpace = hashmap_setupNameSpace,
+		KPACKNAME("map", "1.0"),
+		.initPackage = map_initPackage,
+		.setupPackage = map_setupPackage,
+		.initNameSpace = map_initNameSpace,
+		.setupNameSpace = map_setupNameSpace,
 	};
 	return &d;
 }

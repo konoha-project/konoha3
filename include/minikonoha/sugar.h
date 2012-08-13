@@ -69,10 +69,12 @@ extern "C" {
 #define KW_ParamPattern    (((ksymbol_t)12)|KW_PATTERN) /*$Param*/
 #define KW_TokenPattern    (((ksymbol_t)13)|KW_PATTERN) /*$Token*/
 
-#define KW_StmtConstDecl   KW_ConstPattern
-#define KW_StmtTypeDecl    KW_TypePattern
-#define KW_ExprMethodCall  KW_ParamPattern
-#define KW_StmtMethodDecl  KW_void
+#define KW_StmtConstDecl       KW_ConstPattern
+#define KW_StmtTypeDecl        KW_TypePattern
+#define KW_StmtMethodDecl      KW_void
+#define KW_ExprOperator        KW_ParamPattern
+#define KW_ExprTerm            KW_SymbolPattern
+#define KW_ExprMethodCall      KW_ParamPattern
 
 #define KW_DOT     14
 #define KW_DIV     (1+KW_DOT)
@@ -209,24 +211,25 @@ struct TokenizerEnv {
 typedef const struct SugarSyntaxVar   SugarSyntax;
 typedef struct SugarSyntaxVar         SugarSyntaxVar;
 
+#define SUGARFUNC_PatternMatch   0
+#define SUGARFUNC_ParseExpr      1
+#define SUGARFUNC_TopStmtTyCheck 2
+#define SUGARFUNC_StmtTyCheck    3
+#define SUGARFUNC_ExprTyCheck    4
+#define SUGARFUNC_SIZE           5
+
 struct SugarSyntaxVar {
 	ksymbol_t  keyword;               kshortflag_t  flag;
 	kArray                           *syntaxRuleNULL;
-	kFunc                            *PatternMatch;
-	kFunc                            *ParseExpr;
-	kFunc                            *TopStmtTyCheck;
-	kFunc                            *StmtTyCheck;
-	kFunc                            *ExprTyCheck;
+	union {
+		kFunc                        *sugarFuncTable[SUGARFUNC_SIZE];
+		kArray                       *sugarFuncListTable[SUGARFUNC_SIZE];
+	};
 	// binary
 	ktype_t  ty;
 	kshort_t precedence_op2;        kshort_t precedence_op1;
 };
 
-#define SYNIDX_PatternMatch   0
-#define SYNIDX_ParseExpr      1
-#define SYNIDX_TopStmtTyCheck 2
-#define SYNIDX_StmtTyCheck    3
-#define SYNIDX_ExprTyCheck    4
 
 #define PatternMatch_(NAME)    .PatternMatch   = PatternMatch_##NAME
 #define ParseExpr_(NAME)       .ParseExpr      = ParseExpr_##NAME
@@ -234,14 +237,10 @@ struct SugarSyntaxVar {
 #define StmtTyCheck_(NAME)     .StmtTyCheck    = StmtTyCheck_##NAME
 #define ExprTyCheck_(NAME)     .ExprTyCheck    = ExprTyCheck_##NAME
 
-#define _TERM     .flag = SYNFLAG_ExprTerm
-#define _OP       .flag = SYNFLAG_ExprOp
-#define _OPLeft   .flag = (SYNFLAG_ExprOp|SYNFLAG_ExprLeftJoinOp2)
+#define _OPLeft   .flag = (SYNFLAG_ExprLeftJoinOp2)
 
-#define SYNFLAG_ExprTerm           ((kshortflag_t)1)
-#define SYNFLAG_ExprOp             ((kshortflag_t)1 << 1)
-#define SYNFLAG_ExprLeftJoinOp2    ((kshortflag_t)1 << 2)
-#define SYNFLAG_ExprPostfixOp2     ((kshortflag_t)1 << 3)
+#define SYNFLAG_ExprLeftJoinOp2    ((kshortflag_t)1 << 1)
+#define SYNFLAG_ExprPostfixOp2     ((kshortflag_t)1 << 2)
 
 #define SYNFLAG_StmtBreakExec      ((kshortflag_t)1 << 8)  /* return, throw */
 #define SYNFLAG_StmtJumpAhead      ((kshortflag_t)1 << 9)  /* continue */
@@ -509,12 +508,6 @@ typedef struct {
 
 	kArray          *packageList;
 	KUtilsHashMap   *packageMapNO;
-
-	kFunc *UndefinedParseExpr;
-	kFunc *UndefinedStmtTyCheck;
-	kFunc *UndefinedExprTyCheck;
-	kFunc *ParseExpr_Term;
-	kFunc *ParseExpr_Op;
 
 	TokenRange* (*new_TokenListRange)(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, TokenRange *bufRange);
 	TokenRange* (*new_TokenStackRange)(KonohaContext *kctx, TokenRange *range, TokenRange *bufRange);

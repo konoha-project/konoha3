@@ -641,7 +641,7 @@ static kbool_t pcre_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline
 	kFunc *fo = GCSAFE_new(Func, (uintptr_t) mtd);
 	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '/', NULL, fo, 0);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("$regex"), _TERM, ExprTyCheck_(Regex), },
+		{ .keyword = SYM_("$regex"),  ExprTyCheck_(Regex), },
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);

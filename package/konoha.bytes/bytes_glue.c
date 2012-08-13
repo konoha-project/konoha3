@@ -402,7 +402,6 @@ static int parseSQUOTE(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, i
 	return pos-1;
 }
 
-
 static KMETHOD ExprTyCheck_Squote(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
@@ -421,7 +420,7 @@ static kbool_t bytes_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileli
 {
 	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '\'', parseSQUOTE, NULL, 0);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("$SingleQuote"), _TERM, ExprTyCheck_(Squote)},
+		{ .keyword = SYM_("$SingleQuote"),  ExprTyCheck_(Squote)},
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);

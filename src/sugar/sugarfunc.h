@@ -133,16 +133,16 @@ static KMETHOD PatternMatch_Toks(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD ParseExpr_Term(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_ParseExpr(stmt, tokenList, beginIdx, currentIdx, endIdx);
-	if(beginIdx == currentIdx) {
-		kToken *tk = tokenList->tokenItems[currentIdx];
+	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
+	if(beginIdx == operatorIdx) {
+		kToken *tk = tokenList->tokenItems[operatorIdx];
 		KonohaClass *foundClass = NULL;
 		int nextIdx = kStmt_parseTypePattern(kctx, NULL, Stmt_nameSpace(stmt), tokenList, beginIdx, endIdx, &foundClass);
 		if(foundClass != NULL) {
 			kToken_setTypeId(kctx, tk, Stmt_nameSpace(stmt), foundClass->typeId);
 		}
 		else {
-			nextIdx = currentIdx + 1;
+			nextIdx = operatorIdx + 1;
 		}
 		kExprVar *expr = new_(ExprVar, tk->resolvedSyntaxInfo);
 		KSETv(expr, expr->termToken, tk);
@@ -153,28 +153,28 @@ static KMETHOD ParseExpr_Term(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD ParseExpr_Op(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_ParseExpr(stmt, tokenList, beginIdx, currentIdx, endIdx);
-	kTokenVar *tk = tokenList->tokenVarItems[currentIdx];
-	kExpr *expr, *rexpr = kStmt_parseExpr(kctx, stmt, tokenList, currentIdx + 1, endIdx);
+	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
+	kTokenVar *tk = tokenList->tokenVarItems[operatorIdx];
+	kExpr *expr, *rexpr = kStmt_parseExpr(kctx, stmt, tokenList, operatorIdx + 1, endIdx);
 	PUSH_GCSTACK(rexpr);
-	if(syn->keyword != KW_LET && syn->ExprTyCheck == kmodsugar->UndefinedExprTyCheck) {
-		DBG_P("switching type checker ..");
-		syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);  // switch type checker
-	}
-	if(beginIdx == currentIdx) { // unary operator
+//	if(syn->keyword != KW_LET && syn->sugarFuncTable[SUGARFUNC_ExprTyCheck] == NULL) {
+//		DBG_P("switching type checker ..");
+//		syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);  // switch type checker
+//	}
+	if(beginIdx == operatorIdx) { // unary operator
 		expr = new_ConsExpr(kctx, syn, 2, tk, rexpr);
 	}
 	else {   // binary operator
-		kExpr *lexpr = kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, currentIdx);
+		kExpr *lexpr = kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx);
 		expr = new_ConsExpr(kctx, syn, 3, tk, lexpr, rexpr);
 	}
 	RETURN_(expr);
 }
 
-static inline kbool_t isFieldName(kArray *tokenList, int currentIdx, int endIdx)
+static inline kbool_t isFieldName(kArray *tokenList, int operatorIdx, int endIdx)
 {
-	if(currentIdx + 1 < endIdx) {
-		kToken *tk = tokenList->tokenItems[currentIdx + 1];
+	if(operatorIdx + 1 < endIdx) {
+		kToken *tk = tokenList->tokenItems[operatorIdx + 1];
 		return (tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern);
 	}
 	return false;
@@ -182,24 +182,24 @@ static inline kbool_t isFieldName(kArray *tokenList, int currentIdx, int endIdx)
 
 static KMETHOD ParseExpr_DOT(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_ParseExpr(stmt, tokenList, beginIdx, currentIdx, endIdx);
-	if(beginIdx < currentIdx && isFieldName(tokenList, currentIdx, endIdx)) {
-		kExpr *expr = kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, currentIdx);
-		expr = new_ConsExpr(kctx, syn, 2, tokenList->tokenItems[currentIdx +1], expr);
-		RETURN_(kStmt_rightJoinExpr(kctx, stmt, expr, tokenList, currentIdx +2, endIdx));
+	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
+	if(beginIdx < operatorIdx && isFieldName(tokenList, operatorIdx, endIdx)) {
+		kExpr *expr = kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx);
+		expr = new_ConsExpr(kctx, syn, 2, tokenList->tokenItems[operatorIdx +1], expr);
+		RETURN_(kStmt_rightJoinExpr(kctx, stmt, expr, tokenList, operatorIdx +2, endIdx));
 	}
 }
 
 static KMETHOD ParseExpr_Parenthesis(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_ParseExpr(stmt, tokenList, beginIdx, currentIdx, endIdx);
-	kToken *tk = tokenList->tokenItems[currentIdx];
-	if(beginIdx == currentIdx) {
+	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
+	kToken *tk = tokenList->tokenItems[operatorIdx];
+	if(beginIdx == operatorIdx) {
 		kExpr *expr = kStmt_parseExpr(kctx, stmt, tk->subTokenList, 0, kArray_size(tk->subTokenList));
-		RETURN_(kStmt_rightJoinExpr(kctx, stmt, expr, tokenList, currentIdx + 1, endIdx));
+		RETURN_(kStmt_rightJoinExpr(kctx, stmt, expr, tokenList, operatorIdx + 1, endIdx));
 	}
 	else {
-		kExpr *lexpr = kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, currentIdx);
+		kExpr *lexpr = kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx);
 		if(lexpr == K_NULLEXPR) {
 			RETURN_(lexpr);
 		}
@@ -211,23 +211,23 @@ static KMETHOD ParseExpr_Parenthesis(KonohaContext *kctx, KonohaStack *sfp)
 			lexpr  = new_ConsExpr(kctx, syn, 2, lexpr, K_NULL);
 		}
 		lexpr = kStmt_addExprParam(kctx, stmt, lexpr, tk->subTokenList, 0, kArray_size(tk->subTokenList), 1/*allowEmpty*/);
-		RETURN_(kStmt_rightJoinExpr(kctx, stmt, lexpr, tokenList, currentIdx + 1, endIdx));
+		RETURN_(kStmt_rightJoinExpr(kctx, stmt, lexpr, tokenList, operatorIdx + 1, endIdx));
 	}
 }
 
 static KMETHOD ParseExpr_COMMA(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_ParseExpr(stmt, tokenList, beginIdx, currentIdx, endIdx);
-	kExpr *expr = new_ConsExpr(kctx, syn, 1, tokenList->tokenItems[currentIdx]);
+	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
+	kExpr *expr = new_ConsExpr(kctx, syn, 1, tokenList->tokenItems[operatorIdx]);
 	expr = kStmt_addExprParam(kctx, stmt, expr, tokenList, beginIdx, endIdx, 0/*allowEmpty*/);
 	RETURN_(expr);
 }
 
 static KMETHOD ParseExpr_DOLLAR(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_ParseExpr(stmt, tokenList, beginIdx, currentIdx, endIdx);
-	if(beginIdx == currentIdx && currentIdx +1 < endIdx) {
-		kToken *tk = tokenList->tokenItems[currentIdx +1];
+	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
+	if(beginIdx == operatorIdx && operatorIdx +1 < endIdx) {
+		kToken *tk = tokenList->tokenItems[operatorIdx +1];
 		if(tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
 			kToken_transformToBraceGroup(kctx, (kTokenVar*)tk, Stmt_nameSpace(stmt));
 		}
@@ -1206,7 +1206,6 @@ static KMETHOD StmtTyCheck_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 #define GROUP(T)    .keyword = KW_##T##Group
 #define TOKEN(T)    .keyword = KW_##T
 
-
 static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 {
 	DBG_ASSERT(SYM_("$Param") == KW_ParamPattern);
@@ -1218,42 +1217,42 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ TOKEN(ERR), .flag = SYNFLAG_StmtBreakExec, },
-		{ PATTERN(Symbol),  _TERM, PatternMatch_(MethodName), ExprTyCheck_(Symbol),},
-		{ PATTERN(Text),    _TERM, ExprTyCheck_(Text),},
-		{ PATTERN(Number),     _TERM, ExprTyCheck_(Int),},
-		{ PATTERN(Float),   _TERM, },
+		{ PATTERN(Symbol),  PatternMatch_(MethodName), ParseExpr_(Term), ExprTyCheck_(Symbol),},
+		{ PATTERN(Text),    ExprTyCheck_(Text),},
+		{ PATTERN(Number),  ExprTyCheck_(Int),},
+		{ PATTERN(Float),   },
 		{ GROUP(Parenthesis), .flag = SYNFLAG_ExprPostfixOp2, ParseExpr_(Parenthesis), .precedence_op2 = C_PRECEDENCE_CALL, ExprTyCheck_(FuncStyleCall),}, //KW_ParenthesisGroup
 		{ GROUP(Bracket),  },  //KW_BracketGroup
 		{ GROUP(Brace),  }, // KW_BraceGroup
 		{ PATTERN(Block), PatternMatch_(Block), ExprTyCheck_(Block), },
-		{ PATTERN(Param), PatternMatch_(Params), TopStmtTyCheck_(ParamsDecl), ExprTyCheck_(MethodCall),},
+		{ PATTERN(Param), PatternMatch_(Params), ParseExpr_(Op), TopStmtTyCheck_(ParamsDecl), ExprTyCheck_(MethodCall),},
 		{ PATTERN(Token), PatternMatch_(Toks), },
 		{ TOKEN(DOT), ParseExpr_(DOT), .precedence_op2 = C_PRECEDENCE_CALL, },
-		{ TOKEN(DIV), _OP, .precedence_op2 = C_PRECEDENCE_MUL, },
-		{ TOKEN(MOD), _OP, .precedence_op2 = C_PRECEDENCE_MUL, },
-		{ TOKEN(MUL), _OP, .precedence_op2 = C_PRECEDENCE_MUL, },
-		{ TOKEN(ADD), _OP, .precedence_op2 = C_PRECEDENCE_ADD, },
-		{ TOKEN(SUB), _OP, .precedence_op2 = C_PRECEDENCE_ADD, .precedence_op1 = C_PRECEDENCE_PREUNARY, },
-		{ TOKEN(LT), _OP,  .precedence_op2 = C_PRECEDENCE_COMPARE, },
-		{ TOKEN(LTE), _OP, .precedence_op2 = C_PRECEDENCE_COMPARE, },
-		{ TOKEN(GT), _OP,  .precedence_op2 = C_PRECEDENCE_COMPARE, },
-		{ TOKEN(GTE), _OP, .precedence_op2 = C_PRECEDENCE_COMPARE, },
-		{ TOKEN(EQ), _OP,  .precedence_op2 = C_PRECEDENCE_EQUALS, },
-		{ TOKEN(NEQ), _OP, .precedence_op2 = C_PRECEDENCE_EQUALS, },
-		{ TOKEN(AND), _OP, .precedence_op2 = C_PRECEDENCE_AND, ExprTyCheck_(AND)},
-		{ TOKEN(OR), _OP,  .precedence_op2 = C_PRECEDENCE_OR, ExprTyCheck_(OR)},
-		{ TOKEN(NOT), _OP, .precedence_op1 = C_PRECEDENCE_PREUNARY,},
-		{ TOKEN(COLON), _OP, .precedence_op2 = C_PRECEDENCE_TRINARY, },  // colon
+		{ TOKEN(DIV), .precedence_op2 = C_PRECEDENCE_MUL, },
+		{ TOKEN(MOD), .precedence_op2 = C_PRECEDENCE_MUL, },
+		{ TOKEN(MUL), .precedence_op2 = C_PRECEDENCE_MUL, },
+		{ TOKEN(ADD), .precedence_op2 = C_PRECEDENCE_ADD, },
+		{ TOKEN(SUB), .precedence_op2 = C_PRECEDENCE_ADD, .precedence_op1 = C_PRECEDENCE_PREUNARY, },
+		{ TOKEN(LT),  .precedence_op2 = C_PRECEDENCE_COMPARE, },
+		{ TOKEN(LTE), .precedence_op2 = C_PRECEDENCE_COMPARE, },
+		{ TOKEN(GT),  .precedence_op2 = C_PRECEDENCE_COMPARE, },
+		{ TOKEN(GTE), .precedence_op2 = C_PRECEDENCE_COMPARE, },
+		{ TOKEN(EQ),  .precedence_op2 = C_PRECEDENCE_EQUALS, },
+		{ TOKEN(NEQ), .precedence_op2 = C_PRECEDENCE_EQUALS, },
+		{ TOKEN(AND), .precedence_op2 = C_PRECEDENCE_AND, ParseExpr_(Op), ExprTyCheck_(AND)},
+		{ TOKEN(OR),  .precedence_op2 = C_PRECEDENCE_OR, ParseExpr_(Op), ExprTyCheck_(OR)},
+		{ TOKEN(NOT),  .precedence_op1 = C_PRECEDENCE_PREUNARY,},
+		{ TOKEN(COLON), /*.precedence_op2 = C_PRECEDENCE_TRINARY,*/ },  // colon
 		{ TOKEN(LET),      .flag = SYNFLAG_ExprLeftJoinOp2, ParseExpr_(Op), ExprTyCheck_(assign), .precedence_op2 = C_PRECEDENCE_ASSIGN, },
 		{ TOKEN(COMMA),    ParseExpr_(COMMA), .precedence_op2 = C_PRECEDENCE_COMMA,},
 		{ TOKEN(DOLLAR),   ParseExpr_(DOLLAR), },
 		{ TOKEN(boolean), .type = TY_Boolean, },
 		{ TOKEN(int),     .type = TY_Int, },
-		{ TOKEN(true),    _TERM, ExprTyCheck_(true),},
-		{ TOKEN(false),   _TERM, ExprTyCheck_(false),},
+		{ TOKEN(true),    ExprTyCheck_(true),},
+		{ TOKEN(false),   ExprTyCheck_(false),},
 		{ PATTERN(Expr), .rule ="$Expr", PatternMatch_(Expr), TopStmtTyCheck_(Expr), StmtTyCheck_(Expr),  },
-		{ PATTERN(Type),  _TERM, PatternMatch_(Type), .rule = "$Type $Expr", StmtTyCheck_(TypeDecl), ExprTyCheck_(Type), },
-		{ PATTERN(Const), _TERM, PatternMatch_(ConstName), .rule = "$Const \"=\" $Expr", TopStmtTyCheck_(ConstDecl), ExprTyCheck_(Usymbol),},
+		{ PATTERN(Type),  PatternMatch_(Type), .rule = "$Type $Expr", StmtTyCheck_(TypeDecl), ExprTyCheck_(Type), },
+		{ PATTERN(Const), PatternMatch_(ConstName), .rule = "$Const \"=\" $Expr", TopStmtTyCheck_(ConstDecl), /*ExprTyCheck_(Usymbol),*/},
 		{ TOKEN(void),   .type = TY_void, .rule ="$Type [ClassName: $Type \".\"] $Symbol $Param [$Block]", TopStmtTyCheck_(MethodDecl)},
 		{ TOKEN(if),     .rule ="\"if\" \"(\" $Expr \")\" $Block [\"else\" else: $Block]", TopStmtTyCheck_(if), StmtTyCheck_(if), },
 		{ TOKEN(else),   .rule = "\"else\" $Block", TopStmtTyCheck_(else), StmtTyCheck_(else), },

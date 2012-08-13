@@ -28,19 +28,7 @@ extern "C" {
 
 /* ------------------------------------------------------------------------ */
 
-static KMETHOD UndefinedExprTyCheck(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	if(Expr_isTerm(expr)) {
-		expr = kToken_p(stmt, expr->termToken, ErrTag, "undefined token type checker: '%s'", Token_text(expr->termToken));
-	}
-	else {
-		expr = kStmt_p(stmt, ErrTag, "undefined operator type checker: %s%s",  KW_t(expr->syn->keyword));
-	}
-	RETURN_(expr);
-}
-
-static kExpr *ExprTyCheckFunc(KonohaContext *kctx, kFunc *fo, kStmt *stmt, kExpr *expr, kGamma *gma, int reqty)
+static kExpr *callExprTyCheckFunc(KonohaContext *kctx, kFunc *fo, kStmt *stmt, kExpr *expr, kGamma *gma, int reqty)
 {
 	INIT_GCSTACK();
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
@@ -58,20 +46,28 @@ static kExpr *ExprTyCheckFunc(KonohaContext *kctx, kFunc *fo, kStmt *stmt, kExpr
 
 static kExpr *ExprTyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, int reqty)
 {
-	kFunc *fo = expr->syn->ExprTyCheck;
+	kFunc *fo = expr->syn->sugarFuncTable[SUGARFUNC_ExprTyCheck];
+	if(fo == NULL) {
+		if(Expr_isTerm(expr)) {
+			return kToken_p(stmt, expr->termToken, ErrTag, "undefined token type checker: '%s'", Token_text(expr->termToken));
+		}
+		else {
+			return kStmt_p(stmt, ErrTag, "undefined operator type checker: %s%s",  KW_t(expr->syn->keyword));
+		}
+	}
 	kExpr *texpr;
 	if(IS_Array(fo)) {
 		int i;
 		kArray *a = (kArray*)fo;
 		for(i = kArray_size(a) - 1; i > 0; i--) {
-			texpr = ExprTyCheckFunc(kctx, a->funcItems[i], stmt, expr, gma, reqty);
+			texpr = callExprTyCheckFunc(kctx, a->funcItems[i], stmt, expr, gma, reqty);
 			if(Stmt_isERR(stmt)) return K_NULLEXPR;
 			if(texpr->ty != TY_var) return texpr;
 		}
 		fo = a->funcItems[0];
 	}
 	DBG_ASSERT(IS_Func(fo));
-	texpr = ExprTyCheckFunc(kctx, fo, stmt, expr, gma, reqty);
+	texpr = callExprTyCheckFunc(kctx, fo, stmt, expr, gma, reqty);
 	if(Stmt_isERR(stmt)) return K_NULLEXPR;
 //	FIXME: CHECK ALL VAR_ExprTyCheck
 //	if(texpr->ty == TY_var && texpr != K_NULLEXPR) {
@@ -205,14 +201,6 @@ static kbool_t kStmt_tyCheckByName(KonohaContext *kctx, kStmt *stmt, ksymbol_t n
 
 /* ------------------------------------------------------------------------ */
 
-static KMETHOD UndefinedStmtTyCheck(KonohaContext *kctx, KonohaStack *sfp)  // $Expr
-{
-	VAR_StmtTyCheck(stmt, gma);
-	const char *location = kGamma_isTOPLEVEL(gma) ? "at the top level" : "inside the function";
-	kStmt_p(stmt, ErrTag, "%s%s is not available %s", T_statement(stmt->syn->keyword), location);
-	RETURNb_(false);
-}
-
 static kbool_t Stmt_TyCheckFunc(KonohaContext *kctx, kFunc *fo, kStmt *stmt, kGamma *gma)
 {
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 3);
@@ -226,7 +214,13 @@ static kbool_t Stmt_TyCheckFunc(KonohaContext *kctx, kFunc *fo, kStmt *stmt, kGa
 
 static kbool_t Stmt_TyCheck(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, kGamma *gma)
 {
-	kFunc *fo = kGamma_isTOPLEVEL(gma) ? syn->TopStmtTyCheck : syn->StmtTyCheck;
+	int SUGARFUNC_index = kGamma_isTOPLEVEL(gma) ? SUGARFUNC_TopStmtTyCheck : SUGARFUNC_StmtTyCheck;
+	if(syn->sugarFuncTable[SUGARFUNC_index] == NULL) {
+		const char *location = kGamma_isTOPLEVEL(gma) ? "at the top level" : "inside the function";
+		kStmt_p(stmt, ErrTag, "%s%s is not available %s", T_statement(stmt->syn->keyword), location);
+		return false;
+	}
+	kFunc *fo = syn->sugarFuncTable[SUGARFUNC_index];
 	kbool_t result;
 	if(IS_Array(fo)) { // @Future
 		int i;
