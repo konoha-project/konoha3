@@ -27,6 +27,7 @@
 
 #include <stdio.h>
 #include <time.h>
+#include <sys/time.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,23 +36,8 @@ extern "C" {
 typedef const struct _kDate kDate;
 struct _kDate {
 	KonohaObjectHeader h;
-	struct tm *date;
+	struct timeval tv;
 };
-
-static void Date_init(KonohaContext *kctx, kObject *o, void *conf)
-{
-	struct _kDate *d = (struct _kDate *)o;
-	d->date = NULL;
-}
-
-static void Date_free(KonohaContext *kctx, kObject *o)
-{
-	struct _kDate *d = (struct _kDate *)o;
-	if(d->date != NULL) {
-		free(d->date);
-		d->date = NULL;
-	}
-}
 
 /* ------------------------------------------------------------------------ */
 // [private functions]
@@ -61,21 +47,10 @@ static void Date_free(KonohaContext *kctx, kObject *o)
 static KMETHOD Date_new0(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kDate *d = (struct _kDate *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
-	d->date = (struct tm *)malloc(sizeof(struct tm));
-	time_t timer;
-	struct tm *date;
-	timer = time(NULL);
-	date = localtime(&timer);
-	d->date->tm_sec = date->tm_sec;
-	d->date->tm_min = date->tm_min;
-	d->date->tm_hour = date->tm_hour;
-	d->date->tm_mday = date->tm_mday;
-	d->date->tm_mon = date->tm_mon;
-	d->date->tm_year = date->tm_year;
-	d->date->tm_wday = date->tm_wday;
-	d->date->tm_yday = date->tm_yday;
-	d->date->tm_isdst = date->tm_isdst;
-	fprintf(stdout, "%s", asctime(d->date));
+	struct tm *lt;
+	gettimeofday(&(d->tv), NULL);
+	lt = localtime(&(d->tv.tv_sec));
+	fprintf(stdout, "%s", asctime(lt));
 	RETURN_((kObject *)d);
 }
 
@@ -97,6 +72,90 @@ static KMETHOD Date_new3(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_((kObject *)d);
 }
 
+//## int Date.getDate();
+static KMETHOD Date_getDate(KonohaContext *kctx, KonohaStack *sfp)
+{
+	time_t tv_sec = ((struct _kDate *)sfp[0].asObject)->tv.tv_sec;
+	struct tm *lt = localtime(&tv_sec);
+	RETURNi_(lt->tm_mday);
+}
+
+//## int Date.getDay();
+static KMETHOD Date_getDay(KonohaContext *kctx, KonohaStack *sfp)
+{
+	time_t tv_sec = ((struct _kDate *)sfp[0].asObject)->tv.tv_sec;
+	struct tm *lt = localtime(&tv_sec);
+	RETURNi_(lt->tm_wday);
+}
+
+//## int Date.getFullYear();
+static KMETHOD Date_getFullYear(KonohaContext *kctx, KonohaStack *sfp)
+{
+	time_t tv_sec = ((struct _kDate *)sfp[0].asObject)->tv.tv_sec;
+	struct tm *lt = localtime(&tv_sec);
+	RETURNi_(lt->tm_year);
+}
+
+//## int Date.getHours();
+static KMETHOD Date_getHours(KonohaContext *kctx, KonohaStack *sfp)
+{
+	time_t tv_sec = ((struct _kDate *)sfp[0].asObject)->tv.tv_sec;
+	struct tm *lt = localtime(&tv_sec);
+	RETURNi_(lt->tm_hour);
+}
+
+//## int Date.getMilliseconds();
+static KMETHOD Date_getMilliseconds(KonohaContext *kctx, KonohaStack *sfp)
+{
+	time_t tv_usec = ((struct _kDate *)sfp[0].asObject)->tv.tv_usec;
+	RETURNi_((kint_t)tv_usec / 1000);
+}
+
+//## int Date.getMinutes();
+static KMETHOD Date_getMinutes(KonohaContext *kctx, KonohaStack *sfp)
+{
+	time_t tv_sec = ((struct _kDate *)sfp[0].asObject)->tv.tv_sec;
+	struct tm *lt = localtime(&tv_sec);
+	RETURNi_(lt->tm_min);
+}
+
+//## int Date.getMonth();
+static KMETHOD Date_getMonth(KonohaContext *kctx, KonohaStack *sfp)
+{
+	time_t tv_sec = ((struct _kDate *)sfp[0].asObject)->tv.tv_sec;
+	struct tm *lt = localtime(&tv_sec);
+	RETURNi_(lt->tm_mon);
+}
+
+//## int Date.getSeconds();
+static KMETHOD Date_getSeconds(KonohaContext *kctx, KonohaStack *sfp)
+{
+	time_t tv_sec = ((struct _kDate *)sfp[0].asObject)->tv.tv_sec;
+	struct tm *lt = localtime(&tv_sec);
+	RETURNi_(lt->tm_sec);
+}
+
+//## int Date.getTime();
+static KMETHOD Date_getTime(KonohaContext *kctx, KonohaStack *sfp)
+{
+	time_t tv_sec = ((struct _kDate *)sfp[0].asObject)->tv.tv_sec;
+	time_t tv_usec = ((struct _kDate *)sfp[0].asObject)->tv.tv_usec;
+	kint_t ret = (kint_t)tv_sec * 1000 + (kint_t)tv_usec / 1000;
+	RETURNi_(ret);
+}
+
+//## int Date.getimezoneOffset(); FIXME
+static KMETHOD Date_getTimezoneOffset(KonohaContext *kctx, KonohaStack *sfp)
+{
+	time_t tv_sec = ((struct _kDate *)sfp[0].asObject)->tv.tv_sec;
+	struct tm *lt = localtime(&tv_sec);
+	struct tm *utc = gmtime(&tv_sec);
+	fprintf(stdout, "%s", asctime(lt));
+	fprintf(stdout, "%s", asctime(utc));
+	kint_t ret = ((kint_t)lt->tm_hour + (kint_t)lt->tm_min) - ((kint_t)utc->tm_hour + (kint_t)utc->tm_min);
+	RETURNi_(ret);
+}
+
 /* ------------------------------------------------------------------------ */
 
 #define _Public   kMethod_Public
@@ -114,8 +173,6 @@ static	kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	KDEFINE_CLASS defDate = {
 		STRUCTNAME(Date),
 		.cflag = kClass_Final,
-		.init = Date_init,
-		.free = Date_free,
 	};
 	KonohaClass *cDate = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defDate, pline);
 
@@ -124,10 +181,16 @@ static	kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public|_Const|_Im, _F(Date_new1), TY_Date, TY_Date, MN_("new"), 1, TY_Int, FN_("milliseconds"),
 		_Public|_Const|_Im, _F(Date_new2), TY_Date, TY_Date, MN_("new"), 1, TY_String, FN_("dateString"),
 		_Public|_Const|_Im, _F(Date_new3), TY_Date, TY_Date, MN_("new"), 7, TY_Int, FN_("year"), TY_Int, FN_("month"), TY_Int, FN_("day"), TY_Int, FN_("hour"), TY_Int, FN_("minutes"), TY_Int, FN_("seconds"), TY_Int, FN_("milliseconds"),
-//		_Public|_Const|_Im, _F(Curl_setOpt), TY_void, TY_Curl, MN_("setOpt"), 2, TY_Int, FN_("type"), TY_Object/*FIXME TY_Dynamic*/, FN_("data"),
-//		_Public|_Const|_Im, _F(Curl_appendHeader), TY_void, TY_Curl, MN_("appendHeader"), 1, TY_String, FN_("header"),
-//		_Public|_Const|_Im, _F(Curl_perform), TY_Boolean, TY_Curl, MN_("perform"), 0,
-//		_Public|_Const|_Im, _F(Curl_getInfo), TY_Object/*FIXME TY_Dynamic*/, TY_Curl, MN_("getInfo"), 1, TY_Int, FN_("type"),
+		_Public|_Const|_Im, _F(Date_getDate), TY_Int, TY_Date, MN_("getDate"), 0,
+		_Public|_Const|_Im, _F(Date_getDay), TY_Int, TY_Date, MN_("getDay"), 0,
+		_Public|_Const|_Im, _F(Date_getFullYear), TY_Int, TY_Date, MN_("getFullYear"), 0,
+		_Public|_Const|_Im, _F(Date_getHours), TY_Int, TY_Date, MN_("getHours"), 0,
+		_Public|_Const|_Im, _F(Date_getMilliseconds), TY_Int, TY_Date, MN_("getMilliseconds"), 0,
+		_Public|_Const|_Im, _F(Date_getMinutes), TY_Int, TY_Date, MN_("getMinutes"), 0,
+		_Public|_Const|_Im, _F(Date_getMonth), TY_Int, TY_Date, MN_("getMonth"), 0,
+		_Public|_Const|_Im, _F(Date_getSeconds), TY_Int, TY_Date, MN_("getSeconds"), 0,
+		_Public|_Const|_Im, _F(Date_getTime), TY_Int, TY_Date, MN_("getTime"), 0,
+		_Public|_Const|_Im, _F(Date_getTimezoneOffset), TY_Int, TY_Date, MN_("getTimezoneOffset"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
