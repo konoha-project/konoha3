@@ -32,7 +32,7 @@ typedef struct {
 } kapacheshare_t;
 
 typedef struct {
-	KonohaContextModule h;
+	KonohaModuleContext h;
 	//kRequest *req;
 } ctxapache_t;
 

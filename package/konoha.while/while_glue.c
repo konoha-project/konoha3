@@ -57,35 +57,6 @@ static KMETHOD StmtTyCheck_while(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNb_(ret);
 }
 
-static KMETHOD StmtTyCheck_for(KonohaContext *kctx, KonohaStack *sfp)
-{
-//	VAR_StmtTyCheck(stmt, gma);
-//	DBG_P("for statement .. ");
-//	kToken *typeToken = SUGAR kStmt_getToken(kctx, stmt, KW_TypePattern, NULL);
-//	kToken *varToken  = SUGAR kStmt_getToken(kctx, stmt, KW_SymbolPattern, NULL);
-//	if(typeToken != NULL) {
-//
-//	}
-//	if(!SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0)) {
-//		RETURNb_(false);
-//	}
-//	kBlock *block = SUGAR new_kBlock(kctx, stmt, NULL, NULL);
-//	if(typeToke != NULL) {
-//		KLIB kArray_add(kctx, block->stmtList, kBlock_newStmt(kctx, block, KW_TypeDecl, KW_TypePattern, typeToken, varToken));
-//	}
-//	kStmt *whileStmt = new_Stmt();
-//	whileStmt =
-//	if(varBlock != NULL) {  // for(n: it)
-//
-//	}
-//	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0)) {
-//		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
-//		ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
-//		kStmt_typed(stmt, LOOP);
-//	}
-//	RETURNb_(ret);
-}
-
 static inline kStmt* kStmt_getParentNULL(kStmt *stmt)
 {
 	return stmt->parentBlockNULL->parentStmtNULL;
@@ -131,8 +102,6 @@ static kbool_t while_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileli
 		{ .keyword = SYM_("break"), StmtTyCheck_(break), .rule = "\"break\" [ $Symbol ]", },
 		{ .keyword = SYM_("continue"), StmtTyCheck_(continue), .rule = "\"continue\" [ $Symbol ]", },
 //		{ .keyword = SYM_("for"), _LOOP, StmtTyCheck_(for), .rule = "\"for\" \"(\" [ var: $Block \";\" $Expr \";\" each: $Block ] \")\" $Block", },
-		{ .keyword = SYM_("for"), _LOOP, StmtTyCheck_(for),
-			.rule = "\"for\" \"(\" [$Type] $Symbol \"in\" $Expr  \")\" [$Block] ", },
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);

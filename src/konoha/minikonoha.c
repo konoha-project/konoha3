@@ -136,7 +136,7 @@ static KonohaContextVar* new_context(KonohaContext *kctx, const PlatformApi *pla
 		newctx->platApi = platApi;
 		kctx = (KonohaContext*)newctx;
 		newctx->modshare = (KonohaModule**)calloc(sizeof(KonohaModule*), MOD_MAX);
-		newctx->modlocal = (KonohaContextModule**)calloc(sizeof(KonohaContextModule*), MOD_MAX);
+		newctx->modlocal = (KonohaModuleContext**)calloc(sizeof(KonohaModuleContext*), MOD_MAX);
 
 		MODLOGGER_init(kctx, newctx);
 		MODGC_init(kctx, newctx);
@@ -148,7 +148,7 @@ static KonohaContextVar* new_context(KonohaContext *kctx, const PlatformApi *pla
 		newctx->platApi = kctx->platApi;
 		newctx->share = kctx->share;
 		newctx->modshare = kctx->modshare;
-		newctx->modlocal = (KonohaContextModule**)KCALLOC(sizeof(KonohaContextModule*), MOD_MAX);
+		newctx->modlocal = (KonohaModuleContext**)KCALLOC(sizeof(KonohaModuleContext*), MOD_MAX);
 		MODGC_init(kctx, newctx);
 //		MODLOGGER_init(kctx, newctx);
 	}
@@ -183,7 +183,7 @@ static void kcontext_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 	}
 	KRUNTIME_reftrace(kctx, ctx);
 	for(i = 0; i < MOD_MAX; i++) {
-		KonohaContextModule *p = ctx->modlocal[i];
+		KonohaModuleContext *p = ctx->modlocal[i];
 		if(p != NULL && p->reftrace != NULL) {
 			p->reftrace(kctx, p);
 		}
@@ -199,7 +199,7 @@ static void kcontext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	size_t i;
 	for(i = 1; i < MOD_MAX; i++) {   // 0 is LOGGER, free lately
-		KonohaContextModule *p = ctx->modlocal[i];
+		KonohaModuleContext *p = ctx->modlocal[i];
 		if(p != NULL && p->free != NULL) {
 			p->free(kctx, p);
 		}
@@ -224,7 +224,7 @@ static void kcontext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	else {
 		MODGC_free(kctx, ctx);
 		MODLOGGER_free(kctx, ctx);
-		KFREE(kctx->modlocal, sizeof(KonohaContextModule*) * MOD_MAX);
+		KFREE(kctx->modlocal, sizeof(KonohaModuleContext*) * MOD_MAX);
 		KFREE(ctx, sizeof(KonohaContextVar));
 	}
 }

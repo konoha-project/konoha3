@@ -344,6 +344,7 @@ typedef struct kTokenVar                kTokenVar;
 typedef const struct kExprVar           kExpr;
 typedef struct kExprVar                 kExprVar;
 typedef const struct kStmtVar           kStmt;
+typedef const struct kStmtVar           kStmtNULL;  // Nullable
 typedef struct kStmtVar                 kStmtVar;
 typedef const struct kBlockVar          kBlock;
 typedef struct kBlockVar                kBlockVar;
@@ -436,7 +437,7 @@ typedef struct KonohaStack              KonohaStack;
 typedef struct KonohaStack              KonohaStackVar;
 
 typedef struct KonohaModule        KonohaModule;
-typedef struct KonohaContextModule KonohaContextModule;
+typedef struct KonohaModuleContext KonohaModuleContext;
 
 struct KonohaContextVar {
 	uintptr_t                         safepoint; // set to 1
@@ -446,7 +447,7 @@ struct KonohaContextVar {
 	KonohaRuntimeVar                 *share;
 	KonohaContextRuntimeVar          *stack;
 	KonohaModule                    **modshare;
-	KonohaContextModule             **modlocal;
+	KonohaModuleContext             **modlocal;
 	/* TODO(imasahiro)
 	 * checking modgc performance and remove
 	 * memshare/memlocal from context
@@ -522,10 +523,10 @@ struct KonohaContextRuntimeVar {
 //#define MOD_llvm    15
 #define MOD_REGEX   16
 
-struct KonohaContextModule {
+struct KonohaModuleContext {
 	uintptr_t unique;
-	void (*reftrace)(KonohaContext*, struct KonohaContextModule *);
-	void (*free)(KonohaContext*, struct KonohaContextModule *);
+	void (*reftrace)(KonohaContext*, struct KonohaModuleContext *);
+	void (*free)(KonohaContext*, struct KonohaModuleContext *);
 };
 
 struct KonohaModule {

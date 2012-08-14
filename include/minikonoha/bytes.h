@@ -73,7 +73,7 @@ typedef struct {
 } kmodiconv_t;
 
 typedef struct {
-    KonohaContextModule h;
+    KonohaModuleContext h;
 } ctxiconv_t;
 
 #ifdef __cplusplus

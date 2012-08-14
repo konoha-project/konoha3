@@ -986,7 +986,7 @@ static void Method_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
 /* ------------------------------------------------------------------------ */
 /* [ctxcode] */
 
-static void ctxcode_reftrace(KonohaContext *kctx, struct KonohaContextModule *baseh)
+static void ctxcode_reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh)
 {
 	ctxcode_t *base = (ctxcode_t*)baseh;
 	BEGIN_REFTRACE(2);
@@ -994,7 +994,7 @@ static void ctxcode_reftrace(KonohaContext *kctx, struct KonohaContextModule *ba
 	KREFTRACEv(base->constPools);
 	END_REFTRACE();
 }
-static void ctxcode_free(KonohaContext *kctx, struct KonohaContextModule *baseh)
+static void ctxcode_free(KonohaContext *kctx, struct KonohaModuleContext *baseh)
 {
 	ctxcode_t *base = (ctxcode_t*)baseh;
 	KFREE(base, sizeof(ctxcode_t));
@@ -1009,7 +1009,7 @@ static void kmodcode_setup(KonohaContext *kctx, struct KonohaModule *def, int ne
 		base->h.free     = ctxcode_free;
 		KINITv(base->codeList, new_(Array, K_PAGESIZE/sizeof(void*)));
 		KINITv(base->constPools, new_(Array, 64));
-		kctx->modlocal[MOD_code] = (KonohaContextModule*)base;
+		kctx->modlocal[MOD_code] = (KonohaModuleContext*)base;
 	}
 }
 

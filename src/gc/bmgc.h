@@ -651,7 +651,7 @@ static HeapManager *BMGC_init(KonohaContext *kctx);
 static void BMGC_exit(KonohaContext *kctx, HeapManager *mng);
 
 typedef struct kmemlocal_t {
-	KonohaContextModule   h;
+	KonohaModuleContext   h;
 	kObject     **queue;
 	size_t        queue_capacity;
 	size_t        queue_log2;
@@ -1974,9 +1974,9 @@ kbool_t MODGC_kObject_isManaged(KonohaContext *kctx, void *ptr)
 }
 
 /* ------------------------------------------------------------------------ */
-static void kmodgc_local_reftrace(KonohaContext *kctx, struct KonohaContextModule *baseh) {}
+static void kmodgc_local_reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh) {}
 
-static void kmodgc_local_free(KonohaContext *kctx, struct KonohaContextModule *baseh)
+static void kmodgc_local_free(KonohaContext *kctx, struct KonohaModuleContext *baseh)
 {
 	kmemlocal_t *local = (kmemlocal_t *) baseh;
 	if (local->queue_capacity > 0) {
@@ -1995,7 +1995,7 @@ static void kmodgc_setup(KonohaContext *kctx, struct KonohaModule *def, int newc
 		do_bzero(base, sizeof(kmemlocal_t));
 		base->h.reftrace = kmodgc_local_reftrace;
 		base->h.free     = kmodgc_local_free;
-		kctx->modlocal[MOD_gc] = (KonohaContextModule*)base;
+		kctx->modlocal[MOD_gc] = (KonohaModuleContext*)base;
 	}
 }
 

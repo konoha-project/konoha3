@@ -186,7 +186,7 @@ static KMETHOD String_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 
 static void kmoditerator_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx) {}
 static void kmoditerator_reftrace(KonohaContext *kctx, struct KonohaModule *baseh) { }
-static void kmoditerator_free(KonohaContext *kctx, struct KonohaModule *baseh) { KFREE(baseh, sizeof(kmoditerator_t)); }
+static void kmoditerator_free(KonohaContext *kctx, struct KonohaModule *baseh) { KFREE(baseh, sizeof(KonohaIteratorModule)); }
 
 #define _Public   kMethod_Public
 #define _Const    kMethod_Const
@@ -196,7 +196,7 @@ static void kmoditerator_free(KonohaContext *kctx, struct KonohaModule *baseh) {
 
 static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	kmoditerator_t *base = (kmoditerator_t*)KCALLOC(sizeof(kmoditerator_t), 1);
+	KonohaIteratorModule *base = (KonohaIteratorModule*)KCALLOC(sizeof(KonohaIteratorModule), 1);
 	base->h.name     = "iterator";
 	base->h.setup    = kmoditerator_setup;
 	base->h.reftrace = kmoditerator_reftrace;
@@ -235,14 +235,70 @@ static kbool_t iterator_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirs
 	return true;
 }
 
+static kStmt* new_TypedWhileStmt(KonohaContext *kctx, kStmt *stmt)
+{
+	//	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0)) {
+	//		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
+	//		ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
+	//		kStmt_typed(stmt, LOOP);
+	//	}
+}
+
+static KMETHOD StmtTyCheck_for(KonohaContext *kctx, KonohaStack *sfp)
+{
+//	VAR_StmtTyCheck(stmt, gma);
+//	DBG_P("for statement .. ");
+//	kNameSpace *ns = Stmt_nameSpace(stmt);
+//	kToken *typeToken = SUGAR kStmt_getToken(kctx, stmt, KW_TypePattern, NULL);
+//	kToken *varToken  = SUGAR kStmt_getToken(kctx, stmt, KW_SymbolPattern, NULL);
+//	if(typeToken != NULL) {
+//		KonohaClass *cIterator = CT_p0(kctx, CT_Iterator, typeToken->resolvedTypeId);
+//		if(!SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, cIterator->typeId, 0)) {
+//			RETURNb_(false);
+//		}
+//	}
+//	else {
+//		if(!SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_Iterator, 0)) {
+//			RETURNb_(false);
+//		}
+//		kExpr *expr = SUGAR new_UntypedCallExpr(kctx, SYN_(ns, KW_ExprMethodCall), 1, NULL);
+//	}
+//	TokenRange empty = {Stmt_nameSpace(stmt)};
+//	kBlock *block = SUGAR new_kBlock(kctx, stmt, &empty, NULL);
+//	if(typeToken != NULL) {
+//		kExpr *termExpr = SUGAR new_UntypedTermExpr(kctx, varToken);
+//		kStmt *declStmt = SUGAR new_kStmt(kctx, ns, KW_StmtTypeDecl, KW_TypePattern, typeToken, KW_ExprPattern, termExpr, 0);
+//		SUGAR kBlock_insertAfter(kctx, block, /*lastStmt*/NULL, declStmt);
+//	}
+//	{
+//		kTokenVar *itToken = GCSAFE_new(kTokenVar, 0);
+//		itToken->resolvedSyntaxInfo = varToken->resolvedSyntaxInfo; // KW_SymbolPattern
+//		// _ = A;
+//		kExpr *termExpr = SUGAR new_UntypedTermExpr(kctx, itToken);
+//		kExpr *letExpr = SUGAR new_kStmt(kctx, ns, KW_LET, KW_);
+//		kExpr new_UntypedExpr
+//	}
+//	kStmt *whileStmt = new_TypedWhileStmt(kctx, stmt, varToken, itToken);
+//	SUGAR kBlock_insertAfter(kctx, block, NULL, whileStmt);
+//
+////	kStmt *whileStmt = new_Stmt();
+////	whileStmt =
+////	if(varBlock != NULL) {  // for(n: it)
+////
+////	}
+//	kStmt_setObject(kctx, stmt, KW_BlockPattern, block);
+//
+//	RETURNb_(true);
+}
+
+#define _LOOP .flag = (SYNFLAG_StmtJumpAhead|SYNFLAG_StmtJumpSkip)
+
 static kbool_t iterator_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-//			{ .keyword = SYM_("<<"),  .op2 = "opLSHIFT", .precedence_op2 = 128,},
-//			{ .keyword = SYM_(">>"),  .op2 = "opRSHIFT", .precedence_op2 = 128,},
-//			{ TOKEN("++"),  .op1 = "opINC", .precedence_op2 = 16, .flag = SYNFLAG_ExprPostfixOp2, },
-//			{ TOKEN("--"),  .op1 = "opDEC", .precedence_op2 = 16, .flag = SYNFLAG_ExprPostfixOp2,},
-			{ .keyword = KW_END, },
+		{ .keyword = SYM_("for"), _LOOP, StmtTyCheck_(for),
+			.rule = "\"for\" \"(\" [$Type] $Symbol \"in\" $Expr  \")\" [$Block] ", },
+		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;

@@ -144,10 +144,7 @@ static KMETHOD ParseExpr_Term(KonohaContext *kctx, KonohaStack *sfp)
 		else {
 			nextIdx = operatorIdx + 1;
 		}
-		kExprVar *expr = new_(ExprVar, tk->resolvedSyntaxInfo);
-		KSETv(expr, expr->termToken, tk);
-		Expr_setTerm(expr, 1);
-		RETURN_(kStmt_rightJoinExpr(kctx, stmt, expr, tokenList, nextIdx, endIdx));
+		RETURN_(kStmt_rightJoinExpr(kctx, stmt, new_UntypedTermExpr(kctx, tk), tokenList, nextIdx, endIdx));
 	}
 }
 
@@ -162,11 +159,11 @@ static KMETHOD ParseExpr_Op(KonohaContext *kctx, KonohaStack *sfp)
 //		syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);  // switch type checker
 //	}
 	if(beginIdx == operatorIdx) { // unary operator
-		expr = new_ConsExpr(kctx, syn, 2, tk, rexpr);
+		expr = new_UntypedCallStyleExpr(kctx, syn, 2, tk, rexpr);
 	}
 	else {   // binary operator
 		kExpr *lexpr = kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx);
-		expr = new_ConsExpr(kctx, syn, 3, tk, lexpr, rexpr);
+		expr = new_UntypedCallStyleExpr(kctx, syn, 3, tk, lexpr, rexpr);
 	}
 	RETURN_(expr);
 }
@@ -185,7 +182,7 @@ static KMETHOD ParseExpr_DOT(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
 	if(beginIdx < operatorIdx && isFieldName(tokenList, operatorIdx, endIdx)) {
 		kExpr *expr = kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx);
-		expr = new_ConsExpr(kctx, syn, 2, tokenList->tokenItems[operatorIdx +1], expr);
+		expr = new_UntypedCallStyleExpr(kctx, syn, 2, tokenList->tokenItems[operatorIdx +1], expr);
 		RETURN_(kStmt_rightJoinExpr(kctx, stmt, expr, tokenList, operatorIdx +2, endIdx));
 	}
 }
@@ -208,7 +205,7 @@ static KMETHOD ParseExpr_Parenthesis(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		else if(lexpr->syn->keyword != KW_ExprMethodCall) {
 			syn = SYN_(Stmt_nameSpace(stmt), KW_ParenthesisGroup);    // (f null ())
-			lexpr  = new_ConsExpr(kctx, syn, 2, lexpr, K_NULL);
+			lexpr  = new_UntypedCallStyleExpr(kctx, syn, 2, lexpr, K_NULL);
 		}
 		lexpr = kStmt_addExprParam(kctx, stmt, lexpr, tk->subTokenList, 0, kArray_size(tk->subTokenList), 1/*allowEmpty*/);
 		RETURN_(kStmt_rightJoinExpr(kctx, stmt, lexpr, tokenList, operatorIdx + 1, endIdx));
@@ -218,7 +215,7 @@ static KMETHOD ParseExpr_Parenthesis(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ParseExpr_COMMA(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
-	kExpr *expr = new_ConsExpr(kctx, syn, 1, tokenList->tokenItems[operatorIdx]);
+	kExpr *expr = new_UntypedCallStyleExpr(kctx, syn, 1, tokenList->tokenItems[operatorIdx]);
 	expr = kStmt_addExprParam(kctx, stmt, expr, tokenList, beginIdx, endIdx, 0/*allowEmpty*/);
 	RETURN_(expr);
 }

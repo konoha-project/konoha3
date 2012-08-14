@@ -134,7 +134,15 @@ static void Expr_reftrace(KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
-static kExprVar* Expr_vadd(KonohaContext *kctx, kExprVar *expr, int n, va_list ap)
+static kExpr* new_UntypedTermExpr(KonohaContext *kctx, kToken *tk)
+{
+	kExprVar *expr = GCSAFE_new(ExprVar, tk->resolvedSyntaxInfo);
+	KSETv(expr, expr->termToken, tk);
+	Expr_setTerm(expr, 1);
+	return (kExpr*)expr;
+}
+
+static kExprVar* kExpr_vadd(KonohaContext *kctx, kExprVar *expr, int n, va_list ap)
 {
 	int i;
 	if(!IS_Array(expr->cons)) {
@@ -150,23 +158,23 @@ static kExprVar* Expr_vadd(KonohaContext *kctx, kExprVar *expr, int n, va_list a
 	return expr;
 }
 
-static kExpr* new_ConsExpr(KonohaContext *kctx, SugarSyntax *syn, int n, ...)
+static kExpr* new_UntypedCallStyleExpr(KonohaContext *kctx, SugarSyntax *syn, int n, ...)
 {
 	va_list ap;
 	va_start(ap, n);
 	DBG_ASSERT(syn != NULL);
 	kExprVar *expr = GCSAFE_new(ExprVar, syn);
-	expr = Expr_vadd(kctx, expr, n, ap);
+	expr = kExpr_vadd(kctx, expr, n, ap);
 	va_end(ap);
 	return (kExpr*)expr;
 }
 
 static kExpr* new_TypedConsExpr(KonohaContext *kctx, int build, ktype_t ty, int n, ...)
 {
+	kExprVar *expr = GCSAFE_new(ExprVar, NULL);
 	va_list ap;
 	va_start(ap, n);
-	kExprVar *expr = GCSAFE_new(ExprVar, NULL);
-	expr = Expr_vadd(kctx, expr, n, ap);
+	expr = kExpr_vadd(kctx, expr, n, ap);
 	va_end(ap);
 	expr->build = build;
 	expr->ty = ty;
@@ -175,14 +183,14 @@ static kExpr* new_TypedConsExpr(KonohaContext *kctx, int build, ktype_t ty, int 
 
 static kExpr *kStmt_tyCheckCallParamExpr(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kMethod *mtd, kGamma *gma, ktype_t reqty);
 
-static kExpr* new_TypedMethodCall(KonohaContext *kctx, kStmt *stmt, ktype_t ty, kMethod *mtd, kGamma *gma, int n, ...)
+static kExpr* new_TypedCallExpr(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kMethod *mtd, int n, ...)
 {
 	va_list ap;
 	va_start(ap, n);
 	kExprVar *expr = GCSAFE_new(ExprVar, NULL);
 	KSETv(expr, expr->cons, new_(Array, 8));
 	KLIB kArray_add(kctx, expr->cons, mtd);
-	expr = Expr_vadd(kctx, expr, n, ap);
+	expr = kExpr_vadd(kctx, expr, n, ap);
 	va_end(ap);
 	expr->build = TEXPR_CALL;
 	expr->ty = ty;
@@ -257,6 +265,23 @@ static void Stmt_reftrace(KonohaContext *kctx, kObject *o)
 	BEGIN_REFTRACE(1);
 	KREFTRACEn(stmt->parentBlockNULL);
 	END_REFTRACE();
+}
+
+static kStmt* new_kStmt(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, ...)
+{
+	kStmtVar *stmt = new_(StmtVar, 0);
+	stmt->syn = SYN_(ns, keyword);
+	va_list ap;
+	va_start(ap, keyword);
+	ksymbol_t kw = va_arg(ap, ksymbol_t);
+	while(kw != 0) {
+		kObject *v = va_arg(ap, kObject*);
+		if(v == NULL) break;
+		kStmt_setObject(kctx, stmt, kw, v);
+		kw = va_arg(ap, ksymbol_t);
+	}
+	va_end(ap);
+	return stmt;
 }
 
 static uintptr_t kStmt_parseFlag(KonohaContext *kctx, kStmt *stmt, KonohaFlagSymbolData *flagData, uintptr_t flag)
@@ -335,18 +360,22 @@ static void Block_reftrace(KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
-static void kBlock_insertAfter(KonohaContext *kctx, kBlock *bk, kStmt *target, kStmt *stmt)
+static void kBlock_insertAfter(KonohaContext *kctx, kBlock *bk, kStmtNULL *target, kStmt *stmt)
 {
-	//DBG_ASSERT(stmt->parentNULL == NULL);
 	KSETv(stmt, ((kStmtVar*)stmt)->parentBlockNULL, bk);
-	size_t i;
-	for(i = 0; i < kArray_size(bk->stmtList); i++) {
-		if(bk->stmtList->stmtItems[i] == target) {
-			KLIB kArray_insert(kctx, bk->stmtList, i+1, stmt);
-			return;
+	if(target != NULL) {
+		size_t i;
+		for(i = 0; i < kArray_size(bk->stmtList); i++) {
+			if(bk->stmtList->stmtItems[i] == target) {
+				KLIB kArray_insert(kctx, bk->stmtList, i+1, stmt);
+				return;
+			}
 		}
+		DBG_ABORT("target was not found!!");
 	}
-	DBG_ABORT("target was not found!!");
+	else {
+		KLIB kArray_add(kctx, bk->stmtList, stmt);
+	}
 }
 
 /* --------------- */
