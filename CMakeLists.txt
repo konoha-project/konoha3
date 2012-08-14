@@ -121,6 +121,7 @@ set(PACKAGES
 	konoha.null
 	konoha.rope
 	konoha.string
+	konoha.subtype
 	konoha.var
 	konoha.while
 	sugar
