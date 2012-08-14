@@ -279,6 +279,42 @@ static KMETHOD Date_setMilliseconds(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(ret);
 }
 
+//## int Date.setMinutes(int minutes);
+static KMETHOD Date_setMinutes(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct _kDate *d = (struct _kDate *)sfp[0].asObject;
+	time_t tv_sec = d->tv.tv_sec;
+	struct tm lt = *localtime(&tv_sec);
+	lt.tm_min = sfp[1].intValue;
+	d->tv.tv_sec = mktime(&lt);
+	kint_t ret = (kint_t)d->tv.tv_sec * 1000 + (kint_t)d->tv.tv_usec / 1000;
+	RETURNi_(ret);
+}
+
+//## int Date.setMonth(int month);
+static KMETHOD Date_setMonth(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct _kDate *d = (struct _kDate *)sfp[0].asObject;
+	time_t tv_sec = d->tv.tv_sec;
+	struct tm lt = *localtime(&tv_sec);
+	lt.tm_mon = sfp[1].intValue;
+	d->tv.tv_sec = mktime(&lt);
+	kint_t ret = (kint_t)d->tv.tv_sec * 1000 + (kint_t)d->tv.tv_usec / 1000;
+	RETURNi_(ret);
+}
+
+//## int Date.setSeconds(int seconds);
+static KMETHOD Date_setSeconds(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct _kDate *d = (struct _kDate *)sfp[0].asObject;
+	time_t tv_sec = d->tv.tv_sec;
+	struct tm lt = *localtime(&tv_sec);
+	lt.tm_sec = sfp[1].intValue;
+	d->tv.tv_sec = mktime(&lt);
+	kint_t ret = (kint_t)d->tv.tv_sec * 1000 + (kint_t)d->tv.tv_usec / 1000;
+	RETURNi_(ret);
+}
+
 /* ------------------------------------------------------------------------ */
 
 #define _Public   kMethod_Public
@@ -329,6 +365,9 @@ static	kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public|_Const|_Im, _F(Date_setFullYear), TY_Int, TY_Date, MN_("setFullYear"), 1, TY_Int, FN_("year"),
 		_Public|_Const|_Im, _F(Date_setHours), TY_Int, TY_Date, MN_("setHours"), 1, TY_Int, FN_("hours"),
 		_Public|_Const|_Im, _F(Date_setMilliseconds), TY_Int, TY_Date, MN_("setMilliseconds"), 1, TY_Int, FN_("milliseconds"),
+		_Public|_Const|_Im, _F(Date_setMinutes), TY_Int, TY_Date, MN_("setMinutes"), 1, TY_Int, FN_("minutes"),
+		_Public|_Const|_Im, _F(Date_setMonth), TY_Int, TY_Date, MN_("setMonth"), 1, TY_Int, FN_("month"),
+		_Public|_Const|_Im, _F(Date_setSeconds), TY_Int, TY_Date, MN_("setSeconds"), 1, TY_Int, FN_("seconds"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
