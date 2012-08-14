@@ -905,6 +905,7 @@ struct kStringVar /* extends _Bytes */ {
 #define SPOL_NOPOOL        (1<<5)
 #define SPOL_NOCOPY        (1<<4)
 
+#define K_NULLTEXT          "null"
 #define new_T(t)            (KLIB new_kString(kctx, t, knh_strlen(t), SPOL_TEXT|SPOL_ASCII|SPOL_POOL))
 #define new_S(T, L)         (KLIB new_kString(kctx, T, L, SPOL_ASCII|SPOL_POOL))
 #define S_text(s)           ((const char*) (O_ct(s)->unbox(kctx, (kObject*)s)))
@@ -1175,6 +1176,7 @@ struct KonohaLibVar {
 	KonohaClass*    (*Kclass)(KonohaContext*, ktype_t, kfileline_t);
 	kString*        (*KonohaClass_shortName)(KonohaContext*, KonohaClass *ct);
 	KonohaClass*    (*KonohaClass_Generics)(KonohaContext*, KonohaClass *ct, ktype_t rty, int psize, kparamtype_t *p);
+	kbool_t         (*KonohaClass_isSubtype)(KonohaContext*, KonohaClass *, KonohaClass *);
 
 	kObject*        (*new_kObject)(KonohaContext*, KonohaClass *, uintptr_t);  // GCUNSAFE
 	kObject*        (*new_kObjectOnGCSTACK)(KonohaContext*, KonohaClass *, uintptr_t);

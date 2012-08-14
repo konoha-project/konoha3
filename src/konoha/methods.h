@@ -25,6 +25,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 /* String */
 static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -188,10 +189,8 @@ static KMETHOD Func_new(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Func_invoke(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFunc* fo = sfp[0].asFunc;
-	DBG_P("fo=%s", CT_t(O_ct(fo)));
 	DBG_ASSERT(IS_Func(fo));
 	DBG_ASSERT(IS_Method(fo->mtd));
-	DBG_P("fo->mtd->invokeMethodFunc == %p", fo->mtd->invokeMethodFunc);
 	KSETv_AND_WRITE_BARRIER(NULL, sfp[0].asObject, fo->self, GC_NO_WRITE_BARRIER);
 	KSELFCALL(sfp, fo->mtd);
 }
@@ -213,7 +212,8 @@ static KMETHOD System_assert(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD System_p(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kfileline_t uline = sfp[K_RTNIDX].uline;
-	kreportf(NoneTag, uline, "%s", S_text(sfp[1].asString));
+	const char *text = (IS_NULL(sfp[1].asString)) ? K_NULLTEXT : S_text(sfp[1].asString);
+	kreportf(NoneTag, uline, "%s", text);
 }
 
 //## method void System.gc();
