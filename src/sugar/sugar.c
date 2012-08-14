@@ -133,13 +133,8 @@ static void SugarModule_reftrace(KonohaContext *kctx, struct KonohaModule *baseh
 {
 	KModuleSugar *base = (KModuleSugar*)baseh;
 	KLIB Kmap_each(kctx, base->packageMapNO, NULL, packageMap_reftrace);
-	BEGIN_REFTRACE(6);
+	BEGIN_REFTRACE(1);
 	KREFTRACEv(base->packageList);
-	KREFTRACEv(base->UndefinedParseExpr);
-	KREFTRACEv(base->UndefinedStmtTyCheck);
-	KREFTRACEv(base->UndefinedExprTyCheck);
-	KREFTRACEv(base->ParseExpr_Term);
-	KREFTRACEv(base->ParseExpr_Op);
 	END_REFTRACE();
 }
 
@@ -213,11 +208,11 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	KLIB Knull(kctx, mod->cBlock);
 	SugarModule_setup(kctx, &mod->h, 0);
 
-	KINITv(mod->UndefinedParseExpr,   new_SugarFunc(UndefinedParseExpr));
-	KINITv(mod->UndefinedStmtTyCheck, new_SugarFunc(UndefinedStmtTyCheck));
-	KINITv(mod->UndefinedExprTyCheck, new_SugarFunc(UndefinedExprTyCheck));
-	KINITv(mod->ParseExpr_Op,         new_SugarFunc(ParseExpr_Op));
-	KINITv(mod->ParseExpr_Term,       new_SugarFunc(ParseExpr_Term));
+//	KINITv(mod->UndefinedParseExpr,   new_SugarFunc(UndefinedParseExpr));
+//	KINITv(mod->UndefinedStmtTyCheck, new_SugarFunc(UndefinedStmtTyCheck));
+//	KINITv(mod->UndefinedExprTyCheck, new_SugarFunc(UndefinedExprTyCheck));
+//	KINITv(mod->ParseExpr_Op,         new_SugarFunc(ParseExpr_Op));
+//	KINITv(mod->ParseExpr_Term,       new_SugarFunc(ParseExpr_Term));
 
 	mod->new_TokenListRange         = new_TokenListRange;
 	mod->new_TokenStackRange        = new_TokenStackRange;

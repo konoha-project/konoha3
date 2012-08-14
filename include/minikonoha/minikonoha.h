@@ -1360,6 +1360,14 @@ typedef struct {
 } while (0)
 #define KUNUSEv(V)         (V)->h.ct->free(kctx, (V))
 
+#define KINITSETv(PARENT, VAR, VAL)  do {\
+		if(VAR == NULL) {\
+			KINITp(PARENT, VAR, VAL);\
+		}else {\
+			KSETv(PARENT, VAR, VAL);\
+		}\
+	}while (0)
+
 #define BEGIN_REFTRACE(SIZE)  int _ref_ = (SIZE); kObjectVar** _tail = KONOHA_reftail(kctx, (SIZE));
 #define END_REFTRACE()        (void)_ref_; kctx->stack->reftail = _tail;
 

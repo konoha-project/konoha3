@@ -707,9 +707,9 @@ static kbool_t class_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileli
 		{ .keyword = SYM_("$ClassName"), PatternMatch_(ClassName), },
 		{ .keyword = SYM_("class"), .rule = "\"class\" $ClassName [\"extends\" extends: $Type] [$Block]", TopStmtTyCheck_(class), },
 		{ .keyword = SYM_("."), ExprTyCheck_(Getter) },
-		{ .keyword = SYM_("<:"), _OP, ExprTyCheck_(InstanceOf), .precedence_op2 = C_PRECEDENCE_MUL,/*FIXME*/ },
-		{ .keyword = SYM_("as"), _OP, ExprTyCheck_(As), .precedence_op2 = C_PRECEDENCE_MUL,/*FIXME*/ },
-		{ .keyword = SYM_("to"), _OP, .precedence_op2 = C_PRECEDENCE_MUL,/*FIXME*/ },
+		{ .keyword = SYM_("<:"),  ExprTyCheck_(InstanceOf), .precedence_op2 = C_PRECEDENCE_MUL,/*FIXME*/ },
+		{ .keyword = SYM_("as"),  ExprTyCheck_(As), .precedence_op2 = C_PRECEDENCE_MUL,/*FIXME*/ },
+		{ .keyword = SYM_("to"),  .precedence_op2 = C_PRECEDENCE_MUL,/*FIXME*/ },
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);

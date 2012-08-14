@@ -248,7 +248,7 @@ static kbool_t global_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfilel
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 
-	SUGAR kNameSpace_setSugarFunc(kctx, ns, KW_StmtTypeDecl, SYNIDX_TopStmtTyCheck, new_SugarFunc(StmtTyCheck_GlobalTypeDecl));
+	SUGAR kNameSpace_setSugarFunc(kctx, ns, KW_StmtTypeDecl, SUGARFUNC_TopStmtTyCheck, new_SugarFunc(StmtTyCheck_GlobalTypeDecl));
 	if(O_typeId(ns->scriptObject) == TY_System) {
 		KDEFINE_CLASS defScript = {
 			.structname = "Script",

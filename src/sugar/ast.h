@@ -32,12 +32,6 @@ extern "C" {
 
 /* ------------------------------------------------------------------------ */
 
-static KMETHOD UndefinedParseExpr(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_ParseExpr(stmt, tokenList, s, c, e);
-	kStmt_p(stmt, ErrTag, "undefined expression parser for '%s'", Token_text(tokenList->tokenItems[c]));
-}
-
 static kExpr *callFuncParseExpr(KonohaContext *kctx, SugarSyntax *syn, kFunc *fo, kStmt *stmt, kArray *tokenList, int s, int c, int e)
 {
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 6);
@@ -54,25 +48,36 @@ static kExpr *callFuncParseExpr(KonohaContext *kctx, SugarSyntax *syn, kFunc *fo
 	return lsfp[0].asExpr;
 }
 
-static kExpr *kStmt_parseOperatorExpr(KonohaContext *kctx, kStmt *stmt, kArray *tokenList, int beginIdx, int currentIdx, int endIdx)
+static kExpr *kStmt_parseOperatorExpr(KonohaContext *kctx, kStmt *stmt, SugarSyntax *syn, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx)
 {
-	SugarSyntax *syn = tokenList->tokenItems[currentIdx]->resolvedSyntaxInfo;
-	kFunc *fo = (syn->ParseExpr == NULL) ? kmodsugar->UndefinedParseExpr : syn->ParseExpr;
+	if(syn->sugarFuncTable[SUGARFUNC_ParseExpr] == NULL) {
+		if(syn->precedence_op2 > 0 || syn->precedence_op1 > 0) {
+			syn = SYN_(Stmt_nameSpace(stmt), KW_ExprOperator);
+			return kStmt_parseOperatorExpr(kctx, stmt, syn, tokenList, beginIdx, operatorIdx, endIdx);
+		}
+		if(syn->ty != TY_unknown || syn->sugarFuncTable[SUGARFUNC_ExprTyCheck] != NULL) {
+			syn = SYN_(Stmt_nameSpace(stmt), KW_ExprTerm);
+			return kStmt_parseOperatorExpr(kctx, stmt, syn, tokenList, beginIdx, operatorIdx, endIdx);
+		}
+		kStmt_p(stmt, ErrTag, "undefined expression parser for '%s'", Token_text(tokenList->tokenItems[operatorIdx]));
+		return K_NULLEXPR;
+	}
+	kFunc *fo = syn->sugarFuncTable[SUGARFUNC_ParseExpr];
 	kExpr *texpr;
 	if(IS_Array(fo)) {
 		int i;
 		kArray *a = (kArray*)fo;
 		for(i = kArray_size(a) - 1; i > 0; i--) {
-			texpr = callFuncParseExpr(kctx, syn, fo, stmt, tokenList, beginIdx, currentIdx, endIdx);
+			texpr = callFuncParseExpr(kctx, syn, fo, stmt, tokenList, beginIdx, operatorIdx, endIdx);
 			if(Stmt_isERR(stmt)) return K_NULLEXPR;
 			if(texpr != K_NULLEXPR) return texpr;
 		}
 		fo = a->funcItems[0];
 	}
 	DBG_ASSERT(IS_Func(fo));
-	texpr = callFuncParseExpr(kctx, syn, fo, stmt, tokenList, beginIdx, currentIdx, endIdx);
+	texpr = callFuncParseExpr(kctx, syn, fo, stmt, tokenList, beginIdx, operatorIdx, endIdx);
 	if(texpr == K_NULLEXPR && !Stmt_isERR(stmt)) {
-		kStmt_p(stmt, ErrTag, "syntax error: operator %s", Token_text(tokenList->tokenItems[currentIdx]));
+		kStmt_p(stmt, ErrTag, "syntax error: operator %s", Token_text(tokenList->tokenItems[operatorIdx]));
 	}
 	return texpr;
 }
@@ -112,7 +117,8 @@ static kExpr* kStmt_parseExpr(KonohaContext *kctx, kStmt *stmt, kArray *tokenLis
 	if(!Stmt_isERR(stmt)) {
 		if(beginIdx < endIdx) {
 			int idx = kStmt_findOperator(kctx, stmt, tokenList, beginIdx, endIdx);
-			return kStmt_parseOperatorExpr(kctx, stmt, tokenList, beginIdx, idx, endIdx);
+			SugarSyntax *syn = tokenList->tokenItems[idx]->resolvedSyntaxInfo;
+			return kStmt_parseOperatorExpr(kctx, stmt, syn, tokenList, beginIdx, idx, endIdx);
 		}
 		else {
 			const char *where = "", *token = "";
@@ -245,11 +251,11 @@ static int PatternMatchFunc(KonohaContext *kctx, kFunc *fo, kStmt *stmt, ksymbol
 
 static int PatternMatch(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, ksymbol_t name, kArray *tokenList, int beginIdx, int endIdx)
 {
-	if(syn == NULL || syn->PatternMatch == kmodsugar->UndefinedParseExpr/*NULL*/) {
+	if(syn == NULL || syn->sugarFuncTable[SUGARFUNC_PatternMatch] == NULL) {
 		kStmt_p(stmt, ErrTag, "unknown syntax pattern: %s%s", KW_t(syn->keyword));
 		return -1;
 	}
-	kFunc *fo = syn->PatternMatch;
+	kFunc *fo = syn->sugarFuncTable[SUGARFUNC_PatternMatch];
 	int next;
 	if(IS_Array(fo)) {
 		int i;

@@ -152,7 +152,7 @@ static KMETHOD NameSpace_compileAllDefinedMethods(KonohaContext *kctx, KonohaSta
 static KMETHOD NameSpace_addPatternMatch(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *key = sfp[1].asString;
-	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SYNIDX_PatternMatch, sfp[2].asFunc);
+	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SUGARFUNC_PatternMatch, sfp[2].asFunc);
 	KLIB kNameSpace_compileAllDefinedMethods(kctx);
 }
 
@@ -160,7 +160,7 @@ static KMETHOD NameSpace_addPatternMatch(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD NameSpace_addParseExpr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *key = sfp[1].asString;
-	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SYNIDX_ParseExpr, sfp[2].asFunc);
+	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SUGARFUNC_ParseExpr, sfp[2].asFunc);
 	KLIB kNameSpace_compileAllDefinedMethods(kctx);
 }
 
@@ -168,7 +168,7 @@ static KMETHOD NameSpace_addParseExpr(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD NameSpace_addStmtTyCheck(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *key = sfp[1].asString;
-	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SYNIDX_StmtTyCheck, sfp[2].asFunc);
+	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SUGARFUNC_StmtTyCheck, sfp[2].asFunc);
 	KLIB kNameSpace_compileAllDefinedMethods(kctx);
 }
 
@@ -177,7 +177,7 @@ static KMETHOD NameSpace_addStmtTyCheck(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD NameSpace_addTopStmtTyCheck(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *key = sfp[1].asString;
-	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SYNIDX_TopStmtTyCheck, sfp[2].asFunc);
+	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SUGARFUNC_TopStmtTyCheck, sfp[2].asFunc);
 	KLIB kNameSpace_compileAllDefinedMethods(kctx);
 }
 
@@ -185,18 +185,18 @@ static KMETHOD NameSpace_addTopStmtTyCheck(KonohaContext *kctx, KonohaStack *sfp
 static KMETHOD NameSpace_addExprTyCheck(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *key = sfp[1].asString;
-	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SYNIDX_ExprTyCheck, sfp[2].asFunc);
+	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SUGARFUNC_ExprTyCheck, sfp[2].asFunc);
 	KLIB kNameSpace_compileAllDefinedMethods(kctx);
 }
 
 
-//## void NameSpace.addTermParseExpr(String keyword);
-static KMETHOD NameSpace_addTermParseExpr(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kString *key = sfp[1].asString;
-	DBG_P("termparseexpr=%p", kmodsugar->ParseExpr_Term);
-	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SYNIDX_ParseExpr, kmodsugar->ParseExpr_Term);
-}
+////## void NameSpace.addTermParseExpr(String keyword);
+//static KMETHOD NameSpace_addTermParseExpr(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	kString *key = sfp[1].asString;
+//	DBG_P("termparseexpr=%p", kmodsugar->ParseExpr_Term);
+//	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SUGARFUNC_ParseExpr, kmodsugar->ParseExpr_Term);
+//}
 
 //## Expr Stmt.printError(String msg);
 static KMETHOD Stmt_printError(KonohaContext *kctx, KonohaStack *sfp)
@@ -362,7 +362,6 @@ static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public, _F(NameSpace_addTopStmtTyCheck), TY_void, TY_NameSpace, MN_("addTopStmtTyCheck"), 2, TY_String, FN_key, TY_FuncStmtTyCheck, FN_func,
 		_Public, _F(NameSpace_addStmtTyCheck), TY_void, TY_NameSpace, MN_("addStmtTyCheck"), 2, TY_String, FN_key, TY_FuncStmtTyCheck, FN_func,
 		_Public, _F(NameSpace_addExprTyCheck), TY_void, TY_NameSpace, MN_("addExprTyCheck"), 2, TY_String, FN_key, TY_FuncExprTyCheck, FN_func,
-		_Public, _F(NameSpace_addTermParseExpr), TY_void, TY_NameSpace, MN_("addTermParseExpr"), 1, TY_String, FN_key,
 
 		_Public, _F(Stmt_printError), TY_Expr, TY_Stmt, MN_("printError"), 1, TY_String, FN_msg,
 
