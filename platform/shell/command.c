@@ -381,12 +381,16 @@ static int KonohaContext_test(KonohaContext *kctx, const char *testname)
 	else {
 		//fprintf(stdout, "stdlog_count: %d\n", stdlog_count);
 		if(stdlog_count == 0) {
-			fprintf(stdout, "[PASS]: %s\n", testname);
-			return 0; // OK
+			if(konoha_detectFailedAssert == 0) {
+				fprintf(stdout, "[PASS]: %s\n", testname);
+				return 0; // OK
+			}
 		}
-		fprintf(stdout, "no proof file: %s\n", testname);
+		else {
+			fprintf(stdout, "no proof file: %s\n", testname);
+			konoha_detectFailedAssert = 1;
+		}
 		fprintf(stdout, "[FAIL]: %s\n", testname);
-		konoha_detectFailedAssert = 1;
 		return 1;
 	}
 	return ret;
