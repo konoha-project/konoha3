@@ -391,44 +391,45 @@ static int addGammaStack(KonohaContext *kctx, GammaStack *s, ktype_t ty, ksymbol
 static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	kExpr *texpr = K_NULLEXPR;
-	kStmt *lastExpr = NULL;
-	kfileline_t uline = stmt->uline;
 	kBlock *bk = expr->block;
-	DBG_ASSERT(IS_Block(bk));
-	if(kArray_size(bk->stmtList) > 0) {
-		kStmt *stmt = bk->stmtList->stmtItems[kArray_size(bk->stmtList)-1];
-		if(stmt->syn->keyword == KW_ExprPattern) {
-			lastExpr = stmt;
+	if(IS_Block(bk)) {
+		kExpr *texpr = K_NULLEXPR;
+		kStmt *lastExpr = NULL;
+		kfileline_t uline = stmt->uline;
+		if(kArray_size(bk->stmtList) > 0) {
+			kStmt *stmt = bk->stmtList->stmtItems[kArray_size(bk->stmtList)-1];
+			if(stmt->syn->keyword == KW_ExprPattern) {
+				lastExpr = stmt;
+			}
+			uline = stmt->uline;
 		}
-		uline = stmt->uline;
+		if(lastExpr != NULL) {
+			int lvarsize = gma->genv->localScope.varsize;
+			int popBlockScopeShiftSize = gma->genv->blockScopeShiftSize;
+			gma->genv->blockScopeShiftSize = lvarsize;
+			if(!kBlock_tyCheckAll(kctx, bk, gma)) {
+				RETURN_(texpr);
+			}
+			kExpr *lvar = new_VariableExpr(kctx, gma, TEXPR_LOCAL, TY_var, addGammaStack(kctx, &gma->genv->localScope, TY_var, 0/*FN_*/));
+			kExpr *rexpr = SUGAR kStmt_getExpr(kctx, lastExpr, KW_ExprPattern, NULL);
+			DBG_ASSERT(rexpr != NULL);
+			ktype_t ty = rexpr->ty;
+			if(ty != TY_void) {
+				kExpr *letexpr = new_TypedConsExpr(kctx, TEXPR_LET, TY_void, 3, K_NULL, lvar, rexpr);
+				KLIB kObject_setObject(kctx, lastExpr, KW_ExprPattern, TY_Expr, letexpr);
+				texpr = SUGAR kExpr_setVariable(kctx, expr, gma, TEXPR_BLOCK, ty, lvarsize);
+			}
+			gma->genv->blockScopeShiftSize = popBlockScopeShiftSize;
+			if(lvarsize < gma->genv->localScope.varsize) {
+				gma->genv->localScope.varsize = lvarsize;
+			}
+		}
+		if(texpr == K_NULLEXPR) {
+			kStmt_errline(stmt, uline);
+			kStmt_p(stmt, ErrTag, "block has no value");
+		}
+		RETURN_(texpr);
 	}
-	if(lastExpr != NULL) {
-		int lvarsize = gma->genv->localScope.varsize;
-		int popBlockScopeShiftSize = gma->genv->blockScopeShiftSize;
-		gma->genv->blockScopeShiftSize = lvarsize;
-		if(!kBlock_tyCheckAll(kctx, bk, gma)) {
-			RETURN_(texpr);
-		}
-		kExpr *lvar = new_VariableExpr(kctx, gma, TEXPR_LOCAL, TY_var, addGammaStack(kctx, &gma->genv->localScope, TY_var, 0/*FN_*/));
-		kExpr *rexpr = SUGAR kStmt_getExpr(kctx, lastExpr, KW_ExprPattern, NULL);
-		DBG_ASSERT(rexpr != NULL);
-		ktype_t ty = rexpr->ty;
-		if(ty != TY_void) {
-			kExpr *letexpr = new_TypedConsExpr(kctx, TEXPR_LET, TY_void, 3, K_NULL, lvar, rexpr);
-			KLIB kObject_setObject(kctx, lastExpr, KW_ExprPattern, TY_Expr, letexpr);
-			texpr = SUGAR kExpr_setVariable(kctx, expr, gma, TEXPR_BLOCK, ty, lvarsize);
-		}
-		gma->genv->blockScopeShiftSize = popBlockScopeShiftSize;
-		if(lvarsize < gma->genv->localScope.varsize) {
-			gma->genv->localScope.varsize = lvarsize;
-		}
-	}
-	if(texpr == K_NULLEXPR) {
-		kStmt_errline(stmt, uline);
-		kStmt_p(stmt, ErrTag, "block has no value");
-	}
-	RETURN_(texpr);
 }
 
 static kMethod* NameSpace_getGetterMethodNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ksymbol_t fn)
