@@ -31,7 +31,10 @@ extern int verbose_debug;
 
 static int _sum_  = 0;
 static int _sum2_ = 0;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2e5982b630551e79a32954076b39a7e5b605d617
 static void reftrace(KonohaContext *kctx, KUtilsHashMapEntry *e, void *thunk)
 {
     _sum_ += e->unboxValue;
