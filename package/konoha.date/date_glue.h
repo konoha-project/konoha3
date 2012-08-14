@@ -54,18 +54,21 @@ static KMETHOD Date_new0(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_((kObject *)d);
 }
 
+//## Date Date.new(int milliseconds); Not implemented
 static KMETHOD Date_new1(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kDate *d = (struct _kDate *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
 	RETURN_((kObject *)d);
 }
 
+//## Date Date.new(String dateString); Not implemented
 static KMETHOD Date_new2(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kDate *d = (struct _kDate *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
 	RETURN_((kObject *)d);
 }
 
+//## Date Date.new(int year, int month, int day, int hours, int minutes, int seconds, int milliseconds); Not implemented
 static KMETHOD Date_new3(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kDate *d = (struct _kDate *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
@@ -225,12 +228,64 @@ static KMETHOD Date_getYear(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(lt.tm_year);
 }
 
+//## int Date.parse(String dateString); Not implemented
+static KMETHOD Date_parse(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNi_(0);
+}
+
+//## int Date.setDate(int date);
+static KMETHOD Date_setDate(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct _kDate *d = (struct _kDate *)sfp[0].asObject;
+	time_t tv_sec = d->tv.tv_sec;
+	struct tm lt = *localtime(&tv_sec);
+	lt.tm_mday = sfp[1].intValue;
+	d->tv.tv_sec = mktime(&lt);
+	kint_t ret = (kint_t)d->tv.tv_sec * 1000 + (kint_t)d->tv.tv_usec / 1000;
+	RETURNi_(ret);
+}
+
+//## int Date.setFullYear(int year);
+static KMETHOD Date_setFullYear(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct _kDate *d = (struct _kDate *)sfp[0].asObject;
+	time_t tv_sec = d->tv.tv_sec;
+	struct tm lt = *localtime(&tv_sec);
+	lt.tm_year = sfp[1].intValue - 1900;
+	d->tv.tv_sec = mktime(&lt);
+	kint_t ret = (kint_t)d->tv.tv_sec * 1000 + (kint_t)d->tv.tv_usec / 1000;
+	RETURNi_(ret);
+}
+
+//## int Date.setHours(int hours);
+static KMETHOD Date_setHours(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct _kDate *d = (struct _kDate *)sfp[0].asObject;
+	time_t tv_sec = d->tv.tv_sec;
+	struct tm lt = *localtime(&tv_sec);
+	lt.tm_hour = sfp[1].intValue;
+	d->tv.tv_sec = mktime(&lt);
+	kint_t ret = (kint_t)d->tv.tv_sec * 1000 + (kint_t)d->tv.tv_usec / 1000;
+	RETURNi_(ret);
+}
+
+//## int Date.setMilliseconds(int hours);
+static KMETHOD Date_setMilliseconds(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct _kDate *d = (struct _kDate *)sfp[0].asObject;
+	d->tv.tv_usec = sfp[1].intValue;
+	kint_t ret = (kint_t)d->tv.tv_sec * 1000 + (kint_t)d->tv.tv_usec / 1000;
+	RETURNi_(ret);
+}
+
 /* ------------------------------------------------------------------------ */
 
 #define _Public   kMethod_Public
 #define _Const    kMethod_Const
 #define _Coercion kMethod_Coercion
-#define _Im kMethod_Immutable
+#define _Im       kMethod_Immutable
+#define _Static   kMethod_Static
 #define _F(F)   (intptr_t)(F)
 
 #define CT_Date     cDate
@@ -269,6 +324,11 @@ static	kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public|_Const|_Im, _F(Date_getUTCMonth), TY_Int, TY_Date, MN_("getUTCMonth"), 0,
 		_Public|_Const|_Im, _F(Date_getUTCSeconds), TY_Int, TY_Date, MN_("getUTCSeconds"), 0,
 		_Public|_Const|_Im, _F(Date_getYear), TY_Int, TY_Date, MN_("getFullYear"), 0,
+		_Public|_Static, _F(Date_parse), TY_Int, TY_Date, MN_("parse"), 1, TY_String, FN_("dateString"),
+		_Public|_Const|_Im, _F(Date_setDate), TY_Int, TY_Date, MN_("setDate"), 1, TY_Int, FN_("date"),
+		_Public|_Const|_Im, _F(Date_setFullYear), TY_Int, TY_Date, MN_("setFullYear"), 1, TY_Int, FN_("year"),
+		_Public|_Const|_Im, _F(Date_setHours), TY_Int, TY_Date, MN_("setHours"), 1, TY_Int, FN_("hours"),
+		_Public|_Const|_Im, _F(Date_setMilliseconds), TY_Int, TY_Date, MN_("setMilliseconds"), 1, TY_Int, FN_("milliseconds"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
