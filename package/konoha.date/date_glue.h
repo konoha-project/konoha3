@@ -93,7 +93,7 @@ static KMETHOD Date_getFullYear(KonohaContext *kctx, KonohaStack *sfp)
 {
 	time_t tv_sec = ((struct _kDate *)sfp[0].asObject)->tv.tv_sec;
 	struct tm lt = *localtime(&tv_sec);
-	RETURNi_(lt.tm_year);
+	RETURNi_(lt.tm_year + 1900);
 }
 
 //## int Date.getHours();
@@ -175,7 +175,7 @@ static KMETHOD Date_getUTCFullYear(KonohaContext *kctx, KonohaStack *sfp)
 {
 	time_t tv_sec = ((struct _kDate *)sfp[0].asObject)->tv.tv_sec;
 	struct tm utc = *gmtime(&tv_sec);
-	RETURNi_(utc.tm_year);
+	RETURNi_(utc.tm_year + 1900);
 }
 
 //## int Date.getUTCHours();
@@ -215,6 +215,14 @@ static KMETHOD Date_getUTCSeconds(KonohaContext *kctx, KonohaStack *sfp)
 	time_t tv_sec = ((struct _kDate *)sfp[0].asObject)->tv.tv_sec;
 	struct tm utc = *gmtime(&tv_sec);
 	RETURNi_(utc.tm_sec);
+}
+
+//## int Date.getYear();
+static KMETHOD Date_getYear(KonohaContext *kctx, KonohaStack *sfp)
+{
+	time_t tv_sec = ((struct _kDate *)sfp[0].asObject)->tv.tv_sec;
+	struct tm lt = *localtime(&tv_sec);
+	RETURNi_(lt.tm_year);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -260,6 +268,7 @@ static	kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public|_Const|_Im, _F(Date_getUTCMinutes), TY_Int, TY_Date, MN_("getUTCMinutes"), 0,
 		_Public|_Const|_Im, _F(Date_getUTCMonth), TY_Int, TY_Date, MN_("getUTCMonth"), 0,
 		_Public|_Const|_Im, _F(Date_getUTCSeconds), TY_Int, TY_Date, MN_("getUTCSeconds"), 0,
+		_Public|_Const|_Im, _F(Date_getYear), TY_Int, TY_Date, MN_("getFullYear"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
