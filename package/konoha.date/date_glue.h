@@ -144,7 +144,7 @@ static KMETHOD Date_getTime(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(ret);
 }
 
-//## int Date.getimezoneOffset(); FIXME
+//## int Date.getTimezoneOffset(); FIXME
 static KMETHOD Date_getTimezoneOffset(KonohaContext *kctx, KonohaStack *sfp)
 {
 	time_t tv_sec = ((struct _kDate *)sfp[0].asObject)->tv.tv_sec;
