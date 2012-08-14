@@ -523,7 +523,7 @@ static kBlock* kStmt_parseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToke
 			KLIB kArray_add(kctx, a, tk);
 			prevToken = tk;
 		}
-		kBlock *bk = SUGAR new_Block(kctx, Stmt_nameSpace(stmt), stmt, a, s, kArray_size(a), NULL);
+		kBlock *bk = SUGAR new_kBlock(kctx, Stmt_nameSpace(stmt), stmt, a, s, kArray_size(a), NULL);
 		KLIB kObject_setObject(kctx, stmt, KW_BlockPattern, TY_Block, bk);
 		KLIB kArray_clear(kctx, a, atop);
 		return bk;

@@ -632,7 +632,7 @@ static int makeNestedSyntaxRule(KonohaContext *kctx, TokenRange *sourceRange, in
 	tk->resolvedSymbol = KW_AST;
 	tk->resolvedSyntaxInfo = SYN_(sourceRange->ns, KW_AST);
 	KSETv(tk, tk->subTokenList, new_(TokenArray, 0));
-	TokenRange nestedSourceRange = {sourceRange->tokenList, currentIdx+1, ne, sourceRange->ns};
+	TokenRange nestedSourceRange = {sourceRange->ns, sourceRange->tokenList, currentIdx+1, ne};
 	return kArray_addSyntaxRule(kctx, tk->subTokenList, &nestedSourceRange) ? ne : sourceRange->endIdx;
 }
 
@@ -659,7 +659,7 @@ static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, Token
 			continue;
 		}
 		if(tk->resolvedSyntaxInfo->keyword == KW_BracketGroup) {
-			TokenRange nestedSourceRange = {tk->subTokenList, 0, kArray_size(tk->subTokenList), sourceRange->ns};
+			TokenRange nestedSourceRange = {sourceRange->ns, tk->subTokenList, 0, kArray_size(tk->subTokenList)};
 			tk->resolvedSymbol = KW_OptionalGroup;
 			PUSH_GCSTACK(tk->subTokenList);  // avoid gc
 			KSETv(tk, tk->subTokenList, new_(TokenArray, 0));

@@ -113,8 +113,8 @@ static KMETHOD ParseExpr_SelfAssign(KonohaContext *kctx, KonohaStack *sfp)
 		TokenRange_end(kctx, opRange);
 
 		TokenRange newexprRangeBuf, *newexprRange = SUGAR new_TokenStackRange(kctx, opRange, &newexprRangeBuf);
-		TokenRange A = {tokenList, beginIdx, operatorIdx, ns};
-		TokenRange B = {tokenList, operatorIdx+1, endIdx, ns};
+		TokenRange A = {ns, tokenList, beginIdx, operatorIdx};
+		TokenRange B = {ns, tokenList, operatorIdx+1, endIdx};
 		MacroSet macros[] = {{SYM_("A"), &A}, {SYM_("B"), &B}, {SYM_("+"), opRange}, {0, NULL}/* necessary*/};
 		macroRange->macroSet = macros;
 		SUGAR TokenRange_resolved(kctx, newexprRange, macroRange);

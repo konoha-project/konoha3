@@ -245,7 +245,7 @@ static KMETHOD Stmt_printError(KonohaContext *kctx, KonohaStack *sfp)
 //	kStmt *stmt  = sfp[0].asStmt;
 //	kArray *tokenList  = sfp[1].asArray;
 //	int s = sfp[2].intValue, e = sfp[3].intValue;
-//	RETURN_(SUGAR new_Block(kctx, Stmt_nameSpace(stmt), stmt, tokenList, s, e, ';'));
+//	RETURN_(SUGAR new_kBlock(kctx, Stmt_nameSpace(stmt), stmt, tokenList, s, e, ';'));
 //}
 
 //## Expr Stmt.newExpr(Token[] tokenList, int s, int e);
@@ -425,7 +425,7 @@ static KMETHOD StmtTyCheck_sugar(KonohaContext *kctx, KonohaStack *sfp)
 			else {
 				KINITv(syn->syntaxRuleNULL, new_(Array, 8));
 			}
-			TokenRange rangebuf = {tokenList, 0, kArray_size(tokenList), Stmt_nameSpace(stmt)};
+			TokenRange rangebuf = {Stmt_nameSpace(stmt), tokenList, 0, kArray_size(tokenList)};
 			if(SUGAR kArray_addSyntaxRule(kctx, syn->syntaxRuleNULL, &rangebuf)) {
 				r = 1;
 			}

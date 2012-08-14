@@ -322,10 +322,10 @@ struct kTokenVar {
 #define Token_setRule(o,B)   TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,B)
 
 typedef struct TokenRange {
+	kNameSpace *ns;
 	kArray *tokenList;
 	int beginIdx;
 	int endIdx;
-	kNameSpace *ns;
 	union {
 		kToken *errToken;
 		struct MacroSet *macroSet;
@@ -539,11 +539,11 @@ typedef struct {
 	void         (*kNameSpace_setSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
 	void         (*kNameSpace_addSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
 
-	kBlock*    (*new_Block)(KonohaContext *, kStmt *, TokenRange *, CheckEndOfStmtFunc2);
+	kBlock*    (*new_kBlock)(KonohaContext *, kStmt *, TokenRange *, CheckEndOfStmtFunc2);
 	void       (*kBlock_insertAfter)(KonohaContext *, kBlock *, kStmt *target, kStmt *);
 
 	kExpr*     (*kStmt_parseExpr)(KonohaContext *, kStmt *, kArray *tokenList, int s, int e);
-	kExpr*     (*kStmt_parseOperatorExpr)(KonohaContext *, kStmt *, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx);
+	kExpr*     (*kStmt_parseOperatorExpr)(KonohaContext *, kStmt *, SugarSyntax *, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx);
 	kExpr*     (*new_ConsExpr)(KonohaContext *, SugarSyntax *syn, int n, ...);
 	kExpr *    (*kStmt_addExprParam)(KonohaContext *, kStmt *, kExpr *, kArray *tokenList, int, int, int allowEmpty);
 	kExpr *    (*kStmt_rightJoinExpr)(KonohaContext *, kStmt *, kExpr *, kArray *, int, int);
