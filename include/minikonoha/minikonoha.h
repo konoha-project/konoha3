@@ -1173,7 +1173,6 @@ struct KonohaLibVar {
 	kpackage_t      (*KpackageId)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
 	ksymbol_t       (*Ksymbol)(KonohaContext*, const char*, size_t, int spol, ksymbol_t def);
 
-	kbool_t         (*KimportPackage)(KonohaContext*, kNameSpace*, const char *, kfileline_t);
 	KonohaClass*    (*Kclass)(KonohaContext*, ktype_t, kfileline_t);
 	kString*        (*KonohaClass_shortName)(KonohaContext*, KonohaClass *ct);
 	KonohaClass*    (*KonohaClass_Generics)(KonohaContext*, KonohaClass *ct, ktype_t rty, int psize, kparamtype_t *p);
@@ -1199,14 +1198,16 @@ struct KonohaLibVar {
 
 	kparamid_t (*Kparamdom)(KonohaContext*, int, const kparamtype_t *);
 	kMethod *  (*new_kMethod)(KonohaContext*, uintptr_t, ktype_t, kmethodn_t, MethodFunc);
-	kParam*    (*Method_setParam)(KonohaContext*, kMethod *, ktype_t, int, const kparamtype_t *);
-	void       (*Method_setFunc)(KonohaContext*, kMethod*, MethodFunc);
+	kParam*    (*kMethod_setParam)(KonohaContext*, kMethod *, ktype_t, int, const kparamtype_t *);
+	void       (*kMethod_setFunc)(KonohaContext*, kMethod*, MethodFunc);
 	void       (*kMethod_genCode)(KonohaContext*, kMethod*, kBlock *bk);
 	intptr_t   (*kMethod_indexOfField)(kMethod *);
 
 	kbool_t      (*Konoha_setModule)(KonohaContext*, int, struct KonohaModule *, kfileline_t);
 	KonohaClass* (*Konoha_defineClass)(KonohaContext*, kpackage_t, kpackage_t, kString *, KDEFINE_CLASS *, kfileline_t);
 
+	kbool_t       (*kNameSpace_requirePackage)(KonohaContext*, const char *, kfileline_t);
+	kbool_t       (*kNameSpace_importPackage)(KonohaContext*, kNameSpace*, const char *, kfileline_t);
 	KonohaClass*  (*kNameSpace_getClass)(KonohaContext*, kNameSpace *, const char *, size_t, KonohaClass *);
 	void          (*kNameSpace_loadMethodData)(KonohaContext*, kNameSpace *, intptr_t *d);
 	void          (*kNameSpace_loadConstData)(KonohaContext*, kNameSpace *, const char **d, kfileline_t);
@@ -1230,29 +1231,28 @@ struct KonohaLibVar {
 
 #define UPCAST(o)         ((kObject*)o)
 
-#define KPI                     (kctx->klib)
+#define KMALLOC(size)          KLIB Kmalloc(kctx, size)
+#define KCALLOC(size, item)    KLIB Kzmalloc(kctx, ((size) * (item)))
+#define KFREE(p, size)         KLIB Kfree(kctx, p, size)
 
-#define KMALLOC(size)          (KPI)->Kmalloc(kctx, size)
-#define KCALLOC(size, item)    (KPI)->Kzmalloc(kctx, ((size) * (item)))
-#define KFREE(p, size)         (KPI)->Kfree(kctx, p, size)
-
-#define kwb_putc(W,...)          (KPI)->Kwb_putc(kctx,W, ## __VA_ARGS__, -1)
+#define kwb_putc(W,...)          KLIB Kwb_putc(kctx,W, ## __VA_ARGS__, -1)
 #define Kwb_bytesize(W)                 (((W)->m)->bytesize - (W)->pos)
 
-#define kclass(CID, UL)           (KPI)->Kclass(kctx, CID, UL)
+#define kclass(CID, UL)           KLIB Kclass(kctx, CID, UL)
 
 #define FILEID_(T)                KLIB KfileId(kctx, T, sizeof(T)-1, SPOL_TEXT|SPOL_ASCII, _NEWID)
 
 #define PN_konoha                 0
-#define PackageId_sugar                  1
+#define PackageId_sugar           1
 #define PN_(T)                    KLIB KpackageId(kctx, T, sizeof(T)-1, SPOL_TEXT|SPOL_ASCII|SPOL_POOL, _NEWID)
 
-#define ksymbolA(T, L, DEF)       (KPI)->Ksymbol(kctx, T, L, SPOL_ASCII, DEF)
-#define ksymbolSPOL(T, L, SPOL, DEF)       (KPI)->Ksymbol(kctx, T, L, SPOL, DEF)
-#define SYM_(T)                   (KPI)->Ksymbol(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
-#define EXPT_(T)                  (KPI)->Ksymbol(kctx, (T "Exception"), (sizeof(T "Exception")-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
-#define FN_(T)                    (KPI)->Ksymbol(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
-#define MN_(T)                    (KPI)->Ksymbol(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
+#define ksymbolA(T, L, DEF)       KLIB Ksymbol(kctx, T, L, SPOL_ASCII, DEF)
+#define ksymbolSPOL(T, L, SPOL, DEF)       KLIB Ksymbol(kctx, T, L, SPOL, DEF)
+#define SYM_(T)                   KLIB Ksymbol(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
+#define EXPT_(T)                  KLIB Ksymbol(kctx, (T "Exception"), (sizeof(T "Exception")-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
+#define FN_(T)                    KLIB Ksymbol(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
+#define MN_(T)                    KLIB Ksymbol(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
+#define MN_box                    MN_("box")
 #define T_mn(X)                   SYM_PRE(X), SYM_t(X)
 
 // #define KW_new (((ksymbol_t)40)|0) /*new*/
@@ -1261,15 +1261,14 @@ struct KonohaLibVar {
 #define new_(C, A)                (k##C*)(KLIB new_kObject(kctx, CT_##C, ((uintptr_t)A)))
 #define GCSAFE_new(C, A)          (k##C*)(KLIB new_kObjectOnGCSTACK(kctx, CT_##C, ((uintptr_t)A)))
 
-#define KNULL(C)                  (k##C*)(KPI)->Knull(kctx, CT_##C)
+#define KNULL(C)                  (k##C*)KLIB Knull(kctx, CT_##C)
 
 #define kArray_size(A)            (((A)->bytesize)/sizeof(void*))
 #define kArray_setsize(A, N)      ((kArrayVar*)A)->bytesize = N * sizeof(void*)
-#define new_kParam(CTX, R, PSIZE, P)       (KLIB Method_setParam(CTX, NULL, R, PSIZE, P))
+#define new_kParam(CTX, R, PSIZE, P)       (KLIB kMethod_setParam(CTX, NULL, R, PSIZE, P))
 
-#define KREQUIRE_PACKAGE(NAME, UL)                   (KPI)->KimportPackage(kctx, NULL, NAME, UL)
-#define KEXPORT_PACKAGE(NAME, KS, UL)                (KPI)->KimportPackage(kctx, KS, NAME, UL)
-
+#define KREQUIRE_PACKAGE(NAME, UL)                   KLIB kNameSpace_requirePackage(kctx, NAME, UL)
+#define KEXPORT_PACKAGE(NAME, KS, UL)                KLIB kNameSpace_importPackage(kctx, KS, NAME, UL)
 
 typedef intptr_t  KDEFINE_METHOD;
 
@@ -1299,8 +1298,8 @@ typedef struct {
 	kObject *value;
 } KDEFINE_OBJECT_CONST;
 
-#define kreportf(LEVEL, UL, fmt, ...)  (KPI)->Kreportf(kctx, LEVEL, UL, fmt, ## __VA_ARGS__)
-#define kraise(PARAM)                  (KPI)->Kraise(kctx, PARAM)
+#define kreportf(LEVEL, UL, fmt, ...)  KLIB Kreportf(kctx, LEVEL, UL, fmt, ## __VA_ARGS__)
+#define kraise(PARAM)                  KLIB Kraise(kctx, PARAM)
 
 #define KSET_KLIB(T, UL)   do {\
 		void *func = kctx->klib->T;\

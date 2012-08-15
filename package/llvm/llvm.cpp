@@ -2499,13 +2499,13 @@ static KMETHOD ExecutionEngine_getTargetData(KonohaContext *kctx, KonohaStack *s
 }
 
 //## void Method.setFunction(NativeFunction func);
-static KMETHOD Method_setFunction(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD kMethod_setFunction(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = (kMethod*) sfp[0].asObject;
 	kObject *po = sfp[1].asObject;
 	union anyptr { void *p; MethodFunc f;} ptr;
 	ptr.p = konoha::object_cast<void*>(po);
-	KLIB Method_setFunc(kctx, mtd, ptr.f);
+	KLIB kMethod_setFunc(kctx, mtd, ptr.f);
 	RETURNvoid_();
 }
 
@@ -5061,7 +5061,7 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public, _F(Function_getReturnType), TY_Type, TY_Function, MN_("getReturnType"), 0,
 		_Public, _F(LoadInst_setAlignment),  TY_void, TY_LoadInst, MN_("setAlignment"), 1, TY_Int, FN_("align"),
 		_Public, _F(StoreInst_setAlignment), TY_void, TY_StoreInst, MN_("setAlignment"), 1, TY_Int, FN_("align"),
-		_Public, _F(Method_setFunction), TY_void, TY_Method, MN_("setFunction"), 1, TY_NativeFunction, FN_("nf"),
+		_Public, _F(kMethod_setFunction), TY_void, TY_Method, MN_("setFunction"), 1, TY_NativeFunction, FN_("nf"),
 		_Public|_Static, _F(ConstantInt_get),         TY_Constant, TY_ConstantInt, MN_("getValue"), 2, TY_Type, FN_("type"),TY_Int, FN_("v"),
 		_Public|_Static, _F(ConstantFP_get),          TY_Constant, TY_ConstantFP, MN_("getValue"), 2, TY_Type, FN_("type"),TY_Float, FN_("v"),
 		_Public|_Static, _F(ConstantFP_get),          TY_Constant, TY_ConstantFP, MN_("getValueFromBits"), 2, TY_Type, FN_("type"),TY_Int, FN_("v"),

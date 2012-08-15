@@ -268,7 +268,6 @@ static KMETHOD NameSpace_importPackage(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNb_(kNameSpace_importPackage(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), sfp[K_RTNIDX].uline));
 }
 
-
 #define _Public kMethod_Public
 #define _Static kMethod_Static
 #define _F(F)   (intptr_t)(F)
@@ -281,7 +280,8 @@ void MODSUGAR_loadMethod(KonohaContext *kctx)
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);
-	KSET_KLIB2(KimportPackage, kNameSpace_importPackage, 0);
+	KSET_KLIB2(kNameSpace_requirePackage, kNameSpace_requirePackage, 0);
+	KSET_KLIB2(kNameSpace_importPackage, kNameSpace_importPackage, 0);
 }
 
 #ifdef __cplusplus

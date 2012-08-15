@@ -55,7 +55,7 @@ static kMethod *new_FieldGetter(KonohaContext *kctx, ktype_t cid, ksymbol_t sym,
 	kmethodn_t mn = MN_toGETTER(sym);
 	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_UnboxFieldGetter : MethodFunc_ObjectFieldGetter;
 	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Public|kMethod_Immutable, cid, mn, f);
-	KLIB Method_setParam(kctx, mtd, ty, 0, NULL);
+	KLIB kMethod_setParam(kctx, mtd, ty, 0, NULL);
 	((kMethodVar*)mtd)->delta = idx;  // FIXME
 	return mtd;
 }
@@ -66,7 +66,7 @@ static kMethod *new_FieldSetter(KonohaContext *kctx, ktype_t cid, kmethodn_t sym
 	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_UnboxFieldSetter : MethodFunc_ObjectFieldSetter;
 	kparamtype_t p = {ty, FN_("x")};
 	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Public, cid, mn, f);
-	KLIB Method_setParam(kctx, mtd, ty, 1, &p);
+	KLIB kMethod_setParam(kctx, mtd, ty, 1, &p);
 	((kMethodVar*)mtd)->delta = idx;   // FIXME
 	return mtd;
 }
@@ -116,7 +116,7 @@ static kMethod *new_PrototypeGetter(KonohaContext *kctx, ktype_t cid, ksymbol_t 
 	kmethodn_t mn = MN_toGETTER(sym);
 	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_UnboxPrototypeGetter : MethodFunc_ObjectPrototypeGetter;
 	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Public|kMethod_Immutable, cid, mn, f);
-	KLIB Method_setParam(kctx, mtd, ty, 0, NULL);
+	KLIB kMethod_setParam(kctx, mtd, ty, 0, NULL);
 	((kMethodVar*)mtd)->delta = sym;
 	return mtd;
 }
@@ -127,7 +127,7 @@ static kMethod *new_PrototypeSetter(KonohaContext *kctx, ktype_t cid, ksymbol_t 
 	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_UnboxPrototypeSetter : MethodFunc_ObjectPrototypeSetter;
 	kparamtype_t p = {ty, FN_("x")};
 	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Public, cid, mn, f);
-	KLIB Method_setParam(kctx, mtd, ty, 1, &p);
+	KLIB kMethod_setParam(kctx, mtd, ty, 1, &p);
 	((kMethodVar*)mtd)->delta = sym;
 	return mtd;
 }

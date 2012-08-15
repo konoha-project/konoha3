@@ -139,9 +139,9 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 		}
 		if(CT_isa(kctx, texpr->ty, reqty)) {
 			if(TY_isUnbox(texpr->ty) && !TY_isUnbox(reqty)) {
-				kMethod *mtd = kNameSpace_getMethodNULL(kctx, Stmt_nameSpace(stmt), TY_Int, MN_("box"), 0, MPOL_PARAMSIZE);
+				ktype_t unboxType = texpr->ty == TY_Boolean ? TY_Boolean : TY_Int;
+				kMethod *mtd = kNameSpace_getMethodNULL(kctx, Stmt_nameSpace(stmt), unboxType, MN_box, 0, MPOL_PARAMSIZE);
 				return new_TypedCallExpr(kctx, stmt, gma, reqty, mtd, 1, texpr);
-				//return new_BoxingExpr(kctx, expr, reqty);
 			}
 			return texpr;
 		}
@@ -430,7 +430,7 @@ static kstatus_t TokenRange_eval(KonohaContext *kctx, TokenRange *sourceRange)
 	kstatus_t status = K_CONTINUE;
 	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Static, 0, 0, NULL);
 	PUSH_GCSTACK(mtd);
-	KLIB Method_setParam(kctx, mtd, TY_Object, 0, NULL);
+	KLIB kMethod_setParam(kctx, mtd, TY_Object, 0, NULL);
 	int i = sourceRange->beginIdx, indent = 0;
 	kBlock *singleBlock = KonohaContext_getSugarContext(kctx)->singleBlock;
 	while(i < sourceRange->endIdx) {

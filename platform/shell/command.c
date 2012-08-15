@@ -447,15 +447,14 @@ static void konoha_define(KonohaContext *kctx, char *keyvalue)
 	}
 }
 
-static void konoha_import(KonohaContext *kctx, char *packagename)
+static void konoha_import(KonohaContext *kctx, char *packageName)
 {
-	size_t len = strlen(packagename)+1;
+	size_t len = strlen(packageName)+1;
 	char bufname[len];
-	memcpy(bufname, packagename, len);
-	if(!KREQUIRE_PACKAGE(bufname, 0)) {
+	memcpy(bufname, packageName, len);
+	if(!(KEXPORT_PACKAGE(bufname, KNULL(NameSpace), 0))) {
 		PLATAPI exit_i(EXIT_FAILURE);
 	}
-	KEXPORT_PACKAGE(bufname, KNULL(NameSpace), 0);
 }
 
 static void konoha_startup(KonohaContext *kctx, const char *startup_script)

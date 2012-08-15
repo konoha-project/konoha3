@@ -433,7 +433,7 @@ static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sf
 static void Method_threadCode(KonohaContext *kctx, kMethod *mtd, kByteCode *kcode)
 {
 	kMethodVar *Wmtd = (kMethodVar*)mtd;
-	KLIB Method_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
+	KLIB kMethod_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
 	KSETv(Wmtd, Wmtd->kcode, kcode);
 	Wmtd->pc_start = KonohaVirtualMachine_run(kctx, kctx->esp + 1, kcode->code);
 	if(verbose_code) {
@@ -881,7 +881,7 @@ static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	if(ctxcode == NULL) {
 		kmodcode->h.setup(kctx, NULL, 0);
 	}
-	KLIB Method_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
+	KLIB kMethod_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
 	DBG_ASSERT(kArray_size(ctxcode->codeList) == 0);
 	kBasicBlock* lbINIT  = new_BasicBlockLABEL(kctx);
 	kBasicBlock* lbBEGIN = new_BasicBlockLABEL(kctx);
@@ -976,7 +976,7 @@ static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack 
 //	return (mtd->invokeMethodFunc == MethodFunc_abstract);
 //}
 
-static void Method_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
+static void kMethod_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
 {
 	func = (func == NULL) ? MethodFunc_invokeAbstractMethod : func;
 	((kMethodVar*)mtd)->invokeMethodFunc = func;
@@ -1074,7 +1074,7 @@ void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		RESET_GCSTACK();
 	}
 	KonohaLibVar *l = (KonohaLibVar*)kctx->klib;
-	l->Method_setFunc = Method_setFunc;
+	l->kMethod_setFunc = kMethod_setFunc;
 	l->kMethod_genCode = kMethod_genCode;
 }
 

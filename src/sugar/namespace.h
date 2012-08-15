@@ -618,7 +618,7 @@ static void kNameSpace_loadMethodData(KonohaContext *kctx, kNameSpace *ns, intpt
 			d += 2;
 		}
 		kMethod *mtd = KLIB new_kMethod(kctx, flag, cid, mn, f);
-		KLIB Method_setParam(kctx, mtd, rtype, psize, p);
+		KLIB kMethod_setParam(kctx, mtd, rtype, psize, p);
 		kNameSpace_addMethod(kctx, ns, mtd);
 	}
 }

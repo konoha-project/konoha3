@@ -75,7 +75,7 @@ static kMethod *new_ProtoGetter(KonohaContext *kctx, ktype_t cid, ksymbol_t sym,
 	kmethodn_t mn = ty == TY_Boolean ? MN_toISBOOL(sym) : MN_toGETTER(sym);
 	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_ProtoGetterN : MethodFunc_ProtoGetter;
 	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Public|kMethod_Immutable, cid, mn, f);
-	KLIB Method_setParam(kctx, mtd, ty, 0, NULL);
+	KLIB kMethod_setParam(kctx, mtd, ty, 0, NULL);
 	((kMethodVar*)mtd)->delta = sym;
 	return mtd;
 }
@@ -86,7 +86,7 @@ static kMethod *new_ProtoSetter(KonohaContext *kctx, ktype_t cid, ksymbol_t sym,
 	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_ProtoSetterN : MethodFunc_ProtoSetter;
 	kparamtype_t p = {ty, FN_("x")};
 	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Public, cid, mn, f);
-	KLIB Method_setParam(kctx, mtd, ty, 1, &p);
+	KLIB kMethod_setParam(kctx, mtd, ty, 1, &p);
 	((kMethodVar*)mtd)->delta = sym;
 	return mtd;
 }

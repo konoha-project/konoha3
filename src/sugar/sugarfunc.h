@@ -656,7 +656,8 @@ static kExpr* boxThisExpr(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kExpr *
 	DBG_ASSERT(IS_Method(mtd));
 	DBG_ASSERT(thisClass->typeId != TY_var);
 	if(!TY_isUnbox(mtd->typeId) && CT_isUnbox(thisClass)) {
-		kMethod *boxMethod = kNameSpace_getMethodNULL(kctx, Stmt_nameSpace(stmt), TY_Int, MN_("box"), 0, MPOL_PARAMSIZE);
+		ktype_t unboxType = thisClass->typeId == TY_Boolean ? TY_Boolean : TY_Int;
+		kMethod *boxMethod = kNameSpace_getMethodNULL(kctx, Stmt_nameSpace(stmt), unboxType, MN_box, 0, MPOL_PARAMSIZE);
 		thisExpr = new_TypedCallExpr(kctx, stmt, gma, thisClass->typeId, boxMethod, 1, expr->cons->exprItems[1]);
 		KSETv(expr->cons, expr->cons->exprItems[1], thisExpr);
 	}
@@ -1044,7 +1045,7 @@ static void kMethod_setLazyCompilation(KonohaContext *kctx, kMethodVar *mtd, kSt
 	if(tcode != NULL && tcode->resolvedSyntaxInfo->keyword == TokenType_CODE) {
 		KSETv(mtd, mtd->sourceCodeToken, tcode);
 		KSETv(mtd, mtd->lazyCompileNameSpace, ns);
-		KLIB Method_setFunc(kctx, mtd, MethodFunc_lazyCompilation);
+		KLIB kMethod_setFunc(kctx, mtd, MethodFunc_lazyCompilation);
 		KLIB kArray_add(kctx, KonohaContext_getSugarContext(kctx)->definedMethodList, mtd);
 	}
 }
@@ -1180,7 +1181,7 @@ static KMETHOD StmtTyCheck_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 	if(pa != NULL) {  // if pa is NULL, error is printed out.
 		kMethod *mtd = KLIB new_kMethod(kctx, flag, typeId, mn, NULL);
 		PUSH_GCSTACK(mtd);
-		KLIB Method_setParam(kctx, mtd, pa->rtype, pa->psize, (kparamtype_t*)pa->paramtypeItems);
+		KLIB kMethod_setParam(kctx, mtd, pa->rtype, pa->psize, (kparamtype_t*)pa->paramtypeItems);
 		kMethod *foundMethod = kNameSpace_addMethod(kctx, ns, mtd);
 		if(foundMethod != NULL) {
 			pa = NULL;

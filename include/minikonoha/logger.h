@@ -79,7 +79,7 @@ typedef struct klogconf_t {
 #define ktrace(POLICY, ...)    do {\
 		static klogconf_t _logconf = {LOGPOL_RECORD|LOGPOL_INIT|LOGPOL_CFUNC|POLICY, NULL, {__FUNCTION__}};\
 		if(TFLAG_is(int, _logconf.policy, LOGPOL_RECORD)) {\
-			(KPI)->Ktrace(kctx, &_logconf, ## __VA_ARGS__, LOG_END);\
+			KLIB Ktrace(kctx, &_logconf, ## __VA_ARGS__, LOG_END);\
 		}\
 	}while(0)\
 
