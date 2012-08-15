@@ -27,15 +27,15 @@
 #include <stdio.h>
 
 ////## void Token.setKeyword(String keywork);
-//static KMETHOD Token_setKeyword(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
-//	kString *key = sfp[1].asString;
-//	ksymbol_t keyword = ksymbolA(S_text(key), S_size(key), _NEWID);
-//	tk->keyword = keyword;
-//	DBG_P("setkeyword=%s%s", KW_t(keyword));
-//	RETURNvoid_();
-//}
+static KMETHOD Token_setUnresolvedTokenType(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
+	kString *key = sfp[1].asString;
+	ksymbol_t keyword = ksymbolA(S_text(key), S_size(key), _NEWID);
+	tk->unresolvedTokenType = keyword;
+	DBG_P("setkeyword=%s%s", KW_t(keyword));
+	RETURNvoid_();
+}
 
 //## void Token.setText(String text);
 static KMETHOD Token_setText(KonohaContext *kctx, KonohaStack *sfp)
@@ -340,7 +340,7 @@ static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	//DBG_P("func=%s", TY_t(TY_FuncExprTyCheck));
 
 	KDEFINE_METHOD MethodData[] = {
-//		_Public, _F(Token_setKeyword),  TY_void, TY_Token, MN_("setKeyword"),  1, TY_String, FN_x,
+		_Public, _F(Token_setUnresolvedTokenType),  TY_void, TY_Token, MN_("setUnresolvedTokenType"),  1, TY_String, FN_x,
 		_Public, _F(Token_setText),  TY_void, TY_Token, MN_("setText"),  1, TY_String, FN_x,
 		_Public, _F(Token_setSubArray), TY_void, TY_Token, MN_("setSubArray"), 1, TY_StringArray, FN_x,
 //		_Public, _F(Token_isTypeName), TY_Boolean, TY_Token, MN_("isTypeName"), 0,
