@@ -1,0 +1,8 @@
+ - (RegExpMatch.k:7) 123
+ - (RegExpMatch.k:9) 1
+ - (RegExpMatch.k:12) /
+ - (RegExpMatch.k:14) 1234
+ - (RegExpMatch.k:16) hoge1234
+ - (RegExpMatch.k:17) hoge
+ - (RegExpMatch.k:18) 1234
+Q.E.D.

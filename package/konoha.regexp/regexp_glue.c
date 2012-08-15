@@ -33,6 +33,8 @@
 extern "C" {
 #endif
 
+#define CT_StringArray0 CT_p0(kctx, CT_Array, TY_String)
+
 /* ------------------------------------------------------------------------ */
 /* regexp module */
 //## @Immutable class RegExp Object;
@@ -107,7 +109,7 @@ static kArray *kStringToCharArray(KonohaContext *kctx, kString *bs, int istrim)
 {
 	kbytes_t base = {S_size(bs), {S_text(bs)}};
 	size_t i, n = base.len;
-	kArray *a = new_(Array, n); //TODO new_Array(kctx, TY_String, n);
+	kArray *a = (kArray*)KLIB new_kObject(kctx, CT_StringArray0, 0);
 	if(S_isASCII(bs)) {
 		for(i = 0; i < n; i++) {
 			if(istrim && isspace(base.utext[i])) continue;
@@ -137,7 +139,7 @@ typedef struct {
 } PCRE_regexp_t;
 
 /* ------------------------------------------------------------------------ */
-#define kregexpshare      ((kregexpshare_t*)kctx->modshare[MOD_REGEX])
+#define kregexpshare      ((kregexpshare_t*)kctx->modshare[MOD_REGEXP])
 #define CT_RegExp         kregexpshare->cRegExp
 #define TY_RegExp         kregexpshare->cRegExp->typeId
 
@@ -377,12 +379,12 @@ static void RegExp_set(KonohaContext *kctx, kRegExp *re, kString *ptns, kString 
 
 static KMETHOD RegExp_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RegExp_set(kctx, sfp[0].re, sfp[1].asString, sfp[2].s);
+	RegExp_set(kctx, sfp[0].re, sfp[1].asString, sfp[2].asString);
 	RETURN_(sfp[0].asObject);
 }
 
 /* ------------------------------------------------------------------------ */
-//## @Const method Int String.search(RegExp re);
+//## @Const method Int String.search(RegExp searchvalue);
 
 static KMETHOD String_search(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -390,11 +392,11 @@ static KMETHOD String_search(KonohaContext *kctx, KonohaStack *sfp)
 	intptr_t loc = -1;
 	if(!IS_NULL(re) && S_size(re->pattern) > 0) {
 		kregmatch_t pmatch[2]; // modified by @utrhira
-		const char *str = S_text(sfp[0].s);  // necessary
+		const char *str = S_text(sfp[0].asString);  // necessary
 		int res = pcre_regexec(kctx, re->reg, str, 1, pmatch, re->eflags);
 		if(res == 0) {
 			loc = pmatch[0].rm_so;
-			if (loc != -1 && !S_isASCII(sfp[0].s)) {
+			if (loc != -1 && !S_isASCII(sfp[0].asString)) {
 				kbytes_t base = {loc, {str}};
 				loc = knh_bytes_mlen(base);
 			}
@@ -408,11 +410,11 @@ static KMETHOD String_search(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 /* ------------------------------------------------------------------------ */
-//## @Const method String[] String.match(RegExp re);
+//## @Const method String[] String.match(RegExp regexp);
 
 static KMETHOD String_match(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kString *s0 = sfp[0].s;
+	kString *s0 = sfp[0].asString;
 	kRegExp *re = sfp[1].re;
 	kArray *a = NULL;
 	if(IS_NOTNULL(re) && S_size(re->pattern) > 0) {
@@ -422,7 +424,7 @@ static KMETHOD String_match(KonohaContext *kctx, KonohaStack *sfp)
 		size_t nmatch = pcre_nmatchsize(kctx, re->reg);
 		kregmatch_t *p, pmatch[nmatch+1];
 		int i, isGlobalOption = RegExp_isGlobalOption(re);
-		a = new_(Array, nmatch);/*TODO new_Array(TY_String)*/
+		a = (kArray*)KLIB new_kObject(kctx, CT_StringArray0, nmatch);
 		BEGIN_LOCAL(lsfp, 1);
 		KSETv_AND_WRITE_BARRIER(NULL, lsfp[0].asArray, a, GC_NO_WRITE_BARRIER);
 		do {
@@ -447,20 +449,20 @@ static KMETHOD String_match(KonohaContext *kctx, KonohaStack *sfp)
 		END_LOCAL();
 	}
 	else {
-		a = new_(Array, 0);/*TODO new_Array(TY_String)*/
+		a = (kArray*)KLIB new_kObject(kctx, CT_StringArray0, 0);
 	}
 	RETURN_(a);
 /*new_(O_ct(sfp[K_RTNIDX].o), 0);  // USE THIS; */
 }
 
 /* ------------------------------------------------------------------------ */
-//## @Const method String String.replace(RegExp re, String s);
+//## @Const method String String.replace(RegExp searchvalue, String newvalue);
 
 static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kString *s0 = sfp[0].s;
+	kString *s0 = sfp[0].asString;
 	kRegExp *re = sfp[1].re;
-	kbytes_t fmt = {S_size(sfp[2].s), {S_text(sfp[2].s)}};
+	kbytes_t fmt = {S_size(sfp[2].asString), {S_text(sfp[2].asString)}};
 	kString *s = s0;
 	if(IS_NOTNULL(re) && S_size(re->pattern) > 0) {
 		KUtilsWriteBuffer wb;
@@ -498,11 +500,11 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 /* ------------------------------------------------------------------------ */
-//## @Const method String[] String.split(RegExp re);
+//## @Const method String[] String.split(RegExp separator);
 
 static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kString *s0 = sfp[0].s;
+	kString *s0 = sfp[0].asString;
 	kRegExp *re = sfp[1].re;
 	kArray *a = NULL;
 	if (IS_NOTNULL(re) && S_size(re->pattern) > 0) {
@@ -510,7 +512,7 @@ static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp)
 		const char *eos = str + S_size(s0);
 		kregmatch_t pmatch[KREGEXP_MATCHSIZE+1];
 		if (str < eos) {
-			a = new_(Array, 0); // TODO new_Array(kctx, TY_String, 0);
+			a = (kArray*)KLIB new_kObject(kctx, CT_StringArray0, 0);
 			BEGIN_LOCAL(lsfp, 1);
 			KSETv_AND_WRITE_BARRIER(NULL, lsfp[0].asArray, a, GC_NO_WRITE_BARRIER);
 			while (str <= eos) {
@@ -538,21 +540,68 @@ static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(a);
 }
 
+/* ------------------------------------------------------------------------ */
+//## @Const method String[] String.split(RegExp separator, Int limit);
+
+static KMETHOD String_splitwithSeparatorLimit(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kString *s0 = sfp[0].asString;
+	kRegExp *re = sfp[1].re;
+	//kint_t limit = sfp[2].intValue; /* TODO */
+	kArray *a = NULL;
+	size_t asize = 0;
+	if (IS_NOTNULL(re) && S_size(re->pattern) > 0) {
+		const char *str = S_text(s0);  // necessary
+		const char *eos = str + S_size(s0);
+		kregmatch_t pmatch[KREGEXP_MATCHSIZE+1];
+		if (str < eos) {
+			a = (kArray*)KLIB new_kObject(kctx, CT_StringArray0, 0);
+			BEGIN_LOCAL(lsfp, 1);
+			KSETv_AND_WRITE_BARRIER(NULL, lsfp[0].asArray, a, GC_NO_WRITE_BARRIER);
+			while (str <= eos) {
+				int res = pcre_regexec(kctx, re->reg, str, KREGEXP_MATCHSIZE, pmatch, re->eflags);
+				if (res == 0) {
+					size_t len = pmatch[0].rm_eo;
+					if (len > 0) {
+						kbytes_t sub = {pmatch[0].rm_so, {str}};
+						KLIB kArray_add(kctx, a, KLIB new_kString(kctx, sub.text, sub.len, _SUB(s0)));
+						asize++;
+						str += len;
+						continue;
+					}
+				}
+				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, str, strlen(str), SPOL_POOL)); // append remaining string to array
+				asize++;
+				break;
+			}
+			END_LOCAL();
+		} else { // for 0-length patterh
+			a = kStringToCharArray(kctx, KLIB new_kString(kctx, str, S_size(s0), SPOL_POOL), 0);
+		}
+	}
+	else {
+		a = kStringToCharArray(kctx, s0, 0);
+	}
+	RETURN_(a);
+}
+
+
 // --------------------------------------------------------------------------
 
 #define _Public   kMethod_Public
 #define _Const    kMethod_Const
 #define _Coercion kMethod_Coercion
+#define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
 static kbool_t regexp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	kregexpshare_t *base = (kregexpshare_t*)KCALLOC(sizeof(kregexpshare_t), 1);
-	base->h.name     = "regex";
+	base->h.name     = "regexp";
 	base->h.setup    = kregexpshare_setup;
 	base->h.reftrace = kregexpshare_reftrace;
 	base->h.free     = kregexpshare_free;
-	KLIB Konoha_setModule(kctx, MOD_REGEX, &base->h, pline);
+	KLIB Konoha_setModule(kctx, MOD_REGEXP, &base->h, pline);
 
 	KDEFINE_CLASS RegExpDef = {
 		STRUCTNAME(RegExp),
@@ -563,17 +612,16 @@ static kbool_t regexp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	};
 	base->cRegExp = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &RegExpDef, pline);
 
-	kparamtype_t p = { .ty = TY_String,  };
-	KonohaClass *cStrArray = KLIB KonohaClass_Generics(kctx, CT_(TY_Array), TY_void, 1, &p);
-#define TY_StrArray (cStrArray->typeId)
 	int FN_x = FN_("x");
 	int FN_y = FN_("y");
+	ktype_t TY_StringArray0 = CT_StringArray0->typeId;
 	KDEFINE_METHOD MethodData[] = {
+		/*JS*/_Public|_Im, _F(String_match), TY_StringArray0, TY_String, MN_("match"), 1, TY_RegExp, FN_("regexp"),
+		/*JS*/_Public|_Const|_Im, _F(String_replace), TY_String, TY_String, MN_("replace"), 2, TY_RegExp, FN_("searchvalue"), TY_String, FN_("newvalue"),
+		/*JS*/_Public|_Const|_Im, _F(String_search), TY_Int, TY_String, MN_("search"), 1, TY_RegExp, FN_("searchvalue"),
+		/*JS*/_Public|_Im, _F(String_split), TY_StringArray0, TY_String, MN_("split"), 1, TY_RegExp, FN_("separator"),
+		/*JS*/_Public|_Im, _F(String_splitwithSeparatorLimit), TY_StringArray0, TY_String, MN_("split"), 2, TY_RegExp, FN_("separator"), TY_Int, FN_("limit"),
 		_Public|_Const, _F(RegExp_new),     TY_RegExp,  TY_RegExp,  MN_("new"), 2, TY_String, FN_x, TY_String, FN_y,
-		_Public|_Const, _F(String_search), TY_Int,    TY_String, MN_("search"),  1, TY_RegExp, FN_x,
-		_Public|_Const, _F(String_replace),TY_String, TY_String, MN_("replace"), 2, TY_RegExp, FN_x, TY_String, FN_y,
-		_Public|_Const, _F(String_match),  TY_StrArray, TY_String, MN_("match"), 1, TY_RegExp, FN_x,
-		_Public|_Const, _F(String_split),  TY_StrArray, TY_String, MN_("split"), 1, TY_RegExp, FN_x,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
@@ -585,7 +633,7 @@ static kbool_t regexp_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 	return true;
 }
 
-static KMETHOD parseREGEX(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD parseREGEXP(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *)sfp[1].o;
 	int ch, prev = '/', pos = 1;
@@ -614,7 +662,7 @@ static KMETHOD parseREGEX(KonohaContext *kctx, KonohaStack *sfp)
 				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, source + 1, (pos0-2), 0));
 				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, source + pos0, pos-pos0, 0));
 				tk->subTokenList = a;
-				tk->unresolvedTokenType = SYM_("$regex");
+				tk->unresolvedTokenType = SYM_("$regexp");
 			}
 			RETURNi_(pos);
 		}
@@ -638,11 +686,11 @@ static KMETHOD ExprTyCheck_RegExp(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t regexp_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
-	kMethod *mtd = KLIB new_kMethod(kctx, 0, 0, 0, parseREGEX);
+	kMethod *mtd = KLIB new_kMethod(kctx, 0, 0, 0, parseREGEXP);
 	kFunc *fo = GCSAFE_new(Func, (uintptr_t) mtd);
 	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '/', NULL, fo, 0);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("$regex"),  ExprTyCheck_(RegExp), },
+		{ .keyword = SYM_("$regexp"),  ExprTyCheck_(RegExp), },
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);

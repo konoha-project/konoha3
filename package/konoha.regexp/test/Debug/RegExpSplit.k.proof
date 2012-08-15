@@ -1,0 +1,11 @@
+ - (RegExpSplit.k:6) aa
+ - (RegExpSplit.k:7) bb
+ - (RegExpSplit.k:8) cc
+ - (RegExpSplit.k:9) dd
+ - (RegExpSplit.k:10) ee
+ - (RegExpSplit.k:12) 
+ - (RegExpSplit.k:13) o
+ - (RegExpSplit.k:14) e1234
+ - (RegExpSplit.k:15) o
+ - (RegExpSplit.k:16) e1234
+Q.E.D.

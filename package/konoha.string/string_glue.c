@@ -710,7 +710,6 @@ static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 {
 	int FN_s = FN_("s");
 	int FN_n = FN_("n");
-	//KonohaClass *CT_StringArray0 = CT_p0(kctx, CT_Array, TY_String);
 	ktype_t TY_StringArray0 = CT_StringArray0->typeId;
 	kMethod* concat = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_String, MN_("+"), 0, MPOL_FIRST);
 	KDEFINE_METHOD MethodData[] = {
@@ -723,18 +722,13 @@ static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		/*JS*/_Public|_Const|_Im, _F(String_indexOfwithStart), TY_Int, TY_String, MN_("indexOf"), 2, TY_String, FN_("searchvalue"), TY_Int, FN_("start"),
 		/*JS*/_Public|_Const|_Im, _F(String_lastIndexOf), TY_Int, TY_String, MN_("lastIndexOf"), 1, TY_String, FN_("searchvalue"),
 		/*JS*/_Public|_Const|_Im, _F(String_lastIndexOfwithStart), TY_Int, TY_String, MN_("lastIndexOf"), 2, TY_String, FN_("searchvalue"), TY_Int, FN_("start"),
-		//TODO/*JS*/_Public|_Im, _F(String_match), TY_StringArray0, TY_String, MN_("match"), 1, TY_RegExp, FN_("regexp"),
 		/*JS*/_Public|_Const|_Im, _F(String_replace), TY_String, TY_String, MN_("replace"), 2, TY_String, FN_("searchvalue"), TY_String, FN_("newvalue"),
-		//TODO/*JS*/_Public|_Const|_Im, _F(String_replace), TY_String, TY_String, MN_("replace"), 2, TY_RegExp, FN_("searchvalue"), TY_String, FN_("newvalue"),
 		/*JS*/_Public|_Const|_Im, _F(String_indexOf), TY_Int, TY_String, MN_("search"), 1, TY_String, FN_("searchvalue"),
-		//TODO/*JS*/_Public|_Const|_Im, _F(String_search), TY_Int, TY_String, MN_("search"), 1, TY_RegExp, FN_("searchvalue"),
 		/*JS*/_Public|_Const|_Im, _F(String_substr), TY_String, TY_String, MN_("slice"), 1, TY_Int, FN_("start"),
 		/*JS*/_Public|_Const|_Im, _F(String_slice), TY_String, TY_String, MN_("slice"), 2, TY_Int, FN_("start"), TY_Int, FN_("end"),
 		/*JS*/_Public|_Im, _F(String_split), TY_StringArray0, TY_String, MN_("split"), 0,
 		/*JS*/_Public|_Im, _F(String_splitwithSeparator), TY_StringArray0, TY_String, MN_("split"), 1, TY_String, FN_("separator"),
-		//TODO/*JS*/_Public|_Im, _F(String_split), TY_StringArray0, TY_String, MN_("split"), 1, TY_RegExp, FN_("separator"),
 		/*JS*/_Public|_Im, _F(String_splitwithSeparatorLimit), TY_StringArray0, TY_String, MN_("split"), 2, TY_String, FN_("separator"), TY_Int, FN_("limit"),
-		//TODO/*JS*/_Public|_Im, _F(String_split), TY_StringArray0, TY_String, MN_("split"), 2, TY_RegExp, FN_("separator"), TY_Int, FN_("limit"),
 		/*JS*/_Public|_Const|_Im, _F(String_substr), TY_String, TY_String, MN_("substr"), 1, TY_Int, FN_("start"),
 		/*JS*/_Public|_Const|_Im, _F(String_substrwithLength), TY_String, TY_String, MN_("substr"), 2, TY_Int, FN_("start"), TY_Int, FN_("length"),
 		/*JS*/_Public|_Const|_Im, _F(String_substring), TY_String, TY_String, MN_("substring"), 1, TY_Int, FN_("indexA"),
