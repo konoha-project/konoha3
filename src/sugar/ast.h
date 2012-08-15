@@ -329,7 +329,7 @@ static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *token
 		}
 		else if(ruleToken->resolvedSymbol == KW_OptionalGroup) {
 			//DBG_P("@Optional");
-			TokenRange nrule = {ruleToken->subTokenList, 0, kArray_size(ruleToken->subTokenList)};
+			TokenRange nrule = {Stmt_nameSpace(stmt), ruleToken->subTokenList, 0, kArray_size(ruleToken->subTokenList)};
 			int next = kStmt_matchSyntaxRule(kctx, stmt, tokenList, currentTokenIdx, endIdx, &nrule, 1/*roolback*/);
 			if(next == -1) return returnIdx;
 			currentTokenIdx = next;
@@ -341,7 +341,7 @@ static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *token
 				return kStmt_printMismatchedRule(kctx, stmt, tk, ruleToken, beginIdx, canRollBack);
 			}
 			if(ruleToken->resolvedSymbol == KW_ParenthesisGroup || ruleToken->resolvedSymbol == KW_BracketGroup) {
-				TokenRange nrule = {ruleToken->subTokenList, 0, kArray_size(ruleToken->subTokenList)};
+				TokenRange nrule = {Stmt_nameSpace(stmt), ruleToken->subTokenList, 0, kArray_size(ruleToken->subTokenList)};
 				int next = kStmt_matchSyntaxRule(kctx, stmt, tk->subTokenList, 0, kArray_size(tk->subTokenList), &nrule, 0/*not rollbck*/);
 				if(next == -1) return returnIdx;
 			}
@@ -410,7 +410,7 @@ static kbool_t kStmt_parseBySyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray 
 {
 	kbool_t ret = false;
 	SugarSyntax *syn = kNameSpace_getSyntaxRule(kctx, Stmt_nameSpace(stmt), tokenList, beginIdx, endIdx);
-	TokenRange nrule = {syn->syntaxRuleNULL, 0, kArray_size(syn->syntaxRuleNULL)};
+	TokenRange nrule = {Stmt_nameSpace(stmt), syn->syntaxRuleNULL, 0, kArray_size(syn->syntaxRuleNULL)};
 	DBG_ASSERT(syn->syntaxRuleNULL != NULL);
 	((kStmtVar*)stmt)->syn = syn;
 	ret = (kStmt_matchSyntaxRule(kctx, stmt, tokenList, beginIdx, endIdx, &nrule, 0) != -1);
@@ -673,7 +673,7 @@ static kbool_t Comma(KonohaContext *kctx, TokenRange *range, TokenRange *sourceR
 	return false;
 }
 
-static kBlock *new_Block(KonohaContext *kctx, kStmt *parent, TokenRange *sourceRange, CheckEndOfStmtFunc2 isEndOfStmt)
+static kBlock *new_kBlock(KonohaContext *kctx, kStmt *parent, TokenRange *sourceRange, CheckEndOfStmtFunc2 isEndOfStmt)
 {
 	kBlockVar *bk = GCSAFE_new(BlockVar, sourceRange->ns);
 	if(parent != NULL) {
@@ -702,7 +702,7 @@ static void kToken_transformToBraceGroup(KonohaContext *kctx, kTokenVar *tk, kNa
 {
 	if(tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
 		INIT_GCSTACK();
-		TokenRange range = {new_(TokenArray, 0), 0, 0, ns};
+		TokenRange range = {ns, new_(TokenArray, 0), 0, 0};
 		PUSH_GCSTACK(range.tokenList);
 		TokenRange_tokenize(kctx, &range, S_text(tk->text), tk->uline);
 		KSETv(tk, tk->subTokenList, range.tokenList);
@@ -722,8 +722,8 @@ static kBlock* kStmt_getBlock(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, 
 			kToken_transformToBraceGroup(kctx, (kTokenVar*)tk, ns);
 		}
 		if (tk->resolvedSyntaxInfo->keyword == KW_BraceGroup) {
-			TokenRange range = {tk->subTokenList, 0, kArray_size(tk->subTokenList), ns};
-			bk = new_Block(kctx, stmt, &range, NULL);
+			TokenRange range = {ns, tk->subTokenList, 0, kArray_size(tk->subTokenList)};
+			bk = new_kBlock(kctx, stmt, &range, NULL);
 			KLIB kObject_setObject(kctx, stmt, kw, TY_Block, bk);
 		}
 	}

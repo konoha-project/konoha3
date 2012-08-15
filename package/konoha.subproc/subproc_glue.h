@@ -44,7 +44,7 @@ typedef struct {
 } kmodsubproc_t;
 
 typedef struct {
-	KonohaContextModule h;
+	KonohaModuleContext h;
 } ctxsubproc_t;
 
 typedef struct {

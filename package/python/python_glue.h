@@ -552,7 +552,7 @@ static	kbool_t python_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
-	if(IS_defineFloat()) {
+	if(IS_DefinedFloat()) {
 		KDEFINE_METHOD MethodData[] = {
 			_Public|_Const|_Im|_Coercion, _F(PyObject_toFloat), TY_Float, TY_PyObject, MN_to(TY_Float), 0,
 			_Public|_Const|_Im|_Coercion, _F(Float_toPyObject), TY_PyObject, TY_Float, MN_to(TY_PyObject), 0,

@@ -529,7 +529,7 @@ static kBlock* kStmt_parseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToke
 				prevToken = tk;
 			}
 			TokenRange_end(kctx, sourceRange);
-			bk = SUGAR new_Block(kctx, stmt/*parent*/, sourceRange, NULL);
+			bk = SUGAR new_kBlock(kctx, stmt/*parent*/, sourceRange, NULL);
 			KLIB kObject_setObject(kctx, stmt, KW_BlockPattern, TY_Block, bk);
 		}
 		TokenRange_pop(kctx, range);

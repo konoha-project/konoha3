@@ -467,7 +467,7 @@ static kbool_t CLASSICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr
 		}
 		return 1;
 	} /* TY_Int */
-	if(IS_defineFloat() && cid == TY_Float && ((opcode = OPfmn(kctx, mn, 0)) != OPCODE_NOP)) {
+	if(IS_DefinedFloat() && cid == TY_Float && ((opcode = OPfmn(kctx, mn, 0)) != OPCODE_NOP)) {
 		int swap = 1;
 		if(mn == MN_opNEG) {
 			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);

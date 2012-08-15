@@ -25,6 +25,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 /* String */
 static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -136,6 +137,24 @@ static KMETHOD Int_toString(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(KLIB new_kString(kctx, buf, strlen(buf), SPOL_ASCII));
 }
 
+//## @Const method Object Boolean.box();
+static KMETHOD Boolean_box(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kBoolean *o = !!(sfp[0].unboxValue) ? K_TRUE : K_FALSE;
+	sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;
+	RETURN_(o);
+}
+
+//## @Const method Object Int.box();
+static KMETHOD Int_box(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KonohaClass *c = O_ct(sfp[K_RTNIDX].asObject);
+	DBG_P("reqt=%s", CT_t(c));
+	DBG_ASSERT(CT_isUnbox(c));
+	sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;
+	RETURN_(KLIB new_kObject(kctx, c, sfp[0].unboxValue));
+}
+
 //## @Const method String String.toInt();
 static KMETHOD String_toInt(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -188,10 +207,8 @@ static KMETHOD Func_new(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Func_invoke(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFunc* fo = sfp[0].asFunc;
-	DBG_P("fo=%s", CT_t(O_ct(fo)));
 	DBG_ASSERT(IS_Func(fo));
 	DBG_ASSERT(IS_Method(fo->mtd));
-	DBG_P("fo->mtd->invokeMethodFunc == %p", fo->mtd->invokeMethodFunc);
 	KSETv_AND_WRITE_BARRIER(NULL, sfp[0].asObject, fo->self, GC_NO_WRITE_BARRIER);
 	KSELFCALL(sfp, fo->mtd);
 }
@@ -213,7 +230,8 @@ static KMETHOD System_assert(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD System_p(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kfileline_t uline = sfp[K_RTNIDX].uline;
-	kreportf(NoneTag, uline, "%s", S_text(sfp[1].asString));
+	const char *text = (IS_NULL(sfp[1].asString)) ? K_NULLTEXT : S_text(sfp[1].asString);
+	kreportf(NoneTag, uline, "%s", text);
 }
 
 //## method void System.gc();

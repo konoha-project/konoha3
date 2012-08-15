@@ -60,7 +60,7 @@ typedef struct {
 } KModuleByteCode;
 
 typedef struct {
-	KonohaContextModule      h;
+	KonohaModuleContext      h;
 	kfileline_t      uline;
 	kArray          *codeList;
 	kBasicBlock     *lbEND;  // ON GCSTACK

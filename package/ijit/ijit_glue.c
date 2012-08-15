@@ -44,7 +44,7 @@ typedef struct {
 } kmodjit_t;
 
 typedef struct {
-	KonohaContextModule h;
+	KonohaModuleContext h;
 } kjitmod_t;
 
 static void kmodjit_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)

@@ -57,19 +57,6 @@ static KMETHOD StmtTyCheck_while(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNb_(ret);
 }
 
-static KMETHOD StmtTyCheck_for(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_StmtTyCheck(stmt, gma);
-	DBG_P("for statement .. ");
-	int ret = false;
-	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0)) {
-		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
-		ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
-		kStmt_typed(stmt, LOOP);
-	}
-	RETURNb_(ret);
-}
-
 static inline kStmt* kStmt_getParentNULL(kStmt *stmt)
 {
 	return stmt->parentBlockNULL->parentStmtNULL;
@@ -112,9 +99,9 @@ static kbool_t while_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileli
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("while"), _LOOP, StmtTyCheck_(while), .rule = "\"while\" \"(\" $Expr \")\" $Block",},
-		{ .keyword = SYM_("break"), StmtTyCheck_(break), .rule = "\"break\" [ $Const ]", },
-		{ .keyword = SYM_("continue"), StmtTyCheck_(continue), .rule = "\"continue\" [ $Const ]", },
-//		{ .keyword = SYM_("for"), _LOOP, StmtTyCheck_(for), .rule = "\"for\" \"(\" var: $Block \";\" $Expr \";\" each: $Block \")\" $Block", },
+		{ .keyword = SYM_("break"), StmtTyCheck_(break), .rule = "\"break\" [ $Symbol ]", },
+		{ .keyword = SYM_("continue"), StmtTyCheck_(continue), .rule = "\"continue\" [ $Symbol ]", },
+//		{ .keyword = SYM_("for"), _LOOP, StmtTyCheck_(for), .rule = "\"for\" \"(\" [ var: $Block \";\" $Expr \";\" each: $Block ] \")\" $Block", },
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);

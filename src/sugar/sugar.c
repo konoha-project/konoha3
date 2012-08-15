@@ -79,7 +79,7 @@ kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, kfileline_t uli
 /* ------------------------------------------------------------------------ */
 /* [KonohaContext_getSugarContext(kctx)] */
 
-static void SugarContext_reftrace(KonohaContext *kctx, struct KonohaContextModule *baseh)
+static void SugarContext_reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh)
 {
 	SugarContext *base = (SugarContext*)baseh;
 	BEGIN_REFTRACE(6);
@@ -90,7 +90,7 @@ static void SugarContext_reftrace(KonohaContext *kctx, struct KonohaContextModul
 	KREFTRACEv(base->definedMethodList);
 	END_REFTRACE();
 }
-static void SugarContext_free(KonohaContext *kctx, struct KonohaContextModule *baseh)
+static void SugarContext_free(KonohaContext *kctx, struct KonohaModuleContext *baseh)
 {
 	SugarContext *base = (SugarContext*)baseh;
 	KLIB Karray_free(kctx, &base->errorMessageBuffer);
@@ -112,7 +112,7 @@ static void SugarModule_setup(KonohaContext *kctx, struct KonohaModule *def, int
 		KINITv(base->singleBlock, new_(Block, NULL));
 		KLIB kArray_add(kctx, base->singleBlock->stmtList, K_NULL);
 		KLIB Karray_init(kctx, &base->errorMessageBuffer, K_PAGESIZE);
-		kctx->modlocal[MOD_sugar] = (KonohaContextModule*)base;
+		kctx->modlocal[MOD_sugar] = (KonohaModuleContext*)base;
 	}
 }
 
@@ -232,18 +232,20 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kStmt_tyCheckByName        = kStmt_tyCheckByName;
 	mod->kBlock_tyCheckAll          = kBlock_tyCheckAll;
 	mod->kStmt_tyCheckCallParamExpr = kStmt_tyCheckCallParamExpr;
-	mod->new_TypedMethodCall        = new_TypedMethodCall;
+	mod->new_TypedCallExpr          = new_TypedCallExpr;
 	mod->kStmt_declType             = kStmt_declType;
 	mod->kNameSpace_defineSyntax    = kNameSpace_defineSyntax;
 	mod->kNameSpace_getSyntax       = kNameSpace_getSyntax;
 	mod->kArray_addSyntaxRule       = kArray_addSyntaxRule;
 	mod->kNameSpace_setSugarFunc    = kNameSpace_setSugarFunc;
 	mod->kNameSpace_addSugarFunc    = kNameSpace_addSugarFunc;
-	mod->new_Block                  = new_Block;
+	mod->new_kBlock                  = new_kBlock;
+	mod->new_kStmt                  = new_kStmt;
 	mod->kBlock_insertAfter         = kBlock_insertAfter;
-	mod->kStmt_parseExpr            = kStmt_parseExpr;
+	mod->new_UntypedTermExpr        = new_UntypedTermExpr;
+	mod->new_UntypedCallStyleExpr   = new_UntypedCallStyleExpr;
 	mod->kStmt_parseOperatorExpr    = kStmt_parseOperatorExpr;
-	mod->new_ConsExpr               = new_ConsExpr;
+	mod->kStmt_parseExpr            = kStmt_parseExpr;
 	mod->kStmt_addExprParam         = kStmt_addExprParam;
 	mod->kStmt_rightJoinExpr        = kStmt_rightJoinExpr;
 	mod->Token_pERR                 = Token_pERR;

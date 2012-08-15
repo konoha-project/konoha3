@@ -115,25 +115,6 @@ static kbool_t CT_isa(KonohaContext *kctx, ktype_t cid1, ktype_t cid2)
 	return ct->isSubType(kctx, ct, t);
 }
 
-static kExpr *new_BoxingExpr(KonohaContext *kctx, kExpr *expr, ktype_t reqty)
-{
-	if(expr->build == TEXPR_NCONST) {
-		kExprVar *Wexpr = (kExprVar*)expr;
-		Wexpr->build = TEXPR_CONST;
-		KINITp(Wexpr, Wexpr->objectConstValue, KLIB new_kObject(kctx, CT_(Wexpr->ty), Wexpr->unboxConstValue));
-		Expr_setObjectConstValue(Wexpr, 1);
-		Wexpr->ty = reqty;
-		return expr;
-	}
-	else {
-		kExprVar *texpr = GCSAFE_new(ExprVar, NULL);
-		KINITv(texpr->single, expr);
-		texpr->build = TEXPR_BOX;
-		texpr->ty = reqty;
-		return texpr;
-	}
-}
-
 static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, ktype_t reqty, int pol)
 {
 	kExpr *texpr = expr;
@@ -158,14 +139,16 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 		}
 		if(CT_isa(kctx, texpr->ty, reqty)) {
 			if(TY_isUnbox(texpr->ty) && !TY_isUnbox(reqty)) {
-				return new_BoxingExpr(kctx, expr, reqty);
+				kMethod *mtd = kNameSpace_getMethodNULL(kctx, Stmt_nameSpace(stmt), TY_Int, MN_("box"), 0, MPOL_PARAMSIZE);
+				return new_TypedCallExpr(kctx, stmt, gma, reqty, mtd, 1, texpr);
+				//return new_BoxingExpr(kctx, expr, reqty);
 			}
 			return texpr;
 		}
 		kMethod *mtd = kNameSpace_getCastMethodNULL(kctx, Stmt_nameSpace(stmt), texpr->ty, reqty);
 		DBG_P("finding cast %s => %s: %p", TY_t(texpr->ty), TY_t(reqty), mtd);
 		if(mtd != NULL && (Method_isCoercion(mtd) || FLAG_is(pol, TPOL_COERCION))) {
-			return new_TypedMethodCall(kctx, stmt, reqty, mtd, gma, 1, texpr);
+			return new_TypedCallExpr(kctx, stmt, gma, reqty, mtd, 1, texpr);
 		}
 		return kExpr_p(stmt, expr, ErrTag, "%s is requested, but %s is given", TY_t(reqty), TY_t(texpr->ty));
 	}
@@ -300,7 +283,7 @@ static kBlock* Method_newBlock(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns
 	}
 	TokenRange rangeBuf, *range = new_TokenListRange(kctx, ns, KonohaContext_getSugarContext(kctx)->preparedTokenList, &rangeBuf);
 	TokenRange_tokenize(kctx, range, script, uline);
-	kBlock *bk = new_Block(kctx, NULL/*parentStmt*/, range, SemiColon);
+	kBlock *bk = new_kBlock(kctx, NULL/*parentStmt*/, range, SemiColon);
 	TokenRange_pop(kctx, range);
 	return bk;
 }

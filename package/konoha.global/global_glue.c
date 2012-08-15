@@ -154,7 +154,7 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp)
 		RETURNb_(false);
 	}
 	SUGAR Stmt_p(kctx, stmt, NULL, InfoTag, "%s has type %s", SYM_t(fn), TY_t(expr->ty));
-	expr = SUGAR new_TypedMethodCall(kctx, stmt, TY_void, mtd, gma, 2, new_ConstValueExpr(kctx, O_typeId(scr), scr), expr);
+	expr = SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_void, mtd,  2, new_ConstValueExpr(kctx, O_typeId(scr), scr), expr);
 	KLIB kObject_setObject(kctx, stmt, KW_ExprPattern, TY_Expr, expr);
 	kStmt_typed(stmt, EXPR);
 	RETURNb_(true);
@@ -184,8 +184,7 @@ static kbool_t kScriptObject_typeDeclAndSetter(KonohaContext *kctx, kObject *scr
 	if(mtd != NULL) {
 		kExpr *recvExpr =  new_ConstValueExpr(kctx, O_typeId(scr), scr);
 		PUSH_GCSTACK(recvExpr);
-		kExpr *setterExpr = SUGAR new_TypedMethodCall(kctx, stmt, TY_void, mtd, gma, 2, recvExpr, valueExpr);
-		PUSH_GCSTACK(setterExpr);
+		kExpr *setterExpr = SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_void, mtd,  2, recvExpr, valueExpr);
 		kStmt *newstmt = GCSAFE_new(Stmt, stmt->uline);
 		kStmt_setsyn(newstmt, SYN_(ns, KW_ExprPattern));
 		KLIB kObject_setObject(kctx, newstmt, KW_ExprPattern, TY_Expr, setterExpr);
