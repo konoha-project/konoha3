@@ -6,8 +6,9 @@ int succ(int n) {
 
 void test() {
 	int a;
-	assert(succ(a = 1) == 2);
+	int b = succ(a = 1);
 	assert(a == 1);
+	assert(b == 2);
 }
 
 test();
