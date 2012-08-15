@@ -411,7 +411,7 @@ static KMETHOD ExprTyCheck_Squote(KonohaContext *kctx, KonohaStack *sfp)
 		int ch = S_text(s)[0];
 		RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_Int, ch));
 	} else {
-		SUGAR Stmt_p(kctx, stmt, (kToken*)expr, ErrTag, "single quote doesn't accept multi characters, '%s'", S_text(s));
+		SUGAR kStmt_printMessage(kctx, stmt, (kToken*)expr, ErrTag, "single quote doesn't accept multi characters, '%s'", S_text(s));
 	}
 	RETURN_(K_NULLEXPR);
 }

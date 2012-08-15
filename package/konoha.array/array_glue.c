@@ -61,6 +61,7 @@ static KMETHOD Array_getSize(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(kArray_size(a));
 }
 
+
 #define KARRAY_LIST_SIZE_MAX (1024 * 1024)
 static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -115,6 +116,23 @@ static void UnboxArray_add(KonohaContext *kctx, kArray *o, uintptr_t value)
 	kArray_setsize(a2, (asize+1));
 }
 
+static void UnboxArray_insert(KonohaContext *kctx, kArray *o, size_t n, uintptr_t v)
+{
+    size_t asize = kArray_size(o);
+    struct _kAbstractArray *a = (struct _kAbstractArray*)o;
+    if(!(n < asize)) {
+        UnboxArray_add(kctx, o, v);
+    }
+    else {
+        NArray_ensureMinimumSize(kctx, a, asize+1);
+	DBG_ASSERT(a->a.objectItems[asize] == NULL);
+	kArrayVar *a2 = (kArrayVar *)a;
+        memmove(a2->unboxItems+(n+1), a2->unboxItems+n, sizeof(uintptr_t) * (asize - n));
+	a2->unboxItems[n] = v;
+	kArray_setsize(a2, (asize+1));
+    }
+}
+
 static KMETHOD Array_add1(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = (kArray *)sfp[0].asObject;
@@ -125,6 +143,41 @@ static KMETHOD Array_add1(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
+static KMETHOD Array_push(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kArray *a = (kArray *)sfp[0].asObject;
+	Array_add1(kctx, sfp);
+        RETURNi_(kArray_size(a));
+}
+
+static KMETHOD Array_unshift(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kArray *a = (kArray *)sfp[0].asObject;
+	if (kArray_isUnboxData(a)) {
+		UnboxArray_insert(kctx, a, 0, sfp[1].unboxValue);
+	} else {
+		KLIB kArray_insert(kctx, a, 0, sfp[1].asObject);
+	}
+        RETURNi_(kArray_size(a));
+}
+
+// TODO: it dosent work well.
+/*
+static KMETHOD Array_pop(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kArray *a = sfp[0].asArray;
+	size_t n = kArray_size(a) - 1;
+	if(kArray_isUnboxData(a)) {
+                uintptr_t v = a->unboxItems[n];
+                kArray_setsize((kArrayVar *)a, n);
+		RETURNd_(v);
+	}
+	else {
+                ((struct _kAbstractArray*)a)->a.bytesize = n * sizeof(void*);
+		RETURN_(a->objectItems[n]);
+	}
+}
+*/
 
 static KMETHOD Array_new(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -164,8 +217,12 @@ static	kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public|_Im, _F(Array_get), TY_0,   TY_Array, MN_("get"), 1, TY_Int, FN_("index"),
 		_Public,     _F(Array_set), TY_void, TY_Array, MN_("set"), 2, TY_Int, FN_("index"),  TY_0, FN_("value"),
 		_Public,     _F(Array_getSize), TY_Int, TY_Array, MN_("getSize"), 0,
+		_Public,     _F(Array_getSize), TY_Int, TY_Array, MN_("getlength"), 0,
 		_Public,     _F(Array_newArray), TY_Array, TY_Array, MN_("newArray"), 1, TY_Int, FN_("size"),
 		_Public,     _F(Array_add1), TY_void, TY_Array, MN_("add"), 1, TY_0, FN_("value"),
+		_Public,     _F(Array_push), TY_Int, TY_Array, MN_("push"), 1, TY_0, FN_("value"),
+		//_Public,     _F(Array_pop), TY_0, TY_Array, MN_("pop"), 0,
+		_Public,     _F(Array_unshift), TY_Int, TY_Array, MN_("unshift"), 1, TY_0, FN_("value"),
 		_Public|kMethod_Hidden, _F(Array_newList), TY_Array, TY_Array, MN_("newList"), 0,
 		_Public|_Im, _F(Array_new), TY_void, TY_Array, MN_("new"), 1, TY_Int, FN_("size"),
 		DEND,
@@ -233,9 +290,9 @@ static KMETHOD ParseExpr_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
 	KonohaClass *genericsClass = NULL;
-	int nextIdx = SUGAR kStmt_parseTypePattern(kctx, stmt, Stmt_nameSpace(stmt), tokenList, beginIdx, endIdx, &genericsClass);
+	int nextIdx = SUGAR kkStmt_printMessagearseTypePattern(kctx, stmt, Stmt_nameSpace(stmt), tokenList, beginIdx, endIdx, &genericsClass);
 	if (nextIdx != -1) {  // to avoid Func[T]
-		RETURN_(SUGAR kStmt_parseOperatorExpr(kctx, stmt, tokenList->tokenItems[beginIdx]->resolvedSyntaxInfo, tokenList, beginIdx, beginIdx, endIdx));
+		RETURN_(SUGAR kkStmt_printMessagearseOperatorExpr(kctx, stmt, tokenList->tokenItems[beginIdx]->resolvedSyntaxInfo, tokenList, beginIdx, beginIdx, endIdx));
 	}
 	kToken *currentToken = tokenList->tokenItems[operatorIdx];
 	if(beginIdx == operatorIdx) {
@@ -244,7 +301,7 @@ static KMETHOD ParseExpr_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 		RETURN_(SUGAR kStmt_addExprParam(kctx, stmt, arrayExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), /*allowEmpty*/1));
 	}
 	else {
-		kExpr *leftExpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx);
+		kExpr *leftExpr = SUGAR kkStmt_printMessagearseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx);
 		if(leftExpr == K_NULLEXPR) {
 			RETURN_(leftExpr);
 		}

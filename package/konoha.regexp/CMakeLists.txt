@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 2.6)
+check_include_files(pcre.h HAVE_PCRE_H)
+if(NOT HAVE_PCRE_H)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/missing)
+endif(NOT HAVE_PCRE_H)
+
+find_library(HAVE_LIBPCRE NAMES pcre)
+if(HAVE_LIBPCRE)
+set(PACKAGE_EXTRA_LIBRARY ${HAVE_LIBPCRE})
+set(PACKAGE_SOURCE_CODE regexp_glue.c)
+add_konoha_package(konoha.regexp)
+endif(HAVE_LIBPCRE)

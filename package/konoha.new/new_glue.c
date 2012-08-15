@@ -62,13 +62,13 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_ASSERT(beginIdx == currentIdx);
 	kTokenVar *newToken = tokenList->tokenVarItems[beginIdx];   // new Class (
 	KonohaClass *foundClass = NULL;
-	int nextIdx = SUGAR kStmt_parseTypePattern(kctx, stmt, Stmt_nameSpace(stmt), tokenList, beginIdx + 1, endIdx, &foundClass);
+	int nextIdx = SUGAR kkStmt_printMessagearseTypePattern(kctx, stmt, Stmt_nameSpace(stmt), tokenList, beginIdx + 1, endIdx, &foundClass);
 	if(nextIdx != -1 && nextIdx < kArray_size(tokenList)) {
 		kToken *nextTokenAfterClassName = tokenList->tokenItems[nextIdx];
 //		if (ct->typeId == TY_void) {
-//			RETURN_(SUGAR Stmt_p(kctx, stmt, tk1, ErrTag, "undefined class: %s", S_text(tk1->text)));
+//			RETURN_(SUGAR kStmt_printMessage(kctx, stmt, tk1, ErrTag, "undefined class: %s", S_text(tk1->text)));
 //		} else if (CT_isVirtual(ct)) {
-//			SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "invalid application of 'new' to incomplete class %s", CT_t(ct));
+//			SUGAR kStmt_printMessage(kctx, stmt, NULL, ErrTag, "invalid application of 'new' to incomplete class %s", CT_t(ct));
 //		}
 		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {  // new C (...)
 			SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);

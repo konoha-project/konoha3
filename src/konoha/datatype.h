@@ -453,11 +453,11 @@ static kMethod* new_kMethod(KonohaContext *kctx, uintptr_t flag, ktype_t cid, km
 	mtd->flag    = flag;
 	mtd->typeId     = cid;
 	mtd->mn      = mn;
-	KLIB Method_setFunc(kctx, mtd, func);
+	KLIB kMethod_setFunc(kctx, mtd, func);
 	return mtd;
 }
 
-static kParam* Method_setParam(KonohaContext *kctx, kMethod *mtd_, ktype_t rtype, int psize, const kparamtype_t *p)
+static kParam* kMethod_setParam(KonohaContext *kctx, kMethod *mtd_, ktype_t rtype, int psize, const kparamtype_t *p)
 {
 	kparamid_t paramId = Kparam(kctx, rtype, psize, p);
 	if(mtd_ != NULL) {
@@ -916,7 +916,7 @@ static void KTYTABLE_initkklib(KonohaLibVar *l)
 	l->kArray_clear         = kArray_clear;
 	l->new_kMethod          = new_kMethod;
 	l->Kparamdom            = Kparamdom;
-	l->Method_setParam     = Method_setParam;
+	l->kMethod_setParam     = kMethod_setParam;
 	l->kMethod_indexOfField = STUB_Method_indexOfField;
 	l->Konoha_defineClass    = Konoha_defineClass;
 	l->Knull = Knull;
@@ -1062,8 +1062,8 @@ static void Konoha_loadDefaultMethod(KonohaContext *kctx)
 		_Public|_Immutable|_Const, _F(Int_opGT),  TY_Boolean, TY_Int, MN_(">"),  1, TY_Int, FN_x,
 		_Public|_Immutable|_Const, _F(Int_opGTE), TY_Boolean, TY_Int, MN_(">="), 1, TY_Int, FN_x,
 		_Public|_Immutable|_Const,  _F(Int_toString), TY_String, TY_Int, MN_to(TY_String), 0,
-		_Public|_Immutable|_Const|kMethod_SmartReturn|kMethod_Hidden, _F(Boolean_box), TY_Object, TY_Boolean, MN_("box"), 0,
-		_Public|_Immutable|_Const|kMethod_SmartReturn|kMethod_Hidden, _F(Int_box), TY_Object, TY_Int, MN_("box"), 0,
+		_Public|_Immutable|_Const|kMethod_SmartReturn|kMethod_Hidden, _F(Boolean_box), TY_Object, TY_Boolean, MN_box, 0,
+		_Public|_Immutable|_Const|kMethod_SmartReturn|kMethod_Hidden, _F(Int_box), TY_Object, TY_Int, MN_box, 0,
 		_Public|_Immutable|_Const, _F(String_opEQ),  TY_Boolean, TY_String, MN_("=="),  1, TY_String, FN_x ,
 		_Public|_Immutable|_Const, _F(String_opNEQ), TY_Boolean, TY_String, MN_("!="), 1, TY_String, FN_x ,
 		_Public|_Immutable|_Const, _F(String_toInt), TY_Int, TY_String, MN_to(TY_Int), 0,

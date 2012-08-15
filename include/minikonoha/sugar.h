@@ -432,7 +432,7 @@ struct kStmtVar {
 #define kStmt_getUnboxValue(CTX, O, K, DEF)       (KLIB kObject_getUnboxValue(CTX, UPCAST(O), K, DEF))
 #define kStmt_setUnboxValue(CTX, O, K, T, V)      KLIB kObject_setUnboxValue(CTX, UPCAST(O), K, T, V)
 #define kStmt_removeKey(CTX, O, K)                KLIB kObject_removeKey(CTX, UPCAST(O), K)
-#define kStmt_protoEach(CTX, O, THUNK, F)         KLIB kObject_protoEach(CTX, UPCAST(O), THUNK, F)
+#define kkStmt_printMessagerotoEach(CTX, O, THUNK, F)         KLIB kObject_protoEach(CTX, UPCAST(O), THUNK, F)
 
 struct kBlockVar {
 	KonohaObjectHeader   h;
@@ -530,9 +530,9 @@ typedef struct {
 	void   (*kNameSpace_setTokenizeFunc)(KonohaContext *, kNameSpace *, int ch, TokenizeFunc, kFunc *, int isAddition);
 	void   (*TokenRange_tokenize)(KonohaContext *, TokenRange *, const char *, kfileline_t);
 	kbool_t (*TokenRange_resolved)(KonohaContext *kctx, TokenRange *, TokenRange *);
-	int     (*kStmt_parseTypePattern)(KonohaContext *, kStmt *, kNameSpace *, kArray *, int , int , KonohaClass **classRef);
+	int     (*kkStmt_printMessagearseTypePattern)(KonohaContext *, kStmt *, kNameSpace *, kArray *, int , int , KonohaClass **classRef);
 
-	uintptr_t   (*kStmt_parseFlag)(KonohaContext *kctx, kStmt *stmt, KonohaFlagSymbolData *flagData, uintptr_t flag);
+	uintptr_t   (*kkStmt_printMessagearseFlag)(KonohaContext *kctx, kStmt *stmt, KonohaFlagSymbolData *flagData, uintptr_t flag);
 	kToken*     (*kStmt_getToken)(KonohaContext *, kStmt *, ksymbol_t kw, kToken *def);
 	kExpr*      (*kStmt_getExpr)(KonohaContext *, kStmt *, ksymbol_t kw, kExpr *def);
 	const char* (*kStmt_getText)(KonohaContext *, kStmt *, ksymbol_t kw, const char *def);
@@ -551,8 +551,8 @@ typedef struct {
 
 	kExpr*     (*new_UntypedTermExpr)(KonohaContext *, kToken *tk);
 	kExpr*     (*new_UntypedCallStyleExpr)(KonohaContext *, SugarSyntax *syn, int n, ...);
-	kExpr*     (*kStmt_parseOperatorExpr)(KonohaContext *, kStmt *, SugarSyntax *, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx);
-	kExpr*     (*kStmt_parseExpr)(KonohaContext *, kStmt *, kArray *tokenList, int s, int e);
+	kExpr*     (*kkStmt_printMessagearseOperatorExpr)(KonohaContext *, kStmt *, SugarSyntax *, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx);
+	kExpr*     (*kkStmt_printMessagearseExpr)(KonohaContext *, kStmt *, kArray *tokenList, int s, int e);
 	kExpr*     (*kStmt_addExprParam)(KonohaContext *, kStmt *, kExpr *, kArray *tokenList, int, int, int allowEmpty);
 	kExpr*     (*kStmt_rightJoinExpr)(KonohaContext *, kStmt *, kExpr *, kArray *, int, int);
 
@@ -568,7 +568,7 @@ typedef struct {
 	kbool_t     (*kStmt_declType)(KonohaContext *, kStmt *, kGamma *, ktype_t, kExpr *, TypeDeclFunc, kStmt **);
 
 	void       (*Token_pERR)(KonohaContext *, kTokenVar *, const char *fmt, ...);
-	kExpr *    (*Stmt_p)(KonohaContext *, kStmt *, kToken *, int pe, const char *fmt, ...);
+	kExpr *    (*kStmt_printMessage)(KonohaContext *, kStmt *, kToken *, int pe, const char *fmt, ...);
 
 } KModuleSugar;
 

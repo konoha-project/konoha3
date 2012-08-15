@@ -199,11 +199,11 @@ static KMETHOD NameSpace_addExprTyCheck(KonohaContext *kctx, KonohaStack *sfp)
 //}
 
 //## Expr Stmt.printError(String msg);
-static KMETHOD Stmt_printError(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD kStmt_printMessagerintError(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kStmt   *stmt  = sfp[0].asStmt;
 	kString *msg   = sfp[1].asString;
-	SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "%s", S_text(msg));
+	SUGAR kStmt_printMessage(kctx, stmt, NULL, ErrTag, "%s", S_text(msg));
 	RETURN_(K_NULLEXPR);
 }
 
@@ -254,7 +254,7 @@ static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp)
 	kStmt *stmt  = sfp[0].asStmt;
 	kArray *tokenList  = sfp[1].asArray;
 	int s = sfp[2].intValue, e = sfp[3].intValue;
-	RETURN_(SUGAR kStmt_parseExpr(kctx, stmt, tokenList, s, e));
+	RETURN_(SUGAR kkStmt_printMessagearseExpr(kctx, stmt, tokenList, s, e));
 }
 
 ////## Expr Stmt.newMethodCallExpr(Token key, Token self);
@@ -363,11 +363,11 @@ static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public, _F(NameSpace_addStmtTyCheck), TY_void, TY_NameSpace, MN_("addStmtTyCheck"), 2, TY_String, FN_key, TY_FuncStmtTyCheck, FN_func,
 		_Public, _F(NameSpace_addExprTyCheck), TY_void, TY_NameSpace, MN_("addExprTyCheck"), 2, TY_String, FN_key, TY_FuncExprTyCheck, FN_func,
 
-		_Public, _F(Stmt_printError), TY_Expr, TY_Stmt, MN_("printError"), 1, TY_String, FN_msg,
+		_Public, _F(kStmt_printMessagerintError), TY_Expr, TY_Stmt, MN_("printError"), 1, TY_String, FN_msg,
 
 		_Public, _F(Stmt_newExpr), TY_Expr, TY_Stmt, MN_("newExpr"), 1, TY_String, FN_key,
 		_Public, _F(Stmt_setType), TY_void, TY_Stmt, MN_("setType"), 1, TY_Int, FN_x,
-//		_Public, _F(Stmt_parsedExpr), TY_Expr, TY_Stmt, MN_("parseExpr"), 3, TY_TokenArray, FN_tokenList, TY_Int, FN_s, TY_Int, FN_e,
+//		_Public, _F(kStmt_printMessagearsedExpr), TY_Expr, TY_Stmt, MN_("parseExpr"), 3, TY_TokenArray, FN_tokenList, TY_Int, FN_s, TY_Int, FN_e,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);
@@ -419,7 +419,7 @@ static KMETHOD StmtTyCheck_sugar(KonohaContext *kctx, KonohaStack *sfp)
 		SugarSyntaxVar *syn = kNameSpace_guessSyntaxFromTokenList(kctx, Stmt_nameSpace(stmt), tokenList);
 		if(syn != NULL) {
 			if(syn->syntaxRuleNULL != NULL) {
-				SUGAR Stmt_p(kctx, stmt, NULL, WarnTag, "overriding syntax rule: %s", KW_t(syn->keyword));
+				SUGAR kStmt_printMessage(kctx, stmt, NULL, WarnTag, "overriding syntax rule: %s", KW_t(syn->keyword));
 				KLIB kArray_clear(kctx, syn->syntaxRuleNULL, 0);
 			}
 			else {
