@@ -134,7 +134,7 @@ set(PACKAGES
 	posix.fd
 ##	posix.socket
 ##	konoha.rope
-	konoha.sql
+##	konoha.sql
 ##	konoha.subproc
 	konoha.mpi
 ##	curl
@@ -144,7 +144,7 @@ set(PACKAGES
 	python
 	apache
 #	openssl
-#	logpool
+	logpool
 	konoha.date
 )
 
