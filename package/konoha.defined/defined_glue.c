@@ -89,7 +89,7 @@ static KMETHOD ParseExpr_Defined(KonohaContext *kctx, KonohaStack *sfp)
 		kTokenVar *definedToken = tokenList->tokenVarItems[beginIdx];   // defined
 		kTokenVar *pToken = tokenList->tokenVarItems[beginIdx+1];
 		if(IS_Array(pToken->subTokenList)) {
-			kExpr *expr = SUGAR new_ConsExpr(kctx, definedToken->resolvedSyntaxInfo, 1, definedToken);
+			kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, definedToken->resolvedSyntaxInfo, 1, definedToken);
 			filterArrayList(kctx, Stmt_nameSpace(stmt), pToken->subTokenList, 0, kArray_size(pToken->subTokenList));
 			RETURN_(SUGAR kStmt_addExprParam(kctx, stmt, expr, pToken->subTokenList, 0, kArray_size(pToken->subTokenList), 0/*isAllowEmpty*/));
 		}

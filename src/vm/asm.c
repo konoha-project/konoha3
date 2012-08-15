@@ -593,16 +593,16 @@ static void EXPR_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int s
 		}
 		break;
 	}
-	case TEXPR_BOX   : {
-		DBG_ASSERT(IS_Expr(expr->single));
-		EXPR_asm(kctx, stmt, a, expr->single, shift, espidx);
-		ASM(BOX, OC_(a), NC_(a), CT_(expr->single->ty));
-		break;
-	}
-	case TEXPR_UNBOX   : {
-		ASM(UNBOX, NC_(a), OC_(a), CT_(expr->ty));
-		break;
-	}
+//	case TEXPR_BOX   : {
+//		DBG_ASSERT(IS_Expr(expr->single));
+//		EXPR_asm(kctx, stmt, a, expr->single, shift, espidx);
+//		ASM(BOX, OC_(a), NC_(a), CT_(expr->single->ty));
+//		break;
+//	}
+//	case TEXPR_UNBOX   : {
+//		ASM(UNBOX, NC_(a), OC_(a), CT_(expr->ty));
+//		break;
+//	}
 	case TEXPR_CALL  :
 		CALL_asm(kctx, stmt, a, expr, shift, espidx);
 		if(a != espidx) {
@@ -986,7 +986,7 @@ static void Method_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
 /* ------------------------------------------------------------------------ */
 /* [ctxcode] */
 
-static void ctxcode_reftrace(KonohaContext *kctx, struct KonohaContextModule *baseh)
+static void ctxcode_reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh)
 {
 	ctxcode_t *base = (ctxcode_t*)baseh;
 	BEGIN_REFTRACE(2);
@@ -994,7 +994,7 @@ static void ctxcode_reftrace(KonohaContext *kctx, struct KonohaContextModule *ba
 	KREFTRACEv(base->constPools);
 	END_REFTRACE();
 }
-static void ctxcode_free(KonohaContext *kctx, struct KonohaContextModule *baseh)
+static void ctxcode_free(KonohaContext *kctx, struct KonohaModuleContext *baseh)
 {
 	ctxcode_t *base = (ctxcode_t*)baseh;
 	KFREE(base, sizeof(ctxcode_t));
@@ -1009,7 +1009,7 @@ static void kmodcode_setup(KonohaContext *kctx, struct KonohaModule *def, int ne
 		base->h.free     = ctxcode_free;
 		KINITv(base->codeList, new_(Array, K_PAGESIZE/sizeof(void*)));
 		KINITv(base->constPools, new_(Array, 64));
-		kctx->modlocal[MOD_code] = (KonohaContextModule*)base;
+		kctx->modlocal[MOD_code] = (KonohaModuleContext*)base;
 	}
 }
 

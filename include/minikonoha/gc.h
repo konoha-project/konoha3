@@ -42,7 +42,7 @@ extern "C" {
 //} kgcshare_t;
 //
 //typedef struct {
-//	KonohaContextModule h;
+//	KonohaModuleContext h;
 //} kgcmod_t;
 
 extern void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx);

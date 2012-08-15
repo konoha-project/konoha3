@@ -344,6 +344,7 @@ typedef struct kTokenVar                kTokenVar;
 typedef const struct kExprVar           kExpr;
 typedef struct kExprVar                 kExprVar;
 typedef const struct kStmtVar           kStmt;
+typedef const struct kStmtVar           kStmtNULL;  // Nullable
 typedef struct kStmtVar                 kStmtVar;
 typedef const struct kBlockVar          kBlock;
 typedef struct kBlockVar                kBlockVar;
@@ -436,7 +437,7 @@ typedef struct KonohaStack              KonohaStack;
 typedef struct KonohaStack              KonohaStackVar;
 
 typedef struct KonohaModule        KonohaModule;
-typedef struct KonohaContextModule KonohaContextModule;
+typedef struct KonohaModuleContext KonohaModuleContext;
 
 struct KonohaContextVar {
 	uintptr_t                         safepoint; // set to 1
@@ -446,7 +447,7 @@ struct KonohaContextVar {
 	KonohaRuntimeVar                 *share;
 	KonohaContextRuntimeVar          *stack;
 	KonohaModule                    **modshare;
-	KonohaContextModule             **modlocal;
+	KonohaModuleContext             **modlocal;
 	/* TODO(imasahiro)
 	 * checking modgc performance and remove
 	 * memshare/memlocal from context
@@ -522,10 +523,10 @@ struct KonohaContextRuntimeVar {
 //#define MOD_llvm    15
 #define MOD_REGEX   16
 
-struct KonohaContextModule {
+struct KonohaModuleContext {
 	uintptr_t unique;
-	void (*reftrace)(KonohaContext*, struct KonohaContextModule *);
-	void (*free)(KonohaContext*, struct KonohaContextModule *);
+	void (*reftrace)(KonohaContext*, struct KonohaModuleContext *);
+	void (*free)(KonohaContext*, struct KonohaModuleContext *);
 };
 
 struct KonohaModule {
@@ -905,6 +906,7 @@ struct kStringVar /* extends _Bytes */ {
 #define SPOL_NOPOOL        (1<<5)
 #define SPOL_NOCOPY        (1<<4)
 
+#define K_NULLTEXT          "null"
 #define new_T(t)            (KLIB new_kString(kctx, t, knh_strlen(t), SPOL_TEXT|SPOL_ASCII|SPOL_POOL))
 #define new_S(T, L)         (KLIB new_kString(kctx, T, L, SPOL_ASCII|SPOL_POOL))
 #define S_text(s)           ((const char*) (O_ct(s)->unbox(kctx, (kObject*)s)))
@@ -1175,6 +1177,7 @@ struct KonohaLibVar {
 	KonohaClass*    (*Kclass)(KonohaContext*, ktype_t, kfileline_t);
 	kString*        (*KonohaClass_shortName)(KonohaContext*, KonohaClass *ct);
 	KonohaClass*    (*KonohaClass_Generics)(KonohaContext*, KonohaClass *ct, ktype_t rty, int psize, kparamtype_t *p);
+	kbool_t         (*KonohaClass_isSubtype)(KonohaContext*, KonohaClass *, KonohaClass *);
 
 	kObject*        (*new_kObject)(KonohaContext*, KonohaClass *, uintptr_t);  // GCUNSAFE
 	kObject*        (*new_kObjectOnGCSTACK)(KonohaContext*, KonohaClass *, uintptr_t);

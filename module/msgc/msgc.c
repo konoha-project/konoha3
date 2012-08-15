@@ -105,7 +105,7 @@ typedef struct objpageTBL_t {
 #define K_ARENA_COUNT 3
 
 typedef struct kmemlocal_t {
-	KonohaContextModule     h;
+	KonohaModuleContext     h;
 	objpageTBL_t  *ObjectArenaTBL[K_ARENA_COUNT];
 	kGCObject     *freeObjectList[K_ARENA_COUNT];
 	kGCObject     *freeObjectTail[K_ARENA_COUNT];
@@ -702,9 +702,9 @@ static void gc_sweep(KonohaContext *kctx)
 }
 
 /* --------------------------------------------------------------- */
-static void MSGC_local_reftrace(KonohaContext *kctx, struct KonohaContextModule *baseh) {}
+static void MSGC_local_reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh) {}
 
-static void MSGC_local_free(KonohaContext *kctx, struct KonohaContextModule *baseh)
+static void MSGC_local_free(KonohaContext *kctx, struct KonohaModuleContext *baseh)
 {
 	kmemlocal_t *local = (kmemlocal_t *) baseh;
 	if(local->queue_capacity > 0) {
@@ -730,7 +730,7 @@ static void MSGC_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx
 		//do_bzero(base, sizeof(kmemlocal_t));
 		base->h.reftrace = MSGC_local_reftrace;
 		base->h.free     = MSGC_local_free;
-		kctx->modlocal[MOD_gc] = (KonohaContextModule*)base;
+		kctx->modlocal[MOD_gc] = (KonohaModuleContext*)base;
 		MSGC_SETUP(0);
 		MSGC_SETUP(1);
 		MSGC_SETUP(2);

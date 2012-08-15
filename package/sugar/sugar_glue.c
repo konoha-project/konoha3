@@ -27,15 +27,15 @@
 #include <stdio.h>
 
 ////## void Token.setKeyword(String keywork);
-//static KMETHOD Token_setKeyword(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
-//	kString *key = sfp[1].asString;
-//	ksymbol_t keyword = ksymbolA(S_text(key), S_size(key), _NEWID);
-//	tk->keyword = keyword;
-//	DBG_P("setkeyword=%s%s", KW_t(keyword));
-//	RETURNvoid_();
-//}
+static KMETHOD Token_setUnresolvedTokenType(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
+	kString *key = sfp[1].asString;
+	ksymbol_t keyword = ksymbolA(S_text(key), S_size(key), _NEWID);
+	tk->unresolvedTokenType = keyword;
+	DBG_P("setkeyword=%s%s", KW_t(keyword));
+	RETURNvoid_();
+}
 
 //## void Token.setText(String text);
 static KMETHOD Token_setText(KonohaContext *kctx, KonohaStack *sfp)
@@ -245,7 +245,7 @@ static KMETHOD Stmt_printError(KonohaContext *kctx, KonohaStack *sfp)
 //	kStmt *stmt  = sfp[0].asStmt;
 //	kArray *tokenList  = sfp[1].asArray;
 //	int s = sfp[2].intValue, e = sfp[3].intValue;
-//	RETURN_(SUGAR new_Block(kctx, Stmt_nameSpace(stmt), stmt, tokenList, s, e, ';'));
+//	RETURN_(SUGAR new_kBlock(kctx, Stmt_nameSpace(stmt), stmt, tokenList, s, e, ';'));
 //}
 
 //## Expr Stmt.newExpr(Token[] tokenList, int s, int e);
@@ -340,7 +340,7 @@ static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	//DBG_P("func=%s", TY_t(TY_FuncExprTyCheck));
 
 	KDEFINE_METHOD MethodData[] = {
-//		_Public, _F(Token_setKeyword),  TY_void, TY_Token, MN_("setKeyword"),  1, TY_String, FN_x,
+		_Public, _F(Token_setUnresolvedTokenType),  TY_void, TY_Token, MN_("setUnresolvedTokenType"),  1, TY_String, FN_x,
 		_Public, _F(Token_setText),  TY_void, TY_Token, MN_("setText"),  1, TY_String, FN_x,
 		_Public, _F(Token_setSubArray), TY_void, TY_Token, MN_("setSubArray"), 1, TY_StringArray, FN_x,
 //		_Public, _F(Token_isTypeName), TY_Boolean, TY_Token, MN_("isTypeName"), 0,
@@ -425,7 +425,7 @@ static KMETHOD StmtTyCheck_sugar(KonohaContext *kctx, KonohaStack *sfp)
 			else {
 				KINITv(syn->syntaxRuleNULL, new_(Array, 8));
 			}
-			TokenRange rangebuf = {tokenList, 0, kArray_size(tokenList), Stmt_nameSpace(stmt)};
+			TokenRange rangebuf = {Stmt_nameSpace(stmt), tokenList, 0, kArray_size(tokenList)};
 			if(SUGAR kArray_addSyntaxRule(kctx, syn->syntaxRuleNULL, &rangebuf)) {
 				r = 1;
 			}
@@ -470,8 +470,8 @@ static kbool_t sugar_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileli
 		DEFINE_KEYWORD(TEXPR_LOCAL),
 		DEFINE_KEYWORD(TEXPR_BLOCK),
 		DEFINE_KEYWORD(TEXPR_FIELD),
-		DEFINE_KEYWORD(TEXPR_BOX),
-		DEFINE_KEYWORD(TEXPR_UNBOX),
+//		DEFINE_KEYWORD(TEXPR_BOX),
+//		DEFINE_KEYWORD(TEXPR_UNBOX),
 		DEFINE_KEYWORD(TEXPR_CALL),
 		DEFINE_KEYWORD(TEXPR_AND),
 		DEFINE_KEYWORD(TEXPR_OR),

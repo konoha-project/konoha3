@@ -122,7 +122,7 @@ typedef struct {
 } kmodllvm_t;
 
 typedef struct {
-	KonohaContextModule h;
+	KonohaModuleContext h;
 } kllvmmod_t;
 
 namespace konoha {

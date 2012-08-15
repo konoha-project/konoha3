@@ -963,7 +963,7 @@ static void KTYTABLE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	initStructData(kctx);
 }
 
-static void constPoolMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p)
+static void constPoolMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
 {
 	BEGIN_REFTRACE(1);
 	KREFTRACEv(p->objectValue);
@@ -1061,10 +1061,12 @@ static void Konoha_loadDefaultMethod(KonohaContext *kctx)
 		_Public|_Immutable|_Const, _F(Int_opLTE), TY_Boolean, TY_Int, MN_("<="), 1, TY_Int, FN_x,
 		_Public|_Immutable|_Const, _F(Int_opGT),  TY_Boolean, TY_Int, MN_(">"),  1, TY_Int, FN_x,
 		_Public|_Immutable|_Const, _F(Int_opGTE), TY_Boolean, TY_Int, MN_(">="), 1, TY_Int, FN_x,
-		_Public|_Immutable|_Const|_Coercion, _F(Int_toString), TY_String, TY_Int, MN_to(TY_String), 0,
+		_Public|_Immutable|_Const,  _F(Int_toString), TY_String, TY_Int, MN_to(TY_String), 0,
+		_Public|_Immutable|_Const|kMethod_SmartReturn|kMethod_Hidden, _F(Boolean_box), TY_Object, TY_Boolean, MN_("box"), 0,
+		_Public|_Immutable|_Const|kMethod_SmartReturn|kMethod_Hidden, _F(Int_box), TY_Object, TY_Int, MN_("box"), 0,
 		_Public|_Immutable|_Const, _F(String_opEQ),  TY_Boolean, TY_String, MN_("=="),  1, TY_String, FN_x ,
 		_Public|_Immutable|_Const, _F(String_opNEQ), TY_Boolean, TY_String, MN_("!="), 1, TY_String, FN_x ,
-		_Public|_Immutable|_Const|_Coercion, _F(String_toInt), TY_Int, TY_String, MN_to(TY_Int), 0,
+		_Public|_Immutable|_Const, _F(String_toInt), TY_Int, TY_String, MN_to(TY_Int), 0,
 		_Public|_Immutable|_Const, _F(String_opADD), TY_String, TY_String, MN_("+"), 1, TY_String, FN_x | FN_COERCION,
 		_Public|_Const|_Hidden, _F(Func_new), TY_Func, TY_Func, MN_new, 2, TY_Object, FN_x, TY_Method, FN_x,
 		_Public|kMethod_SmartReturn|_Hidden, _F(Func_invoke), TY_Object, TY_Func, MN_("invoke"), 0,

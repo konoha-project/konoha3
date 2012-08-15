@@ -69,7 +69,7 @@ static KMETHOD HashMap_get(KonohaContext *kctx, KonohaStack *sfp)
 	KUtilsHashMapEntry *e = KLIB Kmap_get(kctx, map, hcode);
 
 	if (p1.ty == TY_Int || p1.ty == TY_Boolean ||
-			(IS_defineFloat() && p1.ty == TY_Float)) {
+			(IS_DefinedFloat() && p1.ty == TY_Float)) {
 		RETURNd_((uintptr_t)e->unboxValue);
 	} else {
 		RETURN_(e->objectValue);
@@ -89,7 +89,7 @@ static KMETHOD HashMap_set(KonohaContext *kctx, KonohaStack *sfp)
 	uintptr_t hcode = strhash(S_text(key), S_size(key));
 	KUtilsHashMapEntry *e = KLIB Kmap_newEntry(kctx, map, hcode);
 	if (p1.ty == TY_Int || p1.ty == TY_Boolean ||
-			(IS_defineFloat() && p1.ty == TY_Float)) {
+			(IS_DefinedFloat() && p1.ty == TY_Float)) {
 		e->unboxValue =(uintptr_t)sfp[2].intValue;
 	} else {
 		// object;

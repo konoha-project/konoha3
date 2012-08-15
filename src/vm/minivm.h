@@ -96,23 +96,7 @@ typedef struct OPNULL {
 	KonohaClass* ty;
 } OPNULL;
 
-#define OPCODE_BOX ((kopcode_t)10)
-typedef struct OPBOX {
-	KCODE_HEAD;
-	kreg_t a;
-	kreg_t b;
-	KonohaClass* ty;
-} OPBOX;
-
-#define OPCODE_UNBOX ((kopcode_t)11)
-typedef struct OPUNBOX {
-	KCODE_HEAD;
-	kreg_t a;
-	kreg_t b;
-	KonohaClass* ty;
-} OPUNBOX;
-
-#define OPCODE_LOOKUP ((kopcode_t)12)
+#define OPCODE_LOOKUP ((kopcode_t)10)
 typedef struct OPLOOKUP {
 	KCODE_HEAD;
 	kreg_t thisidx;
@@ -120,7 +104,7 @@ typedef struct OPLOOKUP {
 	kMethod* mtd;
 } OPLOOKUP;
 
-#define OPCODE_CALL ((kopcode_t)13)
+#define OPCODE_CALL ((kopcode_t)11)
 typedef struct OPCALL {
 	KCODE_HEAD;
 	uintptr_t uline;
@@ -129,48 +113,48 @@ typedef struct OPCALL {
 	kObject* tyo;
 } OPCALL;
 
-#define OPCODE_RET ((kopcode_t)14)
+#define OPCODE_RET ((kopcode_t)12)
 typedef struct OPRET {
 	KCODE_HEAD;
 } OPRET;
 
-#define OPCODE_NCALL ((kopcode_t)15)
+#define OPCODE_NCALL ((kopcode_t)13)
 typedef struct OPNCALL {
 	KCODE_HEAD;
 } OPNCALL;
 
-#define OPCODE_BNOT ((kopcode_t)16)
+#define OPCODE_BNOT ((kopcode_t)14)
 typedef struct OPBNOT {
 	KCODE_HEAD;
 	kreg_t c;
 	kreg_t a;
 } OPBNOT;
 
-#define OPCODE_JMP ((kopcode_t)17)
+#define OPCODE_JMP ((kopcode_t)15)
 typedef struct OPJMP {
 	KCODE_HEAD;
 	VirtualMachineInstruction  *jumppc;
 } OPJMP;
 
-#define OPCODE_JMPF ((kopcode_t)18)
+#define OPCODE_JMPF ((kopcode_t)16)
 typedef struct OPJMPF {
 	KCODE_HEAD;
 	VirtualMachineInstruction  *jumppc;
 	kreg_t a;
 } OPJMPF;
 
-#define OPCODE_TRYJMP ((kopcode_t)19)
+#define OPCODE_TRYJMP ((kopcode_t)17)
 typedef struct OPTRYJMP {
 	KCODE_HEAD;
 	VirtualMachineInstruction  *jumppc;
 } OPTRYJMP;
 
-#define OPCODE_YIELD ((kopcode_t)20)
+#define OPCODE_YIELD ((kopcode_t)18)
 typedef struct OPYIELD {
 	KCODE_HEAD;
 } OPYIELD;
 
-#define OPCODE_ERROR ((kopcode_t)21)
+#define OPCODE_ERROR ((kopcode_t)19)
 typedef struct OPERROR {
 	KCODE_HEAD;
 	uintptr_t uline;
@@ -178,20 +162,20 @@ typedef struct OPERROR {
 	kreg_t esp;
 } OPERROR;
 
-#define OPCODE_SAFEPOINT ((kopcode_t)22)
+#define OPCODE_SAFEPOINT ((kopcode_t)20)
 typedef struct OPSAFEPOINT {
 	KCODE_HEAD;
 	uintptr_t uline;
 	kreg_t esp;
 } OPSAFEPOINT;
 
-#define OPCODE_CHKSTACK ((kopcode_t)23)
+#define OPCODE_CHKSTACK ((kopcode_t)21)
 typedef struct OPCHKSTACK {
 	KCODE_HEAD;
 	uintptr_t uline;
 } OPCHKSTACK;
 
-#define OPCODE_TRACE ((kopcode_t)24)
+#define OPCODE_TRACE ((kopcode_t)22)
 typedef struct OPTRACE {
 	KCODE_HEAD;
 	uintptr_t uline;
@@ -200,7 +184,7 @@ typedef struct OPTRACE {
 } OPTRACE;
 
 	
-#define KOPCODE_MAX ((kopcode_t)25)
+#define KOPCODE_MAX ((kopcode_t)23)
 
 #define VMT_VOID       0
 #define VMT_ADDR       1
@@ -247,8 +231,6 @@ static const kOPDATA_t OPDATA[] = {
 	{"XNMOV", 0, 4, { VMT_RO, VMT_U, VMT_RN, VMT_CID, VMT_VOID}}, 
 	{"NEW", 0, 3, { VMT_RO, VMT_U, VMT_CID, VMT_VOID}}, 
 	{"NULL", 0, 2, { VMT_RO, VMT_CID, VMT_VOID}}, 
-	{"BOX", 0, 3, { VMT_RO, VMT_RN, VMT_CID, VMT_VOID}}, 
-	{"UNBOX", 0, 3, { VMT_RN, VMT_RO, VMT_CID, VMT_VOID}}, 
 	{"LOOKUP", 0, 3, { VMT_RO, VMT_NAMESPACE, VMT_METHOD, VMT_VOID}}, 
 	{"CALL", 0, 4, { VMT_U, VMT_RO, VMT_RO, VMT_CO, VMT_VOID}}, 
 	{"RET", 0, 0, { VMT_VOID}}, 
@@ -276,8 +258,6 @@ static void opcode_check(void)
 	assert(sizeof(OPXNMOV) <= sizeof(VirtualMachineInstruction));
 	assert(sizeof(OPNEW) <= sizeof(VirtualMachineInstruction));
 	assert(sizeof(OPNULL) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPBOX) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPUNBOX) <= sizeof(VirtualMachineInstruction));
 	assert(sizeof(OPLOOKUP) <= sizeof(VirtualMachineInstruction));
 	assert(sizeof(OPCALL) <= sizeof(VirtualMachineInstruction));
 	assert(sizeof(OPRET) <= sizeof(VirtualMachineInstruction));
@@ -356,11 +336,10 @@ static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *kctx, 
 	static void *OPJUMP[] = {
 		&&L_NOP, &&L_THCODE, &&L_ENTER, &&L_EXIT, 
 		&&L_NSET, &&L_NMOV, &&L_NMOVx, &&L_XNMOV, 
-		&&L_NEW, &&L_NULL, &&L_BOX, &&L_UNBOX, 
-		&&L_LOOKUP, &&L_CALL, &&L_RET, &&L_NCALL, 
-		&&L_BNOT, &&L_JMP, &&L_JMPF, &&L_TRYJMP, 
-		&&L_YIELD, &&L_ERROR, &&L_SAFEPOINT, &&L_CHKSTACK, 
-		&&L_TRACE, 
+		&&L_NEW, &&L_NULL, &&L_LOOKUP, &&L_CALL, 
+		&&L_RET, &&L_NCALL, &&L_BNOT, &&L_JMP, 
+		&&L_JMPF, &&L_TRYJMP, &&L_YIELD, &&L_ERROR, 
+		&&L_SAFEPOINT, &&L_CHKSTACK, &&L_TRACE, 
 	};
 #endif
 	krbp_t *rbp = (krbp_t*)sfp0;
@@ -414,16 +393,6 @@ static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *kctx, 
 	CASE(NULL) {
 		OPNULL *op = (OPNULL*)pc;
 		OPEXEC_NULL(op->a, op->ty); pc++;
-		GOTO_NEXT();
-	} 
-	CASE(BOX) {
-		OPBOX *op = (OPBOX*)pc;
-		OPEXEC_BOX(op->a, op->b, op->ty); pc++;
-		GOTO_NEXT();
-	} 
-	CASE(UNBOX) {
-		OPUNBOX *op = (OPUNBOX*)pc;
-		OPEXEC_UNBOX(op->a, op->b, op->ty); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(LOOKUP) {
