@@ -521,7 +521,7 @@ struct KonohaContextRuntimeVar {
 #define MOD_iconv      13
 //#define MOD_IO      14
 //#define MOD_llvm    15
-#define MOD_REGEX   16
+#define MOD_REGEXP   16
 
 struct KonohaModuleContext {
 	uintptr_t unique;
@@ -570,7 +570,7 @@ struct KonohaModule {
 		struct _kIterator *itr; \
 		struct kClass  *c; \
 		struct kDate *dt;\
-		struct kRegex  *re; \
+		struct kRegExp  *re; \
 		struct kRange  *range; \
 		struct kIterator *it; \
 		struct kMap           *m;    \

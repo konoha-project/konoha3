@@ -126,7 +126,8 @@ set(PACKAGES
 	konoha.while
 	sugar
 	llvm
-	konoha.pcre
+##	konoha.pcre
+	konoha.regexp
 ##	konoha.io
 	posix.process
 	posix.file
