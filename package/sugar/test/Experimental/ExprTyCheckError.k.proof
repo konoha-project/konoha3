@@ -1,0 +1,3 @@
+ - (error) (ExprTyCheckError.k:10) true was redefined
+ - (error) (ExprTyCheckError.k:10) System.assert accepts Boolean at the parameter 1
+Q.E.D.

@@ -31,7 +31,8 @@ extern int verbose_debug;
 
 static int _sum_  = 0;
 static int _sum2_ = 0;
-static void reftrace(KonohaContext *kctx, KUtilsHashMapEntry *e)
+
+static void reftrace(KonohaContext *kctx, KUtilsHashMapEntry *e, void *thunk)
 {
     _sum_ += e->unboxValue;
 }
@@ -43,40 +44,40 @@ static void reftrace2(KonohaContext *kctx, void *e)
 void test_Kmap(KonohaContext *kctx)
 {
     int i;
-    KUtilsHashMap* map = kctx->klib->Kmap_init(kctx, 4);
+    KUtilsHashMap* map = KLIB Kmap_init(kctx, 4);
     for (i = 0; i < 10; ++i) {
-        KUtilsHashMapEntry *entry = kctx->klib->Kmap_newEntry(kctx, map, i);
+        KUtilsHashMapEntry *entry = KLIB Kmap_newEntry(kctx, map, i);
         assert(entry->hcode == i);
         entry->unboxKey = i*2;
         entry->unboxValue = i;
     }
     for (i = 0; i < 10; ++i) {
-        KUtilsHashMapEntry *entry = kctx->klib->Kmap_get(kctx, map, i);
+        KUtilsHashMapEntry *entry = KLIB Kmap_get(kctx, map, i);
         assert(entry != NULL);
         assert(entry->unboxValue == i);
     }
-    kctx->klib->Kmap_reftrace(kctx, map, reftrace);
+    KLIB Kmap_each(kctx, map, NULL, reftrace);
     fprintf(stderr, "%d\n", _sum_);
     assert(_sum_ == 45);
 
     for (i = 0; i < 10; i+=2) {
-        KUtilsHashMapEntry *entry = kctx->klib->Kmap_get(kctx, map, i);
+        KUtilsHashMapEntry *entry = KLIB Kmap_get(kctx, map, i);
         assert(entry != NULL);
-        kctx->klib->Kmap_remove(map, entry);
+        KLIB Kmap_remove(map, entry);
     }
     for (i = 0; i < 10; i+=2) {
-        KUtilsHashMapEntry *entry = kctx->klib->Kmap_get(kctx, map, i);
+        KUtilsHashMapEntry *entry = KLIB Kmap_get(kctx, map, i);
         assert(entry == NULL);
     }
     for (i = 0; i < 10; ++i) {
-        KUtilsHashMapEntry *entry = kctx->klib->Kmap_get(kctx, map, i);
+        KUtilsHashMapEntry *entry = KLIB Kmap_get(kctx, map, i);
         if (i % 2 == 0) {
             assert(entry == NULL);
         } else {
             assert(entry->unboxValue == i);
         }
     }
-    kctx->klib->Kmap_free(kctx, map, reftrace2);
+    KLIB Kmap_free(kctx, map, reftrace2);
     assert(_sum2_ == 25);
     fprintf(stderr, "%d\n", _sum2_);
     _sum_ = _sum2_ = 0;

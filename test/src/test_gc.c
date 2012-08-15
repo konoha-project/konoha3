@@ -60,7 +60,7 @@ static void Dummy_free(KonohaContext *kctx, kObject *o)
 
 static KDEFINE_CLASS DummyDef = {
     .structname   = "Dummy",
-    .classId          = 100,
+    .typeId          = 100,
     .cflag        = 0,
     .cstruct_size = sizeof(struct Dummy),
     .init     = Dummy_init,

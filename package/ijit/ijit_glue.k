@@ -1095,7 +1095,7 @@ void jit_init() {
 	Type kmemshare_t = StructType.create(a0, "kmemshare_t", false);
 	Type kmemlocal_t = StructType.create(a0, "kmemlocal_t", false);
 	Type KonohaModule = StructType.create(a0, "KonohaModule", false);
-	Type KonohaContextModule = StructType.create(a0, "KonohaContextModule", false);
+	Type KonohaModuleContext = StructType.create(a0, "KonohaModuleContext", false);
 	Type KonohaContextRuntimeVar = StructType.create(a0, "KonohaContextRuntimeVar", false);
 	Type klogger_t = StructType.create(a0, "klogger_t", false);
 	Type VirtualMachineInstruction = StructType.create(a0, "VirtualMachineInstruction", false);
@@ -1135,7 +1135,7 @@ void jit_init() {
 	KonohaContextVarTy.set(8, PointerType.get(KonohaContextRuntimeVar) /* stack */ );
 	KonohaContextVarTy.set(9, PointerType.get(klogger_t) /* logger */ );
 	KonohaContextVarTy.set(10, PointerType.get(PointerType.get(KonohaModule)) /* modshare */ );
-	KonohaContextVarTy.set(11, PointerType.get(PointerType.get(KonohaContextModule)) /* modlocal */ );
+	KonohaContextVarTy.set(11, PointerType.get(PointerType.get(KonohaModuleContext)) /* modlocal */ );
 	Type KonohaContextVar = StructType.create(KonohaContextVarTy, "KonohaContextVar", false)
 
 	/*------- _kArray ------*/

@@ -1,5 +1,6 @@
-K.import("konoha");
 K.import("konoha.hashmap");
+K.import("konoha.class");
+K.import("konoha.assign");
 
 class Hoge {
 	int x;
@@ -9,11 +10,13 @@ class Hoge {
 		this.y = y0;
 	}
 }
+void test() {
+	HashMap[Hoge] m = new HashMap[Hoge]();
+	Hoge h = new Hoge(1,2);
+	m.set("hoge", h);
+	Hoge h2 = m.get("hoge");
+	h.x = 3;
+	p(h2.x);
+}
 
-HashMap[Hoge] m = new HashMap[Hoge]();
-Hoge h = new Hoge(1,2);
-m.set("hoge", h);
-
-Hoge h2 = m.get("hoge");
-h.x = 3;
-p(h2.x);
+test();

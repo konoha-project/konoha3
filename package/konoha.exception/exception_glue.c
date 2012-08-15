@@ -47,7 +47,7 @@ struct kExceptionVar {
 #define KonohaContext_getExceptionModule(kctx)           ((KonohaExceptionModule*)kctx->modshare[MOD_exception])
 #define KonohaContext_getExceptionContext(kctx)          ((KonohaExceptionContext*)kctx->modlocal[MOD_exception])
 #define CT_Exception         KonohaContext_getExceptionModule(kctx)->cException
-#define TY_Exception         KonohaContext_getExceptionModule(kctx)->cException->classId
+#define TY_Exception         KonohaContext_getExceptionModule(kctx)->cException->typeId
 #define IS_Exception(e)      (O_ct(e) == CT_Exception)
 
 typedef struct {
@@ -57,7 +57,7 @@ typedef struct {
 } KonohaExceptionModule;
 
 typedef struct {
-	KonohaContextModule h;
+	KonohaModuleContext h;
 	kException        *thrownException;
 	//
 } KonohaExceptionContext;
@@ -72,7 +72,7 @@ static void kException_addStackTrace(KonohaContext *kctx, KonohaStack *sfp, kExc
 	kfileline_t uline = sfp[K_RTNIDX].uline;
 	if(uline > 0) {
 		const char *file = FileId_t(uline);
-		KLIB Kwb_printf(kctx, &wb, "(%s:%d) %s.%s%s" , shortfilename(file), (kushort_t)uline, Method_t(mtd));
+		KLIB Kwb_printf(kctx, &wb, "(%s:%d) %s.%s%s" , PLATAPI shortFilePath(file), (kushort_t)uline, Method_t(mtd));
 	}
 //	int i = 0, psize = Method_paramsize(mtd);
 //	kParam *pa = Method_param(mtd);
@@ -129,7 +129,7 @@ static void Kthrow(KonohaContext *kctx, KonohaStack *sfp)
 			p--;
 		}
 	}
-	KLIB Kraise(kctx, 1);
+	//KLIB Kraise(kctx, 1);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -138,7 +138,7 @@ static void Kthrow(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD System_throw(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KonohaExceptionContext *ctx = KonohaContext_getExceptionContext(kctx);
-	KSETv(ctx->thrownException, sfp[1].asException);
+	KSETv_AND_WRITE_BARRIER(NULL, ctx->thrownException, sfp[1].asException, GC_NO_WRITE_BARRIER);
 	Kthrow(kctx, sfp);
 }
 
@@ -237,11 +237,11 @@ static kbool_t exception_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFir
 //	DBG_P("parse bracket!!");
 //	kToken *tk = tokenException->tokenItems[c];
 //	if(s == c) { // TODO
-//		kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, tk->subTokenList, 0, kException_size(tk->subTokenList));
+//		kExpr *expr = SUGAR kkStmt_printMessagearseExpr(kctx, stmt, tk->subTokenList, 0, kException_size(tk->subTokenList));
 //		RETURN_(SUGAR kStmt_rightJoinExpr(kctx, stmt, expr, tokenException, c+1, e));
 //	}
 //	else {
-//		kExpr *lexpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenException, s, c);
+//		kExpr *lexpr = SUGAR kkStmt_printMessagearseExpr(kctx, stmt, tokenException, s, c);
 //		if(lexpr == K_NULLEXPR) {
 //			RETURN_(lexpr);
 //		}
@@ -254,7 +254,7 @@ static kbool_t exception_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFir
 //			tkN->keyword = MN_toGETTER(0);
 //			tkN->uline = tk->uline;
 //			SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
-//			lexpr  = SUGAR new_ConsExpr(kctx, syn, 2, tkN, lexpr);
+//			lexpr  = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, tkN, lexpr);
 //			lexpr = SUGAR kStmt_addExprParam(kctx, stmt, lexpr, tk->subTokenList, 0, kException_size(tk->subTokenList), 1/*allowEmpty*/);
 //		}
 //		RETURN_(SUGAR kStmt_rightJoinExpr(kctx, stmt, lexpr, tokenException, c+1, e));

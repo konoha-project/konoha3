@@ -145,7 +145,7 @@ static	kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 {
 	kparamtype_t p = { .ty = TY_Int,  };
 	KonohaClass *cIntArray = KLIB KonohaClass_Generics(kctx, CT_(TY_Array), TY_void, 1, &p);
-#define TY_IntArray (cIntArray->classId)
+#define TY_IntArray (cIntArray->typeId)
 
 
 	KDEFINE_METHOD MethodData[] = {

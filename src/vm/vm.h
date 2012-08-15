@@ -41,7 +41,7 @@ typedef struct kByteCodeVar           kByteCodeVar;
 #define ctxcode          ((ctxcode_t*)kctx->modlocal[MOD_code])
 #define kmodcode         ((KModuleByteCode*)kctx->modshare[MOD_code])
 #define CT_BasicBlock    kmodcode->cBasicBlock
-#define TY_BasicBlock    kmodcode->cBasicBlock->classId
+#define TY_BasicBlock    kmodcode->cBasicBlock->typeId
 #define CT_ByteCode      kmodcode->cByteCode
 
 #define IS_BasicBlock(O)  ((O)->h.ct == CT_BasicBlock)
@@ -60,7 +60,7 @@ typedef struct {
 } KModuleByteCode;
 
 typedef struct {
-	KonohaContextModule      h;
+	KonohaModuleContext      h;
 	kfileline_t      uline;
 	kArray          *codeList;
 	kBasicBlock     *lbEND;  // ON GCSTACK
@@ -86,7 +86,7 @@ typedef void (*TraceFunc)(KonohaContext *kctx, KonohaStack *sfp, kfileline_t pli
 
 typedef struct {
 	kMethod *mtd;
-	ktype_t classId; kparamid_t signature;
+	ktype_t typeId; kparamid_t signature;
 } kMethodInlineCache;
 
 #if defined(K_USING_THCODE_)
@@ -142,10 +142,10 @@ struct kByteCodeVar {
 
 static void kNameSpace_lookupMethodWithInlineCache(KonohaContext *kctx, KonohaStack *sfp, kNameSpace *ns, kMethod **cache)
 {
-	ktype_t classId = O_classId(sfp[0].asObject);
+	ktype_t typeId = O_typeId(sfp[0].asObject);
 	kMethod *mtd = cache[0];
-	if(mtd->classId != classId) {
-		mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, classId, mtd->mn, mtd->paramdom, MPOL_LATEST|MPOL_SIGNATURE);
+	if(mtd->typeId != typeId) {
+		mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, typeId, mtd->mn, mtd->paramdom, MPOL_LATEST|MPOL_SIGNATURE);
 		cache[0] = mtd;
 	}
 	sfp[K_MTDIDX].mtdNC = mtd;
@@ -227,9 +227,9 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #define OPEXEC_NMOVx(A, B, BX, CT) rbp[(A)].o = (rbp[(B)].asObjectVar)->fieldObjectItems[(BX)]
 #define OPEXEC_XNMOV(A, AX, B, CT) (rbp[(A)].asObjectVar)->fieldObjectItems[AX] = rbp[(B)].o
 
-#define OPEXEC_NEW(A, P, CT)   KSETv(rbp[(A)].o, KLIB new_kObject(kctx, CT, P))
-#define OPEXEC_NULL(A, CT)     KSETv(rbp[(A)].o, KLIB Knull(kctx, CT))
-#define OPEXEC_BOX(A, B, CT)   KSETv(rbp[(A)].o, KLIB new_kObject(kctx, CT, rbp[(B)].intValue))
+#define OPEXEC_NEW(A, P, CT)   KSETv_AND_WRITE_BARRIER(NULL, rbp[(A)].o, KLIB new_kObject(kctx, CT, P), GC_NO_WRITE_BARRIER)
+#define OPEXEC_NULL(A, CT)     KSETv_AND_WRITE_BARRIER(NULL, rbp[(A)].o, KLIB Knull(kctx, CT), GC_NO_WRITE_BARRIER)
+#define OPEXEC_BOX(A, B, CT)   KSETv_AND_WRITE_BARRIER(NULL, rbp[(A)].o, KLIB new_kObject(kctx, CT, rbp[(B)].intValue), GC_NO_WRITE_BARRIER)
 #define OPEXEC_UNBOX(A, B, CT) rbp[(A)].unboxValue = N_toint(rbp[B].o)
 
 #define PC_NEXT(pc)   pc+1
@@ -319,7 +319,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #define OPEXEC_CHKSTACK(UL) \
 	if(unlikely(kctx->esp > kctx->stack->stack_uplimit)) {\
 		kfileline_t uline = (UL == 0) ? rbp[K_ULINEIDX2].uline : UL;\
-		kreportf(CritTag, uline, "stack overflow");\
+		KLIB Kraise(kctx, EXPT_("StackOverflow"), SFP(rbp), uline);\
 	}\
 	if(kctx->safepoint != 0) { \
 		kfileline_t uline = (UL == 0) ? rbp[K_ULINEIDX2].uline : UL;\
@@ -334,8 +334,8 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 	} \
 
 #define OPEXEC_ERROR(UL, msg, ESP) {\
-		kreportf(NoneTag, 0, "RuntimeScriptException: %s", S_text(msg));\
-		kraise(0);\
+		KSETv(K_NULL, kctx->stack->optionalErrorMessage, msg);\
+		KLIB Kraise(kctx, EXPT_("RuntimeScript"), SFP(rbp), UL);\
 	}\
 
 #define OPEXEC_ERROR2(start, msg) { \
@@ -619,7 +619,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #define OPEXEC_TCAST(kctx, rtnidx, thisidx, rix, espidx, tmr)  { \
 		kTypeMap *tmr_ = tmr; \
 		KonohaStack *sfp_ = SFP(rshift(rbp,thisidx));\
-		KonohaClass scid = SP(tmr_)->scid, this_cid = O_classId(sfp_[0].o);\
+		KonohaClass scid = SP(tmr_)->scid, this_cid = O_typeId(sfp_[0].o);\
 		if(this_cid != scid) {\
 			tmr_ = knh_findTypeMapNULL(kctx, scid, SP(tmr)->tcid);\
 			KSETv(((klr_TCAST_t*)op)->cast, tmr_);\
@@ -630,7 +630,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 
 #define OPEXEC_ACAST(rtnidx, thisidx, rix, espidx, tmr)  { \
 		kTypeMap *tmr_ = tmr; \
-		KonohaClass tcid = SP(tmr_)->tcid, this_cid = O_classId(Ro_(thisidx));\
+		KonohaClass tcid = SP(tmr_)->tcid, this_cid = O_typeId(Ro_(thisidx));\
 		if(!class_isa(this_cid, tcid)) {\
 			KonohaClass scid = SP(tmr_)->scid;\
 			if(this_cid != scid) {\

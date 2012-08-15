@@ -429,7 +429,7 @@ static KMETHOD PyObject_import(KonohaContext *kctx, KonohaStack *sfp)
 	PyListObject* ppath;
 	ppath = (PyListObject*)PyList_New(0);
 	PyList_Append((PyObject*)ppath, PyString_FromString("."));
-	char *path = getenv("PYTHONPATH"); // add home dir to python search path.
+	char *path = PLATAPI getenv_i("PYTHONPATH"); // add home dir to python search path.
 	if (path != NULL) {
 		size_t i;
 		char** pathes = pyenv_split(path, ':');
@@ -497,7 +497,7 @@ static	kbool_t python_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	};
 
 	KonohaClass *cPython = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &PythonDef, pline);
-	int TY_PyObject = cPython->classId;
+	int TY_PyObject = cPython->typeId;
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im|_Coercion, _F(PyObject_toBoolean), TY_Boolean, TY_PyObject, MN_to(TY_Boolean), 0,
 		_Public|_Const|_Im|_Coercion, _F(Boolean_toPyObject), TY_PyObject, TY_Boolean, MN_to(TY_PyObject), 0,
@@ -552,7 +552,7 @@ static	kbool_t python_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
-	if(IS_defineFloat()) {
+	if(IS_DefinedFloat()) {
 		KDEFINE_METHOD MethodData[] = {
 			_Public|_Const|_Im|_Coercion, _F(PyObject_toFloat), TY_Float, TY_PyObject, MN_to(TY_Float), 0,
 			_Public|_Const|_Im|_Coercion, _F(Float_toPyObject), TY_PyObject, TY_Float, MN_to(TY_PyObject), 0,

@@ -20,7 +20,7 @@ typedef struct kMPIData {
 		kfloat_t *fa; //FIXME
 		kint_t *ia;   //FIXME
 	};
-	int cid;//FIXME
+	int typeId;//FIXME
 	MPI_Datatype type;
 	size_t offset;
 	size_t size; // for fa/ia

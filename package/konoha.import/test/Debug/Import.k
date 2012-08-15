@@ -7,7 +7,9 @@ import konoha.math.*;
 
 System.p(Math.sin(1.0));
 
-import konoha;
-
+import konoha.assign;
+void f() {
 int a = 10;
 System.p(a);
+}
+f();

@@ -33,28 +33,28 @@
 extern "C" {
 #endif
 
-#define kiteratormod           ((kiteratormod_t*)kctx->mod[MOD_iterator])
-#define kmoditerator           ((kmoditerator_t*)kctx->modshare[MOD_iterator])
-#define IS_defineIterator()    (kctx->modshare[MOD_iterator] != NULL)
+#define KonohaContext_getIteratorContext(kctx)          ((KonohaIteratorModuleContext*)kctx->mod[MOD_iterator])
+#define KonohaContext_getIteratorModule(kctx)           ((KonohaIteratorModule*)kctx->modshare[MOD_iterator])
+#define IS_DefinedIterator()    (kctx->modshare[MOD_iterator] != NULL)
 
 #define CFLAG_Iterator         kClass_Final
-#define CT_Iterator            kmoditerator->cIterator
-#define TY_Iterator            kmoditerator->cIterator->classId
-#define CT_StringIterator      kmoditerator->cStringIterator
-#define TY_StringIterator      kmoditerator->cStringIterator->classId
+#define CT_Iterator            KonohaContext_getIteratorModule(kctx)->cIterator
+#define TY_Iterator            KonohaContext_getIteratorModule(kctx)->cIterator->typeId
+#define CT_StringIterator      KonohaContext_getIteratorModule(kctx)->cStringIterator
+#define TY_StringIterator      KonohaContext_getIteratorModule(kctx)->cStringIterator->typeId
 
-#define IS_Iterator(O)         (O_ct(O)->baseclassId == TY_Iterator)
+#define IS_Iterator(O)         (O_ct(O)->baseTypeId == TY_Iterator)
 
 typedef struct {
 	KonohaModule h;
 	KonohaClass *cIterator;
 	KonohaClass *cStringIterator;
 	KonohaClass *cGenericIterator;
-} kmoditerator_t;
+} KonohaIteratorModule;
 
 typedef struct {
-	KonohaContextModule h;
-} kiteratormod_t;
+	KonohaModuleContext h;
+} KonohaIteratorModuleContext;
 
 typedef struct _kIterator kIterator;
 

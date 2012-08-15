@@ -50,13 +50,13 @@ static const char* packname(const char *str)
 
 static const char* shell_packagepath(char *buf, size_t bufsiz, const char *fname)
 {
-	char *path = getenv("KONOHA_PACKAGEPATH"), *local = "";
+	char *path = PLATAPI getenv_i("KONOHA_PACKAGEPATH"), *local = "";
 	if(path == NULL) {
-		path = getenv("KONOHA_HOME");
+		path = PLATAPI getenv_i("KONOHA_HOME");
 		local = "/package";
 	}
 	if(path == NULL) {
-		path = getenv("HOME");
+		path = PLATAPI getenv_i("HOME");
 		local = "/.minikonoha/package";
 	}
 	snprintf(buf, bufsiz, "%s%s/%s/%s_glue.k", path, local, fname, packname(fname));
@@ -273,13 +273,13 @@ KonohaContext* konoha_create(KonohaClass **cRequest)
 	*cRequest = CT_Request;
 #define _P    kMethod_Public
 #define _F(F) (intptr_t)(F)
-#define TY_Req  (CT_Request->classId)
-#define TY_Tbl  (CT_AprTable->classId)
-#define TY_TblEntry  (CT_AprTableEntry->classId)
+#define TY_Req  (CT_Request->typeId)
+#define TY_Tbl  (CT_AprTable->typeId)
+#define TY_TblEntry  (CT_AprTableEntry->typeId)
 
 	kparamtype_t ps = {TY_TblEntry, FN_("aprTableEntry")};
 	KonohaClass *CT_TblEntryArray = KLIB KonohaClass_Generics(kctx, CT_Array, TY_TblEntry, 1, &ps);
-	ktype_t TY_TblEntryArray = CT_TblEntryArray->classId;
+	ktype_t TY_TblEntryArray = CT_TblEntryArray->typeId;
 
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
@@ -335,8 +335,8 @@ static int konoha_handler(request_rec *r)
 	/* XXX: We assume Request Object may not be freed by GC */
 	kObject *req_obj = KLIB new_kObject(kctx, cRequest, (void*)r);
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
-	KSETv(lsfp[K_CALLDELTA+0].o, K_NULL);
-	KSETv(lsfp[K_CALLDELTA+1].o, req_obj);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, K_NULL, GC_NO_WRITE_BARRIER);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, req_obj, GC_NO_WRITE_BARRIER);
 	KCALL(lsfp, 0, mtd, 1, KLIB Knull(kctx, CT_Int));
 	END_LOCAL();
 	return lsfp[0].intValue;

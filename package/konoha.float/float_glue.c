@@ -55,7 +55,7 @@ static void kmodfloat_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
 
 static void kmodfloat_free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
-	KFREE(baseh, sizeof(kmodfloat_t));
+	KFREE(baseh, sizeof(KonohaFloatModule));
 }
 
 // --------------------------------------------------------------------------
@@ -93,7 +93,7 @@ static KMETHOD Float_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kfloat_t n = sfp[1].floatValue;
 	if(unlikely(n == 0.0)) {
-		kreportf(CritTag, sfp[K_RTNIDX].uline, "Script!!: zero divided");
+		KLIB Kraise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].uline);
 	}
 	RETURNf_(sfp[0].floatValue / n);
 }
@@ -108,7 +108,7 @@ static KMETHOD Int_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kfloat_t n = sfp[1].floatValue;
 	if(unlikely(n == 0.0)) {
-		kreportf(CritTag, sfp[K_RTNIDX].uline, "Script!!: zero divided");
+		KLIB Kraise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].uline);
 	}
 	RETURNf_(sfp[0].intValue / n);
 }
@@ -249,7 +249,7 @@ static KMETHOD Float_random(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	kmodfloat_t *base = (kmodfloat_t*)KCALLOC(sizeof(kmodfloat_t), 1);
+	KonohaFloatModule *base = (KonohaFloatModule*)KCALLOC(sizeof(KonohaFloatModule), 1);
 	base->h.name     = "float";
 	base->h.setup    = kmodfloat_setup;
 	base->h.reftrace = kmodfloat_reftrace;

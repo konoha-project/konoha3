@@ -142,7 +142,7 @@ static uintptr_t p_init(uintptr_t context)
 	memcpy(c, (struct konoha_context*) context, sizeof(*c));
 	KonohaContext *kctx = c->konoha;
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KSETv(lsfp[K_CALLDELTA+0].o, c->finit->self);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, c->finit->self, GC_NO_WRITE_BARRIER);
 	KCALL(lsfp, 0, c->finit->mtd, 0, K_NULL);
 	END_LOCAL();
 	return (uintptr_t) c;
@@ -153,7 +153,7 @@ static uintptr_t p_exit(uintptr_t context)
 	struct konoha_context *c = malloc(sizeof(struct konoha_context));
 	KonohaContext *kctx = c->konoha;
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KSETv(lsfp[K_CALLDELTA+0].o, c->fexit->self);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, c->fexit->self, GC_NO_WRITE_BARRIER);
 	KCALL(lsfp, 0, c->fexit->mtd, 0, K_NULL);
 	END_LOCAL();
 	bzero(c, sizeof(*c));
@@ -172,8 +172,8 @@ static uintptr_t p_func(uintptr_t context, struct LogEntry *e)
 	KonohaContext *kctx = c->konoha;
 	kObject *log = (kObject *) Log_new(kctx, (struct Log *) &e->data);
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KSETv(lsfp[K_CALLDELTA+0].o, c->func->self);
-	KSETv(lsfp[K_CALLDELTA+1].o, log);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, c->func->self, GC_NO_WRITE_BARRIER);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, log, GC_NO_WRITE_BARRIER);
 	KCALL(lsfp, 0, c->func->mtd, 0, K_NULL);
 	END_LOCAL();
 	return context;
@@ -260,9 +260,9 @@ static void *statics_init(KonohaContext *kctx, kFunc *initFo, kFunc *exitFo, kFu
 {
 	struct konoha_context *c = malloc(sizeof(struct konoha_context));
 	c->konoha = kctx;
-	KSETv(c->finit, initFo);
-	KSETv(c->fexit, exitFo);
-	KSETv(c->func,  funcFo);
+	KSETv_AND_WRITE_BARRIER(NULL, c->finit, initFo, GC_NO_WRITE_BARRIER);
+	KSETv_AND_WRITE_BARRIER(NULL, c->fexit, exitFo, GC_NO_WRITE_BARRIER);
+	KSETv_AND_WRITE_BARRIER(NULL, c->func,  funcFo, GC_NO_WRITE_BARRIER);
 	return (void*) c;
 }
 
@@ -353,15 +353,15 @@ static KMETHOD LogPool_loadFile(KonohaContext *kctx, KonohaStack *sfp)
 #define _C kMethod_Const
 #define _S kMethod_Static
 #define _F(F)   (intptr_t)(F)
-#define TY_Logpool  (ct0->classId)
-#define TY_Log      (ct1->classId)
+#define TY_Logpool  (ct0->typeId)
+#define TY_Log      (ct1->typeId)
 
 static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	int i;
 	static KDEFINE_CLASS Def0 = {
 		.structname = "LogPool"/*structname*/,
-		.classId = TY_newid/*cid*/,
+		.typeId = TY_newid/*cid*/,
 		.init = RawPtr_init,
 		.free = Logpool_free,
 	};
@@ -369,7 +369,7 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 
 	static KDEFINE_CLASS Def1 = {
 		.structname = "Log"/*structname*/,
-		.classId = TY_newid/*cid*/,
+		.typeId = TY_newid/*cid*/,
 		.init = RawPtr_init,
 		.free = Log_free,
 		.p    = Log_p,
@@ -378,19 +378,19 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 
 	static KDEFINE_CLASS Def2 = {
 		.structname = "PoolPlugin",
-		.classId = TY_newid,
+		.typeId = TY_newid,
 		.init = RawPtr_init,
 		.free = RawPtr_free,
 	};
 	KonohaClass *ct2 = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &Def2, pline);
-#define TY_Plugin ct2->classId
+#define TY_Plugin ct2->typeId
 	static KDEFINE_CLASS Def3 = {
 		.structname = "",
-		.classId = TY_newid,
+		.typeId = TY_newid,
 		.init = RawPtr_init,
 		.free = RawPtr_free,
 	};
-	Def3.superclassId = ct2->classId;
+	Def3.superTypeId = ct2->typeId;
 	static const char *names[] = {
 		"Printer",
 		"KeyFilter",
@@ -402,14 +402,14 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		"Response",
 	};
 	KonohaClass *tbls[8];
-#define TY_Printer   tbls[0]->classId
-#define TY_KeyFilter tbls[1]->classId
-#define TY_ValFilter tbls[2]->classId
-#define TY_React     tbls[3]->classId
-#define TY_Timer     tbls[4]->classId
-#define TY_Statics   tbls[5]->classId
-#define TY_Copy      tbls[6]->classId
-#define TY_Response  tbls[7]->classId
+#define TY_Printer   tbls[0]->typeId
+#define TY_KeyFilter tbls[1]->typeId
+#define TY_ValFilter tbls[2]->typeId
+#define TY_React     tbls[3]->typeId
+#define TY_Timer     tbls[4]->typeId
+#define TY_Statics   tbls[5]->typeId
+#define TY_Copy      tbls[6]->typeId
+#define TY_Response  tbls[7]->typeId
 
 	for (i = 0; i < 8; i++) {
 		Def3.structname = names[i];

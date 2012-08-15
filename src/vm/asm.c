@@ -433,8 +433,8 @@ static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sf
 static void Method_threadCode(KonohaContext *kctx, kMethod *mtd, kByteCode *kcode)
 {
 	kMethodVar *Wmtd = (kMethodVar*)mtd;
-	KLIB Method_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
-	KSETv(Wmtd->kcode, kcode);
+	KLIB kMethod_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
+	KSETv(Wmtd, Wmtd->kcode, kcode);
 	Wmtd->pc_start = KonohaVirtualMachine_run(kctx, kctx->esp + 1, kcode->code);
 	if(verbose_code) {
 		DBG_P("DUMP CODE");
@@ -546,13 +546,8 @@ static void EXPR_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int s
 		kObject *v = expr->objectConstValue;
 		DBG_ASSERT(!TY_isUnbox(expr->ty));
 		DBG_ASSERT(Expr_hasObjectConstValue(expr));
-//		if(TY_isUnbox(expr->ty)) {
-//			ASM(NSET, NC_(a), (uintptr_t)N_toint(v), CT_(expr->ty));
-//		}
-//		else {
 		v = BUILD_addConstPool(kctx, v);
 		ASM(NSET, OC_(a), (uintptr_t)v, CT_(expr->ty));
-//		}
 		break;
 	}
 	case TEXPR_NEW   : {
@@ -591,16 +586,6 @@ static void EXPR_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int s
 		else {
 			ASM(NMOVx, OC_(a), OC_(index), xindex, CT_(expr->ty));
 		}
-		break;
-	}
-	case TEXPR_BOX   : {
-		DBG_ASSERT(IS_Expr(expr->single));
-		EXPR_asm(kctx, stmt, a, expr->single, shift, espidx);
-		ASM(BOX, OC_(a), NC_(a), CT_(expr->single->ty));
-		break;
-	}
-	case TEXPR_UNBOX   : {
-		ASM(UNBOX, NC_(a), OC_(a), CT_(expr->ty));
 		break;
 	}
 	case TEXPR_CALL  :
@@ -699,34 +684,36 @@ static void AND_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int sh
 
 static void LETEXPR_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int shift, int espidx)
 {
-	kExpr *exprL = kExpr_at(expr, 1);
-	kExpr *exprR = kExpr_at(expr, 2);
-	if(exprL->build == TEXPR_LOCAL) {
-		EXPR_asm(kctx, stmt, exprL->index, exprR, shift, espidx);
-		if(a != espidx) {
-			NMOV_asm(kctx, a, exprL->ty, espidx);
+	kExpr *leftHandExpr = kExpr_at(expr, 1);
+	kExpr *rightHandExpr = kExpr_at(expr, 2);
+	DBG_P("LET (%s) a=%d, shift=%d, espidx=%d", TY_t(expr->ty), a, shift, espidx);
+	if(leftHandExpr->build == TEXPR_LOCAL) {
+		EXPR_asm(kctx, stmt, leftHandExpr->index, rightHandExpr, shift, espidx);
+		if(expr->ty != TY_void && a != leftHandExpr->index) {
+			NMOV_asm(kctx, a, leftHandExpr->ty, leftHandExpr->index);
 		}
 	}
-	else if(exprL->build == TEXPR_STACKTOP) {
-		DBG_P("LET TEXPR_STACKTOP a=%d, exprL->index=%d, espidx=%d", a, exprL->index, espidx);
-		EXPR_asm(kctx, stmt, exprL->index + shift, exprR, shift, espidx);
-		if(a != espidx) {
-			NMOV_asm(kctx, a, exprL->ty, exprL->index + espidx);
+	else if(leftHandExpr->build == TEXPR_STACKTOP) {
+		DBG_P("LET TEXPR_STACKTOP a=%d, leftHandExpr->index=%d, espidx=%d", a, leftHandExpr->index, espidx);
+		EXPR_asm(kctx, stmt, leftHandExpr->index + shift, rightHandExpr, shift, espidx);
+		if(expr->ty != TY_void && a != leftHandExpr->index + shift) {
+			NMOV_asm(kctx, a, leftHandExpr->ty, leftHandExpr->index + shift);
 		}
 	}
 	else{
-		assert(exprL->build == TEXPR_FIELD);
-		EXPR_asm(kctx, stmt, espidx, exprR, shift, espidx);
-		kshort_t index = (kshort_t)exprL->index;
-		kshort_t xindex = (kshort_t)(exprL->index >> (sizeof(kshort_t)*8));
-		if(TY_isUnbox(exprR->ty)) {
-			ASM(XNMOV, OC_(index), xindex, NC_(espidx), CT_(exprL->ty));
+		assert(leftHandExpr->build == TEXPR_FIELD);
+		EXPR_asm(kctx, stmt, espidx, rightHandExpr, shift, espidx);
+		kshort_t index = (kshort_t)leftHandExpr->index;
+		kshort_t xindex = (kshort_t)(leftHandExpr->index >> (sizeof(kshort_t)*8));
+		if(TY_isUnbox(rightHandExpr->ty)) {
+			ASM(XNMOV, OC_(index), xindex, NC_(espidx), CT_(leftHandExpr->ty));
 		}
 		else {
-			ASM(XNMOV, OC_(index), xindex, OC_(espidx), CT_(exprL->ty));
+			ASM(XNMOV, OC_(index), xindex, OC_(espidx), CT_(leftHandExpr->ty));
 		}
-		if(a != espidx) {
-			NMOV_asm(kctx, a, exprL->ty, espidx);
+		if(expr->ty != TY_void && a != espidx) {
+			DBG_ASSERT(expr->ty == TY_void); // TODO: FIXME:
+			NMOV_asm(kctx, a, leftHandExpr->ty, espidx);
 		}
 	}
 }
@@ -765,7 +752,7 @@ static void ErrStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
 	kString *msg = (kString*)kStmt_getObjectNULL(kctx, stmt, KW_ERR);
 	DBG_ASSERT(IS_String(msg));
-	ASM(ERROR, SFP_(espidx), msg);
+	ASM(ERROR, stmt->uline, msg);
 }
 
 static void ExprStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
@@ -778,7 +765,7 @@ static void ExprStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx
 
 static void BlockStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
-	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, KW_BlockPattern, K_NULLBLOCK), shift);
+	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK), shift);
 }
 
 static void IfStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
@@ -788,11 +775,11 @@ static void IfStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 	/* if */
 	lbELSE = EXPR_asmJMPIF(kctx, stmt, espidx, SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL), 0/*FALSE*/, lbELSE, shift, espidx);
 	/* then */
-	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, KW_BlockPattern, K_NULLBLOCK), shift);
+	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK), shift);
 	ASM_JMP(kctx, lbEND);
 	/* else */
 	ASM_LABEL(kctx, lbELSE);
-	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, KW_else, K_NULLBLOCK), shift);
+	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_else, K_NULLBLOCK), shift);
 	/* endif */
 	ASM_LABEL(kctx, lbEND);
 }
@@ -817,7 +804,7 @@ static void LoopStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx
 	ASM_SAFEPOINT(kctx, espidx);
 	EXPR_asmJMPIF(kctx, stmt, espidx, SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL), 0/*FALSE*/, lbBREAK, shift, espidx);
 	//BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, KW_("iteration"), K_NULLBLOCK));
-	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, KW_BlockPattern, K_NULLBLOCK), shift);
+	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK), shift);
 	ASM_JMP(kctx, lbCONTINUE);
 	ASM_LABEL(kctx, lbBREAK);
 //	BUILD_popLABEL(kctx);
@@ -881,7 +868,7 @@ static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	if(ctxcode == NULL) {
 		kmodcode->h.setup(kctx, NULL, 0);
 	}
-	KLIB Method_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
+	KLIB kMethod_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
 	DBG_ASSERT(kArray_size(ctxcode->codeList) == 0);
 	kBasicBlock* lbINIT  = new_BasicBlockLABEL(kctx);
 	kBasicBlock* lbBEGIN = new_BasicBlockLABEL(kctx);
@@ -897,7 +884,7 @@ static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	BLOCK_asm(kctx, bk, 0);
 	ASM_LABEL(kctx, ctxcode->lbEND);
 	if (mtd->mn == MN_new) {
-		ASM(NMOV, OC_(K_RTNIDX), OC_(0), CT_(mtd->classId));   // FIXME: Type 'This' must be resolved
+		ASM(NMOV, OC_(K_RTNIDX), OC_(0), CT_(mtd->typeId));   // FIXME: Type 'This' must be resolved
 	}
 	ASM(RET);
 	assert(ctxcode->lbEND);/* scan-build: remove warning */
@@ -976,7 +963,7 @@ static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack 
 //	return (mtd->invokeMethodFunc == MethodFunc_abstract);
 //}
 
-static void Method_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
+static void kMethod_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
 {
 	func = (func == NULL) ? MethodFunc_invokeAbstractMethod : func;
 	((kMethodVar*)mtd)->invokeMethodFunc = func;
@@ -986,7 +973,7 @@ static void Method_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
 /* ------------------------------------------------------------------------ */
 /* [ctxcode] */
 
-static void ctxcode_reftrace(KonohaContext *kctx, struct KonohaContextModule *baseh)
+static void ctxcode_reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh)
 {
 	ctxcode_t *base = (ctxcode_t*)baseh;
 	BEGIN_REFTRACE(2);
@@ -994,7 +981,7 @@ static void ctxcode_reftrace(KonohaContext *kctx, struct KonohaContextModule *ba
 	KREFTRACEv(base->constPools);
 	END_REFTRACE();
 }
-static void ctxcode_free(KonohaContext *kctx, struct KonohaContextModule *baseh)
+static void ctxcode_free(KonohaContext *kctx, struct KonohaModuleContext *baseh)
 {
 	ctxcode_t *base = (ctxcode_t*)baseh;
 	KFREE(base, sizeof(ctxcode_t));
@@ -1009,7 +996,7 @@ static void kmodcode_setup(KonohaContext *kctx, struct KonohaModule *def, int ne
 		base->h.free     = ctxcode_free;
 		KINITv(base->codeList, new_(Array, K_PAGESIZE/sizeof(void*)));
 		KINITv(base->constPools, new_(Array, 64));
-		kctx->modlocal[MOD_code] = (KonohaContextModule*)base;
+		kctx->modlocal[MOD_code] = (KonohaModuleContext*)base;
 	}
 }
 
@@ -1074,7 +1061,7 @@ void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		RESET_GCSTACK();
 	}
 	KonohaLibVar *l = (KonohaLibVar*)kctx->klib;
-	l->Method_setFunc = Method_setFunc;
+	l->kMethod_setFunc = kMethod_setFunc;
 	l->kMethod_genCode = kMethod_genCode;
 }
 

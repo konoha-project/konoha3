@@ -78,6 +78,7 @@ static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp)
 	kString *s = sfp[1].asString;
 	const char *mode = IS_NULL(sfp[2].asString) ? "r" : S_text(sfp[2].asString);
 	FILE *fp = fopen(S_text(s), mode);
+	DBG_P("fp=%p, filepath=%s", fp, S_text(s));
 	if (fp == NULL) {
 		ktrace(_SystemFault|_ScriptFault,
 				KEYVALUE_s("@", "fopen"),
@@ -86,7 +87,7 @@ static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp)
 				KEYVALUE_s("errstr", strerror(errno))
 		);
 	}
-	struct _kFILE *file = (struct _kFILE*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), fp);
+	struct _kFILE *file = (struct _kFILE*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), (uintptr_t)fp);
 	file->realpath = realpath(S_text(s), NULL);
 	RETURN_(file);
 }
@@ -204,7 +205,7 @@ static KMETHOD File_putC(KonohaContext *kctx, KonohaStack *sfp)
 #define _F(F)   (intptr_t)(F)
 
 #define CT_File         cFile
-#define TY_File         cFile->classId
+#define TY_File         cFile->typeId
 #define IS_File(O)      ((O)->h.ct == CT_File)
 
 static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)

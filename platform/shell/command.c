@@ -237,6 +237,11 @@ static const char* TEST_end(kinfotag_t t)
 	return "";
 }
 
+static const char* TEST_shortText(const char *msg)
+{
+	return "(omitted..)";
+}
+
 static int TEST_vprintf(const char *fmt, va_list ap)
 {
 	stdlog_count++;
@@ -252,28 +257,38 @@ static int TEST_printf(const char *fmt, ...)
 	return res;
 }
 
-static int check_result2(FILE *fp0, FILE *fp1)
+static void TEST_reportCaughtException(const char *exceptionName, const char *scriptName, int line, const char *optionalMessage)
 {
-	char buf0[128];
-	char buf1[128];
-	while (true) {
-		size_t len0, len1;
-		len0 = fread(buf0, 1, sizeof(buf0), fp0);
-		len1 = fread(buf1, 1, sizeof(buf1), fp1);
-		if (len0 != len1) {
-			return 1;//FAILED
-		}
-		if (len0 == 0) {
-			break;
-		}
-		if (memcmp(buf0, buf1, len0) != 0) {
-			return 1;//FAILED
-		}
+	if(line != 0) {
+		fprintf(stdlog, " ** %s (%s:%d)\n", exceptionName, scriptName, line);
 	}
-	return 0; //OK
+	else {
+		fprintf(stdlog, " ** %s\n", exceptionName);
+	}
 }
 
-static int check_result0(FILE *fp0, FILE *fp1)
+//static int check_result2(FILE *fp0, FILE *fp1)
+//{
+//	char buf0[128];
+//	char buf1[128];
+//	while (true) {
+//		size_t len0, len1;
+//		len0 = fread(buf0, 1, sizeof(buf0), fp0);
+//		len1 = fread(buf1, 1, sizeof(buf1), fp1);
+//		if (len0 != len1) {
+//			return 1;//FAILED
+//		}
+//		if (len0 == 0) {
+//			break;
+//		}
+//		if (memcmp(buf0, buf1, len0) != 0) {
+//			return 1;//FAILED
+//		}
+//	}
+//	return 0; //OK
+//}
+
+static int check_result2(FILE *fp0, FILE *fp1)
 {
 	char buf0[4096];
 	char buf1[4096];
@@ -299,34 +314,37 @@ static int check_result0(FILE *fp0, FILE *fp1)
 
 static void make_report(const char *testname)
 {
-	char report_file[256];
-	char script_file[256];
-	char correct_file[256];
-	char result_file[256];
-	snprintf(report_file, 256,  "REPORT_%s.txt", shortfilename(testname));
-	snprintf(script_file, 256,  "%s", testname);
-	snprintf(correct_file, 256, "%s.proof", script_file);
-	snprintf(result_file, 256,  "%s.tested", script_file);
-	FILE *fp = fopen(report_file, "w");
-	FILE *fp2 = fopen(script_file, "r");
-	int ch;
-	while((ch = fgetc(fp2)) != EOF) {
-		fputc(ch, fp);
+	char *path = getenv("KONOHA_REPORT");
+	if(path != NULL) {
+		char report_file[256];
+		char script_file[256];
+		char correct_file[256];
+		char result_file[256];
+		snprintf(report_file, 256,  "%s/REPORT_%s.txt", path, shortFilePath(testname));
+		snprintf(script_file, 256,  "%s", testname);
+		snprintf(correct_file, 256, "%s.proof", script_file);
+		snprintf(result_file, 256,  "%s.tested", script_file);
+		FILE *fp = fopen(report_file, "w");
+		FILE *fp2 = fopen(script_file, "r");
+		int ch;
+		while((ch = fgetc(fp2)) != EOF) {
+			fputc(ch, fp);
+		}
+		fclose(fp2);
+		fprintf(fp, "Expected Result (in %s)\n=====\n", result_file);
+		fp2 = fopen(correct_file, "r");
+		while((ch = fgetc(fp2)) != EOF) {
+			fputc(ch, fp);
+		}
+		fclose(fp2);
+		fprintf(fp, "Result (in %s)\n=====\n", result_file);
+		fp2 = fopen(result_file, "r");
+		while((ch = fgetc(fp2)) != EOF) {
+			fputc(ch, fp);
+		}
+		fclose(fp2);
+		fclose(fp);
 	}
-	fclose(fp2);
-	fprintf(fp, "Expected Result (in %s)\n=====\n", shortfilename(result_file));
-	fp2 = fopen(correct_file, "r");
-	while((ch = fgetc(fp2)) != EOF) {
-		fputc(ch, fp);
-	}
-	fclose(fp2);
-	fprintf(fp, "Result (in %s)\n=====\n", shortfilename(result_file));
-	fp2 = fopen(result_file, "r");
-	while((ch = fgetc(fp2)) != EOF) {
-		fputc(ch, fp);
-	}
-	fclose(fp2);
-	fclose(fp);
 }
 
 extern int konoha_detectFailedAssert;
@@ -363,12 +381,16 @@ static int KonohaContext_test(KonohaContext *kctx, const char *testname)
 	else {
 		//fprintf(stdout, "stdlog_count: %d\n", stdlog_count);
 		if(stdlog_count == 0) {
-			fprintf(stdout, "[PASS]: %s\n", testname);
-			return 0; // OK
+			if(konoha_detectFailedAssert == 0) {
+				fprintf(stdout, "[PASS]: %s\n", testname);
+				return 0; // OK
+			}
 		}
-		fprintf(stdout, "no proof file: %s\n", testname);
+		else {
+			fprintf(stdout, "no proof file: %s\n", testname);
+			konoha_detectFailedAssert = 1;
+		}
 		fprintf(stdout, "[FAIL]: %s\n", testname);
-		konoha_detectFailedAssert = 1;
 		return 1;
 	}
 	return ret;
@@ -425,27 +447,26 @@ static void konoha_define(KonohaContext *kctx, char *keyvalue)
 	}
 }
 
-static void konoha_import(KonohaContext *kctx, char *packagename)
+static void konoha_import(KonohaContext *kctx, char *packageName)
 {
-	size_t len = strlen(packagename)+1;
+	size_t len = strlen(packageName)+1;
 	char bufname[len];
-	memcpy(bufname, packagename, len);
-	if(!KREQUIRE_PACKAGE(bufname, 0)) {
+	memcpy(bufname, packageName, len);
+	if(!(KEXPORT_PACKAGE(bufname, KNULL(NameSpace), 0))) {
 		PLATAPI exit_i(EXIT_FAILURE);
 	}
-	KEXPORT_PACKAGE(bufname, KNULL(NameSpace), 0);
 }
 
 static void konoha_startup(KonohaContext *kctx, const char *startup_script)
 {
 	char buf[256];
-	char *path = getenv("KONOHA_SCRIPTPATH"), *local = "";
+	const char *path = PLATAPI getenv_i("KONOHA_SCRIPTPATH"), *local = "";
 	if(path == NULL) {
-		path = getenv("KONOHA_HOME");
+		path = PLATAPI getenv_i("KONOHA_HOME");
 		local = "/script";
 	}
 	if(path == NULL) {
-		path = getenv("HOME");
+		path = PLATAPI getenv_i("HOME");
 		local = "/.minikonoha/script";
 	}
 	snprintf(buf, sizeof(buf), "%s%s/%s.k", path, local, startup_script);
@@ -464,7 +485,7 @@ static void konoha_commandline(KonohaContext *kctx, int argc, char** argv)
 		KLIB kArray_add(kctx, a, KLIB new_kString(kctx, argv[i], strlen(argv[i]), SPOL_TEXT));
 	}
 	KDEFINE_OBJECT_CONST ObjectData[] = {
-			{"SCRIPT_ARGV", CT_StringArray0->classId, (kObject*)a},
+			{"SCRIPT_ARGV", CT_StringArray0->typeId, (kObject*)a},
 			{}
 	};
 	KLIB kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(ObjectData), 0);
@@ -543,6 +564,8 @@ static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc
 			plat->vprintf_i = TEST_vprintf;
 			plat->beginTag  = TEST_begin;
 			plat->endTag    = TEST_end;
+			plat->shortText = TEST_shortText;
+			plat->reportCaughtException = TEST_reportCaughtException;
 			return KonohaContext_test(konoha, optarg);
 
 		case '?':

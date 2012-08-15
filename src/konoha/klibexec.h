@@ -227,17 +227,29 @@ static KUtilsHashMap *Kmap_init(KonohaContext *kctx, size_t init)
 	return (KUtilsHashMap*)kmap;
 }
 
-static void Kmap_reftrace(KonohaContext *kctx, KUtilsHashMap *kmap, void (*f)(KonohaContext *kctx, KUtilsHashMapEntry *))
+static void Kmap_each(KonohaContext *kctx, KUtilsHashMap *kmap, void *thunk, void (*f)(KonohaContext *kctx, KUtilsHashMapEntry *, void *thunk))
 {
 	size_t i;
 	for(i = 0; i < kmap->hmax; i++) {
 		KUtilsHashMapEntry *e = kmap->hentry[i];
 		while(e != NULL) {
-			f(kctx, e);
+			f(kctx, e, thunk);
 			e = e->next;
 		}
 	}
 }
+
+//static void Kmap_each(KonohaContext *kctx, KUtilsHashMap *kmap, void (*f)(KonohaContext *kctx, KUtilsHashMapEntry *))
+//{
+//	size_t i;
+//	for(i = 0; i < kmap->hmax; i++) {
+//		KUtilsHashMapEntry *e = kmap->hentry[i];
+//		while(e != NULL) {
+//			f(kctx, e);
+//			e = e->next;
+//		}
+//	}
+//}
 
 static void Kmap_free(KonohaContext *kctx, KUtilsHashMap *kmap, void (*f)(KonohaContext *kctx, void *))
 {
@@ -425,6 +437,7 @@ static void kObject_setObject(KonohaContext *kctx, kAbstractObject *o, ksymbol_t
 {
 	kObjectVar *v = (kObjectVar*)o;
 	protomap_set((protomap_t**)&v->h.kvproto, key | SYMKEY_BOXED, ty, (void*)val);
+	KLIB Kwrite_barrier(kctx, v);
 }
 
 static uintptr_t kObject_getUnboxValue(KonohaContext *kctx, kObject *o, ksymbol_t key, uintptr_t defval)
@@ -475,7 +488,7 @@ static void Kreportf(KonohaContext *kctx, kinfotag_t level, kfileline_t pline, c
 	const char *E = PLATAPI endTag(level);
 	if(pline != 0) {
 		const char *file = FileId_t(pline);
-		PLATAPI printf_i("%s - %s(%s:%d) " , B, TAG_t(level), shortfilename(file), (kushort_t)pline);
+		PLATAPI printf_i("%s - %s(%s:%d) " , B, TAG_t(level), PLATAPI shortFilePath(file), (kushort_t)pline);
 	}
 	else {
 		PLATAPI printf_i("%s - %s" , B, TAG_t(level));
@@ -483,18 +496,17 @@ static void Kreportf(KonohaContext *kctx, kinfotag_t level, kfileline_t pline, c
 	PLATAPI vprintf_i(fmt, ap);
 	PLATAPI printf_i("%s\n", E);
 	va_end(ap);
-	if(level == CritTag) {
-		kraise(0);
-	}
 }
 
 // -------------------------------------------------------------------------
 
-static void Kraise(KonohaContext *kctx, int param)
+static void Kraise(KonohaContext *kctx, int symbol, KonohaStack *sfp, kfileline_t pline)
 {
 	KonohaContextRuntimeVar *base = kctx->stack;
+	KNH_ASSERT(symbol != 0);
 	if(base->evaljmpbuf != NULL) {
-		PLATAPI longjmp_i(*base->evaljmpbuf, param+1);  // in setjmp 0 means good
+		base->thrownScriptLine = pline;
+		PLATAPI longjmp_i(*base->evaljmpbuf, symbol);  // in setjmp 0 means good
 	}
 	PLATAPI exit_i(EXIT_FAILURE);
 }
@@ -516,7 +528,7 @@ static void klib_init(KonohaLibVar *l)
 	l->Kwb_free      = Kwb_free;
 	l->Kmap_init     = Kmap_init;
 	l->Kmap_free     = Kmap_free;
-	l->Kmap_reftrace = Kmap_reftrace;
+	l->Kmap_each = Kmap_each;
 	l->Kmap_newEntry = Kmap_newEntry;
 	l->Kmap_get      = Kmap_getentry;
 	l->Kmap_remove   = Kmap_remove;

@@ -3,7 +3,7 @@
 
 K.import("konoha.float");
 K.import("konoha.math");
-K.import("konoha");
+K.import("konoha.class");
 K.import("konoha.bytes");
 K.import("konoha.string");
 K.import("posix.file");

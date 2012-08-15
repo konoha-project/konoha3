@@ -1,4 +1,0 @@
- - (error) (MethodRewrite.k:20) method Person.isChild has already defined
- - (error) (MethodRewrite.k:24) undefined method: Person.!
- - (error) (MethodRewrite.k:24) System.assert accepts Boolean at the parameter 1
-Q.E.D.

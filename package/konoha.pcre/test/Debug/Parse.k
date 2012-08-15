@@ -1,5 +1,4 @@
-// FIXME
-K.import("konoha");
+K.import("konoha.global");
 K.import("konoha.pcre");
 
 /* comment */

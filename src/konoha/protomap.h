@@ -13,8 +13,8 @@ extern "C" {
 #define DICTMAP_THRESHOLD 4
 
 typedef struct protomap_record {
-	unsigned hash;
-	unsigned type;
+	kushort_t hash;
+	kushort_t type;
 	uintptr_t v;
 } map_record_t;
 
@@ -34,7 +34,7 @@ typedef struct hashmap_t {
 
 typedef struct dictmap_t {
 	struct map_base base;
-	unsigned  hash_list[DICTMAP_THRESHOLD];
+	kushort_t hash_list[DICTMAP_THRESHOLD];
 } dictmap_t;
 
 typedef union protomap_t {

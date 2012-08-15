@@ -112,6 +112,7 @@ set(PACKAGES
 	konoha.global
 	konoha.hashmap
 	konoha.i
+	konoha.io
 	konoha.import
 	konoha.int
 	konoha.iterator
@@ -120,26 +121,30 @@ set(PACKAGES
 	konoha.null
 	konoha.rope
 	konoha.string
+	konoha.subtype
+	konoha.var
 	konoha.while
 	sugar
 	llvm
-	konoha.pcre
+##	konoha.pcre
+	konoha.regexp
 ##	konoha.io
 	posix.process
 	posix.file
 	posix.fd
-##	konoha.socket
+##	posix.socket
 ##	konoha.rope
 ##	konoha.subproc
-##	konoha.mpi
+	konoha.mpi
 ##	curl
-	ijit
+##	ijit
 ##	jansson
 ##	mecab
 	python
 	apache
 #	openssl
-#	logpool
+	logpool
+	konoha.date
 )
 
 find_library(HAVE_LIBDL NAMES dl)
@@ -153,6 +158,25 @@ check_type_size(double   SIZEOF_DOUBLE)
 
 check_include_files(dlfcn.h HAVE_DLFCN_H)
 check_include_files(iconv.h HAVE_ICONV_H)
+
+set(_HEADERS stdio.h stdlib.h string.h ctype.h)
+if(UNIX)
+	set(_HEADERS ${_HEADERS} sys/mman.h unistd.h)
+endif(UNIX)
+
+if(APPLE)
+	set(_HEADERS ${_HEADERS} mach-o/dyld.h)
+endif(APPLE)
+
+if(CYGWIN)
+endif(CYGWIN)
+
+if(MSVC)
+endif(MSVC)
+
+check_symbol_exists(posix_memalign "${_HEADERS}" HAVE_POSIX_MEMALIGN)
+check_symbol_exists(memalign       "${_HEADERS}" HAVE_MEMALIGN)
+check_symbol_exists(__builtin_ctzl "${_HEADERS}" HAVE_BUILTIN_CTZL)
 
 FIND_FILE(HAS_DOTGIT .git PATHS "${CMAKE_CURRENT_SOURCE_DIR}")
 if("${HAS_DOTGIT}" MATCHES ".git")
@@ -209,12 +233,13 @@ endif(TEST_COVERAGE)
 enable_testing()
 set(TEST_BIN ${CMAKE_CURRENT_BINARY_DIR}/minikonoha)
 set(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(PARENT_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
 macro(add_test_with_property test_name)
 	add_test(${test_name} ${TEST_BIN} ${ARGN})
 	set_tests_properties(${test_name} PROPERTIES TIMEOUT 5)
 	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT
-		"KONOHA_PACKAGEPATH=${CMAKE_CURRENT_BINARY_DIR}/minikonoha/package")
+		"KONOHA_PACKAGEPATH=${PARENT_BINARY_DIR}/package")
 endmacro(add_test_with_property test_name)
 
 macro(add_konoha_test test_name test_file)
@@ -224,7 +249,9 @@ macro(add_konoha_test test_name test_file)
 			set_tests_properties(${test_name} PROPERTIES TIMEOUT 10)
 		endif(TEST_STRESS)
 	else(test_name MATCHES "Stress")
-		add_test_with_property(${test_name} --test-with ${test_file})
+		if(NOT test_name MATCHES "Shell")
+			add_test_with_property(${test_name} --test-with ${test_file})
+		endif(NOT test_name MATCHES "Shell")
 	endif(test_name MATCHES "Stress")
 	if(TEST_IJIT)
 		add_test_with_property(ijit:${test_name} -Iijit --test-with ${test_file})
@@ -356,6 +383,21 @@ add_test(Shell/Release/Oneline
 add_test(Shell/Release/Multiline
 	${CMAKE_CURRENT_SOURCE_DIR}/test/test-multiline.sh ${TEST_BIN}
 	${CMAKE_CURRENT_SOURCE_DIR}/test/Release/Fibonacci.k)
+
+file(GLOB_RECURSE test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/Shell/*.sh)
+foreach(f ${test_files})
+	string(REPLACE // / f ${f})
+	string(REPLACE .sh .k TEST_SCRIPT ${f})
+	string(REPLACE ${CMAKE_CURRENT_SOURCE_DIR}/test/ "" test_name ${f})
+	if(EXISTS ${TEST_SCRIPT})
+		add_test(${test_name} sh +x ${f} ${TEST_BIN} ${TEST_SCRIPT})
+	else(EXISTS ${TEST_SCRIPT})
+		add_test(${test_name} sh +x ${f} ${TEST_BIN})
+	endif(EXISTS ${TEST_SCRIPT})
+	set_tests_properties(${test_name} PROPERTIES TIMEOUT 5)
+	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT
+		"KONOHA_PACKAGEPATH=${PARENT_BINARY_DIR}/package")
+endforeach(f ${test_files})
 
 install(TARGETS minikonoha minikonoha_bin
 		RUNTIME DESTINATION bin

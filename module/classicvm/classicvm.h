@@ -310,7 +310,7 @@ static kbool_t OPR_hasCONST(KonohaContext *kctx, kExpr *expr, kmethodn_t *mn, in
 
 static kbool_t CLASSICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr, int shift, int espidx)
 {
-	ktype_t mtd_cid = (mtd)->classId;
+	ktype_t mtd_cid = (mtd)->typeId;
 	kmethodn_t mtd_mn = (mtd)->mn;
 	int a = espidx + 1;
 #if 1/*TODO*/
@@ -467,7 +467,7 @@ static kbool_t CLASSICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr
 		}
 		return 1;
 	} /* TY_Int */
-	if(IS_defineFloat() && cid == TY_Float && ((opcode = OPfmn(kctx, mn, 0)) != OPCODE_NOP)) {
+	if(IS_DefinedFloat() && cid == TY_Float && ((opcode = OPfmn(kctx, mn, 0)) != OPCODE_NOP)) {
 		int swap = 1;
 		if(mn == MN_opNEG) {
 			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);

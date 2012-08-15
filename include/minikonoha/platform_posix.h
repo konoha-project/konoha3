@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <setjmp.h>
+#include <sys/time.h>
 #include <syslog.h>
 #include <dlfcn.h>
 #include <sys/stat.h>
@@ -38,6 +39,46 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#ifdef PATH_MAX
+#define K_PATHMAX PATH_MAX
+#else
+#define K_PATHMAX 256
+#endif
+
+// -------------------------------------------------------------------------
+
+static unsigned long long getTimeMilliSecond(void)
+{
+//#if defined(K_USING_WINDOWS)
+//	DWORD tickCount = GetTickCount();
+//	return (knh_int64_t)tickCount;
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+}
+
+// -------------------------------------------------------------------------
+
+static const char* formatSystemPath(char *buf, size_t bufsiz, const char *path)
+{
+	return path;  // stub (in case of no conversion)
+}
+
+static const char* formatKonohaPath(char *buf, size_t bufsiz, const char *path)
+{
+	return path;  // stub (in case of no conversion)
+}
+
+static kbool_t isDir(const char *path)
+{
+	struct stat buf;
+	char pathbuf[K_PATHMAX];
+	if (stat(formatSystemPath(pathbuf, sizeof(pathbuf), path), &buf) == 0) {
+		return S_ISDIR(buf.st_mode);
+	}
+	return false;
+}
 
 // -------------------------------------------------------------------------
 
@@ -126,15 +167,6 @@ static int isEmptyChunk(const char *t, size_t len)
 	return false;
 }
 
-static int isDir(const char *path)
-{
-	struct stat buf;
-	if (stat(path, &buf) == 0) {
-		return S_ISDIR(buf.st_mode);
-	}
-	return 0;
-}
-
 static int loadScript(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *))
 {
 	int isSuccessfullyLoading = false;
@@ -148,7 +180,7 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 		simpleBuffer.allocSize = K_PAGESIZE;
 		isSuccessfullyLoading = true;
 		while(!feof(fp)) {
-			kfileline_t chunkheadline = uline;
+			kfileline_t rangeheadline = uline;
 			kshort_t sline = (kshort_t)uline;
 			bzero(simpleBuffer.buffer, simpleBuffer.allocSize);
 			simpleBuffer.size = 0;
@@ -161,7 +193,7 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 			}
 			if(isEmptyChunk(script, simpleBuffer.size)) {
 				int isBreak = false;
-				isSuccessfullyLoading = evalFunc(script, chunkheadline, &isBreak, thunk);
+				isSuccessfullyLoading = evalFunc(script, rangeheadline, &isBreak, thunk);
 				if(!isSuccessfullyLoading|| isBreak) {
 					break;
 				}
@@ -169,6 +201,17 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 		}
 	}
 	return isSuccessfullyLoading;
+}
+
+static const char* shortFilePath(const char *path)
+{
+	char *p = (char *) strrchr(path, '/');
+	return (p == NULL) ? path : (const char*)p+1;
+}
+
+static const char* shortText(const char *msg)
+{
+	return msg;
 }
 
 static const char *formatTransparentPath(char *buf, size_t bufsiz, const char *parentPath, const char *path)
@@ -198,7 +241,7 @@ static const char* packname(const char *str)
 static const char* formatPackagePath(char *buf, size_t bufsiz, const char *packageName, const char *ext)
 {
 	FILE *fp = NULL;
-	char *path = (char *)getenv("KONOHA_PACKAGEPATH");
+	char *path = getenv("KONOHA_PACKAGEPATH");
 	const char *local = "";
 	if(path == NULL) {
 		path = getenv("KONOHA_HOME");
@@ -283,6 +326,27 @@ static void debugPrintf(const char *file, const char *func, int line, const char
 	va_end(ap);
 }
 
+static void reportCaughtException(const char *exceptionName, const char *scriptName, int line, const char *optionalMessage)
+{
+	if(line != 0) {
+		if(optionalMessage != NULL && optionalMessage[0] != 0) {
+			fprintf(stderr, " ** (%s:%d) %s: %s\n", scriptName, line, exceptionName, optionalMessage);
+		}
+		else {
+			fprintf(stderr, " ** (%s:%d) %s\n", scriptName, line, exceptionName);
+		}
+	}
+	else {
+		if(optionalMessage != NULL && optionalMessage[0] != 0) {
+			fprintf(stderr, " ** %s: %s\n", exceptionName, optionalMessage);
+		}
+		else {
+			fprintf(stderr, " ** %s\n", exceptionName);
+		}
+	}
+}
+
+
 static void NOP_debugPrintf(const char *file, const char *func, int line, const char *fmt, ...)
 {
 }
@@ -290,12 +354,13 @@ static void NOP_debugPrintf(const char *file, const char *func, int line, const 
 static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 {
 	static PlatformApiVar plat = {};
-	plat.name      = "shell";
-	plat.stacksize = K_PAGESIZE * 4;
-	plat.malloc_i  = malloc;
-	plat.free_i    = free;
-	plat.setjmp_i  = ksetjmp;
-	plat.longjmp_i = klongjmp;
+	plat.name            = "shell";
+	plat.stacksize       = K_PAGESIZE * 4;
+	plat.getenv_i        =  (const char *(*)(const char*))getenv;
+	plat.malloc_i        = malloc;
+	plat.free_i          = free;
+	plat.setjmp_i        = ksetjmp;
+	plat.longjmp_i       = klongjmp;
 	plat.syslog_i        = syslog;
 	plat.vsyslog_i       = vsyslog;
 	plat.printf_i        = printf;
@@ -304,14 +369,20 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.vsnprintf_i     = vsnprintf; // retreating..
 	plat.qsort_i         = qsort;
 	plat.exit_i          = exit;
+	plat.formatKonohaPath = formatKonohaPath;
+	plat.formatSystemPath = formatSystemPath;
 		// high level
-	plat.formatPackagePath  = formatPackagePath;
+	plat.getTimeMilliSecond  = getTimeMilliSecond;
+	plat.shortFilePath       = shortFilePath;
+	plat.formatPackagePath   = formatPackagePath;
 	plat.formatTransparentPath = formatTransparentPath;
-	plat.loadPackageHandler = loadPackageHandler;
-	plat.loadScript         = loadScript;
-	plat.beginTag           = beginTag;
-	plat.endTag             = endTag;
-	plat.debugPrintf        = (!verbose_debug) ? NOP_debugPrintf : debugPrintf;
+	plat.loadPackageHandler  = loadPackageHandler;
+	plat.loadScript          = loadScript;
+	plat.beginTag            = beginTag;
+	plat.endTag              = endTag;
+	plat.shortText           = shortText;
+	plat.reportCaughtException = reportCaughtException;
+	plat.debugPrintf         = (!verbose_debug) ? NOP_debugPrintf : debugPrintf;
 	return (PlatformApi*)(&plat);
 }
 

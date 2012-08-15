@@ -47,7 +47,7 @@ extern "C" {
 #define kmodiconv        ((kmodiconv_t*)kctx->modshare[MOD_iconv])
 #define IS_defineBytes() (kctx->modshare[MOD_iconv] != NULL)
 #define CT_Bytes         kmodiconv->cBytes
-#define TY_Bytes         kmodiconv->cBytes->classId
+#define TY_Bytes         kmodiconv->cBytes->typeId
 
 #define IS_Bytes(O)      ((O)->h.ct == CT_Bytes)
 
@@ -73,7 +73,7 @@ typedef struct {
 } kmodiconv_t;
 
 typedef struct {
-    KonohaContextModule h;
+    KonohaModuleContext h;
 } ctxiconv_t;
 
 #ifdef __cplusplus

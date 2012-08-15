@@ -1,3 +1,0 @@
- - (warning) (UnclosedParenthesis.k:3) ignored tokens: {... }
- - (error) (UnclosedParenthesis.k:3) if statement needs syntax pattern: $Block
-Q.E.D.

@@ -30,7 +30,7 @@
 /* ************************************************************************ */
 
 typedef struct ctxlogpool_t {
-	KonohaContextModule h;
+	KonohaModuleContext h;
 	logpool_t *logpool;
 } ctxlogpool_t;
 
@@ -54,11 +54,11 @@ static uintptr_t logpool_Ktrace(KonohaContext *kctx, klogconf_t *logconf, ...)
 	return 0;// FIXME reference to log
 }
 
-static void ctxlogpool_reftrace(KonohaContext *kctx, struct KonohaContextModule *baseh)
+static void ctxlogpool_reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh)
 {
 }
 
-static void ctxlogpool_free(KonohaContext *kctx, struct KonohaContextModule *baseh)
+static void ctxlogpool_free(KonohaContext *kctx, struct KonohaModuleContext *baseh)
 {
 	ctxlogpool_t *base = (ctxlogpool_t*)baseh;
 	logpool_close(base->logpool);
@@ -69,7 +69,7 @@ static void kmodlogpool_setup(KonohaContext *kctx, struct KonohaModule *def, int
 {
 	if(newctx) {
 #define DEFAULT_SERVER "127.0.0.1"
-		char *serverinfo = getenv("LOGPOOL_SERVER");
+		char *serverinfo = PLATAPI getenv_i("LOGPOOL_SERVER");
 		char host[128] = {0};
 		int  port = 14801;
 		if (serverinfo) {
@@ -85,7 +85,7 @@ static void kmodlogpool_setup(KonohaContext *kctx, struct KonohaModule *def, int
 		base->h.reftrace = ctxlogpool_reftrace;
 		base->h.free     = ctxlogpool_free;
 		base->logpool    = logpool_open_trace(NULL, host, port);
-		kctx->modlocal[MOD_logger] = (KonohaContextModule*)base;
+		kctx->modlocal[MOD_logger] = (KonohaModuleContext*)base;
 	}
 }
 
