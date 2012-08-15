@@ -593,16 +593,16 @@ static void EXPR_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int s
 		}
 		break;
 	}
-	case TEXPR_BOX   : {
-		DBG_ASSERT(IS_Expr(expr->single));
-		EXPR_asm(kctx, stmt, a, expr->single, shift, espidx);
-		ASM(BOX, OC_(a), NC_(a), CT_(expr->single->ty));
-		break;
-	}
-	case TEXPR_UNBOX   : {
-		ASM(UNBOX, NC_(a), OC_(a), CT_(expr->ty));
-		break;
-	}
+//	case TEXPR_BOX   : {
+//		DBG_ASSERT(IS_Expr(expr->single));
+//		EXPR_asm(kctx, stmt, a, expr->single, shift, espidx);
+//		ASM(BOX, OC_(a), NC_(a), CT_(expr->single->ty));
+//		break;
+//	}
+//	case TEXPR_UNBOX   : {
+//		ASM(UNBOX, NC_(a), OC_(a), CT_(expr->ty));
+//		break;
+//	}
 	case TEXPR_CALL  :
 		CALL_asm(kctx, stmt, a, expr, shift, espidx);
 		if(a != espidx) {

@@ -356,14 +356,14 @@ typedef kbool_t (*CheckEndOfStmtFunc2)(KonohaContext *, TokenRange *range, Token
 #define TEXPR_LOCAL          4/*variable*/
 #define TEXPR_BLOCK          5
 #define TEXPR_FIELD          6/*variable*/
-#define TEXPR_BOX            7
-#define TEXPR_UNBOX          8
-#define TEXPR_CALL           9
-#define TEXPR_AND           10
-#define TEXPR_OR            11
-#define TEXPR_LET           12
-#define TEXPR_STACKTOP      13
-#define TEXPR_MAX           14
+//#define TEXPR_BOX            7
+//#define TEXPR_UNBOX          8
+#define TEXPR_CALL           7
+#define TEXPR_AND            8
+#define TEXPR_OR             9
+#define TEXPR_LET           10
+#define TEXPR_STACKTOP      11
+#define TEXPR_MAX           12
 
 #define Expr_isCONST(o)     (TEXPR_CONST <= (o)->build && (o)->build <= TEXPR_NCONST)
 #define Expr_isTerm(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
@@ -382,7 +382,6 @@ struct kExprVar {
 	union {
 		kToken  *termToken;     // Term
 		kArray*  cons;          // Cons
-		kExpr*   single;
 		kBlock*  block;
 	};
 	ktype_t ty;    kexpr_t build;

@@ -137,6 +137,24 @@ static KMETHOD Int_toString(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(KLIB new_kString(kctx, buf, strlen(buf), SPOL_ASCII));
 }
 
+//## @Const method Object Boolean.box();
+static KMETHOD Boolean_box(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kBoolean *o = !!(sfp[0].unboxValue) ? K_TRUE : K_FALSE;
+	sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;
+	RETURN_(o);
+}
+
+//## @Const method Object Int.box();
+static KMETHOD Int_box(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KonohaClass *c = O_ct(sfp[K_RTNIDX].asObject);
+	DBG_P("reqt=%s", CT_t(c));
+	DBG_ASSERT(CT_isUnbox(c));
+	sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;
+	RETURN_(KLIB new_kObject(kctx, c, sfp[0].unboxValue));
+}
+
 //## @Const method String String.toInt();
 static KMETHOD String_toInt(KonohaContext *kctx, KonohaStack *sfp)
 {

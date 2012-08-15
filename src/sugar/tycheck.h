@@ -115,25 +115,6 @@ static kbool_t CT_isa(KonohaContext *kctx, ktype_t cid1, ktype_t cid2)
 	return ct->isSubType(kctx, ct, t);
 }
 
-static kExpr *new_BoxingExpr(KonohaContext *kctx, kExpr *expr, ktype_t reqty)
-{
-	if(expr->build == TEXPR_NCONST) {
-		kExprVar *Wexpr = (kExprVar*)expr;
-		Wexpr->build = TEXPR_CONST;
-		KINITp(Wexpr, Wexpr->objectConstValue, KLIB new_kObject(kctx, CT_(Wexpr->ty), Wexpr->unboxConstValue));
-		Expr_setObjectConstValue(Wexpr, 1);
-		Wexpr->ty = reqty;
-		return expr;
-	}
-	else {
-		kExprVar *texpr = GCSAFE_new(ExprVar, NULL);
-		KINITv(texpr->single, expr);
-		texpr->build = TEXPR_BOX;
-		texpr->ty = reqty;
-		return texpr;
-	}
-}
-
 static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, ktype_t reqty, int pol)
 {
 	kExpr *texpr = expr;
@@ -158,7 +139,9 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 		}
 		if(CT_isa(kctx, texpr->ty, reqty)) {
 			if(TY_isUnbox(texpr->ty) && !TY_isUnbox(reqty)) {
-				return new_BoxingExpr(kctx, expr, reqty);
+				kMethod *mtd = kNameSpace_getMethodNULL(kctx, Stmt_nameSpace(stmt), TY_Int, MN_("box"), 0, MPOL_PARAMSIZE);
+				return new_TypedCallExpr(kctx, stmt, gma, reqty, mtd, 1, texpr);
+				//return new_BoxingExpr(kctx, expr, reqty);
 			}
 			return texpr;
 		}

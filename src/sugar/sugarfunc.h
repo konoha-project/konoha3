@@ -649,14 +649,15 @@ static kExpr* Expr_typedWithMethod(KonohaContext *kctx, kExpr *expr, kMethod *mt
 	return expr;
 }
 
-static kExpr* getBoxedThisExpr(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kMethod *mtd)
+static kExpr* boxThisExpr(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kExpr *expr, kMethod *mtd)
 {
 	kExpr *thisExpr = expr->cons->exprItems[1];
 	KonohaClass *thisClass = CT_(thisExpr->ty);
 	DBG_ASSERT(IS_Method(mtd));
 	DBG_ASSERT(thisClass->typeId != TY_var);
 	if(!TY_isUnbox(mtd->typeId) && CT_isUnbox(thisClass)) {
-		thisExpr = new_BoxingExpr(kctx, expr->cons->exprItems[1], thisClass->typeId);
+		kMethod *boxMethod = kNameSpace_getMethodNULL(kctx, Stmt_nameSpace(stmt), TY_Int, MN_("box"), 0, MPOL_PARAMSIZE);
+		thisExpr = new_TypedCallExpr(kctx, stmt, gma, thisClass->typeId, boxMethod, 1, expr->cons->exprItems[1]);
 		KSETv(expr->cons, expr->cons->exprItems[1], thisExpr);
 	}
 	return thisExpr;
@@ -664,7 +665,7 @@ static kExpr* getBoxedThisExpr(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kM
 
 static kExpr *kStmt_tyCheckCallParamExpr(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kMethod *mtd, kGamma *gma, ktype_t reqty)
 {
-	kExpr *thisExpr = getBoxedThisExpr(kctx, stmt, expr, mtd);
+	kExpr *thisExpr = boxThisExpr(kctx, stmt, gma, expr, mtd);
 	KonohaClass *thisClass = CT_(thisExpr->ty);
 	int isConst = (Expr_isCONST(thisExpr)) ? 1 : 0;
 	kParam *pa = Method_param(mtd);
