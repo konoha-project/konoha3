@@ -219,8 +219,8 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kNameSpace_setTokenizeFunc = kNameSpace_setTokenizeFunc;
 	mod->TokenRange_tokenize        = TokenRange_tokenize;
 	mod->TokenRange_resolved        = TokenRange_resolved;
-	mod->kStmt_parseTypePattern     = kStmt_parseTypePattern;
-	mod->kStmt_parseFlag            = kStmt_parseFlag;
+	mod->kkStmt_printMessagearseTypePattern     = kkStmt_printMessagearseTypePattern;
+	mod->kkStmt_printMessagearseFlag            = kkStmt_printMessagearseFlag;
 	mod->kStmt_getToken             = kStmt_getToken;
 	mod->kStmt_getBlock             = kStmt_getBlock;
 	mod->kStmt_getExpr              = kStmt_getExpr;
@@ -244,12 +244,12 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kBlock_insertAfter         = kBlock_insertAfter;
 	mod->new_UntypedTermExpr        = new_UntypedTermExpr;
 	mod->new_UntypedCallStyleExpr   = new_UntypedCallStyleExpr;
-	mod->kStmt_parseOperatorExpr    = kStmt_parseOperatorExpr;
-	mod->kStmt_parseExpr            = kStmt_parseExpr;
+	mod->kkStmt_printMessagearseOperatorExpr    = kkStmt_printMessagearseOperatorExpr;
+	mod->kkStmt_printMessagearseExpr            = kkStmt_printMessagearseExpr;
 	mod->kStmt_addExprParam         = kStmt_addExprParam;
 	mod->kStmt_rightJoinExpr        = kStmt_rightJoinExpr;
 	mod->Token_pERR                 = Token_pERR;
-	mod->Stmt_p                     = Stmt_p;
+	mod->kStmt_printMessage                     = kStmt_printMessage;
 
 	defineDefaultSyntax(kctx, KNULL(NameSpace));
 }

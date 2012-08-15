@@ -52,7 +52,7 @@ static kExpr *ExprTyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma 
 			return kToken_p(stmt, expr->termToken, ErrTag, "undefined token type checker: '%s'", Token_text(expr->termToken));
 		}
 		else {
-			return kStmt_p(stmt, ErrTag, "undefined operator type checker: %s%s",  KW_t(expr->syn->keyword));
+			return kkStmt_printMessage(stmt, ErrTag, "undefined operator type checker: %s%s",  KW_t(expr->syn->keyword));
 		}
 	}
 	kExpr *texpr;
@@ -141,7 +141,7 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 			if(TY_isUnbox(texpr->ty) && !TY_isUnbox(reqty)) {
 				ktype_t unboxType = texpr->ty == TY_Boolean ? TY_Boolean : TY_Int;
 				kMethod *mtd = kNameSpace_getMethodNULL(kctx, Stmt_nameSpace(stmt), unboxType, MN_box, 0, MPOL_PARAMSIZE);
-				return new_TypedCallExpr(kctx, stmt, gma, reqty, mtd, 1, texpr);
+				return new_TypedCallExpr(kctx, stmt, gma, texpr->ty, mtd, 1, texpr);
 			}
 			return texpr;
 		}
@@ -200,28 +200,30 @@ static kbool_t Stmt_TyCheck(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, 
 	int SUGARFUNC_index = kGamma_isTOPLEVEL(gma) ? SUGARFUNC_TopStmtTyCheck : SUGARFUNC_StmtTyCheck;
 	if(syn->sugarFuncTable[SUGARFUNC_index] == NULL) {
 		const char *location = kGamma_isTOPLEVEL(gma) ? "at the top level" : "inside the function";
-		kStmt_p(stmt, ErrTag, "%s%s is not available %s", T_statement(stmt->syn->keyword), location);
+		kkStmt_printMessage(stmt, ErrTag, "%s%s is not available %s", T_statement(stmt->syn->keyword), location);
 		return false;
 	}
-	kFunc *fo = syn->sugarFuncTable[SUGARFUNC_index];
-	kbool_t result;
-	if(IS_Array(fo)) { // @Future
-		int i;
-		kArray *a = (kArray*)fo;
-		for(i = kArray_size(a) - 1; i > 0; i--) {
-			result = Stmt_TyCheckFunc(kctx, a->funcItems[i], stmt, gma);
-			if(stmt->syn == NULL) return true;
-			if(stmt->build != TSTMT_UNDEFINED) return result;
+	else {
+		kFunc *fo = syn->sugarFuncTable[SUGARFUNC_index];
+		kbool_t result = true;
+		if(IS_Array(fo)) { // @Future
+			int i;
+			kArray *a = (kArray*)fo;
+			for(i = kArray_size(a) - 1; i > 0; i--) {
+				result = Stmt_TyCheckFunc(kctx, a->funcItems[i], stmt, gma);
+				if(stmt->syn == NULL) return true;
+				if(stmt->build != TSTMT_UNDEFINED) return result;
+			}
+			fo = a->funcItems[0];
 		}
-		fo = a->funcItems[0];
+		DBG_ASSERT(IS_Func(fo));
+		result = Stmt_TyCheckFunc(kctx, fo, stmt, gma);
+		if(stmt->syn == NULL) return true; // this means done;
+		if(result == false && stmt->build != TSTMT_ERR) {
+			kkStmt_printMessage(stmt, ErrTag, "statement typecheck error: %s%s", T_statement(syn->keyword));
+		}
+		return result;
 	}
-	DBG_ASSERT(IS_Func(fo));
-	result = Stmt_TyCheckFunc(kctx, fo, stmt, gma);
-	if(stmt->syn == NULL) return true; // this means done;
-	if(result == false && stmt->build == TSTMT_UNDEFINED) {
-		kStmt_p(stmt, ErrTag, "statement typecheck error: %s%s", T_statement(syn->keyword));
-	}
-	return result;
 }
 
 static kbool_t kBlock_tyCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)

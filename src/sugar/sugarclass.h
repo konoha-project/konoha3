@@ -284,7 +284,7 @@ static kStmt* new_kStmt(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, 
 	return stmt;
 }
 
-static uintptr_t kStmt_parseFlag(KonohaContext *kctx, kStmt *stmt, KonohaFlagSymbolData *flagData, uintptr_t flag)
+static uintptr_t kkStmt_printMessagearseFlag(KonohaContext *kctx, kStmt *stmt, KonohaFlagSymbolData *flagData, uintptr_t flag)
 {
 	while(flagData->flag != 0) {
 		kObject *op = kStmt_getObjectNULL(kctx, stmt, flagData->symbol);

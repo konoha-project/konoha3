@@ -237,11 +237,11 @@ static kbool_t exception_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFir
 //	DBG_P("parse bracket!!");
 //	kToken *tk = tokenException->tokenItems[c];
 //	if(s == c) { // TODO
-//		kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, tk->subTokenList, 0, kException_size(tk->subTokenList));
+//		kExpr *expr = SUGAR kkStmt_printMessagearseExpr(kctx, stmt, tk->subTokenList, 0, kException_size(tk->subTokenList));
 //		RETURN_(SUGAR kStmt_rightJoinExpr(kctx, stmt, expr, tokenException, c+1, e));
 //	}
 //	else {
-//		kExpr *lexpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenException, s, c);
+//		kExpr *lexpr = SUGAR kkStmt_printMessagearseExpr(kctx, stmt, tokenException, s, c);
 //		if(lexpr == K_NULLEXPR) {
 //			RETURN_(lexpr);
 //		}

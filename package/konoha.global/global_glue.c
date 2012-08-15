@@ -104,12 +104,12 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kObject *o, kStmt
 	ktype_t cid = O_typeId(o);
 	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(fn), ty, MPOL_SETTER|MPOL_CANONICAL);
 	if(mtd != NULL) {
-		SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "already defined name: %s.%s", CT_t(O_ct(o)), SYM_t(fn));
+		SUGAR kStmt_printMessage(kctx, stmt, NULL, ErrTag, "already defined name: %s.%s", CT_t(O_ct(o)), SYM_t(fn));
 		return NULL;
 	}
 	mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toGETTER(fn), 0, MPOL_GETTER);
 	if(mtd != NULL && Method_returnType(mtd) != ty) {
-		SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "differently defined getter: %s.%s", CT_t(O_ct(o)), SYM_t(fn));
+		SUGAR kStmt_printMessage(kctx, stmt, NULL, ErrTag, "differently defined getter: %s.%s", CT_t(O_ct(o)), SYM_t(fn));
 		return NULL;
 	}
 	if(mtd == NULL) { // no getter
@@ -135,13 +135,13 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp)
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	kObject *scr = ns->scriptObject;
 	if(O_typeId(scr) == TY_System) {
-		SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, " global variables are not available");
+		SUGAR kStmt_printMessage(kctx, stmt, NULL, ErrTag, " global variables are not available");
 		RETURNb_(false);
 	}
 	kExpr *vexpr = SUGAR kStmt_getExpr(kctx, stmt, SYM_("var"), K_NULLEXPR);
 	ksymbol_t fn = tosymbol(kctx, vexpr);
 	if(fn == SYM_NONAME) {
-		SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "variable name is expected");
+		SUGAR kStmt_printMessage(kctx, stmt, NULL, ErrTag, "variable name is expected");
 		RETURNb_(false);
 	}
 	kExpr *expr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, K_NULLEXPR);
@@ -153,7 +153,7 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp)
 	if(mtd == NULL) {
 		RETURNb_(false);
 	}
-	SUGAR Stmt_p(kctx, stmt, NULL, InfoTag, "%s has type %s", SYM_t(fn), TY_t(expr->ty));
+	SUGAR kStmt_printMessage(kctx, stmt, NULL, InfoTag, "%s has type %s", SYM_t(fn), TY_t(expr->ty));
 	expr = SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_void, mtd,  2, new_ConstValueExpr(kctx, O_typeId(scr), scr), expr);
 	KLIB kObject_setObject(kctx, stmt, KW_ExprPattern, TY_Expr, expr);
 	kStmt_typed(stmt, EXPR);
@@ -212,7 +212,7 @@ static kbool_t kScriptObject_typeDecl(KonohaContext *kctx, kObject *scr, kStmt *
 		}
 		return true;
 	}
-	SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, "variable name is expected");
+	SUGAR kStmt_printMessage(kctx, stmt, NULL, ErrTag, "variable name is expected");
 	return false;
 }
 
@@ -226,7 +226,7 @@ static KMETHOD StmtTyCheck_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 //	}
 	kObject *scr = Stmt_nameSpace(stmt)->scriptObject;
 	if(O_typeId(scr) == TY_System) {
-		SUGAR Stmt_p(kctx, stmt, NULL, ErrTag, " global variables are not available");
+		SUGAR kStmt_printMessage(kctx, stmt, NULL, ErrTag, " global variables are not available");
 		RETURNb_(false);
 	}
 	kStmt_done(stmt);

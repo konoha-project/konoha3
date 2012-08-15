@@ -61,13 +61,13 @@ static kbool_t kStmt_inferDeclType(KonohaContext *kctx, kStmt *stmt, kGamma *gma
 		}
 		kToken *termToken = kExpr_at(declExpr, 1)->termToken;
 		ktype_t inferedType = kExpr_at(declExpr, 2)->ty;
-		SUGAR Stmt_p(kctx, stmt, termToken, InfoTag, "%s has type %s", SYM_t(termToken->resolvedSymbol), TY_t(inferedType));
+		SUGAR kStmt_printMessage(kctx, stmt, termToken, InfoTag, "%s has type %s", SYM_t(termToken->resolvedSymbol), TY_t(inferedType));
 		return SUGAR kStmt_declType(kctx, stmt, gma, inferedType, declExpr, TypeDecl, lastStmtRef);
 	}
 	if(Expr_isSymbolTerm(declExpr)) {
 		kToken *termToken = declExpr->termToken;
-		SUGAR Stmt_p(kctx, stmt, termToken, WarnTag, "var %s expects an initial value", SYM_t(termToken->resolvedSymbol));
-		SUGAR Stmt_p(kctx, stmt, termToken, InfoTag, "%s has type %s", SYM_t(termToken->resolvedSymbol), TY_t(TY_Object));
+		SUGAR kStmt_printMessage(kctx, stmt, termToken, WarnTag, "var %s expects an initial value", SYM_t(termToken->resolvedSymbol));
+		SUGAR kStmt_printMessage(kctx, stmt, termToken, InfoTag, "%s has type %s", SYM_t(termToken->resolvedSymbol), TY_t(TY_Object));
 	}
 	return SUGAR kStmt_declType(kctx, stmt, gma, TY_Object, declExpr, TypeDecl, lastStmtRef);
 }
