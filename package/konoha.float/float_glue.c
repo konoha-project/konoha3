@@ -25,7 +25,7 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/float.h>
-#include "ext/mt19937ar.h"
+#include <math.h> /* for INFINATE, NAN */
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,7 +33,6 @@ extern "C" {
 
 // --------------------------------------------------------------------------
 
-// Int
 static void Float_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kNumberVar *n = (kNumberVar*)o;  // kFloat has the same structure
@@ -59,6 +58,11 @@ static void kmodfloat_free(KonohaContext *kctx, struct KonohaModule *baseh)
 }
 
 // --------------------------------------------------------------------------
+
+static KMETHOD Float_opPlus(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNf_((sfp[0].floatValue));
+}
 
 /* float + float */
 static KMETHOD Float_opADD(KonohaContext *kctx, KonohaStack *sfp)
@@ -220,24 +224,6 @@ static KMETHOD Float_opMINUS(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNf_(-(sfp[0].floatValue));
 }
 
-//double genrand64_real1(void);
-
-static kfloat_t kfloat_rand(void)
-{
-#if defined(K_USING_NOFLOAT)
-	return (kfloat_t)knh_rand();
-#elif defined(K_USING_INT32)
-	return (kfloat_t)genrand_real1();
-#else
-	return (kfloat_t)genrand64_real1();
-#endif
-}
-
-static KMETHOD Float_random(KonohaContext *kctx, KonohaStack *sfp)
-{
-	RETURNf_(kfloat_rand());
-}
-
 /* ------------------------------------------------------------------------ */
 
 #define _Public   kMethod_Public
@@ -265,6 +251,7 @@ static kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	base->cFloat = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &defFloat, pline);
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
+		_Public|_Const|_Im, _F(Float_opPlus), TY_Float, TY_Float, MN_("+"), 0,
 		_Public|_Const|_Im, _F(Float_opADD), TY_Float, TY_Float, MN_("+"), 1, TY_Float, FN_x,
 		_Public|_Const|_Im, _F(Int_opADD), TY_Float, TY_Int, MN_("+"), 1, TY_Float, FN_x,
 		_Public|_Const|_Im, _F(Float_opSUB), TY_Float, TY_Float, MN_("-"), 1, TY_Float, FN_x,
@@ -291,12 +278,13 @@ static kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public|_Const|_Im, _F(Float_toString), TY_String, TY_Float, MN_to(TY_String), 0,
 		_Public|_Const|_Im, _F(String_toFloat), TY_Float, TY_String, MN_to(TY_Float), 0,
 		_Public|_Const|_Im, _F(Float_opMINUS), TY_Float, TY_Float, MN_("-"), 0,
-		_Public|_Static|_Im, _F(Float_random), TY_Float, TY_Float, MN_("random"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	KDEFINE_FLOAT_CONST FloatData[] = {
 		{"FLOAT_EPSILON", TY_Float, DBL_EPSILON},
+		{"Infinity", TY_Float, INFINITY},
+		{"NaN", TY_Float, NAN},
 		{}
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(FloatData), pline);
@@ -309,6 +297,70 @@ static kbool_t float_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 }
 
 //----------------------------------------------------------------------------
+
+static int parseNumber(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
+{
+	const char *start = tenv->source + tok_start, *end, *ts = start;
+	int c = *ts++;
+	if (!(c == '.' || ('0' <= c && c <= '9'))) {
+		/* It do not seem as Number */
+		return tok_start;
+	}
+	int isFloat = 0;
+	/*
+	 * DIGIT  = 0-9
+	 * DIGITS = DIGIT | DIGIT DIGITS
+	 * INT    = DIGIT | DIGIT1-9 DIGITS
+	 * FLOAT  = INT
+	 *        | INT FRAC
+	 *        | INT EXP
+	 *        | INT FRAC EXP
+	 * FRAC   = "." digits
+	 * EXP    = E digits
+	 * E      = 'e' | 'e+' | 'e-' | 'E' | 'E+' | 'E-'
+	 */
+	if (c == '0') {
+		c = *ts++;
+	}
+	else if ('1' <= c && c <= '9') {
+		for (; '0' <= c && c <= '9' && c != 0; c = *ts++) {
+			if (c == '_') continue;
+		}
+	}
+	if (c != '.' && c != 'e' && c != 'E') {
+		goto L_emit;
+	}
+	if (c == '.') {
+		isFloat = 1;
+		for (c = *ts++; '0' <= c && c <= '9' && c != 0; c = *ts++) {
+			if (c == '_') continue;
+		}
+	}
+	if (c == 'e' || c == 'E') {
+		isFloat = 1;
+		c = *ts++;
+		if (!('0' <= c && c <= '9') && !(c == '+' || c == '-')) {
+			ts--;
+			goto L_emit;
+		}
+		if (c == '+' || c == '-') {
+			c = *ts++;
+		}
+		for (; '0' <= c && c <= '9' && c != 0; c = *ts++) {
+			if (c == '_') continue;
+		}
+	}
+	L_emit:;
+	end = ts;
+	if (IS_NOTNULL(tk)) {
+		/* skip unit */
+		while (isalpha(*ts) && *ts != 0)
+			ts++;
+		KSETv(tk, tk->text, KLIB new_kString(kctx, start, end - start - 1, SPOL_ASCII));
+		tk->unresolvedTokenType = (isFloat)? TokenType_FLOAT : TokenType_INT;
+	}
+	return tok_start + ts - start - 1;
+}
 
 static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -327,6 +379,16 @@ static kbool_t float_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileli
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '0', parseNumber, NULL, 0);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '1', parseNumber, NULL, 0);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '2', parseNumber, NULL, 0);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '3', parseNumber, NULL, 0);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '4', parseNumber, NULL, 0);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '5', parseNumber, NULL, 0);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '6', parseNumber, NULL, 0);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '7', parseNumber, NULL, 0);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '8', parseNumber, NULL, 0);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '9', parseNumber, NULL, 0);
 	return true;
 }
 

@@ -1,0 +1,82 @@
+ - (FloatComparatorLessThan.k:18) 2 < 2: false
+ - (FloatComparatorLessThan.k:19) 2 < pi: true
+ - (FloatComparatorLessThan.k:20) 2 < succ(1): false
+ - (FloatComparatorLessThan.k:21) 2 < -pi: false
+ - (FloatComparatorLessThan.k:22) 2 < minus(-1.63): false
+ - (FloatComparatorLessThan.k:23) 2 < int2 + 1.0: true
+ - (FloatComparatorLessThan.k:24) 2 < pi - int2: false
+ - (FloatComparatorLessThan.k:25) 2 < 3.14159: true
+ - (FloatComparatorLessThan.k:26) 2 < pi / 12: false
+ - (FloatComparatorLessThan.k:27) pi < 2: false
+ - (FloatComparatorLessThan.k:28) pi < pi: false
+ - (FloatComparatorLessThan.k:29) pi < succ(1): false
+ - (FloatComparatorLessThan.k:30) pi < -pi: false
+ - (FloatComparatorLessThan.k:31) pi < minus(-1.63): false
+ - (FloatComparatorLessThan.k:32) pi < int2 + 1.0: false
+ - (FloatComparatorLessThan.k:33) pi < pi - int2: false
+ - (FloatComparatorLessThan.k:34) pi < 3.14159: false
+ - (FloatComparatorLessThan.k:35) pi < pi / 12: false
+ - (FloatComparatorLessThan.k:36) succ(1) < 2: false
+ - (FloatComparatorLessThan.k:37) succ(1) < pi: true
+ - (FloatComparatorLessThan.k:38) succ(1) < succ(1): false
+ - (FloatComparatorLessThan.k:39) succ(1) < -pi: false
+ - (FloatComparatorLessThan.k:40) succ(1) < minus(-1.63): false
+ - (FloatComparatorLessThan.k:41) succ(1) < int2 + 1.0: true
+ - (FloatComparatorLessThan.k:42) succ(1) < pi - int2: false
+ - (FloatComparatorLessThan.k:43) succ(1) < 3.14159: true
+ - (FloatComparatorLessThan.k:44) succ(1) < pi / 12: false
+ - (FloatComparatorLessThan.k:45) -pi < 2: true
+ - (FloatComparatorLessThan.k:46) -pi < pi: true
+ - (FloatComparatorLessThan.k:47) -pi < succ(1): true
+ - (FloatComparatorLessThan.k:48) -pi < -pi: false
+ - (FloatComparatorLessThan.k:49) -pi < minus(-1.63): true
+ - (FloatComparatorLessThan.k:50) -pi < int2 + 1.0: true
+ - (FloatComparatorLessThan.k:51) -pi < pi - int2: true
+ - (FloatComparatorLessThan.k:52) -pi < 3.14159: true
+ - (FloatComparatorLessThan.k:53) -pi < pi / 12: true
+ - (FloatComparatorLessThan.k:54) minus(-1.63) < 2: true
+ - (FloatComparatorLessThan.k:55) minus(-1.63) < pi: true
+ - (FloatComparatorLessThan.k:56) minus(-1.63) < succ(1): true
+ - (FloatComparatorLessThan.k:57) minus(-1.63) < -pi: false
+ - (FloatComparatorLessThan.k:58) minus(-1.63) < minus(-1.63): false
+ - (FloatComparatorLessThan.k:59) minus(-1.63) < int2 + 1.0: true
+ - (FloatComparatorLessThan.k:60) minus(-1.63) < pi - int2: false
+ - (FloatComparatorLessThan.k:61) minus(-1.63) < 3.14159: true
+ - (FloatComparatorLessThan.k:62) minus(-1.63) < pi / 12: false
+ - (FloatComparatorLessThan.k:63) int2 + 1.0 < 2: false
+ - (FloatComparatorLessThan.k:64) int2 + 1.0 < pi: true
+ - (FloatComparatorLessThan.k:65) int2 + 1.0 < succ(1): false
+ - (FloatComparatorLessThan.k:66) int2 + 1.0 < -pi: false
+ - (FloatComparatorLessThan.k:67) int2 + 1.0 < minus(-1.63): false
+ - (FloatComparatorLessThan.k:68) int2 + 1.0 < int2 + 1.0: false
+ - (FloatComparatorLessThan.k:69) int2 + 1.0 < pi - int2: false
+ - (FloatComparatorLessThan.k:70) int2 + 1.0 < 3.14159: true
+ - (FloatComparatorLessThan.k:71) int2 + 1.0 < pi / 12: false
+ - (FloatComparatorLessThan.k:72) pi - int2 < 2: true
+ - (FloatComparatorLessThan.k:73) pi - int2 < pi: true
+ - (FloatComparatorLessThan.k:74) pi - int2 < succ(1): true
+ - (FloatComparatorLessThan.k:75) pi - int2 < -pi: false
+ - (FloatComparatorLessThan.k:76) pi - int2 < minus(-1.63): true
+ - (FloatComparatorLessThan.k:77) pi - int2 < int2 + 1.0: true
+ - (FloatComparatorLessThan.k:78) pi - int2 < pi - int2: false
+ - (FloatComparatorLessThan.k:79) pi - int2 < 3.14159: true
+ - (FloatComparatorLessThan.k:80) pi - int2 < pi / 12: false
+ - (FloatComparatorLessThan.k:81) 3.14159 < 2: false
+ - (FloatComparatorLessThan.k:82) 3.14159 < pi: false
+ - (FloatComparatorLessThan.k:83) 3.14159 < succ(1): false
+ - (FloatComparatorLessThan.k:84) 3.14159 < -pi: false
+ - (FloatComparatorLessThan.k:85) 3.14159 < minus(-1.63): false
+ - (FloatComparatorLessThan.k:86) 3.14159 < int2 + 1.0: false
+ - (FloatComparatorLessThan.k:87) 3.14159 < pi - int2: false
+ - (FloatComparatorLessThan.k:88) 3.14159 < 3.14159: false
+ - (FloatComparatorLessThan.k:89) 3.14159 < pi / 12: false
+ - (FloatComparatorLessThan.k:90) pi / 12 < 2: true
+ - (FloatComparatorLessThan.k:91) pi / 12 < pi: true
+ - (FloatComparatorLessThan.k:92) pi / 12 < succ(1): true
+ - (FloatComparatorLessThan.k:93) pi / 12 < -pi: false
+ - (FloatComparatorLessThan.k:94) pi / 12 < minus(-1.63): true
+ - (FloatComparatorLessThan.k:95) pi / 12 < int2 + 1.0: true
+ - (FloatComparatorLessThan.k:96) pi / 12 < pi - int2: true
+ - (FloatComparatorLessThan.k:97) pi / 12 < 3.14159: true
+ - (FloatComparatorLessThan.k:98) pi / 12 < pi / 12: false
+Q.E.D.
