@@ -1,0 +1,5 @@
+ - (FloatConstants.k:4) Nan == nan
+ - (FloatConstants.k:5) +Infinity == inf
+ - (FloatConstants.k:6) -Infinity == -inf
+ - (FloatConstants.k:7) FLOAT_EPSILON == 0.000000
+Q.E.D.
