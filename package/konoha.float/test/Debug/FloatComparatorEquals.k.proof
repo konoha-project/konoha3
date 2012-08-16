@@ -1,0 +1,82 @@
+ - (FloatComparatorEquals.k:18) 2 == 2: true
+ - (FloatComparatorEquals.k:19) 2 == pi: false
+ - (FloatComparatorEquals.k:20) 2 == succ(1): true
+ - (FloatComparatorEquals.k:21) 2 == -pi: false
+ - (FloatComparatorEquals.k:22) 2 == minus(-1.63): false
+ - (FloatComparatorEquals.k:23) 2 == int2 + 1.0: false
+ - (FloatComparatorEquals.k:24) 2 == pi - int2: false
+ - (FloatComparatorEquals.k:25) 2 == 3.14159: false
+ - (FloatComparatorEquals.k:26) 2 == pi / 12: false
+ - (FloatComparatorEquals.k:27) pi == 2: false
+ - (FloatComparatorEquals.k:28) pi == pi: true
+ - (FloatComparatorEquals.k:29) pi == succ(1): false
+ - (FloatComparatorEquals.k:30) pi == -pi: false
+ - (FloatComparatorEquals.k:31) pi == minus(-1.63): false
+ - (FloatComparatorEquals.k:32) pi == int2 + 1.0: false
+ - (FloatComparatorEquals.k:33) pi == pi - int2: false
+ - (FloatComparatorEquals.k:34) pi == 3.14159: true
+ - (FloatComparatorEquals.k:35) pi == pi / 12: false
+ - (FloatComparatorEquals.k:36) succ(1) == 2: true
+ - (FloatComparatorEquals.k:37) succ(1) == pi: false
+ - (FloatComparatorEquals.k:38) succ(1) == succ(1): true
+ - (FloatComparatorEquals.k:39) succ(1) == -pi: false
+ - (FloatComparatorEquals.k:40) succ(1) == minus(-1.63): false
+ - (FloatComparatorEquals.k:41) succ(1) == int2 + 1.0: false
+ - (FloatComparatorEquals.k:42) succ(1) == pi - int2: false
+ - (FloatComparatorEquals.k:43) succ(1) == 3.14159: false
+ - (FloatComparatorEquals.k:44) succ(1) == pi / 12: false
+ - (FloatComparatorEquals.k:45) -pi == 2: false
+ - (FloatComparatorEquals.k:46) -pi == pi: false
+ - (FloatComparatorEquals.k:47) -pi == succ(1): false
+ - (FloatComparatorEquals.k:48) -pi == -pi: true
+ - (FloatComparatorEquals.k:49) -pi == minus(-1.63): false
+ - (FloatComparatorEquals.k:50) -pi == int2 + 1.0: false
+ - (FloatComparatorEquals.k:51) -pi == pi - int2: false
+ - (FloatComparatorEquals.k:52) -pi == 3.14159: false
+ - (FloatComparatorEquals.k:53) -pi == pi / 12: false
+ - (FloatComparatorEquals.k:54) minus(-1.63) == 2: false
+ - (FloatComparatorEquals.k:55) minus(-1.63) == pi: false
+ - (FloatComparatorEquals.k:56) minus(-1.63) == succ(1): false
+ - (FloatComparatorEquals.k:57) minus(-1.63) == -pi: false
+ - (FloatComparatorEquals.k:58) minus(-1.63) == minus(-1.63): true
+ - (FloatComparatorEquals.k:59) minus(-1.63) == int2 + 1.0: false
+ - (FloatComparatorEquals.k:60) minus(-1.63) == pi - int2: false
+ - (FloatComparatorEquals.k:61) minus(-1.63) == 3.14159: false
+ - (FloatComparatorEquals.k:62) minus(-1.63) == pi / 12: false
+ - (FloatComparatorEquals.k:63) int2 + 1.0 == 2: false
+ - (FloatComparatorEquals.k:64) int2 + 1.0 == pi: false
+ - (FloatComparatorEquals.k:65) int2 + 1.0 == succ(1): false
+ - (FloatComparatorEquals.k:66) int2 + 1.0 == -pi: false
+ - (FloatComparatorEquals.k:67) int2 + 1.0 == minus(-1.63): false
+ - (FloatComparatorEquals.k:68) int2 + 1.0 == int2 + 1.0: true
+ - (FloatComparatorEquals.k:69) int2 + 1.0 == pi - int2: false
+ - (FloatComparatorEquals.k:70) int2 + 1.0 == 3.14159: false
+ - (FloatComparatorEquals.k:71) int2 + 1.0 == pi / 12: false
+ - (FloatComparatorEquals.k:72) pi - int2 == 2: false
+ - (FloatComparatorEquals.k:73) pi - int2 == pi: false
+ - (FloatComparatorEquals.k:74) pi - int2 == succ(1): false
+ - (FloatComparatorEquals.k:75) pi - int2 == -pi: false
+ - (FloatComparatorEquals.k:76) pi - int2 == minus(-1.63): false
+ - (FloatComparatorEquals.k:77) pi - int2 == int2 + 1.0: false
+ - (FloatComparatorEquals.k:78) pi - int2 == pi - int2: true
+ - (FloatComparatorEquals.k:79) pi - int2 == 3.14159: false
+ - (FloatComparatorEquals.k:80) pi - int2 == pi / 12: false
+ - (FloatComparatorEquals.k:81) 3.14159 == 2: false
+ - (FloatComparatorEquals.k:82) 3.14159 == pi: true
+ - (FloatComparatorEquals.k:83) 3.14159 == succ(1): false
+ - (FloatComparatorEquals.k:84) 3.14159 == -pi: false
+ - (FloatComparatorEquals.k:85) 3.14159 == minus(-1.63): false
+ - (FloatComparatorEquals.k:86) 3.14159 == int2 + 1.0: false
+ - (FloatComparatorEquals.k:87) 3.14159 == pi - int2: false
+ - (FloatComparatorEquals.k:88) 3.14159 == 3.14159: true
+ - (FloatComparatorEquals.k:89) 3.14159 == pi / 12: false
+ - (FloatComparatorEquals.k:90) pi / 12 == 2: false
+ - (FloatComparatorEquals.k:91) pi / 12 == pi: false
+ - (FloatComparatorEquals.k:92) pi / 12 == succ(1): false
+ - (FloatComparatorEquals.k:93) pi / 12 == -pi: false
+ - (FloatComparatorEquals.k:94) pi / 12 == minus(-1.63): false
+ - (FloatComparatorEquals.k:95) pi / 12 == int2 + 1.0: false
+ - (FloatComparatorEquals.k:96) pi / 12 == pi - int2: false
+ - (FloatComparatorEquals.k:97) pi / 12 == 3.14159: false
+ - (FloatComparatorEquals.k:98) pi / 12 == pi / 12: true
+Q.E.D.
