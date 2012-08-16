@@ -33,7 +33,6 @@ extern "C" {
 
 // --------------------------------------------------------------------------
 
-// Int
 static void Float_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kNumberVar *n = (kNumberVar*)o;  // kFloat has the same structure
@@ -62,7 +61,7 @@ static void kmodfloat_free(KonohaContext *kctx, struct KonohaModule *baseh)
 
 static KMETHOD Float_opPlus(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(+(sfp[0].floatValue));
+	RETURNf_((sfp[0].floatValue));
 }
 
 /* float + float */
@@ -299,6 +298,70 @@ static kbool_t float_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 
 //----------------------------------------------------------------------------
 
+static int parseNumber(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
+{
+	const char *start = tenv->source + tok_start, *end, *ts = start;
+	int c = *ts++;
+	if (!(c == '.' || ('0' <= c && c <= '9'))) {
+		/* It do not seem as Number */
+		return tok_start;
+	}
+	int isFloat = 0;
+	/*
+	 * DIGIT  = 0-9
+	 * DIGITS = DIGIT | DIGIT DIGITS
+	 * INT    = DIGIT | DIGIT1-9 DIGITS
+	 * FLOAT  = INT
+	 *        | INT FRAC
+	 *        | INT EXP
+	 *        | INT FRAC EXP
+	 * FRAC   = "." digits
+	 * EXP    = E digits
+	 * E      = 'e' | 'e+' | 'e-' | 'E' | 'E+' | 'E-'
+	 */
+	if (c == '0') {
+		c = *ts++;
+	}
+	else if ('1' <= c && c <= '9') {
+		for (; '0' <= c && c <= '9' && c != 0; c = *ts++) {
+			if (c == '_') continue;
+		}
+	}
+	if (c != '.' && c != 'e' && c != 'E') {
+		goto L_emit;
+	}
+	if (c == '.') {
+		isFloat = 1;
+		for (c = *ts++; '0' <= c && c <= '9' && c != 0; c = *ts++) {
+			if (c == '_') continue;
+		}
+	}
+	if (c == 'e' || c == 'E') {
+		isFloat = 1;
+		c = *ts++;
+		if (!('0' <= c && c <= '9') && !(c == '+' || c == '-')) {
+			ts--;
+			goto L_emit;
+		}
+		if (c == '+' || c == '-') {
+			c = *ts++;
+		}
+		for (; '0' <= c && c <= '9' && c != 0; c = *ts++) {
+			if (c == '_') continue;
+		}
+	}
+	L_emit:;
+	end = ts;
+	if (IS_NOTNULL(tk)) {
+		/* skip unit */
+		while (isalpha(*ts) && *ts != 0)
+			ts++;
+		KSETv(tk, tk->text, KLIB new_kString(kctx, start, end - start - 1, SPOL_ASCII));
+		tk->unresolvedTokenType = (isFloat)? TokenType_FLOAT : TokenType_INT;
+	}
+	return tok_start + ts - start - 1;
+}
+
 static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
@@ -316,6 +379,16 @@ static kbool_t float_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileli
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '0', parseNumber, NULL, 0);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '1', parseNumber, NULL, 0);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '2', parseNumber, NULL, 0);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '3', parseNumber, NULL, 0);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '4', parseNumber, NULL, 0);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '5', parseNumber, NULL, 0);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '6', parseNumber, NULL, 0);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '7', parseNumber, NULL, 0);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '8', parseNumber, NULL, 0);
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '9', parseNumber, NULL, 0);
 	return true;
 }
 
