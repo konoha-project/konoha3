@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-K.import("konoha.class");
+K.import("konoha.global");
 
 int v0 = 0; 
 int v1 = 1; 
