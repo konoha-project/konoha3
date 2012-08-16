@@ -1,0 +1,7 @@
+ - (FloatLiteralWithUnit.k:4) 0.0 == 0.000000
+ - (FloatLiteralWithUnit.k:5) 12345.0 == 12345.000000
+ - (FloatLiteralWithUnit.k:6) 1.2345e27 == 1234499999999999961840222208.000000
+ - (FloatLiteralWithUnit.k:7) 1e21 == 1000000000000000000000.000000
+ - (FloatLiteralWithUnit.k:8) 1e20 == 100000000000000000000.000000
+ - (FloatLiteralWithUnit.k:9) -0.0 == -0.000000
+Q.E.D.
