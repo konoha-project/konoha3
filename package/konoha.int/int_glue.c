@@ -24,15 +24,115 @@
 
 /* ************************************************************************ */
 
-#include<minikonoha/minikonoha.h>
-#include<minikonoha/sugar.h>
-#include<minikonoha/float.h>
-
-#include "int_glue.h"
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
+#include <minikonoha/klib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+static KMETHOD Int_opPlus(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNi_(+(sfp[0].intValue));
+}
+
+static KMETHOD Int_opCompl (KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNi_(~sfp[0].intValue);
+}
+
+static KMETHOD Int_opLSHIFT (KonohaContext *kctx, KonohaStack *sfp)
+{
+	int lshift = sfp[1].intValue;
+	RETURNi_(sfp[0].intValue << lshift);
+}
+
+static KMETHOD Int_opRSHIFT (KonohaContext *kctx, KonohaStack *sfp)
+{
+	int rshift = sfp[1].intValue;
+	RETURNi_(sfp[0].intValue >> rshift);
+}
+
+static KMETHOD Int_opAND(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNi_(sfp[0].intValue & sfp[1].intValue);
+}
+
+static KMETHOD Int_opOR(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNi_(sfp[0].intValue | sfp[1].intValue);
+}
+
+static KMETHOD Int_opXOR(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNi_(sfp[0].intValue ^ sfp[1].intValue);
+}
+
+/* ------------------------------------------------------------------------ */
+
+#define _Public   kMethod_Public
+#define _Const    kMethod_Const
+#define _Im       kMethod_Immutable
+#define _Coercion kMethod_Coercion
+#define _F(F)   (intptr_t)(F)
+
+static kbool_t int_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+{
+	int FN_x = FN_("x");
+	KDEFINE_METHOD MethodData[] = {
+		_Public|_Const|_Im, _F(Int_opPlus), TY_Int, TY_Int, MN_("+"), 0,
+		_Public|_Const|_Im, _F(Int_opCompl), TY_Int, TY_Int, MN_("~"), 0,
+		_Public|_Const|_Im, _F(Int_opLSHIFT), TY_Int, TY_Int, MN_("<<"), 1, TY_Int, FN_x,
+		_Public|_Const|_Im, _F(Int_opRSHIFT), TY_Int, TY_Int, MN_(">>"), 1, TY_Int, FN_x,
+		_Public|_Const|_Im, _F(Int_opAND), TY_Int, TY_Int, MN_("&"), 1, TY_Int, FN_x,
+		_Public|_Const|_Im, _F(Int_opOR ), TY_Int, TY_Int, MN_("|"), 1, TY_Int, FN_x,
+		_Public|_Const|_Im, _F(Int_opXOR), TY_Int, TY_Int, MN_("^"), 1, TY_Int, FN_x,
+		//_Public|_Const|_Im, _F(Int_opINC), TY_Int, TY_Int, MN_("opINC"), 0,
+		//_Public|_Const|_Im, _F(Int_opDEC), TY_Int, TY_Int, MN_("opDEC"), 0,
+		DEND,
+	};
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KDEFINE_INT_CONST IntData[] = {
+		{"INT_MAX", TY_Int, KINT_MAX},
+		{"INT_MIN", TY_Int, KINT_MIN},
+		{NULL},
+	};
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
+	return true;
+}
+
+static kbool_t int_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+{
+	return true;
+}
+
+static kbool_t int_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
+{
+	KDEFINE_SYNTAX SYNTAX[] = {
+		{ .keyword = SYM_("~"), .precedence_op1 = C_PRECEDENCE_PREUNARY,},
+		{ .keyword = SYM_("<<"),  .precedence_op2 = C_PRECEDENCE_SHIFT,},
+		{ .keyword = SYM_(">>"),  .precedence_op2 = C_PRECEDENCE_SHIFT,},
+		{ .keyword = SYM_("&"),   .precedence_op2 = C_PRECEDENCE_BITAND,},
+		{ .keyword = SYM_("|"),   .precedence_op2 = C_PRECEDENCE_BITOR,},
+		{ .keyword = SYM_("^"),   .precedence_op2 = C_PRECEDENCE_BITXOR,},
+		//{ TOKEN("++"),  .op1 = "opINC", .precedence_op2 = C_PRECEDENCE_PREUNARY, .flag = SYNFLAG_ExprPostfixOp2, },
+		//{ TOKEN("--"),  .op1 = "opDEC", .precedence_op2 = C_PRECEDENCE_PREUNARY, .flag = SYNFLAG_ExprPostfixOp2,},
+		{ .keyword = KW_END, },
+	};
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
+	SugarSyntaxVar *syn = (SugarSyntaxVar*)SUGAR kNameSpace_getSyntax(kctx, ns, SYM_("+"), 0);
+	if(syn != NULL) {
+		syn->precedence_op1  = 16;
+	}
+	return true;
+}
+
+static kbool_t int_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+{
+	return true;
+}
+
 
 KDEFINE_PACKAGE* int_init(void)
 {
