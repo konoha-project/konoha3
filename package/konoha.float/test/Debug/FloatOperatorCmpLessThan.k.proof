@@ -1,0 +1,5 @@
+ - (FloatOperatorCmpLessThan.k:11) true
+ - (FloatOperatorCmpLessThan.k:12) false
+ - (FloatOperatorCmpLessThan.k:13) false
+ - (FloatOperatorCmpLessThan.k:14) true
+Q.E.D.
