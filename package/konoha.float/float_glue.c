@@ -25,7 +25,7 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/float.h>
-#include "ext/mt19937ar.h"
+#include <math.h> /* for INFINATE, NAN */
 
 #ifdef __cplusplus
 extern "C" {
@@ -220,24 +220,6 @@ static KMETHOD Float_opMINUS(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNf_(-(sfp[0].floatValue));
 }
 
-//double genrand64_real1(void);
-
-static kfloat_t kfloat_rand(void)
-{
-#if defined(K_USING_NOFLOAT)
-	return (kfloat_t)knh_rand();
-#elif defined(K_USING_INT32)
-	return (kfloat_t)genrand_real1();
-#else
-	return (kfloat_t)genrand64_real1();
-#endif
-}
-
-static KMETHOD Float_random(KonohaContext *kctx, KonohaStack *sfp)
-{
-	RETURNf_(kfloat_rand());
-}
-
 /* ------------------------------------------------------------------------ */
 
 #define _Public   kMethod_Public
@@ -291,12 +273,13 @@ static kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public|_Const|_Im, _F(Float_toString), TY_String, TY_Float, MN_to(TY_String), 0,
 		_Public|_Const|_Im, _F(String_toFloat), TY_Float, TY_String, MN_to(TY_Float), 0,
 		_Public|_Const|_Im, _F(Float_opMINUS), TY_Float, TY_Float, MN_("-"), 0,
-		_Public|_Static|_Im, _F(Float_random), TY_Float, TY_Float, MN_("random"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	KDEFINE_FLOAT_CONST FloatData[] = {
 		{"FLOAT_EPSILON", TY_Float, DBL_EPSILON},
+		{"Infinity", TY_Float, INFINITY},
+		{"NaN", TY_Float, NAN},
 		{}
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(FloatData), pline);
