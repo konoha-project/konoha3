@@ -367,7 +367,6 @@ static kstatus_t kBlock_genEvalCode(KonohaContext *kctx, kBlock *bk, kMethod *mt
 	GAMMA_PUSH(gma, &newgma);
 	Gamma_initIt(kctx, &newgma, Method_param(mtd));
 	kBlock_tyCheckAll(kctx, bk, gma);
-	DBG_P("block size =%d", kArray_size(bk->stmtList));
 	GAMMA_POP(gma, &newgma);
 
 	kStmt *stmt = bk->stmtList->stmtItems[0];
@@ -434,15 +433,13 @@ static kstatus_t TokenRange_eval(KonohaContext *kctx, TokenRange *sourceRange)
 	PUSH_GCSTACK(mtd);
 	KLIB kMethod_setParam(kctx, mtd, TY_Object, 0, NULL);
 	int i = sourceRange->beginIdx, indent = 0;
-	kBlock *singleBlock = KonohaContext_getSugarContext(kctx)->singleBlock;
+	kBlock *singleBlock = GCSAFE_new(Block, sourceRange->ns);
 	while(i < sourceRange->endIdx) {
 		TokenRange rangeBuf, *range = new_TokenStackRange(kctx, sourceRange, &rangeBuf);
 		sourceRange->beginIdx = i;
 		i = TokenRange_selectStmtToken(kctx, range, sourceRange, SemiColon, &indent);
-//		DBG_P("sourceRange->beginIdx=%d, i=%d, range=%d,%d", sourceRange->beginIdx, i, range->beginIdx, range->endIdx);
 		if(range->errToken != NULL) return K_BREAK;
 		if(range->endIdx > range->beginIdx) {
-			KSETv(singleBlock, ((kBlockVar*)singleBlock)->blockNameSpace, sourceRange->ns);
 			KLIB kArray_clear(kctx, singleBlock->stmtList, 0);
 			kBlock_addNewStmt(kctx, singleBlock, range);
 			TokenRange_pop(kctx, range);

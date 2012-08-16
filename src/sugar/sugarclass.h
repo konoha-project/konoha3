@@ -339,7 +339,7 @@ static const char* kStmt_getText(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw,
 /* --------------- */
 /* Block */
 
-static void Block_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kBlock_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kBlockVar *bk = (kBlockVar*)o;
 	kNameSpace *ns = (conf != NULL) ? (kNameSpace*)conf : KNULL(NameSpace);
@@ -349,7 +349,7 @@ static void Block_init(KonohaContext *kctx, kObject *o, void *conf)
 	KINITv(bk->esp, new_(Expr, 0));
 }
 
-static void Block_reftrace(KonohaContext *kctx, kObject *o)
+static void kBlock_reftrace(KonohaContext *kctx, kObject *o)
 {
 	kBlock *bk = (kBlock*)o;
 	BEGIN_REFTRACE(4);

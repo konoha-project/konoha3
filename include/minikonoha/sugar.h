@@ -579,7 +579,7 @@ typedef struct {
 	kArray            *errorMessageList;
 	int                errorMessageCount;
 	kbool_t            isBlockingErrorMessage;
-	kBlock            *singleBlock;
+//	kBlock            *singleBlock;
 	kGamma            *preparedGamma;
 //	kArray            *lvarlst;
 	kArray            *definedMethodList;

@@ -518,29 +518,6 @@ static KMETHOD ExprTyCheck_Symbol(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(Expr_tyCheckVariable2(kctx, stmt, expr, gma, reqty));
 }
 
-//static KMETHOD ExprTyCheck_Usymbol(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-//	kToken *tk = expr->termToken;
-//	ksymbol_t unboxKey = tk->resolvedSymbol;
-//	kNameSpace *ns = Stmt_nameSpace(stmt);
-//	if(unboxKey != SYM_NONAME) {
-//		KUtilsKeyValue *kv = kNameSpace_getLocalConstNULL(kctx, ns, unboxKey);
-//		if(kv != NULL) {
-//			if(SYMKEY_isBOXED(kv->key)) {
-//				SUGAR kExpr_setConstValue(kctx, expr, kv->ty, kv->objectValue);
-//			}
-//			else {
-//				SUGAR kExpr_setUnboxConstValue(kctx, expr, kv->ty, kv->unboxValue);
-//			}
-//			RETURN_(expr);
-//		}
-//	}
-//	kObject *v = NameSpace_getSymbolValueNULL(kctx, ns, S_text(tk->text), S_size(tk->text));
-//	kExpr *texpr = (v == NULL) ? kToken_p(stmt, tk, ErrTag, "undefined name: %s", Token_text(tk)) : SUGAR kExpr_setConstValue(kctx, expr, O_typeId(v), v);
-//	RETURN_(texpr);
-//}
-
 static KMETHOD StmtTyCheck_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_StmtTyCheck(stmt, gma);
@@ -723,8 +700,6 @@ static kExpr *Expr_lookupMethod(KonohaContext *kctx, kStmt *stmt, kExpr *expr, k
 			}
 		}
 		if(tkMN->resolvedSymbol == MN_new && psize == 0 && CT_(kExpr_at(expr, 1)->ty)->baseTypeId == TY_Object) {
-			//DBG_P("baseTypeId=%s", TY_t(CT_(kExpr_at(expr, 1)->ty)->baseTypeId));
-			DBG_ASSERT(kExpr_at(expr, 1)->ty != TY_var);
 			return kExpr_at(expr, 1);  // new Person(); // default constructor
 		}
 		kToken_p(stmt, tkMN, ErrTag, "undefined %s: %s.%s%s", MethodType_t(kctx, tkMN->resolvedSymbol, psize), TY_t(this_cid), KW_t(tkMN->resolvedSymbol));
@@ -1115,7 +1090,7 @@ static KMETHOD StmtTyCheck_ParamsDecl(KonohaContext *kctx, KonohaStack *sfp)
 		for(i = 0; i < psize; i++) {
 			kStmt *stmt = params->stmtList->stmtItems[i];
 			if(stmt->syn->keyword != KW_StmtTypeDecl || !StmtTypeDecl_setParam(kctx, stmt, i, p)) {
-				kkStmt_printMessage(stmt, ErrTag, "parameter declaration must be a $Type $name form");
+				kkStmt_printMessage(stmt, ErrTag, "parameter declaration must be a $Type $Symbol form");
 				RETURNb_(false);
 			}
 		}

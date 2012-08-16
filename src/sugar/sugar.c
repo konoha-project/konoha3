@@ -82,11 +82,10 @@ kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, kfileline_t uli
 static void SugarContext_reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh)
 {
 	SugarContext *base = (SugarContext*)baseh;
-	BEGIN_REFTRACE(6);
+	BEGIN_REFTRACE(4);
 	KREFTRACEv(base->preparedTokenList);
 	KREFTRACEv(base->errorMessageList);
 	KREFTRACEv(base->preparedGamma);
-	KREFTRACEv(base->singleBlock);
 	KREFTRACEv(base->definedMethodList);
 	END_REFTRACE();
 }
@@ -107,10 +106,7 @@ static void SugarModule_setup(KonohaContext *kctx, struct KonohaModule *def, int
 		base->errorMessageCount = 0;
 		KINITv(base->errorMessageList, new_(StringArray, 8));
 		KINITv(base->definedMethodList, new_(MethodArray, 8));
-
 		KINITv(base->preparedGamma, new_(Gamma, NULL));
-		KINITv(base->singleBlock, new_(Block, NULL));
-		KLIB kArray_add(kctx, base->singleBlock->stmtList, K_NULL);
 		KLIB Karray_init(kctx, &base->errorMessageBuffer, K_PAGESIZE);
 		kctx->modlocal[MOD_sugar] = (KonohaModuleContext*)base;
 	}
@@ -187,8 +183,8 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	};
 	KDEFINE_CLASS defBlock = {
 		STRUCTNAME(Block),
-		.init = Block_init,
-		.reftrace = Block_reftrace,
+		.init = kBlock_init,
+		.reftrace = kBlock_reftrace,
 	};
 	KDEFINE_CLASS defGamma = {
 		STRUCTNAME(Gamma),
