@@ -251,11 +251,19 @@ static kString *resolveEscapeSequence(KonohaContext *kctx, kString *s, size_t st
 		int ch = *text;
 		if(ch == '\\' && *(text+1) != '\0') {
 			switch (*(text+1)) {
-			case 'n':  ch = '\n'; text++; break;
+			/*
+			 * compatible with ECMA-262
+			 * http://ecma-international.org/ecma-262/5.1/#sec-7.8.4
+			 */
+			case 'b':  ch = '\b'; text++; break;
 			case 't':  ch = '\t'; text++; break;
+			case 'n':  ch = '\n'; text++; break;
+			case 'v':  ch = '\v'; text++; break;
+			case 'f':  ch = '\f'; text++; break;
 			case 'r':  ch = '\r'; text++; break;
+			case '"':  ch = '"';  text++; break;
+			case '\'': ch = '\''; text++; break;
 			case '\\': ch = '\\'; text++; break;
-			case '"':  ch = '\"'; text++; break;
 			}
 		}
 		kwb_putc(&wb, ch);
