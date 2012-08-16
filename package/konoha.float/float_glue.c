@@ -60,6 +60,11 @@ static void kmodfloat_free(KonohaContext *kctx, struct KonohaModule *baseh)
 
 // --------------------------------------------------------------------------
 
+static KMETHOD Float_opPlus(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNi_(+(sfp[0].floatValue));
+}
+
 /* float + float */
 static KMETHOD Float_opADD(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -247,6 +252,7 @@ static kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	base->cFloat = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &defFloat, pline);
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
+		_Public|_Const|_Im, _F(Float_opPlus), TY_Float, TY_Float, MN_("+"), 0,
 		_Public|_Const|_Im, _F(Float_opADD), TY_Float, TY_Float, MN_("+"), 1, TY_Float, FN_x,
 		_Public|_Const|_Im, _F(Int_opADD), TY_Float, TY_Int, MN_("+"), 1, TY_Float, FN_x,
 		_Public|_Const|_Im, _F(Float_opSUB), TY_Float, TY_Float, MN_("-"), 1, TY_Float, FN_x,
