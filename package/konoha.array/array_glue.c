@@ -161,23 +161,24 @@ static KMETHOD Array_unshift(KonohaContext *kctx, KonohaStack *sfp)
         RETURNi_(kArray_size(a));
 }
 
-// TODO: it dosent work well.
-/*
 static KMETHOD Array_pop(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
 	size_t n = kArray_size(a) - 1;
 	if(kArray_isUnboxData(a)) {
                 uintptr_t v = a->unboxItems[n];
+                a->unboxItems[n] = NULL;
                 kArray_setsize((kArrayVar *)a, n);
 		RETURNd_(v);
 	}
-	else {
-                ((struct _kAbstractArray*)a)->a.bytesize = n * sizeof(void*);
-		RETURN_(a->objectItems[n]);
+	else{
+                struct _kAbstractArray *a2 = (struct _kAbstractArray*)a;
+                kObject *value = a2->a.objectItems[n]; 
+                KINITp(a2, a2->a.objectItems[n], value);
+                a2->a.bytesize = n * sizeof(void*);
+		RETURN_(value);
 	}
 }
-*/
 
 static KMETHOD Array_new(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -221,7 +222,7 @@ static	kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public,     _F(Array_newArray), TY_Array, TY_Array, MN_("newArray"), 1, TY_Int, FN_("size"),
 		_Public,     _F(Array_add1), TY_void, TY_Array, MN_("add"), 1, TY_0, FN_("value"),
 		_Public,     _F(Array_push), TY_Int, TY_Array, MN_("push"), 1, TY_0, FN_("value"),
-		//_Public,     _F(Array_pop), TY_0, TY_Array, MN_("pop"), 0,
+		_Public,     _F(Array_pop), TY_0, TY_Array, MN_("pop"), 0,
 		_Public,     _F(Array_unshift), TY_Int, TY_Array, MN_("unshift"), 1, TY_0, FN_("value"),
 		_Public|kMethod_Hidden, _F(Array_newList), TY_Array, TY_Array, MN_("newList"), 0,
 		_Public|_Im, _F(Array_new), TY_void, TY_Array, MN_("new"), 1, TY_Int, FN_("size"),
