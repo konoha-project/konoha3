@@ -525,14 +525,15 @@ typedef struct {
 	kArray          *packageList;
 	KUtilsHashMap   *packageMapNO;
 
-	TokenRange* (*new_TokenListRange)(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, TokenRange *bufRange);
-	TokenRange* (*new_TokenStackRange)(KonohaContext *kctx, TokenRange *range, TokenRange *bufRange);
-	void   (*kNameSpace_setTokenizeFunc)(KonohaContext *, kNameSpace *, int ch, TokenizeFunc, kFunc *, int isAddition);
-	void   (*TokenRange_tokenize)(KonohaContext *, TokenRange *, const char *, kfileline_t);
-	kbool_t (*TokenRange_resolved)(KonohaContext *kctx, TokenRange *, TokenRange *);
-	int     (*kkStmt_printMessagearseTypePattern)(KonohaContext *, kStmt *, kNameSpace *, kArray *, int , int , KonohaClass **classRef);
+	TokenRange* (*new_TokenListRange)(KonohaContext *, kNameSpace *ns, kArray *tokenList, TokenRange *bufRange);
+	TokenRange* (*new_TokenStackRange)(KonohaContext *, TokenRange *range, TokenRange *bufRange);
+	void        (*kNameSpace_setTokenizeFunc)(KonohaContext *, kNameSpace *, int ch, TokenizeFunc, kFunc *, int isAddition);
+	void        (*TokenRange_tokenize)(KonohaContext *, TokenRange *, const char *, kfileline_t);
+	kbool_t     (*TokenRange_resolved)(KonohaContext *, TokenRange *, TokenRange *);
+	kstatus_t   (*TokenRange_eval)(KonohaContext *, TokenRange *);
+	int         (*kStmt_parseTypePattern)(KonohaContext *, kStmt *, kNameSpace *, kArray *, int , int , KonohaClass **classRef);
 
-	uintptr_t   (*kkStmt_printMessagearseFlag)(KonohaContext *kctx, kStmt *stmt, KonohaFlagSymbolData *flagData, uintptr_t flag);
+	uintptr_t   (*kStmt_parseFlag)(KonohaContext *kctx, kStmt *stmt, KonohaFlagSymbolData *flagData, uintptr_t flag);
 	kToken*     (*kStmt_getToken)(KonohaContext *, kStmt *, ksymbol_t kw, kToken *def);
 	kExpr*      (*kStmt_getExpr)(KonohaContext *, kStmt *, ksymbol_t kw, kExpr *def);
 	const char* (*kStmt_getText)(KonohaContext *, kStmt *, ksymbol_t kw, const char *def);

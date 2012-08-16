@@ -117,6 +117,7 @@ set(PACKAGES
 	konoha.int
 	konoha.iterator
 	konoha.math
+	konoha.namespace
 	konoha.new
 	konoha.null
 	konoha.rope

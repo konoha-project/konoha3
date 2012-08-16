@@ -214,9 +214,10 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->new_TokenStackRange        = new_TokenStackRange;
 	mod->kNameSpace_setTokenizeFunc = kNameSpace_setTokenizeFunc;
 	mod->TokenRange_tokenize        = TokenRange_tokenize;
+	mod->TokenRange_eval            = TokenRange_eval;
 	mod->TokenRange_resolved        = TokenRange_resolved;
-	mod->kkStmt_printMessagearseTypePattern     = kkStmt_printMessagearseTypePattern;
-	mod->kkStmt_printMessagearseFlag            = kkStmt_printMessagearseFlag;
+	mod->kStmt_parseTypePattern     = kStmt_parseTypePattern;
+	mod->kStmt_parseFlag            = kStmt_parseFlag;
 	mod->kStmt_getToken             = kStmt_getToken;
 	mod->kStmt_getBlock             = kStmt_getBlock;
 	mod->kStmt_getExpr              = kStmt_getExpr;

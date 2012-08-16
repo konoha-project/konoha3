@@ -198,7 +198,7 @@ typedef float             kfloat_t;
 typedef bool             kbool_t;
 
 typedef enum {
-	K_FAILED, K_CONTINUE, K_BREAK
+	K_FAILED, K_BREAK, K_CONTINUE,
 } kstatus_t;
 
 typedef intptr_t         kint_t;
