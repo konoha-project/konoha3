@@ -215,6 +215,37 @@ static KMETHOD Array_removeAt(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
+static void kArray_reverse(KonohaContext *kctx, kArray *a)
+{
+	size_t asize = kArray_size(a);
+        size_t asize_half = asize / 2;
+	int i;
+        if(kArray_isUnboxData(a)) {
+                a->unboxItems[asize - 1];
+                for(i = 0; i != asize_half; ++i){
+                        uintptr_t temp = a->unboxItems[asize - 1 - i];
+	                a->unboxItems[asize - 1 - i] = a->unboxItems[i];
+                        a->unboxItems[i] = temp;
+                }
+	}
+	else{
+                a->objectItems[asize - 1];
+                for(i = 0; i != asize_half; ++i){
+                        uintptr_t temp = a->objectItems[asize - 1 - i];
+	                a->objectItems[asize - 1 - i] = a->objectItems[i];
+                        a->objectItems[i] = temp;
+                }
+	}
+}
+
+static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kArray *a = sfp[0].asArray;
+        kArray_reverse(kctx, a);
+        RETURN_(a);
+}
+
+
 static KMETHOD Array_shift(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
@@ -233,6 +264,7 @@ static KMETHOD Array_shift(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Array_new(KonohaContext *kctx, KonohaStack *sfp)
 {
+
 	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
 	//DBG_P("objitem=%p", a->objectItems);
 	size_t asize = (size_t)sfp[1].intValue;
@@ -276,6 +308,7 @@ static	kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public,     _F(Array_pop), TY_0, TY_Array, MN_("pop"), 0,
 		_Public,     _F(Array_shift), TY_0, TY_Array, MN_("shift"), 0,
 		_Public,     _F(Array_unshift), TY_Int, TY_Array, MN_("unshift"), 1, TY_0, FN_("value"),
+		_Public,     _F(Array_reverse), TY_Array, TY_Array, MN_("reverse"), 0,
 		_Public|kMethod_Hidden, _F(Array_newList), TY_Array, TY_Array, MN_("newList"), 0,
 		_Public|_Im, _F(Array_new), TY_void, TY_Array, MN_("new"), 1, TY_Int, FN_("size"),
 		DEND,
