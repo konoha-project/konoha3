@@ -407,6 +407,87 @@ static KMETHOD Date_setUTCSeconds(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(ret);
 }
 
+//## int Date.setYear(int year);
+static KMETHOD Date_setYear(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct _kDate *d = (struct _kDate *)sfp[0].asObject;
+	time_t tv_sec = d->tv.tv_sec;
+	struct tm lt = *localtime(&tv_sec);
+	lt.tm_year = sfp[1].intValue;
+	d->tv.tv_sec = mktime(&lt);
+	kint_t ret = (kint_t)d->tv.tv_sec * 1000 + (kint_t)d->tv.tv_usec / 1000;
+	RETURNi_(ret);
+}
+
+#define MAX_STR_SIZE 64
+
+//## String Date.toDateString();
+static KMETHOD Date_toDateString(KonohaContext *kctx, KonohaStack *sfp)
+{
+	time_t tv_sec = ((struct _kDate *)sfp[0].asObject)->tv.tv_sec;
+	struct tm lt = *localtime(&tv_sec);
+	char str[MAX_STR_SIZE];
+	size_t len = strftime(str, MAX_STR_SIZE, "%a %b %d %Y", &lt);
+	RETURN_(KLIB new_kString(kctx, str, len, 0));
+}
+
+//## String Date.toGMTString();
+static KMETHOD Date_toGMTString(KonohaContext *kctx, KonohaStack *sfp)
+{
+	time_t tv_sec = ((struct _kDate *)sfp[0].asObject)->tv.tv_sec;
+	struct tm utc = *gmtime(&tv_sec);
+	char str[MAX_STR_SIZE];
+	size_t len = strftime(str, MAX_STR_SIZE, "%a, %d %b %Y %H:%M:%S %Z", &utc);
+	RETURN_(KLIB new_kString(kctx, str, len, 0));
+}
+
+//## String Date.toISOString();
+static KMETHOD Date_toISOString(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct _kDate *d = (struct _kDate *)sfp[0].asObject;
+	time_t tv_sec = d->tv.tv_sec;
+	struct tm utc = *gmtime(&tv_sec);
+	char str[MAX_STR_SIZE];
+	size_t len = strftime(str, MAX_STR_SIZE, "%Y-%m-%dT%H:%M:%S", &utc);
+	len += snprintf(str, MAX_STR_SIZE, "%s.%3dZ", str, (int)(d->tv.tv_usec / 1000));
+	RETURN_(KLIB new_kString(kctx, str, len, 0));
+}
+
+//## Json Date.toJSON(); Not implemented
+static KMETHOD Date_toJSON(KonohaContext *kctx, KonohaStack *sfp)
+{
+}
+
+//## String Date.toLocaleDateString();
+static KMETHOD Date_toLocaleDateString(KonohaContext *kctx, KonohaStack *sfp)
+{
+	time_t tv_sec = ((struct _kDate *)sfp[0].asObject)->tv.tv_sec;
+	struct tm lt = *localtime(&tv_sec);
+	char str[MAX_STR_SIZE];
+	size_t len = strftime(str, MAX_STR_SIZE, "%A %B %d %Y", &lt);
+	RETURN_(KLIB new_kString(kctx, str, len, 0));
+}
+
+//## String Date.toLocaleTimeString();
+static KMETHOD Date_toLocaleTimeString(KonohaContext *kctx, KonohaStack *sfp)
+{
+	time_t tv_sec = ((struct _kDate *)sfp[0].asObject)->tv.tv_sec;
+	struct tm utc = *localtime(&tv_sec);
+	char str[MAX_STR_SIZE];
+	size_t len = strftime(str, MAX_STR_SIZE, "%H:%M:%S", &utc);
+	RETURN_(KLIB new_kString(kctx, str, len, 0));
+}
+
+//## String Date.toLocaleString();
+static KMETHOD Date_toLocaleString(KonohaContext *kctx, KonohaStack *sfp)
+{
+	time_t tv_sec = ((struct _kDate *)sfp[0].asObject)->tv.tv_sec;
+	struct tm utc = *localtime(&tv_sec);
+	char str[MAX_STR_SIZE];
+	size_t len = strftime(str, MAX_STR_SIZE, "%a %b %d %Y %H:%M:%S (%Z)", &utc);
+	RETURN_(KLIB new_kString(kctx, str, len, 0));
+}
+
 /* ------------------------------------------------------------------------ */
 
 #define _Public   kMethod_Public
@@ -468,6 +549,14 @@ static	kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public, _F(Date_setUTCMinutes), TY_Int, TY_Date, MN_("setUTCMinutes"), 1, TY_Int, FN_("minutes"),
 		_Public, _F(Date_setUTCMonth), TY_Int, TY_Date, MN_("setUTCMonth"), 1, TY_Int, FN_("month"),
 		_Public, _F(Date_setUTCSeconds), TY_Int, TY_Date, MN_("setUTCSeconds"), 1, TY_Int, FN_("seconds"),
+		_Public, _F(Date_setYear), TY_Int, TY_Date, MN_("setYear"), 1, TY_Int, FN_("year"),
+		_Public, _F(Date_toDateString), TY_String, TY_Date, MN_("toDateString"), 0,
+		_Public, _F(Date_toGMTString), TY_String, TY_Date, MN_("toGMTString"), 0,
+		_Public, _F(Date_toISOString), TY_String, TY_Date, MN_("toISOString"), 0,
+//		_Public, _F(Date_toJSON), TY_Json, TY_Date, MN_("toJSON"), 0,
+		_Public, _F(Date_toLocaleDateString), TY_String, TY_Date, MN_("toLocaleDateString"), 0,
+		_Public, _F(Date_toLocaleTimeString), TY_String, TY_Date, MN_("toLocaleTimeString"), 0,
+		_Public, _F(Date_toLocaleString), TY_String, TY_Date, MN_("toLocaleString"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
