@@ -270,11 +270,11 @@ static KMETHOD Date_setHours(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(ret);
 }
 
-//## int Date.setMilliseconds(int hours);
+//## int Date.setMilliseconds(int milliseconds);
 static KMETHOD Date_setMilliseconds(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kDate *d = (struct _kDate *)sfp[0].asObject;
-	d->tv.tv_usec = sfp[1].intValue;
+	d->tv.tv_usec = sfp[1].intValue * 1000;
 	kint_t ret = (kint_t)d->tv.tv_sec * 1000 + (kint_t)d->tv.tv_usec / 1000;
 	RETURNi_(ret);
 }
@@ -311,6 +311,98 @@ static KMETHOD Date_setSeconds(KonohaContext *kctx, KonohaStack *sfp)
 	struct tm lt = *localtime(&tv_sec);
 	lt.tm_sec = sfp[1].intValue;
 	d->tv.tv_sec = mktime(&lt);
+	kint_t ret = (kint_t)d->tv.tv_sec * 1000 + (kint_t)d->tv.tv_usec / 1000;
+	RETURNi_(ret);
+}
+
+//## int Date.setTime(int milliseconds);
+static KMETHOD Date_setTime(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct _kDate *d = (struct _kDate *)sfp[0].asObject;
+	kint_t msec = sfp[1].intValue;
+	d->tv.tv_sec = (time_t)(msec / 1000);
+	d->tv.tv_usec = (time_t)(msec % 1000 * 1000);
+	kint_t ret = (kint_t)d->tv.tv_sec * 1000 + (kint_t)d->tv.tv_usec / 1000;
+	RETURNi_(ret);
+}
+
+//## int Date.setUTCDate(int date);
+static KMETHOD Date_setUTCDate(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct _kDate *d = (struct _kDate *)sfp[0].asObject;
+	time_t tv_sec = d->tv.tv_sec;
+	struct tm utc = *gmtime(&tv_sec);
+	utc.tm_mday = sfp[1].intValue;
+	d->tv.tv_sec = mktime(&utc);
+	kint_t ret = (kint_t)d->tv.tv_sec * 1000 + (kint_t)d->tv.tv_usec / 1000;
+	RETURNi_(ret);
+}
+
+//## int Date.setUTCFullYear(int year);
+static KMETHOD Date_setUTCFullYear(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct _kDate *d = (struct _kDate *)sfp[0].asObject;
+	time_t tv_sec = d->tv.tv_sec;
+	struct tm utc = *gmtime(&tv_sec);
+	utc.tm_year = sfp[1].intValue - 1900;
+	d->tv.tv_sec = mktime(&utc);
+	kint_t ret = (kint_t)d->tv.tv_sec * 1000 + (kint_t)d->tv.tv_usec / 1000;
+	RETURNi_(ret);
+}
+
+//## int Date.setUTCHours(int hours);
+static KMETHOD Date_setUTCHours(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct _kDate *d = (struct _kDate *)sfp[0].asObject;
+	time_t tv_sec = d->tv.tv_sec;
+	struct tm utc = *gmtime(&tv_sec);
+	utc.tm_hour = sfp[1].intValue;
+	d->tv.tv_sec = mktime(&utc);
+	kint_t ret = (kint_t)d->tv.tv_sec * 1000 + (kint_t)d->tv.tv_usec / 1000;
+	RETURNi_(ret);
+}
+
+//## int Date.setUTCMilliseconds(int milliseconds);
+static KMETHOD Date_setUTCMilliseconds(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct _kDate *d = (struct _kDate *)sfp[0].asObject;
+	d->tv.tv_usec = sfp[1].intValue * 1000;
+	kint_t ret = (kint_t)d->tv.tv_sec * 1000 + (kint_t)d->tv.tv_usec / 1000;
+	RETURNi_(ret);
+}
+
+//## int Date.setUTCMinutes(int minutes);
+static KMETHOD Date_setUTCMinutes(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct _kDate *d = (struct _kDate *)sfp[0].asObject;
+	time_t tv_sec = d->tv.tv_sec;
+	struct tm utc = *gmtime(&tv_sec);
+	utc.tm_min = sfp[1].intValue;
+	d->tv.tv_sec = mktime(&utc);
+	kint_t ret = (kint_t)d->tv.tv_sec * 1000 + (kint_t)d->tv.tv_usec / 1000;
+	RETURNi_(ret);
+}
+
+//## int Date.setUTCMonth(int month);
+static KMETHOD Date_setUTCMonth(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct _kDate *d = (struct _kDate *)sfp[0].asObject;
+	time_t tv_sec = d->tv.tv_sec;
+	struct tm utc = *gmtime(&tv_sec);
+	utc.tm_mon = sfp[1].intValue;
+	d->tv.tv_sec = mktime(&utc);
+	kint_t ret = (kint_t)d->tv.tv_sec * 1000 + (kint_t)d->tv.tv_usec / 1000;
+	RETURNi_(ret);
+}
+
+//## int Date.setUTCSeconds(int seconds);
+static KMETHOD Date_setUTCSeconds(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct _kDate *d = (struct _kDate *)sfp[0].asObject;
+	time_t tv_sec = d->tv.tv_sec;
+	struct tm utc = *gmtime(&tv_sec);
+	utc.tm_sec = sfp[1].intValue;
+	d->tv.tv_sec = mktime(&utc);
 	kint_t ret = (kint_t)d->tv.tv_sec * 1000 + (kint_t)d->tv.tv_usec / 1000;
 	RETURNi_(ret);
 }
@@ -359,7 +451,7 @@ static	kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public, _F(Date_getUTCMinutes), TY_Int, TY_Date, MN_("getUTCMinutes"), 0,
 		_Public, _F(Date_getUTCMonth), TY_Int, TY_Date, MN_("getUTCMonth"), 0,
 		_Public, _F(Date_getUTCSeconds), TY_Int, TY_Date, MN_("getUTCSeconds"), 0,
-		_Public, _F(Date_getYear), TY_Int, TY_Date, MN_("getFullYear"), 0,
+		_Public, _F(Date_getYear), TY_Int, TY_Date, MN_("getYear"), 0,
 		_Public|_Static, _F(Date_parse), TY_Int, TY_Date, MN_("parse"), 1, TY_String, FN_("dateString"),
 		_Public, _F(Date_setDate), TY_Int, TY_Date, MN_("setDate"), 1, TY_Int, FN_("date"),
 		_Public, _F(Date_setFullYear), TY_Int, TY_Date, MN_("setFullYear"), 1, TY_Int, FN_("year"),
@@ -368,6 +460,14 @@ static	kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public, _F(Date_setMinutes), TY_Int, TY_Date, MN_("setMinutes"), 1, TY_Int, FN_("minutes"),
 		_Public, _F(Date_setMonth), TY_Int, TY_Date, MN_("setMonth"), 1, TY_Int, FN_("month"),
 		_Public, _F(Date_setSeconds), TY_Int, TY_Date, MN_("setSeconds"), 1, TY_Int, FN_("seconds"),
+		_Public, _F(Date_setTime), TY_Int, TY_Date, MN_("setTime"), 1, TY_Int, FN_("milliseconds"),
+		_Public, _F(Date_setUTCDate), TY_Int, TY_Date, MN_("setUTCDate"), 1, TY_Int, FN_("date"),
+		_Public, _F(Date_setUTCFullYear), TY_Int, TY_Date, MN_("setUTCFullYear"), 1, TY_Int, FN_("year"),
+		_Public, _F(Date_setUTCHours), TY_Int, TY_Date, MN_("setUTCHours"), 1, TY_Int, FN_("hours"),
+		_Public, _F(Date_setUTCMilliseconds), TY_Int, TY_Date, MN_("setUTCMilliseconds"), 1, TY_Int, FN_("milliseconds"),
+		_Public, _F(Date_setUTCMinutes), TY_Int, TY_Date, MN_("setUTCMinutes"), 1, TY_Int, FN_("minutes"),
+		_Public, _F(Date_setUTCMonth), TY_Int, TY_Date, MN_("setUTCMonth"), 1, TY_Int, FN_("month"),
+		_Public, _F(Date_setUTCSeconds), TY_Int, TY_Date, MN_("setUTCSeconds"), 1, TY_Int, FN_("seconds"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
