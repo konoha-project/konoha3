@@ -62,6 +62,16 @@ static size_t text_mlen(const char *s_text, size_t s_size)
 #endif
 }
 
+static size_t text_msize(const char *text, size_t size)
+{
+	const unsigned char *start = (const unsigned char *)text;
+	size_t i, mindex = 0;
+	for(i = 0; i <= size; i++) {
+		mindex += utf8len(*(start + mindex));
+	}
+	return mindex;
+}
+
 static kString *S_mget(KonohaContext *kctx, kString *s, size_t n)
 {
 	DBG_ASSERT(!S_isASCII(s));
@@ -192,6 +202,9 @@ static kString* S_tolower(KonohaContext *kctx, kString *s0, size_t start)
 static kString *S_substring(KonohaContext *kctx, KonohaStack *sfp, kString *s0, size_t start, size_t length)
 {
 	kString *ret = NULL;
+	if(length == 0) {
+		return KNULL(String);
+	}
 	if (S_isASCII(s0)) {
 		start = check_index(kctx, start, S_size(s0), sfp[K_RTNIDX].uline);
 		const char *new_text = S_text(s0) + start;
@@ -293,21 +306,24 @@ static KMETHOD String_indexOfwithStart(KonohaContext *kctx, KonohaStack *sfp)
 	kString *s0 = sfp[0].asString, *s1 = sfp[1].asString;
 	kint_t start = sfp[2].intValue;
 	start = S_range(s0, start);
-	if(S_size(s1) > 0) {
-		long loc = -1;
-		const char *t0 = S_text(s0);
-		t0 += text_mlen(t0, (size_t)start);
-		const char *t1 = S_text(s1);
-		char *p = strstr(t0, t1);
-		if (p != NULL) {
-			loc = p - t0;
-			if (!S_isASCII(s0)) {
-				loc = text_mlen(t0, (size_t)loc);
-			}
+	if(S_size(s1) == 0) {
+		RETURNi_(start);
+	}
+	long loc = -1;
+	const char *t0 = S_text(s0);
+	if(start > 0) {
+		t0 += text_msize(t0, start - 1);
+	}
+	const char *t1 = S_text(s1);
+	char *p = strstr(t0, t1);
+	if (p != NULL) {
+		loc = p - t0;
+		if (!S_isASCII(s0)) {
+			loc = text_mlen(t0, (size_t)loc);
 		}
 		RETURNi_(loc + start);
 	}
-	RETURNi_(start);
+	RETURNi_(-1);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -343,18 +359,42 @@ static KMETHOD String_lastIndexOfwithStart(KonohaContext *kctx, KonohaStack *sfp
 	kint_t start = S_range(s0, sfp[2].intValue);
 	const char *t0 = S_text(s0);
 	const char *t1 = S_text(s1);
-	intptr_t loc = text_mlen(t0, (size_t)start) - S_size(s1);
+	intptr_t loc = text_msize(t0, start) - S_size(s1);
 	int len = S_size(s1);
 	if(S_size(s1) == 0) loc--;
 	for(; loc >= 0; loc--) {
 		if(t0[loc] == t1[0]) {
-			if(strncmp(t0 + loc, t1, len) == 0) break;
+			if(strncmp(t0 + loc, t1, len) == 0) {
+				/* found */
+				break;
+			}
+			else {
+			}
 		}
 	}
 	if (loc >= 0 && !S_isASCII(s0)) {
 		loc = text_mlen(t0, (size_t)loc);
 	}
 	RETURNi_(loc);
+}
+
+/* ------------------------------------------------------------------------ */
+//## @Const method Int String.localeCompare(String that);
+/* http://ecma-international.org/ecma-262/5.1/#sec-15.5.4.9 */
+
+static KMETHOD String_localeCompare(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kString *s0 = sfp[0].asString;
+	kString *s1 = sfp[1].asString;
+	kint_t ret = 0;
+	int res = strncmp(S_text(s0), S_text(s1), S_size(s0));
+	if(res < 0) {
+		ret = -1;
+	}
+	else if(res > 0) {
+		ret = 1;
+	}
+	RETURNi_(ret);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -625,6 +665,10 @@ static KMETHOD String_splitwithSeparatorLimit(KonohaContext *kctx, KonohaStack *
 	kString *separator = sfp[1].asString;
 	kint_t limit = sfp[2].intValue;
 	size_t length = S_length(s0);
+	if(limit < 0) {
+		/* ignore limit */
+		limit = length;
+	}
 	kArray *a = (kArray*)KLIB new_kObject(kctx, CT_StringArray0, 0);
 	const char *start = S_text(s0);
 	const char *end = start + S_size(s0);
@@ -722,6 +766,7 @@ static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		/*JS*/_Public|_Const|_Im, _F(String_indexOfwithStart), TY_Int, TY_String, MN_("indexOf"), 2, TY_String, FN_("searchvalue"), TY_Int, FN_("start"),
 		/*JS*/_Public|_Const|_Im, _F(String_lastIndexOf), TY_Int, TY_String, MN_("lastIndexOf"), 1, TY_String, FN_("searchvalue"),
 		/*JS*/_Public|_Const|_Im, _F(String_lastIndexOfwithStart), TY_Int, TY_String, MN_("lastIndexOf"), 2, TY_String, FN_("searchvalue"), TY_Int, FN_("start"),
+		/*JS*/_Public|_Const|_Im, _F(String_localeCompare), TY_Int, TY_String, MN_("localeCompare"), 1, TY_String, FN_("that"),
 		/*JS*/_Public|_Const|_Im, _F(String_replace), TY_String, TY_String, MN_("replace"), 2, TY_String, FN_("searchvalue"), TY_String, FN_("newvalue"),
 		/*JS*/_Public|_Const|_Im, _F(String_indexOf), TY_Int, TY_String, MN_("search"), 1, TY_String, FN_("searchvalue"),
 		/*JS*/_Public|_Const|_Im, _F(String_substr), TY_String, TY_String, MN_("slice"), 1, TY_Int, FN_("start"),
