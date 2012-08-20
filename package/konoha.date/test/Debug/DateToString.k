@@ -11,6 +11,9 @@ void f() {
 	p(d.toLocaleDateString().getSize() > 0);
 	p(d.toLocaleTimeString().getSize() > 0);
 	p(d.toLocaleString().getSize() > 0);
+	p(d.toString().getSize() > 0);
+	p(d.toTimeString().getSize() > 0);
+	p(d.toUTCString().getSize() > 0);
 }
 
 f();

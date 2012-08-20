@@ -573,6 +573,9 @@ static	kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public, _F(Date_toLocaleDateString), TY_String, TY_Date, MN_("toLocaleDateString"), 0,
 		_Public, _F(Date_toLocaleTimeString), TY_String, TY_Date, MN_("toLocaleTimeString"), 0,
 		_Public, _F(Date_toLocaleString), TY_String, TY_Date, MN_("toLocaleString"), 0,
+		_Public, _F(Date_toLocaleString), TY_String, TY_Date, MN_("toString"), 0,
+		_Public, _F(Date_toLocaleTimeString), TY_String, TY_Date, MN_("toTimeString"), 0,
+		_Public, _F(Date_toGMTString), TY_String, TY_Date, MN_("toUTCString"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
