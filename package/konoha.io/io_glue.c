@@ -133,6 +133,14 @@ struct kOutputStreamVar {
 	KUtilsGrowingArray buffer;
 };
 
+#define MOD_IO 20 /*TODO*/
+#define kioshare ((kioshare_t *)kctx->modshare[MOD_IO])
+
+typedef struct {
+	KonohaModule h;
+	kOutputStream *kstdout;
+} kioshare_t;
+
 #define OutputStream_isAutoFlush(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
 #define OutputStream_setAutoFlush(o,B)   TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,B)
 #define OutputStream_isManualFlush(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local2))
@@ -423,33 +431,42 @@ static KMETHOD OutputStream_isClosed(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 // --------------------------------------------------------------------------
+//## method @public OutputStream System.getOut()
 
-//static void kioshare_setup(KonohaContext *kctx, struct KonohaModule *def)
-//{
-//}
-//
-//static void kioshare_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
-//{
-//}
-//
-//static void kioshare_free(KonohaContext *kctx, struct KonohaModule *baseh)
-//{
-//	KFREE(baseh, sizeof(kioshare_t));
-//}
+static KMETHOD System_getOut(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURN_(kioshare->kstdout);
+}
+
+// --------------------------------------------------------------------------
+
+static void kioshare_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
+{
+}
+
+static void kioshare_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
+{
+}
+
+static void kioshare_free(KonohaContext *kctx, struct KonohaModule *baseh)
+{
+	KFREE(baseh, sizeof(kioshare_t));
+}
 
 #define _Public   kMethod_Public
+#define _Static   kMethod_Static
 #define _Const    kMethod_Const
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
 static kbool_t io_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-//	kioshare_t *base = (kioshare_t*)KCALLOC(sizeof(kioshare_t));
-//	base->h.name     = "io";
-//	base->h.setup    = kioshare_setup;
-//	base->h.reftrace = kioshare_reftrace;
-//	base->h.free     = kioshare_free;
-//	Konoha_setModule(MOD_IO, &base->h, pline);
+	kioshare_t *base = (kioshare_t*)KCALLOC(sizeof(kioshare_t), 1);
+	base->h.name     = "io";
+	base->h.setup    = kioshare_setup;
+	base->h.reftrace = kioshare_reftrace;
+	base->h.free     = kioshare_free;
+	KLIB Konoha_setModule(kctx, MOD_IO, &base->h, pline);
 
 	KDEFINE_CLASS defInputStream = {
 		STRUCTNAME(InputStream),
@@ -467,6 +484,13 @@ static kbool_t io_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 	KonohaClass *cOutputStream = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &defOutputStream, pline);
 	int TY_InputStream = cInputStream->typeId;
 	int TY_OutputStream = cOutputStream->typeId;
+
+#define CT_OutputStream CT_(TY_OutputStream)
+	base->kstdout = new_(OutputStream, NULL);
+	kOutputStream_init(kctx, (kObject *)base->kstdout, NULL);
+	base->kstdout->fp = (FILE_i*)stdout;
+	base->kstdout->streamApi = &FileStreamApi;
+
 	int FN_path = FN_("path");
 	int FN_mode = FN_("mode");
 	int FN_value = FN_("value");
@@ -484,6 +508,7 @@ static kbool_t io_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		_Public, _F(OutputStream_println),  TY_void,         TY_OutputStream, MN_("println"), 1, TY_String, FN_value|_Coercion,
 		_Public, _F(OutputStream_flush),    TY_void,         TY_OutputStream, MN_("flush"), 0,
 		_Public, _F(OutputStream_close),    TY_void,         TY_OutputStream, MN_("close"), 0,
+		_Public|_Static, _F(System_getOut),         TY_OutputStream, TY_System, MN_("getOut"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);
