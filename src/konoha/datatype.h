@@ -657,7 +657,7 @@ static KonohaClass *Generics_realtype(KonohaContext *kctx, KonohaClass *ct, Kono
 		KonohaClass *cParam = CT_(param->paramtypeItems[i].ty);
 		p[i].ty = cParam->realtype(kctx, cParam, self)->typeId;
 	}
-	return KLIB KonohaClass_Generics(kctx, ct, rtype, param->psize, p);
+	return KLIB KonohaClass_Generics(kctx, CT_(ct->baseTypeId), rtype, param->psize, p);
 }
 
 #define TY_isTypeVar2(T)   (T != TY_void && TY_isTypeVar(T))
