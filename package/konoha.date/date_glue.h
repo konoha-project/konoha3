@@ -54,24 +54,40 @@ static KMETHOD Date_new0(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_((kObject *)d);
 }
 
-//## Date Date.new(int milliseconds); Not implemented
+//## Date Date.new(int milliseconds);
 static KMETHOD Date_new1(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kDate *d = (struct _kDate *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+	d->tv.tv_sec = sfp[1].intValue / 1000;
+	d->tv.tv_usec = sfp[1].intValue % 1000 * 1000;
 	RETURN_((kObject *)d);
 }
 
 //## Date Date.new(String dateString); Not implemented
-static KMETHOD Date_new2(KonohaContext *kctx, KonohaStack *sfp)
-{
-	struct _kDate *d = (struct _kDate *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
-	RETURN_((kObject *)d);
-}
+//static KMETHOD Date_new2(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	struct _kDate *d = (struct _kDate *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+//	RETURN_((kObject *)d);
+//}
 
 //## Date Date.new(int year, int month, int day, int hours, int minutes, int seconds, int milliseconds); Not implemented
 static KMETHOD Date_new3(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kDate *d = (struct _kDate *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+	struct tm lt;
+	if(sfp[1].intValue < 100) {
+		lt.tm_year =sfp[1].intValue;
+	}
+	else {
+		lt.tm_year =sfp[1].intValue - 1900;
+	}
+	lt.tm_mon = sfp[2].intValue;
+	lt.tm_mday = sfp[3].intValue;
+	lt.tm_hour = sfp[4].intValue;
+	lt.tm_min = sfp[5].intValue;
+	lt.tm_sec = sfp[6].intValue;
+	d->tv.tv_sec = mktime(&lt);
+	d->tv.tv_usec = sfp[7].intValue * 1000;
 	RETURN_((kObject *)d);
 }
 
@@ -229,10 +245,10 @@ static KMETHOD Date_getYear(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int Date.parse(String dateString); Not implemented
-static KMETHOD Date_parse(KonohaContext *kctx, KonohaStack *sfp)
-{
-	RETURNi_(0);
-}
+//static KMETHOD Date_parse(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	RETURNi_(0);
+//}
 
 //## int Date.setDate(int date);
 static KMETHOD Date_setDate(KonohaContext *kctx, KonohaStack *sfp)
@@ -442,21 +458,21 @@ static KMETHOD Date_toGMTString(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## String Date.toISOString();
-static KMETHOD Date_toISOString(KonohaContext *kctx, KonohaStack *sfp)
-{
-	struct _kDate *d = (struct _kDate *)sfp[0].asObject;
-	time_t tv_sec = d->tv.tv_sec;
-	struct tm utc = *gmtime(&tv_sec);
-	char str[MAX_STR_SIZE];
-	size_t len = strftime(str, MAX_STR_SIZE, "%Y-%m-%dT%H:%M:%S", &utc);
-	len += snprintf(str, MAX_STR_SIZE, "%s.%3dZ", str, (int)(d->tv.tv_usec / 1000));
-	RETURN_(KLIB new_kString(kctx, str, len, 0));
-}
+//static KMETHOD Date_toISOString(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	struct _kDate *d = (struct _kDate *)sfp[0].asObject;
+//	time_t tv_sec = d->tv.tv_sec;
+//	struct tm utc = *gmtime(&tv_sec);
+//	char str[MAX_STR_SIZE];
+//	size_t len = strftime(str, MAX_STR_SIZE, "%Y-%m-%dT%H:%M:%S", &utc);
+//	len += snprintf(str, MAX_STR_SIZE, "%s.%3dZ", str, (int)(d->tv.tv_usec / 1000));
+//	RETURN_(KLIB new_kString(kctx, str, len, 0));
+//}
 
 //## Json Date.toJSON(); Not implemented
-static KMETHOD Date_toJSON(KonohaContext *kctx, KonohaStack *sfp)
-{
-}
+//static KMETHOD Date_toJSON(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//}
 
 //## String Date.toLocaleDateString();
 static KMETHOD Date_toLocaleDateString(KonohaContext *kctx, KonohaStack *sfp)
@@ -512,7 +528,7 @@ static	kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Date_new0), TY_Date, TY_Date, MN_("new"), 0,
 		_Public, _F(Date_new1), TY_Date, TY_Date, MN_("new"), 1, TY_Int, FN_("milliseconds"),
-		_Public, _F(Date_new2), TY_Date, TY_Date, MN_("new"), 1, TY_String, FN_("dateString"),
+//		_Public, _F(Date_new2), TY_Date, TY_Date, MN_("new"), 1, TY_String, FN_("dateString"),
 		_Public, _F(Date_new3), TY_Date, TY_Date, MN_("new"), 7, TY_Int, FN_("year"), TY_Int, FN_("month"), TY_Int, FN_("day"), TY_Int, FN_("hour"), TY_Int, FN_("minutes"), TY_Int, FN_("seconds"), TY_Int, FN_("milliseconds"),
 		_Public, _F(Date_getDate), TY_Int, TY_Date, MN_("getDate"), 0,
 		_Public, _F(Date_getDay), TY_Int, TY_Date, MN_("getDay"), 0,
@@ -533,7 +549,7 @@ static	kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public, _F(Date_getUTCMonth), TY_Int, TY_Date, MN_("getUTCMonth"), 0,
 		_Public, _F(Date_getUTCSeconds), TY_Int, TY_Date, MN_("getUTCSeconds"), 0,
 		_Public, _F(Date_getYear), TY_Int, TY_Date, MN_("getYear"), 0,
-		_Public|_Static, _F(Date_parse), TY_Int, TY_Date, MN_("parse"), 1, TY_String, FN_("dateString"),
+//		_Public|_Static, _F(Date_parse), TY_Int, TY_Date, MN_("parse"), 1, TY_String, FN_("dateString"),
 		_Public, _F(Date_setDate), TY_Int, TY_Date, MN_("setDate"), 1, TY_Int, FN_("date"),
 		_Public, _F(Date_setFullYear), TY_Int, TY_Date, MN_("setFullYear"), 1, TY_Int, FN_("year"),
 		_Public, _F(Date_setHours), TY_Int, TY_Date, MN_("setHours"), 1, TY_Int, FN_("hours"),
@@ -552,7 +568,7 @@ static	kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public, _F(Date_setYear), TY_Int, TY_Date, MN_("setYear"), 1, TY_Int, FN_("year"),
 		_Public, _F(Date_toDateString), TY_String, TY_Date, MN_("toDateString"), 0,
 		_Public, _F(Date_toGMTString), TY_String, TY_Date, MN_("toGMTString"), 0,
-		_Public, _F(Date_toISOString), TY_String, TY_Date, MN_("toISOString"), 0,
+//		_Public, _F(Date_toISOString), TY_String, TY_Date, MN_("toISOString"), 0,
 //		_Public, _F(Date_toJSON), TY_Json, TY_Date, MN_("toJSON"), 0,
 		_Public, _F(Date_toLocaleDateString), TY_String, TY_Date, MN_("toLocaleDateString"), 0,
 		_Public, _F(Date_toLocaleTimeString), TY_String, TY_Date, MN_("toLocaleTimeString"), 0,
