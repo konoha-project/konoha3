@@ -250,6 +250,9 @@ static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, KonohaStack *sfp)
 	kBytes *toBa;
 	DBG_P("size=%d, '%s'", fromBa->bytesize, fromBa->buf);
 	DBG_P("fromCoding:%p, %s", fromCoding, S_text(fromCoding));
+	if (toBa->bytesize == 0) {
+		RETURN_(KNULL(String));
+	}
 	if (fromCoding != (kString*)(CT_String->defaultValueAsNull)) {
 		toBa = convFromTo(kctx, fromBa, S_text(fromCoding), "UTF-8");
 	} else {
@@ -257,7 +260,7 @@ static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, KonohaStack *sfp)
 		toBa = convFromTo(kctx, fromBa, getSystemEncoding(), "UTF-8");
 	}
 	DBG_P("size=%d, '%s'", toBa->bytesize, toBa->buf);
-	RETURN_(KLIB new_kString(kctx, toBa->buf,toBa->bytesize-1, 0));
+	RETURN_(KLIB new_kString(kctx, toBa->buf,toBa->bytesize, 0));
 }
 
 //## @Const method Bytes String.asBytes();
@@ -407,6 +410,7 @@ static KMETHOD ExprTyCheck_Squote(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
 	kString *s = tk->text;
+	DBG_P("string:'%s'", S_text(s));
 	if (S_size(s) == 1) {
 		int ch = S_text(s)[0];
 		RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_Int, ch));
