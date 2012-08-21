@@ -1,19 +1,21 @@
 // written by okamoto
-K.import("konoha");
+K.import("konoha.assign");
+K.import("konoha.class");
 K.import("konoha.string");
+K.import("konoha.regexp");
 K.import("konoha.date");
 
 void f() {
 	Date d = new Date();
-	p(d.toDateString().getSize() > 0);
-	p(d.toGMTString().getSize() > 0);
+	assert(d.toDateString().search(/[A-Z][a-z]*\s[A-Z][a-z]*\s\d{1,2}\s\d{4}/) == 0);
+	assert(d.toGMTString().search(/[A-Z][a-z]*,\s\d{1,2}\s[A-Z][a-z]*\s\d{4}\s\d{2}:\d{2}:\d{2}\s[A-Z]*/) == 0);
 //	p(d.toISOString().getSize() > 0);
-	p(d.toLocaleDateString().getSize() > 0);
-	p(d.toLocaleTimeString().getSize() > 0);
-	p(d.toLocaleString().getSize() > 0);
-	p(d.toString().getSize() > 0);
-	p(d.toTimeString().getSize() > 0);
-	p(d.toUTCString().getSize() > 0);
+	assert(d.toLocaleDateString().search(/[A-Z][a-z]*\s[A-Z][a-z]*\s\d{1,2}\s\d{4}/) == 0);
+	assert(d.toLocaleTimeString().search(/\d{2}:\d{2}:\d{2}/) == 0);
+	assert(d.toLocaleString().search(/[A-Z][a-z]*\s[A-Z][a-z]*\s\d{1,2}\s\d{4}\s\d{2}:\d{2}:\d{2}\s\([A-Z]*\)/) == 0);
+	assert(d.toString().search(/[A-Z][a-z]*\s[A-Z][a-z]*\s\d{1,2}\s\d{4}\s\d{2}:\d{2}:\d{2}\s\([A-Z]*\)/) == 0);
+	assert(d.toTimeString().search(/\d{2}:\d{2}:\d{2}/) == 0);
+	assert(d.toUTCString().search(/[A-Z][a-z]*,\s\d{1,2}\s[A-Z][a-z]*\s\d{4}\s\d{2}:\d{2}:\d{2}\s[A-Z]*/) == 0);
 }
 
 f();
