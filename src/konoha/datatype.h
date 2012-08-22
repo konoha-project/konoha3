@@ -648,6 +648,19 @@ static KonohaClass *CT_body(KonohaContext *kctx, KonohaClass *ct, size_t head, s
 static KonohaClass *Generics_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass *self)
 {
 	DBG_P("trying resolve generic type: %s %s", CT_t(ct), CT_t(self));
+	kParam *param = CT_cparam(ct);
+	int i;
+	kparamtype_t p[param->psize];
+	for(i = 0; i < param->psize; i++) {
+		KonohaClass *cParam = CT_(param->paramtypeItems[i].ty);
+		p[i].ty = cParam->realtype(kctx, cParam, self)->typeId;
+	}
+	return KLIB KonohaClass_Generics(kctx, ct, TY_void, param->psize, p);
+}
+
+static KonohaClass *Func_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass *self)
+{
+	DBG_P("trying resolve generic type: %s %s", CT_t(ct), CT_t(self));
 	KonohaClass *cReturn = CT_(ct->p0);
 	ktype_t rtype = cReturn->realtype(kctx, cReturn, self)->typeId;
 	kParam *param = CT_cparam(ct);
@@ -675,7 +688,7 @@ static void checkTypeVar(KonohaContext *kctx, KonohaClassVar *newct, ktype_t rty
 	if(isTypeVar) {
 		DBG_P("Generics %s has TypeVar", CT_t(newct));
 		newct->cflag |= kClass_TypeVar;
-		newct->realtype = Generics_realtype;
+		newct->realtype = newct->baseTypeId == TY_Func ? Func_realtype : Generics_realtype;
 	}
 }
 
@@ -691,6 +704,7 @@ static KonohaClass *KonohaClass_Generics(KonohaContext *kctx, KonohaClass *ct, k
 		if(ct->searchSimilarClassNULL == NULL) break;
 		ct = ct->searchSimilarClassNULL;
 	} while(ct != NULL);
+
 	KonohaClassVar *newct = new_KonohaClass(kctx, ct0, NULL, NOPLINE);
 	newct->cparamdom = paramdom;
 	newct->p0 = isNotFuncClass ? p[0].ty : rtype;

@@ -61,7 +61,7 @@ typedef struct _kIterator kIterator;
 struct _kIterator {
 	KonohaObjectHeader h;
 	kbool_t (*hasNext)(KonohaContext *kctx, KonohaStack *);
-	void (*setNextResult)(KonohaContext *kctx, KonohaStack*);
+	void    (*setNextResult)(KonohaContext *kctx, KonohaStack*);
 	size_t current_pos;
 	union {
 		kObject  *source;

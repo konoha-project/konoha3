@@ -437,7 +437,6 @@ static kbool_t array_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileli
 	return true;
 }
 
-
 KDEFINE_PACKAGE* array_init(void)
 {
 	static KDEFINE_PACKAGE d = {

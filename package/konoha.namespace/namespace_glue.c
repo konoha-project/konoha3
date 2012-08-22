@@ -30,6 +30,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 // --------------------------------------------------------------------------
 
 static kbool_t namespace_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
@@ -43,7 +44,7 @@ static kbool_t namespace_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFir
 }
 
 // --------------------------------------------------------------------------
-//
+
 static KMETHOD StmtTyCheck_namespace(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_StmtTyCheck(stmt, gma);

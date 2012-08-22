@@ -222,8 +222,6 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public, _F(Iterator_next), TY_0, TY_Iterator, MN_("next"), 0,
 		_Public, _F(Array_toIterator),  base->cGenericIterator->typeId, TY_Array, MN_("toIterator"), 0,
 		_Public, _F(String_toIterator), TY_StringIterator, TY_String, MN_("toIterator"), 0,
-//		_Public|_Const|_Im, _F(Int_opINC), TY_Int, TY_Int, MN_("opINC"), 0,
-//		_Public|_Const|_Im, _F(Int_opDEC), TY_Int, TY_Int, MN_("opDEC"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
@@ -235,22 +233,42 @@ static kbool_t iterator_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirs
 	return true;
 }
 
-static kStmt* new_TypedWhileStmt(KonohaContext *kctx, kStmt *stmt)
-{
-	//	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0)) {
-	//		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
-	//		ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
-	//		kStmt_typed(stmt, LOOP);
-	//	}
-}
+//static kStmt* new_TypedWhileStmt(KonohaContext *kctx, kStmt *stmt, kGamma *gma, )
+//{
+////	kExpr *iteratorExpr = SUGAR new_UntypedTermExpr(kctx, itToken);
+////	kMethod *mtd = kNameSpace_getMethodNULL(kctx, Stmt_nameSpace(stmt), TY_Iterator, MN_("hasNext"), 0, MPOL_PARAMSIZE);
+////	kExpr *hasNextExpr = SUGAR new_TypedCallExpr(kctx, ns, gma, TY_Boolean, mtd, 1, iteratorExpr);
+////
+////	kStmt *whileStmt = SUGAR new_kStmt(kctx, ns, KW_StmtTypeDecl/*dummy*/, KW_ExprPattern, hasNextExpr, KW_BlockPattern, loopBlock, 0);;
+////
+////	//	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0)) {
+////	//		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
+////	//		ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
+////	//		kStmt_typed(stmt, LOOP);
+////	//	}
+//}
+
+#define TY_isIterator(T)     (CT_(T)->baseTypeId == TY_Iterator)
 
 static KMETHOD StmtTyCheck_for(KonohaContext *kctx, KonohaStack *sfp)
 {
-//	VAR_StmtTyCheck(stmt, gma);
-//	DBG_P("for statement .. ");
-//	kNameSpace *ns = Stmt_nameSpace(stmt);
-//	kToken *typeToken = SUGAR kStmt_getToken(kctx, stmt, KW_TypePattern, NULL);
-//	kToken *varToken  = SUGAR kStmt_getToken(kctx, stmt, KW_SymbolPattern, NULL);
+	VAR_StmtTyCheck(stmt, gma);
+	DBG_P("for statement .. ");
+	kNameSpace *ns = Stmt_nameSpace(stmt);
+	kToken *typeToken = SUGAR kStmt_getToken(kctx, stmt, KW_TypePattern, NULL);
+	kToken *varToken  = SUGAR kStmt_getToken(kctx, stmt, KW_SymbolPattern, NULL);
+	DBG_P("typeToken=%p, varToken=%p", typeToken, varToken);
+//	if(!SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, 0)) {
+//		RETURNb_(false);
+//	}
+//	kExpr *iteratorExpr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL);
+//	if(!TY_isIterator(iteratorExpr->ty)) {
+//		kMethod *mtd = kNameSpace_getMethodNULL(kctx, ns, iteratorExpr->ty, MN_to(TY_Iterator), 0, MPOL_PARAMSIZE);
+//		if(mtd == NULL) {
+//
+//		}
+//		iteratorExpr = SUGAR new_TypedCallExpr(kctx, ns, gma, TY_var, mtd, 1, iteratorExpr);
+//	}
 //	if(typeToken != NULL) {
 //		KonohaClass *cIterator = CT_p0(kctx, CT_Iterator, typeToken->resolvedTypeId);
 //		if(!SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, cIterator->typeId, 0)) {
@@ -258,20 +276,17 @@ static KMETHOD StmtTyCheck_for(KonohaContext *kctx, KonohaStack *sfp)
 //		}
 //	}
 //	else {
-//		if(!SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_Iterator, 0)) {
-//			RETURNb_(false);
-//		}
-//		kExpr *expr = SUGAR new_UntypedCallExpr(kctx, SYN_(ns, KW_ExprMethodCall), 1, NULL);
+//
 //	}
 //	TokenRange empty = {Stmt_nameSpace(stmt)};
 //	kBlock *block = SUGAR new_kBlock(kctx, stmt, &empty, NULL);
-//	if(typeToken != NULL) {
+//	if(typeToken != NULL) {   // declare local variable
 //		kExpr *termExpr = SUGAR new_UntypedTermExpr(kctx, varToken);
 //		kStmt *declStmt = SUGAR new_kStmt(kctx, ns, KW_StmtTypeDecl, KW_TypePattern, typeToken, KW_ExprPattern, termExpr, 0);
 //		SUGAR kBlock_insertAfter(kctx, block, /*lastStmt*/NULL, declStmt);
 //	}
 //	{
-//		kTokenVar *itToken = GCSAFE_new(kTokenVar, 0);
+//		kTokenVar *itToken = GCSAFE_new(TokenVar, 0);
 //		itToken->resolvedSyntaxInfo = varToken->resolvedSyntaxInfo; // KW_SymbolPattern
 //		// _ = A;
 //		kExpr *termExpr = SUGAR new_UntypedTermExpr(kctx, itToken);
@@ -280,15 +295,8 @@ static KMETHOD StmtTyCheck_for(KonohaContext *kctx, KonohaStack *sfp)
 //	}
 //	kStmt *whileStmt = new_TypedWhileStmt(kctx, stmt, varToken, itToken);
 //	SUGAR kBlock_insertAfter(kctx, block, NULL, whileStmt);
-//
-////	kStmt *whileStmt = new_Stmt();
-////	whileStmt =
-////	if(varBlock != NULL) {  // for(n: it)
-////
-////	}
 //	kStmt_setObject(kctx, stmt, KW_BlockPattern, block);
-//
-//	RETURNb_(true);
+	RETURNb_(true);
 }
 
 #define _LOOP .flag = (SYNFLAG_StmtJumpAhead|SYNFLAG_StmtJumpSkip)
