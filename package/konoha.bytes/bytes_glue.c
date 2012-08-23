@@ -31,60 +31,6 @@
 
 #include <errno.h> // include this because of E2BIG
 
-
-/* ------------------------------------------------------------------------ */
-/* [util] */
-
-static const char *getSystemEncoding(void)
-{
-	//TODO!! check LC_CTYPE compatibility with iconv
-	char *enc = getenv("LC_CTYPE");
-	//DBG_P("%s", nl_langinfo(CODESET));
-	if(enc != NULL) {
-		return enc;
-	}
-#if defined(K_USING_WINDOWS_)
-	static char codepage[64];
-	knh_snprintf(codepage, sizeof(codepage), "CP%d", (int)GetACP());
-	return codepage;
-#else
-	return "UTF-8";
-#endif
-}
-
-#ifdef HAVE_ICONV_H
-#include <iconv.h>
-#endif /* HAVE_ICONV_H */
-
-#ifdef _ICONV_H
-static kbool_t kloadIconv(KonohaContext *kctx, kmodiconv_t *base, kfileline_t pline)
-{
-	base->ficonv_open = (ficonv_open)iconv_open;
-	base->ficonv = (ficonv)iconv;
-	base->ficonv_close = (ficonv_close)iconv_close;
-	KNH_ASSERT(base->ficonv != NULL && base->ficonv_close != NULL);
-	return true;
-}
-#else
-static kbool_t klinkDynamicIconv(KonohaContext *kctx, kmodiconv_t *base, kfileline_t pline)
-{
-	void *handler = dlopen("libiconv" K_OSDLLEXT, RTLD_LAZY);
-	void *f = NULL;
-	if (handler != NULL) {
-		f = dlsym(handler, "iconv_open");
-		if (f != NULL) {
-			base->ficonv_open = (ficonv_open)f;
-			base->ficonv = (ficonv)dlsym(handler, "iconv");
-			base->ficonv_close = (ficonv_close)dlsym(handler, "iconv_close");
-			KNH_ASSERT(base->ficonv != NULL && base->ficonv_close != NULL);
-			return true;
-		}
-	}
-	kreportf(WarnTag, pline, "cannot find libiconv");
-	return false;
-}
-#endif /* _ICONV_H */
-
 /* ------------------------------------------------------------------------ */
 
 // Bytes_init
@@ -167,8 +113,8 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 	KUtilsWriteBuffer wb;
 
 	char convBuf[CONV_BUFSIZE] = {'\0'};
-	const char *presentPtrFrom = fromBa->text;
-	const char ** inbuf = &presentPtrFrom;
+	char *presentPtrFrom = fromBa->buf;
+	char ** inbuf = &presentPtrFrom;
 	char *presentPtrTo = convBuf;
 	char ** outbuf = &presentPtrTo;
 	size_t inBytesLeft, outBytesLeft;
@@ -180,7 +126,7 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 		// no need to convert.
 		return fromBa;
 	}
-	conv = kmodiconv->ficonv_open(toCoding, fromCoding);
+	conv = (kiconv_t)PLATAPI iconv_open_i(toCoding, fromCoding);
 	if (conv == (kiconv_t)(-1)) {
 		ktrace(_UserInputFault,
 				KEYVALUE_s("@","iconv_open"),
@@ -194,7 +140,7 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 	size_t processedTotalSize = processedSize;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	while (inBytesLeft > 0 && iconv_ret == -1) {
-		iconv_ret = kmodiconv->ficonv(conv, inbuf, &inBytesLeft, outbuf, &outBytesLeft);
+		iconv_ret = PLATAPI iconv_i((uintptr_t)conv, inbuf, &inBytesLeft, outbuf, &outBytesLeft);
 		if (iconv_ret == -1 && errno == E2BIG) {
 			// input is too big.
 			processedSize = CONV_BUFSIZE - outBytesLeft;
@@ -224,7 +170,7 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 			//KLIB Kwb_printf(kctx, &wb, "%s", convBuf);
 		}
 	} /* end of converting loop */
-	kmodiconv->ficonv_close(conv);
+	PLATAPI iconv_close_i((uintptr_t)conv);
 
 	const char *KUtilsWriteBufferopChar = KLIB Kwb_top(kctx, &wb, 0);
 	struct _kBytes *toBa = (struct _kBytes*)KLIB new_kObject(kctx, CT_Bytes, processedTotalSize); // ensure bytes ends with Zero
@@ -257,7 +203,7 @@ static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, KonohaStack *sfp)
 		toBa = convFromTo(kctx, fromBa, S_text(fromCoding), "UTF-8");
 	} else {
 		// conv from default encoding
-		toBa = convFromTo(kctx, fromBa, getSystemEncoding(), "UTF-8");
+		toBa = convFromTo(kctx, fromBa, PLATAPI getSystemCharset(), "UTF-8");
 	}
 	DBG_P("size=%d, '%s'", toBa->bytesize, toBa->buf);
 	RETURN_(KLIB new_kString(kctx, toBa->buf,toBa->bytesize, 0));
@@ -283,7 +229,7 @@ static KMETHOD String_asBytes(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Bytes_asString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *from = sfp[0].ba;
-	kBytes *to = convFromTo(kctx, from, getSystemEncoding(), "UTF-8");
+	kBytes *to = convFromTo(kctx, from, PLATAPI getSystemCharset(), "UTF-8");
 
 	// now ensures 0
 	RETURN_(KLIB new_kString(kctx, to->buf, to->bytesize, 0));
@@ -339,11 +285,7 @@ static KMETHOD Bytes_new(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	kmodiconv_t *base = (kmodiconv_t*)KCALLOC(sizeof(kmodiconv_t), 1);
-#ifdef _ICONV_H
-	base->h.name     = kloadIconv(kctx, base, pline) ? "iconv" : "noconv";
-#else
-	base->h.name     = 	klinkDynamicIconv(kctx, base, pline) ? "iconv" : "noconv";
-#endif /* _ICONV_H */
+	base->h.name     = "iconv";
 	base->h.setup    = kmodiconv_setup;
 	base->h.reftrace = kmodiconv_reftrace;
 	base->h.free     = kmodiconv_free;
