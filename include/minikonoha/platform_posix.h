@@ -35,6 +35,9 @@
 #include <syslog.h>
 #include <dlfcn.h>
 #include <sys/stat.h>
+#ifdef HAVE_ICONV_H
+#include <iconv.h>
+#endif /* HAVE_ICONV_H */
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,6 +48,25 @@ extern "C" {
 #else
 #define K_PATHMAX 256
 #endif
+
+// -------------------------------------------------------------------------
+
+static const char *getSystemCharset(void)
+{
+	//TODO!! check LC_CTYPE compatibility with iconv
+	char *enc = getenv("LC_CTYPE");
+	//DBG_P("%s", nl_langinfo(CODESET));
+	if(enc != NULL) {
+		return enc;
+	}
+#if defined(K_USING_WINDOWS_)
+	static char codepage[64];
+	knh_snprintf(codepage, sizeof(codepage), "CP%d", (int)GetACP());
+	return codepage;
+#else
+	return "UTF-8";
+#endif
+}
 
 // -------------------------------------------------------------------------
 
@@ -351,6 +373,44 @@ static void NOP_debugPrintf(const char *file, const char *func, int line, const 
 {
 }
 
+typedef uintptr_t (*ficonv_open)(const char *, const char *);
+typedef size_t (*ficonv)(uintptr_t, char **, size_t *, char **, size_t *);
+typedef int    (*ficonv_close)(uintptr_t);
+
+static uintptr_t dummy_iconv_open(const char *t, const char *f)
+{
+	return -1;
+}
+static size_t dummy_iconv(uintptr_t i, char **t, size_t *ts, char **f, size_t *fs)
+{
+	return 0;
+}
+static int dummy_iconv_close(uintptr_t i)
+{
+	return 0;
+}
+
+static void loadIconv(PlatformApiVar *plat)
+{
+#ifdef _ICONV_H
+	plat->iconv_open_i    = (ficonv_open)iconv_open;
+	plat->iconv_i         = (ficonv)iconv;
+	plat->iconv_close_i   = (ficonv_close)iconv_close;
+#else
+	void *handler = dlopen("libiconv" K_OSDLLEXT, RTLD_LAZY);
+	if(handler != NULL) {
+		plat->iconv_open_i = (ficonv_open)dlsym(handler, "iconv_open");
+		plat->iconv_i = (ficonv)dlsym(handler, "iconv");
+		plat->iconv_close_i = (ficonv_close)dlsym(handler, "iconv_close");
+	}
+	else {
+		plat->iconv_open_i = dummy_iconv_open;
+		plat->iconv_i = dummy_iconv;
+		plat->iconv_close_i = dummy_iconv_close;
+	}
+#endif /* _ICONV_H */
+}
+
 static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 {
 	static PlatformApiVar plat = {};
@@ -361,6 +421,8 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.free_i          = free;
 	plat.setjmp_i        = ksetjmp;
 	plat.longjmp_i       = klongjmp;
+	loadIconv(&plat);
+	plat.getSystemCharset = getSystemCharset;
 	plat.syslog_i        = syslog;
 	plat.vsyslog_i       = vsyslog;
 	plat.printf_i        = printf;
