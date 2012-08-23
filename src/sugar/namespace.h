@@ -198,6 +198,7 @@ static KUtilsKeyValue* kNameSpace_getConstNULL(KonohaContext *kctx, kNameSpace *
 {
 	while(ns != NULL) {
 		KUtilsKeyValue* foundKeyValue = kNameSpace_getLocalConstNULL(kctx, ns, unboxKey);
+//		DBG_P("rootns=%p, ns=%p, key=%s, value=%p", KNULL(NameSpace), ns, SYM_t(SYMKEY_unbox(unboxKey)), foundKeyValue);
 		if(foundKeyValue != NULL) return foundKeyValue;
 		ns = ns->parentNULL;
 	}
@@ -266,12 +267,12 @@ static kbool_t kNameSpace_setConstData(KonohaContext *kctx, kNameSpace *ns, ksym
 	return kNameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, &kv, 1, 0);
 }
 
-static size_t strlen_alnum(const char *p)
-{
-	size_t len = 0;
-	while(isalnum(p[len]) || p[len] == '_') len++;
-	return len;
-}
+//static size_t strlen_alnum(const char *p)
+//{
+//	size_t len = 0;
+//	while(isalnum(p[len]) || p[len] == '_') len++;
+//	return len;
+//}
 
 static void kNameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ns, const char **d, kfileline_t pline)
 {
@@ -280,8 +281,8 @@ static void kNameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ns, const 
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	while(d[0] != NULL) {
-		//DBG_P("key='%s'", d[0]);
-		kv.key = ksymbolSPOL(d[0], strlen_alnum(d[0]), SPOL_TEXT|SPOL_ASCII, _NEWID) | SYMKEY_BOXED;
+		kv.key = ksymbolSPOL(d[0], strlen(d[0]), SPOL_TEXT|SPOL_ASCII, _NEWID) | SYMKEY_BOXED;
+		DBG_P("key='%s', '%s%s'", d[0], PSYM_t(SYMKEY_unbox(kv.key)));
 		kv.ty  = (ktype_t)(uintptr_t)d[1];
 		if(kv.ty == TY_TEXT) {
 			kv.ty = TY_String;

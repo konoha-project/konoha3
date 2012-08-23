@@ -153,6 +153,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	KonohaLibVar* l = (KonohaLibVar*)ctx->klib;
 	l->kNameSpace_getClass   = kNameSpace_getClass;
 	l->kNameSpace_loadMethodData = kNameSpace_loadMethodData;
+	l->kNameSpace_setConstData   = kNameSpace_setConstData;
 	l->kNameSpace_loadConstData  = kNameSpace_loadConstData;
 	l->kNameSpace_getMethodNULL  = kNameSpace_getMethodNULL;
 	l->kNameSpace_compileAllDefinedMethods    = kNameSpace_compileAllDefinedMethods;

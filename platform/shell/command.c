@@ -176,6 +176,7 @@ static void shell(KonohaContext *kctx)
 	while(1) {
 		kfileline_t inc = 0;
 		kstatus_t status = readstmt(kctx, &wb, &inc);
+		if(status == K_BREAK) break;
 		if(status == K_CONTINUE && Kwb_bytesize(&wb) > 0) {
 			status = konoha_eval((KonohaContext*)kctx, KLIB Kwb_top(kctx, &wb, 1), uline);
 			uline += inc;
@@ -184,9 +185,6 @@ static void shell(KonohaContext *kctx)
 				dumpEval(kctx, &wb);
 				KLIB Kwb_free(&wb);
 			}
-		}
-		if(status == K_BREAK) {
-			break;
 		}
 	}
 	KLIB Kwb_free(&wb);
@@ -410,7 +408,7 @@ static BuiltInTestFunc lookupTestFunc(DEFINE_TESTFUNC *d, const char *name)
 }
 #endif
 
-static int konoha_builtintest(KonohaContext* konoha, const char* name)
+static int CommandLine_doBuiltInTest(KonohaContext* konoha, const char* name)
 {
 #ifdef USE_BUILTINTEST
 	BuiltInTestFunc f = lookupTestFunc(KonohaTestSet, name);
@@ -424,22 +422,21 @@ static int konoha_builtintest(KonohaContext* konoha, const char* name)
 	return 1;
 }
 
-static void konoha_define(KonohaContext *kctx, char *keyvalue)
+static void CommandLine_define(KonohaContext *kctx, char *keyvalue)
 {
 	char *p = strchr(keyvalue, '=');
 	if(p != NULL) {
+		size_t len = p-keyvalue;
+		char namebuf[len+1];
+		memcpy(namebuf, keyvalue, len); namebuf[len] = 0;
+		DBG_P("name='%s'", namebuf);
+		ksymbol_t key = KLIB Ksymbol(kctx, namebuf, len, 0, SYM_NEWID);
 		if(isdigit(p[1])) {
 			long n = strtol(p+1, NULL, 0);
-			KDEFINE_INT_CONST IntData[] = {
-				{keyvalue, TY_Int, n}, {}
-			};
-			KLIB kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(IntData), 0);
+			KLIB kNameSpace_setConstData(kctx, KNULL(NameSpace), key, TY_Int, (uintptr_t)n);
 		}
 		else {
-			KDEFINE_TEXT_CONST TextData[] = {
-				{keyvalue, TY_TEXT, p+1}, {}
-			};
-			KLIB kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(TextData), 0);
+			KLIB kNameSpace_setConstData(kctx, KNULL(NameSpace), key, TY_TEXT, (uintptr_t)(p+1));
 		}
 	}
 	else {
@@ -447,7 +444,7 @@ static void konoha_define(KonohaContext *kctx, char *keyvalue)
 	}
 }
 
-static void konoha_import(KonohaContext *kctx, char *packageName)
+static void CommandLine_import(KonohaContext *kctx, char *packageName)
 {
 	size_t len = strlen(packageName)+1;
 	char bufname[len];
@@ -475,7 +472,7 @@ static void konoha_startup(KonohaContext *kctx, const char *startup_script)
 	}
 }
 
-static void konoha_commandline(KonohaContext *kctx, int argc, char** argv)
+static void CommandLine_setARGV(KonohaContext *kctx, int argc, char** argv)
 {
 	KonohaClass *CT_StringArray0 = CT_p0(kctx, CT_Array, TY_String);
 	kArray *a = (kArray*)KLIB new_kObject(kctx, CT_StringArray0, 0);
@@ -539,14 +536,14 @@ static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc
 		break;
 
 		case 'B':
-			return konoha_builtintest(konoha, optarg);
+			return CommandLine_doBuiltInTest(konoha, optarg);
 
 		case 'D':
-			konoha_define(konoha, optarg);
+			CommandLine_define(konoha, optarg);
 			break;
 
 		case 'I':
-			konoha_import(konoha, optarg);
+			CommandLine_import(konoha, optarg);
 			break;
 
 		case 'S':
@@ -577,7 +574,7 @@ static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc
 		}
 	}
 	scriptidx = optind;
-	konoha_commandline(konoha, argc - scriptidx, argv + scriptidx);
+	CommandLine_setARGV(konoha, argc - scriptidx, argv + scriptidx);
 	if(scriptidx < argc) {
 		ret = konoha_load(konoha, argv[scriptidx]);
 	}
@@ -586,7 +583,7 @@ static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc
 		KonohaContext_setInteractive(konoha);
 	}
 	if(ret && interactive_flag) {
-		konoha_import(konoha, "konoha.i");
+		CommandLine_import(konoha, "konoha.i");
 		ret = konoha_shell(konoha);
 	}
 	return (ret == true) ? 0 : 1;

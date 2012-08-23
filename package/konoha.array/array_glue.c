@@ -28,7 +28,7 @@
 
 /* ------------------------------------------------------------------------ */
 
-//## @Immutable method T0 Array.get(Int n);s
+//## @Immutable method T0 Array.get(Int n);
 static KMETHOD Array_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
@@ -63,6 +63,7 @@ static KMETHOD Array_getSize(KonohaContext *kctx, KonohaStack *sfp)
 
 
 #define KARRAY_LIST_SIZE_MAX (1024 * 1024)
+
 static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
@@ -96,7 +97,7 @@ struct _kAbstractArray {
 	KUtilsGrowingArray a;
 };
 
-static void NArray_ensureMinimumSize(KonohaContext *kctx, struct _kAbstractArray *a, size_t min)
+static void UnboxArray_ensureMinimumSize(KonohaContext *kctx, struct _kAbstractArray *a, size_t min)
 {
 	size_t minbyte = min * sizeof(void*);
 	if(!(minbyte < a->a.bytemax)) {
@@ -109,7 +110,7 @@ static void UnboxArray_add(KonohaContext *kctx, kArray *o, uintptr_t value)
 {
 	size_t asize = kArray_size(o);
 	struct _kAbstractArray *a = (struct _kAbstractArray*)o;
-	NArray_ensureMinimumSize(kctx, a, asize+1);
+	UnboxArray_ensureMinimumSize(kctx, a, asize+1);
 	DBG_ASSERT(a->a.objectItems[asize] == NULL);
 	kArrayVar *a2 = (kArrayVar *)a;
 	a2->unboxItems[asize] = value;
@@ -124,7 +125,7 @@ static void UnboxArray_insert(KonohaContext *kctx, kArray *o, size_t n, uintptr_
 		UnboxArray_add(kctx, o, v);
 	}
 	else {
-		NArray_ensureMinimumSize(kctx, a, asize+1);
+		UnboxArray_ensureMinimumSize(kctx, a, asize+1);
 		DBG_ASSERT(a->a.objectItems[asize] == NULL);
 		kArrayVar *a2 = (kArrayVar *)a;
 		memmove(a2->unboxItems+(n+1), a2->unboxItems+n, sizeof(uintptr_t) * (asize - n));
