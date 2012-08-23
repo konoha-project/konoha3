@@ -801,7 +801,7 @@ static KMETHOD parseREGEXP(KonohaContext *kctx, KonohaStack *sfp)
 			int pos0 = pos;
 			while(isalpha(source[pos])) pos++;
 			if(IS_NOTNULL(tk)) {
-				kArray *a = new_(Array, 2);
+				kArray *a = (kArray*)KLIB new_kObject(kctx, CT_StringArray0, 2);
 				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, source + 1, (pos0-2), 0));
 				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, source + pos0, pos-pos0, 0));
 				tk->subTokenList = a;
