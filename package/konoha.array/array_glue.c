@@ -310,12 +310,15 @@ static KMETHOD Array_indexOf(KonohaContext *kctx, KonohaStack *sfp)
 			}
 		}
 	}else {
+		//TODO:Need to implement Object compareTo.
 		kObject *o = sfp[1].asObject;
 		for(i = 0; i < kArray_size(a); i++) {
+			DBG_ASSERT(O_ct(o)->compareTo != NULL);
 			if (O_ct(o)->compareTo(a->objectItems[i], o) == 0) {
 				res = i; break;
 			}
 		}
+
 	}
 	RETURNi_(res);
 }
@@ -323,7 +326,26 @@ static KMETHOD Array_indexOf(KonohaContext *kctx, KonohaStack *sfp)
 //## method int Array.lastIndexOf(T0 a1);
 static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 {
-
+	kArray *a = sfp[0].asArray;
+	long i = -1;
+	if(Array_isUnboxData(a)) {
+		uintptr_t nv = sfp[1].unboxValue;
+		for(i = kArray_size(a)- 1; i >= 0; i--) {
+			if(a->unboxItems[i] == nv) {
+				break;
+			}
+		}
+	}else {
+		//TODO: Need to implement Object compareTo;
+		kObject *o = sfp[1].asObject;
+		for(i = kArray_size(a)- 1; i >= 0; i--) {
+			DBG_ASSERT(O_ct(o)->compareTo != NULL);
+			if(O_ct(o)compareTo(a->objectItems[i], o) == 0) {
+				break;
+			}
+		}
+	}
+	RETURNi_(i);
 }
 
 //## method Array Array.sort();
@@ -401,6 +423,7 @@ static kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 
 		_Public,     _F(Array_concat), TY_ArrayT0, TY_Array, MN_("concat"), 2,TY_ArrayT0, FN_("a1"), TY_ArrayT0, FN_("a2"),
 		_Public,     _F(Array_indexOf), TY_Int, TY_Array, MN_("indexOf"), 1, TY_0, FN_("value"),
+		_Public,     _F(Array_lastIndexOf), TY_Int, TY_Array, MN_("lastIndexOf"), 1, TY_0, FN_("value"),
 		_Public|kMethod_Hidden, _F(Array_newList), TY_Array, TY_Array, MN_("newList"), 0,
 		_Public|_Im, _F(Array_new), TY_void, TY_Array, MN_("new"), 1, TY_Int, FN_("size"),
 		DEND,
