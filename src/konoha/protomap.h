@@ -244,13 +244,13 @@ static map_record_t *hashmap_api_get(protomap_t *_m, unsigned hash)
 
 static map_status_t hashmap_api_set(protomap_t *_m, unsigned hash, unsigned type, void *val, protomap_t **ptr)
 {
+	(void)ptr;
 	hashmap_t *m = (hashmap_t *) _m;
 	map_record_t r;
 	r.hash = hash;
 	r.type = type;
 	r.v  = cast(uintptr_t, val);
 	return hashmap_set(m, &r);
-	(void)ptr;
 }
 
 static void hashmap_api_remove(protomap_t *_m, unsigned hash)
@@ -369,13 +369,13 @@ static map_record_t *dictmap_get(dictmap_t *m, unsigned hash)
 
 static map_status_t dictmap_api_set(protomap_t *_m, unsigned hash, unsigned type, void *val, protomap_t **ptr)
 {
+	(void)ptr;
 	dictmap_t *m = (dictmap_t *)_m;
 	map_record_t r;
 	r.hash = hash;
 	r.type = type;
 	r.v  = cast(uintptr_t, val);
 	return dictmap_set(m, &r);
-	(void)ptr;
 }
 
 static void dictmap_api_remove(protomap_t *_m, unsigned hash)
@@ -442,9 +442,9 @@ static void nullmap_api_init(protomap_t *m, unsigned init)
 
 static map_status_t nullmap_api_set(protomap_t *_m, unsigned hash, unsigned type, void *val, protomap_t **ptr)
 {
+	(void)_m;
 	*ptr = dictmap_new();
 	return dictmap_api_set(*ptr, hash, type, val, ptr);
-	(void)_m;
 }
 
 static void nullmap_api_remove(protomap_t *_m, unsigned hash)

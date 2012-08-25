@@ -507,7 +507,8 @@ static struct option long_options2[] = {
 
 static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc, char **argv)
 {
-	int ret = true, scriptidx = 0;
+	kbool_t ret = true;
+	int scriptidx = 0;
 	while (1) {
 		int option_index = 0;
 		int c = getopt_long (argc, argv, "icD:I:S:", long_options2, &option_index);

@@ -222,6 +222,7 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 			}
 		}
 	}
+	fclose(fp);
 	return isSuccessfullyLoading;
 }
 
@@ -433,7 +434,7 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.exit_i          = exit;
 	plat.formatKonohaPath = formatKonohaPath;
 	plat.formatSystemPath = formatSystemPath;
-		// high level
+	// high level
 	plat.getTimeMilliSecond  = getTimeMilliSecond;
 	plat.shortFilePath       = shortFilePath;
 	plat.formatPackagePath   = formatPackagePath;

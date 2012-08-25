@@ -305,7 +305,7 @@ static KMETHOD Rope_opADD(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t rope_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	// FIXME: This must be enabled by new loadMethodData
-	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_String, MN_("+"), 2, MPOL_PARAMSIZE|MPOL_FIRST);
+	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_String, MN_("+"), 1, MPOL_PARAMSIZE|MPOL_FIRST);
 	if (mtd != NULL) {
 		KLIB kMethod_setFunc(kctx, mtd, Rope_opADD);
 	} else {

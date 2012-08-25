@@ -1,7 +1,7 @@
- - (FloatLiteralWithUnit.k:4) 0.0 == 0.000000
- - (FloatLiteralWithUnit.k:5) 12345.0 == 12345.000000
- - (FloatLiteralWithUnit.k:6) 1.2345e27 == 1234499999999999961840222208.000000
- - (FloatLiteralWithUnit.k:7) 1e21 == 1000000000000000000000.000000
- - (FloatLiteralWithUnit.k:8) 1e20 == 100000000000000000000.000000
- - (FloatLiteralWithUnit.k:9) -0.0 == -0.000000
+ - (FloatLiteralWithUnit.k:4) 0.0km == 0.000000
+ - (FloatLiteralWithUnit.k:5) 12345.0kg == 12345.000000
+ - (FloatLiteralWithUnit.k:6) 1.2345e27cm == 1234499999999999961840222208.000000
+ - (FloatLiteralWithUnit.k:7) 1e21m == 1000000000000000000000.000000
+ - (FloatLiteralWithUnit.k:8) 1e20mm == 100000000000000000000.000000
+ - (FloatLiteralWithUnit.k:9) -0.1eV == -0.100000
 Q.E.D.

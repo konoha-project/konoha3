@@ -193,10 +193,10 @@ static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes* fromBa = sfp[0].ba;
 	kString*fromCoding = sfp[1].asString;
-	kBytes *toBa;
+	kBytes *toBa = NULL;
 	DBG_P("size=%d, '%s'", fromBa->bytesize, fromBa->buf);
 	DBG_P("fromCoding:%p, %s", fromCoding, S_text(fromCoding));
-	if (toBa->bytesize == 0) {
+	if (fromBa->bytesize == 0) {
 		RETURN_(KNULL(String));
 	}
 	if (fromCoding != (kString*)(CT_String->defaultValueAsNull)) {
