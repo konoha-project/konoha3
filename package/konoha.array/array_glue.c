@@ -327,8 +327,9 @@ static KMETHOD Array_indexOf(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	long i = -1;
-	if(Array_isUnboxData(a)) {
+	kint_t res = -1;
+	size_t i = 0;
+	if(kArray_isUnboxData(a)) {
 		uintptr_t nv = sfp[1].unboxValue;
 		for(i = kArray_size(a)- 1; i >= 0; i--) {
 			if(a->unboxItems[i] == nv) {
@@ -340,12 +341,13 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 		kObject *o = sfp[1].asObject;
 		for(i = kArray_size(a)- 1; i >= 0; i--) {
 			DBG_ASSERT(O_ct(o)->compareTo != NULL);
-			if(O_ct(o)compareTo(a->objectItems[i], o) == 0) {
+			if(O_ct(o)->compareTo(a->objectItems[i], o) == 0) {
 				break;
 			}
 		}
 	}
-	RETURNi_(i);
+	res = i;
+	RETURNi_(res);
 }
 
 //## method Array Array.sort();
@@ -369,7 +371,6 @@ static KMETHOD Array_toString(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Array_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-
 	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
 	//DBG_P("objitem=%p", a->objectItems);
 	size_t asize = (size_t)sfp[1].intValue;
