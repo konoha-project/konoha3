@@ -1717,7 +1717,7 @@ static void bmgc_gc_mark(KonohaContext *kctx, HeapManager *mng, KonohaStack *esp
 {
 	long i;
 	MarkStack mstackbuf, *mstack = mstack_init(kctx, &mstackbuf);
-	KonohaContextRuntimeVar *stack = kctx->stack;
+	KonohaStackRuntimeVar *stack = kctx->stack;
 	kObject *ref = NULL;
 
 	context_reset_refs(kctx);

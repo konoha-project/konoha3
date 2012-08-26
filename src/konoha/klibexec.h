@@ -509,7 +509,7 @@ static void Kreportf(KonohaContext *kctx, kinfotag_t level, kfileline_t pline, c
 
 static void Kraise(KonohaContext *kctx, int symbol, KonohaStack *sfp, kfileline_t pline)
 {
-	KonohaContextRuntimeVar *base = kctx->stack;
+	KonohaStackRuntimeVar *base = kctx->stack;
 	KNH_ASSERT(symbol != 0);
 	if(base->evaljmpbuf != NULL) {
 		base->thrownScriptLine = pline;

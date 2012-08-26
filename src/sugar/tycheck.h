@@ -329,7 +329,7 @@ static kbool_t kMethod_compile(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns
 
 static void Gamma_initIt(KonohaContext *kctx, GammaAllocaData *genv, kParam *pa)
 {
-	KonohaContextRuntimeVar *base = kctx->stack;
+	KonohaStackRuntimeVar *base = kctx->stack;
 	genv->localScope.varsize = 0;
 	if(base->evalty != TY_void) {
 		genv->localScope.varItems[1].fn = FN_("it");
@@ -391,7 +391,7 @@ static kstatus_t kMethod_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtyp
 	BEGIN_LOCAL(lsfp, K_CALLDELTA);
 	{
 		int jumpResult;
-		KonohaContextRuntimeVar *runtime = kctx->stack;
+		KonohaStackRuntimeVar *runtime = kctx->stack;
 		KonohaStack *jump_bottom = runtime->jump_bottom;
 		jmpbuf_i lbuf = {};
 		if(runtime->evaljmpbuf == NULL) {

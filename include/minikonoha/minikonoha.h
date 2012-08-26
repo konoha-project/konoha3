@@ -465,12 +465,12 @@ typedef struct KonohaClassVar           KonohaClassVar;
 typedef struct KonohaClassField         KonohaClassField;
 typedef struct KonohaClassField         KonohaClassFieldVar;
 
-typedef const struct KonohaRuntimeVar   KonohaRuntime;
-typedef struct KonohaRuntimeVar         KonohaRuntimeVar;
-typedef const struct KonohaContextRuntimeVar    LocalRuntime;
-typedef struct KonohaContextRuntimeVar          KonohaContextRuntimeVar;
-typedef struct KonohaStack              KonohaStack;
-typedef struct KonohaStack              KonohaStackVar;
+typedef const struct KonohaRuntimeVar           KonohaRuntime;
+typedef struct KonohaRuntimeVar                 KonohaRuntimeVar;
+typedef const struct KonohaStackRuntimeVar      KonohaStackRuntime;
+typedef struct KonohaStackRuntimeVar            KonohaStackRuntimeVar;
+typedef struct KonohaStack                      KonohaStack;
+typedef struct KonohaStack                      KonohaStackVar;
 
 typedef struct KonohaModule        KonohaModule;
 typedef struct KonohaModuleContext KonohaModuleContext;
@@ -481,11 +481,9 @@ struct KonohaContextVar {
 	PlatformApi                      *platApi;
 	KonohaLib                        *klib;
 	KonohaRuntime                    *share;
-	KonohaContextRuntimeVar          *stack;
+	KonohaStackRuntimeVar            *stack;
 	KonohaModule                    **modshare;
 	KonohaModuleContext             **modlocal;
-//	struct kmemshare_t                *memshare;
-//	struct kmemlocal_t                *memlocal;
 };
 
 // share, local
@@ -526,11 +524,10 @@ struct KonohaRuntimeVar {
 #define KonohaContext_setInteractive(X)  TFLAG_set1(kshortflag_t, (X)->stack->flag, kContext_Interactive)
 #define KonohaContext_setCompileOnly(X)  TFLAG_set1(kshortflag_t, (X)->stack->flag, kContext_CompileOnly)
 
-struct KonohaContextRuntimeVar {
+struct KonohaStackRuntimeVar {
 	KonohaStack*               stack;
 	size_t                     stacksize;
 	KonohaStack*               stack_uplimit;
-	kmutex_t           *stackMutex;
 	kArray                    *gcstack;
 	KUtilsGrowingArray         cwb;
 	// local info
@@ -561,18 +558,19 @@ struct KonohaContextRuntimeVar {
 //#define MOD_llvm    15
 #define MOD_REGEXP   16
 
+struct KonohaModule {
+	const char *name;
+	int mod_id;
+	void (*setup)(KonohaContext*,    struct KonohaModule *, int newctx);
+	void (*reftrace)(KonohaContext*, struct KonohaModule *);
+	void (*free)(KonohaContext*,     struct KonohaModule *);
+	kmutex_t   *moduleMutex;
+};
+
 struct KonohaModuleContext {
 	uintptr_t unique;
 	void (*reftrace)(KonohaContext*, struct KonohaModuleContext *);
 	void (*free)(KonohaContext*, struct KonohaModuleContext *);
-};
-
-struct KonohaModule {
-	const char *name;
-	int mod_id;
-	void (*setup)(KonohaContext*, struct KonohaModule *, int newctx);
-	void (*reftrace)(KonohaContext*, struct KonohaModule *);
-	void (*free)(KonohaContext*, struct KonohaModule *);
 };
 
 #define K_FRAME_NCMEMBER \

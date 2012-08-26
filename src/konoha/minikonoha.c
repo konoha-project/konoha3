@@ -67,7 +67,7 @@ static void knh_endContext(KonohaContext *kctx)
 static void KRUNTIME_init(KonohaContext *kctx, KonohaContextVar *ctx, size_t stacksize)
 {
 	size_t i;
-	KonohaContextRuntimeVar *base = (KonohaContextRuntimeVar*)KCALLOC(sizeof(KonohaContextRuntimeVar), 1);
+	KonohaStackRuntimeVar *base = (KonohaStackRuntimeVar*)KCALLOC(sizeof(KonohaStackRuntimeVar), 1);
 	base->stacksize = stacksize;
 	base->stack = (KonohaStack*)KCALLOC(sizeof(KonohaStack), stacksize);
 	assert(stacksize>64);
@@ -105,7 +105,7 @@ static void KRUNTIME_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	KLIB Karray_free(kctx, &kctx->stack->cwb);
 	KLIB Karray_free(kctx, &kctx->stack->ref);
 	KFREE(kctx->stack->stack, sizeof(KonohaStack) * ctx->stack->stacksize);
-	KFREE(kctx->stack, sizeof(KonohaContextRuntimeVar));
+	KFREE(kctx->stack, sizeof(KonohaStackRuntimeVar));
 }
 
 static kbool_t Konoha_setModule(KonohaContext *kctx, int x, KonohaModule *d, kfileline_t pline)
@@ -236,7 +236,7 @@ static void kcontext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 
 kObjectVar** KONOHA_reftail(KonohaContext *kctx, size_t size)
 {
-	KonohaContextRuntimeVar *stack = kctx->stack;
+	KonohaStackRuntimeVar *stack = kctx->stack;
 	size_t ref_size = stack->reftail - stack->ref.refhead;
 	if(stack->ref.bytemax/sizeof(void*) < size + ref_size) {
 		KLIB Karray_expand(kctx, &stack->ref, (size + ref_size) * sizeof(kObject*));
