@@ -75,13 +75,6 @@ extern "C" {
 #include "konoha_lkm.h"
 #endif /* PLATAPIFORM_KERNEL */
 
-#ifndef jmpbuf_i
-#include <setjmp.h>
-#define jmpbuf_i jmp_buf
-#define ksetjmp  setjmp
-#define klongjmp longjmp
-#endif /*jmpbuf_i*/
-
 #include <stddef.h>
 #include <stdarg.h>
 
@@ -116,6 +109,41 @@ typedef KonohaPackageHandler* (*PackageLoadFunc)(void);
 typedef enum {
 	CritTag, ErrTag, WarnTag, NoticeTag, InfoTag, DebugTag, NoneTag
 } kinfotag_t;
+
+#ifndef jmpbuf_i
+#include <setjmp.h>
+#define jmpbuf_i jmp_buf
+#define ksetjmp  setjmp
+#define klongjmp longjmp
+#endif /*jmpbuf_i*/
+
+#ifndef K_USE_PTHREAD
+typedef void kmutex_t;
+typedef void kmutexattr_t;
+#define KInitLock(X)
+#define KInitRrcureiveLock(X)
+#define KLock(X)
+#define KUnlock(X)
+#define KFreeLock(X)
+#else
+#include<pthread.h>
+typedef pthread_mutex_t     kmutex_t;
+typedef pthread_mutexattr_t kmutexattr_t;
+#define KInitLock(X)    do {\
+		X = (kmutex_t*)KCALLOC(sizeof(kmutex_t), 1);\
+		PLATAPI pthread_mutex_init_i(X, NULL);\
+	}while(0);\
+
+#define KInitRrcureiveLock(X)    PLATAPI pthread_mutex_init_recursive(X)
+#define KLock(X)        PLATAPI pthread_mutex_lock_i(X)
+#define KUnlock(X)      PLATAPI pthread_mutex_unlock_i(X)
+#define KFreeLock(X)    do {\
+		PLATAPI pthread_mutex_destroy_i(X);\
+		KFREE(X, sizeof(kmutex_t));\
+		X = NULL;\
+	}while(0);\
+
+#endif
 
 struct PlatformApiVar {
 	// settings
@@ -155,6 +183,14 @@ struct PlatformApiVar {
     void    (*qsort_i)(void *base, size_t nel, size_t width, int (*compar)(const void *, const void *));
     // abort
 	void    (*exit_i)(int p);
+
+	// pthread
+	int     (*pthread_mutex_init_i)(kmutex_t *mutex, const kmutexattr_t *attr);
+	int     (*pthread_mutex_lock_i)(kmutex_t *mutex);
+	int     (*pthread_mutex_trylock_i)(kmutex_t *mutex);
+	int     (*pthread_mutex_unlock_i)(kmutex_t *mutex);
+    int     (*pthread_mutex_destroy_i)(kmutex_t *mutex);
+    int     (*pthread_mutex_init_recursive)(kmutex_t *mutex);
 
 	/* high-level functions */
 
@@ -429,7 +465,7 @@ typedef struct KonohaClassVar           KonohaClassVar;
 typedef struct KonohaClassField         KonohaClassField;
 typedef struct KonohaClassField         KonohaClassFieldVar;
 
-typedef const struct KonohaRuntimeVar   SharedRuntime;
+typedef const struct KonohaRuntimeVar   KonohaRuntime;
 typedef struct KonohaRuntimeVar         KonohaRuntimeVar;
 typedef const struct KonohaContextRuntimeVar    LocalRuntime;
 typedef struct KonohaContextRuntimeVar          KonohaContextRuntimeVar;
@@ -444,14 +480,10 @@ struct KonohaContextVar {
 	KonohaStack                      *esp;
 	PlatformApi                      *platApi;
 	KonohaLib                        *klib;
-	KonohaRuntimeVar                 *share;
+	KonohaRuntime                    *share;
 	KonohaContextRuntimeVar          *stack;
 	KonohaModule                    **modshare;
 	KonohaModuleContext             **modlocal;
-	/* TODO(imasahiro)
-	 * checking modgc performance and remove
-	 * memshare/memlocal from context
-	 */
 	struct kmemshare_t                *memshare;
 	struct kmemlocal_t                *memlocal;
 };
@@ -461,6 +493,7 @@ struct KonohaContextVar {
 struct KonohaRuntimeVar {
 	KUtilsGrowingArray        classTable;
 	KUtilsHashMap            *longClassNameMapNN;
+	kmutex_t          *classTableMutex;
 	/* system shared const */
 	kObject                  *constNull;
 	kBoolean                 *constTrue;
@@ -468,12 +501,17 @@ struct KonohaRuntimeVar {
 	kString                  *emptyString;
 	kArray                   *emptyArray;
 
+	kmutex_t          *filepackMutex;
 	kArray                   *fileidList;    // file, http://
 	KUtilsHashMap            *fileidMapNN;   //
 	kArray                   *packList;
 	KUtilsHashMap            *packMapNN;
+
+	kmutex_t          *symbolMutex;
 	kArray                   *symbolList;  // NAME, Name, INT_MAX Int_MAX
 	KUtilsHashMap            *symbolMapNN;
+
+	kmutex_t          *paramMutex;
 	kArray                   *paramList;
 	KUtilsHashMap            *paramMapNN;
 	kArray                   *paramdomList;
@@ -493,6 +531,7 @@ struct KonohaContextRuntimeVar {
 	KonohaStack*               stack;
 	size_t                     stacksize;
 	KonohaStack*               stack_uplimit;
+	kmutex_t           *stackMutex;
 	kArray                    *gcstack;
 	KUtilsGrowingArray         cwb;
 	// local info

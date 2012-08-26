@@ -38,7 +38,7 @@ struct io {
     struct event_base *base;
     struct range_stream *cs; // use this at client
     pthread_t thread;
-    pthread_mutex_t lock;
+    kmutex_t lock;
 };
 
 struct io_api {

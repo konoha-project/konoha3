@@ -140,7 +140,7 @@ static KonohaContextVar* new_context(KonohaContext *kctx, const PlatformApi *pla
 
 		MODLOGGER_init(kctx, newctx);
 		MODGC_init(kctx, newctx);
-		KTYTABLE_init(kctx, newctx);
+		KClassTable_init(kctx, newctx);
 	}
 	else {   // others take ctx as its parent
 		newctx = (KonohaContextVar*)KCALLOC(sizeof(KonohaContextVar), 1);
