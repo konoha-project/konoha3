@@ -487,6 +487,7 @@ static void Func_reftrace(KonohaContext *kctx, kObject *o)
 static KonohaClass *T_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass *self)
 {
 	kParam *cparam = CT_cparam(self);
+	DBG_P("ct=%s, self=%s", CT_t(ct), CT_t(self));
 	DBG_ASSERT(ct->optvalue < cparam->psize);
 	KonohaClass *pct = CT_(cparam->paramtypeItems[ct->optvalue].ty);
 	return pct->realtype(kctx, pct, self);
@@ -569,25 +570,27 @@ static KonohaClassVar* new_KonohaClass(KonohaContext *kctx, KonohaClass *bct, KD
 {
 	KonohaRuntimeVar *share = (KonohaRuntimeVar *)kctx->share;
 	KonohaClassVar *ct;
+	ktype_t newid;
 	KLock(share->classTableMutex); {
-		ktype_t newid = share->classTable.bytesize / sizeof(KonohaClassVar*);
+		newid = share->classTable.bytesize / sizeof(KonohaClassVar*);
 		if(share->classTable.bytesize == share->classTable.bytemax) {
 			KLIB Karray_expand(kctx, &share->classTable, share->classTable.bytemax * 2);
 		}
 		share->classTable.bytesize += sizeof(KonohaClassVar*);
 		ct = (KonohaClassVar*)KCALLOC(sizeof(KonohaClass), 1);
 		share->classTable.classItems[newid] = (KonohaClass*)ct;
-		ct->typeId = newid;
 	}
 	KUnlock(share->classTableMutex);
 	if(bct != NULL) {
 		DBG_ASSERT(s == NULL);
 		memcpy(ct, bct, offsetof(KonohaClass, methodList));
+		ct->typeId = newid;
 		if(ct->fnull == DEFAULT_fnull) ct->fnull =  DEFAULT_fnullinit;
 	}
 	else {
 		DBG_ASSERT(s != NULL);
 		ct->cflag   = s->cflag;
+		ct->typeId = newid;
 		ct->baseTypeId    = (s->baseTypeId == 0) ? ct->typeId : s->baseTypeId;
 		ct->superTypeId  = (s->superTypeId == 0) ? TY_Object : s->superTypeId;
 		ct->fieldItems = s->fieldItems;
@@ -873,8 +876,6 @@ static void loadInitStructData(KonohaContext *kctx)
 		new_KonohaClass(kctx, NULL, dd[cid], 0);
 		cid++;
 	}
-	KonohaClassVar *ct = (KonohaClassVar *)CT_Array;
-	ct->p0 = TY_Object;
 }
 
 static void defineDefaultKeywordSymbol(KonohaContext *kctx)
@@ -905,6 +906,10 @@ static void initStructData(KonohaContext *kctx)
 		ct->nameid = ksymbolSPOL(name, strlen(name), SPOL_ASCII|SPOL_POOL|SPOL_TEXT, _NEWID);
 		CT_setName(kctx, ct, 0);
 	}
+	KonohaClassVar *ct = (KonohaClassVar *)CT_Array;
+	ct->p0 = TY_Object;
+	kparamtype_t p = {TY_Object};
+	ct->cparamdom = Kparamdom(kctx, 1, &p);
 }
 
 static void KClassTable_initKonohaLib(KonohaLibVar *l)
