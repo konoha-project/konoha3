@@ -170,9 +170,9 @@ static int getNfd(kArray *a1, kArray *a2, kArray *a3)
 //		 fromSockaddr(kctx, sfp[2].m, addr);
 //	} else {
 //		ktrace(_SystemFault,
-//				KEYVALUE_s("@", "accept"),
-//				KEYVALUE_u("errno", errno),
-//				KEYVALUE_s("errstr", strerror(errno))
+//				KeyValue_s("@", "accept"),
+//				KeyValue_u("errno", errno),
+//				KeyValue_s("errstr", strerror(errno))
 //		);
 //	}
 //	RETURNi_(ret);
@@ -195,9 +195,9 @@ KMETHOD System_accept(KonohaContext *kctx, KonohaStack* sfp)
 	}
 	else {
 		ktrace(_SystemFault,
-				KEYVALUE_s("@", "accept"),
-				KEYVALUE_u("errno", errno),
-				KEYVALUE_s("errstr", strerror(errno))
+				KeyValue_s("@", "accept"),
+				KeyValue_u("errno", errno),
+				KeyValue_s("errstr", strerror(errno))
 		);
 	}
 	RETURNi_(ret);
@@ -218,9 +218,9 @@ KMETHOD System_bind(KonohaContext *kctx, KonohaStack* sfp)
 	);
 	if(ret != 0) {
 		ktrace(_SystemFault,
-			KEYVALUE_s("@", "bind"),
-			KEYVALUE_u("errno", errno),
-			KEYVALUE_s("errstr", strerror(errno))
+			KeyValue_s("@", "bind"),
+			KeyValue_u("errno", errno),
+			KeyValue_s("errstr", strerror(errno))
 		);
 	}
 	RETURNi_(ret);
@@ -233,9 +233,9 @@ KMETHOD System_close(KonohaContext *kctx, KonohaStack* sfp)
 
 	if(ret != 0 ) {
 		ktrace(_SystemFault,
-			KEYVALUE_s("@", "close"),
-			KEYVALUE_u("errno", errno),
-			KEYVALUE_s("errstr", strerror(errno))
+			KeyValue_s("@", "close"),
+			KeyValue_u("errno", errno),
+			KeyValue_s("errstr", strerror(errno))
 		);
 	}
 	RETURNi_(ret);
@@ -257,9 +257,9 @@ KMETHOD System_connect(KonohaContext *kctx, KonohaStack* sfp)
 	);
 	if(ret != 0) {
 		ktrace(_SystemFault,
-			KEYVALUE_s("@", "connect"),
-			KEYVALUE_u("errno", errno),
-			KEYVALUE_s("errstr", strerror(errno))
+			KeyValue_s("@", "connect"),
+			KeyValue_u("errno", errno),
+			KeyValue_s("errstr", strerror(errno))
 		);
 	}
 	RETURNi_(ret);
@@ -271,9 +271,9 @@ KMETHOD System_listen(KonohaContext *kctx, KonohaStack* sfp)
 	int ret = listen(WORD2INT(sfp[1].intValue), WORD2INT(sfp[2].intValue));
 	if(ret != 0) {
 		ktrace(_SystemFault,
-			KEYVALUE_s("@", "listen"),
-			KEYVALUE_u("errno", errno),
-			KEYVALUE_s("errstr", strerror(errno))
+			KeyValue_s("@", "listen"),
+			KeyValue_u("errno", errno),
+			KeyValue_s("errstr", strerror(errno))
 		);
 	}
 	RETURNi_(ret);
@@ -316,9 +316,9 @@ KMETHOD System_getsockopt(KonohaContext *kctx, KonohaStack* sfp)
 	}
 	else {
 		ktrace(_SystemFault,
-			KEYVALUE_s("@", "getsockopt"),
-			KEYVALUE_u("errno", errno),
-			KEYVALUE_s("errstr", strerror(errno))
+			KeyValue_s("@", "getsockopt"),
+			KeyValue_u("errno", errno),
+			KeyValue_s("errstr", strerror(errno))
 		);
 	}
 	RETURNi_(ret);
@@ -336,9 +336,9 @@ KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack* sfp)
 	);
 	if(ret != 0) {
 		ktrace(_SystemFault,
-			KEYVALUE_s("@", "setsockopt"),
-			KEYVALUE_u("errno", errno),
-			KEYVALUE_s("errstr", strerror(errno))
+			KeyValue_s("@", "setsockopt"),
+			KeyValue_u("errno", errno),
+			KeyValue_s("errstr", strerror(errno))
 		);
 	}
 	RETURNi_(ret);
@@ -374,8 +374,8 @@ static KMETHOD System_recv(KonohaContext *kctx, KonohaStack* sfp)
 					  (int)sfp[3].intValue );
 	if(ret < 0 ) {
 		ktrace(_SystemFault,
-				KEYVALUE_s("@", "recv"),
-				KEYVALUE_s("perror", strerror(errno))
+				KeyValue_s("@", "recv"),
+				KeyValue_s("perror", strerror(errno))
 		);
 	}
 	RETURNi_(ret);
@@ -429,8 +429,8 @@ static KMETHOD System_select(KonohaContext *kctx, KonohaStack* sfp)
 	else {
 		if(ret < 0 ) {
 			ktrace(_SystemFault,
-					KEYVALUE_s("@", "select"),
-					KEYVALUE_s("perror", strerror(errno))
+					KeyValue_s("@", "select"),
+					KeyValue_s("perror", strerror(errno))
 			);
 		}
 		// TODO::error or timeout is socket list all clear [pending]
@@ -455,8 +455,8 @@ static KMETHOD System_send(KonohaContext *kctx, KonohaStack* sfp)
 #endif
 	if(oldset == SIG_ERR) {
 		ktrace(_DataFault,
-				KEYVALUE_s("@", "signal"),
-				KEYVALUE_s("perror", strerror(errno))
+				KeyValue_s("@", "signal"),
+				KeyValue_s("perror", strerror(errno))
 		);
 	}
 	int ret = send(WORD2INT(sfp[1].intValue),
@@ -465,16 +465,16 @@ static KMETHOD System_send(KonohaContext *kctx, KonohaStack* sfp)
 					  (int)sfp[3].intValue );
 	if(ret < 0) {
 		ktrace(_DataFault,
-				KEYVALUE_s("@", "send"),
-				KEYVALUE_s("perror", strerror(errno))
+				KeyValue_s("@", "send"),
+				KeyValue_s("perror", strerror(errno))
 		);
 	}
 	if(oldset != SIG_ERR) {
 		ret_signal = signal(SIGPIPE, oldset);
 		if(ret_signal == SIG_ERR) {
 			ktrace(_DataFault,
-					KEYVALUE_s("@", "signal"),
-					KEYVALUE_s("perror", strerror(errno))
+					KeyValue_s("@", "signal"),
+					KeyValue_s("perror", strerror(errno))
 			);
 		}
 	}
@@ -506,18 +506,18 @@ static KMETHOD System_sendto(KonohaContext *kctx, KonohaStack* sfp)
 	);
 	if(ret < 0) {
 		ktrace(_SystemFault,
-				KEYVALUE_s("@", "sendto"),
-				KEYVALUE_u("errno", errno),
-				KEYVALUE_s("errstr", strerror(errno))
+				KeyValue_s("@", "sendto"),
+				KeyValue_u("errno", errno),
+				KeyValue_s("errstr", strerror(errno))
 		);
 	}
 	if(oldset != SIG_ERR) {
 		ret_signal = signal(SIGPIPE, oldset);
 		if(ret_signal == SIG_ERR) {
 			ktrace(_SystemFault,
-				KEYVALUE_s("@", "signal"),
-				KEYVALUE_u("errno", errno),
-				KEYVALUE_s("errstr", strerror(errno))
+				KeyValue_s("@", "signal"),
+				KeyValue_u("errno", errno),
+				KeyValue_s("errstr", strerror(errno))
 			);
 		}
 	}
@@ -530,9 +530,9 @@ KMETHOD System_shutdown(KonohaContext *kctx, KonohaStack* sfp)
 	int ret = shutdown(WORD2INT(sfp[1].intValue), WORD2INT(sfp[2].intValue));
 	if(ret != 0) {
 		ktrace(_SystemFault,
-			KEYVALUE_s("@", "shutdown"),
-			KEYVALUE_u("errno", errno),
-			KEYVALUE_s("errstr", strerror(errno))
+			KeyValue_s("@", "shutdown"),
+			KeyValue_u("errno", errno),
+			KeyValue_s("errstr", strerror(errno))
 		);
 	}
 	RETURNi_(ret);
@@ -544,9 +544,9 @@ KMETHOD System_sockatmark(KonohaContext *kctx, KonohaStack* sfp)
 	int ret = sockatmark(WORD2INT(sfp[1].intValue));
 	if(ret < 0) {
 		ktrace(_SystemFault,
-			KEYVALUE_s("@", "sockadmark"),
-			KEYVALUE_u("errno", errno),
-			KEYVALUE_s("errstr", strerror(errno))
+			KeyValue_s("@", "sockadmark"),
+			KeyValue_u("errno", errno),
+			KeyValue_s("errstr", strerror(errno))
 		);
 	}
 	RETURNi_(ret);
@@ -560,9 +560,9 @@ KMETHOD System_socket(KonohaContext *kctx, KonohaStack* sfp)
 					WORD2INT(sfp[3].intValue));
 	if(ret < 0) {
 		ktrace(_SystemFault,
-				KEYVALUE_s("@", "socket"),
-				KEYVALUE_u("errno", errno),
-				KEYVALUE_s("errstr", strerror(errno))
+				KeyValue_s("@", "socket"),
+				KeyValue_u("errno", errno),
+				KeyValue_s("errstr", strerror(errno))
 		);
 	}
 	RETURNi_(ret);
@@ -584,9 +584,9 @@ static KMETHOD System_socketpair(KonohaContext *kctx, KonohaStack* sfp)
 		}
 		else {
 			ktrace(_SystemFault,
-					KEYVALUE_s("@", "socketpair"),
-					KEYVALUE_u("errno", errno),
-					KEYVALUE_s("errstr", strerror(errno))
+					KeyValue_s("@", "socketpair"),
+					KeyValue_u("errno", errno),
+					KeyValue_s("errstr", strerror(errno))
 			);
 		}
 	}

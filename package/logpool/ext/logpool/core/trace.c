@@ -104,7 +104,7 @@ static void trace_thread_start(struct io *io)
     pthread_mutex_lock(&io->lock);
     pthread_create(&io->thread, NULL, trace_thread_main, io);
     while (1) {
-        if (kmutex_trylock(&io->lock) == 0) {
+        if (pthread_mutex_trylock(&io->lock) == 0) {
             pthread_mutex_unlock(&io->lock);
             break;
         }

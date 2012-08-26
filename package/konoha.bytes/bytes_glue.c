@@ -129,9 +129,9 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 	conv = (kiconv_t)PLATAPI iconv_open_i(toCoding, fromCoding);
 	if (conv == (kiconv_t)(-1)) {
 		ktrace(_UserInputFault,
-				KEYVALUE_s("@","iconv_open"),
-				KEYVALUE_s("from", fromCoding),
-				KEYVALUE_s("to", toCoding)
+				KeyValue_s("@","iconv_open"),
+				KeyValue_s("from", fromCoding),
+				KeyValue_s("to", toCoding)
 		);
 		return KNULL(Bytes);
 	}
@@ -153,10 +153,10 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 			outBytesLeft = CONV_BUFSIZE;
 		} else if (iconv_ret == -1) {
 			ktrace(_DataFault,
-				KEYVALUE_s("@","iconv"),
-				KEYVALUE_s("from", "UTF-8"),
-				KEYVALUE_s("to", toCoding),
-				KEYVALUE_s("error", strerror(errno))
+				KeyValue_s("@","iconv"),
+				KeyValue_s("from", "UTF-8"),
+				KeyValue_s("to", toCoding),
+				KeyValue_s("error", strerror(errno))
 			);
 			KLIB Kwb_free(&wb);
 			return (kBytes*)(CT_Bytes->defaultValueAsNull);

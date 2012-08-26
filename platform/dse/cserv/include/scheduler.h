@@ -36,7 +36,7 @@ struct dScheduler {
 	struct dReq *dReqQueue[DREQ_QUEUE_SIZE];
 	int front;
 	int last;
-	kmutex_t lock;
+	pthread_mutex_t lock;
 	pthread_cond_t cond;
 };
 

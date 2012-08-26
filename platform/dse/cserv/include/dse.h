@@ -249,14 +249,14 @@ static void *dse_dispatch(void *arg)
 					case E_METHOD_EVAL: case E_METHOD_TYCHECK:
 						lp = dse_openlog(dreq->logpoolip);
 						dse_record(lp, &logpool_args, "dtask",
-								KEYVALUE_u("context", dreq->context),
-								KEYVALUE_s("status", "start"),
-								KEYVALUE_u("pid", getpid()),
+								KeyValue_u("context", dreq->context),
+								KeyValue_s("status", "start"),
+								KeyValue_u("pid", getpid()),
 								LOG_END);
 						execlp(cmd_konoha, cmd_konoha, dreq->scriptfilepath, NULL);
 						dse_record(lp, &logpool_args, "dtask",
-								KEYVALUE_u("context", dreq->context),
-								KEYVALUE_s("status", "failed"),
+								KeyValue_u("context", dreq->context),
+								KeyValue_s("status", "failed"),
 								LOG_END);
 						dse_closelog(lp);
 //						if(ret == 1) {
@@ -280,15 +280,15 @@ static void *dse_dispatch(void *arg)
 				lp = dse_openlog(dreq->logpoolip);
 				if(WIFEXITED(status)) {
 					dse_record(lp, &logpool_args, "dtask",
-							KEYVALUE_u("context", dreq->context),
-							KEYVALUE_s("status", "done"),
-							KEYVALUE_u("exit status", WEXITSTATUS(status)),
+							KeyValue_u("context", dreq->context),
+							KeyValue_s("status", "done"),
+							KeyValue_u("exit status", WEXITSTATUS(status)),
 							LOG_END);
 				} else {
 					dse_record(lp, &logpool_args, "dtask",
-							KEYVALUE_u("context", dreq->context),
-							KEYVALUE_s("status", "failed"),
-							KEYVALUE_u("exit status", WEXITSTATUS(status)),
+							KeyValue_u("context", dreq->context),
+							KeyValue_s("status", "failed"),
+							KeyValue_u("exit status", WEXITSTATUS(status)),
 							LOG_END);
 				}
 				dse_closelog(lp);

@@ -99,9 +99,9 @@ static int test_logger(KonohaContext *kctx)
 	int i;
 	for (i = 0; i < 10; i++) {
 		ktrace(LOGPOL_DEBUG,
-			KEYVALUE_s("key1", "hello world"),
-			KEYVALUE_u("key2", v2),
-			KEYVALUE_u("key3", v3)
+			KeyValue_s("key1", "hello world"),
+			KeyValue_u("key2", v2),
+			KeyValue_u("key3", v3)
 		);
 	}
 	return 0;

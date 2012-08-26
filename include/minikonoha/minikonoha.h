@@ -106,10 +106,6 @@ typedef struct KonohaLibVar          KonohaLibVar;
 typedef const struct KonohaPackageHandlerVar KonohaPackageHandler;
 typedef KonohaPackageHandler* (*PackageLoadFunc)(void);
 
-typedef enum {
-	CritTag, ErrTag, WarnTag, NoticeTag, InfoTag, DebugTag, NoneTag
-} kinfotag_t;
-
 #ifndef jmpbuf_i
 #include <setjmp.h>
 #define jmpbuf_i jmp_buf
@@ -144,6 +140,34 @@ typedef pthread_mutexattr_t kmutexattr_t;
 	}while(0);\
 
 #endif
+
+typedef enum {
+	CritTag, ErrTag, WarnTag, NoticeTag, InfoTag, DebugTag, NoneTag
+} kinfotag_t;
+
+typedef enum {
+	Unrecord = 0,
+	isRecord = 1,
+	// Fault
+	SystemFault       =  (1<<1),  /* os, file system, etc. */
+	ScriptFault       =  (1<<2),  /* programmer's mistake */
+	DataFault         =  (1<<3),  /* user input, data mistake */
+	ExternalFault     =  (1<<4),  /* networking or remote services */
+	UnknownFault      =  (1<<5),  /* other fault above */
+	// LogPoint
+	PeriodicPoint     =  (1<<6),  /* sampling */
+	PreactionPoint    =  (1<<7),  /* prediction WARN */
+	ActionChangePoint =  (1<<8),
+	SecurityAudit     =  (1<<9),  /* security audit */
+	PrivacyCaution    =  (1<<10), /* including privacy information */
+	// Internal Use
+	LOGPOOL_INIT      =  (1<<12),
+} logpolicy_t;
+
+typedef struct logconf_t {
+	logpolicy_t policy;
+	void *formatPointer; // for precompiled formattings
+} logconf_t ;
 
 struct PlatformApiVar {
 	// settings
@@ -207,7 +231,26 @@ struct PlatformApiVar {
 	const char* (*endTag)(kinfotag_t);
 	void (*reportCaughtException)(const char *exceptionName, const char *scriptName, int line, const char *optionalMessage);
 	void  (*debugPrintf)(const char *file, const char *func, int line, const char *fmt, ...) __PRINTFMT(4, 5);
+	// trace
+	void (*traceDataLog)(int, logconf_t *, ...);
 };
+
+#define LOG_END 0
+#define LOG_s   1
+#define LOG_u   2
+
+#define KeyValue_u(K,V)    LOG_u, (K), ((uintptr_t)V)
+#define KeyValue_s(K,V)    LOG_s, (K), (V)
+#define KeyValue_p(K,V)    LOG_u, (K), (V)
+
+#define LOG_ScriptFault          KeyValue_u("uline", sfp[K_RTNIDX].uline)
+
+#define KTraceDataLog(LOGKEY, POLICY, ...)    do {\
+		static logconf_t _logconf = {isRecord|LOGPOL_INIT|POLICY};\
+		if(TFLAG_is(int, _logconf.policy, isRecord)) {\
+			PLATAPI traceDataLog(LOGKEY, &_logconf, ## __VA_ARGS__, LOG_END);\
+		}\
+	}while(0)\
 
 /* ------------------------------------------------------------------------ */
 /* type */

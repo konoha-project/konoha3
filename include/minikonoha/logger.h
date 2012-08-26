@@ -70,11 +70,11 @@ typedef struct klogconf_t {
 #define LOG_s   1
 #define LOG_u   2
 
-#define KEYVALUE_u(K,V)    LOG_u, (K), ((uintptr_t)V)
-#define KEYVALUE_s(K,V)    LOG_s, (K), (V)
-#define KEYVALUE_p(K,V)    LOG_u, (K), (V)
+#define KeyValue_u(K,V)    LOG_u, (K), ((uintptr_t)V)
+#define KeyValue_s(K,V)    LOG_s, (K), (V)
+#define KeyValue_p(K,V)    LOG_u, (K), (V)
 
-#define LOG_ScriptFault          KEYVALUE_u("uline", sfp[K_RTNIDX].uline)
+#define LOG_ScriptFault          KeyValue_u("uline", sfp[K_RTNIDX].uline)
 
 #define ktrace(POLICY, ...)    do {\
 		static klogconf_t _logconf = {LOGPOL_RECORD|LOGPOL_INIT|LOGPOL_CFUNC|POLICY, NULL, {__FUNCTION__}};\

@@ -70,8 +70,8 @@ static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
 	size_t asize = (size_t)sfp[1].intValue;
 	if (asize < 0 || KARRAY_LIST_SIZE_MAX < asize) {
 		ktrace(_UserInputFault,
-				KEYVALUE_s("error", "Invalid argument"),
-				KEYVALUE_u("length", asize)
+				KeyValue_s("error", "Invalid argument"),
+				KeyValue_u("length", asize)
 		);
 		RETURN_(a);
 	} else {

@@ -159,9 +159,9 @@ static KMETHOD MPIComm_getSize(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD MPIComm_barrier(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMPIComm *comm = toRawPtr(kMPIComm *, sfp[0].asObject);
-	ktrace(LOGPOL_DEBUG, KEYVALUE_s("at", "MPI_Barrier"), KEYVALUE_s("#", "begin"), LOG_END);
+	ktrace(LOGPOL_DEBUG, KeyValue_s("at", "MPI_Barrier"), KeyValue_s("#", "begin"), LOG_END);
 	bool ret = MPI_Barrier(comm->comm);
-	ktrace(LOGPOL_DEBUG, KEYVALUE_s("at", "MPI_Barrier"), KEYVALUE_s("#", "finish"), LOG_END);
+	ktrace(LOGPOL_DEBUG, KeyValue_s("at", "MPI_Barrier"), KeyValue_s("#", "finish"), LOG_END);
 	RETURNb_(ret);
 }
 
@@ -174,9 +174,9 @@ static KMETHOD MPIComm_send(KonohaContext *kctx, KonohaStack *sfp)
 	int count = sfp[2].intValue;
 	int dest = sfp[3].intValue;
 	int tag = sfp[4].intValue;
-	TRACE(LOGPOL_DEBUG, KEYVALUE_s("at", "MPI_Send"), KEYVALUE_s("#", "begin"), KEYVALUE_u("dest", dest), KEYVALUE_u("count", count), LOG_END);
+	TRACE(LOGPOL_DEBUG, KeyValue_s("at", "MPI_Send"), KeyValue_s("#", "begin"), KeyValue_u("dest", dest), KeyValue_u("count", count), LOG_END);
 	bool ret = (MPI_Send(getbuf(data), count, data->type, dest, tag, comm->comm));
-	TRACE(LOGPOL_DEBUG, KEYVALUE_s("at", "MPI_Send"), KEYVALUE_s("#", "finish"), LOG_END);
+	TRACE(LOGPOL_DEBUG, KeyValue_s("at", "MPI_Send"), KeyValue_s("#", "finish"), LOG_END);
 	RETURNb_(ret);
 }
 
@@ -190,9 +190,9 @@ static KMETHOD MPIComm_recv(KonohaContext *kctx, KonohaStack *sfp)
 	int tag = sfp[4].intValue;
 	MPIData_extend(kctx, data, count);
 	MPI_Status stat;
-	TRACE(LOGPOL_DEBUG, KEYVALUE_s("at", "MPI_Recv"), KEYVALUE_s("#", "begin"), KEYVALUE_u("src", src), KEYVALUE_u("count", count), LOG_END);
+	TRACE(LOGPOL_DEBUG, KeyValue_s("at", "MPI_Recv"), KeyValue_s("#", "begin"), KeyValue_u("src", src), KeyValue_u("count", count), LOG_END);
 	bool ret = (MPI_Recv(getbuf(data), count, data->type, src, tag, comm->comm, &stat));
-	TRACE(LOGPOL_DEBUG, KEYVALUE_s("at", "MPI_Recv"), KEYVALUE_s("#", "finish"), LOG_END);
+	TRACE(LOGPOL_DEBUG, KeyValue_s("at", "MPI_Recv"), KeyValue_s("#", "finish"), LOG_END);
 	RETURNb_(ret);
 }
 
@@ -205,9 +205,9 @@ static KMETHOD MPIComm_iSend(KonohaContext *kctx, KonohaStack *sfp)
 	int dest = sfp[3].intValue;
 	int tag = sfp[4].intValue;
 	kMPIRequest *ret = newMPIRequest(kctx);
-	TRACE(LOGPOL_DEBUG, KEYVALUE_s("at", "MPI_Isend"), KEYVALUE_s("#", "begin"), KEYVALUE_u("dest", dest), KEYVALUE_u("count", count), LOG_END);
+	TRACE(LOGPOL_DEBUG, KeyValue_s("at", "MPI_Isend"), KeyValue_s("#", "begin"), KeyValue_u("dest", dest), KeyValue_u("count", count), LOG_END);
 	MPI_Isend(getbuf(data), count, data->type, dest, tag, comm->comm, &ret->req);
-	TRACE(LOGPOL_DEBUG, KEYVALUE_s("at", "MPI_Isend"), KEYVALUE_s("#", "finish"), LOG_END);
+	TRACE(LOGPOL_DEBUG, KeyValue_s("at", "MPI_Isend"), KeyValue_s("#", "finish"), LOG_END);
 	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(ret)));
 }
 
@@ -221,9 +221,9 @@ static KMETHOD MPIComm_iRecv(KonohaContext *kctx, KonohaStack *sfp)
 	int tag = sfp[4].intValue;
 	kMPIRequest *ret = newMPIRequest(kctx);
 	MPIData_extend(kctx, data, count);
-	TRACE(LOGPOL_DEBUG, KEYVALUE_s("at", "MPI_Irecv"), KEYVALUE_s("#", "begin"), KEYVALUE_u("src", src), KEYVALUE_u("count", count), LOG_END);
+	TRACE(LOGPOL_DEBUG, KeyValue_s("at", "MPI_Irecv"), KeyValue_s("#", "begin"), KeyValue_u("src", src), KeyValue_u("count", count), LOG_END);
 	MPI_Irecv(getbuf(data), count, data->type, src, tag, comm->comm, &ret->req);
-	TRACE(LOGPOL_DEBUG, KEYVALUE_s("at", "MPI_Irecv"), KEYVALUE_s("#", "finish"), LOG_END);
+	TRACE(LOGPOL_DEBUG, KeyValue_s("at", "MPI_Irecv"), KeyValue_s("#", "finish"), LOG_END);
 	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(ret)));
 }
 
@@ -235,9 +235,9 @@ static KMETHOD MPIComm_bcast(KonohaContext *kctx, KonohaStack *sfp)
 	kMPIData *sdata = toRawPtr(kMPIData *, sfp[1].asObject);
 	int count = sfp[2].intValue;
 	int root = sfp[3].intValue;
-	TRACE(LOGPOL_DEBUG, KEYVALUE_s("at", "MPI_Bcast"), KEYVALUE_s("#", "begin"), KEYVALUE_u("root", root), KEYVALUE_u("count", count), LOG_END);
+	TRACE(LOGPOL_DEBUG, KeyValue_s("at", "MPI_Bcast"), KeyValue_s("#", "begin"), KeyValue_u("root", root), KeyValue_u("count", count), LOG_END);
 	bool ret = (MPI_Bcast(getbuf(sdata), count, sdata->type, root, comm->comm));
-	TRACE(LOGPOL_DEBUG, KEYVALUE_s("at", "MPI_Bcast"), KEYVALUE_s("#", "finish"), LOG_END);
+	TRACE(LOGPOL_DEBUG, KeyValue_s("at", "MPI_Bcast"), KeyValue_s("#", "finish"), LOG_END);
 	RETURNb_(ret);
 }
 
