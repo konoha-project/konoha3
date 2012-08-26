@@ -193,6 +193,7 @@ static inline void bitmap_flip(bitmap_t *bm, unsigned index)
 }
 
 /* [BMGC Deta Structure] */
+
 #define HeapMng(kctx) ((memshare(kctx)->gcHeapMng))
 
 struct SubHeap;
@@ -1892,6 +1893,7 @@ static void bitmapMarkingGC(KonohaContext *kctx, HeapManager *mng, enum gc_mode 
 }
 
 /* ------------------------------------------------------------------------ */
+
 static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o)
 {
 	KonohaClass *ct = O_ct(o);
@@ -1954,6 +1956,7 @@ kbool_t MODGC_kObject_isManaged(KonohaContext *kctx, void *ptr)
 	size_t i;
 	if ((uintptr_t) o % KlassBlockSize(SUBHEAP_KLASS_MIN) != 0)
 		return false;
+
 	FOR_EACH_ARRAY_(mng->managed_heap_a, i) {
 		kObject *s = (kObject *) ARRAY_n(mng->managed_heap_a, i);
 		kObject *e = (kObject *) ARRAY_n(mng->managed_heap_end_a, i);
@@ -1974,6 +1977,7 @@ kbool_t MODGC_kObject_isManaged(KonohaContext *kctx, void *ptr)
 }
 
 /* ------------------------------------------------------------------------ */
+
 static void kmodgc_local_reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh) {}
 
 static void kmodgc_local_free(KonohaContext *kctx, struct KonohaModuleContext *baseh)
@@ -2058,4 +2062,5 @@ void MODGC_gc_invoke(KonohaContext *kctx, KonohaStack *esp)
 #ifdef __cplusplus
 }
 #endif
+
 #endif /* BMGC_H_ */

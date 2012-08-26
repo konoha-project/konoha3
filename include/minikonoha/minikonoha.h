@@ -484,12 +484,11 @@ struct KonohaContextVar {
 	KonohaContextRuntimeVar          *stack;
 	KonohaModule                    **modshare;
 	KonohaModuleContext             **modlocal;
-	struct kmemshare_t                *memshare;
-	struct kmemlocal_t                *memlocal;
+//	struct kmemshare_t                *memshare;
+//	struct kmemlocal_t                *memlocal;
 };
 
 // share, local
-
 struct KonohaRuntimeVar {
 	KUtilsGrowingArray        classTable;
 	KUtilsHashMap            *longClassNameMapNN;
