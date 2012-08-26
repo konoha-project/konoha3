@@ -254,10 +254,10 @@ static KMETHOD StmtTyCheck_for(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_StmtTyCheck(stmt, gma);
 	DBG_P("for statement .. ");
-	kNameSpace *ns = Stmt_nameSpace(stmt);
 	kToken *typeToken = SUGAR kStmt_getToken(kctx, stmt, KW_TypePattern, NULL);
 	kToken *varToken  = SUGAR kStmt_getToken(kctx, stmt, KW_SymbolPattern, NULL);
 	DBG_P("typeToken=%p, varToken=%p", typeToken, varToken);
+	//kNameSpace *ns = Stmt_nameSpace(stmt);
 //	if(!SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, 0)) {
 //		RETURNb_(false);
 //	}

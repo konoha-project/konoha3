@@ -270,6 +270,7 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 			}
 		}
 	}
+	fclose(fp);
 	return isSuccessfullyLoading;
 }
 
@@ -488,14 +489,13 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.pthread_mutex_trylock_i = pthread_mutex_trylock;
 	plat.pthread_mutex_destroy_i = pthread_mutex_destroy;
 
-	plat.formatKonohaPath = formatKonohaPath;
-	plat.formatSystemPath = formatSystemPath;
-
 	// high level
 	plat.getTimeMilliSecond  = getTimeMilliSecond;
 	plat.shortFilePath       = shortFilePath;
 	plat.formatPackagePath   = formatPackagePath;
 	plat.formatTransparentPath = formatTransparentPath;
+	plat.formatKonohaPath = formatKonohaPath;
+	plat.formatSystemPath = formatSystemPath;
 	plat.loadPackageHandler  = loadPackageHandler;
 	plat.loadScript          = loadScript;
 	plat.beginTag            = beginTag;

@@ -127,14 +127,11 @@ set(PACKAGES
 	konoha.while
 	sugar
 	llvm
-##	konoha.pcre
 	konoha.regexp
-##	konoha.io
 	posix.process
 	posix.file
 	posix.fd
 ##	posix.socket
-##	konoha.rope
 ##	konoha.sql
 ##	konoha.subproc
 	konoha.mpi
