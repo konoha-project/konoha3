@@ -308,7 +308,7 @@ static void kArray_clear(KonohaContext *kctx, kArray *o, size_t n)
 // ---------------
 // Param
 
-static KonohaClass *CT_body(KonohaContext *kctx, KonohaClass *ct, size_t head, size_t body);
+static KonohaClass *KonohaClass_extendedBody(KonohaContext *kctx, KonohaClass *ct, size_t head, size_t body);
 
 static void Param_init(KonohaContext *kctx, kObject *o, void *conf)
 {
@@ -320,7 +320,7 @@ static void Param_init(KonohaContext *kctx, kObject *o, void *conf)
 static kParam *new_Param(KonohaContext *kctx, ktype_t rtype, int psize, const kparamtype_t *p)
 {
 	KonohaClass *ct = CT_(TY_Param);
-	ct = CT_body(kctx, ct, sizeof(void*), psize * sizeof(kparamtype_t));
+	ct = KonohaClass_extendedBody(kctx, ct, sizeof(void*), psize * sizeof(kparamtype_t));
 	kParamVar *pa = (kParamVar*)new_kObject(kctx, ct, 0);
 	pa->rtype = rtype;
 	pa->psize = psize;
@@ -620,7 +620,7 @@ static KonohaClassVar* new_KonohaClass(KonohaContext *kctx, KonohaClass *bct, KD
 	return ct;
 }
 
-static KonohaClass *CT_body(KonohaContext *kctx, KonohaClass *ct, size_t head, size_t body)
+static KonohaClass *KonohaClass_extendedBody(KonohaContext *kctx, KonohaClass *ct, size_t head, size_t body)
 {
 	KonohaClass *bct = ct;
 	while(ct->cstruct_size < sizeof(KonohaObjectHeader) + head + body) {
