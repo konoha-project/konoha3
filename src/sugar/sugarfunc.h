@@ -714,6 +714,8 @@ static kExpr *Expr_lookupMethod(KonohaContext *kctx, kStmt *stmt, kExpr *expr, k
 		if(Method_isOverloaded(mtd)) {
 			DBG_P("found overloaded method %s.%s%s", Method_t(mtd));
 			mtd = lookupOverloadedMethod(kctx, stmt, expr, mtd, gma);
+			if(mtd == NULL)
+				return K_NULLEXPR;
 		}
 		if (mtd != NULL) {
 			DBG_P("found resolved method %s.%s%s isOverloaded=%d", Method_t(mtd), Method_isOverloaded(mtd));
