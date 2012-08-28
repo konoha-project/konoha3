@@ -744,7 +744,7 @@ static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 	return ct->shortNameNULL;
 }
 
-static void CT_setName(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t pline)
+static void KonohaClass_setName(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t pline)
 {
 	uintptr_t lname = longid(ct->packageDomain, ct->nameid);
 	kreportf(DebugTag, pline, "new class domain=%s, name='%s.%s'", PackageId_t(ct->packageDomain), PackageId_t(ct->packageId), SYM_t(ct->nameid));
@@ -776,7 +776,7 @@ static KonohaClass *Konoha_defineClass(KonohaContext *kctx, kpackage_t packageId
 	else {
 		ct->nameid = ksymbolA(S_text(name), S_size(name), _NEWID);
 	}
-	CT_setName(kctx, ct, pline);
+	KonohaClass_setName(kctx, ct, pline);
 	return (KonohaClass*)ct;
 }
 
@@ -904,7 +904,7 @@ static void initStructData(KonohaContext *kctx)
 		KonohaClassVar *ct = (KonohaClassVar *)ctt[i];
 		const char *name = ct->DBG_NAME;
 		ct->nameid = ksymbolSPOL(name, strlen(name), SPOL_ASCII|SPOL_POOL|SPOL_TEXT, _NEWID);
-		CT_setName(kctx, ct, 0);
+		KonohaClass_setName(kctx, ct, 0);
 	}
 	KonohaClassVar *ct = (KonohaClassVar *)CT_Array;
 	ct->p0 = TY_Object;
@@ -912,7 +912,7 @@ static void initStructData(KonohaContext *kctx)
 	ct->cparamdom = Kparamdom(kctx, 1, &p);
 }
 
-static void KClassTable_initKonohaLib(KonohaLibVar *l)
+static void initKonohaLib(KonohaLibVar *l)
 {
 	l->Kclass                  = Kclass;
 	l->new_kObject             = new_kObject;
@@ -934,7 +934,7 @@ static void KClassTable_initKonohaLib(KonohaLibVar *l)
 	l->KonohaClass_Generics = KonohaClass_Generics;
 }
 
-static void KClassTable_init(KonohaContext *kctx, KonohaContextVar *ctx)
+static void KonohaRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	KonohaRuntimeVar *share = (KonohaRuntimeVar*)KCALLOC(sizeof(KonohaRuntime), 1);
 	ctx->share = share;
@@ -943,7 +943,7 @@ static void KClassTable_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	KInitLock(share->symbolMutex);
 	KInitLock(share->paramMutex);
 
-	KClassTable_initKonohaLib((KonohaLibVar*)kctx->klib);
+	initKonohaLib((KonohaLibVar*)kctx->klib);
 	KLIB Karray_init(kctx, &share->classTable, K_TYTABLE_INIT * sizeof(KonohaClass));
 	loadInitStructData(kctx);
 	share->longClassNameMapNN = KLIB Kmap_init(kctx, 0);
@@ -967,14 +967,11 @@ static void KClassTable_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	KINITv(share->emptyArray,  new_(Array, 0));
 
 	Kparam(kctx, TY_void, 0, NULL);  // PARAM_void
-	Kparamdom(kctx, 0, NULL); // PARAMDOM_void
+	Kparamdom(kctx, 0, NULL);        // PARAMDOM_void
 	FILEID_("(konoha.c)");
 	PN_("konoha");    // PN_konoha
 	PN_("sugar");     // PKG_sugar
 	defineDefaultKeywordSymbol(kctx);
-//	SYM_("");          // MN_
-//	SYM_("new");       // MN_new
-//	SYM_("T");         // UN_T
 	initStructData(kctx);
 }
 
@@ -985,7 +982,7 @@ static void constPoolMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, vo
 	END_REFTRACE();
 }
 
-static void kshare_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
+static void KonohaRuntime_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	KonohaRuntime *share = ctx->share;
 	KonohaClass **cts = (KonohaClass**)kctx->share->classTable.classItems;
@@ -1017,7 +1014,7 @@ static void kshare_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 	END_REFTRACE();
 }
 
-static void TYTABLE_freeCT(KonohaContext *kctx)
+static void KonohaRuntime_freeClassTable(KonohaContext *kctx)
 {
 	KonohaClassVar **cts = (KonohaClassVar**)kctx->share->classTable.classItems;
 	size_t i, size = kctx->share->classTable.bytesize/sizeof(KonohaClassVar*);
@@ -1029,7 +1026,7 @@ static void TYTABLE_freeCT(KonohaContext *kctx)
 	}
 }
 
-static void TYTABLE_free(KonohaContext *kctx, KonohaContextVar *ctx)
+static void KonohaRuntime_free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	KonohaRuntimeVar *share = (KonohaRuntimeVar*)ctx->share;
 	KLIB Kmap_free(kctx, share->longClassNameMapNN, NULL);
@@ -1038,7 +1035,7 @@ static void TYTABLE_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	KLIB Kmap_free(kctx, share->symbolMapNN, NULL);
 	KLIB Kmap_free(kctx, share->paramMapNN, NULL);
 	KLIB Kmap_free(kctx, share->paramdomMapNN, NULL);
-	TYTABLE_freeCT(kctx);
+	KonohaRuntime_freeClassTable(kctx);
 	KLIB Karray_free(kctx, &share->classTable);
 
 	KFreeLock(share->classTableMutex);

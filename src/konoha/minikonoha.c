@@ -140,7 +140,7 @@ static KonohaContextVar* new_context(KonohaContext *kctx, const PlatformApi *pla
 
 		MODLOGGER_init(kctx, newctx);
 		MODGC_init(kctx, newctx);
-		KClassTable_init(kctx, newctx);
+		KonohaRuntime_init(kctx, newctx);
 	}
 	else {   // others take ctx as its parent
 		newctx = (KonohaContextVar*)KCALLOC(sizeof(KonohaContextVar), 1);
@@ -173,7 +173,7 @@ static void kcontext_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	size_t i;
 	if(IS_RootKonohaContext(kctx)) {
-		kshare_reftrace(kctx, ctx);
+		KonohaRuntime_reftrace(kctx, ctx);
 		for(i = 0; i < MOD_MAX; i++) {
 			KonohaModule *p = ctx->modshare[i];
 			if(p != NULL && p->reftrace != NULL) {
@@ -214,7 +214,7 @@ static void kcontext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 			}
 		}
 		MODGC_destoryAllObjects(kctx, ctx);
-		TYTABLE_free(kctx, ctx);
+		KonohaRuntime_free(kctx, ctx);
 		MODGC_free(kctx, ctx);
 		MODLOGGER_free(kctx, ctx);
 		free(kctx->modlocal);
