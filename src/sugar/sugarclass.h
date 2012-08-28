@@ -273,7 +273,8 @@ static kStmt* new_kStmt(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, 
 	stmt->syn = SYN_(ns, keyword);
 	va_list ap;
 	va_start(ap, keyword);
-	ksymbol_t kw = va_arg(ap, ksymbol_t);
+	/* 'ksymbol_t' is promoted to 'int' when passed through to 'va_arg' */
+	ksymbol_t kw = (ksymbol_t) va_arg(ap, int);
 	while(kw != 0) {
 		kObject *v = va_arg(ap, kObject*);
 		if(v == NULL) break;

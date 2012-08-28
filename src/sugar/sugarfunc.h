@@ -715,8 +715,10 @@ static kExpr *Expr_lookupMethod(KonohaContext *kctx, kStmt *stmt, kExpr *expr, k
 			DBG_P("found overloaded method %s.%s%s", Method_t(mtd));
 			mtd = lookupOverloadedMethod(kctx, stmt, expr, mtd, gma);
 		}
-		DBG_P("found resolved method %s.%s%s isOverloaded=%d", Method_t(mtd), Method_isOverloaded(mtd));
-		return kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, reqty);
+		if (mtd != NULL) {
+			DBG_P("found resolved method %s.%s%s isOverloaded=%d", Method_t(mtd), Method_isOverloaded(mtd));
+			return kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, reqty);
+		}
 	}
 	return K_NULLEXPR;
 }

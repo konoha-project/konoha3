@@ -49,6 +49,7 @@ extern "C" {
 #define K_PATHMAX 256
 #endif
 
+#define kunused __attribute__((unused))
 // -------------------------------------------------------------------------
 
 static const char *getSystemCharset(void)
@@ -426,15 +427,15 @@ typedef uintptr_t (*ficonv_open)(const char *, const char *);
 typedef size_t (*ficonv)(uintptr_t, char **, size_t *, char **, size_t *);
 typedef int    (*ficonv_close)(uintptr_t);
 
-static uintptr_t dummy_iconv_open(const char *t, const char *f)
+static kunused uintptr_t dummy_iconv_open(const char *t, const char *f)
 {
 	return -1;
 }
-static size_t dummy_iconv(uintptr_t i, char **t, size_t *ts, char **f, size_t *fs)
+static kunused size_t dummy_iconv(uintptr_t i, char **t, size_t *ts, char **f, size_t *fs)
 {
 	return 0;
 }
-static int dummy_iconv_close(uintptr_t i)
+static kunused int dummy_iconv_close(uintptr_t i)
 {
 	return 0;
 }

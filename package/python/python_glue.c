@@ -22,10 +22,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+#include <Python.h>
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/float.h>
-#include <Python.h>
 
 #define OB_TYPE(obj) (((PyObject*)obj->self)->ob_type)
 
