@@ -26,6 +26,8 @@
 #include <minikonoha/sugar.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 struct kio_t {
 	union {
@@ -431,11 +433,26 @@ static KMETHOD OutputStream_isClosed(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 // --------------------------------------------------------------------------
-//## method @public OutputStream System.getOut()
-
+//## method @public @static OutputStream System.getOut()
 static KMETHOD System_getOut(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURN_(kioshare->kstdout);
+}
+
+//## method @public @static boolean System.isDir(String x)
+static KMETHOD System_isDir(KonohaContext *kctx, KonohaStack *sfp)
+{
+	const char *filename = S_text(sfp[1].asString);
+	struct stat st;
+	RETURNb_(stat(filename, &st) == 0 && S_ISDIR(st.st_mode));
+}
+
+//## method @public @static boolean System.isFile(String x)
+static KMETHOD System_isFile(KonohaContext *kctx, KonohaStack *sfp)
+{
+	const char *filename = S_text(sfp[1].asString);
+	struct stat st;
+	RETURNb_(stat(filename, &st) == 0 && S_ISREG(st.st_mode));
 }
 
 // --------------------------------------------------------------------------
@@ -508,7 +525,9 @@ static kbool_t io_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		_Public, _F(OutputStream_println),  TY_void,         TY_OutputStream, MN_("println"), 1, TY_String, FN_value|_Coercion,
 		_Public, _F(OutputStream_flush),    TY_void,         TY_OutputStream, MN_("flush"), 0,
 		_Public, _F(OutputStream_close),    TY_void,         TY_OutputStream, MN_("close"), 0,
-		_Public|_Static, _F(System_getOut),         TY_OutputStream, TY_System, MN_("getOut"), 0,
+		_Public|_Static, _F(System_isDir),  TY_Boolean,      TY_System, MN_("isDir"), 1, TY_String, FN_x,
+		_Public|_Static, _F(System_isFile), TY_Boolean,      TY_System, MN_("isFile"), 1, TY_String, FN_x,
+		_Public|_Static, _F(System_getOut), TY_OutputStream, TY_System, MN_("getOut"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);
