@@ -540,6 +540,23 @@ static KMETHOD File_isFile(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNb_(stat(filename, &st) == 0 && S_ISREG(st.st_mode));
 }
 
+//## method @public boolean File.rename(String newName)
+static KMETHOD File_rename(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kFile *f = (kFile*)sfp[0].o;
+	const char *oldName = S_text(f->path);
+	const char *newName = S_text(sfp[1].asString);
+	RETURNb_(rename(oldName, newName) == 0); // success: true
+}
+
+//## method @public boolean File.remove()
+static KMETHOD File_remove(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kFile *f = (kFile*)sfp[0].o;
+	const char *filename = S_text(f->path);
+	RETURNb_(remove(filename) == 0); // success: true
+}
+
 //## method @public Array[String] File.list()
 static KMETHOD File_list(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -659,8 +676,8 @@ static kbool_t io_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		_Public, _F(File_isFile),  TY_Boolean,     TY_File, MN_("isFile"), 0,
 		_Public, _F(File_getSize), TY_Int,         TY_File, MN_("getSize"), 0,
 		_Public, _F(File_getSize), TY_Int,         TY_File, MN_("length"), 0,
-		//_Public, _F(File_rename),  TY_Boolean,     TY_File, MN_("rename"), 1, TY_String, FN_x,
-		//_Public, _F(File_remove),  TY_Boolean,     TY_File, MN_("remove"), 0,
+		_Public, _F(File_rename),  TY_Boolean,     TY_File, MN_("rename"), 1, TY_String, FN_x,
+		_Public, _F(File_remove),  TY_Boolean,     TY_File, MN_("remove"), 0,
 		_Public, _F(File_list),    TY_StrArray,    TY_File, MN_("list"), 0,
 
 		_Public|_Static, _F(System_isDir),  TY_Boolean,      TY_System, MN_("isDir"), 1, TY_String, FN_x,
