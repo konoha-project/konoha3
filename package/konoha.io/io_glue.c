@@ -567,7 +567,9 @@ static KMETHOD File_list(KonohaContext *kctx, KonohaStack *sfp)
 	kArray *a = new_(Array, 0);
 	while((e = readdir(dir)) != NULL) {
 		const char *fname = e->d_name;
-		KLIB kArray_add(kctx, a, KLIB new_kString(kctx, fname, strlen(fname), 0));
+		if(strcmp(fname, ".") != 0 && strcmp(fname, "..") != 0) {
+			KLIB kArray_add(kctx, a, KLIB new_kString(kctx, fname, strlen(fname), 0));
+		}
 	}
 	closedir(dir);
 	RETURN_(a);

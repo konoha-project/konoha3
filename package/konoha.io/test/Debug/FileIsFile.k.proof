@@ -1,0 +1,3 @@
+ - (FileIsFile.k:9) true
+ - (FileIsFile.k:11) false
+Q.E.D.
