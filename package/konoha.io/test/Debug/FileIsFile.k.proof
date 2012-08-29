@@ -1,3 +1,5 @@
  - (FileIsFile.k:9) true
  - (FileIsFile.k:11) false
+ - (FileIsFile.k:12) true
+ - (FileIsFile.k:13) false
 Q.E.D.

@@ -1,3 +1,5 @@
  - (FileIsDir.k:9) false
  - (FileIsDir.k:11) true
+ - (FileIsDir.k:12) false
+ - (FileIsDir.k:13) true
 Q.E.D.

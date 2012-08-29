@@ -9,6 +9,8 @@ void test() {
 	p(file1.isFile());
 	File file2 = new File(b + "testdir");
 	p(file2.isFile());
+	p(System.isFile(b + "test.txt"));
+	p(System.isFile(b + "testdir"));
 }
 
 test();
