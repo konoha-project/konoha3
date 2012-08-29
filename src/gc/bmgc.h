@@ -1722,7 +1722,7 @@ static void bmgc_gc_mark(KonohaContext *kctx, HeapManager *mng, KonohaStack *esp
 	kObject *ref = NULL;
 
 	context_reset_refs(kctx);
-	KRUNTIME_reftraceAll(kctx);
+	KonohaContext_reftraceAll(kctx);
 #ifdef USE_GENERATIONAL_GC
 	if (mode & GC_MINOR) {
 		RememberSet_reftrace(kctx, mng);

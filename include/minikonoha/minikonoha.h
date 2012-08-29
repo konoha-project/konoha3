@@ -588,7 +588,7 @@ struct KonohaStackRuntimeVar {
 };
 
 // module
-#define MOD_MAX    32
+#define KonohaModule_MAXSIZE    32
 #define MOD_logger     0
 #define MOD_gc         1
 #define MOD_code       2

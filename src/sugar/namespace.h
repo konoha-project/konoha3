@@ -28,17 +28,21 @@
 
 static void kNameSpace_parseSugarRule2(KonohaContext *kctx, kNameSpace *ns, const char *rule, kfileline_t uline, kArray *ruleList);
 
-static void copyIfArray(KonohaContext *kctx, kNameSpace *ns, kArray **arrayRef)
-{
-	if(arrayRef[0] != NULL && IS_Array(arrayRef[0])) {
-		int i;
-		kArray *newa = GCSAFE_new(Array, kArray_size(arrayRef[0]));
-		for(i = 0; i < kArray_size(arrayRef[0]); i++) {
-			KLIB kArray_add(kctx, newa, arrayRef[0]->objectItems[i]);
-		}
-		KSETv(ns, arrayRef[0], newa);
-	}
-}
+//static void copyIfArray(KonohaContext *kctx, kNameSpace *ns, kArray **arrayRef)
+//{
+//	DBG_P(">>>>>>> arrayRef[0]=%p", arrayRef[0]);
+//	if(arrayRef[0] != NULL) {
+//		DBG_P(">>>>>> arrayRef[0]=%p, %s", arrayRef[0], CT_t(O_ct(arrayRef[0])));
+//		if(IS_Array(arrayRef[0])) {
+//			int i;
+//			kArray *newa = GCSAFE_new(Array, kArray_size(arrayRef[0]));
+//			for(i = 0; i < kArray_size(arrayRef[0]); i++) {
+//				KLIB kArray_add(kctx, newa, arrayRef[0]->objectItems[i]);
+//			}
+//			KSETv(ns, arrayRef[0], newa);
+//		}
+//	}
+//}
 
 static SugarSyntax* kNameSpace_newSyntax(KonohaContext *kctx, kNameSpace *ns, SugarSyntax *parentSyntax, ksymbol_t keyword)
 {
@@ -48,20 +52,16 @@ static SugarSyntax* kNameSpace_newSyntax(KonohaContext *kctx, kNameSpace *ns, Su
 	KUtilsHashMapEntry *e = KLIB Kmap_newEntry(kctx, ns->syntaxMapNN, (uintptr_t)keyword);
 	SugarSyntaxVar *syn = (SugarSyntaxVar*)KCALLOC(sizeof(SugarSyntax), 1);
 	e->unboxValue = (uintptr_t)syn;
+	syn->parentSyntaxNULL = parentSyntax;
+	syn->keyword          = keyword;
 	if(parentSyntax != NULL) {  // TODO: RCGC
 		kreportf(DebugTag, 0, "redefining syntax %s%s on %p", PSYM_t(keyword), parentSyntax);
-		DBG_P("copy parent syntax from %p to %p", parentSyntax, syn);
-		memcpy(syn, parentSyntax, sizeof(SugarSyntax));
-		copyIfArray(kctx, ns, &syn->syntaxRuleNULL);
-		copyIfArray(kctx, ns, &syn->sugarFuncListTable[SUGARFUNC_PatternMatch]);
-		copyIfArray(kctx, ns, &syn->sugarFuncListTable[SUGARFUNC_ParseExpr]);
-		copyIfArray(kctx, ns, &syn->sugarFuncListTable[SUGARFUNC_TopStmtTyCheck]);
-		copyIfArray(kctx, ns, &syn->sugarFuncListTable[SUGARFUNC_StmtTyCheck]);
-		copyIfArray(kctx, ns, &syn->sugarFuncListTable[SUGARFUNC_ExprTyCheck]);
+		syn->ty             = parentSyntax->ty;
+		syn->precedence_op1 = parentSyntax->precedence_op1;
+		syn->precedence_op2 = parentSyntax->precedence_op2;
 	}
 	else {
-		syn->keyword  = keyword;
-		syn->ty       = TY_unknown;
+		syn->ty             = TY_unknown;
 		syn->precedence_op1 = 0;
 		syn->precedence_op2 = 0;
 	}
@@ -90,7 +90,6 @@ static SugarSyntax* kNameSpace_getSyntax(KonohaContext *kctx, kNameSpace *ns, ks
 	return (isNew) ? kNameSpace_newSyntax(kctx, ns, NULL, keyword) : NULL;
 }
 
-
 static void kNameSpace_setSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, size_t idx, kFunc *fo)
 {
 	assert(idx < SUGARFUNC_SIZE);
@@ -98,23 +97,22 @@ static void kNameSpace_setSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol
 	KINITSETv(ns, syn->sugarFuncTable[idx], fo);
 }
 
-static void kNameSpace_addSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, size_t idx, kFunc *fo)
+static void kNameSpace_addSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, size_t idx, kFunc *funcObject)
 {
-	assert(idx < SUGARFUNC_SIZE);
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_getSyntax(kctx, ns, keyword, 1/*new*/);
-	DBG_P("ns=%p, syn=%p");
+	DBG_ASSERT(idx < SUGARFUNC_SIZE);
 	if(syn->sugarFuncTable[idx] == NULL) {
-		KINITv(syn->sugarFuncTable[idx], fo);
+		KINITv(syn->sugarFuncTable[idx], funcObject);
 		return;
 	}
-	else if(IS_Func(syn->sugarFuncTable[idx])) {
-		PUSH_GCSTACK(fo);
+	if(IS_Func(syn->sugarFuncTable[idx])) {
+		PUSH_GCSTACK(funcObject);
 		kArray *a = GCSAFE_new(Array, 0);
 		KLIB kArray_add(kctx, a, syn->sugarFuncTable[idx]);
 		KSETv(ns, syn->sugarFuncListTable[idx], a);
 	}
 	DBG_ASSERT(IS_Array(syn->sugarFuncListTable[idx]));
-	KLIB kArray_add(kctx, syn->sugarFuncListTable[idx], fo);
+	KLIB kArray_add(kctx, syn->sugarFuncListTable[idx], funcObject);
 }
 
 static void SugarSyntax_setSugarFunc(KonohaContext *kctx, SugarSyntaxVar *syn, MethodFunc definedMethodFunc, size_t index, MethodFunc *previousDefinedFuncRef, kFunc **cachedFuncRef)

@@ -220,6 +220,7 @@ typedef struct SugarSyntaxVar         SugarSyntaxVar;
 
 struct SugarSyntaxVar {
 	ksymbol_t  keyword;               kshortflag_t  flag;
+	const struct SugarSyntaxVar      *parentSyntaxNULL;
 	kArray                           *syntaxRuleNULL;
 	union {
 		kFunc                        *sugarFuncTable[SUGARFUNC_SIZE];
@@ -552,7 +553,7 @@ typedef struct {
 
 	kExpr*     (*new_UntypedTermExpr)(KonohaContext *, kToken *tk);
 	kExpr*     (*new_UntypedCallStyleExpr)(KonohaContext *, SugarSyntax *syn, int n, ...);
-	kExpr*     (*kkStmt_printMessagearseOperatorExpr)(KonohaContext *, kStmt *, SugarSyntax *, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx);
+	kExpr*     (*kStmt_parseOperatorExpr)(KonohaContext *, kStmt *, SugarSyntax *, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx);
 	kExpr*     (*kkStmt_printMessagearseExpr)(KonohaContext *, kStmt *, kArray *tokenList, int s, int e);
 	kExpr*     (*kStmt_addExprParam)(KonohaContext *, kStmt *, kExpr *, kArray *tokenList, int, int, int allowEmpty);
 	kExpr*     (*kStmt_rightJoinExpr)(KonohaContext *, kStmt *, kExpr *, kArray *, int, int);

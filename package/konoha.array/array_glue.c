@@ -490,7 +490,7 @@ static KMETHOD ParseExpr_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 	KonohaClass *genericsClass = NULL;
 	int nextIdx = SUGAR kStmt_parseTypePattern(kctx, stmt, Stmt_nameSpace(stmt), tokenList, beginIdx, endIdx, &genericsClass);
 	if (nextIdx != -1) {  // to avoid Func[T]
-		RETURN_(SUGAR kkStmt_printMessagearseOperatorExpr(kctx, stmt, tokenList->tokenItems[beginIdx]->resolvedSyntaxInfo, tokenList, beginIdx, beginIdx, endIdx));
+		RETURN_(SUGAR kStmt_parseOperatorExpr(kctx, stmt, tokenList->tokenItems[beginIdx]->resolvedSyntaxInfo, tokenList, beginIdx, beginIdx, endIdx));
 	}
 	kToken *currentToken = tokenList->tokenItems[operatorIdx];
 	if (beginIdx == operatorIdx) {

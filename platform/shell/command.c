@@ -198,7 +198,7 @@ static void show_version(KonohaContext *kctx)
 	fprintf(stdout, K_PROGNAME " " K_VERSION " (%s) (%x, %s)\n", K_CODENAME, K_REVISION, __DATE__);
 	fprintf(stdout, "[gcc %s]\n", __VERSION__);
 	fprintf(stdout, "options:");
-	for(i = 0; i < MOD_MAX; i++) {
+	for(i = 0; i < KonohaModule_MAXSIZE; i++) {
 		if(kctx->modshare[i] != NULL) {
 			fprintf(stdout, " %s", kctx->modshare[i]->name);
 		}
