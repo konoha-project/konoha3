@@ -207,18 +207,17 @@ static kbool_t SugarSyntax_tyCheckStmt(KonohaContext *kctx, SugarSyntax *syn, kS
 	int i, callCount = 0;
 	while(true) {
 		kFunc *fo = syn->sugarFuncTable[SUGARFUNC_index];
-		kbool_t result = true;
 		if(IS_Array(fo)) { // @Future
 			kArray *a = (kArray*)fo;
 			for(i = kArray_size(a) - 1; i >= 0; i--) {
-				result = callStmtTyCheckFunc(kctx, a->funcItems[i], &callCount, stmt, gma);
+				kbool_t result = callStmtTyCheckFunc(kctx, a->funcItems[i], &callCount, stmt, gma);
 				if(stmt->syn == NULL) return true;
 				if(stmt->build != TSTMT_UNDEFINED) return result;
 			}
 		}
 		else {
 			DBG_ASSERT(IS_Func(fo));
-			result = callStmtTyCheckFunc(kctx, fo, &callCount, stmt, gma);
+			kbool_t result = callStmtTyCheckFunc(kctx, fo, &callCount, stmt, gma);
 			if(stmt->syn == NULL) return true; // this means done;
 			if(stmt->build != TSTMT_UNDEFINED) return result;
 		}
@@ -230,10 +229,9 @@ static kbool_t SugarSyntax_tyCheckStmt(KonohaContext *kctx, SugarSyntax *syn, kS
 		kkStmt_printMessage(stmt, ErrTag, "%s%s is not available %s", T_statement(stmt->syn->keyword), location);
 		return false;
 	}
-	DBG_ASSERT(stmt->build != TSTMT_ERR);
-//	if(result == false && stmt->build != TSTMT_ERR) {
-//		kkStmt_printMessage(stmt, ErrTag, "statement typecheck error: %s%s", T_statement(syn->keyword));
-//	}
+	if(stmt->build != TSTMT_ERR) {
+		kkStmt_printMessage(stmt, ErrTag, "statement typecheck error: %s%s", T_statement(syn->keyword));
+	}
 	return false;
 }
 

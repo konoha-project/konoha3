@@ -1096,16 +1096,17 @@ static KMETHOD StmtTyCheck_ParamsDecl(KonohaContext *kctx, KonohaStack *sfp)
 		for(i = 0; i < psize; i++) {
 			kStmt *stmt = params->stmtList->stmtItems[i];
 			if(stmt->syn->keyword != KW_StmtTypeDecl || !StmtTypeDecl_setParam(kctx, stmt, i, p)) {
-				kkStmt_printMessage(stmt, ErrTag, "parameter declaration must be a $Type $Symbol form");
-				RETURNb_(false);
+				break;
 			}
 		}
 		pa = new_kParam(kctx, rtype, psize, p);
 	}
-	if(IS_Param(pa)) {
+	if(pa != NULL && IS_Param(pa)) {
 		KLIB kObject_setObject(kctx, stmt, KW_ParamPattern, TY_Param, pa);
+		kStmt_done(stmt);
 		RETURNb_(true);
 	}
+	kkStmt_printMessage(stmt, ErrTag, "expected parameter declaration");
 	RETURNb_(false);
 }
 
