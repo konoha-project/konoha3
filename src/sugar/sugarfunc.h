@@ -668,7 +668,7 @@ static kExpr *kStmt_tyCheckCallParamExpr(KonohaContext *kctx, kStmt *stmt, kExpr
 	expr = Expr_typedWithMethod(kctx, expr, mtd, reqty);
 	if(isConst && Method_isConst(mtd)) {
 		ktype_t rtype = ktype_var(kctx, pa->rtype, thisClass);
-		return ExprCall_toConstValue(kctx, expr, expr->cons, rtype);
+		return kExprCall_toConstValue(kctx, expr, expr->cons, rtype);
 	}
 	return expr;
 }
@@ -1071,7 +1071,7 @@ static kParam *kStmt_newMethodParamNULL(KonohaContext *kctx, kStmt *stmt, kGamma
 	kParam *pa = (kParam*)kStmt_getObjectNULL(kctx, stmt, KW_ParamPattern);
 	if(pa == NULL || !IS_Param(pa)) {
 		SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ParamPattern);
-		if(!Stmt_TyCheck(kctx, syn, stmt, gma)) {
+		if(!SugarSyntax_tyCheckStmt(kctx, syn, stmt, gma)) {
 			return NULL;
 		}
 	}
