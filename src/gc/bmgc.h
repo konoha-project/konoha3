@@ -46,6 +46,7 @@ extern "C" {
 #endif
 
 /* memory config */
+
 #define GC_USE_DEFERREDSWEEP 1
 #define USE_SAFEPOINT_POLICY 1
 #define SUBHEAP_DEFAULT_SEGPOOL_SIZE (128)/* 128 * SEGMENT_SIZE(128k) = 16MB*/
@@ -103,6 +104,7 @@ static inline void  do_free(void *ptr, size_t size);
 static inline void  do_bzero(void *ptr, size_t size);
 
 /* ARRAY template */
+
 #define ARRAY(T) ARRAY_##T##_t
 #define DEF_ARRAY_STRUCT_(T, SizeTy) \
 struct ARRAY(T) {\
@@ -193,6 +195,7 @@ static inline void bitmap_flip(bitmap_t *bm, unsigned index)
 }
 
 /* [BMGC Deta Structure] */
+
 #define HeapMng(kctx) ((memshare(kctx)->gcHeapMng))
 
 struct SubHeap;
@@ -726,7 +729,8 @@ static void *call_malloc_aligned(KonohaContext *kctx, size_t size, size_t align)
 #endif
 	return block;
 	L_OutOfMemory:
-	THROW_OutOfMemory(kctx, size);
+	PLATAPI exit_i(EXIT_FAILURE);
+//	THROW_OutOfMemory(kctx, size);
 	return NULL;
 }
 static void call_free_aligned(KonohaContext *kctx, void *block, size_t size)
@@ -795,18 +799,18 @@ static void* Kmalloc(KonohaContext *kctx, size_t s)
 	size_t *p = (size_t*)do_malloc(s + sizeof(size_t));
 	if (unlikely(p == NULL)) {
 		ktrace(_ScriptFault|_SystemFault,
-			KEYVALUE_s("!",  "OutOfMemory"),
-			KEYVALUE_s("at", "malloc"),
-			KEYVALUE_u("size", s),
-			KEYVALUE_u("malloced_size", kklib_malloced)
+			KeyValue_s("!",  "OutOfMemory"),
+			KeyValue_s("at", "malloc"),
+			KeyValue_u("size", s),
+			KeyValue_u("malloced_size", kklib_malloced)
 		);
 	}
 #if GCDEBUG
 	ktrace(LOGPOL_DEBUG,
-			KEYVALUE_s("@", "malloc"),
-			KEYVALUE_p("from", p),
-			KEYVALUE_p("to", ((char*)p)+s),
-			KEYVALUE_u("size", s));
+			KeyValue_s("@", "malloc"),
+			KeyValue_p("from", p),
+			KeyValue_p("to", ((char*)p)+s),
+			KeyValue_u("size", s));
 #endif
 	p[0] = s;
 	kklib_malloced += s;
@@ -829,10 +833,10 @@ static void Kfree(KonohaContext *kctx, void *p, size_t s)
 	do_free(pp - 1, s + sizeof(size_t));
 #if GCDEBUG
 	ktrace(LOGPOL_DEBUG,
-			KEYVALUE_s("@", "free"),
-			KEYVALUE_p("from", p),
-			KEYVALUE_p("to", ((char*)p)+s),
-			KEYVALUE_u("size", s));
+			KeyValue_s("@", "free"),
+			KeyValue_p("from", p),
+			KeyValue_p("to", ((char*)p)+s),
+			KeyValue_u("size", s));
 #endif
 	kklib_malloced -= s;
 }
@@ -1370,13 +1374,14 @@ static kObject *bm_malloc_internal(KonohaContext *kctx, HeapManager *mng, size_t
 {
 	kObject *temp = NULL;
 	SubHeap *h;
-
 	DBG_ASSERT(n != 0);
 #if GCDEBUG
 	global_gc_stat.current_request_size = n;
 #endif
-	if (n > SUBHEAP_KLASS_SIZE_MAX)
+	if (n > SUBHEAP_KLASS_SIZE_MAX) {
+		// is it really okay? (kimio)
 		return do_malloc(n);
+	}
 	h = findSubHeapBySize(mng, n);
 	temp = tryAlloc(kctx, mng, h);
 
@@ -1438,13 +1443,11 @@ static void dumpBM(uintptr_t bm)
 static void clearAllBitMapsAndCount(HeapManager *mng, SubHeap *h)
 {
 	size_t i;
-
 	for (i = 0; i < h->seglist_size; i++) {
 		Segment *seg = h->seglist[i];
 		ClearBitMap(seg->base[0], h->heap_klass);
 		BITMAP_SET_LIMIT(seg->base[0], h->heap_klass);
-		gc_info("klass=%d, seg[%lu]=%p count=%d",
-				seg->heap_klass, i, seg, seg->live_count);
+		gc_info("klass=%d, seg[%lu]=%p count=%d", seg->heap_klass, i, seg, seg->live_count);
 		seg->live_count = 0;
 	}
 }
@@ -1568,7 +1571,6 @@ static void bmgc_gc_init(KonohaContext *kctx, HeapManager *mng, enum gc_mode mod
 {
 	size_t i;
 	SubHeap *h;
-
 #ifdef USE_GENERATIONAL_GC
 	void (*finit_bitmap) (HeapManager *mng, SubHeap *h);
 	finit_bitmap = (mode & GC_MAJOR) ? clearAllBitMapsAndCount : setTenureBitMapsAndCount;
@@ -1716,7 +1718,7 @@ static void bmgc_gc_mark(KonohaContext *kctx, HeapManager *mng, KonohaStack *esp
 {
 	long i;
 	MarkStack mstackbuf, *mstack = mstack_init(kctx, &mstackbuf);
-	KonohaContextRuntimeVar *stack = kctx->stack;
+	KonohaStackRuntimeVar *stack = kctx->stack;
 	kObject *ref = NULL;
 
 	context_reset_refs(kctx);
@@ -1892,16 +1894,17 @@ static void bitmapMarkingGC(KonohaContext *kctx, HeapManager *mng, enum gc_mode 
 }
 
 /* ------------------------------------------------------------------------ */
+
 static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o)
 {
 	KonohaClass *ct = O_ct(o);
 	if (ct) {
 #if GCDEBUG
 		ktrace(LOGPOL_DEBUG,
-				KEYVALUE_s("@", "delete"),
-				KEYVALUE_p("ptr", o),
-				KEYVALUE_u("size", ct->cstruct_size),
-				KEYVALUE_u("cid", ct->classId));
+				KeyValue_s("@", "delete"),
+				KeyValue_p("ptr", o),
+				KeyValue_u("size", ct->cstruct_size),
+				KeyValue_u("cid", ct->classId));
 #endif
 		gc_info("~Object ptr=%p, cid=%d", o, ct->classId);
 		KONOHA_freeObjectField(kctx, (kObjectVar*)o);
@@ -1923,7 +1926,7 @@ static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o)
 void MODGC_check_malloced_size(void)
 {
 	if (verbose_gc) {
-		fprintf(stdout, "\nklib:memory leaked=%ld\n", kklib_malloced);
+		fprintf(stdout, "\nklib:memory leaked=%ld\n", (long)kklib_malloced);
 	}
 }
 
@@ -1939,9 +1942,9 @@ kObject *MODGC_omalloc(KonohaContext *kctx, size_t size)
 	OBJECT_INIT(o);
 #if GCDEBUG
 	ktrace(LOGPOL_DEBUG,
-			KEYVALUE_s("@", "new"),
-			KEYVALUE_p("ptr", o),
-			KEYVALUE_u("size", size));
+			KeyValue_s("@", "new"),
+			KeyValue_p("ptr", o),
+			KeyValue_u("size", size));
 #endif
 	return (kObject*)o;
 }
@@ -1949,11 +1952,12 @@ kObject *MODGC_omalloc(KonohaContext *kctx, size_t size)
 kbool_t MODGC_kObject_isManaged(KonohaContext *kctx, void *ptr)
 {
 	kObject *o = (kObject *) ptr;
-	HeapManager *mng = (HeapManager*) HeapMng(kctx);
 
-	size_t i;
 	if ((uintptr_t) o % KlassBlockSize(SUBHEAP_KLASS_MIN) != 0)
 		return false;
+
+	size_t i;
+	HeapManager *mng = (HeapManager*) HeapMng(kctx);
 	FOR_EACH_ARRAY_(mng->managed_heap_a, i) {
 		kObject *s = (kObject *) ARRAY_n(mng->managed_heap_a, i);
 		kObject *e = (kObject *) ARRAY_n(mng->managed_heap_end_a, i);
@@ -1974,6 +1978,7 @@ kbool_t MODGC_kObject_isManaged(KonohaContext *kctx, void *ptr)
 }
 
 /* ------------------------------------------------------------------------ */
+
 static void kmodgc_local_reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh) {}
 
 static void kmodgc_local_free(KonohaContext *kctx, struct KonohaModuleContext *baseh)
@@ -2058,4 +2063,5 @@ void MODGC_gc_invoke(KonohaContext *kctx, KonohaStack *esp)
 #ifdef __cplusplus
 }
 #endif
+
 #endif /* BMGC_H_ */

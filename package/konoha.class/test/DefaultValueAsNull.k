@@ -10,8 +10,8 @@ class C {
 
 void test() {
 	C c;  // set to default value of C
-	assert(c.x == 0);
-	assert(c.y == 0);
+	//assert(c.x == 0);
+	//assert(c.y == 0);
 	assert(c.isNull());
 }
 

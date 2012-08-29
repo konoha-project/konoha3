@@ -337,14 +337,19 @@ static ksymbol_t Kmap_getcode(KonohaContext *kctx, KUtilsHashMap *kmp, kArray *l
 static kfileline_t KfileId(KonohaContext *kctx, const char *name, size_t len, int spol, ksymbol_t def)
 {
 	uintptr_t hcode = strhash(name, len);
+	KLock(kctx->share->filepackMutex);
 	kfileline_t uline = Kmap_getcode(kctx, kctx->share->fileidMapNN, kctx->share->fileidList, name, len, hcode, spol, def);
+	KUnlock(kctx->share->filepackMutex);
 	return uline << (sizeof(kshort_t) * 8);
 }
 
 static kpackage_t KpackageId(KonohaContext *kctx, const char *name, size_t len, int spol, ksymbol_t def)
 {
 	uintptr_t hcode = strhash(name, len);
-	return Kmap_getcode(kctx, kctx->share->packMapNN, kctx->share->packList, name, len, hcode, spol | SPOL_ASCII, def);
+	KLock(kctx->share->filepackMutex);
+	kpackage_t packid = Kmap_getcode(kctx, kctx->share->packMapNN, kctx->share->packList, name, len, hcode, spol | SPOL_ASCII, def);
+	KUnlock(kctx->share->filepackMutex);
+	return packid;
 }
 
 static ksymbol_t Ksymbol(KonohaContext *kctx, const char *name, size_t len, int spol, ksymbol_t def)
@@ -383,7 +388,9 @@ static ksymbol_t Ksymbol(KonohaContext *kctx, const char *name, size_t len, int 
 		def = SYM_NEWID;
 	}
 	uintptr_t hcode = strhash(name, len);
+	KLock(kctx->share->symbolMutex);
 	ksymbol_t sym = Kmap_getcode(kctx, kctx->share->symbolMapNN, kctx->share->symbolList, name, len, hcode, spol | SPOL_ASCII, def);
+	KUnlock(kctx->share->symbolMutex);
 	return (sym == def) ? def : (sym | mask);
 }
 
@@ -502,7 +509,7 @@ static void Kreportf(KonohaContext *kctx, kinfotag_t level, kfileline_t pline, c
 
 static void Kraise(KonohaContext *kctx, int symbol, KonohaStack *sfp, kfileline_t pline)
 {
-	KonohaContextRuntimeVar *base = kctx->stack;
+	KonohaStackRuntimeVar *base = kctx->stack;
 	KNH_ASSERT(symbol != 0);
 	if(base->evaljmpbuf != NULL) {
 		base->thrownScriptLine = pline;
@@ -528,17 +535,17 @@ static void klib_init(KonohaLibVar *l)
 	l->Kwb_free      = Kwb_free;
 	l->Kmap_init     = Kmap_init;
 	l->Kmap_free     = Kmap_free;
-	l->Kmap_each = Kmap_each;
+	l->Kmap_each     = Kmap_each;
 	l->Kmap_newEntry = Kmap_newEntry;
 	l->Kmap_get      = Kmap_getentry;
 	l->Kmap_remove   = Kmap_remove;
 	l->Kmap_getcode  = Kmap_getcode;
-	l->kObject_getObject = (typeof(l->kObject_getObject))kObject_getObjectNULL;
-	l->kObject_setObject = (typeof(l->kObject_setObject))kObject_setObject;
+	l->kObject_getObject     = (typeof(l->kObject_getObject))kObject_getObjectNULL;
+	l->kObject_setObject     = (typeof(l->kObject_setObject))kObject_setObject;
 	l->kObject_getUnboxValue = (typeof(l->kObject_getUnboxValue))kObject_getUnboxValue;
 	l->kObject_setUnboxValue = (typeof(l->kObject_setUnboxValue))kObject_setUnboxValue;
-	l->kObject_removeKey = (typeof(l->kObject_removeKey))kObject_removeKey;
-	l->kObject_protoEach = (typeof(l->kObject_protoEach))kObject_protoEach;
+	l->kObject_removeKey     = (typeof(l->kObject_removeKey))kObject_removeKey;
+	l->kObject_protoEach     = (typeof(l->kObject_protoEach))kObject_protoEach;
 	l->KfileId       = KfileId;
 	l->KpackageId    = KpackageId;
 	l->Ksymbol       = Ksymbol;

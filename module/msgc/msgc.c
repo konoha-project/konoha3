@@ -188,10 +188,10 @@ static void* Kmalloc(KonohaContext *kctx, size_t s)
 	size_t *p = (size_t*)do_malloc(s + sizeof(size_t));
 	if(unlikely(p == NULL)) {
 		ktrace(_ScriptFault|_SystemFault,
-				KEYVALUE_s("!",  "OutOfMemory"),
-				KEYVALUE_s("at", "malloc"),
-				KEYVALUE_u("size", s),
-				KEYVALUE_u("malloced_size", kklib_malloced)
+				KeyValue_s("!",  "OutOfMemory"),
+				KeyValue_s("at", "malloc"),
+				KeyValue_u("size", s),
+				KeyValue_u("malloced_size", kklib_malloced)
 		  );
 	}
 	p[0] = s;
@@ -592,7 +592,7 @@ static void gc_mark(KonohaContext *kctx)
 {
 	long i;
 	knh_ostack_t ostackbuf, *ostack = ostack_init(kctx, &ostackbuf);
-	KonohaContextRuntimeVar *stack = kctx->stack;
+	KonohaStackRuntimeVar *stack = kctx->stack;
 	kObject *ref = NULL;
 	marked = 0;
 

@@ -80,8 +80,8 @@ static int k_send_port (KonohaContext *kctx, mach_port_t remote_port, mach_port_
 	err = mach_msg_send (&msg.header);
 	if (err != KERN_SUCCESS) {
 		ktrace(_SystemFault,
-				KEYVALUE_s("@", "mach_msg_send"),
-				KEYVALUE_s("msg", "mach msg failed")
+				KeyValue_s("@", "mach_msg_send"),
+				KeyValue_s("msg", "mach msg failed")
 		);
 	}
 	return 0;
@@ -94,8 +94,8 @@ static int k_recv_port (KonohaContext *kctx, mach_port_t recv_port, mach_port_t 
 					MACH_MSG_TIMEOUT_NONE, MACH_PORT_NULL);
 	if(err != KERN_SUCCESS){
 		ktrace(_SystemFault,
-				KEYVALUE_s("@", "mach_msg"),
-				KEYVALUE_s("msg", "recv port failed")
+				KeyValue_s("@", "mach_msg"),
+				KeyValue_s("msg", "recv port failed")
 		);
 	}
 	*port = msg.task_port.name;
@@ -115,7 +115,7 @@ static int setup_resourcemonitor (KonohaContext *kctx, subproc_resource_mon_t *m
 	err = task_set_bootstrap_port(mach_task_self(), mon->parent_recv_port);
 	if (err != KERN_SUCCESS) {
 		ktrace (_SystemFault,
-				KEYVALUE_s("@", "failed to setup resourcemonitor")
+				KeyValue_s("@", "failed to setup resourcemonitor")
 		);
 	}
 	return err;
@@ -124,9 +124,9 @@ static int setup_resourcemonitor (KonohaContext *kctx, subproc_resource_mon_t *m
 static int cleanup_resourcemonitor(KonohaContext *kctx, subproc_resource_mon_t *mon) {
 	if(KERN_SUCCESS != mach_port_deallocate (mach_task_self(), mon->parent_recv_port)) {
 				ktrace(_SystemFault,
-						KEYVALUE_s("@", "dup2"),
-						KEYVALUE_u("errno", errno),
-						KEYVALUE_s("errstr", strerror(errno))
+						KeyValue_s("@", "dup2"),
+						KeyValue_u("errno", errno),
+						KeyValue_s("errstr", strerror(errno))
 				);
 				return -1;
 	}

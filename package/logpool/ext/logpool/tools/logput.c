@@ -11,8 +11,8 @@ static struct logpool_param_stream TRACE_API_PARAM = {
 #define LOG_s   1
 #define LOG_u   2
 
-#define KEYVALUE_u(K,V)    LOG_u, (K), ((uintptr_t)V)
-#define KEYVALUE_s(K,V)    LOG_s, (K), (V)
+#define KeyValue_u(K,V)    LOG_u, (K), ((uintptr_t)V)
+#define KeyValue_s(K,V)    LOG_s, (K), (V)
 
 extern logapi_t LOGAPI;
 
@@ -28,28 +28,28 @@ int main(int argc, char **argv)
     switch (argc) {
         case 3:
             logpool_record(logpool, &logpool_args, LOG_NOTICE, "logput",
-                    KEYVALUE_s(argv[1], argv[2]),
+                    KeyValue_s(argv[1], argv[2]),
                     LOG_END);
             break;
         case 5:
             logpool_record(logpool, &logpool_args, LOG_NOTICE, "logput",
-                    KEYVALUE_s(argv[1], argv[2]),
-                    KEYVALUE_s(argv[3], argv[4]),
+                    KeyValue_s(argv[1], argv[2]),
+                    KeyValue_s(argv[3], argv[4]),
                     LOG_END);
             break;
         case 7:
             logpool_record(logpool, &logpool_args, LOG_NOTICE, "logput",
-                    KEYVALUE_s(argv[1], argv[2]),
-                    KEYVALUE_s(argv[3], argv[4]),
-                    KEYVALUE_s(argv[5], argv[6]),
+                    KeyValue_s(argv[1], argv[2]),
+                    KeyValue_s(argv[3], argv[4]),
+                    KeyValue_s(argv[5], argv[6]),
                     LOG_END);
             break;
         case 9:
             logpool_record(logpool, &logpool_args, LOG_NOTICE, "logput",
-                    KEYVALUE_s(argv[1], argv[2]),
-                    KEYVALUE_s(argv[3], argv[4]),
-                    KEYVALUE_s(argv[5], argv[6]),
-                    KEYVALUE_s(argv[6], argv[8]),
+                    KeyValue_s(argv[1], argv[2]),
+                    KeyValue_s(argv[3], argv[4]),
+                    KeyValue_s(argv[5], argv[6]),
+                    KeyValue_s(argv[6], argv[8]),
                     LOG_END);
 
             break;

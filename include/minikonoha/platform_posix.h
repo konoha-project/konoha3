@@ -35,6 +35,9 @@
 #include <syslog.h>
 #include <dlfcn.h>
 #include <sys/stat.h>
+#ifdef HAVE_ICONV_H
+#include <iconv.h>
+#endif /* HAVE_ICONV_H */
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,6 +48,26 @@ extern "C" {
 #else
 #define K_PATHMAX 256
 #endif
+
+#define kunused __attribute__((unused))
+// -------------------------------------------------------------------------
+
+static const char *getSystemCharset(void)
+{
+	//TODO!! check LC_CTYPE compatibility with iconv
+	char *enc = getenv("LC_CTYPE");
+	//DBG_P("%s", nl_langinfo(CODESET));
+	if(enc != NULL) {
+		return enc;
+	}
+#if defined(K_USING_WINDOWS_)
+	static char codepage[64];
+	knh_snprintf(codepage, sizeof(codepage), "CP%d", (int)GetACP());
+	return codepage;
+#else
+	return "UTF-8";
+#endif
+}
 
 // -------------------------------------------------------------------------
 
@@ -57,6 +80,54 @@ static unsigned long long getTimeMilliSecond(void)
 	gettimeofday(&tv, NULL);
 	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }
+
+// -------------------------------------------------------------------------
+
+#ifdef K_USE_PTHREAD
+//#include<phtread.h>
+
+static int pthread_mutex_init_recursive(kmutex_t *mutex)
+{
+	pthread_mutexattr_t attr;
+	bzero(&attr, sizeof(pthread_mutexattr_t));
+	pthread_mutexattr_init(&attr);
+	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+	return pthread_mutex_init((pthread_mutex_t*)mutex, &attr);
+}
+
+#else
+
+static int pthread_mutex_destroy(kmutex_t *mutex)
+{
+	return 0;
+}
+
+static int pthread_mutex_init(kmutex_t *mutex, const kmutexattr_t *attr)
+{
+	return 0;
+}
+
+static int pthread_mutex_lock(kmutex_t *mutex)
+{
+	return 0;
+}
+
+static int pthread_mutex_trylock(kmutex_t *mutex)
+{
+	return 0;
+}
+
+static int pthread_mutex_unlock(kmutex_t *mutex)
+{
+	return 0;
+}
+
+static int pthread_mutex_init_recursive(kmutex_t *mutex)
+{
+	return 0;
+}
+
+#endif
 
 // -------------------------------------------------------------------------
 
@@ -200,6 +271,7 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 			}
 		}
 	}
+	fclose(fp);
 	return isSuccessfullyLoading;
 }
 
@@ -351,6 +423,44 @@ static void NOP_debugPrintf(const char *file, const char *func, int line, const 
 {
 }
 
+typedef uintptr_t (*ficonv_open)(const char *, const char *);
+typedef size_t (*ficonv)(uintptr_t, char **, size_t *, char **, size_t *);
+typedef int    (*ficonv_close)(uintptr_t);
+
+static kunused uintptr_t dummy_iconv_open(const char *t, const char *f)
+{
+	return -1;
+}
+static kunused size_t dummy_iconv(uintptr_t i, char **t, size_t *ts, char **f, size_t *fs)
+{
+	return 0;
+}
+static kunused int dummy_iconv_close(uintptr_t i)
+{
+	return 0;
+}
+
+static void loadIconv(PlatformApiVar *plat)
+{
+#ifdef _ICONV_H
+	plat->iconv_open_i    = (ficonv_open)iconv_open;
+	plat->iconv_i         = (ficonv)iconv;
+	plat->iconv_close_i   = (ficonv_close)iconv_close;
+#else
+	void *handler = dlopen("libiconv" K_OSDLLEXT, RTLD_LAZY);
+	if(handler != NULL) {
+		plat->iconv_open_i = (ficonv_open)dlsym(handler, "iconv_open");
+		plat->iconv_i = (ficonv)dlsym(handler, "iconv");
+		plat->iconv_close_i = (ficonv_close)dlsym(handler, "iconv_close");
+	}
+	else {
+		plat->iconv_open_i = dummy_iconv_open;
+		plat->iconv_i = dummy_iconv;
+		plat->iconv_close_i = dummy_iconv_close;
+	}
+#endif /* _ICONV_H */
+}
+
 static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 {
 	static PlatformApiVar plat = {};
@@ -361,6 +471,8 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.free_i          = free;
 	plat.setjmp_i        = ksetjmp;
 	plat.longjmp_i       = klongjmp;
+	loadIconv(&plat);
+	plat.getSystemCharset = getSystemCharset;
 	plat.syslog_i        = syslog;
 	plat.vsyslog_i       = vsyslog;
 	plat.printf_i        = printf;
@@ -369,13 +481,22 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.vsnprintf_i     = vsnprintf; // retreating..
 	plat.qsort_i         = qsort;
 	plat.exit_i          = exit;
-	plat.formatKonohaPath = formatKonohaPath;
-	plat.formatSystemPath = formatSystemPath;
-		// high level
+
+	// mutex
+	plat.pthread_mutex_init_i = pthread_mutex_init;
+	plat.pthread_mutex_init_recursive = pthread_mutex_init_recursive;
+	plat.pthread_mutex_lock_i = pthread_mutex_lock;
+	plat.pthread_mutex_unlock_i = pthread_mutex_unlock;
+	plat.pthread_mutex_trylock_i = pthread_mutex_trylock;
+	plat.pthread_mutex_destroy_i = pthread_mutex_destroy;
+
+	// high level
 	plat.getTimeMilliSecond  = getTimeMilliSecond;
 	plat.shortFilePath       = shortFilePath;
 	plat.formatPackagePath   = formatPackagePath;
 	plat.formatTransparentPath = formatTransparentPath;
+	plat.formatKonohaPath = formatKonohaPath;
+	plat.formatSystemPath = formatSystemPath;
 	plat.loadPackageHandler  = loadPackageHandler;
 	plat.loadScript          = loadScript;
 	plat.beginTag            = beginTag;

@@ -707,13 +707,15 @@ static void LETEXPR_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, in
 		kshort_t xindex = (kshort_t)(leftHandExpr->index >> (sizeof(kshort_t)*8));
 		if(TY_isUnbox(rightHandExpr->ty)) {
 			ASM(XNMOV, OC_(index), xindex, NC_(espidx), CT_(leftHandExpr->ty));
+			if(expr->ty != TY_void) {
+				ASM(NMOVx, NC_(a), OC_(index), xindex, CT_(leftHandExpr->ty));
+			}
 		}
 		else {
 			ASM(XNMOV, OC_(index), xindex, OC_(espidx), CT_(leftHandExpr->ty));
-		}
-		if(expr->ty != TY_void && a != espidx) {
-			DBG_ASSERT(expr->ty == TY_void); // TODO: FIXME:
-			NMOV_asm(kctx, a, leftHandExpr->ty, espidx);
+			if(expr->ty != TY_void) {
+				ASM(NMOVx, OC_(a), OC_(index), xindex, CT_(leftHandExpr->ty));
+			}
 		}
 	}
 }

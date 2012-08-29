@@ -42,10 +42,10 @@ static KMETHOD System_lseek(KonohaContext *kctx, KonohaStack *sfp)
 	off_t ret_offset = lseek(fd, offset, whence);
 	if (ret_offset == -1) {
 		ktrace(_DataFault,
-			   KEYVALUE_s("@", "lseek"),
-			   KEYVALUE_u("offset", offset),
-			   KEYVALUE_u("whence", whence),
-			   KEYVALUE_s("errstr", strerror(errno))
+			   KeyValue_s("@", "lseek"),
+			   KeyValue_u("offset", offset),
+			   KeyValue_u("whence", whence),
+			   KeyValue_s("errstr", strerror(errno))
 			);
 	}
 	RETURNi_((int)ret_offset);
@@ -66,9 +66,9 @@ static KMETHOD System_truncate(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = ftruncate(fd, length);
 	if (ret != 0) {
 		ktrace(_SystemFault,
-			   KEYVALUE_s("@", "truncate"),
-			   KEYVALUE_u("length", length),
-			   KEYVALUE_s("errstr", strerror(errno))
+			   KeyValue_s("@", "truncate"),
+			   KeyValue_u("length", length),
+			   KeyValue_s("errstr", strerror(errno))
 			);
 	}
 	RETURNb_(ret == 0);
@@ -82,9 +82,9 @@ static KMETHOD System_chmod(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = fchmod(fd, mode);
 	if (ret != -1) {
 		ktrace(_SystemFault,
-			   KEYVALUE_s("@", "chmod"),
-			   KEYVALUE_u("mode", mode),
-			   KEYVALUE_s("errstr", strerror(errno))
+			   KeyValue_s("@", "chmod"),
+			   KeyValue_u("mode", mode),
+			   KeyValue_s("errstr", strerror(errno))
 			);
 	}
 	RETURNb_(ret == 0);
@@ -100,10 +100,10 @@ static KMETHOD System_chown(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = fchown(fd, owner, group);
 	if (ret != -1) {
 		ktrace(_SystemFault,
-			   KEYVALUE_s("@", "chown"),
-			   KEYVALUE_u("owner", owner),
-			   KEYVALUE_u("group", group),
-			   KEYVALUE_s("errstr", strerror(errno))
+			   KeyValue_s("@", "chown"),
+			   KeyValue_u("owner", owner),
+			   KeyValue_u("group", group),
+			   KeyValue_s("errstr", strerror(errno))
 			);
 	}
 	RETURNb_(ret == 0);
@@ -137,9 +137,9 @@ static KMETHOD System_flock(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = flock(fd, operation);
 	if (ret == -1) {
 		ktrace(_SystemFault,
-			   KEYVALUE_s("@", "flock"),
-			   KEYVALUE_u("operation", operation),
-			   KEYVALUE_s("errstr", strerror(errno))
+			   KeyValue_s("@", "flock"),
+			   KeyValue_u("operation", operation),
+			   KeyValue_s("errstr", strerror(errno))
 			);
 	}
 	RETURNb_(ret == 0);
@@ -152,8 +152,8 @@ static KMETHOD System_sync(KonohaContext *kctx, KonohaStack *sfp)
 	int ret =  fsync(fd);
 	if (ret == -1) {
 		ktrace(_SystemFault,
-			   KEYVALUE_s("@", "fsync"),
-			   KEYVALUE_p("errstr", strerror(errno))
+			   KeyValue_s("@", "fsync"),
+			   KeyValue_p("errstr", strerror(errno))
 			);
 	}
 	RETURNb_(ret == 0);
@@ -168,10 +168,10 @@ static KMETHOD System_link(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = link(oldpath, newpath);
 	if (ret == -1) {
 		ktrace(_SystemFault,
-			   KEYVALUE_s("@", "link"),
-			   KEYVALUE_s("oldpath", oldpath),
-			   KEYVALUE_s("newpath", newpath),
-			   KEYVALUE_p("errstr", strerror(errno))
+			   KeyValue_s("@", "link"),
+			   KeyValue_s("oldpath", oldpath),
+			   KeyValue_s("newpath", newpath),
+			   KeyValue_p("errstr", strerror(errno))
 			);
 	}
 	RETURNi_(ret);
@@ -184,9 +184,9 @@ static KMETHOD System_unlink(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = unlink(pathname);
 	if (ret == -1) {
 		ktrace(_SystemFault,
-			   KEYVALUE_s("@", "unlink"),
-			   KEYVALUE_s("pathname", pathname),
-			   KEYVALUE_p("errstr", strerror(errno))
+			   KeyValue_s("@", "unlink"),
+			   KeyValue_s("pathname", pathname),
+			   KeyValue_p("errstr", strerror(errno))
 			);
 	}
 	RETURNi_(ret);
@@ -201,10 +201,10 @@ static KMETHOD System_rename(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = rename(oldpath, newpath);
 	if (ret == -1) {
 		ktrace(_SystemFault,
-			   KEYVALUE_s("@", "rename"),
-			   KEYVALUE_s("oldpath", oldpath),
-			   KEYVALUE_s("newpath", newpath),
-			   KEYVALUE_p("errstr", strerror(errno))
+			   KeyValue_s("@", "rename"),
+			   KeyValue_s("oldpath", oldpath),
+			   KeyValue_s("newpath", newpath),
+			   KeyValue_p("errstr", strerror(errno))
 			);
 	}
 	RETURNi_(ret);
@@ -217,9 +217,9 @@ static KMETHOD System_rmdir(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = rmdir(pathname);
 	if (ret == -1) {
 		ktrace(_SystemFault,
-			   KEYVALUE_s("@", "rmdir"),
-			   KEYVALUE_s("pathname", pathname),
-			   KEYVALUE_p("errstr", strerror(errno))
+			   KeyValue_s("@", "rmdir"),
+			   KeyValue_s("pathname", pathname),
+			   KeyValue_p("errstr", strerror(errno))
 			);
 	}
 	RETURNi_(ret);
@@ -234,10 +234,10 @@ static KMETHOD System_symlink(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = symlink(oldpath, newpath);
 	if (ret == -1) {
 		ktrace(_SystemFault,
-			   KEYVALUE_s("@", "symlink"),
-			   KEYVALUE_s("oldpath", oldpath),
-			   KEYVALUE_s("newpath", newpath),
-			   KEYVALUE_p("errstr", strerror(errno))
+			   KeyValue_s("@", "symlink"),
+			   KeyValue_s("oldpath", oldpath),
+			   KeyValue_s("newpath", newpath),
+			   KeyValue_p("errstr", strerror(errno))
 			);
 	}
 	RETURNi_(ret);
@@ -253,11 +253,11 @@ static KMETHOD System_readlink(KonohaContext *kctx, KonohaStack *sfp)
 	ssize_t ret = readlink(pathname, (char *)buf, bufsize);
 	if (ret == -1) {
 		ktrace(_SystemFault,
-			   KEYVALUE_s("@", "readlink"),
-			   KEYVALUE_s("pathname", pathname),
-			   KEYVALUE_s("buf", buf),
-			   KEYVALUE_u("bufsize", bufsize),
-			   KEYVALUE_p("errstr", strerror(errno))
+			   KeyValue_s("@", "readlink"),
+			   KeyValue_s("pathname", pathname),
+			   KeyValue_s("buf", buf),
+			   KeyValue_u("bufsize", bufsize),
+			   KeyValue_p("errstr", strerror(errno))
 			);
 	}
 	RETURNi_(ret);
@@ -272,11 +272,11 @@ static KMETHOD System_lchown(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = lchown(pathname, owner, group);
 	if (ret == -1) {
 		ktrace(_SystemFault,
-			   KEYVALUE_s("@", "lchown"),
-			   KEYVALUE_s("pathname", pathname),
-			   KEYVALUE_u("owner", owner),
-			   KEYVALUE_u("group", group),
-			   KEYVALUE_p("errstr", strerror(errno))
+			   KeyValue_s("@", "lchown"),
+			   KeyValue_s("pathname", pathname),
+			   KeyValue_u("owner", owner),
+			   KeyValue_u("group", group),
+			   KeyValue_p("errstr", strerror(errno))
 			);
 	}
 	RETURNi_(ret);
@@ -290,10 +290,10 @@ static KMETHOD System_fchown(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = fchown(fd, owner, group);
 	if (ret == -1) {
 		ktrace(_SystemFault,
-			   KEYVALUE_s("@", "fchown"),
-			   KEYVALUE_u("owner", owner),
-			   KEYVALUE_u("group", group),
-			   KEYVALUE_p("errstr", strerror(errno))
+			   KeyValue_s("@", "fchown"),
+			   KeyValue_u("owner", owner),
+			   KeyValue_u("group", group),
+			   KeyValue_p("errstr", strerror(errno))
 			);
 	}
 	RETURNi_(ret);
@@ -307,10 +307,10 @@ static KMETHOD System_access(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = access(pathname, mode);
 	if (ret == -1) {
 		ktrace(_SystemFault,
-			   KEYVALUE_s("@", "access"),
-			   KEYVALUE_s("pathname", pathname),
-			   KEYVALUE_u("mode", mode),
-			   KEYVALUE_p("errstr", strerror(errno))
+			   KeyValue_s("@", "access"),
+			   KeyValue_s("pathname", pathname),
+			   KeyValue_u("mode", mode),
+			   KeyValue_p("errstr", strerror(errno))
 			);
 	}
 	RETURNi_(ret);
@@ -322,8 +322,8 @@ static KMETHOD System_fsync(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = fsync(fd);
 	if (ret == -1) {
 		ktrace(_SystemFault,
-			   KEYVALUE_s("@", "fsync"),
-			   KEYVALUE_p("errstr", strerror(errno))
+			   KeyValue_s("@", "fsync"),
+			   KeyValue_p("errstr", strerror(errno))
 			);
 	}
 	RETURNi_(ret);

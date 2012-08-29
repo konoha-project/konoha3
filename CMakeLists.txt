@@ -117,6 +117,7 @@ set(PACKAGES
 	konoha.int
 	konoha.iterator
 	konoha.math
+	konoha.namespace
 	konoha.new
 	konoha.null
 	konoha.rope
@@ -126,14 +127,11 @@ set(PACKAGES
 	konoha.while
 	sugar
 	llvm
-##	konoha.pcre
 	konoha.regexp
-##	konoha.io
 	posix.process
 	posix.file
 	posix.fd
 ##	posix.socket
-##	konoha.rope
 ##	konoha.sql
 ##	konoha.subproc
 	konoha.mpi
@@ -389,7 +387,7 @@ file(GLOB_RECURSE test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/Shell/*.sh)
 foreach(f ${test_files})
 	string(REPLACE // / f ${f})
 	string(REPLACE .sh .k TEST_SCRIPT ${f})
-	string(REPLACE ${CMAKE_CURRENT_SOURCE_DIR}/test/ "" test_name ${f})
+	string(REPLACE ${CMAKE_CURRENT_SOURCE_DIR}/test/ "" test_name ${TEST_SCRIPT})
 	if(EXISTS ${TEST_SCRIPT})
 		add_test(${test_name} sh +x ${f} ${TEST_BIN} ${TEST_SCRIPT})
 	else(EXISTS ${TEST_SCRIPT})

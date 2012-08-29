@@ -74,7 +74,6 @@ static KMETHOD Int_opXOR(KonohaContext *kctx, KonohaStack *sfp)
 #define _Public   kMethod_Public
 #define _Const    kMethod_Const
 #define _Im       kMethod_Immutable
-#define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
 static kbool_t int_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
@@ -107,6 +106,48 @@ static kbool_t int_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime
 	return true;
 }
 
+//static KMETHOD parseNonDecimalNumber(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	kTokenVar *tk = (kTokenVar *)sfp[1].o;
+//	const char *source = S_text(sfp[2].asString);
+//	const char *start = source, *end;
+//	int c = *source++;
+//	if (c != '0') {
+//		/* It do not seem as NonDecimalNumber */
+//		RETURNi_(0);
+//	}
+//	/*
+//	 * DIGIT  = 0-9
+//	 * DIGITS = DIGIT | DIGIT DIGITS
+//	 * TAG    = "0x"  | "0b"
+//	 * INT_NON_DECIMAL = TAG DIGITS
+//	 */
+//	int base = 0;
+//	kint_t num = 0;
+//	c = *source++;
+//	switch (c) {
+//		case 'b':
+//			base = 2;  break;
+//		case 'x':
+//			base = 16; break;
+//		default:
+//			RETURNi_(0);
+//	}
+//	for (c = *source++; '0' <= c && c <= '9' && c != 0; c = *source++) {
+//		if (c == '_') continue;
+//		num = num * base + (c - '0');
+//	}
+//	end = source;
+//	if (IS_NOTNULL(tk)) {
+//		/* skip unit */
+//		while (isalpha(*source) && *source != 0)
+//			source++;
+//		KSETv(tk, tk->text, KLIB new_kString(kctx, start, end - start - 1, SPOL_ASCII));
+//		tk->unresolvedTokenType = TokenType_INT;
+//	}
+//	RETURNi_(source - start - 1);
+//}
+
 static kbool_t int_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
@@ -121,6 +162,10 @@ static kbool_t int_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
+	//kMethod *mtd = KLIB new_kMethod(kctx, 0, 0, 0, parseNonDecimalNumber);
+	//kFunc *fo = GCSAFE_new(Func, (uintptr_t) mtd);
+	//SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '0', NULL, fo, 0);
+
 	SugarSyntaxVar *syn = (SugarSyntaxVar*)SUGAR kNameSpace_getSyntax(kctx, ns, SYM_("+"), 0);
 	if(syn != NULL) {
 		syn->precedence_op1  = 16;
@@ -132,7 +177,6 @@ static kbool_t int_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline
 {
 	return true;
 }
-
 
 KDEFINE_PACKAGE* int_init(void)
 {

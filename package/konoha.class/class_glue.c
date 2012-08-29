@@ -459,7 +459,7 @@ static kshortflag_t kkStmt_printMessagearseClassFlag(KonohaContext *kctx, kStmt 
 		ClassDeclFlag[3].symbol = SYM_("@Prototype");
 		ClassDeclFlag[4].symbol = SYM_("@Interface");
 	}
-	return (kshortflag_t)SUGAR kkStmt_printMessagearseFlag(kctx, stmt, ClassDeclFlag, cflag);
+	return (kshortflag_t)SUGAR kStmt_parseFlag(kctx, stmt, ClassDeclFlag, cflag);
 }
 
 static KonohaClassVar* kNameSpace_defineClassName(KonohaContext *kctx, kNameSpace *ns, kshortflag_t cflag, kString *name, kfileline_t pline)

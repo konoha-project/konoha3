@@ -157,7 +157,7 @@ static VirtualMachineInstruction *KonohaVirtualMachine_tryJump(KonohaContext *kc
 {
 	int jmpresult;
 	INIT_GCSTACK();
-	KonohaContextRuntimeVar *base = kctx->stack;
+	KonohaStackRuntimeVar *base = kctx->stack;
 	jmpbuf_i lbuf = {};
 	if(base->evaljmpbuf == NULL) {
 		base->evaljmpbuf = (jmpbuf_i*)KCALLOC(sizeof(jmpbuf_i), 1);

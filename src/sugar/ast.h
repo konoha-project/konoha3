@@ -172,7 +172,7 @@ typedef struct {
 	SugarSyntax *symbolSyntaxInfo;
 } ASTEnv;
 
-static int kkStmt_printMessagearseTypePattern(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KonohaClass **classRef);
+static int kStmt_parseTypePattern(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KonohaClass **classRef);
 
 static KonohaClass* kkStmt_printMessagearseGenerics(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, KonohaClass *baseClass, kArray *tokenList, int beginIdx, int endIdx)
 {
@@ -180,7 +180,7 @@ static KonohaClass* kkStmt_printMessagearseGenerics(KonohaContext *kctx, kStmt *
 	kparamtype_t p[endIdx];
 	while(i < endIdx) {
 		KonohaClass *paramClass = NULL;
-		i = kkStmt_printMessagearseTypePattern(kctx, stmt, ns, tokenList, i, endIdx, &paramClass);
+		i = kStmt_parseTypePattern(kctx, stmt, ns, tokenList, i, endIdx, &paramClass);
 		if(paramClass == NULL) {
 			return NULL;
 		}
@@ -198,7 +198,7 @@ static KonohaClass* kkStmt_printMessagearseGenerics(KonohaContext *kctx, kStmt *
 	}
 }
 
-static int kkStmt_printMessagearseTypePattern(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KonohaClass **classRef)
+static int kStmt_parseTypePattern(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KonohaClass **classRef)
 {
 	int nextIdx = -1;
 	kToken *tk = tokenList->tokenItems[beginIdx];
@@ -371,7 +371,7 @@ static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *token
 static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
 {
 //	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
-	int nextIdx = kkStmt_printMessagearseTypePattern(kctx, NULL, ns, tokenList, beginIdx, endIdx, NULL);
+	int nextIdx = kStmt_parseTypePattern(kctx, NULL, ns, tokenList, beginIdx, endIdx, NULL);
 //	DBG_P("nextIdx=%d, endIdx=%d", nextIdx, endIdx);
 	if(nextIdx != -1) {
 		if(nextIdx < endIdx) {

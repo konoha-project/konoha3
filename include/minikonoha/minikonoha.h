@@ -75,13 +75,6 @@ extern "C" {
 #include "konoha_lkm.h"
 #endif /* PLATAPIFORM_KERNEL */
 
-#ifndef jmpbuf_i
-#include <setjmp.h>
-#define jmpbuf_i jmp_buf
-#define ksetjmp  setjmp
-#define klongjmp longjmp
-#endif /*jmpbuf_i*/
-
 #include <stddef.h>
 #include <stdarg.h>
 
@@ -113,9 +106,68 @@ typedef struct KonohaLibVar          KonohaLibVar;
 typedef const struct KonohaPackageHandlerVar KonohaPackageHandler;
 typedef KonohaPackageHandler* (*PackageLoadFunc)(void);
 
+#ifndef jmpbuf_i
+#include <setjmp.h>
+#define jmpbuf_i jmp_buf
+#define ksetjmp  setjmp
+#define klongjmp longjmp
+#endif /*jmpbuf_i*/
+
+#ifndef K_USE_PTHREAD
+typedef void kmutex_t;
+typedef void kmutexattr_t;
+#define KInitLock(X)
+#define KInitRrcureiveLock(X)
+#define KLock(X)
+#define KUnlock(X)
+#define KFreeLock(X)
+#else
+#include<pthread.h>
+typedef pthread_mutex_t     kmutex_t;
+typedef pthread_mutexattr_t kmutexattr_t;
+#define KInitLock(X)    do {\
+		X = (kmutex_t*)KCALLOC(sizeof(kmutex_t), 1);\
+		PLATAPI pthread_mutex_init_i(X, NULL);\
+	}while(0);\
+
+#define KInitRrcureiveLock(X)    PLATAPI pthread_mutex_init_recursive(X)
+#define KLock(X)        PLATAPI pthread_mutex_lock_i(X)
+#define KUnlock(X)      PLATAPI pthread_mutex_unlock_i(X)
+#define KFreeLock(X)    do {\
+		PLATAPI pthread_mutex_destroy_i(X);\
+		KFREE(X, sizeof(kmutex_t));\
+		X = NULL;\
+	}while(0);\
+
+#endif
+
 typedef enum {
 	CritTag, ErrTag, WarnTag, NoticeTag, InfoTag, DebugTag, NoneTag
 } kinfotag_t;
+
+typedef enum {
+	Unrecord = 0,
+	isRecord = 1,
+	// Fault
+	SystemFault       =  (1<<1),  /* os, file system, etc. */
+	ScriptFault       =  (1<<2),  /* programmer's mistake */
+	DataFault         =  (1<<3),  /* user input, data mistake */
+	ExternalFault     =  (1<<4),  /* networking or remote services */
+	UnknownFault      =  (1<<5),  /* other fault above */
+	// LogPoint
+	PeriodicPoint     =  (1<<6),  /* sampling */
+	PreactionPoint    =  (1<<7),  /* prediction WARN */
+	ActionChangePoint =  (1<<8),
+	SecurityAudit     =  (1<<9),  /* security audit */
+	PrivacyCaution    =  (1<<10), /* including privacy information */
+	// Internal Use
+	LOGPOOL_INIT      =  (1<<12),
+} logpolicy_t;
+
+typedef struct logconf_t {
+	logpolicy_t policy;
+	void *formatPointer; // for precompiled formattings
+} logconf_t ;
 
 struct PlatformApiVar {
 	// settings
@@ -156,6 +208,14 @@ struct PlatformApiVar {
     // abort
 	void    (*exit_i)(int p);
 
+	// pthread
+	int     (*pthread_mutex_init_i)(kmutex_t *mutex, const kmutexattr_t *attr);
+	int     (*pthread_mutex_lock_i)(kmutex_t *mutex);
+	int     (*pthread_mutex_trylock_i)(kmutex_t *mutex);
+	int     (*pthread_mutex_unlock_i)(kmutex_t *mutex);
+    int     (*pthread_mutex_destroy_i)(kmutex_t *mutex);
+    int     (*pthread_mutex_init_recursive)(kmutex_t *mutex);
+
 	/* high-level functions */
 
 	// file load
@@ -171,7 +231,26 @@ struct PlatformApiVar {
 	const char* (*endTag)(kinfotag_t);
 	void (*reportCaughtException)(const char *exceptionName, const char *scriptName, int line, const char *optionalMessage);
 	void  (*debugPrintf)(const char *file, const char *func, int line, const char *fmt, ...) __PRINTFMT(4, 5);
+	// trace
+	void (*traceDataLog)(int, logconf_t *, ...);
 };
+
+#define LOG_END 0
+#define LOG_s   1
+#define LOG_u   2
+
+#define KeyValue_u(K,V)    LOG_u, (K), ((uintptr_t)V)
+#define KeyValue_s(K,V)    LOG_s, (K), (V)
+#define KeyValue_p(K,V)    LOG_u, (K), (V)
+
+#define LOG_ScriptFault          KeyValue_u("uline", sfp[K_RTNIDX].uline)
+
+#define KTraceDataLog(LOGKEY, POLICY, ...)    do {\
+		static logconf_t _logconf = {isRecord|LOGPOL_INIT|POLICY};\
+		if(TFLAG_is(int, _logconf.policy, isRecord)) {\
+			PLATAPI traceDataLog(LOGKEY, &_logconf, ## __VA_ARGS__, LOG_END);\
+		}\
+	}while(0)\
 
 /* ------------------------------------------------------------------------ */
 /* type */
@@ -198,7 +277,7 @@ typedef float             kfloat_t;
 typedef bool             kbool_t;
 
 typedef enum {
-	K_FAILED, K_CONTINUE, K_BREAK
+	K_FAILED, K_BREAK, K_CONTINUE,
 } kstatus_t;
 
 typedef intptr_t         kint_t;
@@ -429,12 +508,12 @@ typedef struct KonohaClassVar           KonohaClassVar;
 typedef struct KonohaClassField         KonohaClassField;
 typedef struct KonohaClassField         KonohaClassFieldVar;
 
-typedef const struct KonohaRuntimeVar   SharedRuntime;
-typedef struct KonohaRuntimeVar         KonohaRuntimeVar;
-typedef const struct KonohaContextRuntimeVar    LocalRuntime;
-typedef struct KonohaContextRuntimeVar          KonohaContextRuntimeVar;
-typedef struct KonohaStack              KonohaStack;
-typedef struct KonohaStack              KonohaStackVar;
+typedef const struct KonohaRuntimeVar           KonohaRuntime;
+typedef struct KonohaRuntimeVar                 KonohaRuntimeVar;
+typedef const struct KonohaStackRuntimeVar      KonohaStackRuntime;
+typedef struct KonohaStackRuntimeVar            KonohaStackRuntimeVar;
+typedef struct KonohaStack                      KonohaStack;
+typedef struct KonohaStack                      KonohaStackVar;
 
 typedef struct KonohaModule        KonohaModule;
 typedef struct KonohaModuleContext KonohaModuleContext;
@@ -444,23 +523,17 @@ struct KonohaContextVar {
 	KonohaStack                      *esp;
 	PlatformApi                      *platApi;
 	KonohaLib                        *klib;
-	KonohaRuntimeVar                 *share;
-	KonohaContextRuntimeVar          *stack;
+	KonohaRuntime                    *share;
+	KonohaStackRuntimeVar            *stack;
 	KonohaModule                    **modshare;
 	KonohaModuleContext             **modlocal;
-	/* TODO(imasahiro)
-	 * checking modgc performance and remove
-	 * memshare/memlocal from context
-	 */
-	struct kmemshare_t                *memshare;
-	struct kmemlocal_t                *memlocal;
 };
 
 // share, local
-
 struct KonohaRuntimeVar {
 	KUtilsGrowingArray        classTable;
 	KUtilsHashMap            *longClassNameMapNN;
+	kmutex_t          *classTableMutex;
 	/* system shared const */
 	kObject                  *constNull;
 	kBoolean                 *constTrue;
@@ -468,12 +541,17 @@ struct KonohaRuntimeVar {
 	kString                  *emptyString;
 	kArray                   *emptyArray;
 
+	kmutex_t          *filepackMutex;
 	kArray                   *fileidList;    // file, http://
 	KUtilsHashMap            *fileidMapNN;   //
 	kArray                   *packList;
 	KUtilsHashMap            *packMapNN;
+
+	kmutex_t          *symbolMutex;
 	kArray                   *symbolList;  // NAME, Name, INT_MAX Int_MAX
 	KUtilsHashMap            *symbolMapNN;
+
+	kmutex_t          *paramMutex;
 	kArray                   *paramList;
 	KUtilsHashMap            *paramMapNN;
 	kArray                   *paramdomList;
@@ -489,7 +567,7 @@ struct KonohaRuntimeVar {
 #define KonohaContext_setInteractive(X)  TFLAG_set1(kshortflag_t, (X)->stack->flag, kContext_Interactive)
 #define KonohaContext_setCompileOnly(X)  TFLAG_set1(kshortflag_t, (X)->stack->flag, kContext_CompileOnly)
 
-struct KonohaContextRuntimeVar {
+struct KonohaStackRuntimeVar {
 	KonohaStack*               stack;
 	size_t                     stacksize;
 	KonohaStack*               stack_uplimit;
@@ -523,18 +601,19 @@ struct KonohaContextRuntimeVar {
 //#define MOD_llvm    15
 #define MOD_REGEXP   16
 
+struct KonohaModule {
+	const char *name;
+	int mod_id;
+	void (*setup)(KonohaContext*,    struct KonohaModule *, int newctx);
+	void (*reftrace)(KonohaContext*, struct KonohaModule *);
+	void (*free)(KonohaContext*,     struct KonohaModule *);
+	kmutex_t   *moduleMutex;
+};
+
 struct KonohaModuleContext {
 	uintptr_t unique;
 	void (*reftrace)(KonohaContext*, struct KonohaModuleContext *);
 	void (*free)(KonohaContext*, struct KonohaModuleContext *);
-};
-
-struct KonohaModule {
-	const char *name;
-	int mod_id;
-	void (*setup)(KonohaContext*, struct KonohaModule *, int newctx);
-	void (*reftrace)(KonohaContext*, struct KonohaModule *);
-	void (*free)(KonohaContext*, struct KonohaModule *);
 };
 
 #define K_FRAME_NCMEMBER \
@@ -1209,7 +1288,9 @@ struct KonohaLibVar {
 	kbool_t       (*kNameSpace_requirePackage)(KonohaContext*, const char *, kfileline_t);
 	kbool_t       (*kNameSpace_importPackage)(KonohaContext*, kNameSpace*, const char *, kfileline_t);
 	KonohaClass*  (*kNameSpace_getClass)(KonohaContext*, kNameSpace *, const char *, size_t, KonohaClass *);
-	void          (*kNameSpace_loadMethodData)(KonohaContext*, kNameSpace *, intptr_t *d);
+
+	void          (*kNameSpace_loadMethodData)(KonohaContext*, kNameSpace *, intptr_t *);
+	kbool_t       (*kNameSpace_setConstData)(KonohaContext *, kNameSpace *, ksymbol_t, ktype_t, uintptr_t);
 	void          (*kNameSpace_loadConstData)(KonohaContext*, kNameSpace *, const char **d, kfileline_t);
 	kMethod*      (*kNameSpace_getMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, kmethodn_t mn, int option, int policy);
 //	kMethod*      (*kNameSpace_getGetterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ksymbol_t sym);

@@ -70,7 +70,7 @@ static bool dse_enqueue(struct dScheduler *dscd, struct dReq *dreq)
 static struct dReq *dse_dequeue(struct dScheduler *dscd)
 {
 	int front = dscd->front;
-	int last = dscd->last;
+	int last  = dscd->last;
 	if(front == last) return NULL;
 	struct dReq *dreq = dscd->dReqQueue[last];
 	dscd->last = next(last);

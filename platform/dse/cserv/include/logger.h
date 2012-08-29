@@ -42,8 +42,8 @@ int getTime(void)
 #define LOG_s   1
 #define LOG_u   2
 
-#define KEYVALUE_u(K,V)    LOG_u, (K), ((uintptr_t)V)
-#define KEYVALUE_s(K,V)    LOG_s, (K), (V)
+#define KeyValue_u(K,V)    LOG_u, (K), ((uintptr_t)V)
+#define KeyValue_s(K,V)    LOG_s, (K), (V)
 
 static void dse_logpool_init(void) {
 	logpool_global_init(LOGPOOL_TRACE);
@@ -67,7 +67,7 @@ static void dse_logpool_exit()
 
 #define dse_record(lp, args, trace_id, ...) \
 	logpool_record(lp, args, LOG_NOTICE, trace_id, \
-			KEYVALUE_u("time", getTime()), \
+			KeyValue_u("time", getTime()), \
 			__VA_ARGS__)
 
 

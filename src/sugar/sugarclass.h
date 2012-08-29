@@ -273,7 +273,8 @@ static kStmt* new_kStmt(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, 
 	stmt->syn = SYN_(ns, keyword);
 	va_list ap;
 	va_start(ap, keyword);
-	ksymbol_t kw = va_arg(ap, ksymbol_t);
+	/* 'ksymbol_t' is promoted to 'int' when passed through to 'va_arg' */
+	ksymbol_t kw = (ksymbol_t) va_arg(ap, int);
 	while(kw != 0) {
 		kObject *v = va_arg(ap, kObject*);
 		if(v == NULL) break;
@@ -284,7 +285,7 @@ static kStmt* new_kStmt(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, 
 	return stmt;
 }
 
-static uintptr_t kkStmt_printMessagearseFlag(KonohaContext *kctx, kStmt *stmt, KonohaFlagSymbolData *flagData, uintptr_t flag)
+static uintptr_t kStmt_parseFlag(KonohaContext *kctx, kStmt *stmt, KonohaFlagSymbolData *flagData, uintptr_t flag)
 {
 	while(flagData->flag != 0) {
 		kObject *op = kStmt_getObjectNULL(kctx, stmt, flagData->symbol);
@@ -339,7 +340,7 @@ static const char* kStmt_getText(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw,
 /* --------------- */
 /* Block */
 
-static void Block_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kBlock_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kBlockVar *bk = (kBlockVar*)o;
 	kNameSpace *ns = (conf != NULL) ? (kNameSpace*)conf : KNULL(NameSpace);
@@ -349,7 +350,7 @@ static void Block_init(KonohaContext *kctx, kObject *o, void *conf)
 	KINITv(bk->esp, new_(Expr, 0));
 }
 
-static void Block_reftrace(KonohaContext *kctx, kObject *o)
+static void kBlock_reftrace(KonohaContext *kctx, kObject *o)
 {
 	kBlock *bk = (kBlock*)o;
 	BEGIN_REFTRACE(4);

@@ -28,7 +28,7 @@ static void Object_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kObjectVar *of = (kObjectVar*)o;
 	of->fieldUnboxItems[0] = 0;
-	of->fieldUnboxItems[1] = 0;
+//	of->fieldUnboxItems[1] = 0;
 }
 
 static void Object_reftrace(KonohaContext *kctx, kObject *o)
@@ -45,27 +45,8 @@ static void Object_reftrace(KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
-//static void ObjectX_init(KonohaContext *kctx, kObject *o, void *conf)
-//{
-//	kObjectVar *of = (kObjectVar*)o;
-//	KonohaClass *ct = O_ct(of);
-//	memcpy(of->fieldObjectItems, ct->defaultValueAsNull->fieldObjectItems, ct->cstruct_size - sizeof(KonohaObjectHeader));
-//}
-
 static void Object_initdef(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t pline)
 {
-//	if(ct->typeId == TY_Object) return;
-//	DBG_P("new object initialization ct->cstruct_size=%d", ct->cstruct_size);
-//	KSETv_AND_WRITE_BARRIER(NULL, ct->defaultValueAsNull, KLIB new_kObject(kctx, ct, 0), GC_NO_WRITE_BARRIER);
-//	if(ct->fieldsize > 0) {  // this is size of super class
-//		KonohaClass *supct = CT_(ct->superTypeId);
-//		assert(ct->fieldsize == supct->fieldsize);
-//		memcpy(ct->defaultValueAsNullVar->fieldObjectItems, supct->defaultValueAsNull->fieldObjectItems, sizeof(kObject*) * ct->fieldsize);
-//	}
-//	if(ct->fieldAllocSize > 0) {
-//		ct->init = ObjectX_init;
-//	}
-//	ct->fnull = DEFAULT_fnull;
 }
 
 static kObject *new_kObject(KonohaContext *kctx, KonohaClass *ct, uintptr_t conf)
@@ -275,8 +256,6 @@ static void Array_ensureMinimumSize(KonohaContext *kctx, struct _kAbstractArray 
 	}
 }
 
-//#define Array_setsize(A, N)  ((kArrayVar*)A)->size = N
-
 static void kArray_add(KonohaContext *kctx, kArray *o, kObject *value)
 {
 	size_t asize = kArray_size(o);
@@ -416,13 +395,19 @@ static kparamid_t Kmap_getparamid(KonohaContext *kctx, KUtilsHashMap *kmp, kArra
 static kparamid_t Kparam(KonohaContext *kctx, ktype_t rtype, int psize, const kparamtype_t *p)
 {
 	uintptr_t hcode = hashparam(rtype, psize, p);
-	return Kmap_getparamid(kctx, kctx->share->paramMapNN, kctx->share->paramList, hcode, equalsParam, rtype, psize, p);
+	KLock(kctx->share->paramMutex);
+	kparamid_t param = Kmap_getparamid(kctx, kctx->share->paramMapNN, kctx->share->paramList, hcode, equalsParam, rtype, psize, p);
+	KUnlock(kctx->share->paramMutex);
+	return param;
 }
 
 static kparamid_t Kparamdom(KonohaContext *kctx, int psize, const kparamtype_t *p)
 {
 	uintptr_t hcode = hashparamdom(psize, p);
-	return Kmap_getparamid(kctx, kctx->share->paramdomMapNN, kctx->share->paramdomList, hcode, equalsParamDom, TY_void, psize, p);
+	KLock(kctx->share->paramMutex);
+	kparamid_t param = Kmap_getparamid(kctx, kctx->share->paramdomMapNN, kctx->share->paramdomList, hcode, equalsParamDom, TY_void, psize, p);
+	KUnlock(kctx->share->paramMutex);
+	return param;
 }
 
 /* --------------- */
@@ -502,6 +487,7 @@ static void Func_reftrace(KonohaContext *kctx, kObject *o)
 static KonohaClass *T_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass *self)
 {
 	kParam *cparam = CT_cparam(self);
+	DBG_P("ct=%s, self=%s", CT_t(ct), CT_t(self));
 	DBG_ASSERT(ct->optvalue < cparam->psize);
 	KonohaClass *pct = CT_(cparam->paramtypeItems[ct->optvalue].ty);
 	return pct->realtype(kctx, pct, self);
@@ -511,7 +497,7 @@ static KonohaClass *T_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass
 
 static KonohaClass* Kclass(KonohaContext *kctx, ktype_t cid, kfileline_t pline)
 {
-	SharedRuntime *share = kctx->share;
+	KonohaRuntime *share = kctx->share;
 	if(!(cid < (share->classTable.bytesize/sizeof(KonohaClassVar*)))) {
 		kreportf(ErrTag, pline, "invalid typeId=%d", (int)cid);
 		KLIB Kraise(kctx, EXPT_("InvalidTypeId"), NULL, pline);
@@ -582,14 +568,19 @@ static kObject *Knull(KonohaContext *kctx, KonohaClass *ct)
 
 static KonohaClassVar* new_KonohaClass(KonohaContext *kctx, KonohaClass *bct, KDEFINE_CLASS *s, kfileline_t pline)
 {
-	KonohaRuntimeVar *share = kctx->share;
-	ktype_t newid = share->classTable.bytesize / sizeof(KonohaClassVar*);
-	if(share->classTable.bytesize == share->classTable.bytemax) {
-		KLIB Karray_expand(kctx, &share->classTable, share->classTable.bytemax * 2);
+	KonohaRuntimeVar *share = (KonohaRuntimeVar *)kctx->share;
+	KonohaClassVar *ct;
+	ktype_t newid;
+	KLock(share->classTableMutex); {
+		newid = share->classTable.bytesize / sizeof(KonohaClassVar*);
+		if(share->classTable.bytesize == share->classTable.bytemax) {
+			KLIB Karray_expand(kctx, &share->classTable, share->classTable.bytemax * 2);
+		}
+		share->classTable.bytesize += sizeof(KonohaClassVar*);
+		ct = (KonohaClassVar*)KCALLOC(sizeof(KonohaClass), 1);
+		share->classTable.classItems[newid] = (KonohaClass*)ct;
 	}
-	share->classTable.bytesize += sizeof(KonohaClassVar*);
-	KonohaClassVar *ct = (KonohaClassVar*)KCALLOC(sizeof(KonohaClass), 1);
-	share->classTable.classItems[newid] = (KonohaClass*)ct;
+	KUnlock(share->classTableMutex);
 	if(bct != NULL) {
 		DBG_ASSERT(s == NULL);
 		memcpy(ct, bct, offsetof(KonohaClass, methodList));
@@ -599,8 +590,8 @@ static KonohaClassVar* new_KonohaClass(KonohaContext *kctx, KonohaClass *bct, KD
 	else {
 		DBG_ASSERT(s != NULL);
 		ct->cflag   = s->cflag;
-		ct->typeId     = newid;
-		ct->baseTypeId    = (s->baseTypeId == 0) ? newid : s->baseTypeId;
+		ct->typeId = newid;
+		ct->baseTypeId    = (s->baseTypeId == 0) ? ct->typeId : s->baseTypeId;
 		ct->superTypeId  = (s->superTypeId == 0) ? TY_Object : s->superTypeId;
 		ct->fieldItems = s->fieldItems;
 		ct->fieldsize  = s->fieldsize;
@@ -648,6 +639,19 @@ static KonohaClass *CT_body(KonohaContext *kctx, KonohaClass *ct, size_t head, s
 static KonohaClass *Generics_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass *self)
 {
 	DBG_P("trying resolve generic type: %s %s", CT_t(ct), CT_t(self));
+	kParam *param = CT_cparam(ct);
+	int i;
+	kparamtype_t p[param->psize];
+	for(i = 0; i < param->psize; i++) {
+		KonohaClass *cParam = CT_(param->paramtypeItems[i].ty);
+		p[i].ty = cParam->realtype(kctx, cParam, self)->typeId;
+	}
+	return KLIB KonohaClass_Generics(kctx, ct, TY_void, param->psize, p);
+}
+
+static KonohaClass *Func_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass *self)
+{
+	DBG_P("trying resolve generic type: %s %s", CT_t(ct), CT_t(self));
 	KonohaClass *cReturn = CT_(ct->p0);
 	ktype_t rtype = cReturn->realtype(kctx, cReturn, self)->typeId;
 	kParam *param = CT_cparam(ct);
@@ -657,7 +661,7 @@ static KonohaClass *Generics_realtype(KonohaContext *kctx, KonohaClass *ct, Kono
 		KonohaClass *cParam = CT_(param->paramtypeItems[i].ty);
 		p[i].ty = cParam->realtype(kctx, cParam, self)->typeId;
 	}
-	return KLIB KonohaClass_Generics(kctx, ct, rtype, param->psize, p);
+	return KLIB KonohaClass_Generics(kctx, CT_(ct->baseTypeId), rtype, param->psize, p);
 }
 
 #define TY_isTypeVar2(T)   (T != TY_void && TY_isTypeVar(T))
@@ -675,7 +679,7 @@ static void checkTypeVar(KonohaContext *kctx, KonohaClassVar *newct, ktype_t rty
 	if(isTypeVar) {
 		DBG_P("Generics %s has TypeVar", CT_t(newct));
 		newct->cflag |= kClass_TypeVar;
-		newct->realtype = Generics_realtype;
+		newct->realtype = newct->baseTypeId == TY_Func ? Func_realtype : Generics_realtype;
 	}
 }
 
@@ -691,6 +695,7 @@ static KonohaClass *KonohaClass_Generics(KonohaContext *kctx, KonohaClass *ct, k
 		if(ct->searchSimilarClassNULL == NULL) break;
 		ct = ct->searchSimilarClassNULL;
 	} while(ct != NULL);
+
 	KonohaClassVar *newct = new_KonohaClass(kctx, ct0, NULL, NOPLINE);
 	newct->cparamdom = paramdom;
 	newct->p0 = isNotFuncClass ? p[0].ty : rtype;
@@ -743,10 +748,13 @@ static void CT_setName(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t plin
 {
 	uintptr_t lname = longid(ct->packageDomain, ct->nameid);
 	kreportf(DebugTag, pline, "new class domain=%s, name='%s.%s'", PackageId_t(ct->packageDomain), PackageId_t(ct->packageId), SYM_t(ct->nameid));
-	KonohaClass *ct2 = (KonohaClass*)map_getu(kctx, kctx->share->longClassNameMapNN, lname, (uintptr_t)NULL);
-	if(ct2 == NULL) {
-		map_addu(kctx, kctx->share->longClassNameMapNN, lname, (uintptr_t)ct);
+	KLock(kctx->share->classTableMutex); {
+		KonohaClass *ct2 = (KonohaClass*)map_getu(kctx, kctx->share->longClassNameMapNN, lname, (uintptr_t)NULL);
+		if(ct2 == NULL) {
+			map_addu(kctx, kctx->share->longClassNameMapNN, lname, (uintptr_t)ct);
+		}
 	}
+	KUnlock(kctx->share->classTableMutex);
 	if(ct->methodList == NULL) {
 		KINITv(ct->methodList, K_EMPTYARRAY);
 		if(ct->typeId > TY_Object) {
@@ -868,8 +876,6 @@ static void loadInitStructData(KonohaContext *kctx)
 		new_KonohaClass(kctx, NULL, dd[cid], 0);
 		cid++;
 	}
-	KonohaClassVar *ct = (KonohaClassVar *)CT_Array;
-	ct->p0 = TY_Object;
 }
 
 static void defineDefaultKeywordSymbol(KonohaContext *kctx)
@@ -900,9 +906,13 @@ static void initStructData(KonohaContext *kctx)
 		ct->nameid = ksymbolSPOL(name, strlen(name), SPOL_ASCII|SPOL_POOL|SPOL_TEXT, _NEWID);
 		CT_setName(kctx, ct, 0);
 	}
+	KonohaClassVar *ct = (KonohaClassVar *)CT_Array;
+	ct->p0 = TY_Object;
+	kparamtype_t p = {TY_Object};
+	ct->cparamdom = Kparamdom(kctx, 1, &p);
 }
 
-static void KTYTABLE_initkklib(KonohaLibVar *l)
+static void KClassTable_initKonohaLib(KonohaLibVar *l)
 {
 	l->Kclass                  = Kclass;
 	l->new_kObject             = new_kObject;
@@ -924,11 +934,16 @@ static void KTYTABLE_initkklib(KonohaLibVar *l)
 	l->KonohaClass_Generics = KonohaClass_Generics;
 }
 
-static void KTYTABLE_init(KonohaContext *kctx, KonohaContextVar *ctx)
+static void KClassTable_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
-	KonohaRuntimeVar *share = (KonohaRuntimeVar*)KCALLOC(sizeof(SharedRuntime), 1);
+	KonohaRuntimeVar *share = (KonohaRuntimeVar*)KCALLOC(sizeof(KonohaRuntime), 1);
 	ctx->share = share;
-	KTYTABLE_initkklib((KonohaLibVar*)kctx->klib);
+	KInitLock(share->classTableMutex);
+	KInitLock(share->filepackMutex);
+	KInitLock(share->symbolMutex);
+	KInitLock(share->paramMutex);
+
+	KClassTable_initKonohaLib((KonohaLibVar*)kctx->klib);
 	KLIB Karray_init(kctx, &share->classTable, K_TYTABLE_INIT * sizeof(KonohaClass));
 	loadInitStructData(kctx);
 	share->longClassNameMapNN = KLIB Kmap_init(kctx, 0);
@@ -972,7 +987,7 @@ static void constPoolMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, vo
 
 static void kshare_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 {
-	SharedRuntime *share = ctx->share;
+	KonohaRuntime *share = ctx->share;
 	KonohaClass **cts = (KonohaClass**)kctx->share->classTable.classItems;
 	size_t i, size = kctx->share->classTable.bytesize/sizeof(KonohaClassVar*);
 	for(i = 0; i < size; i++) {
@@ -1016,7 +1031,7 @@ static void TYTABLE_freeCT(KonohaContext *kctx)
 
 static void TYTABLE_free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
-	KonohaRuntimeVar *share = ctx->share;
+	KonohaRuntimeVar *share = (KonohaRuntimeVar*)ctx->share;
 	KLIB Kmap_free(kctx, share->longClassNameMapNN, NULL);
 	KLIB Kmap_free(kctx, share->fileidMapNN, NULL);
 	KLIB Kmap_free(kctx, share->packMapNN, NULL);
@@ -1025,7 +1040,12 @@ static void TYTABLE_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	KLIB Kmap_free(kctx, share->paramdomMapNN, NULL);
 	TYTABLE_freeCT(kctx);
 	KLIB Karray_free(kctx, &share->classTable);
-	KFREE(share, sizeof(SharedRuntime));
+
+	KFreeLock(share->classTableMutex);
+	KFreeLock(share->filepackMutex);
+	KFreeLock(share->symbolMutex);
+	KFreeLock(share->paramMutex);
+	KFREE(share, sizeof(KonohaRuntime));
 }
 
 /* operator */
