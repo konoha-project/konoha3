@@ -65,9 +65,9 @@ extern "C" {
 #define SEGMENT_SIZE (128 * KB_)
 #define PTR_SIZE (sizeof(void*))
 #define BITS     (PTR_SIZE * 8)
-#define KlassBlockSize(klass) (1UL << klass)
-#define SUBHEAP_KLASS_SIZE_MIN KlassBlockSize(SUBHEAP_KLASS_MIN)
-#define SUBHEAP_KLASS_SIZE_MAX KlassBlockSize(SUBHEAP_KLASS_MAX)
+#define PowerOf2(klass) (1UL << klass)
+#define SUBHEAP_KLASS_SIZE_MIN PowerOf2(SUBHEAP_KLASS_MIN)
+#define SUBHEAP_KLASS_SIZE_MAX PowerOf2(SUBHEAP_KLASS_MAX)
 #define BITMAP_FULL ((uintptr_t)(-1))
 #define ALIGN(x,n)  (((x)+((n)-1))&(~((n)-1)))
 #define CEIL(F)     (F-(int)(F) > 0 ? (int)(F+1) : (int)(F))
@@ -307,9 +307,9 @@ static bmgc_stat global_gc_stat = {};
 DEF_BM(  1);DEF_BM(  2);DEF_BM(  4);
 DEF_BM(  8);DEF_BM( 16);DEF_BM( 32);
 DEF_BM( 64);DEF_BM(128);DEF_BM(256);
-#define BITMAP_L0_SIZE(N) (CEIL(((float)SEGMENT_SIZE)/KlassBlockSize(N)/BITS))
-#define BITMAP_L1_SIZE(N) (CEIL(((float)SEGMENT_SIZE)/KlassBlockSize(N)/BITS/BITS))
-#define BITMAP_L2_SIZE(N) (CEIL(((float)SEGMENT_SIZE)/KlassBlockSize(N)/BITS/BITS/BITS))
+#define BITMAP_L0_SIZE(N) (CEIL(((float)SEGMENT_SIZE)/PowerOf2(N)/BITS))
+#define BITMAP_L1_SIZE(N) (CEIL(((float)SEGMENT_SIZE)/PowerOf2(N)/BITS/BITS))
+#define BITMAP_L2_SIZE(N) (CEIL(((float)SEGMENT_SIZE)/PowerOf2(N)/BITS/BITS/BITS))
 
 static const size_t SegmentBitMapCount[] = {
 	0,0,0,0,0,
@@ -351,7 +351,7 @@ union AllocationBlock {
 	_BLOCK_(2048);_BLOCK_(4096);
 };
 
-#define SEGMENT_BLOCK_COUNT(n) ((n >= SUBHEAP_KLASS_MIN)?(SEGMENT_SIZE / KlassBlockSize(n ) - 1):0)
+#define SEGMENT_BLOCK_COUNT(n) ((n >= SUBHEAP_KLASS_MIN)?(SEGMENT_SIZE / PowerOf2(n ) - 1):0)
 static const size_t SegmentBlockCount[] = {
 	0, 0, 0,
 	SEGMENT_BLOCK_COUNT(3 ), SEGMENT_BLOCK_COUNT(4 ),
@@ -962,7 +962,7 @@ static bool newSegment(HeapManager *mng, SubHeap *h)
 	h->seglist[h->seglist_size++] = seg;
 
 	h->p.seg = seg;
-	findBlockOfLastSegment(seg, h, KlassBlockSize(klass));
+	findBlockOfLastSegment(seg, h, PowerOf2(klass));
 	BITPTRS_INIT(h->p.bitptrs, seg, klass);
 	BITMAP_SET_LIMIT(seg->base[0], klass);
 #ifdef USE_GENERATIONAL_GC
@@ -1038,7 +1038,7 @@ static void BitPtr0_inc(AllocationPointer *p)
 
 static bool inc(AllocationPointer *p, SubHeap *h)
 {
-	int size = KlassBlockSize(h->heap_klass);
+	int size = PowerOf2(h->heap_klass);
 	p->blkptr = (AllocationBlock*)((char*)p->blkptr+size);
 	BitPtr0_inc(p);
 	return ++p->seg->live_count > SegmentBlockCount_GC_MARGIN[h->heap_klass];
@@ -1930,7 +1930,7 @@ kbool_t MODGC_kObject_isManaged(KonohaContext *kctx, void *ptr)
 {
 	kObject *o = (kObject *) ptr;
 
-	if ((uintptr_t) o % KlassBlockSize(SUBHEAP_KLASS_MIN) != 0)
+	if ((uintptr_t) o % PowerOf2(SUBHEAP_KLASS_MIN) != 0)
 		return false;
 
 	size_t i;
@@ -1942,7 +1942,7 @@ kbool_t MODGC_kObject_isManaged(KonohaContext *kctx, void *ptr)
 			Segment *seg;
 			uintptr_t klass, index;
 			OBJECT_LOAD_BLOCK_INFO(o, seg, index, klass);
-			DBG_ASSERT((uintptr_t) o % KlassBlockSize(klass) == 0);
+			DBG_ASSERT((uintptr_t) o % PowerOf2(klass) == 0);
 			uintptr_t bpidx, bpmask;
 			BITPTR_INIT_(bpidx, bpmask, index);
 			bitmap_t *bm = SEG_BITMAP_N(seg, 0, bpidx);
