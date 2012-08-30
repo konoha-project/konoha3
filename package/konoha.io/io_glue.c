@@ -143,7 +143,6 @@ struct kFileVar {
 	kString *path;
 };
 
-#define MOD_IO 20 /*TODO*/
 #define kioshare ((kioshare_t *)kctx->modshare[MOD_IO])
 
 typedef struct {
