@@ -65,11 +65,8 @@ extern "C" {
 #define SEGMENT_SIZE (128 * KB_)
 #define PTR_SIZE (sizeof(void*))
 #define BITS     (PTR_SIZE * 8)
-#define PowerOf2(klass) (1UL << klass)
-#define SUBHEAP_KLASS_SIZE_MIN PowerOf2(SUBHEAP_KLASS_MIN)
-#define SUBHEAP_KLASS_SIZE_MAX PowerOf2(SUBHEAP_KLASS_MAX)
-#define BITMAP_FULL ((uintptr_t)(-1))
-#define ALIGN(x,n)  (((x)+((n)-1))&(~((n)-1)))
+#define PowerOf2(N) (1UL << N)
+#define ALIGN(X,N)  (((X)+((N)-1))&(~((N)-1)))
 #define CEIL(F)     (F-(int)(F) > 0 ? (int)(F+1) : (int)(F))
 #if _WIN64
 #define FFS(n) __builtin_ffsll(n)
@@ -80,7 +77,10 @@ extern "C" {
 #define CLZ(n) __builtin_clzl(n)
 #define CTZ(x) __builtin_ctzl(x)
 #endif
-#define BSR(n) CLZ(n)
+
+#define BITMAP_FULL ((uintptr_t)(-1))
+#define SUBHEAP_KLASS_SIZE_MIN PowerOf2(SUBHEAP_KLASS_MIN)
+#define SUBHEAP_KLASS_SIZE_MAX PowerOf2(SUBHEAP_KLASS_MAX)
 #define BM_SET(m, mask)  (m |= mask)
 #define BM_TEST(m, mask) (m  & mask)
 
@@ -455,7 +455,7 @@ static inline void BITMAP_SET_LIMIT##N (bitmap_t *const bitmap)\
 {\
 	bitmap[L0-1] = BM_SENTINEL_L0_##N;\
 }\
-static inline void BITMAP_SET_LIMIT_AND_CPY_BM##N (bitmap_t *const bitmap, bitmap_t *const snapshot)\
+static inline void BITMAP_SET_LIMIT_AND_COPY_BM##N (bitmap_t *const bitmap, bitmap_t *const snapshot)\
 {\
 	bitmap[L0-1] = BM_SENTINEL_L0_##N;\
 }
@@ -473,7 +473,7 @@ static inline void BITMAP_SET_LIMIT##N (bitmap_t *const bitmap)\
 	bitmap[L0-1] = BM_SENTINEL_L0_##N;\
 	bm->m1.bm[L1-1] = BM_SENTINEL_L1_##N;\
 }\
-static inline void BITMAP_SET_LIMIT_AND_CPY_BM##N (bitmap_t *const bitmap, bitmap_t *const snapshot)\
+static inline void BITMAP_SET_LIMIT_AND_COPY_BM##N (bitmap_t *const bitmap, bitmap_t *const snapshot)\
 {\
 	struct BM##N *bm = (struct BM##N *)bitmap;\
 	struct BM##N *ss = (struct BM##N *)snapshot;\
@@ -495,7 +495,7 @@ static inline void BITMAP_SET_LIMIT##N (bitmap_t *const bitmap)\
 	bm->m1.bm[L1-1] = BM_SENTINEL_L1_##N;\
 	bm->m2.bm[L2-1] = BM_SENTINEL_L2_##N;\
 }\
-static inline void BITMAP_SET_LIMIT_AND_CPY_BM##N (bitmap_t *const bitmap, bitmap_t *const snapshot)\
+static inline void BITMAP_SET_LIMIT_AND_COPY_BM##N (bitmap_t *const bitmap, bitmap_t *const snapshot)\
 {\
 	struct BM##N *bm = (struct BM##N *)bitmap;\
 	struct BM##N *ss = (struct BM##N *)snapshot;\
@@ -574,18 +574,18 @@ static inline void BITPTRS_INIT(BitPtr bitptrs[SEGMENT_LEVEL], Segment *seg, siz
 }
 
 #ifdef USE_GENERATIONAL_GC
-typedef void (*fBITMAP_SET_LIMIT_AND_CPY_BM)(bitmap_t *const bm, bitmap_t *const ss);
-static void BITMAP_SET_LIMIT_AND_CPY_BM_(bitmap_t *const bm, bitmap_t *const ss) { (void)bm; }
-static const fBITMAP_SET_LIMIT_AND_CPY_BM BITMAP_SET_LIMIT_AND_CPY_BM__[] = {
-	BITMAP_SET_LIMIT_AND_CPY_BM_, BITMAP_SET_LIMIT_AND_CPY_BM_, BITMAP_SET_LIMIT_AND_CPY_BM_,
-	BITMAP_SET_LIMIT_AND_CPY_BM_, BITMAP_SET_LIMIT_AND_CPY_BM_, BITMAP_SET_LIMIT_AND_CPY_BM5,
-	BITMAP_SET_LIMIT_AND_CPY_BM6, BITMAP_SET_LIMIT_AND_CPY_BM7, BITMAP_SET_LIMIT_AND_CPY_BM8,
-	BITMAP_SET_LIMIT_AND_CPY_BM9, BITMAP_SET_LIMIT_AND_CPY_BM10, BITMAP_SET_LIMIT_AND_CPY_BM11,
-	BITMAP_SET_LIMIT_AND_CPY_BM12
+typedef void (*fBITMAP_SET_LIMIT_AND_COPY_BM)(bitmap_t *const bm, bitmap_t *const ss);
+static void BITMAP_SET_LIMIT_AND_COPY_BM_(bitmap_t *const bm, bitmap_t *const ss) { (void)bm; }
+static const fBITMAP_SET_LIMIT_AND_COPY_BM BITMAP_SET_LIMIT_AND_COPY_BM__[] = {
+	BITMAP_SET_LIMIT_AND_COPY_BM_, BITMAP_SET_LIMIT_AND_COPY_BM_, BITMAP_SET_LIMIT_AND_COPY_BM_,
+	BITMAP_SET_LIMIT_AND_COPY_BM_, BITMAP_SET_LIMIT_AND_COPY_BM_, BITMAP_SET_LIMIT_AND_COPY_BM5,
+	BITMAP_SET_LIMIT_AND_COPY_BM6, BITMAP_SET_LIMIT_AND_COPY_BM7, BITMAP_SET_LIMIT_AND_COPY_BM8,
+	BITMAP_SET_LIMIT_AND_COPY_BM9, BITMAP_SET_LIMIT_AND_COPY_BM10, BITMAP_SET_LIMIT_AND_COPY_BM11,
+	BITMAP_SET_LIMIT_AND_COPY_BM12
 };
-static inline void BITMAP_SET_LIMIT_AND_CPY_BM(bitmap_t *const bitmap, bitmap_t *const snapshot, size_t klass)
+static inline void BITMAP_SET_LIMIT_AND_COPY_BM(bitmap_t *const bitmap, bitmap_t *const snapshot, size_t klass)
 {
-	BITMAP_SET_LIMIT_AND_CPY_BM__[klass](bitmap, snapshot);
+	BITMAP_SET_LIMIT_AND_COPY_BM__[klass](bitmap, snapshot);
 	BM_SET(bitmap[0], 1);
 	BM_SET(snapshot[0], 1);
 }
@@ -724,7 +724,6 @@ static void *call_malloc_aligned(KonohaContext *kctx, size_t size, size_t align)
 	return block;
 	L_OutOfMemory:
 	PLATAPI exit_i(EXIT_FAILURE);
-//	THROW_OutOfMemory(kctx, size);
 	return NULL;
 }
 static void call_free_aligned(KonohaContext *kctx, void *block, size_t size)
@@ -908,7 +907,7 @@ static void BMGC_exit(KonohaContext *kctx, HeapManager *mng)
 static inline size_t SizeToKlass(size_t n) {
 	size_t size = ALIGN(n, MIN_ALIGN);
 	size_t size_w = size - 1;
-	return (BITS - BSR(size_w));
+	return (BITS - CLZ(size_w));
 }
 
 #define SEGMENTLIST_NEXT(seg, list) do {\
@@ -1448,7 +1447,7 @@ static void setTenureBitMapsAndCount(HeapManager *mng, SubHeap *h)
 		ClearBitMap(seg->base[0], h->heap_klass);
 		LOAD_SNAPSHOT(seg);
 		LOAD_LIVECOUNT(seg);
-		BITMAP_SET_LIMIT_AND_CPY_BM(seg->base[0], seg->snapshots[0], h->heap_klass);
+		BITMAP_SET_LIMIT_AND_COPY_BM(seg->base[0], seg->snapshots[0], h->heap_klass);
 		gc_info("klass=%d, seg[%lu]=%p count=%d",
 				seg->heap_klass, i, seg, seg->live_count);
 	}
