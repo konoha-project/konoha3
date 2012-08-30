@@ -24,52 +24,20 @@
 
 /* ************************************************************************ */
 
-#ifndef DSE_LOGGER_H_
-#define DSE_LOGGER_H_
+#include "util.h"
+#include "message.h"
 
-#include <sys/time.h>
-#include <logpool/logpool.h>
-
-int getTime(void)
+Message *Message_new(unsigned char *requestLine)
 {
-	struct timeval t;
-	gettimeofday(&t, NULL);
-	D_("%d[s] %d[us]", (int)t.tv_sec % 1000, (int)t.tv_usec);
-	return (int)(((int)t.tv_sec % 1000) * 1000 * 1000 + (int)t.tv_usec);
+	size_t len = strlen((char *)requestLine);
+	Message *msg = (Message *)dse_malloc(len + 1);
+	msg = memcpy(msg, requestLine, len);
+	msg[len] = '\0';
+	return msg;
 }
 
-#define LOG_END 0
-#define LOG_s   1
-#define LOG_u   2
-
-#define KeyValue_u(K,V)    LOG_u, (K), ((uintptr_t)V)
-#define KeyValue_s(K,V)    LOG_s, (K), (V)
-
-static void dse_logpool_init(void) {
-	logpool_global_init(LOGPOOL_TRACE);
-}
-
-logpool_t *dse_openlog(char *ip)
+void Message_delete(Message *msg)
 {
-	logpool_t *lp = logpool_open_trace(NULL, ip, 14801);
-	return lp;
+	if(msg == NULL) return;
+	dse_free(msg, strlen((char *)msg) + 1);
 }
-
-static void dse_closelog(logpool_t *lp)
-{
-	logpool_close(lp);
-}
-
-static void dse_logpool_exit()
-{
-	logpool_global_exit();
-}
-
-#define dse_record(lp, args, trace_id, ...) \
-	logpool_record(lp, args, LOG_NOTICE, trace_id, \
-			KeyValue_u("time", getTime()), \
-			__VA_ARGS__)
-
-
-
-#endif /* DSE_LOGGER_H_ */

@@ -24,20 +24,43 @@
 
 /* ************************************************************************ */
 
-#ifndef DSE_DEBUG_H_
-#define DSE_DEBUG_H_
+#include <stdbool.h>
+#include "util.h"
+#include "sched.h"
 
-#include <assert.h>
+Scheduler *Scheduler_new(void)
+{
+	Scheduler *sched = dse_malloc(sizeof(Scheduler));
+	sched->front = 0;
+	sched->last = 0;
+	pthread_mutex_init(&sched->lock, NULL);
+	pthread_cond_init(&sched->cond, NULL);
+	return sched;
+}
 
-#define DSE_DEBUG 1
-#if defined(DSE_DEBUG)
-#define D_(fmt, ...) fprintf(stderr, fmt "\n", ##__VA_ARGS__)
-#define A_(stmt) assert(stmt);
-#else
-#define D_(fmt, ...)
-#define A_(stmt)
-#endif
+void Scheduler_delete(Scheduler *sched)
+{
+	pthread_mutex_destroy(&sched->lock);
+	pthread_cond_destroy(&sched->cond);
+	dse_free(sched, sizeof(Scheduler));
+}
 
+bool dse_enqueue(Scheduler *sched, Message *msg)
+{
+	int front = sched->front;
+	int last = sched->last;
+	if(next(front) == last) return false;
+	sched->msgQueue[front] = msg;
+	sched->front = next(front);
+	return true;
+}
 
-
-#endif /* DSE_DEBUG_H_ */
+Message *dse_dequeue(Scheduler *sched)
+{
+	int front = sched->front;
+	int last = sched->last;
+	if(front == last) return NULL;
+	Message *msg = sched->msgQueue[last];
+	sched->last = next(last);
+	return msg;
+}

@@ -23,31 +23,72 @@
  ***************************************************************************/
 
 /* ************************************************************************ */
-#ifndef DSE_UTIL_H_
-#define DSE_UTIL_H_
 
-#include "debug.h"
-size_t gTotalMalloc;
-void *dse_malloc(size_t size)
+#include <getopt.h>
+#include <logpool/logpool.h>
+#include "util.h"
+#include "dse.h"
+
+#define HTTPD_ADDR "0.0.0.0"
+#define HTTPD_PORT 8080
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int verbose_debug = 0;
+int port = HTTPD_PORT;
+char *logpoolip = NULL;
+
+static struct option long_option[] = {
+	/* These options set a flag. */
+	{"verbose", no_argument, &verbose_debug, 1},
+	{"logpool", required_argument, 0, 'l'},
+	{"port", required_argument, 0, 'p'},
+};
+
+static void dse_parseopt(int argc, char *argv[])
 {
-	void *ptr = malloc(size);
-	if (ptr == NULL) {
-		D_("malloc failed");
-		size = 0;
+	char *e;
+	logpoolip = getenv("LOGPOOL_IP");
+	while(1) {
+		int option_index = 0;
+		int c = getopt_long(argc, argv, "l:p:", long_option, &option_index);
+		if(c == -1) break; /* Detect the end of the options. */
+		switch(c) {
+			case 'l':
+				logpoolip = optarg;
+				break;
+			case 'p':
+				port = (int)strtol(optarg, &e, 10);
+				break;
+			case '?':
+				fprintf(stderr, "Unknown or required argument option -%c\n", optopt);
+				fprintf(stderr, "Usage: COMMAND [ --verbose ] [ --port | -p ] port [ --logpool | -l ] logpoolip\n");
+				exit(EXIT_FAILURE);
+			default:
+				break;
+		}
 	}
-	gTotalMalloc += size;
-
-	return ptr;
+	if(!logpoolip) logpoolip = "0.0.0.0";
+#ifdef DSE_DEBUG
+	verbose_debug = 1;
+#endif /* DSE_DEBUG */
 }
 
-void dse_free(void *ptr, size_t size)
+int main(int argc, char *argv[])
 {
-	free(ptr);
-	gTotalMalloc -= size;
-	A_(gTotalMalloc >= 0);
+	dse_parseopt(argc, argv);
+	DEBUG_PRINT("DSE starts on port %d", port);
+	DEBUG_PRINT("LogPool is running on %s", logpoolip);
+	logpool_global_init(LOGPOOL_TRACE);
+	DSE *dse = DSE_new();
+	DSE_start(dse, HTTPD_ADDR, port);
+	DSE_delete(dse);
+	logpool_global_exit();
+	return 0;
 }
 
-
-
-
-#endif /* DSE_UTIL_H_ */
+#ifdef __cplusplus
+}
+#endif

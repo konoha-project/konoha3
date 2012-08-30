@@ -23,32 +23,32 @@
  ***************************************************************************/
 
 /* ************************************************************************ */
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
 
-#include "../include/dse.h"
+#ifndef SCHED_H_
+#define SCHED_H_
 
-#define HTTPD_ADDR "0.0.0.0"
-#define HTTPD_PORT 8080
+#ifndef K_USE_PTHREAD
+#include <pthread.h>
+#endif /* K_USE_PTHREAD */
 
-struct dDserv *gdserv;
+#include "message.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#define MSG_QUEUE_SIZE 16
+#define next(index) (((index) + 1) % MSG_QUEUE_SIZE)
 
-int main(int argc, char **av)
-{
-	gdserv = NULL;
-	dse_logpool_init();
-	gdserv = dserv_new();
-	dserv_start(gdserv, HTTPD_ADDR, HTTPD_PORT);
-	dserv_close(gdserv);
-	dse_logpool_exit();
-	return 0;
-}
+struct Scheduler {
+	Message *msgQueue[MSG_QUEUE_SIZE];
+	int front;
+	int last;
+	pthread_mutex_t lock;
+	pthread_cond_t cond;
+};
 
-#ifdef __cplusplus
-}
-#endif
+typedef struct Scheduler Scheduler;
+
+Scheduler *Scheduler_new(void);
+void Scheduler_delete(Scheduler *sched);
+bool dse_enqueue(Scheduler *sched, Message *msg);
+Message *dse_dequeue(Scheduler *sched);
+
+#endif /* SCHED_H_ */

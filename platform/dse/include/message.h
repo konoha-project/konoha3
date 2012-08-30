@@ -24,67 +24,14 @@
 
 /* ************************************************************************ */
 
-#ifndef DSE_PROTOCOL_H_
-#define DSE_PROTOCOL_H_
+#ifndef MESSAGE_H_
+#define MESSAGE_H_
 
-struct dReq {
-	struct evhttp_request *req;
-	int method;
-	int context;
-	int taskid;
-	char logpoolip[16];
-	char *scriptfilepath;
-};
+#include <string.h>
 
-struct dRes {
-	int taskid;
-	int status;
-	char *status_symbol;
-	char *status_detail;
-};
+typedef unsigned char Message;
 
-enum {
-	E_METHOD_EVAL,
-	E_METHOD_TYCHECK,
-	E_STATUS_OK,
-};
+Message *Message_new(unsigned char *requestLine);
+void Message_delete(Message *msg);
 
-#define DSE_FILEPATH_SIZE 128
-
-static struct dReq *newDReq()
-{
-	struct dReq *ret = (struct dReq *)malloc(sizeof(struct dReq));
-	ret->method = 0;
-	ret->context = 0;
-	ret->taskid = 0;
-	memset(ret->logpoolip, 16, 0);
-	ret->scriptfilepath = (char*)dse_malloc(DSE_FILEPATH_SIZE);
-	memset(ret->scriptfilepath, 128, 0);
-	return ret;
-}
-
-static void deleteDReq(struct dReq *req)
-{
-	if (req == NULL) return;
-	dse_free(req->scriptfilepath, DSE_FILEPATH_SIZE);
-	dse_free(req, sizeof(struct dReq));
-}
-
-static struct dRes *newDRes()
-{
-	struct dRes *ret = (struct dRes *)dse_malloc(sizeof(struct dRes));
-	ret->taskid = 0;
-	ret->status = 0;
-	ret->status_detail = NULL;
-	ret->status_symbol = NULL;
-	return ret;
-}
-
-static void deleteDRes (struct dRes *res)
-{
-	// check if satus_* is set
-	if (res == NULL) return;
-	dse_free(res, sizeof(struct dRes));
-}
-
-#endif /* DSE_PROTOCOL_H_ */
+#endif /* MESSAGE_H_ */
