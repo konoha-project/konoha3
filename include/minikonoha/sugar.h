@@ -432,7 +432,7 @@ struct kStmtVar {
 #define kStmt_getUnboxValue(CTX, O, K, DEF)       (KLIB kObject_getUnboxValue(CTX, UPCAST(O), K, DEF))
 #define kStmt_setUnboxValue(CTX, O, K, T, V)      KLIB kObject_setUnboxValue(CTX, UPCAST(O), K, T, V)
 #define kStmt_removeKey(CTX, O, K)                KLIB kObject_removeKey(CTX, UPCAST(O), K)
-#define kkStmt_printMessagerotoEach(CTX, O, THUNK, F)         KLIB kObject_protoEach(CTX, UPCAST(O), THUNK, F)
+#define kStmt_protoEach(CTX, O, THUNK, F)         KLIB kObject_protoEach(CTX, UPCAST(O), THUNK, F)
 
 struct kBlockVar {
 	KonohaObjectHeader   h;
@@ -552,8 +552,8 @@ typedef struct {
 
 	kExpr*     (*new_UntypedTermExpr)(KonohaContext *, kToken *tk);
 	kExpr*     (*new_UntypedCallStyleExpr)(KonohaContext *, SugarSyntax *syn, int n, ...);
-	kExpr*     (*kkStmt_printMessagearseOperatorExpr)(KonohaContext *, kStmt *, SugarSyntax *, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx);
-	kExpr*     (*kkStmt_printMessagearseExpr)(KonohaContext *, kStmt *, kArray *tokenList, int s, int e);
+	kExpr*     (*kStmt_parseOperatorExpr)(KonohaContext *, kStmt *, SugarSyntax *, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx);
+	kExpr*     (*kStmt_parseExpr)(KonohaContext *, kStmt *, kArray *tokenList, int s, int e);
 	kExpr*     (*kStmt_addExprParam)(KonohaContext *, kStmt *, kExpr *, kArray *tokenList, int, int, int allowEmpty);
 	kExpr*     (*kStmt_rightJoinExpr)(KonohaContext *, kStmt *, kExpr *, kArray *, int, int);
 

@@ -254,7 +254,7 @@ static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp)
 	kStmt *stmt  = sfp[0].asStmt;
 	kArray *tokenList  = sfp[1].asArray;
 	int s = sfp[2].intValue, e = sfp[3].intValue;
-	RETURN_(SUGAR kkStmt_printMessagearseExpr(kctx, stmt, tokenList, s, e));
+	RETURN_(SUGAR kStmt_parseExpr(kctx, stmt, tokenList, s, e));
 }
 
 ////## Expr Stmt.newMethodCallExpr(Token key, Token self);
