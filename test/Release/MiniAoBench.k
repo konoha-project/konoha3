@@ -172,8 +172,8 @@ void getAmbientOcclusion(RayIntersection isect, Vec ambientOcclusion) {
 	while (j < ntheta) {
 		i = 0;
 		while (i < nphi) {
-			double theta = Math.sqrt(Float.random());
-			double phi = 2.0 * pi * Float.random();
+			double theta = Math.sqrt(Math.random());
+			double phi = 2.0 * pi * Math.random();
 			double x = Math.cos(phi) * theta;
 			double y = Math.sin(phi) * theta;
 			double z = Math.sqrt(1.0 - theta * theta);
