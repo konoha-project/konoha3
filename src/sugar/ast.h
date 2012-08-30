@@ -150,7 +150,7 @@ static kExpr *kStmt_addExprParam(KonohaContext *kctx, kStmt *stmt, kExpr *expr, 
 	if(allowEmpty == 0 || start < i) {
 		expr = Expr_add(kctx, expr, kStmt_parseExpr(kctx, stmt, tokenList, start, i));
 	}
-	KLIB kArray_clear(kctx, tokenList, s);
+	//KLIB kArray_clear(kctx, tokenList, s);
 	return expr;
 }
 
