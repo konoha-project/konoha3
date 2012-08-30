@@ -34,7 +34,9 @@
 #include <event.h>
 #include <evhttp.h>
 #include <event2/buffer.h>
+#ifndef K_USE_PTHREAD
 #define K_USE_PTHREAD 1
+#endif /* K_USE_PTHREAD */
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 extern int verbose_debug;
