@@ -1,4 +1,14 @@
-K.import("konoha");
+K.import("konoha.assign");
+K.import("konoha.while");
+K.import("konoha.class");
+K.import("konoha.global");
+K.import("konoha.null");
+K.import("konoha.int");
+K.import("konoha.array");
+
+// if we import konoha, then it fail
+//K.import("konoha")
+
 /* The Great Computer Language Shootout
    http://shootout.alioth.debian.org/
    contributed by Kimio Kuramitsu
@@ -25,12 +35,12 @@ class TreeNode {
 	}
 }
 
-TreeNode bottomUpTree(int item, int depth){
+TreeNode bottomUpTree(int item, int depth) {
 	if (depth > 0){
 		return new TreeNode(bottomUpTree(2*item-1, depth-1), bottomUpTree(2*item, depth-1), item, false);
 	}
 	else {
-		TreeNode t; // = null;
+		TreeNode t = null;
 		return new TreeNode(t, t, item, true);
 	}
 }

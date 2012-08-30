@@ -125,9 +125,9 @@ void interSectsPlane(Plane plane, RayIntersection isect) {
 }
 
 void getOrthoBasis (Vec normal, Vec[] orthoBasis) {
-	orthoBasis.set(0, new Vec(0.0, 0.0, 0.0));
-	orthoBasis.set(1,new Vec(0.0, 0.0, 0.0));
-	orthoBasis.set(2, new Vec(0.0, 0.0, 0.0));
+	orthoBasis[0] = new Vec(0.0, 0.0, 0.0));
+	orthoBasis[1] = new Vec(0.0, 0.0, 0.0));
+	orthoBasis[2] = new Vec(0.0, 0.0, 0.0));
 	Vec o0 = orthoBasis[0];
 	Vec o1 = orthoBasis[1];
 	Vec o2 = orthoBasis[2];
