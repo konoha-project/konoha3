@@ -33,14 +33,90 @@ static KMETHOD Math_abs(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(abs(Int_to(int, sfp[1])));
 }
 
-static KMETHOD Math_fabs(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Math_acos(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNf_(fabs(Float_to(double, sfp[1])));
+	RETURNf_(acos(Float_to(double, sfp[1])));
+}
+
+static KMETHOD Math_asin(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNf_(asin(Float_to(double, sfp[1])));
+}
+
+static KMETHOD Math_atan(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNf_(atan(Float_to(double, sfp[1])));
+}
+
+static KMETHOD Math_atan2(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNf_(atan2(Float_to(double, sfp[1]),Float_to(double, sfp[2])));
+}
+
+static KMETHOD Math_ceil(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNf_(ceil(Float_to(double, sfp[1])));
+}
+
+static KMETHOD Math_cos(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNf_(cos(Float_to(double, sfp[1])));
+}
+
+static KMETHOD Math_exp(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNf_(exp(Float_to(double, sfp[1])));
+}
+
+static KMETHOD Math_floor(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNf_(floor(Float_to(double, sfp[1])));
+}
+
+static KMETHOD Math_log(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNf_(log(Float_to(double, sfp[1])));
 }
 
 static KMETHOD Math_pow(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNf_(pow(Float_to(double, sfp[1]),Float_to(double, sfp[2])));
+}
+
+static KMETHOD Math_random(KonohaContext *kctx, KonohaStack *sfp)
+{
+//	srand(seed)
+	double ret = rand() / (1.0 + RAND_MAX);
+	RETURNf_(ret);
+}
+
+static KMETHOD Math_sin(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNf_(sin(Float_to(double, sfp[1])));
+}
+
+static KMETHOD Math_sqrt(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNf_(sqrt(Float_to(double, sfp[1])));
+}
+
+static KMETHOD Math_tan(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNf_(tan(Float_to(double, sfp[1])));
+}
+
+static KMETHOD Math_toSource(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURN_(KLIB new_kString(kctx, "Math", strlen("Math"), SPOL_ASCII));
+}
+
+/*static KMETHOD Math_round(KonohaContext *kctx, KonohaStack *sfp)*/
+
+//==================================================================
+
+static KMETHOD Math_fabs(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNf_(fabs(Float_to(double, sfp[1])));
 }
 
 static KMETHOD Math_ldexp(KonohaContext *kctx, KonohaStack *sfp)
@@ -65,10 +141,6 @@ static KMETHOD Math_fmod(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNf_(fmod(Float_to(double, sfp[1]),Float_to(double, sfp[2])));
 }
 
-static KMETHOD Math_ceil(KonohaContext *kctx, KonohaStack *sfp)
-{
-	RETURNf_(ceil(Float_to(double, sfp[1])));
-}
 
 #ifdef K_USING_WIN32_
 static KMETHOD Math_round(KonohaContext *kctx, KonohaStack *sfp)
@@ -82,64 +154,9 @@ static KMETHOD Math_nearByInt(KonohaContext *kctx, KonohaStack *sfp)
 }
 #endif
 
-static KMETHOD Math_floor(KonohaContext *kctx, KonohaStack *sfp)
-{
-	RETURNf_(floor(Float_to(double, sfp[1])));
-}
-
-static KMETHOD Math_sqrt(KonohaContext *kctx, KonohaStack *sfp)
-{
-	RETURNf_(sqrt(Float_to(double, sfp[1])));
-}
-
-static KMETHOD Math_exp(KonohaContext *kctx, KonohaStack *sfp)
-{
-	RETURNf_(exp(Float_to(double, sfp[1])));
-}
-
 static KMETHOD Math_log10(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNf_(log10(Float_to(double, sfp[1])));
-}
-
-static KMETHOD Math_log(KonohaContext *kctx, KonohaStack *sfp)
-{
-	RETURNf_(log(Float_to(double, sfp[1])));
-}
-
-static KMETHOD Math_sin(KonohaContext *kctx, KonohaStack *sfp)
-{
-	RETURNf_(sin(Float_to(double, sfp[1])));
-}
-
-static KMETHOD Math_cos(KonohaContext *kctx, KonohaStack *sfp)
-{
-	RETURNf_(cos(Float_to(double, sfp[1])));
-}
-
-static KMETHOD Math_tan(KonohaContext *kctx, KonohaStack *sfp)
-{
-	RETURNf_(tan(Float_to(double, sfp[1])));
-}
-
-static KMETHOD Math_asin(KonohaContext *kctx, KonohaStack *sfp)
-{
-	RETURNf_(asin(Float_to(double, sfp[1])));
-}
-
-static KMETHOD Math_acos(KonohaContext *kctx, KonohaStack *sfp)
-{
-	RETURNf_(acos(Float_to(double, sfp[1])));
-}
-
-static KMETHOD Math_atan(KonohaContext *kctx, KonohaStack *sfp)
-{
-	RETURNf_(atan(Float_to(double, sfp[1])));
-}
-
-static KMETHOD Math_atan2(KonohaContext *kctx, KonohaStack *sfp)
-{
-	RETURNf_(atan2(Float_to(double, sfp[1]),Float_to(double, sfp[2])));
 }
 
 static KMETHOD Math_sinh(KonohaContext *kctx, KonohaStack *sfp)
@@ -259,10 +276,10 @@ static	kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 			_Public, _F(Math_acosh), TY_Float, TY_Math, MN_("acosh"), 1, TY_Float, FN_x,
 			_Public, _F(Math_atanh), TY_Float, TY_Math, MN_("atanh"), 1, TY_Float, FN_x,
 #endif
-			_Public, _F(Math_max), TY_Float, TY_Math, MN_("max"), 2, TY_Float, FN_x, TY_Float, FN_y,
-			_Public, _F(Math_min), TY_Float, TY_Math, MN_("min"), 2, TY_Float, FN_x, TY_Float, FN_y,
-			_Public, _F(Math_random), TY_Float, TY_Math, MN_("random"), 0,
-			_Public, _F(Math_toSource), TY_String, TY_Math, MN_("toSource"), 0,
+			_Public|_Const, _F(Math_max), TY_Float, TY_Math, MN_("max"), 2, TY_Float, FN_x, TY_Float, FN_y,
+			_Public|_Const, _F(Math_min), TY_Float, TY_Math, MN_("min"), 2, TY_Float, FN_x, TY_Float, FN_y,
+			_Public|_Const, _F(Math_random), TY_Float, TY_Math, MN_("random"), 0,
+			_Public|_Const, _F(Math_toSource), TY_String, TY_Math, MN_("toSource"), 0,
 			DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
