@@ -1,0 +1,3 @@
+ - (error) (ERROR_OverrideMethodCallWithUndefined.k:6) undefined name: a
+ ** RuntimeScriptException (ERROR_OverrideMethodCallWithUndefined.k:6)
+Q.E.D.
