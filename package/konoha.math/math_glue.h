@@ -22,7 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include<math.h>
+#include <math.h>
+#include "ext/mt19937ar.h"
 
 #define Int_to(T, a)               ((T)a.intValue)
 #define Float_to(T, a)             ((T)a.floatValue)
@@ -173,6 +174,39 @@ static KMETHOD Math_atanh(KonohaContext *kctx, KonohaStack *sfp)
 }
 #endif
 
+static KMETHOD Math_max(KonohaContext *kctx, KonohaStack *sfp)
+{
+	double arg1 = Float_to(double, sfp[1]);
+	double arg2 = Float_to(double, sfp[2]);
+	if (arg1 > arg2) {
+		RETURNf_(arg1);
+	}
+	else {
+		RETURNf_(arg2);
+	}
+}
+
+static KMETHOD Math_min(KonohaContext *kctx, KonohaStack *sfp)
+{
+	double arg1 = Float_to(double, sfp[1]);
+	double arg2 = Float_to(double, sfp[2]);
+	if (arg1 < arg2) {
+		RETURNf_(arg1);
+	}
+	else {
+		RETURNf_(arg2);
+	}
+}
+
+static KMETHOD Math_random(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURNf_(genrand64_real2());
+}
+
+static KMETHOD Math_toSource(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURN_(KLIB new_kString(kctx, "Math", strlen("Math"), SPOL_ASCII));
+}
 // --------------------------------------------------------------------------
 
 #define _Public   kMethod_Public
@@ -225,18 +259,25 @@ static	kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 			_Public, _F(Math_acosh), TY_Float, TY_Math, MN_("acosh"), 1, TY_Float, FN_x,
 			_Public, _F(Math_atanh), TY_Float, TY_Math, MN_("atanh"), 1, TY_Float, FN_x,
 #endif
+			_Public, _F(Math_max), TY_Float, TY_Math, MN_("max"), 2, TY_Float, FN_x, TY_Float, FN_y,
+			_Public, _F(Math_min), TY_Float, TY_Math, MN_("min"), 2, TY_Float, FN_x, TY_Float, FN_y,
+			_Public, _F(Math_random), TY_Float, TY_Math, MN_("random"), 0,
+			_Public, _F(Math_toSource), TY_String, TY_Math, MN_("toSource"), 0,
 			DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 
 	KDEFINE_FLOAT_CONST FloatData[] = {
 			{_KVf(E)},
+			{_KVf(LN2)},
+			{_KVf(LN10)},
 			{_KVf(LOG2E)},
 			{_KVf(LOG10E)},
 			{_KVf(LN2)},
 			{_KVf(LN10)},
 			{_KVf(PI)},
 			{_KVf(SQRT2)},
+			{_KVf(SQRT1_2)},
 			{}
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(FloatData), 0);
