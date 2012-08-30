@@ -57,6 +57,36 @@ static void lplog(int priority, const char *message, ...)
 //	va_end(ap);
 }
 
+static const char *dse_formatScriptPath(char *buf, size_t bufsiz)
+{
+	FILE *fp = NULL;
+	char *path = getenv("DSE_SCRIPTPATH");
+	const char *local = "";
+	if(path == NULL) {
+		path = getenv("KONOHA_HOME");
+		local = "/script";
+	}
+	if(path == NULL) {
+		path = getenv("HOME");
+		local = "/.minikonoha/script";
+	}
+	snprintf(buf, bufsiz, "%s%s/%s", path, local, "dse.k");
+#ifdef K_PREFIX
+	fp = fopen(buf, "r");
+	if(fp != NULL) {
+		fclose(fp);
+		return (const char*)buf;
+	}
+	snprintf(buf, bufsiz, "%s/%s", K_PREFIX, "/minikonoha/script/dse.k");
+#endif
+	fp = fopen(buf, "r");
+	if(fp != NULL) {
+		fclose(fp);
+		return (const char*)buf;
+	}
+	return NULL;
+}
+
 static void dse_define(KonohaContext *kctx, Message *msg)
 {
 	if(msg != NULL) {
@@ -72,7 +102,8 @@ static void *dse_dispatch(void *arg)
 	Scheduler *sched = (Scheduler *)arg;
 	Message *msg;
 	kbool_t ret;
-	char script[] = "../scripts/dse.k";
+	char script[256];
+	dse_formatScriptPath(script, sizeof(script));
 	static bool platformIsInitialized = false;
 	PlatformApi *dse_platform = KonohaUtils_getDefaultPlatformApi();
 	if(!platformIsInitialized) {

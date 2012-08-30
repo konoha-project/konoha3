@@ -351,6 +351,20 @@ foreach(dir ${PACKAGES})
 	endif()
 endforeach()
 
+if(USE_DSE_PLATFORM)
+	project(dse)
+	set(DSE_PLATFORM_DIR ${CMAKE_CURRENT_SOURCE_DIR}/platform/dse)
+	set(DSE_PLATFORM_INCLUDE_DIR ${DSE_PLATFORM_DIR}/include)
+	include_directories(${DSE_PLATFORM_INCLUDE_DIR})
+	set(DSE_PLATFORM_SCRIPT_DIR ${DSE_PLATFORM_DIR}/script)
+	file(GLOB DSE_PLATFORM_SRCS ${DSE_PLATFORM_DIR}/src/*.c)
+	add_executable(${PROJECT_NAME} ${DSE_PLATFORM_SRCS})
+	set(DSE_PLATFORM_LIBS event)
+	set(DSE_PLATFORM_LIBS ${DSE_PLATFORM_LIBS} minikonoha)
+	set(DSE_PLATFORM_LIBS ${DSE_PLATFORM_LIBS} logpool)
+	target_link_libraries(${PROJECT_NAME} ${DSE_PLATFORM_LIBS})
+endif(USE_DSE_PLATFORM)
+
 macro(add_clib_test test_name)
 	add_executable(${test_name} ${ARGN})
 	target_link_libraries(${test_name} ${ExtraLibs})
@@ -402,6 +416,11 @@ install(TARGETS minikonoha minikonoha_bin
 		RUNTIME DESTINATION bin
 		LIBRARY DESTINATION lib${LIB_SUFFIX}
 		)
+
+if(USE_DSE_PLATFORM)
+	install(TARGETS dse DESTINATION bin)
+	install(FILES ${DSE_PLATFORM_SCRIPT_DIR}/dse.k DESTINATION minikonoha/script)
+endif(USE_DSE_PLATFORM)
 
 install(DIRECTORY include/ DESTINATION include 
 		FILES_MATCHING
