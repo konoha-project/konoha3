@@ -243,7 +243,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->new_UntypedTermExpr        = new_UntypedTermExpr;
 	mod->new_UntypedCallStyleExpr   = new_UntypedCallStyleExpr;
 	mod->kStmt_parseOperatorExpr    = kStmt_parseOperatorExpr;
-	mod->kkStmt_printMessagearseExpr            = kkStmt_printMessagearseExpr;
+	mod->kStmt_parseExpr            = kStmt_parseExpr;
 	mod->kStmt_addExprParam         = kStmt_addExprParam;
 	mod->kStmt_rightJoinExpr        = kStmt_rightJoinExpr;
 	mod->Token_pERR                 = Token_pERR;

@@ -122,7 +122,7 @@ static int kStmt_findOperator(KonohaContext *kctx, kStmt *stmt, kArray *tokenLis
 	return idx;
 }
 
-static kExpr* kkStmt_printMessagearseExpr(KonohaContext *kctx, kStmt *stmt, kArray *tokenList, int beginIdx, int endIdx)
+static kExpr* kStmt_parseExpr(KonohaContext *kctx, kStmt *stmt, kArray *tokenList, int beginIdx, int endIdx)
 {
 	if(!Stmt_isERR(stmt)) {
 		if(beginIdx < endIdx) {
@@ -150,12 +150,12 @@ static kExpr *kStmt_addExprParam(KonohaContext *kctx, kStmt *stmt, kExpr *expr, 
 	for(i = s; i < e; i++) {
 		kToken *tk = tokenList->tokenItems[i];
 		if(tk->resolvedSyntaxInfo->keyword == KW_COMMA) {
-			expr = Expr_add(kctx, expr, kkStmt_printMessagearseExpr(kctx, stmt, tokenList, start, i));
+			expr = Expr_add(kctx, expr, kStmt_parseExpr(kctx, stmt, tokenList, start, i));
 			start = i + 1;
 		}
 	}
 	if(allowEmpty == 0 || start < i) {
-		expr = Expr_add(kctx, expr, kkStmt_printMessagearseExpr(kctx, stmt, tokenList, start, i));
+		expr = Expr_add(kctx, expr, kStmt_parseExpr(kctx, stmt, tokenList, start, i));
 	}
 	KLIB kArray_clear(kctx, tokenList, s);
 	return expr;
@@ -634,7 +634,7 @@ static int kStmt_addAnnotation(KonohaContext *kctx, kStmt *stmt, TokenRange *ran
 			kToken *nextToken = range->tokenList->tokenItems[i+1];
 			kObject *value = UPCAST(K_TRUE);
 			if(nextToken->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
-				value = (kObject*)kkStmt_printMessagearseExpr(kctx, stmt, nextToken->subTokenList, 0, kArray_size(nextToken->subTokenList));
+				value = (kObject*)kStmt_parseExpr(kctx, stmt, nextToken->subTokenList, 0, kArray_size(nextToken->subTokenList));
 				i++;
 			}
 			if(value != NULL) {

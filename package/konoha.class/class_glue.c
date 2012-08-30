@@ -370,12 +370,6 @@ static kbool_t class_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 
 // --------------------------------------------------------------------------
 
-//static ksymbol_t tosymbolUM(KonohaContext *kctx, kToken *tk)
-//{
-//	DBG_ASSERT(tk->keyword == TokenType_SYMBOL);
-//	return ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
-//}
-
 static KMETHOD ExprTyCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
@@ -391,11 +385,7 @@ static KMETHOD ExprTyCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		SUGAR kStmt_printMessage(kctx, stmt, tkN, ErrTag, "undefined field: %s", S_text(tkN->text));
 	}
-	RETURN_(K_NULLEXPR);
 }
-
-// ----------------------------------------------------------------------------
-
 
 // ----------------------------------------------------------------------------
 /* define class */
@@ -412,16 +402,6 @@ static void Object_initToMakeDefaultValueAsNull(KonohaContext *kctx, kObject *o,
 	KonohaClass *c = O_ct(o);
 	bzero(of->fieldObjectItems, c->cstruct_size - sizeof(KonohaObjectHeader));
 }
-
-//static kObject* Object_fnullToMakeDefaultValueAsNull(KonohaContext *kctx, KonohaClass *ct)
-//{
-//	assert(ct->defaultValueAsNull == NULL);
-//	DBG_P("creating new nulval for %s", CT_t(ct));
-//	KINITv(((KonohaClassVar*)ct)->defaultValueAsNull, KLIB new_kObject(kctx, ct, 0));
-//	kObject_setNullObject(ct->defaultValueAsNull, 1);
-//	((KonohaClassVar*)ct)->fnull = DEFAULT_fnull;
-//	return ct->defaultValueAsNull;
-//}
 
 static void ObjectField_init(KonohaContext *kctx, kObject *o, void *conf)
 {
@@ -506,7 +486,7 @@ static void KonohaClass_initField(KonohaContext *kctx, KonohaClassVar *definedCl
 
 /* Block */
 
-static kBlock* kkStmt_printMessagearseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToken *tokenClassName)
+static kBlock* kStmt_parseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToken *tokenClassName)
 {
 	kBlock *bk = NULL;
 	kToken *blockToken = (kToken*)kStmt_getObject(kctx, stmt, KW_BlockPattern, NULL);
@@ -656,7 +636,7 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 		definedClass = kNameSpace_defineClassName(kctx, ns, cflag, tokenClassName->text, stmt->uline);
 		isNewlyDefinedClass = true;
 	}
-	kBlock *bk = kkStmt_printMessagearseClassBlockNULL(kctx, stmt, tokenClassName);
+	kBlock *bk = kStmt_parseClassBlockNULL(kctx, stmt, tokenClassName);
 	size_t declsize = kBlock_countFieldSize(kctx, bk);
 	if (isNewlyDefinedClass) {   // Already defined
 		KonohaClass *superClass = CT_Object;
@@ -719,6 +699,7 @@ static kbool_t class_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileli
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
+
 	return true;
 }
 

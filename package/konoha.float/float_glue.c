@@ -373,22 +373,22 @@ static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t float_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("float"), .type = TY_Float, },
+		{ .keyword = SYM_("float"),  .type = TY_Float, },
 		{ .keyword = SYM_("double"), .type = TY_Float, },
 		{ .keyword = SYM_("$Float"), ExprTyCheck_(Float), },
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '0', parseNumber, NULL, 0);
-	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '1', parseNumber, NULL, 0);
-	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '2', parseNumber, NULL, 0);
-	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '3', parseNumber, NULL, 0);
-	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '4', parseNumber, NULL, 0);
-	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '5', parseNumber, NULL, 0);
-	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '6', parseNumber, NULL, 0);
-	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '7', parseNumber, NULL, 0);
-	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '8', parseNumber, NULL, 0);
-	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '9', parseNumber, NULL, 0);
+//	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '1', parseNumber, NULL, 0);
+//	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '2', parseNumber, NULL, 0);
+//	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '3', parseNumber, NULL, 0);
+//	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '4', parseNumber, NULL, 0);
+//	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '5', parseNumber, NULL, 0);
+//	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '6', parseNumber, NULL, 0);
+//	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '7', parseNumber, NULL, 0);
+//	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '8', parseNumber, NULL, 0);
+//	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '9', parseNumber, NULL, 0);
 	return true;
 }
 

@@ -499,7 +499,7 @@ static KMETHOD ParseExpr_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 		RETURN_(SUGAR kStmt_addExprParam(kctx, stmt, arrayExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), /*allowEmpty*/1));
 	}
 	else {
-		kExpr *leftExpr = SUGAR kkStmt_printMessagearseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx);
+		kExpr *leftExpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx);
 		if (leftExpr == K_NULLEXPR) {
 			RETURN_(leftExpr);
 		}

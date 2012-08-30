@@ -207,19 +207,21 @@ static kbool_t SugarSyntax_tyCheckStmt(KonohaContext *kctx, SugarSyntax *syn, kS
 	int i, callCount = 0;
 	while(true) {
 		kFunc *fo = syn->sugarFuncTable[SUGARFUNC_index];
-		if(IS_Array(fo)) { // @Future
-			kArray *a = (kArray*)fo;
-			for(i = kArray_size(a) - 1; i >= 0; i--) {
-				kbool_t result = callStmtTyCheckFunc(kctx, a->funcItems[i], &callCount, stmt, gma);
-				if(stmt->syn == NULL) return true;
+		if(fo != NULL) {
+			if(IS_Array(fo)) { // @Future
+				kArray *a = (kArray*)fo;
+				for(i = kArray_size(a) - 1; i >= 0; i--) {
+					kbool_t result = callStmtTyCheckFunc(kctx, a->funcItems[i], &callCount, stmt, gma);
+					if(stmt->syn == NULL) return true;
+					if(stmt->build != TSTMT_UNDEFINED) return result;
+				}
+			}
+			else {
+				DBG_ASSERT(IS_Func(fo));
+				kbool_t result = callStmtTyCheckFunc(kctx, fo, &callCount, stmt, gma);
+				if(stmt->syn == NULL) return true; // this means done;
 				if(stmt->build != TSTMT_UNDEFINED) return result;
 			}
-		}
-		else {
-			DBG_ASSERT(IS_Func(fo));
-			kbool_t result = callStmtTyCheckFunc(kctx, fo, &callCount, stmt, gma);
-			if(stmt->syn == NULL) return true; // this means done;
-			if(stmt->build != TSTMT_UNDEFINED) return result;
 		}
 		if(syn->parentSyntaxNULL == NULL) break;
 		syn = syn->parentSyntaxNULL;

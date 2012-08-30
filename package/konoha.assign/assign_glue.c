@@ -120,7 +120,7 @@ static KMETHOD ParseExpr_SelfAssign(KonohaContext *kctx, KonohaStack *sfp)
 		SUGAR TokenRange_resolved(kctx, newexprRange, macroRange);
 //		KdumpTokenRange(kctx, "replaced", newexprRange);
 
-		kExpr *expr = SUGAR kkStmt_printMessagearseExpr(kctx, stmt, newexprRange->tokenList, newexprRange->beginIdx, newexprRange->endIdx);
+		kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, newexprRange->tokenList, newexprRange->beginIdx, newexprRange->endIdx);
 		TokenRange_pop(kctx, macroRange);
 		RETURN_(expr);
 	}
