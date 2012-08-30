@@ -25,8 +25,6 @@
 /* ************************************************************************ */
 
 #include <logpool/logpool.h>
-#include "util.h"
-#include "message.h"
 #include "dse.h"
 
 #define LOG_END 0

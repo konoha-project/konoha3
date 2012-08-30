@@ -27,25 +27,70 @@
 #ifndef DSE_H_
 #define DSE_H_
 
-#define K_USE_PTHREAD 1
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
 #include <event.h>
 #include <evhttp.h>
 #include <event2/buffer.h>
+#define K_USE_PTHREAD 1
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 extern int verbose_debug;
 #include <minikonoha/platform_posix.h>
-#include "sched.h"
+#ifndef K_USE_PTHREAD
+#include <pthread.h>
+#endif /* K_USE_PTHREAD */
 
 extern char *logpoolip;
 
-struct DSE {
-	struct event_base *base;
-	struct evhttp *httpd;
-	Scheduler *sched;
-};
+// for debug
+//#define DSE_DEBUG 1
+#if defined(DSE_DEBUG)
+#define DEBUG_PRINT(fmt, ...) fprintf(stderr, fmt "\n", ##__VA_ARGS__)
+#define DEBUG_ASSERT(stmt) assert(stmt);
+#else
+#define DEBUG_PRINT(fmt, ...)
+#define DEBUG_ASSERT(stmt)
+#endif
 
+// for memory management
+extern size_t totalMalloc;
+
+void *dse_malloc(size_t size);
+void  dse_free(void *ptr, size_t size);
+
+/* Message */
+typedef unsigned char Message;
+
+Message *Message_new(unsigned char *requestLine);
+void     Message_delete(Message *msg);
+
+/* Scheduler */
+#define MSG_QUEUE_SIZE 16
+#define next(index) (((index) + 1) % MSG_QUEUE_SIZE)
+
+struct Scheduler {
+	Message        *msgQueue[MSG_QUEUE_SIZE];
+	int             front;
+	int             last;
+	pthread_mutex_t lock;
+	pthread_cond_t  cond;
+};
+typedef struct Scheduler Scheduler;
+
+Scheduler   *Scheduler_new(void);
+void         Scheduler_delete(Scheduler *sched);
+bool         dse_enqueue(Scheduler *sched, Message *msg);
+Message     *dse_dequeue(Scheduler *sched);
+
+/* DSE */
+struct DSE {
+	struct event_base   *base;
+	struct evhttp       *httpd;
+	Scheduler           *sched;
+};
 typedef struct DSE DSE;
 
 DSE *DSE_new(void);

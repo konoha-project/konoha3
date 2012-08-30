@@ -26,7 +26,6 @@
 
 #include <getopt.h>
 #include <logpool/logpool.h>
-#include "util.h"
 #include "dse.h"
 
 #define HTTPD_ADDR "0.0.0.0"

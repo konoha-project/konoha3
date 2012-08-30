@@ -25,8 +25,7 @@
 /* ************************************************************************ */
 
 #include <stdbool.h>
-#include "util.h"
-#include "sched.h"
+#include "dse.h"
 
 Scheduler *Scheduler_new(void)
 {

@@ -24,8 +24,7 @@
 
 /* ************************************************************************ */
 
-#include "util.h"
-#include "message.h"
+#include "dse.h"
 
 Message *Message_new(unsigned char *requestLine)
 {
