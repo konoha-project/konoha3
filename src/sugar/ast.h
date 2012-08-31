@@ -163,19 +163,9 @@ static kExpr *kStmt_rightJoinExpr(KonohaContext *kctx, kStmt *stmt, kExpr *expr,
 /* ------------------------------------------------------------------------ */
 /* new ast parser */
 
-typedef struct {
-	kNameSpace *ns;
-	kArray *tokenList;
-	int beginIdx;
-	int endIdx;
-	kArray *stmtTokenList;
-	kToken *errToken;
-	SugarSyntax *symbolSyntaxInfo;
-} ASTEnv;
-
 static int kStmt_parseTypePattern(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KonohaClass **classRef);
 
-static KonohaClass* kkStmt_printMessagearseGenerics(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, KonohaClass *baseClass, kArray *tokenList, int beginIdx, int endIdx)
+static KonohaClass* kStmt_parseGenerics(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, KonohaClass *baseClass, kArray *tokenList, int beginIdx, int endIdx)
 {
 	size_t i = beginIdx, psize = 0;
 	kparamtype_t p[endIdx];
@@ -215,7 +205,7 @@ static int kStmt_parseTypePattern(KonohaContext *kctx, kStmt *stmt, kNameSpace *
 			if(tk->resolvedSyntaxInfo->keyword != KW_BracketGroup) break;
 			int sizeofBracketTokens = kArray_size(tk->subTokenList);
 			if(isAllowedGenerics &&  sizeofBracketTokens > 0) {  // C[T][]
-				KonohaClass *foundGenericClass = kkStmt_printMessagearseGenerics(kctx, stmt, ns, foundClass, tk->subTokenList, 0, sizeofBracketTokens);
+				KonohaClass *foundGenericClass = kStmt_parseGenerics(kctx, stmt, ns, foundClass, tk->subTokenList, 0, sizeofBracketTokens);
 				if(foundGenericClass == NULL) break;
 				foundClass = foundGenericClass;
 			}
@@ -258,18 +248,14 @@ static int PatternMatch(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, ksym
 		while(true) {
 			kFunc *fo = syn->sugarFuncTable[SUGARFUNC_PatternMatch];
 			if(fo != NULL) {
-				int next;
+				kFunc **funcItems = &fo;
+				int index = 0, next;
 				if(IS_Array(fo)) {
-					int i;
-					kArray *a = (kArray*)fo;
-					for(i = kArray_size(a) - 1; i >= 0; i--) {
-						next = callPatternMatchFunc(kctx, a->funcItems[i], &callCount, stmt, name, tokenList, beginIdx, endIdx);
-						if(Stmt_isERR(stmt)) return -1;
-						if(next > beginIdx) return next;
-					}
+					funcItems = syn->sugarFuncListTable[SUGARFUNC_PatternMatch]->funcItems;
+					index = kArray_size(syn->sugarFuncListTable[SUGARFUNC_PatternMatch]) - 1;
 				}
-				else {
-					next = callPatternMatchFunc(kctx, fo, &callCount, stmt, name, tokenList, beginIdx, endIdx);
+				for(; index >= 0; index--) {
+					next = callPatternMatchFunc(kctx, funcItems[index], &callCount, stmt, name, tokenList, beginIdx, endIdx);
 					if(Stmt_isERR(stmt)) return -1;
 					if(next > beginIdx) return next;
 				}

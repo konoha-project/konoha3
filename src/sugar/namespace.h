@@ -54,13 +54,14 @@ static SugarSyntax* kNameSpace_newSyntax(KonohaContext *kctx, kNameSpace *ns, Su
 	e->unboxValue = (uintptr_t)syn;
 	syn->parentSyntaxNULL = parentSyntax;
 	syn->keyword          = keyword;
-	if(parentSyntax != NULL) {  // TODO: RCGC
-		kreportf(DebugTag, 0, "redefining syntax %s%s on %p", PSYM_t(keyword), parentSyntax);
+	if(parentSyntax != NULL) {
+		kreportf(DebugTag, 0, "redefining syntax %s%s on NameSpace=%p, syntax=%p, parent=%p", PSYM_t(keyword), ns, syn, parentSyntax);
 		syn->ty             = parentSyntax->ty;
 		syn->precedence_op1 = parentSyntax->precedence_op1;
 		syn->precedence_op2 = parentSyntax->precedence_op2;
 	}
 	else {
+		kreportf(DebugTag, 0, "new syntax %s%s on NameSpace=%p, syntax=%p, parent=%p", PSYM_t(keyword), ns, syn, parentSyntax);
 		syn->ty             = TY_unknown;
 		syn->precedence_op1 = 0;
 		syn->precedence_op2 = 0;
@@ -79,6 +80,9 @@ static SugarSyntax* kNameSpace_getSyntax(KonohaContext *kctx, kNameSpace *ns, ks
 				if(e->hcode == hcode) {
 					if(isNew && ns != currentNameSpace) {
 						return kNameSpace_newSyntax(kctx, ns, (SugarSyntax*)e->unboxValue, keyword);
+					}
+					if(keyword == KW_DOT) {
+						DBG_P("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ns=%p, syn=%p", ns, (SugarSyntax*)e->unboxValue);
 					}
 					return (SugarSyntax*)e->unboxValue;
 				}
@@ -133,6 +137,7 @@ static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 	while(syndef->keyword != KW_END) {
 		SugarSyntaxVar* syn = (SugarSyntaxVar*)kNameSpace_getSyntax(kctx, ns, syndef->keyword, 1/*isnew*/);
 		DBG_ASSERT(syn != NULL);
+		DBG_P("keyword='%s%s', syn=%p, syn->parent=%p", PSYM_t(syndef->keyword), syn, syn->parentSyntaxNULL);
 		syn->flag  |= ((kshortflag_t)syndef->flag);
 		if(syndef->type != 0) {
 			syn->ty = syndef->type;
