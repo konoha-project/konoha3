@@ -24,6 +24,7 @@
 
 #include<minikonoha/minikonoha.h>
 #include<minikonoha/sugar.h>
+#include<minikonoha/klib.h>
 #include<minikonoha/float.h>
 
 typedef const struct _kHashMap kHashMap;
@@ -53,7 +54,7 @@ static void HashMap_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWrit
 	// TODO
 }
 
-static void entry_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p)
+static void entry_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
 {
 	if (TY_isUnbox(O_typeId(p->objectValue))) {
 		BEGIN_REFTRACE(1);
@@ -68,7 +69,6 @@ static void HashMap_reftrace(KonohaContext *kctx, kObject *o)
 	KLIB Kmap_each(kctx, hmap->map, NULL, entry_reftrace);
 }
 
-#include <minikonoha/klib.h>
 /* ------------------------------------------------------------------------ */
 
 static KMETHOD HashMap_get(KonohaContext *kctx, KonohaStack *sfp)
@@ -114,7 +114,7 @@ static KMETHOD HashMap_set(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD HashMap_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0));
+	RETURN_(sfp[0].asObject);
 }
 /* ------------------------------------------------------------------------ */
 
