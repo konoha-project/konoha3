@@ -119,7 +119,6 @@ static kExpr* kStmt_parseExpr(KonohaContext *kctx, kStmt *stmt, kArray *tokenLis
 		if(beginIdx < endIdx) {
 			int idx = kStmt_findOperator(kctx, stmt, tokenList, beginIdx, endIdx);
 			SugarSyntax *syn = tokenList->tokenItems[idx]->resolvedSyntaxInfo;
-//			DBG_P("@@@@@@@@ syn=%p, keyword='%s%s'", syn, PSYM_t(syn->keyword));
 			return kStmt_parseOperatorExpr(kctx, stmt, syn, tokenList, beginIdx, idx, endIdx);
 		}
 		else {

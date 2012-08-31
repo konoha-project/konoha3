@@ -311,12 +311,11 @@ static KMETHOD Array_indexOf(KonohaContext *kctx, KonohaStack *sfp)
 		//TODO:Need to implement Object compareTo.
 		kObject *o = sfp[1].asObject;
 		for(i = 0; i < kArray_size(a); i++) {
-			DBG_ASSERT(O_ct(o)->compareTo != NULL);
+			KLIB Kraise(kctx, EXPT_("NotImplemented"), sfp, sfp[K_RTNIDX].uline);
 			if (O_ct(o)->compareTo(a->objectItems[i], o) == 0) {
 				res = i; break;
 			}
 		}
-
 	}
 	RETURNi_(res);
 }
@@ -338,7 +337,7 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 		//TODO: Need to implement Object compareTo;
 		kObject *o = sfp[1].asObject;
 		for(i = kArray_size(a)- 1; i >= 0; i--) {
-			DBG_ASSERT(O_ct(o)->compareTo != NULL);
+			KLIB Kraise(kctx, EXPT_("NotImplemented"), sfp, sfp[K_RTNIDX].uline);
 			if(O_ct(o)->compareTo(a->objectItems[i], o) == 0) {
 				break;
 			}
@@ -359,16 +358,51 @@ static KMETHOD Array_splice(KonohaContext *kctx, KonohaStack *sfp)
 
 }
 
+#include<stdio.h>
 //## method String Array.toString();
 static KMETHOD Array_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
+	kArray *a = (kArray*)sfp[0].asArray;
+	size_t i = 0;
+	KUtilsWriteBuffer wb;
+	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	if (kArray_size(a) < 1) RETURN_(KNULL(String));
+	if(kArray_isUnboxData(a)) {
+		uintptr_t uv = a->unboxItems[i];
+		for (i = 0; i < kArray_size(a) - 1; i++) {
+			uv = a->unboxItems[i];
+			KLIB Kwb_printf(kctx, &wb, "%ld,", uv);
+		}
+		uv = a->unboxItems[i];
+		KLIB Kwb_printf(kctx, &wb, "%ld", uv);
+	} else {
+		KonohaStackRuntimeVar *base = kctx->stack;
+		kObject *obj;
+		BEGIN_LOCAL(lsfp, 1);
+		for (i = 0; i < kArray_size(a) - 1; i++) {
+			obj = a->objectItems[i];
+			DBG_ASSERT(O_ct(obj)->p);
+			// before call system.p, push variables
+			KSETv_AND_WRITE_BARRIER(NULL, lsfp[0].o, obj, GC_NO_WRITE_BARRIER);
+			O_ct(obj)->p(kctx, lsfp, 0, &wb, 0);
+			KLIB Kwb_printf(kctx, &wb, ",");
+		}
+		obj = a->objectItems[i];
+		KSETv_AND_WRITE_BARRIER(NULL, lsfp[0].o, obj, GC_NO_WRITE_BARRIER);
+		O_ct(obj)->p(kctx, lsfp, 0, &wb, 0);
+		END_LOCAL();
 
+	}
+	const char *KUtilsWriteBufferTopChar = KLIB Kwb_top(kctx, &wb, 0);
+	size_t strsize = strlen(KUtilsWriteBufferTopChar);
+	kString *ret = KLIB new_kString(kctx, KUtilsWriteBufferTopChar, strsize, 0);
+	KLIB Kwb_free(&wb);
+	RETURN_(ret);
 }
 
 static KMETHOD Array_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
-	//DBG_P("objitem=%p", a->objectItems);
 	size_t asize = (size_t)sfp[1].intValue;
 	if (asize < 0) {
 
@@ -421,6 +455,7 @@ static kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public,     _F(Array_concat), TY_ArrayT0, TY_Array, MN_("concat"), 2,TY_ArrayT0, FN_("a1"), TY_ArrayT0, FN_("a2"),
 		_Public,     _F(Array_indexOf), TY_Int, TY_Array, MN_("indexOf"), 1, TY_0, FN_("value"),
 		_Public,     _F(Array_lastIndexOf), TY_Int, TY_Array, MN_("lastIndexOf"), 1, TY_0, FN_("value"),
+		_Public,     _F(Array_toString), TY_String, TY_Array, MN_("toString"), 0,
 		_Public|kMethod_Hidden, _F(Array_newList), TY_Array, TY_Array, MN_("newList"), 0,
 		_Public|_Im, _F(Array_new), TY_void, TY_Array, MN_("new"), 1, TY_Int, FN_("size"),
 		DEND,

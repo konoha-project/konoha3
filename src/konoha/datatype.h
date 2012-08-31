@@ -876,6 +876,12 @@ static void loadInitStructData(KonohaContext *kctx)
 		new_KonohaClass(kctx, NULL, dd[cid], 0);
 		cid++;
 	}
+	/*
+	 * We need to be set CT_Array->p0 before
+	 * generating Array Objects.
+	 * */
+	KonohaClassVar *ct = (KonohaClassVar *)CT_Array;
+	ct->p0 = TY_Object;
 }
 
 static void defineDefaultKeywordSymbol(KonohaContext *kctx)
@@ -907,7 +913,6 @@ static void initStructData(KonohaContext *kctx)
 		KonohaClass_setName(kctx, ct, 0);
 	}
 	KonohaClassVar *ct = (KonohaClassVar *)CT_Array;
-	ct->p0 = TY_Object;
 	kparamtype_t p = {TY_Object};
 	ct->cparamdom = Kparamdom(kctx, 1, &p);
 }

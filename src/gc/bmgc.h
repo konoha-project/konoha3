@@ -1926,7 +1926,7 @@ static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o)
 void MODGC_check_malloced_size(void)
 {
 	if (verbose_gc) {
-		fprintf(stdout, "\nklib:memory leaked=%ld\n", kklib_malloced);
+		fprintf(stdout, "\nklib:memory leaked=%ld\n", (long)kklib_malloced);
 	}
 }
 
