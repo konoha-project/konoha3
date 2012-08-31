@@ -60,6 +60,8 @@ typedef struct StreamApi {
 	kbool_t (*isEndOfStream)(KonohaContext *kctx, FILE_i *fp);
 } StreamApi;
 
+extern kObjectVar **KONOHA_reftail(KonohaContext *, size_t);
+
 static size_t read_NOP(KonohaContext *kctx, FILE_i *fp, char *buf, size_t bufsiz)
 {
 	return 0;
@@ -273,12 +275,20 @@ static void kOutputStream_writeUTF8(KonohaContext *kctx, kOutputStream *out, con
 static void kFile_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kFile *out = (kFile*)o;
-	out->path = NULL;
+	out->path = K_NULL;
 }
 
 static void kFile_free(KonohaContext *kctx, kObject *o)
 {
 
+}
+
+static void kFile_reftrace(KonohaContext *kctx, kObject *o)
+{
+	kFile *file = (kFile *)o;
+	BEGIN_REFTRACE(1);
+	KREFTRACEv(file->path);
+	END_REFTRACE();
 }
 
 /* ------------------------------------------------------------------------ */
@@ -584,6 +594,12 @@ static void kioshare_setup(KonohaContext *kctx, struct KonohaModule *def, int ne
 
 static void kioshare_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
 {
+	kioshare_t *base = (kioshare_t *)baseh;
+	BEGIN_REFTRACE(3);
+	KREFTRACEv(base->kstdin);
+	KREFTRACEv(base->kstdout);
+	KREFTRACEv(base->kstderr);
+	END_REFTRACE();
 }
 
 static void kioshare_free(KonohaContext *kctx, struct KonohaModule *baseh)
