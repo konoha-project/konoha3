@@ -651,7 +651,7 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	kToken_setTypeId(kctx, tokenClassName, ns, definedClass->typeId);
 	kBlock_addMethodDeclStmt(kctx, bk, tokenClassName, stmt);
-	kStmt_done(stmt);
+	kStmt_done(kctx, stmt);
 	RETURNb_(true);
 }
 

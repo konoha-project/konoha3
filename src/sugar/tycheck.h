@@ -202,23 +202,20 @@ static kbool_t callStmtTyCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef
 
 static kbool_t SugarSyntax_tyCheckStmt(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, kGamma *gma)
 {
-	int SUGARFUNC_index = kGamma_isTOPLEVEL(gma) ? SUGARFUNC_TopStmtTyCheck : SUGARFUNC_StmtTyCheck;
-	int i, callCount = 0;
+	int SUGARFUNC_index = Gamma_isTOPLEVEL(gma) ? SUGARFUNC_TopStmtTyCheck : SUGARFUNC_StmtTyCheck;
+	int callCount = 0;
 	while(true) {
 		kFunc *fo = syn->sugarFuncTable[SUGARFUNC_index];
 		if(fo != NULL) {
+			kFunc **funcItems = &fo;
+			int index = 0;
 			if(IS_Array(fo)) { // @Future
-				kArray *a = (kArray*)fo;
-				for(i = kArray_size(a) - 1; i >= 0; i--) {
-					kbool_t result = callStmtTyCheckFunc(kctx, a->funcItems[i], &callCount, stmt, gma);
-					if(stmt->syn == NULL) return true;
-					if(stmt->build != TSTMT_UNDEFINED) return result;
-				}
+				funcItems = syn->sugarFuncListTable[SUGARFUNC_index]->funcItems;
+				index = kArray_size(syn->sugarFuncListTable[SUGARFUNC_index]) - 1;
 			}
-			else {
-				DBG_ASSERT(IS_Func(fo));
-				kbool_t result = callStmtTyCheckFunc(kctx, fo, &callCount, stmt, gma);
-				if(stmt->syn == NULL) return true; // this means done;
+			for(; index >= 0; index--) {
+				kbool_t result = callStmtTyCheckFunc(kctx, funcItems[index], &callCount, stmt, gma);
+				if(stmt->syn == NULL) return result;
 				if(stmt->build != TSTMT_UNDEFINED) return result;
 			}
 		}
@@ -226,7 +223,7 @@ static kbool_t SugarSyntax_tyCheckStmt(KonohaContext *kctx, SugarSyntax *syn, kS
 		syn = syn->parentSyntaxNULL;
 	}
 	if(callCount == 0) {
-		const char *location = kGamma_isTOPLEVEL(gma) ? "at the top level" : "inside the function";
+		const char *location = Gamma_isTOPLEVEL(gma) ? "at the top level" : "inside the function";
 		kkStmt_printMessage(stmt, ErrTag, "%s%s is not available %s", T_statement(stmt->syn->keyword), location);
 		return false;
 	}
@@ -241,12 +238,11 @@ static kbool_t kBlock_tyCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
 	int i, result = true, lvarsize = gma->genv->localScope.varsize;
 	for(i = 0; i < kArray_size(bk->stmtList); i++) {
 		kStmt *stmt = (kStmt*)bk->stmtList->objectItems[i];
-		SugarSyntax *syn = stmt->syn;
-		KdumpStmt(kctx, stmt);
-		if(syn == NULL) continue; /* This means 'done' */
-		if(Stmt_isERR(stmt) || !SugarSyntax_tyCheckStmt(kctx, syn, stmt, gma)) {
+		if(Stmt_isDone(stmt)) continue;
+		//KdumpStmt(kctx, stmt);
+		if(Stmt_isERR(stmt) || !SugarSyntax_tyCheckStmt(kctx, stmt->syn, stmt, gma)) {
 			DBG_ASSERT(Stmt_isERR(stmt));
-			kGamma_setERROR(gma, 1);
+			Gamma_setERROR(gma, 1);
 			result = false;
 			break;
 		}
@@ -262,14 +258,14 @@ static kbool_t kBlock_tyCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
 
 /* ------------------------------------------------------------------------ */
 
-static GammaAllocaData *Gamma_push(KonohaContext *kctx, kGamma *gma, GammaAllocaData *newone)
+static GammaAllocaData *kGamma_push(KonohaContext *kctx, kGamma *gma, GammaAllocaData *newone)
 {
 	GammaAllocaData *oldone = gma->genv;
 	gma->genv = newone;
 	return oldone;
 }
 
-static GammaAllocaData *Gamma_pop(KonohaContext *kctx, kGamma *gma, GammaAllocaData *oldone, GammaAllocaData *checksum)
+static GammaAllocaData *kGamma_pop(KonohaContext *kctx, kGamma *gma, GammaAllocaData *oldone, GammaAllocaData *checksum)
 {
 	GammaAllocaData *newone = gma->genv;
 	assert(checksum == newone);
@@ -280,8 +276,8 @@ static GammaAllocaData *Gamma_pop(KonohaContext *kctx, kGamma *gma, GammaAllocaD
 	return newone;
 }
 
-#define GAMMA_PUSH(G,B) GammaAllocaData *oldbuf_ = Gamma_push(kctx, G, B)
-#define GAMMA_POP(G,B)  Gamma_pop(kctx, G, oldbuf_, B)
+#define GAMMA_PUSH(G,B) GammaAllocaData *oldbuf_ = kGamma_push(kctx, G, B)
+#define GAMMA_POP(G,B)  kGamma_pop(kctx, G, oldbuf_, B)
 
 // --------------------------------------------------------------------------
 

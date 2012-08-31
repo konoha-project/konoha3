@@ -560,7 +560,7 @@ static KMETHOD StmtTyCheck_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 			else {
 				kkStmt_printMessage(stmt, ErrTag, "constant value is expected");
 			}
-			kStmt_done(stmt);
+			kStmt_done(kctx, stmt);
 		}
 	}
 	RETURNb_(r);
@@ -911,7 +911,7 @@ static KMETHOD StmtTyCheck_else(KonohaContext *kctx, KonohaStack *sfp)
 	if(stmtIf != NULL) {
 		kBlock *bkElse = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
 		KLIB kObject_setObject(kctx, stmtIf, KW_else, TY_Block, bkElse);
-		kStmt_done(stmt);
+		kStmt_done(kctx, stmt);
 		r = kBlock_tyCheckAll(kctx, bkElse, gma);
 	}
 	else {
@@ -988,7 +988,7 @@ static kbool_t kStmt_declType(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kty
 		kStmt *lastStmt = lastStmtRef[0];
 		kBlock_insertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, newstmt);
 		lastStmtRef[0] = newstmt;
-		kStmt_done(stmt);
+		kStmt_done(kctx, stmt);
 		return true;
 	}
 	return false;
@@ -1103,7 +1103,7 @@ static KMETHOD StmtTyCheck_ParamsDecl(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	if(pa != NULL && IS_Param(pa)) {
 		KLIB kObject_setObject(kctx, stmt, KW_ParamPattern, TY_Param, pa);
-		kStmt_done(stmt);
+		kStmt_done(kctx, stmt);
 		RETURNb_(true);
 	}
 	kkStmt_printMessage(stmt, ErrTag, "expected parameter declaration");
@@ -1178,7 +1178,7 @@ static KMETHOD StmtTyCheck_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 			kMethod_setLazyCompilation(kctx, (kMethodVar*)mtd, stmt, ns);
 		}
 	}
-	kStmt_done(stmt);
+	kStmt_done(kctx, stmt);
 	RETURNb_(pa != NULL);
 }
 

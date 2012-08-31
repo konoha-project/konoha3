@@ -433,7 +433,7 @@ static KMETHOD StmtTyCheck_sugar(KonohaContext *kctx, KonohaStack *sfp)
 				KLIB kArray_clear(kctx, syn->syntaxRuleNULL, 0);
 			}
 		}
-		kStmt_done(stmt);
+		kStmt_done(kctx, stmt);
 	}
 	RETURNb_(r);
 }
