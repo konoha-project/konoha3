@@ -28,6 +28,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <mecab.h>
+#include <mecab_config.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -254,14 +255,6 @@ static KMETHOD MecabNode_getRLength(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(ret);
 }
 
-// int MecabNode.getID()
-static KMETHOD MecabNode_getID(KonohaContext *kctx, KonohaStack *sfp)
-{
-	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].asObject;
-	unsigned int ret = node->node->id;
-	RETURNi_(ret);
-}
-
 // int MecabNode.getRCAttr()
 static KMETHOD MecabNode_getRCAttr(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -294,6 +287,16 @@ static KMETHOD MecabNode_getStat(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(ret);
 }
 
+#if USING_ORIGINAL_MECAB_LIBS
+
+// int MecabNode.getID()
+static KMETHOD MecabNode_getID(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct _kMecabNode *node = (struct _kMecabNode*)sfp[0].asObject;
+	unsigned int ret = node->node->id;
+	RETURNi_(ret);
+}
+
 // Boolean MecabNode.isBest()
 static KMETHOD MecabNode_isBest(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -301,6 +304,7 @@ static KMETHOD MecabNode_isBest(KonohaContext *kctx, KonohaStack *sfp)
 	unsigned int ret = node->node->isbest;
 	RETURNb_(ret);
 }
+#endif /* USING_ORIGINAL_MECAB_LIBS */
 
 //// float MecabNode.alpha()
 //static KMETHOD MecabNode_alpha(KonohaContext *kctx, KonohaStack *sfp)
@@ -382,12 +386,14 @@ static kbool_t mecab_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public|_Const, _F(MecabNode_getFeature),  TY_String,  TY_MecabNode, MN_("getFeature"), 0,
 		_Public|_Const, _F(MecabNode_getLength),   TY_Int,  TY_MecabNode, MN_("getLength"), 0,
 		_Public|_Const, _F(MecabNode_getRLength),  TY_Int,  TY_MecabNode, MN_("getRLength"), 0,
-		_Public|_Const, _F(MecabNode_getID),       TY_Int,  TY_MecabNode, MN_("getID"), 0,
 		_Public|_Const, _F(MecabNode_getRCAttr),   TY_Int,  TY_MecabNode, MN_("getRCAttr"), 0,
 		_Public|_Const, _F(MecabNode_getLCAttr),   TY_Int,  TY_MecabNode, MN_("getLCAttr"), 0,
 		_Public|_Const, _F(MecabNode_getCharType), TY_Int,  TY_MecabNode, MN_("getCharType"), 0,
 		_Public|_Const, _F(MecabNode_getStat),     TY_Int,  TY_MecabNode, MN_("getStat"), 0,
+#if USING_ORIGINAL_MECAB_LIBS
+		_Public|_Const, _F(MecabNode_getID),       TY_Int,  TY_MecabNode, MN_("getID"), 0,
 		_Public|_Const, _F(MecabNode_isBest),      TY_Boolean,  TY_MecabNode, MN_("isBest"), 0,
+#endif
 		//_Public|_Const, _F(MecabNode_alpha),       TY_Float,  TY_MecabNode, MN_("alpha"), 0,
 		//_Public|_Const, _F(MecabNode_beta),        TY_Float,  TY_MecabNode, MN_("beta"), 0,
 		//_Public|_Const, _F(MecabNode_prob),        TY_Float,  TY_MecabNode, MN_("prob"), 0,
