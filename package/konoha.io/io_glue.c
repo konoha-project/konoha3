@@ -561,16 +561,18 @@ static KMETHOD File_list(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFile *f = (kFile*)sfp[0].o;
 	const char *dirname = S_text(f->path);
-	DIR *dir = opendir(dirname);
-	struct dirent *e;
 	kArray *a = new_(Array, 0);
-	while((e = readdir(dir)) != NULL) {
-		const char *fname = e->d_name;
-		if(strcmp(fname, ".") != 0 && strcmp(fname, "..") != 0) {
-			KLIB kArray_add(kctx, a, KLIB new_kString(kctx, fname, strlen(fname), 0));
+	DIR *dir = opendir(dirname);
+	if(dir != NULL) {
+		struct dirent *e;
+		while((e = readdir(dir)) != NULL) {
+			const char *fname = e->d_name;
+			if(strcmp(fname, ".") != 0 && strcmp(fname, "..") != 0) {
+				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, fname, strlen(fname), 0));
+			}
 		}
+		closedir(dir);
 	}
-	closedir(dir);
 	RETURN_(a);
 }
 
