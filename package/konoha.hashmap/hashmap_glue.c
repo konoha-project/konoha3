@@ -38,7 +38,6 @@ static void HashMap_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct _kHashMap *map = (struct _kHashMap *)o;
 	map->map = KLIB Kmap_init(kctx, 4);
-	map->map = kctx->klib->Kmap_init(kctx, 4);
 }
 
 static void HashMap_free(KonohaContext *kctx, kObject *o)
@@ -98,14 +97,14 @@ static KMETHOD HashMap_set(KonohaContext *kctx, KonohaStack *sfp)
 	kString *key = sfp[1].asString;
 
 	// want to know p1
-	KonohaClass *ct = m->h.ct;
+	KonohaClass *ct = O_ct(m);
 	kParam *cparam = CT_cparam(ct);
 	kparamtype_t p1 = cparam->paramtypeItems[0];
 	uintptr_t hcode = strhash(S_text(key), S_size(key));
 	KUtilsHashMapEntry *e = KLIB Kmap_newEntry(kctx, map, hcode);
 	if (p1.ty == TY_Int || p1.ty == TY_Boolean ||
 			(IS_DefinedFloat() && p1.ty == TY_Float)) {
-		e->unboxValue =(uintptr_t)sfp[2].intValue;
+		e->unboxValue = sfp[2].unboxValue;
 	} else {
 		// object;
 		e->unboxValue = (uintptr_t)sfp[2].o;
@@ -161,7 +160,6 @@ static kbool_t hashmap_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfile
 {
 	// TODO: map literal
 	KDEFINE_SYNTAX SYNTAX[] = {
-
 			{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
