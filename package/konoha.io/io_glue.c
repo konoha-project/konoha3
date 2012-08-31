@@ -125,7 +125,6 @@ struct kInputStreamVar {
 	uintptr_t iconv;
 	KUtilsGrowingArray buffer;
 	size_t top; size_t tail;
-
 };
 
 typedef struct kOutputStreamVar kOutputStream;
@@ -636,9 +635,10 @@ static kbool_t io_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 	};
 	KDEFINE_CLASS defFile = {
 		STRUCTNAME(File),
-		.cflag = kClass_Final,
-		.init  = kFile_init,
-		.free  = kFile_free,
+		.cflag    = kClass_Final,
+		.init     = kFile_init,
+		.reftrace = kFile_reftrace,
+		.free     = kFile_free,
 	};
 
 	KonohaClass *cInputStream  = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &defInputStream, pline);
