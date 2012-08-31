@@ -15,5 +15,12 @@ void test() {
 	}
 }
 
+void testNoSuchDirectoryCase() {
+	File file = new File(b + "hoge");
+	Array[String] l = file.list();
+	p(l.size);
+}
+
 test();
+testNoSuchDirectoryCase();
 
