@@ -26,8 +26,6 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-
-#define USE_GENERATIONAL_GC 1
 #include <sys/time.h>
 
 #include "minikonoha/minikonoha.h"
@@ -84,16 +82,14 @@ extern "C" {
 #define BM_SET(m, mask)  (m |= mask)
 #define BM_TEST(m, mask) (m  & mask)
 
-#ifdef unlikely
-#undef unlikely
-#endif
-
-#ifdef likely
-#undef likely
-#endif
-
+#ifndef unlikely
 #define unlikely(x)   __builtin_expect(!!(x), 0)
+#endif
+
+#ifndef likely
 #define likely(x)     __builtin_expect(!!(x), 1)
+#endif
+
 #define prefetch_(addr, rw, locality) __builtin_prefetch(addr, rw, locality)
 
 static inline void *do_malloc(size_t size);
@@ -201,7 +197,7 @@ struct Segment;
 union  AllocationBlock;
 struct HeapManager;
 
-typedef void BlkPtr;
+typedef void BlockPtr;
 typedef struct SubHeap SubHeap;
 typedef struct Segment Segment;
 typedef struct HeapManager HeapManager;
@@ -215,7 +211,7 @@ typedef struct BitPtr {
 typedef struct AllocationPointer {
 	BitPtr bitptrs[SEGMENT_LEVEL];
 	Segment *seg;
-	BlkPtr *blkptr;
+	BlockPtr *blockptr;
 } AllocationPointer;
 
 struct SubHeap {
@@ -262,7 +258,7 @@ struct HeapManager {
 
 struct Segment {
 	bitmap_t *base[SEGMENT_LEVEL];
-	const AllocationBlock *blk;
+	const AllocationBlock *block;
 	int heap_klass;
 	int live_count;
 	struct Segment *next;
@@ -343,8 +339,8 @@ struct BM11 { struct bm2   m0; struct bm1 S;struct bm1 m1;};
 struct BM12 { struct bm1   m0;};
 #endif
 
-#define _BLOCK_(size)  struct blk##size{uint8_t m[size];} \
-	b##size [SEGMENT_SIZE/(sizeof(struct blk##size))]
+#define _BLOCK_(size)  struct block##size{uint8_t m[size];} \
+	b##size [SEGMENT_SIZE/(sizeof(struct block##size))]
 union AllocationBlock {
 	_BLOCK_(8   );_BLOCK_(16  );_BLOCK_(32  );_BLOCK_(64  );
 	_BLOCK_(128 );_BLOCK_(256 );_BLOCK_(512 );_BLOCK_(1024);
@@ -933,12 +929,12 @@ static Segment *allocSegment(HeapManager *mng, int klass)
 
 static void findBlockOfLastSegment(Segment *seg, SubHeap *h, size_t size)
 {
-	const AllocationBlock *blk = seg->blk;
-	BlockHeader *head = (BlockHeader *) blk;
+	const AllocationBlock *block = seg->block;
+	BlockHeader *head = (BlockHeader *) block;
 	head->seg   = seg;
 	head->klass = seg->heap_klass;
-	gc_info("seg=%p, blk=(%p,%p)", seg, blk, blk+1);
-	h->p.blkptr = (AllocationBlock*)((char*)blk+(size));
+	gc_info("seg=%p, block=(%p,%p)", seg, block, block+1);
+	h->p.blockptr = (AllocationBlock*)((char*)block+(size));
 }
 
 static bool newSegment(HeapManager *mng, SubHeap *h)
@@ -951,8 +947,8 @@ static bool newSegment(HeapManager *mng, SubHeap *h)
 	DBG_ASSERT(seg->live_count == 0);
 	if (h->seglist_size == h->seglist_max) {
 		size_t newSize, oldSize;
-		oldSize = sizeof(Segment**)*h->seglist_max;
-		newSize = sizeof(Segment**)*h->seglist_max * 2;
+		oldSize = sizeof(Segment*)*h->seglist_max;
+		newSize = sizeof(Segment*)*h->seglist_max * 2;
 		h->seglist_max *= 2;
 		h->seglist = (Segment**)(do_realloc(h->seglist, oldSize, newSize));
 	}
@@ -1038,7 +1034,7 @@ static void BitPtr0_inc(AllocationPointer *p)
 static bool inc(AllocationPointer *p, SubHeap *h)
 {
 	int size = PowerOf2(h->heap_klass);
-	p->blkptr = (AllocationBlock*)((char*)p->blkptr+size);
+	p->blockptr = (AllocationBlock*)((char*)p->blockptr+size);
 	BitPtr0_inc(p);
 	return ++p->seg->live_count > SegmentBlockCount_GC_MARGIN[h->heap_klass];
 }
@@ -1067,11 +1063,11 @@ static uintptr_t bitptrToIndex(uintptr_t bpidx, uintptr_t bpmask)
 	return bpidx * BITS + FFS(bpmask) - 1;
 }
 
-static BlkPtr *blockAddress(Segment *seg, uintptr_t idx, uintptr_t mask)
+static BlockPtr *blockAddress(Segment *seg, uintptr_t idx, uintptr_t mask)
 {
 	size_t size = seg->heap_klass;
 	size_t offset = bitptrToIndex(idx, mask) << size;
-	const BlkPtr *ptr = seg->blk;
+	const BlockPtr *ptr = seg->block;
 	return (AllocationBlock*)((char*)ptr+offset);
 }
 
@@ -1114,7 +1110,7 @@ static bool findNextFreeBlock(AllocationPointer *p)
 			DBG_ASSERT(BP(p, i).mask != 0);
 		} while (i > 0);
 	}
-	p->blkptr = blockAddress(p->seg, BP(p, 0).idx, BP(p, 0).mask);
+	p->blockptr = blockAddress(p->seg, BP(p, 0).idx, BP(p, 0).mask);
 	return true;
 }
 
@@ -1129,7 +1125,7 @@ static void *tryAlloc(KonohaContext *kctx, HeapManager *mng, SubHeap *h)
 			}
 		}
 	}
-	temp = p->blkptr;
+	temp = p->blockptr;
 	prefetch_(temp, 0, 0);
 	inc(p, h);
 	bool isEmpty = inc(p, h);
@@ -1168,18 +1164,18 @@ static void Heap_dispose(SubHeap *h)
 	do_bzero(h, sizeof(*h));
 }
 
-static Segment *SegmentPool_init(size_t size, AllocationBlock *blk)
+static Segment *SegmentPool_init(size_t size, AllocationBlock *block)
 {
 	size_t i;
 	Segment *pool = (Segment*)(do_malloc(sizeof(Segment) * size));
 	Segment *seg  = pool;
 	Segment *next = seg+1, *tail = pool + size - 1;
-	for (i = 0; i < size; ++i, ++blk, ++next, ++seg) {
-		seg->blk  = blk;
-		seg->next = next;
+	for (i = 0; i < size; ++i, ++block, ++next, ++seg) {
+		seg->block = block;
+		seg->next  = next;
 #if GCDEBUG
-		seg->managed_heap = blk;
-		seg->managed_heap_end = blk+1;
+		seg->managed_heap = block;
+		seg->managed_heap_end = block+1;
 #endif
 	}
 	tail->next = NULL;
@@ -1187,19 +1183,19 @@ static Segment *SegmentPool_init(size_t size, AllocationBlock *blk)
 }
 
 #ifdef USE_GENERATIONAL_GC
-static void dispatchRememberSet(HeapManager *mng, size_t heap_size, AllocationBlock *blk)
+static void dispatchRememberSet(HeapManager *mng, size_t heap_size, AllocationBlock *block)
 {
 	BlockHeader *head;
 	Segment *seg = mng->segmentList;
 	bitmap_t *map = do_malloc(heap_size / (MIN_ALIGN) / sizeof(bitmap_t));
 	ARRAY_add(BitMapPtr,  &mng->remember_sets, map);
 	while (seg) {
-		head = (BlockHeader *) blk;
+		head = (BlockHeader *) block;
 		head->remember_set = map;
 		seg->remember_set  = map;
 		seg = seg->next;
 		map += SEGMENT_SIZE / MIN_ALIGN / BITS;
-		blk++;
+		block++;
 	}
 }
 #endif
@@ -1463,7 +1459,7 @@ static void setTenureBitMapsAndCount(HeapManager *mng, SubHeap *h)
 
 static kObject *indexToAddr(Segment *seg, uintptr_t idx, uintptr_t mask)
 {
-	const BlkPtr *ptr = seg->blk;
+	const BlockPtr *ptr = seg->block;
 	size_t size = seg->heap_klass;
 	size_t n = idx * BITS + FFS(mask) - 1;
 	size_t offset = n << size;
