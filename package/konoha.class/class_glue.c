@@ -407,7 +407,7 @@ static void ObjectField_reftrace(KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
-static kshortflag_t kkStmt_printMessagearseClassFlag(KonohaContext *kctx, kStmt *stmt, kshortflag_t cflag)
+static kshortflag_t kStmt_parseClassFlag(KonohaContext *kctx, kStmt *stmt, kshortflag_t cflag)
 {
 	static KonohaFlagSymbolData ClassDeclFlag[] = {
 		{kClass_Private}, {kClass_Singleton}, {kClass_Immutable},
@@ -613,7 +613,7 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 	int isNewlyDefinedClass = false;
 	KonohaClassVar *definedClass = (KonohaClassVar*)KLIB kNameSpace_getClass(kctx, ns, S_text(tokenClassName->text), S_size(tokenClassName->text), NULL);
 	if (definedClass == NULL) {   // Already defined
-		kshortflag_t cflag = kkStmt_printMessagearseClassFlag(kctx, stmt, kClass_Virtual);
+		kshortflag_t cflag = kStmt_parseClassFlag(kctx, stmt, kClass_Virtual);
 		definedClass = kNameSpace_defineClassName(kctx, ns, cflag, tokenClassName->text, stmt->uline);
 		isNewlyDefinedClass = true;
 	}

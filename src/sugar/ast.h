@@ -406,14 +406,21 @@ static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns
 	return syn;
 }
 
-static kbool_t kkStmt_printMessagearseBySyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *tokenList, int beginIdx, int endIdx)
+static kbool_t kStmt_parseBySyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *tokenList, int beginIdx, int endIdx)
 {
 	kbool_t ret = false;
-	SugarSyntax *syn = kNameSpace_getSyntaxRule(kctx, Stmt_nameSpace(stmt), tokenList, beginIdx, endIdx);
-	TokenRange nrule = {Stmt_nameSpace(stmt), syn->syntaxRuleNULL, 0, kArray_size(syn->syntaxRuleNULL)};
-	DBG_ASSERT(syn->syntaxRuleNULL != NULL);
-	((kStmtVar*)stmt)->syn = syn;
-	ret = (kStmt_matchSyntaxRule(kctx, stmt, tokenList, beginIdx, endIdx, &nrule, 0) != -1);
+	kNameSpace *ns = Stmt_nameSpace(stmt);
+	SugarSyntax *stmtSyntax = kNameSpace_getSyntaxRule(kctx, ns, tokenList, beginIdx, endIdx);
+	SugarSyntax *currentSyntax = stmtSyntax;
+	while(currentSyntax != NULL) {
+		if(currentSyntax->syntaxRuleNULL != NULL) {
+			TokenRange nrule = {ns, currentSyntax->syntaxRuleNULL, 0, kArray_size(currentSyntax->syntaxRuleNULL)};
+			((kStmtVar*)stmt)->syn = stmtSyntax;
+			ret = (kStmt_matchSyntaxRule(kctx, stmt, tokenList, beginIdx, endIdx, &nrule, 0) != -1);
+			return ret;
+		}
+		currentSyntax = currentSyntax->parentSyntaxNULL;
+	}
 	return ret;
 }
 
@@ -638,7 +645,7 @@ static kStmt* kBlock_addNewStmt(KonohaContext *kctx, kBlock *bk, TokenRange *ran
 		int currentIdx = kStmt_addAnnotation(kctx, stmt, range);
 		if(currentIdx < range->endIdx) {
 			stmt->uline = range->tokenList->tokenItems[currentIdx]->uline;
-			kkStmt_printMessagearseBySyntaxRule(kctx, stmt, range->tokenList, currentIdx, range->endIdx);
+			kStmt_parseBySyntaxRule(kctx, stmt, range->tokenList, currentIdx, range->endIdx);
 		}
 	}
 	return stmt;
