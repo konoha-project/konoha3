@@ -82,7 +82,7 @@ static SugarSyntax* kNameSpace_getSyntax(KonohaContext *kctx, kNameSpace *ns, ks
 						return kNameSpace_newSyntax(kctx, ns, (SugarSyntax*)e->unboxValue, keyword);
 					}
 					if(keyword == KW_DOT) {
-						DBG_P("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ns=%p, syn=%p", ns, (SugarSyntax*)e->unboxValue);
+						DBG_P("<<<< ns=%p, '%s%s' syn=%p >>>>", ns, PSYM_t(keyword), (SugarSyntax*)e->unboxValue);
 					}
 					return (SugarSyntax*)e->unboxValue;
 				}

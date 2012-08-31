@@ -186,7 +186,6 @@ struct TokenizerEnv {
 
 // Expr ParseExpr(Stmt stmt, Token[] tokenList, int s, int c, int e)
 #define VAR_ParseExpr(STMT, TLS, S, C, E)\
-		DBG_P("@calling");\
 		SugarSyntax *syn = (SugarSyntax*)sfp[0].unboxValue;\
 		kStmt *STMT = (kStmt*)sfp[1].asObject;\
 		kArray *TLS = (kArray*)sfp[2].o;\
