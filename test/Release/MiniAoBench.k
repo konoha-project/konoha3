@@ -125,9 +125,9 @@ void interSectsPlane(Plane plane, RayIntersection isect) {
 }
 
 void getOrthoBasis (Vec normal, Vec[] orthoBasis) {
-	orthoBasis.set(0, new Vec(0.0, 0.0, 0.0));
-	orthoBasis.set(1,new Vec(0.0, 0.0, 0.0));
-	orthoBasis.set(2, new Vec(0.0, 0.0, 0.0));
+	orthoBasis[0] = new Vec(0.0, 0.0, 0.0));
+	orthoBasis[1] = new Vec(0.0, 0.0, 0.0));
+	orthoBasis[2] = new Vec(0.0, 0.0, 0.0));
 	Vec o0 = orthoBasis[0];
 	Vec o1 = orthoBasis[1];
 	Vec o2 = orthoBasis[2];
@@ -172,8 +172,8 @@ void getAmbientOcclusion(RayIntersection isect, Vec ambientOcclusion) {
 	while (j < ntheta) {
 		i = 0;
 		while (i < nphi) {
-			double theta = Math.sqrt(Float.random());
-			double phi = 2.0 * pi * Float.random();
+			double theta = Math.sqrt(Math.random());
+			double phi = 2.0 * pi * Math.random();
 			double x = Math.cos(phi) * theta;
 			double y = Math.sin(phi) * theta;
 			double z = Math.sqrt(1.0 - theta * theta);

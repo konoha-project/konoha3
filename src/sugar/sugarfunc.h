@@ -33,7 +33,7 @@ static KMETHOD PatternMatch_Expr(KonohaContext *kctx, KonohaStack *sfp)
 	INIT_GCSTACK();
 	int returnIdx = -1;
 //	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
-	kExpr *expr = kkStmt_printMessagearseExpr(kctx, stmt, tokenList, beginIdx, endIdx);
+	kExpr *expr = kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, endIdx);
 	if(expr != K_NULLEXPR) {
 		KdumpExpr(kctx, expr);
 		KLIB kObject_setObject(kctx, stmt, name, O_typeId(expr), expr);
@@ -152,7 +152,7 @@ static KMETHOD ParseExpr_Op(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
 	kTokenVar *tk = tokenList->tokenVarItems[operatorIdx];
-	kExpr *expr, *rexpr = kkStmt_printMessagearseExpr(kctx, stmt, tokenList, operatorIdx + 1, endIdx);
+	kExpr *expr, *rexpr = kStmt_parseExpr(kctx, stmt, tokenList, operatorIdx + 1, endIdx);
 	PUSH_GCSTACK(rexpr);
 //	if(syn->keyword != KW_LET && syn->sugarFuncTable[SUGARFUNC_ExprTyCheck] == NULL) {
 //		DBG_P("switching type checker ..");
@@ -162,7 +162,7 @@ static KMETHOD ParseExpr_Op(KonohaContext *kctx, KonohaStack *sfp)
 		expr = new_UntypedCallStyleExpr(kctx, syn, 2, tk, rexpr);
 	}
 	else {   // binary operator
-		kExpr *lexpr = kkStmt_printMessagearseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx);
+		kExpr *lexpr = kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx);
 		expr = new_UntypedCallStyleExpr(kctx, syn, 3, tk, lexpr, rexpr);
 	}
 	RETURN_(expr);
@@ -181,7 +181,7 @@ static KMETHOD ParseExpr_DOT(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
 	if(beginIdx < operatorIdx && isFieldName(tokenList, operatorIdx, endIdx)) {
-		kExpr *expr = kkStmt_printMessagearseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx);
+		kExpr *expr = kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx);
 		expr = new_UntypedCallStyleExpr(kctx, syn, 2, tokenList->tokenItems[operatorIdx +1], expr);
 		RETURN_(kStmt_rightJoinExpr(kctx, stmt, expr, tokenList, operatorIdx +2, endIdx));
 	}
@@ -192,11 +192,11 @@ static KMETHOD ParseExpr_Parenthesis(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
 	kToken *tk = tokenList->tokenItems[operatorIdx];
 	if(beginIdx == operatorIdx) {
-		kExpr *expr = kkStmt_printMessagearseExpr(kctx, stmt, tk->subTokenList, 0, kArray_size(tk->subTokenList));
+		kExpr *expr = kStmt_parseExpr(kctx, stmt, tk->subTokenList, 0, kArray_size(tk->subTokenList));
 		RETURN_(kStmt_rightJoinExpr(kctx, stmt, expr, tokenList, operatorIdx + 1, endIdx));
 	}
 	else {
-		kExpr *lexpr = kkStmt_printMessagearseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx);
+		kExpr *lexpr = kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx);
 		if(lexpr == K_NULLEXPR) {
 			RETURN_(lexpr);
 		}
