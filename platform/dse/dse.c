@@ -24,8 +24,91 @@
 
 /* ************************************************************************ */
 
-#include <logpool/logpool.h>
 #include "dse.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+size_t totalMalloc = 0;
+
+void *dse_malloc(size_t size)
+{
+	void *ptr = malloc(size);
+	if (ptr == NULL) {
+		DEBUG_PRINT("malloc failed");
+		size = 0;
+	}
+	totalMalloc += size;
+	DEBUG_PRINT("totalMalloc:%ld @dse_malloc()", totalMalloc);
+	return ptr;
+}
+
+void dse_free(void *ptr, size_t size)
+{
+	free(ptr);
+	totalMalloc -= size;
+	DEBUG_PRINT("totalMalloc:%ld @dse_free()", totalMalloc);
+	DEBUG_ASSERT(totalMalloc >= 0);
+}
+
+
+
+Message *Message_new(unsigned char *requestLine)
+{
+	size_t len = strlen((char *)requestLine);
+	Message *msg = (Message *)dse_malloc(len + 1);
+	msg = memcpy(msg, requestLine, len);
+	msg[len] = '\0';
+	return msg;
+}
+
+void Message_delete(Message *msg)
+{
+	if(msg == NULL) return;
+	dse_free(msg, strlen((char *)msg) + 1);
+}
+
+
+
+Scheduler *Scheduler_new(void)
+{
+	Scheduler *sched = dse_malloc(sizeof(Scheduler));
+	sched->front = 0;
+	sched->last = 0;
+	pthread_mutex_init(&sched->lock, NULL);
+	pthread_cond_init(&sched->cond, NULL);
+	return sched;
+}
+
+void Scheduler_delete(Scheduler *sched)
+{
+	pthread_mutex_destroy(&sched->lock);
+	pthread_cond_destroy(&sched->cond);
+	dse_free(sched, sizeof(Scheduler));
+}
+
+bool dse_enqueue(Scheduler *sched, Message *msg)
+{
+	int front = sched->front;
+	int last = sched->last;
+	if(next(front) == last) return false;
+	sched->msgQueue[front] = msg;
+	sched->front = next(front);
+	return true;
+}
+
+Message *dse_dequeue(Scheduler *sched)
+{
+	int front = sched->front;
+	int last = sched->last;
+	if(front == last) return NULL;
+	Message *msg = sched->msgQueue[last];
+	sched->last = next(last);
+	return msg;
+}
+
+
 
 #define LOG_END 0
 #define LOG_s   1
@@ -202,3 +285,65 @@ void DSE_delete(DSE *dse)
 	Scheduler_delete(dse->sched);
 	dse_free(dse, sizeof(DSE));
 }
+
+
+
+#define HTTPD_ADDR "0.0.0.0"
+#define HTTPD_PORT 8080
+
+int verbose_debug = 0;
+int port = HTTPD_PORT;
+char *logpoolip = NULL;
+
+static struct option long_option[] = {
+	/* These options set a flag. */
+	{"verbose", no_argument, &verbose_debug, 1},
+	{"logpool", required_argument, 0, 'l'},
+	{"port", required_argument, 0, 'p'},
+};
+
+static void dse_parseopt(int argc, char *argv[])
+{
+	char *e;
+	logpoolip = getenv("LOGPOOL_IP");
+	while(true) {
+		int option_index = 0;
+		int c = getopt_long(argc, argv, "l:p:", long_option, &option_index);
+		if(c == -1) break; /* Detect the end of the options. */
+		switch(c) {
+			case 'l':
+				logpoolip = optarg;
+				break;
+			case 'p':
+				port = (int)strtol(optarg, &e, 10);
+				break;
+			case '?':
+				fprintf(stderr, "Unknown or required argument option -%c\n", optopt);
+				fprintf(stderr, "Usage: COMMAND [ --verbose ] [ --port | -p ] port [ --logpool | -l ] logpoolip\n");
+				exit(EXIT_FAILURE);
+			default:
+				break;
+		}
+	}
+	if(!logpoolip) logpoolip = "0.0.0.0";
+#ifdef DSE_DEBUG
+	verbose_debug = 1;
+#endif /* DSE_DEBUG */
+}
+
+int main(int argc, char *argv[])
+{
+	dse_parseopt(argc, argv);
+	DEBUG_PRINT("DSE starts on port %d", port);
+	DEBUG_PRINT("LogPool is running on %s", logpoolip);
+	logpool_global_init(LOGPOOL_TRACE);
+	DSE *dse = DSE_new();
+	DSE_start(dse, HTTPD_ADDR, port);
+	DSE_delete(dse);
+	logpool_global_exit();
+	return 0;
+}
+
+#ifdef __cplusplus
+}
+#endif

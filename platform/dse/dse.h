@@ -29,11 +29,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <assert.h>
+#include <getopt.h>
 #include <event.h>
 #include <evhttp.h>
 #include <event2/buffer.h>
+#include <logpool/logpool.h>
 #ifndef K_USE_PTHREAD
 #define K_USE_PTHREAD 1
 #endif /* K_USE_PTHREAD */
