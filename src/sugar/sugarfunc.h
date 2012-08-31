@@ -151,13 +151,13 @@ static KMETHOD ParseExpr_Term(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ParseExpr_Op(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
+	if(/*syn->keyword != KW_LET && */syn->sugarFuncTable[SUGARFUNC_ExprTyCheck] == NULL) {
+		DBG_P("switching type checker of %s%s to MethodCall ..", PSYM_t(syn->keyword));
+		syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);  // switch type checker
+	}
 	kTokenVar *tk = tokenList->tokenVarItems[operatorIdx];
 	kExpr *expr, *rexpr = kStmt_parseExpr(kctx, stmt, tokenList, operatorIdx + 1, endIdx);
 	PUSH_GCSTACK(rexpr);
-//	if(syn->keyword != KW_LET && syn->sugarFuncTable[SUGARFUNC_ExprTyCheck] == NULL) {
-//		DBG_P("switching type checker ..");
-//		syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);  // switch type checker
-//	}
 	if(beginIdx == operatorIdx) { // unary operator
 		expr = new_UntypedCallStyleExpr(kctx, syn, 2, tk, rexpr);
 	}
@@ -1221,11 +1221,11 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(GTE), .precedence_op2 = C_PRECEDENCE_COMPARE, },
 		{ TOKEN(EQ),  .precedence_op2 = C_PRECEDENCE_EQUALS, },
 		{ TOKEN(NEQ), .precedence_op2 = C_PRECEDENCE_EQUALS, },
+		{ TOKEN(LET),      .flag = SYNFLAG_ExprLeftJoinOp2, ParseExpr_(Op), ExprTyCheck_(assign), .precedence_op2 = C_PRECEDENCE_ASSIGN, },
 		{ TOKEN(AND), .precedence_op2 = C_PRECEDENCE_AND, ParseExpr_(Op), ExprTyCheck_(AND)},
 		{ TOKEN(OR),  .precedence_op2 = C_PRECEDENCE_OR, ParseExpr_(Op), ExprTyCheck_(OR)},
 		{ TOKEN(NOT),  .precedence_op1 = C_PRECEDENCE_PREUNARY,},
 		{ TOKEN(COLON), /*.precedence_op2 = C_PRECEDENCE_TRINARY,*/ },  // colon
-		{ TOKEN(LET),      .flag = SYNFLAG_ExprLeftJoinOp2, ParseExpr_(Op), ExprTyCheck_(assign), .precedence_op2 = C_PRECEDENCE_ASSIGN, },
 		{ TOKEN(COMMA),    ParseExpr_(COMMA), .precedence_op2 = C_PRECEDENCE_COMMA,},
 		{ TOKEN(DOLLAR),   ParseExpr_(DOLLAR), },
 		{ TOKEN(boolean), .type = TY_Boolean, },

@@ -152,14 +152,21 @@ static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 		SugarSyntax_setSugarFunc(kctx, syn, syndef->TopStmtTyCheck, SUGARFUNC_TopStmtTyCheck, &pStmtTyCheck, &mStmtTyCheck);
 		SugarSyntax_setSugarFunc(kctx, syn, syndef->StmtTyCheck,    SUGARFUNC_StmtTyCheck,    &pStmtTyCheck, &mStmtTyCheck);
 		SugarSyntax_setSugarFunc(kctx, syn, syndef->ExprTyCheck,    SUGARFUNC_ExprTyCheck,    &pExprTyCheck, &mExprTyCheck);
-//		if(syn->ParseExpr == kmodsugar->UndefinedParseExpr) {
-//			if(FLAG_is(syn->flag, SYNFLAG_ExprOp)) {
-//				KSETv(ns, syn->ParseExpr, kmodsugar->ParseExpr_Op);
-//			}
-//			else if(FLAG_is(syn->flag, SYNFLAG_ExprTerm)) {
-//				KSETv(ns, syn->ParseExpr, kmodsugar->ParseExpr_Term);
-//			}
-//		}
+		// set default function
+		if(syn->parentSyntaxNULL == NULL && syn->sugarFuncTable[SUGARFUNC_ParseExpr] == NULL) {
+			if(syn->precedence_op2 > 0 || syn->precedence_op1 > 0) {
+				kFunc *fo = SYN_(ns, KW_ExprOperator)->sugarFuncTable[SUGARFUNC_ParseExpr];
+				DBG_ASSERT(fo != NULL);
+				DBG_P("syn->keyword=%s%s, fo=%p", PSYM_t(syn->keyword), fo);
+				KINITv(syn->sugarFuncTable[SUGARFUNC_ParseExpr], fo);
+			}
+			if(syn->ty != TY_unknown || syn->sugarFuncTable[SUGARFUNC_ExprTyCheck] != NULL) {
+				kFunc *fo = SYN_(ns, KW_ExprTerm)->sugarFuncTable[SUGARFUNC_ParseExpr];
+				DBG_ASSERT(fo != NULL);
+				DBG_P("syn->keyword=%s%s, fo=%p", PSYM_t(syn->keyword), fo);
+				KINITv(syn->sugarFuncTable[SUGARFUNC_ParseExpr], fo);
+			}
+		}
 		DBG_ASSERT(syn == SYN_(ns, syndef->keyword));
 		syndef++;
 	}
