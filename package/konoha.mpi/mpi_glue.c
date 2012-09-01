@@ -535,6 +535,7 @@ static void kmodmpi_free(KonohaContext *kctx, struct KonohaModule *baseh)
 static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	KREQUIRE_PACKAGE("konoha.bytes", pline);
+	KREQUIRE_PACKAGE("konoha.float", pline);
 	kmodmpi_t *base = (kmodmpi_t*)KCALLOC(sizeof(kmodmpi_t), 1);
 	base->h.name     = "mpi";
 	base->h.setup    = kmodmpi_setup;
@@ -707,31 +708,26 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 			{}
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, (const char **)OpData, pline);
-	fprintf(stderr, "%s:%d\n", __func__, __LINE__);
 	return true;
 }
 
 static kbool_t mpi_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
 {
-	fprintf(stderr, "%s:%d\n", __func__, __LINE__);
 	return true;
 }
 
 static kbool_t mpi_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
-	fprintf(stderr, "%s:%d\n", __func__, __LINE__);
 	return true;
 }
 
 static kbool_t mpi_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
-	fprintf(stderr, "%s:%d\n", __func__, __LINE__);
 	return true;
 }
 
 KDEFINE_PACKAGE* mpi_init(void)
 {
-	fprintf(stderr, "%s:%d\n", __func__, __LINE__);
 	static const KDEFINE_PACKAGE d = {
 		KPACKNAME("mpi", "1.0"),
 		.initPackage  = mpi_initPackage,
