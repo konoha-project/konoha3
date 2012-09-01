@@ -110,13 +110,13 @@ set(PACKAGES
 	konoha.defined
 	konoha.float
 	konoha.global
-	konoha.hashmap
 	konoha.i
 	konoha.io
 	konoha.import
 	konoha.int
 	konoha.iterator
 	konoha.math
+	konoha.map
 	konoha.namespace
 	konoha.new
 	konoha.null

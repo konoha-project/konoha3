@@ -77,7 +77,7 @@ static kExpr *kStmt_parseOperatorExpr(KonohaContext *kctx, kStmt *stmt, SugarSyn
 		kkStmt_printMessage(stmt, ErrTag, "syntax error: expression %s", Token_text(tokenList->tokenItems[operatorIdx]));
 	}
 	else {
-		DBG_P("exprSyntax=%p, '%s%s'", exprSyntax, PSYM_t(exprSyntax->keyword));
+//		DBG_P("exprSyntax=%p, '%s%s'", exprSyntax, PSYM_t(exprSyntax->keyword));
 		kkStmt_printMessage(stmt, ErrTag, "undefined expression: %s", Token_text(tokenList->tokenItems[operatorIdx]));
 	}
 	return K_NULLEXPR;
@@ -265,7 +265,7 @@ static int PatternMatch(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, ksym
 		}
 	}
 	if(callCount == 0) {
-		kkStmt_printMessage(stmt, ErrTag, "unknown syntax pattern: %s%s", KW_t(syn->keyword));
+		kkStmt_printMessage(stmt, ErrTag, "undefined syntax pattern: %s%s", KW_t(syn->keyword));
 	}
 //	else {
 //		kkStmt_printMessage(stmt, ErrTag, "syntax error: %s%s", KW_t(syn->keyword));
