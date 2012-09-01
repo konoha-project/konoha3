@@ -397,7 +397,7 @@ static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kBlock *bk = expr->block;
-	if(IS_Block(bk)) {
+	if(IS_Block(bk)) {  // this is special case of ${} by set internally
 		kExpr *texpr = K_NULLEXPR;
 		kStmt *lastExpr = NULL;
 		kfileline_t uline = stmt->uline;
@@ -435,6 +435,7 @@ static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		RETURN_(texpr);
 	}
+	kExpr_p(stmt, expr, ErrTag, "undefined expression: %s", Token_text(expr->termToken));
 }
 
 static kMethod* NameSpace_getGetterMethodNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ksymbol_t fn)

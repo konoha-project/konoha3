@@ -226,6 +226,12 @@ static kbool_t map_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime
 	return true;
 }
 
+
+/* ----------------------------------------------------------------------- */
+
+
+
+
 static kbool_t map_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	// TODO: map literal

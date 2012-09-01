@@ -197,6 +197,7 @@ static kbool_t callStmtTyCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef
 	countRef[0] += 1;
 	KCALL(lsfp, 0, fo->mtd, 3, K_FALSE);
 	END_LOCAL();
+	DBG_P("result=%d", lsfp[0].boolValue);
 	return lsfp[0].boolValue;
 }
 
@@ -239,7 +240,7 @@ static kbool_t kBlock_tyCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
 	for(i = 0; i < kArray_size(bk->stmtList); i++) {
 		kStmt *stmt = (kStmt*)bk->stmtList->objectItems[i];
 		if(Stmt_isDone(stmt)) continue;
-		//KdumpStmt(kctx, stmt);
+		KdumpStmt(kctx, stmt);
 		if(Stmt_isERR(stmt) || !SugarSyntax_tyCheckStmt(kctx, stmt->syn, stmt, gma)) {
 			DBG_ASSERT(Stmt_isERR(stmt));
 			Gamma_setERROR(gma, 1);

@@ -202,6 +202,7 @@ struct TokenizerEnv {
 
 // Expr ExprTyCheck(Stmt stmt, Expr expr, Gamma gma, int typeid)
 #define VAR_ExprTyCheck(STMT, EXPR, GMA, TY) \
+		DBG_P("calling..");\
 		kStmt *STMT = (kStmt*)sfp[1].asObject;\
 		kExpr *EXPR = (kExpr*)sfp[2].o;\
 		kGamma *GMA = (kGamma*)sfp[3].o;\
