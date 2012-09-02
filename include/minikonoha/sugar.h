@@ -220,6 +220,7 @@ typedef struct SugarSyntaxVar         SugarSyntaxVar;
 
 struct SugarSyntaxVar {
 	ksymbol_t  keyword;               kshortflag_t  flag;
+	const struct SugarSyntaxVar      *parentSyntaxNULL;
 	kArray                           *syntaxRuleNULL;
 	union {
 		kFunc                        *sugarFuncTable[SUGARFUNC_SIZE];
@@ -449,10 +450,10 @@ typedef struct {
 } GammaStackDecl ;
 
 #define kGamma_TOPLEVEL        (kshortflag_t)(1)
-#define kGamma_isTOPLEVEL(GMA)  TFLAG_is(kshortflag_t, GMA->genv->flag, kGamma_TOPLEVEL)
+#define Gamma_isTOPLEVEL(GMA)  TFLAG_is(kshortflag_t, GMA->genv->flag, kGamma_TOPLEVEL)
 #define kGamma_ERROR           (kshortflag_t)(1<<1)
-#define kGamma_isERROR(GMA)    TFLAG_is(kshortflag_t, GMA->genv->flag, kGamma_ERROR)
-#define kGamma_setERROR(GMA,B) TFLAG_set(kshortflag_t, GMA->genv->flag, kGamma_ERROR, B)
+#define Gamma_hasERROR(GMA)    TFLAG_is(kshortflag_t, GMA->genv->flag, kGamma_ERROR)
+#define Gamma_setERROR(GMA,B) TFLAG_set(kshortflag_t, GMA->genv->flag, kGamma_ERROR, B)
 
 typedef struct {
 	GammaStackDecl *varItems;
@@ -646,13 +647,17 @@ static inline kNameSpace *kStmt_nameSpace(KonohaContext *kctx, kStmt *stmt)
 }
 
 #define kStmt_setsyn(STMT, S)  Stmt_setsyn(kctx, STMT, S)
-#define kStmt_done(STMT)       Stmt_setsyn(kctx, STMT, NULL)
+#define kStmt_done(kctx, STMT) Stmt_setsyn(kctx, STMT, NULL)
 static inline void Stmt_setsyn(KonohaContext *kctx, kStmt *stmt, SugarSyntax *syn)
 {
 //	if(syn == NULL && stmt->syn != NULL) {
 //		DBG_P("DONE: STMT='%s'", KW_t(syn->keyword));
 //	}
 	((kStmtVar*)stmt)->syn = syn;
+}
+static inline kbool_t Stmt_isDone(kStmt *stmt)
+{
+	return (stmt->syn == NULL);
 }
 
 #define kStmt_typed(STMT, T)  Stmt_typed(STMT, TSTMT_##T)

@@ -5,7 +5,7 @@ K.import("konoha.string");
 K.import("konoha.mpi");
 
 void test_bytes() {
-	Bytes b = "hello".toBytes();
+	Bytes b = "hello".asBytes();
 	MPIData d = MPIData.fromBytes(b);
 	Bytes b2 = d.toBytes();
 	p(b2.asString());

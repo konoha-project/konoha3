@@ -160,7 +160,6 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 
 	KINITv(mod->packageList, new_(Array, 8));
 	mod->packageMapNO = KLIB Kmap_init(kctx, 0);
-
 	KDEFINE_CLASS defNameSpace = {
 		STRUCTNAME(NameSpace),
 		.init = NameSpace_init,

@@ -229,7 +229,7 @@ static KMETHOD StmtTyCheck_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 		SUGAR kStmt_printMessage(kctx, stmt, NULL, ErrTag, " global variables are not available");
 		RETURNb_(false);
 	}
-	kStmt_done(stmt);
+	kStmt_done(kctx, stmt);
 	RETURNb_(kScriptObject_typeDecl(kctx, scr, stmt, gma, Token_typeLiteral(tk), expr, &stmt));
 }
 

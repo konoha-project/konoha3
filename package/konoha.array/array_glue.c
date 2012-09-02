@@ -61,7 +61,6 @@ static KMETHOD Array_getSize(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(kArray_size(a));
 }
 
-
 #define KARRAY_LIST_SIZE_MAX (1024 * 1024)
 
 static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
@@ -180,7 +179,6 @@ static KMETHOD Array_pop(KonohaContext *kctx, KonohaStack *sfp)
 		RETURN_(value);
 	}
 }
-
 
 static void kArray_removeAt(KonohaContext *kctx, kArray *a, size_t n)
 {

@@ -1,2 +1,2 @@
- - (error) (ERROR_PointNumberLiteral.k:2) undefined expression parser for '0.1'
+ - (error) (ERROR_PointNumberLiteral.k:2) undefined expression: 0.1
 Q.E.D.

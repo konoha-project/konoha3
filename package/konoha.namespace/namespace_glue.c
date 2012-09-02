@@ -58,6 +58,7 @@ static KMETHOD StmtTyCheck_namespace(KonohaContext *kctx, KonohaStack *sfp)
 		SUGAR TokenRange_tokenize(kctx, &range, S_text(tk->text), tk->uline);
 		result = SUGAR TokenRange_eval(kctx, &range);
 		RESET_GCSTACK();
+		kStmt_done(kctx, stmt);
 	}
 	RETURNb_(result == K_CONTINUE);
 }

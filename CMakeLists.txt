@@ -110,13 +110,13 @@ set(PACKAGES
 	konoha.defined
 	konoha.float
 	konoha.global
-	konoha.hashmap
 	konoha.i
 	konoha.io
 	konoha.import
 	konoha.int
 	konoha.iterator
 	konoha.math
+	konoha.map
 	konoha.namespace
 	konoha.new
 	konoha.null
@@ -154,6 +154,10 @@ check_type_size(long     SIZEOF_LONG)
 check_type_size(int      SIZEOF_INT)
 check_type_size(float    SIZEOF_FLOAT)
 check_type_size(double   SIZEOF_DOUBLE)
+
+SET(CMAKE_EXTRA_INCLUDE_FILES pthread.h)
+CHECK_TYPE_SIZE(pthread_mutex_t SIZEOF_PTHREAD_MUTEX_T)
+SET(CMAKE_EXTRA_INCLUDE_FILES)
 
 check_include_files(dlfcn.h HAVE_DLFCN_H)
 check_include_files(iconv.h HAVE_ICONV_H)
