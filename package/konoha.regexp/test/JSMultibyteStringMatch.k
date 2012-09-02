@@ -1,6 +1,5 @@
 //written by Joseph
 
-K.import("konoha.string");
 K.import("konoha.regexp");
 K.import("konoha.assign");
 K.import("konoha.array");

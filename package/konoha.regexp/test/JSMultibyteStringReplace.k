@@ -1,6 +1,5 @@
 //written by Joseph
 
-K.import("konoha.string");
 K.import("konoha.regexp");
 
 void test() {
@@ -10,11 +9,6 @@ void test() {
 	assert("せかい、こんにちは、世界".replace(/世界/gi, "日本") == "せかい、こんにちは、日本");
 	assert("せかい、こんにちは、世界".replace(/世界/g, "日本") == "せかい、こんにちは、日本");
 	assert("せかい、こんにちは、世界".replace(/世界/i, "日本") == "せかい、こんにちは、日本");
-
-	assert("せかい、こんにちは、世界".replace("世界", "日本") == "せかい、こんにちは、日本");
-	assert("せかい、こんにちは、世界".replace("世界", "日本") == "せかい、こんにちは、日本");
-	assert("せかい、こんにちは、世界".replace("世界", "日本") == "せかい、こんにちは、日本");
-
 	assert("Hello world! こんにちは 世界!".replace(/(\w+)\s(\w+)/, "$2, $1") == "world, Hello! こんにちは 世界!");
 }
 
