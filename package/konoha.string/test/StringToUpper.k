@@ -4,7 +4,7 @@ K.import("konoha.string");
 
 void test() {
 	assert("fOoBaR123".toUpper() == "FOOBAR123");
-	assert("aあiいuう".toUpper() == "aあiいuう");
+	assert("aあiいuう".toUpper() == "AあIいUう");
 }
 
 test();
