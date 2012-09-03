@@ -148,6 +148,11 @@ static kExpr *kStmt_addExprParam(KonohaContext *kctx, kStmt *stmt, kExpr *expr, 
 	if(allowEmpty == 0 || start < i) {
 		expr = Expr_add(kctx, expr, kStmt_parseExpr(kctx, stmt, tokenList, start, i));
 	}
+	/* XXX(GC)
+	 * We would like to remove references in TokenList at this point for
+	 * GC reason. But as konoha.arrray package' parser, we reuse TokenList
+	 * to build AST. So we cannot clear contents of TokenList.
+	 */
 	//KLIB kArray_clear(kctx, tokenList, s);
 	return expr;
 }
