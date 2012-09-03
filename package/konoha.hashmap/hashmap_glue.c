@@ -24,10 +24,152 @@
 
 #include<minikonoha/minikonoha.h>
 #include<minikonoha/sugar.h>
+#include<minikonoha/klib.h>
 #include<minikonoha/float.h>
 
-#include "./hashmap_glue.h"
+typedef const struct _kHashMap kHashMap;
+struct _kHashMap {
+	KonohaObjectHeader h;
+	KUtilsHashMap *map;
+};
 
+/* ------------------------------------------------------------------------ */
+
+static void HashMap_init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	struct _kHashMap *map = (struct _kHashMap *)o;
+	map->map = KLIB Kmap_init(kctx, 4);
+}
+
+static void HashMap_free(KonohaContext *kctx, kObject *o)
+{
+	struct _kHashMap *map = (struct _kHashMap *)o;
+	if (map->map != NULL) {
+		KLIB Kmap_free(kctx, map->map, NULL);
+	}
+}
+
+static void HashMap_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+{
+	// TODO
+}
+
+static void entry_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
+{
+	if (TY_isUnbox(O_typeId(p->objectValue))) {
+		BEGIN_REFTRACE(1);
+		KREFTRACEv(p->objectValue);
+		END_REFTRACE();
+	}
+}
+
+static void HashMap_reftrace(KonohaContext *kctx, kObject *o)
+{
+	kHashMap *hmap = (kHashMap*)o;
+	KLIB Kmap_each(kctx, hmap->map, NULL, entry_reftrace);
+}
+
+/* ------------------------------------------------------------------------ */
+
+static KMETHOD HashMap_get(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct _kHashMap *m = (struct _kHashMap *)sfp[0].asObject;
+	KUtilsHashMap *map = m->map;
+	kString *key = sfp[1].asString;
+	KonohaClass *ct = m->h.ct;
+	kParam *cparam = CT_cparam(ct);
+	kparamtype_t p1 = cparam->paramtypeItems[0];
+	uintptr_t hcode = strhash(S_text(key), S_size(key));
+	KUtilsHashMapEntry *e = KLIB Kmap_get(kctx, map, hcode);
+
+	if (p1.ty == TY_Int || p1.ty == TY_Boolean ||
+			(IS_DefinedFloat() && p1.ty == TY_Float)) {
+		RETURNd_((uintptr_t)e->unboxValue);
+	} else {
+		RETURN_(e->objectValue);
+	}
+}
+
+static KMETHOD HashMap_set(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct _kHashMap *m = (struct _kHashMap *)sfp[0].asObject;
+	KUtilsHashMap *map = m->map;
+	kString *key = sfp[1].asString;
+
+	// want to know p1
+	KonohaClass *ct = O_ct(m);
+	kParam *cparam = CT_cparam(ct);
+	kparamtype_t p1 = cparam->paramtypeItems[0];
+	uintptr_t hcode = strhash(S_text(key), S_size(key));
+	KUtilsHashMapEntry *e = KLIB Kmap_newEntry(kctx, map, hcode);
+	if (p1.ty == TY_Int || p1.ty == TY_Boolean ||
+			(IS_DefinedFloat() && p1.ty == TY_Float)) {
+		e->unboxValue = sfp[2].unboxValue;
+	} else {
+		// object;
+		e->unboxValue = (uintptr_t)sfp[2].o;
+	}
+	RETURNvoid_();
+}
+
+static KMETHOD HashMap_new(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURN_(sfp[0].asObject);
+}
+/* ------------------------------------------------------------------------ */
+
+#define _Public   kMethod_Public
+#define _Const    kMethod_Const
+#define _Im       kMethod_Immutable
+#define _Coercion kMethod_Coercion
+#define _F(F)   (intptr_t)(F)
+
+#define CT_HashMap cHashMap
+#define TY_HashMap cHashMap->typeId
+static	kbool_t hashmap_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+{
+	KDEFINE_CLASS defHashMap = {
+		STRUCTNAME(HashMap),
+		.cflag    = kClass_Final,
+		.init     = HashMap_init,
+		.free     = HashMap_free,
+		.p        = HashMap_p,
+		.reftrace = HashMap_reftrace,
+	};
+	KonohaClass *cHashMap = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &defHashMap, pline);
+	KonohaClassVar *ct = (KonohaClassVar *)CT_HashMap;
+	ct->p0 = TY_String; // default
+	KDEFINE_METHOD MethodData[] = {
+		_Public, _F(HashMap_get), TY_0, TY_HashMap, MN_("get"), 1, TY_String, FN_("key"),
+		_Public, _F(HashMap_set), TY_void, TY_HashMap, MN_("set"), 2, TY_String, FN_("key"), TY_0, FN_("value"),
+		_Public, _F(HashMap_new), TY_HashMap, TY_HashMap, MN_("new"), 0,
+		DEND,
+	};
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	return true;
+}
+
+static kbool_t hashmap_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+{
+	return true;
+}
+
+//----------------------------------------------------------------------------
+
+static kbool_t hashmap_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
+{
+	// TODO: map literal
+	KDEFINE_SYNTAX SYNTAX[] = {
+			{ .keyword = KW_END, },
+	};
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
+	return true;
+}
+
+static kbool_t hashmap_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+{
+	return true;
+}
 // --------------------------------------------------------------------------
 
 KDEFINE_PACKAGE* hashmap_init(void)
