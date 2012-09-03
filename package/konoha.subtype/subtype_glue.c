@@ -95,7 +95,9 @@ static KMETHOD ExprTyCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_Object, MN_("<:"), 1, MPOL_PARAMSIZE);
 		DBG_ASSERT(mtd != NULL);
 		KSETv(expr->cons, expr->cons->methodItems[0], mtd);
-		KSETv(expr->cons, expr->cons->exprItems[2], SUGAR kExpr_setConstValue(kctx, expr, targetExpr->ty, KLIB Knull(kctx, targetClass)));
+		kExpr *classValue = SUGAR kExpr_setConstValue(kctx,
+				expr->cons->exprItems[2], targetExpr->ty, KLIB Knull(kctx, targetClass));
+		KSETv(expr->cons, expr->cons->exprItems[2], classValue);
 		RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, TY_Boolean));
 	}
 }
@@ -114,7 +116,9 @@ static KMETHOD ExprTyCheck_As(KonohaContext *kctx, KonohaStack *sfp)
 		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_Object, MN_("as"), 0, 0);
 		DBG_ASSERT(mtd != NULL);
 		KSETv(expr->cons, expr->cons->methodItems[0], mtd);
-		KSETv(expr->cons, expr->cons->exprItems[2], SUGAR kExpr_setConstValue(kctx, expr, targetExpr->ty, KLIB Knull(kctx, targetClass)));
+		kExpr *classValue = SUGAR kExpr_setConstValue(kctx,
+				expr->cons->exprItems[2], targetExpr->ty, KLIB Knull(kctx, targetClass));
+		KSETv(expr->cons, expr->cons->exprItems[2], classValue);
 		RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, targetClass->typeId));
 	}
 }
