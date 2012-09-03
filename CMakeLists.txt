@@ -132,6 +132,7 @@ set(PACKAGES
 	posix.file
 	posix.fd
 ##	posix.socket
+	posix.thread
 ##	konoha.sql
 ##	konoha.subproc
 	konoha.mpi
