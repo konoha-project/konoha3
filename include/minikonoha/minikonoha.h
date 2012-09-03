@@ -588,7 +588,7 @@ struct KonohaStackRuntimeVar {
 };
 
 // module
-#define MOD_MAX    32
+#define KonohaModule_MAXSIZE    32
 #define MOD_logger     0
 #define MOD_gc         1
 #define MOD_code       2
@@ -697,8 +697,8 @@ typedef struct krbp_t {
 typedef struct KDEFINE_CLASS {
 	const char *structname;
 	ktype_t     typeId;         kshortflag_t    cflag;
-	ktype_t     baseTypeId;        ktype_t     superTypeId;
-	ktype_t    rtype;        kushort_t  cparamsize;
+	ktype_t     baseTypeId;     ktype_t         superTypeId;
+	ktype_t     rtype;          kushort_t       cparamsize;
 	struct kparamtype_t   *cparamItems;
 	size_t     cstruct_size;
 	KonohaClassField   *fieldItems;
@@ -1451,6 +1451,8 @@ typedef struct {
 		}\
 	}while (0)
 
+
+
 #define BEGIN_REFTRACE(SIZE)  int _ref_ = (SIZE); kObjectVar** _tail = KONOHA_reftail(kctx, (SIZE));
 #define END_REFTRACE()        (void)_ref_; kctx->stack->reftail = _tail;
 
@@ -1466,6 +1468,8 @@ typedef struct {
 		_tail++;\
 	}\
 } while (0)
+
+
 
 #define KNH_SAFEPOINT(kctx, sfp) do {\
 	if (kctx->safepoint != 0) {\

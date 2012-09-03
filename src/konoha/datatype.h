@@ -308,7 +308,7 @@ static void kArray_clear(KonohaContext *kctx, kArray *o, size_t n)
 // ---------------
 // Param
 
-static KonohaClass *CT_body(KonohaContext *kctx, KonohaClass *ct, size_t head, size_t body);
+static KonohaClass *KonohaClass_extendedBody(KonohaContext *kctx, KonohaClass *ct, size_t head, size_t body);
 
 static void Param_init(KonohaContext *kctx, kObject *o, void *conf)
 {
@@ -320,7 +320,7 @@ static void Param_init(KonohaContext *kctx, kObject *o, void *conf)
 static kParam *new_Param(KonohaContext *kctx, ktype_t rtype, int psize, const kparamtype_t *p)
 {
 	KonohaClass *ct = CT_(TY_Param);
-	ct = CT_body(kctx, ct, sizeof(void*), psize * sizeof(kparamtype_t));
+	ct = KonohaClass_extendedBody(kctx, ct, sizeof(void*), psize * sizeof(kparamtype_t));
 	kParamVar *pa = (kParamVar*)new_kObject(kctx, ct, 0);
 	pa->rtype = rtype;
 	pa->psize = psize;
@@ -620,7 +620,7 @@ static KonohaClassVar* new_KonohaClass(KonohaContext *kctx, KonohaClass *bct, KD
 	return ct;
 }
 
-static KonohaClass *CT_body(KonohaContext *kctx, KonohaClass *ct, size_t head, size_t body)
+static KonohaClass *KonohaClass_extendedBody(KonohaContext *kctx, KonohaClass *ct, size_t head, size_t body)
 {
 	KonohaClass *bct = ct;
 	while(ct->cstruct_size < sizeof(KonohaObjectHeader) + head + body) {
@@ -744,7 +744,7 @@ static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 	return ct->shortNameNULL;
 }
 
-static void CT_setName(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t pline)
+static void KonohaClass_setName(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t pline)
 {
 	uintptr_t lname = longid(ct->packageDomain, ct->nameid);
 	kreportf(DebugTag, pline, "new class domain=%s, name='%s.%s'", PackageId_t(ct->packageDomain), PackageId_t(ct->packageId), SYM_t(ct->nameid));
@@ -776,7 +776,7 @@ static KonohaClass *Konoha_defineClass(KonohaContext *kctx, kpackage_t packageId
 	else {
 		ct->nameid = ksymbolA(S_text(name), S_size(name), _NEWID);
 	}
-	CT_setName(kctx, ct, pline);
+	KonohaClass_setName(kctx, ct, pline);
 	return (KonohaClass*)ct;
 }
 
@@ -910,14 +910,14 @@ static void initStructData(KonohaContext *kctx)
 		KonohaClassVar *ct = (KonohaClassVar *)ctt[i];
 		const char *name = ct->DBG_NAME;
 		ct->nameid = ksymbolSPOL(name, strlen(name), SPOL_ASCII|SPOL_POOL|SPOL_TEXT, _NEWID);
-		CT_setName(kctx, ct, 0);
+		KonohaClass_setName(kctx, ct, 0);
 	}
 	KonohaClassVar *ct = (KonohaClassVar *)CT_Array;
 	kparamtype_t p = {TY_Object};
 	ct->cparamdom = Kparamdom(kctx, 1, &p);
 }
 
-static void KClassTable_initKonohaLib(KonohaLibVar *l)
+static void initKonohaLib(KonohaLibVar *l)
 {
 	l->Kclass                  = Kclass;
 	l->new_kObject             = new_kObject;
@@ -939,7 +939,7 @@ static void KClassTable_initKonohaLib(KonohaLibVar *l)
 	l->KonohaClass_Generics = KonohaClass_Generics;
 }
 
-static void KClassTable_init(KonohaContext *kctx, KonohaContextVar *ctx)
+static void KonohaRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	KonohaRuntimeVar *share = (KonohaRuntimeVar*)KCALLOC(sizeof(KonohaRuntime), 1);
 	ctx->share = share;
@@ -948,7 +948,7 @@ static void KClassTable_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	KInitLock(share->symbolMutex);
 	KInitLock(share->paramMutex);
 
-	KClassTable_initKonohaLib((KonohaLibVar*)kctx->klib);
+	initKonohaLib((KonohaLibVar*)kctx->klib);
 	KLIB Karray_init(kctx, &share->classTable, K_TYTABLE_INIT * sizeof(KonohaClass));
 	loadInitStructData(kctx);
 	share->longClassNameMapNN = KLIB Kmap_init(kctx, 0);
@@ -972,14 +972,11 @@ static void KClassTable_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	KINITv(share->emptyArray,  new_(Array, 0));
 
 	Kparam(kctx, TY_void, 0, NULL);  // PARAM_void
-	Kparamdom(kctx, 0, NULL); // PARAMDOM_void
+	Kparamdom(kctx, 0, NULL);        // PARAMDOM_void
 	FILEID_("(konoha.c)");
 	PN_("konoha");    // PN_konoha
 	PN_("sugar");     // PKG_sugar
 	defineDefaultKeywordSymbol(kctx);
-//	SYM_("");          // MN_
-//	SYM_("new");       // MN_new
-//	SYM_("T");         // UN_T
 	initStructData(kctx);
 }
 
@@ -990,7 +987,7 @@ static void constPoolMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, vo
 	END_REFTRACE();
 }
 
-static void kshare_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
+static void KonohaRuntime_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	KonohaRuntime *share = ctx->share;
 	KonohaClass **cts = (KonohaClass**)kctx->share->classTable.classItems;
@@ -1022,7 +1019,7 @@ static void kshare_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 	END_REFTRACE();
 }
 
-static void TYTABLE_freeCT(KonohaContext *kctx)
+static void KonohaRuntime_freeClassTable(KonohaContext *kctx)
 {
 	KonohaClassVar **cts = (KonohaClassVar**)kctx->share->classTable.classItems;
 	size_t i, size = kctx->share->classTable.bytesize/sizeof(KonohaClassVar*);
@@ -1034,7 +1031,7 @@ static void TYTABLE_freeCT(KonohaContext *kctx)
 	}
 }
 
-static void TYTABLE_free(KonohaContext *kctx, KonohaContextVar *ctx)
+static void KonohaRuntime_free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	KonohaRuntimeVar *share = (KonohaRuntimeVar*)ctx->share;
 	KLIB Kmap_free(kctx, share->longClassNameMapNN, NULL);
@@ -1043,7 +1040,7 @@ static void TYTABLE_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	KLIB Kmap_free(kctx, share->symbolMapNN, NULL);
 	KLIB Kmap_free(kctx, share->paramMapNN, NULL);
 	KLIB Kmap_free(kctx, share->paramdomMapNN, NULL);
-	TYTABLE_freeCT(kctx);
+	KonohaRuntime_freeClassTable(kctx);
 	KLIB Karray_free(kctx, &share->classTable);
 
 	KFreeLock(share->classTableMutex);
@@ -1053,52 +1050,3 @@ static void TYTABLE_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	KFREE(share, sizeof(KonohaRuntime));
 }
 
-/* operator */
-#include "methods.h"
-
-#define _Public    kMethod_Public
-#define _Const     kMethod_Const
-#define _Static    kMethod_Static
-#define _Immutable kMethod_Immutable
-#define _Coercion  kMethod_Coercion
-#define _Hidden    kMethod_Hidden
-#define _Override  kMethod_Override
-#define _F(F)      (intptr_t)(F)
-
-static void Konoha_loadDefaultMethod(KonohaContext *kctx)
-{
-	int FN_x = FN_("x");
-	KDEFINE_METHOD MethodData[] = {
-		_Public|_Immutable|_Const, _F(Object_toString), TY_String, TY_Object, MN_to(TY_String), 0,
-		_Public|_Immutable|_Const, _F(Boolean_opNOT), TY_Boolean, TY_Boolean, MN_("!"), 0,
-		_Public|_Immutable|_Const, _F(Boolean_opEQ), TY_Boolean, TY_Boolean, MN_("=="), 1, TY_Boolean, FN_x,
-		_Public|_Immutable|_Const, _F(Int_opNEQ), TY_Boolean, TY_Boolean, MN_("!="), 1, TY_Boolean, FN_x,
-		_Public|_Immutable|_Const, _F(Int_opMINUS), TY_Int, TY_Int, MN_("-"), 0,
-		_Public|_Immutable|_Const, _F(Int_opADD), TY_Int, TY_Int, MN_("+"), 1, TY_Int, FN_x,
-		_Public|_Immutable|_Const, _F(Int_opSUB), TY_Int, TY_Int, MN_("-"), 1, TY_Int, FN_x,
-		_Public|_Immutable|_Const, _F(Int_opMUL), TY_Int, TY_Int, MN_("*"), 1, TY_Int, FN_x,
-		/* opDIV and opMOD raise zero divided exception. Don't set _Const */
-		_Public|_Immutable, _F(Int_opDIV), TY_Int, TY_Int, MN_("/"), 1, TY_Int, FN_x,
-		_Public|_Immutable, _F(Int_opMOD), TY_Int, TY_Int, MN_("%"), 1, TY_Int, FN_x,
-		_Public|_Immutable|_Const, _F(Int_opEQ),  TY_Boolean, TY_Int, MN_("=="),  1, TY_Int, FN_x,
-		_Public|_Immutable|_Const, _F(Int_opNEQ), TY_Boolean, TY_Int, MN_("!="), 1, TY_Int, FN_x,
-		_Public|_Immutable|_Const, _F(Int_opLT),  TY_Boolean, TY_Int, MN_("<"),  1, TY_Int, FN_x,
-		_Public|_Immutable|_Const, _F(Int_opLTE), TY_Boolean, TY_Int, MN_("<="), 1, TY_Int, FN_x,
-		_Public|_Immutable|_Const, _F(Int_opGT),  TY_Boolean, TY_Int, MN_(">"),  1, TY_Int, FN_x,
-		_Public|_Immutable|_Const, _F(Int_opGTE), TY_Boolean, TY_Int, MN_(">="), 1, TY_Int, FN_x,
-		_Public|_Immutable|_Const,  _F(Int_toString), TY_String, TY_Int, MN_to(TY_String), 0,
-		_Public|_Immutable|_Const|kMethod_SmartReturn|kMethod_Hidden, _F(Boolean_box), TY_Object, TY_Boolean, MN_box, 0,
-		_Public|_Immutable|_Const|kMethod_SmartReturn|kMethod_Hidden, _F(Int_box), TY_Object, TY_Int, MN_box, 0,
-		_Public|_Immutable|_Const, _F(String_opEQ),  TY_Boolean, TY_String, MN_("=="),  1, TY_String, FN_x ,
-		_Public|_Immutable|_Const, _F(String_opNEQ), TY_Boolean, TY_String, MN_("!="), 1, TY_String, FN_x ,
-		_Public|_Immutable|_Const, _F(String_toInt), TY_Int, TY_String, MN_to(TY_Int), 0,
-		_Public|_Immutable|_Const, _F(String_opADD), TY_String, TY_String, MN_("+"), 1, TY_String, FN_x | FN_COERCION,
-		_Public|_Const|_Hidden, _F(Func_new), TY_Func, TY_Func, MN_new, 2, TY_Object, FN_x, TY_Method, FN_x,
-		_Public|kMethod_SmartReturn|_Hidden, _F(Func_invoke), TY_Object, TY_Func, MN_("invoke"), 0,
-		_Static|_Public|_Immutable, _F(System_assert), TY_void, TY_System, MN_("assert"), 1, TY_Boolean, FN_x,
-		_Static|_Public|_Immutable, _F(System_p), TY_void, TY_System, MN_("p"), 1, TY_String, FN_("s") | FN_COERCION,
-		_Static|_Public|_Immutable, _F(System_gc), TY_void, TY_System, MN_("gc"), 0,
-		DEND,
-	};
-	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);
-}

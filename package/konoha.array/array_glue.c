@@ -61,7 +61,6 @@ static KMETHOD Array_getSize(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(kArray_size(a));
 }
 
-
 #define KARRAY_LIST_SIZE_MAX (1024 * 1024)
 
 static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
@@ -180,7 +179,6 @@ static KMETHOD Array_pop(KonohaContext *kctx, KonohaStack *sfp)
 		RETURN_(value);
 	}
 }
-
 
 static void kArray_removeAt(KonohaContext *kctx, kArray *a, size_t n)
 {
@@ -433,7 +431,6 @@ static KMETHOD Array_newList(KonohaContext *kctx, KonohaStack *sfp);
 static kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	KREQUIRE_PACKAGE("konoha.new", pline);
-
 	// define array generics
 	//kparamtype_t p1 = {TY_0, FN_("a")};
 	//KonohaClass *CT_ArrayT0 = KLIB KonohaClass_Generics(kctx, CT_Array, TY_0, 1, &p1);

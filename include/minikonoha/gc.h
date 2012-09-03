@@ -54,7 +54,7 @@ extern void MODGC_free(KonohaContext *kctx, KonohaContextVar *ctx);
 extern kObject *MODGC_omalloc(KonohaContext *kctx, size_t size);
 
 /* root reftrace */
-extern void KRUNTIME_reftraceAll(KonohaContext *kctx);
+extern void KonohaContext_reftraceAll(KonohaContext *kctx);
 
 extern void MODGC_gc_invoke(KonohaContext *kctx, KonohaStack *esp);
 extern void MODGC_check_malloced_size(void);

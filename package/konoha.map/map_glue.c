@@ -35,7 +35,6 @@ struct kMapVar {
 #define Map_isUnboxData(o)    (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
 #define Map_setUnboxData(o,b) TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,b)
 
-
 static void kMap_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kMap *map = (kMap*)o;
@@ -183,46 +182,39 @@ static KMETHOD Map_keys(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_DefaultObjectValue();
 }
 
-////## T0 Map.();
-//static KMETHOD Map_(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kMap *m = (kMap*)sfp[0].asObject;
-//	int argc = kctx->esp - sfp - 2;   // believe me
-//	ksymbol_t methodName = (ksymbol_t)kctx->esp[-1].unboxValue;
-//
-//}
-
-//static KMETHOD Map_new(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0));
-//}
-
 /* ------------------------------------------------------------------------ */
 
 #define _Public   kMethod_Public
 #define _Const    kMethod_Const
 #define _Im       kMethod_Immutable
 #define _Coercion kMethod_Coercion
-#define _F(F)   (intptr_t)(F)
+#define _F(F)     (intptr_t)(F)
 
 #define CT_Map cMap
 #define TY_Map cMap->typeId
+
 static	kbool_t map_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
+	kparamtype_t cparam = {TY_Object};
 	KDEFINE_CLASS defMap = {
 		STRUCTNAME(Map),
-		.cflag = kClass_Final,
-		.init = kMap_init,
-		.free = kMap_free,
-		.p     = kMap_p,
+		.cflag     = kClass_Final,
+		.cparamsize = 1,
+		.cparamItems = &cparam,
+		.init      = kMap_init,
+		.reftrace  = kMap_reftrace,
+		.free      = kMap_free,
+		.p         = kMap_p,
 	};
 	KonohaClass *cMap = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &defMap, pline);
-	KonohaClassVar *ct = (KonohaClassVar *)CT_Map;
-	ct->p0 = TY_Object; // default
+	int FN_key = FN_key;
+	int TY_Array0 = CT_p0(kctx, CT_Array, TY_0)->typeId;
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Map_get), TY_0, TY_Map, MN_("get"), 1, TY_String, FN_("key"),
-		_Public, _F(Map_set), TY_void, TY_Map, MN_("set"), 2, TY_String, FN_("key"), TY_0, FN_("value"),
-//		_Public, _F(Map_new), TY_Map, TY_Map, MN_("new"), 0,
+		_Public|_Im|_Const, _F(Map_has), TY_Boolean, TY_Map, MN_("has"), 1, TY_String, FN_key,
+		_Public|_Im|_Const, _F(Map_get), TY_0, TY_Map, MN_("get"), 1, TY_String, FN_key,
+		_Public, _F(Map_set), TY_void, TY_Map, MN_("set"), 2, TY_String, FN_key, TY_0, FN_("value"),
+		_Public, _F(Map_remove), TY_void, TY_Map, MN_("remove"), 1, TY_String, FN_key,
+		_Public|_Im|_Const, _F(Map_keys), TY_Array0, TY_Map, MN_("keys"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
@@ -233,6 +225,12 @@ static kbool_t map_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime
 {
 	return true;
 }
+
+
+/* ----------------------------------------------------------------------- */
+
+
+
 
 static kbool_t map_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {

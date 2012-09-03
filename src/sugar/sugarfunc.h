@@ -151,13 +151,13 @@ static KMETHOD ParseExpr_Term(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ParseExpr_Op(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
+	if(/*syn->keyword != KW_LET && */syn->sugarFuncTable[SUGARFUNC_ExprTyCheck] == NULL) {
+		DBG_P("switching type checker of %s%s to MethodCall ..", PSYM_t(syn->keyword));
+		syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);  // switch type checker
+	}
 	kTokenVar *tk = tokenList->tokenVarItems[operatorIdx];
 	kExpr *expr, *rexpr = kStmt_parseExpr(kctx, stmt, tokenList, operatorIdx + 1, endIdx);
 	PUSH_GCSTACK(rexpr);
-//	if(syn->keyword != KW_LET && syn->sugarFuncTable[SUGARFUNC_ExprTyCheck] == NULL) {
-//		DBG_P("switching type checker ..");
-//		syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);  // switch type checker
-//	}
 	if(beginIdx == operatorIdx) { // unary operator
 		expr = new_UntypedCallStyleExpr(kctx, syn, 2, tk, rexpr);
 	}
@@ -397,7 +397,7 @@ static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kBlock *bk = expr->block;
-	if(IS_Block(bk)) {
+	if(IS_Block(bk)) {  // this is special case of ${} by set internally
 		kExpr *texpr = K_NULLEXPR;
 		kStmt *lastExpr = NULL;
 		kfileline_t uline = stmt->uline;
@@ -435,6 +435,7 @@ static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		RETURN_(texpr);
 	}
+	kExpr_p(stmt, expr, ErrTag, "undefined expression: %s", Token_text(expr->termToken));
 }
 
 static kMethod* NameSpace_getGetterMethodNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ksymbol_t fn)
@@ -560,7 +561,7 @@ static KMETHOD StmtTyCheck_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 			else {
 				kkStmt_printMessage(stmt, ErrTag, "constant value is expected");
 			}
-			kStmt_done(stmt);
+			kStmt_done(kctx, stmt);
 		}
 	}
 	RETURNb_(r);
@@ -668,7 +669,7 @@ static kExpr *kStmt_tyCheckCallParamExpr(KonohaContext *kctx, kStmt *stmt, kExpr
 	expr = Expr_typedWithMethod(kctx, expr, mtd, reqty);
 	if(isConst && Method_isConst(mtd)) {
 		ktype_t rtype = ktype_var(kctx, pa->rtype, thisClass);
-		return ExprCall_toConstValue(kctx, expr, expr->cons, rtype);
+		return kExprCall_toConstValue(kctx, expr, expr->cons, rtype);
 	}
 	return expr;
 }
@@ -913,7 +914,7 @@ static KMETHOD StmtTyCheck_else(KonohaContext *kctx, KonohaStack *sfp)
 	if(stmtIf != NULL) {
 		kBlock *bkElse = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
 		KLIB kObject_setObject(kctx, stmtIf, KW_else, TY_Block, bkElse);
-		kStmt_done(stmt);
+		kStmt_done(kctx, stmt);
 		r = kBlock_tyCheckAll(kctx, bkElse, gma);
 	}
 	else {
@@ -990,7 +991,7 @@ static kbool_t kStmt_declType(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kty
 		kStmt *lastStmt = lastStmtRef[0];
 		kBlock_insertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, newstmt);
 		lastStmtRef[0] = newstmt;
-		kStmt_done(stmt);
+		kStmt_done(kctx, stmt);
 		return true;
 	}
 	return false;
@@ -1073,7 +1074,7 @@ static kParam *kStmt_newMethodParamNULL(KonohaContext *kctx, kStmt *stmt, kGamma
 	kParam *pa = (kParam*)kStmt_getObjectNULL(kctx, stmt, KW_ParamPattern);
 	if(pa == NULL || !IS_Param(pa)) {
 		SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ParamPattern);
-		if(!Stmt_TyCheck(kctx, syn, stmt, gma)) {
+		if(!SugarSyntax_tyCheckStmt(kctx, syn, stmt, gma)) {
 			return NULL;
 		}
 	}
@@ -1098,16 +1099,17 @@ static KMETHOD StmtTyCheck_ParamsDecl(KonohaContext *kctx, KonohaStack *sfp)
 		for(i = 0; i < psize; i++) {
 			kStmt *stmt = params->stmtList->stmtItems[i];
 			if(stmt->syn->keyword != KW_StmtTypeDecl || !StmtTypeDecl_setParam(kctx, stmt, i, p)) {
-				kkStmt_printMessage(stmt, ErrTag, "parameter declaration must be a $Type $Symbol form");
-				RETURNb_(false);
+				break;
 			}
 		}
 		pa = new_kParam(kctx, rtype, psize, p);
 	}
-	if(IS_Param(pa)) {
+	if(pa != NULL && IS_Param(pa)) {
 		KLIB kObject_setObject(kctx, stmt, KW_ParamPattern, TY_Param, pa);
+		kStmt_done(kctx, stmt);
 		RETURNb_(true);
 	}
+	kkStmt_printMessage(stmt, ErrTag, "expected parameter declaration");
 	RETURNb_(false);
 }
 
@@ -1179,7 +1181,7 @@ static KMETHOD StmtTyCheck_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 			kMethod_setLazyCompilation(kctx, (kMethodVar*)mtd, stmt, ns);
 		}
 	}
-	kStmt_done(stmt);
+	kStmt_done(kctx, stmt);
 	RETURNb_(pa != NULL);
 }
 
@@ -1203,7 +1205,6 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ PATTERN(Symbol),  PatternMatch_(MethodName), ParseExpr_(Term), ExprTyCheck_(Symbol),},
 		{ PATTERN(Text),    ExprTyCheck_(Text),},
 		{ PATTERN(Number),  ExprTyCheck_(Int),},
-		{ PATTERN(Float),   },
 		{ GROUP(Parenthesis), .flag = SYNFLAG_ExprPostfixOp2, ParseExpr_(Parenthesis), .precedence_op2 = C_PRECEDENCE_CALL, ExprTyCheck_(FuncStyleCall),}, //KW_ParenthesisGroup
 		{ GROUP(Bracket),  },  //KW_BracketGroup
 		{ GROUP(Brace),  }, // KW_BraceGroup
@@ -1222,11 +1223,11 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(GTE), .precedence_op2 = C_PRECEDENCE_COMPARE, },
 		{ TOKEN(EQ),  .precedence_op2 = C_PRECEDENCE_EQUALS, },
 		{ TOKEN(NEQ), .precedence_op2 = C_PRECEDENCE_EQUALS, },
+		{ TOKEN(LET), .flag = SYNFLAG_ExprLeftJoinOp2, ParseExpr_(Op), ExprTyCheck_(assign), .precedence_op2 = C_PRECEDENCE_ASSIGN, },
 		{ TOKEN(AND), .precedence_op2 = C_PRECEDENCE_AND, ParseExpr_(Op), ExprTyCheck_(AND)},
 		{ TOKEN(OR),  .precedence_op2 = C_PRECEDENCE_OR, ParseExpr_(Op), ExprTyCheck_(OR)},
 		{ TOKEN(NOT),  .precedence_op1 = C_PRECEDENCE_PREUNARY,},
 		{ TOKEN(COLON), /*.precedence_op2 = C_PRECEDENCE_TRINARY,*/ },  // colon
-		{ TOKEN(LET),      .flag = SYNFLAG_ExprLeftJoinOp2, ParseExpr_(Op), ExprTyCheck_(assign), .precedence_op2 = C_PRECEDENCE_ASSIGN, },
 		{ TOKEN(COMMA),    ParseExpr_(COMMA), .precedence_op2 = C_PRECEDENCE_COMMA,},
 		{ TOKEN(DOLLAR),   ParseExpr_(DOLLAR), },
 		{ TOKEN(boolean), .type = TY_Boolean, },
