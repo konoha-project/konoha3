@@ -270,8 +270,8 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 				}
 			}
 		}
+		fclose(fp);
 	}
-	fclose(fp);
 	return isSuccessfullyLoading;
 }
 
