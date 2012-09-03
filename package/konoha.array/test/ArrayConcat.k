@@ -1,18 +1,19 @@
 // written by shinpei
 
-K.import("konoha.global");
 K.import("konoha.assign");
 K.import("konoha.array");
 
 void test () {
 	String[] sa1 = ["a", "b"];
 	String[] sa2 = ["c", "d", "e"];
-	String[] sa3 = ["f", "g"];
 
-	String[] sa = sa1.concat(sa2, sa3);
-	assert(sa.getSize() == 7);
+	String[] sa = sa1.concat(sa2);
+	assert(sa.getSize() == 5);
 	assert(sa[0] == "a");
-	   
+	assert(sa[1] == "b");
+	assert(sa[2] == "c");
+	assert(sa[3] == "d");
+	assert(sa[4] == "e");
 }
 
 test();
