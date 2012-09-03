@@ -162,20 +162,11 @@ static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 				DBG_P("syn->keyword=%s%s, fo=%p", PSYM_t(syn->keyword), fo);
 				KINITv(syn->sugarFuncTable[SUGARFUNC_ParseExpr], fo);
 			}
-			if(syn->ty != TY_unknown || syn->sugarFuncTable[SUGARFUNC_ExprTyCheck] != NULL) {
+			else if(syn->ty != TY_unknown || syn->sugarFuncTable[SUGARFUNC_ExprTyCheck] != NULL) {
 				kFunc *fo = SYN_(ns, KW_ExprTerm)->sugarFuncTable[SUGARFUNC_ParseExpr];
 				DBG_ASSERT(fo != NULL);
 				DBG_P("syn->keyword=%s%s, fo=%p", PSYM_t(syn->keyword), fo);
-				if (syn->sugarFuncTable[SUGARFUNC_ParseExpr]) {
-					kFunc *prevFunc = syn->sugarFuncTable[SUGARFUNC_ParseExpr];
-					PUSH_GCSTACK(prevFunc);
-					kArray *a = GCSAFE_new(Array, 0);
-					KLIB kArray_add(kctx, a, prevFunc);
-					KLIB kArray_add(kctx, a, fo);
-					KSETv(ns, syn->sugarFuncListTable[SUGARFUNC_ParseExpr], a);
-				} else {
-					KINITv(syn->sugarFuncTable[SUGARFUNC_ParseExpr], fo);
-				}
+				KINITv(syn->sugarFuncTable[SUGARFUNC_ParseExpr], fo);
 			}
 		}
 		DBG_ASSERT(syn == SYN_(ns, syndef->keyword));
