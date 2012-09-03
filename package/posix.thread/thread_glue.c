@@ -118,6 +118,14 @@ static void Thread_free(KonohaContext *kctx, kObject *o)
 	//TODO
 }
 
+static void Thread_reftrace(KonohaContext *kctx, kObject *o)
+{
+	kThread *t = (kThread *)o;
+	BEGIN_REFTRACE(1);
+	KREFTRACEv(t->func);
+	END_REFTRACE();
+}
+
 static void Mutex_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kMutex *m = (kMutex *)o;
@@ -221,9 +229,10 @@ static kbool_t thread_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 {
 	KDEFINE_CLASS defThread = {
 		STRUCTNAME(Thread),
-		.cflag = kClass_Final,
-		.init  = Thread_init,
-		.free  = Thread_free,
+		.cflag    = kClass_Final,
+		.init     = Thread_init,
+		.reftrace = Thread_reftrace,
+		.free     = Thread_free,
 	};
 	KDEFINE_CLASS defMutex = {
 		STRUCTNAME(Mutex),
