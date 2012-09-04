@@ -55,42 +55,42 @@ extern int verbose_debug;
 
 // for memory management
 static void *dse_malloc(size_t size);
-static void dse_free(void *ptr, size_t size);
+static void  dse_free(void *ptr, size_t size);
 
 /* Message */
 struct Message {
 	unsigned char *data;
-	size_t len;
+	size_t         len;
 };
 typedef struct Message Message;
 
 static Message *Message_new(unsigned char *requestLine, size_t length);
-static void Message_delete(Message *msg);
+static void     Message_delete(Message *msg);
 
 /* Scheduler */
 #define MSG_QUEUE_SIZE 16
-#define POOL_SIZE 16
-#define next(index) (((index) + 1) % MSG_QUEUE_SIZE)
+#define POOL_SIZE      16
+#define next(index)    (((index) + 1) % MSG_QUEUE_SIZE)
 
 struct Scheduler {
-	Message *msgQueue[MSG_QUEUE_SIZE];
-	int front;
-	int last;
+	Message        *msgQueue[MSG_QUEUE_SIZE];
+	int             front;
+	int             last;
 	pthread_mutex_t lock;
-	pthread_cond_t cond;
+	pthread_cond_t  cond;
 };
 typedef struct Scheduler Scheduler;
 
 static Scheduler *Scheduler_new(void);
-static void Scheduler_delete(Scheduler *sched);
-static bool dse_enqueue(Scheduler *sched, Message *msg);
-static Message *dse_dequeue(Scheduler *sched);
+static void       Scheduler_delete(Scheduler *sched);
+static bool       dse_enqueue(Scheduler *sched, Message *msg);
+static Message   *dse_dequeue(Scheduler *sched);
 
 /* DSE */
 struct DSE {
 	struct event_base *base;
-	struct evhttp *httpd;
-	Scheduler *sched;
+	struct evhttp     *httpd;
+	Scheduler         *sched;
 };
 typedef struct DSE DSE;
 
@@ -98,17 +98,17 @@ static DSE *DSE_new(void);
 static void DSE_start(DSE *dse, const char *addr, int ip);
 static void DSE_delete(DSE *dse);
 
-#define PATH_SIZE 256
+#define PATH_SIZE   256
 #define THREAD_SIZE 16
-#define LOG_END 0
-#define LOG_s 1
+#define LOG_END     0
+#define LOG_s       1
 #define KEYVALUE_s(K,V) LOG_s, (K), (V)
 
-#define HTTPD_ADDR "0.0.0.0"
-#define HTTPD_PORT 8080
+#define HTTPD_ADDR  "0.0.0.0"
+#define HTTPD_PORT  8080
 
 struct targs {
-	Scheduler *sched;
+	Scheduler   *sched;
 	PlatformApi *platform;
 };
 
@@ -120,8 +120,10 @@ extern "C" {
 
 /* global variables */
 static size_t totalMalloc = 0;
-static int port = HTTPD_PORT;
-static char *logpoolip = NULL;
+static int    port = HTTPD_PORT;
+static int    threadsize = THREAD_SIZE;
+static char  *logpoolip = NULL;
+static char  *scriptdir = NULL;
 
 // ---------------------------------------------------------------------------
 // [utilities]
@@ -276,7 +278,16 @@ static void dse_define(KonohaContext *kctx, Message *msg)
 {
 	if(msg != NULL) {
 		KDEFINE_TEXT_CONST TextData[] = {
-			{"DSE_MESSAGE", TY_TEXT, (char *)msg->data}, {}
+			{"DSE_MESSAGE", TY_TEXT, (char *)msg->data},
+			{"DSE_SCRIPT_DIR", TY_TEXT, scriptdir},
+			{}
+		};
+		KLIB kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(TextData), 0);
+	}
+	else {
+		KDEFINE_TEXT_CONST TextData[] = {
+			{"DSE_SCRIPT_DIR", TY_TEXT, scriptdir},
+			{}
 		};
 		KLIB kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(TextData), 0);
 	}
@@ -363,7 +374,7 @@ static void DSE_start(DSE *dse, const char *addr, int ip)
 	}
 
 	int i;
-	pthread_t thread_pool[THREAD_SIZE];
+	pthread_t thread_pool[threadsize];
 	PlatformApi *dse_platform = KonohaUtils_getDefaultPlatformApi();
 	PlatformApiVar *dse_platformVar = (PlatformApiVar *)dse_platform;
 	dse_platformVar->name = "dse";
@@ -373,7 +384,7 @@ static void DSE_start(DSE *dse, const char *addr, int ip)
 		dse_platform
 	};
 
-	for(i = 0; i < THREAD_SIZE; i++) {
+	for(i = 0; i < threadsize; i++) {
 		pthread_create(&thread_pool[i], NULL, dse_dispatch, (void *)&args);
 	}
 	evhttp_set_gencb(dse->httpd, dse_req_handler, (void *)dse->sched);
@@ -393,6 +404,8 @@ static struct option long_option[] = {
 	{"verbose", no_argument, &verbose_debug, 1},
 	{"logpool", required_argument, 0, 'l'},
 	{"port", required_argument, 0, 'p'},
+	{"threadsize", required_argument, 0, 't'},
+	{"scriptdir", required_argument, 0, 'D'},
 	{0, 0, 0, 0}
 };
 
@@ -402,7 +415,7 @@ static void dse_parseopt(int argc, char *argv[])
 	logpoolip = getenv("LOGPOOL_IP");
 	while(true) {
 		int option_index = 0;
-		int c = getopt_long(argc, argv, "l:p:", long_option, &option_index);
+		int c = getopt_long(argc, argv, "l:p:t:D:", long_option, &option_index);
 		if(c == -1) break; /* Detect the end of the options. */
 		switch(c) {
 			case 'l':
@@ -410,6 +423,12 @@ static void dse_parseopt(int argc, char *argv[])
 				break;
 			case 'p':
 				port = (int)strtol(optarg, &e, 10);
+				break;
+			case 't':
+				threadsize = (int)strtol(optarg, &e, 10);
+				break;
+			case 'D':
+				scriptdir = optarg;
 				break;
 			case '?':
 				fprintf(stderr, "Unknown or required argument option -%c\n", optopt);
@@ -420,6 +439,7 @@ static void dse_parseopt(int argc, char *argv[])
 		}
 	}
 	if(!logpoolip) logpoolip = "0.0.0.0";
+	if(!scriptdir) scriptdir = "./";
 	if(getenv("DSE_DEBUG") != NULL || getenv("KONOHA_DEBUG") != NULL) {
 		verbose_debug = 1;
 	}

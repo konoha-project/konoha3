@@ -35,7 +35,7 @@ void main() {
 	}
 	DSERequest req = new DSERequest(DSE_MESSAGE);
 	String script = req.script;
-	String scriptPath = "./" + req.contextid + ".k";
+	String scriptPath = DSE_SCRIPT_DIR + "/" + req.contextid + ".k";
 	String command = req.scripttype + " " + scriptPath;
 	if(DSE_DEBUG == 1) {
 		System.p(command);
