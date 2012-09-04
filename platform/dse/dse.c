@@ -24,9 +24,6 @@
 
 /* ************************************************************************ */
 
-//#ifndef DSE_H_
-//#define DSE_H_
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -48,25 +45,15 @@ extern int verbose_debug;
 #include <pthread.h>
 #endif /* K_USE_PTHREAD */
 
-//extern char *logpoolip;
-
 // for debug
-//#define DSE_DEBUG 1
-//#if defined(DSE_DEBUG)
 #define DEBUG_PRINT(fmt, ...) do { \
 	if (verbose_debug) fprintf(stderr, fmt "\n", ##__VA_ARGS__); \
 } while (0)
 #define DEBUG_ASSERT(stmt) do { \
 	if (verbose_debug) assert(stmt); \
 } while (0)
-//#else
-//#define DEBUG_PRINT(fmt, ...)
-//#define DEBUG_ASSERT(stmt)
-//#endif
 
 // for memory management
-//extern size_t totalMalloc;
-
 static void *dse_malloc(size_t size);
 static void dse_free(void *ptr, size_t size);
 
@@ -125,8 +112,7 @@ struct targs {
 	PlatformApi *platform;
 };
 
-//#endif /* DSE_H_ */
-//
+
 
 #ifdef __cplusplus
 extern "C" {
