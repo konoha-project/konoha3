@@ -30,12 +30,16 @@ class DSERequest {
 }
 
 void main() {
-	p(MESSAGE);
-	DSERequest req = new DSERequest(MESSAGE);
+	if(DSE_DEBUG == 1) {
+		System.p(DSE_MESSAGE);
+	}
+	DSERequest req = new DSERequest(DSE_MESSAGE);
 	String script = req.script;
 	String scriptPath = "./" + req.contextid + ".k";
 	String command = req.scripttype + " " + scriptPath;
-	p(command);
+	if(DSE_DEBUG == 1) {
+		System.p(command);
+	}
 	FILE f = System.fopen(scriptPath, "w");
 	int len = script.getSize();
 	f.write(script.asBytes(), 0, len);
@@ -43,7 +47,7 @@ void main() {
 	Subproc sp = new Subproc("", false);
 	sp.enableShellmode(false);
 	String str = sp.exec(command);
-	p(str);
+	System.p(str);
 }
 
 main();

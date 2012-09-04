@@ -24,54 +24,173 @@
 
 /* ************************************************************************ */
 
-#include "dse.h"
+//#ifndef DSE_H_
+//#define DSE_H_
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+#include <assert.h>
+#include <getopt.h>
+#include <event.h>
+#include <evhttp.h>
+#include <event2/buffer.h>
+#include <logpool/logpool.h>
+#ifndef K_USE_PTHREAD
+#define K_USE_PTHREAD 1
+#endif /* K_USE_PTHREAD */
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
+extern int verbose_debug;
+#include <minikonoha/platform_posix.h>
+#ifndef K_USE_PTHREAD
+#include <pthread.h>
+#endif /* K_USE_PTHREAD */
+
+//extern char *logpoolip;
+
+// for debug
+//#define DSE_DEBUG 1
+//#if defined(DSE_DEBUG)
+#define DEBUG_PRINT(fmt, ...) do { \
+	if (verbose_debug) fprintf(stderr, fmt "\n", ##__VA_ARGS__); \
+} while (0)
+#define DEBUG_ASSERT(stmt) do { \
+	if (verbose_debug) assert(stmt); \
+} while (0)
+//#else
+//#define DEBUG_PRINT(fmt, ...)
+//#define DEBUG_ASSERT(stmt)
+//#endif
+
+// for memory management
+//extern size_t totalMalloc;
+
+static void *dse_malloc(size_t size);
+static void dse_free(void *ptr, size_t size);
+
+/* Message */
+struct Message {
+	unsigned char *data;
+	size_t len;
+};
+typedef struct Message Message;
+
+static Message *Message_new(unsigned char *requestLine, size_t length);
+static void Message_delete(Message *msg);
+
+/* Scheduler */
+#define MSG_QUEUE_SIZE 16
+#define POOL_SIZE 16
+#define next(index) (((index) + 1) % MSG_QUEUE_SIZE)
+
+struct Scheduler {
+	Message *msgQueue[MSG_QUEUE_SIZE];
+	int front;
+	int last;
+	pthread_mutex_t lock;
+	pthread_cond_t cond;
+};
+typedef struct Scheduler Scheduler;
+
+static Scheduler *Scheduler_new(void);
+static void Scheduler_delete(Scheduler *sched);
+static bool dse_enqueue(Scheduler *sched, Message *msg);
+static Message *dse_dequeue(Scheduler *sched);
+
+/* DSE */
+struct DSE {
+	struct event_base *base;
+	struct evhttp *httpd;
+	Scheduler *sched;
+};
+typedef struct DSE DSE;
+
+static DSE *DSE_new(void);
+static void DSE_start(DSE *dse, const char *addr, int ip);
+static void DSE_delete(DSE *dse);
+
+#define PATH_SIZE 256
+#define THREAD_SIZE 16
+#define LOG_END 0
+#define LOG_s 1
+#define KEYVALUE_s(K,V) LOG_s, (K), (V)
+
+#define HTTPD_ADDR "0.0.0.0"
+#define HTTPD_PORT 8080
+
+struct targs {
+	Scheduler *sched;
+	PlatformApi *platform;
+};
+
+//#endif /* DSE_H_ */
+//
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-size_t totalMalloc = 0;
+/* global variables */
+static size_t totalMalloc = 0;
+static int port = HTTPD_PORT;
+static char *logpoolip = NULL;
 
-void *dse_malloc(size_t size)
+// ---------------------------------------------------------------------------
+// [utilities]
+
+static void *dse_malloc(size_t size)
 {
 	void *ptr = malloc(size);
 	if (ptr == NULL) {
 		DEBUG_PRINT("malloc failed");
 		size = 0;
 	}
-	totalMalloc += size;
-	DEBUG_PRINT("totalMalloc:%ld @dse_malloc()", totalMalloc);
+	if (verbose_debug) {
+		totalMalloc += size;
+		fprintf(stderr, "totalMalloc:%ld @dse_malloc()\n", totalMalloc);
+	}
 	return ptr;
 }
 
-void dse_free(void *ptr, size_t size)
+static void dse_free(void *ptr, size_t size)
 {
 	free(ptr);
-	totalMalloc -= size;
-	DEBUG_PRINT("totalMalloc:%ld @dse_free()", totalMalloc);
-	DEBUG_ASSERT(totalMalloc >= 0);
+	if (verbose_debug) {
+		totalMalloc -= size;
+		fprintf(stderr, "totalMalloc:%ld @dse_free()\n", totalMalloc);
+		assert(totalMalloc >= 0);
+	}
 }
 
+// ---------------------------------------------------------------------------
+// [Message]
 
-
-Message *Message_new(unsigned char *requestLine)
+static Message *Message_new(unsigned char *requestLine, size_t length)
 {
-	size_t len = strlen((char *)requestLine);
-	Message *msg = (Message *)dse_malloc(len + 1);
-	msg = memcpy(msg, requestLine, len);
-	msg[len] = '\0';
+	Message *msg = (Message *)dse_malloc(sizeof(Message));
+	if(length <= 0) {
+		length = strlen((const char *)requestLine);
+	}
+	msg->data = (unsigned char *)dse_malloc(length + 1);
+	memcpy(msg->data, requestLine, length);
+	msg->data[length] = '\0';
+	msg->len = length;
 	return msg;
 }
 
-void Message_delete(Message *msg)
+static void Message_delete(Message *msg)
 {
 	if(msg == NULL) return;
-	dse_free(msg, strlen((char *)msg) + 1);
+	dse_free(msg->data, msg->len + 1);
+	dse_free(msg, sizeof(Message));
 }
 
+// ---------------------------------------------------------------------------
+// [Scheduler]
 
-
-Scheduler *Scheduler_new(void)
+static Scheduler *Scheduler_new(void)
 {
 	Scheduler *sched = dse_malloc(sizeof(Scheduler));
 	sched->front = 0;
@@ -81,14 +200,14 @@ Scheduler *Scheduler_new(void)
 	return sched;
 }
 
-void Scheduler_delete(Scheduler *sched)
+static void Scheduler_delete(Scheduler *sched)
 {
 	pthread_mutex_destroy(&sched->lock);
-	pthread_cond_destroy(&sched->cond);
-	dse_free(sched, sizeof(Scheduler));
+	pthread_cond_destroy(&sched->cond),
+		dse_free(sched, sizeof(Scheduler));
 }
 
-bool dse_enqueue(Scheduler *sched, Message *msg)
+static bool dse_enqueue(Scheduler *sched, Message *msg)
 {
 	int front = sched->front;
 	int last = sched->last;
@@ -98,7 +217,7 @@ bool dse_enqueue(Scheduler *sched, Message *msg)
 	return true;
 }
 
-Message *dse_dequeue(Scheduler *sched)
+static Message *dse_dequeue(Scheduler *sched)
 {
 	int front = sched->front;
 	int last = sched->last;
@@ -108,36 +227,33 @@ Message *dse_dequeue(Scheduler *sched)
 	return msg;
 }
 
-
-
-#define LOG_END 0
-#define LOG_s   1
-#define KEYVALUE_s(K,V)    LOG_s, (K), (V)
+// ---------------------------------------------------------------------------
+// [DSE]
 
 //static void vlplog(int priority, const char *message, va_list ap)
 //{
-//	void *logpool_args;
-//	logpool_t *lp;
-//	char *val = va_arg(ap, char *);
-//	if(logpoolip) {
-//		lp = logpool_open_trace(NULL, logpoolip, 14801);
-//	}
-//	else {
-//		lp = logpool_open_trace(NULL, "0.0.0.0", 14801);
-//	}
-//	logpool_record(lp, &logpool_args, LOG_NOTICE, "dse",
-//			KEYVALUE_s("", ""),
-//			LOG_END);
-//	logpool_close(lp);
-//	return;
+// void *logpool_args;
+// logpool_t *lp;
+// char *val = va_arg(ap, char *);
+// if(logpoolip) {
+// lp = logpool_open_trace(NULL, logpoolip, 14801);
+// }
+// else {
+// lp = logpool_open_trace(NULL, "0.0.0.0", 14801);
+// }
+// logpool_record(lp, &logpool_args, LOG_NOTICE, "dse",
+// KEYVALUE_s("", ""),
+// LOG_END);
+// logpool_close(lp);
+// return;
 //}
 
 static void lplog(int priority, const char *message, ...)
 {
-//	va_list ap;
-//	va_start(ap, trace_id);
-//	vlplog(priority, message, ap);
-//	va_end(ap);
+	// va_list ap;
+	// va_start(ap, trace_id);
+	// vlplog(priority, message, ap);
+	// va_end(ap);
 }
 
 static const char *dse_formatScriptPath(char *buf, size_t bufsiz)
@@ -174,27 +290,25 @@ static void dse_define(KonohaContext *kctx, Message *msg)
 {
 	if(msg != NULL) {
 		KDEFINE_TEXT_CONST TextData[] = {
-			{"MESSAGE", TY_TEXT, (char *)msg}, {}
+			{"DSE_MESSAGE", TY_TEXT, (char *)msg->data}, {}
 		};
 		KLIB kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(TextData), 0);
 	}
+	KDEFINE_INT_CONST IntData[] = {
+		{"DSE_DEBUG", TY_Int, verbose_debug}, {}
+	};
+	KLIB kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(IntData), 0);
 }
 
 static void *dse_dispatch(void *arg)
 {
-	Scheduler *sched = (Scheduler *)arg;
+	struct targs *args = (struct targs *)arg;
+	Scheduler *sched = args->sched;
+	PlatformApi *dse_platform = args->platform;
 	Message *msg;
 	kbool_t ret;
-	char script[256];
+	char script[PATH_SIZE];
 	dse_formatScriptPath(script, sizeof(script));
-	static bool platformIsInitialized = false;
-	PlatformApi *dse_platform = KonohaUtils_getDefaultPlatformApi();
-	if(!platformIsInitialized) {
-		PlatformApiVar *dse_platformVar = (PlatformApiVar *)dse_platform;
-		dse_platformVar->name = "dse";
-		dse_platformVar->syslog_i = lplog;
-		platformIsInitialized = true;
-	}
 
 	while(true) {
 		pthread_mutex_lock(&sched->lock);
@@ -203,7 +317,7 @@ static void *dse_dispatch(void *arg)
 			msg = dse_dequeue(sched);
 		}
 		pthread_mutex_unlock(&sched->lock);
-//		DEBUG_PRINT("%s", msg);
+		// DEBUG_PRINT("%s", msg);
 		KonohaContext* konoha = konoha_open(dse_platform);
 		dse_define(konoha, msg);
 		ret = konoha_load(konoha, script);
@@ -213,8 +327,6 @@ static void *dse_dispatch(void *arg)
 	return NULL;
 }
 
-#define THREAD_SIZE 16
-
 static void dse_req_handler(struct evhttp_request *req, void *arg)
 {
 	struct evbuffer *body = evhttp_request_get_input_buffer(req);
@@ -223,23 +335,12 @@ static void dse_req_handler(struct evhttp_request *req, void *arg)
 	Message *msg = NULL;
 	unsigned char *requestLine;
 	struct evbuffer *buf;
-	static bool isFirst = true;
-	static pthread_t thread_pool[THREAD_SIZE];
-	int i;
-
-	if(isFirst) {
-		for(i = 0; i < THREAD_SIZE; i++) {
-			pthread_create(&thread_pool[i], NULL, dse_dispatch, (void *)arg);
-		}
-		isFirst = false;
-	}
 
 	switch(req->type) {
 		case EVHTTP_REQ_POST :
 			// now, we fetch message
 			requestLine = evbuffer_pullup(body, -1);
-			requestLine[len] = '\0';
-			msg = Message_new(requestLine);
+			msg = Message_new(requestLine, len);
 			pthread_mutex_lock(&sched->lock);
 			if(dse_enqueue(sched, msg)) {
 				pthread_mutex_unlock(&sched->lock);
@@ -259,7 +360,7 @@ static void dse_req_handler(struct evhttp_request *req, void *arg)
 	}
 }
 
-DSE *DSE_new(void)
+static DSE *DSE_new(void)
 {
 	DSE *newdse = (DSE *)dse_malloc(sizeof(DSE));
 	newdse->base = event_base_new();
@@ -268,17 +369,32 @@ DSE *DSE_new(void)
 	return newdse;
 }
 
-void DSE_start(DSE *dse, const char *addr, int ip)
+static void DSE_start(DSE *dse, const char *addr, int ip)
 {
 	if(evhttp_bind_socket(dse->httpd, addr, ip) < 0){
 		perror("evhttp_bind_socket");
 		exit(EXIT_FAILURE);
 	}
+
+	int i;
+	pthread_t thread_pool[THREAD_SIZE];
+	PlatformApi *dse_platform = KonohaUtils_getDefaultPlatformApi();
+	PlatformApiVar *dse_platformVar = (PlatformApiVar *)dse_platform;
+	dse_platformVar->name = "dse";
+	dse_platformVar->syslog_i = lplog;
+	struct targs args = {
+		dse->sched,
+		dse_platform
+	};
+
+	for(i = 0; i < THREAD_SIZE; i++) {
+		pthread_create(&thread_pool[i], NULL, dse_dispatch, (void *)&args);
+	}
 	evhttp_set_gencb(dse->httpd, dse_req_handler, (void *)dse->sched);
 	event_base_dispatch(dse->base);
 }
 
-void DSE_delete(DSE *dse)
+static void DSE_delete(DSE *dse)
 {
 	evhttp_free(dse->httpd);
 	event_base_free(dse->base);
@@ -286,20 +402,12 @@ void DSE_delete(DSE *dse)
 	dse_free(dse, sizeof(DSE));
 }
 
-
-
-#define HTTPD_ADDR "0.0.0.0"
-#define HTTPD_PORT 8080
-
-int verbose_debug = 0;
-int port = HTTPD_PORT;
-char *logpoolip = NULL;
-
 static struct option long_option[] = {
 	/* These options set a flag. */
 	{"verbose", no_argument, &verbose_debug, 1},
 	{"logpool", required_argument, 0, 'l'},
 	{"port", required_argument, 0, 'p'},
+	{0, 0, 0, 0}
 };
 
 static void dse_parseopt(int argc, char *argv[])
@@ -326,9 +434,9 @@ static void dse_parseopt(int argc, char *argv[])
 		}
 	}
 	if(!logpoolip) logpoolip = "0.0.0.0";
-#ifdef DSE_DEBUG
-	verbose_debug = 1;
-#endif /* DSE_DEBUG */
+	if(getenv("DSE_DEBUG") != NULL || getenv("KONOHA_DEBUG") != NULL) {
+		verbose_debug = 1;
+	}
 }
 
 int main(int argc, char *argv[])
