@@ -37,7 +37,7 @@ extern "C" {
 
 typedef struct {
 	KonohaObjectHeader h;
-	KonohaContext *ctx;
+	KonohaContext *kctx;
 	pthread_t thread;
 	kFunc *func;
 	//kArray *args;
@@ -48,48 +48,26 @@ typedef struct {
 	pthread_mutex_t mutex;
 } kMutex;
 
+typedef struct {
+	KonohaObjectHeader h;
+	pthread_cond_t cond;
+} kCond;
+
 static void *spawn_start(void *v)
 {
-	//kThread *t = (kThread *)v;
-	//KonohaContext *ctx = t->ctx;
+	kThread *t = (kThread *)v;
+	KonohaContext *kctx = t->kctx;
 
 	//KONOHA_BEGIN(ctx);
 	// set ExceptionHandler
 	//kExceptionHandler* hdr = new_(ExceptionHandler);
 	//ctx->esp[0].hdr = hdr;
 	//ctx->esp++;
-	// set args
-	//ksfp_t *sfp = ctx->esp;
-	//int i, argc = knh_Array_size(t->args);
-	//for(i=0; i<argc; i++) {
-	//	kObject *o = knh_Array_n(t->args, i);
-	//	switch(O_cid(o)) {
-	//	case CLASS_Int:
-	//		sfp[K_CALLDELTA + i + 1].ivalue = N_toint(o);
-	//		break;
-	//	case CLASS_Float:
-	//		sfp[K_CALLDELTA + i + 1].fvalue = N_tofloat(o);
-	//		break;
-	//	case CLASS_Boolean:
-	//		sfp[K_CALLDELTA + i + 1].bvalue = N_tobool(o);
-	//		break;
-	//	default:
-	//		KNH_SETv(ctx, sfp[K_CALLDELTA + i + 1].o, o);
-	//	}
-	//}
-	//knh_Func_invoke(ctx, t->func, sfp, argc);
 
-	//int jump = knh_setjmp(DP(hdr)->jmpbuf);
-	//if(jump == 0) {
-	//	hdr->espidx = (ctx->esp - ctx->stack);
-	//	hdr->parentNC = ctx->ehdrNC;
-	//	((kcontext_t*)ctx)->ehdrNC = hdr;
-	//	knh_Func_invoke(ctx, t->func, sfp, argc);
-	//} else {
-	//	/* catch exception */
-	//	hdr = ctx->ehdrNC;
-	//	((kcontext_t*)ctx)->ehdrNC = hdr->parentNC;
-	//}
+	BEGIN_LOCAL(lsfp, K_CALLDELTA+0);
+	KCALL(lsfp, 0, t->func->mtd, 0, K_NULL);
+	END_LOCAL();
+
 	//kthread_detach(ctx, t->thread);
 	//KNH_FREE(ctx, t, sizeof(kThread));
 
@@ -118,6 +96,8 @@ static void Thread_free(KonohaContext *kctx, kObject *o)
 	//TODO
 }
 
+extern kObjectVar **KONOHA_reftail(KonohaContext *, size_t);
+
 static void Thread_reftrace(KonohaContext *kctx, kObject *o)
 {
 	kThread *t = (kThread *)o;
@@ -138,6 +118,18 @@ static void Mutex_free(KonohaContext *kctx, kObject *o)
 	pthread_mutex_destroy(&m->mutex);
 }
 
+static void Cond_init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kCond *c = (kCond *)o;
+	pthread_cond_init(&c->cond, NULL);
+}
+
+static void Cond_free(KonohaContext *kctx, kObject *o)
+{
+	kCond *c = (kCond *)o;
+	pthread_cond_destroy(&c->cond);
+}
+
 /* ------------------------------------------------------------------------ */
 //## @Native Thread Thread.create(Func f, dynamic[] args)
 static KMETHOD Thread_create(KonohaContext *kctx, KonohaStack *sfp)
@@ -147,7 +139,7 @@ static KMETHOD Thread_create(KonohaContext *kctx, KonohaStack *sfp)
 	if(IS_NOTNULL(f)) {
 		kThread *t = (kThread *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 		//kcontext_t *newCtx = new_ThreadContext(WCTX(ctx));
-		//t->ctx = newCtx;
+		t->kctx = kctx;//FIXME
 		t->func = f;
 		//t->args = args;
 		pthread_create(&(t->thread), NULL, spawn_start, t);
@@ -177,6 +169,22 @@ static KMETHOD Thread_join(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNvoid_();
 }
 
+//## @Native void Thread.exit();
+static KMETHOD Thread_exit(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kThread *t = (kThread *)sfp[0].o;
+	pthread_exit(t->thread);
+	RETURNvoid_();
+}
+	
+//## @Native void Thread.cancel();
+static KMETHOD Thread_cancel(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kThread *t = (kThread *)sfp[0].o;
+	pthread_cancel(t->thread);
+	RETURNvoid_();
+}
+	/* ------------------------------------------------------------------------ */
 //## @Native Mutex Mutex.new()
 static KMETHOD Mutex_new(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -205,11 +213,52 @@ static KMETHOD Mutex_lock(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNvoid_();
 }
 
+//## @Native boolean Mutex.trylock()
+static KMETHOD Mutex_trylock(KonohaContext *kctx, KonohaStack *sfp)
+{
+	// lock success: return true
+	kMutex *m = (kMutex *)sfp[0].o;
+	RETURNb_(pthread_mutex_trylock(&m->mutex) != 0);
+}
+
 //## @Native void Mutex.unlock()
 static KMETHOD Mutex_unlock(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMutex *m = (kMutex *)sfp[0].o;
 	pthread_mutex_unlock(&m->mutex);
+	RETURNvoid_();
+}
+
+/* ------------------------------------------------------------------------ */
+//## @Native Cond Cond.new()
+static KMETHOD Cond_new(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kCond *c = (kCond *)sfp[0].o;
+	RETURN_(c);
+}
+
+//## @Native void Cond.wait(Mutex m)
+static KMETHOD Cond_wait(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kCond *c = (kCond *)sfp[0].o;
+	kMutex *m = (kMutex *)sfp[1].o;
+	pthread_cond_wait(&c->cond, &m->mutex);
+	RETURNvoid_();
+}
+
+//## @Native void Cond.signal()
+static KMETHOD Cond_signal(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kCond *c = (kCond *)sfp[0].o;
+	pthread_cond_signal(&c->cond);
+	RETURNvoid_();
+}
+
+//## @Native void Cond.broadcast()
+static KMETHOD Cond_broadcast(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kCond *c = (kCond *)sfp[0].o;
+	pthread_cond_broadcast(&c->cond);
 	RETURNvoid_();
 }
 
@@ -224,6 +273,7 @@ static KMETHOD Mutex_unlock(KonohaContext *kctx, KonohaStack *sfp)
 
 #define TY_Thread cThread->typeId
 #define TY_Mutex  cMutex->typeId
+#define TY_Cond   cCond->typeId
 
 static kbool_t thread_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
@@ -240,8 +290,15 @@ static kbool_t thread_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		.init  = Mutex_init,
 		.free  = Mutex_free,
 	};
+	KDEFINE_CLASS defCond = {
+		STRUCTNAME(Cond),
+		.cflag = kClass_Final,
+		.init  = Cond_init,
+		.free  = Cond_free,
+	};
 	KonohaClass *cThread = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defThread, pline);
 	KonohaClass *cMutex  = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defMutex, pline);
+	KonohaClass *cCond   = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defCond, pline);
 	
 	kparamtype_t P_Func[] = {{}};
 	int TY_FUNC = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_void, 0, P_Func))->typeId;
@@ -249,10 +306,17 @@ static kbool_t thread_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Static, _F(Thread_create), TY_Thread, TY_Thread, MN_("create"), 1, TY_FUNC, FN_x,
-		_Public, _F(Thread_join)  , TY_void, TY_Thread, MN_("join"), 0,
-		_Public, _F(Mutex_new)    , TY_void, TY_Mutex, MN_("new"), 0,
-		_Public, _F(Mutex_lock)   , TY_void, TY_Mutex, MN_("lock"), 0,
-		_Public, _F(Mutex_unlock) , TY_void, TY_Mutex, MN_("unlock"), 0,
+		_Public, _F(Thread_join)   , TY_void, TY_Thread, MN_("join"), 0,
+		_Public, _F(Thread_exit)   , TY_void, TY_Thread, MN_("exit"), 0,
+		_Public, _F(Thread_cancel) , TY_void, TY_Thread, MN_("cancel"), 0,
+		_Public, _F(Mutex_new)     , TY_Mutex, TY_Mutex, MN_("new"), 0,
+		_Public, _F(Mutex_lock)    , TY_void, TY_Mutex, MN_("lock"), 0,
+		_Public, _F(Mutex_trylock) , TY_void, TY_Mutex, MN_("trylock"), 0,
+		_Public, _F(Mutex_unlock)  , TY_void, TY_Mutex, MN_("unlock"), 0,
+		_Public, _F(Cond_new)      , TY_Cond, TY_Cond, MN_("new"), 0,
+		_Public, _F(Cond_wait)     , TY_void, TY_Cond, MN_("wait"), 0,
+		_Public, _F(Cond_signal)   , TY_void, TY_Cond, MN_("signal"), 0,
+		_Public, _F(Cond_broadcast), TY_void, TY_Cond, MN_("broadcast"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
