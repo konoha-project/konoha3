@@ -279,7 +279,7 @@ static kStmt* new_kStmt(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, 
 		kObject *v = va_arg(ap, kObject*);
 		if(v == NULL) break;
 		kStmt_setObject(kctx, stmt, kw, v);
-		kw = va_arg(ap, ksymbol_t);
+		kw = (ksymbol_t) va_arg(ap, int);
 	}
 	va_end(ap);
 	return stmt;

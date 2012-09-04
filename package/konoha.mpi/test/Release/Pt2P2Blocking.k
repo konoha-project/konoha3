@@ -7,11 +7,11 @@ K.import("konoha.mpi");
 void test_bytes() {
 	MPIComm w = MPIComm.getWorld();
 	if(w.getRank() == 0) {
-		MPIData d = MPIData.fromBytes("this_is_konoha".toBytes());
+		MPIData d = MPIData.fromBytes("this_is_konoha".asBytes());
 		d.setOffset(8);
 		w.send(d, 6, 1, 0);
 	} else {
-		MPIData d = MPIData.fromBytes("hello ".toBytes());
+		MPIData d = MPIData.fromBytes("hello ".asBytes());
 		d.setOffset(6);
 		w.recv(d, 6, 0, 0);
 		d.setOffset(0);
