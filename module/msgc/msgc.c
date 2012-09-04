@@ -779,12 +779,25 @@ void MODGC_check_malloced_size(void)
 {
 }
 //TODO
+#define IS_Managed(n) do {\
+	objpageTBL_t *oat = memshare(kctx)->ObjectArenaTBL[n];\
+	size_t atindex, size = memshare(kctx)->sizeObjectArenaTBL[n];\
+	for(atindex = 0; atindex < size; atindex++) {\
+		uintptr_t start = (uintptr_t)oat[atindex].head##n;\
+		uintptr_t end   = (uintptr_t)oat[atindex].bottom##n;\
+		if (start < o && o < end) {\
+			return true;\
+		}\
+	}\
+} while(0)
+
 kbool_t MODGC_kObject_isManaged(KonohaContext *kctx, void *ptr)
 {
-	kObject *o = (kObject*)ptr;
-	if(o->h.ct == NULL)
-		return false;
-	return true;
+	uintptr_t o = (uintptr_t)ptr;
+	IS_Managed(0);
+	IS_Managed(1);
+	IS_Managed(2);
+	return false;
 }
 
 /* ------------------------------------------------------------------------ */
