@@ -65,8 +65,6 @@ static void *spawn_start(void *v)
 	KCALL(lsfp, 0, t->func->mtd, 0, K_NULL);
 	END_LOCAL();
 
-	pthread_detach(t->thread);
-
 	// TODO cond_signal gc
 	return NULL;
 }
@@ -214,7 +212,7 @@ static KMETHOD Mutex_trylock(KonohaContext *kctx, KonohaStack *sfp)
 {
 	// lock success: return true
 	kMutex *m = (kMutex *)sfp[0].o;
-	RETURNb_(pthread_mutex_trylock(&m->mutex) != 0);
+	RETURNb_(pthread_mutex_trylock(&m->mutex) == 0);
 }
 
 //## @Native void Mutex.unlock()
@@ -313,10 +311,10 @@ static kbool_t thread_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		_Public, _F(Thread_equal)  , TY_Boolean, TY_Thread, MN_("equal"), 1, TY_Thread, FN_x,
 		_Public, _F(Mutex_new)     , TY_Mutex, TY_Mutex, MN_("new"), 0,
 		_Public, _F(Mutex_lock)    , TY_void, TY_Mutex, MN_("lock"), 0,
-		_Public, _F(Mutex_trylock) , TY_void, TY_Mutex, MN_("trylock"), 0,
+		_Public, _F(Mutex_trylock) , TY_Boolean, TY_Mutex, MN_("trylock"), 0,
 		_Public, _F(Mutex_unlock)  , TY_void, TY_Mutex, MN_("unlock"), 0,
 		_Public, _F(Cond_new)      , TY_Cond, TY_Cond, MN_("new"), 0,
-		_Public, _F(Cond_wait)     , TY_void, TY_Cond, MN_("wait"), 0,
+		_Public, _F(Cond_wait)     , TY_void, TY_Cond, MN_("wait"), 1, TY_Mutex, FN_x,
 		_Public, _F(Cond_signal)   , TY_void, TY_Cond, MN_("signal"), 0,
 		_Public, _F(Cond_broadcast), TY_void, TY_Cond, MN_("broadcast"), 0,
 		DEND,
