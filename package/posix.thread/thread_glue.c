@@ -58,29 +58,16 @@ static void *spawn_start(void *v)
 	kThread *t = (kThread *)v;
 	KonohaContext *kctx = t->kctx;
 
-	//KONOHA_BEGIN(ctx);
-	// set ExceptionHandler
-	//kExceptionHandler* hdr = new_(ExceptionHandler);
-	//ctx->esp[0].hdr = hdr;
-	//ctx->esp++;
+	// TODO Exception handling
+	// TODO push func arguments
 
 	BEGIN_LOCAL(lsfp, K_CALLDELTA+0);
 	KCALL(lsfp, 0, t->func->mtd, 0, K_NULL);
 	END_LOCAL();
 
-	//kthread_detach(ctx, t->thread);
-	//KNH_FREE(ctx, t, sizeof(kThread));
+	kthread_detach(ctx, t->thread);
 
-	//KNH_SYSLOCK(ctx);
-	//ctx->ctxobjNC = NULL;
-	//ctx->wshare->threadCounter--;
-	//KONOHA_END(ctx);
-	//if(ctx->share->gcStopCounter != 0) {
-	//	kthread_cond_signal(ctx->share->start_cond);
-	//}else if(ctx->share->threadCounter == 1) {
-	//	kthread_cond_signal(ctx->share->close_cond);
-	//}
-	//KNH_SYSUNLOCK(ctx);
+	// TODO cond_signal gc
 	return NULL;
 }
 
@@ -133,19 +120,21 @@ static void Cond_free(KonohaContext *kctx, kObject *o)
 }
 
 /* ------------------------------------------------------------------------ */
-//## @Native Thread Thread.create(Func f, dynamic[] args)
+//## @Native Thread Thread.create(Func f)
 static KMETHOD Thread_create(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFunc *f = sfp[1].asFunc;
 	//kArray *args = sfp[2].a;
 	if(IS_NOTNULL(f)) {
 		kThread *t = (kThread *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
-		//kcontext_t *newCtx = new_ThreadContext(WCTX(ctx));
+		//kcontext_t *newCtx = new_ThreadContext(ctx)
 		t->kctx = kctx;//FIXME
 		KSETv(t, t->func, f);
 		//KSETv(t, t->args, args);
 		pthread_create(&(t->thread), NULL, spawn_start, t);
 		RETURN_(t);
+	} else {
+		RETUNR_(K_NULL);
 	}
 }
 
@@ -154,20 +143,9 @@ static KMETHOD Thread_join(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kThread *t = (kThread *)sfp[0].o;
 	void *v;
-
-	//KNH_SYSLOCK(ctx);
-	//ctx->wshare->stopCounter++;
-	//if(ctx->share->gcStopCounter != 0) {
-	//	kthread_cond_signal(ctx->share->start_cond);
-	//}
-	//KNH_SYSUNLOCK(ctx);
-
+	// TODO inc gcCounter
 	pthread_join(t->thread, &v);
-
-	//KNH_SYSLOCK(ctx);
-	//ctx->wshare->stopCounter--;
-	//KNH_SYSUNLOCK(ctx);
-
+	// TODO dec gcCounter
 	RETURNvoid_();
 }
 
@@ -186,7 +164,16 @@ static KMETHOD Thread_cancel(KonohaContext *kctx, KonohaStack *sfp)
 	pthread_cancel(t->thread);
 	RETURNvoid_();
 }
-	/* ------------------------------------------------------------------------ */
+
+//## @Native void Thread.detach();
+static KMETHOD Thread_detach(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kThread *t = (kThread *)sfp[0].o;
+	pthread_detach(t->thread);
+	RETURNvoid_();
+}
+
+/* ------------------------------------------------------------------------ */
 //## @Native Mutex Mutex.new()
 static KMETHOD Mutex_new(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -198,20 +185,9 @@ static KMETHOD Mutex_new(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Mutex_lock(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMutex *m = (kMutex *)sfp[0].o;
-
-	//KNH_SYSLOCK(ctx);
-	//ctx->wshare->stopCounter++;
-	//if(ctx->share->gcStopCounter != 0) {
-	//	kthread_cond_signal(ctx->share->start_cond);
-	//}
-	//KNH_SYSUNLOCK(ctx);
-
+	// TODO inc gcCounter
 	pthread_mutex_lock(&m->mutex);
-
-	//KNH_SYSLOCK(ctx);
-	//ctx->wshare->stopCounter--;
-	//KNH_SYSUNLOCK(ctx);
-
+	// TODO dec gcCounter
 	RETURNvoid_();
 }
 
@@ -244,7 +220,9 @@ static KMETHOD Cond_wait(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kCond *c = (kCond *)sfp[0].o;
 	kMutex *m = (kMutex *)sfp[1].o;
+	// TODO inc gcCounter
 	pthread_cond_wait(&c->cond, &m->mutex);
+	// TODO dec gcCounter
 	RETURNvoid_();
 }
 
@@ -305,12 +283,13 @@ static kbool_t thread_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	kparamtype_t P_Func[] = {{}};
 	int TY_FUNC = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_void, 0, P_Func))->typeId;
 
-	int FN_x = FN_("x");
+	int FN_func = FN_("func");
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static, _F(Thread_create), TY_Thread, TY_Thread, MN_("create"), 1, TY_FUNC, FN_x,
+		_Public|_Static, _F(Thread_create), TY_Thread, TY_Thread, MN_("create"), 1, TY_FUNC, FN_func,
 		_Public, _F(Thread_join)   , TY_void, TY_Thread, MN_("join"), 0,
 		_Public, _F(Thread_exit)   , TY_void, TY_Thread, MN_("exit"), 0,
 		_Public, _F(Thread_cancel) , TY_void, TY_Thread, MN_("cancel"), 0,
+		_Public, _F(Thread_detach) , TY_void, TY_Thread, MN_("detach"), 0,
 		_Public, _F(Mutex_new)     , TY_Mutex, TY_Mutex, MN_("new"), 0,
 		_Public, _F(Mutex_lock)    , TY_void, TY_Mutex, MN_("lock"), 0,
 		_Public, _F(Mutex_trylock) , TY_void, TY_Mutex, MN_("trylock"), 0,
