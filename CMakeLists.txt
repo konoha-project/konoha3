@@ -96,9 +96,9 @@ set(PARSER
 
 set(KONOHA_VM_MODULE "" CACHE STRING "konoha vm module")
 if(KONOHA_VM_MODULE)
-	set(VM module/${KONOHA_VM_MODULE}vm/${KONOHA_VM_MODULE}asm.c)
+	set(VM module/${KONOHA_VM_MODULE}vm/${KONOHA_VM_MODULE}compiler.c)
 else(KONOHA_VM_MODULE)
-	set(VM src/vm/asm.c)
+	set(VM src/vm/compiler.c)
 endif(KONOHA_VM_MODULE)
 
 set(PACKAGES
