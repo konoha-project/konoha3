@@ -603,7 +603,7 @@ typedef struct {
 
 static kExpr* kExpr_setConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, kObject *o);
 static kExpr* kExpr_setUnboxConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, uintptr_t unboxValue);
-static kExpr* kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, int build, ktype_t ty, intptr_t index);
+static kExpr* kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, kexpr_t build, ktype_t ty, intptr_t index);
 
 #define TY_NameSpace                       kmodsugar->cNameSpace->typeId
 #define TY_Token                           kmodsugar->cToken->typeId

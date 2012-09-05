@@ -92,6 +92,14 @@ extern "C" {
 
 #define prefetch_(addr, rw, locality) __builtin_prefetch(addr, rw, locality)
 
+#if SIZEOF_VOIDP*8 == 64
+#define PREFIX_x "lx"
+#define PREFIX_d "ld"
+#else
+#define PREFIX_x "x"
+#define PREFIX_d "d"
+#endif
+
 static inline void *do_malloc(size_t size);
 static inline void *do_realloc(void *ptr, size_t oldSize, size_t newSize);
 static inline void  do_free(void *ptr, size_t size);
@@ -329,9 +337,9 @@ struct BM10 { struct bm2  m0; struct bm1 S;struct bm1 m1;};
 struct BM11 { struct bm1  m0; struct bm1 S;};
 struct BM12 { struct bm1  m0;};
 #else
-struct BM5  { struct bm128 m0; struct bm1 S;struct bm4 m1; struct bm1 m2;};
-struct BM6  { struct bm64  m0; struct bm1 S;struct bm2 m1; struct bm1 m2;};
-struct BM7  { struct bm32  m0; struct bm1 S;struct bm1 m1;};
+struct BM5  { struct bm128 m0; struct bm1 S;struct bm4 m1; struct bm1 S2; struct bm1 m2;};
+struct BM6  { struct bm64  m0; struct bm1 S;struct bm2 m1; struct bm1 S2; struct bm1 m2;};
+struct BM7  { struct bm32  m0; struct bm1 S;struct bm1 m1; struct bm1 S2;};
 struct BM8  { struct bm16  m0; struct bm1 S;struct bm1 m1;};
 struct BM9  { struct bm8   m0; struct bm1 S;struct bm1 m1;};
 struct BM10 { struct bm4   m0; struct bm1 S;struct bm1 m1;};
@@ -366,6 +374,10 @@ static const unsigned int SegmentBlockCount_GC_MARGIN[] = {
 	CEIL(SEGMENT_BLOCK_COUNT(9 )*MARGINE), CEIL(SEGMENT_BLOCK_COUNT(10)*MARGINE),
 	CEIL(SEGMENT_BLOCK_COUNT(11)*MARGINE), CEIL(SEGMENT_BLOCK_COUNT(12)*MARGINE),
 };
+
+static bitmap_t bitmap_empty = BITMAP_FULL;
+static bitmap_t *bitmap_dummy = &bitmap_empty;
+static Segment segment_dummy = {};
 
 #if SIZEOF_VOIDP*8 == 64
 //#define BM_SENTINEL_L2_3  (BITMAP_FULL << (2))
@@ -402,27 +414,26 @@ static const unsigned int SegmentBlockCount_GC_MARGIN[] = {
 #define BM_SENTINEL_L0_12 (BITMAP_FULL << (32))
 
 #else
-
-//#define BM_SENTINEL_L2_3  (BITMAP_FULL << (2))
-//#define BM_SENTINEL_L2_4  (BITMAP_FULL << (1))
-#define BM_SENTINEL_L2_5  (BITMAP_FULL << (1))
-#define BM_SENTINEL_L2_6  (BITMAP_FULL << (1))
-#define BM_SENTINEL_L2_7  (BITMAP_FULL)
+//#define BM_SENTINEL_L2_3  (BITMAP_FULL << (16))
+//#define BM_SENTINEL_L2_4  (BITMAP_FULL << (8))
+#define BM_SENTINEL_L2_5  (BITMAP_FULL << (4))
+#define BM_SENTINEL_L2_6  (BITMAP_FULL << (2))
+#define BM_SENTINEL_L2_7  (BITMAP_FULL << (1))
 #define BM_SENTINEL_L2_8  (BITMAP_FULL)
 #define BM_SENTINEL_L2_9  (BITMAP_FULL)
 #define BM_SENTINEL_L2_10 (BITMAP_FULL)
 #define BM_SENTINEL_L2_11 (BITMAP_FULL)
 #define BM_SENTINEL_L2_12 (BITMAP_FULL)
 
-//#define BM_SENTINEL_L1_3  (BITMAP_FULL << (63))
-//#define BM_SENTINEL_L1_4  (BITMAP_FULL << (63))
-#define BM_SENTINEL_L1_5  (BITMAP_FULL << (31))
-#define BM_SENTINEL_L1_6  (BITMAP_FULL << (16))
-#define BM_SENTINEL_L1_7  (BITMAP_FULL << (8))
-#define BM_SENTINEL_L1_8  (BITMAP_FULL << (4))
-#define BM_SENTINEL_L1_9  (BITMAP_FULL << (2))
-#define BM_SENTINEL_L1_10 (BITMAP_FULL << (1))
-#define BM_SENTINEL_L1_11 (BITMAP_FULL)
+//#define BM_SENTINEL_L1_3  (BITMAP_FULL)
+//#define BM_SENTINEL_L1_4  (BITMAP_FULL)
+#define BM_SENTINEL_L1_5  (BITMAP_FULL)
+#define BM_SENTINEL_L1_6  (BITMAP_FULL)
+#define BM_SENTINEL_L1_7  (BITMAP_FULL)
+#define BM_SENTINEL_L1_8  (BITMAP_FULL << (16))
+#define BM_SENTINEL_L1_9  (BITMAP_FULL << (8))
+#define BM_SENTINEL_L1_10 (BITMAP_FULL << (2))
+#define BM_SENTINEL_L1_11 (BITMAP_FULL << (1))
 #define BM_SENTINEL_L1_12 (BITMAP_FULL)
 
 //#define BM_SENTINEL_L0_3  (BITMAP_FULL)
@@ -436,10 +447,6 @@ static const unsigned int SegmentBlockCount_GC_MARGIN[] = {
 #define BM_SENTINEL_L0_11 (BITMAP_FULL)
 #define BM_SENTINEL_L0_12 (BITMAP_FULL)
 #endif
-
-static bitmap_t bitmap_empty = BITMAP_FULL;
-static bitmap_t *bitmap_dummy = &bitmap_empty;
-static Segment segment_dummy = {};
 
 #define DEF_BM_OP0(N, L0, L1, L2)\
 static inline void BITPTRS_SET_BASE##N (bitmap_t **base)\
@@ -500,22 +507,27 @@ static inline void BITMAP_SET_LIMIT_AND_COPY_BM##N (bitmap_t *const bitmap, bitm
 	bm->m2.bm[L2-1] = BM_SENTINEL_L2_##N | ss->m2.bm[L2-1];\
 }
 
-#define DEF_BM_OP0_(N, S) \
-	DEF_BM_OP0(N, BITMAP_L0_SIZE(N)+S, BITMAP_L1_SIZE(N), BITMAP_L2_SIZE(N))
-#define DEF_BM_OP1_(N, S) \
-	DEF_BM_OP1(N, BITMAP_L0_SIZE(N)+S, BITMAP_L1_SIZE(N), BITMAP_L2_SIZE(N))
-#define DEF_BM_OP2_(N, S) \
-	DEF_BM_OP2(N, BITMAP_L0_SIZE(N)+S, BITMAP_L1_SIZE(N), BITMAP_L2_SIZE(N))
+#define DEF_BM_OP0_(N, S1, S2) \
+	DEF_BM_OP0(N, BITMAP_L0_SIZE(N)+S1, BITMAP_L1_SIZE(N)+S2, BITMAP_L2_SIZE(N))
+#define DEF_BM_OP1_(N, S1, S2) \
+	DEF_BM_OP1(N, BITMAP_L0_SIZE(N)+S1, BITMAP_L1_SIZE(N)+S2, BITMAP_L2_SIZE(N))
+#define DEF_BM_OP2_(N, S1, S2) \
+	DEF_BM_OP2(N, BITMAP_L0_SIZE(N)+S1, BITMAP_L1_SIZE(N)+S2, BITMAP_L2_SIZE(N))
 //DEF_BM_OP2( 3, 256+1/*sentinel*/, 4, 1);
 //DEF_BM_OP2( 4, 128+1/*sentinel*/, 2, 1);
-DEF_BM_OP1_( 5, 1/*sentinel*/);
-DEF_BM_OP1_( 6, 1/*sentinel*/);
-DEF_BM_OP1_( 7, 1/*sentinel*/);
-DEF_BM_OP1_( 8, 1/*sentinel*/);
-DEF_BM_OP1_( 9, 1/*sentinel*/);
-DEF_BM_OP1_(10, 1/*sentinel*/);
-DEF_BM_OP0_(11, 1/*sentinel*/);
-DEF_BM_OP0_(12, 0);
+#if SIZEOF_VOIDP*8 == 64
+DEF_BM_OP1_( 5, 1/*sentinel0*/, 0/*sentinel1*/);
+DEF_BM_OP1_( 6, 1/*sentinel0*/, 0/*sentinel1*/);
+#else
+DEF_BM_OP2_( 5, 1/*sentinel0*/, 1/*sentinel1*/);
+DEF_BM_OP2_( 6, 1/*sentinel0*/, 1/*sentinel1*/);
+#endif
+DEF_BM_OP1_( 7, 1/*sentinel0*/, 0/*sentinel1*/);
+DEF_BM_OP1_( 8, 1/*sentinel0*/, 0/*sentinel1*/);
+DEF_BM_OP1_( 9, 1/*sentinel0*/, 0/*sentinel1*/);
+DEF_BM_OP1_(10, 1/*sentinel0*/, 0/*sentinel1*/);
+DEF_BM_OP0_(11, 1/*sentinel0*/, 0/*sentinel1*/);
+DEF_BM_OP0_(12, 0, 0);
 
 
 #define COND(C, T, F) ((C) ? T : F)
@@ -1085,7 +1097,7 @@ static bool findNextFreeBlock(AllocationPointer *p)
 	if (BP(p, 0).mask == 0) {
 		BitPtr *bp;
 #if GCDEBUG
-		gc_info("klass=%d, idx=%ld mask=%lx, seg=%p",
+		gc_info("klass=%" PREFIX_d ", idx=%" PREFIX_d " mask=%" PREFIX_x", seg=%p",
 				(p->seg)?p->seg->heap_klass:-1,
 				BP(p, 0).idx, BP(p, 0).mask, p->seg);
 #endif
@@ -1105,7 +1117,7 @@ static bool findNextFreeBlock(AllocationPointer *p)
 			BP(p, i).idx  = bitptrToIndex(bp->idx, bp->mask);
 			BP(p, i).mask = 1;
 			BP_NEXT_MASK(p, BP(p, i).idx, BP(p,i).mask, i);
-			gc_info("klass=%d, level=%lu idx=%ld mask=%lx",
+			gc_info("klass=%" PREFIX_d ", level=%" PREFIX_d " idx=%" PREFIX_d ", mask=%" PREFIX_x,
 					p->seg->heap_klass, i, BP(p, i).idx, BP(p, i).mask);
 			DBG_ASSERT(BP(p, i).mask != 0);
 		} while (i > 0);
@@ -1127,7 +1139,6 @@ static void *tryAlloc(KonohaContext *kctx, HeapManager *mng, SubHeap *h)
 	}
 	temp = p->blockptr;
 	prefetch_(temp, 0, 0);
-	inc(p, h);
 	bool isEmpty = inc(p, h);
 
 	bitmap_set(&((KonohaContextVar*)kctx)->safepoint, GC_MAJOR_FLAG,
@@ -1244,7 +1255,8 @@ static void HeapManager_expandHeap(KonohaContext *kctx, HeapManager *mng, size_t
 	memshare(kctx)->usedMemorySize += heap_size;
 #endif
 #ifdef GCSTAT
-	gc_stat("Expand Heap(%luMB)[%p, %p]", heap_size/MB_, managed_heap, managed_heap_end);
+	gc_stat("Expand Heap(%uMB)[%p, %p]", (int)heap_size/MB_,
+			managed_heap, managed_heap_end);
 #endif
 }
 
@@ -1330,8 +1342,8 @@ static void deferred_sweep(KonohaContext *kctx, kObject *o)
 {
 #ifdef GC_USE_DEFERREDSWEEP
 #if GCSTAT
-	BlockHeader *head = (BlockHeader*) ((uintptr_t)o) & ~(SEGMENT_SIZE - 1UL);
-	global_gc_stat.collected[head->heap_klass] += 1;
+	BlockHeader *head = (BlockHeader*) (((uintptr_t)o) & ~(SEGMENT_SIZE - 1UL));
+	global_gc_stat.collected[head->klass] += 1;
 #endif
 	bmgc_Object_free(kctx, o);
 #else
@@ -1401,7 +1413,7 @@ static void dumpBM(uintptr_t bm)
 		}
 	}
 	fprintf(stderr, "\n");
-	fprintf(stderr, "%16lx ", bm);
+	fprintf(stderr, "%16" PREFIX_x , bm);
 	for (i = BITS-1; i >= 0; i--) {
 		fprintf(stderr, "%d", i % 10);
 	}
@@ -1420,7 +1432,8 @@ static void clearAllBitMapsAndCount(HeapManager *mng, SubHeap *h)
 		Segment *seg = h->seglist[i];
 		ClearBitMap(seg->base[0], h->heap_klass);
 		BITMAP_SET_LIMIT(seg->base[0], h->heap_klass);
-		gc_info("klass=%d, seg[%lu]=%p count=%d", seg->heap_klass, i, seg, seg->live_count);
+		gc_info("klass=%d, seg[%" PREFIX_d "]=%p count=%d",
+				seg->heap_klass, i, seg, seg->live_count);
 		seg->live_count = 0;
 	}
 }
@@ -1498,7 +1511,7 @@ static void HeapManager_final_free(KonohaContext *kctx, HeapManager *mng)
 				b0_final_sweep(kctx, *bm0, bm0 - b0, seg);
 			}
 		}
-		gc_info("heap[%d] collected %lu",
+		gc_info("heap[%d] collected %" PREFIX_d,
 				h->heap_klass,
 				global_gc_stat.collected[h->heap_klass]);
 	}
@@ -1507,7 +1520,7 @@ static void HeapManager_final_free(KonohaContext *kctx, HeapManager *mng)
 #if GCDEBUG
 static void Heap_dump(const SubHeap *h)
 {
-	gc_info("klass[%2d] object_count=%lu segment_list=(%d) ",
+	gc_info("klass[%2d] object_count=%u segment_list=(%" PREFIX_d ") ",
 			h->heap_klass, global_gc_stat.object_count[h->heap_klass],
 			h->seglist_size);
 }
@@ -1521,7 +1534,7 @@ static void BMGC_dump(HeapManager *mng)
 	gc_info("********************************");
 	gc_info("* Heap Information");
 	gc_info("********************************");
-	gc_info("total allocated object count=%lu", global_gc_stat.total_object);
+	gc_info("total allocated object count=%" PREFIX_d, global_gc_stat.total_object);
 	for (i = SUBHEAP_KLASS_MIN; i <= SUBHEAP_KLASS_MAX; i++) {
 		SubHeap *h = mng->heaps + i;
 		Heap_dump(h);
@@ -1858,7 +1871,7 @@ static void bitmapMarkingGC(KonohaContext *kctx, HeapManager *mng, enum gc_mode 
 		global_gc_stat.collected[i] = 0;
 	}
 	global_gc_stat.gc_count += 1;
-	gc_stat("%sGC(%lu) HeapSize=%luMB, last_collected=%lu, marked=%lu",
+	gc_stat("%sGC(%" PREFIX_d ") HeapSize=%" PREFIX_d" MB, last_collected=%" PREFIX_d", marked=%"PREFIX_d,
 			(mode & GC_MAJOR)?"major":"minor",
 			global_gc_stat.gc_count, (heap_size/MB_), collected, marked);
 #endif
@@ -1876,14 +1889,14 @@ static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o)
 				KeyValue_s("@", "delete"),
 				KeyValue_p("ptr", o),
 				KeyValue_u("size", ct->cstruct_size),
-				KeyValue_u("cid", ct->classId));
+				KeyValue_u("cid", ct->typeId));
 #endif
-		gc_info("~Object ptr=%p, cid=%d", o, ct->classId);
+		gc_info("~Object ptr=%p, cid=%d", o, ct->typeId);
 		KONOHA_freeObjectField(kctx, (kObjectVar*)o);
 		((kObjectVar*)o)->h.ct = NULL;
 #if GCDEBUG
-		memset((void*)o, 0xa, ct->cstruct_size);
-		((kObjectVar*)o)->h.magicflag = 5;
+		//memset((void*)o, 0xa, ct->cstruct_size);
+		//((kObjectVar*)o)->h.magicflag = 5;
 #endif
 #ifdef GCSTAT
 		Segment *seg;

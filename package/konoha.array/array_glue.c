@@ -22,9 +22,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include<minikonoha/minikonoha.h>
-#include<minikonoha/sugar.h>
-#include<minikonoha/float.h>
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
+#include <minikonoha/float.h>
 
 /* ------------------------------------------------------------------------ */
 
@@ -66,19 +66,16 @@ static KMETHOD Array_getSize(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
-	size_t asize = (size_t)sfp[1].intValue;
-	if (asize < 0 || KARRAY_LIST_SIZE_MAX < asize) {
+	if (sfp[1].intValue < 0) {
 		ktrace(_UserInputFault,
 				KeyValue_s("error", "Invalid argument"),
-				KeyValue_u("length", asize)
+				KeyValue_u("length", sfp[1].intValue)
 		);
 		RETURN_(a);
-	} else {
-		//TODO use mmap
-		DBG_P("too big array..");
 	}
-	a->bytemax = asize * sizeof(void*);
-	kArray_setsize((kArray*)a, asize);
+	size_t asize = (size_t)sfp[1].intValue;
+	a->bytemax = asize * sizeof(uintptr_t);
+	kArray_setsize(a, asize);
 	a->objectItems = (kObject**)KCALLOC(a->bytemax, 1);
 	if (!kArray_isUnboxData(a)) {
 		size_t i;
@@ -98,7 +95,7 @@ struct _kAbstractArray {
 
 static void UnboxArray_ensureMinimumSize(KonohaContext *kctx, struct _kAbstractArray *a, size_t min)
 {
-	size_t minbyte = min * sizeof(void*);
+	size_t minbyte = min * sizeof(uintptr_t);
 	if (!(minbyte < a->a.bytemax)) {
 		if (minbyte < sizeof(kObject)) minbyte = sizeof(kObject);
 		KLIB Karray_expand(kctx, &a->a, minbyte);
@@ -111,9 +108,8 @@ static void UnboxArray_add(KonohaContext *kctx, kArray *o, uintptr_t value)
 	struct _kAbstractArray *a = (struct _kAbstractArray*)o;
 	UnboxArray_ensureMinimumSize(kctx, a, asize+1);
 	DBG_ASSERT(a->a.objectItems[asize] == NULL);
-	kArrayVar *a2 = (kArrayVar *)a;
-	a2->unboxItems[asize] = value;
-	kArray_setsize(a2, (asize+1));
+	o->unboxItems[asize] = value;
+	kArray_setsize(o, (asize+1));
 }
 
 static void UnboxArray_insert(KonohaContext *kctx, kArray *o, size_t n, uintptr_t v)
@@ -126,16 +122,15 @@ static void UnboxArray_insert(KonohaContext *kctx, kArray *o, size_t n, uintptr_
 	else {
 		UnboxArray_ensureMinimumSize(kctx, a, asize+1);
 		DBG_ASSERT(a->a.objectItems[asize] == NULL);
-		kArrayVar *a2 = (kArrayVar *)a;
-		memmove(a2->unboxItems+(n+1), a2->unboxItems+n, sizeof(uintptr_t) * (asize - n));
-		a2->unboxItems[n] = v;
-		kArray_setsize(a2, (asize+1));
+		memmove(o->unboxItems+(n+1), o->unboxItems+n, sizeof(uintptr_t) * (asize - n));
+		o->unboxItems[n] = v;
+		kArray_setsize(o, (asize+1));
 	}
 }
 
 static KMETHOD Array_add1(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kArray *a = (kArray *)sfp[0].asObject;
+	kArray *a = sfp[0].asArray;
 	if (kArray_isUnboxData(a)) {
 		UnboxArray_add(kctx, a, sfp[1].unboxValue);
 	} else {
@@ -145,14 +140,14 @@ static KMETHOD Array_add1(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Array_push(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kArray *a = (kArray *)sfp[0].asObject;
+	kArray *a = sfp[0].asArray;
 	Array_add1(kctx, sfp);
 	RETURNi_(kArray_size(a));
 }
 
 static KMETHOD Array_unshift(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kArray *a = (kArray *)sfp[0].asObject;
+	kArray *a = sfp[0].asArray;
 	if (kArray_isUnboxData(a)) {
 		UnboxArray_insert(kctx, a, 0, sfp[1].unboxValue);
 	} else {
@@ -164,18 +159,20 @@ static KMETHOD Array_unshift(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_pop(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
+	if (kArray_size(a) == 0)
+		RETURN_DefaultObjectValue();
 	size_t n = kArray_size(a) - 1;
 	if (kArray_isUnboxData(a)) {
 		uintptr_t v = a->unboxItems[n];
 		a->unboxItems[n] = 0;
-		kArray_setsize((kArrayVar *)a, n);
+		kArray_setsize(a, n);
 		RETURNd_(v);
 	}
 	else {
 		struct _kAbstractArray *a2 = (struct _kAbstractArray*)a;
 		kObject *value = a2->a.objectItems[n];
 		KINITp(a2, a2->a.objectItems[n], NULL);
-		a2->a.bytesize = n * sizeof(void*);
+		a2->a.bytesize = n * sizeof(uintptr_t);
 		RETURN_(value);
 	}
 }
@@ -186,14 +183,12 @@ static void kArray_removeAt(KonohaContext *kctx, kArray *a, size_t n)
 	if (kArray_isUnboxData(a)) {
 		kArrayVar *a2 = (kArrayVar *)a;
 		memmove(a2->unboxItems+n, a2->unboxItems+(n+1), sizeof(uintptr_t) * (asize - n - 1));
-		a2->unboxItems[asize - 1] = (uintptr_t)NULL;
 		kArray_setsize(a2, asize - 1);
 	}
 	else {
 		struct _kAbstractArray *a2 = (struct _kAbstractArray*)a;
 		memmove(a2->a.objectItems+n, a2->a.objectItems+(n+1), sizeof(kObject*) * (asize - n - 1));
-		KINITp(a2, a2->a.objectItems[asize - 1], NULL);
-		a2->a.bytesize = (asize - 1) * sizeof(void*);
+		a2->a.bytesize = (asize - 1) * sizeof(uintptr_t);
 	}
 }
 
@@ -214,8 +209,9 @@ static KMETHOD Array_removeAt(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static void kArray_reverse(KonohaContext *kctx, kArray *a)
+static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
 {
+	kArray *a = sfp[0].asArray;
 	size_t asize = kArray_size(a);
 	size_t asize_half = asize / 2;
 	int i;
@@ -229,19 +225,12 @@ static void kArray_reverse(KonohaContext *kctx, kArray *a)
 	else {
 		for(i = 0; i != asize_half; ++i){
 			kObject *temp = a->objectItems[asize - 1 - i];
-			a->objectItems[asize - 1 - i] = a->objectItems[i];
-			a->objectItems[i] = temp;
+			KSETv(a, a->objectItems[asize - 1 - i], a->objectItems[i]);
+			KSETv(a, a->objectItems[i], temp);
 		}
 	}
-}
-
-static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kArray *a = sfp[0].asArray;
-	kArray_reverse(kctx, a);
 	RETURN_(a);
 }
-
 
 static KMETHOD Array_shift(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -259,39 +248,24 @@ static KMETHOD Array_shift(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-//## method int Array.concat(Array<T> a1, Array<T> a2);
+//## method Array<T> Array.concat(Array<T> a1);
 static KMETHOD Array_concat(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a0 = sfp[0].asArray;
 	kArray *a1 = sfp[1].asArray;
-	kArray *a2 = sfp[2].asArray;
-	//kparamtype_t p1 = {TY_0, FN_("a")};
-	//KonohaClass *CT_ArrayT0 = KLIB KonohaClass_Generics(kctx, CT_Array, TY_0, 1, &p1);
-	kArrayVar *retArray = (kArrayVar*)KNULL(Array);
-	int i;
+	size_t i;
 	if (kArray_isUnboxData(a1)) {
-		for (i = 0; i < kArray_size(a0); i++) {
-			UnboxArray_add(kctx, retArray, a0->unboxItems[i]);
-		}
 		for (i = 0; i < kArray_size(a1); i++){
-			UnboxArray_add(kctx, retArray, a1->unboxItems[i]);
-		}
-		for (i = 0; i < kArray_size(a2); i++) {
-			UnboxArray_add(kctx, retArray, a2->unboxItems[i]);
+			UnboxArray_add(kctx, a0, a1->unboxItems[i]);
 		}
 	} else {
-		for (i = 0; i < kArray_size(a0); i++) {
-			KLIB kArray_add(kctx, retArray, a0->objectItems[i]);
-		}
 		for (i = 0; i < kArray_size(a1); i++){
-			KLIB kArray_add(kctx, retArray, a1->objectItems[i]);
-		}
-		for (i = 0; i < kArray_size(a2); i++) {
-			KLIB kArray_add(kctx, retArray, a2->objectItems[i]);
+			KLIB kArray_add(kctx, a0, a1->objectItems[i]);
 		}
 	}
-	RETURN_(retArray);
+	RETURN_(a0);
 }
+
 //## method int Array.indexOf(T0 a1);
 static KMETHOD Array_indexOf(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -345,26 +319,16 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(res);
 }
 
-//## method Array Array.sort();
-static KMETHOD Array_sort(KonohaContext *kctx, KonohaStack *sfp)
-{
-
-}
-//## method Array Array.splice(int index, int howmany, T0 value);
-static KMETHOD Array_splice(KonohaContext *kctx, KonohaStack *sfp)
-{
-
-}
-
-#include<stdio.h>
 //## method String Array.toString();
 static KMETHOD Array_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kArray *a = (kArray*)sfp[0].asArray;
+	kArray *a = sfp[0].asArray;
 	size_t i = 0;
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	if (kArray_size(a) < 1) RETURN_(KNULL(String));
+	if (kArray_size(a) < 1) {
+		RETURN_(KNULL(String));
+	}
 	if(kArray_isUnboxData(a)) {
 		uintptr_t uv = a->unboxItems[i];
 		for (i = 0; i < kArray_size(a) - 1; i++) {
@@ -374,7 +338,6 @@ static KMETHOD Array_toString(KonohaContext *kctx, KonohaStack *sfp)
 		uv = a->unboxItems[i];
 		KLIB Kwb_printf(kctx, &wb, "%ld", uv);
 	} else {
-		KonohaStackRuntimeVar *base = kctx->stack;
 		kObject *obj;
 		BEGIN_LOCAL(lsfp, 1);
 		for (i = 0; i < kArray_size(a) - 1; i++) {
@@ -402,11 +365,8 @@ static KMETHOD Array_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
 	size_t asize = (size_t)sfp[1].intValue;
-	if (asize < 0) {
-
-	}
-	a->bytemax = asize * sizeof(void*);
-	kArray_setsize((kArray*)a, asize);
+	a->bytemax = asize * sizeof(uintptr_t);
+	kArray_setsize(a, 0);
 	a->objectItems = (kObject**)KCALLOC(a->bytemax, 1);
 	if (!kArray_isUnboxData(a)) {
 		size_t i;
@@ -418,15 +378,29 @@ static KMETHOD Array_new(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(a);
 }
 
+static KMETHOD Array_newList(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kArrayVar *a = (kArrayVar*)sfp[0].asObject;
+	KonohaStack *p = sfp+1;
+	if (kArray_isUnboxData(a)) {
+		for(; p < kctx->esp; p++) {
+			UnboxArray_add(kctx, a, p[0].unboxValue);
+		}
+	}
+	else {
+		for(; p < kctx->esp; p++) {
+			KLIB kArray_add(kctx, a, p[0].asObject);
+		}
+	}
+	RETURN_(a);
+}
+
 // --------------------------------------------------------------------------
 
 #define _Public   kMethod_Public
 #define _Const    kMethod_Const
-#define _Coercion kMethod_Coercion
 #define _Im       kMethod_Immutable
 #define _F(F)     (intptr_t)(F)
-
-static KMETHOD Array_newList(KonohaContext *kctx, KonohaStack *sfp);
 
 static kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
@@ -437,24 +411,25 @@ static kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	KonohaClass *CT_ArrayT0 = CT_p0(kctx, CT_Array, TY_0);
 	ktype_t TY_ArrayT0 = CT_ArrayT0->typeId;
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Im, _F(Array_get), TY_0,   TY_Array, MN_("get"), 1, TY_Int, FN_("index"),
-		_Public,     _F(Array_set), TY_void, TY_Array, MN_("set"), 2, TY_Int, FN_("index"),  TY_0, FN_("value"),
-		_Public,     _F(Array_getSize), TY_Int, TY_Array, MN_("getSize"), 0,
-		_Public,     _F(Array_getSize), TY_Int, TY_Array, MN_("getlength"), 0,
-		_Public,     _F(Array_newArray), TY_Array, TY_Array, MN_("newArray"), 1, TY_Int, FN_("size"),
-		_Public,     _F(Array_add1), TY_void, TY_Array, MN_("add"), 1, TY_0, FN_("value"),
-		_Public,     _F(Array_push), TY_Int, TY_Array, MN_("push"), 1, TY_0, FN_("value"),
-		_Public,     _F(Array_pop), TY_0, TY_Array, MN_("pop"), 0,
-		_Public,     _F(Array_shift), TY_0, TY_Array, MN_("shift"), 0,
-		_Public,     _F(Array_unshift), TY_Int, TY_Array, MN_("unshift"), 1, TY_0, FN_("value"),
-		_Public,     _F(Array_reverse), TY_Array, TY_Array, MN_("reverse"), 0,
+		_Public|_Im,    _F(Array_get), TY_0,   TY_Array, MN_("get"), 1, TY_Int, FN_("index"),
+		_Public,        _F(Array_set), TY_void, TY_Array, MN_("set"), 2, TY_Int, FN_("index"),  TY_0, FN_("value"),
+		_Public|_Im,    _F(Array_removeAt), TY_0,   TY_Array, MN_("removeAt"), 1, TY_Int, FN_("index"),
+		_Public|_Const, _F(Array_getSize), TY_Int, TY_Array, MN_("getSize"), 0,
+		_Public|_Const, _F(Array_getSize), TY_Int, TY_Array, MN_("getlength"), 0,
+		_Public,        _F(Array_add1), TY_void, TY_Array, MN_("add"), 1, TY_0, FN_("value"),
+		_Public,        _F(Array_push), TY_Int, TY_Array, MN_("push"), 1, TY_0, FN_("value"),
+		_Public,        _F(Array_pop), TY_0, TY_Array, MN_("pop"), 0,
+		_Public,        _F(Array_shift), TY_0, TY_Array, MN_("shift"), 0,
+		_Public,        _F(Array_unshift), TY_Int, TY_Array, MN_("unshift"), 1, TY_0, FN_("value"),
+		_Public,        _F(Array_reverse), TY_Array, TY_Array, MN_("reverse"), 0,
 
-		_Public,     _F(Array_concat), TY_ArrayT0, TY_Array, MN_("concat"), 2,TY_ArrayT0, FN_("a1"), TY_ArrayT0, FN_("a2"),
-		_Public,     _F(Array_indexOf), TY_Int, TY_Array, MN_("indexOf"), 1, TY_0, FN_("value"),
-		_Public,     _F(Array_lastIndexOf), TY_Int, TY_Array, MN_("lastIndexOf"), 1, TY_0, FN_("value"),
-		_Public,     _F(Array_toString), TY_String, TY_Array, MN_("toString"), 0,
+		_Public,        _F(Array_concat), TY_ArrayT0, TY_Array, MN_("concat"), 1, TY_ArrayT0, FN_("a1"),
+		_Public,        _F(Array_indexOf), TY_Int, TY_Array, MN_("indexOf"), 1, TY_0, FN_("value"),
+		_Public,        _F(Array_lastIndexOf), TY_Int, TY_Array, MN_("lastIndexOf"), 1, TY_0, FN_("value"),
+		_Public,        _F(Array_toString), TY_String, TY_Array, MN_("toString"), 0,
+		_Public|_Im,    _F(Array_new), TY_void, TY_Array, MN_("new"), 1, TY_Int, FN_("size"),
+		_Public,        _F(Array_newArray), TY_Array, TY_Array, MN_("newArray"), 1, TY_Int, FN_("size"),
 		_Public|kMethod_Hidden, _F(Array_newList), TY_Array, TY_Array, MN_("newList"), 0,
-		_Public|_Im, _F(Array_new), TY_void, TY_Array, MN_("new"), 1, TY_Int, FN_("size"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
@@ -464,23 +439,6 @@ static kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 static kbool_t array_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
 {
 	return true;
-}
-
-static KMETHOD Array_newList(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kArrayVar *a = (kArrayVar*)sfp[0].asObject;
-	KonohaStack *p = sfp+1;
-	if (!kArray_isUnboxData(a)) {
-		for(; p < kctx->esp; p++) {
-			KLIB kArray_add(kctx, a, p[0].asObject);
-		}
-	}
-	else {
-		for(; p < kctx->esp; p++) {
-			UnboxArray_add(kctx, a, p[0].unboxValue);
-		}
-	}
-	RETURN_(a);
 }
 
 static KMETHOD ExprTyCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)

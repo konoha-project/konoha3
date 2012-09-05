@@ -403,6 +403,8 @@ foreach(f ${test_files})
 		"KONOHA_PACKAGEPATH=${PARENT_BINARY_DIR}/package")
 endforeach(f ${test_files})
 
+add_subdirectory(platform/dse)
+
 install(TARGETS minikonoha minikonoha_bin
 		RUNTIME DESTINATION bin
 		LIBRARY DESTINATION lib${LIB_SUFFIX}
