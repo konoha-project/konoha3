@@ -251,11 +251,11 @@ static const char *dse_formatScriptPath(char *buf, size_t bufsiz)
 	const char *local = "";
 	if(path == NULL) {
 		path = getenv("KONOHA_HOME");
-		local = "/script";
+		local = "/dse";
 	}
 	if(path == NULL) {
 		path = getenv("HOME");
-		local = "/.minikonoha/script";
+		local = "/.minikonoha/dse";
 	}
 	snprintf(buf, bufsiz, "%s%s/%s", path, local, "dse.k");
 #ifdef K_PREFIX
@@ -264,7 +264,7 @@ static const char *dse_formatScriptPath(char *buf, size_t bufsiz)
 		fclose(fp);
 		return (const char*)buf;
 	}
-	snprintf(buf, bufsiz, "%s/%s", K_PREFIX, "/minikonoha/script/dse.k");
+	snprintf(buf, bufsiz, "%s/%s", K_PREFIX, "/minikonoha/dse/dse.k");
 #endif
 	fp = fopen(buf, "r");
 	if(fp != NULL) {
