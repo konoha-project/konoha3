@@ -1,5 +1,4 @@
 // written by wakamatsu
-K.import("konoha");
 K.import("posix.thread");
 
 void f() { }

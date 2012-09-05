@@ -1,5 +1,5 @@
 // written by wakamatsu
-K.import("konoha");
+K.import("konoha.new");
 K.import("posix.thread");
 
 void test() {
