@@ -124,6 +124,7 @@ static void Cond_free(KonohaContext *kctx, kObject *o)
 static KMETHOD Thread_create(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFunc *f = sfp[1].asFunc;
+	KLIB kNameSpace_compileAllDefinedMethods(kctx);
 	//kArray *args = sfp[2].a;
 	if(IS_NOTNULL(f)) {
 		kThread *t = (kThread *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
@@ -171,6 +172,23 @@ static KMETHOD Thread_detach(KonohaContext *kctx, KonohaStack *sfp)
 	kThread *t = (kThread *)sfp[0].o;
 	pthread_detach(t->thread);
 	RETURNvoid_();
+}
+
+//## @Native @Static Thread Thread.self();
+static KMETHOD Thread_self(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kThread *t = (kThread *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
+	t->kctx = kctx;//FIXME
+	t->thread = pthread_self();
+	RETURN_(t);
+}
+
+//## @Native boolean Thread.equal(Thread t);
+static KMETHOD Thread_equal(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kThread *t1 = (kThread *)sfp[0].o;
+	kThread *t2 = (kThread *)sfp[1].o;
+	RETURNb_(pthread_equal(t1->thread, t2->thread) != 0);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -284,12 +302,15 @@ static kbool_t thread_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	int TY_FUNC = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_void, 0, P_Func))->typeId;
 
 	int FN_func = FN_("func");
+	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Static, _F(Thread_create), TY_Thread, TY_Thread, MN_("create"), 1, TY_FUNC, FN_func,
 		_Public, _F(Thread_join)   , TY_void, TY_Thread, MN_("join"), 0,
 		_Public, _F(Thread_exit)   , TY_void, TY_Thread, MN_("exit"), 0,
 		_Public, _F(Thread_cancel) , TY_void, TY_Thread, MN_("cancel"), 0,
 		_Public, _F(Thread_detach) , TY_void, TY_Thread, MN_("detach"), 0,
+		_Public|_Static, _F(Thread_self)   , TY_Thread , TY_Thread, MN_("self"), 0,
+		_Public, _F(Thread_equal)  , TY_Boolean, TY_Thread, MN_("equal"), 1, TY_Thread, FN_x,
 		_Public, _F(Mutex_new)     , TY_Mutex, TY_Mutex, MN_("new"), 0,
 		_Public, _F(Mutex_lock)    , TY_void, TY_Mutex, MN_("lock"), 0,
 		_Public, _F(Mutex_trylock) , TY_void, TY_Mutex, MN_("trylock"), 0,
