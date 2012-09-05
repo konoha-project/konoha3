@@ -65,7 +65,7 @@ static void *spawn_start(void *v)
 	KCALL(lsfp, 0, t->func->mtd, 0, K_NULL);
 	END_LOCAL();
 
-	kthread_detach(ctx, t->thread);
+	pthread_detach(t->thread);
 
 	// TODO cond_signal gc
 	return NULL;
@@ -134,7 +134,7 @@ static KMETHOD Thread_create(KonohaContext *kctx, KonohaStack *sfp)
 		pthread_create(&(t->thread), NULL, spawn_start, t);
 		RETURN_(t);
 	} else {
-		RETUNR_(K_NULL);
+		RETURN_(K_NULL);
 	}
 }
 
