@@ -86,8 +86,9 @@ static void *spawn_start(void *v)
 
 static void Thread_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	//kThread *t = (kThread *)o;
-	//TODO
+	kThread *t = (kThread *)o;
+	KINITv(t->func, K_NULL);
+	//KINITv(t->args, K_NULL);
 }
 
 static void Thread_free(KonohaContext *kctx, kObject *o)
@@ -103,6 +104,7 @@ static void Thread_reftrace(KonohaContext *kctx, kObject *o)
 	kThread *t = (kThread *)o;
 	BEGIN_REFTRACE(1);
 	KREFTRACEv(t->func);
+	//KREFTRACEv(t->args);
 	END_REFTRACE();
 }
 
@@ -140,8 +142,8 @@ static KMETHOD Thread_create(KonohaContext *kctx, KonohaStack *sfp)
 		kThread *t = (kThread *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 		//kcontext_t *newCtx = new_ThreadContext(WCTX(ctx));
 		t->kctx = kctx;//FIXME
-		t->func = f;
-		//t->args = args;
+		KSETv(t, t->func, f);
+		//KSETv(t, t->args, args);
 		pthread_create(&(t->thread), NULL, spawn_start, t);
 		RETURN_(t);
 	}
