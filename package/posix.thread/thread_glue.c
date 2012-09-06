@@ -152,8 +152,7 @@ static KMETHOD Thread_join(KonohaContext *kctx, KonohaStack *sfp)
 //## @Native void Thread.exit();
 static KMETHOD Thread_exit(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kThread *t = (kThread *)sfp[0].o;
-	pthread_exit(t->thread);
+	pthread_exit(NULL/*FIXME*/);
 	RETURNvoid_();
 }
 	

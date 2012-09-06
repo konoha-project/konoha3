@@ -576,6 +576,7 @@ static KMETHOD Stat_getst_blocks(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(stat->stat->st_blocks);
 }
 
+#if !defined(__linux__)
 //## int Stat.getst_flags()
 static KMETHOD Stat_getst_flags(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -596,6 +597,7 @@ static KMETHOD Stat_getst_birthtime(KonohaContext *kctx, KonohaStack *sfp)
 	kStat *stat = (kStat *)sfp[0].asObject;
 	RETURNi_(stat->stat->st_birthtime);
 }
+#endif /* !defined(__linux__) */
 
 //## DIR System.opendir(String name)
 static KMETHOD System_opendir(KonohaContext *kctx, KonohaStack *sfp)
@@ -603,7 +605,7 @@ static KMETHOD System_opendir(KonohaContext *kctx, KonohaStack *sfp)
 	const char *name = S_text(sfp[1].asString);
 	DIR *d = opendir(name);
 	struct _kDIR *dir;
-	if(dir != NULL) {
+	if(d != NULL) {
 		dir = (struct _kDIR *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), (uintptr_t)d);
 	}
 	else {
@@ -820,9 +822,11 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		_Public|_Const|_Im, _F(Stat_getst_ctime), TY_int, TY_Stat, MN_("getst_ctime"), 0,
 		_Public|_Const|_Im, _F(Stat_getst_rdev), TY_int, TY_Stat, MN_("getst_rdev"), 0,
 		_Public|_Const|_Im, _F(Stat_getst_blocks), TY_int, TY_Stat, MN_("getst_blocks"), 0,
+#if !defined(__linux__)
 		_Public|_Const|_Im, _F(Stat_getst_flags), TY_int, TY_Stat, MN_("getst_flags"), 0,
 		_Public|_Const|_Im, _F(Stat_getst_gen), TY_int, TY_Stat, MN_("getst_gen"), 0,
 		_Public|_Const|_Im, _F(Stat_getst_birthtime), TY_int, TY_Stat, MN_("getst_birthtime"), 0,
+#endif /* !defined(__linux__) */
 		_Public|_Const|_Im, _F(System_opendir), TY_DIR, TY_System, MN_("opendir"), 1, TY_String, FN_("dirname"),
 		_Public|_Const|_Im, _F(DIR_close), TY_int, TY_DIR, MN_("close"), 0,
 		_Public|_Const|_Im, _F(DIR_getfd), TY_int, TY_DIR, MN_("getfd"), 0,

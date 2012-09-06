@@ -30,6 +30,9 @@
 #include <sys/resource.h>
 #include <sys/time.h>
 #include <grp.h>
+#ifdef __linux__
+#include <sys/wait.h>
+#endif
 
 /* ------------------------------------------------------------------------ */
 
