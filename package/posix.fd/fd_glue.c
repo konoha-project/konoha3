@@ -38,6 +38,7 @@
 typedef const struct _kStat kStat;
 struct _kStat {
 	KonohaObjectHeader h;
+	struct stat *stat;
 };
 
 typedef const struct _kDIR kDIR;
@@ -58,23 +59,20 @@ static void kStat_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct _kStat *stat = (struct _kStat*)o;
 	if(conf != NULL) {
-		struct stat *buf = (struct stat *)conf;
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_dev"), TY_int, buf->st_dev);
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_ino"), TY_int, buf->st_ino);
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_mode"), TY_int, buf->st_mode);
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_nlink"), TY_int, buf->st_nlink);
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_uid"), TY_int, buf->st_uid);
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_gid"), TY_int, buf->st_gid);
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_atime"), TY_int, buf->st_atime);
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_mtime"), TY_int, buf->st_mtime);
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_ctime"), TY_int, buf->st_ctime);
-		// some unix systems (Linux) only
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_rdev"), TY_int, buf->st_rdev);
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_blocks"), TY_int, buf->st_blocks);
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_flags"), TY_int, buf->st_flags);
-		// other unix systems (FreeBSD) only
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_gen"), TY_int, buf->st_gen);
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_birthtime"), TY_int, buf->st_birthtime);
+		stat->stat = (struct stat *)PLATAPI malloc_i(sizeof(struct stat));
+		memcpy(stat->stat, conf, sizeof(struct stat));
+	}
+	else {
+		stat->stat = NULL;
+	}
+}
+
+static void kStat_free(KonohaContext *kctx, kObject *o)
+{
+	struct _kStat *stat = (struct _kStat *)o;
+	if(stat->stat != NULL) {
+		PLATAPI free_i(stat->stat);
+		stat->stat = NULL;
 	}
 }
 
@@ -92,7 +90,7 @@ static void kDIR_init(KonohaContext *kctx, kObject *o, void *conf)
 static void kDIR_free(KonohaContext *kctx, kObject *o)
 {
 	struct _kDIR *dir = (struct _kDIR*)o;
-	if (dir->dirp != NULL) {
+	if(dir->dirp != NULL) {
 		int ret = closedir(dir->dirp);
 		if(ret == -1) {
 			// TODO: throw
@@ -504,85 +502,99 @@ static KMETHOD System_fstat(KonohaContext *kctx, KonohaStack *sfp)
 //## int Stat.getst_dev()
 static KMETHOD Stat_getst_dev(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_dev"), 0));
+	kStat *stat = (kStat *)sfp[0].asObject;
+	RETURNi_(stat->stat->st_dev);
 }
 
 //## int Stat.getst_ino()
 static KMETHOD Stat_getst_ino(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_ino"), 0));
+	kStat *stat = (kStat *)sfp[0].asObject;
+	RETURNi_(stat->stat->st_ino);
 }
 
 //## int Stat.getst_mode()
 static KMETHOD Stat_getst_mode(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_mode"), 0));
+	kStat *stat = (kStat *)sfp[0].asObject;
+	RETURNi_(stat->stat->st_mode);
 }
 
 //## int Stat.getst_nlink()
 static KMETHOD Stat_getst_nlink(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_nlink"), 0));
+	kStat *stat = (kStat *)sfp[0].asObject;
+	RETURNi_(stat->stat->st_nlink);
 }
 
 //## int Stat.getst_uid()
 static KMETHOD Stat_getst_uid(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_uid"), 0));
+	kStat *stat = (kStat *)sfp[0].asObject;
+	RETURNi_(stat->stat->st_uid);
 }
 
 //## int Stat.getst_gid()
 static KMETHOD Stat_getst_gid(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_gid"), 0));
+	kStat *stat = (kStat *)sfp[0].asObject;
+	RETURNi_(stat->stat->st_gid);
 }
 
 //## int Stat.getst_atime()
 static KMETHOD Stat_getst_atime(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_atime"), 0));
+	kStat *stat = (kStat *)sfp[0].asObject;
+	RETURNi_(stat->stat->st_atime);
 }
 
 //## int Stat.getst_mtime()
 static KMETHOD Stat_getst_mtime(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_mtime"), 0));
+	kStat *stat = (kStat *)sfp[0].asObject;
+	RETURNi_(stat->stat->st_mtime);
 }
 
 //## int Stat.getst_ctime()
 static KMETHOD Stat_getst_ctime(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_ctime"), 0));
+	kStat *stat = (kStat *)sfp[0].asObject;
+	RETURNi_(stat->stat->st_ctime);
 }
 
 //## int Stat.getst_rdev()
 static KMETHOD Stat_getst_rdev(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_rdev"), 0));
+	kStat *stat = (kStat *)sfp[0].asObject;
+	RETURNi_(stat->stat->st_rdev);
 }
 
 //## int Stat.getst_blocks()
 static KMETHOD Stat_getst_blocks(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_blocks"), 0));
+	kStat *stat = (kStat *)sfp[0].asObject;
+	RETURNi_(stat->stat->st_blocks);
 }
 
 //## int Stat.getst_flags()
 static KMETHOD Stat_getst_flags(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_flags"), 0));
+	kStat *stat = (kStat *)sfp[0].asObject;
+	RETURNi_(stat->stat->st_flags);
 }
 
 //## int Stat.getst_gen()
 static KMETHOD Stat_getst_gen(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_gen"), 0));
+	kStat *stat = (kStat *)sfp[0].asObject;
+	RETURNi_(stat->stat->st_gen);
 }
 
 //## int Stat.getst_birthtime()
 static KMETHOD Stat_getst_birthtime(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_birthtime"), 0));
+	kStat *stat = (kStat *)sfp[0].asObject;
+	RETURNi_(stat->stat->st_birthtime);
 }
 
 //## DIR System.opendir(String name)
@@ -751,6 +763,7 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		STRUCTNAME(Stat),
 		.cflag = kClass_Final,
 		.init  = kStat_init,
+		.free  = kStat_free,
 		.p     = kStat_p
 	};
 	KonohaClass *cStat = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defStat, pline);
