@@ -232,24 +232,6 @@ static void KonohaContext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 }
 
 /* ------------------------------------------------------------------------ */
-
-// Don't export KONOHA_reftail to packages
-// Don't include KONOHA_reftail in shared header files  (kimio)
-
-kObjectVar** KONOHA_reftail(KonohaContext *kctx, size_t size)
-{
-	KonohaStackRuntimeVar *stack = kctx->stack;
-	size_t ref_size = stack->reftail - stack->ref.refhead;
-	if(stack->ref.bytemax/sizeof(void*) < size + ref_size) {
-		KLIB Karray_expand(kctx, &stack->ref, (size + ref_size) * sizeof(kObject*));
-		stack->reftail = stack->ref.refhead + ref_size;
-	}
-	kObjectVar **reftail = stack->reftail;
-	stack->reftail = NULL;
-	return reftail;
-}
-
-/* ------------------------------------------------------------------------ */
 /* konoha api */
 
 #define BEGIN_(kctx) knh_beginContext(kctx, (void**)&kctx)

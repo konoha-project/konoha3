@@ -44,8 +44,6 @@ static void kMap_init(KonohaContext *kctx, kObject *o, void *conf)
 	}
 }
 
-kObjectVar** KONOHA_reftail(KonohaContext *kctx, size_t size);
-
 static void MapUnboxEntry_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
 {
 	BEGIN_REFTRACE(1);

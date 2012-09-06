@@ -310,8 +310,6 @@ static void ObjectField_init(KonohaContext *kctx, kObject *o, void *conf)
 	memcpy(((kObjectVar *)o)->fieldObjectItems, c->defaultValueAsNull->fieldObjectItems, fieldsize * sizeof(void*));
 }
 
-extern kObjectVar** KONOHA_reftail(KonohaContext *kctx, size_t size);
-
 static void ObjectField_reftrace(KonohaContext *kctx, kObject *o)
 {
 	KonohaClass *c =O_ct(o);

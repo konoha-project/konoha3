@@ -37,7 +37,6 @@ extern "C" {
 // These functions are local functions in minikonoha binary.
 // Don't call from packages directly   (kimio)
 
-kObjectVar** KONOHA_reftail(KonohaContext *kctx, size_t size);
 void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o);  // called from MODGC
 void KONOHA_freeObjectField(KonohaContext *kctx, kObjectVar *o);       // callled from MODGC
 

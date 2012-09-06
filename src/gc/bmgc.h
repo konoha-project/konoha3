@@ -1999,6 +1999,13 @@ static void kmodgc_free(KonohaContext *kctx, struct KonohaModule *baseh)
 	kctx->modshare[MOD_gc] = NULL;
 }
 
+static void Kgc_invoke(KonohaContext *kctx, KonohaStack *esp)
+{
+	enum gc_mode mode = kctx->safepoint & 0x3;
+	mode = (mode == GC_NOP) ? mode : GC_MINOR;
+	bitmapMarkingGC(kctx, HeapManager(kctx), mode);
+}
+
 void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	if (IS_RootKonohaContext(ctx)) {
@@ -2011,6 +2018,7 @@ void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		KSET_KLIB(Kzmalloc, 0);
 		KSET_KLIB(Kfree, 0);
 		KSET_KLIB(Kwrite_barrier, 0);
+		KSET_KLIB(Kgc_invoke, 0);
 		KLIB Konoha_setModule(kctx, MOD_gc, &base->h, 0);
 		assert(sizeof(BlockHeader) <= MIN_ALIGN
 				&& "Minimum size of Object may lager than sizeof BlockHeader");
@@ -2028,13 +2036,6 @@ void MODGC_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	if (IS_RootKonohaContext(ctx)) {
 		KLIB Konoha_setModule(kctx, MOD_gc, NULL, 0);
 	}
-}
-
-void MODGC_gc_invoke(KonohaContext *kctx, KonohaStack *esp)
-{
-	enum gc_mode mode = kctx->safepoint & 0x3;
-	mode = (mode == GC_NOP) ? mode : GC_MINOR;
-	bitmapMarkingGC(kctx, HeapManager(kctx), mode);
 }
 
 /* ------------------------------------------------------------------------ */

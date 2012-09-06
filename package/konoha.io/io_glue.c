@@ -60,8 +60,6 @@ typedef struct StreamApi {
 	kbool_t (*isEndOfStream)(KonohaContext *kctx, FILE_i *fp);
 } StreamApi;
 
-extern kObjectVar **KONOHA_reftail(KonohaContext *, size_t);
-
 static size_t read_NOP(KonohaContext *kctx, FILE_i *fp, char *buf, size_t bufsiz)
 {
 	return 0;

@@ -273,8 +273,6 @@ static char *String_getReference(KonohaContext *kctx, StringBase *s)
 	return NULL;
 }
 
-extern kObjectVar** KONOHA_reftail(KonohaContext *kctx, size_t size);
-
 static void StringBase_reftrace(KonohaContext *kctx, StringBase *s)
 {
 	while (1) {

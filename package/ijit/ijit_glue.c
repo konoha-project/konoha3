@@ -52,8 +52,6 @@ static void kmodjit_setup(KonohaContext *kctx, struct KonohaModule *def, int new
 	(void)kctx;(void)def;(void)newctx;
 }
 
-extern kObjectVar **KONOHA_reftail(KonohaContext *kctx, size_t size);
-
 static void val_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p)
 {
 	BEGIN_REFTRACE(1);

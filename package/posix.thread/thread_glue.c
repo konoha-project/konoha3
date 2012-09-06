@@ -89,8 +89,6 @@ static int kThread_compareTo(kObject *o1, kObject *o2)
 	return pthread_equal(t1->thread, t2->thread) != 0 ? 0 : 1;
 }
 
-extern kObjectVar **KONOHA_reftail(KonohaContext *, size_t);
-
 static void kThread_reftrace(KonohaContext *kctx, kObject *o)
 {
 	kThread *t = (kThread *)o;

@@ -26,8 +26,6 @@
 #include<minikonoha/sugar.h>
 #include<minikonoha/float.h>
 
-kObjectVar** KONOHA_reftail(KonohaContext *kctx, size_t size);
-
 typedef kushort_t kfault_t;
 typedef const struct kExceptionVar kException;
 typedef struct kExceptionVar kExceptionVar;

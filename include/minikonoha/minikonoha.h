@@ -1217,6 +1217,9 @@ struct KonohaLibVar {
 	void* (*Kmalloc)(KonohaContext*, size_t);
 	void* (*Kzmalloc)(KonohaContext*, size_t);
 	void  (*Kfree)(KonohaContext*, void *, size_t);
+
+	void  (*Kgc_invoke)(KonohaContext *, KonohaStack *esp);
+	kObjectVar **(*Kobject_reftail)(KonohaContext *, size_t size);
 	void  (*Kwrite_barrier)(KonohaContext *, kObject *);
 
 	void  (*Karray_init)(KonohaContext *, KUtilsGrowingArray *, size_t);
@@ -1446,7 +1449,7 @@ typedef struct {
 
 
 
-#define BEGIN_REFTRACE(SIZE)  int _ref_ = (SIZE); kObjectVar** _tail = KONOHA_reftail(kctx, (SIZE));
+#define BEGIN_REFTRACE(SIZE)  int _ref_ = (SIZE); kObjectVar** _tail = KLIB Kobject_reftail(kctx, (SIZE));
 #define END_REFTRACE()        (void)_ref_; kctx->stack->reftail = _tail;
 
 #define KREFTRACEv(p)  do {\
@@ -1466,7 +1469,7 @@ typedef struct {
 
 #define KNH_SAFEPOINT(kctx, sfp) do {\
 	if (kctx->safepoint != 0) {\
-		MODGC_gc_invoke(kctx, sfp);\
+		KLIB Kgc_invoke(kctx, sfp);\
 	}\
 } while (0)
 
