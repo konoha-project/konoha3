@@ -84,7 +84,7 @@ static unsigned long long getTimeMilliSecond(void)
 // -------------------------------------------------------------------------
 
 #ifdef K_USE_PTHREAD
-//#include<phtread.h>
+#include <pthread.h>
 
 static int pthread_mutex_init_recursive(kmutex_t *mutex)
 {
