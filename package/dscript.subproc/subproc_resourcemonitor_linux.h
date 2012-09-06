@@ -71,24 +71,24 @@ static int attach_resourcemonitor_for_child(KonohaContext *kctx, subproc_resourc
 	return 0;
 }
 
-static int fetch_resourcemonitor_about(KonohaContext *kctx, subproc_resource_mon_t *mon, enum e_resource res)
-{
-	int mem = 0;
-	size_t dummy, vm;
-	switch(res) {
-	case R_MEMORY:
-		do {
-			vm = 0;
-			fscanf(mon->procfs, "%ld %ld ", &dummy, &vm); // get resident
-			if (mem < vm) mem = vm;
-			if (!vm) break;
-		} while(!usleep(SLEEP_NSEC));
-		mem *= getpagesize();
-	default:
-		break;
-	}
-	return mem;
-}
+//static int fetch_resourcemonitor_about(KonohaContext *kctx, subproc_resource_mon_t *mon, enum e_resource res)
+//{
+//	int mem = 0;
+//	size_t dummy, vm;
+//	switch(res) {
+//	case R_MEMORY:
+//		do {
+//			vm = 0;
+//			fscanf(mon->procfs, "%ld %ld ", &dummy, &vm); // get resident
+//			if (mem < vm) mem = vm;
+//			if (!vm) break;
+//		} while(!usleep(SLEEP_NSEC));
+//		mem *= getpagesize();
+//	default:
+//		break;
+//	}
+//	return mem;
+//}
 
 #ifdef __cplusplus
 }
