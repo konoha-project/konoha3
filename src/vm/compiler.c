@@ -25,6 +25,9 @@
 #include <minikonoha/sugar.h>
 #include <stdio.h>
 /* ************************************************************************ */
+
+int verbose_code = 0;  // global variable
+
 /*static void EXPR_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int shift, int espidx)
 {
 	DBG_ASSERT(expr != NULL);
@@ -64,10 +67,7 @@ void emit_string(const char *str, const char *prefix, const char *suffix, int in
 	for (i = 0; i < indent; i++){
 		putchar(' ');
 	}
-	puts(prefix);
-	puts(str);
-	puts(suffix);
-	putchar('\n');
+	printf("%s%s%s\n", prefix, str, suffix);
 }
 
 
@@ -244,7 +244,7 @@ static void DumpVisitor_visitLocalExpr(struct IRBuilder *self, kExpr *expr)
 {
 	KonohaContext *kctx = self->kctx;
 	char buf[128];
-	snprintf(buf, 128, "LOCAL(%d, %s)", expr->index, CT_t(CT_(expr->ty)));
+	snprintf(buf, 128, "LOCAL(%d, %s)", (int)expr->index, CT_t(CT_(expr->ty)));
 	emit_string(buf, "", "", self->indent);
 
 }
@@ -432,6 +432,7 @@ void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	KonohaLibVar *l = (KonohaLibVar*)kctx->klib;
 	l->kMethod_genCode = kMethod_genCode;
+	l->kMethod_setFunc = kMethod_setFunc;
 }
 
 #ifdef __cplusplus
