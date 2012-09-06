@@ -38,7 +38,7 @@ struct kMapVar {
 static void kMap_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kMap *map = (kMap*)o;
-	map->map = KLIB Kmap_init(kctx, 4);
+	map->map = KLIB Kmap_init(kctx, 17);
 	if(TY_isUnbox(O_p0(map))) {
 		Map_setUnboxData(map, true);
 	}
@@ -229,16 +229,19 @@ static kbool_t map_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime
 
 /* ----------------------------------------------------------------------- */
 
+static KMETHOD ExprTyCheck_MapLiteral(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_ExprTyCheck(stmt, expr, gma, reqty);
+	kToken *termToken = expr->termToken;
+	if(Expr_isTerm(expr) && IS_Token(termToken)) {
+		DBG_P("termToken='%s'", S_text(termToken->text));
 
-
+	}
+}
 
 static kbool_t map_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
-	// TODO: map literal
-	KDEFINE_SYNTAX SYNTAX[] = {
-			{ .keyword = KW_END, },
-	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
+	SUGAR kNameSpace_addSugarFunc(kctx, ns, KW_BlockPattern, SUGARFUNC_ExprTyCheck, new_SugarFunc(ExprTyCheck_MapLiteral));
 	return true;
 }
 
@@ -246,7 +249,6 @@ static kbool_t map_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline
 {
 	return true;
 }
-
 
 KDEFINE_PACKAGE* map_init(void)
 {

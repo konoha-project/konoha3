@@ -270,8 +270,6 @@ struct SugarSyntaxVar {
 typedef struct KDEFINE_SYNTAX {
 	ksymbol_t keyword;  kshortflag_t flag;
 	const char *rule;
-//	const char *op2;
-//	const char *op1;
 	int precedence_op2;
 	int precedence_op1;
 	int type;
@@ -534,6 +532,7 @@ typedef struct {
 	kbool_t     (*TokenRange_resolved)(KonohaContext *, TokenRange *, TokenRange *);
 	kstatus_t   (*TokenRange_eval)(KonohaContext *, TokenRange *);
 	int         (*kStmt_parseTypePattern)(KonohaContext *, kStmt *, kNameSpace *, kArray *, int , int , KonohaClass **classRef);
+	void        (*kToken_transformToBraceGroup)(KonohaContext *, kTokenVar *, kNameSpace *);
 
 	uintptr_t   (*kStmt_parseFlag)(KonohaContext *kctx, kStmt *stmt, KonohaFlagSymbolData *flagData, uintptr_t flag);
 	kToken*     (*kStmt_getToken)(KonohaContext *, kStmt *, ksymbol_t kw, kToken *def);
@@ -582,9 +581,7 @@ typedef struct {
 	kArray            *errorMessageList;
 	int                errorMessageCount;
 	kbool_t            isBlockingErrorMessage;
-//	kBlock            *singleBlock;
 	kGamma            *preparedGamma;
-//	kArray            *lvarlst;
 	kArray            *definedMethodList;
 } SugarContext;
 
@@ -668,7 +665,6 @@ static inline void Stmt_typed(kStmt *stmt, int build)
 		((kStmtVar*)stmt)->build = build;
 	}
 }
-
 
 static inline kbool_t Expr_isSymbolTerm(kExpr *expr)
 {
