@@ -29,39 +29,39 @@
 int verbose_code = 0;  // global variable
 
 /*static void EXPR_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int shift, int espidx)
-{
-	DBG_ASSERT(expr != NULL);
-	//DBG_P("a=%d, shift=%d, espidx=%d", a, shift, espidx);
-	switch(expr->build) {
-	case TEXPR_CONST :
-		break;
-	case TEXPR_NEW   :
-		break;
-	case TEXPR_NULL  :
-		break;
-	case TEXPR_NCONST :
-		break;
-	case TEXPR_LOCAL :
-		break;
-	case TEXPR_BLOCK :
-		break;
-	case TEXPR_FIELD :
-		break;
-	case TEXPR_CALL  :
-		break;
-	case TEXPR_AND  :
-		break;
-	case TEXPR_OR  :
-		break;
-	case TEXPR_LET  :
-		break;
-	case TEXPR_STACKTOP  :
-		break;
-	default:
-		DBG_ABORT("unknown expr=%d", expr->build);
-	}
+  {
+  DBG_ASSERT(expr != NULL);
+//DBG_P("a=%d, shift=%d, espidx=%d", a, shift, espidx);
+switch(expr->build) {
+case TEXPR_CONST :
+break;
+case TEXPR_NEW   :
+break;
+case TEXPR_NULL  :
+break;
+case TEXPR_NCONST :
+break;
+case TEXPR_LOCAL :
+break;
+case TEXPR_BLOCK :
+break;
+case TEXPR_FIELD :
+break;
+case TEXPR_CALL  :
+break;
+case TEXPR_AND  :
+break;
+case TEXPR_OR  :
+break;
+case TEXPR_LET  :
+break;
+case TEXPR_STACKTOP  :
+break;
+default:
+DBG_ABORT("unknown expr=%d", expr->build);
 }
-*/
+}
+ */
 void emit_string(const char *str, const char *prefix, const char *suffix, int indent) {
 	int i;
 	for (i = 0; i < indent; i++){
@@ -365,14 +365,14 @@ static void visitBlock(struct IRBuilder *builder, kBlock *bk)
 		if(stmt->syn == NULL) continue;
 		//ctxcode->uline = stmt->uline;
 		switch(stmt->build) {
-		case TSTMT_ERR:	builder->base.visitErrStmt(builder, stmt);    return;
-		case TSTMT_EXPR:   builder->base.visitExprStmt(builder, stmt);   break;
-		case TSTMT_BLOCK:  builder->base.visitBlockStmt(builder, stmt);  break;
-		case TSTMT_RETURN: builder->base.visitReturnStmt(builder, stmt); return;
-		case TSTMT_IF:	 builder->base.visitIfStmt(builder, stmt);     break;
-		case TSTMT_LOOP:   builder->base.visitLoopStmt(builder, stmt);   break;
-		case TSTMT_JUMP:   builder->base.visitJumpStmt(builder, stmt);   break;
-		default: builder->base.visitUndefinedStmt(builder, stmt);		break;
+			case TSTMT_ERR:	builder->base.visitErrStmt(builder, stmt);    return;
+			case TSTMT_EXPR:   builder->base.visitExprStmt(builder, stmt);   break;
+			case TSTMT_BLOCK:  builder->base.visitBlockStmt(builder, stmt);  break;
+			case TSTMT_RETURN: builder->base.visitReturnStmt(builder, stmt); return;
+			case TSTMT_IF:	 builder->base.visitIfStmt(builder, stmt);     break;
+			case TSTMT_LOOP:   builder->base.visitLoopStmt(builder, stmt);   break;
+			case TSTMT_JUMP:   builder->base.visitJumpStmt(builder, stmt);   break;
+			default: builder->base.visitUndefinedStmt(builder, stmt);		break;
 		}
 	}
 }
@@ -395,6 +395,29 @@ static void handleExpr(struct IRBuilder *builder, kExpr *expr)
 		default: builder->base.visitStackTopExpr(builder, expr);    break;
 	}
 }
+
+
+
+	static void KonohaBuilder_visitErrStmt(struct IRBuilder *builder, kStmt *stmt)
+	static void KonohaBuilder_visitExprStmt(struct IRBuilder *builder, kStmt *stmt)
+	static void KonohaBuilder_visitBlockStmt(struct IRBuilder *builder, kStmt *stmt)
+	static void KonohaBuilder_visitReturnStmt(struct IRBuilder *builder, kStmt *stmt)
+	static void KonohaBuilder_visitIfStmt(struct IRBuilder *builder, kStmt *stmt)
+	static void KonohaBuilder_visitLoopStmt(struct IRBuilder *builder, kStmt *stmt)
+	static void KonohaBuilder_visitJumpStmt(struct IRBuilder *builder, kStmt *stmt)
+	static void KonohaBuilder_visitUndefinedStmt(struct IRBuilder *builder, kStmt *stmt)
+	static void KonohaBuilder_visitConstExpr(struct IRBuilder *builder, kExpr *expr)
+	static void KonohaBuilder_visitNConstExpr(struct IRBuilder *builder, kExpr *expr)
+	static void KonohaBuilder_visitNewExpr(struct IRBuilder *builder, kExpr *expr)
+	static void KonohaBuilder_visitNullExpr(struct IRBuilder *builder, kExpr *expr)
+	static void KonohaBuilder_visitLocalExpr(struct IRBuilder *builder, kExpr *expr)
+	static void KonohaBuilder_visitBlockExpr(struct IRBuilder *builder, kExpr *expr)
+	static void KonohaBuilder_visitFieldExpr(struct IRBuilder *builder, kExpr *expr)
+	static void KonohaBuilder_visitCallExpr(struct IRBuilder *builder, kExpr *expr)
+	static void KonohaBuilder_visitAndExpr(struct IRBuilder *builder, kExpr *expr)
+	static void KonohaBuilder_visitOrExpr(struct IRBuilder *builder, kExpr *expr)
+	static void KonohaBuilder_visitLetExpr(struct IRBuilder *builder, kExpr *expr)
+static void KonohaBuilder_visitStackTopExpr(struct IRBuilder *builder, kExpr *expr)
 
 
 static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
