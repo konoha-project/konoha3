@@ -300,7 +300,7 @@ static kbool_t process_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfile
 KDEFINE_PACKAGE* process_init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("posix.process", "1.0"),
+		KPACKNAME("process", "1.0"),
 		KPACKLIB("POSIX.1", "1.0"),
 		.initPackage = process_initPackage,
 		.setupPackage = process_setupPackage,

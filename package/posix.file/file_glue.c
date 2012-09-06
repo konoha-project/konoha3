@@ -263,18 +263,18 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		.free  = File_free,
 		.p     = File_p,
 	};
-
 	KonohaClass *cFile = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defFile, pline);
+
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im, _F(System_fopen), TY_File, TY_System, MN_("fopen"), 2, TY_String, FN_("path"), TY_String, FN_("mode"),
 		_Public|_Const|_Im, _F(File_close), TY_void, TY_File, MN_("close"), 0,
 		_Public|_Const|_Im, _F(File_getC), TY_Int, TY_File, MN_("getC"), 0,
 		_Public|_Const|_Im, _F(File_putC), TY_Boolean, TY_File, MN_("putC"), 1, TY_Int, FN_("ch"),
-		_Public|_Const, _F(System_umask), TY_Int, TY_System, MN_("umask"), 1, TY_Int, FN_("cmask"),
-		_Public|_Const, _F(System_mkdir), TY_Int, TY_System, MN_("mkdir"), 2, TY_String, FN_("path"), TY_Int, FN_("mode"),
-		_Public|_Const, _F(System_rmdir), TY_Int, TY_System, MN_("rmdir"), 1, TY_String, FN_("path"),
-		_Public|_Const, _F(System_truncate), TY_Int, TY_System, MN_("truncate"), 2, TY_String, FN_("path"), TY_Int, FN_("length"),
-		_Public|_Const, _F(System_chmod), TY_Int, TY_System, MN_("chmod"), 2, TY_String, FN_("path"), TY_Int, FN_("mode"),
+		_Public|_Const|_Im, _F(System_umask), TY_Int, TY_System, MN_("umask"), 1, TY_Int, FN_("cmask"),
+		_Public|_Const|_Im, _F(System_mkdir), TY_Int, TY_System, MN_("mkdir"), 2, TY_String, FN_("path"), TY_Int, FN_("mode"),
+		_Public|_Const|_Im, _F(System_rmdir), TY_Int, TY_System, MN_("rmdir"), 1, TY_String, FN_("path"),
+		_Public|_Const|_Im, _F(System_truncate), TY_Int, TY_System, MN_("truncate"), 2, TY_String, FN_("path"), TY_Int, FN_("length"),
+		_Public|_Const|_Im, _F(System_chmod), TY_Int, TY_System, MN_("chmod"), 2, TY_String, FN_("path"), TY_Int, FN_("mode"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
