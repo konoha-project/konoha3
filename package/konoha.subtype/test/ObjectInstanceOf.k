@@ -6,7 +6,7 @@ K.import("konoha.subtype");
 void test() {
 	Object o;
 	assert(o <: Object);
-	assert(!(o <: Int));
+	assert(!(o <: int));
 	assert(!(o <: String));
 	assert(!(o <: String[]));
 }
