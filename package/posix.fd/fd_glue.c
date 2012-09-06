@@ -59,22 +59,22 @@ static void kStat_init(KonohaContext *kctx, kObject *o, void *conf)
 	struct _kStat *stat = (struct _kStat*)o;
 	if(conf != NULL) {
 		struct stat *buf = (struct stat *)conf;
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_dev"), TY_Int, buf->st_dev);
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_ino"), TY_Int, buf->st_ino);
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_mode"), TY_Int, buf->st_mode);
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_nlink"), TY_Int, buf->st_nlink);
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_uid"), TY_Int, buf->st_uid);
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_gid"), TY_Int, buf->st_gid);
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_atime"), TY_Int, buf->st_atime);
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_mtime"), TY_Int, buf->st_mtime);
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_ctime"), TY_Int, buf->st_ctime);
+		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_dev"), TY_int, buf->st_dev);
+		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_ino"), TY_int, buf->st_ino);
+		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_mode"), TY_int, buf->st_mode);
+		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_nlink"), TY_int, buf->st_nlink);
+		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_uid"), TY_int, buf->st_uid);
+		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_gid"), TY_int, buf->st_gid);
+		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_atime"), TY_int, buf->st_atime);
+		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_mtime"), TY_int, buf->st_mtime);
+		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_ctime"), TY_int, buf->st_ctime);
 		// some unix systems (Linux) only
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_rdev"), TY_Int, buf->st_rdev);
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_blocks"), TY_Int, buf->st_blocks);
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_flags"), TY_Int, buf->st_flags);
+		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_rdev"), TY_int, buf->st_rdev);
+		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_blocks"), TY_int, buf->st_blocks);
+		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_flags"), TY_int, buf->st_flags);
 		// other unix systems (FreeBSD) only
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_gen"), TY_Int, buf->st_gen);
-		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_birthtime"), TY_Int, buf->st_birthtime);
+		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_gen"), TY_int, buf->st_gen);
+		KLIB kObject_setUnboxValue(kctx, UPCAST(stat), SYM_("st_birthtime"), TY_int, buf->st_birthtime);
 	}
 }
 
@@ -149,6 +149,7 @@ static KMETHOD System_lseek(KonohaContext *kctx, KonohaStack *sfp)
 	int whence = sfp[3].intValue;
 	off_t ret_offset = lseek(fd, offset, whence);
 	if (ret_offset == -1) {
+		// TODO: throw
 		ktrace(_DataFault,
 			   KeyValue_s("@", "lseek"),
 			   KeyValue_u("offset", offset),
@@ -173,6 +174,7 @@ static KMETHOD System_ftruncate(KonohaContext *kctx, KonohaStack *sfp)
 	int length = sfp[2].intValue;
 	int ret = ftruncate(fd, length);
 	if (ret != 0) {
+		// TODO: throw
 		ktrace(_SystemFault,
 			   KeyValue_s("@", "ftruncate"),
 			   KeyValue_u("length", length),
@@ -189,6 +191,7 @@ static KMETHOD System_fchmod(KonohaContext *kctx, KonohaStack *sfp)
 	int mode = sfp[2].intValue;
 	int ret = fchmod(fd, mode);
 	if (ret != -1) {
+		// TODO: throw
 		ktrace(_SystemFault,
 			   KeyValue_s("@", "fchmod"),
 			   KeyValue_u("mode", mode),
@@ -204,7 +207,7 @@ static KMETHOD System_fchmod(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kFile *file = (kFile*)sfp[0].asObject;
 //	FILE *fp = file->fp;
-//	int request  = Int_to(int, sfp[1]);
+//	int request  = int_to(int, sfp[1]);
 //	char *argp = String_to(char*, sfp[2]);
 //	if (fp == NULL) RETURNb_(0);
 //	int fd = fileno(fp);
@@ -225,6 +228,7 @@ static KMETHOD System_flock(KonohaContext *kctx, KonohaStack *sfp)
 	int operation = sfp[2].intValue;
 	int ret = flock(fd, operation);
 	if (ret == -1) {
+		// TODO: throw
 		ktrace(_SystemFault,
 			   KeyValue_s("@", "flock"),
 			   KeyValue_u("operation", operation),
@@ -240,6 +244,7 @@ static KMETHOD System_sync(KonohaContext *kctx, KonohaStack *sfp)
 	int fd = sfp[1].intValue;
 	int ret =  fsync(fd);
 	if (ret == -1) {
+		// TODO: throw
 		ktrace(_SystemFault,
 			   KeyValue_s("@", "fsync"),
 			   KeyValue_p("errstr", strerror(errno))
@@ -256,6 +261,7 @@ static KMETHOD System_link(KonohaContext *kctx, KonohaStack *sfp)
 	const char *newpath = S_text(s2);
 	int ret = link(oldpath, newpath);
 	if (ret == -1) {
+		// TODO: throw
 		ktrace(_SystemFault,
 			   KeyValue_s("@", "link"),
 			   KeyValue_s("oldpath", oldpath),
@@ -272,6 +278,7 @@ static KMETHOD System_unlink(KonohaContext *kctx, KonohaStack *sfp)
 	const char *pathname = S_text(s);
 	int ret = unlink(pathname);
 	if (ret == -1) {
+		// TODO: throw
 		ktrace(_SystemFault,
 			   KeyValue_s("@", "unlink"),
 			   KeyValue_s("pathname", pathname),
@@ -289,6 +296,7 @@ static KMETHOD System_rename(KonohaContext *kctx, KonohaStack *sfp)
 	const char *newpath = S_text(s2);
 	int ret = rename(oldpath, newpath);
 	if (ret == -1) {
+		// TODO: throw
 		ktrace(_SystemFault,
 			   KeyValue_s("@", "rename"),
 			   KeyValue_s("oldpath", oldpath),
@@ -305,6 +313,7 @@ static KMETHOD System_rmdir(KonohaContext *kctx, KonohaStack *sfp)
 	const char *pathname = S_text(s);
 	int ret = rmdir(pathname);
 	if (ret == -1) {
+		// TODO: throw
 		ktrace(_SystemFault,
 			   KeyValue_s("@", "rmdir"),
 			   KeyValue_s("pathname", pathname),
@@ -322,6 +331,7 @@ static KMETHOD System_symlink(KonohaContext *kctx, KonohaStack *sfp)
 	const char *newpath = S_text(s2);
 	int ret = symlink(oldpath, newpath);
 	if (ret == -1) {
+		// TODO: throw
 		ktrace(_SystemFault,
 			   KeyValue_s("@", "symlink"),
 			   KeyValue_s("oldpath", oldpath),
@@ -341,6 +351,7 @@ static KMETHOD System_readlink(KonohaContext *kctx, KonohaStack *sfp)
 	size_t bufsize = strlen(buf);
 	ssize_t ret = readlink(pathname, (char *)buf, bufsize);
 	if (ret == -1) {
+		// TODO: throw
 		ktrace(_SystemFault,
 			   KeyValue_s("@", "readlink"),
 			   KeyValue_s("pathname", pathname),
@@ -360,6 +371,7 @@ static KMETHOD System_chown(KonohaContext *kctx, KonohaStack *sfp)
 	gid_t group = sfp[3].intValue;
 	int ret = chown(pathname, owner, group);
 	if (ret == -1) {
+		// TODO: throw
 		ktrace(_SystemFault,
 			   KeyValue_s("@", "chown"),
 			   KeyValue_s("pathname", pathname),
@@ -379,6 +391,7 @@ static KMETHOD System_lchown(KonohaContext *kctx, KonohaStack *sfp)
 	gid_t group = sfp[3].intValue;
 	int ret = lchown(pathname, owner, group);
 	if (ret == -1) {
+		// TODO: throw
 		ktrace(_SystemFault,
 			   KeyValue_s("@", "lchown"),
 			   KeyValue_s("pathname", pathname),
@@ -397,6 +410,7 @@ static KMETHOD System_fchown(KonohaContext *kctx, KonohaStack *sfp)
 	gid_t group = sfp[3].intValue;
 	int ret = fchown(fd, owner, group);
 	if (ret == -1) {
+		// TODO: throw
 		ktrace(_SystemFault,
 			   KeyValue_s("@", "fchown"),
 			   KeyValue_u("owner", owner),
@@ -414,6 +428,7 @@ static KMETHOD System_access(KonohaContext *kctx, KonohaStack *sfp)
 	int mode = sfp[2].intValue;
 	int ret = access(pathname, mode);
 	if (ret == -1) {
+		// TODO: throw
 		ktrace(_SystemFault,
 			   KeyValue_s("@", "access"),
 			   KeyValue_s("pathname", pathname),
@@ -429,6 +444,7 @@ static KMETHOD System_fsync(KonohaContext *kctx, KonohaStack *sfp)
 	int fd = sfp[1].intValue;
 	int ret = fsync(fd);
 	if (ret == -1) {
+		// TODO: throw
 		ktrace(_SystemFault,
 			   KeyValue_s("@", "fsync"),
 			   KeyValue_p("errstr", strerror(errno))
@@ -469,7 +485,7 @@ static KMETHOD System_lstat(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(stat);
 }
 
-//## Stat System.fstat(Int fd)
+//## Stat System.fstat(int fd)
 static KMETHOD System_fstat(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int fd = sfp[1].intValue;
@@ -485,85 +501,85 @@ static KMETHOD System_fstat(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(stat);
 }
 
-//## Int Stat.getst_dev()
+//## int Stat.getst_dev()
 static KMETHOD Stat_getst_dev(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_dev"), 0));
 }
 
-//## Int Stat.getst_ino()
+//## int Stat.getst_ino()
 static KMETHOD Stat_getst_ino(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_ino"), 0));
 }
 
-//## Int Stat.getst_mode()
+//## int Stat.getst_mode()
 static KMETHOD Stat_getst_mode(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_mode"), 0));
 }
 
-//## Int Stat.getst_nlink()
+//## int Stat.getst_nlink()
 static KMETHOD Stat_getst_nlink(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_nlink"), 0));
 }
 
-//## Int Stat.getst_uid()
+//## int Stat.getst_uid()
 static KMETHOD Stat_getst_uid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_uid"), 0));
 }
 
-//## Int Stat.getst_gid()
+//## int Stat.getst_gid()
 static KMETHOD Stat_getst_gid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_gid"), 0));
 }
 
-//## Int Stat.getst_atime()
+//## int Stat.getst_atime()
 static KMETHOD Stat_getst_atime(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_atime"), 0));
 }
 
-//## Int Stat.getst_mtime()
+//## int Stat.getst_mtime()
 static KMETHOD Stat_getst_mtime(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_mtime"), 0));
 }
 
-//## Int Stat.getst_ctime()
+//## int Stat.getst_ctime()
 static KMETHOD Stat_getst_ctime(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_ctime"), 0));
 }
 
-//## Int Stat.getst_rdev()
+//## int Stat.getst_rdev()
 static KMETHOD Stat_getst_rdev(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_rdev"), 0));
 }
 
-//## Int Stat.getst_blocks()
+//## int Stat.getst_blocks()
 static KMETHOD Stat_getst_blocks(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_blocks"), 0));
 }
 
-//## Int Stat.getst_flags()
+//## int Stat.getst_flags()
 static KMETHOD Stat_getst_flags(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_flags"), 0));
 }
 
-//## Int Stat.getst_gen()
+//## int Stat.getst_gen()
 static KMETHOD Stat_getst_gen(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_gen"), 0));
 }
 
-//## Int Stat.getst_birthtime()
+//## int Stat.getst_birthtime()
 static KMETHOD Stat_getst_birthtime(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNi_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, SYM_("st_birthtime"), 0));
@@ -584,7 +600,7 @@ static KMETHOD System_opendir(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(dir);
 }
 
-//## Int DIR.close()
+//## int DIR.close()
 static KMETHOD DIR_close(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kDIR *dir = (struct _kDIR *)sfp[0].asObject;
@@ -596,11 +612,14 @@ static KMETHOD DIR_close(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(ret);
 }
 
-//## Int DIR.getfd()
+//## int DIR.getfd()
 static KMETHOD DIR_getfd(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kDIR *dir = (kDIR *)sfp[0].asObject;
 	int fd = dirfd(dir->dirp);
+	if(fd == -1) {
+		// TODO: throw
+	}
 	RETURNi_(fd);
 }
 
@@ -635,7 +654,7 @@ static KMETHOD DIR_rewind(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNvoid_();
 }
 
-//## void DIR.seek(Int loc)
+//## void DIR.seek(int loc)
 static KMETHOD DIR_seek(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kDIR *dir = (kDIR *)sfp[0].asObject;
@@ -645,16 +664,19 @@ static KMETHOD DIR_seek(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNvoid_();
 }
 
-//## Int DIR.tell()
+//## int DIR.tell()
 static KMETHOD DIR_tell(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kDIR *dir = (kDIR *)sfp[0].asObject;
 	DIR *dirp = dir->dirp;
 	long ret = telldir(dirp);
+	if(ret == -1) {
+		// TODO: throw
+	}
 	RETURNi_(ret);
 }
 
-//## Int Dirent.getd_ino()
+//## int Dirent.getd_ino()
 static KMETHOD Dirent_getd_ino(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kDirent *dirent = (kDirent *)sfp[0].asObject;
@@ -664,7 +686,7 @@ static KMETHOD Dirent_getd_ino(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 #ifdef _DIRENT_HAVE_D_OFF
-//## Int Dirent.getd_off()
+//## int Dirent.getd_off()
 static KMETHOD Dirent_getd_off(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kDirent *dirent = (kDirent *)sfp[0].asObject;
@@ -674,7 +696,7 @@ static KMETHOD Dirent_getd_off(KonohaContext *kctx, KonohaStack *sfp)
 }
 #endif /* _DIRENT_HAVE_D_OFF */
 
-//## Int Dirent.getd_reclen()
+//## int Dirent.getd_reclen()
 static KMETHOD Dirent_getd_reclen(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kDirent *dirent = (kDirent *)sfp[0].asObject;
@@ -683,7 +705,7 @@ static KMETHOD Dirent_getd_reclen(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(d_reclen);
 }
 
-//## Int Dirent.getd_type()
+//## int Dirent.getd_type()
 static KMETHOD Dirent_getd_type(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kDirent *dirent = (kDirent *)sfp[0].asObject;
@@ -701,7 +723,7 @@ static KMETHOD Dirent_getd_name(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(KLIB new_kString(kctx, d_name, strlen(d_name), 0));
 }
 
-//## Int System.getdtablesize()
+//## int System.getdtablesize()
 static KMETHOD System_getdtablesize(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int ret = getdtablesize();
@@ -754,55 +776,55 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 	ktype_t TY_DirentArray0 = CT_DirentArray0->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Im, _F(System_lseek), TY_Int, TY_System, MN_("lseek"), 3, TY_Int, FN_("fd"), TY_Int, FN_("offset"), TY_Int, FN_("whence"),
+		_Public|_Const|_Im, _F(System_lseek), TY_int, TY_System, MN_("lseek"), 3, TY_int, FN_("fd"), TY_int, FN_("offset"), TY_int, FN_("whence"),
 		_Public|_Const|_Im, _F(System_getCwd), TY_String, TY_System, MN_("getCwd"), 0,
-		_Public|_Const|_Im, _F(System_ftruncate), TY_Boolean, TY_System, MN_("ftruncate"), 2, TY_Int, FN_("fd"), TY_Int, FN_("length"),
-		_Public|_Const|_Im, _F(System_fchmod), TY_Boolean, TY_System, MN_("fchmod"), 2, TY_Int, FN_("fd"), TY_Int, FN_("length"),
-		_Public|_Const|_Im, _F(System_flock), TY_Boolean, TY_System, MN_("flock"), 2, TY_Int, FN_("fd"), TY_Int, FN_("operation"),
-		_Public|_Const|_Im, _F(System_sync), TY_Boolean, TY_System, MN_("sync"), 1, TY_Int, FN_("fd"),
-		_Public|_Const|_Im, _F(System_link), TY_Int, TY_System, MN_("link"), 2, TY_String, FN_("oldpath"), TY_String, FN_("newpath"),
-		_Public|_Const|_Im, _F(System_unlink), TY_Int, TY_System, MN_("unlink"), 1, TY_String, FN_("pathname"),
-		_Public|_Const|_Im, _F(System_rename), TY_Int, TY_System, MN_("rename"), 2, TY_String, FN_("oldpath"), TY_String, FN_("newpath"),
-		_Public|_Const|_Im, _F(System_rmdir), TY_Int, TY_System, MN_("rmdir"), 1, TY_String, FN_("pathname"),
-		_Public|_Const|_Im, _F(System_symlink), TY_Int, TY_System, MN_("symlink"), 2, TY_String, FN_("oldpath"), TY_String, FN_("newpath"),
-		_Public|_Const|_Im, _F(System_readlink), TY_Int, TY_System, MN_("readlink"), 3, TY_String, FN_("pathname"), TY_String, FN_("buf"), TY_Int, FN_("bufsize"),
-		_Public|_Const|_Im, _F(System_chown), TY_Int, TY_System, MN_("chown"), 3, TY_String, FN_("pathname"), TY_Int, FN_("owner"), TY_Int, FN_("group"),
-		_Public|_Const|_Im, _F(System_lchown), TY_Int, TY_System, MN_("lchown"), 3, TY_String, FN_("pathname"), TY_Int, FN_("owner"), TY_Int, FN_("group"),
-		_Public|_Const|_Im, _F(System_fchown), TY_Int, TY_System, MN_("fchown"), 3, TY_Int, FN_("pd"), TY_Int, FN_("owner"), TY_Int, FN_("group"),
-		_Public|_Const|_Im, _F(System_access), TY_Int, TY_System, MN_("access"), 2, TY_String, FN_("pathname"), TY_Int, FN_("mode"),
-		_Public|_Const|_Im, _F(System_fsync), TY_Int, TY_System, MN_("fsync"), 1, TY_Int, FN_("fd"),
+		_Public|_Const|_Im, _F(System_ftruncate), TY_boolean, TY_System, MN_("ftruncate"), 2, TY_int, FN_("fd"), TY_int, FN_("length"),
+		_Public|_Const|_Im, _F(System_fchmod), TY_boolean, TY_System, MN_("fchmod"), 2, TY_int, FN_("fd"), TY_int, FN_("length"),
+		_Public|_Const|_Im, _F(System_flock), TY_boolean, TY_System, MN_("flock"), 2, TY_int, FN_("fd"), TY_int, FN_("operation"),
+		_Public|_Const|_Im, _F(System_sync), TY_boolean, TY_System, MN_("sync"), 1, TY_int, FN_("fd"),
+		_Public|_Const|_Im, _F(System_link), TY_int, TY_System, MN_("link"), 2, TY_String, FN_("oldpath"), TY_String, FN_("newpath"),
+		_Public|_Const|_Im, _F(System_unlink), TY_int, TY_System, MN_("unlink"), 1, TY_String, FN_("pathname"),
+		_Public|_Const|_Im, _F(System_rename), TY_int, TY_System, MN_("rename"), 2, TY_String, FN_("oldpath"), TY_String, FN_("newpath"),
+		_Public|_Const|_Im, _F(System_rmdir), TY_int, TY_System, MN_("rmdir"), 1, TY_String, FN_("pathname"),
+		_Public|_Const|_Im, _F(System_symlink), TY_int, TY_System, MN_("symlink"), 2, TY_String, FN_("oldpath"), TY_String, FN_("newpath"),
+		_Public|_Const|_Im, _F(System_readlink), TY_int, TY_System, MN_("readlink"), 3, TY_String, FN_("pathname"), TY_String, FN_("buf"), TY_int, FN_("bufsize"),
+		_Public|_Const|_Im, _F(System_chown), TY_int, TY_System, MN_("chown"), 3, TY_String, FN_("pathname"), TY_int, FN_("owner"), TY_int, FN_("group"),
+		_Public|_Const|_Im, _F(System_lchown), TY_int, TY_System, MN_("lchown"), 3, TY_String, FN_("pathname"), TY_int, FN_("owner"), TY_int, FN_("group"),
+		_Public|_Const|_Im, _F(System_fchown), TY_int, TY_System, MN_("fchown"), 3, TY_int, FN_("pd"), TY_int, FN_("owner"), TY_int, FN_("group"),
+		_Public|_Const|_Im, _F(System_access), TY_int, TY_System, MN_("access"), 2, TY_String, FN_("pathname"), TY_int, FN_("mode"),
+		_Public|_Const|_Im, _F(System_fsync), TY_int, TY_System, MN_("fsync"), 1, TY_int, FN_("fd"),
 		_Public|_Const|_Im, _F(System_stat), TY_Stat, TY_System, MN_("stat"), 1, TY_String, FN_("path"),
 		_Public|_Const|_Im, _F(System_lstat), TY_Stat, TY_System, MN_("lstat"), 1, TY_String, FN_("path"),
-		_Public|_Const|_Im, _F(System_fstat), TY_Stat, TY_System, MN_("fstat"), 1, TY_Int, FN_("fd"),
-		_Public|_Const|_Im, _F(Stat_getst_dev), TY_Int, TY_Stat, MN_("getst_dev"), 0,
-		_Public|_Const|_Im, _F(Stat_getst_ino), TY_Int, TY_Stat, MN_("getst_ino"), 0,
-		_Public|_Const|_Im, _F(Stat_getst_mode), TY_Int, TY_Stat, MN_("getst_mode"), 0,
-		_Public|_Const|_Im, _F(Stat_getst_nlink), TY_Int, TY_Stat, MN_("getst_nlink"), 0,
-		_Public|_Const|_Im, _F(Stat_getst_uid), TY_Int, TY_Stat, MN_("getst_uid"), 0,
-		_Public|_Const|_Im, _F(Stat_getst_gid), TY_Int, TY_Stat, MN_("getst_gid"), 0,
-		_Public|_Const|_Im, _F(Stat_getst_atime), TY_Int, TY_Stat, MN_("getst_atime"), 0,
-		_Public|_Const|_Im, _F(Stat_getst_mtime), TY_Int, TY_Stat, MN_("getst_mtime"), 0,
-		_Public|_Const|_Im, _F(Stat_getst_ctime), TY_Int, TY_Stat, MN_("getst_ctime"), 0,
-		_Public|_Const|_Im, _F(Stat_getst_rdev), TY_Int, TY_Stat, MN_("getst_rdev"), 0,
-		_Public|_Const|_Im, _F(Stat_getst_blocks), TY_Int, TY_Stat, MN_("getst_blocks"), 0,
-		_Public|_Const|_Im, _F(Stat_getst_flags), TY_Int, TY_Stat, MN_("getst_flags"), 0,
-		_Public|_Const|_Im, _F(Stat_getst_gen), TY_Int, TY_Stat, MN_("getst_gen"), 0,
-		_Public|_Const|_Im, _F(Stat_getst_birthtime), TY_Int, TY_Stat, MN_("getst_birthtime"), 0,
+		_Public|_Const|_Im, _F(System_fstat), TY_Stat, TY_System, MN_("fstat"), 1, TY_int, FN_("fd"),
+		_Public|_Const|_Im, _F(Stat_getst_dev), TY_int, TY_Stat, MN_("getst_dev"), 0,
+		_Public|_Const|_Im, _F(Stat_getst_ino), TY_int, TY_Stat, MN_("getst_ino"), 0,
+		_Public|_Const|_Im, _F(Stat_getst_mode), TY_int, TY_Stat, MN_("getst_mode"), 0,
+		_Public|_Const|_Im, _F(Stat_getst_nlink), TY_int, TY_Stat, MN_("getst_nlink"), 0,
+		_Public|_Const|_Im, _F(Stat_getst_uid), TY_int, TY_Stat, MN_("getst_uid"), 0,
+		_Public|_Const|_Im, _F(Stat_getst_gid), TY_int, TY_Stat, MN_("getst_gid"), 0,
+		_Public|_Const|_Im, _F(Stat_getst_atime), TY_int, TY_Stat, MN_("getst_atime"), 0,
+		_Public|_Const|_Im, _F(Stat_getst_mtime), TY_int, TY_Stat, MN_("getst_mtime"), 0,
+		_Public|_Const|_Im, _F(Stat_getst_ctime), TY_int, TY_Stat, MN_("getst_ctime"), 0,
+		_Public|_Const|_Im, _F(Stat_getst_rdev), TY_int, TY_Stat, MN_("getst_rdev"), 0,
+		_Public|_Const|_Im, _F(Stat_getst_blocks), TY_int, TY_Stat, MN_("getst_blocks"), 0,
+		_Public|_Const|_Im, _F(Stat_getst_flags), TY_int, TY_Stat, MN_("getst_flags"), 0,
+		_Public|_Const|_Im, _F(Stat_getst_gen), TY_int, TY_Stat, MN_("getst_gen"), 0,
+		_Public|_Const|_Im, _F(Stat_getst_birthtime), TY_int, TY_Stat, MN_("getst_birthtime"), 0,
 		_Public|_Const|_Im, _F(System_opendir), TY_DIR, TY_System, MN_("opendir"), 1, TY_String, FN_("dirname"),
-		_Public|_Const|_Im, _F(DIR_close), TY_Int, TY_DIR, MN_("close"), 0,
-		_Public|_Const|_Im, _F(DIR_getfd), TY_Int, TY_DIR, MN_("getfd"), 0,
+		_Public|_Const|_Im, _F(DIR_close), TY_int, TY_DIR, MN_("close"), 0,
+		_Public|_Const|_Im, _F(DIR_getfd), TY_int, TY_DIR, MN_("getfd"), 0,
 		_Public|_Const|_Im, _F(DIR_read), TY_DirentArray0, TY_DIR, MN_("read"), 0,
 		_Public|_Const|_Im, _F(DIR_rewind), TY_void, TY_DIR, MN_("rewind"), 0,
-		_Public|_Const|_Im, _F(DIR_seek), TY_void, TY_DIR, MN_("seek"), 1, TY_Int, FN_("loc"),
-		_Public|_Const|_Im, _F(DIR_tell), TY_Int, TY_DIR, MN_("tell"), 0,
-		_Public|_Const|_Im, _F(Dirent_getd_ino), TY_Int, TY_Dirent, MN_("getd_ino"), 0,
+		_Public|_Const|_Im, _F(DIR_seek), TY_void, TY_DIR, MN_("seek"), 1, TY_int, FN_("loc"),
+		_Public|_Const|_Im, _F(DIR_tell), TY_int, TY_DIR, MN_("tell"), 0,
+		_Public|_Const|_Im, _F(Dirent_getd_ino), TY_int, TY_Dirent, MN_("getd_ino"), 0,
 #ifdef _DIRENT_HAVE_D_OFF
-		_Public|_Const|_Im, _F(Dirent_getd_off), TY_Int, TY_Dirent, MN_("getd_off"), 0,
+		_Public|_Const|_Im, _F(Dirent_getd_off), TY_int, TY_Dirent, MN_("getd_off"), 0,
 #endif /* _DIRENT_HAVE_D_OFF */
-		_Public|_Const|_Im, _F(Dirent_getd_reclen), TY_Int, TY_Dirent, MN_("getd_reclen"), 0,
-		_Public|_Const|_Im, _F(Dirent_getd_type), TY_Int, TY_Dirent, MN_("getd_type"), 0,
+		_Public|_Const|_Im, _F(Dirent_getd_reclen), TY_int, TY_Dirent, MN_("getd_reclen"), 0,
+		_Public|_Const|_Im, _F(Dirent_getd_type), TY_int, TY_Dirent, MN_("getd_type"), 0,
 		_Public|_Const|_Im, _F(Dirent_getd_name), TY_String, TY_Dirent, MN_("getd_name"), 0,
-		_Public|_Const|_Im, _F(System_getdtablesize), TY_Int, TY_System, MN_("getdtablesize"), 0,
+		_Public|_Const|_Im, _F(System_getdtablesize), TY_int, TY_System, MN_("getdtablesize"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);

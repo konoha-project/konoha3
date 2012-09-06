@@ -67,6 +67,9 @@ static KMETHOD System_getpgid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int pid = sfp[1].intValue;
 	int ret = getpgid(pid);
+	if(ret == -1) {
+		// TODO: throw
+	}
 	RETURNi_(ret);
 }
 
@@ -75,6 +78,9 @@ static KMETHOD System_setpgid(KonohaContext *kctx, KonohaStack *sfp)
 	int pid = sfp[1].intValue;
 	int pgid = sfp[2].intValue;
 	int ret = setpgid(pid, pgid);
+	if(ret == -1) {
+		// TODO: throw
+	}
 	RETURNi_(ret);
 }
 
@@ -83,12 +89,18 @@ static KMETHOD System_chdir(KonohaContext *kctx, KonohaStack *sfp)
 	kString *s = sfp[1].asString;
 	const char *dir = S_text(s);
 	int ret = chdir(dir);
+	if(ret == -1) {
+		// TODO: throw
+	}
 	RETURNi_(ret);
 }
 
 static KMETHOD System_fchdir(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int ch = fchdir(sfp[1].intValue);
+	if(ch == -1) {
+		// TODO: throw
+	}
 	RETURNi_(ch);
 }
 
@@ -97,6 +109,9 @@ static KMETHOD System_chroot(KonohaContext *kctx, KonohaStack *sfp)
 	kString *s = sfp[1].asString;
 	const char *root = S_text(s);
 	int ret = chroot(root);
+	if(ret == -1) {
+		// TODO: throw
+	}
 	RETURNi_(ret);
 }
 
@@ -106,6 +121,9 @@ static KMETHOD System_getpriority(KonohaContext *kctx, KonohaStack *sfp)
 	int which = sfp[1].intValue;
 	int who = sfp[2].intValue;
 	int ret = getpriority(which, who);
+	if(ret == -1) {
+		// TODO: throw
+	}
 	RETURNi_(ret);
 }
 
@@ -115,6 +133,9 @@ static KMETHOD System_setpriority(KonohaContext *kctx, KonohaStack *sfp)
 	int who = sfp[2].intValue;
 	int priority = sfp[3].intValue;
 	int ret = setpriority(which, who, priority);
+	if(ret == -1) {
+		// TODO: throw
+	}
 	RETURNi_(ret);
 }
 
@@ -123,6 +144,9 @@ static KMETHOD System_getgroups(KonohaContext *kctx, KonohaStack *sfp)
 	int size = sfp[1].intValue;
 	kArray *list = sfp[2].asArray;
 	int ret = getgroups(size, (gid_t *)(list->kintItems));
+	if(ret == -1) {
+		// TODO: throw
+	}
 	RETURNi_(ret);
 }
 
@@ -131,96 +155,132 @@ static KMETHOD System_setgroups(KonohaContext *kctx, KonohaStack *sfp)
 	int size = sfp[1].intValue;
 	kArray *list = sfp[2].asArray;
 	int ret = setgroups(size, (const gid_t *)(list->kintItems));
+	if(ret == -1) {
+		// TODO: throw
+	}
 	RETURNi_(ret);
 }
 
-//## Int System.fork()
+//## int System.fork()
 static KMETHOD System_fork(KonohaContext *kctx, KonohaStack *sfp)
 {
 	pid_t pid = fork();
+	if(pid == -1) {
+		// TODO: throw
+	}
 	RETURNi_(pid);
 }
 
-//## Int System.wait()
+//## int System.wait()
 static KMETHOD System_wait(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int status = 0;
 	pid_t pid = wait(&status);
+	if(pid == -1) {
+		// TODO: throw
+	}
 	RETURNi_(pid);
 }
 
-//## Int System.waitpid(Int pid, Int options)
+//## int System.waitpid(int pid, int options)
 static KMETHOD System_waitpid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int status = 0;
 	pid_t target_pid = sfp[1].intValue;
 	int options = sfp[2].intValue;
 	pid_t pid = waitpid(target_pid, &status, options);
+	if(pid == -1) {
+		// TODO: throw
+	}
 	RETURNi_(pid);
 }
 
-//## Int System.setuid(Int uid)
+//## int System.setuid(int uid)
 static KMETHOD System_setuid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	uid_t uid = sfp[1].intValue;
 	int ret = setuid(uid);
+	if(ret == -1) {
+		// TODO: throw
+	}
 	RETURNi_(ret);
 }
 
-//## Int System.seteuid(Int euid)
+//## int System.seteuid(int euid)
 static KMETHOD System_seteuid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	uid_t euid = sfp[1].intValue;
 	int ret = seteuid(euid);
+	if(ret == -1) {
+		// TODO: throw
+	}
 	RETURNi_(ret);
 }
 
-//## Int System.setreuid(Int ruid, Int euid)
+//## int System.setreuid(int ruid, int euid)
 static KMETHOD System_setreuid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	uid_t ruid = sfp[1].intValue;
 	uid_t euid = sfp[2].intValue;
 	int ret = setreuid(ruid, euid);
+	if(ret == -1) {
+		// TODO: throw
+	}
 	RETURNi_(ret);
 }
 
-//## Int System.setgid(Int gid)
+//## int System.setgid(int gid)
 static KMETHOD System_setgid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	uid_t gid = sfp[1].intValue;
 	int ret = setgid(gid);
+	if(ret == -1) {
+		// TODO: throw
+	}
 	RETURNi_(ret);
 }
 
-//## Int System.setegid(Int euid)
+//## int System.setegid(int euid)
 static KMETHOD System_setegid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	uid_t egid = sfp[1].intValue;
 	int ret = setegid(egid);
+	if(ret == -1) {
+		// TODO: throw
+	}
 	RETURNi_(ret);
 }
 
-//## Int System.setregid(Int rgid, Int egid)
+//## int System.setregid(int rgid, int egid)
 static KMETHOD System_setregid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	uid_t rgid = sfp[1].intValue;
 	uid_t egid = sfp[2].intValue;
 	int ret = setregid(rgid, egid);
+	if(ret == -1) {
+		// TODO: throw
+	}
 	RETURNi_(ret);
 }
 
-//## Int System.setsid()
+//## int System.setsid()
 static KMETHOD System_setsid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	pid_t ret = setsid();
+	if(ret == -1) {
+		// TODO: throw
+	}
 	RETURNi_(ret);
 }
 
-//## Int System.getsid(Int pid)
+//## int System.getsid(int pid)
 static KMETHOD System_getsid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	pid_t pid = sfp[1].intValue;
 	pid_t ret = getsid(pid);
+	if(ret == -1) {
+		// TODO: throw
+	}
 	RETURNi_(ret);
 }
 
@@ -237,8 +297,8 @@ static KMETHOD System_getsid(KonohaContext *kctx, KonohaStack *sfp)
 static	kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	kparamtype_t p = { .ty = TY_int,  };
-	KonohaClass *cIntArray = KLIB KonohaClass_Generics(kctx, CT_(TY_Array), TY_void, 1, &p);
-#define TY_intArray (cIntArray->typeId)
+	KonohaClass *cintArray = KLIB KonohaClass_Generics(kctx, CT_(TY_Array), TY_void, 1, &p);
+#define TY_intArray (cintArray->typeId)
 
 
 	KDEFINE_METHOD MethodData[] = {
@@ -271,14 +331,14 @@ static	kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
-	KDEFINE_INT_CONST IntData[] = {
+	KDEFINE_INT_CONST intData[] = {
 		{_KVi(SIGHUP)},
 		{_KVi(SIGINT)},
 		{_KVi(SIGABRT)},
 		{_KVi(SIGKILL)},
 		{}
 	};
-	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), 0);
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(intData), 0);
 	return true;
 }
 
