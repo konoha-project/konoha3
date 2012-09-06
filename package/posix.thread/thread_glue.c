@@ -69,20 +69,20 @@ static void *spawn_start(void *v)
 	return NULL;
 }
 
-static void Thread_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kThread_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kThread *t = (kThread *)o;
 	KINITv(t->func, K_NULL);
 	//KINITv(t->args, K_NULL);
 }
 
-static void Thread_free(KonohaContext *kctx, kObject *o)
+static void kThread_free(KonohaContext *kctx, kObject *o)
 {
 	//kThread *t = (kThread *)o;
 	//TODO
 }
 
-static int Thread_compareTo(kObject *o1, kObject *o2)
+static int kThread_compareTo(kObject *o1, kObject *o2)
 {
 	kThread *t1 = (kThread *)o1;
 	kThread *t2 = (kThread *)o2;
@@ -91,7 +91,7 @@ static int Thread_compareTo(kObject *o1, kObject *o2)
 
 extern kObjectVar **KONOHA_reftail(KonohaContext *, size_t);
 
-static void Thread_reftrace(KonohaContext *kctx, kObject *o)
+static void kThread_reftrace(KonohaContext *kctx, kObject *o)
 {
 	kThread *t = (kThread *)o;
 	BEGIN_REFTRACE(1);
@@ -100,25 +100,25 @@ static void Thread_reftrace(KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
-static void Mutex_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kMutex_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kMutex *m = (kMutex *)o;
 	pthread_mutex_init(&m->mutex, NULL);
 }
 
-static void Mutex_free(KonohaContext *kctx, kObject *o)
+static void kMutex_free(KonohaContext *kctx, kObject *o)
 {
 	kMutex *m = (kMutex *)o;
 	pthread_mutex_destroy(&m->mutex);
 }
 
-static void Cond_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kCond_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kCond *c = (kCond *)o;
 	pthread_cond_init(&c->cond, NULL);
 }
 
-static void Cond_free(KonohaContext *kctx, kObject *o)
+static void kCond_free(KonohaContext *kctx, kObject *o)
 {
 	kCond *c = (kCond *)o;
 	pthread_cond_destroy(&c->cond);
@@ -131,17 +131,13 @@ static KMETHOD Thread_create(KonohaContext *kctx, KonohaStack *sfp)
 	kFunc *f = sfp[1].asFunc;
 	KLIB kNameSpace_compileAllDefinedMethods(kctx);
 	//kArray *args = sfp[2].a;
-	if(IS_NOTNULL(f)) {
-		kThread *t = (kThread *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
-		//kcontext_t *newCtx = new_ThreadContext(ctx)
-		t->kctx = kctx;//FIXME
-		KSETv(t, t->func, f);
-		//KSETv(t, t->args, args);
-		pthread_create(&(t->thread), NULL, spawn_start, t);
-		RETURN_(t);
-	} else {
-		RETURN_(K_NULL);
-	}
+	kThread *thread = (kThread *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
+	//kcontext_t *newCtx = new_ThreadContext(ctx)
+	thread->kctx = kctx;//FIXME
+	KSETv(thread, thread->func, f);
+	//KSETv(t, t->args, args);
+	pthread_create(&(thread->thread), NULL, spawn_start, thread);
+	RETURN_(thread);
 }
 
 //## @Native void Thread.join();
@@ -191,7 +187,7 @@ static KMETHOD Thread_self(KonohaContext *kctx, KonohaStack *sfp)
 //## @Native boolean Thread.equal(Thread t);
 static KMETHOD Thread_equal(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(Thread_compareTo(sfp[0].o, sfp[1].o) == 0);
+	RETURNb_(kThread_compareTo(sfp[0].o, sfp[1].o) == 0);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -281,22 +277,22 @@ static kbool_t thread_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	KDEFINE_CLASS defThread = {
 		STRUCTNAME(Thread),
 		.cflag    = kClass_Final,
-		.init     = Thread_init,
-		.reftrace = Thread_reftrace,
-		.free     = Thread_free,
-		.compareTo = Thread_compareTo,
+		.init     = kThread_init,
+		.reftrace = kThread_reftrace,
+		.free     = kThread_free,
+		.compareTo = kThread_compareTo,
 	};
 	KDEFINE_CLASS defMutex = {
 		STRUCTNAME(Mutex),
 		.cflag = kClass_Final,
-		.init  = Mutex_init,
-		.free  = Mutex_free,
+		.init  = kMutex_init,
+		.free  = kMutex_free,
 	};
 	KDEFINE_CLASS defCond = {
 		STRUCTNAME(Cond),
 		.cflag = kClass_Final,
-		.init  = Cond_init,
-		.free  = Cond_free,
+		.init  = kCond_init,
+		.free  = kCond_free,
 	};
 	KonohaClass *cThread = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defThread, pline);
 	KonohaClass *cMutex  = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defMutex, pline);
