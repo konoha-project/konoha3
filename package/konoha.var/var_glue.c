@@ -83,7 +83,7 @@ static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t var_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("var"), TopStmtTyCheck_(var), .rule = "\"var\" $Expr", },
+		{ .keyword = SYM_("var"), TopStmtTyCheck_(var), StmtTyCheck_(var), .rule = "\"var\" $Expr", },
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
