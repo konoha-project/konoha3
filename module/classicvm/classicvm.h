@@ -434,12 +434,12 @@ static kbool_t CLASSICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr
 	kopcode_t opcode;
 	ktype_t cid    = mtd_cid;
 	kmethodn_t mn = mtd_mn;
-	if(mtd_cid == TY_Boolean && mtd_mn == MN_opNOT) {
+	if(mtd_cid == TY_boolean && mtd_mn == MN_opNOT) {
 		EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
 		ASM(bNN, NC_(espidx), NC_(a));
 		return 1;
 	}
-	if(mtd_cid == TY_Int && ((opcode = OPimn(kctx, mn, 0)) != OPCODE_NOP)) {
+	if(mtd_cid == TY_int && ((opcode = OPimn(kctx, mn, 0)) != OPCODE_NOP)) {
 		int swap = 1;
 		if(mn == MN_opNEG) {
 			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
@@ -466,8 +466,8 @@ static kbool_t CLASSICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr
 			ASMop(iADD, opcode, NC_(espidx), NC_(a), NC_(b));
 		}
 		return 1;
-	} /* TY_Int */
-	if(IS_DefinedFloat() && cid == TY_Float && ((opcode = OPfmn(kctx, mn, 0)) != OPCODE_NOP)) {
+	} /* TY_int */
+	if(IS_DefinedFloat() && cid == TY_float && ((opcode = OPfmn(kctx, mn, 0)) != OPCODE_NOP)) {
 		int swap = 1;
 		if(mn == MN_opNEG) {
 			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
@@ -498,7 +498,7 @@ static kbool_t CLASSICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr
 			ASMop(fADD, opcode, NC_(espidx), NC_(a), NC_(b));
 		}
 		return 1;
-	} /* TY_Float */
+	} /* TY_float */
 	return 0;
 }
 

@@ -301,13 +301,13 @@ static KMETHOD ExprTyCheck_Type(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ExprTyCheck_true(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_Boolean, (uintptr_t)1));
+	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_boolean, (uintptr_t)1));
 }
 
 static KMETHOD ExprTyCheck_false(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_Boolean, (uintptr_t)0));
+	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_boolean, (uintptr_t)0));
 }
 
 static KMETHOD ExprTyCheck_Int(KonohaContext *kctx, KonohaStack *sfp)
@@ -315,15 +315,15 @@ static KMETHOD ExprTyCheck_Int(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
 	long long n = strtoll(S_text(tk->text), NULL, 0);
-	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_Int, (uintptr_t)n));
+	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_int, (uintptr_t)n));
 }
 
 static KMETHOD ExprTyCheck_AND(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	if(SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 1, gma, TY_Boolean, 0) != K_NULLEXPR) {
-		if(SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 2, gma, TY_Boolean, 0) != K_NULLEXPR) {
-			RETURN_(kExpr_typed(expr, AND, TY_Boolean));
+	if(SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 1, gma, TY_boolean, 0) != K_NULLEXPR) {
+		if(SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 2, gma, TY_boolean, 0) != K_NULLEXPR) {
+			RETURN_(kExpr_typed(expr, AND, TY_boolean));
 		}
 	}
 }
@@ -331,9 +331,9 @@ static KMETHOD ExprTyCheck_AND(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ExprTyCheck_OR(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	if(SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 1, gma, TY_Boolean, 0) != K_NULLEXPR) {
-		if(SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 2, gma, TY_Boolean, 0) != K_NULLEXPR) {
-			RETURN_(kExpr_typed(expr, OR, TY_Boolean));
+	if(SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 1, gma, TY_boolean, 0) != K_NULLEXPR) {
+		if(SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 2, gma, TY_boolean, 0) != K_NULLEXPR) {
+			RETURN_(kExpr_typed(expr, OR, TY_boolean));
 		}
 	}
 }
@@ -640,7 +640,7 @@ static kExpr* boxThisExpr(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kExpr *
 	DBG_ASSERT(IS_Method(mtd));
 	DBG_ASSERT(thisClass->typeId != TY_var);
 	if(!TY_isUnbox(mtd->typeId) && CT_isUnbox(thisClass)) {
-		ktype_t unboxType = thisClass->typeId == TY_Boolean ? TY_Boolean : TY_Int;
+		ktype_t unboxType = thisClass->typeId == TY_boolean ? TY_boolean : TY_int;
 		kMethod *boxMethod = kNameSpace_getMethodNULL(kctx, Stmt_nameSpace(stmt), unboxType, MN_box, 0, MPOL_PARAMSIZE);
 		thisExpr = new_TypedCallExpr(kctx, stmt, gma, thisClass->typeId, boxMethod, 1, expr->cons->exprItems[1]);
 		KSETv(expr->cons, expr->cons->exprItems[1], thisExpr);
@@ -862,7 +862,7 @@ static KMETHOD StmtTyCheck_if(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kbool_t r = 1;
 	VAR_StmtTyCheck(stmt, gma);
-	if((r = kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0))) {
+	if((r = kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_boolean, 0))) {
 		kBlock *bkThen = SUGAR kStmt_getBlock(kctx, stmt, DefaultNameSpace, KW_BlockPattern, K_NULLBLOCK);
 		kBlock *bkElse = SUGAR kStmt_getBlock(kctx, stmt, DefaultNameSpace, KW_else, K_NULLBLOCK);
 		r = kBlock_tyCheckAll(kctx, bkThen, gma);
@@ -1230,8 +1230,8 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(COLON), /*.precedence_op2 = C_PRECEDENCE_TRINARY,*/ },  // colon
 		{ TOKEN(COMMA),    ParseExpr_(COMMA), .precedence_op2 = C_PRECEDENCE_COMMA,},
 		{ TOKEN(DOLLAR),   ParseExpr_(DOLLAR), },
-		{ TOKEN(boolean), .type = TY_Boolean, },
-		{ TOKEN(int),     .type = TY_Int, },
+//		{ TOKEN(boolean), .type = TY_boolean, },
+//		{ TOKEN(int),     .type = TY_int, },
 		{ TOKEN(true),    ExprTyCheck_(true),},
 		{ TOKEN(false),   ExprTyCheck_(false),},
 		{ PATTERN(Expr), .rule ="$Expr", PatternMatch_(Expr), TopStmtTyCheck_(Expr), StmtTyCheck_(Expr),  },

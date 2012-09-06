@@ -42,7 +42,7 @@ static void test_proto_value(KonohaContext *kctx)
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		KLIB kObject_setUnboxValue(kctx, o0, i, TY_Int, i);
+		KLIB kObject_setUnboxValue(kctx, o0, i, TY_int, i);
 	}
 	show_timer(&timer, "Map.setN");
 
@@ -84,7 +84,7 @@ static void test_proto_value(KonohaContext *kctx)
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		KLIB kObject_setUnboxValue(kctx, o1, i%4, TY_Int, i%4);
+		KLIB kObject_setUnboxValue(kctx, o1, i%4, TY_int, i%4);
 	}
 	show_timer(&timer, "Map[4].setN");
 
@@ -111,7 +111,7 @@ static void test_proto_value(KonohaContext *kctx)
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		KLIB kObject_setUnboxValue(kctx, o2, i%16, TY_Int, i%16);
+		KLIB kObject_setUnboxValue(kctx, o2, i%16, TY_int, i%16);
 	}
 	show_timer(&timer, "Map[16].setN");
 

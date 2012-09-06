@@ -59,7 +59,7 @@ static KMETHOD ExprTyCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	}
 	sugarContext->isBlockingErrorMessage = popIsBlockingErrorMessage;
-	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_Boolean, isDefined));
+	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_boolean, isDefined));
 }
 
 static void filterArrayList(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)

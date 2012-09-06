@@ -421,7 +421,7 @@ static kbool_t logpool_initPackage(CTX, kKonohaSpace *ks, int argc, const char**
 	int FN_y = FN_("y");
 	int FN_z = FN_("z");
 	intptr_t MethodData[] = {
-		_P|_C, _F(LogPool_new), TY_Logpool, TY_Logpool, MN_("new"), 2, TY_String, FN_x, TY_Int, FN_y,
+		_P|_C, _F(LogPool_new), TY_Logpool, TY_Logpool, MN_("new"), 2, TY_String, FN_x, TY_int, FN_y,
 		_P|_C, _F(LogPool_get), TY_Log, TY_Logpool, MN_("get"), 0,
 		_P|_C, _F(LogPool_loadFile), TY_void, TY_Logpool, MN_("loadFile"), 2, TY_String, FN_x, TY_String, FN_y,
 		_P|_C, _F(Log_get_), TY_String, TY_Log, MN_("get"), 1, TY_String, FN_x,
@@ -430,7 +430,7 @@ static kbool_t logpool_initPackage(CTX, kKonohaSpace *ks, int argc, const char**
 		_P|_S, _F(ValFilter_create), TY_Plugin, TY_ValFilter, MN_("create"), 3, TY_String, FN_x, TY_String, FN_y, TY_String, FN_z,
 
 		_P|_S, _F(React_create    ), TY_Plugin, TY_React    , MN_("create"), 2, TY_String, FN_x, TY_String, FN_y,
-		_P|_S, _F(Timer_create    ), TY_Plugin, TY_Timer    , MN_("create"), 3, TY_Int, FN_x, TY_Int, FN_y, TY_Int, FN_z,
+		_P|_S, _F(Timer_create    ), TY_Plugin, TY_Timer    , MN_("create"), 3, TY_int, FN_x, TY_int, FN_y, TY_int, FN_z,
 		_P|_S, _F(Statics_create  ), TY_Plugin, TY_Statics  , MN_("create"), 3, TY_Func, FN_x, TY_Func, FN_y, TY_Func, FN_z,
 		_P|_S, _F(Copy_create     ), TY_Plugin, TY_Copy     , MN_("create"), 0,
 		_P|_S, _F(Response_create ), TY_Plugin, TY_Response , MN_("create"), 1, TY_Object, FN_x,

@@ -46,8 +46,8 @@ static KMETHOD Object_isNotNull(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t null_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	intptr_t MethodData[] = {
-		kMethod_Public, _F(Object_isNull), TY_Boolean, TY_Object, MN_("isNull"), 0,
-		kMethod_Public, _F(Object_isNotNull), TY_Boolean, TY_Object, MN_("isNotNull"), 0,
+		kMethod_Public, _F(Object_isNull), TY_boolean, TY_Object, MN_("isNull"), 0,
+		kMethod_Public, _F(Object_isNotNull), TY_boolean, TY_Object, MN_("isNotNull"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);

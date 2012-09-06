@@ -47,7 +47,7 @@ extern "C" {
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-#define _KVi(T)  #T, TY_Int, T
+#define _KVi(T)  #T, TY_int, T
 
 //typedef struct knh_Channel_t {
 //	kObjectHeader h;
@@ -317,15 +317,15 @@ static kbool_t sql_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		_Public, _F(Connection_query), TY_ResultSet, TY_Connection, MN_("query"), 1, TY_String, FN_("query"),
 
 		_Public, _F(ResultSet_getString), TY_String, TY_ResultSet, MN_("getString"), 1, TY_String, FN_("query"),
-		_Public, _F(ResultSet_next), TY_Boolean, TY_ResultSet, MN_("next"), 0,
+		_Public, _F(ResultSet_next), TY_boolean, TY_ResultSet, MN_("next"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 
 	KDEFINE_INT_CONST IntData[] = {
-			{"USING_MYSQL",      TY_Int, USING_MYSQL},
-			{"USING_SQLITE3",    TY_Int, USING_SQLITE3},
-			{"USING_POSTGRESQL", TY_Int, USING_POSTGRESQL},
+			{"USING_MYSQL",      TY_int, USING_MYSQL},
+			{"USING_SQLITE3",    TY_int, USING_SQLITE3},
+			{"USING_POSTGRESQL", TY_int, USING_POSTGRESQL},
 			{}
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);

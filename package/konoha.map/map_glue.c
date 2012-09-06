@@ -210,7 +210,7 @@ static	kbool_t map_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	int FN_key = MN_("key");
 	int TY_Array0 = CT_p0(kctx, CT_Array, TY_0)->typeId;
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Im|_Const, _F(Map_has), TY_Boolean, TY_Map, MN_("has"), 1, TY_String, FN_key,
+		_Public|_Im|_Const, _F(Map_has), TY_boolean, TY_Map, MN_("has"), 1, TY_String, FN_key,
 		_Public|_Im|_Const, _F(Map_get), TY_0, TY_Map, MN_("get"), 1, TY_String, FN_key,
 		_Public, _F(Map_set), TY_void, TY_Map, MN_("set"), 2, TY_String, FN_key, TY_0, FN_("value"),
 		_Public, _F(Map_remove), TY_void, TY_Map, MN_("remove"), 1, TY_String, FN_key,

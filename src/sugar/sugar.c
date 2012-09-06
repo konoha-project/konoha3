@@ -217,6 +217,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->TokenRange_eval            = TokenRange_eval;
 	mod->TokenRange_resolved        = TokenRange_resolved;
 	mod->kStmt_parseTypePattern     = kStmt_parseTypePattern;
+	mod->kToken_transformToBraceGroup = kToken_transformToBraceGroup;
 	mod->kStmt_parseFlag            = kStmt_parseFlag;
 	mod->kStmt_getToken             = kStmt_getToken;
 	mod->kStmt_getBlock             = kStmt_getBlock;
@@ -272,8 +273,8 @@ static KMETHOD NameSpace_importPackage(KonohaContext *kctx, KonohaStack *sfp)
 void MODSUGAR_loadMethod(KonohaContext *kctx)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(NameSpace_importPackage), TY_Boolean, TY_NameSpace, MN_("import"), 1, TY_String, FN_("name"),
-		_Public, _F(NameSpace_loadScript), TY_Boolean, TY_NameSpace, MN_("load"), 1, TY_String, FN_("path"),
+		_Public, _F(NameSpace_importPackage), TY_boolean, TY_NameSpace, MN_("import"), 1, TY_String, FN_("name"),
+		_Public, _F(NameSpace_loadScript), TY_boolean, TY_NameSpace, MN_("load"), 1, TY_String, FN_("path"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);

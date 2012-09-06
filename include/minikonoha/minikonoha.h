@@ -756,8 +756,8 @@ struct KonohaClassField {
 #define TY_void             ((ktype_t)0)
 #define TY_var              ((ktype_t)1)
 #define TY_Object            ((ktype_t)2)
-#define TY_Boolean           ((ktype_t)3)
-#define TY_Int               ((ktype_t)4)
+#define TY_boolean           ((ktype_t)3)
+#define TY_int               ((ktype_t)4)
 #define TY_String            ((ktype_t)5)
 #define TY_Array             ((ktype_t)6)
 #define TY_Param             ((ktype_t)7)
@@ -767,8 +767,8 @@ struct KonohaClassField {
 #define TY_0                ((ktype_t)11)    /* Parameter Type*/
 
 #define CT_Object               CT_(TY_Object)
-#define CT_Boolean              CT_(TY_Boolean)
-#define CT_Int                  CT_(TY_Int)
+#define CT_Boolean              CT_(TY_boolean)
+#define CT_Int                  CT_(TY_int)
 #define CT_String               CT_(TY_String)
 #define CT_Array                CT_(TY_Array)
 #define CT_Param                CT_(TY_Param)
@@ -797,8 +797,8 @@ struct KonohaClassField {
 #define CFLAG_void              kClass_TypeVar|kClass_UnboxType|kClass_Singleton|kClass_Final
 #define CFLAG_var               kClass_TypeVar|kClass_UnboxType|kClass_Singleton|kClass_Final
 #define CFLAG_Object            0
-#define CFLAG_Boolean           kClass_Immutable|kClass_UnboxType|kClass_Final
-#define CFLAG_Int               kClass_Immutable|kClass_UnboxType|kClass_Final
+#define CFLAG_boolean           kClass_Immutable|kClass_UnboxType|kClass_Final
+#define CFLAG_int               kClass_Immutable|kClass_UnboxType|kClass_Final
 #define CFLAG_String            kClass_Immutable|kClass_Final
 #define CFLAG_Array             kClass_Final
 #define CFLAG_Param             kClass_Final
@@ -919,9 +919,9 @@ struct kBooleanVar /* extends kNumber */ {
 	ABSTRACT_NUMBER;
 };
 
-#define IS_Boolean(o)              (O_typeId(o) == TY_Boolean)
-#define IS_TRUE(o)                 (O_baseTypeId(o) == TY_Boolean && N_tobool(o))
-#define IS_FALSE(o)                (O_baseTypeId(o) == TY_Boolean && N_tobool(o) == 0)
+#define IS_Boolean(o)              (O_typeId(o) == TY_boolean)
+#define IS_TRUE(o)                 (O_baseTypeId(o) == TY_boolean && N_tobool(o))
+#define IS_FALSE(o)                (O_baseTypeId(o) == TY_boolean && N_tobool(o) == 0)
 #define new_Boolean(kctx, c)       ((c) ? K_TRUE : K_FALSE)
 #define N_toint(o)                 (((kBoolean*)o)->intValue)
 #define N_tofloat(o)               (((kBoolean*)o)->floatValue)
@@ -935,7 +935,7 @@ struct kIntVar /* extends kNumber */ {
 	ABSTRACT_NUMBER;
 };
 
-#define IS_Int(o)              (O_typeId(o) == TY_Int)
+#define IS_Int(o)              (O_typeId(o) == TY_int)
 
 /* ------------------------------------------------------------------------ */
 /* String */

@@ -108,16 +108,16 @@ static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	base->cAprTableEntry = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &aprTableEntryDef, 0);
 
 	KDEFINE_INT_CONST IntData[] = {
-#define DEFINE_KEYWORD(KW) {#KW, TY_Int, KW}
-		{"APACHE_OK", TY_Int, OK},
-		{"APLOG_EMERG", TY_Int, APLOG_EMERG},
-		{"APLOG_ALERT", TY_Int, APLOG_ALERT},
-		{"APLOG_CRIT", TY_Int, APLOG_CRIT},
-		{"APLOG_ERR", TY_Int, APLOG_ERR},
-		{"APLOG_WARNING", TY_Int, APLOG_WARNING},
-		{"APLOG_NOTICE", TY_Int, APLOG_NOTICE},
-		{"APLOG_INFO", TY_Int, APLOG_INFO},
-		{"APLOG_DEBUG", TY_Int, APLOG_DEBUG},
+#define DEFINE_KEYWORD(KW) {#KW, TY_int, KW}
+		{"APACHE_OK", TY_int, OK},
+		{"APLOG_EMERG", TY_int, APLOG_EMERG},
+		{"APLOG_ALERT", TY_int, APLOG_ALERT},
+		{"APLOG_CRIT", TY_int, APLOG_CRIT},
+		{"APLOG_ERR", TY_int, APLOG_ERR},
+		{"APLOG_WARNING", TY_int, APLOG_WARNING},
+		{"APLOG_NOTICE", TY_int, APLOG_NOTICE},
+		{"APLOG_INFO", TY_int, APLOG_INFO},
+		{"APLOG_DEBUG", TY_int, APLOG_DEBUG},
 		{NULL, 0, 0}
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), 0);

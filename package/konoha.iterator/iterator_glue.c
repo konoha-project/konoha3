@@ -218,7 +218,7 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 	base->cStringIterator = CT_p0(kctx, base->cIterator, TY_String);
 	base->cGenericIterator = CT_p0(kctx, base->cIterator, TY_0);
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Iterator_hasNext), TY_Boolean, TY_Iterator, MN_("hasNext"), 0,
+		_Public, _F(Iterator_hasNext), TY_boolean, TY_Iterator, MN_("hasNext"), 0,
 		_Public, _F(Iterator_next), TY_0, TY_Iterator, MN_("next"), 0,
 		_Public, _F(Array_toIterator),  base->cGenericIterator->typeId, TY_Array, MN_("toIterator"), 0,
 		_Public, _F(String_toIterator), TY_StringIterator, TY_String, MN_("toIterator"), 0,
@@ -237,11 +237,11 @@ static kbool_t iterator_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirs
 //{
 ////	kExpr *iteratorExpr = SUGAR new_UntypedTermExpr(kctx, itToken);
 ////	kMethod *mtd = kNameSpace_getMethodNULL(kctx, Stmt_nameSpace(stmt), TY_Iterator, MN_("hasNext"), 0, MPOL_PARAMSIZE);
-////	kExpr *hasNextExpr = SUGAR new_TypedCallExpr(kctx, ns, gma, TY_Boolean, mtd, 1, iteratorExpr);
+////	kExpr *hasNextExpr = SUGAR new_TypedCallExpr(kctx, ns, gma, TY_boolean, mtd, 1, iteratorExpr);
 ////
 ////	kStmt *whileStmt = SUGAR new_kStmt(kctx, ns, KW_StmtTypeDecl/*dummy*/, KW_ExprPattern, hasNextExpr, KW_BlockPattern, loopBlock, 0);;
 ////
-////	//	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0)) {
+////	//	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_boolean, 0)) {
 ////	//		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
 ////	//		ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
 ////	//		kStmt_typed(stmt, LOOP);

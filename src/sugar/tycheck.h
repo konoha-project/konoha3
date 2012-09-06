@@ -143,7 +143,7 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 		}
 		if(CT_isa(kctx, texpr->ty, reqty)) {
 			if(TY_isUnbox(texpr->ty) && !TY_isUnbox(reqty)) {
-				ktype_t unboxType = texpr->ty == TY_Boolean ? TY_Boolean : TY_Int;
+				ktype_t unboxType = texpr->ty == TY_boolean ? TY_boolean : TY_int;
 				kMethod *mtd = kNameSpace_getMethodNULL(kctx, Stmt_nameSpace(stmt), unboxType, MN_box, 0, MPOL_PARAMSIZE);
 				return new_TypedCallExpr(kctx, stmt, gma, texpr->ty, mtd, 1, texpr);
 			}
