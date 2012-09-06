@@ -136,14 +136,14 @@ set(PACKAGES
 ##	konoha.sql
 	dscript.subproc
 	konoha.mpi
-	curl
+##	curl
 ##	ijit
-	jansson
-	mecab
+##	jansson
+##	mecab
 	python
 	apache
 #	openssl
-#	logpool
+	logpool
 	konoha.date
 )
 
