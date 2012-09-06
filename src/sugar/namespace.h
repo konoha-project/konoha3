@@ -162,7 +162,7 @@ static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 				DBG_P("syn->keyword=%s%s, fo=%p", PSYM_t(syn->keyword), fo);
 				KINITv(syn->sugarFuncTable[SUGARFUNC_ParseExpr], fo);
 			}
-			if(syn->ty != TY_unknown || syn->sugarFuncTable[SUGARFUNC_ExprTyCheck] != NULL) {
+			else if(syn->ty != TY_unknown || syn->sugarFuncTable[SUGARFUNC_ExprTyCheck] != NULL) {
 				kFunc *fo = SYN_(ns, KW_ExprTerm)->sugarFuncTable[SUGARFUNC_ParseExpr];
 				DBG_ASSERT(fo != NULL);
 				DBG_P("syn->keyword=%s%s, fo=%p", PSYM_t(syn->keyword), fo);

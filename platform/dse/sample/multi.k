@@ -43,12 +43,31 @@ class Task {
 	}
 }
 
+String makeFibo(int i) {
+	String fibo = "K.import(\"konoha\"); int fibo(int i) { if(i < 3) return i; else return fibo(i - 1) + fibo(i - 2); }; p(fibo(" + i + "));";
+	return fibo;
+}
+
 void main() {
 	String host = "localhost";
 	int port = 8080;
 	String logpoolip = "0.0.0.0";
-	Task t = new Task(1, "minikonoha", 1, "eval", logpoolip, "p(1);");
-	t.sendTo(host, port);
+	Task t1 = new Task(1, "minikonoha", 1, "eval", logpoolip, makeFibo(31));
+	Task t2 = new Task(2, "minikonoha", 2, "eval", logpoolip, makeFibo(32));
+	Task t3 = new Task(3, "minikonoha", 3, "eval", logpoolip, makeFibo(33));
+	Task t4 = new Task(4, "minikonoha", 4, "eval", logpoolip, makeFibo(34));
+	Task t5 = new Task(5, "minikonoha", 5, "eval", logpoolip, makeFibo(35));
+	Task t6 = new Task(6, "minikonoha", 6, "eval", logpoolip, makeFibo(36));
+	Task t7 = new Task(7, "minikonoha", 7, "eval", logpoolip, makeFibo(37));
+	Task t8 = new Task(8, "minikonoha", 8, "eval", logpoolip, makeFibo(38));
+	t1.sendTo(host, port);
+	t2.sendTo(host, port);
+	t3.sendTo(host, port);
+	t4.sendTo(host, port);
+	t5.sendTo(host, port);
+	t6.sendTo(host, port);
+	t7.sendTo(host, port);
+	t8.sendTo(host, port);
 	return;
 }
 

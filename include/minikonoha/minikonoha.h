@@ -66,6 +66,12 @@ extern "C" {
 #define K_USING_UTF8 1
 #define USE_BUILTINTEST  1
 
+#ifdef K_USE_PTHREAD
+#if defined(__linux__) && !defined(__USE_UNIX98)
+#define __USE_UNIX98 1
+#endif
+#endif
+
 #ifndef PLATAPIFORM_KERNEL
 #include <stdlib.h>
 #include <ctype.h>

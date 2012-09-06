@@ -233,7 +233,7 @@ static kExpr* SUGAR kExpr_setUnboxConstValue(KonohaContext *kctx, kExpr *expr, k
 	return (kExpr*)Wexpr;
 }
 
-static kExpr* SUGAR kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, int build, ktype_t ty, intptr_t index)
+static kExpr* SUGAR kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, kexpr_t build, ktype_t ty, intptr_t index)
 {
 	kExprVar *Wexpr = (expr == NULL) ? GCSAFE_new(ExprVar, 0) : (kExprVar*)expr;
 	Wexpr->build = build;
@@ -279,7 +279,7 @@ static kStmt* new_kStmt(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, 
 		kObject *v = va_arg(ap, kObject*);
 		if(v == NULL) break;
 		kStmt_setObject(kctx, stmt, kw, v);
-		kw = va_arg(ap, ksymbol_t);
+		kw = (ksymbol_t) va_arg(ap, int);
 	}
 	va_end(ap);
 	return stmt;

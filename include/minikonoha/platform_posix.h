@@ -54,12 +54,6 @@ extern "C" {
 
 static const char *getSystemCharset(void)
 {
-	//TODO!! check LC_CTYPE compatibility with iconv
-	char *enc = getenv("LC_CTYPE");
-	//DBG_P("%s", nl_langinfo(CODESET));
-	if(enc != NULL) {
-		return enc;
-	}
 #if defined(K_USING_WINDOWS_)
 	static char codepage[64];
 	knh_snprintf(codepage, sizeof(codepage), "CP%d", (int)GetACP());
@@ -84,7 +78,7 @@ static unsigned long long getTimeMilliSecond(void)
 // -------------------------------------------------------------------------
 
 #ifdef K_USE_PTHREAD
-//#include<phtread.h>
+#include <pthread.h>
 
 static int pthread_mutex_init_recursive(kmutex_t *mutex)
 {
@@ -233,9 +227,9 @@ static int isEmptyChunk(const char *t, size_t len)
 {
 	size_t i;
 	for(i = 0; i < len; i++) {
-		if(!isspace(t[i])) return true;
+		if(!isspace(t[i])) return false;
 	}
-	return false;
+	return true;
 }
 
 static int loadScript(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *))
@@ -262,7 +256,7 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 				simpleBuffer.size = 0;
 				//TODO: do we increment uline??
 			}
-			if(isEmptyChunk(script, simpleBuffer.size)) {
+			if(!isEmptyChunk(script, simpleBuffer.size)) {
 				int isBreak = false;
 				isSuccessfullyLoading = evalFunc(script, rangeheadline, &isBreak, thunk);
 				if(!isSuccessfullyLoading|| isBreak) {
@@ -270,8 +264,8 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 				}
 			}
 		}
+		fclose(fp);
 	}
-	fclose(fp);
 	return isSuccessfullyLoading;
 }
 

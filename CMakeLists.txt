@@ -132,6 +132,7 @@ set(PACKAGES
 	posix.file
 	posix.fd
 ##	posix.socket
+	posix.thread
 ##	konoha.sql
 ##	konoha.subproc
 	konoha.mpi
@@ -401,6 +402,8 @@ foreach(f ${test_files})
 	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT
 		"KONOHA_PACKAGEPATH=${PARENT_BINARY_DIR}/package")
 endforeach(f ${test_files})
+
+add_subdirectory(platform/dse)
 
 install(TARGETS minikonoha minikonoha_bin
 		RUNTIME DESTINATION bin
