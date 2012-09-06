@@ -228,7 +228,7 @@ struct SugarSyntaxVar {
 		kArray                       *sugarFuncListTable[SUGARFUNC_SIZE];
 	};
 	// binary
-	ktype_t  ty;
+//	ktype_t  ty;
 	kshort_t precedence_op2;        kshort_t precedence_op1;
 };
 
@@ -272,7 +272,7 @@ typedef struct KDEFINE_SYNTAX {
 	const char *rule;
 	int precedence_op2;
 	int precedence_op1;
-	int type;
+//	int type;
 	MethodFunc PatternMatch;
 	MethodFunc ParseExpr;
 	MethodFunc TopStmtTyCheck;

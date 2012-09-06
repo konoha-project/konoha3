@@ -373,8 +373,6 @@ static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t float_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("float"),  .type = TY_float, },
-		{ .keyword = SYM_("double"), .type = TY_float, },
 		{ .keyword = SYM_("$Float"), ExprTyCheck_(Float), },
 		{ .keyword = KW_END, },
 	};

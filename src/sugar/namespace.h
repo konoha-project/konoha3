@@ -56,13 +56,11 @@ static SugarSyntax* kNameSpace_newSyntax(KonohaContext *kctx, kNameSpace *ns, Su
 	syn->keyword          = keyword;
 	if(parentSyntax != NULL) {
 		kreportf(DebugTag, 0, "redefining syntax %s%s on NameSpace=%p, syntax=%p, parent=%p", PSYM_t(keyword), ns, syn, parentSyntax);
-		syn->ty             = parentSyntax->ty;
 		syn->precedence_op1 = parentSyntax->precedence_op1;
 		syn->precedence_op2 = parentSyntax->precedence_op2;
 	}
 	else {
 		kreportf(DebugTag, 0, "new syntax %s%s on NameSpace=%p, syntax=%p, parent=%p", PSYM_t(keyword), ns, syn, parentSyntax);
-		syn->ty             = TY_unknown;
 		syn->precedence_op1 = 0;
 		syn->precedence_op2 = 0;
 	}
@@ -136,9 +134,6 @@ static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 		DBG_ASSERT(syn != NULL);
 		DBG_P("keyword='%s%s', syn=%p, syn->parent=%p", PSYM_t(syndef->keyword), syn, syn->parentSyntaxNULL);
 		syn->flag  |= ((kshortflag_t)syndef->flag);
-		if(syndef->type != 0) {
-			syn->ty = syndef->type;
-		}
 		if(syndef->precedence_op1 > 0) {
 			syn->precedence_op1 = syndef->precedence_op1;
 		}
@@ -162,7 +157,7 @@ static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 				DBG_P("syn->keyword=%s%s, fo=%p", PSYM_t(syn->keyword), fo);
 				KINITv(syn->sugarFuncTable[SUGARFUNC_ParseExpr], fo);
 			}
-			else if(syn->ty != TY_unknown || syn->sugarFuncTable[SUGARFUNC_ExprTyCheck] != NULL) {
+			else if(syn->sugarFuncTable[SUGARFUNC_ExprTyCheck] != NULL) {
 				kFunc *fo = SYN_(ns, KW_ExprTerm)->sugarFuncTable[SUGARFUNC_ParseExpr];
 				DBG_ASSERT(fo != NULL);
 				DBG_P("syn->keyword=%s%s, fo=%p", PSYM_t(syn->keyword), fo);

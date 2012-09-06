@@ -1243,8 +1243,6 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ .keyword = KW_END, },
 	};
 	kNameSpace_defineSyntax(kctx, ns, SYNTAX);
-	SugarSyntaxVar *syn = (SugarSyntaxVar*)SYN_(ns, KW_void);
-	syn->ty = TY_void; // it's not cool, but necessary
 }
 
 /* ------------------------------------------------------------------------ */
