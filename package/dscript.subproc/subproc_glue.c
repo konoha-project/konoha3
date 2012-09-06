@@ -22,10 +22,30 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-/* ************************************************************************ */
+#include<minikonoha/minikonoha.h>
+#include<minikonoha/sugar.h>
+#include <minikonoha/bytes.h>
 
-#ifndef SUBPROC_GLUE_H_
-#define SUBPROC_GLUE_H_
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <poll.h>
+#include <signal.h>
+#include <sys/time.h>
+
+#if defined(__linux__)
+#include <linux/version.h>
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 27)
+#define __USE_LOCAL_PIPE2__
+#endif
+#endif /* __linux__ */
+
+#include "subproc_resourcemonitor.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -1265,31 +1285,31 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	ktype_t TY_StringArray = CT_StringArray2->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Im, _F(Subproc_new), TY_Subproc, TY_Subproc,MN_("new"), 2, TY_String, FN_("path"), TY_Boolean, FN_("mode"),
-		_Public|_Const|_Im, _F(Subproc_fg), TY_Int, TY_Subproc, MN_("fg"), 0,
-		_Public|_Const|_Im, _F(Subproc_bg), TY_Boolean, TY_Subproc, MN_("bg"), 0,
+		_Public|_Const|_Im, _F(Subproc_new), TY_Subproc, TY_Subproc,MN_("new"), 2, TY_String, FN_("path"), TY_boolean, FN_("mode"),
+		_Public|_Const|_Im, _F(Subproc_fg), TY_int, TY_Subproc, MN_("fg"), 0,
+		_Public|_Const|_Im, _F(Subproc_bg), TY_boolean, TY_Subproc, MN_("bg"), 0,
 		_Public|_Const|_Im, _F(Subproc_exec), TY_String, TY_Subproc, MN_("exec"), 1, TY_String, FN_("data"),
 		_Public|_Const|_Im, _F(Subproc_communicate), TY_StringArray, TY_Subproc, MN_("communicate"), 1, TY_String, FN_("input"),
-//		_Public|_Const|_Im, _F(Subproc_poll), TY_Int, TY_Subproc, MN_("poll"), 0,
-//		_Public|_Const|_Im, _F(Subproc_wait), TY_Int, TY_Subproc, MN_("wait"), 0,
-//		_Public|_Const|_Im, _F(Subproc_sendSignal), TY_Boolean, TY_Subproc, MN_("sendSignal"), 1 TY_Int, FN_("signal"),
-//		_Public|_Const|_Im, _F(Subproc_terminate), TY_Boolean, TY_Subproc, MN_("terminate"), 0,
-		_Public|_Const|_Im, _F(Subproc_getPid), TY_Int, TY_Subproc, MN_("getPid"), 0,
-		_Public|_Const|_Im, _F(Subproc_enableShellmode), TY_Boolean, TY_Subproc, MN_("enableShellmode"), 1, TY_Boolean, FN_("isShellmode"),
-		_Public|_Const|_Im, _F(Subproc_enablePipemodeIN), TY_Boolean, TY_Subproc, MN_("enablePipemodeIN"), 1, TY_Boolean, FN_("isPipemode"),
-		_Public|_Const|_Im, _F(Subproc_enablePipemodeOUT), TY_Boolean, TY_Subproc, MN_("enablePipemodeOUT"), 1, TY_Boolean, FN_("isPipemode"),
-		_Public|_Const|_Im, _F(Subproc_enablePipemodeERR), TY_Boolean, TY_Subproc, MN_("enablePipemodeERR"), 1, TY_Boolean, FN_("isPipemode"),
-		_Public|_Const|_Im, _F(Subproc_enableStandardIN), TY_Boolean, TY_Subproc, MN_("enableStandardIN"), 1, TY_Boolean, FN_("isStandard"),
-		_Public|_Const|_Im, _F(Subproc_enableStandardOUT), TY_Boolean, TY_Subproc, MN_("enableStandardOUT"), 1, TY_Boolean, FN_("isStandard"),
-		_Public|_Const|_Im, _F(Subproc_enableStandardERR), TY_Boolean, TY_Subproc, MN_("enableStandardERR"), 1, TY_Boolean, FN_("isStandard"),
-		_Public|_Const|_Im, _F(Subproc_isShellmode), TY_Boolean, TY_Subproc, MN_("isShellmode"), 0,
-		_Public|_Const|_Im, _F(Subproc_isPipemodeIN), TY_Boolean, TY_Subproc, MN_("isPipemodeIN"), 0,
-		_Public|_Const|_Im, _F(Subproc_isPipemodeOUT), TY_Boolean, TY_Subproc, MN_("isPipemodeOUT"), 0,
-		_Public|_Const|_Im, _F(Subproc_isPipemodeERR), TY_Boolean, TY_Subproc, MN_("isPipemodeERR"), 0,
-		_Public|_Const|_Im, _F(Subproc_isStandardIN), TY_Boolean, TY_Subproc, MN_("isStandardIN"), 0,
-		_Public|_Const|_Im, _F(Subproc_isStandardOUT), TY_Boolean, TY_Subproc, MN_("isStandardOUT"), 0,
-		_Public|_Const|_Im, _F(Subproc_isStandardERR), TY_Boolean, TY_Subproc, MN_("isStandardERR"), 0,
-		_Public|_Const|_Im, _F(Subproc_isERR2StdOUT), TY_Boolean, TY_Subproc, MN_("isERR2StdOUT"), 0,
+//		_Public|_Const|_Im, _F(Subproc_poll), TY_int, TY_Subproc, MN_("poll"), 0,
+//		_Public|_Const|_Im, _F(Subproc_wait), TY_int, TY_Subproc, MN_("wait"), 0,
+//		_Public|_Const|_Im, _F(Subproc_sendSignal), TY_boolean, TY_Subproc, MN_("sendSignal"), 1 TY_int, FN_("signal"),
+//		_Public|_Const|_Im, _F(Subproc_terminate), TY_boolean, TY_Subproc, MN_("terminate"), 0,
+		_Public|_Const|_Im, _F(Subproc_getPid), TY_int, TY_Subproc, MN_("getPid"), 0,
+		_Public|_Const|_Im, _F(Subproc_enableShellmode), TY_boolean, TY_Subproc, MN_("enableShellmode"), 1, TY_boolean, FN_("isShellmode"),
+		_Public|_Const|_Im, _F(Subproc_enablePipemodeIN), TY_boolean, TY_Subproc, MN_("enablePipemodeIN"), 1, TY_boolean, FN_("isPipemode"),
+		_Public|_Const|_Im, _F(Subproc_enablePipemodeOUT), TY_boolean, TY_Subproc, MN_("enablePipemodeOUT"), 1, TY_boolean, FN_("isPipemode"),
+		_Public|_Const|_Im, _F(Subproc_enablePipemodeERR), TY_boolean, TY_Subproc, MN_("enablePipemodeERR"), 1, TY_boolean, FN_("isPipemode"),
+		_Public|_Const|_Im, _F(Subproc_enableStandardIN), TY_boolean, TY_Subproc, MN_("enableStandardIN"), 1, TY_boolean, FN_("isStandard"),
+		_Public|_Const|_Im, _F(Subproc_enableStandardOUT), TY_boolean, TY_Subproc, MN_("enableStandardOUT"), 1, TY_boolean, FN_("isStandard"),
+		_Public|_Const|_Im, _F(Subproc_enableStandardERR), TY_boolean, TY_Subproc, MN_("enableStandardERR"), 1, TY_boolean, FN_("isStandard"),
+		_Public|_Const|_Im, _F(Subproc_isShellmode), TY_boolean, TY_Subproc, MN_("isShellmode"), 0,
+		_Public|_Const|_Im, _F(Subproc_isPipemodeIN), TY_boolean, TY_Subproc, MN_("isPipemodeIN"), 0,
+		_Public|_Const|_Im, _F(Subproc_isPipemodeOUT), TY_boolean, TY_Subproc, MN_("isPipemodeOUT"), 0,
+		_Public|_Const|_Im, _F(Subproc_isPipemodeERR), TY_boolean, TY_Subproc, MN_("isPipemodeERR"), 0,
+		_Public|_Const|_Im, _F(Subproc_isStandardIN), TY_boolean, TY_Subproc, MN_("isStandardIN"), 0,
+		_Public|_Const|_Im, _F(Subproc_isStandardOUT), TY_boolean, TY_Subproc, MN_("isStandardOUT"), 0,
+		_Public|_Const|_Im, _F(Subproc_isStandardERR), TY_boolean, TY_Subproc, MN_("isStandardERR"), 0,
+		_Public|_Const|_Im, _F(Subproc_isERR2StdOUT), TY_boolean, TY_Subproc, MN_("isERR2StdOUT"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
@@ -1311,7 +1331,20 @@ static kbool_t subproc_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfile
 	return true;
 }
 
+// --------------------------------------------------------------------------
+
+KDEFINE_PACKAGE* subproc_init(void)
+{
+	static KDEFINE_PACKAGE d = {
+		KPACKNAME("subproc", "1.0"),
+		.initPackage = subproc_initPackage,
+		.setupPackage = subproc_setupPackage,
+		.initNameSpace = subproc_initNameSpace,
+		.setupNameSpace = subproc_setupNameSpace,
+	};
+	return &d;
+}
+
 #ifdef __cplusplus
 }
 #endif
-#endif /* SUBPROC_GLUE_H_ */

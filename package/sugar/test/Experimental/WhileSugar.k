@@ -6,7 +6,7 @@ K.import("konoha.null");
 sugar "while" "(" $Expr ")" $Block
 
 boolean tyCheckWhile(Stmt stmt, Gamma gma) {
-	if(stmt.tyCheckExpr("$Expr", gma, 3/*TY_Boolean*/, 0)) {
+	if(stmt.tyCheckExpr("$Expr", gma, 3/*TY_boolean*/, 0)) {
 		return (stmt.getBlock("$Block", null)).tyCheckAll(gma);
 	}
 	return false;

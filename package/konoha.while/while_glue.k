@@ -4,7 +4,7 @@
 // sugar "while" "(" $Expr ")" $Block
 
 // boolean tyCheckWhile(Stmt stmt, Gamma gma) {
-//     if(stmt.tyCheckExpr("$Expr", gma, 3/*TY_Boolean*/, 0)) {
+//     if(stmt.tyCheckExpr("$Expr", gma, 3/*TY_boolean*/, 0)) {
 //         Block block = stmt.getBlock("$Block", null);
 //         boolean ret = block.tyCheckAll(gma);
 //         stmt.setType(TSTMT_LOOP);

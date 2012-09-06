@@ -161,7 +161,7 @@ static kbool_t kNameSpace_merge(KonohaContext *kctx, kNameSpace *ns, kNameSpace 
 			}
 		}
 		// record imported
-		kNameSpace_setConstData(kctx, ns, target->packageId | KW_PATTERN, TY_Int, target->packageId);
+		kNameSpace_setConstData(kctx, ns, target->packageId | KW_PATTERN, TY_int, target->packageId);
 		return true;
 	}
 	return false;

@@ -292,7 +292,7 @@ static void dse_define(KonohaContext *kctx, Message *msg)
 		KLIB kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(TextData), 0);
 	}
 	KDEFINE_INT_CONST IntData[] = {
-		{"DSE_DEBUG", TY_Int, verbose_debug}, {}
+		{"DSE_DEBUG", TY_int, verbose_debug}, {}
 	};
 	KLIB kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(IntData), 0);
 }

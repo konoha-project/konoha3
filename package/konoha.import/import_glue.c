@@ -64,7 +64,7 @@ static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp)
 	tkImport->resolvedSymbol = MN_("import");
 	kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, syn1, 3, tkImport, new_ConstValueExpr(kctx, O_typeId(ns), UPCAST(ns)), ePKG);
 	KLIB kObject_setObject(kctx, stmt, KW_ExprPattern, TY_Expr, expr);
-	ret = SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_Boolean, 0);
+	ret = SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_boolean, 0);
 	if (ret) {
 		kStmt_typed(stmt, EXPR);
 	}

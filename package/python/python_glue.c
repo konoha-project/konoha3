@@ -497,10 +497,10 @@ static kbool_t python_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	KonohaClass *cPython = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &PythonDef, pline);
 	int TY_PyObject = cPython->typeId;
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Im|_Coercion, _F(PyObject_toBoolean), TY_Boolean, TY_PyObject, MN_to(TY_Boolean), 0,
-		_Public|_Const|_Im|_Coercion, _F(Boolean_toPyObject), TY_PyObject, TY_Boolean, MN_to(TY_PyObject), 0,
-		_Public|_Const|_Im|_Coercion, _F(PyObject_toInt), TY_Int, TY_PyObject, MN_to(TY_Int), 0,
-		_Public|_Const|_Im|_Coercion, _F(Int_toPyObject), TY_PyObject, TY_Int, MN_to(TY_PyObject), 0,
+		_Public|_Const|_Im|_Coercion, _F(PyObject_toBoolean), TY_boolean, TY_PyObject, MN_to(TY_boolean), 0,
+		_Public|_Const|_Im|_Coercion, _F(Boolean_toPyObject), TY_PyObject, TY_boolean, MN_to(TY_PyObject), 0,
+		_Public|_Const|_Im|_Coercion, _F(PyObject_toInt), TY_int, TY_PyObject, MN_to(TY_int), 0,
+		_Public|_Const|_Im|_Coercion, _F(Int_toPyObject), TY_PyObject, TY_int, MN_to(TY_PyObject), 0,
 		_Public|_Const|_Im|_Coercion, _F(PyObject_toString), TY_String, TY_PyObject, MN_to(TY_String), 0,
 		_Public|_Const|_Im|_Coercion, _F(String_toPyObject), TY_PyObject, TY_String, MN_to(TY_PyObject), 0,
 		_Public|_Const|_Im|_Coercion, _F(PyObject_toString), TY_String, TY_PyObject, MN_("toString"),  0,
@@ -544,7 +544,7 @@ static kbool_t python_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		//_Public|_Const|_Im|_Coercion, _F(PyObject_toSet), TY_Set, TY_PyObject, MN_to(TY_Set), 0,
 		//_Public|_Const|_Im|_Coercion, _F(Code_toPyObject), TY_PyObject, TY_Code, MN_to(TY_PyObject), 0,
 		//_Public|_Const|_Im|_Coercion, _F(PyObject_toCode), TY_Code, TY_PyObject, MN_to(TY_Code), 0,
-		_Public|_Im, _F(Python_eval), TY_Boolean, TY_System, FN_("pyEval"), 1, TY_String, FN_("script"),
+		_Public|_Im, _F(Python_eval), TY_boolean, TY_System, FN_("pyEval"), 1, TY_String, FN_("script"),
 		_Public|_Im, _F(PyObject_import), TY_PyObject, TY_PyObject, FN_("import"), 1, TY_String, FN_("name"),
 		_Public|_Im, _F(PyObject_), TY_PyObject, TY_PyObject, 0, 1, TY_PyObject, 0,
 		DEND,
@@ -552,8 +552,8 @@ static kbool_t python_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	if(IS_DefinedFloat()) {
 		KDEFINE_METHOD MethodData[] = {
-			_Public|_Const|_Im|_Coercion, _F(PyObject_toFloat), TY_Float, TY_PyObject, MN_to(TY_Float), 0,
-			_Public|_Const|_Im|_Coercion, _F(Float_toPyObject), TY_PyObject, TY_Float, MN_to(TY_PyObject), 0,
+			_Public|_Const|_Im|_Coercion, _F(PyObject_toFloat), TY_float, TY_PyObject, MN_to(TY_float), 0,
+			_Public|_Const|_Im|_Coercion, _F(Float_toPyObject), TY_PyObject, TY_float, MN_to(TY_PyObject), 0,
 			DEND,
 		};
 		KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);

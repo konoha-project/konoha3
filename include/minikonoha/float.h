@@ -39,7 +39,7 @@ extern "C" {
 #define KonohaContext_getFloatContext(kctx)        ((KonohaFloatModuleContext*)kctx->mod[MOD_float])
 #define IS_DefinedFloat()    (kctx->modshare[MOD_float] != NULL)
 #define CT_Float                                   KonohaContext_getFloatModule(kctx)->cFloat
-#define TY_Float                                   KonohaContext_getFloatModule(kctx)->cFloat->typeId
+#define TY_float                                   KonohaContext_getFloatModule(kctx)->cFloat->typeId
 
 #define IS_Float(O)      ((O)->h.ct == CT_Float)
 

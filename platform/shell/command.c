@@ -433,7 +433,7 @@ static void CommandLine_define(KonohaContext *kctx, char *keyvalue)
 		ksymbol_t key = KLIB Ksymbol(kctx, namebuf, len, 0, SYM_NEWID);
 		if(isdigit(p[1])) {
 			long n = strtol(p+1, NULL, 0);
-			KLIB kNameSpace_setConstData(kctx, KNULL(NameSpace), key, TY_Int, (uintptr_t)n);
+			KLIB kNameSpace_setConstData(kctx, KNULL(NameSpace), key, TY_int, (uintptr_t)n);
 		}
 		else {
 			KLIB kNameSpace_setConstData(kctx, KNULL(NameSpace), key, TY_TEXT, (uintptr_t)(p+1));

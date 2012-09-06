@@ -132,8 +132,9 @@ set(PACKAGES
 	posix.file
 	posix.fd
 ##	posix.socket
-	konoha.sql
-##	konoha.subproc
+	posix.thread
+##	konoha.sql
+	dscript.subproc
 	konoha.mpi
 	curl
 ##	ijit

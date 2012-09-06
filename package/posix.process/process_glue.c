@@ -139,31 +139,31 @@ static KMETHOD System_setgroups(KonohaContext *kctx, KonohaStack *sfp)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-#define _KVi(T) #T, TY_Int, T
+#define _KVi(T) #T, TY_int, T
 
 static	kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	kparamtype_t p = { .ty = TY_Int,  };
+	kparamtype_t p = { .ty = TY_int,  };
 	KonohaClass *cIntArray = KLIB KonohaClass_Generics(kctx, CT_(TY_Array), TY_void, 1, &p);
-#define TY_IntArray (cIntArray->typeId)
+#define TY_intArray (cIntArray->typeId)
 
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static, _F(System_getpid), TY_Int, TY_System, MN_("getpid"), 0,
-		_Public|_Static, _F(System_getppid), TY_Int, TY_System, MN_("getppid"), 0,
-		_Public|_Static, _F(System_getuid), TY_Int, TY_System, MN_("getuid"), 0,
-		_Public|_Static, _F(System_geteuid), TY_Int, TY_System, MN_("geteuid"), 0,
-		_Public|_Static, _F(System_getgid), TY_Int, TY_System, MN_("getgid"), 0,
-		_Public|_Static, _F(System_getegid), TY_Int, TY_System, MN_("getegid"), 0,
-		_Public|_Static, _F(System_getpgid), TY_Int, TY_System, MN_("getpgid"), 1, TY_Int, FN_("pid"),
-		_Public|_Static, _F(System_setpgid), TY_Int, TY_System, MN_("setpgid"), 2, TY_Int, FN_("pid"), TY_Int, FN_("pgid"),
-		_Public|_Static, _F(System_chdir), TY_Int, TY_System, MN_("chdir"), 1, TY_String, FN_("pathname"),
-		_Public|_Static, _F(System_fchdir), TY_Int, TY_System, MN_("fchdir"), 1, TY_Int, FN_("fd"),
-		_Public|_Static, _F(System_chroot), TY_Int, TY_System, MN_("chroot"), 1, TY_String, FN_("pathname"),
-		_Public|_Static, _F(System_getpriority), TY_Int, TY_System, MN_("getpriority"), 2, TY_Int, FN_("which"), TY_Int, FN_("who"),
-		_Public|_Static, _F(System_setpriority), TY_Int, TY_System, MN_("setpriority"), 3, TY_Int, FN_("which"), TY_Int, FN_("who"), TY_Int, FN_("priority"),
-		_Public|_Static, _F(System_getgroups), TY_Int, TY_System, MN_("getgroups"), 2, TY_Int, FN_("size"), TY_IntArray, FN_("list[]"),
-		_Public|_Static, _F(System_setgroups), TY_Int, TY_System, MN_("setgroups"), 2, TY_Int, FN_("size"), TY_IntArray, FN_("*list"),
+		_Public|_Static, _F(System_getpid), TY_int, TY_System, MN_("getpid"), 0,
+		_Public|_Static, _F(System_getppid), TY_int, TY_System, MN_("getppid"), 0,
+		_Public|_Static, _F(System_getuid), TY_int, TY_System, MN_("getuid"), 0,
+		_Public|_Static, _F(System_geteuid), TY_int, TY_System, MN_("geteuid"), 0,
+		_Public|_Static, _F(System_getgid), TY_int, TY_System, MN_("getgid"), 0,
+		_Public|_Static, _F(System_getegid), TY_int, TY_System, MN_("getegid"), 0,
+		_Public|_Static, _F(System_getpgid), TY_int, TY_System, MN_("getpgid"), 1, TY_int, FN_("pid"),
+		_Public|_Static, _F(System_setpgid), TY_int, TY_System, MN_("setpgid"), 2, TY_int, FN_("pid"), TY_int, FN_("pgid"),
+		_Public|_Static, _F(System_chdir), TY_int, TY_System, MN_("chdir"), 1, TY_String, FN_("pathname"),
+		_Public|_Static, _F(System_fchdir), TY_int, TY_System, MN_("fchdir"), 1, TY_int, FN_("fd"),
+		_Public|_Static, _F(System_chroot), TY_int, TY_System, MN_("chroot"), 1, TY_String, FN_("pathname"),
+		_Public|_Static, _F(System_getpriority), TY_int, TY_System, MN_("getpriority"), 2, TY_int, FN_("which"), TY_int, FN_("who"),
+		_Public|_Static, _F(System_setpriority), TY_int, TY_System, MN_("setpriority"), 3, TY_int, FN_("which"), TY_int, FN_("who"), TY_int, FN_("priority"),
+		_Public|_Static, _F(System_getgroups), TY_int, TY_System, MN_("getgroups"), 2, TY_int, FN_("size"), TY_intArray, FN_("list[]"),
+		_Public|_Static, _F(System_setgroups), TY_int, TY_System, MN_("setgroups"), 2, TY_int, FN_("size"), TY_intArray, FN_("*list"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);

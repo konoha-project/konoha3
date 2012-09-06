@@ -63,7 +63,7 @@ static int parseINDENT(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, i
 	}
 	if(IS_NOTNULL(tk)) {
 		tk->unresolvedTokenType = TokenType_INDENT;
-		tk->indent = 0; /* indent FIXME: Debug/Parser/LineNumber.k (Failed) */
+		tk->indent = indent;
 	}
 	return pos-1;
 }

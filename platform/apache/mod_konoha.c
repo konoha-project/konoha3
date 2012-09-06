@@ -291,7 +291,7 @@ KonohaContext* konoha_create(KonohaClass **cRequest)
 		_P, _F(Request_getHandler), TY_String, TY_Req, MN_("getHandler"), 0,
 		_P, _F(Request_setContentType), TY_void, TY_Req, MN_("setContentType"), 1, TY_String, FN_("type"),
 		_P, _F(Request_setContentEncoding), TY_void, TY_Req, MN_("setContentEncoding"), 1, TY_String, FN_("enc"),
-		_P, _F(Request_logError), TY_void, TY_Req, MN_("logError"), 3, TY_Int, FN_("level"), TY_Int, FN_("status"), TY_String, FN_("msg"),
+		_P, _F(Request_logError), TY_void, TY_Req, MN_("logError"), 3, TY_int, FN_("level"), TY_int, FN_("status"), TY_String, FN_("msg"),
 		_P, _F(Request_getHeadersIn), TY_Tbl, TY_Req, MN_("getHeadersIn"), 0,
 		_P, _F(Request_getHeadersOut), TY_Tbl, TY_Req, MN_("getHeadersOut"), 0,
 		_P, _F(AprTable_add), TY_void, TY_Tbl, MN_("add"), 2, TY_String, FN_("key"), TY_String, FN_("val"),

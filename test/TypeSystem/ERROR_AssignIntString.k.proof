@@ -1,3 +1,3 @@
- - (error) (ERROR_AssignIntString.k:6) Int is requested, but String is given
+ - (error) (ERROR_AssignIntString.k:6) int is requested, but String is given
  ** RuntimeScriptException (ERROR_AssignIntString.k:6)
 Q.E.D.

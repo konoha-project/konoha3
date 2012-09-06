@@ -22,6 +22,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+#define PARAM_void     0
+#define PARAMDOM_void                  0
+#define PARAMDOM_DefaultGenericsParam  1
+
 static kObject* DEFAULT_fnull(KonohaContext *kctx, KonohaClass *ct);
 
 static void Object_init(KonohaContext *kctx, kObject *o, void *conf)
@@ -780,10 +784,10 @@ static KonohaClass *Konoha_defineClass(KonohaContext *kctx, kpackage_t packageId
 	return (KonohaClass*)ct;
 }
 
-#define TYPENAME(C) \
+#define UnboxTypeName(C) \
 	.structname = #C,\
 	.typeId = TY_##C,\
-	.cflag = CFLAG_##C\
+	.cflag  = CFLAG_##C\
 
 #define TYNAME(C) \
 	.structname = #C,\
@@ -794,10 +798,10 @@ static KonohaClass *Konoha_defineClass(KonohaContext *kctx, kpackage_t packageId
 static void loadInitStructData(KonohaContext *kctx)
 {
 	KDEFINE_CLASS defTvoid = {
-		TYPENAME(void),
+		UnboxTypeName(void),
 	};
 	KDEFINE_CLASS defTvar = {
-		TYPENAME(var),
+		UnboxTypeName(var),
 	};
 	KDEFINE_CLASS defObject = {
 		TYNAME(Object),
@@ -806,14 +810,16 @@ static void loadInitStructData(KonohaContext *kctx)
 		.initdef = Object_initdef,
 	};
 	KDEFINE_CLASS defBoolean = {
-		TYNAME(Boolean),
-		.init = Number_init,
+		UnboxTypeName(boolean),
+		.cstruct_size = sizeof(kBoolean),
+		.init  = Number_init,
 		.unbox = Number_unbox,
-		.p    = Boolean_p,
+		.p     = Boolean_p,
 		.fnull = Boolean_fnull,
 	};
 	KDEFINE_CLASS defInt = {
-		TYNAME(Int),
+		UnboxTypeName(int),
+		.cstruct_size = sizeof(kInt),
 		.init  = Number_init,
 		.unbox = Number_unbox,
 		.p     = Int_p,
@@ -850,7 +856,7 @@ static void loadInitStructData(KonohaContext *kctx)
 		.init = DEFAULT_init,
 	};
 	KDEFINE_CLASS defT0 = {
-		TYPENAME(0),
+		UnboxTypeName(0),
 		.init = DEFAULT_init,
 		.realtype = T_realtype,
 	};
@@ -876,12 +882,8 @@ static void loadInitStructData(KonohaContext *kctx)
 		new_KonohaClass(kctx, NULL, dd[cid], 0);
 		cid++;
 	}
-	/*
-	 * We need to be set CT_Array->p0 before
-	 * generating Array Objects.
-	 * */
 	KonohaClassVar *ct = (KonohaClassVar *)CT_Array;
-	ct->p0 = TY_Object;
+	ct->p0 = TY_Object;    // don't move (ide)
 }
 
 static void defineDefaultKeywordSymbol(KonohaContext *kctx)
@@ -912,9 +914,6 @@ static void initStructData(KonohaContext *kctx)
 		ct->nameid = ksymbolSPOL(name, strlen(name), SPOL_ASCII|SPOL_POOL|SPOL_TEXT, _NEWID);
 		KonohaClass_setName(kctx, ct, 0);
 	}
-	KonohaClassVar *ct = (KonohaClassVar *)CT_Array;
-	kparamtype_t p = {TY_Object};
-	ct->cparamdom = Kparamdom(kctx, 1, &p);
 }
 
 static void initKonohaLib(KonohaLibVar *l)
@@ -973,6 +972,8 @@ static void KonohaRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx)
 
 	Kparam(kctx, TY_void, 0, NULL);  // PARAM_void
 	Kparamdom(kctx, 0, NULL);        // PARAMDOM_void
+	kparamtype_t p = {TY_Object};
+	Kparamdom(kctx, 1, &p);          // PARAMDOM_DefaultGenericsParam  1
 	FILEID_("(konoha.c)");
 	PN_("konoha");    // PN_konoha
 	PN_("sugar");     // PKG_sugar

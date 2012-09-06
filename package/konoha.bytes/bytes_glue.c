@@ -308,11 +308,11 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public|_Const|_Im|_Coercion, _F(Bytes_asString), TY_String, TY_Bytes,  MN_("asString"),  0,
 		_Public|_Const,     _F(Bytes_encodeTo),   TY_Bytes,  TY_Bytes,  MN_("encodeTo"),    1, TY_String, FN_encoding,
 		_Public|_Const,     _F(Bytes_decodeFrom),   TY_String, TY_Bytes,  MN_("decodeFrom"),    1, TY_String, FN_encoding,
-		_Public|_Const|_Im,     _F(Bytes_get), TY_Int, TY_Bytes, MN_("get"), 1, TY_Int, FN_x,
-		_Public|_Const|_Im,     _F(Bytes_set), TY_Int, TY_Bytes, MN_("set"), 2, TY_Int, FN_x, TY_Int, FN_c,
-		_Public|_Const|_Im,     _F(Bytes_setAll), TY_void, TY_Bytes, MN_("setAll"), 1, TY_Int, FN_x,
-		_Public|_Const|_Im,     _F(Bytes_getSize), TY_Int, TY_Bytes, MN_("getSize"), 0,
-		_Public|_Const|_Im,     _F(Bytes_new), TY_Bytes, TY_Bytes, MN_("new"), 1, TY_Int, FN_size,
+		_Public|_Const|_Im,     _F(Bytes_get), TY_int, TY_Bytes, MN_("get"), 1, TY_int, FN_x,
+		_Public|_Const|_Im,     _F(Bytes_set), TY_int, TY_Bytes, MN_("set"), 2, TY_int, FN_x, TY_int, FN_c,
+		_Public|_Const|_Im,     _F(Bytes_setAll), TY_void, TY_Bytes, MN_("setAll"), 1, TY_int, FN_x,
+		_Public|_Const|_Im,     _F(Bytes_getSize), TY_int, TY_Bytes, MN_("getSize"), 0,
+		_Public|_Const|_Im,     _F(Bytes_new), TY_Bytes, TY_Bytes, MN_("new"), 1, TY_int, FN_size,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, NULL, methoddata);
@@ -355,7 +355,7 @@ static KMETHOD ExprTyCheck_Squote(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_P("string:'%s'", S_text(s));
 	if (S_size(s) == 1) {
 		int ch = S_text(s)[0];
-		RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_Int, ch));
+		RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_int, ch));
 	} else {
 		SUGAR kStmt_printMessage(kctx, stmt, (kToken*)expr, ErrTag, "single quote doesn't accept multi characters, '%s'", S_text(s));
 	}

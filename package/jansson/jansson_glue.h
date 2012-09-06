@@ -75,7 +75,7 @@ static void Jansson_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWrit
 #define TY_Json     cJson->typeId
 #define IS_Json(O)  ((O)->h.ct == CT_Json)
 
-#define _KVi(T)  #T, TY_Int, T
+#define _KVi(T)  #T, TY_int, T
 
 /* ------------------------------------------------------------------------ */
 /* [API methodList] */
@@ -447,24 +447,24 @@ static	kbool_t jansson_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public|_Const|_Im, _F(Json_dump),      TY_String,    TY_Json, MN_("dump"),         0,
 		_Public|_Const|_Im, _F(Json_get),       TY_Json,      TY_Json, MN_("get"),          1, TY_String, FN_("key"),
 		_Public|_Const|_Im, _F(Json_getArray),  TY_JsonArray, TY_Json, MN_("getArray"),     1, TY_String, FN_("key"),
-		_Public|_Const|_Im, _F(Json_getBool),   TY_Boolean,   TY_Json, MN_("getBool"),      1, TY_String, FN_("key"),
-		_Public|_Const|_Im, _F(Json_getFloat),  TY_Float,     TY_Json, MN_("getFloat"),     1, TY_String, FN_("key"),
-		_Public|_Const|_Im, _F(Json_getInt),    TY_Int,       TY_Json, MN_("getInt"),       1, TY_String, FN_("key"),
+		_Public|_Const|_Im, _F(Json_getBool),   TY_boolean,   TY_Json, MN_("getBool"),      1, TY_String, FN_("key"),
+		_Public|_Const|_Im, _F(Json_getFloat),  TY_float,     TY_Json, MN_("getFloat"),     1, TY_String, FN_("key"),
+		_Public|_Const|_Im, _F(Json_getInt),    TY_int,       TY_Json, MN_("getInt"),       1, TY_String, FN_("key"),
 		_Public|_Const|_Im, _F(Json_getString), TY_String,    TY_Json, MN_("getString"),    1, TY_String, FN_("key"),
 		_Public, _F(Json_new),       TY_Json,      TY_Json, MN_("new"),          0,
 		_Public|_Const|_Im, _F(Json_parse),     TY_Json,      TY_Json, MN_("parse"),        1, TY_String, FN_("data"),
 		_Public, _F(Json_set),       TY_void,      TY_Json, MN_("set"),          2, TY_String, FN_("key"), TY_Json, FN_("value"),
 		_Public, _F(Json_setArray),  TY_void,      TY_Json, MN_("setArray"),     2, TY_String, FN_("key"), TY_JsonArray, FN_("value"),
-		_Public, _F(Json_setBool),   TY_void,      TY_Json, MN_("setBool"),      2, TY_String, FN_("key"), TY_Boolean, FN_("value"),
-		_Public, _F(Json_setFloat),  TY_void,      TY_Json, MN_("setFloat"),     2, TY_String, FN_("key"), TY_Float, FN_("value"),
-		_Public, _F(Json_setInt),    TY_void,      TY_Json, MN_("setInt"),       2, TY_String, FN_("key"), TY_Int, FN_("value"),
+		_Public, _F(Json_setBool),   TY_void,      TY_Json, MN_("setBool"),      2, TY_String, FN_("key"), TY_boolean, FN_("value"),
+		_Public, _F(Json_setFloat),  TY_void,      TY_Json, MN_("setFloat"),     2, TY_String, FN_("key"), TY_float, FN_("value"),
+		_Public, _F(Json_setInt),    TY_void,      TY_Json, MN_("setInt"),       2, TY_String, FN_("key"), TY_int, FN_("value"),
 		_Public, _F(Json_setString), TY_void,      TY_Json, MN_("setString"),    2, TY_String, FN_("key"), TY_String, FN_("value"),
 		_Public|_Const|_Im, _F(Json_dump),      TY_String,    TY_JsonArray, MN_("dump"),    0,
 
-		_Public, _F(JsonArray_newArray),  TY_JsonArray,      TY_JsonArray, MN_("newArray"), 1, TY_Int, FN_("size"),
-		_Public|_Const|_Im, _F(JsonArray_get),       TY_Json,           TY_JsonArray, MN_("get"),      1, TY_Int, FN_("index"),
+		_Public, _F(JsonArray_newArray),  TY_JsonArray,      TY_JsonArray, MN_("newArray"), 1, TY_int, FN_("size"),
+		_Public|_Const|_Im, _F(JsonArray_get),       TY_Json,           TY_JsonArray, MN_("get"),      1, TY_int, FN_("index"),
 		_Public, _F(JsonArray_add),       TY_void,           TY_JsonArray, MN_("add"),      1, TY_Json, FN_("value"),
-		_Public|_Const|_Im, _F(JsonArray_getSize),   TY_Int,            TY_JsonArray, MN_("getSize"),  0,
+		_Public|_Const|_Im, _F(JsonArray_getSize),   TY_int,            TY_JsonArray, MN_("getSize"),  0,
 		_Public, _F(JsonArray_append),    TY_void,           TY_JsonArray, MN_("append"),   1, TY_Json, FN_("data"),
 		DEND,
 	};

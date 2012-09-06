@@ -751,20 +751,20 @@ static kbool_t regexp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 
 	ktype_t TY_StringArray0 = CT_StringArray0->typeId;
 	KDEFINE_METHOD MethodData[] = {
-		/*JS*/_Public|_Const|_Im, _F(RegExp_getGlobal), TY_Boolean, TY_RegExp, MN_("getGlobal"), 0,
-		/*JS*/_Public|_Const|_Im, _F(RegExp_getIgnoreCase), TY_Boolean, TY_RegExp, MN_("getIgnoreCase"), 0,
-		/*JS*/_Public|_Const|_Im, _F(RegExp_getMultiline), TY_Boolean, TY_RegExp, MN_("getMultiline"), 0,
+		/*JS*/_Public|_Const|_Im, _F(RegExp_getGlobal), TY_boolean, TY_RegExp, MN_("getGlobal"), 0,
+		/*JS*/_Public|_Const|_Im, _F(RegExp_getIgnoreCase), TY_boolean, TY_RegExp, MN_("getIgnoreCase"), 0,
+		/*JS*/_Public|_Const|_Im, _F(RegExp_getMultiline), TY_boolean, TY_RegExp, MN_("getMultiline"), 0,
 		/*JS*/_Public|_Const|_Im, _F(RegExp_getSource), TY_String, TY_RegExp, MN_("getSource"), 0,
-		/*JS*/_Public|_Const|_Im, _F(RegExp_getLastIndex), TY_Int, TY_RegExp, MN_("getLastIndex"), 0,
+		/*JS*/_Public|_Const|_Im, _F(RegExp_getLastIndex), TY_int, TY_RegExp, MN_("getLastIndex"), 0,
 		/*JS*/_Public|_Im, _F(String_match), TY_StringArray0, TY_String, MN_("match"), 1, TY_RegExp, FN_("regexp"),
 		/*JS*/_Public|_Const|_Im, _F(String_replace), TY_String, TY_String, MN_("replace"), 2, TY_RegExp, FN_("searchvalue"), TY_String, FN_("newvalue"),
-		/*JS*/_Public|_Const|_Im, _F(String_search), TY_Int, TY_String, MN_("search"), 1, TY_RegExp, FN_("searchvalue"),
+		/*JS*/_Public|_Const|_Im, _F(String_search), TY_int, TY_String, MN_("search"), 1, TY_RegExp, FN_("searchvalue"),
 		/*JS*/_Public|_Im, _F(String_split), TY_StringArray0, TY_String, MN_("split"), 1, TY_RegExp, FN_("separator"),
-		/*JS*/_Public|_Im, _F(String_splitwithSeparatorLimit), TY_StringArray0, TY_String, MN_("split"), 2, TY_RegExp, FN_("separator"), TY_Int, FN_("limit"),
+		/*JS*/_Public|_Im, _F(String_splitwithSeparatorLimit), TY_StringArray0, TY_String, MN_("split"), 2, TY_RegExp, FN_("separator"), TY_int, FN_("limit"),
 		/*JS*/_Public|_Const, _F(RegExp_new),     TY_RegExp,  TY_RegExp,  MN_("new"), 1, TY_String, FN_("pattern"),
 		/*JS*/_Public|_Const, _F(RegExp_newwithOption),     TY_RegExp,  TY_RegExp,  MN_("new"), 2, TY_String, FN_("pattern"), TY_String, FN_("option"),
 		/*JS*/_Public|_Const, _F(RegExp_exec),    TY_StringArray0, TY_RegExp,  MN_("exec"), 1, TY_String, FN_("str"),
-		/*JS*/_Public|_Const|_Im, _F(RegExp_test),    TY_Boolean, TY_RegExp,  MN_("test"), 1, TY_String, FN_("str"),
+		/*JS*/_Public|_Const|_Im, _F(RegExp_test),    TY_boolean, TY_RegExp,  MN_("test"), 1, TY_String, FN_("str"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);

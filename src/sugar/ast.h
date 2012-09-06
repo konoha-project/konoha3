@@ -463,13 +463,8 @@ static int TokenRange_addSymbolToken(KonohaContext *kctx, TokenRange *range, Tok
 	}
 	SugarSyntax *syn = SYN_(range->ns, symbol);
 	if(syn != NULL) {
-		if(syn->ty != TY_unknown) {
-			kToken_setTypeId(kctx, tk, range->ns, syn->ty);
-		}
-		else {
-			tk->resolvedSymbol     = symbol;
-			tk->resolvedSyntaxInfo = syn;
-		}
+		tk->resolvedSymbol     = symbol;
+		tk->resolvedSyntaxInfo = syn;
 	}
 	else {
 		KonohaClass *foundClass = KLIB kNameSpace_getClass(kctx, range->ns, t, S_size(tk->text), NULL);
