@@ -1,6 +1,6 @@
-K.import("mecab");
-K.import("konoha.float");
 K.import("konoha");
+K.import("mecab");
+//K.import("konoha.float");
 
 void main() {
 	Tagger m = new Tagger();
