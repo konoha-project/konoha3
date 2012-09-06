@@ -71,7 +71,7 @@ extern "C" {
 
 #define KW_StmtConstDecl       KW_ConstPattern
 #define KW_StmtTypeDecl        KW_TypePattern
-#define KW_StmtMethodDecl      KW_MethodPattern
+#define KW_StmtMethodDecl      KW_MethodDeclPattern
 #define KW_ExprOperator        KW_ParamPattern
 #define KW_ExprTerm            KW_SymbolPattern
 #define KW_ExprMethodCall      KW_ParamPattern
@@ -110,7 +110,7 @@ extern "C" {
 // reserved
 //#define MN_new       (8+KW_void)
 #define FN_this      FN_("this")
-#define KW_MethodPattern    (((ksymbol_t)KW_return)|KW_PATTERN) /*$Method*/
+#define KW_MethodDeclPattern    (((ksymbol_t)KW_return)|KW_PATTERN) /*$Method*/
 
 #define kflag_clear(flag)  (flag) = 0
 #define K_CHECKSUM 1
