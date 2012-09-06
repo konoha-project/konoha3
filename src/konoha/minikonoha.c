@@ -161,11 +161,12 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 		MODSUGAR_loadMethod(kctx);
 	}
 	else {
-//		for(i = 0; i < KonohaModule_MAXSIZE; i++) {
-//			if(newctx->modshare[i] != NULL && newctx->modshare[i]->new_local != NULL) {
-//				newctx->mod[i] = newctx->modshare[i]->new_local((KonohaContext_t)newctx, newctx->modshare[i]);
-//			}
-//		}
+		int i;
+		for(i = 0; i < KonohaModule_MAXSIZE; i++) {
+			if(newctx->modshare[i] != NULL && newctx->modshare[i]->setup != NULL) {
+				newctx->modshare[i]->setup((KonohaContext *)newctx, newctx->modshare[i], true);
+			}
+		}
 	}
 	return newctx;
 }
