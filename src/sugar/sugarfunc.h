@@ -1205,6 +1205,7 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ PATTERN(Symbol),  PatternMatch_(MethodName), ParseExpr_(Term), ExprTyCheck_(Symbol),},
 		{ PATTERN(Text),    ExprTyCheck_(Text),},
 		{ PATTERN(Number),  ExprTyCheck_(Int),},
+//		{ PATTERN(Float),  },
 		{ GROUP(Parenthesis), .flag = SYNFLAG_ExprPostfixOp2, ParseExpr_(Parenthesis), .precedence_op2 = C_PRECEDENCE_CALL, ExprTyCheck_(FuncStyleCall),}, //KW_ParenthesisGroup
 		{ GROUP(Bracket),  },  //KW_BracketGroup
 		{ GROUP(Brace),  }, // KW_BraceGroup
@@ -1230,14 +1231,12 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(COLON), /*.precedence_op2 = C_PRECEDENCE_TRINARY,*/ },  // colon
 		{ TOKEN(COMMA),    ParseExpr_(COMMA), .precedence_op2 = C_PRECEDENCE_COMMA,},
 		{ TOKEN(DOLLAR),   ParseExpr_(DOLLAR), },
-//		{ TOKEN(boolean), .type = TY_boolean, },
-//		{ TOKEN(int),     .type = TY_int, },
 		{ TOKEN(true),    ExprTyCheck_(true),},
 		{ TOKEN(false),   ExprTyCheck_(false),},
 		{ PATTERN(Expr), .rule ="$Expr", PatternMatch_(Expr), TopStmtTyCheck_(Expr), StmtTyCheck_(Expr),  },
 		{ PATTERN(Type),  PatternMatch_(Type), .rule = "$Type $Expr", StmtTyCheck_(TypeDecl), ExprTyCheck_(Type), },
 		{ PATTERN(Const), PatternMatch_(ConstName), .rule = "$Const \"=\" $Expr", TopStmtTyCheck_(ConstDecl), /*ExprTyCheck_(Usymbol),*/},
-		{ TOKEN(void),   .type = TY_void, .rule ="$Type [ClassName: $Type \".\"] $Symbol $Param [$Block]", TopStmtTyCheck_(MethodDecl)},
+		{ TOKEN(void),   /*.type = TY_void,*/ .rule ="$Type [ClassName: $Type \".\"] $Symbol $Param [$Block]", TopStmtTyCheck_(MethodDecl)},
 		{ TOKEN(if),     .rule ="\"if\" \"(\" $Expr \")\" $Block [\"else\" else: $Block]", TopStmtTyCheck_(if), StmtTyCheck_(if), },
 		{ TOKEN(else),   .rule = "\"else\" $Block", TopStmtTyCheck_(else), StmtTyCheck_(else), },
 		{ TOKEN(return), .rule ="\"return\" [$Expr]", .flag = SYNFLAG_StmtBreakExec, StmtTyCheck_(return), },
