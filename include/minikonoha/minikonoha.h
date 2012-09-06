@@ -715,7 +715,11 @@ typedef struct KDEFINE_CLASS {
 #define STRUCTNAME(C) \
 	.structname = #C,\
 	.typeId = TY_newid,\
-	.cstruct_size = sizeof(k##C)\
+	.cstruct_size = sizeof(k##C)
+
+#define UNBOXNAME(C) \
+	.structname = #C,\
+	.typeId = TY_newid
 
 //KonohaClassVar;
 typedef uintptr_t kmagicflag_t;
