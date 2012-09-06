@@ -1,5 +1,5 @@
 K.import("konoha.bytes");
-K.import("konoha.subproc");
+K.import("dscript.subproc");
 
 void f () {
 	Subproc s = Subproc.new("", false);

@@ -715,7 +715,11 @@ typedef struct KDEFINE_CLASS {
 #define STRUCTNAME(C) \
 	.structname = #C,\
 	.typeId = TY_newid,\
-	.cstruct_size = sizeof(k##C)\
+	.cstruct_size = sizeof(k##C)
+
+#define UNBOXNAME(C) \
+	.structname = #C,\
+	.typeId = TY_newid
 
 //KonohaClassVar;
 typedef uintptr_t kmagicflag_t;
@@ -944,30 +948,13 @@ struct kIntVar /* extends kNumber */ {
 #define TY_TYPE                   TY_var     /*special use for KonohaClass*/
 #define IS_String(o)              (O_typeId(o) == TY_String)
 
-/*
- * Bit encoding for Rope String
- * 5432109876543210
- * 000xxxxxxxxxxxxx ==> magicflag bit representation
- * 001xxxxxxxxxxxxx LinerString
- * 011xxxxxxxxxxxxx ExterenalString
- * 010xxxxxxxxxxxxx InlinedString
- * 100xxxxxxxxxxxxx RopeString
- */
-
-#define S_FLAG_MASK_BASE (13)
-#define S_FLAG_LINER     ((1UL << (0)))
-#define S_FLAG_NOFREE    ((1UL << (1)))
-#define S_FLAG_ROPE      ((1UL << (2)))
-#define S_FLAG_INLINE    (S_FLAG_NOFREE)
-#define S_FLAG_EXTERNAL  (S_FLAG_LINER | S_FLAG_NOFREE)
-
-#define S_isRope(o)          (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
+/* kObject_Local1 is reserved by konoha.string package */
 #define S_isTextSgm(o)       (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local2))
 #define S_setTextSgm(o,b)    TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local2,b)
 #define S_isMallocText(o)    (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local3))
 #define S_setMallocText(o,b) TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local3,b)
 #define S_isASCII(o)         (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local4))
-#define S_setASCII(o,b)      TFLAG_set(uintptr_t,((kObjectVar*)o)->h.magicflag,kObject_Local4,b)
+#define S_setASCII(o,b)      TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local4,b)
 #define S_isPooled(o)        (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local5))
 #define S_setPooled(o,b)     TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local5,b)
 #define SIZEOF_INLINETEXT    (sizeof(void*)*8 - sizeof(kBytes))

@@ -36,8 +36,8 @@ void cross(Vec v0, Vec v1, Vec v2) {
 }
 
 void normalize(Vec v1) {
-	double q = dot(v1, v1);
-	double length = Math.sqrt(q);
+	float q = dot(v1, v1);
+	float length = Math.sqrt(q);
 	if (length > 1.0e-10) {
 		v1.x = v1.x / length;
 		v1.y = v1.y / length;
@@ -51,15 +51,15 @@ class RayIntersection {
 	Vec rayDirection;
 	Vec hitPosition;
 	Vec normal;
-	double distance;
+	float distance;
 	boolean  hit;
 }
 
 class Sphere {
 	Vec center;
-	double radius;
+	float radius;
 
-	Sphere(double x0, double y0, double z0, double r0) {
+	Sphere(float x0, float y0, float z0, float r0) {
 		this.center = new Vec(x0, y0, z0);
 		this.radius = r0;
 	}
@@ -71,12 +71,12 @@ class Sphere {
 
 void interSectsSphere(Sphere s, RayIntersection isect) {
 	Vec rs = new Vec(isect.rayPosition.x - s.center.x, isect.rayPosition.y - s.center.y, isect.rayPosition.z - s.center.z);
-	double b = dot(rs, isect.rayDirection);
-	double c = dot(rs, rs) - s.radius * s.radius;
-	double d = b * b - c;
+	float b = dot(rs, isect.rayDirection);
+	float c = dot(rs, rs) - s.radius * s.radius;
+	float d = b * b - c;
 
 	if (d > 0.0) {
-		double t = -b - Math.sqrt(d);
+		float t = -b - Math.sqrt(d);
 		if ((t > 0.0) && (t < isect.distance)) {
 			isect.distance = t;
 			isect.hit = true;
@@ -105,11 +105,11 @@ Array[Sphere] spheres;
 Plane plane;
 
 void interSectsPlane(Plane plane, RayIntersection isect) {
-	double d = -1.0 * dot(plane.position, plane.normal);
-	double v = dot(isect.rayDirection, plane.normal);
+	float d = -1.0 * dot(plane.position, plane.normal);
+	float v = dot(isect.rayDirection, plane.normal);
 
 	if (v > 0.0000000000000001 || v < -0.00000000000000001) {
-		double t = -1.0 * (dot(isect.rayPosition, plane.normal) + d) / v;
+		float t = -1.0 * (dot(isect.rayPosition, plane.normal) + d) / v;
 
 		if ((t > 0.0) && (t < isect.distance)) {
 			isect.distance = t;
@@ -155,8 +155,8 @@ void getAmbientOcclusion(RayIntersection isect, Vec ambientOcclusion) {
 	int i, j;
 	int ntheta = naosamples;
 	int nphi = naosamples;
-	double eps = 0.0001;
-	double pi = 3.141593;
+	float eps = 0.0001;
+	float pi = 3.141593;
 
 	RayIntersection occlsect = new RayIntersection();
 	occlsect.rayPosition = new Vec(isect.hitPosition.x + eps * isect.normal.x,isect.hitPosition.y + eps * isect.normal.y,isect.hitPosition.z + eps * isect.normal.z);
@@ -172,11 +172,11 @@ void getAmbientOcclusion(RayIntersection isect, Vec ambientOcclusion) {
 	while (j < ntheta) {
 		i = 0;
 		while (i < nphi) {
-			double theta = Math.sqrt(Math.random());
-			double phi = 2.0 * pi * Math.random();
-			double x = Math.cos(phi) * theta;
-			double y = Math.sin(phi) * theta;
-			double z = Math.sqrt(1.0 - theta * theta);
+			float theta = Math.sqrt(Math.random());
+			float phi = 2.0 * pi * Math.random();
+			float x = Math.cos(phi) * theta;
+			float y = Math.sin(phi) * theta;
+			float z = Math.sqrt(1.0 - theta * theta);
 			occlsect.rayDirection.x = x * basis[0].x + y * basis[1].x + z * basis[2].x;
 			occlsect.rayDirection.y = x * basis[0].y + y * basis[1].y + z * basis[2].y;
 			occlsect.rayDirection.z = x * basis[0].z + y * basis[1].z + z * basis[2].z;
@@ -195,16 +195,16 @@ void getAmbientOcclusion(RayIntersection isect, Vec ambientOcclusion) {
 		} 
 		j += 1;
 	}
-	double fntheta = ntheta;
-	double fnphi = nphi;
-	double fhitCount = hitCount;
-	double occlusionRatio = (fntheta * fnphi - fhitCount) / (fntheta * fnphi);
+	float fntheta = ntheta;
+	float fnphi = nphi;
+	float fhitCount = hitCount;
+	float occlusionRatio = (fntheta * fnphi - fhitCount) / (fntheta * fnphi);
 	ambientOcclusion.x = occlusionRatio;
 	ambientOcclusion.y = occlusionRatio;
 	ambientOcclusion.z = occlusionRatio;
 }
 
-int clamp(double value) {
+int clamp(float value) {
 	int i = value * 255.5;
 	if (i > 255) i = 255;
 	else if (i < 0) i = 0;
@@ -212,7 +212,7 @@ int clamp(double value) {
 }
 
 void render(int[] byteImage, int width, int height, int numberOfSubSamples) {
-	float[] fimg = new Float[width * height * 3];
+	float[] fimg = new float[width * height * 3];
 	RayIntersection isect = new RayIntersection();
 	int y, x,v,u;
 	float fnumberOfSubSamples = numberOfSubSamples;

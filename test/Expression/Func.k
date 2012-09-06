@@ -5,7 +5,7 @@ int succ(int n) {
 }
 
 void f() {
-	Func[Int,Int] g = succ;
+	Func[int,int] g = succ;
 	assert(g(1) == 2);
 }
 
