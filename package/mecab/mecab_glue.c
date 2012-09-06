@@ -82,8 +82,6 @@ static void Tagger_free(KonohaContext *kctx, kObject *o)
 /* [API methods] */
 /* Tagger class  */
 
-//#define getMecab(O) ((mecab_t *)((kTagger*)(O)->mecab))
-
 // Tagger Tagger.new();
 static KMETHOD Tagger_new (KonohaContext *kctx, KonohaStack *sfp)
 {

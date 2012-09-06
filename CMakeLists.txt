@@ -132,17 +132,17 @@ set(PACKAGES
 	posix.file
 	posix.fd
 ##	posix.socket
-##	konoha.sql
+	konoha.sql
 ##	konoha.subproc
 	konoha.mpi
-##	curl
+	curl
 ##	ijit
-##	jansson
-##	mecab
+	jansson
+	mecab
 	python
 	apache
 #	openssl
-	logpool
+#	logpool
 	konoha.date
 )
 
