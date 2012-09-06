@@ -76,7 +76,7 @@ static void Tagger_free(KonohaContext *kctx, kObject *o)
 #define TY_MecabNode     cMecabNode->typeId
 #define IS_MecabNode(O)  ((O)->h.ct == CT_MecabNode)
 
-#define _KVi(T)  #T, TY_Int, T
+#define _KVi(T)  #T, TY_int, T
 
 /* ------------------------------------------------------------------------ */
 /* [API methods] */
@@ -161,11 +161,11 @@ static KMETHOD MecabNode_next(KonohaContext *kctx, KonohaStack *sfp)
 	if (next != NULL) {
 		ret = (struct _kMecabNode*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 		ret->node = next;
+		RETURN_(ret);
 	}
 	else {
-		ret = NULL;
+		RETURN_DefaultObjectValue();
 	}
-	RETURN_(ret);
 }
 
 // MecabNode MecabNode.prev()
@@ -177,11 +177,11 @@ static KMETHOD MecabNode_prev(KonohaContext *kctx, KonohaStack *sfp)
 	if (node != NULL) {
 		ret = (struct _kMecabNode*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 		ret->node = prev;
+		RETURN_(ret);
 	}
 	else {
-		ret = NULL;
+		RETURN_DefaultObjectValue();
 	}
-	RETURN_(ret);
 }
 
 // MecabNode MecabNode.enext()
@@ -193,11 +193,11 @@ static KMETHOD MecabNode_enext(KonohaContext *kctx, KonohaStack *sfp)
 	if (node != NULL) {
 		ret = (struct _kMecabNode*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 		ret->node = enext;
+		RETURN_(ret);
 	}
 	else {
-		ret = NULL;
+		RETURN_DefaultObjectValue();
 	}
-	RETURN_(ret);
 }
 
 // MecabNode MecabNode.bnext()
@@ -357,7 +357,7 @@ static kbool_t mecab_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const, _F(Tagger_new),         TY_Tagger,  TY_Tagger, MN_("new"),   0,
 		_Public|_Const, _F(Tagger_parse),       TY_String,  TY_Tagger, MN_("parse"), 1, TY_String, FN_("input"),
-		_Public|_Const, _F(Tagger_NBestParse),  TY_String,  TY_Tagger, MN_("NBestParse"), 2, TY_Int, FN_("n"), TY_String, FN_("input"),
+		_Public|_Const, _F(Tagger_NBestParse),  TY_String,  TY_Tagger, MN_("NBestParse"), 2, TY_int, FN_("n"), TY_String, FN_("input"),
 		_Public|_Const, _F(Tagger_NBestInit),   TY_String,  TY_Tagger, MN_("NBestInit"), 1, TY_String, FN_("input"),
 		_Public|_Const, _F(Tagger_NBestNext),   TY_String,  TY_Tagger, MN_("NBestNext"), 0,
 		_Public|_Const, _F(Tagger_parseToNode), TY_MecabNode,  TY_Tagger, MN_("parseToNode"), 1, TY_String, FN_("input"),
@@ -369,19 +369,19 @@ static kbool_t mecab_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public|_Const, _F(MecabNode_bnext),       TY_MecabNode,  TY_MecabNode, MN_("bnext"), 0,
 		_Public|_Const, _F(MecabNode_getSurface),  TY_String,  TY_MecabNode, MN_("getSurface"), 0,
 		_Public|_Const, _F(MecabNode_getFeature),  TY_String,  TY_MecabNode, MN_("getFeature"), 0,
-		_Public|_Const, _F(MecabNode_getLength),   TY_Int,  TY_MecabNode, MN_("getLength"), 0,
-		_Public|_Const, _F(MecabNode_getRLength),  TY_Int,  TY_MecabNode, MN_("getRLength"), 0,
-		_Public|_Const, _F(MecabNode_getRCAttr),   TY_Int,  TY_MecabNode, MN_("getRCAttr"), 0,
-		_Public|_Const, _F(MecabNode_getLCAttr),   TY_Int,  TY_MecabNode, MN_("getLCAttr"), 0,
-		_Public|_Const, _F(MecabNode_getCharType), TY_Int,  TY_MecabNode, MN_("getCharType"), 0,
-		_Public|_Const, _F(MecabNode_getStat),     TY_Int,  TY_MecabNode, MN_("getStat"), 0,
-		_Public|_Const, _F(MecabNode_getID),       TY_Int,  TY_MecabNode, MN_("getID"), 0,
-		_Public|_Const, _F(MecabNode_isBest),      TY_Boolean,  TY_MecabNode, MN_("isBest"), 0,
+		_Public|_Const, _F(MecabNode_getLength),   TY_int,  TY_MecabNode, MN_("getLength"), 0,
+		_Public|_Const, _F(MecabNode_getRLength),  TY_int,  TY_MecabNode, MN_("getRLength"), 0,
+		_Public|_Const, _F(MecabNode_getRCAttr),   TY_int,  TY_MecabNode, MN_("getRCAttr"), 0,
+		_Public|_Const, _F(MecabNode_getLCAttr),   TY_int,  TY_MecabNode, MN_("getLCAttr"), 0,
+		_Public|_Const, _F(MecabNode_getCharType), TY_int,  TY_MecabNode, MN_("getCharType"), 0,
+		_Public|_Const, _F(MecabNode_getStat),     TY_int,  TY_MecabNode, MN_("getStat"), 0,
+		_Public|_Const, _F(MecabNode_getID),       TY_int,  TY_MecabNode, MN_("getID"), 0,
+		_Public|_Const, _F(MecabNode_isBest),      TY_boolean,  TY_MecabNode, MN_("isBest"), 0,
 		//_Public|_Const, _F(MecabNode_alpha),       TY_Float,  TY_MecabNode, MN_("alpha"), 0,
 		//_Public|_Const, _F(MecabNode_beta),        TY_Float,  TY_MecabNode, MN_("beta"), 0,
 		//_Public|_Const, _F(MecabNode_prob),        TY_Float,  TY_MecabNode, MN_("prob"), 0,
-		_Public|_Const, _F(MecabNode_wcost),       TY_Int,  TY_MecabNode, MN_("wcost"), 0,
-		_Public|_Const, _F(MecabNode_cost),        TY_Int,  TY_MecabNode, MN_("cost"), 0,
+		_Public|_Const, _F(MecabNode_wcost),       TY_int,  TY_MecabNode, MN_("wcost"), 0,
+		_Public|_Const, _F(MecabNode_cost),        TY_int,  TY_MecabNode, MN_("cost"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
