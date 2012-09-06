@@ -120,7 +120,6 @@ set(PACKAGES
 	konoha.namespace
 	konoha.new
 	konoha.null
-	konoha.rope
 	konoha.string
 	konoha.subtype
 	konoha.var

@@ -145,7 +145,7 @@ static void String_checkASCII(KonohaContext *kctx, kString *s)
 		case 1:     ch |= *p++;
 		} while(--n>0);
 	}
-	S_setASCII(s, (ch < 128));
+	S_setASCII((kStringVar*)s, (ch < 128));
 }
 
 static kString* new_kString(KonohaContext *kctx, const char *text, size_t len, int spol)
