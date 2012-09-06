@@ -22,10 +22,30 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-/* ************************************************************************ */
+#include<minikonoha/minikonoha.h>
+#include<minikonoha/sugar.h>
+#include <minikonoha/bytes.h>
 
-#ifndef SUBPROC_GLUE_H_
-#define SUBPROC_GLUE_H_
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <poll.h>
+#include <signal.h>
+#include <sys/time.h>
+
+#if defined(__linux__)
+#include <linux/version.h>
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 27)
+#define __USE_LOCAL_PIPE2__
+#endif
+#endif /* __linux__ */
+
+#include "subproc_resourcemonitor.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -1311,7 +1331,20 @@ static kbool_t subproc_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfile
 	return true;
 }
 
+// --------------------------------------------------------------------------
+
+KDEFINE_PACKAGE* subproc_init(void)
+{
+	static KDEFINE_PACKAGE d = {
+		KPACKNAME("subproc", "1.0"),
+		.initPackage = subproc_initPackage,
+		.setupPackage = subproc_setupPackage,
+		.initNameSpace = subproc_initNameSpace,
+		.setupNameSpace = subproc_setupNameSpace,
+	};
+	return &d;
+}
+
 #ifdef __cplusplus
 }
 #endif
-#endif /* SUBPROC_GLUE_H_ */
