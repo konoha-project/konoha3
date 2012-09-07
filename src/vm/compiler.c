@@ -102,6 +102,7 @@ struct IRBuilder {
 		int indent;
 		int espidx;
 	};
+	int a; /* what is a ? */
 	kStmt* currentStmt;
 };
 
@@ -605,7 +606,10 @@ static void KonohaVisitor_visitReturnStmt(struct IRBuilder *self, kStmt *stmt)
 	KonohaContext *kctx = self->kctx;
 	kExpr *expr = (kExpr*)kStmt_getObjectNULL(kctx, stmt, KW_ExprPattern);
 	if(expr != NULL && IS_Expr(expr) && expr->ty != TY_void) {
+		int a = self->a;
+		self->a = K_RTNIDX;
 		handleExpr(self, expr);
+		self->a = a;
 	}
 	ASM_JMP(kctx, ctxcode->lbEND);  // RET
 }
@@ -667,7 +671,7 @@ static void KonohaVisitor_visitUndefinedStmt(struct IRBuilder *self, kStmt *stmt
 static void KonohaVisitor_visitConstExpr(struct IRBuilder *self, kExpr *expr)
 {
 	KonohaContext *kctx = self->kctx;
-	int a = self->espidx;
+	int a = self->a;
 	kObject *v = expr->objectConstValue;
 	DBG_ASSERT(!TY_isUnbox(expr->ty));
 	DBG_ASSERT(Expr_hasObjectConstValue(expr));
@@ -678,21 +682,21 @@ static void KonohaVisitor_visitConstExpr(struct IRBuilder *self, kExpr *expr)
 static void KonohaVisitor_visitNConstExpr(struct IRBuilder *self, kExpr *expr)
 {
 	KonohaContext *kctx = self->kctx;
-	int a = self->espidx;
+	int a = self->a;
 	ASM(NSET, NC_(a), expr->unboxConstValue, CT_(expr->ty));
 }
 
 static void KonohaVisitor_visitNewExpr(struct IRBuilder *self, kExpr *expr)
 {
 	KonohaContext *kctx = self->kctx;
-	int a = self->espidx;
+	int a = self->a;
 	ASM(NEW, OC_(a), expr->index, CT_(expr->ty));
 }
 
 static void KonohaVisitor_visitNullExpr(struct IRBuilder *self, kExpr *expr)
 {
 	KonohaContext *kctx = self->kctx;
-	int a = self->espidx;
+	int a = self->a;
 	if(TY_isUnbox(expr->ty)) {
 		ASM(NSET, NC_(a), 0, CT_(expr->ty));
 	}
@@ -704,14 +708,14 @@ static void KonohaVisitor_visitNullExpr(struct IRBuilder *self, kExpr *expr)
 static void KonohaVisitor_visitLocalExpr(struct IRBuilder *self, kExpr *expr)
 {
 	KonohaContext *kctx = self->kctx;
-	int a = self->espidx;
+	int a = self->a;
 	NMOV_asm(kctx, a, expr->ty, expr->index);
 }
 
 static void KonohaVisitor_visitBlockExpr(struct IRBuilder *self, kExpr *expr)
 {
 	KonohaContext *kctx = self->kctx;
-	int a = self->espidx;
+	int a = self->a;
 	DBG_ASSERT(IS_Block(expr->block));
 	visitBlock(self, expr->block);
 	NMOV_asm(kctx, a, expr->ty, self->espidx);
@@ -720,7 +724,7 @@ static void KonohaVisitor_visitBlockExpr(struct IRBuilder *self, kExpr *expr)
 static void KonohaVisitor_visitFieldExpr(struct IRBuilder *self, kExpr *expr)
 {
 	KonohaContext *kctx = self->kctx;
-	int a = self->espidx;
+	int a = self->a;
 	kshort_t index = (kshort_t)expr->index;
 	kshort_t xindex = (kshort_t)(expr->index >> (sizeof(kshort_t)*8));
 	if(TY_isUnbox(expr->ty)) {
@@ -764,7 +768,7 @@ static void KonohaVisitor_visitCallExpr(struct IRBuilder *self, kExpr *expr)
 static void KonohaVisitor_visitAndExpr(struct IRBuilder *self, kExpr *expr)
 {
 	KonohaContext *kctx = self->kctx;
-	int a = self->espidx;
+	int a = self->a;
 	int i, size = kArray_size(expr->cons);
 	kBasicBlock*  lbTRUE = new_BasicBlockLABEL(kctx);
 	kBasicBlock*  lbFALSE = new_BasicBlockLABEL(kctx);
@@ -781,7 +785,7 @@ static void KonohaVisitor_visitAndExpr(struct IRBuilder *self, kExpr *expr)
 static void KonohaVisitor_visitOrExpr(struct IRBuilder *self, kExpr *expr)
 {
 	KonohaContext *kctx = self->kctx;
-	int a = self->espidx;
+	int a = self->a;
 	int i, size = kArray_size(expr->cons);
 	kBasicBlock*  lbTRUE = new_BasicBlockLABEL(kctx);
 	kBasicBlock*  lbFALSE = new_BasicBlockLABEL(kctx);
@@ -798,7 +802,7 @@ static void KonohaVisitor_visitOrExpr(struct IRBuilder *self, kExpr *expr)
 static void KonohaVisitor_visitLetExpr(struct IRBuilder *self, kExpr *expr)
 {
 	KonohaContext *kctx = self->kctx;
-	int a = self->espidx;
+	int a = self->a;
 	int espidx = self->espidx;
 	kExpr *exprL = kExpr_at(expr, 1);
 	kExpr *exprR = kExpr_at(expr, 2);
@@ -844,10 +848,8 @@ struct IRBuilder *createKonohaVisitor(struct IRBuilder *builder)
 #define DEFINE_BUILDER_API(NAME) builder->base.visit##NAME = KonohaVisitor_visit##NAME;
 	VISITOR_LIST(DEFINE_BUILDER_API);
 #undef DEFINE_BUILDER_API
-	builder->indent = 0;
 	builder->espidx = 0;
-	//builder->blocks = NULL;
-	//builder->workingBlock = NULL;
+	builder->a = 0;
 	builder->currentStmt = NULL;
 	return builder;
 }
@@ -1207,9 +1209,9 @@ static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	ASM_LABEL(kctx, lbBEGIN);
 
 	struct IRBuilder *builder, builderbuf;
-	builder = createDumpVisitor(&builderbuf);
-	builder->kctx = kctx;
-	visitBlock(builder, bk);
+	//builder = createDumpVisitor(&builderbuf);
+	//builder->kctx = kctx;
+	//visitBlock(builder, bk);
 	builder = createKonohaVisitor(&builderbuf);
 	builder->kctx = kctx;
 	visitBlock(builder, bk);
