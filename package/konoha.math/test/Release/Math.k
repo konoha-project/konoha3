@@ -31,3 +31,15 @@ System.p(MATH_LN10);
 System.p(MATH_PI);
 System.p(MATH_SQRT2);
 
+void f() {
+    float r0 = Math.random();
+    float r1 = Math.random();
+    float r2 = Math.random();
+    float r3 = Math.random();
+    assert(0.0 <= r0 && r0 <= 1.0);
+    assert(0.0 <= r1 && r1 <= 1.0);
+    assert(0.0 <= r2 && r2 <= 1.0);
+    assert(0.0 <= r3 && r3 <= 1.0);
+}
+
+f();
