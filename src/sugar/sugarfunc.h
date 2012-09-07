@@ -1228,7 +1228,7 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(AND), .precedence_op2 = C_PRECEDENCE_AND, ParseExpr_(Op), ExprTyCheck_(AND)},
 		{ TOKEN(OR),  .precedence_op2 = C_PRECEDENCE_OR, ParseExpr_(Op), ExprTyCheck_(OR)},
 		{ TOKEN(NOT),  .precedence_op1 = C_PRECEDENCE_PREUNARY,},
-		{ TOKEN(COLON), /*.precedence_op2 = C_PRECEDENCE_TRINARY,*/ },  // colon
+		{ TOKEN(COLON), .precedence_op2 = C_PRECEDENCE_TRINARY, },  // colon
 		{ TOKEN(COMMA),    ParseExpr_(COMMA), .precedence_op2 = C_PRECEDENCE_COMMA,},
 		{ TOKEN(DOLLAR),   ParseExpr_(DOLLAR), },
 		{ TOKEN(true),    ExprTyCheck_(true),},

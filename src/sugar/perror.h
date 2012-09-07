@@ -193,7 +193,6 @@ static void WARN_IgnoredTokens(KonohaContext *kctx, kArray *tokenList, int begin
 	}
 }
 
-
 #ifdef __cplusplus
 }
 #endif

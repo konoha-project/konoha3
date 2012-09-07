@@ -272,7 +272,6 @@ typedef struct KDEFINE_SYNTAX {
 	const char *rule;
 	int precedence_op2;
 	int precedence_op1;
-//	int type;
 	MethodFunc PatternMatch;
 	MethodFunc ParseExpr;
 	MethodFunc TopStmtTyCheck;
