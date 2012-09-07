@@ -246,8 +246,8 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kStmt_parseExpr            = kStmt_parseExpr;
 	mod->kStmt_addExprParam         = kStmt_addExprParam;
 	mod->kStmt_rightJoinExpr        = kStmt_rightJoinExpr;
-	mod->Token_pERR                 = Token_pERR;
-	mod->kStmt_printMessage                     = kStmt_printMessage;
+	mod->kToken_printMessage        = kToken_printMessage;
+	mod->kStmt_printMessage         = kStmt_printMessage;
 
 	defineDefaultSyntax(kctx, KNULL(NameSpace));
 }

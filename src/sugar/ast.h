@@ -473,14 +473,14 @@ static int TokenRange_addSymbolToken(KonohaContext *kctx, TokenRange *range, Tok
 		}
 		else {
 //			if(!isalpha(t[0])) {
-//				Token_pERR(kctx, tk, "undefined token: %s", Token_text(tk));
+//				kToken_printMessage(kctx, tk, "undefined token: %s", Token_text(tk));
 //				range->errToken = tk;
 //				return sourceRange->endIdx;  // end
 //				while(t[0] != 0) {
 //					ksymbol_t op1 = ksymbolA(t, 1, SYM_NEWID);
 //					syn = SYN_(range->ns, op1);
 //					if(syn == NULL) {
-//						Token_pERR(kctx, tk, "undefined token: %s", Token_text(tk));
+//						kToken_printMessage(kctx, tk, "undefined token: %s", Token_text(tk));
 //						range->errToken = tk;
 //						return range->endIdx;  // end
 //					}
@@ -548,7 +548,7 @@ static int TokenRange_addStrucuredToken(KonohaContext *kctx, TokenRange *range, 
 		if(nestedRange->errToken != NULL) {
 			if(returnIdx == sourceRange->endIdx) {
 				int closech = (AST_type == KW_ParenthesisGroup) ? ')': ']';
-				Token_pERR(kctx, astToken, "'%c' is expected (probably before %s)", closech, Token_text(sourceRange->tokenList->tokenItems[probablyCloseBefore]));
+				kToken_printMessage(kctx, astToken, ErrTag, "'%c' is expected (probably before %s)", closech, Token_text(sourceRange->tokenList->tokenItems[probablyCloseBefore]));
 				nestedRange->errToken = astToken;
 			}
 			range->errToken = nestedRange->errToken;

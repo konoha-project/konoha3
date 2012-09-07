@@ -569,8 +569,8 @@ typedef struct {
 	kExpr *     (*kStmt_tyCheckCallParamExpr)(KonohaContext *, kStmt *, kExpr *, kMethod *, kGamma *, ktype_t);
 	kbool_t     (*kStmt_declType)(KonohaContext *, kStmt *, kGamma *, ktype_t, kExpr *, TypeDeclFunc, kStmt **);
 
-	void       (*Token_pERR)(KonohaContext *, kTokenVar *, const char *fmt, ...);
-	kExpr *    (*kStmt_printMessage)(KonohaContext *, kStmt *, kToken *, int pe, const char *fmt, ...);
+	void       (*kToken_printMessage)(KonohaContext *, kTokenVar *, kinfotag_t, const char *fmt, ...);
+	kExpr *    (*kStmt_printMessage)(KonohaContext *, kStmt *, kToken *, kinfotag_t, const char *fmt, ...);
 
 } KModuleSugar;
 
