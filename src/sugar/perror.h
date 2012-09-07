@@ -137,12 +137,12 @@ static kfileline_t kExpr_uline(KonohaContext *kctx, kExpr *expr, kfileline_t uli
 	return uline;
 }
 
-static kExpr* kStmt_printMessage2(KonohaContext *kctx, kStmt *stmt, kToken *tk, int pe, const char *fmt, ...)
+static kExpr* kStmt_printMessage2(KonohaContext *kctx, kStmt *stmt, kToken *tk, kinfotag_t taglevel, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
 	kfileline_t uline = stmt->uline;
-	if(tk != NULL && pe <= ErrTag ) {
+	if(tk != NULL && taglevel <= ErrTag ) {
 		if(IS_Token(tk)) {
 			uline = tk->uline;
 		}
@@ -150,8 +150,8 @@ static kExpr* kStmt_printMessage2(KonohaContext *kctx, kStmt *stmt, kToken *tk, 
 			uline = kExpr_uline(kctx, (kExpr*)tk, uline);
 		}
 	}
-	kString *errmsg = SugarContext_vprintMessage(kctx, pe, uline, fmt, ap);
-	if(pe <= ErrTag && !Stmt_isERR(stmt)) {
+	kString *errmsg = SugarContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
+	if(taglevel <= ErrTag && !Stmt_isERR(stmt)) {
 		kStmt_toERR(kctx, stmt, errmsg);
 	}
 	va_end(ap);
