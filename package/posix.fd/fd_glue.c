@@ -32,6 +32,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <dirent.h>
+#include "fdconfig.h"
 
 /* ------------------------------------------------------------------------ */
 
@@ -541,6 +542,13 @@ static KMETHOD Stat_getst_gid(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(stat->stat->st_gid);
 }
 
+//## int Stat.getst_size()
+static KMETHOD Stat_getst_size(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kStat *stat = (kStat *)sfp[0].asObject;
+	RETURNi_(stat->stat->st_size);
+}
+
 //## int Stat.getst_atime()
 static KMETHOD Stat_getst_atime(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -562,42 +570,59 @@ static KMETHOD Stat_getst_ctime(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(stat->stat->st_ctime);
 }
 
+#ifdef HAVE_STRUCT_STAT_ST_RDEV
 //## int Stat.getst_rdev()
 static KMETHOD Stat_getst_rdev(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kStat *stat = (kStat *)sfp[0].asObject;
 	RETURNi_(stat->stat->st_rdev);
 }
+#endif /* HAVE_STRUCT_STAT_ST_RDEV */
 
+#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
 //## int Stat.getst_blocks()
 static KMETHOD Stat_getst_blocks(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kStat *stat = (kStat *)sfp[0].asObject;
 	RETURNi_(stat->stat->st_blocks);
 }
+#endif /* HAVE_STRUCT_STAT_ST_BLOCKS */
 
-#if !defined(__linux__)
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
+//## int Stat.getst_blksize()
+static KMETHOD Stat_getst_blksize(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kStat *stat = (kStat *)sfp[0].asObject;
+	RETURNi_(stat->stat->st_blksize);
+}
+#endif /* HAVE_STRUCT_STAT_ST_BLKSIZE */
+
+#ifdef HAVE_STRUCT_STAT_ST_FLAGS
 //## int Stat.getst_flags()
 static KMETHOD Stat_getst_flags(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kStat *stat = (kStat *)sfp[0].asObject;
 	RETURNi_(stat->stat->st_flags);
 }
+#endif /* HAVE_STRUCT_STAT_ST_FLAGS */
 
+#ifdef HAVE_STRUCT_STAT_ST_GEN
 //## int Stat.getst_gen()
 static KMETHOD Stat_getst_gen(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kStat *stat = (kStat *)sfp[0].asObject;
 	RETURNi_(stat->stat->st_gen);
 }
+#endif /* HAVE_STRUCT_STAT_ST_GEN */
 
+#ifdef HAVE_STRUCT_STAT_ST_BIRTHTIME
 //## int Stat.getst_birthtime()
 static KMETHOD Stat_getst_birthtime(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kStat *stat = (kStat *)sfp[0].asObject;
 	RETURNi_(stat->stat->st_birthtime);
 }
-#endif /* !defined(__linux__) */
+#endif /* HAVE_STRUCT_STAT_ST_BIRTHTIME */
 
 //## DIR System.opendir(String name)
 static KMETHOD System_opendir(KonohaContext *kctx, KonohaStack *sfp)
@@ -817,16 +842,28 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		_Public|_Const|_Im, _F(Stat_getst_nlink), TY_int, TY_Stat, MN_("getst_nlink"), 0,
 		_Public|_Const|_Im, _F(Stat_getst_uid), TY_int, TY_Stat, MN_("getst_uid"), 0,
 		_Public|_Const|_Im, _F(Stat_getst_gid), TY_int, TY_Stat, MN_("getst_gid"), 0,
+		_Public|_Const|_Im, _F(Stat_getst_size), TY_int, TY_Stat, MN_("getst_size"), 0,
 		_Public|_Const|_Im, _F(Stat_getst_atime), TY_int, TY_Stat, MN_("getst_atime"), 0,
 		_Public|_Const|_Im, _F(Stat_getst_mtime), TY_int, TY_Stat, MN_("getst_mtime"), 0,
 		_Public|_Const|_Im, _F(Stat_getst_ctime), TY_int, TY_Stat, MN_("getst_ctime"), 0,
+#ifdef HAVE_STRUCT_STAT_ST_RDEV
 		_Public|_Const|_Im, _F(Stat_getst_rdev), TY_int, TY_Stat, MN_("getst_rdev"), 0,
+#endif /* HAVE_STRUCT_STAT_ST_RDEV */
+#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
 		_Public|_Const|_Im, _F(Stat_getst_blocks), TY_int, TY_Stat, MN_("getst_blocks"), 0,
-#if !defined(__linux__)
+#endif /* HAVE_STRUCT_STAT_ST_BLOCKS */
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
+		_Public|_Const|_Im, _F(Stat_getst_blksize), TY_int, TY_Stat, MN_("getst_blksize"), 0,
+#endif /* HAVE_STRUCT_STAT_ST_BLKSIZE */
+#ifdef HAVE_STRUCT_STAT_ST_FLAGS
 		_Public|_Const|_Im, _F(Stat_getst_flags), TY_int, TY_Stat, MN_("getst_flags"), 0,
+#endif /* HAVE_STRUCT_STAT_ST_FLAGS */
+#ifdef HAVE_STRUCT_STAT_ST_GEN
 		_Public|_Const|_Im, _F(Stat_getst_gen), TY_int, TY_Stat, MN_("getst_gen"), 0,
+#endif /* HAVE_STRUCT_STAT_ST_GEN */
+#ifdef HAVE_STRUCT_STAT_ST_BIRTHTIME
 		_Public|_Const|_Im, _F(Stat_getst_birthtime), TY_int, TY_Stat, MN_("getst_birthtime"), 0,
-#endif /* !defined(__linux__) */
+#endif /* HAVE_STRUCT_STAT_ST_BIRTHTIME */
 		_Public|_Const|_Im, _F(System_opendir), TY_DIR, TY_System, MN_("opendir"), 1, TY_String, FN_("dirname"),
 		_Public|_Const|_Im, _F(DIR_close), TY_int, TY_DIR, MN_("close"), 0,
 		_Public|_Const|_Im, _F(DIR_getfd), TY_int, TY_DIR, MN_("getfd"), 0,
