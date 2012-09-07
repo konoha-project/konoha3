@@ -229,7 +229,7 @@ static void Kfree(KonohaContext *kctx, void *p, size_t s)
 /* ------------------------------------------------------- */
 #define FREELIST_POP(o,i) do {\
 	if(memlocal(kctx)->freeObjectList[i] == NULL) {\
-		MODGC_gc_invoke(kctx,0);\
+		KLIB Kgc_invoke(kctx,0);\
 	}\
 	DBG_ASSERT(memlocal(kctx)->freeObjectList[i] != NULL);\
 	o = memlocal(kctx)->freeObjectList[i];\
