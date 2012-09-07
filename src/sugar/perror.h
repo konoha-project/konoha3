@@ -137,11 +137,7 @@ static kfileline_t kExpr_uline(KonohaContext *kctx, kExpr *expr, kfileline_t uli
 	return uline;
 }
 
-#define kkStmt_printMessage(STMT, PE, FMT, ...)        kStmt_printMessage(kctx, STMT, NULL, PE, FMT, ## __VA_ARGS__)
-#define kToken_p(STMT, TK, PE, FMT, ...)   kStmt_printMessage(kctx, STMT, TK, PE, FMT, ## __VA_ARGS__)
-#define kExpr_p(STMT, EXPR, PE, FMT, ...)  kStmt_printMessage(kctx, STMT, (kToken*)EXPR, PE, FMT, ## __VA_ARGS__)
-
-static kExpr* kStmt_printMessage(KonohaContext *kctx, kStmt *stmt, kToken *tk, int pe, const char *fmt, ...)
+static kExpr* kStmt_printMessage2(KonohaContext *kctx, kStmt *stmt, kToken *tk, int pe, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -196,7 +192,6 @@ static void WARN_IgnoredTokens(KonohaContext *kctx, kArray *tokenList, int begin
 		KLIB Kwb_free(&wb);
 	}
 }
-
 
 
 #ifdef __cplusplus

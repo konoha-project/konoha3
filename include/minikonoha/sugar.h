@@ -434,6 +434,10 @@ struct kStmtVar {
 #define kStmt_removeKey(CTX, O, K)                KLIB kObject_removeKey(CTX, UPCAST(O), K)
 #define kStmt_protoEach(CTX, O, THUNK, F)         KLIB kObject_protoEach(CTX, UPCAST(O), THUNK, F)
 
+#define kStmt_printMessage(kctx, STMT, PE, FMT, ...)            SUGAR kStmt_printMessage2(kctx, STMT, NULL, PE, FMT, ## __VA_ARGS__)
+#define kStmtToken_printMessage(kctx, STMT, TK, PE, FMT, ...)   SUGAR kStmt_printMessage2(kctx, STMT, TK, PE, FMT, ## __VA_ARGS__)
+#define kStmtExpr_printMessage(kctx, STMT, EXPR, PE, FMT, ...)  SUGAR kStmt_printMessage2(kctx, STMT, (kToken*)EXPR, PE, FMT, ## __VA_ARGS__)
+
 struct kBlockVar {
 	KonohaObjectHeader   h;
 	kNameSpace          *blockNameSpace;
@@ -570,7 +574,7 @@ typedef struct {
 	kbool_t     (*kStmt_declType)(KonohaContext *, kStmt *, kGamma *, ktype_t, kExpr *, TypeDeclFunc, kStmt **);
 
 	void       (*kToken_printMessage)(KonohaContext *, kTokenVar *, kinfotag_t, const char *fmt, ...);
-	kExpr *    (*kStmt_printMessage)(KonohaContext *, kStmt *, kToken *, kinfotag_t, const char *fmt, ...);
+	kExpr *    (*kStmt_printMessage2)(KonohaContext *, kStmt *, kToken *, kinfotag_t, const char *fmt, ...);
 
 } KModuleSugar;
 

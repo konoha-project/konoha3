@@ -70,11 +70,11 @@ static kExpr *ExprTyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma 
 	}
 	if(callCount == 0) {
 		if(Expr_isTerm(expr)) {
-			return kToken_p(stmt, expr->termToken, ErrTag, "undefined token type checker: '%s'", Token_text(expr->termToken));
+			return kStmtToken_printMessage(kctx, stmt, expr->termToken, ErrTag, "undefined token type checker: '%s'", Token_text(expr->termToken));
 		}
 		else {
 			DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", expr->syn, expr->syn->parentSyntaxNULL, PSYM_t(syn->keyword));
-			return kkStmt_printMessage(stmt, ErrTag, "undefined operator type checker: %s%s",  KW_t(expr->syn->keyword));
+			return kStmt_printMessage(kctx, stmt, ErrTag, "undefined operator type checker: %s%s",  KW_t(expr->syn->keyword));
 		}
 	}
 	return K_NULLEXPR;
@@ -134,7 +134,7 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 		//DBG_P("type=%s, reqty=%s", TY_t(expr->ty), TY_t(reqty));
 		if(texpr->ty == TY_void) {
 			if(!FLAG_is(pol, TPOL_ALLOWVOID)) {
-				texpr = kExpr_p(stmt, expr, ErrTag, "void is not acceptable");
+				texpr = kStmtExpr_printMessage(kctx, stmt, expr, ErrTag, "void is not acceptable");
 			}
 			return texpr;
 		}
@@ -154,7 +154,7 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 		if(mtd != NULL && (Method_isCoercion(mtd) || FLAG_is(pol, TPOL_COERCION))) {
 			return new_TypedCallExpr(kctx, stmt, gma, reqty, mtd, 1, texpr);
 		}
-		return kExpr_p(stmt, expr, ErrTag, "%s is requested, but %s is given", TY_t(reqty), TY_t(texpr->ty));
+		return kStmtExpr_printMessage(kctx, stmt, expr, ErrTag, "%s is requested, but %s is given", TY_t(reqty), TY_t(texpr->ty));
 	}
 	return texpr;
 }
@@ -225,11 +225,11 @@ static kbool_t SugarSyntax_tyCheckStmt(KonohaContext *kctx, SugarSyntax *syn, kS
 	}
 	if(callCount == 0) {
 		const char *location = Gamma_isTOPLEVEL(gma) ? "at the top level" : "inside the function";
-		kkStmt_printMessage(stmt, ErrTag, "%s%s is not available %s", T_statement(stmt->syn->keyword), location);
+		kStmt_printMessage(kctx, stmt, ErrTag, "%s%s is not available %s", T_statement(stmt->syn->keyword), location);
 		return false;
 	}
 	if(stmt->build != TSTMT_ERR) {
-		kkStmt_printMessage(stmt, ErrTag, "statement typecheck error: %s%s", T_statement(syn->keyword));
+		kStmt_printMessage(kctx, stmt, ErrTag, "statement typecheck error: %s%s", T_statement(syn->keyword));
 	}
 	return false;
 }

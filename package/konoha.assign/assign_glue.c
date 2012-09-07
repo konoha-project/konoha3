@@ -59,7 +59,7 @@
 //				}
 //			}
 //		}
-//		SUGAR kStmt_printMessage(kctx, stmt, (kToken*)expr, ErrTag, "variable name is expected");
+//		SUGAR kStmt_printMessage2(kctx, stmt, (kToken*)expr, ErrTag, "variable name is expected");
 //	}
 //	RETURN_(K_NULLEXPR);
 //}
@@ -125,7 +125,7 @@ static KMETHOD ParseExpr_SelfAssign(KonohaContext *kctx, KonohaStack *sfp)
 		RETURN_(expr);
 	}
 	else {
-		SUGAR kStmt_printMessage(kctx, stmt, selfAssignToken, ErrTag, "undefined binary operator: %s", SYM_t(opSymbol));
+		SUGAR kStmt_printMessage2(kctx, stmt, selfAssignToken, ErrTag, "undefined binary operator: %s", SYM_t(opSymbol));
 	}
 }
 

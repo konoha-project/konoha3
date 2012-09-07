@@ -463,7 +463,7 @@ static kbool_t kStmt_addClassField(KonohaContext *kctx, kStmt *stmt, kGamma *gma
 				KonohaClass_addField(kctx, definedClass, flag, ty, symbol);
 			}
 			else {
-				SUGAR kStmt_printMessage(kctx, stmt, lexpr->termToken, ErrTag, "field initial value must be const: %s", S_text(name));
+				SUGAR kStmt_printMessage2(kctx, stmt, lexpr->termToken, ErrTag, "field initial value must be const: %s", S_text(name));
 				return false;
 			}
 			return true;
@@ -475,7 +475,7 @@ static kbool_t kStmt_addClassField(KonohaContext *kctx, kStmt *stmt, kGamma *gma
 		}
 		return true;
 	}
-	SUGAR kStmt_printMessage(kctx, stmt, NULL, ErrTag, "field name is expected");
+	SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "field name is expected");
 	return false;
 }
 
@@ -511,7 +511,7 @@ static void kBlock_addMethodDeclStmt(KonohaContext *kctx, kBlock *bk, kToken *to
 				lastStmt = stmt;
 			}
 			else {
-				SUGAR kStmt_printMessage(kctx, stmt, NULL, WarnTag, "%s is not available within the class clause", KW_t(stmt->syn->keyword));
+				SUGAR kStmt_printMessage2(kctx, stmt, NULL, WarnTag, "%s is not available within the class clause", KW_t(stmt->syn->keyword));
 			}
 		}
 	}
@@ -543,11 +543,11 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 			DBG_ASSERT(Token_isVirtualTypeLiteral(tokenSuperClass));
 			superClass = CT_(Token_typeLiteral(tokenSuperClass));
 			if(CT_isFinal(superClass)) {
-				SUGAR kStmt_printMessage(kctx, stmt, NULL, ErrTag, "%s is final", CT_t(superClass));
+				SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "%s is final", CT_t(superClass));
 				RETURNb_(false);
 			}
 			if(CT_isVirtual(superClass)) {
-				SUGAR kStmt_printMessage(kctx, stmt, NULL, ErrTag, "%s is still virtual", CT_t(superClass));
+				SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "%s is still virtual", CT_t(superClass));
 				RETURNb_(false);
 			}
 		}
@@ -556,7 +556,7 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	else {
 		if(declsize > 0 && !CT_isVirtual(definedClass)) {
-			SUGAR kStmt_printMessage(kctx, stmt, NULL, ErrTag, "%s has already defined", CT_t(definedClass));
+			SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "%s has already defined", CT_t(definedClass));
 			RETURNb_(false);
 		}
 	}
@@ -599,7 +599,7 @@ static KMETHOD ExprTyCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 			KSETv(expr->cons, expr->cons->methodItems[0], mtd);
 			RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, reqty));
 		}
-		SUGAR kStmt_printMessage(kctx, stmt, tkN, ErrTag, "undefined field: %s", S_text(tkN->text));
+		SUGAR kStmt_printMessage2(kctx, stmt, tkN, ErrTag, "undefined field: %s", S_text(tkN->text));
 	}
 }
 
