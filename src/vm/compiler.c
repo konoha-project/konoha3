@@ -129,12 +129,14 @@ static void handleStmt(struct IRBuilder *builder, kStmt *stmt)
 
 static void visitBlock(struct IRBuilder *builder, kBlock *bk)
 {
+	KonohaContext *kctx = builder->kctx;
 	int shift = builder->shift;
 	builder->espidx = (bk->esp->build == TEXPR_STACKTOP) ? shift + bk->esp->index : bk->esp->index;
 	int i;
 	for(i = 0; i < kArray_size(bk->stmtList); i++) {
 		kStmt *stmt = bk->stmtList->stmtItems[i];
 		if(stmt->syn == NULL) continue;
+		ctxcode->uline = stmt->uline;
 		handleStmt(builder, stmt);
 	}
 	builder->shift = shift;
@@ -546,11 +548,13 @@ static void KonohaVisitor_visitBlockExpr(struct IRBuilder *self, kExpr *expr)
 	KonohaContext *kctx = self->kctx;
 	int a = self->a;
 	int shift = self->shift;
-	self->shift = self->espidx;
+	int espidx = self->espidx;
 	DBG_ASSERT(IS_Block(expr->block));
+	self->shift = self->espidx;
 	visitBlock(self, expr->block);
 	self->shift = shift;
-	NMOV_asm(kctx, a, expr->ty, self->espidx);
+	NMOV_asm(kctx, a, expr->ty, espidx);
+	self->espidx = espidx;
 }
 
 static void KonohaVisitor_visitFieldExpr(struct IRBuilder *self, kExpr *expr)
@@ -629,7 +633,7 @@ static void KonohaVisitor_visitOrExpr(struct IRBuilder *self, kExpr *expr)
 	kBasicBlock*  lbTRUE = new_BasicBlockLABEL(kctx);
 	kBasicBlock*  lbFALSE = new_BasicBlockLABEL(kctx);
 	for(i = 1; i < size; i++) {
-		KonohaVisitor_asmJMPIF(self, kExpr_at(expr, i), 1/*TRUE*/, lbFALSE);
+		KonohaVisitor_asmJMPIF(self, kExpr_at(expr, i), 1/*TRUE*/, lbTRUE);
 	}
 	ASM(NSET, NC_(a), 0/*O_data(K_FALSE)*/, CT_Boolean);
 	ASM_JMP(kctx, lbFALSE);
