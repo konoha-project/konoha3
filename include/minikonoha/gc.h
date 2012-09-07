@@ -34,17 +34,6 @@
 extern "C" {
 #endif
 
-//#define kgcmod        ((kgcmod_t*)kctx->mod[MOD_GC])
-//#define kgcshare      ((kgcshare_t*)kctx->modshare[MOD_GC])
-//
-//typedef struct {
-//	KonohaModule h;
-//} kgcshare_t;
-//
-//typedef struct {
-//	KonohaModuleContext h;
-//} kgcmod_t;
-
 extern void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx);
 extern void MODGCSHARE_free(KonohaContext *kctx, KonohaContextVar *ctx);
 extern void MODGC_destoryAllObjects(KonohaContext *kctx, KonohaContextVar *ctx);

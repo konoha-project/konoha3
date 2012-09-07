@@ -77,11 +77,11 @@ typedef struct klogconf_t {
 #define LOG_ScriptFault          KeyValue_u("uline", sfp[K_RTNIDX].uline)
 
 #define ktrace(POLICY, ...)    do {\
-		static klogconf_t _logconf = {LOGPOL_RECORD|LOGPOL_INIT|LOGPOL_CFUNC|POLICY, NULL, {__FUNCTION__}};\
-		if(TFLAG_is(int, _logconf.policy, LOGPOL_RECORD)) {\
-			KLIB Ktrace(kctx, &_logconf, ## __VA_ARGS__, LOG_END);\
-		}\
-	}while(0)\
+	static klogconf_t _logconf = {LOGPOL_RECORD|LOGPOL_INIT|LOGPOL_CFUNC|POLICY, NULL, {__FUNCTION__}};\
+	if(TFLAG_is(int, _logconf.policy, LOGPOL_RECORD)) {\
+		KLIB Ktrace(kctx, &_logconf, ## __VA_ARGS__, LOG_END);\
+	}\
+} while (0)
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -33,15 +33,13 @@
 extern "C" {
 #endif
 
-#define KFLOAT_FMT             "%.6f"
-
-#define KonohaContext_getFloatModule(kctx)         ((KonohaFloatModule*)kctx->modshare[MOD_float])
-#define KonohaContext_getFloatContext(kctx)        ((KonohaFloatModuleContext*)kctx->mod[MOD_float])
-#define IS_DefinedFloat()    (kctx->modshare[MOD_float] != NULL)
-#define CT_Float                                   KonohaContext_getFloatModule(kctx)->cFloat
-#define TY_float                                   KonohaContext_getFloatModule(kctx)->cFloat->typeId
-
-#define IS_Float(O)      ((O)->h.ct == CT_Float)
+#define KonohaContext_getFloatModule(kctx)    ((KonohaFloatModule*)kctx->modshare[MOD_float])
+#define KonohaContext_getFloatContext(kctx)   ((KonohaFloatModuleContext*)kctx->mod[MOD_float])
+#define IS_DefinedFloat() (kctx->modshare[MOD_float] != NULL)
+#define CT_Float          (KonohaContext_getFloatModule(kctx)->cFloat)
+#define TY_float          (CT_Float->typeId)
+#define IS_Float(O)       ((O)->h.ct == CT_Float)
+#define KFLOAT_FMT        "%.6f"
 
 typedef struct {
 	KonohaModule h;
