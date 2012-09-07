@@ -103,6 +103,7 @@ struct IRBuilder {
 		int espidx;
 	};
 	int a; /* what is a ? */
+	int shift;
 	kStmt* currentStmt;
 };
 
@@ -128,16 +129,23 @@ static void handleStmt(struct IRBuilder *builder, kStmt *stmt)
 
 static void visitBlock(struct IRBuilder *builder, kBlock *bk)
 {
+	int shift = builder->shift;
+	builder->espidx = (bk->esp->build == TEXPR_STACKTOP) ? shift + bk->esp->index : bk->esp->index;
 	int i;
 	for(i = 0; i < kArray_size(bk->stmtList); i++) {
 		kStmt *stmt = bk->stmtList->stmtItems[i];
 		if(stmt->syn == NULL) continue;
 		handleStmt(builder, stmt);
 	}
+	builder->shift = shift;
+	builder->espidx = 0;
 }
 
 static void handleExpr(struct IRBuilder *builder, kExpr *expr)
 {
+	int a = builder->a;
+	int espidx = builder->espidx;
+	int shift = builder->shift;
 	switch(expr->build) {
 		case TEXPR_CONST:    builder->base.visitConstExpr(builder, expr);  break;
 		case TEXPR_NEW:      builder->base.visitNewExpr(builder, expr);    break;
@@ -153,6 +161,9 @@ static void handleExpr(struct IRBuilder *builder, kExpr *expr)
 		case TEXPR_STACKTOP:
 		default: builder->base.visitStackTopExpr(builder, expr);    break;
 	}
+	builder->a = a;
+	builder->espidx = espidx;
+	builder->shift = shift;
 }
 
 static kBlock* Stmt_getFirstBlock(KonohaContext *kctx, kStmt *stmt)
@@ -188,197 +199,8 @@ static kString* Stmt_getErrorMessage(KonohaContext *kctx, kStmt *stmt)
 }
 
 /* ************************************************************************ */
-static void DumpVisitor_visitErrStmt(struct IRBuilder *self, kStmt *stmt)
-{
-	KonohaContext *kctx = self->kctx;
-	emit_string(S_text(kStmt_getObjectNULL(kctx, stmt, KW_ERR)), "", "", self->indent);
-}
 
-static void DumpVisitor_visitExprStmt(struct IRBuilder *self, kStmt *stmt)
-{
-	KonohaContext *kctx = self->kctx;
-	handleExpr(self, Stmt_getFirstExpr(kctx, stmt));
-}
-
-static void DumpVisitor_visitBlockStmt(struct IRBuilder *self, kStmt *stmt)
-{
-	KonohaContext *kctx = self->kctx;
-	visitBlock(self, Stmt_getFirstBlock(kctx, stmt)); 
-}
-
-static void DumpVisitor_visitReturnStmt(struct IRBuilder *self, kStmt *stmt)
-{
-	KonohaContext *kctx = self->kctx;
-	emit_string("Return", "", "", self->indent);
-	kExpr* expr = Stmt_getFirstExpr(kctx, stmt);
-	if (expr != NULL && IS_Expr(expr)){
-		handleExpr(self, expr);
-	}
-}
-
-static void DumpVisitor_visitIfStmt(struct IRBuilder *self, kStmt *stmt)
-{
-	KonohaContext *kctx = self->kctx;
-	self->indent++;
-	emit_string("If", "", "", self->indent - 1);
-	handleExpr(self, Stmt_getFirstExpr(kctx, stmt));
-	emit_string("Then", "", "", self->indent - 1);
-	visitBlock(self, Stmt_getFirstBlock(kctx, stmt)); 
-	emit_string("Else", "", "", self->indent - 1);
-	visitBlock(self, Stmt_getElseBlock(kctx, stmt)); 
-	self->indent--;
-}
-
-static void DumpVisitor_visitLoopStmt(struct IRBuilder *self, kStmt *stmt)
-{
-	KonohaContext *kctx = self->kctx;
-	self->indent++;
-	emit_string("Loop", "", "", self->indent - 1);
-	handleExpr(self, Stmt_getFirstExpr(kctx, stmt));
-	emit_string("Body", "", "", self->indent - 1);
-	visitBlock(self, Stmt_getFirstBlock(kctx, stmt)); 
-	self->indent--;
-}
-
-static void DumpVisitor_visitJumpStmt(struct IRBuilder *self, kStmt *stmt)
-{
-	//KonohaContext *kctx = self->kctx;
-	emit_string("Jump", "", "", self->indent);
-}
-
-static void DumpVisitor_visitUndefinedStmt(struct IRBuilder *self, kStmt *stmt)
-{
-	//KonohaContext *kctx = self->kctx;
-}
-
-static void DumpVisitor_visitConstExpr(struct IRBuilder *self, kExpr *expr)
-{
-	KonohaContext *kctx = self->kctx;
-	KUtilsWriteBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	KonohaStack sfp[1];
-	kObject *obj = expr->objectConstValue;
-	sfp[0].o = obj;
-	O_ct(obj)->p(kctx, sfp, 0, &wb, 0);
-	char  *str = (char *) KLIB Kwb_top(kctx, &wb, 0);
-	char buf[128];
-	snprintf(buf, 128, "CONST:%s:'%s'", CT_t(O_ct(obj)), str);
-	emit_string(buf, "", "", self->indent);
-	KLIB Kwb_free(&wb);
-}
-
-static void DumpVisitor_visitNConstExpr(struct IRBuilder *self, kExpr *expr)
-{
-	KonohaContext *kctx = self->kctx;
-	KUtilsWriteBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	KonohaStack sfp[1];
-	unsigned long unboxVal = expr->unboxConstValue;
-	KonohaClass *ct = CT_(expr->ty);
-	sfp[0].unboxValue = unboxVal;
-	ct->p(kctx, sfp, 0, &wb, 0);
-	char  *str = (char *) KLIB Kwb_top(kctx, &wb, 0);
-	char buf[128];
-	snprintf(buf, 128, "NCONST:'%s'", str);
-	emit_string(buf, "", "", self->indent);
-	KLIB Kwb_free(&wb);
-}
-
-static void DumpVisitor_visitNewExpr(struct IRBuilder *self, kExpr *expr)
-{
-	//KonohaContext *kctx = self->kctx;
-	emit_string("NEW", "", "", self->indent);
-}
-
-static void DumpVisitor_visitNullExpr(struct IRBuilder *self, kExpr *expr)
-{
-	KonohaContext *kctx = self->kctx;
-	char buf[128];
-	snprintf(buf, 128, "%s.NULL", CT_t(CT_(expr->ty)));
-	emit_string(buf, "", "", self->indent);
-}
-
-static void DumpVisitor_visitLocalExpr(struct IRBuilder *self, kExpr *expr)
-{
-	KonohaContext *kctx = self->kctx;
-	char buf[128];
-	snprintf(buf, 128, "LOCAL(%d, %s)", (int)expr->index, CT_t(CT_(expr->ty)));
-	emit_string(buf, "", "", self->indent);
-
-}
-
-static void DumpVisitor_visitBlockExpr(struct IRBuilder *self, kExpr *expr)
-{
-	//KonohaContext *kctx = self->kctx;
-	emit_string("BLOCK", "", "", self->indent);
-	visitBlock(self, expr->block);
-}
-
-static void DumpVisitor_visitFieldExpr(struct IRBuilder *self, kExpr *expr)
-{
-	//KonohaContext *kctx = self->kctx;
-	emit_string("FIELD", "", "", self->indent);
-}
-
-static void DumpVisitor_visitCallExpr(struct IRBuilder *self, kExpr *expr)
-{
-	KonohaContext *kctx = self->kctx;
-	KUtilsWriteBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	kMethod *mtd = CallExpr_getMethod(expr);
-	KLIB Kwb_printf(kctx, &wb, "CALL: '%s%s'", T_mn(mtd->mn));
-	self->indent++;
-	emit_string(KLIB Kwb_top(kctx, &wb, 1), "(", "", self->indent);
-	self->indent++;
-	unsigned i;
-	for(i = 1; i < kArray_size(expr->cons); ++i) {
-		handleExpr(self, kExpr_at(expr, i));
-	}
-	self->indent--;
-	emit_string(")", "", "", self->indent);
-	self->indent--;
-	KLIB Kwb_free(&wb);
-}
-
-static void DumpVisitor_visitAndExpr(struct IRBuilder *self, kExpr *expr)
-{
-	//KonohaContext *kctx = self->kctx;
-	emit_string("AND", "", "", self->indent);
-	self->indent++;
-	unsigned i;
-	for(i = 1; i < kArray_size(expr->cons); ++i) {
-		handleExpr(self, kExpr_at(expr, i));
-	}
-	self->indent--;
-}
-
-static void DumpVisitor_visitOrExpr(struct IRBuilder *self, kExpr *expr)
-{
-	//KonohaContext *kctx = self->kctx;
-	emit_string("OR", "", "", self->indent);
-	self->indent++;
-	unsigned i;
-	for(i = 1; i < kArray_size(expr->cons); ++i) {
-		handleExpr(self, kExpr_at(expr, i));
-	}
-	self->indent--;
-}
-
-static void DumpVisitor_visitLetExpr(struct IRBuilder *self, kExpr *expr)
-{
-	self->indent++;
-	emit_string("LET ", "", "", self->indent);
-	self->indent++;
-	handleExpr(self, kExpr_at(expr, 1));
-	emit_string(":=", "", "", self->indent);
-	handleExpr(self, kExpr_at(expr, 2));
-	self->indent--;
-	self->indent--;
-}
-
-static void DumpVisitor_visitStackTopExpr(struct IRBuilder *self, kExpr *expr)
-{
-}
+#include "dumpvisitor.c"
 
 struct IRBuilder *createCppVisitor(struct IRBuilder *builder);
 struct IRBuilder *createLLVMVisitor(struct IRBuilder *builder);
@@ -572,9 +394,10 @@ static void NMOV_asm(KonohaContext *kctx, int a, ktype_t ty, int b)
 	}
 }
 
-static kBasicBlock* KonohaVisitor_asmJMPIF(struct IRBuilder *self, int a, kExpr *expr, int isTRUE, kBasicBlock* label)
+static kBasicBlock* KonohaVisitor_asmJMPIF(struct IRBuilder *self, kExpr *expr, int isTRUE, kBasicBlock* label)
 {
 	KonohaContext *kctx = self->kctx;
+	int a = self->a;
 	handleExpr(self, expr);
 	if(isTRUE) {
 		ASM(BNOT, NC_(a), NC_(a));
@@ -592,7 +415,10 @@ static void KonohaVisitor_visitErrStmt(struct IRBuilder *self, kStmt *stmt)
 static void KonohaVisitor_visitExprStmt(struct IRBuilder *self, kStmt *stmt)
 {
 	KonohaContext *kctx = self->kctx;
+	int a = self->a;
+	self->a = self->espidx;
 	handleExpr(self, Stmt_getFirstExpr(kctx, stmt));
+	self->a = a;
 }
 
 static void KonohaVisitor_visitBlockStmt(struct IRBuilder *self, kStmt *stmt)
@@ -618,10 +444,13 @@ static void KonohaVisitor_visitIfStmt(struct IRBuilder *self, kStmt *stmt)
 {
 	KonohaContext *kctx = self->kctx;
 	int espidx = self->espidx;
+	int a = self->a;
 	kBasicBlock*  lbELSE = new_BasicBlockLABEL(kctx);
 	kBasicBlock*  lbEND  = new_BasicBlockLABEL(kctx);
 	/* if */
-	lbELSE = KonohaVisitor_asmJMPIF(self, espidx, Stmt_getFirstExpr(kctx, stmt), 0/*FALSE*/, lbELSE);
+	self->a = espidx;
+	lbELSE = KonohaVisitor_asmJMPIF(self, Stmt_getFirstExpr(kctx, stmt), 0/*FALSE*/, lbELSE);
+	self->a = a;
 	/* then */
 	visitBlock(self, Stmt_getFirstBlock(kctx, stmt));
 	ASM_JMP(kctx, lbEND);
@@ -636,14 +465,16 @@ static void KonohaVisitor_visitLoopStmt(struct IRBuilder *self, kStmt *stmt)
 {
 	KonohaContext *kctx = self->kctx;
 	int espidx = self->espidx;
+	int a = self->a;
 	kBasicBlock* lbCONTINUE = new_BasicBlockLABEL(kctx);
 	kBasicBlock* lbBREAK = new_BasicBlockLABEL(kctx);
 	KLIB kObject_setObject(kctx, stmt, SYM_("continue"), TY_BasicBlock, lbCONTINUE);
 	KLIB kObject_setObject(kctx, stmt, SYM_("break"), TY_BasicBlock, lbBREAK);
 	ASM_LABEL(kctx, lbCONTINUE);
 	ASM_SAFEPOINT(kctx, espidx);
-	KonohaVisitor_asmJMPIF(self, espidx, Stmt_getFirstExpr(kctx, stmt), 0/*FALSE*/, lbBREAK);
-	
+	self->a = espidx;
+	KonohaVisitor_asmJMPIF(self, Stmt_getFirstExpr(kctx, stmt), 0/*FALSE*/, lbBREAK);
+	self->a = a;
 	visitBlock(self, Stmt_getFirstBlock(kctx, stmt));
 	ASM_JMP(kctx, lbCONTINUE);
 	ASM_LABEL(kctx, lbBREAK);
@@ -707,17 +538,18 @@ static void KonohaVisitor_visitNullExpr(struct IRBuilder *self, kExpr *expr)
 
 static void KonohaVisitor_visitLocalExpr(struct IRBuilder *self, kExpr *expr)
 {
-	KonohaContext *kctx = self->kctx;
-	int a = self->a;
-	NMOV_asm(kctx, a, expr->ty, expr->index);
+	NMOV_asm(self->kctx, self->a, expr->ty, expr->index);
 }
 
 static void KonohaVisitor_visitBlockExpr(struct IRBuilder *self, kExpr *expr)
 {
 	KonohaContext *kctx = self->kctx;
 	int a = self->a;
+	int shift = self->shift;
+	self->shift = self->espidx;
 	DBG_ASSERT(IS_Block(expr->block));
 	visitBlock(self, expr->block);
+	self->shift = shift;
 	NMOV_asm(kctx, a, expr->ty, self->espidx);
 }
 
@@ -743,15 +575,17 @@ static void KonohaVisitor_visitCallExpr(struct IRBuilder *self, kExpr *expr)
 
 	int i;
 	int s = Method_isStatic(mtd) ? 2 : 1;
+	int a = self->a;
 	int espidx = self->espidx;
 	int thisidx = espidx + K_CALLDELTA;
 	for(i = s; i < kArray_size(expr->cons); i++) {
 		kExpr *exprN = kExpr_at(expr, i);
 		DBG_ASSERT(IS_Expr(exprN));
-		self->espidx = thisidx + i - 1;
+		self->a = self->espidx = thisidx + i - 1;
 		handleExpr(self, exprN);
 	}
 	self->espidx = espidx;
+	self->a = a;
 
 	int argc = CallExpr_getArgCount(expr);
 	if(Method_isFinal(mtd) || !Method_isVirtual(mtd)) {
@@ -762,6 +596,11 @@ static void KonohaVisitor_visitCallExpr(struct IRBuilder *self, kExpr *expr)
 	}
 
 	ASM(CALL, ctxcode->uline, SFP_(thisidx), ESP_(espidx, argc), KLIB Knull(kctx, CT_(expr->ty)));
+
+	if(a != espidx) {
+		NMOV_asm(kctx, a, expr->ty, espidx);
+	}
+
 }
 
 
@@ -773,7 +612,7 @@ static void KonohaVisitor_visitAndExpr(struct IRBuilder *self, kExpr *expr)
 	kBasicBlock*  lbTRUE = new_BasicBlockLABEL(kctx);
 	kBasicBlock*  lbFALSE = new_BasicBlockLABEL(kctx);
 	for(i = 1; i < size; i++) {
-		KonohaVisitor_asmJMPIF(self, a, kExpr_at(expr, i), 0/*FALSE*/, lbFALSE);
+		KonohaVisitor_asmJMPIF(self, kExpr_at(expr, i), 0/*FALSE*/, lbFALSE);
 	}
 	ASM(NSET, NC_(a), 1/*O_data(K_TRUE)*/, CT_Boolean);
 	ASM_JMP(kctx, lbTRUE);
@@ -790,7 +629,7 @@ static void KonohaVisitor_visitOrExpr(struct IRBuilder *self, kExpr *expr)
 	kBasicBlock*  lbTRUE = new_BasicBlockLABEL(kctx);
 	kBasicBlock*  lbFALSE = new_BasicBlockLABEL(kctx);
 	for(i = 1; i < size; i++) {
-		KonohaVisitor_asmJMPIF(self, a, kExpr_at(expr, i), 1/*TRUE*/, lbFALSE);
+		KonohaVisitor_asmJMPIF(self, kExpr_at(expr, i), 1/*TRUE*/, lbFALSE);
 	}
 	ASM(NSET, NC_(a), 0/*O_data(K_FALSE)*/, CT_Boolean);
 	ASM_JMP(kctx, lbFALSE);
@@ -803,43 +642,60 @@ static void KonohaVisitor_visitLetExpr(struct IRBuilder *self, kExpr *expr)
 {
 	KonohaContext *kctx = self->kctx;
 	int a = self->a;
+	int shift = self->shift;
 	int espidx = self->espidx;
-	kExpr *exprL = kExpr_at(expr, 1);
-	kExpr *exprR = kExpr_at(expr, 2);
-	if(exprL->build == TEXPR_LOCAL) {
-		handleExpr(self, exprR);
-		if(a != espidx) {
-			NMOV_asm(kctx, a, exprL->ty, espidx);
+
+	kExpr *leftHandExpr = kExpr_at(expr, 1);
+	kExpr *rightHandExpr = kExpr_at(expr, 2);
+	DBG_P("LET (%s) a=%d, shift=%d, espidx=%d", TY_t(expr->ty), a, shift, espidx);
+	if(leftHandExpr->build == TEXPR_LOCAL) {
+		self->a = leftHandExpr->index;
+		handleExpr(self, rightHandExpr);
+		self->a = a;
+		if(expr->ty != TY_void && a != leftHandExpr->index) {
+			NMOV_asm(kctx, a, leftHandExpr->ty, leftHandExpr->index);
 		}
 	}
-	else if(exprL->build == TEXPR_STACKTOP) {
-		DBG_P("LET TEXPR_STACKTOP a=%d, exprL->index=%d, espidx=%d", a, exprL->index, espidx);
-		handleExpr(self, exprR);
-		if(a != espidx) {
-			NMOV_asm(kctx, a, exprL->ty, exprL->index + espidx);
+	else if(leftHandExpr->build == TEXPR_STACKTOP) {
+		DBG_P("LET TEXPR_STACKTOP a=%d, leftHandExpr->index=%d, espidx=%d", a, leftHandExpr->index, espidx);
+		self->a = leftHandExpr->index + shift;
+		handleExpr(self, rightHandExpr);
+		self->a = a;
+		if(expr->ty != TY_void && a != leftHandExpr->index + shift) {
+			NMOV_asm(kctx, a, leftHandExpr->ty, leftHandExpr->index + shift);
 		}
 	}
 	else{
-		assert(exprL->build == TEXPR_FIELD);
-		handleExpr(self, exprR);
-		kshort_t index = (kshort_t)exprL->index;
-		kshort_t xindex = (kshort_t)(exprL->index >> (sizeof(kshort_t)*8));
-		if(TY_isUnbox(exprR->ty)) {
-			ASM(XNMOV, OC_(index), xindex, NC_(espidx), CT_(exprL->ty));
+		assert(leftHandExpr->build == TEXPR_FIELD);
+		self->a = espidx;
+		handleExpr(self, rightHandExpr);
+		self->a = a;
+		kshort_t index = (kshort_t)leftHandExpr->index;
+		kshort_t xindex = (kshort_t)(leftHandExpr->index >> (sizeof(kshort_t)*8));
+		if(TY_isUnbox(rightHandExpr->ty)) {
+			ASM(XNMOV, OC_(index), xindex, NC_(espidx), CT_(leftHandExpr->ty));
+			if(expr->ty != TY_void) {
+				ASM(NMOVx, NC_(a), OC_(index), xindex, CT_(leftHandExpr->ty));
+			}
 		}
 		else {
-			ASM(XNMOV, OC_(index), xindex, OC_(espidx), CT_(exprL->ty));
-		}
-		if(a != espidx) {
-			NMOV_asm(kctx, a, exprL->ty, espidx);
+			ASM(XNMOV, OC_(index), xindex, OC_(espidx), CT_(leftHandExpr->ty));
+			if(expr->ty != TY_void) {
+				ASM(NMOVx, OC_(a), OC_(index), xindex, CT_(leftHandExpr->ty));
+			}
 		}
 	}
 
 }
 
-static void KonohaVisitor_visitStackTopExpr(struct IRBuilder *self, kExpr *expr)
+static  void KonohaVisitor_visitStackTopExpr(struct IRBuilder *self, kExpr *expr)
 {
-	//KonohaContext *kctx = self->kctx;
+	KonohaContext *kctx = self->kctx;
+	int shift = self->shift;
+	int a = self->a;
+	int espidx = self->espidx;
+	DBG_ASSERT(expr->index + shift < espidx);
+	NMOV_asm(kctx, a, expr->ty, expr->index + shift);
 }
 
 
@@ -1214,8 +1070,9 @@ static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	//visitBlock(builder, bk);
 	builder = createKonohaVisitor(&builderbuf);
 	builder->kctx = kctx;
+	builder->shift = 0;
 	visitBlock(builder, bk);
-
+	builder->shift = 0;
 	ASM_LABEL(kctx, ctxcode->lbEND);
 	if (mtd->mn == MN_new) {
 		ASM(NMOV, OC_(K_RTNIDX), OC_(0), CT_(mtd->typeId));   // FIXME: Type 'This' must be resolved
