@@ -33,6 +33,7 @@ extern "C" {
 #endif
 
 int verbose_code = 0;  // global variable
+//#define USE_DUMP_VISITOR 1
 
 /* ------------------------------------------------------------------------ */
 typedef struct IRBuilder IRBuilder;
@@ -212,7 +213,6 @@ static kBasicBlock *kStmt_getLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbo
 }
 
 /* ------------------------------------------------------------------------ */
-#define USE_DUMP_VISITOR 1
 #include "dumpvisitor.c"
 
 /* ------------------------------------------------------------------------ */
