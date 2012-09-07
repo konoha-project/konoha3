@@ -130,6 +130,8 @@ static void handleStmt(struct IRBuilder *builder, kStmt *stmt)
 static void visitBlock(struct IRBuilder *builder, kBlock *bk)
 {
 	KonohaContext *kctx = builder->kctx;
+	int a = builder->a;
+	int espidx = builder->espidx;
 	int shift = builder->shift;
 	builder->espidx = (bk->esp->build == TEXPR_STACKTOP) ? shift + bk->esp->index : bk->esp->index;
 	int i;
@@ -139,8 +141,9 @@ static void visitBlock(struct IRBuilder *builder, kBlock *bk)
 		ctxcode->uline = stmt->uline;
 		handleStmt(builder, stmt);
 	}
+	builder->a = a;
+	builder->espidx = espidx;
 	builder->shift = shift;
-	builder->espidx = 0;
 }
 
 static void handleExpr(struct IRBuilder *builder, kExpr *expr)
