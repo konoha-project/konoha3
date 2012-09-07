@@ -245,8 +245,8 @@ struct SugarSyntaxVar {
 #define SYNFLAG_ExprPostfixOp2     ((kshortflag_t)1 << 2)
 
 #define SYNFLAG_StmtBreakExec      ((kshortflag_t)1 << 8)  /* return, throw */
-#define SYNFLAG_StmtJumpAhead      ((kshortflag_t)1 << 9)  /* continue */
-#define SYNFLAG_StmtJumpSkip       ((kshortflag_t)1 << 10)  /* break */
+#define SYNFLAG_StmtJumpAhead0      ((kshortflag_t)1 << 9)  /* continue */
+#define SYNFLAG_StmtJumpSkip0       ((kshortflag_t)1 << 10)  /* break */
 
 // operator priority
 
@@ -436,6 +436,11 @@ struct kStmtVar {
 #define kStmt_printMessage(kctx, STMT, PE, FMT, ...)            SUGAR kStmt_printMessage2(kctx, STMT, NULL, PE, FMT, ## __VA_ARGS__)
 #define kStmtToken_printMessage(kctx, STMT, TK, PE, FMT, ...)   SUGAR kStmt_printMessage2(kctx, STMT, TK, PE, FMT, ## __VA_ARGS__)
 #define kStmtExpr_printMessage(kctx, STMT, EXPR, PE, FMT, ...)  SUGAR kStmt_printMessage2(kctx, STMT, (kToken*)EXPR, PE, FMT, ## __VA_ARGS__)
+
+#define Stmt_isCatchContinue(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local2))
+#define Stmt_setCatchContinue(o,B)   TFLAG_set(uintptr_t,((kStmtVar*)o)->h.magicflag,kObject_Local2,B)
+#define Stmt_isCatchBreak(o)         (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local3))
+#define Stmt_setCatchBreak(o,B)      TFLAG_set(uintptr_t,((kStmtVar*)o)->h.magicflag,kObject_Local3,B)
 
 struct kBlockVar {
 	KonohaObjectHeader   h;

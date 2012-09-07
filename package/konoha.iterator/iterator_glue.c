@@ -250,6 +250,25 @@ static kbool_t iterator_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirs
 
 #define TY_isIterator(T)     (CT_(T)->baseTypeId == TY_Iterator)
 
+
+
+//static kBlock *new_MacroBlock(KonohaContext *kctx, kNameSpace *ns)
+//{
+//	kArray *tokenList = KonohaContext_getSugarContext(kctx)->preparedTokenList;
+//	TokenRange macroRangeBuf, *macroRange = SUGAR new_TokenListRange(kctx, ns, tokenList, &macroRangeBuf);
+////	TokenRange newexprRangeBuf, *newexprRange = SUGAR new_TokenStackRange(kctx, macroRange, &newexprRangeBuf);
+//	SUGAR TokenRange_tokenize(kctx, macroRange, "T _ = E; if(_.hasNext()) {N = _.next(); }", 0);
+//	MacroSet macroSet[10] = {{0, NULL}};
+////		TokenRange A = {ns, tokenList, beginIdx, operatorIdx};
+////		TokenRange B = {ns, tokenList, operatorIdx+1, endIdx};
+////	MacroSet macroSet[] = {{SYM_("A"), &A}, {SYM_("B"), &B}, {SYM_("+"), opRange}, {0, NULL}/* necessary*/};
+//	macroRange->macroSet = macroSet;
+////	SUGAR TokenRange_resolved(kctx, newexprRange, macroRange);
+////	TokenRange empty = {Stmt_nameSpace(stmt)};
+////	return SUGAR new_kBlock(kctx, stmt, newexprRange, NULL);
+//	return NULL;
+//}
+
 static KMETHOD StmtTyCheck_for(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_StmtTyCheck(stmt, gma);
@@ -257,34 +276,33 @@ static KMETHOD StmtTyCheck_for(KonohaContext *kctx, KonohaStack *sfp)
 	kToken *typeToken = SUGAR kStmt_getToken(kctx, stmt, KW_TypePattern, NULL);
 	kToken *varToken  = SUGAR kStmt_getToken(kctx, stmt, KW_SymbolPattern, NULL);
 	DBG_P("typeToken=%p, varToken=%p", typeToken, varToken);
-	//kNameSpace *ns = Stmt_nameSpace(stmt);
-//	if(!SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, 0)) {
-//		RETURNb_(false);
-//	}
-//	kExpr *iteratorExpr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL);
-//	if(!TY_isIterator(iteratorExpr->ty)) {
-//		kMethod *mtd = kNameSpace_getMethodNULL(kctx, ns, iteratorExpr->ty, MN_to(TY_Iterator), 0, MPOL_PARAMSIZE);
-//		if(mtd == NULL) {
-//
-//		}
-//		iteratorExpr = SUGAR new_TypedCallExpr(kctx, ns, gma, TY_var, mtd, 1, iteratorExpr);
-//	}
-//	if(typeToken != NULL) {
-//		KonohaClass *cIterator = CT_p0(kctx, CT_Iterator, typeToken->resolvedTypeId);
-//		if(!SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, cIterator->typeId, 0)) {
-//			RETURNb_(false);
-//		}
-//	}
-//	else {
-//
-//	}
-//	TokenRange empty = {Stmt_nameSpace(stmt)};
-//	kBlock *block = SUGAR new_kBlock(kctx, stmt, &empty, NULL);
+	kNameSpace *ns = Stmt_nameSpace(stmt);
+	if(!SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, 0)) {
+		RETURNb_(false);
+	}
+	kExpr *iteratorExpr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL);
+	if(!TY_isIterator(iteratorExpr->ty)) {
+		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, iteratorExpr->ty, MN_to(TY_Iterator), 0, MPOL_PARAMSIZE);
+		if(mtd == NULL) {
+			kStmtExpr_printMessage(kctx, stmt, iteratorExpr, ErrTag, "expected iterator after in");
+			RETURNb_(false);
+		}
+		iteratorExpr = SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_var, mtd, 1, iteratorExpr);
+		kStmt_setObject(kctx, stmt, KW_ExprPattern, iteratorExpr);
+	}
+	if(typeToken != NULL) {
+		KonohaClass *cIterator = CT_p0(kctx, CT_Iterator, typeToken->resolvedTypeId);
+		if(!SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, cIterator->typeId, 0)) {
+			RETURNb_(false);
+		}
+	}
+//	kBlock *block = new_MacroBlock(kctx, ns, /*typeToken, varToken, iteratorExpr*/);
 //	if(typeToken != NULL) {   // declare local variable
 //		kExpr *termExpr = SUGAR new_UntypedTermExpr(kctx, varToken);
 //		kStmt *declStmt = SUGAR new_kStmt(kctx, ns, KW_StmtTypeDecl, KW_TypePattern, typeToken, KW_ExprPattern, termExpr, 0);
 //		SUGAR kBlock_insertAfter(kctx, block, /*lastStmt*/NULL, declStmt);
 //	}
+
 //	{
 //		kTokenVar *itToken = GCSAFE_new(TokenVar, 0);
 //		itToken->resolvedSyntaxInfo = varToken->resolvedSyntaxInfo; // KW_SymbolPattern
@@ -304,7 +322,7 @@ static KMETHOD StmtTyCheck_for(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t iterator_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("for"), _LOOP, StmtTyCheck_(for),
+		{ .keyword = SYM_("for"), StmtTyCheck_(for),
 			.rule = "\"for\" \"(\" [$Type] $Symbol \"in\" $Expr  \")\" [$Block] ", },
 		{ .keyword = KW_END, },
 	};

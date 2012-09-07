@@ -52,7 +52,11 @@ static KMETHOD StmtTyCheck_while(KonohaContext *kctx, KonohaStack *sfp)
 	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_boolean, 0)) {
 		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
 		ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
-		kStmt_typed(stmt, LOOP);
+		if(ret) {
+			kStmt_typed(stmt, LOOP);
+			Stmt_setCatchContinue(stmt, true);
+			Stmt_setCatchBreak(stmt, true);
+		}
 	}
 	RETURNb_(ret);
 }
@@ -67,7 +71,7 @@ static KMETHOD StmtTyCheck_break(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_StmtTyCheck(stmt, gma);
 	kStmt *p = stmt;
 	while((p = kStmt_getParentNULL(p)) != NULL) {
-		if(FLAG_is(p->syn->flag, SYNFLAG_StmtJumpSkip)) {
+		if(Stmt_isCatchBreak(p)) {
 			KLIB kObject_setObject(kctx, stmt, stmt->syn->keyword, TY_Stmt, p);
 			kStmt_typed(stmt, JUMP);
 			RETURNb_(true);
@@ -83,7 +87,7 @@ static KMETHOD StmtTyCheck_continue(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_P("continue statement .. ");
 	kStmt *p = stmt;
 	while((p = kStmt_getParentNULL(p)) != NULL) {
-		if(FLAG_is(p->syn->flag, SYNFLAG_StmtJumpAhead)) {
+		if(Stmt_isCatchContinue(p)) {
 			KLIB kObject_setObject(kctx, stmt, stmt->syn->keyword, TY_Stmt, p);
 			kStmt_typed(stmt, JUMP);
 			RETURNb_(true);
@@ -98,7 +102,7 @@ static KMETHOD StmtTyCheck_continue(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t while_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("while"), _LOOP, StmtTyCheck_(while), .rule = "\"while\" \"(\" $Expr \")\" $Block",},
+		{ .keyword = SYM_("while"), StmtTyCheck_(while), .rule = "\"while\" \"(\" $Expr \")\" $Block",},
 		{ .keyword = SYM_("break"), StmtTyCheck_(break), .rule = "\"break\" [ $Symbol ]", },
 		{ .keyword = SYM_("continue"), StmtTyCheck_(continue), .rule = "\"continue\" [ $Symbol ]", },
 //		{ .keyword = SYM_("for"), _LOOP, StmtTyCheck_(for), .rule = "\"for\" \"(\" [ var: $Block \";\" $Expr \";\" each: $Block ] \")\" $Block", },

@@ -689,15 +689,21 @@ typedef struct krbp_t {
 #define P_DUMP   1
 
 #define CLASSAPI \
-		void (*init)(KonohaContext*, kObject*, void *conf);\
-		void (*reftrace)(KonohaContext*, kObject*);\
-		void (*free)(KonohaContext*, kObject*);\
-		kObject* (*fnull)(KonohaContext*, KonohaClass*);\
-		void (*p)(KonohaContext*, KonohaStack *, int, KUtilsWriteBuffer *, int);\
-		uintptr_t (*unbox)(KonohaContext*, kObject*);\
-		int  (*compareTo)(kObject*, kObject*);\
-		void (*initdef)(KonohaContext*, KonohaClassVar*, kfileline_t);\
-		kbool_t (*isSubType)(KonohaContext*, KonohaClass*, KonohaClass*);\
+		void         (*init)(KonohaContext*, kObject*, void *conf);\
+		void         (*reftrace)(KonohaContext*, kObject*);\
+		void         (*free)(KonohaContext*, kObject*);\
+		kObject*     (*fnull)(KonohaContext*, KonohaClass*);\
+		void         (*p)(KonohaContext*, KonohaStack *, int, KUtilsWriteBuffer *, int);\
+		uintptr_t    (*unbox)(KonohaContext*, kObject*);\
+		int          (*compareObject)(kObject*, kObject*);\
+		int          (*compareUnboxValue)(uintptr_t, uintptr_t);\
+		kbool_t      (*hasField)(KonohaContext*, kObject*, ksymbol_t, ktype_t);\
+		kObject*     (*getFieldObjectValue)(KonohaContext*, kObject*, ksymbol_t, ktype_t);\
+		void         (*setFieldObjectValue)(KonohaContext*, kObject*, ksymbol_t, ktype_t, kObject *);\
+		uintptr_t    (*getFieldUnboxValue)(KonohaContext*, kObject*, ksymbol_t, ktype_t);\
+		void         (*setFieldUnboxValue)(KonohaContext*, kObject*, ksymbol_t, ktype_t, uintptr_t);\
+		void         (*initdef)(KonohaContext*, KonohaClassVar*, kfileline_t);\
+		kbool_t      (*isSubType)(KonohaContext*, KonohaClass*, KonohaClass*);\
 		KonohaClass* (*realtype)(KonohaContext*, KonohaClass*, KonohaClass*)
 
 typedef struct KDEFINE_CLASS {

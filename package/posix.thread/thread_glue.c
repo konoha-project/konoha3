@@ -277,7 +277,7 @@ static kbool_t thread_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		.init     = kThread_init,
 		.reftrace = kThread_reftrace,
 		.free     = kThread_free,
-		.compareTo = kThread_compareTo,
+		.compareObject = kThread_compareTo,
 	};
 	KDEFINE_CLASS defMutex = {
 		STRUCTNAME(Mutex),
