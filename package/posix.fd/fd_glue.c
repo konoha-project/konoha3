@@ -347,7 +347,9 @@ static KMETHOD System_readlink(KonohaContext *kctx, KonohaStack *sfp)
 	kString *s2 = sfp[2].asString;
 	const char *pathname = S_text(s1);
 	const char *buf = S_text(s2);
-	size_t bufsize = strlen(buf);
+	size_t bufsize = sfp[3].intValue;
+	//size_t bufsize = strlen(buf);
+	//ssize_t ret = readlink(pathname, (char *)buf, bufsize);
 	ssize_t ret = readlink(pathname, (char *)buf, bufsize);
 	if (ret == -1) {
 		// TODO: throw
@@ -883,6 +885,24 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KDEFINE_INT_CONST intData[] = {
+		/*for System.access*/
+		{"R_OK", TY_int, R_OK},
+		{"W_OK", TY_int, W_OK},
+		{"X_OK", TY_int, X_OK},
+		{"F_OK", TY_int, F_OK},
+		/*for System.lseek*/
+		{"SEEK_SET", TY_int, SEEK_SET},
+		{"SEEK_CUR", TY_int, SEEK_CUR},
+		{"SEEK_END", TY_int, SEEK_END},
+		/*for System.flock*/
+		{"LOCK_SH", TY_int, LOCK_SH},
+		{"LOCK_EX", TY_int, LOCK_EX},
+		{"LOCK_UN", TY_int, LOCK_UN},
+		{"LOCK_NB", TY_int, LOCK_NB},
+		{}
+	};
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(intData), 0);
 	return true;
 }
 
