@@ -414,7 +414,7 @@ static kBasicBlock* KonohaVisitor_asmJMPIF(struct IRBuilder *self, kExpr *expr, 
 static void KonohaVisitor_visitErrStmt(struct IRBuilder *self, kStmt *stmt)
 {
 	KonohaContext *kctx = self->kctx;
-	ASM(ERROR, SFP_(self->espidx), Stmt_getErrorMessage(kctx, stmt));
+	ASM(ERROR, stmt->uline, Stmt_getErrorMessage(kctx, stmt));
 }
 
 static void KonohaVisitor_visitExprStmt(struct IRBuilder *self, kStmt *stmt)
