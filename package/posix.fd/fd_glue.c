@@ -32,6 +32,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <dirent.h>
+#include "fdconfig.h"
 
 /* ------------------------------------------------------------------------ */
 
