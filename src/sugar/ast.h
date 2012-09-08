@@ -44,7 +44,11 @@ static kExpr *callFuncParseExpr(KonohaContext *kctx, SugarSyntax *syn, kFunc *fo
 	lsfp[K_CALLDELTA+5].intValue = e;
 	countRef[0] += 1;
 //	DBG_P("calling %d times keyword='%s%s' fo=%p", countRef[0], PSYM_t(syn->keyword), fo);
-	KCALL(lsfp, 0, fo->mtd, 5, K_NULLEXPR);
+	{
+		KonohaStack *sfp = lsfp + K_CALLDELTA;
+		KSetMethodCallStack(sfp, 0/*UL*/, fo->mtd, 5, K_NULLEXPR);
+		KonohaRuntime_callMethod(kctx, sfp);
+	}
 	END_LOCAL();
 	DBG_ASSERT(IS_Expr(lsfp[0].asObject));
 	return lsfp[0].asExpr;
@@ -240,7 +244,11 @@ static int callPatternMatchFunc(KonohaContext *kctx, kFunc *fo, int *countRef, k
 	lsfp[K_CALLDELTA+4].intValue = beginIdx;
 	lsfp[K_CALLDELTA+5].intValue = endIdx;
 	countRef[0] += 1;
-	KCALL(lsfp, 0, fo->mtd, 5, KLIB Knull(kctx, CT_Int));
+	{
+		KonohaStack *sfp = lsfp + K_CALLDELTA;
+		KSetMethodCallStack(sfp, 0/*UL*/, fo->mtd, 5, KLIB Knull(kctx, CT_Int));
+		KonohaRuntime_callMethod(kctx, sfp);
+	}
 	END_LOCAL();
 	RESET_GCSTACK();
 	return (int)lsfp[0].intValue;

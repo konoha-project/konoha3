@@ -38,7 +38,11 @@ static kExpr *callExprTyCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef,
 	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+3].o, (kObject*)gma,  GC_NO_WRITE_BARRIER);
 	lsfp[K_CALLDELTA+4].intValue = reqty;
 	countRef[0] += 1;
-	KCALL(lsfp, 0, fo->mtd, 5, K_NULLEXPR);
+	{
+		KonohaStack *sfp = lsfp + K_CALLDELTA;
+		KSetMethodCallStack(sfp, 0/*UL*/, fo->mtd, 5, K_NULLEXPR);
+		KonohaRuntime_callMethod(kctx, sfp);
+	}
 	END_LOCAL();
 	RESET_GCSTACK();
 	DBG_ASSERT(IS_Expr(lsfp[0].asObject));
@@ -104,7 +108,11 @@ static kExpr* kExprCall_toConstValue(KonohaContext *kctx, kExpr *expr, kArray *c
 	for(i = 1; i < size; i++) {
 		kExpr_putConstValue(kctx, cons->exprItems[i], lsfp + K_CALLDELTA + i - 1);
 	}
-	KCALL(lsfp, 0, mtd, psize, KLIB Knull(kctx, CT_(expr->ty)));
+	{
+		KonohaStack *sfp = lsfp + K_CALLDELTA;
+		KSetMethodCallStack(sfp, 0/*UL*/, mtd, psize, KLIB Knull(kctx, CT_(expr->ty)));
+		KonohaRuntime_callMethod(kctx, sfp);
+	}
 	END_LOCAL();
 	if(TY_isUnbox(rtype) || rtype == TY_void) {
 		return SUGAR kExpr_setUnboxConstValue(kctx, expr, rtype, lsfp[0].unboxValue);
@@ -195,9 +203,12 @@ static kbool_t callStmtTyCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef
 	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, (kObject*)stmt, GC_NO_WRITE_BARRIER);
 	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+2].o, (kObject*)gma , GC_NO_WRITE_BARRIER);
 	countRef[0] += 1;
-	KCALL(lsfp, 0, fo->mtd, 3, K_FALSE);
+	{
+		KonohaStack *sfp = lsfp + K_CALLDELTA;
+		KSetMethodCallStack(sfp, 0/*UL*/, fo->mtd, 3, K_FALSE);
+		KonohaRuntime_callMethod(kctx, sfp);
+	}
 	END_LOCAL();
-	DBG_P("result=%d", lsfp[0].boolValue);
 	return lsfp[0].boolValue;
 }
 
@@ -401,7 +412,7 @@ static kstatus_t kMethod_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtyp
 		lsfp[K_CALLDELTA+1].intValue = runtime->stack[runtime->evalidx].intValue;
 	}
 	KonohaStack *sfp = lsfp + K_CALLDELTA;
-	KSetMethodCallStack(sfp, mtd, 0/*UL*/, 1, KLIB Knull(kctx, CT_(rtype)));
+	KSetMethodCallStack(sfp, 0/*UL*/, mtd, 1, KLIB Knull(kctx, CT_(rtype)));
 	kstatus_t result = K_CONTINUE;
 	if(KLIB KonohaRuntime_tryCallMethod(kctx, sfp)) {
 		runtime->evalty = rtype;
@@ -414,48 +425,6 @@ static kstatus_t kMethod_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtyp
 	END_LOCAL();
 	return result;
 }
-
-//static kstatus_t kMethod_runEval0(KonohaContext *kctx, kMethod *mtd, ktype_t rtype)
-//{
-//	kstatus_t result = K_CONTINUE;
-//	INIT_GCSTACK();
-//	BEGIN_LOCAL(lsfp, K_CALLDELTA);
-//	{
-//		int jumpResult;
-//		KonohaStackRuntimeVar *runtime = kctx->stack;
-//		KonohaStack *jump_bottom = runtime->jump_bottom;
-//		jmpbuf_i lbuf = {};
-//		if(runtime->evaljmpbuf == NULL) {
-//			runtime->evaljmpbuf = (jmpbuf_i*)KCALLOC(sizeof(jmpbuf_i), 1);
-//		}
-//		memcpy(&lbuf, runtime->evaljmpbuf, sizeof(jmpbuf_i));
-//		runtime->jump_bottom = lsfp + K_CALLDELTA; // FIXME ??
-//		KSETv(K_NULL, runtime->optionalErrorMessage, TS_EMPTY);
-//		runtime->thrownScriptLine = 0;
-//		if((jumpResult = PLATAPI setjmp_i(*runtime->evaljmpbuf)) == 0) {
-//			//DBG_P("TY=%s, running EVAL..", TY_t(rtype));
-//			if(runtime->evalty != TY_void) {
-//				KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, runtime->stack[runtime->evalidx].o, GC_NO_WRITE_BARRIER);
-//				lsfp[K_CALLDELTA+1].intValue = runtime->stack[runtime->evalidx].intValue;
-//			}
-//			KCALL(lsfp, 0, mtd, 0, KLIB Knull(kctx, CT_(rtype)));
-//			runtime->evalty = rtype;
-//			runtime->evalidx = (lsfp - kctx->stack->stack);
-//		}
-//		else {
-//			//KLIB reportException(kctx);
-//			const char *file = PLATAPI shortFilePath(FileId_t(runtime->thrownScriptLine));
-//			PLATAPI reportCaughtException(SYM_t(jumpResult), file, (kushort_t)runtime->thrownScriptLine,  S_text(runtime->optionalErrorMessage));
-//			runtime->evalty = TY_void;  // no value
-//			result = K_BREAK;        // message must be reported;
-//		}
-//		runtime->jump_bottom = jump_bottom;
-//		memcpy(runtime->evaljmpbuf, &lbuf, sizeof(jmpbuf_i));
-//	}
-//	END_LOCAL();
-//	RESET_GCSTACK();
-//	return result;
-//}
 
 static kstatus_t TokenRange_eval(KonohaContext *kctx, TokenRange *sourceRange)
 {

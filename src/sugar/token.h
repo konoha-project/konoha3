@@ -421,7 +421,11 @@ static int callFuncTokenize(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, Token
 	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, fo->self, GC_NO_WRITE_BARRIER);
 	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, (kObject*)tk, GC_NO_WRITE_BARRIER);
 	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+2].s, preparedString, GC_NO_WRITE_BARRIER);
-	KCALL(lsfp, 0, fo->mtd, 2, KLIB Knull(kctx, CT_Int));
+	{
+		KonohaStack *sfp = lsfp + K_CALLDELTA;
+		KSetMethodCallStack(sfp, 0/*UL*/, fo->mtd, 2, KLIB Knull(kctx, CT_Int));
+		KonohaRuntime_callMethod(kctx, sfp);
+	}
 	END_LOCAL();
 	int pos = lsfp[0].intValue + tok_start;
 	if(pos > tok_start) { // check new lines

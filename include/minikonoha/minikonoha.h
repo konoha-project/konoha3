@@ -1204,7 +1204,7 @@ struct _kSystem {
 		sfp[K_MTDIDX].mtdNC = NULL;\
 	} \
 
-#define KSetMethodCallStack(tsfp, MTD, UL, ARGC, DEFVAL) { \
+#define KSetMethodCallStack(tsfp, UL, MTD, ARGC, DEFVAL) { \
 		tsfp[K_MTDIDX].mtdNC   = MTD; \
 		tsfp[K_SHIFTIDX].shift = 0;\
 		KSETv_AND_WRITE_BARRIER(NULL, tsfp[K_RTNIDX].o, ((kObject*)DEFVAL), GC_NO_WRITE_BARRIER);\
