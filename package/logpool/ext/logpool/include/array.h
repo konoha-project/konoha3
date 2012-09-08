@@ -60,7 +60,7 @@ static inline void ARRAY_##T##_dispose(ARRAY(T) *a) {\
 #define ARRAY_init_1(T, a, e1) do {\
 	ARRAY_init(T, a);\
 	ARRAY_add(T, a, e1);\
-} while(0)
+} while (0)
 
 #define FOR_EACH_ARRAY_(a, x, i) \
 		for(i=0, x = ARRAY_n(a, i); i < ARRAY_size(a); x = ARRAY_n(a,(++i)))

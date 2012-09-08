@@ -487,9 +487,11 @@ static kExpr* Expr_tyCheckVariable2(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 		if(genv->localScope.varItems[0].ty != TY_void) {
 			DBG_ASSERT(genv->this_cid == genv->localScope.varItems[0].ty);
 			KonohaClass *ct = CT_(genv->this_cid);
-			for(i = ct->fieldsize; i >= 0; i--) {
-				if(ct->fieldItems[i].fn == symbol && ct->fieldItems[i].ty != TY_void) {
-					return SUGAR kExpr_setVariable(kctx, expr, gma, TEXPR_FIELD, ct->fieldItems[i].ty, longid((kshort_t)i, 0));
+			if (ct->fieldsize > 0) {
+				for(i = ct->fieldsize; i >= 0; i--) {
+					if(ct->fieldItems[i].fn == symbol && ct->fieldItems[i].ty != TY_void) {
+						return SUGAR kExpr_setVariable(kctx, expr, gma, TEXPR_FIELD, ct->fieldItems[i].ty, longid((kshort_t)i, 0));
+					}
 				}
 			}
 			kMethod *mtd = NameSpace_getGetterMethodNULL(kctx, ns, genv->this_cid, symbol);

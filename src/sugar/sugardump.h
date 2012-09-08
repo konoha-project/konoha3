@@ -47,10 +47,10 @@ static const char* StatementType(ksymbol_t keyword)
 #define KdumpExpr(CTX, EXPR)
 
 #else
-#define KdumpTokenArray(CTX, TLS, S, E) 	DBG_P("@"); dumpTokenArray(CTX, 1, TLS, S, E)
-#define KdumpTokenRange(CTX, MSG, R) 	    DBG_P(MSG); dumpTokenArray(CTX, 1, R->tokenList, R->beginIdx, R->endIdx)
-#define KdumpStmt(CTX, STMT) 		        dumpStmt(CTX, STMT)
-#define KdumpExpr(CTX, EXPR)                dumpExpr(CTX, 0, 0, EXPR)
+#define KdumpTokenArray(CTX, TLS, S, E)  DBG_P("@"); dumpTokenArray(CTX, 1, TLS, S, E)
+#define KdumpTokenRange(CTX, MSG, R)     DBG_P(MSG); dumpTokenArray(CTX, 1, R->tokenList, R->beginIdx, R->endIdx)
+#define KdumpStmt(CTX, STMT)             dumpStmt(CTX, STMT)
+#define KdumpExpr(CTX, EXPR)             dumpExpr(CTX, 0, 0, EXPR)
 
 /* --------------- */
 /* Token */

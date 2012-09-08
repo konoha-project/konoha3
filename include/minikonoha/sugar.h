@@ -28,9 +28,6 @@
 /* ------------------------------------------------------------------------ */
 /* sugar.h */
 
-#ifndef __KERNEL__
-#include <dlfcn.h>
-#endif
 #include "minikonoha.h"
 #include "klib.h"
 
@@ -182,7 +179,7 @@ struct TokenizerEnv {
 		kArray *TLS = (kArray*)sfp[3].o;\
 		int S = (int)sfp[4].intValue;\
 		int E = (int)sfp[5].intValue;\
-		(void)STMT; (void)NAME; (void)TLS; (void)S; (void)E;\
+		(void)STMT; (void)NAME; (void)TLS; (void)S; (void)E
 
 // Expr ParseExpr(Stmt stmt, Token[] tokenList, int s, int c, int e)
 #define VAR_ParseExpr(STMT, TLS, S, C, E)\
@@ -192,13 +189,13 @@ struct TokenizerEnv {
 		int S = (int)sfp[3].intValue;\
 		int C = (int)sfp[4].intValue;\
 		int E = (int)sfp[5].intValue;\
-		(void)syn; (void)STMT; (void)TLS; (void)S; (void)C; (void)E;\
+		(void)syn; (void)STMT; (void)TLS; (void)S; (void)C; (void)E
 
 // boolean StmtTyCheck(Stmt stmt, Gamma gma)
 #define VAR_StmtTyCheck(STMT, GMA)\
 		kStmt *STMT = (kStmt*)sfp[1].asObject;\
 		kGamma *GMA = (kGamma*)sfp[2].o;\
-		(void)STMT; (void)GMA;\
+		(void)STMT; (void)GMA
 
 // Expr ExprTyCheck(Stmt stmt, Expr expr, Gamma gma, int typeid)
 #define VAR_ExprTyCheck(STMT, EXPR, GMA, TY) \
@@ -207,7 +204,7 @@ struct TokenizerEnv {
 		kExpr *EXPR = (kExpr*)sfp[2].o;\
 		kGamma *GMA = (kGamma*)sfp[3].o;\
 		ktype_t TY = (ktype_t)sfp[4].intValue;\
-		(void)STMT; (void)EXPR; (void)GMA; (void)TY;\
+		(void)STMT; (void)EXPR; (void)GMA; (void)TY
 
 typedef const struct SugarSyntaxVar   SugarSyntax;
 typedef struct SugarSyntaxVar         SugarSyntaxVar;
@@ -332,11 +329,11 @@ typedef struct TokenRange {
 	};
 } TokenRange;
 
-#define TokenRange_end(kctx, range)  	range->endIdx = kArray_size(range->tokenList);
-#define TokenRange_pop(kctx, range)     {\
-		KLIB kArray_clear(kctx, range->tokenList, range->beginIdx);\
-		range->endIdx = range->beginIdx;\
-	}\
+#define TokenRange_end(kctx, range)   range->endIdx = kArray_size(range->tokenList)
+#define TokenRange_pop(kctx, range)   do {\
+	KLIB kArray_clear(kctx, range->tokenList, range->beginIdx);\
+	range->endIdx = range->beginIdx;\
+} while (0)
 
 typedef struct MacroSet {
 	int/*ksymbol_t*/          symbol;
@@ -371,7 +368,7 @@ typedef kbool_t (*CheckEndOfStmtFunc2)(KonohaContext *, TokenRange *range, Token
 #define Expr_isTerm(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
 #define Expr_setTerm(o,B)   TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,B)
 
-#define Expr_hasObjectConstValue(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local2))
+#define Expr_hasObjectConstValue(o)     (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local2))
 #define Expr_setObjectConstValue(o,B)   TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local2,B)
 
 #define kExpr_at(E,N)        ((E)->cons->exprItems[(N)])
@@ -642,9 +639,9 @@ static inline kNameSpace *kStmt_nameSpace(KonohaContext *kctx, kStmt *stmt)
 #define kStmt_done(kctx, STMT) Stmt_setsyn(kctx, STMT, NULL)
 static inline void Stmt_setsyn(KonohaContext *kctx, kStmt *stmt, SugarSyntax *syn)
 {
-//	if(syn == NULL && stmt->syn != NULL) {
-//		DBG_P("DONE: STMT='%s'", KW_t(syn->keyword));
-//	}
+	//if(syn == NULL && stmt->syn != NULL) {
+	//	DBG_P("DONE: STMT='%s'", KW_t(syn->keyword));
+	//}
 	((kStmtVar*)stmt)->syn = syn;
 }
 static inline kbool_t Stmt_isDone(kStmt *stmt)
