@@ -160,7 +160,7 @@ static kbool_t i_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t
 	return true;
 }
 
-static kbool_t i_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
+static kbool_t i_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 //	USING_SUGAR;
 //	KDEFINE_SYNTAX SYNTAX[] = {
@@ -169,11 +169,11 @@ static kbool_t i_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t
 //		{ TOKEN("$Float"), .keyword = KW_TK(TokenType_FLOAT), .ExprTyCheck = ExprTyCheck_FLOAT, },
 //		{ .keyword = KW_END, },
 //	};
-//	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
+//	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 	return true;
 }
 
-static kbool_t i_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t i_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

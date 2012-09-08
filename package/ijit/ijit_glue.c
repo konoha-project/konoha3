@@ -699,12 +699,12 @@ static void _kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 
 static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KREQUIRE_PACKAGE("sugar", pline);
-	KREQUIRE_PACKAGE("konoha.float", pline);
-	KREQUIRE_PACKAGE("llvm", pline);
-	KREQUIRE_PACKAGE("konoha.assign", pline);
-	KREQUIRE_PACKAGE("konoha.null", pline);
-	KREQUIRE_PACKAGE("konoha.string", pline);
+	KRequirePackage("sugar", pline);
+	KRequirePackage("konoha.float", pline);
+	KRequirePackage("llvm", pline);
+	KRequirePackage("konoha.assign", pline);
+	KRequirePackage("konoha.null", pline);
+	KRequirePackage("konoha.string", pline);
 	kmodjit_t *base  = (kmodjit_t*)KCALLOC(sizeof(kmodjit_t), 1);
 	base->h.name     = "ijit";
 	base->h.setup    = kmodjit_setup;
@@ -844,12 +844,12 @@ static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 	return true;
 }
 
-static kbool_t ijit_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
+static kbool_t ijit_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t ijit_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t ijit_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

@@ -827,7 +827,7 @@ static KMETHOD ExprTyCheck_RegExp(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(SUGAR kExpr_setConstValue(kctx, expr, TY_RegExp, UPCAST(r)));
 }
 
-static kbool_t regexp_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t regexp_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	kMethod *mtd = KLIB new_kMethod(kctx, 0, 0, 0, parseREGEXP);
 	kFunc *fo = GCSAFE_new(Func, (uintptr_t) mtd);
@@ -836,11 +836,11 @@ static kbool_t regexp_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileli
 		{ .keyword = SYM_("$regexp"),  ExprTyCheck_(RegExp), },
 		{ .keyword = KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 	return true;
 }
 
-static kbool_t regexp_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t regexp_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

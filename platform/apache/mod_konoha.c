@@ -269,7 +269,7 @@ KonohaContext* konoha_create(KonohaClass **cRequest)
 	KonohaContext* konoha = konoha_open(&apache_platform);
 	KonohaContext_t kctx = konoha;
 	kNameSpace *ns = KNULL(NameSpace);
-	KREQUIRE_PACKAGE("apache", 0);
+	KRequirePackage("apache", 0);
 	*cRequest = CT_Request;
 #define _P    kMethod_Public
 #define _F(F) (intptr_t)(F)

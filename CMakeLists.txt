@@ -102,13 +102,18 @@ else(KONOHA_VM_MODULE)
 endif(KONOHA_VM_MODULE)
 
 set(PACKAGES
+## add konoha.xx package in an alphabetical order 
 	konoha
 	konoha.array
 	konoha.assign
+	konoha.break
 	konoha.bytes
 	konoha.class
+	konoha.continue
+	konoha.date
 	konoha.defined
 	konoha.float
+	konoha.foreach
 	konoha.global
 	konoha.i
 	konoha.io
@@ -143,7 +148,6 @@ set(PACKAGES
 	apache
 #	openssl
 	logpool
-	konoha.date
 )
 
 find_library(HAVE_LIBDL NAMES dl)

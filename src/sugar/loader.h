@@ -182,7 +182,7 @@ static kbool_t kNameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, con
 	if(pack != NULL) {
 		kbool_t isContinousLoading = kNameSpace_merge(kctx, ns, pack->packageNameSpace, pline);
 		if(isContinousLoading && pack->packageHandler != NULL && pack->packageHandler->initNameSpace != NULL) {
-			isContinousLoading = pack->packageHandler->initNameSpace(kctx, ns, pline);
+			isContinousLoading = pack->packageHandler->initNameSpace(kctx, pack->packageNameSpace, ns, pline);
 		}
 		if(isContinousLoading && pack->exportScriptUri != 0) {
 			const char *scriptPath = FileId_t(pack->exportScriptUri);
@@ -191,7 +191,7 @@ static kbool_t kNameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, con
 			isContinousLoading = PLATAPI loadScript(scriptPath, uline, (void*)&thunk, evalHookFunc);
 		}
 		if(isContinousLoading && pack->packageHandler != NULL && pack->packageHandler->setupNameSpace != NULL) {
-			isContinousLoading = pack->packageHandler->setupNameSpace(kctx, ns, pline);
+			isContinousLoading = pack->packageHandler->setupNameSpace(kctx, pack->packageNameSpace, ns, pline);
 		}
 		return true;
 	}

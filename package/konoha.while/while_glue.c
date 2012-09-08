@@ -43,7 +43,7 @@ static kbool_t while_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 }
 
 // --------------------------------------------------------------------------
-//
+
 static KMETHOD StmtTyCheck_while(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_StmtTyCheck(stmt, gma);
@@ -66,53 +66,19 @@ static inline kStmt* kStmt_getParentNULL(kStmt *stmt)
 	return stmt->parentBlockNULL->parentStmtNULL;
 }
 
-static KMETHOD StmtTyCheck_break(KonohaContext *kctx, KonohaStack *sfp)
+static kbool_t while_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
-	VAR_StmtTyCheck(stmt, gma);
-	kStmt *p = stmt;
-	while((p = kStmt_getParentNULL(p)) != NULL) {
-		if(Stmt_isCatchBreak(p)) {
-			KLIB kObject_setObject(kctx, stmt, stmt->syn->keyword, TY_Stmt, p);
-			kStmt_typed(stmt, JUMP);
-			RETURNb_(true);
-		}
-	}
-	SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "break statement not within a loop");
-	RETURNb_(false);
-}
-
-static KMETHOD StmtTyCheck_continue(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_StmtTyCheck(stmt, gma);
-	DBG_P("continue statement .. ");
-	kStmt *p = stmt;
-	while((p = kStmt_getParentNULL(p)) != NULL) {
-		if(Stmt_isCatchContinue(p)) {
-			KLIB kObject_setObject(kctx, stmt, stmt->syn->keyword, TY_Stmt, p);
-			kStmt_typed(stmt, JUMP);
-			RETURNb_(true);
-		}
-	}
-	SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "continue statement not within a loop");
-	RETURNb_((false));
-}
-
-#define _LOOP .flag = (SYNFLAG_StmtJumpAhead|SYNFLAG_StmtJumpSkip)
-
-static kbool_t while_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
-{
+	KImportPackage(ns, "konoha.break", pline);
+	KImportPackage(ns, "konoha.continue", pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("while"), StmtTyCheck_(while), .rule = "\"while\" \"(\" $Expr \")\" $Block",},
-		{ .keyword = SYM_("break"), StmtTyCheck_(break), .rule = "\"break\" [ $Symbol ]", },
-		{ .keyword = SYM_("continue"), StmtTyCheck_(continue), .rule = "\"continue\" [ $Symbol ]", },
-//		{ .keyword = SYM_("for"), _LOOP, StmtTyCheck_(for), .rule = "\"for\" \"(\" [ var: $Block \";\" $Expr \";\" each: $Block ] \")\" $Block", },
 		{ .keyword = KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 	return true;
 }
 
-static kbool_t while_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t while_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
@@ -120,7 +86,7 @@ static kbool_t while_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileli
 KDEFINE_PACKAGE* while_init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("C-compatible while", "1.0"),
+		KPACKNAME("konoha", "1.0"),
 		.initPackage      = while_initPackage,
 		.setupPackage     = while_setupPackage,
 		.initNameSpace  = while_initNameSpace,

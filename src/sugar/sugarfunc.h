@@ -1253,7 +1253,7 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(return), .rule ="\"return\" [$Expr]", .flag = SYNFLAG_StmtBreakExec, StmtTyCheck_(return), },
 		{ .keyword = KW_END, },
 	};
-	kNameSpace_defineSyntax(kctx, ns, SYNTAX);
+	kNameSpace_defineSyntax(kctx, ns, SYNTAX, ns);
 }
 
 /* ------------------------------------------------------------------------ */

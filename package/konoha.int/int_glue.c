@@ -148,7 +148,7 @@ static kbool_t int_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime
 //	RETURNi_(source - start - 1);
 //}
 
-static kbool_t int_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
+static kbool_t int_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("~"), .precedence_op1 = C_PRECEDENCE_PREUNARY,},
@@ -161,7 +161,7 @@ static kbool_t int_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline
 		//{ TOKEN("--"),  .op1 = "opDEC", .precedence_op2 = C_PRECEDENCE_PREUNARY, .flag = SYNFLAG_ExprPostfixOp2,},
 		{ .keyword = KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 	//kMethod *mtd = KLIB new_kMethod(kctx, 0, 0, 0, parseNonDecimalNumber);
 	//kFunc *fo = GCSAFE_new(Func, (uintptr_t) mtd);
 	//SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '0', NULL, fo, 0);
@@ -173,7 +173,7 @@ static kbool_t int_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline
 	return true;
 }
 
-static kbool_t int_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t int_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

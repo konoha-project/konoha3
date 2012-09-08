@@ -200,7 +200,7 @@ static KMETHOD Math_random(KonohaContext *kctx, KonohaStack *sfp)
 
 static	kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KREQUIRE_PACKAGE("konoha.float", pline);
+	KRequirePackage("konoha.float", pline);
 	static KDEFINE_CLASS MathDef = {
 			.structname = "Math"/*structname*/,
 			.typeId = TY_newid/*cid*/,
@@ -265,20 +265,20 @@ static kbool_t math_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 	return true;
 }
 
-static kbool_t math_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
+static kbool_t math_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
-	KEXPORT_PACKAGE("konoha.float", ns, pline);
+	KImportPackage(ns, "konoha.float", pline);
 	return true;
 }
 
-static kbool_t math_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t math_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 KDEFINE_PACKAGE* math_init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("math", "1.0"),
+		KPACKNAME("konoha", "1.0"),
 		.initPackage = math_initPackage,
 		.setupPackage = math_setupPackage,
 		.initNameSpace = math_initNameSpace,

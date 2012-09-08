@@ -28,22 +28,6 @@
 
 static void kNameSpace_parseSugarRule2(KonohaContext *kctx, kNameSpace *ns, const char *rule, kfileline_t uline, kArray *ruleList);
 
-//static void copyIfArray(KonohaContext *kctx, kNameSpace *ns, kArray **arrayRef)
-//{
-//	DBG_P(">>>>>>> arrayRef[0]=%p", arrayRef[0]);
-//	if(arrayRef[0] != NULL) {
-//		DBG_P(">>>>>> arrayRef[0]=%p, %s", arrayRef[0], CT_t(O_ct(arrayRef[0])));
-//		if(IS_Array(arrayRef[0])) {
-//			int i;
-//			kArray *newa = GCSAFE_new(Array, kArray_size(arrayRef[0]));
-//			for(i = 0; i < kArray_size(arrayRef[0]); i++) {
-//				KLIB kArray_add(kctx, newa, arrayRef[0]->objectItems[i]);
-//			}
-//			KSETv(ns, arrayRef[0], newa);
-//		}
-//	}
-//}
-
 static SugarSyntax* kNameSpace_newSyntax(KonohaContext *kctx, kNameSpace *ns, SugarSyntax *parentSyntax, ksymbol_t keyword)
 {
 	if(ns->syntaxMapNN == NULL) {
@@ -125,46 +109,49 @@ static void SugarSyntax_setSugarFunc(KonohaContext *kctx, SugarSyntaxVar *syn, M
 	}
 }
 
-static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE_SYNTAX *syndef)
+static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE_SYNTAX *syndef, kNameSpace *packageNameSpace)
 {
 	MethodFunc pPatternMatch = NULL, pParseExpr = NULL, pStmtTyCheck = NULL, pExprTyCheck = NULL;
 	kFunc *mPatternMatch = NULL, *mParseExpr = NULL, *mStmtTyCheck = NULL, *mExprTyCheck = NULL;
 	while(syndef->keyword != KW_END) {
 		SugarSyntaxVar* syn = (SugarSyntaxVar*)kNameSpace_getSyntax(kctx, ns, syndef->keyword, 1/*isnew*/);
 		DBG_ASSERT(syn != NULL);
-		DBG_P("keyword='%s%s', syn=%p, syn->parent=%p", PSYM_t(syndef->keyword), syn, syn->parentSyntaxNULL);
-		syn->flag  |= ((kshortflag_t)syndef->flag);
-		if(syndef->precedence_op1 > 0) {
-			syn->precedence_op1 = syndef->precedence_op1;
-		}
-		if(syndef->precedence_op2 > 0) {
-			syn->precedence_op2 = syndef->precedence_op2;
-		}
-		if(syndef->rule != NULL) {
-			KINITv(syn->syntaxRuleNULL, new_(TokenArray, 0));
-			kNameSpace_parseSugarRule2(kctx, ns, syndef->rule, 0, syn->syntaxRuleNULL);
-		}
-		SugarSyntax_setSugarFunc(kctx, syn, syndef->PatternMatch,   SUGARFUNC_PatternMatch,   &pPatternMatch, &mPatternMatch);
-		SugarSyntax_setSugarFunc(kctx, syn, syndef->ParseExpr,      SUGARFUNC_ParseExpr,      &pParseExpr, &mParseExpr);
-		SugarSyntax_setSugarFunc(kctx, syn, syndef->TopStmtTyCheck, SUGARFUNC_TopStmtTyCheck, &pStmtTyCheck, &mStmtTyCheck);
-		SugarSyntax_setSugarFunc(kctx, syn, syndef->StmtTyCheck,    SUGARFUNC_StmtTyCheck,    &pStmtTyCheck, &mStmtTyCheck);
-		SugarSyntax_setSugarFunc(kctx, syn, syndef->ExprTyCheck,    SUGARFUNC_ExprTyCheck,    &pExprTyCheck, &mExprTyCheck);
-		// set default function
-		if(syn->parentSyntaxNULL == NULL && syn->sugarFuncTable[SUGARFUNC_ParseExpr] == NULL) {
-			if(syn->precedence_op2 > 0 || syn->precedence_op1 > 0) {
-				kFunc *fo = SYN_(ns, KW_ExprOperator)->sugarFuncTable[SUGARFUNC_ParseExpr];
-				DBG_ASSERT(fo != NULL);
-				DBG_P("syn->keyword=%s%s, fo=%p", PSYM_t(syn->keyword), fo);
-				KINITv(syn->sugarFuncTable[SUGARFUNC_ParseExpr], fo);
+		{
+			DBG_P("keyword='%s%s', syn=%p, syn->parent=%p", PSYM_t(syndef->keyword), syn, syn->parentSyntaxNULL);
+			syn->lastLoadedPackageId = packageNameSpace->packageId;
+			syn->flag  |= ((kshortflag_t)syndef->flag);
+			if(syndef->precedence_op1 > 0) {
+				syn->precedence_op1 = syndef->precedence_op1;
 			}
-			else if(syn->sugarFuncTable[SUGARFUNC_ExprTyCheck] != NULL) {
-				kFunc *fo = SYN_(ns, KW_ExprTerm)->sugarFuncTable[SUGARFUNC_ParseExpr];
-				DBG_ASSERT(fo != NULL);
-				DBG_P("syn->keyword=%s%s, fo=%p", PSYM_t(syn->keyword), fo);
-				KINITv(syn->sugarFuncTable[SUGARFUNC_ParseExpr], fo);
+			if(syndef->precedence_op2 > 0) {
+				syn->precedence_op2 = syndef->precedence_op2;
 			}
+			if(syndef->rule != NULL) {
+				KINITv(syn->syntaxRuleNULL, new_(TokenArray, 0));
+				kNameSpace_parseSugarRule2(kctx, ns, syndef->rule, 0, syn->syntaxRuleNULL);
+			}
+			SugarSyntax_setSugarFunc(kctx, syn, syndef->PatternMatch,   SUGARFUNC_PatternMatch,   &pPatternMatch, &mPatternMatch);
+			SugarSyntax_setSugarFunc(kctx, syn, syndef->ParseExpr,      SUGARFUNC_ParseExpr,      &pParseExpr, &mParseExpr);
+			SugarSyntax_setSugarFunc(kctx, syn, syndef->TopStmtTyCheck, SUGARFUNC_TopStmtTyCheck, &pStmtTyCheck, &mStmtTyCheck);
+			SugarSyntax_setSugarFunc(kctx, syn, syndef->StmtTyCheck,    SUGARFUNC_StmtTyCheck,    &pStmtTyCheck, &mStmtTyCheck);
+			SugarSyntax_setSugarFunc(kctx, syn, syndef->ExprTyCheck,    SUGARFUNC_ExprTyCheck,    &pExprTyCheck, &mExprTyCheck);
+			// set default function
+			if(syn->parentSyntaxNULL == NULL && syn->sugarFuncTable[SUGARFUNC_ParseExpr] == NULL) {
+				if(syn->precedence_op2 > 0 || syn->precedence_op1 > 0) {
+					kFunc *fo = SYN_(ns, KW_ExprOperator)->sugarFuncTable[SUGARFUNC_ParseExpr];
+					DBG_ASSERT(fo != NULL);
+					DBG_P("syn->keyword=%s%s, fo=%p", PSYM_t(syn->keyword), fo);
+					KINITv(syn->sugarFuncTable[SUGARFUNC_ParseExpr], fo);
+				}
+				else if(syn->sugarFuncTable[SUGARFUNC_ExprTyCheck] != NULL) {
+					kFunc *fo = SYN_(ns, KW_ExprTerm)->sugarFuncTable[SUGARFUNC_ParseExpr];
+					DBG_ASSERT(fo != NULL);
+					DBG_P("syn->keyword=%s%s, fo=%p", PSYM_t(syn->keyword), fo);
+					KINITv(syn->sugarFuncTable[SUGARFUNC_ParseExpr], fo);
+				}
+			}
+			DBG_ASSERT(syn == SYN_(ns, syndef->keyword));
 		}
-		DBG_ASSERT(syn == SYN_(ns, syndef->keyword));
 		syndef++;
 	}
 }

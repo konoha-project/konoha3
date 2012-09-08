@@ -449,7 +449,7 @@ static void CommandLine_import(KonohaContext *kctx, char *packageName)
 	size_t len = strlen(packageName)+1;
 	char bufname[len];
 	memcpy(bufname, packageName, len);
-	if(!(KEXPORT_PACKAGE(bufname, KNULL(NameSpace), 0))) {
+	if(!(KImportPackage(KNULL(NameSpace), bufname, 0))) {
 		PLATAPI exit_i(EXIT_FAILURE);
 	}
 }

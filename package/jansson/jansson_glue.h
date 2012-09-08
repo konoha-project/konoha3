@@ -427,8 +427,8 @@ static KMETHOD JsonArray_append(KonohaContext *kctx, KonohaStack *sfp)
 
 static	kbool_t jansson_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KREQUIRE_PACKAGE("konoha.float", pline);
-	//KREQUIRE_PACKAGE("konoha.string", pline);
+	KRequirePackage("konoha.float", pline);
+	//KRequirePackage("konoha.string", pline);
 	KDEFINE_CLASS JsonDef = {
 		//STRUCTNAME(Json),
 		.structname = "Json",
@@ -477,14 +477,14 @@ static kbool_t jansson_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirst
 	return true;
 }
 
-static kbool_t jansson_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
+static kbool_t jansson_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
-	//KEXPORT_PACKAGE("konoha.string", ns,  pline);
-	//KEXPORT_PACKAGE("konoha.float", ns, pline);
+	//KImportPackage("konoha.string", ns,  pline);
+	//KImportPackage("konoha.float", ns, pline);
 	return true;
 }
 
-static kbool_t jansson_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t jansson_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

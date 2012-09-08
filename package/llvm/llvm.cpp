@@ -4615,7 +4615,7 @@ static void kmodllvm_free(KonohaContext *kctx, struct KonohaModule *baseh)
 
 static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char **args, kfileline_t pline)
 {
-	KREQUIRE_PACKAGE("konoha.float", pline);
+	KRequirePackage("konoha.float", pline);
 	(void)argc;(void)args;
 	kmodllvm_t *base = (kmodllvm_t*)KCALLOC(sizeof(kmodllvm_t), 1);
 	base->h.name     = "llvm";
@@ -5269,13 +5269,13 @@ static kbool_t llvm_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 	return true;
 }
 
-static kbool_t llvm_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
+static kbool_t llvm_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	(void)kctx;(void)ns;(void)pline;
 	return true;
 }
 
-static kbool_t llvm_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t llvm_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	(void)kctx;(void)ns;(void)pline;
 	return true;

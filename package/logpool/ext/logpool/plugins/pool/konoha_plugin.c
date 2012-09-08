@@ -103,8 +103,8 @@ void konoha_plugin_init(KonohaContextVar **konohap, memcached_st **mcp)
     *mcp = memcached_create(NULL);
     KonohaContext *kctx = *konohap;
     kNameSpace *ns = KNULL(NameSpace);
-    KEXPORT_PACKAGE("sugar", ns, 0);
-    KEXPORT_PACKAGE("logpool", ns, 0);
+    KImportPackage("sugar", ns, 0);
+    KImportPackage("logpool", ns, 0);
     memcached_server_list_st servers;
     memcached_return_t rc;
     servers = memcached_server_list_append(NULL, "127.0.0.1", 11211, &rc);

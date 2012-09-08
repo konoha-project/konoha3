@@ -42,18 +42,18 @@
 
 static	kbool_t konoha_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KREQUIRE_PACKAGE("konoha.assign", pline);
-	KREQUIRE_PACKAGE("konoha.while", pline);
+	KRequirePackage("konoha.assign", pline);
+	KRequirePackage("konoha.while", pline);
 
-	KREQUIRE_PACKAGE("konoha.class", pline);
-	KREQUIRE_PACKAGE("konoha.global", pline);
+	KRequirePackage("konoha.class", pline);
+	KRequirePackage("konoha.global", pline);
 
-	KREQUIRE_PACKAGE("konoha.null", pline);
-	KREQUIRE_PACKAGE("konoha.int", pline);
+	KRequirePackage("konoha.null", pline);
+	KRequirePackage("konoha.int", pline);
 #ifndef K_USING_NOFLOAT
-	KREQUIRE_PACKAGE("konoha.float", pline);
+	KRequirePackage("konoha.float", pline);
 #endif
-	KREQUIRE_PACKAGE("konoha.array", pline);
+	KRequirePackage("konoha.array", pline);
 	return true;
 }
 
@@ -62,23 +62,23 @@ static kbool_t konoha_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 	return true;
 }
 
-static kbool_t konoha_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t konoha_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
-	KEXPORT_PACKAGE("konoha.assign", ns, pline);
-	KEXPORT_PACKAGE("konoha.while", ns, pline);
-	KEXPORT_PACKAGE("konoha.class", ns, pline);
-	KEXPORT_PACKAGE("konoha.global", ns, pline);
+	KImportPackage(ns, "konoha.assign", pline);
+	KImportPackage(ns, "konoha.while",  pline);
+	KImportPackage(ns, "konoha.class",  pline);
+	KImportPackage(ns, "konoha.global", pline);
 
-	KEXPORT_PACKAGE("konoha.null", ns, pline);
-	KEXPORT_PACKAGE("konoha.int", ns, pline);
+	KImportPackage(ns, "konoha.null", pline);
+	KImportPackage(ns, "konoha.int",  pline);
 	if(kctx->modshare[MOD_float] != NULL) {
-		KEXPORT_PACKAGE("konoha.float", ns, pline);
+		KImportPackage(ns, "konoha.float", pline);
 	}
-	KEXPORT_PACKAGE("konoha.array", ns, pline);
+	KImportPackage(ns, "konoha.array", pline);
 	return true;
 }
 
-static kbool_t konoha_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t konoha_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
