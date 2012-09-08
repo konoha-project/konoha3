@@ -131,11 +131,22 @@ static KMETHOD PatternMatch_Toks(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ------------------------------------------------------------------------ */
 
+static KMETHOD ParseExpr_Expr(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
+	if(beginIdx == operatorIdx) {
+		kToken *tk = tokenList->tokenItems[operatorIdx];
+		DBG_ASSERT(IS_Expr(tk->parsedExpr));
+		RETURN_(tk->parsedExpr);
+	}
+}
+
 static KMETHOD ParseExpr_Term(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
 	if(beginIdx == operatorIdx) {
 		kToken *tk = tokenList->tokenItems[operatorIdx];
+
 		KonohaClass *foundClass = NULL;
 		int nextIdx = kStmt_parseTypePattern(kctx, NULL, Stmt_nameSpace(stmt), tokenList, beginIdx, endIdx, &foundClass);
 		if(foundClass != NULL) {
@@ -1233,9 +1244,9 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(DOLLAR),   ParseExpr_(DOLLAR), },
 		{ TOKEN(true),    ExprTyCheck_(true),},
 		{ TOKEN(false),   ExprTyCheck_(false),},
-		{ PATTERN(Expr), .rule ="$Expr", PatternMatch_(Expr), TopStmtTyCheck_(Expr), StmtTyCheck_(Expr),  },
+		{ PATTERN(Expr), .rule ="$Expr", PatternMatch_(Expr), TopStmtTyCheck_(Expr), StmtTyCheck_(Expr), ParseExpr_(Expr) },
 		{ PATTERN(Type),  PatternMatch_(Type), .rule = "$Type $Expr", StmtTyCheck_(TypeDecl), ExprTyCheck_(Type), },
-		{ PATTERN(Const), PatternMatch_(ConstName), .rule = "$Const \"=\" $Expr", TopStmtTyCheck_(ConstDecl), /*ExprTyCheck_(Usymbol),*/},
+		{ PATTERN(Const), PatternMatch_(ConstName), .rule = "$Const \"=\" $Expr", TopStmtTyCheck_(ConstDecl), },
 		{ PATTERN(MethodDecl), .rule ="$Type [ClassName: $Type \".\"] $Symbol $Param [$Block]", TopStmtTyCheck_(MethodDecl)},
 		{ TOKEN(if),     .rule ="\"if\" \"(\" $Expr \")\" $Block [\"else\" else: $Block]", TopStmtTyCheck_(if), StmtTyCheck_(if), },
 		{ TOKEN(else),   .rule = "\"else\" $Block", TopStmtTyCheck_(else), StmtTyCheck_(else), },

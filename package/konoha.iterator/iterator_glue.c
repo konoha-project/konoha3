@@ -233,91 +233,111 @@ static kbool_t iterator_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirs
 	return true;
 }
 
-//static kStmt* new_TypedWhileStmt(KonohaContext *kctx, kStmt *stmt, kGamma *gma, )
-//{
-////	kExpr *iteratorExpr = SUGAR new_UntypedTermExpr(kctx, itToken);
-////	kMethod *mtd = kNameSpace_getMethodNULL(kctx, Stmt_nameSpace(stmt), TY_Iterator, MN_("hasNext"), 0, MPOL_PARAMSIZE);
-////	kExpr *hasNextExpr = SUGAR new_TypedCallExpr(kctx, ns, gma, TY_boolean, mtd, 1, iteratorExpr);
-////
-////	kStmt *whileStmt = SUGAR new_kStmt(kctx, ns, KW_StmtTypeDecl/*dummy*/, KW_ExprPattern, hasNextExpr, KW_BlockPattern, loopBlock, 0);;
-////
-////	//	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_boolean, 0)) {
-////	//		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
-////	//		ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
-////	//		kStmt_typed(stmt, LOOP);
-////	//	}
-//}
-
 #define TY_isIterator(T)     (CT_(T)->baseTypeId == TY_Iterator)
 
+static kToken* new_TypeToken(KonohaContext *kctx, kNameSpace *ns, ktype_t typeId)
+{
+	kToken *TypeToken = GCSAFE_new(Token, 0);
+	kToken_setTypeId(kctx, TypeToken, ns, typeId);
+	return TypeToken;
+}
 
+static kToken* new_ParsedExprToken(KonohaContext *kctx, kNameSpace *ns, kExpr *expr)
+{
+	kTokenVar *ParsedExprToken = GCSAFE_new(TokenVar, 0);
+	ParsedExprToken->resolvedSyntaxInfo = SYN_(ns, KW_ExprPattern);
+	KSETv(ParsedExprToken, ParsedExprToken->parsedExpr, expr);
+	return (kToken*)ParsedExprToken;
+}
 
-//static kBlock *new_MacroBlock(KonohaContext *kctx, kNameSpace *ns)
-//{
-//	kArray *tokenList = KonohaContext_getSugarContext(kctx)->preparedTokenList;
-//	TokenRange macroRangeBuf, *macroRange = SUGAR new_TokenListRange(kctx, ns, tokenList, &macroRangeBuf);
-////	TokenRange newexprRangeBuf, *newexprRange = SUGAR new_TokenStackRange(kctx, macroRange, &newexprRangeBuf);
-//	SUGAR TokenRange_tokenize(kctx, macroRange, "T _ = E; if(_.hasNext()) {N = _.next(); }", 0);
-//	MacroSet macroSet[10] = {{0, NULL}};
-////		TokenRange A = {ns, tokenList, beginIdx, operatorIdx};
-////		TokenRange B = {ns, tokenList, operatorIdx+1, endIdx};
-////	MacroSet macroSet[] = {{SYM_("A"), &A}, {SYM_("B"), &B}, {SYM_("+"), opRange}, {0, NULL}/* necessary*/};
-//	macroRange->macroSet = macroSet;
-////	SUGAR TokenRange_resolved(kctx, newexprRange, macroRange);
-////	TokenRange empty = {Stmt_nameSpace(stmt)};
-////	return SUGAR new_kBlock(kctx, stmt, newexprRange, NULL);
-//	return NULL;
-//}
+static void MacroSet_setTokenAt(KonohaContext *kctx, MacroSet *macroSet, int index, kArray *tokenList, const char *symbol, ...)
+{
+	DBG_ASSERT(macroSet[index].tokenList == NULL);
+	macroSet[index].symbol = KLIB Ksymbol(kctx, symbol, strlen(symbol), SPOL_TEXT|SPOL_ASCII, _NEWID);
+	macroSet[index].tokenList = tokenList;
+	macroSet[index].beginIdx = kArray_size(tokenList);
+	kToken *tk;
+	va_list ap;
+	va_start(ap , symbol);
+	while((tk = va_arg(ap, kToken*)) != NULL) {
+		DBG_ASSERT(IS_Token(tk));
+		KLIB kArray_add(kctx, tokenList, tk);
+	}
+	va_end(ap);
+	macroSet[index].endIdx = kArray_size(tokenList);
+}
+
+/* This implementation is a little tricky (by kimio)
+ * The syntax of loop is defined as if statement
+ * Typechecking is overloaded as while statement (@see while_glue);
+ */
+
+static kBlock *new_MacroBlock(KonohaContext *kctx, kStmt *stmt, kToken *IteratorTypeToken, kToken *IteratorExprToken, kToken *TypeToken, kToken *VariableToken)
+{
+	kNameSpace *ns = Stmt_nameSpace(stmt);
+	kArray *tokenList = KonohaContext_getSugarContext(kctx)->preparedTokenList;
+	TokenRange macroRangeBuf, *macroRange = SUGAR new_TokenListRange(kctx, ns, tokenList, &macroRangeBuf);
+	SUGAR TokenRange_tokenize(kctx, macroRange, "T _ = E; if(_.hasNext()) {N = _.next(); }", 0);
+	MacroSet macroSet[4] = {{0, NULL, 0, 0}};
+	MacroSet_setTokenAt(kctx, macroSet, 0, tokenList, "T", IteratorTypeToken, NULL);
+	MacroSet_setTokenAt(kctx, macroSet, 1, tokenList, "E", IteratorExprToken, NULL);
+	if(TypeToken == NULL) {
+		MacroSet_setTokenAt(kctx, macroSet, 2, tokenList, "N", VariableToken, NULL);
+	}
+	else {
+		MacroSet_setTokenAt(kctx, macroSet, 2, tokenList, "N", TypeToken, VariableToken, NULL);
+	}
+	macroRange->macroSet = macroSet;
+	TokenRange expandedRangeBuf, *expandedRange = SUGAR new_TokenListRange(kctx, ns, tokenList, &expandedRangeBuf);
+	SUGAR TokenRange_resolved(kctx, expandedRange, macroRange);
+	return SUGAR new_kBlock(kctx, stmt, expandedRange, NULL);
+}
+
+static void kStmt_appendBlock(KonohaContext *kctx, kStmt *stmt, kBlock *bk)
+{
+	if(bk != NULL) {
+		kBlock *block = SUGAR kStmt_getBlock(kctx, stmt, Stmt_nameSpace(stmt), KW_BlockPattern, NULL);
+		int i;
+		for(i = 0; i < kArray_size(bk->stmtList); i++) {
+			KLIB kArray_add(kctx, block->stmtList, bk->stmtList->stmtItems[i]);
+		}
+	}
+}
 
 static KMETHOD StmtTyCheck_for(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_StmtTyCheck(stmt, gma);
 	DBG_P("for statement .. ");
-	kToken *typeToken = SUGAR kStmt_getToken(kctx, stmt, KW_TypePattern, NULL);
-	kToken *varToken  = SUGAR kStmt_getToken(kctx, stmt, KW_SymbolPattern, NULL);
-	DBG_P("typeToken=%p, varToken=%p", typeToken, varToken);
-	kNameSpace *ns = Stmt_nameSpace(stmt);
-	if(!SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, 0)) {
-		RETURNb_(false);
-	}
-	kExpr *iteratorExpr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL);
-	if(!TY_isIterator(iteratorExpr->ty)) {
-		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, iteratorExpr->ty, MN_to(TY_Iterator), 0, MPOL_PARAMSIZE);
-		if(mtd == NULL) {
-			kStmtExpr_printMessage(kctx, stmt, iteratorExpr, ErrTag, "expected iterator after in");
-			RETURNb_(false);
+	int isOkay = false;
+	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, 0)) {
+		kNameSpace *ns = Stmt_nameSpace(stmt);
+		kToken *TypeToken = SUGAR kStmt_getToken(kctx, stmt, KW_TypePattern, NULL);
+		kToken *VariableToken  = SUGAR kStmt_getToken(kctx, stmt, KW_SymbolPattern, NULL);
+		DBG_P("typeToken=%p, varToken=%p", TypeToken, VariableToken);
+		kExpr *IteratorExpr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL);
+		if(!TY_isIterator(IteratorExpr->ty)) {
+			kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, IteratorExpr->ty, MN_to(TY_Iterator), 0, MPOL_PARAMSIZE);
+			if(mtd == NULL) {
+				kStmtExpr_printMessage(kctx, stmt, IteratorExpr, ErrTag, "expected Iterator expression after in");
+				RETURNb_(false);
+			}
+			IteratorExpr = SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_var, mtd, 1, IteratorExpr);
+			kStmt_setObject(kctx, stmt, KW_ExprPattern, IteratorExpr);
 		}
-		iteratorExpr = SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_var, mtd, 1, iteratorExpr);
-		kStmt_setObject(kctx, stmt, KW_ExprPattern, iteratorExpr);
-	}
-	if(typeToken != NULL) {
-		KonohaClass *cIterator = CT_p0(kctx, CT_Iterator, typeToken->resolvedTypeId);
-		if(!SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, cIterator->typeId, 0)) {
-			RETURNb_(false);
+		kBlock *block = new_MacroBlock(kctx, stmt, new_TypeToken(kctx, ns, IteratorExpr->ty), new_ParsedExprToken(kctx, ns, IteratorExpr), TypeToken, VariableToken);
+		kStmt *IfStmt = block->stmtList->stmtItems[1]; // @see macro;
+		kStmt_appendBlock(kctx, IfStmt, SUGAR kStmt_getBlock(kctx, stmt, ns, KW_BlockPattern, NULL));
+		Stmt_setCatchBreak(IfStmt, true);
+		Stmt_setCatchContinue(IfStmt, true);
+		isOkay = SUGAR kBlock_tyCheckAll(kctx, block, gma);
+		if(isOkay) {
+			kStmt_typed(IfStmt, LOOP);
+			kStmt_setObject(kctx, stmt, KW_BlockPattern, block);
+			kStmt_typed(stmt, BLOCK);
 		}
 	}
-//	kBlock *block = new_MacroBlock(kctx, ns, /*typeToken, varToken, iteratorExpr*/);
-//	if(typeToken != NULL) {   // declare local variable
-//		kExpr *termExpr = SUGAR new_UntypedTermExpr(kctx, varToken);
-//		kStmt *declStmt = SUGAR new_kStmt(kctx, ns, KW_StmtTypeDecl, KW_TypePattern, typeToken, KW_ExprPattern, termExpr, 0);
-//		SUGAR kBlock_insertAfter(kctx, block, /*lastStmt*/NULL, declStmt);
-//	}
-
-//	{
-//		kTokenVar *itToken = GCSAFE_new(TokenVar, 0);
-//		itToken->resolvedSyntaxInfo = varToken->resolvedSyntaxInfo; // KW_SymbolPattern
-//		// _ = A;
-//		kExpr *termExpr = SUGAR new_UntypedTermExpr(kctx, itToken);
-//		kExpr *letExpr = SUGAR new_kStmt(kctx, ns, KW_LET, KW_);
-//		kExpr new_UntypedExpr
-//	}
-//	kStmt *whileStmt = new_TypedWhileStmt(kctx, stmt, varToken, itToken);
-//	SUGAR kBlock_insertAfter(kctx, block, NULL, whileStmt);
-//	kStmt_setObject(kctx, stmt, KW_BlockPattern, block);
-	RETURNb_(true);
+	RETURNb_(isOkay);
 }
-
-#define _LOOP .flag = (SYNFLAG_StmtJumpAhead|SYNFLAG_StmtJumpSkip)
 
 static kbool_t iterator_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
 {

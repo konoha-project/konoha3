@@ -302,6 +302,7 @@ struct kTokenVar {
 	union {
 		kString *text;
 		kArray  *subTokenList;
+		kExpr   *parsedExpr;
 	};
 	kfileline_t     uline;
 	SugarSyntax    *resolvedSyntaxInfo;
@@ -383,23 +384,6 @@ struct kExprVar {
 	union {
 		kToken  *termToken;     // Term
 		kArray*  cons;          // Cons
-		kBlock*  block;
-	};
-	ktype_t ty;    kexpr_t build;
-	union {
-		kObject*   objectConstValue;
-		uintptr_t  unboxConstValue;
-		intptr_t   index;
-	};
-};
-
-struct kTypedExprVar {
-	KonohaObjectHeader h;
-	SugarSyntax *syn;
-	union {
-		kToken  *termToken;     // Term
-		kArray*  cons;          // Cons
-		kExpr*   single;
 		kBlock*  block;
 	};
 	ktype_t ty;    kexpr_t build;
