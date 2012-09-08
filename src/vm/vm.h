@@ -319,7 +319,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #define OPEXEC_CHKSTACK(UL) \
 	if(unlikely(kctx->esp > kctx->stack->stack_uplimit)) {\
 		kfileline_t uline = (UL == 0) ? rbp[K_ULINEIDX2].uline : UL;\
-		KLIB Kraise(kctx, EXPT_("StackOverflow"), SFP(rbp), uline);\
+		KLIB KonohaRuntime_raise(kctx, EXPT_("StackOverflow"), SFP(rbp), uline, NULL);\
 	}\
 	if(kctx->safepoint != 0) { \
 		kfileline_t uline = (UL == 0) ? rbp[K_ULINEIDX2].uline : UL;\
@@ -334,8 +334,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 	} \
 
 #define OPEXEC_ERROR(UL, msg, ESP) {\
-		KSETv(K_NULL, kctx->stack->optionalErrorMessage, msg);\
-		KLIB Kraise(kctx, EXPT_("RuntimeScript"), SFP(rbp), UL);\
+		KLIB KonohaRuntime_raise(kctx, EXPT_("RuntimeScript"), SFP(rbp), UL, msg);\
 	}\
 
 #define OPEXEC_ERROR2(start, msg) { \

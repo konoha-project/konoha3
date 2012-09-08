@@ -507,13 +507,45 @@ static void Kreportf(KonohaContext *kctx, kinfotag_t level, kfileline_t pline, c
 
 // -------------------------------------------------------------------------
 
-static void Kraise(KonohaContext *kctx, int symbol, KonohaStack *sfp, kfileline_t pline)
+static kbool_t KonohaRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KonohaStackRuntimeVar *base = kctx->stack;
+	KonohaStackRuntimeVar *runtime = kctx->stack;
+	KonohaStack *jump_bottom = runtime->jump_bottom;
+	jmpbuf_i lbuf = {};
+	if(runtime->evaljmpbuf == NULL) {
+		runtime->evaljmpbuf = (jmpbuf_i*)KCALLOC(sizeof(jmpbuf_i), 1);
+	}
+	memcpy(&lbuf, runtime->evaljmpbuf, sizeof(jmpbuf_i));
+	runtime->jump_bottom = sfp;
+	runtime->thrownScriptLine = 0;
+	KSETv_AND_WRITE_BARRIER(NULL, runtime->optionalErrorMessage, TS_EMPTY, GC_NO_WRITE_BARRIER);
+	kbool_t result = true;
+	int jumpResult;
+	INIT_GCSTACK();
+	if((jumpResult = PLATAPI setjmp_i(*runtime->evaljmpbuf)) == 0) {
+		KonohaRuntime_callMethod(kctx, sfp);
+	}
+	else {
+		const char *file = PLATAPI shortFilePath(FileId_t(runtime->thrownScriptLine));
+		PLATAPI reportCaughtException(SYM_t(jumpResult), file, (kushort_t)runtime->thrownScriptLine,  S_text(runtime->optionalErrorMessage));
+		result = false;
+	}
+	RESET_GCSTACK();
+	runtime->jump_bottom = jump_bottom;
+	memcpy(runtime->evaljmpbuf, &lbuf, sizeof(jmpbuf_i));
+	return result;
+}
+
+static void KonohaRuntime_raise(KonohaContext *kctx, int symbol, KonohaStack *sfp, kfileline_t pline, kString *optionalErrorMessage)
+{
+	KonohaStackRuntimeVar *runtime = kctx->stack;
 	KNH_ASSERT(symbol != 0);
-	if(base->evaljmpbuf != NULL) {
-		base->thrownScriptLine = pline;
-		PLATAPI longjmp_i(*base->evaljmpbuf, symbol);  // in setjmp 0 means good
+	if(runtime->evaljmpbuf != NULL) {
+		runtime->thrownScriptLine = pline;
+		if(optionalErrorMessage != NULL) {
+			KSETv_AND_WRITE_BARRIER(NULL, runtime->optionalErrorMessage, optionalErrorMessage, GC_NO_WRITE_BARRIER);
+		}
+		PLATAPI longjmp_i(*runtime->evaljmpbuf, symbol);  // in setjmp 0 means good
 	}
 	PLATAPI exit_i(EXIT_FAILURE);
 }
@@ -569,5 +601,6 @@ static void klib_init(KonohaLibVar *l)
 	l->KpackageId    = KpackageId;
 	l->Ksymbol       = Ksymbol;
 	l->Kreportf      = Kreportf;
-	l->Kraise        = Kraise;
+	l->KonohaRuntime_tryCallMethod = KonohaRuntime_tryCallMethod;
+	l->KonohaRuntime_raise         = KonohaRuntime_raise;
 }

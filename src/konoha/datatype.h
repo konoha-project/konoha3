@@ -504,7 +504,7 @@ static KonohaClass* Kclass(KonohaContext *kctx, ktype_t cid, kfileline_t pline)
 	KonohaRuntime *share = kctx->share;
 	if(!(cid < (share->classTable.bytesize/sizeof(KonohaClassVar*)))) {
 		kreportf(ErrTag, pline, "invalid typeId=%d", (int)cid);
-		KLIB Kraise(kctx, EXPT_("InvalidTypeId"), NULL, pline);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("InvalidParameter"), NULL, pline, NULL);
 	}
 	return share->classTable.classItems[cid];
 }

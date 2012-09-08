@@ -1198,6 +1198,20 @@ struct _kSystem {
 
 #define END_LOCAL() ((KonohaContextVar*)kctx)->esp = esp_;
 
+// if you want to ignore (exception), use KonohaRuntime_tryCallMethod
+#define KonohaRuntime_callMethod(kctx, sfp) { \
+		(sfp[K_MTDIDX].mtdNC)->invokeMethodFunc(kctx, sfp);\
+		sfp[K_MTDIDX].mtdNC = NULL;\
+	} \
+
+#define KSetMethodCallStack(tsfp, MTD, UL, ARGC, DEFVAL) { \
+		tsfp[K_MTDIDX].mtdNC   = MTD; \
+		tsfp[K_SHIFTIDX].shift = 0;\
+		KSETv_AND_WRITE_BARRIER(NULL, tsfp[K_RTNIDX].o, ((kObject*)DEFVAL), GC_NO_WRITE_BARRIER);\
+		tsfp[K_RTNIDX].uline   = UL;\
+		klr_setesp(kctx, tsfp + ARGC + 1);\
+	} \
+
 #define KCALL(LSFP, RIX, MTD, ARGC, DEFVAL) { \
 		KonohaStack *tsfp = LSFP + RIX + K_CALLDELTA;\
 		tsfp[K_MTDIDX].mtdNC = MTD;\
@@ -1209,6 +1223,7 @@ struct _kSystem {
 		(MTD)->invokeMethodFunc(kctx, tsfp);\
 		tsfp[K_MTDIDX].mtdNC = NULL;\
 	} \
+
 
 #define KSELFCALL(TSFP, MTD) { \
 		KonohaStack *tsfp = TSFP;\
@@ -1304,7 +1319,9 @@ struct KonohaLibVar {
 
 	void          (*KCodeGen)(KonohaContext*, kMethod *, kBlock *);
 	void          (*Kreportf)(KonohaContext*, kinfotag_t, kfileline_t, const char *fmt, ...);
-	void          (*Kraise)(KonohaContext*, int symbol, KonohaStack *, kfileline_t);
+
+	kbool_t       (*KonohaRuntime_tryCallMethod)(KonohaContext *, KonohaStack *);
+	void          (*KonohaRuntime_raise)(KonohaContext*, int symbol, KonohaStack *, kfileline_t, kString *Nullable);
 
 	uintptr_t     (*Ktrace)(KonohaContext*, struct klogconf_t *logconf, ...);
 };
@@ -1386,7 +1403,7 @@ typedef struct {
 } KDEFINE_OBJECT_CONST;
 
 #define kreportf(LEVEL, UL, fmt, ...)  KLIB Kreportf(kctx, LEVEL, UL, fmt, ## __VA_ARGS__)
-#define kraise(PARAM)                  KLIB Kraise(kctx, PARAM)
+#define kraise(PARAM)                  KLIB KonohaRuntime_raise(kctx, PARAM)
 
 #define KSET_KLIB(T, UL)   do {\
 		void *func = kctx->klib->T;\

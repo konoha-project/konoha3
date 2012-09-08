@@ -33,6 +33,13 @@ extern "C" {
 
 // --------------------------------------------------------------------------
 
+static void THROW_ZeroDividedException(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].uline, NULL);
+}
+
+// --------------------------------------------------------------------------
+
 static void Float_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kNumberVar *n = (kNumberVar*)o;  // kFloat has the same structure
@@ -97,7 +104,7 @@ static KMETHOD Float_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kfloat_t n = sfp[1].floatValue;
 	if(unlikely(n == 0.0)) {
-		KLIB Kraise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].uline);
+		THROW_ZeroDividedException(kctx, sfp);
 	}
 	RETURNf_(sfp[0].floatValue / n);
 }
@@ -112,7 +119,7 @@ static KMETHOD Int_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kfloat_t n = sfp[1].floatValue;
 	if(unlikely(n == 0.0)) {
-		KLIB Kraise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].uline);
+		THROW_ZeroDividedException(kctx, sfp);
 	}
 	RETURNf_(sfp[0].intValue / n);
 }

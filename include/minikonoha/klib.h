@@ -177,7 +177,7 @@ static kinline size_t check_index(KonohaContext *kctx, kint_t n, size_t max, kfi
 {
 	size_t n1 = (size_t)n;
 	if(unlikely(!(n1 < max))) {
-		KLIB Kraise(kctx, EXPT_("OutOfArrayBoundary"), NULL, pline);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfArrayBoundary"), NULL, pline, NULL);
 	}
 	return n1;
 }

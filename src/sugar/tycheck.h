@@ -394,45 +394,68 @@ static kstatus_t kBlock_genEvalCode(KonohaContext *kctx, kBlock *bk, kMethod *mt
 
 static kstatus_t kMethod_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtype)
 {
-	kstatus_t result = K_CONTINUE;
-	INIT_GCSTACK();
 	BEGIN_LOCAL(lsfp, K_CALLDELTA);
-	{
-		int jumpResult;
-		KonohaStackRuntimeVar *runtime = kctx->stack;
-		KonohaStack *jump_bottom = runtime->jump_bottom;
-		jmpbuf_i lbuf = {};
-		if(runtime->evaljmpbuf == NULL) {
-			runtime->evaljmpbuf = (jmpbuf_i*)KCALLOC(sizeof(jmpbuf_i), 1);
-		}
-		memcpy(&lbuf, runtime->evaljmpbuf, sizeof(jmpbuf_i));
-		runtime->jump_bottom = lsfp + K_CALLDELTA; // FIXME ??
-		KSETv(K_NULL, runtime->optionalErrorMessage, TS_EMPTY);
-		runtime->thrownScriptLine = 0;
-		if((jumpResult = PLATAPI setjmp_i(*runtime->evaljmpbuf)) == 0) {
-			//DBG_P("TY=%s, running EVAL..", TY_t(rtype));
-			if(runtime->evalty != TY_void) {
-				KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, runtime->stack[runtime->evalidx].o, GC_NO_WRITE_BARRIER);
-				lsfp[K_CALLDELTA+1].intValue = runtime->stack[runtime->evalidx].intValue;
-			}
-			KCALL(lsfp, 0, mtd, 0, KLIB Knull(kctx, CT_(rtype)));
-			runtime->evalty = rtype;
-			runtime->evalidx = (lsfp - kctx->stack->stack);
-		}
-		else {
-			//KLIB reportException(kctx);
-			const char *file = PLATAPI shortFilePath(FileId_t(runtime->thrownScriptLine));
-			PLATAPI reportCaughtException(SYM_t(jumpResult), file, (kushort_t)runtime->thrownScriptLine,  S_text(runtime->optionalErrorMessage));
-			runtime->evalty = TY_void;  // no value
-			result = K_BREAK;        // message must be reported;
-		}
-		runtime->jump_bottom = jump_bottom;
-		memcpy(runtime->evaljmpbuf, &lbuf, sizeof(jmpbuf_i));
+	KonohaStackRuntimeVar *runtime = kctx->stack;
+	if(runtime->evalty != TY_void) {
+		KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, runtime->stack[runtime->evalidx].o, GC_NO_WRITE_BARRIER);
+		lsfp[K_CALLDELTA+1].intValue = runtime->stack[runtime->evalidx].intValue;
+	}
+	KonohaStack *sfp = lsfp + K_CALLDELTA;
+	KSetMethodCallStack(sfp, mtd, 0/*UL*/, 1, KLIB Knull(kctx, CT_(rtype)));
+	kstatus_t result = K_CONTINUE;
+	if(KLIB KonohaRuntime_tryCallMethod(kctx, sfp)) {
+		runtime->evalty = rtype;
+		runtime->evalidx = (lsfp - kctx->stack->stack);
+	}
+	else {
+		runtime->evalty = TY_void;  // no value
+		result = K_BREAK;        // message must be reported;
 	}
 	END_LOCAL();
-	RESET_GCSTACK();
 	return result;
 }
+
+//static kstatus_t kMethod_runEval0(KonohaContext *kctx, kMethod *mtd, ktype_t rtype)
+//{
+//	kstatus_t result = K_CONTINUE;
+//	INIT_GCSTACK();
+//	BEGIN_LOCAL(lsfp, K_CALLDELTA);
+//	{
+//		int jumpResult;
+//		KonohaStackRuntimeVar *runtime = kctx->stack;
+//		KonohaStack *jump_bottom = runtime->jump_bottom;
+//		jmpbuf_i lbuf = {};
+//		if(runtime->evaljmpbuf == NULL) {
+//			runtime->evaljmpbuf = (jmpbuf_i*)KCALLOC(sizeof(jmpbuf_i), 1);
+//		}
+//		memcpy(&lbuf, runtime->evaljmpbuf, sizeof(jmpbuf_i));
+//		runtime->jump_bottom = lsfp + K_CALLDELTA; // FIXME ??
+//		KSETv(K_NULL, runtime->optionalErrorMessage, TS_EMPTY);
+//		runtime->thrownScriptLine = 0;
+//		if((jumpResult = PLATAPI setjmp_i(*runtime->evaljmpbuf)) == 0) {
+//			//DBG_P("TY=%s, running EVAL..", TY_t(rtype));
+//			if(runtime->evalty != TY_void) {
+//				KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, runtime->stack[runtime->evalidx].o, GC_NO_WRITE_BARRIER);
+//				lsfp[K_CALLDELTA+1].intValue = runtime->stack[runtime->evalidx].intValue;
+//			}
+//			KCALL(lsfp, 0, mtd, 0, KLIB Knull(kctx, CT_(rtype)));
+//			runtime->evalty = rtype;
+//			runtime->evalidx = (lsfp - kctx->stack->stack);
+//		}
+//		else {
+//			//KLIB reportException(kctx);
+//			const char *file = PLATAPI shortFilePath(FileId_t(runtime->thrownScriptLine));
+//			PLATAPI reportCaughtException(SYM_t(jumpResult), file, (kushort_t)runtime->thrownScriptLine,  S_text(runtime->optionalErrorMessage));
+//			runtime->evalty = TY_void;  // no value
+//			result = K_BREAK;        // message must be reported;
+//		}
+//		runtime->jump_bottom = jump_bottom;
+//		memcpy(runtime->evaljmpbuf, &lbuf, sizeof(jmpbuf_i));
+//	}
+//	END_LOCAL();
+//	RESET_GCSTACK();
+//	return result;
+//}
 
 static kstatus_t TokenRange_eval(KonohaContext *kctx, TokenRange *sourceRange)
 {

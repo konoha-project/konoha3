@@ -518,7 +518,7 @@ static kString *S_substring(KonohaContext *kctx, KonohaStack *sfp, kString *s0, 
 		ret = S_msubstr(kctx, s0, start, length);
 		if (unlikely(ret == NULL)) {
 			kreportf(CritTag, sfp[K_RTNIDX].uline, "Script!!: out of array index %ld", sfp[1].intValue);
-			KLIB Kraise(kctx, EXPT_("OutOfStringBoundary"), sfp, sfp[K_RTNIDX].uline);
+			KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfStringBoundary"), sfp, sfp[K_RTNIDX].uline, NULL);
 		}
 	}
 	return ret;
@@ -808,7 +808,7 @@ static KMETHOD String_get(KonohaContext *kctx, KonohaStack *sfp)
 		s = S_mget(kctx, s, n);
 		if (unlikely(s == NULL)) {
 			kreportf(CritTag, sfp[K_RTNIDX].uline, "Script!!: out of array index %ld", (int)n);
-			KLIB Kraise(kctx, EXPT_("OutOfStringBoundary"), sfp, sfp[K_RTNIDX].uline);
+			KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfStringBoundary"), sfp, sfp[K_RTNIDX].uline, NULL);
 		}
 	}
 	RETURN_(s);
@@ -823,7 +823,7 @@ static KMETHOD String_charCodeAt(KonohaContext *kctx, KonohaStack *sfp)
 	kint_t ccode = S_mcharCodeAt(kctx, sfp[0].asString, n);
 	if (unlikely(ccode == -1)) {
 		kreportf(CritTag, sfp[K_RTNIDX].uline, "Script!!: out of array index %ld", (int)n);
-		KLIB Kraise(kctx, EXPT_("OutOfStringBoundary"), sfp, sfp[K_RTNIDX].uline);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfStringBoundary"), sfp, sfp[K_RTNIDX].uline, NULL);
 	}
 	RETURNi_(ccode);
 }

@@ -95,7 +95,7 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackage_t packageId,
 	KonohaPackageHandler *packageHandler = PLATAPI loadPackageHandler(packageName);
 	if(path == NULL && packageHandler == NULL) {
 		kreportf(ErrTag, pline, "package not found: %s path=%s", packageName, PLATAPI shortText(pathbuf));
-		KLIB Kraise(kctx, EXPT_("PackageLoader"), NULL, pline);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("PackageLoader"), NULL, pline, NULL);
 		return NULL;
 	}
 	kNameSpace *ns = new_NameSpace(kctx, packageId, packageId);
