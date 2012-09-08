@@ -338,8 +338,10 @@ typedef struct TokenRange {
 	}\
 
 typedef struct MacroSet {
-	ksymbol_t   symbol;
-	TokenRange *macro;
+	int/*ksymbol_t*/          symbol;
+	kArray                   *tokenList;
+	int                       beginIdx;
+	int                       endIdx;
 } MacroSet;
 
 typedef kbool_t (*CheckEndOfStmtFunc2)(KonohaContext *, TokenRange *range, TokenRange *sourceRange, int *currentIdxRef, int *indentRef);

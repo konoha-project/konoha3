@@ -436,14 +436,14 @@ static kbool_t TokenRange_expandMacro(KonohaContext *kctx, TokenRange *range, ks
 	while(macro->symbol != 0) {
 		if(macro->symbol == symbol) {
 			size_t i;
-			TokenRange *macroRange = macro->macro;
-			for(i = macroRange->beginIdx; i < macroRange->endIdx; i++) {
-				kToken *tk = macroRange->tokenList->tokenItems[i];
+			for(i = macro->beginIdx; i < macro->endIdx; i++) {
+				kToken *tk = macro->tokenList->tokenItems[i];
 				if(tk->resolvedSyntaxInfo != NULL) {
 					KLIB kArray_add(kctx, range->tokenList, tk);
 				}
 				else {
-					i = TokenRange_addResolvedToken(kctx, range, macroRange, i);
+					TokenRange macroRange = {range->ns, macro->tokenList, macro->beginIdx, macro->endIdx};
+					i = TokenRange_addResolvedToken(kctx, range, &macroRange, i);
 				}
 			}
 			return true;
