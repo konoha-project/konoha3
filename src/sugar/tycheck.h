@@ -89,11 +89,11 @@ static void kExpr_putConstValue(KonohaContext *kctx, kExpr *expr, KonohaStack *s
 	if(expr->build == TEXPR_CONST) {
 		KSETv_AND_WRITE_BARRIER(NULL, sfp[0].asObject, expr->objectConstValue, GC_NO_WRITE_BARRIER);
 		sfp[0].unboxValue = O_unbox(expr->objectConstValue);
-	}else if(expr->build == TEXPR_NCONST) {
+	} else if(expr->build == TEXPR_NCONST) {
 		sfp[0].unboxValue = expr->unboxConstValue;
-	}else if(expr->build == TEXPR_NEW) {
+	} else if(expr->build == TEXPR_NEW) {
 		KSETv_AND_WRITE_BARRIER(NULL, sfp[0].asObject, KLIB new_kObject(kctx, CT_(expr->ty), 0), GC_NO_WRITE_BARRIER);
-	}else {
+	} else {
 		assert(expr->build == TEXPR_NULL);
 		KSETv_AND_WRITE_BARRIER(NULL, sfp[0].asObject, KLIB Knull(kctx, CT_(expr->ty)), GC_NO_WRITE_BARRIER);
 		sfp[0].unboxValue = 0;

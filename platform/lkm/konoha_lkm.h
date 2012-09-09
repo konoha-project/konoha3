@@ -61,10 +61,10 @@ static inline long long int _strtoll(const char *nptr, char **endptr, int base)
 		if(*nptr == 'x' || *nptr == 'X') {
 			base = 16;
 			nptr++;
-		}else {
+		} else {
 			base = 8;
 		}
-	}else if(*nptr == '+'){
+	} else if(*nptr == '+'){
 		nptr++;
 	}
 	if(base == 0)
