@@ -431,16 +431,23 @@ static void CommandLine_define(KonohaContext *kctx, char *keyvalue)
 		memcpy(namebuf, keyvalue, len); namebuf[len] = 0;
 		DBG_P("name='%s'", namebuf);
 		ksymbol_t key = KLIB Ksymbol(kctx, namebuf, len, 0, SYM_NEWID);
+		uintptr_t unboxValue;
+		ktype_t ty;
 		if(isdigit(p[1])) {
-			long n = strtol(p+1, NULL, 0);
-			KLIB kNameSpace_setConstData(kctx, KNULL(NameSpace), key, TY_int, (uintptr_t)n, 0);
+			ty = TY_int;
+			unboxValue = (uintptr_t)strtol(p+1, NULL, 0);
 		}
 		else {
-			KLIB kNameSpace_setConstData(kctx, KNULL(NameSpace), key, TY_TEXT, (uintptr_t)(p+1), 0);
+			ty = TY_TEXT;
+			unboxValue = (uintptr_t)(p+1);
+		}
+		if(!KLIB kNameSpace_setConstData(kctx, KNULL(NameSpace), key, ty, unboxValue, 0)) {
+			PLATAPI exit_i(EXIT_FAILURE);
 		}
 	}
 	else {
 		fprintf(stdout, "invalid define option: use -D<key>=<value>\n");
+		PLATAPI exit_i(EXIT_FAILURE);
 	}
 }
 
