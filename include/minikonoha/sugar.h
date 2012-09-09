@@ -399,6 +399,7 @@ struct kExprVar {
 #define TSTMT_IF             5
 #define TSTMT_LOOP           6
 #define TSTMT_JUMP           7
+#define TSTMT_TRY            8
 
 struct kStmtVar {
 	KonohaObjectHeader h;
