@@ -109,6 +109,7 @@ set(PACKAGES
 	konoha.break
 	konoha.bytes
 	konoha.class
+	konoha.const
 	konoha.continue
 	konoha.date
 	konoha.defined

@@ -148,10 +148,12 @@ static kbool_t kNameSpace_merge(KonohaContext *kctx, kNameSpace *ns, kNameSpace 
 {
 	if(!kNameSpace_isImported(kctx, ns, target, pline)) {
 		if(target->packageId != PN_konoha) {
-			kNameSpace_importClassName(kctx, ns, target->packageId, pline);
+			return kNameSpace_importClassName(kctx, ns, target->packageId, pline);
 		}
 		if(target->constTable.bytesize > 0) {
-			kNameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, target->constTable.keyvalueItems, target->constTable.bytesize/sizeof(KUtilsKeyValue), pline);
+			if(!kNameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, target->constTable.keyvalueItems, target->constTable.bytesize/sizeof(KUtilsKeyValue), pline)) {
+				return false;
+			}
 		}
 		size_t i;
 		for(i = 0; i < kArray_size(target->methodList); i++) {
@@ -161,8 +163,7 @@ static kbool_t kNameSpace_merge(KonohaContext *kctx, kNameSpace *ns, kNameSpace 
 			}
 		}
 		// record imported
-		kNameSpace_setConstData(kctx, ns, target->packageId | KW_PATTERN, TY_int, target->packageId);
-		return true;
+		return kNameSpace_setConstData(kctx, ns, target->packageId | KW_PATTERN, TY_int, target->packageId, pline);
 	}
 	return false;
 }
