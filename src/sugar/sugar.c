@@ -207,10 +207,12 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 
 	SugarModule_setup(kctx, &mod->h, 0);
 
-	KDEFINE_INT_CONST ClassData[] = {
+	KDEFINE_INT_CONST ClassData[] = {   // minikonoha defined class
+		{"void", TY_TYPE, (uintptr_t)CT_void},
 		{"boolean", TY_TYPE, (uintptr_t)CT_Boolean},
 		{"int",    TY_TYPE, (uintptr_t)CT_Int},
 		{"String", TY_TYPE, (uintptr_t)CT_String},
+		{"Func",   TY_TYPE, (uintptr_t)CT_Func},
 		{"System", TY_TYPE, (uintptr_t)CT_System},
 		{NULL},
 	};

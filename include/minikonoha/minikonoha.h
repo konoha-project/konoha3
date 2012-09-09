@@ -777,6 +777,7 @@ struct KonohaClassField {
 #define TY_System            ((ktype_t)10)
 #define TY_0                ((ktype_t)11)    /* Parameter Type*/
 
+#define CT_void                 CT_(TY_void)
 #define CT_Object               CT_(TY_Object)
 #define CT_Boolean              CT_(TY_boolean)
 #define CT_Int                  CT_(TY_int)
@@ -1307,7 +1308,7 @@ struct KonohaLibVar {
 	kbool_t      (*KonohaRuntime_setModule)(KonohaContext*, int, struct KonohaModule *, kfileline_t);
 
 	struct KonohaPackageVar*   (*kNameSpace_requirePackage)(KonohaContext*, const char *, kfileline_t);
-	kbool_t          (*kNameSpace_importPackage)(KonohaContext*, kNameSpace*, const char *, kfileline_t);
+	kbool_t              (*kNameSpace_importPackage)(KonohaContext*, kNameSpace*, const char *, kfileline_t);
 	KonohaClass*     (*kNameSpace_getClass)(KonohaContext*, kNameSpace *, const char *, size_t, KonohaClass *);
 	KonohaClass*     (*kNameSpace_defineClass)(KonohaContext*, kNameSpace *, kString *, KDEFINE_CLASS *, kfileline_t);
 

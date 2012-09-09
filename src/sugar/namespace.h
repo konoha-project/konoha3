@@ -157,6 +157,8 @@ static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 // --------------------------------------------------------------------------
 // ConstTable
 
+#define kNameSpace_sizeConstTable(ns)    (ns->constTable.bytesize / sizeof(KUtilsKeyValue))
+
 static int comprKeyVal(const void *a, const void *b)
 {
 	int akey = SYMKEY_unbox(((KUtilsKeyValue*)a)->key);
@@ -166,7 +168,7 @@ static int comprKeyVal(const void *a, const void *b)
 
 static KUtilsKeyValue* kNameSpace_getLocalConstNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t unboxKey)
 {
-	size_t min = 0, max = ns->constTable.bytesize / sizeof(KUtilsKeyValue);
+	size_t min = 0, max = kNameSpace_sizeConstTable(ns);
 	while(min < max) {
 		size_t p = (max + min) / 2;
 		ksymbol_t key = SYMKEY_unbox(ns->constTable.keyvalueItems[p].key);
@@ -290,22 +292,25 @@ static kbool_t kNameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ns, con
 	return result;
 }
 
-static kbool_t kNameSpace_importClassName(KonohaContext *kctx, kNameSpace *ns, kpackage_t packageId, kfileline_t pline)
+static kbool_t kNameSpace_importClassName(KonohaContext *kctx, kNameSpace *ns, kNameSpace *targetNameSpace, kfileline_t pline)
 {
-	KUtilsKeyValue kv;
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	size_t i, size = KARRAYSIZE(kctx->share->classTable.bytesize, uintptr);
+	size_t i, size = kNameSpace_sizeConstTable(targetNameSpace);
 	kbool_t result = true;
 	for(i = 0; i < size; i++) {
-		KonohaClass *ct = CT_(i);
-		if(CT_isPrivate(ct)) continue;
-		if(ct->packageId == packageId) {
-			DBG_P("importing packageId=%s.%s, %s..", PackageId_t(ct->packageId), SYM_t(ct->classNameSymbol), PackageId_t(packageId));
-			kv.key = ct->classNameSymbol;
-			kv.ty  = TY_TYPE;
-			kv.unboxValue = (uintptr_t)ct;
-			KLIB Kwb_write(kctx, &wb, (const char*)(&kv), sizeof(KUtilsKeyValue));
+		KUtilsKeyValue *kvs = targetNameSpace->constTable.keyvalueItems + i;
+		if(kvs->ty == TY_TYPE) {
+			KonohaClass *ct = (KonohaClass*)kvs->unboxValue;
+			if(CT_isPrivate(ct)) continue;
+			if(targetNameSpace->packageId == ct->packageId) {
+				DBG_P("importing packageId=%s.%s to %s..", PackageId_t(ct->packageId), SYM_t(ct->classNameSymbol), PackageId_t(ns->packageId));
+				KLIB Kwb_write(kctx, &wb, (const char*)(kvs), sizeof(KUtilsKeyValue));
+			}
+//			kv.key = ct->classNameSymbol;
+//			kv.ty  = TY_TYPE;
+//			kv.unboxValue = (uintptr_t)ct;
+//			KLIB Kwb_write(kctx, &wb, (const char*)(&kv), sizeof(KUtilsKeyValue));
 		}
 	}
 	size_t nitems = Kwb_bytesize(&wb) / sizeof(KUtilsKeyValue);
@@ -331,14 +336,10 @@ static KonohaClass *kNameSpace_getClass(KonohaContext *kctx, kNameSpace *ns, con
 		packageId = KLIB KpackageId(kctx, name, plen, 0, SYM_NONAME);
 	}
 	if(packageId != SYM_NONAME) {
-//		uintptr_t hcode = longid(packageId, un);
-//		ct = (KonohaClass*)map_getu(kctx, kctx->share->longClassNameMapNN, hcode, 0);
-//		if(ct == NULL) {
-			KUtilsKeyValue *kvs = kNameSpace_getConstNULL(kctx, ns, un);
-			if(kvs != NULL && kvs->ty == TY_TYPE) {
-				return (KonohaClass*)kvs->unboxValue;
-			}
-//		}
+		KUtilsKeyValue *kvs = kNameSpace_getConstNULL(kctx, ns, un);
+		if(kvs != NULL && kvs->ty == TY_TYPE) {
+			return (KonohaClass*)kvs->unboxValue;
+		}
 	}
 	return (ct != NULL) ? ct : defaultClass;
 }
@@ -739,10 +740,9 @@ static kbool_t kNameSpace_isImported(KonohaContext *kctx, kNameSpace *ns, kNameS
 static kbool_t kNameSpace_merge(KonohaContext *kctx, kNameSpace *ns, kNameSpace *target, kfileline_t pline)
 {
 	if(!kNameSpace_isImported(kctx, ns, target, pline)) {
-		if(target->packageId != PN_konoha) {
-			if(!kNameSpace_importClassName(kctx, ns, target->packageId, pline)) {
-				return false;
-			}
+		DBG_P("target->packageId=%s", PackageId_t(target->packageId));
+		if(!kNameSpace_importClassName(kctx, ns, target, pline)) {
+			return false;
 		}
 		if(target->constTable.bytesize > 0) {
 			if(!kNameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, target->constTable.keyvalueItems, target->constTable.bytesize/sizeof(KUtilsKeyValue), pline)) {
