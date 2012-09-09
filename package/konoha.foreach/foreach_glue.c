@@ -154,6 +154,7 @@ static KMETHOD StmtTyCheck_for(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t foreach_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
+	KImportPackage(ns, "konoha.iterator", pline);
 	KImportPackage(ns, "konoha.break", pline);
 	KImportPackage(ns, "konoha.continue", pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
