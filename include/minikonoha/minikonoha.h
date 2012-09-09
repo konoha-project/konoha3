@@ -1370,8 +1370,8 @@ struct KonohaLibVar {
 #define kArray_setsize(A, N)      ((kArrayVar*)A)->bytesize = N * sizeof(void*)
 #define new_kParam(CTX, R, PSIZE, P)       (KLIB kMethod_setParam(CTX, NULL, R, PSIZE, P))
 
-#define KRequirePackage(NAME, UL)                   KLIB kNameSpace_requirePackage(kctx, NAME, UL)
-#define KImportPackage(NS, NAME, UL)                KLIB kNameSpace_importPackage(kctx, NS, NAME, UL)
+#define KRequirePackage(NAME, UL)       if(!KLIB kNameSpace_requirePackage(kctx, NAME, UL)) return false;
+#define KImportPackage(NS, NAME, UL)    if(!KLIB kNameSpace_importPackage(kctx, NS, NAME, UL)) return false;
 
 typedef intptr_t  KDEFINE_METHOD;
 
