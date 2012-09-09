@@ -824,6 +824,40 @@ static void JumpStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx
 	ASM_JMP(kctx, lbJUMP);
 }
 
+static void ASMBranch(KonohaContext *kctx, kBasicBlock *jumpBB)
+{
+	kBasicBlock *bb = ctxcode->currentWorkingBlock;
+	kBasicBlock *newbb = new_BasicBlockLABEL(kctx);
+	OPTRYJMP op_ = {TADDR, OPCODE_TRYJMP, ASMLINE, NULL};
+	union { VirtualMachineInstruction op; OPTRYJMP op_; } tmp_; tmp_.op_ = op_;
+	BUILD_asm(kctx, &tmp_.op, sizeof(OPTRYJMP));
+
+	bb->branchBlock = jumpBB; jumpBB->incoming += 1;
+	bb->nextBlock   = newbb;  newbb->incoming  += 1;
+	ctxcode->currentWorkingBlock = newbb;
+}
+
+static void TryStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
+{
+	kBasicBlock* lbCatched = new_BasicBlockLABEL(kctx);
+	kBasicBlock* lbFinally = new_BasicBlockLABEL(kctx);
+	kBlock *catchBlock   = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("catch"),   K_NULLBLOCK);
+	kBlock *finallyBlock = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("finally"), K_NULLBLOCK);
+	PUSH_GCSTACK(catchBlock);
+	PUSH_GCSTACK(finallyBlock);
+	KLIB kObject_setObject(kctx, stmt, SYM_("catch"),   TY_BasicBlock, lbCatched);
+	KLIB kObject_setObject(kctx, stmt, SYM_("finally"), TY_BasicBlock, lbFinally);
+	ASMBranch(kctx/*, OPCODE_TRYJMP*/, lbCatched);
+
+	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK), shift);
+	ASM_JMP(kctx, lbFinally);
+	ASM_LABEL(kctx, lbCatched);
+	BLOCK_asm(kctx, catchBlock, shift);
+	ASM_JMP(kctx, lbFinally);
+	ASM_LABEL(kctx, lbFinally);
+	BLOCK_asm(kctx, finallyBlock, shift);
+}
+
 static void UndefinedStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
 	DBG_P("undefined asm syntax kw='%s'", SYM_t(stmt->syn->keyword));
@@ -845,6 +879,7 @@ static void BLOCK_asm(KonohaContext *kctx, kBlock *bk, int shift)
 		case TSTMT_IF:     IfStmt_asm(kctx, stmt, shift, espidx);     break;
 		case TSTMT_LOOP:   LoopStmt_asm(kctx, stmt, shift, espidx);     break;
 		case TSTMT_JUMP:   JumpStmt_asm(kctx, stmt, shift, espidx);     break;
+		case TSTMT_TRY:    TryStmt_asm(kctx, stmt, shift, espidx);      break;
 		default: UndefinedStmt_asm(kctx, stmt, shift, espidx); break;
 		}
 	}

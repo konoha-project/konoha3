@@ -122,11 +122,13 @@ set(PACKAGES
 	konoha.iterator
 	konoha.math
 	konoha.map
+	konoha.mpi
 	konoha.namespace
 	konoha.new
 	konoha.null
 	konoha.string
 	konoha.subtype
+##	konoha.sql
 	konoha.var
 	konoha.while
 	sugar
@@ -137,13 +139,11 @@ set(PACKAGES
 	posix.fd
 ##	posix.socket
 	posix.thread
-##	konoha.sql
 	dscript.subproc
-	konoha.mpi
-##	curl
+	curl
 ##	ijit
 ##	jansson
-##	mecab
+	mecab
 	python
 	apache
 #	openssl
