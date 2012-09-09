@@ -42,18 +42,28 @@
 
 static	kbool_t konoha_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KRequirePackage("konoha.assign", pline);
-	KRequirePackage("konoha.while", pline);
-
-	KRequirePackage("konoha.class", pline);
+	KRequirePackage("konoha.namespace", pline);
+	KRequirePackage("konoha.const", pline);
 	KRequirePackage("konoha.global", pline);
+	KRequirePackage("konoha.class", pline);       // subtype
 
 	KRequirePackage("konoha.null", pline);
+
+	KRequirePackage("konoha.while",  pline);  // continue, break
+
 	KRequirePackage("konoha.int", pline);
 #ifndef K_USING_NOFLOAT
 	KRequirePackage("konoha.float", pline);
 #endif
+	KRequirePackage("konoha.string", pline);
 	KRequirePackage("konoha.array", pline);
+	KRequirePackage("konoha.map", pline);
+	KRequirePackage("konoha.iterator", pline);
+
+	KRequirePackage("konoha.assign", pline);
+	KRequirePackage("konoha.io", pline);
+
+
 	return true;
 }
 
@@ -64,17 +74,28 @@ static kbool_t konoha_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 
 static kbool_t konoha_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
-	KImportPackage(ns, "konoha.assign", pline);
-	KImportPackage(ns, "konoha.while",  pline);
-	KImportPackage(ns, "konoha.class",  pline);
+	KImportPackage(ns, "konoha.namespace", pline);
+	KImportPackage(ns, "konoha.const",  pline);  // TopLevel
 	KImportPackage(ns, "konoha.global", pline);
+	KImportPackage(ns, "konoha.class",  pline);
 
-	KImportPackage(ns, "konoha.null", pline);
+	KImportPackage(ns, "konoha.null", pline);    // Operator
+
+	KImportPackage(ns, "konoha.while",  pline);
+
 	KImportPackage(ns, "konoha.int",  pline);
-	if(kctx->modshare[MOD_float] != NULL) {
-		KImportPackage(ns, "konoha.float", pline);
-	}
+	KImportPackage(ns, "konoha.float", pline);
+	KImportPackage(ns, "konoha.string", pline);
+
+	KImportPackage(ns, "konoha.date", pline);
 	KImportPackage(ns, "konoha.array", pline);
+	KImportPackage(ns, "konoha.map", pline);
+	KImportPackage(ns, "konoha.iterator", pline);
+
+	KImportPackage(ns, "konoha.assign", pline);
+
+	KImportPackage(ns, "konoha.io", pline);
+
 	return true;
 }
 
