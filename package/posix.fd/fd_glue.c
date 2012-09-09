@@ -793,7 +793,7 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		.free  = kStat_free,
 		.p     = kStat_p
 	};
-	KonohaClass *cStat = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defStat, pline);
+	KonohaClass *cStat = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defStat, pline);
 
 	KDEFINE_CLASS defDIR = {
 		STRUCTNAME(DIR),
@@ -802,7 +802,7 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		.free  = kDIR_free,
 		.p     = kDIR_p
 	};
-	KonohaClass *cDIR = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defDIR, pline);
+	KonohaClass *cDIR = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDIR, pline);
 
 	KDEFINE_CLASS defDirent = {
 		STRUCTNAME(Dirent),
@@ -811,7 +811,7 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		.free  = kDirent_free,
 		.p     = kDirent_p
 	};
-	KonohaClass *cDirent = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defDirent, pline);
+	KonohaClass *cDirent = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDirent, pline);
 	KonohaClass *CT_DirentArray0 = CT_p0(kctx, CT_Array, cDirent->typeId);
 	ktype_t TY_DirentArray0 = CT_DirentArray0->typeId;
 

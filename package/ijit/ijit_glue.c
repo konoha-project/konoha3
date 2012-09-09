@@ -721,7 +721,7 @@ static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	static KDEFINE_CLASS PointerDef = {
 		STRUCTNAME(Pointer)
 	};
-	base->cPointer = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &PointerDef, pline);
+	base->cPointer = KLIB kNameSpace_defineClass(kctx, ns, NULL, &PointerDef, pline);
 
 	//FIXME
 	//KDEFINE_INT_CONST IntData[] = {
@@ -730,7 +730,7 @@ static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	//};
 	//KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
 
-	KLIB Konoha_setModule(kctx, MOD_jit, &base->h, pline);
+	KLIB KonohaRuntime_setModule(kctx, MOD_jit, &base->h, pline);
 	return true;
 }
 

@@ -308,8 +308,8 @@ static kbool_t sql_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		.free = ResultSet_free,
 	};
 
-	KonohaClass *cConnection = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &ConnectionDef, pline);
-	KonohaClass *cResultSet = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &ResultSetDef, pline);
+	KonohaClass *cConnection = KLIB kNameSpace_defineClass(kctx, ns, NULL, &ConnectionDef, pline);
+	KonohaClass *cResultSet = KLIB kNameSpace_defineClass(kctx, ns, NULL, &ResultSetDef, pline);
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Connection_new), TY_Connection, TY_Connection, MN_("new"), 1, TY_String, FN_("dbname"),

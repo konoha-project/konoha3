@@ -178,15 +178,15 @@ static kExpr* kStmt_tyCheckExprAt(KonohaContext *kctx, kStmt *stmt, kExpr *exprP
 	return K_NULLEXPR;
 }
 
-static kbool_t kStmt_tyCheckByName(KonohaContext *kctx, kStmt *stmt, ksymbol_t nameid, kGamma *gma, ktype_t reqty, int pol)
+static kbool_t kStmt_tyCheckByName(KonohaContext *kctx, kStmt *stmt, ksymbol_t classNameSymbol, kGamma *gma, ktype_t reqty, int pol)
 {
-	kExpr *expr = (kExpr*)kStmt_getObjectNULL(kctx, stmt, nameid);
+	kExpr *expr = (kExpr*)kStmt_getObjectNULL(kctx, stmt, classNameSymbol);
 	if(expr != NULL && IS_Expr(expr)) {
 		kExpr *texpr = Expr_tyCheck(kctx, stmt, expr, gma, reqty, pol);
 //		DBG_P("reqty=%s, texpr->ty=%s isnull=%d", TY_t(reqty), TY_t(texpr->ty), (texpr == K_NULLEXPR));
 		if(texpr != K_NULLEXPR) {
 			if(texpr != expr) {
-				KLIB kObject_setObject(kctx, stmt, nameid, TY_Expr, texpr);
+				KLIB kObject_setObject(kctx, stmt, classNameSymbol, TY_Expr, texpr);
 			}
 			return 1;
 		}

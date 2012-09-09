@@ -1268,7 +1268,7 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	base->h.setup    = kmodsubproc_setup;
 	base->h.reftrace = kmodsubproc_reftrace;
 	base->h.free     = kmodsubproc_free;
-	KLIB Konoha_setModule(kctx, MOD_subproc, &base->h, pline);
+	KLIB KonohaRuntime_setModule(kctx, MOD_subproc, &base->h, pline);
 
 	KDEFINE_CLASS defSubproc = {
 		STRUCTNAME(Subproc),
@@ -1278,7 +1278,7 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		.p     = Subproc_p,
 	};
 
-	base->cSubproc= KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defSubproc, pline);
+	base->cSubproc= KLIB kNameSpace_defineClass(kctx, ns, NULL, &defSubproc, pline);
 
 	kparamtype_t ps = {TY_String, FN_("str")};
 	KonohaClass *CT_StringArray2 = KLIB KonohaClass_Generics(kctx, CT_Array, TY_String, 1, &ps);

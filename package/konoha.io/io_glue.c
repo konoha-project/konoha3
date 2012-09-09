@@ -617,7 +617,7 @@ static kbool_t io_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 	base->h.setup    = kioshare_setup;
 	base->h.reftrace = kioshare_reftrace;
 	base->h.free     = kioshare_free;
-	KLIB Konoha_setModule(kctx, MOD_IO, &base->h, pline);
+	KLIB KonohaRuntime_setModule(kctx, MOD_IO, &base->h, pline);
 
 	KDEFINE_CLASS defInputStream = {
 		STRUCTNAME(InputStream),
@@ -639,9 +639,9 @@ static kbool_t io_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		.free     = kFile_free,
 	};
 
-	KonohaClass *cInputStream  = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &defInputStream, pline);
-	KonohaClass *cOutputStream = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &defOutputStream, pline);
-	KonohaClass *cFile         = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &defFile, pline);
+	KonohaClass *cInputStream  = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defInputStream, pline);
+	KonohaClass *cOutputStream = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defOutputStream, pline);
+	KonohaClass *cFile         = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defFile, pline);
 	int TY_InputStream = cInputStream->typeId;
 	int TY_OutputStream = cOutputStream->typeId;
 	int TY_File = cFile->typeId;

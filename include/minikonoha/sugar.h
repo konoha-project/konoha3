@@ -172,7 +172,7 @@ struct TokenizerEnv {
 		(void)TK; (void)STR; (void)UL;\
 *****/
 
-// int PatternMatch(Stmt stmt, int nameid, Token[] toks, int s, int e)
+// int PatternMatch(Stmt stmt, int classNameSymbol, Token[] toks, int s, int e)
 #define VAR_PatternMatch(STMT, NAME, TLS, S, E)\
 		kStmt *STMT = (kStmt*)sfp[1].asObject;\
 		ksymbol_t NAME = (ksymbol_t)sfp[2].intValue;\

@@ -527,7 +527,7 @@ static	kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		STRUCTNAME(Date),
 		.cflag = kClass_Final,
 	};
-	KonohaClass *cDate = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defDate, pline);
+	KonohaClass *cDate = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDate, pline);
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Date_new0), TY_Date, TY_Date, MN_("new"), 0,

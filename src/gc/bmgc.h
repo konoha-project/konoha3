@@ -2019,7 +2019,7 @@ void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		KSET_KLIB(Kfree, 0);
 		KSET_KLIB(Kwrite_barrier, 0);
 		KSET_KLIB(Kgc_invoke, 0);
-		KLIB Konoha_setModule(kctx, MOD_gc, &base->h, 0);
+		KLIB KonohaRuntime_setModule(kctx, MOD_gc, &base->h, 0);
 		assert(sizeof(BlockHeader) <= MIN_ALIGN
 				&& "Minimum size of Object may lager than sizeof BlockHeader");
 	}
@@ -2034,7 +2034,7 @@ void MODGC_free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	assert(memlocal(ctx) == NULL);
 	if (IS_RootKonohaContext(ctx)) {
-		KLIB Konoha_setModule(kctx, MOD_gc, NULL, 0);
+		KLIB KonohaRuntime_setModule(kctx, MOD_gc, NULL, 0);
 	}
 }
 

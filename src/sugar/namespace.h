@@ -301,8 +301,8 @@ static kbool_t kNameSpace_importClassName(KonohaContext *kctx, kNameSpace *ns, k
 		KonohaClass *ct = CT_(i);
 		if(CT_isPrivate(ct)) continue;
 		if(ct->packageId == packageId) {
-			DBG_P("importing packageId=%s.%s, %s..", PackageId_t(ct->packageId), SYM_t(ct->nameid), PackageId_t(packageId));
-			kv.key = ct->nameid;
+			DBG_P("importing packageId=%s.%s, %s..", PackageId_t(ct->packageId), SYM_t(ct->classNameSymbol), PackageId_t(packageId));
+			kv.key = ct->classNameSymbol;
 			kv.ty  = TY_TYPE;
 			kv.unboxValue = (uintptr_t)ct;
 			KLIB Kwb_write(kctx, &wb, (const char*)(&kv), sizeof(KUtilsKeyValue));
@@ -331,16 +331,25 @@ static KonohaClass *kNameSpace_getClass(KonohaContext *kctx, kNameSpace *ns, con
 		packageId = KLIB KpackageId(kctx, name, plen, 0, SYM_NONAME);
 	}
 	if(packageId != SYM_NONAME) {
-		uintptr_t hcode = longid(packageId, un);
-		ct = (KonohaClass*)map_getu(kctx, kctx->share->longClassNameMapNN, hcode, 0);
-		if(ct == NULL) {
+//		uintptr_t hcode = longid(packageId, un);
+//		ct = (KonohaClass*)map_getu(kctx, kctx->share->longClassNameMapNN, hcode, 0);
+//		if(ct == NULL) {
 			KUtilsKeyValue *kvs = kNameSpace_getConstNULL(kctx, ns, un);
 			if(kvs != NULL && kvs->ty == TY_TYPE) {
 				return (KonohaClass*)kvs->unboxValue;
 			}
-		}
+//		}
 	}
 	return (ct != NULL) ? ct : defaultClass;
+}
+
+static KonohaClass *kNameSpace_defineClass(KonohaContext *kctx, kNameSpace *ns, kString *name, KDEFINE_CLASS *cdef, kfileline_t pline)
+{
+	KonohaClass *ct = KLIB KonohaClass_define(kctx, ns->packageId, name, cdef, pline);
+	if(!KLIB kNameSpace_setConstData(kctx, ns, ct->classNameSymbol, TY_TYPE, (uintptr_t)ct, pline)) {
+		return NULL;
+	}
+	return ct;
 }
 
 // --------------------------------------------------------------------------
@@ -617,6 +626,7 @@ static kMethod* kNameSpace_getCastMethodNULL(KonohaContext *kctx, kNameSpace *ns
 	return mtd;
 }
 
+// ---------------------------------------------------------------------------
 
 static kstatus_t kNameSpace_eval(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline);
 
@@ -752,11 +762,11 @@ static kbool_t kNameSpace_merge(KonohaContext *kctx, kNameSpace *ns, kNameSpace 
 	return false;
 }
 
-static kbool_t kNameSpace_requirePackage(KonohaContext *kctx, const char *name, kfileline_t pline)
+static KonohaPackage* kNameSpace_requirePackage(KonohaContext *kctx, const char *name, kfileline_t pline)
 {
 	kpackage_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
 	KonohaPackage *pack = getPackageNULL(kctx, packageId, pline);
-	return (pack != NULL);
+	return pack;
 }
 
 static kbool_t kNameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, const char *name, kfileline_t pline)

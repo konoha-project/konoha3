@@ -189,7 +189,7 @@ static	kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 			.structname = "Math"/*structname*/,
 			.typeId = TY_newid/*cid*/,
 	};
-	KonohaClass *cMath = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &MathDef, pline);
+	KonohaClass *cMath = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MathDef, pline);
 	int FN_x = FN_("x");
 	int FN_y = FN_("y");
 	KDEFINE_METHOD MethodData[] = {

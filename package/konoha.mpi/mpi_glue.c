@@ -541,7 +541,7 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	base->h.setup    = kmodmpi_setup;
 	base->h.reftrace = kmodmpi_reftrace;
 	base->h.free     = kmodmpi_free;
-	KLIB Konoha_setModule(kctx, MOD_mpi, &base->h, pline);
+	KLIB KonohaRuntime_setModule(kctx, MOD_mpi, &base->h, pline);
 
 	MPI_Init(&argc, (char ***)&args);
 	g_comm_world = (kMPIComm *)KMALLOC(sizeof(kMPIComm));
@@ -626,11 +626,11 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	//	0/*hashCode*/,
 	//	0/*initdef*/
 	//};
-	KonohaClass *CT_MPI = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &MPIDef, pline);
-	KonohaClass *CT_MPIComm = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &MPICommDef, pline);
-	KonohaClass *CT_MPIRequest = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &MPIRequestDef, pline);
-	KonohaClass *CT_MPIData = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &MPIDataDef, pline);
-	//KonohaClass *CT_MPIOp = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &MPIOpDef, pline);
+	KonohaClass *CT_MPI = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MPIDef, pline);
+	KonohaClass *CT_MPIComm = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MPICommDef, pline);
+	KonohaClass *CT_MPIRequest = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MPIRequestDef, pline);
+	KonohaClass *CT_MPIData = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MPIDataDef, pline);
+	//KonohaClass *CT_MPIOp = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MPIOpDef, pline);
 #define TY_MPI         (CT_MPI->typeId)
 #define TY_MPIComm     (CT_MPIComm->typeId)
 #define TY_MPIRequest  (CT_MPIRequest->typeId)

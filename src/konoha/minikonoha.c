@@ -109,7 +109,7 @@ static void KonohaStackRuntime_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	KFREE(kctx->stack, sizeof(KonohaStackRuntimeVar));
 }
 
-static kbool_t Konoha_setModule(KonohaContext *kctx, int x, KonohaModule *d, kfileline_t pline)
+static kbool_t KonohaRuntime_setModule(KonohaContext *kctx, int x, KonohaModule *d, kfileline_t pline)
 {
 	if(kctx->modshare[x] != NULL) {
 		kreportf(ErrTag, pline, "module already registered: %s", kctx->modshare[x]->name);
@@ -131,7 +131,7 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 	if(kctx == NULL) {  // NULL means first one
 		KonohaLibVar *klib = (KonohaLibVar*)calloc(sizeof(KonohaLib) + sizeof(KonohaContextVar), 1);
 		klib_init(klib);
-		klib->Konoha_setModule    = Konoha_setModule;
+		klib->KonohaRuntime_setModule    = KonohaRuntime_setModule;
 		newctx = (KonohaContextVar*)(klib + 1);
 		newctx->klib = (KonohaLib*)klib;
 		newctx->platApi = platApi;

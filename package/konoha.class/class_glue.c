@@ -233,7 +233,7 @@ static kbool_t KonohaClass_setClassFieldUnboxValue(KonohaContext *kctx, KonohaCl
 //		.superTypeId = supct->typeId,
 //	};
 //	setfield(kctx, &defNewClass, fieldsize, supct);
-//	KonohaClass *ct = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, name, &defNewClass, pline);
+//	KonohaClass *ct = KLIB kNameSpace_defineClass(kctx, ns, name, &defNewClass, pline);
 //	ct->fnull(kctx, ct);  // create null object
 //	return ct;
 //}
@@ -349,7 +349,7 @@ static KonohaClassVar* kNameSpace_defineClassName(KonohaContext *kctx, kNameSpac
 		.superTypeId  = TY_Object, //superClass->typeId,
 		.init = Object_initToMakeDefaultValueAsNull, // dummy for first generation of DefaultValueAsNull
 	};
-	KonohaClassVar *definedClass = (KonohaClassVar*)KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, name, &defNewClass, pline);
+	KonohaClassVar *definedClass = (KonohaClassVar*)KLIB kNameSpace_defineClass(kctx, ns, name, &defNewClass, pline);
 	KDEFINE_CLASS_CONST ClassData[] = {
 		{S_text(name), TY_TYPE, definedClass},
 		{NULL},

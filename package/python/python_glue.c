@@ -494,7 +494,7 @@ static kbool_t python_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 			.p    = PyObject_p,
 	};
 
-	KonohaClass *cPython = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &PythonDef, pline);
+	KonohaClass *cPython = KLIB kNameSpace_defineClass(kctx, ns, NULL, &PythonDef, pline);
 	int TY_PyObject = cPython->typeId;
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im|_Coercion, _F(PyObject_toBoolean), TY_boolean, TY_PyObject, MN_to(TY_boolean), 0,

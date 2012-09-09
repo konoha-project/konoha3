@@ -242,7 +242,7 @@ struct _kScript {
 static kbool_t global_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("var"), TopStmtTyCheck_(var), .rule = "\"var\" var: $Expr \"=\" $Expr", },
+		{ .keyword = SYM_("var"), TopStmtTyCheck_(var), .rule = "\"var\" var: $Symbol \"=\" $Expr", },
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
@@ -255,7 +255,7 @@ static kbool_t global_initNameSpace(KonohaContext *kctx, kNameSpace *packageName
 			.cflag = kClass_Singleton|kClass_Final,
 			.cstruct_size = sizeof(kScript),
 		};
-		KonohaClass *cScript = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defScript, pline);
+		KonohaClass *cScript = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defScript, pline);
 		KSETv(ns, ((kNameSpaceVar*)ns)->scriptObject, KLIB Knull(kctx, cScript));
 	}
 	return true;

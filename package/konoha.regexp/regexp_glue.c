@@ -738,7 +738,7 @@ static kbool_t regexp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	base->h.setup    = kregexpshare_setup;
 	base->h.reftrace = kregexpshare_reftrace;
 	base->h.free     = kregexpshare_free;
-	KLIB Konoha_setModule(kctx, MOD_REGEXP, &base->h, pline);
+	KLIB KonohaRuntime_setModule(kctx, MOD_REGEXP, &base->h, pline);
 
 	KDEFINE_CLASS RegExpDef = {
 		STRUCTNAME(RegExp),
@@ -747,7 +747,7 @@ static kbool_t regexp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		.free = RegExp_free,
 		.p    = RegExp_p,
 	};
-	base->cRegExp = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &RegExpDef, pline);
+	base->cRegExp = KLIB kNameSpace_defineClass(kctx, ns, NULL, &RegExpDef, pline);
 
 	ktype_t TY_StringArray0 = CT_StringArray0->typeId;
 	KDEFINE_METHOD MethodData[] = {

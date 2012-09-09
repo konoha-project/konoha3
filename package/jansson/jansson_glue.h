@@ -438,7 +438,7 @@ static	kbool_t jansson_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		.free = Jansson_free,
 		.p    = Jansson_p,
 	};
-	KonohaClass *cJson = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &JsonDef, pline);
+	KonohaClass *cJson = KLIB kNameSpace_defineClass(kctx, ns, NULL, &JsonDef, pline);
 	kparamtype_t ps = {TY_Json, FN_("json")};
 	KonohaClass *CT_JsonArray = KLIB KonohaClass_Generics(kctx, CT_Array, TY_Json, 1, &ps);
 	ktype_t TY_JsonArray = CT_JsonArray->typeId;

@@ -208,7 +208,7 @@ static kbool_t exception_initPackage(KonohaContext *kctx, kNameSpace *ns, int ar
 	mod->h.setup    = kModuleException_setup;
 	mod->h.reftrace = kModuleException_reftrace;
 	mod->h.free     = kModuleException_free;
-	KLIB Konoha_setModule(kctx, MOD_exception, &mod->h, pline);
+	KLIB KonohaRuntime_setModule(kctx, MOD_exception, &mod->h, pline);
 	KDEFINE_CLASS defException = {
 		STRUCTNAME(Exception),
 		.cflag = CFLAG_Exception,
@@ -216,7 +216,7 @@ static kbool_t exception_initPackage(KonohaContext *kctx, kNameSpace *ns, int ar
 		.reftrace = Exception_reftrace,
 		.p     = Exception_p,
 	};
-	mod->cException = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &defException, pline);
+	mod->cException = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defException, pline);
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Exception_new), TY_Exception,  TY_Exception, MN_("new"), 0, _Public|_Hidden, _F(System_throw), TY_void,  TY_System, MN_("throw"), 1, TY_Exception, FN_("e"),

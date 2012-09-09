@@ -739,7 +739,7 @@ void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		KSET_KLIB(Kzmalloc, 0);
 		KSET_KLIB(Kfree, 0);
 		KSET_KLIB(Kwrite_barrier, 0);
-		KLIB Konoha_setModule(kctx, MOD_gc, &base->h, 0);
+		KLIB KonohaRuntime_setModule(kctx, MOD_gc, &base->h, 0);
 	}
 	MSGC_setup(ctx, (KonohaModule*) memshare(kctx), 1);
 }
@@ -749,7 +749,7 @@ void MODGC_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	assert(memlocal(ctx) == NULL);
 	if(IS_RootKonohaContext(ctx)) {
 		MSGC_free(kctx, (KonohaModule*) memshare(kctx));
-		KLIB Konoha_setModule(kctx, MOD_gc, NULL, 0);
+		KLIB KonohaRuntime_setModule(kctx, MOD_gc, NULL, 0);
 	}
 }
 

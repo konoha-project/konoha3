@@ -247,7 +247,7 @@ static kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	base->h.setup    = kmodfloat_setup;
 	base->h.reftrace = kmodfloat_reftrace;
 	base->h.free     = kmodfloat_free;
-	KLIB Konoha_setModule(kctx, MOD_float, &base->h, pline);
+	KLIB KonohaRuntime_setModule(kctx, MOD_float, &base->h, pline);
 
 	KDEFINE_CLASS defFloat = {
 		UNBOXNAME(float),
@@ -256,7 +256,7 @@ static kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		.init = Float_init,
 		.p     = Float_p,
 	};
-	base->cFloat = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &defFloat, pline);
+	base->cFloat = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defFloat, pline);
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im, _F(Float_opPlus), TY_float, TY_float, MN_("+"), 0,

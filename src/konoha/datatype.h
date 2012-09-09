@@ -716,7 +716,7 @@ static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 {
 	if(ct->shortNameNULL == NULL) {
 		if(ct->cparamdom == 0 && ct->baseTypeId != TY_Func) {
-			KINITv(((KonohaClassVar*)ct)->shortNameNULL, SYM_s(ct->nameid));
+			KINITv(((KonohaClassVar*)ct)->shortNameNULL, SYM_s(ct->classNameSymbol));
 		}
 		else {
 			size_t i, c = 0;
@@ -727,7 +727,7 @@ static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 				KonohaClass_shortName(kctx, CT_(cparam->paramtypeItems[i].ty));
 			}
 			Kwb_init(&(kctx->stack->cwb), &wb);
-			kString *s = SYM_s(ct->nameid);
+			kString *s = SYM_s(ct->classNameSymbol);
 			KLIB Kwb_write(kctx, &wb, S_text(s), S_size(s));
 			kwb_putc(&wb, '[');
 			if(ct->baseTypeId == TY_Func) {
@@ -750,15 +750,15 @@ static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 
 static void KonohaClass_setName(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t pline)
 {
-	uintptr_t lname = longid(ct->packageDomain, ct->nameid);
-	KLIB Kreportf(kctx, DebugTag, pline, "new class domain=%s, name='%s.%s'", PackageId_t(ct->packageDomain), PackageId_t(ct->packageId), SYM_t(ct->nameid));
-	KLock(kctx->share->classTableMutex); {
-		KonohaClass *ct2 = (KonohaClass*)map_getu(kctx, kctx->share->longClassNameMapNN, lname, (uintptr_t)NULL);
-		if(ct2 == NULL) {
-			map_addu(kctx, kctx->share->longClassNameMapNN, lname, (uintptr_t)ct);
-		}
-	}
-	KUnlock(kctx->share->classTableMutex);
+//	uintptr_t lname = longid(ct->packageDomain, ct->classNameSymbol);
+//	KLock(kctx->share->classTableMutex); {
+//		KonohaClass *ct2 = (KonohaClass*)map_getu(kctx, kctx->share->longClassNameMapNN, lname, (uintptr_t)NULL);
+//		if(ct2 == NULL) {
+//			map_addu(kctx, kctx->share->longClassNameMapNN, lname, (uintptr_t)ct);
+//		}
+//	}
+//	KUnlock(kctx->share->classTableMutex);
+	KLIB Kreportf(kctx, DebugTag, pline, "new class %s.%s", PackageId_t(ct->packageId), SYM_t(ct->classNameSymbol));
 	if(ct->methodList == NULL) {
 		KINITv(ct->methodList, K_EMPTYARRAY);
 		if(ct->typeId > TY_Object) {
@@ -767,18 +767,18 @@ static void KonohaClass_setName(KonohaContext *kctx, KonohaClassVar *ct, kfileli
 	}
 }
 
-static KonohaClass *Konoha_defineClass(KonohaContext *kctx, kpackage_t packageId, kpackage_t packageDomain, kString *name, KDEFINE_CLASS *cdef, kfileline_t pline)
+static KonohaClass *KonohaClass_define(KonohaContext *kctx, kpackage_t packageId, kString *name, KDEFINE_CLASS *cdef, kfileline_t pline)
 {
 	KonohaClassVar *ct = new_KonohaClass(kctx, NULL, cdef, pline);
 	ct->packageId  = packageId;
-	ct->packageDomain = packageDomain;
+	ct->packageDomain = packageId;
 	if(name == NULL) {
 		const char *n = cdef->structname;
 		assert(n != NULL); // structname must be set;
-		ct->nameid = ksymbolSPOL(n, strlen(n), SPOL_ASCII|SPOL_POOL|SPOL_TEXT, _NEWID);
+		ct->classNameSymbol = ksymbolSPOL(n, strlen(n), SPOL_ASCII|SPOL_POOL|SPOL_TEXT, _NEWID);
 	}
 	else {
-		ct->nameid = ksymbolA(S_text(name), S_size(name), _NEWID);
+		ct->classNameSymbol = ksymbolA(S_text(name), S_size(name), _NEWID);
 	}
 	KonohaClass_setName(kctx, ct, pline);
 	return (KonohaClass*)ct;
@@ -911,7 +911,7 @@ static void initStructData(KonohaContext *kctx)
 	for(i = 0; i <= TY_0; i++) {
 		KonohaClassVar *ct = (KonohaClassVar *)ctt[i];
 		const char *name = ct->DBG_NAME;
-		ct->nameid = ksymbolSPOL(name, strlen(name), SPOL_ASCII|SPOL_POOL|SPOL_TEXT, _NEWID);
+		ct->classNameSymbol = ksymbolSPOL(name, strlen(name), SPOL_ASCII|SPOL_POOL|SPOL_TEXT, _NEWID);
 		KonohaClass_setName(kctx, ct, 0);
 	}
 }
@@ -932,7 +932,7 @@ static void initKonohaLib(KonohaLibVar *l)
 	l->Kparamdom            = Kparamdom;
 	l->kMethod_setParam     = kMethod_setParam;
 	l->kMethod_indexOfField = STUB_Method_indexOfField;
-	l->Konoha_defineClass    = Konoha_defineClass;
+	l->KonohaClass_define   = KonohaClass_define;
 	l->Knull = Knull;
 	l->KonohaClass_shortName = KonohaClass_shortName;
 	l->KonohaClass_Generics = KonohaClass_Generics;

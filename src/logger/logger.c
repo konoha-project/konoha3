@@ -191,7 +191,7 @@ void MODLOGGER_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	base->h.setup    = kmodlogger_setup;
 	base->h.reftrace = kmodlogger_reftrace;
 	//base->h.free     = kmodlogger_free;
-	KLIB Konoha_setModule(kctx, MOD_logger, (KonohaModule*)base, 0);
+	KLIB KonohaRuntime_setModule(kctx, MOD_logger, (KonohaModule*)base, 0);
 	KSET_KLIB(Ktrace, 0);
 }
 

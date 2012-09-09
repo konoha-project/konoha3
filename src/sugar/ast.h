@@ -81,7 +81,6 @@ static kExpr *kStmt_parseOperatorExpr(KonohaContext *kctx, kStmt *stmt, SugarSyn
 		kStmt_printMessage(kctx, stmt, ErrTag, "syntax error: expression %s", Token_text(tokenList->tokenItems[operatorIdx]));
 	}
 	else {
-//		DBG_P("exprSyntax=%p, '%s%s'", exprSyntax, PSYM_t(exprSyntax->keyword));
 		kStmt_printMessage(kctx, stmt, ErrTag, "undefined expression: %s", Token_text(tokenList->tokenItems[operatorIdx]));
 	}
 	return K_NULLEXPR;
@@ -152,11 +151,6 @@ static kExpr *kStmt_addExprParam(KonohaContext *kctx, kStmt *stmt, kExpr *expr, 
 	if(allowEmpty == 0 || start < i) {
 		expr = Expr_add(kctx, expr, kStmt_parseExpr(kctx, stmt, tokenList, start, i));
 	}
-	/* XXX(GC)
-	 * We would like to remove references in TokenList at this point for
-	 * GC reason. But as konoha.arrray package' parser, we reuse TokenList
-	 * to build AST. So we cannot clear contents of TokenList.
-	 */
 	//KLIB kArray_clear(kctx, tokenList, s);
 	return expr;
 }
@@ -299,7 +293,7 @@ static int TokenArray_findPrefetchedRuleToken(kArray *tokenList, int beginIdx, i
 static int kStmt_parseMismatchedRule(KonohaContext *kctx, kStmt *stmt, kToken *tk, kToken *ruleToken, int returnIdx, int canRollBack)
 {
 	if(!canRollBack && !Stmt_isERR(stmt)) {
-		kStmtToken_printMessage(kctx, stmt, tk, ErrTag, "%s%s expects %s%s", T_statement(stmt->syn->keyword), KW_t(ruleToken->resolvedSymbol));
+		kStmtToken_printMessage(kctx, stmt, tk, ErrTag, "%s%s: %s%s is expected", T_statement(stmt->syn->keyword), KW_t(ruleToken->resolvedSymbol));
 	}
 	return returnIdx;
 }
@@ -480,26 +474,6 @@ static int TokenRange_addSymbolToken(KonohaContext *kctx, TokenRange *range, Tok
 			kToken_setTypeId(kctx, tk, range->ns, foundClass->typeId);
 		}
 		else {
-//			if(!isalpha(t[0])) {
-//				kToken_printMessage(kctx, tk, "undefined token: %s", Token_text(tk));
-//				range->errToken = tk;
-//				return sourceRange->endIdx;  // end
-//				while(t[0] != 0) {
-//					ksymbol_t op1 = ksymbolA(t, 1, SYM_NEWID);
-//					syn = SYN_(range->ns, op1);
-//					if(syn == NULL) {
-//						kToken_printMessage(kctx, tk, "undefined token: %s", Token_text(tk));
-//						range->errToken = tk;
-//						return range->endIdx;  // end
-//					}
-//					kTokenVar *splitToken = new_(TokenVar, syn->keyword);
-//					KLIB kArray_add(kctx, range->stmtTokenList, splitToken);
-//					splitToken->resolvedSyntaxInfo = syn;
-//					splitToken->uline = tk->uline;
-//					KSETv(splitToken, splitToken->text, SYM_s(op1));
-//					t++;
-//				}
-//			}
 			tk->resolvedSymbol = symbol;
 			tk->resolvedSyntaxInfo = SYN_(sourceRange->ns, KW_SymbolPattern);
 		}

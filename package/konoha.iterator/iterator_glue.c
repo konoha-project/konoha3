@@ -201,7 +201,7 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 	base->h.setup    = kmoditerator_setup;
 	base->h.reftrace = kmoditerator_reftrace;
 	base->h.free     = kmoditerator_free;
-	KLIB Konoha_setModule(kctx, MOD_iterator, &base->h, pline);
+	KLIB KonohaRuntime_setModule(kctx, MOD_iterator, &base->h, pline);
 
 	kparamtype_t IteratorParam = {
 		.ty = TY_Object,
@@ -214,7 +214,7 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 		.cparamsize  = 1,
 		.cparamItems = &IteratorParam,
 	};
-	base->cIterator = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &defIterator, pline);
+	base->cIterator = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defIterator, pline);
 	base->cStringIterator = CT_p0(kctx, base->cIterator, TY_String);
 	base->cGenericIterator = CT_p0(kctx, base->cIterator, TY_0);
 	KDEFINE_METHOD MethodData[] = {

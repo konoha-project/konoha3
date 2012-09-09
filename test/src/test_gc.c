@@ -72,7 +72,7 @@ void test_gc(KonohaContext *kctx)
 {
 #define CT_Dummy ct
     int i, j;
-    KonohaClass *ct = KLIB Konoha_defineClass(kctx, 0, 0, NULL, &DummyDef, 0);
+    KonohaClass *ct = KLIB KonohaClass_define(kctx, 0, NULL, &DummyDef, 0);
     /* small size */
     for (i = 0; i < 10; ++i) {
         for (j = 0; j < 100; ++j) {

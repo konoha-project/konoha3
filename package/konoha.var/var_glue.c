@@ -66,7 +66,7 @@ static kbool_t kStmt_inferDeclType(KonohaContext *kctx, kStmt *stmt, kGamma *gma
 	}
 	if(Expr_isSymbolTerm(declExpr)) {
 		kToken *termToken = declExpr->termToken;
-		SUGAR kStmt_printMessage2(kctx, stmt, termToken, WarnTag, "var %s expects an initial value", SYM_t(termToken->resolvedSymbol));
+		SUGAR kStmt_printMessage2(kctx, stmt, termToken, WarnTag, "var %s: an initial value is expected", SYM_t(termToken->resolvedSymbol));
 		SUGAR kStmt_printMessage2(kctx, stmt, termToken, InfoTag, "%s has type %s", SYM_t(termToken->resolvedSymbol), TY_t(TY_Object));
 	}
 	return SUGAR kStmt_declType(kctx, stmt, gma, TY_Object, declExpr, TypeDecl, lastStmtRef);

@@ -204,7 +204,7 @@ static	kbool_t map_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		.free      = kMap_free,
 		.p         = kMap_p,
 	};
-	KonohaClass *cMap = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &defMap, pline);
+	KonohaClass *cMap = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defMap, pline);
 	int FN_key = MN_("key");
 	int TY_Array0 = CT_p0(kctx, CT_Array, TY_0)->typeId;
 	KDEFINE_METHOD MethodData[] = {
