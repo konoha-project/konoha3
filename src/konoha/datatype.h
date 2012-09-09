@@ -751,7 +751,7 @@ static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 static void KonohaClass_setName(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t pline)
 {
 	uintptr_t lname = longid(ct->packageDomain, ct->nameid);
-	kreportf(DebugTag, pline, "new class domain=%s, name='%s.%s'", PackageId_t(ct->packageDomain), PackageId_t(ct->packageId), SYM_t(ct->nameid));
+	KLIB Kreportf(kctx, DebugTag, pline, "new class domain=%s, name='%s.%s'", PackageId_t(ct->packageDomain), PackageId_t(ct->packageId), SYM_t(ct->nameid));
 	KLock(kctx->share->classTableMutex); {
 		KonohaClass *ct2 = (KonohaClass*)map_getu(kctx, kctx->share->longClassNameMapNN, lname, (uintptr_t)NULL);
 		if(ct2 == NULL) {

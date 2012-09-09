@@ -128,7 +128,6 @@ static kinline kbool_t sym_equals(KonohaContext *kctx, ksymbol_t s1, ksymbol_t s
 	return false;
 }
 
-
 static kinline uintptr_t longid(kushort_t packageDomain, kushort_t un)
 {
 	uintptr_t hcode = packageDomain;
