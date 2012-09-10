@@ -2,5 +2,5 @@
 
 K.import("konoha.object");
 
-assert(("").getTypeId() == 4);
+assert(("").getTypeId() == 5/*TY_String*/);
 

@@ -5,7 +5,7 @@ K.import("konoha.class");
 
 
 void test() {
-  int[] a = new int[-1];
+	int[] a = new int[-1];
 }
 
 test();
