@@ -27,8 +27,22 @@
 
 // --------------------------------------------------------------------------
 
+#define _Public   kMethod_Public
+#define _Coercion kMethod_Coercion
+#define _F(F)   (intptr_t)(F)
+
+static KMETHOD NameSpace_setImplicitGlobalVariable_(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kNameSpace_setImplicitGlobalVariable(sfp[0].asNameSpace, sfp[1].boolValue);
+}
+
 static	kbool_t global_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
+	KDEFINE_METHOD MethodData[] = {
+		_Public, _F(NameSpace_setImplicitGlobalVariable_), TY_void, TY_NameSpace, MN_("setImplicitGlobalVariable"), 1, TY_boolean, FN_("enabled"),
+		DEND,
+	};
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	return true;
 }
 
@@ -200,10 +214,20 @@ static kbool_t kGlobalObject_typeDecl(KonohaContext *kctx, kObject *scr, kStmt *
 			// this is neccesarry to avoid 'int a = a + 1;';
 			return false;
 		}
+		if(ty == TY_var) {
+			ty = kExpr_at(expr, 2)->ty;
+			kStmt_printMessage(kctx, stmt, InfoTag, "%s has type %s", SYM_t(kExpr_at(expr, 1)->termToken->resolvedSymbol), TY_t(ty));
+		}
 		return kGlobalObject_typeDeclAndSetter(kctx, scr, stmt, gma, ty, kExpr_at(expr, 1), kExpr_at(expr, 2), lastStmtRef);
 	} else if(Expr_isSymbolTerm(expr)) {
-		kExpr *valueExpr = new_VariableExpr(kctx, gma, TEXPR_NULL, ty, 0);
-		return kGlobalObject_typeDeclAndSetter(kctx, scr, stmt, gma, ty, expr, valueExpr, lastStmtRef);
+		if(ty == TY_var) {
+			kStmt_printMessage(kctx, stmt, ErrTag, "an initial value is expected: var %s", SYM_t(kExpr_at(expr, 1)->termToken->resolvedSymbol));
+			return false;
+		}
+		else {
+			kExpr *valueExpr = new_VariableExpr(kctx, gma, TEXPR_NULL, ty, 0);
+			return kGlobalObject_typeDeclAndSetter(kctx, scr, stmt, gma, ty, expr, valueExpr, lastStmtRef);
+		}
 	} else if(expr->syn->keyword == KW_COMMA) {
 		size_t i;
 		for(i = 1; i < kArray_size(expr->cons); i++) {
@@ -211,7 +235,7 @@ static kbool_t kGlobalObject_typeDecl(KonohaContext *kctx, kObject *scr, kStmt *
 		}
 		return true;
 	}
-	SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "variable name is expected");
+	kStmt_printMessage(kctx, stmt, ErrTag, "variable name is expected");
 	return false;
 }
 
@@ -253,11 +277,6 @@ static KMETHOD StmtTyCheck_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t global_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
-//	KDEFINE_SYNTAX SYNTAX[] = {
-//		{ .keyword = SYM_("var"), TopStmtTyCheck_(var), .rule = "\"var\" var: $Symbol \"=\" $Expr", },
-//		{ .keyword = KW_END, },
-//	};
-//	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 	SUGAR kNameSpace_setSugarFunc(kctx, ns, KW_StmtTypeDecl, SUGARFUNC_TopStmtTyCheck, new_SugarFunc(StmtTyCheck_GlobalTypeDecl));
 	return kNameSpace_initGlobalObject(kctx, ns, pline);
 }

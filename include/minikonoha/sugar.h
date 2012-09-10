@@ -294,9 +294,17 @@ struct kNameSpaceVar {
 	kArray                            *methodList;   // default K_EMPTYARRAY
 };
 
-#define kNameSpace_ImplicitField                     ((uintptr_t)(1<<0))
-#define kNameSpace_allowedImplictFieldAccess(ns)      1/*(TFLAG_is(uintptr_t, (o)->syntaxOption, kNameSpace_ImplicitField))*/
-#define kNameSpace_allowedImplictGlobalVariable(ns)   1
+#define kNameSpace_TypeInference                     ((uintptr_t)(1<<0))
+#define kNameSpace_ImplicitField                     ((uintptr_t)(1<<1))
+#define kNameSpace_ImplicitGlobalVariable            ((uintptr_t)(1<<2))
+
+#define kNameSpace_allowedTypeInference(ns)   (TFLAG_is(uintptr_t, (ns)->syntaxOption, kNameSpace_TypeInference))
+#define kNameSpace_setTypeInference(ns, B)    TFLAG_set(uintptr_t, (ns)->syntaxOption, kNameSpace_TypeInference, B)
+
+#define kNameSpace_allowedImplicitFieldAccess(ns)      1/*(TFLAG_is(uintptr_t, (ns)->syntaxOption, kNameSpace_ImplicitField))*/
+
+#define kNameSpace_allowedImplicitGlobalVariable(ns)   (TFLAG_is(uintptr_t, (ns)->syntaxOption, kNameSpace_ImplicitGlobalVariable))
+#define kNameSpace_setImplicitGlobalVariable(ns, B)    TFLAG_set(uintptr_t, ((kNameSpaceVar*)ns)->syntaxOption, kNameSpace_ImplicitGlobalVariable, B)
 
 /* Token */
 struct kTokenVar {

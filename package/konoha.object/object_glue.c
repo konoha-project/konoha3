@@ -49,7 +49,6 @@ static kbool_t object_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		{NULL},
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(ClassData), 0);
-
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const, _F(Object_getTypeId), TY_int, TY_Object, MN_("getTypeId"), 0,
 		DEND,

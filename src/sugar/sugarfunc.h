@@ -483,7 +483,7 @@ static kExpr* kExpr_tyCheckVariable(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 			return SUGAR kExpr_setVariable(kctx, expr, gma, TEXPR_LOCAL, genv->localScope.varItems[i].ty, i);
 		}
 	}
-	if(kNameSpace_allowedImplictFieldAccess(ns)) {
+	if(kNameSpace_allowedImplicitFieldAccess(ns)) {
 		if(genv->localScope.varItems[0].ty != TY_void) {
 			DBG_ASSERT(genv->this_cid == genv->localScope.varItems[0].ty);
 			KonohaClass *ct = CT_(genv->this_cid);
@@ -500,7 +500,7 @@ static kExpr* kExpr_tyCheckVariable(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 			}
 		}
 	}
-	if((Gamma_isTopLevel(gma) || kNameSpace_allowedImplictGlobalVariable(ns)) && ns->globalObjectNULL != NULL) {
+	if((Gamma_isTopLevel(gma) || kNameSpace_allowedImplicitGlobalVariable(ns)) && ns->globalObjectNULL != NULL) {
 		ktype_t cid = O_typeId(ns->globalObjectNULL);
 		kMethod *mtd = kNameSpace_getGetterMethodNULL(kctx, ns, cid, symbol);
 		if(mtd != NULL) {
@@ -796,7 +796,7 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kEx
 		}
 	}
 
-	if((Gamma_isTopLevel(gma) || kNameSpace_allowedImplictGlobalVariable(ns)) && ns->globalObjectNULL != NULL) {
+	if((Gamma_isTopLevel(gma) || kNameSpace_allowedImplicitGlobalVariable(ns)) && ns->globalObjectNULL != NULL) {
 		ktype_t cid = O_typeId(ns->globalObjectNULL);
 		kMethod *mtd = kNameSpace_getGetterMethodNULL(kctx, ns, cid, fn);
 		if(mtd != NULL && TY_isFunc(Method_returnType(mtd))) {
