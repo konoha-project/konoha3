@@ -3,5 +3,5 @@
 boolean
 int
 String[]
-Array[String]
+// Array[String] this is unsupported
 

@@ -404,10 +404,13 @@ static KMETHOD Array_newList(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KRequirePackage("konoha.new", pline);
-	// define array generics
-	//kparamtype_t p1 = {TY_0, FN_("a")};
-	//KonohaClass *CT_ArrayT0 = KLIB KonohaClass_Generics(kctx, CT_Array, TY_0, 1, &p1);
+	KRequirePackage("konoha.new", pline);  // FIXME
+	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
+		{"Array", TY_TYPE, (uintptr_t)CT_(TY_Array)},
+		{NULL},
+	};
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(ClassData), 0);
+
 	KonohaClass *CT_ArrayT0 = CT_p0(kctx, CT_Array, TY_0);
 	ktype_t TY_ArrayT0 = CT_ArrayT0->typeId;
 	KDEFINE_METHOD MethodData[] = {
