@@ -313,6 +313,17 @@ static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
+	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
+		{"Token", TY_TYPE, (uintptr_t)CT_Token},
+		{"Stmt", TY_TYPE,  (uintptr_t)CT_Stmt},
+		{"Expr", TY_TYPE,  (uintptr_t)CT_Expr},
+		{"Block", TY_TYPE, (uintptr_t)CT_Block},
+		{"Gamma", TY_TYPE, (uintptr_t)CT_Gamma},
+		{"NameSpace", TY_TYPE, (uintptr_t)CT_NameSpace},
+		{NULL},
+	};
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(ClassData), 0);
+
 	int FN_buildid = FN_("buildid"), FN_key = FN_("key"), FN_defval = FN_("defval");
 	int FN_typeid = FN_("typeid"), FN_gma = FN_("gma"), FN_pol = FN_("pol");
 	int FN_func = FN_("func"), FN_msg = FN_("msg");
