@@ -4,18 +4,18 @@ K.import("konoha.class");
 K.import("konoha.date");
 
 void f() {
-	Date d = new Date();
-	assert(d.getDate() > 0);
-	assert(d.getDay() > 0);
-	assert(d.getFullYear() >= 2012);
-	assert(d.getHours() >= 0);
-	assert(d.getMilliseconds() >= 0);
-	assert(d.getMinutes() >= 0);
-	assert(d.getMonth() >= 0);
-	assert(d.getSeconds() >= 0);
-	assert(d.getTime() > 0);
+	Date d = new Date(2012, 9, 10, 18, 46, 30, 10);
+	assert(d.getDate() == 10);
+	assert(d.getDay() == 3);
+	assert(d.getFullYear() == 2012);
+	assert(d.getHours() == 18);
+	assert(d.getMilliseconds() == 10);
+	assert(d.getMinutes() == 46);
+	assert(d.getMonth() == 9);
+	assert(d.getSeconds() == 30);
+	assert(d.getTime() == 1349862390010);
 	assert(d.getTimezoneOffset() > -720 || d.getTimezoneOffset() < 720);
-	assert(d.getYear() >= 112);
+	assert(d.getYear() == 112);
 }
 
 f();
