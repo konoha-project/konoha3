@@ -1,8 +1,10 @@
 // written by kimio kuramitsu
 
+K.import("konoha.object");
 
 void test() {
-	Object o = "123";
+	String s = "123";
+	Object o = s;
 	//assert(o == n);
 }
 

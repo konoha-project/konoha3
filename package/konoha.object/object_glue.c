@@ -43,13 +43,13 @@ static KMETHOD Object_getTypeId(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t object_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
+	KRequirePackage("konoha.subtype", pline);
 	KDEFINE_INT_CONST ClassData[] = {   // add Object as available
-		{"Object", TY_TYPE, (uintptr_t)CT_(Object)},
+		{"Object", TY_TYPE, (uintptr_t)CT_(TY_Object)},
 		{NULL},
 	};
-	kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(ClassData), 0);
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(ClassData), 0);
 
-	int FN_type = FN_("type");
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const, _F(Object_getTypeId), TY_int, TY_Object, MN_("getTypeId"), 0,
 		DEND,
@@ -65,28 +65,29 @@ static kbool_t object_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 
 // --------------------------------------------------------------------------
 
-static KMETHOD ExprTyCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	kToken *tkN = expr->cons->tokenItems[0];
-	ksymbol_t fn = tkN->resolvedSymbol;
-	kExpr *self = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 1, gma, TY_var, 0);
-	kNameSpace *ns = Stmt_nameSpace(stmt);
-	if(self != K_NULLEXPR) {
-		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, self->ty, MN_toGETTER(fn), 0, MPOL_GETTER);
-		if(mtd != NULL) {
-			KSETv(expr->cons, expr->cons->methodItems[0], mtd);
-			RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, reqty));
-		}
-		SUGAR kStmt_printMessage2(kctx, stmt, tkN, ErrTag, "undefined field: %s", S_text(tkN->text));
-	}
-	RETURN_(K_NULLEXPR);
-}
+//static KMETHOD ExprTyCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	VAR_ExprTyCheck(stmt, expr, gma, reqty);
+//	kToken *tkN = expr->cons->tokenItems[0];
+//	ksymbol_t fn = tkN->resolvedSymbol;
+//	kExpr *self = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 1, gma, TY_var, 0);
+//	kNameSpace *ns = Stmt_nameSpace(stmt);
+//	if(self != K_NULLEXPR) {
+//		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, self->ty, MN_toGETTER(fn), 0, MPOL_GETTER);
+//		if(mtd != NULL) {
+//			KSETv(expr->cons, expr->cons->methodItems[0], mtd);
+//			RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, reqty));
+//		}
+//		SUGAR kStmt_printMessage2(kctx, stmt, tkN, ErrTag, "undefined field: %s", S_text(tkN->text));
+//	}
+//	RETURN_(K_NULLEXPR);
+//}
 
 // ----------------------------------------------------------------------------
 
 static kbool_t object_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
+	KImportPackage(ns, "konoha.subtype", pline);
 //	KDEFINE_SYNTAX SYNTAX[] = {
 //		{ .keyword = SYM_("."), ExprTyCheck_(Getter) },
 //		{ .keyword = KW_END, },
