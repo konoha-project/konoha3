@@ -113,6 +113,7 @@ set(PACKAGES
 	konoha.continue
 	konoha.date
 	konoha.defined
+	konoha.field
 	konoha.float
 	konoha.foreach
 	konoha.global

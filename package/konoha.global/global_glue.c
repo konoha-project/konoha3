@@ -31,15 +31,16 @@
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static KMETHOD NameSpace_setImplicitGlobalVariable_(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD NameSpace_setTransparentGlobalVariable_(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kNameSpace_setImplicitGlobalVariable(sfp[0].asNameSpace, sfp[1].boolValue);
+	kNameSpace_setTransparentGlobalVariable(sfp[0].asNameSpace, sfp[1].boolValue);
 }
 
 static	kbool_t global_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
+	KRequirePackage("konoha.field", pline);
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(NameSpace_setImplicitGlobalVariable_), TY_void, TY_NameSpace, MN_("setImplicitGlobalVariable"), 1, TY_boolean, FN_("enabled"),
+		_Public, _F(NameSpace_setTransparentGlobalVariable_), TY_void, TY_NameSpace, MN_("setTransparentGlobalVariable"), 1, TY_boolean, FN_("enabled"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
@@ -134,53 +135,7 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kObject *o, kStmt
 	return mtd;
 }
 
-static inline ksymbol_t tosymbol(KonohaContext *kctx, kExpr *expr)
-{
-	if(Expr_isSymbolTerm(expr)) {
-		return expr->termToken->resolvedSymbol;
-	}
-	return SYM_NONAME;
-}
-
-//static KMETHOD StmtTyCheck_var(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	VAR_StmtTyCheck(stmt, gma);
-//	DBG_P("global assign .. ");
-//	kNameSpace *ns = Stmt_nameSpace(stmt);
-//	kObject *scr = ns->scriptObject;
-//	if(O_typeId(scr) == TY_System) {
-//		SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, " global variables are not available");
-//		RETURNb_(false);
-//	}
-//	kExpr *vexpr = SUGAR kStmt_getExpr(kctx, stmt, SYM_("var"), K_NULLEXPR);
-//	ksymbol_t fn = tosymbol(kctx, vexpr);
-//	if(fn == SYM_NONAME) {
-//		SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "variable name is expected");
-//		RETURNb_(false);
-//	}
-//	kExpr *expr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, K_NULLEXPR);
-//	if(!SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, 0)) {
-//		RETURNb_(false);
-//	}
-//	/*kExpr **/expr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, K_NULLEXPR);
-//	kMethod *mtd = Object_newProtoSetterNULL(kctx, scr, stmt, ns, expr->ty, fn);
-//	if(mtd == NULL) {
-//		RETURNb_(false);
-//	}
-//	SUGAR kStmt_printMessage2(kctx, stmt, NULL, InfoTag, "%s has type %s", SYM_t(fn), TY_t(expr->ty));
-//	expr = SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_void, mtd,  2, new_ConstValueExpr(kctx, O_typeId(scr), scr), expr);
-//	KLIB kObject_setObject(kctx, stmt, KW_ExprPattern, TY_Expr, expr);
-//	kStmt_typed(stmt, EXPR);
-//	RETURNb_(true);
-//}
-
 // ---------------------------------------------------------------------------
-
-//static kMethod* ExprTerm_getSetterNULL(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kObject *scr, kGamma *gma, ktype_t ty)
-//{
-//	kNameSpace *ns = Stmt_nameSpace(stmt);
-//	return Object_newProtoSetterNULL(kctx, scr, stmt, ns, ty, expr->termToken->resolvedSymbol);
-//}
 
 static void appendSetterStmt(KonohaContext *kctx, kStmt **lastStmtRef, kStmt *newstmt)
 {
@@ -277,6 +232,7 @@ static KMETHOD StmtTyCheck_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t global_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
+	KImportPackage(ns, "konoha.field", pline);
 	SUGAR kNameSpace_setSugarFunc(kctx, ns, KW_StmtTypeDecl, SUGARFUNC_TopStmtTyCheck, new_SugarFunc(StmtTyCheck_GlobalTypeDecl));
 	return kNameSpace_initGlobalObject(kctx, ns, pline);
 }

@@ -500,7 +500,7 @@ static kExpr* kExpr_tyCheckVariable(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 			}
 		}
 	}
-	if((Gamma_isTopLevel(gma) || kNameSpace_allowedImplicitGlobalVariable(ns)) && ns->globalObjectNULL != NULL) {
+	if((Gamma_isTopLevel(gma) || kNameSpace_allowedTransparentGlobalVariable(ns)) && ns->globalObjectNULL != NULL) {
 		ktype_t cid = O_typeId(ns->globalObjectNULL);
 		kMethod *mtd = kNameSpace_getGetterMethodNULL(kctx, ns, cid, symbol);
 		if(mtd != NULL) {
@@ -796,7 +796,7 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kEx
 		}
 	}
 
-	if((Gamma_isTopLevel(gma) || kNameSpace_allowedImplicitGlobalVariable(ns)) && ns->globalObjectNULL != NULL) {
+	if((Gamma_isTopLevel(gma) || kNameSpace_allowedTransparentGlobalVariable(ns)) && ns->globalObjectNULL != NULL) {
 		ktype_t cid = O_typeId(ns->globalObjectNULL);
 		kMethod *mtd = kNameSpace_getGetterMethodNULL(kctx, ns, cid, fn);
 		if(mtd != NULL && TY_isFunc(Method_returnType(mtd))) {
@@ -990,11 +990,23 @@ static kbool_t kStmt_declType(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kty
 			// this is neccesarry to avoid 'int a = a + 1;';
 			return false;
 		}
+		if(ty == TY_var) {
+			kToken *termToken = kExpr_at(declExpr, 1)->termToken;
+			ktype_t inferedType = kExpr_at(declExpr, 2)->ty;
+			kStmtToken_printMessage(kctx, stmt, termToken, InfoTag, "%s has type %s%s", PSYM_t(termToken->resolvedSymbol), TY_t(inferedType));
+			ty = inferedType;
+		}
 		newstmt = TypeDecl(kctx, stmt, gma, ty, kExpr_at(declExpr, 1), kExpr_at(declExpr, 2));
 	}
 	else if(Expr_isSymbolTerm(declExpr)) {
-		kExpr *vexpr = new_VariableExpr(kctx, gma, TEXPR_NULL, ty, 0);
-		newstmt = TypeDecl(kctx, stmt, gma, ty, declExpr, vexpr);
+		if(ty == TY_var) {
+			kStmt_printMessage(kctx, stmt, ErrTag, "an initial value is expected: var %s%s", PSYM_t(declExpr->termToken->resolvedSymbol));
+			return false;
+		}
+		else {
+			kExpr *vexpr = new_VariableExpr(kctx, gma, TEXPR_NULL, ty, 0);
+			newstmt = TypeDecl(kctx, stmt, gma, ty, declExpr, vexpr);
+		}
 	}
 	else {
 		kStmt_printMessage(kctx, stmt, ErrTag, "type declaration: variable name is expected");
