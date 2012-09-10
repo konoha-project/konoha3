@@ -295,8 +295,8 @@ struct kNameSpaceVar {
 };
 
 #define kNameSpace_ImplicitField                     ((uintptr_t)(1<<0))
-#define kNameSpace_allowedImplicitFieldAccess(o)     1/*(TFLAG_is(uintptr_t, (o)->syntaxOption, kNameSpace_ImplicitField))*/
-#define kNameSpace_allowedImplictGlobalVariable(ns)  1
+#define kNameSpace_allowedImplictFieldAccess(ns)      1/*(TFLAG_is(uintptr_t, (o)->syntaxOption, kNameSpace_ImplicitField))*/
+#define kNameSpace_allowedImplictGlobalVariable(ns)   1
 
 /* Token */
 struct kTokenVar {
@@ -445,8 +445,8 @@ typedef struct {
 	ktype_t    ty;    ksymbol_t  fn;
 } GammaStackDecl ;
 
-#define kGamma_TOPLEVEL        (kshortflag_t)(1)
-#define Gamma_isTOPLEVEL(GMA)  TFLAG_is(kshortflag_t, GMA->genv->flag, kGamma_TOPLEVEL)
+#define kGamma_TopLevel        (kshortflag_t)(1)
+#define Gamma_isTopLevel(GMA)  TFLAG_is(kshortflag_t, GMA->genv->flag, kGamma_TopLevel)
 #define kGamma_ERROR           (kshortflag_t)(1<<1)
 #define Gamma_hasERROR(GMA)    TFLAG_is(kshortflag_t, GMA->genv->flag, kGamma_ERROR)
 #define Gamma_setERROR(GMA,B) TFLAG_set(kshortflag_t, GMA->genv->flag, kGamma_ERROR, B)

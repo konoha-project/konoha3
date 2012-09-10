@@ -214,7 +214,7 @@ static kbool_t callStmtTyCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef
 
 static kbool_t SugarSyntax_tyCheckStmt(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, kGamma *gma)
 {
-	int SUGARFUNC_index = Gamma_isTOPLEVEL(gma) ? SUGARFUNC_TopStmtTyCheck : SUGARFUNC_StmtTyCheck;
+	int SUGARFUNC_index = Gamma_isTopLevel(gma) ? SUGARFUNC_TopStmtTyCheck : SUGARFUNC_StmtTyCheck;
 	int callCount = 0;
 	while(true) {
 		kFunc *fo = syn->sugarFuncTable[SUGARFUNC_index];
@@ -235,7 +235,7 @@ static kbool_t SugarSyntax_tyCheckStmt(KonohaContext *kctx, SugarSyntax *syn, kS
 		syn = syn->parentSyntaxNULL;
 	}
 	if(callCount == 0) {
-		const char *location = Gamma_isTOPLEVEL(gma) ? "at the top level" : "inside the function";
+		const char *location = Gamma_isTopLevel(gma) ? "at the top level" : "inside the function";
 		kStmt_printMessage(kctx, stmt, ErrTag, "%s%s is not available %s", T_statement(stmt->syn->keyword), location);
 		return false;
 	}
@@ -378,7 +378,7 @@ static kstatus_t kBlock_genEvalCode(KonohaContext *kctx, kBlock *bk, kMethod *mt
 	kGamma *gma = KonohaContext_getSugarContext(kctx)->preparedGamma;
 	GammaStackDecl lvarItems[32] = {};
 	GammaAllocaData newgma = {
-		.flag = kGamma_TOPLEVEL,
+		.flag = kGamma_TopLevel,
 		.currentWorkingMethod = mtd,
 		.this_cid     = TY_System,
 		.localScope.varItems = lvarItems, .localScope.capacity = 32, .localScope.varsize = 0, .localScope.allocsize = 0,
