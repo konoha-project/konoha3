@@ -1,19 +1,19 @@
- - (FloatOperator.k:10) 3.000000
- - (FloatOperator.k:11) 2.000000
- - (FloatOperator.k:12) 2.000000
- - (FloatOperator.k:13) 3.000000
- - (FloatOperator.k:18) 1.000000
- - (FloatOperator.k:19) -1.000000
- - (FloatOperator.k:20) 1.000000
- - (FloatOperator.k:21) 3.000000
- - (FloatOperator.k:26) 20.000000
- - (FloatOperator.k:27) 30.000000
- - (FloatOperator.k:28) 30.000000
- - (FloatOperator.k:29) 18.000000
- - (FloatOperator.k:34) 1.250000
- - (FloatOperator.k:35) 0.833333
- - (FloatOperator.k:36) 1.200000
- - (FloatOperator.k:37) 2.000000
+ - (FloatOperator.k:10) 3.000000e+00
+ - (FloatOperator.k:11) 2.000000e+00
+ - (FloatOperator.k:12) 2.000000e+00
+ - (FloatOperator.k:13) 3.000000e+00
+ - (FloatOperator.k:18) 1.000000e+00
+ - (FloatOperator.k:19) -1.000000e+00
+ - (FloatOperator.k:20) 1.000000e+00
+ - (FloatOperator.k:21) 3.000000e+00
+ - (FloatOperator.k:26) 2.000000e+01
+ - (FloatOperator.k:27) 3.000000e+01
+ - (FloatOperator.k:28) 3.000000e+01
+ - (FloatOperator.k:29) 1.800000e+01
+ - (FloatOperator.k:34) 1.250000e+00
+ - (FloatOperator.k:35) 8.333333e-01
+ - (FloatOperator.k:36) 1.200000e+00
+ - (FloatOperator.k:37) 2.000000e+00
  - (FloatOperator.k:42) false
  - (FloatOperator.k:43) true
  - (FloatOperator.k:44) true
