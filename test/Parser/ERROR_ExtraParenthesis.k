@@ -1,5 +1,5 @@
 // written by kimio
 
-if(a == 1)) {
+if(true)) {
 	System.p("hi");
 }

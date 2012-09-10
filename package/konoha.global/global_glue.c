@@ -76,31 +76,6 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObj
 
 // ---------------------------------------------------------------------------
 
-//static void appendSetterStmt(KonohaContext *kctx, kStmt **lastStmtRef, kStmt *newstmt)
-//{
-//	kStmt *lastStmt = lastStmtRef[0];
-//	SUGAR kBlock_insertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, newstmt);
-//	lastStmtRef[0] = newstmt;
-//}
-//
-//static kbool_t kGlobalObject_typeDeclAndSetter(KonohaContext *kctx, kObject *scr, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr, kExpr *valueExpr, kStmt **lastStmtRef)
-//{
-//	kNameSpace *ns = Stmt_nameSpace(stmt);
-//	kMethod *mtd = Object_newProtoSetterNULL(kctx, scr, stmt, ns, ty, termExpr->termToken->resolvedSymbol);
-//	DBG_P("mtd=%p", mtd);
-//	if(mtd != NULL) {
-//		kExpr *recvExpr =  new_ConstValueExpr(kctx, O_typeId(scr), scr);
-//		PUSH_GCSTACK(recvExpr);
-//		kExpr *setterExpr = SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_void, mtd,  2, recvExpr, valueExpr);
-//		kStmt *newstmt = GCSAFE_new(Stmt, stmt->uline);
-//		kStmt_setsyn(newstmt, SYN_(ns, KW_ExprPattern));
-//		KLIB kObject_setObject(kctx, newstmt, KW_ExprPattern, TY_Expr, setterExpr);
-//		appendSetterStmt(kctx, lastStmtRef, newstmt);
-//		return true;
-//	}
-//	return false;
-//}
-
 static kStmt* TypeDeclAndMakeSetter(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr, kExpr *valueExpr, kObject *scr)
 {
 	kNameSpace *ns = Stmt_nameSpace(stmt);
@@ -116,40 +91,6 @@ static kStmt* TypeDeclAndMakeSetter(KonohaContext *kctx, kStmt *stmt, kGamma *gm
 	}
 	return NULL;
 }
-
-////typedef kStmt* (*TypeDeclFunc)(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr, kExpr *vexpr);
-//
-//static kbool_t kGlobalObject_typeDecl2(KonohaContext *kctx, kObject *scr, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *expr, kStmt **lastStmtRef)
-//{
-//	if(expr->syn->keyword == KW_LET && Expr_isSymbolTerm(kExpr_at(expr, 1))) {
-//		if(SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 2, gma, ty, 0) == K_NULLEXPR) {
-//			// this is neccesarry to avoid 'int a = a + 1;';
-//			return false;
-//		}
-//		if(ty == TY_var) {
-//			ty = kExpr_at(expr, 2)->ty;
-//			kStmt_printMessage(kctx, stmt, InfoTag, "%s has type %s", SYM_t(kExpr_at(expr, 1)->termToken->resolvedSymbol), TY_t(ty));
-//		}
-//		return kGlobalObject_typeDeclAndSetter(kctx, scr, stmt, gma, ty, kExpr_at(expr, 1), kExpr_at(expr, 2), lastStmtRef);
-//	} else if(Expr_isSymbolTerm(expr)) {
-//		if(ty == TY_var) {
-//			kStmt_printMessage(kctx, stmt, ErrTag, "an initial value is expected: var %s", SYM_t(expr->termToken->resolvedSymbol));
-//			return false;
-//		}
-//		else {
-//			kExpr *valueExpr = new_VariableExpr(kctx, gma, TEXPR_NULL, ty, 0);
-//			return kGlobalObject_typeDeclAndSetter(kctx, scr, stmt, gma, ty, expr, valueExpr, lastStmtRef);
-//		}
-//	} else if(expr->syn->keyword == KW_COMMA) {
-//		size_t i;
-//		for(i = 1; i < kArray_size(expr->cons); i++) {
-//			if(!kGlobalObject_typeDecl(kctx, scr, stmt, gma, ty, kExpr_at(expr, i), lastStmtRef)) return false;
-//		}
-//		return true;
-//	}
-//	kStmt_printMessage(kctx, stmt, ErrTag, "variable name is expected");
-//	return false;
-//}
 
 typedef const struct _kGlobalObject kGlobalObject;
 struct _kGlobalObject {
