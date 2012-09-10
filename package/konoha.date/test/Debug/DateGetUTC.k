@@ -4,15 +4,15 @@ K.import("konoha.class");
 K.import("konoha.date");
 
 void f() {
-	Date d = new Date();
-	assert(d.getUTCDate() > 0);
-	assert(d.getUTCDay() > 0);
-	assert(d.getUTCFullYear() >= 2012);
-	assert(d.getUTCHours() >= 0);
-	assert(d.getUTCMilliseconds() >= 0);
-	assert(d.getUTCMinutes() >= 0);
-	assert(d.getUTCMonth() >= 0);
-	assert(d.getUTCSeconds() >= 0);
+	Date d = new Date(2012, 9, 10, 18, 46, 30, 10);
+	assert(d.getUTCDate() == 10);
+	assert(d.getUTCDay() == 3);
+	assert(d.getUTCFullYear() == 2012);
+	assert(d.getUTCHours() == 9);
+	assert(d.getUTCMilliseconds() == 10);
+	assert(d.getUTCMinutes() == 46);
+	assert(d.getUTCMonth() >= 9);
+	assert(d.getUTCSeconds() >= 30);
 }
 
 f();
