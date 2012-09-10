@@ -1470,7 +1470,7 @@ typedef struct {
 #define KINITSETv(PARENT, VAR, VAL)  do {\
 	if(VAR == NULL) {\
 		KINITp(PARENT, VAR, VAL);\
-	}else {\
+	} else {\
 		KSETv(PARENT, VAR, VAL);\
 	}\
 } while (0)

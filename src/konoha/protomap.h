@@ -95,8 +95,6 @@ static inline unsigned protomap_size(protomap_t *m)
 	return m->h.base.used_size;
 }
 
-#define cast(T, V) ((T)(V))
-
 #ifndef CLZ
 #define CLZ(n) __builtin_clzl(n)
 #endif
@@ -124,7 +122,7 @@ static inline unsigned protomap_size(protomap_t *m)
 
 static inline protomap_t *protomap_create(const protomap_api_t *api)
 {
-	protomap_t *m = cast(protomap_t *, _MALLOC(sizeof(*m)));
+	protomap_t *m = (protomap_t *) _MALLOC(sizeof(*m));
 	m->h.base.api = api;
 	m->h.base.used_size = 0;
 	return m;
@@ -148,7 +146,7 @@ static void hashmap_record_reset(hashmap_t *m, size_t newsize)
 	unsigned alloc_size = sizeof(map_record_t) * newsize;
 	m->base.used_size = 0;
 	(m->record_size_mask) = newsize - 1;
-	m->base.records = cast(map_record_t *, calloc(1, alloc_size));
+	m->base.records = (map_record_t *) calloc(1, alloc_size);
 }
 
 #define DELTA 8
@@ -202,6 +200,7 @@ static map_status_t hashmap_set(hashmap_t *m, map_record_t *rec)
 			return res;
 		hashmap_record_resize(m);
 	} while (1);
+	return PROTOMAP_FAILED;
 }
 
 static map_record_t *hashmap_get(hashmap_t *m, unsigned hash)
@@ -249,7 +248,7 @@ static map_status_t hashmap_api_set(protomap_t *_m, unsigned hash, unsigned type
 	map_record_t r;
 	r.hash = hash;
 	r.type = type;
-	r.v  = cast(uintptr_t, val);
+	r.v  = (uintptr_t) val;
 	return hashmap_set(m, &r);
 }
 
@@ -300,7 +299,7 @@ static protomap_t *dictmap_init(dictmap_t *m)
 {
 	int i;
 	const size_t allocSize = sizeof(map_record_t)*DICTMAP_THRESHOLD;
-	m->base.records = cast(map_record_t *, _MALLOC(allocSize));
+	m->base.records = (map_record_t *) _MALLOC(allocSize);
 
 	for (i = 0; i < DICTMAP_THRESHOLD; ++i) {
 		m->hash_list[i] = 0;
@@ -374,7 +373,7 @@ static map_status_t dictmap_api_set(protomap_t *_m, unsigned hash, unsigned type
 	map_record_t r;
 	r.hash = hash;
 	r.type = type;
-	r.v  = cast(uintptr_t, val);
+	r.v  = (uintptr_t) val;
 	return dictmap_set(m, &r);
 }
 

@@ -551,9 +551,9 @@ static int knh_wait(KonohaContext *kctx, int pid, int bg, int timeout, int *stat
 	// return value creation
 	if(WIFSIGNALED(stat)) {
 		return WTERMSIG(stat) * -1;
-	}else if ( WIFSTOPPED(stat) ) {
+	} else if ( WIFSTOPPED(stat) ) {
 		return WSTOPSIG(stat) * -1;
-	}else {
+	} else {
 		return S_EXIT;
 	}
 }
@@ -570,11 +570,11 @@ static int proc_start(KonohaContext *kctx, subprocData_t *spd) {
 		spd->cpid  = pid;
 		if(spd->bg != 1) {
 			ret = knh_wait(kctx, spd->cpid, spd->bg, spd->timeout, &spd->status );
-		}else {
+		} else {
 			// nomal end status for bg
 			ret = 0;
 		}
-	}else {
+	} else {
 		DBG_P("failed");
 	}
 	return ret;
@@ -734,13 +734,13 @@ KMETHOD Subproc_exec(KonohaContext *kctx, KonohaStack *sfp)
 				clearFd(&p->r);
 				clearFd(&p->w);
 				clearFd(&p->e);
-			}else if (p->r.mode == M_FILE) {
+			} else if (p->r.mode == M_FILE) {
 				char *msg = " will be ignored.";
 				char *cmd = (char*)S_text(sfp[1].asString);
 				char mbuf[strlen(msg)+strlen(cmd)+1];
 				snprintf(mbuf, sizeof(mbuf), "'%s'%s", cmd, msg);
 			}
-		}else {
+		} else {
 			ktrace(_SystemFault,
 					KeyValue_s("@", "knh_wait"),
 					KeyValue_u("errno", errno),
@@ -779,7 +779,7 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 				fputc('\n', p->w.fp);
 				fflush(p->w.fp);
 				fsync(fileno(p->w.fp));
-			}else {
+			} else {
 				ktrace(_SystemFault,
 						KeyValue_s("@", "fwrite"),
 						KeyValue_u("errno", errno),
@@ -799,7 +799,7 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 					KeyValue_u("errno", errno),
 					KeyValue_s("errstr", strerror(errno))
 			);
-		}else {
+		} else {
 			ret_a = (kArray*)KLIB new_kObject(kctx, CT_Array, 0);
 			if(p->r.mode == M_PIPE) {
 				char buf[BUFSIZE];
@@ -1234,7 +1234,7 @@ static void Subproc_init(KonohaContext *kctx, kObject *o, void *conf)
 	struct _kSubproc *proc = (struct _kSubproc*)o;
 	if(conf != NULL) {
 		proc->spd = (subprocData_t*)conf;
-	}else {
+	} else {
 		proc->spd = (subprocData_t *)KCALLOC(sizeof(subprocData_t), 1);
 	}
 }

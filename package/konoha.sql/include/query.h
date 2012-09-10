@@ -90,7 +90,7 @@ int knh_bytes_parseint(kbytes_t t, kint_t *value)
 			else {
 				base = 8;  i = 1;
 			}
-		}else if(t.utext[0] == '-') {
+		} else if(t.utext[0] == '-') {
 			base = 10; i = 1;
 		}
 	}
@@ -99,19 +99,19 @@ int knh_bytes_parseint(kbytes_t t, kint_t *value)
 		if('0' <= c && c <= '9') {
 			prev = n;
 			n = n * base + (c - '0');
-		}else if(base == 16) {
+		} else if(base == 16) {
 			if('A' <= c && c <= 'F') {
 				prev = n;
 				n = n * 16 + (10 + c - 'A');
-			}else if('a' <= c && c <= 'f') {
+			} else if('a' <= c && c <= 'f') {
 				prev = n;
 				n = n * 16 + (10 + c - 'a');
-			}else {
+			} else {
 				break;
 			}
-		}else if(c == '_') {
+		} else if(c == '_') {
 			continue;
-		}else {
+		} else {
 			break;
 		}
 		if(!(n >= prev)) {

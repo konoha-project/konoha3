@@ -218,7 +218,7 @@ static int parseCOMMENT(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, 
 		if(prev == '*' && ch == '/') {
 			level--;
 			if(level == 0) return pos;
-		}else if(prev == '/' && ch == '*') {
+		} else if(prev == '/' && ch == '*') {
 			level++;
 		}
 		prev = ch;
