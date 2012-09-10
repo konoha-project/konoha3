@@ -606,7 +606,6 @@ static void kioshare_free(KonohaContext *kctx, struct KonohaModule *baseh)
 
 #define _Public   kMethod_Public
 #define _Static   kMethod_Static
-#define _Const    kMethod_Const
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 

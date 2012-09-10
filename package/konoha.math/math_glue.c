@@ -198,7 +198,7 @@ static KMETHOD Math_random(KonohaContext *kctx, KonohaStack *sfp)
 #define _KVf(T) "MATH_" #T, TY_float, M_##T
 #define TY_Math  (cMath->typeId)
 
-static	kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	KRequirePackage("konoha.float", pline);
 	static KDEFINE_CLASS MathDef = {

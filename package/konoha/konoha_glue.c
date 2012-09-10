@@ -22,25 +22,16 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include<minikonoha/minikonoha.h>
-#include<minikonoha/sugar.h>
-//#include<minikonoha/float.h>
-
-// operator only
-//#include"assign_glue.h"
-//#include"while_glue.h"
-
-// class and operator
-//#include"class_glue.h"
-//#include"global_glue.h"
-
-// method and operator
-//#include"array_glue.h"
-
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
 
 // --------------------------------------------------------------------------
 
-static	kbool_t konoha_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+static kbool_t konoha_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	KRequirePackage("konoha.namespace", pline);
 	KRequirePackage("konoha.const", pline);
@@ -118,3 +109,6 @@ KDEFINE_PACKAGE* konoha_init(void)
 	return &d;
 }
 
+#ifdef __cplusplus
+} /* extern "C" { */
+#endif

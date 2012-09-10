@@ -26,9 +26,9 @@
 extern "C" {
 #endif
 
-#include<minikonoha/minikonoha.h>
-#include<minikonoha/sugar.h>
-#include<mecab.h>
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
+#include <mecab.h>
 
 struct _kTagger {
 	KonohaObjectHeader h;

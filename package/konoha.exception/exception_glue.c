@@ -264,7 +264,6 @@ static kbool_t exception_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFir
 //	}
 //}
 
-#include <stdio.h>
 static KMETHOD StmtTyCheck_try(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_StmtTyCheck(stmt, gma);
@@ -272,7 +271,6 @@ static KMETHOD StmtTyCheck_try(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = false;
 	kBlock *tryBlock, *catchBlock, *finallyBlock;
 	tryBlock     = SUGAR kStmt_getBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
-	asm volatile("int3");
 	if (SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_Exception, 0)) {
 		catchBlock   = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("catch"),   K_NULLBLOCK);
 		finallyBlock = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("finally"), K_NULLBLOCK);

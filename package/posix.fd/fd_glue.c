@@ -24,11 +24,11 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
+#include <minikonoha/bytes.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/file.h>
-#include <minikonoha/bytes.h>
 #include <errno.h>
 #include <stdio.h>
 #include <dirent.h>

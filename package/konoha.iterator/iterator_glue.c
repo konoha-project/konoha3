@@ -24,9 +24,9 @@
 
 /* ************************************************************************ */
 
+#define USE_STRINGLIB 1
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-#define USE_STRINGLIB
 #include <minikonoha/klib.h>
 #include <minikonoha/iterator.h>
 
@@ -135,27 +135,6 @@ static KMETHOD Array_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(itr);
 }
 
-#define utf8len(c)    _utf8len[(int)c]
-
-static const char _utf8len[] = {
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-		2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-		3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-		4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 0, 0,
-};
-
 static kbool_t String_hasNext(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kIterator *itr = sfp[0].itr;
@@ -189,9 +168,6 @@ static void kmoditerator_reftrace(KonohaContext *kctx, struct KonohaModule *base
 static void kmoditerator_free(KonohaContext *kctx, struct KonohaModule *baseh) { KFREE(baseh, sizeof(KonohaIteratorModule)); }
 
 #define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Im       kMethod_Immutable
-#define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
 static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)

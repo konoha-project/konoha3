@@ -1,8 +1,9 @@
 // written by wakamatsu
 K.import("konoha");
 K.import("konoha.io");
+K.import("konoha.const");
 
-String b = "../../../package/konoha.io/test/Debug/";
+const b = "../../../package/konoha.io/test/Debug/";
 
 void test() {
 	File file1 = new File(b + "test.txt");

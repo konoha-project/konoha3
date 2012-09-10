@@ -42,8 +42,8 @@ static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp)
 		for (; i < kArray_size(tokenList)-1; i+=2) {
 			/* name . */
 			kToken *tk  = tokenList->tokenItems[i+0];
-//			assert(tk->keyword  == TokenType_SYMBOL);
-//			assert(dot->keyword == KW_DOT);
+			//assert(tk->keyword  == TokenType_SYMBOL);
+			//assert(dot->keyword == KW_DOT);
 			if (i+2 < kArray_size(tokenList)) {
 				kToken *startTk = tokenList->tokenItems[i+2];
 				if (startTk->resolvedSyntaxInfo->keyword == star) {

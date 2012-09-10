@@ -128,7 +128,7 @@ typedef void kmutexattr_t;
 #define KUnlock(X)
 #define KFreeLock(X)
 #else
-#include<pthread.h>
+#include <pthread.h>
 typedef pthread_mutex_t     kmutex_t;
 typedef pthread_mutexattr_t kmutexattr_t;
 #define KInitLock(X)    do {\
