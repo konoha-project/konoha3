@@ -180,6 +180,12 @@ static KMETHOD Map_keys(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_DefaultObjectValue();
 }
 
+//## Map<T> Map<T>.new();
+static KMETHOD Map_new(KonohaContext *kctx, KonohaStack *sfp)
+{
+	RETURN_(sfp[0].asObject);
+}
+
 /* ------------------------------------------------------------------------ */
 
 #define _Public   kMethod_Public
@@ -191,7 +197,7 @@ static KMETHOD Map_keys(KonohaContext *kctx, KonohaStack *sfp)
 #define CT_Map cMap
 #define TY_Map cMap->typeId
 
-static	kbool_t map_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t map_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	kparamtype_t cparam = {TY_Object};
 	KDEFINE_CLASS defMap = {
@@ -208,6 +214,7 @@ static	kbool_t map_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	int FN_key = MN_("key");
 	int TY_Array0 = CT_p0(kctx, CT_Array, TY_0)->typeId;
 	KDEFINE_METHOD MethodData[] = {
+		_Public, _F(Map_new), TY_Map, TY_Map, MN_("new"), 0,
 		_Public|_Im|_Const, _F(Map_has), TY_boolean, TY_Map, MN_("has"), 1, TY_String, FN_key,
 		_Public|_Im|_Const, _F(Map_get), TY_0, TY_Map, MN_("get"), 1, TY_String, FN_key,
 		_Public, _F(Map_set), TY_void, TY_Map, MN_("set"), 2, TY_String, FN_key, TY_0, FN_("value"),
@@ -223,7 +230,6 @@ static kbool_t map_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime
 {
 	return true;
 }
-
 
 /* ----------------------------------------------------------------------- */
 
