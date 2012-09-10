@@ -304,8 +304,6 @@ static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp)
 
 // --------------------------------------------------------------------------
 
-// --------------------------------------------------------------------------
-
 #define _Public   kMethod_Public
 #define _Const    kMethod_Const
 #define _Coercion kMethod_Coercion

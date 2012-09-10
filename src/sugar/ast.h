@@ -158,7 +158,12 @@ static kExpr *kStmt_addExprParam(KonohaContext *kctx, kStmt *stmt, kExpr *expr, 
 static kExpr *kStmt_rightJoinExpr(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kArray *tokenList, int c, int e)
 {
 	if(c < e && expr != K_NULLEXPR && !Stmt_isERR(stmt)) {
-		WARN_IgnoredTokens(kctx, tokenList, c, e);
+		kToken *tk = tokenList->tokenItems[c];
+		if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern || tk->resolvedSyntaxInfo->sugarFuncTable[SUGARFUNC_ParseExpr] == NULL) {
+			kStmtToken_printMessage(kctx, stmt, tk, ErrTag, "undefined operator: %s", Token_text(tk));
+			return K_NULLEXPR;
+		}
+		kStmtToken_printMessage(kctx, stmt, tk, WarnTag, "ignored term: %s...", Token_text(tk));
 	}
 	return expr;
 }

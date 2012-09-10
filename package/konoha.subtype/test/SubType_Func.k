@@ -1,14 +1,15 @@
 // written by kimio kuramitsu
 
-K.import("konoha.class");
 K.import("konoha.subtype");
 
 void test() {
-	Object o = "";
-	assert(o <: Object);
+	Func o;
+	assert(!(o <: boolean));
 	assert(!(o <: int));
-	assert(o <: String);
+	assert(!(o <: String));
+	assert(!(o <: System));
 	assert(!(o <: String[]));
+	assert((o <: Func));
 }
 
 test();
