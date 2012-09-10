@@ -51,6 +51,7 @@ static	kbool_t konoha_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 
 	KRequirePackage("konoha.while",  pline);  // continue, break
 
+	KRequirePackage("konoha.object", pline);  // subtype
 	KRequirePackage("konoha.int", pline);
 #ifndef K_USING_NOFLOAT
 	KRequirePackage("konoha.float", pline);
@@ -83,6 +84,7 @@ static kbool_t konoha_initNameSpace(KonohaContext *kctx, kNameSpace *packageName
 
 	KImportPackage(ns, "konoha.while",  pline);
 
+	KImportPackage(ns, "konoha.object", pline);  // subtype
 	KImportPackage(ns, "konoha.int",  pline);
 	KImportPackage(ns, "konoha.float", pline);
 	KImportPackage(ns, "konoha.string", pline);
