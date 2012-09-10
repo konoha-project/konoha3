@@ -158,7 +158,7 @@ static inline void ARRAY_##T##_clear(ARRAY(T) *a) {\
 #define ARRAY_add(T, a, v)      ARRAY_##T##_add(a, v)
 #define ARRAY_dispose(T, a)     ARRAY_##T##_dispose(a)
 #define ARRAY_init(T, a)        ARRAY_init_##T (a)
-#define ARRAY_clear(T, a)        ARRAY_##T##_clear(a)
+#define ARRAY_clear(T, a)       ARRAY_##T##_clear(a)
 #define ARRAY_n(a, n)  ((a).list[n])
 #define ARRAY_size(a)  ((a).size)
 #define ARRAY_init_1(T, a, e1) do {\
@@ -286,7 +286,9 @@ struct Segment {
 typedef struct BlockHeader {
 	Segment *seg;
 	long klass;
+#ifdef USE_GENERATIONAL_GC
 	bitmap_t *remember_set;
+#endif
 } BlockHeader;
 
 typedef struct gc_stat {
@@ -793,7 +795,7 @@ static inline void do_free(void *ptr, size_t size)
 	free(ptr);
 }
 
-static ssize_t kklib_malloced = 0;
+static ssize_t klib_malloced = 0;
 
 static void* Kmalloc(KonohaContext *kctx, size_t s)
 {
@@ -803,7 +805,7 @@ static void* Kmalloc(KonohaContext *kctx, size_t s)
 			KeyValue_s("!",  "OutOfMemory"),
 			KeyValue_s("at", "malloc"),
 			KeyValue_u("size", s),
-			KeyValue_u("malloced_size", kklib_malloced)
+			KeyValue_u("malloced_size", klib_malloced)
 		);
 	}
 #if GCDEBUG
@@ -814,13 +816,13 @@ static void* Kmalloc(KonohaContext *kctx, size_t s)
 			KeyValue_u("size", s));
 #endif
 	p[0] = s;
-	kklib_malloced += s;
+	klib_malloced += s;
 	return (void*)(p+1);
 }
 
 static void* Kzmalloc(KonohaContext *kctx, size_t s)
 {
-	kklib_malloced += s;
+	klib_malloced += s;
 	size_t *p = (size_t*)do_malloc(s + sizeof(size_t));
 	p[0] = s;
 	do_bzero(p+1, s);
@@ -829,7 +831,7 @@ static void* Kzmalloc(KonohaContext *kctx, size_t s)
 
 static void Kfree(KonohaContext *kctx, void *p, size_t s)
 {
-	size_t *pp = (size_t*)p;
+	size_t *pp = (size_t *)p;
 	DBG_ASSERT(pp[-1] == s);
 	do_free(pp - 1, s + sizeof(size_t));
 #if GCDEBUG
@@ -839,7 +841,7 @@ static void Kfree(KonohaContext *kctx, void *p, size_t s)
 			KeyValue_p("to", ((char*)p)+s),
 			KeyValue_u("size", s));
 #endif
-	kklib_malloced -= s;
+	klib_malloced -= s;
 }
 
 /* ------------------------------------------------------------------------ */
@@ -859,7 +861,7 @@ static MarkStack *mstack_init(KonohaContext *kctx, MarkStack *mstack)
 
 static void mstack_push(KonohaContext *kctx, MarkStack *mstack, kObject *ref)
 {
-	size_t ntail = (mstack->tail + 1 ) & mstack->capacity;
+	size_t ntail = (mstack->tail + 1) & mstack->capacity;
 	if (unlikely(ntail == 0)) {
 		size_t capacity = 1 << mstack->capacity_log2;
 		size_t stacksize = sizeof(kObject*) * capacity;
@@ -927,7 +929,7 @@ static inline size_t SizeToKlass(size_t n) {
 
 #define BM_IS_FULL(BM) (~(BM) == 0)
 #define SEG_BITMAP_N(seg, n, idx) ((bitmap_t*)((seg->base[n])+idx))
-#define AP_BITMAP_N(ap, n, idx) ((bitmap_t*)((ap->seg->base[n])+idx))
+#define AP_BITMAP_N(ap, n, idx)   SEG_BITMAP_N(ap->seg, n, idx)
 
 static Segment *allocSegment(HeapManager *mng, int klass)
 {
@@ -1732,6 +1734,7 @@ static void bmgc_gc_mark(KonohaContext *kctx, HeapManager *mng, KonohaStack *esp
 #endif
 }
 
+#if 0
 void *bm_malloc(KonohaContext *kctx, size_t n)
 {
 	HeapManager *mng = HeapManager(kctx);
@@ -1784,6 +1787,7 @@ void *bm_realloc(KonohaContext *kctx, void *ptr, size_t os, size_t ns)
 		return newptr;
 	}
 }
+#endif
 
 #define LIST_PUSH(tail, e) do {\
 	*tail = e;\
@@ -1817,7 +1821,7 @@ static void rearrangeSegList(SubHeap *h, size_t klass, bitmap_t *checkFull)
 
 static void bmgc_gc_sweep(KonohaContext *kctx, HeapManager *mng)
 {
-	bitmap_t checkFull[1] = {0};
+	bitmap_t checkFull = 0;
 	size_t i, j;
 	SubHeap *h;
 
@@ -1836,13 +1840,13 @@ static void bmgc_gc_sweep(KonohaContext *kctx, HeapManager *mng)
 				h->heap_klass,
 				global_gc_stat.collected[h->heap_klass]);
 #endif
-		rearrangeSegList(h, j, checkFull);
+		rearrangeSegList(h, j, &checkFull);
 	}
 
-	if (*checkFull) {
+	if (checkFull) {
 		HeapManager_expandHeap(kctx, mng, SUBHEAP_DEFAULT_SEGPOOL_SIZE*2);
 		for_each_heap(h, i, mng->heaps) {
-			if (bitmap_get(checkFull, i))
+			if (bitmap_get(&checkFull, i))
 				newSegment(mng, h);
 		}
 	}
@@ -1911,7 +1915,7 @@ static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o)
 void MODGC_check_malloced_size(void)
 {
 	if (verbose_gc) {
-		fprintf(stdout, "\nklib:memory leaked=%ld\n", (long)kklib_malloced);
+		fprintf(stdout, "\nklib:memory leaked=%ld\n", (long)klib_malloced);
 	}
 }
 
