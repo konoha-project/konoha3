@@ -34,7 +34,12 @@ static void NameSpace_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kNameSpaceVar *ns = (kNameSpaceVar*)o;
 	bzero(&ns->parentNULL, sizeof(kNameSpace) - sizeof(KonohaObjectHeader));
-	ns->parentNULL = conf;
+	if(conf != NULL) {
+		KINITv(ns->parentNULL, (kNameSpace*)conf);
+		ns->packageId     = ns->parentNULL->packageId;
+		ns->packageDomain = ns->parentNULL->packageDomain;
+		ns->syntaxOption  = ns->parentNULL->syntaxOption;
+	}
 	KINITv(ns->methodList, K_EMPTYARRAY);
 	//KINITv(ns->scriptObject, KLIB Knull(kctx, CT_System));
 }

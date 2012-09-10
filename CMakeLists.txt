@@ -127,6 +127,7 @@ set(PACKAGES
 	konoha.namespace
 	konoha.new
 	konoha.null
+	konoha.object
 	konoha.string
 	konoha.subtype
 ##	konoha.sql
