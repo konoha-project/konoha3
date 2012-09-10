@@ -21,3 +21,5 @@ GTAGS
 *.k.tested
 .cproject
 .project
+
+.DS_Store
