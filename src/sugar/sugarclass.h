@@ -65,7 +65,7 @@ static void NameSpace_reftrace(KonohaContext *kctx, kObject *o)
 		}
 	}
 	KREFTRACEn(ns->parentNULL);
-	//KREFTRACEv(ns->scriptObject);
+	KREFTRACEn(ns->globalObjectNULL);
 	KREFTRACEv(ns->methodList);
 	END_REFTRACE();
 }
