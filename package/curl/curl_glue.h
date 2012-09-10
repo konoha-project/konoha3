@@ -398,7 +398,7 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 
 #define _KVi(T)  #T, TY_int, T
 
-static	kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	ctx = (struct KonohaContextVar *)kctx;
 

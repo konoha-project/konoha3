@@ -22,9 +22,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include<minikonoha/minikonoha.h>
-#include<minikonoha/sugar.h>
-#include<minikonoha/klib.h>
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
+#include <minikonoha/klib.h>
 
 struct fn {
 	uintptr_t  flag;
@@ -139,11 +139,9 @@ KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp)
 // --------------------------------------------------------------------------
 
 #define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static	kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	KonohaClass *ct = kclass(TY_Method, pline);
 	KSET_TYFUNC(ct, p, Method, pline);
@@ -162,14 +160,6 @@ static kbool_t i_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t
 
 static kbool_t i_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
-//	USING_SUGAR;
-//	KDEFINE_SYNTAX SYNTAX[] = {
-//		{ TOKEN("float"), .type = TY_float, },
-//		{ TOKEN("double"), .type = TY_float, },
-//		{ TOKEN("$Float"), .keyword = KW_TK(TokenType_FLOAT), .ExprTyCheck = ExprTyCheck_FLOAT, },
-//		{ .keyword = KW_END, },
-//	};
-//	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 	return true;
 }
 

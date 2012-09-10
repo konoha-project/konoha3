@@ -22,19 +22,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include<minikonoha/minikonoha.h>
-#include<minikonoha/sugar.h>
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
 
 // --------------------------------------------------------------------------
 
-#define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Hidden   kMethod_Hidden
-#define _Imm    kMethod_Immutable
-#define _Coercion kMethod_Coercion
-#define _F(F)   (intptr_t)(F)
-
-static	kbool_t new_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t new_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	return true;
 }

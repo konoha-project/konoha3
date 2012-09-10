@@ -297,7 +297,7 @@ static KMETHOD System_getsid(KonohaContext *kctx, KonohaStack *sfp)
 
 #define _KVi(T) #T, TY_int, T
 
-static	kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	kparamtype_t p = { .ty = TY_int,  };
 	KonohaClass *cintArray = KLIB KonohaClass_Generics(kctx, CT_(TY_Array), TY_void, 1, &p);

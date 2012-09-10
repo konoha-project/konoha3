@@ -22,12 +22,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#ifndef DATE_GLUE_H_
-#define DATE_GLUE_H_
-
-#include<minikonoha/minikonoha.h>
-#include<minikonoha/sugar.h>
-#include<minikonoha/float.h>
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
+#include <minikonoha/float.h>
 
 #include <stdio.h>
 #include <time.h>
@@ -521,7 +518,7 @@ static KMETHOD Date_toLocaleString(KonohaContext *kctx, KonohaStack *sfp)
 #define TY_Date     cDate->typeId
 #define IS_Date(O)  ((O)->h.ct == CT_Date)
 
-static	kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	KDEFINE_CLASS defDate = {
 		STRUCTNAME(Date),
@@ -613,8 +610,6 @@ KDEFINE_PACKAGE* date_init(void)
 	};
 	return &d;
 }
-
-#endif /* DATE_GLUE_H_ */
 
 #ifdef __cplusplus
 }

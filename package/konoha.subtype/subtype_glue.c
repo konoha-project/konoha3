@@ -62,7 +62,7 @@ static KMETHOD Object_as(KonohaContext *kctx, KonohaStack *sfp)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static	kbool_t subtype_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t subtype_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	int FN_type = FN_("type");
 	KDEFINE_METHOD MethodData[] = {

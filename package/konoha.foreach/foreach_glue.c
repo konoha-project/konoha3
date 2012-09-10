@@ -26,7 +26,6 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-#define USE_STRINGLIB
 #include <minikonoha/klib.h>
 #include <minikonoha/iterator.h>
 
