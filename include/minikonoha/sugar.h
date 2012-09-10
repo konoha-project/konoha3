@@ -515,7 +515,7 @@ struct kGammaVar {
 #define K_NULLEXPR   (kExpr*)((CT_Expr)->defaultValueAsNull)
 #define K_NULLBLOCK  (kBlock*)((CT_Block)->defaultValueAsNull)
 
-typedef kStmt* (*TypeDeclFunc)(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr, kExpr *vexpr);
+typedef kStmt* (*TypeDeclFunc)(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr, kExpr *vexpr, kObject *thunk);
 
 typedef struct {
 	KonohaModule  h;
@@ -572,7 +572,7 @@ typedef struct {
 	kbool_t     (*kStmt_tyCheckByName)(KonohaContext *, kStmt*, ksymbol_t, kGamma *, ktype_t, int);
 	kExpr*      (*kStmt_tyCheckExprAt)(KonohaContext *, kStmt *, kExpr *, size_t, kGamma *, ktype_t, int);
 	kExpr *     (*kStmt_tyCheckCallParamExpr)(KonohaContext *, kStmt *, kExpr *, kMethod *, kGamma *, ktype_t);
-	kbool_t     (*kStmt_declType)(KonohaContext *, kStmt *, kGamma *, ktype_t, kExpr *, TypeDeclFunc, kStmt **);
+	kbool_t     (*kStmt_declType)(KonohaContext *, kStmt *, kGamma *, ktype_t, kExpr *, kObject *, TypeDeclFunc, kStmt **);
 
 	void       (*kToken_printMessage)(KonohaContext *, kTokenVar *, kinfotag_t, const char *fmt, ...);
 	kExpr *    (*kStmt_printMessage2)(KonohaContext *, kStmt *, kToken *, kinfotag_t, const char *fmt, ...);

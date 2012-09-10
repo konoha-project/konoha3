@@ -337,13 +337,6 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 		KLIB KonohaRuntime_raise(kctx, EXPT_("RuntimeScript"), SFP(rbp), UL, msg);\
 	}\
 
-#define OPEXEC_ERROR2(start, msg) { \
-		kException *e_ = new_Error(kctx, 0, msg);\
-		KonohaContext_setThrowingException(kctx, e_);\
-		knh_throw(kctx, SFP(rbp), SFPIDX(start)); \
-	} \
-
-
 #define KLR_LDMTD(ctx, thisidx, ldmtd, hc, mtdO) { \
 		ldmtd(ctx, SFP(rbp), op);\
 	} \

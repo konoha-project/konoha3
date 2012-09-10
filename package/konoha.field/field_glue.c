@@ -131,18 +131,15 @@ static kMethod *new_PrototypeSetter(KonohaContext *kctx, ktype_t cid, ksymbol_t 
 	return mtd;
 }
 
-static void KonohaClass_addMethod(KonohaContext *kctx, KonohaClass *ct, kMethod *mtd)
+static kbool_t KonohaClass_addField(KonohaContext *kctx, KonohaClass *ct, int flag, ktype_t ty, ksymbol_t sym)
 {
+	int pos = ct->fieldsize;
 	if(unlikely(ct->methodList == K_EMPTYARRAY)) {
 		KINITv(((KonohaClassVar*)ct)->methodList, new_(MethodArray, 8));
 	}
-	KLIB kArray_add(kctx, ct->methodList, mtd);
-}
 
-static void KonohaClass_addField(KonohaContext *kctx, KonohaClassVar *definedClass, int flag, ktype_t ty, ksymbol_t sym)
-{
-	int pos = definedClass->fieldsize;
-	if(pos < definedClass->fieldAllocSize) {
+	if(pos < ct->fieldAllocSize) {
+		KonohaClassVar *definedClass = (KonohaClassVar*)ct;
 		definedClass->fieldsize += 1;
 		definedClass->fieldItems[pos].flag = flag;
 		definedClass->fieldItems[pos].ty = ty;
@@ -155,56 +152,36 @@ static void KonohaClass_addField(KonohaContext *kctx, KonohaClassVar *definedCla
 			KSETv(o, o->fieldObjectItems[pos], KLIB Knull(kctx, CT_(ty)));
 			definedClass->fieldItems[pos].isobj = 1;
 		}
-		if(FLAG_is(definedClass->fieldItems[pos].flag, kField_Getter)) {
+		if(FLAG_is(flag, kField_Getter)) {
 			FLAG_unset(definedClass->fieldItems[pos].flag, kField_Getter);
 			kMethod *mtd = new_FieldGetter(kctx, definedClass->typeId, sym, ty, pos);
-			KonohaClass_addMethod(kctx, definedClass, mtd);
+			KLIB kArray_add(kctx, ct->methodList, mtd);
 		}
-		if(FLAG_is(definedClass->fieldItems[pos].flag, kField_Setter)) {
+		if(FLAG_is(flag, kField_Setter)) {
 			FLAG_unset(definedClass->fieldItems[pos].flag, kField_Setter);
 			kMethod *mtd = new_FieldSetter(kctx, definedClass->typeId, sym, ty, pos);
-			KonohaClass_addMethod(kctx, definedClass, mtd);
+			KLIB kArray_add(kctx, ct->methodList, mtd);
 		}
 	}
 	else {
-		kMethod *mtd = new_PrototypeGetter(kctx, definedClass->typeId, sym, ty);
-		KonohaClass_addMethod(kctx, definedClass, mtd);
-		mtd = new_PrototypeSetter(kctx, definedClass->typeId, sym, ty);
-		KonohaClass_addMethod(kctx, definedClass, mtd);
-	}
-}
-
-static kbool_t KonohaClass_setClassFieldObjectValue(KonohaContext *kctx, KonohaClassVar *definedClass, ksymbol_t sym, kObject *objectValue)
-{
-	int i;
-	for(i = definedClass->fieldsize; i >= 0; i--) {
-		if(definedClass->fieldItems[i].fn == sym  && O_ct(definedClass->defaultValueAsNullVar->fieldObjectItems[i]) == O_ct(objectValue)) {
-			kObjectVar *o = definedClass->defaultValueAsNullVar;
-			KSETv(o, o->fieldObjectItems[i], objectValue);
-			return true;
+		if(FLAG_is(flag, kField_Getter)) {
+			kMethod *mtd = new_PrototypeGetter(kctx, ct->typeId, sym, ty);
+			KLIB kArray_add(kctx, ct->methodList, mtd);
+		}
+		if(FLAG_is(flag, kField_Setter)) {
+			kMethod *mtd = new_PrototypeSetter(kctx, ct->typeId, sym, ty);
+			KLIB kArray_add(kctx, ct->methodList, mtd);
 		}
 	}
-	return false;
-}
-
-static kbool_t KonohaClass_setClassFieldUnboxValue(KonohaContext *kctx, KonohaClassVar *definedClass, ksymbol_t sym, uintptr_t unboxValue)
-{
-	int i;
-	for(i = definedClass->fieldsize; i >= 0; i--) {
-		if(definedClass->fieldItems[i].fn == sym  && TY_isUnbox(definedClass->fieldItems[i].ty)) {
-			definedClass->defaultValueAsNullVar->fieldUnboxItems[i] = unboxValue;
-			return true;
-		}
-	}
-	return false;
+	return true;
 }
 
 // --------------------------------------------------------------------------
 
 static kbool_t field_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KRequirePackage("konoha.new", pline);
 	KSET_KLIB2(kMethod_indexOfField, KLIB2_Method_indexOfField, pline);
+	KSET_KLIB2(KonohaClass_addField, KonohaClass_addField, pline);
 	return true;
 }
 

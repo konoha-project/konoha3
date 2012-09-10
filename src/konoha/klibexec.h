@@ -543,6 +543,7 @@ static void KonohaRuntime_raise(KonohaContext *kctx, int symbol, KonohaStack *sf
 	if(runtime->evaljmpbuf != NULL) {
 		runtime->thrownScriptLine = pline;
 		if(optionalErrorMessage != NULL) {
+			//KSETv(K_NULL, runtime->optionalErrorMessage, optionalErrorMessage);
 			KSETv_AND_WRITE_BARRIER(NULL, runtime->optionalErrorMessage, optionalErrorMessage, GC_NO_WRITE_BARRIER);
 		}
 		PLATAPI longjmp_i(*runtime->evaljmpbuf, symbol);  // in setjmp 0 means good

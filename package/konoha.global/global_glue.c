@@ -52,103 +52,59 @@ static kbool_t global_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 	return true;
 }
 
-// --------------------------------------------------------------------------
-
-static KMETHOD MethodFunc_ProtoGetter(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
-	ksymbol_t key = (ksymbol_t)mtd->delta;
-	RETURN_(KLIB kObject_getObject(kctx, sfp[0].asObject, key, sfp[K_RTNIDX].o));
-}
-
-static KMETHOD MethodFunc_ProtoGetterN(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
-	ksymbol_t key = (ksymbol_t)mtd->delta;
-	RETURNd_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, key, 0));
-}
-
-static KMETHOD MethodFunc_ProtoSetter(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
-	ksymbol_t key = (ksymbol_t)mtd->delta;
-	KLIB kObject_setObject(kctx, sfp[0].asObject, key, O_typeId(sfp[1].asObject), sfp[1].asObject);
-	RETURN_(sfp[1].asObject);
-}
-
-static KMETHOD MethodFunc_ProtoSetterN(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
-	ksymbol_t key = (ksymbol_t)mtd->delta;
-	kParam *pa = Method_param(mtd);
-	KLIB kObject_setUnboxValue(kctx, sfp[0].asObject, key, pa->paramtypeItems[0].ty, sfp[1].unboxValue);
-	RETURNd_(sfp[1].unboxValue);
-}
-
-static kMethod *new_ProtoGetter(KonohaContext *kctx, ktype_t cid, ksymbol_t sym, ktype_t ty)
-{
-	kmethodn_t mn = ty == TY_boolean ? MN_toISBOOL(sym) : MN_toGETTER(sym);
-	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_ProtoGetterN : MethodFunc_ProtoGetter;
-	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Public|kMethod_Immutable, cid, mn, f);
-	KLIB kMethod_setParam(kctx, mtd, ty, 0, NULL);
-	((kMethodVar*)mtd)->delta = sym;
-	return mtd;
-}
-
-static kMethod *new_ProtoSetter(KonohaContext *kctx, ktype_t cid, ksymbol_t sym, ktype_t ty)
-{
-	kmethodn_t mn = MN_toSETTER(sym);
-	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_ProtoSetterN : MethodFunc_ProtoSetter;
-	kparamtype_t p = {ty, FN_("x")};
-	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Public, cid, mn, f);
-	KLIB kMethod_setParam(kctx, mtd, ty, 1, &p);
-	((kMethodVar*)mtd)->delta = sym;
-	return mtd;
-}
-
-static void KonohaClass_addMethod2(KonohaContext *kctx, KonohaClass *ct, kMethod *mtd)
-{
-	if(unlikely(ct->methodList == K_EMPTYARRAY)) {
-		KINITv(((KonohaClassVar*)ct)->methodList, new_(MethodArray, 8));
-	}
-	KLIB kArray_add(kctx, ct->methodList, mtd);
-}
-
-static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kObject *o, kStmt *stmt, kNameSpace *ns, ktype_t ty, ksymbol_t fn)
+static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObject *o, ktype_t ty, ksymbol_t symbol)
 {
 	ktype_t cid = O_typeId(o);
-	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(fn), ty, MPOL_SETTER|MPOL_CANONICAL);
+	kNameSpace *ns = Stmt_nameSpace(stmt);
+	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(symbol), ty, MPOL_SETTER);
 	if(mtd != NULL) {
-		SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "already defined name: %s.%s", CT_t(O_ct(o)), SYM_t(fn));
+		SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "already defined name: %s", SYM_t(symbol));
 		return NULL;
 	}
-	mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toGETTER(fn), 0, MPOL_GETTER);
+	mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toGETTER(symbol), 0, MPOL_GETTER);
 	if(mtd != NULL && Method_returnType(mtd) != ty) {
-		SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "differently defined getter: %s.%s", CT_t(O_ct(o)), SYM_t(fn));
+		SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "differently defined name: %s", SYM_t(symbol));
 		return NULL;
 	}
+	int flag = kField_Setter;
 	if(mtd == NULL) { // no getter
-		KonohaClass_addMethod2(kctx, O_ct(o), new_ProtoGetter(kctx, cid, fn, ty));
+		flag |= kField_Getter;
 	}
-	mtd = new_ProtoSetter(kctx, cid, fn, ty);
-	KonohaClass_addMethod2(kctx, O_ct(o), mtd);
-	return mtd;
+	KLIB KonohaClass_addField(kctx, O_ct(o), flag, ty, symbol);
+	return KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(symbol), ty, MPOL_SETTER);
 }
 
 // ---------------------------------------------------------------------------
 
-static void appendSetterStmt(KonohaContext *kctx, kStmt **lastStmtRef, kStmt *newstmt)
-{
-	kStmt *lastStmt = lastStmtRef[0];
-	SUGAR kBlock_insertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, newstmt);
-	lastStmtRef[0] = newstmt;
-}
+//static void appendSetterStmt(KonohaContext *kctx, kStmt **lastStmtRef, kStmt *newstmt)
+//{
+//	kStmt *lastStmt = lastStmtRef[0];
+//	SUGAR kBlock_insertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, newstmt);
+//	lastStmtRef[0] = newstmt;
+//}
+//
+//static kbool_t kGlobalObject_typeDeclAndSetter(KonohaContext *kctx, kObject *scr, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr, kExpr *valueExpr, kStmt **lastStmtRef)
+//{
+//	kNameSpace *ns = Stmt_nameSpace(stmt);
+//	kMethod *mtd = Object_newProtoSetterNULL(kctx, scr, stmt, ns, ty, termExpr->termToken->resolvedSymbol);
+//	DBG_P("mtd=%p", mtd);
+//	if(mtd != NULL) {
+//		kExpr *recvExpr =  new_ConstValueExpr(kctx, O_typeId(scr), scr);
+//		PUSH_GCSTACK(recvExpr);
+//		kExpr *setterExpr = SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_void, mtd,  2, recvExpr, valueExpr);
+//		kStmt *newstmt = GCSAFE_new(Stmt, stmt->uline);
+//		kStmt_setsyn(newstmt, SYN_(ns, KW_ExprPattern));
+//		KLIB kObject_setObject(kctx, newstmt, KW_ExprPattern, TY_Expr, setterExpr);
+//		appendSetterStmt(kctx, lastStmtRef, newstmt);
+//		return true;
+//	}
+//	return false;
+//}
 
-static kbool_t kGlobalObject_typeDeclAndSetter(KonohaContext *kctx, kObject *scr, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr, kExpr *valueExpr, kStmt **lastStmtRef)
+static kStmt* TypeDeclAndMakeSetter(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr, kExpr *valueExpr, kObject *scr)
 {
 	kNameSpace *ns = Stmt_nameSpace(stmt);
-	kMethod *mtd = Object_newProtoSetterNULL(kctx, scr, stmt, ns, ty, termExpr->termToken->resolvedSymbol);
-	DBG_P("mtd=%p", mtd);
+	kMethod *mtd = Object_newProtoSetterNULL(kctx, stmt, scr, ty, termExpr->termToken->resolvedSymbol);
 	if(mtd != NULL) {
 		kExpr *recvExpr =  new_ConstValueExpr(kctx, O_typeId(scr), scr);
 		PUSH_GCSTACK(recvExpr);
@@ -156,43 +112,44 @@ static kbool_t kGlobalObject_typeDeclAndSetter(KonohaContext *kctx, kObject *scr
 		kStmt *newstmt = GCSAFE_new(Stmt, stmt->uline);
 		kStmt_setsyn(newstmt, SYN_(ns, KW_ExprPattern));
 		KLIB kObject_setObject(kctx, newstmt, KW_ExprPattern, TY_Expr, setterExpr);
-		appendSetterStmt(kctx, lastStmtRef, newstmt);
-		return true;
+		return newstmt;
 	}
-	return false;
+	return NULL;
 }
 
-static kbool_t kGlobalObject_typeDecl(KonohaContext *kctx, kObject *scr, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *expr, kStmt **lastStmtRef)
-{
-	if(expr->syn->keyword == KW_LET && Expr_isSymbolTerm(kExpr_at(expr, 1))) {
-		if(SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 2, gma, ty, 0) == K_NULLEXPR) {
-			// this is neccesarry to avoid 'int a = a + 1;';
-			return false;
-		}
-		if(ty == TY_var) {
-			ty = kExpr_at(expr, 2)->ty;
-			kStmt_printMessage(kctx, stmt, InfoTag, "%s has type %s", SYM_t(kExpr_at(expr, 1)->termToken->resolvedSymbol), TY_t(ty));
-		}
-		return kGlobalObject_typeDeclAndSetter(kctx, scr, stmt, gma, ty, kExpr_at(expr, 1), kExpr_at(expr, 2), lastStmtRef);
-	} else if(Expr_isSymbolTerm(expr)) {
-		if(ty == TY_var) {
-			kStmt_printMessage(kctx, stmt, ErrTag, "an initial value is expected: var %s", SYM_t(kExpr_at(expr, 1)->termToken->resolvedSymbol));
-			return false;
-		}
-		else {
-			kExpr *valueExpr = new_VariableExpr(kctx, gma, TEXPR_NULL, ty, 0);
-			return kGlobalObject_typeDeclAndSetter(kctx, scr, stmt, gma, ty, expr, valueExpr, lastStmtRef);
-		}
-	} else if(expr->syn->keyword == KW_COMMA) {
-		size_t i;
-		for(i = 1; i < kArray_size(expr->cons); i++) {
-			if(!kGlobalObject_typeDecl(kctx, scr, stmt, gma, ty, kExpr_at(expr, i), lastStmtRef)) return false;
-		}
-		return true;
-	}
-	kStmt_printMessage(kctx, stmt, ErrTag, "variable name is expected");
-	return false;
-}
+////typedef kStmt* (*TypeDeclFunc)(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr, kExpr *vexpr);
+//
+//static kbool_t kGlobalObject_typeDecl2(KonohaContext *kctx, kObject *scr, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *expr, kStmt **lastStmtRef)
+//{
+//	if(expr->syn->keyword == KW_LET && Expr_isSymbolTerm(kExpr_at(expr, 1))) {
+//		if(SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 2, gma, ty, 0) == K_NULLEXPR) {
+//			// this is neccesarry to avoid 'int a = a + 1;';
+//			return false;
+//		}
+//		if(ty == TY_var) {
+//			ty = kExpr_at(expr, 2)->ty;
+//			kStmt_printMessage(kctx, stmt, InfoTag, "%s has type %s", SYM_t(kExpr_at(expr, 1)->termToken->resolvedSymbol), TY_t(ty));
+//		}
+//		return kGlobalObject_typeDeclAndSetter(kctx, scr, stmt, gma, ty, kExpr_at(expr, 1), kExpr_at(expr, 2), lastStmtRef);
+//	} else if(Expr_isSymbolTerm(expr)) {
+//		if(ty == TY_var) {
+//			kStmt_printMessage(kctx, stmt, ErrTag, "an initial value is expected: var %s", SYM_t(expr->termToken->resolvedSymbol));
+//			return false;
+//		}
+//		else {
+//			kExpr *valueExpr = new_VariableExpr(kctx, gma, TEXPR_NULL, ty, 0);
+//			return kGlobalObject_typeDeclAndSetter(kctx, scr, stmt, gma, ty, expr, valueExpr, lastStmtRef);
+//		}
+//	} else if(expr->syn->keyword == KW_COMMA) {
+//		size_t i;
+//		for(i = 1; i < kArray_size(expr->cons); i++) {
+//			if(!kGlobalObject_typeDecl(kctx, scr, stmt, gma, ty, kExpr_at(expr, i), lastStmtRef)) return false;
+//		}
+//		return true;
+//	}
+//	kStmt_printMessage(kctx, stmt, ErrTag, "variable name is expected");
+//	return false;
+//}
 
 typedef const struct _kGlobalObject kGlobalObject;
 struct _kGlobalObject {
@@ -224,7 +181,8 @@ static KMETHOD StmtTyCheck_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 		kToken *tk  = SUGAR kStmt_getToken(kctx, stmt, KW_TypePattern, NULL);
 		kExpr  *expr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL);
 		kStmt *lastStmt = stmt;
-		result = kGlobalObject_typeDecl(kctx, ns->globalObjectNULL, stmt, gma, tk->resolvedTypeId, expr, &lastStmt);
+		result = SUGAR kStmt_declType(kctx, stmt, gma, tk->resolvedTypeId, expr, ns->globalObjectNULL, TypeDeclAndMakeSetter, &lastStmt);
+		//result = kGlobalObject_typeDecl(kctx, ns->globalObjectNULL, stmt, gma, tk->resolvedTypeId, expr, &lastStmt);
 	}
 	kStmt_done(kctx, stmt);
 	RETURNb_(result);

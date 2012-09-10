@@ -1,3 +1,2 @@
- - (error) (ERROR_CStyleMacro.k:1) undefined function: #
- - (error) (ERROR_CStyleMacro.k:1) function var takes 0 parameter(s), but given 1 parameter(s)
+ - (error) (ERROR_CStyleMacro.k:1) undefined operator: define
 Q.E.D.

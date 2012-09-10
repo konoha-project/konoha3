@@ -958,7 +958,7 @@ static KMETHOD StmtTyCheck_return(KonohaContext *kctx, KonohaStack *sfp)
 
 ///* ------------------------------------------------------------------------ */
 
-static kStmt* TypeDeclLocalVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr, kExpr *vexpr)
+static kStmt* TypeDeclLocalVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr, kExpr *vexpr, kObject *thunk)
 {
 	DBG_ASSERT(Expr_isSymbolTerm(termExpr));
 	kToken *tk = termExpr->termToken;
@@ -972,7 +972,7 @@ static kStmt* TypeDeclLocalVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gm
 	return newstmt;
 }
 
-static kbool_t kStmt_declType(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *declExpr, TypeDeclFunc TypeDecl, kStmt **lastStmtRef)
+static kbool_t kStmt_declType(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *declExpr, kObject *thunk, TypeDeclFunc TypeDecl, kStmt **lastStmtRef)
 {
 	kStmt *newstmt = NULL;
 	if(TypeDecl == NULL) {
@@ -981,7 +981,7 @@ static kbool_t kStmt_declType(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kty
 	if(declExpr->syn->keyword == KW_COMMA) {
 		size_t i;
 		for(i = 1; i < kArray_size(declExpr->cons); i++) {
-			if(!kStmt_declType(kctx, stmt, gma, ty, kExpr_at(declExpr, i), TypeDecl, lastStmtRef)) return false;
+			if(!kStmt_declType(kctx, stmt, gma, ty, kExpr_at(declExpr, i), thunk, TypeDecl, lastStmtRef)) return false;
 		}
 		return true;
 	}
@@ -996,7 +996,7 @@ static kbool_t kStmt_declType(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kty
 			kStmtToken_printMessage(kctx, stmt, termToken, InfoTag, "%s has type %s%s", PSYM_t(termToken->resolvedSymbol), TY_t(inferedType));
 			ty = inferedType;
 		}
-		newstmt = TypeDecl(kctx, stmt, gma, ty, kExpr_at(declExpr, 1), kExpr_at(declExpr, 2));
+		newstmt = TypeDecl(kctx, stmt, gma, ty, kExpr_at(declExpr, 1), kExpr_at(declExpr, 2), thunk);
 	}
 	else if(Expr_isSymbolTerm(declExpr)) {
 		if(ty == TY_var) {
@@ -1005,7 +1005,7 @@ static kbool_t kStmt_declType(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kty
 		}
 		else {
 			kExpr *vexpr = new_VariableExpr(kctx, gma, TEXPR_NULL, ty, 0);
-			newstmt = TypeDecl(kctx, stmt, gma, ty, declExpr, vexpr);
+			newstmt = TypeDecl(kctx, stmt, gma, ty, declExpr, vexpr, thunk);
 		}
 	}
 	else {
@@ -1030,7 +1030,7 @@ static KMETHOD StmtTyCheck_TypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 //	if(tk == NULL || !Token_isVirtualTypeLiteral(tk) || expr == NULL) {
 //		RETURNb_(false);
 //	}
-	RETURNb_(kStmt_declType(kctx, stmt, gma, Token_typeLiteral(tk), expr, TypeDeclLocalVariable, &stmt));
+	RETURNb_(kStmt_declType(kctx, stmt, gma, Token_typeLiteral(tk), expr, NULL, TypeDeclLocalVariable, &stmt));
 }
 
 // ------------------

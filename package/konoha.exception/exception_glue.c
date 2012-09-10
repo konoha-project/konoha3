@@ -267,7 +267,7 @@ static kbool_t exception_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFir
 static KMETHOD StmtTyCheck_try(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_StmtTyCheck(stmt, gma);
-	fprintf(stderr, "try statement .. \n");
+	DBG_P("try statement .. \n");
 	int ret = false;
 	kBlock *tryBlock, *catchBlock, *finallyBlock;
 	tryBlock     = SUGAR kStmt_getBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
