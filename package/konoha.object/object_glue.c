@@ -41,7 +41,7 @@ static KMETHOD Object_getTypeId(KonohaContext *kctx, KonohaStack *sfp)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-statickbool_t object_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t object_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	KDEFINE_INT_CONST ClassData[] = {   // add Object as available
 		{"Object", TY_TYPE, (uintptr_t)CT_(Object)},
