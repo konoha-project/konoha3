@@ -28,13 +28,15 @@
 /* --------------- */
 /* NameSpace */
 
+#define kNameSpace_sizeConstTable(ns)    (ns->constTable.bytesize / sizeof(KUtilsKeyValue))
+
 static void NameSpace_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kNameSpaceVar *ns = (kNameSpaceVar*)o;
 	bzero(&ns->parentNULL, sizeof(kNameSpace) - sizeof(KonohaObjectHeader));
 	ns->parentNULL = conf;
 	KINITv(ns->methodList, K_EMPTYARRAY);
-	KINITv(ns->scriptObject, KLIB Knull(kctx, CT_System));
+	//KINITv(ns->scriptObject, KLIB Knull(kctx, CT_System));
 }
 
 static void syntaxMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
@@ -55,7 +57,7 @@ static void NameSpace_reftrace(KonohaContext *kctx, kObject *o)
 	if(ns->syntaxMapNN != NULL) {
 		KLIB Kmap_each(kctx, ns->syntaxMapNN, NULL, syntaxMap_reftrace);
 	}
-	size_t i, size = ns->constTable.bytesize / sizeof(KUtilsKeyValue);
+	size_t i, size = kNameSpace_sizeConstTable(ns);
 	BEGIN_REFTRACE(size+3);
 	for(i = 0; i < size; i++) {
 		if(SYMKEY_isBOXED(ns->constTable.keyvalueItems[i].key)) {
@@ -63,7 +65,7 @@ static void NameSpace_reftrace(KonohaContext *kctx, kObject *o)
 		}
 	}
 	KREFTRACEn(ns->parentNULL);
-	KREFTRACEv(ns->scriptObject);
+	//KREFTRACEv(ns->scriptObject);
 	KREFTRACEv(ns->methodList);
 	END_REFTRACE();
 }

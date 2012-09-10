@@ -282,18 +282,23 @@ typedef struct KDEFINE_SYNTAX {
 
 struct kNameSpaceVar {
 	KonohaObjectHeader h;
+	uintptr_t          syntaxOption;
 	kpackage_t packageId;  	kpackage_t packageDomain;
 	kNameSpace                        *parentNULL;
 	const TokenizeFunc                *tokenMatrix;
 	KUtilsHashMap                     *syntaxMapNN;
-	//
-	kObject                           *scriptObject;
-	kArray*                            methodList;   // default K_EMPTYARRAY
+
 	KUtilsGrowingArray                 constTable;        // const variable
+	size_t                             sortedConstTable;
+	kObject                           *globalObjectNULL;
+	kArray                            *methodList;   // default K_EMPTYARRAY
 };
 
-/* Token */
+#define kNameSpace_ImplicitField                     ((uintptr_t)(1<<0))
+#define kNameSpace_allowedImplicitFieldAccess(o)     1/*(TFLAG_is(uintptr_t, (o)->syntaxOption, kNameSpace_ImplicitField))*/
+#define kNameSpace_allowedImplictGlobalVariable(ns)  1
 
+/* Token */
 struct kTokenVar {
 	KonohaObjectHeader h;
 	union {

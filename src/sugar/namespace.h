@@ -157,8 +157,6 @@ static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 // --------------------------------------------------------------------------
 // ConstTable
 
-#define kNameSpace_sizeConstTable(ns)    (ns->constTable.bytesize / sizeof(KUtilsKeyValue))
-
 static int comprKeyVal(const void *a, const void *b)
 {
 	int akey = SYMKEY_unbox(((KUtilsKeyValue*)a)->key);
