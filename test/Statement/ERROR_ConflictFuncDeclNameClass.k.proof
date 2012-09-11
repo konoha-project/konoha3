@@ -1,2 +1,2 @@
- - (error) (ERROR_ConflictFuncDeclNameClass.k:3) function declaration expects $Symbol
+ - (error) (ERROR_ConflictFuncDeclNameClass.k:3) function declaration: $Symbol is expected
 Q.E.D.

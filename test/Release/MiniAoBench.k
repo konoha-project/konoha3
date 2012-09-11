@@ -3,16 +3,21 @@
 
 K.import("konoha.float");
 K.import("konoha.math");
-K.import("konoha");
 K.import("konoha.bytes");
 K.import("konoha.string");
-K.import("posix.file");
+K.import("konoha.global");
+K.import("konoha.const");
+K.import("konoha.class");
+K.import("konoha.array");
+K.import("konoha.while");
+K.import("konoha.assign");
+K.setTransparentGlobalVariable(true);
 
-int width = 64;
-int height = 64;
+const width = 64;
+const height = 64;
 
-int nsubsamples = 2;
-int naosamples = 4;
+const nsubsamples = 2;
+const naosamples = 4;
 
 class Vec {
 	float x;
@@ -45,7 +50,6 @@ void normalize(Vec v1) {
 	}
 }
 
-
 class RayIntersection {
 	Vec rayPosition;
 	Vec rayDirection;
@@ -62,10 +66,6 @@ class Sphere {
 	Sphere(float x0, float y0, float z0, float r0) {
 		this.center = new Vec(x0, y0, z0);
 		this.radius = r0;
-	}
-
-	Array[Sphere] newArray(int size) {
-		return this;
 	}
 }
 
@@ -125,9 +125,9 @@ void interSectsPlane(Plane plane, RayIntersection isect) {
 }
 
 void getOrthoBasis (Vec normal, Vec[] orthoBasis) {
-	orthoBasis[0] = new Vec(0.0, 0.0, 0.0));
-	orthoBasis[1] = new Vec(0.0, 0.0, 0.0));
-	orthoBasis[2] = new Vec(0.0, 0.0, 0.0));
+	orthoBasis[0] = new Vec(0.0, 0.0, 0.0);
+	orthoBasis[1] = new Vec(0.0, 0.0, 0.0);
+	orthoBasis[2] = new Vec(0.0, 0.0, 0.0);
 	Vec o0 = orthoBasis[0];
 	Vec o1 = orthoBasis[1];
 	Vec o2 = orthoBasis[2];
@@ -300,24 +300,6 @@ void run() {
 		i += 1;
 	}
 	p("");
-
-	//FILE outfile = System.fopen("ao.ppm", "w");
-	//outfile.write("P3".toBytes(), 0, 2);
-	//outfile.write("\n".toBytes(), 0, 1);
-	//String swidth = "" + width;
-	//outfile.write(swidth.toBytes(), 0, swidth.getSize());
-	//String sheight = " " + height;
-	//outfile.write(sheight.toBytes(), 0, sheight.getSize());
-	//outfile.write("\n".toBytes(), 0, 1);
-	//outfile.write("255".toBytes(), 0, 3);
-	//while (i < size) {
-	//	String simg = " " + img[i];
-	//	outfile.write(simg.toBytes(), 0, simg.getSize());
-	//	i += 1;
-	//}
-	//outfile.write("\n".toBytes(), 0, 1);
-
-	//outfile.close();
 }
 
 void main() {

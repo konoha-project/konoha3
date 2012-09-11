@@ -5,16 +5,15 @@ K.import("konoha.global");
 K.import("konoha.null");
 K.import("konoha.int");
 K.import("konoha.array");
-
-// if we import konoha, then it fail
-//K.import("konoha")
+K.import("konoha.const");
+K.setTransparentGlobalVariable(true);
 
 /* The Great Computer Language Shootout
    http://shootout.alioth.debian.org/
    contributed by Kimio Kuramitsu
 */
 
-int c_MINDEPTH = 4;
+const c_MINDEPTH = 4;
 
 class TreeNode {
 	TreeNode left, right;
@@ -48,7 +47,7 @@ TreeNode bottomUpTree(int item, int depth) {
 void main() {
 	int n = 10;
 	int maxDepth;
-	if(c_MINDEPTH + 2 > n) maxDepth = c_MINDEPTH + 2; else maxDepth = n;
+	if(c_MINDEPTH + 2 > n) { maxDepth = c_MINDEPTH + 2; } else { maxDepth = n; }
 	int stretchDepth = maxDepth + 1;
 	int check = bottomUpTree(0,stretchDepth).itemCheck();
 	assert(check == -1);
@@ -74,4 +73,3 @@ void main() {
 }
 
 main();
-
