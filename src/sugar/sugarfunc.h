@@ -1122,6 +1122,7 @@ static KMETHOD StmtTyCheck_ParamsDecl(KonohaContext *kctx, KonohaStack *sfp)
 		size_t i, psize = kArray_size(params->stmtList);
 		kparamtype_t p[psize];
 		for(i = 0; i < psize; i++) {
+			p[i].ty = TY_void; p[i].fn = 0;
 			kStmt *stmt = params->stmtList->stmtItems[i];
 			if(stmt->syn->keyword != KW_StmtTypeDecl || !StmtTypeDecl_setParam(kctx, stmt, i, p)) {
 				break;
