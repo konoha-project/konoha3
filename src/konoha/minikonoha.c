@@ -123,6 +123,8 @@ static kbool_t KonohaRuntime_setModule(KonohaContext *kctx, int x, KonohaModule 
 /* ------------------------------------------------------------------------ */
 /* [kcontext] */
 
+static void KonohaContext_free(KonohaContext *kctx, KonohaContextVar *ctx);
+
 static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformApi *platApi)
 {
 	KonohaContextVar *newctx;
@@ -135,6 +137,8 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 		newctx = (KonohaContextVar*)(klib + 1);
 		newctx->klib = (KonohaLib*)klib;
 		newctx->platApi = platApi;
+		((KonohaLibVar*)newctx->klib)->KKonohaContext_new    = new_KonohaContext;
+		((KonohaLibVar*)newctx->klib)->KKonohaContext_delete = KonohaContext_free;
 		kctx = (KonohaContext*)newctx;
 		newctx->modshare = (KonohaModule**)calloc(sizeof(KonohaModule*), KonohaModule_MAXSIZE);
 		newctx->modlocal = (KonohaModuleContext**)calloc(sizeof(KonohaModuleContext*), KonohaModule_MAXSIZE);
