@@ -74,7 +74,6 @@ static int parseNL(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int p
 	return parseINDENT(kctx, tk, tenv, pos+1);
 }
 
-#ifdef USE_SCRIPT_TOKENER
 static int parseNUM(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
 {
 	int ch, pos = tok_start;
@@ -89,33 +88,6 @@ static int parseNUM(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int 
 	}
 	return pos - 1;  // next
 }
-#else
-static int parseNUM(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
-{
-	int ch, pos = tok_start, dot = 0;
-	const char *ts = tenv->source;
-	while((ch = ts[pos++]) != 0) {
-		if(ch == '_') continue; // nothing
-		if(ch == '.') {
-			if(!isdigit(ts[pos])) {
-				break;
-			}
-			dot++;
-			continue;
-		}
-		if((ch == 'e' || ch == 'E') && (ts[pos] == '+' || ts[pos] =='-')) {
-			pos++;
-			continue;
-		}
-		if(!isalnum(ch)) break;
-	}
-	if(IS_NOTNULL(tk)) {
-		KSETv(tk, tk->text, KLIB new_kString(kctx, ts + tok_start, (pos-1)-tok_start, SPOL_ASCII));
-		tk->unresolvedTokenType = (dot == 0) ? TokenType_INT : TokenType_FLOAT;
-	}
-	return pos - 1;  // next
-}
-#endif
 
 /**static kbool_t isLowerCaseSymbol(const char *t)
 {

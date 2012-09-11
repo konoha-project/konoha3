@@ -1,7 +1,7 @@
- - (BinaryTree.k:55) stretch tree of depth 11 check: -1
- - (BinaryTree.k:68) 2048 trees of depth 4 check: -2048
- - (BinaryTree.k:68) 512 trees of depth 6 check: -512
- - (BinaryTree.k:68) 128 trees of depth 8 check: -128
- - (BinaryTree.k:68) 32 trees of depth 10 check: -32
- - (BinaryTree.k:73) long lived tree of depth 10 check: -1
+ - (BinaryTree.k:54) stretch tree of depth 11 check: -1
+ - (BinaryTree.k:67) 2048 trees of depth 4 check: -2048
+ - (BinaryTree.k:67) 512 trees of depth 6 check: -512
+ - (BinaryTree.k:67) 128 trees of depth 8 check: -128
+ - (BinaryTree.k:67) 32 trees of depth 10 check: -32
+ - (BinaryTree.k:72) long lived tree of depth 10 check: -1
 Q.E.D.
