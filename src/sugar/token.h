@@ -89,18 +89,6 @@ static int parseNUM(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int 
 	return pos - 1;  // next
 }
 
-static kbool_t isUpperCaseSymbol(const char *t)
-{
-	while(t[0] != 0) {
-		if(isupper(t[0])) return true;
-		if(t[0] == '_') {
-			t++; continue;
-		}
-		break;
-	}
-	return false;
-}
-
 static void kToken_setSymbolText(KonohaContext *kctx, kTokenVar *tk, const char *t, size_t len)
 {
 	if(IS_NOTNULL(tk)) {

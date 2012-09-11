@@ -56,18 +56,6 @@ static KMETHOD PatternMatch_Type(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(returnIdx);
 }
 
-static KMETHOD PatternMatch_ConstName(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
-	int returnIdx = -1;
-	kToken *tk = tokenList->tokenItems[beginIdx];
-	if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern && isUpperCaseSymbol(S_text(tk->text))) {
-		KLIB kObject_setObject(kctx, stmt, name, O_typeId(tk), tk);
-		returnIdx = beginIdx + 1;
-	}
-	RETURNi_(returnIdx);
-}
-
 static KMETHOD PatternMatch_MethodName(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
@@ -146,7 +134,6 @@ static KMETHOD ParseExpr_Term(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
 	if(beginIdx == operatorIdx) {
 		kToken *tk = tokenList->tokenItems[operatorIdx];
-
 		KonohaClass *foundClass = NULL;
 		int nextIdx = kStmt_parseTypePattern(kctx, NULL, Stmt_nameSpace(stmt), tokenList, beginIdx, endIdx, &foundClass);
 		if(foundClass != NULL) {
@@ -370,7 +357,6 @@ static KMETHOD ExprTyCheck_assign(KonohaContext *kctx, KonohaStack *sfp)
 				ktype_t cid = leftHandExpr->cons->exprItems[1]->ty;
 				ktype_t paramType = leftHandExpr->ty; //CT_(cid)->realtype(kctx, CT_(cid), CT_(leftHandExpr->ty));
 				mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(mtd->mn), paramType, MPOL_SETTER|MPOL_CANONICAL);
-				DBG_P("cid=%s, mtd=%p", TY_t(cid), mtd);
 				if(mtd != NULL) {
 					KSETv(leftHandExpr->cons, leftHandExpr->cons->methodItems[0], mtd);
 					KLIB kArray_add(kctx, leftHandExpr->cons, rightHandExpr);
@@ -397,7 +383,6 @@ static int addGammaStack(KonohaContext *kctx, GammaStack *s, ktype_t ty, ksymbol
 		s->varItems = v;
 		s->allocsize = asize;
 	}
-	DBG_P("index=%d, ty=%s fn=%s", index, TY_t(ty), SYM_t(fn));
 	s->varItems[index].ty = ty;
 	s->varItems[index].fn = fn;
 	s->varsize += 1;
@@ -462,7 +447,7 @@ static kExpr* new_GetterExpr(KonohaContext *kctx, kToken *tkU, kMethod *mtd, kEx
 	return (kExpr*)expr1;
 }
 
-static kObject *NameSpace_getSymbolValueNULL(KonohaContext *kctx, kNameSpace *ns, const char *key, size_t klen)
+static kObject *kNameSpace_getSymbolValueNULL(KonohaContext *kctx, kNameSpace *ns, const char *key, size_t klen)
 {
 	if(key[0] == 'K' && (key[1] == 0 || strcmp("Konoha", key) == 0)) {
 		return (kObject*)ns;
@@ -470,7 +455,7 @@ static kObject *NameSpace_getSymbolValueNULL(KonohaContext *kctx, kNameSpace *ns
 	return NULL;
 }
 
-static kExpr* kExpr_tyCheckVariable(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, ktype_t reqty)
+static kExpr* kExpr_tyCheckVariableNULL(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, ktype_t reqty)
 {
 	DBG_ASSERT(expr->ty == TY_var);
 	kToken *tk = expr->termToken;
@@ -527,57 +512,22 @@ static kExpr* kExpr_tyCheckVariable(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 			return expr;
 		}
 	}
-	kObject *v = NameSpace_getSymbolValueNULL(kctx, ns, S_text(tk->text), S_size(tk->text));
-	kExpr *texpr = (v == NULL) ? kStmtToken_printMessage(kctx, stmt, tk, ErrTag, "undefined name: %s", Token_text(tk)) : SUGAR kExpr_setConstValue(kctx, expr, O_typeId(v), v);
-	return texpr;
+	kObject *v = kNameSpace_getSymbolValueNULL(kctx, ns, S_text(tk->text), S_size(tk->text));
+	if(v != NULL) {
+		return SUGAR kExpr_setConstValue(kctx, expr, O_typeId(v), v);
+	}
+	return NULL;
 }
 
 static KMETHOD ExprTyCheck_Symbol(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	RETURN_(kExpr_tyCheckVariable(kctx, stmt, expr, gma, reqty));
-}
-
-static KMETHOD StmtTyCheck_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_StmtTyCheck(stmt, gma);
-	kbool_t r = false;
-	kNameSpace *ns = Stmt_nameSpace(stmt);
-	kToken *tk = SUGAR kStmt_getToken(kctx, stmt, KW_ConstPattern, NULL);
-	ksymbol_t unboxKey = tk->resolvedSymbol;
-	KUtilsKeyValue *kv = kNameSpace_getLocalConstNULL(kctx, ns, unboxKey);
-	if(kv != NULL) {
-		kStmt_printMessage(kctx, stmt, ErrTag, "already defined name: %s", Token_text(tk));
+	kExpr *texpr = kExpr_tyCheckVariableNULL(kctx, stmt, expr, gma, reqty);
+	if(texpr == NULL) {
+		kToken *tk = expr->termToken;
+		texpr = kStmtToken_printMessage(kctx, stmt, tk, ErrTag, "undefined name: %s", Token_text(tk));
 	}
-	else {
-		r = kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, TPOL_CONST);
-		if(r) {
-			kExpr *expr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL);
-			KUtilsKeyValue kv = { unboxKey, expr->ty};
-			if(expr->build == TEXPR_NULL) {
-				kv.ty = TY_TYPE;
-				kv.unboxValue = (uintptr_t)(CT_(expr->ty));
-				expr = NULL;
-			}
-			else if(expr->build == TEXPR_CONST) {
-				kv.key = unboxKey | SYMKEY_BOXED;
-				kv.objectValue = expr->objectConstValue;
-				expr = NULL;
-			}
-			else if(expr->build == TEXPR_NCONST) {
-				kv.unboxValue = expr->unboxConstValue;
-				expr = NULL;
-			}
-			if(expr == NULL) {
-				kNameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, &kv, 1, stmt->uline);
-			}
-			else {
-				kStmt_printMessage(kctx, stmt, ErrTag, "constant value is expected");
-			}
-			kStmt_done(kctx, stmt);
-		}
-	}
-	RETURNb_(r);
+	RETURN_(texpr);
 }
 
 static ktype_t ktype_var(KonohaContext *kctx, ktype_t ty, KonohaClass *this_ct)
@@ -1261,7 +1211,7 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(false),   ExprTyCheck_(false),},
 		{ PATTERN(Expr), .rule ="$Expr", PatternMatch_(Expr), TopStmtTyCheck_(Expr), StmtTyCheck_(Expr), ParseExpr_(Expr) },
 		{ PATTERN(Type),  PatternMatch_(Type), .rule = "$Type $Expr", StmtTyCheck_(TypeDecl), ExprTyCheck_(Type), },
-		{ PATTERN(Const), PatternMatch_(ConstName), .rule = "$Const \"=\" $Expr", TopStmtTyCheck_(ConstDecl), },
+//		{ PATTERN(Const), PatternMatch_(ConstName), .rule = "$Const \"=\" $Expr", TopStmtTyCheck_(ConstDecl), },
 		{ PATTERN(MethodDecl), .rule ="$Type [ClassName: $Type \".\"] $Symbol $Param [$Block]", TopStmtTyCheck_(MethodDecl)},
 		{ TOKEN(if),     .rule ="\"if\" \"(\" $Expr \")\" $Block [\"else\" else: $Block]", TopStmtTyCheck_(if), StmtTyCheck_(if), },
 		{ TOKEN(else),   .rule = "\"else\" $Block", TopStmtTyCheck_(else), StmtTyCheck_(else), },
