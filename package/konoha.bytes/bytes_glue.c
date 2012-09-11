@@ -36,7 +36,7 @@
 // Bytes_init
 static void Bytes_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	if ((size_t)conf <= 0) return ;
+	if ((size_t)conf <= 0) return;
 	struct _kBytes *ba = (struct _kBytes*)o;
 	ba->byteptr = NULL;
 	ba->byteptr = (const char *)KCALLOC((size_t)conf, 1);

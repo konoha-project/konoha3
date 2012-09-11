@@ -216,7 +216,7 @@ static kString* new_kStringf(KonohaContext *kctx, int spol, const char *fmt, ...
 struct _kAbstractArray {
 	KonohaObjectHeader h;
 	KUtilsGrowingArray a;
-} ;
+};
 
 static void Array_init(KonohaContext *kctx, kObject *o, void *conf)
 {

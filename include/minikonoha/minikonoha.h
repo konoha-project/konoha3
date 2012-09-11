@@ -173,7 +173,7 @@ typedef enum {
 typedef struct logconf_t {
 	logpolicy_t policy;
 	void *formatPointer; // for precompiled formattings
-} logconf_t ;
+} logconf_t;
 
 struct PlatformApiVar {
 	// settings
@@ -753,7 +753,7 @@ struct KonohaClassVar {
 	KUtilsHashMap            *constPoolMapNO;
 	KonohaClass              *searchSimilarClassNULL;
 	KonohaClass              *searchSuperMethodClassNULL;
-} ;
+};
 
 struct KonohaClassField {
 	kshortflag_t    flag;
@@ -891,7 +891,7 @@ typedef struct KonohaObjectHeader {
 	kmagicflag_t magicflag;
 	KonohaClass *ct;
 	KUtilsGrowingArray *kvproto;
-} KonohaObjectHeader ;
+} KonohaObjectHeader;
 
 struct kObjectVar {
 	KonohaObjectHeader h;
@@ -1572,7 +1572,7 @@ typedef int (*BuiltInTestFunc)(KonohaContext *kctx);
 typedef struct DEFINE_TESTFUNC {
 	const char *name;
 	BuiltInTestFunc f;
-} DEFINE_TESTFUNC ;
+} DEFINE_TESTFUNC;
 #endif
 
 #ifdef __cplusplus
