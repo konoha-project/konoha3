@@ -167,7 +167,7 @@ typedef enum {
 	SecurityAudit     =  (1<<9),  /* security audit */
 	PrivacyCaution    =  (1<<10), /* including privacy information */
 	// Internal Use
-	LOGPOOL_INIT      =  (1<<12),
+	LOGPOOL_INIT      =  (1<<12)
 } logpolicy_t;
 
 typedef struct logconf_t {
@@ -283,7 +283,7 @@ typedef float             kfloat_t;
 typedef bool             kbool_t;
 
 typedef enum {
-	K_FAILED, K_BREAK, K_CONTINUE,
+	K_FAILED, K_BREAK, K_CONTINUE
 } kstatus_t;
 
 typedef intptr_t         kint_t;
