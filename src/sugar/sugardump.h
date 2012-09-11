@@ -67,9 +67,9 @@ static void dumpToken(KonohaContext *kctx, kToken *tk, int n)
 				DUMP_P("Token[%d] '%s' TokenType=``%s%s''\n", n, Token_text(tk), PSYM_t(tk->unresolvedTokenType));
 			}
 		}
-		else if(Token_isRule(tk)) {
-			DUMP_P("RuleToken(%d) '%s' resolvedSymbol=%s%s classNameSymbol=%s%s\n", n, Token_text(tk), PSYM_t(tk->resolvedSymbol), PSYM_t(tk->indent));
-		}
+//		else if(Token_isRule(tk)) {
+//			DUMP_P("RuleToken(%d) '%s' resolvedSymbol=%s%s classNameSymbol=%s%s\n", n, Token_text(tk), PSYM_t(tk->resolvedSymbol), PSYM_t(tk->indent));
+//		}
 		else if(tk->resolvedSyntaxInfo->keyword == KW_TypePattern) {
 			DUMP_P("Token(%d) '%s' type=%s\n", n, Token_text(tk), TY_t(tk->resolvedTypeId));
 		}

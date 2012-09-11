@@ -328,8 +328,12 @@ struct kTokenVar {
 	};
 };
 
-#define Token_isRule(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
-#define Token_setRule(o,B)   TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,B)
+//#define Token_isRule(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
+//#define Token_setRule(o,B)   TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,B)
+
+#define Token_isBeforeWhiteSpace(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local2))
+#define Token_setBeforeWhiteSpace(o,B)   TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local2,B)
+
 
 typedef struct TokenRange {
 	kNameSpace *ns;

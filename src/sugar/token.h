@@ -89,18 +89,6 @@ static int parseNUM(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int 
 	return pos - 1;  // next
 }
 
-/**static kbool_t isLowerCaseSymbol(const char *t)
-{
-	while(t[0] != 0) {
-		if(islower(t[0])) return true;
-		if(t[0] == '_') {
-			t++; continue;
-		}
-		return false;
-	}
-	return true;
-}**/
-
 static kbool_t isUpperCaseSymbol(const char *t)
 {
 	while(t[0] != 0) {
@@ -113,7 +101,7 @@ static kbool_t isUpperCaseSymbol(const char *t)
 	return false;
 }
 
-static void Token_setSymbolText(KonohaContext *kctx, kTokenVar *tk, const char *t, size_t len)
+static void kToken_setSymbolText(KonohaContext *kctx, kTokenVar *tk, const char *t, size_t len)
 {
 	if(IS_NOTNULL(tk)) {
 		ksymbol_t kw = ksymbolA(t, len, SYM_NONAME);
@@ -138,13 +126,13 @@ static int parseSYMBOL(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, i
 		if(ch == '_' || isalnum(ch)) continue; // nothing
 		break;
 	}
-	Token_setSymbolText(kctx, tk, ts + tok_start, (pos-1)-tok_start);
+	kToken_setSymbolText(kctx, tk, ts + tok_start, (pos-1)-tok_start);
 	return pos - 1;  // next
 }
 
 static int parseOP1(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
 {
-	Token_setSymbolText(kctx, tk,  tenv->source + tok_start, 1);
+	kToken_setSymbolText(kctx, tk,  tenv->source + tok_start, 1);
 	return tok_start+1;
 }
 
@@ -162,7 +150,7 @@ static int parseOP(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int t
 		}
 		break;
 	}
-	Token_setSymbolText(kctx, tk, tenv->source + tok_start, (pos-1)-tok_start);
+	kToken_setSymbolText(kctx, tk, tenv->source + tok_start, (pos-1)-tok_start);
 	return pos-1;
 }
 
@@ -242,6 +230,19 @@ static int parseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, TokenizerEn
 	return pos-1;
 }
 
+static int ParseWhiteSpace(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
+{
+	size_t size = kArray_size(tenv->tokenList);
+	if(size > 0) {
+		kTokenVar *tk = tenv->tokenList->tokenVarItems[size-1];
+		if(tk->uline == tenv->currentLine && tk->unresolvedTokenType != TokenType_INDENT) {
+			Token_setBeforeWhiteSpace(tk, true);
+			DBG_P("BeforeWhiteSpace: '%s'", S_text(tk->text));
+		}
+	}
+	return tok_start+1;
+}
+
 static int parseSKIP(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
 {
 	return tok_start+1;
@@ -274,9 +275,9 @@ static const TokenizeFunc MiniKonohaTokenMatrix[] = {
 #define _NL        6
 	parseNL,
 #define _TAB       7
-	parseSKIP,
+	ParseWhiteSpace,
 #define _SP_       8
-	parseSKIP,
+	ParseWhiteSpace,
 #define _LPAR      9
 	parseOP1,
 #define _RPAR      10

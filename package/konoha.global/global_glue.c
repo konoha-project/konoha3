@@ -123,7 +123,6 @@ static KMETHOD StmtTyCheck_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 		kExpr  *expr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL);
 		kStmt *lastStmt = stmt;
 		result = SUGAR kStmt_declType(kctx, stmt, gma, tk->resolvedTypeId, expr, ns->globalObjectNULL, TypeDeclAndMakeSetter, &lastStmt);
-		//result = kGlobalObject_typeDecl(kctx, ns->globalObjectNULL, stmt, gma, tk->resolvedTypeId, expr, &lastStmt);
 	}
 	kStmt_done(kctx, stmt);
 	RETURNb_(result);
@@ -144,7 +143,7 @@ static kbool_t global_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNam
 KDEFINE_PACKAGE* global_init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("global", "1.0"),
+		KPACKNAME("konoha", "1.0"),
 		.initPackage = global_initPackage,
 		.setupPackage = global_setupPackage,
 		.initNameSpace = global_initNameSpace,
