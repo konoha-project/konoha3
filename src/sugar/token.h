@@ -237,7 +237,7 @@ static int ParseWhiteSpace(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *ten
 		kTokenVar *tk = tenv->tokenList->tokenVarItems[size-1];
 		if(tk->uline == tenv->currentLine && tk->unresolvedTokenType != TokenType_INDENT) {
 			Token_setBeforeWhiteSpace(tk, true);
-			DBG_P("BeforeWhiteSpace: '%s'", S_text(tk->text));
+//			DBG_P("BeforeWhiteSpace: '%s'", S_text(tk->text));
 		}
 	}
 	return tok_start+1;

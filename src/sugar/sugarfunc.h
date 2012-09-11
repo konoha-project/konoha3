@@ -993,7 +993,7 @@ static kbool_t kStmt_declType(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kty
 		if(ty == TY_var) {
 			kToken *termToken = kExpr_at(declExpr, 1)->termToken;
 			ktype_t inferedType = kExpr_at(declExpr, 2)->ty;
-			kStmtToken_printMessage(kctx, stmt, termToken, InfoTag, "%s has type %s%s", PSYM_t(termToken->resolvedSymbol), TY_t(inferedType));
+			kStmtToken_printMessage(kctx, stmt, termToken, InfoTag, "%s%s has type %s", PSYM_t(termToken->resolvedSymbol), TY_t(inferedType));
 			ty = inferedType;
 		}
 		newstmt = TypeDecl(kctx, stmt, gma, ty, kExpr_at(declExpr, 1), kExpr_at(declExpr, 2), thunk);
