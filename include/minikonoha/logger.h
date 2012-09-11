@@ -64,7 +64,7 @@ typedef struct klogconf_t {
 		const char *func;
 		kMethod *mtd;
 	};
-} klogconf_t ;
+} klogconf_t;
 
 #define LOG_END 0
 #define LOG_s   1

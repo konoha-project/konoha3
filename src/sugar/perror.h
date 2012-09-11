@@ -169,7 +169,7 @@ static const char *kToken_t_(KonohaContext *kctx, kToken *tk)
 	}
 	else {
 		switch(tk->resolvedSymbol) {
-			case TokenType_CODE: ;
+			case TokenType_CODE:
 			case KW_BraceGroup: return "{... }";
 			case KW_ParenthesisGroup: return "(... )";
 			case KW_BracketGroup: return "[... ]";

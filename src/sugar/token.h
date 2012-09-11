@@ -347,31 +347,31 @@ static const TokenizeFunc MiniKonohaTokenMatrix[] = {
 static const char cMatrix[128] = {
 	0/*nul*/, 1/*soh*/, 1/*stx*/, 1/*etx*/, 1/*eot*/, 1/*enq*/, 1/*ack*/, 1/*bel*/,
 	1/*bs*/,  _TAB/*ht*/, _NL/*nl*/, 1/*vt*/, 1/*np*/, 1/*cr*/, 1/*so*/, 1/*si*/,
-	/*	020 dle  021 dc1  022 dc2  023 dc3  024 dc4  025 nak  026 syn  027 etb*/
+	/*020 dle  021 dc1  022 dc2  023 dc3  024 dc4  025 nak  026 syn  027 etb */
 	1, 1, 1, 1,     1, 1, 1, 1,
-	/*	030 can  031 em   032 sub  033 esc  034 fs   035 gs   036 rs   037 us*/
+	/*030 can  031 em   032 sub  033 esc  034 fs   035 gs   036 rs   037 us */
 	1, 1, 1, 1,     1, 1, 1, 1,
-	/*040 sp   041  !   042  "   043  #   044  $   045  %   046  &   047  '*/
+	/*040 sp   041  !   042  "   043  #   044  $   045  %   046  &   047  ' */
 	_SP_, _OKIDOKI, _DQUOTE, _SHARP, _DOLLAR, _PER, _AND, _QUOTE,
-	/*050  (   051  )   052  *   053  +   054  ,   055  -   056  .   057  /*/
+	/*050  (   051  )   052  *   053  +   054  ,   055  -   056  .   057  / */
 	_LPAR, _RPAR, _STAR, _PLUS, _COMMA, _MINUS, _DOT, _SLASH,
 	/*060  0   061  1   062  2   063  3   064  4   065  5   066  6   067  7 */
 	_DIGIT, _DIGIT, _DIGIT, _DIGIT,  _DIGIT, _DIGIT, _DIGIT, _DIGIT,
-	/*	070  8   071  9   072  :   073  ;   074  <   075  =   076  >   077  ? */
+	/*070  8   071  9   072  :   073  ;   074  <   075  =   076  >   077  ? */
 	_DIGIT, _DIGIT, _COLON, _SEMICOLON, _LT, _EQ, _GT, _QUESTION,
 	/*100  @   101  A   102  B   103  C   104  D   105  E   106  F   107  G */
 	_AT_, _UALPHA, _UALPHA, _UALPHA, _UALPHA, _UALPHA, _UALPHA, _UALPHA,
 	/*110  H   111  I   112  J   113  K   114  L   115  M   116  N   117  O */
 	_UALPHA, _UALPHA, _UALPHA, _UALPHA, _UALPHA, _UALPHA, _UALPHA, _UALPHA,
-	/*120  P   121  Q   122  R   123  S   124  T   125  U   126  V   127  W*/
+	/*120  P   121  Q   122  R   123  S   124  T   125  U   126  V   127  W */
 	_UALPHA, _UALPHA, _UALPHA, _UALPHA, _UALPHA, _UALPHA, _UALPHA, _UALPHA,
-	/*130  X   131  Y   132  Z   133  [   134  \   135  ]   136  ^   137  _*/
+	/*130  X   131  Y   132  Z   133  [   134  \   135  ]   136  ^   137  _ */
 	_UALPHA, _UALPHA, _UALPHA, _LSQ, _BKSLASH, _RSQ, _HAT, _UNDER,
-	/*140  `   141  a   142  b   143  c   144  d   145  e   146  f   147  g*/
+	/*140  `   141  a   142  b   143  c   144  d   145  e   146  f   147  g */
 	_BKQUOTE, _LALPHA, _LALPHA, _LALPHA, _LALPHA, _LALPHA, _LALPHA, _LALPHA,
-	/*150  h   151  i   152  j   153  k   154  l   155  m   156  n   157  o*/
+	/*150  h   151  i   152  j   153  k   154  l   155  m   156  n   157  o */
 	_LALPHA, _LALPHA, _LALPHA, _LALPHA, _LALPHA, _LALPHA, _LALPHA, _LALPHA,
-	/*160  p   161  q   162  r   163  s   164  t   165  u   166  v   167  w*/
+	/*160  p   161  q   162  r   163  s   164  t   165  u   166  v   167  w */
 	_LALPHA, _LALPHA, _LALPHA, _LALPHA, _LALPHA, _LALPHA, _LALPHA, _LALPHA,
 	/*170  x   171  y   172  z   173  {   174  |   175  }   176  ~   177 del*/
 	_LALPHA, _LALPHA, _LALPHA, _LBR, _VAR, _RBR, _CHILDER, 1,

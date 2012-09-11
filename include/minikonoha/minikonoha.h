@@ -167,13 +167,13 @@ typedef enum {
 	SecurityAudit     =  (1<<9),  /* security audit */
 	PrivacyCaution    =  (1<<10), /* including privacy information */
 	// Internal Use
-	LOGPOOL_INIT      =  (1<<12),
+	LOGPOOL_INIT      =  (1<<12)
 } logpolicy_t;
 
 typedef struct logconf_t {
 	logpolicy_t policy;
 	void *formatPointer; // for precompiled formattings
-} logconf_t ;
+} logconf_t;
 
 struct PlatformApiVar {
 	// settings
@@ -283,7 +283,7 @@ typedef float             kfloat_t;
 typedef bool             kbool_t;
 
 typedef enum {
-	K_FAILED, K_BREAK, K_CONTINUE,
+	K_FAILED, K_BREAK, K_CONTINUE
 } kstatus_t;
 
 typedef intptr_t         kint_t;
@@ -753,7 +753,7 @@ struct KonohaClassVar {
 	KUtilsHashMap            *constPoolMapNO;
 	KonohaClass              *searchSimilarClassNULL;
 	KonohaClass              *searchSuperMethodClassNULL;
-} ;
+};
 
 struct KonohaClassField {
 	kshortflag_t    flag;
@@ -891,7 +891,7 @@ typedef struct KonohaObjectHeader {
 	kmagicflag_t magicflag;
 	KonohaClass *ct;
 	KUtilsGrowingArray *kvproto;
-} KonohaObjectHeader ;
+} KonohaObjectHeader;
 
 struct kObjectVar {
 	KonohaObjectHeader h;
@@ -1326,6 +1326,8 @@ struct KonohaLibVar {
 	void          (*KonohaRuntime_raise)(KonohaContext*, int symbol, KonohaStack *, kfileline_t, kString *Nullable);
 
 	uintptr_t     (*Ktrace)(KonohaContext*, struct klogconf_t *logconf, ...);
+	struct KonohaContextVar* (*KKonohaContext_new)(KonohaContext *, const PlatformApi *api);
+	void (*KKonohaContext_delete)(KonohaContext *parentCtx, struct KonohaContextVar *ctx);
 };
 
 #define K_NULL            (kctx->share->constNull)
@@ -1572,7 +1574,7 @@ typedef int (*BuiltInTestFunc)(KonohaContext *kctx);
 typedef struct DEFINE_TESTFUNC {
 	const char *name;
 	BuiltInTestFunc f;
-} DEFINE_TESTFUNC ;
+} DEFINE_TESTFUNC;
 #endif
 
 #ifdef __cplusplus

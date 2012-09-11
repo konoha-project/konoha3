@@ -391,7 +391,7 @@ static int knh_popen(KonohaContext *kctx, kString* command, subprocData_t *spd, 
 			int num = kArray_size(a);
 			char *envs[num+1];
 			int i;
-			for(i = 0 ; i<num ; i++) {
+			for(i = 0; i < num; i++) {
 				envs[i] = (char*)S_text(a->stringItems[i]);
 			}
 			envs[num] = NULL;
@@ -591,7 +591,7 @@ static void setFd(KonohaContext *kctx, pfd_t *p, int changeMode, FILE* ptr) {
 	if(((p->mode == M_PIPE) || (p->mode == M_FILE)) && !(p->mode == changeMode)) {
 		// warning of the pipe or file mode overwrite
 		//char *msg = (p->mode == M_PIPE) ? "pipe has already set, but we overwrite it." :
-		//"file has already set, but we overwrite it." ;
+		//"file has already set, but we overwrite it.";
 		//WarnTagPackageMessage(kctx, msg );
 		//fprintf(stderr, "%s\n", msg);
 	}

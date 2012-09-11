@@ -60,7 +60,11 @@
 #include "llvm/ExecutionEngine/JIT.h"
 #include "llvm/ExecutionEngine/Interpreter.h"
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
+#if LLVM_VERSION >= 302
+#include "llvm/IRBuilder.h"
+#else
 #include "llvm/Support/IRBuilder.h"
+#endif
 
 #if LLVM_VERSION <= 208
 #include "llvm/Support/DynamicLinker.h"
@@ -4511,7 +4515,9 @@ static KDEFINE_INT_CONST IntGlobalVariable[] = {
 	{"PrivateLinkage",                  TY_int, GlobalValue::PrivateLinkage},
 	{"LinkerPrivateLinkage",            TY_int, GlobalValue::LinkerPrivateLinkage},
 	{"LinkerPrivateWeakLinkage",        TY_int, GlobalValue::LinkerPrivateWeakLinkage},
+#if LLVM_VERSION < 302
 	{"LinkerPrivateWeakDefAutoLinkage", TY_int, GlobalValue::LinkerPrivateWeakDefAutoLinkage},
+#endif
 	{"DLLImportLinkage",                TY_int, GlobalValue::DLLImportLinkage},
 	{"DLLExportLinkage",                TY_int, GlobalValue::DLLExportLinkage},
 	{"ExternalWeakLinkage",             TY_int, GlobalValue::ExternalWeakLinkage},
@@ -4624,22 +4630,83 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	base->h.free     = kmodllvm_free;
 	KLIB KonohaRuntime_setModule(kctx, MOD_llvm, &base->h, pline);
 
-	static KDEFINE_CLASS ValueDef = {
-		"Value"/*structname*/,
-		TY_newid/*cid*/,  0/*cflag*/,
-		0/*baseTypeId*/, 0/*superTypeId*/,0/*rtype*/,0/*psize*/,NULL/*cparams*/,
-		sizeof(kRawPtr)/*cstruct_size*/,
-		NULL/*fields*/, 0/*fieldsize*/, 0/*fieldAllocSize*/,
-		0/*init*/,
-		0/*reftrace*/,
-		0/*free*/,
-		0/*fnull*/,
-		0/*p*/, 0/*unbox*/,
-		0/*compareTo*/,
-		0/*getkey*/,
-		0/*hashCode*/,
-		0/*initdef*/
-	};
+#define DEFINE_CLASS_CPP(\
+	/*const char * */structname,\
+	/*ktype_t      */typeId,         /*kshortflag_t    */cflag,\
+	/*ktype_t      */baseTypeId,     /*ktype_t         */superTypeId,\
+	/*ktype_t      */rtype,          /*kushort_t       */cparamsize,\
+	/*struct kparamtype_t   **/cparamItems,\
+	/*size_t     */cstruct_size,\
+	/*KonohaClassField   **/fieldItems,\
+	/*kushort_t  */fieldsize,       /*kushort_t */fieldAllocSize,\
+		init,\
+		reftrace,\
+		free,\
+		fnull,\
+		p,\
+		unbox,\
+		compareObject,\
+		compareUnboxValue,\
+		hasField,\
+		getFieldObjectValue,\
+		setFieldObjectValue,\
+		getFieldUnboxValue,\
+		setFieldUnboxValue,\
+		initdef,\
+		isSubType,\
+		realtype) {\
+	/*const char * */structname,\
+	/*ktype_t      */typeId,         /*kshortflag_t    */cflag,\
+	/*ktype_t      */baseTypeId,     /*ktype_t         */superTypeId,\
+	/*ktype_t      */rtype,          /*kushort_t       */cparamsize,\
+	/*struct kparamtype_t   * */cparamItems,\
+	/*size_t     */cstruct_size,\
+	/*KonohaClassField   * */fieldItems,\
+	/*kushort_t  */fieldsize,       /*kushort_t */fieldAllocSize,\
+		init,\
+		reftrace,\
+		free,\
+		fnull,\
+		p,\
+		unbox,\
+		compareObject,\
+		compareUnboxValue,\
+		hasField,\
+		getFieldObjectValue,\
+		setFieldObjectValue,\
+		getFieldUnboxValue,\
+		setFieldUnboxValue,\
+		initdef,\
+		isSubType,\
+		realtype}
+
+#define DEFINE_CLASS_0(NAME, FN_INIT, FN_FREE, FN_COMPARE) DEFINE_CLASS_CPP(\
+		NAME,\
+		TY_newid, 0,\
+		0, 0,\
+		0, 0,\
+		NULL,\
+		sizeof(kRawPtr),\
+		NULL, 0, 0,\
+		FN_INIT/*init*/,\
+		0/*reftrace*/,\
+		FN_FREE/*free*/,\
+		0/*fnull*/,\
+		0/*p*/,\
+		0/*unbox*/,\
+		FN_COMPARE/*compareObject*/,\
+		0/*compareUnboxValue*/,\
+		0/*hasField*/,\
+		0/*getFieldObjectValue*/,\
+		0/*setFieldObjectValue*/,\
+		0/*getFieldUnboxValue*/,\
+		0/*setFieldUnboxValue*/,\
+		0/*initdef*/,\
+		0/*isSubType*/,\
+		0/*realtype*/)
+
+
+	static KDEFINE_CLASS ValueDef = DEFINE_CLASS_0("Value", 0, 0, 0);
 	base->cValue = KLIB kNameSpace_defineClass(kctx, ns, NULL, &ValueDef, pline);
 
 	static const char *TypeDefName[] = {
@@ -4671,93 +4738,21 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 			CT_TypeTBL[i] = KLIB kNameSpace_defineClass(kctx, ns, NULL, &TypeDef, 0);
 		}
 	}
-	static KDEFINE_CLASS BasicBlockDef = {
-		"LLVMBasicBlock"/*structname*/,
-		TY_newid/*cid*/,  0/*cflag*/,
-		0/*baseTypeId*/, 0/*superTypeId*/,0/*rtype*/,0/*psize*/,NULL/*cparams*/,
-		0/*cstruct_size*/,
-		NULL/*fields*/, 0/*fieldsize*/, 0/*fieldAllocSize*/,
-		0/*init*/,
-		0/*reftrace*/,
-		0/*free*/,
-		0/*fnull*/,
-		0/*p*/, 0/*unbox*/,
-		BasicBlock_compareTo/*compareTo*/,
-		0/*getkey*/,
-		0/*hashCode*/,
-		0/*initdef*/
-	};
+	static KDEFINE_CLASS BasicBlockDef = DEFINE_CLASS_0("LLVMBasicBlock",0, 0, BasicBlock_compareTo);
 	CT_BasicBlock = KLIB kNameSpace_defineClass(kctx, ns, NULL, &BasicBlockDef, pline);
 
-	static KDEFINE_CLASS IRBuilderDef = {
-		"IRBuilder"/*structname*/,
-		TY_newid/*cid*/,  0/*cflag*/,
-		0/*baseTypeId*/, 0/*superTypeId*/,0/*rtype*/,0/*psize*/,NULL/*cparams*/,
-		0/*cstruct_size*/,
-		NULL/*fields*/, 0/*fieldsize*/, 0/*fieldAllocSize*/,
-		0/*init*/,
-		0/*reftrace*/,
-		0/*free*/,
-		0/*fnull*/,
-		0/*p*/, 0/*unbox*/,
-		0/*compareTo*/,
-		0/*getkey*/,
-		0/*hashCode*/,
-		0/*initdef*/
-	};
+	static KDEFINE_CLASS IRBuilderDef = DEFINE_CLASS_0("IRBuilder", 0, 0, 0);
 	CT_IRBuilder = KLIB kNameSpace_defineClass(kctx, ns, NULL, &IRBuilderDef, pline);
 #if LLVM_VERSION >= 300
-	static KDEFINE_CLASS PassManagerBuilderDef = {
-		"PassManagerBuilder"/*structname*/,
-		TY_newid/*cid*/,  0/*cflag*/,
-		0/*baseTypeId*/, 0/*superTypeId*/,0/*rtype*/,0/*psize*/,NULL/*cparams*/,
-		0/*cstruct_size*/,
-		NULL/*fields*/, 0/*fieldsize*/, 0/*fieldAllocSize*/,
-		PassManagerBuilder_ptr_init/*init*/,
-		0/*reftrace*/,
-		PassManagerBuilder_ptr_free/*free*/,
-		0/*fnull*/,
-		0/*p*/, 0/*unbox*/,
-		0/*compareTo*/,
-		0/*getkey*/,
-		0/*hashCode*/,
-		0/*initdef*/
-	};
+	static KDEFINE_CLASS PassManagerBuilderDef = DEFINE_CLASS_0("PassManagerBuilder",
+			PassManagerBuilder_ptr_init, PassManagerBuilder_ptr_free, 0);
 	KonohaClass *CT_PassManagerBuilder = KLIB kNameSpace_defineClass(kctx, ns, NULL, &PassManagerBuilderDef, pline);
 #define TY_PassManagerBuilder         (CT_PassManagerBuilder)->typeId
 #endif
-	static KDEFINE_CLASS PassManagerDef = {
-		"PassManager"/*structname*/,
-		TY_newid/*cid*/,  0/*cflag*/,
-		0/*baseTypeId*/, 0/*superTypeId*/,0/*rtype*/,0/*psize*/,NULL/*cparams*/,
-		0/*cstruct_size*/,
-		NULL/*fields*/, 0/*fieldsize*/, 0/*fieldAllocSize*/,
-		PassManager_ptr_init/*init*/,
-		0/*reftrace*/,
-		PassManager_ptr_free/*free*/,
-		0/*fnull*/,
-		0/*p*/, 0/*unbox*/,
-		0/*compareTo*/,
-		0/*getkey*/,
-		0/*hashCode*/,
-		0/*initdef*/
-	};
-	static KDEFINE_CLASS FunctionPassManagerDef = {
-		"FunctionPassManager"/*structname*/,
-		TY_newid/*cid*/,  0/*cflag*/,
-		0/*baseTypeId*/, 0/*superTypeId*/,0/*rtype*/,0/*psize*/,NULL/*cparams*/,
-		0/*cstruct_size*/,
-		NULL/*fields*/, 0/*fieldsize*/, 0/*fieldAllocSize*/,
-		FunctionPassManager_ptr_init/*init*/,
-		0/*reftrace*/,
-		FunctionPassManager_ptr_free/*free*/,
-		0/*fnull*/,
-		0/*p*/, 0/*unbox*/,
-		0/*compareTo*/,
-		0/*getkey*/,
-		0/*hashCode*/,
-		0/*initdef*/
-	};
+	static KDEFINE_CLASS PassManagerDef = DEFINE_CLASS_0("PassManager",
+		PassManager_ptr_init, PassManager_ptr_free, 0);
+	static KDEFINE_CLASS FunctionPassManagerDef = DEFINE_CLASS_0("FunctionPassManager",
+			FunctionPassManager_ptr_init, FunctionPassManager_ptr_free, 0);
 	KonohaClass *CT_PassManager = KLIB kNameSpace_defineClass(kctx, ns, NULL, &PassManagerDef, pline);
 	KonohaClass *CT_FunctionPassManager = KLIB kNameSpace_defineClass(kctx, ns, NULL, &FunctionPassManagerDef, pline);
 	KonohaClass *CT_InstTBL[21];
@@ -4846,10 +4841,10 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 #define TY_PassManager         (CT_PassManager)->typeId
 #define TY_FunctionPassManager (CT_FunctionPassManager)->typeId
 	/* TODO */
-	kparamtype_t P_TypeArray[] = {{TY_Type}};
+	kparamtype_t P_TypeArray[] = {{TY_Type, 0}};
 	int TY_TypeArray = (KLIB KonohaClass_Generics(kctx, CT_Array, TY_void, 1, P_TypeArray))->typeId;
 
-	kparamtype_t P_ValueArray[] = {{TY_Value}};
+	kparamtype_t P_ValueArray[] = {{TY_Value, 0}};
 	int TY_ValueArray = (KLIB KonohaClass_Generics(kctx, CT_Array, TY_void, 1, P_ValueArray))->typeId;
 #define TY_Array_Value    (TY_ValueArray)
 #define TY_Array_Type     (TY_TypeArray)

@@ -324,7 +324,7 @@ static void knh_RegExp_setOptions(kRegExp *re, const char *option)
 static size_t knh_regexp_matched(kregmatch_t* r, size_t maxmatch)
 {
 	size_t n = 0;
-	for (; n < maxmatch && r[n].rm_so != -1; n++) ;
+	for (; n < maxmatch && r[n].rm_so != -1; n++) {}
 	return n;
 }
 

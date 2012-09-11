@@ -53,7 +53,7 @@ static ssize_t knh_dev_read(struct file *filp, char __user *user_buf,
 		size_t count, loff_t *offset);
 
 static ssize_t knh_dev_write(struct file *filp,const char __user *user_buf,
-		size_t count,loff_t *offset) ;
+		size_t count,loff_t *offset);
 
 static struct file_operations knh_fops = {
 	.owner = THIS_MODULE,

@@ -451,7 +451,7 @@ typedef kbool_t (*CheckEndOfStmtFunc)(KonohaContext *, kArray *, int *currentIdx
 
 typedef struct {
 	ktype_t    ty;    ksymbol_t  fn;
-} GammaStackDecl ;
+} GammaStackDecl;
 
 #define kGamma_TopLevel        (kshortflag_t)(1)
 #define Gamma_isTopLevel(GMA)  TFLAG_is(kshortflag_t, GMA->genv->flag, kGamma_TopLevel)
@@ -464,7 +464,7 @@ typedef struct {
 	size_t varsize;
 	size_t capacity;
 	size_t allocsize;  // set size if not allocated  (by default on stack)
-} GammaStack ;
+} GammaStack;
 
 typedef struct  {
 	kshortflag_t  flag;      kshortflag_t  cflag;
