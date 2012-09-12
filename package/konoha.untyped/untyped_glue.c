@@ -27,39 +27,36 @@
 
 // --------------------------------------------------------------------------
 
-static kbool_t var_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t untyped_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
-		{"var", TY_TYPE, (uintptr_t)CT_(TY_var)},
-		{NULL},
-	};
-	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(ClassData), 0);
+	KRequiredPackage("konoha.var", pline);
 	return true;
 }
 
-static kbool_t var_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t untyped_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t var_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t untyped_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+{
+	KImportPackage(ns, "konoha.var", pline);
+	return true;
+}
+
+static kbool_t untyped_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t var_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
-{
-	return true;
-}
-
-KDEFINE_PACKAGE* var_init(void)
+KDEFINE_PACKAGE* untyped_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("konoha", "1.0"),
-		.initPackage = var_initPackage,
-		.setupPackage = var_setupPackage,
-		.initNameSpace = var_initNameSpace,
-		.setupNameSpace = var_setupNameSpace,
+		.initPackage = untyped_initPackage,
+		.setupPackage = untyped_setupPackage,
+		.initNameSpace = untyped_initNameSpace,
+		.setupNameSpace = untyped_setupNameSpace,
 	};
 	return &d;
 }

@@ -142,6 +142,7 @@ set(PACKAGES
 	posix.fd
 ##	posix.socket
 	posix.thread
+	dscript.dollar
 	dscript.subproc
 	curl
 ##	ijit
