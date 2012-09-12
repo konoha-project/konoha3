@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #ifdef USE_DUMP_VISITOR
-#define DUMPER(BUILDER)  ((struct DumpVisitor*)BUILDER)
+#define DUMPER(BUILDER)  ((struct DumpVisitorLocal*)(BUILDER)->local_fields)
 static void emit_string(const char *str, const char *prefix, const char *suffix, int indent)
 {
 	int i;
@@ -187,12 +187,37 @@ static void DumpVisitor_visitStackTopExpr(KonohaContext *kctx, IRBuilder *self, 
 	emit_string("STACKTOP", "", "", DUMPER(self)->indent);
 }
 
+static void DumpVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
+{
+	unsigned i;
+	KUtilsWriteBuffer wb;
+	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	kParam *pa = Method_param(mtd);
+	KLIB Kwb_printf(kctx, &wb, "METHOD %s%s(", T_mn(mtd->mn));
+	for (i = 0; i < pa->psize; i++) {
+		if (i != 0) {
+			KLIB Kwb_putc(kctx, &wb, ',', ' ', -1);
+		}
+		KLIB Kwb_printf(kctx, &wb, "%s %s", TY_t(pa->paramtypeItems[i].ty), SYM_t(pa->paramtypeItems[i].fn));
+	}
+	emit_string(KLIB Kwb_top(kctx, &wb, 1), "", ") {", 0);
+	builder->local_fields = (void *) KMALLOC(sizeof(int));
+	DUMPER(builder)->indent = 0;
+}
+
+void DumpVisitor_free(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
+{
+	emit_string("}", "", "", 0);
+	KFREE(builder->local_fields, sizeof(int));
+}
+
 static IRBuilder *createDumpVisitor(IRBuilder *builder)
 {
 #define DEFINE_BUILDER_API(NAME) builder->api.visit##NAME = DumpVisitor_visit##NAME;
 	VISITOR_LIST(DEFINE_BUILDER_API);
 #undef DEFINE_BUILDER_API
-	DUMPER(builder)->indent = 0;
+	builder->api.fn_init = DumpVisitor_init;
+	builder->api.fn_free = DumpVisitor_free;
 	return builder;
 }
 

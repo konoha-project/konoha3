@@ -63,6 +63,7 @@ typedef struct {
 	KonohaModuleContext      h;
 	kfileline_t      uline;
 	kArray          *codeList;
+	kBasicBlock     *lbINIT; // ON GCSTACK
 	kBasicBlock     *lbEND;  // ON GCSTACK
 	kArray          *constPools;
 	kBasicBlock     *currentWorkingBlock;
@@ -178,7 +179,7 @@ static VirtualMachineInstruction *KonohaVirtualMachine_tryJump(KonohaContext *kc
 
 static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *sfp, kfileline_t pline)
 {
-
+	KNH_SAFEPOINT(kctx, sfp);
 }
 
 //-------------------------------------------------------------------------
