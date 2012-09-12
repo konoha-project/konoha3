@@ -100,13 +100,13 @@ static void KonohaStackRuntime_reftrace(KonohaContext *kctx, KonohaContextVar *c
 
 static void KonohaStackRuntime_free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
-	if(kctx->stack->evaljmpbuf != NULL) {
-		KFREE(kctx->stack->evaljmpbuf, sizeof(jmpbuf_i));
+	if(ctx->stack->evaljmpbuf != NULL) {
+		KFREE(ctx->stack->evaljmpbuf, sizeof(jmpbuf_i));
 	}
-	KLIB Karray_free(kctx, &kctx->stack->cwb);
-	KLIB Karray_free(kctx, &kctx->stack->ref);
-	KFREE(kctx->stack->stack, sizeof(KonohaStack) * ctx->stack->stacksize);
-	KFREE(kctx->stack, sizeof(KonohaStackRuntimeVar));
+	KLIB Karray_free(kctx, &ctx->stack->cwb);
+	KLIB Karray_free(kctx, &ctx->stack->ref);
+	KFREE(ctx->stack->stack, sizeof(KonohaStack) * ctx->stack->stacksize);
+	KFREE(ctx->stack, sizeof(KonohaStackRuntimeVar));
 }
 
 static kbool_t KonohaRuntime_setModule(KonohaContext *kctx, int x, KonohaModule *d, kfileline_t pline)
@@ -207,11 +207,11 @@ static void KonohaContext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	for(i = 1; i < KonohaModule_MAXSIZE; i++) {   // 0 is LOGGER, free lately
 		KonohaModuleContext *p = ctx->modlocal[i];
 		if(p != NULL && p->free != NULL) {
-			p->free(kctx, p);
+			p->free(ctx, p);
 		}
 	}
 	KonohaStackRuntime_free(kctx, ctx);
-	if(IS_RootKonohaContext(kctx)){  // share
+	if(IS_RootKonohaContext(ctx)){  // share
 		KonohaLibVar *kklib = (KonohaLibVar*)ctx - 1;
 		for(i = 0; i < KonohaModule_MAXSIZE; i++) {
 			KonohaModule *p = ctx->modshare[i];
@@ -230,7 +230,7 @@ static void KonohaContext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	else {
 		MODGC_free(kctx, ctx);
 		MODLOGGER_free(kctx, ctx);
-		KFREE(kctx->modlocal, sizeof(KonohaModuleContext*) * KonohaModule_MAXSIZE);
+		KFREE(ctx->modlocal, sizeof(KonohaModuleContext*) * KonohaModule_MAXSIZE);
 		KFREE(ctx, sizeof(KonohaContextVar));
 	}
 }
