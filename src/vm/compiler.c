@@ -97,18 +97,16 @@ struct IRBuilder {
 	int espidx;
 };
 
-struct DumpVisitor {
+typedef struct DumpVisitor {
 	struct IRBuilder base;
-};
+} DumpVisitor;
 
-struct DumpVisitorLocal {
+typedef struct DumpVisitorLocal {
 	int indent;
-};
+} DumpVisitorLocal;
 
-struct JSVisitor {
-	struct IRBuilder base;
-	int indent;
-};
+typedef DumpVisitor JSVisitor;
+typedef DumpVisitorLocal JSVisitorLocal;
 
 struct VMCodeBuilder {
 	struct IRBuilder base;

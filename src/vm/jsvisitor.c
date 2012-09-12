@@ -1,15 +1,13 @@
 #include <stdio.h>
 
-#define USE_JS_VISITOR
 #ifdef USE_JS_VISITOR
-#define DUMPER(BUILDER)  ((struct JSVisitor*)BUILDER)
+#define DUMPER(BUILDER)  ((JSVisitorLocal*)(BUILDER)->local_fields)
 
 #define MN_isNotNull MN_("isNotNull")
 #define MN_isNull    MN_("isNull")
 #define MN_get    MN_("get")
 #define MN_set    MN_("set")
 #define MN_opNOT  MN_("!")
-#define MN_opNEG  MN_("opNEG")
 #define MN_opADD  MN_("+")
 #define MN_opSUB  MN_("-")
 #define MN_opMUL  MN_("*")
@@ -43,7 +41,6 @@ static void emit_newline(const char *str, int indent)
 
 static int MethodName_isBinaryOperator(KonohaContext *kctx, kmethodn_t mn)
 {
-	//if (mn == MN_opNEG ) return OPCODE_iNEG;
 	if (mn == MN_opADD ) return 1;
 	if (mn == MN_opSUB ) return 1;
 	if (mn == MN_opMUL ) return 1;
@@ -55,19 +52,17 @@ static int MethodName_isBinaryOperator(KonohaContext *kctx, kmethodn_t mn)
 	if (mn == MN_opLTE ) return 1;
 	if (mn == MN_opGT  ) return 1;
 	if (mn == MN_opGTE ) return 1;
-#ifdef OPCODE_iAND
 	if (mn == MN_opLAND) return 1;
 	if (mn == MN_opLOR ) return 1;
 	if (mn == MN_opLXOR) return 1;
 	if (mn == MN_opLSFT) return 1;
 	if (mn == MN_opRSFT) return 1;
-#endif
 	return 0;
 }
 
 static int MethodName_isUnaryOperator(KonohaContext *kctx, kmethodn_t mn)
 {
-	if (mn == MN_opNEG) return 1;
+	if (mn == MN_opSUB) return 1;
 	if (mn == MN_opNOT) return 1;
 	return 0;
 }
@@ -103,11 +98,11 @@ static void JSVisitor_visitReturnStmt(KonohaContext *kctx, IRBuilder *self, kStm
 static void JSVisitor_visitIfStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
 {
 	DUMPER(self)->indent++;
-	emit_string_js("if(", "", "");
+	emit_string_js("if (", "", "");
 	handleExpr(kctx, self, Stmt_getFirstExpr(kctx, stmt));
-	emit_newline("){", DUMPER(self)->indent++);
+	emit_newline(") {", DUMPER(self)->indent++);
 	visitBlock(kctx, self, Stmt_getFirstBlock(kctx, stmt));
-	emit_newline("}else{", --(DUMPER(self)->indent));
+	emit_newline("} else {", --(DUMPER(self)->indent));
 	visitBlock(kctx, self, Stmt_getElseBlock(kctx, stmt));
 	emit_newline("}", DUMPER(self)->indent);
 	DUMPER(self)->indent--;
@@ -118,7 +113,7 @@ static void JSVisitor_visitLoopStmt(KonohaContext *kctx, IRBuilder *self, kStmt 
 	DUMPER(self)->indent++;
 	emit_string_js("while(", "", "");
 	handleExpr(kctx, self, Stmt_getFirstExpr(kctx, stmt));
-	emit_newline("){", DUMPER(self)->indent);
+	emit_newline(") {", DUMPER(self)->indent);
 	visitBlock(kctx, self, Stmt_getFirstBlock(kctx, stmt));
 	emit_newline("}", DUMPER(self)->indent);
 	DUMPER(self)->indent--;
@@ -136,15 +131,15 @@ static void JSVisitor_visitUndefinedStmt(KonohaContext *kctx, IRBuilder *self, k
 
 static void JSVisitor_visitConstExpr(KonohaContext *kctx, IRBuilder *self, kExpr *expr)
 {
-	if(expr->ty == TY_System){
+	if (expr->ty == TY_System) {
 		emit_string_js("System", "", "");
 		return;
-	}else if(Expr_isTerm(expr)){
+	} else if (Expr_isTerm(expr)) {
 		int is_string = expr->ty == TY_String;
 		kToken *tk = (kToken*)expr->termToken;
-		if(is_string) emit_string_js("\"", "", "");
+		if (is_string) emit_string_js("\"", "", "");
 		emit_string_js(S_text(tk->text), "", "");
-		if(is_string) emit_string_js("\"", "", "");
+		if (is_string) emit_string_js("\"", "", "");
 		return;
 	}	
 	kObject *obj = expr->objectConstValue;
@@ -200,18 +195,20 @@ static void JSVisitor_visitFieldExpr(KonohaContext *kctx, IRBuilder *self, kExpr
 static void JSVisitor_visitCallExpr(KonohaContext *kctx, IRBuilder *self, kExpr *expr)
 {
 	kMethod *mtd = CallExpr_getMethod(expr);
-	if(MethodName_isBinaryOperator(kctx, mtd->mn)){
+	if (kArray_size(expr->cons) == 2 && MethodName_isUnaryOperator(kctx, mtd->mn)) {
+		emit_string_js("", T_mn(mtd->mn));
+		emit_string_js("(", "", "");
+		handleExpr(kctx, self, kExpr_at(expr, 1));
+		emit_string_js(")", "", "");
+	}
+	else if (MethodName_isBinaryOperator(kctx, mtd->mn)) {
 		emit_string_js("(", "", "");
 		handleExpr(kctx, self, kExpr_at(expr, 1));
 		emit_string_js("", T_mn(mtd->mn));
 		handleExpr(kctx, self, kExpr_at(expr, 2));
 		emit_string_js(")", "", "");
-	}else if(MethodName_isUnaryOperator(kctx, mtd->mn)){
-		emit_string_js("", T_mn(mtd->mn));
-		emit_string_js("(", "", "");
-		handleExpr(kctx, self, kExpr_at(expr, 1));
-		emit_string_js(")", "", "");
-	}else{
+	}
+	else {
 		handleExpr(kctx, self, kExpr_at(expr, 1));
 		emit_string_js(".", "", "");
 		emit_string_js("", T_mn(mtd->mn));
@@ -220,7 +217,7 @@ static void JSVisitor_visitCallExpr(KonohaContext *kctx, IRBuilder *self, kExpr 
 		unsigned n = kArray_size(expr->cons);
 		for (i = 2; i < n;) {
 			handleExpr(kctx, self, kExpr_at(expr, i));
-			if(++i < n){
+			if (++i < n) {
 				emit_string_js(", ", "", "");
 			}
 		}
@@ -235,7 +232,7 @@ static void JSVisitor_visitAndExpr(KonohaContext *kctx, IRBuilder *self, kExpr *
 	emit_string_js("(", "", "");
 	for (i = 1; i < kArray_size(expr->cons);) {
 		handleExpr(kctx, self, kExpr_at(expr, i));
-		if(++i < n){
+		if (++i < n) {
 			emit_string_js(" && ", "", "");
 		}
 	}
@@ -249,7 +246,7 @@ static void JSVisitor_visitOrExpr(KonohaContext *kctx, IRBuilder *self, kExpr *e
 	emit_string_js("(", "", "");
 	for (i = 1; i < kArray_size(expr->cons);) {
 		handleExpr(kctx, self, kExpr_at(expr, i));
-		if(++i < n){
+		if (++i < n) {
 			emit_string_js(" || ", "", "");
 		}
 	}
@@ -267,7 +264,7 @@ static void JSVisitor_visitLetExpr(KonohaContext *kctx, IRBuilder *self, kExpr *
 
 static void JSVisitor_visitStackTopExpr(KonohaContext *kctx, IRBuilder *self, kExpr *expr)
 {
-	//emit_string_js("STACKTOP", "", "");
+	emit_string_js("/*FIXME*/STACKTOP", "", "");
 }
 
 static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
@@ -276,9 +273,9 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	kParam *pa = Method_param(mtd);
-	if(mtd->mn){
+	if (mtd->mn) {
 		KLIB Kwb_printf(kctx, &wb, "%s.%s%s = function(", CT_t(CT_(mtd->typeId)), T_mn(mtd->mn));
-	}else{
+	} else {
 		KLIB Kwb_printf(kctx, &wb, "(function(", CT_t(CT_(mtd->typeId)), T_mn(mtd->mn));
 	}
 	for (i = 0; i < pa->psize; i++) {
@@ -288,7 +285,7 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 		KLIB Kwb_printf(kctx, &wb, "%s", SYM_t(pa->paramtypeItems[i].fn));
 	}
 	emit_string_js(KLIB Kwb_top(kctx, &wb, 1), "", "");
-	emit_newline("){", ++DUMPER(builder)->indent);
+	emit_newline(") {", ++DUMPER(builder)->indent);
 	builder->local_fields = (void *) KMALLOC(sizeof(int));
 	DUMPER(builder)->indent = 0;
 }
@@ -296,9 +293,9 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 void JSVisitor_free(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
 {
 	KFREE(builder->local_fields, sizeof(int));
-	if(mtd->mn){
+	if (mtd->mn) {
 		emit_newline("}", --DUMPER(builder)->indent);
-	}else{
+	} else {
 		emit_newline("})();", DUMPER(builder)->indent);
 	}
 }
@@ -308,7 +305,6 @@ static IRBuilder *createJSVisitor(IRBuilder *builder)
 #define DEFINE_BUILDER_API(NAME) builder->api.visit##NAME = JSVisitor_visit##NAME;
 	VISITOR_LIST(DEFINE_BUILDER_API);
 #undef DEFINE_BUILDER_API
-	DUMPER(builder)->indent = 0;
 	builder->api.fn_init = JSVisitor_init;
 	builder->api.fn_free = JSVisitor_free;
 	return builder;
