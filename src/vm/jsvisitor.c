@@ -27,8 +27,6 @@
 #define MN_opLSFT MN_("<<")
 #define MN_opRSFT MN_(">>")
 
-#define TY_GlobalVariable      (CT_InstTBL[ 9])->typeId
-
 static void emit_string_js(const char *str, const char *prefix, const char *suffix)
 {
 	printf("%s%s%s", prefix, str, suffix);
@@ -278,7 +276,11 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	kParam *pa = Method_param(mtd);
-	KLIB Kwb_printf(kctx, &wb, "function %s%s(", T_mn(mtd->mn));
+	if(mtd->mn){
+		KLIB Kwb_printf(kctx, &wb, "%s.%s%s = function(", CT_t(CT_(mtd->typeId)), T_mn(mtd->mn));
+	}else{
+		KLIB Kwb_printf(kctx, &wb, "(function(", CT_t(CT_(mtd->typeId)), T_mn(mtd->mn));
+	}
 	for (i = 0; i < pa->psize; i++) {
 		if (i != 0) {
 			KLIB Kwb_putc(kctx, &wb, ',', ' ', -1);
@@ -293,8 +295,12 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 
 void JSVisitor_free(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
 {
-	emit_newline("}", --DUMPER(builder)->indent);
 	KFREE(builder->local_fields, sizeof(int));
+	if(mtd->mn){
+		emit_newline("}", --DUMPER(builder)->indent);
+	}else{
+		emit_newline("})();", DUMPER(builder)->indent);
+	}
 }
 
 static IRBuilder *createJSVisitor(IRBuilder *builder)
