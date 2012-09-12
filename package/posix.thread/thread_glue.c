@@ -66,7 +66,7 @@ static void *spawn_start(void *v)
 	KCALL(lsfp, 0, t->func->mtd, 0, K_NULL);
 	END_LOCAL();
 
-	KLIB KonohaContext_free(t->rootCtx, kctx);
+	KLIB KonohaContext_free(t->rootCtx, (KonohaContextVar *)kctx);
 	t->kctx = NULL;
 	// TODO cond_signal gc
 	return NULL;
