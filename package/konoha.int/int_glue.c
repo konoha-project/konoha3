@@ -106,51 +106,127 @@ static kbool_t int_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime
 	return true;
 }
 
-//static KMETHOD parseNonDecimalNumber(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kTokenVar *tk = (kTokenVar *)sfp[1].o;
-//	const char *source = S_text(sfp[2].asString);
-//	const char *start = source, *end;
-//	int c = *source++;
-//	if (c != '0') {
-//		/* It do not seem as NonDecimalNumber */
-//		RETURNi_(0);
-//	}
-//	/*
-//	 * DIGIT  = 0-9
-//	 * DIGITS = DIGIT | DIGIT DIGITS
-//	 * TAG    = "0x"  | "0b"
-//	 * INT_NON_DECIMAL = TAG DIGITS
-//	 */
-//	int base = 0;
-//	kint_t num = 0;
-//	c = *source++;
-//	switch (c) {
-//		case 'b':
-//			base = 2;  break;
-//		case 'x':
-//			base = 16; break;
-//		default:
-//			RETURNi_(0);
-//	}
-//	for (c = *source++; '0' <= c && c <= '9' && c != 0; c = *source++) {
-//		if (c == '_') continue;
-//		num = num * base + (c - '0');
-//	}
-//	end = source;
-//	if (IS_NOTNULL(tk)) {
-//		/* skip unit */
-//		while (isalpha(*source) && *source != 0)
-//			source++;
-//		KSETv(tk, tk->text, KLIB new_kString(kctx, start, end - start - 1, SPOL_ASCII));
-//		tk->unresolvedTokenType = TokenType_INT;
-//	}
-//	RETURNi_(source - start - 1);
-//}
+static char parseHexDigit(char c)
+{
+	return ('0' <= c && c <= '9') ? c - '0' :
+		('a' <= c && c <= 'f') ? c - 'a' + 10:
+		('A' <= c && c <= 'F') ? c - 'A' + 10:-1;
+}
+static char parseOctalDigit(char c)
+{
+	return ('0' <= c && c <= '7') ? c - '0' : -1;
+}
+static char parseDecimalDigit(char c)
+{
+	return ('0' <= c && c <= '9') ? c - '0' : -1;
+}
+
+static char parseBinaryDigit(char c)
+{
+	return ('0' == c || c == '1') ? c - '0' : -1;
+}
+
+static KMETHOD parseNumber(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kTokenVar *tk = (kTokenVar *)sfp[1].o;
+	const char *source = S_text(sfp[2].asString);
+	const char *start = source, *end;
+	int c = *source++;
+	/*
+	 * DIGIT  = 0-9
+	 * DIGITS = DIGIT | DIGIT DIGITS
+	 * HEX    = 0-9a-fA-F
+	 * HEXS   = HEX | HEX HEXS
+	 * BIN    = 0 | 1
+	 * BINS   = BIN | BIN BINS
+	 * TAG    = "0x"  | "0b"
+	 * HEXINT = ("0x" | "0X") HEXS
+	 * INT    = DIGITS | HEXS | BINS
+	 */
+	int base = 10;
+	char (*parseDigit)(char) = parseDecimalDigit;
+	if (c == '0') {
+		c = *source++;
+		switch (c) {
+			case 'b':
+				base = 2;  parseDigit = parseBinaryDigit; break;
+			case 'x':
+				base = 16; parseDigit = parseHexDigit; break;
+			case '0':case '1':case '2':case '3':
+			case '4':case '5':case '6':case '7':
+				base = 8; parseDigit = parseOctalDigit;
+				break;
+			default:
+				RETURNi_(0);
+		}
+	}
+	for (; (c = *source) != 0; ++source) {
+		if (c == '_') continue;
+		if (parseDigit(c) == -1)
+			break;
+	}
+
+	end = source;
+	if (IS_NOTNULL(tk)) {
+		/* skip unit */
+		while (isalpha(c) && c != 0) {
+			if (*source == 0)
+				break;
+			c = *source++;
+		}
+		KSETv(tk, tk->text, KLIB new_kString(kctx, start, end - start, SPOL_ASCII));
+		tk->unresolvedTokenType = TokenType_INT;
+	}
+	RETURNi_(source - start);
+}
+
+static kint_t _kstrtoll(const char *p, char (*parseDigit)(char), int base)
+{
+	long long tmp = 0, prev = 0;
+	char c;
+	for (; (c = *p) != 0; ++p) {
+		if (c == '_') continue;
+		c = parseDigit(c);
+		if (c == -1)
+			break;
+		tmp = tmp * base + c;
+		if (tmp < prev) {
+			/* Overflow!! */
+			return 0;
+		}
+		prev = tmp;
+	}
+	return (kint_t) tmp;
+}
+
+static kint_t kstrtoll(const char *p)
+{
+	if (*p == '0') {
+		if (*(p+1) == 'x' || *(p+1) == 'X') {
+		return _kstrtoll(p+2, parseHexDigit, 16);
+		}
+		if (*(p+1) == 'b') {
+			return _kstrtoll(p+2, parseBinaryDigit, 2);
+		}
+		if ('0' <= *(p+1) && *(p+1) <= '7') {
+			return _kstrtoll(p+1, parseOctalDigit, 8);
+		}
+	}
+	return _kstrtoll(p, parseDecimalDigit, 10);
+}
+
+static KMETHOD ExprTyCheck_Int2(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_ExprTyCheck(stmt, expr, gma, reqty);
+	kToken *tk = expr->termToken;
+	long long n = kstrtoll(S_text(tk->text));
+	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_int, (uintptr_t)n));
+}
 
 static kbool_t int_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
+		{ .keyword = KW_NumberPattern, ExprTyCheck_(Int2) },
 		{ .keyword = SYM_("~"), .precedence_op1 = C_PRECEDENCE_PREUNARY,},
 		{ .keyword = SYM_("<<"),  .precedence_op2 = C_PRECEDENCE_SHIFT,},
 		{ .keyword = SYM_(">>"),  .precedence_op2 = C_PRECEDENCE_SHIFT,},
@@ -162,9 +238,14 @@ static kbool_t int_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpa
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
-	//kMethod *mtd = KLIB new_kMethod(kctx, 0, 0, 0, parseNonDecimalNumber);
-	//kFunc *fo = GCSAFE_new(Func, (uintptr_t) mtd);
-	//SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '0', NULL, fo, 0);
+
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
+	kMethod *mtd = KLIB new_kMethod(kctx, 0, 0, 0, parseNumber);
+	kFunc *fo = GCSAFE_new(Func, (uintptr_t) mtd);
+	int i;
+	for (i = 0; i <= 9; i++) {
+		SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '0'+i, NULL, fo, 0);
+	}
 
 	SugarSyntaxVar *syn = (SugarSyntaxVar*)SUGAR kNameSpace_getSyntax(kctx, ns, SYM_("+"), 0);
 	if(syn != NULL) {
