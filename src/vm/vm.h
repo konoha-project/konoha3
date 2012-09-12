@@ -179,7 +179,7 @@ static VirtualMachineInstruction *KonohaVirtualMachine_tryJump(KonohaContext *kc
 
 static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *sfp, kfileline_t pline)
 {
-
+	KNH_SAFEPOINT(kctx, sfp);
 }
 
 //-------------------------------------------------------------------------
