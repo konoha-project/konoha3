@@ -38,6 +38,7 @@ extern "C" {
 typedef struct {
 	KonohaObjectHeader h;
 	KonohaContext *kctx;
+	KonohaContext *rootCtx;
 	pthread_t thread;
 	kFunc *func;
 	//kArray *args;
@@ -65,6 +66,8 @@ static void *spawn_start(void *v)
 	KCALL(lsfp, 0, t->func->mtd, 0, K_NULL);
 	END_LOCAL();
 
+	KLIB KKonohaContext_delete(t->rootCtx, kctx);
+	t->kctx = NULL;
 	// TODO cond_signal gc
 	return NULL;
 }
@@ -130,8 +133,8 @@ static KMETHOD Thread_create(KonohaContext *kctx, KonohaStack *sfp)
 	KLIB kNameSpace_compileAllDefinedMethods(kctx);
 	//kArray *args = sfp[2].a;
 	kThread *thread = (kThread *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
-	//kcontext_t *newCtx = new_ThreadContext(ctx)
-	thread->kctx = kctx;//FIXME
+	thread->rootCtx = kctx; //TODO getRootContext
+	thread->kctx = KLIB KKonohaContext_new(kctx, kctx->platApi);
 	KSETv(thread, thread->func, f);
 	//KSETv(t, t->args, args);
 	pthread_create(&(thread->thread), NULL, spawn_start, thread);
