@@ -36,6 +36,7 @@ int verbose_code = 0;  // global variable
 //#define USE_DUMP_VISITOR 1
 
 /* ------------------------------------------------------------------------ */
+struct IRBuilder;
 typedef struct IRBuilder IRBuilder;
 typedef void (*VisitStmt_t)(KonohaContext *kctx, IRBuilder *self, kStmt *stmt);
 typedef void (*VisitExpr_t)(KonohaContext *kctx, IRBuilder *self, kExpr *expr);
@@ -61,6 +62,8 @@ struct IRBuilderAPI {
 	VisitExpr_t visitOrExpr;
 	VisitExpr_t visitLetExpr;
 	VisitExpr_t visitStackTopExpr;
+	void (*fn_init)(KonohaContext *kctx, struct IRBuilder *builder, kMethod *method);
+	void (*fn_free)(KonohaContext *kctx, struct IRBuilder *builder, kMethod *method);
 };
 
 #define VISITOR_LIST(OP) \
@@ -87,15 +90,18 @@ struct IRBuilderAPI {
 
 struct IRBuilder {
 	struct IRBuilderAPI api;
+	void *local_fields;
+	kStmt* currentStmt; /*FIXME(ide): need to reftrace currentStmt */
 	int a; /* what is a ? */
 	int shift;
 	int espidx;
-	kStmt* currentStmt; /*FIXME(ide): need to reftrace currentStmt */
-	void *unused;
 };
 
 struct DumpVisitor {
 	struct IRBuilder base;
+};
+
+struct DumpVisitorLocal {
 	int indent;
 };
 
@@ -642,14 +648,54 @@ static void KonohaVisitor_visitStackTopExpr(KonohaContext *kctx, IRBuilder *self
 	NMOV_asm(kctx, a, expr->ty, expr->index + shift);
 }
 
+static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sfp);
+static void _THCODE(KonohaContext *kctx, VirtualMachineInstruction *pc, void **codeaddr);
+static void BUILD_compile(KonohaContext *kctx, kMethod *mtd, kBasicBlock *beginBlock, kBasicBlock *endBlock);
+
+static void KonohaVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
+{
+	builder->espidx = 0;
+	builder->a = 0;
+	builder->currentStmt = NULL;
+	builder->shift = 0;
+
+	KLIB kMethod_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
+
+	DBG_ASSERT(kArray_size(ctxcode->codeList) == 0);
+	kBasicBlock* lbINIT  = new_BasicBlockLABEL(kctx);
+	kBasicBlock* lbBEGIN = new_BasicBlockLABEL(kctx);
+	ctxcode->lbINIT = lbINIT;
+	ctxcode->lbEND  = new_BasicBlockLABEL(kctx);
+	PUSH_GCSTACK(lbINIT);
+	PUSH_GCSTACK(lbBEGIN);
+	PUSH_GCSTACK(ctxcode->lbEND);
+	ctxcode->currentWorkingBlock = lbINIT;
+	ASM(THCODE, _THCODE);
+	ASM(CHKSTACK, 0);
+	ASM_LABEL(kctx, lbBEGIN);
+}
+
+static void KonohaVisitor_free(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
+{
+	builder->shift = 0;
+	ASM_LABEL(kctx, ctxcode->lbEND);
+	if (mtd->mn == MN_new) {
+		ASM(NMOV, OC_(K_RTNIDX), OC_(0), CT_(mtd->typeId));   // FIXME: Type 'This' must be resolved
+	}
+	ASM(RET);
+	assert(ctxcode->lbEND);/* scan-build: remove warning */
+	BUILD_compile(kctx, mtd, ctxcode->lbINIT, ctxcode->lbEND);
+	ctxcode->lbINIT = NULL;
+	ctxcode->lbEND  = NULL;
+}
+
 static IRBuilder *createKonohaVisitor(IRBuilder *builder)
 {
 #define DEFINE_BUILDER_API(NAME) builder->api.visit##NAME = KonohaVisitor_visit##NAME;
 	VISITOR_LIST(DEFINE_BUILDER_API);
 #undef DEFINE_BUILDER_API
-	builder->espidx = 0;
-	builder->a = 0;
-	builder->currentStmt = NULL;
+	builder->api.fn_init = KonohaVisitor_init;
+	builder->api.fn_free = KonohaVisitor_free;
 	return builder;
 }
 
@@ -999,36 +1045,23 @@ static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	if (ctxcode == NULL) {
 		kmodcode->h.setup(kctx, NULL, 1);
 	}
-	KLIB kMethod_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
-	DBG_ASSERT(kArray_size(ctxcode->codeList) == 0);
-	kBasicBlock* lbINIT  = new_BasicBlockLABEL(kctx);
-	kBasicBlock* lbBEGIN = new_BasicBlockLABEL(kctx);
-	ctxcode->lbEND = new_BasicBlockLABEL(kctx);
-	PUSH_GCSTACK(lbINIT);
-	PUSH_GCSTACK(lbBEGIN);
-	PUSH_GCSTACK(ctxcode->lbEND);
-	ctxcode->currentWorkingBlock = lbINIT;
-	ASM(THCODE, _THCODE);
-	ASM(CHKSTACK, 0);
-	ASM_LABEL(kctx, lbBEGIN);
 
 	IRBuilder *builder, builderbuf;
 #ifdef USE_DUMP_VISITOR
-	builder = createDumpVisitor(&builderbuf);
-	visitBlock(kctx, builder, bk);
-#endif
-	builder = createKonohaVisitor(&builderbuf);
-	builder->shift = 0;
-	visitBlock(kctx, builder, bk);
-	builder->shift = 0;
-	ASM_LABEL(kctx, ctxcode->lbEND);
-	if (mtd->mn == MN_new) {
-		ASM(NMOV, OC_(K_RTNIDX), OC_(0), CT_(mtd->typeId));   // FIXME: Type 'This' must be resolved
+	{
+		builder = createDumpVisitor(&builderbuf);
+		builder->api.fn_init(kctx, builder, mtd);
+		visitBlock(kctx, builder, bk);
+		builder->api.fn_free(kctx, builder, mtd);
 	}
-	ASM(RET);
-	assert(ctxcode->lbEND);/* scan-build: remove warning */
-	BUILD_compile(kctx, mtd, lbINIT, ctxcode->lbEND);
-	ctxcode->lbEND = NULL;
+#endif
+	{
+		builder = createKonohaVisitor(&builderbuf);
+		builder->api.fn_init(kctx, builder, mtd);
+		visitBlock(kctx, builder, bk);
+		builder->api.fn_free(kctx, builder, mtd);
+	}
+
 	RESET_GCSTACK();
 }
 

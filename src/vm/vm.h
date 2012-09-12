@@ -63,6 +63,7 @@ typedef struct {
 	KonohaModuleContext      h;
 	kfileline_t      uline;
 	kArray          *codeList;
+	kBasicBlock     *lbINIT; // ON GCSTACK
 	kBasicBlock     *lbEND;  // ON GCSTACK
 	kArray          *constPools;
 	kBasicBlock     *currentWorkingBlock;
