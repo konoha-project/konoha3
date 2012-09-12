@@ -569,14 +569,17 @@ typedef struct {
 
 	kExpr*       (*kExpr_setConstValue)(KonohaContext *, kExpr *, ktype_t ty, kObject *o);
 	kExpr*       (*kExpr_setUnboxConstValue)(KonohaContext *, kExpr *, ktype_t ty, uintptr_t unboxValue);
-	kExpr*     (*kExpr_setVariable)(KonohaContext *, kExpr *, kGamma *, kexpr_t build, ktype_t ty, intptr_t index);
+	kExpr*       (*kExpr_setVariable)(KonohaContext *, kExpr *, kGamma *, kexpr_t build, ktype_t ty, intptr_t index);
 
 	kExpr *     (*new_TypedCallExpr)(KonohaContext *, kStmt *, kGamma *, ktype_t ty, kMethod *mtd, int n, ...);
 	kbool_t     (*kBlock_tyCheckAll)(KonohaContext *, kBlock *, kGamma *);
 	kbool_t     (*kStmt_tyCheckByName)(KonohaContext *, kStmt*, ksymbol_t, kGamma *, ktype_t, int);
 	kExpr*      (*kStmt_tyCheckExprAt)(KonohaContext *, kStmt *, kExpr *, size_t, kGamma *, ktype_t, int);
 	kExpr *     (*kStmt_tyCheckCallParamExpr)(KonohaContext *, kStmt *, kExpr *, kMethod *, kGamma *, ktype_t);
+	int         (*kGamma_declareLocalVariable)(KonohaContext *, kGamma *, ktype_t, ksymbol_t);
 	kbool_t     (*kStmt_declType)(KonohaContext *, kStmt *, kGamma *, ktype_t, kExpr *, kObject *, TypeDeclFunc, kStmt **);
+	kExpr*      (*kStmt_tyCheckVariableNULL)(KonohaContext *, kStmt *, kExpr *, kGamma *, ktype_t);
+
 
 	void       (*kToken_printMessage)(KonohaContext *, kTokenVar *, kinfotag_t, const char *fmt, ...);
 	kExpr *    (*kStmt_printMessage2)(KonohaContext *, kStmt *, kToken *, kinfotag_t, const char *fmt, ...);

@@ -239,7 +239,10 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kBlock_tyCheckAll          = kBlock_tyCheckAll;
 	mod->kStmt_tyCheckCallParamExpr = kStmt_tyCheckCallParamExpr;
 	mod->new_TypedCallExpr          = new_TypedCallExpr;
+	mod->kGamma_declareLocalVariable = kGamma_declareLocalVariable;
 	mod->kStmt_declType             = kStmt_declType;
+	mod->kStmt_tyCheckVariableNULL  = kStmt_tyCheckVariableNULL;
+
 	mod->kNameSpace_defineSyntax    = kNameSpace_defineSyntax;
 	mod->kNameSpace_getSyntax       = kNameSpace_getSyntax;
 	mod->kArray_addSyntaxRule       = kArray_addSyntaxRule;

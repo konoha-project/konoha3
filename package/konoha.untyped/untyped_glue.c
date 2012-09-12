@@ -29,7 +29,7 @@
 
 static kbool_t untyped_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KRequiredPackage("konoha.var", pline);
+	KRequirePackage("konoha.var", pline);
 	return true;
 }
 
@@ -38,9 +38,47 @@ static kbool_t untyped_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirst
 	return true;
 }
 
+static void DeclVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr)
+{
+	DBG_ASSERT(Expr_isSymbolTerm(termExpr));
+	kToken *termToken = termExpr->termToken;
+	if(Gamma_isTopLevel(gma)) {
+		kNameSpace *ns = Stmt_nameSpace(stmt);
+		if(ns->globalObjectNULL == NULL) {
+			kStmtToken_printMessage(kctx, stmt, termToken, ErrTag, "unavailable global variable");
+			return;
+		}
+		kStmtToken_printMessage(kctx, stmt, termToken, InfoTag, "global variable %s%s has type %s", PSYM_t(termToken->resolvedSymbol), TY_t(ty));
+		KLIB KonohaClass_addField(kctx, O_ct(ns->globalObjectNULL), kField_Getter|kField_Setter, ty, termToken->resolvedSymbol);
+	}
+	else {
+		kStmtToken_printMessage(kctx, stmt, termToken, InfoTag, "%s%s has type %s", PSYM_t(termToken->resolvedSymbol), TY_t(ty));
+		SUGAR kGamma_declareLocalVariable(kctx, gma, ty, termToken->resolvedSymbol);
+	}
+}
+
+static KMETHOD ExprTyCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_ExprTyCheck(stmt, expr, gma, reqty);
+	kExpr *leftHandExpr = kExpr_at(expr, 1);
+	if(Expr_isSymbolTerm(leftHandExpr)) {
+		kExpr *texpr = SUGAR kStmt_tyCheckVariableNULL(kctx, stmt, leftHandExpr, gma, TY_var);
+		if(texpr == NULL) {
+			kExpr *rightHandExpr = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 2, gma, TY_var, 0);
+			if(rightHandExpr != K_NULLEXPR) {
+				DeclVariable(kctx, stmt, gma, rightHandExpr->ty, leftHandExpr);
+			}
+		}
+		else {
+			KSETv(expr->cons, expr->cons->exprItems[1], texpr);
+		}
+	}
+}
+
 static kbool_t untyped_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KImportPackage(ns, "konoha.var", pline);
+	SUGAR kNameSpace_addSugarFunc(kctx, ns, SYM_("="), SUGARFUNC_ExprTyCheck, new_SugarFunc(ExprTyCheck_UntypedAssign));
 	return true;
 }
 

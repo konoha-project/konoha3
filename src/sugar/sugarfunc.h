@@ -272,7 +272,6 @@ static kString *resolveEscapeSequence(KonohaContext *kctx, kString *s, size_t st
 	return s;
 }
 
-
 static KMETHOD ExprTyCheck_Text(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
@@ -369,8 +368,9 @@ static KMETHOD ExprTyCheck_assign(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(K_NULLEXPR);
 }
 
-static int addGammaStack(KonohaContext *kctx, GammaStack *s, ktype_t ty, ksymbol_t fn)
+static int kGamma_declareLocalVariable(KonohaContext *kctx, kGamma *gma, ktype_t ty, ksymbol_t fn)
 {
+	GammaStack *s = &gma->genv->localScope;
 	int index = s->varsize;
 	if(!(s->varsize < s->capacity)) {
 		s->capacity *= 2;
@@ -411,7 +411,7 @@ static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, KonohaStack *sfp)
 			if(!kBlock_tyCheckAll(kctx, bk, gma)) {
 				RETURN_(texpr);
 			}
-			kExpr *lvar = new_VariableExpr(kctx, gma, TEXPR_LOCAL, TY_var, addGammaStack(kctx, &gma->genv->localScope, TY_var, 0/*FN_*/));
+			kExpr *lvar = new_VariableExpr(kctx, gma, TEXPR_LOCAL, TY_var, kGamma_declareLocalVariable(kctx, gma, TY_var, 0/*FN_*/));
 			kExpr *rexpr = SUGAR kStmt_getExpr(kctx, lastExpr, KW_ExprPattern, NULL);
 			DBG_ASSERT(rexpr != NULL);
 			ktype_t ty = rexpr->ty;
@@ -455,7 +455,7 @@ static kObject *kNameSpace_getSymbolValueNULL(KonohaContext *kctx, kNameSpace *n
 	return NULL;
 }
 
-static kExpr* kExpr_tyCheckVariableNULL(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, ktype_t reqty)
+static kExpr* kStmt_tyCheckVariableNULL(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, ktype_t reqty)
 {
 	DBG_ASSERT(expr->ty == TY_var);
 	kToken *tk = expr->termToken;
@@ -522,7 +522,7 @@ static kExpr* kExpr_tyCheckVariableNULL(KonohaContext *kctx, kStmt *stmt, kExpr 
 static KMETHOD ExprTyCheck_Symbol(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-	kExpr *texpr = kExpr_tyCheckVariableNULL(kctx, stmt, expr, gma, reqty);
+	kExpr *texpr = kStmt_tyCheckVariableNULL(kctx, stmt, expr, gma, reqty);
 	if(texpr == NULL) {
 		kToken *tk = expr->termToken;
 		texpr = kStmtToken_printMessage(kctx, stmt, tk, ErrTag, "undefined name: %s", Token_text(tk));
@@ -912,7 +912,7 @@ static kStmt* TypeDeclLocalVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gm
 {
 	DBG_ASSERT(Expr_isSymbolTerm(termExpr));
 	kToken *tk = termExpr->termToken;
-	int index = addGammaStack(kctx, &gma->genv->localScope, ty, tk->resolvedSymbol);
+	int index = kGamma_declareLocalVariable(kctx, gma, ty, tk->resolvedSymbol);
 	SUGAR kExpr_setVariable(kctx, termExpr, gma, TEXPR_LOCAL, ty, index);
 	termExpr = new_TypedConsExpr(kctx, TEXPR_LET, TY_void, 3, K_NULL, termExpr, vexpr);
 	kStmt *newstmt = GCSAFE_new(Stmt, stmt->uline);

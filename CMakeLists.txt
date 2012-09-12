@@ -113,6 +113,7 @@ set(PACKAGES
 	konoha.continue
 	konoha.date
 	konoha.defined
+	konoha.dynamic
 	konoha.field
 	konoha.float
 	konoha.foreach
@@ -129,14 +130,15 @@ set(PACKAGES
 	konoha.new
 	konoha.null
 	konoha.object
+	konoha.regexp
 	konoha.string
 	konoha.subtype
 ##	konoha.sql
+	konoha.untyped
 	konoha.var
 	konoha.while
 	sugar
 	llvm
-	konoha.regexp
 	posix.process
 	posix.file
 	posix.fd
