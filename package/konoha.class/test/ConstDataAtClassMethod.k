@@ -1,7 +1,8 @@
 // written by Atsushi Uchida
 K.import("konoha.class");
-A = 10;
-B = "abcd";
+K.import("konoha.const");
+const A = 10;
+const B = "abcd";
 class C {
     void f() {
         assert(A == 10);

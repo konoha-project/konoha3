@@ -74,7 +74,7 @@ static KMETHOD Date_new1(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Date_new3(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kDate *d = (struct _kDate *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
-	struct tm lt;
+	struct tm lt = {};
 	if(sfp[1].intValue < 100) {
 		lt.tm_year =sfp[1].intValue;
 	}
@@ -83,7 +83,7 @@ static KMETHOD Date_new3(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	lt.tm_mon = sfp[2].intValue;
 	lt.tm_mday = sfp[3].intValue;
-	lt.tm_hour = sfp[4].intValue + 1;
+	lt.tm_hour = sfp[4].intValue;
 	lt.tm_min = sfp[5].intValue;
 	lt.tm_sec = sfp[6].intValue;
 	d->tv.tv_sec = mktime(&lt);
@@ -566,25 +566,25 @@ static kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public, _F(Date_new1), TY_Date, TY_Date, MN_("new"), 1, TY_int, FN_("milliseconds"),
 //		_Public, _F(Date_new2), TY_Date, TY_Date, MN_("new"), 1, TY_String, FN_("dateString"),
 		_Public, _F(Date_new3), TY_Date, TY_Date, MN_("new"), 7, TY_int, FN_("year"), TY_int, FN_("month"), TY_int, FN_("day"), TY_int, FN_("hour"), TY_int, FN_("minutes"), TY_int, FN_("seconds"), TY_int, FN_("milliseconds"),
-		_Public, _F(Date_getDate), TY_int, TY_Date, MN_("getDate"), 0,
-		_Public, _F(Date_getDay), TY_int, TY_Date, MN_("getDay"), 0,
-		_Public, _F(Date_getFullYear), TY_int, TY_Date, MN_("getFullYear"), 0,
-		_Public, _F(Date_getHours), TY_int, TY_Date, MN_("getHours"), 0,
-		_Public, _F(Date_getMilliseconds), TY_int, TY_Date, MN_("getMilliseconds"), 0,
-		_Public, _F(Date_getMinutes), TY_int, TY_Date, MN_("getMinutes"), 0,
-		_Public, _F(Date_getMonth), TY_int, TY_Date, MN_("getMonth"), 0,
-		_Public, _F(Date_getSeconds), TY_int, TY_Date, MN_("getSeconds"), 0,
-		_Public, _F(Date_getTime), TY_int, TY_Date, MN_("getTime"), 0,
-		_Public, _F(Date_getTimezoneOffset), TY_int, TY_Date, MN_("getTimezoneOffset"), 0,
-		_Public, _F(Date_getUTCDate), TY_int, TY_Date, MN_("getUTCDate"), 0,
-		_Public, _F(Date_getUTCDay), TY_int, TY_Date, MN_("getUTCDay"), 0,
-		_Public, _F(Date_getUTCFullYear), TY_int, TY_Date, MN_("getUTCFullYear"), 0,
-		_Public, _F(Date_getUTCHours), TY_int, TY_Date, MN_("getUTCHours"), 0,
-		_Public, _F(Date_getUTCMilliseconds), TY_int, TY_Date, MN_("getUTCMilliseconds"), 0,
-		_Public, _F(Date_getUTCMinutes), TY_int, TY_Date, MN_("getUTCMinutes"), 0,
-		_Public, _F(Date_getUTCMonth), TY_int, TY_Date, MN_("getUTCMonth"), 0,
-		_Public, _F(Date_getUTCSeconds), TY_int, TY_Date, MN_("getUTCSeconds"), 0,
-		_Public, _F(Date_getYear), TY_int, TY_Date, MN_("getYear"), 0,
+		_Public|_Im, _F(Date_getDate), TY_int, TY_Date, MN_("getDate"), 0,
+		_Public|_Im, _F(Date_getDay), TY_int, TY_Date, MN_("getDay"), 0,
+		_Public|_Im, _F(Date_getFullYear), TY_int, TY_Date, MN_("getFullYear"), 0,
+		_Public|_Im, _F(Date_getHours), TY_int, TY_Date, MN_("getHours"), 0,
+		_Public|_Im, _F(Date_getMilliseconds), TY_int, TY_Date, MN_("getMilliseconds"), 0,
+		_Public|_Im, _F(Date_getMinutes), TY_int, TY_Date, MN_("getMinutes"), 0,
+		_Public|_Im, _F(Date_getMonth), TY_int, TY_Date, MN_("getMonth"), 0,
+		_Public|_Im, _F(Date_getSeconds), TY_int, TY_Date, MN_("getSeconds"), 0,
+		_Public|_Im, _F(Date_getTime), TY_int, TY_Date, MN_("getTime"), 0,
+		_Public|_Im, _F(Date_getTimezoneOffset), TY_int, TY_Date, MN_("getTimezoneOffset"), 0,
+		_Public|_Im, _F(Date_getUTCDate), TY_int, TY_Date, MN_("getUTCDate"), 0,
+		_Public|_Im, _F(Date_getUTCDay), TY_int, TY_Date, MN_("getUTCDay"), 0,
+		_Public|_Im, _F(Date_getUTCFullYear), TY_int, TY_Date, MN_("getUTCFullYear"), 0,
+		_Public|_Im, _F(Date_getUTCHours), TY_int, TY_Date, MN_("getUTCHours"), 0,
+		_Public|_Im, _F(Date_getUTCMilliseconds), TY_int, TY_Date, MN_("getUTCMilliseconds"), 0,
+		_Public|_Im, _F(Date_getUTCMinutes), TY_int, TY_Date, MN_("getUTCMinutes"), 0,
+		_Public|_Im, _F(Date_getUTCMonth), TY_int, TY_Date, MN_("getUTCMonth"), 0,
+		_Public|_Im, _F(Date_getUTCSeconds), TY_int, TY_Date, MN_("getUTCSeconds"), 0,
+		_Public|_Im, _F(Date_getYear), TY_int, TY_Date, MN_("getYear"), 0,
 //		_Public|_Static, _F(Date_parse), TY_int, TY_Date, MN_("parse"), 1, TY_String, FN_("dateString"),
 		_Public, _F(Date_setDate), TY_int, TY_Date, MN_("setDate"), 1, TY_int, FN_("date"),
 		_Public, _F(Date_setFullYear), TY_int, TY_Date, MN_("setFullYear"), 1, TY_int, FN_("year"),
