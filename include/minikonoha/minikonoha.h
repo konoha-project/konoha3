@@ -1326,8 +1326,8 @@ struct KonohaLibVar {
 	void          (*KonohaRuntime_raise)(KonohaContext*, int symbol, KonohaStack *, kfileline_t, kString *Nullable);
 
 	uintptr_t     (*Ktrace)(KonohaContext*, struct klogconf_t *logconf, ...);
-	struct KonohaContextVar* (*KKonohaContext_new)(KonohaContext *, const PlatformApi *api);
-	void (*KKonohaContext_delete)(KonohaContext *parentCtx, struct KonohaContextVar *ctx);
+	struct KonohaContextVar* (*KonohaContext_init)(KonohaContext *rootContext, const PlatformApi *api);
+	void (*KonohaContext_free)(KonohaContext *rootContext, struct KonohaContextVar *ctx);
 };
 
 #define K_NULL            (kctx->share->constNull)

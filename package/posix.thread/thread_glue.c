@@ -66,7 +66,7 @@ static void *spawn_start(void *v)
 	KCALL(lsfp, 0, t->func->mtd, 0, K_NULL);
 	END_LOCAL();
 
-	KLIB KKonohaContext_delete(t->rootCtx, kctx);
+	KLIB KonohaContext_free(t->rootCtx, kctx);
 	t->kctx = NULL;
 	// TODO cond_signal gc
 	return NULL;
@@ -134,7 +134,7 @@ static KMETHOD Thread_create(KonohaContext *kctx, KonohaStack *sfp)
 	//kArray *args = sfp[2].a;
 	kThread *thread = (kThread *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 	thread->rootCtx = kctx; //TODO getRootContext
-	thread->kctx = KLIB KKonohaContext_new(kctx, kctx->platApi);
+	thread->kctx = KLIB KonohaContext_init(kctx, kctx->platApi);
 	KSETv(thread, thread->func, f);
 	//KSETv(t, t->args, args);
 	pthread_create(&(thread->thread), NULL, spawn_start, thread);

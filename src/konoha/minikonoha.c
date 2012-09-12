@@ -137,8 +137,8 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 		newctx = (KonohaContextVar*)(klib + 1);
 		newctx->klib = (KonohaLib*)klib;
 		newctx->platApi = platApi;
-		((KonohaLibVar*)newctx->klib)->KKonohaContext_new    = new_KonohaContext;
-		((KonohaLibVar*)newctx->klib)->KKonohaContext_delete = KonohaContext_free;
+		((KonohaLibVar*)newctx->klib)->KonohaContext_init = new_KonohaContext;
+		((KonohaLibVar*)newctx->klib)->KonohaContext_free = KonohaContext_free;
 		kctx = (KonohaContext*)newctx;
 		newctx->modshare = (KonohaModule**)calloc(sizeof(KonohaModule*), KonohaModule_MAXSIZE);
 		newctx->modlocal = (KonohaModuleContext**)calloc(sizeof(KonohaModuleContext*), KonohaModule_MAXSIZE);
