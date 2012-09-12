@@ -105,6 +105,11 @@ struct DumpVisitorLocal {
 	int indent;
 };
 
+struct JSVisitor {
+	struct IRBuilder base;
+	int indent;
+};
+
 struct VMCodeBuilder {
 	struct IRBuilder base;
 };
@@ -220,7 +225,7 @@ static kBasicBlock *kStmt_getLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbo
 
 /* ------------------------------------------------------------------------ */
 #include "dumpvisitor.c"
-
+#include "jsvisitor.c"
 /* ------------------------------------------------------------------------ */
 #if defined(K_USING_THCODE_)
 #define TADDR   NULL, 0/*counter*/
@@ -1050,6 +1055,14 @@ static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 #ifdef USE_DUMP_VISITOR
 	{
 		builder = createDumpVisitor(&builderbuf);
+		builder->api.fn_init(kctx, builder, mtd);
+		visitBlock(kctx, builder, bk);
+		builder->api.fn_free(kctx, builder, mtd);
+	}
+#endif
+#ifdef USE_JS_VISITOR
+	{
+		builder = createJSVisitor(&builderbuf);
 		builder->api.fn_init(kctx, builder, mtd);
 		visitBlock(kctx, builder, bk);
 		builder->api.fn_free(kctx, builder, mtd);
