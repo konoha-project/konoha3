@@ -62,6 +62,7 @@ struct IRBuilderAPI {
 	VisitExpr_t visitOrExpr;
 	VisitExpr_t visitLetExpr;
 	VisitExpr_t visitStackTopExpr;
+	KonohaStack sfp[1];
 	void (*fn_init)(KonohaContext *kctx, struct IRBuilder *builder, kMethod *method);
 	void (*fn_free)(KonohaContext *kctx, struct IRBuilder *builder, kMethod *method);
 };
@@ -131,6 +132,7 @@ static void handleStmt(KonohaContext *kctx, IRBuilder *builder, kStmt *stmt)
 	builder->currentStmt = beforeStmt;
 }
 
+	KonohaStack sfp[1];
 static void handleExpr(KonohaContext *kctx, IRBuilder *builder, kExpr *expr)
 {
 	int a = builder->a;
@@ -165,6 +167,7 @@ static void visitBlock(KonohaContext *kctx, IRBuilder *builder, kBlock *bk)
 	int i;
 	for (i = 0; i < kArray_size(bk->stmtList); i++) {
 		kStmt *stmt = bk->stmtList->stmtItems[i];
+	KonohaStack sfp[1];
 		if (stmt->syn == NULL) continue;
 		ctxcode->uline = stmt->uline;
 		handleStmt(kctx, builder, stmt);
