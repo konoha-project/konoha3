@@ -172,10 +172,6 @@ static void JSVisitor_visitNullExpr(KonohaContext *kctx, IRBuilder *self, kExpr 
 
 static void JSVisitor_visitLocalExpr(KonohaContext *kctx, IRBuilder *self, kExpr *expr)
 {
-	//char buf[128];
-	//snprintf(buf, 128, "LOCAL(%d, %s)", (int)expr->index, CT_t(CT_(expr->ty)));
-	//char* name = GET_VARIABLE_NAME_FROM_EXPR(kctx, expr);
-	//emit_string_js(name, "", "");
 	kToken *tk = (kToken*)expr->termToken;
 	emit_string_js(S_text(tk->text), "", "");
 }
@@ -290,7 +286,7 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 	DUMPER(builder)->indent = 0;
 }
 
-void JSVisitor_free(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
+static void JSVisitor_free(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
 {
 	KFREE(builder->local_fields, sizeof(int));
 	if (mtd->mn) {
