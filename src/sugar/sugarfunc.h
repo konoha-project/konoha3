@@ -672,7 +672,7 @@ static kExpr *Expr_lookupMethod(KonohaContext *kctx, kStmt *stmt, kExpr *expr, k
 		if(tkMN->resolvedSymbol == MN_new && psize == 0 && CT_(kExpr_at(expr, 1)->ty)->baseTypeId == TY_Object) {
 			return kExpr_at(expr, 1);  // new Person(); // default constructor
 		}
-		kStmtToken_printMessage(kctx, stmt, tkMN, ErrTag, "undefined %s: %s.%s%s", MethodType_t(kctx, tkMN->resolvedSymbol, psize), TY_t(this_cid), KW_t(tkMN->resolvedSymbol));
+		kStmtToken_printMessage(kctx, stmt, tkMN, ErrTag, "undefined %s: %s.%s%s", MethodType_t(kctx, tkMN->resolvedSymbol, psize), TY_t(this_cid), PSYM_t(tkMN->resolvedSymbol));
 	}
 	if(mtd != NULL) {
 		if(Method_isOverloaded(mtd)) {
@@ -1172,7 +1172,7 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 	DBG_ASSERT(SYM_("$Param") == KW_ParamPattern);
 	DBG_ASSERT(SYM_(".") == KW_DOT);
 	DBG_ASSERT(SYM_(":") == KW_COLON);
-	DBG_ASSERT(SYM_("void") == KW_void);
+	DBG_ASSERT(SYM_("true") == KW_true);
 	DBG_ASSERT(SYM_("return") == KW_return);
 	DBG_ASSERT(SYM_("new") == MN_new);
 

@@ -33,7 +33,7 @@ static KMETHOD Token_setUnresolvedTokenType(KonohaContext *kctx, KonohaStack *sf
 	kString *key = sfp[1].asString;
 	ksymbol_t keyword = ksymbolA(S_text(key), S_size(key), _NEWID);
 	tk->unresolvedTokenType = keyword;
-	DBG_P("setkeyword=%s%s", KW_t(keyword));
+	DBG_P("setkeyword=%s%s", PSYM_t(keyword));
 	RETURNvoid_();
 }
 
@@ -428,7 +428,7 @@ static KMETHOD StmtTyCheck_sugar(KonohaContext *kctx, KonohaStack *sfp)
 		SugarSyntaxVar *syn = kNameSpace_guessSyntaxFromTokenList(kctx, Stmt_nameSpace(stmt), tokenList);
 		if(syn != NULL) {
 			if(syn->syntaxRuleNULL != NULL) {
-				SUGAR kStmt_printMessage2(kctx, stmt, NULL, WarnTag, "overriding syntax rule: %s", KW_t(syn->keyword));
+				SUGAR kStmt_printMessage2(kctx, stmt, NULL, WarnTag, "overriding syntax rule: %s", PSYM_t(syn->keyword));
 				KLIB kArray_clear(kctx, syn->syntaxRuleNULL, 0);
 			}
 			else {
@@ -453,10 +453,8 @@ static kbool_t sugar_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameS
 #define DEFINE_KEYWORD(KW) {#KW, TY_int, KW}
 		DEFINE_KEYWORD(KW_ExprPattern),
 		DEFINE_KEYWORD(KW_SymbolPattern),
-		DEFINE_KEYWORD(KW_ConstPattern),
 		DEFINE_KEYWORD(KW_TextPattern),
 		DEFINE_KEYWORD(KW_NumberPattern),
-		DEFINE_KEYWORD(KW_FloatPattern),
 		DEFINE_KEYWORD(KW_TypePattern),
 		DEFINE_KEYWORD(KW_ParenthesisGroup),
 		DEFINE_KEYWORD(KW_BracketGroup),

@@ -78,7 +78,7 @@ static kExpr *ExprTyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma 
 		}
 		else {
 			DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", expr->syn, expr->syn->parentSyntaxNULL, PSYM_t(syn->keyword));
-			return kStmt_printMessage(kctx, stmt, ErrTag, "undefined operator type checker: %s%s",  KW_t(expr->syn->keyword));
+			return kStmt_printMessage(kctx, stmt, ErrTag, "undefined operator type checker: %s%s",  PSYM_t(expr->syn->keyword));
 		}
 	}
 	return K_NULLEXPR;

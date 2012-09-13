@@ -421,7 +421,7 @@ static size_t kBlock_countFieldSize(KonohaContext *kctx, kBlock *bk)
 	if(bk != NULL) {
 		for(i = 0; i < kArray_size(bk->stmtList); i++) {
 			kStmt *stmt = bk->stmtList->stmtItems[i];
-			DBG_P("stmt->keyword=%s%s", KW_t(stmt->syn->keyword));
+			DBG_P("stmt->keyword=%s%s", PSYM_t(stmt->syn->keyword));
 			if(stmt->syn->keyword == KW_StmtTypeDecl) {
 				kExpr *expr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL);
 				if(expr->syn->keyword == KW_COMMA) {
@@ -511,7 +511,7 @@ static void kBlock_addMethodDeclStmt(KonohaContext *kctx, kBlock *bk, kToken *to
 				lastStmt = stmt;
 			}
 			else {
-				SUGAR kStmt_printMessage2(kctx, stmt, NULL, WarnTag, "%s is not available within the class clause", KW_t(stmt->syn->keyword));
+				SUGAR kStmt_printMessage2(kctx, stmt, NULL, WarnTag, "%s is not available within the class clause", PSYM_t(stmt->syn->keyword));
 			}
 		}
 	}

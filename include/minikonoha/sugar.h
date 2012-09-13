@@ -35,36 +35,35 @@
 extern "C" {
 #endif
 
-#define KW_t(X)   SYM_PRE(X),SYM_t(X)
-
 #define TokenType_ERR          KW_TokenPattern
 #define TokenType_NONE         0
 #define TokenType_INDENT       1
 #define TokenType_SYMBOL       KW_SymbolPattern
 #define TokenType_TEXT         KW_TextPattern
 #define TokenType_INT          KW_NumberPattern
-#define TokenType_FLOAT        KW_FloatPattern
+//#define TokenType_FLOAT        KW_FloatPattern
 #define TokenType_CODE         KW_BlockPattern
 
 #define KW_END  ((ksymbol_t)-1)
 #define KW_ERR  (((ksymbol_t)0)|0) /**/
 #define KW_ExprPattern      (((ksymbol_t)1)|KW_PATTERN) /*$Expr*/
 #define KW_SymbolPattern    (((ksymbol_t)2)|KW_PATTERN) /*$Symbol*/
-#define KW_ConstPattern     (((ksymbol_t)3)|KW_PATTERN) /*$Const*/
-#define KW_TextPattern      (((ksymbol_t)4)|KW_PATTERN) /*$Text*/
-#define KW_NumberPattern    (((ksymbol_t)5)|KW_PATTERN) /*$Number*/
-#define KW_FloatPattern     (((ksymbol_t)6)|KW_PATTERN) /*$Float*/
-#define KW_TypePattern      (((ksymbol_t)7)|KW_PATTERN) /*$Type*/
+#define KW_TextPattern      (((ksymbol_t)3)|KW_PATTERN) /*$Text*/
+#define KW_NumberPattern    (((ksymbol_t)4)|KW_PATTERN) /*$Number*/
+#define KW_TypePattern      (((ksymbol_t)5)|KW_PATTERN) /*$Type*/
 
-#define KW_ParenthesisGroup (((ksymbol_t)8)) /*()*/
-#define KW_BracketGroup     (((ksymbol_t)9)) /*[]*/
-#define KW_BraceGroup       (((ksymbol_t)10)) /*{}*/
-#define KW_TypeCastGroup    (((ksymbol_t)8)|KW_PATTERN) /*$()*/
-#define KW_TypeParamGroup   (((ksymbol_t)9)|KW_PATTERN) /*$[]*/
-#define KW_OptionalGroup   (((ksymbol_t)9)|KW_ATMARK)  /*@[]*/
-#define KW_BlockPattern    (((ksymbol_t)11)|KW_PATTERN) /*$Block*/
-#define KW_ParamPattern    (((ksymbol_t)12)|KW_PATTERN) /*$Param*/
-#define KW_TokenPattern    (((ksymbol_t)13)|KW_PATTERN) /*$Token*/
+//#define KW_ConstPattern     (((ksymbol_t)3)|KW_PATTERN) /*$Const*/
+//#define KW_FloatPattern     (((ksymbol_t)6)|KW_PATTERN) /*$Float*/
+
+#define KW_ParenthesisGroup (((ksymbol_t)6)) /*()*/
+#define KW_BracketGroup     (((ksymbol_t)7)) /*[]*/
+#define KW_BraceGroup       (((ksymbol_t)8)) /*{}*/
+#define KW_TypeCastGroup    (((ksymbol_t)6)|KW_PATTERN) /*$()*/
+#define KW_TypeParamGroup   (((ksymbol_t)7)|KW_PATTERN) /*$[]*/
+#define KW_OptionalGroup    (((ksymbol_t)7)|KW_ATMARK)  /*@[]*/
+#define KW_BlockPattern     (((ksymbol_t)9)|KW_PATTERN) /*$Block*/
+#define KW_ParamPattern     (((ksymbol_t)10)|KW_PATTERN) /*$Param*/
+#define KW_TokenPattern     (((ksymbol_t)11)|KW_PATTERN) /*$Token*/
 
 #define KW_StmtConstDecl       KW_ConstPattern
 #define KW_StmtTypeDecl        KW_TypePattern
@@ -73,7 +72,7 @@ extern "C" {
 #define KW_ExprTerm            KW_SymbolPattern
 #define KW_ExprMethodCall      KW_ParamPattern
 
-#define KW_DOT     14
+#define KW_DOT     12
 #define KW_DIV     (1+KW_DOT)
 #define KW_MOD     (2+KW_DOT)
 #define KW_MUL     (3+KW_DOT)
@@ -96,14 +95,15 @@ extern "C" {
 
 // #define KW_void (((ksymbol_t)32)|0) /*void*/
 
-#define KW_void      32
-#define KW_boolean   (1+KW_void)
-#define KW_int       (2+KW_void)
-#define KW_true      (3+KW_void)
-#define KW_false     (4+KW_void)
-#define KW_if        (5+KW_void)
-#define KW_else      (6+KW_void)
-#define KW_return    (7+KW_void)
+//#define KW_void      32
+//#define KW_boolean   (1+KW_void)
+//#define KW_int       (2+KW_void)
+#define KW_void      (30)
+#define KW_true      (0+KW_void)
+#define KW_false     (1+KW_void)
+#define KW_if        (2+KW_void)
+#define KW_else      (3+KW_void)
+#define KW_return    (4+KW_void)
 // reserved
 //#define MN_new       (8+KW_void)
 #define FN_this      FN_("this")
@@ -679,7 +679,7 @@ static inline kNameSpace *kStmt_nameSpace(KonohaContext *kctx, kStmt *stmt)
 static inline void Stmt_setsyn(KonohaContext *kctx, kStmt *stmt, SugarSyntax *syn)
 {
 	//if(syn == NULL && stmt->syn != NULL) {
-	//	DBG_P("DONE: STMT='%s'", KW_t(syn->keyword));
+	//	DBG_P("DONE: STMT='%s'", PSYM_t(syn->keyword));
 	//}
 	((kStmtVar*)stmt)->syn = syn;
 }

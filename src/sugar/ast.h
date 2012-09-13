@@ -277,10 +277,10 @@ static int PatternMatch(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, ksym
 		}
 	}
 	if(callCount == 0) {
-		kStmt_printMessage(kctx, stmt, ErrTag, "undefined syntax pattern: %s%s", KW_t(syn->keyword));
+		kStmt_printMessage(kctx, stmt, ErrTag, "undefined syntax pattern: %s%s", PSYM_t(syn->keyword));
 	}
 //	else {
-//		kStmt_printMessage(kctx, stmt, ErrTag, "syntax error: %s%s", KW_t(syn->keyword));
+//		kStmt_printMessage(kctx, stmt, ErrTag, "syntax error: %s%s", PSYM_t(syn->keyword));
 //	}
 	return -1;
 }
@@ -317,7 +317,7 @@ static const char* StatementType(ksymbol_t keyword)
 static int kStmt_parseMismatchedRule(KonohaContext *kctx, kStmt *stmt, kToken *tk, kToken *ruleToken, int returnIdx, int canRollBack)
 {
 	if(!canRollBack && !Stmt_isERR(stmt)) {
-		kStmtToken_printMessage(kctx, stmt, tk, ErrTag, "%s%s: %s%s is expected", T_statement(stmt->syn->keyword), KW_t(ruleToken->resolvedSymbol));
+		kStmtToken_printMessage(kctx, stmt, tk, ErrTag, "%s%s: %s%s is expected", T_statement(stmt->syn->keyword), PSYM_t(ruleToken->resolvedSymbol));
 	}
 	return returnIdx;
 }
@@ -382,7 +382,7 @@ static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *token
 		kToken *ruleToken = rule->tokenList->tokenItems[currentRuleIdx];
 		if(ruleToken->resolvedSymbol != KW_OptionalGroup) {
 			if(!canRollBack) {
-				kStmt_printMessage(kctx, stmt, ErrTag, "%s%s needs syntax pattern: %s%s", T_statement(stmt->syn->keyword), KW_t(ruleToken->resolvedSymbol));
+				kStmt_printMessage(kctx, stmt, ErrTag, "%s%s needs syntax pattern: %s%s", T_statement(stmt->syn->keyword), PSYM_t(ruleToken->resolvedSymbol));
 				return returnIdx;
 			}
 		}
