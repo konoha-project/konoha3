@@ -46,7 +46,7 @@ int verbose_sugar = 0;
 #include "ast.h"
 #include "tycheck.h"
 #include "sugarfunc.h"
-#include "loader.h"
+#include "macro.h"
 
 /* ------------------------------------------------------------------------ */
 /* Sugar Global Functions */

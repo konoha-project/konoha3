@@ -288,8 +288,6 @@ static void Konoha_loadDefaultMethod(KonohaContext *kctx)
 	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);
 }
 
-
-
 #ifdef __cplusplus
 }
 #endif
