@@ -684,6 +684,14 @@ static void Kwrite_barrier(KonohaContext *kctx, kObject *parent)
 	(void)kctx;(void)parent;
 }
 
+void Kgc_invoke(KonohaContext *kctx, KonohaStack *esp)
+{
+	//TODO : stop the world
+	gc_init(kctx);
+	gc_mark(kctx);
+	gc_sweep(kctx);
+	//P(memlocal(kctx)->freeObjectListSize[0]);
+}
 static void MSGC_local_reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh) {}
 
 static void MSGC_local_free(KonohaContext *kctx, struct KonohaModuleContext *baseh)
@@ -739,6 +747,7 @@ void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		KSET_KLIB(Kzmalloc, 0);
 		KSET_KLIB(Kfree, 0);
 		KSET_KLIB(Kwrite_barrier, 0);
+		KSET_KLIB(Kgc_invoke, 0);
 		KLIB KonohaRuntime_setModule(kctx, MOD_gc, &base->h, 0);
 	}
 	MSGC_setup(ctx, (KonohaModule*) memshare(kctx), 1);
@@ -766,14 +775,6 @@ kObject *MODGC_omalloc(KonohaContext *kctx, size_t size)
 	return (kObject *)o;
 }
 
-void MODGC_gc_invoke(KonohaContext *kctx, KonohaStack *esp)
-{
-	//TODO : stop the world
-	gc_init(kctx);
-	gc_mark(kctx);
-	gc_sweep(kctx);
-	//P(memlocal(kctx)->freeObjectListSize[0]);
-}
 
 void MODGC_check_malloced_size(void)
 {
