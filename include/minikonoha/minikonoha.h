@@ -1140,15 +1140,27 @@ struct kMethodVar {
 	uintptr_t         serialNumber;
 };
 
+typedef struct MethodMatch {
+	ksymbol_t mn;
+	size_t        paramsize;
+	size_t        paramdom;
+	kparamtype_t *param;
+	kbool_t       isBreak;
+	kMethod      *foundMethodNULL;
+	kArray       *foundMethodListNULL;
+} MethodMatch;
+
+typedef kbool_t (*MethodMatchFunc)(KonohaContext *kctx, kMethod *mtd, MethodMatch *m);
+
 // used in kNameSpace_getMethodNULL()
 
-#define MPOL_FIRST           0
+#define MPOL_FIRST_          0
 #define MPOL_LATEST          1
 #define MPOL_PARAMSIZE   (1<<1)
 #define MPOL_SIGNATURE   (1<<2)
 #define MPOL_SETTER      (1<<3)
 #define MPOL_CANONICAL   (1<<5)
-#define MPOL_GETTER      MPOL_PARAMSIZE|MPOL_FIRST|MPOL_CANONICAL
+#define MPOL_GETTER      MPOL_PARAMSIZE|MPOL_FIRST_|MPOL_CANONICAL
 
 #define K_CALLDELTA   4
 #define K_RTNIDX    (-4)
