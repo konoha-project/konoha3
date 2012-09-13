@@ -740,7 +740,7 @@ static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 	kparamtype_t P_ExprArray[] = {{TY_Expr}};
 	int TY_ExprArray = (KLIB KonohaClass_Generics(kctx, CT_Array, TY_void, 1, P_ExprArray))->typeId;
 
-	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_System, MN_("genCode"), 0, MPOL_FIRST);
+	kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_System, MN_("genCode"), 0, MPOL_FIRST);
 	KINITv(kmodjit->genCode, mtd);
 #define TY_Pointer kmodjit->cPointer->typeId
 #define _Public   kMethod_Public

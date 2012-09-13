@@ -1089,7 +1089,7 @@ static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	int FN_n = FN_("n");
 	ktype_t TY_StringArray0 = CT_StringArray0->typeId;
 
-	kMethod *concat = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_String, MN_("+"), 1, MPOL_PARAMSIZE_|MPOL_FIRST_);
+	kMethod *concat = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_String, MN_("+"), 1);
 	if (concat != NULL) {
 		KLIB kMethod_setFunc(kctx, concat, Rope_opADD);
 	} else {
