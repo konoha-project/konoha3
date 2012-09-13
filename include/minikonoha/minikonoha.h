@@ -1141,7 +1141,8 @@ struct kMethodVar {
 };
 
 typedef struct MethodMatch {
-	ksymbol_t mn;
+	kNameSpace   *ns;
+	ksymbol_t     mn;
 	size_t        paramsize;
 	size_t        paramdom;
 	kparamtype_t *param;
@@ -1156,11 +1157,11 @@ typedef kbool_t (*MethodMatchFunc)(KonohaContext *kctx, kMethod *mtd, MethodMatc
 
 #define MPOL_FIRST_          0
 #define MPOL_LATEST          1
-#define MPOL_PARAMSIZE   (1<<1)
-#define MPOL_SIGNATURE   (1<<2)
-#define MPOL_SETTER      (1<<3)
-#define MPOL_CANONICAL   (1<<5)
-#define MPOL_GETTER      MPOL_PARAMSIZE|MPOL_FIRST_|MPOL_CANONICAL
+#define MPOL_PARAMSIZE_   (1<<1)
+#define MPOL_SIGNATURE_    (1<<2)
+#define MPOL_SETTER       (1<<3)
+#define MPOL_CANONICAL    (1<<5)
+#define MPOL_GETTER      MPOL_PARAMSIZE_|MPOL_FIRST_|MPOL_CANONICAL
 
 #define K_CALLDELTA   4
 #define K_RTNIDX    (-4)
@@ -1333,6 +1334,12 @@ struct KonohaLibVar {
 	kbool_t          (*kNameSpace_loadConstData)(KonohaContext*, kNameSpace *, const char **d, kfileline_t);
 	void             (*kNameSpace_loadMethodData)(KonohaContext*, kNameSpace *, intptr_t *);
 	kMethod*         (*kNameSpace_getMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, kmethodn_t mn, int option, int policy);
+
+	kMethod*         (*kNameSpace_getGetterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ksymbol_t mn, ktype_t);
+	kMethod*         (*kNameSpace_getSetterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ksymbol_t mn, ktype_t);
+	kMethod*         (*kNameSpace_getMethodByParamSizeNULL)(KonohaContext*, kNameSpace *, ktype_t cid, kmethodn_t mn, int paramsize);
+	kMethod*         (*kNameSpace_getMethodBySignatureNULL)(KonohaContext*, kNameSpace *, ktype_t cid, kmethodn_t mn, int paramdom, int paramsize, kparamtype_t *);
+
 	void             (*kNameSpace_compileAllDefinedMethods)(KonohaContext *kctx);
 
 	void             (*KCodeGen)(KonohaContext*, kMethod *, kBlock *);

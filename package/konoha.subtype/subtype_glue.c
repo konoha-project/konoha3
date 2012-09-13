@@ -92,7 +92,7 @@ static KMETHOD ExprTyCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 			RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_boolean, staticSubType));
 		}
 		kNameSpace *ns = Stmt_nameSpace(stmt);
-		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_Object, MN_("<:"), 1, MPOL_PARAMSIZE);
+		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_Object, MN_("<:"), 1, MPOL_PARAMSIZE_);
 		DBG_ASSERT(mtd != NULL);
 		KSETv(expr->cons, expr->cons->methodItems[0], mtd);
 		kExpr *classValue = SUGAR kExpr_setConstValue(kctx,

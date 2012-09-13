@@ -120,13 +120,6 @@ static kExpr* kExprCall_toConstValue(KonohaContext *kctx, kExpr *expr, kArray *c
 	return SUGAR kExpr_setConstValue(kctx, expr, rtype, lsfp[0].asObject);
 }
 
-static kbool_t CT_isa(KonohaContext *kctx, ktype_t cid1, ktype_t cid2)
-{
-	DBG_ASSERT(cid1 != cid2); // should be checked
-	KonohaClass *ct = CT_(cid1), *t = CT_(cid2);
-	return ct->isSubType(kctx, ct, t);
-}
-
 static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, ktype_t reqty, int pol)
 {
 	kExpr *texpr = expr;
@@ -152,7 +145,7 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 		if(CT_isa(kctx, texpr->ty, reqty)) {
 			if(TY_isUnbox(texpr->ty) && !TY_isUnbox(reqty)) {
 				ktype_t unboxType = texpr->ty == TY_boolean ? TY_boolean : TY_int;
-				kMethod *mtd = kNameSpace_getMethodNULL(kctx, Stmt_nameSpace(stmt), unboxType, MN_box, 0, MPOL_PARAMSIZE);
+				kMethod *mtd = kNameSpace_getMethodByParamSizeNULL(kctx, Stmt_nameSpace(stmt), unboxType, MN_box, 0);
 				return new_TypedCallExpr(kctx, stmt, gma, texpr->ty, mtd, 1, texpr);
 			}
 			return texpr;

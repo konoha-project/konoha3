@@ -434,12 +434,6 @@ static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, KonohaStack *sfp)
 	kStmtExpr_printMessage(kctx, stmt, expr, ErrTag, "undefined expression: %s", Token_text(expr->termToken));
 }
 
-static kMethod* kNameSpace_getGetterMethodNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ksymbol_t fn)
-{
-	if(fn == SYM_NONAME) return NULL;
-	return KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toGETTER(fn), 0, MPOL_GETTER);
-}
-
 static kExpr* new_GetterExpr(KonohaContext *kctx, kToken *tkU, kMethod *mtd, kExpr *expr)
 {
 	kExprVar *expr1 = (kExprVar *)new_TypedConsExpr(kctx, TEXPR_CALL, Method_returnType(mtd), 2, mtd, expr);
@@ -479,7 +473,7 @@ static kExpr* kStmt_tyCheckVariableNULL(KonohaContext *kctx, kStmt *stmt, kExpr 
 					}
 				}
 			}
-			kMethod *mtd = kNameSpace_getGetterMethodNULL(kctx, ns, genv->this_cid, symbol);
+			kMethod *mtd = kNameSpace_getGetterMethodNULL(kctx, ns, genv->this_cid, symbol, TY_var);
 			if(mtd != NULL) {
 				return new_GetterExpr(kctx, tk, mtd, new_VariableExpr(kctx, gma, TEXPR_LOCAL, genv->this_cid, 0));
 			}
@@ -487,7 +481,7 @@ static kExpr* kStmt_tyCheckVariableNULL(KonohaContext *kctx, kStmt *stmt, kExpr 
 	}
 	if((Gamma_isTopLevel(gma) || kNameSpace_allowedTransparentGlobalVariable(ns)) && ns->globalObjectNULL != NULL) {
 		ktype_t cid = O_typeId(ns->globalObjectNULL);
-		kMethod *mtd = kNameSpace_getGetterMethodNULL(kctx, ns, cid, symbol);
+		kMethod *mtd = kNameSpace_getGetterMethodNULL(kctx, ns, cid, symbol, TY_var);
 		if(mtd != NULL) {
 			return new_GetterExpr(kctx, tk, mtd, new_ConstValueExpr(kctx, cid, ns->globalObjectNULL));
 		}
@@ -561,25 +555,9 @@ static kMethod *lookupOverloadedMethod(KonohaContext *kctx, kStmt *stmt, kExpr *
 		}
 		p[i].ty = expr->cons->exprItems[i+2]->ty;
 	}
-	kNameSpace *ns = Stmt_nameSpace(stmt);
 	kparamid_t paramdom = KLIB Kparamdom(kctx, psize, p);
-	kMethod *foundMethod = kNameSpace_getMethodNULL(kctx, ns, thisClass->typeId, mtd->mn, paramdom, MPOL_SIGNATURE|MPOL_LATEST);
+	kMethod *foundMethod = kNameSpace_getMethodBySignatureNULL(kctx, Stmt_nameSpace(stmt), thisClass->typeId, mtd->mn, paramdom, psize, p);
 	DBG_P("paradom=%d, foundMethod=%p", paramdom, foundMethod);
-	if(foundMethod == NULL) {
-		kArray *abuf = kctx->stack->gcstack;
-		size_t atop = kArray_size(abuf);
-		kNameSpace_findMethodList(kctx, ns, thisClass->typeId, mtd->mn, abuf, atop);
-		for(i = atop; i < kArray_size(abuf); i++) {
-			foundMethod = abuf->methodItems[i];
-			kParam *pa = Method_param(foundMethod);
-			if(pa->psize != psize) continue;
-			// TODO; check parameter;
-		}
-		KLIB kArray_clear(kctx, abuf, atop);
-		if(foundMethod == NULL) {
-			foundMethod = mtd;
-		}
-	}
 	return foundMethod;
 }
 
@@ -604,7 +582,7 @@ static kExpr* boxThisExpr(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kExpr *
 	DBG_ASSERT(thisClass->typeId != TY_var);
 	if(!TY_isUnbox(mtd->typeId) && CT_isUnbox(thisClass)) {
 		ktype_t unboxType = thisClass->typeId == TY_boolean ? TY_boolean : TY_int;
-		kMethod *boxMethod = kNameSpace_getMethodNULL(kctx, Stmt_nameSpace(stmt), unboxType, MN_box, 0, MPOL_PARAMSIZE);
+		kMethod *boxMethod = kNameSpace_getMethodByParamSizeNULL(kctx, Stmt_nameSpace(stmt), unboxType, MN_box, 0);
 		thisExpr = new_TypedCallExpr(kctx, stmt, gma, thisClass->typeId, boxMethod, 1, expr->cons->exprItems[1]);
 		KSETv(expr->cons, expr->cons->exprItems[1], thisExpr);
 	}
@@ -661,7 +639,7 @@ static kExpr *Expr_lookupMethod(KonohaContext *kctx, kStmt *stmt, kExpr *expr, k
 	kTokenVar *tkMN = expr->cons->tokenVarItems[0];
 	DBG_ASSERT(IS_Token(tkMN));
 	size_t psize = kArray_size(expr->cons) - 2;
-	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, this_cid, tkMN->resolvedSymbol, psize, MPOL_LATEST|MPOL_PARAMSIZE|MPOL_CANONICAL);
+	kMethod *mtd = kNameSpace_getMethodByParamSizeNULL(kctx, ns, this_cid, tkMN->resolvedSymbol, psize);
 	if(mtd == NULL) {
 		if(tkMN->text != TS_EMPTY) {  // find Dynamic Call ..
 			mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, this_cid, 0/*NONAME*/, 0, MPOL_FIRST_);
@@ -731,7 +709,7 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kEx
 				}
 			}
 		}
-		mtd = kNameSpace_getGetterMethodNULL(kctx, ns, genv->this_cid, fn);
+		mtd = kNameSpace_getGetterMethodNULL(kctx, ns, genv->this_cid, fn, TY_var);
 		if(mtd != NULL && TY_isFunc(Method_returnType(mtd))) {
 			KSETv(exprN->cons, exprN->cons->exprItems[0], new_GetterExpr(kctx, termToken, mtd, new_VariableExpr(kctx, gma, TEXPR_LOCAL, genv->this_cid, 0)));
 			return NULL;
@@ -739,7 +717,7 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kEx
 	}
 	{
 		int paramsize = kArray_size(exprN->cons) - 2;
-		kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, TY_System, fn, paramsize, MPOL_FIRST_|MPOL_PARAMSIZE|MPOL_CANONICAL);
+		kMethod *mtd = kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_System, fn, paramsize);
 		if(mtd != NULL) {
 			KSETv(exprN->cons, exprN->cons->exprItems[1], new_ConstValueExpr(kctx, TY_System, KLIB Knull(kctx, CT_System)));
 			return mtd;
@@ -748,7 +726,7 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kEx
 
 	if((Gamma_isTopLevel(gma) || kNameSpace_allowedTransparentGlobalVariable(ns)) && ns->globalObjectNULL != NULL) {
 		ktype_t cid = O_typeId(ns->globalObjectNULL);
-		kMethod *mtd = kNameSpace_getGetterMethodNULL(kctx, ns, cid, fn);
+		kMethod *mtd = kNameSpace_getGetterMethodNULL(kctx, ns, cid, fn, TY_var);
 		if(mtd != NULL && TY_isFunc(Method_returnType(mtd))) {
 			KSETv(exprN->cons, exprN->cons->exprItems[0], new_GetterExpr(kctx, termToken, mtd, new_ConstValueExpr(kctx, cid, ns->globalObjectNULL)));
 			return NULL;

@@ -157,6 +157,11 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	l->kNameSpace_setConstData   = kNameSpace_setConstData;
 	l->kNameSpace_loadConstData  = kNameSpace_loadConstData;
 	l->kNameSpace_getMethodNULL  = kNameSpace_getMethodNULL;
+	l->kNameSpace_getGetterMethodNULL  = kNameSpace_getGetterMethodNULL;
+	l->kNameSpace_getSetterMethodNULL  = kNameSpace_getSetterMethodNULL;
+	l->kNameSpace_getMethodByParamSizeNULL  = kNameSpace_getMethodByParamSizeNULL;
+	l->kNameSpace_getMethodBySignatureNULL  = kNameSpace_getMethodBySignatureNULL;
+
 	l->kNameSpace_compileAllDefinedMethods    = kNameSpace_compileAllDefinedMethods;
 
 	KINITv(mod->packageList, new_(Array, 8));

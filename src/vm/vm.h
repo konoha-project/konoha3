@@ -146,7 +146,7 @@ static void kNameSpace_lookupMethodWithInlineCache(KonohaContext *kctx, KonohaSt
 	ktype_t typeId = O_typeId(sfp[0].asObject);
 	kMethod *mtd = cache[0];
 	if(mtd->typeId != typeId) {
-		mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, typeId, mtd->mn, mtd->paramdom, MPOL_LATEST|MPOL_SIGNATURE);
+		mtd = KLIB kNameSpace_getMethodBySignatureNULL(kctx, ns, typeId, mtd->mn, mtd->paramdom, 0, NULL);
 		cache[0] = mtd;
 	}
 	sfp[K_MTDIDX].mtdNC = mtd;

@@ -372,11 +372,11 @@ static int formatLowerCanonicalName(char *buf, size_t bufsiz, const char *name)
 
 static kbool_t checkMethodPolicyOption(KonohaContext *kctx, kMethod *mtd, int option, int policy)
 {
-	if(TFLAG_is(int, policy, MPOL_PARAMSIZE)) {
+	if(TFLAG_is(int, policy, MPOL_PARAMSIZE_)) {
 		kParam *param = Method_param(mtd);
 		if(param->psize != option) return false;
 	}
-	if(TFLAG_is(int, policy, MPOL_SIGNATURE)) {
+	if(TFLAG_is(int, policy, MPOL_SIGNATURE_)) {
 		if(mtd->paramdom != option) return false;
 	}
 //	if(TFLAG_is(int, policy, MPOL_SETTER)) {
@@ -597,15 +597,6 @@ static kbool_t MethodMatch_StaticFunc(KonohaContext *kctx, kMethod *mtd, MethodM
 	return true;
 }
 
-static kMethod* kNameSpace_getStaticFuncNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ksymbol_t symbol)
-{
-	MethodMatch m = {};
-	m.mn = symbol;
-	return kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_StaticFunc, &m);
-}
-
-
-
 static kbool_t MethodMatch_ParamSize(KonohaContext *kctx, kMethod *mtd, MethodMatch *m)
 {
 	kParam *param = Method_param(mtd);
@@ -613,27 +604,130 @@ static kbool_t MethodMatch_ParamSize(KonohaContext *kctx, kMethod *mtd, MethodMa
 		if(m->foundMethodNULL != NULL) {
 			if(m->foundMethodNULL->serialNumber < mtd->serialNumber) return true;
 		}
+		m->isBreak = true;
 		m->foundMethodNULL = mtd;
 		return true;
 	}
 	return false;
+}
+
+static kbool_t MethodMatch_Param0(KonohaContext *kctx, kMethod *mtd, MethodMatch *m)
+{
+	kParam *param = Method_param(mtd);
+	if(param->psize == 0) {
+		m->foundMethodNULL = mtd;
+		m->isBreak = true;
+		return true;
+	}
+	return false;
+}
+
+static kbool_t CT_isa(KonohaContext *kctx, ktype_t cid1, ktype_t cid2)
+{
+	DBG_ASSERT(cid1 != cid2); // should be checked
+	KonohaClass *ct = CT_(cid1), *t = CT_(cid2);
+	return ct->isSubType(kctx, ct, t);
+}
+
+static kMethod* kNameSpace_getCastMethodNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ktype_t tcid)
+{
+	MethodMatch m = {};
+	m.mn = MN_to(tcid);
+	m.paramsize = 0;
+	kMethod *mtd = kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_Param0, &m);
+	if(mtd == NULL) {
+		m.mn = MN_as(tcid);
+		mtd = kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_Param0, &m);
+	}
+	return mtd;
 }
 
 static kbool_t MethodMatch_Signature(KonohaContext *kctx, kMethod *mtd, MethodMatch *m)
 {
 	if(mtd->paramdom == m->paramdom) {
+		m->isBreak = true;
 		m->foundMethodNULL = mtd;
 		return true;
 	}
-	if(m->foundMethodNULL == NULL) {
-		int i;
+	if(m->param != NULL && m->foundMethodNULL == NULL) {
 		kParam *param = Method_param(mtd);
-		for(i = 0; i < m->paramsize; i++) {
-
+		if(param->psize == m->paramsize) {
+			int i;
+			for(i = 0; i < m->paramsize; i++) {
+				if(m->param[i].ty != param->paramtypeItems[i].ty) {
+					if(CT_isa(kctx, m->param[i].ty, param->paramtypeItems[i].ty)) {
+						continue;
+					}
+					kMethod *castMethod = kNameSpace_getCastMethodNULL(kctx, m->ns, m->param[i].ty, param->paramtypeItems[i].ty);
+					if(castMethod != NULL && (Method_isCoercion(castMethod) || FN_isCOERCION(param->paramtypeItems[i].fn))) {
+						continue;
+					}
+					return false;
+				}
+			}
+			m->foundMethodNULL = mtd;
+			return false;
 		}
 	}
 	return false;
 }
+
+static kMethod* kNameSpace_getStaticFuncNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ksymbol_t symbol)
+{
+	MethodMatch m = {};
+	m.mn = symbol;
+	return kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_StaticFunc, &m);
+}
+
+static kMethod* kNameSpace_getGetterMethodNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ksymbol_t symbol, ktype_t type)
+{
+	if(symbol != SYM_NONAME) {
+		MethodMatch m = {};
+		m.mn = MN_toGETTER(symbol);
+		m.paramsize = 0;
+		return kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_Param0, &m);
+	}
+	return NULL;
+}
+
+static kMethod* kNameSpace_getSetterMethodNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ksymbol_t symbol, ktype_t type)
+{
+	if(symbol != SYM_NONAME) {
+		MethodMatch m = {};
+		m.mn = MN_toGETTER(symbol);
+		m.paramsize = 1;
+		if(type == TY_var) {
+			return kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_ParamSize, &m);
+		}
+		else {
+			kparamtype_t p = {type};
+			m.paramdom = KLIB Kparamdom(kctx, 1, &p);
+			return kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_Signature, &m);
+		}
+	}
+	return NULL;
+}
+
+static kMethod* kNameSpace_getMethodByParamSizeNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ksymbol_t symbol, int paramsize)
+{
+	MethodMatch m = {};
+	m.mn = symbol;
+	m.paramsize = paramsize;
+	return kNameSpace_matchMethodNULL(kctx, ns, cid, paramsize == 0 ? MethodMatch_Param0 : MethodMatch_ParamSize, &m);
+}
+
+static kMethod* kNameSpace_getMethodBySignatureNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ksymbol_t symbol, int paramdom, int paramsize, kparamtype_t *param)
+{
+	MethodMatch m = {};
+	m.ns = ns;
+	m.mn = symbol;
+	m.paramdom = paramdom;
+	m.paramsize = paramsize;
+	m.param = param;
+	return kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_Signature, &m);
+}
+
+// ---------------------------------------------------------------------------
 
 static kMethod* kMethod_replaceWith(KonohaContext *kctx, kMethodVar *oldMethod, kMethodVar *newMethod)
 {
@@ -655,7 +749,7 @@ static kMethod* kNameSpace_addMethod(KonohaContext *kctx, kNameSpace *ns, kMetho
 		KLIB Kreportf(kctx, DebugTag, 0, "@%s loading method %s.%s%s", PackageId_t(ns->packageId), Method_t(mtd));
 	}
 	if(Method_isPublic(mtd) /* && ct->packageDomain == ns->packageDomain*/) {
-		kMethod *foundMethod = KonohaClass_getMethodNULL(kctx, ct, mtd->mn, mtd->paramdom, MPOL_FIRST_|MPOL_SIGNATURE);
+		kMethod *foundMethod = KonohaClass_getMethodNULL(kctx, ct, mtd->mn, mtd->paramdom, MPOL_FIRST_|MPOL_SIGNATURE_);
 		if(foundMethod != NULL) {  // same signature
 			if(foundMethod->typeId == mtd->typeId) {
 				DBG_P("duplicated method %s.%s%s", Method_t(foundMethod));
@@ -674,7 +768,7 @@ static kMethod* kNameSpace_addMethod(KonohaContext *kctx, kNameSpace *ns, kMetho
 			}
 		}
 		else {
-			foundMethod = KonohaClass_getMethodNULL(kctx, ct, mtd->mn, Method_paramsize(mtd), MPOL_FIRST_|MPOL_PARAMSIZE);
+			foundMethod = KonohaClass_getMethodNULL(kctx, ct, mtd->mn, Method_paramsize(mtd), MPOL_FIRST_|MPOL_PARAMSIZE_);
 			if(foundMethod != NULL) {
 				DBG_P("set overloading method %s.%s%s", Method_t(foundMethod));
 				Method_setOverloaded(foundMethod, true);
@@ -743,15 +837,6 @@ static void kNameSpace_loadMethodData(KonohaContext *kctx, kNameSpace *ns, intpt
 		KLIB kMethod_setParam(kctx, mtd, rtype, psize, p);
 		kNameSpace_addMethod(kctx, ns, mtd);
 	}
-}
-
-static kMethod* kNameSpace_getCastMethodNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ktype_t tcid)
-{
-	kMethod *mtd = kNameSpace_getMethodNULL(kctx, ns, cid, MN_to(tcid), 0, MPOL_PARAMSIZE|MPOL_FIRST_);
-	if(mtd == NULL) {
-		mtd = kNameSpace_getMethodNULL(kctx, ns, cid, MN_as(tcid), 0, MPOL_PARAMSIZE|MPOL_FIRST_);
-	}
-	return mtd;
 }
 
 // ---------------------------------------------------------------------------
