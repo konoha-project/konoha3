@@ -950,7 +950,7 @@ static kbool_t kStmt_declType(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kty
 	}
 	else if(Expr_isSymbolTerm(declExpr)) {
 		if(ty == TY_var) {
-			kStmt_printMessage(kctx, stmt, ErrTag, "an initial value is expected: var %s%s", PSYM_t(declExpr->termToken->resolvedSymbol));
+			kStmt_printMessage(kctx, stmt, ErrTag, "initial value is expected: var %s%s", PSYM_t(declExpr->termToken->resolvedSymbol));
 			return false;
 		}
 		else {

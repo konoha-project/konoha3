@@ -1,10 +1,10 @@
 // written by kimio kuramitsu
 
-K.import("konoha.var");
+K.import("konoha.untyped");
 
 void test() {
-	var n = 1;
-	System.p("n="+n);
+	n = 124;
+	assert(n == 124);
 }
 
 test();
