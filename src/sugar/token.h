@@ -649,7 +649,6 @@ static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, Token
 			i++;
 			continue;
 		}
-		dumpToken(kctx, tk, -1);
 		kToken_printMessage(kctx, tk, ErrTag, "illegal syntax rule: %s", Token_text(tk));
 		return false;
 	}

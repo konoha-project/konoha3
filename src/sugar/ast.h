@@ -295,6 +295,25 @@ static int TokenArray_findPrefetchedRuleToken(kArray *tokenList, int beginIdx, i
 	return -1;
 }
 
+#define T_statement(kw)  StatementName(kctx, kw), StatementType(kw)
+
+static const char* StatementName(KonohaContext *kctx, ksymbol_t keyword)
+{
+	const char *statement = SYM_t(keyword);
+	if(keyword == KW_ExprPattern) statement = "expression";
+	else if(keyword == KW_StmtTypeDecl) statement = "variable";
+	else if(keyword == KW_StmtMethodDecl) statement =  "function";
+	return statement;
+}
+
+static const char* StatementType(ksymbol_t keyword)
+{
+	const char *postfix = " statement";
+	if(keyword == KW_ExprPattern) postfix = "";
+	else if(keyword == KW_StmtTypeDecl || keyword == KW_StmtMethodDecl) postfix = " declaration";
+	return postfix;
+}
+
 static int kStmt_parseMismatchedRule(KonohaContext *kctx, kStmt *stmt, kToken *tk, kToken *ruleToken, int returnIdx, int canRollBack)
 {
 	if(!canRollBack && !Stmt_isERR(stmt)) {
@@ -315,13 +334,11 @@ static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *token
 	for(currentRuleIdx = rule->beginIdx; currentRuleIdx < rule->endIdx && currentTokenIdx < endIdx; currentRuleIdx++) {
 		kToken *ruleToken = rule->tokenList->tokenItems[currentRuleIdx];
 		currentTokenIdx = kTokenArray_skip(tokenList, currentTokenIdx, endIdx);
-		dumpToken(kctx, ruleToken, currentRuleIdx);
 		if(KW_isPATTERN(ruleToken->resolvedSymbol)) {
 			//DBG_P("@Pattern");
 			int patternEndIdx = endIdx;
 			if(currentRuleIdx + 1 < rule->endIdx) {
 				kToken *prefetchedRuleToken = rule->tokenList->tokenItems[currentRuleIdx+1];
-				dumpToken(kctx, prefetchedRuleToken, currentRuleIdx+1);
 				if((!KW_isPATTERN(prefetchedRuleToken->resolvedSymbol) && prefetchedRuleToken->resolvedSymbol != KW_OptionalGroup)) {
 					patternEndIdx = TokenArray_findPrefetchedRuleToken(tokenList, currentTokenIdx+1, endIdx, prefetchedRuleToken);
 					if(patternEndIdx == -1) {

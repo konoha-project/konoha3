@@ -41,12 +41,12 @@ int verbose_sugar = 0;
 #include "perror.h"
 #include "sugarclass.h"
 #include "namespace.h"
-#include "sugardump.h"
+#include "macro.h"
 #include "token.h"
 #include "ast.h"
 #include "tycheck.h"
 #include "sugarfunc.h"
-#include "macro.h"
+#include "sugardump.h"
 
 /* ------------------------------------------------------------------------ */
 /* Sugar Global Functions */
@@ -259,6 +259,11 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kStmt_rightJoinExpr        = kStmt_rightJoinExpr;
 	mod->kToken_printMessage        = kToken_printMessage;
 	mod->kStmt_printMessage2        = kStmt_printMessage2;
+
+	mod->dumpToken      = dumpToken;
+	mod->dumpTokenArray = dumpTokenArray;
+	mod->dumpExpr       = dumpExpr;
+	mod->dumpStmt       = dumpStmt;
 
 	defineDefaultSyntax(kctx, KNULL(NameSpace));
 }
