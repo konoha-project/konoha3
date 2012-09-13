@@ -1,2 +1,2 @@
- - (error) (ERROR_PointNumberLiteral.k:2) undefined expression: 0.1
+ - (error) (ERROR_PointNumberLiteral.k:2) syntax error: expression .
 Q.E.D.
