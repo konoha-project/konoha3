@@ -412,6 +412,7 @@ foreach(f ${test_files})
 endforeach(f ${test_files})
 
 add_subdirectory(platform/dse)
+add_subdirectory(platform/apache)
 
 install(TARGETS minikonoha minikonoha_bin
 		RUNTIME DESTINATION bin
