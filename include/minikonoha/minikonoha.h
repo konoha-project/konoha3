@@ -1159,9 +1159,9 @@ typedef kbool_t (*MethodMatchFunc)(KonohaContext *kctx, kMethod *mtd, MethodMatc
 #define MPOL_LATEST          1
 #define MPOL_PARAMSIZE_   (1<<1)
 #define MPOL_SIGNATURE_    (1<<2)
-#define MPOL_SETTER       (1<<3)
+//#define MPOL_SETTER       (1<<3)
 #define MPOL_CANONICAL    (1<<5)
-#define MPOL_GETTER      MPOL_PARAMSIZE_|MPOL_FIRST_|MPOL_CANONICAL
+//#define MPOL_GETTER      MPOL_PARAMSIZE_|MPOL_FIRST_|MPOL_CANONICAL
 
 #define K_CALLDELTA   4
 #define K_RTNIDX    (-4)

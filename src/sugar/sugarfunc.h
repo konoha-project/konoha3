@@ -355,7 +355,7 @@ static KMETHOD ExprTyCheck_assign(KonohaContext *kctx, KonohaStack *sfp)
 			if(MN_isGETTER(mtd->mn)) {
 				ktype_t cid = leftHandExpr->cons->exprItems[1]->ty;
 				ktype_t paramType = leftHandExpr->ty; //CT_(cid)->realtype(kctx, CT_(cid), CT_(leftHandExpr->ty));
-				mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(mtd->mn), paramType, MPOL_SETTER|MPOL_CANONICAL);
+				mtd = KLIB kNameSpace_getSetterMethodNULL(kctx, ns, cid, SYM_UNMASK(mtd->mn), paramType);
 				if(mtd != NULL) {
 					KSETv(leftHandExpr->cons, leftHandExpr->cons->methodItems[0], mtd);
 					KLIB kArray_add(kctx, leftHandExpr->cons, rightHandExpr);

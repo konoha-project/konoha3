@@ -56,12 +56,12 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObj
 {
 	ktype_t cid = O_typeId(o);
 	kNameSpace *ns = Stmt_nameSpace(stmt);
-	kMethod *mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(symbol), ty, MPOL_SETTER);
+	kMethod *mtd = KLIB kNameSpace_getSetterMethodNULL(kctx, ns, cid, symbol, TY_var);
 	if(mtd != NULL) {
 		SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "already defined name: %s", SYM_t(symbol));
 		return NULL;
 	}
-	mtd = KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toGETTER(symbol), 0, MPOL_GETTER);
+	mtd = KLIB kNameSpace_getGetterMethodNULL(kctx, ns, cid, symbol, TY_var);
 	if(mtd != NULL && Method_returnType(mtd) != ty) {
 		SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "differently defined name: %s", SYM_t(symbol));
 		return NULL;
@@ -71,7 +71,7 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObj
 		flag |= kField_Getter;
 	}
 	KLIB KonohaClass_addField(kctx, O_ct(o), flag, ty, symbol);
-	return KLIB kNameSpace_getMethodNULL(kctx, ns, cid, MN_toSETTER(symbol), ty, MPOL_SETTER);
+	return KLIB kNameSpace_getSetterMethodNULL(kctx, ns, cid, symbol, ty);
 }
 
 // ---------------------------------------------------------------------------

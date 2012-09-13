@@ -694,7 +694,7 @@ static kMethod* kNameSpace_getSetterMethodNULL(KonohaContext *kctx, kNameSpace *
 {
 	if(symbol != SYM_NONAME) {
 		MethodMatch m = {};
-		m.mn = MN_toGETTER(symbol);
+		m.mn = MN_toSETTER(symbol);
 		m.paramsize = 1;
 		if(type == TY_var) {
 			return kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_ParamSize, &m);
