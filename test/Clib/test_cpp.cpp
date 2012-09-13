@@ -28,7 +28,7 @@
 #include "minikonoha/float.h"
 #include "minikonoha/gc.h"
 extern int verbose_debug;
-#include "minikonoha/platform_posix.h"
+#include "minikonoha/platform.h"
 
 /* checking header files can compile at g++ */
 int main(int argc, char const* argv[])

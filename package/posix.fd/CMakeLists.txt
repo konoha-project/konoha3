@@ -10,4 +10,6 @@ check_struct_has_member("struct stat" st_birthtime sys/stat.h HAVE_STRUCT_STAT_S
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
 	${CMAKE_CURRENT_BINARY_DIR}/fdconfig.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-add_konoha_package(posix.fd)
+if(NOT MINGW AND NOT MSVC)
+	add_konoha_package(posix.fd)
+endif()

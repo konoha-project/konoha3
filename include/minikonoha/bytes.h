@@ -30,7 +30,9 @@
 #endif
 
 #include <string.h>
+#ifndef __MINGW32__
 #include <langinfo.h>
+#endif
 #include <locale.h>
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
