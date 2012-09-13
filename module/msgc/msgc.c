@@ -146,7 +146,7 @@ static void Arena_init(KonohaContext *kctx, kmemshare_t *memshare)
 	}
 }
 
-#define ARENA_FREE(j) do { \
+#define ARENA_FREE(j) do {\
 	size_t i;\
 	DBG_ASSERT(memshare->ObjectArenaTBL[j] != NULL);\
 	for(i = 0; i < memshare->sizeObjectArenaTBL[j]; i++) {\
@@ -639,7 +639,7 @@ static size_t sweep0(KonohaContext *kctx, void *p, int n, size_t sizeOfObject)
 	}
 	return collected;
 }
-#define GC_SWEEP(n)\
+#define GC_SWEEP(n) do {\
 	size_t collected = 0;\
 	objpageTBL_t *oat = memshare(kctx)->ObjectArenaTBL[n];\
 	size_t atindex, size = memshare(kctx)->sizeObjectArenaTBL[n];\
@@ -651,7 +651,8 @@ static size_t sweep0(KonohaContext *kctx, void *p, int n, size_t sizeOfObject)
 			listSize += K_PAGEOBJECTSIZE(n);\
 		}\
 	}\
-	CHECK_EXPAND(listSize,n);
+	CHECK_EXPAND(listSize,n);\
+} while (0)
 
 static size_t gc_sweep0(KonohaContext *kctx)
 {
@@ -684,7 +685,7 @@ static void Kwrite_barrier(KonohaContext *kctx, kObject *parent)
 	(void)kctx;(void)parent;
 }
 
-void Kgc_invoke(KonohaContext *kctx, KonohaStack *esp)
+static void Kgc_invoke(KonohaContext *kctx, KonohaStack *esp)
 {
 	//TODO : stop the world
 	gc_init(kctx);
