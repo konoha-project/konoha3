@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+//#define USE_JS_VISITOR
 #ifdef USE_JS_VISITOR
 #define DUMPER(BUILDER)  ((JSVisitorLocal*)(BUILDER)->local_fields)
 
@@ -74,7 +74,11 @@ static void JSVisitor_visitErrStmt(KonohaContext *kctx, IRBuilder *self, kStmt *
 
 static void JSVisitor_visitExprStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
 {
-	handleExpr(kctx, self, Stmt_getFirstExpr(kctx, stmt));
+	kExpr *expr = Stmt_getFirstExpr(kctx, stmt);
+	if(expr->build == TEXPR_LET){
+		emit_string_js("var ", "", "");
+	}
+	handleExpr(kctx, self, expr);
 	emit_newline(";", DUMPER(self)->indent);
 }
 
@@ -266,6 +270,7 @@ static void JSVisitor_visitStackTopExpr(KonohaContext *kctx, IRBuilder *self, kE
 static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
 {
 	unsigned i;
+	builder->local_fields = (void *) KMALLOC(sizeof(int));
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	kParam *pa = Method_param(mtd);
@@ -282,7 +287,6 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 	}
 	emit_string_js(KLIB Kwb_top(kctx, &wb, 1), "", "");
 	emit_newline(") {", ++DUMPER(builder)->indent);
-	builder->local_fields = (void *) KMALLOC(sizeof(int));
 	DUMPER(builder)->indent = 0;
 }
 
