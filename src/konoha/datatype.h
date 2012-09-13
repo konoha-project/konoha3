@@ -417,12 +417,15 @@ static kparamid_t Kparamdom(KonohaContext *kctx, int psize, const kparamtype_t *
 /* --------------- */
 /* Method */
 
+static uintptr_t methodSerialNumber = 0;
+
 static void Method_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kMethodVar *mtd = (kMethodVar*)o;
 	bzero(&mtd->invokeMethodFunc, sizeof(kMethod) - sizeof(KonohaObjectHeader));
 	KINITv(mtd->sourceCodeToken, (struct kToken*)K_NULL);
 	KINITv(mtd->kcode, K_NULL);
+	mtd->serialNumber = methodSerialNumber++;
 }
 
 static void Method_reftrace(KonohaContext *kctx, kObject *o)
@@ -431,7 +434,6 @@ static void Method_reftrace(KonohaContext *kctx, kObject *o)
 	kMethod *mtd = (kMethod*)o;
 	KREFTRACEv(mtd->sourceCodeToken);
 	KREFTRACEv(mtd->kcode);
-	KREFTRACEn(mtd->proceedNUL);
 	END_REFTRACE();
 }
 
@@ -439,9 +441,9 @@ static kMethod* new_kMethod(KonohaContext *kctx, uintptr_t flag, ktype_t cid, km
 {
 #define CT_MethodVar CT_Method
 	kMethodVar* mtd = new_(MethodVar, NULL);
-	mtd->flag    = flag;
+	mtd->flag       = flag;
 	mtd->typeId     = cid;
-	mtd->mn      = mn;
+	mtd->mn         = mn;
 	KLIB kMethod_setFunc(kctx, mtd, func);
 	return mtd;
 }

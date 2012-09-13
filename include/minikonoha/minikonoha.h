@@ -1060,6 +1060,7 @@ struct kParamVar {
 #define kMethod_Abstract             ((uintptr_t)(1<<10))
 #define kMethod_Coercion             ((uintptr_t)(1<<11))
 #define kMethod_SmartReturn          ((uintptr_t)(1<<12))
+
 //#define kMethod_CALLCC               ((uintptr_t)(1<<8))
 //#define kMethod_FASTCALL             ((uintptr_t)(1<<9))
 //#define kMethod_D                    ((uintptr_t)(1<<10))
@@ -1067,6 +1068,9 @@ struct kParamVar {
 #define kMethod_LibraryCompatible    ((uintptr_t)(1<<31))
 #define kMethod_JSCompatible         ((uintptr_t)(1<<30))
 #define kMethod_JavaCompatible       ((uintptr_t)(1<<29))
+#define kMethod_DynamicCall          ((uintptr_t)(1<<28))
+#define kMethod_FastCall             ((uintptr_t)(1<<27))
+
 
 #define Method_isPublic(o)       (TFLAG_is(uintptr_t, (o)->flag, kMethod_Public))
 //#define Method_setPublic(o,B)  TFLAG_set(uintptr_t, (o)->flag, kMethod_Public,B)
@@ -1084,12 +1088,13 @@ struct kParamVar {
 #define Method_isOverloaded(o)      (TFLAG_is(uintptr_t,(o)->flag,kMethod_Overloaded))
 #define Method_setOverloaded(o,B)   TFLAG_set(uintptr_t,((kMethodVar*)o)->flag, kMethod_Overloaded, B)
 
+#define Method_isDynamicCall(o)     (TFLAG_is(uintptr_t, (o)->flag, kMethod_DynamicCall))
+#define Method_isFastCall(o)        (TFLAG_is(uintptr_t, (o)->flag, kMethod_FastCall))
 #define Method_isSmartReturn(o)     (TFLAG_is(uintptr_t, (o)->flag, kMethod_SmartReturn))
 
 #define Method_isTransCast(mtd)    MN_isTOCID(mtd->mn)
 #define Method_isCast(mtd)         MN_isASCID(mtd->mn)
 #define Method_isCoercion(mtd)    (TFLAG_is(uintptr_t, (mtd)->flag,kMethod_Coercion))
-
 
 #define Method_param(mtd)        kctx->share->paramList->paramItems[mtd->paramid]
 #define Method_returnType(mtd)   ((Method_param(mtd))->rtype)
@@ -1132,7 +1137,7 @@ struct kMethodVar {
 		const struct kByteCodeVar    *kcode;
 		kNameSpace   *lazyCompileNameSpace;       // lazy compilation
 	};
-	kMethod           *proceedNUL;   // proceed
+	uintptr_t         serialNumber;
 };
 
 // used in kNameSpace_getMethodNULL()
@@ -1150,8 +1155,7 @@ struct kMethodVar {
 #define K_SHIFTIDX  (-3)
 #define K_PCIDX     (-2)
 #define K_MTDIDX    (-1)
-#define K_TMRIDX    (0)
-#define K_SELFIDX   0
+#define K_DYNSIDX   (-1)
 
 //#define K_NEXTIDX    2
 #define K_ULINEIDX2  (-7)
@@ -1189,7 +1193,7 @@ struct _kSystem {
 /* ------------------------------------------------------------------------ */
 /* macros */
 
-#define klr_setesp(kctx, newesp)  ((KonohaContextVar*)kctx)->esp = (newesp)
+#define KonohaRuntime_setesp(kctx, newesp)  ((KonohaContextVar*)kctx)->esp = (newesp)
 #define klr_setmtdNC(sfpA, mtdO)   sfpA.mtdNC = mtdO
 
 //#define Method_isByteCode(mtd) ((mtd)->invokeMethodFunc == MethodFunc_runVirtualMachine)
@@ -1211,7 +1215,7 @@ struct _kSystem {
 		tsfp[K_SHIFTIDX].shift = 0;\
 		KSETv_AND_WRITE_BARRIER(NULL, tsfp[K_RTNIDX].o, ((kObject*)DEFVAL), GC_NO_WRITE_BARRIER);\
 		tsfp[K_RTNIDX].uline   = UL;\
-		klr_setesp(kctx, tsfp + ARGC + 1);\
+		KonohaRuntime_setesp(kctx, tsfp + ARGC + 1);\
 	} \
 
 #define KCALL(LSFP, RIX, MTD, ARGC, DEFVAL) { \
@@ -1221,7 +1225,7 @@ struct _kSystem {
 		tsfp[K_SHIFTIDX].shift = 0;\
 		KSETv_AND_WRITE_BARRIER(NULL, tsfp[K_RTNIDX].o, ((kObject*)DEFVAL), GC_NO_WRITE_BARRIER);\
 		tsfp[K_RTNIDX].uline = __LINE__;\
-		klr_setesp(kctx, tsfp + ARGC + 1);\
+		KonohaRuntime_setesp(kctx, tsfp + ARGC + 1);\
 		(MTD)->invokeMethodFunc(kctx, tsfp);\
 		tsfp[K_MTDIDX].mtdNC = NULL;\
 	} \

@@ -404,7 +404,6 @@ static KMETHOD Array_newList(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	//KRequirePackage("konoha.new", pline);  // FIXME
 	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
 		{"Array", TY_TYPE, (uintptr_t)CT_(TY_Array)},
 		{NULL},

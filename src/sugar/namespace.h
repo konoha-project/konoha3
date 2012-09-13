@@ -506,6 +506,132 @@ static kMethod* kNameSpace_getMethodNULL(KonohaContext *kctx, kNameSpace *ns, kt
 	}
 }
 
+typedef struct MethodMatch {
+	ksymbol_t mn;
+	size_t        paramsize;
+	size_t        paramdom;
+	kparamtype_t *param;
+	kMethod      *foundMethodNULL;
+	kArray       *foundMethodListNULL;
+} MethodMatch;
+
+typedef kbool_t (*MethodMatchFunc)(KonohaContext *kctx, kMethod *mtd, MethodMatch *m);
+
+static inline long Method_id(kMethod *mtd)
+{
+	long id = mtd->typeId;
+	return (id << (sizeof(kshort_t)*8)) | mtd->mn;
+}
+
+static int comprMethod(const void *a, const void *b)
+{
+	long aid = Method_id((kMethod*)a);
+	long bid = Method_id((kMethod*)b);
+	return aid - bid;
+}
+
+static void kMethodList_matchMethod(KonohaContext *kctx, kArray *methodList, size_t sorted, ktype_t typeId, MethodMatchFunc MatchMethod, MethodMatch *option)
+{
+	int i, min = 0, max = sorted;
+	long optkey = ((long)typeId << (sizeof(kshort_t)*8)) | option->mn;
+	while(min < max) {
+		size_t p = (max + min) / 2;
+		kMethod *mtd = methodList->methodItems[p];
+		long key = Method_id(mtd);
+		if(key == optkey) {
+			MatchMethod(kctx, mtd, option);
+			i = p - 1;
+			while(i >= 0) {
+				kMethod *mtd = methodList->methodItems[i];
+				if(Method_id(mtd) != optkey) break;
+				MatchMethod(kctx, mtd, option);
+				i--;
+			}
+			i = p + 1;
+			while(i < sorted) {
+				kMethod *mtd = methodList->methodItems[i];
+				if(Method_id(mtd) != optkey) break;
+				MatchMethod(kctx, mtd, option);
+				i++;
+			}
+			break;
+		}
+		else if(key < optkey) {
+			min = p + 1;
+		}
+		else {
+			max = p;
+		}
+	}
+	for(i = sorted; i < kArray_size(methodList); i++) {
+		kMethod *mtd = methodList->methodItems[i];
+		long key = Method_id(mtd);
+		if(key == optkey) {
+			MatchMethod(kctx, mtd, option);
+		}
+	}
+}
+
+static kMethod* kNameSpace_matchMethodNULL(KonohaContext *kctx, kNameSpace *startNameSpace, ktype_t typeId, MethodMatchFunc MatchMethod, MethodMatch *option)
+{
+	KonohaClass *ct = CT_(typeId);
+	while(ct != NULL) {
+		kNameSpace *ns = startNameSpace;
+		while(ns != NULL) {
+			kMethodList_matchMethod(kctx, ns->methodList, 0, ct->typeId, MatchMethod, option);
+			ns = ns->parentNULL;
+		}
+		if(option->foundMethodNULL != NULL) {
+			return option->foundMethodNULL;
+		}
+		kMethodList_matchMethod(kctx, ns->methodList, 0, ct->typeId, MatchMethod, option);
+		if(option->foundMethodNULL != NULL) {
+			return option->foundMethodNULL;
+		}
+		ct = ct->searchSuperMethodClassNULL;
+	}
+	return NULL;
+}
+
+static kbool_t MethodMatch_FuncName(KonohaContext *kctx, kMethod *mtd, MethodMatch *m)
+{
+	if(m->foundMethodNULL != NULL) {
+		if(m->foundMethodNULL->serialNumber > mtd->serialNumber) return false;
+	}
+	m->foundMethodNULL = mtd;
+	return true;
+}
+
+static kbool_t MethodMatch_ParamSize(KonohaContext *kctx, kMethod *mtd, MethodMatch *m)
+{
+	kParam *param = Method_param(mtd);
+	if(param->psize == m->paramsize) {
+		if(m->foundMethodNULL != NULL) {
+			if(m->foundMethodNULL->serialNumber < mtd->serialNumber) return true;
+		}
+		m->foundMethodNULL = mtd;
+		return true;
+	}
+	return false;
+}
+
+static kbool_t MethodMatch_Signature(KonohaContext *kctx, kMethod *mtd, MethodMatch *m)
+{
+	if(mtd->paramdom == m->paramdom) {
+		m->foundMethodNULL = mtd;
+		return true;
+	}
+	if(m->foundMethodNULL == NULL) {
+		int i;
+		kParam *param = Method_param(mtd);
+		for(i = 0; i < m->paramsize; i++) {
+
+		}
+	}
+	return false;
+}
+
+
 static kMethod* kMethod_replaceWith(KonohaContext *kctx, kMethodVar *oldMethod, kMethodVar *newMethod)
 {
 	if(Method_isOverride(newMethod)) {

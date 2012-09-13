@@ -247,14 +247,14 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 	sfp_[K_SHIFTIDX].shift = THIS; \
 	sfp_[K_PCIDX].pc = PC_NEXT(pc);\
 	sfp_[K_MTDIDX].mtdNC = mtd_;\
-	klr_setesp(kctx, SFP(rshift(rbp, espshift)));\
+	KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espshift)));\
 	(mtd_)->invokeMethodFunc(kctx, sfp_); \
 	sfp_[K_MTDIDX].mtdNC = NULL;\
 } while (0)
 
 #define OPEXEC_VCALL(UL, THIS, espshift, mtdO, CTO) do {\
 	kMethod *mtd_ = mtdO;\
-	klr_setesp(kctx, SFP(rshift(rbp, espshift)));\
+	KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espshift)));\
 	OPEXEC_CHKSTACK(UL);\
 	rbp = rshift(rbp, THIS);\
 	rbp[K_ULINEIDX2-1].o = CTO;\
@@ -274,7 +274,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 	sfp_[K_SHIFTIDX].shift = THIS; \
 	sfp_[K_PCIDX].pc = PC_NEXT(pc);\
 	sfp_[K_MTDIDX].mtdNC = mtd_;\
-	klr_setesp(kctx, SFP(rshift(rbp, espshift)));\
+	KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espshift)));\
 	(mtd_)->invokeMethodFunc(kctx, sfp_); \
 	sfp_[K_MTDIDX].mtdNC = NULL;\
 } while (0)
@@ -334,7 +334,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 
 #define OPEXEC_SAFEPOINT(UL, espidx) do {\
 	if(kctx->safepoint != 0) { \
-		klr_setesp(kctx, SFP(rshift(rbp, espidx)));\
+		KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espidx)));\
 		KonohaVirtualMachine_onSafePoint(kctx, (KonohaStack*)rbp, UL); \
 	} \
 } while (0)
@@ -535,7 +535,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 /* [CALL] */
 
 #define OPEXEC_FASTCALL0(c, thisidx, rix, espidx, fcall) do {\
-	klr_setesp(kctx, SFP(rshift(rbp, espidx)));\
+	KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espidx)));\
 	fcall(kctx, SFP(rshift(rbp, thisidx)), (long)rix);\
 } while (0)
 
@@ -544,7 +544,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 
 #define OPEXEC_VCALL_(UL, THIS, espshift, mtdO, CTO) do {\
 	kMethod *mtd_ = mtdO;\
-	klr_setesp(kctx, SFP(rshift(rbp, espshift)));\
+	KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espshift)));\
 	OPEXEC_CHKSTACK(UL);\
 	rbp = rshift(rbp, THIS);\
 	rbp[K_ULINEIDX2-1].o = CTO;\
@@ -559,7 +559,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #define OPEXEC_JMP_(PC, JUMP)   OPEXEC_RET()
 
 #define OPEXEC_YIELD(espidx) do {\
-	klr_setesp(kctx, SFP(rshift(rbp,espidx)));\
+	KonohaRuntime_setesp(kctx, SFP(rshift(rbp,espidx)));\
 	goto L_RETURN;\
 } while (0)
 
@@ -570,7 +570,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 /**
 #define OPEXEC_VINVOKE(ctx, rtnidx, thisidx, espshift) do {\
 kMethod *mtd_ = (rbp[thisidx].fo)->mtd;\
-klr_setesp(ctx, SFP(rshift(rbp, espshift)));\
+KonohaRuntime_setesp(ctx, SFP(rshift(rbp, espshift)));\
 rbp = rshift(rbp, thisidx);\
 rbp[K_SHIFTIDX2].shift = thisidx;\
 rbp[K_PCIDX2].pc = PC_NEXT(pc);\
@@ -582,7 +582,7 @@ GOTO_PC(pc); \
 
 #define OPEXEC_THUNK(rtnidx, thisidx, espshift, mtdO) do {\
 	kMethod *mtd_ = mtdO == NULL ? rbp[thisidx+K_MTDIDX2].mtdNC : mtdO;\
-	klr_setesp(kctx, SFP(rshift(rbp, espshift)));\
+	KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espshift)));\
 	knh_stack_newThunk(kctx, (KonohaStack*)rshift(rbp, thisidx));\
 } while (0)
 
@@ -605,7 +605,7 @@ GOTO_PC(pc); \
 #define OPEXEC_fCAST(c, a) Rf_(c) = (kfloat_t)Ri_(a)
 
 #define OPEXEC_SCAST(rtnidx, thisidx, rix, espidx, tmr) do {\
-	klr_setesp(kctx, SFP(rshift(rbp, espidx)));\
+	KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espidx)));\
 	knh_TypeMap_exec(kctx, tmr, SFP(rshift(rbp,thisidx)), rix); \
 } while (0)
 
@@ -617,7 +617,7 @@ GOTO_PC(pc); \
 		tmr_ = knh_findTypeMapNULL(kctx, scid, SP(tmr)->tcid);\
 		KSETv(((klr_TCAST_t*)op)->cast, tmr_);\
 	}\
-	klr_setesp(kctx, SFP(rshift(rbp, espidx)));\
+	KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espidx)));\
 	knh_TypeMap_exec(kctx, tmr_, sfp_, rix); \
 } while (0)
 
@@ -630,7 +630,7 @@ GOTO_PC(pc); \
 			tmr_ = knh_findTypeMapNULL(kctx, scid, tcid);\
 			KNH_SETv(((klr_ACAST_t*)op)->cast, tmr_);\
 		}\
-		/*klr_setesp(kctx, SFP(rshift(rbp, espidx)));*/\
+		/*KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espidx)));*/\
 		knh_TypeMap_exec(kctx, tmr_, SFP(rshift(rbp,thisidx)), rix); \
 	}\
 } while (0)
@@ -649,7 +649,7 @@ GOTO_PC(pc); \
 #define OPEXEC_NEXT(PC, JUMP, rtnidx, ib, rix, espidx) do {\
 	KonohaStack *itrsfp_ = SFP(rshift(rbp, ib)); \
 	DBG_ASSERT(IS_bIterator(itrsfp_[0].it));\
-	klr_setesp(kctx, SFP(rshift(rbp, espidx)));\
+	KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espidx)));\
 	if(!((itrsfp_[0].it)->fnext_1(kctx, itrsfp_, rix))) { \
 		OPEXEC_JMP(PC, JUMP); \
 	} \
@@ -682,7 +682,7 @@ GOTO_PC(pc); \
 		knh_ExceptionHandlerEX_t* _hdrEX = DP(_hdr);\
 		pc = _hdrEX->pc; \
 		rbp = RBP(ctx->stack + _hdrEX->sfpidx);\
-		klr_setesp(ctx, (ctx->stack + _hdr->espidx));\
+		KonohaRuntime_setesp(ctx, (ctx->stack + _hdr->espidx));\
 		op = _hdrEX->op;\
 		((KonohaContextVar*)ctx)->ehdrNC = _hdr->parentNC;\
 		OPEXEC_JMP(PC, JUMP);\
@@ -718,7 +718,7 @@ GOTO_PC(pc); \
 		knh_ExceptionHandlerEX_t* _hdrEX = DP(_hdr);\
 		pc = _hdrEX->pc; \
 		rbp = RBP(ctx->stack + _hdrEX->sfpidx);\
-		klr_setesp(ctx, (ctx->stack + _hdr->espidx));\
+		KonohaRuntime_setesp(ctx, (ctx->stack + _hdr->espidx));\
 		op = _hdrEX->op;\
 		((KonohaContextVar*)ctx)->ehdrNC = _hdr->parentNC;\
 		OPEXEC_JMP(PC, JUMP);\
