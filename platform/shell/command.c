@@ -26,6 +26,8 @@
 #include <minikonoha/sugar.h>
 #include "minikonoha/gc.h"
 #include <minikonoha/klib.h>
+#define USE_BUILTINTEST 1
+#include "testkonoha.h"
 #include <getopt.h>
 
 #ifdef __cplusplus

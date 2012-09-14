@@ -66,6 +66,7 @@ SET(CMAKE_CXX_FLAGS_COMPRESSED "${CMAKE_C_FLAGS_COMPRESSED}")
 
 if(${CMAKE_BUILD_TYPE} STREQUAL "Compressed")
 	set(K_NODEBUG 1)
+	add_definitions(-DNDEBUG)
 endif()
 
 set(RUNTIME

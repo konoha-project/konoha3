@@ -64,7 +64,6 @@ extern "C" {
 #endif
 
 #define K_USING_UTF8 1
-#define USE_BUILTINTEST  1
 
 #ifdef K_USE_PTHREAD
 #if defined(__linux__) && !defined(__USE_UNIX98)
@@ -1591,14 +1590,6 @@ extern void konoha_close(KonohaContext* konoha);
 extern kbool_t konoha_load(KonohaContext* konoha, const char *scriptfile);
 extern kbool_t konoha_eval(KonohaContext* konoha, const char *script, kfileline_t uline);
 extern kbool_t konoha_run(KonohaContext* konoha);  // TODO
-
-#ifdef USE_BUILTINTEST
-typedef int (*BuiltInTestFunc)(KonohaContext *kctx);
-typedef struct DEFINE_TESTFUNC {
-	const char *name;
-	BuiltInTestFunc f;
-} DEFINE_TESTFUNC;
-#endif
 
 #ifdef __cplusplus
 } /* extern "C" */

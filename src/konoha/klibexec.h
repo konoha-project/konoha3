@@ -397,18 +397,6 @@ static ksymbol_t Ksymbol(KonohaContext *kctx, const char *name, size_t len, int 
 // -------------------------------------------------------------------------
 // library
 
-static KUtilsGrowingArray *new_karray(KonohaContext *kctx, size_t bytesize, size_t bytemax)
-{
-	KUtilsGrowingArray *m = (KUtilsGrowingArray*)KCALLOC(sizeof(KUtilsGrowingArray), 1);
-	DBG_ASSERT(bytesize <= bytemax);
-	if(bytemax > 0) {
-		m->bytebuf = (char*)KCALLOC(bytemax, 1);
-		m->bytesize = bytesize;
-		m->bytemax = bytemax;
-	}
-	return m;
-}
-
 void KONOHA_freeObjectField(KonohaContext *kctx, kObjectVar *o)
 {
 	KonohaClass *ct = O_ct(o);

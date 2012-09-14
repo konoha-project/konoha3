@@ -27,6 +27,12 @@
 
 #define MAX 1000
 
+typedef int (*BuiltInTestFunc)(KonohaContext *kctx);
+typedef struct DEFINE_TESTFUNC {
+	const char *name;
+	BuiltInTestFunc f;
+} DEFINE_TESTFUNC;
+
 static uintptr_t keys[] = {
 	1, 3, 2, 3, 8, 1, 2, 4, 9, 12, 2, 19, 3, 2, 7, 9, 10,
 	11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
@@ -75,9 +81,10 @@ static int test_kwb(KonohaContext *kctx)
 {
 	const char *t= "0123456789012345678901234567890123456789";
 	size_t i = 0;
-	KUtilsGrowingArray *buf = new_karray(kctx, 0, 64);
+	KUtilsGrowingArray buf;
+	KLIB Karray_init(kctx, &buf, 64);
 	KUtilsWriteBuffer wb;
-	KLIB Kwb_init(buf, &wb);
+	KLIB Kwb_init(&buf, &wb);
 	KLIB Kwb_printf(kctx, &wb, "%s%s%s%s", t, t, t, t);
 	t = KLIB Kwb_top(kctx, &wb, 1);
 	while(*t != 0) {
@@ -87,8 +94,7 @@ static int test_kwb(KonohaContext *kctx)
 	}
 	assert(i == Kwb_bytesize(&wb));
 	KLIB Kwb_free(&wb);
-	KLIB Karray_free(kctx, buf);
-	KFREE(buf, sizeof(KUtilsGrowingArray));
+	KLIB Karray_free(kctx, &buf);
 	return 0;
 }
 
