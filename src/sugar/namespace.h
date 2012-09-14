@@ -533,12 +533,6 @@ static void kMethodList_matchMethod(KonohaContext *kctx, kArray *methodList, siz
 		max = kArray_size(methodList);
 		PLATAPI qsort_i(methodList->methodItems, max, sizeof(kMethod*), comprMethod);
 		sorted[0] = max;
-		for(i = 1; i < kArray_size(methodList); i++) {
-			long key1 = Method_id(methodList->methodItems[i-1]);
-			long key2 = Method_id(methodList->methodItems[i]);
-			DBG_P("%d: i=%d, %ld %ld", (key1 <= key2), i, key1, key2);
-			//DBG_ASSERT(key1 <= key2);
-		}
 	}
 	while(min < max) {
 		size_t p = (max + min) / 2;

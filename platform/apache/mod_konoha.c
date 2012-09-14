@@ -27,8 +27,13 @@
 
 #include "apr_strings.h"
 #include "http_log.h"
+#ifndef K_USE_PTHREAD
+#define K_USE_PTHREAD 1
+#endif
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
+extern int verbose_debug;
+#include <minikonoha/platform_posix.h>
 #include "../../package/apache/apache_glue.h"
 
 #ifndef K_PREFIX
@@ -42,102 +47,50 @@ typedef struct konoha_config {
 module AP_MODULE_DECLARE_DATA konoha_module;
 static const char *apache_package_path = NULL;
 
-static const char* packname(const char *str)
-{
-	char *p = strrchr(str, '.');
-	return (p == NULL) ? str : (const char*)p+1;
-}
-
-static const char* shell_packagepath(char *buf, size_t bufsiz, const char *fname)
-{
-	char *path = PLATAPI getenv_i("KONOHA_PACKAGEPATH"), *local = "";
-	if(path == NULL) {
-		path = PLATAPI getenv_i("KONOHA_HOME");
-		local = "/package";
-	}
-	if(path == NULL) {
-		path = PLATAPI getenv_i("HOME");
-		local = "/.minikonoha/package";
-	}
-	snprintf(buf, bufsiz, "%s%s/%s/%s_glue.k", path, local, fname, packname(fname));
-#ifdef K_PREFIX
-	FILE *fp = fopen(buf, "r");
-	if(fp != NULL) {
-		fclose(fp);
-	}
-	else {
-		snprintf(buf, bufsiz, K_PREFIX "/minikonoha/package" "/%s/%s_glue.k", fname, packname(fname));
-	}
-#endif
-	return (const char*)buf;
-}
-
-static const char* apache_packagepath(char *buf, size_t bufsiz, const char *fname)
+static const char *apache_formatPackagePath(char *buf, size_t bufsiz, const char *packageName, const char *ext)
 {
 	if (apache_package_path) {
-		snprintf(buf, bufsiz, "%s/%s/%s_glue.k", apache_package_path, fname, packname(fname));
+		snprintf(buf, bufsiz, "%s/%s/%s%s", apache_package_path, packageName, packname(packageName), ext);
 		FILE *fp = fopen(buf, "r");
 		if(fp != NULL) {
 			fclose(fp);
 			return buf;
 		}
 	}
-	return shell_packagepath(buf, bufsiz, fname);
+	return formatPackagePath(buf, bufsiz, packageName, ext);
 }
 
-static const char* shell_exportpath(char *buf, size_t bufsiz, const char *pname)
+static KonohaPackageHandler *apache_loadPackageHandler(const char *packageName)
 {
-	char *p = strrchr(buf, '/');
-	snprintf(p, bufsiz - (p  - buf), "/%s_exports.k", packname(pname));
-	FILE *fp = fopen(buf, "r");
-	if(fp != NULL) {
-		fclose(fp);
-		return (const char*)buf;
+	char pathbuf[256];
+	apache_formatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_glue" K_OSDLLEXT);
+	void *gluehdr = dlopen(pathbuf, RTLD_LAZY);
+	//fprintf(stderr, "pathbuf=%s, gluehdr=%p", pathbuf, gluehdr);
+	if(gluehdr != NULL) {
+		char funcbuf[80];
+		snprintf(funcbuf, sizeof(funcbuf), "%s_init", packname(packageName));
+		PackageLoadFunc f = (PackageLoadFunc)dlsym(gluehdr, funcbuf);
+		if(f != NULL) {
+			return f();
+		}
 	}
 	return NULL;
 }
 
-static const char* begin(kinfotag_t t) { (void)t; return ""; }
-static const char* end(kinfotag_t t) { (void)t; return ""; }
+static const char* apache_beginTag(kinfotag_t t) { (void)t; return ""; }
+static const char* apache_endTag(kinfotag_t t) { (void)t; return ""; }
 
-static void debugPrintf(const char *file, const char *func, int L, const char *fmt, ...)
+static PlatformApi *getApachePlatform()
 {
-	va_list ap;
-	va_start(ap , fmt);
-	fflush(stdout);
-	fprintf(stderr, "DEBUG(%s:%s:%d) ", file, func, L);
-	vfprintf(stderr, fmt, ap);
-	fprintf(stderr, "\n");
-	va_end(ap);
+	PlatformApiVar *apache_platformvar = (PlatformApiVar *)KonohaUtils_getDefaultPlatformApi();
+	apache_platformvar->name               = "apache";
+	apache_platformvar->stacksize          = K_PAGESIZE;
+	apache_platformvar->formatPackagePath  = apache_formatPackagePath;
+	apache_platformvar->loadPackageHandler = apache_loadPackageHandler;
+	apache_platformvar->beginTag           = apache_beginTag;
+	apache_platformvar->endTag             = apache_endTag;
+	return (PlatformApi *)apache_platformvar;
 }
-
-
-static const PlatformApi apache_platform = {
-	.name        = "apache",
-	.stacksize   = K_PAGESIZE,
-	.malloc_i    = malloc,
-	.free_i      = free,
-	.setjmp_i    = ksetjmp,
-	.longjmp_i   = klongjmp,
-	.realpath_i  = realpath,
-	.fopen_i     = (FILE_i* (*)(const char*, const char*))fopen,
-	.fgetc_i     = (int     (*)(FILE_i *))fgetc,
-	.feof_i      = (int     (*)(FILE_i *))feof,
-	.fclose_i    = (int     (*)(FILE_i *))fclose,
-	.syslog_i    = syslog,
-	.vsyslog_i   = vsyslog,
-	.printf_i    = printf,
-	.vprintf_i   = vprintf,
-	.snprintf_i  = snprintf,
-	.vsnprintf_i = vsnprintf,
-	.qsort_i     = qsort,
-	.exit_i      = exit,
-	.packagepath = apache_packagepath,
-	.exportpath  = shell_exportpath,
-	.begin       = begin,
-	.end         = end,
-	.debugPrintf       = debugPrintf,
-};
 
 // class methodList start ==============================================================================================
 // ## void Request.puts(String s)
@@ -159,6 +112,9 @@ static KMETHOD Request_getMethod(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Request_getArgs(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRequest *self = (kRequest *) sfp[0].asObject;
+	if(self->r->args == NULL) {
+		RETURN_(KNULL(String));
+	}
 	RETURN_(KLIB new_kString(kctx, self->r->args, strlen(self->r->args), 0));
 }
 // ## String Request.getUri();
@@ -209,13 +165,13 @@ static KMETHOD Request_logError(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Request_getHeadersIn(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRequest *self = (kRequest *) sfp[0].asObject;
-	RETURN_(KLIB new_kObject(kctx, CT_AprTable, (void*)self->r->headers_in));
+	RETURN_(KLIB new_kObject(kctx, CT_AprTable, (uintptr_t)self->r->headers_in));
 }
 // ## AprTable Request.getHeadersOut();
 static KMETHOD Request_getHeadersOut(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRequest *self = (kRequest *) sfp[0].asObject;
-	RETURN_(KLIB new_kObject(kctx, CT_AprTable, (void*)self->r->headers_out));
+	RETURN_(KLIB new_kObject(kctx, CT_AprTable, (uintptr_t)self->r->headers_out));
 }
 
 // ## void AprTable.add(String key, String val)
@@ -240,12 +196,12 @@ static KMETHOD AprTable_set(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD AprTable_getElts(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kAprTable *self = (kAprTable *) sfp[0].asObject;
-	kArray *arr = (kArray*)KLIB new_kObject(kctx, CT_Array, NULL);
+	kArray *arr = (kArray*)KLIB new_kObject(kctx, CT_Array, 0);
 	const apr_array_header_t *apr_arr = apr_table_elts(self->tbl);
 	const apr_table_entry_t *entries = (apr_table_entry_t *)apr_arr->elts;
 	int i=0;
 	for (i=0; i<apr_arr->nelts; i++) {
-		KLIB kArray_add(kctx, arr, (kAprTableEntry *)KLIB new_kObject(kctx, CT_AprTableEntry, entries));
+		KLIB kArray_add(kctx, arr, (kAprTableEntry *)KLIB new_kObject(kctx, CT_AprTableEntry, (uintptr_t)entries));
 		entries++;
 	}
 	RETURN_(arr);
@@ -266,8 +222,8 @@ static KMETHOD AprTableEntry_getVal(KonohaContext *kctx, KonohaStack *sfp)
 
 KonohaContext* konoha_create(KonohaClass **cRequest)
 {
-	KonohaContext* konoha = konoha_open(&apache_platform);
-	KonohaContext_t kctx = konoha;
+	PlatformApi *apache_platform = getApachePlatform();
+	KonohaContext* kctx = konoha_open(apache_platform);
 	kNameSpace *ns = KNULL(NameSpace);
 	KRequirePackage("apache", 0);
 	*cRequest = CT_Request;
@@ -277,8 +233,7 @@ KonohaContext* konoha_create(KonohaClass **cRequest)
 #define TY_Tbl  (CT_AprTable->typeId)
 #define TY_TblEntry  (CT_AprTableEntry->typeId)
 
-	kparamtype_t ps = {TY_TblEntry, FN_("aprTableEntry")};
-	KonohaClass *CT_TblEntryArray = KLIB KonohaClass_Generics(kctx, CT_Array, TY_TblEntry, 1, &ps);
+	KonohaClass *CT_TblEntryArray = CT_p0(kctx, CT_Array, TY_TblEntry);
 	ktype_t TY_TblEntryArray = CT_TblEntryArray->typeId;
 
 	int FN_x = FN_("x");
@@ -302,7 +257,7 @@ KonohaContext* konoha_create(KonohaClass **cRequest)
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
-	return konoha;
+	return kctx;
 }
 
 static int konoha_handler(request_rec *r)
@@ -317,23 +272,25 @@ static int konoha_handler(request_rec *r)
 	// 	return HTTP_METHOD_NOT_ALLOWED;
 	// }
 	KonohaClass *cRequest;
+	verbose_debug = 1;
 	KonohaContext* konoha = konoha_create(&cRequest);
 	//assert(cRequest != NULL);
 	r->content_encoding = "utf-8";
-	if (!konoha_load(konoha, r->filename)) {
+	ap_log_rerror(APLOG_MARK, APLOG_CRIT, 0, r, "filename=%s", r->filename);
+	if (konoha_load(konoha, r->filename)) {
 		return DECLINED;
 	}
 
-	KonohaContext_t kctx = (KonohaContext_t) konoha;
+	KonohaContext *kctx = konoha;
 	kNameSpace *ns = KNULL(NameSpace);
-	kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_System, MN_("handler"));
+	kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_System, MN_("handler"), -1);  // fixme
 	if (mtd == NULL) {
-		ap_log_rerror(APLOG_MARK, APLOG_CRIT, 0, r, "System.handler() not found");
+		ap_log_rerror(APLOG_MARK, APLOG_CRIT, 0, r, "Apache.handler() not found");
 		return -1;
 	}
 
 	/* XXX: We assume Request Object may not be freed by GC */
-	kObject *req_obj = KLIB new_kObject(kctx, cRequest, (void*)r);
+	kObject *req_obj = KLIB new_kObject(kctx, cRequest, (uintptr_t)r);
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
 	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, K_NULL, GC_NO_WRITE_BARRIER);
 	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, req_obj, GC_NO_WRITE_BARRIER);
