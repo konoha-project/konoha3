@@ -775,7 +775,7 @@ kObject *MODGC_omalloc(KonohaContext *kctx, size_t size)
 }
 
 
-void MODGC_check_malloced_size(void)
+void MODGC_check_malloced_size(KonohaContext *kctx)
 {
 }
 //TODO

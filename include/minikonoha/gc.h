@@ -45,7 +45,7 @@ extern kObject *MODGC_omalloc(KonohaContext *kctx, size_t size);
 /* root reftrace */
 extern void KonohaContext_reftraceAll(KonohaContext *kctx);
 
-extern void MODGC_check_malloced_size(void);
+extern void MODGC_check_malloced_size(KonohaContext *kctx);
 extern kbool_t MODGC_kObject_isManaged(KonohaContext *kctx, void *ptr);
 
 #ifdef __cplusplus

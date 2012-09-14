@@ -249,6 +249,7 @@ KonohaContext* konoha_open(const PlatformApi *platform)
 
 void konoha_close(KonohaContext* konoha)
 {
+	MODGC_check_malloced_size(konoha);
 	KonohaContext_free(konoha, (KonohaContextVar*)konoha);
 }
 

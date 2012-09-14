@@ -615,7 +615,6 @@ int main(int argc, char *argv[])
 	KonohaContext* konoha = konoha_open(plat);
 	ret = konoha_parseopt(konoha, (PlatformApiVar*)plat, argc, argv);
 	konoha_close(konoha);
-	MODGC_check_malloced_size();
 	return ret ? konoha_detectFailedAssert: 0;
 }
 

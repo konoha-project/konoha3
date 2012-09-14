@@ -320,7 +320,7 @@ DEF_BM( 64);DEF_BM(128);DEF_BM(256);
 #define BITMAP_L1_SIZE(N) (CEIL(((float)SEGMENT_SIZE)/PowerOf2(N)/BITS/BITS))
 #define BITMAP_L2_SIZE(N) (CEIL(((float)SEGMENT_SIZE)/PowerOf2(N)/BITS/BITS/BITS))
 
-static const size_t SegmentBitMapCount[] = {
+static const unsigned SegmentBitMapCount[] = {
 	0,0,0,0,0,
 	BITMAP_L0_SIZE(5 ),
 	BITMAP_L0_SIZE(6 ),
@@ -361,7 +361,7 @@ union AllocationBlock {
 };
 
 #define SEGMENT_BLOCK_COUNT(n) ((n >= SUBHEAP_KLASS_MIN)?(SEGMENT_SIZE / PowerOf2(n ) - 1):0)
-static const size_t SegmentBlockCount[] = {
+static const unsigned SegmentBlockCount[] = {
 	0, 0, 0,
 	SEGMENT_BLOCK_COUNT(3 ), SEGMENT_BLOCK_COUNT(4 ),
 	SEGMENT_BLOCK_COUNT(5 ), SEGMENT_BLOCK_COUNT(6 ),
@@ -570,15 +570,15 @@ static const fBITMAP_SET_LIMIT BITMAP_SET_LIMIT__[] = {
 	BITMAP_SET_LIMIT12
 };
 
-static inline void BITMAP_SET_LIMIT(bitmap_t *const bitmap, size_t klass)
+static inline void BITMAP_SET_LIMIT(bitmap_t *const bitmap, unsigned klass)
 {
 	BITMAP_SET_LIMIT__[klass](bitmap);
 	BM_SET(bitmap[0], 1);
 }
 
-static inline void BITPTRS_INIT(BitPtr bitptrs[SEGMENT_LEVEL], Segment *seg, size_t klass)
+static inline void BITPTRS_INIT(BitPtr bitptrs[SEGMENT_LEVEL], Segment *seg, unsigned klass)
 {
-	size_t i;
+	unsigned i;
 	BITPTRS_SET_BASE[klass](seg->base);
 	for (i = 0; i < SEGMENT_LEVEL; ++i) {
 		bitptrs[i].idx = 0;
@@ -596,14 +596,14 @@ static const fBITMAP_SET_LIMIT_AND_COPY_BM BITMAP_SET_LIMIT_AND_COPY_BM__[] = {
 	BITMAP_SET_LIMIT_AND_COPY_BM9, BITMAP_SET_LIMIT_AND_COPY_BM10, BITMAP_SET_LIMIT_AND_COPY_BM11,
 	BITMAP_SET_LIMIT_AND_COPY_BM12
 };
-static inline void BITMAP_SET_LIMIT_AND_COPY_BM(bitmap_t *const bitmap, bitmap_t *const snapshot, size_t klass)
+static inline void BITMAP_SET_LIMIT_AND_COPY_BM(bitmap_t *const bitmap, bitmap_t *const snapshot, unsigned klass)
 {
 	BITMAP_SET_LIMIT_AND_COPY_BM__[klass](bitmap, snapshot);
 	BM_SET(bitmap[0], 1);
 	BM_SET(snapshot[0], 1);
 }
 
-static inline void SNAPSHOT_INIT(Segment *seg, size_t klass)
+static inline void SNAPSHOT_INIT(Segment *seg, unsigned klass)
 {
 	BITPTRS_SET_BASE[klass](seg->snapshots);
 }
@@ -829,8 +829,8 @@ static void* Kmalloc(KonohaContext *kctx, size_t s)
 			KeyValue_p("to", ((char*)p)+s),
 			KeyValue_u("size", s));
 #endif
-#ifdef MEMORY_DEBUG
 	klib_malloced += s;
+#ifdef MEMORY_DEBUG
 	p[0] = s;
 	p += 1;
 #endif
@@ -844,8 +844,8 @@ static void* Kzmalloc(KonohaContext *kctx, size_t s)
 			+ sizeof(size_t)
 #endif
 			);
-#ifdef MEMORY_DEBUG
 	klib_malloced += s;
+#ifdef MEMORY_DEBUG
 	p[0] = s;
 	p += 1;
 #endif
@@ -855,9 +855,9 @@ static void* Kzmalloc(KonohaContext *kctx, size_t s)
 static void Kfree(KonohaContext *kctx, void *p, size_t s)
 {
 	size_t *pp = (size_t *)p;
+	klib_malloced -= s;
 #ifdef MEMORY_DEBUG
 	DBG_ASSERT(pp[-1] == s);
-	klib_malloced -= s;
 	pp -= 1;
 #endif
 #if GCDEBUG
@@ -983,7 +983,7 @@ static void findBlockOfLastSegment(Segment *seg, SubHeap *h, size_t size)
 
 static bool newSegment(HeapManager *mng, SubHeap *h)
 {
-	size_t klass = h->heap_klass;
+	unsigned klass = h->heap_klass;
 	Segment *seg = allocSegment(mng, klass);
 	DBG_ASSERT(h->freelist == NULL);
 
@@ -1025,7 +1025,7 @@ static inline bool freelist_isEmpty(SubHeap *h)
 	return (h->freelist == NULL);
 }
 
-static bool fetchSegment(SubHeap *h, size_t klass)
+static bool fetchSegment(SubHeap *h, unsigned klass)
 {
 	Segment *seg;
 	if (freelist_isEmpty(h))
@@ -1346,7 +1346,7 @@ static void HeapManager_delete(KonohaContext *kctx, HeapManager *mng)
 
 static SubHeap *findSubHeapBySize(HeapManager *mng, size_t n)
 {
-	size_t klass = SizeToKlass(n);
+	unsigned klass = SizeToKlass(n);
 	DBG_ASSERT(n <= SUBHEAP_KLASS_SIZE_MAX);
 	DBG_ASSERT(n != 0);
 	return &(mng->heaps)[klass];
@@ -1824,7 +1824,7 @@ void *bm_realloc(KonohaContext *kctx, void *ptr, size_t os, size_t ns)
 	tail  = &e->next;\
 } while (0)
 
-static void rearrangeSegList(SubHeap *h, size_t klass, bitmap_t *checkFull)
+static void rearrangeSegList(SubHeap *h, unsigned klass, bitmap_t *checkFull)
 {
 	size_t i, count_dead = 0;
 	Segment *unfilled = NULL, **unfilled_tail = &unfilled;
@@ -1942,10 +1942,10 @@ static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o)
 }
 
 /* [MODGC API] */
-void MODGC_check_malloced_size(void)
+void MODGC_check_malloced_size(KonohaContext *kctx)
 {
 	if (verbose_gc) {
-		fprintf(stdout, "\nklib:memory leaked=%ld\n", (long)klib_malloced);
+		PLATAPI printf_i("\nklib:memory leaked=%ld\n", (long)klib_malloced);
 	}
 }
 

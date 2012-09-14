@@ -42,7 +42,7 @@ int main(int argc, const char *argv[])
     for (i = 0; i < 100; ++i) {
         lib->Kfree(0, malloced[i], i);
     }
-    MODGC_check_malloced_size();
+    MODGC_check_malloced_size(konoha);
     for (i = 0; i < 100; ++i) {
         malloced[i] = lib->Kzmalloc(0, i);
         int j;
@@ -55,6 +55,5 @@ int main(int argc, const char *argv[])
         lib->Kfree(0, malloced[i], i);
     }
     konoha_close(konoha);
-    MODGC_check_malloced_size();
     return 0;
 }

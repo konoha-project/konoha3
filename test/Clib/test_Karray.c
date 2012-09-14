@@ -56,6 +56,5 @@ int main(int argc, const char *argv[])
         test_Karray(konoha);
     }
     konoha_close(konoha);
-    MODGC_check_malloced_size();
     return 0;
 }

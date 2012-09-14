@@ -105,7 +105,6 @@ int main(int argc, const char *argv[])
     konoha_close(konoha);
     assert(__free__ == __init__);
     fprintf(stderr, "alloced_object_count = %d, freed_object_count=%d\n", __init__, __free__);
-    MODGC_check_malloced_size();
     return ret;
 }
 
