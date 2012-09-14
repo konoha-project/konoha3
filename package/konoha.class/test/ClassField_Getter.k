@@ -14,8 +14,8 @@ class Person {
 
 void f() {
 	Person p = new Person("naruto", 17);
-	assert(p.getAge() == 17);
-	assert(p.getAge() == p.age);
+	assert(p.getage() == 17);
+	assert(p.getage() == p.age);
 }
 
 f();

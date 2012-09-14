@@ -6,10 +6,10 @@ void test() {
 	Mutex m = new Mutex();
 
 	m.lock();
-	assert(m.tryLock() == false); // fail
+	assert(m.trylock() == false); // fail
 	m.unlock();
 
-	assert(m.tryLock() == true); // success
+	assert(m.trylock() == true); // success
 	m.unlock();
 }
 

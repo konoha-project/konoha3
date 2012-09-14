@@ -18,8 +18,8 @@ class Person {
 
 void f() {
 	Person p = new Person("naruto", 17);
-	p.setChild(true);
-	assert(p.getChild());
+	p.setchild(true);
+	assert(p.getchild());
 	assert(p.isChild());
 }
 
