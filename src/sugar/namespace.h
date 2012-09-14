@@ -519,15 +519,27 @@ static inline long Method_id(kMethod *mtd)
 
 static int comprMethod(const void *a, const void *b)
 {
-	long aid = Method_id((kMethod*)a);
-	long bid = Method_id((kMethod*)b);
-	return aid - bid;
+	long aid = Method_id(((kMethod**)a)[0]);
+	long bid = Method_id(((kMethod**)b)[0]);
+	if(aid == bid) return 0;
+	return aid < bid ? -1 : 1;
 }
 
-static void kMethodList_matchMethod(KonohaContext *kctx, kArray *methodList, size_t sorted, ktype_t typeId, MethodMatchFunc MatchMethod, MethodMatch *option)
+static void kMethodList_matchMethod(KonohaContext *kctx, kArray *methodList, size_t *sorted, ktype_t typeId, MethodMatchFunc MatchMethod, MethodMatch *option)
 {
-	int i, min = 0, max = sorted;
+	long i, min = 0, max = sorted[0];
 	long optkey = ((long)typeId << (sizeof(kshort_t)*8)) | option->mn;
+	if(kArray_size(methodList) - max > 8) {
+		max = kArray_size(methodList);
+		PLATAPI qsort_i(methodList->methodItems, max, sizeof(kMethod*), comprMethod);
+		sorted[0] = max;
+		for(i = 1; i < kArray_size(methodList); i++) {
+			long key1 = Method_id(methodList->methodItems[i-1]);
+			long key2 = Method_id(methodList->methodItems[i]);
+			DBG_P("%d: i=%d, %ld %ld", (key1 <= key2), i, key1, key2);
+			//DBG_ASSERT(key1 <= key2);
+		}
+	}
 	while(min < max) {
 		size_t p = (max + min) / 2;
 		kMethod *mtd = methodList->methodItems[p];
@@ -542,7 +554,7 @@ static void kMethodList_matchMethod(KonohaContext *kctx, kArray *methodList, siz
 				i--;
 			}
 			i = p + 1;
-			while(i < sorted) {
+			while(i < sorted[0]) {
 				kMethod *mtd = methodList->methodItems[i];
 				if(Method_id(mtd) != optkey) break;
 				MatchMethod(kctx, mtd, option);
@@ -557,7 +569,7 @@ static void kMethodList_matchMethod(KonohaContext *kctx, kArray *methodList, siz
 			max = p;
 		}
 	}
-	for(i = sorted; i < kArray_size(methodList); i++) {
+	for(i = sorted[0]; i < kArray_size(methodList); i++) {
 		kMethod *mtd = methodList->methodItems[i];
 		long key = Method_id(mtd);
 		if(key == optkey) {
@@ -572,13 +584,13 @@ static kMethod* kNameSpace_matchMethodNULL(KonohaContext *kctx, kNameSpace *star
 	while(ct != NULL) {
 		kNameSpace *ns = startNameSpace;
 		while(ns != NULL) {
-			kMethodList_matchMethod(kctx, ns->methodList, 0, ct->typeId, MatchMethod, option);
+			kMethodList_matchMethod(kctx, ns->methodList, &ns->sortedConstTable, ct->typeId, MatchMethod, option);
 			if(option->isBreak) {
 				return option->foundMethodNULL;
 			}
 			ns = ns->parentNULL;
 		}
-		kMethodList_matchMethod(kctx, ct->methodList, 0, ct->typeId, MatchMethod, option);
+		kMethodList_matchMethod(kctx, ct->methodList, &ct->sortedMethodList, ct->typeId, MatchMethod, option);
 		if(option->isBreak) {
 			return option->foundMethodNULL;
 		}
@@ -772,7 +784,6 @@ static kMethod* kNameSpace_addMethod(KonohaContext *kctx, kNameSpace *ns, kMetho
 	else {
 		foundMethod = kNameSpace_getMethodByParamSizeNULL(kctx, ns, ct->typeId, mtd->mn, Method_paramsize(mtd));
 		if(foundMethod != NULL) {
-			DBG_P("set overloading method %s.%s%s", Method_t(foundMethod));
 			Method_setOverloaded(foundMethod, true);
 			Method_setOverloaded(mtd, true);
 		}

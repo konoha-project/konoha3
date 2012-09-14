@@ -743,7 +743,7 @@ struct KonohaClassVar {
 	kushort_t  fieldsize;         kushort_t fieldAllocSize;
 	const char               *DBG_NAME;
 	ksymbol_t   classNameSymbol;  kushort_t   optvalue;
-
+	size_t      sortedMethodList;
 	kArray     *methodList;
 	kString    *shortNameNULL;
 	union {   // default value
