@@ -355,12 +355,23 @@ static KMETHOD ExprTyCheck_assign(KonohaContext *kctx, KonohaStack *sfp)
 			if(MN_isGETTER(mtd->mn)) {
 				ktype_t cid = leftHandExpr->cons->exprItems[1]->ty;
 				ktype_t paramType = leftHandExpr->ty; //CT_(cid)->realtype(kctx, CT_(cid), CT_(leftHandExpr->ty));
-				ksymbol_t kw = SYM_UNMASK(mtd->mn);
-				mtd = KLIB kNameSpace_getSetterMethodNULL(kctx, ns, cid, kw, paramType);
-				if(mtd != NULL) {
-					KSETv(leftHandExpr->cons, leftHandExpr->cons->methodItems[0], mtd);
+				ksymbol_t sym = SYM_UNMASK(mtd->mn);
+				kMethod *foundMethod = KLIB kNameSpace_getSetterMethodNULL(kctx, ns, cid, sym, paramType);
+				if(foundMethod != NULL) {
+					KSETv(leftHandExpr->cons, leftHandExpr->cons->methodItems[0], foundMethod);
 					KLIB kArray_add(kctx, leftHandExpr->cons, rightHandExpr);
-					RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, leftHandExpr, mtd, gma, reqty));
+					RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, leftHandExpr, foundMethod, gma, reqty));
+				}
+				kParam *pa = Method_param(mtd);
+				if (pa->psize == 1) { /* transform "T1 A.get(T2)" to "void A.set(T2, T1)" */
+					kparamtype_t p[2] = {{pa->paramtypeItems[0].ty}, {pa->rtype}};
+					kparamid_t paramdom = KLIB Kparamdom(kctx, 2, p);
+					foundMethod = kNameSpace_getMethodBySignatureNULL(kctx, ns, cid, MN_toSETTER(sym), paramdom, 2, p);
+					if(foundMethod != NULL) {
+						KSETv(leftHandExpr->cons, leftHandExpr->cons->methodItems[0], foundMethod);
+						KLIB kArray_add(kctx, leftHandExpr->cons, rightHandExpr);
+						RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, leftHandExpr, foundMethod, gma, reqty));
+					}
 				}
 			}
 		}
