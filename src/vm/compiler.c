@@ -222,8 +222,10 @@ static kBasicBlock *kStmt_getLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbo
 }
 
 /* ------------------------------------------------------------------------ */
+#ifndef PLATAPIFORM_KERNEL
 #include "dumpvisitor.c"
 #include "jsvisitor.c"
+#endif
 /* ------------------------------------------------------------------------ */
 #if defined(K_USING_THCODE_)
 #define TADDR   NULL, 0/*counter*/

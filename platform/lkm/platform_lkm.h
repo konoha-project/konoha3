@@ -34,7 +34,7 @@ typedef long intptr_t;
 typedef intptr_t FILE;
 
 #define TODO_LKM
-#define PLATAPI getenv_i(a) NULL
+//#define getenv_i(a) NULL
 #define stdin  ((FILE*)NULL)
 #define stdout KERN_INFO
 #define stderr KERN_ALERT
@@ -118,10 +118,10 @@ static inline int feof(void *fp)
 #define dlopen(a,b) NULL
 #define dlsym(a,b) NULL
 
-static inline char *realpath(const char *a,char *b)
+static inline const char *shortFilePath(const char *path)
 {
-	(void)a;(void)b;
-	return NULL;
+	(void)path;
+	return "kernel";
 }
 
 #define LOG_INFO 0

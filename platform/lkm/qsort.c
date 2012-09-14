@@ -36,7 +36,7 @@ __FBSDID("$FreeBSD$");
 
 #include <stdlib.h>
 #else
-#include "konoha_lkm.h"
+#include "platform_lkm.h"
 #endif
 
 #ifdef I_AM_QSORT_R

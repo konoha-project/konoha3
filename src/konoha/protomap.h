@@ -1,7 +1,9 @@
+#ifndef PLATAPIFORM_KERNEL
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#endif
 
 #ifndef KJSON_MAP_H
 #define KJSON_MAP_H
