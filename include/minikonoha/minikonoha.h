@@ -78,7 +78,7 @@ extern "C" {
 #include <assert.h>
 #include <string.h>
 #else
-#include "konoha_lkm.h"
+#include "platform_lkm.h"
 #endif /* PLATAPIFORM_KERNEL */
 
 #include <stddef.h>
