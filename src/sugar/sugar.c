@@ -265,10 +265,12 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kToken_printMessage        = kToken_printMessage;
 	mod->kStmt_printMessage2        = kStmt_printMessage2;
 
+#ifndef USE_SMALLBUILD
 	mod->dumpToken      = dumpToken;
 	mod->dumpTokenArray = dumpTokenArray;
 	mod->dumpExpr       = dumpExpr;
 	mod->dumpStmt       = dumpStmt;
+#endif
 
 	defineDefaultSyntax(kctx, KNULL(NameSpace));
 }

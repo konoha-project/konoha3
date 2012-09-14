@@ -650,6 +650,7 @@ static kExpr* kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, k
 #ifdef USE_SMALLBUILD
 #define KdumpToken(ctx, tk)
 #define KdumpTokenArray(CTX, TLS, S, E)
+#define KdumpTokenRange(CTX, MSG, R)
 #define KdumpStmt(CTX, STMT)
 #define KdumpExpr(CTX, EXPR)
 #else
