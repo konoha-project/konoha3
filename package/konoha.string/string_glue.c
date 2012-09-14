@@ -35,14 +35,15 @@ extern "C" {
 #endif
 /*
  * Bit encoding for Rope String
- * 5432109876543210
- * 000xxxxxxxxxxxxx ==> magicflag bit representation
- * 001xxxxxxxxxxxxx LinerString
- * 011xxxxxxxxxxxxx ExterenalString
- * 010xxxxxxxxxxxxx InlinedString
- * 100xxxxxxxxxxxxx RopeString
- * xxx1xxxxxxxxxxxx ASCII-String
- * xxxx1xxxxxxxxxxx Pooled-String
+ * ObjectHeader's magicflag space
+ * [StringType]    | MSB ------------------------ LSB
+ * (not-allowed)   | xxxxxxxxxxxxxxxx000xxxxxxxxxxxxx
+ * LinerString     | xxxxxxxxxxxxxxxx001xxxxxxxxxxxxx
+ * ExterenalString | xxxxxxxxxxxxxxxx011xxxxxxxxxxxxx
+ * InlinedString   | xxxxxxxxxxxxxxxx010xxxxxxxxxxxxx
+ * RopeString      | xxxxxxxxxxxxxxxx100xxxxxxxxxxxxx
+ * ASCII-String    | xxxxxxxxxxxxxxxxxxx1xxxxxxxxxxxx
+ * Pooled-String   | xxxxxxxxxxxxxxxxxxxx1xxxxxxxxxxx
  */
 #define S_isRope(o)          (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
 
