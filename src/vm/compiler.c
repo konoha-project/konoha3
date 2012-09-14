@@ -146,8 +146,8 @@ static void handleExpr(KonohaContext *kctx, IRBuilder *builder, kExpr *expr)
 		case TEXPR_AND:      builder->api.visitAndExpr(kctx, builder, expr);    break;
 		case TEXPR_OR:       builder->api.visitOrExpr(kctx, builder, expr);     break;
 		case TEXPR_LET:      builder->api.visitLetExpr(kctx, builder, expr);    break;
-		case TEXPR_STACKTOP:
-		default: builder->api.visitStackTopExpr(kctx, builder, expr);    break;
+		case TEXPR_STACKTOP: builder->api.visitStackTopExpr(kctx, builder, expr);break;
+		default: DBG_ABORT("unknown expr=%d", expr->build);
 	}
 	builder->a = a;
 	builder->espidx = espidx;

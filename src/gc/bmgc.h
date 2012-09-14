@@ -1124,10 +1124,11 @@ static BlockPtr *blockAddress(Segment *seg, uintptr_t idx, uintptr_t mask)
 
 static bool findNextFreeBlock(AllocationPointer *p)
 {
-	uintptr_t i, idx = BP(p, 0).idx;
+	uintptr_t idx = BP(p, 0).idx;
 	BP_NEXT_MASK(p, BP(p, 0).idx, BP(p, 0).mask, 0);
 	if (BP(p, 0).mask == 0) {
 		BitPtr *bp;
+		unsigned i;
 #if GCDEBUG
 		gc_info("klass=%" PREFIX_d ", idx=%" PREFIX_d " mask=%" PREFIX_x", seg=%p",
 				(p->seg)?p->seg->heap_klass:-1,
