@@ -652,24 +652,22 @@ static size_t sweep0(KonohaContext *kctx, void *p, int n, size_t sizeOfObject)
 		}\
 	}\
 	CHECK_EXPAND(listSize,n);\
+	return collected;\
 } while (0)
 
 static size_t gc_sweep0(KonohaContext *kctx)
 {
 	GC_SWEEP(0);
-	return collected;
 }
 
 static size_t gc_sweep1(KonohaContext *kctx)
 {
 	GC_SWEEP(1);
-	return collected;
 }
 
 static size_t gc_sweep2(KonohaContext *kctx)
 {
 	GC_SWEEP(2);
-	return collected;
 }
 
 static void gc_sweep(KonohaContext *kctx)
