@@ -59,7 +59,7 @@ static kObject *new_kObject(KonohaContext *kctx, KonohaClass *ct, uintptr_t conf
 	kObjectVar *o = (kObjectVar*) MODGC_omalloc(kctx, ct->cstruct_size);
 	o->h.magicflag = ct->magicflag;
 	o->h.ct = ct;
-	o->h.kvproto = (KUtilsGrowingArray*)protomap_new(0);
+	o->h.kvproto = (KUtilsGrowingArray*) Kprotomap_new(0);
 	ct->init(kctx, (kObject*)o, (void*)conf);
 	return (kObject*)o;
 }

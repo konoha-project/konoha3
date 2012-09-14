@@ -39,10 +39,10 @@ typedef struct dictmap_t {
 	kushort_t hash_list[DICTMAP_THRESHOLD];
 } dictmap_t;
 
-typedef union protomap_t {
+typedef union Kprotomap_t {
 	hashmap_t h;
 	dictmap_t d;
-} protomap_t;
+} Kprotomap_t;
 
 typedef struct map_iterator {
 	long index;
@@ -55,44 +55,43 @@ typedef enum map_status_t {
 } map_status_t;
 
 struct map_api {
-	map_record_t *(*_get)(protomap_t *m, unsigned hash);
-	map_status_t  (*_set)(protomap_t *m, unsigned hash, unsigned type, void *val, protomap_t **map);
-	map_record_t *(*_next)(protomap_t *m, protomap_iterator *itr);
-	void (*_remove)(protomap_t *m, unsigned hash);
-	void (*_init)(protomap_t *m, unsigned init);
-	void (*_dispose)(protomap_t *m);
+	map_record_t *(*_get)(Kprotomap_t *m, unsigned hash);
+	map_status_t  (*_set)(Kprotomap_t *m, unsigned hash, unsigned type, void *val, Kprotomap_t **map);
+	map_record_t *(*_next)(Kprotomap_t *m, protomap_iterator *itr);
+	void (*_remove)(Kprotomap_t *m, unsigned hash);
+	void (*_init)(Kprotomap_t *m, unsigned init);
+	void (*_dispose)(Kprotomap_t *m);
 };
 
-static protomap_t *protomap_new(unsigned init);
-//static void protomap_init(protomap_t *m, unsigned init);
-static void protomap_delete(protomap_t *m);
+static Kprotomap_t *Kprotomap_new(unsigned init);
+static void protomap_delete(Kprotomap_t *m);
 
-static inline void protomap_dispose(protomap_t *m)
+static inline void protomap_dispose(Kprotomap_t *m)
 {
 	m->h.base.api->_dispose(m);
 }
 
-static inline map_record_t *protomap_get(protomap_t *m, unsigned hash)
+static inline KUtilsKeyValue *protomap_get(Kprotomap_t *m, unsigned hash)
 {
-	return m->h.base.api->_get(m, hash);
+	return (KUtilsKeyValue *) m->h.base.api->_get(m, hash);
 }
 
-static inline map_status_t protomap_set(protomap_t **m, unsigned hash, unsigned type, void *val)
+static inline map_status_t protomap_set(Kprotomap_t **m, unsigned hash, unsigned type, void *val)
 {
 	return (*m)->h.base.api->_set(*m, hash, type, val, m);
 }
 
-static inline void protomap_remove(protomap_t *m, unsigned hash)
+static inline void protomap_remove(Kprotomap_t *m, unsigned hash)
 {
 	return m->h.base.api->_remove(m, hash);
 }
 
-static inline map_record_t *protomap_next(protomap_t *m, protomap_iterator *itr)
+static inline KUtilsKeyValue *protomap_next(Kprotomap_t *m, protomap_iterator *itr)
 {
-	return m->h.base.api->_next(m, itr);
+	return (KUtilsKeyValue *) m->h.base.api->_next(m, itr);
 }
 
-static inline unsigned protomap_size(protomap_t *m)
+static inline unsigned protomap_size(Kprotomap_t *m)
 {
 	return m->h.base.used_size;
 }
@@ -109,22 +108,14 @@ static inline unsigned protomap_size(protomap_t *m)
 #define POWER_OF_TWO(N) ((unsigned)(BITS - CLZ(N - 1)))
 #endif
 
-#ifndef unlikely
-#define unlikely(x)   __builtin_expect(!!(x), 0)
-#endif
-
-#ifndef likely
-#define likely(x)     __builtin_expect(!!(x), 1)
-#endif
-
 #define MAP_INITSIZE DICTMAP_THRESHOLD
 
 #define _MALLOC(SIZE)    malloc(SIZE)
 #define _FREE(PTR, SIZE) free(PTR)
 
-static inline protomap_t *protomap_create(const protomap_api_t *api)
+static inline Kprotomap_t *protomap_create(const protomap_api_t *api)
 {
-	protomap_t *m = (protomap_t *) _MALLOC(sizeof(*m));
+	Kprotomap_t *m = (Kprotomap_t *) _MALLOC(sizeof(*m));
 	m->h.base.api = api;
 	m->h.base.used_size = 0;
 	return m;
@@ -225,25 +216,25 @@ static void hashmap_init(hashmap_t *m, unsigned init)
 	hashmap_record_reset(m, 1U << (POWER_OF_TWO(init)));
 }
 
-static void hashmap_api_init(protomap_t *m, unsigned init)
+static void hashmap_api_init(Kprotomap_t *m, unsigned init)
 {
 	hashmap_init((hashmap_t *) m, init);
 }
 
-static void hashmap_api_dispose(protomap_t *_m)
+static void hashmap_api_dispose(Kprotomap_t *_m)
 {
 	hashmap_t *m = (hashmap_t *) _m;
 	_FREE(m->base.records, (m->record_size_mask+1) * sizeof(map_record_t));
 }
 
-static map_record_t *hashmap_api_get(protomap_t *_m, unsigned hash)
+static map_record_t *hashmap_api_get(Kprotomap_t *_m, unsigned hash)
 {
 	hashmap_t *m = (hashmap_t *) _m;
 	map_record_t *r = hashmap_get(m, hash);
 	return r;
 }
 
-static map_status_t hashmap_api_set(protomap_t *_m, unsigned hash, unsigned type, void *val, protomap_t **ptr)
+static map_status_t hashmap_api_set(Kprotomap_t *_m, unsigned hash, unsigned type, void *val, Kprotomap_t **ptr)
 {
 	(void)ptr;
 	hashmap_t *m = (hashmap_t *) _m;
@@ -254,7 +245,7 @@ static map_status_t hashmap_api_set(protomap_t *_m, unsigned hash, unsigned type
 	return hashmap_set(m, &r);
 }
 
-static void hashmap_api_remove(protomap_t *_m, unsigned hash)
+static void hashmap_api_remove(Kprotomap_t *_m, unsigned hash)
 {
 	hashmap_t *m = (hashmap_t *) _m;
 	map_record_t *r = hashmap_get(m, hash);
@@ -265,7 +256,7 @@ static void hashmap_api_remove(protomap_t *_m, unsigned hash)
 	}
 }
 
-static map_record_t *hashmap_api_next(protomap_t *_m, protomap_iterator *itr)
+static map_record_t *hashmap_api_next(Kprotomap_t *_m, protomap_iterator *itr)
 {
 	hashmap_t *m = (hashmap_t *) _m;
 	unsigned i, size = (m->record_size_mask);
@@ -289,15 +280,15 @@ static const protomap_api_t HASH_API = {
 	hashmap_api_dispose
 };
 
-static protomap_t *hashmap_new(unsigned init)
+static Kprotomap_t *hashmap_new(unsigned init)
 {
-	protomap_t *m = protomap_create(&HASH_API);
+	Kprotomap_t *m = protomap_create(&HASH_API);
 	hashmap_init((hashmap_t *) m, init);
 	return m;
 }
 
 /* [DICTMAP] */
-static protomap_t *dictmap_init(dictmap_t *m)
+static Kprotomap_t *dictmap_init(dictmap_t *m)
 {
 	int i;
 	const size_t allocSize = sizeof(map_record_t)*DICTMAP_THRESHOLD;
@@ -307,10 +298,10 @@ static protomap_t *dictmap_init(dictmap_t *m)
 		m->hash_list[i] = 0;
 		m->base.records[i].type = 0;
 	}
-	return (protomap_t *) m;
+	return (Kprotomap_t *) m;
 }
 
-static void dictmap_api_init(protomap_t *_m, unsigned init)
+static void dictmap_api_init(Kprotomap_t *_m, unsigned init)
 {
 	dictmap_init((dictmap_t *) _m);
 	(void)init;
@@ -368,7 +359,7 @@ static map_record_t *dictmap_get(dictmap_t *m, unsigned hash)
 	return NULL;
 }
 
-static map_status_t dictmap_api_set(protomap_t *_m, unsigned hash, unsigned type, void *val, protomap_t **ptr)
+static map_status_t dictmap_api_set(Kprotomap_t *_m, unsigned hash, unsigned type, void *val, Kprotomap_t **ptr)
 {
 	(void)ptr;
 	dictmap_t *m = (dictmap_t *)_m;
@@ -379,7 +370,7 @@ static map_status_t dictmap_api_set(protomap_t *_m, unsigned hash, unsigned type
 	return dictmap_set(m, &r);
 }
 
-static void dictmap_api_remove(protomap_t *_m, unsigned hash)
+static void dictmap_api_remove(Kprotomap_t *_m, unsigned hash)
 {
 	dictmap_t *m = (dictmap_t *)_m;
 	map_record_t *r = dictmap_get(m, hash);
@@ -390,7 +381,7 @@ static void dictmap_api_remove(protomap_t *_m, unsigned hash)
 	}
 }
 
-static map_record_t *dictmap_api_next(protomap_t *_m, protomap_iterator *itr)
+static map_record_t *dictmap_api_next(Kprotomap_t *_m, protomap_iterator *itr)
 {
 	dictmap_t *m = (dictmap_t *)_m;
 	unsigned i;
@@ -402,14 +393,14 @@ static map_record_t *dictmap_api_next(protomap_t *_m, protomap_iterator *itr)
 	return NULL;
 }
 
-static map_record_t *dictmap_api_get(protomap_t *_m, unsigned hash)
+static map_record_t *dictmap_api_get(Kprotomap_t *_m, unsigned hash)
 {
 	dictmap_t *m = (dictmap_t *)_m;
 	map_record_t *r = dictmap_get(m, hash);
 	return r;
 }
 
-static void dictmap_api_dispose(protomap_t *_m)
+static void dictmap_api_dispose(Kprotomap_t *_m)
 {
 	dictmap_t *m = (dictmap_t *)_m;
 	free((map_record_t *)m->base.records);
@@ -424,9 +415,9 @@ static const protomap_api_t DICT_API = {
 	dictmap_api_dispose
 };
 
-static protomap_t *dictmap_new()
+static Kprotomap_t *dictmap_new()
 {
-	protomap_t *m = protomap_create(&DICT_API);
+	Kprotomap_t *m = protomap_create(&DICT_API);
 	return dictmap_init((dictmap_t *) m);
 }
 
@@ -436,36 +427,36 @@ typedef struct nullmap_t {
 	struct map_base base;
 } nullmap_t;
 
-static void nullmap_api_init(protomap_t *m, unsigned init)
+static void nullmap_api_init(Kprotomap_t *m, unsigned init)
 {
 	(void)m; (void) init;
 }
 
-static map_status_t nullmap_api_set(protomap_t *_m, unsigned hash, unsigned type, void *val, protomap_t **ptr)
+static map_status_t nullmap_api_set(Kprotomap_t *_m, unsigned hash, unsigned type, void *val, Kprotomap_t **ptr)
 {
 	(void)_m;
 	*ptr = dictmap_new();
 	return dictmap_api_set(*ptr, hash, type, val, ptr);
 }
 
-static void nullmap_api_remove(protomap_t *_m, unsigned hash)
+static void nullmap_api_remove(Kprotomap_t *_m, unsigned hash)
 {
 	(void)_m; (void)hash;
 }
 
-static map_record_t *nullmap_api_next(protomap_t *_m, protomap_iterator *itr)
+static map_record_t *nullmap_api_next(Kprotomap_t *_m, protomap_iterator *itr)
 {
 	(void)_m; (void)itr;
 	return NULL;
 }
 
-static map_record_t *nullmap_api_get(protomap_t *_m, unsigned hash)
+static map_record_t *nullmap_api_get(Kprotomap_t *_m, unsigned hash)
 {
 	(void)_m; (void)hash;
 	return NULL;
 }
 
-static void nullmap_api_dispose(protomap_t *_m)
+static void nullmap_api_dispose(Kprotomap_t *_m)
 {
 	(void)_m;
 }
@@ -483,23 +474,23 @@ static const nullmap_t nullmap = {
 	{&NULL_API, 0, 0}
 };
 
-static inline protomap_t *nullmap_new(void)
+static inline Kprotomap_t *nullmap_new(void)
 {
-	return (protomap_t *) &nullmap;
+	return (Kprotomap_t *) &nullmap;
 }
 
 /* [PROTOMAP] */
-static protomap_t *protomap_new(unsigned init)
+static Kprotomap_t *Kprotomap_new(unsigned init)
 {
-	protomap_t *m = (init == 0) ? nullmap_new() :
+	Kprotomap_t *m = (init == 0) ? nullmap_new() :
 		(init <= DICTMAP_THRESHOLD) ? dictmap_new() : hashmap_new(init);
 	return m;
 }
 
-static void protomap_delete(protomap_t *m)
+static void protomap_delete(Kprotomap_t *m)
 {
 	protomap_dispose(m);
-	if (m != (protomap_t*)&nullmap) {
+	if (m != (Kprotomap_t *)&nullmap) {
 		free(m);
 	}
 }

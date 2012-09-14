@@ -400,7 +400,7 @@ static ksymbol_t Ksymbol(KonohaContext *kctx, const char *name, size_t len, int 
 void KONOHA_freeObjectField(KonohaContext *kctx, kObjectVar *o)
 {
 	KonohaClass *ct = O_ct(o);
-	protomap_delete((protomap_t*)o->h.kvproto);
+	protomap_delete((Kprotomap_t *)o->h.kvproto);
 	ct->free(kctx, o);
 }
 
@@ -408,12 +408,12 @@ void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o)
 {
 	unsigned map_size;
 	O_ct(o)->reftrace(kctx, o);
-	map_size = protomap_size((protomap_t*)o->h.kvproto);
+	map_size = protomap_size((Kprotomap_t *)o->h.kvproto);
 	if (map_size) {
 		protomap_iterator itr = {0};
 		KUtilsKeyValue *d;
 		BEGIN_REFTRACE(map_size);
-		while ((d = (KUtilsKeyValue*)protomap_next((protomap_t*)o->h.kvproto, &itr)) != NULL) {
+		while ((d = protomap_next((Kprotomap_t *)o->h.kvproto, &itr)) != NULL) {
 			if(SYMKEY_isBOXED(d->key)) {
 				KREFTRACEv(d->objectValue);
 			}
@@ -424,36 +424,36 @@ void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o)
 
 static kObject* kObject_getObjectNULL(KonohaContext *kctx, kObject *o, ksymbol_t key, kObject *defval)
 {
-	KUtilsKeyValue *d = (KUtilsKeyValue*)protomap_get((protomap_t*)o->h.kvproto, key | SYMKEY_BOXED);
+	KUtilsKeyValue *d = protomap_get((Kprotomap_t *)o->h.kvproto, key | SYMKEY_BOXED);
 	return (d != NULL) ? d->objectValue : defval;
 }
 
 static void kObject_setObject(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, ktype_t ty, kObject *val)
 {
 	kObjectVar *v = (kObjectVar*)o;
-	protomap_set((protomap_t**)&v->h.kvproto, key | SYMKEY_BOXED, ty, (void*)val);
+	protomap_set((Kprotomap_t **)&v->h.kvproto, key | SYMKEY_BOXED, ty, (void*)val);
 	KLIB Kwrite_barrier(kctx, v);
 }
 
 static uintptr_t kObject_getUnboxValue(KonohaContext *kctx, kObject *o, ksymbol_t key, uintptr_t defval)
 {
-	KUtilsKeyValue *d = (KUtilsKeyValue*)protomap_get((protomap_t*)o->h.kvproto, key);
+	KUtilsKeyValue *d = protomap_get((Kprotomap_t *)o->h.kvproto, key);
 	return (d != NULL) ? d->unboxValue : defval;
 }
 
 static void kObject_setUnboxValue(KonohaContext *kctx, kObject *o, ksymbol_t key, ktype_t ty, uintptr_t unboxValue)
 {
 	kObjectVar *v = (kObjectVar*)o;
-	protomap_set((protomap_t**)&v->h.kvproto, key, ty, (void*)unboxValue);
+	protomap_set((Kprotomap_t **)&v->h.kvproto, key, ty, (void*)unboxValue);
 }
 
 static void kObject_removeKey(KonohaContext *kctx, kObject *o, ksymbol_t key)
 {
-	KUtilsKeyValue *d = (KUtilsKeyValue*)protomap_get((protomap_t*)o->h.kvproto, key | SYMKEY_BOXED);
+	KUtilsKeyValue *d = protomap_get((Kprotomap_t *)o->h.kvproto, key | SYMKEY_BOXED);
 	if(d != NULL) {
 		d->key = 0; d->ty = 0; d->unboxValue = 0;
 	}
-	d = (KUtilsKeyValue*)protomap_get((protomap_t*)o->h.kvproto, key);
+	d = protomap_get((Kprotomap_t *)o->h.kvproto, key);
 	if(d != NULL) {
 		d->key = 0; d->ty = 0; d->unboxValue = 0;
 	}
@@ -462,10 +462,10 @@ static void kObject_removeKey(KonohaContext *kctx, kObject *o, ksymbol_t key)
 typedef void (*feach)(KonohaContext *kctx, void *, KUtilsKeyValue *d);
 static void kObject_protoEach(KonohaContext *kctx, kObject *o, void *thunk, feach f)
 {
-	map_record_t *r;
+	KUtilsKeyValue *r;
 	protomap_iterator itr = {0};
-	while ((r = protomap_next((protomap_t*)o->h.kvproto, &itr)) != NULL) {
-		f(kctx, thunk, (KUtilsKeyValue*)r);
+	while ((r = protomap_next((Kprotomap_t *)o->h.kvproto, &itr)) != NULL) {
+		f(kctx, thunk, r);
 	}
 }
 
