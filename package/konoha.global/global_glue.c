@@ -115,7 +115,7 @@ static kbool_t kNameSpace_initGlobalObject(KonohaContext *kctx, kNameSpace *ns, 
 static KMETHOD StmtTyCheck_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_StmtTyCheck(stmt, gma);
-	kbool_t result;
+	kbool_t result = false;
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	if(kNameSpace_initGlobalObject(kctx, ns, stmt->uline)) {
 		kToken *tk  = SUGAR kStmt_getToken(kctx, stmt, KW_TypePattern, NULL);
