@@ -126,6 +126,7 @@ static char parseBinaryDigit(char c)
 	return ('0' == c || c == '1') ? c - '0' : -1;
 }
 
+#include <stdio.h>
 static KMETHOD parseNumber(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *)sfp[1].o;
@@ -144,6 +145,7 @@ static KMETHOD parseNumber(KonohaContext *kctx, KonohaStack *sfp)
 	 * INT    = DIGITS | HEXS | BINS
 	 */
 	int base = 10;
+	bool isFloat = false;
 	char (*parseDigit)(char) = parseDecimalDigit;
 	if (c == '0') {
 		c = *source++;
@@ -157,7 +159,8 @@ static KMETHOD parseNumber(KonohaContext *kctx, KonohaStack *sfp)
 				base = 8; parseDigit = parseOctalDigit;
 				break;
 			default:
-				RETURNi_(0);
+				source--;
+				break;
 		}
 	}
 	for (; (c = *source) != 0; ++source) {
@@ -166,6 +169,48 @@ static KMETHOD parseNumber(KonohaContext *kctx, KonohaStack *sfp)
 			break;
 	}
 
+	/*
+	 * DIGIT  = 0-9
+	 * DIGITS = DIGIT | DIGIT DIGITS
+	 * INT    = DIGIT | DIGIT1-9 DIGITS
+	 * FLOAT  = INT
+	 *        | INT FRAC
+	 *        | INT EXP
+	 *        | INT FRAC EXP
+	 * FRAC   = "." digits
+	 * EXP    = E digits
+	 * E      = 'e' | 'e+' | 'e-' | 'E' | 'E+' | 'E-'
+	 */
+	if (base != 10 && c != '.' && c != 'e' && c != 'E') {
+		goto L_emit;
+	}
+	if (c == '.') {
+		isFloat = true;
+		source++;
+		for (; (c = *source) != 0; ++source) {
+			if (c == '_') continue;
+			if (parseDecimalDigit(c) == -1)
+				break;
+		}
+	}
+	if (c == 'e' || c == 'E') {
+		isFloat = true;
+		c = *(++source);
+		if (!('0' <= c && c <= '9') && !(c == '+' || c == '-')) {
+			source--;
+			goto L_emit;
+		}
+		if (c == '+' || c == '-') {
+			c = *source++;
+		}
+		for (; (c = *source) != 0; ++source) {
+			if (c == '_') continue;
+			if (parseDecimalDigit(c) == -1)
+				break;
+		}
+	}
+
+	L_emit:;
 	end = source;
 	if (IS_NOTNULL(tk)) {
 		/* skip unit */
@@ -175,7 +220,7 @@ static KMETHOD parseNumber(KonohaContext *kctx, KonohaStack *sfp)
 			c = *source++;
 		}
 		KSETv(tk, tk->text, KLIB new_kString(kctx, start, end - start, SPOL_ASCII));
-		tk->unresolvedTokenType = TokenType_INT;
+		tk->unresolvedTokenType = isFloat ? SYM_("$Float") : TokenType_INT;
 	}
 	RETURNi_(source - start);
 }
@@ -242,10 +287,7 @@ static kbool_t int_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpa
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 	kMethod *mtd = KLIB new_kMethod(kctx, 0, 0, 0, parseNumber);
 	kFunc *fo = GCSAFE_new(Func, (uintptr_t) mtd);
-	int i;
-	for (i = 0; i <= 9; i++) {
-		SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '0'+i, NULL, fo, 0);
-	}
+	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '0', NULL, fo, 0);
 
 	SugarSyntaxVar *syn = (SugarSyntaxVar*)SUGAR kNameSpace_getSyntax(kctx, ns, SYM_("+"), 0);
 	if(syn != NULL) {
