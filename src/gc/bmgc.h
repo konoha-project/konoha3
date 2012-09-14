@@ -43,6 +43,8 @@ extern "C" {
 #define GCSTAT 1
 #endif
 
+//#define MEMORY_DEBUG 1
+
 /* memory config */
 
 #define GC_USE_DEFERREDSWEEP 1
@@ -101,6 +103,7 @@ extern "C" {
 #endif
 
 static inline void *do_malloc(size_t size);
+static inline void *do_calloc(size_t count, size_t size);
 static inline void *do_realloc(void *ptr, size_t oldSize, size_t newSize);
 static inline void  do_free(void *ptr, size_t size);
 static inline void  do_bzero(void *ptr, size_t size);
@@ -778,6 +781,13 @@ static inline void *do_malloc(size_t size)
 	return ptr;
 }
 
+static inline void *do_calloc(size_t count, size_t size)
+{
+	void *ptr = calloc(count, size);
+	DBG_CHECK_MALLOCED_INC_SIZE(size);
+	return ptr;
+}
+
 static inline void *do_realloc(void *ptr, size_t oldSize, size_t newSize)
 {
 	char *newptr = (char *) realloc(ptr, newSize);
@@ -799,7 +809,11 @@ static ssize_t klib_malloced = 0;
 
 static void* Kmalloc(KonohaContext *kctx, size_t s)
 {
-	size_t *p = (size_t*)do_malloc(s + sizeof(size_t));
+	size_t *p = (size_t*)do_malloc(s
+#ifdef MEMORY_DEBUG
+			+ sizeof(size_t)
+#endif
+			);
 	if (unlikely(p == NULL)) {
 		ktrace(_ScriptFault|_SystemFault,
 			KeyValue_s("!",  "OutOfMemory"),
@@ -815,25 +829,37 @@ static void* Kmalloc(KonohaContext *kctx, size_t s)
 			KeyValue_p("to", ((char*)p)+s),
 			KeyValue_u("size", s));
 #endif
-	p[0] = s;
+#ifdef MEMORY_DEBUG
 	klib_malloced += s;
-	return (void*)(p+1);
+	p[0] = s;
+	p += 1;
+#endif
+	return (void*)p;
 }
 
 static void* Kzmalloc(KonohaContext *kctx, size_t s)
 {
+	size_t *p = (size_t*)do_calloc(1, s
+#ifdef MEMORY_DEBUG
+			+ sizeof(size_t)
+#endif
+			);
+#ifdef MEMORY_DEBUG
 	klib_malloced += s;
-	size_t *p = (size_t*)do_malloc(s + sizeof(size_t));
 	p[0] = s;
-	do_bzero(p+1, s);
-	return (void*)(p+1);
+	p += 1;
+#endif
+	return (void*)(p);
 }
 
 static void Kfree(KonohaContext *kctx, void *p, size_t s)
 {
 	size_t *pp = (size_t *)p;
+#ifdef MEMORY_DEBUG
 	DBG_ASSERT(pp[-1] == s);
-	do_free(pp - 1, s + sizeof(size_t));
+	klib_malloced -= s;
+	pp -= 1;
+#endif
 #if GCDEBUG
 	ktrace(LOGPOL_DEBUG,
 			KeyValue_s("@", "free"),
@@ -841,7 +867,11 @@ static void Kfree(KonohaContext *kctx, void *p, size_t s)
 			KeyValue_p("to", ((char*)p)+s),
 			KeyValue_u("size", s));
 #endif
-	klib_malloced -= s;
+	do_free(pp, s
+#ifdef MEMORY_DEBUG
+			+ sizeof(size_t)
+#endif
+			);
 }
 
 /* ------------------------------------------------------------------------ */
