@@ -631,6 +631,13 @@ static kbool_t MethodMatch_Param0(KonohaContext *kctx, kMethod *mtd, MethodMatch
 	return false;
 }
 
+static kbool_t MethodMatch_ParamNoCheck(KonohaContext *kctx, kMethod *mtd, MethodMatch *m)
+{
+	m->foundMethodNULL = mtd;
+	m->isBreak = true;
+	return true;
+}
+
 static kbool_t CT_isa(KonohaContext *kctx, ktype_t cid1, ktype_t cid2)
 {
 	DBG_ASSERT(cid1 != cid2); // should be checked
@@ -722,7 +729,9 @@ static kMethod* kNameSpace_getMethodByParamSizeNULL(KonohaContext *kctx, kNameSp
 	MethodMatch m = {};
 	m.mn = symbol;
 	m.paramsize = paramsize;
-	return kNameSpace_matchMethodNULL(kctx, ns, cid, paramsize == 0 ? MethodMatch_Param0 : MethodMatch_ParamSize, &m);
+	MethodMatchFunc func = paramsize == 0 ? MethodMatch_Param0 : MethodMatch_ParamSize;
+	if(paramsize == -1) func = MethodMatch_ParamNoCheck;
+	return kNameSpace_matchMethodNULL(kctx, ns, cid, func, &m);
 }
 
 static kMethod* kNameSpace_getMethodBySignatureNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ksymbol_t symbol, int paramdom, int paramsize, kparamtype_t *param)
