@@ -211,14 +211,14 @@ static KMETHOD parseNumber(KonohaContext *kctx, KonohaStack *sfp)
 	}
 
 	L_emit:;
-	end = source;
 	if (IS_NOTNULL(tk)) {
 		/* skip unit */
-		while (isalpha(c) && c != 0) {
-			if (*source == 0)
+		for (; (c = *source) != 0; ++source) {
+			if (c == '_') continue;
+			if (!isalpha(c))
 				break;
-			c = *source++;
 		}
+		end = source;
 		KSETv(tk, tk->text, KLIB new_kString(kctx, start, end - start, SPOL_ASCII));
 		tk->unresolvedTokenType = isFloat ? SYM_("$Float") : TokenType_INT;
 	}
