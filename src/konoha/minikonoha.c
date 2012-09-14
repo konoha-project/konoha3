@@ -223,6 +223,7 @@ static void KonohaContext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 		KonohaRuntime_free(kctx, ctx);
 		MODGC_free(kctx, ctx);
 		MODLOGGER_free(kctx, ctx);
+		MODGC_check_malloced_size(kctx);
 		free(kctx->modlocal);
 		free(kctx->modshare);
 		free(kklib/*, sizeof(KonohaLib) + sizeof(KonohaContextVar)*/);
@@ -249,7 +250,6 @@ KonohaContext* konoha_open(const PlatformApi *platform)
 
 void konoha_close(KonohaContext* konoha)
 {
-	MODGC_check_malloced_size(konoha);
 	KonohaContext_free(konoha, (KonohaContextVar*)konoha);
 }
 
