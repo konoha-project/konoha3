@@ -695,13 +695,35 @@ static kMethod* kNameSpace_getStaticFuncNULL(KonohaContext *kctx, kNameSpace *ns
 	return kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_StaticFunc, &m);
 }
 
+static ksymbol_t anotherSymbol(KonohaContext *kctx, ksymbol_t symbol)
+{
+	kString *s = SYM_s(symbol);
+	size_t len = S_size(s);
+	char t[len+1];
+	memcpy(t, S_text(s), len);
+	t[len]=0;
+	if(isupper(t[0])) {
+		t[0] = tolower(t[0]);
+	}
+	else {
+		t[0] = toupper(t[0]);
+	}
+	DBG_P("'%s' => '%s'", S_text(s), t);
+	return KLIB Ksymbol(kctx, (const char *)t, len, 0, SYM_NONAME);
+}
+
 static kMethod* kNameSpace_getGetterMethodNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ksymbol_t symbol, ktype_t type)
 {
 	if(symbol != SYM_NONAME) {
 		MethodMatch m = {};
 		m.mn = MN_toGETTER(symbol);
 		m.paramsize = 0;
-		return kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_Param0, &m);
+		kMethod *mtd = kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_Param0, &m);
+		if(mtd == NULL && ((symbol = anotherSymbol(kctx, symbol)) != SYM_NONAME)) {
+			m.mn = MN_toGETTER(symbol);
+			mtd = kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_Param0, &m);
+		}
+		return mtd;
 	}
 	return NULL;
 }
@@ -712,14 +734,21 @@ static kMethod* kNameSpace_getSetterMethodNULL(KonohaContext *kctx, kNameSpace *
 		MethodMatch m = {};
 		m.mn = MN_toSETTER(symbol);
 		m.paramsize = 1;
+		MethodMatchFunc func;
 		if(type == TY_var) {
-			return kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_ParamSize, &m);
+			func = MethodMatch_ParamSize;
 		}
 		else {
 			kparamtype_t p = {type};
 			m.paramdom = KLIB Kparamdom(kctx, 1, &p);
-			return kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_Signature, &m);
+			func = MethodMatch_Signature;
 		}
+		kMethod *mtd = kNameSpace_matchMethodNULL(kctx, ns, cid, func, &m);
+		if(mtd == NULL && ((symbol = anotherSymbol(kctx, symbol)) != SYM_NONAME)) {
+			m.mn = MN_toSETTER(symbol);
+			mtd = kNameSpace_matchMethodNULL(kctx, ns, cid, func, &m);
+		}
+		return mtd;
 	}
 	return NULL;
 }
