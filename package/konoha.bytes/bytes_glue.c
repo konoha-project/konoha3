@@ -172,7 +172,7 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 	} /* end of converting loop */
 	PLATAPI iconv_close_i((uintptr_t)conv);
 
-	const char *KUtilsWriteBufferopChar = KLIB Kwb_top(kctx, &wb, 0);
+	const char *KUtilsWriteBufferopChar = KLIB Kwb_top(kctx, &wb, 1);
 	struct _kBytes *toBa = (struct _kBytes*)KLIB new_kObject(kctx, CT_Bytes, processedTotalSize); // ensure bytes ends with Zero
 	memcpy(toBa->buf, KUtilsWriteBufferopChar, processedTotalSize); // including NUL terminate by ensuredZeo
 	KLIB Kwb_free(&wb);
@@ -186,6 +186,13 @@ static KMETHOD Bytes_encodeTo(KonohaContext *kctx, KonohaStack *sfp)
 	kString *toCoding = sfp[1].asString;
 
 	RETURN_(convFromTo(kctx, ba, "UTF-8", S_text(toCoding)));
+}
+
+static kString *toString(KonohaContext *kctx, kBytes *ba)
+{
+	// At this point, we assuem 'ba' is null terminated.
+	DBG_ASSERT(strlen(ba->buf)+1 == ba->bytesize);
+	return KLIB new_kString(kctx, ba->buf, ba->bytesize-1, 0);
 }
 
 //## @Const method String Bytes.decodeFrom(String fromEncoding);
@@ -206,16 +213,17 @@ static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, KonohaStack *sfp)
 		toBa = convFromTo(kctx, fromBa, PLATAPI getSystemCharset(), "UTF-8");
 	}
 	DBG_P("size=%d, '%s'", toBa->bytesize, toBa->buf);
-	RETURN_(KLIB new_kString(kctx, toBa->buf,toBa->bytesize, 0));
+	RETURN_(toString(kctx, toBa));
 }
 
 //## @Const method Bytes String.asBytes();
 static KMETHOD String_asBytes(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString* s = sfp[0].s;
-	kBytes* ba = (kBytes*)KLIB new_kObject(kctx, CT_Bytes, S_size(s));
-	if (S_size(s) != 0) {
-		memcpy(ba->buf, s->utext, S_size(s)+1); // including NUL char
+	size_t size = S_size(s);
+	kBytes* ba = new_(Bytes, (size>0)?size+1:0);
+	if (size > 0) {
+		memcpy(ba->buf, s->utext, size+1); // including NUL char
 		DBG_ASSERT(ba->buf[S_size(s)] == '\0');
 	}
 	RETURN_(ba);
@@ -231,8 +239,7 @@ static KMETHOD Bytes_asString(KonohaContext *kctx, KonohaStack *sfp)
 	kBytes *from = sfp[0].ba;
 	kBytes *to = convFromTo(kctx, from, PLATAPI getSystemCharset(), "UTF-8");
 
-	// now ensures 0
-	RETURN_(KLIB new_kString(kctx, to->buf, to->bytesize, 0));
+	RETURN_(toString(kctx, to));
 }
 
 //## Int Bytes.get(Int n);
