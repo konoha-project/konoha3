@@ -48,6 +48,7 @@ int verbose_gc = 0;
 #define Object_unsetMark(o) TFLAG_set0(uintptr_t,(o)->h.magicflag,kObject_GCFlag)
 #define Object_setMark(o)   TFLAG_set1(uintptr_t,(o)->h.magicflag,kObject_GCFlag)
 #define Object_isMark(o)   (TFLAG_is(uintptr_t,(o)->h.magicflag, kObject_GCFlag))
+#define prefetch_(addr, rw, locality) __builtin_prefetch(addr, rw, locality)
 
 
 typedef struct kGCObject0 {
@@ -114,19 +115,24 @@ typedef struct objpageTBL_t {
 #define ARENA_COUNT_SIZE(size,c) (size) >> (c)
 #define K_ARENA_COUNT 3
 
+typedef struct MarkStack {
+	kObject **stack;
+	size_t tail;
+	size_t capacity;
+	size_t capacity_log2;
+} MarkStack;
+
 typedef struct kmemlocal_t {
 	KonohaModuleContext     h;
 	objpageTBL_t  *ObjectArenaTBL[K_ARENA_COUNT];
-	size_t          sizeObjectArenaTBL[K_ARENA_COUNT];
-	size_t          capacityObjectArenaTBL[K_ARENA_COUNT];
+	size_t         sizeObjectArenaTBL[K_ARENA_COUNT];
+	size_t         capacityObjectArenaTBL[K_ARENA_COUNT];
 
 	kGCObject     *freeObjectList[K_ARENA_COUNT];
 	kGCObject     *freeObjectTail[K_ARENA_COUNT];
 	size_t         freeObjectListSize[K_ARENA_COUNT];
 
-	kObject     **queue;
-	size_t        queue_capacity;
-	size_t        queue_log2;
+	MarkStack mstack;
 } kmemlocal_t;
 
 typedef struct kmemshare_t {
@@ -493,71 +499,54 @@ static void gc_extendObjectArena2(KonohaContext *kctx)
 }
 
 /* ------------------------------------------------------- */
+/* [mstack] */
 
-typedef struct knh_ostack_t {
-	kObject **stack;
-	size_t cur;
-	size_t tail;
-	size_t capacity;
-	size_t capacity_log2;
-} knh_ostack_t;
-
-static knh_ostack_t *ostack_init(KonohaContext *kctx, knh_ostack_t *ostack)
+static MarkStack *mstack_init(KonohaContext *kctx, MarkStack *mstack)
 {
-	ostack->capacity = memlocal(kctx)->queue_capacity;
-	ostack->stack = memlocal(kctx)->queue;
-	ostack->capacity_log2  = memlocal(kctx)->queue_log2;
-	if(ostack->capacity == 0) {
-		ostack->capacity_log2 = 12;
-		ostack->capacity = (1 << ostack->capacity_log2) - 1;
+	if (mstack->capacity == 0) {
+		mstack->capacity_log2 = 12;
+		mstack->capacity = (1 << mstack->capacity_log2) - 1;
 		DBG_ASSERT(K_PAGESIZE == 1 << 12);
-		ostack->stack = (kObject**)do_malloc(sizeof(kObject*) * (ostack->capacity + 1));
+		mstack->stack = (kObject**)do_malloc(sizeof(kObject*)*(mstack->capacity + 1));
 	}
-	ostack->cur  = 0;
-	ostack->tail = 0;
-	return ostack;
+	mstack->tail = 0;
+	return mstack;
 }
 
-static void ostack_push(KonohaContext *kctx, knh_ostack_t *ostack, kObject *ref)
+static void mstack_push(KonohaContext *kctx, MarkStack *mstack, kObject *ref)
 {
-	size_t ntail = (ostack->tail + 1 ) & ostack->capacity;
-	if(unlikely(ntail == ostack->cur)) {
-		size_t capacity = 1 << ostack->capacity_log2;
-		ostack->stack = (kObject**)do_realloc(ostack->stack, capacity * sizeof(kObject*), capacity * 2 * sizeof(kObject*));
-		ostack->capacity_log2 += 1;
-		ostack->capacity = (1 << ostack->capacity_log2) - 1;
-		ntail = (ostack->tail + 1) & ostack->capacity;
+	size_t ntail = (mstack->tail + 1) & mstack->capacity;
+	if (unlikely(ntail == 0)) {
+		size_t capacity = 1 << mstack->capacity_log2;
+		size_t stacksize = sizeof(kObject*) * capacity;
+		mstack->stack = (kObject**)do_realloc(mstack->stack, stacksize, stacksize * 2);
+		mstack->capacity_log2 += 1;
+		mstack->capacity = (1 << mstack->capacity_log2) - 1;
+		ntail = (mstack->tail + 1) & mstack->capacity;
 	}
-	ostack->stack[ostack->tail] = ref;
-	ostack->tail = ntail;
+	mstack->stack[mstack->tail] = ref;
+	mstack->tail = ntail;
 }
 
-static kObject *ostack_next(knh_ostack_t *ostack)
+static kObject *mstack_next(MarkStack *mstack)
 {
 	kObject *ref = NULL;
-	if(ostack->cur != ostack->tail) {
-		ostack->tail -=1;
-		ref = ostack->stack[ostack->tail];
+	if (likely(mstack->tail != 0)) {
+		mstack->tail -=1;
+		ref = mstack->stack[mstack->tail];
+		prefetch_(ref, 0, 0);
 	}
 	return ref;
 }
-
-static void ostack_free(KonohaContext *kctx, knh_ostack_t *ostack)
-{
-	memlocal(kctx)->queue_capacity = ostack->capacity;
-	memlocal(kctx)->queue = ostack->stack;
-	memlocal(kctx)->queue_log2 = ostack->capacity_log2;
-}
-
 /* --------------------------------------------------------------- */
 
 static int marked = 0;
-static void mark_ostack(KonohaContext *kctx, kObject *ref, knh_ostack_t *ostack,int i)
+static void mark_mstack(KonohaContext *kctx, kObject *ref, MarkStack *mstack)
 {
 	if(!Object_isMark(ref)) {
 		Object_setMark((kObjectVar *)ref);
 		++marked;
-		ostack_push(kctx, ostack, ref);
+		mstack_push(kctx, mstack, ref);
 	}
 }
 
@@ -570,7 +559,7 @@ static void gc_init(KonohaContext *kctx)
 static void gc_mark(KonohaContext *kctx)
 {
 	long i;
-	knh_ostack_t ostackbuf, *ostack = ostack_init(kctx, &ostackbuf);
+	MarkStack *mstack = mstack_init(kctx, &memlocal(kctx)->mstack);
 	KonohaStackRuntimeVar *stack = kctx->stack;
 	kObject *ref = NULL;
 	marked = 0;
@@ -579,18 +568,17 @@ static void gc_mark(KonohaContext *kctx)
 	KonohaContext_reftraceAll(kctx);
 	size_t ref_size = stack->reftail - stack->ref.refhead;
 	goto L_INLOOP;
-	while((ref = ostack_next(ostack)) != NULL) {
+	while((ref = mstack_next(mstack)) != NULL) {
 		context_reset_refs(kctx);
 		KONOHA_reftraceObject(kctx, ref);
 		ref_size = stack->reftail - stack->ref.refhead;
 		if(ref_size > 0) {
 			L_INLOOP:;
 			for (i = ref_size-1; i >= 0; --i) {
-				mark_ostack(kctx, stack->ref.refhead[i], ostack,1);
+				mark_mstack(kctx, stack->ref.refhead[i], mstack);
 			}
 		}
 	}
-	ostack_free(kctx, ostack);
 }
 
 #define CHECK_EXPAND(listSize,n) do {\
@@ -681,10 +669,10 @@ static void MSGC_local_free(KonohaContext *kctx, struct KonohaModuleContext *bas
 	ARENA_FINAL_FREE(1);
 	ARENA_FINAL_FREE(2);
 	Arena_free(kctx, local);
-	if(local->queue_capacity > 0) {
-		do_free(local->queue,  (local->queue_capacity + 1) * sizeof(kObject*));
-		local->queue = NULL;
-		local->queue_capacity = 0;
+	if(local->mstack.capacity > 0) {
+		do_free(local->mstack.stack,  (local->mstack.capacity + 1) * sizeof(kObject*));
+		local->mstack.stack = NULL;
+		local->mstack.capacity = 0;
 	}
 	do_free(local, sizeof(kmemlocal_t));
 	kctx->modlocal[MOD_gc] = NULL;
@@ -715,7 +703,7 @@ static void MSGC_reftrace(KonohaContext *kctx, struct KonohaModule *baseh) {}
 
 static void MSGC_free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
-	do_free(baseh, sizeof(kmemlocal_t));
+	do_free(baseh, sizeof(kmemshare_t));
 	kctx->modshare[MOD_gc] = NULL;
 }
 
@@ -740,7 +728,7 @@ void MODGC_free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	assert(memlocal(ctx) == NULL);
 	if(IS_RootKonohaContext(ctx)) {
-		MSGC_free(kctx, (KonohaModule*) memlocal(kctx));
+		MSGC_free(kctx, (KonohaModule*) memshare(kctx));
 		KLIB KonohaRuntime_setModule(kctx, MOD_gc, NULL, 0);
 	}
 }
@@ -762,7 +750,7 @@ kObject *MODGC_omalloc(KonohaContext *kctx, size_t size)
 void MODGC_check_malloced_size(KonohaContext *kctx)
 {
 }
-//TODO
+
 #define IS_Managed(n) do {\
 	objpageTBL_t *oat = memlocal(kctx)->ObjectArenaTBL[n];\
 	size_t atindex, size = memlocal(kctx)->sizeObjectArenaTBL[n];\
