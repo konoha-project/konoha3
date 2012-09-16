@@ -442,41 +442,41 @@ static kArray *RegExp_execute(KonohaContext *kctx, kRegExp *re, kString *s0)
 }
 
 /* ------------------------------------------------------------------------ */
-//## @Const method Boolean RegExp.getGlobal();
+//## @Const method Boolean RegExp.getglobal();
 
-static KMETHOD RegExp_getGlobal(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD RegExp_getglobal(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNb_(RegExp_isGlobal(sfp[0].re));
 }
 
 /* ------------------------------------------------------------------------ */
-//## @Const method Boolean RegExp.getIgnoreCase();
+//## @Const method Boolean RegExp.getignoreCase();
 
-static KMETHOD RegExp_getIgnoreCase(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD RegExp_getignoreCase(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNb_(RegExp_isIgnoreCase(sfp[0].re));
 }
 
 /* ------------------------------------------------------------------------ */
-//## @Const method Boolean RegExp.getMultiline();
+//## @Const method Boolean RegExp.getmultiline();
 
-static KMETHOD RegExp_getMultiline(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD RegExp_getmultiline(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNb_(RegExp_isMultiline(sfp[0].re));
 }
 
 /* ------------------------------------------------------------------------ */
-//## @Const method String RegExp.getSource();
+//## @Const method String RegExp.getsource();
 
-static KMETHOD RegExp_getSource(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD RegExp_getsource(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURN_(sfp[0].re->pattern);
 }
 
 /* ------------------------------------------------------------------------ */
-//## @Const method Int RegExp.getLastIndex();
+//## @Const method Int RegExp.getlastIndex();
 
-static KMETHOD RegExp_getLastIndex(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD RegExp_getlastIndex(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNi_(sfp[0].re->lastIndex);
 }
@@ -751,11 +751,11 @@ static kbool_t regexp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 
 	ktype_t TY_StringArray0 = CT_StringArray0->typeId;
 	KDEFINE_METHOD MethodData[] = {
-		/*JS*/_Public|_Const|_Im, _F(RegExp_getGlobal), TY_boolean, TY_RegExp, MN_("getGlobal"), 0,
-		/*JS*/_Public|_Const|_Im, _F(RegExp_getIgnoreCase), TY_boolean, TY_RegExp, MN_("getIgnoreCase"), 0,
-		/*JS*/_Public|_Const|_Im, _F(RegExp_getMultiline), TY_boolean, TY_RegExp, MN_("getMultiline"), 0,
-		/*JS*/_Public|_Const|_Im, _F(RegExp_getSource), TY_String, TY_RegExp, MN_("getSource"), 0,
-		/*JS*/_Public|_Const|_Im, _F(RegExp_getLastIndex), TY_int, TY_RegExp, MN_("getLastIndex"), 0,
+		/*JS*/_Public|_Const|_Im, _F(RegExp_getglobal), TY_boolean, TY_RegExp, MN_("getglobal"), 0,
+		/*JS*/_Public|_Const|_Im, _F(RegExp_getignoreCase), TY_boolean, TY_RegExp, MN_("getignoreCase"), 0,
+		/*JS*/_Public|_Const|_Im, _F(RegExp_getmultiline), TY_boolean, TY_RegExp, MN_("getmultiline"), 0,
+		/*JS*/_Public|_Const|_Im, _F(RegExp_getsource), TY_String, TY_RegExp, MN_("getsource"), 0,
+		/*JS*/_Public|_Const|_Im, _F(RegExp_getlastIndex), TY_int, TY_RegExp, MN_("getlastIndex"), 0,
 		/*JS*/_Public|_Im, _F(String_match), TY_StringArray0, TY_String, MN_("match"), 1, TY_RegExp, FN_("regexp"),
 		/*JS*/_Public|_Const|_Im, _F(String_replace), TY_String, TY_String, MN_("replace"), 2, TY_RegExp, FN_("searchvalue"), TY_String, FN_("newvalue"),
 		/*JS*/_Public|_Const|_Im, _F(String_search), TY_int, TY_String, MN_("search"), 1, TY_RegExp, FN_("searchvalue"),
