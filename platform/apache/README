@@ -20,7 +20,7 @@ konoha apache module.
 * Create /path/to/document_root/hello.k
   K.import("apache");
   
-  int System.handler(Request r) {
+  @Public int System.handler(Request r) {
       r.puts("<strong>hello world!</strong>")
       return APACHE_OK;
   }
