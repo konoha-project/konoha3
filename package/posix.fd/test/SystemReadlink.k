@@ -1,13 +1,12 @@
 //Written by Joseph
 
-K.import("konoha.new");
-K.import("konoha.bytes");
-K.import("posix.fd");
+import("konoha.bytes");
+import("posix.fd");
 
 void test() {
-	Bytes buf = new Bytes(4096);
-	assert(System.readlink("symlinked.txt", buf.asString(), buf.getsize()) > 0);
-	assert(System.readlink("notexist.txt", buf.asString(), buf.getsize()) == -1);
+	assert(System.readlink("files/readlink.txt") == "newfile.txt");
+	assert(System.readlink("files/newfile.txt") == "");
+	assert(System.readlink("files/notexist.txt") == "");
 }
 
 test();

@@ -27,8 +27,6 @@
 #include <unistd.h>
 #include <signal.h>
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/fcntl.h>
 #include <sys/resource.h>
 #include <sys/time.h>
 #include <grp.h>
@@ -98,15 +96,6 @@ static KMETHOD System_chdir(KonohaContext *kctx, KonohaStack *sfp)
 		// TODO: throw
 	}
 	RETURNi_(ret);
-}
-
-static KMETHOD System_fchdir(KonohaContext *kctx, KonohaStack *sfp)
-{
-	int ch = fchdir(sfp[1].intValue);
-	if(ch == -1) {
-		// TODO: throw
-	}
-	RETURNi_(ch);
 }
 
 static KMETHOD System_chroot(KonohaContext *kctx, KonohaStack *sfp)
@@ -289,32 +278,6 @@ static KMETHOD System_getsid(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(ret);
 }
 
-//## int System.open(String pathname, int flags)
-static KMETHOD System_open(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kString *s = sfp[1].asString;
-	const char *pathname = S_text(s);
-	int flags = sfp[2].intValue;
-	int ret = open(pathname, flags);
-	if(ret == -1) {
-		// TODO: throw
-	}
-	RETURNi_(ret);
-}
-
-//## int System.open(String pathname, int flags, int mode)
-static KMETHOD System_open_mode(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kString *s = sfp[1].asString;
-	const char *pathname = S_text(s);
-	int flags = sfp[2].intValue;
-	mode_t mode = sfp[3].intValue;
-	int ret = open(pathname, flags, mode);
-	if(ret == -1) {
-		// TODO: throw
-	}
-	RETURNi_(ret);
-}
 /* ------------------------------------------------------------------------ */
 
 #define _Public   kMethod_Public
@@ -342,7 +305,6 @@ static kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public|_Static, _F(System_getpgid), TY_int, TY_System, MN_("getpgid"), 1, TY_int, FN_("pid"),
 		_Public|_Static, _F(System_setpgid), TY_int, TY_System, MN_("setpgid"), 2, TY_int, FN_("pid"), TY_int, FN_("pgid"),
 		_Public|_Static, _F(System_chdir), TY_int, TY_System, MN_("chdir"), 1, TY_String, FN_("pathname"),
-		_Public|_Static, _F(System_fchdir), TY_int, TY_System, MN_("fchdir"), 1, TY_int, FN_("fd"),
 		_Public|_Static, _F(System_chroot), TY_int, TY_System, MN_("chroot"), 1, TY_String, FN_("pathname"),
 		_Public|_Static, _F(System_getpriority), TY_int, TY_System, MN_("getpriority"), 2, TY_int, FN_("which"), TY_int, FN_("who"),
 		_Public|_Static, _F(System_setpriority), TY_int, TY_System, MN_("setpriority"), 3, TY_int, FN_("which"), TY_int, FN_("who"), TY_int, FN_("priority"),
@@ -359,8 +321,6 @@ static kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public|_Static, _F(System_setregid), TY_int, TY_System, MN_("setrguid"), 2, TY_int, FN_("rgid"), TY_int, FN_("egid"),
 		_Public|_Static, _F(System_setsid), TY_int, TY_System, MN_("setsid"), 0,
 		_Public|_Static, _F(System_getsid), TY_int, TY_System, MN_("getsid"), 1, TY_int, FN_("pid"),
-		_Public|_Static, _F(System_open), TY_int, TY_System, MN_("open"), 2, TY_String, FN_("pathname"), TY_int, FN_("flags"),
-		_Public|_Static, _F(System_open_mode), TY_int, TY_System, MN_("open"), 3, TY_String, FN_("pathname"), TY_int, FN_("flags"), TY_int, FN_("mode"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
@@ -369,17 +329,6 @@ static kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		{_KVi(SIGINT)},
 		{_KVi(SIGABRT)},
 		{_KVi(SIGKILL)},
-		/*for System.open*/
-		{_KVi(O_RDONLY)},
-		{_KVi(O_WRONLY)},
-		{_KVi(O_RDWR)},
-		{_KVi(O_CREAT)},
-		{_KVi(O_EXCL)},
-		{_KVi(O_TRUNC)},
-		{_KVi(O_APPEND)},
-		{_KVi(O_NONBLOCK)},
-		{_KVi(O_NDELAY)},
-		{_KVi(O_NOCTTY)},
 		/*for System.setpriority*/
 		{_KVi(PRIO_PROCESS)},
 		{_KVi(PRIO_PGRP)},

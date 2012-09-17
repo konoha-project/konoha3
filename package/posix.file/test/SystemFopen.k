@@ -1,32 +1,29 @@
 //Written by Joseph
-K.import("konoha");
-K.import("konoha.bytes");
-K.import("posix.file");
-K.import("posix.fd");
+
+import("konoha");
+import("konoha.bytes");
+import("posix.file");
+import("posix.fd");
 
 void test() {
-	FILE f = System.fopen("testfile.txt", "r");
+	FILE f = System.fopen("files/opentest.txt", "r");
 	assert(f.isNotNull());
 	f.close();
-	assert(f.isNull());
-	f = System.fopen("testfile.txt", "w");
+	f = System.fopen("files/opentest.txt", "w");
 	assert(f.isNotNull());
 	f.close();
-	assert(f.isNull());
-	f = System.fopen("testfile.txt", "a");
+	f = System.fopen("files/opentest.txt", "a");
 	assert(f.isNotNull());
 	f.close();
-	assert(f.isNull());
-	f = System.fopen("notexist.txt", "r");
-	assert(f.isNull());
+	f = System.fopen("files/notexist.txt", "r");//fail to open
 	f.close();
-	f = System.fopen("notexist.txt", "w");//Create the file.
+	f = System.fopen("files/notexist.txt", "w");//Create the file.
 	assert(f.isNotNull());
 	f.close();
-	f = System.fopen("notexist.txt", "a");//Create the file.
+	f = System.fopen("files/notexist.txt", "a");//Create the file.
 	assert(f.isNotNull());
 	f.close();
-	System.unlink("notexist.txt");
+	System.unlink("files/notexist.txt");
 }
 
 test();

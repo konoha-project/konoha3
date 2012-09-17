@@ -1,6 +1,7 @@
 //Written by Joseph
-K.import("konoha.bytes");
-K.import("posix.file");
+
+import("konoha.bytes");
+import("posix.file");
 
 void test() {
 	assert(System.mkdir("fuga", 0777) == 0);

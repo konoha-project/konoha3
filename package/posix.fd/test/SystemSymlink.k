@@ -1,14 +1,14 @@
 //Written by Joseph
 
-K.import("posix.fd");
+import("posix.fd");
 
 void test() {
-	if (System.access("symlinked.txt", F_OK) == 0) {
-		System.unlink("symlinked.txt");
+	if (System.access("files/symlinked.txt", F_OK) == 0) {
+		System.unlink("files/symlinked.txt");
 	}
-	assert(System.symlink("newfile.txt", "symlinked.txt") == 0);
-	assert(System.symlink("newfile.txt", "newfile.txt") == -1);
-	assert(System.symlink("notexist.txt", "symlinked.txt") == -1);
+	assert(System.symlink("files/newfile.txt", "files/symlinked.txt") == 0);
+	assert(System.symlink("files/newfile.txt", "files/newfile.txt") == -1);
+	assert(System.symlink("files/notexist.txt", "files/symlinked.txt") == -1);
 }
 
 test();

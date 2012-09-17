@@ -1,8 +1,8 @@
 //Written by Joseph
 
-K.import("konoha.bytes");
-K.import("posix.fd");
-K.import("posix.file");
+import("konoha.bytes");
+import("posix.fd");
+import("posix.file");
 
 void test() {
 	System.mkdir("hoge", 0777);
