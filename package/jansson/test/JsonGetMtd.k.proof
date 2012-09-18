@@ -1,5 +1,5 @@
  - (JsonGetMtd.k:25) 10
- - (JsonGetMtd.k:26) 1.000000
+ - (JsonGetMtd.k:26) 1.000000e+00
  - (JsonGetMtd.k:27) hoge
  - (JsonGetMtd.k:28) true
  - (JsonGetMtd.k:32) {"foo": "bar"}

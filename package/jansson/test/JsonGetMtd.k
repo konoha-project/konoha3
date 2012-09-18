@@ -21,7 +21,7 @@ void main() {
 	*/
 
 	Json j = new Json();
-	Json parsed = j.parse(sample);
+	Json parsed = Json.parse(sample);
 	p(parsed.getInt("int"));
 	p(parsed.getFloat("float"));
 	p(parsed.getString("string"));
@@ -32,7 +32,7 @@ void main() {
 		p(a[i]);
 		i += 1;
 	}
-	p(parsed.get("json"));
+	p(parsed.getJson("json"));
 	String[] keys = parsed.getKeys();
 	i = 0;
 	while(i < keys.getSize()) {
