@@ -131,6 +131,7 @@ typedef struct kmemlocal_t {
 	kGCObject     *freeObjectList[K_ARENA_COUNT];
 	kGCObject     *freeObjectTail[K_ARENA_COUNT];
 	size_t         freeObjectListSize[K_ARENA_COUNT];
+	size_t         gc_threshold[K_ARENA_COUNT];
 
 	MarkStack mstack;
 } kmemlocal_t;
@@ -141,6 +142,10 @@ typedef struct kmemshare_t {
 
 #define memlocal(kctx) ((kmemlocal_t*)((kctx)->modlocal[MOD_gc]))
 #define memshare(kctx) ((kmemshare_t*)((kctx)->modshare[MOD_gc]))
+
+#define INIT_THRESHOLD_SIZE(i) do {\
+	memlocal(kctx)->gc_threshold[i] = memlocal(kctx)->freeObjectListSize[i] / 8;\
+} while(0);
 
 static void Arena_init(KonohaContext *kctx, kmemlocal_t *memlocal)
 {
@@ -234,8 +239,8 @@ static void Kfree(KonohaContext *kctx, void *p, size_t s)
 
 /* ------------------------------------------------------- */
 #define FREELIST_POP(o,i) do {\
-	if(memlocal(kctx)->freeObjectList[i] == NULL) {\
-		KLIB Kgc_invoke(kctx,0);\
+	if(memlocal(kctx)->freeObjectListSize[i] <= memlocal(kctx)->gc_threshold[i]) {\
+		((KonohaContextVar*)kctx)->safepoint = 1;\
 	}\
 	DBG_ASSERT(memlocal(kctx)->freeObjectList[i] != NULL);\
 	o = memlocal(kctx)->freeObjectList[i];\
@@ -304,6 +309,7 @@ static void ObjectArenaTBL_init0(KonohaContext *kctx, objpageTBL_t *oat, size_t 
 		ObjectPage_init0(opage);
 		memlocal(kctx)->freeObjectListSize[0] += K_PAGEOBJECTSIZE(0);
 	}
+	INIT_THRESHOLD_SIZE(0);
 	(opage-1)->slots[K_PAGEOBJECTSIZE(0) - 1].ref = NULL;
 }
 
@@ -317,6 +323,7 @@ static void ObjectArenaTBL_init1(KonohaContext *kctx, objpageTBL_t *oat, size_t 
 		ObjectPage_init1(opage);
 		memlocal(kctx)->freeObjectListSize[1] += K_PAGEOBJECTSIZE(1);
 	}
+	INIT_THRESHOLD_SIZE(1);
 	(opage-1)->slots[K_PAGEOBJECTSIZE(1) - 1].ref = NULL;
 }
 
@@ -330,6 +337,7 @@ static void ObjectArenaTBL_init2(KonohaContext *kctx, objpageTBL_t *oat, size_t 
 		ObjectPage_init2(opage);
 		memlocal(kctx)->freeObjectListSize[2] += K_PAGEOBJECTSIZE(2);
 	}
+	INIT_THRESHOLD_SIZE(2);
 	(opage-1)->slots[K_PAGEOBJECTSIZE(2) - 1].ref = NULL;
 }
 
@@ -582,7 +590,7 @@ static void gc_mark(KonohaContext *kctx)
 }
 
 #define CHECK_EXPAND(listSize,n) do {\
-	if(memlocal(kctx)->freeObjectListSize[n] < listSize / 10) {/* 90% */\
+	if(memlocal(kctx)->freeObjectListSize[n] <= memlocal(kctx)->gc_threshold[n]) {\
 		gc_extendObjectArena##n(kctx);\
 	}\
 } while (0)
@@ -644,6 +652,7 @@ static void gc_sweep(KonohaContext *kctx)
 	gc_sweep0(kctx);
 	gc_sweep1(kctx);
 	gc_sweep2(kctx);
+	((KonohaContextVar *)kctx)->safepoint = 0;
 }
 
 /* --------------------------------------------------------------- */
