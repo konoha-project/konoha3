@@ -416,15 +416,18 @@ endforeach(f ${test_files})
 add_subdirectory(platform/dse)
 add_subdirectory(platform/apache)
 
+# for konoha command
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/platform/shell/konoha.sh.cmake
+		${CMAKE_CURRENT_BINARY_DIR}/konoha.sh)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/konoha.sh
+	DESTINATION bin
+	RENAME konoha
+	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
 install(TARGETS minikonoha minikonoha_bin
 		RUNTIME DESTINATION bin
 		LIBRARY DESTINATION lib${LIB_SUFFIX}
 		)
-
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/platform/shell/konoha.sh
-	DESTINATION bin
-	RENAME konoha
-	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
 install(DIRECTORY include/ DESTINATION include 
 		FILES_MATCHING
