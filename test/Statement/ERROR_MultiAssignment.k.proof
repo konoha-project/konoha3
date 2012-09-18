@@ -1,0 +1,3 @@
+ - (error) (ERROR_MultiAssignment.k:5) undefined operator type checker: ,
+ ** RuntimeScriptException (ERROR_MultiAssignment.k:5)
+Q.E.D.

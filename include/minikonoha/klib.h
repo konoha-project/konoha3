@@ -22,8 +22,16 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#ifndef KONOHA2_INLINELIBS_H_
-#define KONOHA2_INLINELIBS_H_
+#ifndef MINIOKNOHA_INLINELIBS_H_
+#define MINIOKNOHA_INLINELIBS_H_
+
+#ifndef MINIOKNOHA_H_
+#error Do not include klib.h without minikonoha.h.
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define kinline __attribute__((unused))
 
@@ -43,13 +51,6 @@ static kinline uintptr_t strhash(const char *name, size_t len)
 		hcode = name[i] + (31 * hcode);
 	}
 	return hcode;
-}
-
-static kinline const char* shortfilename(const char *str)
-{
-	/*XXX g++ 4.4.5 need char* cast to compile it. */
-	char *p = (char *) strrchr(str, '/');
-	return (p == NULL) ? str : (const char*)p+1;
 }
 
 #define FileId_s(X)  FileId_s_(kctx, X)
@@ -127,7 +128,6 @@ static kinline kbool_t sym_equals(KonohaContext *kctx, ksymbol_t s1, ksymbol_t s
 	return false;
 }
 
-
 static kinline uintptr_t longid(kushort_t packageDomain, kushort_t un)
 {
 	uintptr_t hcode = packageDomain;
@@ -152,6 +152,7 @@ static kinline uintptr_t map_getu(KonohaContext *kctx, KUtilsHashMap *kmp, uintp
 	KUtilsHashMapEntry *e = KLIB Kmap_get(kctx, kmp, hcode);
 	while(e != NULL) {
 		if(e->hcode == hcode) return e->unboxValue;
+		e = e->next;
 	}
 	return def;
 }
@@ -175,7 +176,7 @@ static kinline size_t check_index(KonohaContext *kctx, kint_t n, size_t max, kfi
 {
 	size_t n1 = (size_t)n;
 	if(unlikely(!(n1 < max))) {
-		kreportf(CritTag, pline, "Script!!: out of array index %ld < %lu", n, max);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfArrayBoundary"), NULL, pline, NULL);
 	}
 	return n1;
 }
@@ -204,11 +205,14 @@ static const char _utf8len[] = {
 };
 #endif
 
-static kinline void Method_setProceedMethod(KonohaContext *kctx, kMethod *mtd, kMethod *mtd2)
-{
-	DBG_ASSERT(mtd != mtd2);
-	DBG_ASSERT(mtd->proceedNUL == NULL);
-	KINITv(((kMethodVar*)mtd)->proceedNUL, mtd2);
-}
+//static kinline void Method_setProceedMethod(KonohaContext *kctx, kMethod *mtd, kMethod *mtd2)
+//{
+//	DBG_ASSERT(mtd != mtd2);
+//	DBG_ASSERT(mtd->proceedNUL == NULL);
+//	KINITp(mtd, ((kMethodVar*)mtd)->proceedNUL, mtd2);
+//}
 
-#endif /* KONOHA2_INLINELIBS_H_ */
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+#endif /* MINIOKNOHA_INLINELIBS_H_ */

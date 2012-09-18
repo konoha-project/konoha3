@@ -97,27 +97,32 @@ static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		.free = AprTableEntry_free,
 	};
 
+	static KDEFINE_CLASS apacheDef = {
+		STRUCTNAME(Apache),
+	};
+
 	kapacheshare_t *base = (kapacheshare_t*)KCALLOC(sizeof(kapacheshare_t), 1);
 	base->h.name     = "apache";
 	base->h.setup    = kapacheshare_setup;
 	base->h.reftrace = kapacheshare_reftrace;
 	base->h.free     = kapacheshare_free;
-	KLIB Konoha_setModule(kctx, MOD_APACHE, &base->h, pline);
-	base->cRequest = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &Def, 0);
-	base->cAprTable = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &aprTableDef, 0);
-	base->cAprTableEntry = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &aprTableEntryDef, 0);
+	KLIB KonohaRuntime_setModule(kctx, MOD_APACHE, &base->h, pline);
+	base->cRequest = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def, 0);
+	base->cAprTable = KLIB kNameSpace_defineClass(kctx, ns, NULL, &aprTableDef, 0);
+	base->cAprTableEntry = KLIB kNameSpace_defineClass(kctx, ns, NULL, &aprTableEntryDef, 0);
+	base->cApache = KLIB kNameSpace_defineClass(kctx, ns, NULL, &apacheDef, 0);
 
 	KDEFINE_INT_CONST IntData[] = {
-#define DEFINE_KEYWORD(KW) {#KW, TY_Int, KW}
-		{"APACHE_OK", TY_Int, OK},
-		{"APLOG_EMERG", TY_Int, APLOG_EMERG},
-		{"APLOG_ALERT", TY_Int, APLOG_ALERT},
-		{"APLOG_CRIT", TY_Int, APLOG_CRIT},
-		{"APLOG_ERR", TY_Int, APLOG_ERR},
-		{"APLOG_WARNING", TY_Int, APLOG_WARNING},
-		{"APLOG_NOTICE", TY_Int, APLOG_NOTICE},
-		{"APLOG_INFO", TY_Int, APLOG_INFO},
-		{"APLOG_DEBUG", TY_Int, APLOG_DEBUG},
+#define DEFINE_KEYWORD(KW) {#KW, TY_int, KW}
+		{"APACHE_OK", TY_int, OK},
+		{"APLOG_EMERG", TY_int, APLOG_EMERG},
+		{"APLOG_ALERT", TY_int, APLOG_ALERT},
+		{"APLOG_CRIT", TY_int, APLOG_CRIT},
+		{"APLOG_ERR", TY_int, APLOG_ERR},
+		{"APLOG_WARNING", TY_int, APLOG_WARNING},
+		{"APLOG_NOTICE", TY_int, APLOG_NOTICE},
+		{"APLOG_INFO", TY_int, APLOG_INFO},
+		{"APLOG_DEBUG", TY_int, APLOG_DEBUG},
 		{NULL, 0, 0}
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), 0);
@@ -129,12 +134,12 @@ static kbool_t apache_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 	return true;
 }
 
-static kbool_t apache_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
+static kbool_t apache_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t apache_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t apache_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

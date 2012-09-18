@@ -1,0 +1,34 @@
+LOGPOOL
+=========================
+
+-------------------------
+  Logging API
+-------------------------
+  logpool_t *logpool_open_trace(logpool_t *parent, char *host, int port);
+  void logpool_close(logpool_t *p);
+  void logpool_record(logpool_t *logpool, void *args, int priority, char *trace_id, ...);
+  struct logdata {
+      long  type;
+      short klen;
+      short vlen;
+      char *key;
+      char *val;
+  };
+  void logpool_record_list(logpool_t *ctx, void *args, int priority,
+          char *trace_id, int logsize, struct logdata *logs);
+
+-------------------------
+  HOW_TO_COMPILE
+-------------------------
+  $ mkdir Release
+  $ cmake -DCMAKE_BUILD_TYPE=Release && make
+  $ make
+
+-------------------------
+  HOW_TO_EXEC
+-------------------------
+  $ memcached -d
+  $ ./Release/logpoold >& logpoold.log &
+  $ ./Release/example1 Release/mod_example.bc >& example1.log &
+  $ ./Release/test_trace
+

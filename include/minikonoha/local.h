@@ -22,15 +22,21 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#ifndef KONOHA2_LOCAL_H_
-#define KONOHA2_LOCAL_H_
+#ifndef MINIOKNOHA_LOCAL_H_
+#define MINIOKNOHA_LOCAL_H_
+#ifndef MINIOKNOHA_H_
+#error Do not include local.h without minikonoha.h.
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define IS_RootKonohaContext(o)   (kctx == (KonohaContext*)o)
 
 // These functions are local functions in minikonoha binary.
 // Don't call from packages directly   (kimio)
 
-kObjectVar** KONOHA_reftail(KonohaContext *kctx, size_t size);
 void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o);  // called from MODGC
 void KONOHA_freeObjectField(KonohaContext *kctx, kObjectVar *o);       // callled from MODGC
 
@@ -45,7 +51,8 @@ void MODLOGGER_init(KonohaContext *kctx, KonohaContextVar *ctx);
 void MODLOGGER_free(KonohaContext *kctx, KonohaContextVar *ctx);
 void MODSUGAR_loadMethod(KonohaContext *kctx);
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
-
-
-#endif /* KONOHA2_LOCAL_H_ */
+#endif /* MINIOKNOHA_LOCAL_H_ */

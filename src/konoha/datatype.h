@@ -22,13 +22,17 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+#define PARAM_void     0
+#define PARAMDOM_void                  0
+#define PARAMDOM_DefaultGenericsParam  1
+
 static kObject* DEFAULT_fnull(KonohaContext *kctx, KonohaClass *ct);
 
 static void Object_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kObjectVar *of = (kObjectVar*)o;
 	of->fieldUnboxItems[0] = 0;
-	of->fieldUnboxItems[1] = 0;
+//	of->fieldUnboxItems[1] = 0;
 }
 
 static void Object_reftrace(KonohaContext *kctx, kObject *o)
@@ -45,29 +49,8 @@ static void Object_reftrace(KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
-static void ObjectX_init(KonohaContext *kctx, kObject *o, void *conf)
-{
-	kObjectVar *of = (kObjectVar*)o;
-	KonohaClass *ct = O_ct(of);
-	assert(CT_isDefined(ct));
-	assert(ct->defaultValueAsNull != NULL);
-	memcpy(of->fieldObjectItems, ct->defaultValueAsNull->fieldObjectItems, ct->cstruct_size - sizeof(KonohaObjectHeader));
-}
-
 static void Object_initdef(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t pline)
 {
-	if(ct->classId == TY_Object) return;
-	DBG_P("new object initialization ct->cstruct_size=%d", ct->cstruct_size);
-	KSETv(ct->defaultValueAsNull, KLIB new_kObject(kctx, ct, 0));
-	if(ct->fieldsize > 0) {  // this is size of super class
-		KonohaClass *supct = CT_(ct->superclassId);
-		assert(ct->fieldsize == supct->fieldsize);
-		memcpy(ct->defaultValueAsNull_->fieldObjectItems, supct->defaultValueAsNull->fieldObjectItems, sizeof(kObject*) * ct->fieldsize);
-	}
-	if(ct->fieldAllocSize > 0) {
-		ct->init = ObjectX_init;
-	}
-	ct->fnull = DEFAULT_fnull;
 }
 
 static kObject *new_kObject(KonohaContext *kctx, KonohaClass *ct, uintptr_t conf)
@@ -76,18 +59,14 @@ static kObject *new_kObject(KonohaContext *kctx, KonohaClass *ct, uintptr_t conf
 	kObjectVar *o = (kObjectVar*) MODGC_omalloc(kctx, ct->cstruct_size);
 	o->h.magicflag = ct->magicflag;
 	o->h.ct = ct;
-	o->h.kvproto = kvproto_null();
+	o->h.kvproto = (KUtilsGrowingArray*) Kprotomap_new(0);
 	ct->init(kctx, (kObject*)o, (void*)conf);
 	return (kObject*)o;
 }
 
 static kObject *new_kObjectOnGCSTACK(KonohaContext *kctx, KonohaClass *ct, uintptr_t conf)
 {
-	kObjectVar *o = (kObjectVar*) MODGC_omalloc(kctx, ct->cstruct_size);
-	o->h.magicflag = ct->magicflag;
-	o->h.ct = ct;
-	o->h.kvproto = kvproto_null();
-	ct->init(kctx, (kObject*)o, (void*)conf);
+	kObject *o = new_kObject(kctx, ct, conf);
 	PUSH_GCSTACK(o);  // GCSAFE
 	return (kObject*)o;
 }
@@ -166,7 +145,7 @@ static void String_checkASCII(KonohaContext *kctx, kString *s)
 		case 1:     ch |= *p++;
 		} while(--n>0);
 	}
-	S_setASCII(s, (ch < 128));
+	S_setASCII((kStringVar*)s, (ch < 128));
 }
 
 static kString* new_kString(KonohaContext *kctx, const char *text, size_t len, int spol)
@@ -237,7 +216,7 @@ static kString* new_kStringf(KonohaContext *kctx, int spol, const char *fmt, ...
 struct _kAbstractArray {
 	KonohaObjectHeader h;
 	KUtilsGrowingArray a;
-} ;
+};
 
 static void Array_init(KonohaContext *kctx, kObject *o, void *conf)
 {
@@ -281,15 +260,13 @@ static void Array_ensureMinimumSize(KonohaContext *kctx, struct _kAbstractArray 
 	}
 }
 
-//#define Array_setsize(A, N)  ((kArrayVar*)A)->size = N
-
 static void kArray_add(KonohaContext *kctx, kArray *o, kObject *value)
 {
 	size_t asize = kArray_size(o);
 	struct _kAbstractArray *a = (struct _kAbstractArray*)o;
 	Array_ensureMinimumSize(kctx, a, asize+1);
 	DBG_ASSERT(a->a.objectItems[asize] == NULL);
-	KINITv(a->a.objectItems[asize], value);
+	KINITp(a, a->a.objectItems[asize], value);
 	a->a.bytesize = (asize+1) * sizeof(void*);
 }
 
@@ -303,7 +280,7 @@ static void kArray_insert(KonohaContext *kctx, kArray *o, size_t n, kObject *v)
 	else {
 		Array_ensureMinimumSize(kctx, a, asize+1);
 		memmove(a->a.objectItems+(n+1), a->a.objectItems+n, sizeof(kObject*) * (asize - n));
-		KINITv(a->a.objectItems[n], v);
+		KINITp(a, a->a.objectItems[n], v);
 		a->a.bytesize = (asize+1) * sizeof(void*);
 	}
 }
@@ -335,7 +312,7 @@ static void kArray_clear(KonohaContext *kctx, kArray *o, size_t n)
 // ---------------
 // Param
 
-static KonohaClass *CT_body(KonohaContext *kctx, KonohaClass *ct, size_t head, size_t body);
+static KonohaClass *KonohaClass_extendedBody(KonohaContext *kctx, KonohaClass *ct, size_t head, size_t body);
 
 static void Param_init(KonohaContext *kctx, kObject *o, void *conf)
 {
@@ -347,7 +324,7 @@ static void Param_init(KonohaContext *kctx, kObject *o, void *conf)
 static kParam *new_Param(KonohaContext *kctx, ktype_t rtype, int psize, const kparamtype_t *p)
 {
 	KonohaClass *ct = CT_(TY_Param);
-	ct = CT_body(kctx, ct, sizeof(void*), psize * sizeof(kparamtype_t));
+	ct = KonohaClass_extendedBody(kctx, ct, sizeof(void*), psize * sizeof(kparamtype_t));
 	kParamVar *pa = (kParamVar*)new_kObject(kctx, ct, 0);
 	pa->rtype = rtype;
 	pa->psize = psize;
@@ -422,17 +399,25 @@ static kparamid_t Kmap_getparamid(KonohaContext *kctx, KUtilsHashMap *kmp, kArra
 static kparamid_t Kparam(KonohaContext *kctx, ktype_t rtype, int psize, const kparamtype_t *p)
 {
 	uintptr_t hcode = hashparam(rtype, psize, p);
-	return Kmap_getparamid(kctx, kctx->share->paramMapNN, kctx->share->paramList, hcode, equalsParam, rtype, psize, p);
+	KLock(kctx->share->paramMutex);
+	kparamid_t param = Kmap_getparamid(kctx, kctx->share->paramMapNN, kctx->share->paramList, hcode, equalsParam, rtype, psize, p);
+	KUnlock(kctx->share->paramMutex);
+	return param;
 }
 
 static kparamid_t Kparamdom(KonohaContext *kctx, int psize, const kparamtype_t *p)
 {
 	uintptr_t hcode = hashparamdom(psize, p);
-	return Kmap_getparamid(kctx, kctx->share->paramdomMapNN, kctx->share->paramdomList, hcode, equalsParamDom, TY_void, psize, p);
+	KLock(kctx->share->paramMutex);
+	kparamid_t param = Kmap_getparamid(kctx, kctx->share->paramdomMapNN, kctx->share->paramdomList, hcode, equalsParamDom, TY_void, psize, p);
+	KUnlock(kctx->share->paramMutex);
+	return param;
 }
 
 /* --------------- */
 /* Method */
+
+static uintptr_t methodSerialNumber = 0;
 
 static void Method_init(KonohaContext *kctx, kObject *o, void *conf)
 {
@@ -440,6 +425,7 @@ static void Method_init(KonohaContext *kctx, kObject *o, void *conf)
 	bzero(&mtd->invokeMethodFunc, sizeof(kMethod) - sizeof(KonohaObjectHeader));
 	KINITv(mtd->sourceCodeToken, (struct kToken*)K_NULL);
 	KINITv(mtd->kcode, K_NULL);
+	mtd->serialNumber = methodSerialNumber++;
 }
 
 static void Method_reftrace(KonohaContext *kctx, kObject *o)
@@ -448,7 +434,6 @@ static void Method_reftrace(KonohaContext *kctx, kObject *o)
 	kMethod *mtd = (kMethod*)o;
 	KREFTRACEv(mtd->sourceCodeToken);
 	KREFTRACEv(mtd->kcode);
-	KREFTRACEn(mtd->proceedNUL);
 	END_REFTRACE();
 }
 
@@ -456,14 +441,14 @@ static kMethod* new_kMethod(KonohaContext *kctx, uintptr_t flag, ktype_t cid, km
 {
 #define CT_MethodVar CT_Method
 	kMethodVar* mtd = new_(MethodVar, NULL);
-	mtd->flag    = flag;
-	mtd->classId     = cid;
-	mtd->mn      = mn;
-	KLIB Method_setFunc(kctx, mtd, func);
+	mtd->flag       = flag;
+	mtd->typeId     = cid;
+	mtd->mn         = mn;
+	KLIB kMethod_setFunc(kctx, mtd, func);
 	return mtd;
 }
 
-static kParam* Method_setParam(KonohaContext *kctx, kMethod *mtd_, ktype_t rtype, int psize, const kparamtype_t *p)
+static kParam* kMethod_setParam(KonohaContext *kctx, kMethod *mtd_, ktype_t rtype, int psize, const kparamtype_t *p)
 {
 	kparamid_t paramId = Kparam(kctx, rtype, psize, p);
 	if(mtd_ != NULL) {
@@ -491,7 +476,7 @@ static void Func_init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void Func_reftrace(KonohaContext *kctx, kObject *o)
 {
-	BEGIN_REFTRACE(4);
+	BEGIN_REFTRACE(2);
 	kFunc *fo = (kFunc*)o;
 	KREFTRACEv(fo->self);
 	KREFTRACEv(fo->mtd);
@@ -508,6 +493,7 @@ static void Func_reftrace(KonohaContext *kctx, kObject *o)
 static KonohaClass *T_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass *self)
 {
 	kParam *cparam = CT_cparam(self);
+	DBG_P("ct=%s, self=%s", CT_t(ct), CT_t(self));
 	DBG_ASSERT(ct->optvalue < cparam->psize);
 	KonohaClass *pct = CT_(cparam->paramtypeItems[ct->optvalue].ty);
 	return pct->realtype(kctx, pct, self);
@@ -517,12 +503,12 @@ static KonohaClass *T_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass
 
 static KonohaClass* Kclass(KonohaContext *kctx, ktype_t cid, kfileline_t pline)
 {
-	SharedRuntime *share = kctx->share;
-	if(cid < (share->classTable.bytesize/sizeof(KonohaClassVar*))) {
-		return share->classTable.classItems[cid];
+	KonohaRuntime *share = kctx->share;
+	if(!(cid < (share->classTable.bytesize/sizeof(KonohaClassVar*)))) {
+		kreportf(ErrTag, pline, "invalid typeId=%d", (int)cid);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("InvalidParameter"), NULL, pline, NULL);
 	}
-	kreportf(CritTag, pline, "invalid cid=%d", (int)cid);
-	return share->classTable.classItems[0];
+	return share->classTable.classItems[cid];
 }
 
 static void DEFAULT_init(KonohaContext *kctx, kObject *o, void *conf)
@@ -542,7 +528,7 @@ static void DEFAULT_free(KonohaContext *kctx, kObject *o)
 
 static void DEFAULT_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
-	KLIB Kwb_printf(kctx, wb, "&%p(:%s)", sfp[pos].o, TY_t(O_classId(sfp[pos].o)));
+	KLIB Kwb_printf(kctx, wb, "&%p(:%s)", sfp[pos].o, TY_t(O_typeId(sfp[pos].o)));
 }
 
 static uintptr_t DEFAULT_unbox(KonohaContext *kctx, kObject *o)
@@ -552,10 +538,10 @@ static uintptr_t DEFAULT_unbox(KonohaContext *kctx, kObject *o)
 
 static kbool_t DEFAULT_isSubType(KonohaContext *kctx, KonohaClass* ct, KonohaClass *t)
 {
-	if(t->classId == TY_Object) return true;
-	while(ct->superclassId != TY_Object) {
-		ct = CT_(ct->superclassId);
-		if(ct->classId == t->classId) return true;
+	if(t->typeId == TY_Object) return true;
+	while(ct->superTypeId != TY_Object) {
+		ct = CT_(ct->superTypeId);
+		if(ct->typeId == t->typeId) return true;
 	}
 	return false;
 }
@@ -588,26 +574,31 @@ static kObject *Knull(KonohaContext *kctx, KonohaClass *ct)
 
 static KonohaClassVar* new_KonohaClass(KonohaContext *kctx, KonohaClass *bct, KDEFINE_CLASS *s, kfileline_t pline)
 {
-	KonohaRuntimeVar *share = kctx->share;
-	ktype_t newid = share->classTable.bytesize / sizeof(KonohaClassVar*);
-	if(share->classTable.bytesize == share->classTable.bytemax) {
-		KLIB Karray_expand(kctx, &share->classTable, share->classTable.bytemax * 2);
+	KonohaRuntimeVar *share = (KonohaRuntimeVar *)kctx->share;
+	KonohaClassVar *ct;
+	ktype_t newid;
+	KLock(share->classTableMutex); {
+		newid = share->classTable.bytesize / sizeof(KonohaClassVar*);
+		if(share->classTable.bytesize == share->classTable.bytemax) {
+			KLIB Karray_expand(kctx, &share->classTable, share->classTable.bytemax * 2);
+		}
+		share->classTable.bytesize += sizeof(KonohaClassVar*);
+		ct = (KonohaClassVar*)KCALLOC(sizeof(KonohaClass), 1);
+		share->classTable.classItems[newid] = (KonohaClass*)ct;
 	}
-	share->classTable.bytesize += sizeof(KonohaClassVar*);
-	KonohaClassVar *ct = (KonohaClassVar*)KCALLOC(sizeof(KonohaClass), 1);
-	share->classTable.classItems[newid] = (KonohaClass*)ct;
+	KUnlock(share->classTableMutex);
 	if(bct != NULL) {
 		DBG_ASSERT(s == NULL);
 		memcpy(ct, bct, offsetof(KonohaClass, methodList));
-		ct->classId = newid;
+		ct->typeId = newid;
 		if(ct->fnull == DEFAULT_fnull) ct->fnull =  DEFAULT_fnullinit;
 	}
 	else {
 		DBG_ASSERT(s != NULL);
 		ct->cflag   = s->cflag;
-		ct->classId     = newid;
-		ct->baseclassId    = (s->baseclassId == 0) ? newid : s->baseclassId;
-		ct->superclassId  = (s->superclassId == 0) ? TY_Object : s->superclassId;
+		ct->typeId = newid;
+		ct->baseTypeId    = (s->baseTypeId == 0) ? ct->typeId : s->baseTypeId;
+		ct->superTypeId  = (s->superTypeId == 0) ? TY_Object : s->superTypeId;
 		ct->fieldItems = s->fieldItems;
 		ct->fieldsize  = s->fieldsize;
 		ct->fieldAllocSize = s->fieldAllocSize;
@@ -635,7 +626,7 @@ static KonohaClassVar* new_KonohaClass(KonohaContext *kctx, KonohaClass *bct, KD
 	return ct;
 }
 
-static KonohaClass *CT_body(KonohaContext *kctx, KonohaClass *ct, size_t head, size_t body)
+static KonohaClass *KonohaClass_extendedBody(KonohaContext *kctx, KonohaClass *ct, size_t head, size_t body)
 {
 	KonohaClass *bct = ct;
 	while(ct->cstruct_size < sizeof(KonohaObjectHeader) + head + body) {
@@ -654,16 +645,29 @@ static KonohaClass *CT_body(KonohaContext *kctx, KonohaClass *ct, size_t head, s
 static KonohaClass *Generics_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass *self)
 {
 	DBG_P("trying resolve generic type: %s %s", CT_t(ct), CT_t(self));
-	KonohaClass *cReturn = CT_(ct->p0);
-	ktype_t rtype = cReturn->realtype(kctx, cReturn, self)->classId;
 	kParam *param = CT_cparam(ct);
 	int i;
 	kparamtype_t p[param->psize];
 	for(i = 0; i < param->psize; i++) {
 		KonohaClass *cParam = CT_(param->paramtypeItems[i].ty);
-		p[i].ty = cParam->realtype(kctx, cParam, self)->classId;
+		p[i].ty = cParam->realtype(kctx, cParam, self)->typeId;
 	}
-	return KLIB KonohaClass_Generics(kctx, ct, rtype, param->psize, p);
+	return KLIB KonohaClass_Generics(kctx, ct, TY_void, param->psize, p);
+}
+
+static KonohaClass *Func_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass *self)
+{
+	DBG_P("trying resolve generic type: %s %s", CT_t(ct), CT_t(self));
+	KonohaClass *cReturn = CT_(ct->p0);
+	ktype_t rtype = cReturn->realtype(kctx, cReturn, self)->typeId;
+	kParam *param = CT_cparam(ct);
+	int i;
+	kparamtype_t p[param->psize];
+	for(i = 0; i < param->psize; i++) {
+		KonohaClass *cParam = CT_(param->paramtypeItems[i].ty);
+		p[i].ty = cParam->realtype(kctx, cParam, self)->typeId;
+	}
+	return KLIB KonohaClass_Generics(kctx, CT_(ct->baseTypeId), rtype, param->psize, p);
 }
 
 #define TY_isTypeVar2(T)   (T != TY_void && TY_isTypeVar(T))
@@ -681,7 +685,7 @@ static void checkTypeVar(KonohaContext *kctx, KonohaClassVar *newct, ktype_t rty
 	if(isTypeVar) {
 		DBG_P("Generics %s has TypeVar", CT_t(newct));
 		newct->cflag |= kClass_TypeVar;
-		newct->realtype = Generics_realtype;
+		newct->realtype = newct->baseTypeId == TY_Func ? Func_realtype : Generics_realtype;
 	}
 }
 
@@ -689,7 +693,7 @@ static KonohaClass *KonohaClass_Generics(KonohaContext *kctx, KonohaClass *ct, k
 {
 	kparamid_t paramdom = Kparamdom(kctx, psize, p);
 	KonohaClass *ct0 = ct;
-	int isNotFuncClass = (ct->baseclassId != TY_Func);
+	int isNotFuncClass = (ct->baseTypeId != TY_Func);
 	do {
 		if(ct->cparamdom == paramdom && (isNotFuncClass || ct->p0 == rtype)) {
 			return ct;
@@ -697,6 +701,7 @@ static KonohaClass *KonohaClass_Generics(KonohaContext *kctx, KonohaClass *ct, k
 		if(ct->searchSimilarClassNULL == NULL) break;
 		ct = ct->searchSimilarClassNULL;
 	} while(ct != NULL);
+
 	KonohaClassVar *newct = new_KonohaClass(kctx, ct0, NULL, NOPLINE);
 	newct->cparamdom = paramdom;
 	newct->p0 = isNotFuncClass ? p[0].ty : rtype;
@@ -712,8 +717,8 @@ static KonohaClass *KonohaClass_Generics(KonohaContext *kctx, KonohaClass *ct, k
 static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 {
 	if(ct->shortNameNULL == NULL) {
-		if(ct->cparamdom == 0 && ct->baseclassId != TY_Func) {
-			KINITv(((KonohaClassVar*)ct)->shortNameNULL, SYM_s(ct->nameid));
+		if(ct->cparamdom == 0 && ct->baseTypeId != TY_Func) {
+			KINITv(((KonohaClassVar*)ct)->shortNameNULL, SYM_s(ct->classNameSymbol));
 		}
 		else {
 			size_t i, c = 0;
@@ -724,10 +729,10 @@ static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 				KonohaClass_shortName(kctx, CT_(cparam->paramtypeItems[i].ty));
 			}
 			Kwb_init(&(kctx->stack->cwb), &wb);
-			kString *s = SYM_s(ct->nameid);
+			kString *s = SYM_s(ct->classNameSymbol);
 			KLIB Kwb_write(kctx, &wb, S_text(s), S_size(s));
 			kwb_putc(&wb, '[');
-			if(ct->baseclassId == TY_Func) {
+			if(ct->baseTypeId == TY_Func) {
 				s = KonohaClass_shortName(kctx, CT_(ct->p0));
 				KLIB Kwb_write(kctx, &wb, S_text(s), S_size(s)); c++;
 			}
@@ -745,57 +750,60 @@ static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 	return ct->shortNameNULL;
 }
 
-static void CT_setName(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t pline)
+static void KonohaClass_setName(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t pline)
 {
-	uintptr_t lname = longid(ct->packageDomain, ct->nameid);
-	kreportf(DebugTag, pline, "new class domain=%s, name='%s.%s'", PackageId_t(ct->packageDomain), PackageId_t(ct->packageId), SYM_t(ct->nameid));
-	KonohaClass *ct2 = (KonohaClass*)map_getu(kctx, kctx->share->longClassNameMapNN, lname, (uintptr_t)NULL);
-	if(ct2 == NULL) {
-		map_addu(kctx, kctx->share->longClassNameMapNN, lname, (uintptr_t)ct);
-	}
+//	uintptr_t lname = longid(ct->packageDomain, ct->classNameSymbol);
+//	KLock(kctx->share->classTableMutex); {
+//		KonohaClass *ct2 = (KonohaClass*)map_getu(kctx, kctx->share->longClassNameMapNN, lname, (uintptr_t)NULL);
+//		if(ct2 == NULL) {
+//			map_addu(kctx, kctx->share->longClassNameMapNN, lname, (uintptr_t)ct);
+//		}
+//	}
+//	KUnlock(kctx->share->classTableMutex);
+	KLIB Kreportf(kctx, DebugTag, pline, "new class %s.%s", PackageId_t(ct->packageId), SYM_t(ct->classNameSymbol));
 	if(ct->methodList == NULL) {
 		KINITv(ct->methodList, K_EMPTYARRAY);
-		if(ct->classId > TY_Object) {
-			ct->searchSuperMethodClassNULL = CT_(ct->superclassId);
+		if(ct->typeId > TY_Object) {
+			ct->searchSuperMethodClassNULL = CT_(ct->superTypeId);
 		}
 	}
 }
 
-static KonohaClass *Konoha_defineClass(KonohaContext *kctx, kpackage_t packageId, kpackage_t packageDomain, kString *name, KDEFINE_CLASS *cdef, kfileline_t pline)
+static KonohaClass *KonohaClass_define(KonohaContext *kctx, kpackage_t packageId, kString *name, KDEFINE_CLASS *cdef, kfileline_t pline)
 {
 	KonohaClassVar *ct = new_KonohaClass(kctx, NULL, cdef, pline);
 	ct->packageId  = packageId;
-	ct->packageDomain = packageDomain;
+	ct->packageDomain = packageId;
 	if(name == NULL) {
 		const char *n = cdef->structname;
 		assert(n != NULL); // structname must be set;
-		ct->nameid = ksymbolSPOL(n, strlen(n), SPOL_ASCII|SPOL_POOL|SPOL_TEXT, _NEWID);
+		ct->classNameSymbol = ksymbolSPOL(n, strlen(n), SPOL_ASCII|SPOL_POOL|SPOL_TEXT, _NEWID);
 	}
 	else {
-		ct->nameid = ksymbolA(S_text(name), S_size(name), _NEWID);
+		ct->classNameSymbol = ksymbolA(S_text(name), S_size(name), _NEWID);
 	}
-	CT_setName(kctx, ct, pline);
+	KonohaClass_setName(kctx, ct, pline);
 	return (KonohaClass*)ct;
 }
 
-#define TYPENAME(C) \
+#define UnboxTypeName(C) \
 	.structname = #C,\
-	.classId = TY_##C,\
-	.cflag = CFLAG_##C\
+	.typeId = TY_##C,\
+	.cflag  = CFLAG_##C\
 
 #define TYNAME(C) \
 	.structname = #C,\
-	.classId = TY_##C,\
+	.typeId = TY_##C,\
 	.cflag = CFLAG_##C,\
 	.cstruct_size = sizeof(k##C)\
 
 static void loadInitStructData(KonohaContext *kctx)
 {
 	KDEFINE_CLASS defTvoid = {
-		TYPENAME(void),
+		UnboxTypeName(void),
 	};
 	KDEFINE_CLASS defTvar = {
-		TYPENAME(var),
+		UnboxTypeName(var),
 	};
 	KDEFINE_CLASS defObject = {
 		TYNAME(Object),
@@ -804,14 +812,16 @@ static void loadInitStructData(KonohaContext *kctx)
 		.initdef = Object_initdef,
 	};
 	KDEFINE_CLASS defBoolean = {
-		TYNAME(Boolean),
-		.init = Number_init,
+		UnboxTypeName(boolean),
+		.cstruct_size = sizeof(kBoolean),
+		.init  = Number_init,
 		.unbox = Number_unbox,
-		.p    = Boolean_p,
+		.p     = Boolean_p,
 		.fnull = Boolean_fnull,
 	};
 	KDEFINE_CLASS defInt = {
-		TYNAME(Int),
+		UnboxTypeName(int),
+		.cstruct_size = sizeof(kInt),
 		.init  = Number_init,
 		.unbox = Number_unbox,
 		.p     = Int_p,
@@ -848,7 +858,7 @@ static void loadInitStructData(KonohaContext *kctx)
 		.init = DEFAULT_init,
 	};
 	KDEFINE_CLASS defT0 = {
-		TYPENAME(0),
+		UnboxTypeName(0),
 		.init = DEFAULT_init,
 		.realtype = T_realtype,
 	};
@@ -870,24 +880,23 @@ static void loadInitStructData(KonohaContext *kctx)
 	KDEFINE_CLASS **dd = DATATYPES;
 	int cid = 0;
 	while(dd[cid] != NULL) {
-		DBG_ASSERT(dd[cid]->classId == cid);
+		DBG_ASSERT(dd[cid]->typeId == cid);
 		new_KonohaClass(kctx, NULL, dd[cid], 0);
 		cid++;
 	}
 	KonohaClassVar *ct = (KonohaClassVar *)CT_Array;
-	ct->p0 = TY_Object;
+	ct->p0 = TY_Object;    // don't move (ide)
 }
 
 static void defineDefaultKeywordSymbol(KonohaContext *kctx)
 {
 	size_t i;
 	static const char *keywords[] = {
-		"", "$expr", "$SYMBOL", "$USYMBOL", "$TEXT", "$INT", "$FLOAT",
-		"$type", "$()", "$[]", "${}", "$block", "$params", "$toks",
+		"", "$Expr", "$Symbol", "$Text", "$Number",
+		"$Type", "()", "[]", "{}", "$Block", "$Param", "$Token",
 		".", "/", "%", "*", "+", "-", "<", "<=", ">", ">=", "==", "!=",
-		"&&", "||", "!", "=", ",", "$", /*"@",*/
-		"void", "boolean", "int", "true", "false", "if", "else", "return", // syn
-
+		"&&", "||", "!", "=", ",", "$", ":", /*"@",*/
+		"true", "false", "if", "else", "return", // syn
 		"new",
 	};
 	for(i = 0; i < sizeof(keywords) / sizeof(const char*); i++) {
@@ -904,12 +913,12 @@ static void initStructData(KonohaContext *kctx)
 	for(i = 0; i <= TY_0; i++) {
 		KonohaClassVar *ct = (KonohaClassVar *)ctt[i];
 		const char *name = ct->DBG_NAME;
-		ct->nameid = ksymbolSPOL(name, strlen(name), SPOL_ASCII|SPOL_POOL|SPOL_TEXT, _NEWID);
-		CT_setName(kctx, ct, 0);
+		ct->classNameSymbol = ksymbolSPOL(name, strlen(name), SPOL_ASCII|SPOL_POOL|SPOL_TEXT, _NEWID);
+		KonohaClass_setName(kctx, ct, 0);
 	}
 }
 
-static void KTYTABLE_initkklib(KonohaLibVar *l)
+static void initKonohaLib(KonohaLibVar *l)
 {
 	l->Kclass                  = Kclass;
 	l->new_kObject             = new_kObject;
@@ -923,19 +932,24 @@ static void KTYTABLE_initkklib(KonohaLibVar *l)
 	l->kArray_clear         = kArray_clear;
 	l->new_kMethod          = new_kMethod;
 	l->Kparamdom            = Kparamdom;
-	l->Method_setParam     = Method_setParam;
+	l->kMethod_setParam     = kMethod_setParam;
 	l->kMethod_indexOfField = STUB_Method_indexOfField;
-	l->Konoha_defineClass    = Konoha_defineClass;
+	l->KonohaClass_define   = KonohaClass_define;
 	l->Knull = Knull;
 	l->KonohaClass_shortName = KonohaClass_shortName;
 	l->KonohaClass_Generics = KonohaClass_Generics;
 }
 
-static void KTYTABLE_init(KonohaContext *kctx, KonohaContextVar *ctx)
+static void KonohaRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
-	KonohaRuntimeVar *share = (KonohaRuntimeVar*)KCALLOC(sizeof(SharedRuntime), 1);
+	KonohaRuntimeVar *share = (KonohaRuntimeVar*)KCALLOC(sizeof(KonohaRuntime), 1);
 	ctx->share = share;
-	KTYTABLE_initkklib((KonohaLibVar*)kctx->klib);
+	KInitLock(share->classTableMutex);
+	KInitLock(share->filepackMutex);
+	KInitLock(share->symbolMutex);
+	KInitLock(share->paramMutex);
+
+	initKonohaLib((KonohaLibVar*)kctx->klib);
 	KLIB Karray_init(kctx, &share->classTable, K_TYTABLE_INIT * sizeof(KonohaClass));
 	loadInitStructData(kctx);
 	share->longClassNameMapNN = KLIB Kmap_init(kctx, 0);
@@ -959,40 +973,39 @@ static void KTYTABLE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	KINITv(share->emptyArray,  new_(Array, 0));
 
 	Kparam(kctx, TY_void, 0, NULL);  // PARAM_void
-	Kparamdom(kctx, 0, NULL); // PARAMDOM_void
+	Kparamdom(kctx, 0, NULL);        // PARAMDOM_void
+	kparamtype_t p = {TY_Object};
+	Kparamdom(kctx, 1, &p);          // PARAMDOM_DefaultGenericsParam  1
 	FILEID_("(konoha.c)");
 	PN_("konoha");    // PN_konoha
 	PN_("sugar");     // PKG_sugar
 	defineDefaultKeywordSymbol(kctx);
-//	SYM_("");          // MN_
-//	SYM_("new");       // MN_new
-//	SYM_("T");         // UN_T
 	initStructData(kctx);
 }
 
-static void val_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p)
+static void constPoolMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
 {
 	BEGIN_REFTRACE(1);
 	KREFTRACEv(p->objectValue);
 	END_REFTRACE();
 }
 
-static void kshare_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
+static void KonohaRuntime_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 {
-	SharedRuntime *share = ctx->share;
+	KonohaRuntime *share = ctx->share;
 	KonohaClass **cts = (KonohaClass**)kctx->share->classTable.classItems;
 	size_t i, size = kctx->share->classTable.bytesize/sizeof(KonohaClassVar*);
 	for(i = 0; i < size; i++) {
 		KonohaClass *ct = cts[i];
 		{
-			BEGIN_REFTRACE(4);
+			BEGIN_REFTRACE(3);
 			KREFTRACEv(ct->methodList);
 			KREFTRACEn(ct->shortNameNULL);
 			KREFTRACEn(ct->defaultValueAsNull);
 			END_REFTRACE();
 		}
-		if (ct->constPoolMapNO) {
-			KLIB Kmap_reftrace(kctx, ct->constPoolMapNO, val_reftrace);
+		if (ct->constPoolMapNO != NULL) {
+			KLIB Kmap_each(kctx, ct->constPoolMapNO, NULL, constPoolMap_reftrace);
 		}
 	}
 	BEGIN_REFTRACE(10);
@@ -1009,7 +1022,7 @@ static void kshare_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 	END_REFTRACE();
 }
 
-static void TYTABLE_freeCT(KonohaContext *kctx)
+static void KonohaRuntime_freeClassTable(KonohaContext *kctx)
 {
 	KonohaClassVar **cts = (KonohaClassVar**)kctx->share->classTable.classItems;
 	size_t i, size = kctx->share->classTable.bytesize/sizeof(KonohaClassVar*);
@@ -1021,64 +1034,22 @@ static void TYTABLE_freeCT(KonohaContext *kctx)
 	}
 }
 
-static void TYTABLE_free(KonohaContext *kctx, KonohaContextVar *ctx)
+static void KonohaRuntime_free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
-	KonohaRuntimeVar *share = ctx->share;
+	KonohaRuntimeVar *share = (KonohaRuntimeVar*)ctx->share;
 	KLIB Kmap_free(kctx, share->longClassNameMapNN, NULL);
 	KLIB Kmap_free(kctx, share->fileidMapNN, NULL);
 	KLIB Kmap_free(kctx, share->packMapNN, NULL);
 	KLIB Kmap_free(kctx, share->symbolMapNN, NULL);
 	KLIB Kmap_free(kctx, share->paramMapNN, NULL);
 	KLIB Kmap_free(kctx, share->paramdomMapNN, NULL);
-	TYTABLE_freeCT(kctx);
+	KonohaRuntime_freeClassTable(kctx);
 	KLIB Karray_free(kctx, &share->classTable);
-	KFREE(share, sizeof(SharedRuntime));
+
+	KFreeLock(share->classTableMutex);
+	KFreeLock(share->filepackMutex);
+	KFreeLock(share->symbolMutex);
+	KFreeLock(share->paramMutex);
+	KFREE(share, sizeof(KonohaRuntime));
 }
 
-/* operator */
-#include "methods.h"
-
-#define _Public    kMethod_Public
-#define _Const     kMethod_Const
-#define _Static    kMethod_Static
-#define _Immutable kMethod_Immutable
-#define _Coercion  kMethod_Coercion
-#define _Hidden    kMethod_Hidden
-#define _Override  kMethod_Override
-#define _F(F)      (intptr_t)(F)
-
-static void Konoha_loadDefaultMethod(KonohaContext *kctx)
-{
-	int FN_x = FN_("x");
-	KDEFINE_METHOD MethodData[] = {
-		_Public|_Immutable|_Const, _F(Object_toString), TY_String, TY_Object, MN_to(TY_String), 0,
-		_Public|_Immutable|_Const, _F(Boolean_opNOT), TY_Boolean, TY_Boolean, MN_("!"), 0,
-		_Public|_Immutable|_Const, _F(Int_opNEQ), TY_Boolean, TY_Boolean, MN_("!="), 1, TY_Boolean, FN_x,
-		_Public|_Immutable|_Const, _F(Int_opEQ), TY_Boolean, TY_Boolean, MN_("=="), 1, TY_Boolean, FN_x,
-		_Public|_Immutable|_Const, _F(Int_opMINUS), TY_Int, TY_Int, MN_("-"), 0,
-		_Public|_Immutable|_Const, _F(Int_opADD), TY_Int, TY_Int, MN_("+"), 1, TY_Int, FN_x,
-		_Public|_Immutable|_Const, _F(Int_opSUB), TY_Int, TY_Int, MN_("-"), 1, TY_Int, FN_x,
-		_Public|_Immutable|_Const, _F(Int_opMUL), TY_Int, TY_Int, MN_("*"), 1, TY_Int, FN_x,
-		/* opDIV and opMOD raise zero divided exception. Don't set _Const */
-		_Public|_Immutable, _F(Int_opDIV), TY_Int, TY_Int, MN_("/"), 1, TY_Int, FN_x,
-		_Public|_Immutable, _F(Int_opMOD), TY_Int, TY_Int, MN_("%"), 1, TY_Int, FN_x,
-		_Public|_Immutable|_Const, _F(Int_opEQ),  TY_Boolean, TY_Int, MN_("=="),  1, TY_Int, FN_x,
-		_Public|_Immutable|_Const, _F(Int_opNEQ), TY_Boolean, TY_Int, MN_("!="), 1, TY_Int, FN_x,
-		_Public|_Immutable|_Const, _F(Int_opLT),  TY_Boolean, TY_Int, MN_("<"),  1, TY_Int, FN_x,
-		_Public|_Immutable|_Const, _F(Int_opLTE), TY_Boolean, TY_Int, MN_("<="), 1, TY_Int, FN_x,
-		_Public|_Immutable|_Const, _F(Int_opGT),  TY_Boolean, TY_Int, MN_(">"),  1, TY_Int, FN_x,
-		_Public|_Immutable|_Const, _F(Int_opGTE), TY_Boolean, TY_Int, MN_(">="), 1, TY_Int, FN_x,
-		_Public|_Immutable|_Const|_Coercion, _F(Int_toString), TY_String, TY_Int, MN_to(TY_String), 0,
-		_Public|_Immutable|_Const, _F(String_opEQ),  TY_Boolean, TY_String, MN_("=="),  1, TY_String, FN_x ,
-		_Public|_Immutable|_Const, _F(String_opNEQ), TY_Boolean, TY_String, MN_("!="), 1, TY_String, FN_x ,
-		_Public|_Immutable|_Const|_Coercion, _F(String_toInt), TY_Int, TY_String, MN_to(TY_Int), 0,
-		_Public|_Immutable|_Const, _F(String_opADD), TY_String, TY_String, MN_("+"), 1, TY_String, FN_x | FN_COERCION,
-		_Public|_Const|_Hidden, _F(Func_new), TY_Func, TY_Func, MN_new, 2, TY_Object, FN_x, TY_Method, FN_x,
-		_Public|kMethod_SmartReturn|_Hidden, _F(Func_invoke), TY_Object, TY_Func, MN_("invoke"), 0,
-		_Static|_Public|_Immutable, _F(System_assert), TY_void, TY_System, MN_("assert"), 1, TY_Boolean, FN_x,
-		_Static|_Public|_Immutable, _F(System_p), TY_void, TY_System, MN_("p"), 1, TY_String, FN_("s") | FN_COERCION,
-		_Static|_Public|_Immutable, _F(System_gc), TY_void, TY_System, MN_("gc"), 0,
-		DEND,
-	};
-	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);
-}

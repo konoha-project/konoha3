@@ -2,7 +2,7 @@ K.import("sugar");
 K.import("konoha.float");
 K.import("llvm");
 K.import("konoha.array");
-K.import("konoha.assignment");
+K.import("konoha.assign");
 K.import("konoha.null");
 K.import("konoha.string");
 K.import("konoha.class");
@@ -848,7 +848,7 @@ void exprItemstmt_asm(Stmt stmt, int espidx) {
 }
 
 void stmtListtmt_asm(Stmt stmt, int espidx) {
-	Block bk = stmt.getBlock("$block", null);
+	Block bk = stmt.getBlock("$Block", null);
 	block_asm(bk);
 }
 
@@ -864,7 +864,7 @@ void ifstmt_asm(Stmt stmt, int espidx) {
 
 	/* bbThen codegen */
 	builder.setInsertPoint(bbThen);
-	block_asm(stmt.getBlock("$block", null));
+	block_asm(stmt.getBlock("$Block", null));
 	//bbThen = builder.getInsertBlock();
 	if (builder.getInsertBlock().getTerminator().isNull()) {
 		builder.createBr(bbMerge);
@@ -1090,13 +1090,13 @@ void jit_init() {
 	Type kclass = StructType.create(a0, "kclass", false);
 	Type KUtilsGrowingArray = StructType.create(a0, "KUtilsGrowingArray", false);
 	Type PlatformApi = StructType.create(a0, "PlatformApi", false);
-	Type SharedRuntime = StructType.create(a0, "SharedRuntime", false);
+	Type KonohaRuntime = StructType.create(a0, "KonohaRuntime", false);
 	Type klocal_t = StructType.create(a0, "klocal_t", false);
 	Type kmemshare_t = StructType.create(a0, "kmemshare_t", false);
 	Type kmemlocal_t = StructType.create(a0, "kmemlocal_t", false);
 	Type KonohaModule = StructType.create(a0, "KonohaModule", false);
-	Type KonohaContextModule = StructType.create(a0, "KonohaContextModule", false);
-	Type KonohaContextRuntimeVar = StructType.create(a0, "KonohaContextRuntimeVar", false);
+	Type KonohaModuleContext = StructType.create(a0, "KonohaModuleContext", false);
+	Type KonohaStackRuntimeVar = StructType.create(a0, "KonohaStackRuntimeVar", false);
 	Type klogger_t = StructType.create(a0, "klogger_t", false);
 	Type VirtualMachineInstruction = StructType.create(a0, "VirtualMachineInstruction", false);
 	/*------- KonohaObjectHeader ------*/
@@ -1130,12 +1130,12 @@ void jit_init() {
 	KonohaContextVarTy.set(3, PointerType.get(PlatformApi) /* plat */ );
 	KonohaContextVarTy.set(4, PointerType.get(kmemshare_t) /* memshare */ );
 	KonohaContextVarTy.set(5, PointerType.get(kmemlocal_t) /* memlocal */ );
-	KonohaContextVarTy.set(6, PointerType.get(SharedRuntime) /* share */ );
+	KonohaContextVarTy.set(6, PointerType.get(KonohaRuntime) /* share */ );
 	KonohaContextVarTy.set(7, PointerType.get(klocal_t) /* local */ );
-	KonohaContextVarTy.set(8, PointerType.get(KonohaContextRuntimeVar) /* stack */ );
+	KonohaContextVarTy.set(8, PointerType.get(KonohaStackRuntimeVar) /* stack */ );
 	KonohaContextVarTy.set(9, PointerType.get(klogger_t) /* logger */ );
 	KonohaContextVarTy.set(10, PointerType.get(PointerType.get(KonohaModule)) /* modshare */ );
-	KonohaContextVarTy.set(11, PointerType.get(PointerType.get(KonohaContextModule)) /* modlocal */ );
+	KonohaContextVarTy.set(11, PointerType.get(PointerType.get(KonohaModuleContext)) /* modlocal */ );
 	Type KonohaContextVar = StructType.create(KonohaContextVarTy, "KonohaContextVar", false)
 
 	/*------- _kArray ------*/

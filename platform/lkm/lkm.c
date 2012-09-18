@@ -23,8 +23,6 @@
  ***************************************************************************/
 
 /* ************************************************************************ */
-
-#include "konoha_lkm.h"
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/klib.h"
 
@@ -53,7 +51,7 @@ static ssize_t knh_dev_read(struct file *filp, char __user *user_buf,
 		size_t count, loff_t *offset);
 
 static ssize_t knh_dev_write(struct file *filp,const char __user *user_buf,
-		size_t count,loff_t *offset) ;
+		size_t count,loff_t *offset);
 
 static struct file_operations knh_fops = {
 	.owner = THIS_MODULE,
@@ -127,35 +125,35 @@ static int printf_(const char *fmt, ...)
 	return 0;
 }
 
-const PlatformApi* platform_kernel(void)
+PlatformApi* platform_kernel(void)
 {
 	static PlatformApi plat = {
 		.name = "lkm",
 		.stacksize = K_PAGESIZE * 4,
-		.malloc_i    = malloc,
-		.free_i      = free,
-		.setjmp_i    = setjmp,
-		.longjmp_i   = longjmp,
-		.realpath_i  = realpath,
-		.fopen_i     = fopen,
-		.fgetc_i     = fgetc,
-		.feof_i      = feof,
-		.fclose_i    = fclose,
-		.syslog_i    = syslog,
-		.vsyslog_i   = NULL,
-		.printf_i    = printf_,
-		.vprintf_i   = kvprintf_i,
-		.snprintf_i  = snprintf,
-		.vsnprintf_i = vsnprintf,
-		.qsort_i     = qsort,
-		.exit_i      = kexit,
-		.packagepath = NULL,
-		.exportpath  = NULL,
-		.begin       = kbegin,
-		.end         = kend,
-		.debugPrintf       = kdebugPrintf
+		.malloc_i      = malloc,
+		.free_i        = free,
+		.setjmp_i      = setjmp,
+		.longjmp_i     = longjmp,
+		.shortFilePath = shortFilePath,
+		//.fopen_i     = fopen,
+		//.fgetc_i     = fgetc,
+		//.feof_i      = feof,
+		//.fclose_i    = fclose,
+		.syslog_i      = syslog,
+		.vsyslog_i     = NULL,
+		.printf_i      = printf_,
+		.vprintf_i     = kvprintf_i,
+		.snprintf_i    = snprintf,
+		.vsnprintf_i   = vsnprintf,
+		.qsort_i       = qsort,
+		.exit_i        = kexit,
+		//.packagepath = NULL,
+		//.exportpath  = NULL,
+		.beginTag      = kbegin,
+		.endTag        = kend,
+		.debugPrintf   = kdebugPrintf
 	};
-	return (const PlatformApi*)(&plat);
+	return (PlatformApi*)(&plat);
 }
 
 static void KonohaContext_evalScript(KonohaContext *kctx, char *data, size_t len)
@@ -180,7 +178,7 @@ static ssize_t knh_dev_write(struct file *filp,const char __user *user_buf,
 	len = copy_from_user(buf,user_buf,count);
 	memset(dev->buffer,0,sizeof(char)*MAXCOPYBUF);
 	buf[count] = '\0';
-	KonohaContext_evalScript((KonohaContext_t)dev->konoha,buf,strlen(buf));
+	KonohaContext_evalScript(dev->konoha,buf,strlen(buf));
 //	snprintf(dev->buffer,MAXCOPYBUF,"%s",((KonohaContext_t)dev->konoha)->buffer);
 //	strncpy(((KonohaContext_t)dev->konoha)->buffer,"\0",1);
 //	printk(KERN_DEBUG "[%s][dev->buffer='%s']\n",__func__ ,dev->buffer);

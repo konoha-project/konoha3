@@ -76,8 +76,8 @@ static KMETHOD kSHA1_Final(KonohaContext *kctx, KonohaStack *sfp)
 #define _C kMethod_Const
 #define _S kMethod_Static
 #define _F(F)   (intptr_t)(F)
-#define TY_openssl  (ct0->classId)
-#define TY_Log      (ct1->classId)
+#define TY_openssl  (ct0->typeId)
+#define TY_Log      (ct1->typeId)
 
 static kbool_t openssl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
@@ -88,25 +88,25 @@ static kbool_t openssl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	KonohaClass *tbls[2];
 	static KDEFINE_CLASS Def = {
 			.structname = "",
-			.classId = TY_newid,
+			.typeId = TY_newid,
 			.init = RawPtr_init,
 			.free = RawPtr_free,
 	};
-#define TY_MD5  tbls[0]->classId
-#define TY_SHA1 tbls[1]->classId
+#define TY_MD5  tbls[0]->typeId
+#define TY_SHA1 tbls[1]->typeId
 	int i;
 	for (i = 0; i < 2; i++) {
 		Def.structname = names[i];
-		tbls[i] = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &Def, pline);
+		tbls[i] = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def, pline);
 	}
 
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
 		_P, _F(kMD5_Init),   TY_SHA1,   TY_MD5, MN_("new"), 0,
-		_P, _F(kMD5_Update), TY_Int,   TY_MD5, MN_("update"), 1, TY_String, FN_x,
+		_P, _F(kMD5_Update), TY_int,   TY_MD5, MN_("update"), 1, TY_String, FN_x,
 		_P, _F(kMD5_Final),  TY_String, TY_MD5, MN_("final"), 0,
 		_P, _F(kSHA1_Init),   TY_SHA1,   TY_SHA1, MN_("new"), 0,
-		_P, _F(kSHA1_Update), TY_Int,   TY_SHA1, MN_("update"), 1, TY_String, FN_x,
+		_P, _F(kSHA1_Update), TY_int,   TY_SHA1, MN_("update"), 1, TY_String, FN_x,
 		_P, _F(kSHA1_Final),  TY_String, TY_SHA1, MN_("final"), 0,
 
 		DEND,
@@ -120,12 +120,12 @@ static kbool_t openssl_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirst
 	return true;
 }
 
-static kbool_t openssl_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
+static kbool_t openssl_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t openssl_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t openssl_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

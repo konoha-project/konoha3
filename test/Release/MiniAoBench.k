@@ -3,16 +3,21 @@
 
 K.import("konoha.float");
 K.import("konoha.math");
-K.import("konoha");
 K.import("konoha.bytes");
 K.import("konoha.string");
-K.import("posix.file");
+K.import("konoha.global");
+K.import("konoha.const");
+K.import("konoha.class");
+K.import("konoha.array");
+K.import("konoha.while");
+K.import("konoha.assign");
+K.setTransparentGlobalVariable(true);
 
-int width = 64;
-int height = 64;
+const width = 64;
+const height = 64;
 
-int nsubsamples = 2;
-int naosamples = 4;
+const nsubsamples = 2;
+const naosamples = 4;
 
 class Vec {
 	float x;
@@ -36,8 +41,8 @@ void cross(Vec v0, Vec v1, Vec v2) {
 }
 
 void normalize(Vec v1) {
-	double q = dot(v1, v1);
-	double length = Math.sqrt(q);
+	float q = dot(v1, v1);
+	float length = Math.sqrt(q);
 	if (length > 1.0e-10) {
 		v1.x = v1.x / length;
 		v1.y = v1.y / length;
@@ -45,38 +50,33 @@ void normalize(Vec v1) {
 	}
 }
 
-
 class RayIntersection {
 	Vec rayPosition;
 	Vec rayDirection;
 	Vec hitPosition;
 	Vec normal;
-	double distance;
+	float distance;
 	boolean  hit;
 }
 
 class Sphere {
 	Vec center;
-	double radius;
+	float radius;
 
-	Sphere(double x0, double y0, double z0, double r0) {
+	Sphere(float x0, float y0, float z0, float r0) {
 		this.center = new Vec(x0, y0, z0);
 		this.radius = r0;
-	}
-
-	Array[Sphere] newArray(int size) {
-		return this;
 	}
 }
 
 void interSectsSphere(Sphere s, RayIntersection isect) {
 	Vec rs = new Vec(isect.rayPosition.x - s.center.x, isect.rayPosition.y - s.center.y, isect.rayPosition.z - s.center.z);
-	double b = dot(rs, isect.rayDirection);
-	double c = dot(rs, rs) - s.radius * s.radius;
-	double d = b * b - c;
+	float b = dot(rs, isect.rayDirection);
+	float c = dot(rs, rs) - s.radius * s.radius;
+	float d = b * b - c;
 
 	if (d > 0.0) {
-		double t = -b - Math.sqrt(d);
+		float t = -b - Math.sqrt(d);
 		if ((t > 0.0) && (t < isect.distance)) {
 			isect.distance = t;
 			isect.hit = true;
@@ -105,11 +105,11 @@ Array[Sphere] spheres;
 Plane plane;
 
 void interSectsPlane(Plane plane, RayIntersection isect) {
-	double d = -1.0 * dot(plane.position, plane.normal);
-	double v = dot(isect.rayDirection, plane.normal);
+	float d = -1.0 * dot(plane.position, plane.normal);
+	float v = dot(isect.rayDirection, plane.normal);
 
 	if (v > 0.0000000000000001 || v < -0.00000000000000001) {
-		double t = -1.0 * (dot(isect.rayPosition, plane.normal) + d) / v;
+		float t = -1.0 * (dot(isect.rayPosition, plane.normal) + d) / v;
 
 		if ((t > 0.0) && (t < isect.distance)) {
 			isect.distance = t;
@@ -125,9 +125,9 @@ void interSectsPlane(Plane plane, RayIntersection isect) {
 }
 
 void getOrthoBasis (Vec normal, Vec[] orthoBasis) {
-	orthoBasis.set(0, new Vec(0.0, 0.0, 0.0));
-	orthoBasis.set(1,new Vec(0.0, 0.0, 0.0));
-	orthoBasis.set(2, new Vec(0.0, 0.0, 0.0));
+	orthoBasis[0] = new Vec(0.0, 0.0, 0.0);
+	orthoBasis[1] = new Vec(0.0, 0.0, 0.0);
+	orthoBasis[2] = new Vec(0.0, 0.0, 0.0);
 	Vec o0 = orthoBasis[0];
 	Vec o1 = orthoBasis[1];
 	Vec o2 = orthoBasis[2];
@@ -155,8 +155,8 @@ void getAmbientOcclusion(RayIntersection isect, Vec ambientOcclusion) {
 	int i, j;
 	int ntheta = naosamples;
 	int nphi = naosamples;
-	double eps = 0.0001;
-	double pi = 3.141593;
+	float eps = 0.0001;
+	float pi = 3.141593;
 
 	RayIntersection occlsect = new RayIntersection();
 	occlsect.rayPosition = new Vec(isect.hitPosition.x + eps * isect.normal.x,isect.hitPosition.y + eps * isect.normal.y,isect.hitPosition.z + eps * isect.normal.z);
@@ -172,11 +172,11 @@ void getAmbientOcclusion(RayIntersection isect, Vec ambientOcclusion) {
 	while (j < ntheta) {
 		i = 0;
 		while (i < nphi) {
-			double theta = Math.sqrt(Float.random());
-			double phi = 2.0 * pi * Float.random();
-			double x = Math.cos(phi) * theta;
-			double y = Math.sin(phi) * theta;
-			double z = Math.sqrt(1.0 - theta * theta);
+			float theta = Math.sqrt(Math.random());
+			float phi = 2.0 * pi * Math.random();
+			float x = Math.cos(phi) * theta;
+			float y = Math.sin(phi) * theta;
+			float z = Math.sqrt(1.0 - theta * theta);
 			occlsect.rayDirection.x = x * basis[0].x + y * basis[1].x + z * basis[2].x;
 			occlsect.rayDirection.y = x * basis[0].y + y * basis[1].y + z * basis[2].y;
 			occlsect.rayDirection.z = x * basis[0].z + y * basis[1].z + z * basis[2].z;
@@ -195,16 +195,16 @@ void getAmbientOcclusion(RayIntersection isect, Vec ambientOcclusion) {
 		} 
 		j += 1;
 	}
-	double fntheta = ntheta;
-	double fnphi = nphi;
-	double fhitCount = hitCount;
-	double occlusionRatio = (fntheta * fnphi - fhitCount) / (fntheta * fnphi);
+	float fntheta = ntheta;
+	float fnphi = nphi;
+	float fhitCount = hitCount;
+	float occlusionRatio = (fntheta * fnphi - fhitCount) / (fntheta * fnphi);
 	ambientOcclusion.x = occlusionRatio;
 	ambientOcclusion.y = occlusionRatio;
 	ambientOcclusion.z = occlusionRatio;
 }
 
-int clamp(double value) {
+int clamp(float value) {
 	int i = value * 255.5;
 	if (i > 255) i = 255;
 	else if (i < 0) i = 0;
@@ -212,7 +212,7 @@ int clamp(double value) {
 }
 
 void render(int[] byteImage, int width, int height, int numberOfSubSamples) {
-	float[] fimg = new Float[width * height * 3];
+	float[] fimg = new float[width * height * 3];
 	RayIntersection isect = new RayIntersection();
 	int y, x,v,u;
 	float fnumberOfSubSamples = numberOfSubSamples;
@@ -300,24 +300,6 @@ void run() {
 		i += 1;
 	}
 	p("");
-
-	//FILE outfile = System.fopen("ao.ppm", "w");
-	//outfile.write("P3".toBytes(), 0, 2);
-	//outfile.write("\n".toBytes(), 0, 1);
-	//String swidth = "" + width;
-	//outfile.write(swidth.toBytes(), 0, swidth.getSize());
-	//String sheight = " " + height;
-	//outfile.write(sheight.toBytes(), 0, sheight.getSize());
-	//outfile.write("\n".toBytes(), 0, 1);
-	//outfile.write("255".toBytes(), 0, 3);
-	//while (i < size) {
-	//	String simg = " " + img[i];
-	//	outfile.write(simg.toBytes(), 0, simg.getSize());
-	//	i += 1;
-	//}
-	//outfile.write("\n".toBytes(), 0, 1);
-
-	//outfile.close();
 }
 
 void main() {

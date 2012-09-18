@@ -19,8 +19,8 @@ XNMOV      0                  a:ro ax:u  b:rn ty:cid
 
 NEW        0                  a:ro p:u   ty:cid
 NULL       0                  a:ro ty:cid
-BOX        0                  a:ro b:rn ty:cid
-UNBOX      0                  a:rn b:ro ty:cid
+#BOX        0                  a:ro b:rn ty:cid
+#UNBOX      0                  a:rn b:ro ty:cid
 
 LOOKUP     0                  thisidx:ro ns:NameSpace mtd:Method
 CALL       0                  uline:u thisidx:ro espshift:ro tyo:co

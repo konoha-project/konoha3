@@ -24,9 +24,9 @@
 
 /* ************************************************************************ */
 
+#define USE_STRINGLIB 1
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-#define USE_STRINGLIB
 #include <minikonoha/klib.h>
 #include <minikonoha/iterator.h>
 
@@ -93,8 +93,8 @@ static KMETHOD Iterator_next(KonohaContext *kctx, KonohaStack *sfp)
 //static KMETHOD Iterator_new(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kIterator *itr = (kIterator*)sfp[0].asObject;
-//	KSETv(itr->funcHasNext, sfp[1].fo);
-//	KSETv(itr->funcNext,sfp[2].asFunc);
+//	KSETv(itr, itr->funcHasNext, sfp[1].fo);
+//	KSETv(itr, itr->funcNext,sfp[2].asFunc);
 //	itr->hasNext = callFuncHasNext;
 //	itr->setNextResult = callFuncNext;
 //	RETURN_(itr);
@@ -121,7 +121,7 @@ static void Array_setNextResultUnbox(KonohaContext *kctx, KonohaStack* sfp)
 	size_t n = itr->current_pos;
 	itr->current_pos += 1;
 	DBG_ASSERT(n < kArray_size(itr->arrayList));
-	RETURN_(itr->arrayList->kintItems[n]);
+	RETURNd_(itr->arrayList->kintItems[n]);
 }
 
 static KMETHOD Array_toIterator(KonohaContext *kctx, KonohaStack *sfp)
@@ -129,32 +129,11 @@ static KMETHOD Array_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 	kArray *a = sfp[0].asArray;
 	KonohaClass *cIterator = CT_p0(kctx, CT_Iterator, O_ct(a)->p0);
 	kIterator *itr = (kIterator*)KLIB new_kObject(kctx, cIterator, 0);
-	KSETv(itr->arrayList, a);
+	KSETv(itr, itr->arrayList, a);
 	itr->hasNext = Array_hasNext;
 	itr->setNextResult = TY_isUnbox(O_ct(a)->p0) ? Array_setNextResultUnbox : Array_setNextResult;
 	RETURN_(itr);
 }
-
-#define utf8len(c)    _utf8len[(int)c]
-
-static const char _utf8len[] = {
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-		2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-		3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-		4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 0, 0,
-};
 
 static kbool_t String_hasNext(KonohaContext *kctx, KonohaStack* sfp)
 {
@@ -176,7 +155,7 @@ static void String_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 static KMETHOD String_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kIterator *itr = (kIterator*)KLIB new_kObject(kctx, CT_StringIterator, 0);
-	KSETv(itr->source, sfp[0].asObject);
+	KSETv(itr, itr->source, sfp[0].asObject);
 	itr->hasNext = String_hasNext;
 	itr->setNextResult = String_setNextResult;
 	RETURN_(itr);
@@ -186,22 +165,19 @@ static KMETHOD String_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 
 static void kmoditerator_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx) {}
 static void kmoditerator_reftrace(KonohaContext *kctx, struct KonohaModule *baseh) { }
-static void kmoditerator_free(KonohaContext *kctx, struct KonohaModule *baseh) { KFREE(baseh, sizeof(kmoditerator_t)); }
+static void kmoditerator_free(KonohaContext *kctx, struct KonohaModule *baseh) { KFREE(baseh, sizeof(KonohaIteratorModule)); }
 
 #define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Im       kMethod_Immutable
-#define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
 static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	kmoditerator_t *base = (kmoditerator_t*)KCALLOC(sizeof(kmoditerator_t), 1);
+	KonohaIteratorModule *base = (KonohaIteratorModule*)KCALLOC(sizeof(KonohaIteratorModule), 1);
 	base->h.name     = "iterator";
 	base->h.setup    = kmoditerator_setup;
 	base->h.reftrace = kmoditerator_reftrace;
 	base->h.free     = kmoditerator_free;
-	KLIB Konoha_setModule(kctx, MOD_iterator, &base->h, pline);
+	KLIB KonohaRuntime_setModule(kctx, MOD_iterator, &base->h, pline);
 
 	kparamtype_t IteratorParam = {
 		.ty = TY_Object,
@@ -214,16 +190,14 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 		.cparamsize  = 1,
 		.cparamItems = &IteratorParam,
 	};
-	base->cIterator = KLIB Konoha_defineClass(kctx, ns->packageId, PN_konoha, NULL, &defIterator, pline);
+	base->cIterator = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defIterator, pline);
 	base->cStringIterator = CT_p0(kctx, base->cIterator, TY_String);
 	base->cGenericIterator = CT_p0(kctx, base->cIterator, TY_0);
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Iterator_hasNext), TY_Boolean, TY_Iterator, MN_("hasNext"), 0,
+		_Public, _F(Iterator_hasNext), TY_boolean, TY_Iterator, MN_("hasNext"), 0,
 		_Public, _F(Iterator_next), TY_0, TY_Iterator, MN_("next"), 0,
-		_Public, _F(Array_toIterator),  base->cGenericIterator->classId, TY_Array, MN_("toIterator"), 0,
+		_Public, _F(Array_toIterator),  base->cGenericIterator->typeId, TY_Array, MN_("toIterator"), 0,
 		_Public, _F(String_toIterator), TY_StringIterator, TY_String, MN_("toIterator"), 0,
-//		_Public|_Const|_Im, _F(Int_opINC), TY_Int, TY_Int, MN_("opINC"), 0,
-//		_Public|_Const|_Im, _F(Int_opDEC), TY_Int, TY_Int, MN_("opDEC"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
@@ -235,20 +209,12 @@ static kbool_t iterator_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirs
 	return true;
 }
 
-static kbool_t iterator_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
+static kbool_t iterator_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
-	KDEFINE_SYNTAX SYNTAX[] = {
-//			{ .keyword = SYM_("<<"), _OP, .op2 = "opLSHIFT", .priority_op2 = 128,},
-//			{ .keyword = SYM_(">>"), _OP, .op2 = "opRSHIFT", .priority_op2 = 128,},
-//			{ TOKEN("++"), _OP, .op1 = "opINC", .priority_op2 = 16, .flag = SYNFLAG_ExprPostfixOp2, },
-//			{ TOKEN("--"), _OP, .op1 = "opDEC", .priority_op2 = 16, .flag = SYNFLAG_ExprPostfixOp2,},
-			{ .keyword = KW_END, },
-	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t iterator_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t iterator_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

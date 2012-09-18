@@ -23,13 +23,15 @@
  ***************************************************************************/
 
 /* ************************************************************************ */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "commons.h"
+int verbose_gc = 0;
 
-#ifdef K_USING_RCGC
-#include "rcgc.h"
-#elif defined(K_USING_GENGC)
-#include "gbmgc.h"
-#else
+#define USE_GENERATIONAL_GC 1
 #include "bmgc.h"
+
+#ifdef __cplusplus
+} /* extern "C" */
 #endif

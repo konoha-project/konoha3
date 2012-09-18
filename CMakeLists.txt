@@ -66,6 +66,8 @@ SET(CMAKE_CXX_FLAGS_COMPRESSED "${CMAKE_C_FLAGS_COMPRESSED}")
 
 if(${CMAKE_BUILD_TYPE} STREQUAL "Compressed")
 	set(K_NODEBUG 1)
+	add_definitions(-DNDEBUG)
+	add_definitions(-DUSE_SMALLBUILD)
 endif()
 
 set(RUNTIME
@@ -96,45 +98,64 @@ set(PARSER
 
 set(KONOHA_VM_MODULE "" CACHE STRING "konoha vm module")
 if(KONOHA_VM_MODULE)
-	set(VM module/${KONOHA_VM_MODULE}vm/${KONOHA_VM_MODULE}asm.c)
+	set(VM module/${KONOHA_VM_MODULE}vm/${KONOHA_VM_MODULE}compiler.c)
 else(KONOHA_VM_MODULE)
-	set(VM src/vm/asm.c)
+	set(VM src/vm/compiler.c)
 endif(KONOHA_VM_MODULE)
 
 set(PACKAGES
-	sugar
+## add konoha.xx package in an alphabetical order 
 	konoha
-	konoha.null
-	konoha.int
-	konoha.float
-	konoha.math
-	konoha.string
-	konoha.bytes
 	konoha.array
-	konoha.iterator
-	konoha.hashmap
-	konoha.assignment
-	konoha.while
+	konoha.assign
+	konoha.break
+	konoha.bytes
 	konoha.class
+	konoha.const
+	konoha.continue
+	konoha.date
+	konoha.defined
+	konoha.dynamic
+	konoha.field
+	konoha.float
+	konoha.foreach
 	konoha.global
-	llvm
-	konoha.pcre
-##	konoha.io
 	konoha.i
+	konoha.io
+	konoha.import
+	konoha.int
+	konoha.iterator
+	konoha.math
+	konoha.map
+	konoha.mpi
+	konoha.namespace
+	konoha.new
+	konoha.null
+	konoha.object
+	konoha.regexp
+	konoha.string
+	konoha.subtype
+##	konoha.sql
+	konoha.untyped
+	konoha.var
+	konoha.while
+	sugar
+	llvm
 	posix.process
 	posix.file
 	posix.fd
-##	konoha.socket
-	konoha.rope
-##	konoha.subproc
-##	konoha.mpi
-##	curl
-	ijit
-	jansson
+##	posix.socket
+	posix.thread
+	dscript.dollar
+	dscript.subproc
+	curl
+##	ijit
+##	jansson
+	mecab
 	python
 	apache
-	konoha.import
 #	openssl
+	logpool
 )
 
 find_library(HAVE_LIBDL NAMES dl)
@@ -146,8 +167,31 @@ check_type_size(int      SIZEOF_INT)
 check_type_size(float    SIZEOF_FLOAT)
 check_type_size(double   SIZEOF_DOUBLE)
 
+SET(CMAKE_EXTRA_INCLUDE_FILES pthread.h)
+CHECK_TYPE_SIZE(pthread_mutex_t SIZEOF_PTHREAD_MUTEX_T)
+SET(CMAKE_EXTRA_INCLUDE_FILES)
+
 check_include_files(dlfcn.h HAVE_DLFCN_H)
 check_include_files(iconv.h HAVE_ICONV_H)
+
+set(_HEADERS stdio.h stdlib.h string.h ctype.h)
+if(UNIX)
+	set(_HEADERS ${_HEADERS} sys/mman.h unistd.h)
+endif(UNIX)
+
+if(APPLE)
+	set(_HEADERS ${_HEADERS} mach-o/dyld.h)
+endif(APPLE)
+
+if(CYGWIN)
+endif(CYGWIN)
+
+if(MSVC)
+endif(MSVC)
+
+check_symbol_exists(posix_memalign "${_HEADERS}" HAVE_POSIX_MEMALIGN)
+check_symbol_exists(memalign       "${_HEADERS}" HAVE_MEMALIGN)
+check_symbol_exists(__builtin_ctzl "${_HEADERS}" HAVE_BUILTIN_CTZL)
 
 FIND_FILE(HAS_DOTGIT .git PATHS "${CMAKE_CURRENT_SOURCE_DIR}")
 if("${HAS_DOTGIT}" MATCHES ".git")
@@ -204,23 +248,36 @@ endif(TEST_COVERAGE)
 enable_testing()
 set(TEST_BIN ${CMAKE_CURRENT_BINARY_DIR}/minikonoha)
 set(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(PARENT_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
-macro(add_konoha_test test_name)
+macro(add_test_with_property test_name)
 	add_test(${test_name} ${TEST_BIN} ${ARGN})
-	set_tests_properties(${test_name} PROPERTIES TIMEOUT 10)
+	set_tests_properties(${test_name} PROPERTIES TIMEOUT 5)
 	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT
-		"KONOHA_PACKAGEPATH=${CMAKE_CURRENT_BINARY_DIR}/minikonoha/package")
-endmacro(add_konoha_test test_name)
+		"KONOHA_PACKAGEPATH=${PARENT_BINARY_DIR}/package")
+endmacro(add_test_with_property test_name)
+
+macro(add_konoha_test test_name test_file)
+	if(test_name MATCHES "Stress")
+		if(TEST_STRESS)
+			add_test_with_property(${test_name} --test-with ${test_file})
+			set_tests_properties(${test_name} PROPERTIES TIMEOUT 10)
+		endif(TEST_STRESS)
+	else(test_name MATCHES "Stress")
+		if(NOT test_name MATCHES "Shell")
+			add_test_with_property(${test_name} --test-with ${test_file})
+		endif(NOT test_name MATCHES "Shell")
+	endif(test_name MATCHES "Stress")
+	if(TEST_IJIT)
+		add_test_with_property(ijit:${test_name} -Iijit --test-with ${test_file})
+	endif(TEST_IJIT)
+endmacro(add_konoha_test test_name test_file)
 
 file(GLOB_RECURSE test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/*.k)
 foreach(f ${test_files})
 	string(REPLACE // / f ${f})
 	string(REPLACE ${CMAKE_CURRENT_SOURCE_DIR}/test/ "" test_name ${f})
-	add_konoha_test(${test_name} --test-with ${f})
-	if(TEST_IJIT)
-		add_konoha_test(ijit:${test_name} -Iijit --test-with ${f})
-	endif(TEST_IJIT)
-	set_tests_properties(${test_name} PROPERTIES TIMEOUT 10)
+	add_konoha_test(${test_name} ${f})
 endforeach(f ${test_files})
 
 add_library(minikonoha SHARED ${RUNTIME} ${GC} ${LOGGER} ${PARSER} ${VM})
@@ -250,13 +307,10 @@ macro(create_package_project _PKGNAME)
 		string(REPLACE // / f ${f})
 		string(REPLACE ${PARENT_SOURCE_DIR}/package/ "" test_name ${f})
 		string(REPLACE /test "" test_name ${test_name})
-		add_konoha_test(${test_name} --test-with ${f})
-		if(TEST_IJIT)
-			add_konoha_test(ijit:${test_name} -Iijit --test-with ${f})
-		endif(TEST_IJIT)
-		if (PACKAGE_ENV)
+		add_konoha_test(${test_name} ${f})
+		if(PACKAGE_ENV)
 			set_tests_properties(${test_name} PROPERTIES ENVIRONMENT ${PACKAGE_ENV})
-		endif (PACKAGE_ENV)
+		endif(PACKAGE_ENV)
 	endforeach(f ${test_files})
 	set(CMAKE_BUILD_TYPE ${KONOHA_BUILD_TYPE})
 	PKGNAME(${_PKGNAME} _PACKAGE_NAME)
@@ -277,19 +331,20 @@ macro(create_package_project _PKGNAME)
 	if(${LEN} GREATER 0)
 		add_library(${LIB} SHARED ${PACKAGE_SOURCE_CODE})
 		set_target_properties(${LIB} PROPERTIES PREFIX "")
-		target_link_libraries(${LIB} minikonoha)
 		if(PACKAGE_EXTRA_LIBRARY)
 		target_link_libraries(${LIB} ${PACKAGE_EXTRA_LIBRARY})
 		endif(PACKAGE_EXTRA_LIBRARY)
 		install(TARGETS ${LIB} DESTINATION ${_KONOHA_PACKAGE_DIR})
 	endif(${LEN} GREATER 0)
-	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGE_SCRIPT_CODE} DESTINATION ${_KONOHA_PACKAGE_DIR})
-	add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_SCRIPT_CODE}
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGE_SCRIPT_CODE}
-		${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_SCRIPT_CODE})
-	add_custom_target(copy_${PACKAGE_SCRIPT_CODE} ALL DEPENDS
-		${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_SCRIPT_CODE})
+	if(PACKAGE_SCRIPT_CODE)
+		install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGE_SCRIPT_CODE} DESTINATION ${_KONOHA_PACKAGE_DIR})
+		add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_SCRIPT_CODE}
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGE_SCRIPT_CODE}
+			${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_SCRIPT_CODE})
+		add_custom_target(copy_${PACKAGE_SCRIPT_CODE} ALL DEPENDS
+			${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_SCRIPT_CODE})
+	endif(PACKAGE_SCRIPT_CODE)
 endmacro(create_package_project)
 
 macro(add_konoha_package PKGNAME)
@@ -315,19 +370,21 @@ macro(add_clib_test test_name)
 	add_executable(${test_name} ${ARGN})
 	target_link_libraries(${test_name} ${ExtraLibs})
 	add_test(Clib/Release/${test_name} ${test_name})
+	set_tests_properties(Clib/Release/${test_name} PROPERTIES TIMEOUT 5)
 endmacro(add_clib_test sources)
 
-add_clib_test(test_sizeof  ./test/src/test_sizeof.c)
-add_clib_test(test_Kmalloc ./test/src/test_Kmalloc.c)
-add_clib_test(test_Karray  ./test/src/test_Karray.c)
-add_clib_test(test_gc      ./test/src/test_gc.c)
-add_clib_test(test_Kwb     ./test/src/test_Kwb.c)
-add_clib_test(test_map     ./test/src/test_map.c)
-add_clib_test(test_string  ./test/src/test_string.c)
-add_clib_test(test_cpp     ./test/src/test_cpp.cpp)
+add_clib_test(test_sizeof  ./test/Clib/test_sizeof.c)
+add_clib_test(test_Kmalloc ./test/Clib/test_Kmalloc.c)
+add_clib_test(test_Karray  ./test/Clib/test_Karray.c)
+add_clib_test(test_gc      ./test/Clib/test_gc.c)
+add_clib_test(test_Kwb     ./test/Clib/test_Kwb.c)
+add_clib_test(test_map     ./test/Clib/test_map.c)
+add_clib_test(test_string  ./test/Clib/test_string.c)
+add_clib_test(test_cpp     ./test/Clib/test_cpp.cpp)
+add_clib_test(test_proto   ./test/Clib/test_proto.c)
 
 macro(add_builtin_test test_name)
-	add_konoha_test(Builtin/${test_name} ${ARGN})
+	add_test_with_property(Builtin/${test_name} ${ARGN})
 endmacro(add_builtin_test test_name)
 
 add_builtin_test(Release/Logger  --builtin-test=test_logger)
@@ -340,6 +397,24 @@ add_test(Shell/Release/Oneline
 add_test(Shell/Release/Multiline
 	${CMAKE_CURRENT_SOURCE_DIR}/test/test-multiline.sh ${TEST_BIN}
 	${CMAKE_CURRENT_SOURCE_DIR}/test/Release/Fibonacci.k)
+
+file(GLOB_RECURSE test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/Shell/*.sh)
+foreach(f ${test_files})
+	string(REPLACE // / f ${f})
+	string(REPLACE .sh .k TEST_SCRIPT ${f})
+	string(REPLACE ${CMAKE_CURRENT_SOURCE_DIR}/test/ "" test_name ${TEST_SCRIPT})
+	if(EXISTS ${TEST_SCRIPT})
+		add_test(${test_name} sh +x ${f} ${TEST_BIN} ${TEST_SCRIPT})
+	else(EXISTS ${TEST_SCRIPT})
+		add_test(${test_name} sh +x ${f} ${TEST_BIN})
+	endif(EXISTS ${TEST_SCRIPT})
+	set_tests_properties(${test_name} PROPERTIES TIMEOUT 5)
+	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT
+		"KONOHA_PACKAGEPATH=${PARENT_BINARY_DIR}/package")
+endforeach(f ${test_files})
+
+add_subdirectory(platform/dse)
+add_subdirectory(platform/apache)
 
 install(TARGETS minikonoha minikonoha_bin
 		RUNTIME DESTINATION bin

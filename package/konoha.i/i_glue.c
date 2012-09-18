@@ -22,9 +22,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include<minikonoha/minikonoha.h>
-#include<minikonoha/sugar.h>
-#include<minikonoha/klib.h>
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
+#include <minikonoha/klib.h>
 
 struct fn {
 	uintptr_t  flag;
@@ -68,7 +68,7 @@ static void Method_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWrite
 	if(level != 0) {
 		MethodAttribute_p(kctx, mtd, wb);
 	}
-	KLIB Kwb_printf(kctx, wb, "%s %s.%s%s", TY_t(pa->rtype), TY_t(mtd->classId), T_mn(mtd->mn));
+	KLIB Kwb_printf(kctx, wb, "%s %s.%s%s", TY_t(pa->rtype), TY_t(mtd->typeId), T_mn(mtd->mn));
 	if(level != 0) {
 		size_t i;
 		kwb_putc(wb, '(');
@@ -95,7 +95,7 @@ static void copyMethodList(KonohaContext *kctx, ktype_t cid, kArray *s, kArray *
 	size_t i;
 	for(i = 0; i < kArray_size(s); i++) {
 		kMethod *mtd = s->methodItems[i];
-		if(mtd->classId != cid) continue;
+		if(mtd->typeId != cid) continue;
 		KLIB kArray_add(kctx, d, mtd);
 	}
 }
@@ -104,7 +104,7 @@ static void dumpMethod(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd)
 {
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	KSETv(sfp[2].asMethod, mtd);
+	KSETv_AND_WRITE_BARRIER(NULL, sfp[2].asMethod, mtd, GC_NO_WRITE_BARRIER);
 	O_ct(mtd)->p(kctx, sfp, 2, &wb, 1);
 	PLATAPI printf_i("%s\n", KLIB Kwb_top(kctx, &wb, 1));
 	KLIB Kwb_free(&wb);
@@ -126,12 +126,12 @@ KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp)
 	size_t start = kArray_size(list);
 	kNameSpace *ns = sfp[0].asNameSpace;
 	KonohaClass *ct = O_ct(sfp[1].asObject);
-	DBG_P("*** man %s", TY_t(ct->classId));
+	DBG_P("*** man %s", TY_t(ct->typeId));
 	while(ns != NULL) {
-		copyMethodList(kctx, ct->classId, ns->methodList, list);
+		copyMethodList(kctx, ct->typeId, ns->methodList, list);
 		ns = ns->parentNULL;
 	}
-	copyMethodList(kctx, ct->classId, ct->methodList, list);
+	copyMethodList(kctx, ct->typeId, ct->methodList, list);
 	dumpMethodList(kctx, sfp, start, list);
 	RESET_GCSTACK();
 }
@@ -139,11 +139,9 @@ KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp)
 // --------------------------------------------------------------------------
 
 #define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static	kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	KonohaClass *ct = kclass(TY_Method, pline);
 	KSET_TYFUNC(ct, p, Method, pline);
@@ -160,20 +158,12 @@ static kbool_t i_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t
 	return true;
 }
 
-static kbool_t i_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
+static kbool_t i_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
-//	USING_SUGAR;
-//	KDEFINE_SYNTAX SYNTAX[] = {
-//		{ TOKEN("float"), .type = TY_Float, },
-//		{ TOKEN("double"), .type = TY_Float, },
-//		{ TOKEN("$FLOAT"), .keyword = KW_TK(TK_FLOAT), .ExprTyCheck = ExprTyCheck_FLOAT, },
-//		{ .keyword = KW_END, },
-//	};
-//	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t i_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t i_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

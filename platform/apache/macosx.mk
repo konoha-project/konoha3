@@ -18,8 +18,8 @@ APACHECTL=apachectl
 #DEFS=-Dmy_define=my_value
 INCLUDES=-I../../include
 #LIBS=
-CFLAGS=-g -O2 -W -Wall
-LDFLAGS=-L/usr/local/lib -lkonoha2
+CFLAGS=-g -O2 -Wall
+LDFLAGS=-L/usr/local/lib -lminikonoha
 #-std=c99
 
 #   the default target

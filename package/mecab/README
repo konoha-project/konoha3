@@ -1,0 +1,46 @@
+# This README tells you how to install and use MeCab and minikonoha mecab bind.
+#
+# Author: Motoki Yoan (July, 9, 2012)
+
+minikonoha mecab bind requires followings.
+  1. minikonoha (git://github.com/konoha-project/minikonoha.git)
+  2. Mecab   (http://mecab.googlecode.com/svn/trunk/mecab/doc/index.html)
+
+############## 1. GET MeCab ###################
+
+1.1 Download Mecab
+  $ wget http://mecab.googlecode.com/files/mecab-0.994.tar.gz
+1.2 Download IPA dictionary
+  $ wget http://mecab.googlecode.com/files/mecab-ipadic-2.7.0-20070801.tar.gz
+
+############## 2. HOW TO INSTALL ##############
+
+2.1 Install MeCab
+
+  $ cd /path/to/minikonoha/package/mecab
+  $ tar zxvf libs/mecab-xxx.tar.gz
+  $ cd mecab-xxx
+  $ ./configure --enable-utf8-only
+  $ make && sudo make install
+
+2.2 Install IPA dictionary
+
+  $ cd /path/to/minikonoha/package/mecab
+  $ tar zxvf libs/mecab-ipadic-xxx.tar.gz
+  $ cd mecab-ipadic-xxx
+  $ ./configure --with-charset=utf8
+  $ make && sudo make install
+
+2.3 Install minikonoha MeCab bind.
+
+  $ vi CMakeLists.txt // add mecab package
+  $ mkdir build
+  $ cd build
+  $ cmake .. && make && sudo make install
+
+############## 3. SAMPLES ##############
+
+  $ cd /path/to/minikonoha/package/mecab/test/Debug
+  $ minikonoha example.k
+  $ minikonoha getNoun.k
+

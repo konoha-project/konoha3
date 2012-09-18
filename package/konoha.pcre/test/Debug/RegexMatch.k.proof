@@ -1,8 +1,0 @@
- - (RegexMatch.k:5) 123
- - (RegexMatch.k:7) 1
- - (RegexMatch.k:10) /
- - (RegexMatch.k:12) 1234
- - (RegexMatch.k:14) hoge1234
- - (RegexMatch.k:15) hoge
- - (RegexMatch.k:16) 1234
-Q.E.D.

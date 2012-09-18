@@ -25,6 +25,21 @@
 #ifndef MODICONV_H_
 #define MODICONV_H_
 
+#ifndef MINIOKNOHA_H_
+#error Do not include bytes.h without minikonoha.h.
+#endif
+
+#include <string.h>
+#include <langinfo.h>
+#include <locale.h>
+#ifdef HAVE_ICONV_H
+#include <iconv.h>
+#endif /* HAVE_ICONV_H */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* ------------------------------------------------------------------------ */
 /* [class defs] */
 
@@ -32,36 +47,30 @@
 #define kmodiconv        ((kmodiconv_t*)kctx->modshare[MOD_iconv])
 #define IS_defineBytes() (kctx->modshare[MOD_iconv] != NULL)
 #define CT_Bytes         kmodiconv->cBytes
-#define TY_Bytes         kmodiconv->cBytes->classId
+#define TY_Bytes         kmodiconv->cBytes->typeId
 
 #define IS_Bytes(O)      ((O)->h.ct == CT_Bytes)
 
-#include <string.h>
-#include <langinfo.h>
-#include <locale.h>
-#ifdef K_USING_ICONV
-#include <iconv.h>
+#ifdef HAVE_ICONV_H
 typedef iconv_t kiconv_t;
 #else
 typedef long    kiconv_t;
-#endif
-
-typedef kiconv_t (*ficonv_open)(const char *, const char *);
-typedef size_t (*ficonv)(kiconv_t, const char **, size_t *, char **, size_t *);
-typedef int    (*ficonv_close)(kiconv_t);
+#endif /* HAVE_ICONV_H */
 
 typedef struct {
-    KonohaModule h;
-    KonohaClass     *cBytes;
-    kbool_t      (*encode)(const char* from, const char* to, const char* text, size_t len, KUtilsWriteBuffer* wb);
-    const char*  fmt;
-    const char*  locale;
-    kiconv_t     (*ficonv_open)(const char *, const char*);
-    size_t       (*ficonv)(kiconv_t, const char **, size_t *, char**, size_t *);
-    int          (*ficonv_close)(kiconv_t);
+	KonohaModule h;
+	KonohaClass     *cBytes;
+	//kbool_t      (*encode)(const char* from, const char* to, const char* text, size_t len, KUtilsWriteBuffer* wb);
+	//const char*  fmt;
+	//const char*  locale;
 } kmodiconv_t;
 
 typedef struct {
-    KonohaContextModule h;
+	KonohaModuleContext h;
 } ctxiconv_t;
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
 #endif /* MODICONV_H_ */

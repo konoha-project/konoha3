@@ -1,0 +1,3 @@
+ - (error) Script!!: out of array index 999
+ ** OutOfStringBoundaryException
+Q.E.D.

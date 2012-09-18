@@ -73,9 +73,9 @@ static size_t write_String(char *buffer, size_t size, size_t nitems, void *strin
 	size *= nitems;
 	KLIB Kwb_write(kctx, &wb, buffer, size);
 	str = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), SPOL_POOL);
-	res->ubuf = str->ubuf + res->bytesize;// - str->ubuf;
-	res->bytesize = str->bytesize - res->bytesize;// - str->bytesize;
-	KSETv(res, (kStringVar*)str);
+//TODO handle SPOL and inline_text
+	res->ubuf = str->ubuf;
+	res->bytesize = str->bytesize;
 	KLIB Kwb_free(&wb);
 	return size;
 }
@@ -288,8 +288,8 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 			FILE* fp = ((kCurl*)sfp[0].asObject)->fp;
 			if ((fp = tmpfile()) == NULL) {
 				ktrace(_DataFault,   // FIXME
-						KEYVALUE_s("Curl.setOpt", "Could not set body CURLOPT.READDATA"),
-						KEYVALUE_u("curlopt", curlopt)
+						KeyValue_s("Curl.setOpt", "Could not set body CURLOPT.READDATA"),
+						KeyValue_u("curlopt", curlopt)
 					);
 				break;
 			}
@@ -300,8 +300,8 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	default: {
 		ktrace(_DataFault,   // FIXME
-				KEYVALUE_s("Curl.setOpt", "UnsupportedOption"),
-				KEYVALUE_u("curlopt", curlopt)
+				KeyValue_s("Curl.setOpt", "UnsupportedOption"),
+				KeyValue_u("curlopt", curlopt)
 			  );
 		// KNH_NTRACE2(ctx, "Curl.setOpt:UnsupportedOption", K_FAILED, KNH_LDATA(LOG_i("curlopt", curlopt)));
 		break;
@@ -393,12 +393,12 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 #define _F(F)   (intptr_t)(F)
 
 #define CT_Curl     cCurl
-#define TY_Curl     cCurl->classId
+#define TY_Curl     cCurl->typeId
 #define IS_Curl(O)  ((O)->h.ct == CT_Curl)
 
-#define _KVi(T)  #T, TY_Int, T
+#define _KVi(T)  #T, TY_int, T
 
-static	kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	ctx = (struct KonohaContextVar *)kctx;
 
@@ -408,14 +408,14 @@ static	kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		.init = Curl_init,
 		.free = Curl_free,
 	};
-	KonohaClass *cCurl = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &defCurl, pline);
+	KonohaClass *cCurl = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defCurl, pline);
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im, _F(Curl_new), TY_Curl, TY_Curl, MN_("new"), 0,
-		_Public|_Const|_Im, _F(Curl_setOpt), TY_void, TY_Curl, MN_("setOpt"), 2, TY_Int, FN_("type"), TY_Object/*FIXME TY_Dynamic*/, FN_("data"),
+		_Public|_Const|_Im, _F(Curl_setOpt), TY_void, TY_Curl, MN_("setOpt"), 2, TY_int, FN_("type"), TY_Object/*FIXME TY_Dynamic*/, FN_("data"),
 		_Public|_Const|_Im, _F(Curl_appendHeader), TY_void, TY_Curl, MN_("appendHeader"), 1, TY_String, FN_("header"),
-		_Public|_Const|_Im, _F(Curl_perform), TY_Boolean, TY_Curl, MN_("perform"), 0,
-		_Public|_Const|_Im, _F(Curl_getInfo), TY_Object/*FIXME TY_Dynamic*/, TY_Curl, MN_("getInfo"), 1, TY_Int, FN_("type"),
+		_Public|_Const|_Im, _F(Curl_perform), TY_boolean, TY_Curl, MN_("perform"), 0,
+		_Public|_Const|_Im, _F(Curl_getInfo), TY_Object/*FIXME TY_Dynamic*/, TY_Curl, MN_("getInfo"), 1, TY_int, FN_("type"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
@@ -528,12 +528,12 @@ static kbool_t curl_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 	return true;
 }
 
-static kbool_t curl_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
+static kbool_t curl_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t curl_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t curl_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

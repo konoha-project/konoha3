@@ -1,10 +1,19 @@
-K.import("konoha");
+K.import("konoha.assign");
+K.import("konoha.while");
+K.import("konoha.class");
+K.import("konoha.global");
+K.import("konoha.null");
+K.import("konoha.int");
+K.import("konoha.array");
+K.import("konoha.const");
+K.setTransparentGlobalVariable(true);
+
 /* The Great Computer Language Shootout
    http://shootout.alioth.debian.org/
    contributed by Kimio Kuramitsu
 */
 
-int c_MINDEPTH = 4;
+const c_MINDEPTH = 4;
 
 class TreeNode {
 	TreeNode left, right;
@@ -25,12 +34,12 @@ class TreeNode {
 	}
 }
 
-TreeNode bottomUpTree(int item, int depth){
+TreeNode bottomUpTree(int item, int depth) {
 	if (depth > 0){
 		return new TreeNode(bottomUpTree(2*item-1, depth-1), bottomUpTree(2*item, depth-1), item, false);
 	}
 	else {
-		TreeNode t; // = null;
+		TreeNode t = null;
 		return new TreeNode(t, t, item, true);
 	}
 }
@@ -38,7 +47,7 @@ TreeNode bottomUpTree(int item, int depth){
 void main() {
 	int n = 10;
 	int maxDepth;
-	if(c_MINDEPTH + 2 > n) maxDepth = c_MINDEPTH + 2; else maxDepth = n;
+	if(c_MINDEPTH + 2 > n) { maxDepth = c_MINDEPTH + 2; } else { maxDepth = n; }
 	int stretchDepth = maxDepth + 1;
 	int check = bottomUpTree(0,stretchDepth).itemCheck();
 	assert(check == -1);
@@ -64,4 +73,3 @@ void main() {
 }
 
 main();
-

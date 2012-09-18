@@ -14,7 +14,9 @@ endif()
 
 find_path(APR_INCLUDE_DIR apr.h
         /usr/local/include/apr-1
-        /usr/include/apr-1)
+        /usr/local/include/apr-1.0
+        /usr/include/apr-1
+        /usr/include/apr-1.0)
 
 find_library(APR_LIBRARY
         NAMES apr-1

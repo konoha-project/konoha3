@@ -22,38 +22,43 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include<minikonoha/minikonoha.h>
-#include<minikonoha/sugar.h>
-//#include<minikonoha/float.h>
-
-// operator only
-//#include"assignment_glue.h"
-//#include"while_glue.h"
-
-// class and operator
-//#include"class_glue.h"
-//#include"global_glue.h"
-
-// method and operator
-//#include"array_glue.h"
-
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
 
 // --------------------------------------------------------------------------
 
-static	kbool_t konoha_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
-{
-	KREQUIRE_PACKAGE("konoha.assignment", pline);
-	KREQUIRE_PACKAGE("konoha.while", pline);
-
-	KREQUIRE_PACKAGE("konoha.class", pline);
-	KREQUIRE_PACKAGE("konoha.global", pline);
-
-	KREQUIRE_PACKAGE("konoha.null", pline);
-	KREQUIRE_PACKAGE("konoha.int", pline);
-#ifndef K_USING_NOFLOAT
-	KREQUIRE_PACKAGE("konoha.float", pline);
+#ifdef __cplusplus
+extern "C" {
 #endif
-	KREQUIRE_PACKAGE("konoha.array", pline);
+
+static kbool_t konoha_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+{
+	KRequirePackage("konoha.namespace", pline);
+	KRequirePackage("konoha.const", pline);
+	KRequirePackage("konoha.global", pline);
+	KRequirePackage("konoha.class", pline);       // subtype
+
+	KRequirePackage("konoha.null", pline);
+
+	KRequirePackage("konoha.while",  pline);  // continue, break
+
+	KRequirePackage("konoha.var", pline);
+
+	KRequirePackage("konoha.object", pline);  // subtype
+	KRequirePackage("konoha.int", pline);
+#ifndef K_USING_NOFLOAT
+	KRequirePackage("konoha.float", pline);
+#endif
+	KRequirePackage("konoha.string", pline);
+	KRequirePackage("konoha.array", pline);
+	KRequirePackage("konoha.map", pline);
+	KRequirePackage("konoha.iterator", pline);
+
+
+	KRequirePackage("konoha.assign", pline);
+	KRequirePackage("konoha.io", pline);
+
+
 	return true;
 }
 
@@ -62,23 +67,37 @@ static kbool_t konoha_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 	return true;
 }
 
-static kbool_t konoha_initNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t konoha_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
-	KEXPORT_PACKAGE("konoha.assignment", ns, pline);
-	KEXPORT_PACKAGE("konoha.while", ns, pline);
-	KEXPORT_PACKAGE("konoha.class", ns, pline);
-	KEXPORT_PACKAGE("konoha.global", ns, pline);
+	KImportPackage(ns, "konoha.namespace", pline);
+	KImportPackage(ns, "konoha.const",  pline);  // TopLevel
+	KImportPackage(ns, "konoha.global", pline);
+	KImportPackage(ns, "konoha.class",  pline);
 
-	KEXPORT_PACKAGE("konoha.null", ns, pline);
-	KEXPORT_PACKAGE("konoha.int", ns, pline);
-	if(kctx->modshare[MOD_float] != NULL) {
-		KEXPORT_PACKAGE("konoha.float", ns, pline);
-	}
-	KEXPORT_PACKAGE("konoha.array", ns, pline);
+	KImportPackage(ns, "konoha.null", pline);    // Operator
+
+	KImportPackage(ns, "konoha.while",  pline);
+
+	KImportPackage(ns, "konoha.var",  pline);
+
+	KImportPackage(ns, "konoha.object", pline);  // subtype
+	KImportPackage(ns, "konoha.int",  pline);
+	KImportPackage(ns, "konoha.float", pline);
+	KImportPackage(ns, "konoha.string", pline);
+
+	KImportPackage(ns, "konoha.date", pline);
+	KImportPackage(ns, "konoha.array", pline);
+	KImportPackage(ns, "konoha.map", pline);
+	KImportPackage(ns, "konoha.iterator", pline);
+
+	KImportPackage(ns, "konoha.assign", pline);
+
+	KImportPackage(ns, "konoha.io", pline);
+
 	return true;
 }
 
-static kbool_t konoha_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t konoha_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
@@ -95,3 +114,6 @@ KDEFINE_PACKAGE* konoha_init(void)
 	return &d;
 }
 
+#ifdef __cplusplus
+} /* extern "C" { */
+#endif

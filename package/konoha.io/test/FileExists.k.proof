@@ -1,0 +1,3 @@
+ - (FileExists.k:9) true
+ - (FileExists.k:11) false
+Q.E.D.

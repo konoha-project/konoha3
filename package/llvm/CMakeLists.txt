@@ -56,9 +56,19 @@ execute_process(
 
 set(ORIG_CXX_FLAGS ${CMAKE_CXX_FLAGS_${uppercase_CMAKE_BUILD_TYPE}})
 set(PACKAGE_CXX_FLAGS "${LLVM_CXXFLAGS} -Wno-variadic-macros ${ORIG_CXX_FLAGS} -UNDEBUG")
-string(REPLACE " " ";" v ${LLVM_JIT_LIBS})
+string(REPLACE "-l" "" tmp ${LLVM_JIT_LIBS})
+string(REPLACE " " ";" LLVMLIBS ${tmp})
+
+string(REPLACE " " ";" tmp ${LLVM_LDFLAGS})
+foreach(lib ${tmp})
+	string(REGEX MATCH "^-l" res "${lib}")
+	if("${res}" STREQUAL "-l")
+		string(REPLACE "-l" "" lib ${lib})
+		set(LLVMLIBS ${LLVMLIBS} ${lib})
+	endif()
+endforeach(lib ${tmp})
+
 link_directories(${LINK_DIRECTORIES} ${LLVM_LIBDIR})
-set(ExtraLibs ${ExtraLibs} ${v})
 
 set(K_LLVM_VERSION ${LLVM_VERSION})
 string(REPLACE "." "0" K_LLVM_VERSION ${K_LLVM_VERSION})
@@ -72,6 +82,6 @@ message(FATAL ERROR
         "konoha.llvm package not support old version of llvm (<=llvm-2.8)")
 endif(${LLVM_VERSION} VERSION_LESS "2.8")
 
-set(PACKAGE_EXTRA_LIBRARY ${ExtraLibs})
+set(PACKAGE_EXTRA_LIBRARY ${LLVMLIBS})
 add_konoha_package(llvm)
 endif(LLVM_CONFIG)

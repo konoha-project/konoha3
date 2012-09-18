@@ -1,10 +1,10 @@
 obj-m:= konohadev.o
 konohadev-objs := \
-	../../src/konoha/konoha2.o\
+	../../src/konoha/minikonoha.o\
 	../../module/msgc/msgc.o\
 	../../src/sugar/sugar.o\
 	../../src/logger/logger.o\
-	../../src/vm/asm.o\
+	../../src/vm/compiler.o\
 	qsort.o\
 	lkm.o
 
@@ -12,7 +12,7 @@ konohadev-objs := \
 KDIR  := /lib/modules/$(shell uname -r)/build
 PWD   := $(shell pwd)
 VERBOSE=0
-EXTRA_CFLAGS := -DPLATFORM_KERNEL
+EXTRA_CFLAGS := -DPLATAPIFORM_KERNEL
 EXTRA_CFLAGS += -Wno-declaration-after-statement
 EXTRA_CFLAGS += -I$(SRCDIR)/include -I$(SRCDIR)/platform/lkm/
 

@@ -37,7 +37,7 @@ def parse_package(fpath):
 #	return p[-2]
 ###
 
-def fpath_shortfilename(fpath):
+def shortFilePath(fpath):
 	p = fpath.split('/')
 	return p[-1].replace('.c', '')
 ###

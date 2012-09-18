@@ -1,0 +1,4 @@
+ - (error) (ERROR_IncrementalOperator.k:7) undefined operator: ++
+ - (error) (ERROR_IncrementalOperator.k:9) undefined operator: --
+ ** RuntimeScriptException (ERROR_IncrementalOperator.k:7)
+Q.E.D.

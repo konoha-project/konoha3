@@ -4,31 +4,32 @@ K.import("konoha");
 
 class Task {
 	int taskid;
-	String type;
-	int context;
-	String method;
+	String scripttype;
+	int contextid;
+	String execmethod;
 	String logpool;
 	String script;
 
-	Task(int taskid, String type, int context, String method, String logpool, String script) {
+	Task(int taskid, String scripttype, int contextid, String execmethod, String logpool, String script) {
 		this.taskid = taskid;
-		this.type = type;
-		this.context = context;
-		this.method = method;
+		this.scripttype = scripttype;
+		this.contextid = contextid;
+		this.execmethod = execmethod;
 		this.logpool = logpool;
 		this.script = script;
 	}
 
 	void sendTo(String host, int port) {
 		Json sdata = new Json();
-		sdata.setString("taskid", this.taskid + ""); // TODO setInt();
-		sdata.setString("type", this.type);
-		sdata.setString("context", this.context); // TODO setInt();
-		sdata.setString("method", this.method);
+		sdata.setInt("taskid", this.taskid);
+		sdata.setString("scripttype", this.scripttype);
+		sdata.setInt("contextid", this.contextid);
+		sdata.setString("execmethod", this.execmethod);
 		sdata.setString("logpool", this.logpool);
 		sdata.setString("script", this.script);
 
 		String req = sdata.dump();
+		p(req);
 		String res = "";
 
 		Curl c = new Curl();
@@ -40,18 +41,13 @@ class Task {
 		c.perform();
 		return;
 	}
-
-	void sync() {
-		// syncronize
-		return;
-	}
 }
 
 void main() {
 	String host = "localhost";
 	int port = 8080;
 	String logpoolip = "0.0.0.0";
-	Task t = new Task(1, "test", 1, "eval", logpoolip, "p(1);");
+	Task t = new Task(1, "minikonoha", 1, "eval", logpoolip, "p(1);");
 	t.sendTo(host, port);
 	return;
 }

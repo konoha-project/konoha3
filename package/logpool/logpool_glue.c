@@ -106,7 +106,7 @@ static KMETHOD LogPool_get(KonohaContext *kctx, KonohaStack *sfp)
 	logpool_t *lp = (logpool_t *) ((kRawPtr *) sfp[0].asObject)->rawptr;
 	char *buf = malloc(256);
 	char *ret = logpool_client_get(lp, buf, 256);
-	kObject *log = KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), NULL);
+	kObject *log = KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
 	if (ret == NULL) {
 		kObject_setNullObject(log, 1);
 		free(buf);
@@ -140,9 +140,9 @@ static uintptr_t p_init(uintptr_t context)
 {
 	struct konoha_context *c = malloc(sizeof(struct konoha_context));
 	memcpy(c, (struct konoha_context*) context, sizeof(*c));
-	KonohaContext_t kctx = c->konoha;
+	KonohaContext *kctx = c->konoha;
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KSETv(lsfp[K_CALLDELTA+0].o, c->finit->self);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, c->finit->self, GC_NO_WRITE_BARRIER);
 	KCALL(lsfp, 0, c->finit->mtd, 0, K_NULL);
 	END_LOCAL();
 	return (uintptr_t) c;
@@ -151,9 +151,9 @@ static uintptr_t p_init(uintptr_t context)
 static uintptr_t p_exit(uintptr_t context)
 {
 	struct konoha_context *c = malloc(sizeof(struct konoha_context));
-	KonohaContext_t kctx = c->konoha;
+	KonohaContext *kctx = c->konoha;
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KSETv(lsfp[K_CALLDELTA+0].o, c->fexit->self);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, c->fexit->self, GC_NO_WRITE_BARRIER);
 	KCALL(lsfp, 0, c->fexit->mtd, 0, K_NULL);
 	END_LOCAL();
 	bzero(c, sizeof(*c));
@@ -169,11 +169,11 @@ static kRawPtr *Log_new(KonohaContext *kctx, struct Log *e)
 static uintptr_t p_func(uintptr_t context, struct LogEntry *e)
 {
 	struct konoha_context *c = malloc(sizeof(struct konoha_context));
-	KonohaContext_t kctx = c->konoha;
+	KonohaContext *kctx = c->konoha;
 	kObject *log = (kObject *) Log_new(kctx, (struct Log *) &e->data);
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KSETv(lsfp[K_CALLDELTA+0].o, c->func->self);
-	KSETv(lsfp[K_CALLDELTA+1].o, log);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, c->func->self, GC_NO_WRITE_BARRIER);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, log, GC_NO_WRITE_BARRIER);
 	KCALL(lsfp, 0, c->func->mtd, 0, K_NULL);
 	END_LOCAL();
 	return context;
@@ -195,7 +195,7 @@ static char *copy_string(KonohaContext *kctx, kString *s)
 static KMETHOD Printer_create(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct pool_plugin_print *p = POOL_PLUGIN_CLONE(pool_plugin_print);
-	kRawPtr *ret = (kRawPtr *) KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), p);
+	kRawPtr *ret = (kRawPtr *) KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), (uintptr_t)p);
 	RETURN_(ret);
 }
 
@@ -203,7 +203,7 @@ static KMETHOD Printer_create(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ValFilter_create(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct pool_plugin_val_filter *p = POOL_PLUGIN_CLONE(pool_plugin_val_filter);
-	kRawPtr *ret = (kRawPtr *) KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), p);
+	kRawPtr *ret = (kRawPtr *) KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), (uintptr_t)p);
 	p->klen = S_size(sfp[1].asString);
 	p->key  = copy_string(kctx, sfp[1].asString);
 	p->vlen = S_size(sfp[2].s);
@@ -220,7 +220,7 @@ static KMETHOD ValFilter_create(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD KeyFilter_create(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct pool_plugin_key_filter *p = POOL_PLUGIN_CLONE(pool_plugin_key_filter);
-	kRawPtr *ret = (kRawPtr *) KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), p);
+	kRawPtr *ret = (kRawPtr *) KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), (uintptr_t)p);
 	p->klen = S_size(sfp[1].asString);
 	p->key  = copy_string(kctx, sfp[2].s);
 	RETURN_(ret);
@@ -230,7 +230,7 @@ static KMETHOD KeyFilter_create(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD React_create(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct pool_plugin_react *p = POOL_PLUGIN_CLONE(pool_plugin_react);
-	kRawPtr *ret = (kRawPtr *) KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), p);
+	kRawPtr *ret = (kRawPtr *) KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), (uintptr_t)p);
 	p->conf.traceName = copy_string(kctx, sfp[1].asString);
 	p->conf.key       = copy_string(kctx, sfp[2].s);
 	RETURN_(ret);
@@ -240,7 +240,7 @@ static KMETHOD React_create(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Timer_create(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct pool_plugin_timer *p = POOL_PLUGIN_CLONE(pool_plugin_timer);
-	kRawPtr *ret = (kRawPtr *) KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), p);
+	kRawPtr *ret = (kRawPtr *) KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), (uintptr_t)p);
 	p->timer = sfp[1].intValue;
 	p->flag_start  = sfp[2].intValue;
 	p->flag_cont   = sfp[3].intValue;
@@ -252,7 +252,7 @@ static KMETHOD Timer_create(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Copy_create(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct pool_plugin_copy *p = POOL_PLUGIN_CLONE(pool_plugin_copy);
-	kRawPtr *ret = (kRawPtr *) KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), p);
+	kRawPtr *ret = (kRawPtr *) KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), (uintptr_t)p);
 	RETURN_(ret);
 }
 
@@ -260,9 +260,9 @@ static void *statics_init(KonohaContext *kctx, kFunc *initFo, kFunc *exitFo, kFu
 {
 	struct konoha_context *c = malloc(sizeof(struct konoha_context));
 	c->konoha = kctx;
-	KSETv(c->finit, initFo);
-	KSETv(c->fexit, exitFo);
-	KSETv(c->func,  funcFo);
+	KSETv_AND_WRITE_BARRIER(NULL, c->finit, initFo, GC_NO_WRITE_BARRIER);
+	KSETv_AND_WRITE_BARRIER(NULL, c->fexit, exitFo, GC_NO_WRITE_BARRIER);
+	KSETv_AND_WRITE_BARRIER(NULL, c->func,  funcFo, GC_NO_WRITE_BARRIER);
 	return (void*) c;
 }
 
@@ -270,8 +270,8 @@ static void *statics_init(KonohaContext *kctx, kFunc *initFo, kFunc *exitFo, kFu
 static KMETHOD Statics_create(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct pool_plugin_statics *p = POOL_PLUGIN_CLONE(pool_plugin_statics);
-	kRawPtr *ret = (kRawPtr *) KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), p);
-	p->context = (uintptr_t)statics_init(kctx, sfp[1].fo, sfp[2].asFunc, sfp[3].fo);
+	kRawPtr *ret = (kRawPtr *) KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), (uintptr_t)p);
+	p->context = (uintptr_t)statics_init(kctx, sfp[1].asFunc, sfp[2].asFunc, sfp[3].asFunc);
 	p->finit = p_init;
 	p->fexit = p_exit;
 	p->function = p_func;
@@ -282,7 +282,7 @@ static KMETHOD Statics_create(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Response_create(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct pool_plugin_response *p = POOL_PLUGIN_CLONE(pool_plugin_response);
-	kRawPtr *ret = (kRawPtr *) KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), p);
+	kRawPtr *ret = (kRawPtr *) KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), (uintptr_t)p);
 	kRawPtr *ev = (kRawPtr *) sfp[1].asObject;
 	p->bev = ev->rawptr;
 	RETURN_(ret);
@@ -353,44 +353,44 @@ static KMETHOD LogPool_loadFile(KonohaContext *kctx, KonohaStack *sfp)
 #define _C kMethod_Const
 #define _S kMethod_Static
 #define _F(F)   (intptr_t)(F)
-#define TY_Logpool  (ct0->classId)
-#define TY_Log      (ct1->classId)
+#define TY_Logpool  (ct0->typeId)
+#define TY_Log      (ct1->typeId)
 
 static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	int i;
 	static KDEFINE_CLASS Def0 = {
 		.structname = "LogPool"/*structname*/,
-		.classId = TY_newid/*cid*/,
+		.typeId = TY_newid/*cid*/,
 		.init = RawPtr_init,
 		.free = Logpool_free,
 	};
-	KonohaClass *ct0 = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &Def0, pline);
+	KonohaClass *ct0 = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def0, pline);
 
 	static KDEFINE_CLASS Def1 = {
 		.structname = "Log"/*structname*/,
-		.classId = TY_newid/*cid*/,
+		.typeId = TY_newid/*cid*/,
 		.init = RawPtr_init,
 		.free = Log_free,
 		.p    = Log_p,
 	};
-	KonohaClass *ct1 = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &Def1, pline);
+	KonohaClass *ct1 = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def1, pline);
 
 	static KDEFINE_CLASS Def2 = {
 		.structname = "PoolPlugin",
-		.classId = TY_newid,
+		.typeId = TY_newid,
 		.init = RawPtr_init,
 		.free = RawPtr_free,
 	};
-	KonohaClass *ct2 = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &Def2, pline);
-#define TY_Plugin ct2->classId
+	KonohaClass *ct2 = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def2, pline);
+#define TY_Plugin ct2->typeId
 	static KDEFINE_CLASS Def3 = {
 		.structname = "",
-		.classId = TY_newid,
+		.typeId = TY_newid,
 		.init = RawPtr_init,
 		.free = RawPtr_free,
 	};
-	Def3.superclassId = ct2->classId;
+	Def3.superTypeId = ct2->typeId;
 	static const char *names[] = {
 		"Printer",
 		"KeyFilter",
@@ -402,25 +402,25 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		"Response",
 	};
 	KonohaClass *tbls[8];
-#define TY_Printer   tbls[0]->classId
-#define TY_KeyFilter tbls[1]->classId
-#define TY_ValFilter tbls[2]->classId
-#define TY_React     tbls[3]->classId
-#define TY_Timer     tbls[4]->classId
-#define TY_Statics   tbls[5]->classId
-#define TY_Copy      tbls[6]->classId
-#define TY_Response  tbls[7]->classId
+#define TY_Printer   tbls[0]->typeId
+#define TY_KeyFilter tbls[1]->typeId
+#define TY_ValFilter tbls[2]->typeId
+#define TY_React     tbls[3]->typeId
+#define TY_Timer     tbls[4]->typeId
+#define TY_Statics   tbls[5]->typeId
+#define TY_Copy      tbls[6]->typeId
+#define TY_Response  tbls[7]->typeId
 
 	for (i = 0; i < 8; i++) {
 		Def3.structname = names[i];
-		tbls[i] = KLIB Konoha_defineClass(kctx, ns->packageId, ns->packageDomain, NULL, &Def3, pline);
+		tbls[i] = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def3, pline);
 	}
 
 	int FN_x = FN_("x");
 	int FN_y = FN_("y");
 	int FN_z = FN_("z");
 	KDEFINE_METHOD MethodData[] = {
-		_P|_C, _F(LogPool_new), TY_Logpool, TY_Logpool, MN_("new"), 2, TY_String, FN_x, TY_Int, FN_y,
+		_P|_C, _F(LogPool_new), TY_Logpool, TY_Logpool, MN_("new"), 2, TY_String, FN_x, TY_int, FN_y,
 		_P|_C, _F(LogPool_get), TY_Log, TY_Logpool, MN_("get"), 0,
 		_P|_C, _F(LogPool_loadFile), TY_void, TY_Logpool, MN_("loadFile"), 2, TY_String, FN_x, TY_String, FN_y,
 		_P|_C, _F(Log_get_), TY_String, TY_Log, MN_("get"), 1, TY_String, FN_x,
@@ -429,7 +429,7 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_P|_S, _F(ValFilter_create), TY_Plugin, TY_ValFilter, MN_("create"), 3, TY_String, FN_x, TY_String, FN_y, TY_String, FN_z,
 
 		_P|_S, _F(React_create    ), TY_Plugin, TY_React    , MN_("create"), 2, TY_String, FN_x, TY_String, FN_y,
-		_P|_S, _F(Timer_create    ), TY_Plugin, TY_Timer    , MN_("create"), 3, TY_Int, FN_x, TY_Int, FN_y, TY_Int, FN_z,
+		_P|_S, _F(Timer_create    ), TY_Plugin, TY_Timer    , MN_("create"), 3, TY_int, FN_x, TY_int, FN_y, TY_int, FN_z,
 		_P|_S, _F(Statics_create  ), TY_Plugin, TY_Statics  , MN_("create"), 3, TY_Func, FN_x, TY_Func, FN_y, TY_Func, FN_z,
 		_P|_S, _F(Copy_create     ), TY_Plugin, TY_Copy     , MN_("create"), 0,
 		_P|_S, _F(Response_create ), TY_Plugin, TY_Response , MN_("create"), 1, TY_Object, FN_x,
@@ -446,12 +446,12 @@ static kbool_t logpool_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirst
 	return true;
 }
 
-static kbool_t logpool_initNameSpace(KonohaContext *kctx,  kNameSpace *ns, kfileline_t pline)
+static kbool_t logpool_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t logpool_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t logpool_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
