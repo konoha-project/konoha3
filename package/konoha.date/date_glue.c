@@ -497,9 +497,9 @@ static KMETHOD Date_toISOString(KonohaContext *kctx, KonohaStack *sfp)
 	struct tm utc;
 	gmtime_r(&tv_sec, &utc);
 	char str[MAX_STR_SIZE];
-	strftime(str, MAX_STR_SIZE, "%Y-%m-%dT%H:%M:%S", &utc);
-	snprintf(str, MAX_STR_SIZE, "%s.%03dZ", str, (int)(d->tv.tv_usec / 1000));
-	RETURN_(KLIB new_kString(kctx, str, strlen(str), 0));
+	size_t len = strftime(str, MAX_STR_SIZE, "%Y-%m-%dT%H:%M:%S", &utc);
+	len += snprintf(str+len, MAX_STR_SIZE, ".%03dZ", (int)(d->tv.tv_usec / 1000));
+	RETURN_(KLIB new_kString(kctx, str, len, 0));
 }
 
 //## Json Date.toJSON(); Not implemented

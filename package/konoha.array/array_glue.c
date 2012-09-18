@@ -300,7 +300,7 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 	size_t i = 0;
 	if(kArray_isUnboxData(a)) {
 		uintptr_t nv = sfp[1].unboxValue;
-		for(i = kArray_size(a)- 1; i >= 0; i--) {
+		for(i = kArray_size(a)- 1; i != 0; i--) {
 			if(a->unboxItems[i] == nv) {
 				break;
 			}
@@ -308,7 +308,7 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 	} else {
 		//TODO: Need to implement Object compareTo;
 		kObject *o = sfp[1].asObject;
-		for(i = kArray_size(a)- 1; i >= 0; i--) {
+		for(i = kArray_size(a)- 1; i != 0; i--) {
 			KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplemented"), sfp, sfp[K_RTNIDX].uline, NULL);
 			if(O_ct(o)->compareObject(a->objectItems[i], o) == 0) {
 				break;

@@ -30,6 +30,10 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct kio_t {
 	union {
 		int  fd;

@@ -581,7 +581,7 @@ static int proc_start(KonohaContext *kctx, subprocData_t *spd) {
 }
 
 // for new & enablePipemodeXXX(false) & enableStandardXXX(false) & enableERR2StdOUT(false)
-inline void initFd(pfd_t *p) {
+static inline void initFd(pfd_t *p) {
 	p->mode = M_DEFAULT;
 	p->fp   = NULL;
 }
