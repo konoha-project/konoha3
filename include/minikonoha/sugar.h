@@ -292,6 +292,7 @@ struct kNameSpaceVar {
 	size_t                             sortedConstTable;
 	kObject                           *globalObjectNULL;
 	kArray                            *methodList;   // default K_EMPTYARRAY
+	size_t                             sortedMethodList;
 };
 
 #define kNameSpace_TypeInference                     ((uintptr_t)(1<<0))

@@ -525,14 +525,14 @@ static int comprMethod(const void *a, const void *b)
 	return aid < bid ? -1 : 1;
 }
 
-static void kMethodList_matchMethod(KonohaContext *kctx, kArray *methodList, size_t *sorted, ktype_t typeId, MethodMatchFunc MatchMethod, MethodMatch *option)
+static void kMethodList_matchMethod(KonohaContext *kctx, kArray *methodList, const size_t *sorted, ktype_t typeId, MethodMatchFunc MatchMethod, MethodMatch *option)
 {
 	long i, min = 0, max = sorted[0];
 	long optkey = ((long)typeId << (sizeof(kshort_t)*8)) | option->mn;
 	if(kArray_size(methodList) - max > 8) {
 		max = kArray_size(methodList);
 		PLATAPI qsort_i(methodList->methodItems, max, sizeof(kMethod*), comprMethod);
-		sorted[0] = max;
+		((size_t*)sorted)[0] = max;
 	}
 	while(min < max) {
 		size_t p = (max + min) / 2;
@@ -578,7 +578,7 @@ static kMethod* kNameSpace_matchMethodNULL(KonohaContext *kctx, kNameSpace *star
 	while(ct != NULL) {
 		kNameSpace *ns = startNameSpace;
 		while(ns != NULL) {
-			kMethodList_matchMethod(kctx, ns->methodList, &ns->sortedConstTable, ct->typeId, MatchMethod, option);
+			kMethodList_matchMethod(kctx, ns->methodList, &ns->sortedMethodList, ct->typeId, MatchMethod, option);
 			if(option->isBreak) {
 				return option->foundMethodNULL;
 			}
