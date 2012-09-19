@@ -498,12 +498,12 @@ static kExpr* kStmt_tyCheckVariableNULL(KonohaContext *kctx, kStmt *stmt, kExpr 
 			return new_GetterExpr(kctx, tk, mtd, new_ConstValueExpr(kctx, cid, ns->globalObjectNULL));
 		}
 	}
-	kMethod *mtd = kNameSpace_getStaticFuncNULL(kctx, ns, O_typeId(ns), symbol);  // finding function
+	kMethod *mtd = kNameSpace_getNameSpaceFuncNULL(kctx, ns, symbol, reqty);  // finding function
 	if(mtd != NULL) {
 		kParam *pa = Method_param(mtd);
 		KonohaClass *ct = KLIB KonohaClass_Generics(kctx, CT_Func, pa->rtype, pa->psize, (kparamtype_t*)pa->paramtypeItems);
 		kFuncVar *fo = (kFuncVar*)KLIB new_kObjectOnGCSTACK(kctx, ct, (uintptr_t)mtd);
-		KSETv(fo, fo->self, KLIB Knull(kctx, CT_System));
+		KSETv(fo, fo->self, UPCAST(ns));
 		return new_ConstValueExpr(kctx, ct->typeId, UPCAST(fo));
 	}
 	if(symbol != SYM_NONAME) {
@@ -645,7 +645,7 @@ static const char* MethodType_t(KonohaContext *kctx, kmethodn_t mn, size_t psize
 	return "method";
 }
 
-static kExpr *Expr_lookupMethod(KonohaContext *kctx, kStmt *stmt, kExpr *expr, ktype_t this_cid, kGamma *gma, ktype_t reqty)
+static kExpr *kStmtExpr_lookupMethod(KonohaContext *kctx, kStmt *stmt, kExpr *expr, ktype_t this_cid, kGamma *gma, ktype_t reqty)
 {
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	kTokenVar *tkMN = expr->cons->tokenVarItems[0];
@@ -683,7 +683,7 @@ static KMETHOD ExprTyCheck_MethodCall(KonohaContext *kctx, KonohaStack *sfp)
 	kExpr *texpr = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 1, gma, TY_var, 0);
 	if(texpr != K_NULLEXPR) {
 		ktype_t this_cid = texpr->ty;
-		RETURN_(Expr_lookupMethod(kctx, stmt, expr, this_cid, gma, reqty));
+		RETURN_(kStmtExpr_lookupMethod(kctx, stmt, expr, this_cid, gma, reqty));
 	}
 }
 
@@ -731,7 +731,7 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kEx
 		int paramsize = kArray_size(exprN->cons) - 2;
 		kMethod *mtd = kNameSpace_getMethodByParamSizeNULL(kctx, ns, O_typeId(ns), fn, paramsize);
 		if(mtd != NULL) {
-			KSETv(exprN->cons, exprN->cons->exprItems[1], new_ConstValueExpr(kctx, O_typeId(ns), ns));
+			KSETv(exprN->cons, exprN->cons->exprItems[1], new_ConstValueExpr(kctx, O_typeId(ns), UPCAST(ns)));
 			return mtd;
 		}
 	}

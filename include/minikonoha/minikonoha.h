@@ -1152,8 +1152,8 @@ struct kMethodVar {
 typedef struct MethodMatch {
 	kNameSpace   *ns;
 	ksymbol_t     mn;
-	size_t        paramsize;
-	size_t        paramdom;
+	int           paramsize;
+	int           paramdom;
 	kparamtype_t *param;
 	kbool_t       isBreak;
 	kMethod      *foundMethodNULL;

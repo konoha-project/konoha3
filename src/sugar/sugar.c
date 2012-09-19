@@ -161,7 +161,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	l->kNameSpace_getMethodByParamSizeNULL  = kNameSpace_getMethodByParamSizeNULL;
 	l->kNameSpace_getMethodBySignatureNULL  = kNameSpace_getMethodBySignatureNULL;
 
-	l->kNameSpace_compileAllDefinedMethods    = kNameSpace_compileAllDefinedMethods;
+	l->kNameSpace_compileAllDefinedMethods  = kNameSpace_compileAllDefinedMethods;
 	l->kNameSpace_reftraceSugarExtension =  kNameSpace_reftraceSugarExtension;
 	l->kNameSpace_freeSugarExtension =  kNameSpace_freeSugarExtension;
 

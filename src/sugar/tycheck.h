@@ -373,7 +373,7 @@ static kstatus_t kBlock_genEvalCode(KonohaContext *kctx, kBlock *bk, kMethod *mt
 	GammaAllocaData newgma = {
 		.flag = kGamma_TopLevel,
 		.currentWorkingMethod = mtd,
-		.this_cid     = TY_System,
+		.this_cid     = TY_NameSpace,
 		.localScope.varItems = lvarItems, .localScope.capacity = 32, .localScope.varsize = 0, .localScope.allocsize = 0,
 	};
 	GAMMA_PUSH(gma, &newgma);

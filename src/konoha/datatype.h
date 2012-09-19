@@ -478,7 +478,6 @@ static void NameSpace_init(KonohaContext *kctx, kObject *o, void *conf)
 		ns->syntaxOption  = ns->parentNULL->syntaxOption;
 	}
 	KINITv(ns->methodList, K_EMPTYARRAY);
-	//KINITv(ns->scriptObject, KLIB Knull(kctx, CT_System));
 }
 
 static void NameSpace_reftrace(KonohaContext *kctx, kObject *o)
@@ -528,8 +527,6 @@ static void Func_reftrace(KonohaContext *kctx, kObject *o)
 
 // ---------------
 // System
-
-//#define CT_System               CT_(TY_System)
 
 // ---------------
 

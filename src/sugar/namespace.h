@@ -593,18 +593,29 @@ static kMethod* kNameSpace_matchMethodNULL(KonohaContext *kctx, kNameSpace *star
 	return option->foundMethodNULL;
 }
 
-static kbool_t MethodMatch_StaticFunc(KonohaContext *kctx, kMethod *mtd, MethodMatch *m)
+//static kbool_t MethodMatch_StaticFunc(KonohaContext *kctx, kMethod *mtd, MethodMatch *m)
+//{
+//	if(Method_isStatic(mtd)) {
+//		if(m->foundMethodNULL != NULL) {
+//			if(m->foundMethodNULL->serialNumber > mtd->serialNumber) return false;
+//		}
+//		m->foundMethodNULL = mtd;
+//		m->isBreak = true;
+//		return true;
+//	}
+//	return true;
+//}
+
+static kbool_t MethodMatch_Func(KonohaContext *kctx, kMethod *mtd, MethodMatch *m)
 {
-	if(Method_isStatic(mtd)) {
-		if(m->foundMethodNULL != NULL) {
-			if(m->foundMethodNULL->serialNumber > mtd->serialNumber) return false;
-		}
-		m->foundMethodNULL = mtd;
-		m->isBreak = true;
-		return true;
+	if(m->foundMethodNULL != NULL) {
+		if(m->foundMethodNULL->serialNumber > mtd->serialNumber) return false;
 	}
+	m->foundMethodNULL = mtd;
+	m->isBreak = true;
 	return true;
 }
+
 
 static kbool_t MethodMatch_ParamSize(KonohaContext *kctx, kMethod *mtd, MethodMatch *m)
 {
@@ -688,11 +699,15 @@ static kbool_t MethodMatch_Signature(KonohaContext *kctx, kMethod *mtd, MethodMa
 	return false;
 }
 
-static kMethod* kNameSpace_getStaticFuncNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ksymbol_t symbol)
+static kMethod* kNameSpace_getNameSpaceFuncNULL(KonohaContext *kctx, kNameSpace *ns, ksymbol_t symbol, ktype_t reqty)
 {
 	MethodMatch m = {};
 	m.mn = symbol;
-	return kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_StaticFunc, &m);
+	if(TY_isFunc(reqty)) {
+		m.paramdom = CT_(reqty)->cparamdom;  // TODO
+		return kNameSpace_matchMethodNULL(kctx, ns, O_typeId(ns), MethodMatch_Signature, &m);
+	}
+	return kNameSpace_matchMethodNULL(kctx, ns, O_typeId(ns), MethodMatch_Func, &m);
 }
 
 static ksymbol_t anotherSymbol(KonohaContext *kctx, ksymbol_t symbol)
