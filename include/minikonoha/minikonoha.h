@@ -1207,11 +1207,10 @@ struct kNameSpaceVar {
 
 #define kNameSpace_TypeInference                     ((uintptr_t)(1<<0))
 #define kNameSpace_ImplicitField                     ((uintptr_t)(1<<1))
-#define kNameSpace_TransparentGlobalVariable            ((uintptr_t)(1<<2))
+#define kNameSpace_TransparentGlobalVariable         ((uintptr_t)(1<<2))
 
-#define kNameSpace_allowedTypeInference(ns)   (TFLAG_is(uintptr_t, (ns)->syntaxOption, kNameSpace_TypeInference))
-#define kNameSpace_setTypeInference(ns, B)    TFLAG_set(uintptr_t, (ns)->syntaxOption, kNameSpace_TypeInference, B)
-
+#define kNameSpace_allowedTypeInference(ns)            (TFLAG_is(uintptr_t, (ns)->syntaxOption, kNameSpace_TypeInference))
+#define kNameSpace_setTypeInference(ns, B)             TFLAG_set(uintptr_t, (ns)->syntaxOption, kNameSpace_TypeInference, B)
 #define kNameSpace_allowedImplicitFieldAccess(ns)      1/*(TFLAG_is(uintptr_t, (ns)->syntaxOption, kNameSpace_ImplicitField))*/
 
 #define kNameSpace_allowedTransparentGlobalVariable(ns)   (TFLAG_is(uintptr_t, (ns)->syntaxOption, kNameSpace_TransparentGlobalVariable))
