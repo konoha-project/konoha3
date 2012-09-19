@@ -30,6 +30,11 @@
 #include <time.h>
 #include <sys/time.h>
 
+#ifdef __MINGW32__
+#define localtime_r(a, b) localtime(a)
+#define gmtime_r(a, b) gmtime(a)
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

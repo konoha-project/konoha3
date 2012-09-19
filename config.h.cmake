@@ -4,6 +4,9 @@
 /* Define to 1 if you have the <iconv.h> header file. */
 #cmakedefine HAVE_ICONV_H 1
 
+/* Define to 1 if you have the <syslog.h> header file. */
+#cmakedefine HAVE_SYSLOG_H 1
+
 /* Define to 1 if you have the `dl' library (-ldl). */
 #cmakedefine HAVE_LIBDL 1
 

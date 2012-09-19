@@ -1,6 +1,6 @@
 extern int verbose_debug;
 #include "minikonoha/minikonoha.h"
-#include "minikonoha/platform_posix.h"
+#include "minikonoha/platform.h"
 #include <stdio.h>
 #include <sys/time.h>
 
