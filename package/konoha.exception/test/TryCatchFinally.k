@@ -1,6 +1,6 @@
 // written by imasahiro
-K.import("konoha.exception");
-K.import("konoha.new");
+import("konoha.exception");
+import("konoha.new");
 
 System.p("try-start");
 try {

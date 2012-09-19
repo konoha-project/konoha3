@@ -1,6 +1,6 @@
 // written by Atsushi Uchida
-K.import("konoha.class");
-K.import("konoha.const");
+import("konoha.class");
+import("konoha.const");
 const A = 10;
 const B = "abcd";
 class C {

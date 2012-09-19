@@ -1,6 +1,6 @@
 // written by kimio
 
-K.import("konoha.null");
+import("konoha.null");
 
 void test() {
 	int a;

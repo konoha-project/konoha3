@@ -1,7 +1,7 @@
 // written kimio kuramitsu
 
-K.import("konoha.namespace");
+import("konoha.namespace");
 
 namespace {
-	K.import("konoha.float");
+	import("konoha.float");
 }

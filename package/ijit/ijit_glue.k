@@ -1,11 +1,11 @@
-K.import("sugar");
-K.import("konoha.float");
-K.import("llvm");
-K.import("konoha.array");
-K.import("konoha.assign");
-K.import("konoha.null");
-K.import("konoha.string");
-K.import("konoha.class");
+import("sugar");
+import("konoha.float");
+import("llvm");
+import("konoha.array");
+import("konoha.assign");
+import("konoha.null");
+import("konoha.string");
+import("konoha.class");
 
 //enum ctype {
 //	/*TY_VOID*/1,

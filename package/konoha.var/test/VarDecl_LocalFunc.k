@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-K.import("konoha.var");
+import("konoha.var");
 
 int succ(int n) {
 	return n+1;

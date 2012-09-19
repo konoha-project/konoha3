@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
-K.import("konoha.object");
-K.import("konoha.subtype");
+import("konoha.object");
+import("konoha.subtype");
 
 void test() {
 	Func f;

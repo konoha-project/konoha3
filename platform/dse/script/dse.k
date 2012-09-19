@@ -1,14 +1,14 @@
 // written by okamoto
 // reviewed by nakata
 
-K.import("konoha.global");
-K.import("konoha.assign");
-K.import("konoha.class");
-K.import("konoha.string");
-K.import("konoha.bytes");
-K.import("jansson");
-K.import("posix.file");
-K.import("konoha.subproc");
+import("konoha.global");
+import("konoha.assign");
+import("konoha.class");
+import("konoha.string");
+import("konoha.bytes");
+import("jansson");
+import("posix.file");
+import("konoha.subproc");
 
 class DSERequest {
 	int taskid;

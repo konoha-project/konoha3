@@ -1,7 +1,7 @@
 // written by okamoto
-K.import("konoha.assign");
-K.import("konoha.class");
-K.import("konoha.date");
+import("konoha.assign");
+import("konoha.class");
+import("konoha.date");
 
 void f() {
 	Date d = new Date();

@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
-K.import("sugar");
-K.import("konoha.null");
+import("sugar");
+import("konoha.null");
 
 Expr tycheck(Stmt stmt, Expr expr, Gamma gma, int typeinfo) {
 	return null;

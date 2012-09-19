@@ -1,5 +1,5 @@
-K.import("konoha.regexp");
-K.import("konoha.array");
+import("konoha.regexp");
+import("konoha.array");
 
 void f() {
     Array[String] r1 = "hoge1234".match(/123/);

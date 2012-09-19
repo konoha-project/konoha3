@@ -1,6 +1,6 @@
 /* written by shinpei nakata */
 
-K.import("konoha.bytes");
+import("konoha.bytes");
 
 void test () {
 	 assert("hoge".asBytes().encodeTo("EUC-JP").decodeFrom("EUC-JP") == "hoge");

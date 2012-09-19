@@ -1,16 +1,16 @@
 // written by wakamatsu
-K.import("konoha");
-K.import("konoha.io");
+import("konoha");
+import("konoha.io");
 
 const b = "../../../package/konoha.io/test/";
 
 void test() {
 	File file = new File(b + "testdir");
 	Array[String] l = file.list();
-	p(l.size);
+	System.p(l.size);
 	int i = 0;
 	while(i < l.size) {
-		p(l[i]);
+		System.p(l[i]);
 		i += 1;
 	}
 }
@@ -18,7 +18,7 @@ void test() {
 void testNoSuchDirectoryCase() {
 	File file = new File(b + "hoge");
 	Array[String] l = file.list();
-	p(l.size);
+	System.p(l.size);
 }
 
 test();

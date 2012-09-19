@@ -1,4 +1,4 @@
-K.import("konoha.math");
+import("konoha.math");
 
 System.p(Math.abs(4));
 System.p(Math.fabs(9.0));

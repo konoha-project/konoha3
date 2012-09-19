@@ -1,5 +1,5 @@
-K.import("konoha.class");
-K.import("konoha.assign");
+import("konoha.class");
+import("konoha.assign");
 
 class A;
 

@@ -1,6 +1,6 @@
 // written by kimio
 
-K.import("konoha.subtype");
+import("konoha.subtype");
 
 void test() {
 	String[] o;

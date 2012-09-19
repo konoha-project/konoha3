@@ -1,5 +1,5 @@
 // written by kimio kuramitsu
-K.import("konoha.const");
+import("konoha.const");
 
 const N0 = 0;
 const N1 = 1;

@@ -1,7 +1,7 @@
 // written by shunsuke shida
 // modified by kimio kuramitsu
 
-K.import("konoha.class");
+import("konoha.class");
 
 class C {
 	int age;

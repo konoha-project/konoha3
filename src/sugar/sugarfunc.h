@@ -498,7 +498,7 @@ static kExpr* kStmt_tyCheckVariableNULL(KonohaContext *kctx, kStmt *stmt, kExpr 
 			return new_GetterExpr(kctx, tk, mtd, new_ConstValueExpr(kctx, cid, ns->globalObjectNULL));
 		}
 	}
-	kMethod *mtd = kNameSpace_getStaticFuncNULL(kctx, ns, TY_System, symbol);  // finding function
+	kMethod *mtd = kNameSpace_getStaticFuncNULL(kctx, ns, O_typeId(ns), symbol);  // finding function
 	if(mtd != NULL) {
 		kParam *pa = Method_param(mtd);
 		KonohaClass *ct = KLIB KonohaClass_Generics(kctx, CT_Func, pa->rtype, pa->psize, (kparamtype_t*)pa->paramtypeItems);
@@ -729,9 +729,9 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kEx
 	}
 	{
 		int paramsize = kArray_size(exprN->cons) - 2;
-		kMethod *mtd = kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_System, fn, paramsize);
+		kMethod *mtd = kNameSpace_getMethodByParamSizeNULL(kctx, ns, O_typeId(ns), fn, paramsize);
 		if(mtd != NULL) {
-			KSETv(exprN->cons, exprN->cons->exprItems[1], new_ConstValueExpr(kctx, TY_System, KLIB Knull(kctx, CT_System)));
+			KSETv(exprN->cons, exprN->cons->exprItems[1], new_ConstValueExpr(kctx, O_typeId(ns), ns));
 			return mtd;
 		}
 	}
@@ -1124,7 +1124,7 @@ static KMETHOD StmtTyCheck_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	uintptr_t flag    = kStmt_parseFlag(kctx, stmt, MethodDeclFlag, 0);
 	kNameSpace *ns    = Stmt_nameSpace(stmt);
-	ktype_t typeId    = kStmt_getClassId(kctx, stmt, ns, SYM_("ClassName"), TY_System);
+	ktype_t typeId    = kStmt_getClassId(kctx, stmt, ns, SYM_("ClassName"), O_typeId(ns));
 	kmethodn_t mn     = kStmt_getMethodSymbol(kctx, stmt, ns, KW_SymbolPattern, MN_new);
 	kParam *pa        = kStmt_newMethodParamNULL(kctx, stmt, gma);
 	if(TY_isSingleton(typeId)) { flag |= kMethod_Static; }

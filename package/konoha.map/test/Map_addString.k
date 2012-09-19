@@ -1,4 +1,4 @@
 // written by kimio
 
-K.import("konoha.map");
+import("konoha.map");
 

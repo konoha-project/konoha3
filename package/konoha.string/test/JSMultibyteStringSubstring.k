@@ -1,6 +1,6 @@
 //written by Joseph
 
-K.import("konoha.string");
+import("konoha.string");
 
 void test() {
 	assert("こんにちは、世界!".substring(3, 7) == "ちは、世");

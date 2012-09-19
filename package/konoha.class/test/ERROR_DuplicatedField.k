@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-K.import("konoha.class");
+import("konoha.class");
 
 class C {
 	String name;

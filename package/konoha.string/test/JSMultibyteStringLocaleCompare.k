@@ -1,6 +1,6 @@
 //written by Joseph
 
-K.import("konoha.string");
+import("konoha.string");
 
 void test() {
 	assert("あ".localeCompare("あ") == 0);

@@ -11,8 +11,8 @@ void main() {
 	int i = 0;
 	while (i < result.getSize()) {
 		Json data = result[i].get("data");
-		p(data.getString("title"));
-		p(data.getString("sentence"));
+		System.p(data.getString("title"));
+		System.p(data.getString("sentence"));
 		i += 1;
 	}
 }

@@ -1,8 +1,8 @@
-K.import("konoha.global");
-K.import("konoha.regexp");
+import("konoha.global");
+import("konoha.regexp");
 
 /* comment */
 // line comment
-p(10/2);  /* div */
+System.p(10/2);  /* div */
 int n = 100;
-p(n/2/5/*hoge*/); /* div */
+System.p(n/2/5/*hoge*/); /* div */

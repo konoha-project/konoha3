@@ -1,7 +1,7 @@
 // written by shinpei
 
-K.import("konoha.array");
-K.import("konoha.class");
+import("konoha.array");
+import("konoha.class");
 
 class Person {
 	int age;

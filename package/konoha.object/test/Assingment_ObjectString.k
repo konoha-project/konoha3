@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-K.import("konoha.object");
+import("konoha.object");
 
 void test() {
 	String s = "123";

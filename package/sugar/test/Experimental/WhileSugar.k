@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
-K.import("sugar");
-K.import("konoha.null");
+import("sugar");
+import("konoha.null");
 
 sugar "while" "(" $Expr ")" $Block
 

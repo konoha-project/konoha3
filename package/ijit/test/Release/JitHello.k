@@ -1,4 +1,4 @@
-K.import("ijit");
+import("ijit");
 void f() {
     System.p("hello world");
     return;

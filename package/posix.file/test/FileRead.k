@@ -1,9 +1,9 @@
 // written by shinpei
-K.import("konoha.assign");
-K.import("konoha.while");
-K.import("konoha.string");
-K.import("konoha.bytes");
-K.import("posix.file");
+import("konoha.assign");
+import("konoha.while");
+import("konoha.string");
+import("konoha.bytes");
+import("posix.file");
 
 void f () {
 	FILE f = System.fopen("../../../package/posix.file/test/helloworld.txt", "r");
@@ -21,7 +21,7 @@ void f () {
 			str = str + buf.asString();
 		}
 	}
-	p(str);
+	System.p(str);
 }
 f();
 

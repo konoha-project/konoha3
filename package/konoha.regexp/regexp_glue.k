@@ -1,9 +1,9 @@
-//K.import("sugar");
-//K.import("konoha.while");
-//K.import("konoha.string");
-//K.import("konoha.assign");
-//K.import("konoha.array");
-//K.import("konoha.class");
+//import("sugar");
+//import("konoha.while");
+//import("konoha.string");
+//import("konoha.assign");
+//import("konoha.array");
+//import("konoha.class");
 //
 //int regexToken(Token tk, String source) {
 //    if (source.get(1) == "/" || source.get(1) == "*") {

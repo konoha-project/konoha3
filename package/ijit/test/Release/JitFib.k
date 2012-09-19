@@ -1,5 +1,5 @@
 // written by imasahiro
-K.import("ijit");
+import("ijit");
 
 int fibo(int n) {
     if(n < 3) {

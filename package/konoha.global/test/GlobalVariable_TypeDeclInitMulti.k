@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-K.import("konoha.global");
+import("konoha.global");
 
 int x=1,y=2,z=3;
 

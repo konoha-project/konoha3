@@ -1,12 +1,12 @@
 // written by wakamatsu
-K.import("konoha");
-K.import("konoha.io");
+import("konoha");
+import("konoha.io");
 
 const b = "../../../package/konoha.io/test/";
 
 void test() {
 	File file = new File(b + "test.txt");
-	p(file.getSize());
+	System.p(file.getSize());
 }
 
 test();

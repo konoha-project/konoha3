@@ -1,8 +1,8 @@
 //written by Joseph
 
-K.import("konoha.string");
-K.import("konoha.regexp");
-K.import("konoha.assign");
+import("konoha.string");
+import("konoha.regexp");
+import("konoha.assign");
 
 void test() {
 	String str = "Hello world!";

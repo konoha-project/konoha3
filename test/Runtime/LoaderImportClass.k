@@ -1,5 +1,5 @@
 // written by kimio kuramitsu
-K.import("konoha.math");
+import("konoha.math");
 
 Math
 

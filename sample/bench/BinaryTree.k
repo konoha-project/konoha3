@@ -1,4 +1,4 @@
-K.import("konoha");
+import("konoha");
 /* The Great Computer Language Shootout
    http://shootout.alioth.debian.org/
    contributed by Kimio Kuramitsu
@@ -42,7 +42,7 @@ void main() {
 	int stretchDepth = maxDepth + 1;
 	int check = bottomUpTree(0,stretchDepth).itemCheck();
 	assert(check == -1);
-	p("stretch tree of depth " + stretchDepth + " check: " + check);
+	System.p("stretch tree of depth " + stretchDepth + " check: " + check);
 	TreeNode longLivedTree = bottomUpTree(0,maxDepth);
 	int depth = c_MINDEPTH;
 	while (depth <= maxDepth) {
@@ -55,12 +55,12 @@ void main() {
 			i=i+1;
 		}
 		assert(check == iterations * -2);
-		p("" + (iterations*2) + " trees of depth " + depth + " check: " + check);
+		System.p("" + (iterations*2) + " trees of depth " + depth + " check: " + check);
 		depth = depth + 2;
 	}
 	check = longLivedTree.itemCheck();
 	assert(check == -1);
-	p("long lived tree of depth " + maxDepth + " check: "+ check);
+	System.p("long lived tree of depth " + maxDepth + " check: "+ check);
 }
 
 main();

@@ -1,7 +1,7 @@
 /* written by shinpei nakata */
 
-K.import("konoha.bytes");
-K.import("konoha.null");
+import("konoha.bytes");
+import("konoha.null");
 
 void test() {
 	Bytes b = "".asBytes();

@@ -1,8 +1,8 @@
 // written by wakamatsu
-K.import("posix.thread");
+import("posix.thread");
 
 void f() {
-	p("hello world");
+	System.p("hello world");
 }
 
 void test() {

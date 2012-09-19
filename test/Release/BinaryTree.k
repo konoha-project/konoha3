@@ -1,11 +1,11 @@
-K.import("konoha.assign");
-K.import("konoha.while");
-K.import("konoha.class");
-K.import("konoha.global");
-K.import("konoha.null");
-K.import("konoha.int");
-K.import("konoha.array");
-K.import("konoha.const");
+import("konoha.assign");
+import("konoha.while");
+import("konoha.class");
+import("konoha.global");
+import("konoha.null");
+import("konoha.int");
+import("konoha.array");
+import("konoha.const");
 K.setTransparentGlobalVariable(true);
 
 /* The Great Computer Language Shootout
@@ -51,7 +51,7 @@ void main() {
 	int stretchDepth = maxDepth + 1;
 	int check = bottomUpTree(0,stretchDepth).itemCheck();
 	assert(check == -1);
-	p("stretch tree of depth " + stretchDepth + " check: " + check);
+	System.p("stretch tree of depth " + stretchDepth + " check: " + check);
 	TreeNode longLivedTree = bottomUpTree(0,maxDepth);
 	int depth = c_MINDEPTH;
 	while (depth <= maxDepth) {
@@ -64,12 +64,12 @@ void main() {
 			i=i+1;
 		}
 		assert(check == iterations * -2);
-		p("" + (iterations*2) + " trees of depth " + depth + " check: " + check);
+		System.p("" + (iterations*2) + " trees of depth " + depth + " check: " + check);
 		depth = depth + 2;
 	}
 	check = longLivedTree.itemCheck();
 	assert(check == -1);
-	p("long lived tree of depth " + maxDepth + " check: "+ check);
+	System.p("long lived tree of depth " + maxDepth + " check: "+ check);
 }
 
 main();

@@ -1,10 +1,10 @@
 //written by Joseph
 
-K.import("konoha.regexp");
-//K.import("konoha.null");/*TODO*/
-K.import("konoha.assign");
-K.import("konoha.array");
-K.import("konoha.class");
+import("konoha.regexp");
+//import("konoha.null");/*TODO*/
+import("konoha.assign");
+import("konoha.array");
+import("konoha.class");
 
 void test() {
 	String str = "こんにちは、世界!";

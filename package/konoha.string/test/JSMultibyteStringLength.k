@@ -1,7 +1,7 @@
 //written by Joseph
 
-K.import("konoha.string");
-K.import("konoha.class");
+import("konoha.string");
+import("konoha.class");
 
 void test() {
 	assert("こんにちは、世界!".length == 9);

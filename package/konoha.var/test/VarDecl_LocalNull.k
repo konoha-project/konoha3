@@ -1,8 +1,8 @@
 // written by kimio kuramitsu
 
-K.import("konoha.var");
-K.import("konoha.null");
-K.import("konoha.object");
+import("konoha.var");
+import("konoha.null");
+import("konoha.object");
 
 void test() {
 	var o = null;

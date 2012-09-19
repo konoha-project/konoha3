@@ -1,5 +1,5 @@
 // reported by Atsushi Uchida
-K.import("konoha.assign");
+import("konoha.assign");
 
 void f() {
     int i = 0;

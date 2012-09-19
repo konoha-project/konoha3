@@ -1,5 +1,5 @@
 // generated with genstrstrby kimio kuramitsu
-K.import("konoha.string")
+import("konoha.string")
 
 void test() {
   String a = "a";

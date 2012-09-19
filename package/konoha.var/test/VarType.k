@@ -1,3 +1,3 @@
 // written by kimio
-K.import("konoha.var");
+import("konoha.var");
 var

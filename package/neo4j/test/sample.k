@@ -11,17 +11,17 @@ void main() {
 	// create Node1: Naruto
 	Node n1 = db.createNode();
 	n1.setPropertyString("name", "Naruto");
-	p(n1.getPropertyString("name"));
+	System.p(n1.getPropertyString("name"));
 
 	// create Node2: Sakura
 	Node n2 = db.createNode();
 	n2.setPropertyString("name", "Sakura");
-	p(n2.getPropertyString("name"));
+	System.p(n2.getPropertyString("name"));
 
 	// create Node2: Sakura
 	Node n3 = db.createNode();
 	n3.setPropertyString("name", "Sasuke");
-	p(n3.getPropertyString("name"));
+	System.p(n3.getPropertyString("name"));
 
 	// create Relationship: Naruto knows Sakura
 	Relationship rel = n1.relationshipTo(n2, "LOVES");
@@ -29,22 +29,22 @@ void main() {
 	// create Relationship: Naruto knows Sakura
 	Relationship rel = n1.relationshipTo(n3, "KNOWS");
 
-	p(" ------------------ ");
+	System.p(" ------------------ ");
 	// get Node from index
 	Node n4 = db.getNode(n1.idx); // n4 is Naruto.
-	p(n4.getPropertyString("name"));
+	System.p(n4.getPropertyString("name"));
 
 	// get Naruto's Relationship: "Knows"
 	Json[] types = n1.getRelationships();
-	//p(types[0].getString("type"));
+	//System.p(types[0].getString("type"));
 
 	// get end node KNOWS: Naruto -[KNOWS]-> Sakura
 	Node n5 = n1.getEndNode("KNOWS");
-	p(n5.getPropertyString("name"));
+	System.p(n5.getPropertyString("name"));
 
 	// get end node KNOWS: Naruto -[KNOWS]-> Sakura
 	Node n6 = n1.getEndNode("LOVES");
-	p(n6.getPropertyString("name"));
+	System.p(n6.getPropertyString("name"));
 
 	db.shutdown();
 }

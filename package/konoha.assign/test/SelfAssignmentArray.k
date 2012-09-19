@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
-K.import("konoha.assign");
-K.import("konoha.array"); // if Ok
+import("konoha.assign");
+import("konoha.array"); // if Ok
 
 void test() {
 	int[] a = [0, 0];

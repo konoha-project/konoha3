@@ -1,6 +1,6 @@
 // written by unknown (maybe ide)
-K.import("konoha.while");
-K.import("konoha.assign");
+import("konoha.while");
+import("konoha.assign");
 
 void f() {
 	int i = 0;

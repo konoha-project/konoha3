@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
-K.import("konoha.untyped");
-K.import("konoha.global");
+import("konoha.untyped");
+import("konoha.global");
 
 int succ(int n) {
 	return n+1;

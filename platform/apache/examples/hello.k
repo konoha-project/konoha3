@@ -1,7 +1,7 @@
-K.import("konoha.while");
-K.import("konoha.assign");
-K.import("konoha.array");
-K.import("apache");
+import("konoha.while");
+import("konoha.assign");
+import("konoha.array");
+import("apache");
 
 @Public int Apache.handler(Request req) {
 	req.setContentType("text/html");

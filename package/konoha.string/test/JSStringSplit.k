@@ -1,8 +1,8 @@
 //written by Joseph
 
-K.import("konoha.string");
-K.import("konoha.array");
-K.import("konoha.assign");
+import("konoha.string");
+import("konoha.array");
+import("konoha.assign");
 
 void test() {
 	String[] ma = "How are you doing today?".split(" ");

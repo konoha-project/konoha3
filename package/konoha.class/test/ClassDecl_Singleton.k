@@ -1,6 +1,6 @@
 // written kimio kuramitsu
 
-K.import("konoha.class");
+import("konoha.class");
 
 @Singleton class Math {  // @Test
 	int abs(int x) {     // This must be a static method

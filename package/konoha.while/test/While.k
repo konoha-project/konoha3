@@ -1,7 +1,7 @@
 // written by kimio
 
-K.import("konoha.assign");
-K.import("konoha.while");
+import("konoha.assign");
+import("konoha.while");
 
 int f() {
 	int i;

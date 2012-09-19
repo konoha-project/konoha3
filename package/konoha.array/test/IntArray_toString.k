@@ -1,4 +1,4 @@
-K.import("konoha.array");
+import("konoha.array");
 
 void test() {
 	int[] ia = [1,2,3];

@@ -1,6 +1,6 @@
 // written by imasahiro
-K.import("konoha.string");
-K.import("konoha.bytes");
+import("konoha.string");
+import("konoha.bytes");
 
 void f() {
     String a = "aaaaaaaaaaaaaaaa";

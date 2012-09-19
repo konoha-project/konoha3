@@ -1,8 +1,8 @@
 // written by shinpei
-K.import("konoha.while");
-K.import("konoha.new");
-K.import("konoha.iterator");
-K.import("konoha.array");
+import("konoha.while");
+import("konoha.new");
+import("konoha.iterator");
+import("konoha.array");
 
 void iteratorTest () {
 	Array[int] ia = [];
@@ -11,7 +11,7 @@ void iteratorTest () {
 	ia.add(5);
 	Iterator[int] itr = ia.toIterator();
 	while (itr.hasNext()) {
-		p(itr.next());
+		System.p(itr.next());
 	}
 }
 

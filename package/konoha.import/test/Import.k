@@ -1,5 +1,5 @@
 // written by Masahiro Ide
-K.import("konoha.import");
+import("konoha.import");
 
 import konoha.math;
 

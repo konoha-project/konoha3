@@ -1,6 +1,6 @@
 // written by kimio 
 
-K.import("konoha.class");
+import("konoha.class");
 
 class C {
 }

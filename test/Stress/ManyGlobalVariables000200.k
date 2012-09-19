@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-K.import("konoha.global");
+import("konoha.global");
 K.setTransparentGlobalVariable(true);
 int v0 = 0;
 int v1 = 1;

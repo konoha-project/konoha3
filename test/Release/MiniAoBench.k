@@ -1,16 +1,16 @@
 
 // written by shinpei nakata
 
-K.import("konoha.float");
-K.import("konoha.math");
-K.import("konoha.bytes");
-K.import("konoha.string");
-K.import("konoha.global");
-K.import("konoha.const");
-K.import("konoha.class");
-K.import("konoha.array");
-K.import("konoha.while");
-K.import("konoha.assign");
+import("konoha.float");
+import("konoha.math");
+import("konoha.bytes");
+import("konoha.string");
+import("konoha.global");
+import("konoha.const");
+import("konoha.class");
+import("konoha.array");
+import("konoha.while");
+import("konoha.assign");
 K.setTransparentGlobalVariable(true);
 
 const width = 64;
@@ -290,16 +290,16 @@ void run() {
 	setupScene();
 	render(img, width, height, nsubsamples);
 
-	p("P3");
-	p(width);
-	p(height);
-	p("255");
+	System.p("P3");
+	System.p(width);
+	System.p(height);
+	System.p("255");
 	while (i < size) {
 		String simg = " " + img[i];
-		p(simg);
+		System.p(simg);
 		i += 1;
 	}
-	p("");
+	System.p("");
 }
 
 void main() {

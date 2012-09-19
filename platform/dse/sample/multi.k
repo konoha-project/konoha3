@@ -1,6 +1,6 @@
-K.import("jansson");
-K.import("curl");
-K.import("konoha");
+import("jansson");
+import("curl");
+import("konoha");
 
 class Task {
 	int taskid;

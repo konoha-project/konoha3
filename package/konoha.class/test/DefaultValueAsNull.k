@@ -1,7 +1,7 @@
 // written by kimio
 
-K.import("konoha.class");
-K.import("konoha.null");
+import("konoha.class");
+import("konoha.null");
 
 class C {
 	int x;

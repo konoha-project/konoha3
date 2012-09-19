@@ -1,5 +1,5 @@
 // written by kimio kuramitsu
 
-K.import("konoha.int");
+import("konoha.int");
 
 assert(0 < INT_MAX);

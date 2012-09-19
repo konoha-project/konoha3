@@ -1,6 +1,6 @@
 //written by takeo onoda
 
-K.import("konoha.string");
+import("konoha.string");
 
 void test() {
 	assert("  \t\n\t foo \t\n bar \t\n\t".trim() == "foo \t\n bar");

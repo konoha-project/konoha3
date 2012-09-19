@@ -1,6 +1,6 @@
-K.import("konoha");
-K.import("konoha.bytes");
-K.import("konoha.socket");
+import("konoha");
+import("konoha.bytes");
+import("konoha.socket");
 
 
 void main () {

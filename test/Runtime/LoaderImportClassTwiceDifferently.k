@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
-K.import("konoha.math");
-K.import("konoha");
+import("konoha.math");
+import("konoha");
 
 Math
 

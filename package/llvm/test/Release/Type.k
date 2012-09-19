@@ -1,6 +1,6 @@
 // written by imasahiro
-K.import("konoha.float");
-K.import("llvm");
+import("konoha.float");
+import("llvm");
 
 void f() {
     Type.getVoidTy().dump();

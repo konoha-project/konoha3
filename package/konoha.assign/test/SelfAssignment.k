@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-K.import("konoha.assign");
+import("konoha.assign");
 
 void test() {
 	int a = 1;

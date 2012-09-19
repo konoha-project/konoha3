@@ -1,7 +1,7 @@
 // written by shinpei
 
-K.import("konoha.array");
-K.import("konoha.class");
+import("konoha.array");
+import("konoha.class");
 void f () {
 	int[] ia = new int[0];
 	ia.add(4);

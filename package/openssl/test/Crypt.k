@@ -1,6 +1,6 @@
 // written by Masahiro Ide
-K.import("openssl");
-K.import("konoha");
+import("openssl");
+import("konoha");
 
 void f() {
     MD5 md5 = new MD5();

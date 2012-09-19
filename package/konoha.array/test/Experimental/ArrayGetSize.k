@@ -1,12 +1,12 @@
 // written by okamoto
-K.import("konoha.new");
-K.import("konoha.array");
+import("konoha.new");
+import("konoha.array");
 
 void f () {
 	int[] ia = new int[0];
 	ia.add(4);
 	ia.add(3);
-	p(ia.getSize());
+	System.p(ia.getSize());
 }
 
 f();

@@ -1,5 +1,5 @@
 // written by imasahiro
-K.import("ijit");
+import("ijit");
 
 boolean f(boolean a, boolean b) {
     return a && b;

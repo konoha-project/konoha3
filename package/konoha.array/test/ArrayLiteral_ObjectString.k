@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
-K.import("konoha.array");
-K.import("konoha.object");
+import("konoha.array");
+import("konoha.object");
 
 void test() {
 	Object[] a = ["1", "2", "3"]; // boxing

@@ -1,12 +1,12 @@
 
 // written by shinpei nakata
 
-K.import("konoha.float");
-K.import("konoha.math");
-K.import("konoha.class");
-K.import("konoha.bytes");
-K.import("konoha.string");
-K.import("posix.file");
+import("konoha.float");
+import("konoha.math");
+import("konoha.class");
+import("konoha.bytes");
+import("konoha.string");
+import("posix.file");
 
 int width = 256;
 int height = 256;

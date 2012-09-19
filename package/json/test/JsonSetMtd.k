@@ -1,5 +1,5 @@
-K.import("json");
-K.import("konoha");
+import("json");
+import("konoha");
 
 void test() {
 	String sample = "{}"
@@ -37,16 +37,16 @@ void test() {
 	parsed.setArray("array", ja);
 
 	// Get JSON
-	p(parsed.getInt("int"));
-	p(parsed.getFloat("float"));
-	p(parsed.getString("string"));
-	p(parsed.getBool("bool"));
-	p(parsed.get("json"));
+	System.p(parsed.getInt("int"));
+	System.p(parsed.getFloat("float"));
+	System.p(parsed.getString("string"));
+	System.p(parsed.getBool("bool"));
+	System.p(parsed.get("json"));
 	JSON[] a = parsed.getArray("array");
 	int i = 0;
-	p(a.getSize());
+	System.p(a.getSize());
 	while (i < a.getSize()) {
-		p(a[i].dump());
+		System.p(a[i].dump());
 		i += 1;
 	}
 }

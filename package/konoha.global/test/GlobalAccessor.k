@@ -1,5 +1,5 @@
 // written by kimio
 
-K.import("konoha.global");
+import("konoha.global");
 global
 

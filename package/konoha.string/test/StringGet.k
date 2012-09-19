@@ -1,6 +1,6 @@
 //written by takeo onoda
 
-K.import("konoha.string");
+import("konoha.string");
 
 void test() {
 	assert("hoge".get(0) == "h");

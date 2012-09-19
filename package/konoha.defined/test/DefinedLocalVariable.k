@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-K.import("konoha.defined");
+import("konoha.defined");
 
 void test() {
 	int a;

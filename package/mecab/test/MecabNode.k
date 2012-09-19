@@ -1,30 +1,30 @@
-K.import("konoha");
-K.import("mecab");
-//K.import("konoha.float");
+import("konoha");
+import("mecab");
+//import("konoha.float");
 
 void main() {
 	Tagger m = new Tagger();
 	String input = "太郎は次郎が持っている本を花子に渡した。";
-	p("Input: " + input);
+	System.p("Input: " + input);
 	MecabNode node = m.parseToNode(input);
 	int i = 0;
 	//while (node != null) {
 	while (i < 17) {
-		p("Surface:\t"  + node.getSurface());
-		p("Feature:\t"  + node.getFeature());
-		p("Length:\t"   + node.getLength());
-		p("RLength:\t"  + node.getRLength());
-		p("ID:\t"       + node.getID());
-		p("rcAttr:\t"   + node.getRCAttr());
-		p("lcAttr:\t"   + node.getLCAttr());
-		p("CharType:\t" + node.getCharType());
-		p("Stat:\t"     + node.getStat());
-		p("isBest:\t"   + node.isBest());
-		//p("Alpha:\t"    + node.alpha());
-		//p("Beta:\t"     + node.beta());
-		//p("prob:\t"     + node.prob());
-		p("wcost:\t "    + node.wcost());
-		p("cost:\t"     + node.cost());
+		System.p("Surface:\t"  + node.getSurface());
+		System.p("Feature:\t"  + node.getFeature());
+		System.p("Length:\t"   + node.getLength());
+		System.p("RLength:\t"  + node.getRLength());
+		System.p("ID:\t"       + node.getID());
+		System.p("rcAttr:\t"   + node.getRCAttr());
+		System.p("lcAttr:\t"   + node.getLCAttr());
+		System.p("CharType:\t" + node.getCharType());
+		System.p("Stat:\t"     + node.getStat());
+		System.p("isBest:\t"   + node.isBest());
+		//System.p("Alpha:\t"    + node.alpha());
+		//System.p("Beta:\t"     + node.beta());
+		//System.p("prob:\t"     + node.prob());
+		System.p("wcost:\t "    + node.wcost());
+		System.p("cost:\t"     + node.cost());
 		node = node.next();
 		i += 1;
 	}

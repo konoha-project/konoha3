@@ -1,6 +1,6 @@
 // generated with geninttest by kimio kurmaitsu
 
-K.import("konoha.int");
+import("konoha.int");
 int succ(int n) {
 	return n+1;
 }

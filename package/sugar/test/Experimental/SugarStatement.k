@@ -1,5 +1,5 @@
 // written by kimio kuramitsu
 
-K.import("sugar");
+import("sugar");
 
 sugar "while" "(" $Expr ")" $Block;

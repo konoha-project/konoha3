@@ -1,6 +1,6 @@
-K.import("konoha");
-K.import("konoha.bytes");
-K.import("konoha.mpi");
+import("konoha");
+import("konoha.bytes");
+import("konoha.mpi");
 
 float fabs(float f) {
 	if(f < 0.0) return 0.0 - f;
@@ -103,10 +103,10 @@ void main() {
 		float tw = r2.getf(0);
 		float mflops = 2.0 * nn * nn * nn / tw;
 		mflops = mflops * 1.0e-6;
-		p("N = " + nn);
-		p("Mat-Mat time = " + tw + " [sec.]");
-		p(" " + mflops + " [MFLOPS]");
-		p("ok");
+		System.p("N = " + nn);
+		System.p("Mat-Mat time = " + tw + " [sec.]");
+		System.p(" " + mflops + " [MFLOPS]");
+		System.p("ok");
 	}
 
 	/* ---------- Verification ---------- */
@@ -117,7 +117,7 @@ void main() {
 			int i=0;
 			while(i < nn) {
 				if(fabs(c.getf(j + i * np) - nn) > eps) {
-					p("error in " + j + ", " + i);
+					System.p("error in " + j + ", " + i);
 					return;
 				}
 				i=i+1;

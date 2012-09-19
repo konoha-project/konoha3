@@ -1,5 +1,5 @@
-K.import("konoha");
-K.import("curl");
+import("konoha");
+import("curl");
 
 void test() {
 	Curl c = new Curl();

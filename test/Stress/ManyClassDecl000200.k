@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-K.import("konoha.class");
+import("konoha.class");
 
 class C0 {int x0; }
 class C1 {int x1; }

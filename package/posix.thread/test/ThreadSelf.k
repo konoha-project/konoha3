@@ -1,5 +1,5 @@
 // written by wakamatsu
-K.import("posix.thread");
+import("posix.thread");
 
 void f() { }
 

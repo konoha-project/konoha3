@@ -1,6 +1,6 @@
 //written by Joseph
 
-K.import("konoha.string");
+import("konoha.string");
 
 void test() {
 	assert("こんにちは、にほん".lastIndexOf("に") == 6);

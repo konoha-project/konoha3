@@ -1,7 +1,7 @@
 //written by Joseph
 
-K.import("konoha.regexp");
-K.import("konoha.assign");
+import("konoha.regexp");
+import("konoha.assign");
 
 void test() {
 	RegExp patt = /world/gi;

@@ -1,6 +1,6 @@
 // written by shinpei
 
-K.import("konoha.array")
+import("konoha.array")
 
 void test() {
 	String[] ia = ["a","b","c"];

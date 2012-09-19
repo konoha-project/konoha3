@@ -1,9 +1,9 @@
 //written by Joseph
 
-K.import("konoha.string");
-K.import("konoha.regexp");
-K.import("konoha.assign");
-K.import("konoha.class");
+import("konoha.string");
+import("konoha.regexp");
+import("konoha.assign");
+import("konoha.class");
 
 void test() {
 	String str = "The rain stays.";

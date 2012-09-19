@@ -1,6 +1,6 @@
 /* written by kimio? */
-K.import("konoha.float");
-K.import("konoha.while");
+import("konoha.float");
+import("konoha.while");
 
 float sqrt(float y) {
   float x = y / 2;

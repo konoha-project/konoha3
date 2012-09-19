@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-K.import("sugar");
+import("sugar");
 
 Expr tyCheckTrue(Stmt stmt, Expr expr, Gamma gma, int typeid) {
 	System.p("do nothing");

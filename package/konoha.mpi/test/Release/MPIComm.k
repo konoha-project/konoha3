@@ -1,9 +1,9 @@
 // written by wakamatsu
-K.import("konoha.mpi");
+import("konoha.mpi");
 
 void test() {
 	MPIComm w = MPIComm.getWorld();
-	p("hello world. rank = " + w.getRank() + " / " + w.getSize());
+	System.p("hello world. rank = " + w.getRank() + " / " + w.getSize());
 }
 
 test();

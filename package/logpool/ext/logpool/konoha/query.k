@@ -1,6 +1,6 @@
-K.import("logpool");
-K.import("sugar");
-K.import("konoha.assignment");
+import("logpool");
+import("sugar");
+import("konoha.assignment");
 
 PoolPlugin initPlugin(Object ev) {
     PoolPlugin p0 = Printer.create();

@@ -1,5 +1,5 @@
 // written by kimio 
 
-K.import("konoha.object");
+import("konoha.object");
 Object;
 

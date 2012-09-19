@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-K.import("konoha.var");
+import("konoha.var");
 
 void test() {
 	var n;

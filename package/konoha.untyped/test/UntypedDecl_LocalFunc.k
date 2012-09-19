@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-K.import("konoha.untyped");
+import("konoha.untyped");
 
 int succ(int n) {
 	return n+1;

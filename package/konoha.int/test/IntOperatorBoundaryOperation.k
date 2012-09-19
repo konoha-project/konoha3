@@ -1,5 +1,5 @@
 /* this test is written by shinpei nakata */
-K.import("konoha.int");
+import("konoha.int");
 
 void int_operator_boundaryOperation_boundaryOperation() { 
 	int max = INT_MAX;

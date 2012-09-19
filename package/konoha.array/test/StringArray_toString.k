@@ -1,4 +1,4 @@
-K.import("konoha.array");
+import("konoha.array");
 
 void test() {
 	String[] sa = ["hello", "new", "world"];

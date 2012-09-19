@@ -1,6 +1,6 @@
 // written by wakamatsu
-K.import("konoha.new");
-K.import("posix.thread");
+import("konoha.new");
+import("posix.thread");
 
 void test() {
 	Mutex m = new Mutex();

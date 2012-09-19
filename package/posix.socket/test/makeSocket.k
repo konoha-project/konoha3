@@ -1,6 +1,6 @@
 // written by shinpei
-K.import("konoha.bytes");
-K.import("konoha.socket");
+import("konoha.bytes");
+import("konoha.socket");
 int makeSocket() {
   return System.socket(AF_INET, SOCK_STREAM, 0);
 }

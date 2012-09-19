@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-K.import("konoha.new");
-K.import("konoha.object");
+import("konoha.new");
+import("konoha.object");
 
 new Object();

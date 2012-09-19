@@ -1,7 +1,7 @@
 // written by shinpei nakata
 
-K.import("konoha.null");
-K.import("konoha.object");
+import("konoha.null");
+import("konoha.object");
 
 void test () {
 	Object obj = null;

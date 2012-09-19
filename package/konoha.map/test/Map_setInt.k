@@ -1,8 +1,8 @@
 // written by masahiro ide
 
-K.import("konoha.map");
-K.import("konoha.new");
-K.import("konoha.array");
+import("konoha.map");
+import("konoha.new");
+import("konoha.array");
 
 void test() {
 	Map[int] m = new Map[int]();

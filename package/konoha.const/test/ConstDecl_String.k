@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-K.import("konoha.const");
+import("konoha.const");
 
 const NAME="konoha";
 assert(NAME == "konoha");

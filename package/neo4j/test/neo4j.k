@@ -2,10 +2,10 @@
  * written by motoki yoan
  */
 
-K.import("jansson");
-K.import("konoha");
-K.import("konoha.string");
-K.import("konoha.curl");
+import("jansson");
+import("konoha");
+import("konoha.string");
+import("konoha.curl");
 
 K.load("../../src/rest.k");
 K.load("../../src/relationship.k");

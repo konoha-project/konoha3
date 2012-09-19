@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-K.import("konoha.null");
+import("konoha.null");
 
 void test () {
 	int n = null;   // n is 0

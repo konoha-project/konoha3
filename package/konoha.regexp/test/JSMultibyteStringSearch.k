@@ -1,6 +1,6 @@
 //written by Joseph
 
-K.import("konoha.regexp");
+import("konoha.regexp");
 
 void test() {
 	assert("こんにちは、世界!".search(/世界/gi) == 6);

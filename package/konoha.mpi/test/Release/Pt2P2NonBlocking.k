@@ -1,7 +1,7 @@
 // written by wakamatsu
-K.import("konoha.bytes");
-K.import("konoha.float");
-K.import("konoha.mpi");
+import("konoha.bytes");
+import("konoha.float");
+import("konoha.mpi");
 
 void test_bytes() {
 	MPIComm w = MPIComm.getWorld();

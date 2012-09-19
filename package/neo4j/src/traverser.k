@@ -4,7 +4,7 @@
 
 /* ----------------------------------------------------------------- */
 
-K.import("konoha.pcre");
+import("konoha.pcre");
 
 class Traverser {
 	String order;
