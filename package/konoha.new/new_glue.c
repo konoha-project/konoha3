@@ -55,7 +55,8 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_ASSERT(beginIdx == currentIdx);
 	kTokenVar *newToken = tokenList->tokenVarItems[beginIdx];   // new Class (
 	KonohaClass *foundClass = NULL;
-	int nextIdx = SUGAR kStmt_parseTypePattern(kctx, stmt, Stmt_nameSpace(stmt), tokenList, beginIdx + 1, endIdx, &foundClass);
+	kNameSpace *ns = Stmt_nameSpace(stmt);
+	int nextIdx = SUGAR kStmt_parseTypePattern(kctx, stmt, ns, tokenList, beginIdx + 1, endIdx, &foundClass);
 	if(nextIdx != -1 && nextIdx < kArray_size(tokenList)) {
 		kToken *nextTokenAfterClassName = tokenList->tokenItems[nextIdx];
 //		if (ct->typeId == TY_void) {
@@ -64,16 +65,35 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp)
 //			SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "invalid application of 'new' to incomplete class %s", CT_t(ct));
 //		}
 		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {  // new C (...)
-			SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
+			SugarSyntax *syn = SYN_(ns, KW_ExprMethodCall);
 			kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, newToken, NewExpr(kctx, syn, tokenList->tokenVarItems[beginIdx+1], foundClass->typeId));
 			newToken->resolvedSymbol = MN_new;
 			RETURN_(expr);
 		}
+		SugarSyntax *newsyn = SYN_(ns, SYM_("new"));
 		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KW_BracketGroup) {     // new int [100]
-			SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), SYM_("new"));
-			KonohaClass *arrayClass = CT_p0(kctx, CT_Array, foundClass->typeId);
-			newToken->resolvedSymbol = MN_("newArray");
-			kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, newToken, NewExpr(kctx, syn, tokenList->tokenVarItems[beginIdx+1], arrayClass->typeId));
+			kArray *subTokenList = nextTokenAfterClassName->subTokenList;
+			KonohaClass *classT0 = NULL;
+			kExpr *expr;
+			int hasGenerics = -1;
+			if (kArray_size(subTokenList) > 0) {
+				hasGenerics = SUGAR kStmt_parseTypePattern(kctx, stmt, ns, subTokenList, 0, kArray_size(subTokenList), &classT0);
+			}
+			if (hasGenerics != -1) {
+				/* new Type1[Type2[]] => Type1<Type2>.new Or Type1<Type2>.newList */
+				KonohaClass *realType = CT_p0(kctx, foundClass, classT0->typeId);
+				SugarSyntax *syn;// = (realType->baseTypeId != TY_Array) ? SYN_(ns, KW_ExprMethodCall) : newsyn;
+				syn = newsyn;
+				newToken->resolvedSymbol = (realType->baseTypeId != TY_Array) ? MN_new : MN_("newArray");
+				expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, newToken,
+						NewExpr(kctx, syn, tokenList->tokenVarItems[beginIdx+1], realType->typeId));
+			} else {
+				/* new Type1[] => Array<Type1>.newList */
+				KonohaClass *arrayClass = CT_p0(kctx, CT_Array, foundClass->typeId);
+				newToken->resolvedSymbol = MN_("newArray");
+				expr = SUGAR new_UntypedCallStyleExpr(kctx, newsyn, 2, newToken,
+						NewExpr(kctx, newsyn, tokenList->tokenVarItems[beginIdx+1], arrayClass->typeId));
+			}
 			RETURN_(expr);
 		}
 	}

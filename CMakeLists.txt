@@ -173,6 +173,7 @@ SET(CMAKE_EXTRA_INCLUDE_FILES)
 
 check_include_files(dlfcn.h HAVE_DLFCN_H)
 check_include_files(iconv.h HAVE_ICONV_H)
+check_include_files(syslog.h HAVE_SYSLOG_H)
 
 set(_HEADERS stdio.h stdlib.h string.h ctype.h)
 if(UNIX)
@@ -415,6 +416,14 @@ endforeach(f ${test_files})
 
 add_subdirectory(platform/dse)
 add_subdirectory(platform/apache)
+
+# for konoha command
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/platform/shell/konoha.sh.cmake
+		${CMAKE_CURRENT_BINARY_DIR}/konoha.sh)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/konoha.sh
+	DESTINATION bin
+	RENAME konoha
+	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
 install(TARGETS minikonoha minikonoha_bin
 		RUNTIME DESTINATION bin

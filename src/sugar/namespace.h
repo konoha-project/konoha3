@@ -578,13 +578,13 @@ static kMethod* kNameSpace_matchMethodNULL(KonohaContext *kctx, kNameSpace *star
 	while(ct != NULL) {
 		kNameSpace *ns = startNameSpace;
 		while(ns != NULL) {
-			kMethodList_matchMethod(kctx, ns->methodList, &ns->sortedConstTable, ct->typeId, MatchMethod, option);
+			kMethodList_matchMethod(kctx, ns->methodList, (size_t *) &ns->sortedConstTable, ct->typeId, MatchMethod, option);
 			if(option->isBreak) {
 				return option->foundMethodNULL;
 			}
 			ns = ns->parentNULL;
 		}
-		kMethodList_matchMethod(kctx, ct->methodList, &ct->sortedMethodList, ct->typeId, MatchMethod, option);
+		kMethodList_matchMethod(kctx, ct->methodList, (size_t *) &ct->sortedMethodList, ct->typeId, MatchMethod, option);
 		if(option->isBreak) {
 			return option->foundMethodNULL;
 		}
@@ -945,7 +945,7 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackage_t packageId,
 static KonohaPackage *getPackageNULL(KonohaContext *kctx, kpackage_t packageId, kfileline_t pline)
 {
 	KonohaPackage *pack = (KonohaPackage*)map_getu(kctx, kmodsugar->packageMapNO, packageId, uNULL);
-	isFirstTime_t flag = isFirstTime;
+	isFirstTime_t flag = FirstTime;
 	if(pack == NULL) {
 		pack = loadPackageNULL(kctx, packageId, pline);
 		if(pack == NULL) return NULL;

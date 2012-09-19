@@ -74,7 +74,7 @@ static KMETHOD Dynamic_(KonohaContext *kctx, KonohaStack *sfp)
 		if(kMethod_checkMethodCallStack(kctx, sfp, mtd, argc)) {
 			KonohaRuntime_setesp(kctx, kctx->esp - 1);
 			sfp[K_MTDIDX].mtdNC = mtd;
-			kObject *returnValue = sfp[K_RTNIDX].asObject;
+			//kObject *returnValue = sfp[K_RTNIDX].asObject;
 			KonohaRuntime_callMethod(kctx, sfp);
 
 			return;

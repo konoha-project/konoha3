@@ -300,7 +300,7 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 	size_t i = 0;
 	if(kArray_isUnboxData(a)) {
 		uintptr_t nv = sfp[1].unboxValue;
-		for(i = kArray_size(a)- 1; i >= 0; i--) {
+		for(i = kArray_size(a)- 1; i != 0; i--) {
 			if(a->unboxItems[i] == nv) {
 				break;
 			}
@@ -308,7 +308,7 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 	} else {
 		//TODO: Need to implement Object compareTo;
 		kObject *o = sfp[1].asObject;
-		for(i = kArray_size(a)- 1; i >= 0; i--) {
+		for(i = kArray_size(a)- 1; i != 0; i--) {
 			KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplemented"), sfp, sfp[K_RTNIDX].uline, NULL);
 			if(O_ct(o)->compareObject(a->objectItems[i], o) == 0) {
 				break;
@@ -480,12 +480,14 @@ static KMETHOD ParseExpr_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
 	KonohaClass *genericsClass = NULL;
-	int nextIdx = SUGAR kStmt_parseTypePattern(kctx, stmt, Stmt_nameSpace(stmt), tokenList, beginIdx, endIdx, &genericsClass);
+	kNameSpace *ns = Stmt_nameSpace(stmt);
+	int nextIdx = SUGAR kStmt_parseTypePattern(kctx, stmt, ns, tokenList, beginIdx, endIdx, &genericsClass);
 	if (nextIdx != -1) {  // to avoid Func[T]
 		RETURN_(SUGAR kStmt_parseOperatorExpr(kctx, stmt, tokenList->tokenItems[beginIdx]->resolvedSyntaxInfo, tokenList, beginIdx, beginIdx, endIdx));
 	}
 	kToken *currentToken = tokenList->tokenItems[operatorIdx];
 	if (beginIdx == operatorIdx) {
+		/* transform '[ Value1, Value2, ... ]' to '(Call Untyped new (Value1, Value2, ...))' */
 		DBG_ASSERT(currentToken->resolvedSyntaxInfo->keyword == KW_BracketGroup);
 		kExpr *arrayExpr = SUGAR new_UntypedCallStyleExpr(kctx, currentToken->resolvedSyntaxInfo, 2, currentToken, K_NULL);
 		RETURN_(SUGAR kStmt_addExprParam(kctx, stmt, arrayExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), /*allowEmpty*/1));
@@ -499,20 +501,24 @@ static KMETHOD ParseExpr_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 			DBG_P("cur:%d, beg:%d, endIdx:%d", operatorIdx, beginIdx, endIdx);
 			size_t subTokenSize = kArray_size(currentToken->subTokenList);
 			if (subTokenSize == 0) {
-				// 2 patterns, new int[(empty)], or new int[](x)
-				//new int[](x) --> new int[x]
-				//kToken *nextToken = tokenList->tokenItems[operatorIdx];
-				kExpr_setsyn(leftExpr, SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall));
-				//operatorIdx += 1;
-				//leftExpr = SUGAR kStmt_addExprParam(kctx, stmt, leftExpr, nextToken->subTokenList, 0, kArray_size(nextToken->subTokenList), 0/*allowEmpty*/);
-				//RETURN_(leftExpr);
-			} else { // s > 0
-				kExpr_setsyn(leftExpr, SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall));
-				DBG_P("currentToken->subtoken:%d", kArray_size(currentToken->subTokenList));
-				leftExpr = SUGAR kStmt_addExprParam(kctx, stmt, leftExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), 0/*allowEmpty*/);
+				/* transform 'new Type0 [ ]' => (Call Type0 new) */
+				kExpr_setsyn(leftExpr, SYN_(ns, KW_ExprMethodCall));
+			} else {
+				/* transform 'new Type0 [ Type1 ] (...) => new 'Type0<Type1>' (...) */
+				KonohaClass *classT0 = NULL;
+				kArray *subTokenList = currentToken->subTokenList;
+				int beginIdx = -1;
+				if (kArray_size(subTokenList) > 0) {
+					beginIdx = SUGAR kStmt_parseTypePattern(kctx, stmt, ns, subTokenList, 0, kArray_size(subTokenList), &classT0);
+				}
+				beginIdx = (beginIdx == -1) ? 0 : beginIdx;
+				kExpr_setsyn(leftExpr, SYN_(ns, KW_ExprMethodCall));
+				DBG_P("currentToken->subtoken:%d", kArray_size(subTokenList));
+				leftExpr = SUGAR kStmt_addExprParam(kctx, stmt, leftExpr, subTokenList, beginIdx, kArray_size(subTokenList), beginIdx != 0);
 			}
 		}
-		else {   // X[1] => get X 1
+		else {
+			/* transform 'Value0 [ Value1 ]=> (Call Value0 get (Value1)) */
 			kTokenVar *tkN = GCSAFE_new(TokenVar, 0);
 			tkN->resolvedSymbol= MN_toGETTER(0);
 			tkN->uline = currentToken->uline;

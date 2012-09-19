@@ -27,7 +27,7 @@
 #include "minikonoha/gc.h"
 
 extern int verbose_debug;
-#include <minikonoha/platform_posix.h>
+#include <minikonoha/platform.h>
 
 void test_kString(KonohaContext *kctx)
 {
