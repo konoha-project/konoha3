@@ -38,6 +38,8 @@ extern "C" {
 #define K_OSDLLEXT        ".dylib"
 #elif defined(__linux__)
 #define K_OSDLLEXT        ".so"
+#elif degined(__MINGW32__)
+#define K_OSDLLEXT        ".dll"
 #endif
 #endif
 
@@ -114,7 +116,11 @@ typedef KonohaPackageHandler* (*PackageLoadFunc)(void);
 #ifndef jmpbuf_i
 #include <setjmp.h>
 #define jmpbuf_i jmp_buf
+#if __MINGW32__ || __MSVC__
+#define ksetjmp  _setjmp
+#else
 #define ksetjmp  setjmp
+#endif
 #define klongjmp longjmp
 #endif /*jmpbuf_i*/
 

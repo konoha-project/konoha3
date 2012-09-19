@@ -27,7 +27,7 @@
 #include "minikonoha/gc.h"
 
 extern int verbose_debug;
-#include <minikonoha/platform_posix.h>
+#include <minikonoha/platform.h>
 
 static int _sum_  = 0;
 static int _sum2_ = 0;
