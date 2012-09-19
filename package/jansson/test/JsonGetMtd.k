@@ -1,9 +1,15 @@
+K.import("konoha.class");
+K.import("konoha.while");
+K.import("konoha.int");
+K.import("konoha.float");
+K.import("konoha.string");
+K.import("konoha.array");
+K.import("konoha.assign");
+
 K.import("jansson");
-K.import("konoha");
 
 void main() {
 	String sample = "{\"int\": 10, \"float\": 1.0, \"string\": \"hoge\", \"bool\": true, \"array\": [{\"foo\": \"bar\"}, {\"hoge\": \"huga\"}], \"json\": {\"foo\": \"bar\", \"hoge\": \"huga\"}}"
-
 	/*
 	sample = {
 		"int": 10,
@@ -22,7 +28,7 @@ void main() {
 	*/
 
 	Json j = new Json();
-	Json parsed = j.parse(sample);
+	Json parsed = Json.parse(sample);
 	p(parsed.getInt("int"));
 	p(parsed.getFloat("float"));
 	p(parsed.getString("string"));
@@ -33,7 +39,13 @@ void main() {
 		p(a[i]);
 		i += 1;
 	}
-	p(parsed.get("json"));
+	p(parsed.getJson("json"));
+	String[] keys = parsed.getKeys();
+	i = 0;
+	while(i < keys.getSize()) {
+		p(keys[i]);
+		i += 1;
+	}
 }
 
 main();
