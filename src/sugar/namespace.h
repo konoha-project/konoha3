@@ -704,8 +704,11 @@ static kMethod* kNameSpace_getNameSpaceFuncNULL(KonohaContext *kctx, kNameSpace 
 	MethodMatch m = {};
 	m.mn = symbol;
 	if(TY_isFunc(reqty)) {
-		m.paramdom = CT_(reqty)->cparamdom;  // TODO
-		return kNameSpace_matchMethodNULL(kctx, ns, O_typeId(ns), MethodMatch_Signature, &m);
+		m.paramdom = CT_(reqty)->cparamdom;
+		kNameSpace_matchMethodNULL(kctx, ns, O_typeId(ns), MethodMatch_Signature, &m);
+		if(m.foundMethodNULL != NULL) {
+			return m.foundMethodNULL;
+		}
 	}
 	return kNameSpace_matchMethodNULL(kctx, ns, O_typeId(ns), MethodMatch_Func, &m);
 }
