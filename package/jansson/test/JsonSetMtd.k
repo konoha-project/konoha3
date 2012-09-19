@@ -1,6 +1,12 @@
-K.import("jansson");
+K.import("konoha.class");
+K.import("konoha.while");
+K.import("konoha.int");
 K.import("konoha.float");
-K.import("konoha");
+K.import("konoha.string");
+K.import("konoha.array");
+K.import("konoha.assign");
+
+K.import("jansson");
 
 void main() {
 	String sample = "{}"
