@@ -47,7 +47,7 @@ static void NameSpace_init(KonohaContext *kctx, kObject *o, void *conf)
 static void syntaxMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
 {
 	SugarSyntax *syn = (SugarSyntax*)p->unboxValue;
-	BEGIN_REFTRACE(6);
+	BEGIN_REFTRACE(1+SUGARFUNC_SIZE);
 	KREFTRACEn(syn->syntaxRuleNULL);
 	size_t i;
 	for(i = 0; i < SUGARFUNC_SIZE; i++) {
@@ -62,17 +62,28 @@ static void NameSpace_reftrace(KonohaContext *kctx, kObject *o)
 	if(ns->syntaxMapNN != NULL) {
 		KLIB Kmap_each(kctx, ns->syntaxMapNN, NULL, syntaxMap_reftrace);
 	}
-	size_t i, size = kNameSpace_sizeConstTable(ns);
-	BEGIN_REFTRACE(size+3);
-	for(i = 0; i < size; i++) {
-		if(SYMKEY_isBOXED(ns->constTable.keyvalueItems[i].key)) {
-			KREFTRACEv(ns->constTable.keyvalueItems[i].objectValue);
+	{
+		size_t i, size = kNameSpace_sizeConstTable(ns);
+		BEGIN_REFTRACE(size+3);
+		for(i = 0; i < size; i++) {
+			if(SYMKEY_isBOXED(ns->constTable.keyvalueItems[i].key)) {
+				KREFTRACEv(ns->constTable.keyvalueItems[i].objectValue);
+			}
 		}
+		KREFTRACEn(ns->parentNULL);
+		KREFTRACEn(ns->globalObjectNULL);
+		KREFTRACEv(ns->methodList);
+		END_REFTRACE();
 	}
-	KREFTRACEn(ns->parentNULL);
-	KREFTRACEn(ns->globalObjectNULL);
-	KREFTRACEv(ns->methodList);
-	END_REFTRACE();
+	if (ns->tokenMatrix) {
+		BEGIN_REFTRACE(KCHAR_MAX);
+		size_t i;
+		kFunc **funcMatrix = ((kFunc **) ns->tokenMatrix) + KCHAR_MAX;
+		for(i = 0; i < KCHAR_MAX; i++) {
+			KREFTRACEn(funcMatrix[i]);
+		}
+		END_REFTRACE();
+	}
 }
 
 static void syntaxMap_free(KonohaContext *kctx, void *p)
