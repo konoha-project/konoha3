@@ -28,8 +28,6 @@
 /* --------------- */
 /* NameSpace */
 
-#define kNameSpace_sizeConstTable(ns)    (ns->constTable.bytesize / sizeof(KUtilsKeyValue))
-
 static void syntaxMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
 {
 	SugarSyntax *syn = (SugarSyntax*)p->unboxValue;
