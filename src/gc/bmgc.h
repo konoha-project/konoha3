@@ -1928,7 +1928,8 @@ static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o)
 #endif
 		gc_info("~Object ptr=%p, cid=%d", o, ct->typeId);
 		KONOHA_freeObjectField(kctx, (kObjectVar*)o);
-		((kObjectVar*)o)->h.ct = NULL;
+		//((kObjectVar*)o)->h.ct = NULL;
+		do_bzero((void *)o, ct->cstruct_size);
 #if GCDEBUG
 		//memset((void*)o, 0xa, ct->cstruct_size);
 		//((kObjectVar*)o)->h.magicflag = 5;

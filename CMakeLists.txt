@@ -258,6 +258,7 @@ macro(add_test_with_property test_name)
 		"KONOHA_PACKAGEPATH=${PARENT_BINARY_DIR}/package")
 endmacro(add_test_with_property test_name)
 
+option(TEST_STRESS "Use Stress Test" OFF)
 macro(add_konoha_test test_name test_file)
 	if(test_name MATCHES "Stress")
 		if(TEST_STRESS)
