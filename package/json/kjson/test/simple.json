@@ -1,0 +1,10 @@
+{
+    "a" : "Alpha",
+    "b" : true,
+    "c" : 12345,
+    "d" : [true, [false, [12345, null], 3.967, ["something", false], null]],
+    "e" : { "one" : 1, "two" : 2},
+    "f" : null,
+    "h" : { "a" : { "b" : { "c" : { "d" : {"e" : { "f" : { "g" : null }}}}}}},
+    "i" : [[[[[[[null]]]]]]]
+}

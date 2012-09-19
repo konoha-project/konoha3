@@ -631,7 +631,7 @@ static kStmt* kBlock_addNewStmt(KonohaContext *kctx, kBlock *bk, TokenRange *ran
 {
 	kStmtVar *stmt = new_(StmtVar, 0);
 	KLIB kArray_add(kctx, bk->stmtList, stmt);
-	KINITv(stmt->parentBlockNULL, bk);
+	KINITp(stmt, stmt->parentBlockNULL, bk);
 	if(range->errToken != NULL) {
 		kStmt_toERR(kctx, stmt, range->errToken->text);
 	}

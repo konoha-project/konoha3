@@ -1,8 +1,14 @@
- - (JsonGetMtd.k:26) 10
- - (JsonGetMtd.k:27) 1.000000
- - (JsonGetMtd.k:28) hoge
- - (JsonGetMtd.k:29) true
- - (JsonGetMtd.k:33) {"foo": "bar"}
- - (JsonGetMtd.k:33) {"hoge": "huga"}
- - (JsonGetMtd.k:36) {"foo": "bar", "hoge": "huga"}
+ - (JsonGetMtd.k:25) 10
+ - (JsonGetMtd.k:26) 1.000000e+00
+ - (JsonGetMtd.k:27) hoge
+ - (JsonGetMtd.k:28) true
+ - (JsonGetMtd.k:32) {"foo": "bar"}
+ - (JsonGetMtd.k:32) {"hoge": "huga"}
+ - (JsonGetMtd.k:35) {"foo": "bar", "hoge": "huga"}
+ - (JsonGetMtd.k:39) int
+ - (JsonGetMtd.k:39) string
+ - (JsonGetMtd.k:39) bool
+ - (JsonGetMtd.k:39) float
+ - (JsonGetMtd.k:39) array
+ - (JsonGetMtd.k:39) json
 Q.E.D.

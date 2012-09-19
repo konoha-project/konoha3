@@ -1,9 +1,9 @@
- - (JsonSetMtd.k:42) 10
- - (JsonSetMtd.k:43) 1.000000
- - (JsonSetMtd.k:44) hoge
- - (JsonSetMtd.k:45) true
- - (JsonSetMtd.k:46) {"foo": "bar", "hoge": "fuga"}
- - (JsonSetMtd.k:49) 2
- - (JsonSetMtd.k:51) {"foo": "bar"}
- - (JsonSetMtd.k:51) {"hoge": "fuga"}
+ - (JsonSetMtd.k:41) 10
+ - (JsonSetMtd.k:42) 1.000000e+00
+ - (JsonSetMtd.k:43) hoge
+ - (JsonSetMtd.k:44) true
+ - (JsonSetMtd.k:45) {"foo": "bar", "hoge": "fuga"}
+ - (JsonSetMtd.k:48) 2
+ - (JsonSetMtd.k:50) {"foo": "bar"}
+ - (JsonSetMtd.k:50) {"hoge": "fuga"}
 Q.E.D.
