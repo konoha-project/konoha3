@@ -425,10 +425,10 @@ typedef const struct kMethodVar         kMethod;
 typedef struct kMethodVar               kMethodVar;
 typedef const struct kFuncVar           kFunc;
 typedef struct kFuncVar                 kFuncVar;
-
-/* sugar.h */
 typedef const struct kNameSpaceVar      kNameSpace;
 typedef struct kNameSpaceVar            kNameSpaceVar;
+
+/* sugar.h */
 typedef const struct kTokenVar          kToken;
 typedef struct kTokenVar                kTokenVar;
 typedef const struct kExprVar           kExpr;
@@ -780,8 +780,9 @@ struct KonohaClassField {
 #define TY_Param             ((ktype_t)7)
 #define TY_Method            ((ktype_t)8)
 #define TY_Func              ((ktype_t)9)
-#define TY_System            ((ktype_t)10)
-#define TY_0                ((ktype_t)11)    /* Parameter Type*/
+#define TY_NameSpace         ((ktype_t)10)
+#define TY_System            ((ktype_t)11)
+#define TY_0                 ((ktype_t)12)    /* Parameter Type*/
 
 #define CT_void                 CT_(TY_void)
 #define CT_Object               CT_(TY_Object)
@@ -792,6 +793,7 @@ struct KonohaClassField {
 #define CT_Param                CT_(TY_Param)
 #define CT_Method               CT_(TY_Method)
 #define CT_Func                 CT_(TY_Func)
+#define CT_NameSpace            CT_(TY_NameSpace)
 #define CT_System               CT_(TY_System)
 
 #define CT_StringArray          CT_Array
@@ -822,8 +824,9 @@ struct KonohaClassField {
 #define CFLAG_Param             kClass_Final
 #define CFLAG_Method            kClass_Final
 #define CFLAG_Func              kClass_Final
+#define CFLAG_NameSpace         kClass_Final
 #define CFLAG_System            kClass_Singleton|kClass_Final
-#define CFLAG_0                kClass_TypeVar|kClass_UnboxType|kClass_Singleton|kClass_Final
+#define CFLAG_0                 kClass_TypeVar|kClass_UnboxType|kClass_Singleton|kClass_Final
 
 
 #define CT_isPrivate(ct)      (TFLAG_is(kshortflag_t,(ct)->cflag, kClass_Private))
@@ -1351,6 +1354,9 @@ struct KonohaLibVar {
 	intptr_t        (*kMethod_indexOfField)(kMethod *);
 
 	kbool_t         (*KonohaRuntime_setModule)(KonohaContext*, int, struct KonohaModule *, kfileline_t);
+
+	void (*kNameSpace_reftraceSugarExtension)(KonohaContext *, kNameSpace *);
+	void (*kNameSpace_freeSugarExtension)(KonohaContext *, kNameSpaceVar *);
 
 	struct KonohaPackageVar*   (*kNameSpace_requirePackage)(KonohaContext*, const char *, kfileline_t);
 	kbool_t          (*kNameSpace_importPackage)(KonohaContext*, kNameSpace*, const char *, kfileline_t);

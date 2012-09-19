@@ -156,23 +156,18 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	l->kNameSpace_loadMethodData = kNameSpace_loadMethodData;
 	l->kNameSpace_setConstData   = kNameSpace_setConstData;
 	l->kNameSpace_loadConstData  = kNameSpace_loadConstData;
-//	l->kNameSpace_getMethodNULL  = kNameSpace_getMethodNULL;
 	l->kNameSpace_getGetterMethodNULL  = kNameSpace_getGetterMethodNULL;
 	l->kNameSpace_getSetterMethodNULL  = kNameSpace_getSetterMethodNULL;
 	l->kNameSpace_getMethodByParamSizeNULL  = kNameSpace_getMethodByParamSizeNULL;
 	l->kNameSpace_getMethodBySignatureNULL  = kNameSpace_getMethodBySignatureNULL;
 
 	l->kNameSpace_compileAllDefinedMethods    = kNameSpace_compileAllDefinedMethods;
+	l->kNameSpace_reftraceSugarExtension =  kNameSpace_reftraceSugarExtension;
+	l->kNameSpace_freeSugarExtension =  kNameSpace_freeSugarExtension;
 
 	KINITv(mod->packageList, new_(Array, 8));
 	mod->packageMapNO = KLIB Kmap_init(kctx, 0);
 
-	KDEFINE_CLASS defNameSpace = {
-		STRUCTNAME(NameSpace),
-		.init = NameSpace_init,
-		.reftrace = NameSpace_reftrace,
-		.free = NameSpace_free,
-	};
 	KDEFINE_CLASS defToken = {
 		STRUCTNAME(Token),
 		.init = Token_init,
@@ -197,7 +192,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		STRUCTNAME(Gamma),
 		.init = Gamma_init,
 	};
-	mod->cNameSpace = KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defNameSpace, 0);
+
 	mod->cToken =     KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defToken, 0);
 	mod->cExpr  =     KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defExpr, 0);
 	mod->cStmt  =     KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defStmt, 0);
@@ -205,7 +200,6 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->cGamma =     KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defGamma, 0);
 	mod->cTokenArray = CT_p0(kctx, CT_Array, mod->cToken->typeId);
 
-	KLIB Knull(kctx, mod->cNameSpace);
 	KLIB Knull(kctx, mod->cToken);
 	KLIB Knull(kctx, mod->cExpr);
 	KLIB Knull(kctx, mod->cBlock);

@@ -71,44 +71,6 @@ static void kNameSpace_freeSugarExtension(KonohaContext *kctx, kNameSpaceVar *ns
 	}
 }
 
-static void NameSpace_init(KonohaContext *kctx, kObject *o, void *conf)
-{
-	kNameSpaceVar *ns = (kNameSpaceVar*)o;
-	bzero(&ns->parentNULL, sizeof(kNameSpace) - sizeof(KonohaObjectHeader));
-	if(conf != NULL) {
-		KINITv(ns->parentNULL, (kNameSpace*)conf);
-		ns->packageId     = ns->parentNULL->packageId;
-		ns->packageDomain = ns->parentNULL->packageDomain;
-		ns->syntaxOption  = ns->parentNULL->syntaxOption;
-	}
-	KINITv(ns->methodList, K_EMPTYARRAY);
-	//KINITv(ns->scriptObject, KLIB Knull(kctx, CT_System));
-}
-
-static void NameSpace_reftrace(KonohaContext *kctx, kObject *o)
-{
-	kNameSpace *ns = (kNameSpace*)o;
-	kNameSpace_reftraceSugarExtension(kctx, ns);
-	size_t i, size = kNameSpace_sizeConstTable(ns);
-	BEGIN_REFTRACE(size+3);
-	for(i = 0; i < size; i++) {
-		if(SYMKEY_isBOXED(ns->constTable.keyvalueItems[i].key)) {
-			KREFTRACEv(ns->constTable.keyvalueItems[i].objectValue);
-		}
-	}
-	KREFTRACEn(ns->parentNULL);
-	KREFTRACEn(ns->globalObjectNULL);
-	KREFTRACEv(ns->methodList);
-	END_REFTRACE();
-}
-
-static void NameSpace_free(KonohaContext *kctx, kObject *o)
-{
-	kNameSpaceVar *ns = (kNameSpaceVar*)o;
-	kNameSpace_freeSugarExtension(kctx, ns);
-	KLIB Karray_free(kctx, &ns->constTable);
-}
-
 /* --------------- */
 /* Token */
 

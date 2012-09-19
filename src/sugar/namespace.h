@@ -905,7 +905,7 @@ static kbool_t kNameSpace_loadScript(KonohaContext *kctx, kNameSpace *ns, const 
 
 static kNameSpace* new_PackageNameSpace(KonohaContext *kctx, kpackage_t packageDomain, kpackage_t packageId)
 {
-	kNameSpaceVar *ns = GCSAFE_new(NameSpaceVar, KNULL(NameSpace));
+	kNameSpaceVar *ns = (kNameSpaceVar*)GCSAFE_new(NameSpace, KNULL(NameSpace));
 	ns->packageId = packageId;
 	ns->packageDomain = packageId;
 	return (kNameSpace*)ns;

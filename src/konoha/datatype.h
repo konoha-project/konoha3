@@ -465,6 +465,49 @@ static intptr_t STUB_Method_indexOfField(kMethod *mtd)
 }
 
 // ---------------
+// NameSpace
+
+static void NameSpace_init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kNameSpaceVar *ns = (kNameSpaceVar*)o;
+	bzero(&ns->parentNULL, sizeof(kNameSpace) - sizeof(KonohaObjectHeader));
+	if(conf != NULL) {
+		KINITv(ns->parentNULL, (kNameSpace*)conf);
+		ns->packageId     = ns->parentNULL->packageId;
+		ns->packageDomain = ns->parentNULL->packageDomain;
+		ns->syntaxOption  = ns->parentNULL->syntaxOption;
+	}
+	KINITv(ns->methodList, K_EMPTYARRAY);
+	//KINITv(ns->scriptObject, KLIB Knull(kctx, CT_System));
+}
+
+static void NameSpace_reftrace(KonohaContext *kctx, kObject *o)
+{
+	kNameSpace *ns = (kNameSpace*)o;
+	KLIB kNameSpace_reftraceSugarExtension(kctx, ns);
+	size_t i, size = kNameSpace_sizeConstTable(ns);
+	BEGIN_REFTRACE(size+3);
+	for(i = 0; i < size; i++) {
+		if(SYMKEY_isBOXED(ns->constTable.keyvalueItems[i].key)) {
+			KREFTRACEv(ns->constTable.keyvalueItems[i].objectValue);
+		}
+	}
+	KREFTRACEn(ns->parentNULL);
+	KREFTRACEn(ns->globalObjectNULL);
+	KREFTRACEv(ns->methodList);
+	END_REFTRACE();
+}
+
+static void NameSpace_free(KonohaContext *kctx, kObject *o)
+{
+	kNameSpaceVar *ns = (kNameSpaceVar*)o;
+	KLIB kNameSpace_freeSugarExtension(kctx, ns);
+	KLIB Karray_free(kctx, &ns->constTable);
+}
+
+
+
+// ---------------
 // System
 
 static void Func_init(KonohaContext *kctx, kObject *o, void *conf)
@@ -853,6 +896,12 @@ static void loadInitStructData(KonohaContext *kctx)
 		.init = Func_init,
 		.reftrace = Func_reftrace,
 	};
+	KDEFINE_CLASS defNameSpace = {
+		TYNAME(NameSpace),
+		.init = NameSpace_init,
+		.reftrace = NameSpace_reftrace,
+		.free = NameSpace_free,
+	};
 	KDEFINE_CLASS defSystem = {
 		TYNAME(System),
 		.init = DEFAULT_init,
@@ -873,6 +922,7 @@ static void loadInitStructData(KonohaContext *kctx)
 		&defParam,
 		&defMethod,
 		&defFunc,
+		&defNameSpace,
 		&defSystem,
 		&defT0,
 		NULL,
@@ -916,6 +966,7 @@ static void initStructData(KonohaContext *kctx)
 		ct->classNameSymbol = ksymbolSPOL(name, strlen(name), SPOL_ASCII|SPOL_POOL|SPOL_TEXT, _NEWID);
 		KonohaClass_setName(kctx, ct, 0);
 	}
+	KLIB Knull(kctx, CT_NameSpace);
 }
 
 static void initKonohaLib(KonohaLibVar *l)
