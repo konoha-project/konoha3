@@ -7,8 +7,8 @@ import("konoha");
 import("konoha.string");
 import("konoha.curl");
 
-K.load("../../src/rest.k");
-K.load("../../src/relationship.k");
-K.load("../../src/node.k");
-K.load("../../src/db.k");
-K.load("../../src/traverser.k");
+load("../../src/rest.k");
+load("../../src/relationship.k");
+load("../../src/node.k");
+load("../../src/db.k");
+load("../../src/traverser.k");

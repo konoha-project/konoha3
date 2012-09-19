@@ -2,7 +2,7 @@
  * written by motoki yoan
  */
 
-K.load("neo4j.k");
+load("neo4j.k");
 
 void main() {
 	// create DB

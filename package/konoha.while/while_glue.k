@@ -14,7 +14,7 @@
 // }
 
 // NameSpace.compileAllDefinedMethods();
-// K.addTopStmtTyCheck("while", tyCheckWhile);
-// K.addStmtTyCheck("while", tyCheckWhile);
-// K.addTermParseExpr("while");
+// addTopStmtTyCheck("while", tyCheckWhile);
+// addStmtTyCheck("while", tyCheckWhile);
+// addTermParseExpr("while");
 

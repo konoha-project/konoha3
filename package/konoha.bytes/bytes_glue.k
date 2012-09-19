@@ -35,6 +35,6 @@
 // }
 
 
-// K.addTokenizeFunc("'", singleQuoteToken);
-// K.addExprTyCheck("$SingleQuote", tyCheckSingleQuote);
-// K.addTermParseExpr("$SingleQuote");
+// addTokenizeFunc("'", singleQuoteToken);
+// addExprTyCheck("$SingleQuote", tyCheckSingleQuote);
+// addTermParseExpr("$SingleQuote");

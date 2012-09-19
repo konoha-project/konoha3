@@ -11,7 +11,7 @@ import("konoha.class");
 import("konoha.array");
 import("konoha.while");
 import("konoha.assign");
-K.setTransparentGlobalVariable(true);
+setTransparentGlobalVariable(true);
 
 const width = 64;
 const height = 64;

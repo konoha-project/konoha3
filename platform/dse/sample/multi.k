@@ -44,7 +44,7 @@ class Task {
 }
 
 String makeFibo(int i) {
-	String fibo = "K.import(\"konoha\"); int fibo(int i) { if(i < 3) return i; else return fibo(i - 1) + fibo(i - 2); }; p(fibo(" + i + "));";
+	String fibo = "import(\"konoha\"); int fibo(int i) { if(i < 3) return i; else return fibo(i - 1) + fibo(i - 2); }; p(fibo(" + i + "));";
 	return fibo;
 }
 

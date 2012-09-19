@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
 import("konoha.global");
-K.setTransparentGlobalVariable(true);
+setTransparentGlobalVariable(true);
 
 int x = 123;
 

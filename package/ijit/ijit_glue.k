@@ -178,10 +178,10 @@ Value createConstValue(int ctype, Object v, int i, float f) {
 }
 
 int cid2ctype(int type) {
-	if (type == K.getCid("Int", -1))     { return /*TY_INT*/3; }
-	if (type == K.getCid("Boolean", -1)) { return /*TY_BOOL*/8; }
-	if (type == K.getCid("Float", -1))   { return /*TY_FLOAT*/5; }
-	if (type == K.getCid("void", -1)) { return /*TY_VOID*/1; }
+	if (type == getCid("Int", -1))     { return /*TY_INT*/3; }
+	if (type == getCid("Boolean", -1)) { return /*TY_BOOL*/8; }
+	if (type == getCid("Float", -1))   { return /*TY_FLOAT*/5; }
+	if (type == getCid("void", -1)) { return /*TY_VOID*/1; }
 	return /*TY_OBJECT*/12;
 }
 
@@ -190,17 +190,17 @@ Type cid2Type(int type) {
 }
 
 int type2cid(Type type) {
-	if (type == ctype2Type(/*TY_INT*/3))   { return K.getCid("Int", -1); }
-	if (type == ctype2Type(/*TY_BOOL*/8))  { return K.getCid("Boolean", -1); }
-	if (type == ctype2Type(/*TY_FLOAT*/5)) { return K.getCid("Float", -1); }
-	if (type == ctype2Type(/*TY_VOID*/1)) { return K.getCid("void", -1); }
-	return K.getCid("Object", -1);
+	if (type == ctype2Type(/*TY_INT*/3))   { return getCid("Int", -1); }
+	if (type == ctype2Type(/*TY_BOOL*/8))  { return getCid("Boolean", -1); }
+	if (type == ctype2Type(/*TY_FLOAT*/5)) { return getCid("Float", -1); }
+	if (type == ctype2Type(/*TY_VOID*/1)) { return getCid("void", -1); }
+	return getCid("Object", -1);
 }
 
 boolean ty_isUnbox(int cid) {
-	if (cid == K.getCid("Int", -1)) { return true; }
-	if (cid == K.getCid("Boolean", -1)) { return true; }
-	if (cid == K.getCid("Float", -1)) { return true; }
+	if (cid == getCid("Int", -1)) { return true; }
+	if (cid == getCid("Boolean", -1)) { return true; }
+	if (cid == getCid("Float", -1)) { return true; }
 	return false;
 }
 
@@ -433,8 +433,8 @@ Value expr_asm(int a, Expr expr, int espidx) {
 void storesfp(Value val, int reqtype, int sfpidx) {
 	IRBuilder builder = System.getBuilder();
 	Value vsfp  = getvsfp();
-	if (type2cid(val.getType()) == K.getCid("Object", -1)) {
-		Value vsfp0 = loadsfp(builder, vsfp, K.getCid("Object", -1), sfpidx);
+	if (type2cid(val.getType()) == getCid("Object", -1)) {
+		Value vsfp0 = loadsfp(builder, vsfp, getCid("Object", -1), sfpidx);
 		builder.createStore(val, vsfp0, false);
 	} else {
 		Value vsfp0 = loadsfp(builder, vsfp, reqtype, sfpidx);
@@ -463,7 +463,7 @@ void asm_shift_esp(int idx) {
 }
 
 Value loadMtdFromSfp(IRBuilder builder, Value vsfp, int mtdidx) {
-	Value v = loadsfp(builder, vsfp, K.getCid("Int", -1), mtdidx);
+	Value v = loadsfp(builder, vsfp, getCid("Int", -1), mtdidx);
 	return builder.createBitCast(v, PointerType.get(ctype2Type(/*TY_METHOD*/11)));
 }
 
@@ -471,7 +471,7 @@ void prepare_call_stack(int thisidx, Value vsfp, Object def, Method mtd, int uli
 	int rtnidx = thisidx + /*K_RTNIDX*/-4;
 	int mtdidx = thisidx + /*K_MTDIDX*/-1;
 	IRBuilder builder = System.getBuilder();
-	if ((def).getCid() != K.getCid("void", -1)) {
+	if ((def).getCid() != getCid("void", -1)) {
 		Value vsfp0 = loadsfp(builder, vsfp, (def).getCid(), rtnidx);
 		if (ty_isUnbox(def.getCid())) {
 			int unboxValue = def.unbox();
@@ -486,7 +486,7 @@ void prepare_call_stack(int thisidx, Value vsfp, Object def, Method mtd, int uli
 	Value vmtd  = createConstValue(/*TY_METHOD*/11, (mtd), 0, 0);
 	builder.createStore(vmtd, vsfp1, false);
 
-	Value vsfp2 = loadsfp(builder, vsfp, K.getCid("Int", -1), rtnidx);
+	Value vsfp2 = loadsfp(builder, vsfp, getCid("Int", -1), rtnidx);
 	Value vline = createConstValue(/*TY_INT*/3, null, uline, 0);
 	builder.createStore(vline, vsfp2, false);
 
@@ -652,14 +652,14 @@ Value call_asm(int a, Expr expr, int espidx) {
 		//ASM(CALL, kmodjit.uline, sfp(thisidx), esp(espidx, argc), System.KLIB Knull(kctx, expr.getType()));
 	}
 	else {
-		if (mtd.getCid() == K.getCid("Int", -1)) {
+		if (mtd.getCid() == getCid("Int", -1)) {
 			if (check_asm_int_op(mtd.getFname(), argc)) {
 				Value v = asm_int_op(mtd.getFname(), expr, thisidx + s - 1);
 				vstack_setValue(nc(espidx), v);
 				return v;
 			}
 		}
-		if (mtd.getCid() == K.getCid("Float", -1)) {
+		if (mtd.getCid() == getCid("Float", -1)) {
 			if (check_asm_float_op(mtd.getFname(), argc)) {
 				Value v = asm_float_op(mtd.getFname(), expr, thisidx + s - 1);
 				vstack_setValue(nc(espidx), v);
@@ -681,7 +681,7 @@ Value call_asm(int a, Expr expr, int espidx) {
 			return v;
 		}
 	}
-	if (mtd.getReturnType() != K.getCid("void", -1)) {
+	if (mtd.getReturnType() != getCid("void", -1)) {
 		IRBuilder builder = System.getBuilder();
 		Value v = loadsfp(builder, getvsfp(), mtd.getReturnType(), sfp(thisidx) + /*K_RTNIDX*/-4);
 		Value v1 = builder.createLoad(v, false);
@@ -830,7 +830,7 @@ Boolean isExpr(Expr expr) {
 	int x   = expr.getAddr();
 	int ct  = System.getPointer(x, 8, 64);
 	int cid = System.getPointer(ct, 88, 16);
-	return cid == K.getCid("Expr", -1);
+	return cid == getCid("Expr", -1);
 }
 Expr Stmt.getExpr(int id, Expr def) {
 	Expr expr = getObjectNULL(id);
@@ -887,7 +887,7 @@ void ifstmt_asm(Stmt stmt, int espidx) {
 void returnstmt_asm(Stmt stmt, int espidx) {
 	Expr expr = stmt.getObjectNULL(KW_ExprPattern);
 	IRBuilder builder = System.getBuilder();
-	if(isExpr(expr) && expr.getType() != K.getCid("void", -1)) {
+	if(isExpr(expr) && expr.getType() != getCid("void", -1)) {
 		Value retval = expr_asm(/*K_RTNIDX*/-4, expr, espidx);
 		Function f = System.getFunction();
 		Type retTy = f.getReturnType();
@@ -899,7 +899,7 @@ void returnstmt_asm(Stmt stmt, int espidx) {
 		} else {
 			builder.createRet(retval);
 		}
-	} else if (expr.getType() == K.getCid("void", -1)) {
+	} else if (expr.getType() == getCid("void", -1)) {
 		builder.createRetVoid();
 	}
 }
@@ -971,7 +971,7 @@ void construct_args(Array argsTy, Param pa, int n, int psize) {
 Value loadsfp(IRBuilder builder, Value vsfp, int reqtype, int sfpidx) {
 	int idx = tri(ty_isUnbox(reqtype), 1, 0);
 	Value v = builder.createConstGEP2_32(vsfp, sfpidx, idx);
-	if (reqtype != K.getCid("Boolean", -1) && !(reqtype == K.getCid("Float", -1))) {
+	if (reqtype != getCid("Boolean", -1) && !(reqtype == getCid("Float", -1))) {
 		return v;
 	}
 	return builder.createBitCast(v, PointerType.get(cid2Type(reqtype)));
@@ -1012,7 +1012,7 @@ Function build_wrapper_func(Method mtd, Module m, Function f) {
 
 	/* call function and  set return values */
 	Value callinst = builder.createCall(f, params);
-	if (retTy != K.getCid("void", -1)) {
+	if (retTy != getCid("void", -1)) {
 		Value v = loadsfp(builder, arg_sfp, retTy, /*K_RTNIDX*/-4);
 		builder.createStore(callinst, v, false/*isVolatile*/);
 	}
@@ -1196,7 +1196,7 @@ void System.genCode(Method mtd, Block bk) {
 	LLVMBasicBlock iblock = builder.getInsertBlock();
 	if (iblock.getTerminator().isNull()) {
 		int rtype = mtd.getReturnType();
-		if (rtype == K.getCid("void", -1)) {
+		if (rtype == getCid("void", -1)) {
 			builder.createRetVoid();
 		} else {
 			Value v = createConstValue(cid2ctype(rtype), System.KLIB Knull(kctx, rtype), 0, 0.0);

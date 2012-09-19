@@ -6,7 +6,7 @@ import("konoha.null");
 import("konoha.int");
 import("konoha.array");
 import("konoha.const");
-K.setTransparentGlobalVariable(true);
+setTransparentGlobalVariable(true);
 
 /* The Great Computer Language Shootout
    http://shootout.alioth.debian.org/

@@ -7,7 +7,7 @@ Expr tyCheckTrue(Stmt stmt, Expr expr, Gamma gma, int typeid) {
 	return expr; // nothing
 }
 
-K.addExprTyCheck("true", tyCheckTrue);
+addExprTyCheck("true", tyCheckTrue);
 
 assert(true);
 

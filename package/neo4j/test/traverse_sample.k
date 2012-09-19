@@ -1,4 +1,4 @@
-K.load("neo4j.k");
+load("neo4j.k");
 
 void main() {
 	GraphDatabaseService db = new GraphDatabaseService("http://localhost", 7474);

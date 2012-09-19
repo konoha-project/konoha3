@@ -2,5 +2,5 @@
 
 import("konoha.i");
 import("konoha.int");
-K.man(int);
+man(int);
 

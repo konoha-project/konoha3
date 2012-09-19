@@ -2,7 +2,7 @@
  * written by motoki yoan
  */
 
-K.load("neo4j.k");
+load("neo4j.k");
 
 Node addNode(GraphDatabaseService db, Node from, int i) {
 	if (i > 2) return null;

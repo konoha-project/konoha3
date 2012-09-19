@@ -32,6 +32,6 @@
 // 	return 0
 // }
 
-// K.addParseExpr("[]", squareBracketParseExpr);
+// addParseExpr("[]", squareBracketParseExpr);
 
 // []
