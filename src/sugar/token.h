@@ -372,9 +372,10 @@ static int kchar(const char *t, int pos)
 	return (ch < 0) ? _MULTI : cMatrix[ch];
 }
 
-static int callFuncTokenize(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
+static int callTokennizeFunc(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
 {
 	// The above string operation is bad thing. Don't repeat it
+	DBG_ASSERT(IS_Func(fo));
 	kStringVar *preparedString = (kStringVar*)tenv->preparedString;
 	preparedString->text = tenv->source + tok_start;
 	preparedString->bytesize = tenv->sourceLength - tok_start;
@@ -408,12 +409,12 @@ static int tokenizeEach(KonohaContext *kctx, int kchar, kTokenVar* tk, Tokenizer
 			kArray *a = (kArray*)fo;
 			int i;
 			for(i = kArray_size(a) - 1; i >= 0; i--) {
-				pos = callFuncTokenize(kctx, a->funcItems[i], tk, tenv, tok_start);
+				pos = callTokennizeFunc(kctx, a->funcItems[i], tk, tenv, tok_start);
 				if(pos > tok_start) return pos;
 			}
 			fo = a->funcItems[0];
 		}
-		pos = callFuncTokenize(kctx, fo, tk, tenv, tok_start);
+		pos = callTokennizeFunc(kctx, fo, tk, tenv, tok_start);
 		if(pos > tok_start) return pos;
 	}
 	pos = tenv->cfuncItems[kchar](kctx, tk, tenv, tok_start);
@@ -467,7 +468,7 @@ static int parseLazyBlock(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv
 	return pos-1;
 }
 
-static const TokenizeFunc *NameSpace_tokenMatrix(KonohaContext *kctx, kNameSpace *ns)
+static const TokenizeFunc *kNameSpace_tokenMatrix(KonohaContext *kctx, kNameSpace *ns)
 {
 	if(ns->tokenMatrix == NULL) {
 		DBG_ASSERT(KCHAR_MAX * sizeof(TokenizeFunc) == sizeof(MiniKonohaTokenMatrix));
@@ -479,14 +480,14 @@ static const TokenizeFunc *NameSpace_tokenMatrix(KonohaContext *kctx, kNameSpace
 			memcpy(tokenMatrix, MiniKonohaTokenMatrix, sizeof(MiniKonohaTokenMatrix));
 			bzero(tokenMatrix + KCHAR_MAX, sizeof(MiniKonohaTokenMatrix));
 		}
-		((kNameSpaceVar*)ns)->tokenMatrix = (const TokenizeFunc*)tokenMatrix;
+		((kNameSpaceVar*)ns)->tokenMatrix = (void*)tokenMatrix;
 	}
-	return ns->tokenMatrix;
+	return (TokenizeFunc*)ns->tokenMatrix;
 }
 
 static kFunc **NameSpace_tokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns)
 {
-	kFunc **funcMatrix = (kFunc**)NameSpace_tokenMatrix(kctx, ns);
+	kFunc **funcMatrix = (kFunc**)kNameSpace_tokenMatrix(kctx, ns);
 	return funcMatrix + KCHAR_MAX;
 }
 
@@ -494,7 +495,7 @@ static void kNameSpace_setTokenizeFunc(KonohaContext *kctx, kNameSpace *ns, int 
 {
 	int kchar = (ch < 0) ? _MULTI : cMatrix[ch];
 	if(cfunc != NULL) {
-		TokenizeFunc *funcMatrix = (TokenizeFunc *)NameSpace_tokenMatrix(kctx, ns);
+		TokenizeFunc *funcMatrix = (TokenizeFunc *)kNameSpace_tokenMatrix(kctx, ns);
 		funcMatrix[kchar] = cfunc;
 	}
 	else {
@@ -519,33 +520,6 @@ static void kNameSpace_setTokenizeFunc(KonohaContext *kctx, kNameSpace *ns, int 
 	}
 }
 
-//static void TokenRange_tokenize(KonohaContext *kctx, kNameSpace *ns, const char *source, kfileline_t uline, kArray *parsedTokenList)
-//{
-//	size_t i, pos = kArray_size(parsedTokenList);
-//	TokenizerEnv tenv = {
-//		.source = source,
-//		.sourceLength = strlen(source),
-//		.currentLine  = uline,
-//		.tokenList   = parsedTokenList,
-//		.tabsize = 4,
-//		.cfuncItems   = (ns == NULL) ? MiniKonohaTokenMatrix : NameSpace_tokenMatrix(kctx, ns),
-//	};
-//	INIT_GCSTACK();
-//	kString *preparedString = KLIB new_kString(kctx, tenv.source, tenv.sourceLength, SPOL_ASCII|SPOL_TEXT|SPOL_NOPOOL);
-//	PUSH_GCSTACK(preparedString);
-//	tenv.preparedString = preparedString;
-//	if(ns != NULL) {
-//		tenv.funcItems = NameSpace_tokenFuncMatrix(kctx, ns);
-//	}
-//	tokenize(kctx, &tenv);
-//	RESET_GCSTACK();
-//	if(uline == 0) {
-//		for(i = pos; i < kArray_size(parsedTokenList); i++) {
-//			parsedTokenList->tokenVarItems[i]->uline = 0;
-//		}
-//	}
-//}
-
 static void TokenRange_tokenize(KonohaContext *kctx, TokenRange *range, const char *source, kfileline_t uline)
 {
 	DBG_ASSERT(range->beginIdx == range->endIdx);
@@ -555,7 +529,7 @@ static void TokenRange_tokenize(KonohaContext *kctx, TokenRange *range, const ch
 		.currentLine  = uline,
 		.tokenList    = range->tokenList,
 		.tabsize = 4,
-		.cfuncItems   = (range->ns == NULL) ? MiniKonohaTokenMatrix : NameSpace_tokenMatrix(kctx, range->ns),
+		.cfuncItems   = (range->ns == NULL) ? MiniKonohaTokenMatrix : kNameSpace_tokenMatrix(kctx, range->ns),
 	};
 	INIT_GCSTACK();
 	kString *preparedString = KLIB new_kString(kctx, tenv.source, tenv.sourceLength, SPOL_ASCII|SPOL_TEXT|SPOL_NOPOOL);
@@ -657,23 +631,6 @@ static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, Token
 }
 
 static kbool_t TokenRange_resolved(KonohaContext *kctx, TokenRange *range, TokenRange *sourceRange);
-
-//static void check(KonohaContext *kctx, kArray *a, int as, int ae, kArray *b, int bs, int be)
-//{
-//	DBG_ASSERT(ae-as==be-bs);
-//	int i;
-//	for(i = 0; i < ae-as; i++) {
-//		kToken *tkA = a->tokenItems[as+i];
-//		kToken *tkB = b->tokenItems[bs+i];
-//		dumpToken(kctx, tkA, i);
-//		dumpToken(kctx, tkB, i);
-//		DBG_ASSERT(tkA->unresolvedTokenType == tkB->resolvedSymbol);
-//		if(IS_Array(tkA->subTokenList)) {
-//			DBG_ASSERT(IS_Array(tkB->subTokenList));
-//			check(kctx, tkA->subTokenList, 0, kArray_size(tkA->subTokenList), tkB->subTokenList, 0, kArray_size(tkB->subTokenList));
-//		}
-//	}
-//}
 
 static void kNameSpace_parseSugarRule2(KonohaContext *kctx, kNameSpace *ns, const char *rule, kfileline_t uline, kArray *ruleList)
 {

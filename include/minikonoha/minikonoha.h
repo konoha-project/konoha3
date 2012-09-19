@@ -1188,6 +1188,36 @@ struct kFuncVar {
 };
 
 /* ------------------------------------------------------------------------ */
+/* NameSpace */
+
+struct kNameSpaceVar {
+	KonohaObjectHeader h;
+	uintptr_t          syntaxOption;
+	kpackage_t packageId;  	kpackage_t packageDomain;
+	kNameSpace                        *parentNULL;
+	KUtilsGrowingArray                 constTable;        // const variable
+	size_t                             sortedConstTable;
+	kObject                           *globalObjectNULL;
+	kArray                            *methodList;   // default K_EMPTYARRAY
+	size_t                             sortedMethodList;
+	// the below references are defined in sugar
+	void                              *tokenMatrix;
+	KUtilsHashMap                     *syntaxMapNN;
+};
+
+#define kNameSpace_TypeInference                     ((uintptr_t)(1<<0))
+#define kNameSpace_ImplicitField                     ((uintptr_t)(1<<1))
+#define kNameSpace_TransparentGlobalVariable            ((uintptr_t)(1<<2))
+
+#define kNameSpace_allowedTypeInference(ns)   (TFLAG_is(uintptr_t, (ns)->syntaxOption, kNameSpace_TypeInference))
+#define kNameSpace_setTypeInference(ns, B)    TFLAG_set(uintptr_t, (ns)->syntaxOption, kNameSpace_TypeInference, B)
+
+#define kNameSpace_allowedImplicitFieldAccess(ns)      1/*(TFLAG_is(uintptr_t, (ns)->syntaxOption, kNameSpace_ImplicitField))*/
+
+#define kNameSpace_allowedTransparentGlobalVariable(ns)   (TFLAG_is(uintptr_t, (ns)->syntaxOption, kNameSpace_TransparentGlobalVariable))
+#define kNameSpace_setTransparentGlobalVariable(ns, B)    TFLAG_set(uintptr_t, ((kNameSpaceVar*)ns)->syntaxOption, kNameSpace_TransparentGlobalVariable, B)
+
+/* ------------------------------------------------------------------------ */
 /* System */
 
 #define IS_System(o)              (O_typeId(o) == TY_System)

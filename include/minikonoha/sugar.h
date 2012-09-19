@@ -163,6 +163,9 @@ struct TokenizerEnv {
 	kString            *preparedString;
 };
 
+#define SIZEOF_TOKENMATRIX   (sizeof(void*) * KCHAR_MAX * 2)
+
+
 /******
 // ParseToken
 #define VAR_ParseToken(TK, STR, UL) \
@@ -277,35 +280,6 @@ typedef struct KDEFINE_SYNTAX {
 } KDEFINE_SYNTAX;
 
 #define new_SugarFunc(F)     new_(Func, KLIB new_kMethod(kctx, 0, 0, 0, F))
-
-#define SIZEOF_TOKENMATRIX (KCHAR_MAX * sizeof(TokenizeFunc) * 2)
-
-struct kNameSpaceVar {
-	KonohaObjectHeader h;
-	uintptr_t          syntaxOption;
-	kpackage_t packageId;  	kpackage_t packageDomain;
-	kNameSpace                        *parentNULL;
-	const TokenizeFunc                *tokenMatrix;
-	KUtilsHashMap                     *syntaxMapNN;
-
-	KUtilsGrowingArray                 constTable;        // const variable
-	size_t                             sortedConstTable;
-	kObject                           *globalObjectNULL;
-	kArray                            *methodList;   // default K_EMPTYARRAY
-	size_t                             sortedMethodList;
-};
-
-#define kNameSpace_TypeInference                     ((uintptr_t)(1<<0))
-#define kNameSpace_ImplicitField                     ((uintptr_t)(1<<1))
-#define kNameSpace_TransparentGlobalVariable            ((uintptr_t)(1<<2))
-
-#define kNameSpace_allowedTypeInference(ns)   (TFLAG_is(uintptr_t, (ns)->syntaxOption, kNameSpace_TypeInference))
-#define kNameSpace_setTypeInference(ns, B)    TFLAG_set(uintptr_t, (ns)->syntaxOption, kNameSpace_TypeInference, B)
-
-#define kNameSpace_allowedImplicitFieldAccess(ns)      1/*(TFLAG_is(uintptr_t, (ns)->syntaxOption, kNameSpace_ImplicitField))*/
-
-#define kNameSpace_allowedTransparentGlobalVariable(ns)   (TFLAG_is(uintptr_t, (ns)->syntaxOption, kNameSpace_TransparentGlobalVariable))
-#define kNameSpace_setTransparentGlobalVariable(ns, B)    TFLAG_set(uintptr_t, ((kNameSpaceVar*)ns)->syntaxOption, kNameSpace_TransparentGlobalVariable, B)
 
 /* Token */
 struct kTokenVar {
