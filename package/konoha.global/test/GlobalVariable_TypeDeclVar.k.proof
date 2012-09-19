@@ -1,2 +1,2 @@
- - (error) (GlobalVariable_TypeDeclVar.k:6) an initial value is expected: var s
+ - (error) (GlobalVariable_TypeDeclVar.k:6) initial value is expected: var s
 Q.E.D.

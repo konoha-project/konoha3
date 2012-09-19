@@ -48,7 +48,7 @@ extern int verbose_code;
 extern int verbose_sugar;
 extern int verbose_gc;
 
-#include <minikonoha/platform_posix.h>
+#include <minikonoha/platform.h>
 
 // -------------------------------------------------------------------------
 // minishell
@@ -210,11 +210,19 @@ static void show_version(KonohaContext *kctx)
 
 static kbool_t konoha_shell(KonohaContext* konoha)
 {
+#ifdef __MINGW32__
+	void *handler = (void *)LoadLibraryA((LPCTSTR)"libreadline" K_OSDLLEXT);
+	void *f = (handler != NULL) ? (void *)GetProcAddress(handler, "readline") : NULL;
+	kreadline = (f != NULL) ? (char* (*)(const char*))f : readline;
+	f = (handler != NULL) ? (void *)GetProcAddress(handler, "add_history") : NULL;	
+	kadd_history = (f != NULL) ? (int (*)(const char*))f : add_history;
+#else
 	void *handler = dlopen("libreadline" K_OSDLLEXT, RTLD_LAZY);
 	void *f = (handler != NULL) ? dlsym(handler, "readline") : NULL;
 	kreadline = (f != NULL) ? (char* (*)(const char*))f : readline;
 	f = (handler != NULL) ? dlsym(handler, "add_history") : NULL;
 	kadd_history = (f != NULL) ? (int (*)(const char*))f : add_history;
+#endif
 	show_version(konoha);
 	shell(konoha);
 	return true;

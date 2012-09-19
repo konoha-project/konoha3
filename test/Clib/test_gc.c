@@ -31,7 +31,7 @@ extern "C" {
 #endif
 
 extern int verbose_debug;
-#include <minikonoha/platform_posix.h>
+#include <minikonoha/platform.h>
 
 typedef struct Dummy {
     int x;

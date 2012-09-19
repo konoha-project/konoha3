@@ -43,9 +43,6 @@
 extern "C" {
 #endif
 
-#ifndef SOCKET_GLUE_H_
-#define SOCKET_GLUE_H_
-
 #define WORD2INT(val) (sizeof(val)==8) ? (val&0x7FFFFFFF)|((val>>32)&0x80000000) : val
 
 /*

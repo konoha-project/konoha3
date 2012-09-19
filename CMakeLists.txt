@@ -173,6 +173,7 @@ SET(CMAKE_EXTRA_INCLUDE_FILES)
 
 check_include_files(dlfcn.h HAVE_DLFCN_H)
 check_include_files(iconv.h HAVE_ICONV_H)
+check_include_files(syslog.h HAVE_SYSLOG_H)
 
 set(_HEADERS stdio.h stdlib.h string.h ctype.h)
 if(UNIX)

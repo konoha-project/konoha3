@@ -27,9 +27,11 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/logger.h>
 #include <minikonoha/local.h>
-#ifndef PLATAPIFORM_KERNEL
+#ifdef HAVE_SYSLOG_H
 #include <syslog.h>
-#endif /* PLATAPIFORM_KERNEL */
+#else
+#define	LOG_INFO	6
+#endif /* HAVE_SYSLOG_H */
 /* ------------------------------------------------------------------------ */
 /* [logger] */
 

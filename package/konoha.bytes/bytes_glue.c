@@ -191,7 +191,6 @@ static KMETHOD Bytes_encodeTo(KonohaContext *kctx, KonohaStack *sfp)
 static kString *toString(KonohaContext *kctx, kBytes *ba)
 {
 	// At this point, we assuem 'ba' is null terminated.
-	DBG_ASSERT(strlen(ba->buf)+1 == ba->bytesize);
 	return KLIB new_kString(kctx, ba->buf, ba->bytesize-1, 0);
 }
 
@@ -223,7 +222,7 @@ static KMETHOD String_asBytes(KonohaContext *kctx, KonohaStack *sfp)
 	size_t size = S_size(s);
 	kBytes* ba = new_(Bytes, (size>0)?size+1:0);
 	if (size > 0) {
-		memcpy(ba->buf, s->utext, size+1); // including NUL char
+		memcpy(ba->buf, S_text(s), size+1); // including NUL char
 		DBG_ASSERT(ba->buf[S_size(s)] == '\0');
 	}
 	RETURN_(ba);

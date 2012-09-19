@@ -22,35 +22,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <stdio.h>
-#include "minikonoha/minikonoha.h"
-#include "minikonoha/gc.h"
+#ifndef PLATFORM_H_
+#define PLATFORM_H_
 
-extern int verbose_debug;
-#include <minikonoha/platform.h>
+#ifdef __MINGW32__
+#include <minikonoha/platform_mingw.h>
+#else
+#include <minikonoha/platform_posix.h>
+#endif
 
-void test_Kwb(KonohaContext *kctx)
-{
-    KUtilsGrowingArray a;
-    KUtilsWriteBuffer wb;
-    /* if we use karray as kwb, struct_size should be sizeof(char) */
-    kctx->klib->Karray_init(kctx, &a, 4);
-    kctx->klib->Kwb_init(&a, &wb);
-    kctx->klib->Kwb_write(kctx, &wb, "abcd", 4);
-    kctx->klib->Kwb_write(kctx, &wb, "abcd", 4);
-    const char *data = kctx->klib->Kwb_top(kctx, &wb, 1);
-    assert(strcmp(data, "abcdabcd") == 0);
-    kctx->klib->Kwb_free(&wb);
-    kctx->klib->Karray_free(kctx, &a);
-}
-
-int main(int argc, const char *argv[])
-{
-    KonohaContext* konoha = konoha_open(KonohaUtils_getDefaultPlatformApi());
-    int i;
-    for (i = 0; i < 100; ++i) {
-        test_Kwb(konoha);
-    }
-    konoha_close(konoha);
-    return 0;
-}
+#endif /* PLATFORM_H_ */

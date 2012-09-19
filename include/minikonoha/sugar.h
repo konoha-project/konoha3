@@ -118,7 +118,7 @@ extern "C" {
 #define KPACKLIB(N, V) \
 	.libname = N, .libversion = V
 
-typedef enum {  Nope, isFirstTime } isFirstTime_t;
+typedef enum {  Nope, FirstTime } isFirstTime_t;
 
 struct KonohaPackageHandlerVar {
 	int konoha_checksum;
