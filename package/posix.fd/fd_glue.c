@@ -464,6 +464,7 @@ static KMETHOD System_stat(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	else {
 		// TODO: throw
+		RETURN_(KLIB Knull(kctx, O_ct(sfp[K_RTNIDX].o)));
 	}
 	RETURN_(stat);
 }
