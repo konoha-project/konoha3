@@ -47,7 +47,7 @@ void main() {
 	int i = 0;
 	p(a.getSize());
 	while (i < a.getSize()) {
-		p(a[i].dump());
+		p(a[i]);
 		i += 1;
 	}
 }
