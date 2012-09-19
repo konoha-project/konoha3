@@ -1,0 +1,15 @@
+language: c
+compiler:
+  - clang
+  - gcc
+
+before_install:
+  - "sudo apt-get install cmake"
+
+before_script:
+  - "mkdir -p build"
+  - "cd build"
+  - "cmake ../"
+  - "make"
+
+script: "make test"
