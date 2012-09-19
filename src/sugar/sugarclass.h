@@ -30,6 +30,49 @@
 
 #define kNameSpace_sizeConstTable(ns)    (ns->constTable.bytesize / sizeof(KUtilsKeyValue))
 
+static void syntaxMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
+{
+	SugarSyntax *syn = (SugarSyntax*)p->unboxValue;
+	BEGIN_REFTRACE(6);
+	KREFTRACEn(syn->syntaxRuleNULL);
+	size_t i;
+	for(i = 0; i < SUGARFUNC_SIZE; i++) {
+		KREFTRACEn(syn->sugarFuncTable[i]);
+	}
+	END_REFTRACE();
+}
+
+static void kNameSpace_reftraceSugarExtension(KonohaContext *kctx, kNameSpace *ns)
+{
+	if(ns->syntaxMapNN != NULL) {
+		KLIB Kmap_each(kctx, ns->syntaxMapNN, NULL, syntaxMap_reftrace);
+	}
+	if(ns->tokenMatrix != NULL) {
+		BEGIN_REFTRACE(KCHAR_MAX);
+		size_t i;
+		kFunc** items = ((kFunc**)ns->tokenMatrix) + KCHAR_MAX;
+		for(i = 0; i < KCHAR_MAX; i++) {
+			KREFTRACEn(items[i]);
+		}
+		END_REFTRACE();
+	}
+}
+
+static void syntaxMap_free(KonohaContext *kctx, void *p)
+{
+	KFREE(p, sizeof(SugarSyntax));
+}
+
+static void kNameSpace_freeSugarExtension(KonohaContext *kctx, kNameSpaceVar *ns)
+{
+	if(ns->syntaxMapNN != NULL) {
+		KLIB Kmap_free(kctx, ns->syntaxMapNN, syntaxMap_free);
+	}
+	if(ns->tokenMatrix != NULL) {
+		KFREE((void*)ns->tokenMatrix, SIZEOF_TOKENMATRIX);
+	}
+}
+
 static void NameSpace_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kNameSpaceVar *ns = (kNameSpaceVar*)o;
@@ -44,24 +87,10 @@ static void NameSpace_init(KonohaContext *kctx, kObject *o, void *conf)
 	//KINITv(ns->scriptObject, KLIB Knull(kctx, CT_System));
 }
 
-static void syntaxMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
-{
-	SugarSyntax *syn = (SugarSyntax*)p->unboxValue;
-	BEGIN_REFTRACE(6);
-	KREFTRACEn(syn->syntaxRuleNULL);
-	size_t i;
-	for(i = 0; i < SUGARFUNC_SIZE; i++) {
-		KREFTRACEn(syn->sugarFuncTable[i]);
-	}
-	END_REFTRACE();
-}
-
 static void NameSpace_reftrace(KonohaContext *kctx, kObject *o)
 {
 	kNameSpace *ns = (kNameSpace*)o;
-	if(ns->syntaxMapNN != NULL) {
-		KLIB Kmap_each(kctx, ns->syntaxMapNN, NULL, syntaxMap_reftrace);
-	}
+	kNameSpace_reftraceSugarExtension(kctx, ns);
 	size_t i, size = kNameSpace_sizeConstTable(ns);
 	BEGIN_REFTRACE(size+3);
 	for(i = 0; i < size; i++) {
@@ -75,20 +104,10 @@ static void NameSpace_reftrace(KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
-static void syntaxMap_free(KonohaContext *kctx, void *p)
-{
-	KFREE(p, sizeof(SugarSyntax));
-}
-
 static void NameSpace_free(KonohaContext *kctx, kObject *o)
 {
 	kNameSpaceVar *ns = (kNameSpaceVar*)o;
-	if(ns->syntaxMapNN != NULL) {
-		KLIB Kmap_free(kctx, ns->syntaxMapNN, syntaxMap_free);
-	}
-	if(ns->tokenMatrix != NULL) {
-		KFREE((void*)ns->tokenMatrix, SIZEOF_TOKENMATRIX);
-	}
+	kNameSpace_freeSugarExtension(kctx, ns);
 	KLIB Karray_free(kctx, &ns->constTable);
 }
 

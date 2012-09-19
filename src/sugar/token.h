@@ -485,7 +485,7 @@ static const TokenizeFunc *kNameSpace_tokenMatrix(KonohaContext *kctx, kNameSpac
 	return (TokenizeFunc*)ns->tokenMatrix;
 }
 
-static kFunc **NameSpace_tokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns)
+static kFunc **kNameSpace_tokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns)
 {
 	kFunc **funcMatrix = (kFunc**)kNameSpace_tokenMatrix(kctx, ns);
 	return funcMatrix + KCHAR_MAX;
@@ -499,7 +499,7 @@ static void kNameSpace_setTokenizeFunc(KonohaContext *kctx, kNameSpace *ns, int 
 		funcMatrix[kchar] = cfunc;
 	}
 	else {
-		kFunc ** funcMatrix = NameSpace_tokenFuncMatrix(kctx, ns);
+		kFunc ** funcMatrix = kNameSpace_tokenFuncMatrix(kctx, ns);
 		if(funcMatrix[kchar] == NULL) {
 			KINITp(ns, funcMatrix[kchar], funcTokenize);
 		}
@@ -536,7 +536,7 @@ static void TokenRange_tokenize(KonohaContext *kctx, TokenRange *range, const ch
 	PUSH_GCSTACK(preparedString);
 	tenv.preparedString = preparedString;
 	if(range->ns != NULL) {
-		tenv.funcItems = NameSpace_tokenFuncMatrix(kctx, range->ns);
+		tenv.funcItems = kNameSpace_tokenFuncMatrix(kctx, range->ns);
 	}
 	tokenize(kctx, &tenv);
 	TokenRange_end(kctx, range);
