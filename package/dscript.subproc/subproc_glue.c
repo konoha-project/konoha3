@@ -921,11 +921,11 @@ static int subproc_popen(KonohaContext *kctx, kString* command, kSubproc *p, int
 
 static int subproc_wait(KonohaContext *kctx, int pid, kshortflag_t flag, int timeout, int *status ) {
 
-#ifndef __APPLE__
+#if defined(__linux__)
 	__sighandler_t alarm_oldset  = SIG_ERR;
 	__sighandler_t keyInt_oldset = SIG_ERR;
 	__sighandler_t ret = SIG_ERR;
-#else
+#elif defined(__APPLE__) || defined(__NetBSD__)
 	sig_t alarm_oldset  = SIG_ERR;
 	sig_t keyInt_oldset = SIG_ERR;
 	sig_t ret = SIG_ERR;
@@ -1059,7 +1059,13 @@ static void clearFd(pfd_t *p) {
 
 // for poll
 static int getPidStatus(int pid, int *status) {
+#if defined(__NetBSD__)
+#define WCONTINUED	0
+#endif
 	return waitpid(pid, status, WNOHANG | WUNTRACED | WCONTINUED);
+#if defined(__NetBSD__)
+#undef WCONTINUED
+#endif
 }
 
 // for Subproc_free & fg & exec & communicate & restart
@@ -1216,9 +1222,9 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 			kString *s = sfp[1].asString;
 			// The measure against panic,
 			// if "Broken Pipe" is detected at the time of writing.
-#ifndef __APPLE__
+#if defined(__linux__)
 			__sighandler_t oldset = signal(SIGPIPE, SIG_IGN);
-#else
+#elif defined(__APPLE__) || defined(__NetBSD__)
 			sig_t oldset = signal(SIGPIPE, SIG_IGN);
 #endif
 			if(fwrite(S_text(s), sizeof(char), S_size(s), sp->wfp) > 0) {
