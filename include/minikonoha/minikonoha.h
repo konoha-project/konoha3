@@ -555,8 +555,8 @@ struct KonohaRuntimeVar {
 	kmutex_t          *filepackMutex;
 	kArray                   *fileidList;    // file, http://
 	KUtilsHashMap            *fileidMapNN;   //
-	kArray                   *packList;
-	KUtilsHashMap            *packMapNN;
+	kArray                   *packageIdList;
+	KUtilsHashMap            *packageIdMapNN;
 	KUtilsHashMap            *packageMapNO;
 
 

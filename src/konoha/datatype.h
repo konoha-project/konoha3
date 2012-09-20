@@ -1003,8 +1003,8 @@ static void KonohaRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	share->longClassNameMapNN = KLIB Kmap_init(kctx, 0);
 	KINITv(share->fileidList, new_(StringArray, 8));
 	share->fileidMapNN = KLIB Kmap_init(kctx, 0);
-	KINITv(share->packList, new_(StringArray, 8));
-	share->packMapNN = KLIB Kmap_init(kctx, 0);
+	KINITv(share->packageIdList, new_(StringArray, 8));
+	share->packageIdMapNN = KLIB Kmap_init(kctx, 0);
 	share->packageMapNO = KLIB Kmap_init(kctx, 0);
 
 	KINITv(share->symbolList, new_(StringArray, 32));
@@ -1073,7 +1073,7 @@ static void KonohaRuntime_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 	KREFTRACEv(share->emptyString);
 	KREFTRACEv(share->emptyArray);
 	KREFTRACEv(share->fileidList);
-	KREFTRACEv(share->packList);
+	KREFTRACEv(share->packageIdList);
 	KREFTRACEv(share->symbolList);
 	KREFTRACEv(share->paramList);
 	KREFTRACEv(share->paramdomList);
@@ -1102,7 +1102,7 @@ static void KonohaRuntime_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	KonohaRuntimeVar *share = (KonohaRuntimeVar*)ctx->share;
 	KLIB Kmap_free(kctx, share->longClassNameMapNN, NULL);
 	KLIB Kmap_free(kctx, share->fileidMapNN, NULL);
-	KLIB Kmap_free(kctx, share->packMapNN, NULL);
+	KLIB Kmap_free(kctx, share->packageIdMapNN, NULL);
 	KLIB Kmap_free(kctx, share->packageMapNO, packageMap_free);
 	KLIB Kmap_free(kctx, share->symbolMapNN, NULL);
 	KLIB Kmap_free(kctx, share->paramMapNN, NULL);

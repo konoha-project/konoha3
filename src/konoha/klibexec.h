@@ -347,7 +347,7 @@ static kpackage_t KpackageId(KonohaContext *kctx, const char *name, size_t len, 
 {
 	uintptr_t hcode = strhash(name, len);
 	KLock(kctx->share->filepackMutex);
-	kpackage_t packid = Kmap_getcode(kctx, kctx->share->packMapNN, kctx->share->packList, name, len, hcode, spol | SPOL_ASCII, def);
+	kpackage_t packid = Kmap_getcode(kctx, kctx->share->packageIdMapNN, kctx->share->packageIdList, name, len, hcode, spol | SPOL_ASCII, def);
 	KUnlock(kctx->share->filepackMutex);
 	return packid;
 }
