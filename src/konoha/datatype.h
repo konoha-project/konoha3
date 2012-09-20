@@ -1005,9 +1005,10 @@ static void KonohaRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	share->fileidMapNN = KLIB Kmap_init(kctx, 0);
 	KINITv(share->packList, new_(StringArray, 8));
 	share->packMapNN = KLIB Kmap_init(kctx, 0);
+	share->packageMapNO = KLIB Kmap_init(kctx, 0);
+
 	KINITv(share->symbolList, new_(StringArray, 32));
 	share->symbolMapNN = KLIB Kmap_init(kctx, 0);
-
 	share->paramMapNN = KLIB Kmap_init(kctx, 0);
 	KINITv(share->paramList, new_(Array, 32));
 	share->paramdomMapNN = KLIB Kmap_init(kctx, 0);
@@ -1038,6 +1039,14 @@ static void constPoolMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, vo
 	END_REFTRACE();
 }
 
+static void packageMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
+{
+	KonohaPackage *pack = (KonohaPackage*)p->unboxValue;
+	BEGIN_REFTRACE(1);
+	KREFTRACEn(pack->packageNameSpace);
+	END_REFTRACE();
+}
+
 static void KonohaRuntime_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	KonohaRuntime *share = ctx->share;
@@ -1056,6 +1065,7 @@ static void KonohaRuntime_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 			KLIB Kmap_each(kctx, ct->constPoolMapNO, NULL, constPoolMap_reftrace);
 		}
 	}
+	KLIB Kmap_each(kctx, share->packageMapNO, NULL, packageMap_reftrace);
 	BEGIN_REFTRACE(10);
 	KREFTRACEv(share->constNull);
 	KREFTRACEv(share->constTrue);
@@ -1082,15 +1092,22 @@ static void KonohaRuntime_freeClassTable(KonohaContext *kctx)
 	}
 }
 
+static void packageMap_free(KonohaContext *kctx, void *p)
+{
+	KFREE(p, sizeof(KonohaPackage));
+}
+
 static void KonohaRuntime_free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	KonohaRuntimeVar *share = (KonohaRuntimeVar*)ctx->share;
 	KLIB Kmap_free(kctx, share->longClassNameMapNN, NULL);
 	KLIB Kmap_free(kctx, share->fileidMapNN, NULL);
 	KLIB Kmap_free(kctx, share->packMapNN, NULL);
+	KLIB Kmap_free(kctx, share->packageMapNO, packageMap_free);
 	KLIB Kmap_free(kctx, share->symbolMapNN, NULL);
 	KLIB Kmap_free(kctx, share->paramMapNN, NULL);
 	KLIB Kmap_free(kctx, share->paramdomMapNN, NULL);
+
 	KonohaRuntime_freeClassTable(kctx);
 	KLIB Karray_free(kctx, &share->classTable);
 

@@ -557,6 +557,8 @@ struct KonohaRuntimeVar {
 	KUtilsHashMap            *fileidMapNN;   //
 	kArray                   *packList;
 	KUtilsHashMap            *packMapNN;
+	KUtilsHashMap            *packageMapNO;
+
 
 	kmutex_t          *symbolMutex;
 	kArray                   *symbolList;  // NAME, Name, INT_MAX Int_MAX

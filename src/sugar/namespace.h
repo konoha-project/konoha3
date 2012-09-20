@@ -962,12 +962,16 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackage_t packageId,
 
 static KonohaPackage *getPackageNULL(KonohaContext *kctx, kpackage_t packageId, kfileline_t pline)
 {
-	KonohaPackage *pack = (KonohaPackage*)map_getu(kctx, kmodsugar->packageMapNO, packageId, uNULL);
+	KLock(kctx->share->filepackMutex);
+	KonohaPackage *pack = (KonohaPackage*)map_getu(kctx, kctx->share->packageMapNO, packageId, uNULL);
+	KUnlock(kctx->share->filepackMutex);
 	isFirstTime_t flag = FirstTime;
 	if(pack == NULL) {
 		pack = loadPackageNULL(kctx, packageId, pline);
 		if(pack == NULL) return NULL;
-		map_addu(kctx, kmodsugar->packageMapNO, packageId, (uintptr_t)pack);
+		KLock(kctx->share->filepackMutex);
+		map_addu(kctx, kctx->share->packageMapNO, packageId, (uintptr_t)pack);
+		KUnlock(kctx->share->filepackMutex);
 		flag = Nope;
 	}
 	if(pack->packageHandler != NULL && pack->packageHandler->setupPackage != NULL) {

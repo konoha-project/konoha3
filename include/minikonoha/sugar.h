@@ -213,7 +213,6 @@ struct SugarSyntaxVar {
 	int lastLoadedPackageId;
 };
 
-
 #define PatternMatch_(NAME)    .PatternMatch   = PatternMatch_##NAME
 #define ParseExpr_(NAME)       .ParseExpr      = ParseExpr_##NAME
 #define TopStmtTyCheck_(NAME)  .TopStmtTyCheck = StmtTyCheck_##NAME
@@ -483,9 +482,6 @@ typedef struct {
 	KonohaClass *cBlock;
 	KonohaClass *cGamma;
 	KonohaClass *cTokenArray;
-
-	kArray          *packageList;
-	KUtilsHashMap   *packageMapNO;
 
 	TokenRange* (*new_TokenListRange)(KonohaContext *, kNameSpace *ns, kArray *tokenList, TokenRange *bufRange);
 	TokenRange* (*new_TokenStackRange)(KonohaContext *, TokenRange *range, TokenRange *bufRange);
