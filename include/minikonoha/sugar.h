@@ -109,39 +109,7 @@ extern "C" {
 #define FN_this      FN_("this")
 #define KW_MethodDeclPattern    (((ksymbol_t)KW_return)|KW_PATTERN) /*$Method*/
 
-#define kflag_clear(flag)  (flag) = 0
-#define K_CHECKSUM 1
-
-#define KPACKNAME(N, V) \
-	.name = N, .version = V, .konoha_checksum = K_CHECKSUM, .konoha_revision = K_REVISION
-
-#define KPACKLIB(N, V) \
-	.libname = N, .libversion = V
-
-typedef enum {  Nope, FirstTime } isFirstTime_t;
-
-struct KonohaPackageHandlerVar {
-	int konoha_checksum;
-	const char *name;
-	const char *version;
-	const char *libname;
-	const char *libversion;
-	const char *note;
-	kbool_t (*initPackage)   (KonohaContext *kctx, kNameSpace *, int, const char**, kfileline_t);
-	kbool_t (*setupPackage)  (KonohaContext *kctx, kNameSpace *, isFirstTime_t, kfileline_t);
-	kbool_t (*initNameSpace) (KonohaContext *kctx, kNameSpace *, kNameSpace *, kfileline_t);
-	kbool_t (*setupNameSpace)(KonohaContext *kctx, kNameSpace *, kNameSpace *, kfileline_t);
-	int konoha_revision;
-};
-
-typedef struct KonohaPackageVar KonohaPackage;
-
-struct KonohaPackageVar {
-	kpackage_t                   packageId;
-	kNameSpace                  *packageNameSpace;
-	KonohaPackageHandler        *packageHandler;
-	kfileline_t                  exportScriptUri;
-};
+//#define kflag_clear(flag)  (flag) = 0
 
 // NameSpace_syntaxOption
 
