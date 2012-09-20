@@ -354,9 +354,9 @@ static KMETHOD ExprTyCheck_assign(KonohaContext *kctx, KonohaStack *sfp)
 			DBG_ASSERT(IS_Method(mtd));
 			if(MN_isGETTER(mtd->mn)) {
 				ktype_t cid = leftHandExpr->cons->exprItems[1]->ty;
-				ktype_t paramType = leftHandExpr->ty; //CT_(cid)->realtype(kctx, CT_(cid), CT_(leftHandExpr->ty));
+				ktype_t paramType = leftHandExpr->ty;
 				ksymbol_t sym = SYM_UNMASK(mtd->mn);
-				kMethod *foundMethod = KLIB kNameSpace_getSetterMethodNULL(kctx, ns, cid, sym, paramType);
+				kMethod *foundMethod = KLIB kNameSpace_getSetterMethodNULL(kctx, ns, cid, sym, paramType);  // FIXME
 				if(foundMethod != NULL) {
 					KSETv(leftHandExpr->cons, leftHandExpr->cons->methodItems[0], foundMethod);
 					KLIB kArray_add(kctx, leftHandExpr->cons, rightHandExpr);
@@ -453,14 +453,6 @@ static kExpr* new_GetterExpr(KonohaContext *kctx, kToken *tkU, kMethod *mtd, kEx
 	return (kExpr*)expr1;
 }
 
-static kObject *kNameSpace_getSymbolValueNULL(KonohaContext *kctx, kNameSpace *ns, const char *key, size_t klen)
-{
-	if(key[0] == 'K' && (key[1] == 0 || strcmp("Konoha", key) == 0)) {
-		return (kObject*)ns;
-	}
-	return NULL;
-}
-
 static kExpr* kStmt_tyCheckVariableNULL(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, ktype_t reqty)
 {
 	DBG_ASSERT(expr->ty == TY_var);
@@ -517,10 +509,6 @@ static kExpr* kStmt_tyCheckVariableNULL(KonohaContext *kctx, kStmt *stmt, kExpr 
 			}
 			return expr;
 		}
-	}
-	kObject *v = kNameSpace_getSymbolValueNULL(kctx, ns, S_text(tk->text), S_size(tk->text));
-	if(v != NULL) {
-		return SUGAR kExpr_setConstValue(kctx, expr, O_typeId(v), v);
 	}
 	return NULL;
 }
