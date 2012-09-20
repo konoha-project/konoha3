@@ -838,7 +838,8 @@ static KMETHOD String_substr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s0 = sfp[0].asString;
 	size_t start = S_index(s0, sfp[1].intValue);
-	kint_t length = S_length(s0);
+	start = (((kint_t)S_length(s0)) < start) ? S_length(s0) : start;
+	kint_t length = S_length(s0) - start;
 	RETURN_(S_substring(kctx, sfp, s0, start, length));
 }
 
@@ -939,9 +940,10 @@ static KMETHOD String_slice(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s0 = sfp[0].asString;
 	kint_t start = S_index(s0, sfp[1].intValue);
+	start = (((kint_t)S_length(s0)) < start) ? S_length(s0) : start;
 	kint_t end = S_index(s0, sfp[2].intValue);
-	end = check_index(kctx, end, S_length(s0), sfp[K_RTNIDX].uline);
-	size_t length = end - start;
+	end = (((kint_t)S_length(s0)) < end) ? S_length(s0) : end;
+	size_t length = (end < start) ? 0 : end - start;
 	RETURN_(S_substring(kctx, sfp, s0, start, length));
 }
 
