@@ -38,7 +38,7 @@ extern "C" {
 #define K_OSDLLEXT        ".dylib"
 #elif defined(__linux__)
 #define K_OSDLLEXT        ".so"
-#elif degined(__MINGW32__)
+#elif defined(__MINGW32__)
 #define K_OSDLLEXT        ".dll"
 #endif
 #endif
