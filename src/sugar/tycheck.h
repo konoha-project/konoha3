@@ -220,8 +220,11 @@ static kbool_t SugarSyntax_tyCheckStmt(KonohaContext *kctx, SugarSyntax *syn, kS
 			}
 			for(; index >= 0; index--) {
 				kbool_t result = callStmtTyCheckFunc(kctx, funcItems[index], &callCount, stmt, gma);
-				if(stmt->syn == NULL) return result;
-				if(stmt->build != TSTMT_UNDEFINED) return result;
+				if(Stmt_isDone(stmt)) return true;
+				if(Stmt_isERR(stmt)) return false;
+				if(stmt->build != TSTMT_UNDEFINED) {
+					return true;
+				}
 			}
 		}
 		if(syn->parentSyntaxNULL == NULL) break;
