@@ -98,15 +98,6 @@ static KMETHOD System_chdir(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(ret);
 }
 
-static KMETHOD System_fchdir(KonohaContext *kctx, KonohaStack *sfp)
-{
-	int ch = fchdir(sfp[1].intValue);
-	if(ch == -1) {
-		// TODO: throw
-	}
-	RETURNi_(ch);
-}
-
 static KMETHOD System_chroot(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s = sfp[1].asString;
@@ -314,7 +305,6 @@ static kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public|_Static, _F(System_getpgid), TY_int, TY_System, MN_("getpgid"), 1, TY_int, FN_("pid"),
 		_Public|_Static, _F(System_setpgid), TY_int, TY_System, MN_("setpgid"), 2, TY_int, FN_("pid"), TY_int, FN_("pgid"),
 		_Public|_Static, _F(System_chdir), TY_int, TY_System, MN_("chdir"), 1, TY_String, FN_("pathname"),
-		_Public|_Static, _F(System_fchdir), TY_int, TY_System, MN_("fchdir"), 1, TY_int, FN_("fd"),
 		_Public|_Static, _F(System_chroot), TY_int, TY_System, MN_("chroot"), 1, TY_String, FN_("pathname"),
 		_Public|_Static, _F(System_getpriority), TY_int, TY_System, MN_("getpriority"), 2, TY_int, FN_("which"), TY_int, FN_("who"),
 		_Public|_Static, _F(System_setpriority), TY_int, TY_System, MN_("setpriority"), 3, TY_int, FN_("which"), TY_int, FN_("who"), TY_int, FN_("priority"),
@@ -339,6 +329,10 @@ static kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		{_KVi(SIGINT)},
 		{_KVi(SIGABRT)},
 		{_KVi(SIGKILL)},
+		/*for System.setpriority*/
+		{_KVi(PRIO_PROCESS)},
+		{_KVi(PRIO_PGRP)},
+		{_KVi(PRIO_USER)},
 		{}
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(intData), 0);

@@ -619,6 +619,7 @@ static KMETHOD SockAddr_new (KonohaContext *kctx, KonohaStack *sfp)
 
 #define _Public   kMethod_Public
 #define _Const    kMethod_Const
+#define _Static   kMethod_Static
 #define _Coercion kMethod_Coercion
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
@@ -626,6 +627,8 @@ static KMETHOD SockAddr_new (KonohaContext *kctx, KonohaStack *sfp)
 #define CT_SockAddr         cSockAddr
 #define TY_SockAddr         cSockAddr->typeId
 #define IS_SockAddr(O)      ((O)->h.ct == CT_SockAddr)
+
+#define _KVi(T) #T, TY_int, T
 
 static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
@@ -641,30 +644,30 @@ static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	ktype_t TY_intArray = CT_IntArray->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Im, _F(System_accept), TY_int, TY_System, MN_("accept"), 2, TY_int, FN_("fd"), TY_SockAddr, FN_("sockaddr"),
-		_Public|_Const|_Im, _F(System_bind), TY_int, TY_System, MN_("bind"), 4, TY_int, FN_("fd"), TY_String, FN_("srcIP"), TY_int, FN_("srcPort"), TY_int, FN_("family"),
-		_Public|_Const|_Im, _F(System_close), TY_int, TY_System, MN_("close"), 1, TY_int, FN_("fd"),
-		_Public|_Const|_Im, _F(System_connect), TY_int, TY_System, MN_("connect"), 4, TY_int, FN_("fd"), TY_String, FN_("dstIP"), TY_int, FN_("dstPort"), TY_int, FN_("family"),
-		_Public|_Const|_Im, _F(System_listen), TY_int, TY_System, MN_("listen"), 2, TY_int, FN_("fd"), TY_int, FN_("backlog"),
-//		_Public|_Const|_Im, _F(System_getsockname), TY_Map TY_System, MN_("getsockname"),1, TY_int, FN_("fd"),
-		_Public|_Const|_Im, _F(System_getsockopt), TY_int, TY_System, MN_("getsockopt"), 2, TY_int, FN_("fd"), TY_int, FN_("opt"),
-		_Public|_Const|_Im, _F(System_setsockopt), TY_int, TY_System, MN_("setsockopt"), 3, TY_int, FN_("fd"), TY_int, FN_("opt"), TY_int, FN_("value"),
-//		_Public|_Const|_Im, _F(System_getpeername), TY_Map, TY_System, MN_("getpeername"), 1, TY_int, FN_("fd"),
-		_Public, _F(System_select), TY_int, TY_System, MN_("select"), 5, TY_intArray, FN_("readsocks"), TY_intArray, FN_("writesocks"), TY_intArray, FN_("exceptsocks"), TY_int, FN_("timeoutSec"), TY_int, FN_("timeoutUSec"),
-		_Public|_Const|_Im, _F(System_shutdown), TY_int, TY_System, MN_("shutdown"), 2, TY_int, FN_("fd"), TY_int, FN_("how"),
-		_Public|_Const|_Im, _F(System_sockatmark), TY_int, TY_System, MN_("sockatmark"), 1, TY_int, FN_("fd"),
-		_Public|_Const|_Im, _F(System_socket), TY_int, TY_System, MN_("socket"), 3, TY_int, FN_("family"), TY_int, FN_("type"), TY_int, FN_("protocol"),
-		_Public|_Const|_Im, _F(System_socketpair), TY_int, TY_System, MN_("socketpair"), 4, TY_int, FN_("family"), TY_int, FN_("type"), TY_int, FN_("protocol"), TY_intArray, FN_("pairsock"),
+		_Public|_Static|_Const|_Im, _F(System_accept), TY_int, TY_System, MN_("accept"), 2, TY_int, FN_("fd"), TY_SockAddr, FN_("sockaddr"),
+		_Public|_Static|_Const|_Im, _F(System_bind), TY_int, TY_System, MN_("bind"), 4, TY_int, FN_("fd"), TY_String, FN_("srcIP"), TY_int, FN_("srcPort"), TY_int, FN_("family"),
+		_Public|_Static|_Const|_Im, _F(System_close), TY_int, TY_System, MN_("close"), 1, TY_int, FN_("fd"),
+		_Public|_Static|_Const|_Im, _F(System_connect), TY_int, TY_System, MN_("connect"), 4, TY_int, FN_("fd"), TY_String, FN_("dstIP"), TY_int, FN_("dstPort"), TY_int, FN_("family"),
+		_Public|_Static|_Const|_Im, _F(System_listen), TY_int, TY_System, MN_("listen"), 2, TY_int, FN_("fd"), TY_int, FN_("backlog"),
+//		_Public|_Static|_Const|_Im, _F(System_getsockname), TY_Map TY_System, MN_("getsockname"),1, TY_int, FN_("fd"),
+		_Public|_Static|_Const|_Im, _F(System_getsockopt), TY_int, TY_System, MN_("getsockopt"), 2, TY_int, FN_("fd"), TY_int, FN_("opt"),
+		_Public|_Static|_Const|_Im, _F(System_setsockopt), TY_int, TY_System, MN_("setsockopt"), 3, TY_int, FN_("fd"), TY_int, FN_("opt"), TY_int, FN_("value"),
+//		_Public|_Static|_Const|_Im, _F(System_getpeername), TY_Map, TY_System, MN_("getpeername"), 1, TY_int, FN_("fd"),
+		_Public|_Static, _F(System_select), TY_int, TY_System, MN_("select"), 5, TY_intArray, FN_("readsocks"), TY_intArray, FN_("writesocks"), TY_intArray, FN_("exceptsocks"), TY_int, FN_("timeoutSec"), TY_int, FN_("timeoutUSec"),
+		_Public|_Static|_Const|_Im, _F(System_shutdown), TY_int, TY_System, MN_("shutdown"), 2, TY_int, FN_("fd"), TY_int, FN_("how"),
+		_Public|_Static|_Const|_Im, _F(System_sockatmark), TY_int, TY_System, MN_("sockatmark"), 1, TY_int, FN_("fd"),
+		_Public|_Static|_Const|_Im, _F(System_socket), TY_int, TY_System, MN_("socket"), 3, TY_int, FN_("family"), TY_int, FN_("type"), TY_int, FN_("protocol"),
+		_Public|_Static|_Const|_Im, _F(System_socketpair), TY_int, TY_System, MN_("socketpair"), 4, TY_int, FN_("family"), TY_int, FN_("type"), TY_int, FN_("protocol"), TY_intArray, FN_("pairsock"),
 		_Public|_Const|_Im, _F(SockAddr_new), TY_SockAddr, TY_SockAddr, MN_("new"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	if(IS_defineBytes()) {
 		KDEFINE_METHOD MethodData2[] = {
-				_Public|_Const|_Im, _F(System_sendto), TY_int, TY_System, MN_("sendto"), 6, TY_int, FN_("socket"), TY_Bytes, FN_("msg"), TY_int, FN_("flag"), TY_String, FN_("dstIP"), TY_int, FN_("dstPort"), TY_int, FN_("family"),
-				_Public|_Const|_Im, _F(System_recv), TY_int, TY_System, MN_("recv"), 3, TY_int, FN_("fd"), TY_Bytes, FN_("buf"), TY_int, FN_("flags"),
-//				_Public|_Const|_Im, _F(System_recvfrom), TY_int, TY_System, MN_("recvfrom"), 4, TY_int, FN_x, TY_Bytes, FN_y, TY_int, FN_z, TY_Map, FN_v,
-				_Public|_Const|_Im, _F(System_send), TY_int, TY_System, MN_("send"), 3, TY_int, FN_("fd"), TY_Bytes, FN_("msg"), TY_int, FN_("flags"),
+				_Public|_Static|_Const|_Im, _F(System_sendto), TY_int, TY_System, MN_("sendto"), 6, TY_int, FN_("socket"), TY_Bytes, FN_("msg"), TY_int, FN_("flag"), TY_String, FN_("dstIP"), TY_int, FN_("dstPort"), TY_int, FN_("family"),
+				_Public|_Static|_Const|_Im, _F(System_recv), TY_int, TY_System, MN_("recv"), 3, TY_int, FN_("fd"), TY_Bytes, FN_("buf"), TY_int, FN_("flags"),
+//				_Public|_Static|_Const|_Im, _F(System_recvfrom), TY_int, TY_System, MN_("recvfrom"), 4, TY_int, FN_x, TY_Bytes, FN_y, TY_int, FN_z, TY_Map, FN_v,
+				_Public|_Static|_Const|_Im, _F(System_send), TY_int, TY_System, MN_("send"), 3, TY_int, FN_("fd"), TY_Bytes, FN_("msg"), TY_int, FN_("flags"),
 				DEND,
 			};
 		KLIB kNameSpace_loadMethodData(kctx, ns, MethodData2);
@@ -673,59 +676,60 @@ static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		kreportf(InfoTag, pline, "konoha.bytes package hasn't imported. Some features are still disabled.");
 	}
 	KDEFINE_INT_CONST IntData[] = {
-			{"PF_LOCAL",TY_int, PF_LOCAL},
-			{"PF_UNIX", TY_int, PF_UNIX},
-			{"PF_INET", TY_int, PF_INET},
-			{"PF_INET6", TY_int, PF_INET6},
-			{"PF_APPLETALK", TY_int, PF_APPLETALK},
+			{_KVi(PF_LOCAL)},
+			{_KVi(PF_UNIX)},
+			{_KVi(PF_INET)},
+			{_KVi(PF_INET6)},
+			{_KVi(PF_APPLETALK)},
 #ifndef __APPLE__
-			{"PF_PACKET", TY_int, PF_PACKET},
+			{_KVi(PF_PACKET)},
 #endif
-			{"AF_LOCAL", TY_int, AF_LOCAL},
-			{"AF_UNIX", TY_int, AF_UNIX},
-			{"AF_INET", TY_int, AF_INET},
-			{"AF_INET6", TY_int, AF_INET6},
-			{"AF_APPLETALK", TY_int, AF_APPLETALK},
+			{_KVi(AF_LOCAL)},
+			{_KVi(AF_UNIX)},
+			{_KVi(AF_INET)},
+			{_KVi(AF_INET6)},
+			{_KVi(AF_APPLETALK)},
 #ifndef __APPLE__
-			{"AF_PACKET", TY_int, AF_PACKET},
+			{_KVi(AF_PACKET)},
 #endif
 			// Types of sockets
-			{"SOCK_STREAM", TY_int, SOCK_STREAM},
-			{"SOCK_DGRAM", TY_int, SOCK_DGRAM},
-			{"SOCK_RAW", TY_int, SOCK_RAW},
-			{"SOCK_RDM", TY_int, SOCK_RDM},
+			{_KVi(SOCK_STREAM)},
+			{_KVi(SOCK_DGRAM)},
+			{_KVi(SOCK_RAW)},
+			{_KVi(SOCK_RDM)},
 			// send & recv flags
-			{"MSG_OOB", TY_int, MSG_OOB},
-			{"MSG_PEEK", TY_int, MSG_PEEK},
-			{"MSG_DONTROUTE", TY_int, MSG_DONTROUTE},
-			{"MSG_OOB", TY_int, MSG_OOB},
-			{"MSG_TRUNC", TY_int, MSG_TRUNC},
-			{"MSG_DONTWAIT", TY_int, MSG_DONTWAIT},
-			{"MSG_EOR", TY_int, MSG_EOR},
-			{"MSG_WAITALL", TY_int, MSG_WAITALL},
+			{_KVi(MSG_OOB)},
+			{_KVi(MSG_PEEK)},
+			{_KVi(MSG_DONTROUTE)},
+			{_KVi(MSG_OOB)},
+			{_KVi(MSG_TRUNC)},
+			{_KVi(MSG_DONTWAIT)},
+			{_KVi(MSG_EOR)},
+			{_KVi(MSG_WAITALL)},
 #ifndef	__APPLE__
-			{"MSG_CONFIRM", TY_int, MSG_CONFIRM},
-			{"MSG_ERRQUEUE", TY_int, MSG_ERRQUEUE},
-			{"MSG_NOSIGNAL", TY_int, MSG_NOSIGNAL},
-			{"MSG_MORE", TY_int, MSG_MORE},
+			{_KVi(MSG_CONFIRM)},
+			{_KVi(MSG_ERRQUEUE)},
+			{_KVi(MSG_NOSIGNAL)},
+			{_KVi(MSG_MORE)},
 #endif
 			// socket options
-			{"SO_REUSEADDR", TY_int, SO_REUSEADDR},
-			{"SO_TYPE", TY_int, SO_TYPE},
-			{"SO_ERROR", TY_int, SO_ERROR},
-			{"SO_DONTROUTE", TY_int, SO_DONTROUTE},
-			{"SO_BROADCAST", TY_int, SO_BROADCAST},
-			{"SO_SNDBUF", TY_int, SO_SNDBUF},
-			{"SO_RCVBUF", TY_int, SO_RCVBUF},
-			{"SO_KEEPALIVE", TY_int, SO_KEEPALIVE},
-			{"SO_OOBINLINE", TY_int, SO_OOBINLINE},
+			{_KVi(SO_REUSEADDR)},
+			{_KVi(SO_TYPE)},
+			{_KVi(SO_ERROR)},
+			{_KVi(SO_DONTROUTE)},
+			{_KVi(SO_BROADCAST)},
+			{_KVi(SO_SNDBUF)},
+			{_KVi(SO_RCVBUF)},
+			{_KVi(SO_KEEPALIVE)},
+			{_KVi(SO_OOBINLINE)},
 #ifndef __APPLE__
-			{"SO_NO_CHECK", TY_int, SO_NO_CHECK},
-			{"SO_PRIORITY", TY_int, SO_PRIORITY},
+			{_KVi(SO_NO_CHECK)},
+			{_KVi(SO_PRIORITY)},
 #endif
-			{"SHUT_RD", TY_int, SHUT_RD},
-			{"SHUT_WR", TY_int, SHUT_WR},
-			{"SHUT_RDWR", TY_int, SHUT_RDWR},
+			{_KVi(SHUT_RD)},
+			{_KVi(SHUT_WR)},
+			{_KVi(SHUT_RDWR)},
+			{_KVi(SOMAXCONN)},
 			{}
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
