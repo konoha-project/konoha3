@@ -168,8 +168,9 @@ typedef enum {
 	// LogPoint
 	PeriodicPoint     =  (1<<6),  /* sampling */
 	PreactionPoint    =  (1<<7),  /* prediction WARN */
-	ActionChangePoint =  (1<<8),
+	ActionPoint       =  (1<<8),
 	SecurityAudit     =  (1<<9),  /* security audit */
+	// Otehr flag
 	PrivacyCaution    =  (1<<10), /* including privacy information */
 	// Internal Use
 	LOGPOOL_INIT      =  (1<<12)
@@ -177,7 +178,7 @@ typedef enum {
 
 typedef struct logconf_t {
 	logpolicy_t policy;
-	void *formatPointer; // for precompiled formattings
+	void *formatter; // for precompiled formattings
 } logconf_t;
 
 struct PlatformApiVar {
@@ -208,8 +209,6 @@ struct PlatformApiVar {
 	unsigned long long (*getTimeMilliSecond)(void);
 
 	/* message */
-	void    (*syslog_i)(int priority, const char *message, ...) __PRINTFMT(2, 3);
-	void    (*vsyslog_i)(int priority, const char *message, va_list args);
 	int     (*printf_i)(const char *fmt, ...) __PRINTFMT(2, 3);
 	int     (*vprintf_i)(const char *fmt, va_list args);
 	int     (*snprintf_i)(char *str, size_t size, const char *fmt, ...);
@@ -242,8 +241,13 @@ struct PlatformApiVar {
 	const char* (*endTag)(kinfotag_t);
 	void (*reportCaughtException)(const char *exceptionName, const char *scriptName, int line, const char *optionalMessage);
 	void  (*debugPrintf)(const char *file, const char *func, int line, const char *fmt, ...) __PRINTFMT(4, 5);
-	// trace
-	void (*traceDataLog)(int, logconf_t *, ...);
+
+	// logging, trace
+	const char *LOGGER_NAME;
+	void  (*syslog_i)(int priority, const char *message, ...) __PRINTFMT(2, 3);
+	void  (*vsyslog_i)(int priority, const char *message, va_list args);
+	void   *logger;  // logger handler
+	void  (*traceDataLog)(void *, int, logconf_t *, ...);
 };
 
 #define LOG_END 0
@@ -256,12 +260,35 @@ struct PlatformApiVar {
 
 #define LOG_ScriptFault          KeyValue_u("uline", sfp[K_RTNIDX].uline)
 
-#define KTraceDataLog(LOGKEY, POLICY, ...)    do {\
-	static logconf_t _logconf = {isRecord|LOGPOL_INIT|POLICY};\
-	if(TFLAG_is(int, _logconf.policy, isRecord)) {\
-		PLATAPI traceDataLog(LOGKEY, &_logconf, ## __VA_ARGS__, LOG_END);\
-	}\
-} while (0)
+#define KTrace(LOGKEY, POLICY, ...)    do {\
+		static logconf_t _logconf = {isRecord|LOGPOL_INIT|POLICY};\
+		if(TFLAG_is(int, _logconf.policy, isRecord)) {\
+			PLATAPI traceDataLog(PLATAPI logger, LOGKEY, &_logconf, ## __VA_ARGS__, LOG_END);\
+		}\
+	} while (0)
+
+#define KTraceApi(POLICY, APINAME, ...)    do {\
+		static logconf_t _logconf = {isRecord|LOGPOL_INIT|POLICY};\
+		PLATAPI traceDataLog(PLATAPI logger, 0/*LOGKEY*/, &_logconf, LOG_s, "api", APINAME, ## __VA_ARGS__, LOG_END);\
+	} while (0)
+
+#define KTraceApi2(POLICY, APINAME, ...)    do {\
+		static logconf_t _logconf = {isRecord|LOGPOL_INIT|POLICY};\
+		if(TFLAG_is(int, _logconf.policy, isRecord)) {\
+			PLATAPI traceDataLog(PLATAPI logger, 0/*LOGKEY*/, &_logconf, LOG_s, "api", APINAME, ## __VA_ARGS__, LOG_END);\
+		}\
+	} while (0)
+
+#define KSetElaspedTimer(TIMER)  TIMER = PLATAPI getTimeMilliSecond()
+
+#define KTraceApiElapsedTimer(POLICY, TPOLICY, APINAME, TIMER, ...)    do {\
+		static logconf_t _logconf = {isRecord|LOGPOL_INIT|POLICY};\
+		unsigned long long elapsed_time = PLATAPI getTimeMilliSecond() - TIMER;\
+		if((elapsed_time) >= (TPOLICY) && TFLAG_is(int, _logconf.policy, isRecord)) {\
+			PLATAPI traceDataLog(PLATAPI logger, 0/*LOGKEY*/, &_logconf, LOG_s, "api", APINAME, LOG_u, "elapsed_time", elapsed_time, ## __VA_ARGS__, LOG_END);\
+		}\
+	} while (0)
+
 
 /* ------------------------------------------------------------------------ */
 /* type */

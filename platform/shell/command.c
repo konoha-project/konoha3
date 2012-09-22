@@ -607,6 +607,14 @@ static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc
 	return (ret == true) ? 0 : 1;
 }
 
+static void testDataLog(KonohaContext *kctx)
+{
+	unsigned long long timer;
+	KSetElaspedTimer(timer);
+	KTraceApi(SystemFault|ActionPoint, "test", KeyValue_s("start", "test"), KeyValue_u("count", 1), LOG_ERRNO);
+	KTraceApiElapsedTimer(SystemFault, 0/*ms*/, "syslog", timer);
+}
+
 // -------------------------------------------------------------------------
 // ** main **
 
@@ -621,6 +629,7 @@ int main(int argc, char *argv[])
 	}
 	PlatformApi *plat = KonohaUtils_getDefaultPlatformApi();
 	KonohaContext* konoha = konoha_open(plat);
+	testDataLog(konoha);
 	ret = konoha_parseopt(konoha, (PlatformApiVar*)plat, argc, argv);
 	konoha_close(konoha);
 	return ret ? konoha_detectFailedAssert: 0;

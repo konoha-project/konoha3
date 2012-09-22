@@ -67,8 +67,9 @@ typedef struct klogconf_t {
 } klogconf_t;
 
 #define LOG_END 0
-#define LOG_s   1
-#define LOG_u   2
+#define LOG_s     1
+#define LOG_u     2
+#define LOG_ERRNO 3
 
 #define KeyValue_u(K,V)    LOG_u, (K), ((uintptr_t)V)
 #define KeyValue_s(K,V)    LOG_s, (K), (V)
