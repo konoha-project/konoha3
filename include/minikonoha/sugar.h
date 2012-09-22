@@ -546,7 +546,7 @@ typedef struct {
 	KUtilsGrowingArray errorMessageBuffer;
 	kArray            *errorMessageList;
 	int                errorMessageCount;
-	kbool_t            isBlockingErrorMessage;
+	kbool_t            isBlockedErrorMessage;
 	kGamma            *preparedGamma;
 	kArray            *definedMethodList;
 } SugarContext;

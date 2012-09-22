@@ -438,7 +438,7 @@ static KMETHOD ExprTyCheck_Block(KonohaContext *kctx, KonohaStack *sfp)
 			}
 		}
 		if(texpr == K_NULLEXPR) {
-			kStmt_errline(stmt, uline);
+			((kStmtVar*)stmt)->uline = uline;
 			kStmt_printMessage(kctx, stmt, ErrTag, "block has no value");
 		}
 		RETURN_(texpr);

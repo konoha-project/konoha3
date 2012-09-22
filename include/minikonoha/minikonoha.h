@@ -1188,16 +1188,6 @@ typedef struct MethodMatch {
 
 typedef kbool_t (*MethodMatchFunc)(KonohaContext *kctx, kMethod *mtd, MethodMatch *m);
 
-// used in kNameSpace_getMethodNULL()
-
-#define MPOL_FIRST_          0
-#define MPOL_LATEST          1
-//#define MPOL_PARAMSIZE_   (1<<1)
-//#define MPOL_SIGNATURE_    (1<<2)
-//#define MPOL_SETTER       (1<<3)
-#define MPOL_CANONICAL    (1<<5)
-//#define MPOL_GETTER      MPOL_PARAMSIZE_|MPOL_FIRST_|MPOL_CANONICAL
-
 #define K_CALLDELTA   4
 #define K_RTNIDX    (-4)
 #define K_SHIFTIDX  (-3)
@@ -1266,7 +1256,7 @@ struct _kSystem {
 #define klr_setmtdNC(sfpA, mtdO)   sfpA.mtdNC = mtdO
 
 //#define Method_isByteCode(mtd) ((mtd)->invokeMethodFunc == MethodFunc_runVirtualMachine)
-#define Method_isByteCode(mtd) (0)
+//#define Method_isByteCode(mtd) (0)
 
 #define BEGIN_LOCAL(V,N) \
 	KonohaStack *V = kctx->esp, *esp_ = kctx->esp; (void)V;((KonohaContextVar*)kctx)->esp = esp_+N;\

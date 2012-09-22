@@ -49,8 +49,8 @@ static KMETHOD ExprTyCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 	size_t i;
 	kbool_t isDefined = true;
 	SugarContext *sugarContext = KonohaContext_getSugarContext(kctx);
-	int popIsBlockingErrorMessage = sugarContext->isBlockingErrorMessage;
-	sugarContext->isBlockingErrorMessage = true;
+	int popIsBlockingErrorMessage = sugarContext->isBlockedErrorMessage;
+	sugarContext->isBlockedErrorMessage = true;
 	for(i = 1; i < kArray_size(expr->cons); i++) {
 		kExpr *typedExpr = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, i, gma, TY_var, TPOL_ALLOWVOID);
 		if(typedExpr == K_NULLEXPR) {
@@ -58,7 +58,7 @@ static KMETHOD ExprTyCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 			break;
 		}
 	}
-	sugarContext->isBlockingErrorMessage = popIsBlockingErrorMessage;
+	sugarContext->isBlockedErrorMessage = popIsBlockingErrorMessage;
 	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_boolean, isDefined));
 }
 

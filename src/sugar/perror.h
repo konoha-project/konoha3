@@ -33,7 +33,7 @@ extern "C" {
 
 static int isPrintMessage(KonohaContext *kctx, SugarContext *sugarContext, kinfotag_t taglevel)
 {
-	if(sugarContext->isBlockingErrorMessage) return false;
+	if(sugarContext->isBlockedErrorMessage) return false;
 	if(verbose_sugar) return true;
 	if(taglevel == InfoTag) {
 		if(KonohaContext_isInteractive(kctx) || KonohaContext_isCompileOnly(kctx)) {
@@ -100,17 +100,17 @@ static SugarSyntax* kNameSpace_getSyntax(KonohaContext *kctx, kNameSpace *ns0, k
 
 static void kStmt_toERR(KonohaContext *kctx, kStmt *stmt, kString *errmsg)
 {
-	if(errmsg != NULL) { // not in case of isBlockingErrorMessage
+	if(errmsg != NULL) { // not in case of isBlockedErrorMessage
 		((kStmtVar*)stmt)->syn   = SYN_(Stmt_nameSpace(stmt), KW_ERR);
 		((kStmtVar*)stmt)->build = TSTMT_ERR;
 		KLIB kObject_setObject(kctx, stmt, KW_ERR, TY_String, errmsg);
 	}
 }
 
-static inline void kStmt_errline(kStmt *stmt, kfileline_t uline)
-{
-	((kStmtVar*)stmt)->uline = uline;
-}
+//static inline void kStmt_errline(kStmt *stmt, kfileline_t uline)
+//{
+//	((kStmtVar*)stmt)->uline = uline;
+//}
 
 static kfileline_t kExpr_uline(KonohaContext *kctx, kExpr *expr, kfileline_t uline)
 {
@@ -157,6 +157,7 @@ static kExpr* kStmt_printMessage2(KonohaContext *kctx, kStmt *stmt, kToken *tk, 
 }
 
 #define Token_text(tk) kToken_t_(kctx, tk)
+
 static const char *kToken_t_(KonohaContext *kctx, kToken *tk)
 {
 	if(IS_String(tk->text)) {
@@ -175,21 +176,6 @@ static const char *kToken_t_(KonohaContext *kctx, kToken *tk)
 		return "";
 	}
 }
-
-//static void WARN_IgnoredTokens(KonohaContext *kctx, kArray *tokenList, int beginIdx, int endIdx)
-//{
-//	if(beginIdx < endIdx) {
-//		int i = beginIdx;
-//		KUtilsWriteBuffer wb;
-//		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-//		KLIB Kwb_printf(kctx, &wb, "%s", Token_text(tokenList->tokenItems[i])); i++;
-//		while(i < endIdx) {
-//			KLIB Kwb_printf(kctx, &wb, " %s", Token_text(tokenList->tokenItems[i])); i++;
-//		}
-//		SugarContext_printMessage(kctx, InfoTag, tokenList->tokenItems[beginIdx]->uline, "ignored tokens: %s", KLIB Kwb_top(kctx, &wb, 1));
-//		KLIB Kwb_free(&wb);
-//	}
-//}
 
 #ifdef __cplusplus
 }

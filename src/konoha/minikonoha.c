@@ -143,7 +143,6 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 		newctx->modshare = (KonohaModule**)calloc(sizeof(KonohaModule*), KonohaModule_MAXSIZE);
 		newctx->modlocal = (KonohaModuleContext**)calloc(sizeof(KonohaModuleContext*), KonohaModule_MAXSIZE);
 
-		MODLOGGER_init(kctx, newctx);
 		MODGC_init(kctx, newctx);
 		KonohaRuntime_init(kctx, newctx);
 	}
@@ -155,7 +154,6 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 		newctx->modshare = kctx->modshare;
 		newctx->modlocal = (KonohaModuleContext**)KCALLOC(sizeof(KonohaModuleContext*), KonohaModule_MAXSIZE);
 		MODGC_init(kctx, newctx);
-//		MODLOGGER_init(kctx, newctx);
 	}
 	KonohaStackRuntime_init(kctx, newctx, platApi->stacksize);
 	if(IS_RootKonohaContext(newctx)) {
@@ -222,7 +220,6 @@ static void KonohaContext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 		MODGC_destoryAllObjects(kctx, ctx);
 		KonohaRuntime_free(kctx, ctx);
 		MODGC_free(kctx, ctx);
-		MODLOGGER_free(kctx, ctx);
 		MODGC_check_malloced_size(kctx);
 		free(kctx->modlocal);
 		free(kctx->modshare);
@@ -230,7 +227,6 @@ static void KonohaContext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	}
 	else {
 		MODGC_free(kctx, ctx);
-		MODLOGGER_free(kctx, ctx);
 		KFREE(ctx->modlocal, sizeof(KonohaModuleContext*) * KonohaModule_MAXSIZE);
 		KFREE(ctx, sizeof(KonohaContextVar));
 	}
