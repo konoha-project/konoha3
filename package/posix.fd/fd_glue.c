@@ -153,7 +153,7 @@ static KMETHOD System_lseek(KonohaContext *kctx, KonohaStack *sfp)
 	off_t ret_offset = lseek(fd, offset, whence);
 	if (ret_offset == -1) {
 		// TODO: throw
-		ktrace(_DataFault,
+		OLDTRACE_SWITCH_TO_KTrace(_DataFault,
 			   LogText("@", "lseek"),
 			   LogUint("offset", offset),
 			   LogUint("whence", whence),
@@ -178,7 +178,7 @@ static KMETHOD System_ftruncate(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = ftruncate(fd, length);
 	if (ret != 0) {
 		// TODO: throw
-		ktrace(_SystemFault,
+		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
 			   LogText("@", "ftruncate"),
 			   LogUint("length", length),
 			   LogText("errstr", strerror(errno))
@@ -195,7 +195,7 @@ static KMETHOD System_fchmod(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = fchmod(fd, mode);
 	if (ret != -1) {
 		// TODO: throw
-		ktrace(_SystemFault,
+		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
 			   LogText("@", "fchmod"),
 			   LogUint("mode", mode),
 			   LogText("errstr", strerror(errno))
@@ -232,7 +232,7 @@ static KMETHOD System_flock(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = flock(fd, operation);
 	if (ret == -1) {
 		// TODO: throw
-		ktrace(_SystemFault,
+		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
 			   LogText("@", "flock"),
 			   LogUint("operation", operation),
 			   LogText("errstr", strerror(errno))
@@ -248,7 +248,7 @@ static KMETHOD System_sync(KonohaContext *kctx, KonohaStack *sfp)
 	int ret =  fsync(fd);
 	if (ret == -1) {
 		// TODO: throw
-		ktrace(_SystemFault,
+		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
 			   LogText("@", "fsync"),
 			   KeyValue_p("errstr", strerror(errno))
 			);
@@ -265,7 +265,7 @@ static KMETHOD System_link(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = link(oldpath, newpath);
 	if (ret == -1) {
 		// TODO: throw
-		ktrace(_SystemFault,
+		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
 			   LogText("@", "link"),
 			   LogText("oldpath", oldpath),
 			   LogText("newpath", newpath),
@@ -282,7 +282,7 @@ static KMETHOD System_unlink(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = unlink(pathname);
 	if (ret == -1) {
 		// TODO: throw
-		ktrace(_SystemFault,
+		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
 			   LogText("@", "unlink"),
 			   LogText("pathname", pathname),
 			   KeyValue_p("errstr", strerror(errno))
@@ -300,7 +300,7 @@ static KMETHOD System_rename(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = rename(oldpath, newpath);
 	if (ret == -1) {
 		// TODO: throw
-		ktrace(_SystemFault,
+		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
 			   LogText("@", "rename"),
 			   LogText("oldpath", oldpath),
 			   LogText("newpath", newpath),
@@ -317,7 +317,7 @@ static KMETHOD System_rmdir(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = rmdir(pathname);
 	if (ret == -1) {
 		// TODO: throw
-		ktrace(_SystemFault,
+		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
 			   LogText("@", "rmdir"),
 			   LogText("pathname", pathname),
 			   KeyValue_p("errstr", strerror(errno))
@@ -335,7 +335,7 @@ static KMETHOD System_symlink(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = symlink(oldpath, newpath);
 	if (ret == -1) {
 		// TODO: throw
-		ktrace(_SystemFault,
+		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
 			   LogText("@", "symlink"),
 			   LogText("oldpath", oldpath),
 			   LogText("newpath", newpath),
@@ -353,7 +353,7 @@ static KMETHOD System_readlink(KonohaContext *kctx, KonohaStack *sfp)
 	ssize_t ret = readlink(pathname, pathbuf, PATHMAX);
 	if (ret == -1) {
 		// TODO: throw
-		ktrace(_SystemFault,
+		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
 			   LogText("@", "readlink"),
 			   LogText("pathname", pathname),
 			   KeyValue_p("errstr", strerror(errno))
@@ -375,7 +375,7 @@ static KMETHOD System_chown(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = chown(pathname, owner, group);
 	if (ret == -1) {
 		// TODO: throw
-		ktrace(_SystemFault,
+		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
 			   LogText("@", "chown"),
 			   LogText("pathname", pathname),
 			   LogUint("owner", owner),
@@ -395,7 +395,7 @@ static KMETHOD System_lchown(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = lchown(pathname, owner, group);
 	if (ret == -1) {
 		// TODO: throw
-		ktrace(_SystemFault,
+		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
 			   LogText("@", "lchown"),
 			   LogText("pathname", pathname),
 			   LogUint("owner", owner),
@@ -414,7 +414,7 @@ static KMETHOD System_fchown(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = fchown(fd, owner, group);
 	if (ret == -1) {
 		// TODO: throw
-		ktrace(_SystemFault,
+		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
 			   LogText("@", "fchown"),
 			   LogUint("owner", owner),
 			   LogUint("group", group),
@@ -432,7 +432,7 @@ static KMETHOD System_access(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = access(pathname, mode);
 	if (ret == -1) {
 		// TODO: throw
-		ktrace(_SystemFault,
+		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
 			   LogText("@", "access"),
 			   LogText("pathname", pathname),
 			   LogUint("mode", mode),
@@ -448,7 +448,7 @@ static KMETHOD System_fsync(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = fsync(fd);
 	if (ret == -1) {
 		// TODO: throw
-		ktrace(_SystemFault,
+		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
 			   LogText("@", "fsync"),
 			   KeyValue_p("errstr", strerror(errno))
 			);

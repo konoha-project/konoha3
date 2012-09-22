@@ -69,9 +69,9 @@ kconn_t *MYSQL_qopen(KonohaContext *kctx, const char* url)
 	pdbnm = (dbnm[0]) ? dbnm : NULL;
 
 	MYSQL *db = mysql_init(NULL);
-	ktrace(_UserInputFault, LogText("@","mysql_init"));
+	OLDTRACE_SWITCH_TO_KTrace(_UserInputFault, LogText("@","mysql_init"));
 	db = mysql_real_connect(db, phost, puser, ppass, pdbnm, port, NULL, 0);
-	ktrace(_UserInputFault, LogText("@","mysql_real_connect"),
+	OLDTRACE_SWITCH_TO_KTrace(_UserInputFault, LogText("@","mysql_real_connect"),
 			LogText("host", phost),
 			LogText("user", user),
 			LogText("passwd", ppass),
@@ -93,7 +93,7 @@ int MYSQL_qnext(KonohaContext *kctx, kqcur_t *qcursor, kResultSet *rs)
 {
 	MYSQL_ROW row;
 	if ((row = mysql_fetch_row((MYSQL_RES*)qcursor)) != NULL) {
-		ktrace(_UserInputFault, LogText("@","mysql_fetch_row"));
+		OLDTRACE_SWITCH_TO_KTrace(_UserInputFault, LogText("@","mysql_fetch_row"));
 		int i;
 		kint_t ival;
 		kfloat_t fval;
@@ -130,7 +130,7 @@ int MYSQL_qnext(KonohaContext *kctx, kqcur_t *qcursor, kResultSet *rs)
 		} /* for */
 		return 1; /* CONTINUE */
 	} else {
-		ktrace(_UserInputFault, LogText("@","mysql_fetch_row"));
+		OLDTRACE_SWITCH_TO_KTrace(_UserInputFault, LogText("@","mysql_fetch_row"));
 	}
 	return 0; /* NOMORE */
 }
@@ -148,7 +148,7 @@ kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char* sql, struct _kR
 		/* Connection.exec */
 		int r = mysql_query(db, sql);
 		if(r > 0) {
-			ktrace(_UserInputFault,
+			OLDTRACE_SWITCH_TO_KTrace(_UserInputFault,
 					LogText("@","mysql_query"),
 					LogText("query", sql),
 					LogUint("errno", mysql_errno(db)),
@@ -159,7 +159,7 @@ kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char* sql, struct _kR
 	else {
 		/* Connection.query */
 		int r = mysql_query((MYSQL*)db, sql);
-		ktrace(_UserInputFault,
+		OLDTRACE_SWITCH_TO_KTrace(_UserInputFault,
 				LogText("@","mysql_query"),
 				LogText("query", sql),
 				LogUint("errno", mysql_errno(db)),
@@ -170,13 +170,13 @@ kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char* sql, struct _kR
 			if (res == NULL) { // NULL RESULT
 				if (mysql_errno(db) != 0) {
 					mysql_free_result(res);
-					ktrace(_UserInputFault,
+					OLDTRACE_SWITCH_TO_KTrace(_UserInputFault,
 							LogText("@","mysql_sotre_result"),
 							LogUint("errno", mysql_errno(db)),
 							LogText("error", mysql_error(db))
 					);
 				} else {
-					ktrace(_UserInputFault,
+					OLDTRACE_SWITCH_TO_KTrace(_UserInputFault,
 							LogText("@","mysql_sotre_result"),
 							LogUint("errno", mysql_errno(db)),
 							LogText("error", mysql_error(db))
@@ -185,7 +185,7 @@ kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char* sql, struct _kR
 			}
 			else {
 				knh_ResultSet_initColumn(kctx, rs, (size_t)mysql_num_fields(res));
-				ktrace(_UserInputFault,
+				OLDTRACE_SWITCH_TO_KTrace(_UserInputFault,
 							LogText("@","mysql_sotre_result"),
 							LogUint("errno", mysql_errno(db)),
 							LogText("error", mysql_error(db))

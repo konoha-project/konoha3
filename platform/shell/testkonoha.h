@@ -104,7 +104,7 @@ static int test_logger(KonohaContext *kctx)
 	int v3 = -3;
 	int i;
 	for (i = 0; i < 10; i++) {
-		ktrace(LOGPOL_DEBUG,
+		KTrace(UnknownFault|PeriodicPoint, 0,
 			LogText("key1", "hello world"),
 			LogUint("key2", v2),
 			LogUint("key3", v3)

@@ -287,7 +287,7 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 		if (IS_String(sfp[2].o)) {
 			FILE* fp = ((kCurl*)sfp[0].asObject)->fp;
 			if ((fp = tmpfile()) == NULL) {
-				ktrace(_DataFault,   // FIXME
+				OLDTRACE_SWITCH_TO_KTrace(_DataFault,   // FIXME
 						LogText("Curl.setOpt", "Could not set body CURLOPT.READDATA"),
 						LogUint("curlopt", curlopt)
 					);
@@ -299,7 +299,7 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 			break;
 		}
 	default: {
-		ktrace(_DataFault,   // FIXME
+		OLDTRACE_SWITCH_TO_KTrace(_DataFault,   // FIXME
 				LogText("Curl.setOpt", "UnsupportedOption"),
 				LogUint("curlopt", curlopt)
 			  );

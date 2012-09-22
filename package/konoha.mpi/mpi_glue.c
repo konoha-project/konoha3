@@ -28,7 +28,7 @@
 #include <minikonoha/bytes.h>
 #include <stdio.h>
 #include "mpi_glue.h"
-#define TRACE(POLICY, ...) ktrace(POLICY, __VA_ARGS__);
+#define TRACE(POLICY, ...) OLDTRACE_SWITCH_TO_KTrace(POLICY, __VA_ARGS__);
 
 #ifdef __cplusplus
 extern "C" {
@@ -159,9 +159,9 @@ static KMETHOD MPIComm_getSize(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD MPIComm_barrier(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMPIComm *comm = toRawPtr(kMPIComm *, sfp[0].asObject);
-	ktrace(LOGPOL_DEBUG, LogText("at", "MPI_Barrier"), LogText("#", "begin"), LOG_END);
+	OLDTRACE_SWITCH_TO_KTrace(LOGPOL_DEBUG, LogText("at", "MPI_Barrier"), LogText("#", "begin"), LOG_END);
 	bool ret = MPI_Barrier(comm->comm);
-	ktrace(LOGPOL_DEBUG, LogText("at", "MPI_Barrier"), LogText("#", "finish"), LOG_END);
+	OLDTRACE_SWITCH_TO_KTrace(LOGPOL_DEBUG, LogText("at", "MPI_Barrier"), LogText("#", "finish"), LOG_END);
 	RETURNb_(ret);
 }
 

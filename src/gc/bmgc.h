@@ -815,15 +815,15 @@ static void* Kmalloc(KonohaContext *kctx, size_t s)
 #endif
 			);
 	if (unlikely(p == NULL)) {
-		ktrace(_ScriptFault|_SystemFault,
-			LogText("!",  "OutOfMemory"),
-			LogText("at", "malloc"),
-			LogUint("size", s),
-			LogUint("malloced_size", klib_malloced)
-		);
+//		OLDTRACE_SWITCH_TO_KTrace(_ScriptFault|_SystemFault,
+//			LogText("!",  "OutOfMemory"),
+//			LogText("at", "malloc"),
+//			LogUint("size", s),
+//			LogUint("malloced_size", klib_malloced)
+//		);
 	}
 #if GCDEBUG
-	ktrace(LOGPOL_DEBUG,
+	OLDTRACE_SWITCH_TO_KTrace(LOGPOL_DEBUG,
 			LogText("@", "malloc"),
 			KeyValue_p("from", p),
 			KeyValue_p("to", ((char*)p)+s),
@@ -861,7 +861,7 @@ static void Kfree(KonohaContext *kctx, void *p, size_t s)
 	pp -= 1;
 #endif
 #if GCDEBUG
-	ktrace(LOGPOL_DEBUG,
+	OLDTRACE_SWITCH_TO_KTrace(LOGPOL_DEBUG,
 			LogText("@", "free"),
 			KeyValue_p("from", p),
 			KeyValue_p("to", ((char*)p)+s),
@@ -1920,7 +1920,7 @@ static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o)
 	KonohaClass *ct = O_ct(o);
 	if (ct) {
 #if GCDEBUG
-		ktrace(LOGPOL_DEBUG,
+		OLDTRACE_SWITCH_TO_KTrace(LOGPOL_DEBUG,
 				LogText("@", "delete"),
 				KeyValue_p("ptr", o),
 				LogUint("size", ct->cstruct_size),
@@ -1962,7 +1962,7 @@ kObject *MODGC_omalloc(KonohaContext *kctx, size_t size)
 	kObjectVar *o = (kObjectVar*)bm_malloc_internal(kctx, HeapManager(kctx), size);
 	OBJECT_INIT(o);
 #if GCDEBUG
-	ktrace(LOGPOL_DEBUG,
+	OLDTRACE_SWITCH_TO_KTrace(LOGPOL_DEBUG,
 			LogText("@", "new"),
 			KeyValue_p("ptr", o),
 			LogUint("size", size));

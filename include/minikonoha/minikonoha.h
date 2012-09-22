@@ -260,30 +260,32 @@ struct PlatformApiVar {
 #define LogErrno        LOG_ERRNO
 #define LogScriptLine(sfp)   LogText("ScriptName", FileId_t(sfp[K_RTNIDX].uline)), LogUint("ScriptLine", (ushort_t)sfp[K_RTNIDX].uline)
 
-#define KTrace(LOGKEY, POLICY, ...)    do {\
-		static logconf_t _logconf = {isRecord|LOGPOL_INIT|POLICY};\
+#define KTrace(POLICY, LOGKEY, ...)    do {\
+		static logconf_t _logconf = {isRecord|LOGPOOL_INIT|POLICY};\
 		if(TFLAG_is(int, _logconf.policy, isRecord)) {\
 			PLATAPI traceDataLog(PLATAPI logger, LOGKEY, &_logconf, ## __VA_ARGS__, LOG_END);\
 		}\
 	} while (0)
 
 #define KTraceApi(POLICY, APINAME, ...)    do {\
-		static logconf_t _logconf = {isRecord|LOGPOL_INIT|POLICY};\
+		static logconf_t _logconf = {isRecord|LOGPOOL_INIT|POLICY};\
 		if(TFLAG_is(int, _logconf.policy, isRecord)) {\
-			PLATAPI traceDataLog(PLATAPI logger, 0/*LOGKEY*/, &_logconf, LOG_s, "Api", APINAME, ## __VA_ARGS__, LOG_END);\
+			PLATAPI traceDataLog(PLATAPI logger, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
 		}\
 	} while (0)
 
 #define KSetElaspedTimer(TIMER)  TIMER = PLATAPI getTimeMilliSecond()
 
 #define KTraceApiElapsedTimer(POLICY, TPOLICY, APINAME, TIMER, ...)    do {\
-		static logconf_t _logconf = {isRecord|LOGPOL_INIT|POLICY};\
+		static logconf_t _logconf = {isRecord|LOGPOOL_INIT|POLICY};\
 		unsigned long long elapsed_time = PLATAPI getTimeMilliSecond() - TIMER;\
 		if((elapsed_time) >= (TPOLICY) && TFLAG_is(int, _logconf.policy, isRecord)) {\
-			PLATAPI traceDataLog(PLATAPI logger, 0/*LOGKEY*/, &_logconf, LOG_s, "Api", APINAME, LOG_u, "ElapsedTime", elapsed_time, ## __VA_ARGS__, LOG_END);\
+			PLATAPI traceDataLog(PLATAPI logger, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), LogUint("ElapsedTime", elapsed_time), ## __VA_ARGS__, LOG_END);\
 		}\
 	} while (0)
 
+
+#define OLDTRACE_SWITCH_TO_KTrace(POLICY, ...)
 
 /* ------------------------------------------------------------------------ */
 /* type */
@@ -1688,7 +1690,6 @@ extern kbool_t konoha_run(KonohaContext* konoha);  // TODO
 } /* extern "C" */
 #endif
 
-#include "logger.h"
 #include "gc.h"
 
 #endif /* MINIOKNOHA_H_ */
