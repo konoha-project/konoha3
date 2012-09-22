@@ -288,8 +288,8 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 			FILE* fp = ((kCurl*)sfp[0].asObject)->fp;
 			if ((fp = tmpfile()) == NULL) {
 				ktrace(_DataFault,   // FIXME
-						KeyValue_s("Curl.setOpt", "Could not set body CURLOPT.READDATA"),
-						KeyValue_u("curlopt", curlopt)
+						LogText("Curl.setOpt", "Could not set body CURLOPT.READDATA"),
+						LogUint("curlopt", curlopt)
 					);
 				break;
 			}
@@ -300,8 +300,8 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	default: {
 		ktrace(_DataFault,   // FIXME
-				KeyValue_s("Curl.setOpt", "UnsupportedOption"),
-				KeyValue_u("curlopt", curlopt)
+				LogText("Curl.setOpt", "UnsupportedOption"),
+				LogUint("curlopt", curlopt)
 			  );
 		// KNH_NTRACE2(ctx, "Curl.setOpt:UnsupportedOption", K_FAILED, KNH_LDATA(LOG_i("curlopt", curlopt)));
 		break;

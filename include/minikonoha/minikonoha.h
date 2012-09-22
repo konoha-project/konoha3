@@ -250,15 +250,15 @@ struct PlatformApiVar {
 	void  (*traceDataLog)(void *, int, logconf_t *, ...);
 };
 
-#define LOG_END 0
-#define LOG_s   1
-#define LOG_u   2
+#define LOG_END   0
+#define LOG_s     1
+#define LOG_u     2
+#define LOG_ERRNO 3
 
-#define KeyValue_u(K,V)    LOG_u, (K), ((uintptr_t)V)
-#define KeyValue_s(K,V)    LOG_s, (K), (V)
-#define KeyValue_p(K,V)    LOG_u, (K), (V)
-
-#define LOG_ScriptFault          KeyValue_u("uline", sfp[K_RTNIDX].uline)
+#define LogUint(K,V)    LOG_u, (K), ((uintptr_t)V)
+#define LogText(K,V)    LOG_s, (K), (V)
+#define LogErrno        LOG_ERRNO
+#define LogScriptLine(sfp)   LogText("ScriptName", FileId_t(sfp[K_RTNIDX].uline)), LogUint("ScriptLine", (ushort_t)sfp[K_RTNIDX].uline)
 
 #define KTrace(LOGKEY, POLICY, ...)    do {\
 		static logconf_t _logconf = {isRecord|LOGPOL_INIT|POLICY};\
@@ -269,13 +269,8 @@ struct PlatformApiVar {
 
 #define KTraceApi(POLICY, APINAME, ...)    do {\
 		static logconf_t _logconf = {isRecord|LOGPOL_INIT|POLICY};\
-		PLATAPI traceDataLog(PLATAPI logger, 0/*LOGKEY*/, &_logconf, LOG_s, "api", APINAME, ## __VA_ARGS__, LOG_END);\
-	} while (0)
-
-#define KTraceApi2(POLICY, APINAME, ...)    do {\
-		static logconf_t _logconf = {isRecord|LOGPOL_INIT|POLICY};\
 		if(TFLAG_is(int, _logconf.policy, isRecord)) {\
-			PLATAPI traceDataLog(PLATAPI logger, 0/*LOGKEY*/, &_logconf, LOG_s, "api", APINAME, ## __VA_ARGS__, LOG_END);\
+			PLATAPI traceDataLog(PLATAPI logger, 0/*LOGKEY*/, &_logconf, LOG_s, "Api", APINAME, ## __VA_ARGS__, LOG_END);\
 		}\
 	} while (0)
 
@@ -285,7 +280,7 @@ struct PlatformApiVar {
 		static logconf_t _logconf = {isRecord|LOGPOL_INIT|POLICY};\
 		unsigned long long elapsed_time = PLATAPI getTimeMilliSecond() - TIMER;\
 		if((elapsed_time) >= (TPOLICY) && TFLAG_is(int, _logconf.policy, isRecord)) {\
-			PLATAPI traceDataLog(PLATAPI logger, 0/*LOGKEY*/, &_logconf, LOG_s, "api", APINAME, LOG_u, "elapsed_time", elapsed_time, ## __VA_ARGS__, LOG_END);\
+			PLATAPI traceDataLog(PLATAPI logger, 0/*LOGKEY*/, &_logconf, LOG_s, "Api", APINAME, LOG_u, "ElapsedTime", elapsed_time, ## __VA_ARGS__, LOG_END);\
 		}\
 	} while (0)
 

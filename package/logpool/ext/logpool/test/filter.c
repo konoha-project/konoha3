@@ -20,10 +20,10 @@ static struct logpool_param_filter FILTERED_STRING_API_PARAM = {
 #define LOG_i   2
 #define LOG_f   4
 
-#define KeyValue_u(K,V)    LOG_u, (K), ((uintptr_t)V)
+#define LogUint(K,V)    LOG_u, (K), ((uintptr_t)V)
 #define KEYVALUE_i(K,V)    LOG_i, (K), ((uintptr_t)V)
 #define KEYVALUE_f(K,V)    LOG_f, (K), (f2u(V))
-#define KeyValue_s(K,V)    LOG_s, (K), (V)
+#define LogText(K,V)    LOG_s, (K), (V)
 
 extern logapi_t LOGAPI;
 
@@ -35,7 +35,7 @@ static void logpool_test_write0(logpool_t *logpool)
     logpool_record(logpool, NULL, LOG_INFO, "event",
             KEYVALUE_f("float", f),
             KEYVALUE_i("int",   i),
-            KeyValue_s("string", s),
+            LogText("string", s),
             LOG_END
             );
 }
@@ -48,7 +48,7 @@ static void logpool_test_write1(logpool_t *logpool)
     logpool_record(logpool, NULL, LOG_NOTICE, "event",
             KEYVALUE_f("float", f),
             KEYVALUE_i("int",   i),
-            KeyValue_s("string", s),
+            LogText("string", s),
             LOG_END
             );
 }

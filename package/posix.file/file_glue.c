@@ -56,8 +56,8 @@ static void File_free(KonohaContext *kctx, kObject *o)
 		if (ret != 0) {
 			// TODO: throw
 			ktrace(_SystemFault,
-					KeyValue_s("@", "fclose"),
-					KeyValue_s("errstr", strerror(errno))
+					LogText("@", "fclose"),
+					LogText("errstr", strerror(errno))
 			);
 		}
 		file->fp = NULL;
@@ -86,10 +86,10 @@ static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp)
 	if (fp == NULL) {
 		// TODO: throw
 		ktrace(_SystemFault|_ScriptFault,
-				KeyValue_s("@", "fopen"),
-				KeyValue_s("path", S_text(s)),
-				KeyValue_u("mode", mode),
-				KeyValue_s("errstr", strerror(errno))
+				LogText("@", "fopen"),
+				LogText("path", S_text(s)),
+				LogUint("mode", mode),
+				LogText("errstr", strerror(errno))
 		);
 	}
 	struct _kFILE *file = (struct _kFILE*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), (uintptr_t)fp);
@@ -118,8 +118,8 @@ static KMETHOD File_read(KonohaContext *kctx, KonohaStack *sfp)
 		if (size == 0 && ferror(fp) != 0){
 			// TODO: throw
 			ktrace(_SystemFault,
-					KeyValue_s("@", "fread"),
-					KeyValue_s("errstr", strerror(errno))
+					LogText("@", "fread"),
+					LogText("errstr", strerror(errno))
 			);
 			clearerr(fp);
 		}
@@ -143,8 +143,8 @@ static KMETHOD File_write(KonohaContext *kctx , KonohaStack *sfp)
 		if (size < len) {
 			// TODO: throw
 			ktrace(_SystemFault,
-					KeyValue_s("@", "fwrite"),
-					KeyValue_s("errstr", strerror(errno))
+					LogText("@", "fwrite"),
+					LogText("errstr", strerror(errno))
 			);
 		}
 	}
@@ -161,8 +161,8 @@ static KMETHOD File_close(KonohaContext *kctx, KonohaStack *sfp)
 		if (ret != 0) {
 			// TODO: throw
 			ktrace(_SystemFault,
-					KeyValue_s("@", "fclose"),
-					KeyValue_s("errstr", strerror(errno))
+					LogText("@", "fclose"),
+					LogText("errstr", strerror(errno))
 			);
 		}
 		file->fp = NULL;
@@ -180,8 +180,8 @@ static KMETHOD File_getC(KonohaContext *kctx, KonohaStack *sfp)
 		if (ch == EOF && ferror(fp) != 0) {
 			// TODO: throw
 			ktrace(LOGPOL_DEBUG | _DataFault,
-					KeyValue_s("@", "fgetc"),
-					KeyValue_s("errstr", strerror(errno))
+					LogText("@", "fgetc"),
+					LogText("errstr", strerror(errno))
 			);
 		}
 	}
@@ -197,8 +197,8 @@ static KMETHOD File_putC(KonohaContext *kctx, KonohaStack *sfp)
 		if (ch == EOF) {
 			// TODO: throw
 			ktrace(LOGPOL_DEBUG | _DataFault,
-					KeyValue_s("@", "fputc"),
-					KeyValue_s("errstr", strerror(errno))
+					LogText("@", "fputc"),
+					LogText("errstr", strerror(errno))
 			);
 		}
 		RETURNb_(ch != EOF);

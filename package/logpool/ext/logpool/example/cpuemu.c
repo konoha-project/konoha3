@@ -23,8 +23,8 @@ extern logapi_t LOGAPI;
 #define LOG_i   2
 #define LOG_f   4
 
-#define KeyValue_u(K,V)    LOG_u, (K), ((uintptr_t)V)
-#define KeyValue_s(K,V)    LOG_s, (K), (V)
+#define LogUint(K,V)    LOG_u, (K), ((uintptr_t)V)
+#define LogText(K,V)    LOG_s, (K), (V)
 
 static int verbose = 0;
 
@@ -79,9 +79,9 @@ static void emu(int interval, int step, int pid)
   }
   for (i = 0; i < step; ++i) {
     logpool_record(logpool, &args, LOG_NOTICE, "cpuevent",
-        KeyValue_u("cpu", cpu(i)),
-        KeyValue_u("mem", mem(i)),
-        KeyValue_u("net", net(i)),
+        LogUint("cpu", cpu(i)),
+        LogUint("mem", mem(i)),
+        LogUint("net", net(i)),
         LOG_END
         );
     usleep(interval);

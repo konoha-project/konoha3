@@ -17,10 +17,10 @@ extern logapi_t LOGAPI;
 #define LOG_i   2
 #define LOG_f   4
 
-#define KeyValue_u(K,V)    LOG_u, (K), ((uintptr_t)V)
+#define LogUint(K,V)    LOG_u, (K), ((uintptr_t)V)
 #define KEYVALUE_i(K,V)    LOG_i, (K), ((uintptr_t)V)
 #define KEYVALUE_f(K,V)    LOG_f, (K), (f2u(V))
-#define KeyValue_s(K,V)    LOG_s, (K), (V)
+#define LogText(K,V)    LOG_s, (K), (V)
 
 
 static void logpool_test_write(logpool_t *logpool)
@@ -31,34 +31,34 @@ static void logpool_test_write(logpool_t *logpool)
     logpool_record(logpool, NULL, LOG_NOTICE, "event",
             KEYVALUE_f("0:float", f),
             KEYVALUE_i("0:int",   i),
-            KeyValue_s("0:string", s),
+            LogText("0:string", s),
             KEYVALUE_f("1:float", f),
             KEYVALUE_i("1:int",   i),
-            KeyValue_s("1:string", s),
+            LogText("1:string", s),
             KEYVALUE_f("2:float", f),
             KEYVALUE_i("2:int",   i),
-            KeyValue_s("2:string", s),
+            LogText("2:string", s),
             KEYVALUE_f("3:float", f),
             KEYVALUE_i("3:int",   i),
-            KeyValue_s("3:string", s),
+            LogText("3:string", s),
             KEYVALUE_f("4:float", f),
             KEYVALUE_i("4:int",   i),
-            KeyValue_s("4:string", s),
+            LogText("4:string", s),
             KEYVALUE_f("5:float", f),
             KEYVALUE_i("5:int",   i),
-            KeyValue_s("5:string", s),
+            LogText("5:string", s),
             KEYVALUE_f("6:float", f),
             KEYVALUE_i("6:int",   i),
-            KeyValue_s("6:string", s),
+            LogText("6:string", s),
             KEYVALUE_f("7:float", f),
             KEYVALUE_i("7:int",   i),
-            KeyValue_s("7:string", s),
+            LogText("7:string", s),
             KEYVALUE_f("8:float", f),
             KEYVALUE_i("8:int",   i),
-            KeyValue_s("8:string", s),
+            LogText("8:string", s),
             KEYVALUE_f("9:float", f),
             KEYVALUE_i("9:int",   i),
-            KeyValue_s("9:string", s),
+            LogText("9:string", s),
             LOG_END
             );
 }

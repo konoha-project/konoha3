@@ -14,8 +14,8 @@ extern logapi_t LOGAPI;
 #define LOG_i   2
 #define LOG_f   4
 
-#define KeyValue_u(K,V)    LOG_u, (K), ((uintptr_t)V)
-#define KeyValue_s(K,V)    LOG_s, (K), (V)
+#define LogUint(K,V)    LOG_u, (K), ((uintptr_t)V)
+#define LogText(K,V)    LOG_s, (K), (V)
 
 
 int n = 0;
@@ -25,9 +25,9 @@ static void logpool_test_write(logpool_t *logpool)
     const char *s = "hello world";
     void *args;
     logpool_record(logpool, &args, LOG_NOTICE, "event",
-            KeyValue_u("uint",   i),
-            KeyValue_u("tid",   i/10),
-            KeyValue_s("string", s),
+            LogUint("uint",   i),
+            LogUint("tid",   i/10),
+            LogText("string", s),
             LOG_END
             );
     n++;

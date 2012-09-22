@@ -68,8 +68,8 @@ static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
 	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
 	if (sfp[1].intValue < 0) {
 		ktrace(_UserInputFault,
-				KeyValue_s("error", "Invalid argument"),
-				KeyValue_u("length", sfp[1].intValue)
+				LogText("error", "Invalid argument"),
+				LogUint("length", sfp[1].intValue)
 		);
 		RETURN_(a);
 	}

@@ -154,10 +154,10 @@ static KMETHOD System_lseek(KonohaContext *kctx, KonohaStack *sfp)
 	if (ret_offset == -1) {
 		// TODO: throw
 		ktrace(_DataFault,
-			   KeyValue_s("@", "lseek"),
-			   KeyValue_u("offset", offset),
-			   KeyValue_u("whence", whence),
-			   KeyValue_s("errstr", strerror(errno))
+			   LogText("@", "lseek"),
+			   LogUint("offset", offset),
+			   LogUint("whence", whence),
+			   LogText("errstr", strerror(errno))
 			);
 	}
 	RETURNi_((int)ret_offset);
@@ -179,9 +179,9 @@ static KMETHOD System_ftruncate(KonohaContext *kctx, KonohaStack *sfp)
 	if (ret != 0) {
 		// TODO: throw
 		ktrace(_SystemFault,
-			   KeyValue_s("@", "ftruncate"),
-			   KeyValue_u("length", length),
-			   KeyValue_s("errstr", strerror(errno))
+			   LogText("@", "ftruncate"),
+			   LogUint("length", length),
+			   LogText("errstr", strerror(errno))
 			);
 	}
 	RETURNb_(ret == 0);
@@ -196,9 +196,9 @@ static KMETHOD System_fchmod(KonohaContext *kctx, KonohaStack *sfp)
 	if (ret != -1) {
 		// TODO: throw
 		ktrace(_SystemFault,
-			   KeyValue_s("@", "fchmod"),
-			   KeyValue_u("mode", mode),
-			   KeyValue_s("errstr", strerror(errno))
+			   LogText("@", "fchmod"),
+			   LogUint("mode", mode),
+			   LogText("errstr", strerror(errno))
 			);
 	}
 	RETURNb_(ret == 0);
@@ -233,9 +233,9 @@ static KMETHOD System_flock(KonohaContext *kctx, KonohaStack *sfp)
 	if (ret == -1) {
 		// TODO: throw
 		ktrace(_SystemFault,
-			   KeyValue_s("@", "flock"),
-			   KeyValue_u("operation", operation),
-			   KeyValue_s("errstr", strerror(errno))
+			   LogText("@", "flock"),
+			   LogUint("operation", operation),
+			   LogText("errstr", strerror(errno))
 			);
 	}
 	RETURNb_(ret == 0);
@@ -249,7 +249,7 @@ static KMETHOD System_sync(KonohaContext *kctx, KonohaStack *sfp)
 	if (ret == -1) {
 		// TODO: throw
 		ktrace(_SystemFault,
-			   KeyValue_s("@", "fsync"),
+			   LogText("@", "fsync"),
 			   KeyValue_p("errstr", strerror(errno))
 			);
 	}
@@ -266,9 +266,9 @@ static KMETHOD System_link(KonohaContext *kctx, KonohaStack *sfp)
 	if (ret == -1) {
 		// TODO: throw
 		ktrace(_SystemFault,
-			   KeyValue_s("@", "link"),
-			   KeyValue_s("oldpath", oldpath),
-			   KeyValue_s("newpath", newpath),
+			   LogText("@", "link"),
+			   LogText("oldpath", oldpath),
+			   LogText("newpath", newpath),
 			   KeyValue_p("errstr", strerror(errno))
 			);
 	}
@@ -283,8 +283,8 @@ static KMETHOD System_unlink(KonohaContext *kctx, KonohaStack *sfp)
 	if (ret == -1) {
 		// TODO: throw
 		ktrace(_SystemFault,
-			   KeyValue_s("@", "unlink"),
-			   KeyValue_s("pathname", pathname),
+			   LogText("@", "unlink"),
+			   LogText("pathname", pathname),
 			   KeyValue_p("errstr", strerror(errno))
 			);
 	}
@@ -301,9 +301,9 @@ static KMETHOD System_rename(KonohaContext *kctx, KonohaStack *sfp)
 	if (ret == -1) {
 		// TODO: throw
 		ktrace(_SystemFault,
-			   KeyValue_s("@", "rename"),
-			   KeyValue_s("oldpath", oldpath),
-			   KeyValue_s("newpath", newpath),
+			   LogText("@", "rename"),
+			   LogText("oldpath", oldpath),
+			   LogText("newpath", newpath),
 			   KeyValue_p("errstr", strerror(errno))
 			);
 	}
@@ -318,8 +318,8 @@ static KMETHOD System_rmdir(KonohaContext *kctx, KonohaStack *sfp)
 	if (ret == -1) {
 		// TODO: throw
 		ktrace(_SystemFault,
-			   KeyValue_s("@", "rmdir"),
-			   KeyValue_s("pathname", pathname),
+			   LogText("@", "rmdir"),
+			   LogText("pathname", pathname),
 			   KeyValue_p("errstr", strerror(errno))
 			);
 	}
@@ -336,9 +336,9 @@ static KMETHOD System_symlink(KonohaContext *kctx, KonohaStack *sfp)
 	if (ret == -1) {
 		// TODO: throw
 		ktrace(_SystemFault,
-			   KeyValue_s("@", "symlink"),
-			   KeyValue_s("oldpath", oldpath),
-			   KeyValue_s("newpath", newpath),
+			   LogText("@", "symlink"),
+			   LogText("oldpath", oldpath),
+			   LogText("newpath", newpath),
 			   KeyValue_p("errstr", strerror(errno))
 			);
 	}
@@ -354,8 +354,8 @@ static KMETHOD System_readlink(KonohaContext *kctx, KonohaStack *sfp)
 	if (ret == -1) {
 		// TODO: throw
 		ktrace(_SystemFault,
-			   KeyValue_s("@", "readlink"),
-			   KeyValue_s("pathname", pathname),
+			   LogText("@", "readlink"),
+			   LogText("pathname", pathname),
 			   KeyValue_p("errstr", strerror(errno))
 			);
 		pathbuf[0] = '\0';
@@ -376,10 +376,10 @@ static KMETHOD System_chown(KonohaContext *kctx, KonohaStack *sfp)
 	if (ret == -1) {
 		// TODO: throw
 		ktrace(_SystemFault,
-			   KeyValue_s("@", "chown"),
-			   KeyValue_s("pathname", pathname),
-			   KeyValue_u("owner", owner),
-			   KeyValue_u("group", group),
+			   LogText("@", "chown"),
+			   LogText("pathname", pathname),
+			   LogUint("owner", owner),
+			   LogUint("group", group),
 			   KeyValue_p("errstr", strerror(errno))
 			);
 	}
@@ -396,10 +396,10 @@ static KMETHOD System_lchown(KonohaContext *kctx, KonohaStack *sfp)
 	if (ret == -1) {
 		// TODO: throw
 		ktrace(_SystemFault,
-			   KeyValue_s("@", "lchown"),
-			   KeyValue_s("pathname", pathname),
-			   KeyValue_u("owner", owner),
-			   KeyValue_u("group", group),
+			   LogText("@", "lchown"),
+			   LogText("pathname", pathname),
+			   LogUint("owner", owner),
+			   LogUint("group", group),
 			   KeyValue_p("errstr", strerror(errno))
 			);
 	}
@@ -415,9 +415,9 @@ static KMETHOD System_fchown(KonohaContext *kctx, KonohaStack *sfp)
 	if (ret == -1) {
 		// TODO: throw
 		ktrace(_SystemFault,
-			   KeyValue_s("@", "fchown"),
-			   KeyValue_u("owner", owner),
-			   KeyValue_u("group", group),
+			   LogText("@", "fchown"),
+			   LogUint("owner", owner),
+			   LogUint("group", group),
 			   KeyValue_p("errstr", strerror(errno))
 			);
 	}
@@ -433,9 +433,9 @@ static KMETHOD System_access(KonohaContext *kctx, KonohaStack *sfp)
 	if (ret == -1) {
 		// TODO: throw
 		ktrace(_SystemFault,
-			   KeyValue_s("@", "access"),
-			   KeyValue_s("pathname", pathname),
-			   KeyValue_u("mode", mode),
+			   LogText("@", "access"),
+			   LogText("pathname", pathname),
+			   LogUint("mode", mode),
 			   KeyValue_p("errstr", strerror(errno))
 			);
 	}
@@ -449,7 +449,7 @@ static KMETHOD System_fsync(KonohaContext *kctx, KonohaStack *sfp)
 	if (ret == -1) {
 		// TODO: throw
 		ktrace(_SystemFault,
-			   KeyValue_s("@", "fsync"),
+			   LogText("@", "fsync"),
 			   KeyValue_p("errstr", strerror(errno))
 			);
 	}

@@ -611,7 +611,7 @@ static void testDataLog(KonohaContext *kctx)
 {
 	unsigned long long timer;
 	KSetElaspedTimer(timer);
-	KTraceApi(SystemFault|ActionPoint, "test", KeyValue_s("start", "test"), KeyValue_u("count", 1), LOG_ERRNO);
+	KTraceApi(SystemFault|ActionPoint, "test", LogText("start", "test"), LogUint("count", 1), LOG_ERRNO);
 	KTraceApiElapsedTimer(SystemFault, 0/*ms*/, "syslog", timer);
 }
 

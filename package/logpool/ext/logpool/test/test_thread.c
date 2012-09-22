@@ -9,13 +9,13 @@ static void *thread_main(void *args)
     void *lp_args;
 #define LOG_END 0
 #define LOG_u   2
-#define KeyValue_u(K,V)    LOG_u, (K), ((uintptr_t)V)
+#define LogUint(K,V)    LOG_u, (K), ((uintptr_t)V)
 
     int i;
     for (i = 0; i < 1024; ++i) {
         logpool_record(logpool, &lp_args, LOG_NOTICE, "thread",
-                KeyValue_u("ID", (uintptr_t)args),
-                KeyValue_u("V", i),
+                LogUint("ID", (uintptr_t)args),
+                LogUint("V", i),
                 LOG_END);
     }
     logpool_close(logpool);

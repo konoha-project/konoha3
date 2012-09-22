@@ -209,10 +209,10 @@ static void* Kmalloc(KonohaContext *kctx, size_t s)
 	size_t *p = (size_t*)do_malloc(s + sizeof(size_t));
 	if(unlikely(p == NULL)) {
 		ktrace(_ScriptFault|_SystemFault,
-				KeyValue_s("!",  "OutOfMemory"),
-				KeyValue_s("at", "malloc"),
-				KeyValue_u("size", s),
-				KeyValue_u("malloced_size", kklib_malloced)
+				LogText("!",  "OutOfMemory"),
+				LogText("at", "malloc"),
+				LogUint("size", s),
+				LogUint("malloced_size", kklib_malloced)
 		  );
 	}
 	p[0] = s;
