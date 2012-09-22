@@ -265,6 +265,7 @@ static KMETHOD System_chmod(KonohaContext *kctx, KonohaStack *sfp)
 
 #define _Public   kMethod_Public
 #define _Const    kMethod_Const
+#define _Static   kMethod_Static
 #define _Coercion kMethod_Coercion
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
@@ -285,15 +286,15 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	KonohaClass *cFile = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defFile, pline);
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Im, _F(System_fopen), TY_File, TY_System, MN_("fopen"), 2, TY_String, FN_("path"), TY_String, FN_("mode"),
+		_Public|_Static|_Const|_Im, _F(System_fopen), TY_File, TY_System, MN_("fopen"), 2, TY_String, FN_("path"), TY_String, FN_("mode"),
 		_Public|_Const|_Im, _F(File_close), TY_void, TY_File, MN_("close"), 0,
 		_Public|_Const|_Im, _F(File_getC), TY_int, TY_File, MN_("getC"), 0,
 		_Public|_Const|_Im, _F(File_putC), TY_boolean, TY_File, MN_("putC"), 1, TY_int, FN_("ch"),
-		_Public|_Const|_Im, _F(System_umask), TY_int, TY_System, MN_("umask"), 1, TY_int, FN_("cmask"),
-		_Public|_Const|_Im, _F(System_mkdir), TY_int, TY_System, MN_("mkdir"), 2, TY_String, FN_("path"), TY_int, FN_("mode"),
-		_Public|_Const|_Im, _F(System_rmdir), TY_int, TY_System, MN_("rmdir"), 1, TY_String, FN_("path"),
-		_Public|_Const|_Im, _F(System_truncate), TY_int, TY_System, MN_("truncate"), 2, TY_String, FN_("path"), TY_int, FN_("length"),
-		_Public|_Const|_Im, _F(System_chmod), TY_int, TY_System, MN_("chmod"), 2, TY_String, FN_("path"), TY_int, FN_("mode"),
+		_Public|_Static|_Const|_Im, _F(System_umask), TY_int, TY_System, MN_("umask"), 1, TY_int, FN_("cmask"),
+		_Public|_Static|_Const|_Im, _F(System_mkdir), TY_int, TY_System, MN_("mkdir"), 2, TY_String, FN_("path"), TY_int, FN_("mode"),
+		_Public|_Static|_Const|_Im, _F(System_rmdir), TY_int, TY_System, MN_("rmdir"), 1, TY_String, FN_("path"),
+		_Public|_Static|_Const|_Im, _F(System_truncate), TY_int, TY_System, MN_("truncate"), 2, TY_String, FN_("path"), TY_int, FN_("length"),
+		_Public|_Static|_Const|_Im, _F(System_chmod), TY_int, TY_System, MN_("chmod"), 2, TY_String, FN_("path"), TY_int, FN_("mode"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
