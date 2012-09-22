@@ -81,17 +81,6 @@ else(KONOHA_GC_MODULE)
 	set(GC src/gc/gc.c)
 endif(KONOHA_GC_MODULE)
 
-
-set(KONOHA_LOGGER_MODULE "" CACHE STRING "konoha logger module")
-if(KONOHA_LOGGER_MODULE)
-	if("${KONOHA_LOGGER_MODULE}" MATCHES "logpool")
-		set(LOGGER_MODULE_LIBS logpool)
-	endif()
-	set(LOGGER module/${KONOHA_LOGGER_MODULE}/${KONOHA_LOGGER_MODULE}.c)
-else(KONOHA_LOGGER_MODULE)
-	set(LOGGER src/logger/logger.c)
-endif(KONOHA_LOGGER_MODULE)
-
 set(PARSER
 	src/sugar/sugar.c
 )
@@ -226,10 +215,6 @@ if(HAVE_LIBDL)
 set(ExtraLibs ${ExtraLibs} ${HAVE_LIBDL})
 endif(HAVE_LIBDL)
 
-if(LOGGER_MODULE_LIBS)
-set(ExtraLibs ${ExtraLibs} ${LOGGER_MODULE_LIBS})
-endif(LOGGER_MODULE_LIBS)
-
 macro(POP _STR _DELIM _RESULT)
 	string(REPLACE ${_DELIM} ";" _tmp ${_STR})
 	list(REVERSE _tmp)
@@ -282,7 +267,7 @@ foreach(f ${test_files})
 	add_konoha_test(${test_name} ${f})
 endforeach(f ${test_files})
 
-add_library(minikonoha SHARED ${RUNTIME} ${GC} ${LOGGER} ${PARSER} ${VM})
+add_library(minikonoha SHARED ${RUNTIME} ${GC} ${PARSER} ${VM})
 target_link_libraries(minikonoha ${ExtraLibs})
 set(ExtraLibs ${ExtraLibs} minikonoha)
 
