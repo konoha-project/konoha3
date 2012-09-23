@@ -173,6 +173,8 @@ typedef struct logconf_t {
 	void *formatter; // for precompiled formattings
 } logconf_t;
 
+typedef struct GcContext GcContext;
+
 struct PlatformApiVar {
 	// settings
 	const char *name;
@@ -184,6 +186,17 @@ struct PlatformApiVar {
 	// memory
 	void*   (*malloc_i)(size_t);
 	void    (*free_i)(void *);
+
+	const char* GC_NAME;
+	void    (*new_GcContext)(GcContext *gcctx);
+	void    (*free_GcContext)(GcContext *gcctx);
+	void    (*allocObject)(GcContext *gcctx, size_t);
+	int     (*isObject)(GcContext *gcctx, void *);
+	void    (*assignObject)(GcContext *gcctx, void *dst, void *val);
+	void    (*setFieldObject)(GcContext *gcctx, void *parent, void *dst, void *val);
+	void    (*reftraceObject)(GcContext *gcctx, void *val);
+	void    (*invokeGC)(GcContext *gcctx);
+	void    (*refdecObject)(GcContext *gcctx, void *val);  // for the future (RCGC)
 
 	// setjmp
 	int     (*setjmp_i)(jmpbuf_i);
@@ -229,7 +242,7 @@ struct PlatformApiVar {
 
 	// message (cui)
 	char*  (*readline_i)(const char *prompt);
-	int   (*add_history_i)(const char *);
+	int    (*add_history_i)(const char *);
 
 	const char* (*shortText)(const char *msg);
 	const char* (*beginTag)(kinfotag_t);
