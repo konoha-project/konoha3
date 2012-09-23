@@ -26,7 +26,6 @@
 #include <minikonoha/sugar.h>
 
 #include <stdio.h>
-#include <minikonoha/logger.h>
 #include <minikonoha/bytes.h>
 
 #include <errno.h> // include this because of E2BIG
