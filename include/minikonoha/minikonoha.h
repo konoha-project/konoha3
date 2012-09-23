@@ -1255,9 +1255,6 @@ struct _kSystem {
 #define KonohaRuntime_setesp(kctx, newesp)  ((KonohaContextVar*)kctx)->esp = (newesp)
 #define klr_setmtdNC(sfpA, mtdO)   sfpA.mtdNC = mtdO
 
-//#define Method_isByteCode(mtd) ((mtd)->invokeMethodFunc == MethodFunc_runVirtualMachine)
-//#define Method_isByteCode(mtd) (0)
-
 #define BEGIN_LOCAL(V,N) \
 	KonohaStack *V = kctx->esp, *esp_ = kctx->esp; (void)V;((KonohaContextVar*)kctx)->esp = esp_+N;\
 
@@ -1433,7 +1430,6 @@ struct KonohaLibVar {
 	kbool_t       (*KonohaRuntime_tryCallMethod)(KonohaContext *, KonohaStack *);
 	void          (*KonohaRuntime_raise)(KonohaContext*, int symbol, KonohaStack *, kfileline_t, kString *Nullable);
 
-	uintptr_t     (*Ktrace)(KonohaContext*, struct klogconf_t *logconf, ...);
 	KonohaContextVar *(*KonohaContext_init)(KonohaContext *rootContext, const PlatformApi *api);
 	void (*KonohaContext_free)(KonohaContext *rootContext, KonohaContextVar *ctx);
 };
@@ -1645,21 +1641,21 @@ typedef struct {
 	return; \
 } while (0)
 
-//#ifndef K_NODEBUG
+#ifndef USE_SMALLBUILD
 #define KNH_ASSERT(a)       assert(a)
 #define DBG_ASSERT(a)       assert(a)
 #define TODO_ASSERT(a)      assert(a)
 #define DBG_P(fmt, ...)     PLATAPI debugPrintf(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__)
 #define DBG_ABORT(fmt, ...) PLATAPI debugPrintf(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__); PLATAPI exit_i(EXIT_FAILURE)
 #define DUMP_P(fmt, ...)    PLATAPI printf_i(fmt, ## __VA_ARGS__)
-//#else
-//#define KNH_ASSERT(a)
-//#define DBG_ASSERT(a)
-//#define TODO_ASSERT(a)
-//#define DBG_P(fmt, ...)
-//#define DBG_ABORT(fmt, ...)
-//#define DUMP_P(fmt, ...)
-//#endif
+#else
+#define KNH_ASSERT(a)
+#define DBG_ASSERT(a)
+#define TODO_ASSERT(a)
+#define DBG_P(fmt, ...)
+#define DBG_ABORT(fmt, ...)
+#define DUMP_P(fmt, ...)
+#endif
 
 #ifndef unlikely
 #define unlikely(x)   __builtin_expect(!!(x), 0)
