@@ -472,6 +472,32 @@ static void NOP_debugPrintf(const char *file, const char *func, int line, const 
 
 // --------------------------------------------------------------------------
 
+#include "libcode/libc_readline.h"
+
+static void PlatformApi_loadReadline(PlatformApiVar *plat)
+{
+//#ifdef __MINGW32__
+//	void *handler = (void *)LoadLibraryA((LPCTSTR)"libreadline" K_OSDLLEXT);
+//	void *f = (handler != NULL) ? (void *)GetProcAddress(handler, "readline") : NULL;
+//	kreadline = (f != NULL) ? (char* (*)(const char*))f : readline;
+//	f = (handler != NULL) ? (void *)GetProcAddress(handler, "add_history") : NULL;
+//	kadd_history = (f != NULL) ? (int (*)(const char*))f : add_history;
+//#else
+	void *handler = dlopen("libreadline" K_OSDLLEXT, RTLD_LAZY);
+	if(handler != NULL) {
+		plat->readline_i = (char* (*)(const char*))dlsym(handler, "readline");
+		plat->add_history_i = (int (*)(const char*))dlsym(handler, "add_history");
+	}
+	if(plat->readline_i == NULL) {
+		plat->readline_i = readline;
+	}
+	if(plat->add_history_i == NULL) {
+		plat->add_history_i = add_history;
+	}
+}
+
+// --------------------------------------------------------------------------
+
 #define EBUFSIZ 1024
 #include "libcode/logtext_formatter.h"
 
@@ -530,6 +556,9 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 
 	// timer
 	plat.getTimeMilliSecond  = getTimeMilliSecond;
+
+	// readline
+	PlatformApi_loadReadline(&plat);
 
 	// logger
 	plat.LOGGER_NAME         = "syslog";

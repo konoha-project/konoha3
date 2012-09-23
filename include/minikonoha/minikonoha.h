@@ -225,7 +225,10 @@ struct PlatformApiVar {
 	KonohaPackageHandler* (*loadPackageHandler)(const char *packageName);
 	int (*loadScript)(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *));
 
-	// message
+	// message (cui)
+	char*  (*readline_i)(const char *prompt);
+	int   (*add_history_i)(const char *);
+
 	const char* (*shortText)(const char *msg);
 	const char* (*beginTag)(kinfotag_t);
 	const char* (*endTag)(kinfotag_t);

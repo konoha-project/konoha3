@@ -54,43 +54,6 @@ extern int verbose_gc;
 // -------------------------------------------------------------------------
 // minishell
 
-static char *(*kreadline)(const char *);
-static int  (*kadd_history)(const char *);
-
-static char* readline(const char* prompt)
-{
-	static int checkCTL = 0;
-	int ch, pos = 0;
-	static char linebuf[1024]; // THREAD-UNSAFE
-	fputs(prompt, stdout);
-	while((ch = fgetc(stdin)) != EOF) {
-		if(ch == '\r') continue;
-		if(ch == 27) {
-			/* ^[[A */;
-			fgetc(stdin); fgetc(stdin);
-			if(checkCTL == 0) {
-				fprintf(stdout, " - use readline, it provides better shell experience.\n");
-				checkCTL = 1;
-			}
-			continue;
-		}
-		if(ch == '\n' || pos == sizeof(linebuf) - 1) {
-			linebuf[pos] = 0;
-			break;
-		}
-		linebuf[pos] = ch;
-		pos++;
-	}
-	if(ch == EOF) return NULL;
-	char *p = (char*)malloc(pos+1);
-	memcpy(p, linebuf, pos+1);
-	return p;
-}
-
-static int add_history(const char* line)
-{
-	return 0;
-}
 
 static int checkstmt(const char *t, size_t len)
 {
@@ -130,7 +93,7 @@ static kstatus_t readstmt(KonohaContext *kctx, KUtilsWriteBuffer *wb, kfileline_
 //	fputs(TERM_BBOLD(kctx), stdout);
 	while(1) {
 		int check;
-		char *ln = kreadline(line == 1 ? ">>> " : "    ");
+		char *ln = PLATAPI readline_i(line == 1 ? ">>> " : "    ");
 		if(ln == NULL) {
 			KLIB Kwb_free(wb);
 			status = K_BREAK;
@@ -151,7 +114,7 @@ static kstatus_t readstmt(KonohaContext *kctx, KUtilsWriteBuffer *wb, kfileline_
 		break;
 	}
 	if(Kwb_bytesize(wb) > 0) {
-		kadd_history(KLIB Kwb_top(kctx, wb, 1));
+		PLATAPI add_history_i(KLIB Kwb_top(kctx, wb, 1));
 	}
 //	fputs(TERM_EBOLD(kctx), stdout);
 	fflush(stdout);
@@ -211,24 +174,10 @@ static void show_version(KonohaContext *kctx)
 
 static kbool_t konoha_shell(KonohaContext* konoha)
 {
-#ifdef __MINGW32__
-	void *handler = (void *)LoadLibraryA((LPCTSTR)"libreadline" K_OSDLLEXT);
-	void *f = (handler != NULL) ? (void *)GetProcAddress(handler, "readline") : NULL;
-	kreadline = (f != NULL) ? (char* (*)(const char*))f : readline;
-	f = (handler != NULL) ? (void *)GetProcAddress(handler, "add_history") : NULL;	
-	kadd_history = (f != NULL) ? (int (*)(const char*))f : add_history;
-#else
-	void *handler = dlopen("libreadline" K_OSDLLEXT, RTLD_LAZY);
-	void *f = (handler != NULL) ? dlsym(handler, "readline") : NULL;
-	kreadline = (f != NULL) ? (char* (*)(const char*))f : readline;
-	f = (handler != NULL) ? dlsym(handler, "add_history") : NULL;
-	kadd_history = (f != NULL) ? (int (*)(const char*))f : add_history;
-#endif
 	show_version(konoha);
 	shell(konoha);
 	return true;
 }
-
 
 // -------------------------------------------------------------------------
 // KonohaContext*est
