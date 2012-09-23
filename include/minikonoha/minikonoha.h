@@ -33,16 +33,6 @@
 extern "C" {
 #endif
 
-#ifndef K_OSDLLEXT
-#if defined(__APPLE__)
-#define K_OSDLLEXT        ".dylib"
-#elif defined(__linux__)
-#define K_OSDLLEXT        ".so"
-#elif defined(__MINGW32__)
-#define K_OSDLLEXT        ".dll"
-#endif
-#endif
-
 #define K_TYTABLE_INIT 64
 #define K_PAGESIZE        4096
 

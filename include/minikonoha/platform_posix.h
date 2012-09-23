@@ -24,8 +24,27 @@
 
 #ifndef PLATFORM_POSIX_H_
 #define PLATFORM_POSIX_H_
+
 #ifndef MINIOKNOHA_H_
 #error Do not include platform_posix.h without minikonoha.h.
+#endif
+
+/* platform configuration */
+
+#ifndef K_OSDLLEXT
+#if defined(__APPLE__)
+#define K_OSDLLEXT        ".dylib"
+#elif defined(__linux__)
+#define K_OSDLLEXT        ".so"
+#elif defined(__MINGW32__)
+#define K_OSDLLEXT        ".dll"
+#endif
+#endif
+
+#ifdef PATH_MAX
+#define K_PATHMAX PATH_MAX
+#else
+#define K_PATHMAX 256
 #endif
 
 #include <stdio.h>
@@ -43,12 +62,6 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#ifdef PATH_MAX
-#define K_PATHMAX PATH_MAX
-#else
-#define K_PATHMAX 256
 #endif
 
 #define kunused __attribute__((unused))
@@ -459,222 +472,8 @@ static void NOP_debugPrintf(const char *file, const char *func, int line, const 
 
 // --------------------------------------------------------------------------
 
-#define writeToBuffer(CH, buftop, bufend) { buftop[0] = CH; buftop++; }
-
-#define TEXTSIZE(T)   T, (sizeof(T) - 1)
-
-static char *writeFixedTextToBuffer(const char *text, size_t len, char *buftop, char *bufend)
-{
-	if(bufend - buftop > len) {
-		memcpy(buftop, text, len);
-		return buftop+len;
-	}
-	return buftop;
-}
-
-static char *writeTextToBuffer(const char *s, char *buftop, char *bufend)
-{
-	if(buftop < bufend) {
-		buftop[0] = '"';
-		buftop++;
-	}
-	while(*s != 0 && buftop < bufend) {
-		if(*s == '"') {
-			buftop[0] = '\"'; buftop++;
-			if(buftop < bufend) {
-				buftop[0] = s[0];
-				buftop++;
-			}
-		}
-		else if(*s == '\n') {
-			buftop[0] = '\\'; buftop++;
-			if(buftop < bufend) {
-				buftop[0] = 'n';
-				buftop++;
-			}
-		}
-		else {
-			buftop[0] = s[0];
-			buftop++;
-		}
-		s++;
-	}
-	if(buftop < bufend) {
-		buftop[0] = '"';
-		buftop++;
-	}
-	return buftop;
-}
-
-static void reverse(char *const start, char *const end, const int len)
-{
-	int i, l = len / 2;
-	register char *s = start;
-	register char *e = end - 1;
-	for (i = 0; i < l; i++) {
-		char tmp = *s;
-		*s++ = *e;
-		*e-- = tmp;
-	}
-}
-
-static char *writeUnsingedIntToBuffer(uintptr_t uint, char *const buftop, const char *const bufend)
-{
-	int i = 0;
-	while (buftop + i < bufend) {
-		int tmp = uint % 10;
-		uint /= 10;
-		buftop[i] = '0' + tmp;
-		++i;
-		if (uint == 0)
-			break;
-	}
-	reverse(buftop, buftop + i, i);
-	return buftop + i;
-}
-
-//typedef enum {
-//	Unrecord = 0,
-//	isRecord = 1,
-//	// Fault
-//	SystemFault       =  (1<<1),  /* os, file system, etc. */
-//	ScriptFault       =  (1<<2),  /* programmer's mistake */
-//	DataFault         =  (1<<3),  /* user input, data mistake */
-//	ExternalFault     =  (1<<4),  /* networking or remote services */
-//	UnknownFault      =  (1<<5),  /* other fault above */
-//	// LogPoint
-//	PeriodicPoint     =  (1<<6),  /* sampling */
-//	PreactionPoint    =  (1<<7),  /* prediction WARN */
-//	ActionChangePoint =  (1<<8),
-//	SecurityAudit     =  (1<<9),  /* security audit */
-//	PrivacyCaution    =  (1<<10), /* including privacy information */
-//	// Internal Use
-//	LOGPOOL_INIT      =  (1<<12)
-//} logpolicy_t;
-
-static char* writeKeyToBuffer(const char *key, size_t keylen, char *buftop, char *bufend)
-{
-	if(buftop < bufend) {
-		writeToBuffer('"', buftop, bufend);
-	}
-	buftop = writeFixedTextToBuffer(key, keylen, buftop, bufend);
-	if(buftop + 3 < bufend) {
-		buftop[0] = '"';
-		buftop[1] = ':';
-		buftop[2] = ' ';
-		buftop+=3;
-	}
-	return buftop;
-}
-
-#define HasFault (SystemFault|ScriptFault|DataFault|ExternalFault)
-
-static char* writePolicyToBuffer(logconf_t *logconf, char *buftop, char *bufend)
-{
-	if(TFLAG_is(int, logconf->policy, PeriodicPoint) || TFLAG_is(int, logconf->policy, PreactionPoint)
-	    || TFLAG_is(int, logconf->policy, ActionPoint) || TFLAG_is(int, logconf->policy, SecurityAudit)) {
-		buftop = writeKeyToBuffer(TEXTSIZE("TracePoint"), buftop, bufend);
-		writeToBuffer('"', buftop, bufend);
-		if(TFLAG_is(int, logconf->policy, PeriodicPoint)) {
-			buftop = writeFixedTextToBuffer(TEXTSIZE("Periodic,"), buftop, bufend);
-		}
-		if(TFLAG_is(int, logconf->policy, PreactionPoint)) {
-			buftop = writeFixedTextToBuffer(TEXTSIZE("PreAction,"), buftop, bufend);
-		}
-		if(TFLAG_is(int, logconf->policy, ActionPoint)) {
-			buftop = writeFixedTextToBuffer(TEXTSIZE("Action,"), buftop, bufend);
-		}
-		if(TFLAG_is(int, logconf->policy, SecurityAudit)) {
-			buftop = writeFixedTextToBuffer(TEXTSIZE("SecurityAudit,"), buftop, bufend);
-		}
-		buftop[-1] = '"';
-		buftop[0] = ',';
-		buftop[1] = ' ';
-		buftop+=2;
-	}
-	if(TFLAG_is(int, logconf->policy, SystemFault) || TFLAG_is(int, logconf->policy, ScriptFault)
-	    || TFLAG_is(int, logconf->policy, DataFault) || TFLAG_is(int, logconf->policy, ExternalFault) || TFLAG_is(int, logconf->policy, UnknownFault)) {
-		buftop = writeKeyToBuffer(TEXTSIZE("FaultType"), buftop, bufend);
-		writeToBuffer('"', buftop, bufend);
-		if(TFLAG_is(int, logconf->policy, SystemFault)) {
-			buftop = writeFixedTextToBuffer(TEXTSIZE("SystemFault,"), buftop, bufend);
-		}
-		if(TFLAG_is(int, logconf->policy, ScriptFault)) {
-			buftop = writeFixedTextToBuffer(TEXTSIZE("ScriptFault,"), buftop, bufend);
-		}
-		if(TFLAG_is(int, logconf->policy, DataFault)) {
-			buftop = writeFixedTextToBuffer(TEXTSIZE("DataFault,"), buftop, bufend);
-		}
-		if(TFLAG_is(int, logconf->policy, ExternalFault)) {
-			buftop = writeFixedTextToBuffer(TEXTSIZE("ExternalFault,"), buftop, bufend);
-		}
-		if(TFLAG_is(int, logconf->policy, UnknownFault)) {
-			buftop = writeFixedTextToBuffer(TEXTSIZE("UnknownFault,"), buftop, bufend);
-		}
-		buftop[-1] = '"';
-		buftop[0] = ',';
-		buftop[1] = ' ';
-		buftop+=2;
-	}
-//	if(TFLAG_is(int, logconf->policy, PrivacyCaution)) {
-//		buftop = writeTextToBuffer("PrivacyCaution\": \"true", buftop, bufend);
-//		buftop[0] = ',';
-//		buftop[1] = ' ';
-//		buftop+=2;
-//	}
-	return buftop;
-}
-
-static char* writeErrnoToBuffer(logconf_t *logconf, char *buftop, char *bufend)
-{
-	if((logconf->policy & HasFault)) {
-		buftop = writeKeyToBuffer(TEXTSIZE("errno"), buftop, bufend);
-		buftop = writeUnsingedIntToBuffer((uintptr_t)errno, buftop, bufend);
-		buftop[0] = ','; buftop[1] = ' '; buftop+=2;
-		buftop = writeKeyToBuffer(TEXTSIZE("message"), buftop, bufend);
-		buftop = writeTextToBuffer(strerror(errno), buftop, bufend);
-		errno = 0;
-	}
-	return buftop;
-}
-
-static void writeDataLogToBuffer(logconf_t *logconf, va_list ap, char *buftop, char *bufend)
-{
-	int c = 0, logtype;
-	buftop[0] = '{'; buftop++;
-	buftop = writePolicyToBuffer(logconf, buftop, bufend);
-	while((logtype = va_arg(ap, int)) != LOG_END) {
-		if(c > 0 && buftop + 3 < bufend) {
-			buftop[0] = ',';
-			buftop[1] = ' ';
-			buftop+=2;
-		}
-		switch(logtype) {
-		case LOG_s: {
-			const char *key = va_arg(ap, const char*);
-			const char *text = va_arg(ap, const char*);
-			buftop = writeKeyToBuffer(key, strlen(key), buftop, bufend);
-			buftop = writeTextToBuffer(text, buftop, bufend);
-			break;
-		}
-		case LOG_u: {
-			const char *key = va_arg(ap, const char*);
-			buftop = writeKeyToBuffer(key, strlen(key), buftop, bufend);
-			buftop = writeUnsingedIntToBuffer(va_arg(ap, uintptr_t), buftop, bufend);
-			break;
-		}
-		case LOG_ERRNO : {
-			buftop = writeErrnoToBuffer(logconf, buftop, bufend);
-			break;
-		}
-		}
-		c++;
-	}
-	buftop[0] = '}'; buftop++;
-	buftop[0] = '\0';
-}
-
 #define EBUFSIZ 1024
+#include "libcode/logtext_formatter.h"
 
 static void traceDataLog(void *logger, int logkey, logconf_t *logconf, ...)
 {
@@ -682,7 +481,7 @@ static void traceDataLog(void *logger, int logkey, logconf_t *logconf, ...)
 	va_list ap;
 	va_start(ap, logconf);
 	writeDataLogToBuffer(logconf, ap, buf, buf + (EBUFSIZ - 4));
-	syslog(LOG_INFO, "%s", buf);
+	syslog(LOG_NOTICE, "%s", buf);
 	if(verbose_debug) {
 		fprintf(stderr, "TRACE %s\n", buf);
 	}
@@ -716,8 +515,6 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.pthread_mutex_trylock_i = pthread_mutex_trylock;
 	plat.pthread_mutex_destroy_i = pthread_mutex_destroy;
 
-	// high level
-	plat.getTimeMilliSecond  = getTimeMilliSecond;
 	plat.shortFilePath       = shortFilePath;
 	plat.formatPackagePath   = formatPackagePath;
 	plat.formatTransparentPath = formatTransparentPath;
@@ -731,6 +528,10 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.reportCaughtException = reportCaughtException;
 	plat.debugPrintf         = (!verbose_debug) ? NOP_debugPrintf : debugPrintf;
 
+	// timer
+	plat.getTimeMilliSecond  = getTimeMilliSecond;
+
+	// logger
 	plat.LOGGER_NAME         = "syslog";
 	plat.syslog_i            = syslog;
 	plat.vsyslog_i           = vsyslog;
