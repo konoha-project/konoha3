@@ -35,6 +35,11 @@
 #include <time.h>  //for 'struct timeval'
 #endif
 
+#if defined(__NetBSD__)
+#include <sys/time.h>
+#include <sys/select.h>
+#endif	//__NetBSD__
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -449,10 +454,10 @@ static KMETHOD System_send(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kBytes *ba = sfp[2].asBytes;
 	// Broken Pipe Signal Mask
-#if !(defined(__APPLE__) || defined(__NetBSD__))
+#if defined(__linux__)
 	__sighandler_t oldset = signal(SIGPIPE, SIG_IGN);
 	__sighandler_t ret_signal = SIG_ERR;
-#else
+#elif defined(__APPLE__) || defined(__NetBSD__)
 	sig_t oldset = signal(SIGPIPE, SIG_IGN);
 	sig_t ret_signal = SIG_ERR;
 #endif
@@ -492,10 +497,10 @@ static KMETHOD System_sendto(KonohaContext *kctx, KonohaStack* sfp)
 	kString* s = sfp[4].asString;
 	toSockaddr(&addr, (char *)S_text(s), WORD2INT(sfp[5].intValue), WORD2INT(sfp[6].intValue));
 	// Broken Pipe Signal Mask
-#if !(defined(__APPLE__) || defined(__NetBSD__))
+#if defined(__linux__)
 	__sighandler_t oldset = signal(SIGPIPE, SIG_IGN);
 	__sighandler_t ret_signal = SIG_ERR;
-#else
+#elif defined(__APPLE__) || defined(__NetBSD__)
 	sig_t oldset = signal(SIGPIPE, SIG_IGN);
 	sig_t ret_signal = SIG_ERR;
 #endif
@@ -663,7 +668,7 @@ static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 			{_KVi(PF_INET)},
 			{_KVi(PF_INET6)},
 			{_KVi(PF_APPLETALK)},
-#if !(defined(__APPLE__) || defined(__NetBSD__))
+#ifdef __linux___
 			{_KVi(PF_PACKET)},
 #endif
 			{_KVi(AF_LOCAL)},
@@ -671,7 +676,7 @@ static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 			{_KVi(AF_INET)},
 			{_KVi(AF_INET6)},
 			{_KVi(AF_APPLETALK)},
-#if !(defined(__APPLE__) || defined(__NetBSD__))
+#ifdef __linux___
 			{_KVi(AF_PACKET)},
 #endif
 			// Types of sockets
@@ -688,7 +693,7 @@ static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 			{_KVi(MSG_DONTWAIT)},
 			{_KVi(MSG_EOR)},
 			{_KVi(MSG_WAITALL)},
-#ifndef __APPLE__
+#ifdef	__linux__
 			{_KVi(MSG_CONFIRM)},
 			{_KVi(MSG_ERRQUEUE)},
 			{_KVi(MSG_NOSIGNAL)},
@@ -704,7 +709,7 @@ static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 			{_KVi(SO_RCVBUF)},
 			{_KVi(SO_KEEPALIVE)},
 			{_KVi(SO_OOBINLINE)},
-#if !(defined(__APPLE__) || defined(__NetBSD__))
+#ifdef	__linux__
 			{_KVi(SO_NO_CHECK)},
 			{_KVi(SO_PRIORITY)},
 #endif
