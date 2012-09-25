@@ -182,6 +182,7 @@ endif(MSVC)
 check_symbol_exists(posix_memalign "${_HEADERS}" HAVE_POSIX_MEMALIGN)
 check_symbol_exists(memalign       "${_HEADERS}" HAVE_MEMALIGN)
 check_symbol_exists(__builtin_ctzl "${_HEADERS}" HAVE_BUILTIN_CTZL)
+check_symbol_exists(bzero "${_HEADERS}" HAVE_BZERO)
 
 FIND_FILE(HAS_DOTGIT .git PATHS "${CMAKE_CURRENT_SOURCE_DIR}")
 if("${HAS_DOTGIT}" MATCHES ".git")
