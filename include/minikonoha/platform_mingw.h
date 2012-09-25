@@ -24,21 +24,30 @@
 
 #ifndef PLATFORM_MINGW_H_
 #define PLATFORM_MINGW_H_
-#ifndef MINIOKNOHA_H_
-#error Do not include platform_posix.h without minikonoha.h.
+
+/* platform configuration */
+
+#ifndef K_OSDLLEXT
+#define K_OSDLLEXT        ".dll"
+#endif
+
+#ifdef PATH_MAX
+#define K_PATHMAX PATH_MAX
+#else
+#define K_PATHMAX 256
 #endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <setjmp.h>
 #include <sys/time.h>
-#ifdef HAVE_SYSLOG_H
-#include <syslog.h>
-#endif
+
 #ifdef HAVE_DLFCN_H
 #include <dlfcn.h>
 #endif
 #include <sys/stat.h>
+#include <errno.h>
+
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
 #endif /* HAVE_ICONV_H */
@@ -47,12 +56,6 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#ifdef PATH_MAX
-#define K_PATHMAX PATH_MAX
-#else
-#define K_PATHMAX 256
 #endif
 
 #define kunused __attribute__((unused))
@@ -67,6 +70,44 @@ static const char *getSystemCharset(void)
 #else
 	return "UTF-8";
 #endif
+}
+
+typedef uintptr_t (*ficonv_open)(const char *, const char *);
+typedef size_t (*ficonv)(uintptr_t, char **, size_t *, char **, size_t *);
+typedef int    (*ficonv_close)(uintptr_t);
+
+static kunused uintptr_t dummy_iconv_open(const char *t, const char *f)
+{
+	return -1;
+}
+static kunused size_t dummy_iconv(uintptr_t i, char **t, size_t *ts, char **f, size_t *fs)
+{
+	return 0;
+}
+static kunused int dummy_iconv_close(uintptr_t i)
+{
+	return 0;
+}
+
+static void loadIconv(PlatformApiVar *plat)
+{
+#ifdef _ICONV_H
+	plat->iconv_open_i    = (ficonv_open)iconv_open;
+	plat->iconv_i         = (ficonv)iconv;
+	plat->iconv_close_i   = (ficonv_close)iconv_close;
+#else
+	HMODULE handler = LoadLibrary("libiconv" K_OSDLLEXT);
+	if(handler != NULL) {
+		plat->iconv_open_i = (ficonv_open)GetProcAddress(handler, "iconv_open");
+		plat->iconv_i = (ficonv)GetProcAddress(handler, "iconv");
+		plat->iconv_close_i = (ficonv_close)GetProcAddress(handler, "iconv_close");
+	}
+	else {
+		plat->iconv_open_i = dummy_iconv_open;
+		plat->iconv_i = dummy_iconv;
+		plat->iconv_close_i = dummy_iconv_close;
+	}
+#endif /* _ICONV_H */
 }
 
 // -------------------------------------------------------------------------
@@ -361,11 +402,11 @@ static const char* beginTag(kinfotag_t t)
 {
 	DBG_ASSERT(t <= NoneTag);
 	static const char* tags[] = {
-		"\x1b[1m\x1b[31m", /*CritTag*/
-		"\x1b[1m\x1b[31m", /*ErrTag*/
-		"\x1b[1m\x1b[31m", /*WarnTag*/
-		"\x1b[1m", /*NoticeTag*/
-		"\x1b[1m", /*InfoTag*/
+		"", /*CritTag*/
+		"", /*ErrTag*/
+		"", /*WarnTag*/
+		"", /*NoticeTag*/
+		"", /*InfoTag*/
 		"", /*DebugTag*/
 		"", /* NoneTag*/
 	};
@@ -376,11 +417,11 @@ static const char* endTag(kinfotag_t t)
 {
 	DBG_ASSERT(t <= NoneTag);
 	static const char* tags[] = {
-		"\x1b[0m", /*CritTag*/
-		"\x1b[0m", /*ErrTag*/
-		"\x1b[0m", /*WarnTag*/
-		"\x1b[0m", /*NoticeTag*/
-		"\x1b[0m", /*InfoTag*/
+		"", /*CritTag*/
+		"", /*ErrTag*/
+		"", /*WarnTag*/
+		"", /*NoticeTag*/
+		"", /*InfoTag*/
 		"", /* Debug */
 		"", /* NoneTag*/
 	};
@@ -423,31 +464,41 @@ static void NOP_debugPrintf(const char *file, const char *func, int line, const 
 {
 }
 
-typedef uintptr_t (*ficonv_open)(const char *, const char *);
-typedef size_t (*ficonv)(uintptr_t, char **, size_t *, char **, size_t *);
-typedef int    (*ficonv_close)(uintptr_t);
+// --------------------------------------------------------------------------
 
-static kunused uintptr_t dummy_iconv_open(const char *t, const char *f)
+#include "libcode/libc_readline.h"
+
+static void PlatformApi_loadReadline(PlatformApiVar *plat)
 {
-	return -1;
-}
-static kunused size_t dummy_iconv(uintptr_t i, char **t, size_t *ts, char **f, size_t *fs)
-{
-	return 0;
-}
-static kunused int dummy_iconv_close(uintptr_t i)
-{
-	return 0;
+	HMODULE handler = LoadLibrary("libreadline" K_OSDLLEXT);
+	if(handler != NULL) {
+		plat->readline_i = (char* (*)(const char*))GetProcAddress(handler, "readline");
+		plat->add_history_i = (int (*)(const char*))GetProcAddress(handler, "add_history");
+	}
+	if(plat->readline_i == NULL) {
+		plat->readline_i = readline;
+	}
+	if(plat->add_history_i == NULL) {
+		plat->add_history_i = add_history;
+	}
 }
 
-static void loadIconv(PlatformApiVar *plat)
-{
-#ifdef HAVE_ICONV_H
-		plat->iconv_open_i = dummy_iconv_open;
-		plat->iconv_i = dummy_iconv;
-		plat->iconv_close_i = dummy_iconv_close;
+// --------------------------------------------------------------------------
 
-#endif /* HAVE_ICONV_H */
+#define EBUFSIZ 1024
+#include "libcode/logtext_formatter.h"
+
+static void traceDataLog(void *logger, int logkey, logconf_t *logconf, ...)
+{
+	char buf[EBUFSIZ];
+	va_list ap;
+	va_start(ap, logconf);
+	writeDataLogToBuffer(logconf, ap, buf, buf + (EBUFSIZ - 4));
+	//syslog(LOG_NOTICE, "%s", buf);
+	if(verbose_debug) {
+		fprintf(stderr, "TRACE %s\n", buf);
+	}
+	va_end(ap);
 }
 
 static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
@@ -462,10 +513,6 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.longjmp_i       = klongjmp;
 	loadIconv(&plat);
 	plat.getSystemCharset = getSystemCharset;
-#ifdef HAVE_SYSLOG_H
-	plat.syslog_i        = syslog;
-	plat.vsyslog_i       = vsyslog;
-#endif
 	plat.printf_i        = printf;
 	plat.vprintf_i       = vprintf;
 	plat.snprintf_i      = snprintf;  // avoid to use Xsnprintf
@@ -481,8 +528,6 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.pthread_mutex_trylock_i = pthread_mutex_trylock;
 	plat.pthread_mutex_destroy_i = pthread_mutex_destroy;
 
-	// high level
-	plat.getTimeMilliSecond  = getTimeMilliSecond;
 	plat.shortFilePath       = shortFilePath;
 	plat.formatPackagePath   = formatPackagePath;
 	plat.formatTransparentPath = formatTransparentPath;
@@ -495,10 +540,24 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.shortText           = shortText;
 	plat.reportCaughtException = reportCaughtException;
 	plat.debugPrintf         = (!verbose_debug) ? NOP_debugPrintf : debugPrintf;
+
+	// timer
+	plat.getTimeMilliSecond  = getTimeMilliSecond;
+
+	// readline
+	PlatformApi_loadReadline(&plat);
+
+	// logger
+	//plat.LOGGER_NAME         = "syslog";
+	//plat.syslog_i            = syslog;
+	//plat.vsyslog_i           = vsyslog;
+	plat.logger              = NULL;
+	plat.traceDataLog        = traceDataLog;
 	return (PlatformApi*)(&plat);
 }
 
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
+
 #endif /* PLATFORM_MINGW_H_ */

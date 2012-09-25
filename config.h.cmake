@@ -69,3 +69,6 @@
 
 /* Define to 1 if you have the `__builtin_ctzl' function. */
 #cmakedefine HAVE_BUILTIN_CTZL 1
+
+/* Define to 1 if you have the `bzero' function. */
+#cmakedefine HAVE_BZERO 1
