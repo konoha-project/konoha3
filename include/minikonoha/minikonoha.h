@@ -112,12 +112,14 @@ typedef KonohaPackageHandler* (*PackageLoadFunc)(void);
 #ifndef jmpbuf_i
 #include <setjmp.h>
 #define jmpbuf_i jmp_buf
-#if defined(__MINGW32__)
+#if defined(__MINGW64__)
 static inline int setjmp_mingw(_JBTYPE* t)
 {
 	return _setjmp(t, NULL);
 }
 #define ksetjmp  setjmp_mingw
+#elif defined(__MINGW32__)
+#define ksetjmp  _setjmp
 #else
 #define ksetjmp  setjmp
 #endif
