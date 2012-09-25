@@ -30,7 +30,7 @@
 #endif
 
 #include <string.h>
-#ifndef __MINGW32__
+#ifdef __GNUC__
 #include <langinfo.h>
 #endif
 #include <locale.h>

@@ -84,7 +84,11 @@ extern "C" {
 #ifndef __KERNEL__
 #include <limits.h>
 #include <float.h>
+#ifdef HAVE_STDBOOL_H
 #include <stdbool.h>
+#else
+#include <minikonoha/stdbool.h>
+#endif
 #include <stdint.h>
 #endif
 
@@ -92,6 +96,20 @@ extern "C" {
 #define __PRINTFMT(idx1, idx2) __attribute__((format(printf, idx1, idx2)))
 #else
 #define __PRINTFMT(idx1, idx2)
+#endif
+
+#ifdef _MSC_VER
+#pragma warning(disable:4013)
+#pragma warning(disable:4033)
+#pragma warning(disable:4100)
+#pragma warning(disable:4114)
+#pragma warning(disable:4127)
+#pragma warning(disable:4201)
+#pragma warning(disable:4204)
+#pragma warning(disable:4431)
+#pragma warning(disable:4820)
+
+#define inline
 #endif
 
 /* ------------------------------------------------------------------------ */
@@ -106,7 +124,11 @@ typedef struct KonohaLibVar          KonohaLibVar;
 #define KLIB    (kctx->klib)->
 
 #define KDEFINE_PACKAGE KonohaPackageHandler
+#ifdef _MSC_VER
+typedef struct KonohaPackageHandlerVar KonohaPackageHandler;
+#else
 typedef const struct KonohaPackageHandlerVar KonohaPackageHandler;
+#endif
 typedef KonohaPackageHandler* (*PackageLoadFunc)(void);
 
 #ifndef jmpbuf_i
@@ -118,7 +140,7 @@ static inline int setjmp_mingw(_JBTYPE* t)
 	return _setjmp(t, NULL);
 }
 #define ksetjmp  setjmp_mingw
-#elif defined(__MINGW32__)
+#elif defined(__MINGW32__) || defined(_MSC_VER)
 #define ksetjmp  _setjmp
 #else
 #define ksetjmp  setjmp
@@ -1319,9 +1341,13 @@ struct _kSystem {
 
 #define KPACKNAME(N, V) \
 	.name = N, .version = V, .konoha_checksum = K_CHECKSUM, .konoha_revision = K_REVISION
+#define KSETPACKNAME(VAR, N, V) \
+ 	do{ VAR.name = N; VAR.version = V; VAR.konoha_checksum = K_CHECKSUM; VAR.konoha_revision = K_REVISION; } while(0)
 
 #define KPACKLIB(N, V) \
 	.libname = N, .libversion = V
+#define KSETPACKLIB(VAR, N, V) \
+	do{ VAR.libname = N; VAR.libversion = V; } while(0)
 
 typedef enum {  Nope, FirstTime } isFirstTime_t;
 
@@ -1557,10 +1583,7 @@ typedef struct {
 // gc
 
 #if defined(_MSC_VER)
-#define OBJECT_SET(var, val) do {\
-	kObject **var_ = (kObject**)&val; \
-	var_[0] = (val_); \
-} while (0)
+#define OBJECT_SET(var, val) var = (decltype(var))(val)
 #else
 #define OBJECT_SET(var, val) var = (typeof(var))(val)
 #endif /* defined(_MSC_VER) */
@@ -1660,9 +1683,15 @@ typedef struct {
 } while (0)
 
 #ifndef USE_SMALLBUILD
+#ifdef _MSC_VER
+#define KNH_ASSERT(a)
+#define DBG_ASSERT(a)
+#define TODO_ASSERT(a)
+#else
 #define KNH_ASSERT(a)       assert(a)
 #define DBG_ASSERT(a)       assert(a)
 #define TODO_ASSERT(a)      assert(a)
+#endif /* _MSC_VER */
 #define DBG_P(fmt, ...)     PLATAPI debugPrintf(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__)
 #define DBG_ABORT(fmt, ...) PLATAPI debugPrintf(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__); PLATAPI exit_i(EXIT_FAILURE)
 #define DUMP_P(fmt, ...)    PLATAPI printf_i(fmt, ## __VA_ARGS__)
@@ -1675,12 +1704,22 @@ typedef struct {
 #define DUMP_P(fmt, ...)
 #endif
 
+#ifdef __GNUC__
 #ifndef unlikely
 #define unlikely(x)   __builtin_expect(!!(x), 0)
 #endif
 
 #ifndef likely
 #define likely(x)     __builtin_expect(!!(x), 1)
+#endif
+#else
+#ifndef unlikely
+#define unlikely(x)   (x)
+#endif
+
+#ifndef likely
+#define likely(x)     (x)
+#endif
 #endif
 
 ///* Konoha API */
