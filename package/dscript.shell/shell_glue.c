@@ -55,7 +55,7 @@ static KMETHOD StmtTyCheck_dsh(KonohaContext *kctx, KonohaStack *sfp)
 		kToken *token = tokenList->tokenItems[i];
 		KLIB Kwb_write(kctx, &wb, S_text(token->text), S_size(token->text));
 		if(Token_isBeforeWhiteSpace(token)) {
-			KLIB Kwb_write(kctx, &wb, " ", 1);
+			kwb_putc(&wb, ' ');
 		}
 	}
 	kString *cmd = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), 0);
@@ -68,7 +68,8 @@ static KMETHOD StmtTyCheck_dsh(KonohaContext *kctx, KonohaStack *sfp)
 	kExpr *callExpr = new_ConstValueExpr(kctx, TY_String, UPCAST(cmd));
 	callToken->resolvedSymbol = MN_("call");
 	const char cname[] = "Subproc";
-	kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 3, callToken, new_UnboxConstValueExpr(kctx, KLIB kNameSpace_getClass(kctx, ns, cname, strlen(cname), NULL)->typeId, 0), callExpr);
+	kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 3, callToken,
+			new_UnboxConstValueExpr(kctx, KLIB kNameSpace_getClass(kctx, ns, cname, strlen(cname), NULL)->typeId, 0), callExpr);
 	KLIB kObject_setObject(kctx, stmt, KW_ExprPattern, TY_Expr, expr);
 	kbool_t ret = SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_int, 0);
 	if(ret) {
@@ -82,12 +83,10 @@ static KMETHOD StmtTyCheck_dsh(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t shell_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
-	//KImportPackage(ns, "konoha.new", pline);
-	//KImportPackage(ns, "konoha.global", pline);
 	//KImportPackage(ns, "dscript.dollar", pline);
 	KImportPackage(ns, "dscript.subproc", pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("dsh"), .rule = "\"dsh\" $Token", TopStmtTyCheck_(dsh)},
+		{ .keyword = SYM_("dsh"), .rule = "\"dsh\" $Token", TopStmtTyCheck_(dsh), StmtTyCheck_(dsh)},
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
