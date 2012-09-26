@@ -84,6 +84,10 @@ static void kObject_writeToBuffer(KonohaContext *kctx, kObject *o, int isDelim, 
 	if(IS_NULL(o)) {
 		KLIB Kwb_write(kctx, wb, TEXTSIZE("null"));
 	}
+	else if(IS_String(o)) {
+		kString *s = (kString *)o;
+		KLIB Kwb_write(kctx, wb, S_text(s), S_size(s));
+	}
 	else {
 		if(sfp == NULL) {
 			sfp = (KonohaValue*)kctx->esp;
