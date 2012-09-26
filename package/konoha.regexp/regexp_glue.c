@@ -332,9 +332,11 @@ static void WB_write_regexpfmt(KonohaContext *kctx, KUtilsWriteBuffer *wb, kbyte
 {
 	const char *ch = fmt->text;
 	const char *eof = ch + fmt->len; // end of fmt
+	char buf[1];
 	for (; ch < eof; ch++) {
 		if (*ch == '\\') {
-			kwb_putc(wb, *ch);
+			buf[0] = *ch;
+			KLIB Kwb_write(kctx, wb, buf, 1);
 			ch++;
 		} else if (*ch == '$' && isdigit(ch[1])) {
 			size_t grpidx = (size_t)ch[1] - '0'; // get head of grourp_index
@@ -355,7 +357,8 @@ static void WB_write_regexpfmt(KonohaContext *kctx, KUtilsWriteBuffer *wb, kbyte
 				continue; // skip putc
 			}
 		}
-		kwb_putc(wb, *ch);
+		buf[0] = *ch;
+		KLIB Kwb_write(kctx, wb, buf, ch);
 	}
 }
 

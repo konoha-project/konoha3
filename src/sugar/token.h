@@ -53,6 +53,13 @@ static TokenRange* new_TokenStackRange(KonohaContext *kctx, TokenRange *range, T
 
 /* ------------------------------------------------------------------------ */
 
+static void ERROR_UnclosedToken(KonohaContext *kctx, kTokenVar *tk, const char *ch)
+{
+	if(IS_NOTNULL(tk)) {
+		kToken_printMessage(kctx, tk, ErrTag, "must close with %s", ch);
+	}
+}
+
 static int parseINDENT(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int pos)
 {
 	int ch, indent = 0;
@@ -79,7 +86,7 @@ static int parseNUM(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int 
 	int ch, pos = tok_start;
 	const char *ts = tenv->source;
 	while((ch = ts[pos++]) != 0) {
-		if(ch == '_') continue; // nothing
+		//if(ch == '_') continue; // nothing
 		if(!isalnum(ch)) break;
 	}
 	if(IS_NOTNULL(tk)) {
@@ -171,9 +178,7 @@ static int parseCOMMENT(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, 
 		}
 		prev = ch;
 	}
-	if(IS_NOTNULL(tk)) {
-		kToken_printMessage(kctx, tk, ErrTag, "must close with */");
-	}
+	ERROR_UnclosedToken(kctx, tk, "*/");
 	return pos-1;/*EOF*/
 }
 
@@ -191,30 +196,29 @@ static int parseSLASH(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, in
 
 static int parseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
 {
-	KUtilsWriteBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	int ch, prev = '"', prev2 = '\0', pos = tok_start + 1;
+	int ch, prev = '"', prev2 = '\0', pos = tok_start + 1, hasUTF8 = false;
 	while((ch = tenv->source[pos++]) != 0) {
 		if(ch == '\n') {
 			break;
 		}
 		if(ch == '"' && (prev != '\\' || (prev == '\\' && prev2 == '\\'))) {
 			if(IS_NOTNULL(tk)) {
-				size_t length = Kwb_bytesize(&wb);
-				KSETv(tk, tk->text, KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), length, 0));
+				size_t length = pos - (tok_start + 1) - 1;
+				KSETv(tk, tk->text, KLIB new_kString(kctx, tenv->source + tok_start + 1, length, hasUTF8 ? SPOL_UTF8 : SPOL_ASCII));
 				tk->unresolvedTokenType = TokenType_TEXT;
 			}
-			KLIB Kwb_free(&wb);
 			return pos;
+		}
+		if(ch == '\\' && IS_NOTNULL(tk)) {
+			kToken_set(RequiredReformat, tk, true);
+		}
+		if(ch < 0) {
+			hasUTF8 = true;
 		}
 		prev2 = prev;
 		prev = ch;
-		kwb_putc(&wb, ch);
 	}
-	if(IS_NOTNULL(tk)) {
-		kToken_printMessage(kctx, tk, ErrTag, "must close with \"");
-	}
-	KLIB Kwb_free(&wb);
+	ERROR_UnclosedToken(kctx, tk, "\"");
 	return pos-1;
 }
 
@@ -224,8 +228,7 @@ static int ParseWhiteSpace(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *ten
 	if(size > 0) {
 		kTokenVar *tk = tenv->tokenList->tokenVarItems[size-1];
 		if(tk->uline == tenv->currentLine && tk->unresolvedTokenType != TokenType_INDENT) {
-			Token_setBeforeWhiteSpace(tk, true);
-//			DBG_P("BeforeWhiteSpace: '%s'", S_text(tk->text));
+			kToken_set(BeforeWhiteSpace, tk, true);
 		}
 	}
 	return tok_start+1;
@@ -462,9 +465,7 @@ static int parseLazyBlock(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv
 			pos = tokenizeEach(kctx, ch, (kTokenVar*)K_NULLTOKEN, tenv, pos);
 		}
 	}
-	if(IS_NOTNULL(tk)) {
-		kToken_printMessage(kctx, tk, ErrTag, "must close with }");
-	}
+	ERROR_UnclosedToken(kctx, tk, "}");
 	return pos-1;
 }
 

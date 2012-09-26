@@ -837,17 +837,17 @@ static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 			Kwb_init(&(kctx->stack->cwb), &wb);
 			kString *s = SYM_s(ct->classNameSymbol);
 			KLIB Kwb_write(kctx, &wb, S_text(s), S_size(s));
-			kwb_putc(&wb, '[');
+			KLIB Kwb_write(kctx, &wb, "[", 1);
 			if(ct->baseTypeId == TY_Func) {
 				s = KonohaClass_shortName(kctx, CT_(ct->p0));
 				KLIB Kwb_write(kctx, &wb, S_text(s), S_size(s)); c++;
 			}
 			for(i = 0; i < cparam->psize; i++) {
-				if(c > 0) kwb_putc(&wb, ',');
+				if(c > 0) KLIB Kwb_write(kctx, &wb, ",", 1);
 				s = KonohaClass_shortName(kctx, CT_(cparam->paramtypeItems[i].ty));
 				KLIB Kwb_write(kctx, &wb, S_text(s), S_size(s));
 			}
-			kwb_putc(&wb, ']');
+			KLIB Kwb_write(kctx, &wb, "]", 1);
 			const char *text = Kwb_top(kctx, &wb, 1);
 			KINITv(((KonohaClassVar*)ct)->shortNameNULL, new_kString(kctx, text, Kwb_bytesize(&wb), SPOL_ASCII));
 			KLIB Kwb_free(&wb);
@@ -943,6 +943,7 @@ static void loadInitStructData(KonohaContext *kctx)
 		.init = kArray_init,
 		.reftrace = kArray_reftrace,
 		.free = kArray_free,
+		.p    = kArray_p,
 	};
 	KDEFINE_CLASS defParam = {
 		TYNAME(Param),

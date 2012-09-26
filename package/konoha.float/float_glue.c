@@ -46,9 +46,9 @@ static void Float_init(KonohaContext *kctx, kObject *o, void *conf)
 	n->unboxValue = (uintptr_t)conf;  // conf is unboxed data
 }
 
-static void Float_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void Float_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
-	KLIB Kwb_printf(kctx, wb, KFLOAT_FMT, sfp[pos].floatValue);
+	KLIB Kwb_printf(kctx, wb, KFLOAT_FMT, v[pos].floatValue);
 }
 
 static void kmodfloat_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)

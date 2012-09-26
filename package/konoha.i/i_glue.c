@@ -22,69 +22,74 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+#define  USE_MethodFlagData
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/klib.h>
 
-struct fn {
-	uintptr_t  flag;
-	const char *aname;
-};
+//struct fn {
+//	uintptr_t  flag;
+//	const char *aname;
+//};
+//
+//#define _P(T)  kMethod_##T, #T
+//
+//static struct fn attrs[] = {
+//	{_P(Public)}, {_P(Static)}, {_P(Const)}, {_P(Abstract)},
+//	{_P(Virtual)}, {_P(Final)}, /*{_P(Overloaded)},*/
+//	{_P(Coercion)}, {_P(SmartReturn)},
+//	{_P(Restricted)}, {_P(Immutable)},
+////	{_P(FASTCALL)}, {_P(CALLCC)},
+//	{_P(Hidden)},
+//	{0, NULL}
+//};
+//
+//static void MethodAttribute_p(KonohaContext *kctx, kMethod *mtd, KUtilsWriteBuffer *wb)
+//{
+//	uintptr_t i;
+//	for(i = 0; i < 30; i++) {
+//		if(attrs[i].aname == NULL) break;
+//		if((attrs[i].flag & mtd->flag) == attrs[i].flag) {
+//			KLIB Kwb_printf(kctx, wb, "@%s ", attrs[i].aname);
+//		}
+//	}
+//	if(Method_isCast(mtd)) {
+//		KLIB Kwb_printf(kctx, wb, "@Cast ");
+//	}
+////	if(Method_isTransCast(mtd)) {
+////		KLIB Kwb_printf(kctx, wb, "@T ");
+////	}
+//}
 
-#define _P(T)  kMethod_##T, #T
-
-static struct fn attrs[] = {
-	{_P(Public)}, {_P(Static)}, {_P(Const)}, {_P(Abstract)},
-	{_P(Virtual)}, {_P(Final)}, /*{_P(Overloaded)},*/
-	{_P(Coercion)}, {_P(SmartReturn)},
-	{_P(Restricted)}, {_P(Immutable)},
-//	{_P(FASTCALL)}, {_P(CALLCC)},
-	{_P(Hidden)},
-	{0, NULL}
-};
-
-static void MethodAttribute_p(KonohaContext *kctx, kMethod *mtd, KUtilsWriteBuffer *wb)
+static void Method_writeAttributeToBuffer(KonohaContext *kctx, kMethod *mtd, KUtilsWriteBuffer *wb)
 {
-	uintptr_t i;
-	for(i = 0; i < 30; i++) {
-		if(attrs[i].aname == NULL) break;
-		if((attrs[i].flag & mtd->flag) == attrs[i].flag) {
-			KLIB Kwb_printf(kctx, wb, "@%s ", attrs[i].aname);
+	size_t i;
+	for(i = 0; i < sizeof(MethodFlagData)/sizeof(const char*); i++) {
+		uintptr_t flagmask = 1 << i;
+		if((mtd->flag && flagmask) == flagmask) {
+			KLIB Kwb_printf(kctx, wb, "@%s ", MethodFlagData[i]);
 		}
 	}
-	if(Method_isCast(mtd)) {
-		KLIB Kwb_printf(kctx, wb, "@Cast ");
-	}
-//	if(Method_isTransCast(mtd)) {
-//		KLIB Kwb_printf(kctx, wb, "@T ");
-//	}
 }
 
-static void Method_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void kMethod_writeToBuffer(KonohaContext *kctx, kMethod *mtd, KUtilsWriteBuffer *wb)
 {
-	kMethod *mtd = sfp[pos].asMethod;
 	kParam *pa = Method_param(mtd);
-	DBG_ASSERT(IS_Method(mtd));
-	if(level != 0) {
-		MethodAttribute_p(kctx, mtd, wb);
-	}
+	Method_writeAttributeToBuffer(kctx, mtd, wb);
 	KLIB Kwb_printf(kctx, wb, "%s %s.%s%s", TY_t(pa->rtype), TY_t(mtd->typeId), T_mn(mtd->mn));
-	if(level != 0) {
+	{
 		size_t i;
-		kwb_putc(wb, '(');
+		KLIB Kwb_write(kctx, wb, "(", 1);
 		for(i = 0; i < pa->psize; i++) {
 			if(i > 0) {
-				kwb_putc(wb, ',', ' ');
+				KLIB Kwb_write(kctx, wb, ", ", 2);
 			}
 			if(FN_isCOERCION(pa->paramtypeItems[i].fn)) {
 				KLIB Kwb_printf(kctx, wb, "@Coercion ");
 			}
 			KLIB Kwb_printf(kctx, wb, "%s %s", TY_t(pa->paramtypeItems[i].ty), SYM_t(pa->paramtypeItems[i].fn));
 		}
-//		if(Param_isVARGs(DP(mtd)->mp)) {
-//			knh_write_delimdots(kctx, w);
-//		}
-		kwb_putc(wb, ')');
+		KLIB Kwb_write(kctx, wb, ")", 1);
 	}
 }
 
@@ -104,8 +109,7 @@ static void dumpMethod(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd)
 {
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	KSETv_AND_WRITE_BARRIER(NULL, sfp[2].asMethod, mtd, GC_NO_WRITE_BARRIER);
-	Method_p(kctx, sfp, 2, &wb, 1);
+	kMethod_writeToBuffer(kctx, mtd, &wb);
 	PLATAPI printf_i("%s\n", KLIB Kwb_top(kctx, &wb, 1));
 	KLIB Kwb_free(&wb);
 	return;
@@ -143,8 +147,6 @@ static KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KonohaClass *ct = kclass(TY_Method, pline);
-	KSET_TYFUNC(ct, p, Method, pline);
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(NameSpace_man), TY_void, TY_NameSpace, MN_("man"), 1, TY_Object, FN_("x") | FN_COERCION,
 		DEND,

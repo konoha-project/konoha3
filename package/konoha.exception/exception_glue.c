@@ -212,7 +212,7 @@ static kbool_t exception_initPackage(KonohaContext *kctx, kNameSpace *ns, int ar
 	KDEFINE_CLASS defException = {
 		STRUCTNAME(Exception),
 		.cflag = CFLAG_Exception,
-		.init = Exception_init,
+		.init  = Exception_init,
 		.reftrace = Exception_reftrace,
 		.p     = Exception_p,
 	};

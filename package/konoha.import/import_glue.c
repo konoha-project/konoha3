@@ -51,7 +51,7 @@ static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp)
 				}
 			}
 			KLIB Kwb_write(kctx, &wb, S_text(tk->text), S_size(tk->text));
-			kwb_putc(&wb, '.');
+			KLIB Kwb_write(kctx, &wb, ".", 1);
 		}
 	}
 	kString *name = tokenList->tokenItems[i]->text;

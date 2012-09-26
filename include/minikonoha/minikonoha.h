@@ -425,11 +425,11 @@ typedef struct {
 #define FN_Coersion             FN_COERCION
 #define FN_isCOERCION(fn)       ((fn & FN_COERCION) == FN_COERCION)
 
-#define MN_ISBOOL     KFLAG_H0
+//#define MN_ISBOOL     KFLAG_H0
 #define MN_GETTER     KFLAG_H1
 #define MN_SETTER     KFLAG_H2
 
-#define MN_Annotation (KFLAG_H1|KFLAG_H2)
+#define MN_Annotation        (KFLAG_H1|KFLAG_H2)
 #define MN_isAnnotation(S)   ((S & KW_PATTERN) == MN_Annotation)
 
 #define MN_TOCID             (KFLAG_H0|KFLAG_H1)
@@ -437,8 +437,8 @@ typedef struct {
 #define KW_PATTERN           (KFLAG_H0|KFLAG_H1|KFLAG_H2)
 #define KW_isPATTERN(S)      ((S & KW_PATTERN) == KW_PATTERN)
 
-#define MN_isISBOOL(mn)      (SYM_HEAD(mn) == MN_ISBOOL)
-#define MN_toISBOOL(mn)      ((SYM_UNMASK(mn)) | MN_ISBOOL)
+//#define MN_isISBOOL(mn)      (SYM_HEAD(mn) == MN_ISBOOL)
+//#define MN_toISBOOL(mn)      ((SYM_UNMASK(mn)) | MN_ISBOOL)
 #define MN_isGETTER(mn)      (SYM_HEAD(mn) == MN_GETTER)
 #define MN_toGETTER(mn)      ((SYM_UNMASK(mn)) | MN_GETTER)
 #define MN_isSETTER(mn)      (SYM_HEAD(mn) == MN_SETTER)
@@ -1046,10 +1046,6 @@ struct kStringVar /* extends _Bytes */ {
 #define S_text(s)           ((const char*) (O_ct(s)->unbox(kctx, (kObject*)s)))
 #define S_size(s)           ((s)->bytesize)
 
-//#define S_equals(s, b)        knh_bytes_equals(S_tobytes(s), b)
-//#define S_startsWith(s, b)    knh_bytes_startsWith_(S_tobytes(s), b)
-//#define S_endsWith(s, b)      knh_bytes_endsWith_(S_tobytes(s), b)
-
 /* ------------------------------------------------------------------------ */
 //## class Array   Object;
 
@@ -1101,7 +1097,7 @@ struct kParamVar {
 
 #define IS_Method(o)                 (O_baseTypeId(o) == TY_Method)
 
-#ifdef FlagData
+#ifdef USE_MethodFlagData
 static const char* MethodFlagData[] = {
 	"Public", "Virtual", "Final", "Const", "Static", "Immutable",
 	"Coercion", "Restricted", "FastCall", "SmartReturn", "Variadic",
@@ -1479,7 +1475,7 @@ struct KonohaLibVar {
 #define KCALLOC(size, item)    KLIB Kzmalloc(kctx, ((size) * (item)))
 #define KFREE(p, size)         KLIB Kfree(kctx, p, size)
 
-#define kwb_putc(W,...)          KLIB Kwb_putc(kctx,W, ## __VA_ARGS__, -1)
+//#define KLIB Kwb_write(W,...)          KLIB Kwb_putc(kctx,W, ## __VA_ARGS__, -1)
 #define Kwb_bytesize(W)                 (((W)->m)->bytesize - (W)->pos)
 
 #define kclass(CID, UL)           KLIB Kclass(kctx, CID, UL)

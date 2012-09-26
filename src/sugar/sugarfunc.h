@@ -238,13 +238,13 @@ static KMETHOD ParseExpr_DOLLAR(KonohaContext *kctx, KonohaStack *sfp)
 /* ------------------------------------------------------------------------ */
 /* Expression TyCheck */
 
-static kString *resolveEscapeSequence(KonohaContext *kctx, kString *s, size_t start)
+static kString *kToken_resolvedEscapeSequence(KonohaContext *kctx, kToken *tk, size_t start)
 {
-	const char *text = S_text(s) + start;
-	const char *end  = S_text(s) + S_size(s);
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	KLIB Kwb_write(kctx, &wb, S_text(s), start);
+	const char *text = S_text(tk->text) + start;
+	const char *end  = S_text(tk->text) + S_size(tk->text);
+	KLIB Kwb_write(kctx, &wb, S_text(tk->text), start);
 	while (text < end) {
 		int ch = *text;
 		if(ch == '\\' && *(text+1) != '\0') {
@@ -262,12 +262,17 @@ static kString *resolveEscapeSequence(KonohaContext *kctx, kString *s, size_t st
 			case '"':  ch = '"';  text++; break;
 			case '\'': ch = '\''; text++; break;
 			case '\\': ch = '\\'; text++; break;
+			default:	return NULL;
 			}
 		}
-		kwb_putc(&wb, ch);
+		{
+			char buf[1] = {ch};
+			KLIB Kwb_write(kctx, &wb, (const char*)buf, 1);
+		}
 		text++;
 	}
-	s = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
+	kString *s = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
+	PUSH_GCSTACK(s);
 	KLIB Kwb_free(&wb);
 	return s;
 }
@@ -277,12 +282,12 @@ static KMETHOD ExprTyCheck_Text(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ExprTyCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
 	kString *text = tk->text;
-	size_t i, size = S_size(text);
-	for(i = 0; i < size; i++) {
-		int ch = text->buf[i];
-		if(ch == '\\') {
-			text = resolveEscapeSequence(kctx, text, i);
-			break;
+	if(kToken_is(RequiredReformat, tk)) {
+		const char *escape = strchr(S_text(text), '\\');
+		DBG_ASSERT(escape != NULL);
+		text = kToken_resolvedEscapeSequence(kctx, tk, escape - S_text(text));
+		if(text == NULL) {
+			RETURN_(ERROR_UndefinedEscapeSequence(kctx, stmt, tk));
 		}
 	}
 	RETURN_(SUGAR kExpr_setConstValue(kctx, expr, TY_String, UPCAST(text)));

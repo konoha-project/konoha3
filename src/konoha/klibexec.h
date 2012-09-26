@@ -367,10 +367,10 @@ static ksymbol_t Ksymbol(KonohaContext *kctx, const char *name, size_t len, int 
 				mask = MN_SETTER;
 			}
 		}
-		else if(ch1 == 's' && (ch0 == 'i'/* || ch0 == 'I'*/)) {
-			len -= 2; name += 2;
-			mask = MN_ISBOOL;
-		}
+//		else if(ch1 == 's' && (ch0 == 'i'/* || ch0 == 'I'*/)) {
+//			len -= 2; name += 2;
+//			mask = MN_ISBOOL;
+//		}
 		else if(ch1 == 'o' && (ch0 == 't'/* || ch0 == 'T'*/)) {
 			len -= 2; name += 2;
 			mask = MN_TOCID;
