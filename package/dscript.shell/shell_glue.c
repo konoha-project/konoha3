@@ -77,17 +77,6 @@ static KMETHOD StmtTyCheck_dsh(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNb_(ret);
 }
 
-//static KMETHOD ExprTyCheck_dsh(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	VAR_ExprTyCheck(stmt, expr, gma, reqty);
-//	const char cname[] = "Subproc";
-//	kNameSpace *ns = Stmt_nameSpace(stmt);
-//	kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, KLIB kNameSpace_getClass(kctx, ns, cname, strlen(cname), NULL)->typeId, MN_("call"), 0);
-//	asm("int3");
-//	//kExpr *callExpr = new_ConstValueExpr(kctx, TY_String, UPCAST(cmd));
-//	//RETURN_(SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_int, mtd, 1, 0));
-//}
-
 // ----------------------------------------------------------------------------
 /* define class */
 
@@ -98,7 +87,6 @@ static kbool_t shell_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameS
 	//KImportPackage(ns, "dscript.dollar", pline);
 	KImportPackage(ns, "dscript.subproc", pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		//{ .keyword = SYM_("dsh"), .rule = "\"dsh\" $Token", TopStmtTyCheck_(dsh), StmtTyCheck_(dsh)},
 		{ .keyword = SYM_("dsh"), .rule = "\"dsh\" $Token", TopStmtTyCheck_(dsh)},
 		{ .keyword = KW_END, },
 	};

@@ -120,7 +120,6 @@ static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
 				DBG_ASSERT(IS_Array(expr->cons));
 			}
 			else {
-				if(!IS_Array(expr->cons)) return;
 				DUMP_P("[%d] Expr: kw='%s%s', syn=%p, size=%ld", n, PSYM_t(expr->syn->keyword), expr->syn, kArray_size(expr->cons));
 				DUMP_P("\n");
 				for(i=0; i < kArray_size(expr->cons); i++) {
