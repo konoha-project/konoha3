@@ -28,14 +28,13 @@
 
 static kObject* DEFAULT_fnull(KonohaContext *kctx, KonohaClass *ct);
 
-static void Object_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kObject_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kObjectVar *of = (kObjectVar*)o;
 	of->fieldUnboxItems[0] = 0;
-//	of->fieldUnboxItems[1] = 0;
 }
 
-static void Object_reftrace(KonohaContext *kctx, kObject *o)
+static void kObject_reftrace(KonohaContext *kctx, kObject *o)
 {
 	kObject *of = (kObject*)o;
 	KonohaClass *ct = O_ct(of);
@@ -47,10 +46,6 @@ static void Object_reftrace(KonohaContext *kctx, kObject *o)
 		}
 	}
 	END_REFTRACE();
-}
-
-static void Object_initdef(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t pline)
-{
 }
 
 static kObject *new_kObject(KonohaContext *kctx, KonohaClass *ct, uintptr_t conf)
@@ -71,36 +66,36 @@ static kObject *new_kObjectOnGCSTACK(KonohaContext *kctx, KonohaClass *ct, uintp
 	return (kObject*)o;
 }
 
-static uintptr_t Number_unbox(KonohaContext *kctx, kObject *o)
+static uintptr_t kNumber_unbox(KonohaContext *kctx, kObject *o)
 {
 	kNumber *n = (kNumber*)o;
 	return (uintptr_t) n->unboxValue;
 }
 
 // Boolean
-static void Number_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kNumber_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kIntVar *n = (kIntVar*)o;
 	n->unboxValue = (uintptr_t)conf;
 }
 
-static void Boolean_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void kBoolean_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
 	KLIB Kwb_printf(kctx, wb, sfp[pos].boolValue ? "true" : "false");
 }
 
-static kObject* Boolean_fnull(KonohaContext *kctx, KonohaClass *ct)
+static kObject* kBoolean_fnull(KonohaContext *kctx, KonohaClass *ct)
 {
 	return (kObject*)K_FALSE;
 }
 
-static void Int_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void kInt_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
 	KLIB Kwb_printf(kctx, wb, KINT_FMT, sfp[pos].intValue);
 }
 
 // String
-static void String_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kString_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kStringVar *s = (kStringVar*)o;
 	s->text = "";
@@ -108,7 +103,7 @@ static void String_init(KonohaContext *kctx, kObject *o, void *conf)
 	S_setTextSgm(s, true);
 }
 
-static void String_free(KonohaContext *kctx, kObject *o)
+static void kString_free(KonohaContext *kctx, kObject *o)
 {
 	kString *s = (kString*)o;
 	if(S_isMallocText(s)) {
@@ -116,7 +111,7 @@ static void String_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void String_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void kString_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
 {
 	if(level == 0) {
 		KLIB Kwb_printf(kctx, wb, "%s", S_text(sfp[pos].o));
@@ -126,14 +121,14 @@ static void String_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWrite
 	}
 }
 
-static uintptr_t String_unbox(KonohaContext *kctx, kObject *o)
+static uintptr_t kString_unbox(KonohaContext *kctx, kObject *o)
 {
 	kString *s = (kString*)o;
 	DBG_ASSERT(IS_String(s));
 	return (uintptr_t) s->text;
 }
 
-static void String_checkASCII(KonohaContext *kctx, kString *s)
+static void kString_checkASCII(KonohaContext *kctx, kString *s)
 {
 	unsigned char ch = 0;
 	long len = S_size(s), n = (len + 3) / 4;
@@ -189,7 +184,7 @@ static kString* new_kString(KonohaContext *kctx, const char *text, size_t len, i
 		S_setASCII(s, 0);
 	}
 	else {
-		String_checkASCII(kctx, s);
+		kString_checkASCII(kctx, s);
 	}
 //	if(TFLAG_is(int, policy, SPOL_POOL)) {
 //		kmapSN_add(kctx, ct->constPoolMapNO, s);
@@ -218,7 +213,7 @@ struct _kAbstractArray {
 	KUtilsGrowingArray a;
 };
 
-static void Array_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kArray_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct _kAbstractArray *a = (struct _kAbstractArray*)o;
 	a->a.bytebuf     = NULL;
@@ -232,7 +227,7 @@ static void Array_init(KonohaContext *kctx, kObject *o, void *conf)
 	}
 }
 
-static void Array_reftrace(KonohaContext *kctx, kObject *o)
+static void kArray_reftrace(KonohaContext *kctx, kObject *o)
 {
 	kArray *a = (kArray*)o;
 	if(!kArray_isUnboxData(a)) {
@@ -245,13 +240,19 @@ static void Array_reftrace(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void Array_free(KonohaContext *kctx, kObject *o)
+static void kArray_free(KonohaContext *kctx, kObject *o)
 {
 	struct _kAbstractArray *a = (struct _kAbstractArray*)o;
 	KLIB Karray_free(kctx, &a->a);
 }
 
-static void Array_ensureMinimumSize(KonohaContext *kctx, struct _kAbstractArray *a, size_t min)
+static void kArray_p(KonohaContext *kctx, KonohaStack *value, int pos, KUtilsWriteBuffer *wb, int level)
+{
+	KLIB Kwb_write(kctx, wb, "[", 1);
+	KLIB Kwb_write(kctx, wb, "]", 1);
+}
+
+static void kArray_ensureMinimumSize(KonohaContext *kctx, struct _kAbstractArray *a, size_t min)
 {
 	size_t minbyte = min * sizeof(void*);
 	if(!(minbyte < a->a.bytemax)) {
@@ -264,7 +265,7 @@ static void kArray_add(KonohaContext *kctx, kArray *o, kObject *value)
 {
 	size_t asize = kArray_size(o);
 	struct _kAbstractArray *a = (struct _kAbstractArray*)o;
-	Array_ensureMinimumSize(kctx, a, asize+1);
+	kArray_ensureMinimumSize(kctx, a, asize+1);
 	DBG_ASSERT(a->a.objectItems[asize] == NULL);
 	KINITp(a, a->a.objectItems[asize], value);
 	a->a.bytesize = (asize+1) * sizeof(void*);
@@ -278,24 +279,12 @@ static void kArray_insert(KonohaContext *kctx, kArray *o, size_t n, kObject *v)
 		kArray_add(kctx, o, v);
 	}
 	else {
-		Array_ensureMinimumSize(kctx, a, asize+1);
+		kArray_ensureMinimumSize(kctx, a, asize+1);
 		memmove(a->a.objectItems+(n+1), a->a.objectItems+n, sizeof(kObject*) * (asize - n));
 		KINITp(a, a->a.objectItems[n], v);
 		a->a.bytesize = (asize+1) * sizeof(void*);
 	}
 }
-
-//KNHAPI2(void) kArray_remove_(KonohaContext *kctx, kArray *a, size_t n)
-//{
-//	DBG_ASSERT(n < a->size);
-//	if (kArray_isUnboxData(a)) {
-//		knh_memmove(a->nlist+n, a->nlist+(n+1), sizeof(kunbox_t) * (a->size - n - 1));
-//	} else {
-//		KNH_FINALv(kctx, a->objectItems[n]);
-//		knh_memmove(a->list+n, a->list+(n+1), sizeof(kObject*) * (a->size - n - 1));
-//	}
-//	a->size--;
-//}
 
 static void kArray_clear(KonohaContext *kctx, kArray *o, size_t n)
 {
@@ -314,7 +303,7 @@ static void kArray_clear(KonohaContext *kctx, kArray *o, size_t n)
 
 static KonohaClass *KonohaClass_extendedBody(KonohaContext *kctx, KonohaClass *ct, size_t head, size_t body);
 
-static void Param_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kParam_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kParamVar *pa = (kParamVar*)o;
 	pa->psize = 0;
@@ -419,7 +408,7 @@ static kparamid_t Kparamdom(KonohaContext *kctx, int psize, const kparamtype_t *
 
 static uintptr_t methodSerialNumber = 0;
 
-static void Method_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kMethod_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kMethodVar *mtd = (kMethodVar*)o;
 	bzero(&mtd->invokeMethodFunc, sizeof(kMethod) - sizeof(KonohaObjectHeader));
@@ -428,7 +417,7 @@ static void Method_init(KonohaContext *kctx, kObject *o, void *conf)
 	mtd->serialNumber = methodSerialNumber++;
 }
 
-static void Method_reftrace(KonohaContext *kctx, kObject *o)
+static void kMethod_reftrace(KonohaContext *kctx, kObject *o)
 {
 	BEGIN_REFTRACE(3);
 	kMethod *mtd = (kMethod*)o;
@@ -437,9 +426,9 @@ static void Method_reftrace(KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
+#define CT_MethodVar CT_Method
 static kMethod* new_kMethod(KonohaContext *kctx, uintptr_t flag, ktype_t cid, kmethodn_t mn, MethodFunc func)
 {
-#define CT_MethodVar CT_Method
 	kMethodVar* mtd = new_(MethodVar, NULL);
 	mtd->flag       = flag;
 	mtd->typeId     = cid;
@@ -504,8 +493,6 @@ static void NameSpace_free(KonohaContext *kctx, kObject *o)
 	KLIB Karray_free(kctx, &ns->constTable);
 }
 
-
-
 // ---------------
 // System
 
@@ -527,6 +514,7 @@ static void Func_reftrace(KonohaContext *kctx, kObject *o)
 
 // ---------------
 // System
+
 
 // ---------------
 
@@ -847,46 +835,46 @@ static void loadInitStructData(KonohaContext *kctx)
 	};
 	KDEFINE_CLASS defObject = {
 		TYNAME(Object),
-		.init = Object_init,
-		.reftrace = Object_reftrace,
-		.initdef = Object_initdef,
+		.init = kObject_init,
+		.reftrace = kObject_reftrace,
 	};
 	KDEFINE_CLASS defBoolean = {
 		UnboxTypeName(boolean),
 		.cstruct_size = sizeof(kBoolean),
-		.init  = Number_init,
-		.unbox = Number_unbox,
-		.p     = Boolean_p,
-		.fnull = Boolean_fnull,
+		.init  = kNumber_init,
+		.unbox = kNumber_unbox,
+		.p     = kBoolean_p,
+		.fnull = kBoolean_fnull,
 	};
 	KDEFINE_CLASS defInt = {
 		UnboxTypeName(int),
 		.cstruct_size = sizeof(kInt),
-		.init  = Number_init,
-		.unbox = Number_unbox,
-		.p     = Int_p,
+		.init  = kNumber_init,
+		.unbox = kNumber_unbox,
+		.p     = kInt_p,
 	};
 	KDEFINE_CLASS defString = {
 		TYNAME(String),
-		.init = String_init,
-		.free = String_free,
-		.p    = String_p,
-		.unbox = String_unbox
+		.init = kString_init,
+		.free = kString_free,
+		.p    = kString_p,
+		.unbox = kString_unbox
 	};
 	KDEFINE_CLASS defArray = {
 		TYNAME(Array),
-		.init = Array_init,
-		.reftrace = Array_reftrace,
-		.free = Array_free,
+		.init = kArray_init,
+		.reftrace = kArray_reftrace,
+		.free = kArray_free,
+		.p    = kArray_p,
 	};
 	KDEFINE_CLASS defParam = {
 		TYNAME(Param),
-		.init = Param_init,
+		.init = kParam_init,
 	};
 	KDEFINE_CLASS defMethod = {
 		TYNAME(Method),
-		.init = Method_init,
-		.reftrace = Method_reftrace,
+		.init = kMethod_init,
+		.reftrace = kMethod_reftrace,
 	};
 	KDEFINE_CLASS defFunc = {
 		TYNAME(Func),

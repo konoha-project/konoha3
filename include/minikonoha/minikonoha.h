@@ -29,9 +29,9 @@
 #include "config.h"
 #endif
 
-#ifndef HAVE_BZERO
-#define bzero(s, n) memset(s, 0, n)
-#endif
+//#ifndef HAVE_BZERO
+//#define bzero(s, n) memset(s, 0, n)
+//#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -565,8 +565,8 @@ typedef const struct KonohaRuntimeVar           KonohaRuntime;
 typedef struct KonohaRuntimeVar                 KonohaRuntimeVar;
 typedef const struct KonohaStackRuntimeVar      KonohaStackRuntime;
 typedef struct KonohaStackRuntimeVar            KonohaStackRuntimeVar;
-typedef struct KonohaStack                      KonohaStack;
-typedef struct KonohaStack                      KonohaStackVar;
+typedef struct KonohaValueVar                   KonohaStack;
+typedef struct KonohaValueVar                   KonohaValue;
 
 typedef struct KonohaModule        KonohaModule;
 typedef struct KonohaModuleContext KonohaModuleContext;
@@ -719,7 +719,7 @@ struct KonohaModuleContext {
 	kint_t     dummy_intValue;\
 	kfloat_t   dummy_floatValue
 
-struct KonohaStack {
+struct KonohaValueVar {
 	union {
 		K_FRAME_MEMBER;
 	};
@@ -1098,32 +1098,45 @@ struct kParamVar {
 /* ------------------------------------------------------------------------ */
 /* Method */
 
-#define IS_Method(o)              (O_baseTypeId(o) == TY_Method)
+#define IS_Method(o)                 (O_baseTypeId(o) == TY_Method)
 
+#ifdef FlagData
+static const char* MethodFlagData[] = {
+	"Public", "Virtual", "Final", "Const", "Static", "Immutable",
+	"Coercion", "Restricted", "FastCall", "SmartReturn", "Variadic",
+	"LibCompatible", "JSCompatible", "JavaCompatible",
+};
+#endif
+
+// property
 #define kMethod_Public               ((uintptr_t)(1<<0))
-#define kMethod_Hidden               ((uintptr_t)(1<<1))
-#define kMethod_Virtual              ((uintptr_t)(1<<2))
-#define kMethod_Final                ((uintptr_t)(1<<3))
-#define kMethod_Const                ((uintptr_t)(1<<4))
-#define kMethod_Static               ((uintptr_t)(1<<5))
-#define kMethod_Immutable            ((uintptr_t)(1<<6))
+#define kMethod_Virtual              ((uintptr_t)(1<<1))
+#define kMethod_Final                ((uintptr_t)(1<<2))
+#define kMethod_Const                ((uintptr_t)(1<<3))
+#define kMethod_Static               ((uintptr_t)(1<<4))
+#define kMethod_Immutable            ((uintptr_t)(1<<5))
+
+// call rule
+#define kMethod_Coercion             ((uintptr_t)(1<<6))
 #define kMethod_Restricted           ((uintptr_t)(1<<7))
-#define kMethod_Overloaded           ((uintptr_t)(1<<8))
-#define kMethod_Override             ((uintptr_t)(1<<9))
-#define kMethod_Abstract             ((uintptr_t)(1<<10))
-#define kMethod_Coercion             ((uintptr_t)(1<<11))
-#define kMethod_SmartReturn          ((uintptr_t)(1<<12))
+#define kMethod_FastCall             ((uintptr_t)(1<<8))
+#define kMethod_SmartReturn          ((uintptr_t)(1<<9))
+#define kMethod_Variadic             ((uintptr_t)(1<<10))
 
-//#define kMethod_CALLCC               ((uintptr_t)(1<<8))
-//#define kMethod_FASTCALL             ((uintptr_t)(1<<9))
-//#define kMethod_D                    ((uintptr_t)(1<<10))
+// compatible
+#define kMethod_LibCompatible        ((uintptr_t)(1<<11))
+#define kMethod_JSCompatible         ((uintptr_t)(1<<12))
+#define kMethod_JCompatible          ((uintptr_t)(1<<13))
 
-#define kMethod_LibraryCompatible    ((uintptr_t)(1<<31))
-#define kMethod_JSCompatible         ((uintptr_t)(1<<30))
-#define kMethod_JavaCompatible       ((uintptr_t)(1<<29))
-#define kMethod_DynamicCall          ((uintptr_t)(1<<28))
-#define kMethod_FastCall             ((uintptr_t)(1<<27))
+// internal
+#define kMethod_Hidden               ((uintptr_t)(1<<14))
+#define kMethod_Abstract             ((uintptr_t)(1<<15))
+#define kMethod_Overloaded           ((uintptr_t)(1<<16))
+#define kMethod_Override             ((uintptr_t)(1<<17))
+#define kMethod_DynamicCall          ((uintptr_t)(1<<18))
 
+#define Method_is(P, MTD)            (TFLAG_is(uintptr_t, (MTD)->flag, kMethod_##P))
+#define Method_set(P, MTD, B)        TFLAG_set(uintptr_t, ((kMethodVar*)MTD)->flag, kMethod_##P, B)
 
 #define Method_isPublic(o)       (TFLAG_is(uintptr_t, (o)->flag, kMethod_Public))
 //#define Method_setPublic(o,B)  TFLAG_set(uintptr_t, (o)->flag, kMethod_Public,B)
