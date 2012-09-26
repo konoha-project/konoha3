@@ -102,6 +102,7 @@ typedef struct PlatformApiVar        PlatformApiVar;
 typedef const struct KonohaLibVar    KonohaLib;
 typedef struct KonohaLibVar          KonohaLibVar;
 
+#define TEXTSIZE(T)   T, (sizeof(T) - 1)
 #define PLATAPI (kctx->platApi)->
 #define KLIB    (kctx->klib)->
 
@@ -743,8 +744,8 @@ typedef struct krbp_t {
 		void         (*reftrace)(KonohaContext*, kObject*);\
 		void         (*free)(KonohaContext*, kObject*);\
 		kObject*     (*fnull)(KonohaContext*, KonohaClass*);\
-		void         (*p)(KonohaContext*, KonohaStack *, int, KUtilsWriteBuffer *, int);\
 		uintptr_t    (*unbox)(KonohaContext*, kObject*);\
+		void         (*p)(KonohaContext*, KonohaValue *, int, KUtilsWriteBuffer *);\
 		int          (*compareObject)(kObject*, kObject*);\
 		int          (*compareUnboxValue)(uintptr_t, uintptr_t);\
 		kbool_t      (*hasField)(KonohaContext*, kObject*, ksymbol_t, ktype_t);\

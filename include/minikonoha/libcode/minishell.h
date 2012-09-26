@@ -98,7 +98,7 @@ static void dumpEval(KonohaContext *kctx, KUtilsWriteBuffer *wb)
 	ktype_t ty = base->evalty;
 	if(ty != TY_void) {
 		KonohaStack *lsfp = base->stack + base->evalidx;
-		CT_(ty)->p(kctx, lsfp, 0, wb, P_DUMP);
+		CT_(ty)->p(kctx, lsfp, 0, wb);
 		fflush(stdout);
 		PLATAPI printf_i("TYPE=%s EVAL=%s\n", TY_t(ty), KLIB Kwb_top(kctx, wb,1));
 	}

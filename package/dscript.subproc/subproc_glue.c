@@ -1248,11 +1248,6 @@ static void Subproc_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void Subproc_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
-{
-
-}
-
 /* ------------------------------------------------------------------------ */
 
 #define _Public   kMethod_Public
@@ -1275,7 +1270,6 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		.cflag = kClass_Final,
 		.init  = Subproc_init,
 		.free  = Subproc_free,
-		.p     = Subproc_p,
 	};
 
 	base->cSubproc= KLIB kNameSpace_defineClass(kctx, ns, NULL, &defSubproc, pline);

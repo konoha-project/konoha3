@@ -66,6 +66,46 @@ static kObject *new_kObjectOnGCSTACK(KonohaContext *kctx, KonohaClass *ct, uintp
 	return (kObject*)o;
 }
 
+static void KonohaClass_writeUnboxValueToBuffer(KonohaContext *kctx, KonohaClass *c, uintptr_t unboxValue, int isDelim, KUtilsWriteBuffer *wb)
+{
+	if(isDelim > 0) {
+		KLIB Kwb_write(kctx, wb, ", ", 2);
+	}
+	KonohaValue v = {};
+	v.unboxValue = unboxValue;
+	c->p(kctx, &v, 0, wb);
+}
+
+static void kObject_writeToBuffer(KonohaContext *kctx, kObject *o, int isDelim, KUtilsWriteBuffer *wb, KonohaValue *sfp, int pos)
+{
+	if(isDelim > 0) {
+		KLIB Kwb_write(kctx, wb, ", ", 2);
+	}
+	if(IS_NULL(o)) {
+		KLIB Kwb_write(kctx, wb, TEXTSIZE("null"));
+	}
+	else {
+		if(sfp == NULL) {
+			sfp = (KonohaValue*)kctx->esp;
+			pos = 0;
+		}
+		else {
+			int i;
+			for(i = 0; i < pos; i++) {
+				if(sfp[i].asObject == o) break;
+			}
+		}
+		if(TY_isUnbox(O_typeId(o))) {
+			DBG_P("sfp[pos]=%d, unbox=%d", sfp[pos].unboxValue, O_unbox(o));
+			sfp[pos].unboxValue = O_unbox(o);
+		}
+		else {
+			KSETv_AND_WRITE_BARRIER(NULL, sfp[pos].asObject, o, GC_NO_WRITE_BARRIER);
+		}
+		O_ct(o)->p(kctx, sfp, pos, wb);
+	}
+}
+
 static uintptr_t kNumber_unbox(KonohaContext *kctx, kObject *o)
 {
 	kNumber *n = (kNumber*)o;
@@ -79,9 +119,14 @@ static void kNumber_init(KonohaContext *kctx, kObject *o, void *conf)
 	n->unboxValue = (uintptr_t)conf;
 }
 
-static void kBoolean_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void kBoolean_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
-	KLIB Kwb_printf(kctx, wb, sfp[pos].boolValue ? "true" : "false");
+	if(v[pos].boolValue) {
+		KLIB Kwb_write(kctx, wb, TEXTSIZE("true"));
+	}
+	else {
+		KLIB Kwb_write(kctx, wb, TEXTSIZE("false"));
+	}
 }
 
 static kObject* kBoolean_fnull(KonohaContext *kctx, KonohaClass *ct)
@@ -89,9 +134,9 @@ static kObject* kBoolean_fnull(KonohaContext *kctx, KonohaClass *ct)
 	return (kObject*)K_FALSE;
 }
 
-static void kInt_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void kInt_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
-	KLIB Kwb_printf(kctx, wb, KINT_FMT, sfp[pos].intValue);
+	KLIB Kwb_printf(kctx, wb, KINT_FMT, v[pos].intValue);
 }
 
 // String
@@ -111,14 +156,30 @@ static void kString_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kString_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void kString_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
-	if(level == 0) {
-		KLIB Kwb_printf(kctx, wb, "%s", S_text(sfp[pos].o));
+	const char *t = S_text(v[pos].asString);
+	size_t i, len = S_size(v[pos].asString);
+	Kwb_write(kctx, wb, "\"", 1);
+	for(i = 0; i < len; i++) {
+		int ch = t[i];
+		char buf[2] = {'\\', ch};
+		if(ch == '\\' || ch == '"') {
+			KLIB Kwb_write(kctx, wb, buf, 2);
+		}
+		else if(t[i] == '\n'){
+			buf[1] = 'n';
+			KLIB Kwb_write(kctx, wb, buf, 2);
+		}
+		else if(t[i] == '\t'){
+			buf[1] = 't';
+			KLIB Kwb_write(kctx, wb, buf, 2);
+		}
+		else {
+			KLIB Kwb_write(kctx, wb, buf+1, 1);
+		}
 	}
-	else {
-		KLIB Kwb_printf(kctx, wb, "\"%s\"", S_text(sfp[pos].o));
-	}
+	Kwb_write(kctx, wb, "\"", 1);
 }
 
 static uintptr_t kString_unbox(KonohaContext *kctx, kObject *o)
@@ -246,9 +307,23 @@ static void kArray_free(KonohaContext *kctx, kObject *o)
 	KLIB Karray_free(kctx, &a->a);
 }
 
-static void kArray_p(KonohaContext *kctx, KonohaStack *value, int pos, KUtilsWriteBuffer *wb, int level)
+static void kArray_p(KonohaContext *kctx, KonohaValue *values, int pos, KUtilsWriteBuffer *wb)
 {
+	size_t i;
+	kArray *a = values[pos].asArray;
 	KLIB Kwb_write(kctx, wb, "[", 1);
+	if(kArray_isUnboxData(a)) {
+		KonohaClass *c = CT_(O_p0(a));
+		for(i = 0; i < kArray_size(a); i++) {
+			KonohaClass_writeUnboxValueToBuffer(kctx, c, a->unboxItems[i], (i > 0)/*delim*/, wb);
+		}
+	}
+	else {
+		for(i = 0; i < kArray_size(a); i++) {
+			kObject *o = a->objectItems[i];
+			kObject_writeToBuffer(kctx, o, (i>0)/*delim*/, wb, values, pos+1);
+		}
+	}
 	KLIB Kwb_write(kctx, wb, "]", 1);
 }
 
@@ -554,9 +629,12 @@ static void DEFAULT_free(KonohaContext *kctx, kObject *o)
 	(void)kctx;(void)o;
 }
 
-static void DEFAULT_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void DEFAULT_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
-	KLIB Kwb_printf(kctx, wb, "&%p(:%s)", sfp[pos].o, TY_t(O_typeId(sfp[pos].o)));
+	KLIB Kwb_write(kctx, wb, TEXTSIZE("{\"class\": \""));
+	KLIB Kwb_write(kctx, wb, TY_t(O_typeId(v[pos].asObject)), 0);
+	KLIB Kwb_write(kctx, wb, TEXTSIZE("\"}"));
+	//KLIB Kwb_printf(kctx, wb, "&%p(:%s)", sfp[pos].o, TY_t(O_typeId(sfp[pos].o)));
 }
 
 static uintptr_t DEFAULT_unbox(KonohaContext *kctx, kObject *o)
@@ -865,7 +943,6 @@ static void loadInitStructData(KonohaContext *kctx)
 		.init = kArray_init,
 		.reftrace = kArray_reftrace,
 		.free = kArray_free,
-		.p    = kArray_p,
 	};
 	KDEFINE_CLASS defParam = {
 		TYNAME(Param),

@@ -31,7 +31,12 @@ static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb, 0);
+	if(TY_isUnbox(O_typeId(sfp[0].asObject))) {
+		O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb);
+	}
+	else {
+		kObject_writeToBuffer(kctx, sfp[0].asObject, false/*delim*/, &wb, sfp, 0);
+	}
 	kString* s = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
 	KLIB Kwb_free(&wb);
 	RETURN_(s);
