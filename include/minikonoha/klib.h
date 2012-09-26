@@ -33,7 +33,11 @@
 extern "C" {
 #endif
 
+#ifdef __GNUC__
 #define kinline __attribute__((unused))
+#else
+#define kinline
+#endif
 
 static kinline size_t size64(size_t s)
 {
