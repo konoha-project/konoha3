@@ -1405,7 +1405,7 @@ struct KonohaLibVar {
 
 	void                (*Kwb_init)(KUtilsGrowingArray *, KUtilsWriteBuffer *);
 	void                (*Kwb_write)(KonohaContext*, KUtilsWriteBuffer *, const char *, size_t);
-	void                (*Kwb_putc)(KonohaContext*, KUtilsWriteBuffer *, ...);
+//	void                (*Kwb_putc)(KonohaContext*, KUtilsWriteBuffer *, ...);
 	void                (*Kwb_vprintf)(KonohaContext*, KUtilsWriteBuffer *, const char *fmt, va_list ap);
 	void                (*Kwb_printf)(KonohaContext*, KUtilsWriteBuffer *, const char *fmt, ...);
 	const char*         (*Kwb_top)(KonohaContext*, KUtilsWriteBuffer *, int);

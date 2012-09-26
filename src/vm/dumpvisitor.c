@@ -196,7 +196,7 @@ static void DumpVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMe
 	KLIB Kwb_printf(kctx, &wb, "METHOD %s%s(", T_mn(mtd->mn));
 	for (i = 0; i < pa->psize; i++) {
 		if (i != 0) {
-			KLIB Kwb_putc(kctx, &wb, ',', ' ', -1);
+			KLIB Kwb_write(kctx, &wb, ", ", 2);
 		}
 		KLIB Kwb_printf(kctx, &wb, "%s %s", TY_t(pa->paramtypeItems[i].ty), SYM_t(pa->paramtypeItems[i].fn));
 	}
