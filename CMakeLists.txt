@@ -143,6 +143,7 @@ set(PACKAGES
 	posix.thread
 	dscript.dollar
 	dscript.subproc
+	dscript.shell
 	curl
 ##	ijit
 ##	jansson
