@@ -55,7 +55,7 @@ static KMETHOD StmtTyCheck_dsh(KonohaContext *kctx, KonohaStack *sfp)
 		kToken *token = tokenList->tokenItems[i];
 		KLIB Kwb_write(kctx, &wb, S_text(token->text), S_size(token->text));
 		if(Token_isBeforeWhiteSpace(token)) {
-			kwb_putc(&wb, ' ');
+			KLIB Kwb_write(kctx, &wb, " ", 1);
 		}
 	}
 	kString *cmd = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), 0);

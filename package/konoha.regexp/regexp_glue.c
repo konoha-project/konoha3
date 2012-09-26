@@ -358,7 +358,7 @@ static void WB_write_regexpfmt(KonohaContext *kctx, KUtilsWriteBuffer *wb, kbyte
 			}
 		}
 		buf[0] = *ch;
-		KLIB Kwb_write(kctx, wb, buf, ch);
+		KLIB Kwb_write(kctx, wb, buf, 1);
 	}
 }
 
