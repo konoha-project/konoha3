@@ -323,21 +323,46 @@ typedef kbool_t (*CheckEndOfStmtFunc2)(KonohaContext *, TokenRange *range, Token
 #define Token_isVirtualTypeLiteral(TK)     ((TK)->resolvedSyntaxInfo->keyword == KW_TypePattern)
 #define Token_typeLiteral(TK)              (TK)->resolvedTypeId
 
+typedef enum {
+	TEXPR_CONST,
+	TEXPR_NEW,
+	TEXPR_NULL,
+	TEXPR_NCONST,
+	TEXPR_LOCAL,
+	TEXPR_BLOCK,
+	TEXPR_FIELD,
+	TEXPR_CALL,
+	TEXPR_AND,
+	TEXPR_OR,
+	TEXPR_LET,
+	TEXPR_STACKTOP,
+
+	TSTMT_EXPR,
+	TSTMT_BLOCK,
+	TSTMT_RETURN,
+	TSTMT_IF,
+	TSTMT_LOOP,
+	TSTMT_JUMP,
+	TSTMT_TRY,
+
+	TSTMT_ERR,   // this must be last
+} kvisit_t;
+
 #define TEXPR_UNTYPED       -1   /*THIS MUST NOT HAPPEN*/
-#define TEXPR_CONST          0
-#define TEXPR_NEW            1
-#define TEXPR_NULL           2
-#define TEXPR_NCONST         3
-#define TEXPR_LOCAL          4/*variable*/
-#define TEXPR_BLOCK          5
-#define TEXPR_FIELD          6/*variable*/
-//#define TEXPR_BOX            7
-//#define TEXPR_UNBOX          8
-#define TEXPR_CALL           7
-#define TEXPR_AND            8
-#define TEXPR_OR             9
-#define TEXPR_LET           10
-#define TEXPR_STACKTOP      11
+//#define TEXPR_CONST          0
+//#define TEXPR_NEW            1
+//#define TEXPR_NULL           2
+//#define TEXPR_NCONST         3
+//#define TEXPR_LOCAL          4/*variable*/
+//#define TEXPR_BLOCK          5
+//#define TEXPR_FIELD          6/*variable*/
+////#define TEXPR_BOX            7
+////#define TEXPR_UNBOX          8
+//#define TEXPR_CALL           7
+//#define TEXPR_AND            8
+//#define TEXPR_OR             9
+//#define TEXPR_LET           10
+//#define TEXPR_STACKTOP      11
 #define TEXPR_MAX           12
 
 #define Expr_isCONST(o)     (TEXPR_CONST <= (o)->build && (o)->build <= TEXPR_NCONST)
@@ -368,14 +393,14 @@ struct kExprVar {
 };
 
 #define TSTMT_UNDEFINED      0
-#define TSTMT_ERR            1
-#define TSTMT_EXPR           2
-#define TSTMT_BLOCK          3
-#define TSTMT_RETURN         4
-#define TSTMT_IF             5
-#define TSTMT_LOOP           6
-#define TSTMT_JUMP           7
-#define TSTMT_TRY            8
+//#define TSTMT_ERR            1
+//#define TSTMT_EXPR           2
+//#define TSTMT_BLOCK          3
+//#define TSTMT_RETURN         4
+//#define TSTMT_IF             5
+//#define TSTMT_LOOP           6
+//#define TSTMT_JUMP           7
+//#define TSTMT_TRY            8
 
 struct kStmtVar {
 	KonohaObjectHeader h;

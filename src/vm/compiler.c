@@ -33,11 +33,12 @@ extern "C" {
 #endif
 
 int verbose_code = 0;  // global variable
-//#define USE_DUMP_VISITOR 1
 
 /* ------------------------------------------------------------------------ */
 struct IRBuilder;
+
 typedef struct IRBuilder IRBuilder;
+
 typedef void (*VisitStmt_t)(KonohaContext *kctx, IRBuilder *self, kStmt *stmt);
 typedef void (*VisitExpr_t)(KonohaContext *kctx, IRBuilder *self, kExpr *expr);
 

@@ -83,20 +83,6 @@ static void Kwb_write(KonohaContext *kctx, KUtilsWriteBuffer *wb, const char *da
 	m->bytesize += bytelen;
 }
 
-//static void Kwb_putc(KonohaContext *kctx, KUtilsWriteBuffer *wb, ...)
-//{
-//	char buf[256];
-//	int ch, len = 0;
-//	va_list ap;
-//	va_start(ap , wb);
-//	while((ch = (int)va_arg(ap, int)) != -1) {
-//		buf[len] = ch;
-//		len++;
-// 	}
-//	Kwb_write(kctx, wb, buf, len);
-//	va_end(ap);
-//}
-
 static void Kwb_vprintf(KonohaContext *kctx, KUtilsWriteBuffer *wb, const char *fmt, va_list ap)
 {
 	va_list ap2;
@@ -239,18 +225,6 @@ static void Kmap_each(KonohaContext *kctx, KUtilsHashMap *kmap, void *thunk, voi
 	}
 }
 
-//static void Kmap_each(KonohaContext *kctx, KUtilsHashMap *kmap, void (*f)(KonohaContext *kctx, KUtilsHashMapEntry *))
-//{
-//	size_t i;
-//	for(i = 0; i < kmap->hmax; i++) {
-//		KUtilsHashMapEntry *e = kmap->hentry[i];
-//		while(e != NULL) {
-//			f(kctx, e);
-//			e = e->next;
-//		}
-//	}
-//}
-
 static void Kmap_free(KonohaContext *kctx, KUtilsHashMap *kmap, void (*f)(KonohaContext *kctx, void *))
 {
 	if(f != NULL) {
@@ -308,7 +282,7 @@ static void Kmap_remove(KUtilsHashMap* kmap, KUtilsHashMapEntry *oe)
 
 // key management
 
-static void map_addStringUnboxValue(KonohaContext *kctx, KUtilsHashMap *kmp, uintptr_t hcode, kString *stringKey, uintptr_t unboxValue)
+static void Kmap_addStringUnboxValue(KonohaContext *kctx, KUtilsHashMap *kmp, uintptr_t hcode, kString *stringKey, uintptr_t unboxValue)
 {
 	KUtilsHashMapEntry *e = KLIB Kmap_newEntry(kctx, kmp, hcode);
 	KINITv(e->stringKey, stringKey);
@@ -328,7 +302,7 @@ static ksymbol_t Kmap_getcode(KonohaContext *kctx, KUtilsHashMap *kmp, kArray *l
 		kString *stringKey = KLIB new_kString(kctx, name, len, spol);
 		uintptr_t sym = kArray_size(list);
 		KLIB kArray_add(kctx, list, stringKey);
-		map_addStringUnboxValue(kctx, kmp, hcode, stringKey, sym);
+		Kmap_addStringUnboxValue(kctx, kmp, hcode, stringKey, sym);
 		return (ksymbol_t)sym;
 	}
 	return def;
@@ -568,7 +542,6 @@ static void klib_init(KonohaLibVar *l)
 	l->Karray_free   = Karray_free;
 	l->Kwb_init      = Kwb_init;
 	l->Kwb_write     = Kwb_write;
-//	l->Kwb_putc      = Kwb_putc;
 	l->Kwb_vprintf   = Kwb_vprintf;
 	l->Kwb_printf    = Kwb_printf;
 	l->Kwb_top       = Kwb_top;

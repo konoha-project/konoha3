@@ -1405,7 +1405,6 @@ struct KonohaLibVar {
 
 	void                (*Kwb_init)(KUtilsGrowingArray *, KUtilsWriteBuffer *);
 	void                (*Kwb_write)(KonohaContext*, KUtilsWriteBuffer *, const char *, size_t);
-//	void                (*Kwb_putc)(KonohaContext*, KUtilsWriteBuffer *, ...);
 	void                (*Kwb_vprintf)(KonohaContext*, KUtilsWriteBuffer *, const char *fmt, va_list ap);
 	void                (*Kwb_printf)(KonohaContext*, KUtilsWriteBuffer *, const char *fmt, ...);
 	const char*         (*Kwb_top)(KonohaContext*, KUtilsWriteBuffer *, int);
@@ -1419,6 +1418,8 @@ struct KonohaLibVar {
 	void                (*Kmap_free)(KonohaContext*, KUtilsHashMap *, void (*)(KonohaContext*, void *));
 	ksymbol_t           (*Kmap_getcode)(KonohaContext*, KUtilsHashMap *, kArray *, const char *, size_t, uintptr_t, int, ksymbol_t);
 
+	KonohaContextVar *(*KonohaContext_init)(KonohaContext *rootContext, const PlatformApi *api);
+	void (*KonohaContext_free)(KonohaContext *rootContext, KonohaContextVar *ctx);
 
 	kfileline_t     (*KfileId)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
 	kpackage_t      (*KpackageId)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
@@ -1469,7 +1470,6 @@ struct KonohaLibVar {
 	kbool_t          (*kNameSpace_setConstData)(KonohaContext *, kNameSpace *, ksymbol_t, ktype_t, uintptr_t, kfileline_t);
 	kbool_t          (*kNameSpace_loadConstData)(KonohaContext*, kNameSpace *, const char **d, kfileline_t);
 	void             (*kNameSpace_loadMethodData)(KonohaContext*, kNameSpace *, intptr_t *);
-//	kMethod*         (*kNameSpace_getMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, kmethodn_t mn, int option, int policy);
 
 	kMethod*         (*kNameSpace_getGetterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ksymbol_t mn, ktype_t);
 	kMethod*         (*kNameSpace_getSetterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ksymbol_t mn, ktype_t);
@@ -1478,14 +1478,11 @@ struct KonohaLibVar {
 
 	void             (*kNameSpace_compileAllDefinedMethods)(KonohaContext *kctx);
 
+	// code generator package
 	void             (*KCodeGen)(KonohaContext*, kMethod *, kBlock *);
+	kbool_t          (*KonohaRuntime_tryCallMethod)(KonohaContext *, KonohaStack *);
+	void             (*KonohaRuntime_raise)(KonohaContext*, int symbol, KonohaStack *, kfileline_t, kString *Nullable);
 	void             (*Kreportf)(KonohaContext*, kinfotag_t, kfileline_t, const char *fmt, ...);
-
-	kbool_t       (*KonohaRuntime_tryCallMethod)(KonohaContext *, KonohaStack *);
-	void          (*KonohaRuntime_raise)(KonohaContext*, int symbol, KonohaStack *, kfileline_t, kString *Nullable);
-
-	KonohaContextVar *(*KonohaContext_init)(KonohaContext *rootContext, const PlatformApi *api);
-	void (*KonohaContext_free)(KonohaContext *rootContext, KonohaContextVar *ctx);
 };
 
 #define K_NULL            (kctx->share->constNull)
