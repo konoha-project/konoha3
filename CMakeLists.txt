@@ -423,6 +423,7 @@ endforeach(f ${test_files})
 
 add_subdirectory(platform/dse)
 add_subdirectory(platform/apache)
+add_subdirectory(platform/logger-shell)
 
 # for konoha command
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/platform/shell/konoha.sh.cmake

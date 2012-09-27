@@ -501,6 +501,9 @@ static void traceDataLog(void *logger, int logkey, logconf_t *logconf, ...)
 	va_end(ap);
 }
 
+static void diagnosis(void) {
+}
+
 static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 {
 	static PlatformApiVar plat = {};
@@ -553,6 +556,7 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	//plat.vsyslog_i           = vsyslog;
 	plat.logger              = NULL;
 	plat.traceDataLog        = traceDataLog;
+	plat.diagnosis           = diagnosis;
 	return (PlatformApi*)(&plat);
 }
 
