@@ -68,9 +68,9 @@ static void File_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void File_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void File_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
-	kFILE *file = (kFILE*)sfp[pos].asObject;
+	kFILE *file = (kFILE*)v[pos].asObject;
 	FILE *fp = file->fp;
 	KLIB Kwb_printf(kctx, wb, "FILE :%p, path=%s", fp, file->realpath);
 }

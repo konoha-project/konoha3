@@ -379,9 +379,9 @@ static void RegExp_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void RegExp_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void RegExp_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
-	kRegExp *re = sfp[pos].re;
+	kRegExp *re = v[pos].re;
 	KLIB Kwb_printf(kctx, wb, "/%s/%s%s%s", S_text(re->pattern),
 			RegExp_isGlobal(re) ? "g" : "",
 			RegExp_isIgnoreCase(re) ? "i" : "",

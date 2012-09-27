@@ -61,11 +61,6 @@ static void Iterator_init(KonohaContext *kctx, kObject *o, void *conf)
 	itr->setNextResult = isUnboxEntry ? Nothing_setNextResultUnbox : Nothing_setNextResult;
 }
 
-static void Iterator_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
-{
-//	KLIB Kwb_printf(kctx, wb, KFLOAT_FMT, sfp[pos].floatValue);
-}
-
 /* ------------------------------------------------------------------------ */
 
 static KMETHOD Iterator_hasNext(KonohaContext *kctx, KonohaStack *sfp)
@@ -186,7 +181,6 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 		STRUCTNAME(Iterator),
 		.cflag  = CFLAG_Iterator,
 		.init   = Iterator_init,
-		.p      = Iterator_p,
 		.cparamsize  = 1,
 		.cparamItems = &IteratorParam,
 	};

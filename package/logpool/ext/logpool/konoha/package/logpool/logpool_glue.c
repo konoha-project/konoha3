@@ -62,7 +62,7 @@ static void Log_free(CTX, kObject *po)
 	o->rawptr = NULL;
 }
 
-static void Log_p(CTX, ksfp_t *sfp, int pos, kwb_t *wb, int level)
+static void Log_p(CTX, ksfp_t *sfp, int pos, kwb_t *wb)
 {
 	kRawPtr *self = (kRawPtr *) sfp[0].o;
 	struct Log *log = (struct Log *) self->rawptr;

@@ -182,9 +182,9 @@ static void Exception_reftrace(KonohaContext *kctx, kObject *o)
 
 }
 
-static void Exception_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void Exception_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
-	KLIB Kwb_printf(kctx, wb, "%s", S_text(sfp[pos].asException));
+	KLIB Kwb_printf(kctx, wb, "%s", S_text(v[pos].asException->message));
 }
 
 static void kModuleException_setup(KonohaContext *kctx, KonohaModule *def, int newctx)

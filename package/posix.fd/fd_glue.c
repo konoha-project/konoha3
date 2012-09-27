@@ -81,9 +81,9 @@ static void kStat_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kStat_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void kStat_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
-	KLIB Kwb_printf(kctx, wb, "Stat :%p", sfp[pos].asObject);
+	KLIB Kwb_printf(kctx, wb, "Stat :%p", v[pos].asObject);
 }
 
 static void kDIR_init(KonohaContext *kctx, kObject *o, void *conf)
@@ -104,9 +104,9 @@ static void kDIR_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kDIR_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void kDIR_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
-	kDIR *dir = (kDIR*)sfp[pos].asObject;
+	kDIR *dir = (kDIR*)v[pos].asObject;
 	DIR *dirp = dir->dirp;
 	KLIB Kwb_printf(kctx, wb, "DIR :%p", dirp);
 }
@@ -132,9 +132,9 @@ static void kDirent_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kDirent_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void kDirent_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
-	struct _kDirent *dirent = (struct _kDirent *)sfp[pos].asObject;
+	struct _kDirent *dirent = (struct _kDirent *)v[pos].asObject;
 	struct dirent *entry = dirent->entry;
 	KLIB Kwb_printf(kctx, wb, "Dirent :%p", entry);
 }

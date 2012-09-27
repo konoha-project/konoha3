@@ -34,7 +34,7 @@ struct _kDynamic {
 //{
 //}
 //
-//static void Dynamic_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+//static void Dynamic_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 //{
 //}
 //

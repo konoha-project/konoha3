@@ -78,10 +78,10 @@ static void kMap_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kMap_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
-{
-	// TODO
-}
+//static void kMap_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb)
+//{
+//	// TODO
+//}
 
 /* ------------------------------------------------------------------------ */
 /* method */
@@ -208,7 +208,7 @@ static kbool_t map_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		.init      = kMap_init,
 		.reftrace  = kMap_reftrace,
 		.free      = kMap_free,
-		.p         = kMap_p,
+		//.p         = kMap_p,
 	};
 	KonohaClass *cMap = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defMap, pline);
 	int FN_key = MN_("key");

@@ -53,38 +53,32 @@ static void Bytes_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void Bytes_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void Bytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
-	kBytes *ba = (kBytes*)sfp[pos].o;
-	DBG_P("level:%d", level);
-	if(level == 0) {
-		KLIB Kwb_printf(kctx, wb, "byte[%d]", ba->bytesize);
-	}
-	else if(level == 1) {
-		size_t i, j, n;
-		for(j = 0; j * 16 < ba->bytesize; j++) {
-			KLIB Kwb_printf(kctx, wb, "%08x", (int)(j*16));
-			for(i = 0; i < 16; i++) {
-				n = j * 16 + i;
-				if(n < ba->bytesize) {
-					KLIB Kwb_printf(kctx, wb, " %2x", (int)ba->utext[n]);
-				}
-				else {
-					KLIB Kwb_printf(kctx, wb, "%s", "   ");
-				}
+	kBytes *ba = (kBytes*)v[pos].o;
+	size_t i, j, n;
+	for(j = 0; j * 16 < ba->bytesize; j++) {
+		KLIB Kwb_printf(kctx, wb, "%08x", (int)(j*16));
+		for(i = 0; i < 16; i++) {
+			n = j * 16 + i;
+			if(n < ba->bytesize) {
+				KLIB Kwb_printf(kctx, wb, " %2x", (int)ba->utext[n]);
 			}
-			KLIB Kwb_printf(kctx, wb, "%s", "    ");
-			for(i = 0; i < 16; i++) {
-				n = j * 16 + i;
-				if(n < ba->bytesize && isprint(ba->utext[n])) {
-					KLIB Kwb_printf(kctx, wb, "%c", (int)ba->utext[n]);
-				}
-				else {
-					KLIB Kwb_printf(kctx, wb, "%s", " ");
-				}
+			else {
+				KLIB Kwb_printf(kctx, wb, "%s", "   ");
 			}
-			KLIB Kwb_printf(kctx, wb, "\n");
 		}
+		KLIB Kwb_printf(kctx, wb, "%s", "    ");
+		for(i = 0; i < 16; i++) {
+			n = j * 16 + i;
+			if(n < ba->bytesize && isprint(ba->utext[n])) {
+				KLIB Kwb_printf(kctx, wb, "%c", (int)ba->utext[n]);
+			}
+			else {
+				KLIB Kwb_printf(kctx, wb, "%s", " ");
+			}
+		}
+		KLIB Kwb_printf(kctx, wb, "\n");
 	}
 }
 

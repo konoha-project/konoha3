@@ -47,10 +47,9 @@ static void PyObject_init(KonohaContext *kctx, kObject *o, void *conf)
 	}
 }
 
-static void PyObject_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void PyObject_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
-	// Now, level value has no effect.
-	PyObject *pyo =  ((kPyObject*)sfp[pos].o)->self;
+	PyObject *pyo =  ((kPyObject*)v[pos].o)->self;
 	PyObject* str = pyo->ob_type->tp_str(pyo);
 	Py_INCREF(str);
 	KLIB Kwb_printf(kctx, wb, "%s", PyString_AsString(str));

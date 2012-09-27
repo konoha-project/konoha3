@@ -31,7 +31,7 @@
 
 static char *writeFixedTextToBuffer(const char *text, size_t len, char *buftop, char *bufend)
 {
-	if(bufend - buftop > len) {
+	if((size_t)(bufend - buftop) > len) {
 		memcpy(buftop, text, len);
 		return buftop+len;
 	}
