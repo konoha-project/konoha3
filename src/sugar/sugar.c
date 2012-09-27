@@ -26,14 +26,13 @@
 
 #define USING_SUGAR_AS_BUILTIN 1
 #include <minikonoha/sugar.h>
+#include <minikonoha/local.h>
 
 /* ************************************************************************ */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <minikonoha/local.h>
 
 // global variable
 int verbose_sugar = 0;
