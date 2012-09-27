@@ -1,12 +1,12 @@
-import("konoha.bytes");
+//Written by Joseph
+
+import("konoha.new");
 import("dscript.subproc");
 
-void f () {
-	Subproc s = Subproc.new("", false);
-	s.enableShellmode(false);
-	String str = s.exec("echo $HOME");
-	System.p(str);
+void test() {
+	Subproc s = new Subproc("", false);
+	assert(s.exec("echo \"hi\"") == "\"hi\"\n");
+	assert(s.exec("echo hello") == "hello\n");
 }
 
-f();
-
+test();
