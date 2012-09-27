@@ -717,27 +717,29 @@ static unsigned page_to_kb_shift;
 
 // _diagnosis must be called by only one thread
 static void _diagnosis(void) {
-	static pid_t                pid;
-	static struct        libproc *LIBPROC;
-	unsigned int         hz;
-	unsigned int         running,blocked,dummy_1,dummy_2;
-	static jiff          cpu_use[2], cpu_nic[2], cpu_sys[2], cpu_idl[2], cpu_iow[2], cpu_xxx[2], cpu_yyy[2], cpu_zzz[2];
-	jiff                 duse, dsys, didl, diow, dstl, Div, divo2;
-	static unsigned long pgpgin[2], pgpgout[2], pswpin[2], pswpout[2];
-	static unsigned int  intr[2], ctxt[2];
-	unsigned             sleep_time = 1;
-	unsigned             sleep_half = (sleep_time/2);
-	unsigned long        kb_per_page = sysconf(_SC_PAGESIZE) / 1024ul;
-	int                  debt = 0;  // handle idle ticks running backwards
-	static unsigned int  isFirst = true;
-	static unsigned int  tog = 0;
-	unsigned             swap_si, swap_so, io_bi, io_bo, system_in, system_cs;
-	static unsigned      cpu_us, cpu_sy, cpu_id, cpu_wa;
-	unsigned long        memory_swpd, memory_free, memory_buff, memory_cache;
-	float                percent_cpu_usage, percent_mem_usage;
-	unsigned             kb_mem_usage;
+	static pid_t              pid;
+	static struct             libproc *LIBPROC;
+	unsigned int              hz;
+	unsigned int              running,blocked,dummy_1,dummy_2;
+	static jiff               cpu_use[2], cpu_nic[2], cpu_sys[2], cpu_idl[2], cpu_iow[2], cpu_xxx[2], cpu_yyy[2], cpu_zzz[2];
+	jiff                      duse, dsys, didl, diow, dstl, Div, divo2;
+	static unsigned long      pgpgin[2], pgpgout[2], pswpin[2], pswpout[2];
+	static unsigned int       intr[2], ctxt[2];
+	static unsigned long long prev_time;
+	unsigned long long        new_time, time_diff;
+	unsigned                  sleep_time, sleep_half;
+	unsigned long             kb_per_page = sysconf(_SC_PAGESIZE) / 1024ul;
+	int                       debt = 0;  // handle idle ticks running backwards
+	static unsigned int       isFirst = true;
+	static unsigned int       tog = 0;
+	unsigned                  swap_si, swap_so, io_bi, io_bo, system_in, system_cs;
+	static unsigned           cpu_us, cpu_sy, cpu_id, cpu_wa;
+	unsigned long             memory_swpd, memory_free, memory_buff, memory_cache;
+	float                     percent_cpu_usage, percent_mem_usage;
+	unsigned                  kb_mem_usage;
 
 	if(isFirst) {
+		prev_time = getTimeMilliSecond();
 		pid = getpid();
 		LIBPROC = getLibproc();
 		hz = *(LIBPROC->Hertz);
@@ -768,6 +770,11 @@ static void _diagnosis(void) {
 		isFirst = false;
 	}
 	else {
+		new_time = getTimeMilliSecond();
+		time_diff = (new_time - prev_time) / 1000;
+		prev_time = new_time;
+		sleep_time = (time_diff > 1) ? time_diff : 1;
+		sleep_half = sleep_time/2;
 		tog= !tog;
 		LIBPROC->getstat(cpu_use+tog,cpu_nic+tog,cpu_sys+tog,cpu_idl+tog,cpu_iow+tog,cpu_xxx+tog,cpu_yyy+tog,cpu_zzz+tog,
 				pgpgin+tog,pgpgout+tog,pswpin+tog,pswpout+tog,
