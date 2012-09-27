@@ -89,7 +89,8 @@ static kBlock *new_MacroBlock(KonohaContext *kctx, kStmt *stmt, kToken *Iterator
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	kArray *tokenList = KonohaContext_getSugarContext(kctx)->preparedTokenList;
 	TokenRange macroRangeBuf, *macroRange = SUGAR new_TokenListRange(kctx, ns, tokenList, &macroRangeBuf);
-	SUGAR TokenRange_tokenize(kctx, macroRange, "T _ = E; if(_.hasNext()) {N = _.next(); }", 0);
+	/* FIXME(imasahiro) "T _ = E; if(_.hasNext()) { N = _.next(); }" */
+	SUGAR TokenRange_tokenize(kctx, macroRange, "T _ = E; if(_.hasNext()) N = _.next();", 0);
 	MacroSet macroSet[4] = {{0, NULL, 0, 0}};
 	MacroSet_setTokenAt(kctx, macroSet, 0, tokenList, "T", IteratorTypeToken, NULL);
 	MacroSet_setTokenAt(kctx, macroSet, 1, tokenList, "E", IteratorExprToken, NULL);
