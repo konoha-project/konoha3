@@ -36,7 +36,6 @@ extern "C" {
 
 extern void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx);
 extern void MODGCSHARE_free(KonohaContext *kctx, KonohaContextVar *ctx);
-extern void MODGC_destoryAllObjects(KonohaContext *kctx, KonohaContextVar *ctx);
 
 extern void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx);
 extern void MODGC_free(KonohaContext *kctx, KonohaContextVar *ctx);

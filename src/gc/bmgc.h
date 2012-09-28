@@ -2066,10 +2066,6 @@ void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	kmodgc_setup(ctx, (KonohaModule*) memshare(kctx), 1);
 }
 
-void MODGC_destoryAllObjects(KonohaContext *kctx, KonohaContextVar *ctx)
-{
-}
-
 void MODGC_free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	assert(memlocal(ctx) == NULL);
