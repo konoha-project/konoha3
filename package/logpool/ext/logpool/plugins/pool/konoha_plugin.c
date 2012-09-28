@@ -1,7 +1,6 @@
 #include <libmemcached/memcached.h>
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-extern int verbose_debug;
 #include <minikonoha/platform_posix.h>
 #include "pool_plugin.h"
 #include <stdio.h>

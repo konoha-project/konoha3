@@ -39,7 +39,6 @@
 #endif /* K_USE_PTHREAD */
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-extern int verbose_debug;
 #include <minikonoha/platform_posix.h>
 #ifndef K_USE_PTHREAD
 #include <pthread.h>

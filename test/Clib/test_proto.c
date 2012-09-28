@@ -1,4 +1,3 @@
-extern int verbose_debug;
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/platform.h"
 #include <stdio.h>
