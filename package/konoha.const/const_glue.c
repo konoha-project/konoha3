@@ -98,10 +98,10 @@ static kbool_t const_setupNameSpace(KonohaContext *kctx, kNameSpace *packageName
 KDEFINE_PACKAGE* const_init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("konoha", "1.0"),
-		.initPackage = const_initPackage,
-		.setupPackage = const_setupPackage,
-		.initNameSpace = const_initNameSpace,
+		KPACKNAME("const", "1.0"),
+		.initPackage    = const_initPackage,
+		.setupPackage   = const_setupPackage,
+		.initNameSpace  = const_initNameSpace,
 		.setupNameSpace = const_setupNameSpace,
 	};
 	return &d;
@@ -110,4 +110,3 @@ KDEFINE_PACKAGE* const_init(void)
 #ifdef __cplusplus
 }
 #endif
-

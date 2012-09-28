@@ -29,7 +29,8 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
-////## void Token.setKeyword(String keywork);
+
+//## void Token.setKeyword(String keywork);
 static KMETHOD Token_setUnresolvedTokenType(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
@@ -508,14 +509,14 @@ KDEFINE_PACKAGE* sugar_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("sugar", "1.0"),
-		.initPackage = sugar_initPackage,
-		.setupPackage = sugar_setupPackage,
-		.initNameSpace = sugar_initNameSpace,
+		.initPackage    = sugar_initPackage,
+		.setupPackage   = sugar_setupPackage,
+		.initNameSpace  = sugar_initNameSpace,
 		.setupNameSpace = sugar_setupNameSpace,
 	};
 	return &d;
 }
+
 #ifdef __cplusplus
 }
 #endif
-

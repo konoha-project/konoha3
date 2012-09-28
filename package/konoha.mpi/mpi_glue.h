@@ -33,4 +33,3 @@ typedef struct kMPIRequest {
 extern kMPIComm *g_comm_world;
 
 #endif
-

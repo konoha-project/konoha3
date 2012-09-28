@@ -385,14 +385,14 @@ KDEFINE_PACKAGE* bytes_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("bytes", "1.0"),
-		.initPackage = bytes_initPackage,
-		.setupPackage = bytes_setupPackage,
-		.initNameSpace = bytes_initNameSpace,
+		.initPackage    = bytes_initPackage,
+		.setupPackage   = bytes_setupPackage,
+		.initNameSpace  = bytes_initNameSpace,
 		.setupNameSpace = bytes_setupNameSpace,
 	};
 	return &d;
 }
+
 #ifdef __cplusplus
 }
 #endif
-

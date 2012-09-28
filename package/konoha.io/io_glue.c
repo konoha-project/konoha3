@@ -730,9 +730,9 @@ KDEFINE_PACKAGE* io_init(void)
 {
 	static const KDEFINE_PACKAGE d = {
 		KPACKNAME("io", "1.0"),
-		.initPackage  = io_initPackage,
-		.setupPackage = io_setupPackage,
-		.initNameSpace = io_initNameSpace,
+		.initPackage    = io_initPackage,
+		.setupPackage   = io_setupPackage,
+		.initNameSpace  = io_initNameSpace,
 		.setupNameSpace = io_setNameSpace,
 	};
 	return &d;

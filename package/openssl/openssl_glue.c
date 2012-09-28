@@ -137,9 +137,9 @@ KDEFINE_PACKAGE* openssl_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("openssl", "1.0"),
-		.initPackage = openssl_initPackage,
-		.setupPackage = openssl_setupPackage,
-		.initNameSpace = openssl_initNameSpace,
+		.initPackage    = openssl_initPackage,
+		.setupPackage   = openssl_setupPackage,
+		.initNameSpace  = openssl_initNameSpace,
 		.setupNameSpace = openssl_setupNameSpace,
 	};
 	return &d;
@@ -148,4 +148,3 @@ KDEFINE_PACKAGE* openssl_init(void)
 #ifdef __cplusplus
 }
 #endif
-

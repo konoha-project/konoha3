@@ -22,7 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#define USE_STRINGLIB
+#define USE_STRINGLIB 1
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
@@ -863,4 +863,3 @@ KDEFINE_PACKAGE* regexp_init(void)
 #ifdef __cplusplus
 }
 #endif
-

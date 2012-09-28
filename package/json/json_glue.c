@@ -252,9 +252,9 @@ KDEFINE_PACKAGE* JSON_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("JSON", "1.0"),
-		.initPackage = JSON_initPackage,
-		.setupPackage = JSON_setupPackage,
-		.initNameSpace = JSON_initNameSpace,
+		.initPackage    = JSON_initPackage,
+		.setupPackage   = JSON_setupPackage,
+		.initNameSpace  = JSON_initNameSpace,
 		.setupNameSpace = JSON_setupNameSpace,
 	};
 	return &d;
@@ -263,4 +263,3 @@ KDEFINE_PACKAGE* JSON_init(void)
 #ifdef __cplusplus
 }
 #endif
-

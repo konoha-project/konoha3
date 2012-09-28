@@ -36,7 +36,6 @@
 extern "C"{
 #endif
 
-
 typedef const struct _kFILE kFILE;
 struct _kFILE {
 	KonohaObjectHeader h;
@@ -338,14 +337,14 @@ KDEFINE_PACKAGE* file_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("file", "1.0"),
-		.initPackage = file_initPackage,
-		.setupPackage = file_setupPackage,
-		.initNameSpace = file_initNameSpace,
+		.initPackage    = file_initPackage,
+		.setupPackage   = file_setupPackage,
+		.initNameSpace  = file_initNameSpace,
 		.setupNameSpace = file_setupNameSpace,
 	};
 	return &d;
 }
+
 #ifdef __cplusplus
 }
 #endif
-

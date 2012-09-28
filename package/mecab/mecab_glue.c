@@ -22,13 +22,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <mecab.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 struct _kTagger {
 	KonohaObjectHeader h;
@@ -418,9 +418,9 @@ KDEFINE_PACKAGE* mecab_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("mecab", "1.0"),
-		.initPackage = mecab_initPackage,
-		.setupPackage = mecab_setupPackage,
-		.initNameSpace = mecab_initNameSpace,
+		.initPackage    = mecab_initPackage,
+		.setupPackage   = mecab_setupPackage,
+		.initNameSpace  = mecab_initNameSpace,
 		.setupNameSpace = mecab_setupNameSpace,
 	};
 	return &d;
@@ -429,4 +429,3 @@ KDEFINE_PACKAGE* mecab_init(void)
 #ifdef __cplusplus
 }
 #endif
-

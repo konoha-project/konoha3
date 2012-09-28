@@ -34,7 +34,6 @@
 extern "C" {
 #endif
 
-
 static kbool_t Nothing_hasNext(KonohaContext *kctx, KonohaStack* sfp)
 {
 	return false;
@@ -217,9 +216,9 @@ KDEFINE_PACKAGE* iterator_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("iterator", "1.0"),
-		.initPackage =iterator_initPackage,
-		.setupPackage = iterator_setupPackage,
-		.initNameSpace = iterator_initNameSpace,
+		.initPackage    = iterator_initPackage,
+		.setupPackage   = iterator_setupPackage,
+		.initNameSpace  = iterator_initNameSpace,
 		.setupNameSpace = iterator_setupNameSpace,
 	};
 	return &d;

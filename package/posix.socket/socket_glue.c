@@ -22,13 +22,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-// **************************************************************************
-// LIST OF CONTRIBUTERS
-//  shinpei - Shinpei Nakata, Yokohama National University, Japan
-//  kimio - Kimio Kuramitsu, Yokohama National University, Japan
-//  goccy - Masaaki Goshima, Yokohama National University, Japan
-// **************************************************************************
-
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/bytes.h>
@@ -45,13 +38,6 @@ extern "C" {
 
 #define WORD2INT(val) (sizeof(val)==8) ? (val&0x7FFFFFFF)|((val>>32)&0x80000000) : val
 
-/*
- #define KNH_TODO(msg) do {\
-	fprintf(stderr, "TODO(%s) : %s at %s:%d",\
-			msg, __FUNCTION__, __FILE__, __LINE__);\
-	abort();\
-} while (0)
-*/
 #define KNH_NTRACE2(...) KNH_TODO("ntrace")
 
 typedef const struct _kSockAddr kSockAddr;
@@ -755,9 +741,9 @@ KDEFINE_PACKAGE* socket_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("socket", "1.0"),
-		.initPackage = socket_initPackage,
-		.setupPackage = socket_setupPackage,
-		.initNameSpace = socket_initNameSpace,
+		.initPackage    = socket_initPackage,
+		.setupPackage   = socket_setupPackage,
+		.initNameSpace  = socket_initNameSpace,
 		.setupNameSpace = socket_setupNameSpace,
 	};
 	return &d;
@@ -766,4 +752,3 @@ KDEFINE_PACKAGE* socket_init(void)
 #ifdef __cplusplus
 }
 #endif
-

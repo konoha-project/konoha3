@@ -25,6 +25,10 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MOD_jit  40/*TODO*/
 #define kjitmod ((kjitmod_t*)kctx->mod[MOD_jit])
 #define kmodjit ((kmodjit_t*)kctx->modshare[MOD_jit])
@@ -858,10 +862,14 @@ KDEFINE_PACKAGE* ijit_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("ijit", "1.0"),
-		.initPackage = ijit_initPackage,
-		.setupPackage = ijit_setupPackage,
-		.initNameSpace = ijit_initNameSpace,
+		.initPackage    = ijit_initPackage,
+		.setupPackage   = ijit_setupPackage,
+		.initNameSpace  = ijit_initNameSpace,
 		.setupNameSpace = ijit_setupNameSpace,
 	};
 	return &d;
 }
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif

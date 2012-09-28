@@ -178,10 +178,10 @@ static kbool_t foreach_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNa
 KDEFINE_PACKAGE* foreach_init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("konoha", "1.0"),
-		.initPackage =foreach_initPackage,
-		.setupPackage = foreach_setupPackage,
-		.initNameSpace = foreach_initNameSpace,
+		KPACKNAME("foreach", "1.0"),
+		.initPackage    = foreach_initPackage,
+		.setupPackage   = foreach_setupPackage,
+		.initNameSpace  = foreach_initNameSpace,
 		.setupNameSpace = foreach_setupNameSpace,
 	};
 	return &d;

@@ -262,9 +262,9 @@ KDEFINE_PACKAGE* map_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("map", "1.0"),
-		.initPackage = map_initPackage,
-		.setupPackage = map_setupPackage,
-		.initNameSpace = map_initNameSpace,
+		.initPackage    = map_initPackage,
+		.setupPackage   = map_setupPackage,
+		.initNameSpace  = map_initNameSpace,
 		.setupNameSpace = map_setupNameSpace,
 	};
 	return &d;
@@ -273,5 +273,3 @@ KDEFINE_PACKAGE* map_init(void)
 #ifdef __cplusplus
 }
 #endif
-
-// --------------------------------------------------------------------------

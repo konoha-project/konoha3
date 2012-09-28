@@ -583,14 +583,14 @@ KDEFINE_PACKAGE* python_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("python", "1.0"),
-		.initPackage = python_initPackage,
-		.setupPackage = python_setupPackage,
-		.initNameSpace = python_initNameSpace,
+		.initPackage    = python_initPackage,
+		.setupPackage   = python_setupPackage,
+		.initNameSpace  = python_initNameSpace,
 		.setupNameSpace = python_setupNameSpace,
 	};
 	return &d;
 }
+
 #ifdef __cplusplus
 }
 #endif
-

@@ -986,14 +986,14 @@ KDEFINE_PACKAGE* fd_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("fd", "1.0"),
-		.initPackage = fd_initPackage,
-		.setupPackage = fd_setupPackage,
-		.initNameSpace = fd_initNameSpace,
+		.initPackage    = fd_initPackage,
+		.setupPackage   = fd_setupPackage,
+		.initNameSpace  = fd_initNameSpace,
 		.setupNameSpace = fd_setupNameSpace,
 	};
 	return &d;
 }
+
 #ifdef __cplusplus
 }
 #endif
-

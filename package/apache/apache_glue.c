@@ -153,9 +153,9 @@ KDEFINE_PACKAGE* apache_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("apache", "1.0"),
-		.initPackage = apache_initPackage,
-		.setupPackage = apache_setupPackage,
-		.initNameSpace = apache_initNameSpace,
+		.initPackage    = apache_initPackage,
+		.setupPackage   = apache_setupPackage,
+		.initNameSpace  = apache_initNameSpace,
 		.setupNameSpace = apache_setupNameSpace,
 	};
 	return &d;
@@ -164,4 +164,3 @@ KDEFINE_PACKAGE* apache_init(void)
 #ifdef __cplusplus
 }
 #endif
-

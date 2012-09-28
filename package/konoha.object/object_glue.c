@@ -110,9 +110,9 @@ KDEFINE_PACKAGE* object_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("object", "1.0"),
-		.initPackage = object_initPackage,
-		.setupPackage = object_setupPackage,
-		.initNameSpace = object_initNameSpace,
+		.initPackage    = object_initPackage,
+		.setupPackage   = object_setupPackage,
+		.initNameSpace  = object_initNameSpace,
 		.setupNameSpace = object_setupNameSpace,
 	};
 	return &d;
@@ -121,4 +121,3 @@ KDEFINE_PACKAGE* object_init(void)
 #ifdef __cplusplus
 }
 #endif
-

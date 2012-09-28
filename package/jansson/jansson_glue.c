@@ -485,9 +485,9 @@ KDEFINE_PACKAGE* jansson_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("jansson", "1.0"),
-		.initPackage = jansson_initPackage,
-		.setupPackage = jansson_setupPackage,
-		.initNameSpace = jansson_initNameSpace,
+		.initPackage    = jansson_initPackage,
+		.setupPackage   = jansson_setupPackage,
+		.initNameSpace  = jansson_initNameSpace,
 		.setupNameSpace = jansson_setupNameSpace,
 	};
 	return &d;
@@ -496,4 +496,3 @@ KDEFINE_PACKAGE* jansson_init(void)
 #ifdef __cplusplus
 }
 #endif
-

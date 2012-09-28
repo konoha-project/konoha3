@@ -502,9 +502,9 @@ KDEFINE_PACKAGE* curl_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("curl", "1.0"),
-		.initPackage = curl_initPackage,
-		.setupPackage = curl_setupPackage,
-		.initNameSpace = curl_initNameSpace,
+		.initPackage    = curl_initPackage,
+		.setupPackage   = curl_setupPackage,
+		.initNameSpace  = curl_initNameSpace,
 		.setupNameSpace = curl_setupNameSpace,
 	};
 	return &d;
@@ -513,4 +513,3 @@ KDEFINE_PACKAGE* curl_init(void)
 #ifdef __cplusplus
 }
 #endif
-

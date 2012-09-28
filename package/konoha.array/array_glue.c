@@ -554,15 +554,15 @@ static kbool_t array_setupNameSpace(KonohaContext *kctx, kNameSpace *packageName
 KDEFINE_PACKAGE* array_init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("konoha", "1.0"),
-		.initPackage = array_initPackage,
-		.setupPackage = array_setupPackage,
-		.initNameSpace = array_initNameSpace,
+		KPACKNAME("array", "1.0"),
+		.initPackage    = array_initPackage,
+		.setupPackage   = array_setupPackage,
+		.initNameSpace  = array_initNameSpace,
 		.setupNameSpace = array_setupNameSpace,
 	};
 	return &d;
 }
+
 #ifdef __cplusplus
 }
 #endif
-

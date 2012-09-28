@@ -282,15 +282,15 @@ static kbool_t math_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameS
 KDEFINE_PACKAGE* math_init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("konoha", "1.0"),
-		.initPackage = math_initPackage,
-		.setupPackage = math_setupPackage,
-		.initNameSpace = math_initNameSpace,
+		KPACKNAME("math", "1.0"),
+		.initPackage    = math_initPackage,
+		.setupPackage   = math_setupPackage,
+		.initNameSpace  = math_initNameSpace,
 		.setupNameSpace = math_setupNameSpace,
 	};
 	return &d;
 }
+
 #ifdef __cplusplus
 }
 #endif
-

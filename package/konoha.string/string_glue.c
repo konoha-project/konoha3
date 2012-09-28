@@ -1171,14 +1171,14 @@ KDEFINE_PACKAGE* string_init(void)
 {
 	static const KDEFINE_PACKAGE d = {
 		KPACKNAME("String", "1.0"),
-		.initPackage = string_initPackage,
-		.setupPackage = string_setupPackage,
-		.initNameSpace = string_initNameSpace,
+		.initPackage    = string_initPackage,
+		.setupPackage   = string_setupPackage,
+		.initNameSpace  = string_initNameSpace,
 		.setupNameSpace = string_setupNameSpace,
 	};
 	return &d;
 }
+
 #ifdef __cplusplus
 }
 #endif
-

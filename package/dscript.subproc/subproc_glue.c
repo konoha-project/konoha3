@@ -1389,9 +1389,9 @@ KDEFINE_PACKAGE* subproc_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("subproc", "1.0"),
-		.initPackage = subproc_initPackage,
-		.setupPackage = subproc_setupPackage,
-		.initNameSpace = subproc_initNameSpace,
+		.initPackage    = subproc_initPackage,
+		.setupPackage   = subproc_setupPackage,
+		.initNameSpace  = subproc_initNameSpace,
 		.setupNameSpace = subproc_setupNameSpace,
 	};
 	return &d;

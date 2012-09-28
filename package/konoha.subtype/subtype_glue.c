@@ -151,14 +151,14 @@ KDEFINE_PACKAGE* subtype_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("subtype", "1.0"),
-		.initPackage = subtype_initPackage,
-		.setupPackage = subtype_setupPackage,
-		.initNameSpace = subtype_initNameSpace,
+		.initPackage    = subtype_initPackage,
+		.setupPackage   = subtype_setupPackage,
+		.initNameSpace  = subtype_initNameSpace,
 		.setupNameSpace = subtype_setupNameSpace,
 	};
 	return &d;
 }
+
 #ifdef __cplusplus
 }
 #endif
-

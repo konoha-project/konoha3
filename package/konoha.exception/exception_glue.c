@@ -26,6 +26,10 @@
 #include <minikonoha/sugar.h>
 #include <minikonoha/float.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef kushort_t kfault_t;
 typedef const struct kExceptionVar kException;
 typedef struct kExceptionVar kExceptionVar;
@@ -312,10 +316,14 @@ KDEFINE_PACKAGE* exception_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("exception", "1.0"),
-		.initPackage = exception_initPackage,
-		.setupPackage = exception_setupPackage,
-		.initNameSpace = exception_initNameSpace,
+		.initPackage    = exception_initPackage,
+		.setupPackage   = exception_setupPackage,
+		.initNameSpace  = exception_initNameSpace,
 		.setupNameSpace = exception_setupNameSpace,
 	};
 	return &d;
 }
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif

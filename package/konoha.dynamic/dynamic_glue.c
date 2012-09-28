@@ -144,15 +144,15 @@ static kbool_t dynamic_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNa
 KDEFINE_PACKAGE* dynamic_init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("konoha", "1.0"),
-		.initPackage = dynamic_initPackage,
-		.setupPackage = dynamic_setupPackage,
-		.initNameSpace = dynamic_initNameSpace,
+		KPACKNAME("dynamic", "1.0"),
+		.initPackage    = dynamic_initPackage,
+		.setupPackage   = dynamic_setupPackage,
+		.initNameSpace  = dynamic_initNameSpace,
 		.setupNameSpace = dynamic_setupNameSpace,
 	};
 	return &d;
 }
+
 #ifdef __cplusplus
 }
 #endif
-

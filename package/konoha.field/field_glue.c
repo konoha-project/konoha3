@@ -233,15 +233,15 @@ static kbool_t field_setupNameSpace(KonohaContext *kctx, kNameSpace *packageName
 KDEFINE_PACKAGE* field_init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("konoha", "1.0"),
-		.initPackage = field_initPackage,
-		.setupPackage = field_setupPackage,
-		.initNameSpace = field_initNameSpace,
+		KPACKNAME("field", "1.0"),
+		.initPackage    = field_initPackage,
+		.setupPackage   = field_setupPackage,
+		.initNameSpace  = field_initNameSpace,
 		.setupNameSpace = field_setupNameSpace,
 	};
 	return &d;
 }
+
 #ifdef __cplusplus
 }
 #endif
-

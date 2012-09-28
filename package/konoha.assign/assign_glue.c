@@ -102,9 +102,9 @@ KDEFINE_PACKAGE* assign_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("assign", "1.0"),
-		.initPackage = assign_initPackage,
-		.setupPackage = assign_setupPackage,
-		.initNameSpace = assign_initNameSpace,
+		.initPackage    = assign_initPackage,
+		.setupPackage   = assign_setupPackage,
+		.initNameSpace  = assign_initNameSpace,
 		.setupNameSpace = assign_setupNameSpace,
 	};
 	return &d;
@@ -113,4 +113,3 @@ KDEFINE_PACKAGE* assign_init(void)
 #ifdef __cplusplus
 }
 #endif
-

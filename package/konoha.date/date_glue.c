@@ -46,9 +46,6 @@ struct _kDate {
 };
 
 /* ------------------------------------------------------------------------ */
-// [private functions]
-
-/* ------------------------------------------------------------------------ */
 //## Date Date.new();
 static KMETHOD Date_new0(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -643,9 +640,9 @@ KDEFINE_PACKAGE* date_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("date", "1.0"),
-		.initPackage = date_initPackage,
-		.setupPackage = date_setupPackage,
-		.initNameSpace = date_initNameSpace,
+		.initPackage    = date_initPackage,
+		.setupPackage   = date_setupPackage,
+		.initNameSpace  = date_initNameSpace,
 		.setupNameSpace = date_setupNameSpace,
 	};
 	return &d;

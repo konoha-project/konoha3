@@ -27,12 +27,13 @@
 #include <minikonoha/float.h>
 #include <minikonoha/bytes.h>
 #include <stdio.h>
-#include "mpi_glue.h"
 #define TRACE(POLICY, ...) OLDTRACE_SWITCH_TO_KTrace(POLICY, __VA_ARGS__);
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "mpi_glue.h"
 
 /* ------------------------------------------------------------------------ */
 kMPIComm *g_comm_world;
@@ -730,9 +731,9 @@ KDEFINE_PACKAGE* mpi_init(void)
 {
 	static const KDEFINE_PACKAGE d = {
 		KPACKNAME("mpi", "1.0"),
-		.initPackage  = mpi_initPackage,
-		.setupPackage = mpi_setupPackage,
-		.initNameSpace = mpi_initNameSpace,
+		.initPackage    = mpi_initPackage,
+		.setupPackage   = mpi_setupPackage,
+		.initNameSpace  = mpi_initNameSpace,
 		.setupNameSpace = mpi_setupNameSpace,
 	};
 	return &d;
@@ -741,4 +742,3 @@ KDEFINE_PACKAGE* mpi_init(void)
 #ifdef __cplusplus
 }
 #endif
-

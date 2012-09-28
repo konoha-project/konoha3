@@ -131,7 +131,7 @@ KDEFINE_PACKAGE* new_init(void)
 	};
 	return &d;
 }
+
 #ifdef __cplusplus
 }
 #endif
-
