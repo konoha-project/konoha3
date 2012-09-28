@@ -187,8 +187,12 @@ static KMETHOD Bytes_encodeTo(KonohaContext *kctx, KonohaStack *sfp)
 
 static kString *toString(KonohaContext *kctx, kBytes *ba)
 {
-	// At this point, we assuem 'ba' is null terminated.
-	return KLIB new_kString(kctx, ba->buf, ba->bytesize-1, 0);
+	if (ba->buf || ba->bytesize == 0) {
+		return TS_EMPTY;
+	} else {
+		// At this point, we assuem 'ba' is null terminated.
+		return KLIB new_kString(kctx, ba->buf, ba->bytesize-1, 0);
+	}
 }
 
 //## @Const method String Bytes.decodeFrom(String fromEncoding);
@@ -224,10 +228,6 @@ static KMETHOD String_asBytes(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	RETURN_(ba);
 }
-
-// this method is same as Bytes.decodeFrom(defaultencoding);
-// this methodList needs string_glue.h for counting mlen...
-//#include "../konoha.string/string_glue.h"
 
 //## @Const method String Bytes.asString();
 static KMETHOD Bytes_asString(KonohaContext *kctx, KonohaStack *sfp)
