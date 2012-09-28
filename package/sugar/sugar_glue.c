@@ -26,6 +26,9 @@
 #include <minikonoha/sugar.h>
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C"{
+#endif
 ////## void Token.setKeyword(String keywork);
 static KMETHOD Token_setUnresolvedTokenType(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -512,3 +515,7 @@ KDEFINE_PACKAGE* sugar_init(void)
 	};
 	return &d;
 }
+#ifdef __cplusplus
+}
+#endif
+

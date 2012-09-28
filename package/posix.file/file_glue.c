@@ -32,6 +32,11 @@
 #include <errno.h>
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
+
 typedef const struct _kFILE kFILE;
 struct _kFILE {
 	KonohaObjectHeader h;
@@ -340,3 +345,7 @@ KDEFINE_PACKAGE* file_init(void)
 	};
 	return &d;
 }
+#ifdef __cplusplus
+}
+#endif
+

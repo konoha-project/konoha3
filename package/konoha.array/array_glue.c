@@ -26,6 +26,10 @@
 #include <minikonoha/sugar.h>
 #include <minikonoha/float.h>
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 /* ------------------------------------------------------------------------ */
 
 //## @Immutable method T0 Array.get(Int n);
@@ -558,3 +562,7 @@ KDEFINE_PACKAGE* array_init(void)
 	};
 	return &d;
 }
+#ifdef __cplusplus
+}
+#endif
+

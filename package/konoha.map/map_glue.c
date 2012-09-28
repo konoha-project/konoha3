@@ -26,6 +26,10 @@
 #include <minikonoha/sugar.h>
 #include <minikonoha/klib.h>
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 typedef struct kMapVar kMap;
 struct kMapVar {
 	KonohaObjectHeader h;
@@ -265,5 +269,9 @@ KDEFINE_PACKAGE* map_init(void)
 	};
 	return &d;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 // --------------------------------------------------------------------------

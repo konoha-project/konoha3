@@ -30,6 +30,10 @@
 
 #include <errno.h> // include this because of E2BIG
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 /* ------------------------------------------------------------------------ */
 
 // Bytes_init
@@ -388,3 +392,7 @@ KDEFINE_PACKAGE* bytes_init(void)
 	};
 	return &d;
 }
+#ifdef __cplusplus
+}
+#endif
+
