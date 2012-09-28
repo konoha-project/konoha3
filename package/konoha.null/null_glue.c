@@ -24,7 +24,9 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-
+#ifdef __cplusplus
+extern "C"{
+#endif
 // --------------------------------------------------------------------------
 //## Boolean Object.isNull();
 static KMETHOD Object_isNull(KonohaContext *kctx, KonohaStack *sfp)
@@ -126,4 +128,8 @@ KDEFINE_PACKAGE* null_init(void)
 	};
 	return &d;
 }
+
+#ifdef __cplusplus
+}
+#endif
 

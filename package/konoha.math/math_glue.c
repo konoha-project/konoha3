@@ -29,6 +29,10 @@
 #include <minikonoha/float.h>
 #include "mt19937ar.h"
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 #define Int_to(T, a)               ((T)a.intValue)
 #define Float_to(T, a)             ((T)a.floatValue)
 
@@ -286,3 +290,7 @@ KDEFINE_PACKAGE* math_init(void)
 	};
 	return &d;
 }
+#ifdef __cplusplus
+}
+#endif
+

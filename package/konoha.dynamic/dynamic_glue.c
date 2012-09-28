@@ -25,6 +25,10 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 typedef const struct _kDynamic kDynamic;
 struct _kDynamic {
 	KonohaObjectHeader h;
@@ -148,3 +152,7 @@ KDEFINE_PACKAGE* dynamic_init(void)
 	};
 	return &d;
 }
+#ifdef __cplusplus
+}
+#endif
+

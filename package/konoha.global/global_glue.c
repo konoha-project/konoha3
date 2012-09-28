@@ -25,6 +25,10 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 // --------------------------------------------------------------------------
 
 #define _Public   kMethod_Public
@@ -150,3 +154,7 @@ KDEFINE_PACKAGE* global_init(void)
 	};
 	return &d;
 }
+#ifdef __cplusplus
+}
+#endif
+

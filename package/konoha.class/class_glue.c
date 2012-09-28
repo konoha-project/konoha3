@@ -26,6 +26,9 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 
+#ifdef __cplusplus
+extern "C"{
+#endif
 static KMETHOD MethodFunc_ObjectFieldGetter(KonohaContext *kctx, KonohaStack *sfp)
 {
 	size_t delta = sfp[K_MTDIDX].mtdNC->delta;
@@ -634,3 +637,7 @@ KDEFINE_PACKAGE* class_init(void)
 	};
 	return &d;
 }
+#ifdef __cplusplus
+}
+#endif
+

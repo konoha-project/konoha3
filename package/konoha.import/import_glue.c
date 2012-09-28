@@ -26,6 +26,10 @@
 #include <minikonoha/sugar.h>
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int ret = false;
@@ -109,3 +113,7 @@ KDEFINE_PACKAGE* import_init(void)
 	};
 	return &d;
 }
+#ifdef __cplusplus
+}
+#endif
+

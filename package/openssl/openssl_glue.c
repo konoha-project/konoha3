@@ -2,6 +2,10 @@
 #include "openssl/md5.h"
 #include "openssl/sha.h"
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 static void RawPtr_free(KonohaContext *kctx, kObject *po)
 {
 	kRawPtr *o = (kRawPtr*)(po);
@@ -140,4 +144,8 @@ KDEFINE_PACKAGE* openssl_init(void)
 	};
 	return &d;
 }
+
+#ifdef __cplusplus
+}
+#endif
 

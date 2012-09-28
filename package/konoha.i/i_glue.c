@@ -27,6 +27,10 @@
 #include <minikonoha/sugar.h>
 #include <minikonoha/klib.h>
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 //struct fn {
 //	uintptr_t  flag;
 //	const char *aname;
@@ -181,3 +185,7 @@ KDEFINE_PACKAGE* i_init(void)
 	};
 	return &d;
 }
+#ifdef __cplusplus
+}
+#endif
+
