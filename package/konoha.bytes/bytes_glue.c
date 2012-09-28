@@ -187,7 +187,7 @@ static KMETHOD Bytes_encodeTo(KonohaContext *kctx, KonohaStack *sfp)
 
 static kString *toString(KonohaContext *kctx, kBytes *ba)
 {
-	if (ba->buf || ba->bytesize == 0) {
+	if (ba->buf == NULL || ba->bytesize == 0) {
 		return TS_EMPTY;
 	} else {
 		// At this point, we assuem 'ba' is null terminated.
