@@ -38,6 +38,9 @@
 #define PATHMAX 256
 #endif /*PATHMAX*/
 
+#ifdef __cplusplus
+extern "C"{
+#endif
 /* ------------------------------------------------------------------------ */
 
 typedef const struct _kStat kStat;
@@ -990,3 +993,7 @@ KDEFINE_PACKAGE* fd_init(void)
 	};
 	return &d;
 }
+#ifdef __cplusplus
+}
+#endif
+

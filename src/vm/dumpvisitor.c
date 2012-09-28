@@ -2,6 +2,11 @@
 
 #ifdef USE_DUMP_VISITOR
 #define DUMPER(BUILDER)  ((struct DumpVisitorLocal*)(BUILDER)->local_fields)
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static void emit_string(const char *str, const char *prefix, const char *suffix, int indent)
 {
 	int i;
@@ -220,5 +225,9 @@ static IRBuilder *createDumpVisitor(IRBuilder *builder)
 	builder->api.fn_free = DumpVisitor_free;
 	return builder;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

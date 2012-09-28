@@ -27,6 +27,10 @@
 #include <minikonoha/sugar.h>
 #include <minikonoha/float.h>
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 #define OB_TYPE(obj) (((PyObject*)obj->self)->ob_type)
 
 typedef const struct _kPyObject kPyObject;
@@ -586,3 +590,7 @@ KDEFINE_PACKAGE* python_init(void)
 	};
 	return &d;
 }
+#ifdef __cplusplus
+}
+#endif
+

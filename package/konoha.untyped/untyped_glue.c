@@ -25,6 +25,11 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 
+
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 // --------------------------------------------------------------------------
 
 static kbool_t untyped_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
@@ -98,3 +103,8 @@ KDEFINE_PACKAGE* untyped_init(void)
 	};
 	return &d;
 }
+
+#ifdef __cplusplus
+}
+#endif
+
