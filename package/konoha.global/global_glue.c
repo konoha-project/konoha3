@@ -33,7 +33,7 @@
 
 static KMETHOD NameSpace_setTransparentGlobalVariable_(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kNameSpace_setTransparentGlobalVariable(sfp[0].asNameSpace, sfp[1].boolValue);
+	kNameSpace_set(TransparentGlobalVariable, sfp[0].asNameSpace, sfp[1].boolValue);
 }
 
 static	kbool_t global_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
