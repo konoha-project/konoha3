@@ -93,7 +93,7 @@ struct IRBuilder {
 	struct IRBuilderAPI api;
 	void *local_fields;
 	kStmt* currentStmt; /*FIXME(ide): need to reftrace currentStmt */
-	int a; /* what is a ? */
+	int a; /* whatis a ? */
 	int shift;
 	int espidx;
 };

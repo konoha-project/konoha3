@@ -43,7 +43,6 @@ static kExpr *callFuncParseExpr(KonohaContext *kctx, SugarSyntax *syn, kFunc *fo
 	lsfp[K_CALLDELTA+4].intValue = c;
 	lsfp[K_CALLDELTA+5].intValue = e;
 	countRef[0] += 1;
-//	DBG_P("calling %d times keyword='%s%s' fo=%p", countRef[0], PSYM_t(syn->keyword), fo);
 	{
 		KonohaStack *sfp = lsfp + K_CALLDELTA;
 		KSetMethodCallStack(sfp, 0/*UL*/, fo->mtd, 5, K_NULLEXPR);
@@ -151,7 +150,6 @@ static kExpr *kStmt_addExprParam(KonohaContext *kctx, kStmt *stmt, kExpr *expr, 
 	if(allowEmpty == 0 || start < i) {
 		expr = Expr_add(kctx, expr, kStmt_parseExpr(kctx, stmt, tokenList, start, i));
 	}
-	//KLIB kArray_clear(kctx, tokenList, s);
 	return expr;
 }
 
@@ -279,9 +277,6 @@ static int PatternMatch(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, ksym
 	if(callCount == 0) {
 		kStmt_printMessage(kctx, stmt, ErrTag, "undefined syntax pattern: %s%s", PSYM_t(syn->keyword));
 	}
-//	else {
-//		kStmt_printMessage(kctx, stmt, ErrTag, "syntax error: %s%s", PSYM_t(syn->keyword));
-//	}
 	return -1;
 }
 
@@ -400,26 +395,24 @@ static int kStmt_matchSyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *token
 static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
 {
 //	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
-	int nextIdx = kStmt_parseTypePattern(kctx, NULL, ns, tokenList, beginIdx, endIdx, NULL);
-//	DBG_P("nextIdx=%d, endIdx=%d", nextIdx, endIdx);
-	if(nextIdx != -1) {
-		if(nextIdx < endIdx) {
-			kToken *tk = tokenList->tokenItems[nextIdx];
-			if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern) {
-				if(nextIdx+1 < endIdx && tokenList->tokenItems[nextIdx+1]->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
-//					DBG_P("MethodDecl");
-					return SYN_(ns, KW_StmtMethodDecl); //
+	if(kNameSpace_isAllowed(CStyleDecl, ns)) {
+		int nextIdx = kStmt_parseTypePattern(kctx, NULL, ns, tokenList, beginIdx, endIdx, NULL);
+		if(nextIdx != -1) {
+			if(nextIdx < endIdx) {
+				kToken *tk = tokenList->tokenItems[nextIdx];
+				if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern) {
+					if(nextIdx+1 < endIdx && tokenList->tokenItems[nextIdx+1]->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
+						return SYN_(ns, KW_StmtMethodDecl);
+					}
+					return SYN_(ns, KW_StmtTypeDecl);
 				}
-//				DBG_P("TypeDecl");
-				return SYN_(ns, KW_StmtTypeDecl);  //
+				if(tk->resolvedSyntaxInfo->keyword == KW_TypePattern
+					|| ((tk->resolvedSyntaxInfo->precedence_op1 > 0 || tk->resolvedSyntaxInfo->precedence_op2 > 0) && tk->resolvedSyntaxInfo->keyword != KW_DOT)) {
+					return SYN_(ns, KW_StmtMethodDecl);
+				}
 			}
-			if(tk->resolvedSyntaxInfo->keyword == KW_TypePattern
-				|| ((tk->resolvedSyntaxInfo->precedence_op1 > 0 || tk->resolvedSyntaxInfo->precedence_op2 > 0) && tk->resolvedSyntaxInfo->keyword != KW_DOT)) {
-//				DBG_P("MethodDecl");
-				return SYN_(ns, KW_StmtMethodDecl); //
-			}
+			return SYN_(ns, KW_ExprPattern);
 		}
-		return SYN_(ns, KW_ExprPattern);
 	}
 	kToken *tk = tokenList->tokenItems[beginIdx];
 	SugarSyntax *syn = tk->resolvedSyntaxInfo;

@@ -531,10 +531,11 @@ static intptr_t STUB_Method_indexOfField(kMethod *mtd)
 // ---------------
 // NameSpace
 
-static void NameSpace_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kNameSpace_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kNameSpaceVar *ns = (kNameSpaceVar*)o;
 	bzero(&ns->parentNULL, sizeof(kNameSpace) - sizeof(KonohaObjectHeader));
+	ns->syntaxOption = kNameSpace_DefaultSyntaxOption;
 	if(conf != NULL) {
 		KINITv(ns->parentNULL, (kNameSpace*)conf);
 		ns->packageId     = ns->parentNULL->packageId;
@@ -544,7 +545,7 @@ static void NameSpace_init(KonohaContext *kctx, kObject *o, void *conf)
 	KINITv(ns->methodList, K_EMPTYARRAY);
 }
 
-static void NameSpace_reftrace(KonohaContext *kctx, kObject *o)
+static void kNameSpace_reftrace(KonohaContext *kctx, kObject *o)
 {
 	kNameSpace *ns = (kNameSpace*)o;
 	KLIB kNameSpace_reftraceSugarExtension(kctx, ns);
@@ -561,7 +562,7 @@ static void NameSpace_reftrace(KonohaContext *kctx, kObject *o)
 	END_REFTRACE();
 }
 
-static void NameSpace_free(KonohaContext *kctx, kObject *o)
+static void kNameSpace_free(KonohaContext *kctx, kObject *o)
 {
 	kNameSpaceVar *ns = (kNameSpaceVar*)o;
 	KLIB kNameSpace_freeSugarExtension(kctx, ns);
@@ -961,9 +962,9 @@ static void loadInitStructData(KonohaContext *kctx)
 	};
 	KDEFINE_CLASS defNameSpace = {
 		TYNAME(NameSpace),
-		.init = NameSpace_init,
-		.reftrace = NameSpace_reftrace,
-		.free = NameSpace_free,
+		.init = kNameSpace_init,
+		.reftrace = kNameSpace_reftrace,
+		.free = kNameSpace_free,
 	};
 	KDEFINE_CLASS defSystem = {
 		TYNAME(System),
