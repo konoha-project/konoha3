@@ -175,7 +175,8 @@ static KMETHOD Array_pop(KonohaContext *kctx, KonohaStack *sfp)
 	else {
 		struct _kAbstractArray *a2 = (struct _kAbstractArray*)a;
 		kObject *value = a2->a.objectItems[n];
-		KINITp(a2, a2->a.objectItems[n], NULL);
+		kObject** null = NULL;
+		KINITp(a2, a2->a.objectItems[n], null);
 		a2->a.bytesize = n * sizeof(uintptr_t);
 		RETURN_(value);
 	}
@@ -539,8 +540,8 @@ static KMETHOD ParseExpr_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t array_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ GROUP(Bracket), .flag = SYNFLAG_ExprPostfixOp2, ExprTyCheck_(Bracket), ParseExpr_(Bracket), .precedence_op2 = C_PRECEDENCE_CALL, },
-		{ .keyword = KW_END, },
+		{ KW_BracketGroup, SYNFLAG_ExprPostfixOp2, NULL, C_PRECEDENCE_CALL, 0, NULL, ParseExpr_Bracket, NULL, NULL, ExprTyCheck_Bracket, },
+		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 	return true;
@@ -553,13 +554,12 @@ static kbool_t array_setupNameSpace(KonohaContext *kctx, kNameSpace *packageName
 
 KDEFINE_PACKAGE* array_init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("array", "1.0"),
-		.initPackage    = array_initPackage,
-		.setupPackage   = array_setupPackage,
-		.initNameSpace  = array_initNameSpace,
-		.setupNameSpace = array_setupNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {0};
+	KSETPACKNAME(d, "array", "1.0");
+	d.initPackage    = array_initPackage;
+	d.setupPackage   = array_setupPackage;
+	d.initNameSpace  = array_initNameSpace;
+	d.setupNameSpace = array_setupNameSpace;
 	return &d;
 }
 

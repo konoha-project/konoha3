@@ -1145,9 +1145,9 @@ static KMETHOD StmtTyCheck_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ------------------------------------------------------------------------ */
 
-#define PATTERN(T)  .keyword = KW_##T##Pattern
-#define GROUP(T)    .keyword = KW_##T##Group
-#define TOKEN(T)    .keyword = KW_##T
+#define PATTERN(T)  KW_##T##Pattern
+#define GROUP(T)    KW_##T##Group
+#define TOKEN(T)    KW_##T
 
 static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 {
@@ -1159,45 +1159,44 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 	DBG_ASSERT(SYM_("new") == MN_new);
 
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ TOKEN(ERR), .flag = SYNFLAG_StmtBreakExec, },
-		{ PATTERN(Symbol),  PatternMatch_(MethodName), ParseExpr_(Term), ExprTyCheck_(Symbol),},
-		{ PATTERN(Text),    ExprTyCheck_(Text),},
-		{ PATTERN(Number),  ExprTyCheck_(Int),},
-//		{ PATTERN(Float),  },
-		{ GROUP(Parenthesis), .flag = SYNFLAG_ExprPostfixOp2, ParseExpr_(Parenthesis), .precedence_op2 = C_PRECEDENCE_CALL, ExprTyCheck_(FuncStyleCall),}, //KW_ParenthesisGroup
+		{ TOKEN(ERR), SYNFLAG_StmtBreakExec, },
+		{ PATTERN(Symbol),  0, NULL, 0, 0, PatternMatch_MethodName, ParseExpr_Term, NULL, NULL, ExprTyCheck_Symbol,},
+		{ PATTERN(Text),    0, NULL, 0, 0, NULL, NULL, NULL, NULL, ExprTyCheck_Text,},
+		{ PATTERN(Number),  0, NULL, 0, 0, NULL, NULL, NULL, NULL, ExprTyCheck_Int,},
+		{ GROUP(Parenthesis), SYNFLAG_ExprPostfixOp2, NULL, C_PRECEDENCE_CALL, 0, NULL, ParseExpr_Parenthesis, NULL, NULL, ExprTyCheck_FuncStyleCall,}, //KW_ParenthesisGroup
 		{ GROUP(Bracket),  },  //KW_BracketGroup
 		{ GROUP(Brace),  }, // KW_BraceGroup
-		{ PATTERN(Block), PatternMatch_(Block), ExprTyCheck_(Block), },
-		{ PATTERN(Param), PatternMatch_(Params), ParseExpr_(Op), TopStmtTyCheck_(ParamsDecl), ExprTyCheck_(MethodCall),},
-		{ PATTERN(Token), PatternMatch_(Toks), },
-		{ TOKEN(DOT), ParseExpr_(DOT), .precedence_op2 = C_PRECEDENCE_CALL, },
-		{ TOKEN(DIV), .precedence_op2 = C_PRECEDENCE_MUL, },
-		{ TOKEN(MOD), .precedence_op2 = C_PRECEDENCE_MUL, },
-		{ TOKEN(MUL), .precedence_op2 = C_PRECEDENCE_MUL, },
-		{ TOKEN(ADD), .precedence_op2 = C_PRECEDENCE_ADD, },
-		{ TOKEN(SUB), .precedence_op2 = C_PRECEDENCE_ADD, .precedence_op1 = C_PRECEDENCE_PREUNARY, },
-		{ TOKEN(LT),  .precedence_op2 = C_PRECEDENCE_COMPARE, },
-		{ TOKEN(LTE), .precedence_op2 = C_PRECEDENCE_COMPARE, },
-		{ TOKEN(GT),  .precedence_op2 = C_PRECEDENCE_COMPARE, },
-		{ TOKEN(GTE), .precedence_op2 = C_PRECEDENCE_COMPARE, },
-		{ TOKEN(EQ),  .precedence_op2 = C_PRECEDENCE_EQUALS, },
-		{ TOKEN(NEQ), .precedence_op2 = C_PRECEDENCE_EQUALS, },
-		{ TOKEN(LET), .flag = SYNFLAG_ExprLeftJoinOp2, ParseExpr_(Op), ExprTyCheck_(assign), .precedence_op2 = C_PRECEDENCE_ASSIGN, },
-		{ TOKEN(AND), .precedence_op2 = C_PRECEDENCE_AND, ParseExpr_(Op), ExprTyCheck_(AND)},
-		{ TOKEN(OR),  .precedence_op2 = C_PRECEDENCE_OR, ParseExpr_(Op), ExprTyCheck_(OR)},
-		{ TOKEN(NOT),  .precedence_op1 = C_PRECEDENCE_PREUNARY,},
-		{ TOKEN(COLON), .precedence_op2 = C_PRECEDENCE_TRINARY, },  // colon
-		{ TOKEN(COMMA),    ParseExpr_(COMMA), .precedence_op2 = C_PRECEDENCE_COMMA,},
-		{ TOKEN(DOLLAR),   ParseExpr_(DOLLAR), },
-		{ TOKEN(true),    ExprTyCheck_(true),},
-		{ TOKEN(false),   ExprTyCheck_(false),},
-		{ PATTERN(Expr), .rule ="$Expr", PatternMatch_(Expr), TopStmtTyCheck_(Expr), StmtTyCheck_(Expr), ParseExpr_(Expr) },
-		{ PATTERN(Type),  PatternMatch_(Type), .rule = "$Type $Expr", StmtTyCheck_(TypeDecl), ExprTyCheck_(Type), },
-		{ PATTERN(MethodDecl), .rule ="$Type [ClassName: $Type \".\"] $Symbol $Param [$Block]", TopStmtTyCheck_(MethodDecl)},
-		{ TOKEN(if),     .rule ="\"if\" \"(\" $Expr \")\" $Block [\"else\" else: $Block]", /*TopStmtTyCheck_(if),*/ StmtTyCheck_(if), },
-		{ TOKEN(else),   .rule = "\"else\" $Block", TopStmtTyCheck_(else), StmtTyCheck_(else), },
-		{ TOKEN(return), .rule ="\"return\" [$Expr]", .flag = SYNFLAG_StmtBreakExec, StmtTyCheck_(return), },
-		{ .keyword = KW_END, },
+		{ PATTERN(Block), 0, NULL, 0, 0, PatternMatch_Block, NULL, NULL, NULL, ExprTyCheck_Block, },
+		{ PATTERN(Param), 0, NULL, 0, 0, PatternMatch_Params, ParseExpr_Op, StmtTyCheck_ParamsDecl, NULL, ExprTyCheck_MethodCall,},
+		{ PATTERN(Token), 0, NULL, 0, 0, PatternMatch_Toks, },
+		{ TOKEN(DOT), 0, NULL, C_PRECEDENCE_CALL, 0, NULL, ParseExpr_DOT, },
+		{ TOKEN(DIV), 0, NULL, C_PRECEDENCE_MUL, },
+		{ TOKEN(MOD), 0, NULL, C_PRECEDENCE_MUL, },
+		{ TOKEN(MUL), 0, NULL, C_PRECEDENCE_MUL, },
+		{ TOKEN(ADD), 0, NULL, C_PRECEDENCE_ADD, },
+		{ TOKEN(SUB), 0, NULL, C_PRECEDENCE_ADD, C_PRECEDENCE_PREUNARY, },
+		{ TOKEN(LT),  0, NULL, C_PRECEDENCE_COMPARE, },
+		{ TOKEN(LTE), 0, NULL, C_PRECEDENCE_COMPARE, },
+		{ TOKEN(GT),  0, NULL, C_PRECEDENCE_COMPARE, },
+		{ TOKEN(GTE), 0, NULL, C_PRECEDENCE_COMPARE, },
+		{ TOKEN(EQ),  0, NULL, C_PRECEDENCE_EQUALS, },
+		{ TOKEN(NEQ), 0, NULL, C_PRECEDENCE_EQUALS, },
+		{ TOKEN(LET), SYNFLAG_ExprLeftJoinOp2, NULL, C_PRECEDENCE_ASSIGN, 0, NULL, ParseExpr_Op, NULL, NULL, ExprTyCheck_assign, },
+		{ TOKEN(AND), 0, NULL, C_PRECEDENCE_AND, 0, NULL, ParseExpr_Op, NULL, NULL, ExprTyCheck_AND, },
+		{ TOKEN(OR),  0, NULL, C_PRECEDENCE_OR,  0, NULL, ParseExpr_Op, NULL, NULL, ExprTyCheck_OR, },
+		{ TOKEN(NOT), 0, NULL, 0, C_PRECEDENCE_PREUNARY, },
+		{ TOKEN(COLON), 0, NULL, C_PRECEDENCE_TRINARY, },  // colon
+		{ TOKEN(COMMA),   0, NULL, C_PRECEDENCE_COMMA, 0, NULL, ParseExpr_COMMA, },
+		{ TOKEN(DOLLAR),  0, NULL, 0, 0, NULL, ParseExpr_DOLLAR, },
+		{ TOKEN(true),    0, NULL, 0, 0, NULL, NULL, NULL, NULL, ExprTyCheck_true, },
+		{ TOKEN(false),   0, NULL, 0, 0, NULL, NULL, NULL, NULL, ExprTyCheck_false, },
+		{ PATTERN(Expr),  0, "$Expr", 0, 0, PatternMatch_Expr, ParseExpr_Expr, StmtTyCheck_Expr, StmtTyCheck_Expr, NULL, },
+		{ PATTERN(Type),  0, "$Type $Expr", 0, 0, PatternMatch_Type, NULL, NULL, StmtTyCheck_TypeDecl, ExprTyCheck_Type, },
+		{ PATTERN(MethodDecl), 0, "$Type [ClassName: $Type \".\"] $Symbol $Param [$Block]", 0, 0, NULL, NULL, StmtTyCheck_MethodDecl, NULL, NULL, },
+		{ TOKEN(if),     0, "\"if\" \"(\" $Expr \")\" $Block [\"else\" else: $Block]", 0, 0, NULL, NULL, NULL, StmtTyCheck_if, NULL, },
+		{ TOKEN(else),   0,  "\"else\" $Block", 0, 0, NULL, NULL, StmtTyCheck_else, StmtTyCheck_else, NULL, },
+		{ TOKEN(return), SYNFLAG_StmtBreakExec, "\"return\" [$Expr]", 0, 0, NULL, NULL, NULL, StmtTyCheck_return, NULL, },
+		{ KW_END, },
 	};
 	kNameSpace_defineSyntax(kctx, ns, SYNTAX, ns);
 }

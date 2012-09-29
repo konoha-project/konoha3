@@ -24,7 +24,11 @@
 
 /* ************************************************************************ */
 
+#ifdef HAVE_STDBOOL_H
 #include <stdbool.h>
+#else
+#include "minikonoha/stdbool.h"
+#endif
 #include <stdio.h>
 #include <sys/time.h>
 

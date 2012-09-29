@@ -125,11 +125,7 @@ typedef struct KonohaLibVar          KonohaLibVar;
 #define KLIB    (kctx->klib)->
 
 #define KDEFINE_PACKAGE KonohaPackageHandler
-#ifdef _MSC_VER
 typedef struct KonohaPackageHandlerVar KonohaPackageHandler;
-#else
-typedef const struct KonohaPackageHandlerVar KonohaPackageHandler;
-#endif
 typedef KonohaPackageHandler* (*PackageLoadFunc)(void);
 
 #ifndef jmpbuf_i
@@ -802,6 +798,17 @@ typedef struct KDEFINE_CLASS {
 #define UNBOXNAME(C) \
 	.structname = #C,\
 	.typeId = TY_newid
+
+#define SETSTRUCTNAME(VAR, C) do{\
+		VAR.structname = #C;\
+		VAR.typeId = TY_newid;\
+		VAR.cstruct_size = sizeof(k##C);\
+	}while(0)
+
+#define SETUNBOXNAME(VAR, C) do{\
+		VAR.structname = #C;\
+		VAR.typeId = TY_newid;\
+	}while(0)
 
 //KonohaClassVar;
 typedef uintptr_t kmagicflag_t;

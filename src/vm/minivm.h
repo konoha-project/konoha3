@@ -25,6 +25,11 @@
 #define MINIVM_H
 // THIS FILE WAS AUTOMATICALLY GENERATED
 
+#ifndef __GNUC__
+#ifdef K_USING_THCODE_
+#undef K_USING_THCODE_
+#endif
+#endif
 
 #define OPCODE_NOP ((kopcode_t)0)
 typedef struct OPNOP {

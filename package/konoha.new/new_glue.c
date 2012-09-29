@@ -108,8 +108,8 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t new_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("new"), ParseExpr_(new), .precedence_op1 = C_PRECEDENCE_CALL},
-		{ .keyword = KW_END, },
+		{ SYM_("new"), 0, NULL, 0, C_PRECEDENCE_CALL, NULL, ParseExpr_new, NULL, NULL, NULL, },
+		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 	return true;
@@ -122,13 +122,12 @@ static kbool_t new_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSp
 
 KDEFINE_PACKAGE* new_init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("new", "1.0"),
-		.initPackage    = new_initPackage,
-		.setupPackage   = new_setupPackage,
-		.initNameSpace  = new_initNameSpace,
-		.setupNameSpace = new_setupNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {0};
+	KSETPACKNAME(d, "new", "1.0");
+	d.initPackage    = new_initPackage;
+	d.setupPackage   = new_setupPackage;
+	d.initNameSpace  = new_initNameSpace;
+	d.setupNameSpace = new_setupNameSpace;
 	return &d;
 }
 

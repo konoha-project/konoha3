@@ -271,16 +271,14 @@ static KMETHOD ExprTyCheck_Int2(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t int_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = KW_NumberPattern, ExprTyCheck_(Int2) },
-		{ .keyword = SYM_("~"), .precedence_op1 = C_PRECEDENCE_PREUNARY,},
-		{ .keyword = SYM_("<<"),  .precedence_op2 = C_PRECEDENCE_SHIFT,},
-		{ .keyword = SYM_(">>"),  .precedence_op2 = C_PRECEDENCE_SHIFT,},
-		{ .keyword = SYM_("&"),   .precedence_op2 = C_PRECEDENCE_BITAND,},
-		{ .keyword = SYM_("|"),   .precedence_op2 = C_PRECEDENCE_BITOR,},
-		{ .keyword = SYM_("^"),   .precedence_op2 = C_PRECEDENCE_BITXOR,},
-		//{ TOKEN("++"),  .op1 = "opINC", .precedence_op2 = C_PRECEDENCE_PREUNARY, .flag = SYNFLAG_ExprPostfixOp2, },
-		//{ TOKEN("--"),  .op1 = "opDEC", .precedence_op2 = C_PRECEDENCE_PREUNARY, .flag = SYNFLAG_ExprPostfixOp2,},
-		{ .keyword = KW_END, },
+		{ KW_NumberPattern, 0,  NULL, 0, 0, NULL, NULL, NULL, NULL, ExprTyCheck_Int2, },
+		{ SYM_("~"),  0, NULL, 0,                   C_PRECEDENCE_PREUNARY, NULL, NULL, NULL, NULL, NULL, },
+		{ SYM_("<<"), 0, NULL, C_PRECEDENCE_SHIFT,  0,                     NULL, NULL, NULL, NULL, NULL, },
+		{ SYM_(">>"), 0, NULL, C_PRECEDENCE_SHIFT,  0,                     NULL, NULL, NULL, NULL, NULL, },
+		{ SYM_("&"),  0, NULL, C_PRECEDENCE_BITAND, 0,                     NULL, NULL, NULL, NULL, NULL, },
+		{ SYM_("|"),  0, NULL, C_PRECEDENCE_BITOR,  0,                     NULL, NULL, NULL, NULL, NULL, },
+		{ SYM_("^"),  0, NULL, C_PRECEDENCE_BITXOR, 0,                     NULL, NULL, NULL, NULL, NULL, },
+		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 
@@ -303,13 +301,12 @@ static kbool_t int_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSp
 
 KDEFINE_PACKAGE* int_init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("int", "1.0"),
-		.initPackage    = int_initPackage,
-		.setupPackage   = int_setupPackage,
-		.initNameSpace  = int_initNameSpace,
-		.setupNameSpace = int_setupNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {0};
+	KSETPACKNAME(d, "int", "1.0");
+	d.initPackage    = int_initPackage;
+	d.setupPackage   = int_setupPackage;
+	d.initNameSpace  = int_initNameSpace;
+	d.setupNameSpace = int_setupNameSpace;
 	return &d;
 }
 

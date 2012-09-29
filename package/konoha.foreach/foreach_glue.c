@@ -162,9 +162,8 @@ static kbool_t foreach_initNameSpace(KonohaContext *kctx, kNameSpace *packageNam
 	KImportPackage(ns, "konoha.break", pline);
 	KImportPackage(ns, "konoha.continue", pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("for"), StmtTyCheck_(for),
-			.rule = "\"for\" \"(\" [$Type] $Symbol \"in\" $Expr  \")\" [$Block] ", },
-		{ .keyword = KW_END, },
+		{ SYM_("for"), 0, "\"for\" \"(\" [$Type] $Symbol \"in\" $Expr  \")\" [$Block] ", 0, 0, NULL, NULL, NULL, StmtTyCheck_for, NULL, },
+		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 	return true;
@@ -177,13 +176,12 @@ static kbool_t foreach_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNa
 
 KDEFINE_PACKAGE* foreach_init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("foreach", "1.0"),
-		.initPackage    = foreach_initPackage,
-		.setupPackage   = foreach_setupPackage,
-		.initNameSpace  = foreach_initNameSpace,
-		.setupNameSpace = foreach_setupNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {0};
+	KSETPACKNAME(d, "foreach", "1.0");
+	d.initPackage    = foreach_initPackage;
+	d.setupPackage   = foreach_setupPackage;
+	d.initNameSpace  = foreach_initNameSpace;
+	d.setupNameSpace = foreach_setupNameSpace;
 	return &d;
 }
 

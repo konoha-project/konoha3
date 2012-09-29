@@ -173,16 +173,16 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 	base->h.free     = kmoditerator_free;
 	KLIB KonohaRuntime_setModule(kctx, MOD_iterator, &base->h, pline);
 
-	kparamtype_t IteratorParam = {
-		.ty = TY_Object,
-	};
-	KDEFINE_CLASS defIterator = {
-		STRUCTNAME(Iterator),
-		.cflag  = CFLAG_Iterator,
-		.init   = Iterator_init,
-		.cparamsize  = 1,
-		.cparamItems = &IteratorParam,
-	};
+	kparamtype_t IteratorParam = {0};
+	IteratorParam.ty = TY_Object;
+
+	KDEFINE_CLASS defIterator = {0};
+	SETSTRUCTNAME(defIterator, Iterator);
+	defIterator.cflag  = CFLAG_Iterator;
+	defIterator.init   = Iterator_init;
+	defIterator.cparamsize  = 1;
+	defIterator.cparamItems = &IteratorParam;
+
 	base->cIterator = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defIterator, pline);
 	base->cStringIterator = CT_p0(kctx, base->cIterator, TY_String);
 	base->cGenericIterator = CT_p0(kctx, base->cIterator, TY_0);
@@ -214,13 +214,12 @@ static kbool_t iterator_setupNameSpace(KonohaContext *kctx, kNameSpace *packageN
 
 KDEFINE_PACKAGE* iterator_init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("iterator", "1.0"),
-		.initPackage    = iterator_initPackage,
-		.setupPackage   = iterator_setupPackage,
-		.initNameSpace  = iterator_initNameSpace,
-		.setupNameSpace = iterator_setupNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {0};
+	KSETPACKNAME(d, "iterator", "1.0");
+	d.initPackage    = iterator_initPackage;
+	d.setupPackage   = iterator_setupPackage;
+	d.initNameSpace  = iterator_initNameSpace;
+	d.setupNameSpace = iterator_setupNameSpace;
 	return &d;
 }
 

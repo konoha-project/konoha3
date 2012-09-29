@@ -28,6 +28,10 @@
 extern "C" {
 #endif
 
+#ifdef _MSC_VER
+#define strtoll _strtoi64
+#endif
+
 /* ------------------------------------------------------------------------ */
 /* TokenRange */
 
@@ -524,14 +528,14 @@ static void kNameSpace_setTokenizeFunc(KonohaContext *kctx, kNameSpace *ns, int 
 static void TokenRange_tokenize(KonohaContext *kctx, TokenRange *range, const char *source, kfileline_t uline)
 {
 	DBG_ASSERT(range->beginIdx == range->endIdx);
-	TokenizerEnv tenv = {
-		.source = source,
-		.sourceLength = strlen(source),
-		.currentLine  = uline,
-		.tokenList    = range->tokenList,
-		.tabsize = 4,
-		.cfuncItems   = (range->ns == NULL) ? MiniKonohaTokenMatrix : kNameSpace_tokenMatrix(kctx, range->ns),
-	};
+	TokenizerEnv tenv = {0};
+	tenv.source = source;
+	tenv.sourceLength = strlen(source);
+	tenv.currentLine  = uline;
+	tenv.tokenList    = range->tokenList;
+	tenv.tabsize = 4;
+	tenv.cfuncItems   = (range->ns == NULL) ? MiniKonohaTokenMatrix : kNameSpace_tokenMatrix(kctx, range->ns);
+
 	INIT_GCSTACK();
 	kString *preparedString = KLIB new_kString(kctx, tenv.source, tenv.sourceLength, SPOL_ASCII|SPOL_TEXT|SPOL_NOPOOL);
 	PUSH_GCSTACK(preparedString);

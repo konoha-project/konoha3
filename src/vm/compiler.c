@@ -1204,17 +1204,17 @@ void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	base->h.reftrace = kmodcode_reftrace;
 	base->h.free     = kmodcode_free;
 	KLIB KonohaRuntime_setModule(kctx, MOD_code, &base->h, 0);
-	KDEFINE_CLASS defBasicBlock = {
-		STRUCTNAME(BasicBlock),
-		.init = BasicBlock_init,
-		.free = BasicBlock_free,
-	};
-	KDEFINE_CLASS defByteCode = {
-		STRUCTNAME(ByteCode),
-		.init = ByteCode_init,
-		.reftrace = ByteCode_reftrace,
-		.free = ByteCode_free,
-	};
+	KDEFINE_CLASS defBasicBlock = {0};
+	SETSTRUCTNAME(defBasicBlock, BasicBlock);
+	defBasicBlock.init = BasicBlock_init;
+	defBasicBlock.free = BasicBlock_free;
+	
+	KDEFINE_CLASS defByteCode = {0};
+	SETSTRUCTNAME(defByteCode, ByteCode);
+	defByteCode.init = ByteCode_init;
+	defByteCode.reftrace = ByteCode_reftrace;
+	defByteCode.free = ByteCode_free;
+	
 	base->cBasicBlock = KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defBasicBlock, 0);
 	base->cByteCode = KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defByteCode, 0);
 	kmodcode_setup(kctx, &base->h, 0);

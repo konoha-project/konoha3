@@ -68,8 +68,8 @@ static KMETHOD StmtTyCheck_continue(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t continue_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("continue"), StmtTyCheck_(continue), .rule = "\"continue\" [ $Symbol ]", },
-		{ .keyword = KW_END, },
+		{ SYM_("continue"), 0, "\"continue\" [ $Symbol ]", 0, 0, NULL, NULL, NULL, StmtTyCheck_continue, NULL, },
+		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 	return true;
@@ -82,13 +82,12 @@ static kbool_t continue_setupNameSpace(KonohaContext *kctx, kNameSpace *packageN
 
 KDEFINE_PACKAGE* continue_init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("continue", "1.0"),
-		.initPackage    = continue_initPackage,
-		.setupPackage   = continue_setupPackage,
-		.initNameSpace  = continue_initNameSpace,
-		.setupNameSpace = continue_setupNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {0};
+	KSETPACKNAME(d, "continue", "1.0");
+	d.initPackage    = continue_initPackage;
+	d.setupPackage   = continue_setupPackage;
+	d.initNameSpace  = continue_initNameSpace;
+	d.setupNameSpace = continue_setupNameSpace;
 	return &d;
 }
 

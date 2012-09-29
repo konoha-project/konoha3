@@ -144,30 +144,29 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	l->kNameSpace_reftraceSugarExtension =  kNameSpace_reftraceSugarExtension;
 	l->kNameSpace_freeSugarExtension =  kNameSpace_freeSugarExtension;
 
-	KDEFINE_CLASS defToken = {
-		STRUCTNAME(Token),
-		.init = Token_init,
-		.reftrace = Token_reftrace,
-	};
-	KDEFINE_CLASS defExpr = {
-		STRUCTNAME(Expr),
-		.init = Expr_init,
-		.reftrace = Expr_reftrace,
-	};
-	KDEFINE_CLASS defStmt = {
-		STRUCTNAME(Stmt),
-		.init = Stmt_init,
-		.reftrace = Stmt_reftrace,
-	};
-	KDEFINE_CLASS defBlock = {
-		STRUCTNAME(Block),
-		.init = kBlock_init,
-		.reftrace = kBlock_reftrace,
-	};
-	KDEFINE_CLASS defGamma = {
-		STRUCTNAME(Gamma),
-		.init = Gamma_init,
-	};
+	KDEFINE_CLASS defToken = {0};
+	SETSTRUCTNAME(defToken, Token);
+	defToken.init = Token_init;
+	defToken.reftrace = Token_reftrace;
+	
+	KDEFINE_CLASS defExpr = {0};
+	SETSTRUCTNAME(defExpr, Expr);
+	defExpr.init = Expr_init;
+	defExpr.reftrace = Expr_reftrace;
+	
+	KDEFINE_CLASS defStmt = {0};
+	SETSTRUCTNAME(defStmt, Stmt);
+	defStmt.init = Stmt_init;
+	defStmt.reftrace = Stmt_reftrace;
+	
+	KDEFINE_CLASS defBlock = {0};
+	SETSTRUCTNAME(defBlock, Block);
+	defBlock.init = kBlock_init;
+	defBlock.reftrace = kBlock_reftrace;
+	
+	KDEFINE_CLASS defGamma = {0};
+	SETSTRUCTNAME(defGamma, Gamma);
+	defGamma.init = Gamma_init;
 
 	mod->cToken =     KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defToken, 0);
 	mod->cExpr  =     KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defExpr, 0);

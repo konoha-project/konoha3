@@ -325,11 +325,14 @@ static kbool_t kMethod_compile(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns
 	kBlock *bk = kMethod_newBlock(kctx, mtd, ns, text, uline);
 	DBG_P("@@@@@@@@@ NS=%p", ns);
 	GammaStackDecl lvarItems[32] = {};
-	GammaAllocaData newgma = {
-		.currentWorkingMethod = mtd,
-		.this_cid = (mtd)->typeId,
-		.localScope.varItems = lvarItems, .localScope.capacity = 32, .localScope.varsize = 0, .localScope.allocsize = 0,
-	};
+	GammaAllocaData newgma = {0};
+	newgma.currentWorkingMethod = mtd;
+	newgma.this_cid = (mtd)->typeId;
+	newgma.localScope.varItems = lvarItems;
+	newgma.localScope.capacity = 32;
+	newgma.localScope.varsize = 0;
+	newgma.localScope.allocsize = 0;
+
 	GAMMA_PUSH(gma, &newgma);
 	kGamma_initParam(kctx, &newgma, Method_param(mtd));
 	kBlock_tyCheckAll(kctx, bk, gma);
@@ -373,12 +376,15 @@ static kstatus_t kBlock_genEvalCode(KonohaContext *kctx, kBlock *bk, kMethod *mt
 {
 	kGamma *gma = KonohaContext_getSugarContext(kctx)->preparedGamma;
 	GammaStackDecl lvarItems[32] = {};
-	GammaAllocaData newgma = {
-		.flag = kGamma_TopLevel,
-		.currentWorkingMethod = mtd,
-		.this_cid     = TY_NameSpace,
-		.localScope.varItems = lvarItems, .localScope.capacity = 32, .localScope.varsize = 0, .localScope.allocsize = 0,
-	};
+	GammaAllocaData newgma = {0};
+	newgma.flag = kGamma_TopLevel;
+	newgma.currentWorkingMethod = mtd;
+	newgma.this_cid     = TY_NameSpace;
+	newgma.localScope.varItems = lvarItems;
+	newgma.localScope.capacity = 32;
+	newgma.localScope.varsize = 0;
+	newgma.localScope.allocsize = 0;
+
 	GAMMA_PUSH(gma, &newgma);
 	kGamma_initIt(kctx, &newgma, Method_param(mtd));
 	kBlock_tyCheckAll(kctx, bk, gma);

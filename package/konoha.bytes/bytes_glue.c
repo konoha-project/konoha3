@@ -294,13 +294,13 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	base->h.free     = kmodiconv_free;
 	KLIB KonohaRuntime_setModule(kctx, MOD_iconv, &base->h, pline);
 
-	KDEFINE_CLASS defBytes = {
-		STRUCTNAME(Bytes),
-		.cflag   = kClass_Final,
-		.free    = Bytes_free,
-		.init    = Bytes_init,
-		.p       = Bytes_p,
-	};
+	KDEFINE_CLASS defBytes = {0};
+	SETSTRUCTNAME(defBytes, Bytes);
+	defBytes.cflag   = kClass_Final;
+	defBytes.free    = Bytes_free;
+	defBytes.init    = Bytes_init;
+	defBytes.p       = Bytes_p;
+
 	base->cBytes = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defBytes, pline);
 	int FN_encoding = FN_("encoding");
 	int FN_x = FN_("x");
@@ -369,8 +369,8 @@ static kbool_t bytes_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameS
 {
 	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '\'', parseSQUOTE, NULL, 0);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("$SingleQuote"),  ExprTyCheck_(Squote)},
-		{ .keyword = KW_END, },
+		{ SYM_("$SingleQuote"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, ExprTyCheck_Squote, },
+		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 	return true;
@@ -383,13 +383,12 @@ static kbool_t bytes_setupNameSpace(KonohaContext *kctx, kNameSpace *packageName
 
 KDEFINE_PACKAGE* bytes_init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("bytes", "1.0"),
-		.initPackage    = bytes_initPackage,
-		.setupPackage   = bytes_setupPackage,
-		.initNameSpace  = bytes_initNameSpace,
-		.setupNameSpace = bytes_setupNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {0};
+	KSETPACKNAME(d, "bytes", "1.0");
+	d.initPackage    = bytes_initPackage;
+	d.setupPackage   = bytes_setupPackage;
+	d.initNameSpace  = bytes_initNameSpace;
+	d.setupNameSpace = bytes_setupNameSpace;
 	return &d;
 }
 

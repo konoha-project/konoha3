@@ -346,13 +346,13 @@ static kshortflag_t kStmt_parseClassFlag(KonohaContext *kctx, kStmt *stmt, kshor
 
 static KonohaClassVar* kNameSpace_defineClassName(KonohaContext *kctx, kNameSpace *ns, kshortflag_t cflag, kString *name, kfileline_t pline)
 {
-	KDEFINE_CLASS defNewClass = {
-		.cflag         = cflag,
-		.typeId       = TY_newid,
-		.baseTypeId   = TY_Object,
-		.superTypeId  = TY_Object, //superClass->typeId,
-		.init = Object_initToMakeDefaultValueAsNull, // dummy for first generation of DefaultValueAsNull
-	};
+	KDEFINE_CLASS defNewClass = {0};
+	defNewClass.cflag         = cflag;
+	defNewClass.typeId       = TY_newid;
+	defNewClass.baseTypeId   = TY_Object;
+	defNewClass.superTypeId  = TY_Object; //superClass->typeId;
+	defNewClass.init = Object_initToMakeDefaultValueAsNull; // dummy for first generation of DefaultValueAsNull
+
 	KonohaClassVar *definedClass = (KonohaClassVar*)KLIB kNameSpace_defineClass(kctx, ns, name, &defNewClass, pline);
 	KDEFINE_CLASS_CONST ClassData[] = {
 		{S_text(name), TY_TYPE, definedClass},
@@ -611,10 +611,10 @@ static kbool_t class_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameS
 {
 	KImportPackage(ns, "konoha.new", pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("$ClassName"), PatternMatch_(ClassName), },
-		{ .keyword = SYM_("class"), .rule = "\"class\" $ClassName [\"extends\" extends: $Type] [$Block]", TopStmtTyCheck_(class), },
-		{ .keyword = SYM_("."), ExprTyCheck_(Getter), .precedence_op2 = -1, },
-		{ .keyword = KW_END, },
+		{ SYM_("$ClassName"), 0, NULL, 0, 0, PatternMatch_ClassName, NULL, NULL, NULL, NULL, },
+		{ SYM_("class"), 0, "\"class\" $ClassName [\"extends\" extends: $Type] [$Block]", 0, 0, NULL, NULL, StmtTyCheck_class, NULL, NULL, },
+		{ SYM_("."), 0, NULL, -1, 0, NULL, NULL, NULL, NULL, ExprTyCheck_Getter, },
+		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 	return true;
@@ -629,13 +629,12 @@ static kbool_t class_setupNameSpace(KonohaContext *kctx, kNameSpace *packageName
 
 KDEFINE_PACKAGE* class_init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("class", "1.0"),
-		.initPackage    = class_initPackage,
-		.setupPackage   = class_setupPackage,
-		.initNameSpace  = class_initNameSpace,
-		.setupNameSpace = class_setupNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {0};
+	KSETPACKNAME(d, "class", "1.0");
+	d.initPackage    = class_initPackage;
+	d.setupPackage   = class_setupPackage;
+	d.initNameSpace  = class_initNameSpace;
+	d.setupNameSpace = class_setupNameSpace;
 	return &d;
 }
 
