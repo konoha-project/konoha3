@@ -758,8 +758,9 @@ typedef struct krbp_t {
 	};
 } krbp_t;
 
-#define P_STR    0
-#define P_DUMP   1
+typedef enum {
+	ToStringFormat, JSONFormat,
+} kformat_t;
 
 #define CLASSAPI \
 		void         (*init)(KonohaContext*, kObject*, void *conf);\
