@@ -300,7 +300,7 @@ static kbool_t kNameSpace_importClassName(KonohaContext *kctx, kNameSpace *ns, k
 		KUtilsKeyValue *kvs = targetNameSpace->constTable.keyvalueItems + i;
 		if(kvs->ty == TY_TYPE) {
 			KonohaClass *ct = (KonohaClass*)kvs->unboxValue;
-			if(CT_isPrivate(ct)) continue;
+			if(CT_is(Private, ct)) continue;
 			if(targetNameSpace->packageId == ct->packageId) {
 				DBG_P("importing packageId=%s.%s to %s..", PackageId_t(ct->packageId), SYM_t(ct->classNameSymbol), PackageId_t(ns->packageId));
 				KLIB Kwb_write(kctx, &wb, (const char*)(kvs), sizeof(KUtilsKeyValue));

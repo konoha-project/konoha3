@@ -87,7 +87,7 @@ static KMETHOD ExprTyCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 	kExpr *targetExpr = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 2, gma, TY_var, 0);
 	if(selfExpr != K_NULLEXPR && targetExpr != K_NULLEXPR) {
 		KonohaClass *selfClass = CT_(selfExpr->ty), *targetClass = CT_(targetExpr->ty);
-		if(CT_isFinal(selfClass)) {
+		if(CT_is(Final, selfClass)) {
 			kbool_t staticSubType = (selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass));
 			RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_boolean, staticSubType));
 		}

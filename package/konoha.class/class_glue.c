@@ -243,7 +243,7 @@ static kbool_t KonohaClass_setClassFieldUnboxValue(KonohaContext *kctx, KonohaCl
 //{
 //	ktype_t superTypeId = sfp[3].intValue == 0 ? TY_Object :(ktype_t)sfp[3].intValue;
 //	KonohaClass *supct = kclass(superTypeId, sfp[K_RTNIDX].uline);
-//	if(CT_isFinal(supct)) {
+//	if(CT_is(Final, supct)) {
 //		kreportf(CritTag, sfp[K_RTNIDX].uline, "%s is final", TY_t(superTypeId));
 //	}
 //	if(!CT_isDefined(supct)) {
@@ -542,11 +542,11 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 		if (tokenSuperClass != NULL) {
 			DBG_ASSERT(Token_isVirtualTypeLiteral(tokenSuperClass));
 			superClass = CT_(Token_typeLiteral(tokenSuperClass));
-			if(CT_isFinal(superClass)) {
+			if(CT_is(Final, superClass)) {
 				SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "%s is final", CT_t(superClass));
 				RETURNb_(false);
 			}
-			if(CT_isVirtual(superClass)) {
+			if(CT_is(Virtual, superClass)) {
 				SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "%s is still virtual", CT_t(superClass));
 				RETURNb_(false);
 			}
@@ -555,7 +555,7 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 		KonohaClass_initField(kctx, definedClass, superClass, initsize);
 	}
 	else {
-		if(declsize > 0 && !CT_isVirtual(definedClass)) {
+		if(declsize > 0 && !CT_is(Virtual, definedClass)) {
 			SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "%s has already defined", CT_t(definedClass));
 			RETURNb_(false);
 		}
@@ -564,7 +564,7 @@ static KMETHOD StmtTyCheck_class(KonohaContext *kctx, KonohaStack *sfp)
 		if(!kBlock_declClassField(kctx, bk, gma, definedClass)) {
 			RETURNb_(false);
 		}
-		CT_setVirtual(definedClass, false);
+		CT_set(Virtual, definedClass, false);
 	}
 	kToken_setTypeId(kctx, tokenClassName, ns, definedClass->typeId);
 	kBlock_addMethodDeclStmt(kctx, bk, tokenClassName, stmt);

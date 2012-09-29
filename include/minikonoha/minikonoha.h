@@ -421,7 +421,7 @@ typedef struct {
 } KonohaFlagSymbolData;
 
 /* ktype_t */
-#define TY_newid        ((ktype_t)-1)
+#define TY_newid           ((ktype_t)-1)
 #define TY_unknown         ((ktype_t)-2)
 
 #define CT_(t)              (kctx->share->classTable.classItems[t])
@@ -837,8 +837,8 @@ struct KonohaClassField {
 
 /* ----------------------------------------------------------------------- */
 
-#define TY_void             ((ktype_t)0)
-#define TY_var              ((ktype_t)1)
+#define TY_void              ((ktype_t)0)
+#define TY_var               ((ktype_t)1)
 #define TY_Object            ((ktype_t)2)
 #define TY_boolean           ((ktype_t)3)
 #define TY_int               ((ktype_t)4)
@@ -868,63 +868,39 @@ struct KonohaClassField {
 #define CT_MethodArray          CT_Array
 #define kMethodArray            kArray
 
-#define kClass_Ref              ((kshortflag_t)(1<<0))
-#define kClass_Prototype        ((kshortflag_t)(1<<1))
-#define kClass_Immutable        ((kshortflag_t)(1<<2))
+#define kClass_TypeVar          ((kshortflag_t)(1<<0))
+#define kClass_UnboxType        ((kshortflag_t)(1<<1))
+#define kClass_Singleton        ((kshortflag_t)(1<<2))
+#define kClass_Immutable        ((kshortflag_t)(1<<3))
 #define kClass_Private          ((kshortflag_t)(1<<4))
-#define kClass_Final            ((kshortflag_t)(1<<5))
-#define kClass_Singleton        ((kshortflag_t)(1<<6))
-#define kClass_UnboxType        ((kshortflag_t)(1<<7))
-#define kClass_Interface        ((kshortflag_t)(1<<8))
-#define kClass_TypeVar          ((kshortflag_t)(1<<9))
-#define kClass_Virtual          ((kshortflag_t)(1<<10))
+#define kClass_Nullable         ((kshortflag_t)(1<<5))
+#define kClass_Virtual          ((kshortflag_t)(1<<6))
+#define kClass_Newable          ((kshortflag_t)(1<<7))
+#define kClass_Final            ((kshortflag_t)(1<<8))
+#define kClass_Interface        ((kshortflag_t)(1<<9))
+#define kClass_Prototype        ((kshortflag_t)(1<<10))
 
 #define CFLAG_SUPERMASK         kClass_Prototype|kClass_Singleton
 
 #define CFLAG_void              kClass_TypeVar|kClass_UnboxType|kClass_Singleton|kClass_Final
 #define CFLAG_var               kClass_TypeVar|kClass_UnboxType|kClass_Singleton|kClass_Final
-#define CFLAG_Object            0
-#define CFLAG_boolean           kClass_Immutable|kClass_UnboxType|kClass_Final
-#define CFLAG_int               kClass_Immutable|kClass_UnboxType|kClass_Final
-#define CFLAG_String            kClass_Immutable|kClass_Final
-#define CFLAG_Array             kClass_Final
-#define CFLAG_Param             kClass_Final
-#define CFLAG_Method            kClass_Final
-#define CFLAG_Func              kClass_Final
-#define CFLAG_NameSpace         kClass_Final
+#define CFLAG_Object            kClass_Nullable
+#define CFLAG_boolean           kClass_Nullable|kClass_Immutable|kClass_UnboxType|kClass_Final
+#define CFLAG_int               kClass_Nullable|kClass_Immutable|kClass_UnboxType|kClass_Final
+#define CFLAG_String            kClass_Nullable|kClass_Immutable|kClass_Final
+#define CFLAG_Array             kClass_Nullable|kClass_Final
+#define CFLAG_Param             kClass_Nullable|kClass_Final
+#define CFLAG_Method            kClass_Nullable|kClass_Final
+#define CFLAG_Func              kClass_Nullable|kClass_Final
+#define CFLAG_NameSpace         kClass_Nullable|kClass_Final
 #define CFLAG_System            kClass_Singleton|kClass_Final
 #define CFLAG_0                 kClass_TypeVar|kClass_UnboxType|kClass_Singleton|kClass_Final
 
+#define CT_is(P, C)           (TFLAG_is(kshortflag_t, (C)->cflag, kClass_##P))
+#define TY_is(P, T)           (TFLAG_is(kshortflag_t, (CT_(T))->cflag, kClass_##P))
+#define CT_set(P, C, B)       TFLAG_set(kshortflag_t, (C)->cflag, kClass_##P, B)
 
-#define CT_isPrivate(ct)      (TFLAG_is(kshortflag_t,(ct)->cflag, kClass_Private))
-#define TY_isSingleton(T)     (TFLAG_is(kshortflag_t,(CT_(T))->cflag, kClass_Singleton))
-#define CT_isSingleton(ct)    (TFLAG_is(kshortflag_t,(ct)->cflag, kClass_Singleton))
-
-#define CT_isFinal(ct)         (TFLAG_is(kshortflag_t,(ct)->cflag, kClass_Final))
-#define TY_isFinal(ct)         (TFLAG_is(kshortflag_t,CT_(ct)->cflag, kClass_Final))
-
-//#define TY_isVirtual(T)     (TFLAG_is(kshortflag_t,(CT_(T))->cflag, kClass_Virtual))
-#define CT_isVirtual(ct)    (TFLAG_is(kshortflag_t,(ct)->cflag, kClass_Virtual))
-#define CT_setVirtual(C, B)   TFLAG_set(kshortflag_t, (C)->cflag, kClass_Virtual, B)
-
-#define TY_isTypeVar(t)      (TFLAG_is(kshortflag_t,(CT_(t))->cflag, kClass_TypeVar))
 #define TY_isFunc(T)         (CT_(T)->baseTypeId == TY_Func)
-
-/* magic flag */
-#define MAGICFLAG(f)             (K_OBJECT_MAGIC | ((kmagicflag_t)(f) & K_CFLAGMASK))
-
-#define kObject_NullObject       ((kmagicflag_t)(1<<0))
-#define kObject_GCFlag           ((kmagicflag_t)(1<<1))
-
-#define kObject_Local6           ((kmagicflag_t)(1<<10))
-#define kObject_Local5           ((kmagicflag_t)(1<<11))
-#define kObject_Local4           ((kmagicflag_t)(1<<12))
-#define kObject_Local3           ((kmagicflag_t)(1<<13))
-#define kObject_Local2           ((kmagicflag_t)(1<<14))
-#define kObject_Local1           ((kmagicflag_t)(1<<15))
-
-#define kObject_is(O,A)            (TFLAG_is(kmagicflag_t,(O)->h.magicflag,A))
-#define kObject_set(O,A,B)         TFLAG_set(kmagicflag_t, ((kObjectVar*)O)->h.magicflag,A,B)
 
 #define kField_Hidden          ((kshortflag_t)(1<<0))
 #define kField_Protected       ((kshortflag_t)(1<<1))
@@ -935,33 +911,35 @@ struct KonohaClassField {
 #define kField_ReadOnly        ((kshortflag_t)(1<<6))
 #define kField_Property        ((kshortflag_t)(1<<7))
 
-///* ------------------------------------------------------------------------ */
-///* Type Variable */
-////## @TypeVariable class Tvoid Tvoid;
-////## @TypeVariable class Tvar  Tvoid;
-//
-//#define OFLAG_Tvoid              MAGICFLAG(0)
-//#define TY_void                  TY_void
-//#define OFLAG_Tvar               MAGICFLAG(0)
-//#define CFLAG_Tvar               CFLAG_Tvoid
-//#define TY_var                   TY_Tvar
-
 /* ------------------------------------------------------------------------ */
 /* Object */
 
-#define kObject_NullObject         ((kmagicflag_t)(1<<0))
-#define kObject_isNullObject(o)    (TFLAG_is(kmagicflag_t,(o)->h.magicflag,kObject_NullObject))
-#define kObject_setNullObject(o,b) TFLAG_set(kmagicflag_t,((kObjectVar*)o)->h.magicflag,kObject_NullObject,b)
+/* magic flag */
+#define MAGICFLAG(f)             (K_OBJECT_MAGIC | ((kmagicflag_t)(f) & K_CFLAGMASK))
+
+// common
+#define kObject_NullObject       ((kmagicflag_t)(1<<0))
+#define kObject_GCFlag           ((kmagicflag_t)(1<<1))
+#define kObject_Common1          ((kmagicflag_t)(1<<2))  // ## reserved
+#define kObject_Common2          ((kmagicflag_t)(1<<3))  // ## reserved
+
+// local
+#define kObject_Local6           ((kmagicflag_t)(1<<4))
+#define kObject_Local5           ((kmagicflag_t)(1<<5))
+#define kObject_Local4           ((kmagicflag_t)(1<<6))
+#define kObject_Local3           ((kmagicflag_t)(1<<7))
+#define kObject_Local2           ((kmagicflag_t)(1<<8))
+#define kObject_Local1           ((kmagicflag_t)(1<<9))
+
+#define kObject_is(P, O, A)      (TFLAG_is(kmagicflag_t,(O)->h.magicflag, kObject_##P))
+#define kObject_set(P, O, B)     TFLAG_set(kmagicflag_t, ((kObjectVar*)O)->h.magicflag, kObject_##P, B)
+
+#define kObject_MagicMask           (1|1<<2|1<<3|1<<4|1<<5|1<<6|1<<7|1<<8|1<<9)
+#define kObject_magic(O)            (uintptr_t)((O)->.magicflag >> 10)
+#define kObject_setMagic(O,MAGIC)   ((kObjectVar*)O)->h.magicflag = ((((uintptr_t)M) << 10) & ((O)->.magicflag & kObject_MagicFlag))
 
 #define IS_NULL(o)                 ((((o)->h.magicflag) & kObject_NullObject) == kObject_NullObject)
 #define IS_NOTNULL(o)              ((((o)->h.magicflag) & kObject_NullObject) != kObject_NullObject)
-
-#define K_FASTMALLOC_SIZE  (sizeof(void*) * 8)
-
-#define K_OBJECT_MAGIC           (578L << ((sizeof(kshortflag_t)*8)))
-#define K_CFLAGMASK              (FLAG_Object_Ref)
-#define KNH_MAGICFLAG(f)         (K_OBJECT_MAGIC | ((kmagicflag_t)(f) & K_CFLAGMASK))
-#define DBG_ASSERT_ISOBJECT(o)   DBG_ASSERT(TFLAG_is(uintptr_t,(o)->h.magicflag, K_OBJECT_MAGIC))
 
 typedef struct KonohaObjectHeader {
 	kmagicflag_t magicflag;

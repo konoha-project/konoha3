@@ -1119,8 +1119,8 @@ static KMETHOD StmtTyCheck_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 	ktype_t typeId    = kStmt_getClassId(kctx, stmt, ns, SYM_("ClassName"), O_typeId(ns));
 	kmethodn_t mn     = kStmt_getMethodSymbol(kctx, stmt, ns, KW_SymbolPattern, MN_new);
 	kParam *pa        = kStmt_newMethodParamNULL(kctx, stmt, gma);
-	if(TY_isSingleton(typeId)) { flag |= kMethod_Static; }
-	if(TY_isFinal(typeId)) { flag |= kMethod_Final; }
+	if(TY_is(Singleton, typeId)) { flag |= kMethod_Static; }
+	if(TY_is(Final, typeId)) { flag |= kMethod_Final; }
 	if(pa != NULL) {  // if pa is NULL, error is printed out.
 		kMethod *mtd = KLIB new_kMethod(kctx, flag, typeId, mn, NULL);
 		PUSH_GCSTACK(mtd);

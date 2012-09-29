@@ -669,7 +669,7 @@ static kObject* DEFAULT_fnullinit(KonohaContext *kctx, KonohaClass *ct)
 	assert(ct->defaultValueAsNull == NULL);
 	DBG_P("creating new nulval for %s", CT_t(ct));
 	KINITv(((KonohaClassVar*)ct)->defaultValueAsNull, KLIB new_kObject(kctx, ct, 0));
-	kObject_setNullObject(ct->defaultValueAsNull, 1);
+	kObject_set(NullObject, ct->defaultValueAsNull, true);
 	((KonohaClassVar*)ct)->fnull = DEFAULT_fnull;
 	return ct->defaultValueAsNull;
 }
@@ -777,14 +777,14 @@ static KonohaClass *Func_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaCl
 	return KLIB KonohaClass_Generics(kctx, CT_(ct->baseTypeId), rtype, param->psize, p);
 }
 
-#define TY_isTypeVar2(T)   (T != TY_void && TY_isTypeVar(T))
+#define TY_isTypeVar2(T)   (T != TY_void && TY_is(TypeVar, T))
 
 static void checkTypeVar(KonohaContext *kctx, KonohaClassVar *newct, ktype_t rtype, int psize, kparamtype_t *p)
 {
 	int i, isTypeVar = TY_isTypeVar2(rtype);
 	if(!isTypeVar) {
 		for(i = 0; i < psize; i++) {
-			if(TY_isTypeVar(p[i].ty)) {
+			if(TY_is(TypeVar, p[i].ty)) {
 				isTypeVar = true;
 			}
 		}
@@ -1082,7 +1082,7 @@ static void KonohaRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	KINITv(share->paramdomList, new_(Array, 32));
 	//
 	KINITv(share->constNull, new_(Object, NULL));
-	kObject_setNullObject(share->constNull, 1);
+	kObject_set(NullObject, share->constNull, true);
 	KINITv(share->constTrue,   new_(Boolean, 1));
 	KINITv(share->constFalse,  new_(Boolean, 0));
 	KINITv(share->emptyString, new_(String, NULL));

@@ -63,7 +63,7 @@ static KMETHOD ParseExpr_dollar(KonohaContext *kctx, KonohaStack *sfp)
 //		kToken *nextTokenAfterClassName = tokenList->tokenItems[nextIdx];
 ////		if (ct->typeId == TY_void) {
 ////			RETURN_(SUGAR kStmt_printMessage2(kctx, stmt, tk1, ErrTag, "undefined class: %s", S_text(tk1->text)));
-////		} else if (CT_isVirtual(ct)) {
+////		} else if (CT_is(Virtual, ct)) {
 ////			SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "invalid application of 'dollar' to incomplete class %s", CT_t(ct));
 ////		}
 //		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {  // dollar C (...)
