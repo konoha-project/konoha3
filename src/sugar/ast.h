@@ -561,13 +561,15 @@ static int TokenRange_addResolvedToken(KonohaContext *kctx, TokenRange *range, T
 	if(tk->topCharHint == '[') {
 		return TokenRange_addStrucuredToken(kctx, range, sourceRange, currentIdx, KW_BracketGroup);
 	}
-	if(tk->topCharHint == '@' && currentIdx + 1 < sourceRange->endIdx) {
-		kTokenVar *tk1 = sourceRange->tokenList->tokenVarItems[currentIdx+1];
-		if(tk1->unresolvedTokenType == TokenType_SYMBOL) {
-			tk1->resolvedSymbol = ksymbolA(S_text(tk1->text), S_size(tk1->text), SYM_NEWID) | MN_Annotation;
-			tk1->resolvedSyntaxInfo = SYN_(sourceRange->ns, KW_SymbolPattern);
-			KLIB kArray_add(kctx, range->tokenList, tk1);
-			return currentIdx+1;
+	if(kNameSpace_isAllowed(JStyleAnnotation, sourceRange->ns)) {
+		if(tk->topCharHint == '@' && currentIdx + 1 < sourceRange->endIdx) {
+			kTokenVar *tk1 = sourceRange->tokenList->tokenVarItems[currentIdx+1];
+			if(tk1->unresolvedTokenType == TokenType_SYMBOL) {
+				tk1->resolvedSymbol = ksymbolA(S_text(tk1->text), S_size(tk1->text), SYM_NEWID) | MN_Annotation;
+				tk1->resolvedSyntaxInfo = SYN_(sourceRange->ns, KW_SymbolPattern);
+				KLIB kArray_add(kctx, range->tokenList, tk1);
+				return currentIdx+1;
+			}
 		}
 	}
 	if(tk->unresolvedTokenType == TokenType_SYMBOL) {
