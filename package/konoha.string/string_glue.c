@@ -37,17 +37,18 @@ extern "C" {
  * Bit encoding for Rope String
  * ObjectHeader's magicflag space
  * [StringType]    | MSB ------------------------ LSB
- * (not-allowed)   | xxxxxxxxxxxxxxxx000xxxxxxxxxxxxx
- * LinerString     | xxxxxxxxxxxxxxxx001xxxxxxxxxxxxx
- * ExterenalString | xxxxxxxxxxxxxxxx011xxxxxxxxxxxxx
- * InlinedString   | xxxxxxxxxxxxxxxx010xxxxxxxxxxxxx
- * RopeString      | xxxxxxxxxxxxxxxx100xxxxxxxxxxxxx
- * ASCII-String    | xxxxxxxxxxxxxxxxxxx1xxxxxxxxxxxx
- * Pooled-String   | xxxxxxxxxxxxxxxxxxxx1xxxxxxxxxxx
+ *                 | 10987654321098765432109876543210
+ * (not-allowed)   | xxxxxxxxxxxxxxxxxxxxxx000xxxxxxx
+ * LinerString     | xxxxxxxxxxxxxxxxxxxxxx001xxxxxxx
+ * ExterenalString | xxxxxxxxxxxxxxxxxxxxxx011xxxxxxx
+ * InlinedString   | xxxxxxxxxxxxxxxxxxxxxx010xxxxxxx
+ * RopeString      | xxxxxxxxxxxxxxxxxxxxxx100xxxxxxx
+ * ASCII-String    | xxxxxxxxxxxxxxxxxxxxxxxxx1xxxxxx
+ * Pooled-String   | xxxxxxxxxxxxxxxxxxxxxxxxxx1xxxxx
  */
 #define S_isRope(o)          (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
 
-#define S_FLAG_MASK_BASE (13)
+#define S_FLAG_MASK_BASE (7)
 #define S_FLAG_LINER     ((1UL << (0)))
 #define S_FLAG_NOFREE    ((1UL << (1)))
 #define S_FLAG_ROPE      ((1UL << (2)))
