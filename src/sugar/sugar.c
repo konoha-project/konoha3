@@ -201,6 +201,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->TokenRange_resolved        = TokenRange_resolved;
 	mod->kStmt_parseTypePattern     = kStmt_parseTypePattern;
 	mod->kToken_transformToBraceGroup = kToken_transformToBraceGroup;
+	mod->kStmt_setParsedObject      = kStmt_setParsedObject;
 	mod->kStmt_parseFlag            = kStmt_parseFlag;
 	mod->kStmt_getToken             = kStmt_getToken;
 	mod->kStmt_getBlock             = kStmt_getBlock;

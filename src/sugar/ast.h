@@ -661,16 +661,6 @@ static kbool_t SemiColon(KonohaContext *kctx, TokenRange *range, TokenRange *sou
 	return found;
 }
 
-static kbool_t Comma(KonohaContext *kctx, TokenRange *range, TokenRange *sourceRange, int *currentIdxRef, int *indentRef)
-{
-	kToken *tk = sourceRange->tokenList->tokenItems[*currentIdxRef];
-	if(tk->topCharHint == ',') {
-		*currentIdxRef += 1;
-		return true;
-	}
-	return false;
-}
-
 static kBlock *new_kBlock(KonohaContext *kctx, kStmt *parent, TokenRange *sourceRange, CheckEndOfStmtFunc2 isEndOfStmt)
 {
 	kBlockVar *bk = GCSAFE_new(BlockVar, sourceRange->ns);
