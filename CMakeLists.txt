@@ -399,12 +399,20 @@ add_builtin_test(Release/Logger  --builtin-test=test_logger)
 add_builtin_test(Release/Kwb     --builtin-test=test_kwb)
 add_builtin_test(Release/Kvproto --builtin-test=test_kvproto)
 
+macro(set_package_path test_name)
+set_tests_properties(${test_name} PROPERTIES ENVIRONMENT
+	"KONOHA_PACKAGEPATH=${PARENT_BINARY_DIR}/package")
+endmacro(set_package_path test_name)
+
 add_test(Shell/Release/Oneline
 	${CMAKE_CURRENT_SOURCE_DIR}/test/test-oneline.sh ${TEST_BIN}
 	"System.p(\"hi\");")
+set_package_path(Shell/Release/Oneline)
+
 add_test(Shell/Release/Multiline
 	${CMAKE_CURRENT_SOURCE_DIR}/test/test-multiline.sh ${TEST_BIN}
 	${CMAKE_CURRENT_SOURCE_DIR}/test/Release/Fibonacci.k)
+set_package_path(Shell/Release/Multiline)
 
 file(GLOB_RECURSE test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/Shell/*.sh)
 foreach(f ${test_files})

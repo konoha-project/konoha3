@@ -955,7 +955,6 @@ static int kStmt_parseBySyntaxRule2(KonohaContext *kctx, kStmt *stmt, int indent
 	SugarSyntax *stmtSyntax = kNameSpace_getSyntaxRule(kctx, ns, tokenList, beginIdx, endIdx);
 	SugarSyntax *currentSyntax = stmtSyntax;
 	((kStmtVar*)stmt)->syn = stmtSyntax;
-	DBG_ASSERT(stmtSyntax != NULL);
 	kToken *errRule = NULL;
 	while(currentSyntax != NULL) {
 		if(currentSyntax->syntaxRuleNULL != NULL) {
@@ -974,12 +973,31 @@ static int kStmt_parseBySyntaxRule2(KonohaContext *kctx, kStmt *stmt, int indent
 	return endIdx;
 }
 
-static int kStmt_addAnnotation2(KonohaContext *kctx, kStmt *stmt, TokenRange *range, int currentIdx, int *indentRef)
+static int TokenRange_skipAnnotation(KonohaContext *kctx, TokenRange *range, int currentIdx)
+{
+	for(currentIdx = range->beginIdx; currentIdx < range->endIdx; currentIdx++) {
+		kToken *tk = range->tokenList->tokenItems[currentIdx];
+		if(tk->unresolvedTokenType == TokenType_INDENT) {
+			continue;
+		}
+		if(!MN_isAnnotation(tk->resolvedSymbol)) break;
+		if(currentIdx + 1 < range->endIdx) {
+			kToken *nextToken = range->tokenList->tokenItems[currentIdx+1];
+			if(nextToken->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
+				currentIdx++;
+			}
+		}
+	}
+	return currentIdx;
+}
+
+static int kStmt_addAnnotation2(KonohaContext *kctx, kStmtVar *stmt, TokenRange *range, int currentIdx, int *indentRef)
 {
 	for(currentIdx = range->beginIdx; currentIdx < range->endIdx; currentIdx++) {
 		kToken *tk = range->tokenList->tokenItems[currentIdx];
 		if(tk->unresolvedTokenType == TokenType_INDENT) {
 			indentRef[0] = tk->indent;
+			stmt->uline = tk->uline;
 			continue;
 		}
 		if(!MN_isAnnotation(tk->resolvedSymbol)) break;
@@ -1000,13 +1018,13 @@ static int kStmt_addAnnotation2(KonohaContext *kctx, kStmt *stmt, TokenRange *ra
 
 static int kBlock_addNewStmt2(KonohaContext *kctx, kBlock *bk, TokenRange *tokens)
 {
-	kStmtVar *stmt = new_(StmtVar, 0);
-	KLIB kArray_add(kctx, bk->stmtList, stmt);
-	KINITp(stmt, stmt->parentBlockNULL, bk);
-	int indent = 0;
-	int currentIdx = kStmt_addAnnotation2(kctx, stmt, tokens, tokens->beginIdx, &indent);
+	int currentIdx = TokenRange_skipAnnotation(kctx, tokens, tokens->beginIdx);
 	if(currentIdx < tokens->endIdx) {
-		stmt->uline = tokens->tokenList->tokenItems[currentIdx]->uline;
+		int indent = 0;
+		kStmtVar *stmt = new_(StmtVar, 0);
+		KLIB kArray_add(kctx, bk->stmtList, stmt);
+		KINITp(stmt, stmt->parentBlockNULL, bk);
+		kStmt_addAnnotation2(kctx, stmt, tokens, tokens->beginIdx, &indent);
 		currentIdx = kStmt_parseBySyntaxRule2(kctx, stmt, indent, tokens->tokenList, currentIdx, tokens->endIdx);
 		if(currentIdx == -1) {
 			DBG_ASSERT(Stmt_isERR(stmt));

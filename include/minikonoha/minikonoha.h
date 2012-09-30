@@ -760,7 +760,7 @@ typedef struct krbp_t {
 } krbp_t;
 
 typedef enum {
-	ToStringFormat, JSONFormat,
+	ToStringFormat, JSONFormat
 } kformat_t;
 
 #define CLASSAPI \
