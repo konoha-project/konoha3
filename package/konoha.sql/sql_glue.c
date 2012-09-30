@@ -22,12 +22,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-// **************************************************************************
-// LIST OF CONTRIBUTERS
-//  kimio - Kimio Kuramitsu, Yokohama National University, Japan
-//  yoan  - Motoki Yoan, Yokohama National University, Japan
-// **************************************************************************
-
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/bytes.h>
@@ -347,17 +341,14 @@ KDEFINE_PACKAGE* sql_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("sql", "1.0"),
-		.initPackage = sql_initPackage,
-		.setupPackage = sql_setupPackage,
-		.initNameSpace = sql_initNameSpace,
+		.initPackage    = sql_initPackage,
+		.setupPackage   = sql_setupPackage,
+		.initNameSpace  = sql_initNameSpace,
 		.setupNameSpace = sql_setupNameSpace,
 	};
 	return &d;
 }
 
-#undef new_T
-
 #ifdef __cplusplus
 }
 #endif
-

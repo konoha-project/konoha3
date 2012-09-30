@@ -178,10 +178,10 @@ static const char *kToken_t_(KonohaContext *kctx, kToken *tk)
 
 static kExpr* ERROR_SyntaxErrorToken(KonohaContext *kctx, kStmt *stmt, kToken *tk)
 {
-	return kStmtToken_printMessage(kctx, stmt, tk, ErrTag, "syntax error at %s", Token_text(kctx, tk));
+	return kStmtToken_printMessage(kctx, stmt, tk, ErrTag, "syntax error at %s", Token_text(tk));
 }
 
-#define ERROR_UndefinedEscapeSequence(kctx, stmt, tk) ERROR_SyntaxError(kctx, stmt, tk)
+#define ERROR_UndefinedEscapeSequence(kctx, stmt, tk) ERROR_SyntaxErrorToken(kctx, stmt, tk)
 
 #else
 

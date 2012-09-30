@@ -29,10 +29,6 @@
 #include "config.h"
 #endif
 
-//#ifndef HAVE_BZERO
-//#define bzero(s, n) memset(s, 0, n)
-//#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -67,6 +63,10 @@ extern "C" {
 #if defined(__linux__) && !defined(__USE_UNIX98)
 #define __USE_UNIX98 1
 #endif
+#endif
+
+#if defined(HAVE_CONFIG_H) && !defined(HAVE_BZERO)
+#define bzero(s, n) memset(s, 0, n)
 #endif
 
 #ifndef PLATAPIFORM_KERNEL
@@ -289,6 +289,7 @@ struct PlatformApiVar {
 	void  (*vsyslog_i)(int priority, const char *message, va_list args);
 	void   *logger;  // logger handler
 	void  (*traceDataLog)(void *, int, logconf_t *, ...);
+	void  (*diagnosis)(void);
 };
 
 #define LOG_END   0

@@ -25,6 +25,10 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 // Object.getTypeId()
 
 static KMETHOD Object_getTypeId(KonohaContext *kctx, KonohaStack *sfp)
@@ -106,10 +110,14 @@ KDEFINE_PACKAGE* object_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("object", "1.0"),
-		.initPackage = object_initPackage,
-		.setupPackage = object_setupPackage,
-		.initNameSpace = object_initNameSpace,
+		.initPackage    = object_initPackage,
+		.setupPackage   = object_setupPackage,
+		.initNameSpace  = object_initNameSpace,
 		.setupNameSpace = object_setupNameSpace,
 	};
 	return &d;
 }
+
+#ifdef __cplusplus
+}
+#endif

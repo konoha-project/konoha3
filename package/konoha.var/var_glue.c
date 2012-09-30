@@ -25,6 +25,9 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 
+#ifdef __cplusplus
+extern "C"{
+#endif
 // --------------------------------------------------------------------------
 
 static kbool_t var_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
@@ -55,11 +58,15 @@ static kbool_t var_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSp
 KDEFINE_PACKAGE* var_init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("konoha", "1.0"),
-		.initPackage = var_initPackage,
-		.setupPackage = var_setupPackage,
-		.initNameSpace = var_initNameSpace,
+		KPACKNAME("var", "1.0"),
+		.initPackage    = var_initPackage,
+		.setupPackage   = var_setupPackage,
+		.initNameSpace  = var_initNameSpace,
 		.setupNameSpace = var_setupNameSpace,
 	};
 	return &d;
 }
+
+#ifdef __cplusplus
+}
+#endif

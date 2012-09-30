@@ -337,9 +337,9 @@ KDEFINE_PACKAGE* float_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("float", "1.0"),
-		.initPackage = float_initPackage,
-		.setupPackage = float_setupPackage,
-		.initNameSpace = float_initNameSpace,
+		.initPackage    = float_initPackage,
+		.setupPackage   = float_setupPackage,
+		.initNameSpace  = float_initNameSpace,
 		.setupNameSpace = float_setupNameSpace,
 	};
 	return &d;

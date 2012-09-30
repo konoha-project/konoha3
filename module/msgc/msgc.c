@@ -474,10 +474,6 @@ static void knh_ObjectArena_finalfree2(KonohaContext *kctx, objpageTBL_t *oat, s
 	KNH_OBJECTARENA_FINALFREE(2);
 }
 
-void MODGC_destoryAllObjects(KonohaContext *kctx, KonohaContextVar *ctx)
-{
-}
-
 #define K_ARENASIZE             ((sizeof(kGCObject0) * K_PAGESIZE) * 16) /*4MB*/
 
 #define gc_extendObjectArena(N) do {\

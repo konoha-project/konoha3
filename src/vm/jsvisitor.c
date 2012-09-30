@@ -3,6 +3,10 @@
 #ifdef USE_JS_VISITOR
 #define DUMPER(BUILDER)  ((JSVisitorLocal*)(BUILDER)->local_fields)
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MN_isNotNull MN_("isNotNull")
 #define MN_isNull    MN_("isNull")
 #define MN_get    MN_("get")
@@ -310,4 +314,9 @@ static IRBuilder *createJSVisitor(IRBuilder *builder)
 	return builder;
 }
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif
+

@@ -32,7 +32,6 @@
 #endif
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-extern int verbose_debug;
 #include <minikonoha/platform_posix.h>
 #include "../../package/apache/apache_glue.h"
 

@@ -32,6 +32,10 @@
 #include <errno.h>
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 typedef const struct _kFILE kFILE;
 struct _kFILE {
 	KonohaObjectHeader h;
@@ -68,9 +72,9 @@ static void File_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void File_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void File_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
-	kFILE *file = (kFILE*)sfp[pos].asObject;
+	kFILE *file = (kFILE*)v[pos].asObject;
 	FILE *fp = file->fp;
 	KLIB Kwb_printf(kctx, wb, "FILE :%p, path=%s", fp, file->realpath);
 }
@@ -333,10 +337,14 @@ KDEFINE_PACKAGE* file_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("file", "1.0"),
-		.initPackage = file_initPackage,
-		.setupPackage = file_setupPackage,
-		.initNameSpace = file_initNameSpace,
+		.initPackage    = file_initPackage,
+		.setupPackage   = file_setupPackage,
+		.initNameSpace  = file_initNameSpace,
 		.setupNameSpace = file_setupNameSpace,
 	};
 	return &d;
 }
+
+#ifdef __cplusplus
+}
+#endif

@@ -25,6 +25,10 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 typedef const struct _kDynamic kDynamic;
 struct _kDynamic {
 	KonohaObjectHeader h;
@@ -34,7 +38,7 @@ struct _kDynamic {
 //{
 //}
 //
-//static void Dynamic_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+//static void Dynamic_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 //{
 //}
 //
@@ -140,11 +144,15 @@ static kbool_t dynamic_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNa
 KDEFINE_PACKAGE* dynamic_init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("konoha", "1.0"),
-		.initPackage = dynamic_initPackage,
-		.setupPackage = dynamic_setupPackage,
-		.initNameSpace = dynamic_initNameSpace,
+		KPACKNAME("dynamic", "1.0"),
+		.initPackage    = dynamic_initPackage,
+		.setupPackage   = dynamic_setupPackage,
+		.initNameSpace  = dynamic_initNameSpace,
 		.setupNameSpace = dynamic_setupNameSpace,
 	};
 	return &d;
 }
+
+#ifdef __cplusplus
+}
+#endif

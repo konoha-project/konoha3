@@ -31,6 +31,10 @@
 #include <logpool/io.h>
 #include <logpool/message.idl.data.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct kRawPtr {
 	KonohaObjectHeader h;
 	void *rawptr;
@@ -61,7 +65,7 @@ static void Log_free(KonohaContext *kctx, kObject *po)
 	o->rawptr = NULL;
 }
 
-static void Log_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void Log_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb)
 {
 	kRawPtr *self = (kRawPtr *) sfp[0].asObject;
 	struct Log *log = (struct Log *) self->rawptr;
@@ -460,11 +464,14 @@ KDEFINE_PACKAGE* logpool_init(void)
 	logpool_global_init(LOGPOOL_DEFAULT);
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("logpool", "1.0"),
-		.initPackage = logpool_initPackage,
-		.setupPackage = logpool_setupPackage,
-		.initNameSpace = logpool_initNameSpace,
+		.initPackage    = logpool_initPackage,
+		.setupPackage   = logpool_setupPackage,
+		.initNameSpace  = logpool_initNameSpace,
 		.setupNameSpace = logpool_setupNameSpace,
 	};
 	return &d;
 }
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif

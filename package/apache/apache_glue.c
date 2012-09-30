@@ -33,6 +33,11 @@
 #undef PACKAGE_VERSION
 #include "apache_glue.h"
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
+
 static void Request_init(KonohaContext *kctx, kObject *po, void *conf)
 {
 	(void)kctx;
@@ -148,11 +153,14 @@ KDEFINE_PACKAGE* apache_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("apache", "1.0"),
-		.initPackage = apache_initPackage,
-		.setupPackage = apache_setupPackage,
-		.initNameSpace = apache_initNameSpace,
+		.initPackage    = apache_initPackage,
+		.setupPackage   = apache_setupPackage,
+		.initNameSpace  = apache_initNameSpace,
 		.setupNameSpace = apache_setupNameSpace,
 	};
 	return &d;
 }
 
+#ifdef __cplusplus
+}
+#endif

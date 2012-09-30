@@ -64,9 +64,9 @@ static void Jansson_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void Jansson_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void Jansson_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
-	struct _kJson *json = (struct _kJson *)sfp[pos].asObject;
+	struct _kJson *json = (struct _kJson *)v[pos].asObject;
 	char* data = json_dumps(json->obj, JSON_ENSURE_ASCII);
 	KLIB Kwb_printf(kctx, wb, "%s", data);
 	free(data);
@@ -485,9 +485,9 @@ KDEFINE_PACKAGE* jansson_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("jansson", "1.0"),
-		.initPackage = jansson_initPackage,
-		.setupPackage = jansson_setupPackage,
-		.initNameSpace = jansson_initNameSpace,
+		.initPackage    = jansson_initPackage,
+		.setupPackage   = jansson_setupPackage,
+		.initNameSpace  = jansson_initNameSpace,
 		.setupNameSpace = jansson_setupNameSpace,
 	};
 	return &d;
@@ -496,4 +496,3 @@ KDEFINE_PACKAGE* jansson_init(void)
 #ifdef __cplusplus
 }
 #endif
-

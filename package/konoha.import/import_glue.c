@@ -24,7 +24,10 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-#include <stdio.h>
+
+#ifdef __cplusplus
+extern "C"{
+#endif
 
 static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -102,10 +105,14 @@ KDEFINE_PACKAGE* import_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("import", "1.0"),
-		.initPackage = import_initPackage,
-		.setupPackage = import_setupPackage,
-		.initNameSpace = import_initNameSpace,
+		.initPackage    = import_initPackage,
+		.setupPackage   = import_setupPackage,
+		.initNameSpace  = import_initNameSpace,
 		.setupNameSpace = import_setupNameSpace,
 	};
 	return &d;
 }
+
+#ifdef __cplusplus
+}
+#endif

@@ -25,8 +25,6 @@
 #include <stdio.h>
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/gc.h"
-
-extern int verbose_debug;
 #include <minikonoha/platform.h>
 
 int main(int argc, const char *argv[])

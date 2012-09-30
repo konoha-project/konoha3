@@ -239,7 +239,7 @@ static int spSplit(char* str, char* args[]) {
 
 static int knh_popen(KonohaContext *kctx, kString* command, subprocData_t *spd, int defaultMode)
 {
-	if (IS_NULL(command)) {
+	if (IS_NULL(command) || S_size(command) == 0) {
 		return -1;
 	}
 	pid_t pid  = -1;
@@ -632,7 +632,11 @@ static kbool_t kPipeReadArray(KonohaContext *kctx, kArray *a, FILE *fp)
 			break;
 		}
 	}
-	return ferror(fp) == 0;
+	if(ferror(fp) == 0) {
+		KLIB kArray_add(kctx, a, KNULL(String));
+		return false;
+	}
+	return true;
 }
 
 static kString *kPipeReadStringNULL(KonohaContext *kctx, FILE *fp)
@@ -813,6 +817,9 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 					);
 				}
 			}
+			else {
+				KLIB kArray_add(kctx, ret_a, KNULL(String));
+			}
 			if(p->e.mode == M_PIPE) {
 				if(!kPipeReadArray(kctx, ret_a, p->e.fp)) {
 					KTraceApi(SystemFault, "Subproc.communicate",
@@ -820,11 +827,13 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 					);
 				}
 			}
+			else {
+				KLIB kArray_add(kctx, ret_a, KNULL(String));
+			}
 		}
 	}
 	RETURN_( ret_a );
 }
-
 
 //## @Restricted boolean Subproc.enableShellmode(boolean isShellmode);
 static KMETHOD Subproc_enableShellmode(KonohaContext *kctx, KonohaStack *sfp)
@@ -1380,9 +1389,9 @@ KDEFINE_PACKAGE* subproc_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("subproc", "1.0"),
-		.initPackage = subproc_initPackage,
-		.setupPackage = subproc_setupPackage,
-		.initNameSpace = subproc_initNameSpace,
+		.initPackage    = subproc_initPackage,
+		.setupPackage   = subproc_setupPackage,
+		.initNameSpace  = subproc_initNameSpace,
 		.setupNameSpace = subproc_setupNameSpace,
 	};
 	return &d;

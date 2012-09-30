@@ -217,7 +217,6 @@ static void KonohaContext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 				p->free(kctx, p);
 			}
 		}
-		MODGC_destoryAllObjects(kctx, ctx);
 		KonohaRuntime_free(kctx, ctx);
 		MODGC_free(kctx, ctx);
 		MODGC_check_malloced_size(kctx);

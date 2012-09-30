@@ -558,7 +558,6 @@ static kbool_t kStmt_parseBySyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray 
 //	return endIdx;
 //}
 
-
 static int TokenRange_addResolvedToken(KonohaContext *kctx, TokenRange *range, TokenRange *sourceRange, int currentIdx);
 
 static kbool_t TokenRange_expandMacro(KonohaContext *kctx, TokenRange *range, ksymbol_t symbol, MacroSet *macro)
@@ -750,7 +749,6 @@ static kStmt* kBlock_addNewStmt(KonohaContext *kctx, kBlock *bk, TokenRange *ran
 		kStmt_toERR(kctx, stmt, range->errToken->text);
 	}
 	else {
-		int i;
 		int currentIdx = kStmt_addAnnotation(kctx, stmt, range);
 		if(currentIdx < range->endIdx) {
 			stmt->uline = range->tokenList->tokenItems[currentIdx]->uline;

@@ -38,6 +38,9 @@
 #define PATHMAX 256
 #endif /*PATHMAX*/
 
+#ifdef __cplusplus
+extern "C"{
+#endif
 /* ------------------------------------------------------------------------ */
 
 typedef const struct _kStat kStat;
@@ -81,9 +84,9 @@ static void kStat_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kStat_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void kStat_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
-	KLIB Kwb_printf(kctx, wb, "Stat :%p", sfp[pos].asObject);
+	KLIB Kwb_printf(kctx, wb, "Stat :%p", v[pos].asObject);
 }
 
 static void kDIR_init(KonohaContext *kctx, kObject *o, void *conf)
@@ -104,9 +107,9 @@ static void kDIR_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kDIR_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void kDIR_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
-	kDIR *dir = (kDIR*)sfp[pos].asObject;
+	kDIR *dir = (kDIR*)v[pos].asObject;
 	DIR *dirp = dir->dirp;
 	KLIB Kwb_printf(kctx, wb, "DIR :%p", dirp);
 }
@@ -132,9 +135,9 @@ static void kDirent_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kDirent_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void kDirent_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
-	struct _kDirent *dirent = (struct _kDirent *)sfp[pos].asObject;
+	struct _kDirent *dirent = (struct _kDirent *)v[pos].asObject;
 	struct dirent *entry = dirent->entry;
 	KLIB Kwb_printf(kctx, wb, "Dirent :%p", entry);
 }
@@ -983,10 +986,14 @@ KDEFINE_PACKAGE* fd_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("fd", "1.0"),
-		.initPackage = fd_initPackage,
-		.setupPackage = fd_setupPackage,
-		.initNameSpace = fd_initNameSpace,
+		.initPackage    = fd_initPackage,
+		.setupPackage   = fd_setupPackage,
+		.initNameSpace  = fd_initNameSpace,
 		.setupNameSpace = fd_setupNameSpace,
 	};
 	return &d;
 }
+
+#ifdef __cplusplus
+}
+#endif

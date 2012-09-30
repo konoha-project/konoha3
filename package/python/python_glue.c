@@ -27,6 +27,10 @@
 #include <minikonoha/sugar.h>
 #include <minikonoha/float.h>
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 #define OB_TYPE(obj) (((PyObject*)obj->self)->ob_type)
 
 typedef const struct _kPyObject kPyObject;
@@ -47,10 +51,9 @@ static void PyObject_init(KonohaContext *kctx, kObject *o, void *conf)
 	}
 }
 
-static void PyObject_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void PyObject_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
-	// Now, level value has no effect.
-	PyObject *pyo =  ((kPyObject*)sfp[pos].o)->self;
+	PyObject *pyo =  ((kPyObject*)v[pos].o)->self;
 	PyObject* str = pyo->ob_type->tp_str(pyo);
 	Py_INCREF(str);
 	KLIB Kwb_printf(kctx, wb, "%s", PyString_AsString(str));
@@ -580,10 +583,14 @@ KDEFINE_PACKAGE* python_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("python", "1.0"),
-		.initPackage = python_initPackage,
-		.setupPackage = python_setupPackage,
-		.initNameSpace = python_initNameSpace,
+		.initPackage    = python_initPackage,
+		.setupPackage   = python_setupPackage,
+		.initNameSpace  = python_initNameSpace,
 		.setupNameSpace = python_setupNameSpace,
 	};
 	return &d;
 }
+
+#ifdef __cplusplus
+}
+#endif

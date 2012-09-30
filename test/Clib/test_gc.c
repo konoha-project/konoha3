@@ -25,13 +25,11 @@
 #include <stdio.h>
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/gc.h"
+#include <minikonoha/platform.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-extern int verbose_debug;
-#include <minikonoha/platform.h>
 
 typedef struct Dummy {
     int x;

@@ -25,6 +25,10 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 // --------------------------------------------------------------------------
 
 #define _Public   kMethod_Public
@@ -142,11 +146,15 @@ static kbool_t global_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNam
 KDEFINE_PACKAGE* global_init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("konoha", "1.0"),
-		.initPackage = global_initPackage,
-		.setupPackage = global_setupPackage,
-		.initNameSpace = global_initNameSpace,
+		KPACKNAME("global", "1.0"),
+		.initPackage    = global_initPackage,
+		.setupPackage   = global_setupPackage,
+		.initNameSpace  = global_initNameSpace,
 		.setupNameSpace = global_setupNameSpace,
 	};
 	return &d;
 }
+
+#ifdef __cplusplus
+}
+#endif

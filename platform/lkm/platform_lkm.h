@@ -15,11 +15,10 @@
 #include <linux/slab.h>
 #include <linux/types.h>
 #include <linux/ctype.h>
+#if HAVE_LINUX_SYSLOG_H
 #include <linux/syslog.h>
+#endif
 #include <asm/uaccess.h>
-
-#define KNH_EXT_QSORT  1
-#define KNH_EXT_SETJMP 1
 
 /* stdint.h */
 #ifndef _STDINT_H
@@ -33,7 +32,6 @@ typedef long intptr_t;
 
 typedef intptr_t FILE;
 
-#define TODO_LKM
 //#define getenv_i(a) NULL
 #define stdin  ((FILE*)NULL)
 #define stdout KERN_INFO

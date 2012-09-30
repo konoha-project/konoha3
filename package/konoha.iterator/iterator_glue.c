@@ -34,7 +34,6 @@
 extern "C" {
 #endif
 
-
 static kbool_t Nothing_hasNext(KonohaContext *kctx, KonohaStack* sfp)
 {
 	return false;
@@ -59,11 +58,6 @@ static void Iterator_init(KonohaContext *kctx, kObject *o, void *conf)
 	itr->current_pos = 0;
 	itr->hasNext = Nothing_hasNext;
 	itr->setNextResult = isUnboxEntry ? Nothing_setNextResultUnbox : Nothing_setNextResult;
-}
-
-static void Iterator_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
-{
-//	KLIB Kwb_printf(kctx, wb, KFLOAT_FMT, sfp[pos].floatValue);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -186,7 +180,6 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 		STRUCTNAME(Iterator),
 		.cflag  = CFLAG_Iterator,
 		.init   = Iterator_init,
-		.p      = Iterator_p,
 		.cparamsize  = 1,
 		.cparamItems = &IteratorParam,
 	};
@@ -223,9 +216,9 @@ KDEFINE_PACKAGE* iterator_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("iterator", "1.0"),
-		.initPackage =iterator_initPackage,
-		.setupPackage = iterator_setupPackage,
-		.initNameSpace = iterator_initNameSpace,
+		.initPackage    = iterator_initPackage,
+		.setupPackage   = iterator_setupPackage,
+		.initNameSpace  = iterator_initNameSpace,
 		.setupNameSpace = iterator_setupNameSpace,
 	};
 	return &d;

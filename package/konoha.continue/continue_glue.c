@@ -83,9 +83,9 @@ static kbool_t continue_setupNameSpace(KonohaContext *kctx, kNameSpace *packageN
 KDEFINE_PACKAGE* continue_init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("konoha", "1.0"),
-		.initPackage      = continue_initPackage,
-		.setupPackage     = continue_setupPackage,
+		KPACKNAME("continue", "1.0"),
+		.initPackage    = continue_initPackage,
+		.setupPackage   = continue_setupPackage,
 		.initNameSpace  = continue_initNameSpace,
 		.setupNameSpace = continue_setupNameSpace,
 	};

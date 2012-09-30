@@ -30,10 +30,6 @@
 #endif
 
 #include <string.h>
-#ifdef __GNUC__
-#include <langinfo.h>
-#endif
-#include <locale.h>
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
 #endif /* HAVE_ICONV_H */

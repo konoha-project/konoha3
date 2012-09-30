@@ -106,9 +106,9 @@ KDEFINE_PACKAGE* konoha_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("konoha", "1.0"),
-		.initPackage = konoha_initPackage,
-		.setupPackage = konoha_setupPackage,
-		.initNameSpace = konoha_initNameSpace,
+		.initPackage    = konoha_initPackage,
+		.setupPackage   = konoha_setupPackage,
+		.initNameSpace  = konoha_initNameSpace,
 		.setupNameSpace = konoha_setupNameSpace,
 	};
 	return &d;

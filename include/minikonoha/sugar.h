@@ -332,7 +332,7 @@ typedef enum {
 	TSTMT_JUMP,
 	TSTMT_TRY,
 
-	TSTMT_ERR,   // this must be the last stmt
+	TSTMT_ERR   // this must be last
 } kvisit_t;
 
 #define TEXPR_UNTYPED       -1   /*THIS MUST NOT HAPPEN*/

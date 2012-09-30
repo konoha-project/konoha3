@@ -26,6 +26,10 @@
 #include <minikonoha/sugar.h>
 #include <minikonoha/klib.h>
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 typedef struct kMapVar kMap;
 struct kMapVar {
 	KonohaObjectHeader h;
@@ -78,10 +82,10 @@ static void kMap_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kMap_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
-{
-	// TODO
-}
+//static void kMap_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb)
+//{
+//	// TODO
+//}
 
 /* ------------------------------------------------------------------------ */
 /* method */
@@ -208,7 +212,7 @@ static kbool_t map_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		.init      = kMap_init,
 		.reftrace  = kMap_reftrace,
 		.free      = kMap_free,
-		.p         = kMap_p,
+		//.p         = kMap_p,
 	};
 	KonohaClass *cMap = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defMap, pline);
 	int FN_key = MN_("key");
@@ -258,12 +262,14 @@ KDEFINE_PACKAGE* map_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("map", "1.0"),
-		.initPackage = map_initPackage,
-		.setupPackage = map_setupPackage,
-		.initNameSpace = map_initNameSpace,
+		.initPackage    = map_initPackage,
+		.setupPackage   = map_setupPackage,
+		.initNameSpace  = map_initNameSpace,
 		.setupNameSpace = map_setupNameSpace,
 	};
 	return &d;
 }
 
-// --------------------------------------------------------------------------
+#ifdef __cplusplus
+}
+#endif

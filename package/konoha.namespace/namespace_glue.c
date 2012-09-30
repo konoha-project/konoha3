@@ -82,8 +82,8 @@ KDEFINE_PACKAGE* namespace_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("namespace", "1.0"),
-		.initPackage      = namespace_initPackage,
-		.setupPackage     = namespace_setupPackage,
+		.initPackage    = namespace_initPackage,
+		.setupPackage   = namespace_setupPackage,
 		.initNameSpace  = namespace_initNameSpace,
 		.setupNameSpace = namespace_setupNameSpace,
 	};

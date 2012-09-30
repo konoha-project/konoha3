@@ -305,13 +305,14 @@ KDEFINE_PACKAGE* int_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("int", "1.0"),
-		.initPackage =int_initPackage,
-		.setupPackage = int_setupPackage,
-		.initNameSpace = int_initNameSpace,
+		.initPackage    = int_initPackage,
+		.setupPackage   = int_setupPackage,
+		.initNameSpace  = int_initNameSpace,
 		.setupNameSpace = int_setupNameSpace,
 	};
 	return &d;
 }
+
 #ifdef __cplusplus
 }
 #endif

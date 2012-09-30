@@ -27,7 +27,6 @@
 #include "minikonoha/sugar.h"
 #include "minikonoha/float.h"
 #include "minikonoha/gc.h"
-extern int verbose_debug;
 #include "minikonoha/platform.h"
 
 /* checking header files can compile at g++ */

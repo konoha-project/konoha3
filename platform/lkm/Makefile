@@ -3,7 +3,6 @@ konohadev-objs := \
 	../../src/konoha/minikonoha.o\
 	../../module/msgc/msgc.o\
 	../../src/sugar/sugar.o\
-	../../src/logger/logger.o\
 	../../src/vm/compiler.o\
 	qsort.o\
 	lkm.o
@@ -14,7 +13,7 @@ PWD   := $(shell pwd)
 VERBOSE=0
 EXTRA_CFLAGS := -DPLATAPIFORM_KERNEL
 EXTRA_CFLAGS += -Wno-declaration-after-statement
-EXTRA_CFLAGS += -I$(SRCDIR)/include -I$(SRCDIR)/platform/lkm/
+EXTRA_CFLAGS += -I$(SUBDIRS)/../../include -I$(SUBDIRS)/../../platform/lkm/
 
 default:
 	$(MAKE) -C $(KDIR) SUBDIRS=$(PWD) modules KBUILD_VERBOSE=$(VERBOSE)

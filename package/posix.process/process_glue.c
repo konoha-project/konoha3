@@ -34,6 +34,10 @@
 #include <sys/wait.h>
 #endif
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 /* ------------------------------------------------------------------------ */
 
 static KMETHOD System_getpid(KonohaContext *kctx, KonohaStack *sfp)
@@ -359,11 +363,14 @@ KDEFINE_PACKAGE* process_init(void)
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("process", "1.0"),
 		KPACKLIB("POSIX.1", "1.0"),
-		.initPackage = process_initPackage,
-		.setupPackage = process_setupPackage,
-		.initNameSpace = process_initNameSpace,
+		.initPackage    = process_initPackage,
+		.setupPackage   = process_setupPackage,
+		.initNameSpace  = process_initNameSpace,
 		.setupNameSpace = process_setupNameSpace,
 	};
 	return &d;
 }
 
+#ifdef __cplusplus
+}
+#endif

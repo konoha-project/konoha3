@@ -54,9 +54,9 @@ static void kJSON_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kJSON_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb, int level)
+static void kJSON_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
-	kJSON *json = (kJSON *)sfp[pos].asObject;
+	kJSON *json = (kJSON *)v[pos].asObject;
 	char *data = JSON_toString(json->json);
 	KLIB Kwb_printf(kctx, wb, "%s", data);
 	free(data);
@@ -252,9 +252,9 @@ KDEFINE_PACKAGE* JSON_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("JSON", "1.0"),
-		.initPackage = JSON_initPackage,
-		.setupPackage = JSON_setupPackage,
-		.initNameSpace = JSON_initNameSpace,
+		.initPackage    = JSON_initPackage,
+		.setupPackage   = JSON_setupPackage,
+		.initNameSpace  = JSON_initNameSpace,
 		.setupNameSpace = JSON_setupNameSpace,
 	};
 	return &d;
@@ -263,4 +263,3 @@ KDEFINE_PACKAGE* JSON_init(void)
 #ifdef __cplusplus
 }
 #endif
-
