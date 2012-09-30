@@ -1264,7 +1264,7 @@ struct kNameSpaceVar {
 
 // NameSpace_syntaxOption
 
-#define kNameSpace_DefaultSyntaxOption               kNameSpace_CStyleDecl|kNameSpace_JStyleAnnotation
+#define kNameSpace_DefaultSyntaxOption               kNameSpace_CStyleDecl|kNameSpace_JStyleAnnotation|kNameSpace_ImplicitField
 #define kNameSpace_isAllowed(P, ns)                  (TFLAG_is(uintptr_t, (ns)->syntaxOption, kNameSpace_##P))
 #define kNameSpace_set(P, ns, B)                     TFLAG_set(uintptr_t, ((kNameSpaceVar*)ns)->syntaxOption, kNameSpace_##P, B)
 
