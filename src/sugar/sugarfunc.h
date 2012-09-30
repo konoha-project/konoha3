@@ -27,12 +27,30 @@ extern "C" {
 #endif
 
 
+static int findEndOfStatement(KonohaContext *kctx, kArray *tokenList, int beginIdx, int endIdx, int isNoNeedSemiColon)
+{
+	int c;
+	for(c = beginIdx; c < endIdx; c++) {
+		kToken *tk = tokenList->tokenItems[c];
+		if(kToken_is(StatementSeparator, tk)) return c;
+		if(isNoNeedSemiColon && tk->unresolvedTokenType == TokenType_INDENT) {
+			return c;
+		}
+	}
+	return endIdx;
+}
+
+static void kStmt_setParsedObject(KonohaContext *kctx, kStmt *stmt, int keyid, kObject *o)
+{
+	KLIB kObject_setObject(kctx, stmt, keyid, O_typeId(o), o);
+}
+
 static KMETHOD PatternMatch_Expr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
 	INIT_GCSTACK();
 	int returnIdx = -1;
-//	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
+	endIdx = findEndOfStatement(kctx, tokenList, beginIdx, endIdx, true/*isNoNeedSemiColon*/);
 	kExpr *expr = kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, endIdx);
 	if(expr != K_NULLEXPR) {
 		KdumpExpr(kctx, expr);
@@ -95,8 +113,9 @@ static KMETHOD PatternMatch_Block(KonohaContext *kctx, KonohaStack *sfp)
 		RETURNi_(beginIdx+1);
 	}
 	else {
+		endIdx = findEndOfStatement(kctx, tokenList, beginIdx, endIdx, true);
 		TokenRange range = {Stmt_nameSpace(stmt), tokenList, beginIdx, endIdx};
-		kBlock *bk = new_kBlock(kctx, stmt, &range, SemiColon);
+		kBlock *bk = new_kBlock2(kctx, stmt, &range);
 		KLIB kObject_setObject(kctx, stmt, name, O_typeId(bk), bk);
 		RETURNi_(endIdx);
 	}
@@ -229,7 +248,7 @@ static KMETHOD ParseExpr_DOLLAR(KonohaContext *kctx, KonohaStack *sfp)
 		if(tk->resolvedSyntaxInfo->keyword == KW_BraceGroup) {
 			kExprVar *expr = GCSAFE_new(ExprVar, SYN_(Stmt_nameSpace(stmt), KW_BlockPattern));
 			TokenRange range = {Stmt_nameSpace(stmt), tk->subTokenList, 0, kArray_size(tk->subTokenList)};
-			KSETv(expr, expr->block, new_kBlock(kctx, stmt, &range, SemiColon));
+			KSETv(expr, expr->block, SUGAR new_kBlock2(kctx, stmt, &range));
 			RETURN_(expr);
 		}
 	}

@@ -352,11 +352,11 @@ static kString* kInputStream_readLine(KonohaContext *kctx,  kInputStream *in)
 	size_t len = hasCarrigeReturn ? endOfLineIdx - in->top - 1 : endOfLineIdx - in->top;
 	if(!hasMultiByteChar || !HAS_ICONV(in->iconv)) {
 		lineString = (endOfLineIdx - in->top == 0) ? KNULL(String)
-			: KLIB new_kString(kctx, in->buffer.bytebuf + in->top, len, SPOL_ASCII);
+			: KLIB new_kString(kctx, in->buffer.bytebuf + in->top, len, StringPolicy_ASCII);
 	}
 	else {
 		//TODO;
-		lineString = KLIB new_kString(kctx, in->buffer.bytebuf + in->top, len, SPOL_UTF8);
+		lineString = KLIB new_kString(kctx, in->buffer.bytebuf + in->top, len, StringPolicy_UTF8);
 	}
 	in->top += endOfLineIdx;
 	if(in->top > K_PAGESIZE) {  // compaction

@@ -209,7 +209,7 @@ static kString* new_kString(KonohaContext *kctx, const char *text, size_t len, i
 	KonohaClass *ct = CT_(TY_String);
 	kStringVar *s = NULL; //knh_PtrMap_getS(kctx, ct->constPoolMapNULL, text, len);
 	if(s != NULL) return s;
-	if(TFLAG_is(int, spol, SPOL_TEXT)) {
+	if(TFLAG_is(int, spol, StringPolicy_TEXT)) {
 		s = (kStringVar*)new_kObject(kctx, ct, 0);
 		s->text = text;
 		s->bytesize = len;
@@ -221,7 +221,7 @@ static kString* new_kString(KonohaContext *kctx, const char *text, size_t len, i
 		s->bytesize = len;
 		S_setTextSgm(s, 1);
 		if(text != NULL) {
-			DBG_ASSERT(!TFLAG_is(int, spol, SPOL_NOCOPY));
+			DBG_ASSERT(!TFLAG_is(int, spol, StringPolicy_NOCOPY));
 			memcpy(s->ubuf, text, len);
 		}
 		s->buf[len] = '\0';
@@ -233,21 +233,21 @@ static kString* new_kString(KonohaContext *kctx, const char *text, size_t len, i
 		S_setTextSgm(s, 0);
 		S_setMallocText(s, 1);
 		if(text != NULL) {
-			DBG_ASSERT(!TFLAG_is(int, spol, SPOL_NOCOPY));
+			DBG_ASSERT(!TFLAG_is(int, spol, StringPolicy_NOCOPY));
 			memcpy(s->ubuf, text, len);
 		}
 		s->buf[len] = '\0';
 	}
-	if(TFLAG_is(int, spol, SPOL_ASCII)) {
+	if(TFLAG_is(int, spol, StringPolicy_ASCII)) {
 		S_setASCII(s, 1);
 	}
-	else if(TFLAG_is(int, spol, SPOL_UTF8)) {
+	else if(TFLAG_is(int, spol, StringPolicy_UTF8)) {
 		S_setASCII(s, 0);
 	}
 	else {
 		kString_checkASCII(kctx, s);
 	}
-//	if(TFLAG_is(int, policy, SPOL_POOL)) {
+//	if(TFLAG_is(int, policy, StringPolicy_POOL)) {
 //		kmapSN_add(kctx, ct->constPoolMapNO, s);
 //		S_setPooled(s, 1);
 //	}
@@ -850,7 +850,7 @@ static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 			}
 			KLIB Kwb_write(kctx, &wb, "]", 1);
 			const char *text = Kwb_top(kctx, &wb, 1);
-			KINITv(((KonohaClassVar*)ct)->shortNameNULL, new_kString(kctx, text, Kwb_bytesize(&wb), SPOL_ASCII));
+			KINITv(((KonohaClassVar*)ct)->shortNameNULL, new_kString(kctx, text, Kwb_bytesize(&wb), StringPolicy_ASCII));
 			KLIB Kwb_free(&wb);
 		}
 	}
@@ -884,7 +884,7 @@ static KonohaClass *KonohaClass_define(KonohaContext *kctx, kpackage_t packageId
 	if(name == NULL) {
 		const char *n = cdef->structname;
 		assert(n != NULL); // structname must be set;
-		ct->classNameSymbol = ksymbolSPOL(n, strlen(n), SPOL_ASCII|SPOL_POOL|SPOL_TEXT, _NEWID);
+		ct->classNameSymbol = ksymbolSPOL(n, strlen(n), StringPolicy_ASCII|StringPolicy_POOL|StringPolicy_TEXT, _NEWID);
 	}
 	else {
 		ct->classNameSymbol = ksymbolA(S_text(name), S_size(name), _NEWID);
@@ -1014,8 +1014,8 @@ static void defineDefaultKeywordSymbol(KonohaContext *kctx)
 		"new",
 	};
 	for(i = 0; i < sizeof(keywords) / sizeof(const char*); i++) {
-		ksymbolSPOL(keywords[i], strlen(keywords[i]), SPOL_TEXT|SPOL_ASCII, SYM_NEWID);
-		//ksymbol_t sym = ksymbolSPOL(keywords[i], strlen(keywords[i]), SPOL_TEXT|SPOL_ASCII, SYM_NEWID);
+		ksymbolSPOL(keywords[i], strlen(keywords[i]), StringPolicy_TEXT|StringPolicy_ASCII, SYM_NEWID);
+		//ksymbol_t sym = ksymbolSPOL(keywords[i], strlen(keywords[i]), StringPolicy_TEXT|StringPolicy_ASCII, SYM_NEWID);
 		//fprintf(stdout, "#define KW_%s (((ksymbol_t)%d)|0) /*%s*/\n", SYM_t(sym), SYM_UNMASK(sym), keywords[i]);
 	}
 }
@@ -1027,7 +1027,7 @@ static void initStructData(KonohaContext *kctx)
 	for(i = 0; i <= TY_0; i++) {
 		KonohaClassVar *ct = (KonohaClassVar *)ctt[i];
 		const char *name = ct->DBG_NAME;
-		ct->classNameSymbol = ksymbolSPOL(name, strlen(name), SPOL_ASCII|SPOL_POOL|SPOL_TEXT, _NEWID);
+		ct->classNameSymbol = ksymbolSPOL(name, strlen(name), StringPolicy_ASCII|StringPolicy_POOL|StringPolicy_TEXT, _NEWID);
 		KonohaClass_setName(kctx, ct, 0);
 	}
 	KLIB Knull(kctx, CT_NameSpace);

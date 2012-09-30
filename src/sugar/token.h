@@ -86,11 +86,10 @@ static int parseNUM(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int 
 	int ch, pos = tok_start;
 	const char *ts = tenv->source;
 	while((ch = ts[pos++]) != 0) {
-		//if(ch == '_') continue; // nothing
 		if(!isalnum(ch)) break;
 	}
 	if(IS_NOTNULL(tk)) {
-		KSETv(tk, tk->text, KLIB new_kString(kctx, ts + tok_start, (pos-1)-tok_start, SPOL_ASCII));
+		KSETv(tk, tk->text, KLIB new_kString(kctx, ts + tok_start, (pos-1)-tok_start, StringPolicy_ASCII));
 		tk->unresolvedTokenType = TokenType_INT;
 	}
 	return pos - 1;  // next
@@ -104,7 +103,7 @@ static void kToken_setSymbolText(KonohaContext *kctx, kTokenVar *tk, const char 
 			KSETv(tk, tk->text, SYM_s(kw));
 		}
 		else {
-			KSETv(tk, tk->text, KLIB new_kString(kctx, t, len, SPOL_ASCII));
+			KSETv(tk, tk->text, KLIB new_kString(kctx, t, len, StringPolicy_ASCII));
 		}
 		tk->unresolvedTokenType = TokenType_SYMBOL;
 		if(len == 1) {
@@ -129,6 +128,30 @@ static int parseOP1(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int 
 {
 	kToken_setSymbolText(kctx, tk,  tenv->source + tok_start, 1);
 	return tok_start+1;
+}
+
+static int ParseSemiColon(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
+{
+	kToken_setSymbolText(kctx, tk,  tenv->source + tok_start, 1);
+	if(IS_NOTNULL(tk)) {
+		kToken_set(StatementSeparator, tk, true);
+	}
+	return tok_start+1;
+}
+
+static int ParseAnnotation(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
+{
+	// parse @Annotation:
+	// This is part of JStyle dependent. If you don't want to parse, override this.
+	if(isalnum(tenv->source[tok_start+1])) {
+		int pos = parseSYMBOL(kctx, tk, tenv, tok_start+1);
+		if(IS_NOTNULL(tk)) {  // pre-resolved
+			tk->resolvedSymbol = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID) | MN_Annotation;
+			tk->resolvedSyntaxInfo = SYN_(tenv->ns, KW_SymbolPattern);
+		}
+		return pos;
+	}
+	return parseOP1(kctx, tk, tenv, tok_start);
 }
 
 static int parseOP(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
@@ -204,7 +227,7 @@ static int parseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, TokenizerEn
 		if(ch == '"' && (prev != '\\' || (prev == '\\' && prev2 == '\\'))) {
 			if(IS_NOTNULL(tk)) {
 				size_t length = pos - (tok_start + 1) - 1;
-				KSETv(tk, tk->text, KLIB new_kString(kctx, tenv->source + tok_start + 1, length, hasUTF8 ? SPOL_UTF8 : SPOL_ASCII));
+				KSETv(tk, tk->text, KLIB new_kString(kctx, tenv->source + tok_start + 1, length, hasUTF8 ? StringPolicy_UTF8 : StringPolicy_ASCII));
 				tk->unresolvedTokenType = TokenType_TEXT;
 			}
 			return pos;
@@ -316,13 +339,13 @@ static const TokenizeFunc MiniKonohaTokenMatrix[] = {
 #define _COLON     31
 	parseOP,
 #define _SEMICOLON 32
-	parseOP1,
+	ParseSemiColon,
 #define _EQ        33
 	parseOP,
 #define _QUESTION  34
 	parseOP,
 #define _AT_       35
-	parseOP1,
+	ParseAnnotation,
 #define _VAR       36
 	parseOP,
 #define _CHILDER   37
@@ -524,30 +547,34 @@ static void kNameSpace_setTokenizeFunc(KonohaContext *kctx, kNameSpace *ns, int 
 static void TokenRange_tokenize(KonohaContext *kctx, TokenRange *range, const char *source, kfileline_t uline)
 {
 	DBG_ASSERT(range->beginIdx == range->endIdx);
-	TokenizerEnv tenv = {
-		.source = source,
-		.sourceLength = strlen(source),
-		.currentLine  = uline,
-		.tokenList    = range->tokenList,
-		.tabsize = 4,
-		.cfuncItems   = (range->ns == NULL) ? MiniKonohaTokenMatrix : kNameSpace_tokenMatrix(kctx, range->ns),
-	};
-	INIT_GCSTACK();
-	kString *preparedString = KLIB new_kString(kctx, tenv.source, tenv.sourceLength, SPOL_ASCII|SPOL_TEXT|SPOL_NOPOOL);
-	PUSH_GCSTACK(preparedString);
-	tenv.preparedString = preparedString;
-	if(range->ns != NULL) {
-		tenv.funcItems = kNameSpace_tokenFuncMatrix(kctx, range->ns);
+	TokenizerEnv tenv = {};
+	tenv.source = source;
+	tenv.sourceLength = strlen(source);
+	tenv.currentLine  = uline;
+	tenv.tokenList    = range->tokenList;
+	tenv.tabsize = 4;
+	tenv.ns = range->ns;
+	tenv.cfuncItems   = (range->ns == NULL) ? MiniKonohaTokenMatrix : kNameSpace_tokenMatrix(kctx, range->ns);
+	{
+		INIT_GCSTACK();
+		kString *preparedString = KLIB new_kString(kctx, tenv.source, tenv.sourceLength, StringPolicy_ASCII|StringPolicy_TEXT|StringPolicy_NOPOOL);
+		PUSH_GCSTACK(preparedString);
+		tenv.preparedString = preparedString;
+		if(range->ns != NULL) {
+			tenv.funcItems = kNameSpace_tokenFuncMatrix(kctx, range->ns);
+		}
+		tokenize(kctx, &tenv);
+		RESET_GCSTACK();
 	}
-	tokenize(kctx, &tenv);
 	TokenRange_end(kctx, range);
-	RESET_GCSTACK();
+#ifndef BE_COMPACT
 	if(uline == 0) {
 		size_t i;
 		for(i = range->beginIdx; i < range->endIdx; i++) {
 			range->tokenList->tokenVarItems[i]->uline = 0;
 		}
 	}
+#endif
 }
 
 // ---------------------------------------------------------------------------

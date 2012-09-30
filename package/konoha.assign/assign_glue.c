@@ -46,7 +46,7 @@ static KMETHOD ParseExpr_SelfAssign(KonohaContext *kctx, KonohaStack *sfp)
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	kToken *selfAssignToken = tokenList->tokenItems[operatorIdx];
 	DBG_ASSERT(S_size(selfAssignToken->text) > 1);
-	ksymbol_t opSymbol = KLIB Ksymbol(kctx, S_text(selfAssignToken->text), S_size(selfAssignToken->text) - 1, SPOL_ASCII, _NEWID);
+	ksymbol_t opSymbol = KLIB Ksymbol(kctx, S_text(selfAssignToken->text), S_size(selfAssignToken->text) - 1, StringPolicy_ASCII, _NEWID);
 	SugarSyntax *opSyntax = SYN_(ns, opSymbol);
 	if(opSyntax != NULL) {
 		TokenRange macroRangeBuf, *macroRange = SUGAR new_TokenListRange(kctx, Stmt_nameSpace(stmt), tokenList, &macroRangeBuf);

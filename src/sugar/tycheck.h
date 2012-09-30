@@ -299,7 +299,7 @@ static kBlock* kMethod_newBlock(KonohaContext *kctx, kMethod *mtd, kNameSpace *n
 	}
 	TokenRange rangeBuf, *range = new_TokenListRange(kctx, ns, KonohaContext_getSugarContext(kctx)->preparedTokenList, &rangeBuf);
 	TokenRange_tokenize(kctx, range, script, uline);
-	kBlock *bk = new_kBlock(kctx, NULL/*parentStmt*/, range, SemiColon);
+	kBlock *bk = new_kBlock2(kctx, NULL/*parentStmt*/, range);
 	TokenRange_pop(kctx, range);
 	return bk;
 }

@@ -244,7 +244,7 @@ static kbool_t kNameSpace_setConstData(KonohaContext *kctx, kNameSpace *ns, ksym
 	if(ty == TY_TEXT) {
 		const char *textData = (const char*)unboxValue;
 		kv.ty = TY_String;
-		kv.stringValue = KLIB new_kString(kctx, textData, strlen(textData), SPOL_TEXT);
+		kv.stringValue = KLIB new_kString(kctx, textData, strlen(textData), StringPolicy_TEXT);
 		PUSH_GCSTACK(kv.objectValue);
 	}
 	if(TY_isUnbox(kv.ty) || kv.ty == TY_TYPE) {
@@ -264,11 +264,11 @@ static kbool_t kNameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ns, con
 	kbool_t result = true;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	while(d[0] != NULL) {
-		kv.key = ksymbolSPOL(d[0], strlen(d[0]), SPOL_TEXT|SPOL_ASCII, _NEWID) | SYMKEY_BOXED;
+		kv.key = ksymbolSPOL(d[0], strlen(d[0]), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID) | SYMKEY_BOXED;
 		kv.ty  = (ktype_t)(uintptr_t)d[1];
 		if(kv.ty == TY_TEXT) {
 			kv.ty = TY_String;
-			kv.stringValue = KLIB new_kString(kctx, d[2], strlen(d[2]), SPOL_TEXT);
+			kv.stringValue = KLIB new_kString(kctx, d[2], strlen(d[2]), StringPolicy_TEXT);
 			PUSH_GCSTACK(kv.objectValue);
 		}
 		else if(TY_isUnbox(kv.ty) || kv.ty == TY_TYPE) {

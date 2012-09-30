@@ -41,7 +41,6 @@ extern "C" {
 #define TokenType_SYMBOL       KW_SymbolPattern
 #define TokenType_TEXT         KW_TextPattern
 #define TokenType_INT          KW_NumberPattern
-//#define TokenType_FLOAT        KW_FloatPattern
 #define TokenType_CODE         KW_BlockPattern
 
 #define KW_END  ((ksymbol_t)-1)
@@ -118,6 +117,7 @@ typedef struct TokenizerEnv TokenizerEnv;
 typedef int (*TokenizeFunc)(KonohaContext *, kTokenVar *, TokenizerEnv *, int);
 
 struct TokenizerEnv {
+	kNameSpace         *ns;
 	const char         *source;
 	size_t              sourceLength;
 	kfileline_t         currentLine;
@@ -270,16 +270,19 @@ struct kTokenVar {
 	};
 };
 
-//#define Token_isRule(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
-//#define Token_setRule(o,B)   TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,B)
+#define kTokenFlag_StatementSeparator    kObject_Local1
+#define kTokenFlag_RequiredReformat      kObject_Local2
+#define kTokenFlag_BeforeWhiteSpace      kObject_Local3
 
-#define kTokenFlag_RequiredReformat    kObject_Local1
-#define kTokenFlag_BeforeWhiteSpace    kObject_Local2
 #define kToken_is(P, o)      (TFLAG_is(uintptr_t,(o)->h.magicflag, kTokenFlag_ ##P))
 #define kToken_set(P,o,B)    TFLAG_set(uintptr_t,(o)->h.magicflag, kTokenFlag_##P, B)
 
-#define Token_isBeforeWhiteSpace(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local2))
-
+typedef struct MacroSet {
+	int/*ksymbol_t*/          symbol;
+	kArray                   *tokenList;
+	int                       beginIdx;
+	int                       endIdx;
+} MacroSet;
 
 typedef struct TokenRange {
 	kNameSpace *ns;
@@ -290,6 +293,7 @@ typedef struct TokenRange {
 		kToken *errToken;
 		struct MacroSet *macroSet;
 	};
+	int stopChar;
 } TokenRange;
 
 #define TokenRange_end(kctx, range)   range->endIdx = kArray_size(range->tokenList)
@@ -298,12 +302,6 @@ typedef struct TokenRange {
 	range->endIdx = range->beginIdx;\
 } while (0)
 
-typedef struct MacroSet {
-	int/*ksymbol_t*/          symbol;
-	kArray                   *tokenList;
-	int                       beginIdx;
-	int                       endIdx;
-} MacroSet;
 
 typedef kbool_t (*CheckEndOfStmtFunc2)(KonohaContext *, TokenRange *range, TokenRange *sourceRange, int *currentIdxRef, int *indentRef);
 
@@ -521,7 +519,7 @@ typedef struct {
 	void         (*kNameSpace_setSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
 	void         (*kNameSpace_addSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
 
-	kBlock*      (*new_kBlock)(KonohaContext *, kStmt *, TokenRange *, CheckEndOfStmtFunc2);
+	kBlock*      (*new_kBlock)(KonohaContext *, kStmt *, TokenRange *);
 	kStmt*       (*new_kStmt)(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, ...);
 	void         (*kBlock_insertAfter)(KonohaContext *, kBlock *, kStmtNULL *target, kStmt *);
 

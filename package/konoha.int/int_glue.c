@@ -219,7 +219,7 @@ static KMETHOD parseNumber(KonohaContext *kctx, KonohaStack *sfp)
 				break;
 		}
 		end = source;
-		KSETv(tk, tk->text, KLIB new_kString(kctx, start, end - start, SPOL_ASCII));
+		KSETv(tk, tk->text, KLIB new_kString(kctx, start, end - start, StringPolicy_ASCII));
 		tk->unresolvedTokenType = isFloat ? SYM_("$Float") : TokenType_INT;
 	}
 	RETURNi_(source - start);

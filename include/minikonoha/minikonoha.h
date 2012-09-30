@@ -1035,16 +1035,18 @@ struct kStringVar /* extends _Bytes */ {
 	const char inline_text[SIZEOF_INLINETEXT];
 };
 
-#define SPOL_TEXT          (1<<0)
-#define SPOL_ASCII         (1<<1)
-#define SPOL_UTF8          (1<<2)
-#define SPOL_POOL          (1<<3)
-#define SPOL_NOPOOL        (1<<5)
-#define SPOL_NOCOPY        (1<<4)
+typedef enum {
+	StringPolicy_TEXT     =     (1<<0),
+	StringPolicy_ASCII    =     (1<<1),
+	StringPolicy_UTF8     =     (1<<2),
+	StringPolicy_POOL     =     (1<<3),
+	StringPolicy_NOPOOL   =     (1<<5),
+	StringPolicy_NOCOPY   =     (1<<4),
+} StringPolicy;
 
 #define K_NULLTEXT          "null"
-#define new_T(t)            (KLIB new_kString(kctx, t, knh_strlen(t), SPOL_TEXT|SPOL_ASCII|SPOL_POOL))
-#define new_S(T, L)         (KLIB new_kString(kctx, T, L, SPOL_ASCII|SPOL_POOL))
+#define new_T(t)            (KLIB new_kString(kctx, t, knh_strlen(t), StringPolicy_TEXT|StringPolicy_ASCII|StringPolicy_POOL))
+#define new_S(T, L)         (KLIB new_kString(kctx, T, L, StringPolicy_ASCII|StringPolicy_POOL))
 #define S_text(s)           ((const char*) (O_ct(s)->unbox(kctx, (kObject*)s)))
 #define S_size(s)           ((s)->bytesize)
 
@@ -1264,12 +1266,12 @@ struct kNameSpaceVar {
 
 // NameSpace_syntaxOption
 
-#define kNameSpace_DefaultSyntaxOption               kNameSpace_CStyleDecl|kNameSpace_JStyleAnnotation
+#define kNameSpace_DefaultSyntaxOption               kNameSpace_CStyleDecl|kNameSpace_ImplicitField
 #define kNameSpace_isAllowed(P, ns)                  (TFLAG_is(uintptr_t, (ns)->syntaxOption, kNameSpace_##P))
 #define kNameSpace_set(P, ns, B)                     TFLAG_set(uintptr_t, ((kNameSpaceVar*)ns)->syntaxOption, kNameSpace_##P, B)
 
 #define kNameSpace_CStyleDecl                        ((uintptr_t)(1<<0))
-#define kNameSpace_JStyleAnnotation                  ((uintptr_t)(1<<1))
+#define kNameSpace_NoSemiColon                       ((uintptr_t)(1<<1))
 
 #define kNameSpace_TypeInference                     ((uintptr_t)(1<<2))
 #define kNameSpace_ImplicitField                     ((uintptr_t)(1<<3))
@@ -1495,18 +1497,18 @@ struct KonohaLibVar {
 
 #define kclass(CID, UL)           KLIB Kclass(kctx, CID, UL)
 
-#define FILEID_(T)                KLIB KfileId(kctx, T, sizeof(T)-1, SPOL_TEXT|SPOL_ASCII, _NEWID)
+#define FILEID_(T)                KLIB KfileId(kctx, T, sizeof(T)-1, StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
 
 #define PN_konoha                 0
 #define PackageId_sugar           1
-#define PN_(T)                    KLIB KpackageId(kctx, T, sizeof(T)-1, SPOL_TEXT|SPOL_ASCII|SPOL_POOL, _NEWID)
+#define PN_(T)                    KLIB KpackageId(kctx, T, sizeof(T)-1, StringPolicy_TEXT|StringPolicy_ASCII|StringPolicy_POOL, _NEWID)
 
-#define ksymbolA(T, L, DEF)       KLIB Ksymbol(kctx, T, L, SPOL_ASCII, DEF)
+#define ksymbolA(T, L, DEF)       KLIB Ksymbol(kctx, T, L, StringPolicy_ASCII, DEF)
 #define ksymbolSPOL(T, L, SPOL, DEF)       KLIB Ksymbol(kctx, T, L, SPOL, DEF)
-#define SYM_(T)                   KLIB Ksymbol(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
-#define EXPT_(T)                  KLIB Ksymbol(kctx, (T "Exception"), (sizeof(T "Exception")-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
-#define FN_(T)                    KLIB Ksymbol(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
-#define MN_(T)                    KLIB Ksymbol(kctx, T, (sizeof(T)-1), SPOL_TEXT|SPOL_ASCII, _NEWID)
+#define SYM_(T)                   KLIB Ksymbol(kctx, T, (sizeof(T)-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
+#define EXPT_(T)                  KLIB Ksymbol(kctx, (T "Exception"), (sizeof(T "Exception")-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
+#define FN_(T)                    KLIB Ksymbol(kctx, T, (sizeof(T)-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
+#define MN_(T)                    KLIB Ksymbol(kctx, T, (sizeof(T)-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
 #define MN_box                    MN_("box")
 #define T_mn(X)                   SYM_PRE(X), SYM_t(X)
 

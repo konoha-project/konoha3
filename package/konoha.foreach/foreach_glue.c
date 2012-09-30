@@ -65,7 +65,7 @@ static kToken* new_ParsedExprToken(KonohaContext *kctx, kNameSpace *ns, kExpr *e
 static void MacroSet_setTokenAt(KonohaContext *kctx, MacroSet *macroSet, int index, kArray *tokenList, const char *symbol, ...)
 {
 	DBG_ASSERT(macroSet[index].tokenList == NULL);
-	macroSet[index].symbol = KLIB Ksymbol(kctx, symbol, strlen(symbol), SPOL_TEXT|SPOL_ASCII, _NEWID);
+	macroSet[index].symbol = KLIB Ksymbol(kctx, symbol, strlen(symbol), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID);
 	macroSet[index].tokenList = tokenList;
 	macroSet[index].beginIdx = kArray_size(tokenList);
 	kToken *tk;
@@ -107,7 +107,7 @@ static kBlock *new_MacroBlock(KonohaContext *kctx, kStmt *stmt, kToken *Iterator
 	macroRange->macroSet = macroSet;
 	TokenRange expandedRangeBuf, *expandedRange = SUGAR new_TokenListRange(kctx, ns, tokenList, &expandedRangeBuf);
 	SUGAR TokenRange_resolved(kctx, expandedRange, macroRange);
-	return SUGAR new_kBlock(kctx, stmt, expandedRange, NULL);
+	return SUGAR new_kBlock(kctx, stmt, expandedRange);
 }
 
 static void kStmt_appendBlock(KonohaContext *kctx, kStmt *stmt, kBlock *bk)

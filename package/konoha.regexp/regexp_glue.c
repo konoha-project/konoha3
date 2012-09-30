@@ -104,10 +104,10 @@ static kbytes_t knh_bytes_mofflen(kbytes_t v, size_t moff, size_t mlen)
 #endif
 }
 
-#define _ALWAYS SPOL_POOL
-#define _NEVER  SPOL_POOL
-#define _ASCII  SPOL_ASCII
-#define _UTF8   SPOL_UTF8
+#define _ALWAYS StringPolicy_POOL
+#define _NEVER  StringPolicy_POOL
+#define _ASCII  StringPolicy_ASCII
+#define _UTF8   StringPolicy_UTF8
 #define _SUB(s0) (S_isASCII(s0) ? _ASCII|_ALWAYS : _ALWAYS)
 #define _SUBCHAR(s0) (S_isASCII(s0) ? _ASCII : 0)
 #define _CHARSIZE(len) (len==1 ? _ASCII : _UTF8)
@@ -138,7 +138,7 @@ static kArray *kStringToCharArray(KonohaContext *kctx, kString *bs, int istrim, 
 
 static kString *kwb_newString(KonohaContext *kctx, KUtilsWriteBuffer *wb, int flg)
 {
-	return KLIB new_kString(kctx, KLIB Kwb_top(kctx, wb, flg), Kwb_bytesize(wb), SPOL_POOL);
+	return KLIB new_kString(kctx, KLIB Kwb_top(kctx, wb, flg), Kwb_bytesize(wb), StringPolicy_POOL);
 }
 
 typedef struct {
@@ -611,12 +611,12 @@ static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp)
 						continue;
 					}
 				}
-				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, str, strlen(str), SPOL_POOL)); // append remaining string to array
+				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, str, strlen(str), StringPolicy_POOL)); // append remaining string to array
 				break;
 			}
 			END_LOCAL();
 		} else { // for 0-length patterh
-			a = kStringToCharArray(kctx, KLIB new_kString(kctx, str, S_size(s0), SPOL_POOL), 0, -1/* no limit */);
+			a = kStringToCharArray(kctx, KLIB new_kString(kctx, str, S_size(s0), StringPolicy_POOL), 0, -1/* no limit */);
 		}
 	}
 	else {
@@ -659,13 +659,13 @@ static KMETHOD String_splitwithSeparatorLimit(KonohaContext *kctx, KonohaStack *
 						continue;
 					}
 				}
-				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, str, strlen(str), SPOL_POOL)); // append remaining string to array
+				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, str, strlen(str), StringPolicy_POOL)); // append remaining string to array
 				asize++;
 				break;
 			}
 			END_LOCAL();
 		} else { // for 0-length patterh
-			a = kStringToCharArray(kctx, KLIB new_kString(kctx, str, S_size(s0), SPOL_POOL), 0, limit);
+			a = kStringToCharArray(kctx, KLIB new_kString(kctx, str, S_size(s0), StringPolicy_POOL), 0, limit);
 		}
 	}
 	else {

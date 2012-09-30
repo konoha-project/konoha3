@@ -128,7 +128,7 @@ static KMETHOD Log_get_(KonohaContext *kctx, KonohaStack *sfp)
 	int   klen = S_size(sfp[1].asString);
 	int   vlen;
 	char *data = Log_get(log, key, klen, &vlen);
-	RETURN_(KLIB new_kString(kctx, data, vlen, SPOL_ASCII|SPOL_POOL));
+	RETURN_(KLIB new_kString(kctx, data, vlen, StringPolicy_ASCII|StringPolicy_POOL));
 }
 
 // --------------------------------------------------------------------------
