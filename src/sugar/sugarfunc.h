@@ -86,17 +86,30 @@ static KMETHOD PatternMatch_MethodName(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(returnIdx);
 }
 
+static void checkParam(KonohaContext *kctx, TokenRange* tokens)
+{
+	int i;
+	for(i = 0; i < tokens->endIdx; i++) {
+		kTokenVar *tk = tokens->tokenList->tokenVarItems[i];
+		if(tk->resolvedSyntaxInfo->keyword == KW_void) {
+			tokens->endIdx = i; //  f(void) = > f()
+			return;
+		}
+		if(tk->resolvedSyntaxInfo->keyword == KW_COMMA) {
+			kToken_set(StatementSeparator, tk, true);
+		}
+	}
+}
+
 static KMETHOD PatternMatch_Params(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
 	int returnIdx = -1;
 	kToken *tk = tokenList->tokenItems[beginIdx];
 	if(tk->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
-		kArray *tokenList = tk->subTokenList;
-		int ss = 0, ee = kArray_size(tokenList);
-		if(0 < ee && tokenList->tokenItems[0]->resolvedSyntaxInfo->keyword == KW_void) ss = 1;  //  f(void) = > f()
-		TokenRange range = {Stmt_nameSpace(stmt), tokenList, ss, ee};
-		kBlock *bk = new_kBlock(kctx, stmt, &range, Comma);
+		TokenRange param = {Stmt_nameSpace(stmt), tk->subTokenList, 0, kArray_size(tk->subTokenList)};
+		checkParam(kctx, &param);
+		kBlock *bk = new_kBlock2(kctx, stmt, &param);
 		KLIB kObject_setObject(kctx, stmt, name, O_typeId(bk), bk);
 		returnIdx = beginIdx + 1;
 	}

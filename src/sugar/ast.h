@@ -800,8 +800,10 @@ static int TokenRange_resolved2(KonohaContext *kctx, TokenRange *tokens, TokenRa
 	for(; currentIdx < source->endIdx; currentIdx++) {
 		kTokenVar *tk = source->tokenList->tokenVarItems[currentIdx];
 		if(tk->resolvedSyntaxInfo == NULL) {
-			if(tokens->stopChar != 0 && tokens->stopChar == tk->topCharHint) {
-				return currentIdx;
+			if(tokens->stopChar != 0) {
+				if(tk->unresolvedTokenType == TokenType_INDENT) continue;  // remove INDENT in () or []
+				if(tokens->stopChar == tk->topCharHint) return currentIdx;
+
 			}
 			if(tk->topCharHint == '(' || tk->topCharHint == '[') {
 				currentIdx = TokenRange_addGroup(kctx, tokens, source, currentIdx+1, tk);
@@ -920,13 +922,16 @@ static int kStmt_matchSyntaxRule2(KonohaContext *kctx, kStmt *stmt, TokenRange *
 			}
 		}
 		else if(ruleToken->resolvedSymbol == KW_OptionalGroup) {
-			TokenRange nrule = {Stmt_nameSpace(stmt), ruleToken->subTokenList, 0, kArray_size(ruleToken->subTokenList)};
-			tokens->beginIdx = currentTokenIdx;
-			int next = kStmt_matchSyntaxRule2(kctx, stmt, tokens, &nrule, errRuleRef);
-			errRuleRef[0] = NULL;
-			if(Stmt_isERR(stmt)) return -1;
-			if(next != -1) {
-				currentTokenIdx = next;
+			kToken *tk = tokens->tokenList->tokenItems[currentTokenIdx];
+			if(!kToken_is(StatementSeparator, tk)) { // matching return; with return [$Expr]
+				TokenRange nrule = {Stmt_nameSpace(stmt), ruleToken->subTokenList, 0, kArray_size(ruleToken->subTokenList)};
+				tokens->beginIdx = currentTokenIdx;
+				int next = kStmt_matchSyntaxRule2(kctx, stmt, tokens, &nrule, errRuleRef);
+				errRuleRef[0] = NULL;
+				if(Stmt_isERR(stmt)) return -1;
+				if(next != -1) {
+					currentTokenIdx = next;
+				}
 			}
 		}
 		else {
