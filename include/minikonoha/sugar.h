@@ -289,12 +289,12 @@ typedef struct TokenSequence {
 	kArray *tokenList;
 	int beginIdx;
 	int endIdx;
+	kToken *openToken;
+	int     stopChar;
 	union {
 		kToken *errToken;
-		kToken *openToken;
 		struct MacroSet *macroSet;
 	};
-	int stopChar;
 } TokenSequence;
 
 #define TokenSequence_end(kctx, range)   range->endIdx = kArray_size(range->tokenList)

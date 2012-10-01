@@ -460,7 +460,7 @@ static kstatus_t TokenSequence_eval(KonohaContext *kctx, TokenSequence *source)
 	PUSH_GCSTACK(mtd);
 	KLIB kMethod_setParam(kctx, mtd, TY_Object, 0, NULL);
 	kBlock *singleBlock = GCSAFE_new(Block, source->ns);
-	TokenSequence tokens = {source->ns, source->tokenList, kArray_size(source->tokenList), 0, {NULL}, 0};
+	TokenSequence tokens = {source->ns, source->tokenList, kArray_size(source->tokenList), 0};
 	while(source->beginIdx < source->endIdx) {
 		if(TokenSequence_selectStatement(kctx, &tokens, source)) {
 			if(tokens.errToken != NULL) return K_BREAK;

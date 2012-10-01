@@ -41,6 +41,8 @@ static TokenSequence* new_TokenListRange(KonohaContext *kctx, kNameSpace *ns, kA
 	bufRange->tokenList = tokenList;
 	bufRange->beginIdx  = kArray_size(tokenList);
 	bufRange->endIdx    = bufRange->beginIdx;
+	bufRange->stopChar  = 0;
+	bufRange->openToken = NULL;
 	bufRange->errToken  = NULL;
 	return bufRange;
 }
@@ -51,6 +53,8 @@ static TokenSequence* new_TokenStackRange(KonohaContext *kctx, TokenSequence *ra
 	bufRange->tokenList = range->tokenList;
 	bufRange->beginIdx  = kArray_size(range->tokenList);
 	bufRange->endIdx    = bufRange->beginIdx;
+	bufRange->stopChar  = 0;
+	bufRange->openToken = NULL;
 	bufRange->errToken  = range->errToken;
 	return bufRange;
 }
@@ -583,7 +587,7 @@ static void kNameSpace_setTokenizeFunc(KonohaContext *kctx, kNameSpace *ns, int 
 
 // ---------------------------------------------------------------------------
 
-static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, TokenSequence *sourceRange);
+static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, TokenSequence *rules);
 #define Token_topch(tk) ((IS_String(tk->text) && S_size((tk)->text) == 1) ? S_text((tk)->text)[0] : 0)
 
 static int findCloseChar2(KonohaContext *kctx, TokenSequence *sourceRange, int beginIdx, int closech)
@@ -607,22 +611,23 @@ static int makeNestedSyntaxRule(KonohaContext *kctx, TokenSequence *sourceRange,
 	return kArray_addSyntaxRule(kctx, tk->subTokenList, &nestedSourceRange) ? ne : sourceRange->endIdx;
 }
 
-static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, TokenSequence *sourceRange)
+static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, TokenSequence *rules)
 {
 	int i;
 	ksymbol_t stmtEntryKey = 0;
-	//KdumpTokenArray(kctx, sourceRange->tokenList, sourceRange->beginIdx, sourceRange->endIdx);
-	for(i = sourceRange->beginIdx; i < sourceRange->endIdx; i++) {
-		kTokenVar *tk = sourceRange->tokenList->tokenVarItems[i];
+	//KdumpTokenArray(kctx, rules->tokenList, rules->beginIdx, rules->endIdx);
+	for(i = rules->beginIdx; i < rules->endIdx; i++) {
+		kTokenVar *tk = rules->tokenList->tokenVarItems[i];
+		if(tk->unresolvedTokenType == TokenType_INDENT) continue;
 		DBG_ASSERT(tk->resolvedSyntaxInfo != NULL);
 		if(tk->resolvedSyntaxInfo->keyword == KW_TextPattern) {
 			int topch = Token_topch(tk);
 			KLIB kArray_add(kctx, ruleList, tk);
 			if(topch == '(') {
-				i = makeNestedSyntaxRule(kctx, sourceRange, i, KW_ParenthesisGroup, ')');
+				i = makeNestedSyntaxRule(kctx, rules, i, KW_ParenthesisGroup, ')');
 			}
 			else if(topch == '[') {
-				i = makeNestedSyntaxRule(kctx, sourceRange, i, KW_BracketGroup, ']');
+				i = makeNestedSyntaxRule(kctx, rules, i, KW_BracketGroup, ']');
 			}
 			else {
 				tk->resolvedSymbol = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
@@ -630,7 +635,7 @@ static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, Token
 			continue;
 		}
 		if(tk->resolvedSyntaxInfo->keyword == KW_BracketGroup) {
-			TokenSequence nestedSourceRange = {sourceRange->ns, tk->subTokenList, 0, kArray_size(tk->subTokenList)};
+			TokenSequence nestedSourceRange = {rules->ns, tk->subTokenList, 0, kArray_size(tk->subTokenList)};
 			tk->resolvedSymbol = KW_OptionalGroup;
 			PUSH_GCSTACK(tk->subTokenList);  // avoid gc
 			KSETv(tk, tk->subTokenList, new_(TokenArray, 0));
@@ -638,10 +643,10 @@ static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, Token
 			KLIB kArray_add(kctx, ruleList, tk);
 			continue;
 		}
-		if(tk->topCharHint == '$' && i+1 < sourceRange->endIdx) {  // $PatternName
-			tk = sourceRange->tokenList->tokenVarItems[++i];
+		if(tk->topCharHint == '$' && i+1 < rules->endIdx) {  // $PatternName
+			tk = rules->tokenList->tokenVarItems[++i];
 			if(IS_String(tk->text)) {
-				tk->resolvedSyntaxInfo = SYN_(sourceRange->ns, KW_SymbolPattern);
+				tk->resolvedSyntaxInfo = SYN_(rules->ns, KW_SymbolPattern);
 				tk->resolvedSymbol = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWRAW) | KW_PATTERN;
 				if(stmtEntryKey == 0) stmtEntryKey = tk->resolvedSymbol;
 				tk->stmtEntryKey = stmtEntryKey;
@@ -650,7 +655,7 @@ static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, Token
 				continue;
 			}
 		}
-		if(i + 1 < sourceRange->endIdx && sourceRange->tokenList->tokenItems[i+1]->topCharHint == ':' && IS_String(tk->text)) {
+		if(i + 1 < rules->endIdx && rules->tokenList->tokenItems[i+1]->topCharHint == ':' && IS_String(tk->text)) {
 			stmtEntryKey = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWRAW);
 			i++;
 			continue;
@@ -662,7 +667,7 @@ static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, Token
 	return true;
 }
 
-static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, TokenSequence *sourceRange, int start);
+static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, TokenSequence *rules, int start);
 
 static void kNameSpace_parseSugarRule2(KonohaContext *kctx, kNameSpace *ns, const char *rule, kfileline_t uline, kArray *ruleList)
 {

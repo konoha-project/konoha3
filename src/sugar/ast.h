@@ -410,7 +410,7 @@ static int TokenSequence_addGroup(KonohaContext *kctx, TokenSequence *tokens, To
 	astToken->resolvedSyntaxInfo = SYN_(tokens->ns, AST_type);
 	KSETv(astToken, astToken->subTokenList, new_(TokenArray, 0));
 	astToken->uline = openToken->uline;
-	TokenSequence nested = {source->ns, astToken->subTokenList, 0, 0, {openToken}, closech};
+	TokenSequence nested = {source->ns, astToken->subTokenList, 0, 0, openToken, closech};
 	int returnIdx = TokenSequence_resolved2(kctx, &nested, source, currentIdx);
 	if(nested.errToken != NULL) {
 		tokens->errToken = nested.errToken;
