@@ -438,7 +438,7 @@ static KMETHOD StmtTyCheck_sugar(KonohaContext *kctx, KonohaStack *sfp)
 			else {
 				KINITv(syn->syntaxRuleNULL, new_(Array, 8));
 			}
-			TokenRange rangebuf = {Stmt_nameSpace(stmt), tokenList, 0, kArray_size(tokenList)};
+			TokenSequence rangebuf = {Stmt_nameSpace(stmt), tokenList, 0, kArray_size(tokenList)};
 			if(SUGAR kArray_addSyntaxRule(kctx, syn->syntaxRuleNULL, &rangebuf)) {
 				r = 1;
 			}

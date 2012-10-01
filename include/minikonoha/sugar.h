@@ -284,7 +284,7 @@ typedef struct MacroSet {
 	int                       endIdx;
 } MacroSet;
 
-typedef struct TokenRange {
+typedef struct TokenSequence {
 	kNameSpace *ns;
 	kArray *tokenList;
 	int beginIdx;
@@ -294,16 +294,16 @@ typedef struct TokenRange {
 		struct MacroSet *macroSet;
 	};
 	int stopChar;
-} TokenRange;
+} TokenSequence;
 
-#define TokenRange_end(kctx, range)   range->endIdx = kArray_size(range->tokenList)
-#define TokenRange_pop(kctx, range)   do {\
+#define TokenSequence_end(kctx, range)   range->endIdx = kArray_size(range->tokenList)
+#define TokenSequence_pop(kctx, range)   do {\
 	KLIB kArray_clear(kctx, range->tokenList, range->beginIdx);\
 	range->endIdx = range->beginIdx;\
 } while (0)
 
 
-typedef kbool_t (*CheckEndOfStmtFunc2)(KonohaContext *, TokenRange *range, TokenRange *sourceRange, int *currentIdxRef, int *indentRef);
+typedef kbool_t (*CheckEndOfStmtFunc2)(KonohaContext *, TokenSequence *range, TokenSequence *sourceRange, int *currentIdxRef, int *indentRef);
 
 #define Token_isVirtualTypeLiteral(TK)     ((TK)->resolvedSyntaxInfo->keyword == KW_TypePattern)
 #define Token_typeLiteral(TK)              (TK)->resolvedTypeId
@@ -497,12 +497,12 @@ typedef struct {
 	KonohaClass *cGamma;
 	KonohaClass *cTokenArray;
 
-	TokenRange* (*new_TokenListRange)(KonohaContext *, kNameSpace *ns, kArray *tokenList, TokenRange *bufRange);
-	TokenRange* (*new_TokenStackRange)(KonohaContext *, TokenRange *range, TokenRange *bufRange);
+	TokenSequence* (*new_TokenListRange)(KonohaContext *, kNameSpace *ns, kArray *tokenList, TokenSequence *bufRange);
+	TokenSequence* (*new_TokenStackRange)(KonohaContext *, TokenSequence *range, TokenSequence *bufRange);
 	void        (*kNameSpace_setTokenizeFunc)(KonohaContext *, kNameSpace *, int ch, TokenizeFunc, kFunc *, int isAddition);
-	void        (*TokenRange_tokenize)(KonohaContext *, TokenRange *, const char *, kfileline_t);
-	kbool_t     (*TokenRange_resolved)(KonohaContext *, TokenRange *, TokenRange *);
-	kstatus_t   (*TokenRange_eval)(KonohaContext *, TokenRange *);
+	void        (*TokenSequence_tokenize)(KonohaContext *, TokenSequence *, const char *, kfileline_t);
+	kbool_t     (*TokenSequence_resolved)(KonohaContext *, TokenSequence *, TokenSequence *);
+	kstatus_t   (*TokenSequence_eval)(KonohaContext *, TokenSequence *);
 	int         (*kStmt_parseTypePattern)(KonohaContext *, kStmt *, kNameSpace *, kArray *, int , int , KonohaClass **classRef);
 	void        (*kToken_transformToBraceGroup)(KonohaContext *, kTokenVar *, kNameSpace *);
 
@@ -516,11 +516,11 @@ typedef struct {
 
 	SugarSyntax* (*kNameSpace_getSyntax)(KonohaContext *, kNameSpace *, ksymbol_t, int);
 	void         (*kNameSpace_defineSyntax)(KonohaContext *, kNameSpace *, KDEFINE_SYNTAX *, kNameSpace *packageNameSpace);
-	kbool_t      (*kArray_addSyntaxRule)(KonohaContext *, kArray *ruleList, TokenRange *sourceRange);
+	kbool_t      (*kArray_addSyntaxRule)(KonohaContext *, kArray *ruleList, TokenSequence *sourceRange);
 	void         (*kNameSpace_setSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
 	void         (*kNameSpace_addSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
 
-	kBlock*      (*new_kBlock)(KonohaContext *, kStmt *, TokenRange *);
+	kBlock*      (*new_kBlock)(KonohaContext *, kStmt *, TokenSequence *);
 	kStmt*       (*new_kStmt)(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, ...);
 	void         (*kBlock_insertAfter)(KonohaContext *, kBlock *, kStmtNULL *target, kStmt *);
 
@@ -612,13 +612,13 @@ static kExpr* kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, k
 #ifdef USE_SMALLBUILD
 #define KdumpToken(ctx, tk)
 #define KdumpTokenArray(CTX, TLS, S, E)
-#define KdumpTokenRange(CTX, MSG, R)
+#define KdumpTokenSequence(CTX, MSG, R)
 #define KdumpStmt(CTX, STMT)
 #define KdumpExpr(CTX, EXPR)
 #else
 #define KdumpToken(ctx, tk)              ((const KModuleSugar*)kmodsugar)->dumpToken(ctx, tk, 0)
 #define KdumpTokenArray(CTX, TLS, S, E)  DBG_P("@"); ((const KModuleSugar*)kmodsugar)->dumpTokenArray(CTX, 1, TLS, S, E)
-#define KdumpTokenRange(CTX, MSG, R)     DBG_P(MSG); ((const KModuleSugar*)kmodsugar)->dumpTokenArray(CTX, 1, R->tokenList, R->beginIdx, R->endIdx)
+#define KdumpTokenSequence(CTX, MSG, R)     DBG_P(MSG); ((const KModuleSugar*)kmodsugar)->dumpTokenArray(CTX, 1, R->tokenList, R->beginIdx, R->endIdx)
 #define KdumpStmt(CTX, STMT)             ((const KModuleSugar*)kmodsugar)->dumpStmt(CTX, STMT)
 #define KdumpExpr(CTX, EXPR)             ((const KModuleSugar*)kmodsugar)->dumpExpr(CTX, 0, 0, EXPR)
 #endif

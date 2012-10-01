@@ -57,10 +57,10 @@ static kstatus_t kNameSpace_eval(KonohaContext *kctx, kNameSpace *ns, const char
 	kmodsugar->h.setup(kctx, (KonohaModule*)kmodsugar, 0/*lazy*/);
 	INIT_GCSTACK();
 	{
-		TokenRange rangeBuf, *range = new_TokenListRange(kctx, ns, KonohaContext_getSugarContext(kctx)->preparedTokenList, &rangeBuf);
-		TokenRange_tokenize(kctx, range, script, uline);
-		result = TokenRange_eval(kctx, range);
-		TokenRange_pop(kctx, range);
+		TokenSequence rangeBuf, *range = new_TokenListRange(kctx, ns, KonohaContext_getSugarContext(kctx)->preparedTokenList, &rangeBuf);
+		TokenSequence_tokenize(kctx, range, script, uline);
+		result = TokenSequence_eval(kctx, range);
+		TokenSequence_pop(kctx, range);
 	}
 	RESET_GCSTACK();
 	return result;
@@ -196,9 +196,9 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->new_TokenListRange         = new_TokenListRange;
 	mod->new_TokenStackRange        = new_TokenStackRange;
 	mod->kNameSpace_setTokenizeFunc = kNameSpace_setTokenizeFunc;
-	mod->TokenRange_tokenize        = TokenRange_tokenize;
-	mod->TokenRange_eval            = TokenRange_eval;
-	mod->TokenRange_resolved        = TokenRange_resolved;
+	mod->TokenSequence_tokenize        = TokenSequence_tokenize;
+	mod->TokenSequence_eval            = TokenSequence_eval;
+	mod->TokenSequence_resolved        = TokenSequence_resolved;
 	mod->kStmt_parseTypePattern     = kStmt_parseTypePattern;
 	mod->kToken_transformToBraceGroup = kToken_transformToBraceGroup;
 	mod->kStmt_setParsedObject      = kStmt_setParsedObject;

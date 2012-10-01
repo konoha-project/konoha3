@@ -394,11 +394,11 @@ static kBlock* kStmt_parseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToke
 	kToken *blockToken = (kToken*)kStmt_getObject(kctx, stmt, KW_BlockPattern, NULL);
 	if(blockToken != NULL && blockToken->resolvedSyntaxInfo->keyword == KW_BlockPattern) {
 		const char *cname = S_text(tokenClassName->text);
-		TokenRange rangeBuf, *range = SUGAR new_TokenListRange(kctx, Stmt_nameSpace(stmt), KonohaContext_getSugarContext(kctx)->preparedTokenList, &rangeBuf);
-		SUGAR TokenRange_tokenize(kctx, range,  S_text(blockToken->text), blockToken->uline);
+		TokenSequence rangeBuf, *range = SUGAR new_TokenListRange(kctx, Stmt_nameSpace(stmt), KonohaContext_getSugarContext(kctx)->preparedTokenList, &rangeBuf);
+		SUGAR TokenSequence_tokenize(kctx, range,  S_text(blockToken->text), blockToken->uline);
 		{
 			kToken *prevToken = blockToken;
-			TokenRange sourceBuf, *sourceRange = SUGAR new_TokenStackRange(kctx, range, &sourceBuf);
+			TokenSequence sourceBuf, *sourceRange = SUGAR new_TokenStackRange(kctx, range, &sourceBuf);
 			int i;
 			for(i = range->beginIdx; i < range->endIdx; i++) {
 				kToken *tk = range->tokenList->tokenItems[i];
@@ -410,11 +410,11 @@ static kBlock* kStmt_parseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToke
 				KLIB kArray_add(kctx, sourceRange->tokenList, tk);
 				prevToken = tk;
 			}
-			TokenRange_end(kctx, sourceRange);
+			TokenSequence_end(kctx, sourceRange);
 			bk = SUGAR new_kBlock(kctx, stmt/*parent*/, sourceRange);
 			KLIB kObject_setObject(kctx, stmt, KW_BlockPattern, TY_Block, bk);
 		}
-		TokenRange_pop(kctx, range);
+		TokenSequence_pop(kctx, range);
 	}
 	return bk;
 }

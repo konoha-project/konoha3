@@ -49,16 +49,16 @@ static KMETHOD ParseExpr_SelfAssign(KonohaContext *kctx, KonohaStack *sfp)
 	ksymbol_t opSymbol = KLIB Ksymbol(kctx, S_text(selfAssignToken->text), S_size(selfAssignToken->text) - 1, StringPolicy_ASCII, _NEWID);
 	SugarSyntax *opSyntax = SYN_(ns, opSymbol);
 	if(opSyntax != NULL) {
-		TokenRange macroRangeBuf, *macroRange = SUGAR new_TokenListRange(kctx, Stmt_nameSpace(stmt), tokenList, &macroRangeBuf);
-		SUGAR TokenRange_tokenize(kctx, macroRange, "A = ( A ) + ( B )", 0);
+		TokenSequence macroRangeBuf, *macroRange = SUGAR new_TokenListRange(kctx, Stmt_nameSpace(stmt), tokenList, &macroRangeBuf);
+		SUGAR TokenSequence_tokenize(kctx, macroRange, "A = ( A ) + ( B )", 0);
 
-		TokenRange opRangeBuf, *opRange = SUGAR new_TokenStackRange(kctx, macroRange, &opRangeBuf);
+		TokenSequence opRangeBuf, *opRange = SUGAR new_TokenStackRange(kctx, macroRange, &opRangeBuf);
 		kTokenVar *opToken = GCSAFE_new(TokenVar, TokenType_SYMBOL);
 		KSETv(opToken, opToken->text, SYM_s(opSymbol));
 		KLIB kArray_add(kctx, opRange->tokenList, opToken);
-		TokenRange_end(kctx, opRange);
+		TokenSequence_end(kctx, opRange);
 
-		TokenRange newexprRangeBuf, *newexprRange = SUGAR new_TokenStackRange(kctx, opRange, &newexprRangeBuf);
+		TokenSequence newexprRangeBuf, *newexprRange = SUGAR new_TokenStackRange(kctx, opRange, &newexprRangeBuf);
 		MacroSet macroSet[] = {
 			{SYM_("A"), tokenList, beginIdx, operatorIdx},
 			{SYM_("B"), tokenList, operatorIdx+1, endIdx},
@@ -66,11 +66,11 @@ static KMETHOD ParseExpr_SelfAssign(KonohaContext *kctx, KonohaStack *sfp)
 			{0, NULL, 0, 0},
 		};
 		macroRange->macroSet = macroSet;
-		SUGAR TokenRange_resolved(kctx, newexprRange, macroRange);
-//		KdumpTokenRange(kctx, "replaced", newexprRange);
+		SUGAR TokenSequence_resolved(kctx, newexprRange, macroRange);
+//		KdumpTokenSequence(kctx, "replaced", newexprRange);
 
 		kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, newexprRange->tokenList, newexprRange->beginIdx, newexprRange->endIdx);
-		TokenRange_pop(kctx, macroRange);
+		TokenSequence_pop(kctx, macroRange);
 		RETURN_(expr);
 	}
 	else {

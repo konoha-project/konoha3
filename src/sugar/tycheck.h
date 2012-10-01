@@ -297,10 +297,10 @@ static kBlock* kMethod_newBlock(KonohaContext *kctx, kMethod *mtd, kNameSpace *n
 		script = S_text(mtd->sourceCodeToken->text);
 		uline = mtd->sourceCodeToken->uline;
 	}
-	TokenRange rangeBuf, *range = new_TokenListRange(kctx, ns, KonohaContext_getSugarContext(kctx)->preparedTokenList, &rangeBuf);
-	TokenRange_tokenize(kctx, range, script, uline);
+	TokenSequence rangeBuf, *range = new_TokenListRange(kctx, ns, KonohaContext_getSugarContext(kctx)->preparedTokenList, &rangeBuf);
+	TokenSequence_tokenize(kctx, range, script, uline);
 	kBlock *bk = new_kBlock2(kctx, NULL/*parentStmt*/, range);
-	TokenRange_pop(kctx, range);
+	TokenSequence_pop(kctx, range);
 	return bk;
 }
 
@@ -422,7 +422,7 @@ static kstatus_t kMethod_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtyp
 	return result;
 }
 
-static int TokenRange_selectStmtToken2(KonohaContext *kctx, TokenRange *tokens, TokenRange *source)
+static int TokenSequence_selectStatement(KonohaContext *kctx, TokenSequence *tokens, TokenSequence *source)
 {
 	int currentIdx, sourceEndIdx = source->endIdx, isPreviousIndent = false;
 	for(currentIdx = source->beginIdx; currentIdx < sourceEndIdx; currentIdx++) {
@@ -441,22 +441,22 @@ static int TokenRange_selectStmtToken2(KonohaContext *kctx, TokenRange *tokens, 
 	tokens->endIdx = 0;
 	tokens->errToken = NULL;
 	tokens->stopChar = 0;
-	TokenRange_resolved2(kctx, tokens, source, source->beginIdx);
+	TokenSequence_resolved2(kctx, tokens, source, source->beginIdx);
 	source->beginIdx = source->endIdx;
 	source->endIdx = sourceEndIdx;
 	return currentIdx;
 }
 
-static kstatus_t TokenRange_eval(KonohaContext *kctx, TokenRange *source)
+static kstatus_t TokenSequence_eval(KonohaContext *kctx, TokenSequence *source)
 {
 	kstatus_t status = K_CONTINUE;
 	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Static, 0, 0, NULL);
 	PUSH_GCSTACK(mtd);
 	KLIB kMethod_setParam(kctx, mtd, TY_Object, 0, NULL);
 	kBlock *singleBlock = GCSAFE_new(Block, source->ns);
-	TokenRange tokens = {source->ns, source->tokenList, kArray_size(source->tokenList), 0, {NULL}, 0};
+	TokenSequence tokens = {source->ns, source->tokenList, kArray_size(source->tokenList), 0, {NULL}, 0};
 	while(source->beginIdx < source->endIdx) {
-		if(TokenRange_selectStmtToken2(kctx, &tokens, source)) {
+		if(TokenSequence_selectStatement(kctx, &tokens, source)) {
 			if(tokens.errToken != NULL) return K_BREAK;
 			while(tokens.beginIdx < tokens.endIdx) {
 				KLIB kArray_clear(kctx, singleBlock->stmtList, 0);
