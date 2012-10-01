@@ -729,7 +729,7 @@ static kbool_t mpi_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSp
 
 KDEFINE_PACKAGE* mpi_init(void)
 {
-	static const KDEFINE_PACKAGE d = {
+	static KDEFINE_PACKAGE d = {
 		KPACKNAME("mpi", "1.0"),
 		.initPackage    = mpi_initPackage,
 		.setupPackage   = mpi_setupPackage,

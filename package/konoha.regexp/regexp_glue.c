@@ -850,7 +850,7 @@ static kbool_t regexp_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNam
 
 KDEFINE_PACKAGE* regexp_init(void)
 {
-	static const KDEFINE_PACKAGE d = {
+	static KDEFINE_PACKAGE d = {
 		KPACKNAME("regexp", "1.0"),
 		.initPackage    = regexp_initPackage,
 		.setupPackage   = regexp_setupPackage,
