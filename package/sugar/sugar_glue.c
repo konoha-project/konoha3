@@ -493,8 +493,8 @@ static kbool_t sugar_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameS
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("sugar"), .rule ="\"sugar\" $Token", TopStmtTyCheck_(sugar), },
-		{ .keyword = KW_END, },
+		{ SYM_("sugar"), 0, "\"sugar\" $Token", 0, 0, NULL, NULL, StmtTyCheck_sugar, NULL, NULL, },
+		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 	return true;
@@ -507,13 +507,12 @@ static kbool_t sugar_setupNameSpace(KonohaContext *kctx, kNameSpace *packageName
 
 KDEFINE_PACKAGE* sugar_init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("sugar", "1.0"),
-		.initPackage    = sugar_initPackage,
-		.setupPackage   = sugar_setupPackage,
-		.initNameSpace  = sugar_initNameSpace,
-		.setupNameSpace = sugar_setupNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {0};
+	KSETPACKNAME(d, "sugar", "1.0");
+	d.initPackage    = sugar_initPackage;
+	d.setupPackage   = sugar_setupPackage;
+	d.initNameSpace  = sugar_initNameSpace;
+	d.setupNameSpace = sugar_setupNameSpace;
 	return &d;
 }
 

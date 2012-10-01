@@ -22,6 +22,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+#ifdef _MSC_VER
+#define typeof decltype
+#endif
+
 static void Karray_init(KonohaContext *kctx, KUtilsGrowingArray *m, size_t bytemax)
 {
 	m->bytesize = 0;

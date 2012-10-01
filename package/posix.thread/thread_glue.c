@@ -340,7 +340,7 @@ static kbool_t thread_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNam
 
 KDEFINE_PACKAGE* thread_init(void)
 {
-	static const KDEFINE_PACKAGE d = {
+	static KDEFINE_PACKAGE d = {
 		KPACKNAME("thread", "1.0"),
 		.initPackage    = thread_initPackage,
 		.setupPackage   = thread_setupPackage,

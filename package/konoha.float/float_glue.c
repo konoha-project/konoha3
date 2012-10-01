@@ -22,10 +22,18 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+
+
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/float.h>
+
+#ifdef _MSC_VER
+#define INFINITY (DBL_MAX+DBL_MAX)
+#define NAN (INFINITY-INFINITY)
+#else
 #include <math.h> /* for INFINATE, NAN */
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -252,13 +260,13 @@ static kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	/* Use konoha.int package's Parser to parsing FloatLiteral */
 	KRequirePackage("konoha.int", pline);
 
-	KDEFINE_CLASS defFloat = {
-		UNBOXNAME(float),
-		.cstruct_size = sizeof(kFloat),
-		.cflag = CFLAG_int,
-		.init = Float_init,
-		.p     = Float_p,
-	};
+	KDEFINE_CLASS defFloat = {0};
+	SETUNBOXNAME(defFloat, float);
+	defFloat.cstruct_size = sizeof(kFloat);
+	defFloat.cflag = CFLAG_int;
+	defFloat.init = Float_init;
+	defFloat.p     = Float_p;
+
 	base->cFloat = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defFloat, pline);
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
@@ -319,8 +327,8 @@ static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t float_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("$Float"), ExprTyCheck_(Float), },
-		{ .keyword = KW_END, },
+		{ SYM_("$Float"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, ExprTyCheck_Float, },
+		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 
@@ -335,13 +343,12 @@ static kbool_t float_setupNameSpace(KonohaContext *kctx, kNameSpace *packageName
 
 KDEFINE_PACKAGE* float_init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("float", "1.0"),
-		.initPackage    = float_initPackage,
-		.setupPackage   = float_setupPackage,
-		.initNameSpace  = float_initNameSpace,
-		.setupNameSpace = float_setupNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {0};
+	KSETPACKNAME(d, "float", "1.0");
+	d.initPackage    = float_initPackage;
+	d.setupPackage   = float_setupPackage;
+	d.initNameSpace  = float_initNameSpace;
+	d.setupNameSpace = float_setupNameSpace;
 	return &d;
 }
 

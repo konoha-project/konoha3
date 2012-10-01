@@ -46,6 +46,10 @@
 extern "C" {
 #endif
 
+#ifndef __GNUC__
+#define __attribute__(X)
+#endif
+
 #if defined(K_USING_INT32)
 
 /* Period parameters */

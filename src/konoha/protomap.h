@@ -12,6 +12,10 @@
 extern "C" {
 #endif
 
+#ifndef __GNUC__
+#define __attribute__(X)
+#endif
+
 #define DICTMAP_THRESHOLD 4
 
 typedef struct protomap_record {

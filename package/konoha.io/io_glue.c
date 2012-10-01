@@ -728,13 +728,12 @@ static kbool_t io_setNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace
 
 KDEFINE_PACKAGE* io_init(void)
 {
-	static const KDEFINE_PACKAGE d = {
-		KPACKNAME("io", "1.0"),
-		.initPackage    = io_initPackage,
-		.setupPackage   = io_setupPackage,
-		.initNameSpace  = io_initNameSpace,
-		.setupNameSpace = io_setNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {0};
+	KSETPACKNAME(d, "io", "1.0");
+	d.initPackage    = io_initPackage;
+	d.setupPackage   = io_setupPackage;
+	d.initNameSpace  = io_initNameSpace;
+	d.setupNameSpace = io_setNameSpace;
 	return &d;
 }
 

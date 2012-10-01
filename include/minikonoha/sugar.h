@@ -291,6 +291,7 @@ typedef struct TokenSequence {
 	int endIdx;
 	union {
 		kToken *errToken;
+		kToken *openToken;
 		struct MacroSet *macroSet;
 	};
 	int stopChar;

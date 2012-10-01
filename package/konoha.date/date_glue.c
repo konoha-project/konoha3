@@ -638,13 +638,12 @@ static kbool_t date_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameS
 
 KDEFINE_PACKAGE* date_init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("date", "1.0"),
-		.initPackage    = date_initPackage,
-		.setupPackage   = date_setupPackage,
-		.initNameSpace  = date_initNameSpace,
-		.setupNameSpace = date_setupNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {0};
+	KSETPACKNAME(d, "date", "1.0");
+	d.initPackage    = date_initPackage;
+	d.setupPackage   = date_setupPackage;
+	d.initNameSpace  = date_initNameSpace;
+	d.setupNameSpace = date_setupNameSpace;
 	return &d;
 }
 

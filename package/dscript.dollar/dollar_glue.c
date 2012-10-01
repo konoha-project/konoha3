@@ -91,8 +91,8 @@ static KMETHOD ParseExpr_dollar(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t dollar_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("$"), ParseExpr_(dollar), .precedence_op1 = C_PRECEDENCE_CALL},
-		{ .keyword = KW_END, },
+		{ SYM_("$"), 0, NULL, 0, C_PRECEDENCE_CALL, NULL, ParseExpr_dollar, NULL, NULL, NULL, },
+		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 	return true;
@@ -105,13 +105,12 @@ static kbool_t dollar_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNam
 
 KDEFINE_PACKAGE* dollar_init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("dscript", "1.0"),
-		.initPackage    = dollar_initPackage,
-		.setupPackage   = dollar_setupPackage,
-		.initNameSpace  = dollar_initNameSpace,
-		.setupNameSpace = dollar_setupNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {0};
+	KSETPACKNAME(d, "dscript", "1.0");
+	d.initPackage    = dollar_initPackage;
+	d.setupPackage   = dollar_setupPackage;
+	d.initNameSpace  = dollar_initNameSpace;
+	d.setupNameSpace = dollar_setupNameSpace;
 	return &d;
 }
 

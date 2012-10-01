@@ -103,12 +103,12 @@ struct _kGlobalObject {
 static kbool_t kNameSpace_initGlobalObject(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	if(ns->globalObjectNULL == NULL) {
-		KDEFINE_CLASS defGlobalObject = {
-			.structname = "GlobalObject",
-			.typeId = TY_newid,
-			.cflag = kClass_Singleton|kClass_Final,
-			.cstruct_size = sizeof(kGlobalObject),
-		};
+		KDEFINE_CLASS defGlobalObject = {0};
+		defGlobalObject.structname = "GlobalObject";
+		defGlobalObject.typeId = TY_newid;
+		defGlobalObject.cflag = kClass_Singleton|kClass_Final;
+		defGlobalObject.cstruct_size = sizeof(kGlobalObject);
+
 		KonohaClass *cGlobalObject = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defGlobalObject, pline);
 		KINITp(ns, ((kNameSpaceVar*)ns)->globalObjectNULL, KLIB Knull(kctx, cGlobalObject));
 		return KLIB kNameSpace_setConstData(kctx, ns, SYM_("global"), cGlobalObject->typeId, (uintptr_t)ns->globalObjectNULL, pline);
@@ -145,13 +145,12 @@ static kbool_t global_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNam
 
 KDEFINE_PACKAGE* global_init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("global", "1.0"),
-		.initPackage    = global_initPackage,
-		.setupPackage   = global_setupPackage,
-		.initNameSpace  = global_initNameSpace,
-		.setupNameSpace = global_setupNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {0};
+	KSETPACKNAME(d, "global", "1.0");
+	d.initPackage    = global_initPackage;
+	d.setupPackage   = global_setupPackage;
+	d.initNameSpace  = global_initNameSpace;
+	d.setupNameSpace = global_setupNameSpace;
 	return &d;
 }
 

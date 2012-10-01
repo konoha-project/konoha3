@@ -71,8 +71,8 @@ static kbool_t while_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameS
 	KImportPackage(ns, "konoha.break", pline);
 	KImportPackage(ns, "konoha.continue", pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("while"), StmtTyCheck_(while), .rule = "\"while\" \"(\" $Expr \")\" $Block",},
-		{ .keyword = KW_END, },
+		{ SYM_("while"), 0, "\"while\" \"(\" $Expr \")\" $Block", 0, 0, NULL, NULL, NULL, StmtTyCheck_while, NULL, },
+		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 	return true;
@@ -85,13 +85,12 @@ static kbool_t while_setupNameSpace(KonohaContext *kctx, kNameSpace *packageName
 
 KDEFINE_PACKAGE* while_init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("while", "1.0"),
-		.initPackage    = while_initPackage,
-		.setupPackage   = while_setupPackage,
-		.initNameSpace  = while_initNameSpace,
-		.setupNameSpace = while_setupNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {0};
+	KSETPACKNAME(d, "while", "1.0");
+	d.initPackage    = while_initPackage;
+	d.setupPackage   = while_setupPackage;
+	d.initNameSpace  = while_initNameSpace;
+	d.setupNameSpace = while_setupNameSpace;
 	return &d;
 }
 

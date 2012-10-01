@@ -105,8 +105,8 @@ static KMETHOD ParseExpr_isNotNull(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t null_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("null"), ExprTyCheck_(null), },
-		{ .keyword = KW_END, },
+		{ SYM_("null"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, ExprTyCheck_null, },
+		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 	SUGAR kNameSpace_addSugarFunc(kctx, ns, SYM_("=="), SUGARFUNC_ParseExpr, new_SugarFunc(ParseExpr_isNull));
@@ -121,13 +121,12 @@ static kbool_t null_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameS
 
 KDEFINE_PACKAGE* null_init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("null", "1.0"),
-		.initPackage    = null_initPackage,
-		.setupPackage   = null_setupPackage,
-		.initNameSpace  = null_initNameSpace,
-		.setupNameSpace = null_setupNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {0};
+	KSETPACKNAME(d, "null", "1.0");
+	d.initPackage    = null_initPackage;
+	d.setupPackage   = null_setupPackage;
+	d.initNameSpace  = null_initNameSpace;
+	d.setupNameSpace = null_setupNameSpace;
 	return &d;
 }
 

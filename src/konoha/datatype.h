@@ -26,6 +26,10 @@
 #define PARAMDOM_void                  0
 #define PARAMDOM_DefaultGenericsParam  1
 
+#ifdef _MSC_VER
+#define typeof decltype
+#endif
+
 static kObject* DEFAULT_fnull(KonohaContext *kctx, KonohaClass *ct);
 
 static void kObject_init(KonohaContext *kctx, kObject *o, void *conf)
@@ -904,77 +908,90 @@ static KonohaClass *KonohaClass_define(KonohaContext *kctx, kpackage_t packageId
 	.cflag = CFLAG_##C,\
 	.cstruct_size = sizeof(k##C)\
 
+#define SetUnboxTypeName(VAR, C) do{\
+		VAR.structname = #C;\
+		VAR.typeId = TY_##C;\
+		VAR.cflag  = CFLAG_##C;\
+	}while(0)\
+
+#define SETTYNAME(VAR, C) do{\
+		VAR.structname = #C;\
+		VAR.typeId = TY_##C;\
+		VAR.cflag = CFLAG_##C;\
+		VAR.cstruct_size = sizeof(k##C);\
+	}while(0)\
+
 static void loadInitStructData(KonohaContext *kctx)
 {
-	KDEFINE_CLASS defTvoid = {
-		UnboxTypeName(void),
-	};
-	KDEFINE_CLASS defTvar = {
-		UnboxTypeName(var),
-	};
-	KDEFINE_CLASS defObject = {
-		TYNAME(Object),
-		.init = kObject_init,
-		.reftrace = kObject_reftrace,
-	};
-	KDEFINE_CLASS defBoolean = {
-		UnboxTypeName(boolean),
-		.cstruct_size = sizeof(kBoolean),
-		.init  = kNumber_init,
-		.unbox = kNumber_unbox,
-		.p     = kBoolean_p,
-		.fnull = kBoolean_fnull,
-	};
-	KDEFINE_CLASS defInt = {
-		UnboxTypeName(int),
-		.cstruct_size = sizeof(kInt),
-		.init  = kNumber_init,
-		.unbox = kNumber_unbox,
-		.p     = kInt_p,
-	};
-	KDEFINE_CLASS defString = {
-		TYNAME(String),
-		.init = kString_init,
-		.free = kString_free,
-		.p    = kString_p,
-		.unbox = kString_unbox
-	};
-	KDEFINE_CLASS defArray = {
-		TYNAME(Array),
-		.init = kArray_init,
-		.reftrace = kArray_reftrace,
-		.free = kArray_free,
-		.p    = kArray_p,
-	};
-	KDEFINE_CLASS defParam = {
-		TYNAME(Param),
-		.init = kParam_init,
-	};
-	KDEFINE_CLASS defMethod = {
-		TYNAME(Method),
-		.init = kMethod_init,
-		.reftrace = kMethod_reftrace,
-	};
-	KDEFINE_CLASS defFunc = {
-		TYNAME(Func),
-		.init = Func_init,
-		.reftrace = Func_reftrace,
-	};
-	KDEFINE_CLASS defNameSpace = {
-		TYNAME(NameSpace),
-		.init = kNameSpace_init,
-		.reftrace = kNameSpace_reftrace,
-		.free = kNameSpace_free,
-	};
-	KDEFINE_CLASS defSystem = {
-		TYNAME(System),
-		.init = DEFAULT_init,
-	};
-	KDEFINE_CLASS defT0 = {
-		UnboxTypeName(0),
-		.init = DEFAULT_init,
-		.realtype = T_realtype,
-	};
+	KDEFINE_CLASS defTvoid = {0};
+	SetUnboxTypeName(defTvoid, void);
+	
+	KDEFINE_CLASS defTvar = {0};
+	SetUnboxTypeName(defTvar, var);
+	
+	KDEFINE_CLASS defObject = {0};
+	SETTYNAME(defObject, Object);
+	defObject.init = kObject_init;
+	defObject.reftrace = kObject_reftrace;
+	
+	KDEFINE_CLASS defBoolean = {0};
+	SetUnboxTypeName(defBoolean, boolean);
+	defBoolean.cstruct_size = sizeof(kBoolean);
+	defBoolean.init  = kNumber_init;
+	defBoolean.unbox = kNumber_unbox;
+	defBoolean.p     = kBoolean_p;
+	defBoolean.fnull = kBoolean_fnull;
+	
+	KDEFINE_CLASS defInt = {0};
+	SetUnboxTypeName(defInt, int);
+	defInt.cstruct_size = sizeof(kInt);
+	defInt.init  = kNumber_init;
+	defInt.unbox = kNumber_unbox;
+	defInt.p     = kInt_p;
+	
+	KDEFINE_CLASS defString = {0};
+	SETTYNAME(defString, String);
+	defString.init = kString_init;
+	defString.free = kString_free;
+	defString.p    = kString_p;
+	defString.unbox = kString_unbox;
+	
+	KDEFINE_CLASS defArray = {0};
+	SETTYNAME(defArray, Array);
+	defArray.init = kArray_init;
+	defArray.reftrace = kArray_reftrace;
+	defArray.free = kArray_free;
+	defArray.p    = kArray_p;
+	
+	KDEFINE_CLASS defParam = {0};
+	SETTYNAME(defParam, Param);
+	defParam.init = kParam_init;
+	
+	KDEFINE_CLASS defMethod = {0};
+	SETTYNAME(defMethod, Method);
+	defMethod.init = kMethod_init;
+	defMethod.reftrace = kMethod_reftrace;
+	
+	KDEFINE_CLASS defFunc = {0};
+	SETTYNAME(defFunc, Func);
+	defFunc.init = Func_init;
+	defFunc.reftrace = Func_reftrace;
+	
+	KDEFINE_CLASS defNameSpace = {0};
+	SETTYNAME(defNameSpace, NameSpace);
+	defNameSpace.init = kNameSpace_init;
+	defNameSpace.reftrace = kNameSpace_reftrace;
+	defNameSpace.free = kNameSpace_free;
+	
+	KDEFINE_CLASS defSystem = {0};
+	SETTYNAME(defSystem, System);
+	defSystem.init = DEFAULT_init;
+	
+	KDEFINE_CLASS defT0 = {0};
+	SetUnboxTypeName(defT0, 0);
+	defT0.init = DEFAULT_init;
+	defT0.realtype = T_realtype;
+
 	KDEFINE_CLASS *DATATYPES[] = {
 		&defTvoid,
 		&defTvar,

@@ -108,13 +108,12 @@ static kbool_t object_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNam
 
 KDEFINE_PACKAGE* object_init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("object", "1.0"),
-		.initPackage    = object_initPackage,
-		.setupPackage   = object_setupPackage,
-		.initNameSpace  = object_initNameSpace,
-		.setupNameSpace = object_setupNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {0};
+	KSETPACKNAME(d, "object", "1.0");
+	d.initPackage    = object_initPackage;
+	d.setupPackage   = object_setupPackage;
+	d.initNameSpace  = object_initNameSpace;
+	d.setupNameSpace = object_setupNameSpace;
 	return &d;
 }
 

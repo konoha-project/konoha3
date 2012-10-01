@@ -28,6 +28,10 @@
 extern "C" {
 #endif
 
+#ifdef _MSC_VER
+#define strtoll _strtoi64
+#endif
+
 /* ------------------------------------------------------------------------ */
 /* TokenSequence */
 

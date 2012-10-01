@@ -99,8 +99,8 @@ static KMETHOD ParseExpr_Defined(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t defined_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("defined"), .precedence_op1 = C_PRECEDENCE_PREUNARY, ParseExpr_(Defined), ExprTyCheck_(Defined), },
-		{ .keyword = KW_END, },
+		{ SYM_("defined"), 0, NULL, 0, C_PRECEDENCE_PREUNARY, NULL, ParseExpr_Defined, NULL, NULL, ExprTyCheck_Defined, },
+		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 	return true;
@@ -113,13 +113,12 @@ static kbool_t defined_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNa
 
 KDEFINE_PACKAGE* defined_init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("defined", "1.0"),
-		.initPackage    = defined_initPackage,
-		.setupPackage   = defined_setupPackage,
-		.initNameSpace  = defined_initNameSpace,
-		.setupNameSpace = defined_setupNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {0};
+	KSETPACKNAME(d, "defined", "1.0");
+	d.initPackage    = defined_initPackage;
+	d.setupPackage   = defined_setupPackage;
+	d.initNameSpace  = defined_initNameSpace;
+	d.setupNameSpace = defined_setupNameSpace;
 	return &d;
 }
 

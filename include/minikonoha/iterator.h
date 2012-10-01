@@ -56,8 +56,6 @@ typedef struct {
 	KonohaModuleContext h;
 } KonohaIteratorModuleContext;
 
-typedef struct _kIterator kIterator;
-
 struct _kIterator {
 	KonohaObjectHeader h;
 	kbool_t (*hasNext)(KonohaContext *kctx, KonohaStack *);
@@ -70,6 +68,8 @@ struct _kIterator {
 	};
 	kFunc        *funcNext;
 };
+
+typedef struct _kIterator kIterator;
 
 #ifdef __cplusplus
 } /* extern "C" */
