@@ -32,7 +32,9 @@
 extern "C" {
 #endif
 
+#ifndef _MSC_VER
 #define K_USING_THCODE_
+#endif
 
 typedef struct kBasicBlockVar         kBasicBlock;
 typedef const struct kByteCodeVar     kByteCode;

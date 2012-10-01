@@ -174,7 +174,7 @@ static int kStmt_parseTypePattern(KonohaContext *kctx, kStmt *stmt, kNameSpace *
 static KonohaClass* kStmt_parseGenerics(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, KonohaClass *baseClass, kArray *tokenList, int beginIdx, int endIdx)
 {
 	size_t i = beginIdx, psize = 0;
-	kparamtype_t p[endIdx];
+	kparamtype_t *p = ALLOCA(kparamtype_t, endIdx);
 	while(i < endIdx) {
 		KonohaClass *paramClass = NULL;
 		i = kStmt_parseTypePattern(kctx, stmt, ns, tokenList, i, endIdx, &paramClass);

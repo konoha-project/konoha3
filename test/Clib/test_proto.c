@@ -1,7 +1,6 @@
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/platform.h"
 #include <stdio.h>
-#include <sys/time.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -9,13 +8,17 @@ extern "C" {
 
 static void reset_timer(struct timeval *timer)
 {
-	gettimeofday(timer, NULL);
+	unsigned long long t = getTimeMilliSecond();
+	timer->tv_sec = t / 1000;
+	timer->tv_usec = t % 1000 * 10;
 }
 
 static void show_timer(struct timeval *timer, const char *s)
 {
 	struct timeval time;
-	gettimeofday(&time, NULL);
+	unsigned long long t = getTimeMilliSecond();
+	time.tv_sec = t / 1000;
+	time.tv_usec = t % 1000 * 10;
 	double sec = (time.tv_sec - timer->tv_sec)
 		+ (double)(time.tv_usec - timer->tv_usec) / 1000 / 1000;
 	fprintf(stderr, "%-16s: %f sec\n", s, sec);

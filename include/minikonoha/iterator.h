@@ -69,7 +69,8 @@ struct _kIterator {
 	kFunc        *funcNext;
 };
 
-typedef struct _kIterator kIterator;
+#define kIterator struct _kIterator
+//typedef struct _kIterator kIterator;
 
 #ifdef __cplusplus
 } /* extern "C" */
