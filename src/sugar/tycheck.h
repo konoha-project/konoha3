@@ -422,25 +422,50 @@ static kstatus_t kMethod_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtyp
 	return result;
 }
 
-static kstatus_t TokenRange_eval(KonohaContext *kctx, TokenRange *sourceRange)
+static int TokenRange_selectStmtToken2(KonohaContext *kctx, TokenRange *tokens, TokenRange *source)
+{
+	int currentIdx, sourceEndIdx = source->endIdx, isPreviousIndent = false;
+	for(currentIdx = source->beginIdx; currentIdx < sourceEndIdx; currentIdx++) {
+		kToken *tk = source->tokenList->tokenItems[currentIdx];
+		if(kToken_is(StatementSeparator, tk)) {
+			source->endIdx = currentIdx + 1;
+			break;
+		}
+		if(isPreviousIndent && tk->unresolvedTokenType == TokenType_INDENT) {
+			source->endIdx = currentIdx;
+			break;
+		}
+		isPreviousIndent = (tk->unresolvedTokenType == TokenType_INDENT);
+	}
+	KLIB kArray_clear(kctx, tokens->tokenList, tokens->beginIdx);
+	tokens->endIdx = 0;
+	tokens->errToken = NULL;
+	tokens->stopChar = 0;
+	TokenRange_resolved2(kctx, tokens, source, source->beginIdx);
+	source->beginIdx = source->endIdx;
+	source->endIdx = sourceEndIdx;
+	return currentIdx;
+}
+
+static kstatus_t TokenRange_eval(KonohaContext *kctx, TokenRange *source)
 {
 	kstatus_t status = K_CONTINUE;
 	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Static, 0, 0, NULL);
 	PUSH_GCSTACK(mtd);
 	KLIB kMethod_setParam(kctx, mtd, TY_Object, 0, NULL);
-	int i = sourceRange->beginIdx, indent = 0;
-	kBlock *singleBlock = GCSAFE_new(Block, sourceRange->ns);
-	while(i < sourceRange->endIdx) {
-		TokenRange rangeBuf, *range = new_TokenStackRange(kctx, sourceRange, &rangeBuf);
-		sourceRange->beginIdx = i;
-		i = TokenRange_selectStmtToken(kctx, range, sourceRange, SemiColon, &indent);
-		if(range->errToken != NULL) return K_BREAK;
-		if(range->endIdx > range->beginIdx) {
-			KLIB kArray_clear(kctx, singleBlock->stmtList, 0);
-			kBlock_addNewStmt(kctx, singleBlock, range);
-			TokenRange_pop(kctx, range);
-			status = kBlock_genEvalCode(kctx, singleBlock, mtd);
-			if(status != K_CONTINUE) break;
+	kBlock *singleBlock = GCSAFE_new(Block, source->ns);
+	TokenRange tokens = {source->ns, source->tokenList, kArray_size(source->tokenList), 0, {NULL}, 0};
+	while(source->beginIdx < source->endIdx) {
+		if(TokenRange_selectStmtToken2(kctx, &tokens, source)) {
+			if(tokens.errToken != NULL) return K_BREAK;
+			while(tokens.beginIdx < tokens.endIdx) {
+				KLIB kArray_clear(kctx, singleBlock->stmtList, 0);
+				kBlock_addNewStmt2(kctx, singleBlock, &tokens);
+				if(kArray_size(singleBlock->stmtList) > 0) {
+					status = kBlock_genEvalCode(kctx, singleBlock, mtd);
+					if(status != K_CONTINUE) break;
+				}
+			}
 		}
 	}
 	return status;

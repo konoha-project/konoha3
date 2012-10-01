@@ -758,8 +758,6 @@ static kbool_t TokenRange_paramMacro(KonohaContext *kctx, TokenRange *tokens, kA
 	return false;
 }
 
-//define Inc(VAR, ITR) :
-
 /* ------------------------------------------------------------------------ */
 
 static int TokenRange_addGroup(KonohaContext *kctx, TokenRange *tokens, TokenRange *source, int currentIdx, kToken *openToken)
@@ -829,10 +827,6 @@ static int TokenRange_resolved2(KonohaContext *kctx, TokenRange *tokens, TokenRa
 
 			}
 			else {
-//				SugarSyntax *syn = SYN_(tokens->ns, tk->unresolvedTokenType);
-//				if(syn != NULL) {
-//					tk->resolvedSyntaxInfo = syn;
-//				}
 				tk->resolvedSyntaxInfo = SYN_(tokens->ns, tk->unresolvedTokenType);
 				DBG_ASSERT(tk->resolvedSyntaxInfo != NULL);
 			}
@@ -986,6 +980,18 @@ static int TokenRange_skipAnnotation(KonohaContext *kctx, TokenRange *range, int
 	return currentIdx;
 }
 
+static int TokenRange_skipStatementSeparator(TokenRange *tokens, int currentIdx)
+{
+	for(; currentIdx < tokens->endIdx; currentIdx++) {
+		kToken *tk = tokens->tokenList->tokenItems[currentIdx];
+		if(!kToken_is(StatementSeparator, tk)) {
+			break;
+		}
+	}
+	tokens->beginIdx = currentIdx;
+	return currentIdx;
+}
+
 static int kStmt_addAnnotation2(KonohaContext *kctx, kStmtVar *stmt, TokenRange *range, int currentIdx, int *indentRef)
 {
 	for(currentIdx = range->beginIdx; currentIdx < range->endIdx; currentIdx++) {
@@ -1011,9 +1017,10 @@ static int kStmt_addAnnotation2(KonohaContext *kctx, kStmtVar *stmt, TokenRange 
 	return currentIdx;
 }
 
-static int kBlock_addNewStmt2(KonohaContext *kctx, kBlock *bk, TokenRange *tokens)
+static void kBlock_addNewStmt2(KonohaContext *kctx, kBlock *bk, TokenRange *tokens)
 {
-	int currentIdx = TokenRange_skipAnnotation(kctx, tokens, tokens->beginIdx);
+	int currentIdx = TokenRange_skipStatementSeparator(tokens, tokens->beginIdx);
+	currentIdx = TokenRange_skipAnnotation(kctx, tokens, tokens->beginIdx);
 	if(currentIdx < tokens->endIdx) {
 		int indent = 0;
 		kStmtVar *stmt = new_(StmtVar, 0);
@@ -1023,22 +1030,10 @@ static int kBlock_addNewStmt2(KonohaContext *kctx, kBlock *bk, TokenRange *token
 		currentIdx = kStmt_parseBySyntaxRule2(kctx, stmt, indent, tokens->tokenList, currentIdx, tokens->endIdx);
 		if(currentIdx == -1) {
 			DBG_ASSERT(Stmt_isERR(stmt));
-			return tokens->endIdx;
+			tokens->beginIdx = tokens->endIdx;
 		}
 	}
-	return currentIdx;
-}
-
-static int TokenRange_skipStatementSeparator(TokenRange *tokens, int currentIdx)
-{
-	for(; currentIdx < tokens->endIdx; currentIdx++) {
-		kToken *tk = tokens->tokenList->tokenItems[currentIdx];
-		if(!kToken_is(StatementSeparator, tk)) {
-			break;
-		}
-	}
-	tokens->beginIdx = currentIdx;
-	return currentIdx;
+	tokens->beginIdx = TokenRange_skipStatementSeparator(tokens, currentIdx);
 }
 
 static kBlock *new_kBlock2(KonohaContext *kctx, kStmt *parent, TokenRange *source)
@@ -1049,10 +1044,8 @@ static kBlock *new_kBlock2(KonohaContext *kctx, kStmt *parent, TokenRange *sourc
 	}
 	TokenRange tokens = {source->ns, source->tokenList, kArray_size(source->tokenList)};
 	TokenRange_resolved2(kctx, &tokens, source, source->beginIdx);
-	int currentIdx = TokenRange_skipStatementSeparator(&tokens, tokens.beginIdx);
-	while(currentIdx < tokens.endIdx) {
-		currentIdx = kBlock_addNewStmt2(kctx, bk, &tokens);
-		currentIdx = TokenRange_skipStatementSeparator(&tokens, currentIdx);
+	while(tokens.beginIdx < tokens.endIdx) {
+		kBlock_addNewStmt2(kctx, bk, &tokens);
 	}
 	return (kBlock*)bk;
 }
