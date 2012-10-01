@@ -658,7 +658,6 @@ static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, Token
 	return true;
 }
 
-static kbool_t TokenSequence_resolved(KonohaContext *kctx, TokenSequence *tokens, TokenSequence *sourceRange);
 static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, TokenSequence *sourceRange, int start);
 
 static void kNameSpace_parseSugarRule2(KonohaContext *kctx, kNameSpace *ns, const char *rule, kfileline_t uline, kArray *ruleList)

@@ -1191,7 +1191,6 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 	DBG_ASSERT(SYM_("true") == KW_true);
 	DBG_ASSERT(SYM_("return") == KW_return);
 	DBG_ASSERT(SYM_("new") == MN_new);
-
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ TOKEN(ERR), .flag = SYNFLAG_StmtBreakExec, },
 		{ PATTERN(Symbol),  PatternMatch_(MethodName), ParseExpr_(Term), ExprTyCheck_(Symbol),},

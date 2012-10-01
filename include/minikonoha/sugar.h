@@ -35,24 +35,13 @@
 extern "C" {
 #endif
 
-#define TokenType_ERR          KW_TokenPattern
-#define TokenType_NONE         0
-#define TokenType_INDENT       1
-#define TokenType_SYMBOL       KW_SymbolPattern
-#define TokenType_TEXT         KW_TextPattern
-#define TokenType_INT          KW_NumberPattern
-#define TokenType_CODE         KW_BlockPattern
-
-#define KW_END  ((ksymbol_t)-1)
-#define KW_ERR  (((ksymbol_t)0)|0) /**/
+#define KW_END              ((ksymbol_t)-1)
+#define KW_ERR              (((ksymbol_t)0)|0) /**/
 #define KW_ExprPattern      (((ksymbol_t)1)|KW_PATTERN) /*$Expr*/
 #define KW_SymbolPattern    (((ksymbol_t)2)|KW_PATTERN) /*$Symbol*/
 #define KW_TextPattern      (((ksymbol_t)3)|KW_PATTERN) /*$Text*/
 #define KW_NumberPattern    (((ksymbol_t)4)|KW_PATTERN) /*$Number*/
 #define KW_TypePattern      (((ksymbol_t)5)|KW_PATTERN) /*$Type*/
-
-//#define KW_ConstPattern     (((ksymbol_t)3)|KW_PATTERN) /*$Const*/
-//#define KW_FloatPattern     (((ksymbol_t)6)|KW_PATTERN) /*$Float*/
 
 #define KW_ParenthesisGroup (((ksymbol_t)6)) /*()*/
 #define KW_BracketGroup     (((ksymbol_t)7)) /*[]*/
@@ -64,7 +53,22 @@ extern "C" {
 #define KW_ParamPattern     (((ksymbol_t)10)|KW_PATTERN) /*$Param*/
 #define KW_TokenPattern     (((ksymbol_t)11)|KW_PATTERN) /*$Token*/
 
-#define KW_StmtConstDecl       KW_ConstPattern
+typedef enum {
+//#define TokenType_ERR          KW_TokenPattern
+//#define TokenType_NONE         0
+//#define TokenType_INDENT       1
+//#define TokenType_SYMBOL       KW_SymbolPattern
+//#define TokenType_TEXT         KW_TextPattern
+//#define TokenType_INT          KW_NumberPattern
+//#define TokenType_CODE         KW_BlockPattern
+	TokenType_INDENT = 1,
+	TokenType_SYMBOL = KW_SymbolPattern,
+	TokenType_TEXT   = KW_TextPattern,
+	TokenType_INT    = KW_NumberPattern,
+	TokenType_CODE   = KW_BlockPattern,
+	TokenType_ERR    = KW_TokenPattern,
+} TokenType;
+
 #define KW_StmtTypeDecl        KW_TypePattern
 #define KW_StmtMethodDecl      KW_MethodDeclPattern
 #define KW_ExprOperator        KW_ParamPattern
@@ -92,17 +96,13 @@ extern "C" {
 #define KW_ATMARK  MN_Annotation
 #define KW_COLON   (17+KW_DOT)
 
-// #define KW_void (((ksymbol_t)32)|0) /*void*/
-
-//#define KW_void      32
-//#define KW_boolean   (1+KW_void)
-//#define KW_int       (2+KW_void)
 #define KW_void      (30)
 #define KW_true      (0+KW_void)
 #define KW_false     (1+KW_void)
 #define KW_if        (2+KW_void)
 #define KW_else      (3+KW_void)
 #define KW_return    (4+KW_void)
+
 // reserved
 //#define MN_new       (8+KW_void)
 #define FN_this      FN_("this")
