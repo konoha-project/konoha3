@@ -472,8 +472,9 @@ static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, T
 		}
 		KLIB kArray_add(kctx, tokens->tokenList, tk);
 	}
-	if(tokens->stopChar != 0 && tokens->openToken != NULL) {
+	if(tokens->stopChar != 0) {
 		char buf[2] = {tokens->stopChar, 0};
+		DBG_ASSERT(tokens->openToken != NULL);
 		ERROR_UnclosedToken(kctx, (kTokenVar*)tokens->openToken, (const char*)buf);
 	}
 	TokenSequence_end(kctx, tokens);
