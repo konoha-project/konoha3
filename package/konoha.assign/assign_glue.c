@@ -66,7 +66,7 @@ static KMETHOD ParseExpr_SelfAssign(KonohaContext *kctx, KonohaStack *sfp)
 			{0, NULL, 0, 0},
 		};
 		macroRange->macroSet = macroSet;
-		SUGAR TokenSequence_resolved(kctx, newexprRange, macroRange);
+		SUGAR TokenSequence_resolved(kctx, newexprRange, macroRange, macroRange->beginIdx);
 //		KdumpTokenSequence(kctx, "replaced", newexprRange);
 
 		kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, newexprRange->tokenList, newexprRange->beginIdx, newexprRange->endIdx);

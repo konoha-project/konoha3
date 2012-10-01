@@ -198,7 +198,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kNameSpace_setTokenizeFunc = kNameSpace_setTokenizeFunc;
 	mod->TokenSequence_tokenize        = TokenSequence_tokenize;
 	mod->TokenSequence_eval            = TokenSequence_eval;
-	mod->TokenSequence_resolved        = TokenSequence_resolved;
+	mod->TokenSequence_resolved        = TokenSequence_resolved2;
 	mod->kStmt_parseTypePattern     = kStmt_parseTypePattern;
 	mod->kToken_transformToBraceGroup = kToken_transformToBraceGroup;
 	mod->kStmt_setParsedObject      = kStmt_setParsedObject;

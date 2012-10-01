@@ -501,7 +501,7 @@ typedef struct {
 	TokenSequence* (*new_TokenStackRange)(KonohaContext *, TokenSequence *range, TokenSequence *bufRange);
 	void        (*kNameSpace_setTokenizeFunc)(KonohaContext *, kNameSpace *, int ch, TokenizeFunc, kFunc *, int isAddition);
 	void        (*TokenSequence_tokenize)(KonohaContext *, TokenSequence *, const char *, kfileline_t);
-	kbool_t     (*TokenSequence_resolved)(KonohaContext *, TokenSequence *, TokenSequence *);
+	int         (*TokenSequence_resolved)(KonohaContext *, TokenSequence *, TokenSequence *, int);
 	kstatus_t   (*TokenSequence_eval)(KonohaContext *, TokenSequence *);
 	int         (*kStmt_parseTypePattern)(KonohaContext *, kStmt *, kNameSpace *, kArray *, int , int , KonohaClass **classRef);
 	void        (*kToken_transformToBraceGroup)(KonohaContext *, kTokenVar *, kNameSpace *);

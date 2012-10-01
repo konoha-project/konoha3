@@ -88,13 +88,13 @@ static kBlock *new_MacroBlock(KonohaContext *kctx, kStmt *stmt, kToken *Iterator
 {
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	kArray *tokenList = KonohaContext_getSugarContext(kctx)->preparedTokenList;
-	TokenSequence macroRangeBuf, *macroRange = SUGAR new_TokenListRange(kctx, ns, tokenList, &macroRangeBuf);
+	TokenSequence macroRangeBuf, *macro = SUGAR new_TokenListRange(kctx, ns, tokenList, &macroRangeBuf);
 	/* FIXME(imasahiro)
 	 * we need to implement template as Block
 	 * "T _ = E; if(_.hasNext()) { N = _.next(); }"
 	 *                           ^^^^^^^^^^^^^^^^^
 	 */
-	SUGAR TokenSequence_tokenize(kctx, macroRange, "T _ = E; if(_.hasNext()) N = _.next();", 0);
+	SUGAR TokenSequence_tokenize(kctx, macro, "T _ = E; if(_.hasNext()) N = _.next();", 0);
 	MacroSet macroSet[4] = {{0, NULL, 0, 0}};
 	MacroSet_setTokenAt(kctx, macroSet, 0, tokenList, "T", IteratorTypeToken, NULL);
 	MacroSet_setTokenAt(kctx, macroSet, 1, tokenList, "E", IteratorExprToken, NULL);
@@ -104,9 +104,9 @@ static kBlock *new_MacroBlock(KonohaContext *kctx, kStmt *stmt, kToken *Iterator
 	else {
 		MacroSet_setTokenAt(kctx, macroSet, 2, tokenList, "N", TypeToken, VariableToken, NULL);
 	}
-	macroRange->macroSet = macroSet;
+	macro->macroSet = macroSet;
 	TokenSequence expandedRangeBuf, *expandedRange = SUGAR new_TokenListRange(kctx, ns, tokenList, &expandedRangeBuf);
-	SUGAR TokenSequence_resolved(kctx, expandedRange, macroRange);
+	SUGAR TokenSequence_resolved(kctx, expandedRange, macro, macro->beginIdx);
 	return SUGAR new_kBlock(kctx, stmt, expandedRange);
 }
 

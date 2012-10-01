@@ -659,13 +659,14 @@ static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, Token
 }
 
 static kbool_t TokenSequence_resolved(KonohaContext *kctx, TokenSequence *tokens, TokenSequence *sourceRange);
+static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, TokenSequence *sourceRange, int start);
 
 static void kNameSpace_parseSugarRule2(KonohaContext *kctx, kNameSpace *ns, const char *rule, kfileline_t uline, kArray *ruleList)
 {
 	TokenSequence rawRangeBuf, *rawRange = new_TokenListRange(kctx, ns, KonohaContext_getSugarContext(kctx)->preparedTokenList, &rawRangeBuf);
 	TokenSequence_tokenize(kctx, rawRange, rule, uline);
 	TokenSequence sourceRangeBuf, *sourceRange = new_TokenStackRange(kctx, rawRange, &sourceRangeBuf);
-	TokenSequence_resolved(kctx, sourceRange, rawRange);
+	TokenSequence_resolved2(kctx, sourceRange, rawRange, rawRange->beginIdx);
 	KdumpTokenSequence(kctx, "resolved", sourceRange);
 	kArray_addSyntaxRule(kctx, ruleList, sourceRange);
 	TokenSequence_pop(kctx, rawRange);

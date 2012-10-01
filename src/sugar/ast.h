@@ -422,24 +422,6 @@ static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns
 	return syn;
 }
 
-static kbool_t kStmt_parseBySyntaxRule(KonohaContext *kctx, kStmt *stmt, kArray *tokenList, int beginIdx, int endIdx)
-{
-	kbool_t ret = false;
-	kNameSpace *ns = Stmt_nameSpace(stmt);
-	SugarSyntax *stmtSyntax = kNameSpace_getSyntaxRule(kctx, ns, tokenList, beginIdx, endIdx);
-	SugarSyntax *currentSyntax = stmtSyntax;
-	while(currentSyntax != NULL) {
-		if(currentSyntax->syntaxRuleNULL != NULL) {
-			TokenSequence nrule = {ns, currentSyntax->syntaxRuleNULL, 0, kArray_size(currentSyntax->syntaxRuleNULL)};
-			((kStmtVar*)stmt)->syn = stmtSyntax;
-			ret = (kStmt_matchSyntaxRule(kctx, stmt, tokenList, beginIdx, endIdx, &nrule, 0) != -1);
-			return ret;
-		}
-		currentSyntax = currentSyntax->parentSyntaxNULL;
-	}
-	return ret;
-}
-
 // ---------------------------------------------------------------------------
 
 static int TokenSequence_addResolvedToken(KonohaContext *kctx, TokenSequence *range, TokenSequence *sourceRange, int currentIdx);
@@ -603,89 +585,6 @@ static kbool_t TokenSequence_resolved(KonohaContext *kctx, TokenSequence *range,
 	return (range->errToken == NULL);
 }
 
-static int kStmt_addAnnotation(KonohaContext *kctx, kStmt *stmt, TokenSequence *range)
-{
-	int i;
-	for(i = range->beginIdx; i < range->endIdx; i++) {
-		kToken *tk = range->tokenList->tokenItems[i];
-		if(!MN_isAnnotation(tk->resolvedSymbol)) break;
-		if(i + 1 < range->endIdx) {
-			kToken *nextToken = range->tokenList->tokenItems[i+1];
-			kObject *value = UPCAST(K_TRUE);
-			if(nextToken->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
-				value = (kObject*)kStmt_parseExpr(kctx, stmt, nextToken->subTokenList, 0, kArray_size(nextToken->subTokenList));
-				i++;
-			}
-			if(value != NULL) {
-				KLIB kObject_setObject(kctx, stmt, tk->resolvedSymbol, O_typeId(value), value);
-			}
-		}
-	}
-	return i;
-}
-
-static kStmt* kBlock_addNewStmt(KonohaContext *kctx, kBlock *bk, TokenSequence *range)
-{
-	kStmtVar *stmt = new_(StmtVar, 0);
-	KLIB kArray_add(kctx, bk->stmtList, stmt);
-	KINITp(stmt, stmt->parentBlockNULL, bk);
-	if(range->errToken != NULL) {
-		kStmt_toERR(kctx, stmt, range->errToken->text);
-	}
-	else {
-		int currentIdx = kStmt_addAnnotation(kctx, stmt, range);
-		if(currentIdx < range->endIdx) {
-			stmt->uline = range->tokenList->tokenItems[currentIdx]->uline;
-			kStmt_parseBySyntaxRule(kctx, stmt, range->tokenList, currentIdx, range->endIdx);
-		}
-	}
-	return stmt;
-}
-
-static kbool_t SemiColon(KonohaContext *kctx, TokenSequence *range, TokenSequence *sourceRange, int *currentIdxRef, int *indentRef)
-{
-	kbool_t found = false;
-	kToken *tk = sourceRange->tokenList->tokenItems[*currentIdxRef];
-	if(tk->topCharHint == ';') {
-		found = true;
-		do {
-			*currentIdxRef += 1;
-			if(!(*currentIdxRef < sourceRange->endIdx)) break;
-			tk = sourceRange->tokenList->tokenItems[*currentIdxRef];
-		}while(tk->topCharHint == ';');
-	}
-	if(tk->unresolvedTokenType == TokenType_INDENT) {
-//		DBG_P("!! previous=%d, indent=%d", indentRef[0], tk->indent);
-		found = (kArray_size(range->tokenList) > range->beginIdx);
-	}
-	return found;
-}
-
-static kBlock *new_kBlock(KonohaContext *kctx, kStmt *parent, TokenSequence *sourceRange, CheckEndOfStmtFunc2 isEndOfStmt)
-{
-	kBlockVar *bk = GCSAFE_new(BlockVar, sourceRange->ns);
-	if(parent != NULL) {
-		KINITv(bk->parentStmtNULL, parent);
-	}
-	if(isEndOfStmt == NULL) {
-		isEndOfStmt = SemiColon;
-	}
-	int i = sourceRange->beginIdx, indent = 0;
-	while(i < sourceRange->endIdx) {
-		TokenSequence rangeBuf, *range = new_TokenStackRange(kctx, sourceRange, &rangeBuf);
-		sourceRange->beginIdx = i;
-		i = TokenSequence_selectStmtToken(kctx, range, sourceRange, isEndOfStmt, &indent);
-		if(range->errToken != NULL) {
-			kBlock_addNewStmt(kctx, bk, range);
-			break;
-		}
-		if(range->endIdx > range->beginIdx) {
-			kBlock_addNewStmt(kctx, bk, range);
-		}
-	}
-	return (kBlock*)bk;
-}
-
 static void kToken_transformToBraceGroup(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns)
 {
 	if(tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
@@ -697,25 +596,6 @@ static void kToken_transformToBraceGroup(KonohaContext *kctx, kTokenVar *tk, kNa
 		tk->resolvedSyntaxInfo = SYN_(ns, KW_BraceGroup);
 		RESET_GCSTACK();
 	}
-}
-
-static kBlock* kStmt_getBlock(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, ksymbol_t kw, kBlock *def)
-{
-	kBlock *bk = (kBlock*)kStmt_getObjectNULL(kctx, stmt, kw);
-	if(bk == NULL) return def;
-	if(IS_Token(bk)) {
-		kToken *tk = (kToken*)bk;
-		if(ns == NULL) ns = Stmt_nameSpace(stmt);
-		if (tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
-			kToken_transformToBraceGroup(kctx, (kTokenVar*)tk, ns);
-		}
-		if (tk->resolvedSyntaxInfo->keyword == KW_BraceGroup) {
-			TokenSequence range = {ns, tk->subTokenList, 0, kArray_size(tk->subTokenList)};
-			bk = new_kBlock(kctx, stmt, &range, NULL);
-			KLIB kObject_setObject(kctx, stmt, kw, TY_Block, bk);
-		}
-	}
-	return (IS_Block(bk)) ? bk : def;
 }
 
 /* ------------------------------------------------------------------------ */
@@ -1049,6 +929,26 @@ static kBlock *new_kBlock2(KonohaContext *kctx, kStmt *parent, TokenSequence *so
 	}
 	return (kBlock*)bk;
 }
+
+static kBlock* kStmt_getBlock(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, ksymbol_t kw, kBlock *def)
+{
+	kBlock *bk = (kBlock*)kStmt_getObjectNULL(kctx, stmt, kw);
+	if(bk == NULL) return def;
+	if(IS_Token(bk)) {
+		kToken *tk = (kToken*)bk;
+		if(ns == NULL) ns = Stmt_nameSpace(stmt);
+		if (tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
+			kToken_transformToBraceGroup(kctx, (kTokenVar*)tk, ns);
+		}
+		if (tk->resolvedSyntaxInfo->keyword == KW_BraceGroup) {
+			TokenSequence range = {ns, tk->subTokenList, 0, kArray_size(tk->subTokenList)};
+			bk = new_kBlock2(kctx, stmt, &range);
+			KLIB kObject_setObject(kctx, stmt, kw, TY_Block, bk);
+		}
+	}
+	return (IS_Block(bk)) ? bk : def;
+}
+
 
 /* ------------------------------------------------------------------------ */
 
