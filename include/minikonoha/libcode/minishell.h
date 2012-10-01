@@ -116,7 +116,7 @@ static void shell(KonohaContext *kctx)
 		kstatus_t status = readstmt(kctx, &wb, &inc);
 		if(status == K_BREAK) break;
 		if(status == K_CONTINUE && Kwb_bytesize(&wb) > 0) {
-			status = konoha_eval((KonohaContext*)kctx, KLIB Kwb_top(kctx, &wb, 1), uline);
+			status = (kstatus_t)konoha_eval((KonohaContext*)kctx, KLIB Kwb_top(kctx, &wb, 1), uline);
 			uline += inc;
 			KLIB Kwb_free(&wb);
 			if(status != K_FAILED) {
@@ -134,7 +134,13 @@ static void show_version(KonohaContext *kctx)
 {
 	int i;
 	PLATAPI printf_i(K_PROGNAME " " K_VERSION " (%s) (%s, %s)\n", K_CODENAME, K_REVISION, __DATE__);
+#if defined(__GNUC__)
 	PLATAPI printf_i("[gcc %s]\n", __VERSION__);
+#elif defined(_MSC_VER)
+	PLATAPI printf_i("[Microsoft Visual C++ %s]\n", _MSC_VER);
+#elif defined(__clang__)
+	PLATAPI printf_i("[clang %s]\n", __VERSION__);
+#endif
 	PLATAPI printf_i("options:");
 	for(i = 0; i < KonohaModule_MAXSIZE; i++) {
 		if(kctx->modshare[i] != NULL) {

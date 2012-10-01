@@ -39,7 +39,9 @@ extern int verbose_debug;
 } /* extern "C" */
 #endif
 
-#ifdef __MINGW32__
+#if defined(_MSC_VER)
+#include <minikonoha/platform_msvc.h>
+#elif defined(__MINGW32__)
 #include <minikonoha/platform_mingw.h>
 #else
 #include <minikonoha/platform_posix.h>
