@@ -415,6 +415,7 @@ static int TokenSequence_addGroup(KonohaContext *kctx, TokenSequence *tokens, Ma
 		int pushStopChar = source->SourceConfig.stopChar;
 		source->SourceConfig.openToken = openToken;
 		source->SourceConfig.stopChar = closech;
+		nested.TargetPolicy.RemovingIndent = true;
 		int returnIdx = TokenSequence_resolved2(kctx, &nested, macro, source, currentIdx);
 		source->SourceConfig.openToken = pushOpenToken;
 		source->SourceConfig.stopChar = pushStopChar;
