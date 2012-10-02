@@ -994,9 +994,6 @@ static KMETHOD StmtTyCheck_TypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_StmtTyCheck(stmt, gma);
 	kToken *tk  = SUGAR kStmt_getToken(kctx, stmt, KW_TypePattern, NULL);
 	kExpr  *expr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL);
-//	if(tk == NULL || !Token_isVirtualTypeLiteral(tk) || expr == NULL) {
-//		RETURNb_(false);
-//	}
 	RETURNb_(kStmt_declType(kctx, stmt, gma, Token_typeLiteral(tk), expr, NULL, TypeDeclLocalVariable, &stmt));
 }
 
