@@ -549,7 +549,7 @@ static kMethod *lookupOverloadedMethod(KonohaContext *kctx, kStmt *stmt, kExpr *
 {
 	KonohaClass *thisClass = CT_(expr->cons->exprItems[1]->ty);
 	size_t i, psize = kArray_size(expr->cons) - 2;
-	kparamtype_t p[psize];
+	kparamtype_t *p = ALLOCA(kparamtype_t, psize);
 	kParam *pa = Method_param(mtd);
 	for(i = 0; i < psize; i++) {
 		size_t n = i + 2;
@@ -1052,7 +1052,7 @@ static KMETHOD StmtTyCheck_ParamsDecl(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	else if(IS_Block(params)) {
 		size_t i, psize = kArray_size(params->stmtList);
-		kparamtype_t p[psize];
+		kparamtype_t *p = ALLOCA(kparamtype_t, psize);
 		for(i = 0; i < psize; i++) {
 			p[i].ty = TY_void; p[i].fn = 0;
 			kStmt *stmt = params->stmtList->stmtItems[i];

@@ -30,7 +30,9 @@
 extern "C"{
 #endif
 
-typedef struct kMapVar kMap;
+//typedef struct kMapVar kMap;
+#define kMap struct kMapVar
+
 struct kMapVar {
 	KonohaObjectHeader h;
 	KUtilsHashMap *map;
