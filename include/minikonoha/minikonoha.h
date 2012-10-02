@@ -210,8 +210,6 @@ typedef struct logconf_t {
 	void *formatter; // for precompiled formattings
 } logconf_t;
 
-typedef struct GcContext GcContext;
-
 struct PlatformApiVar {
 	// settings
 	const char *name;
@@ -220,20 +218,9 @@ struct PlatformApiVar {
 	// system info
 	const char* (*getenv_i)(const char*);
 
-	// memory
-	void*   (*malloc_i)(size_t);
-	void    (*free_i)(void *);
-
-	const char* GC_NAME;
-	void    (*new_GcContext)(GcContext *gcctx);
-	void    (*free_GcContext)(GcContext *gcctx);
-	void    (*allocObject)(GcContext *gcctx, size_t);
-	int     (*isObject)(GcContext *gcctx, void *);
-	void    (*assignObject)(GcContext *gcctx, void *dst, void *val);
-	void    (*setFieldObject)(GcContext *gcctx, void *parent, void *dst, void *val);
-	void    (*reftraceObject)(GcContext *gcctx, void *val);
-	void    (*invokeGC)(GcContext *gcctx);
-	void    (*refdecObject)(GcContext *gcctx, void *val);  // for the future (RCGC)
+	/* memory allocation / deallocation */
+	void *(*malloc_i)(size_t size);
+	void  (*free_i)  (void *ptr);
 
 	// setjmp
 	int     (*setjmp_i)(jmpbuf_i);
@@ -608,6 +595,7 @@ struct KonohaContextVar {
 	KonohaStackRuntimeVar            *stack;
 	KonohaModule                    **modshare;
 	KonohaModuleContext             **modlocal;
+	struct GcContext *gcContext;
 };
 
 // share, local
@@ -1395,15 +1383,25 @@ struct KonohaPackageVar {
 // kklib
 
 struct klogconf_t;
+typedef struct GcContext GcContext;
+struct kObjectVisitor;
 
 struct KonohaLibVar {
 	void* (*Kmalloc)(KonohaContext*, size_t);
 	void* (*Kzmalloc)(KonohaContext*, size_t);
 	void  (*Kfree)(KonohaContext*, void *, size_t);
 
-	void  (*Kgc_invoke)(KonohaContext *, KonohaStack *esp);
+	/* Garbage Collection API */
+	GcContext *(*KnewGcContext)(KonohaContext *kctx);
+	void (*KdeleteGcContext)(GcContext *gc);
+	void (*KscheduleGC)     (GcContext *gc);
+	struct kObjectVar *(*KallocObject)(GcContext *gc, KonohaClass *klass);
+	bool (*KisObject)   (GcContext *gc, void *ptr);
+	void (*KvisitObject)(struct kObjectVisitor *visitor, struct kObjectVar *obj);
+
 	kObjectVar **(*Kobject_reftail)(KonohaContext *, size_t size);
 	void  (*Kwrite_barrier)(KonohaContext *, kObject *);
+	void (*KsetObjectField)(kObject *parent, kObjectVar **oldValPtr, kObjectVar *newVal);
 
 	void  (*Karray_init)(KonohaContext *, KUtilsGrowingArray *, size_t);
 	void  (*Karray_resize)(KonohaContext*, KUtilsGrowingArray *, size_t);
@@ -1655,9 +1653,7 @@ typedef struct {
 } while (0)
 
 #define KNH_SAFEPOINT(kctx, sfp) do {\
-	if (kctx->safepoint != 0) {\
-		KLIB Kgc_invoke(kctx, sfp);\
-	}\
+	KLIB KscheduleGC(kctx->gcContext);\
 } while (0)
 
 // method macro
