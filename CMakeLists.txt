@@ -315,7 +315,7 @@ macro(create_package_project _PKGNAME)
 	set(LIB  "${_PACKAGE_NAME}_glue")
 	set(_PACKAGE_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 	set(_PACKAGE_STRING  ${CMAKE_PROJECT_NAME}-${_PACKAGE_VERSION})
-	set(_KONOHA_PACKAGE_DIR minikonoha/package/${KONOHA_VERSION}/${PROJECT_NAME})
+	set(_KONOHA_PACKAGE_DIR lib/minikonoha/${SO_VERSION}/package/${KONOHA_VERSION}/${PROJECT_NAME})
 	set(CMAKE_C_FLAGS_${uppercase_CMAKE_BUILD_TYPE}
 		"${CMAKE_C_FLAGS_${uppercase_CMAKE_BUILD_TYPE}} ${PACKAGE_C_FLAGS}")
 	set(CMAKE_CXX_FLAGS_${uppercase_CMAKE_BUILD_TYPE}
@@ -439,12 +439,13 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/konoha.sh
 	DESTINATION bin
 	RENAME konoha
 	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-## Install files
-## /usr/local/bin/konoha
-## /usr/local/bin/minikonoha
-## /usr/local/lib/libminikonoha.dylib
-## /usr/local/lib/minikonoha/0.1/package/konoha.while/while_glue.{k,dylib}
-## /usr/local/include/minikonoha/*.h
+
+# Install files
+# ${CMAKE_INSTALL_PREFIX}/bin/konoha
+# ${CMAKE_INSTALL_PREFIX}/bin/minikonoha
+# ${CMAKE_INSTALL_PREFIX}/lib/libminikonoha.dylib
+# ${CMAKE_INSTALL_PREFIX}/lib/minikonoha/${SO_VERSION}/package/konoha.while/while_glue.{k,dylib}
+# ${CMAKE_INSTALL_PREFIX}/include/minikonoha/*.h
 
 install(TARGETS minikonoha minikonoha_bin
 		RUNTIME DESTINATION bin

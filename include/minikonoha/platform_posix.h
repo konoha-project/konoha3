@@ -371,7 +371,7 @@ static const char* formatPackagePath(char *buf, size_t bufsiz, const char *packa
 		fclose(fp);
 		return (const char*)buf;
 	}
-	snprintf(buf, bufsiz, K_PREFIX "/minikonoha/package" "/%s/%s%s", packageName, packname(packageName), ext);
+	snprintf(buf, bufsiz, K_PREFIX "/lib/minikonoha/" K_VERSION "/package" "/%s/%s%s", packageName, packname(packageName), ext);
 #endif
 	fp = fopen(buf, "r");
 	if(fp != NULL) {
