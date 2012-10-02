@@ -143,6 +143,11 @@ struct TokenizerEnv {
 		(void)TK; (void)STR; (void)UL;\
 *****/
 
+#define VAR_TRACE
+#ifndef VAR_TRACE
+#define VAR_TRACE DBG_P("tracing.. file=%s, line=%d", __FILE__, __LINE__)
+#endif
+
 // int PatternMatch(Stmt stmt, int classNameSymbol, Token[] toks, int s, int e)
 #define VAR_PatternMatch(STMT, NAME, TLS, S, E)\
 		kStmt *STMT = (kStmt*)sfp[1].asObject;\
@@ -150,7 +155,7 @@ struct TokenizerEnv {
 		kArray *TLS = (kArray*)sfp[3].o;\
 		int S = (int)sfp[4].intValue;\
 		int E = (int)sfp[5].intValue;\
-		(void)STMT; (void)NAME; (void)TLS; (void)S; (void)E
+		VAR_TRACE; (void)STMT; (void)NAME; (void)TLS; (void)S; (void)E
 
 // Expr ParseExpr(Stmt stmt, Token[] tokenList, int s, int c, int e)
 #define VAR_ParseExpr(STMT, TLS, S, C, E)\
@@ -160,22 +165,21 @@ struct TokenizerEnv {
 		int S = (int)sfp[3].intValue;\
 		int C = (int)sfp[4].intValue;\
 		int E = (int)sfp[5].intValue;\
-		(void)syn; (void)STMT; (void)TLS; (void)S; (void)C; (void)E
+		VAR_TRACE; (void)syn; (void)STMT; (void)TLS; (void)S; (void)C; (void)E
 
 // boolean StmtTyCheck(Stmt stmt, Gamma gma)
 #define VAR_StmtTyCheck(STMT, GMA)\
 		kStmt *STMT = (kStmt*)sfp[1].asObject;\
 		kGamma *GMA = (kGamma*)sfp[2].o;\
-		(void)STMT; (void)GMA
+		VAR_TRACE; (void)STMT; (void)GMA
 
 // Expr ExprTyCheck(Stmt stmt, Expr expr, Gamma gma, int typeid)
 #define VAR_ExprTyCheck(STMT, EXPR, GMA, TY) \
-		DBG_P("calling..");\
 		kStmt *STMT = (kStmt*)sfp[1].asObject;\
 		kExpr *EXPR = (kExpr*)sfp[2].o;\
 		kGamma *GMA = (kGamma*)sfp[3].o;\
 		ktype_t TY = (ktype_t)sfp[4].intValue;\
-		(void)STMT; (void)EXPR; (void)GMA; (void)TY
+		VAR_TRACE; (void)STMT; (void)EXPR; (void)GMA; (void)TY
 
 typedef const struct SugarSyntaxVar   SugarSyntax;
 typedef struct SugarSyntaxVar         SugarSyntaxVar;

@@ -956,6 +956,7 @@ static kbool_t kStmt_declType(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kty
 			// this is neccesarry to avoid 'int a = a + 1;';
 			return false;
 		}
+		DBG_P("ty=%s", TY_t(ty));
 		if(ty == TY_var) {
 			kToken *termToken = kExpr_at(declExpr, 1)->termToken;
 			ktype_t inferedType = kExpr_at(declExpr, 2)->ty;
