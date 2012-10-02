@@ -431,6 +431,8 @@ add_subdirectory(platform/dse)
 add_subdirectory(platform/apache)
 add_subdirectory(platform/logger-shell)
 
+include(${CMAKE_CURRENT_SOURCE_DIR}/cpack.cmake)
+
 # for konoha command
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/platform/shell/konoha.sh.cmake
 		${CMAKE_CURRENT_BINARY_DIR}/konoha.sh)
