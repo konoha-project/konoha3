@@ -283,7 +283,7 @@ static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp)
 //	kToken *tk     = sfp[2].asToken;
 //	if(tk->tt != KW_ParenthesisGroup || tk->tt != KW_BracketGroup) {
 //		SUGAR p(kctx, WarnTag, tk->uline, tk->lpos, "not parameter token");
-//		kObject_setNullObject(expr, 1);
+//		kObject_set(NullObject, expr, 1);
 //	}
 //	if(IS_NOTNULL(expr)) {
 //		assert(IS_Array(tk->subTokenList));
@@ -298,7 +298,7 @@ static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp)
 //	kExpr *expr  = sfp[0].asExpr;
 //	kExpr *o     = sfp[1].asExpr;
 //	if(IS_NULL(o) && IS_Array(expr->cons)) {
-//		kObject_setNullObject(expr, 1);
+//		kObject_set(NullObject, expr, 1);
 //	}
 //	if(IS_NOTNULL(expr)) {
 //		KLIB kArray_add(kctx, expr->cons, o);

@@ -112,7 +112,7 @@ static KMETHOD LogPool_get(KonohaContext *kctx, KonohaStack *sfp)
 	char *ret = logpool_client_get(lp, buf, 256);
 	kObject *log = KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
 	if (ret == NULL) {
-		kObject_setNullObject(log, 1);
+		kObject_set(NullObject, log, 1);
 		free(buf);
 	}
 	RawPtr_init(kctx, log, buf);
