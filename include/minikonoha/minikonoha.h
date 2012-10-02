@@ -1371,7 +1371,7 @@ struct KonohaPackageHandlerVar {
 	kbool_t (*setupPackage)  (KonohaContext *kctx, kNameSpace *, isFirstTime_t, kfileline_t);
 	kbool_t (*initNameSpace) (KonohaContext *kctx, kNameSpace *, kNameSpace *, kfileline_t);
 	kbool_t (*setupNameSpace)(KonohaContext *kctx, kNameSpace *, kNameSpace *, kfileline_t);
-	int konoha_revision;
+	const char *konoha_revision;
 };
 
 typedef struct KonohaPackageVar KonohaPackage;

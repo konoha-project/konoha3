@@ -26,7 +26,7 @@
 #cmakedefine K_CONFIG_OS "${K_CONFIG_OS}"
 
 /* build revision */
-#cmakedefine K_REVISION  ${K_REVISION}
+#cmakedefine K_REVISION  "${K_REVISION}"
 
 /* no debug opt */
 #cmakedefine K_NODEBUG  ${K_NODEBUG}

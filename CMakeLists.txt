@@ -197,22 +197,16 @@ if("${HAS_DOTGIT}" MATCHES ".git")
 	find_package(Git)
 	if(GIT_EXECUTABLE)
 		execute_process(
-				COMMAND ${GIT_EXECUTABLE} rev-parse -q --short=8 HEAD
+			COMMAND ${GIT_EXECUTABLE} rev-parse -q --short=8 HEAD
 			OUTPUT_VARIABLE GIT_SHA1
-				OUTPUT_STRIP_TRAILING_WHITESPACE
-				)
-	set(K_REVISION "0x${GIT_SHA1}")
+			OUTPUT_STRIP_TRAILING_WHITESPACE
+		)
+	set(K_REVISION "${GIT_SHA1}")
 	set(K_REVISION_PREFIX "git:")
 	endif(GIT_EXECUTABLE)
 else()
-find_package(Subversion)
-if(Subversion_FOUND)
-	set(_PATH)
-	get_filename_component(_PATH ${CMAKE_CURRENT_SOURCE_DIR} REALPATH)
-	Subversion_WC_INFO(${_PATH} ER)
-	set(K_REVISION ${ER_WC_REVISION})
-	set(K_REVISION_PREFIX "svn:")
-endif(Subversion_FOUND)
+	set(K_REVISION "${PACKAGE_VERSION}")
+	set(K_REVISION_PREFIX "release:")
 endif()
 
 add_definitions(-DHAVE_CONFIG_H)
@@ -440,10 +434,17 @@ add_subdirectory(platform/logger-shell)
 # for konoha command
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/platform/shell/konoha.sh.cmake
 		${CMAKE_CURRENT_BINARY_DIR}/konoha.sh)
+
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/konoha.sh
 	DESTINATION bin
 	RENAME konoha
 	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+## Install files
+## /usr/local/bin/konoha
+## /usr/local/bin/minikonoha
+## /usr/local/lib/libminikonoha.dylib
+## /usr/local/lib/minikonoha/0.1/package/konoha.while/while_glue.{k,dylib}
+## /usr/local/include/minikonoha/*.h
 
 install(TARGETS minikonoha minikonoha_bin
 		RUNTIME DESTINATION bin

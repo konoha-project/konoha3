@@ -133,7 +133,7 @@ static void shell(KonohaContext *kctx)
 static void show_version(KonohaContext *kctx)
 {
 	int i;
-	PLATAPI printf_i(K_PROGNAME " " K_VERSION " (%s) (%x, %s)\n", K_CODENAME, K_REVISION, __DATE__);
+	PLATAPI printf_i(K_PROGNAME " " K_VERSION " (%s) (%s, %s)\n", K_CODENAME, K_REVISION, __DATE__);
 	PLATAPI printf_i("[gcc %s]\n", __VERSION__);
 	PLATAPI printf_i("options:");
 	for(i = 0; i < KonohaModule_MAXSIZE; i++) {
