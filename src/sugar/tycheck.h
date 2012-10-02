@@ -53,7 +53,7 @@ static kExpr *ExprTyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma 
 {
 	int callCount = 0;
 	SugarSyntax *syn = expr->syn;
-	DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", syn, syn->parentSyntaxNULL, PSYM_t(syn->keyword));
+	//DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", syn, syn->parentSyntaxNULL, PSYM_t(syn->keyword));
 	while(true) {
 		kFunc *fo = syn->sugarFuncTable[SUGARFUNC_ExprTyCheck];
 		if(fo != NULL) {
