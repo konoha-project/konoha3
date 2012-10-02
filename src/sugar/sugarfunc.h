@@ -27,13 +27,13 @@ extern "C" {
 #endif
 
 
-static int findEndOfStatement(KonohaContext *kctx, kArray *tokenList, int beginIdx, int endIdx, int isNoNeedSemiColon)
+static int findEndOfStatement(KonohaContext *kctx, kArray *tokenList, int beginIdx, int endIdx, int isNoSemiColon)
 {
 	int c;
 	for(c = beginIdx; c < endIdx; c++) {
 		kToken *tk = tokenList->tokenItems[c];
 		if(kToken_is(StatementSeparator, tk)) return c;
-		if(isNoNeedSemiColon && tk->unresolvedTokenType == TokenType_INDENT) {
+		if(isNoSemiColon && tk->unresolvedTokenType == TokenType_INDENT) {
 			return c;
 		}
 	}
@@ -50,7 +50,7 @@ static KMETHOD PatternMatch_Expr(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
 	INIT_GCSTACK();
 	int returnIdx = -1;
-	endIdx = findEndOfStatement(kctx, tokenList, beginIdx, endIdx, true/*isNoNeedSemiColon*/);
+	endIdx = findEndOfStatement(kctx, tokenList, beginIdx, endIdx, kNameSpace_isAllowed(NoSemiColon, Stmt_nameSpace(stmt)));
 	kExpr *expr = kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, endIdx);
 	if(expr != K_NULLEXPR) {
 		KdumpExpr(kctx, expr);
@@ -137,7 +137,7 @@ static KMETHOD PatternMatch_Block(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD PatternMatch_Toks(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
-	endIdx = findEndOfStatement(kctx, tokenList, beginIdx, endIdx, true/*isNoNeedSemiColon*/);
+	endIdx = findEndOfStatement(kctx, tokenList, beginIdx, endIdx, kNameSpace_isAllowed(NoSemiColon, Stmt_nameSpace(stmt)));
 	if(beginIdx < endIdx) {
 		kArray *a = new_(TokenArray, (intptr_t)(endIdx - beginIdx));
 		for(; beginIdx < endIdx; beginIdx++) {
