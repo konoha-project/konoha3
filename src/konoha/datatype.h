@@ -758,7 +758,7 @@ static KonohaClass *Generics_realtype(KonohaContext *kctx, KonohaClass *ct, Kono
 	DBG_P("trying resolve generic type: %s %s", CT_t(ct), CT_t(self));
 	kParam *param = CT_cparam(ct);
 	int i;
-	kparamtype_t p[param->psize];
+	kparamtype_t *p = ALLOCA(kparamtype_t, param->psize);
 	for(i = 0; i < param->psize; i++) {
 		KonohaClass *cParam = CT_(param->paramtypeItems[i].ty);
 		p[i].ty = cParam->realtype(kctx, cParam, self)->typeId;
@@ -773,7 +773,7 @@ static KonohaClass *Func_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaCl
 	ktype_t rtype = cReturn->realtype(kctx, cReturn, self)->typeId;
 	kParam *param = CT_cparam(ct);
 	int i;
-	kparamtype_t p[param->psize];
+	kparamtype_t *p = ALLOCA(kparamtype_t, param->psize);
 	for(i = 0; i < param->psize; i++) {
 		KonohaClass *cParam = CT_(param->paramtypeItems[i].ty);
 		p[i].ty = cParam->realtype(kctx, cParam, self)->typeId;

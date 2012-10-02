@@ -100,8 +100,10 @@ extern "C" {
 
 #ifdef _MSC_VER
 #pragma warning(disable:4013)
+#pragma warning(disable:4018)
 #pragma warning(disable:4033)
 #pragma warning(disable:4100)
+#pragma warning(disable:4101)
 #pragma warning(disable:4114)
 #pragma warning(disable:4127)
 #pragma warning(disable:4201)
@@ -109,7 +111,8 @@ extern "C" {
 #pragma warning(disable:4431)
 #pragma warning(disable:4820)
 
-#define inline
+#define inline __inline
+typedef long long ssize_t;
 #endif
 
 /* ------------------------------------------------------------------------ */
@@ -144,6 +147,11 @@ static inline int setjmp_mingw(_JBTYPE* t)
 #endif
 #define klongjmp longjmp
 #endif /*jmpbuf_i*/
+
+#ifdef _MSC_VER
+#include <malloc.h>
+#endif
+#define ALLOCA(T, SIZE) ((T*)alloca(SIZE * sizeof(T)))
 
 #ifndef K_USE_PTHREAD
 typedef void kmutex_t;
@@ -299,7 +307,7 @@ struct PlatformApiVar {
 #define LogScriptLine(sfp)   LogText("ScriptName", FileId_t(sfp[K_RTNIDX].uline)), LogUint("ScriptLine", (ushort_t)sfp[K_RTNIDX].uline)
 
 #define KTrace(POLICY, LOGKEY, ...)    do {\
-		static logconf_t _logconf = {isRecord|LOGPOOL_INIT|POLICY};\
+		static logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|POLICY)};\
 		if(TFLAG_is(int, _logconf.policy, isRecord)) {\
 			PLATAPI traceDataLog(PLATAPI logger, LOGKEY, &_logconf, ## __VA_ARGS__, LOG_END);\
 		}\

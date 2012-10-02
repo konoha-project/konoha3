@@ -28,18 +28,65 @@
 
 #include <stdio.h>
 #include <time.h>
+#ifdef _MSC_VER
+#include <windows.h>
+#else
 #include <sys/time.h>
+#endif
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(_MSC_VER)
+
 #define localtime_r(a, b) localtime(a)
 #define gmtime_r(a, b) gmtime(a)
+
+#ifdef _MSC_VER
+
+#if defined(_MSC_VER) || defined(_MSC_EXTENSIONS)
+  #define DELTA_EPOCH_IN_MICROSECS  11644473600000000Ui64
+#else
+  #define DELTA_EPOCH_IN_MICROSECS  11644473600000000ULL
 #endif
+
+static int gettimeofday(struct timeval *tv, void *tz)
+{
+	FILETIME ft;
+	unsigned __int64 tmpres = 0;
+	static int tzflag;
+
+	if (NULL != tv)
+	{
+		GetSystemTimeAsFileTime(&ft);
+
+		tmpres |= ft.dwHighDateTime;
+		tmpres <<= 32;
+		tmpres |= ft.dwLowDateTime;
+
+		/*converting file time to unix epoch*/
+		tmpres -= DELTA_EPOCH_IN_MICROSECS;
+		tmpres /= 10;  /*convert into microseconds*/
+		tv->tv_sec = (long)(tmpres / 1000000UL);
+		tv->tv_usec = (long)(tmpres % 1000000UL);
+	}
+
+	return 0;
+}
+
+#define snprintf sprintf_s
+
+#endif /* _MSC_VER */
+
+#endif /* defined(__MINGW32__) || defined(_MSC_VER) */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#ifdef _MSC_VER
+#define kDate const struct _kDate
+#else
 typedef const struct _kDate kDate;
+#endif
+
 struct _kDate {
 	KonohaObjectHeader h;
 	struct timeval tv;
@@ -51,8 +98,8 @@ static KMETHOD Date_new0(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kDate *d = (struct _kDate *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
 	struct tm lt;
-	gettimeofday(&(d->tv), NULL);
-	localtime_r(&(d->tv.tv_sec), &lt);
+	gettimeofday((struct timeval*)&(d->tv), NULL);
+	localtime_r((const time_t*)&(d->tv.tv_sec), &lt);
 	RETURN_((kObject *)d);
 }
 
@@ -78,16 +125,16 @@ static KMETHOD Date_new3(KonohaContext *kctx, KonohaStack *sfp)
 	struct _kDate *d = (struct _kDate *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
 	struct tm lt = {};
 	if(sfp[1].intValue < 100) {
-		lt.tm_year =sfp[1].intValue;
+		lt.tm_year = sfp[1].intValue;
 	}
 	else {
-		lt.tm_year =sfp[1].intValue - 1900;
+		lt.tm_year = sfp[1].intValue - 1900;
 	}
-	lt.tm_mon = sfp[2].intValue;
+	lt.tm_mon  = sfp[2].intValue;
 	lt.tm_mday = sfp[3].intValue;
 	lt.tm_hour = sfp[4].intValue;
-	lt.tm_min = sfp[5].intValue;
-	lt.tm_sec = sfp[6].intValue;
+	lt.tm_min  = sfp[5].intValue;
+	lt.tm_sec  = sfp[6].intValue;
 	d->tv.tv_sec = mktime(&lt);
 	d->tv.tv_usec = sfp[7].intValue * 1000;
 	RETURN_((kObject *)d);
@@ -557,10 +604,10 @@ static KMETHOD Date_toLocaleString(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KDEFINE_CLASS defDate = {
-		STRUCTNAME(Date),
-		.cflag = kClass_Final,
-	};
+	KDEFINE_CLASS defDate = {0};
+	SETSTRUCTNAME(defDate, Date);
+	defDate.cflag = kClass_Final;
+
 	KonohaClass *cDate = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDate, pline);
 
 	KDEFINE_METHOD MethodData[] = {

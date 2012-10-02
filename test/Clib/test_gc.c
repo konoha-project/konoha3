@@ -57,13 +57,21 @@ static void Dummy_free(KonohaContext *kctx, kObject *o)
 }
 
 static KDEFINE_CLASS DummyDef = {
-    .structname   = "Dummy",
-    .typeId          = 100,
-    .cflag        = 0,
-    .cstruct_size = sizeof(struct Dummy),
-    .init     = Dummy_init,
-    .reftrace = Dummy_reftrace,
-    .free     = Dummy_free
+    /*.structname   = */ "Dummy",
+    /*.typeId       = */ 100,
+    /*.cflag        = */ 0,
+	                     0,
+	                     0,
+	                     0,
+	                     0,
+	                     0,
+    /*.cstruct_size = */ sizeof(struct Dummy),
+	                     0,
+	                     0,
+	                     0,
+    /*.init         = */ Dummy_init,
+    /*.reftrace     = */ Dummy_reftrace,
+    /*.free         = */ Dummy_free,
 };
 
 void test_gc(KonohaContext *kctx)
