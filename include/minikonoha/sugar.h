@@ -284,23 +284,37 @@ typedef struct MacroSet {
 	int                       endIdx;
 } MacroSet;
 
+struct TokenSequenceSource {
+	kToken *openToken;
+	int     stopChar;
+	kToken *foundErrorToken;
+};
+
+struct TokenSequenceTarget {
+	int RemovingIndent;
+};
+
 typedef struct TokenSequence {
 	kNameSpace *ns;
 	kArray *tokenList;
 	int beginIdx;
 	int endIdx;
-	kToken *openToken;
-	int     stopChar;
 	union {
-		kToken *errToken;
-		struct MacroSet *macroSet;
+		struct TokenSequenceSource SourceConfig;
+		struct TokenSequenceTarget TargetPolicy;
 	};
 } TokenSequence;
 
 #define TokenSequence_end(kctx, range)   range->endIdx = kArray_size(range->tokenList)
+
+#define TokenSequence_push(kctx, range)   do {\
+	range.beginIdx = kArray_size(range.tokenList);\
+	range.endIdx   = 0;\
+} while (0)
+
 #define TokenSequence_pop(kctx, range)   do {\
-	KLIB kArray_clear(kctx, range->tokenList, range->beginIdx);\
-	range->endIdx = range->beginIdx;\
+	KLIB kArray_clear(kctx, range.tokenList, range.beginIdx);\
+	range.endIdx = range.beginIdx;\
 } while (0)
 
 
@@ -498,11 +512,9 @@ typedef struct {
 	KonohaClass *cGamma;
 	KonohaClass *cTokenArray;
 
-	TokenSequence* (*new_TokenListRange)(KonohaContext *, kNameSpace *ns, kArray *tokenList, TokenSequence *bufRange);
-	TokenSequence* (*new_TokenStackRange)(KonohaContext *, TokenSequence *range, TokenSequence *bufRange);
 	void        (*kNameSpace_setTokenizeFunc)(KonohaContext *, kNameSpace *, int ch, TokenizeFunc, kFunc *, int isAddition);
 	void        (*TokenSequence_tokenize)(KonohaContext *, TokenSequence *, const char *, kfileline_t);
-	int         (*TokenSequence_resolved)(KonohaContext *, TokenSequence *, TokenSequence *, int);
+	int         (*TokenSequence_resolved)(KonohaContext *, TokenSequence *, MacroSet *, TokenSequence *, int);
 	kstatus_t   (*TokenSequence_eval)(KonohaContext *, TokenSequence *);
 	int         (*kStmt_parseTypePattern)(KonohaContext *, kStmt *, kNameSpace *, kArray *, int , int , KonohaClass **classRef);
 	void        (*kToken_transformToBraceGroup)(KonohaContext *, kTokenVar *, kNameSpace *);
@@ -521,7 +533,7 @@ typedef struct {
 	void         (*kNameSpace_setSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
 	void         (*kNameSpace_addSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
 
-	kBlock*      (*new_kBlock)(KonohaContext *, kStmt *, TokenSequence *);
+	kBlock*      (*new_kBlock)(KonohaContext *, kStmt *, MacroSet *, TokenSequence *);
 	kStmt*       (*new_kStmt)(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, ...);
 	void         (*kBlock_insertAfter)(KonohaContext *, kBlock *, kStmtNULL *target, kStmt *);
 

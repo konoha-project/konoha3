@@ -297,10 +297,11 @@ static kBlock* kMethod_newBlock(KonohaContext *kctx, kMethod *mtd, kNameSpace *n
 		script = S_text(mtd->sourceCodeToken->text);
 		uline = mtd->sourceCodeToken->uline;
 	}
-	TokenSequence rangeBuf, *range = new_TokenListRange(kctx, ns, KonohaContext_getSugarContext(kctx)->preparedTokenList, &rangeBuf);
-	TokenSequence_tokenize(kctx, range, script, uline);
-	kBlock *bk = new_kBlock2(kctx, NULL/*parentStmt*/, range);
-	TokenSequence_pop(kctx, range);
+	TokenSequence tokens = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList, 0};
+	TokenSequence_push(kctx, tokens);
+	TokenSequence_tokenize(kctx, &tokens, script, uline);
+	kBlock *bk = new_kBlock2(kctx, NULL/*parentStmt*/, NULL/*macro*/, &tokens);
+	TokenSequence_pop(kctx, tokens);
 	return bk;
 }
 
@@ -445,9 +446,7 @@ static int TokenSequence_selectStatement(KonohaContext *kctx, TokenSequence *tok
 	}
 	KLIB kArray_clear(kctx, tokens->tokenList, tokens->beginIdx);
 	tokens->endIdx = 0;
-	tokens->errToken = NULL;
-	tokens->stopChar = 0;
-	TokenSequence_resolved2(kctx, tokens, source, source->beginIdx);
+	TokenSequence_resolved2(kctx, tokens, NULL, source, source->beginIdx);
 	source->beginIdx = source->endIdx;
 	source->endIdx = sourceEndIdx;
 	return currentIdx;
@@ -463,7 +462,7 @@ static kstatus_t TokenSequence_eval(KonohaContext *kctx, TokenSequence *source)
 	TokenSequence tokens = {source->ns, source->tokenList, kArray_size(source->tokenList), 0};
 	while(source->beginIdx < source->endIdx) {
 		if(TokenSequence_selectStatement(kctx, &tokens, source)) {
-			if(tokens.errToken != NULL) return K_BREAK;
+			if(source->SourceConfig.foundErrorToken != NULL) return K_BREAK;
 			while(tokens.beginIdx < tokens.endIdx) {
 				KLIB kArray_clear(kctx, singleBlock->stmtList, 0);
 				kBlock_addNewStmt2(kctx, singleBlock, &tokens);

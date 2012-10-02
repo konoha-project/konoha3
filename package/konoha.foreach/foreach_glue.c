@@ -87,27 +87,26 @@ static void MacroSet_setTokenAt(KonohaContext *kctx, MacroSet *macroSet, int ind
 static kBlock *new_MacroBlock(KonohaContext *kctx, kStmt *stmt, kToken *IteratorTypeToken, kToken *IteratorExprToken, kToken *TypeToken, kToken *VariableToken)
 {
 	kNameSpace *ns = Stmt_nameSpace(stmt);
-	kArray *tokenList = KonohaContext_getSugarContext(kctx)->preparedTokenList;
-	TokenSequence macroRangeBuf, *macro = SUGAR new_TokenListRange(kctx, ns, tokenList, &macroRangeBuf);
+	TokenSequence source = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
+	TokenSequence_push(kctx, source);
 	/* FIXME(imasahiro)
 	 * we need to implement template as Block
 	 * "T _ = E; if(_.hasNext()) { N = _.next(); }"
 	 *                           ^^^^^^^^^^^^^^^^^
 	 */
-	SUGAR TokenSequence_tokenize(kctx, macro, "T _ = E; if(_.hasNext()) N = _.next();", 0);
+	SUGAR TokenSequence_tokenize(kctx, &source, "T _ = E; if(_.hasNext()) N = _.next();", 0);
 	MacroSet macroSet[4] = {{0, NULL, 0, 0}};
-	MacroSet_setTokenAt(kctx, macroSet, 0, tokenList, "T", IteratorTypeToken, NULL);
-	MacroSet_setTokenAt(kctx, macroSet, 1, tokenList, "E", IteratorExprToken, NULL);
+	MacroSet_setTokenAt(kctx, macroSet, 0, source.tokenList, "T", IteratorTypeToken, NULL);
+	MacroSet_setTokenAt(kctx, macroSet, 1, source.tokenList, "E", IteratorExprToken, NULL);
 	if(TypeToken == NULL) {
-		MacroSet_setTokenAt(kctx, macroSet, 2, tokenList, "N", VariableToken, NULL);
+		MacroSet_setTokenAt(kctx, macroSet, 2, source.tokenList, "N", VariableToken, NULL);
 	}
 	else {
-		MacroSet_setTokenAt(kctx, macroSet, 2, tokenList, "N", TypeToken, VariableToken, NULL);
+		MacroSet_setTokenAt(kctx, macroSet, 2, source.tokenList, "N", TypeToken, VariableToken, NULL);
 	}
-	macro->macroSet = macroSet;
-	TokenSequence expandedRangeBuf, *expandedRange = SUGAR new_TokenListRange(kctx, ns, tokenList, &expandedRangeBuf);
-	SUGAR TokenSequence_resolved(kctx, expandedRange, macro, macro->beginIdx);
-	return SUGAR new_kBlock(kctx, stmt, expandedRange);
+	kBlock *bk = SUGAR new_kBlock(kctx, stmt, macroSet, &source);
+	TokenSequence_pop(kctx, source);
+	return bk;
 }
 
 static void kStmt_appendBlock(KonohaContext *kctx, kStmt *stmt, kBlock *bk)

@@ -394,24 +394,25 @@ static kBlock* kStmt_parseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToke
 	kToken *blockToken = (kToken*)kStmt_getObject(kctx, stmt, KW_BlockPattern, NULL);
 	if(blockToken != NULL && blockToken->resolvedSyntaxInfo->keyword == KW_BlockPattern) {
 		const char *cname = S_text(tokenClassName->text);
-		TokenSequence rangeBuf, *range = SUGAR new_TokenListRange(kctx, Stmt_nameSpace(stmt), KonohaContext_getSugarContext(kctx)->preparedTokenList, &rangeBuf);
-		SUGAR TokenSequence_tokenize(kctx, range,  S_text(blockToken->text), blockToken->uline);
+		TokenSequence range = {Stmt_nameSpace(stmt), KonohaContext_getSugarContext(kctx)->preparedTokenList};
+		TokenSequence_push(kctx, range);
+		SUGAR TokenSequence_tokenize(kctx, &range,  S_text(blockToken->text), blockToken->uline);
 		{
+			TokenSequence sourceRange = {range.ns, range.tokenList, range.endIdx};
 			kToken *prevToken = blockToken;
-			TokenSequence sourceBuf, *sourceRange = SUGAR new_TokenStackRange(kctx, range, &sourceBuf);
 			int i;
-			for(i = range->beginIdx; i < range->endIdx; i++) {
-				kToken *tk = range->tokenList->tokenItems[i];
+			for(i = range.beginIdx; i < range.endIdx; i++) {
+				kToken *tk = range.tokenList->tokenItems[i];
 				if(tk->topCharHint == '(' && prevToken->unresolvedTokenType == TokenType_SYMBOL && strcmp(cname, S_text(prevToken->text)) == 0) {
 					kTokenVar *newToken = GCSAFE_new(TokenVar, TokenType_SYMBOL);
-					KLIB kArray_add(kctx, sourceRange->tokenList, newToken);
+					KLIB kArray_add(kctx, sourceRange.tokenList, newToken);
 					KSETv(newToken, newToken->text, SYM_s(MN_new));
 				}
-				KLIB kArray_add(kctx, sourceRange->tokenList, tk);
+				KLIB kArray_add(kctx, sourceRange.tokenList, tk);
 				prevToken = tk;
 			}
-			TokenSequence_end(kctx, sourceRange);
-			bk = SUGAR new_kBlock(kctx, stmt/*parent*/, sourceRange);
+			TokenSequence_end(kctx, (&sourceRange));
+			bk = SUGAR new_kBlock(kctx, stmt/*parent*/, NULL, &sourceRange);
 			KLIB kObject_setObject(kctx, stmt, KW_BlockPattern, TY_Block, bk);
 		}
 		TokenSequence_pop(kctx, range);

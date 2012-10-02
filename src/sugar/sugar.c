@@ -57,10 +57,11 @@ static kstatus_t kNameSpace_eval(KonohaContext *kctx, kNameSpace *ns, const char
 	kmodsugar->h.setup(kctx, (KonohaModule*)kmodsugar, 0/*lazy*/);
 	INIT_GCSTACK();
 	{
-		TokenSequence rangeBuf, *range = new_TokenListRange(kctx, ns, KonohaContext_getSugarContext(kctx)->preparedTokenList, &rangeBuf);
-		TokenSequence_tokenize(kctx, range, script, uline);
-		result = TokenSequence_eval(kctx, range);
-		TokenSequence_pop(kctx, range);
+		TokenSequence tokens = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
+		TokenSequence_push(kctx, tokens);
+		TokenSequence_tokenize(kctx, &tokens, script, uline);
+		result = TokenSequence_eval(kctx, &tokens);
+		TokenSequence_pop(kctx, tokens);
 	}
 	RESET_GCSTACK();
 	return result;
@@ -192,8 +193,6 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	};
 	kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(ClassData), 0);
 
-	mod->new_TokenListRange         = new_TokenListRange;
-	mod->new_TokenStackRange        = new_TokenStackRange;
 	mod->kNameSpace_setTokenizeFunc = kNameSpace_setTokenizeFunc;
 	mod->TokenSequence_tokenize        = TokenSequence_tokenize;
 	mod->TokenSequence_eval            = TokenSequence_eval;

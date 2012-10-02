@@ -33,33 +33,6 @@ extern "C" {
 #endif
 
 /* ------------------------------------------------------------------------ */
-/* TokenSequence */
-
-static TokenSequence* new_TokenListRange(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, TokenSequence *bufRange)
-{
-	bufRange->ns        = ns;
-	bufRange->tokenList = tokenList;
-	bufRange->beginIdx  = kArray_size(tokenList);
-	bufRange->endIdx    = bufRange->beginIdx;
-	bufRange->stopChar  = 0;
-	bufRange->openToken = NULL;
-	bufRange->errToken  = NULL;
-	return bufRange;
-}
-
-static TokenSequence* new_TokenStackRange(KonohaContext *kctx, TokenSequence *range, TokenSequence *bufRange)
-{
-	bufRange->ns        = range->ns;
-	bufRange->tokenList = range->tokenList;
-	bufRange->beginIdx  = kArray_size(range->tokenList);
-	bufRange->endIdx    = bufRange->beginIdx;
-	bufRange->stopChar  = 0;
-	bufRange->openToken = NULL;
-	bufRange->errToken  = range->errToken;
-	return bufRange;
-}
-
-/* ------------------------------------------------------------------------ */
 
 static void ERROR_UnclosedToken(KonohaContext *kctx, kTokenVar *tk, const char *ch)
 {
@@ -527,7 +500,6 @@ static kFunc **kNameSpace_tokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns)
 
 static void TokenSequence_tokenize(KonohaContext *kctx, TokenSequence *tokens, const char *source, kfileline_t uline)
 {
-	DBG_ASSERT(tokens->beginIdx == tokens->endIdx);
 	TokenizerEnv tenv = {};
 	tenv.source = source;
 	tenv.sourceLength = strlen(source);
@@ -667,17 +639,19 @@ static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, Token
 	return true;
 }
 
-static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, TokenSequence *rules, int start);
+static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, MacroSet *, TokenSequence *rules, int start);
 
-static void kNameSpace_parseSugarRule2(KonohaContext *kctx, kNameSpace *ns, const char *rule, kfileline_t uline, kArray *ruleList)
+static void kNameSpace_parseSugarRule2(KonohaContext *kctx, kNameSpace *ns, const char *ruleSource, kfileline_t uline, kArray *ruleList)
 {
-	TokenSequence rawRangeBuf, *rawRange = new_TokenListRange(kctx, ns, KonohaContext_getSugarContext(kctx)->preparedTokenList, &rawRangeBuf);
-	TokenSequence_tokenize(kctx, rawRange, rule, uline);
-	TokenSequence sourceRangeBuf, *sourceRange = new_TokenStackRange(kctx, rawRange, &sourceRangeBuf);
-	TokenSequence_resolved2(kctx, sourceRange, rawRange, rawRange->beginIdx);
-	KdumpTokenSequence(kctx, "resolved", sourceRange);
-	kArray_addSyntaxRule(kctx, ruleList, sourceRange);
-	TokenSequence_pop(kctx, rawRange);
+	TokenSequence source = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
+	TokenSequence_push(kctx, source);
+	TokenSequence_tokenize(kctx, &source, ruleSource, uline);
+	TokenSequence rules = {ns, source.tokenList, source.endIdx};
+	rules.TargetPolicy.RemovingIndent = true;
+	TokenSequence_resolved2(kctx, &rules, NULL, &source, source.beginIdx);
+	//KdumpTokenSequence(kctx, "resolved", rules);
+	kArray_addSyntaxRule(kctx, ruleList, &rules);
+	TokenSequence_pop(kctx, source);
 }
 
 /* ------------------------------------------------------------------------ */
