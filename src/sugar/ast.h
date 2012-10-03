@@ -169,22 +169,32 @@ static kExpr *kStmt_rightJoinExpr(KonohaContext *kctx, kStmt *stmt, kExpr *expr,
 /* ------------------------------------------------------------------------ */
 /* new ast parser */
 
-static int kStmt_parseTypePattern(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KonohaClass **classRef);
+static int TokenUtils_parseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KonohaClass **classRef);
 
-static KonohaClass* kStmt_parseGenerics(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, KonohaClass *baseClass, kArray *tokenList, int beginIdx, int endIdx)
+static int TokenList_skipIndent(kArray *tokenList, int currentIdx, int endIdx)
 {
-	size_t i = beginIdx, psize = 0;
+	for(; currentIdx < endIdx; currentIdx++) {
+		kToken *tk = tokenList->tokenItems[currentIdx];
+		if(kToken_is(StatementSeparator, tk)) return endIdx; // ;
+		if(tk->unresolvedTokenType != TokenType_INDENT) break;
+	}
+	return currentIdx;
+}
+
+static KonohaClass* TokenUtils_parseGenericsType(KonohaContext *kctx, kNameSpace *ns, KonohaClass *baseClass, kArray *tokenList, int beginIdx, int endIdx)
+{
+	size_t currentIdx = beginIdx, psize = 0;
 	kparamtype_t p[endIdx];
-	while(i < endIdx) {
+	while(currentIdx < endIdx) {
 		KonohaClass *paramClass = NULL;
-		i = kStmt_parseTypePattern(kctx, stmt, ns, tokenList, i, endIdx, &paramClass);
+		currentIdx = TokenUtils_parseTypePattern(kctx, ns, tokenList, currentIdx, endIdx, &paramClass);
 		if(paramClass == NULL) {
 			return NULL;
 		}
 		p[psize].ty = paramClass->typeId;
 		psize++;
-		if(i < endIdx && tokenList->tokenItems[i]->resolvedSyntaxInfo->keyword == KW_COMMA) {
-			i++;
+		if(currentIdx < endIdx && tokenList->tokenItems[currentIdx]->resolvedSyntaxInfo->keyword == KW_COMMA) {
+			currentIdx++;
 		}
 	}
 	if(baseClass->baseTypeId == TY_Func) {
@@ -195,7 +205,7 @@ static KonohaClass* kStmt_parseGenerics(KonohaContext *kctx, kStmt *stmt, kNameS
 	}
 }
 
-static int kStmt_parseTypePattern(KonohaContext *kctx, kStmt *stmt/* if NULL, no error*/, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KonohaClass **classRef)
+static int TokenUtils_parseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KonohaClass **classRef)
 {
 	int nextIdx = -1;
 	kToken *tk = tokenList->tokenItems[beginIdx];
@@ -218,7 +228,7 @@ static int kStmt_parseTypePattern(KonohaContext *kctx, kStmt *stmt/* if NULL, no
 			if(tk->resolvedSyntaxInfo == NULL || tk->resolvedSyntaxInfo->keyword != KW_BracketGroup) break;
 			int sizeofBracketTokens = kArray_size(tk->subTokenList);
 			if(isAllowedGenerics &&  sizeofBracketTokens > 0) {  // C[T][]
-				KonohaClass *foundGenericClass = kStmt_parseGenerics(kctx, stmt, ns, foundClass, tk->subTokenList, 0, sizeofBracketTokens);
+				KonohaClass *foundGenericClass = TokenUtils_parseGenericsType(kctx, ns, foundClass, tk->subTokenList, 0, sizeofBracketTokens);
 				if(foundGenericClass == NULL) break;
 				foundClass = foundGenericClass;
 			}
@@ -278,26 +288,16 @@ static const char* StatementType(ksymbol_t keyword)
 	return postfix;
 }
 
-static int TokenList_skipIndent(kArray *tokenList, int currentIdx, int endIdx)
-{
-	for(; currentIdx < endIdx; currentIdx++) {
-		kToken *tk = tokenList->tokenItems[currentIdx];
-		if(kToken_is(StatementSeparator, tk)) return endIdx; // ;
-		if(tk->unresolvedTokenType != TokenType_INDENT) break;
-	}
-	return currentIdx;
-}
-
 static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
 {
 //	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
 	if(kNameSpace_isAllowed(CStyleDecl, ns)) {
-		int nextIdx = kStmt_parseTypePattern(kctx, NULL, ns, tokenList, beginIdx, endIdx, NULL);
+		int nextIdx = TokenUtils_parseTypePattern(kctx, ns, tokenList, beginIdx, endIdx, NULL);
 		DBG_P("@ nextIdx = %d", nextIdx);
 		if(nextIdx != -1) {
 			nextIdx = TokenList_skipIndent(tokenList, nextIdx, endIdx);
 			if(nextIdx < endIdx) {
-				if(kStmt_parseTypePattern(kctx, NULL, ns, tokenList, nextIdx, endIdx, NULL) != -1) {
+				if(TokenUtils_parseTypePattern(kctx, ns, tokenList, nextIdx, endIdx, NULL) != -1) {
 					DBG_P("MethodDecl2");
 					return SYN_(ns, KW_StmtMethodDecl);
 				}
