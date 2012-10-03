@@ -287,14 +287,14 @@ static const char* StatementType(ksymbol_t keyword)
 	return postfix;
 }
 
-static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
+static SugarSyntax* kNameSpace_getStatementSyntax(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
 {
-	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
+	//KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
 	if(kNameSpace_isAllowed(CStyleDecl, ns)) {
 		int nextIdx = TokenUtils_parseTypePattern(kctx, ns, tokenList, beginIdx, endIdx, NULL);
+		DBG_P("@ nextIdx = %d < %d", nextIdx, endIdx);
 		if(nextIdx != -1) {
 			nextIdx = TokenList_skipIndent(tokenList, nextIdx, endIdx);
-			DBG_P("@ nextIdx = %d < %d", nextIdx, endIdx);
 			if(nextIdx < endIdx) {
 				if(TokenUtils_parseTypePattern(kctx, ns, tokenList, nextIdx, endIdx, NULL) != -1) {
 					DBG_P("MethodDecl2");
@@ -311,10 +311,10 @@ static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns
 					DBG_P("StmtTypeDecl");
 					return SYN_(ns, KW_StmtTypeDecl);
 				}
-				//					if(tk->resolvedSyntaxInfo->keyword != KW_DOT && ((tk->resolvedSyntaxInfo->precedence_op1 > 0 || tk->resolvedSyntaxInfo->precedence_op2 > 0))) {
-				//						DBG_P("Operator");
-				//						return SYN_(ns, KW_StmtMethodDecl);
-				//					}
+				if(tk->resolvedSyntaxInfo->keyword != KW_DOT && ((tk->resolvedSyntaxInfo->precedence_op1 > 0 || tk->resolvedSyntaxInfo->precedence_op2 > 0))) {
+					DBG_P("Operator");
+					return SYN_(ns, KW_StmtMethodDecl);
+				}
 			}
 			DBG_P("Expression");
 			return SYN_(ns, KW_ExprPattern);
@@ -584,7 +584,7 @@ static int kStmt_matchSyntaxRule2(KonohaContext *kctx, kStmt *stmt, TokenSequenc
 static int kStmt_parseBySyntaxRule2(KonohaContext *kctx, kStmt *stmt, int indent, kArray *tokenList, int beginIdx, int endIdx)
 {
 	kNameSpace *ns = Stmt_nameSpace(stmt);
-	SugarSyntax *stmtSyntax = kNameSpace_getSyntaxRule(kctx, ns, tokenList, beginIdx, endIdx);
+	SugarSyntax *stmtSyntax = kNameSpace_getStatementSyntax(kctx, ns, tokenList, beginIdx, endIdx);
 	SugarSyntax *currentSyntax = stmtSyntax;
 	((kStmtVar*)stmt)->syn = stmtSyntax;
 	kToken *errRule = NULL;
