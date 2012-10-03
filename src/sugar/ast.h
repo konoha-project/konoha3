@@ -291,10 +291,9 @@ static int TokenList_skipIndent(kArray *tokenList, int currentIdx, int endIdx)
 static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
 {
 //	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
-	DBG_P("@");
 	if(kNameSpace_isAllowed(CStyleDecl, ns)) {
 		int nextIdx = kStmt_parseTypePattern(kctx, NULL, ns, tokenList, beginIdx, endIdx, NULL);
-		DBG_P("nextIdx = %d", nextIdx);
+		DBG_P("@ nextIdx = %d", nextIdx);
 		if(nextIdx != -1) {
 			nextIdx = TokenList_skipIndent(tokenList, nextIdx, endIdx);
 			if(nextIdx < endIdx) {
@@ -317,6 +316,7 @@ static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns
 				//						return SYN_(ns, KW_StmtMethodDecl);
 				//					}
 			}
+			DBG_P("Expression");
 			return SYN_(ns, KW_ExprPattern);
 		}
 	}
