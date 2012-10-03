@@ -24,13 +24,7 @@
 
 /* ************************************************************************ */
 
-#ifdef HAVE_STDBOOL_H
-#include <stdbool.h>
-#else
-#include "minikonoha/stdbool.h"
-#endif
 #include <stdio.h>
-#include <sys/time.h>
 
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/gc.h"
@@ -73,9 +67,30 @@ extern "C" {
 #define ALIGN(X,N)  (((X)+((N)-1))&(~((N)-1)))
 #define CEIL(F)     (F-(int)(F) > 0 ? (int)(F+1) : (int)(F))
 #if _WIN64
+#ifdef _MSC_VER
+#include <intrin.h>
+static uint32_t CTZ(uint32_t x)
+{
+	unsigned long r = 0;
+	_BitScanReverse64(&r, x);
+	return r;
+}
+static uint32_t CLZ(uint32_t x)
+{
+	unsigned long r = 0;
+	_BitScanForward64(&r, x);
+	return r;
+}
+static uint32_t FFS(uint32_t x)
+{
+	if(x == 0) return 0;
+	return CTZ(x) + 1;
+}
+#else
 #define FFS(n) __builtin_ffsll(n)
 #define CLZ(n) __builtin_clzll(n)
 #define CTZ(x) __builtin_ctzll(x)
+#endif
 #else
 #define FFS(n) __builtin_ffsl(n)
 #define CLZ(n) __builtin_clzl(n)
@@ -96,7 +111,11 @@ extern "C" {
 #define likely(x)     __builtin_expect(!!(x), 1)
 #endif
 
+#ifdef __GNUC__
 #define prefetch_(addr, rw, locality) __builtin_prefetch(addr, rw, locality)
+#else
+#define prefetch_(addr, rw, locality)
+#endif
 
 #if SIZEOF_VOIDP*8 == 64
 #define PREFIX_x "lx"
@@ -689,15 +708,6 @@ typedef struct kmemshare_t {
 #define memshare(kctx) ((kmemshare_t*)((kctx)->modshare[MOD_gc]))
 
 /* ------------------------------------------------------------------------ */
-
-static inline uint64_t getTimeMilliSecond(void)
-{
-	struct timeval tv;
-	gettimeofday(&tv, NULL);
-	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
-}
-
-/* ------------------------------------------------------------------------ */
 /* malloc */
 
 static void THROW_OutOfMemory(KonohaContext *kctx, size_t size)
@@ -1239,7 +1249,7 @@ static void dispatchRememberSet(HeapManager *mng, size_t heap_size, AllocationBl
 {
 	BlockHeader *head;
 	Segment *seg = mng->segmentList;
-	bitmap_t *map = do_malloc(heap_size / (MIN_ALIGN) / sizeof(bitmap_t));
+	bitmap_t *map = (bitmap_t*)do_malloc(heap_size / (MIN_ALIGN) / sizeof(bitmap_t));
 	ARRAY_add(BitMapPtr,  &mng->remember_sets, map);
 	while (seg) {
 		head = (BlockHeader *) block;
@@ -1409,7 +1419,7 @@ static kObject *bm_malloc_internal(KonohaContext *kctx, HeapManager *mng, size_t
 		return (kObject *) (ptr + sizeof(BlockHeader));
 	}
 	h = findSubHeapBySize(mng, n);
-	temp = tryAlloc(kctx, mng, h);
+	temp = (kObject*)tryAlloc(kctx, mng, h);
 
 	if (temp != NULL)
 		goto L_finaly;
@@ -1425,7 +1435,7 @@ static kObject *bm_malloc_internal(KonohaContext *kctx, HeapManager *mng, size_t
 		goto L_finaly;
 	majorGC(kctx, mng);
 #endif /* defined(USE_SAFEPOINT_POLICY) */
-	temp = tryAlloc(kctx, mng, h);
+	temp = (kObject*)tryAlloc(kctx, mng, h);
 	if (temp == NULL) {
 		THROW_OutOfMemory(kctx, n);
 		assert(0);
@@ -2026,7 +2036,7 @@ static void kmodgc_local_free(KonohaContext *kctx, struct KonohaModuleContext *b
 static void kmodgc_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
 {
 	if (memlocal(kctx) == NULL) {
-		kmemlocal_t *base = do_malloc(sizeof(kmemlocal_t));
+		kmemlocal_t *base = (kmemlocal_t*)do_malloc(sizeof(kmemlocal_t));
 		do_bzero(base, sizeof(kmemlocal_t));
 		base->h.reftrace = kmodgc_local_reftrace;
 		base->h.free     = kmodgc_local_free;
@@ -2045,7 +2055,7 @@ static void kmodgc_free(KonohaContext *kctx, struct KonohaModule *baseh)
 
 static void Kgc_invoke(KonohaContext *kctx, KonohaStack *esp)
 {
-	enum gc_mode mode = kctx->safepoint & 0x3;
+	enum gc_mode mode = (enum gc_mode)(kctx->safepoint & 0x3);
 	mode = (mode == GC_NOP) ? mode : GC_MINOR;
 	bitmapMarkingGC(kctx, HeapManager(kctx), mode);
 }

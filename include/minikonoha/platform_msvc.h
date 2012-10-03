@@ -22,17 +22,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#ifndef PLATFORM_POSIX_H_
-#define PLATFORM_POSIX_H_
+#ifndef PLATFORM_MINGW_H_
+#define PLATFORM_MINGW_H_
 
 /* platform configuration */
 
 #ifndef K_OSDLLEXT
-#if defined(__APPLE__)
-#define K_OSDLLEXT        ".dylib"
-#elif defined(__linux__)
-#define K_OSDLLEXT        ".so"
-#endif
+#define K_OSDLLEXT        ".dll"
 #endif
 
 #ifdef PATH_MAX
@@ -44,47 +40,48 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <setjmp.h>
-#include <sys/time.h>
-#include <syslog.h>
-#include <dlfcn.h>
-#include <sys/stat.h>
+////#include <sys/time.h>
+//
+//#ifdef HAVE_DLFCN_H
+//#include <dlfcn.h>
+//#endif
+////#include <sys/stat.h>
 #include <errno.h>
+//
+//#ifdef HAVE_ICONV_H
+//#include <iconv.h>
+//#endif /* HAVE_ICONV_H */
 
-#ifdef HAVE_ICONV_H
-#include <iconv.h>
-#endif /* HAVE_ICONV_H */
+#include <windows.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define kunused __attribute__((unused))
+#define snprintf sprintf_s
+
 // -------------------------------------------------------------------------
 
 static const char *getSystemCharset(void)
 {
-#if defined(K_USING_WINDOWS_)
 	static char codepage[64];
-	knh_snprintf(codepage, sizeof(codepage), "CP%d", (int)GetACP());
+	snprintf(codepage, sizeof(codepage), "CP%d", (int)GetACP());
 	return codepage;
-#else
-	return "UTF-8";
-#endif
 }
 
 typedef uintptr_t (*ficonv_open)(const char *, const char *);
 typedef size_t (*ficonv)(uintptr_t, char **, size_t *, char **, size_t *);
 typedef int    (*ficonv_close)(uintptr_t);
 
-static kunused uintptr_t dummy_iconv_open(const char *t, const char *f)
+static uintptr_t dummy_iconv_open(const char *t, const char *f)
 {
 	return -1;
 }
-static kunused size_t dummy_iconv(uintptr_t i, char **t, size_t *ts, char **f, size_t *fs)
+static size_t dummy_iconv(uintptr_t i, char **t, size_t *ts, char **f, size_t *fs)
 {
 	return 0;
 }
-static kunused int dummy_iconv_close(uintptr_t i)
+static int dummy_iconv_close(uintptr_t i)
 {
 	return 0;
 }
@@ -96,11 +93,11 @@ static void loadIconv(PlatformApiVar *plat)
 	plat->iconv_i         = (ficonv)iconv;
 	plat->iconv_close_i   = (ficonv_close)iconv_close;
 #else
-	void *handler = dlopen("libiconv" K_OSDLLEXT, RTLD_LAZY);
+	HMODULE handler = LoadLibrary("libiconv" K_OSDLLEXT);
 	if(handler != NULL) {
-		plat->iconv_open_i = (ficonv_open)dlsym(handler, "iconv_open");
-		plat->iconv_i = (ficonv)dlsym(handler, "iconv");
-		plat->iconv_close_i = (ficonv_close)dlsym(handler, "iconv_close");
+		plat->iconv_open_i = (ficonv_open)GetProcAddress(handler, "iconv_open");
+		plat->iconv_i = (ficonv)GetProcAddress(handler, "iconv");
+		plat->iconv_close_i = (ficonv_close)GetProcAddress(handler, "iconv_close");
 	}
 	else {
 		plat->iconv_open_i = dummy_iconv_open;
@@ -112,14 +109,11 @@ static void loadIconv(PlatformApiVar *plat)
 
 // -------------------------------------------------------------------------
 
+#define DELTA_EPOCH_IN_MICROSECS  11644473600000000Ui64
+
 static unsigned long long getTimeMilliSecond(void)
 {
-//#if defined(K_USING_WINDOWS)
-//	DWORD tickCount = GetTickCount();
-//	return (knh_int64_t)tickCount;
-	struct timeval tv;
-	gettimeofday(&tv, NULL);
-	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+	return (unsigned long long)GetTickCount();
 }
 
 // -------------------------------------------------------------------------
@@ -184,12 +178,12 @@ static const char* formatKonohaPath(char *buf, size_t bufsiz, const char *path)
 
 static kbool_t isDir(const char *path)
 {
-	struct stat buf;
 	char pathbuf[K_PATHMAX];
-	if (stat(formatSystemPath(pathbuf, sizeof(pathbuf), path), &buf) == 0) {
-		return S_ISDIR(buf.st_mode);
-	}
-	return false;
+	formatSystemPath(pathbuf, sizeof(pathbuf), path);
+
+	DWORD attr = GetFileAttributesA(pathbuf);
+	if(attr == -1) return false;
+	return ((attr & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY);
 }
 
 // -------------------------------------------------------------------------
@@ -294,7 +288,7 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 		while(!feof(fp)) {
 			kfileline_t rangeheadline = uline;
 			kshort_t sline = (kshort_t)uline;
-			bzero(simpleBuffer.buffer, simpleBuffer.allocSize);
+			memset(simpleBuffer.buffer, 0, simpleBuffer.allocSize);
 			simpleBuffer.size = 0;
 			uline = readChunk(fp, uline, &simpleBuffer);
 			const char *script = (const char*)simpleBuffer.buffer;
@@ -371,7 +365,7 @@ static const char* formatPackagePath(char *buf, size_t bufsiz, const char *packa
 		fclose(fp);
 		return (const char*)buf;
 	}
-	snprintf(buf, bufsiz, K_PREFIX "/lib/minikonoha/" K_VERSION "/package" "/%s/%s%s", packageName, packname(packageName), ext);
+	snprintf(buf, bufsiz, K_PREFIX "/minikonoha/package" "/%s/%s%s", packageName, packname(packageName), ext);
 #endif
 	fp = fopen(buf, "r");
 	if(fp != NULL) {
@@ -385,12 +379,12 @@ static KonohaPackageHandler *loadPackageHandler(const char *packageName)
 {
 	char pathbuf[256];
 	formatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_glue" K_OSDLLEXT);
-	void *gluehdr = dlopen(pathbuf, RTLD_LAZY);
+	HMODULE gluehdr = LoadLibrary(pathbuf);
 	//fprintf(stderr, "pathbuf=%s, gluehdr=%p", pathbuf, gluehdr);
 	if(gluehdr != NULL) {
 		char funcbuf[80];
 		snprintf(funcbuf, sizeof(funcbuf), "%s_init", packname(packageName));
-		PackageLoadFunc f = (PackageLoadFunc)dlsym(gluehdr, funcbuf);
+		PackageLoadFunc f = (PackageLoadFunc)GetProcAddress(gluehdr, funcbuf);
 		if(f != NULL) {
 			return f();
 		}
@@ -402,11 +396,11 @@ static const char* beginTag(kinfotag_t t)
 {
 	DBG_ASSERT(t <= NoneTag);
 	static const char* tags[] = {
-		"\x1b[1m\x1b[31m", /*CritTag*/
-		"\x1b[1m\x1b[31m", /*ErrTag*/
-		"\x1b[1m\x1b[31m", /*WarnTag*/
-		"\x1b[1m", /*NoticeTag*/
-		"\x1b[1m", /*InfoTag*/
+		"", /*CritTag*/
+		"", /*ErrTag*/
+		"", /*WarnTag*/
+		"", /*NoticeTag*/
+		"", /*InfoTag*/
 		"", /*DebugTag*/
 		"", /* NoneTag*/
 	};
@@ -417,11 +411,11 @@ static const char* endTag(kinfotag_t t)
 {
 	DBG_ASSERT(t <= NoneTag);
 	static const char* tags[] = {
-		"\x1b[0m", /*CritTag*/
-		"\x1b[0m", /*ErrTag*/
-		"\x1b[0m", /*WarnTag*/
-		"\x1b[0m", /*NoticeTag*/
-		"\x1b[0m", /*InfoTag*/
+		"", /*CritTag*/
+		"", /*ErrTag*/
+		"", /*WarnTag*/
+		"", /*NoticeTag*/
+		"", /*InfoTag*/
 		"", /* Debug */
 		"", /* NoneTag*/
 	};
@@ -470,10 +464,10 @@ static void NOP_debugPrintf(const char *file, const char *func, int line, const 
 
 static void PlatformApi_loadReadline(PlatformApiVar *plat)
 {
-	void *handler = dlopen("libreadline" K_OSDLLEXT, RTLD_LAZY);
+	HMODULE handler = LoadLibrary("libreadline" K_OSDLLEXT);
 	if(handler != NULL) {
-		plat->readline_i = (char* (*)(const char*))dlsym(handler, "readline");
-		plat->add_history_i = (int (*)(const char*))dlsym(handler, "add_history");
+		plat->readline_i = (char* (*)(const char*))GetProcAddress(handler, "readline");
+		plat->add_history_i = (int (*)(const char*))GetProcAddress(handler, "add_history");
 	}
 	if(plat->readline_i == NULL) {
 		plat->readline_i = readline;
@@ -494,15 +488,14 @@ static void traceDataLog(void *logger, int logkey, logconf_t *logconf, ...)
 	va_list ap;
 	va_start(ap, logconf);
 	writeDataLogToBuffer(logconf, ap, buf, buf + (EBUFSIZ - 4));
-	syslog(LOG_NOTICE, "%s", buf);
+	//syslog(LOG_NOTICE, "%s", buf);
 	if(verbose_debug) {
 		fprintf(stderr, "TRACE %s\n", buf);
 	}
 	va_end(ap);
 }
 
-static void diagnosis(void)
-{
+static void diagnosis(void) {
 }
 
 static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
@@ -552,9 +545,9 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	PlatformApi_loadReadline(&plat);
 
 	// logger
-	plat.LOGGER_NAME         = "syslog";
-	plat.syslog_i            = syslog;
-	plat.vsyslog_i           = vsyslog;
+	//plat.LOGGER_NAME         = "syslog";
+	//plat.syslog_i            = syslog;
+	//plat.vsyslog_i           = vsyslog;
 	plat.logger              = NULL;
 	plat.traceDataLog        = traceDataLog;
 	plat.diagnosis           = diagnosis;
@@ -565,4 +558,4 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 } /* extern "C" */
 #endif
 
-#endif /* PLATFORM_POSIX_H_ */
+#endif /* PLATFORM_MINGW_H_ */

@@ -183,7 +183,7 @@ static int TokenUtils_parseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArr
 static KonohaClass* TokenUtils_parseGenericsType(KonohaContext *kctx, kNameSpace *ns, KonohaClass *baseClass, kArray *tokenList, int beginIdx, int endIdx)
 {
 	size_t currentIdx = beginIdx, psize = 0;
-	kparamtype_t p[endIdx];
+	kparamtype_t *p = ALLOCA(kparamtype_t, endIdx);
 	while(currentIdx < endIdx) {
 		KonohaClass *paramClass = NULL;
 		currentIdx = TokenUtils_parseTypePattern(kctx, ns, tokenList, currentIdx, endIdx, &paramClass);

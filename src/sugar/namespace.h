@@ -324,7 +324,7 @@ static KonohaClass *kNameSpace_getClass(KonohaContext *kctx, kNameSpace *ns, con
 	KonohaClass *ct = NULL;
 	kpackage_t packageId= PN_konoha;
 	ksymbol_t  un = SYM_NONAME;
-	char *p = strrchr(name, '.');
+	const char *p = strrchr(name, '.');
 	if(p == NULL) {
 		un = ksymbolA(name, len, SYM_NONAME);
 	}
@@ -717,7 +717,7 @@ static ksymbol_t anotherSymbol(KonohaContext *kctx, ksymbol_t symbol)
 {
 	kString *s = SYM_s(symbol);
 	size_t len = S_size(s);
-	char t[len+1];
+	char *t = ALLOCA(char, len+1);
 	memcpy(t, S_text(s), len);
 	t[len]=0;
 	if(isupper(t[0])) {
@@ -863,7 +863,7 @@ static void kNameSpace_loadMethodData(KonohaContext *kctx, kNameSpace *ns, intpt
 		ktype_t cid  = (ktype_t)d[3];
 		kmethodn_t mn = (kmethodn_t)d[4];
 		size_t i, psize = (size_t)d[5];
-		kparamtype_t p[psize+1];
+		kparamtype_t *p = ALLOCA(kparamtype_t, psize+1);
 		d = d + 6;
 		for(i = 0; i < psize; i++) {
 			p[i].ty = (ktype_t)d[0];
@@ -1055,7 +1055,7 @@ kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len,
 	kpackage_t packageId = KLIB KpackageId(kctx, "main", sizeof("main")-1, 0, _NEWID);
 	kNameSpace *ns = new_PackageNameSpace(kctx, packageId, packageId);
 	PUSH_GCSTACK(ns);
-	kstatus_t result = kNameSpace_loadScript(kctx, ns, path, pline);
+	kstatus_t result = (kstatus_t)kNameSpace_loadScript(kctx, ns, path, pline);
 	RESET_GCSTACK();
 	return result;
 }

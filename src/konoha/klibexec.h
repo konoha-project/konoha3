@@ -90,7 +90,11 @@ static void Kwb_write(KonohaContext *kctx, KUtilsWriteBuffer *wb, const char *da
 static void Kwb_vprintf(KonohaContext *kctx, KUtilsWriteBuffer *wb, const char *fmt, va_list ap)
 {
 	va_list ap2;
+#ifdef _MSC_VER
+	ap2 = ap;
+#else
 	va_copy(ap2, ap);
+#endif
 	KUtilsGrowingArray *m = wb->m;
 	size_t s = m->bytesize;
 	size_t n = PLATAPI vsnprintf_i( m->bytebuf + s, m->bytemax - s, fmt, ap);
@@ -183,7 +187,7 @@ static KUtilsHashMapEntry *Kmap_newEntry(KonohaContext *kctx, KUtilsHashMap *kma
 		size_t oarenasize = kmap->arenasize;
 		char *oarena = (char*)kmap->arena;
 		kmap->arenasize *= 2;
-		kmap->arena = KMALLOC(kmap->arenasize * sizeof(KUtilsHashMapEntry));
+		kmap->arena = (KUtilsHashMapEntry*)KMALLOC(kmap->arenasize * sizeof(KUtilsHashMapEntry));
 		memcpy(kmap->arena, oarena, oarenasize * sizeof(KUtilsHashMapEntry));
 		kmap_shiftptr(kmap, (char*)kmap->arena - oarena);
 		kmap_makeFreeList(kmap, oarenasize, kmap->arenasize);

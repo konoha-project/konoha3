@@ -16,6 +16,24 @@ extern "C" {
 #define __attribute__(X)
 #endif
 
+#ifdef _MSC_VER
+#include <intrin.h>
+
+static uint32_t __inline __builtin_ctzl(uint32_t x )
+{
+	unsigned long r = 0;
+	_BitScanReverse64(&r, x);
+	return r;
+}
+
+static uint32_t __inline __builtin_clzl(uint32_t x )
+{
+	unsigned long r = 0;
+	_BitScanForward64(&r, x);
+	return r;
+}
+#endif
+
 #define DICTMAP_THRESHOLD 4
 
 typedef struct protomap_record {

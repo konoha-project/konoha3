@@ -30,6 +30,7 @@
 #include <minikonoha/klib.h>
 #include <minikonoha/iterator.h>
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
