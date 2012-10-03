@@ -223,8 +223,10 @@ static int TokenUtils_parseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArr
 	if(foundClass != NULL) {
 		int isAllowedGenerics = true;
 		for(; nextIdx < endIdx; nextIdx++) {
-			kToken *tk = tokenList->tokenItems[nextIdx];
-			if(tk->resolvedSyntaxInfo == NULL || tk->resolvedSyntaxInfo->keyword != KW_BracketGroup) break;
+			tk = tokenList->tokenItems[nextIdx];
+			if(tk->resolvedSyntaxInfo == NULL || tk->resolvedSyntaxInfo->keyword != KW_BracketGroup) {
+				break;
+			}
 			int sizeofBracketTokens = kArray_size(tk->subTokenList);
 			if(isAllowedGenerics &&  sizeofBracketTokens > 0) {  // C[T][]
 				KonohaClass *foundGenericClass = TokenUtils_parseGenericsType(kctx, ns, foundClass, tk->subTokenList, 0, sizeofBracketTokens);
@@ -236,7 +238,6 @@ static int TokenUtils_parseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArr
 				foundClass = CT_p0(kctx, CT_Array, foundClass->typeId);  // C[] => Array[C]
 			}
 			isAllowedGenerics = false;
-			nextIdx++;
 		}
 	}
 	if(classRef != NULL) {
@@ -267,7 +268,6 @@ static int callPatternMatchFunc(KonohaContext *kctx, kFunc *fo, int *countRef, k
 	return (int)lsfp[0].intValue;
 }
 
-
 #define T_statement(kw)  StatementName(kctx, kw), StatementType(kw)
 
 static const char* StatementName(KonohaContext *kctx, ksymbol_t keyword)
@@ -289,18 +289,19 @@ static const char* StatementType(ksymbol_t keyword)
 
 static SugarSyntax* kNameSpace_getSyntaxRule(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
 {
-//	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
+	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
 	if(kNameSpace_isAllowed(CStyleDecl, ns)) {
 		int nextIdx = TokenUtils_parseTypePattern(kctx, ns, tokenList, beginIdx, endIdx, NULL);
-		DBG_P("@ nextIdx = %d", nextIdx);
 		if(nextIdx != -1) {
 			nextIdx = TokenList_skipIndent(tokenList, nextIdx, endIdx);
+			DBG_P("@ nextIdx = %d < %d", nextIdx, endIdx);
 			if(nextIdx < endIdx) {
 				if(TokenUtils_parseTypePattern(kctx, ns, tokenList, nextIdx, endIdx, NULL) != -1) {
 					DBG_P("MethodDecl2");
 					return SYN_(ns, KW_StmtMethodDecl);
 				}
 				kToken *tk = tokenList->tokenItems[nextIdx];
+				KdumpToken(kctx, tk);
 				if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern) {
 					int symbolNextIdx = TokenList_skipIndent(tokenList, nextIdx + 1, endIdx);
 					if(symbolNextIdx < endIdx && tokenList->tokenItems[symbolNextIdx]->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
