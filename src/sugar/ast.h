@@ -169,8 +169,6 @@ static kExpr *kStmt_rightJoinExpr(KonohaContext *kctx, kStmt *stmt, kExpr *expr,
 /* ------------------------------------------------------------------------ */
 /* new ast parser */
 
-static int TokenUtils_parseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KonohaClass **classRef);
-
 static int TokenList_skipIndent(kArray *tokenList, int currentIdx, int endIdx)
 {
 	for(; currentIdx < endIdx; currentIdx++) {
@@ -181,6 +179,7 @@ static int TokenList_skipIndent(kArray *tokenList, int currentIdx, int endIdx)
 	return currentIdx;
 }
 
+static int TokenUtils_parseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KonohaClass **classRef);
 static KonohaClass* TokenUtils_parseGenericsType(KonohaContext *kctx, kNameSpace *ns, KonohaClass *baseClass, kArray *tokenList, int beginIdx, int endIdx)
 {
 	size_t currentIdx = beginIdx, psize = 0;
