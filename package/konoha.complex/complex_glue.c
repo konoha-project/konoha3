@@ -611,8 +611,10 @@ static KMETHOD Complex_conj(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
-	double ret = conj(z);
-	RETURNf_(ret);
+	double _Complex answer = conj(z);
+	kComplex *ret = (kComplex *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+	ret->z = answer;
+	RETURN_(ret);
 }
 
 //## Complex Complex.conjf();
@@ -620,8 +622,10 @@ static KMETHOD Complex_conjf(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
-	float ret = conj(zf);
-	RETURNf_(ret);
+	float _Complex answer = conj(zf);
+	kComplex *ret = (kComplex *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+	ret->z = answer;
+	RETURN_(ret);
 }
 
 //## Complex Complex.conjl();
@@ -629,8 +633,10 @@ static KMETHOD Complex_conjl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
-	long double ret = conj(zl);
-	RETURNf_(ret);
+	long double answer = conj(zl);
+	kComplex *ret = (kComplex *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+	ret->z = answer;
+	RETURN_(ret);
 }
 
 /* You can attach the following annotations to each methods. */
@@ -718,9 +724,9 @@ static kbool_t Complex_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public, _F(Complex_carg),    TY_float, TY_Complex, MN_("carg"),    0,
 		_Public, _F(Complex_cargf),   TY_float, TY_Complex, MN_("cargf"),   0,
 		_Public, _F(Complex_cargl),   TY_float, TY_Complex, MN_("cargl"),   0,
-		_Public, _F(Complex_conj),    TY_float, TY_Complex, MN_("conj"),    0,
-		_Public, _F(Complex_conjf),   TY_float, TY_Complex, MN_("conjf"),   0,
-		_Public, _F(Complex_conjl),   TY_float, TY_Complex, MN_("conjl"),   0,
+		_Public, _F(Complex_conj),    TY_Complex, TY_Complex, MN_("conj"),    0,
+		_Public, _F(Complex_conjf),   TY_Complex, TY_Complex, MN_("conjf"),   0,
+		_Public, _F(Complex_conjl),   TY_Complex, TY_Complex, MN_("conjl"),   0,
 		DEND, /* <= sentinel */
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
