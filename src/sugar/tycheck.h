@@ -429,7 +429,7 @@ static kstatus_t kMethod_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtyp
 	return result;
 }
 
-static int TokenSequence_selectStatement(KonohaContext *kctx, TokenSequence *tokens, TokenSequence *source)
+static void TokenSequence_selectStatement(KonohaContext *kctx, TokenSequence *tokens, TokenSequence *source)
 {
 	int currentIdx, sourceEndIdx = source->endIdx, isPreviousIndent = false;
 	for(currentIdx = source->beginIdx; currentIdx < sourceEndIdx; currentIdx++) {
@@ -438,18 +438,19 @@ static int TokenSequence_selectStatement(KonohaContext *kctx, TokenSequence *tok
 			source->endIdx = currentIdx + 1;
 			break;
 		}
-		if(isPreviousIndent && tk->unresolvedTokenType == TokenType_INDENT) {
+		if(isPreviousIndent && kToken_isIndent(tk)) {
 			source->endIdx = currentIdx;
 			break;
 		}
-		isPreviousIndent = (tk->unresolvedTokenType == TokenType_INDENT);
+		isPreviousIndent = (kToken_isIndent(tk));
 	}
 	KLIB kArray_clear(kctx, tokens->tokenList, tokens->beginIdx);
 	tokens->endIdx = 0;
+	//KdumpTokenArray(kctx, source->tokenList, source->beginIdx, source->endIdx);
 	TokenSequence_resolved2(kctx, tokens, NULL, source, source->beginIdx);
+	//KdumpTokenArray(kctx, tokens->tokenList, tokens->beginIdx, tokens->endIdx);
 	source->beginIdx = source->endIdx;
 	source->endIdx = sourceEndIdx;
-	return currentIdx;
 }
 
 static kstatus_t TokenSequence_eval(KonohaContext *kctx, TokenSequence *source)
@@ -459,19 +460,20 @@ static kstatus_t TokenSequence_eval(KonohaContext *kctx, TokenSequence *source)
 	PUSH_GCSTACK(mtd);
 	KLIB kMethod_setParam(kctx, mtd, TY_Object, 0, NULL);
 	kBlock *singleBlock = GCSAFE_new(Block, source->ns);
-	TokenSequence tokens = {source->ns, source->tokenList, kArray_size(source->tokenList), 0};
+	TokenSequence tokens = {source->ns, source->tokenList};
 	while(source->beginIdx < source->endIdx) {
-		if(TokenSequence_selectStatement(kctx, &tokens, source)) {
-			if(source->SourceConfig.foundErrorToken != NULL) return K_BREAK;
-			while(tokens.beginIdx < tokens.endIdx) {
-				KLIB kArray_clear(kctx, singleBlock->stmtList, 0);
-				kBlock_addNewStmt2(kctx, singleBlock, &tokens);
-				if(kArray_size(singleBlock->stmtList) > 0) {
-					status = kBlock_genEvalCode(kctx, singleBlock, mtd);
-					if(status != K_CONTINUE) break;
-				}
+		TokenSequence_push(kctx, tokens);
+		TokenSequence_selectStatement(kctx, &tokens, source);
+		if(source->SourceConfig.foundErrorToken != NULL) return K_BREAK;
+		while(tokens.beginIdx < tokens.endIdx) {
+			KLIB kArray_clear(kctx, singleBlock->stmtList, 0);
+			kBlock_addNewStmt2(kctx, singleBlock, &tokens);
+			if(kArray_size(singleBlock->stmtList) > 0) {
+				status = kBlock_genEvalCode(kctx, singleBlock, mtd);
+				if(status != K_CONTINUE) break;
 			}
 		}
+		TokenSequence_pop(kctx, tokens);
 	}
 	return status;
 }

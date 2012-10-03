@@ -590,7 +590,7 @@ static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, Token
 	//KdumpTokenArray(kctx, rules->tokenList, rules->beginIdx, rules->endIdx);
 	for(i = rules->beginIdx; i < rules->endIdx; i++) {
 		kTokenVar *tk = rules->tokenList->tokenVarItems[i];
-		if(tk->unresolvedTokenType == TokenType_INDENT) continue;
+		if(kToken_isIndent(tk)) continue;
 		DBG_ASSERT(tk->resolvedSyntaxInfo != NULL);
 		if(tk->resolvedSyntaxInfo->keyword == KW_TextPattern) {
 			int topch = Token_topch(tk);

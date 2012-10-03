@@ -191,7 +191,6 @@ typedef struct SugarSyntaxVar         SugarSyntaxVar;
 #define SYNFLAG_StmtJumpAhead0      ((kshortflag_t)1 << 9)  /* continue */
 #define SYNFLAG_StmtJumpSkip0       ((kshortflag_t)1 << 10)  /* break */
 
-
 struct SugarSyntaxVar {
 	ksymbol_t  keyword;               kshortflag_t  flag;
 	const struct SugarSyntaxVar      *parentSyntaxNULL;
@@ -268,6 +267,8 @@ struct kTokenVar {
 		ksymbol_t   stmtEntryKey;         // pattern name for 'setting key in Stmt'
 	};
 };
+
+#define kToken_isIndent(T)  ((T)->unresolvedTokenType == TokenType_INDENT && (T)->resolvedSyntaxInfo == NULL)
 
 #define kTokenFlag_StatementSeparator    kObject_Local1
 #define kTokenFlag_RequiredReformat      kObject_Local2

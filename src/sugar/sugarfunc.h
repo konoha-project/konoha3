@@ -32,7 +32,7 @@ static int findEndOfStatement(KonohaContext *kctx, kArray *tokenList, int beginI
 	for(c = beginIdx; c < endIdx; c++) {
 		kToken *tk = tokenList->tokenItems[c];
 		if(kToken_is(StatementSeparator, tk)) return c;
-		if(isNoSemiColon && tk->unresolvedTokenType == TokenType_INDENT) {
+		if(isNoSemiColon && kToken_isIndent(tk)) {
 			return c;
 		}
 	}
@@ -142,7 +142,7 @@ static KMETHOD PatternMatch_Toks(KonohaContext *kctx, KonohaStack *sfp)
 		kArray *a = new_(TokenArray, (intptr_t)(endIdx - beginIdx));
 		for(; beginIdx < endIdx; beginIdx++) {
 			kToken *tk = tokenList->tokenItems[beginIdx];
-			if(tk->unresolvedTokenType == TokenType_INDENT) continue;
+			if(kToken_isIndent(tk)) continue;
 			KLIB kArray_add(kctx, a, tk);
 		}
 		kStmt_setParsedObject(kctx, stmt, name, UPCAST(a));

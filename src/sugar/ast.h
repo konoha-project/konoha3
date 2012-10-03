@@ -213,10 +213,10 @@ static int TokenUtils_parseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArr
 		foundClass = CT_(tk->resolvedTypeId);
 		nextIdx = beginIdx + 1;
 	}
-	else if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern) { // recheck
+	else if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern) { // check
 		foundClass = KLIB kNameSpace_getClass(kctx, ns, S_text(tk->text), S_size(tk->text), NULL);
 		if(foundClass != NULL) {
-			kToken_setTypeId(kctx, tk, ns, foundClass->typeId);
+//			kToken_setTypeId(kctx, tk, ns, foundClass->typeId);
 			nextIdx = beginIdx + 1;
 		}
 	}
@@ -291,6 +291,7 @@ static SugarSyntax* kNameSpace_getStatementSyntax(KonohaContext *kctx, kNameSpac
 {
 	kToken *tk = tokenList->tokenItems[beginIdx];
 	SugarSyntax *syn = tk->resolvedSyntaxInfo;
+	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
 	if(syn->syntaxRuleNULL == NULL) {
 		int nextIdx = TokenUtils_parseTypePattern(kctx, ns, tokenList, beginIdx, endIdx, NULL);
 		DBG_P("@ nextIdx = %d < %d", nextIdx, endIdx);
@@ -302,7 +303,6 @@ static SugarSyntax* kNameSpace_getStatementSyntax(KonohaContext *kctx, kNameSpac
 					return SYN_(ns, KW_StmtMethodDecl);
 				}
 				kToken *tk = tokenList->tokenItems[nextIdx];
-				KdumpToken(kctx, tk);
 				if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern) {
 					int symbolNextIdx = TokenUtils_skipIndent(tokenList, nextIdx + 1, endIdx);
 					if(symbolNextIdx < endIdx && tokenList->tokenItems[symbolNextIdx]->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
@@ -540,7 +540,7 @@ static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, M
 	}
 	for(; currentIdx < source->endIdx; currentIdx++) {
 		kTokenVar *tk = source->tokenList->tokenVarItems[currentIdx];
-		if(tk->unresolvedTokenType == TokenType_INDENT && tokens->TargetPolicy.RemovingIndent) {
+		if(kToken_isIndent(tk) && tokens->TargetPolicy.RemovingIndent) {
 			continue;  // remove INDENT in () or []
 		}
 		if(tk->unresolvedTokenType == TokenType_CODE && (tokens->TargetPolicy.ExpandingBraceGroup || macroParam != NULL)) {
@@ -641,7 +641,7 @@ static int kStmt_currentTokenIndex(KonohaContext *kctx, kStmt *stmt, kArray *tok
 	int c;
 	for(c = beginIdx; c < endIdx; c++) {
 		kToken *tk = tokenList->tokenItems[c];
-		if(tk->unresolvedTokenType == TokenType_INDENT) {
+		if(kToken_isIndent(tk)) {
 			continue;
 		}
 		if(tk->unresolvedTokenType == TokenType_ERR) {
@@ -739,24 +739,6 @@ static int kStmt_parseBySyntaxRule2(KonohaContext *kctx, kStmt *stmt, int indent
 	return endIdx;
 }
 
-static int TokenSequence_skipAnnotation(KonohaContext *kctx, TokenSequence *range, int currentIdx)
-{
-	for(currentIdx = range->beginIdx; currentIdx < range->endIdx; currentIdx++) {
-		kToken *tk = range->tokenList->tokenItems[currentIdx];
-		if(tk->unresolvedTokenType == TokenType_INDENT) {
-			continue;
-		}
-		if(!MN_isAnnotation(tk->resolvedSymbol)) break;
-		if(currentIdx + 1 < range->endIdx) {
-			kToken *nextToken = range->tokenList->tokenItems[currentIdx+1];
-			if(nextToken->resolvedSyntaxInfo != NULL && nextToken->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
-				currentIdx++;
-			}
-		}
-	}
-	return currentIdx;
-}
-
 static int TokenSequence_skipStatementSeparator(TokenSequence *tokens, int currentIdx)
 {
 	for(; currentIdx < tokens->endIdx; currentIdx++) {
@@ -769,11 +751,31 @@ static int TokenSequence_skipStatementSeparator(TokenSequence *tokens, int curre
 	return currentIdx;
 }
 
+static int TokenSequence_skipAnnotation(KonohaContext *kctx, TokenSequence *tokens, int currentIdx)
+{
+	for(; currentIdx < tokens->endIdx; currentIdx++) {
+		kToken *tk = tokens->tokenList->tokenItems[currentIdx];
+		DBG_P("cur=%d isINDENT=%d", currentIdx, kToken_isIndent(tk));
+		KdumpToken(kctx, tk);
+		if(kToken_isIndent(tk)) continue;
+		DBG_P("cur=%d, anno=%d", currentIdx, MN_isAnnotation(tk->resolvedSymbol));
+		if(!MN_isAnnotation(tk->resolvedSymbol)) break;
+		if(currentIdx + 1 < tokens->endIdx) {
+			kToken *nextToken = tokens->tokenList->tokenItems[currentIdx+1];
+			KdumpToken(kctx, nextToken);
+			if(nextToken->resolvedSyntaxInfo != NULL && nextToken->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
+				currentIdx++;
+			}
+		}
+	}
+	return currentIdx;
+}
+
 static int kStmt_addAnnotation2(KonohaContext *kctx, kStmtVar *stmt, TokenSequence *range, int currentIdx, int *indentRef)
 {
 	for(currentIdx = range->beginIdx; currentIdx < range->endIdx; currentIdx++) {
 		kToken *tk = range->tokenList->tokenItems[currentIdx];
-		if(tk->unresolvedTokenType == TokenType_INDENT) {
+		if(kToken_isIndent(tk)) {
 			indentRef[0] = tk->indent;
 			stmt->uline = tk->uline;
 			continue;
@@ -797,7 +799,9 @@ static int kStmt_addAnnotation2(KonohaContext *kctx, kStmtVar *stmt, TokenSequen
 static void kBlock_addNewStmt2(KonohaContext *kctx, kBlock *bk, TokenSequence *tokens)
 {
 	int currentIdx = TokenSequence_skipStatementSeparator(tokens, tokens->beginIdx);
-	currentIdx = TokenSequence_skipAnnotation(kctx, tokens, tokens->beginIdx);
+	currentIdx = TokenSequence_skipAnnotation(kctx, tokens, currentIdx);
+	DBG_P("begin=%d, curr=%d", tokens->beginIdx, currentIdx);
+	KdumpTokenArray(kctx, tokens->tokenList, currentIdx, tokens->endIdx);
 	if(currentIdx < tokens->endIdx) {
 		int indent = 0;
 		kStmtVar *stmt = new_(StmtVar, 0);
