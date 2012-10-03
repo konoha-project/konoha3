@@ -296,6 +296,7 @@ struct TokenSequenceSource {
 
 struct TokenSequenceTarget {
 	int RemovingIndent;
+	SugarSyntax *syntaxSymbolPattern;
 };
 
 typedef struct TokenSequence {

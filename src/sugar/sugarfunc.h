@@ -26,7 +26,6 @@
 extern "C" {
 #endif
 
-
 static int findEndOfStatement(KonohaContext *kctx, kArray *tokenList, int beginIdx, int endIdx, int isNoSemiColon)
 {
 	int c;
@@ -67,9 +66,9 @@ static KMETHOD PatternMatch_Type(KonohaContext *kctx, KonohaStack *sfp)
 	KonohaClass *foundClass = NULL;
 	int returnIdx = kStmt_parseTypePattern(kctx, stmt, Stmt_nameSpace(stmt), tokenList, beginIdx, endIdx, &foundClass);
 	if(foundClass != NULL) {
-		kToken *tk = tokenList->tokenItems[beginIdx];
-		kToken_setTypeId(kctx, tk, Stmt_nameSpace(stmt), foundClass->typeId);
+		kTokenVar *tk = GCSAFE_new(TokenVar, 0);
 		kStmt_setParsedObject(kctx, stmt, name, UPCAST(tk));
+		kToken_setTypeId(kctx, tk, Stmt_nameSpace(stmt), foundClass->typeId);
 	}
 	RETURNi_(returnIdx);
 }
@@ -956,7 +955,6 @@ static kbool_t kStmt_declType(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kty
 			// this is neccesarry to avoid 'int a = a + 1;';
 			return false;
 		}
-		DBG_P("ty=%s", TY_t(ty));
 		if(ty == TY_var) {
 			kToken *termToken = kExpr_at(declExpr, 1)->termToken;
 			ktype_t inferedType = kExpr_at(declExpr, 2)->ty;
@@ -966,8 +964,8 @@ static kbool_t kStmt_declType(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kty
 		newstmt = TypeDecl(kctx, stmt, gma, ty, kExpr_at(declExpr, 1), kExpr_at(declExpr, 2), thunk);
 	}
 	else if(Expr_isSymbolTerm(declExpr)) {
-		if(ty == TY_var) {
-			kStmt_printMessage(kctx, stmt, ErrTag, "initial value is expected: var %s%s", PSYM_t(declExpr->termToken->resolvedSymbol));
+		if(ty == TY_var  || !TY_is(Nullable, ty)) {
+			kStmt_printMessage(kctx, stmt, ErrTag, "%s %s%s: initial value is expected", TY_t(ty), PSYM_t(declExpr->termToken->resolvedSymbol));
 			return false;
 		}
 		else {
