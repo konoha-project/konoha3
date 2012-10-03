@@ -84,7 +84,6 @@ static void Token_init(KonohaContext *kctx, kObject *o, void *conf)
 	}
 	else {
 		KINITv(tk->text, SYM_s(tk->unresolvedTokenType));
-		DBG_P("symbol=%d, '%s'", tk->unresolvedTokenType, S_text(tk->text));
 	}
 	tk->resolvedSyntaxInfo = NULL;
 }
