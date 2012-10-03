@@ -289,8 +289,9 @@ static const char* StatementType(ksymbol_t keyword)
 
 static SugarSyntax* kNameSpace_getStatementSyntax(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
 {
-	//KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
-	if(kNameSpace_isAllowed(CStyleDecl, ns)) {
+	kToken *tk = tokenList->tokenItems[beginIdx];
+	SugarSyntax *syn = tk->resolvedSyntaxInfo;
+	if(syn->syntaxRuleNULL == NULL) {
 		int nextIdx = TokenUtils_parseTypePattern(kctx, ns, tokenList, beginIdx, endIdx, NULL);
 		DBG_P("@ nextIdx = %d < %d", nextIdx, endIdx);
 		if(nextIdx != -1) {
@@ -316,13 +317,7 @@ static SugarSyntax* kNameSpace_getStatementSyntax(KonohaContext *kctx, kNameSpac
 					return SYN_(ns, KW_StmtMethodDecl);
 				}
 			}
-			DBG_P("Expression");
-			return SYN_(ns, KW_ExprPattern);
 		}
-	}
-	kToken *tk = tokenList->tokenItems[beginIdx];
-	SugarSyntax *syn = tk->resolvedSyntaxInfo;
-	if(syn->syntaxRuleNULL == NULL) {
 		return SYN_(ns, KW_ExprPattern);
 	}
 	return syn;
