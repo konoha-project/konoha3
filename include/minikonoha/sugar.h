@@ -308,14 +308,13 @@ typedef struct TokenSequence {
 #define TokenSequence_end(kctx, range)   range->endIdx = kArray_size(range->tokenList)
 
 #define TokenSequence_push(kctx, range) \
-	size_t _checkIdx = kArray_size(range.tokenList);\
-	range.beginIdx = _checkIdx;\
+	size_t _popCheckIdx = kArray_size(range.tokenList);\
+	range.beginIdx = kArray_size(range.tokenList);\
 	range.endIdx   = 0;\
 
 #define TokenSequence_pop(kctx, range)   do {\
-	KLIB kArray_clear(kctx, range.tokenList, range.beginIdx);\
-	range.endIdx = range.beginIdx;\
-	DBG_ASSERT(_checkIdx == kArray_size(range.tokenList));\
+	KLIB kArray_clear(kctx, range.tokenList, _popCheckIdx);\
+	DBG_ASSERT(_popCheckIdx == kArray_size(range.tokenList));\
 } while (0)
 
 typedef kbool_t (*CheckEndOfStmtFunc2)(KonohaContext *, TokenSequence *range, TokenSequence *sourceRange, int *currentIdxRef, int *indentRef);
