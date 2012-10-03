@@ -88,7 +88,7 @@ static KMETHOD ParseExpr_BinarySugar(KonohaContext *kctx, KonohaStack *sfp)
 			{0, NULL, 0, 0},
 		};
 		macro.TargetPolicy.RemovingIndent = true;
-		SUGAR TokenSequence_applyMacro(kctx, &macro, opSyntax->macroDataNULL, opSyntax->macroParamSize, macroParam, NULL);
+		SUGAR TokenSequence_applyMacro(kctx, &macro, opSyntax->macroDataNULL, opSyntax->macroParamSize, macroParam);
 		kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx);
 		TokenSequence_pop(kctx, macro);
 		RETURN_(expr);

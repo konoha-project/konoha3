@@ -514,7 +514,7 @@ typedef struct {
 
 	void        (*kNameSpace_setTokenizeFunc)(KonohaContext *, kNameSpace *, int ch, TokenizeFunc, kFunc *, int isAddition);
 	void        (*TokenSequence_tokenize)(KonohaContext *, TokenSequence *, const char *, kfileline_t);
-	kbool_t     (*TokenSequence_applyMacro)(KonohaContext *, TokenSequence *, kArray *, size_t, MacroSet *, kToken *);
+	kbool_t     (*TokenSequence_applyMacro)(KonohaContext *, TokenSequence *, kArray *, size_t, MacroSet *);
 	void        (*kNameSpace_setMacroData)(KonohaContext *, kNameSpace *, ksymbol_t, int, const char *);
 	int         (*TokenSequence_resolved)(KonohaContext *, TokenSequence *, MacroSet *, TokenSequence *, int);
 	kstatus_t   (*TokenSequence_eval)(KonohaContext *, TokenSequence *);

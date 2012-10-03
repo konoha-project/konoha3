@@ -580,7 +580,7 @@ static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, M
 					continue;
 				}
 				SugarSyntax *syn = SYN_(source->ns, symbol);
-				if(FLAG_is(syn->flag, SYNFLAG_Macro)) {
+				if(syn != NULL && FLAG_is(syn->flag, SYNFLAG_Macro)) {
 					currentIdx = TokenSequence_applyMacroSyntax(kctx, tokens, syn, macroParam, source, currentIdx);
 					continue;
 				}
