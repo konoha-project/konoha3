@@ -74,10 +74,31 @@ static KMETHOD ParseExpr_SelfAssign(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
+static KMETHOD ParseExpr_BinarySugar(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
+	kToken *opToken = tokenList->tokenItems[operatorIdx];
+	SugarSyntax *opSyntax = opToken->resolvedSyntaxInfo;
+	if(opSyntax->macroParamSize == 2) {
+		TokenSequence macro = {Stmt_nameSpace(stmt), tokenList};
+		TokenSequence_push(kctx, macro);
+		MacroSet macroParam[] = {
+			{SYM_("X"), tokenList, beginIdx, operatorIdx},
+			{SYM_("Y"), tokenList, operatorIdx+1, endIdx},
+			{0, NULL, 0, 0},
+		};
+		macro.TargetPolicy.RemovingIndent = true;
+		SUGAR TokenSequence_applyMacro(kctx, &macro, opSyntax->macroDataNULL, opSyntax->macroParamSize, macroParam, NULL);
+		kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx);
+		TokenSequence_pop(kctx, macro);
+		RETURN_(expr);
+	}
+}
+
 static kbool_t assign_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("+="), (SYNFLAG_ExprLeftJoinOp2), NULL, C_PRECEDENCE_ASSIGN, 0, NULL, ParseExpr_SelfAssign, NULL, NULL, NULL, },
+		{ SYM_("+="), (SYNFLAG_ExprLeftJoinOp2), NULL, C_PRECEDENCE_ASSIGN, 0, NULL, ParseExpr_BinarySugar, NULL, NULL, NULL, },
 		{ SYM_("-="), (SYNFLAG_ExprLeftJoinOp2), NULL, C_PRECEDENCE_ASSIGN, 0, NULL, ParseExpr_SelfAssign, NULL, NULL, NULL, },
 		{ SYM_("*="), (SYNFLAG_ExprLeftJoinOp2), NULL, C_PRECEDENCE_ASSIGN, 0, NULL, ParseExpr_SelfAssign, NULL, NULL, NULL, },
 		{ SYM_("/="), (SYNFLAG_ExprLeftJoinOp2), NULL, C_PRECEDENCE_ASSIGN, 0, NULL, ParseExpr_SelfAssign, NULL, NULL, NULL, },
@@ -85,6 +106,7 @@ static kbool_t assign_initNameSpace(KonohaContext *kctx, kNameSpace *packageName
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
+	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("+="), 2, "X Y X = (X) + (Y)");
 	return true;
 }
 

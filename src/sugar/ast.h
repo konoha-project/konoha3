@@ -325,42 +325,68 @@ static SugarSyntax* kNameSpace_getStatementSyntax(KonohaContext *kctx, kNameSpac
 
 // ---------------------------------------------------------------------------
 
-static void kToken_transformToBraceGroup(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns, MacroSet *macroSet)
-{
-	if(tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
-		INIT_GCSTACK();
-		TokenSequence range = {ns, new_(TokenArray, 0), 0, 0};
-		PUSH_GCSTACK(range.tokenList);
-		TokenSequence_tokenize(kctx, &range, S_text(tk->text), tk->uline);
-		KSETv(tk, tk->subTokenList, range.tokenList);
-		tk->resolvedSyntaxInfo = SYN_(ns, KW_BraceGroup);
-		RESET_GCSTACK();
-	}
-}
-
-/* ------------------------------------------------------------------------ */
-
 static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, MacroSet *, TokenSequence *source, int beginIdx);
 
-static kbool_t TokenSequence_expandMacro(KonohaContext *kctx, TokenSequence *tokens, ksymbol_t symbol, MacroSet *macroSet)
+static kbool_t TokenSequence_expandMacro(KonohaContext *kctx, TokenSequence *tokens, ksymbol_t symbol, MacroSet *macroParam)
 {
-	while(macroSet->symbol != 0) {
-		if(macroSet->symbol == symbol) {
-			TokenSequence paramtokens = {tokens->ns, macroSet->tokenList, macroSet->beginIdx, macroSet->endIdx};
-			TokenSequence_resolved2(kctx, tokens, NULL, &paramtokens, macroSet->beginIdx);
+	while(macroParam->symbol != 0) {
+		if(macroParam->symbol == symbol) {
+			TokenSequence paramtokens = {tokens->ns, macroParam->tokenList, macroParam->beginIdx, macroParam->endIdx};
+			TokenSequence_resolved2(kctx, tokens, NULL, &paramtokens, macroParam->beginIdx);
 			return true;
 		}
-		macroSet++;
+		macroParam++;
 	}
 	return false;
 }
 
-static kbool_t TokenSequence_applyMacro(KonohaContext *kctx, TokenSequence *tokens, kArray *macroTokenList, size_t paramsize, kToken *group)
+static kArray* kArray_slice(KonohaContext *kctx, kArray *a, int beginIdx, int endIdx)
+{
+	kArray *newa = new_(Array, endIdx - beginIdx);
+	int i;
+	for(i = beginIdx; i < endIdx; i++) {
+		KLIB kArray_add(kctx, newa, a->objectItems[i]);
+	}
+	return newa;
+}
+
+static kTokenVar* kToken_expandGroupMacro(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns, MacroSet *macroParam)
+{
+	TokenSequence source = {ns, tk->subTokenList, 0, kArray_size(tk->subTokenList)};
+	if(source.endIdx > 0) {
+		int isChanged = true;
+		TokenSequence group = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
+		TokenSequence_push(kctx, group);
+		TokenSequence_resolved2(kctx, &group, macroParam, &source, source.beginIdx);
+		if(group.endIdx - group.beginIdx == source.endIdx) {
+			int i;
+			isChanged = false;
+			for(i = 0; i < source.endIdx; i++) {
+				if(source.tokenList->tokenItems[i] != group.tokenList->tokenItems[group.beginIdx+i]) {
+					isChanged = true;
+				}
+			}
+		}
+		if(isChanged) {
+			kTokenVar *groupToken = new_(TokenVar, tk->resolvedSymbol);
+			KSETv(groupToken, groupToken->subTokenList, kArray_slice(kctx, group.tokenList, group.beginIdx, group.endIdx));
+			groupToken->resolvedSyntaxInfo = tk->resolvedSyntaxInfo;
+			groupToken->uline = tk->uline;
+			tk = groupToken;
+		}
+		TokenSequence_pop(kctx, group);
+	}
+	return tk;
+}
+
+static kbool_t TokenSequence_applyMacro(KonohaContext *kctx, TokenSequence *tokens, kArray *macroTokenList, size_t paramsize, MacroSet *macroParam, kToken *group)
 {
 	TokenSequence macro = {tokens->ns, macroTokenList, paramsize, kArray_size(macroTokenList)};
-	if(paramsize == 0) {
-		TokenSequence_resolved2(kctx, tokens, NULL, &macro, 0);
-		return true;
+	KdumpTokenArray(kctx, macro.tokenList, 0, kArray_size(macroTokenList));
+	int dstart = kArray_size(tokens->tokenList);
+	DBG_P("dstart=%d, tokens->begin,end=%d, %d", dstart, tokens->beginIdx, tokens->endIdx);
+	if(paramsize == 0 || macroParam != NULL) {
+		TokenSequence_resolved2(kctx, tokens, macroParam, &macro, paramsize);
 	}
 	else {
 		MacroSet mp[paramsize+1];
@@ -377,38 +403,32 @@ static kbool_t TokenSequence_applyMacro(KonohaContext *kctx, TokenSequence *toke
 				if(!(p < paramsize)) break;
 			}
 		}
-		if(p + 1 == paramsize) {
-			mp[p].symbol = macroTokenList->tokenItems[p]->resolvedSymbol;
-			mp[p].tokenList = group->subTokenList;
-			mp[p].beginIdx = start;
-			mp[p].endIdx = kArray_size(group->subTokenList);
-			mp[p+1].symbol = 0; /* sentinel */
-			TokenSequence_resolved2(kctx, tokens, mp, &macro, paramsize/*start*/);
-			return true;
+		if(p + 1 != paramsize) {
+			return false;
 		}
-		return false;
+		mp[p].symbol = macroTokenList->tokenItems[p]->resolvedSymbol;
+		mp[p].tokenList = group->subTokenList;
+		mp[p].beginIdx = start;
+		mp[p].endIdx = kArray_size(group->subTokenList);
+		mp[p+1].symbol = 0; /* sentinel */
+		TokenSequence_resolved2(kctx, tokens, mp, &macro, paramsize/*start*/);
 	}
-}
-
-static kArray* kArray_slice(KonohaContext *kctx, kArray *a, int beginIdx, int endIdx)
-{
-	kArray *newa = new_(Array, endIdx - beginIdx);
-	int i;
-	for(i = beginIdx; i < endIdx; i++) {
-		KLIB kArray_add(kctx, newa, a->objectItems[i]);
-	}
-	return newa;
+	DBG_P("dstart=%d, tokens->begin,end=%d, %d", dstart, tokens->beginIdx, tokens->endIdx);
+	KdumpTokenArray(kctx, tokens->tokenList, dstart, tokens->endIdx);
+	return true;
 }
 
 static void kNameSpace_setMacroData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int paramsize, const char *data)
 {
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)SUGAR kNameSpace_getSyntax(kctx, ns, keyword, /*new*/true);
-	TokenSequence tokens = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
-	TokenSequence_push(kctx, tokens);
-	TokenSequence_tokenize(kctx, &tokens, data, 0);
+	TokenSequence source = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
+	TokenSequence_push(kctx, source);
+	TokenSequence_tokenize(kctx, &source, data, 0);
+	TokenSequence tokens = {source.ns, source.tokenList, source.endIdx};
+	TokenSequence_resolved2(kctx, &tokens, NULL, &source, source.beginIdx);
 	syn->macroParamSize = paramsize;
-	KSETv(ns, syn->macroDataNULL, kArray_slice(kctx, tokens.tokenList, tokens.beginIdx, tokens.endIdx));
-	TokenSequence_pop(kctx, tokens);
+	KINITSETv(ns, syn->macroDataNULL, kArray_slice(kctx, tokens.tokenList, tokens.beginIdx + 1 /* removing head indent*/, tokens.endIdx));
+	TokenSequence_pop(kctx, source);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -423,7 +443,7 @@ static int TokenSequence_addGroup(KonohaContext *kctx, TokenSequence *tokens, Ma
 	KSETv(astToken, astToken->subTokenList, new_(TokenArray, 0));
 	astToken->uline = openToken->uline;
 	{
-		TokenSequence nested = {source->ns, astToken->subTokenList, 0, 0};
+		TokenSequence nested = {source->ns, astToken->subTokenList};
 		kToken *pushOpenToken = source->SourceConfig.openToken;
 		int pushStopChar = source->SourceConfig.stopChar;
 		source->SourceConfig.openToken = openToken;
@@ -436,7 +456,20 @@ static int TokenSequence_addGroup(KonohaContext *kctx, TokenSequence *tokens, Ma
 	}
 }
 
-static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, MacroSet *macro, TokenSequence *source, int beginIdx)
+static kTokenVar* kToken_transformToBraceGroup(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns, MacroSet *macroSet)
+{
+	TokenSequence source = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
+	TokenSequence_push(kctx, source);
+	TokenSequence_tokenize(kctx, &source, S_text(tk->text), tk->uline);
+	KSETv(tk, tk->subTokenList, new_(TokenArray, 0));
+	tk->resolvedSyntaxInfo = SYN_(ns, KW_BraceGroup);
+	TokenSequence tokens = {ns, tk->subTokenList, 0};
+	TokenSequence_resolved2(kctx, &tokens, macroSet, &source, source.beginIdx);
+	TokenSequence_pop(kctx, source);
+	return tk;
+}
+
+static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, MacroSet *macroParam, TokenSequence *source, int beginIdx)
 {
 	int currentIdx = beginIdx;
 	if(tokens->TargetPolicy.syntaxSymbolPattern == NULL) {
@@ -447,12 +480,29 @@ static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, M
 		if(tk->unresolvedTokenType == TokenType_INDENT && tokens->TargetPolicy.RemovingIndent) {
 			continue;  // remove INDENT in () or []
 		}
+		if(tk->unresolvedTokenType == TokenType_CODE && (tokens->TargetPolicy.ExpandingBraceGroup || macroParam != NULL)) {
+			tk = kToken_transformToBraceGroup(kctx, tk, tokens->ns, macroParam);
+			KLIB kArray_add(kctx, tokens->tokenList, tk);
+			continue;
+		}
+		if(macroParam != NULL && tk->resolvedSyntaxInfo != NULL) {
+			ksymbol_t keyword = tk->resolvedSyntaxInfo->keyword;
+			if(keyword == KW_SymbolPattern && TokenSequence_expandMacro(kctx, tokens, tk->resolvedSymbol, macroParam)) {
+				continue;
+			}
+			if(keyword == KW_ParenthesisGroup || keyword == KW_BracketGroup || keyword == KW_BraceGroup) {
+				tk = kToken_expandGroupMacro(kctx, tk, tokens->ns, macroParam);
+			}
+			if(keyword == TokenType_CODE) {
+				tk = kToken_transformToBraceGroup(kctx, tk, tokens->ns, macroParam);
+			}
+		}
 		if(tk->resolvedSyntaxInfo == NULL) {
 			if(source->SourceConfig.openToken != NULL && source->SourceConfig.stopChar == tk->topCharHint) {
 				return currentIdx;
 			}
 			if(tk->topCharHint == '(' || tk->topCharHint == '[') {
-				currentIdx = TokenSequence_addGroup(kctx, tokens, macro, source, currentIdx+1, tk);
+				currentIdx = TokenSequence_addGroup(kctx, tokens, macroParam, source, currentIdx+1, tk);
 				if(source->SourceConfig.foundErrorToken != NULL) return source->endIdx;
 				continue; // already added
 			}
@@ -463,7 +513,7 @@ static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, M
 			if(tk->unresolvedTokenType == TokenType_SYMBOL) {
 				const char *t = S_text(tk->text);
 				ksymbol_t symbol = ksymbolA(t, S_size(tk->text), SYM_NEWID);
-				if(macro != NULL && TokenSequence_expandMacro(kctx, tokens, symbol, macro)) {
+				if(macroParam != NULL && TokenSequence_expandMacro(kctx, tokens, symbol, macroParam)) {
 					continue;
 				}
 				SugarSyntax *syn = SYN_(source->ns, symbol);
@@ -481,8 +531,8 @@ static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, M
 	}
 	if(source->SourceConfig.openToken != NULL) {
 		char buf[2] = {source->SourceConfig.stopChar, 0};
-		DBG_ASSERT(source->SourceConfig.openToken != NULL);
 		ERROR_UnclosedToken(kctx, (kTokenVar*)source->SourceConfig.openToken, (const char*)buf);
+		source->SourceConfig.foundErrorToken = source->SourceConfig.openToken;
 	}
 	TokenSequence_end(kctx, tokens);
 	return source->endIdx;

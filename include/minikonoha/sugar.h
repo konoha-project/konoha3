@@ -291,6 +291,7 @@ struct TokenSequenceSource {
 
 struct TokenSequenceTarget {
 	int RemovingIndent;
+	int ExpandingBraceGroup;
 	SugarSyntax *syntaxSymbolPattern;
 };
 
@@ -513,13 +514,13 @@ typedef struct {
 
 	void        (*kNameSpace_setTokenizeFunc)(KonohaContext *, kNameSpace *, int ch, TokenizeFunc, kFunc *, int isAddition);
 	void        (*TokenSequence_tokenize)(KonohaContext *, TokenSequence *, const char *, kfileline_t);
-	kbool_t     (*TokenSequence_applyMacro)(KonohaContext *, TokenSequence *, kArray *, size_t, kToken *);
+	kbool_t     (*TokenSequence_applyMacro)(KonohaContext *, TokenSequence *, kArray *, size_t, MacroSet *, kToken *);
 	void        (*kNameSpace_setMacroData)(KonohaContext *, kNameSpace *, ksymbol_t, int, const char *);
 	int         (*TokenSequence_resolved)(KonohaContext *, TokenSequence *, MacroSet *, TokenSequence *, int);
 	kstatus_t   (*TokenSequence_eval)(KonohaContext *, TokenSequence *);
 
 	int         (*TokenUtils_parseTypePattern)(KonohaContext *, kNameSpace *, kArray *, int , int , KonohaClass **classRef);
-	void        (*kToken_transformToBraceGroup)(KonohaContext *, kTokenVar *, kNameSpace *, MacroSet *);
+	kTokenVar*  (*kToken_transformToBraceGroup)(KonohaContext *, kTokenVar *, kNameSpace *, MacroSet *);
 
 	void        (*kStmt_setParsedObject)(KonohaContext *, kStmt *, ksymbol_t, kObject *o);
 	uintptr_t   (*kStmt_parseFlag)(KonohaContext *kctx, kStmt *stmt, KonohaFlagSymbolData *flagData, uintptr_t flag);
