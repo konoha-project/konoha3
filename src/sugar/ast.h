@@ -325,7 +325,7 @@ static SugarSyntax* kNameSpace_getStatementSyntax(KonohaContext *kctx, kNameSpac
 
 // ---------------------------------------------------------------------------
 
-static void kToken_transformToBraceGroup(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns)
+static void kToken_transformToBraceGroup(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns, MacroSet *macroSet)
 {
 	if(tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
 		INIT_GCSTACK();
@@ -388,6 +388,27 @@ static kbool_t TokenSequence_applyMacro(KonohaContext *kctx, TokenSequence *toke
 		}
 		return false;
 	}
+}
+
+static kArray* kArray_slice(KonohaContext *kctx, kArray *a, int beginIdx, int endIdx)
+{
+	kArray *newa = new_(Array, endIdx - beginIdx);
+	int i;
+	for(i = beginIdx; i < endIdx; i++) {
+		KLIB kArray_add(kctx, newa, a->objectItems[i]);
+	}
+	return newa;
+}
+
+static void kNameSpace_setMacroData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int paramsize, const char *data)
+{
+	SugarSyntaxVar *syn = (SugarSyntaxVar *)SUGAR kNameSpace_getSyntax(kctx, ns, keyword, /*new*/true);
+	TokenSequence tokens = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
+	TokenSequence_push(kctx, tokens);
+	TokenSequence_tokenize(kctx, &tokens, data, 0);
+	syn->macroParamSize = paramsize;
+	KSETv(ns, syn->macroDataNULL, kArray_slice(kctx, tokens.tokenList, tokens.beginIdx, tokens.endIdx));
+	TokenSequence_pop(kctx, tokens);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -702,7 +723,7 @@ static kBlock* kStmt_getBlock(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, 
 		kToken *tk = (kToken*)bk;
 		if(ns == NULL) ns = Stmt_nameSpace(stmt);
 		if (tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
-			kToken_transformToBraceGroup(kctx, (kTokenVar*)tk, ns);
+			kToken_transformToBraceGroup(kctx, (kTokenVar*)tk, ns, NULL);
 		}
 		if (tk->resolvedSyntaxInfo->keyword == KW_BraceGroup) {
 			TokenSequence range = {ns, tk->subTokenList, 0, kArray_size(tk->subTokenList)};

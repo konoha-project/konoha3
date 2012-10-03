@@ -54,13 +54,6 @@ extern "C" {
 #define KW_TokenPattern     (((ksymbol_t)11)|KW_PATTERN) /*$Token*/
 
 typedef enum {
-//#define TokenType_ERR          KW_TokenPattern
-//#define TokenType_NONE         0
-//#define TokenType_INDENT       1
-//#define TokenType_SYMBOL       KW_SymbolPattern
-//#define TokenType_TEXT         KW_TextPattern
-//#define TokenType_INT          KW_NumberPattern
-//#define TokenType_CODE         KW_BlockPattern
 	TokenType_INDENT = 1,
 	TokenType_SYMBOL = KW_SymbolPattern,
 	TokenType_TEXT   = KW_TextPattern,
@@ -113,6 +106,7 @@ typedef enum {
 // Tokenizer
 
 #define KCHAR_MAX  41
+#define SIZEOF_TOKENMATRIX   (sizeof(void*) * KCHAR_MAX * 2)
 typedef struct TokenizerEnv TokenizerEnv;
 typedef int (*TokenizeFunc)(KonohaContext *, kTokenVar *, TokenizerEnv *, int);
 
@@ -130,9 +124,6 @@ struct TokenizerEnv {
 	};
 	kString            *preparedString;
 };
-
-#define SIZEOF_TOKENMATRIX   (sizeof(void*) * KCHAR_MAX * 2)
-
 
 /******
 // ParseToken
@@ -191,6 +182,16 @@ typedef struct SugarSyntaxVar         SugarSyntaxVar;
 #define SUGARFUNC_ExprTyCheck    4
 #define SUGARFUNC_SIZE           5
 
+#define SYNFLAG_Macro               ((kshortflag_t)1)
+
+#define SYNFLAG_ExprLeftJoinOp2    ((kshortflag_t)1 << 1)
+#define SYNFLAG_ExprPostfixOp2     ((kshortflag_t)1 << 2)
+
+#define SYNFLAG_StmtBreakExec      ((kshortflag_t)1 << 8)  /* return, throw */
+#define SYNFLAG_StmtJumpAhead0      ((kshortflag_t)1 << 9)  /* continue */
+#define SYNFLAG_StmtJumpSkip0       ((kshortflag_t)1 << 10)  /* break */
+
+
 struct SugarSyntaxVar {
 	ksymbol_t  keyword;               kshortflag_t  flag;
 	const struct SugarSyntaxVar      *parentSyntaxNULL;
@@ -201,7 +202,8 @@ struct SugarSyntaxVar {
 	};
 	// binary
 	kshort_t precedence_op2;        kshort_t precedence_op1;
-	int lastLoadedPackageId;
+	kpackage_t lastLoadedPackageId; kshort_t macroParamSize;
+	kArray                          *macroDataNULL;
 };
 
 #define PatternMatch_(NAME)    .PatternMatch   = PatternMatch_##NAME
@@ -211,13 +213,6 @@ struct SugarSyntaxVar {
 #define ExprTyCheck_(NAME)     .ExprTyCheck    = ExprTyCheck_##NAME
 
 #define _OPLeft   .flag = (SYNFLAG_ExprLeftJoinOp2)
-
-#define SYNFLAG_ExprLeftJoinOp2    ((kshortflag_t)1 << 1)
-#define SYNFLAG_ExprPostfixOp2     ((kshortflag_t)1 << 2)
-
-#define SYNFLAG_StmtBreakExec      ((kshortflag_t)1 << 8)  /* return, throw */
-#define SYNFLAG_StmtJumpAhead0      ((kshortflag_t)1 << 9)  /* continue */
-#define SYNFLAG_StmtJumpSkip0       ((kshortflag_t)1 << 10)  /* break */
 
 // operator priority
 
@@ -312,16 +307,16 @@ typedef struct TokenSequence {
 
 #define TokenSequence_end(kctx, range)   range->endIdx = kArray_size(range->tokenList)
 
-#define TokenSequence_push(kctx, range)   do {\
-	range.beginIdx = kArray_size(range.tokenList);\
+#define TokenSequence_push(kctx, range) \
+	size_t _checkIdx = kArray_size(range.tokenList);\
+	range.beginIdx = _checkIdx;\
 	range.endIdx   = 0;\
-} while (0)
 
 #define TokenSequence_pop(kctx, range)   do {\
 	KLIB kArray_clear(kctx, range.tokenList, range.beginIdx);\
 	range.endIdx = range.beginIdx;\
+	DBG_ASSERT(_checkIdx == kArray_size(range.tokenList));\
 } while (0)
-
 
 typedef kbool_t (*CheckEndOfStmtFunc2)(KonohaContext *, TokenSequence *range, TokenSequence *sourceRange, int *currentIdxRef, int *indentRef);
 
@@ -519,10 +514,13 @@ typedef struct {
 
 	void        (*kNameSpace_setTokenizeFunc)(KonohaContext *, kNameSpace *, int ch, TokenizeFunc, kFunc *, int isAddition);
 	void        (*TokenSequence_tokenize)(KonohaContext *, TokenSequence *, const char *, kfileline_t);
+	kbool_t     (*TokenSequence_applyMacro)(KonohaContext *, TokenSequence *, kArray *, size_t, kToken *);
+	void        (*kNameSpace_setMacroData)(KonohaContext *, kNameSpace *, ksymbol_t, int, const char *);
 	int         (*TokenSequence_resolved)(KonohaContext *, TokenSequence *, MacroSet *, TokenSequence *, int);
 	kstatus_t   (*TokenSequence_eval)(KonohaContext *, TokenSequence *);
+
 	int         (*TokenUtils_parseTypePattern)(KonohaContext *, kNameSpace *, kArray *, int , int , KonohaClass **classRef);
-	void        (*kToken_transformToBraceGroup)(KonohaContext *, kTokenVar *, kNameSpace *);
+	void        (*kToken_transformToBraceGroup)(KonohaContext *, kTokenVar *, kNameSpace *, MacroSet *);
 
 	void        (*kStmt_setParsedObject)(KonohaContext *, kStmt *, ksymbol_t, kObject *o);
 	uintptr_t   (*kStmt_parseFlag)(KonohaContext *kctx, kStmt *stmt, KonohaFlagSymbolData *flagData, uintptr_t flag);
