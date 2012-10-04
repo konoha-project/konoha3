@@ -1,0 +1,11 @@
+// written by kimio kuramitsu
+
+;
+  ;
+;
+;;; ;
+;
+
+
+;
+

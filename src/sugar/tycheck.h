@@ -461,13 +461,18 @@ static kstatus_t TokenSequence_eval(KonohaContext *kctx, TokenSequence *source)
 	KLIB kMethod_setParam(kctx, mtd, TY_Object, 0, NULL);
 	kBlock *singleBlock = GCSAFE_new(Block, source->ns);
 	TokenSequence tokens = {source->ns, source->tokenList};
+
 	while(source->beginIdx < source->endIdx) {
 		TokenSequence_push(kctx, tokens);
 		TokenSequence_selectStatement(kctx, &tokens, source);
-		if(source->SourceConfig.foundErrorToken != NULL) return K_BREAK;
+		if(source->SourceConfig.foundErrorToken != NULL) {
+			return K_BREAK;
+		}
 		while(tokens.beginIdx < tokens.endIdx) {
 			KLIB kArray_clear(kctx, singleBlock->stmtList, 0);
-			kBlock_addNewStmt2(kctx, singleBlock, &tokens);
+			if(!kBlock_addNewStmt2(kctx, singleBlock, &tokens)) {
+				return K_BREAK;
+			}
 			if(kArray_size(singleBlock->stmtList) > 0) {
 				status = kBlock_genEvalCode(kctx, singleBlock, mtd);
 				if(status != K_CONTINUE) break;

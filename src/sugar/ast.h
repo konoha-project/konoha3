@@ -753,20 +753,25 @@ static int TokenSequence_skipStatementSeparator(TokenSequence *tokens, int curre
 
 static int TokenSequence_skipAnnotation(KonohaContext *kctx, TokenSequence *tokens, int currentIdx)
 {
+	int count = 0;
 	for(; currentIdx < tokens->endIdx; currentIdx++) {
 		kToken *tk = tokens->tokenList->tokenItems[currentIdx];
-		DBG_P("cur=%d isINDENT=%d", currentIdx, kToken_isIndent(tk));
-		KdumpToken(kctx, tk);
 		if(kToken_isIndent(tk)) continue;
-		DBG_P("cur=%d, anno=%d", currentIdx, MN_isAnnotation(tk->resolvedSymbol));
-		if(!MN_isAnnotation(tk->resolvedSymbol)) break;
-		if(currentIdx + 1 < tokens->endIdx) {
-			kToken *nextToken = tokens->tokenList->tokenItems[currentIdx+1];
-			KdumpToken(kctx, nextToken);
-			if(nextToken->resolvedSyntaxInfo != NULL && nextToken->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
-				currentIdx++;
+		if(MN_isAnnotation(tk->resolvedSymbol)) {
+			count++;
+			if(currentIdx + 1 < tokens->endIdx) {
+				kToken *nextToken = tokens->tokenList->tokenItems[currentIdx+1];
+				if(nextToken->resolvedSyntaxInfo != NULL && nextToken->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
+					currentIdx++;
+				}
 			}
+			continue;
 		}
+		if(kToken_is(StatementSeparator, tk)) {
+			tokens->beginIdx = currentIdx+1;
+			continue;
+		}
+		break;
 	}
 	return currentIdx;
 }
@@ -796,12 +801,11 @@ static int kStmt_addAnnotation2(KonohaContext *kctx, kStmtVar *stmt, TokenSequen
 	return currentIdx;
 }
 
-static void kBlock_addNewStmt2(KonohaContext *kctx, kBlock *bk, TokenSequence *tokens)
+static kbool_t kBlock_addNewStmt2(KonohaContext *kctx, kBlock *bk, TokenSequence *tokens)
 {
 	int currentIdx = TokenSequence_skipStatementSeparator(tokens, tokens->beginIdx);
 	currentIdx = TokenSequence_skipAnnotation(kctx, tokens, currentIdx);
-	DBG_P("begin=%d, curr=%d", tokens->beginIdx, currentIdx);
-	KdumpTokenArray(kctx, tokens->tokenList, currentIdx, tokens->endIdx);
+	//KdumpTokenArray(kctx, tokens->tokenList, currentIdx, tokens->endIdx);
 	if(currentIdx < tokens->endIdx) {
 		int indent = 0;
 		kStmtVar *stmt = new_(StmtVar, 0);
@@ -815,9 +819,11 @@ static void kBlock_addNewStmt2(KonohaContext *kctx, kBlock *bk, TokenSequence *t
 		if(currentIdx == -1) {
 			DBG_ASSERT(Stmt_isERR(stmt));
 			tokens->beginIdx = tokens->endIdx;
+			return false;
 		}
 	}
 	tokens->beginIdx = TokenSequence_skipStatementSeparator(tokens, currentIdx);
+	return true;
 }
 
 static kBlock *new_kBlock2(KonohaContext *kctx, kStmt *parent, MacroSet *macro, TokenSequence *source)
