@@ -221,7 +221,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 
 	mod->kNameSpace_defineSyntax    = kNameSpace_defineSyntax;
 	mod->kNameSpace_getSyntax       = kNameSpace_getSyntax;
-	mod->kArray_addSyntaxRule       = kArray_addSyntaxRule;
+	mod->kArray_addSyntaxRule       = kArray_addSyntaxPattern;
 	mod->kNameSpace_setSugarFunc    = kNameSpace_setSugarFunc;
 	mod->kNameSpace_addSugarFunc    = kNameSpace_addSugarFunc;
 	mod->new_kBlock                 = new_kBlock2;

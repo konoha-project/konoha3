@@ -559,7 +559,7 @@ static void kNameSpace_setTokenizeFunc(KonohaContext *kctx, kNameSpace *ns, int 
 
 // ---------------------------------------------------------------------------
 
-static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, TokenSequence *rules);
+static kbool_t kArray_addSyntaxPattern(KonohaContext *kctx, kArray *patternList, TokenSequence *patterns);
 #define Token_topch(tk) ((IS_String(tk->text) && S_size((tk)->text) == 1) ? S_text((tk)->text)[0] : 0)
 
 static int findCloseChar2(KonohaContext *kctx, TokenSequence *sourceRange, int beginIdx, int closech)
@@ -572,34 +572,34 @@ static int findCloseChar2(KonohaContext *kctx, TokenSequence *sourceRange, int b
 	return sourceRange->endIdx;
 }
 
-static int makeNestedSyntaxRule(KonohaContext *kctx, TokenSequence *sourceRange, int currentIdx, ksymbol_t KW_AST, int closech)
+static int TokenSequence_nestedSyntaxPattern(KonohaContext *kctx, TokenSequence *tokens, int currentIdx, ksymbol_t KW_AST, int closech)
 {
-	kTokenVar *tk = sourceRange->tokenList->tokenVarItems[currentIdx];
-	int ne = findCloseChar2(kctx, sourceRange, currentIdx+1, closech);
+	kTokenVar *tk = tokens->tokenList->tokenVarItems[currentIdx];
+	int ne = findCloseChar2(kctx, tokens, currentIdx+1, closech);
 	tk->resolvedSymbol = KW_AST;
-	tk->resolvedSyntaxInfo = SYN_(sourceRange->ns, KW_AST);
+	tk->resolvedSyntaxInfo = SYN_(tokens->ns, KW_AST);
 	KSETv(tk, tk->subTokenList, new_(TokenArray, 0));
-	TokenSequence nestedSourceRange = {sourceRange->ns, sourceRange->tokenList, currentIdx+1, ne};
-	return kArray_addSyntaxRule(kctx, tk->subTokenList, &nestedSourceRange) ? ne : sourceRange->endIdx;
+	TokenSequence nestedSourceRange = {tokens->ns, tokens->tokenList, currentIdx+1, ne};
+	return kArray_addSyntaxPattern(kctx, tk->subTokenList, &nestedSourceRange) ? ne : tokens->endIdx;
 }
 
-static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, TokenSequence *rules)
+static kbool_t kArray_addSyntaxPattern(KonohaContext *kctx, kArray *patternList, TokenSequence *patterns)
 {
 	int i;
 	ksymbol_t stmtEntryKey = 0;
 	//KdumpTokenArray(kctx, rules->tokenList, rules->beginIdx, rules->endIdx);
-	for(i = rules->beginIdx; i < rules->endIdx; i++) {
-		kTokenVar *tk = rules->tokenList->tokenVarItems[i];
+	for(i = patterns->beginIdx; i < patterns->endIdx; i++) {
+		kTokenVar *tk = patterns->tokenList->tokenVarItems[i];
 		if(kToken_isIndent(tk)) continue;
 		DBG_ASSERT(tk->resolvedSyntaxInfo != NULL);
 		if(tk->resolvedSyntaxInfo->keyword == KW_TextPattern) {
 			int topch = Token_topch(tk);
-			KLIB kArray_add(kctx, ruleList, tk);
+			KLIB kArray_add(kctx, patternList, tk);
 			if(topch == '(') {
-				i = makeNestedSyntaxRule(kctx, rules, i, KW_ParenthesisGroup, ')');
+				i = TokenSequence_nestedSyntaxPattern(kctx, patterns, i, KW_ParenthesisGroup, ')');
 			}
 			else if(topch == '[') {
-				i = makeNestedSyntaxRule(kctx, rules, i, KW_BracketGroup, ']');
+				i = TokenSequence_nestedSyntaxPattern(kctx, patterns, i, KW_BracketGroup, ']');
 			}
 			else {
 				tk->resolvedSymbol = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
@@ -607,50 +607,57 @@ static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, Token
 			continue;
 		}
 		if(tk->resolvedSyntaxInfo->keyword == KW_BracketGroup) {
-			TokenSequence nestedSourceRange = {rules->ns, tk->subTokenList, 0, kArray_size(tk->subTokenList)};
+			TokenSequence nestedSourceRange = {patterns->ns, tk->subTokenList, 0, kArray_size(tk->subTokenList)};
 			tk->resolvedSymbol = KW_OptionalGroup;
 			PUSH_GCSTACK(tk->subTokenList);  // avoid gc
 			KSETv(tk, tk->subTokenList, new_(TokenArray, 0));
-			kArray_addSyntaxRule(kctx, tk->subTokenList, &nestedSourceRange);
-			KLIB kArray_add(kctx, ruleList, tk);
+			kArray_addSyntaxPattern(kctx, tk->subTokenList, &nestedSourceRange);
+			KLIB kArray_add(kctx, patternList, tk);
 			continue;
 		}
-		if(tk->topCharHint == '$' && i+1 < rules->endIdx) {  // $PatternName
-			tk = rules->tokenList->tokenVarItems[++i];
+		if(tk->topCharHint == '$' && i+1 < patterns->endIdx) {  // $PatternName
+			tk = patterns->tokenList->tokenVarItems[++i];
 			if(IS_String(tk->text)) {
-				tk->resolvedSyntaxInfo = SYN_(rules->ns, KW_SymbolPattern);
+				tk->resolvedSyntaxInfo = SYN_(patterns->ns, KW_SymbolPattern);
 				tk->resolvedSymbol = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWRAW) | KW_PATTERN;
 				if(stmtEntryKey == 0) stmtEntryKey = tk->resolvedSymbol;
 				tk->stmtEntryKey = stmtEntryKey;
 				stmtEntryKey = 0;
-				KLIB kArray_add(kctx, ruleList, tk);
+				KLIB kArray_add(kctx, patternList, tk);
 				continue;
 			}
 		}
-		if(i + 1 < rules->endIdx && rules->tokenList->tokenItems[i+1]->topCharHint == ':' && IS_String(tk->text)) {
+		if(i + 1 < patterns->endIdx && patterns->tokenList->tokenItems[i+1]->topCharHint == ':' && IS_String(tk->text)) {
 			stmtEntryKey = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWRAW);
 			i++;
 			continue;
 		}
-		kToken_printMessage(kctx, tk, ErrTag, "illegal syntax rule: %s", Token_text(tk));
+		kToken_printMessage(kctx, tk, ErrTag, "illegal syntax pattern: %s", Token_text(tk));
 		return false;
 	}
+	
 	//KdumpTokenArray(kctx, ruleList, 0, kArray_size(ruleList));
 	return true;
 }
 
-static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, MacroSet *, TokenSequence *rules, int start);
+static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, MacroSet *, TokenSequence *source, int start);
 
 static void kNameSpace_parseSugarRule2(KonohaContext *kctx, kNameSpace *ns, const char *ruleSource, kfileline_t uline, kArray *ruleList)
 {
 	TokenSequence source = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
 	TokenSequence_push(kctx, source);
 	TokenSequence_tokenize(kctx, &source, ruleSource, uline);
-	TokenSequence rules = {ns, source.tokenList, source.endIdx};
-	rules.TargetPolicy.RemovingIndent = true;
-	TokenSequence_resolved2(kctx, &rules, NULL, &source, source.beginIdx);
-	//KdumpTokenSequence(kctx, "resolved", rules);
-	kArray_addSyntaxRule(kctx, ruleList, &rules);
+	TokenSequence patterns = {ns, source.tokenList, source.endIdx};
+	patterns.TargetPolicy.RemovingIndent = true;
+	TokenSequence_resolved2(kctx, &patterns, NULL, &source, source.beginIdx);
+	kArray_addSyntaxPattern(kctx, ruleList, &patterns);
+	kToken *firstPattern = patterns.tokenList->tokenItems[patterns.beginIdx];
+	if(KW_isPATTERN(firstPattern->resolvedSymbol) && firstPattern->resolvedSymbol != KW_ExprPattern) {
+		if(ns->StmtPatternListNULL == NULL) {
+			KINITp(ns, ((kNameSpaceVar*)ns)->StmtPatternListNULL, new_(TokenArray, 0));
+		}
+		KLIB kArray_add(kctx, ns->StmtPatternListNULL, firstPattern);
+	}
 	TokenSequence_pop(kctx, source);
 }
 

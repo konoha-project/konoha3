@@ -554,15 +554,16 @@ static void kNameSpace_reftrace(KonohaContext *kctx, kObject *o)
 	kNameSpace *ns = (kNameSpace*)o;
 	KLIB kNameSpace_reftraceSugarExtension(kctx, ns);
 	size_t i, size = kNameSpace_sizeConstTable(ns);
-	BEGIN_REFTRACE(size+3);
+	BEGIN_REFTRACE(size + 4);
 	for(i = 0; i < size; i++) {
 		if(SYMKEY_isBOXED(ns->constTable.keyvalueItems[i].key)) {
 			KREFTRACEv(ns->constTable.keyvalueItems[i].objectValue);
 		}
 	}
+	KREFTRACEv(ns->methodList);
 	KREFTRACEn(ns->parentNULL);
 	KREFTRACEn(ns->globalObjectNULL);
-	KREFTRACEv(ns->methodList);
+	KREFTRACEn(ns->StmtPatternListNULL);
 	END_REFTRACE();
 }
 
@@ -1023,8 +1024,8 @@ static void defineDefaultKeywordSymbol(KonohaContext *kctx)
 {
 	size_t i;
 	static const char *keywords[] = {
-		"", "$Expr", "$Symbol", "$Text", "$Number",
-		"$Type", "()", "[]", "{}", "$Block", "$Param", "$Token",
+		"", "$Expr", "$Symbol", "$Text", "$Number", "$Type",
+		"()", "[]", "{}", "$Block", "$Param", "$TypeDecl", "$MethodDecl", "$TokenSequence",
 		".", "/", "%", "*", "+", "-", "<", "<=", ">", ">=", "==", "!=",
 		"&&", "||", "!", "=", ",", "$", ":", /*"@",*/
 		"true", "false", "if", "else", "return", // syn

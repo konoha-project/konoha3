@@ -268,25 +268,6 @@ static int callPatternMatchFunc(KonohaContext *kctx, kFunc *fo, int *countRef, k
 	return (int)lsfp[0].intValue;
 }
 
-#define T_statement(kw)  StatementName(kctx, kw), StatementType(kw)
-
-static const char* StatementName(KonohaContext *kctx, ksymbol_t keyword)
-{
-	const char *statement = SYM_t(keyword);
-	if(keyword == KW_ExprPattern) statement = "expression";
-	else if(keyword == KW_StmtTypeDecl) statement = "variable";
-	else if(keyword == KW_StmtMethodDecl) statement =  "function";
-	return statement;
-}
-
-static const char* StatementType(ksymbol_t keyword)
-{
-	const char *postfix = " statement";
-	if(keyword == KW_ExprPattern) postfix = "";
-	else if(keyword == KW_StmtTypeDecl || keyword == KW_StmtMethodDecl) postfix = " declaration";
-	return postfix;
-}
-
 static SugarSyntax* kNameSpace_getStatementSyntax(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
 {
 	kToken *tk = tokenList->tokenItems[beginIdx];
@@ -300,25 +281,123 @@ static SugarSyntax* kNameSpace_getStatementSyntax(KonohaContext *kctx, kNameSpac
 			if(nextIdx < endIdx) {
 				if(TokenUtils_parseTypePattern(kctx, ns, tokenList, nextIdx, endIdx, NULL) != -1) {
 					DBG_P("MethodDecl2");
-					return SYN_(ns, KW_StmtMethodDecl);
+					return SYN_(ns, KW_MethodDeclPattern);
 				}
 				kToken *tk = tokenList->tokenItems[nextIdx];
 				if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern) {
 					int symbolNextIdx = TokenUtils_skipIndent(tokenList, nextIdx + 1, endIdx);
 					if(symbolNextIdx < endIdx && tokenList->tokenItems[symbolNextIdx]->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
 						DBG_P("FuncDecl");
-						return SYN_(ns, KW_StmtMethodDecl);
+						return SYN_(ns, KW_MethodDeclPattern);
 					}
 					DBG_P("StmtTypeDecl");
-					return SYN_(ns, KW_StmtTypeDecl);
+					return SYN_(ns, KW_TypeDeclPattern);
 				}
 				if(tk->resolvedSyntaxInfo->keyword != KW_DOT && ((tk->resolvedSyntaxInfo->precedence_op1 > 0 || tk->resolvedSyntaxInfo->precedence_op2 > 0))) {
 					DBG_P("Operator");
-					return SYN_(ns, KW_StmtMethodDecl);
+					return SYN_(ns, KW_MethodDeclPattern);
 				}
 			}
 		}
 		return SYN_(ns, KW_ExprPattern);
+	}
+	return syn;
+}
+
+static int SugarSyntax_matchPattern(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, int name, kArray *tokenList, int beginIdx, int endIdx)
+{
+	int callCount = 0;
+	if(syn != NULL) {
+		while(true) {
+			kFunc *fo = syn->sugarFuncTable[SUGARFUNC_PatternMatch];
+			if(fo != NULL) {
+				kFunc **funcItems = &fo;
+				int index = 0, next;
+				if(IS_Array(fo)) {
+					funcItems = syn->sugarFuncListTable[SUGARFUNC_PatternMatch]->funcItems;
+					index = kArray_size(syn->sugarFuncListTable[SUGARFUNC_PatternMatch]) - 1;
+				}
+				for(; index >= 0; index--) {
+					next = callPatternMatchFunc(kctx, funcItems[index], &callCount, stmt, name, tokenList, beginIdx, endIdx);
+					if(Stmt_isERR(stmt)) return -1;
+					if(next >= beginIdx) return next;
+				}
+			}
+			if(syn->parentSyntaxNULL == NULL) break;
+			syn = syn->parentSyntaxNULL;
+		}
+	}
+	if(callCount == 0) {
+		kStmt_printMessage(kctx, stmt, ErrTag, "undefined syntax pattern: %s%s", PSYM_t(syn->keyword));
+	}
+	return -1;
+}
+
+static KMETHOD PatternMatch_TypeDecl(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
+	KonohaClass *foundClass = NULL;
+	int nextIdx = TokenUtils_parseTypePattern(kctx, Stmt_nameSpace(stmt), tokenList, beginIdx, endIdx, &foundClass);
+	DBG_P("@ nextIdx = %d < %d", nextIdx, endIdx);
+	if(nextIdx != -1) {
+		nextIdx = TokenUtils_skipIndent(tokenList, nextIdx, endIdx);
+		if(nextIdx < endIdx) {
+			kToken *tk = tokenList->tokenItems[nextIdx];
+			if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern) {
+				RETURNi_(beginIdx);
+			}
+		}
+	}
+	RETURNi_(-1);
+}
+
+static KMETHOD PatternMatch_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
+	KonohaClass *foundClass = NULL;
+	int nextIdx = TokenUtils_parseTypePattern(kctx, Stmt_nameSpace(stmt), tokenList, beginIdx, endIdx, &foundClass);
+	DBG_P("@ nextIdx = %d < %d", nextIdx, endIdx);
+	if(nextIdx != -1) {
+		nextIdx = TokenUtils_skipIndent(tokenList, nextIdx, endIdx);
+		if(nextIdx < endIdx) {
+			if(TokenUtils_parseTypePattern(kctx, Stmt_nameSpace(stmt), tokenList, nextIdx, endIdx, NULL) != -1) {
+				RETURNi_(beginIdx);
+			}
+			kToken *tk = tokenList->tokenItems[nextIdx];
+			if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern) {
+				int symbolNextIdx = TokenUtils_skipIndent(tokenList, nextIdx + 1, endIdx);
+				if(symbolNextIdx < endIdx && tokenList->tokenItems[symbolNextIdx]->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
+					RETURNi_(beginIdx);
+				}
+				RETURNi_(-1);
+			}
+			if(tk->resolvedSyntaxInfo->keyword != KW_DOT && ((tk->resolvedSyntaxInfo->precedence_op1 > 0 || tk->resolvedSyntaxInfo->precedence_op2 > 0))) {
+				RETURNi_(beginIdx);
+			}
+		}
+	}
+	RETURNi_(-1);
+}
+
+static SugarSyntax* kNameSpace_getStatementSyntax2(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
+{
+	kToken *tk = tokenList->tokenItems[beginIdx];
+	SugarSyntax *syn = tk->resolvedSyntaxInfo;
+	if(syn->syntaxRuleNULL == NULL) {
+		kNameSpace *currentNameSpace = ns;
+		while(currentNameSpace != NULL) {
+			if(currentNameSpace->StmtPatternListNULL != NULL) {
+				int i;
+				for(i = kArray_size(currentNameSpace->StmtPatternListNULL); i >=0; i++) {
+					kToken *patternToken = currentNameSpace->StmtPatternListNULL->tokenItems[i];
+					if(SugarSyntax_matchPattern(kctx, patternToken->resolvedSyntaxInfo, (kStmt*)KLIB Knull(kctx, CT_Stmt), 0, tokenList, beginIdx, endIdx) != -1) {
+						return SYN_(ns, patternToken->stmtEntryKey);
+					}
+				}
+			}
+			currentNameSpace = currentNameSpace->parentNULL;
+		}
+		syn = SYN_(ns, KW_ExprPattern);
 	}
 	return syn;
 }
@@ -655,16 +734,19 @@ static int kStmt_currentTokenIndex(KonohaContext *kctx, kStmt *stmt, kArray *tok
 
 }
 
-static int kStmt_matchSyntaxRule2(KonohaContext *kctx, kStmt *stmt, TokenSequence *tokens, TokenSequence *rules, kToken **errRuleRef)
+static int kStmt_matchSyntaxPattern(KonohaContext *kctx, kStmt *stmt, TokenSequence *tokens, TokenSequence *patterns, kToken **errRuleRef)
 {
-	int currentRuleIdx = rules->beginIdx, currentTokenIdx = tokens->beginIdx;
-	for(; currentRuleIdx < rules->endIdx; currentRuleIdx++) {
-		kToken *ruleToken = rules->tokenList->tokenItems[currentRuleIdx];
-		currentTokenIdx = kStmt_currentTokenIndex(kctx, stmt, tokens->tokenList, currentTokenIdx, tokens->endIdx);
-		if(currentTokenIdx == -1) {
-			while(ruleToken->resolvedSymbol == KW_OptionalGroup && currentRuleIdx + 1 < rules->endIdx) {
-				currentRuleIdx++;
-				ruleToken = rules->tokenList->tokenItems[currentRuleIdx];
+	int patternIdx = patterns->beginIdx, tokenIdx = tokens->beginIdx;
+//	KdumpTokenArray(kctx, patterns->tokenList, patterns->beginIdx, patterns->endIdx);
+//	KdumpTokenArray(kctx, tokens->tokenList, tokens->beginIdx, tokens->endIdx);
+	for(; patternIdx < patterns->endIdx; patternIdx++) {
+		kToken *ruleToken = patterns->tokenList->tokenItems[patternIdx];
+//		DBG_P("patternIdx=%d", patternIdx);
+		tokenIdx = kStmt_currentTokenIndex(kctx, stmt, tokens->tokenList, tokenIdx, tokens->endIdx);
+		if(tokenIdx == -1) {
+			while(ruleToken->resolvedSymbol == KW_OptionalGroup && patternIdx + 1 < patterns->endIdx) {
+				patternIdx++;
+				ruleToken = patterns->tokenList->tokenItems[patternIdx];
 			}
 			if(ruleToken->resolvedSymbol != KW_OptionalGroup) {
 				errRuleRef[0] = ruleToken;
@@ -674,28 +756,28 @@ static int kStmt_matchSyntaxRule2(KonohaContext *kctx, kStmt *stmt, TokenSequenc
 		}
 		if(KW_isPATTERN(ruleToken->resolvedSymbol)) {
 			SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), ruleToken->resolvedSymbol);
-			tokens->beginIdx = currentTokenIdx;
-			currentTokenIdx = PatternMatch2(kctx, syn, stmt, ruleToken->stmtEntryKey, tokens);
-			if(currentTokenIdx == -1) {
+			tokens->beginIdx = tokenIdx;
+			tokenIdx = PatternMatch2(kctx, syn, stmt, ruleToken->stmtEntryKey, tokens);
+			if(tokenIdx == -1) {
 				errRuleRef[0] = ruleToken;
 				return -1;
 			}
 		}
 		else if(ruleToken->resolvedSymbol == KW_OptionalGroup) {
-			kToken *tk = tokens->tokenList->tokenItems[currentTokenIdx];
+			kToken *tk = tokens->tokenList->tokenItems[tokenIdx];
 			if(!kToken_is(StatementSeparator, tk)) { // matching return; with return [$Expr]
 				TokenSequence nrule = {Stmt_nameSpace(stmt), ruleToken->subTokenList, 0, kArray_size(ruleToken->subTokenList)};
-				tokens->beginIdx = currentTokenIdx;
-				int next = kStmt_matchSyntaxRule2(kctx, stmt, tokens, &nrule, errRuleRef);
+				tokens->beginIdx = tokenIdx;
+				int next = kStmt_matchSyntaxPattern(kctx, stmt, tokens, &nrule, errRuleRef);
 				errRuleRef[0] = NULL;
 				if(Stmt_isERR(stmt)) return -1;
 				if(next != -1) {
-					currentTokenIdx = next;
+					tokenIdx = next;
 				}
 			}
 		}
 		else {
-			kToken *tk = tokens->tokenList->tokenItems[currentTokenIdx];
+			kToken *tk = tokens->tokenList->tokenItems[tokenIdx];
 			if(ruleToken->resolvedSymbol != tk->resolvedSymbol) {
 				errRuleRef[0] = ruleToken;
 				return -1;
@@ -703,18 +785,37 @@ static int kStmt_matchSyntaxRule2(KonohaContext *kctx, kStmt *stmt, TokenSequenc
 			if(ruleToken->resolvedSymbol == KW_ParenthesisGroup || ruleToken->resolvedSymbol == KW_BracketGroup) {
 				TokenSequence nrule = {Stmt_nameSpace(stmt), ruleToken->subTokenList, 0, kArray_size(ruleToken->subTokenList)};
 				TokenSequence ntokens = {Stmt_nameSpace(stmt), tk->subTokenList, 0, kArray_size(tk->subTokenList)};
-				int next = kStmt_matchSyntaxRule2(kctx, stmt, &ntokens, &nrule, errRuleRef);
+				int next = kStmt_matchSyntaxPattern(kctx, stmt, &ntokens, &nrule, errRuleRef);
 				if(next == -1) {
 					return -1;
 				}
 			}
-			currentTokenIdx++;
+			tokenIdx++;
 		}
 	}
-	return currentTokenIdx;
+	return tokenIdx;
 }
 
-static int kStmt_parseBySyntaxRule2(KonohaContext *kctx, kStmt *stmt, int indent, kArray *tokenList, int beginIdx, int endIdx)
+#define T_statement(kw)  StatementName(kctx, kw), StatementType(kw)
+
+static const char* StatementName(KonohaContext *kctx, ksymbol_t keyword)
+{
+	const char *statement = SYM_t(keyword);
+	if(keyword == KW_ExprPattern) statement = "expression";
+	else if(keyword == KW_TypeDeclPattern) statement = "variable";
+	else if(keyword == KW_MethodDeclPattern) statement =  "function";
+	return statement;
+}
+
+static const char* StatementType(ksymbol_t keyword)
+{
+	const char *postfix = " statement";
+	if(keyword == KW_ExprPattern) postfix = "";
+	else if(keyword == KW_TypeDeclPattern || keyword == KW_MethodDeclPattern) postfix = " declaration";
+	return postfix;
+}
+
+static int kStmt_parseBySyntaxPattern(KonohaContext *kctx, kStmt *stmt, int indent, kArray *tokenList, int beginIdx, int endIdx)
 {
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	SugarSyntax *stmtSyntax = kNameSpace_getStatementSyntax(kctx, ns, tokenList, beginIdx, endIdx);
@@ -726,7 +827,7 @@ static int kStmt_parseBySyntaxRule2(KonohaContext *kctx, kStmt *stmt, int indent
 			TokenSequence nrule  = {ns, currentSyntax->syntaxRuleNULL, 0, kArray_size(currentSyntax->syntaxRuleNULL)};
 			TokenSequence tokens = {ns, tokenList, beginIdx, endIdx};
 			errRule = NULL;
-			int nextIdx = kStmt_matchSyntaxRule2(kctx, stmt, &tokens, &nrule, &errRule);
+			int nextIdx = kStmt_matchSyntaxPattern(kctx, stmt, &tokens, &nrule, &errRule);
 			if(Stmt_isERR(stmt)) return -1;
 			if(beginIdx < nextIdx) return nextIdx;
 		}
@@ -814,7 +915,7 @@ static kbool_t kBlock_addNewStmt2(KonohaContext *kctx, kBlock *bk, TokenSequence
 		if(stmt->uline == 0) {
 			stmt->uline = tokens->tokenList->tokenItems[currentIdx]->uline;
 		}
-		currentIdx = kStmt_parseBySyntaxRule2(kctx, stmt, indent, tokens->tokenList, currentIdx, tokens->endIdx);
+		currentIdx = kStmt_parseBySyntaxPattern(kctx, stmt, indent, tokens->tokenList, currentIdx, tokens->endIdx);
 		if(currentIdx == -1) {
 			DBG_ASSERT(Stmt_isERR(stmt));
 			tokens->beginIdx = tokens->endIdx;

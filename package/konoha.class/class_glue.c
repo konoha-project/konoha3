@@ -427,7 +427,7 @@ static size_t kBlock_countFieldSize(KonohaContext *kctx, kBlock *bk)
 		for(i = 0; i < kArray_size(bk->stmtList); i++) {
 			kStmt *stmt = bk->stmtList->stmtItems[i];
 			DBG_P("stmt->keyword=%s%s", PSYM_t(stmt->syn->keyword));
-			if(stmt->syn->keyword == KW_StmtTypeDecl) {
+			if(stmt->syn->keyword == KW_TypeDeclPattern) {
 				kExpr *expr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL);
 				if(expr->syn->keyword == KW_COMMA) {
 					c += (kArray_size(expr->cons) - 1);
@@ -490,7 +490,7 @@ static kbool_t kBlock_declClassField(KonohaContext *kctx, kBlock *bk, kGamma *gm
 	kbool_t failedOnce = false;
 	for(i = 0; i < kArray_size(bk->stmtList); i++) {
 		kStmt *stmt = bk->stmtList->stmtItems[i];
-		if(stmt->syn->keyword == KW_StmtTypeDecl) {
+		if(stmt->syn->keyword == KW_TypeDeclPattern) {
 			kshortflag_t flag = kField_Getter | kField_Setter;
 			kToken *tk  = SUGAR kStmt_getToken(kctx, stmt, KW_TypePattern, NULL);
 			kExpr *expr = SUGAR kStmt_getExpr(kctx, stmt,  KW_ExprPattern, NULL);
@@ -508,8 +508,8 @@ static void kBlock_addMethodDeclStmt(KonohaContext *kctx, kBlock *bk, kToken *to
 		size_t i;
 		for(i = 0; i < kArray_size(bk->stmtList); i++) {
 			kStmt *stmt = bk->stmtList->stmtItems[i];
-			if(stmt->syn->keyword == KW_StmtTypeDecl) continue;
-			if(stmt->syn->keyword == KW_StmtMethodDecl) {
+			if(stmt->syn->keyword == KW_TypeDeclPattern) continue;
+			if(stmt->syn->keyword == KW_MethodDeclPattern) {
 				kStmt *lastStmt = classStmt;
 				KLIB kObject_setObject(kctx, stmt, SYM_("ClassName"), TY_Token, tokenClassName);
 				SUGAR kBlock_insertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, stmt);

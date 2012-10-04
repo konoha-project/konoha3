@@ -46,12 +46,14 @@ extern "C" {
 #define KW_ParenthesisGroup (((ksymbol_t)6)) /*()*/
 #define KW_BracketGroup     (((ksymbol_t)7)) /*[]*/
 #define KW_BraceGroup       (((ksymbol_t)8)) /*{}*/
-#define KW_TypeCastGroup    (((ksymbol_t)6)|KW_PATTERN) /*$()*/
-#define KW_TypeParamGroup   (((ksymbol_t)7)|KW_PATTERN) /*$[]*/
-#define KW_OptionalGroup    (((ksymbol_t)7)|KW_ATMARK)  /*@[]*/
-#define KW_BlockPattern     (((ksymbol_t)9)|KW_PATTERN) /*$Block*/
-#define KW_ParamPattern     (((ksymbol_t)10)|KW_PATTERN) /*$Param*/
-#define KW_TokenPattern     (((ksymbol_t)11)|KW_PATTERN) /*$Token*/
+#define KW_TypeCastGroup    (((ksymbol_t)6)|KW_PATTERN)    /*$()*/
+#define KW_TypeParamGroup   (((ksymbol_t)7)|KW_PATTERN)    /*$[]*/
+#define KW_OptionalGroup    (((ksymbol_t)7)|KW_ATMARK)     /*@[]*/
+#define KW_BlockPattern     (((ksymbol_t)9)|KW_PATTERN)    /*$Block*/
+#define KW_ParamPattern     (((ksymbol_t)10)|KW_PATTERN)   /*$Param*/
+#define KW_TypeDeclPattern  (((ksymbol_t)11)|KW_PATTERN)   /*$TypeDecl*/
+#define KW_MethodDeclPattern  (((ksymbol_t)12)|KW_PATTERN) /*$MethodDecl*/
+#define KW_TokenPattern     (((ksymbol_t)13)|KW_PATTERN)   /*$Token*/
 
 typedef enum {
 	TokenType_INDENT = 1,
@@ -62,13 +64,11 @@ typedef enum {
 	TokenType_ERR    = KW_TokenPattern,
 } TokenType;
 
-#define KW_StmtTypeDecl        KW_TypePattern
-#define KW_StmtMethodDecl      KW_MethodDeclPattern
 #define KW_ExprOperator        KW_ParamPattern
 #define KW_ExprTerm            KW_SymbolPattern
 #define KW_ExprMethodCall      KW_ParamPattern
 
-#define KW_DOT     12
+#define KW_DOT     14
 #define KW_DIV     (1+KW_DOT)
 #define KW_MOD     (2+KW_DOT)
 #define KW_MUL     (3+KW_DOT)
@@ -89,7 +89,7 @@ typedef enum {
 #define KW_ATMARK  MN_Annotation
 #define KW_COLON   (17+KW_DOT)
 
-#define KW_void      (30)
+#define KW_void      (32)
 #define KW_true      (0+KW_void)
 #define KW_false     (1+KW_void)
 #define KW_if        (2+KW_void)
@@ -99,7 +99,6 @@ typedef enum {
 // reserved
 //#define MN_new       (8+KW_void)
 #define FN_this      FN_("this")
-#define KW_MethodDeclPattern    (((ksymbol_t)KW_return)|KW_PATTERN) /*$Method*/
 
 //#define kflag_clear(flag)  (flag) = 0
 
