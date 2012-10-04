@@ -304,35 +304,6 @@ static SugarSyntax* kNameSpace_getStatementSyntax(KonohaContext *kctx, kNameSpac
 	return syn;
 }
 
-static int SugarSyntax_matchPattern(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, int name, kArray *tokenList, int beginIdx, int endIdx)
-{
-	int callCount = 0;
-	if(syn != NULL) {
-		while(true) {
-			kFunc *fo = syn->sugarFuncTable[SUGARFUNC_PatternMatch];
-			if(fo != NULL) {
-				kFunc **funcItems = &fo;
-				int index = 0, next;
-				if(IS_Array(fo)) {
-					funcItems = syn->sugarFuncListTable[SUGARFUNC_PatternMatch]->funcItems;
-					index = kArray_size(syn->sugarFuncListTable[SUGARFUNC_PatternMatch]) - 1;
-				}
-				for(; index >= 0; index--) {
-					next = callPatternMatchFunc(kctx, funcItems[index], &callCount, stmt, name, tokenList, beginIdx, endIdx);
-					if(Stmt_isERR(stmt)) return -1;
-					if(next >= beginIdx) return next;
-				}
-			}
-			if(syn->parentSyntaxNULL == NULL) break;
-			syn = syn->parentSyntaxNULL;
-		}
-	}
-	if(callCount == 0) {
-		kStmt_printMessage(kctx, stmt, ErrTag, "undefined syntax pattern: %s%s", PSYM_t(syn->keyword));
-	}
-	return -1;
-}
-
 static KMETHOD PatternMatch_TypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
@@ -379,18 +350,51 @@ static KMETHOD PatternMatch_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(-1);
 }
 
+static int SugarSyntax_matchPattern(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, int name, kArray *tokenList, int beginIdx, int endIdx)
+{
+	int callCount = 0;
+	if(syn != NULL) {
+		while(true) {
+			kFunc *fo = syn->sugarFuncTable[SUGARFUNC_PatternMatch];
+			if(fo != NULL) {
+				kFunc **funcItems = &fo;
+				int index = 0, next;
+				if(IS_Array(fo)) {
+					funcItems = syn->sugarFuncListTable[SUGARFUNC_PatternMatch]->funcItems;
+					index = kArray_size(syn->sugarFuncListTable[SUGARFUNC_PatternMatch]) - 1;
+				}
+				for(; index >= 0; index--) {
+					next = callPatternMatchFunc(kctx, funcItems[index], &callCount, stmt, name, tokenList, beginIdx, endIdx);
+					if(Stmt_isERR(stmt)) return -1;
+					if(next >= beginIdx) return next;
+				}
+			}
+			if(syn->parentSyntaxNULL == NULL) break;
+			syn = syn->parentSyntaxNULL;
+		}
+	}
+	if(callCount == 0) {
+		kStmt_printMessage(kctx, stmt, ErrTag, "undefined syntax pattern: %s%s", PSYM_t(syn->keyword));
+	}
+	return -1;
+}
+
 static SugarSyntax* kNameSpace_getStatementSyntax2(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
 {
 	kToken *tk = tokenList->tokenItems[beginIdx];
 	SugarSyntax *syn = tk->resolvedSyntaxInfo;
+	kBlockVar *NullBlock = (kBlockVar*)KLIB Knull(kctx, CT_Block);
+	KSETv(NullBlock, NullBlock->blockNameSpace, ns); // this is very tricky to allow access kStmt_nameSpace() to NameSpace (thread-unsafe);
+	kStmt* NullStmt = (kStmt*)KLIB Knull(kctx, CT_Stmt);
 	if(syn->syntaxRuleNULL == NULL) {
 		kNameSpace *currentNameSpace = ns;
 		while(currentNameSpace != NULL) {
 			if(currentNameSpace->StmtPatternListNULL != NULL) {
 				int i;
-				for(i = kArray_size(currentNameSpace->StmtPatternListNULL); i >=0; i++) {
+				for(i = kArray_size(currentNameSpace->StmtPatternListNULL) - 1; i >=0; i++) {
 					kToken *patternToken = currentNameSpace->StmtPatternListNULL->tokenItems[i];
-					if(SugarSyntax_matchPattern(kctx, patternToken->resolvedSyntaxInfo, (kStmt*)KLIB Knull(kctx, CT_Stmt), 0, tokenList, beginIdx, endIdx) != -1) {
+					DBG_P(">>>>>>>>>> patternToken=%s%s", PSYM_t(patternToken->resolvedSymbol));
+					if(SugarSyntax_matchPattern(kctx, patternToken->resolvedSyntaxInfo, NullStmt, 0, tokenList, beginIdx, endIdx) != -1) {
 						return SYN_(ns, patternToken->stmtEntryKey);
 					}
 				}
@@ -463,7 +467,6 @@ static kbool_t TokenSequence_applyMacro(KonohaContext *kctx, TokenSequence *toke
 	TokenSequence macro = {tokens->ns, macroTokenList, paramsize, kArray_size(macroTokenList)};
 	KdumpTokenArray(kctx, macro.tokenList, 0, kArray_size(macroTokenList));
 	int dstart = kArray_size(tokens->tokenList);
-	DBG_P("dstart=%d, tokens->begin,end=%d, %d", dstart, tokens->beginIdx, tokens->endIdx);
 	TokenSequence_resolved2(kctx, tokens, macroParam, &macro, paramsize);
 	DBG_P("dstart=%d, tokens->begin,end=%d, %d", dstart, tokens->beginIdx, tokens->endIdx);
 	KdumpTokenArray(kctx, tokens->tokenList, dstart, tokens->endIdx);

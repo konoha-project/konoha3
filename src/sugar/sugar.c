@@ -178,7 +178,8 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 
 	KLIB Knull(kctx, mod->cToken);
 	KLIB Knull(kctx, mod->cExpr);
-	KLIB Knull(kctx, mod->cBlock);
+	kStmtVar *NullStmt = (kStmtVar*)KLIB Knull(kctx, mod->cStmt);
+	KSETv(NullStmt, NullStmt->parentBlockNULL, (kBlock*)KLIB Knull(kctx, mod->cBlock));
 
 	SugarModule_setup(kctx, &mod->h, 0);
 

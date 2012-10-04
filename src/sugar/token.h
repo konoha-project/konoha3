@@ -652,10 +652,11 @@ static void kNameSpace_parseSugarRule2(KonohaContext *kctx, kNameSpace *ns, cons
 	TokenSequence_resolved2(kctx, &patterns, NULL, &source, source.beginIdx);
 	kArray_addSyntaxPattern(kctx, ruleList, &patterns);
 	kToken *firstPattern = patterns.tokenList->tokenItems[patterns.beginIdx];
-	if(KW_isPATTERN(firstPattern->resolvedSymbol) && firstPattern->resolvedSymbol != KW_ExprPattern) {
+	if(KW_isPATTERN(firstPattern->resolvedSymbol) && firstPattern->resolvedSyntaxInfo->keyword != KW_ExprPattern) {
 		if(ns->StmtPatternListNULL == NULL) {
 			KINITp(ns, ((kNameSpaceVar*)ns)->StmtPatternListNULL, new_(TokenArray, 0));
 		}
+		DBG_P(">>>>>>>>>> adding PATTERN %s%s %s%s", PSYM_t(firstPattern->resolvedSymbol), PSYM_t(firstPattern->resolvedSyntaxInfo->keyword));
 		KLIB kArray_add(kctx, ns->StmtPatternListNULL, firstPattern);
 	}
 	TokenSequence_pop(kctx, source);
