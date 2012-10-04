@@ -66,7 +66,8 @@ extern "C" {
 #define PowerOf2(N) (1UL << N)
 #define ALIGN(X,N)  (((X)+((N)-1))&(~((N)-1)))
 #define CEIL(F)     (F-(int)(F) > 0 ? (int)(F+1) : (int)(F))
-#if _WIN64
+
+#ifdef _WIN64
 #ifdef _MSC_VER
 #include <intrin.h>
 static uint32_t CTZ(uint32_t x)
@@ -86,12 +87,12 @@ static uint32_t FFS(uint32_t x)
 	if(x == 0) return 0;
 	return CTZ(x) + 1;
 }
-#else
+#else /* defined(_MSC_VER) */
 #define FFS(n) __builtin_ffsll(n)
 #define CLZ(n) __builtin_clzll(n)
 #define CTZ(x) __builtin_ctzll(x)
-#endif
-#else
+#endif /* defined(_MSC_VER) */
+#else /* defined(_WIN64) */
 #define FFS(n) __builtin_ffsl(n)
 #define CLZ(n) __builtin_clzl(n)
 #define CTZ(x) __builtin_ctzl(x)
@@ -359,25 +360,20 @@ static const unsigned SegmentBitMapCount[] = {
 	BITMAP_L0_SIZE(12)
 };
 
-#if SIZEOF_VOIDP*8 == 64
-struct BM5  { struct bm64 m0; struct bm1 S;struct bm1 m1;};
-struct BM6  { struct bm32 m0; struct bm1 S;struct bm1 m1;};
-struct BM7  { struct bm16 m0; struct bm1 S;struct bm1 m1;};
-struct BM8  { struct bm8  m0; struct bm1 S;struct bm1 m1;};
-struct BM9  { struct bm4  m0; struct bm1 S;struct bm1 m1;};
-struct BM10 { struct bm2  m0; struct bm1 S;struct bm1 m1;};
-struct BM11 { struct bm1  m0; struct bm1 S;};
-struct BM12 { struct bm1  m0;};
-#else
-struct BM5  { struct bm128 m0; struct bm1 S;struct bm4 m1; struct bm1 S2; struct bm1 m2;};
-struct BM6  { struct bm64  m0; struct bm1 S;struct bm2 m1; struct bm1 S2; struct bm1 m2;};
-struct BM7  { struct bm32  m0; struct bm1 S;struct bm1 m1; struct bm1 S2;};
-struct BM8  { struct bm16  m0; struct bm1 S;struct bm1 m1;};
-struct BM9  { struct bm8   m0; struct bm1 S;struct bm1 m1;};
-struct BM10 { struct bm4   m0; struct bm1 S;struct bm1 m1;};
-struct BM11 { struct bm2   m0; struct bm1 S;struct bm1 m1;};
-struct BM12 { struct bm1   m0;};
-#endif
+#define BITMAP_INFO_LIST(OP)\
+	OP( 5, BITMAP_L0_SIZE( 5), BITMAP_L1_SIZE( 5), BITMAP_L2_SIZE( 5))\
+	OP( 6, BITMAP_L0_SIZE( 6), BITMAP_L1_SIZE( 6), BITMAP_L2_SIZE( 6))\
+	OP( 7, BITMAP_L0_SIZE( 7), BITMAP_L1_SIZE( 7), BITMAP_L2_SIZE( 7))\
+	OP( 8, BITMAP_L0_SIZE( 8), BITMAP_L1_SIZE( 8), BITMAP_L2_SIZE( 8))\
+	OP( 9, BITMAP_L0_SIZE( 9), BITMAP_L1_SIZE( 9), BITMAP_L2_SIZE( 9))\
+	OP(10, BITMAP_L0_SIZE(10), BITMAP_L1_SIZE(10), BITMAP_L2_SIZE(10))\
+	OP(11, BITMAP_L0_SIZE(11), BITMAP_L1_SIZE(11), BITMAP_L2_SIZE(11))\
+	OP(12, BITMAP_L0_SIZE(12), BITMAP_L1_SIZE(12), BITMAP_L2_SIZE(12))
+
+#define BITMAP_LAYOUT(KLASS, N0, N1, N2)\
+	struct BM##KLASS { bitmap_t m0[N0]; bitmap_t m1[N1]; bitmap_t m2[N2];};
+BITMAP_INFO_LIST(BITMAP_LAYOUT);
+#undef BITMAP_LAYOUT
 
 #define _BLOCK_(size)  struct block##size{uint8_t m[size];} \
 	b##size [SEGMENT_SIZE/(sizeof(struct block##size))]
@@ -411,228 +407,109 @@ static bitmap_t bitmap_empty = BITMAP_FULL;
 static bitmap_t *bitmap_dummy = &bitmap_empty;
 static Segment segment_dummy = {};
 
-#if SIZEOF_VOIDP*8 == 64
-//#define BM_SENTINEL_L2_3  (BITMAP_FULL << (2))
-//#define BM_SENTINEL_L2_4  (BITMAP_FULL << (1))
-#define BM_SENTINEL_L2_5  (BITMAP_FULL)
-#define BM_SENTINEL_L2_6  (BITMAP_FULL)
-#define BM_SENTINEL_L2_7  (BITMAP_FULL)
-#define BM_SENTINEL_L2_8  (BITMAP_FULL)
-#define BM_SENTINEL_L2_9  (BITMAP_FULL)
-#define BM_SENTINEL_L2_10 (BITMAP_FULL)
-#define BM_SENTINEL_L2_11 (BITMAP_FULL)
-#define BM_SENTINEL_L2_12 (BITMAP_FULL)
+static const unsigned int BITMAP_LIMIT[][SEGMENT_LEVEL] = {
+	{/* klass0 */}, {/* klass1 */}, {/* klass2 */}, {/* klass3 */}, {/* klass4 */},
+#define BITMAP_SIZE_IN_EACH_LEVEL(KLASS, N0, N1, N2) {N0, N1, N2},
+	BITMAP_INFO_LIST(BITMAP_SIZE_IN_EACH_LEVEL)
+#undef BITMAP_SIZE_IN_EACH_LEVEL
+};
 
-//#define BM_SENTINEL_L1_3  (BITMAP_FULL << (63))
-//#define BM_SENTINEL_L1_4  (BITMAP_FULL << (63))
-#define BM_SENTINEL_L1_5  (BITMAP_FULL << (63))
-#define BM_SENTINEL_L1_6  (BITMAP_FULL << (32))
-#define BM_SENTINEL_L1_7  (BITMAP_FULL << (16))
-#define BM_SENTINEL_L1_8  (BITMAP_FULL << (8))
-#define BM_SENTINEL_L1_9  (BITMAP_FULL << (2))
-#define BM_SENTINEL_L1_10 (BITMAP_FULL << (1))
-#define BM_SENTINEL_L1_11 (BITMAP_FULL)
-#define BM_SENTINEL_L1_12 (BITMAP_FULL)
+static const unsigned int BITMAP_OFFSET[][SEGMENT_LEVEL] = {
+	{/* klass0 */}, {/* klass1 */}, {/* klass2 */}, {/* klass3 */}, {/* klass4 */},
+#define OFFSET(TYPE, FIELD) ((unsigned) ((unsigned long)&(((struct BM##TYPE *) 0)->FIELD))/sizeof(bitmap_t))
+#define BITMAP_OFFSET(K, N0, N1, N2) {OFFSET(K, m0), OFFSET(K, m1), OFFSET(K, m2)},
+	BITMAP_INFO_LIST(BITMAP_OFFSET)
+#undef BITMAP_OFFSET
+};
 
-//#define BM_SENTINEL_L0_3  (BITMAP_FULL)
-//#define BM_SENTINEL_L0_4  (BITMAP_FULL)
-#define BM_SENTINEL_L0_5  (BITMAP_FULL)
-#define BM_SENTINEL_L0_6  (BITMAP_FULL)
-#define BM_SENTINEL_L0_7  (BITMAP_FULL)
-#define BM_SENTINEL_L0_8  (BITMAP_FULL)
-#define BM_SENTINEL_L0_9  (BITMAP_FULL)
-#define BM_SENTINEL_L0_10 (BITMAP_FULL)
-#define BM_SENTINEL_L0_11 (BITMAP_FULL)
-#define BM_SENTINEL_L0_12 (BITMAP_FULL << (32))
-
+static const uintptr_t BITMAP_MASK[][SEGMENT_LEVEL] = {
+#define BITMASK_DEFAULT {0, 0, 0}
+	BITMASK_DEFAULT /* klass0 */,
+	BITMASK_DEFAULT /* klass1 */,
+	BITMASK_DEFAULT /* klass2 */,
+	BITMASK_DEFAULT /* klass3 */,
+	BITMASK_DEFAULT /* klass4 */,
+#undef BITMASK_DEFAULT
+#if SIZEOF_VOIDP*8 == 32
+	{/* klass5  */              0,               0, BITMAP_FULL<<4},
+	{/* klass6  */              0,               0, BITMAP_FULL<<2},
+	{/* klass7  */              0,               0, BITMAP_FULL<<1},
+	{/* klass8  */              0, BITMAP_FULL<<16, BITMAP_FULL},
+	{/* klass9  */              0, BITMAP_FULL<< 8, BITMAP_FULL},
+	{/* klass10 */              0, BITMAP_FULL<< 4, BITMAP_FULL},
+	{/* klass11 */              0, BITMAP_FULL<< 2, BITMAP_FULL},
+	{/* klass12 */              0, BITMAP_FULL<< 1, BITMAP_FULL},
 #else
-//#define BM_SENTINEL_L2_3  (BITMAP_FULL << (16))
-//#define BM_SENTINEL_L2_4  (BITMAP_FULL << (8))
-#define BM_SENTINEL_L2_5  (BITMAP_FULL << (4))
-#define BM_SENTINEL_L2_6  (BITMAP_FULL << (2))
-#define BM_SENTINEL_L2_7  (BITMAP_FULL << (1))
-#define BM_SENTINEL_L2_8  (BITMAP_FULL)
-#define BM_SENTINEL_L2_9  (BITMAP_FULL)
-#define BM_SENTINEL_L2_10 (BITMAP_FULL)
-#define BM_SENTINEL_L2_11 (BITMAP_FULL)
-#define BM_SENTINEL_L2_12 (BITMAP_FULL)
-
-//#define BM_SENTINEL_L1_3  (BITMAP_FULL)
-//#define BM_SENTINEL_L1_4  (BITMAP_FULL)
-#define BM_SENTINEL_L1_5  (BITMAP_FULL)
-#define BM_SENTINEL_L1_6  (BITMAP_FULL)
-#define BM_SENTINEL_L1_7  (BITMAP_FULL)
-#define BM_SENTINEL_L1_8  (BITMAP_FULL << (16))
-#define BM_SENTINEL_L1_9  (BITMAP_FULL << (8))
-#define BM_SENTINEL_L1_10 (BITMAP_FULL << (2))
-#define BM_SENTINEL_L1_11 (BITMAP_FULL << (1))
-#define BM_SENTINEL_L1_12 (BITMAP_FULL)
-
-//#define BM_SENTINEL_L0_3  (BITMAP_FULL)
-//#define BM_SENTINEL_L0_4  (BITMAP_FULL)
-#define BM_SENTINEL_L0_5  (BITMAP_FULL)
-#define BM_SENTINEL_L0_6  (BITMAP_FULL)
-#define BM_SENTINEL_L0_7  (BITMAP_FULL)
-#define BM_SENTINEL_L0_8  (BITMAP_FULL)
-#define BM_SENTINEL_L0_9  (BITMAP_FULL)
-#define BM_SENTINEL_L0_10 (BITMAP_FULL)
-#define BM_SENTINEL_L0_11 (BITMAP_FULL)
-#define BM_SENTINEL_L0_12 (BITMAP_FULL)
+	{/* klass5  */              0,               0, BITMAP_FULL},
+	{/* klass6  */              0, BITMAP_FULL<<32, BITMAP_FULL},
+	{/* klass7  */              0, BITMAP_FULL<<16, BITMAP_FULL},
+	{/* klass8  */              0, BITMAP_FULL<< 8, BITMAP_FULL},
+	{/* klass9  */              0, BITMAP_FULL<< 4, BITMAP_FULL},
+	{/* klass10 */              0, BITMAP_FULL<< 2, BITMAP_FULL},
+	{/* klass11 */              0, BITMAP_FULL<< 1, BITMAP_FULL},
+	{/* klass12 */BITMAP_FULL<<32, BITMAP_FULL<< 0, BITMAP_FULL},
 #endif
-
-#define DEF_BM_OP0(N, L0, L1, L2)\
-static inline void BITPTRS_SET_BASE##N (bitmap_t **base)\
-{\
-	base[1] = (bitmap_t*) bitmap_dummy;\
-	base[2] = (bitmap_t*) bitmap_dummy;\
-}\
-static inline void BITMAP_SET_LIMIT##N (bitmap_t *const bitmap)\
-{\
-	bitmap[L0-1] = BM_SENTINEL_L0_##N;\
-}\
-static inline void BITMAP_SET_LIMIT_AND_COPY_BM##N (bitmap_t *const bitmap, bitmap_t *const snapshot)\
-{\
-	bitmap[L0-1] = BM_SENTINEL_L0_##N;\
-}
-
-#define DEF_BM_OP1(N, L0, L1, L2)\
-static inline void BITPTRS_SET_BASE##N (bitmap_t **base)\
-{\
-	struct BM##N *bm = (struct BM##N *)base[0];\
-	base[1] = (bitmap_t*)(&bm->m1.bm);\
-	base[2] = (bitmap_t*)bitmap_dummy;\
-}\
-static inline void BITMAP_SET_LIMIT##N (bitmap_t *const bitmap)\
-{\
-	struct BM##N *bm = (struct BM##N *)bitmap;\
-	bitmap[L0-1] = BM_SENTINEL_L0_##N;\
-	bm->m1.bm[L1-1] = BM_SENTINEL_L1_##N;\
-}\
-static inline void BITMAP_SET_LIMIT_AND_COPY_BM##N (bitmap_t *const bitmap, bitmap_t *const snapshot)\
-{\
-	struct BM##N *bm = (struct BM##N *)bitmap;\
-	struct BM##N *ss = (struct BM##N *)snapshot;\
-	bitmap[L0-1] = BM_SENTINEL_L0_##N;\
-	bm->m1.bm[L1-1] = BM_SENTINEL_L1_##N | ss->m1.bm[L1-1];\
-}
-
-#define DEF_BM_OP2(N, L0, L1, L2)\
-static inline void BITPTRS_SET_BASE##N (bitmap_t **base)\
-{\
-	struct BM##N *bm = (struct BM##N *)base[0];\
-	base[1] = (bitmap_t*)(&bm->m1.bm);\
-	base[2] = (bitmap_t*)(&bm->m2.bm);\
-}\
-static inline void BITMAP_SET_LIMIT##N (bitmap_t *const bitmap)\
-{\
-	struct BM##N *bm = (struct BM##N *)bitmap;\
-	bitmap[L0-1] = BM_SENTINEL_L0_##N;\
-	bm->m1.bm[L1-1] = BM_SENTINEL_L1_##N;\
-	bm->m2.bm[L2-1] = BM_SENTINEL_L2_##N;\
-}\
-static inline void BITMAP_SET_LIMIT_AND_COPY_BM##N (bitmap_t *const bitmap, bitmap_t *const snapshot)\
-{\
-	struct BM##N *bm = (struct BM##N *)bitmap;\
-	struct BM##N *ss = (struct BM##N *)snapshot;\
-	bitmap[L0-1] = BM_SENTINEL_L0_##N;\
-	bm->m1.bm[L1-1] = BM_SENTINEL_L1_##N | ss->m1.bm[L1-1];\
-	bm->m2.bm[L2-1] = BM_SENTINEL_L2_##N | ss->m2.bm[L2-1];\
-}
-
-#define DEF_BM_OP0_(N, S1, S2) \
-	DEF_BM_OP0(N, BITMAP_L0_SIZE(N)+S1, BITMAP_L1_SIZE(N)+S2, BITMAP_L2_SIZE(N))
-#define DEF_BM_OP1_(N, S1, S2) \
-	DEF_BM_OP1(N, BITMAP_L0_SIZE(N)+S1, BITMAP_L1_SIZE(N)+S2, BITMAP_L2_SIZE(N))
-#define DEF_BM_OP2_(N, S1, S2) \
-	DEF_BM_OP2(N, BITMAP_L0_SIZE(N)+S1, BITMAP_L1_SIZE(N)+S2, BITMAP_L2_SIZE(N))
-//DEF_BM_OP2( 3, 256+1/*sentinel*/, 4, 1);
-//DEF_BM_OP2( 4, 128+1/*sentinel*/, 2, 1);
-#if SIZEOF_VOIDP*8 == 64
-DEF_BM_OP1_( 5, 1/*sentinel0*/, 0/*sentinel1*/);
-DEF_BM_OP1_( 6, 1/*sentinel0*/, 0/*sentinel1*/);
-#else
-DEF_BM_OP2_( 5, 1/*sentinel0*/, 1/*sentinel1*/);
-DEF_BM_OP2_( 6, 1/*sentinel0*/, 1/*sentinel1*/);
-#endif
-DEF_BM_OP1_( 7, 1/*sentinel0*/, 0/*sentinel1*/);
-DEF_BM_OP1_( 8, 1/*sentinel0*/, 0/*sentinel1*/);
-DEF_BM_OP1_( 9, 1/*sentinel0*/, 0/*sentinel1*/);
-DEF_BM_OP1_(10, 1/*sentinel0*/, 0/*sentinel1*/);
-DEF_BM_OP0_(11, 1/*sentinel0*/, 0/*sentinel1*/);
-DEF_BM_OP0_(12, 0, 0);
-
-
-#define COND(C, T, F) ((C) ? T : F)
-#define _MASK_(N) {\
-	COND(BITMAP_L0_SIZE(N) > 0, 1, 0),\
-	COND(BITMAP_L1_SIZE(N) > 0, 1, 0),\
-	COND(BITMAP_L2_SIZE(N) > 0, 1, 0)}
-#define _MASK_NULL {}
-static const bool BITMAP_DEFAULT_MASK[][SEGMENT_LEVEL] = {
-	_MASK_NULL,
-	_MASK_NULL,
-	_MASK_NULL,
-	_MASK_( 3), _MASK_( 4),
-	_MASK_( 5), _MASK_( 6),
-	_MASK_( 7), _MASK_( 8),
-	_MASK_( 9), _MASK_(10),
-	_MASK_(11), _MASK_(12),
 };
 
-typedef void (*fBITPTRS_SET_BASE)(bitmap_t *base[SEGMENT_LEVEL]);
-static void BITPTRS_SET_BASE_(bitmap_t *base[SEGMENT_LEVEL]) {}
-static const fBITPTRS_SET_BASE BITPTRS_SET_BASE[] = {
-	BITPTRS_SET_BASE_, BITPTRS_SET_BASE_, BITPTRS_SET_BASE_,  BITPTRS_SET_BASE_,
-	BITPTRS_SET_BASE_, BITPTRS_SET_BASE5, BITPTRS_SET_BASE6,  BITPTRS_SET_BASE7,
-	BITPTRS_SET_BASE8, BITPTRS_SET_BASE9, BITPTRS_SET_BASE10, BITPTRS_SET_BASE11,
-	BITPTRS_SET_BASE12
-};
-
-typedef void (*fBITMAP_SET_LIMIT)(bitmap_t *const bm);
-static void BITMAP_SET_LIMIT_(bitmap_t *const bm) { (void)bm; }
-static const fBITMAP_SET_LIMIT BITMAP_SET_LIMIT__[] = {
-	BITMAP_SET_LIMIT_, BITMAP_SET_LIMIT_, BITMAP_SET_LIMIT_,  BITMAP_SET_LIMIT_,
-	BITMAP_SET_LIMIT_, BITMAP_SET_LIMIT5, BITMAP_SET_LIMIT6,  BITMAP_SET_LIMIT7,
-	BITMAP_SET_LIMIT8, BITMAP_SET_LIMIT9, BITMAP_SET_LIMIT10, BITMAP_SET_LIMIT11,
-	BITMAP_SET_LIMIT12
-};
-
-static inline void BITMAP_SET_LIMIT(bitmap_t *const bitmap, unsigned klass)
+void BitMapTree_check_align(bitmap_t *base, unsigned klass)
 {
-	BITMAP_SET_LIMIT__[klass](bitmap);
-	BM_SET(bitmap[0], 1);
+#define DEBUG_CHECK_OFFSET(N)\
+	if (klass == N) {\
+		struct BM##N *bm##N = (struct BM##N *) base;\
+		assert(bm##N->m0 == base + BITMAP_OFFSET[klass][0]/(sizeof(uintptr_t)));\
+		assert(bm##N->m1 == base + BITMAP_OFFSET[klass][1]/(sizeof(uintptr_t)));\
+		assert(bm##N->m2 == base + BITMAP_OFFSET[klass][2]/(sizeof(uintptr_t)));\
+		return;\
+	}
+	DEBUG_CHECK_OFFSET(5);
+	DEBUG_CHECK_OFFSET(6);
+	DEBUG_CHECK_OFFSET(7);
+	DEBUG_CHECK_OFFSET(8);
+	DEBUG_CHECK_OFFSET(9);
+	DEBUG_CHECK_OFFSET(10);
+	DEBUG_CHECK_OFFSET(11);
+	DEBUG_CHECK_OFFSET(12);
 }
 
-static inline void BITPTRS_INIT(BitPtr bitptrs[SEGMENT_LEVEL], Segment *seg, unsigned klass)
+static void BitMapTree_Init(bitmap_t *base[SEGMENT_LEVEL], unsigned klass)
 {
 	unsigned i;
-	BITPTRS_SET_BASE[klass](seg->base);
-	for (i = 0; i < SEGMENT_LEVEL; ++i) {
-		bitptrs[i].idx = 0;
-		bitptrs[i].mask = BITMAP_DEFAULT_MASK[klass][i];
+	bitmap_t *bitmap = base[0];
+	for (i = 1; i < SEGMENT_LEVEL; ++i) {
+		unsigned offset = BITMAP_OFFSET[klass][i];
+		base[i] = bitmap + offset;
 	}
 }
 
-#ifdef USE_GENERATIONAL_GC
-typedef void (*fBITMAP_SET_LIMIT_AND_COPY_BM)(bitmap_t *const bm, bitmap_t *const ss);
-static void BITMAP_SET_LIMIT_AND_COPY_BM_(bitmap_t *const bm, bitmap_t *const ss) { (void)bm; }
-static const fBITMAP_SET_LIMIT_AND_COPY_BM BITMAP_SET_LIMIT_AND_COPY_BM__[] = {
-	BITMAP_SET_LIMIT_AND_COPY_BM_, BITMAP_SET_LIMIT_AND_COPY_BM_, BITMAP_SET_LIMIT_AND_COPY_BM_,
-	BITMAP_SET_LIMIT_AND_COPY_BM_, BITMAP_SET_LIMIT_AND_COPY_BM_, BITMAP_SET_LIMIT_AND_COPY_BM5,
-	BITMAP_SET_LIMIT_AND_COPY_BM6, BITMAP_SET_LIMIT_AND_COPY_BM7, BITMAP_SET_LIMIT_AND_COPY_BM8,
-	BITMAP_SET_LIMIT_AND_COPY_BM9, BITMAP_SET_LIMIT_AND_COPY_BM10, BITMAP_SET_LIMIT_AND_COPY_BM11,
-	BITMAP_SET_LIMIT_AND_COPY_BM12
-};
-static inline void BITMAP_SET_LIMIT_AND_COPY_BM(bitmap_t *const bitmap, bitmap_t *const snapshot, unsigned klass)
+static void BITPTRS_INIT(BitPtr bitptrs[SEGMENT_LEVEL], Segment *seg, unsigned klass)
 {
-	BITMAP_SET_LIMIT_AND_COPY_BM__[klass](bitmap, snapshot);
+	unsigned i;
+	BitMapTree_Init(seg->base, klass);
+	for (i = 0; i < SEGMENT_LEVEL; ++i) {
+		bitptrs[i].idx  = 0;
+		bitptrs[i].mask = 1;
+	}
+}
+
+static void BITMAP_SET_LIMIT(bitmap_t *bitmap, unsigned klass)
+{
+	bitmap[BITMAP_OFFSET[klass][1]-1] = BITMAP_MASK[klass][0];
+	bitmap[BITMAP_OFFSET[klass][2]-1] = BITMAP_MASK[klass][1];
+	bitmap[BITMAP_OFFSET[klass][2]  ] = BITMAP_MASK[klass][2];
+	BM_SET(bitmap[0], 1);
+}
+
+#ifdef USE_GENERATIONAL_GC
+static void BITMAP_SET_LIMIT_AND_COPY_BM(bitmap_t *bitmap, bitmap_t *snapshot, unsigned klass)
+{
+	BITMAP_SET_LIMIT(bitmap, klass);
 	BM_SET(bitmap[0], 1);
 	BM_SET(snapshot[0], 1);
 }
 
-static inline void SNAPSHOT_INIT(Segment *seg, unsigned klass)
+static void SNAPSHOT_INIT(Segment *seg, unsigned klass)
 {
-	BITPTRS_SET_BASE[klass](seg->snapshots);
+	BitMapTree_Init(seg->snapshots, klass);
 }
 #endif
 
@@ -865,6 +742,7 @@ static void Kfree(KonohaContext *kctx, void *p, size_t s)
 			);
 }
 
+
 /* ------------------------------------------------------------------------ */
 /* [mstack] */
 
@@ -1064,7 +942,6 @@ static void BitPtr0_inc(AllocationPointer *p)
 	BM_SET(*bm, bpmask);
 	uintptr_t rot = bpmask >> (BITS - 1);
 
-	BP(p, 0).idx  = bpidx + rot;
 	BP(p, 0).mask = (bpmask << 1) | rot;
 }
 
@@ -1109,11 +986,45 @@ static BlockPtr *blockAddress(Segment *seg, uintptr_t idx, uintptr_t mask)
 }
 
 #define BP_NEXT_MASK(ap, bpidx, bpmask, j) do {\
-	bitmap_t *bm   = AP_BITMAP_N(p, j, bpidx);\
+	bitmap_t *bm   = AP_BITMAP_N(ap, j, bpidx);\
 	uintptr_t temp = *bm | (bpmask - 1UL);\
 	uintptr_t mask = (temp + 1UL) & ~temp;\
 	bpmask = mask;\
 } while (0)
+
+static bitmap_t *bitmap_get_limit(bitmap_t *base, unsigned klass, unsigned level)
+{
+	return base + BITMAP_LIMIT[klass][level];
+}
+
+static void BitPtr_searchUnfilledBlock(AllocationPointer *ap, BitPtr *bp, int level)
+{
+	bitmap_t *bm;
+	bitmap_t *base = AP_BITMAP_N(ap, level, bp->idx);
+	bitmap_t *limit = bitmap_get_limit(base, ap->seg->heap_klass, level);
+	BM_SET(*base, bp->mask);
+
+	bp->mask = 0;
+	for (bm = base; bm < limit; ++bm) {
+		bitmap_t mask = 1;
+		while (1) {
+			uintptr_t temp = *bm;
+			mask = (temp + 1UL) & ~temp;
+			if (mask == 0) {
+				break;
+			}
+			bitmap_t *bitmap = AP_BITMAP_N(ap, level-1, bitptrToIndex(bm - base, mask));
+			if (BM_IS_FULL(*bitmap)) {
+				BM_SET(*bm, mask);
+				continue;
+			}
+			bp->idx  = bm - base;
+			bp->mask = mask;
+			return;
+		}
+	}
+	return;
+}
 
 static bool findNextFreeBlock(AllocationPointer *p)
 {
@@ -1129,18 +1040,19 @@ static bool findNextFreeBlock(AllocationPointer *p)
 #endif
 		for (i = 1; i < SEGMENT_LEVEL; ++i) {
 			bp = BitPtr_init(&BP(p, i), idx);
-			bitmap_t *bm = AP_BITMAP_N(p, i, bp->idx);
-			BM_SET(*bm, bp->mask);
+			BitPtr_searchUnfilledBlock(p, bp, i);
 			BP_NEXT_MASK(p, bp->idx, bp->mask, i);
-			if (bp->mask != 0)
+			if (bp->mask != 0) {
+				DBG_ASSERT(BP(p, i).idx == bp->idx && BP(p, i).mask == bp->mask);
 				break;
+			}
 			idx /= BITS;
 		}
 		if (i == SEGMENT_LEVEL)
 			return false;
 		do {
 			--i;
-			BP(p, i).idx  = bitptrToIndex(bp->idx, bp->mask);
+			BP(p, i).idx  = bitptrToIndex(BP(p, i+1).idx, BP(p, i+1).mask);
 			BP(p, i).mask = 1;
 			BP_NEXT_MASK(p, BP(p, i).idx, BP(p,i).mask, i);
 			gc_info("klass=%" PREFIX_d ", level=%" PREFIX_d " idx=%" PREFIX_d ", mask=%" PREFIX_x,
@@ -1185,6 +1097,7 @@ static bool Heap_init(HeapManager *mng, SubHeap *h, int klass)
 	h->seglist_max  = HEAP_SEGMENTLIST_INIT_SIZE;
 	h->seglist  = (Segment**)(do_malloc(sizeof(Segment**)*h->seglist_max));
 	h->freelist = NULL;
+	h->p.bitptrs[0].idx  = 0;
 	h->p.bitptrs[0].mask = 1;
 	h->p.seg = &segment_dummy;
 	for (i = 0; i < SEGMENT_LEVEL; ++i) {
@@ -1443,7 +1356,7 @@ static void dumpBM(uintptr_t bm)
 	for (i = BITS-1; i >= 0; i--) {
 		fprintf(stderr, "%d", i % 10);
 	}
-	fprintf(stderr, "\n                 ");
+	fprintf(stderr, "\n                ");
 	for (mask = 1UL << (BITS-1); mask; mask >>= 1) {
 		fprintf(stderr, "%d", (bm & mask)?1:0);
 	}
@@ -1482,7 +1395,7 @@ static void setTenureBitMapsAndCount(HeapManager *mng, SubHeap *h)
 		ClearBitMap(seg->base[0], h->heap_klass);
 		LOAD_SNAPSHOT(seg);
 		LOAD_LIVECOUNT(seg);
-		BITMAP_SET_LIMIT_AND_COPY_BM(seg->base[0], seg->snapshots[0], h->heap_klass);
+		BITMAP_SET_LIMIT_AND_COPY_BM(seg->base[0], seg->base[0], h->heap_klass);
 		gc_info("klass=%d, seg[%lu]=%p count=%d",
 				seg->heap_klass, i, seg, seg->live_count);
 	}
