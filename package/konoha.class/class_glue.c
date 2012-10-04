@@ -347,7 +347,7 @@ static kshortflag_t kStmt_parseClassFlag(KonohaContext *kctx, kStmt *stmt, kshor
 static KonohaClassVar* kNameSpace_defineClassName(KonohaContext *kctx, kNameSpace *ns, kshortflag_t cflag, kString *name, kfileline_t pline)
 {
 	KDEFINE_CLASS defNewClass = {0};
-	defNewClass.cflag         = cflag;
+	defNewClass.cflag         = cflag | kClass_Nullable;
 	defNewClass.typeId       = TY_newid;
 	defNewClass.baseTypeId   = TY_Object;
 	defNewClass.superTypeId  = TY_Object; //superClass->typeId;
