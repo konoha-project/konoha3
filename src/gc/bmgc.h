@@ -430,6 +430,16 @@ static const uintptr_t BITMAP_MASK[][SEGMENT_LEVEL] = {
 	BITMASK_DEFAULT /* klass3 */,
 	BITMASK_DEFAULT /* klass4 */,
 #undef BITMASK_DEFAULT
+#if SIZEOF_VOIDP*8 == 32
+	{/* klass5  */              0,               0, BITMAP_FULL<<4},
+	{/* klass6  */              0,               0, BITMAP_FULL<<2},
+	{/* klass7  */              0,               0, BITMAP_FULL<<1},
+	{/* klass8  */              0, BITMAP_FULL<<16, BITMAP_FULL},
+	{/* klass9  */              0, BITMAP_FULL<< 8, BITMAP_FULL},
+	{/* klass10 */              0, BITMAP_FULL<< 4, BITMAP_FULL},
+	{/* klass11 */              0, BITMAP_FULL<< 2, BITMAP_FULL},
+	{/* klass12 */              0, BITMAP_FULL<< 1, BITMAP_FULL},
+#else
 	{/* klass5  */              0,               0, BITMAP_FULL},
 	{/* klass6  */              0, BITMAP_FULL<<32, BITMAP_FULL},
 	{/* klass7  */              0, BITMAP_FULL<<16, BITMAP_FULL},
@@ -438,6 +448,7 @@ static const uintptr_t BITMAP_MASK[][SEGMENT_LEVEL] = {
 	{/* klass10 */              0, BITMAP_FULL<< 2, BITMAP_FULL},
 	{/* klass11 */              0, BITMAP_FULL<< 1, BITMAP_FULL},
 	{/* klass12 */BITMAP_FULL<<32, BITMAP_FULL<< 0, BITMAP_FULL},
+#endif
 };
 
 void BitMapTree_check_align(bitmap_t *base, unsigned klass)
@@ -996,17 +1007,20 @@ static void BitPtr_searchUnfilledBlock(AllocationPointer *ap, BitPtr *bp, int le
 	bp->mask = 0;
 	for (bm = base; bm < limit; ++bm) {
 		bitmap_t mask = 1;
-		uintptr_t temp = *bm;
-		mask = (temp + 1UL) & ~temp;
-		if (mask) {
-			bitmap_t *bitmap = AP_BITMAP_N(ap, level-1, bitptrToIndex(bm - base, 1));
+		while (1) {
+			uintptr_t temp = *bm;
+			mask = (temp + 1UL) & ~temp;
+			if (mask == 0) {
+				break;
+			}
+			bitmap_t *bitmap = AP_BITMAP_N(ap, level-1, bitptrToIndex(bm - base, mask));
 			if (BM_IS_FULL(*bitmap)) {
-				BM_SET(*bm, bp->mask);
+				BM_SET(*bm, mask);
 				continue;
 			}
 			bp->idx  = bm - base;
 			bp->mask = mask;
-			break;
+			return;
 		}
 	}
 	return;
@@ -1028,15 +1042,17 @@ static bool findNextFreeBlock(AllocationPointer *p)
 			bp = BitPtr_init(&BP(p, i), idx);
 			BitPtr_searchUnfilledBlock(p, bp, i);
 			BP_NEXT_MASK(p, bp->idx, bp->mask, i);
-			if (bp->mask != 0)
+			if (bp->mask != 0) {
+				DBG_ASSERT(BP(p, i).idx == bp->idx && BP(p, i).mask == bp->mask);
 				break;
+			}
 			idx /= BITS;
 		}
 		if (i == SEGMENT_LEVEL)
 			return false;
 		do {
 			--i;
-			BP(p, i).idx  = bitptrToIndex(bp->idx, bp->mask);
+			BP(p, i).idx  = bitptrToIndex(BP(p, i+1).idx, BP(p, i+1).mask);
 			BP(p, i).mask = 1;
 			BP_NEXT_MASK(p, BP(p, i).idx, BP(p,i).mask, i);
 			gc_info("klass=%" PREFIX_d ", level=%" PREFIX_d " idx=%" PREFIX_d ", mask=%" PREFIX_x,
