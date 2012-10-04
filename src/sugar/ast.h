@@ -727,7 +727,7 @@ static int kStmt_parseBySyntaxRule2(KonohaContext *kctx, kStmt *stmt, int indent
 			TokenSequence tokens = {ns, tokenList, beginIdx, endIdx};
 			errRule = NULL;
 			int nextIdx = kStmt_matchSyntaxRule2(kctx, stmt, &tokens, &nrule, &errRule);
-			if(Stmt_isERR(stmt)) return endIdx;
+			if(Stmt_isERR(stmt)) return -1;
 			if(beginIdx < nextIdx) return nextIdx;
 		}
 		currentSyntax = currentSyntax->parentSyntaxNULL;
@@ -736,7 +736,7 @@ static int kStmt_parseBySyntaxRule2(KonohaContext *kctx, kStmt *stmt, int indent
 		DBG_ASSERT(errRule != NULL);
 		kStmt_printMessage(kctx, stmt, ErrTag, "%s%s: %s%s is expected", T_statement(stmt->syn->keyword), PSYM_t(errRule->resolvedSymbol));
 	}
-	return endIdx;
+	return -1;
 }
 
 static int TokenSequence_skipStatementSeparator(TokenSequence *tokens, int currentIdx)
@@ -805,7 +805,6 @@ static kbool_t kBlock_addNewStmt2(KonohaContext *kctx, kBlock *bk, TokenSequence
 {
 	int currentIdx = TokenSequence_skipStatementSeparator(tokens, tokens->beginIdx);
 	currentIdx = TokenSequence_skipAnnotation(kctx, tokens, currentIdx);
-	//KdumpTokenArray(kctx, tokens->tokenList, currentIdx, tokens->endIdx);
 	if(currentIdx < tokens->endIdx) {
 		int indent = 0;
 		kStmtVar *stmt = new_(StmtVar, 0);

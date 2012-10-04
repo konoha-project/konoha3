@@ -446,9 +446,8 @@ static void TokenSequence_selectStatement(KonohaContext *kctx, TokenSequence *to
 	}
 	KLIB kArray_clear(kctx, tokens->tokenList, tokens->beginIdx);
 	tokens->endIdx = 0;
-	//KdumpTokenArray(kctx, source->tokenList, source->beginIdx, source->endIdx);
 	TokenSequence_resolved2(kctx, tokens, NULL, source, source->beginIdx);
-	//KdumpTokenArray(kctx, tokens->tokenList, tokens->beginIdx, tokens->endIdx);
+	KdumpTokenArray(kctx, tokens->tokenList, tokens->beginIdx, tokens->endIdx);
 	source->beginIdx = source->endIdx;
 	source->endIdx = sourceEndIdx;
 }
@@ -479,6 +478,7 @@ static kstatus_t TokenSequence_eval(KonohaContext *kctx, TokenSequence *source)
 			}
 		}
 		TokenSequence_pop(kctx, tokens);
+		if(status != K_CONTINUE) break;
 	}
 	return status;
 }
