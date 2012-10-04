@@ -151,7 +151,7 @@ static inline int setjmp_mingw(_JBTYPE* t)
 #ifdef _MSC_VER
 #include <malloc.h>
 #endif
-#define ALLOCA(T, SIZE) ((T*)alloca(SIZE * sizeof(T)))
+#define ALLOCA(T, SIZE) ((T*)alloca((SIZE) * sizeof(T)))
 
 #ifndef K_USE_PTHREAD
 typedef void kmutex_t;
