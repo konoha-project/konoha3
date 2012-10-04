@@ -496,9 +496,10 @@ static KMETHOD Complex_csqrtl(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Complex_cpow(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kComplex *kx = (kComplex *) sfp[0].asObject;
-	kComplex *ky = (kComplex *) sfp[1].asObject;
 	double _Complex x = kx->z;
-	double _Complex y = ky->z;
+	double real = (double)sfp[1].floatValue;
+	double imaginary = (double)sfp[2].floatValue;
+	double _Complex y = real + I * imaginary;
 	double ret = cpow(x, y);
 	RETURNf_(ret);
 }
@@ -507,10 +508,11 @@ static KMETHOD Complex_cpow(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Complex_cpowf(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kComplex *kx = (kComplex *) sfp[0].asObject;
-	kComplex *ky = (kComplex *) sfp[1].asObject;
-	float _Complex xf = (float _Complex)kx->z;
-	float _Complex yf = (float _Complex)ky->z;
-	float ret = cpow(xf, yf);
+	float _Complex x = (float _Complex)kx->z;
+	float real = (float)sfp[1].floatValue;
+	float imaginary = (float)sfp[2].floatValue;
+	float _Complex y = real + I * imaginary;
+	float ret = cpowf(x, y);
 	RETURNf_(ret);
 }
 
@@ -518,10 +520,11 @@ static KMETHOD Complex_cpowf(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Complex_cpowl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kComplex *kx = (kComplex *) sfp[0].asObject;
-	kComplex *ky = (kComplex *) sfp[1].asObject;
-	long double _Complex xl = (long double _Complex)kx->z;
-	long double _Complex yl = (long double _Complex)ky->z;
-	long double ret = cpow(xl, yl);
+	long double _Complex x = (long double _Complex)kx->z;
+	long double real = (long double)sfp[1].floatValue;
+	long double imaginary = (long double)sfp[2].floatValue;
+	long double _Complex y = real + I * imaginary;
+	long double ret = cpowl(x, y);
 	RETURNf_(ret);
 }
 
@@ -663,7 +666,7 @@ static kbool_t Complex_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	/* You can define methods with the following procedures. */
 	int TY_Complex = ComplexClass->typeId;
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Complex_new),     TY_Complex, TY_Complex, MN_("new"),     2, TY_float,   FN_("real"), TY_float, FN_("imaginary"),
+		_Public, _F(Complex_new),     TY_Complex, TY_Complex, MN_("new"),   2, TY_float, FN_("real"), TY_float, FN_("imaginary"),
 		_Public, _F(Complex_csin),    TY_float, TY_Complex, MN_("csin"),    0,
 		_Public, _F(Complex_csinf),   TY_float, TY_Complex, MN_("csinf"),   0,
 		_Public, _F(Complex_csinl),   TY_float, TY_Complex, MN_("csinl"),   0,
@@ -712,9 +715,9 @@ static kbool_t Complex_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public, _F(Complex_csqrt),   TY_float, TY_Complex, MN_("csqrt"),   0,
 		_Public, _F(Complex_csqrtf),  TY_float, TY_Complex, MN_("csqrtf"),  0,
 		_Public, _F(Complex_csqrtl),  TY_float, TY_Complex, MN_("csqrtl"),  0,
-		_Public, _F(Complex_cpow),    TY_float, TY_Complex, MN_("cpow"),    0,
-		_Public, _F(Complex_cpowf),   TY_float, TY_Complex, MN_("cpowf"),   0,
-		_Public, _F(Complex_cpowl),   TY_float, TY_Complex, MN_("cpowl"),   0,
+		_Public, _F(Complex_cpow),    TY_float, TY_Complex, MN_("cpow"),    2, TY_float,   FN_("real"), TY_float, FN_("imaginary"),
+		_Public, _F(Complex_cpowf),   TY_float, TY_Complex, MN_("cpowf"),   2, TY_float,   FN_("real"), TY_float, FN_("imaginary"),
+		_Public, _F(Complex_cpowl),   TY_float, TY_Complex, MN_("cpowl"),   2, TY_float,   FN_("real"), TY_float, FN_("imaginary"),
 		_Public, _F(Complex_creal),   TY_float, TY_Complex, MN_("creal"),   0,
 		_Public, _F(Complex_crealf),  TY_float, TY_Complex, MN_("crealf"),  0,
 		_Public, _F(Complex_creall),  TY_float, TY_Complex, MN_("creall"),  0,
