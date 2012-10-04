@@ -493,7 +493,7 @@ static kbool_t sugar_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameS
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("sugar"), 0, "\"sugar\" $Token", 0, 0, NULL, NULL, StmtTyCheck_sugar, NULL, NULL, },
+		{ SYM_("syntax"), 0, "\"syntax\" $Token", 0, 0, NULL, NULL, StmtTyCheck_sugar, NULL, NULL, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
