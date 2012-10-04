@@ -36,9 +36,9 @@ extern "C" {
 #define K_TYTABLE_INIT 64
 #define K_PAGESIZE        4096
 
-#define K_VERSION   "0.1"
+#define K_VERSION   "0.2"
 #define K_MAJOR_VERSION 0
-#define K_MINOR_VERSION 1
+#define K_MINOR_VERSION 2
 #define K_PATCH_LEVEL   0
 
 #ifndef K_REVISION
