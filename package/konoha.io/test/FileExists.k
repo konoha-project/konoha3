@@ -1,15 +1,14 @@
 // written by wakamatsu
-import("konoha");
-import("konoha.io");
-import("konoha.const");
+// modified by chenji
 
-const b = "../../../package/konoha.io/test/";
+import("konoha.io");
+import("konoha.new");
 
 void test() {
-	File file1 = new File(b + "test.txt");
-	System.p(file1.exists());
-	File file2 = new File(b + "hoge.txt");
-	System.p(file2.exists());
+	File file1 = new File("../../../package/konoha.io/test/test.txt");
+	assert(file1.exists() == true);
+	File file2 = new File("../../../package/konoha.io/test/hoge.txt");
+	assert(file2.exists() == false);
 }
 
 test();
