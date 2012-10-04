@@ -29,7 +29,7 @@ extern "C" {
 
 int verbose_gc = 0;
 
-#define USE_GENERATIONAL_GC 1
+//#define USE_GENERATIONAL_GC 1
 #include "bmgc.h"
 
 #ifdef __cplusplus

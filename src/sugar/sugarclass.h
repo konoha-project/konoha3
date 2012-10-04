@@ -101,9 +101,10 @@ static void Token_reftrace(KonohaContext *kctx, kObject *o)
 
 static void Expr_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	kExprVar *expr      =   (kExprVar*)o;
-	expr->build      =   TEXPR_UNTYPED;
-	expr->ty         =   TY_var;
+	kExprVar *expr = (kExprVar*)o;
+	expr->build    = TEXPR_UNTYPED;
+	expr->ty       = TY_var;
+	expr->index    = 0;
 	KINITv(expr->termToken, K_NULLTOKEN);
 	expr->syn = (SugarSyntax*)conf;
 }
