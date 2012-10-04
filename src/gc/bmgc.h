@@ -1579,6 +1579,12 @@ static void RememberSet_add(kObject *o)
 	uintptr_t offset = ((uintptr_t)o &  (SEGMENT_SIZE - 1UL)) >> SUBHEAP_KLASS_MIN;
 	BlockHeader *head = (BlockHeader*) addr;
 	bitmap_t *map = head->remember_set;
+#ifdef DEBUG_WRITE_BARRIER
+	int ret = bitmap_get(map+(offset/BITS), offset%BITS);
+	if (ret == 0 && Object_isTenure(o)) {
+		fprintf(stderr, "W %p\n", o);
+	}
+#endif
 	bitmap_set(map+(offset/BITS), offset%BITS, Object_isTenure(o));
 }
 
@@ -1591,7 +1597,13 @@ static void RememberSet_reftrace(KonohaContext *kctx, HeapManager *mng)
 		bitmap_t *base = ARRAY_n(mng->remember_sets, i);
 		bitmap_t *m = base;
 		bitmap_t *e = m + bitmap_size;
-		for (; m != e; base+=BITS, base_address += (SEGMENT_SIZE/sizeof(void*))) {
+		for (; m != e; base+=BITS, base_address +=
+#if SIZEOF_VOIDP*8 == 64
+				(SEGMENT_SIZE)
+#else
+				(SEGMENT_SIZE/sizeof(void*))
+#endif
+		) {
 			for (; m < base + BITS; ++m) {
 				bitmap_t b = (*m);
 				while (b != 0) {
@@ -1600,16 +1612,15 @@ static void RememberSet_reftrace(KonohaContext *kctx, HeapManager *mng)
 					b ^= 1UL << index;
 					offset = (m - base) * BITS + index;
 					kObject *o = (kObject*)(base_address + (offset << SUBHEAP_KLASS_MIN));
+#ifdef DEBUG_WRITE_BARRIER
+					fprintf(stderr, "R %p\n", o);
+#endif
 					KONOHA_reftraceObject(kctx, o);
 				}
 				bitmap_reset(m, 0);
 			}
 		}
 	}
-}
-
-static void RememberSet_clear(HeapManager *mng)
-{
 }
 
 #endif
@@ -1659,9 +1670,6 @@ static void bmgc_gc_mark(HeapManager *mng, enum gc_mode mode)
 			}
 		}
 	}
-#ifdef USE_GENERATIONAL_GC
-	RememberSet_clear(mng);
-#endif
 }
 
 #define LIST_PUSH(tail, e) do {\
@@ -1845,6 +1853,7 @@ static void KscheduleGC(HeapManager *mng)
 	enum gc_mode mode = mng->flags & 0x3;
 	if (mode) {
 		mode = (mode == GC_NOP) ? mode : GC_MINOR;
+		gc_info("scheduleGC mode=%d", mode);
 		bitmapMarkingGC(mng, mode);
 	}
 }
