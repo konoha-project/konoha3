@@ -53,10 +53,6 @@ extern "C" {
 #define SEGMENT_LEVEL 3
 #define MIN_ALIGN (1UL << SUBHEAP_KLASS_MIN)
 
-#ifdef USE_GENERATIONAL_GC
-#define MINOR_COUNT 16
-#endif
-
 #define KB_   (1024)
 #define MB_   (KB_*1024)
 
@@ -66,6 +62,14 @@ extern "C" {
 #define PowerOf2(N) (1UL << N)
 #define ALIGN(X,N)  (((X)+((N)-1))&(~((N)-1)))
 #define CEIL(F)     (F-(int)(F) > 0 ? (int)(F+1) : (int)(F))
+
+#if SIZEOF_VOIDP*8 == 64
+#define USE_GENERATIONAL_GC 1
+#endif
+
+#ifdef USE_GENERATIONAL_GC
+#define MINOR_COUNT 16
+#endif
 
 #ifdef _WIN64
 #ifdef _MSC_VER
@@ -451,7 +455,8 @@ static const uintptr_t BITMAP_MASK[][SEGMENT_LEVEL] = {
 #endif
 };
 
-void BitMapTree_check_align(bitmap_t *base, unsigned klass)
+#ifdef GCDEBUG
+static void BitMapTree_check_align(bitmap_t *base, unsigned klass)
 {
 #define DEBUG_CHECK_OFFSET(N)\
 	if (klass == N) {\
@@ -470,6 +475,7 @@ void BitMapTree_check_align(bitmap_t *base, unsigned klass)
 	DEBUG_CHECK_OFFSET(11);
 	DEBUG_CHECK_OFFSET(12);
 }
+#endif
 
 static void BitMapTree_Init(bitmap_t *base[SEGMENT_LEVEL], unsigned klass)
 {
@@ -503,6 +509,9 @@ static void BITMAP_SET_LIMIT(bitmap_t *bitmap, unsigned klass)
 static void BITMAP_SET_LIMIT_AND_COPY_BM(bitmap_t *bitmap, bitmap_t *snapshot, unsigned klass)
 {
 	BITMAP_SET_LIMIT(bitmap, klass);
+	bitmap[BITMAP_OFFSET[klass][1]-1] |= snapshot[BITMAP_OFFSET[klass][1]-1];
+	bitmap[BITMAP_OFFSET[klass][2]-1] |= snapshot[BITMAP_OFFSET[klass][2]-1];
+	bitmap[BITMAP_OFFSET[klass][2]  ] |= snapshot[BITMAP_OFFSET[klass][2]  ];
 	BM_SET(bitmap[0], 1);
 	BM_SET(snapshot[0], 1);
 }
@@ -1395,7 +1404,7 @@ static void setTenureBitMapsAndCount(HeapManager *mng, SubHeap *h)
 		ClearBitMap(seg->base[0], h->heap_klass);
 		LOAD_SNAPSHOT(seg);
 		LOAD_LIVECOUNT(seg);
-		BITMAP_SET_LIMIT_AND_COPY_BM(seg->base[0], seg->base[0], h->heap_klass);
+		BITMAP_SET_LIMIT_AND_COPY_BM(seg->base[0], seg->snapshots[0], h->heap_klass);
 		gc_info("klass=%d, seg[%lu]=%p count=%d",
 				seg->heap_klass, i, seg, seg->live_count);
 	}
@@ -1582,11 +1591,11 @@ static void RememberSet_reftrace(KonohaContext *kctx, HeapManager *mng)
 		bitmap_t *base = ARRAY_n(mng->remember_sets, i);
 		bitmap_t *m = base;
 		bitmap_t *e = m + bitmap_size;
-		for (; m != e; base+=BITS, base_address += SEGMENT_SIZE) {
+		for (; m != e; base+=BITS, base_address += (SEGMENT_SIZE/sizeof(void*))) {
 			for (; m < base + BITS; ++m) {
 				bitmap_t b = (*m);
 				while (b != 0) {
-					unsigned index, offset;
+					uintptr_t index, offset;
 					index = CTZ(b);
 					b ^= 1UL << index;
 					offset = (m - base) * BITS + index;
