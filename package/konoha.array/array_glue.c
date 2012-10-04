@@ -547,7 +547,7 @@ static KMETHOD ParseExpr_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t array_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KW_BracketGroup, SYNFLAG_ExprPostfixOp2, NULL, C_PRECEDENCE_CALL, 0, NULL, ParseExpr_Bracket, NULL, NULL, ExprTyCheck_Bracket, },
+		{ KW_BracketGroup, SYNFLAG_ExprPostfixOp2, NULL, Precedence_CStyleCALL, 0, NULL, ParseExpr_Bracket, NULL, NULL, ExprTyCheck_Bracket, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);

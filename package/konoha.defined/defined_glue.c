@@ -99,7 +99,7 @@ static KMETHOD ParseExpr_Defined(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t defined_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("defined"), 0, NULL, 0, C_PRECEDENCE_PREUNARY, NULL, ParseExpr_Defined, NULL, NULL, ExprTyCheck_Defined, },
+		{ SYM_("defined"), 0, NULL, 0, Precedence_CStylePREUNARY, NULL, ParseExpr_Defined, NULL, NULL, ExprTyCheck_Defined, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);

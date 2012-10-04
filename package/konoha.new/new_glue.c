@@ -108,7 +108,7 @@ static KMETHOD ParseExpr_new(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t new_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("new"), 0, NULL, 0, C_PRECEDENCE_CALL, NULL, ParseExpr_new, NULL, NULL, NULL, },
+		{ SYM_("new"), 0, NULL, 0, Precedence_CStyleCALL, NULL, ParseExpr_new, NULL, NULL, NULL, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);

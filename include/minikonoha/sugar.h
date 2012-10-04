@@ -213,24 +213,26 @@ struct SugarSyntaxVar {
 
 #define _OPLeft   .flag = (SYNFLAG_ExprLeftJoinOp2)
 
-// operator priority
+// operator prcedence
 
-#define C_PRECEDENCE_CALL      100  /*x(), x[], x.x x->x x++ */
-#define C_PRECEDENCE_PREUNARY  200  /*++x, --x, sizeof x &x +x -x !x */
-#define C_PRECEDENCE_CAST      300  /* (T)x */
-#define C_PRECEDENCE_MUL       400  /* x * x, x / x, x % x*/
-#define C_PRECEDENCE_ADD       500  /* x + x, x - x */
-#define C_PRECEDENCE_SHIFT     600  /* x << x, x >> x */
-#define C_PRECEDENCE_COMPARE   700
-#define C_PRECEDENCE_EQUALS    800
-#define C_PRECEDENCE_BITAND    900
-#define C_PRECEDENCE_BITXOR    1000
-#define C_PRECEDENCE_BITOR     1100
-#define C_PRECEDENCE_AND       1200
-#define C_PRECEDENCE_OR        1300
-#define C_PRECEDENCE_TRINARY   1400  /* ? : */
-#define C_PRECEDENCE_ASSIGN    1500
-#define C_PRECEDENCE_COMMA     1600
+typedef enum {
+	Precedence_CStyleCALL     = 100,  /*x(), x[], x.x x->x x++ */
+	Precedence_CStylePREUNARY = 200,  /*++x, --x, sizeof x &x +x -x !x */
+	Precedence_CStyleCAST     = 300,  /* (T)x */
+	Precedence_CStyleMUL      = 400,  /* x * x, x / x, x % x*/
+	Precedence_CStyleADD      = 500,  /* x + x, x - x */
+	Precedence_CStyleSHIFT    = 600,  /* x << x, x >> x */
+	Precedence_CStyleCOMPARE  = 700,
+	Precedence_CStyleEQUALS   = 800,
+	Precedence_CStyleBITAND   = 900,
+	Precedence_CStyleBITXOR   = 1000,
+	Precedence_CStyleBITOR    = 1100,
+	Precedence_CStyleAND      = 1200,
+	Precedence_CStyleOR       = 1300,
+	Precedence_CStyleTRINARY  = 1400,  /* ? : */
+	Precedence_CStyleASSIGN   = 1500,
+	Precedence_CStyleCOMMA    = 1600,
+} Precedence;
 
 typedef struct KDEFINE_SYNTAX {
 	ksymbol_t keyword;  kshortflag_t flag;
