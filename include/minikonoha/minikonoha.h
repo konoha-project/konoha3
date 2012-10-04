@@ -1044,7 +1044,7 @@ typedef enum {
 	StringPolicy_UTF8     =     (1<<2),
 	StringPolicy_POOL     =     (1<<3),
 	StringPolicy_NOPOOL   =     (1<<5),
-	StringPolicy_NOCOPY   =     (1<<4),
+	StringPolicy_NOCOPY   =     (1<<4)
 } StringPolicy;
 
 #define K_NULLTEXT          "null"
