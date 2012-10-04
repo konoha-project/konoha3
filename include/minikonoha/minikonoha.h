@@ -910,7 +910,7 @@ struct KonohaClassField {
 #define CFLAG_Method            kClass_Nullable|kClass_Final
 #define CFLAG_Func              kClass_Nullable|kClass_Final
 #define CFLAG_NameSpace         kClass_Nullable|kClass_Final
-#define CFLAG_System            kClass_Singleton|kClass_Final
+#define CFLAG_System            kClass_Nullable|kClass_Singleton|kClass_Final
 #define CFLAG_0                 kClass_TypeVar|kClass_UnboxType|kClass_Singleton|kClass_Final
 
 #define CT_is(P, C)           (TFLAG_is(kshortflag_t, (C)->cflag, kClass_##P))
