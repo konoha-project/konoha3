@@ -151,7 +151,7 @@ static inline int setjmp_mingw(_JBTYPE* t)
 #ifdef _MSC_VER
 #include <malloc.h>
 #endif
-#define ALLOCA(T, SIZE) ((T*)alloca(SIZE * sizeof(T)))
+#define ALLOCA(T, SIZE) ((T*)alloca((SIZE) * sizeof(T)))
 
 #ifndef K_USE_PTHREAD
 typedef void kmutex_t;
@@ -1044,7 +1044,7 @@ typedef enum {
 	StringPolicy_UTF8     =     (1<<2),
 	StringPolicy_POOL     =     (1<<3),
 	StringPolicy_NOPOOL   =     (1<<5),
-	StringPolicy_NOCOPY   =     (1<<4),
+	StringPolicy_NOCOPY   =     (1<<4)
 } StringPolicy;
 
 #define K_NULLTEXT          "null"
