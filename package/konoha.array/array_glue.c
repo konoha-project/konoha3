@@ -132,6 +132,12 @@ static void UnboxArray_insert(KonohaContext *kctx, kArray *o, size_t n, uintptr_
 	}
 }
 
+static KMETHOD Array_clear(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kArray *a = sfp[0].asArray;
+	KLIB kArray_clear(kctx, a, 0);
+}
+
 static KMETHOD Array_add1(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
@@ -423,6 +429,7 @@ static kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public|_Im,    _F(Array_removeAt), TY_0,   TY_Array, MN_("removeAt"), 1, TY_int, FN_("index"),
 		_Public|_Const, _F(Array_getSize), TY_int, TY_Array, MN_("getSize"), 0,
 		_Public|_Const, _F(Array_getSize), TY_int, TY_Array, MN_("getlength"), 0,
+		_Public,        _F(Array_clear), TY_void, TY_Array, MN_("clear"), 0,
 		_Public,        _F(Array_add1), TY_void, TY_Array, MN_("add"), 1, TY_0, FN_("value"),
 		_Public,        _F(Array_push), TY_int, TY_Array, MN_("push"), 1, TY_0, FN_("value"),
 		_Public,        _F(Array_pop), TY_0, TY_Array, MN_("pop"), 0,
