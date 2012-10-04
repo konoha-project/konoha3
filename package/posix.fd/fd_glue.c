@@ -24,7 +24,6 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-#include <minikonoha/bytes.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>

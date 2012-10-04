@@ -280,6 +280,7 @@ static KMETHOD System_chmod(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
+	KImportPackage(ns, "konoha.bytes", pline);
 	KDEFINE_CLASS defFile = {
 		STRUCTNAME(FILE),
 		.cflag = kClass_Final,
@@ -299,20 +300,12 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public|_Static|_Const|_Im, _F(System_rmdir), TY_int, TY_System, MN_("rmdir"), 1, TY_String, FN_("path"),
 		_Public|_Static|_Const|_Im, _F(System_truncate), TY_int, TY_System, MN_("truncate"), 2, TY_String, FN_("path"), TY_int, FN_("length"),
 		_Public|_Static|_Const|_Im, _F(System_chmod), TY_int, TY_System, MN_("chmod"), 2, TY_String, FN_("path"), TY_int, FN_("mode"),
+		// the function below uses Bytes
+		_Public|_Const, _F(File_write), TY_int, TY_File, MN_("write"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
+		_Public|_Const, _F(File_read), TY_int, TY_File, MN_("read"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
-	if (IS_defineBytes()) {
-		// the function below uses Bytes
-		KDEFINE_METHOD MethodData2[] = {
-			_Public|_Const, _F(File_write), TY_int, TY_File, MN_("write"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
-			_Public|_Const, _F(File_read), TY_int, TY_File, MN_("read"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
-			DEND,
-		};
-		KLIB kNameSpace_loadMethodData(kctx, ns, MethodData2);
-	} else {
-		kreportf(InfoTag, pline, "konoha.bytes package hasn't imported. Some features are still disabled.");
-	}
 	return true;
 }
 
