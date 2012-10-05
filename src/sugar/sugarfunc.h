@@ -109,7 +109,7 @@ static KMETHOD PatternMatch_Params(KonohaContext *kctx, KonohaStack *sfp)
 	if(tk->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
 		TokenSequence param = {Stmt_nameSpace(stmt), tk->subTokenList, 0, kArray_size(tk->subTokenList)};
 		checkParam(kctx, &param);
-		kBlock *bk = new_kBlock2(kctx, stmt, NULL, &param);
+		kBlock *bk = new_kBlock(kctx, stmt, NULL, &param);
 		kStmt_setParsedObject(kctx, stmt, name, UPCAST(bk));
 		returnIdx = beginIdx + 1;
 	}
@@ -128,7 +128,7 @@ static KMETHOD PatternMatch_Block(KonohaContext *kctx, KonohaStack *sfp)
 	else {
 		endIdx = findEndOfStatement(kctx, tokenList, beginIdx, endIdx, true);
 		TokenSequence range = {Stmt_nameSpace(stmt), tokenList, beginIdx, endIdx};
-		kBlock *bk = new_kBlock2(kctx, stmt, NULL, &range);
+		kBlock *bk = new_kBlock(kctx, stmt, NULL, &range);
 		kStmt_setParsedObject(kctx, stmt, name, UPCAST(bk));
 		RETURNi_(endIdx);
 	}
@@ -263,7 +263,7 @@ static KMETHOD ParseExpr_DOLLAR(KonohaContext *kctx, KonohaStack *sfp)
 		if(tk->resolvedSyntaxInfo->keyword == KW_BraceGroup) {
 			kExprVar *expr = GCSAFE_new(ExprVar, SYN_(Stmt_nameSpace(stmt), KW_BlockPattern));
 			TokenSequence range = {Stmt_nameSpace(stmt), tk->subTokenList, 0, kArray_size(tk->subTokenList)};
-			KSETv(expr, expr->block, SUGAR new_kBlock2(kctx, stmt, NULL, &range));
+			KSETv(expr, expr->block, SUGAR new_kBlock(kctx, stmt, NULL, &range));
 			RETURN_(expr);
 		}
 	}

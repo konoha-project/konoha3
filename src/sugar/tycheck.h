@@ -300,7 +300,7 @@ static kBlock* kMethod_newBlock(KonohaContext *kctx, kMethod *mtd, kNameSpace *n
 	TokenSequence tokens = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList, 0};
 	TokenSequence_push(kctx, tokens);
 	TokenSequence_tokenize(kctx, &tokens, script, uline);
-	kBlock *bk = new_kBlock2(kctx, NULL/*parentStmt*/, NULL/*macro*/, &tokens);
+	kBlock *bk = new_kBlock(kctx, NULL/*parentStmt*/, NULL/*macro*/, &tokens);
 	TokenSequence_pop(kctx, tokens);
 	return bk;
 }
@@ -469,7 +469,7 @@ static kstatus_t TokenSequence_eval(KonohaContext *kctx, TokenSequence *source)
 		}
 		while(tokens.beginIdx < tokens.endIdx) {
 			KLIB kArray_clear(kctx, singleBlock->stmtList, 0);
-			if(!kBlock_addNewStmt2(kctx, singleBlock, &tokens)) {
+			if(!kBlock_addNewStmt(kctx, singleBlock, &tokens)) {
 				return K_BREAK;
 			}
 			if(kArray_size(singleBlock->stmtList) > 0) {
