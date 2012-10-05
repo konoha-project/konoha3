@@ -26,6 +26,8 @@
 
 #include <stdio.h>
 
+//#define GCDEBUG 1
+
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/gc.h"
 #include "minikonoha/local.h"
@@ -77,14 +79,14 @@ extern "C" {
 static uint32_t CTZ(uint32_t x)
 {
 	unsigned long r = 0;
-	_BitScanReverse64(&r, x);
+	_BitScanForward(&r, x);
 	return r;
 }
 static uint32_t CLZ(uint32_t x)
 {
 	unsigned long r = 0;
-	_BitScanForward64(&r, x);
-	return r;
+	_BitScanReverse(&r, x);
+	return 63 - r;
 }
 static uint32_t FFS(uint32_t x)
 {
