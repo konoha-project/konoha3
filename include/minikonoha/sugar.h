@@ -525,7 +525,7 @@ typedef struct {
 	int         (*TokenUtils_parseTypePattern)(KonohaContext *, kNameSpace *, kArray *, int , int , KonohaClass **classRef);
 	kTokenVar*  (*kToken_transformToBraceGroup)(KonohaContext *, kTokenVar *, kNameSpace *, MacroSet *);
 
-	void        (*kStmt_setParsedObject)(KonohaContext *, kStmt *, ksymbol_t, kObject *o);
+	void        (*kStmt_addParsedObject)(KonohaContext *, kStmt *, ksymbol_t, kObject *o);
 	uintptr_t   (*kStmt_parseFlag)(KonohaContext *kctx, kStmt *stmt, KonohaFlagSymbolData *flagData, uintptr_t flag);
 	kToken*     (*kStmt_getToken)(KonohaContext *, kStmt *, ksymbol_t kw, kToken *def);
 	kExpr*      (*kStmt_getExpr)(KonohaContext *, kStmt *, ksymbol_t kw, kExpr *def);
