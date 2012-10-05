@@ -1847,7 +1847,7 @@ static kbool_t KisObject(HeapManager *mng, void *ptr)
 
 static void KscheduleGC(HeapManager *mng)
 {
-	enum gc_mode mode = mng->flags & 0x3;
+	enum gc_mode mode = (enum gc_mode)(mng->flags & 0x3);
 	if (mode) {
 		mode = (mode == GC_NOP) ? mode : GC_MINOR;
 		gc_info("scheduleGC mode=%d", mode);
