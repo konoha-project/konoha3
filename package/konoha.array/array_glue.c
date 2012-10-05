@@ -501,9 +501,6 @@ static kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	KonohaClass *CT_ArrayT0 = CT_p0(kctx, CT_Array, TY_0);
 	ktype_t TY_ArrayT0 = CT_ArrayT0->typeId;
 
-	KonohaClass *CT_ArrayInt = CT_p0(kctx, CT_Array, TY_int);
-	ktype_t TY_ArrayInt = CT_ArrayInt->typeId;
-
 	kparamtype_t p[] = {{TY_0}};
 	ktype_t TY_FuncMap = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_0 , 1, p))->typeId;
 
