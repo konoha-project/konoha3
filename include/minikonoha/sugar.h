@@ -62,7 +62,7 @@ typedef enum {
 	TokenType_INT    = KW_NumberPattern,
 	TokenType_CODE   = KW_BlockPattern,
 	TokenType_ERR    = KW_TokenPattern
-} TokenType;
+} kTokenType;
 
 #define KW_ExprOperator        KW_ParamPattern
 #define KW_ExprTerm            KW_SymbolPattern

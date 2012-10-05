@@ -26,6 +26,8 @@
 
 #include <stdio.h>
 
+//#define GCDEBUG 1
+
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/gc.h"
 #include "minikonoha/local.h"
@@ -77,14 +79,14 @@ extern "C" {
 static uint32_t CTZ(uint32_t x)
 {
 	unsigned long r = 0;
-	_BitScanReverse64(&r, x);
+	_BitScanForward(&r, x);
 	return r;
 }
 static uint32_t CLZ(uint32_t x)
 {
 	unsigned long r = 0;
-	_BitScanForward64(&r, x);
-	return r;
+	_BitScanReverse(&r, x);
+	return 63 - r;
 }
 static uint32_t FFS(uint32_t x)
 {
@@ -1847,7 +1849,7 @@ static kbool_t KisObject(HeapManager *mng, void *ptr)
 
 static void KscheduleGC(HeapManager *mng)
 {
-	enum gc_mode mode = mng->flags & 0x3;
+	enum gc_mode mode = (enum gc_mode)(mng->flags & 0x3);
 	if (mode) {
 		mode = (mode == GC_NOP) ? mode : GC_MINOR;
 		gc_info("scheduleGC mode=%d", mode);

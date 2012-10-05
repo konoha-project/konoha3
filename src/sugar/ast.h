@@ -318,7 +318,7 @@ static kbool_t TokenSequence_applyMacro(KonohaContext *kctx, TokenSequence *toke
 static void TokenSequence_applyMacroGroup(KonohaContext *kctx, TokenSequence *tokens, kArray *macroTokenList, int paramsize, kToken *groupToken)
 {
 	int i;
-	MacroSet mp[paramsize+1];
+	MacroSet* mp = ALLOCA(MacroSet, paramsize+1);
 	DBG_ASSERT(paramsize < kArray_size(macroTokenList));
 	for(i = 0; i < paramsize; i++) {
 		mp[i].symbol = macroTokenList->tokenItems[i]->resolvedSymbol;

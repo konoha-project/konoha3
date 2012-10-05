@@ -236,37 +236,27 @@ static kbool_t exception_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFir
 	return true;
 }
 
+static kStmt* Stmt_lookupTryOrCatchStmtNULL(KonohaContext *kctx, kStmt *stmt)
+{
+	int i;
+	kArray *bka = stmt->parentBlockNULL->stmtList;
+	ksymbol_t trySym = SYM_("try");
+	ksymbol_t catchSym = SYM_("catch");
+	for(i = 0; kArray_size(bka); i++) {
+		kStmt *s = bka->stmtItems[i];
+		if(s == stmt) {
+			break;
+		}
+	}
 
-//
-//static KMETHOD ParseExpr_BRACKET(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	VAR_ParseExpr(stmt, tokenException, s, c, e);
-//	DBG_P("parse bracket!!");
-//	kToken *tk = tokenException->tokenItems[c];
-//	if(s == c) { // TODO
-//		kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, tk->subTokenList, 0, kException_size(tk->subTokenList));
-//		RETURN_(SUGAR kStmt_rightJoinExpr(kctx, stmt, expr, tokenException, c+1, e));
-//	}
-//	else {
-//		kExpr *lexpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenException, s, c);
-//		if(lexpr == K_NULLEXPR) {
-//			RETURN_(lexpr);
-//		}
-//		if(lexpr->syn->keyword == KW_new) {  // new int[100]
-//			kExpr_setsyn(lexpr, SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall));
-//			lexpr = SUGAR kStmt_addExprParam(kctx, stmt, lexpr, tk->subTokenList, 0, kException_size(tk->subTokenList), 0/*allowEmpty*/);
-//		}
-//		else {   // X[1] => get X 1
-//			kTokenVar *tkN = GCSAFE_new(TokenVar, 0);
-//			tkN->keyword = MN_toGETTER(0);
-//			tkN->uline = tk->uline;
-//			SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
-//			lexpr  = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, tkN, lexpr);
-//			lexpr = SUGAR kStmt_addExprParam(kctx, stmt, lexpr, tk->subTokenList, 0, kException_size(tk->subTokenList), 1/*allowEmpty*/);
-//		}
-//		RETURN_(SUGAR kStmt_rightJoinExpr(kctx, stmt, lexpr, tokenException, c+1, e));
-//	}
-//}
+	for(i = i-1; i >= 0; i--) {
+		kStmt *s = bka->stmtItems[i];
+		if (s->syn && (s->syn->keyword == trySym || s->syn->keyword == catchSym)) {
+			return s;
+		}
+	}
+	return NULL;
+}
 
 static KMETHOD StmtTyCheck_try(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -275,20 +265,20 @@ static KMETHOD StmtTyCheck_try(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = false;
 	kBlock *tryBlock, *catchBlock, *finallyBlock;
 	tryBlock     = SUGAR kStmt_getBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
-	if (SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_Exception, 0)) {
-		catchBlock   = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("catch"),   K_NULLBLOCK);
-		finallyBlock = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("finally"), K_NULLBLOCK);
-		ret = SUGAR kBlock_tyCheckAll(kctx, tryBlock,   gma);
-		if (ret == false) {
-			RETURNb_(ret);
-		}
-		ret = SUGAR kBlock_tyCheckAll(kctx, catchBlock, gma);
-		if (ret == false) {
-			RETURNb_(ret);
-		}
-		if (finallyBlock) {
-			ret = SUGAR kBlock_tyCheckAll(kctx, finallyBlock, gma);
-		}
+	ret = SUGAR kBlock_tyCheckAll(kctx, tryBlock,   gma);
+	if (ret == false) {
+		RETURNb_(ret);
+	}
+
+	catchBlock   = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("catch"),   K_NULLBLOCK);
+	finallyBlock = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("finally"), K_NULLBLOCK);
+	ret = SUGAR kBlock_tyCheckAll(kctx, tryBlock,   gma);
+	ret = SUGAR kBlock_tyCheckAll(kctx, catchBlock, gma);
+	if (ret == false) {
+		RETURNb_(ret);
+	}
+	if (finallyBlock) {
+		ret = SUGAR kBlock_tyCheckAll(kctx, finallyBlock, gma);
 	}
 	if(ret) {
 		kStmt_typed(stmt, TRY);
@@ -296,11 +286,56 @@ static KMETHOD StmtTyCheck_try(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNb_(ret);
 }
 
+static KMETHOD StmtTyCheck_catch(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_StmtTyCheck(stmt, gma);
+	DBG_P("catch statement .. \n");
+	int ret = false;
+
+	// check "catch(...)"
+	//ret = SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_Exception, 0);
+
+	kBlock *catchBlock = SUGAR kStmt_getBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
+	kStmt *parentStmt = Stmt_lookupTryOrCatchStmtNULL(kctx, stmt);
+
+	if (catchBlock != K_NULLBLOCK && parentStmt != NULL) {
+		ret = SUGAR kBlock_tyCheckAll(kctx, catchBlock, gma);
+		kExpr *expr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, K_NULLEXPR);
+		KLIB kObject_setObject(kctx, parentStmt, KW_ExprPattern, TY_Exception, expr);
+		KLIB kObject_setObject(kctx, parentStmt, SYM_("catch"), TY_Block, stmt);
+		kStmt_done(kctx, stmt);
+	} else {
+		kStmt_printMessage(kctx, stmt, ErrTag, "upper stmt is not try/catch");
+		RETURNb_(false);
+	}
+	RETURNb_(ret);
+}
+
+static KMETHOD StmtTyCheck_finally(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_StmtTyCheck(stmt, gma);
+	DBG_P("finally statement .. \n");
+	int ret = false;
+	kBlock *finallyBlock = SUGAR kStmt_getBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
+
+	if (finallyBlock != K_NULLBLOCK) {
+		kStmt *tryStmt = Stmt_lookupTryOrCatchStmtNULL(kctx, stmt);
+		if (tryStmt != NULL) {
+			ret = SUGAR kBlock_tyCheckAll(kctx, finallyBlock, gma);
+			KLIB kObject_setObject(kctx, tryStmt, SYM_("finally"), TY_Block, finallyBlock);
+			kStmt_done(kctx, stmt);
+		}
+	}
+
+	RETURNb_(ret);
+}
+
 static kbool_t exception_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("try"), TopStmtTyCheck_(try), StmtTyCheck_(try), .rule = "\"try\" $Block [ \"catch\" \"(\" $Expr \")\" catch: $Block ] [ \"finally\" finally: $Block ]",},
-//		{ .keyword = SYM_("[]"), .flag = SYNFLAG_ExprPostfixOp2, ParseExpr_(BRACKET), .precedence_op2 = 16, },  //KW_BracketGroup
+		{ .keyword = SYM_("try"), StmtTyCheck_(try), .rule = "\"try\" $Block [ \"catch\" \"(\" $Type $Symbol \")\" catch: $Block ] [ \"finally\" finally: $Block ]",},
+		{ .keyword = SYM_("catch"), StmtTyCheck_(catch), .rule = "\"catch\" \"(\" $Type $Symbol \")\" $Block",},
+		{ .keyword = SYM_("finally"), StmtTyCheck_(finally), .rule = "\"finally\" $Block ",},
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
