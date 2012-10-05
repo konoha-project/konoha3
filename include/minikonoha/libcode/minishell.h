@@ -137,7 +137,7 @@ static void show_version(KonohaContext *kctx)
 #if defined(__GNUC__)
 	PLATAPI printf_i("[gcc %s]\n", __VERSION__);
 #elif defined(_MSC_VER)
-	PLATAPI printf_i("[Microsoft Visual C++ %s]\n", _MSC_VER);
+	PLATAPI printf_i("[Microsoft Visual C++ %d]\n", _MSC_VER);
 #elif defined(__clang__)
 	PLATAPI printf_i("[clang %s]\n", __VERSION__);
 #endif

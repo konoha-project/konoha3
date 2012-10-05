@@ -113,6 +113,7 @@ extern "C" {
 
 #define inline __inline
 typedef long long ssize_t;
+#define __func__ __FUNCTION__
 #endif
 
 /* ------------------------------------------------------------------------ */
