@@ -31,6 +31,9 @@
 #include <sys/socket.h>
 #include <errno.h>
 #include <signal.h>
+#if defined(__NetBSD__)
+#include <time.h>  //for 'struct timeval'
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -446,7 +449,7 @@ static KMETHOD System_send(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kBytes *ba = sfp[2].ba;
 	// Broken Pipe Signal Mask
-#ifndef __APPLE__
+#if !(defined(__APPLE__) || defined(__NetBSD__))
 	__sighandler_t oldset = signal(SIGPIPE, SIG_IGN);
 	__sighandler_t ret_signal = SIG_ERR;
 #else
@@ -489,7 +492,7 @@ static KMETHOD System_sendto(KonohaContext *kctx, KonohaStack* sfp)
 	kString* s = sfp[4].s;
 	toSockaddr(&addr, (char*)S_text(s), WORD2INT(sfp[5].intValue), WORD2INT(sfp[6].intValue));
 	// Broken Pipe Signal Mask
-#ifndef __APPLE__
+#if !(defined(__APPLE__) || defined(__NetBSD__))
 	__sighandler_t oldset = signal(SIGPIPE, SIG_IGN);
 	__sighandler_t ret_signal = SIG_ERR;
 #else
@@ -659,7 +662,7 @@ static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 			{_KVi(PF_INET)},
 			{_KVi(PF_INET6)},
 			{_KVi(PF_APPLETALK)},
-#ifndef __APPLE__
+#if !(defined(__APPLE__) || defined(__NetBSD__))
 			{_KVi(PF_PACKET)},
 #endif
 			{_KVi(AF_LOCAL)},
@@ -667,7 +670,7 @@ static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 			{_KVi(AF_INET)},
 			{_KVi(AF_INET6)},
 			{_KVi(AF_APPLETALK)},
-#ifndef __APPLE__
+#if !(defined(__APPLE__) || defined(__NetBSD__))
 			{_KVi(AF_PACKET)},
 #endif
 			// Types of sockets
@@ -684,7 +687,7 @@ static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 			{_KVi(MSG_DONTWAIT)},
 			{_KVi(MSG_EOR)},
 			{_KVi(MSG_WAITALL)},
-#ifndef	__APPLE__
+#ifndef __APPLE__
 			{_KVi(MSG_CONFIRM)},
 			{_KVi(MSG_ERRQUEUE)},
 			{_KVi(MSG_NOSIGNAL)},
@@ -700,7 +703,7 @@ static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 			{_KVi(SO_RCVBUF)},
 			{_KVi(SO_KEEPALIVE)},
 			{_KVi(SO_OOBINLINE)},
-#ifndef __APPLE__
+#if !(defined(__APPLE__) || defined(__NetBSD__))
 			{_KVi(SO_NO_CHECK)},
 			{_KVi(SO_PRIORITY)},
 #endif
