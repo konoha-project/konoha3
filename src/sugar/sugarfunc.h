@@ -1221,8 +1221,6 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(true),    0, NULL, 0, 0, NULL, NULL, NULL, NULL, ExprTyCheck_true, },
 		{ TOKEN(false),   0, NULL, 0, 0, NULL, NULL, NULL, NULL, ExprTyCheck_false, },
 		{ PATTERN(Expr),  0, "$Expr", 0, 0, PatternMatch_Expr, ParseExpr_Expr, StmtTyCheck_Expr, StmtTyCheck_Expr, NULL, },
-//		{ PATTERN(Type),  0, "$Type $Expr", 0, 0, PatternMatch_Type, NULL, NULL, StmtTyCheck_TypeDecl, ExprTyCheck_Type, },
-//		{ PATTERN(MethodDecl), 0, "$Type [ClassName: $Type \".\"] $Symbol $Param [$Block]", 0, 0, NULL, NULL, StmtTyCheck_MethodDecl, NULL, NULL, },
 		{ PATTERN(Type),  0, NULL, 0, 0, PatternMatch_Type, NULL, NULL, NULL/*StmtTyCheck_TypeDecl*/, ExprTyCheck_Type, },
 		{ PATTERN(TypeDecl),   0, "$TypeDecl $Type $Expr", 0, 0, PatternMatch_TypeDecl, NULL, NULL, StmtTyCheck_TypeDecl, },
 		{ PATTERN(MethodDecl), 0, "$MethodDecl $Type [ClassName: $Type \".\"] $Symbol $Param [$Block]", 0, 0, PatternMatch_MethodDecl, NULL, StmtTyCheck_MethodDecl, NULL, NULL, },

@@ -557,7 +557,6 @@ static void kNameSpace_setTokenizeFunc(KonohaContext *kctx, kNameSpace *ns, int 
 	}
 }
 
-
 #ifdef __cplusplus
 }
 #endif
