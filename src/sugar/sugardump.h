@@ -170,7 +170,7 @@ static void dumpStmt(KonohaContext *kctx, kStmt *stmt)
 			DUMP_P("STMT (DONE)\n");
 		}
 		else {
-			DUMP_P("STMT %s%s {\n", T_statement(stmt->syn->keyword));
+			DUMP_P("STMT %s%s {\n", KWSTMT_t(stmt->syn->keyword));
 			KLIB kObject_protoEach(kctx, stmt, NULL, dumpEntry);
 			DUMP_P("\n}\n");
 		}

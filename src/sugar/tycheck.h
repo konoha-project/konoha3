@@ -232,11 +232,11 @@ static kbool_t SugarSyntax_tyCheckStmt(KonohaContext *kctx, SugarSyntax *syn, kS
 	}
 	if(callCount == 0) {
 		const char *location = Gamma_isTopLevel(gma) ? "at the top level" : "inside the function";
-		kStmt_printMessage(kctx, stmt, ErrTag, "%s%s is not available %s", T_statement(stmt->syn->keyword), location);
+		kStmt_printMessage(kctx, stmt, ErrTag, "%s%s is not available %s", KWSTMT_t(stmt->syn->keyword), location);
 		return false;
 	}
 	if(stmt->build != TSTMT_ERR) {
-		kStmt_printMessage(kctx, stmt, ErrTag, "statement typecheck error: %s%s", T_statement(syn->keyword));
+		kStmt_printMessage(kctx, stmt, ErrTag, "statement typecheck error: %s%s", KWSTMT_t(syn->keyword));
 	}
 	return false;
 }

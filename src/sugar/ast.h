@@ -174,7 +174,7 @@ static int TokenUtils_skipIndent(kArray *tokenList, int currentIdx, int endIdx)
 	for(; currentIdx < endIdx; currentIdx++) {
 		kToken *tk = tokenList->tokenItems[currentIdx];
 		if(kToken_is(StatementSeparator, tk)) return endIdx; // ;
-		if(tk->unresolvedTokenType != TokenType_INDENT) break;
+		if(!kToken_isIndent(tk)) break;
 	}
 	return currentIdx;
 }
@@ -216,7 +216,7 @@ static int TokenUtils_parseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArr
 	else if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern) { // check
 		foundClass = KLIB kNameSpace_getClass(kctx, ns, S_text(tk->text), S_size(tk->text), NULL);
 		if(foundClass != NULL) {
-//			kToken_setTypeId(kctx, tk, ns, foundClass->typeId);
+			//kToken_setTypeId(kctx, tk, ns, foundClass->typeId);
 			nextIdx = beginIdx + 1;
 		}
 	}
@@ -247,28 +247,8 @@ static int TokenUtils_parseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArr
 	return nextIdx;
 }
 
-static int callPatternMatchFunc(KonohaContext *kctx, kFunc *fo, int *countRef, kStmt *stmt, ksymbol_t name, kArray *tokenList, int beginIdx, int endIdx)
-{
-	INIT_GCSTACK();
-	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, fo->self, GC_NO_WRITE_BARRIER);
-	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, (kObject*)stmt, GC_NO_WRITE_BARRIER);
-	lsfp[K_CALLDELTA+2].intValue = name;
-	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+3].asArray, tokenList, GC_NO_WRITE_BARRIER);
-	lsfp[K_CALLDELTA+4].intValue = beginIdx;
-	lsfp[K_CALLDELTA+5].intValue = endIdx;
-	countRef[0] += 1;
-	{
-		KonohaStack *sfp = lsfp + K_CALLDELTA;
-		KSetMethodCallStack(sfp, 0/*UL*/, fo->mtd, 5, KLIB Knull(kctx, CT_Int));
-		KonohaRuntime_callMethod(kctx, sfp);
-	}
-	END_LOCAL();
-	RESET_GCSTACK();
-	return (int)lsfp[0].intValue;
-}
-
 // ---------------------------------------------------------------------------
+/* macro */
 
 static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, MacroSet *, TokenSequence *source, int beginIdx);
 
@@ -551,33 +531,25 @@ static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, M
 
 /* ------------------------------------------------------------------------ */
 
-static int PatternMatch2(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, ksymbol_t name, TokenSequence *tokens)
+static int callPatternMatchFunc(KonohaContext *kctx, kFunc *fo, int *countRef, kStmt *stmt, ksymbol_t name, kArray *tokenList, int beginIdx, int endIdx)
 {
-	int callCount = 0;
-	if(syn != NULL) {
-		while(true) {
-			kFunc *fo = syn->sugarFuncTable[SUGARFUNC_PatternMatch];
-			if(fo != NULL) {
-				kFunc **funcItems = &fo;
-				int index = 0, next;
-				if(IS_Array(fo)) {
-					funcItems = syn->sugarFuncListTable[SUGARFUNC_PatternMatch]->funcItems;
-					index = kArray_size(syn->sugarFuncListTable[SUGARFUNC_PatternMatch]) - 1;
-				}
-				for(; index >= 0; index--) {
-					next = callPatternMatchFunc(kctx, funcItems[index], &callCount, stmt, name, tokens->tokenList, tokens->beginIdx, tokens->endIdx);
-					if(Stmt_isERR(stmt)) return -1;
-					if(next >= tokens->beginIdx) return next;
-				}
-			}
-			if(syn->parentSyntaxNULL == NULL) break;
-			syn = syn->parentSyntaxNULL;
-		}
+	INIT_GCSTACK();
+	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, fo->self, GC_NO_WRITE_BARRIER);
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, (kObject*)stmt, GC_NO_WRITE_BARRIER);
+	lsfp[K_CALLDELTA+2].intValue = name;
+	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+3].asArray, tokenList, GC_NO_WRITE_BARRIER);
+	lsfp[K_CALLDELTA+4].intValue = beginIdx;
+	lsfp[K_CALLDELTA+5].intValue = endIdx;
+	countRef[0] += 1;
+	{
+		KonohaStack *sfp = lsfp + K_CALLDELTA;
+		KSetMethodCallStack(sfp, 0/*UL*/, fo->mtd, 5, KLIB Knull(kctx, CT_Int));
+		KonohaRuntime_callMethod(kctx, sfp);
 	}
-	if(callCount == 0) {
-		kStmt_printMessage(kctx, stmt, ErrTag, "undefined syntax pattern: %s%s", PSYM_t(syn->keyword));
-	}
-	return -1;
+	END_LOCAL();
+	RESET_GCSTACK();
+	return (int)lsfp[0].intValue;
 }
 
 static int SugarSyntax_matchPattern(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, int name, kArray *tokenList, int beginIdx, int endIdx)
@@ -630,17 +602,14 @@ static int kStmt_matchSyntaxPattern(KonohaContext *kctx, kStmt *stmt, TokenSeque
 				}
 			}
 			else if(ruleToken->resolvedSymbol == KW_OptionalGroup) {
-	//			kToken *tk = tokens->tokenList->tokenItems[tokenIdx];
-	//			if(!kToken_is(StatementSeparator, tk)) { // matching return; with return [$Expr]
-					TokenSequence nrule = {ns, ruleToken->subTokenList, 0, kArray_size(ruleToken->subTokenList)};
-					tokens->beginIdx = tokenIdx;
-					int next = kStmt_matchSyntaxPattern(kctx, stmt, tokens, &nrule, errRuleRef);
-					errRuleRef[0] = NULL;
-					if(Stmt_isERR(stmt)) return -1;
-					if(next != -1) {
-						tokenIdx = next;
-					}
-	//			}
+				TokenSequence nrule = {ns, ruleToken->subTokenList, 0, kArray_size(ruleToken->subTokenList)};
+				tokens->beginIdx = tokenIdx;
+				int next = kStmt_matchSyntaxPattern(kctx, stmt, tokens, &nrule, errRuleRef);
+				errRuleRef[0] = NULL;
+				if(Stmt_isERR(stmt)) return -1;
+				if(next != -1) {
+					tokenIdx = next;
+				}
 			}
 			else {
 				kToken *tk = tokens->tokenList->tokenItems[tokenIdx];
@@ -784,7 +753,7 @@ static SugarSyntax* kNameSpace_getStatementSyntax2(KonohaContext *kctx, kStmt *s
 	return syn;
 }
 
-#define T_statement(kw)  StatementName(kctx, kw), StatementType(kw)
+#define KWSTMT_t(kw)  StatementName(kctx, kw), StatementType(kw)
 
 static const char* StatementName(KonohaContext *kctx, ksymbol_t keyword)
 {
@@ -847,7 +816,7 @@ static int kStmt_parseBySyntaxPattern(KonohaContext *kctx, kStmt *stmt, int inde
 	}
 	if(!Stmt_isERR(stmt)) {
 		DBG_ASSERT(errRule != NULL);
-		kStmt_printMessage(kctx, stmt, ErrTag, "%s%s: %s%s is expected", T_statement(stmt->syn->keyword), PSYM_t(errRule->resolvedSymbol));
+		kStmt_printMessage(kctx, stmt, ErrTag, "%s%s: %s%s is expected", KWSTMT_t(stmt->syn->keyword), PSYM_t(errRule->resolvedSymbol));
 	}
 	return -1;
 }
