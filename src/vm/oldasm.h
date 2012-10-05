@@ -44,29 +44,29 @@
 #define BBOP(BB)     (BB)->codeTable.codeItems
 #define GammaBuilderLabel(n)   (kBasicBlock*)(ctxcode->lstacks->objectItems[n])
 
-#define ASM(T, ...) do {\
-	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};\
-	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_;\
-	BUILD_asm(kctx, &tmp_.op, sizeof(OP##T));\
-} while (0)
+#define ASM(T, ...) do {												\
+		OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};		\
+		union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_; \
+		BUILD_asm(kctx, &tmp_.op, sizeof(OP##T));						\
+	} while (0)
 
-#define ASMop(T, OP, ...) do {\
-	OP##T op_ = {TADDR, OP, ASMLINE, ## __VA_ARGS__};\
-	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_;\
-	BUILD_asm(kctx, &tmp_.op, sizeof(OP##T));\
-} while (0)
+#define ASMop(T, OP, ...) do {											\
+		OP##T op_ = {TADDR, OP, ASMLINE, ## __VA_ARGS__};				\
+		union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_; \
+		BUILD_asm(kctx, &tmp_.op, sizeof(OP##T));						\
+	} while (0)
 
-#define ASMbranch(T, lb, ...) do {\
-	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, NULL, ## __VA_ARGS__};\
-	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_;\
-	ASM_BRANCH_(kctx, lb, &tmp_.op, sizeof(OP##T)); \
-} while (0)
+#define ASMbranch(T, lb, ...) do {										\
+		OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, NULL, ## __VA_ARGS__};	\
+		union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_; \
+		ASM_BRANCH_(kctx, lb, &tmp_.op, sizeof(OP##T));					\
+	} while (0)
 
-#define kBasicBlock_add(bb, T, ...) do { \
-	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};\
-	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_;\
-	BasicBlock_add(kctx, bb, 0, &tmp_.op, sizeof(OP##T));\
-} while (0)
+#define kBasicBlock_add(bb, T, ...) do {								\
+		OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};		\
+		union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_; \
+		BasicBlock_add(kctx, bb, 0, &tmp_.op, sizeof(OP##T));			\
+	} while (0)
 
 #ifdef _CLASSICVM
 #include "../../module/classicvm/classicvm_gen.h"
@@ -147,7 +147,7 @@ static void BasicBlock_strip0(KonohaContext *kctx, kBasicBlock *bb)
 		if(BasicBlock_isVisited(bb)) return;
 		BasicBlock_setVisited(bb, 1);
 		if(bb->branchBlock != NULL) {
-			L_JUMP:; {
+		L_JUMP:; {
 				kBasicBlock *bbJ = (kBasicBlock*)bb->branchBlock;
 				if(bbJ->codeTable.bytesize == 0 && bbJ->branchBlock != NULL && bbJ->nextBlock == NULL) {
 					//DBG_P("DIRECT JMP id=%d JMP to id=%d", bbJ->id, DP(bbJ->branchBlock)->id);
@@ -178,7 +178,7 @@ static void BasicBlock_strip0(KonohaContext *kctx, kBasicBlock *bb)
 			bb = bb->nextBlock;
 			continue;
 		}
-		L_NEXT:;
+	L_NEXT:;
 		if(bb->nextBlock != NULL) {
 			kBasicBlock *bbN = bb->nextBlock;
 			if(bbN->codeTable.bytesize == 0 && bbN->nextBlock != NULL && bbN->branchBlock == NULL) {
@@ -281,7 +281,7 @@ static size_t BasicBlock_peephole(KonohaContext *kctx, kBasicBlock *bb)
 
 static size_t BasicBlock_size(KonohaContext *kctx, kBasicBlock *bb, size_t c)
 {
-	L_TAIL:;
+L_TAIL:;
 	if(bb == NULL || BasicBlock_isVisited(bb)) return c;
 	BasicBlock_setVisited(bb, 1);
 	if(bb->nextBlock != NULL) {

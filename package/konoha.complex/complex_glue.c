@@ -727,19 +727,19 @@ static kbool_t Complex_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public, _F(Complex_carg),    TY_float, TY_Complex, MN_("carg"),    0,
 		_Public, _F(Complex_cargf),   TY_float, TY_Complex, MN_("cargf"),   0,
 		_Public, _F(Complex_cargl),   TY_float, TY_Complex, MN_("cargl"),   0,
-		_Public, _F(Complex_conj),    TY_Complex, TY_Complex, MN_("conj"),    0,
-		_Public, _F(Complex_conjf),   TY_Complex, TY_Complex, MN_("conjf"),   0,
-		_Public, _F(Complex_conjl),   TY_Complex, TY_Complex, MN_("conjl"),   0,
+		_Public, _F(Complex_conj),    TY_Complex, TY_Complex, MN_("conj"),  0,
+		_Public, _F(Complex_conjf),   TY_Complex, TY_Complex, MN_("conjf"), 0,
+		_Public, _F(Complex_conjl),   TY_Complex, TY_Complex, MN_("conjl"), 0,
 		DEND, /* <= sentinel */
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 
 	/* You can define constant variable with the following procedures. */
-	KDEFINE_INT_CONST IntData[] = {
-		{"NARUTO_AGE", TY_int, 18},
+	KDEFINE_FLOAT_CONST FloatData[] = {
+		{"FLOAT_EPSILON", TY_float, DBL_EPSILON},
 		{} /* <= sentinel */
 	};
-	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(FloatData), pline);
 	return true;
 }
 
