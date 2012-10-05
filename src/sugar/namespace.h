@@ -511,24 +511,24 @@ static kMethod* kNameSpace_getMethodNULL(KonohaContext *kctx, kNameSpace *ns, kt
 
 // ---------------------------------------------------------------------------
 
-static inline kint_t Method_id(kMethod *mtd)
+static inline long Method_id(kMethod *mtd)
 {
-	kint_t id = mtd->typeId;
+	long id = mtd->typeId;
 	return (id << (sizeof(kshort_t)*8)) | mtd->mn;
 }
 
 static int comprMethod(const void *a, const void *b)
 {
-	kint_t aid = Method_id(((kMethod**)a)[0]);
-	kint_t bid = Method_id(((kMethod**)b)[0]);
+	long aid = Method_id(((kMethod**)a)[0]);
+	long bid = Method_id(((kMethod**)b)[0]);
 	if(aid == bid) return 0;
 	return aid < bid ? -1 : 1;
 }
 
 static void kMethodList_matchMethod(KonohaContext *kctx, kArray *methodList, const size_t *sorted, ktype_t typeId, MethodMatchFunc MatchMethod, MethodMatch *option)
 {
-	kint_t i, min = 0, max = sorted[0];
-	kint_t optkey = ((kint_t)typeId << (sizeof(kshort_t)*8)) | option->mn;
+	long i, min = 0, max = sorted[0];
+	long optkey = ((long)typeId << (sizeof(kshort_t)*8)) | option->mn;
 	if(kArray_size(methodList) - max > 8) {
 		max = kArray_size(methodList);
 		PLATAPI qsort_i(methodList->methodItems, max, sizeof(kMethod*), comprMethod);
@@ -537,7 +537,7 @@ static void kMethodList_matchMethod(KonohaContext *kctx, kArray *methodList, con
 	while(min < max) {
 		size_t p = (max + min) / 2;
 		kMethod *mtd = methodList->methodItems[p];
-		kint_t key = Method_id(mtd);
+		long key = Method_id(mtd);
 		if(key == optkey) {
 			MatchMethod(kctx, mtd, option);
 			i = p - 1;
@@ -565,7 +565,7 @@ static void kMethodList_matchMethod(KonohaContext *kctx, kArray *methodList, con
 	}
 	for(i = sorted[0]; i < kArray_size(methodList); i++) {
 		kMethod *mtd = methodList->methodItems[i];
-		kint_t key = Method_id(mtd);
+		long key = Method_id(mtd);
 		if(key == optkey) {
 			MatchMethod(kctx, mtd, option);
 		}
