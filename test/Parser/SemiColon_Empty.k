@@ -1,0 +1,7 @@
+// written by kimio kuramitsu
+
+;
+;
+;
+;
+

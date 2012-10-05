@@ -103,7 +103,7 @@ static KMETHOD Person_say(KonohaContext *kctx, KonohaStack *sfp)
 	const char *text = S_text(name);
 	char *buf = (char *)alloca(16 + S_size(name));
 	sprintf(buf, "hello , %s!", text);
-	RETURN_(KLIB new_kString(kctx, buf, strlen(buf), SPOL_TEXT));
+	RETURN_(KLIB new_kString(kctx, buf, strlen(buf), StringPolicy_TEXT));
 }
 
 /* You can attach the following annotations to each methods. */

@@ -219,7 +219,7 @@ static KMETHOD parseNumber(KonohaContext *kctx, KonohaStack *sfp)
 				break;
 		}
 		end = source;
-		KSETv(tk, tk->text, KLIB new_kString(kctx, start, end - start, SPOL_ASCII));
+		KSETv(tk, tk->text, KLIB new_kString(kctx, start, end - start, StringPolicy_ASCII));
 		tk->unresolvedTokenType = isFloat ? SYM_("$Float") : TokenType_INT;
 	}
 	RETURNi_(source - start);
@@ -272,12 +272,12 @@ static kbool_t int_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpa
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ KW_NumberPattern, 0,  NULL, 0, 0, NULL, NULL, NULL, NULL, ExprTyCheck_Int2, },
-		{ SYM_("~"),  0, NULL, 0,                   C_PRECEDENCE_PREUNARY, NULL, NULL, NULL, NULL, NULL, },
-		{ SYM_("<<"), 0, NULL, C_PRECEDENCE_SHIFT,  0,                     NULL, NULL, NULL, NULL, NULL, },
-		{ SYM_(">>"), 0, NULL, C_PRECEDENCE_SHIFT,  0,                     NULL, NULL, NULL, NULL, NULL, },
-		{ SYM_("&"),  0, NULL, C_PRECEDENCE_BITAND, 0,                     NULL, NULL, NULL, NULL, NULL, },
-		{ SYM_("|"),  0, NULL, C_PRECEDENCE_BITOR,  0,                     NULL, NULL, NULL, NULL, NULL, },
-		{ SYM_("^"),  0, NULL, C_PRECEDENCE_BITXOR, 0,                     NULL, NULL, NULL, NULL, NULL, },
+		{ SYM_("~"),  0, NULL, 0,                   Precedence_CStylePREUNARY, NULL, NULL, NULL, NULL, NULL, },
+		{ SYM_("<<"), 0, NULL, Precedence_CStyleSHIFT,  0,                     NULL, NULL, NULL, NULL, NULL, },
+		{ SYM_(">>"), 0, NULL, Precedence_CStyleSHIFT,  0,                     NULL, NULL, NULL, NULL, NULL, },
+		{ SYM_("&"),  0, NULL, Precedence_CStyleBITAND, 0,                     NULL, NULL, NULL, NULL, NULL, },
+		{ SYM_("|"),  0, NULL, Precedence_CStyleBITOR,  0,                     NULL, NULL, NULL, NULL, NULL, },
+		{ SYM_("^"),  0, NULL, Precedence_CStyleBITXOR, 0,                     NULL, NULL, NULL, NULL, NULL, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);

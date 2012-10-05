@@ -26,6 +26,10 @@
 extern "C" {
 #endif
 
+#ifdef _MSC_VER
+#define strtoll _strtoi64
+#endif
+
 /* String */
 static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -139,7 +143,7 @@ static KMETHOD Int_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	char buf[40];
 	PLATAPI snprintf_i(buf, sizeof(buf), "%ld", (intptr_t)sfp[0].intValue);
-	RETURN_(KLIB new_kString(kctx, buf, strlen(buf), SPOL_ASCII));
+	RETURN_(KLIB new_kString(kctx, buf, strlen(buf), StringPolicy_ASCII));
 }
 
 //## @Const method Object Boolean.box();
@@ -170,8 +174,8 @@ static KMETHOD String_toInt(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD String_opADD(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *lhs = sfp[0].s, *rhs = sfp[1].asString;
-	int spol = (S_isASCII(lhs) && S_isASCII(rhs)) ? SPOL_ASCII : SPOL_UTF8;
-	kString *s = KLIB new_kString(kctx, NULL, S_size(lhs)+S_size(rhs), spol|SPOL_NOCOPY);
+	int spol = (S_isASCII(lhs) && S_isASCII(rhs)) ? StringPolicy_ASCII : StringPolicy_UTF8;
+	kString *s = KLIB new_kString(kctx, NULL, S_size(lhs)+S_size(rhs), spol|StringPolicy_NOCOPY);
 	memcpy(s->buf, S_text(lhs), S_size(lhs));
 	memcpy(s->buf+S_size(lhs), S_text(rhs), S_size(rhs));
 	RETURN_(s);
@@ -242,7 +246,7 @@ static KMETHOD System_p(KonohaContext *kctx, KonohaStack *sfp)
 //## method void System.gc();
 static KMETHOD System_gc(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KLIB Kgc_invoke(kctx, NULL);
+	KLIB KscheduleGC(kctx->gcContext);
 }
 
 // --------------------------------------------------------------------------

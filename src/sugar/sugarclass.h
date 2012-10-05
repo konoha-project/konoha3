@@ -84,7 +84,6 @@ static void Token_init(KonohaContext *kctx, kObject *o, void *conf)
 	}
 	else {
 		KINITv(tk->text, SYM_s(tk->unresolvedTokenType));
-		DBG_P("symbol=%d, '%s'", tk->unresolvedTokenType, S_text(tk->text));
 	}
 	tk->resolvedSyntaxInfo = NULL;
 }
@@ -102,9 +101,10 @@ static void Token_reftrace(KonohaContext *kctx, kObject *o)
 
 static void Expr_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	kExprVar *expr      =   (kExprVar*)o;
-	expr->build      =   TEXPR_UNTYPED;
-	expr->ty         =   TY_var;
+	kExprVar *expr = (kExprVar*)o;
+	expr->build    = TEXPR_UNTYPED;
+	expr->ty       = TY_var;
+	expr->index    = 0;
 	KINITv(expr->termToken, K_NULLTOKEN);
 	expr->syn = (SugarSyntax*)conf;
 }
@@ -241,6 +241,7 @@ static void Stmt_init(KonohaContext *kctx, kObject *o, void *conf)
 	stmt->uline    = (kfileline_t)conf;
 	stmt->syn      = NULL;
 	stmt->build    = 0;
+
 	stmt->parentBlockNULL = NULL;
 	stmt->build    = 0;
 }

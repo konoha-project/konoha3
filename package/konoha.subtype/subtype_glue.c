@@ -132,8 +132,8 @@ static KMETHOD ExprTyCheck_As(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t subtype_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("<:"), 0, NULL, C_PRECEDENCE_MUL, 0, NULL, NULL, NULL, NULL, ExprTyCheck_InstanceOf, },
-		{ SYM_("as"), 0, NULL, C_PRECEDENCE_MUL, 0, NULL, NULL, NULL, NULL, ExprTyCheck_As},
+		{ SYM_("<:"), 0, NULL, Precedence_CStyleMUL, 0, NULL, NULL, NULL, NULL, ExprTyCheck_InstanceOf, },
+		{ SYM_("as"), 0, NULL, Precedence_CStyleMUL, 0, NULL, NULL, NULL, NULL, ExprTyCheck_As},
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);

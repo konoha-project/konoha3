@@ -438,7 +438,7 @@ static KMETHOD StmtTyCheck_sugar(KonohaContext *kctx, KonohaStack *sfp)
 			else {
 				KINITv(syn->syntaxRuleNULL, new_(Array, 8));
 			}
-			TokenRange rangebuf = {Stmt_nameSpace(stmt), tokenList, 0, kArray_size(tokenList)};
+			TokenSequence rangebuf = {Stmt_nameSpace(stmt), tokenList, 0, kArray_size(tokenList)};
 			if(SUGAR kArray_addSyntaxRule(kctx, syn->syntaxRuleNULL, &rangebuf)) {
 				r = 1;
 			}
@@ -493,7 +493,7 @@ static kbool_t sugar_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameS
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("sugar"), 0, "\"sugar\" $Token", 0, 0, NULL, NULL, StmtTyCheck_sugar, NULL, NULL, },
+		{ SYM_("syntax"), 0, "\"syntax\" $Token", 0, 0, NULL, NULL, StmtTyCheck_sugar, NULL, NULL, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);

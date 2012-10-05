@@ -32,7 +32,7 @@ static void dumpToken(KonohaContext *kctx, kToken *tk, int n)
 	if(verbose_sugar) {
 		if (n < 0) n = (short)tk->uline;
 		if(tk->resolvedSyntaxInfo == NULL) {
-			if(tk->unresolvedTokenType == TokenType_INDENT) {
+			if(kToken_isIndent(tk)) {
 				DUMP_P("Token[%d] '%s' TokenType=%s%s indent=%d\n", n, Token_text(tk), PSYM_t(tk->unresolvedTokenType), tk->indent);
 			}
 			else {

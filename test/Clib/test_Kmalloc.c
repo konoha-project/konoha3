@@ -44,7 +44,7 @@ int main(int argc, const char *argv[])
     for (i = 0; i < 100; ++i) {
         malloced[i] = lib->Kzmalloc(0, i);
         int j;
-        char *p = malloced[i];
+        char *p = (char*)malloced[i];
         for (j = 0; j < i; ++j) {
             assert(p[0] == 0);
         }

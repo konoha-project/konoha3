@@ -31,6 +31,9 @@
 #include <sys/socket.h>
 #include <errno.h>
 #include <signal.h>
+#if defined(__NetBSD__)
+#include <time.h>  //for 'struct timeval'
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -446,7 +449,7 @@ static KMETHOD System_send(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kBytes *ba = sfp[2].ba;
 	// Broken Pipe Signal Mask
-#ifndef __APPLE__
+#if !(defined(__APPLE__) || defined(__NetBSD__))
 	__sighandler_t oldset = signal(SIGPIPE, SIG_IGN);
 	__sighandler_t ret_signal = SIG_ERR;
 #else
@@ -489,7 +492,7 @@ static KMETHOD System_sendto(KonohaContext *kctx, KonohaStack* sfp)
 	kString* s = sfp[4].s;
 	toSockaddr(&addr, (char*)S_text(s), WORD2INT(sfp[5].intValue), WORD2INT(sfp[6].intValue));
 	// Broken Pipe Signal Mask
-#ifndef __APPLE__
+#if !(defined(__APPLE__) || defined(__NetBSD__))
 	__sighandler_t oldset = signal(SIGPIPE, SIG_IGN);
 	__sighandler_t ret_signal = SIG_ERR;
 #else
@@ -645,29 +648,21 @@ static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		_Public|_Static|_Const|_Im, _F(System_socket), TY_int, TY_System, MN_("socket"), 3, TY_int, FN_("family"), TY_int, FN_("type"), TY_int, FN_("protocol"),
 		_Public|_Static|_Const|_Im, _F(System_socketpair), TY_int, TY_System, MN_("socketpair"), 4, TY_int, FN_("family"), TY_int, FN_("type"), TY_int, FN_("protocol"), TY_intArray, FN_("pairsock"),
 		_Public|_Const|_Im, _F(SockAddr_new), TY_SockAddr, TY_SockAddr, MN_("new"), 0,
+		// the function below uses Bytes
+		_Public|_Static|_Const|_Im, _F(System_sendto), TY_int, TY_System, MN_("sendto"), 6, TY_int, FN_("socket"), TY_Bytes, FN_("msg"), TY_int, FN_("flag"), TY_String, FN_("dstIP"), TY_int, FN_("dstPort"), TY_int, FN_("family"),
+		_Public|_Static|_Const|_Im, _F(System_recv), TY_int, TY_System, MN_("recv"), 3, TY_int, FN_("fd"), TY_Bytes, FN_("buf"), TY_int, FN_("flags"),
+//		_Public|_Static|_Const|_Im, _F(System_recvfrom), TY_int, TY_System, MN_("recvfrom"), 4, TY_int, FN_x, TY_Bytes, FN_y, TY_int, FN_z, TY_Map, FN_v,
+		_Public|_Static|_Const|_Im, _F(System_send), TY_int, TY_System, MN_("send"), 3, TY_int, FN_("fd"), TY_Bytes, FN_("msg"), TY_int, FN_("flags"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
-	if(IS_defineBytes()) {
-		KDEFINE_METHOD MethodData2[] = {
-				_Public|_Static|_Const|_Im, _F(System_sendto), TY_int, TY_System, MN_("sendto"), 6, TY_int, FN_("socket"), TY_Bytes, FN_("msg"), TY_int, FN_("flag"), TY_String, FN_("dstIP"), TY_int, FN_("dstPort"), TY_int, FN_("family"),
-				_Public|_Static|_Const|_Im, _F(System_recv), TY_int, TY_System, MN_("recv"), 3, TY_int, FN_("fd"), TY_Bytes, FN_("buf"), TY_int, FN_("flags"),
-//				_Public|_Static|_Const|_Im, _F(System_recvfrom), TY_int, TY_System, MN_("recvfrom"), 4, TY_int, FN_x, TY_Bytes, FN_y, TY_int, FN_z, TY_Map, FN_v,
-				_Public|_Static|_Const|_Im, _F(System_send), TY_int, TY_System, MN_("send"), 3, TY_int, FN_("fd"), TY_Bytes, FN_("msg"), TY_int, FN_("flags"),
-				DEND,
-			};
-		KLIB kNameSpace_loadMethodData(kctx, ns, MethodData2);
-	}
-	else {
-		kreportf(InfoTag, pline, "konoha.bytes package hasn't imported. Some features are still disabled.");
-	}
 	KDEFINE_INT_CONST IntData[] = {
 			{_KVi(PF_LOCAL)},
 			{_KVi(PF_UNIX)},
 			{_KVi(PF_INET)},
 			{_KVi(PF_INET6)},
 			{_KVi(PF_APPLETALK)},
-#ifndef __APPLE__
+#if !(defined(__APPLE__) || defined(__NetBSD__))
 			{_KVi(PF_PACKET)},
 #endif
 			{_KVi(AF_LOCAL)},
@@ -675,7 +670,7 @@ static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 			{_KVi(AF_INET)},
 			{_KVi(AF_INET6)},
 			{_KVi(AF_APPLETALK)},
-#ifndef __APPLE__
+#if !(defined(__APPLE__) || defined(__NetBSD__))
 			{_KVi(AF_PACKET)},
 #endif
 			// Types of sockets
@@ -692,7 +687,7 @@ static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 			{_KVi(MSG_DONTWAIT)},
 			{_KVi(MSG_EOR)},
 			{_KVi(MSG_WAITALL)},
-#ifndef	__APPLE__
+#ifndef __APPLE__
 			{_KVi(MSG_CONFIRM)},
 			{_KVi(MSG_ERRQUEUE)},
 			{_KVi(MSG_NOSIGNAL)},
@@ -708,7 +703,7 @@ static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 			{_KVi(SO_RCVBUF)},
 			{_KVi(SO_KEEPALIVE)},
 			{_KVi(SO_OOBINLINE)},
-#ifndef __APPLE__
+#if !(defined(__APPLE__) || defined(__NetBSD__))
 			{_KVi(SO_NO_CHECK)},
 			{_KVi(SO_PRIORITY)},
 #endif

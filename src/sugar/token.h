@@ -33,29 +33,6 @@ extern "C" {
 #endif
 
 /* ------------------------------------------------------------------------ */
-/* TokenRange */
-
-static TokenRange* new_TokenListRange(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, TokenRange *bufRange)
-{
-	bufRange->ns        = ns;
-	bufRange->tokenList = tokenList;
-	bufRange->beginIdx  = kArray_size(tokenList);
-	bufRange->endIdx    = bufRange->beginIdx;
-	bufRange->errToken  = NULL;
-	return bufRange;
-}
-
-static TokenRange* new_TokenStackRange(KonohaContext *kctx, TokenRange *range, TokenRange *bufRange)
-{
-	bufRange->ns        = range->ns;
-	bufRange->tokenList = range->tokenList;
-	bufRange->beginIdx  = kArray_size(range->tokenList);
-	bufRange->endIdx    = bufRange->beginIdx;
-	bufRange->errToken  = range->errToken;
-	return bufRange;
-}
-
-/* ------------------------------------------------------------------------ */
 
 static void ERROR_UnclosedToken(KonohaContext *kctx, kTokenVar *tk, const char *ch)
 {
@@ -64,7 +41,7 @@ static void ERROR_UnclosedToken(KonohaContext *kctx, kTokenVar *tk, const char *
 	}
 }
 
-static int parseINDENT(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int pos)
+static int ParseIndent(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int pos)
 {
 	int ch, indent = 0;
 	while((ch = tenv->source[pos++]) != 0) {
@@ -75,14 +52,17 @@ static int parseINDENT(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, i
 	if(IS_NOTNULL(tk)) {
 		tk->unresolvedTokenType = TokenType_INDENT;
 		tk->indent = indent;
+		tk->uline = tenv->currentLine;
 	}
 	return pos-1;
 }
 
-static int parseNL(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int pos)
+static int ParseLineFeed(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int pos)
 {
-	tenv->currentLine += 1;
-	return parseINDENT(kctx, tk, tenv, pos+1);
+	if(tenv->currentLine != 0) {
+		tenv->currentLine += 1;
+	}
+	return ParseIndent(kctx, tk, tenv, pos+1);
 }
 
 static int parseNUM(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
@@ -90,11 +70,10 @@ static int parseNUM(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int 
 	int ch, pos = tok_start;
 	const char *ts = tenv->source;
 	while((ch = ts[pos++]) != 0) {
-		//if(ch == '_') continue; // nothing
 		if(!isalnum(ch)) break;
 	}
 	if(IS_NOTNULL(tk)) {
-		KSETv(tk, tk->text, KLIB new_kString(kctx, ts + tok_start, (pos-1)-tok_start, SPOL_ASCII));
+		KSETv(tk, tk->text, KLIB new_kString(kctx, ts + tok_start, (pos-1)-tok_start, StringPolicy_ASCII));
 		tk->unresolvedTokenType = TokenType_INT;
 	}
 	return pos - 1;  // next
@@ -108,7 +87,7 @@ static void kToken_setSymbolText(KonohaContext *kctx, kTokenVar *tk, const char 
 			KSETv(tk, tk->text, SYM_s(kw));
 		}
 		else {
-			KSETv(tk, tk->text, KLIB new_kString(kctx, t, len, SPOL_ASCII));
+			KSETv(tk, tk->text, KLIB new_kString(kctx, t, len, StringPolicy_ASCII));
 		}
 		tk->unresolvedTokenType = TokenType_SYMBOL;
 		if(len == 1) {
@@ -133,6 +112,30 @@ static int parseOP1(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int 
 {
 	kToken_setSymbolText(kctx, tk,  tenv->source + tok_start, 1);
 	return tok_start+1;
+}
+
+static int ParseSemiColon(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
+{
+	kToken_setSymbolText(kctx, tk,  tenv->source + tok_start, 1);
+	if(IS_NOTNULL(tk)) {
+		kToken_set(StatementSeparator, tk, true);
+	}
+	return tok_start+1;
+}
+
+static int ParseAnnotation(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
+{
+	// parse @Annotation:
+	// This is part of JStyle dependent. If you don't want to parse, override this.
+	if(isalnum(tenv->source[tok_start+1])) {
+		int pos = parseSYMBOL(kctx, tk, tenv, tok_start+1);
+		if(IS_NOTNULL(tk)) {  // pre-resolved
+			tk->resolvedSymbol = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID) | MN_Annotation;
+			tk->resolvedSyntaxInfo = SYN_(tenv->ns, KW_SymbolPattern);
+		}
+		return pos;
+	}
+	return parseOP1(kctx, tk, tenv, tok_start);
 }
 
 static int parseOP(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
@@ -208,7 +211,7 @@ static int parseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, TokenizerEn
 		if(ch == '"' && (prev != '\\' || (prev == '\\' && prev2 == '\\'))) {
 			if(IS_NOTNULL(tk)) {
 				size_t length = pos - (tok_start + 1) - 1;
-				KSETv(tk, tk->text, KLIB new_kString(kctx, tenv->source + tok_start + 1, length, hasUTF8 ? SPOL_UTF8 : SPOL_ASCII));
+				KSETv(tk, tk->text, KLIB new_kString(kctx, tenv->source + tok_start + 1, length, hasUTF8 ? StringPolicy_UTF8 : StringPolicy_ASCII));
 				tk->unresolvedTokenType = TokenType_TEXT;
 			}
 			return pos;
@@ -268,7 +271,7 @@ static const TokenizeFunc MiniKonohaTokenMatrix[] = {
 #define _MULTI     5
 	parseUndefinedToken,
 #define _NL        6
-	parseNL,
+	ParseLineFeed,
 #define _TAB       7
 	ParseWhiteSpace,
 #define _SP_       8
@@ -320,13 +323,13 @@ static const TokenizeFunc MiniKonohaTokenMatrix[] = {
 #define _COLON     31
 	parseOP,
 #define _SEMICOLON 32
-	parseOP1,
+	ParseSemiColon,
 #define _EQ        33
 	parseOP,
 #define _QUESTION  34
 	parseOP,
 #define _AT_       35
-	parseOP1,
+	ParseAnnotation,
 #define _VAR       36
 	parseOP,
 #define _CHILDER   37
@@ -432,8 +435,7 @@ static void tokenize(KonohaContext *kctx, TokenizerEnv *tenv)
 {
 	int ch, pos = 0;
 	kTokenVar *tk = GCSAFE_new(TokenVar, 0);
-	tk->uline = tenv->currentLine;
-	pos = parseINDENT(kctx, tk, tenv, pos);
+	pos = ParseIndent(kctx, tk, tenv, pos);
 	while((ch = kchar(tenv->source, pos)) != 0) {
 		if(tk->unresolvedTokenType != 0) {
 			KLIB kArray_add(kctx, tenv->tokenList, tk);
@@ -496,6 +498,36 @@ static kFunc **kNameSpace_tokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns)
 	return funcMatrix + KCHAR_MAX;
 }
 
+static void TokenSequence_tokenize(KonohaContext *kctx, TokenSequence *tokens, const char *source, kfileline_t uline)
+{
+	TokenizerEnv tenv = {};
+	tenv.source = source;
+	tenv.sourceLength = strlen(source);
+	tenv.currentLine  = uline;
+	tenv.tokenList    = tokens->tokenList;
+	tenv.tabsize = 4;
+	tenv.ns = tokens->ns;
+	tenv.cfuncItems = kNameSpace_tokenMatrix(kctx, tokens->ns);
+	tenv.funcItems  = kNameSpace_tokenFuncMatrix(kctx, tokens->ns);
+	{
+		INIT_GCSTACK();
+		kString *preparedString = KLIB new_kString(kctx, tenv.source, tenv.sourceLength, StringPolicy_ASCII|StringPolicy_TEXT|StringPolicy_NOPOOL);
+		PUSH_GCSTACK(preparedString);
+		tenv.preparedString = preparedString;
+		tokenize(kctx, &tenv);
+		RESET_GCSTACK();
+	}
+	TokenSequence_end(kctx, tokens);
+#ifndef BE_COMPACT
+	if(uline == 0) {
+		size_t i;
+		for(i = tokens->beginIdx; i < tokens->endIdx; i++) {
+			tokens->tokenList->tokenVarItems[i]->uline = 0;
+		}
+	}
+#endif
+}
+
 static void kNameSpace_setTokenizeFunc(KonohaContext *kctx, kNameSpace *ns, int ch, TokenizeFunc cfunc, kFunc *funcTokenize, int isAddition)
 {
 	int kchar = (ch < 0) ? _MULTI : cMatrix[ch];
@@ -525,41 +557,12 @@ static void kNameSpace_setTokenizeFunc(KonohaContext *kctx, kNameSpace *ns, int 
 	}
 }
 
-static void TokenRange_tokenize(KonohaContext *kctx, TokenRange *range, const char *source, kfileline_t uline)
-{
-	DBG_ASSERT(range->beginIdx == range->endIdx);
-	TokenizerEnv tenv = {0};
-	tenv.source = source;
-	tenv.sourceLength = strlen(source);
-	tenv.currentLine  = uline;
-	tenv.tokenList    = range->tokenList;
-	tenv.tabsize = 4;
-	tenv.cfuncItems   = (range->ns == NULL) ? MiniKonohaTokenMatrix : kNameSpace_tokenMatrix(kctx, range->ns);
-
-	INIT_GCSTACK();
-	kString *preparedString = KLIB new_kString(kctx, tenv.source, tenv.sourceLength, SPOL_ASCII|SPOL_TEXT|SPOL_NOPOOL);
-	PUSH_GCSTACK(preparedString);
-	tenv.preparedString = preparedString;
-	if(range->ns != NULL) {
-		tenv.funcItems = kNameSpace_tokenFuncMatrix(kctx, range->ns);
-	}
-	tokenize(kctx, &tenv);
-	TokenRange_end(kctx, range);
-	RESET_GCSTACK();
-	if(uline == 0) {
-		size_t i;
-		for(i = range->beginIdx; i < range->endIdx; i++) {
-			range->tokenList->tokenVarItems[i]->uline = 0;
-		}
-	}
-}
-
 // ---------------------------------------------------------------------------
 
-static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, TokenRange *sourceRange);
+static kbool_t kArray_addSyntaxPattern(KonohaContext *kctx, kArray *patternList, TokenSequence *patterns);
 #define Token_topch(tk) ((IS_String(tk->text) && S_size((tk)->text) == 1) ? S_text((tk)->text)[0] : 0)
 
-static int findCloseChar2(KonohaContext *kctx, TokenRange *sourceRange, int beginIdx, int closech)
+static int findCloseChar2(KonohaContext *kctx, TokenSequence *sourceRange, int beginIdx, int closech)
 {
 	int i;
 	for(i = beginIdx; i < sourceRange->endIdx; i++) {
@@ -569,33 +572,35 @@ static int findCloseChar2(KonohaContext *kctx, TokenRange *sourceRange, int begi
 	return sourceRange->endIdx;
 }
 
-static int makeNestedSyntaxRule(KonohaContext *kctx, TokenRange *sourceRange, int currentIdx, ksymbol_t KW_AST, int closech)
+static int TokenSequence_nestedSyntaxPattern(KonohaContext *kctx, TokenSequence *tokens, int currentIdx, ksymbol_t KW_AST, int closech)
 {
-	kTokenVar *tk = sourceRange->tokenList->tokenVarItems[currentIdx];
-	int ne = findCloseChar2(kctx, sourceRange, currentIdx+1, closech);
+	kTokenVar *tk = tokens->tokenList->tokenVarItems[currentIdx];
+	int ne = findCloseChar2(kctx, tokens, currentIdx+1, closech);
 	tk->resolvedSymbol = KW_AST;
-	tk->resolvedSyntaxInfo = SYN_(sourceRange->ns, KW_AST);
+	tk->resolvedSyntaxInfo = SYN_(tokens->ns, KW_AST);
 	KSETv(tk, tk->subTokenList, new_(TokenArray, 0));
-	TokenRange nestedSourceRange = {sourceRange->ns, sourceRange->tokenList, currentIdx+1, ne};
-	return kArray_addSyntaxRule(kctx, tk->subTokenList, &nestedSourceRange) ? ne : sourceRange->endIdx;
+	TokenSequence nestedSourceRange = {tokens->ns, tokens->tokenList, currentIdx+1, ne};
+	return kArray_addSyntaxPattern(kctx, tk->subTokenList, &nestedSourceRange) ? ne : tokens->endIdx;
 }
 
-static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, TokenRange *sourceRange)
+static kbool_t kArray_addSyntaxPattern(KonohaContext *kctx, kArray *patternList, TokenSequence *patterns)
 {
 	int i;
 	ksymbol_t stmtEntryKey = 0;
-	//KdumpTokenArray(kctx, sourceRange->tokenList, sourceRange->beginIdx, sourceRange->endIdx);
-	for(i = sourceRange->beginIdx; i < sourceRange->endIdx; i++) {
-		kTokenVar *tk = sourceRange->tokenList->tokenVarItems[i];
+	kTokenVar *tk, *prevToken = NULL;
+	//KdumpTokenArray(kctx, rules->tokenList, rules->beginIdx, rules->endIdx);
+	for(i = patterns->beginIdx; i < patterns->endIdx; i++, prevToken = tk) {
+		tk = patterns->tokenList->tokenVarItems[i];
+		if(kToken_isIndent(tk)) continue;
 		DBG_ASSERT(tk->resolvedSyntaxInfo != NULL);
 		if(tk->resolvedSyntaxInfo->keyword == KW_TextPattern) {
 			int topch = Token_topch(tk);
-			KLIB kArray_add(kctx, ruleList, tk);
+			KLIB kArray_add(kctx, patternList, tk);
 			if(topch == '(') {
-				i = makeNestedSyntaxRule(kctx, sourceRange, i, KW_ParenthesisGroup, ')');
+				i = TokenSequence_nestedSyntaxPattern(kctx, patterns, i, KW_ParenthesisGroup, ')');
 			}
 			else if(topch == '[') {
-				i = makeNestedSyntaxRule(kctx, sourceRange, i, KW_BracketGroup, ']');
+				i = TokenSequence_nestedSyntaxPattern(kctx, patterns, i, KW_BracketGroup, ']');
 			}
 			else {
 				tk->resolvedSymbol = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID);
@@ -603,49 +608,63 @@ static kbool_t kArray_addSyntaxRule(KonohaContext *kctx, kArray *ruleList, Token
 			continue;
 		}
 		if(tk->resolvedSyntaxInfo->keyword == KW_BracketGroup) {
-			TokenRange nestedSourceRange = {sourceRange->ns, tk->subTokenList, 0, kArray_size(tk->subTokenList)};
+			TokenSequence nestedSourceRange = {patterns->ns, tk->subTokenList, 0, kArray_size(tk->subTokenList)};
 			tk->resolvedSymbol = KW_OptionalGroup;
 			PUSH_GCSTACK(tk->subTokenList);  // avoid gc
 			KSETv(tk, tk->subTokenList, new_(TokenArray, 0));
-			kArray_addSyntaxRule(kctx, tk->subTokenList, &nestedSourceRange);
-			KLIB kArray_add(kctx, ruleList, tk);
+			kArray_addSyntaxPattern(kctx, tk->subTokenList, &nestedSourceRange);
+			KLIB kArray_add(kctx, patternList, tk);
 			continue;
 		}
-		if(tk->topCharHint == '$' && i+1 < sourceRange->endIdx) {  // $PatternName
-			tk = sourceRange->tokenList->tokenVarItems[++i];
+		if(tk->topCharHint == '$' && i+1 < patterns->endIdx) {  // $PatternName
+			tk = patterns->tokenList->tokenVarItems[++i];
 			if(IS_String(tk->text)) {
-				tk->resolvedSyntaxInfo = SYN_(sourceRange->ns, KW_SymbolPattern);
+				tk->resolvedSyntaxInfo = SYN_(patterns->ns, KW_SymbolPattern);
 				tk->resolvedSymbol = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWRAW) | KW_PATTERN;
 				if(stmtEntryKey == 0) stmtEntryKey = tk->resolvedSymbol;
 				tk->stmtEntryKey = stmtEntryKey;
 				stmtEntryKey = 0;
-				KLIB kArray_add(kctx, ruleList, tk);
+				KLIB kArray_add(kctx, patternList, tk);
 				continue;
 			}
 		}
-		if(i + 1 < sourceRange->endIdx && sourceRange->tokenList->tokenItems[i+1]->topCharHint == ':' && IS_String(tk->text)) {
+		if(i + 1 < patterns->endIdx && patterns->tokenList->tokenItems[i+1]->topCharHint == ':' && IS_String(tk->text)) {
 			stmtEntryKey = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWRAW);
 			i++;
 			continue;
 		}
-		kToken_printMessage(kctx, tk, ErrTag, "illegal syntax rule: %s", Token_text(tk));
+		if(tk->topCharHint == '*' && prevToken != NULL) {
+			kToken_set(MatchPreviousPattern, prevToken, true);
+			tk = NULL;
+			continue;
+		}
+		kToken_printMessage(kctx, tk, ErrTag, "illegal syntax pattern: %s", Token_text(tk));
 		return false;
 	}
 	//KdumpTokenArray(kctx, ruleList, 0, kArray_size(ruleList));
 	return true;
 }
 
-static kbool_t TokenRange_resolved(KonohaContext *kctx, TokenRange *range, TokenRange *sourceRange);
+static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, MacroSet *, TokenSequence *source, int start);
 
-static void kNameSpace_parseSugarRule2(KonohaContext *kctx, kNameSpace *ns, const char *rule, kfileline_t uline, kArray *ruleList)
+static void kNameSpace_parseSugarRule2(KonohaContext *kctx, kNameSpace *ns, const char *ruleSource, kfileline_t uline, kArray *ruleList)
 {
-	TokenRange rawRangeBuf, *rawRange = new_TokenListRange(kctx, ns, KonohaContext_getSugarContext(kctx)->preparedTokenList, &rawRangeBuf);
-	TokenRange_tokenize(kctx, rawRange, rule, uline);
-	TokenRange sourceRangeBuf, *sourceRange = new_TokenStackRange(kctx, rawRange, &sourceRangeBuf);
-	TokenRange_resolved(kctx, sourceRange, rawRange);
-	KdumpTokenRange(kctx, "resolved", sourceRange);
-	kArray_addSyntaxRule(kctx, ruleList, sourceRange);
-	TokenRange_pop(kctx, rawRange);
+	TokenSequence source = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
+	TokenSequence_push(kctx, source);
+	TokenSequence_tokenize(kctx, &source, ruleSource, uline);
+	TokenSequence patterns = {ns, source.tokenList, source.endIdx};
+	patterns.TargetPolicy.RemovingIndent = true;
+	TokenSequence_resolved2(kctx, &patterns, NULL, &source, source.beginIdx);
+	kArray_addSyntaxPattern(kctx, ruleList, &patterns);
+	kToken *firstPattern = patterns.tokenList->tokenItems[patterns.beginIdx];
+	if(KW_isPATTERN(firstPattern->resolvedSymbol) && firstPattern->resolvedSyntaxInfo->keyword != KW_ExprPattern) {
+		if(ns->StmtPatternListNULL == NULL) {
+			KINITp(ns, ((kNameSpaceVar*)ns)->StmtPatternListNULL, new_(TokenArray, 0));
+		}
+		DBG_P(">>>>>>>>>> adding PATTERN %s%s %s%s", PSYM_t(firstPattern->resolvedSymbol), PSYM_t(firstPattern->resolvedSyntaxInfo->keyword));
+		KLIB kArray_add(kctx, ns->StmtPatternListNULL, firstPattern);
+	}
+	TokenSequence_pop(kctx, source);
 }
 
 /* ------------------------------------------------------------------------ */

@@ -30,6 +30,7 @@
 #include <minikonoha/klib.h>
 #include <minikonoha/iterator.h>
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -143,7 +144,7 @@ static void String_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 	const char *t = S_text(s) + itr->current_pos;
 	size_t charsize = utf8len(t[0]);
 	itr->current_pos += charsize;
-	RETURN_(KLIB new_kString(kctx, t, charsize, (charsize == 1) ? SPOL_ASCII : SPOL_UTF8));
+	RETURN_(KLIB new_kString(kctx, t, charsize, (charsize == 1) ? StringPolicy_ASCII : StringPolicy_UTF8));
 }
 
 static KMETHOD String_toIterator(KonohaContext *kctx, KonohaStack *sfp)

@@ -57,13 +57,21 @@ static void Dummy_free(KonohaContext *kctx, kObject *o)
 }
 
 static KDEFINE_CLASS DummyDef = {
-    .structname   = "Dummy",
-    .typeId          = 100,
-    .cflag        = 0,
-    .cstruct_size = sizeof(struct Dummy),
-    .init     = Dummy_init,
-    .reftrace = Dummy_reftrace,
-    .free     = Dummy_free
+    /*.structname   = */ "Dummy",
+    /*.typeId       = */ 100,
+    /*.cflag        = */ 0,
+	                     0,
+	                     0,
+	                     0,
+	                     0,
+	                     0,
+    /*.cstruct_size = */ sizeof(struct Dummy),
+	                     0,
+	                     0,
+	                     0,
+    /*.init         = */ Dummy_init,
+    /*.reftrace     = */ Dummy_reftrace,
+    /*.free         = */ Dummy_free,
 };
 
 void test_gc(KonohaContext *kctx)
@@ -79,7 +87,7 @@ void test_gc(KonohaContext *kctx)
         }
         assert(__init__ == (i+1) * 100);
         assert(__trace__ == -1);
-        KLIB Kgc_invoke(kctx, 0);
+        KLIB KscheduleGC(kctx->gcContext);
     }
 
     int small_object_count = __init__;
@@ -91,7 +99,7 @@ void test_gc(KonohaContext *kctx)
         }
         assert(__init__ == (i+1) * 1000 + small_object_count);
         assert(__trace__ == -1);
-        KLIB Kgc_invoke(kctx, 0);
+        KLIB KscheduleGC(kctx->gcContext);
     }
 }
 

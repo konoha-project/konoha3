@@ -54,9 +54,9 @@ static KMETHOD StmtTyCheck_namespace(KonohaContext *kctx, KonohaStack *sfp)
 		INIT_GCSTACK();
 		kNameSpace *ns = GCSAFE_new(NameSpace, Stmt_nameSpace(stmt));
 		kArray *a = KonohaContext_getSugarContext(kctx)->preparedTokenList;
-		TokenRange range = {ns, a, kArray_size(a), kArray_size(a)};
-		SUGAR TokenRange_tokenize(kctx, &range, S_text(tk->text), tk->uline);
-		result = SUGAR TokenRange_eval(kctx, &range);
+		TokenSequence range = {ns, a, kArray_size(a), kArray_size(a)};
+		SUGAR TokenSequence_tokenize(kctx, &range, S_text(tk->text), tk->uline);
+		result = SUGAR TokenSequence_eval(kctx, &range);
 		RESET_GCSTACK();
 		kStmt_done(kctx, stmt);
 	}

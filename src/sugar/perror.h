@@ -58,6 +58,7 @@ static kString* SugarContext_vprintMessage(KonohaContext *kctx, kinfotag_t tagle
 		}
 		else {
 			KLIB Kwb_printf(kctx, &wb, "%s" , msg);
+			DBG_ASSERT(uline > 0);
 		}
 		size_t len = wb.m->bytesize - pos;
 		KLIB Kwb_vprintf(kctx, &wb, fmt, ap);

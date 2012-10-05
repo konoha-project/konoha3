@@ -347,7 +347,7 @@ static kshortflag_t kStmt_parseClassFlag(KonohaContext *kctx, kStmt *stmt, kshor
 static KonohaClassVar* kNameSpace_defineClassName(KonohaContext *kctx, kNameSpace *ns, kshortflag_t cflag, kString *name, kfileline_t pline)
 {
 	KDEFINE_CLASS defNewClass = {0};
-	defNewClass.cflag         = cflag;
+	defNewClass.cflag         = cflag | kClass_Nullable;
 	defNewClass.typeId       = TY_newid;
 	defNewClass.baseTypeId   = TY_Object;
 	defNewClass.superTypeId  = TY_Object; //superClass->typeId;
@@ -394,27 +394,28 @@ static kBlock* kStmt_parseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToke
 	kToken *blockToken = (kToken*)kStmt_getObject(kctx, stmt, KW_BlockPattern, NULL);
 	if(blockToken != NULL && blockToken->resolvedSyntaxInfo->keyword == KW_BlockPattern) {
 		const char *cname = S_text(tokenClassName->text);
-		TokenRange rangeBuf, *range = SUGAR new_TokenListRange(kctx, Stmt_nameSpace(stmt), KonohaContext_getSugarContext(kctx)->preparedTokenList, &rangeBuf);
-		SUGAR TokenRange_tokenize(kctx, range,  S_text(blockToken->text), blockToken->uline);
+		TokenSequence range = {Stmt_nameSpace(stmt), KonohaContext_getSugarContext(kctx)->preparedTokenList};
+		TokenSequence_push(kctx, range);
+		SUGAR TokenSequence_tokenize(kctx, &range,  S_text(blockToken->text), blockToken->uline);
 		{
+			TokenSequence sourceRange = {range.ns, range.tokenList, range.endIdx};
 			kToken *prevToken = blockToken;
-			TokenRange sourceBuf, *sourceRange = SUGAR new_TokenStackRange(kctx, range, &sourceBuf);
 			int i;
-			for(i = range->beginIdx; i < range->endIdx; i++) {
-				kToken *tk = range->tokenList->tokenItems[i];
+			for(i = range.beginIdx; i < range.endIdx; i++) {
+				kToken *tk = range.tokenList->tokenItems[i];
 				if(tk->topCharHint == '(' && prevToken->unresolvedTokenType == TokenType_SYMBOL && strcmp(cname, S_text(prevToken->text)) == 0) {
 					kTokenVar *newToken = GCSAFE_new(TokenVar, TokenType_SYMBOL);
-					KLIB kArray_add(kctx, sourceRange->tokenList, newToken);
+					KLIB kArray_add(kctx, sourceRange.tokenList, newToken);
 					KSETv(newToken, newToken->text, SYM_s(MN_new));
 				}
-				KLIB kArray_add(kctx, sourceRange->tokenList, tk);
+				KLIB kArray_add(kctx, sourceRange.tokenList, tk);
 				prevToken = tk;
 			}
-			TokenRange_end(kctx, sourceRange);
-			bk = SUGAR new_kBlock(kctx, stmt/*parent*/, sourceRange, NULL);
+			TokenSequence_end(kctx, (&sourceRange));
+			bk = SUGAR new_kBlock(kctx, stmt/*parent*/, NULL, &sourceRange);
 			KLIB kObject_setObject(kctx, stmt, KW_BlockPattern, TY_Block, bk);
 		}
-		TokenRange_pop(kctx, range);
+		TokenSequence_pop(kctx, range);
 	}
 	return bk;
 }
@@ -426,7 +427,7 @@ static size_t kBlock_countFieldSize(KonohaContext *kctx, kBlock *bk)
 		for(i = 0; i < kArray_size(bk->stmtList); i++) {
 			kStmt *stmt = bk->stmtList->stmtItems[i];
 			DBG_P("stmt->keyword=%s%s", PSYM_t(stmt->syn->keyword));
-			if(stmt->syn->keyword == KW_StmtTypeDecl) {
+			if(stmt->syn->keyword == KW_TypeDeclPattern) {
 				kExpr *expr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL);
 				if(expr->syn->keyword == KW_COMMA) {
 					c += (kArray_size(expr->cons) - 1);
@@ -489,7 +490,7 @@ static kbool_t kBlock_declClassField(KonohaContext *kctx, kBlock *bk, kGamma *gm
 	kbool_t failedOnce = false;
 	for(i = 0; i < kArray_size(bk->stmtList); i++) {
 		kStmt *stmt = bk->stmtList->stmtItems[i];
-		if(stmt->syn->keyword == KW_StmtTypeDecl) {
+		if(stmt->syn->keyword == KW_TypeDeclPattern) {
 			kshortflag_t flag = kField_Getter | kField_Setter;
 			kToken *tk  = SUGAR kStmt_getToken(kctx, stmt, KW_TypePattern, NULL);
 			kExpr *expr = SUGAR kStmt_getExpr(kctx, stmt,  KW_ExprPattern, NULL);
@@ -507,8 +508,8 @@ static void kBlock_addMethodDeclStmt(KonohaContext *kctx, kBlock *bk, kToken *to
 		size_t i;
 		for(i = 0; i < kArray_size(bk->stmtList); i++) {
 			kStmt *stmt = bk->stmtList->stmtItems[i];
-			if(stmt->syn->keyword == KW_StmtTypeDecl) continue;
-			if(stmt->syn->keyword == KW_StmtMethodDecl) {
+			if(stmt->syn->keyword == KW_TypeDeclPattern) continue;
+			if(stmt->syn->keyword == KW_MethodDeclPattern) {
 				kStmt *lastStmt = classStmt;
 				KLIB kObject_setObject(kctx, stmt, SYM_("ClassName"), TY_Token, tokenClassName);
 				SUGAR kBlock_insertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, stmt);

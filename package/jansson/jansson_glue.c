@@ -328,7 +328,7 @@ static KMETHOD Json_getKeys(KonohaContext *kctx, KonohaStack *sfp)
 	while (iter) {
 		key = json_object_iter_key(iter);
 		iter = json_object_iter_next(obj, iter);
-		KLIB kArray_add(kctx, a, KLIB new_kString(kctx, key, strlen(key), SPOL_POOL|SPOL_ASCII));
+		KLIB kArray_add(kctx, a, KLIB new_kString(kctx, key, strlen(key), StringPolicy_POOL|StringPolicy_ASCII));
 	}
 	RETURN_(a);
 }

@@ -29,7 +29,79 @@
 
 #define USE_BUILTINTEST 1
 #include "testkonoha.h"
+#ifdef __GNUC__
 #include <getopt.h>
+#else
+
+char *optarg = 0;
+int optind   = 1;
+int optopt   = 0;
+int opterr   = 0;
+int optreset = 0;
+
+struct option {
+	char *name;
+	int has_arg;
+	int *flag;
+	int val;
+};
+
+/* The has_arg field should be one of: */
+enum {
+	no_argument,       /* no argument to the option is expect        */
+	required_argument, /* an argument to the option is required      */
+	optional_argument, /* an argument to the option may be presented */
+};
+
+static int getopt_long(int argc, char * const *argv, const char *optstring, const struct option *longopts, int *longindex);
+
+#include <string.h>
+#include <ctype.h>
+static int getopt_long(int argc, char * const *argv, const char *optstring, const struct option *longopts, int *longindex)
+{
+	if (optind < argc) {
+		char *arg = argv[optind];
+		if (arg == 0)
+			return -1;
+		if (arg[0] == '-' && arg[1] == '-') {
+			const struct option *opt = longopts;
+			arg += 2;
+			while (opt->name) {
+				char *end = strchr(arg, '=');
+				if (end == 0 && opt->has_arg == no_argument) {
+					if (strcmp(arg, opt->name) == 0)
+						*longindex = opt - longopts;
+					optind++;
+					return opt->val;
+				}
+				if (strncmp(arg, opt->name, end - arg) == 0) {
+					*longindex = opt - longopts;
+					optarg = end+1;
+					optind++;
+					return opt->val;
+				}
+				opt++;
+			}
+		}
+		else if (arg[0] == '-') {
+			arg += 1;
+			const char *c = optstring;
+			while (*c != 0) {
+				if (*c == arg[0]) {
+					if (*(c+1) == ':' && arg[1] == '=') {
+						optarg = arg+2;
+					}
+					optind++;
+					return arg[0];
+				}
+				c++;
+			}
+		}
+	}
+	return -1;
+}
+
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -227,6 +299,10 @@ static int KonohaContext_test(KonohaContext *kctx, const char *testname)
 	return ret;
 }
 
+#ifdef _MSC_VER
+#define strcasecmp stricmp
+#endif
+
 #ifdef USE_BUILTINTEST
 extern DEFINE_TESTFUNC KonohaTestSet[];
 static BuiltInTestFunc lookupTestFunc(DEFINE_TESTFUNC *d, const char *name)
@@ -260,7 +336,7 @@ static void CommandLine_define(KonohaContext *kctx, char *keyvalue)
 	char *p = strchr(keyvalue, '=');
 	if(p != NULL) {
 		size_t len = p-keyvalue;
-		char namebuf[len+1];
+		char *namebuf = ALLOCA(char, len+1);
 		memcpy(namebuf, keyvalue, len); namebuf[len] = 0;
 		DBG_P("name='%s'", namebuf);
 		ksymbol_t key = KLIB Ksymbol(kctx, namebuf, len, 0, SYM_NEWID);
@@ -287,7 +363,7 @@ static void CommandLine_define(KonohaContext *kctx, char *keyvalue)
 static void CommandLine_import(KonohaContext *kctx, char *packageName)
 {
 	size_t len = strlen(packageName)+1;
-	char bufname[len];
+	char *bufname = ALLOCA(char, len);
 	memcpy(bufname, packageName, len);
 	if(!(KLIB kNameSpace_importPackage(kctx, KNULL(NameSpace), bufname, 0))) {
 		PLATAPI exit_i(EXIT_FAILURE);
@@ -319,7 +395,7 @@ static void CommandLine_setARGV(KonohaContext *kctx, int argc, char** argv)
 	int i;
 	for(i = 0; i < argc; i++) {
 		DBG_P("argv=%d, '%s'", i, argv[i]);
-		KLIB kArray_add(kctx, a, KLIB new_kString(kctx, argv[i], strlen(argv[i]), SPOL_TEXT));
+		KLIB kArray_add(kctx, a, KLIB new_kString(kctx, argv[i], strlen(argv[i]), StringPolicy_TEXT));
 	}
 	KDEFINE_OBJECT_CONST ObjectData[] = {
 			{"SCRIPT_ARGV", CT_StringArray0->typeId, (kObject*)a},

@@ -1,0 +1,3 @@
+ - (error) (TopLeveLError_FuncDecl.k:4) undefined function: g
+ ** RuntimeScriptException (TopLeveLError_FuncDecl.k:4)
+Q.E.D.

@@ -65,7 +65,7 @@ static kToken* new_ParsedExprToken(KonohaContext *kctx, kNameSpace *ns, kExpr *e
 static void MacroSet_setTokenAt(KonohaContext *kctx, MacroSet *macroSet, int index, kArray *tokenList, const char *symbol, ...)
 {
 	DBG_ASSERT(macroSet[index].tokenList == NULL);
-	macroSet[index].symbol = KLIB Ksymbol(kctx, symbol, strlen(symbol), SPOL_TEXT|SPOL_ASCII, _NEWID);
+	macroSet[index].symbol = KLIB Ksymbol(kctx, symbol, strlen(symbol), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID);
 	macroSet[index].tokenList = tokenList;
 	macroSet[index].beginIdx = kArray_size(tokenList);
 	kToken *tk;
@@ -87,27 +87,26 @@ static void MacroSet_setTokenAt(KonohaContext *kctx, MacroSet *macroSet, int ind
 static kBlock *new_MacroBlock(KonohaContext *kctx, kStmt *stmt, kToken *IteratorTypeToken, kToken *IteratorExprToken, kToken *TypeToken, kToken *VariableToken)
 {
 	kNameSpace *ns = Stmt_nameSpace(stmt);
-	kArray *tokenList = KonohaContext_getSugarContext(kctx)->preparedTokenList;
-	TokenRange macroRangeBuf, *macroRange = SUGAR new_TokenListRange(kctx, ns, tokenList, &macroRangeBuf);
+	TokenSequence source = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
+	TokenSequence_push(kctx, source);
 	/* FIXME(imasahiro)
 	 * we need to implement template as Block
 	 * "T _ = E; if(_.hasNext()) { N = _.next(); }"
 	 *                           ^^^^^^^^^^^^^^^^^
 	 */
-	SUGAR TokenRange_tokenize(kctx, macroRange, "T _ = E; if(_.hasNext()) N = _.next();", 0);
+	SUGAR TokenSequence_tokenize(kctx, &source, "T _ = E; if(_.hasNext()) N = _.next();", 0);
 	MacroSet macroSet[4] = {{0, NULL, 0, 0}};
-	MacroSet_setTokenAt(kctx, macroSet, 0, tokenList, "T", IteratorTypeToken, NULL);
-	MacroSet_setTokenAt(kctx, macroSet, 1, tokenList, "E", IteratorExprToken, NULL);
+	MacroSet_setTokenAt(kctx, macroSet, 0, source.tokenList, "T", IteratorTypeToken, NULL);
+	MacroSet_setTokenAt(kctx, macroSet, 1, source.tokenList, "E", IteratorExprToken, NULL);
 	if(TypeToken == NULL) {
-		MacroSet_setTokenAt(kctx, macroSet, 2, tokenList, "N", VariableToken, NULL);
+		MacroSet_setTokenAt(kctx, macroSet, 2, source.tokenList, "N", VariableToken, NULL);
 	}
 	else {
-		MacroSet_setTokenAt(kctx, macroSet, 2, tokenList, "N", TypeToken, VariableToken, NULL);
+		MacroSet_setTokenAt(kctx, macroSet, 2, source.tokenList, "N", TypeToken, VariableToken, NULL);
 	}
-	macroRange->macroSet = macroSet;
-	TokenRange expandedRangeBuf, *expandedRange = SUGAR new_TokenListRange(kctx, ns, tokenList, &expandedRangeBuf);
-	SUGAR TokenRange_resolved(kctx, expandedRange, macroRange);
-	return SUGAR new_kBlock(kctx, stmt, expandedRange, NULL);
+	kBlock *bk = SUGAR new_kBlock(kctx, stmt, macroSet, &source);
+	TokenSequence_pop(kctx, source);
+	return bk;
 }
 
 static void kStmt_appendBlock(KonohaContext *kctx, kStmt *stmt, kBlock *bk)

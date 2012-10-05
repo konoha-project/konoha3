@@ -132,6 +132,12 @@ static void UnboxArray_insert(KonohaContext *kctx, kArray *o, size_t n, uintptr_
 	}
 }
 
+static KMETHOD Array_clear(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kArray *a = sfp[0].asArray;
+	KLIB kArray_clear(kctx, a, 0);
+}
+
 static KMETHOD Array_add1(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
@@ -423,6 +429,7 @@ static kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public|_Im,    _F(Array_removeAt), TY_0,   TY_Array, MN_("removeAt"), 1, TY_int, FN_("index"),
 		_Public|_Const, _F(Array_getSize), TY_int, TY_Array, MN_("getSize"), 0,
 		_Public|_Const, _F(Array_getSize), TY_int, TY_Array, MN_("getlength"), 0,
+		_Public,        _F(Array_clear), TY_void, TY_Array, MN_("clear"), 0,
 		_Public,        _F(Array_add1), TY_void, TY_Array, MN_("add"), 1, TY_0, FN_("value"),
 		_Public,        _F(Array_push), TY_int, TY_Array, MN_("push"), 1, TY_0, FN_("value"),
 		_Public,        _F(Array_pop), TY_0, TY_Array, MN_("pop"), 0,
@@ -486,7 +493,7 @@ static KMETHOD ParseExpr_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
 	KonohaClass *genericsClass = NULL;
 	kNameSpace *ns = Stmt_nameSpace(stmt);
-	int nextIdx = SUGAR kStmt_parseTypePattern(kctx, stmt, ns, tokenList, beginIdx, endIdx, &genericsClass);
+	int nextIdx = SUGAR TokenUtils_parseTypePattern(kctx, ns, tokenList, beginIdx, endIdx, &genericsClass);
 	if (nextIdx != -1) {  // to avoid Func[T]
 		RETURN_(SUGAR kStmt_parseOperatorExpr(kctx, stmt, tokenList->tokenItems[beginIdx]->resolvedSyntaxInfo, tokenList, beginIdx, beginIdx, endIdx));
 	}
@@ -514,7 +521,7 @@ static KMETHOD ParseExpr_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 				kArray *subTokenList = currentToken->subTokenList;
 				int beginIdx = -1;
 				if (kArray_size(subTokenList) > 0) {
-					beginIdx = SUGAR kStmt_parseTypePattern(kctx, stmt, ns, subTokenList, 0, kArray_size(subTokenList), &classT0);
+					beginIdx = SUGAR TokenUtils_parseTypePattern(kctx, ns, subTokenList, 0, kArray_size(subTokenList), &classT0);
 				}
 				beginIdx = (beginIdx == -1) ? 0 : beginIdx;
 				kExpr_setsyn(leftExpr, SYN_(ns, KW_ExprMethodCall));
@@ -540,7 +547,7 @@ static KMETHOD ParseExpr_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t array_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KW_BracketGroup, SYNFLAG_ExprPostfixOp2, NULL, C_PRECEDENCE_CALL, 0, NULL, ParseExpr_Bracket, NULL, NULL, ExprTyCheck_Bracket, },
+		{ KW_BracketGroup, SYNFLAG_ExprPostfixOp2, NULL, Precedence_CStyleCALL, 0, NULL, ParseExpr_Bracket, NULL, NULL, ExprTyCheck_Bracket, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);

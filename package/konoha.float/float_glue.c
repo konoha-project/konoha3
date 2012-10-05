@@ -224,7 +224,7 @@ static KMETHOD Float_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	char buf[40];
 	PLATAPI snprintf_i(buf, sizeof(buf), KFLOAT_FMT, sfp[0].floatValue);
-	RETURN_(KLIB new_kString(kctx, buf, strlen(buf), SPOL_ASCII));
+	RETURN_(KLIB new_kString(kctx, buf, strlen(buf), StringPolicy_ASCII));
 }
 
 /* String to float */

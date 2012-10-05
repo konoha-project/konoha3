@@ -57,10 +57,11 @@ static kstatus_t kNameSpace_eval(KonohaContext *kctx, kNameSpace *ns, const char
 	kmodsugar->h.setup(kctx, (KonohaModule*)kmodsugar, 0/*lazy*/);
 	INIT_GCSTACK();
 	{
-		TokenRange rangeBuf, *range = new_TokenListRange(kctx, ns, KonohaContext_getSugarContext(kctx)->preparedTokenList, &rangeBuf);
-		TokenRange_tokenize(kctx, range, script, uline);
-		result = TokenRange_eval(kctx, range);
-		TokenRange_pop(kctx, range);
+		TokenSequence tokens = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
+		TokenSequence_push(kctx, tokens);
+		TokenSequence_tokenize(kctx, &tokens, script, uline);
+		result = TokenSequence_eval(kctx, &tokens);
+		TokenSequence_pop(kctx, tokens);
 	}
 	RESET_GCSTACK();
 	return result;
@@ -177,7 +178,8 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 
 	KLIB Knull(kctx, mod->cToken);
 	KLIB Knull(kctx, mod->cExpr);
-	KLIB Knull(kctx, mod->cBlock);
+	kStmtVar *NullStmt = (kStmtVar*)KLIB Knull(kctx, mod->cStmt);
+	KSETv(NullStmt, NullStmt->parentBlockNULL, (kBlock*)KLIB Knull(kctx, mod->cBlock));
 
 	SugarModule_setup(kctx, &mod->h, 0);
 
@@ -192,14 +194,15 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	};
 	kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(ClassData), 0);
 
-	mod->new_TokenListRange         = new_TokenListRange;
-	mod->new_TokenStackRange        = new_TokenStackRange;
 	mod->kNameSpace_setTokenizeFunc = kNameSpace_setTokenizeFunc;
-	mod->TokenRange_tokenize        = TokenRange_tokenize;
-	mod->TokenRange_eval            = TokenRange_eval;
-	mod->TokenRange_resolved        = TokenRange_resolved;
-	mod->kStmt_parseTypePattern     = kStmt_parseTypePattern;
+	mod->TokenSequence_tokenize        = TokenSequence_tokenize;
+	mod->TokenSequence_applyMacro      = TokenSequence_applyMacro;
+	mod->kNameSpace_setMacroData       = kNameSpace_setMacroData;
+	mod->TokenSequence_resolved        = TokenSequence_resolved2;
+	mod->TokenSequence_eval            = TokenSequence_eval;
+	mod->TokenUtils_parseTypePattern     = TokenUtils_parseTypePattern;
 	mod->kToken_transformToBraceGroup = kToken_transformToBraceGroup;
+	mod->kStmt_setParsedObject      = kStmt_setParsedObject;
 	mod->kStmt_parseFlag            = kStmt_parseFlag;
 	mod->kStmt_getToken             = kStmt_getToken;
 	mod->kStmt_getBlock             = kStmt_getBlock;
@@ -219,10 +222,10 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 
 	mod->kNameSpace_defineSyntax    = kNameSpace_defineSyntax;
 	mod->kNameSpace_getSyntax       = kNameSpace_getSyntax;
-	mod->kArray_addSyntaxRule       = kArray_addSyntaxRule;
+	mod->kArray_addSyntaxRule       = kArray_addSyntaxPattern;
 	mod->kNameSpace_setSugarFunc    = kNameSpace_setSugarFunc;
 	mod->kNameSpace_addSugarFunc    = kNameSpace_addSugarFunc;
-	mod->new_kBlock                  = new_kBlock;
+	mod->new_kBlock                 = new_kBlock2;
 	mod->new_kStmt                  = new_kStmt;
 	mod->kBlock_insertAfter         = kBlock_insertAfter;
 	mod->new_UntypedTermExpr        = new_UntypedTermExpr;

@@ -125,7 +125,7 @@ static KMETHOD Log_get_(CTX, ksfp_t *sfp _RIX)
 	int   klen = S_size(sfp[1].s);
 	int   vlen;
 	char *data = Log_get(log, key, klen, &vlen);
-	RETURN_(new_kString(data, vlen, SPOL_ASCII|SPOL_POOL));
+	RETURN_(new_kString(data, vlen, StringPolicy_ASCII|StringPolicy_POOL));
 }
 
 // --------------------------------------------------------------------------

@@ -40,55 +40,51 @@ static kbool_t assign_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 	return true;
 }
 
-static KMETHOD ParseExpr_SelfAssign(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD ParseExpr_BinarySugar(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
-	kNameSpace *ns = Stmt_nameSpace(stmt);
-	kToken *selfAssignToken = tokenList->tokenItems[operatorIdx];
-	DBG_ASSERT(S_size(selfAssignToken->text) > 1);
-	ksymbol_t opSymbol = KLIB Ksymbol(kctx, S_text(selfAssignToken->text), S_size(selfAssignToken->text) - 1, SPOL_ASCII, _NEWID);
-	SugarSyntax *opSyntax = SYN_(ns, opSymbol);
-	if(opSyntax != NULL) {
-		TokenRange macroRangeBuf, *macroRange = SUGAR new_TokenListRange(kctx, Stmt_nameSpace(stmt), tokenList, &macroRangeBuf);
-		SUGAR TokenRange_tokenize(kctx, macroRange, "A = ( A ) + ( B )", 0);
-
-		TokenRange opRangeBuf, *opRange = SUGAR new_TokenStackRange(kctx, macroRange, &opRangeBuf);
-		kTokenVar *opToken = GCSAFE_new(TokenVar, TokenType_SYMBOL);
-		KSETv(opToken, opToken->text, SYM_s(opSymbol));
-		KLIB kArray_add(kctx, opRange->tokenList, opToken);
-		TokenRange_end(kctx, opRange);
-
-		TokenRange newexprRangeBuf, *newexprRange = SUGAR new_TokenStackRange(kctx, opRange, &newexprRangeBuf);
-		MacroSet macroSet[] = {
-			{SYM_("A"), tokenList, beginIdx, operatorIdx},
-			{SYM_("B"), tokenList, operatorIdx+1, endIdx},
-			{SYM_("+"), opRange->tokenList, opRange->beginIdx, opRange->endIdx},
+	kToken *opToken = tokenList->tokenItems[operatorIdx];
+	SugarSyntax *opSyntax = opToken->resolvedSyntaxInfo;
+	if(opSyntax->macroParamSize == 2) {
+		TokenSequence macro = {Stmt_nameSpace(stmt), tokenList};
+		TokenSequence_push(kctx, macro);
+		MacroSet macroParam[] = {
+			{SYM_("X"), tokenList, beginIdx, operatorIdx},
+			{SYM_("Y"), tokenList, operatorIdx+1, endIdx},
 			{0, NULL, 0, 0},
 		};
-		macroRange->macroSet = macroSet;
-		SUGAR TokenRange_resolved(kctx, newexprRange, macroRange);
-//		KdumpTokenRange(kctx, "replaced", newexprRange);
-
-		kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, newexprRange->tokenList, newexprRange->beginIdx, newexprRange->endIdx);
-		TokenRange_pop(kctx, macroRange);
+		macro.TargetPolicy.RemovingIndent = true;
+		SUGAR TokenSequence_applyMacro(kctx, &macro, opSyntax->macroDataNULL, opSyntax->macroParamSize, macroParam);
+		kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx);
+		TokenSequence_pop(kctx, macro);
 		RETURN_(expr);
-	}
-	else {
-		SUGAR kStmt_printMessage2(kctx, stmt, selfAssignToken, ErrTag, "undefined binary operator: %s", SYM_t(opSymbol));
 	}
 }
 
 static kbool_t assign_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("+="), (SYNFLAG_ExprLeftJoinOp2), NULL, C_PRECEDENCE_ASSIGN, 0, NULL, ParseExpr_SelfAssign, NULL, NULL, NULL, },
-		{ SYM_("-="), (SYNFLAG_ExprLeftJoinOp2), NULL, C_PRECEDENCE_ASSIGN, 0, NULL, ParseExpr_SelfAssign, NULL, NULL, NULL, },
-		{ SYM_("*="), (SYNFLAG_ExprLeftJoinOp2), NULL, C_PRECEDENCE_ASSIGN, 0, NULL, ParseExpr_SelfAssign, NULL, NULL, NULL, },
-		{ SYM_("/="), (SYNFLAG_ExprLeftJoinOp2), NULL, C_PRECEDENCE_ASSIGN, 0, NULL, ParseExpr_SelfAssign, NULL, NULL, NULL, },
-		{ SYM_("%="), (SYNFLAG_ExprLeftJoinOp2), NULL, C_PRECEDENCE_ASSIGN, 0, NULL, ParseExpr_SelfAssign, NULL, NULL, NULL, },
+		{ SYM_("+="), (SYNFLAG_ExprLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, ParseExpr_BinarySugar, NULL, NULL, NULL, },
+		{ SYM_("-="), (SYNFLAG_ExprLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, ParseExpr_BinarySugar, NULL, NULL, NULL, },
+		{ SYM_("*="), (SYNFLAG_ExprLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, ParseExpr_BinarySugar, NULL, NULL, NULL, },
+		{ SYM_("/="), (SYNFLAG_ExprLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, ParseExpr_BinarySugar, NULL, NULL, NULL, },
+		{ SYM_("%="), (SYNFLAG_ExprLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, ParseExpr_BinarySugar, NULL, NULL, NULL, },
+		{ SYM_("|="), (SYNFLAG_ExprLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, ParseExpr_BinarySugar, NULL, NULL, NULL, },
+		{ SYM_("&="), (SYNFLAG_ExprLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, ParseExpr_BinarySugar, NULL, NULL, NULL, },
+		{ SYM_("<<="), (SYNFLAG_ExprLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, ParseExpr_BinarySugar, NULL, NULL, NULL, },
+		{ SYM_(">>="), (SYNFLAG_ExprLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, ParseExpr_BinarySugar, NULL, NULL, NULL, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
+	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("+="), 2,  "X Y X = (X) + (Y)");
+	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("-="), 2,  "X Y X = (X) - (Y)");
+	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("*="), 2,  "X Y X = (X) * (Y)");
+	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("/="), 2,  "X Y X = (X) / (Y)");
+	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("%="), 2,  "X Y X = (X) % (Y)");
+	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("|="), 2,  "X Y X = (X) | (Y)");
+	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("&="), 2,  "X Y X = (X) & (Y)");
+	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("<<="), 2, "X Y X = (X) << (Y)");
+	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_(">>="), 2, "X Y X = (X) >> (Y)");
 	return true;
 }
 
