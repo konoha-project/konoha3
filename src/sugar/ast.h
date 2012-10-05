@@ -822,6 +822,20 @@ static const char* StatementType(ksymbol_t keyword)
 	return postfix;
 }
 
+static int selectSyntaxPattern(KonohaContext *kctx, TokenSequence *patterns, kArray *patternList, int endIdx)
+{
+	int i;
+	for(i = endIdx - 1; i >= 0; i--) {
+		kToken *tk = patternList->tokenItems[i];
+		if(IS_NULL(tk)) {
+			patterns->endIdx = endIdx;
+			patterns->beginIdx = i + 1;
+			return i - 1;
+		}
+	}
+	return -1;
+}
+
 static int kStmt_parseBySyntaxPattern(KonohaContext *kctx, kStmt *stmt, int indent, kArray *tokenList, int beginIdx, int endIdx)
 {
 	kNameSpace *ns = Stmt_nameSpace(stmt);
@@ -831,12 +845,16 @@ static int kStmt_parseBySyntaxPattern(KonohaContext *kctx, kStmt *stmt, int inde
 	kToken *errRule = NULL;
 	while(currentSyntax != NULL) {
 		if(currentSyntax->syntaxRuleNULL != NULL) {
-			TokenSequence nrule  = {ns, currentSyntax->syntaxRuleNULL, 0, kArray_size(currentSyntax->syntaxRuleNULL)};
+			int patternEndIdx = kArray_size(currentSyntax->syntaxRuleNULL);
 			TokenSequence tokens = {ns, tokenList, beginIdx, endIdx};
-			errRule = NULL;
-			int nextIdx = kStmt_matchSyntaxPattern(kctx, stmt, &tokens, &nrule, &errRule);
-			if(Stmt_isERR(stmt)) return -1;
-			if(beginIdx < nextIdx) return nextIdx;
+			TokenSequence nrule  = {ns, currentSyntax->syntaxRuleNULL};
+			do {
+				patternEndIdx = selectSyntaxPattern(kctx, &nrule, currentSyntax->syntaxRuleNULL, patternEndIdx);
+				errRule = NULL;
+				int nextIdx = kStmt_matchSyntaxPattern(kctx, stmt, &tokens, &nrule, &errRule);
+				if(Stmt_isERR(stmt)) return -1;
+				if(beginIdx < nextIdx) return nextIdx;
+			} while(patternEndIdx > 0);
 		}
 		currentSyntax = currentSyntax->parentSyntaxNULL;
 	}

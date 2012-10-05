@@ -560,14 +560,14 @@ static void kNameSpace_setTokenizeFunc(KonohaContext *kctx, kNameSpace *ns, int 
 // ---------------------------------------------------------------------------
 
 static kbool_t kArray_addSyntaxPattern(KonohaContext *kctx, kArray *patternList, TokenSequence *patterns);
-#define Token_topch(tk) ((IS_String(tk->text) && S_size((tk)->text) == 1) ? S_text((tk)->text)[0] : 0)
+#define kTokenPattern_topch(tk) ((IS_String(tk->text) && S_size((tk)->text) == 1) ? S_text((tk)->text)[0] : 0)
 
 static int findCloseChar2(KonohaContext *kctx, TokenSequence *sourceRange, int beginIdx, int closech)
 {
 	int i;
 	for(i = beginIdx; i < sourceRange->endIdx; i++) {
 		kToken *tk = sourceRange->tokenList->tokenItems[i];
-		if(Token_topch(tk) == closech) return i;
+		if(kTokenPattern_topch(tk) == closech) return i;
 	}
 	return sourceRange->endIdx;
 }
@@ -591,10 +591,10 @@ static kbool_t kArray_addSyntaxPattern(KonohaContext *kctx, kArray *patternList,
 	//KdumpTokenArray(kctx, rules->tokenList, rules->beginIdx, rules->endIdx);
 	for(i = patterns->beginIdx; i < patterns->endIdx; i++, prevToken = tk) {
 		tk = patterns->tokenList->tokenVarItems[i];
-		if(kToken_isIndent(tk)) continue;
+		//if(kToken_isIndent(tk)) continue;
 		DBG_ASSERT(tk->resolvedSyntaxInfo != NULL);
 		if(tk->resolvedSyntaxInfo->keyword == KW_TextPattern) {
-			int topch = Token_topch(tk);
+			int topch = kTokenPattern_topch(tk);
 			KLIB kArray_add(kctx, patternList, tk);
 			if(topch == '(') {
 				i = TokenSequence_nestedSyntaxPattern(kctx, patterns, i, KW_ParenthesisGroup, ')');
@@ -624,6 +624,7 @@ static kbool_t kArray_addSyntaxPattern(KonohaContext *kctx, kArray *patternList,
 				if(stmtEntryKey == 0) stmtEntryKey = tk->resolvedSymbol;
 				tk->stmtEntryKey = stmtEntryKey;
 				stmtEntryKey = 0;
+				KdumpToken(kctx, tk);
 				KLIB kArray_add(kctx, patternList, tk);
 				continue;
 			}
@@ -641,13 +642,12 @@ static kbool_t kArray_addSyntaxPattern(KonohaContext *kctx, kArray *patternList,
 		kToken_printMessage(kctx, tk, ErrTag, "illegal syntax pattern: %s", Token_text(tk));
 		return false;
 	}
-	//KdumpTokenArray(kctx, ruleList, 0, kArray_size(ruleList));
 	return true;
 }
 
 static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, MacroSet *, TokenSequence *source, int start);
 
-static void kNameSpace_parseSugarRule2(KonohaContext *kctx, kNameSpace *ns, const char *ruleSource, kfileline_t uline, kArray *ruleList)
+static void kNameSpace_parseSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, const char *ruleSource, kfileline_t uline, kArray *patternList)
 {
 	TokenSequence source = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
 	TokenSequence_push(kctx, source);
@@ -655,14 +655,19 @@ static void kNameSpace_parseSugarRule2(KonohaContext *kctx, kNameSpace *ns, cons
 	TokenSequence patterns = {ns, source.tokenList, source.endIdx};
 	patterns.TargetPolicy.RemovingIndent = true;
 	TokenSequence_resolved2(kctx, &patterns, NULL, &source, source.beginIdx);
-	kArray_addSyntaxPattern(kctx, ruleList, &patterns);
-	kToken *firstPattern = patterns.tokenList->tokenItems[patterns.beginIdx];
-	if(KW_isPATTERN(firstPattern->resolvedSymbol) && firstPattern->resolvedSyntaxInfo->keyword != KW_ExprPattern) {
-		if(ns->StmtPatternListNULL == NULL) {
-			KINITp(ns, ((kNameSpaceVar*)ns)->StmtPatternListNULL, new_(TokenArray, 0));
+	KLIB kArray_add(kctx, patternList, K_NULLTOKEN);  // delim
+	int firstPatternIdx = kArray_size(patternList);
+	kArray_addSyntaxPattern(kctx, patternList, &patterns);
+	if(firstPatternIdx > kArray_size(patternList)) {
+		kToken *firstPattern = patternList->tokenItems[firstPatternIdx];
+		if(KW_isPATTERN(firstPattern->resolvedSymbol) && firstPattern->stmtEntryKey != KW_ExprPattern) {
+			if(ns->StmtPatternListNULL == NULL) {
+				KINITp(ns, ((kNameSpaceVar*)ns)->StmtPatternListNULL, new_(TokenArray, 0));
+			}
+			DBG_P(">>>>>>>>>> adding PATTERN %d %s%s", firstPatternIdx, firstPattern->resolvedSymbol, PSYM_t(firstPattern->resolvedSymbol));
+			KdumpToken(kctx, firstPattern);
+			KLIB kArray_add(kctx, ns->StmtPatternListNULL, firstPattern);
 		}
-		DBG_P(">>>>>>>>>> adding PATTERN %s%s %s%s", PSYM_t(firstPattern->resolvedSymbol), PSYM_t(firstPattern->resolvedSyntaxInfo->keyword));
-		KLIB kArray_add(kctx, ns->StmtPatternListNULL, firstPattern);
 	}
 	TokenSequence_pop(kctx, source);
 }

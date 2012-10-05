@@ -26,7 +26,7 @@
 // ---------------------------------------------------------------------------
 // Syntax Management
 
-static void kNameSpace_parseSugarRule2(KonohaContext *kctx, kNameSpace *ns, const char *rule, kfileline_t uline, kArray *ruleList);
+static void kNameSpace_parseSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, const char *rule, kfileline_t uline, kArray *ruleList);
 
 static SugarSyntax* kNameSpace_newSyntax(KonohaContext *kctx, kNameSpace *ns, SugarSyntax *parentSyntax, ksymbol_t keyword)
 {
@@ -127,7 +127,7 @@ static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 			}
 			if(syndef->rule != NULL) {
 				KINITp(ns, syn->syntaxRuleNULL, new_(TokenArray, 0));
-				kNameSpace_parseSugarRule2(kctx, ns, syndef->rule, 0, syn->syntaxRuleNULL);
+				kNameSpace_parseSyntaxPattern(kctx, ns, syndef->rule, 0, syn->syntaxRuleNULL);
 			}
 			SugarSyntax_setSugarFunc(kctx, syn, syndef->PatternMatch,   SUGARFUNC_PatternMatch,   &pPatternMatch, &mPatternMatch);
 			SugarSyntax_setSugarFunc(kctx, syn, syndef->ParseExpr,      SUGARFUNC_ParseExpr,      &pParseExpr, &mParseExpr);
