@@ -587,9 +587,10 @@ static kbool_t kArray_addSyntaxPattern(KonohaContext *kctx, kArray *patternList,
 {
 	int i;
 	ksymbol_t stmtEntryKey = 0;
+	kTokenVar *tk, *prevToken = NULL;
 	//KdumpTokenArray(kctx, rules->tokenList, rules->beginIdx, rules->endIdx);
-	for(i = patterns->beginIdx; i < patterns->endIdx; i++) {
-		kTokenVar *tk = patterns->tokenList->tokenVarItems[i];
+	for(i = patterns->beginIdx; i < patterns->endIdx; i++, prevToken = tk) {
+		tk = patterns->tokenList->tokenVarItems[i];
 		if(kToken_isIndent(tk)) continue;
 		DBG_ASSERT(tk->resolvedSyntaxInfo != NULL);
 		if(tk->resolvedSyntaxInfo->keyword == KW_TextPattern) {
@@ -632,10 +633,14 @@ static kbool_t kArray_addSyntaxPattern(KonohaContext *kctx, kArray *patternList,
 			i++;
 			continue;
 		}
+		if(tk->topCharHint == '*' && prevToken != NULL) {
+			kToken_set(MatchPreviousPattern, prevToken, true);
+			tk = NULL;
+			continue;
+		}
 		kToken_printMessage(kctx, tk, ErrTag, "illegal syntax pattern: %s", Token_text(tk));
 		return false;
 	}
-	
 	//KdumpTokenArray(kctx, ruleList, 0, kArray_size(ruleList));
 	return true;
 }

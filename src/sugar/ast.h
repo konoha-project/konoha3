@@ -744,6 +744,7 @@ static int kStmt_matchSyntaxPattern(KonohaContext *kctx, kStmt *stmt, TokenSeque
 //	KdumpTokenArray(kctx, tokens->tokenList, tokens->beginIdx, tokens->endIdx);
 	for(; patternIdx < patterns->endIdx; patternIdx++) {
 		kToken *ruleToken = patterns->tokenList->tokenItems[patternIdx];
+		L_ReDo:;
 //		DBG_P("patternIdx=%d", patternIdx);
 		tokenIdx = kStmt_currentTokenIndex(kctx, stmt, tokens->tokenList, tokenIdx, tokens->endIdx);
 		if(tokenIdx == -1) {
@@ -761,7 +762,7 @@ static int kStmt_matchSyntaxPattern(KonohaContext *kctx, kStmt *stmt, TokenSeque
 			SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), ruleToken->resolvedSymbol);
 			tokens->beginIdx = tokenIdx;
 			tokenIdx = PatternMatch2(kctx, syn, stmt, ruleToken->stmtEntryKey, tokens);
-			if(tokenIdx == -1) {
+			if(tokenIdx == -1 && !kToken_is(MatchPreviousPattern, ruleToken)) {
 				errRuleRef[0] = ruleToken;
 				return -1;
 			}
@@ -774,7 +775,7 @@ static int kStmt_matchSyntaxPattern(KonohaContext *kctx, kStmt *stmt, TokenSeque
 				int next = kStmt_matchSyntaxPattern(kctx, stmt, tokens, &nrule, errRuleRef);
 				errRuleRef[0] = NULL;
 				if(Stmt_isERR(stmt)) return -1;
-				if(next != -1) {
+				if(next != -1 && !kToken_is(MatchPreviousPattern, ruleToken)) {
 					tokenIdx = next;
 				}
 			}
@@ -794,6 +795,9 @@ static int kStmt_matchSyntaxPattern(KonohaContext *kctx, kStmt *stmt, TokenSeque
 				}
 			}
 			tokenIdx++;
+		}
+		if(kToken_is(MatchPreviousPattern, ruleToken)) {
+			goto L_ReDo;
 		}
 	}
 	return tokenIdx;

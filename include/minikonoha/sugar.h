@@ -272,10 +272,11 @@ struct kTokenVar {
 #define kToken_isIndent(T)  ((T)->unresolvedTokenType == TokenType_INDENT && (T)->resolvedSyntaxInfo == NULL)
 
 #define kTokenFlag_StatementSeparator    kObject_Local1
+#define kTokenFlag_MatchPreviousPattern  kObject_Local1
 #define kTokenFlag_RequiredReformat      kObject_Local2
 #define kTokenFlag_BeforeWhiteSpace      kObject_Local3
 
-#define kToken_is(P, o)      (TFLAG_is(uintptr_t,(o)->h.magicflag, kTokenFlag_ ##P))
+#define kToken_is(P, o)      (TFLAG_is(uintptr_t,(o)->h.magicflag, kTokenFlag_##P))
 #define kToken_set(P,o,B)    TFLAG_set(uintptr_t,(o)->h.magicflag, kTokenFlag_##P, B)
 
 typedef struct MacroSet {
