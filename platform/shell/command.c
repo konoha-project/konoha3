@@ -101,7 +101,7 @@ static int getopt_long(int argc, char * const *argv, const char *optstring, cons
 	return -1;
 }
 
-#endif
+#endif /*__GNUC__ */
 
 #ifdef __cplusplus
 extern "C" {
@@ -408,17 +408,18 @@ static void CommandLine_setARGV(KonohaContext *kctx, int argc, char** argv)
 
 static struct option long_options2[] = {
 	/* These options set a flag. */
-	{"verbose", no_argument,       &verbose_debug, 1},
-	{"verbose:gc",    no_argument, &verbose_gc, 1},
-	{"verbose:sugar", no_argument, &verbose_sugar, 1},
-	{"verbose:code",  no_argument, &verbose_code, 1},
-	{"interactive", no_argument,   0, 'i'},
-	{"typecheck",   no_argument,   0, 'c'},
-	{"define",    required_argument, 0, 'D'},
-	{"import",    required_argument, 0, 'I'},
-	{"startwith", required_argument, 0, 'S'},
-	{"test",  required_argument, 0, 'T'},
-	{"test-with",  required_argument, 0, 'T'},
+	{"verbose",       no_argument,       &verbose_debug, 1},
+	{"verbose:gc",    no_argument,       &verbose_gc,    1},
+	{"verbose:sugar", no_argument,       &verbose_sugar, 1},
+	{"verbose:code",  no_argument,       &verbose_code,  1},
+	{"output",        required_argument, 0, 'o'},
+	{"interactive",   no_argument,       0, 'i'},
+	{"typecheck",     no_argument,       0, 'c'},
+	{"define",        required_argument, 0, 'D'},
+	{"import",        required_argument, 0, 'I'},
+	{"startwith",     required_argument, 0, 'S'},
+	{"test",          required_argument, 0, 'T'},
+	{"test-with",     required_argument, 0, 'T'},
 	{"builtin-test",  required_argument, 0, 'B'},
 	{NULL, 0, 0, 0},
 };
@@ -486,6 +487,9 @@ static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc
 
 		case '?':
 			/* getopt_long already printed an error message. */
+			break;
+
+		case 'o':
 			break;
 
 		default:
