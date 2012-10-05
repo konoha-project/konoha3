@@ -12,222 +12,222 @@ float fabs(float v) {
 void test() {
   int a = 1;
   float fa = 3.14159;
-  System.p(0.5 / 0.5 / 0.5); // 2.000000
-  System.p(0.5 / 0.5 / a); // 1.000000
-  System.p(0.5 / 0.5 / fa); // 0.318310
-  System.p(0.5 / 0.5 / fabs(-3.0)); // 0.333333
-  System.p(0.5 / 0.5 / 3.14159); // 0.318310
-  System.p(0.5 / 0.5 / -fa); // -0.318310
-  System.p(0.5 / a / 0.5); // 1.000000
-  System.p(0.5 / a / a); // 0.500000
-  System.p(0.5 / a / fa); // 0.159155
-  System.p(0.5 / a / fabs(-3.0)); // 0.166667
-  System.p(0.5 / a / 3.14159); // 0.159155
-  System.p(0.5 / a / -fa); // -0.159155
-  System.p(0.5 / fa / 0.5); // 0.318310
-  System.p(0.5 / fa / a); // 0.159155
-  System.p(0.5 / fa / fa); // 0.050661
-  System.p(0.5 / fa / fabs(-3.0)); // 0.053052
-  System.p(0.5 / fa / 3.14159); // 0.050661
-  System.p(0.5 / fa / -fa); // -0.050661
-  System.p(0.5 / fabs(-3.0) / 0.5); // 0.333333
-  System.p(0.5 / fabs(-3.0) / a); // 0.166667
-  System.p(0.5 / fabs(-3.0) / fa); // 0.053052
-  System.p(0.5 / fabs(-3.0) / fabs(-3.0)); // 0.055556
-  System.p(0.5 / fabs(-3.0) / 3.14159); // 0.053052
-  System.p(0.5 / fabs(-3.0) / -fa); // -0.053052
-  System.p(0.5 / 3.14159 / 0.5); // 0.318310
-  System.p(0.5 / 3.14159 / a); // 0.159155
-  System.p(0.5 / 3.14159 / fa); // 0.050661
-  System.p(0.5 / 3.14159 / fabs(-3.0)); // 0.053052
-  System.p(0.5 / 3.14159 / 3.14159); // 0.050661
-  System.p(0.5 / 3.14159 / -fa); // -0.050661
-  System.p(0.5 / -fa / 0.5); // -0.318310
-  System.p(0.5 / -fa / a); // -0.159155
-  System.p(0.5 / -fa / fa); // -0.050661
-  System.p(0.5 / -fa / fabs(-3.0)); // -0.053052
-  System.p(0.5 / -fa / 3.14159); // -0.050661
-  System.p(0.5 / -fa / -fa); // 0.050661
-  System.p(a / 0.5 / 0.5); // 4.000000
-  System.p(a / 0.5 / a); // 2.000000
-  System.p(a / 0.5 / fa); // 0.636620
-  System.p(a / 0.5 / fabs(-3.0)); // 0.666667
-  System.p(a / 0.5 / 3.14159); // 0.636620
-  System.p(a / 0.5 / -fa); // -0.636620
-  System.p(a / a / 0.5); // 2.000000
-  System.p(a / a / a); // 1
-  System.p(a / a / fa); // 0.318310
-  System.p(a / a / fabs(-3.0)); // 0.333333
-  System.p(a / a / 3.14159); // 0.318310
-  System.p(a / a / -fa); // -0.318310
-  System.p(a / fa / 0.5); // 0.636620
-  System.p(a / fa / a); // 0.318310
-  System.p(a / fa / fa); // 0.101321
-  System.p(a / fa / fabs(-3.0)); // 0.106103
-  System.p(a / fa / 3.14159); // 0.101321
-  System.p(a / fa / -fa); // -0.101321
-  System.p(a / fabs(-3.0) / 0.5); // 0.666667
-  System.p(a / fabs(-3.0) / a); // 0.333333
-  System.p(a / fabs(-3.0) / fa); // 0.106103
-  System.p(a / fabs(-3.0) / fabs(-3.0)); // 0.111111
-  System.p(a / fabs(-3.0) / 3.14159); // 0.106103
-  System.p(a / fabs(-3.0) / -fa); // -0.106103
-  System.p(a / 3.14159 / 0.5); // 0.636620
-  System.p(a / 3.14159 / a); // 0.318310
-  System.p(a / 3.14159 / fa); // 0.101321
-  System.p(a / 3.14159 / fabs(-3.0)); // 0.106103
-  System.p(a / 3.14159 / 3.14159); // 0.101321
-  System.p(a / 3.14159 / -fa); // -0.101321
-  System.p(a / -fa / 0.5); // -0.636620
-  System.p(a / -fa / a); // -0.318310
-  System.p(a / -fa / fa); // -0.101321
-  System.p(a / -fa / fabs(-3.0)); // -0.106103
-  System.p(a / -fa / 3.14159); // -0.101321
-  System.p(a / -fa / -fa); // 0.101321
-  System.p(fa / 0.5 / 0.5); // 12.566360
-  System.p(fa / 0.5 / a); // 6.283180
-  System.p(fa / 0.5 / fa); // 2.000000
-  System.p(fa / 0.5 / fabs(-3.0)); // 2.094393
-  System.p(fa / 0.5 / 3.14159); // 2.000000
-  System.p(fa / 0.5 / -fa); // -2.000000
-  System.p(fa / a / 0.5); // 6.283180
-  System.p(fa / a / a); // 3.141590
-  System.p(fa / a / fa); // 1.000000
-  System.p(fa / a / fabs(-3.0)); // 1.047197
-  System.p(fa / a / 3.14159); // 1.000000
-  System.p(fa / a / -fa); // -1.000000
-  System.p(fa / fa / 0.5); // 2.000000
-  System.p(fa / fa / a); // 1.000000
-  System.p(fa / fa / fa); // 0.318310
-  System.p(fa / fa / fabs(-3.0)); // 0.333333
-  System.p(fa / fa / 3.14159); // 0.318310
-  System.p(fa / fa / -fa); // -0.318310
-  System.p(fa / fabs(-3.0) / 0.5); // 2.094393
-  System.p(fa / fabs(-3.0) / a); // 1.047197
-  System.p(fa / fabs(-3.0) / fa); // 0.333333
-  System.p(fa / fabs(-3.0) / fabs(-3.0)); // 0.349066
-  System.p(fa / fabs(-3.0) / 3.14159); // 0.333333
-  System.p(fa / fabs(-3.0) / -fa); // -0.333333
-  System.p(fa / 3.14159 / 0.5); // 2.000000
-  System.p(fa / 3.14159 / a); // 1.000000
-  System.p(fa / 3.14159 / fa); // 0.318310
-  System.p(fa / 3.14159 / fabs(-3.0)); // 0.333333
-  System.p(fa / 3.14159 / 3.14159); // 0.318310
-  System.p(fa / 3.14159 / -fa); // -0.318310
-  System.p(fa / -fa / 0.5); // -2.000000
-  System.p(fa / -fa / a); // -1.000000
-  System.p(fa / -fa / fa); // -0.318310
-  System.p(fa / -fa / fabs(-3.0)); // -0.333333
-  System.p(fa / -fa / 3.14159); // -0.318310
-  System.p(fa / -fa / -fa); // 0.318310
-  System.p(fabs(-3.0) / 0.5 / 0.5); // 12.000000
-  System.p(fabs(-3.0) / 0.5 / a); // 6.000000
-  System.p(fabs(-3.0) / 0.5 / fa); // 1.909861
-  System.p(fabs(-3.0) / 0.5 / fabs(-3.0)); // 2.000000
-  System.p(fabs(-3.0) / 0.5 / 3.14159); // 1.909861
-  System.p(fabs(-3.0) / 0.5 / -fa); // -1.909861
-  System.p(fabs(-3.0) / a / 0.5); // 6.000000
-  System.p(fabs(-3.0) / a / a); // 3.000000
-  System.p(fabs(-3.0) / a / fa); // 0.954930
-  System.p(fabs(-3.0) / a / fabs(-3.0)); // 1.000000
-  System.p(fabs(-3.0) / a / 3.14159); // 0.954930
-  System.p(fabs(-3.0) / a / -fa); // -0.954930
-  System.p(fabs(-3.0) / fa / 0.5); // 1.909861
-  System.p(fabs(-3.0) / fa / a); // 0.954930
-  System.p(fabs(-3.0) / fa / fa); // 0.303964
-  System.p(fabs(-3.0) / fa / fabs(-3.0)); // 0.318310
-  System.p(fabs(-3.0) / fa / 3.14159); // 0.303964
-  System.p(fabs(-3.0) / fa / -fa); // -0.303964
-  System.p(fabs(-3.0) / fabs(-3.0) / 0.5); // 2.000000
-  System.p(fabs(-3.0) / fabs(-3.0) / a); // 1.000000
-  System.p(fabs(-3.0) / fabs(-3.0) / fa); // 0.318310
-  System.p(fabs(-3.0) / fabs(-3.0) / fabs(-3.0)); // 0.333333
-  System.p(fabs(-3.0) / fabs(-3.0) / 3.14159); // 0.318310
-  System.p(fabs(-3.0) / fabs(-3.0) / -fa); // -0.318310
-  System.p(fabs(-3.0) / 3.14159 / 0.5); // 1.909861
-  System.p(fabs(-3.0) / 3.14159 / a); // 0.954930
-  System.p(fabs(-3.0) / 3.14159 / fa); // 0.303964
-  System.p(fabs(-3.0) / 3.14159 / fabs(-3.0)); // 0.318310
-  System.p(fabs(-3.0) / 3.14159 / 3.14159); // 0.303964
-  System.p(fabs(-3.0) / 3.14159 / -fa); // -0.303964
-  System.p(fabs(-3.0) / -fa / 0.5); // -1.909861
-  System.p(fabs(-3.0) / -fa / a); // -0.954930
-  System.p(fabs(-3.0) / -fa / fa); // -0.303964
-  System.p(fabs(-3.0) / -fa / fabs(-3.0)); // -0.318310
-  System.p(fabs(-3.0) / -fa / 3.14159); // -0.303964
-  System.p(fabs(-3.0) / -fa / -fa); // 0.303964
-  System.p(3.14159 / 0.5 / 0.5); // 12.566360
-  System.p(3.14159 / 0.5 / a); // 6.283180
-  System.p(3.14159 / 0.5 / fa); // 2.000000
-  System.p(3.14159 / 0.5 / fabs(-3.0)); // 2.094393
-  System.p(3.14159 / 0.5 / 3.14159); // 2.000000
-  System.p(3.14159 / 0.5 / -fa); // -2.000000
-  System.p(3.14159 / a / 0.5); // 6.283180
-  System.p(3.14159 / a / a); // 3.141590
-  System.p(3.14159 / a / fa); // 1.000000
-  System.p(3.14159 / a / fabs(-3.0)); // 1.047197
-  System.p(3.14159 / a / 3.14159); // 1.000000
-  System.p(3.14159 / a / -fa); // -1.000000
-  System.p(3.14159 / fa / 0.5); // 2.000000
-  System.p(3.14159 / fa / a); // 1.000000
-  System.p(3.14159 / fa / fa); // 0.318310
-  System.p(3.14159 / fa / fabs(-3.0)); // 0.333333
-  System.p(3.14159 / fa / 3.14159); // 0.318310
-  System.p(3.14159 / fa / -fa); // -0.318310
-  System.p(3.14159 / fabs(-3.0) / 0.5); // 2.094393
-  System.p(3.14159 / fabs(-3.0) / a); // 1.047197
-  System.p(3.14159 / fabs(-3.0) / fa); // 0.333333
-  System.p(3.14159 / fabs(-3.0) / fabs(-3.0)); // 0.349066
-  System.p(3.14159 / fabs(-3.0) / 3.14159); // 0.333333
-  System.p(3.14159 / fabs(-3.0) / -fa); // -0.333333
-  System.p(3.14159 / 3.14159 / 0.5); // 2.000000
-  System.p(3.14159 / 3.14159 / a); // 1.000000
-  System.p(3.14159 / 3.14159 / fa); // 0.318310
-  System.p(3.14159 / 3.14159 / fabs(-3.0)); // 0.333333
-  System.p(3.14159 / 3.14159 / 3.14159); // 0.318310
-  System.p(3.14159 / 3.14159 / -fa); // -0.318310
-  System.p(3.14159 / -fa / 0.5); // -2.000000
-  System.p(3.14159 / -fa / a); // -1.000000
-  System.p(3.14159 / -fa / fa); // -0.318310
-  System.p(3.14159 / -fa / fabs(-3.0)); // -0.333333
-  System.p(3.14159 / -fa / 3.14159); // -0.318310
-  System.p(3.14159 / -fa / -fa); // 0.318310
-  System.p(-fa / 0.5 / 0.5); // -12.566360
-  System.p(-fa / 0.5 / a); // -6.283180
-  System.p(-fa / 0.5 / fa); // -2.000000
-  System.p(-fa / 0.5 / fabs(-3.0)); // -2.094393
-  System.p(-fa / 0.5 / 3.14159); // -2.000000
-  System.p(-fa / 0.5 / -fa); // 2.000000
-  System.p(-fa / a / 0.5); // -6.283180
-  System.p(-fa / a / a); // -3.141590
-  System.p(-fa / a / fa); // -1.000000
-  System.p(-fa / a / fabs(-3.0)); // -1.047197
-  System.p(-fa / a / 3.14159); // -1.000000
-  System.p(-fa / a / -fa); // 1.000000
-  System.p(-fa / fa / 0.5); // -2.000000
-  System.p(-fa / fa / a); // -1.000000
-  System.p(-fa / fa / fa); // -0.318310
-  System.p(-fa / fa / fabs(-3.0)); // -0.333333
-  System.p(-fa / fa / 3.14159); // -0.318310
-  System.p(-fa / fa / -fa); // 0.318310
-  System.p(-fa / fabs(-3.0) / 0.5); // -2.094393
-  System.p(-fa / fabs(-3.0) / a); // -1.047197
-  System.p(-fa / fabs(-3.0) / fa); // -0.333333
-  System.p(-fa / fabs(-3.0) / fabs(-3.0)); // -0.349066
-  System.p(-fa / fabs(-3.0) / 3.14159); // -0.333333
-  System.p(-fa / fabs(-3.0) / -fa); // 0.333333
-  System.p(-fa / 3.14159 / 0.5); // -2.000000
-  System.p(-fa / 3.14159 / a); // -1.000000
-  System.p(-fa / 3.14159 / fa); // -0.318310
-  System.p(-fa / 3.14159 / fabs(-3.0)); // -0.333333
-  System.p(-fa / 3.14159 / 3.14159); // -0.318310
-  System.p(-fa / 3.14159 / -fa); // 0.318310
-  System.p(-fa / -fa / 0.5); // 2.000000
-  System.p(-fa / -fa / a); // 1.000000
-  System.p(-fa / -fa / fa); // 0.318310
-  System.p(-fa / -fa / fabs(-3.0)); // 0.333333
-  System.p(-fa / -fa / 3.14159); // 0.318310
-  System.p(-fa / -fa / -fa); // -0.318310
+  assert(0.5 / 0.5 / 0.5 - (2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(0.5 / 0.5 / a - (1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(0.5 / 0.5 / fa - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(0.5 / 0.5 / fabs(-3.0) - (0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(0.5 / 0.5 / 3.14159 - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(0.5 / 0.5 / -fa - (-0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(0.5 / a / 0.5 - (1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(0.5 / a / a - (0.500000000000000) <= FLOAT_EPSILON*10);
+  assert(0.5 / a / fa - (0.159155077524438) <= FLOAT_EPSILON*10);
+  assert(0.5 / a / fabs(-3.0) - (0.166666666666667) <= FLOAT_EPSILON*10);
+  assert(0.5 / a / 3.14159 - (0.159155077524438) <= FLOAT_EPSILON*10);
+  assert(0.5 / a / -fa - (-0.159155077524438) <= FLOAT_EPSILON*10);
+  assert(0.5 / fa / 0.5 - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(0.5 / fa / a - (0.159155077524438) <= FLOAT_EPSILON*10);
+  assert(0.5 / fa / fa - (0.050660677403620) <= FLOAT_EPSILON*10);
+  assert(0.5 / fa / fabs(-3.0) - (0.053051692508146) <= FLOAT_EPSILON*10);
+  assert(0.5 / fa / 3.14159 - (0.050660677403620) <= FLOAT_EPSILON*10);
+  assert(0.5 / fa / -fa - (-0.050660677403620) <= FLOAT_EPSILON*10);
+  assert(0.5 / fabs(-3.0) / 0.5 - (0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(0.5 / fabs(-3.0) / a - (0.166666666666667) <= FLOAT_EPSILON*10);
+  assert(0.5 / fabs(-3.0) / fa - (0.053051692508146) <= FLOAT_EPSILON*10);
+  assert(0.5 / fabs(-3.0) / fabs(-3.0) - (0.055555555555556) <= FLOAT_EPSILON*10);
+  assert(0.5 / fabs(-3.0) / 3.14159 - (0.053051692508146) <= FLOAT_EPSILON*10);
+  assert(0.5 / fabs(-3.0) / -fa - (-0.053051692508146) <= FLOAT_EPSILON*10);
+  assert(0.5 / 3.14159 / 0.5 - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(0.5 / 3.14159 / a - (0.159155077524438) <= FLOAT_EPSILON*10);
+  assert(0.5 / 3.14159 / fa - (0.050660677403620) <= FLOAT_EPSILON*10);
+  assert(0.5 / 3.14159 / fabs(-3.0) - (0.053051692508146) <= FLOAT_EPSILON*10);
+  assert(0.5 / 3.14159 / 3.14159 - (0.050660677403620) <= FLOAT_EPSILON*10);
+  assert(0.5 / 3.14159 / -fa - (-0.050660677403620) <= FLOAT_EPSILON*10);
+  assert(0.5 / -fa / 0.5 - (-0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(0.5 / -fa / a - (-0.159155077524438) <= FLOAT_EPSILON*10);
+  assert(0.5 / -fa / fa - (-0.050660677403620) <= FLOAT_EPSILON*10);
+  assert(0.5 / -fa / fabs(-3.0) - (-0.053051692508146) <= FLOAT_EPSILON*10);
+  assert(0.5 / -fa / 3.14159 - (-0.050660677403620) <= FLOAT_EPSILON*10);
+  assert(0.5 / -fa / -fa - (0.050660677403620) <= FLOAT_EPSILON*10);
+  assert(a / 0.5 / 0.5 - (4.000000000000000) <= FLOAT_EPSILON*10);
+  assert(a / 0.5 / a - (2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(a / 0.5 / fa - (0.636620310097753) <= FLOAT_EPSILON*10);
+  assert(a / 0.5 / fabs(-3.0) - (0.666666666666667) <= FLOAT_EPSILON*10);
+  assert(a / 0.5 / 3.14159 - (0.636620310097753) <= FLOAT_EPSILON*10);
+  assert(a / 0.5 / -fa - (-0.636620310097753) <= FLOAT_EPSILON*10);
+  assert(a / a / 0.5 - (2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(a / a / a - (1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(a / a / fa - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(a / a / fabs(-3.0) - (0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(a / a / 3.14159 - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(a / a / -fa - (-0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(a / fa / 0.5 - (0.636620310097753) <= FLOAT_EPSILON*10);
+  assert(a / fa / a - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(a / fa / fa - (0.101321354807240) <= FLOAT_EPSILON*10);
+  assert(a / fa / fabs(-3.0) - (0.106103385016292) <= FLOAT_EPSILON*10);
+  assert(a / fa / 3.14159 - (0.101321354807240) <= FLOAT_EPSILON*10);
+  assert(a / fa / -fa - (-0.101321354807240) <= FLOAT_EPSILON*10);
+  assert(a / fabs(-3.0) / 0.5 - (0.666666666666667) <= FLOAT_EPSILON*10);
+  assert(a / fabs(-3.0) / a - (0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(a / fabs(-3.0) / fa - (0.106103385016292) <= FLOAT_EPSILON*10);
+  assert(a / fabs(-3.0) / fabs(-3.0) - (0.111111111111111) <= FLOAT_EPSILON*10);
+  assert(a / fabs(-3.0) / 3.14159 - (0.106103385016292) <= FLOAT_EPSILON*10);
+  assert(a / fabs(-3.0) / -fa - (-0.106103385016292) <= FLOAT_EPSILON*10);
+  assert(a / 3.14159 / 0.5 - (0.636620310097753) <= FLOAT_EPSILON*10);
+  assert(a / 3.14159 / a - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(a / 3.14159 / fa - (0.101321354807240) <= FLOAT_EPSILON*10);
+  assert(a / 3.14159 / fabs(-3.0) - (0.106103385016292) <= FLOAT_EPSILON*10);
+  assert(a / 3.14159 / 3.14159 - (0.101321354807240) <= FLOAT_EPSILON*10);
+  assert(a / 3.14159 / -fa - (-0.101321354807240) <= FLOAT_EPSILON*10);
+  assert(a / -fa / 0.5 - (-0.636620310097753) <= FLOAT_EPSILON*10);
+  assert(a / -fa / a - (-0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(a / -fa / fa - (-0.101321354807240) <= FLOAT_EPSILON*10);
+  assert(a / -fa / fabs(-3.0) - (-0.106103385016292) <= FLOAT_EPSILON*10);
+  assert(a / -fa / 3.14159 - (-0.101321354807240) <= FLOAT_EPSILON*10);
+  assert(a / -fa / -fa - (0.101321354807240) <= FLOAT_EPSILON*10);
+  assert(fa / 0.5 / 0.5 - (12.566360000000000) <= FLOAT_EPSILON*10);
+  assert(fa / 0.5 / a - (6.283180000000000) <= FLOAT_EPSILON*10);
+  assert(fa / 0.5 / fa - (2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(fa / 0.5 / fabs(-3.0) - (2.094393333333333) <= FLOAT_EPSILON*10);
+  assert(fa / 0.5 / 3.14159 - (2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(fa / 0.5 / -fa - (-2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(fa / a / 0.5 - (6.283180000000000) <= FLOAT_EPSILON*10);
+  assert(fa / a / a - (3.141590000000000) <= FLOAT_EPSILON*10);
+  assert(fa / a / fa - (1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(fa / a / fabs(-3.0) - (1.047196666666667) <= FLOAT_EPSILON*10);
+  assert(fa / a / 3.14159 - (1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(fa / a / -fa - (-1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(fa / fa / 0.5 - (2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(fa / fa / a - (1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(fa / fa / fa - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(fa / fa / fabs(-3.0) - (0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(fa / fa / 3.14159 - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(fa / fa / -fa - (-0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(fa / fabs(-3.0) / 0.5 - (2.094393333333333) <= FLOAT_EPSILON*10);
+  assert(fa / fabs(-3.0) / a - (1.047196666666667) <= FLOAT_EPSILON*10);
+  assert(fa / fabs(-3.0) / fa - (0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(fa / fabs(-3.0) / fabs(-3.0) - (0.349065555555556) <= FLOAT_EPSILON*10);
+  assert(fa / fabs(-3.0) / 3.14159 - (0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(fa / fabs(-3.0) / -fa - (-0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(fa / 3.14159 / 0.5 - (2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(fa / 3.14159 / a - (1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(fa / 3.14159 / fa - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(fa / 3.14159 / fabs(-3.0) - (0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(fa / 3.14159 / 3.14159 - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(fa / 3.14159 / -fa - (-0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(fa / -fa / 0.5 - (-2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(fa / -fa / a - (-1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(fa / -fa / fa - (-0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(fa / -fa / fabs(-3.0) - (-0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(fa / -fa / 3.14159 - (-0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(fa / -fa / -fa - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / 0.5 / 0.5 - (12.000000000000000) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / 0.5 / a - (6.000000000000000) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / 0.5 / fa - (1.909860930293259) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / 0.5 / fabs(-3.0) - (2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / 0.5 / 3.14159 - (1.909860930293259) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / 0.5 / -fa - (-1.909860930293259) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / a / 0.5 - (6.000000000000000) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / a / a - (3.000000000000000) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / a / fa - (0.954930465146630) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / a / fabs(-3.0) - (1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / a / 3.14159 - (0.954930465146630) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / a / -fa - (-0.954930465146630) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / fa / 0.5 - (1.909860930293259) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / fa / a - (0.954930465146630) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / fa / fa - (0.303964064421719) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / fa / fabs(-3.0) - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / fa / 3.14159 - (0.303964064421719) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / fa / -fa - (-0.303964064421719) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / fabs(-3.0) / 0.5 - (2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / fabs(-3.0) / a - (1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / fabs(-3.0) / fa - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / fabs(-3.0) / fabs(-3.0) - (0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / fabs(-3.0) / 3.14159 - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / fabs(-3.0) / -fa - (-0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / 3.14159 / 0.5 - (1.909860930293259) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / 3.14159 / a - (0.954930465146630) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / 3.14159 / fa - (0.303964064421719) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / 3.14159 / fabs(-3.0) - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / 3.14159 / 3.14159 - (0.303964064421719) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / 3.14159 / -fa - (-0.303964064421719) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / -fa / 0.5 - (-1.909860930293259) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / -fa / a - (-0.954930465146630) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / -fa / fa - (-0.303964064421719) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / -fa / fabs(-3.0) - (-0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / -fa / 3.14159 - (-0.303964064421719) <= FLOAT_EPSILON*10);
+  assert(fabs(-3.0) / -fa / -fa - (0.303964064421719) <= FLOAT_EPSILON*10);
+  assert(3.14159 / 0.5 / 0.5 - (12.566360000000000) <= FLOAT_EPSILON*10);
+  assert(3.14159 / 0.5 / a - (6.283180000000000) <= FLOAT_EPSILON*10);
+  assert(3.14159 / 0.5 / fa - (2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(3.14159 / 0.5 / fabs(-3.0) - (2.094393333333333) <= FLOAT_EPSILON*10);
+  assert(3.14159 / 0.5 / 3.14159 - (2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(3.14159 / 0.5 / -fa - (-2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(3.14159 / a / 0.5 - (6.283180000000000) <= FLOAT_EPSILON*10);
+  assert(3.14159 / a / a - (3.141590000000000) <= FLOAT_EPSILON*10);
+  assert(3.14159 / a / fa - (1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(3.14159 / a / fabs(-3.0) - (1.047196666666667) <= FLOAT_EPSILON*10);
+  assert(3.14159 / a / 3.14159 - (1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(3.14159 / a / -fa - (-1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(3.14159 / fa / 0.5 - (2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(3.14159 / fa / a - (1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(3.14159 / fa / fa - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(3.14159 / fa / fabs(-3.0) - (0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(3.14159 / fa / 3.14159 - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(3.14159 / fa / -fa - (-0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(3.14159 / fabs(-3.0) / 0.5 - (2.094393333333333) <= FLOAT_EPSILON*10);
+  assert(3.14159 / fabs(-3.0) / a - (1.047196666666667) <= FLOAT_EPSILON*10);
+  assert(3.14159 / fabs(-3.0) / fa - (0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(3.14159 / fabs(-3.0) / fabs(-3.0) - (0.349065555555556) <= FLOAT_EPSILON*10);
+  assert(3.14159 / fabs(-3.0) / 3.14159 - (0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(3.14159 / fabs(-3.0) / -fa - (-0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(3.14159 / 3.14159 / 0.5 - (2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(3.14159 / 3.14159 / a - (1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(3.14159 / 3.14159 / fa - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(3.14159 / 3.14159 / fabs(-3.0) - (0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(3.14159 / 3.14159 / 3.14159 - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(3.14159 / 3.14159 / -fa - (-0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(3.14159 / -fa / 0.5 - (-2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(3.14159 / -fa / a - (-1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(3.14159 / -fa / fa - (-0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(3.14159 / -fa / fabs(-3.0) - (-0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(3.14159 / -fa / 3.14159 - (-0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(3.14159 / -fa / -fa - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(-fa / 0.5 / 0.5 - (-12.566360000000000) <= FLOAT_EPSILON*10);
+  assert(-fa / 0.5 / a - (-6.283180000000000) <= FLOAT_EPSILON*10);
+  assert(-fa / 0.5 / fa - (-2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(-fa / 0.5 / fabs(-3.0) - (-2.094393333333333) <= FLOAT_EPSILON*10);
+  assert(-fa / 0.5 / 3.14159 - (-2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(-fa / 0.5 / -fa - (2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(-fa / a / 0.5 - (-6.283180000000000) <= FLOAT_EPSILON*10);
+  assert(-fa / a / a - (-3.141590000000000) <= FLOAT_EPSILON*10);
+  assert(-fa / a / fa - (-1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(-fa / a / fabs(-3.0) - (-1.047196666666667) <= FLOAT_EPSILON*10);
+  assert(-fa / a / 3.14159 - (-1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(-fa / a / -fa - (1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(-fa / fa / 0.5 - (-2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(-fa / fa / a - (-1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(-fa / fa / fa - (-0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(-fa / fa / fabs(-3.0) - (-0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(-fa / fa / 3.14159 - (-0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(-fa / fa / -fa - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(-fa / fabs(-3.0) / 0.5 - (-2.094393333333333) <= FLOAT_EPSILON*10);
+  assert(-fa / fabs(-3.0) / a - (-1.047196666666667) <= FLOAT_EPSILON*10);
+  assert(-fa / fabs(-3.0) / fa - (-0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(-fa / fabs(-3.0) / fabs(-3.0) - (-0.349065555555556) <= FLOAT_EPSILON*10);
+  assert(-fa / fabs(-3.0) / 3.14159 - (-0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(-fa / fabs(-3.0) / -fa - (0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(-fa / 3.14159 / 0.5 - (-2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(-fa / 3.14159 / a - (-1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(-fa / 3.14159 / fa - (-0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(-fa / 3.14159 / fabs(-3.0) - (-0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(-fa / 3.14159 / 3.14159 - (-0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(-fa / 3.14159 / -fa - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(-fa / -fa / 0.5 - (2.000000000000000) <= FLOAT_EPSILON*10);
+  assert(-fa / -fa / a - (1.000000000000000) <= FLOAT_EPSILON*10);
+  assert(-fa / -fa / fa - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(-fa / -fa / fabs(-3.0) - (0.333333333333333) <= FLOAT_EPSILON*10);
+  assert(-fa / -fa / 3.14159 - (0.318310155048877) <= FLOAT_EPSILON*10);
+  assert(-fa / -fa / -fa - (-0.318310155048877) <= FLOAT_EPSILON*10);
 }
 
 test();

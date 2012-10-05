@@ -588,16 +588,12 @@ static void *call_malloc_aligned(size_t size, size_t align)
 	(void)ret;
 #elif defined(HAVE_MEMALIGN)
 	block = memalign(align, size);
-	if (unlikely(block == NULL))
-		goto L_OutOfMemory;
 #elif defined(K_USING_WINDOWS_)
 	block = VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
-	if (unlikely(block == NULL))
-		goto L_OutOfMemory;
 #else
 	block = malloc(size + align);
 	if (unlikely(block == NULL))
-		goto L_OutOfMemory;
+		return NULL;
 	if ((uintptr_t)block % align != 0) {
 		char *t2 = (char*)((((uintptr_t)block / align) + 1) * align);
 		void **p = (void**)(t2 + size);
@@ -1178,11 +1174,12 @@ static void HeapManager_expandHeap(HeapManager *mng, size_t list_size)
 	Segment *segment_pool;
 
 	size_t heap_size = list_size * SEGMENT_SIZE;
-	void *managed_heap = call_malloc_aligned(heap_size, SEGMENT_SIZE);
-	void *managed_heap_end = (char*)managed_heap + heap_size;
-	if (!managed_heap) {
+	void *managed_heap, *managed_heap_end;
+	managed_heap     = call_malloc_aligned(heap_size, SEGMENT_SIZE);
+	if (managed_heap == NULL) {
 		THROW_OutOfMemory(mng->kctx, heap_size);
 	}
+	managed_heap_end = (char*)managed_heap + heap_size;
 	do_bzero(managed_heap, heap_size);
 #if defined(GCDEBUG) && defined(GCSTAT)
 	global_gc_stat.managed_heap = (AllocationBlock*) managed_heap;

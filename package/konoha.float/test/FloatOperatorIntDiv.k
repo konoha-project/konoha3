@@ -1,17 +1,12 @@
-/* this test is written by shinpei nakata */
-
-void global_setup() { 
-	import("konoha.float")
-}
-global_setup();
+import("konoha.float")
 
 void float_operator_intDiv_IntDiv() { 
 	int i1 = 1;
 	float f2500000 = 2.500000;
-	System.p( 1  /  2.500000 );
-	System.p( 1  /  i1 );
-	System.p( i1  /  1 );
-	System.p( i1  /  f2500000 );
+	assert( 1  /  2.500000  - (4.000000e-01) <= FLOAT_EPSILON*10);
+	assert( 1  /  i1  - (1) <= FLOAT_EPSILON*10);
+	assert( i1  /  1  - (1) <= FLOAT_EPSILON*10);
+	assert( i1  /  f2500000  - (4.000000e-01) <= FLOAT_EPSILON*10);
 }
-float_operator_intDiv_IntDiv();
 
+float_operator_intDiv_IntDiv();

@@ -230,7 +230,7 @@ typedef enum {
 	Precedence_CStyleOR       = 1300,
 	Precedence_CStyleTRINARY  = 1400,  /* ? : */
 	Precedence_CStyleASSIGN   = 1500,
-	Precedence_CStyleCOMMA    = 1600,
+	Precedence_CStyleCOMMA    = 1600
 } Precedence;
 
 typedef struct KDEFINE_SYNTAX {
