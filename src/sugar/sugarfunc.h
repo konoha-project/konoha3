@@ -145,24 +145,30 @@ static KMETHOD PatternMatch_Block(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static KMETHOD PatternMatch_Toks(KonohaContext *kctx, KonohaStack *sfp)
+//static KMETHOD PatternMatch_Toks(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
+//	endIdx = TokenUtils_findEndOfStatement(kctx, tokenList, beginIdx, endIdx, kNameSpace_isAllowed(NoSemiColon, Stmt_nameSpace(stmt)));
+//	if(beginIdx < endIdx) {
+//		kArray *a = new_(TokenArray, (intptr_t)(endIdx - beginIdx));
+//		for(; beginIdx < endIdx; beginIdx++) {
+//			kToken *tk = tokenList->tokenItems[beginIdx];
+//			if(kToken_isIndent(tk)) continue;
+//			KLIB kArray_add(kctx, a, tk);
+//		}
+//		kStmt_addParsedObject(kctx, stmt, name, UPCAST(a));
+//		RETURNi_(endIdx);
+//	}
+//	RETURNi_(-1);
+//}
+
+static KMETHOD PatternMatch_Token(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
-	endIdx = TokenUtils_findEndOfStatement(kctx, tokenList, beginIdx, endIdx, kNameSpace_isAllowed(NoSemiColon, Stmt_nameSpace(stmt)));
-	if(beginIdx < endIdx) {
-		kArray *a = new_(TokenArray, (intptr_t)(endIdx - beginIdx));
-		for(; beginIdx < endIdx; beginIdx++) {
-			kToken *tk = tokenList->tokenItems[beginIdx];
-			if(kToken_isIndent(tk)) continue;
-			KLIB kArray_add(kctx, a, tk);
-		}
-		kStmt_addParsedObject(kctx, stmt, name, UPCAST(a));
-		RETURNi_(endIdx);
-	}
-	RETURNi_(-1);
+	DBG_ASSERT(beginIdx < endIdx);
+	kStmt_addParsedObject(kctx, stmt, name, UPCAST(tokenList->tokenItems[beginIdx]));
+	RETURNi_(beginIdx+1);
 }
-
-
 
 static KMETHOD PatternMatch_TypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -1258,7 +1264,7 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ GROUP(Brace),  }, // KW_BraceGroup
 		{ PATTERN(Block), 0, NULL, 0, 0, PatternMatch_Block, NULL, NULL, NULL, ExprTyCheck_Block, },
 		{ PATTERN(Param), 0, NULL, 0, 0, PatternMatch_Param, ParseExpr_Op, StmtTyCheck_ParamsDecl, NULL, ExprTyCheck_MethodCall,},
-		{ PATTERN(Token), 0, NULL, 0, 0, PatternMatch_Toks, },
+		{ PATTERN(Token), 0, NULL, 0, 0, PatternMatch_Token/*PatternMatch_Toks*/, },
 		{ TOKEN(DOT), 0, NULL, Precedence_CStyleCALL, 0, NULL, ParseExpr_DOT, },
 		{ TOKEN(DIV), 0, NULL, Precedence_CStyleMUL, },
 		{ TOKEN(MOD), 0, NULL, Precedence_CStyleMUL, },
