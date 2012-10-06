@@ -28,9 +28,6 @@
 /* build revision */
 #cmakedefine K_REVISION  "${K_REVISION}"
 
-/* no debug opt */
-#cmakedefine K_NODEBUG  ${K_NODEBUG}
-
 /* dll extension */
 #cmakedefine K_OSDLLEXT "${K_OSDLLEXT}"
 
