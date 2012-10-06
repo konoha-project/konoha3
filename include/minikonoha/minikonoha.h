@@ -549,7 +549,7 @@ typedef struct KUtilsHashMapEntry {
 		uintptr_t        unboxKey;
 		kString         *stringKey;
 		kParam          *paramKey;
-		void            *pkey;
+		void            *ptrKey;
 	};
 	union {
 		kObject         *objectValue;
@@ -560,8 +560,8 @@ typedef struct KUtilsHashMapEntry {
 
 typedef struct KUtilsHashMap KUtilsHashMap;
 struct KUtilsHashMap {
-	KUtilsHashMapEntry *arena;
-	KUtilsHashMapEntry *unused;
+	KUtilsHashMapEntry  *arena;
+	KUtilsHashMapEntry  *unused;
 	KUtilsHashMapEntry **hentry;
 	size_t arenasize;
 	size_t size;

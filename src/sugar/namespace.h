@@ -39,12 +39,10 @@ static SugarSyntax* kNameSpace_newSyntax(KonohaContext *kctx, kNameSpace *ns, Su
 	syn->parentSyntaxNULL = parentSyntax;
 	syn->keyword          = keyword;
 	if(parentSyntax != NULL) {
-//		kreportf(DebugTag, 0, "redefining syntax %s%s on NameSpace=%p, syntax=%p, parent=%p", PSYM_t(keyword), ns, syn, parentSyntax);
 		syn->precedence_op1 = parentSyntax->precedence_op1;
 		syn->precedence_op2 = parentSyntax->precedence_op2;
 	}
 	else {
-//		kreportf(DebugTag, 0, "new syntax %s%s on NameSpace=%p, syntax=%p, parent=%p", PSYM_t(keyword), ns, syn, parentSyntax);
 		syn->precedence_op1 = 0;
 		syn->precedence_op2 = 0;
 	}
