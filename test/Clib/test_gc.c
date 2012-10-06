@@ -103,6 +103,74 @@ void test_gc(KonohaContext *kctx)
     }
 }
 
+#ifdef _WIN64
+#ifdef _MSC_VER
+#include <intrin.h>
+static uint32_t CTZ(uint32_t x)
+{
+	unsigned long r = 0;
+	_BitScanForward(&r, x);
+	return r;
+}
+static uint32_t CLZ(uint32_t x)
+{
+	unsigned long r = 0;
+	_BitScanReverse(&r, x);
+	return 63 - r;
+}
+static uint32_t FFS(uint32_t x)
+{
+	if(x == 0) return 0;
+	return CTZ(x) + 1;
+}
+#else /* defined(_MSC_VER) */
+#define FFS(n) __builtin_ffsll(n)
+#define CLZ(n) __builtin_clzll(n)
+#define CTZ(x) __builtin_ctzll(x)
+#endif /* defined(_MSC_VER) */
+#else /* defined(_WIN64) */
+#define FFS(n) __builtin_ffsl(n)
+#define CLZ(n) __builtin_clzl(n)
+#define CTZ(x) __builtin_ctzl(x)
+#endif
+
+static uintptr_t myffs(uintptr_t val)
+{
+    uintptr_t bit;
+
+    if (val == 0)
+        return 0;
+
+    for (bit = 1; !(val & 1); bit++)
+        val >>= 1;
+
+    return bit;
+}
+
+static void test_bitops()
+{
+    static const uintptr_t test_data[] = {
+        0, 1, 2, 3, 4, 5, 7, 13,
+        100, 108, 120, 128, 129, 219, 250, 256,
+        257, 300, 420, 510, 512, 513, 1000, 1023,
+        1024, 2040, 2048, 2049, 4095, 4096, 4097, 8190,
+        8192, 8193, 16383, 16384, 16385, 32767, 32768, 32769
+    };
+
+    static const uintptr_t clz_test[] = {
+        63, 63, 62, 62, 61, 61, 61, 60,
+        57, 57, 57, 56, 56, 56, 56, 55,
+        55, 55, 55, 55, 54, 54, 54, 54,
+        53, 53, 52, 52, 52, 51, 51, 51,
+        50, 50, 50, 49, 49, 49, 48, 48
+    };
+    uintptr_t i;
+    for (i = 0; i < sizeof(test_data)/sizeof(uintptr_t); i++) {
+        assert(CLZ(test_data[i]) == clz_test[i]);
+        assert(FFS(test_data[i]) == myffs(test_data[i]));
+    }
+}
+
 int main(int argc, const char *argv[])
 {
     int ret = 0;
@@ -111,6 +179,7 @@ int main(int argc, const char *argv[])
     konoha_close(konoha);
     assert(__free__ == __init__);
     fprintf(stderr, "alloced_object_count = %d, freed_object_count=%d\n", __init__, __free__);
+    test_bitops();
     return ret;
 }
 
