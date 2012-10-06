@@ -2,4 +2,5 @@
 
 import("sugar");
 
-sugar "while" "(" $Expr ")" $Block;
+syntax "while" "(" $Expr ")" 
+	$Block;
