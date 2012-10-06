@@ -1140,8 +1140,8 @@ static const char* MethodFlagData[] = {
 #define kMethod_Override             ((uintptr_t)(1<<17))
 #define kMethod_DynamicCall          ((uintptr_t)(1<<18))
 
-#define Method_is(P, MTD)            (TFLAG_is(uintptr_t, (MTD)->flag, kMethod_##P))
-#define Method_set(P, MTD, B)        TFLAG_set(uintptr_t, ((kMethodVar*)MTD)->flag, kMethod_##P, B)
+#define kMethod_is(P, MTD)            (TFLAG_is(uintptr_t, (MTD)->flag, kMethod_##P))
+#define kMethod_set(P, MTD, B)        TFLAG_set(uintptr_t, ((kMethodVar*)MTD)->flag, kMethod_##P, B)
 
 #define Method_isPublic(o)       (TFLAG_is(uintptr_t, (o)->flag, kMethod_Public))
 //#define Method_setPublic(o,B)  TFLAG_set(uintptr_t, (o)->flag, kMethod_Public,B)
@@ -1708,10 +1708,12 @@ typedef struct {
 #define DBG_ASSERT(a)       assert(a)
 #define TODO_ASSERT(a)      assert(a)
 #endif /* _MSC_VER */
+#define SAFECHECK(T)        (T)
 #define DBG_P(fmt, ...)     PLATAPI debugPrintf(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__)
 #define DBG_ABORT(fmt, ...) PLATAPI debugPrintf(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__); PLATAPI exit_i(EXIT_FAILURE)
 #define DUMP_P(fmt, ...)    PLATAPI printf_i(fmt, ## __VA_ARGS__)
 #else
+#define SAFECHECK(T)        (1)
 #define KNH_ASSERT(a)
 #define DBG_ASSERT(a)
 #define TODO_ASSERT(a)

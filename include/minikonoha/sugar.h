@@ -175,12 +175,16 @@ struct TokenizerEnv {
 typedef const struct SugarSyntaxVar   SugarSyntax;
 typedef struct SugarSyntaxVar         SugarSyntaxVar;
 
-#define SUGARFUNC_PatternMatch   0
-#define SUGARFUNC_ParseExpr      1
-#define SUGARFUNC_TopStmtTyCheck 2
-#define SUGARFUNC_StmtTyCheck    3
-#define SUGARFUNC_ExprTyCheck    4
-#define SUGARFUNC_SIZE           5
+typedef enum {
+	SugarFunc_PatternMatch   = 0,
+	SugarFunc_ParseExpr      = 1,
+	SugarFunc_TopStmtTyCheck = 2,
+	SugarFunc_StmtTyCheck    = 3,
+	SugarFunc_ExprTyCheck    = 4,
+	SugarFunc_SIZE           = 5,
+} SugerFunc;
+
+//#define SugarFunc_SIZE           5
 
 #define SYNFLAG_Macro               ((kshortflag_t)1)
 
@@ -196,8 +200,8 @@ struct SugarSyntaxVar {
 	const struct SugarSyntaxVar      *parentSyntaxNULL;
 	kArray                           *SyntaxPatternListNULL;
 	union {
-		kFunc                        *sugarFuncTable[SUGARFUNC_SIZE];
-		kArray                       *sugarFuncListTable[SUGARFUNC_SIZE];
+		kFunc                        *sugarFuncTable[SugarFunc_SIZE];
+		kArray                       *sugarFuncListTable[SugarFunc_SIZE];
 	};
 	// binary
 	kshort_t precedence_op2;        kshort_t precedence_op1;

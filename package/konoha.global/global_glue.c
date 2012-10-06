@@ -134,7 +134,7 @@ static KMETHOD StmtTyCheck_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t global_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KImportPackage(ns, "konoha.field", pline);
-	SUGAR kNameSpace_setSugarFunc(kctx, ns, KW_TypeDeclPattern, SUGARFUNC_TopStmtTyCheck, new_SugarFunc(StmtTyCheck_GlobalTypeDecl));
+	SUGAR kNameSpace_setSugarFunc(kctx, ns, KW_TypeDeclPattern, SugarFunc_TopStmtTyCheck, new_SugarFunc(StmtTyCheck_GlobalTypeDecl));
 	return kNameSpace_initGlobalObject(kctx, ns, pline);
 }
 

@@ -156,7 +156,7 @@ static KMETHOD NameSpace_compileAllDefinedMethods(KonohaContext *kctx, KonohaSta
 static KMETHOD NameSpace_addPatternMatch(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *key = sfp[1].asString;
-	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SUGARFUNC_PatternMatch, sfp[2].asFunc);
+	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SugarFunc_PatternMatch, sfp[2].asFunc);
 	KLIB kNameSpace_compileAllDefinedMethods(kctx);
 }
 
@@ -164,7 +164,7 @@ static KMETHOD NameSpace_addPatternMatch(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD NameSpace_addParseExpr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *key = sfp[1].asString;
-	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SUGARFUNC_ParseExpr, sfp[2].asFunc);
+	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SugarFunc_ParseExpr, sfp[2].asFunc);
 	KLIB kNameSpace_compileAllDefinedMethods(kctx);
 }
 
@@ -172,7 +172,7 @@ static KMETHOD NameSpace_addParseExpr(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD NameSpace_addStmtTyCheck(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *key = sfp[1].asString;
-	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SUGARFUNC_StmtTyCheck, sfp[2].asFunc);
+	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SugarFunc_StmtTyCheck, sfp[2].asFunc);
 	KLIB kNameSpace_compileAllDefinedMethods(kctx);
 }
 
@@ -181,7 +181,7 @@ static KMETHOD NameSpace_addStmtTyCheck(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD NameSpace_addTopStmtTyCheck(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *key = sfp[1].asString;
-	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SUGARFUNC_TopStmtTyCheck, sfp[2].asFunc);
+	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SugarFunc_TopStmtTyCheck, sfp[2].asFunc);
 	KLIB kNameSpace_compileAllDefinedMethods(kctx);
 }
 
@@ -189,7 +189,7 @@ static KMETHOD NameSpace_addTopStmtTyCheck(KonohaContext *kctx, KonohaStack *sfp
 static KMETHOD NameSpace_addExprTyCheck(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *key = sfp[1].asString;
-	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SUGARFUNC_ExprTyCheck, sfp[2].asFunc);
+	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SugarFunc_ExprTyCheck, sfp[2].asFunc);
 	KLIB kNameSpace_compileAllDefinedMethods(kctx);
 }
 
@@ -199,7 +199,7 @@ static KMETHOD NameSpace_addExprTyCheck(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kString *key = sfp[1].asString;
 //	DBG_P("termparseexpr=%p", kmodsugar->ParseExpr_Term);
-//	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SUGARFUNC_ParseExpr, kmodsugar->ParseExpr_Term);
+//	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SugarFunc_ParseExpr, kmodsugar->ParseExpr_Term);
 //}
 
 //## Expr Stmt.printError(String msg);

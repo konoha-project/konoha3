@@ -82,7 +82,7 @@ static KMETHOD ExprTyCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t untyped_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KImportPackage(ns, "konoha.var", pline);
-	SUGAR kNameSpace_addSugarFunc(kctx, ns, SYM_("="), SUGARFUNC_ExprTyCheck, new_SugarFunc(ExprTyCheck_UntypedAssign));
+	SUGAR kNameSpace_addSugarFunc(kctx, ns, SYM_("="), SugarFunc_ExprTyCheck, new_SugarFunc(ExprTyCheck_UntypedAssign));
 	return true;
 }
 

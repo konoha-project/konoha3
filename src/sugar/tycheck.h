@@ -55,13 +55,13 @@ static kExpr *ExprTyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma 
 	SugarSyntax *syn = expr->syn;
 	//DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", syn, syn->parentSyntaxNULL, PSYM_t(syn->keyword));
 	while(true) {
-		kFunc *fo = syn->sugarFuncTable[SUGARFUNC_ExprTyCheck];
+		kFunc *fo = syn->sugarFuncTable[SugarFunc_ExprTyCheck];
 		if(fo != NULL) {
 			kFunc** funcItems = &fo;
 			int index = 0;
 			if(IS_Array(fo)) {
-				funcItems = syn->sugarFuncListTable[SUGARFUNC_ExprTyCheck]->funcItems;
-				index = kArray_size(syn->sugarFuncListTable[SUGARFUNC_ExprTyCheck]) - 1;
+				funcItems = syn->sugarFuncListTable[SugarFunc_ExprTyCheck]->funcItems;
+				index = kArray_size(syn->sugarFuncListTable[SugarFunc_ExprTyCheck]) - 1;
 			}
 			for(; index >= 0; index--) {
 				kExpr *texpr = callExprTyCheckFunc(kctx, funcItems[index], &callCount, stmt, expr, gma, reqty);
@@ -207,16 +207,16 @@ static kbool_t callStmtTyCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef
 
 static kbool_t SugarSyntax_tyCheckStmt(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, kGamma *gma)
 {
-	int SUGARFUNC_index = Gamma_isTopLevel(gma) ? SUGARFUNC_TopStmtTyCheck : SUGARFUNC_StmtTyCheck;
+	int SugarFunc_index = Gamma_isTopLevel(gma) ? SugarFunc_TopStmtTyCheck : SugarFunc_StmtTyCheck;
 	int callCount = 0;
 	while(true) {
-		kFunc *fo = syn->sugarFuncTable[SUGARFUNC_index];
+		kFunc *fo = syn->sugarFuncTable[SugarFunc_index];
 		if(fo != NULL) {
 			kFunc **funcItems = &fo;
 			int index = 0;
 			if(IS_Array(fo)) { // @Future
-				funcItems = syn->sugarFuncListTable[SUGARFUNC_index]->funcItems;
-				index = kArray_size(syn->sugarFuncListTable[SUGARFUNC_index]) - 1;
+				funcItems = syn->sugarFuncListTable[SugarFunc_index]->funcItems;
+				index = kArray_size(syn->sugarFuncListTable[SugarFunc_index]) - 1;
 			}
 			for(; index >= 0; index--) {
 				/*kbool_t result =*/ callStmtTyCheckFunc(kctx, funcItems[index], &callCount, stmt, gma);

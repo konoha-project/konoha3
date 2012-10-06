@@ -250,7 +250,7 @@ static KMETHOD ExprTyCheck_MapLiteral(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t map_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
-	SUGAR kNameSpace_addSugarFunc(kctx, ns, KW_BlockPattern, SUGARFUNC_ExprTyCheck, new_SugarFunc(ExprTyCheck_MapLiteral));
+	SUGAR kNameSpace_addSugarFunc(kctx, ns, KW_BlockPattern, SugarFunc_ExprTyCheck, new_SugarFunc(ExprTyCheck_MapLiteral));
 	return true;
 }
 

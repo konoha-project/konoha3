@@ -256,7 +256,7 @@ static KMETHOD ParseExpr_Term(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ParseExpr_Op(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_ParseExpr(stmt, tokenList, beginIdx, operatorIdx, endIdx);
-	if(/*syn->keyword != KW_LET && */syn->sugarFuncTable[SUGARFUNC_ExprTyCheck] == NULL) {
+	if(/*syn->keyword != KW_LET && */syn->sugarFuncTable[SugarFunc_ExprTyCheck] == NULL) {
 		DBG_P("switching type checker of %s%s to MethodCall ..", PSYM_t(syn->keyword));
 		syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);  // switch type checker
 	}

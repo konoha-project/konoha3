@@ -58,13 +58,13 @@ static kExpr *kStmt_parseOperatorExpr(KonohaContext *kctx, kStmt *stmt, SugarSyn
 	int callCount = 0;
 	SugarSyntax *currentSyntax = exprSyntax;
 	while(true) {
-		kFunc *fo = currentSyntax->sugarFuncTable[SUGARFUNC_ParseExpr];
+		kFunc *fo = currentSyntax->sugarFuncTable[SugarFunc_ParseExpr];
 		if(fo != NULL) {
 			kFunc **funcItems = &fo;
 			int index = 0;
 			if(IS_Array(fo)) {
-				funcItems = currentSyntax->sugarFuncListTable[SUGARFUNC_ParseExpr]->funcItems;
-				index =  kArray_size(currentSyntax->sugarFuncListTable[SUGARFUNC_ParseExpr]) - 1;
+				funcItems = currentSyntax->sugarFuncListTable[SugarFunc_ParseExpr]->funcItems;
+				index =  kArray_size(currentSyntax->sugarFuncListTable[SugarFunc_ParseExpr]) - 1;
 			}
 			for(; index >= 0; index--) {
 				DBG_ASSERT(IS_Func(funcItems[index]));
@@ -157,7 +157,7 @@ static kExpr *kStmt_rightJoinExpr(KonohaContext *kctx, kStmt *stmt, kExpr *expr,
 {
 	if(c < e && expr != K_NULLEXPR && !Stmt_isERR(stmt)) {
 		kToken *tk = tokenList->tokenItems[c];
-		if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern || tk->resolvedSyntaxInfo->sugarFuncTable[SUGARFUNC_ParseExpr] == NULL) {
+		if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern || tk->resolvedSyntaxInfo->sugarFuncTable[SugarFunc_ParseExpr] == NULL) {
 			kStmtToken_printMessage(kctx, stmt, tk, ErrTag, "undefined operator: %s", Token_text(tk));
 			return K_NULLEXPR;
 		}
@@ -557,13 +557,13 @@ static int SugarSyntax_matchPattern(KonohaContext *kctx, SugarSyntax *syn, kToke
 	int callCount = 0;
 	if(syn != NULL) {
 		while(true) {
-			kFunc *fo = syn->sugarFuncTable[SUGARFUNC_PatternMatch];
+			kFunc *fo = syn->sugarFuncTable[SugarFunc_PatternMatch];
 			if(fo != NULL) {
 				kFunc **funcItems = &fo;
 				int index = 0, next;
 				if(IS_Array(fo)) {
-					funcItems = syn->sugarFuncListTable[SUGARFUNC_PatternMatch]->funcItems;
-					index = kArray_size(syn->sugarFuncListTable[SUGARFUNC_PatternMatch]) - 1;
+					funcItems = syn->sugarFuncListTable[SugarFunc_PatternMatch]->funcItems;
+					index = kArray_size(syn->sugarFuncListTable[SugarFunc_PatternMatch]) - 1;
 				}
 				for(; index >= 0; index--) {
 					next = callPatternMatchFunc(kctx, funcItems[index], &callCount, stmt, name, tokenList, beginIdx, endIdx);
@@ -978,11 +978,8 @@ static void kNameSpace_parseSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, c
 	kArray_addSyntaxPattern(kctx, patternList, &patterns);
 	if(firstPatternIdx < kArray_size(patternList)) {
 		kToken *firstPattern = patternList->tokenItems[firstPatternIdx];
-		if(KW_isPATTERN(firstPattern->resolvedSymbol) && firstPattern->stmtEntryKey != KW_ExprPattern) {
-			if(ns->StmtPatternListNULL == NULL) {
-				KINITp(ns, ((kNameSpaceVar*)ns)->StmtPatternListNULL, new_(TokenArray, 0));
-			}
-			KLIB kArray_add(kctx, ns->StmtPatternListNULL, firstPattern);
+		if(kToken_isFirstPattern(firstPattern)) {
+			ArrayNULL_append(kctx, UPCAST(ns), &((kNameSpaceVar*)ns)->StmtPatternListNULL, UPCAST(firstPattern));
 		}
 	}
 	TokenSequence_pop(kctx, source);
