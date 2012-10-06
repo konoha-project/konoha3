@@ -166,8 +166,13 @@ static KMETHOD PatternMatch_Token(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
 	DBG_ASSERT(beginIdx < endIdx);
-	kStmt_addParsedObject(kctx, stmt, name, UPCAST(tokenList->tokenItems[beginIdx]));
-	RETURNi_(beginIdx+1);
+	kToken *tk = tokenList->tokenItems[beginIdx];
+	DBG_P(">>>>>>>>> tk=%s", Token_text(tk));
+	if(!kToken_is(StatementSeparator, tk)) {
+		kStmt_addParsedObject(kctx, stmt, name, UPCAST(tk));
+		RETURNi_(beginIdx+1);
+	}
+	RETURNi_(-1);
 }
 
 static KMETHOD PatternMatch_TypeDecl(KonohaContext *kctx, KonohaStack *sfp)

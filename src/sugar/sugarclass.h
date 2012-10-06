@@ -32,7 +32,7 @@ static void syntaxMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void 
 {
 	SugarSyntax *syn = (SugarSyntax*)p->unboxValue;
 	BEGIN_REFTRACE(6);
-	KREFTRACEn(syn->syntaxRuleNULL);
+	KREFTRACEn(syn->SyntaxPatternListNULL);
 	size_t i;
 	for(i = 0; i < SUGARFUNC_SIZE; i++) {
 		KREFTRACEn(syn->sugarFuncTable[i]);

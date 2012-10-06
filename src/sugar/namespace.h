@@ -126,8 +126,8 @@ static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 				syn->precedence_op2 = syndef->precedence_op2;
 			}
 			if(syndef->rule != NULL) {
-				KINITp(ns, syn->syntaxRuleNULL, new_(TokenArray, 0));
-				kNameSpace_parseSyntaxPattern(kctx, ns, syndef->rule, 0, syn->syntaxRuleNULL);
+				KINITp(ns, syn->SyntaxPatternListNULL, new_(TokenArray, 0));
+				kNameSpace_parseSyntaxPattern(kctx, ns, syndef->rule, 0, syn->SyntaxPatternListNULL);
 			}
 			SugarSyntax_setSugarFunc(kctx, syn, syndef->PatternMatch,   SUGARFUNC_PatternMatch,   &pPatternMatch, &mPatternMatch);
 			SugarSyntax_setSugarFunc(kctx, syn, syndef->ParseExpr,      SUGARFUNC_ParseExpr,      &pParseExpr, &mParseExpr);

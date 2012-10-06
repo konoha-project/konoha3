@@ -90,6 +90,7 @@ static kbool_t shell_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameS
 	KImportPackage(ns, "dscript.subproc", pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("dsh"), 0, "\"dsh\" $Token", 0, 0, NULL, NULL, StmtTyCheck_dsh, StmtTyCheck_dsh, NULL, },
+	//	{ SYM_("$Shell"), 0, "$Shell $Token*", 0, 0, PatternMatch_Shell, NULL, StmtTyCheck_Shell, StmtTyCheck_Shell},
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);

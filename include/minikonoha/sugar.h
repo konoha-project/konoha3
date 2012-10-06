@@ -55,15 +55,6 @@ extern "C" {
 #define KW_MethodDeclPattern  (((ksymbol_t)12)|KW_PATTERN) /*$MethodDecl*/
 #define KW_TokenPattern     (((ksymbol_t)13)|KW_PATTERN)   /*$Token*/
 
-typedef enum {
-	TokenType_INDENT = 1,
-	TokenType_SYMBOL = KW_SymbolPattern,
-	TokenType_TEXT   = KW_TextPattern,
-	TokenType_INT    = KW_NumberPattern,
-	TokenType_CODE   = KW_BlockPattern,
-	TokenType_ERR    = KW_TokenPattern
-} kTokenType;
-
 #define KW_ExprOperator        KW_ParamPattern
 #define KW_ExprTerm            KW_SymbolPattern
 #define KW_ExprMethodCall      KW_ParamPattern
@@ -95,6 +86,15 @@ typedef enum {
 #define KW_if        (2+KW_void)
 #define KW_else      (3+KW_void)
 #define KW_return    (4+KW_void)
+
+typedef enum {
+	TokenType_INDENT = 1,
+	TokenType_SYMBOL = KW_SymbolPattern,
+	TokenType_TEXT   = KW_TextPattern,
+	TokenType_INT    = KW_NumberPattern,
+	TokenType_CODE   = KW_BlockPattern,
+	TokenType_ERR    = KW_TokenPattern
+} kTokenType;
 
 // reserved
 //#define MN_new       (8+KW_void)
@@ -171,6 +171,7 @@ struct TokenizerEnv {
 		ktype_t TY = (ktype_t)sfp[4].intValue;\
 		VAR_TRACE; (void)STMT; (void)EXPR; (void)GMA; (void)TY
 
+
 typedef const struct SugarSyntaxVar   SugarSyntax;
 typedef struct SugarSyntaxVar         SugarSyntaxVar;
 
@@ -183,17 +184,17 @@ typedef struct SugarSyntaxVar         SugarSyntaxVar;
 
 #define SYNFLAG_Macro               ((kshortflag_t)1)
 
-#define SYNFLAG_ExprLeftJoinOp2    ((kshortflag_t)1 << 1)
-#define SYNFLAG_ExprPostfixOp2     ((kshortflag_t)1 << 2)
+#define SYNFLAG_ExprLeftJoinOp2     ((kshortflag_t)1 << 1)
+#define SYNFLAG_ExprPostfixOp2      ((kshortflag_t)1 << 2)
 
-#define SYNFLAG_StmtBreakExec      ((kshortflag_t)1 << 8)  /* return, throw */
+#define SYNFLAG_StmtBreakExec       ((kshortflag_t)1 << 8)  /* return, throw */
 #define SYNFLAG_StmtJumpAhead0      ((kshortflag_t)1 << 9)  /* continue */
 #define SYNFLAG_StmtJumpSkip0       ((kshortflag_t)1 << 10)  /* break */
 
 struct SugarSyntaxVar {
 	ksymbol_t  keyword;               kshortflag_t  flag;
 	const struct SugarSyntaxVar      *parentSyntaxNULL;
-	kArray                           *syntaxRuleNULL;
+	kArray                           *SyntaxPatternListNULL;
 	union {
 		kFunc                        *sugarFuncTable[SUGARFUNC_SIZE];
 		kArray                       *sugarFuncListTable[SUGARFUNC_SIZE];

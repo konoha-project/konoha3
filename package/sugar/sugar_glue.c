@@ -306,6 +306,8 @@ static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp)
 //	RETURN_(expr);
 //}
 
+
+
 // --------------------------------------------------------------------------
 
 #define _Public   kMethod_Public
@@ -431,19 +433,19 @@ static KMETHOD StmtTyCheck_sugar(KonohaContext *kctx, KonohaStack *sfp)
 	if(tokenList != NULL) {
 		SugarSyntaxVar *syn = kNameSpace_guessSyntaxFromTokenList(kctx, Stmt_nameSpace(stmt), tokenList);
 		if(syn != NULL) {
-			if(syn->syntaxRuleNULL != NULL) {
+			if(syn->SyntaxPatternListNULL != NULL) {
 				SUGAR kStmt_printMessage2(kctx, stmt, NULL, WarnTag, "overriding syntax rule: %s", PSYM_t(syn->keyword));
-				KLIB kArray_clear(kctx, syn->syntaxRuleNULL, 0);
+				KLIB kArray_clear(kctx, syn->SyntaxPatternListNULL, 0);
 			}
 			else {
-				KINITv(syn->syntaxRuleNULL, new_(Array, 8));
+				KINITv(syn->SyntaxPatternListNULL, new_(Array, 8));
 			}
 			TokenSequence rangebuf = {Stmt_nameSpace(stmt), tokenList, 0, kArray_size(tokenList)};
-			if(SUGAR kArray_addSyntaxRule(kctx, syn->syntaxRuleNULL, &rangebuf)) {
+			if(SUGAR kArray_addSyntaxRule(kctx, syn->SyntaxPatternListNULL, &rangebuf)) {
 				r = 1;
 			}
 			else {
-				KLIB kArray_clear(kctx, syn->syntaxRuleNULL, 0);
+				KLIB kArray_clear(kctx, syn->SyntaxPatternListNULL, 0);
 			}
 		}
 		kStmt_done(kctx, stmt);
@@ -493,7 +495,7 @@ static kbool_t sugar_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameS
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("syntax"), 0, "\"syntax\" $Token", 0, 0, NULL, NULL, StmtTyCheck_sugar, NULL, NULL, },
+		{ SYM_("syntax"), 0, "\"syntax\" $Token $Token*", 0, 0, NULL, NULL, StmtTyCheck_sugar, NULL, NULL, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
