@@ -33,9 +33,11 @@ static void kStmt_addParsedObject(KonohaContext *kctx, kStmt *stmt, ksymbol_t ke
 		KLIB kObject_setObject(kctx, stmt, keyid, O_typeId(o), o);
 	}
 	else {
+		DBG_P(">>> keyid=%s%s valueList=%s, value=%s", PSYM_t(keyid), CT_t(O_ct(valueList)), CT_t(O_ct(o)));
 		if(!IS_Array(valueList)) {
 			kArray *newList = GCSAFE_new(Array, 0);
 			KLIB kArray_add(kctx, newList, valueList);
+			KLIB kObject_setObject(kctx, stmt, keyid, O_typeId(newList), newList);
 			valueList = newList;
 		}
 		KLIB kArray_add(kctx, valueList, o);

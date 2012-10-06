@@ -430,6 +430,8 @@ static KMETHOD StmtTyCheck_sugar(KonohaContext *kctx, KonohaStack *sfp)
 	kbool_t r = 0;
 	VAR_StmtTyCheck(stmt, gma);
 	kTokenArray *tokenList = (kTokenArray*)kStmt_getObject(kctx, stmt, KW_TokenPattern, NULL);
+	DBG_P(">>>>>> tokenList=%s", CT_t(O_ct(tokenList)));
+
 	if(tokenList != NULL) {
 		SugarSyntaxVar *syn = kNameSpace_guessSyntaxFromTokenList(kctx, Stmt_nameSpace(stmt), tokenList);
 		if(syn != NULL) {
