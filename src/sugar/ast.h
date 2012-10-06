@@ -750,7 +750,7 @@ static int kStmt_parseBySyntaxPattern(KonohaContext *kctx, kStmt *stmt, int inde
 		if(errRule[1] != NULL) {
 			kStmt_printMessage(kctx, stmt, ErrTag, "%s%s: %s%s is expected: not %s", KWSTMT_t(stmt->syn->keyword), PSYM_t(errRule[0]->resolvedSymbol), Token_text(errRule[1]));
 		} else {
-			kStmt_printMessage(kctx, stmt, ErrTag, "%s%s: %s%s is expected: not %s", KWSTMT_t(stmt->syn->keyword), PSYM_t(errRule[0]->resolvedSymbol));
+			kStmt_printMessage(kctx, stmt, ErrTag, "%s%s: %s%s is expected", KWSTMT_t(stmt->syn->keyword), PSYM_t(errRule[0]->resolvedSymbol));
 		}
 #endif
 	}

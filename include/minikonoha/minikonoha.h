@@ -1696,6 +1696,8 @@ typedef struct {
 	return; \
 } while (0)
 
+#define FIXME_ASSERT(a)    assert(a)
+
 #ifndef USE_SMALLBUILD
 #ifdef _MSC_VER
 #define KNH_ASSERT(a)

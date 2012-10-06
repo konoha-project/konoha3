@@ -425,30 +425,24 @@ static SugarSyntaxVar *kNameSpace_guessSyntaxFromTokenList(KonohaContext *kctx, 
 	return NULL;
 }
 
-static KMETHOD StmtTyCheck_sugar(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD StmtTyCheck_syntax(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kbool_t r = 0;
 	VAR_StmtTyCheck(stmt, gma);
 	kTokenArray *tokenList = (kTokenArray*)kStmt_getObject(kctx, stmt, KW_TokenPattern, NULL);
-	DBG_P(">>>>>> tokenList=%s", CT_t(O_ct(tokenList)));
-
 	if(tokenList != NULL) {
+		FIXME_ASSERT(IS_Array(tokenList));  // tokenList can be Token
 		SugarSyntaxVar *syn = kNameSpace_guessSyntaxFromTokenList(kctx, Stmt_nameSpace(stmt), tokenList);
 		if(syn != NULL) {
 			if(syn->SyntaxPatternListNULL != NULL) {
-				SUGAR kStmt_printMessage2(kctx, stmt, NULL, WarnTag, "overriding syntax rule: %s", PSYM_t(syn->keyword));
-				KLIB kArray_clear(kctx, syn->SyntaxPatternListNULL, 0);
+				SUGAR kStmt_printMessage2(kctx, stmt, NULL, InfoTag, "overriding syntax: %s%s", PSYM_t(syn->keyword));
 			}
 			else {
 				KINITv(syn->SyntaxPatternListNULL, new_(Array, 8));
 			}
-			TokenSequence rangebuf = {Stmt_nameSpace(stmt), tokenList, 0, kArray_size(tokenList)};
-			if(SUGAR kArray_addSyntaxRule(kctx, syn->SyntaxPatternListNULL, &rangebuf)) {
-				r = 1;
-			}
-			else {
-				KLIB kArray_clear(kctx, syn->SyntaxPatternListNULL, 0);
-			}
+			TokenSequence tokens = {Stmt_nameSpace(stmt), tokenList, 0, kArray_size(tokenList)};
+			SUGAR kArray_addSyntaxRule(kctx, syn->SyntaxPatternListNULL, &tokens);
+			r = 1;
 		}
 		kStmt_done(kctx, stmt);
 	}
@@ -497,7 +491,7 @@ static kbool_t sugar_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameS
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("syntax"), 0, "\"syntax\" $Token $Token*", 0, 0, NULL, NULL, StmtTyCheck_sugar, NULL, NULL, },
+		{ SYM_("syntax"), 0, "\"syntax\" $Token $Token*", 0, 0, NULL, NULL, StmtTyCheck_syntax, NULL, NULL, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
