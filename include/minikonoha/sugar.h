@@ -181,7 +181,7 @@ typedef enum {
 	SugarFunc_TopLevelStatement = 2,
 	SugarFunc_Statement    = 3,
 	SugarFunc_TypeCheck    = 4,
-	SugarFunc_SIZE           = 5,
+	SugarFunc_SIZE           = 5
 } SugerFunc;
 
 //#define SugarFunc_SIZE           5
