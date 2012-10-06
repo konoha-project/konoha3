@@ -1,8 +1,7 @@
 //written by Joseph
 
-import("konoha.regexp");
-import("konoha.assign");
 import("konoha.class");
+import("konoha.regexp");
 
 void test() {
 	//check whether or not "i" modifier is set.

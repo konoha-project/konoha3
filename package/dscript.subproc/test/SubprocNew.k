@@ -1,6 +1,5 @@
 //Written by Joseph
 
-import("konoha.null");
 import("konoha.new");
 import("konoha.array");
 import("dscript.subproc");
@@ -18,11 +17,8 @@ void test() {
 	String[] str2 = b.communicate("");
 	assert(str2[0] == "\"hi\"\n");
 
-	Subproc b = new Subproc("", false);
-	assert(b.fg() != 0);
-
-	Subproc e;
-	assert(e.isNull());
+	Subproc c = new Subproc("", false);
+	assert(c.fg() != 0);
 }
 
 test();
