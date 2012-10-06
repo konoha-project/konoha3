@@ -42,9 +42,9 @@ static kbool_t shell_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 
 // --------------------------------------------------------------------------
 
-static KMETHOD StmtTyCheck_dsh(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Statement_dsh(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_StmtTyCheck(stmt, gma);
+	VAR_Statement(stmt, gma);
 	kTokenArray *tokenList = (kTokenArray *)kStmt_getObjectNULL(kctx, stmt, KW_TokenPattern);
 	if(tokenList == NULL) {
 		RETURNb_(false);
@@ -89,8 +89,8 @@ static kbool_t shell_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameS
 	//KImportPackage(ns, "dscript.dollar", pline);
 	KImportPackage(ns, "dscript.subproc", pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("dsh"), 0, "\"dsh\" $Token", 0, 0, NULL, NULL, StmtTyCheck_dsh, StmtTyCheck_dsh, NULL, },
-	//	{ SYM_("$Shell"), 0, "$Shell $Token*", 0, 0, PatternMatch_Shell, NULL, StmtTyCheck_Shell, StmtTyCheck_Shell},
+		{ SYM_("dsh"), 0, "\"dsh\" $Token", 0, 0, NULL, NULL, Statement_dsh, Statement_dsh, NULL, },
+	//	{ SYM_("$Shell"), 0, "$Shell $Token*", 0, 0, PatternMatch_Shell, NULL, Statement_Shell, Statement_Shell},
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);

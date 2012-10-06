@@ -196,9 +196,9 @@ static kbool_t field_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 
 // --------------------------------------------------------------------------
 
-static KMETHOD ExprTyCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_ExprTyCheck(stmt, expr, gma, reqty);
+	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *tkN = expr->cons->tokenItems[0];
 	ksymbol_t fn = tkN->resolvedSymbol;
 	kExpr *self = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 1, gma, TY_var, 0);
@@ -216,7 +216,7 @@ static KMETHOD ExprTyCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t field_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("."), 0, NULL, -1, 0, NULL, NULL, NULL, NULL, ExprTyCheck_Getter, },
+		{ SYM_("."), 0, NULL, -1, 0, NULL, NULL, NULL, NULL, TypeCheck_Getter, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);

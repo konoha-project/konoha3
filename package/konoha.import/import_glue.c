@@ -29,10 +29,10 @@
 extern "C"{
 #endif
 
-static KMETHOD StmtTyCheck_import(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int ret = false;
-	VAR_StmtTyCheck(stmt, gma);
+	VAR_Statement(stmt, gma);
 	kTokenArray *tokenList = (kTokenArray *) kStmt_getObjectNULL(kctx, stmt, KW_TokenPattern);
 	if (tokenList == NULL) {
 		RETURNb_(false);
@@ -89,7 +89,7 @@ static kbool_t import_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 static kbool_t import_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("import"), 0, "\"import\" $Token [ \".*\"] ", 0, 0, NULL, NULL, StmtTyCheck_import, NULL, NULL, },
+		{ SYM_("import"), 0, "\"import\" $Token [ \".*\"] ", 0, 0, NULL, NULL, Statement_import, NULL, NULL, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);

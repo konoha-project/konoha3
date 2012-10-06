@@ -7,7 +7,7 @@ Expr tyCheckTrue(Stmt stmt, Expr expr, Gamma gma, int typeid) {
 	return expr; // nothing
 }
 
-addExprTyCheck("true", tyCheckTrue);
+addTypeCheck("true", tyCheckTrue);
 
 assert(true);
 

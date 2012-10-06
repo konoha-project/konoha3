@@ -39,5 +39,5 @@ Expr tyCheckSingleQuote(Stmt stmt, Expr expr, Gamma gma, int typeid) {
 
 
 addTokenizeFunc("'", singleQuoteToken);
-addExprTyCheck("$SingleQuote", tyCheckSingleQuote);
-//addTermParseExpr("$SingleQuote");
+addTypeCheck("$SingleQuote", tyCheckSingleQuote);
+//addTermExpression("$SingleQuote");

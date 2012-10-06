@@ -36,5 +36,5 @@
 
 
 // addTokenizeFunc("'", singleQuoteToken);
-// addExprTyCheck("$SingleQuote", tyCheckSingleQuote);
-// addTermParseExpr("$SingleQuote");
+// addTypeCheck("$SingleQuote", tyCheckSingleQuote);
+// addTermExpression("$SingleQuote");

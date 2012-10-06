@@ -9,6 +9,6 @@ Expr tycheck(Stmt stmt, Expr expr, Gamma gma, int typeinfo) {
 
 NameSpace.compileAllDefinedMethods();
 // this is test. meaningless
-addExprTyCheck("null", tycheck);
+addTypeCheck("null", tycheck);
 
 null

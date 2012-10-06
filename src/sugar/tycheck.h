@@ -28,7 +28,7 @@ extern "C" {
 
 /* ------------------------------------------------------------------------ */
 
-static kExpr *callExprTyCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef, kStmt *stmt, kExpr *expr, kGamma *gma, int reqty)
+static kExpr *callTypeCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef, kStmt *stmt, kExpr *expr, kGamma *gma, int reqty)
 {
 	INIT_GCSTACK();
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
@@ -49,16 +49,16 @@ static kExpr *callExprTyCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef,
 	return (kExpr*)lsfp[0].asObject;
 }
 
-static kExpr *ExprTyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, int reqty)
+static kExpr *TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, int reqty)
 {
 	int callCount = 0;
 	SugarSyntax *syn = expr->syn;
 	//DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", syn, syn->parentSyntaxNULL, PSYM_t(syn->keyword));
 	while(true) {
 		int index, size;
-		kFunc **funcItems = SugarSyntax_funcTable(kctx, syn, SugarFunc_ExprTyCheck, &size);
+		kFunc **funcItems = SugarSyntax_funcTable(kctx, syn, SugarFunc_TypeCheck, &size);
 		for(index = size - 1; index >= 0; index--) {
-			kExpr *texpr = callExprTyCheckFunc(kctx, funcItems[index], &callCount, stmt, expr, gma, reqty);
+			kExpr *texpr = callTypeCheckFunc(kctx, funcItems[index], &callCount, stmt, expr, gma, reqty);
 			if(Stmt_isERR(stmt)) return K_NULLEXPR;
 			if(texpr->ty != TY_var) return texpr;
 		}
@@ -121,7 +121,7 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 		if(!IS_Expr(expr)) {
 			expr = new_ConstValueExpr(kctx, O_typeId(expr), UPCAST(expr));
 		}
-		texpr = ExprTyCheck(kctx, stmt, expr, gma, reqty);
+		texpr = TypeCheck(kctx, stmt, expr, gma, reqty);
 	}
 	if(Stmt_isERR(stmt)) texpr = K_NULLEXPR;
 	if(texpr != K_NULLEXPR) {
@@ -182,7 +182,7 @@ static kbool_t kStmt_tyCheckByName(KonohaContext *kctx, kStmt *stmt, ksymbol_t c
 
 /* ------------------------------------------------------------------------ */
 
-static kbool_t callStmtTyCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef, kStmt *stmt, kGamma *gma)
+static kbool_t callStatementFunc(KonohaContext *kctx, kFunc *fo, int *countRef, kStmt *stmt, kGamma *gma)
 {
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 3);
 	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, (kObject*)fo->self, GC_NO_WRITE_BARRIER);
@@ -200,13 +200,13 @@ static kbool_t callStmtTyCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef
 
 static kbool_t SugarSyntax_tyCheckStmt(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, kGamma *gma)
 {
-	int SugarFunc_index = Gamma_isTopLevel(gma) ? SugarFunc_TopStmtTyCheck : SugarFunc_StmtTyCheck;
+	int SugarFunc_index = Gamma_isTopLevel(gma) ? SugarFunc_TopLevelStatement : SugarFunc_Statement;
 	int callCount = 0;
 	while(true) {
 		int index, size;
 		kFunc **funcItems = SugarSyntax_funcTable(kctx, syn, SugarFunc_index, &size);
 		for(index = size - 1; index >= 0; index--) {
-			/*kbool_t result =*/ callStmtTyCheckFunc(kctx, funcItems[index], &callCount, stmt, gma);
+			/*kbool_t result =*/ callStatementFunc(kctx, funcItems[index], &callCount, stmt, gma);
 			if(Stmt_isDone(stmt)) return true;
 			if(Stmt_isERR(stmt)) return false;
 			if(stmt->build != TSTMT_UNDEFINED) {

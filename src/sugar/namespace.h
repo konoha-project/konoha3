@@ -111,8 +111,8 @@ static void SugarSyntax_setSugarFunc(KonohaContext *kctx, SugarSyntaxVar *syn, M
 
 static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE_SYNTAX *syndef, kNameSpace *packageNameSpace)
 {
-	MethodFunc pPatternMatch = NULL, pParseExpr = NULL, pStmtTyCheck = NULL, pExprTyCheck = NULL;
-	kFunc *mPatternMatch = NULL, *mParseExpr = NULL, *mStmtTyCheck = NULL, *mExprTyCheck = NULL;
+	MethodFunc pPatternMatch = NULL, pExpression = NULL, pStatement = NULL, pTypeCheck = NULL;
+	kFunc *mPatternMatch = NULL, *mExpression = NULL, *mStatement = NULL, *mTypeCheck = NULL;
 	while(syndef->keyword != KW_END) {
 		SugarSyntaxVar* syn = (SugarSyntaxVar*)kNameSpace_getSyntax(kctx, ns, syndef->keyword, 1/*isnew*/);
 		DBG_ASSERT(syn != NULL);
@@ -130,21 +130,21 @@ static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 				kNameSpace_parseSyntaxPattern(kctx, ns, syndef->rule, 0, syn->SyntaxPatternListNULL);
 			}
 			SugarSyntax_setSugarFunc(kctx, syn, syndef->PatternMatch,   SugarFunc_PatternMatch,   &pPatternMatch, &mPatternMatch);
-			SugarSyntax_setSugarFunc(kctx, syn, syndef->ParseExpr,      SugarFunc_ParseExpr,      &pParseExpr, &mParseExpr);
-			SugarSyntax_setSugarFunc(kctx, syn, syndef->TopStmtTyCheck, SugarFunc_TopStmtTyCheck, &pStmtTyCheck, &mStmtTyCheck);
-			SugarSyntax_setSugarFunc(kctx, syn, syndef->StmtTyCheck,    SugarFunc_StmtTyCheck,    &pStmtTyCheck, &mStmtTyCheck);
-			SugarSyntax_setSugarFunc(kctx, syn, syndef->ExprTyCheck,    SugarFunc_ExprTyCheck,    &pExprTyCheck, &mExprTyCheck);
+			SugarSyntax_setSugarFunc(kctx, syn, syndef->Expression,      SugarFunc_Expression,      &pExpression, &mExpression);
+			SugarSyntax_setSugarFunc(kctx, syn, syndef->TopLevelStatement, SugarFunc_TopLevelStatement, &pStatement, &mStatement);
+			SugarSyntax_setSugarFunc(kctx, syn, syndef->Statement,    SugarFunc_Statement,    &pStatement, &mStatement);
+			SugarSyntax_setSugarFunc(kctx, syn, syndef->TypeCheck,    SugarFunc_TypeCheck,    &pTypeCheck, &mTypeCheck);
 			// set default function
-			if(syn->parentSyntaxNULL == NULL && syn->sugarFuncTable[SugarFunc_ParseExpr] == NULL) {
+			if(syn->parentSyntaxNULL == NULL && syn->sugarFuncTable[SugarFunc_Expression] == NULL) {
 				if(syn->precedence_op2 > 0 || syn->precedence_op1 > 0) {
-					kFunc *fo = SYN_(ns, KW_ExprOperator)->sugarFuncTable[SugarFunc_ParseExpr];
+					kFunc *fo = SYN_(ns, KW_ExprOperator)->sugarFuncTable[SugarFunc_Expression];
 					DBG_ASSERT(fo != NULL);
-					KINITp(ns, syn->sugarFuncTable[SugarFunc_ParseExpr], fo);
+					KINITp(ns, syn->sugarFuncTable[SugarFunc_Expression], fo);
 				}
-				else if(syn->sugarFuncTable[SugarFunc_ExprTyCheck] != NULL) {
-					kFunc *fo = SYN_(ns, KW_ExprTerm)->sugarFuncTable[SugarFunc_ParseExpr];
+				else if(syn->sugarFuncTable[SugarFunc_TypeCheck] != NULL) {
+					kFunc *fo = SYN_(ns, KW_ExprTerm)->sugarFuncTable[SugarFunc_Expression];
 					DBG_ASSERT(fo != NULL);
-					KINITp(ns, syn->sugarFuncTable[SugarFunc_ParseExpr], fo);
+					KINITp(ns, syn->sugarFuncTable[SugarFunc_Expression], fo);
 				}
 			}
 			DBG_ASSERT(syn == SYN_(ns, syndef->keyword));

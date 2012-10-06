@@ -820,9 +820,9 @@ static KMETHOD parseREGEXP(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(pos-1);
 }
 
-static KMETHOD ExprTyCheck_RegExp(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD TypeCheck_RegExp(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_ExprTyCheck(stmt, expr, gma, reqty);
+	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
 	kRegExp *r = new_(RegExp, NULL);
 	DBG_ASSERT(kArray_size(tk->subTokenList) == 2);
@@ -836,7 +836,7 @@ static kbool_t regexp_initNameSpace(KonohaContext *kctx, kNameSpace *packageName
 	kFunc *fo = GCSAFE_new(Func, (uintptr_t) mtd);
 	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '/', NULL, fo, 0);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("$regexp"),  ExprTyCheck_(RegExp), },
+		{ .keyword = SYM_("$regexp"),  TypeCheck_(RegExp), },
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);

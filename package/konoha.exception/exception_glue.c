@@ -258,9 +258,9 @@ static kStmt* Stmt_lookupTryOrCatchStmtNULL(KonohaContext *kctx, kStmt *stmt)
 	return NULL;
 }
 
-static KMETHOD StmtTyCheck_try(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Statement_try(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_StmtTyCheck(stmt, gma);
+	VAR_Statement(stmt, gma);
 	DBG_P("try statement .. \n");
 	int ret = false;
 	kBlock *tryBlock, *catchBlock, *finallyBlock;
@@ -286,9 +286,9 @@ static KMETHOD StmtTyCheck_try(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNb_(ret);
 }
 
-static KMETHOD StmtTyCheck_catch(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Statement_catch(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_StmtTyCheck(stmt, gma);
+	VAR_Statement(stmt, gma);
 	DBG_P("catch statement .. \n");
 	int ret = false;
 
@@ -311,9 +311,9 @@ static KMETHOD StmtTyCheck_catch(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNb_(ret);
 }
 
-static KMETHOD StmtTyCheck_finally(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Statement_finally(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_StmtTyCheck(stmt, gma);
+	VAR_Statement(stmt, gma);
 	DBG_P("finally statement .. \n");
 	int ret = false;
 	kBlock *finallyBlock = SUGAR kStmt_getBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
@@ -333,9 +333,9 @@ static KMETHOD StmtTyCheck_finally(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t exception_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("try"), StmtTyCheck_(try), .rule = "\"try\" $Block [ \"catch\" \"(\" $Type $Symbol \")\" catch: $Block ] [ \"finally\" finally: $Block ]",},
-		{ .keyword = SYM_("catch"), StmtTyCheck_(catch), .rule = "\"catch\" \"(\" $Type $Symbol \")\" $Block",},
-		{ .keyword = SYM_("finally"), StmtTyCheck_(finally), .rule = "\"finally\" $Block ",},
+		{ .keyword = SYM_("try"), Statement_(try), .rule = "\"try\" $Block [ \"catch\" \"(\" $Type $Symbol \")\" catch: $Block ] [ \"finally\" finally: $Block ]",},
+		{ .keyword = SYM_("catch"), Statement_(catch), .rule = "\"catch\" \"(\" $Type $Symbol \")\" $Block",},
+		{ .keyword = SYM_("finally"), Statement_(finally), .rule = "\"finally\" $Block ",},
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);

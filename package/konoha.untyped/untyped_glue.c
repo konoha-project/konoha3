@@ -61,9 +61,9 @@ static void DeclVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t 
 	}
 }
 
-static KMETHOD ExprTyCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_ExprTyCheck(stmt, expr, gma, reqty);
+	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kExpr *leftHandExpr = kExpr_at(expr, 1);
 	if(Expr_isSymbolTerm(leftHandExpr)) {
 		kExpr *texpr = SUGAR kStmt_tyCheckVariableNULL(kctx, stmt, leftHandExpr, gma, TY_var);
@@ -82,7 +82,7 @@ static KMETHOD ExprTyCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t untyped_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KImportPackage(ns, "konoha.var", pline);
-	SUGAR kNameSpace_addSugarFunc(kctx, ns, SYM_("="), SugarFunc_ExprTyCheck, new_SugarFunc(ExprTyCheck_UntypedAssign));
+	SUGAR kNameSpace_addSugarFunc(kctx, ns, SYM_("="), SugarFunc_TypeCheck, new_SugarFunc(TypeCheck_UntypedAssign));
 	return true;
 }
 

@@ -50,9 +50,9 @@ static inline kStmt* kStmt_getParentNULL(kStmt *stmt)
 	return stmt->parentBlockNULL->parentStmtNULL;
 }
 
-static KMETHOD StmtTyCheck_continue(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_StmtTyCheck(stmt, gma);
+	VAR_Statement(stmt, gma);
 	kStmt *p = stmt;
 	while((p = kStmt_getParentNULL(p)) != NULL) {
 		if(Stmt_isCatchContinue(p)) {
@@ -68,7 +68,7 @@ static KMETHOD StmtTyCheck_continue(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t continue_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("continue"), 0, "\"continue\" [ $Symbol ]", 0, 0, NULL, NULL, NULL, StmtTyCheck_continue, NULL, },
+		{ SYM_("continue"), 0, "\"continue\" [ $Symbol ]", 0, 0, NULL, NULL, NULL, Statement_continue, NULL, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);

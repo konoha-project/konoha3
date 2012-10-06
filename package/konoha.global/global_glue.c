@@ -116,9 +116,9 @@ static kbool_t kNameSpace_initGlobalObject(KonohaContext *kctx, kNameSpace *ns, 
 	return true;
 }
 
-static KMETHOD StmtTyCheck_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Statement_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_StmtTyCheck(stmt, gma);
+	VAR_Statement(stmt, gma);
 	kbool_t result = false;
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	if(kNameSpace_initGlobalObject(kctx, ns, stmt->uline)) {
@@ -134,7 +134,7 @@ static KMETHOD StmtTyCheck_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t global_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KImportPackage(ns, "konoha.field", pline);
-	SUGAR kNameSpace_setSugarFunc(kctx, ns, KW_TypeDeclPattern, SugarFunc_TopStmtTyCheck, new_SugarFunc(StmtTyCheck_GlobalTypeDecl));
+	SUGAR kNameSpace_setSugarFunc(kctx, ns, KW_TypeDeclPattern, SugarFunc_TopLevelStatement, new_SugarFunc(Statement_GlobalTypeDecl));
 	return kNameSpace_initGlobalObject(kctx, ns, pline);
 }
 

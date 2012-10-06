@@ -45,9 +45,9 @@ static kbool_t namespace_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFir
 
 // --------------------------------------------------------------------------
 
-static KMETHOD StmtTyCheck_namespace(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_StmtTyCheck(stmt, gma);
+	VAR_Statement(stmt, gma);
 	kstatus_t result = K_CONTINUE;
 	kToken *tk = SUGAR kStmt_getToken(kctx, stmt, KW_BlockPattern, NULL);
 	if(tk != NULL && tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
@@ -66,7 +66,7 @@ static KMETHOD StmtTyCheck_namespace(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t namespace_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("namespace"), 0, "\"namespace\" $Block", 0, 0, NULL, NULL, StmtTyCheck_namespace, NULL, NULL, },
+		{ SYM_("namespace"), 0, "\"namespace\" $Block", 0, 0, NULL, NULL, Statement_namespace, NULL, NULL, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);

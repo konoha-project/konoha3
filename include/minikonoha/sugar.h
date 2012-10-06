@@ -147,8 +147,8 @@ struct TokenizerEnv {
 		int E = (int)sfp[5].intValue;\
 		VAR_TRACE; (void)STMT; (void)NAME; (void)TLS; (void)S; (void)E
 
-// Expr ParseExpr(Stmt stmt, Token[] tokenList, int s, int c, int e)
-#define VAR_ParseExpr(STMT, TLS, S, C, E)\
+// Expr Expression(Stmt stmt, Token[] tokenList, int s, int c, int e)
+#define VAR_Expression(STMT, TLS, S, C, E)\
 		SugarSyntax *syn = (SugarSyntax*)sfp[0].unboxValue;\
 		kStmt *STMT = (kStmt*)sfp[1].asObject;\
 		kArray *TLS = (kArray*)sfp[2].o;\
@@ -157,14 +157,14 @@ struct TokenizerEnv {
 		int E = (int)sfp[5].intValue;\
 		VAR_TRACE; (void)syn; (void)STMT; (void)TLS; (void)S; (void)C; (void)E
 
-// boolean StmtTyCheck(Stmt stmt, Gamma gma)
-#define VAR_StmtTyCheck(STMT, GMA)\
+// boolean Statement(Stmt stmt, Gamma gma)
+#define VAR_Statement(STMT, GMA)\
 		kStmt *STMT = (kStmt*)sfp[1].asObject;\
 		kGamma *GMA = (kGamma*)sfp[2].o;\
 		VAR_TRACE; (void)STMT; (void)GMA
 
-// Expr ExprTyCheck(Stmt stmt, Expr expr, Gamma gma, int typeid)
-#define VAR_ExprTyCheck(STMT, EXPR, GMA, TY) \
+// Expr TypeCheck(Stmt stmt, Expr expr, Gamma gma, int typeid)
+#define VAR_TypeCheck(STMT, EXPR, GMA, TY) \
 		kStmt *STMT = (kStmt*)sfp[1].asObject;\
 		kExpr *EXPR = (kExpr*)sfp[2].o;\
 		kGamma *GMA = (kGamma*)sfp[3].o;\
@@ -177,10 +177,10 @@ typedef struct SugarSyntaxVar         SugarSyntaxVar;
 
 typedef enum {
 	SugarFunc_PatternMatch   = 0,
-	SugarFunc_ParseExpr      = 1,
-	SugarFunc_TopStmtTyCheck = 2,
-	SugarFunc_StmtTyCheck    = 3,
-	SugarFunc_ExprTyCheck    = 4,
+	SugarFunc_Expression      = 1,
+	SugarFunc_TopLevelStatement = 2,
+	SugarFunc_Statement    = 3,
+	SugarFunc_TypeCheck    = 4,
 	SugarFunc_SIZE           = 5,
 } SugerFunc;
 
@@ -210,10 +210,10 @@ struct SugarSyntaxVar {
 };
 
 #define PatternMatch_(NAME)    .PatternMatch   = PatternMatch_##NAME
-#define ParseExpr_(NAME)       .ParseExpr      = ParseExpr_##NAME
-#define TopStmtTyCheck_(NAME)  .TopStmtTyCheck = StmtTyCheck_##NAME
-#define StmtTyCheck_(NAME)     .StmtTyCheck    = StmtTyCheck_##NAME
-#define ExprTyCheck_(NAME)     .ExprTyCheck    = ExprTyCheck_##NAME
+#define Expression_(NAME)       .Expression      = Expression_##NAME
+#define TopLevelStatement_(NAME)  .TopLevelStatement = Statement_##NAME
+#define Statement_(NAME)     .Statement    = Statement_##NAME
+#define TypeCheck_(NAME)     .TypeCheck    = TypeCheck_##NAME
 
 #define _OPLeft   .flag = (SYNFLAG_ExprLeftJoinOp2)
 
@@ -244,10 +244,10 @@ typedef struct KDEFINE_SYNTAX {
 	int precedence_op2;
 	int precedence_op1;
 	MethodFunc PatternMatch;
-	MethodFunc ParseExpr;
-	MethodFunc TopStmtTyCheck;
-	MethodFunc StmtTyCheck;
-	MethodFunc ExprTyCheck;
+	MethodFunc Expression;
+	MethodFunc TopLevelStatement;
+	MethodFunc Statement;
+	MethodFunc TypeCheck;
 } KDEFINE_SYNTAX;
 
 #define new_SugarFunc(F)     new_(Func, KLIB new_kMethod(kctx, 0, 0, 0, F))

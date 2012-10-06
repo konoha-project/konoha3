@@ -68,9 +68,9 @@ static kbool_t object_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 
 // --------------------------------------------------------------------------
 
-//static KMETHOD ExprTyCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
+//static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	VAR_ExprTyCheck(stmt, expr, gma, reqty);
+//	VAR_TypeCheck(stmt, expr, gma, reqty);
 //	kToken *tkN = expr->cons->tokenItems[0];
 //	ksymbol_t fn = tkN->resolvedSymbol;
 //	kExpr *self = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 1, gma, TY_var, 0);
@@ -92,7 +92,7 @@ static kbool_t object_initNameSpace(KonohaContext *kctx, kNameSpace *packageName
 {
 	KImportPackage(ns, "konoha.subtype", pline);
 //	KDEFINE_SYNTAX SYNTAX[] = {
-//		{ .keyword = SYM_("."), ExprTyCheck_(Getter) },
+//		{ .keyword = SYM_("."), TypeCheck_(Getter) },
 //		{ .keyword = KW_END, },
 //	};
 //	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);

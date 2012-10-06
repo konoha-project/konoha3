@@ -43,9 +43,9 @@ static kbool_t defined_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirst
 
 //----------------------------------------------------------------------------
 
-static KMETHOD ExprTyCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_ExprTyCheck(stmt, expr, gma, reqty);
+	VAR_TypeCheck(stmt, expr, gma, reqty);
 	size_t i;
 	kbool_t isDefined = true;
 	SugarContext *sugarContext = KonohaContext_getSugarContext(kctx);
@@ -82,9 +82,9 @@ static void filterArrayList(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLi
 }
 
 
-static KMETHOD ParseExpr_Defined(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_ParseExpr(stmt, tokenList, beginIdx, currentIdx, endIdx);
+	VAR_Expression(stmt, tokenList, beginIdx, currentIdx, endIdx);
 	if(beginIdx == currentIdx && beginIdx + 1 < endIdx) {
 		kTokenVar *definedToken = tokenList->tokenVarItems[beginIdx];   // defined
 		kTokenVar *pToken = tokenList->tokenVarItems[beginIdx+1];
@@ -99,7 +99,7 @@ static KMETHOD ParseExpr_Defined(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t defined_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("defined"), 0, NULL, 0, Precedence_CStylePREUNARY, NULL, ParseExpr_Defined, NULL, NULL, ExprTyCheck_Defined, },
+		{ SYM_("defined"), 0, NULL, 0, Precedence_CStylePREUNARY, NULL, Expression_Defined, NULL, NULL, TypeCheck_Defined, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);

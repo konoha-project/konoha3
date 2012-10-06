@@ -120,9 +120,9 @@ static void kStmt_appendBlock(KonohaContext *kctx, kStmt *stmt, kBlock *bk)
 	}
 }
 
-static KMETHOD StmtTyCheck_for(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_StmtTyCheck(stmt, gma);
+	VAR_Statement(stmt, gma);
 	DBG_P("for statement .. ");
 	int isOkay = false;
 	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, 0)) {
@@ -161,7 +161,7 @@ static kbool_t foreach_initNameSpace(KonohaContext *kctx, kNameSpace *packageNam
 	KImportPackage(ns, "konoha.break", pline);
 	KImportPackage(ns, "konoha.continue", pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("for"), 0, "\"for\" \"(\" [$Type] $Symbol \"in\" $Expr  \")\" [$Block] ", 0, 0, NULL, NULL, NULL, StmtTyCheck_for, NULL, },
+		{ SYM_("for"), 0, "\"for\" \"(\" [$Type] $Symbol \"in\" $Expr  \")\" [$Block] ", 0, 0, NULL, NULL, NULL, Statement_for, NULL, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);

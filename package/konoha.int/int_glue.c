@@ -260,9 +260,9 @@ static kint_t kstrtoll(const char *p)
 	return _kstrtoll(p, parseDecimalDigit, 10);
 }
 
-static KMETHOD ExprTyCheck_Int2(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD TypeCheck_Int2(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_ExprTyCheck(stmt, expr, gma, reqty);
+	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
 	long long n = kstrtoll(S_text(tk->text));
 	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_int, (uintptr_t)n));
@@ -271,7 +271,7 @@ static KMETHOD ExprTyCheck_Int2(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t int_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ KW_NumberPattern, 0,  NULL, 0, 0, NULL, NULL, NULL, NULL, ExprTyCheck_Int2, },
+		{ KW_NumberPattern, 0,  NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_Int2, },
 		{ SYM_("~"),  0, NULL, 0,                   Precedence_CStylePREUNARY, NULL, NULL, NULL, NULL, NULL, },
 		{ SYM_("<<"), 0, NULL, Precedence_CStyleSHIFT,  0,                     NULL, NULL, NULL, NULL, NULL, },
 		{ SYM_(">>"), 0, NULL, Precedence_CStyleSHIFT,  0,                     NULL, NULL, NULL, NULL, NULL, },

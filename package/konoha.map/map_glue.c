@@ -238,9 +238,9 @@ static kbool_t map_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime
 
 /* ----------------------------------------------------------------------- */
 
-static KMETHOD ExprTyCheck_MapLiteral(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD TypeCheck_MapLiteral(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_ExprTyCheck(stmt, expr, gma, reqty);
+	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *termToken = expr->termToken;
 	if(Expr_isTerm(expr) && IS_Token(termToken)) {
 		DBG_P("termToken='%s'", S_text(termToken->text));
@@ -250,7 +250,7 @@ static KMETHOD ExprTyCheck_MapLiteral(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t map_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
-	SUGAR kNameSpace_addSugarFunc(kctx, ns, KW_BlockPattern, SugarFunc_ExprTyCheck, new_SugarFunc(ExprTyCheck_MapLiteral));
+	SUGAR kNameSpace_addSugarFunc(kctx, ns, KW_BlockPattern, SugarFunc_TypeCheck, new_SugarFunc(TypeCheck_MapLiteral));
 	return true;
 }
 

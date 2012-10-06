@@ -12,8 +12,8 @@ boolean tyCheckWhile(Stmt stmt, Gamma gma) {
 	return false;
 }
 
-addTopStmtTyCheck("while", tyCheckWhile);
-addStmtTyCheck("while", tyCheckWhile);
+addTopLevelStatement("while", tyCheckWhile);
+addStatement("while", tyCheckWhile);
 
 // b = a while (a<10);
 

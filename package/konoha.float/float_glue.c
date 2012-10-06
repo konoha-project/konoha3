@@ -316,9 +316,9 @@ static kbool_t float_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 }
 
 //----------------------------------------------------------------------------
-static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD TypeCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_ExprTyCheck(stmt, expr, gma, reqty);
+	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
 	sfp[4].floatValue = strtod(S_text(tk->text), NULL);   // just using tramsformation float
 	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_float, sfp[4].unboxValue));
@@ -327,7 +327,7 @@ static KMETHOD ExprTyCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t float_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("$Float"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, ExprTyCheck_Float, },
+		{ SYM_("$Float"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_Float, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);

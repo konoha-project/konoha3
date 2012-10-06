@@ -50,9 +50,9 @@ static inline kStmt* kStmt_getParentNULL(kStmt *stmt)
 	return stmt->parentBlockNULL->parentStmtNULL;
 }
 
-static KMETHOD StmtTyCheck_break(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_StmtTyCheck(stmt, gma);
+	VAR_Statement(stmt, gma);
 	kStmt *p = stmt;
 	while((p = kStmt_getParentNULL(p)) != NULL) {
 		if(Stmt_isCatchBreak(p)) {
@@ -68,7 +68,7 @@ static KMETHOD StmtTyCheck_break(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t break_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("break"), 0, "\"break\" [ $Symbol ]", 0, 0, NULL, NULL, NULL, StmtTyCheck_break, NULL, },
+		{ SYM_("break"), 0, "\"break\" [ $Symbol ]", 0, 0, NULL, NULL, NULL, Statement_break, NULL, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
