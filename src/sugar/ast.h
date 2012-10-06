@@ -724,7 +724,6 @@ static int kStmt_parseBySyntaxPattern(KonohaContext *kctx, kStmt *stmt, int inde
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	SugarSyntax *currentSyntax = stmtSyntax;
 	while(currentSyntax != NULL) {
-		DBG_P("currentSyntax=%p, PatternList=%p", currentSyntax, currentSyntax->SyntaxPatternListNULL);
 		if(currentSyntax->SyntaxPatternListNULL != NULL) {
 			int patternEndIdx = kArray_size(currentSyntax->SyntaxPatternListNULL);
 			TokenSequence tokens = {ns, tokenList, beginIdx, endIdx};
@@ -733,7 +732,6 @@ static int kStmt_parseBySyntaxPattern(KonohaContext *kctx, kStmt *stmt, int inde
 				patternEndIdx = TokenSequence_selectSyntaxPattern(kctx, &nrule, currentSyntax->SyntaxPatternListNULL, patternEndIdx);
 				errRule[0] = NULL; errRule[1] = NULL;
 				int nextIdx = kStmt_matchSyntaxPattern(kctx, stmt, &tokens, &nrule, errRule);
-				DBG_P("@@@ nextIdx=%d", nextIdx);
 				if(Stmt_isERR(stmt)) return -1;
 				if(beginIdx < nextIdx) return nextIdx;
 			} while(patternEndIdx > 0);
@@ -748,7 +746,7 @@ static int kStmt_parseBySyntaxPattern(KonohaContext *kctx, kStmt *stmt, int inde
 		kStmt_printMessage(kctx, stmt, ErrTag, "%s%s: %s%s is expected", KWSTMT_t(stmt->syn->keyword), PSYM_t(errRule[0]->resolvedSymbol));
 #else
 		if(errRule[1] != NULL) {
-			kStmt_printMessage(kctx, stmt, ErrTag, "%s%s: %s%s is expected: not %s", KWSTMT_t(stmt->syn->keyword), PSYM_t(errRule[0]->resolvedSymbol), Token_text(errRule[1]));
+			kStmt_printMessage(kctx, stmt, ErrTag, "%s%s: %s%s is expected before %s", KWSTMT_t(stmt->syn->keyword), PSYM_t(errRule[0]->resolvedSymbol), Token_text(errRule[1]));
 		} else {
 			kStmt_printMessage(kctx, stmt, ErrTag, "%s%s: %s%s is expected", KWSTMT_t(stmt->syn->keyword), PSYM_t(errRule[0]->resolvedSymbol));
 		}
