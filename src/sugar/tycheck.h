@@ -55,19 +55,12 @@ static kExpr *ExprTyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma 
 	SugarSyntax *syn = expr->syn;
 	//DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", syn, syn->parentSyntaxNULL, PSYM_t(syn->keyword));
 	while(true) {
-		kFunc *fo = syn->sugarFuncTable[SugarFunc_ExprTyCheck];
-		if(fo != NULL) {
-			kFunc** funcItems = &fo;
-			int index = 0;
-			if(IS_Array(fo)) {
-				funcItems = syn->sugarFuncListTable[SugarFunc_ExprTyCheck]->funcItems;
-				index = kArray_size(syn->sugarFuncListTable[SugarFunc_ExprTyCheck]) - 1;
-			}
-			for(; index >= 0; index--) {
-				kExpr *texpr = callExprTyCheckFunc(kctx, funcItems[index], &callCount, stmt, expr, gma, reqty);
-				if(Stmt_isERR(stmt)) return K_NULLEXPR;
-				if(texpr->ty != TY_var) return texpr;
-			}
+		int index, size;
+		kFunc **funcItems = SugarSyntax_funcTable(kctx, syn, SugarFunc_ExprTyCheck, &size);
+		for(index = size - 1; index >= 0; index--) {
+			kExpr *texpr = callExprTyCheckFunc(kctx, funcItems[index], &callCount, stmt, expr, gma, reqty);
+			if(Stmt_isERR(stmt)) return K_NULLEXPR;
+			if(texpr->ty != TY_var) return texpr;
 		}
 		if(syn->parentSyntaxNULL == NULL) break;
 		syn = syn->parentSyntaxNULL;
@@ -210,21 +203,14 @@ static kbool_t SugarSyntax_tyCheckStmt(KonohaContext *kctx, SugarSyntax *syn, kS
 	int SugarFunc_index = Gamma_isTopLevel(gma) ? SugarFunc_TopStmtTyCheck : SugarFunc_StmtTyCheck;
 	int callCount = 0;
 	while(true) {
-		kFunc *fo = syn->sugarFuncTable[SugarFunc_index];
-		if(fo != NULL) {
-			kFunc **funcItems = &fo;
-			int index = 0;
-			if(IS_Array(fo)) { // @Future
-				funcItems = syn->sugarFuncListTable[SugarFunc_index]->funcItems;
-				index = kArray_size(syn->sugarFuncListTable[SugarFunc_index]) - 1;
-			}
-			for(; index >= 0; index--) {
-				/*kbool_t result =*/ callStmtTyCheckFunc(kctx, funcItems[index], &callCount, stmt, gma);
-				if(Stmt_isDone(stmt)) return true;
-				if(Stmt_isERR(stmt)) return false;
-				if(stmt->build != TSTMT_UNDEFINED) {
-					return true;
-				}
+		int index, size;
+		kFunc **funcItems = SugarSyntax_funcTable(kctx, syn, SugarFunc_index, &size);
+		for(index = size - 1; index >= 0; index--) {
+			/*kbool_t result =*/ callStmtTyCheckFunc(kctx, funcItems[index], &callCount, stmt, gma);
+			if(Stmt_isDone(stmt)) return true;
+			if(Stmt_isERR(stmt)) return false;
+			if(stmt->build != TSTMT_UNDEFINED) {
+				return true;
 			}
 		}
 		if(syn->parentSyntaxNULL == NULL) break;

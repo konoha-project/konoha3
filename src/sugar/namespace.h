@@ -852,7 +852,7 @@ static void ArrayNULL_appendArray(KonohaContext *kctx, kObject *p, kArray **arra
 	}
 }
 
-static kFunc** SugarSyntax_funcTable(KonohaContext *kctx, SugarSyntax *syn, int index, size_t *sizeRef)
+static kFunc** SugarSyntax_funcTable(KonohaContext *kctx, SugarSyntax *syn, int index, int *sizeRef)
 {
 	kFunc *fo = syn->sugarFuncTable[index];
 	if(fo == NULL) {
@@ -860,7 +860,7 @@ static kFunc** SugarSyntax_funcTable(KonohaContext *kctx, SugarSyntax *syn, int 
 		return NULL;
 	}
 	else if(IS_Array(fo)) {
-		sizeRef[0] =  kArray_size(syn->sugarFuncListTable[index]) - 1;
+		sizeRef[0] =  kArray_size(syn->sugarFuncListTable[index]);
 		return syn->sugarFuncListTable[index]->funcItems;
 	}
 	sizeRef[0] = 1;
@@ -903,7 +903,7 @@ static kbool_t kNameSpace_importSyntax(KonohaContext *kctx, kNameSpace *ns, Suga
 			}
 		}
 		for(index = 0; index < SugarFunc_SIZE; index++) {
-			size_t j, size;
+			int j, size;
 			kFunc **funcItems = SugarSyntax_funcTable(kctx, target, index, &size);
 			for(j = 0; j < size; j++) {
 				SugarSyntax_addFunc(kctx, ns, syn, index, funcItems[j]);

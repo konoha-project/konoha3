@@ -58,20 +58,13 @@ static kExpr *kStmt_parseOperatorExpr(KonohaContext *kctx, kStmt *stmt, SugarSyn
 	int callCount = 0;
 	SugarSyntax *currentSyntax = exprSyntax;
 	while(true) {
-		kFunc *fo = currentSyntax->sugarFuncTable[SugarFunc_ParseExpr];
-		if(fo != NULL) {
-			kFunc **funcItems = &fo;
-			int index = 0;
-			if(IS_Array(fo)) {
-				funcItems = currentSyntax->sugarFuncListTable[SugarFunc_ParseExpr]->funcItems;
-				index =  kArray_size(currentSyntax->sugarFuncListTable[SugarFunc_ParseExpr]) - 1;
-			}
-			for(; index >= 0; index--) {
-				DBG_ASSERT(IS_Func(funcItems[index]));
-				kExpr *texpr = callFuncParseExpr(kctx, exprSyntax, funcItems[index], &callCount, stmt, tokenList, beginIdx, operatorIdx, endIdx);
-				if(Stmt_isERR(stmt)) return K_NULLEXPR;
-				if(texpr != K_NULLEXPR) return texpr;
-			}
+		int index, size;
+		kFunc **funcItems = SugarSyntax_funcTable(kctx, currentSyntax, SugarFunc_ParseExpr, &size);
+		for(index = size - 1; index >= 0; index--) {
+			DBG_ASSERT(IS_Func(funcItems[index]));
+			kExpr *texpr = callFuncParseExpr(kctx, exprSyntax, funcItems[index], &callCount, stmt, tokenList, beginIdx, operatorIdx, endIdx);
+			if(Stmt_isERR(stmt)) return K_NULLEXPR;
+			if(texpr != K_NULLEXPR) return texpr;
 		}
 		if(currentSyntax->parentSyntaxNULL == NULL) break;
 		currentSyntax = currentSyntax->parentSyntaxNULL;
@@ -557,19 +550,12 @@ static int SugarSyntax_matchPattern(KonohaContext *kctx, SugarSyntax *syn, kToke
 	int callCount = 0;
 	if(syn != NULL) {
 		while(true) {
-			kFunc *fo = syn->sugarFuncTable[SugarFunc_PatternMatch];
-			if(fo != NULL) {
-				kFunc **funcItems = &fo;
-				int index = 0, next;
-				if(IS_Array(fo)) {
-					funcItems = syn->sugarFuncListTable[SugarFunc_PatternMatch]->funcItems;
-					index = kArray_size(syn->sugarFuncListTable[SugarFunc_PatternMatch]) - 1;
-				}
-				for(; index >= 0; index--) {
-					next = callPatternMatchFunc(kctx, funcItems[index], &callCount, stmt, name, tokenList, beginIdx, endIdx);
-					if(Stmt_isERR(stmt)) return -1;
-					if(next >= beginIdx) return next;
-				}
+			int index, size;
+			kFunc **funcItems = SugarSyntax_funcTable(kctx, syn, SugarFunc_PatternMatch, &size);
+			for(index = size - 1; index >= 0; index--) {
+				int next = callPatternMatchFunc(kctx, funcItems[index], &callCount, stmt, name, tokenList, beginIdx, endIdx);
+				if(Stmt_isERR(stmt)) return -1;
+				if(next >= beginIdx) return next;
 			}
 			if(syn->parentSyntaxNULL == NULL) break;
 			syn = syn->parentSyntaxNULL;
