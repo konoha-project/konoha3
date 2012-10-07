@@ -885,7 +885,6 @@ static kNameSpace* new_PackageNameSpace(KonohaContext *kctx, kpackage_t packageD
 {
 	kNameSpaceVar *ns = (kNameSpaceVar*)GCSAFE_new(NameSpace, KNULL(NameSpace));
 	ns->packageId = packageId;
-	ns->packageDomain = packageId;
 	return (kNameSpace*)ns;
 }
 

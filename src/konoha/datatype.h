@@ -543,7 +543,6 @@ static void kNameSpace_init(KonohaContext *kctx, kObject *o, void *conf)
 	if(conf != NULL) {
 		KINITv(ns->parentNULL, (kNameSpace*)conf);
 		ns->packageId     = ns->parentNULL->packageId;
-		ns->packageDomain = ns->parentNULL->packageDomain;
 		ns->syntaxOption  = ns->parentNULL->syntaxOption;
 	}
 	KINITv(ns->methodList, K_EMPTYARRAY);
@@ -554,7 +553,7 @@ static void kNameSpace_reftrace(KonohaContext *kctx, kObject *o)
 	kNameSpace *ns = (kNameSpace*)o;
 	KLIB kNameSpace_reftraceSugarExtension(kctx, ns);
 	size_t i, size = kNameSpace_sizeConstTable(ns);
-	BEGIN_REFTRACE(size + 4);
+	BEGIN_REFTRACE(size + 5);
 	for(i = 0; i < size; i++) {
 		if(SYMKEY_isBOXED(ns->constTable.keyValueItems[i].key)) {
 			KREFTRACEv(ns->constTable.keyValueItems[i].objectValue);
@@ -563,6 +562,7 @@ static void kNameSpace_reftrace(KonohaContext *kctx, kObject *o)
 	KREFTRACEv(ns->methodList);
 	KREFTRACEn(ns->parentNULL);
 	KREFTRACEn(ns->globalObjectNULL);
+	KREFTRACEn(ns->TokenFuncListNULL);
 	KREFTRACEn(ns->StmtPatternListNULL);
 	END_REFTRACE();
 }
