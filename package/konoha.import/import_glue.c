@@ -89,7 +89,7 @@ static kbool_t import_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 static kbool_t import_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("import"), 0, "\"import\" $Token [ \".*\"] ", 0, 0, NULL, NULL, Statement_import, NULL, NULL, },
+		{ SYM_("import"), 0, "\"import\" $Token $Token* [ \".*\"] ", 0, 0, NULL, NULL, Statement_import, NULL, NULL, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
