@@ -528,7 +528,7 @@ typedef struct KUtilsGrowingArray {
 	union {
 		char              *bytebuf;
 		const struct KonohaClassVar      **classItems;
-		KUtilsKeyValue    *keyvalueItems;
+		KUtilsKeyValue    *keyValueItems;
 		struct VirtualMachineInstruction   *codeItems;
 		kObject        **objectItems;
 		kObjectVar     **refhead;  // stack->ref
