@@ -24,8 +24,6 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-
-#include <stdio.h>
 #include <minikonoha/bytes.h>
 
 #include <errno.h> // include this because of E2BIG
@@ -109,7 +107,7 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 	kiconv_t conv;
 	KUtilsWriteBuffer wb;
 
-	char convBuf[CONV_BUFSIZE] = {'\0'};
+	char convBuf[CONV_BUFSIZE] = {0};
 	char *presentPtrFrom = fromBa->buf;
 	char ** inbuf = &presentPtrFrom;
 	char *presentPtrTo = convBuf;
@@ -327,27 +325,28 @@ static kbool_t bytes_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 	return true;
 }
 
-
-static int parseSQUOTE(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tenv, int tok_start)
+static KMETHOD TokenFunc_SingleQuote(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int ch, prev = '\'', pos = tok_start + 1;
-	while((ch = tenv->source[pos++]) != 0) {
+	kTokenVar *tk = (kTokenVar *)sfp[1].o;
+	int ch, prev = '/', pos = 1;
+	const char *source = S_text(sfp[2].asString);
+	while((ch = source[pos++]) != 0) {
 		if(ch == '\n') {
 			break;
 		}
 		if(ch == '\'' && prev != '\\') {
 			if(IS_NOTNULL(tk)) {
-				KSETv(tk, tk->text, KLIB new_kString(kctx, tenv->source + tok_start + 1, (pos-1)- (tok_start+1), 0));
+				KSETv(tk, tk->text, KLIB new_kString(kctx, source + 1, (pos-2), 0));
 				tk->unresolvedTokenType = SYM_("$SingleQuote");
 			}
-			return pos;
+			RETURNi_(pos);
 		}
 		prev = ch;
 	}
 	if(IS_NOTNULL(tk)) {
 		kreportf(ErrTag, tk->uline, "must close with \'");
 	}
-	return pos-1;
+	RETURNi_(0);
 }
 
 static KMETHOD TypeCheck_Squote(KonohaContext *kctx, KonohaStack *sfp)
@@ -367,8 +366,9 @@ static KMETHOD TypeCheck_Squote(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t bytes_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
-	// FIXME: This is an old fashion; USE TokenFunc style definition
-//	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '\'', parseSQUOTE, NULL, 0);
+	kMethod *mtd = KLIB new_kMethod(kctx, 0, 0, 0, TokenFunc_SingleQuote);
+	kFunc *fo = GCSAFE_new(Func, (uintptr_t) mtd);
+	SUGAR kNameSpace_addTokenFunc(kctx, ns, '\'', fo);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("$SingleQuote"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_Squote, },
 		{ KW_END, },
