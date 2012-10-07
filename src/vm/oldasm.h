@@ -44,28 +44,28 @@
 #define BBOP(BB)     (BB)->codeTable.codeItems
 #define GammaBuilderLabel(n)   (kBasicBlock*)(ctxcode->lstacks->objectItems[n])
 
-#define ASM(T, ...) do {\
-	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};\
-	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_;\
-	BUILD_asm(kctx, &tmp_.op, sizeof(OP##T));\
+#define ASM(T, ...) do {												\
+	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};		\
+	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_; \
+	BUILD_asm(kctx, &tmp_.op, sizeof(OP##T));						\
 } while (0)
 
-#define ASMop(T, OP, ...) do {\
-	OP##T op_ = {TADDR, OP, ASMLINE, ## __VA_ARGS__};\
-	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_;\
-	BUILD_asm(kctx, &tmp_.op, sizeof(OP##T));\
+#define ASMop(T, OP, ...) do {											\
+	OP##T op_ = {TADDR, OP, ASMLINE, ## __VA_ARGS__};				\
+	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_; \
+	BUILD_asm(kctx, &tmp_.op, sizeof(OP##T));						\
 } while (0)
 
-#define ASMbranch(T, lb, ...) do {\
-	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, NULL, ## __VA_ARGS__};\
-	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_;\
-	ASM_BRANCH_(kctx, lb, &tmp_.op, sizeof(OP##T)); \
+#define ASMbranch(T, lb, ...) do {										\
+	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, NULL, ## __VA_ARGS__};	\
+	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_; \
+	ASM_BRANCH_(kctx, lb, &tmp_.op, sizeof(OP##T));					\
 } while (0)
 
-#define kBasicBlock_add(bb, T, ...) do { \
-	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};\
-	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_;\
-	BasicBlock_add(kctx, bb, 0, &tmp_.op, sizeof(OP##T));\
+#define kBasicBlock_add(bb, T, ...) do {								\
+	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};		\
+	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_; \
+	BasicBlock_add(kctx, bb, 0, &tmp_.op, sizeof(OP##T));			\
 } while (0)
 
 #ifdef _CLASSICVM
