@@ -1,8 +1,6 @@
 //written by Joseph
 
 import("konoha.regexp");
-import("konoha.assign");
-import("konoha.string");
 
 void test() {
 	String str = "世界、こんにちは、世界!";

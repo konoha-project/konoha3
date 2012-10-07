@@ -1,8 +1,7 @@
 //written by Joseph
 
-import("konoha.regexp");
 import("konoha.array");
-import("konoha.assign");
+import("konoha.regexp");
 
 void test() {
 	String[] ma = "The rain in SPAIN stays mainly in the plain".match(/ain/g);
