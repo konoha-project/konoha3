@@ -1,9 +1,7 @@
 //written by Joseph
 
-import("konoha.regexp");
-import("konoha.string");
-import("konoha.assign");
 import("konoha.new");
+import("konoha.regexp");
 
 void test() {
 	RegExp myExp = new RegExp("こんにちは、世界");

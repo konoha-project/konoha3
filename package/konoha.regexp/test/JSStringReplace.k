@@ -1,7 +1,6 @@
 //written by Joseph
 
 import("konoha.regexp");
-import("konoha.assign");
 
 void test() {
 	RegExp patt = /world/gi;

@@ -1,10 +1,7 @@
 //written by Joseph
 
-import("konoha.string");
-import("konoha.regexp");
-import("konoha.assign");
 import("konoha.array");
-//import("konoha.null");/*TODO*/
+import("konoha.regexp");
 
 void test() {
 	String str = "Hello world!";
