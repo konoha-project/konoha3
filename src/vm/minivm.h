@@ -345,139 +345,116 @@ static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *kctx, 
 	DISPATCH_START(pc);
 
 	CASE(NOP) {
-		DBG_P("%d", pc->opcode);
 		OPNOP *op = (OPNOP*)pc;
 		OPEXEC_NOP(); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(THCODE) {
-		DBG_P("%d", pc->opcode);
 		OPTHCODE *op = (OPTHCODE*)pc;
 		OPEXEC_THCODE(op->threadCode); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(ENTER) {
-		DBG_P("%d", pc->opcode);
 		OPENTER *op = (OPENTER*)pc;
 		OPEXEC_ENTER(); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(EXIT) {
-		DBG_P("%d", pc->opcode);
 		OPEXIT *op = (OPEXIT*)pc;
 		OPEXEC_EXIT(); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(NSET) {
-		DBG_P("%d", pc->opcode);
 		OPNSET *op = (OPNSET*)pc;
 		OPEXEC_NSET(op->a, op->n, op->ty); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(NMOV) {
-		DBG_P("%d", pc->opcode);
 		OPNMOV *op = (OPNMOV*)pc;
 		OPEXEC_NMOV(op->a, op->b, op->ty); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(NMOVx) {
-		DBG_P("%d", pc->opcode);
 		OPNMOVx *op = (OPNMOVx*)pc;
 		OPEXEC_NMOVx(op->a, op->b, op->bx, op->ty); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(XNMOV) {
-		DBG_P("%d", pc->opcode);
 		OPXNMOV *op = (OPXNMOV*)pc;
 		OPEXEC_XNMOV(op->a, op->ax, op->b, op->ty); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(NEW) {
-		DBG_P("%d", pc->opcode);
 		OPNEW *op = (OPNEW*)pc;
 		OPEXEC_NEW(op->a, op->p, op->ty); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(NULL) {
-		DBG_P("%d", pc->opcode);
 		OPNULL *op = (OPNULL*)pc;
 		OPEXEC_NULL(op->a, op->ty); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(LOOKUP) {
-		DBG_P("%d", pc->opcode);
 		OPLOOKUP *op = (OPLOOKUP*)pc;
 		OPEXEC_LOOKUP(op->thisidx, op->ns, op->mtd); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(CALL) {
-		DBG_P("%d", pc->opcode);
 		OPCALL *op = (OPCALL*)pc;
 		OPEXEC_CALL(op->uline, op->thisidx, op->espshift, op->tyo); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(RET) {
-		DBG_P("%d", pc->opcode);
 		OPRET *op = (OPRET*)pc;
 		OPEXEC_RET(); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(NCALL) {
-		DBG_P("%d", pc->opcode);
 		OPNCALL *op = (OPNCALL*)pc;
 		OPEXEC_NCALL(); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(BNOT) {
-		DBG_P("%d", pc->opcode);
 		OPBNOT *op = (OPBNOT*)pc;
 		OPEXEC_BNOT(op->c, op->a); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(JMP) {
-		DBG_P("%d", pc->opcode);
 		OPJMP *op = (OPJMP*)pc;
 		OPEXEC_JMP(pc = op->jumppc, JUMP); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(JMPF) {
-		DBG_P("%d", pc->opcode);
 		OPJMPF *op = (OPJMPF*)pc;
 		OPEXEC_JMPF(pc = op->jumppc, JUMP, op->a); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(TRYJMP) {
-		DBG_P("%d", pc->opcode);
 		OPTRYJMP *op = (OPTRYJMP*)pc;
 		OPEXEC_TRYJMP(pc = op->jumppc, JUMP); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(YIELD) {
-		DBG_P("%d", pc->opcode);
 		OPYIELD *op = (OPYIELD*)pc;
 		OPEXEC_YIELD(); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(ERROR) {
-		DBG_P("%d", pc->opcode);
 		OPERROR *op = (OPERROR*)pc;
 		OPEXEC_ERROR(op->uline, op->msg, op->esp); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(SAFEPOINT) {
-		DBG_P("%d", pc->opcode);
 		OPSAFEPOINT *op = (OPSAFEPOINT*)pc;
 		OPEXEC_SAFEPOINT(op->uline, op->esp); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(CHKSTACK) {
-		DBG_P("%d", pc->opcode);
 		OPCHKSTACK *op = (OPCHKSTACK*)pc;
 		OPEXEC_CHKSTACK(op->uline); pc++;
 		GOTO_NEXT();
 	} 
 	CASE(TRACE) {
-		DBG_P("%d", pc->opcode);
 		OPTRACE *op = (OPTRACE*)pc;
 		OPEXEC_TRACE(op->uline, op->thisidx, op->trace); pc++;
 		GOTO_NEXT();
