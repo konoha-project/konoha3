@@ -48,10 +48,6 @@ static void ArrayNULL_appendArray(KonohaContext *kctx, kObject *p, kArray **arra
 	}
 }
 
-
-// ---------------------------------------------------------------------------
-/* TokenFunc Management */
-
 static void kNameSpace_addFuncList(KonohaContext *kctx, kNameSpace *ns, kArray **funcListTable, int index, kFunc *fo)
 {
 	kArray *a = funcListTable[index];
@@ -67,6 +63,10 @@ static void kNameSpace_addFuncList(KonohaContext *kctx, kNameSpace *ns, kArray *
 	}
 	KLIB kArray_add(kctx, a, fo);
 }
+
+// ---------------------------------------------------------------------------
+/* TokenFunc Management */
+
 
 static int AsciiToKonohaChar(int ascii);
 
@@ -137,21 +137,21 @@ static kFunc** SugarSyntax_funcTable(KonohaContext *kctx, SugarSyntax *syn, int 
 	return (kFunc**)&(syn->sugarFuncTable[index]);
 }
 
-static void SugarSyntax_addFunc(KonohaContext *kctx, kNameSpace *ns, SugarSyntaxVar *syn, int index, kFunc *fo)
-{
-	kArray *a = syn->sugarFuncListTable[index];
-	if(a == NULL) {
-		KSETv(ns, syn->sugarFuncTable[index], fo);
-		return;
-	}
-	else if(!IS_Array(a)) {
-		kArray *newa = new_(Array, 0);
-		KLIB kArray_add(kctx, newa, a);
-		KSETv(ns, syn->sugarFuncListTable[index], newa);
-		a = newa;
-	}
-	KLIB kArray_add(kctx, a, fo);
-}
+//static void SugarSyntax_addFunc(KonohaContext *kctx, kNameSpace *ns, SugarSyntaxVar *syn, int index, kFunc *fo)
+//{
+//	kArray *a = syn->sugarFuncListTable[index];
+//	if(a == NULL) {
+//		KSETv(ns, syn->sugarFuncTable[index], fo);
+//		return;
+//	}
+//	else if(!IS_Array(a)) {
+//		kArray *newa = new_(Array, 0);
+//		KLIB kArray_add(kctx, newa, a);
+//		KSETv(ns, syn->sugarFuncListTable[index], newa);
+//		a = newa;
+//	}
+//	KLIB kArray_add(kctx, a, fo);
+//}
 
 static kbool_t kNameSpace_importSyntax(KonohaContext *kctx, kNameSpace *ns, SugarSyntax *target, kfileline_t pline)
 {
@@ -174,7 +174,7 @@ static kbool_t kNameSpace_importSyntax(KonohaContext *kctx, kNameSpace *ns, Suga
 			int j, size;
 			kFunc **funcItems = SugarSyntax_funcTable(kctx, target, index, &size);
 			for(j = 0; j < size; j++) {
-				SugarSyntax_addFunc(kctx, ns, syn, index, funcItems[j]);
+				kNameSpace_addFuncList(kctx, ns, syn->sugarFuncListTable, index, funcItems[j]);
 			}
 		}
 		syn->lastLoadedPackageId = target->lastLoadedPackageId;
@@ -235,7 +235,7 @@ static void kNameSpace_addSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol
 {
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_getSyntax(kctx, ns, keyword, 1/*new*/);
 	DBG_ASSERT(idx < SugarFunc_SIZE);
-	SugarSyntax_addFunc(kctx, ns, syn, idx, funcObject);
+	kNameSpace_addFuncList(kctx, ns, syn->sugarFuncListTable, idx, funcObject);
 }
 
 static void SugarSyntax_setMethodFunc(KonohaContext *kctx, SugarSyntaxVar *syn, MethodFunc definedMethodFunc, size_t index, MethodFunc *previousDefinedFuncRef, kFunc **cachedFuncRef)
