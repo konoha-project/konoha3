@@ -70,7 +70,7 @@ static void kNameSpace_addFuncList(KonohaContext *kctx, kNameSpace *ns, kArray *
 
 static int AsciiToKonohaChar(int ascii);
 
-static void kNameSpace_setTokenFunc(KonohaContext *kctx, kNameSpace *ns, int asciiChar, kFunc *fo)
+static void kNameSpace_addTokenFunc(KonohaContext *kctx, kNameSpace *ns, int asciiChar, kFunc *fo)
 {
 	if(fo->adhocKeyForTokenFunc == 0) {
 		((kFuncVar*)fo)->adhocKeyForTokenFunc = AsciiToKonohaChar(asciiChar);

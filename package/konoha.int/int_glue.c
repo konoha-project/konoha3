@@ -285,11 +285,11 @@ static kbool_t int_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpa
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 	kMethod *mtd = KLIB new_kMethod(kctx, 0, 0, 0, parseNumber);
 	kFunc *fo = GCSAFE_new(Func, (uintptr_t) mtd);
-	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '0', NULL, fo, 0);
+	SUGAR kNameSpace_addTokenFunc(kctx, ns, '0', fo);
 
 	SugarSyntaxVar *syn = (SugarSyntaxVar*)SUGAR kNameSpace_getSyntax(kctx, ns, SYM_("+"), 0);
 	if(syn != NULL) {
-		syn->precedence_op1  = 16;
+		syn->precedence_op1  = Precedence_CStylePREUNARY;
 	}
 	return true;
 }

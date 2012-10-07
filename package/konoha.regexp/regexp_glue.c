@@ -779,7 +779,7 @@ static kbool_t regexp_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 	return true;
 }
 
-static KMETHOD parseREGEXP(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *)sfp[1].o;
 	int ch, prev = '/', pos = 1;
@@ -832,9 +832,9 @@ static KMETHOD TypeCheck_RegExp(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t regexp_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
-	kMethod *mtd = KLIB new_kMethod(kctx, 0, 0, 0, parseREGEXP);
+	kMethod *mtd = KLIB new_kMethod(kctx, 0, 0, 0, TokenFunc_JavaScriptRegExp);
 	kFunc *fo = GCSAFE_new(Func, (uintptr_t) mtd);
-	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '/', NULL, fo, 0);
+	SUGAR kNameSpace_addTokenFunc(kctx, ns, '/', fo);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("$regexp"),  TypeCheck_(RegExp), },
 		{ .keyword = KW_END, },

@@ -139,10 +139,10 @@ static KMETHOD Expr_setUnboxConstValue(KonohaContext *kctx, KonohaStack *sfp)
 }
 // --------------------------------------------------------------------------
 
-//## void NameSpace.addTokenizeFunc(String keyword, Func f);
-static KMETHOD NameSpace_addTokenizeFunc(KonohaContext *kctx, KonohaStack *sfp)
+//## void NameSpace.addTokenFunc(String keyword, Func f);
+static KMETHOD NameSpace_addTokenFunc(KonohaContext *kctx, KonohaStack *sfp)
 {
-	SUGAR kNameSpace_setTokenizeFunc(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString)[0], NULL, sfp[2].asFunc, 1/*isAddition*/);
+	SUGAR kNameSpace_addTokenFunc(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString)[0], sfp[2].asFunc);
 	KLIB kNameSpace_compileAllDefinedMethods(kctx);
 }
 
@@ -371,7 +371,7 @@ static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public, _F(Expr_getTermToken), TY_Token, TY_Expr, MN_("getTermToken"), 0,
 		_Public, _F(Expr_setUnboxConstValue), TY_Expr, TY_Expr, MN_("setUnboxConstValue"), 2, TY_int, FN_("type"), TY_int, FN_("value"),
 		_Public, _F(NameSpace_compileAllDefinedMethods), TY_void, TY_NameSpace, MN_("compileAllDefinedMethods"), 0,
-		_Public, _F(NameSpace_addTokenizeFunc), TY_void, TY_NameSpace, MN_("addTokenizeFunc"), 2, TY_String, FN_key, TY_FuncTokenize, FN_func,
+		_Public, _F(NameSpace_addTokenFunc), TY_void, TY_NameSpace, MN_("addTokenFunc"), 2, TY_String, FN_key, TY_FuncTokenize, FN_func,
 		_Public, _F(NameSpace_addPatternMatch), TY_void, TY_NameSpace, MN_("addPatternMatch"), 2, TY_String, FN_key, TY_FuncPatternMatch, FN_func,
 		_Public, _F(NameSpace_addExpression), TY_void, TY_NameSpace, MN_("addExpression"), 2, TY_String, FN_key, TY_FuncExpression, FN_func,
 		_Public, _F(NameSpace_addTopLevelStatement), TY_void, TY_NameSpace, MN_("addTopLevelStatement"), 2, TY_String, FN_key, TY_FuncStatement, FN_func,

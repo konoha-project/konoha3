@@ -45,4 +45,4 @@
 //    return 0;
 //}
 //
-//addTokenizeFunc("/", regexToken);
+//addTokenFunc("/", regexToken);

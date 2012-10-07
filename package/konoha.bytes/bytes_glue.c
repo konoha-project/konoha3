@@ -367,7 +367,8 @@ static KMETHOD TypeCheck_Squote(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t bytes_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
-	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '\'', parseSQUOTE, NULL, 0);
+	// FIXME: This is an old fashion; USE TokenFunc style definition
+//	SUGAR kNameSpace_setTokenizeFunc(kctx, ns, '\'', parseSQUOTE, NULL, 0);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("$SingleQuote"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_Squote, },
 		{ KW_END, },

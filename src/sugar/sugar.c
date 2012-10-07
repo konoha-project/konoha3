@@ -194,7 +194,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	};
 	kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(ClassData), 0);
 
-	mod->kNameSpace_setTokenizeFunc = kNameSpace_setTokenizeFunc;
+	mod->kNameSpace_addTokenFunc       = kNameSpace_addTokenFunc;
 	mod->TokenSequence_tokenize        = TokenSequence_tokenize;
 	mod->TokenSequence_applyMacro      = TokenSequence_applyMacro;
 	mod->kNameSpace_setMacroData       = kNameSpace_setMacroData;

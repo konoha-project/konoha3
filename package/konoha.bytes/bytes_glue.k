@@ -35,6 +35,6 @@
 // }
 
 
-// addTokenizeFunc("'", singleQuoteToken);
+// addTokenFunc("'", singleQuoteToken);
 // addTypeCheck("$SingleQuote", tyCheckSingleQuote);
 // addTermExpression("$SingleQuote");
