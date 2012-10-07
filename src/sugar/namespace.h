@@ -419,30 +419,7 @@ static kbool_t kNameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ns, con
 	return result;
 }
 
-static kbool_t kNameSpace_importConstData(KonohaContext *kctx, kNameSpace *ns, kNameSpace *targetNS, void *thunk, kbool_t (*match)(KonohaContext *kctx, KUtilsKeyValue *, void *thunk), kfileline_t pline)
-{
-	KUtilsWriteBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	size_t i, size = kNameSpace_sizeConstTable(targetNS);
-	kbool_t result = true;
-	for(i = 0; i < size; i++) {
-		KUtilsKeyValue *kvs = targetNS->constTable.keyValueItems + i;
-		if(match(kctx, kvs, thunk)) {
-			KLIB Kwb_write(kctx, &wb, (const char*)(kvs), sizeof(KUtilsKeyValue));
-		}
-	}
-	size_t nitems = Kwb_bytesize(&wb) / sizeof(KUtilsKeyValue);
-	if(nitems > 0) {
-		result = kNameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, (KUtilsKeyValue*)KLIB Kwb_top(kctx, &wb, 0), nitems, pline);
-	}
-	KLIB Kwb_free(&wb);
-	return result;
-}
-
-// ---------------------------------------------------------------------------
-/* ClassName in ConstTable */
-
-//static kbool_t kNameSpace_importClassName(KonohaContext *kctx, kNameSpace *ns, kNameSpace *targetNS, kfileline_t pline)
+//static kbool_t kNameSpace_importConstData(KonohaContext *kctx, kNameSpace *ns, kNameSpace *targetNS, void *thunk, kbool_t (*match)(KonohaContext *kctx, KUtilsKeyValue *, void *thunk), kfileline_t pline)
 //{
 //	KUtilsWriteBuffer wb;
 //	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
@@ -450,13 +427,8 @@ static kbool_t kNameSpace_importConstData(KonohaContext *kctx, kNameSpace *ns, k
 //	kbool_t result = true;
 //	for(i = 0; i < size; i++) {
 //		KUtilsKeyValue *kvs = targetNS->constTable.keyValueItems + i;
-//		if(kvs->ty == TY_TYPE) {
-//			KonohaClass *ct = (KonohaClass*)kvs->unboxValue;
-//			if(CT_is(Private, ct)) continue;
-//			if(targetNS->packageId == ct->packageId) {
-//				DBG_P("importing packageId=%s.%s to %s..", PackageId_t(ct->packageId), SYM_t(ct->classNameSymbol), PackageId_t(ns->packageId));
-//				KLIB Kwb_write(kctx, &wb, (const char*)(kvs), sizeof(KUtilsKeyValue));
-//			}
+//		if(match(kctx, kvs, thunk)) {
+//			KLIB Kwb_write(kctx, &wb, (const char*)(kvs), sizeof(KUtilsKeyValue));
 //		}
 //	}
 //	size_t nitems = Kwb_bytesize(&wb) / sizeof(KUtilsKeyValue);
@@ -466,6 +438,9 @@ static kbool_t kNameSpace_importConstData(KonohaContext *kctx, kNameSpace *ns, k
 //	KLIB Kwb_free(&wb);
 //	return result;
 //}
+
+// ---------------------------------------------------------------------------
+/* ClassName in ConstTable */
 
 static KonohaClass *kNameSpace_getClass(KonohaContext *kctx, kNameSpace *ns, const char *name, size_t len, KonohaClass *defaultClass)
 {
@@ -970,17 +945,17 @@ static KonohaPackage *getPackageNULL(KonohaContext *kctx, kpackage_t packageId, 
 	return pack;
 }
 
-static kbool_t kNameSpace_importSymbol(KonohaContext *kctx, kNameSpace *ns, kNameSpace *target, ksymbol_t keyword, kfileline_t pline)
+static kbool_t kNameSpace_importSymbol(KonohaContext *kctx, kNameSpace *ns, kNameSpace *targetNS, ksymbol_t keyword, kfileline_t pline)
 {
-	KUtilsKeyValue *kvs = kNameSpace_getLocalConstNULL(kctx, target, keyword);
+	KUtilsKeyValue *kvs = kNameSpace_getLocalConstNULL(kctx, targetNS, keyword);
 	if(kvs != NULL) {
 		if(kNameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, kvs, 1, pline)) {
 			if(kvs->ty == TY_TYPE) {
 				size_t i;
 				ktype_t typeId = ((KonohaClass*)kvs->unboxValue)->typeId;
-				for(i = 0; i < kArray_size(target->methodList); i++) {
-					kMethod *mtd = target->methodList->methodItems[i];
-					if(mtd->typeId == typeId && !kMethod_is(Public,mtd) /*&& !kMethod_is(Private, mtd)*/) {
+				for(i = 0; i < kArray_size(targetNS->methodList); i++) {
+					kMethod *mtd = targetNS->methodList->methodItems[i];
+					if(mtd->typeId == typeId /*&& !kMethod_is(Private, mtd)*/) {
 						KLIB kArray_add(kctx, ns->methodList, mtd);
 					}
 				}
@@ -989,7 +964,7 @@ static kbool_t kNameSpace_importSymbol(KonohaContext *kctx, kNameSpace *ns, kNam
 		}
 	}
 	else { // there is no const data
-		SugarSyntax *syn = SYN_(target, keyword);
+		SugarSyntax *syn = SYN_(targetNS, keyword);
 		if(syn != NULL) {
 			return kNameSpace_importSyntax(kctx, ns, syn, pline);
 		}
@@ -1011,13 +986,11 @@ static kbool_t kNameSpace_importAll(KonohaContext *kctx, kNameSpace *ns, kNameSp
 {
 	if(!kNameSpace_isImported(kctx, ns, targetNS, pline)) {
 		size_t i;
-		DBG_P("target->packageId=%s", PackageId_t(targetNS->packageId));
 		if(kNameSpace_sizeConstTable(targetNS) > 0) {
 			if(!kNameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, targetNS->constTable.keyValueItems, kNameSpace_sizeConstTable(targetNS), pline)) {
 				return false;
 			}
 		}
-		//kNameSpace_importTokenFunc(kctx, ns, targetNS, pline);
 		kNameSpace_importSyntaxAll(kctx, ns, targetNS, pline);
 		for(i = 0; i < kArray_size(targetNS->methodList); i++) {
 			kMethod *mtd = targetNS->methodList->methodItems[i];
@@ -1058,6 +1031,16 @@ static kbool_t kNameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, con
 			isContinousLoading = pack->packageHandler->setupNameSpace(kctx, pack->packageNameSpace, ns, pline);
 		}
 		return true;
+	}
+	return false;
+}
+
+static kbool_t kNameSpace_importPackageSymbol(KonohaContext *kctx, kNameSpace *ns, const char *name, ksymbol_t keyword, kfileline_t pline)
+{
+	kpackage_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
+	KonohaPackage *pack = getPackageNULL(kctx, packageId, pline);
+	if(pack != NULL) {
+		return kNameSpace_importSymbol(kctx, ns, pack->packageNameSpace, keyword, pline);
 	}
 	return false;
 }

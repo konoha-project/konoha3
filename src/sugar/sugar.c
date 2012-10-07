@@ -247,7 +247,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	defineDefaultSyntax(kctx, KNULL(NameSpace));
 }
 
-// boolean NameSpace.loadScript(String path);
+// boolean NameSpace.load(String path);
 static KMETHOD NameSpace_loadScript(KonohaContext *kctx, KonohaStack *sfp)
 {
 	char pathbuf[256];
@@ -255,10 +255,18 @@ static KMETHOD NameSpace_loadScript(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNb_(kNameSpace_loadScript(kctx, sfp[0].asNameSpace, path, sfp[K_RTNIDX].uline));
 }
 
-// boolean NameSpace.importPackage(String pkgname);
+// boolean NameSpace.import(String pkgname);
 static KMETHOD NameSpace_importPackage(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RETURNb_(kNameSpace_importPackage(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), sfp[K_RTNIDX].uline));
+}
+
+// boolean NameSpace.import(String pkgname, String symbol);
+static KMETHOD NameSpace_importPackageSymbol(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kString *key = sfp[2].asString;
+	ksymbol_t keyword = ksymbolA(S_text(key), S_size(key), SYM_NONAME);
+	RETURNb_(kNameSpace_importPackageSymbol(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), keyword, sfp[K_RTNIDX].uline));
 }
 
 #define _Public kMethod_Public
@@ -269,6 +277,7 @@ void MODSUGAR_loadMethod(KonohaContext *kctx)
 {
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(NameSpace_importPackage), TY_boolean, TY_NameSpace, MN_("import"), 1, TY_String, FN_("name"),
+		_Public, _F(NameSpace_importPackageSymbol), TY_boolean, TY_NameSpace, MN_("import"), 2, TY_String, FN_("name"), TY_String, FN_("symbol"),
 		_Public, _F(NameSpace_loadScript), TY_boolean, TY_NameSpace, MN_("load"), 1, TY_String, FN_("path"),
 		DEND,
 	};

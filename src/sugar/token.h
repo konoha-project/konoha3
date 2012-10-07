@@ -138,19 +138,19 @@ static int ParseAnnotation(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeni
 	return ParseSingleOperator(kctx, tk, tokenizer, tok_start);
 }
 
-static KMETHOD TokenFunc_JavaStyleAnnotation(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_TokenFunc(tk, source);
-	if(isalnum(tokenizer->source[tok_start+1])) {  // tokenizer, tok_start is older style of tokneizer
-		int pos = ParseSymbol(kctx, tk, tokenizer, tok_start+1);
-		if(IS_NOTNULL(tk)) {  // pre-resolved
-			tk->resolvedSymbol = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID) | MN_Annotation;
-			tk->resolvedSyntaxInfo = SYN_(tokenizer->ns, KW_SymbolPattern);
-		}
-		RETURNi_(pos - tok_start);
-	}
-	RETURNi_(0);
-}
+//static KMETHOD TokenFunc_JavaStyleAnnotation(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	VAR_TokenFunc(tk, source);
+//	if(isalnum(tokenizer->source[tok_start+1])) {  // tokenizer, tok_start is older style of tokneizer
+//		int pos = ParseSymbol(kctx, tk, tokenizer, tok_start+1);
+//		if(IS_NOTNULL(tk)) {  // pre-resolved
+//			tk->resolvedSymbol = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID) | MN_Annotation;
+//			tk->resolvedSyntaxInfo = SYN_(tokenizer->ns, KW_SymbolPattern);
+//		}
+//		RETURNi_(pos - tok_start);
+//	}
+//	RETURNi_(0);
+//}
 
 static int ParseOperator(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
