@@ -7,7 +7,7 @@ int TokenFunc(Token tk, String source) {
 	return 0;
 }
 
-addTokenFunc("'", TokenFunc);
+setTokenFunc("'", TokenFunc);
 
 ''
 

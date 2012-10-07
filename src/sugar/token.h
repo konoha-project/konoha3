@@ -467,7 +467,6 @@ static const TokenizeFunc *kNameSpace_tokenMatrix(KonohaContext *kctx, kNameSpac
 			bzero(tokenMatrix + KCHAR_MAX, sizeof(MiniKonohaTokenMatrix));
 		}
 		((kNameSpaceVar*)ns)->tokenMatrix = (void*)tokenMatrix;
-		kNameSpace_loadTokenFunc(kctx, ns, (kArray**)ns->tokenMatrix + KCHAR_MAX, ns);
 	}
 	return (TokenizeFunc*)ns->tokenMatrix;
 }
@@ -498,35 +497,6 @@ static void TokenSequence_tokenize(KonohaContext *kctx, TokenSequence *tokens, c
 		RESET_GCSTACK();
 	}
 	TokenSequence_end(kctx, tokens);
-}
-
-static void kNameSpace_setTokenizeFunc(KonohaContext *kctx, kNameSpace *ns, int ch, TokenizeFunc cfunc, kFunc *funcTokenize, int isAddition)
-{
-	int kchar = (ch < 0) ? KonohaChar_Unicode : cMatrix[ch];
-	if(cfunc != NULL) {
-		TokenizeFunc *funcMatrix = (TokenizeFunc *)kNameSpace_tokenMatrix(kctx, ns);
-		funcMatrix[kchar] = cfunc;
-	}
-	else {
-		kFunc ** funcMatrix = kNameSpace_tokenFuncMatrix(kctx, ns);
-		if(funcMatrix[kchar] == NULL) {
-			KINITp(ns, funcMatrix[kchar], funcTokenize);
-		}
-		else {
-			if(isAddition) {
-				kArray *a = (kArray*)funcMatrix[kchar];
-				if(!IS_Array(a)) {
-					a = new_(Array, 0);
-					KLIB kArray_add(kctx, a, funcMatrix[kchar]);
-					KSETv(ns, funcMatrix[kchar], (kFunc*)a);
-				}
-				KLIB kArray_add(kctx, a, funcTokenize);
-			}
-			else {
-				KSETv(ns, funcMatrix[kchar], funcTokenize);
-			}
-		}
-	}
 }
 
 #ifdef __cplusplus

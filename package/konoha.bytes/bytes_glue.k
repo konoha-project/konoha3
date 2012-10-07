@@ -14,7 +14,7 @@
 // 		}
 // 		if(ch == "'" && prev != "\\") {
 // 			tk.setText(source.substring(1, pos - 1));
-// 			tk.setKeyword("$SingleQuote");
+// 			tk.setKeyword("$SingleQuotedString");
 // 			return pos + 1;
 // 		}
 // 		prev = ch;
@@ -23,7 +23,7 @@
 // 	return pos-1;
 // }
 
-// Expr tyCheckSingleQuote(Stmt stmt, Expr expr, Gamma gma, int typeid) {
+// Expr tyCheckSingleQuotedString(Stmt stmt, Expr expr, Gamma gma, int typeid) {
 // 	Token tk = expr.getTermToken();
 // 	String s = tk.getText();
 // 	if (s.getSize() == 1) {
@@ -35,6 +35,6 @@
 // }
 
 
-// addTokenFunc("'", singleQuoteToken);
-// addTypeCheck("$SingleQuote", tyCheckSingleQuote);
-// addTermExpression("$SingleQuote");
+// setTokenFunc("'", singleQuoteToken);
+// addTypeCheck("$SingleQuotedString", tyCheckSingleQuotedString);
+// addTermExpression("$SingleQuotedString");

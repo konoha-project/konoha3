@@ -59,14 +59,14 @@
 
 // NameSpace.compileAllDefinedMethods();
 
-// addTokenFunc("-", floatToken);
-// addTokenFunc("0", floatToken);
-// addTokenFunc("1", floatToken);
-// addTokenFunc("2", floatToken);
-// addTokenFunc("3", floatToken);
-// addTokenFunc("4", floatToken);
-// addTokenFunc("5", floatToken);
-// addTokenFunc("6", floatToken);
-// addTokenFunc("7", floatToken);
-// addTokenFunc("8", floatToken);
-// addTokenFunc("9", floatToken);
+// setTokenFunc("-", floatToken);
+// setTokenFunc("0", floatToken);
+// setTokenFunc("1", floatToken);
+// setTokenFunc("2", floatToken);
+// setTokenFunc("3", floatToken);
+// setTokenFunc("4", floatToken);
+// setTokenFunc("5", floatToken);
+// setTokenFunc("6", floatToken);
+// setTokenFunc("7", floatToken);
+// setTokenFunc("8", floatToken);
+// setTokenFunc("9", floatToken);

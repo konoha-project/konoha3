@@ -808,7 +808,7 @@ static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, source + 1, (pos0-2), 0));
 				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, source + pos0, pos-pos0, 0));
 				tk->subTokenList = a;
-				tk->unresolvedTokenType = SYM_("$regexp");
+				tk->unresolvedTokenType = SYM_("$RegExp");
 			}
 			RETURNi_(pos);
 		}
@@ -832,14 +832,13 @@ static KMETHOD TypeCheck_RegExp(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t regexp_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
-	kMethod *mtd = KLIB new_kMethod(kctx, 0, 0, 0, TokenFunc_JavaScriptRegExp);
-	kFunc *fo = GCSAFE_new(Func, (uintptr_t) mtd);
-	SUGAR kNameSpace_addTokenFunc(kctx, ns, '/', fo);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ .keyword = SYM_("$regexp"),  TypeCheck_(RegExp), },
+		{ .keyword = SYM_("$RegExp"),  TypeCheck_(RegExp), },
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
+
+	SUGAR kNameSpace_setTokenFunc(kctx, ns, SYM_("$RegExp"), KonohaChar_Slash, new_SugarFunc(TokenFunc_JavaScriptRegExp));
 	return true;
 }
 
