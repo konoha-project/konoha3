@@ -32,7 +32,7 @@ extern "C" {
 #endif
 
 typedef struct Dummy {
-    int x;
+	int x;
 } kDummy;
 
 
@@ -42,76 +42,83 @@ static int __free__  = 0;
 
 static void Dummy_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-    assert((uintptr_t)conf == 0xdeadbeaf);
-    ((kDummy*)o)->x = __init__++;
+	assert((uintptr_t)conf == 0xdeadbeaf);
+	((kDummy*)o)->x = __init__++;
 }
 
 static void Dummy_reftrace(KonohaContext *kctx, kObject *o)
 {
-    __trace__++;
+	__trace__++;
 }
 
 static void Dummy_free(KonohaContext *kctx, kObject *o)
 {
-    __free__++;
+	__free__++;
 }
 
 static KDEFINE_CLASS DummyDef = {
-    /*.structname   = */ "Dummy",
-    /*.typeId       = */ 100,
-    /*.cflag        = */ 0,
-	                     0,
-	                     0,
-	                     0,
-	                     0,
-	                     0,
-    /*.cstruct_size = */ sizeof(struct Dummy),
-	                     0,
-	                     0,
-	                     0,
-    /*.init         = */ Dummy_init,
-    /*.reftrace     = */ Dummy_reftrace,
-    /*.free         = */ Dummy_free,
+	/*.structname   = */ "Dummy",
+	/*.typeId       = */ 100,
+	/*.cflag        = */ 0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	/*.cstruct_size = */ sizeof(struct Dummy),
+	0,
+	0,
+	0,
+	/*.init         = */ Dummy_init,
+	/*.reftrace     = */ Dummy_reftrace,
+	/*.free         = */ Dummy_free,
+		0/*fnull*/,
+		0/*p*/,
+		0/*unbox*/,
+		0/*compareObject*/,
+		0/*compareUnboxValue*/,
+		0/*hasField*/,
+		0/*getFieldObjectValue*/,
+		0/*setFieldObjectValue*/,
+		0/*getFieldUnboxValue*/,
+		0/*setFieldUnboxValue*/,
+		0/*initdef*/,
+		0/*isSubType*/,
+		0/*realtype*/
 };
 
 void test_gc(KonohaContext *kctx)
 {
 #define CT_Dummy ct
-    int i, j;
-    KonohaClass *ct = KLIB KonohaClass_define(kctx, 0, NULL, &DummyDef, 0);
-    /* small size */
-    for (i = 0; i < 10; ++i) {
-        for (j = 0; j < 100; ++j) {
-            kDummy *dummy = new_(Dummy, 0xdeadbeaf);
-            assert(__init__ == dummy->x+1);
-        }
-        assert(__init__ == (i+1) * 100);
-        assert(__trace__ == -1);
-        KLIB KscheduleGC(kctx->gcContext);
-    }
+	int i, j;
+	KonohaClass *ct = KLIB KonohaClass_define(kctx, 0, NULL, &DummyDef, 0);
+	/* small size */
+	for (i = 0; i < 10; ++i) {
+		for (j = 0; j < 100; ++j) {
+			kDummy *dummy = new_(Dummy, 0xdeadbeaf);
+			assert(__init__ == dummy->x+1);
+		}
+		assert(__init__ == (i+1) * 100);
+		assert(__trace__ == -1);
+		KLIB KscheduleGC(kctx->gcContext);
+	}
 
-    int small_object_count = __init__;
-    /* middle size */
-    for (i = 0; i < 100; ++i) {
-        for (j = 0; j < 1000; ++j) {
-            kDummy *dummy = new_(Dummy, 0xdeadbeaf);
-            assert(__init__ == dummy->x+1);
-        }
-        assert(__init__ == (i+1) * 1000 + small_object_count);
-        assert(__trace__ == -1);
-        KLIB KscheduleGC(kctx->gcContext);
-    }
+	int small_object_count = __init__;
+	/* middle size */
+	for (i = 0; i < 100; ++i) {
+		for (j = 0; j < 1000; ++j) {
+			kDummy *dummy = new_(Dummy, 0xdeadbeaf);
+			assert(__init__ == dummy->x+1);
+		}
+		assert(__init__ == (i+1) * 1000 + small_object_count);
+		assert(__trace__ == -1);
+		KLIB KscheduleGC(kctx->gcContext);
+	}
 }
 
 #ifdef _WIN64
 #ifdef _MSC_VER
 #include <intrin.h>
-static uint32_t CTZ(uint32_t x)
-{
-	unsigned long r = 0;
-	_BitScanForward(&r, x);
-	return r;
-}
 static uint32_t CLZ(uint32_t x)
 {
 	unsigned long r = 0;
@@ -126,61 +133,59 @@ static uint32_t FFS(uint32_t x)
 #else /* defined(_MSC_VER) */
 #define FFS(n) __builtin_ffsll(n)
 #define CLZ(n) __builtin_clzll(n)
-#define CTZ(x) __builtin_ctzll(x)
 #endif /* defined(_MSC_VER) */
 #else /* defined(_WIN64) */
 #define FFS(n) __builtin_ffsl(n)
 #define CLZ(n) __builtin_clzl(n)
-#define CTZ(x) __builtin_ctzl(x)
 #endif
 
 static uintptr_t myffs(uintptr_t val)
 {
-    uintptr_t bit;
+	uintptr_t bit;
 
-    if (val == 0)
-        return 0;
+	if (val == 0)
+		return 0;
 
-    for (bit = 1; !(val & 1); bit++)
-        val >>= 1;
+	for (bit = 1; !(val & 1); bit++)
+		val >>= 1;
 
-    return bit;
+	return bit;
 }
 
 static void test_bitops()
 {
-    static const uintptr_t test_data[] = {
-        0, 1, 2, 3, 4, 5, 7, 13,
-        100, 108, 120, 128, 129, 219, 250, 256,
-        257, 300, 420, 510, 512, 513, 1000, 1023,
-        1024, 2040, 2048, 2049, 4095, 4096, 4097, 8190,
-        8192, 8193, 16383, 16384, 16385, 32767, 32768, 32769
-    };
+	static const uintptr_t test_data[] = {
+		0, 1, 2, 3, 4, 5, 7, 13,
+		100, 108, 120, 128, 129, 219, 250, 256,
+		257, 300, 420, 510, 512, 513, 1000, 1023,
+		1024, 2040, 2048, 2049, 4095, 4096, 4097, 8190,
+		8192, 8193, 16383, 16384, 16385, 32767, 32768, 32769
+	};
 
-    static const uintptr_t clz_test[] = {
-        63, 63, 62, 62, 61, 61, 61, 60,
-        57, 57, 57, 56, 56, 56, 56, 55,
-        55, 55, 55, 55, 54, 54, 54, 54,
-        53, 53, 52, 52, 52, 51, 51, 51,
-        50, 50, 50, 49, 49, 49, 48, 48
-    };
-    uintptr_t i;
-    for (i = 0; i < sizeof(test_data)/sizeof(uintptr_t); i++) {
-        assert(CLZ(test_data[i]) == clz_test[i]);
-        assert(FFS(test_data[i]) == myffs(test_data[i]));
-    }
+	static const uintptr_t clz_test[] = {
+		63, 63, 62, 62, 61, 61, 61, 60,
+		57, 57, 57, 56, 56, 56, 56, 55,
+		55, 55, 55, 55, 54, 54, 54, 54,
+		53, 53, 52, 52, 52, 51, 51, 51,
+		50, 50, 50, 49, 49, 49, 48, 48
+	};
+	uintptr_t i;
+	for (i = 0; i < sizeof(test_data)/sizeof(uintptr_t); i++) {
+		assert(CLZ(test_data[i]) == clz_test[i]);
+		assert(FFS(test_data[i]) == myffs(test_data[i]));
+	}
 }
 
 int main(int argc, const char *argv[])
 {
-    int ret = 0;
-    KonohaContext* konoha = konoha_open(KonohaUtils_getDefaultPlatformApi());
-    test_gc(konoha);
-    konoha_close(konoha);
-    assert(__free__ == __init__);
-    fprintf(stderr, "alloced_object_count = %d, freed_object_count=%d\n", __init__, __free__);
-    test_bitops();
-    return ret;
+	int ret = 0;
+	KonohaContext* konoha = konoha_open(KonohaUtils_getDefaultPlatformApi());
+	test_gc(konoha);
+	konoha_close(konoha);
+	assert(__free__ == __init__);
+	fprintf(stderr, "alloced_object_count = %d, freed_object_count=%d\n", __init__, __free__);
+	test_bitops();
+	return ret;
 }
 
 #ifdef __cplusplus
