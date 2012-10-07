@@ -100,16 +100,59 @@ typedef enum {
 //#define MN_new       (8+KW_void)
 #define FN_this      FN_("this")
 
-//#define kflag_clear(flag)  (flag) = 0
-
 // Tokenizer
+
+typedef enum {
+	KonohaChar_Null                 = 0,
+	KonohaChar_Undefined            = 1,
+	KonohaChar_Digit                = 2,
+	KonohaChar_UpperCaseAlphabet    = 3,
+	KonohaChar_LowerCaseAlphabet    = 4,
+	KonohaChar_Unicode              = 5,
+	KonohaChar_NewLine              = 6,
+	KonohaChar_Tab                  = 7,
+	KonohaChar_Space                = 8,
+	KonohaChar_OpenParenthesis      =9,
+	KonohaChar_CloseParenthesis      =10,
+	KonohaChar_OpenBracket       =11,
+	KonohaChar_CloseBracket       =12,
+	KonohaChar_OpenBrace       =13,
+	KonohaChar_CloseBrace       =14,
+	KonohaChar_LessThan        =15,
+	KonohaChar_GreaterThan        =16,
+	KonohaChar_Quote     =17,
+	KonohaChar_DoubleQuote    =18,
+	KonohaChar_BackQuote   =19,
+	KonohaChar_Surprised   =20,
+	KonohaChar_Sharp     =21,
+	KonohaChar_Dollar    =22,
+	KonohaChar_Percent       =23,
+	KonohaChar_And       =24,
+	KonohaChar_Star      =25,
+	KonohaChar_Plus      =26,
+	KonohaChar_Comma     =27,
+	KonohaChar_Minus     =28,
+	KonohaChar_Dot       =29,
+	KonohaChar_Slash     =30,
+	KonohaChar_Colon     =31,
+	KonohaChar_SemiColon =32,
+	KonohaChar_Equal        =33,
+	KonohaChar_Question  =34,
+	KonohaChar_AtMark       =35,
+	KonohaChar_Var       =36,
+	KonohaChar_Childer   =37,
+	KonohaChar_BackSlash   =38,
+	KonohaChar_Hat       =39,
+	KonohaChar_UnderBar     =40,
+	KonohaChar_MAX = 41
+} KonohaChar;
 
 #define KCHAR_MAX  41
 #define SIZEOF_TOKENMATRIX   (sizeof(void*) * KCHAR_MAX * 2)
-typedef struct TokenizerEnv TokenizerEnv;
-typedef int (*TokenizeFunc)(KonohaContext *, kTokenVar *, TokenizerEnv *, int);
+typedef struct Tokenizer Tokenizer;
+typedef int (*TokenizeFunc)(KonohaContext *, kTokenVar *, Tokenizer *, int);
 
-struct TokenizerEnv {
+struct Tokenizer {
 	kNameSpace         *ns;
 	const char         *source;
 	size_t              sourceLength;
@@ -137,6 +180,14 @@ struct TokenizerEnv {
 #ifndef VAR_TRACE
 #define VAR_TRACE DBG_P("tracing.. file=%s, line=%d", __FILE__, __LINE__)
 #endif
+
+// int TokenFunc(Token tk, Source s)
+#define VAR_TokenFunc(TK, S)\
+		kTokenVar *TK = (kTokenVar*)sfp[1].asObject;\
+		kString *S = sfp[2].asString;\
+		Tokenizer *tokenizer = (Tokenizer*)sfp[1].unboxValue;\
+		int tok_start = (ksymbol_t)sfp[2].intValue;\
+		VAR_TRACE; (void)TK; (void)S; (void)tok_start; (void)tokenizer;
 
 // int PatternMatch(Stmt stmt, int classNameSymbol, Token[] toks, int s, int e)
 #define VAR_PatternMatch(STMT, NAME, TLS, S, E)\

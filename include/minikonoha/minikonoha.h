@@ -1246,6 +1246,7 @@ struct kFuncVar {
 	KonohaObjectHeader h;
 	kObject *self;
 	kMethod *mtd;
+	int adhocKeyForTokenFunc;   // as name implies,
 };
 
 /* ------------------------------------------------------------------------ */
@@ -1265,6 +1266,7 @@ struct kNameSpaceVar {
 	// the below references are defined in sugar
 	uintptr_t                          syntaxOption;
 	void                              *tokenMatrix;
+	//kArray                            *TokenFuncListNULL;
 	KUtilsHashMap                     *syntaxMapNN;
 	kArray                            *StmtPatternListNULL;
 };

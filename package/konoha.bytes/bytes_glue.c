@@ -328,7 +328,7 @@ static kbool_t bytes_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 }
 
 
-static int parseSQUOTE(KonohaContext *kctx, kTokenVar *tk, TokenizerEnv *tenv, int tok_start)
+static int parseSQUOTE(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tenv, int tok_start)
 {
 	int ch, prev = '\'', pos = tok_start + 1;
 	while((ch = tenv->source[pos++]) != 0) {
