@@ -218,12 +218,13 @@ typedef const struct SugarSyntaxVar   SugarSyntax;
 typedef struct SugarSyntaxVar         SugarSyntaxVar;
 
 typedef enum {
-	SugarFunc_PatternMatch      = 0,
-	SugarFunc_Expression        = 1,
-	SugarFunc_TopLevelStatement = 2,
-	SugarFunc_Statement         = 3,
-	SugarFunc_TypeCheck         = 4,
-	SugarFunc_SIZE              = 5
+	SugarFunc_TokenFunc         = 0,
+	SugarFunc_PatternMatch      = 1,
+	SugarFunc_Expression        = 2,
+	SugarFunc_TopLevelStatement = 3,
+	SugarFunc_Statement         = 4,
+	SugarFunc_TypeCheck         = 5,
+	SugarFunc_SIZE              = 6
 } SugerFunc;
 
 #define SYNFLAG_Macro               ((kshortflag_t)1)
