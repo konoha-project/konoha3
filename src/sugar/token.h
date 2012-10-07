@@ -269,7 +269,7 @@ static int ParseUndefinedToken(KonohaContext *kctx, kTokenVar *tk, Tokenizer *to
 	return tok_start;
 }
 
-static int parseLazyBlock(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start);
+static int ParseLazyBlock(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start);
 
 static const TokenizeFunc MiniKonohaTokenMatrix[] = {
 	ParseSkip,  /* KonohaChar_Null */
@@ -285,7 +285,7 @@ static const TokenizeFunc MiniKonohaTokenMatrix[] = {
 	ParseSingleOperator, /* KonohaChar_CloseParenthesis */
 	ParseSingleOperator, /* KonohaChar_OpenBracket */
 	ParseSingleOperator, /* KonohaChar_CloseBracket */
-	parseLazyBlock, /* KonohaChar_OpenBrace */
+	ParseLazyBlock, /* KonohaChar_OpenBrace */
 	ParseSingleOperator, /* KonohaChar_CloseBrace */
 	ParseOperator,  /* KonohaChar_LessThan */
 	ParseOperator,  /* KonohaChar_LessThan */
@@ -428,7 +428,7 @@ static void Tokenizer_tokenize(KonohaContext *kctx, Tokenizer *tokenizer)
 	}
 }
 
-static int parseLazyBlock(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
+static int ParseLazyBlock(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	int ch, level = 1, pos = tok_start + 1;
 	while((ch = AsciiToKonohaChar(tokenizer->source[pos])) != 0) {
