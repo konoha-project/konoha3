@@ -807,7 +807,7 @@ static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 				kArray *a = (kArray*)KLIB new_kObject(kctx, CT_StringArray0, 2);
 				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, source + 1, (pos0-2), 0));
 				KLIB kArray_add(kctx, a, KLIB new_kString(kctx, source + pos0, pos-pos0, 0));
-				tk->subTokenList = a;
+				tk->subTokenList = a;  // FIXME: terrible bug!! who wrote this
 				tk->unresolvedTokenType = SYM_("$RegExp");
 			}
 			RETURNi_(pos);
