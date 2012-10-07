@@ -167,15 +167,6 @@ struct Tokenizer {
 	kString            *preparedString;
 };
 
-/******
-// ParseToken
-#define VAR_ParseToken(TK, STR, UL) \
-		kTokenVar *TK = (kTokenVar*)sfp[0].asObject;\
-		kString *STR = sfp[1].asString;\
-		int UL = (int)sfp[2].intValue;\
-		(void)TK; (void)STR; (void)UL;\
-*****/
-
 //#define VAR_TRACE
 #ifndef VAR_TRACE
 #define VAR_TRACE DBG_P("tracing.. file=%s, line=%d", __FILE__, __LINE__)
