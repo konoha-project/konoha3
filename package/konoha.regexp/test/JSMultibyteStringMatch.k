@@ -1,9 +1,7 @@
 //written by Joseph
 
-import("konoha.regexp");
-import("konoha.assign");
 import("konoha.array");
-//import("konoha.null");/*TODO*/
+import("konoha.regexp");
 
 void test() {
 	String[] ma = "世界、こんにちは、世界".match(/世界/g);

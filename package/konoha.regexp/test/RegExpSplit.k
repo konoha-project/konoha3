@@ -1,5 +1,5 @@
-import("konoha.regexp");
 import("konoha.array");
+import("konoha.regexp");
 
 void test() {
 	Array[String] r1 = "aa/bb/cc/dd/ee".split(/\//);

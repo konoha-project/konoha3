@@ -5,11 +5,11 @@ import("dscript.subproc");
 
 void test() {
 	Subproc s = new Subproc("echo hi", false);
-	assert(s.exec("echo \"hi\"") == "\"hi\"\n");
-	assert(s.exec("echo hello") == "hello\n");
-	s.fg();
+	//before execution
+	assert(s.setBufsize(32));
+	s.bg();
 	//after execution
-	assert(s.exec("ls") == "");
+	assert(s.setBufsize(64) == false);
 }
 
 test();

@@ -10,54 +10,26 @@ set(VERSION_MAJOR "0")
 set(VERSION_MINOR "2")
 set(VERSION_PATCH "0")
 
-set(PACKAGE_NAME    ${PROJECT_NAME})
-set(PACKAGE_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
-set(PACKAGE_STRING  ${CMAKE_PROJECT_NAME}-${PACKAGE_VERSION})
-set(SO_VERSION      ${VERSION_MAJOR}.${VERSION_MINOR})
-set(PACKAGE_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR})
-
-set(K_CONFIG_ARCH ${CMAKE_SYSTEM})
-set(K_CONFIG_OS   ${CMAKE_SYSTEM_NAME})
-set(K_CONFIG_CPU  ${CMAKE_SYSTEM_PROCESSOR})
-set(K_PREFIX ${CMAKE_INSTALL_PREFIX})
-
-if(UNIX)
-	set(K_OSDLLEXT ".so")
-endif(UNIX)
-
-if(APPLE)
-	set(K_OSDLLEXT ".dylib")
-endif(APPLE)
-
-if(CYGWIN)
-	set(K_OSDLLEXT ".so")
-endif(CYGWIN)
-
-if(MSVC)
-	set(K_OSDLLEXT ".dll")
-endif(MSVC)
-
-if(MINGW)
-	set(K_OSDLLEXT ".dll")
-endif(MINGW)
-
 set(INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${INCLUDE_DIRS})
 
 if(NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE "Release" )
+	set(CMAKE_BUILD_TYPE "Release")
 endif()
+
 string(TOUPPER ${CMAKE_BUILD_TYPE} uppercase_CMAKE_BUILD_TYPE)
 
 option(USE_X86_32 off)
 set(KONOHA_CFLAGS "")
 if(USE_X86_32)
-set(KONOHA_CFLAGS "-m32")
+	set(KONOHA_CFLAGS "-m32")
 endif(USE_X86_32)
 
-SET(CMAKE_C_FLAGS         "-Wall -Wcomment -Wformat ${KONOHA_CFLAGS}")
-SET(CMAKE_CXX_FLAGS       "")
+SET(CFLAGS "-Wfloat-equal -Wsign-compare -Wformat")
+SET(CFLAGS "${CFLAGS} -Wall -Wcomment -Wunused-macros ${KONOHA_CFLAGS}")
+SET(CMAKE_C_FLAGS   "${CFLAGS} -Wno-long-long")
+SET(CMAKE_CXX_FLAGS "${CFLAGS}")
 if(MSVC)
 	SET(CMAKE_C_FLAGS_RELEASE      "/D NDEBUG /W3 /Wall /TP /MT /Ox /Ob2 /GL")
 	SET(CMAKE_C_FLAGS_DEBUG        "/D_DEBUG /W3 /Wall /TP /MTd /Zi /Ob0 /Od /RTC1")
@@ -67,16 +39,16 @@ else(MSVC)
 	SET(CMAKE_C_FLAGS_DEBUG        "${CMAKE_C_FLAGS} -O0 -g3")
 	SET(CMAKE_C_FLAGS_COMPRESSED   "${CMAKE_C_FLAGS} -Os -g0")
 endif(MSVC)
-SET(CMAKE_CXX_FLAGS_RELEASE    "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS_RELEASE}")
-SET(CMAKE_CXX_FLAGS_DEBUG      "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS_DEBUG}")
-SET(CMAKE_CXX_FLAGS_COMPRESSED "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS_COMPRESSED}")
+SET(CMAKE_CXX_FLAGS_RELEASE    "${CMAKE_CXX_FLAGS} -O3 -g")
+SET(CMAKE_CXX_FLAGS_DEBUG      "${CMAKE_CXX_FLAGS} -O0 -g3")
+SET(CMAKE_CXX_FLAGS_COMPRESSED "${CMAKE_CXX_FLAGS} -Os -g0")
 
 if(${CMAKE_BUILD_TYPE} STREQUAL "Compressed")
-	set(K_NODEBUG 1)
 	add_definitions(-DNDEBUG)
 	add_definitions(-DUSE_SMALLBUILD)
 endif()
 
+## Source Code settings
 set(RUNTIME
 	src/konoha/minikonoha.c
 )
@@ -99,6 +71,7 @@ else(KONOHA_VM_MODULE)
 	set(VM src/vm/compiler.c)
 endif(KONOHA_VM_MODULE)
 
+## Packages
 set(PACKAGES
 ## add konoha.xx package in an alphabetical order 
 	konoha
@@ -155,6 +128,29 @@ set(PACKAGES
 #	logpool
 )
 
+set(PACKAGE_NAME    ${PROJECT_NAME})
+set(PACKAGE_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
+set(PACKAGE_STRING  ${CMAKE_PROJECT_NAME}-${PACKAGE_VERSION})
+set(SO_VERSION      ${VERSION_MAJOR}.${VERSION_MINOR})
+set(PACKAGE_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR})
+
+set(K_CONFIG_ARCH ${CMAKE_SYSTEM})
+set(K_CONFIG_OS   ${CMAKE_SYSTEM_NAME})
+set(K_CONFIG_CPU  ${CMAKE_SYSTEM_PROCESSOR})
+set(K_PREFIX ${CMAKE_INSTALL_PREFIX})
+
+if(UNIX OR CYGWIN)
+	set(K_OSDLLEXT ".so")
+endif()
+
+if(APPLE)
+	set(K_OSDLLEXT ".dylib")
+endif(APPLE)
+
+if(MSVC OR MINGW)
+	set(K_OSDLLEXT ".dll")
+endif()
+
 find_library(HAVE_LIBDL NAMES dl)
 find_library(HAVE_LIBM  NAMES m)
 
@@ -210,7 +206,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
 
 set(ExtraLibs)
 if(HAVE_LIBDL)
-set(ExtraLibs ${ExtraLibs} ${HAVE_LIBDL})
+	set(ExtraLibs ${ExtraLibs} ${HAVE_LIBDL})
 endif(HAVE_LIBDL)
 
 macro(POP _STR _DELIM _RESULT)
@@ -450,7 +446,7 @@ install(TARGETS minikonoha minikonoha_bin
 install(DIRECTORY include/ DESTINATION include 
 		FILES_MATCHING
 		PATTERN "*.h"
-		PATTERN ".svn" EXCLUDE
+		PATTERN ".git" EXCLUDE
 		)
 
 MESSAGE(STATUS)

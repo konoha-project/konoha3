@@ -67,7 +67,6 @@ static void kNameSpace_addFuncList(KonohaContext *kctx, kNameSpace *ns, kArray *
 // ---------------------------------------------------------------------------
 /* TokenFunc Management */
 
-
 static int AsciiToKonohaChar(int ascii);
 
 static void kNameSpace_addTokenFunc(KonohaContext *kctx, kNameSpace *ns, int asciiChar, kFunc *fo)
@@ -1033,6 +1032,7 @@ static kbool_t kNameSpace_importAll(KonohaContext *kctx, kNameSpace *ns, kNameSp
 				return false;
 			}
 		}
+		//kNameSpace_importTokenFunc(kctx, ns, targetNS, pline);
 		kNameSpace_importSyntaxAll(kctx, ns, targetNS, pline);
 		for(i = 0; i < kArray_size(targetNS->methodList); i++) {
 			kMethod *mtd = targetNS->methodList->methodItems[i];
