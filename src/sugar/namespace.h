@@ -48,6 +48,53 @@ static void ArrayNULL_appendArray(KonohaContext *kctx, kObject *p, kArray **arra
 	}
 }
 
+
+// ---------------------------------------------------------------------------
+/* TokenFunc Management */
+
+static void kNameSpace_addFuncList(KonohaContext *kctx, kNameSpace *ns, kArray **funcListTable, int index, kFunc *fo)
+{
+	kArray *a = funcListTable[index];
+	if(a == NULL) {
+		KSETv(ns, funcListTable[index], (kArray*)fo);
+		return;
+	}
+	else if(!IS_Array(a)) {
+		kArray *newa = new_(Array, 0);
+		KLIB kArray_add(kctx, newa, a);
+		KSETv(ns, funcListTable[index], newa);
+		a = newa;
+	}
+	KLIB kArray_add(kctx, a, fo);
+}
+
+static int AsciiToKonohaChar(int ascii);
+
+static void kNameSpace_setTokenFunc(KonohaContext *kctx, kNameSpace *ns, int asciiChar, kFunc *fo)
+{
+	if(fo->adhocKeyForTokenFunc == 0) {
+		((kFuncVar*)fo)->adhocKeyForTokenFunc = AsciiToKonohaChar(asciiChar);
+	}
+	ArrayNULL_append(kctx, UPCAST(ns), &((kNameSpaceVar*)ns)->TokenFuncListNULL, UPCAST(fo));
+	if(ns->tokenMatrix != NULL) {
+		kNameSpace_addFuncList(kctx, ns, (kArray**)ns->tokenMatrix + KCHAR_MAX, fo->adhocKeyForTokenFunc, fo);
+	}
+}
+
+static void kNameSpace_loadTokenFunc(KonohaContext *kctx, kNameSpace *ns, kArray **list, kNameSpace *targetNS)
+{
+	if(targetNS->parentNULL != NULL) {
+		kNameSpace_loadTokenFunc(kctx, ns, list, targetNS->parentNULL);
+	}
+	if(targetNS->TokenFuncListNULL != NULL) {
+		size_t i;
+		for(i = 0; i < kArray_size(targetNS->TokenFuncListNULL); i++) {
+			kFunc *fo = targetNS->TokenFuncListNULL->funcItems[i];
+			kNameSpace_addFuncList(kctx, ns, list, fo->adhocKeyForTokenFunc, fo);
+		}
+	}
+}
+
 // ---------------------------------------------------------------------------
 // Syntax Management
 

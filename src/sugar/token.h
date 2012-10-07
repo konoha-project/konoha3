@@ -405,10 +405,9 @@ static const char cMatrix[128] = {
 	KonohaChar_LowerCaseAlphabet, KonohaChar_LowerCaseAlphabet, KonohaChar_LowerCaseAlphabet, KonohaChar_OpenBrace, KonohaChar_Var, KonohaChar_CloseBrace, KonohaChar_Childer, 1,
 };
 
-static int toKonohaChar(const char *t, int pos)
+static int AsciiToKonohaChar(int ascii)
 {
-	int ch = t[pos];
-	return (ch < 0) ? KonohaChar_Unicode : cMatrix[ch];
+	return (ascii < 0) ? KonohaChar_Unicode : cMatrix[ascii];
 }
 
 static void Tokenizer_tokenize(KonohaContext *kctx, Tokenizer *tokenizer)
@@ -416,7 +415,7 @@ static void Tokenizer_tokenize(KonohaContext *kctx, Tokenizer *tokenizer)
 	int ch, pos = 0;
 	kTokenVar *tk = GCSAFE_new(TokenVar, 0);
 	pos = ParseIndent(kctx, tk, tokenizer, pos);
-	while((ch = toKonohaChar(tokenizer->source, pos)) != 0) {
+	while((ch = AsciiToKonohaChar(tokenizer->source[pos])) != 0) {
 		if(tk->unresolvedTokenType != 0) {
 			KLIB kArray_add(kctx, tokenizer->tokenList, tk);
 			tk = GCSAFE_new(TokenVar, 0);
@@ -432,7 +431,7 @@ static void Tokenizer_tokenize(KonohaContext *kctx, Tokenizer *tokenizer)
 static int parseLazyBlock(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	int ch, level = 1, pos = tok_start + 1;
-	while((ch = toKonohaChar(tokenizer->source, pos)) != 0) {
+	while((ch = AsciiToKonohaChar(tokenizer->source[pos])) != 0) {
 		if(ch == KonohaChar_CloseBrace/*}*/) {
 			level--;
 			if(level == 0) {
@@ -458,7 +457,7 @@ static int parseLazyBlock(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeniz
 static const TokenizeFunc *kNameSpace_tokenMatrix(KonohaContext *kctx, kNameSpace *ns)
 {
 	if(ns->tokenMatrix == NULL) {
-		DBG_ASSERT(KCHAR_MAX * sizeof(TokenizeFunc) == sizeof(MiniKonohaTokenMatrix));
+		//DBG_ASSERT(KCHAR_MAX * sizeof(TokenizeFunc) == sizeof(MiniKonohaTokenMatrix));
 		TokenizeFunc *tokenMatrix = (TokenizeFunc*)KMALLOC(SIZEOF_TOKENMATRIX);
 		if(ns->parentNULL != NULL && ns->parentNULL->tokenMatrix != NULL) {
 			memcpy(tokenMatrix, ns->parentNULL->tokenMatrix, SIZEOF_TOKENMATRIX);
@@ -468,6 +467,7 @@ static const TokenizeFunc *kNameSpace_tokenMatrix(KonohaContext *kctx, kNameSpac
 			bzero(tokenMatrix + KCHAR_MAX, sizeof(MiniKonohaTokenMatrix));
 		}
 		((kNameSpaceVar*)ns)->tokenMatrix = (void*)tokenMatrix;
+		kNameSpace_loadTokenFunc(kctx, ns, (kArray**)ns->tokenMatrix + KCHAR_MAX, ns);
 	}
 	return (TokenizeFunc*)ns->tokenMatrix;
 }
@@ -528,7 +528,6 @@ static void kNameSpace_setTokenizeFunc(KonohaContext *kctx, kNameSpace *ns, int 
 		}
 	}
 }
-
 
 #ifdef __cplusplus
 }

@@ -582,6 +582,7 @@ static void Func_init(KonohaContext *kctx, kObject *o, void *conf)
 	kFuncVar *fo = (kFuncVar*)o;
 	KINITv(fo->self, K_NULL);
 	KINITv(fo->mtd, conf == NULL ? KNULL(Method) : (kMethod*)conf);
+	fo->adhocKeyForTokenFunc = 0;
 }
 
 static void Func_reftrace(KonohaContext *kctx, kObject *o)
