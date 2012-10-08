@@ -154,8 +154,10 @@ static kbool_t cstyle_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 {
 	KDEFINE_SYNTAX defStatement[] = {
 		{ SYM_("while"), 0, "\"while\" \"(\" $Expr \")\" $Block", 0, 0, NULL, NULL, NULL, Statement_while, NULL, },
-		{ SYM_("break"), 0, "\"break\" [ $Symbol ]", 0, 0, NULL, NULL, NULL, Statement_break, NULL, },
-		{ SYM_("continue"), 0, "\"continue\" [ $Symbol ]", 0, 0, NULL, NULL, NULL, Statement_continue, NULL, },
+		{ SYM_("do"), 0, "\"do\"  $Block \"while\" \"(\" $Expr \")\"", 0, 0, NULL, NULL, NULL, Statement_while/*FIXME*/, NULL, },
+		{ SYM_("for"), 0, "\"for\" \"(\" $Stmt3 \")\" $Block", 0, 0, NULL, NULL, NULL, Statement_while/*FIXME*/, NULL, },
+		{ SYM_("break"), 0, "\"break\"", 0, 0, NULL, NULL, NULL, Statement_break, NULL, },
+		{ SYM_("continue"), 0, "\"continue\"", 0, 0, NULL, NULL, NULL, Statement_continue, NULL, },
 		{ KW_END, }, /* sentinental */
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, defStatement, ns);
