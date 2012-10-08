@@ -206,8 +206,8 @@ void getAmbientOcclusion(RayIntersection isect, Vec ambientOcclusion) {
 
 int clamp(float value) {
 	int i = value * 255.5;
-	if (i > 255) i = 255;
-	else if (i < 0) i = 0;
+	if (i > 255) { i = 255; }
+	else if (i < 0) { i = 0; }
 	return i;
 }
 

@@ -29,7 +29,7 @@ class TreeNode {
 	
 	int itemCheck(){
 		// if necessary deallocate here
-		if(isNull) return item;
+		if(isNull) { return item; }
 		return item + left.itemCheck() - right.itemCheck();
 	}
 }
