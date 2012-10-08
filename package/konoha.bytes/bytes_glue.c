@@ -325,7 +325,7 @@ static kbool_t bytes_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 	return true;
 }
 
-static KMETHOD TokenFunc_SingleQuotedString(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD TokenFunc_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *)sfp[1].o;
 	int ch, prev = '/', pos = 1;
@@ -337,7 +337,7 @@ static KMETHOD TokenFunc_SingleQuotedString(KonohaContext *kctx, KonohaStack *sf
 		if(ch == '\'' && prev != '\\') {
 			if(IS_NOTNULL(tk)) {
 				KSETv(tk, tk->text, KLIB new_kString(kctx, source + 1, (pos-2), 0));
-				tk->unresolvedTokenType = SYM_("$SingleQuotedString");
+				tk->unresolvedTokenType = SYM_("$SingleQuotedChar");
 			}
 			RETURNi_(pos);
 		}
@@ -349,7 +349,7 @@ static KMETHOD TokenFunc_SingleQuotedString(KonohaContext *kctx, KonohaStack *sf
 	RETURNi_(0);
 }
 
-static KMETHOD TypeCheck_SingleQuotedString(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD TypeCheck_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
@@ -367,11 +367,11 @@ static KMETHOD TypeCheck_SingleQuotedString(KonohaContext *kctx, KonohaStack *sf
 static kbool_t bytes_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("$SingleQuotedString"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_SingleQuotedString, },
+		{ SYM_("$SingleQuotedChar"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_SingleQuotedChar, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
-	SUGAR kNameSpace_setTokenFunc(kctx, ns, SYM_("$SingleQuotedString"), KonohaChar_Quote, new_SugarFunc(TokenFunc_SingleQuotedString));
+	SUGAR kNameSpace_setTokenFunc(kctx, ns, SYM_("$SingleQuotedChar"), KonohaChar_Quote, new_SugarFunc(TokenFunc_SingleQuotedChar));
 	return true;
 }
 
