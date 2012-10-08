@@ -119,6 +119,7 @@ static kFunc** SugarSyntax_funcTable(KonohaContext *kctx, SugarSyntax *syn, int 
 
 static kbool_t kNameSpace_importSyntax(KonohaContext *kctx, kNameSpace *ns, SugarSyntax *target, kfileline_t pline)
 {
+	DBG_P(">>>>>>> %s%s", PSYM_t(target->keyword));
 	SugarSyntaxVar *syn = (SugarSyntaxVar*)kNameSpace_getSyntax(kctx, ns, target->keyword, true/*isNew*/);
 	if(syn->lastLoadedPackageId != target->lastLoadedPackageId) {
 		int index;
@@ -947,26 +948,28 @@ static KonohaPackage *getPackageNULL(KonohaContext *kctx, kpackage_t packageId, 
 
 static kbool_t kNameSpace_importSymbol(KonohaContext *kctx, kNameSpace *ns, kNameSpace *targetNS, ksymbol_t keyword, kfileline_t pline)
 {
-	KUtilsKeyValue *kvs = kNameSpace_getLocalConstNULL(kctx, targetNS, keyword);
-	if(kvs != NULL) {
-		if(kNameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, kvs, 1, pline)) {
-			if(kvs->ty == TY_TYPE) {
-				size_t i;
-				ktype_t typeId = ((KonohaClass*)kvs->unboxValue)->typeId;
-				for(i = 0; i < kArray_size(targetNS->methodList); i++) {
-					kMethod *mtd = targetNS->methodList->methodItems[i];
-					if(mtd->typeId == typeId /*&& !kMethod_is(Private, mtd)*/) {
-						KLIB kArray_add(kctx, ns->methodList, mtd);
+	SugarSyntax *syn = SYN_(targetNS, keyword);
+	DBG_P(">>>>>>> %s%s syn=%p", PSYM_t(keyword), syn);
+	if(syn != NULL) {
+		return kNameSpace_importSyntax(kctx, ns, syn, pline);
+	}
+	else {
+		KUtilsKeyValue *kvs = kNameSpace_getLocalConstNULL(kctx, targetNS, keyword);
+		DBG_P(">>>>>>> %s%s kvs=%p", PSYM_t(keyword), kvs);
+		if(kvs != NULL) {
+			if(kNameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, kvs, 1, pline)) {
+				if(kvs->ty == TY_TYPE) {
+					size_t i;
+					ktype_t typeId = ((KonohaClass*)kvs->unboxValue)->typeId;
+					for(i = 0; i < kArray_size(targetNS->methodList); i++) {
+						kMethod *mtd = targetNS->methodList->methodItems[i];
+						if(mtd->typeId == typeId /*&& !kMethod_is(Private, mtd)*/) {
+							KLIB kArray_add(kctx, ns->methodList, mtd);
+						}
 					}
 				}
+				return true;
 			}
-			return true;
-		}
-	}
-	else { // there is no const data
-		SugarSyntax *syn = SYN_(targetNS, keyword);
-		if(syn != NULL) {
-			return kNameSpace_importSyntax(kctx, ns, syn, pline);
 		}
 	}
 	return false;

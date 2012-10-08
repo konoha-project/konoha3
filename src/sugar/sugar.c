@@ -265,7 +265,7 @@ static KMETHOD NameSpace_importPackage(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD NameSpace_importPackageSymbol(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *key = sfp[2].asString;
-	ksymbol_t keyword = ksymbolA(S_text(key), S_size(key), SYM_NONAME);
+	ksymbol_t keyword = ksymbolA(S_text(key), S_size(key), _NEWID);
 	RETURNb_(kNameSpace_importPackageSymbol(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), keyword, sfp[K_RTNIDX].uline));
 }
 
