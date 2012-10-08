@@ -126,8 +126,7 @@ static char parseBinaryDigit(char c)
 	return ('0' == c || c == '1') ? c - '0' : -1;
 }
 
-#include <stdio.h>
-static KMETHOD parseNumber(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD TokenFunc_NumberInt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *)sfp[1].o;
 	const char *source = S_text(sfp[2].asString);
@@ -283,7 +282,7 @@ static kbool_t int_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpa
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
-	kMethod *mtd = KLIB new_kMethod(kctx, 0, 0, 0, parseNumber);
+	kMethod *mtd = KLIB new_kMethod(kctx, 0, 0, 0, TokenFunc_NumberInt);
 	kFunc *fo = GCSAFE_new(Func, (uintptr_t) mtd);
 	SUGAR kNameSpace_addTokenFunc(kctx, ns, '0', fo);
 
