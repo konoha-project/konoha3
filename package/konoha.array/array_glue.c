@@ -65,8 +65,6 @@ static KMETHOD Array_getSize(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNi_(kArray_size(a));
 }
 
-#define KARRAY_LIST_SIZE_MAX (1024 * 1024)
-
 static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
@@ -225,7 +223,7 @@ static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
 	kArray *a = sfp[0].asArray;
 	size_t asize = kArray_size(a);
 	size_t asize_half = asize / 2;
-	int i;
+	size_t i;
 	if (kArray_isUnboxData(a)) {
 		for(i = 0; i != asize_half; ++i) {
 			uintptr_t temp = a->unboxItems[asize - 1 - i];
@@ -252,12 +250,9 @@ static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
 	ktype_t resolve_type = Method_returnType(f->mtd);
 
 	KonohaClass *CT_ArrayT0 = CT_p0(kctx, CT_Array, resolve_type);
-	kArrayVar *map = (kArrayVar*)KLIB new_kObject(kctx, CT_ArrayT0, 0);
-	map->bytemax = asize * sizeof(uintptr_t);
-	kArray_setsize(map, asize);
-	map->objectItems = (kObject**)KCALLOC(map->bytemax, 1);
+	kArrayVar *ret = (kArrayVar*)KLIB new_kObject(kctx, CT_ArrayT0, asize);
 
-	int i;
+	size_t i;
 	if (kArray_isUnboxData(a)) {
 		for(i=0; i != asize; ++i) {
 			uintptr_t tmp = a->unboxItems[i];
@@ -266,7 +261,7 @@ static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
 			lsfp[K_CALLDELTA+1].unboxValue = tmp;
 			KCALL(lsfp, 0, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
 			END_LOCAL();
-			map->unboxItems[i] = lsfp[0].unboxValue;
+			ret->unboxItems[i] = lsfp[0].unboxValue;
 		}
 	}
 	else {
@@ -277,10 +272,10 @@ static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
 			KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, tmp, GC_NO_WRITE_BARRIER);
 			KCALL(lsfp, 0, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
 			END_LOCAL();
-			KSETv(map, map->objectItems[i], lsfp[0].o);
+			KSETv(ret, ret->objectItems[i], lsfp[0].o);
 		}
 	}
-	RETURN_(map);
+	RETURN_(ret);
 }
 
 /* T Array[T].inject(Func[T,T,T] func) */
@@ -291,32 +286,33 @@ static KMETHOD Array_inject(KonohaContext *kctx, KonohaStack *sfp)
 	size_t asize = kArray_size(a);
 	ktype_t resolve_type = Method_returnType(f->mtd);
 
-	int i;
+	size_t i;
 	if (kArray_isUnboxData(a)) {
-		uintptr_t ret_val = 0;
+		uintptr_t tmp = 0;
+		BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
 		for(i=0; i != asize; ++i) {
-			BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
 			KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, K_NULL, GC_NO_WRITE_BARRIER);
-			lsfp[K_CALLDELTA+1].unboxValue = ret_val;
+			lsfp[K_CALLDELTA+1].unboxValue = tmp;
 			lsfp[K_CALLDELTA+2].unboxValue = a->unboxItems[i];
 			KCALL(lsfp, 0, f->mtd, 2, KLIB Knull(kctx, CT_(resolve_type)));
-			END_LOCAL();
-			ret_val = lsfp[0].unboxValue;
+			tmp = lsfp[0].unboxValue;
 		}
-		RETURNd_(ret_val);
+		END_LOCAL();
+		RETURNd_(tmp);
 	}
 	else {
-		kObject *ret_obj = (kObject*)KLIB new_kObject(kctx, CT_(resolve_type), 0);
+		kObject *tmp = (kObject*) KLIB new_kObject(kctx, CT_(resolve_type), 0);
+		kObject *nulobj = KLIB Knull(kctx, CT_(resolve_type));
+		BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
 		for(i=0; i != asize; ++i) {
-			BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
 			KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, K_NULL, GC_NO_WRITE_BARRIER);
-			KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, ret_obj, GC_NO_WRITE_BARRIER);
+			KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, tmp,    GC_NO_WRITE_BARRIER);
 			KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+2].o, a->objectItems[i], GC_NO_WRITE_BARRIER);
-			KCALL(lsfp, 0, f->mtd, 2, KLIB Knull(kctx, CT_(resolve_type)));
-			END_LOCAL();
-			KSETv(NULL, ret_obj, lsfp[0].o);
+			KCALL(lsfp, 0, f->mtd, 2, nulobj);
+			KSETv(NULL, tmp, lsfp[0].o);
 		}
-		RETURN_(ret_obj);
+		END_LOCAL();
+		RETURN_(tmp);
 	}
 }
 
@@ -627,8 +623,6 @@ static KMETHOD Expression_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 		RETURN_(SUGAR kStmt_rightJoinExpr(kctx, stmt, leftExpr, tokenList, operatorIdx + 1, endIdx));
 	}
 }
-
-#define GROUP(T)    .keyword = KW_##T##Group
 
 static kbool_t array_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
