@@ -48,14 +48,47 @@ static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNb_(ret);
 }
 
+static inline kStmt* kStmt_getParentNULL(kStmt *stmt)
+{
+	return stmt->parentBlockNULL->parentStmtNULL;
+}
+
+static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_Statement(stmt, gma);
+	kStmt *p = stmt;
+	while((p = kStmt_getParentNULL(p)) != NULL) {
+		if(kStmt_is(CatchBreak, p)) {
+			KLIB kObject_setObject(kctx, stmt, stmt->syn->keyword, TY_Stmt, p);
+			kStmt_typed(stmt, JUMP);
+			RETURNb_(true);
+		}
+	}
+	SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "break statement not within a loop");
+}
+
+static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_Statement(stmt, gma);
+	kStmt *p = stmt;
+	while((p = kStmt_getParentNULL(p)) != NULL) {
+		if(kStmt_is(CatchContinue, p)) {
+			KLIB kObject_setObject(kctx, stmt, stmt->syn->keyword, TY_Stmt, p);
+			kStmt_typed(stmt, JUMP);
+			RETURNb_(true);
+		}
+	}
+	SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "continue statement not within a loop");
+}
+
 // --------------------------------------------------------------------------
 
 static kbool_t cstyle_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KImportPackage(ns, "konoha.break", pline);
-	KImportPackage(ns, "konoha.continue", pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("while"), 0, "\"while\" \"(\" $Expr \")\" $Block", 0, 0, NULL, NULL, NULL, Statement_while, NULL, },
+		{ SYM_("break"), 0, "\"break\" [ $Symbol ]", 0, 0, NULL, NULL, NULL, Statement_break, NULL, },
+		{ SYM_("continue"), 0, "\"continue\" [ $Symbol ]", 0, 0, NULL, NULL, NULL, Statement_continue, NULL, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, ns);
@@ -68,11 +101,6 @@ static kbool_t cstyle_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 }
 
 // --------------------------------------------------------------------------
-
-static inline kStmt* kStmt_getParentNULL(kStmt *stmt)
-{
-	return stmt->parentBlockNULL->parentStmtNULL;
-}
 
 static kbool_t cstyle_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
@@ -94,6 +122,8 @@ KDEFINE_PACKAGE* cstyle_init(void)
 	d.setupNameSpace = cstyle_setupNameSpace;
 	return &d;
 }
+
+// --------------------------------------------------------------------------
 
 #ifdef __cplusplus
 }
