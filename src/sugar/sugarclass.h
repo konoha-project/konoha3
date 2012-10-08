@@ -284,13 +284,6 @@ static uintptr_t kStmt_parseFlag(KonohaContext *kctx, kStmt *stmt, KonohaFlagSym
 	return flag;
 }
 
-#define kStmt_is(STMT, KW) Stmt_is(kctx, STMT, KW)
-
-static inline kbool_t Stmt_is(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw)
-{
-	return (kStmt_getObjectNULL(kctx, stmt, kw) != NULL);
-}
-
 static kToken* kStmt_getToken(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw, kToken *def)
 {
 	kToken *tk = (kToken*)kStmt_getObjectNULL(kctx, stmt, kw);

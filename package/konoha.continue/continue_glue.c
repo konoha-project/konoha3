@@ -55,7 +55,7 @@ static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_Statement(stmt, gma);
 	kStmt *p = stmt;
 	while((p = kStmt_getParentNULL(p)) != NULL) {
-		if(Stmt_isCatchContinue(p)) {
+		if(kStmt_is(CatchContinue, p)) {
 			KLIB kObject_setObject(kctx, stmt, stmt->syn->keyword, TY_Stmt, p);
 			kStmt_typed(stmt, JUMP);
 			RETURNb_(true);
