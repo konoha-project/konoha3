@@ -243,6 +243,83 @@ static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(a);
 }
 
+/* Array[T] Array[T].map(Func[T,T] func) */
+static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kArray *a = sfp[0].asArray;
+	kFunc  *f = sfp[1].asFunc;
+	size_t asize = kArray_size(a);
+	ktype_t resolve_type = Method_returnType(f->mtd);
+
+	KonohaClass *CT_ArrayT0 = CT_p0(kctx, CT_Array, resolve_type);
+	kArrayVar *map = (kArrayVar*)KLIB new_kObject(kctx, CT_ArrayT0, 0);
+	map->bytemax = asize * sizeof(uintptr_t);
+	kArray_setsize(map, asize);
+	map->objectItems = (kObject**)KCALLOC(map->bytemax, 1);
+
+	int i;
+	if (kArray_isUnboxData(a)) {
+		for(i=0; i != asize; ++i) {
+			uintptr_t tmp = a->unboxItems[i];
+			BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
+			KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, K_NULL, GC_NO_WRITE_BARRIER);
+			lsfp[K_CALLDELTA+1].unboxValue = tmp;
+			KCALL(lsfp, 0, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
+			END_LOCAL();
+			map->unboxItems[i] = lsfp[0].unboxValue;
+		}
+	}
+	else {
+		for(i=0; i != asize; ++i) {
+			kObject *tmp  = a->objectItems[i];
+			BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
+			KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, K_NULL, GC_NO_WRITE_BARRIER);
+			KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, tmp, GC_NO_WRITE_BARRIER);
+			KCALL(lsfp, 0, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
+			END_LOCAL();
+			KSETv(map, map->objectItems[i], lsfp[0].o);
+		}
+	}
+	RETURN_(map);
+}
+
+/* T Array[T].inject(Func[T,T,T] func) */
+static KMETHOD Array_inject(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kArray *a = sfp[0].asArray;
+	kFunc  *f = sfp[1].asFunc;
+	size_t asize = kArray_size(a);
+	ktype_t resolve_type = Method_returnType(f->mtd);
+
+	int i;
+	if (kArray_isUnboxData(a)) {
+		uintptr_t ret_val = 0;
+		for(i=0; i != asize; ++i) {
+			BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
+			KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, K_NULL, GC_NO_WRITE_BARRIER);
+			lsfp[K_CALLDELTA+1].unboxValue = ret_val;
+			lsfp[K_CALLDELTA+2].unboxValue = a->unboxItems[i];
+			KCALL(lsfp, 0, f->mtd, 2, KLIB Knull(kctx, CT_(resolve_type)));
+			END_LOCAL();
+			ret_val = lsfp[0].unboxValue;
+		}
+		RETURNd_(ret_val);
+	}
+	else {
+		kObject *ret_obj = (kObject*)KLIB new_kObject(kctx, CT_(resolve_type), 0);
+		for(i=0; i != asize; ++i) {
+			BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
+			KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, K_NULL, GC_NO_WRITE_BARRIER);
+			KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, ret_obj, GC_NO_WRITE_BARRIER);
+			KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+2].o, a->objectItems[i], GC_NO_WRITE_BARRIER);
+			KCALL(lsfp, 0, f->mtd, 2, KLIB Knull(kctx, CT_(resolve_type)));
+			END_LOCAL();
+			KSETv(NULL, ret_obj, lsfp[0].o);
+		}
+		RETURN_(ret_obj);
+	}
+}
+
 static KMETHOD Array_shift(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
@@ -423,6 +500,13 @@ static kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 
 	KonohaClass *CT_ArrayT0 = CT_p0(kctx, CT_Array, TY_0);
 	ktype_t TY_ArrayT0 = CT_ArrayT0->typeId;
+
+	kparamtype_t p[] = {{TY_0}};
+	ktype_t TY_FuncMap = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_0 , 1, p))->typeId;
+
+	kparamtype_t P_inject[] = {{TY_0},{TY_0}};
+	ktype_t TY_FuncInject = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_0 , 2, P_inject))->typeId;
+
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Im,    _F(Array_get), TY_0,   TY_Array, MN_("get"), 1, TY_int, FN_("index"),
 		_Public,        _F(Array_set), TY_void, TY_Array, MN_("set"), 2, TY_int, FN_("index"),  TY_0, FN_("value"),
@@ -436,6 +520,8 @@ static kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public,        _F(Array_shift), TY_0, TY_Array, MN_("shift"), 0,
 		_Public,        _F(Array_unshift), TY_int, TY_Array, MN_("unshift"), 1, TY_0, FN_("value"),
 		_Public,        _F(Array_reverse), TY_Array, TY_Array, MN_("reverse"), 0,
+		_Public|_Im,    _F(Array_map), TY_ArrayT0, TY_Array, MN_("map"), 1, TY_FuncMap, FN_("func"),
+		_Public|_Im,    _F(Array_inject), TY_0, TY_Array, MN_("inject"), 1, TY_FuncInject, FN_("func"),
 
 		_Public,        _F(Array_concat), TY_ArrayT0, TY_Array, MN_("concat"), 1, TY_ArrayT0, FN_("a1"),
 		_Public,        _F(Array_indexOf), TY_int, TY_Array, MN_("indexOf"), 1, TY_0, FN_("value"),
