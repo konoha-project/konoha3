@@ -171,7 +171,7 @@ static void test_bitops()
 	};
 	uintptr_t i;
 	for (i = 0; i < sizeof(test_data)/sizeof(uintptr_t); i++) {
-		assert(CLZ(test_data[i]) == clz_test[i]);
+		assert((uintptr_t)CLZ(test_data[i]) == (clz_test[i] - ((sizeof(void*)*8/64>=1)?0:32)));
 		assert(FFS(test_data[i]) == myffs(test_data[i]));
 	}
 }
