@@ -89,7 +89,7 @@ static kbool_t shell_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameS
 	//KImportPackage(ns, "dscript.dollar", pline);
 	KImportPackage(ns, "dscript.subproc", pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("dsh"), 0, "\"dsh\" $Token", 0, 0, NULL, NULL, Statement_dsh, Statement_dsh, NULL, },
+		{ SYM_("dsh"), 0, "\"dsh\" $Token*", 0, 0, NULL, NULL, Statement_dsh, Statement_dsh, NULL, },
 	//	{ SYM_("$Shell"), 0, "$Shell $Token*", 0, 0, PatternMatch_Shell, NULL, Statement_Shell, Statement_Shell},
 		{ KW_END, },
 	};

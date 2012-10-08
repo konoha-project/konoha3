@@ -126,7 +126,6 @@ static char parseBinaryDigit(char c)
 	return ('0' == c || c == '1') ? c - '0' : -1;
 }
 
-#include <stdio.h>
 static KMETHOD TokenFunc_ExtendedIntLiteral(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *)sfp[1].o;
