@@ -31,6 +31,8 @@
 extern "C" {
 #endif
 
+/* Expression */
+
 static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Statement(stmt, gma);
@@ -81,17 +83,95 @@ static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 	SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "continue statement not within a loop");
 }
 
+/* Literal */
+
+static KMETHOD TokenFunc_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kTokenVar *tk = (kTokenVar *)sfp[1].o;
+	int ch, prev = '/', pos = 1;
+	const char *source = S_text(sfp[2].asString);
+	while((ch = source[pos++]) != 0) {
+		if(ch == '\n') {
+			break;
+		}
+		if(ch == '\'' && prev != '\\') {
+			if(IS_NOTNULL(tk)) {
+				KSETv(tk, tk->text, KLIB new_kString(kctx, source + 1, (pos-2), 0));
+				tk->unresolvedTokenType = SYM_("$SingleQuotedChar");
+			}
+			RETURNi_(pos);
+		}
+		prev = ch;
+	}
+	if(IS_NOTNULL(tk)) {
+		kreportf(ErrTag, tk->uline, "must close with \'");
+	}
+	RETURNi_(0);
+}
+
+static KMETHOD TypeCheck_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_TypeCheck(stmt, expr, gma, reqty);
+	kToken *tk = expr->termToken;
+	if (S_size(tk->text) == 1) {
+		int ch = S_text(tk->text)[0];
+		RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_int, ch));
+	}
+	RETURN_(K_NULLEXPR);
+}
+
+/* Expression */
+
+static KMETHOD Expression_Indexer(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
+	KonohaClass *genericsClass = NULL;
+	kNameSpace *ns = Stmt_nameSpace(stmt);
+	int nextIdx = SUGAR TokenUtils_parseTypePattern(kctx, ns, tokenList, beginIdx, endIdx, &genericsClass);
+	if (nextIdx != -1) {  // to avoid Func[T]
+		RETURN_(SUGAR kStmt_parseOperatorExpr(kctx, stmt, tokenList->tokenItems[beginIdx]->resolvedSyntaxInfo, tokenList, beginIdx, beginIdx, endIdx));
+	}
+	kToken *currentToken = tokenList->tokenItems[operatorIdx];
+	if (beginIdx < operatorIdx) {
+		kExpr *leftExpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx);
+		if (leftExpr == K_NULLEXPR) {
+			RETURN_(leftExpr);
+		}
+		/* transform 'Value0 [ Value1 ]=> (Call Value0 get (Value1)) */
+		kTokenVar *tkN = GCSAFE_new(TokenVar, 0);
+		tkN->resolvedSymbol= MN_toGETTER(0);
+		tkN->uline = currentToken->uline;
+		SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
+		leftExpr  = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, tkN, leftExpr);
+		leftExpr = SUGAR kStmt_addExprParam(kctx, stmt, leftExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), 1/*allowEmpty*/);
+		RETURN_(SUGAR kStmt_rightJoinExpr(kctx, stmt, leftExpr, tokenList, operatorIdx + 1, endIdx));
+	}
+}
+
 // --------------------------------------------------------------------------
 
 static kbool_t cstyle_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KDEFINE_SYNTAX SYNTAX[] = {
+	KDEFINE_SYNTAX defStatement[] = {
 		{ SYM_("while"), 0, "\"while\" \"(\" $Expr \")\" $Block", 0, 0, NULL, NULL, NULL, Statement_while, NULL, },
 		{ SYM_("break"), 0, "\"break\" [ $Symbol ]", 0, 0, NULL, NULL, NULL, Statement_break, NULL, },
 		{ SYM_("continue"), 0, "\"continue\" [ $Symbol ]", 0, 0, NULL, NULL, NULL, Statement_continue, NULL, },
-		{ KW_END, },
+		{ KW_END, }, /* sentinental */
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, ns);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, defStatement, ns);
+
+	KDEFINE_SYNTAX defLiteral[] = {
+		{ SYM_("$SingleQuotedChar"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_SingleQuotedChar, },
+		{ KW_END, }, /* sentinental */
+	};
+	SUGAR kNameSpace_defineSyntax(kctx, ns, defLiteral, ns);
+	SUGAR kNameSpace_setTokenFunc(kctx, ns, SYM_("$SingleQuotedChar"), KonohaChar_Quote, new_SugarFunc(TokenFunc_SingleQuotedChar));
+
+	KDEFINE_SYNTAX defExpression[] = {
+		{ KW_BracketGroup, SYNFLAG_ExprPostfixOp2, NULL, Precedence_CStyleCALL, 0, NULL, Expression_Indexer, NULL, NULL, NULL, },
+		{ KW_END, }, /* sentinental */
+	};
+	SUGAR kNameSpace_defineSyntax(kctx, ns, defExpression, ns);
 	return true;
 }
 

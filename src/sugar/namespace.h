@@ -119,7 +119,6 @@ static kFunc** SugarSyntax_funcTable(KonohaContext *kctx, SugarSyntax *syn, int 
 
 static kbool_t kNameSpace_importSyntax(KonohaContext *kctx, kNameSpace *ns, SugarSyntax *target, kfileline_t pline)
 {
-	DBG_P(">>>>>>> %s%s", PSYM_t(target->keyword));
 	SugarSyntaxVar *syn = (SugarSyntaxVar*)kNameSpace_getSyntax(kctx, ns, target->keyword, true/*isNew*/);
 	if(syn->lastLoadedPackageId != target->lastLoadedPackageId) {
 		int index;
@@ -321,7 +320,6 @@ static KUtilsKeyValue* kNameSpace_getConstNULL(KonohaContext *kctx, kNameSpace *
 static kbool_t kNameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, KUtilsKeyValue *kvs, size_t nitems, kfileline_t pline)
 {
 	size_t i, size = kNameSpace_sizeConstTable(ns);
-//	DBG_P("mergeConstTable previous_size=%d, size=%d", s, s + nitems);
 	if(size == 0) {
 		KLIB Karray_init(kctx, &ns->constTable, (nitems + 8) * sizeof(KUtilsKeyValue));
 		memcpy(ns->constTable.keyValueItems, kvs, nitems * sizeof(KUtilsKeyValue));
@@ -949,13 +947,11 @@ static KonohaPackage *getPackageNULL(KonohaContext *kctx, kpackage_t packageId, 
 static kbool_t kNameSpace_importSymbol(KonohaContext *kctx, kNameSpace *ns, kNameSpace *targetNS, ksymbol_t keyword, kfileline_t pline)
 {
 	SugarSyntax *syn = SYN_(targetNS, keyword);
-	DBG_P(">>>>>>> %s%s syn=%p", PSYM_t(keyword), syn);
 	if(syn != NULL) {
 		return kNameSpace_importSyntax(kctx, ns, syn, pline);
 	}
 	else {
 		KUtilsKeyValue *kvs = kNameSpace_getLocalConstNULL(kctx, targetNS, keyword);
-		DBG_P(">>>>>>> %s%s kvs=%p", PSYM_t(keyword), kvs);
 		if(kvs != NULL) {
 			if(kNameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, kvs, 1, pline)) {
 				if(kvs->ty == TY_TYPE) {
