@@ -24,16 +24,11 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-#include <minikonoha/bytes.h>
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <poll.h>
 #include <signal.h>
 #include <sys/time.h>
 
@@ -139,8 +134,8 @@ static void keyIntHandler(int sig) { kill(fgPid, SIGINT); }
 // subproc macro
 #define MAXARGS            128				// the number maximum of parameters for spSplit
 #define DELAY              1000				// the adjustment value at the time of signal transmission
-#define DEF_TIMEOUT        10 * 1000		// default timeout valx
-//#define DEF_TIMEOUT -1
+//#define DEF_TIMEOUT        10 * 1000		// default timeout valx
+#define DEF_TIMEOUT -1
 #define ONEXEC(p)          ( (p != NULL) && (p->cpid > 0) ) ? 1 : 0
 #define PREEXEC(p)         ( (p != NULL) && (p->cpid == -1) ) ? 1 : 0
 #define WORD2INT(val)      (sizeof(val)==8) ? (val&0x7FFFFFFF)|((val>>32)&0x80000000) : val
@@ -256,7 +251,7 @@ static int knh_popen(KonohaContext *kctx, kString* command, subprocData_t *spd, 
 	}
 	if(wmode == M_PIPE) {
 		if(pipe(p2c) != 0) {
-			OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
+			KTrace(SystemFault, 0,
 					LogText("@", "pipe"),
 					LogUint("errno", errno),
 					LogText("errstr", strerror(errno))
@@ -268,7 +263,7 @@ static int knh_popen(KonohaContext *kctx, kString* command, subprocData_t *spd, 
 
 	if(emode == M_PIPE) {
 		if(pipe2(err, O_NONBLOCK) != 0) {
-			OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
+			KTrace(SystemFault, 0,
 					LogText("@", "pipe"),
 					LogUint("errno", errno),
 					LogText("errstr", strerror(errno))
@@ -301,7 +296,7 @@ static int knh_popen(KonohaContext *kctx, kString* command, subprocData_t *spd, 
 		if(wmode == M_PIPE){
 			close(0);
 			if (dup2(p2c[0], 0) == -1) {
-				OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
+				KTrace(SystemFault, 0,
 						LogText("@", "dup2"),
 						LogUint("errno", errno),
 						LogText("errstr", strerror(errno))
@@ -312,7 +307,7 @@ static int knh_popen(KonohaContext *kctx, kString* command, subprocData_t *spd, 
 		else if(wmode == M_FILE) {
 			close(0);
 			if(dup2(fileno(spd->w.fp), 0) == -1) {
-				OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
+				KTrace(SystemFault, 0,
 						LogText("@", "dup2"),
 						LogUint("errno", errno),
 						LogText("errstr", strerror(errno))
@@ -322,7 +317,7 @@ static int knh_popen(KonohaContext *kctx, kString* command, subprocData_t *spd, 
 		if(rmode == M_PIPE) {
 			close(1);
 			if(dup2(c2p[1], 1) == -1){
-				OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
+				KTrace(SystemFault, 0,
 						LogText("@", "dup2"),
 						LogUint("errno", errno),
 						LogText("errstr", strerror(errno))
@@ -333,7 +328,7 @@ static int knh_popen(KonohaContext *kctx, kString* command, subprocData_t *spd, 
 		else if(rmode == M_FILE) {
 			close(1);
 			if(dup2(fileno(spd->r.fp), 1) == -1) {
-				OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
+				KTrace(SystemFault, 0,
 						LogText("@", "dup2"),
 						LogUint("errno", errno),
 						LogText("errstr", strerror(errno))
@@ -364,7 +359,7 @@ static int knh_popen(KonohaContext *kctx, kString* command, subprocData_t *spd, 
 		setsid(); // separation from tty
 		if(!IS_NULL(spd->cwd)) { // TODO!!
 			if(chdir(S_text((spd->cwd))) != 0) {
-				OLDTRACE_SWITCH_TO_KTrace(_ScriptFault,
+				KTrace(ScriptFault, 0,
 						LogText("@", "chdir"),
 						LogText("cwd", S_text(spd->cwd)),
 						LogUint("errno", errno),
@@ -377,7 +372,7 @@ static int knh_popen(KonohaContext *kctx, kString* command, subprocData_t *spd, 
 		if(spd->shell == 0) {
 			// division of a commnad parameter
 			if(spSplit((char*)S_text(command), args) < 0){
-				OLDTRACE_SWITCH_TO_KTrace(_ScriptFault,
+				KTrace(ScriptFault, 0,
 						LogText("@", "spSplit"),
 						LogText("command", S_text(command))
 				);
@@ -398,7 +393,7 @@ static int knh_popen(KonohaContext *kctx, kString* command, subprocData_t *spd, 
 			// if its not, they will return with -1.
 			if(spd->shell == 0) {
 				if(execve(args[0], args, envs) == -1) {
-					OLDTRACE_SWITCH_TO_KTrace(_SystemFault | _ScriptFault,
+					KTrace(SystemFault | ScriptFault, 0,
 							LogText("@", "execve"),
 							LogUint("errno", errno),
 							LogText("errstr", strerror(errno))
@@ -407,7 +402,7 @@ static int knh_popen(KonohaContext *kctx, kString* command, subprocData_t *spd, 
 			}
 			else {
 				if (execle("/bin/sh", "sh", "-c", S_text(command), NULL, envs) == -1) {
-					OLDTRACE_SWITCH_TO_KTrace(_SystemFault | _ScriptFault,
+					KTrace(SystemFault | ScriptFault, 0,
 							LogText("@", "execle"),
 							LogUint("errno", errno),
 							LogText("errstr", strerror(errno))
@@ -417,7 +412,7 @@ static int knh_popen(KonohaContext *kctx, kString* command, subprocData_t *spd, 
 		} else {
 			if(spd->shell == 0) {
 				if(execvp(args[0], args) == -1) {
-					OLDTRACE_SWITCH_TO_KTrace(_SystemFault | _ScriptFault,
+					KTrace(SystemFault | ScriptFault, 0,
 							LogText("@", "execvp"),
 							LogUint("errno", errno),
 							LogText("errstr", strerror(errno))
@@ -426,7 +421,7 @@ static int knh_popen(KonohaContext *kctx, kString* command, subprocData_t *spd, 
 			}
 			else {
 				if(execlp("sh", "sh", "-c", S_text(command), NULL) == -1) {
-					OLDTRACE_SWITCH_TO_KTrace(_SystemFault | _ScriptFault,
+					KTrace(SystemFault | ScriptFault, 0,
 							LogText("@", "execlp"),
 							LogUint("errno", errno),
 							LogText("errstr", strerror(errno))
@@ -487,7 +482,7 @@ static int knh_wait(KonohaContext *kctx, int pid, int bg, int timeout, int *stat
 				ret = signal(SIGALRM, SIG_DFL);
 			}
 			if(ret == SIG_ERR) {
-				OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
+				KTrace(SystemFault, 0,
 						LogText("@", "signal"),
 						LogUint("errno", errno),
 						LogText("errstr", strerror(errno))
@@ -537,7 +532,7 @@ static int knh_wait(KonohaContext *kctx, int pid, int bg, int timeout, int *stat
 			ret = signal(SIGINT, SIG_DFL);
 		}
 		if(ret == SIG_ERR) {
-			OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
+			KTrace(SystemFault, 0,
 					LogText("@", "signal"),
 					LogUint("errno", errno),
 					LogText("errstr", strerror(errno))
@@ -549,10 +544,13 @@ static int knh_wait(KonohaContext *kctx, int pid, int bg, int timeout, int *stat
 	}
 	// return value creation
 	if(WIFSIGNALED(stat)) {
+		DBG_P("SIGNALED");
 		return WTERMSIG(stat) * -1;
 	} else if ( WIFSTOPPED(stat) ) {
+		DBG_P("STOPPED");
 		return WSTOPSIG(stat) * -1;
 	} else {
+		DBG_P("EXITED");
 		return S_EXIT;
 	}
 }
@@ -633,7 +631,7 @@ static kbool_t kPipeReadArray(KonohaContext *kctx, kArray *a, FILE *fp)
 		}
 	}
 	if(ferror(fp) == 0) {
-		KLIB kArray_add(kctx, a, KNULL(String));
+		clearerr(fp);
 		return false;
 	}
 	return true;
@@ -654,6 +652,7 @@ static kString *kPipeReadStringNULL(KonohaContext *kctx, FILE *fp)
 		}
 	}
 	if(ferror(fp)) {
+		clearerr(fp);
 		return NULL;
 	}
 	kString *ret = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), 0);
@@ -675,7 +674,7 @@ static kString *kSubproc_checkOutput(KonohaContext *kctx, kSubproc *sp, kString 
 				clearFd(&p->r);
 				clearFd(&p->w);
 				clearFd(&p->e);
-				OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
+				KTrace(SystemFault, 0,
 						LogText("@", "TIMEOUT"),
 						LogUint("errno", errno),
 						LogText("errstr", strerror(errno))
@@ -684,8 +683,8 @@ static kString *kSubproc_checkOutput(KonohaContext *kctx, kSubproc *sp, kString 
 			else if ( (p->r.mode == M_PIPE) || (p->r.mode == M_DEFAULT) ) {
 				ret_s = kPipeReadStringNULL(kctx, p->r.fp);
 				if(ret_s == NULL) {
-					OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
-							LogText("@", "fread"),
+					KTrace(SystemFault, 0,
+							LogText("@", "fread")
 					);
 					ret_s = KNULL(String);
 				}
@@ -699,7 +698,7 @@ static kString *kSubproc_checkOutput(KonohaContext *kctx, kSubproc *sp, kString 
 				snprintf(mbuf, sizeof(mbuf), "'%s'%s", cmd, msg);
 			}
 		} else {
-			OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
+			KTrace(SystemFault, 0,
 					LogText("@", "knh_wait"),
 					LogUint("errno", errno),
 					LogText("errstr", strerror(errno))
@@ -784,12 +783,14 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 #else
 			sig_t oldset = signal(SIGPIPE, SIG_IGN);
 #endif
-			if(fwrite(S_text(s), sizeof(char), S_size(s), p->w.fp) > 0) {
-				fputc('\n', p->w.fp);
-				fflush(p->w.fp);
-				fsync(fileno(p->w.fp));
+			if(fwrite(S_text(s), 1, S_size(s), p->w.fp) > 0) {
+				//fputc('\n', p->w.fp);
+				//fflush(p->w.fp);
+				//fsync(fileno(p->w.fp));
+				fclose(p->w.fp); // TODO: To communicate again, we need to regenerate FILE pointer from fd.
+				p->w.fp = NULL;
 			} else {
-				OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
+				KTrace(SystemFault, 0,
 						LogText("@", "fwrite"),
 						LogUint("errno", errno),
 						LogText("errstr", strerror(errno))
@@ -803,7 +804,7 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 		if(knh_wait(kctx, p->cpid, p->bg, p->timeout, &p->status ) == S_TIMEOUT) {
 			p->timeoutKill = 1;
 			killWait(p->cpid);
-			OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
+			KTrace(SystemFault, 0,
 					LogText("@", "knh_wait"),
 					LogUint("errno", errno),
 					LogText("errstr", strerror(errno))
@@ -813,7 +814,9 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 			if(p->r.mode == M_PIPE) {
 				if(!kPipeReadArray(kctx, ret_a, p->r.fp)) {
 					KTraceApi(SystemFault, "Subproc.communicate",
-							LogText("@", "fread")
+							LogText("@", "fread"),
+							LogUint("errno", errno),
+							LogText("errstr", strerror(errno))
 					);
 				}
 			}
@@ -823,7 +826,9 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 			if(p->e.mode == M_PIPE) {
 				if(!kPipeReadArray(kctx, ret_a, p->e.fp)) {
 					KTraceApi(SystemFault, "Subproc.communicate",
-							LogText("@", "fread")
+							LogText("@", "fread"),
+							LogUint("errno", errno),
+							LogText("errstr", strerror(errno))
 					);
 				}
 			}
