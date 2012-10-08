@@ -25,6 +25,11 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 
+// for isCommand
+#include <unistd.h>
+#include <sys/stat.h>
+#include <stdio.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -42,6 +47,99 @@ static kbool_t shell_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 
 // --------------------------------------------------------------------------
 
+static const char *expandDollarToken(KonohaContext *kctx, kTokenArray *tokens, size_t start, size_t end)
+{
+	// TODO: Expand $token by using konoha variable, return char pointer.
+	return NULL;
+}
+
+static kbool_t checkPath(const char *path, const char *cmd)
+{
+	struct stat sb;
+	char buf[PATH_MAX];
+	const char *fullpath;
+	if(path != NULL) {
+		snprintf(buf, PATH_MAX, "%s/%s", path, cmd);
+		fullpath = buf;
+	}
+	else {
+		fullpath = cmd;
+	}
+	if(lstat(fullpath, &sb) == -1) {
+		return false;
+	}
+	return (sb.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH));
+}
+
+static kbool_t isCommand(const char *cmd)
+{
+	if(strchr(cmd, ' ') != NULL) {
+		return false;
+	}
+	if(cmd[0] == '/') {
+		return checkPath(NULL, cmd);
+	}
+	size_t bufsize = confstr(_CS_PATH, NULL, 0);
+	char buf[bufsize];
+	confstr(_CS_PATH, buf, bufsize);
+	char *pos, *p = buf;
+	while(pos < buf + bufsize) {
+		if ((pos = strchr(p, ':')) == NULL) {
+			if(checkPath(p, cmd)) return true;
+			break;
+		}
+		p[pos - p] = '\0';
+		if(checkPath(p, cmd)) return true;
+		p = pos + 1;
+	}
+	return false;
+}
+
+static kString *splitWhiteSpace(KonohaContext *kctx, kTokenArray *tokenList)
+{
+	size_t i;
+	KUtilsWriteBuffer wb;
+	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	if(O_typeId(tokenList) == TY_Token) {
+		/* Single token was passed (e.g. "dsh ls;"). */
+		kToken *token = (kToken *)tokenList;
+		KLIB Kwb_write(kctx, &wb, S_text(token->text), S_size(token->text));
+	}
+	else {
+		/* Multiple tokens was passed (e.g. "dsh ls -la;"). */
+		for(i = 0; i < kArray_size(tokenList); i++) {
+			kToken *token = tokenList->tokenItems[i];
+			if(token->resolvedSymbol == SYM_("|")) {
+				// TODO: PIPE
+			}
+			else if(token->resolvedSymbol == SYM_("$")) {
+				// TODO: parse dollar token ($token)
+				size_t start = i;
+				while(i < kArray_size(tokenList) && !kToken_is(BeforeWhiteSpace, tokenList->tokenItems[i])) {
+					++i;
+				}
+				const char *dollarstr = expandDollarToken(kctx, tokenList, start, i-1);
+				if(dollarstr == NULL) {
+					KLIB Kwb_free(&wb);
+					return NULL;
+				}
+				else {
+					KLIB Kwb_write(kctx, &wb, dollarstr, strlen(dollarstr));
+				}
+			}
+			else {
+				KLIB Kwb_write(kctx, &wb, S_text(token->text), S_size(token->text));
+			}
+			if(kToken_is(BeforeWhiteSpace, token)) {
+				KLIB Kwb_write(kctx, &wb, " ", 1);
+			}
+		}
+	}
+	kString *cmd = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), 0);
+	KLIB Kwb_free(&wb);
+	return cmd;
+}
+
 static KMETHOD Statement_dsh(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Statement(stmt, gma);
@@ -50,22 +148,16 @@ static KMETHOD Statement_dsh(KonohaContext *kctx, KonohaStack *sfp)
 		RETURNb_(false);
 	}
 
-	size_t i;
-	KUtilsWriteBuffer wb;
-	kNameSpace *ns = Stmt_nameSpace(stmt);
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	for(i = 0; i < kArray_size(tokenList); i++) {
-		kToken *token = tokenList->tokenItems[i];
-		KLIB Kwb_write(kctx, &wb, S_text(token->text), S_size(token->text));
-		if(kToken_is(BeforeWhiteSpace, token)) {
-			KLIB Kwb_write(kctx, &wb, " ", 1);
-		}
+	kString *cmd = splitWhiteSpace(kctx, tokenList);
+	if(cmd == NULL) {
+		RETURNb_(false);
 	}
-	kString *cmd = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), 0);
-	PUSH_GCSTACK(cmd);
-	KLIB Kwb_free(&wb);
-	DBG_P("cmd$ %s", S_text(cmd));
+	DBG_P("cmd=%s", S_text(cmd));
+	DBG_P("iscommand=%d", isCommand(S_text(cmd)));
 
+	//TODO: generate eval("cmd") syntax
+
+	kNameSpace *ns = Stmt_nameSpace(stmt);
 	SugarSyntaxVar *syn = (SugarSyntaxVar*) SYN_(ns, KW_ExprMethodCall);
 	kTokenVar *callToken = GCSAFE_new(TokenVar, 0);
 	kExpr *callExpr = new_ConstValueExpr(kctx, TY_String, UPCAST(cmd));
