@@ -4,10 +4,10 @@ import("cstyle");
 
 void test() {
 	int i = 0;
-	while(i < 10) {
+	while(false) {
 		i = i + 1;
 	}
-	assert(i == 10);
+	assert(i == 0);
 }
 test();
 

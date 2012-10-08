@@ -1,0 +1,3 @@
+ - (error) (BreakStatement.k:6) break statement not within a loop
+ ** RuntimeScriptException (BreakStatement.k:6)
+Q.E.D.
