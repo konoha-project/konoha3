@@ -144,7 +144,7 @@ static KMETHOD Expression_Indexer(KonohaContext *kctx, KonohaStack *sfp)
 		tkN->uline = currentToken->uline;
 		SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
 		leftExpr  = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, tkN, leftExpr);
-		leftExpr = SUGAR kStmt_addExprParam(kctx, stmt, leftExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), 1/*allowEmpty*/);
+		leftExpr = SUGAR kStmt_addExprParam(kctx, stmt, leftExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), false/*allowEmpty*/);
 		RETURN_(SUGAR kStmt_rightJoinExpr(kctx, stmt, leftExpr, tokenList, operatorIdx + 1, endIdx));
 	}
 	DBG_P("nothing");
