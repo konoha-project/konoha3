@@ -297,12 +297,12 @@ static kTokenVar* kToken_expandGroupMacro(KonohaContext *kctx, kTokenVar *tk, kN
 	return tk;
 }
 
-static kbool_t TokenSequence_applyMacro(KonohaContext *kctx, TokenSequence *tokens, kArray *macroTokenList, size_t paramsize, MacroSet *macroParam)
+static kbool_t TokenSequence_applyMacro(KonohaContext *kctx, TokenSequence *tokens, kArray *macroTokenList, int beginIdx, int endIdx, size_t paramsize, MacroSet *macroParam)
 {
-	TokenSequence macro = {tokens->ns, macroTokenList, paramsize, kArray_size(macroTokenList)};
-	KdumpTokenArray(kctx, macro.tokenList, 0, kArray_size(macroTokenList));
+	TokenSequence macro = {tokens->ns, macroTokenList, beginIdx + paramsize, endIdx};
+	KdumpTokenArray(kctx, macro.tokenList, macro.beginIdx, macro.endIdx);
 	int dstart = kArray_size(tokens->tokenList);
-	TokenSequence_resolved2(kctx, tokens, macroParam, &macro, paramsize);
+	TokenSequence_resolved2(kctx, tokens, macroParam, &macro, beginIdx + paramsize);
 	DBG_P("dstart=%d, tokens->begin,end=%d, %d", dstart, tokens->beginIdx, tokens->endIdx);
 	KdumpTokenArray(kctx, tokens->tokenList, dstart, tokens->endIdx);
 	return true;
@@ -332,7 +332,7 @@ static void TokenSequence_applyMacroGroup(KonohaContext *kctx, TokenSequence *to
 	DBG_ASSERT(p < paramsize);
 	mp[p].beginIdx = start;
 	mp[p].endIdx = kArray_size(groupToken->subTokenList);
-	TokenSequence_applyMacro(kctx, tokens, macroTokenList, paramsize, mp);
+	TokenSequence_applyMacro(kctx, tokens, macroTokenList, 0, kArray_size(macroTokenList), paramsize, mp);
 }
 
 static void kNameSpace_setMacroData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int paramsize, const char *data)
@@ -406,7 +406,7 @@ static kToken* new_CommaToken(KonohaContext *kctx)
 static int TokenSequence_applyMacroSyntax(KonohaContext *kctx, TokenSequence *tokens, SugarSyntax *syn, MacroSet *macroParam, TokenSequence *source, int currentIdx)
 {
 	if(syn->macroParamSize == 0) {
-		TokenSequence_applyMacro(kctx, tokens, syn->macroDataNULL, 0, NULL);
+		TokenSequence_applyMacro(kctx, tokens, syn->macroDataNULL, 0, kArray_size(syn->macroDataNULL), 0, NULL);
 		return currentIdx;
 	}
 	TokenSequence dummy = {tokens->ns, kctx->stack->gcstack};
