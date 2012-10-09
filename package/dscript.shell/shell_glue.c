@@ -234,7 +234,7 @@ static KMETHOD Statement_Shell(KonohaContext *kctx, KonohaStack *sfp)
 			PUSH_GCSTACK(cmd);
 		}
 		DBG_P("cmd=%s", S_text(cmd));
-		system(S_text(cmd));
+		system(S_text(cmd));  // FIXME: This is for demo
 		kStmt_done(kctx, stmt);
 	}
 	RETURNb_(false);
