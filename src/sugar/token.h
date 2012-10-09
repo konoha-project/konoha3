@@ -65,6 +65,17 @@ static int ParseLineFeed(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenize
 	return ParseIndent(kctx, tk, tokenizer, pos+1);
 }
 
+static int ParseBackSlash(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int pos)
+{
+	if(tokenizer->source[pos+1] == '\n') {
+		if(tokenizer->currentLine != 0) {
+			tokenizer->currentLine += 1;
+		}
+		return ParseIndent(kctx, (kTokenVar*)KNULL(Token), tokenizer, pos+2);
+	}
+	return pos+1;
+}
+
 static int ParseNumber(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	int ch, pos = tok_start;
@@ -264,9 +275,10 @@ static int ParseUndefinedToken(KonohaContext *kctx, kTokenVar *tk, Tokenizer *to
 {
 	if(IS_NOTNULL(tk)) {
 		kToken_printMessage(kctx, tk, ErrTag, "undefined token character: %c (ascii=%x)", tokenizer->source[tok_start], tokenizer->source[tok_start]);
+		while(tokenizer->source[++tok_start] != 0);
+		return tok_start;
 	}
-	while(tokenizer->source[++tok_start] != 0);
-	return tok_start;
+	return tok_start+1;
 }
 
 static int ParseLazyBlock(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start);
@@ -310,7 +322,7 @@ static const TokenizeFunc MiniKonohaTokenMatrix[] = {
 	ParseAnnotation, /* KonohaChar_AtMark */
 	ParseOperator, /* KonohaChar_Var */
 	ParseOperator, /* KonohaChar_Childer */
-	ParseUndefinedToken,  /* KonohaChar_BackSlash */
+	ParseBackSlash/*ParseUndefinedToken*/,  /* KonohaChar_BackSlash */
 	ParseOperator, /* KonohaChar_Hat */
 	ParseSymbol,  /* KonohaChar_Underbar */
 };
