@@ -184,20 +184,34 @@ static KMETHOD Expression_Indexer(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_P("nothing");
 }
 
-//static KMETHOD Expression_Increment(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
-//	DBG_P("beginIdx=%d, endIdx=%d", beginIdx, endIdx);
-//	kToken *currentToken = tokenList->tokenItems[operatorIdx];
-//	SugarSyntax *opSyntax = currentToken->resolvedSyntaxInfo;
-//	if(beginIdx == endIdx) { ++A /* MACRO   X = (X) + 1 */
-//		opSyntax->macroDataNULL
-//	}
-//	else {/* (beginIdx < operatorIdx) MACRO ${ int _ = X; X = (X) + 1; _} */
-//
-//	}
-//	DBG_P("nothing");
-//}
+static KMETHOD Expression_Increment(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
+	DBG_P("beginIdx=%d, endIdx=%d", beginIdx, endIdx);
+	kToken *currentToken = tokenList->tokenItems[operatorIdx];
+	SugarSyntax *opSyntax = currentToken->resolvedSyntaxInfo;
+	TokenSequence macro = {Stmt_nameSpace(stmt), tokenList};
+	TokenSequence_push(kctx, macro);
+	macro.TargetPolicy.RemovingIndent = true;
+	if(beginIdx == endIdx) { /* ++A  MACRO    X X = (X) + 1 */
+		MacroSet macroParam[] = {
+			{SYM_("X"), tokenList, operatorIdx+1, endIdx},
+			{0, NULL, 0, 0}, /* sentinel */
+		};
+		SUGAR TokenSequence_applyMacro(kctx, &macro, opSyntax->macroDataNULL, 0, 6, 1, macroParam);
+	}
+	else {/* (beginIdx < operatorIdx) MACRO ${ int _ = X; X = (X) + 1; _} */
+		TokenSequence macro = {Stmt_nameSpace(stmt), tokenList};
+		MacroSet macroParam[] = {
+			{SYM_("X"), tokenList, beginIdx, operatorIdx},
+			{0, NULL, 0, 0}, /* sentinel */
+		};
+		SUGAR TokenSequence_applyMacro(kctx, &macro, opSyntax->macroDataNULL, 6, kArray_size(opSyntax->macroDataNULL), 1, macroParam);
+	}
+	kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx);
+	TokenSequence_pop(kctx, macro);
+	RETURN_(expr);
+}
 
 // --------------------------------------------------------------------------
 
@@ -222,11 +236,13 @@ static kbool_t cstyle_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 
 	KDEFINE_SYNTAX defExpression[] = {
 		{ SYM_("[]"), SYNFLAG_ExprPostfixOp2, NULL, Precedence_CStyleCALL, 0, NULL, Expression_Indexer, NULL, NULL, NULL, },
-		{ SYM_("++"), SYNFLAG_ExprPostfixOp2, NULL, Precedence_CStyleCALL, Precedence_CStylePREUNARY, },
-		{ SYM_("--"), SYNFLAG_ExprPostfixOp2, NULL, Precedence_CStyleCALL, Precedence_CStylePREUNARY, },
+		{ SYM_("++"), SYNFLAG_ExprPostfixOp2, NULL, Precedence_CStyleCALL, Precedence_CStylePREUNARY, NULL, Expression_Increment,},
+		{ SYM_("--"), SYNFLAG_ExprPostfixOp2, NULL, Precedence_CStyleCALL, Precedence_CStylePREUNARY, NULL, Expression_Increment,},
 		{ KW_END, }, /* sentinental */
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, defExpression, ns);
+	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("++"), 1,  "X X = (X) + 1 X ${int _ = X; X = (X) + 1; _}");
+	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("--"), 1,  "X X = (X) - 1 X ${int _ = X; X = (X) - 1; _}");
 	return true;
 }
 
