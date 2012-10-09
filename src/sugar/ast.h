@@ -104,7 +104,7 @@ static int kStmt_findOperator(KonohaContext *kctx, kStmt *stmt, kArray *tokenLis
 	return idx;
 }
 
-static kExpr* kStmt_parseExpr(KonohaContext *kctx, kStmt *stmt, kArray *tokenList, int beginIdx, int endIdx)
+static kExpr* kStmt_parseExpr(KonohaContext *kctx, kStmt *stmt, kArray *tokenList, int beginIdx, int endIdx, const char *hintBeforeText)
 {
 	if(!Stmt_isERR(stmt)) {
 		if(beginIdx < endIdx) {
@@ -113,35 +113,28 @@ static kExpr* kStmt_parseExpr(KonohaContext *kctx, kStmt *stmt, kArray *tokenLis
 			return kStmt_parseOperatorExpr(kctx, stmt, syn, tokenList, beginIdx, idx, endIdx);
 		}
 		else {
-#ifdef USE_SMALLBUILD
-			kStmt_printMessage(kctx, stmt, ErrTag, "syntax error: empty");
-#else
-			const char *where = "", *token = "";
-			if (0 < beginIdx - 1) {
-				where = " after "; token = Token_text(tokenList->tokenItems[beginIdx-1]);
-			}
-			else if(endIdx < kArray_size(tokenList)) {
-				where = " before "; token = Token_text(tokenList->tokenItems[endIdx]);
-			}
-			kStmt_printMessage(kctx, stmt, ErrTag, "expected expression%s%s", where, token);
+			if(hintBeforeText == NULL) hintBeforeText = "";
+			kStmt_printMessage(kctx, stmt, ErrTag, "expected expression after %s", hintBeforeText);
 		}
-#endif
 	}
 	return K_NULLEXPR;
 }
 
-static kExpr *kStmt_addExprParam(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kArray *tokenList, int s, int e, int allowEmpty)
+static kExpr *kStmt_addExprParam(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kArray *tokenList, int s, int e, const char *hintBeforeText/* if NULL empty isAllowed */)
 {
 	int i, start = s;
 	for(i = s; i < e; i++) {
 		kToken *tk = tokenList->tokenItems[i];
 		if(tk->resolvedSyntaxInfo->keyword == KW_COMMA) {
-			expr = Expr_add(kctx, expr, kStmt_parseExpr(kctx, stmt, tokenList, start, i));
+			if(start < i || hintBeforeText != NULL) {
+				expr = Expr_add(kctx, expr, kStmt_parseExpr(kctx, stmt, tokenList, start, i, hintBeforeText));
+				if(hintBeforeText != NULL) hintBeforeText = ",";
+			}
 			start = i + 1;
 		}
 	}
-	if(allowEmpty == 0 || start < i) {
-		expr = Expr_add(kctx, expr, kStmt_parseExpr(kctx, stmt, tokenList, start, i));
+	if(start < i || hintBeforeText != NULL) {
+		expr = Expr_add(kctx, expr, kStmt_parseExpr(kctx, stmt, tokenList, start, i, hintBeforeText));
 	}
 	return expr;
 }
@@ -793,7 +786,7 @@ static int kStmt_addAnnotation(KonohaContext *kctx, kStmtVar *stmt, TokenSequenc
 			kToken *nextToken = range->tokenList->tokenItems[currentIdx+1];
 			kObject *value = UPCAST(K_TRUE);
 			if(nextToken->resolvedSyntaxInfo != NULL && nextToken->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
-				value = (kObject*)kStmt_parseExpr(kctx, stmt, nextToken->subTokenList, 0, kArray_size(nextToken->subTokenList));
+				value = (kObject*)kStmt_parseExpr(kctx, stmt, nextToken->subTokenList, 0, kArray_size(nextToken->subTokenList), "(");
 				currentIdx++;
 			}
 			if(value != NULL) {

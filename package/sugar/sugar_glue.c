@@ -254,14 +254,14 @@ static KMETHOD kStmt_printMessage2rintError(KonohaContext *kctx, KonohaStack *sf
 //	RETURN_(SUGAR new_kBlock(kctx, Stmt_nameSpace(stmt), stmt, tokenList, s, e, ';'));
 //}
 
-//## Expr Stmt.newExpr(Token[] tokenList, int s, int e);
-static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kStmt *stmt  = sfp[0].asStmt;
-	kArray *tokenList  = sfp[1].asArray;
-	int s = sfp[2].intValue, e = sfp[3].intValue;
-	RETURN_(SUGAR kStmt_parseExpr(kctx, stmt, tokenList, s, e));
-}
+////## Expr Stmt.newExpr(Token[] tokenList, int s, int e);
+//static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	kStmt *stmt  = sfp[0].asStmt;
+//	kArray *tokenList  = sfp[1].asArray;
+//	int s = sfp[2].intValue, e = sfp[3].intValue;
+//	RETURN_(SUGAR kStmt_parseExpr(kctx, stmt, tokenList, s, e, NULL));
+//}
 
 ////## Expr Stmt.newMethodCallExpr(Token key, Token self);
 //static KMETHOD Stmt_newMethodCallExpr(KonohaContext *kctx, KonohaStack *sfp)
@@ -382,7 +382,7 @@ static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 
 		_Public, _F(kStmt_printMessage2rintError), TY_Expr, TY_Stmt, MN_("printError"), 1, TY_String, FN_msg,
 
-		_Public, _F(Stmt_newExpr), TY_Expr, TY_Stmt, MN_("newExpr"), 1, TY_String, FN_key,
+//		_Public, _F(Stmt_newExpr), TY_Expr, TY_Stmt, MN_("newExpr"), 1, TY_String, FN_key,
 		_Public, _F(Stmt_setType), TY_void, TY_Stmt, MN_("setType"), 1, TY_int, FN_x,
 //		_Public, _F(kStmt_printMessage2arsedExpr), TY_Expr, TY_Stmt, MN_("parseExpr"), 3, TY_TokenArray, FN_tokenList, TY_int, FN_s, TY_int, FN_e,
 		DEND,

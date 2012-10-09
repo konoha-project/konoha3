@@ -78,7 +78,7 @@ static KMETHOD Expression_isNull(KonohaContext *kctx, KonohaStack *sfp)
 		DBG_P("checking .. x == null");
 		kTokenVar *tk = tokenList->tokenVarItems[operatorIdx+1];
 		if(tk->resolvedSymbol == SYM_("null")) {
-			kExpr *leftHandExpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx);
+			kExpr *leftHandExpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
 			tk->resolvedSymbol = SYM_("isNull");
 			RETURN_(SUGAR new_UntypedCallStyleExpr(kctx, SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall), 2, tk, leftHandExpr));
 		}
@@ -93,7 +93,7 @@ static KMETHOD Expression_isNotNull(KonohaContext *kctx, KonohaStack *sfp)
 		DBG_P("checking .. x != null");
 		kTokenVar *tk = tokenList->tokenVarItems[operatorIdx+1];
 		if(tk->resolvedSymbol == SYM_("null")) {
-			kExpr *leftHandExpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx);
+			kExpr *leftHandExpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
 			tk->resolvedSymbol = SYM_("isNotNull");
 			RETURN_(SUGAR new_UntypedCallStyleExpr(kctx, SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall), 2, tk, leftHandExpr));
 		}

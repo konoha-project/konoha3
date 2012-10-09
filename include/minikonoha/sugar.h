@@ -571,8 +571,8 @@ typedef struct {
 	kExpr*       (*new_UntypedTermExpr)(KonohaContext *, kToken *tk);
 	kExpr*       (*new_UntypedCallStyleExpr)(KonohaContext *, SugarSyntax *syn, int n, ...);
 	kExpr*       (*kStmt_parseOperatorExpr)(KonohaContext *, kStmt *, SugarSyntax *, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx);
-	kExpr*       (*kStmt_parseExpr)(KonohaContext *, kStmt *, kArray *tokenList, int s, int e);
-	kExpr*       (*kStmt_addExprParam)(KonohaContext *, kStmt *, kExpr *, kArray *tokenList, int, int, int allowEmpty);
+	kExpr*       (*kStmt_parseExpr)(KonohaContext *, kStmt *, kArray *tokenList, int s, int e, const char *hintBeforeText);
+	kExpr*       (*kStmt_addExprParam)(KonohaContext *, kStmt *, kExpr *, kArray *tokenList, int, int, const char *hintBeforeText);
 	kExpr*       (*kStmt_rightJoinExpr)(KonohaContext *, kStmt *, kExpr *, kArray *, int, int);
 
 	kExpr*       (*kExpr_setConstValue)(KonohaContext *, kExpr *, ktype_t ty, kObject *o);
