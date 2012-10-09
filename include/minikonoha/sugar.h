@@ -169,7 +169,7 @@ struct Tokenizer {
 
 //#define VAR_TRACE
 #ifndef VAR_TRACE
-#define VAR_TRACE DBG_P("tracing.. file=%s, line=%d", __FILE__, __LINE__)
+#define VAR_TRACE DBG_P("tracing..")
 #endif
 
 // int TokenFunc(Token tk, Source s)

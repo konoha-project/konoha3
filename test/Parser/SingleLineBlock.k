@@ -7,5 +7,6 @@ int f(int n) {
 	return c;
 }
 
+//System.p("a="+ f(1));
 assert(f(1) == 2);
 	
