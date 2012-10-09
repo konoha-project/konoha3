@@ -1545,7 +1545,7 @@ static void bitmap_mark(bitmap_t bm, Segment *seg, uintptr_t idx, uintptr_t mask
 	}
 }
 
-static void mark_mstack(KonohaContext *kctx, HeapManager *mng, kObject *o, MarkStack *mstack)
+static void mark_mstack(HeapManager *mng, kObject *o, MarkStack *mstack)
 {
 	Segment *seg;
 	int index, klass;
@@ -1662,7 +1662,7 @@ static void bmgc_gc_mark(HeapManager *mng, enum gc_mode mode)
 		if (ref_size > 0) {
 			L_INLOOP:;
 			for (i = ref_size-1; i >= 0; --i) {
-				mark_mstack(kctx, mng, stack->ref.refhead[i], mstack);
+				mark_mstack(mng, stack->ref.refhead[i], mstack);
 			}
 		}
 	}
