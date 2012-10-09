@@ -173,6 +173,36 @@ static KMETHOD Statement_dsh(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNb_(ret);
 }
 
+
+static KMETHOD PatternMatch_Shell(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_PatternMatch(stmt, nameid, tokenList, beginIdx, endIdx);
+	kToken *firstToken = tokenList->tokenItems[beginIdx];
+	DBG_P("firstToken='%s', isCommand=%d", S_text(firstToken->text), isCommand(S_text(firstToken->text)));
+	RETURNi_((firstToken->resolvedSyntaxInfo->keyword == KW_SymbolPattern && isCommand(S_text(firstToken->text))) ? 0 : -1);
+}
+
+static KMETHOD Statement_Shell(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_Statement(stmt, gma);
+	kTokenArray *tokenList = (kTokenArray *)kStmt_getObjectNULL(kctx, stmt, KW_TokenPattern);
+	if(tokenList != NULL) {
+		kString *cmd = NULL;
+		if(IS_Token(tokenList)) {
+			cmd = ((kToken*)tokenList)->text;
+		}
+		else {
+			DBG_ASSERT(IS_Array(tokenList));
+			cmd = splitWhiteSpace(kctx, tokenList);  // forget GC
+			PUSH_GCSTACK(cmd);
+		}
+		DBG_P("cmd=%s", S_text(cmd));
+		system(S_text(cmd));
+		kStmt_done(kctx, stmt);
+	}
+	RETURNb_(false);
+}
+
 // ----------------------------------------------------------------------------
 /* define class */
 
@@ -182,7 +212,7 @@ static kbool_t shell_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameS
 	KImportPackage(ns, "dscript.subproc", pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("dsh"), 0, "\"dsh\" $Token*", 0, 0, NULL, NULL, Statement_dsh, Statement_dsh, NULL, },
-	//	{ SYM_("$Shell"), 0, "$Shell $Token*", 0, 0, PatternMatch_Shell, NULL, Statement_Shell, Statement_Shell},
+		{ SYM_("$Shell"), 0, "$Shell $Token*", 0, 0, PatternMatch_Shell, NULL, Statement_Shell, Statement_Shell},
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
