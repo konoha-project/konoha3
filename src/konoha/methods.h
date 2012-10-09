@@ -207,8 +207,8 @@ static KMETHOD String_opNEQ(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Func_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFuncVar *fo = (kFuncVar*)sfp[0].asFunc;
-	KSETv(fo, fo->self, sfp[1].asObject);
-	KSETv(fo, fo->mtd,  sfp[2].asMethod);
+	KFieldSet(fo, fo->self, sfp[1].asObject);
+	KFieldSet(fo, fo->mtd,  sfp[2].asMethod);
 	RETURN_(fo);
 }
 
@@ -218,7 +218,7 @@ static KMETHOD Func_invoke(KonohaContext *kctx, KonohaStack *sfp)
 	kFunc* fo = sfp[0].asFunc;
 	DBG_ASSERT(IS_Func(fo));
 	DBG_ASSERT(IS_Method(fo->mtd));
-	KSETv_AND_WRITE_BARRIER(NULL, sfp[0].asObject, fo->self, GC_NO_WRITE_BARRIER);
+	KUnsafeFieldSet(sfp[0].asObject, fo->self);
 	KSELFCALL(sfp, fo->mtd);
 }
 

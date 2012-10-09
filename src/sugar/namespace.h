@@ -29,7 +29,7 @@
 static void ArrayNULL_append(KonohaContext *kctx, kObject *p, kArray **arrayRef, kObject *o)
 {
 	if(arrayRef[0] == NULL) {
-		KSETv(p, arrayRef[0], new_(Array, 0));
+		KFieldSet(p, arrayRef[0], new_(Array, 0));
 	}
 	KLIB kArray_add(kctx, arrayRef[0], o);
 }
@@ -39,7 +39,7 @@ static void ArrayNULL_appendArray(KonohaContext *kctx, kObject *p, kArray **arra
 	int i;
 	if(a != NULL) {
 		if(arrayRef[0] == NULL) {
-			KSETv(p, arrayRef[0], new_(Array, kArray_size(a)));
+			KFieldSet(p, arrayRef[0], new_(Array, kArray_size(a)));
 		}
 		for(i = 0; i < kArray_size(a); i++) {
 			kObject *o = a->objectItems[i];
@@ -52,13 +52,13 @@ static void kNameSpace_addFuncList(KonohaContext *kctx, kNameSpace *ns, kArray *
 {
 	kArray *a = funcListTable[index];
 	if(a == NULL) {
-		KSETv(ns, funcListTable[index], (kArray*)fo);
+		KFieldSet(ns, funcListTable[index], (kArray*)fo);
 		return;
 	}
 	else if(!IS_Array(a)) {
 		kArray *newa = new_(Array, 0);
 		KLIB kArray_add(kctx, newa, a);
-		KSETv(ns, funcListTable[index], newa);
+		KFieldSet(ns, funcListTable[index], newa);
 		a = newa;
 	}
 	KLIB kArray_add(kctx, a, fo);
@@ -200,7 +200,7 @@ static SugarSyntaxVar *kNameSpace_setSugarFunc(KonohaContext *kctx, kNameSpace *
 {
 	assert(idx < SugarFunc_SIZE);
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_getSyntax(kctx, ns, keyword, 1/*new*/);
-	KINITSETv(ns, syn->sugarFuncTable[idx], fo);
+	KSafeFieldSet(ns, syn->sugarFuncTable[idx], fo);
 	return syn;
 }
 
@@ -216,20 +216,20 @@ static SugarSyntaxVar *kNameSpace_setTokenFunc(KonohaContext *kctx, kNameSpace *
 {
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_getSyntax(kctx, ns, keyword, 1/*new*/);
 	syn->tokenKonohaChar = konohaChar;
-	KINITSETv(ns, syn->sugarFuncTable[SugarFunc_TokenFunc], fo);
+	KSafeFieldSet(ns, syn->sugarFuncTable[SugarFunc_TokenFunc], fo);
 	kArray **list = (kArray**)kNameSpace_tokenFuncMatrix(kctx, ns);
 	kNameSpace_addFuncList(kctx, ns, list, konohaChar, fo);
 	return syn;
 }
 
-static void SugarSyntax_setMethodFunc(KonohaContext *kctx, SugarSyntaxVar *syn, MethodFunc definedMethodFunc, size_t index, MethodFunc *previousDefinedFuncRef, kFunc **cachedFuncRef)
+static void SugarSyntax_setMethodFunc(KonohaContext *kctx, kNameSpace *ns, SugarSyntaxVar *syn, MethodFunc definedMethodFunc, size_t index, MethodFunc *previousDefinedFuncRef, kFunc **cachedFuncRef)
 {
 	if(definedMethodFunc != NULL) {
 		if(definedMethodFunc != previousDefinedFuncRef[0]) {
 			previousDefinedFuncRef[0] = definedMethodFunc;
 			cachedFuncRef[0] = new_SugarFunc(definedMethodFunc);
 		}
-		KINITv(syn->sugarFuncTable[index], cachedFuncRef[0]);
+		KFieldInit(ns, syn->sugarFuncTable[index], cachedFuncRef[0]);
 	}
 }
 
@@ -249,25 +249,25 @@ static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 			syn->precedence_op2 = syndef->precedence_op2;
 		}
 		if(syndef->rule != NULL) {
-			KINITp(ns, syn->SyntaxPatternListNULL, new_(TokenArray, 0));
+			KFieldInit(ns, syn->SyntaxPatternListNULL, new_(TokenArray, 0));
 			kNameSpace_parseSyntaxPattern(kctx, ns, syndef->rule, 0, syn->SyntaxPatternListNULL);
 		}
-		SugarSyntax_setMethodFunc(kctx, syn, syndef->PatternMatch,   SugarFunc_PatternMatch,   &pPatternMatch, &mPatternMatch);
-		SugarSyntax_setMethodFunc(kctx, syn, syndef->Expression,      SugarFunc_Expression,      &pExpression, &mExpression);
-		SugarSyntax_setMethodFunc(kctx, syn, syndef->TopLevelStatement, SugarFunc_TopLevelStatement, &pStatement, &mStatement);
-		SugarSyntax_setMethodFunc(kctx, syn, syndef->Statement,    SugarFunc_Statement,    &pStatement, &mStatement);
-		SugarSyntax_setMethodFunc(kctx, syn, syndef->TypeCheck,    SugarFunc_TypeCheck,    &pTypeCheck, &mTypeCheck);
+		SugarSyntax_setMethodFunc(kctx, ns, syn, syndef->PatternMatch,   SugarFunc_PatternMatch,   &pPatternMatch, &mPatternMatch);
+		SugarSyntax_setMethodFunc(kctx, ns, syn, syndef->Expression,      SugarFunc_Expression,      &pExpression, &mExpression);
+		SugarSyntax_setMethodFunc(kctx, ns, syn, syndef->TopLevelStatement, SugarFunc_TopLevelStatement, &pStatement, &mStatement);
+		SugarSyntax_setMethodFunc(kctx, ns, syn, syndef->Statement,    SugarFunc_Statement,    &pStatement, &mStatement);
+		SugarSyntax_setMethodFunc(kctx, ns, syn, syndef->TypeCheck,    SugarFunc_TypeCheck,    &pTypeCheck, &mTypeCheck);
 		// set default function
 		if(syn->parentSyntaxNULL == NULL && syn->sugarFuncTable[SugarFunc_Expression] == NULL) {
 			if(syn->precedence_op2 > 0 || syn->precedence_op1 > 0) {
 				kFunc *fo = SYN_(ns, KW_ExprOperator)->sugarFuncTable[SugarFunc_Expression];
 				DBG_ASSERT(fo != NULL);
-				KINITp(ns, syn->sugarFuncTable[SugarFunc_Expression], fo);
+				KFieldInit(ns, syn->sugarFuncTable[SugarFunc_Expression], fo);
 			}
 			else if(syn->sugarFuncTable[SugarFunc_TypeCheck] != NULL) {
 				kFunc *fo = SYN_(ns, KW_ExprTerm)->sugarFuncTable[SugarFunc_Expression];
 				DBG_ASSERT(fo != NULL);
-				KINITp(ns, syn->sugarFuncTable[SugarFunc_Expression], fo);
+				KFieldInit(ns, syn->sugarFuncTable[SugarFunc_Expression], fo);
 			}
 		}
 		DBG_ASSERT(syn == SYN_(ns, syndef->keyword));
@@ -805,13 +805,13 @@ static kMethod* kNameSpace_addMethod(KonohaContext *kctx, kNameSpace *ns, kMetho
 	}
 	if(kMethod_is(Public, mtd)) {
 		if(unlikely(ct->methodList == K_EMPTYARRAY)) {
-			KINITv(((KonohaClassVar*)ct)->methodList, new_(MethodArray, 8));
+			KUnsafeFieldInit(((KonohaClassVar*)ct)->methodList, new_(MethodArray, 8));
 		}
 		KLIB kArray_add(kctx, ct->methodList, mtd);
 	}
 	else {
 		if(ns->methodList == K_EMPTYARRAY) {
-			KSETv(ns, ((kNameSpaceVar*)ns)->methodList, new_(MethodArray, 8));
+			KFieldSet(ns, ((kNameSpaceVar*)ns)->methodList, new_(MethodArray, 8));
 		}
 		KLIB kArray_add(kctx, ns->methodList, mtd);
 	}
@@ -915,7 +915,7 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackage_t packageId,
 	}
 	KonohaPackage *pack = (KonohaPackage*)KCALLOC(sizeof(KonohaPackage), 1);
 	pack->packageId = packageId;
-	KINITv(pack->packageNameSpace, ns);
+	KUnsafeFieldInit(pack->packageNameSpace, ns);
 	pack->packageHandler = packageHandler;
 	path = PLATAPI formatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_exports.k");
 	if(path != NULL) {

@@ -44,7 +44,7 @@ static KMETHOD MethodFunc_ObjectFieldSetter(KonohaContext *kctx, KonohaStack *sf
 {
 	size_t delta = sfp[K_MTDIDX].mtdNC->delta;
 	kObjectVar *o = sfp[0].asObjectVar;
-	KSETv(o, o->fieldObjectItems[delta], sfp[1].asObject);
+	KFieldSet(o, o->fieldObjectItems[delta], sfp[1].asObject);
 	RETURN_(sfp[1].asObject);
 }
 static KMETHOD MethodFunc_UnboxFieldSetter(KonohaContext *kctx, KonohaStack *sfp)
@@ -139,7 +139,7 @@ static kbool_t KonohaClass_addField(KonohaContext *kctx, KonohaClass *ct, int fl
 {
 	int pos = ct->fieldsize;
 	if(unlikely(ct->methodList == K_EMPTYARRAY)) {
-		KINITv(((KonohaClassVar*)ct)->methodList, new_(MethodArray, 8));
+		KUnsafeFieldInit(((KonohaClassVar*)ct)->methodList, new_(MethodArray, 8));
 	}
 
 	if(pos < ct->fieldAllocSize) {
@@ -153,7 +153,7 @@ static kbool_t KonohaClass_addField(KonohaContext *kctx, KonohaClass *ct, int fl
 		}
 		else {
 			kObjectVar *o = definedClass->defaultValueAsNullVar;
-			KSETv(o, o->fieldObjectItems[pos], KLIB Knull(kctx, CT_(ty)));
+			KFieldSet(o, o->fieldObjectItems[pos], KLIB Knull(kctx, CT_(ty)));
 			definedClass->fieldItems[pos].isobj = 1;
 		}
 		if(FLAG_is(flag, kField_Getter)) {
@@ -206,7 +206,7 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 	if(self != K_NULLEXPR) {
 		kMethod *mtd = KLIB kNameSpace_getGetterMethodNULL(kctx, ns, self->ty, fn, TY_var);
 		if(mtd != NULL) {
-			KSETv(expr->cons, expr->cons->methodItems[0], mtd);
+			KFieldSet(expr->cons, expr->cons->methodItems[0], mtd);
 			RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, reqty));
 		}
 		SUGAR kStmt_printMessage2(kctx, stmt, tkN, ErrTag, "undefined field: %s", S_text(tkN->text));

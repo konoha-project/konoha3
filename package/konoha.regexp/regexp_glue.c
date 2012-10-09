@@ -393,7 +393,7 @@ static void RegExp_set(KonohaContext *kctx, kRegExp *re, kString *ptns, kString 
 	const char *ptn = S_text(ptns);
 	const char *opt = S_text(opts);
 	knh_RegExp_setOptions(re, opt);
-	KSETv(re, re->pattern, ptns);
+	KFieldSet(re, re->pattern, ptns);
 	re->reg = pcre_regmalloc(kctx, ptns);
 	int cflags = pcre_parsecflags(kctx, opt);
 	if(!S_isASCII(ptns)) {
@@ -416,7 +416,7 @@ static kArray *RegExp_execute(KonohaContext *kctx, kRegExp *re, kString *s0)
 		int i, isGlobalOption = RegExp_isGlobal(re);
 		a = (kArray*)KLIB new_kObject(kctx, CT_StringArray0, nmatch);
 		BEGIN_LOCAL(lsfp, 1);
-		KSETv_AND_WRITE_BARRIER(NULL, lsfp[0].asArray, a, GC_NO_WRITE_BARRIER);
+		KUnsafeFieldSet(lsfp[0].asArray, a);
 		do {
 			int res = pcre_regexec(kctx, re->reg, str, nmatch, pmatch, re->eflags);
 			if(res != 0) {
@@ -599,7 +599,7 @@ static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp)
 		if (str < eos) {
 			a = (kArray*)KLIB new_kObject(kctx, CT_StringArray0, 0);
 			BEGIN_LOCAL(lsfp, 1);
-			KSETv_AND_WRITE_BARRIER(NULL, lsfp[0].asArray, a, GC_NO_WRITE_BARRIER);
+			KUnsafeFieldSet(lsfp[0].asArray, a);
 			while (str <= eos) {
 				int res = pcre_regexec(kctx, re->reg, str, KREGEXP_MATCHSIZE, pmatch, re->eflags);
 				if (res == 0) {
@@ -646,7 +646,7 @@ static KMETHOD String_splitwithSeparatorLimit(KonohaContext *kctx, KonohaStack *
 		if (str < eos) {
 			a = (kArray*)KLIB new_kObject(kctx, CT_StringArray0, 0);
 			BEGIN_LOCAL(lsfp, 1);
-			KSETv_AND_WRITE_BARRIER(NULL, lsfp[0].asArray, a, GC_NO_WRITE_BARRIER);
+			KUnsafeFieldSet(lsfp[0].asArray, a);
 			while (str <= eos && asize < limit) {
 				int res = pcre_regexec(kctx, re->reg, str, KREGEXP_MATCHSIZE, pmatch, re->eflags);
 				if (res == 0) {

@@ -46,7 +46,7 @@ static KMETHOD Token_setText(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
 	kString *text = sfp[1].asString;
-	KSETv(tk, tk->text, text);
+	KFieldSet(tk, tk->text, text);
 	RETURNvoid_();
 }
 
@@ -55,7 +55,7 @@ static KMETHOD Token_setSubArray(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *) sfp[0].asToken;
 	kArray *sub = sfp[1].asArray;
-	KSETv(tk, tk->subTokenList, sub);
+	KFieldSet(tk, tk->subTokenList, sub);
 	RETURNvoid_();
 }
 
@@ -271,8 +271,8 @@ static KMETHOD kStmt_printMessage2rintError(KonohaContext *kctx, KonohaStack *sf
 //	kToken *tk   = sfp[1].asToken;
 //	assert(tk->keyword != 0);
 //	kExprVar *expr = GCSAFE_new(ExprVar, SYN_(Stmt_nameSpace(stmt), tk->keyword));
-//	KSETv(expr, expr->tk, tk);
-//	KSETv(expr, expr->cons, new_(Array, 8));
+//	KFieldSet(expr, expr->tk, tk);
+//	KFieldSet(expr, expr->cons, new_(Array, 8));
 //	RETURN_(expr);
 //}
 
@@ -440,7 +440,7 @@ static KMETHOD Statement_syntax(KonohaContext *kctx, KonohaStack *sfp)
 				SUGAR kStmt_printMessage2(kctx, stmt, NULL, InfoTag, "overriding syntax: %s%s", PSYM_t(syn->keyword));
 			}
 			else {
-				KINITv(syn->SyntaxPatternListNULL, new_(Array, 8));
+				KFieldInit(Stmt_nameSpace(stmt), syn->SyntaxPatternListNULL, new_(Array, 8));
 			}
 			TokenSequence tokens = {Stmt_nameSpace(stmt), tokenList, 0, kArray_size(tokenList)};
 			SUGAR kArray_addSyntaxRule(kctx, syn->SyntaxPatternListNULL, &tokens);

@@ -1631,12 +1631,9 @@ static void Kwrite_barrier(KonohaContext *kctx, kObject *parent)
 #endif
 }
 
-static void KsetObjectField(kObject *parent, kObjectVar **oldValPtr, kObjectVar *newVal)
+static void KupdateObjectField(kObject *parent, kObjectVar *oldValPtr, kObjectVar *newVal)
 {
-#ifdef USE_GENERATIONAL_GC
-	RememberSet_add(parent);
-#endif
-	*oldValPtr = newVal;
+	Kwrite_barrier(NULL, parent);
 }
 
 #define context_reset_refs(kctx) kctx->stack->reftail = kctx->stack->ref.refhead
@@ -1869,7 +1866,7 @@ void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		KSET_KLIB(KdeleteGcContext, 0);
 		KSET_KLIB(KscheduleGC, 0);
 		KSET_KLIB(KallocObject, 0);
-		KSET_KLIB(KsetObjectField, 0);
+		KSET_KLIB(KupdateObjectField, 0);
 		KSET_KLIB(KisObject, 0);
 
 		assert(sizeof(BlockHeader) <= MIN_ALIGN

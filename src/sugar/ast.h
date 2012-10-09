@@ -36,9 +36,9 @@ static kExpr *callFuncExpression(KonohaContext *kctx, SugarSyntax *syn, kFunc *f
 {
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 6);
 	lsfp[K_CALLDELTA+0].unboxValue = (uintptr_t)syn;
-	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, fo->self, GC_NO_WRITE_BARRIER);
-	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, (kObject*)stmt, GC_NO_WRITE_BARRIER);
-	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+2].asArray, tokenList, GC_NO_WRITE_BARRIER);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, fo->self);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, (kObject*)stmt);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asArray, tokenList);
 	lsfp[K_CALLDELTA+3].intValue = beginIdx;
 	lsfp[K_CALLDELTA+4].intValue = operatorIdx;
 	lsfp[K_CALLDELTA+5].intValue = endIdx;
@@ -283,7 +283,7 @@ static kTokenVar* kToken_expandGroupMacro(KonohaContext *kctx, kTokenVar *tk, kN
 		}
 		if(isChanged) {
 			kTokenVar *groupToken = new_(TokenVar, tk->resolvedSymbol);
-			KSETv(groupToken, groupToken->subTokenList, kArray_slice(kctx, group.tokenList, group.beginIdx, group.endIdx));
+			KFieldSet(groupToken, groupToken->subTokenList, kArray_slice(kctx, group.tokenList, group.beginIdx, group.endIdx));
 			groupToken->resolvedSyntaxInfo = tk->resolvedSyntaxInfo;
 			groupToken->uline = tk->uline;
 			tk = groupToken;
@@ -341,7 +341,7 @@ static void kNameSpace_setMacroData(KonohaContext *kctx, kNameSpace *ns, ksymbol
 	tokens.TargetPolicy.ExpandingBraceGroup = true;
 	TokenSequence_resolved2(kctx, &tokens, NULL, &source, source.beginIdx);
 	syn->macroParamSize = paramsize;
-	KINITSETv(ns, syn->macroDataNULL, kArray_slice(kctx, tokens.tokenList, tokens.beginIdx + 1 /* removing head indent*/, tokens.endIdx));
+	KSafeFieldSet(ns, syn->macroDataNULL, kArray_slice(kctx, tokens.tokenList, tokens.beginIdx + 1 /* removing head indent*/, tokens.endIdx));
 	TokenSequence_pop(kctx, source);
 }
 
@@ -354,7 +354,7 @@ static int TokenSequence_addGroup(KonohaContext *kctx, TokenSequence *tokens, Ma
 	kTokenVar *astToken = new_(TokenVar, AST_type);
 	KLIB kArray_add(kctx, tokens->tokenList, astToken);
 	astToken->resolvedSyntaxInfo = SYN_(tokens->ns, AST_type);
-	KSETv(astToken, astToken->subTokenList, new_(TokenArray, 0));
+	KFieldSet(astToken, astToken->subTokenList, new_(TokenArray, 0));
 	astToken->uline = openToken->uline;
 	{
 		TokenSequence nested = {source->ns, astToken->subTokenList};
@@ -376,7 +376,7 @@ static kTokenVar* kToken_transformToBraceGroup(KonohaContext *kctx, kTokenVar *t
 	TokenSequence_push(kctx, source);
 	KdumpToken(kctx, tk);
 	TokenSequence_tokenize(kctx, &source, S_text(tk->text), tk->uline);
-	KSETv(tk, tk->subTokenList, new_(TokenArray, 0));
+	KFieldSet(tk, tk->subTokenList, new_(TokenArray, 0));
 	tk->resolvedSyntaxInfo = SYN_(ns, KW_BraceGroup);
 	TokenSequence tokens = {ns, tk->subTokenList, 0};
 	TokenSequence_resolved2(kctx, &tokens, macroSet, &source, source.beginIdx);
@@ -526,10 +526,10 @@ static int callPatternMatchFunc(KonohaContext *kctx, kFunc *fo, int *countRef, k
 {
 	INIT_GCSTACK();
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, fo->self, GC_NO_WRITE_BARRIER);
-	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, (kObject*)stmt, GC_NO_WRITE_BARRIER);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, fo->self);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, (kObject*)stmt);
 	lsfp[K_CALLDELTA+2].intValue = name;
-	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+3].asArray, tokenList, GC_NO_WRITE_BARRIER);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+3].asArray, tokenList);
 	lsfp[K_CALLDELTA+4].intValue = beginIdx;
 	lsfp[K_CALLDELTA+5].intValue = endIdx;
 	countRef[0] += 1;
@@ -809,7 +809,7 @@ static kbool_t kBlock_addNewStmt(KonohaContext *kctx, kBlock *bk, TokenSequence 
 		int indent = 0;
 		kStmtVar *stmt = new_(StmtVar, 0);
 		KLIB kArray_add(kctx, bk->stmtList, stmt);
-		KINITp(stmt, stmt->parentBlockNULL, bk);
+		KFieldInit(stmt, stmt->parentBlockNULL, bk);
 		kStmt_addAnnotation(kctx, stmt, tokens, tokens->beginIdx, &indent);
 		if(stmt->uline == 0) {
 			stmt->uline = tokens->tokenList->tokenItems[currentIdx]->uline;
@@ -829,7 +829,7 @@ static kBlock *new_kBlock(KonohaContext *kctx, kStmt *parent, MacroSet *macro, T
 {
 	kBlockVar *bk = GCSAFE_new(BlockVar, source->ns);
 	if(parent != NULL) {
-		KINITv(bk->parentStmtNULL, parent);
+		KFieldInit(bk, bk->parentStmtNULL, parent);
 	}
 	TokenSequence tokens = {source->ns, source->tokenList, kArray_size(source->tokenList)};
 	source->SourceConfig.openToken = NULL;
@@ -883,7 +883,7 @@ static int TokenSequence_nestedSyntaxPattern(KonohaContext *kctx, TokenSequence 
 	int ne = TokenSequence_findCloseCharAsTopChar(kctx, tokens, currentIdx+1, closech);
 	tk->resolvedSymbol = KW_AST;
 	tk->resolvedSyntaxInfo = SYN_(tokens->ns, KW_AST);
-	KSETv(tk, tk->subTokenList, new_(TokenArray, 0));
+	KFieldSet(tk, tk->subTokenList, new_(TokenArray, 0));
 	TokenSequence nestedSourceRange = {tokens->ns, tokens->tokenList, currentIdx+1, ne};
 	return kArray_addSyntaxPattern(kctx, tk->subTokenList, &nestedSourceRange) ? ne : tokens->endIdx;
 }
@@ -916,7 +916,7 @@ static kbool_t kArray_addSyntaxPattern(KonohaContext *kctx, kArray *patternList,
 			TokenSequence nestedSourceRange = {patterns->ns, tk->subTokenList, 0, kArray_size(tk->subTokenList)};
 			tk->resolvedSymbol = KW_OptionalGroup;
 			PUSH_GCSTACK(tk->subTokenList);  // avoid gc
-			KSETv(tk, tk->subTokenList, new_(TokenArray, 0));
+			KFieldSet(tk, tk->subTokenList, new_(TokenArray, 0));
 			kArray_addSyntaxPattern(kctx, tk->subTokenList, &nestedSourceRange);
 			KLIB kArray_add(kctx, patternList, tk);
 			continue;

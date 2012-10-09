@@ -44,7 +44,7 @@ static KMETHOD MethodFunc_ObjectFieldSetter(KonohaContext *kctx, KonohaStack *sf
 {
 	size_t delta = sfp[K_MTDIDX].mtdNC->delta;
 	kObjectVar *o = sfp[0].asObjectVar;
-	KSETv(o, o->fieldObjectItems[delta], sfp[1].asObject);
+	KFieldSet(o, o->fieldObjectItems[delta], sfp[1].asObject);
 	RETURN_(sfp[1].asObject);
 }
 static KMETHOD MethodFunc_UnboxFieldSetter(KonohaContext *kctx, KonohaStack *sfp)
@@ -138,7 +138,7 @@ static kMethod *new_PrototypeSetter(KonohaContext *kctx, ktype_t cid, ksymbol_t 
 static void KonohaClass_addMethod(KonohaContext *kctx, KonohaClass *ct, kMethod *mtd)
 {
 	if(unlikely(ct->methodList == K_EMPTYARRAY)) {
-		KINITv(((KonohaClassVar*)ct)->methodList, new_(MethodArray, 8));
+		KUnsafeFieldInit(((KonohaClassVar*)ct)->methodList, new_(MethodArray, 8));
 	}
 	KLIB kArray_add(kctx, ct->methodList, mtd);
 }
@@ -156,7 +156,7 @@ static void KonohaClass_addField(KonohaContext *kctx, KonohaClassVar *definedCla
 		}
 		else {
 			kObjectVar *o = definedClass->defaultValueAsNullVar;
-			KSETv(o, o->fieldObjectItems[pos], KLIB Knull(kctx, CT_(ty)));
+			KFieldSet(o, o->fieldObjectItems[pos], KLIB Knull(kctx, CT_(ty)));
 			definedClass->fieldItems[pos].isobj = 1;
 		}
 		if(FLAG_is(definedClass->fieldItems[pos].flag, kField_Getter)) {
@@ -184,7 +184,7 @@ static kbool_t KonohaClass_setClassFieldObjectValue(KonohaContext *kctx, KonohaC
 	for(i = definedClass->fieldsize; i >= 0; i--) {
 		if(definedClass->fieldItems[i].fn == sym  && O_ct(definedClass->defaultValueAsNullVar->fieldObjectItems[i]) == O_ct(objectValue)) {
 			kObjectVar *o = definedClass->defaultValueAsNullVar;
-			KSETv(o, o->fieldObjectItems[i], objectValue);
+			KFieldSet(o, o->fieldObjectItems[i], objectValue);
 			return true;
 		}
 	}
@@ -406,7 +406,7 @@ static kBlock* kStmt_parseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToke
 				if(tk->topCharHint == '(' && prevToken->unresolvedTokenType == TokenType_SYMBOL && strcmp(cname, S_text(prevToken->text)) == 0) {
 					kTokenVar *newToken = GCSAFE_new(TokenVar, TokenType_SYMBOL);
 					KLIB kArray_add(kctx, sourceRange.tokenList, newToken);
-					KSETv(newToken, newToken->text, SYM_s(MN_new));
+					KFieldSet(newToken, newToken->text, SYM_s(MN_new));
 				}
 				KLIB kArray_add(kctx, sourceRange.tokenList, tk);
 				prevToken = tk;
@@ -601,7 +601,7 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 	if(self != K_NULLEXPR) {
 		kMethod *mtd = KLIB kNameSpace_getGetterMethodNULL(kctx, ns, self->ty, fn, TY_var);
 		if(mtd != NULL) {
-			KSETv(expr->cons, expr->cons->methodItems[0], mtd);
+			KFieldSet(expr->cons, expr->cons->methodItems[0], mtd);
 			RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, reqty));
 		}
 		SUGAR kStmt_printMessage2(kctx, stmt, tkN, ErrTag, "undefined field: %s", S_text(tkN->text));

@@ -143,7 +143,7 @@ static uintptr_t p_init(uintptr_t context)
 	memcpy(c, (struct konoha_context*) context, sizeof(*c));
 	CTX_t _ctx = c->konoha;
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KSETv(lsfp[K_CALLDELTA+0].o, c->finit->self);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, c->finit->self);
 	KCALL(lsfp, 0, c->finit->mtd, 0, K_NULL);
 	END_LOCAL();
 	return (uintptr_t) c;
@@ -154,7 +154,7 @@ static uintptr_t p_exit(uintptr_t context)
 	struct konoha_context *c = malloc(sizeof(struct konoha_context));
 	CTX_t _ctx = c->konoha;
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KSETv(lsfp[K_CALLDELTA+0].o, c->fexit->self);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, c->fexit->self);
 	KCALL(lsfp, 0, c->fexit->mtd, 0, K_NULL);
 	END_LOCAL();
 	bzero(c, sizeof(*c));
@@ -173,8 +173,8 @@ static uintptr_t p_func(uintptr_t context, struct LogEntry *e)
 	CTX_t _ctx = c->konoha;
 	kObject *log = (kObject *) Log_new(_ctx, (struct Log *) &e->data);
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KSETv(lsfp[K_CALLDELTA+0].o, c->func->self);
-	KSETv(lsfp[K_CALLDELTA+1].o, log);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, c->func->self);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, log);
 	KCALL(lsfp, 0, c->func->mtd, 0, K_NULL);
 	END_LOCAL();
 	return context;
@@ -261,9 +261,9 @@ static void *statics_init(CTX, kFunc *initFo, kFunc *exitFo, kFunc *funcFo)
 {
 	struct konoha_context *c = malloc(sizeof(struct konoha_context));
 	c->konoha = _ctx;
-	KSETv(c->finit, initFo);
-	KSETv(c->fexit, exitFo);
-	KSETv(c->func,  funcFo);
+	KUnsafeFieldSet(c->finit, initFo);
+	KUnsafeFieldSet(c->fexit, exitFo);
+	KUnsafeFieldSet(c->func,  funcFo);
 	return (void*) c;
 }
 

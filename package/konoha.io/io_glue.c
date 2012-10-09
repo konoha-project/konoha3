@@ -292,7 +292,7 @@ static void kOutputStream_writeUTF8(KonohaContext *kctx, kOutputStream *out, con
 static void kFile_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kFile *out = (kFile*)o;
-	KINITv(out->path, K_NULL);
+	KFieldInit(out, out->path, K_NULL);
 }
 
 static void kFile_free(KonohaContext *kctx, kObject *o)
@@ -529,7 +529,7 @@ static KMETHOD System_isFile(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD File_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFile *f = (kFile*)sfp[0].o;
-	KSETv(f, f->path, sfp[1].asString);
+	KFieldSet(f, f->path, sfp[1].asString);
 	RETURN_(f);
 }
 

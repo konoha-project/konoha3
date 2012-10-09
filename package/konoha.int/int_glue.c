@@ -218,7 +218,7 @@ static KMETHOD TokenFunc_ExtendedIntLiteral(KonohaContext *kctx, KonohaStack *sf
 				break;
 		}
 		end = source;
-		KSETv(tk, tk->text, KLIB new_kString(kctx, start, end - start, StringPolicy_ASCII));
+		KFieldSet(tk, tk->text, KLIB new_kString(kctx, start, end - start, StringPolicy_ASCII));
 		tk->unresolvedTokenType = isFloat ? SYM_("$Float") : TokenType_INT;
 	}
 	RETURNi_(source - start);

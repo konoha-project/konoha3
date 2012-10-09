@@ -90,7 +90,7 @@ static void kToken_printMessage(KonohaContext *kctx, kTokenVar *tk, kinfotag_t t
 	kString *errmsg = SugarContext_vprintMessage(kctx, taglevel, tk->uline, fmt, ap);
 	va_end(ap);
 	if(errmsg != NULL) {
-		KSETv(tk, tk->text, errmsg);
+		KFieldSet(tk, tk->text, errmsg);
 		tk->unresolvedTokenType = TokenType_ERR;
 		tk->resolvedSyntaxInfo = NULL;
 	}

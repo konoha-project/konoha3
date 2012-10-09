@@ -230,9 +230,9 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #define OPEXEC_NMOVx(A, B, BX, CT) rbp[(A)].o = (rbp[(B)].asObjectVar)->fieldObjectItems[(BX)]
 #define OPEXEC_XNMOV(A, AX, B, CT) (rbp[(A)].asObjectVar)->fieldObjectItems[AX] = rbp[(B)].o
 
-#define OPEXEC_NEW(A, P, CT)   KSETv_AND_WRITE_BARRIER(NULL, rbp[(A)].o, KLIB new_kObject(kctx, CT, P), GC_NO_WRITE_BARRIER)
-#define OPEXEC_NULL(A, CT)     KSETv_AND_WRITE_BARRIER(NULL, rbp[(A)].o, KLIB Knull(kctx, CT), GC_NO_WRITE_BARRIER)
-#define OPEXEC_BOX(A, B, CT)   KSETv_AND_WRITE_BARRIER(NULL, rbp[(A)].o, KLIB new_kObject(kctx, CT, rbp[(B)].intValue), GC_NO_WRITE_BARRIER)
+#define OPEXEC_NEW(A, P, CT)   KUnsafeFieldSet(rbp[(A)].o, KLIB new_kObject(kctx, CT, P))
+#define OPEXEC_NULL(A, CT)     KUnsafeFieldSet(rbp[(A)].o, KLIB Knull(kctx, CT))
+#define OPEXEC_BOX(A, B, CT)   KUnsafeFieldSet(rbp[(A)].o, KLIB new_kObject(kctx, CT, rbp[(B)].intValue))
 #define OPEXEC_UNBOX(A, B, CT) rbp[(A)].unboxValue = N_toint(rbp[B].o)
 
 #define PC_NEXT(pc)   pc+1
@@ -617,7 +617,7 @@ GOTO_PC(pc); \
 	KonohaClass scid = SP(tmr_)->scid, this_cid = O_typeId(sfp_[0].o);\
 	if(this_cid != scid) {\
 		tmr_ = knh_findTypeMapNULL(kctx, scid, SP(tmr)->tcid);\
-		KSETv(((klr_TCAST_t*)op)->cast, tmr_);\
+		KUnsafeFieldSet(((klr_TCAST_t*)op)->cast, tmr_);\
 	}\
 	KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espidx)));\
 	knh_TypeMap_exec(kctx, tmr_, sfp_, rix); \

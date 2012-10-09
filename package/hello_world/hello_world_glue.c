@@ -88,7 +88,7 @@ static KMETHOD Person_new(KonohaContext *kctx, KonohaStack *sfp)
 	kint_t   age  = sfp[2].intValue;
 	/* If you want to determine the type of the return value,
 	 * please check O_ct(sfp[K_RTNIDX].o) . */
-	KSETv(p, p->name, name);
+	KFieldSet(p, p->name, name);
 	p->age = age;
 	RETURN_(p);
 }

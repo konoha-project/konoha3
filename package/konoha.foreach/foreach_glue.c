@@ -58,7 +58,7 @@ static kToken* new_ParsedExprToken(KonohaContext *kctx, kNameSpace *ns, kExpr *e
 {
 	kTokenVar *ParsedExprToken = GCSAFE_new(TokenVar, 0);
 	ParsedExprToken->resolvedSyntaxInfo = SYN_(ns, KW_ExprPattern);
-	KSETv(ParsedExprToken, ParsedExprToken->parsedExpr, expr);
+	KFieldSet(ParsedExprToken, ParsedExprToken->parsedExpr, expr);
 	return (kToken*)ParsedExprToken;
 }
 

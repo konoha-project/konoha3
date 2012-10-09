@@ -126,8 +126,8 @@ struct pool_plugin *konoha_plugin_get(KonohaContext *kctx, memcached_st *mc, cha
     kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_System, MN_("initPlugin"), 1, MPOL_PARAMSIZE|MPOL_FIRST);
     if (mtd) {
         BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
-        KSETv_AND_WRITE_BARRIER(0, lsfp[K_CALLDELTA+0].o, K_NULL, GC_NO_WRITE_BARRIER);
-        KSETv_AND_WRITE_BARRIER(0, lsfp[K_CALLDELTA+1].o, ev, GC_NO_WRITE_BARRIER);
+        KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, K_NULL);
+        KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, ev);
         KCALL(lsfp, 0, mtd, 2, K_NULL);
         END_LOCAL();
         kObject *ret = lsfp[0].o;

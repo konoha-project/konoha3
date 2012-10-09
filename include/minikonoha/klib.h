@@ -213,7 +213,7 @@ static const char _utf8len[] = {
 //{
 //	DBG_ASSERT(mtd != mtd2);
 //	DBG_ASSERT(mtd->proceedNUL == NULL);
-//	KINITp(mtd, ((kMethodVar*)mtd)->proceedNUL, mtd2);
+//	KFieldInit(mtd, ((kMethodVar*)mtd)->proceedNUL, mtd2);
 //}
 
 #ifdef __cplusplus

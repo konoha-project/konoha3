@@ -84,7 +84,7 @@ static int ParseNumber(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer,
 		if(!isalnum(ch)) break;
 	}
 	if(IS_NOTNULL(tk)) {
-		KSETv(tk, tk->text, KLIB new_kString(kctx, ts + tok_start, (pos-1)-tok_start, StringPolicy_ASCII));
+		KFieldSet(tk, tk->text, KLIB new_kString(kctx, ts + tok_start, (pos-1)-tok_start, StringPolicy_ASCII));
 		tk->unresolvedTokenType = TokenType_INT;
 	}
 	return pos - 1;  // next
@@ -95,10 +95,10 @@ static void kToken_setSymbolText(KonohaContext *kctx, kTokenVar *tk, const char 
 	if(IS_NOTNULL(tk)) {
 		ksymbol_t kw = ksymbolA(t, len, SYM_NONAME);
 		if(kw == SYM_UNMASK(kw)) {
-			KSETv(tk, tk->text, SYM_s(kw));
+			KFieldSet(tk, tk->text, SYM_s(kw));
 		}
 		else {
-			KSETv(tk, tk->text, KLIB new_kString(kctx, t, len, StringPolicy_ASCII));
+			KFieldSet(tk, tk->text, KLIB new_kString(kctx, t, len, StringPolicy_ASCII));
 		}
 		tk->unresolvedTokenType = TokenType_SYMBOL;
 		if(len == 1) {
@@ -236,7 +236,7 @@ static int ParseDoubleQuotedText(KonohaContext *kctx, kTokenVar *tk, Tokenizer *
 		if(ch == '"' && (prev != '\\' || (prev == '\\' && prev2 == '\\'))) {
 			if(IS_NOTNULL(tk)) {
 				size_t length = pos - (tok_start + 1) - 1;
-				KSETv(tk, tk->text, KLIB new_kString(kctx, tokenizer->source + tok_start + 1, length, hasUTF8 ? StringPolicy_UTF8 : StringPolicy_ASCII));
+				KFieldSet(tk, tk->text, KLIB new_kString(kctx, tokenizer->source + tok_start + 1, length, hasUTF8 ? StringPolicy_UTF8 : StringPolicy_ASCII));
 				tk->unresolvedTokenType = TokenType_TEXT;
 			}
 			return pos;
@@ -332,10 +332,10 @@ static int callTokenFunc(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, Tokenize
 {
 	DBG_ASSERT(IS_Func(fo));
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
-	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, fo->self, GC_NO_WRITE_BARRIER);
-	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, (kObject*)tk, GC_NO_WRITE_BARRIER);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, fo->self);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, (kObject*)tk);
 	lsfp[K_CALLDELTA+1].unboxValue = (uintptr_t)tokenizer;
-	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+2].s, preparedString, GC_NO_WRITE_BARRIER);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].s, preparedString);
 	{
 		KonohaStack *sfp = lsfp + K_CALLDELTA;
 		KSetMethodCallStack(sfp, 0/*UL*/, fo->mtd, 2, KLIB Knull(kctx, CT_Int));
@@ -448,7 +448,7 @@ static int ParseLazyBlock(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeniz
 			level--;
 			if(level == 0) {
 				if(IS_NOTNULL(tk)) {
-					KSETv(tk, tk->text, KLIB new_kString(kctx, tokenizer->source + tok_start + 1, ((pos-2)-(tok_start)+1), 0));
+					KFieldSet(tk, tk->text, KLIB new_kString(kctx, tokenizer->source + tok_start + 1, ((pos-2)-(tok_start)+1), 0));
 					tk->unresolvedTokenType = TokenType_CODE;
 				}
 				return pos + 1;

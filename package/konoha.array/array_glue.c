@@ -54,7 +54,7 @@ static KMETHOD Array_set(KonohaContext *kctx, KonohaStack *sfp)
 		a->unboxItems[n] = sfp[2].unboxValue;
 	}
 	else {
-		KSETv(a, a->objectItems[n], sfp[2].o);
+		KFieldSet(a, a->objectItems[n], sfp[2].o);
 	}
 }
 
@@ -83,7 +83,7 @@ static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
 		size_t i;
 		kObject *null = KLIB Knull(kctx, CT_(O_p0(a)));
 		for(i = 0; i < asize; i++) {
-			KSETv(a, a->objectItems[i], null);
+			KFieldSet(a, a->objectItems[i], null);
 		}
 	}
 	RETURN_(a);
@@ -180,7 +180,7 @@ static KMETHOD Array_pop(KonohaContext *kctx, KonohaStack *sfp)
 		struct _kAbstractArray *a2 = (struct _kAbstractArray*)a;
 		kObject *value = a2->a.objectItems[n];
 		kObject** null = NULL;
-		KINITp(a2, a2->a.objectItems[n], null);
+		KFieldInit(a2, a2->a.objectItems[n], null);
 		a2->a.bytesize = n * sizeof(uintptr_t);
 		RETURN_(value);
 	}
@@ -234,8 +234,8 @@ static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
 	else {
 		for(i = 0; i != asize_half; ++i){
 			kObject *temp = a->objectItems[asize - 1 - i];
-			KSETv(a, a->objectItems[asize - 1 - i], a->objectItems[i]);
-			KSETv(a, a->objectItems[i], temp);
+			KFieldSet(a, a->objectItems[asize - 1 - i], a->objectItems[i]);
+			KFieldSet(a, a->objectItems[i], temp);
 		}
 	}
 	RETURN_(a);
@@ -257,7 +257,7 @@ static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
 		for(i=0; i != asize; ++i) {
 			uintptr_t tmp = a->unboxItems[i];
 			BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
-			KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, K_NULL, GC_NO_WRITE_BARRIER);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, K_NULL);
 			lsfp[K_CALLDELTA+1].unboxValue = tmp;
 			KCALL(lsfp, 0, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
 			END_LOCAL();
@@ -268,11 +268,11 @@ static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
 		for(i=0; i != asize; ++i) {
 			kObject *tmp  = a->objectItems[i];
 			BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
-			KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, K_NULL, GC_NO_WRITE_BARRIER);
-			KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, tmp, GC_NO_WRITE_BARRIER);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, K_NULL);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, tmp);
 			KCALL(lsfp, 0, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
 			END_LOCAL();
-			KSETv(ret, ret->objectItems[i], lsfp[0].o);
+			KFieldSet(ret, ret->objectItems[i], lsfp[0].o);
 		}
 	}
 	kArray_setsize(ret, asize);
@@ -292,7 +292,7 @@ static KMETHOD Array_inject(KonohaContext *kctx, KonohaStack *sfp)
 		uintptr_t tmp = 0;
 		BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
 		for(i=0; i != asize; ++i) {
-			KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, K_NULL, GC_NO_WRITE_BARRIER);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, K_NULL);
 			lsfp[K_CALLDELTA+1].unboxValue = tmp;
 			lsfp[K_CALLDELTA+2].unboxValue = a->unboxItems[i];
 			KCALL(lsfp, 0, f->mtd, 2, KLIB Knull(kctx, CT_(resolve_type)));
@@ -302,15 +302,16 @@ static KMETHOD Array_inject(KonohaContext *kctx, KonohaStack *sfp)
 		RETURNd_(tmp);
 	}
 	else {
+		/* FIXME(GC) */
 		kObject *tmp = (kObject*) KLIB new_kObject(kctx, CT_(resolve_type), 0);
 		kObject *nulobj = KLIB Knull(kctx, CT_(resolve_type));
 		BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
 		for(i=0; i != asize; ++i) {
-			KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, K_NULL, GC_NO_WRITE_BARRIER);
-			KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, tmp,    GC_NO_WRITE_BARRIER);
-			KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+2].o, a->objectItems[i], GC_NO_WRITE_BARRIER);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, K_NULL);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, tmp);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+2].o, a->objectItems[i]);
 			KCALL(lsfp, 0, f->mtd, 2, nulobj);
-			KSETv(NULL, tmp, lsfp[0].o);
+			KUnsafeFieldSet(tmp, lsfp[0].o);
 		}
 		END_LOCAL();
 		RETURN_(tmp);
@@ -429,12 +430,12 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 //			obj = a->objectItems[i];
 //			DBG_ASSERT(O_ct(obj)->p);
 //			// before call system.p, push variables
-//			KSETv_AND_WRITE_BARRIER(NULL, lsfp[0].o, obj, GC_NO_WRITE_BARRIER);
+//			KUnsafeFieldSet(lsfp[0].o, obj);
 //			O_ct(obj)->p(kctx, lsfp, 0, &wb, 0);
 //			KLIB Kwb_printf(kctx, &wb, ",");
 //		}
 //		obj = a->objectItems[i];
-//		KSETv_AND_WRITE_BARRIER(NULL, lsfp[0].o, obj, GC_NO_WRITE_BARRIER);
+//		KUnsafeFieldSet(lsfp[0].o, obj);
 //		O_ct(obj)->p(kctx, lsfp, 0, &wb, 0);
 //		END_LOCAL();
 //
@@ -457,7 +458,7 @@ static KMETHOD Array_new(KonohaContext *kctx, KonohaStack *sfp)
 		size_t i;
 		kObject *null = KLIB Knull(kctx, CT_(O_p0(a)));
 		for(i = 0; i < asize; i++) {
-			KSETv(a, a->objectItems[i], null);
+			KFieldSet(a, a->objectItems[i], null);
 		}
 	}
 	RETURN_(a);
@@ -566,8 +567,8 @@ static KMETHOD TypeCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, Stmt_nameSpace(stmt), TY_Array, MN_("newList"), -1);
 	DBG_ASSERT(mtd != NULL);
-	KSETv(expr, expr->cons->methodItems[0], mtd);
-	KSETv(expr, expr->cons->exprItems[1], SUGAR kExpr_setVariable(kctx, NULL, gma, TEXPR_NEW, requestClass->typeId, 0));
+	KFieldSet(expr, expr->cons->methodItems[0], mtd);
+	KFieldSet(expr, expr->cons->exprItems[1], SUGAR kExpr_setVariable(kctx, NULL, gma, TEXPR_NEW, requestClass->typeId, 0));
 	RETURN_(Expr_typed(expr, TEXPR_CALL, requestClass->typeId));
 }
 

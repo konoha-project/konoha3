@@ -242,7 +242,7 @@ static KMETHOD Connection_query(KonohaContext *kctx, KonohaStack *sfp)
 		rs->qcurfree = NULL;
 		//DP(rs)->qcurfree = knh_getQueryDSPI(kctx, K_DEFAULT_DSPI)->qcurfree;
 	}
-	KSETv(rs, rs->connection, c);
+	KFieldSet(rs, rs->connection, c);
 	RETURN_(rs);
 }
 
@@ -262,8 +262,8 @@ static void ResultSet_init(KonohaContext *kctx, kObject *o, void *conf)
 	rs->column_size = 0;
 	rs->column = NULL;
 	kBytes* ba = (kBytes*)KLIB new_kObject(kctx, CT_Bytes, RESULTSET_BUFSIZE);
-	KINITv(rs->databuf, ba);
-	KINITv(rs->connection, NULL);
+	KFieldInit(rs, rs->databuf, ba);
+	KFieldInit(rs, rs->connection, K_NULL);
 	rs->qcurfree = NULL;
 	rs->count = 0;
 }

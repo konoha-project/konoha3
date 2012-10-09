@@ -140,7 +140,7 @@ static void Kthrow(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD System_throw(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KonohaExceptionContext *ctx = KonohaContext_getExceptionContext(kctx);
-	KSETv_AND_WRITE_BARRIER(NULL, ctx->thrownException, sfp[1].asException, GC_NO_WRITE_BARRIER);
+	KUnsafeFieldSet(ctx->thrownException, sfp[1].asException);
 	Kthrow(kctx, sfp);
 }
 
@@ -172,8 +172,8 @@ static void Exception_init(KonohaContext *kctx, kObject *o, void *conf)
 	e->flag = 0;
 	e->faultId = 0;
 	e->uline = 0;
-	KINITv(e->message, TS_EMPTY);
-	KINITv(e->stackTraceList, K_EMPTYARRAY);
+	KFieldInit(e, e->message, TS_EMPTY);
+	KFieldInit(e, e->stackTraceList, K_EMPTYARRAY);
 }
 
 static void Exception_reftrace(KonohaContext *kctx, kObject *o)

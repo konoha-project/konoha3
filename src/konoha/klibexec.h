@@ -293,7 +293,7 @@ static void Kmap_remove(KUtilsHashMap* kmap, KUtilsHashMapEntry *oe)
 static void Kmap_addStringUnboxValue(KonohaContext *kctx, KUtilsHashMap *kmp, uintptr_t hcode, kString *stringKey, uintptr_t unboxValue)
 {
 	KUtilsHashMapEntry *e = KLIB Kmap_newEntry(kctx, kmp, hcode);
-	KINITv(e->stringKey, stringKey);
+	KUnsafeFieldInit(e->stringKey, stringKey);
 	e->unboxValue = unboxValue;
 }
 
@@ -488,7 +488,7 @@ static kbool_t KonohaRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp
 	memcpy(&lbuf, runtime->evaljmpbuf, sizeof(jmpbuf_i));
 	runtime->jump_bottom = sfp;
 	runtime->thrownScriptLine = 0;
-	KSETv_AND_WRITE_BARRIER(NULL, runtime->optionalErrorMessage, TS_EMPTY, GC_NO_WRITE_BARRIER);
+	KUnsafeFieldSet(runtime->optionalErrorMessage, TS_EMPTY);
 	kbool_t result = true;
 	int jumpResult;
 	INIT_GCSTACK();
@@ -513,8 +513,7 @@ static void KonohaRuntime_raise(KonohaContext *kctx, int symbol, KonohaStack *sf
 	if(runtime->evaljmpbuf != NULL) {
 		runtime->thrownScriptLine = pline;
 		if(optionalErrorMessage != NULL) {
-			//KSETv(K_NULL, runtime->optionalErrorMessage, optionalErrorMessage);
-			KSETv_AND_WRITE_BARRIER(NULL, runtime->optionalErrorMessage, optionalErrorMessage, GC_NO_WRITE_BARRIER);
+			KUnsafeFieldSet(runtime->optionalErrorMessage, optionalErrorMessage);
 		}
 		PLATAPI longjmp_i(*runtime->evaljmpbuf, symbol);  // in setjmp 0 means good
 	}

@@ -130,7 +130,7 @@ static KMETHOD TokenFunc_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		if(ch == '\'' && prev != '\\') {
 			if(IS_NOTNULL(tk)) {
-				KSETv(tk, tk->text, KLIB new_kString(kctx, source + 1, (pos-2), 0));
+				KFieldSet(tk, tk->text, KLIB new_kString(kctx, source + 1, (pos-2), 0));
 				tk->unresolvedTokenType = SYM_("$SingleQuotedChar");
 			}
 			RETURNi_(pos);

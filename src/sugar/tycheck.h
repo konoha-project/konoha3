@@ -32,10 +32,10 @@ static kExpr *callTypeCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef, k
 {
 	INIT_GCSTACK();
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, fo->self, GC_NO_WRITE_BARRIER);
-	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, (kObject*)stmt, GC_NO_WRITE_BARRIER);
-	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+2].o, (kObject*)expr, GC_NO_WRITE_BARRIER);
-	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+3].o, (kObject*)gma,  GC_NO_WRITE_BARRIER);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, fo->self);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, (kObject*)stmt);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].o, (kObject*)expr);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+3].o, (kObject*)gma);
 	lsfp[K_CALLDELTA+4].intValue = reqty;
 	countRef[0] += 1;
 	{
@@ -80,15 +80,15 @@ static kExpr *TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *g
 static void kExpr_putConstValue(KonohaContext *kctx, kExpr *expr, KonohaStack *sfp)
 {
 	if(expr->build == TEXPR_CONST) {
-		KSETv_AND_WRITE_BARRIER(NULL, sfp[0].asObject, expr->objectConstValue, GC_NO_WRITE_BARRIER);
+		KUnsafeFieldSet(sfp[0].asObject, expr->objectConstValue);
 		sfp[0].unboxValue = O_unbox(expr->objectConstValue);
 	} else if(expr->build == TEXPR_NCONST) {
 		sfp[0].unboxValue = expr->unboxConstValue;
 	} else if(expr->build == TEXPR_NEW) {
-		KSETv_AND_WRITE_BARRIER(NULL, sfp[0].asObject, KLIB new_kObject(kctx, CT_(expr->ty), 0), GC_NO_WRITE_BARRIER);
+		KUnsafeFieldSet(sfp[0].asObject, KLIB new_kObject(kctx, CT_(expr->ty), 0));
 	} else {
 		assert(expr->build == TEXPR_NULL);
-		KSETv_AND_WRITE_BARRIER(NULL, sfp[0].asObject, KLIB Knull(kctx, CT_(expr->ty)), GC_NO_WRITE_BARRIER);
+		KUnsafeFieldSet(sfp[0].asObject, KLIB Knull(kctx, CT_(expr->ty)));
 		sfp[0].unboxValue = 0;
 	}
 }
@@ -158,7 +158,7 @@ static kExpr* kStmt_tyCheckExprAt(KonohaContext *kctx, kStmt *stmt, kExpr *exprP
 	if(!Expr_isTerm(exprP) && pos < kArray_size(exprP->cons)) {
 		kExpr *expr = exprP->cons->exprItems[pos];
 		expr = Expr_tyCheck(kctx, stmt, expr, gma, reqty, pol);
-		KSETv(exprP->cons, exprP->cons->exprItems[pos], expr);
+		KFieldSet(exprP->cons, exprP->cons->exprItems[pos], expr);
 		return expr;
 	}
 	return K_NULLEXPR;
@@ -185,9 +185,9 @@ static kbool_t kStmt_tyCheckByName(KonohaContext *kctx, kStmt *stmt, ksymbol_t c
 static kbool_t callStatementFunc(KonohaContext *kctx, kFunc *fo, int *countRef, kStmt *stmt, kGamma *gma)
 {
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 3);
-	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, (kObject*)fo->self, GC_NO_WRITE_BARRIER);
-	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, (kObject*)stmt, GC_NO_WRITE_BARRIER);
-	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+2].o, (kObject*)gma , GC_NO_WRITE_BARRIER);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, (kObject*)fo->self);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, (kObject*)stmt);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].o, (kObject*)gma);
 	countRef[0] += 1;
 	{
 		KonohaStack *sfp = lsfp + K_CALLDELTA;
@@ -397,7 +397,7 @@ static kstatus_t kMethod_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtyp
 	BEGIN_LOCAL(lsfp, K_CALLDELTA);
 	KonohaStackRuntimeVar *runtime = kctx->stack;
 	if(runtime->evalty != TY_void) {
-		KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, runtime->stack[runtime->evalidx].o, GC_NO_WRITE_BARRIER);
+		KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, runtime->stack[runtime->evalidx].o);
 		lsfp[K_CALLDELTA+1].intValue = runtime->stack[runtime->evalidx].intValue;
 	}
 	KonohaStack *sfp = lsfp + K_CALLDELTA;

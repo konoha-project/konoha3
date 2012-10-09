@@ -78,7 +78,7 @@ static kbool_t object_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 //	if(self != K_NULLEXPR) {
 //		kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, self->ty, MN_toGETTER(fn), 0, MPOL_GETTER);
 //		if(mtd != NULL) {
-//			KSETv(expr->cons, expr->cons->methodItems[0], mtd);
+//			KFieldSet(expr->cons, expr->cons->methodItems[0], mtd);
 //			RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, reqty));
 //		}
 //		SUGAR kStmt_printMessage2(kctx, stmt, tkN, ErrTag, "undefined field: %s", S_text(tkN->text));

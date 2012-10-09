@@ -74,12 +74,12 @@ static void KonohaStackRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx, 
 	assert(stacksize>64);
 	base->stack_uplimit = base->stack + (stacksize - 64);
 	for(i = 0; i < stacksize; i++) {
-		KINITv(base->stack[i].o, K_NULL);
+		KUnsafeFieldInit(base->stack[i].o, K_NULL);
 	}
-	KINITv(base->gcstack, new_(Array, K_PAGESIZE/sizeof(void*)));
+	KUnsafeFieldInit(base->gcstack, new_(Array, K_PAGESIZE/sizeof(void*)));
 	KLIB Karray_init(kctx, &base->cwb, K_PAGESIZE * 4);
 	KLIB Karray_init(kctx, &base->ref, K_PAGESIZE);
-	KINITv(base->optionalErrorMessage, TS_EMPTY);
+	KUnsafeFieldInit(base->optionalErrorMessage, TS_EMPTY);
 	base->reftail = base->ref.refhead;
 	ctx->esp = base->stack;
 	ctx->stack = base;

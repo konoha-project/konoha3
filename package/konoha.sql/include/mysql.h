@@ -197,7 +197,7 @@ kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char* sql, struct _kR
 					kString *s = KLIB new_kString(kctx, field->name, strlen(field->name), 0);
 					//ResultSet_setName(kctx, rs, i, s);
 					DBG_ASSERT(i < rs->column_size);
-					KSETv(rs, rs->column[i].name, s);
+					KFieldSet(rs, rs->column[i].name, s);
 					i++;
 				}
 			}

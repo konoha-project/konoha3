@@ -708,7 +708,7 @@ static KMETHOD Subproc_new(KonohaContext *kctx, KonohaStack *sfp)
 	kSubproc *sp = (kSubproc*)sfp[0].asObject;
 	subprocData_t *p = sp->spd;
 	if ( p != NULL ) {
-		KSETv(sp, p->command, sfp[1].asString);
+		KFieldSet(sp, p->command, sfp[1].asString);
 		p->closefds = sfp[2].boolValue;
 	}
 	RETURN_(sp);
@@ -1194,7 +1194,7 @@ static KMETHOD Subproc_isERR2StdOUT(KonohaContext *kctx, KonohaStack *sfp)
 //	kSubproc *sp = GCSAFE_new(Subproc, NULL);
 //	subprocData_t *p = sp->spd;
 //	int ret = S_PREEXECUTION;
-//	KSETv(sp, p->command, sfp[1].asString);
+//	KFieldSet(sp, p->command, sfp[1].asString);
 //	if ( (ret = proc_start(kctx, p)) == S_TIMEOUT ) {
 //		p->timeoutKill = 1;
 //		killWait(p->cpid);

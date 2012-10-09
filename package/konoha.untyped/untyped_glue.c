@@ -74,7 +74,7 @@ static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 			}
 		}
 		else {
-			KSETv(expr->cons, expr->cons->exprItems[1], texpr);
+			KFieldSet(expr->cons, expr->cons->exprItems[1], texpr);
 		}
 	}
 }

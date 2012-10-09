@@ -291,8 +291,8 @@ static int konoha_handler(request_rec *r)
 	/* XXX: We assume Request Object may not be freed by GC */
 	kObject *req_obj = KLIB new_kObject(kctx, cRequest, (uintptr_t)r);
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
-	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+0].o, K_NULL, GC_NO_WRITE_BARRIER);
-	KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, req_obj, GC_NO_WRITE_BARRIER);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, K_NULL);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, req_obj);
 	KCALL(lsfp, 0, mtd, 1, KLIB Knull(kctx, CT_Int));
 	END_LOCAL();
 	return lsfp[0].intValue;

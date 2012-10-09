@@ -110,7 +110,7 @@ static kbool_t kNameSpace_initGlobalObject(KonohaContext *kctx, kNameSpace *ns, 
 		defGlobalObject.cstruct_size = sizeof(kGlobalObject);
 
 		KonohaClass *cGlobalObject = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defGlobalObject, pline);
-		KINITp(ns, ((kNameSpaceVar*)ns)->globalObjectNULL, KLIB Knull(kctx, cGlobalObject));
+		KFieldInit(ns, ((kNameSpaceVar*)ns)->globalObjectNULL, KLIB Knull(kctx, cGlobalObject));
 		return KLIB kNameSpace_setConstData(kctx, ns, SYM_("global"), cGlobalObject->typeId, (uintptr_t)ns->globalObjectNULL, pline);
 	}
 	return true;
