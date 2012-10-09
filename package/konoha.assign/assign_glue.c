@@ -28,6 +28,7 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
+
 // --------------------------------------------------------------------------
 
 static kbool_t assign_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
