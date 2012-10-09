@@ -131,6 +131,7 @@ static KMETHOD Expression_Indexer(KonohaContext *kctx, KonohaStack *sfp)
 	if (nextIdx != -1) {  // to avoid Func[T]
 		RETURN_(SUGAR kStmt_parseOperatorExpr(kctx, stmt, tokenList->tokenItems[beginIdx]->resolvedSyntaxInfo, tokenList, beginIdx, beginIdx, endIdx));
 	}
+	DBG_P("beginIdx=%d, endIdx=%d", beginIdx, endIdx);
 	kToken *currentToken = tokenList->tokenItems[operatorIdx];
 	if (beginIdx < operatorIdx) {
 		kExpr *leftExpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx);
@@ -146,6 +147,7 @@ static KMETHOD Expression_Indexer(KonohaContext *kctx, KonohaStack *sfp)
 		leftExpr = SUGAR kStmt_addExprParam(kctx, stmt, leftExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), 1/*allowEmpty*/);
 		RETURN_(SUGAR kStmt_rightJoinExpr(kctx, stmt, leftExpr, tokenList, operatorIdx + 1, endIdx));
 	}
+	DBG_P("nothing");
 }
 
 // --------------------------------------------------------------------------
