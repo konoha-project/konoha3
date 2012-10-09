@@ -122,10 +122,10 @@ static kbool_t kNameSpace_importSyntax(KonohaContext *kctx, kNameSpace *ns, Suga
 	SugarSyntaxVar *syn = (SugarSyntaxVar*)kNameSpace_getSyntax(kctx, ns, target->keyword, true/*isNew*/);
 	if(syn->lastLoadedPackageId != target->lastLoadedPackageId) {
 		int index;
+		KLIB Kreportf(kctx, DebugTag, 0, "@%s importing syntax %s%s", PackageId_t(ns->packageId), PSYM_t(syn->keyword));
 		syn->flag = target->flag;
 		syn->precedence_op1 = target->precedence_op1;
 		syn->precedence_op1 = target->precedence_op2;
-
 		syn->macroParamSize = target->macroParamSize;
 		ArrayNULL_appendArray(kctx, UPCAST(ns), &syn->macroDataNULL, target->macroDataNULL);
 		ArrayNULL_appendArray(kctx, UPCAST(ns), &syn->SyntaxPatternListNULL, target->SyntaxPatternListNULL);
@@ -320,7 +320,6 @@ static KUtilsKeyValue* kNameSpace_getConstNULL(KonohaContext *kctx, kNameSpace *
 static kbool_t kNameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns, KUtilsKeyValue *kvs, size_t nitems, kfileline_t pline)
 {
 	size_t i, size = kNameSpace_sizeConstTable(ns);
-//	DBG_P("mergeConstTable previous_size=%d, size=%d", s, s + nitems);
 	if(size == 0) {
 		KLIB Karray_init(kctx, &ns->constTable, (nitems + 8) * sizeof(KUtilsKeyValue));
 		memcpy(ns->constTable.keyValueItems, kvs, nitems * sizeof(KUtilsKeyValue));
@@ -947,26 +946,26 @@ static KonohaPackage *getPackageNULL(KonohaContext *kctx, kpackage_t packageId, 
 
 static kbool_t kNameSpace_importSymbol(KonohaContext *kctx, kNameSpace *ns, kNameSpace *targetNS, ksymbol_t keyword, kfileline_t pline)
 {
-	KUtilsKeyValue *kvs = kNameSpace_getLocalConstNULL(kctx, targetNS, keyword);
-	if(kvs != NULL) {
-		if(kNameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, kvs, 1, pline)) {
-			if(kvs->ty == TY_TYPE) {
-				size_t i;
-				ktype_t typeId = ((KonohaClass*)kvs->unboxValue)->typeId;
-				for(i = 0; i < kArray_size(targetNS->methodList); i++) {
-					kMethod *mtd = targetNS->methodList->methodItems[i];
-					if(mtd->typeId == typeId /*&& !kMethod_is(Private, mtd)*/) {
-						KLIB kArray_add(kctx, ns->methodList, mtd);
+	SugarSyntax *syn = SYN_(targetNS, keyword);
+	if(syn != NULL) {
+		return kNameSpace_importSyntax(kctx, ns, syn, pline);
+	}
+	else {
+		KUtilsKeyValue *kvs = kNameSpace_getLocalConstNULL(kctx, targetNS, keyword);
+		if(kvs != NULL) {
+			if(kNameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, kvs, 1, pline)) {
+				if(kvs->ty == TY_TYPE) {
+					size_t i;
+					ktype_t typeId = ((KonohaClass*)kvs->unboxValue)->typeId;
+					for(i = 0; i < kArray_size(targetNS->methodList); i++) {
+						kMethod *mtd = targetNS->methodList->methodItems[i];
+						if(mtd->typeId == typeId /*&& !kMethod_is(Private, mtd)*/) {
+							KLIB kArray_add(kctx, ns->methodList, mtd);
+						}
 					}
 				}
+				return true;
 			}
-			return true;
-		}
-	}
-	else { // there is no const data
-		SugarSyntax *syn = SYN_(targetNS, keyword);
-		if(syn != NULL) {
-			return kNameSpace_importSyntax(kctx, ns, syn, pline);
 		}
 	}
 	return false;

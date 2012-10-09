@@ -143,8 +143,8 @@ static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 		kBlock *block = new_MacroBlock(kctx, stmt, new_TypeToken(kctx, ns, IteratorExpr->ty), new_ParsedExprToken(kctx, ns, IteratorExpr), TypeToken, VariableToken);
 		kStmt *IfStmt = block->stmtList->stmtItems[1]; // @see macro;
 		kStmt_appendBlock(kctx, IfStmt, SUGAR kStmt_getBlock(kctx, stmt, ns, KW_BlockPattern, NULL));
-		Stmt_setCatchBreak(IfStmt, true);
-		Stmt_setCatchContinue(IfStmt, true);
+		kStmt_set(CatchBreak, IfStmt, true);
+		kStmt_set(CatchContinue, IfStmt, true);
 		isOkay = SUGAR kBlock_tyCheckAll(kctx, block, gma);
 		if(isOkay) {
 			kStmt_typed(IfStmt, LOOP);

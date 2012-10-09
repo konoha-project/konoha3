@@ -89,6 +89,7 @@ set(PACKAGES
 	konoha.var
 	konoha.while
 	sugar
+	cstyle
 	llvm
 	posix.process
 	posix.file

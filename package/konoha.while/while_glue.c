@@ -51,8 +51,8 @@ static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = false;
 	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_boolean, 0)) {
 		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
-		Stmt_setCatchContinue(stmt, true);  // set before tyCheckAll
-		Stmt_setCatchBreak(stmt, true);
+		kStmt_set(CatchContinue, stmt, true);  // set before tyCheckAll
+		kStmt_set(CatchBreak, stmt, true);
 		ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
 		if(ret) {
 			kStmt_typed(stmt, LOOP);

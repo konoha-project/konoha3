@@ -113,7 +113,7 @@ static kExpr* kStmt_parseExpr(KonohaContext *kctx, kStmt *stmt, kArray *tokenLis
 			return kStmt_parseOperatorExpr(kctx, stmt, syn, tokenList, beginIdx, idx, endIdx);
 		}
 		else {
-#ifdef BE_COMPACT
+#ifdef USE_SMALLBUILD
 			kStmt_printMessage(kctx, stmt, ErrTag, "syntax error: empty");
 #else
 			const char *where = "", *token = "";
@@ -166,7 +166,7 @@ static int TokenUtils_skipIndent(kArray *tokenList, int currentIdx, int endIdx)
 {
 	for(; currentIdx < endIdx; currentIdx++) {
 		kToken *tk = tokenList->tokenItems[currentIdx];
-		if(kToken_is(StatementSeparator, tk)) return endIdx; // ;
+		if(kToken_is(StatementSeparator, tk)) continue;
 		if(!kToken_isIndent(tk)) break;
 	}
 	return currentIdx;
@@ -600,7 +600,6 @@ static int kStmt_matchSyntaxPattern(KonohaContext *kctx, kStmt *stmt, TokenSeque
 				}
 			}
 			else {
-				kToken *tk = tokens->tokenList->tokenItems[tokenIdx];
 				if(ruleToken->resolvedSymbol != tk->resolvedSymbol) {
 					errRuleRef[0] = ruleToken;
 					return -1;
@@ -629,7 +628,7 @@ static int kStmt_matchSyntaxPattern(KonohaContext *kctx, kStmt *stmt, TokenSeque
 				patternIdx++;
 				ruleToken = patterns->tokenList->tokenItems[patternIdx];
 			}
-			return tokens->endIdx;
+			return tokenIdx;
 		}
 	}
 	return tokenIdx;
@@ -705,7 +704,7 @@ static int kStmt_parseBySyntaxPattern(KonohaContext *kctx, kStmt *stmt, int inde
 {
 	SugarSyntax *stmtSyntax = kStmt_resolveStatementSyntax(kctx, stmt, tokenList, beginIdx, endIdx);
 	((kStmtVar*)stmt)->syn = stmtSyntax;
-	DBG_P(">>>>>>>>>>>>>>>>>>> Found SugarSyntax=%s%s", KWSTMT_t(stmtSyntax->keyword));
+	//DBG_P(">>>>>>>>>>>>>>>>>>> Found SugarSyntax=%s%s", KWSTMT_t(stmtSyntax->keyword));
 	kToken *errRule[2];
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	SugarSyntax *currentSyntax = stmtSyntax;
@@ -805,6 +804,7 @@ static int kStmt_addAnnotation(KonohaContext *kctx, kStmtVar *stmt, TokenSequenc
 
 static kbool_t kBlock_addNewStmt(KonohaContext *kctx, kBlock *bk, TokenSequence *tokens)
 {
+	//KdumpTokenArray(kctx, tokens->tokenList, tokens->beginIdx, tokens->endIdx);
 	int currentIdx = TokenSequence_skipStatementSeparator(tokens, tokens->beginIdx);
 	currentIdx = TokenSequence_skipAnnotation(kctx, tokens, currentIdx);
 	if(currentIdx < tokens->endIdx) {

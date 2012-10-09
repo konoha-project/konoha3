@@ -134,17 +134,15 @@ static KMETHOD PatternMatch_CStyleBlock(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
 	kToken *tk = tokenList->tokenItems[beginIdx];
 //	KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
-	if(tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
+	if(tk->resolvedSyntaxInfo->keyword == TokenType_CODE || tk->resolvedSyntaxInfo->keyword == KW_BraceGroup) {
 		kStmt_addParsedObject(kctx, stmt, name, UPCAST(tk));
 		RETURNi_(beginIdx+1);
 	}
-	else {
-		endIdx = TokenUtils_findEndOfStatement(kctx, tokenList, beginIdx, endIdx, true);
-		TokenSequence range = {Stmt_nameSpace(stmt), tokenList, beginIdx, endIdx};
-		kBlock *bk = new_kBlock(kctx, stmt, NULL, &range);
-		kStmt_addParsedObject(kctx, stmt, name, UPCAST(bk));
-		RETURNi_(endIdx);
-	}
+	int newEndIdx = TokenUtils_findEndOfStatement(kctx, tokenList, beginIdx, endIdx, true);
+	TokenSequence tokens = {Stmt_nameSpace(stmt), tokenList, beginIdx, newEndIdx};
+	kBlock *bk = new_kBlock(kctx, stmt, NULL, &tokens);
+	kStmt_addParsedObject(kctx, stmt, name, UPCAST(bk));
+	RETURNi_(newEndIdx);
 }
 
 static KMETHOD PatternMatch_Token(KonohaContext *kctx, KonohaStack *sfp)

@@ -24,15 +24,7 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-#include <stdio.h>
-#ifdef _MSC_VER
-#include <Windows.h>
-#else
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <dirent.h>
-#endif
+#include <minikonoha/io.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,15 +50,6 @@ struct kio_t {
 	size_t  (*_unblockwrite)(KonohaContext *kctx, struct kio_t *, const char *buf, size_t bufsiz);
 	const char *DBG_NAME;  // unnecessary for free
 };
-
-typedef void FILE_i;
-
-typedef struct StreamApi {
-	size_t (*read_i)(KonohaContext *kctx, FILE_i *fp, char *buf, size_t);
-	size_t (*write_i)(KonohaContext *kctx, FILE_i *fp, const char *buf, size_t);
-	kbool_t (*close_i)(KonohaContext *kctx, FILE_i *fp);
-	kbool_t (*isEndOfStream)(KonohaContext *kctx, FILE_i *fp);
-} StreamApi;
 
 static size_t read_NOP(KonohaContext *kctx, FILE_i *fp, char *buf, size_t bufsiz)
 {
@@ -119,38 +102,6 @@ static StreamApi FileStreamApi = {
 	read_FILE, write_FILE, close_FILE, isEndOfStreamFILE,
 };
 
-#define ICONV_NULL       ((uintptr_t)-1)
-#define HAS_ICONV(I)     (I != ICONV_NULL)
-
-#ifdef _MSC_VER
-#define kInputStream struct kInputStreamVar
-#else
-typedef struct kInputStreamVar kInputStream;
-#endif
-
-struct kInputStreamVar {
-	KonohaObjectHeader h;
-	FILE_i *fp;
-	StreamApi *streamApi;
-	uintptr_t iconv;
-	KUtilsGrowingArray buffer;
-	size_t top; size_t tail;
-};
-
-#ifdef _MSC_VER
-#define kOutputStream struct kOutputStreamVar
-#else
-typedef struct kOutputStreamVar kOutputStream;
-#endif
-
-struct kOutputStreamVar {
-	KonohaObjectHeader h;
-	FILE *fp;
-	StreamApi *streamApi;
-	uintptr_t iconv;
-	KUtilsGrowingArray buffer;
-};
-
 #ifdef _MSC_VER
 #define kFile struct kFileVar
 #else
@@ -161,15 +112,6 @@ struct kFileVar {
 	KonohaObjectHeader h;
 	kString *path;
 };
-
-#define kioshare ((kioshare_t *)kctx->modshare[MOD_IO])
-
-typedef struct {
-	KonohaModule h;
-	kInputStream  *kstdin;
-	kOutputStream *kstdout;
-	kOutputStream *kstderr;
-} kioshare_t;
 
 #define OutputStream_isAutoFlush(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
 #define OutputStream_setAutoFlush(o,B)   TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,B)
