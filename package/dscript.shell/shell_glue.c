@@ -54,11 +54,19 @@ static KMETHOD Statement_dsh(KonohaContext *kctx, KonohaStack *sfp)
 	KUtilsWriteBuffer wb;
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	for(i = 0; i < kArray_size(tokenList); i++) {
-		kToken *token = tokenList->tokenItems[i];
+	if(O_typeId(tokenList) == TY_Token) {
+		/* Single token was passed (e.g. "dsh ls;"). */
+		kToken *token = (kToken *)tokenList;
 		KLIB Kwb_write(kctx, &wb, S_text(token->text), S_size(token->text));
-		if(kToken_is(BeforeWhiteSpace, token)) {
-			KLIB Kwb_write(kctx, &wb, " ", 1);
+	}
+	else {
+		/* Multiple tokens was passed (e.g. "dsh ls -la;"). */
+		for(i = 0; i < kArray_size(tokenList); i++) {
+			kToken *token = tokenList->tokenItems[i];
+			KLIB Kwb_write(kctx, &wb, S_text(token->text), S_size(token->text));
+			if(kToken_is(BeforeWhiteSpace, token)) {
+				KLIB Kwb_write(kctx, &wb, " ", 1);
+			}
 		}
 	}
 	kString *cmd = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), 0);
