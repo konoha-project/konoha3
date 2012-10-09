@@ -173,13 +173,50 @@ static KMETHOD Statement_dsh(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNb_(ret);
 }
 
+static kbool_t DSLib_checkExecutablePath(KonohaContext *kctx, const char *path, const char *cmd)
+{
+	char buf[PATH_MAX];
+	struct stat sb;
+	const char *fullpath;
+	if(path != NULL) {
+		snprintf(buf, PATH_MAX, "%s/%s", path, cmd);
+		fullpath = buf;
+	}
+	else {
+		fullpath = cmd;
+	}
+	DBG_P("path='%s'", fullpath);
+	if(lstat(fullpath, &sb) == -1) {
+		return false;
+	}
+	return (sb.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH));
+}
+
+static kbool_t DSLib_isCommand(KonohaContext *kctx, const char *cmd)
+{
+	size_t bufsize = confstr(_CS_PATH, NULL, 0);
+	char buf[bufsize];
+	confstr(_CS_PATH, buf, bufsize);
+	char *pos, *p = buf;
+	while(pos < buf + bufsize) {
+		if ((pos = strchr(p, ':')) == NULL) {
+			if(DSLib_checkExecutablePath(kctx, p, cmd)) return true;
+			break;
+		}
+		p[pos - p] = '\0';
+		if(DSLib_checkExecutablePath(kctx, p, cmd)) return true;
+		p = pos + 1;
+	}
+	return DSLib_checkExecutablePath(kctx, "/bin", cmd);
+}
+
 
 static KMETHOD PatternMatch_Shell(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, nameid, tokenList, beginIdx, endIdx);
 	kToken *firstToken = tokenList->tokenItems[beginIdx];
-	DBG_P("firstToken='%s', isCommand=%d", S_text(firstToken->text), isCommand(S_text(firstToken->text)));
-	RETURNi_((firstToken->resolvedSyntaxInfo->keyword == KW_SymbolPattern && isCommand(S_text(firstToken->text))) ? 0 : -1);
+	DBG_P("firstToken='%s', isCommand=%d", S_text(firstToken->text), DSLib_isCommand(kctx, S_text(firstToken->text)));
+	RETURNi_((firstToken->resolvedSyntaxInfo->keyword == KW_SymbolPattern && DSLib_isCommand(kctx, S_text(firstToken->text))) ? beginIdx : -1);
 }
 
 static KMETHOD Statement_Shell(KonohaContext *kctx, KonohaStack *sfp)
