@@ -198,7 +198,7 @@ static KMETHOD Expression_Increment(KonohaContext *kctx, KonohaStack *sfp)
 			{SYM_("X"), tokenList, operatorIdx+1, endIdx},
 			{0, NULL, 0, 0}, /* sentinel */
 		};
-		SUGAR TokenSequence_applyMacro(kctx, &macro, opSyntax->macroDataNULL, 0, 6, 1, macroParam);
+		SUGAR TokenSequence_applyMacro(kctx, &macro, opSyntax->macroDataNULL, 0, 5, 1, macroParam);
 	}
 	else {/* (beginIdx < operatorIdx) MACRO ${ int _ = X; X = (X) + 1; _} */
 		TokenSequence macro = {Stmt_nameSpace(stmt), tokenList};
@@ -206,7 +206,7 @@ static KMETHOD Expression_Increment(KonohaContext *kctx, KonohaStack *sfp)
 			{SYM_("X"), tokenList, beginIdx, operatorIdx},
 			{0, NULL, 0, 0}, /* sentinel */
 		};
-		SUGAR TokenSequence_applyMacro(kctx, &macro, opSyntax->macroDataNULL, 6, kArray_size(opSyntax->macroDataNULL), 1, macroParam);
+		SUGAR TokenSequence_applyMacro(kctx, &macro, opSyntax->macroDataNULL, 5, kArray_size(opSyntax->macroDataNULL), 1, macroParam);
 	}
 	kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx);
 	TokenSequence_pop(kctx, macro);

@@ -342,6 +342,7 @@ static void kNameSpace_setMacroData(KonohaContext *kctx, kNameSpace *ns, ksymbol
 	TokenSequence_push(kctx, source);
 	TokenSequence_tokenize(kctx, &source, data, 0);
 	TokenSequence tokens = {source.ns, source.tokenList, source.endIdx};
+	tokens.TargetPolicy.ExpandingBraceGroup = true;
 	TokenSequence_resolved2(kctx, &tokens, NULL, &source, source.beginIdx);
 	syn->macroParamSize = paramsize;
 	KINITSETv(ns, syn->macroDataNULL, kArray_slice(kctx, tokens.tokenList, tokens.beginIdx + 1 /* removing head indent*/, tokens.endIdx));
@@ -377,6 +378,7 @@ static kTokenVar* kToken_transformToBraceGroup(KonohaContext *kctx, kTokenVar *t
 {
 	TokenSequence source = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
 	TokenSequence_push(kctx, source);
+	KdumpToken(kctx, tk);
 	TokenSequence_tokenize(kctx, &source, S_text(tk->text), tk->uline);
 	KSETv(tk, tk->subTokenList, new_(TokenArray, 0));
 	tk->resolvedSyntaxInfo = SYN_(ns, KW_BraceGroup);
