@@ -198,7 +198,7 @@ static kbool_t DSLib_isCommand(KonohaContext *kctx, const char *cmd)
 	char buf[bufsize];
 	confstr(_CS_PATH, buf, bufsize);
 	char *pos, *p = buf;
-	while(pos < buf + bufsize) {
+	while(p < buf + bufsize) {
 		if ((pos = strchr(p, ':')) == NULL) {
 			if(DSLib_checkExecutablePath(kctx, p, cmd)) return true;
 			break;
