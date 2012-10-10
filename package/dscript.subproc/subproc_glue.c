@@ -57,17 +57,6 @@ extern int pipe2 (int __pipedes[2], int __flags);
 #endif
 extern int sigignore (int __sig);
 
-//#define MOD_subproc 23
-//
-//typedef struct {
-//	KonohaModule h;
-//	KonohaClass     *cSubproc;
-//} kmodsubproc_t;
-//
-//typedef struct {
-//	KonohaModuleContext h;
-//} ctxsubproc_t;
-
 typedef struct {
 	int mode;                              // the kind of identifier
 	FILE* fp;                              // file stream pointer
@@ -101,12 +90,6 @@ struct _kSubproc {
 
 /* ------------------------------------------------------------------------ */
 /* [class defs] */
-
-//#define ctxsubproc         ((ctxsubproc_t*)kctx->mod[MOD_subproc])
-//#define kmodsubproc        ((kmodsubproc_t*)kctx->modshare[MOD_subproc])
-//#define IS_defineSubproc() (kctx->modshare[MOD_subproc] != NULL)
-//#define CT_Subproc         kmodsubproc->cSubproc
-//#define TY_Subproc         kmodsubproc->cSubproc->typeId
 #define CT_Subproc         cSubproc
 #define TY_Subproc         cSubproc->typeId
 #define IS_Subproc(O)      ((O)->h.ct == CT_Subproc)
@@ -1214,49 +1197,32 @@ static KMETHOD Subproc_isERR2StdOUT(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## @Static int Subproc.call(String args);
-static KMETHOD Subproc_call(KonohaContext *kctx, KonohaStack *sfp)
-{
-	KonohaClass *cSubproc = KLIB kNameSpace_getClass(kctx, sfp[K_DYNSIDX].asNameSpace, "dscript.subproc.Subproc", strlen("dscript.subproc.Subproc"), NULL);
-	kSubproc *sp = GCSAFE_new(Subproc, NULL);
-	subprocData_t *p = sp->spd;
-	int ret = S_PREEXECUTION;
-	KSETv(sp, p->command, sfp[1].asString);
-	if ( (ret = proc_start(kctx, p)) == S_TIMEOUT ) {
-		p->timeoutKill = 1;
-		killWait(p->cpid);
-//		KNH_NTHROW2(kctx, sfp, "Script!!", "subproc.fg :: timeout", K_FAILED, KNH_LDATA0);
-	}
-	int status = p->status;
-	if(WIFEXITED(status)) {
-		ret = WEXITSTATUS(status);
-	} else if (WIFSIGNALED(status)) {
-		ret = WTERMSIG(status) * -1;
-	} else if (WIFSTOPPED(status)) {
-		ret = WSTOPSIG(status) * -1;
-	}
-	RETURNi_( ret );
-}
+//static KMETHOD Subproc_call(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	kSubproc *sp = GCSAFE_new(Subproc, NULL);
+//	subprocData_t *p = sp->spd;
+//	int ret = S_PREEXECUTION;
+//	KSETv(sp, p->command, sfp[1].asString);
+//	if ( (ret = proc_start(kctx, p)) == S_TIMEOUT ) {
+//		p->timeoutKill = 1;
+//		killWait(p->cpid);
+////		KNH_NTHROW2(kctx, sfp, "Script!!", "subproc.fg :: timeout", K_FAILED, KNH_LDATA0);
+//	}
+//	int status = p->status;
+//	if(WIFEXITED(status)) {
+//		ret = WEXITSTATUS(status);
+//	} else if (WIFSIGNALED(status)) {
+//		ret = WTERMSIG(status) * -1;
+//	} else if (WIFSTOPPED(status)) {
+//		ret = WSTOPSIG(status) * -1;
+//	}
+//	RETURNi_( ret );
+//}
 
 //## @Static String Subproc.checkOutput(String args);
-static KMETHOD Subproc_checkOutput(KonohaContext *kctx, KonohaStack *sfp)
-{
-	KonohaClass *cSubproc = KLIB kNameSpace_getClass(kctx, sfp[K_DYNSIDX].asNameSpace, "dscript.subproc.Subproc", strlen("dscript.subproc.Subproc"), NULL);
-	RETURN_(kSubproc_checkOutput(kctx, GCSAFE_new(Subproc, NULL), sfp[1].asString));
-}
-
-/* ------------------------------------------------------------------------ */
-
-//static void kmodsubproc_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
+//static KMETHOD Subproc_checkOutput(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//}
-//
-//static void kmodsubproc_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
-//{
-//}
-//
-//static void kmodsubproc_free(KonohaContext *kctx, struct KonohaModule *baseh)
-//{
-//	KFREE(baseh, sizeof(kmodsubproc_t));
+//	RETURN_(kSubproc_checkOutput(kctx, GCSAFE_new(Subproc, NULL), sfp[1].asString));
 //}
 
 /* ------------------------------------------------------------------------ */
@@ -1317,12 +1283,6 @@ static void kSubproc_reftrace(KonohaContext *kctx, kObject *o)
 
 static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-//	kmodsubproc_t *base = (kmodsubproc_t *)KCALLOC(sizeof(kmodsubproc_t), 1);
-//	base->h.name     = "subproc";
-//	base->h.setup    = kmodsubproc_setup;
-//	base->h.reftrace = kmodsubproc_reftrace;
-//	base->h.free     = kmodsubproc_free;
-//	KLIB KonohaRuntime_setModule(kctx, MOD_subproc, &base->h, pline);
 	KImportPackage(ns, "posix.file", pline);
 	KDEFINE_CLASS defSubproc = {
 		STRUCTNAME(Subproc),
@@ -1366,8 +1326,8 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public|_Im, _F(Subproc_isStandardOUT), TY_boolean, TY_Subproc, MN_("isStandardOUT"), 0,
 		_Public|_Im, _F(Subproc_isStandardERR), TY_boolean, TY_Subproc, MN_("isStandardERR"), 0,
 		_Public|_Im, _F(Subproc_isERR2StdOUT), TY_boolean, TY_Subproc, MN_("isERR2StdOUT"), 0,
-		_Public|_Static|_Im, _F(Subproc_call), TY_int, TY_Subproc, MN_("call"), 1, TY_String, FN_("args"),
-		_Public|_Static|_Im, _F(Subproc_checkOutput), TY_String, TY_Subproc, MN_("checkOutput"), 1, TY_String, FN_("data"),
+//		_Public|_Static|_Im, _F(Subproc_call), TY_int, TY_Subproc, MN_("call"), 1, TY_String, FN_("args"),
+//		_Public|_Static|_Im, _F(Subproc_checkOutput), TY_String, TY_Subproc, MN_("checkOutput"), 1, TY_String, FN_("data"),
 		_Public|_Im, _F(Subproc_setCwd), TY_boolean, TY_Subproc, MN_("setCwd"), 1, TY_String, FN_("cwd"),
 		_Public|_Im, _F(Subproc_setBufsize), TY_boolean, TY_Subproc, MN_("setBufsize"), 1, TY_int, FN_("bufsize"),
 		_Public|_Im, _F(Subproc_setFileIN), TY_boolean, TY_Subproc, MN_("setFileIN"), 1, TY_FILE, FN_("file"),
