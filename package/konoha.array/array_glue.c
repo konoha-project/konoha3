@@ -261,7 +261,7 @@ static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
 			lsfp[K_CALLDELTA+1].unboxValue = tmp;
 			KCALL(lsfp, 0, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
 			END_LOCAL();
-			ret->unboxItems[i] = lsfp[0].unboxValue;
+			UnboxArray_add(kctx, ret, lsfp[0].unboxValue);
 		}
 	}
 	else {
@@ -272,7 +272,7 @@ static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
 			KSETv_AND_WRITE_BARRIER(NULL, lsfp[K_CALLDELTA+1].o, tmp, GC_NO_WRITE_BARRIER);
 			KCALL(lsfp, 0, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
 			END_LOCAL();
-			KSETv(ret, ret->objectItems[i], lsfp[0].o);
+			KLIB kArray_add(kctx, ret, lsfp[0].o);
 		}
 	}
 	kArray_setsize(ret, asize);
