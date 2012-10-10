@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 2.6)
+find_library(HAVE_GMP NAMES gmp)
+
+if(HAVE_GMP)
+	set(ExtraLibs ${ExtraLibs} ${HAVE_GMP})
+	set(PACKAGE_EXTRA_LIBRARY ${ExtraLibs})
+	set(PACKAGE_SOURCE_CODE gmp_glue.c)
+	set(PACKAGE_SCRIPT_CODE gmp_glue.k)
+	add_konoha_package(gmp)
+endif(HAVE_GMP)
