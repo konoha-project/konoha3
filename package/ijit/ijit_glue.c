@@ -56,14 +56,15 @@ static void kmodjit_setup(KonohaContext *kctx, struct KonohaModule *def, int new
 	(void)kctx;(void)def;(void)newctx;
 }
 
-static void val_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p)
+static void val_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
 {
+	kObjectVisitor *visitor = (kObjectVisitor *) thunk;
 	BEGIN_REFTRACE(1);
 	KREFTRACEv(p->objectValue);
 	END_REFTRACE();
 }
 
-static void kmodjit_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
+static void kmodjit_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, kObjectVisitor *visitor)
 {
 	kmodjit_t *mod = (kmodjit_t *) baseh;
 	BEGIN_REFTRACE(3);
@@ -71,7 +72,7 @@ static void kmodjit_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
 	KREFTRACEv(mod->global_value);
 	KREFTRACEv(mod->constPool);
 	END_REFTRACE();
-	KLIB Kmap_each(kctx, mod->jitcache, val_reftrace);
+	KLIB Kmap_each(kctx, mod->jitcache, (void *) visitor, val_reftrace);
 }
 
 static void kmodjit_free(KonohaContext *kctx, struct KonohaModule *baseh)

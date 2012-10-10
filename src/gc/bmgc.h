@@ -1587,7 +1587,40 @@ static void RememberSet_add(kObject *o)
 	bitmap_set(map+(offset/BITS), offset%BITS, Object_isTenure(o));
 }
 
-static void RememberSet_reftrace(KonohaContext *kctx, HeapManager *mng)
+static void Kwrite_barrier(KonohaContext *kctx, kObject *parent)
+{
+#ifdef USE_GENERATIONAL_GC
+	RememberSet_add(parent);
+#endif
+}
+
+static void KupdateObjectField(kObject *parent, kObject *oldValPtr, kObject *newVal)
+{
+	Kwrite_barrier(NULL, parent);
+}
+
+typedef struct ObjectGraphTracer {
+	kObjectVisitor base;
+	HeapManager  *mng;
+	MarkStack    *mstack;
+} ObjectGraphTracer;
+
+static void ObjectGraphTracer_visit(kObjectVisitor *visitor, kObject *object)
+{
+	ObjectGraphTracer *tracer = (ObjectGraphTracer *) visitor;
+	mark_mstack(tracer->mng, object, tracer->mstack);
+}
+
+static void ObjectGraphTracer_visitRange(kObjectVisitor *visitor, kObject **begin, kObject **end)
+{
+	ObjectGraphTracer *tracer = (ObjectGraphTracer *) visitor;
+	kObject **itr;
+	for (itr = begin; itr != end; ++itr) {
+		mark_mstack(tracer->mng, *itr, tracer->mstack);
+	}
+}
+
+static void RememberSet_reftrace(KonohaContext *kctx, HeapManager *mng, kObjectVisitor *visitor)
 {
 	size_t i;
 	FOR_EACH_ARRAY_(mng->remember_sets, i) {
@@ -1614,7 +1647,7 @@ static void RememberSet_reftrace(KonohaContext *kctx, HeapManager *mng)
 #ifdef DEBUG_WRITE_BARRIER
 					fprintf(stderr, "R %p\n", o);
 #endif
-					KONOHA_reftraceObject(kctx, o);
+					KONOHA_reftraceObject(kctx, o, visitor);
 				}
 				bitmap_reset(m, 0);
 			}
@@ -1624,48 +1657,29 @@ static void RememberSet_reftrace(KonohaContext *kctx, HeapManager *mng)
 
 #endif
 
-static void Kwrite_barrier(KonohaContext *kctx, kObject *parent)
-{
-#ifdef USE_GENERATIONAL_GC
-	RememberSet_add(parent);
-#endif
-}
-
-static void KupdateObjectField(kObject *parent, kObjectVar *oldValPtr, kObjectVar *newVal)
-{
-	Kwrite_barrier(NULL, parent);
-}
-
-#define context_reset_refs(kctx) kctx->stack->reftail = kctx->stack->ref.refhead
-
 static void bmgc_gc_mark(HeapManager *mng, enum gc_mode mode)
 {
-	long i;
 	KonohaContext *kctx = mng->kctx;
 	MarkStack *mstack = mstack_init(&mng->mstack);
-	KonohaStackRuntimeVar *stack = kctx->stack;
 	kObject *ref = NULL;
+	ObjectGraphTracer tracer = {};
+	tracer.base.fn_visit      = ObjectGraphTracer_visit;
+	tracer.base.fn_visitRange = ObjectGraphTracer_visitRange;
+	tracer.mng    = mng;
+	tracer.mstack = mstack;
 
-	context_reset_refs(kctx);
-	KonohaContext_reftraceAll(kctx);
+	KonohaContext_reftraceAll(kctx, &tracer.base);
 #ifdef USE_GENERATIONAL_GC
 	if (mode & GC_MINOR) {
-		RememberSet_reftrace(kctx, mng);
+		RememberSet_reftrace(kctx, mng, &tracer.base);
 	}
 #endif
-	size_t ref_size = stack->reftail - stack->ref.refhead;
-	goto L_INLOOP;
-	while ((ref = mstack_next(mstack)) != NULL) {
-		context_reset_refs(kctx);
-		KONOHA_reftraceObject(kctx, ref);
-		ref_size = stack->reftail - stack->ref.refhead;
-		if (ref_size > 0) {
-			L_INLOOP:;
-			for (i = ref_size-1; i >= 0; --i) {
-				mark_mstack(mng, stack->ref.refhead[i], mstack);
-			}
-		}
-	}
+	ref = mstack_next(mstack);
+	if (unlikely(ref == 0))
+		return;
+	do {
+		KONOHA_reftraceObject(kctx, ref, &tracer.base);
+	} while ((ref = mstack_next(mstack)) != NULL);
 }
 
 #define LIST_PUSH(tail, e) do {\

@@ -37,8 +37,9 @@ extern "C" {
 extern void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx);
 extern void MODGC_check_malloced_size(KonohaContext *kctx);
 
+struct kObjectVisitor;
 /* root reftrace */
-extern void KonohaContext_reftraceAll(KonohaContext *kctx);
+extern void KonohaContext_reftraceAll(KonohaContext *kctx, kObjectVisitor *visitor);
 
 #ifdef __cplusplus
 } /* extern "C" */

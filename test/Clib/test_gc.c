@@ -46,7 +46,7 @@ static void Dummy_init(KonohaContext *kctx, kObject *o, void *conf)
 	((kDummy*)o)->x = __init__++;
 }
 
-static void Dummy_reftrace(KonohaContext *kctx, kObject *o)
+static void Dummy_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
 {
 	__trace__++;
 }

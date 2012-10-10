@@ -63,7 +63,7 @@ static void kmodfloat_setup(KonohaContext *kctx, struct KonohaModule *def, int n
 {
 }
 
-static void kmodfloat_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
+static void kmodfloat_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, kObjectVisitor *visitor)
 {
 }
 

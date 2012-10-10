@@ -586,6 +586,7 @@ typedef struct KonohaValueVar                   KonohaValue;
 
 typedef struct KonohaModule        KonohaModule;
 typedef struct KonohaModuleContext KonohaModuleContext;
+struct kObjectVisitor;
 
 struct KonohaContextVar {
 	uintptr_t                         safepoint; // set to 1
@@ -678,14 +679,14 @@ struct KonohaModule {
 	const char *name;
 	int mod_id;
 	void (*setup)(KonohaContext*,    struct KonohaModule *, int newctx);
-	void (*reftrace)(KonohaContext*, struct KonohaModule *);
+	void (*reftrace)(KonohaContext*, struct KonohaModule *, struct kObjectVisitor *);
 	void (*free)(KonohaContext*,     struct KonohaModule *);
 	kmutex_t   *moduleMutex;
 };
 
 struct KonohaModuleContext {
 	uintptr_t unique;
-	void (*reftrace)(KonohaContext*, struct KonohaModuleContext *);
+	void (*reftrace)(KonohaContext*, struct KonohaModuleContext *, struct kObjectVisitor *);
 	void (*free)(KonohaContext*, struct KonohaModuleContext *);
 };
 
@@ -758,7 +759,7 @@ typedef enum {
 
 #define CLASSAPI \
 		void         (*init)(KonohaContext*, kObject*, void *conf);\
-		void         (*reftrace)(KonohaContext*, kObject*);\
+		void         (*reftrace)(KonohaContext*, kObject*, struct kObjectVisitor *visitor);\
 		void         (*free)(KonohaContext*, kObject*);\
 		kObject*     (*fnull)(KonohaContext*, KonohaClass*);\
 		uintptr_t    (*unbox)(KonohaContext*, kObject*);\
@@ -1370,7 +1371,11 @@ struct KonohaPackageVar {
 
 struct klogconf_t;
 typedef struct GcContext GcContext;
-struct kObjectVisitor;
+
+typedef struct kObjectVisitor {
+	void (*fn_visit)(struct kObjectVisitor *vistor, kObject *object);
+	void (*fn_visitRange)(struct kObjectVisitor *visitor, kObject **begin, kObject **end);
+} kObjectVisitor;
 
 struct KonohaLibVar {
 	void* (*Kmalloc)(KonohaContext*, size_t);
@@ -1450,7 +1455,7 @@ struct KonohaLibVar {
 
 	kbool_t         (*KonohaRuntime_setModule)(KonohaContext*, int, struct KonohaModule *, kfileline_t);
 
-	void (*kNameSpace_reftraceSugarExtension)(KonohaContext *, kNameSpace *);
+	void (*kNameSpace_reftraceSugarExtension)(KonohaContext *, kNameSpace *, struct kObjectVisitor *visitor);
 	void (*kNameSpace_freeSugarExtension)(KonohaContext *, kNameSpaceVar *);
 
 	KonohaPackage*   (*kNameSpace_requirePackage)(KonohaContext*, const char *, kfileline_t);
@@ -1608,19 +1613,22 @@ typedef struct {
 	}\
 } while (0)
 
-#define BEGIN_REFTRACE(SIZE)  int _ref_ = (SIZE); kObjectVar** _tail = KLIB Kobject_reftail(kctx, (SIZE));
-#define END_REFTRACE()        (void)_ref_; kctx->stack->reftail = _tail;
+#define BEGIN_REFTRACE(SIZE)
+#define END_REFTRACE()
 
 #define KREFTRACEv(p)  do {\
 	DBG_ASSERT(p != NULL);\
-	_tail[0] = (kObjectVar*)p;\
-	_tail++;\
+	visitor->fn_visit(visitor, (kObject *)(p));\
+} while (0)
+
+#define KREFTRACE_RANGE(BEGIN, END)  do {\
+	DBG_ASSERT(p != NULL);\
+	visitor->fn_visitRange(visitor, (kObject **)(BEGIN), (kObject **)(END));\
 } while (0)
 
 #define KREFTRACEn(p) do {\
 	if(p != NULL) {\
-		_tail[0] = (kObjectVar*)p;\
-		_tail++;\
+		visitor->fn_visit(visitor, (kObject *)(p));\
 	}\
 } while (0)
 

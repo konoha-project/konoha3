@@ -4602,7 +4602,7 @@ static void kmodllvm_setup(KonohaContext *kctx, struct KonohaModule *def, int ne
 	(void)kctx;(void)def;(void)newctx;
 }
 
-static void kmodllvm_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
+static void kmodllvm_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, kObjectVisitor *visitor)
 {
 	(void)kctx;(void)baseh;
 }

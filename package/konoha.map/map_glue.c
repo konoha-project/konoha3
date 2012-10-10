@@ -52,6 +52,7 @@ static void kMap_init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void MapUnboxEntry_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
 {
+	kObjectVisitor *visitor = (kObjectVisitor *) thunk;
 	BEGIN_REFTRACE(1);
 	KREFTRACEv(p->stringKey);
 	END_REFTRACE();
@@ -59,20 +60,21 @@ static void MapUnboxEntry_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, v
 
 static void MapObjectEntry_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
 {
+	kObjectVisitor *visitor = (kObjectVisitor *) thunk;
 	BEGIN_REFTRACE(2);
 	KREFTRACEn(p->stringKey);
 	KREFTRACEv(p->objectValue);
 	END_REFTRACE();
 }
 
-static void kMap_reftrace(KonohaContext *kctx, kObject *o)
+static void kMap_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
 {
 	kMap *map = (kMap*)o;
 	if(TY_isUnbox(O_p0(map))) {
-		KLIB Kmap_each(kctx, map->map, NULL, MapUnboxEntry_reftrace);
+		KLIB Kmap_each(kctx, map->map, (void *)visitor, MapUnboxEntry_reftrace);
 	}
 	else {
-		KLIB Kmap_each(kctx, map->map, NULL, MapObjectEntry_reftrace);
+		KLIB Kmap_each(kctx, map->map, (void *)visitor, MapObjectEntry_reftrace);
 	}
 }
 

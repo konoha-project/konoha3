@@ -521,7 +521,7 @@ static void kmodmpi_setup(KonohaContext *kctx, struct KonohaModule *def, int new
 	(void)kctx;(void)def;(void)newctx;
 }
 
-static void kmodmpi_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
+static void kmodmpi_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, kObjectVisitor *visitor)
 {
 	(void)kctx;(void)baseh;
 }

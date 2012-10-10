@@ -275,13 +275,13 @@ static char *String_getReference(KonohaContext *kctx, StringBase *s)
 	return NULL;
 }
 
-static void StringBase_reftrace(KonohaContext *kctx, StringBase *s)
+static void StringBase_reftrace(KonohaContext *kctx, StringBase *s, kObjectVisitor *visitor)
 {
 	while (1) {
 		if (unlikely(!StringBase_isRope(s)))
 			break;
 		RopeString *rope = (RopeString *) s;
-		StringBase_reftrace(kctx, rope->left);
+		StringBase_reftrace(kctx, rope->left, visitor);
 		BEGIN_REFTRACE(3);
 		KREFTRACEv(rope);//FIXME reftracing rope is needed?
 		KREFTRACEv(rope->left);
@@ -291,9 +291,9 @@ static void StringBase_reftrace(KonohaContext *kctx, StringBase *s)
 	}
 }
 
-static void String2_reftrace(KonohaContext *kctx, kObject *o)
+static void String2_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
 {
-	StringBase_reftrace(kctx, (StringBase *) o);
+	StringBase_reftrace(kctx, (StringBase *) o, visitor);
 }
 
 static uintptr_t String2_unbox(KonohaContext *kctx, kObject *o)

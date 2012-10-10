@@ -300,7 +300,7 @@ static void kFile_free(KonohaContext *kctx, kObject *o)
 
 }
 
-static void kFile_reftrace(KonohaContext *kctx, kObject *o)
+static void kFile_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
 {
 	kFile *file = (kFile *)o;
 	BEGIN_REFTRACE(1);
@@ -668,7 +668,7 @@ static void kioshare_setup(KonohaContext *kctx, struct KonohaModule *def, int ne
 {
 }
 
-static void kioshare_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
+static void kioshare_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, kObjectVisitor *visitor)
 {
 	kioshare_t *base = (kioshare_t *)baseh;
 	BEGIN_REFTRACE(3);

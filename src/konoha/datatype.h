@@ -38,7 +38,7 @@ static void kObject_init(KonohaContext *kctx, kObject *o, void *conf)
 	of->fieldUnboxItems[0] = 0;
 }
 
-static void kObject_reftrace(KonohaContext *kctx, kObject *o)
+static void kObject_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
 {
 	kObject *of = (kObject*)o;
 	KonohaClass *ct = O_ct(of);
@@ -292,7 +292,7 @@ static void kArray_init(KonohaContext *kctx, kObject *o, void *conf)
 	}
 }
 
-static void kArray_reftrace(KonohaContext *kctx, kObject *o)
+static void kArray_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
 {
 	kArray *a = (kArray*)o;
 	if(!kArray_isUnboxData(a)) {
@@ -496,7 +496,7 @@ static void kMethod_init(KonohaContext *kctx, kObject *o, void *conf)
 	mtd->serialNumber = methodSerialNumber++;
 }
 
-static void kMethod_reftrace(KonohaContext *kctx, kObject *o)
+static void kMethod_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
 {
 	BEGIN_REFTRACE(3);
 	kMethod *mtd = (kMethod*)o;
@@ -548,10 +548,10 @@ static void kNameSpace_init(KonohaContext *kctx, kObject *o, void *conf)
 	KFieldInit(ns, ns->methodList, K_EMPTYARRAY);
 }
 
-static void kNameSpace_reftrace(KonohaContext *kctx, kObject *o)
+static void kNameSpace_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
 {
 	kNameSpace *ns = (kNameSpace*)o;
-	KLIB kNameSpace_reftraceSugarExtension(kctx, ns);
+	KLIB kNameSpace_reftraceSugarExtension(kctx, ns, visitor);
 	size_t i, size = kNameSpace_sizeConstTable(ns);
 	BEGIN_REFTRACE(size + 5);
 	for(i = 0; i < size; i++) {
@@ -585,7 +585,7 @@ static void Func_init(KonohaContext *kctx, kObject *o, void *conf)
 	fo->adhocKeyForTokenFunc = 0;
 }
 
-static void Func_reftrace(KonohaContext *kctx, kObject *o)
+static void Func_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
 {
 	BEGIN_REFTRACE(2);
 	kFunc *fo = (kFunc*)o;
@@ -626,7 +626,7 @@ static void DEFAULT_init(KonohaContext *kctx, kObject *o, void *conf)
 	(void)kctx;(void)o;(void)conf;
 }
 
-static void DEFAULT_reftrace(KonohaContext *kctx, kObject *o)
+static void DEFAULT_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
 {
 	(void)kctx;(void)o;
 }
@@ -1119,6 +1119,7 @@ static void KonohaRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx)
 
 static void constPoolMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
 {
+	kObjectVisitor *visitor = (kObjectVisitor *) thunk;
 	BEGIN_REFTRACE(1);
 	KREFTRACEv(p->objectValue);
 	END_REFTRACE();
@@ -1126,13 +1127,14 @@ static void constPoolMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, vo
 
 static void packageMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
 {
+	kObjectVisitor *visitor = (kObjectVisitor *) thunk;
 	KonohaPackage *pack = (KonohaPackage*)p->unboxValue;
 	BEGIN_REFTRACE(1);
 	KREFTRACEn(pack->packageNameSpace);
 	END_REFTRACE();
 }
 
-static void KonohaRuntime_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
+static void KonohaRuntime_reftrace(KonohaContext *kctx, KonohaContextVar *ctx, kObjectVisitor *visitor)
 {
 	KonohaRuntime *share = ctx->share;
 	KonohaClass **cts = (KonohaClass**)kctx->share->classTable.classItems;
@@ -1147,10 +1149,10 @@ static void KonohaRuntime_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
 			END_REFTRACE();
 		}
 		if (ct->constPoolMapNO != NULL) {
-			KLIB Kmap_each(kctx, ct->constPoolMapNO, NULL, constPoolMap_reftrace);
+			KLIB Kmap_each(kctx, ct->constPoolMapNO, (void *) visitor, constPoolMap_reftrace);
 		}
 	}
-	KLIB Kmap_each(kctx, share->packageMapNO, NULL, packageMap_reftrace);
+	KLIB Kmap_each(kctx, share->packageMapNO, (void *) visitor, packageMap_reftrace);
 	BEGIN_REFTRACE(10);
 	KREFTRACEv(share->constNull);
 	KREFTRACEv(share->constTrue);

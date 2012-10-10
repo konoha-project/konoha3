@@ -85,7 +85,7 @@ static void KonohaStackRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx, 
 	ctx->stack = base;
 }
 
-static void KonohaStackRuntime_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
+static void KonohaStackRuntime_reftrace(KonohaContext *kctx, KonohaContextVar *ctx, kObjectVisitor *visitor)
 {
 	KonohaStack *sp = ctx->stack->stack;
 	BEGIN_REFTRACE((kctx->esp - sp) + 2);
@@ -173,30 +173,30 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 	return newctx;
 }
 
-static void KonohaContext_reftrace(KonohaContext *kctx, KonohaContextVar *ctx)
+static void KonohaContext_reftrace(KonohaContext *kctx, KonohaContextVar *ctx, kObjectVisitor *visitor)
 {
 	size_t i;
 	if(IS_RootKonohaContext(kctx)) {
-		KonohaRuntime_reftrace(kctx, ctx);
+		KonohaRuntime_reftrace(kctx, ctx, visitor);
 		for(i = 0; i < KonohaModule_MAXSIZE; i++) {
 			KonohaModule *p = ctx->modshare[i];
 			if(p != NULL && p->reftrace != NULL) {
-				p->reftrace(kctx, p);
+				p->reftrace(kctx, p, visitor);
 			}
 		}
 	}
-	KonohaStackRuntime_reftrace(kctx, ctx);
+	KonohaStackRuntime_reftrace(kctx, ctx, visitor);
 	for(i = 0; i < KonohaModule_MAXSIZE; i++) {
 		KonohaModuleContext *p = ctx->modlocal[i];
 		if(p != NULL && p->reftrace != NULL) {
-			p->reftrace(kctx, p);
+			p->reftrace(kctx, p, visitor);
 		}
 	}
 }
 
-void KonohaContext_reftraceAll(KonohaContext *kctx)
+void KonohaContext_reftraceAll(KonohaContext *kctx, kObjectVisitor *visitor)
 {
-	KonohaContext_reftrace(kctx, (KonohaContextVar*)kctx);
+	KonohaContext_reftrace(kctx, (KonohaContextVar*)kctx, visitor);
 }
 
 static void KonohaContext_free(KonohaContext *kctx, KonohaContextVar *ctx)

@@ -386,10 +386,10 @@ void KONOHA_freeObjectField(KonohaContext *kctx, kObjectVar *o)
 	ct->free(kctx, o);
 }
 
-void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o)
+void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
 {
 	unsigned map_size;
-	O_ct(o)->reftrace(kctx, o);
+	O_ct(o)->reftrace(kctx, o, visitor);
 	map_size = protomap_size((Kprotomap_t *)o->h.kvproto);
 	if (map_size) {
 		protomap_iterator itr = {0};

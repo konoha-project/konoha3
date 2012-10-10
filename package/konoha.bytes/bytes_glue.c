@@ -88,7 +88,7 @@ static void kmodiconv_setup(KonohaContext *kctx, struct KonohaModule *def, int n
 {
 }
 
-static void kmodiconv_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
+static void kmodiconv_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, kObjectVisitor *visitor)
 {
 }
 

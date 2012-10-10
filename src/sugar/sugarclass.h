@@ -30,6 +30,7 @@
 
 static void syntaxMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
 {
+	kObjectVisitor *visitor = (kObjectVisitor *) thunk;
 	SugarSyntax *syn = (SugarSyntax*)p->unboxValue;
 	BEGIN_REFTRACE(6);
 	KREFTRACEn(syn->SyntaxPatternListNULL);
@@ -40,10 +41,10 @@ static void syntaxMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void 
 	END_REFTRACE();
 }
 
-static void kNameSpace_reftraceSugarExtension(KonohaContext *kctx, kNameSpace *ns)
+static void kNameSpace_reftraceSugarExtension(KonohaContext *kctx, kNameSpace *ns, kObjectVisitor *visitor)
 {
 	if(ns->syntaxMapNN != NULL) {
-		KLIB Kmap_each(kctx, ns->syntaxMapNN, NULL, syntaxMap_reftrace);
+		KLIB Kmap_each(kctx, ns->syntaxMapNN, (void *)visitor, syntaxMap_reftrace);
 	}
 	if(ns->tokenMatrix != NULL) {
 		BEGIN_REFTRACE(KCHAR_MAX);
@@ -88,7 +89,7 @@ static void Token_init(KonohaContext *kctx, kObject *o, void *conf)
 	tk->resolvedSyntaxInfo = NULL;
 }
 
-static void Token_reftrace(KonohaContext *kctx, kObject *o)
+static void Token_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
 {
 	kToken *tk = (kToken*)o;
 	BEGIN_REFTRACE(1);
@@ -109,7 +110,7 @@ static void Expr_init(KonohaContext *kctx, kObject *o, void *conf)
 	expr->syn = (SugarSyntax*)conf;
 }
 
-static void Expr_reftrace(KonohaContext *kctx, kObject *o)
+static void Expr_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
 {
 	kExpr *expr = (kExpr*)o;
 	BEGIN_REFTRACE(2);
@@ -246,7 +247,7 @@ static void Stmt_init(KonohaContext *kctx, kObject *o, void *conf)
 	stmt->build    = 0;
 }
 
-static void Stmt_reftrace(KonohaContext *kctx, kObject *o)
+static void Stmt_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
 {
 	kStmt *stmt = (kStmt*)o;
 	BEGIN_REFTRACE(1);
@@ -330,7 +331,7 @@ static void kBlock_init(KonohaContext *kctx, kObject *o, void *conf)
 	KFieldInit(bk, bk->esp, new_(Expr, 0));
 }
 
-static void kBlock_reftrace(KonohaContext *kctx, kObject *o)
+static void kBlock_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
 {
 	kBlock *bk = (kBlock*)o;
 	BEGIN_REFTRACE(4);

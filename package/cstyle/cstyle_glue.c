@@ -148,7 +148,7 @@ static KMETHOD TypeCheck_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
 	if (S_size(tk->text) == 1) {
-		int ch = S_text(tk->text)[0];  // FIXME: unsupported escape sequence
+		int ch = S_text(tk->text)[0];
 		RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_int, ch));
 	}
 	RETURN_(K_NULLEXPR);

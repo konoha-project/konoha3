@@ -75,7 +75,7 @@ static void AprTableEntry_free(KonohaContext *kctx, kObject *po)
 }
 
 static void kapacheshare_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx) {}
-static void kapacheshare_reftrace(KonohaContext *kctx, struct KonohaModule *baseh) {}
+static void kapacheshare_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, kObjectVisitor *visitor) {}
 static void kapacheshare_free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 	KFREE(baseh, sizeof(kapacheshare_t));

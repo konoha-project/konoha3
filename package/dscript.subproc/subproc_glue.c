@@ -1253,7 +1253,7 @@ static void kSubproc_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kSubproc_reftrace(KonohaContext *kctx, kObject *o)
+static void kSubproc_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
 {
 	struct _kSubproc *proc = (struct _kSubproc*)o;
 	BEGIN_REFTRACE(3);

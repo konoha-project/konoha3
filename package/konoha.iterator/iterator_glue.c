@@ -159,7 +159,7 @@ static KMETHOD String_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 /* ------------------------------------------------------------------------ */
 
 static void kmoditerator_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx) {}
-static void kmoditerator_reftrace(KonohaContext *kctx, struct KonohaModule *baseh) { }
+static void kmoditerator_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, kObjectVisitor *visitor) { }
 static void kmoditerator_free(KonohaContext *kctx, struct KonohaModule *baseh) { KFREE(baseh, sizeof(KonohaIteratorModule)); }
 
 #define _Public   kMethod_Public

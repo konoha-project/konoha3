@@ -54,7 +54,7 @@ static uintptr_t logpool_Ktrace(KonohaContext *kctx, klogconf_t *logconf, ...)
 	return 0;// FIXME reference to log
 }
 
-static void ctxlogpool_reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh)
+static void ctxlogpool_reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh, kObjectVisitor *visitor)
 {
 }
 
@@ -89,7 +89,7 @@ static void kmodlogpool_setup(KonohaContext *kctx, struct KonohaModule *def, int
 	}
 }
 
-static void kmodlogpool_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
+static void kmodlogpool_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, kObjectVisitor *visitor)
 {
 }
 
