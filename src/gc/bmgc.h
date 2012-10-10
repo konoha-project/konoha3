@@ -1086,8 +1086,10 @@ static void *tryAlloc(HeapManager *mng, SubHeap *h)
 	prefetch_(temp, 0, 0);
 	bool isEmpty = inc(p, h);
 
+#ifdef USE_GENERATIONAL_GC
 	bitmap_set(&mng->flags, GC_MAJOR_FLAG,
 			(mng->segmentList == NULL && h->freelist == NULL && isEmpty));
+#endif
 	return temp;
 }
 
@@ -1319,6 +1321,9 @@ static kObject *bm_malloc_internal(HeapManager *mng, size_t n)
 	if (temp != NULL)
 		goto L_finaly;
 #ifdef USE_SAFEPOINT_POLICY
+#ifdef USE_GENERATIONAL_GC
+	bitmap_set(&mng->flags, GC_MAJOR_FLAG, 1);
+#endif
 	HeapManager_expandHeap(mng, SUBHEAP_DEFAULT_SEGPOOL_SIZE*2);
 	newSegment(mng, h);
 #else
@@ -1740,6 +1745,9 @@ static void bmgc_gc_sweep(HeapManager *mng)
 	}
 
 	if (checkFull) {
+#ifdef USE_GENERATIONAL_GC
+		bitmap_set(&mng->flags, GC_MAJOR_FLAG, 1);
+#endif
 		HeapManager_expandHeap(mng, SUBHEAP_DEFAULT_SEGPOOL_SIZE*2);
 		for_each_heap(h, i, mng->heaps) {
 			if (bitmap_get(&checkFull, i))
@@ -1751,6 +1759,7 @@ static void bmgc_gc_sweep(HeapManager *mng)
 static void bitmapMarkingGC(HeapManager *mng, enum gc_mode mode)
 {
 	gc_info("GC starting");
+	bitmap_reset(&mng->flags, 0);
 	bmgc_gc_init(mng, mode);
 #ifdef GCSTAT
 	size_t i = 0, marked = 0, collected = 0, heap_size = 0;
@@ -1775,7 +1784,6 @@ static void bitmapMarkingGC(HeapManager *mng, enum gc_mode mode)
 			(mode & GC_MAJOR)?"major":"minor",
 			global_gc_stat.gc_count, (heap_size/MB_), collected, marked);
 #endif
-	bitmap_reset(&mng->flags, 0);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -1862,7 +1870,6 @@ static void KscheduleGC(HeapManager *mng)
 {
 	enum gc_mode mode = (enum gc_mode)(mng->flags & 0x3);
 	if (mode) {
-		mode = (mode == GC_NOP) ? mode : GC_MINOR;
 		gc_info("scheduleGC mode=%d", mode);
 		bitmapMarkingGC(mng, mode);
 	}
