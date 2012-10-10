@@ -560,7 +560,7 @@ static kMethod* kNameSpace_matchMethodNULL(KonohaContext *kctx, kNameSpace *star
 
 //static kbool_t MethodMatch_StaticFunc(KonohaContext *kctx, kMethod *mtd, MethodMatch *m)
 //{
-//	if(Method_isStatic(mtd)) {
+//	if(kMethod_is(Static, mtd)) {
 //		if(m->foundMethodNULL != NULL) {
 //			if(m->foundMethodNULL->serialNumber > mtd->serialNumber) return false;
 //		}
@@ -651,7 +651,7 @@ static kbool_t MethodMatch_Signature(KonohaContext *kctx, kMethod *mtd, MethodMa
 						continue;
 					}
 					kMethod *castMethod = kNameSpace_getCastMethodNULL(kctx, m->ns, m->param[i].ty, param->paramtypeItems[i].ty);
-					if(castMethod != NULL && (Method_isCoercion(castMethod) || FN_isCOERCION(param->paramtypeItems[i].fn))) {
+					if(castMethod != NULL && (kMethod_is(Coercion, castMethod) || FN_isCOERCION(param->paramtypeItems[i].fn))) {
 						continue;
 					}
 					return false;
@@ -786,11 +786,11 @@ static kMethod* kNameSpace_addMethod(KonohaContext *kctx, kNameSpace *ns, kMetho
 			return kMethod_replaceWith(kctx, (kMethodVar*)foundMethod, (kMethodVar*)mtd);
 		}
 		else {
-			if(!Method_isFinal(foundMethod)) {
+			if(!kMethod_is(Final, foundMethod)) {
 				DBG_P("Changing Virtual method %s.%s%s by %s.%s%s....", Method_t(foundMethod), Method_t(mtd));
-				Method_setVirtual(foundMethod, true);  // FIXME
+				kMethod_set(Virtual, foundMethod, true);  // FIXME
 			}
-			if(!Method_isVirtual(foundMethod) || Method_isFinal(foundMethod)) {
+			if(!kMethod_is(Virtual, foundMethod) || kMethod_is(Final, foundMethod)) {
 				DBG_P("Can't override method %s.%s%s <: %s.%s%s ....", Method_t(mtd), Method_t(foundMethod));
 				return NULL;
 			}
@@ -799,11 +799,11 @@ static kMethod* kNameSpace_addMethod(KonohaContext *kctx, kNameSpace *ns, kMetho
 	else {
 		foundMethod = kNameSpace_getMethodByParamSizeNULL(kctx, ns, ct->typeId, mtd->mn, Method_paramsize(mtd));
 		if(foundMethod != NULL) {
-			Method_setOverloaded(foundMethod, true);
-			Method_setOverloaded(mtd, true);
+			kMethod_set(Overloaded, foundMethod, true);
+			kMethod_set(Overloaded, mtd, true);
 		}
 	}
-	if(Method_isPublic(mtd)) {
+	if(kMethod_is(Public, mtd)) {
 		if(unlikely(ct->methodList == K_EMPTYARRAY)) {
 			KINITv(((KonohaClassVar*)ct)->methodList, new_(MethodArray, 8));
 		}
@@ -993,7 +993,7 @@ static kbool_t kNameSpace_importAll(KonohaContext *kctx, kNameSpace *ns, kNameSp
 		kNameSpace_importSyntaxAll(kctx, ns, targetNS, pline);
 		for(i = 0; i < kArray_size(targetNS->methodList); i++) {
 			kMethod *mtd = targetNS->methodList->methodItems[i];
-			if(Method_isPublic(mtd) && mtd->packageId == targetNS->packageId) {
+			if(kMethod_is(Public, mtd) && mtd->packageId == targetNS->packageId) {
 				KLIB kArray_add(kctx, ns->methodList, mtd);
 			}
 		}

@@ -622,7 +622,7 @@ static KMETHOD System_getNULL(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Method_isStatic_(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].asMethod;
-	kbool_t b = Method_isStatic(mtd);
+	kbool_t b = kMethod_is(Static, mtd);
 	RETURNb_(b);
 }
 
@@ -630,7 +630,7 @@ static KMETHOD Method_isStatic_(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Method_isVirtual_(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].asMethod;
-	kbool_t b = Method_isVirtual(mtd);
+	kbool_t b = kMethod_is(Virtual, mtd);
 	RETURNb_(b);
 }
 

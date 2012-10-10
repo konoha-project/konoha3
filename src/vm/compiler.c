@@ -535,7 +535,7 @@ static void KonohaVisitor_visitCallExpr(KonohaContext *kctx, IRBuilder *self, kE
 	 * expr->cons = [method, this, arg1, arg2, ...]
 	 **/
 	int i, a = self->a;
-	int s = Method_isStatic(mtd) ? 2 : 1;
+	int s = kMethod_is(Static, mtd) ? 2 : 1;
 	int espidx  = self->espidx;
 	int thisidx = espidx + K_CALLDELTA;
 	int argc = CallExpr_getArgCount(expr);
@@ -548,7 +548,7 @@ static void KonohaVisitor_visitCallExpr(KonohaContext *kctx, IRBuilder *self, kE
 	self->espidx = espidx;
 	self->a = a;
 
-	if (Method_isFinal(mtd) || !Method_isVirtual(mtd)) {
+	if (kMethod_is(Final, mtd) || !kMethod_is(Virtual, mtd)) {
 		ASM(NSET, NC_(thisidx-1), (intptr_t)mtd, CT_Method);
 	}
 	else {

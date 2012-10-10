@@ -90,6 +90,7 @@ struct _kSubproc {
 
 /* ------------------------------------------------------------------------ */
 /* [class defs] */
+
 #define CT_Subproc         cSubproc
 #define TY_Subproc         cSubproc->typeId
 #define IS_Subproc(O)      ((O)->h.ct == CT_Subproc)

@@ -145,7 +145,7 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 		}
 		kMethod *mtd = kNameSpace_getCastMethodNULL(kctx, Stmt_nameSpace(stmt), texpr->ty, reqty);
 		DBG_P("finding cast %s => %s: %p", TY_t(texpr->ty), TY_t(reqty), mtd);
-		if(mtd != NULL && (Method_isCoercion(mtd) || FLAG_is(pol, TPOL_COERCION))) {
+		if(mtd != NULL && (kMethod_is(Coercion, mtd) || FLAG_is(pol, TPOL_COERCION))) {
 			return new_TypedCallExpr(kctx, stmt, gma, reqty, mtd, 1, texpr);
 		}
 		return kStmtExpr_printMessage(kctx, stmt, expr, ErrTag, "%s is requested, but %s is given", TY_t(reqty), TY_t(texpr->ty));
@@ -298,7 +298,7 @@ static void kGamma_initParam(KonohaContext *kctx, GammaAllocaData *genv, kParam 
 		genv->localScope.varItems[i+1].fn = pa->paramtypeItems[i].fn;
 		genv->localScope.varItems[i+1].ty = pa->paramtypeItems[i].ty;
 	}
-	if(!Method_isStatic(genv->currentWorkingMethod)) {
+	if(!kMethod_is(Static, genv->currentWorkingMethod)) {
 		genv->localScope.varItems[0].fn = FN_this;
 		genv->localScope.varItems[0].ty = genv->this_cid;
 	}

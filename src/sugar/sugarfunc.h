@@ -662,7 +662,7 @@ static kExpr* kExpr_typedWithMethod(KonohaContext *kctx, kExpr *expr, kMethod *m
 		kExpr_typed(expr, CALL, thisExpr->ty);
 	}
 	else {
-		kExpr_typed(expr, CALL, Method_isSmartReturn(mtd) ? reqty : ktype_var(kctx, Method_returnType(mtd), CT_(thisExpr->ty)));
+		kExpr_typed(expr, CALL, kMethod_is(SmartReturn, mtd) ? reqty : ktype_var(kctx, Method_returnType(mtd), CT_(thisExpr->ty)));
 	}
 	return expr;
 }
@@ -701,7 +701,7 @@ static kExpr *kStmt_tyCheckCallParamExpr(KonohaContext *kctx, kStmt *stmt, kExpr
 		if(!Expr_isCONST(texpr)) isConst = 0;
 	}
 	expr = kExpr_typedWithMethod(kctx, expr, mtd, reqty);
-	if(isConst && Method_isConst(mtd)) {
+	if(isConst && kMethod_is(Const, mtd)) {
 		ktype_t rtype = ktype_var(kctx, pa->rtype, thisClass);
 		return kExprCall_toConstValue(kctx, expr, expr->cons, rtype);
 	}
@@ -746,12 +746,12 @@ static kExpr *kStmtExpr_lookupMethod(KonohaContext *kctx, kStmt *stmt, kExpr *ex
 		kStmtToken_printMessage(kctx, stmt, tkMN, ErrTag, "undefined %s: %s.%s%s", MethodType_t(kctx, tkMN->resolvedSymbol, psize), TY_t(this_cid), PSYM_t(tkMN->resolvedSymbol));
 	}
 	if(mtd != NULL) {
-		if(Method_isOverloaded(mtd)) {
+		if(kMethod_is(Overloaded, mtd)) {
 			DBG_P("found overloaded method %s.%s%s", Method_t(mtd));
 			mtd = kStmt_lookupOverloadedMethod(kctx, stmt, expr, mtd, gma);
 		}
 		if (mtd != NULL) {
-			DBG_P("found resolved method %s.%s%s isOverloaded=%d", Method_t(mtd), Method_isOverloaded(mtd));
+			DBG_P("found resolved method %s.%s%s isOverloaded=%d", Method_t(mtd), kMethod_is(Overloaded, mtd));
 			return kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, reqty);
 		}
 	}
@@ -836,7 +836,7 @@ static KMETHOD TypeCheck_FuncStyleCall(KonohaContext *kctx, KonohaStack *sfp)
 	if(Expr_isSymbolTerm(kExpr_at(expr, 0))) {
 		kMethod *mtd = Expr_lookUpFuncOrMethod(kctx, Stmt_nameSpace(stmt), expr, gma, reqty);
 		if(mtd != NULL) {
-			if(Method_isOverloaded(mtd)) {
+			if(kMethod_is(Overloaded, mtd)) {
 				DBG_P("overloaded found %s.%s%s", Method_t(mtd));
 				mtd = kStmt_lookupOverloadedMethod(kctx, stmt, expr, mtd, gma);
 			}

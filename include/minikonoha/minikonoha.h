@@ -1109,7 +1109,7 @@ struct kParamVar {
 static const char* MethodFlagData[] = {
 	"Public", "Virtual", "Final", "Const", "Static", "Immutable",
 	"Coercion", "Restricted", "FastCall", "SmartReturn", "Variadic",
-	"LibCompatible", "JSCompatible", "JavaCompatible",
+	"CCompatible", "JSCompatible", "JavaCompatible",
 };
 #endif
 
@@ -1129,7 +1129,7 @@ static const char* MethodFlagData[] = {
 #define kMethod_Variadic             ((uintptr_t)(1<<10))
 
 // compatible
-#define kMethod_LibCompatible        ((uintptr_t)(1<<11))
+#define kMethod_CCompatible        ((uintptr_t)(1<<11))
 #define kMethod_JSCompatible         ((uintptr_t)(1<<12))
 #define kMethod_JCompatible          ((uintptr_t)(1<<13))
 
@@ -1139,33 +1139,15 @@ static const char* MethodFlagData[] = {
 #define kMethod_Overloaded           ((uintptr_t)(1<<16))
 #define kMethod_Override             ((uintptr_t)(1<<17))
 #define kMethod_DynamicCall          ((uintptr_t)(1<<18))
+#define kMethod_Warning              ((uintptr_t)(1<<19))
+
+#define kMethod_WeakCoercion         kMethod_Coercion|kMethod_Warning
 
 #define kMethod_is(P, MTD)            (TFLAG_is(uintptr_t, (MTD)->flag, kMethod_##P))
 #define kMethod_set(P, MTD, B)        TFLAG_set(uintptr_t, ((kMethodVar*)MTD)->flag, kMethod_##P, B)
 
-#define Method_isPublic(o)       (TFLAG_is(uintptr_t, (o)->flag, kMethod_Public))
-//#define Method_setPublic(o,B)  TFLAG_set(uintptr_t, (o)->flag, kMethod_Public,B)
-#define Method_isHidden(o)       (TFLAG_is(uintptr_t, (o)->flag, kMethod_Hidden))
-//#define Method_setHidden(o,B)  TFLAG_set(uintptr_t, (o)->flag,kMethod_Hidden,B)
-#define Method_isStatic(o)       (TFLAG_is(uintptr_t, (o)->flag, kMethod_Static))
-#define Method_setStatic(o,B)    TFLAG_set(uintptr_t, (o)->flag, kMethod_Static,B)
-#define Method_isConst(o)        (TFLAG_is(uintptr_t, (o)->flag, kMethod_Const))
-#define Method_isOverride(o)     (TFLAG_is(uintptr_t, (o)->flag, kMethod_Override))
-
-#define Method_isVirtual(o)         (TFLAG_is(uintptr_t, (o)->flag,kMethod_Virtual))
-#define Method_isFinal(o)           (TFLAG_is(uintptr_t, (o)->flag,kMethod_Final))
-#define Method_setVirtual(o,B)      TFLAG_set(uintptr_t, ((kMethodVar*)o)->flag,kMethod_Virtual,B)
-
-#define Method_isOverloaded(o)      (TFLAG_is(uintptr_t,(o)->flag,kMethod_Overloaded))
-#define Method_setOverloaded(o,B)   TFLAG_set(uintptr_t,((kMethodVar*)o)->flag, kMethod_Overloaded, B)
-
-#define Method_isDynamicCall(o)     (TFLAG_is(uintptr_t, (o)->flag, kMethod_DynamicCall))
-#define Method_isFastCall(o)        (TFLAG_is(uintptr_t, (o)->flag, kMethod_FastCall))
-#define Method_isSmartReturn(o)     (TFLAG_is(uintptr_t, (o)->flag, kMethod_SmartReturn))
-
 #define Method_isTransCast(mtd)    MN_isTOCID(mtd->mn)
 #define Method_isCast(mtd)         MN_isASCID(mtd->mn)
-#define Method_isCoercion(mtd)    (TFLAG_is(uintptr_t, (mtd)->flag,kMethod_Coercion))
 
 #define Method_param(mtd)        kctx->share->paramList->paramItems[mtd->paramid]
 #define Method_returnType(mtd)   ((Method_param(mtd))->rtype)

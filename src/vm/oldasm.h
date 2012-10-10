@@ -619,7 +619,7 @@ static void CALL_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int s
 {
 	kMethod *mtd = expr->cons->methodItems[0];
 	DBG_ASSERT(IS_Method(mtd));
-	int i, s = Method_isStatic(mtd) ? 2 : 1, thisidx = espidx + K_CALLDELTA;
+	int i, s = kMethod_is(Static, mtd) ? 2 : 1, thisidx = espidx + K_CALLDELTA;
 #ifdef _CLASSICVM
 	if (CLASSICVM_CALL_asm(kctx, mtd, expr, shift, espidx)) {
 		return;
@@ -634,7 +634,7 @@ static void CALL_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int s
 //	if (mtd->mn == MN_new && mtd->invokeMethodFunc == MethodFunc_abstract) {
 //		/* do nothing */
 //	} else
-//	if(Method_isFinal(mtd) || !Method_isVirtual(mtd)) {
+//	if(kMethod_is(Final, mtd) || !kMethod_is(Virtual, mtd)) {
 //		if(mtd->invokeMethodFunc != MethodFunc_runVirtualMachine) {
 //		ASM(SCALL, ctxcode->uline, SFP_(thisidx), ESP_(espidx, argc), mtd, KLIB Knull(kctx, CT_(expr->ty)));
 //		}
@@ -643,7 +643,7 @@ static void CALL_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int s
 //		}
 //	}
 //	else {
-	if(Method_isFinal(mtd) || !Method_isVirtual(mtd)) {
+	if(kMethod_is(Final, mtd) || !kMethod_is(Virtual, mtd)) {
 		ASM(NSET, NC_(thisidx-1), (intptr_t)mtd, CT_Method);
 	}
 	else {
