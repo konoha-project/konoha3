@@ -107,6 +107,7 @@ set(PACKAGES
 	apache
 #	openssl
 #	logpool
+	gmp
 )
 
 set(PACKAGE_NAME    ${PROJECT_NAME})
