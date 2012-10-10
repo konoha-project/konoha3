@@ -1,2 +1,2 @@
- - (error) (ERROR_CStyleMacro.k:1) undefined operator: define
+ - (error) (ERROR_CStyleMacro.k:1) undefined syntax: #define ...
 Q.E.D.

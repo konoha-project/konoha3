@@ -1,2 +1,2 @@
- - (error) (ERROR_UndefinedOperator.k:2) undefined operator: ++
+ - (error) (ERROR_UndefinedOperator.k:2) undefined syntax: 1 ++ ...
 Q.E.D.

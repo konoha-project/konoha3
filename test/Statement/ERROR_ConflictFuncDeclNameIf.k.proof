@@ -1,2 +1,2 @@
- - (error) (ERROR_ConflictFuncDeclNameIf.k:3) undefined operator: if
+ - (error) (ERROR_ConflictFuncDeclNameIf.k:3) undefined syntax: int if ...
 Q.E.D.

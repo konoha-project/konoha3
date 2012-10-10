@@ -761,7 +761,7 @@ static kMethod* kNameSpace_getMethodBySignatureNULL(KonohaContext *kctx, kNameSp
 
 static kMethod* kMethod_replaceWith(KonohaContext *kctx, kMethodVar *oldMethod, kMethodVar *newMethod)
 {
-	if(Method_isOverride(newMethod)) {
+	if(kMethod_is(Override, newMethod)) {
 		kMethodVar tempMethod;
 		tempMethod = *oldMethod;
 		*oldMethod = *newMethod;

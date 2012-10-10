@@ -1,3 +1,3 @@
- - (error) (ERROR_IncrementalOperator.k:7) undefined operator: ++
+ - (error) (ERROR_IncrementalOperator.k:7) undefined syntax: i++ ...
  ** RuntimeScriptException (ERROR_IncrementalOperator.k:7)
 Q.E.D.

@@ -1,3 +1,3 @@
- - (error) (FuncDecl_UnknownParam.k:2) undefined operator: a
+ - (error) (FuncDecl_UnknownParam.k:2) undefined syntax: Unknown a ...
  - (error) (FuncDecl_UnknownParam.k:4) void is requested, but int is given
 Q.E.D.

@@ -1,2 +1,2 @@
- - (error) (ERROR_RightJoinOperator.k:2) undefined operator: ++
+ - (error) (ERROR_RightJoinOperator.k:2) undefined syntax: 1 ++ ...
 Q.E.D.
