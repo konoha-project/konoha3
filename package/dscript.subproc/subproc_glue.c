@@ -888,11 +888,8 @@ static KMETHOD Subproc_setFileIN(KonohaContext *kctx, KonohaStack *sfp)
 	subprocData_t *p = sp->spd;
 	int ret = PREEXEC(p);
 	if(ret) {
-		ret = (sfp[1].asObject != NULL);
-		if(ret) {
-			kFILE *kfile = (kFILE*)sfp[1].asObject;
-			setFd(kctx, &p->w, M_FILE, kfile->fp);
-		}
+		kFILE *kfile = (kFILE*)sfp[1].asObject;
+		setFd(kctx, &p->w, M_FILE, kfile->fp);
 	}
 	RETURNb_(ret);
 }
@@ -904,11 +901,8 @@ KMETHOD Subproc_setFileOUT(KonohaContext *kctx, KonohaStack *sfp)
 	subprocData_t *p = sp->spd;
 	int ret = PREEXEC(p);
 	if(ret) {
-		ret = (sfp[1].asObject != NULL);
-		if(ret) {
-			kFILE *kfile = (kFILE *)sfp[1].asObject;
-			setFd(kctx, &p->r, M_FILE, kfile->fp);
-		}
+		kFILE *kfile = (kFILE *)sfp[1].asObject;
+		setFd(kctx, &p->r, M_FILE, kfile->fp);
 	}
 	RETURNb_(ret);
 }
@@ -920,11 +914,8 @@ KMETHOD Subproc_setFileERR(KonohaContext *kctx, KonohaStack *sfp)
 	subprocData_t *p = sp->spd;
 	int ret = PREEXEC(p);
 	if(ret) {
-		ret = (sfp[1].asObject != NULL);
-		if(ret) {
 			kFILE *kfile = (kFILE *)sfp[1].asObject;
 			setFd(kctx, &p->e, M_FILE, kfile->fp);
-		}
 	}
 	RETURNb_(ret);
 }
