@@ -30,51 +30,10 @@
 extern "C" {
 #endif
 
-/*
-NOTE: mpz_t, mpf_t and mpq_t are pointer.
-*/
-
 typedef struct _kMpz {
 	KonohaObjectHeader h;
-	mpz_t mpz;
+	mpz_t mpz; // mpz_t is pointer
 } kMpz;
-
-//typedef struct _kMpf {
-//	KonohaObjectHeader h;
-//	mpf_t mpf;
-//} kMpf;
-//
-//typedef struct _kMpq {
-//	KonohaObjectHeader h;
-//	mpq_t mpq;
-//} kMpq;
-
-KonohaClass *cMpz = NULL;
-//KonohaClass *cMpf = NULL;
-//KonohaClass *cMpq = NULL;
-
-/* ------------------------------------------------------------------------ */
-
-#define _Public   kMethod_Public
-#define _Override kMethod_Override
-#define _Const    kMethod_Const
-#define _Coercion kMethod_Coercion
-#define _Im kMethod_Immutable
-#define _F(F)   (intptr_t)(F)
-
-#define CT_Mpz     cMpz
-#define TY_Mpz     cMpz->typeId
-#define IS_Mpz(O)  ((O)->h.ct == CT_Mpz)
-
-//#define CT_Mpf     cMpf
-//#define TY_Mpf     cMpf->typeId
-//#define IS_Mpf(O)  ((O)->h.ct == CT_Mpf)
-//
-//#define CT_Mpq     cMpq
-//#define TY_Mpq     cMpq->typeId
-//#define IS_Mpq(O)  ((O)->h.ct == CT_Mpq)
-//
-#define _KVi(T)  #T, TY_int, T
 
 /* ------------------------------------------------------------------------ */
 /* [API methods] */
@@ -132,9 +91,9 @@ static KMETHOD Mpz_new_str(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Mpz_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *self = (kMpz*)sfp[0].asObject;
-	char *buf = mpz_get_str(NULL, 10, self->mpz);
+	char *buf = ALLOCA(char, mpz_sizeinbase(self->mpz, 10));
+	mpz_get_str(buf, 10, self->mpz);
 	kObject * ret = (kObject*)KLIB new_kString(kctx, buf, strlen(buf), StringPolicy_ASCII);
-	free(buf);
 	RETURN_(ret);
 }
 
@@ -146,14 +105,14 @@ static KMETHOD Mpz_toInt(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Int_toMpz(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, CT_Mpz, 0);
+	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
 	mpz_set_si(ret->mpz, sfp[0].intValue);
 	RETURN_(ret);
 }
 
 static KMETHOD String_toMpz(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, CT_Mpz, 0);
+	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
 	const char *src  = S_text(sfp[0].s);
 	mpz_set_str(ret->mpz, src, 10);
 	RETURN_(ret);
@@ -162,11 +121,11 @@ static KMETHOD String_toMpz(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Mpz_getSize(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *self = (kMpz*)sfp[0].asObject;
-	char *buf = mpz_get_str(NULL, 10, self->mpz);
+	char *buf = ALLOCA(char, mpz_sizeinbase(self->mpz, 10));
+	mpz_get_str(buf, 10, self->mpz);
 	int size = strlen(buf);
-	free(buf);
 	if(mpz_cmp_si(self->mpz, 0) < 0){
-		RETURNi_(size - 1);
+		size -= 1;
 	}
 	RETURNi_(size);
 }
@@ -180,7 +139,7 @@ static KMETHOD Mpz_isEven(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Mpz_power(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *self = (kMpz*)sfp[0].asObject;
-	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, CT_Mpz, 0);
+	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
 	mpz_pow_ui(ret->mpz, self->mpz, sfp[1].intValue);
 	RETURN_(ret);
 }
@@ -217,27 +176,11 @@ static KMETHOD Mpz_opADD_int(KonohaContext *kctx, KonohaStack *sfp)
 	mpz_add_ui(ret->mpz, lhs->mpz, sfp[1].intValue);
 	RETURN_(ret);
 }
-/*
-static KMETHOD Mpz_opADDASSIGN(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kMpz *lhs = (kMpz*)sfp[0].asObject;
-	kMpz *rhs = (kMpz*)sfp[1].asObject;
-	mpz_add(lhs->mpz, lhs->mpz, rhs->mpz);
-	RETURN_(lhs);
-}
 
-static KMETHOD Mpz_opADDASSIGN_int(KonohaContext *kctx, KonohaStack *sfp)
-{
-	printf("+= int\n");
-	kMpz *lhs = (kMpz*)sfp[0].asObject;
-	mpz_add_ui(lhs->mpz, lhs->mpz, sfp[1].intValue);
-	RETURN_(lhs);
-}
-*/
 static KMETHOD Int_opADD_mpz(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *rhs = (kMpz*)sfp[1].asObject;
-	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, CT_Mpz, 0);
+	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
 	mpz_add_ui(ret->mpz, rhs->mpz, sfp[0].intValue);
 	RETURN_(ret);
 }
@@ -262,7 +205,7 @@ static KMETHOD Mpz_opSUB_int(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Int_opSUB_mpz(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *rhs = (kMpz*)sfp[1].asObject;
-	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, CT_Mpz, 0);
+	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
 	mpz_sub_ui(ret->mpz, rhs->mpz, sfp[0].intValue);
 	RETURN_(ret);
 }
@@ -287,7 +230,7 @@ static KMETHOD Mpz_opMUL_int(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Int_opMUL_mpz(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *rhs = (kMpz*)sfp[1].asObject;
-	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, CT_Mpz, 0);
+	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
 	mpz_mul_ui(ret->mpz, rhs->mpz, sfp[0].intValue);
 	RETURN_(ret);
 }
@@ -312,7 +255,7 @@ static KMETHOD Mpz_opMOD_int(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Int_opMOD_mpz(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *rhs = (kMpz*)sfp[1].asObject;
-	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, CT_Mpz, 0);
+	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
 	mpz_mod_ui(ret->mpz, rhs->mpz, sfp[0].intValue);
 	RETURN_(ret);
 }
@@ -337,7 +280,7 @@ static KMETHOD Mpz_opDIV_int(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Int_opDIV_mpz(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *rhs = (kMpz*)sfp[1].asObject;
-	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, CT_Mpz, 0);
+	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
 	mpz_tdiv_q_ui(ret->mpz, rhs->mpz, sfp[0].intValue);
 	RETURN_(ret);
 }
@@ -481,6 +424,14 @@ static KMETHOD Int_opNEQ_mpz(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ------------------------------------------------------------------------ */
 
+#define _Public   kMethod_Public
+#define _Override kMethod_Override
+#define _Const    kMethod_Const
+#define _F(F)   (intptr_t)(F)
+
+#define TY_Mpz     cMpz->typeId
+
+
 static kbool_t gmp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char **args, kfileline_t pline)
 {
 	static KDEFINE_CLASS MpzDef = {0};
@@ -490,21 +441,7 @@ static kbool_t gmp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	MpzDef.free  = Mpz_free;
 	MpzDef.p     = Mpz_p;
 
-	//static KDEFINE_CLASS MpfDef = {0};
-	//SETSTRUCTNAME(MpfDef, Mpf);
-	//MpfDef.cflag = kClass_Final;
-	//MpfDef.init = Mpf_init;
-	//MpfDef.free = Mpf_free;
-	
-	//static KDEFINE_CLASS MpqDef = {0};
-	//SETSTRUCTNAME(MpqDef, Mpq);// Mpz Mpz.%(Mpz)
-	//MpqDef.cflag = kClass_Final;
-	//MpqDef.init = Mpq_init;
-	//MpqDef.free = Mpq_free;
-	
-	cMpz = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MpzDef, pline);
-	//cMpf = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MpfDef, pline);
-	//cMpq = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MpqDef, pline);
+	KonohaClass *cMpz = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MpzDef, pline);
 
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
@@ -562,16 +499,7 @@ static kbool_t gmp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
-/*
-	KDEFINE_INT_CONST IntData[] = {
-			{_KVi(MECAB_NOR_NODE)},
-			{_KVi(MECAB_UNK_NODE)},
-			{_KVi(MECAB_BOS_NODE)},
-			{_KVi(MECAB_EOS_NODE)},
-			{}
-	};
-	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
-*/
+
 	return true;
 }
 
