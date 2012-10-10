@@ -275,6 +275,7 @@ static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
 			KSETv(ret, ret->objectItems[i], lsfp[0].o);
 		}
 	}
+	kArray_setsize(ret, asize);
 	RETURN_(ret);
 }
 
