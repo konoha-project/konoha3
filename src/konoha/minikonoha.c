@@ -78,9 +78,7 @@ static void KonohaStackRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx, 
 	}
 	KUnsafeFieldInit(base->gcstack, new_(Array, K_PAGESIZE/sizeof(void*)));
 	KLIB Karray_init(kctx, &base->cwb, K_PAGESIZE * 4);
-	KLIB Karray_init(kctx, &base->ref, K_PAGESIZE);
 	KUnsafeFieldInit(base->optionalErrorMessage, TS_EMPTY);
-	base->reftail = base->ref.refhead;
 	ctx->esp = base->stack;
 	ctx->stack = base;
 }
@@ -104,7 +102,6 @@ static void KonohaStackRuntime_free(KonohaContext *kctx, KonohaContextVar *ctx)
 		KFREE(ctx->stack->evaljmpbuf, sizeof(jmpbuf_i));
 	}
 	KLIB Karray_free(kctx, &ctx->stack->cwb);
-	KLIB Karray_free(kctx, &ctx->stack->ref);
 	KFREE(ctx->stack->stack, sizeof(KonohaStack) * ctx->stack->stacksize);
 	KFREE(ctx->stack, sizeof(KonohaStackRuntimeVar));
 }

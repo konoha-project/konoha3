@@ -650,8 +650,6 @@ struct KonohaStackRuntimeVar {
 	kshortflag_t               flag;
 	KonohaContext             *rootctx;
 	void*                      cstack_bottom;  // for GC
-	KUtilsGrowingArray         ref;   // reftrace
-	kObjectVar**               reftail;
 	ktype_t                    evalty;
 	kushort_t                  evalidx;
 	kfileline_t                thrownScriptLine;
@@ -1390,7 +1388,6 @@ struct KonohaLibVar {
 	bool (*KisObject)   (GcContext *gc, void *ptr);
 	void (*KvisitObject)(struct kObjectVisitor *visitor, struct kObjectVar *obj);
 
-	kObjectVar **(*Kobject_reftail)(KonohaContext *, size_t size);
 	void  (*Kwrite_barrier)(KonohaContext *, kObject *);
 	void  (*KupdateObjectField)(kObject *parent, kObject *oldPtr, kObject *newVal);
 
