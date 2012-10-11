@@ -1576,34 +1576,6 @@ static void mark_mstack(HeapManager *mng, kObject *o, MarkStack *mstack)
 	}
 }
 
-#ifdef USE_GENERATIONAL_GC
-static void RememberSet_add(kObject *o)
-{
-	uintptr_t addr   = ((uintptr_t)o & ~(SEGMENT_SIZE - 1UL));
-	uintptr_t offset = ((uintptr_t)o &  (SEGMENT_SIZE - 1UL)) >> SUBHEAP_KLASS_MIN;
-	BlockHeader *head = (BlockHeader*) addr;
-	bitmap_t *map = head->remember_set;
-#ifdef DEBUG_WRITE_BARRIER
-	int ret = bitmap_get(map+(offset/BITS), offset%BITS);
-	if (ret == 0 && Object_isTenure(o)) {
-		fprintf(stderr, "W %p\n", o);
-	}
-#endif
-	bitmap_set(map+(offset/BITS), offset%BITS, Object_isTenure(o));
-}
-
-static void Kwrite_barrier(KonohaContext *kctx, kObject *parent)
-{
-#ifdef USE_GENERATIONAL_GC
-	RememberSet_add(parent);
-#endif
-}
-
-static void KupdateObjectField(kObject *parent, kObject *oldValPtr, kObject *newVal)
-{
-	Kwrite_barrier(NULL, parent);
-}
-
 typedef struct ObjectGraphTracer {
 	kObjectVisitor base;
 	HeapManager  *mng;
@@ -1625,6 +1597,36 @@ static void ObjectGraphTracer_visitRange(kObjectVisitor *visitor, kObject **begi
 	}
 }
 
+#ifdef USE_GENERATIONAL_GC
+static void RememberSet_add(kObject *o)
+{
+	uintptr_t addr   = ((uintptr_t)o & ~(SEGMENT_SIZE - 1UL));
+	uintptr_t offset = ((uintptr_t)o &  (SEGMENT_SIZE - 1UL)) >> SUBHEAP_KLASS_MIN;
+	BlockHeader *head = (BlockHeader*) addr;
+	bitmap_t *map = head->remember_set;
+#ifdef DEBUG_WRITE_BARRIER
+	int ret = bitmap_get(map+(offset/BITS), offset%BITS);
+	if (ret == 0 && Object_isTenure(o)) {
+		fprintf(stderr, "W %p\n", o);
+	}
+#endif
+	bitmap_set(map+(offset/BITS), offset%BITS, Object_isTenure(o));
+}
+#endif
+
+static void Kwrite_barrier(KonohaContext *kctx, kObject *parent)
+{
+#ifdef USE_GENERATIONAL_GC
+	RememberSet_add(parent);
+#endif
+}
+
+static void KupdateObjectField(kObject *parent, kObject *oldValPtr, kObject *newVal)
+{
+	Kwrite_barrier(NULL, parent);
+}
+
+#ifdef USE_GENERATIONAL_GC
 static void RememberSet_reftrace(KonohaContext *kctx, HeapManager *mng, kObjectVisitor *visitor)
 {
 	size_t i;
