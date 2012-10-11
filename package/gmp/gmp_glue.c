@@ -262,13 +262,18 @@ static KMETHOD Int_opMOD_mpz(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(ret);
 }
 
+static void THROW_ZeroDividedException(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].uline, NULL);
+}
+
 static KMETHOD Mpz_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *lhs = (kMpz*)sfp[0].asObject;
 	kMpz *rhs = (kMpz*)sfp[1].asObject;
 	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(lhs), 0);
-	if(mpz_sgn(rhs->mpz) == 0){
-
+	if(unlikely(mpz_sgn(rhs->mpz) == 0)){
+		THROW_ZeroDividedException(kctx, sfp);
 	}else{
 		mpz_tdiv_q(ret->mpz, lhs->mpz, rhs->mpz);
 	}
@@ -280,7 +285,8 @@ static KMETHOD Mpz_opDIV_int(KonohaContext *kctx, KonohaStack *sfp)
 	kMpz  *lhs = (kMpz*)sfp[0].asObject;
 	kint_t rhs = sfp[1].intValue;
 	kMpz  *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(lhs), 0);
-	if(rhs == 0){
+	if(unlikely(rhs == 0)){
+		THROW_ZeroDividedException(kctx, sfp);
 	}else{
 		mpz_tdiv_q_ui(ret->mpz, lhs->mpz, rhs);
 	}
@@ -291,8 +297,8 @@ static KMETHOD Int_opDIV_mpz(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *rhs = (kMpz*)sfp[1].asObject;
 	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(rhs), 0);
-	if(mpz_sgn(rhs->mpz) == 0){
-
+	if(unlikely(mpz_sgn(rhs->mpz) == 0)){
+		THROW_ZeroDividedException(kctx, sfp);
 	}else{
 		mpz_set_si(ret->mpz, sfp[0].intValue);
 		mpz_tdiv_q(ret->mpz, ret->mpz, rhs->mpz);
@@ -442,6 +448,7 @@ static KMETHOD Int_opNEQ_mpz(KonohaContext *kctx, KonohaStack *sfp)
 #define _Public   kMethod_Public
 #define _Im       kMethod_Immutable
 #define _Const    kMethod_Const
+#define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
 #define TY_Mpz     cMpz->typeId
@@ -464,10 +471,10 @@ static kbool_t gmp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		_Public|_Const,     _F(Mpz_new_mpz),    TY_Mpz,     TY_Mpz, MN_("new"), 1, TY_Mpz, FN_x,
 		_Public|_Const,     _F(Mpz_new_int),    TY_Mpz,     TY_Mpz, MN_("new"), 1, TY_int, FN_x,
 		_Public|_Const,     _F(Mpz_new_str),    TY_Mpz,     TY_Mpz, MN_("new"), 1, TY_String, FN_x,
-		_Public|_Im|_Const, _F(Mpz_toString),   TY_String,  TY_Mpz, MN_to(TY_String),   0,
-		_Public|_Im|_Const, _F(Mpz_toInt),      TY_int,     TY_Mpz, MN_to(TY_int),   0,
-		_Public|_Im|_Const, _F(Int_toMpz),      TY_Mpz,     TY_int, MN_to(TY_Mpz),   0,
-		_Public|_Im|_Const, _F(String_toMpz),   TY_Mpz,     TY_String, MN_to(TY_Mpz),   0,
+		_Public|_Im|_Const|_Coercion, _F(Mpz_toString),   TY_String,  TY_Mpz, MN_to(TY_String),   0,
+		_Public|_Im|_Const|_Coercion, _F(Mpz_toInt),      TY_int,     TY_Mpz, MN_to(TY_int),   0,
+		_Public|_Im|_Const|_Coercion, _F(Int_toMpz),      TY_Mpz,     TY_int, MN_to(TY_Mpz),   0,
+		_Public|_Im|_Const|_Coercion, _F(String_toMpz),   TY_Mpz,     TY_String, MN_to(TY_Mpz),   0,
 		_Public|_Im|_Const, _F(Mpz_getSize),    TY_int,     TY_Mpz, MN_("getsize"), 0,
 		_Public|_Im|_Const, _F(Mpz_isEven),     TY_boolean, TY_Mpz, MN_("isEven"), 0,
 		_Public|_Im|_Const, _F(Mpz_power),      TY_Mpz,     TY_Mpz, MN_("power"), 1, TY_int, FN_x,
