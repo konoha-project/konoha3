@@ -104,9 +104,9 @@
 #undef PACKAGE_NAME
 #undef PACKAGE_STRING
 #undef PACKAGE_VERSION
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/float.h>
+#include "minikonoha/minikonoha.h"
+#include "minikonoha/sugar.h"
+#include "minikonoha/float.h"
 #include <stdio.h>
 
 struct kRawPtr {
