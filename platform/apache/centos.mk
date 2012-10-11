@@ -18,7 +18,7 @@ DEFS=-DK_INTERNAL=1
 #INCLUDES=-Imy/include/dir
 #LIBS=-Lmy/lib/dir -lmylib
 CFLAGS=-g0 -O2 -W -Wall
-LDFLAGS=-ljson -lkonoha
+LDFLAGS=-lminikonoha
 
 #   the default target
 all: local-shared-build

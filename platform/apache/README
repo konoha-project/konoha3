@@ -18,7 +18,7 @@ konoha apache module.
 
 [Example]
 * Create /path/to/document_root/hello.k
-  K.import("apache");
+  import("apache");
   
   @Public int System.handler(Request r) {
       r.puts("<strong>hello world!</strong>")
