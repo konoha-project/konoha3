@@ -203,10 +203,11 @@ static KMETHOD Mpz_opSUB_int(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 static KMETHOD Int_opSUB_mpz(KonohaContext *kctx, KonohaStack *sfp)
-{
+{	
 	kMpz *rhs = (kMpz*)sfp[1].asObject;
 	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
-	mpz_sub_ui(ret->mpz, rhs->mpz, sfp[0].intValue);
+	mpz_set_si(ret->mpz, sfp[0].intValue);
+	mpz_sub(ret->mpz, ret->mpz, rhs->mpz);
 	RETURN_(ret);
 }
 
@@ -256,8 +257,14 @@ static KMETHOD Int_opMOD_mpz(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *rhs = (kMpz*)sfp[1].asObject;
 	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
-	mpz_mod_ui(ret->mpz, rhs->mpz, sfp[0].intValue);
+	mpz_set_si(ret->mpz, sfp[0].intValue);
+	mpz_mod(ret->mpz, ret->mpz, rhs->mpz);
 	RETURN_(ret);
+}
+
+static void THROW_ZeroDividedException(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].uline, NULL);
 }
 
 static KMETHOD Mpz_opDIV(KonohaContext *kctx, KonohaStack *sfp)
@@ -265,23 +272,37 @@ static KMETHOD Mpz_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 	kMpz *lhs = (kMpz*)sfp[0].asObject;
 	kMpz *rhs = (kMpz*)sfp[1].asObject;
 	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(lhs), 0);
-	mpz_tdiv_q(ret->mpz, lhs->mpz, rhs->mpz);
+	if(unlikely(mpz_sgn(rhs->mpz) == 0)){
+		THROW_ZeroDividedException(kctx, sfp);
+	}else{
+		mpz_tdiv_q(ret->mpz, lhs->mpz, rhs->mpz);
+	}
 	RETURN_(ret);
 }
 
 static KMETHOD Mpz_opDIV_int(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kMpz *lhs = (kMpz*)sfp[0].asObject;
-	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(lhs), 0);
-	mpz_tdiv_q_ui(ret->mpz, lhs->mpz, sfp[1].intValue);
+	kMpz  *lhs = (kMpz*)sfp[0].asObject;
+	kint_t rhs = sfp[1].intValue;
+	kMpz  *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(lhs), 0);
+	if(unlikely(rhs == 0)){
+		THROW_ZeroDividedException(kctx, sfp);
+	}else{
+		mpz_tdiv_q_ui(ret->mpz, lhs->mpz, rhs);
+	}
 	RETURN_(ret);
 }
 
 static KMETHOD Int_opDIV_mpz(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *rhs = (kMpz*)sfp[1].asObject;
-	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
-	mpz_tdiv_q_ui(ret->mpz, rhs->mpz, sfp[0].intValue);
+	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(rhs), 0);
+	if(unlikely(mpz_sgn(rhs->mpz) == 0)){
+		THROW_ZeroDividedException(kctx, sfp);
+	}else{
+		mpz_set_si(ret->mpz, sfp[0].intValue);
+		mpz_tdiv_q(ret->mpz, ret->mpz, rhs->mpz);
+	}
 	RETURN_(ret);
 }
 
@@ -425,8 +446,9 @@ static KMETHOD Int_opNEQ_mpz(KonohaContext *kctx, KonohaStack *sfp)
 /* ------------------------------------------------------------------------ */
 
 #define _Public   kMethod_Public
-#define _Override kMethod_Override
+#define _Im       kMethod_Immutable
 #define _Const    kMethod_Const
+#define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
 #define TY_Mpz     cMpz->typeId
@@ -445,57 +467,55 @@ static kbool_t gmp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Override|_Const, _F(Mpz_new),            TY_Mpz,    TY_Mpz, MN_("new"), 0,
-		_Public|_Override|_Const, _F(Mpz_new_mpz),        TY_Mpz,    TY_Mpz, MN_("new"), 1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Mpz_new_int),        TY_Mpz,    TY_Mpz, MN_("new"), 1, TY_int, FN_x,
-		_Public|_Override|_Const, _F(Mpz_new_str),        TY_Mpz,    TY_Mpz, MN_("new"), 1, TY_String, FN_x,
-		_Public|_Const,           _F(Mpz_toString),       TY_String, TY_Mpz, MN_to(TY_String),   0,
-		_Public|_Const,           _F(Mpz_toInt),          TY_int,    TY_Mpz, MN_to(TY_int),   0,
-		_Public|_Const,           _F(Int_toMpz),          TY_Mpz,    TY_int, MN_to(TY_Mpz),   0,
-		_Public|_Const,           _F(String_toMpz),       TY_Mpz,    TY_String, MN_to(TY_Mpz),   0,
-		_Public|_Const,           _F(Mpz_getSize),        TY_int,    TY_Mpz, MN_("getsize"), 0,
-		_Public|_Const,           _F(Mpz_isEven),         TY_boolean,TY_Mpz, MN_("isEven"), 0,
-		_Public|_Const,           _F(Mpz_power),          TY_Mpz,    TY_Mpz, MN_("power"), 1, TY_int, FN_x,
-		_Public|_Const,           _F(Mpz_opMINUS),        TY_Mpz,    TY_Mpz, MN_("-"),   0,
-		_Public|_Const,           _F(Mpz_abs),            TY_Mpz,    TY_Mpz, MN_("abs"), 0,
-		_Public|_Override|_Const, _F(Mpz_opADD),          TY_Mpz,    TY_Mpz, MN_("+"),   1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opADD_int),      TY_Mpz,    TY_Mpz, MN_("+"),   1, TY_int, FN_x,
-		//_Public|_Override|_Const, _F(Mpz_opADDASSIGN),    TY_Mpz,    TY_Mpz, MN_("+="),  1, TY_Mpz, FN_x,
-		//_Public|_Override|_Const, _F(Mpz_opADDASSIGN_int),TY_Mpz,    TY_Mpz, MN_("+="),  1, TY_int, FN_x,
-		_Public|_Override|_Const, _F(Int_opADD_mpz),      TY_Mpz,    TY_int, MN_("+"),   1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opSUB),          TY_Mpz,    TY_Mpz, MN_("-"),   1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opSUB_int),      TY_Mpz,    TY_Mpz, MN_("-"),   1, TY_int, FN_x,
-		_Public|_Override|_Const, _F(Int_opSUB_mpz),      TY_Mpz,    TY_int, MN_("-"),   1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opMUL),          TY_Mpz,    TY_Mpz, MN_("*"),   1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opMUL_int),      TY_Mpz,    TY_Mpz, MN_("*"),   1, TY_int, FN_x,
-		_Public|_Override|_Const, _F(Int_opMUL_mpz),      TY_Mpz,    TY_int, MN_("*"),   1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opMOD),          TY_Mpz,    TY_Mpz, MN_("%"),   1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opMOD_int),      TY_Mpz,    TY_Mpz, MN_("%"),   1, TY_int, FN_x,
-		_Public|_Override|_Const, _F(Int_opMOD_mpz),      TY_Mpz,    TY_int, MN_("%"),   1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opDIV),          TY_Mpz,    TY_Mpz, MN_("/"),   1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opDIV_int),      TY_Mpz,    TY_Mpz, MN_("/"),   1, TY_int, FN_x,
-		_Public|_Override|_Const, _F(Int_opDIV_mpz),      TY_Mpz,    TY_int, MN_("/"),   1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opAND),          TY_Mpz,    TY_Mpz, MN_("&"),   1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opOR),           TY_Mpz,    TY_Mpz, MN_("|"),   1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opXOR),          TY_Mpz,    TY_Mpz, MN_("^"),   1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opLT),           TY_boolean,TY_Mpz, MN_("<"),   1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opGT),           TY_boolean,TY_Mpz, MN_(">"),   1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opEQ),           TY_boolean,TY_Mpz, MN_("=="),  1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opLTEQ),         TY_boolean,TY_Mpz, MN_("<="),  1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opGTEQ),         TY_boolean,TY_Mpz, MN_(">="),  1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opNEQ),          TY_boolean,TY_Mpz, MN_("!="),  1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opLT_int),       TY_boolean,TY_Mpz, MN_("<"),   1, TY_int, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opGT_int),       TY_boolean,TY_Mpz, MN_(">"),   1, TY_int, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opEQ_int),       TY_boolean,TY_Mpz, MN_("=="),  1, TY_int, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opLTEQ_int),     TY_boolean,TY_Mpz, MN_("<="),  1, TY_int, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opGTEQ_int),     TY_boolean,TY_Mpz, MN_(">="),  1, TY_int, FN_x,
-		_Public|_Override|_Const, _F(Mpz_opNEQ_int),      TY_boolean,TY_Mpz, MN_("!="),  1, TY_int, FN_x,
-		_Public|_Override|_Const, _F(Int_opLT_mpz),       TY_boolean,TY_int, MN_("<"),   1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Int_opGT_mpz),       TY_boolean,TY_int, MN_(">"),   1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Int_opEQ_mpz),       TY_boolean,TY_int, MN_("=="),  1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Int_opLTEQ_mpz),     TY_boolean,TY_int, MN_("<="),  1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Int_opGTEQ_mpz),     TY_boolean,TY_int, MN_(">="),  1, TY_Mpz, FN_x,
-		_Public|_Override|_Const, _F(Int_opNEQ_mpz),      TY_boolean,TY_int, MN_("!="),  1, TY_Mpz, FN_x,
+		_Public|_Const,     _F(Mpz_new),        TY_Mpz,	    TY_Mpz, MN_("new"), 0,
+		_Public|_Const,     _F(Mpz_new_mpz),    TY_Mpz,     TY_Mpz, MN_("new"), 1, TY_Mpz, FN_x,
+		_Public|_Const,     _F(Mpz_new_int),    TY_Mpz,     TY_Mpz, MN_("new"), 1, TY_int, FN_x,
+		_Public|_Const,     _F(Mpz_new_str),    TY_Mpz,     TY_Mpz, MN_("new"), 1, TY_String, FN_x,
+		_Public|_Im|_Const|_Coercion, _F(Mpz_toString),   TY_String,  TY_Mpz, MN_to(TY_String),   0,
+		_Public|_Im|_Const|_Coercion, _F(Mpz_toInt),      TY_int,     TY_Mpz, MN_to(TY_int),   0,
+		_Public|_Im|_Const|_Coercion, _F(Int_toMpz),      TY_Mpz,     TY_int, MN_to(TY_Mpz),   0,
+		_Public|_Im|_Const|_Coercion, _F(String_toMpz),   TY_Mpz,     TY_String, MN_to(TY_Mpz),   0,
+		_Public|_Im|_Const, _F(Mpz_getSize),    TY_int,     TY_Mpz, MN_("getsize"), 0,
+		_Public|_Im|_Const, _F(Mpz_isEven),     TY_boolean, TY_Mpz, MN_("isEven"), 0,
+		_Public|_Im|_Const, _F(Mpz_power),      TY_Mpz,     TY_Mpz, MN_("power"), 1, TY_int, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opMINUS),    TY_Mpz,     TY_Mpz, MN_("-"),   0,
+		_Public|_Im|_Const, _F(Mpz_abs),        TY_Mpz,     TY_Mpz, MN_("abs"), 0,
+		_Public|_Im|_Const, _F(Mpz_opADD),      TY_Mpz,     TY_Mpz, MN_("+"),   1, TY_Mpz, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opADD_int),  TY_Mpz,     TY_Mpz, MN_("+"),   1, TY_int, FN_x,
+		_Public|_Im|_Const, _F(Int_opADD_mpz),  TY_Mpz,     TY_int, MN_("+"),   1, TY_Mpz, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opSUB),      TY_Mpz,     TY_Mpz, MN_("-"),   1, TY_Mpz, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opSUB_int),  TY_Mpz,     TY_Mpz, MN_("-"),   1, TY_int, FN_x,
+		_Public|_Im|_Const, _F(Int_opSUB_mpz),  TY_Mpz,     TY_int, MN_("-"),   1, TY_Mpz, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opMUL),      TY_Mpz,     TY_Mpz, MN_("*"),   1, TY_Mpz, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opMUL_int),  TY_Mpz,     TY_Mpz, MN_("*"),   1, TY_int, FN_x,
+		_Public|_Im|_Const, _F(Int_opMUL_mpz),  TY_Mpz,     TY_int, MN_("*"),   1, TY_Mpz, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opMOD),      TY_Mpz,     TY_Mpz, MN_("%"),   1, TY_Mpz, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opMOD_int),  TY_Mpz,     TY_Mpz, MN_("%"),   1, TY_int, FN_x,
+		_Public|_Im|_Const, _F(Int_opMOD_mpz),  TY_Mpz,     TY_int, MN_("%"),   1, TY_Mpz, FN_x,
+		_Public|_Im       , _F(Mpz_opDIV),      TY_Mpz,     TY_Mpz, MN_("/"),   1, TY_Mpz, FN_x,
+		_Public|_Im       , _F(Mpz_opDIV_int),  TY_Mpz,     TY_Mpz, MN_("/"),   1, TY_int, FN_x,
+		_Public|_Im       , _F(Int_opDIV_mpz),  TY_Mpz,     TY_int, MN_("/"),   1, TY_Mpz, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opAND),      TY_Mpz,     TY_Mpz, MN_("&"),   1, TY_Mpz, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opOR),       TY_Mpz,     TY_Mpz, MN_("|"),   1, TY_Mpz, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opXOR),      TY_Mpz,     TY_Mpz, MN_("^"),   1, TY_Mpz, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opLT),       TY_boolean, TY_Mpz, MN_("<"),   1, TY_Mpz, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opGT),       TY_boolean, TY_Mpz, MN_(">"),   1, TY_Mpz, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opEQ),       TY_boolean, TY_Mpz, MN_("=="),  1, TY_Mpz, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opLTEQ),     TY_boolean, TY_Mpz, MN_("<="),  1, TY_Mpz, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opGTEQ),     TY_boolean, TY_Mpz, MN_(">="),  1, TY_Mpz, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opNEQ),      TY_boolean, TY_Mpz, MN_("!="),  1, TY_Mpz, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opLT_int),   TY_boolean, TY_Mpz, MN_("<"),   1, TY_int, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opGT_int),   TY_boolean, TY_Mpz, MN_(">"),   1, TY_int, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opEQ_int),   TY_boolean, TY_Mpz, MN_("=="),  1, TY_int, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opLTEQ_int), TY_boolean, TY_Mpz, MN_("<="),  1, TY_int, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opGTEQ_int), TY_boolean, TY_Mpz, MN_(">="),  1, TY_int, FN_x,
+		_Public|_Im|_Const, _F(Mpz_opNEQ_int),  TY_boolean, TY_Mpz, MN_("!="),  1, TY_int, FN_x,
+		_Public|_Im|_Const, _F(Int_opLT_mpz),   TY_boolean, TY_int, MN_("<"),   1, TY_Mpz, FN_x,
+		_Public|_Im|_Const, _F(Int_opGT_mpz),   TY_boolean, TY_int, MN_(">"),   1, TY_Mpz, FN_x,
+		_Public|_Im|_Const, _F(Int_opEQ_mpz),   TY_boolean, TY_int, MN_("=="),  1, TY_Mpz, FN_x,
+		_Public|_Im|_Const, _F(Int_opLTEQ_mpz), TY_boolean, TY_int, MN_("<="),  1, TY_Mpz, FN_x,
+		_Public|_Im|_Const, _F(Int_opGTEQ_mpz), TY_boolean, TY_int, MN_(">="),  1, TY_Mpz, FN_x,
+		_Public|_Im|_Const, _F(Int_opNEQ_mpz),  TY_boolean, TY_int, MN_("!="),  1, TY_Mpz, FN_x,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
