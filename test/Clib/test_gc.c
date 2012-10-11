@@ -155,7 +155,7 @@ static uintptr_t myffs(uintptr_t val)
 static void test_bitops()
 {
 	static const uintptr_t test_data[] = {
-		0, 1, 2, 3, 4, 5, 7, 13,
+		-1, 1, 2, 3, 4, 5, 7, 13,
 		100, 108, 120, 128, 129, 219, 250, 256,
 		257, 300, 420, 510, 512, 513, 1000, 1023,
 		1024, 2040, 2048, 2049, 4095, 4096, 4097, 8190,
@@ -163,15 +163,18 @@ static void test_bitops()
 	};
 
 	static const uintptr_t clz_test[] = {
-		63, 63, 62, 62, 61, 61, 61, 60,
+		0, 63, 62, 62, 61, 61, 61, 60,
 		57, 57, 57, 56, 56, 56, 56, 55,
 		55, 55, 55, 55, 54, 54, 54, 54,
 		53, 53, 52, 52, 52, 51, 51, 51,
 		50, 50, 50, 49, 49, 49, 48, 48
 	};
 	uintptr_t i;
-	for (i = 0; i < sizeof(test_data)/sizeof(uintptr_t); i++) {
-		assert((uintptr_t)CLZ(test_data[i]) == (clz_test[i] - ((sizeof(void*)*8/64>=1)?0:32)));
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
+	for (i = 0; i < ARRAY_SIZE(test_data); i++) {
+		int test   = CLZ(test_data[i]);
+		int answer = (clz_test[i]);
+		assert(test == answer);
 		assert(FFS(test_data[i]) == myffs(test_data[i]));
 	}
 }
