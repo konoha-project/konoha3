@@ -24,6 +24,17 @@ void main() {
 
 	assert((10).toMpz().power(100).size == 101);
 	assert(n4.isEven());
+
+	Mpz m6 = (6).toMpz();
+	Mpz m2 = (2).toMpz();
+	Mpz m3 = (3).toMpz();
+
+	assert(m6 / 2  == 3);
+	assert(m6 / m2 == 3);
+	assert(m6 / m2 == m3);
+	assert(6  / m2 == m3);
+	assert(6  / 2  == m3);
+	assert(6  / m2 == 3);
 }
 
 main();
