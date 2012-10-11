@@ -59,6 +59,7 @@ set(PACKAGES
 	konoha.break
 	konoha.bytes
 	konoha.class
+	konoha.closure
 	konoha.complex
 	konoha.const
 	konoha.continue
@@ -107,7 +108,7 @@ set(PACKAGES
 	apache
 #	openssl
 #	logpool
-	gmp
+#	gmp
 )
 
 set(PACKAGE_NAME    ${PROJECT_NAME})

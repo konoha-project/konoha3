@@ -223,6 +223,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kNameSpace_defineSyntax    = kNameSpace_defineSyntax;
 	mod->kNameSpace_getSyntax       = kNameSpace_getSyntax;
 	mod->kArray_addSyntaxRule       = kArray_addSyntaxPattern;
+	mod->SugarSyntax_tyCheckStmt    = SugarSyntax_tyCheckStmt;
 	mod->kNameSpace_setSugarFunc    = kNameSpace_setSugarFunc;
 	mod->kNameSpace_addSugarFunc    = kNameSpace_addSugarFunc;
 	mod->new_kBlock                 = new_kBlock;
@@ -230,6 +231,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kBlock_insertAfter         = kBlock_insertAfter;
 	mod->new_UntypedTermExpr        = new_UntypedTermExpr;
 	mod->new_UntypedCallStyleExpr   = new_UntypedCallStyleExpr;
+	mod->new_TypedConsExpr          = new_TypedConsExpr;
 	mod->kStmt_parseOperatorExpr    = kStmt_parseOperatorExpr;
 	mod->kStmt_parseExpr            = kStmt_parseExpr;
 	mod->kStmt_addExprParam         = kStmt_addExprParam;

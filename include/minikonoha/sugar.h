@@ -394,6 +394,7 @@ typedef enum {
 	TSTMT_LOOP,
 	TSTMT_JUMP,
 	TSTMT_TRY,
+	TSTMT_CLOSURE,
 
 	TSTMT_ERR   // this must be last
 } kvisit_t;
@@ -544,6 +545,7 @@ typedef struct {
 	SugarSyntax*    (*kNameSpace_getSyntax)(KonohaContext *, kNameSpace *, ksymbol_t, int);
 	void            (*kNameSpace_defineSyntax)(KonohaContext *, kNameSpace *, KDEFINE_SYNTAX *, kNameSpace *packageNameSpace);
 	kbool_t         (*kArray_addSyntaxRule)(KonohaContext *, kArray *ruleList, TokenSequence *sourceRange);
+	kbool_t         (*SugarSyntax_tyCheckStmt)(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, kGamma *gma);
 	SugarSyntaxVar* (*kNameSpace_setTokenFunc)(KonohaContext *, kNameSpace *, ksymbol_t, int ch, kFunc *);
 	SugarSyntaxVar* (*kNameSpace_setSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
 	SugarSyntaxVar* (*kNameSpace_addSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
@@ -570,6 +572,7 @@ typedef struct {
 
 	kExpr*       (*new_UntypedTermExpr)(KonohaContext *, kToken *tk);
 	kExpr*       (*new_UntypedCallStyleExpr)(KonohaContext *, SugarSyntax *syn, int n, ...);
+	kExpr*       (*new_TypedConsExpr)(KonohaContext *, SugarSyntax *syn, int n, ...);
 	kExpr*       (*kStmt_parseOperatorExpr)(KonohaContext *, kStmt *, SugarSyntax *, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx);
 	kExpr*       (*kStmt_parseExpr)(KonohaContext *, kStmt *, kArray *tokenList, int s, int e, const char *hintBeforeText);
 	kExpr*       (*kStmt_addExprParam)(KonohaContext *, kStmt *, kExpr *, kArray *tokenList, int, int, const char *hintBeforeText);
