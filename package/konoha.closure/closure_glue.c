@@ -98,12 +98,11 @@ static KMETHOD Expression_Closure(KonohaContext *kctx, KonohaStack *sfp)
 	 * beginIdx+4 : $Block
 	 */
 	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
-	printf("beginIdx: %d, operatorIdx: %d, endIdx: %d\n", beginIdx, operatorIdx, endIdx);
 	int nextIdx = TokenUtils_skipIndent(tokenList, beginIdx+1, kArray_size(tokenList));
 	kToken* tk = tokenList->tokenItems[nextIdx];
-	//if (tk->resolvedSyntaxInfo->keyword != KW_ParenthesisGroup) {
-	//	RETURN_(kStmt_printMessage(kctx, stmt, ErrTag, "expected parameter after 'function'"));
-	//}
+	if (tk->resolvedSyntaxInfo->keyword != KW_ParenthesisGroup) {
+		RETURN_(kStmt_printMessage(kctx, stmt, ErrTag, "expected parameter after 'function'"));
+	}
 	kArray *paramTokenList = tk->subTokenList;
 	TokenSequence param = {Stmt_nameSpace(stmt), paramTokenList, 0, kArray_size(paramTokenList)};
 	TokenSequence_checkCStyleParam(kctx, &param);
@@ -131,16 +130,17 @@ static KMETHOD Expression_Closure(KonohaContext *kctx, KonohaStack *sfp)
 	nextIdx = TokenUtils_skipIndent(tokenList, nextIdx+1, kArray_size(tokenList));
 	KonohaClass *retClass = NULL;
 	nextIdx = SUGAR TokenUtils_parseTypePattern(kctx, Stmt_nameSpace(stmt), tokenList, nextIdx, kArray_size(tokenList), &retClass);
-	if (retClass) {
-		nextIdx = TokenUtils_skipIndent(tokenList, nextIdx+1, kArray_size(tokenList));
-		TokenSequence param = {Stmt_nameSpace(stmt), tokenList, nextIdx, kArray_size(tokenList)};
-		kBlock *bkBody = SUGAR new_kBlock(kctx, stmt, NULL, &param); /* GCSAFE */
-		SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), SYM_("function"));
-		kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 3, pa, retClass, bkBody);
-		RETURN_(expr);
-	} else {
+	if (!retClass) {
 		RETURN_(kStmt_printMessage(kctx, stmt, ErrTag, "expected return type after '=>' token"));
 	}
+
+	/* syntax is OK */
+	nextIdx = TokenUtils_skipIndent(tokenList, nextIdx+1, kArray_size(tokenList));
+	TokenSequence blockSeq = {Stmt_nameSpace(stmt), tokenList, nextIdx, kArray_size(tokenList)};
+	kBlock *bkBody = SUGAR new_kBlock(kctx, stmt, NULL, &blockSeq); /* GCSAFE */
+	SugarSyntax *synFunc = SYN_(Stmt_nameSpace(stmt), SYM_("function"));
+	kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, synFunc, 3, pa, retClass, bkBody);
+	RETURN_(expr);
 
 }
 
