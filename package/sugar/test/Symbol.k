@@ -4,7 +4,7 @@ import("sugar");
 
 void test() {
 	symbol keyword = "$Symbol";
-	System.p(symbol);
+	System.p(keyword);
 }
 
 test();
