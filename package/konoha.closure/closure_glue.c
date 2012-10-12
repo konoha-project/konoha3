@@ -119,7 +119,6 @@ static KMETHOD Expression_Closure(KonohaContext *kctx, KonohaStack *sfp)
 			break;
 		}
 	}
-	kParam *pa = new_kParam(kctx, TY_void, psize, p); /* GCSAFE */
 
 	/* checking return type */
 	nextIdx = TokenUtils_skipIndent(tokenList, nextIdx+1, kArray_size(tokenList));
@@ -134,20 +133,39 @@ static KMETHOD Expression_Closure(KonohaContext *kctx, KonohaStack *sfp)
 		RETURN_(kStmt_printMessage(kctx, stmt, ErrTag, "expected return type after '=>' token"));
 	}
 
+	kParam *pa = new_kParam(kctx, retClass->typeId, psize, p); /* GCSAFE */
+
 	/* syntax is OK */
 	nextIdx = TokenUtils_skipIndent(tokenList, nextIdx+1, kArray_size(tokenList));
 	TokenSequence blockSeq = {Stmt_nameSpace(stmt), tokenList, nextIdx, kArray_size(tokenList)};
 	kBlock *bkBody = SUGAR new_kBlock(kctx, stmt, NULL, &blockSeq); /* GCSAFE */
 	SugarSyntax *synFunc = SYN_(Stmt_nameSpace(stmt), SYM_("function"));
-	kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, synFunc, 3, pa, retClass, bkBody);
+	kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, synFunc, 2, pa, bkBody);
 	RETURN_(expr);
 
 }
 
 static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 {
-	printf("hihioh;sjdf;lkajsdf;j\n");
-	asm("int3");
+	VAR_TypeCheck(stmt, expr, gma, reqty);
+	kParam *pa = expr->cons->paramItems[0];
+	kBlock *bk = (kBlock*)expr->cons->objectItems[1];
+	int ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
+	if (ret) {
+		INIT_GCSTACK();
+		uintptr_t flag = 0;
+		kMethod *mtd = KLIB new_kMethod(kctx, flag, 0/* typeId, is it OK? */, 0/* mn, is it OK? */, NULL);
+		PUSH_GCSTACK(mtd);
+		KonohaClass *ctFunc = KLIB KonohaClass_Generics(kctx, CT_Func, pa->rtype, pa->psize, (kparamtype_t*)pa->paramtypeItems);
+		kFuncVar *fo = (kFuncVar*)KLIB new_kObject(kctx, ctFunc, (uintptr_t)mtd);
+		KUnsafeFieldInit(fo->self, Stmt_nameSpace(stmt)->globalObjectNULL);
+		PUSH_GCSTACK(fo);
+		KLIB kMethod_setParam(kctx, mtd, pa->rtype, pa->psize, (kparamtype_t*)pa->paramtypeItems);
+		KLIB kObject_setObject(kctx, expr, SYM_("Func"), TY_Func, fo);
+		KLIB kObject_setObject(kctx, expr, SYM_("Block"), TY_Block, bk);
+		RESET_GCSTACK();
+		RETURN_(kExpr_typed(expr, CLOSURE, fo->h.ct->typeId));
+	}
 }
 
 static kbool_t closure_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)

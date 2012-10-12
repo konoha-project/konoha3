@@ -387,6 +387,7 @@ typedef enum {
 	TEXPR_OR,
 	TEXPR_LET,
 	TEXPR_STACKTOP,
+	TEXPR_CLOSURE,
 
 	TSTMT_EXPR,  // this must be the first stmt
 	TSTMT_BLOCK,
@@ -395,7 +396,6 @@ typedef enum {
 	TSTMT_LOOP,
 	TSTMT_JUMP,
 	TSTMT_TRY,
-	TSTMT_CLOSURE,
 
 	TSTMT_ERR   // this must be last
 } kvisit_t;
