@@ -710,7 +710,7 @@ static int kStmt_parseBySyntaxPattern(KonohaContext *kctx, kStmt *stmt, int inde
 		if(currentSyntax->SyntaxPatternListNULL != NULL) {
 			int patternEndIdx = kArray_size(currentSyntax->SyntaxPatternListNULL);
 			TokenSequence tokens = {ns, tokenList, beginIdx, endIdx};
-			TokenSequence nrule  = {ns, currentSyntax->SyntaxPatternListNULL};
+			TokenSequence nrule  = {ns, currentSyntax->SyntaxPatternListNULL, 0, kArray_size(currentSyntax->SyntaxPatternListNULL)};
 			do {
 				patternEndIdx = TokenSequence_selectSyntaxPattern(kctx, &nrule, currentSyntax->SyntaxPatternListNULL, patternEndIdx);
 				errRule[0] = NULL; errRule[1] = NULL;
