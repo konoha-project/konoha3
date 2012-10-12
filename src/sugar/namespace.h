@@ -210,6 +210,13 @@ static SugarSyntaxVar *kNameSpace_addSugarFunc(KonohaContext *kctx, kNameSpace *
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_getSyntax(kctx, ns, keyword, 1/*new*/);
 	DBG_ASSERT(idx < SugarFunc_SIZE);
 	kNameSpace_addFuncList(kctx, ns, syn->sugarFuncListTable, idx, funcObject);
+	// set default function
+	if(syn->parentSyntaxNULL == NULL && syn->sugarFuncTable[SugarFunc_Expression] == NULL) {
+		DBG_ASSERT(syn->precedence_op2 == 0 && syn->precedence_op1 == 0);
+		kFunc *fo = SYN_(ns, KW_ExprTerm)->sugarFuncTable[SugarFunc_Expression];
+		DBG_ASSERT(fo != NULL);
+		KFieldInit(ns, syn->sugarFuncTable[SugarFunc_Expression], fo);
+	}
 	return syn;
 }
 
