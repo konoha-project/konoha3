@@ -277,15 +277,15 @@ static void dse_define(KonohaContext *kctx, Message *msg)
 {
 	if(msg != NULL) {
 		KDEFINE_TEXT_CONST TextData[] = {
-			{"DSE_MESSAGE", TY_TEXT, (char *)msg->data},
-			{"DSE_SCRIPT_DIR", TY_TEXT, scriptdir},
+			{"DSE_MESSAGE", VirtualType_Text, (char *)msg->data},
+			{"DSE_SCRIPT_DIR", VirtualType_Text, scriptdir},
 			{}
 		};
 		KLIB kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(TextData), 0);
 	}
 	else {
 		KDEFINE_TEXT_CONST TextData[] = {
-			{"DSE_SCRIPT_DIR", TY_TEXT, scriptdir},
+			{"DSE_SCRIPT_DIR", VirtualType_Text, scriptdir},
 			{}
 		};
 		KLIB kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(TextData), 0);

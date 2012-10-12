@@ -369,13 +369,13 @@ static kbool_t kNameSpace_setConstData(KonohaContext *kctx, kNameSpace *ns, ksym
 	KUtilsKeyValue kv;
 	kv.ty = ty;
 	kv.unboxValue = unboxValue;
-	if(ty == TY_TEXT) {
+	if(ty == VirtualType_Text) {
 		const char *textData = (const char*)unboxValue;
 		kv.ty = TY_String;
 		kv.stringValue = KLIB new_kString(kctx, textData, strlen(textData), StringPolicy_TEXT);
 		PUSH_GCSTACK(kv.objectValue);
 	}
-	if(TY_isUnbox(kv.ty) || kv.ty == TY_TYPE) {
+	if(TY_isUnbox(kv.ty) || kv.ty == VirtualType_KonohaClass) {
 		kv.key = key;
 	}
 	else {
@@ -394,12 +394,12 @@ static kbool_t kNameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ns, con
 	while(d[0] != NULL) {
 		kv.key = ksymbolSPOL(d[0], strlen(d[0]), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID) | SYMKEY_BOXED;
 		kv.ty  = (ktype_t)(uintptr_t)d[1];
-		if(kv.ty == TY_TEXT) {
+		if(kv.ty == VirtualType_Text) {
 			kv.ty = TY_String;
 			kv.stringValue = KLIB new_kString(kctx, d[2], strlen(d[2]), StringPolicy_TEXT);
 			PUSH_GCSTACK(kv.objectValue);
 		}
-		else if(TY_isUnbox(kv.ty) || kv.ty == TY_TYPE) {
+		else if(TY_isUnbox(kv.ty) || kv.ty == VirtualType_KonohaClass) {
 			kv.key = SYMKEY_unbox(kv.key);
 			kv.unboxValue = (uintptr_t)d[2];
 		}
@@ -457,7 +457,7 @@ static KonohaClass *kNameSpace_getClass(KonohaContext *kctx, kNameSpace *ns, con
 	}
 	if(packageId != SYM_NONAME) {
 		KUtilsKeyValue *kvs = kNameSpace_getConstNULL(kctx, ns, un);
-		if(kvs != NULL && kvs->ty == TY_TYPE) {
+		if(kvs != NULL && kvs->ty == VirtualType_KonohaClass) {
 			return (KonohaClass*)kvs->unboxValue;
 		}
 	}
@@ -467,7 +467,7 @@ static KonohaClass *kNameSpace_getClass(KonohaContext *kctx, kNameSpace *ns, con
 static KonohaClass *kNameSpace_defineClass(KonohaContext *kctx, kNameSpace *ns, kString *name, KDEFINE_CLASS *cdef, kfileline_t pline)
 {
 	KonohaClass *ct = KLIB KonohaClass_define(kctx, ns->packageId, name, cdef, pline);
-	if(!KLIB kNameSpace_setConstData(kctx, ns, ct->classNameSymbol, TY_TYPE, (uintptr_t)ct, pline)) {
+	if(!KLIB kNameSpace_setConstData(kctx, ns, ct->classNameSymbol, VirtualType_KonohaClass, (uintptr_t)ct, pline)) {
 		return NULL;
 	}
 	return ct;
@@ -954,7 +954,7 @@ static kbool_t kNameSpace_importSymbol(KonohaContext *kctx, kNameSpace *ns, kNam
 		KUtilsKeyValue *kvs = kNameSpace_getLocalConstNULL(kctx, targetNS, keyword);
 		if(kvs != NULL) {
 			if(kNameSpace_mergeConstData(kctx, (kNameSpaceVar*)ns, kvs, 1, pline)) {
-				if(kvs->ty == TY_TYPE) {
+				if(kvs->ty == VirtualType_KonohaClass) {
 					size_t i;
 					ktype_t typeId = ((KonohaClass*)kvs->unboxValue)->typeId;
 					for(i = 0; i < kArray_size(targetNS->methodList); i++) {

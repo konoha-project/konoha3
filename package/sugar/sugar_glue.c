@@ -432,13 +432,13 @@ static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 {
 	KonohaClass *cSymbol = loadSymbolClass(kctx, ns, pline);
 	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
-		{"Token", TY_TYPE, (uintptr_t)CT_Token},
-		{"Stmt", TY_TYPE,  (uintptr_t)CT_Stmt},
-		{"Expr", TY_TYPE,  (uintptr_t)CT_Expr},
-		{"Block", TY_TYPE, (uintptr_t)CT_Block},
-		{"Gamma", TY_TYPE, (uintptr_t)CT_Gamma},
-		{"NameSpace", TY_TYPE, (uintptr_t)CT_NameSpace},
-		{"symbol", TY_TYPE, (uintptr_t)cSymbol},
+		{"Token", VirtualType_KonohaClass, (uintptr_t)CT_Token},
+		{"Stmt", VirtualType_KonohaClass,  (uintptr_t)CT_Stmt},
+		{"Expr", VirtualType_KonohaClass,  (uintptr_t)CT_Expr},
+		{"Block", VirtualType_KonohaClass, (uintptr_t)CT_Block},
+		{"Gamma", VirtualType_KonohaClass, (uintptr_t)CT_Gamma},
+		{"NameSpace", VirtualType_KonohaClass, (uintptr_t)CT_NameSpace},
+		{"symbol", VirtualType_KonohaClass, (uintptr_t)cSymbol},
 		{NULL},
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(ClassData), 0);

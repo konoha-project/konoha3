@@ -104,7 +104,7 @@ static kbool_t dynamic_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	
 	KonohaClass *cDynamic = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDynamic, pline);
 //	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
-//		{"Array", TY_TYPE, (uintptr_t)CT_(TY_Array)},
+//		{"Array", VirtualType_KonohaClass, (uintptr_t)CT_(TY_Array)},
 //		{NULL},
 //	};
 //	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(ClassData), 0);

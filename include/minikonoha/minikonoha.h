@@ -1011,8 +1011,12 @@ struct kIntVar /* extends kNumber */ {
 /* ------------------------------------------------------------------------ */
 /* String */
 
-#define TY_TEXT                   TY_void    /*special use for const char*/
-#define TY_TYPE                   TY_var     /*special use for KonohaClass*/
+typedef enum {
+	VirtualType_Text                  =   TY_void,    /*special use for const char*/
+	VirtualType_KonohaClass           =   TY_var,     /*special use for KonohaClass*/
+	VirtualType_StaticMethod          =   TY_0,       /*special use for Method*/
+} VirtualType;
+
 #define IS_String(o)              (O_typeId(o) == TY_String)
 
 /* kObject_Local1 is reserved by konoha.string package */

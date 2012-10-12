@@ -33,7 +33,7 @@ extern "C"{
 static kbool_t var_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
-		{"var", TY_TYPE, (uintptr_t)CT_(TY_var)},
+		{"var", VirtualType_KonohaClass, (uintptr_t)CT_(TY_var)},
 		{NULL},
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(ClassData), 0);

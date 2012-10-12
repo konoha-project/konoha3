@@ -49,7 +49,7 @@ static kbool_t object_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 {
 	KRequirePackage("konoha.subtype", pline);
 	KDEFINE_INT_CONST ClassData[] = {   // add Object as available
-		{"Object", TY_TYPE, (uintptr_t)CT_(TY_Object)},
+		{"Object", VirtualType_KonohaClass, (uintptr_t)CT_(TY_Object)},
 		{NULL},
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(ClassData), 0);

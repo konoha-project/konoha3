@@ -56,7 +56,7 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 		uintptr_t unboxValue;
 		result = false;
 		if(ConstExpr->build == TEXPR_NULL) {   // const C = String
-			type = TY_TYPE;
+			type = VirtualType_KonohaClass;
 			unboxValue = (uintptr_t)(CT_(ConstExpr->ty));
 			result = true;
 		}
