@@ -37,29 +37,22 @@ static kbool_t closure_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirst
 	return true;
 }
 
-static ktype_t kStmt_getClassId(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, ksymbol_t kw, ktype_t defcid)
+/* Tokenutils_skipindent(
+ * copied from ast.h
+ */
+static int TokenUtils_skipIndent(kArray *tokenList, int currentIdx, int endIdx)
 {
-	kToken *tk = (kToken*)kStmt_getObjectNULL(kctx, stmt, kw);
-	if(tk == NULL || !IS_Token(tk)) {
-		return defcid;
+	for(; currentIdx < endIdx; currentIdx++) {
+		kToken *tk = tokenList->tokenItems[currentIdx];
+		if(kToken_is(StatementSeparator, tk)) continue;
+		if(!kToken_isIndent(tk)) break;
 	}
-	else {
-		DBG_ASSERT(Token_isVirtualTypeLiteral(tk));
-		return Token_typeLiteral(tk);
-	}
+	return currentIdx;
 }
 
-static ksymbol_t kStmt_getMethodSymbol(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, ksymbol_t kw, kmethodn_t defmn)
-{
-	kToken *tk = (kToken*)kStmt_getObjectNULL(kctx, stmt, kw);
-	if(tk == NULL || !IS_Token(tk) || !IS_String(tk->text)) {
-		return defmn;
-	}
-	else {
-		return tk->resolvedSymbol;
-	}
-}
-
+/* kStmt_newMethodParamNULL(
+ * copied from sugarfunc.h
+ */
 static kParam *kStmt_newMethodParamNULL(KonohaContext *kctx, kStmt *stmt, kGamma* gma)
 {
 	kParam *pa = (kParam*)kStmt_getObjectNULL(kctx, stmt, KW_ParamPattern);
@@ -74,132 +67,121 @@ static kParam *kStmt_newMethodParamNULL(KonohaContext *kctx, kStmt *stmt, kGamma
 	return pa;
 }
 
-static int addGammaStack(KonohaContext *kctx, GammaStack *s, ktype_t ty, ksymbol_t fn)
+/* TokenSequence_checkCStyleParam
+ * copied from sugarfunc.h
+ */
+static void TokenSequence_checkCStyleParam(KonohaContext *kctx, TokenSequence* tokens)
 {
-	int index = s->varsize;
-	if(!(s->varsize < s->capacity)) {
-		s->capacity *= 2;
-		size_t asize = sizeof(GammaStackDecl) * s->capacity;
-		GammaStackDecl *v = (GammaStackDecl*)KMALLOC(asize);
-		memcpy(v, s->varItems, asize/2);
-		if(s->allocsize > 0) {
-			KFREE(s->varItems, s->allocsize);
+	int i;
+	for(i = 0; i < tokens->endIdx; i++) {
+		kTokenVar *tk = tokens->tokenList->tokenVarItems[i];
+		if(tk->resolvedSyntaxInfo->keyword == KW_void) {
+			tokens->endIdx = i; //  f(void) = > f()
+			return;
 		}
-		s->varItems = v;
-		s->allocsize = asize;
+		if(tk->resolvedSyntaxInfo->keyword == KW_COMMA) {
+			kToken_set(StatementSeparator, tk, true);
+		}
 	}
-	DBG_P("index=%d, ty=%s fn=%s", index, TY_t(ty), SYM_t(fn));
-	s->varItems[index].ty = ty;
-	s->varItems[index].fn = fn;
-	s->varsize += 1;
-	return index;
 }
 
-static int TokenUtils_skipIndent(kArray *tokenList, int currentIdx, int endIdx)
+/* Stmttypedecl_setparam
+ * copied from sugarfunc.h
+ */
+static kbool_t StmtTypeDecl_setParam(KonohaContext *kctx, kStmt *stmt, int n, kparamtype_t *p)
 {
-	for(; currentIdx < endIdx; currentIdx++) {
-		kToken *tk = tokenList->tokenItems[currentIdx];
-		if(kToken_is(StatementSeparator, tk)) continue;
-		if(!kToken_isIndent(tk)) break;
+	kToken *tkT  = SUGAR kStmt_getToken(kctx, stmt, KW_TypePattern, NULL);
+	kExpr  *expr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL);
+	DBG_ASSERT(tkT != NULL);
+	DBG_ASSERT(expr != NULL);
+	if(Expr_isSymbolTerm(expr)) {
+		kToken *tkN = expr->termToken;
+		ksymbol_t fn = ksymbolA(S_text(tkN->text), S_size(tkN->text), SYM_NEWID);
+		p[n].fn = fn;
+		p[n].ty = Token_typeLiteral(tkT);
+		return true;
 	}
-	return currentIdx;
+	return false;
 }
 
-static KMETHOD PatternMatch_Closure(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Expression_Closure(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
-	kNameSpace *ns = Stmt_nameSpace(stmt);
-	KonohaClass *foundClass = NULL;
-	int nextIdx = SUGAR TokenUtils_parseTypePattern(kctx, ns, tokenList, beginIdx, endIdx, &foundClass);
-	//DBG_P("@ nextIdx = %d < %d", nextIdx, endIdx);
-	if(nextIdx != -1) {
-		nextIdx = TokenUtils_skipIndent(tokenList, nextIdx, endIdx);
-		if(nextIdx < endIdx) {
-			kToken *tk = tokenList->tokenItems[nextIdx];
-			if(SUGAR TokenUtils_parseTypePattern(kctx, ns, tokenList, nextIdx, endIdx, NULL) != -1) {
-				RETURNi_(beginIdx);
-			}
-			if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern) {
-				int symbolNextIdx = TokenUtils_skipIndent(tokenList, nextIdx + 1, endIdx);
-				if(symbolNextIdx < endIdx && tokenList->tokenItems[symbolNextIdx]->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {
-					RETURNi_(beginIdx);
-				}
-				RETURNi_(-1);
-			}
-			if(tk->resolvedSyntaxInfo->keyword != KW_DOT && ((tk->resolvedSyntaxInfo->precedence_op1 > 0 || tk->resolvedSyntaxInfo->precedence_op2 > 0))) {
-				RETURNi_(beginIdx);
-			}
+	/* Closure Expression
+	 * potentially exists indent token in between each tokens
+	 * beginIdx   : "function"
+	 * beginIdx+1 : $Param
+	 * beginIdx+2 : "=>"
+	 * beginIdx+3 : $Type, means return type
+	 * beginIdx+4 : $Block
+	 */
+	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
+	int nextIdx = TokenUtils_skipIndent(tokenList, beginIdx+1, kArray_size(tokenList));
+	kToken* tk = tokenList->tokenItems[nextIdx];
+	if (tk->resolvedSyntaxInfo->keyword != KW_ParenthesisGroup) {
+		RETURN_(kStmt_printMessage(kctx, stmt, ErrTag, "expected parameter after 'function'"));
+	}
+	kArray *paramTokenList = tk->subTokenList;
+	TokenSequence param = {Stmt_nameSpace(stmt), paramTokenList, 0, kArray_size(paramTokenList)};
+	TokenSequence_checkCStyleParam(kctx, &param);
+	kBlock *bk = SUGAR new_kBlock(kctx, stmt, NULL, &param); /* GCSAFE */
+
+	/* parsing parameter of closure function */
+	size_t i, psize = (bk->stmtList) ? kArray_size(bk->stmtList) : 0;
+	kparamtype_t *p = ALLOCA(kparamtype_t, psize);
+	for (i = 0; i < psize; i++) {
+		p[i].ty = TY_void; p[i].fn = 0;
+		kStmt *stmtParam = bk->stmtList->stmtItems[i];
+		if (stmtParam->syn->keyword != KW_TypeDeclPattern || !StmtTypeDecl_setParam(kctx, stmtParam, i, p)) {
+			RETURN_(kStmt_printMessage(kctx, stmt, ErrTag, "invalid parameter"));
+			break;
 		}
 	}
-	RETURNi_(-1);
+	kParam *pa = new_kParam(kctx, TY_void, psize, p); /* GCSAFE */
+	//KLIB kObject_setObject(kctx, stmt, KW_ParamPattern, TY_Param, pa);
+
+	/* checking return type */
+	nextIdx = TokenUtils_skipIndent(tokenList, nextIdx+1, kArray_size(tokenList));
+	tk = tokenList->tokenItems[nextIdx];
+	if (strcmp(tk->text->text, "=>") != 0) {
+		RETURN_(kStmt_printMessage(kctx, stmt, ErrTag, "expected '=>' token after closure parameter"));
+	}
+	nextIdx = TokenUtils_skipIndent(tokenList, nextIdx+1, kArray_size(tokenList));
+	KonohaClass *retClass = NULL;
+	nextIdx = SUGAR TokenUtils_parseTypePattern(kctx, Stmt_nameSpace(stmt), tokenList, nextIdx, kArray_size(tokenList), &retClass);
+	if (retClass) {
+		nextIdx = TokenUtils_skipIndent(tokenList, nextIdx+1, kArray_size(tokenList));
+		TokenSequence param = {Stmt_nameSpace(stmt), tokenList, nextIdx, kArray_size(tokenList)};
+		kBlock *bkBody = SUGAR new_kBlock(kctx, stmt, NULL, &param); /* GCSAFE */
+		//KLIB kObject_setObject(kctx, stmt, KW_TypePattern, retClass->typeId, retClass);
+		//KLIB kObject_setObject(kctx, stmt, KW_BlockPattern, retClass->typeId, bkBody);
+		SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), SYM_("function"));
+		kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, stmt->syn, 3, pa, retClass, bkBody);
+		RETURN_(expr);
+	} else {
+		RETURN_(kStmt_printMessage(kctx, stmt, ErrTag, "expected return type after '=>' token"));
+	}
+
 }
 
-static KMETHOD Statement_closure(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 {
-	VAR_Statement(stmt, gma);
-	//uintptr_t flag    = kStmt_parseFlag(kctx, stmt, MethodDeclFlag, 0);
-	uintptr_t flag    = 0;
-	int ret = false;
-	kNameSpace *ns    = Stmt_nameSpace(stmt);
-	ktype_t typeId   = kStmt_getClassId(kctx, stmt, ns, SYM_("ClassName"), O_typeId(ns));
-	kmethodn_t mn     = kStmt_getMethodSymbol(kctx, stmt, ns, KW_SymbolPattern, MN_new);
-	kParam *pa        = kStmt_newMethodParamNULL(kctx, stmt, gma);
-	if(pa != NULL) {  // if pa is NULL, error is printed out.
-		kMethod *mtd = KLIB new_kMethod(kctx, flag, typeId, mn, NULL);
-		KLIB kObject_setObject(kctx, stmt, SYM_("Method"), TY_Method, mtd);
-		KLIB kMethod_setParam(kctx, mtd, pa->rtype, pa->psize, (kparamtype_t*)pa->paramtypeItems);
-		kMethod *oldMethod = gma->genv->currentWorkingMethod;
-		gma->genv->currentWorkingMethod = mtd;
-		//printf("rtype: %zd psize: %zd\n", pa->rtype, pa->psize);
-		KonohaClass *ct = CT_(mtd->typeId);
-		kToken *blockToken = (kToken*)kStmt_getObjectNULL(kctx, stmt, KW_BlockPattern);
-
-		kToken *tkSymbol = (kToken*)kStmt_getObjectNULL(kctx, stmt, KW_SymbolPattern);
-		//printf("resolvedsymbol %zd\n", tkSymbol->resolvedSymbol);
-		kExpr *exprTerm = SUGAR new_UntypedTermExpr(kctx, tkSymbol);
-		KonohaClass *ctFunc = KLIB KonohaClass_Generics(kctx, CT_Func, pa->rtype, pa->psize, (kparamtype_t*)pa->paramtypeItems);
-		kFuncVar *fo = (kFuncVar*)KLIB new_kObjectOnGCSTACK(kctx, ctFunc, (uintptr_t)mtd);
-		KFieldSet(fo, fo->self, UPCAST(ns));
-		kExpr *exprFunc =  new_ConstValueExpr(kctx, ctFunc->typeId, UPCAST(fo));
-		kExpr *exprMtd =  new_ConstValueExpr(kctx, ctFunc->typeId, UPCAST(mtd));
-		kExpr *exprDecl = SUGAR new_UntypedCallStyleExpr(kctx, SYN_(Stmt_nameSpace(stmt), KW_LET), 3, exprTerm, exprTerm, exprFunc);
-		kStmt *newstmt = stmt;
-
-		if (SUGAR kStmt_declType(kctx, stmt, gma, ctFunc->typeId, exprDecl, NULL, NULL, &newstmt)) {
-			KLIB kObject_setObject(kctx, stmt, SYM_("Expr"), TY_Expr, exprDecl);
-			//printf("hi\n");
-		}
-
-		if (blockToken != NULL && blockToken->resolvedSyntaxInfo->keyword == KW_BlockPattern) {
-			TokenSequence range = {Stmt_nameSpace(stmt), KonohaContext_getSugarContext(kctx)->preparedTokenList};
-			TokenSequence_push(kctx, range);
-			SUGAR TokenSequence_tokenize(kctx, &range, S_text(blockToken->text), blockToken->uline);
-			kBlock *bk = SUGAR new_kBlock(kctx, stmt, &range, NULL);
-			ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
-			if (ret) {
-				((kStmtVar*)stmt)->syn = SYN_(Stmt_nameSpace(stmt), KW_ParamPattern);
-				KLIB kObject_setObject(kctx, stmt, SYM_("Block"), TY_Block, bk);
-				kStmt_typed(stmt, CLOSURE);
-				gma->genv->currentWorkingMethod = oldMethod;
-				RETURNb_(1);
-			}
-		}
-	}
-	RETURNb_(0);
+	printf("hihioh;sjdf;lkajsdf;j\n");
+	asm("int3");
 }
 
 #define PATTERN(T)    .keyword = KW_##T##Pattern
 static kbool_t closure_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ PATTERN(MethodDecl), 0, "$MethodDecl $Type $Symbol $Param $Block", 0, 0, PatternMatch_Closure, NULL, NULL, Statement_closure, NULL, },
+		{ SYM_("function"), 0, NULL/*"\"function\" $Param \"=>\" $Type $Block"*/, 0, 0, NULL, Expression_Closure, NULL, NULL, TypeCheck_Closure, },
+		//{ SYM_("$ClosureDecl"), 0, "$ClosureDecl $Param \"=>\" $Type $Block", 0, 0, PatternMatch_Closure, NULL, NULL, Statement_closure, NULL, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
 	return true;
 }
 
-static kbool_t closure_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static kbool_t closure_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
@@ -208,12 +190,11 @@ static kbool_t closure_setupNameSpace(KonohaContext *kctx, kNameSpace *ns, kfile
 
 KDEFINE_PACKAGE* closure_init(void)
 {
-	static KDEFINE_PACKAGE d = {
-		KPACKNAME("closure", "1.0"),
-		.initPackage = closure_initPackage,
-		.setupPackage = closure_setupPackage,
-		.initNameSpace = closure_initNameSpace,
-		.setupNameSpace = closure_setupNameSpace,
-	};
+	static KDEFINE_PACKAGE d = {0};
+	KSETPACKNAME(d, "closure", "1.0");
+	d.initPackage = closure_initPackage;
+	d.setupPackage = closure_setupPackage;
+	d.initNameSpace = closure_initNameSpace;
+	d.setupNameSpace = closure_setupNameSpace;
 	return &d;
 }

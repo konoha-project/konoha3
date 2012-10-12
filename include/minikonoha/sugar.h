@@ -86,6 +86,7 @@ extern "C" {
 #define KW_if        (2+KW_void)
 #define KW_else      (3+KW_void)
 #define KW_return    (4+KW_void)
+#define KW_function  (5+KW_void)
 
 typedef enum {
 	TokenType_INDENT = 1,
