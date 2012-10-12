@@ -50,23 +50,6 @@ static int TokenUtils_skipIndent(kArray *tokenList, int currentIdx, int endIdx)
 	return currentIdx;
 }
 
-/* kStmt_newMethodParamNULL(
- * copied from sugarfunc.h
- */
-static kParam *kStmt_newMethodParamNULL(KonohaContext *kctx, kStmt *stmt, kGamma* gma)
-{
-	kParam *pa = (kParam*)kStmt_getObjectNULL(kctx, stmt, KW_ParamPattern);
-	if(pa == NULL || !IS_Param(pa)) {
-		SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ParamPattern);
-		if (!SUGAR SugarSyntax_tyCheckStmt(kctx, syn, stmt, gma)) {
-			return NULL;
-		}
-	}
-	pa = (kParam*)kStmt_getObjectNULL(kctx, stmt, KW_ParamPattern);
-	DBG_ASSERT(IS_Param(pa));
-	return pa;
-}
-
 /* TokenSequence_checkCStyleParam
  * copied from sugarfunc.h
  */
@@ -115,11 +98,12 @@ static KMETHOD Expression_Closure(KonohaContext *kctx, KonohaStack *sfp)
 	 * beginIdx+4 : $Block
 	 */
 	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
+	printf("beginIdx: %d, operatorIdx: %d, endIdx: %d\n", beginIdx, operatorIdx, endIdx);
 	int nextIdx = TokenUtils_skipIndent(tokenList, beginIdx+1, kArray_size(tokenList));
 	kToken* tk = tokenList->tokenItems[nextIdx];
-	if (tk->resolvedSyntaxInfo->keyword != KW_ParenthesisGroup) {
-		RETURN_(kStmt_printMessage(kctx, stmt, ErrTag, "expected parameter after 'function'"));
-	}
+	//if (tk->resolvedSyntaxInfo->keyword != KW_ParenthesisGroup) {
+	//	RETURN_(kStmt_printMessage(kctx, stmt, ErrTag, "expected parameter after 'function'"));
+	//}
 	kArray *paramTokenList = tk->subTokenList;
 	TokenSequence param = {Stmt_nameSpace(stmt), paramTokenList, 0, kArray_size(paramTokenList)};
 	TokenSequence_checkCStyleParam(kctx, &param);
@@ -137,7 +121,6 @@ static KMETHOD Expression_Closure(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	}
 	kParam *pa = new_kParam(kctx, TY_void, psize, p); /* GCSAFE */
-	//KLIB kObject_setObject(kctx, stmt, KW_ParamPattern, TY_Param, pa);
 
 	/* checking return type */
 	nextIdx = TokenUtils_skipIndent(tokenList, nextIdx+1, kArray_size(tokenList));
@@ -152,10 +135,8 @@ static KMETHOD Expression_Closure(KonohaContext *kctx, KonohaStack *sfp)
 		nextIdx = TokenUtils_skipIndent(tokenList, nextIdx+1, kArray_size(tokenList));
 		TokenSequence param = {Stmt_nameSpace(stmt), tokenList, nextIdx, kArray_size(tokenList)};
 		kBlock *bkBody = SUGAR new_kBlock(kctx, stmt, NULL, &param); /* GCSAFE */
-		//KLIB kObject_setObject(kctx, stmt, KW_TypePattern, retClass->typeId, retClass);
-		//KLIB kObject_setObject(kctx, stmt, KW_BlockPattern, retClass->typeId, bkBody);
 		SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), SYM_("function"));
-		kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, stmt->syn, 3, pa, retClass, bkBody);
+		kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 3, pa, retClass, bkBody);
 		RETURN_(expr);
 	} else {
 		RETURN_(kStmt_printMessage(kctx, stmt, ErrTag, "expected return type after '=>' token"));
@@ -169,11 +150,10 @@ static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 	asm("int3");
 }
 
-#define PATTERN(T)    .keyword = KW_##T##Pattern
 static kbool_t closure_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("function"), 0, NULL/*"\"function\" $Param \"=>\" $Type $Block"*/, 0, 0, NULL, Expression_Closure, NULL, NULL, TypeCheck_Closure, },
+		{ SYM_("function"), 0, NULL/*"\"function\" $Param \"=>\" $Type $Block"*/, Precedence_CStyleCOMMA, Precedence_CStyleCOMMA, NULL, Expression_Closure, NULL, NULL, TypeCheck_Closure, },
 		//{ SYM_("$ClosureDecl"), 0, "$ClosureDecl $Param \"=>\" $Type $Block", 0, 0, PatternMatch_Closure, NULL, NULL, Statement_closure, NULL, },
 		{ KW_END, },
 	};
