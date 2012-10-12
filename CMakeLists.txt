@@ -333,6 +333,18 @@ macro(create_package_project _PKGNAME)
 		add_custom_target(copy_${PACKAGE_SCRIPT_CODE} ALL DEPENDS
 			${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_SCRIPT_CODE})
 	endif(PACKAGE_SCRIPT_CODE)
+	# for copy test files
+	if(PACKAGE_TEST_FILE)
+		foreach(testfile ${PACKAGE_TEST_FILE})
+			add_custom_command(OUTPUT
+				${CMAKE_CURRENT_BINARY_DIR}/${testfile}
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different
+				${CMAKE_CURRENT_SOURCE_DIR}/test/${testfile}
+				${CMAKE_CURRENT_BINARY_DIR}/${testfile})
+		endforeach(testfile ${PACKAGE_TEST_FILE})
+		add_custom_target(copy_${_PKGNAME}_testfile ALL DEPENDS
+			${PACKAGE_TEST_FILE})
+	endif(PACKAGE_TEST_FILE)
 endmacro(create_package_project)
 
 macro(add_konoha_package PKGNAME)
