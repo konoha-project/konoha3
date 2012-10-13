@@ -45,7 +45,7 @@ typedef struct {
 
 static inline kObject *new_ReturnCppObject(KonohaContext *kctx,KonohaStack *sfp, void *ptr) {
 	kObject *defobj = sfp[(-(K_CALLDELTA))].asObject;
-	kObject *ret = KLIB new_kObjectDontUseThis(kctx, O_ct(defobj), (uintptr_t)ptr);
+	kObject *ret = KLIB new_kObjectDontUseThis(kctx, O_ct(defobj), (uintptr_t)ptr, GcUnsafe);
 	((kRawPtr *)ret)->rawptr = ptr;
 	return ret;
 }
@@ -67,7 +67,7 @@ static void MPIData_extend(KonohaContext *kctx, kMPIData *p, int size) {
 	if(p->size < newSize) {
 		switch(p->typeId) {
 		case KMPI_BYTES: {
-			kBytes *b = (kBytes *)KLIB new_kObjectDontUseThis(kctx, CT_Bytes, (uintptr_t)newSize);
+			kBytes *b = (kBytes *)KLIB new_kObjectDontUseThis(kctx, CT_Bytes, (uintptr_t)newSize, GcUnsafe);
 			memcpy(b->buf, p->b->buf, p->size);
 			p->b = b;
 			p->size = newSize;
@@ -382,8 +382,8 @@ static KMETHOD MPIData_fromBytes(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMPIData *d = newMPIData(kctx);
 	d->type = MPI_CHAR;
-	d->b = sfp[1].ba;
-	d->size = sfp[1].ba->bytesize;
+	d->b = sfp[1].asBytes;
+	d->size = sfp[1].asBytes->bytesize;
 	d->offset = 0;
 	d->typeId = KMPI_BYTES;
 	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(d)));
@@ -507,8 +507,8 @@ static KMETHOD MPIData_seti(KonohaContext *kctx, KonohaStack *sfp)
 /* ------------------------------------------------------------------------ */
 #define _Public   kMethod_Public
 #define _Static   kMethod_Static
-#define _Const    kMethod_Const
-#define _Coercion kMethod_Coercion
+//#define _Const    kMethod_Const
+//#define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
 typedef struct {
@@ -548,84 +548,26 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	g_comm_world = (kMPIComm *)KMALLOC(sizeof(kMPIComm));
 	g_comm_world->comm = MPI_COMM_WORLD;
 	static KDEFINE_CLASS MPIDef = {
-		"MPI"/*structname*/,
-		TY_newid/*cid*/,  0/*cflag*/,
-		0/*baseTypeId*/, 0/*superTypeId*/, 0/*cstruct_size*/,
-		0/*fields*/, 0/*fieldsize*/, 0/*fieldAllocSize*/,
-		0/*packageId*/, 0/*packageDomain*/,
-		0/*init*/,
-		0/*reftrace*/,
-		0/*free*/,
-		0/*fnull*/,
-		0/*p*/, 0/*unbox*/,
-		0/*compareTo*/,
-		0/*getkey*/,
-		0/*hashCode*/,
-		0/*initdef*/
+		.structname = "MPI",
+		.typeId = TY_newid
 	};
 	static KDEFINE_CLASS MPICommDef = {
-		"MPIComm"/*structname*/,
-		TY_newid/*cid*/,  0/*cflag*/,
-		0/*baseTypeId*/, 0/*superTypeId*/, 0/*cstruct_size*/,
-		0/*fields*/, 0/*fieldsize*/, 0/*fieldAllocSize*/,
-		0/*packageId*/, 0/*packageDomain*/,
-		0/*init*/,
-		0/*reftrace*/,
-		0/*free*/,
-		0/*fnull*/,
-		0/*p*/, 0/*unbox*/,
-		0/*compareTo*/,
-		0/*getkey*/,
-		0/*hashCode*/,
-		0/*initdef*/
+		.structname = "MPIComm",
+		.typeId = TY_newid
 	};
 	static KDEFINE_CLASS MPIRequestDef = {
-		"MPIRequest"/*structname*/,
-		TY_newid/*cid*/,  0/*cflag*/,
-		0/*baseTypeId*/, 0/*superTypeId*/, 0/*cstruct_size*/,
-		0/*fields*/, 0/*fieldsize*/, 0/*fieldAllocSize*/,
-		0/*packageId*/, 0/*packageDomain*/,
-		0/*init*/,
-		0/*reftrace*/,
-		MPIRequest_ptr_free/*free*/,
-		0/*fnull*/,
-		0/*p*/, 0/*unbox*/,
-		0/*compareTo*/,
-		0/*getkey*/,
-		0/*hashCode*/,
-		0/*initdef*/
+		.structname = "MPIRequest",
+		.typeId = TY_newid,
+		.free = MPIRequest_ptr_free
 	};
 	static KDEFINE_CLASS MPIDataDef = {
-		"MPIData"/*structname*/,
-		TY_newid/*cid*/,  0/*cflag*/,
-		0/*baseTypeId*/, 0/*superTypeId*/, 0/*cstruct_size*/,
-		0/*fields*/, 0/*fieldsize*/, 0/*fieldAllocSize*/,
-		0/*packageId*/, 0/*packageDomain*/,
-		0/*init*/,
-		0/*reftrace*/,
-		MPIData_ptr_free/*free*/,
-		0/*fnull*/,
-		0/*p*/, 0/*unbox*/,
-		0/*compareTo*/,
-		0/*getkey*/,
-		0/*hashCode*/,
-		0/*initdef*/
+		.structname = "MPIData",
+		.typeId = TY_newid,
+		.free = MPIData_ptr_free
 	};
 	//static KDEFINE_CLASS MPIOpDef = {
-	//	"MPIOp"/*structname*/,
-	//	TY_newid/*cid*/,  0/*cflag*/,
-	//	0/*baseTypeId*/, 0/*superTypeId*/, 0/*cstruct_size*/,
-	//	0/*fields*/, 0/*fieldsize*/, 0/*fieldAllocSize*/,
-	//	0/*packageId*/, 0/*packageDomain*/,
-	//	0/*init*/,
-	//	0/*reftrace*/,
-	//	0/*free*/,
-	//	0/*fnull*/,
-	//	0/*p*/, 0/*unbox*/,
-	//	0/*compareTo*/,
-	//	0/*getkey*/,
-	//	0/*hashCode*/,
-	//	0/*initdef*/
+	//	.structname = "MPIOp",
+	//	.typeId = TY_newid
 	//};
 	KonohaClass *CT_MPI = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MPIDef, pline);
 	KonohaClass *CT_MPIComm = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MPICommDef, pline);
