@@ -81,9 +81,9 @@ static int test_kwb(KonohaContext *kctx)
 {
 	const char *t= "0123456789012345678901234567890123456789";
 	size_t i = 0;
-	KUtilsGrowingArray buf;
+	KGrowingArray buf;
 	KLIB Karray_init(kctx, &buf, 64);
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&buf, &wb);
 	KLIB Kwb_printf(kctx, &wb, "%s%s%s%s", t, t, t, t);
 	t = KLIB Kwb_top(kctx, &wb, 1);

@@ -86,7 +86,7 @@ static SugarSyntax* kNameSpace_newSyntax(KonohaContext *kctx, kNameSpace *ns, Su
 	if(ns->syntaxMapNN == NULL) {
 		((kNameSpaceVar*)ns)->syntaxMapNN = KLIB Kmap_init(kctx, 0);
 	}
-	KUtilsHashMapEntry *e = KLIB Kmap_newEntry(kctx, ns->syntaxMapNN, (uintptr_t)keyword);
+	KHashMapEntry *e = KLIB Kmap_newEntry(kctx, ns->syntaxMapNN, (uintptr_t)keyword);
 	SugarSyntaxVar *syn = (SugarSyntaxVar*)KCALLOC(sizeof(SugarSyntax), 1);
 	e->unboxValue = (uintptr_t)syn;
 	syn->parentSyntaxNULL = parentSyntax;
@@ -159,7 +159,7 @@ struct ImportSyntaxArgument {
 	kfileline_t pline;
 };
 
-static void importEachSyntax(KonohaContext *kctx, KUtilsHashMapEntry *e, void *thunk)
+static void importEachSyntax(KonohaContext *kctx, KHashMapEntry *e, void *thunk)
 {
 	struct ImportSyntaxArgument *argd = (struct ImportSyntaxArgument*)thunk;
 	kNameSpace_importSyntax(kctx, argd->ns, (SugarSyntax*)e->unboxValue, argd->pline);
@@ -180,7 +180,7 @@ static SugarSyntax* kNameSpace_getSyntax(KonohaContext *kctx, kNameSpace *ns, ks
 	uintptr_t hcode = keyword;
 	while(currentNameSpace != NULL) {
 		if(currentNameSpace->syntaxMapNN != NULL) {
-			KUtilsHashMapEntry *e = KLIB Kmap_get(kctx, currentNameSpace->syntaxMapNN, hcode);
+			KHashMapEntry *e = KLIB Kmap_get(kctx, currentNameSpace->syntaxMapNN, hcode);
 			while(e != NULL) {
 				if(e->hcode == hcode) {
 					if(isNew && ns != currentNameSpace) {
@@ -329,7 +329,7 @@ static kbool_t kNameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns,
 //		}
 	}
 	else {
-		KUtilsWriteBuffer wb;
+		KGrowingBuffer wb;
 		KLIB Kwb_init(&(KonohaContext_getSugarContext(kctx)->errorMessageBuffer), &wb);
 		for(i = 0; i < nitems; i++) {
 			ksymbol_t unboxKey = kvs[i].key;
@@ -388,7 +388,7 @@ static kbool_t kNameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ns, con
 {
 	INIT_GCSTACK();
 	KUtilsKeyValue kv;
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	kbool_t result = true;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	while(d[0] != NULL) {
@@ -420,7 +420,7 @@ static kbool_t kNameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ns, con
 
 //static kbool_t kNameSpace_importConstData(KonohaContext *kctx, kNameSpace *ns, kNameSpace *targetNS, void *thunk, kbool_t (*match)(KonohaContext *kctx, KUtilsKeyValue *, void *thunk), kfileline_t pline)
 //{
-//	KUtilsWriteBuffer wb;
+//	KGrowingBuffer wb;
 //	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 //	size_t i, size = kNameSpace_sizeConstTable(targetNS);
 //	kbool_t result = true;
@@ -444,7 +444,7 @@ static kbool_t kNameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ns, con
 static KonohaClass *kNameSpace_getClass(KonohaContext *kctx, kNameSpace *ns, const char *name, size_t len, KonohaClass *defaultClass)
 {
 	KonohaClass *ct = NULL;
-	kpackage_t packageId = PN_konoha;
+	kpackageId_t packageId = PN_konoha;
 	ksymbol_t  un = SYM_NONAME;
 	const char *p = strrchr(name, '.');
 	if(p == NULL) {
@@ -886,14 +886,14 @@ static kbool_t kNameSpace_loadScript(KonohaContext *kctx, kNameSpace *ns, const 
 // ---------------------------------------------------------------------------
 // Package Management */
 
-static kNameSpace* new_PackageNameSpace(KonohaContext *kctx, kpackage_t packageDomain, kpackage_t packageId)
+static kNameSpace* new_PackageNameSpace(KonohaContext *kctx, kpackageId_t packageDomain, kpackageId_t packageId)
 {
 	kNameSpaceVar *ns = (kNameSpaceVar*)GCSAFE_new(NameSpace, KNULL(NameSpace));
 	ns->packageId = packageId;
 	return (kNameSpace*)ns;
 }
 
-static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackage_t packageId, kfileline_t pline)
+static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackageId_t packageId, kfileline_t pline)
 {
 	const char *packageName = S_text(PackageId_s(packageId));
 	char pathbuf[256];
@@ -924,7 +924,7 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackage_t packageId,
 	return pack;
 }
 
-static KonohaPackage *getPackageNULL(KonohaContext *kctx, kpackage_t packageId, kfileline_t pline)
+static KonohaPackage *getPackageNULL(KonohaContext *kctx, kpackageId_t packageId, kfileline_t pline)
 {
 	KLock(kctx->share->filepackMutex);
 	KonohaPackage *pack = (KonohaPackage*)map_getu(kctx, kctx->share->packageMapNO, packageId, uNULL);
@@ -1005,14 +1005,14 @@ static kbool_t kNameSpace_importAll(KonohaContext *kctx, kNameSpace *ns, kNameSp
 
 static KonohaPackage* kNameSpace_requirePackage(KonohaContext *kctx, const char *name, kfileline_t pline)
 {
-	kpackage_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
+	kpackageId_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
 	KonohaPackage *pack = getPackageNULL(kctx, packageId, pline);
 	return pack;
 }
 
 static kbool_t kNameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, const char *name, kfileline_t pline)
 {
-	kpackage_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
+	kpackageId_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
 	KonohaPackage *pack = getPackageNULL(kctx, packageId, pline);
 	DBG_ASSERT(ns != NULL);
 	if(pack != NULL) {
@@ -1036,7 +1036,7 @@ static kbool_t kNameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, con
 
 static kbool_t kNameSpace_importPackageSymbol(KonohaContext *kctx, kNameSpace *ns, const char *name, ksymbol_t keyword, kfileline_t pline)
 {
-	kpackage_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
+	kpackageId_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
 	KonohaPackage *pack = getPackageNULL(kctx, packageId, pline);
 	if(pack != NULL) {
 		return kNameSpace_importSymbol(kctx, ns, pack->packageNameSpace, keyword, pline);
@@ -1050,7 +1050,7 @@ kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len,
 		kmodsugar->h.setup(kctx, (KonohaModule*)kmodsugar, 0/*lazy*/);
 	}
 	INIT_GCSTACK();
-	kpackage_t packageId = KLIB KpackageId(kctx, "main", sizeof("main")-1, 0, _NEWID);
+	kpackageId_t packageId = KLIB KpackageId(kctx, "main", sizeof("main")-1, 0, _NEWID);
 	kNameSpace *ns = new_PackageNameSpace(kctx, packageId, packageId);
 	PUSH_GCSTACK(ns);
 	kstatus_t result = (kstatus_t)kNameSpace_loadScript(kctx, ns, path, pline);

@@ -43,7 +43,7 @@ static ksymbol_t StringToKsymbol(KonohaContext *kctx, kString *key)
 	return ksymbolA(S_text(key), S_size(key), _NEWID);
 }
 
-static void kSymbol_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void kSymbol_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	ksymbol_t symbol = (ksymbol_t)v[pos].unboxValue;
 	DBG_P(">>> symbol=%d, %s%s", symbol, PSYM_t(symbol));

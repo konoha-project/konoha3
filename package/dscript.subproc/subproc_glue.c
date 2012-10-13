@@ -628,7 +628,7 @@ static kbool_t kPipeReadArray(KonohaContext *kctx, kArray *a, FILE *fp)
 static kString *kPipeReadStringNULL(KonohaContext *kctx, FILE *fp)
 {
 	char buf[K_PAGESIZE];
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	while(1) {
 		size_t size = fread(buf, 1, sizeof(buf), fp);

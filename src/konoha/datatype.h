@@ -58,7 +58,7 @@ static kObject *new_kObject(KonohaContext *kctx, KonohaClass *ct, uintptr_t conf
 	kObjectVar *o = KLIB KallocObject(kctx->gcContext, ct);
 	o->h.magicflag = ct->magicflag;
 	o->h.ct = ct;
-	o->h.kvproto = (KUtilsGrowingArray*) Kprotomap_new(0);
+	o->h.kvproto = (KGrowingArray*) Kprotomap_new(0);
 	ct->init(kctx, (kObject*)o, (void*)conf);
 	return (kObject*)o;
 }
@@ -70,7 +70,7 @@ static kObject *new_kObjectOnGCSTACK(KonohaContext *kctx, KonohaClass *ct, uintp
 	return (kObject*)o;
 }
 
-static void KonohaClass_writeUnboxValueToBuffer(KonohaContext *kctx, KonohaClass *c, uintptr_t unboxValue, int isDelim, KUtilsWriteBuffer *wb)
+static void KonohaClass_writeUnboxValueToBuffer(KonohaContext *kctx, KonohaClass *c, uintptr_t unboxValue, int isDelim, KGrowingBuffer *wb)
 {
 	if(isDelim > 0) {
 		KLIB Kwb_write(kctx, wb, ", ", 2);
@@ -80,7 +80,7 @@ static void KonohaClass_writeUnboxValueToBuffer(KonohaContext *kctx, KonohaClass
 	c->p(kctx, &v, 0, wb);
 }
 
-static void kObject_writeToBuffer(KonohaContext *kctx, kObject *o, int isDelim, KUtilsWriteBuffer *wb, KonohaValue *sfp, int pos)
+static void kObject_writeToBuffer(KonohaContext *kctx, kObject *o, int isDelim, KGrowingBuffer *wb, KonohaValue *sfp, int pos)
 {
 	if(isDelim > 0) {
 		KLIB Kwb_write(kctx, wb, ", ", 2);
@@ -123,7 +123,7 @@ static void kNumber_init(KonohaContext *kctx, kObject *o, void *conf)
 	n->unboxValue = (uintptr_t)conf;
 }
 
-static void kBoolean_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void kBoolean_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	if(v[pos].boolValue) {
 		KLIB Kwb_write(kctx, wb, TEXTSIZE("true"));
@@ -138,7 +138,7 @@ static kObject* kBoolean_fnull(KonohaContext *kctx, KonohaClass *ct)
 	return (kObject*)K_FALSE;
 }
 
-static void kInt_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void kInt_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	KLIB Kwb_printf(kctx, wb, KINT_FMT, v[pos].intValue);
 }
@@ -160,7 +160,7 @@ static void kString_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kString_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void kString_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	const char *t = S_text(v[pos].asString);
 	size_t i, len = S_size(v[pos].asString);
@@ -260,7 +260,7 @@ static kString* new_kString(KonohaContext *kctx, const char *text, size_t len, i
 
 static kString* new_kStringf(KonohaContext *kctx, int spol, const char *fmt, ...)
 {
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	Kwb_init(&(kctx->stack->cwb), &wb);
 	va_list ap;
 	va_start(ap, fmt);
@@ -275,7 +275,7 @@ static kString* new_kStringf(KonohaContext *kctx, int spol, const char *fmt, ...
 // Array
 struct _kAbstractArray {
 	KonohaObjectHeader h;
-	KUtilsGrowingArray a;
+	KGrowingArray a;
 };
 
 static void kArray_init(KonohaContext *kctx, kObject *o, void *conf)
@@ -311,7 +311,7 @@ static void kArray_free(KonohaContext *kctx, kObject *o)
 	KLIB Karray_free(kctx, &a->a);
 }
 
-static void kArray_p(KonohaContext *kctx, KonohaValue *values, int pos, KUtilsWriteBuffer *wb)
+static void kArray_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingBuffer *wb)
 {
 	size_t i;
 	kArray *a = values[pos].asArray;
@@ -446,12 +446,12 @@ static kbool_t equalsParam(ktype_t rtype, int psize, const kparamtype_t *p, kPar
 
 typedef kbool_t (*equalsP)(ktype_t rtype, int psize, const kparamtype_t *p, kParam *pa);
 
-static kparamid_t Kmap_getparamid(KonohaContext *kctx, KUtilsHashMap *kmp, kArray *list, uintptr_t hcode, equalsP f, ktype_t rtype, int psize, const kparamtype_t *p)
+static kparamId_t Kmap_getparamid(KonohaContext *kctx, KHashMap *kmp, kArray *list, uintptr_t hcode, equalsP f, ktype_t rtype, int psize, const kparamtype_t *p)
 {
-	KUtilsHashMapEntry *e = KLIB Kmap_get(kctx, kmp, hcode);
+	KHashMapEntry *e = KLIB Kmap_get(kctx, kmp, hcode);
 	while(e != NULL) {
 		if(e->hcode == hcode && f(rtype, psize, p, e->paramKey)) {
-			return (kparamid_t)e->unboxValue;
+			return (kparamId_t)e->unboxValue;
 		}
 		e = e->next;
 	}
@@ -461,23 +461,23 @@ static kparamid_t Kmap_getparamid(KonohaContext *kctx, KUtilsHashMap *kmp, kArra
 	e = KLIB Kmap_newEntry(kctx, kmp, hcode);
 	KUnsafeFieldInit(e->paramKey, pa);
 	e->unboxValue = paramid;
-	return (kparamid_t)paramid;
+	return (kparamId_t)paramid;
 }
 
-static kparamid_t Kparam(KonohaContext *kctx, ktype_t rtype, int psize, const kparamtype_t *p)
+static kparamId_t Kparam(KonohaContext *kctx, ktype_t rtype, int psize, const kparamtype_t *p)
 {
 	uintptr_t hcode = hashparam(rtype, psize, p);
 	KLock(kctx->share->paramMutex);
-	kparamid_t param = Kmap_getparamid(kctx, kctx->share->paramMapNN, kctx->share->paramList, hcode, equalsParam, rtype, psize, p);
+	kparamId_t param = Kmap_getparamid(kctx, kctx->share->paramMapNN, kctx->share->paramList, hcode, equalsParam, rtype, psize, p);
 	KUnlock(kctx->share->paramMutex);
 	return param;
 }
 
-static kparamid_t Kparamdom(KonohaContext *kctx, int psize, const kparamtype_t *p)
+static kparamId_t Kparamdom(KonohaContext *kctx, int psize, const kparamtype_t *p)
 {
 	uintptr_t hcode = hashparamdom(psize, p);
 	KLock(kctx->share->paramMutex);
-	kparamid_t param = Kmap_getparamid(kctx, kctx->share->paramdomMapNN, kctx->share->paramdomList, hcode, equalsParamDom, TY_void, psize, p);
+	kparamId_t param = Kmap_getparamid(kctx, kctx->share->paramdomMapNN, kctx->share->paramdomList, hcode, equalsParamDom, TY_void, psize, p);
 	KUnlock(kctx->share->paramMutex);
 	return param;
 }
@@ -518,7 +518,7 @@ static kMethod* new_kMethod(KonohaContext *kctx, uintptr_t flag, ktype_t cid, km
 
 static kParam* kMethod_setParam(KonohaContext *kctx, kMethod *mtd_, ktype_t rtype, int psize, const kparamtype_t *p)
 {
-	kparamid_t paramId = Kparam(kctx, rtype, psize, p);
+	kparamId_t paramId = Kparam(kctx, rtype, psize, p);
 	if(mtd_ != NULL) {
 		kMethodVar* mtd = (kMethodVar*)mtd_;
 		mtd->paramdom = Kparamdom(kctx, psize, p);
@@ -636,7 +636,7 @@ static void DEFAULT_free(KonohaContext *kctx, kObject *o)
 	(void)kctx;(void)o;
 }
 
-static void DEFAULT_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void DEFAULT_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	KLIB Kwb_write(kctx, wb, TEXTSIZE("{\"class\": \""));
 	KLIB Kwb_write(kctx, wb, TY_t(O_typeId(v[pos].asObject)), 0);
@@ -804,7 +804,7 @@ static void checkTypeVar(KonohaContext *kctx, KonohaClassVar *newct, ktype_t rty
 
 static KonohaClass *KonohaClass_Generics(KonohaContext *kctx, KonohaClass *ct, ktype_t rtype, int psize, kparamtype_t *p)
 {
-	kparamid_t paramdom = Kparamdom(kctx, psize, p);
+	kparamId_t paramdom = Kparamdom(kctx, psize, p);
 	KonohaClass *ct0 = ct;
 	int isNotFuncClass = (ct->baseTypeId != TY_Func);
 	do {
@@ -836,7 +836,7 @@ static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 		else {
 			size_t i, c = 0;
 			kParam *cparam = CT_cparam(ct);
-			KUtilsWriteBuffer wb;
+			KGrowingBuffer wb;
 			KonohaClass_shortName(kctx, CT_(ct->p0));
 			for(i = 0; i < cparam->psize; i++) {
 				KonohaClass_shortName(kctx, CT_(cparam->paramtypeItems[i].ty));
@@ -882,7 +882,7 @@ static void KonohaClass_setName(KonohaContext *kctx, KonohaClassVar *ct, kfileli
 	}
 }
 
-static KonohaClass *KonohaClass_define(KonohaContext *kctx, kpackage_t packageId, kString *name, KDEFINE_CLASS *cdef, kfileline_t pline)
+static KonohaClass *KonohaClass_define(KonohaContext *kctx, kpackageId_t packageId, kString *name, KDEFINE_CLASS *cdef, kfileline_t pline)
 {
 	KonohaClassVar *ct = new_KonohaClass(kctx, NULL, cdef, pline);
 	ct->packageId  = packageId;
@@ -1117,7 +1117,7 @@ static void KonohaRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	initStructData(kctx);
 }
 
-static void constPoolMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
+static void constPoolMap_reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
 {
 	kObjectVisitor *visitor = (kObjectVisitor *) thunk;
 	BEGIN_REFTRACE(1);
@@ -1125,7 +1125,7 @@ static void constPoolMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, vo
 	END_REFTRACE();
 }
 
-static void packageMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
+static void packageMap_reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
 {
 	kObjectVisitor *visitor = (kObjectVisitor *) thunk;
 	KonohaPackage *pack = (KonohaPackage*)p->unboxValue;

@@ -64,7 +64,7 @@ static void Jansson_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void Jansson_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void Jansson_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	struct _kJson *json = (struct _kJson *)v[pos].asObject;
 	char* data = json_dumps(json->obj, JSON_ENSURE_ASCII);

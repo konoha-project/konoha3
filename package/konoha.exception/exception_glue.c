@@ -69,7 +69,7 @@ typedef struct {
 static void kException_addStackTrace(KonohaContext *kctx, KonohaStack *sfp, kException *e)
 {
 	kMethod *mtd = sfp[K_MTDIDX].methodCallInfo;
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&kctx->stack->cwb, &wb);
 	kfileline_t uline = sfp[K_RTNIDX].callerFileLine;
 	if(uline > 0) {
@@ -186,7 +186,7 @@ static void Exception_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *
 
 }
 
-static void Exception_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void Exception_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	KLIB Kwb_printf(kctx, wb, "%s", S_text(v[pos].asException->message));
 }

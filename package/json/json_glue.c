@@ -54,7 +54,7 @@ static void kJSON_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kJSON_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void kJSON_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	kJSON *json = (kJSON *)v[pos].asObject;
 	char *data = JSON_toString(json->json);

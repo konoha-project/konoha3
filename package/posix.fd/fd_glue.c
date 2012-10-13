@@ -83,7 +83,7 @@ static void kStat_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kStat_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void kStat_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	KLIB Kwb_printf(kctx, wb, "Stat :%p", v[pos].asObject);
 }
@@ -106,7 +106,7 @@ static void kDIR_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kDIR_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void kDIR_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	kDIR *dir = (kDIR*)v[pos].asObject;
 	DIR *dirp = dir->dirp;
@@ -134,7 +134,7 @@ static void kDirent_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kDirent_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void kDirent_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	struct _kDirent *dirent = (struct _kDirent *)v[pos].asObject;
 	struct dirent *entry = dirent->entry;

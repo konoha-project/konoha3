@@ -92,7 +92,7 @@ static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
 // Array
 struct _kAbstractArray {
 	KonohaObjectHeader h;
-	KUtilsGrowingArray a;
+	KGrowingArray a;
 };
 
 static void UnboxArray_ensureMinimumSize(KonohaContext *kctx, struct _kAbstractArray *a, size_t min)
@@ -410,7 +410,7 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kArray *a = sfp[0].asArray;
 //	size_t i = 0;
-//	KUtilsWriteBuffer wb;
+//	KGrowingBuffer wb;
 //	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 //	if (kArray_size(a) < 1) {
 //		RETURN_(KNULL(String));
@@ -440,9 +440,9 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 //		END_LOCAL();
 //
 //	}
-//	const char *KUtilsWriteBufferTopChar = KLIB Kwb_top(kctx, &wb, 0);
-//	size_t strsize = strlen(KUtilsWriteBufferTopChar);
-//	kString *ret = KLIB new_kString(kctx, KUtilsWriteBufferTopChar, strsize, 0);
+//	const char *KGrowingBufferTopChar = KLIB Kwb_top(kctx, &wb, 0);
+//	size_t strsize = strlen(KGrowingBufferTopChar);
+//	kString *ret = KLIB new_kString(kctx, KGrowingBufferTopChar, strsize, 0);
 //	KLIB Kwb_free(&wb);
 //	RETURN_(ret);
 //}

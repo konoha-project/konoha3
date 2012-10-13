@@ -740,7 +740,7 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 	kString *newvalue = sfp[2].asString;
 	const char *start = S_text(s0);
 	const char *end = start + S_size(s0);
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	if(S_size(searchvalue) == 0) {
 		KLIB Kwb_write(kctx, &wb, S_text(newvalue), S_size(newvalue));

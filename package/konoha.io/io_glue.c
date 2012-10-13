@@ -43,11 +43,11 @@ struct kio_t {
 		int  fd;
 		void *handler;
 		FILE *fp;
-		KUtilsWriteBuffer wb;
+		KGrowingBuffer wb;
 	};
 	void *handler2; // NULL
 	int  isRunning;
-	KUtilsGrowingArray buffer;
+	KGrowingArray buffer;
 	size_t top; size_t tail;
 	kbool_t (*_read)(KonohaContext *kctx, struct kio_t *);
 	size_t  (*_write)(KonohaContext *kctx, struct kio_t *, const char *buf, size_t bufsiz);
@@ -133,7 +133,7 @@ struct kInputStreamVar {
 	FILE_i *fp;
 	StreamApi *streamApi;
 	uintptr_t iconv;
-	KUtilsGrowingArray buffer;
+	KGrowingArray buffer;
 	size_t top; size_t tail;
 };
 
@@ -148,7 +148,7 @@ struct kOutputStreamVar {
 	FILE *fp;
 	StreamApi *streamApi;
 	uintptr_t iconv;
-	KUtilsGrowingArray buffer;
+	KGrowingArray buffer;
 };
 
 #ifdef _MSC_VER
@@ -207,7 +207,7 @@ static void kInputStream_free(KonohaContext *kctx, kObject *o)
 	kInputStream_close(kctx, (kInputStream*)o);
 }
 
-static size_t kInputStream_readToBuffer(KonohaContext *kctx, kInputStream *in, KUtilsGrowingArray *buffer)
+static size_t kInputStream_readToBuffer(KonohaContext *kctx, kInputStream *in, KGrowingArray *buffer)
 {
 	if(!(buffer->bytesize + K_PAGESIZE < buffer->bytemax)) {
 		KLIB Karray_expand(kctx, buffer, buffer->bytesize + K_PAGESIZE);
@@ -217,7 +217,7 @@ static size_t kInputStream_readToBuffer(KonohaContext *kctx, kInputStream *in, K
 	return n;
 }
 
-//static uintptr_t kOutputStream_writeBuffer(KonohaContext *kctx, kOutputStream *out, KUtilsGrowingArray *buffer, size_t offset)
+//static uintptr_t kOutputStream_writeBuffer(KonohaContext *kctx, kOutputStream *out, KGrowingArray *buffer, size_t offset)
 //{
 //	return out->streamApi->write_i(kctx, out->fp, buffer->bytebuf + offset, buffer->bytesize - offset);
 //}

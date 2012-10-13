@@ -402,11 +402,11 @@ typedef uintptr_t                     kfileline_t;
 #define NOPLINE                       0
 
 // halfieldsize id
-typedef kushort_t       kpackage_t;     /* package id*/
+typedef kushort_t       kpackageId_t;     /* package id*/
 typedef kushort_t       ktype_t;        /* cid classid, ty type */
 typedef kushort_t       ksymbol_t;
 typedef kushort_t       kmethodn_t;
-typedef kushort_t       kparamid_t;
+typedef kushort_t       kparamId_t;
 
 typedef struct {
 	uintptr_t flag;
@@ -523,7 +523,7 @@ typedef struct KUtilsKeyValue {
 
 #define KARRAYSIZE(BS, T)   ((BS)/sizeof(T##_t))
 
-typedef struct KUtilsGrowingArray {
+typedef struct KGrowingArray {
 	size_t bytesize;
 	union {
 		char              *bytebuf;
@@ -534,16 +534,16 @@ typedef struct KUtilsGrowingArray {
 		kObjectVar     **refhead;  // stack->ref
 	};
 	size_t bytemax;
-} KUtilsGrowingArray;
+} KGrowingArray;
 
-typedef struct KUtilsWriteBuffer {
-	KUtilsGrowingArray *m;
+typedef struct KGrowingBuffer {
+	KGrowingArray *m;
 	size_t pos;
-} KUtilsWriteBuffer;
+} KGrowingBuffer;
 
-typedef struct KUtilsHashMapEntry {
+typedef struct KHashMapEntry {
 	uintptr_t hcode;
-	struct KUtilsHashMapEntry *next;
+	struct KHashMapEntry *next;
 	union {
 		uintptr_t        key;
 		uintptr_t        unboxKey;
@@ -556,13 +556,13 @@ typedef struct KUtilsHashMapEntry {
 		uintptr_t        unboxValue;
 		void            *ptrValue;
 	};
-} KUtilsHashMapEntry;
+} KHashMapEntry;
 
-typedef struct KUtilsHashMap KUtilsHashMap;
-struct KUtilsHashMap {
-	KUtilsHashMapEntry  *arena;
-	KUtilsHashMapEntry  *unused;
-	KUtilsHashMapEntry **hentry;
+typedef struct KHashMap KHashMap;
+struct KHashMap {
+	KHashMapEntry  *arena;
+	KHashMapEntry  *unused;
+	KHashMapEntry **hentry;
 	size_t arenasize;
 	size_t size;
 	size_t hmax;
@@ -602,8 +602,8 @@ struct KonohaContextVar {
 
 // share, local
 struct KonohaRuntimeVar {
-	KUtilsGrowingArray        classTable;
-	KUtilsHashMap            *longClassNameMapNN;
+	KGrowingArray        classTable;
+	KHashMap            *longClassNameMapNN;
 	kmutex_t          *classTableMutex;
 	/* system shared const */
 	kObject                  *constNull;
@@ -614,21 +614,21 @@ struct KonohaRuntimeVar {
 
 	kmutex_t          *filepackMutex;
 	kArray                   *fileidList;    // file, http://
-	KUtilsHashMap            *fileidMapNN;   //
+	KHashMap            *fileidMapNN;   //
 	kArray                   *packageIdList;
-	KUtilsHashMap            *packageIdMapNN;
-	KUtilsHashMap            *packageMapNO;
+	KHashMap            *packageIdMapNN;
+	KHashMap            *packageMapNO;
 
 
 	kmutex_t          *symbolMutex;
 	kArray                   *symbolList;  // NAME, Name, INT_MAX Int_MAX
-	KUtilsHashMap            *symbolMapNN;
+	KHashMap            *symbolMapNN;
 
 	kmutex_t          *paramMutex;
 	kArray                   *paramList;
-	KUtilsHashMap            *paramMapNN;
+	KHashMap            *paramMapNN;
 	kArray                   *paramdomList;
-	KUtilsHashMap            *paramdomMapNN;
+	KHashMap            *paramdomMapNN;
 };
 
 #define kContext_Debug          ((kshortflag_t)(1<<0))
@@ -645,7 +645,7 @@ struct KonohaStackRuntimeVar {
 	size_t                     stacksize;
 	KonohaStack*               stack_uplimit;
 	kArray                    *gcstack;
-	KUtilsGrowingArray         cwb;
+	KGrowingArray         cwb;
 	// local info
 	kshortflag_t               flag;
 	KonohaContext             *rootctx;
@@ -753,7 +753,7 @@ typedef enum {
 		void         (*free)(KonohaContext*, kObject*);\
 		kObject*     (*fnull)(KonohaContext*, KonohaClass*);\
 		uintptr_t    (*unbox)(KonohaContext*, kObject*);\
-		void         (*p)(KonohaContext*, KonohaValue *, int, KUtilsWriteBuffer *);\
+		void         (*p)(KonohaContext*, KonohaValue *, int, KGrowingBuffer *);\
 		int          (*compareObject)(kObject*, kObject*);\
 		int          (*compareUnboxValue)(uintptr_t, uintptr_t);\
 		kbool_t      (*hasField)(KonohaContext*, kObject*, ksymbol_t, ktype_t);\
@@ -803,10 +803,10 @@ typedef uintptr_t kmagicflag_t;
 
 struct KonohaClassVar {
 	CLASSAPI;
-	kpackage_t   packageId;    kpackage_t    packageDomain;
+	kpackageId_t   packageId;    kpackageId_t    packageDomain;
 	ktype_t      typeId;       kshortflag_t  cflag;
 	ktype_t      baseTypeId;   ktype_t       superTypeId;
-	ktype_t   p0;              kparamid_t    cparamdom;
+	ktype_t   p0;              kparamId_t    cparamdom;
 	kmagicflag_t magicflag;
 	size_t     cstruct_size;
 	KonohaClassField         *fieldItems;
@@ -820,7 +820,7 @@ struct KonohaClassVar {
 		kObject           *defaultValueAsNull;
 		kObjectVar        *defaultValueAsNullVar;
 	};
-	KUtilsHashMap            *constPoolMapNO;
+	KHashMap            *constPoolMapNO;
 	KonohaClass              *searchSimilarClassNULL;
 	KonohaClass              *searchSuperMethodClassNULL;
 };
@@ -941,7 +941,7 @@ struct KonohaClassField {
 typedef struct KonohaObjectHeader {
 	kmagicflag_t magicflag;
 	KonohaClass *ct;
-	KUtilsGrowingArray *kvproto;
+	KGrowingArray *kvproto;
 } KonohaObjectHeader;
 
 struct kObjectVar {
@@ -1177,8 +1177,8 @@ struct kMethodVar {
 	};
 	uintptr_t         flag;
 	ktype_t           typeId;      kmethodn_t  mn;
-	kparamid_t        paramid;      kparamid_t paramdom;
-	kshort_t          delta;        kpackage_t packageId;
+	kparamId_t        paramid;      kparamId_t paramdom;
+	kshort_t          delta;        kpackageId_t packageId;
 	kToken           *sourceCodeToken;
 	union {
 		kObject      *objdata;
@@ -1233,9 +1233,9 @@ struct kFuncVar {
 
 struct kNameSpaceVar {
 	KonohaObjectHeader h;
-	kpackage_t packageId;  	           kshortflag_t syntaxOption;
+	kpackageId_t packageId;  	           kshortflag_t syntaxOption;
 	kNameSpace                        *parentNULL;
-	KUtilsGrowingArray                 constTable;        // const variable
+	KGrowingArray                 constTable;        // const variable
 	size_t                             sortedConstTable;
 	kObject                           *globalObjectNULL;
 	kArray                            *methodList;   // default K_EMPTYARRAY
@@ -1243,7 +1243,7 @@ struct kNameSpaceVar {
 	// the below references are defined in sugar
 	void                              *tokenMatrix;
 	kArray                            *TokenFuncListNULL;
-	KUtilsHashMap                     *syntaxMapNN;
+	KHashMap                     *syntaxMapNN;
 	kArray                            *StmtPatternListNULL;
 };
 
@@ -1353,7 +1353,7 @@ struct KonohaPackageHandlerVar {
 typedef struct KonohaPackageVar KonohaPackage;
 
 struct KonohaPackageVar {
-	kpackage_t                   packageId;
+	kpackageId_t                   packageId;
 	kNameSpace                  *packageNameSpace;
 	KonohaPackageHandler        *packageHandler;
 	kfileline_t                  exportScriptUri;
@@ -1386,36 +1386,36 @@ struct KonohaLibVar {
 	void  (*Kwrite_barrier)(KonohaContext *, kObject *);
 	void  (*KupdateObjectField)(kObject *parent, kObject *oldPtr, kObject *newVal);
 
-	void  (*Karray_init)(KonohaContext *, KUtilsGrowingArray *, size_t);
-	void  (*Karray_resize)(KonohaContext*, KUtilsGrowingArray *, size_t);
-	void  (*Karray_expand)(KonohaContext*, KUtilsGrowingArray *, size_t);
-	void  (*Karray_free)(KonohaContext*, KUtilsGrowingArray *);
+	void  (*Karray_init)(KonohaContext *, KGrowingArray *, size_t);
+	void  (*Karray_resize)(KonohaContext*, KGrowingArray *, size_t);
+	void  (*Karray_expand)(KonohaContext*, KGrowingArray *, size_t);
+	void  (*Karray_free)(KonohaContext*, KGrowingArray *);
 
-	void                (*Kwb_init)(KUtilsGrowingArray *, KUtilsWriteBuffer *);
-	void                (*Kwb_write)(KonohaContext*, KUtilsWriteBuffer *, const char *, size_t);
-	void                (*Kwb_vprintf)(KonohaContext*, KUtilsWriteBuffer *, const char *fmt, va_list ap);
-	void                (*Kwb_printf)(KonohaContext*, KUtilsWriteBuffer *, const char *fmt, ...);
-	const char*         (*Kwb_top)(KonohaContext*, KUtilsWriteBuffer *, int);
-	void                (*Kwb_free)(KUtilsWriteBuffer *);
+	void                (*Kwb_init)(KGrowingArray *, KGrowingBuffer *);
+	void                (*Kwb_write)(KonohaContext*, KGrowingBuffer *, const char *, size_t);
+	void                (*Kwb_vprintf)(KonohaContext*, KGrowingBuffer *, const char *fmt, va_list ap);
+	void                (*Kwb_printf)(KonohaContext*, KGrowingBuffer *, const char *fmt, ...);
+	const char*         (*Kwb_top)(KonohaContext*, KGrowingBuffer *, int);
+	void                (*Kwb_free)(KGrowingBuffer *);
 
-	KUtilsHashMap*      (*Kmap_init)(KonohaContext*, size_t);
-	KUtilsHashMapEntry* (*Kmap_newEntry)(KonohaContext*, KUtilsHashMap *, uintptr_t);
-	KUtilsHashMapEntry* (*Kmap_get)(KonohaContext*, KUtilsHashMap *, uintptr_t);
-	void                (*Kmap_remove)(KUtilsHashMap *, KUtilsHashMapEntry *);
-	void                (*Kmap_each)(KonohaContext*, KUtilsHashMap *, void *thunk, void (*)(KonohaContext*, KUtilsHashMapEntry*, void *));
-	void                (*Kmap_free)(KonohaContext*, KUtilsHashMap *, void (*)(KonohaContext*, void *));
-	ksymbol_t           (*Kmap_getcode)(KonohaContext*, KUtilsHashMap *, kArray *, const char *, size_t, uintptr_t, int, ksymbol_t);
+	KHashMap*      (*Kmap_init)(KonohaContext*, size_t);
+	KHashMapEntry* (*Kmap_newEntry)(KonohaContext*, KHashMap *, uintptr_t);
+	KHashMapEntry* (*Kmap_get)(KonohaContext*, KHashMap *, uintptr_t);
+	void                (*Kmap_remove)(KHashMap *, KHashMapEntry *);
+	void                (*Kmap_each)(KonohaContext*, KHashMap *, void *thunk, void (*)(KonohaContext*, KHashMapEntry*, void *));
+	void                (*Kmap_free)(KonohaContext*, KHashMap *, void (*)(KonohaContext*, void *));
+	ksymbol_t           (*Kmap_getcode)(KonohaContext*, KHashMap *, kArray *, const char *, size_t, uintptr_t, int, ksymbol_t);
 
 	KonohaContextVar *(*KonohaContext_init)(KonohaContext *rootContext, const PlatformApi *api);
 	void (*KonohaContext_free)(KonohaContext *rootContext, KonohaContextVar *ctx);
 
 	kfileline_t     (*KfileId)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
-	kpackage_t      (*KpackageId)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
+	kpackageId_t      (*KpackageId)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
 	ksymbol_t       (*Ksymbol)(KonohaContext*, const char*, size_t, int spol, ksymbol_t def);
 
 	KonohaClass*    (*Kclass)(KonohaContext*, ktype_t, kfileline_t);
 	kString*        (*KonohaClass_shortName)(KonohaContext*, KonohaClass *ct);
-	KonohaClass*    (*KonohaClass_define)(KonohaContext*, kpackage_t, kString *, KDEFINE_CLASS *, kfileline_t);
+	KonohaClass*    (*KonohaClass_define)(KonohaContext*, kpackageId_t, kString *, KDEFINE_CLASS *, kfileline_t);
 	KonohaClass*    (*KonohaClass_Generics)(KonohaContext*, KonohaClass *, ktype_t rty, int psize, kparamtype_t *p);
 	kbool_t         (*KonohaClass_isSubtype)(KonohaContext*, KonohaClass *, KonohaClass *);
 	kbool_t         (*KonohaClass_addField)(KonohaContext*, KonohaClass *, int flag, ktype_t ty, ksymbol_t sym);
@@ -1438,7 +1438,7 @@ struct KonohaLibVar {
 	void            (*kArray_insert)(KonohaContext*, kArray *, size_t, kAbstractObject *);
 	void            (*kArray_clear)(KonohaContext*, kArray *, size_t);
 
-	kparamid_t      (*Kparamdom)(KonohaContext*, int, const kparamtype_t *);
+	kparamId_t      (*Kparamdom)(KonohaContext*, int, const kparamtype_t *);
 	kMethod *       (*new_kMethod)(KonohaContext*, uintptr_t, ktype_t, kmethodn_t, MethodFunc);
 	kParam*         (*kMethod_setParam)(KonohaContext*, kMethod *, ktype_t, int, const kparamtype_t *);
 	void            (*kMethod_setFunc)(KonohaContext*, kMethod*, MethodFunc);

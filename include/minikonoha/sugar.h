@@ -246,7 +246,7 @@ struct SugarSyntaxVar {
 	};
 	kshort_t tokenKonohaChar;
 	kshort_t precedence_op2;          kshort_t precedence_op1;
-	kpackage_t lastLoadedPackageId;
+	kpackageId_t lastLoadedPackageId;
 	kshort_t macroParamSize;
 	kArray                           *macroDataNULL;
 };
@@ -602,7 +602,7 @@ typedef struct {
 typedef struct {
 	KonohaModuleContext h;
 	kArray            *preparedTokenList;
-	KUtilsGrowingArray errorMessageBuffer;
+	KGrowingArray errorMessageBuffer;
 	kArray            *errorMessageList;
 	int                errorMessageCount;
 	kbool_t            isBlockedErrorMessage;

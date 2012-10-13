@@ -51,7 +51,7 @@ static void PyObject_init(KonohaContext *kctx, kObject *o, void *conf)
 	}
 }
 
-static void PyObject_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void PyObject_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	PyObject *pyo =  ((kPyObject*)v[pos].asObject)->self;
 	PyObject* str = pyo->ob_type->tp_str(pyo);
@@ -145,7 +145,7 @@ static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 //static KMETHOD PyObject_toBytes(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kPyObject *po = (kPyObject*)sfp[0].asObject;
-//	KUtilsWriteBuffer wb;
+//	KGrowingBuffer wb;
 //	if(po->self == NULL) {
 //		// [TODO] throw Exception
 //	}
@@ -176,7 +176,7 @@ static KMETHOD String_toPyObject(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kPyObject *po = (kPyObject*)sfp[0].asObject;
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	// assert
 	DBG_ASSERT(po->self != NULL);
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
@@ -202,7 +202,7 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 	//	RETURN_(KLIB new_kString(kctx, t, strlen(t), 0));
 	//}
 	//else {
-	//	KUtilsWriteBuffer wb;
+	//	KGrowingBuffer wb;
 	//	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	//	O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb, 0);
 	//	kString* s = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);

@@ -42,7 +42,7 @@ typedef struct {
 	kArray  *constPool;
 	kArray  *global_value;
 	FgenCode defaultCodeGen;
-	KUtilsHashMap *jitcache;
+	KHashMap *jitcache;
 	kfileline_t uline;
 	KonohaClass *cPointer;
 } kmodjit_t;
@@ -56,7 +56,7 @@ static void kmodjit_setup(KonohaContext *kctx, struct KonohaModule *def, int new
 	(void)kctx;(void)def;(void)newctx;
 }
 
-static void val_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
+static void val_reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
 {
 	kObjectVisitor *visitor = (kObjectVisitor *) thunk;
 	BEGIN_REFTRACE(1);
@@ -278,8 +278,8 @@ static uintptr_t jitcache_hash(kMethod *mtd)
 static kObject *jitcache_get(KonohaContext *kctx, kMethod *mtd)
 {
 	uintptr_t hcode = jitcache_hash(mtd);
-	KUtilsHashMap *map = kmodjit->jitcache;
-	KUtilsHashMapEntry *e = KLIB Kmap_get(kctx, map, hcode);
+	KHashMap *map = kmodjit->jitcache;
+	KHashMapEntry *e = KLIB Kmap_get(kctx, map, hcode);
 	if (e) {
 		return (kObject*) e->unboxValue;
 	} else {
@@ -290,8 +290,8 @@ static kObject *jitcache_get(KonohaContext *kctx, kMethod *mtd)
 static void jitcache_set(KonohaContext *kctx, kMethod *mtd, kObject *f)
 {
 	uintptr_t hcode = jitcache_hash(mtd);
-	KUtilsHashMap *map = kmodjit->jitcache;
-	KUtilsHashMapEntry *newe = KLIB Kmap_newEntry(kctx, map, hcode);
+	KHashMap *map = kmodjit->jitcache;
+	KHashMapEntry *newe = KLIB Kmap_newEntry(kctx, map, hcode);
 	newe->unboxValue = (uintptr_t) f;
 }
 
@@ -595,7 +595,7 @@ static KMETHOD Method_getReturnType(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Method_getFname(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].asMethod;
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	KLIB Kwb_printf(kctx, &wb, "%s%s", T_mn(mtd->mn));
 	kString *fname = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), StringPolicy_POOL);

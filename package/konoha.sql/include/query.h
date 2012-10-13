@@ -214,14 +214,14 @@ int knh_ResultSet_findColumn(KonohaContext *kctx, kResultSet *o, const char* nam
 KMETHOD ResultSet_setInt(KonohaContext *kctx, kResultSet *rs, size_t n, kint_t value)
 {
 	DBG_ASSERT(n < rs->column_size);
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	rs->column[n].ctype = knh_ResultSet_CTYPE__integer;
 	rs->column[n].start = strlen(rs->databuf->text);
 	rs->column[n].len = sizeof(kint_t);
 	KLIB Kwb_write(kctx, &wb, (const char*)(&value), sizeof(kint_t));
-	const char *KUtilsWriteBufferopChar = KLIB Kwb_top(kctx, &wb, 0);
-	memcpy((void*)(rs->databuf->text + rs->column[n].start), KUtilsWriteBufferopChar, sizeof(kint_t)); // including NUL terminate by ensuredZeo
+	const char *KGrowingBufferopChar = KLIB Kwb_top(kctx, &wb, 0);
+	memcpy((void*)(rs->databuf->text + rs->column[n].start), KGrowingBufferopChar, sizeof(kint_t)); // including NUL terminate by ensuredZeo
 	KLIB Kwb_free(&wb);
 }
 
@@ -230,15 +230,15 @@ KMETHOD ResultSet_setInt(KonohaContext *kctx, kResultSet *rs, size_t n, kint_t v
 KMETHOD ResultSet_setFloat(KonohaContext *kctx, kResultSet *rs, size_t n, kfloat_t value)
 {
 	KNH_ASSERT(n < rs->column_size);
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	//kbytes_t t = {sizeof(kfloat_t), {(const char*)(&value)}};
 	rs->column[n].ctype = knh_ResultSet_CTYPE__float;
 	rs->column[n].start = strlen(rs->databuf->text);
 	rs->column[n].len = sizeof(kfloat_t);
 	KLIB Kwb_write(kctx, &wb, (const char*)(&value), sizeof(kint_t));
-	const char *KUtilsWriteBufferopChar = KLIB Kwb_top(kctx, &wb, 0);
-	memcpy((void*)(rs->databuf->text + rs->column[n].start), KUtilsWriteBufferopChar, sizeof(kint_t)); // including NUL terminate by ensuredZeo
+	const char *KGrowingBufferopChar = KLIB Kwb_top(kctx, &wb, 0);
+	memcpy((void*)(rs->databuf->text + rs->column[n].start), KGrowingBufferopChar, sizeof(kint_t)); // including NUL terminate by ensuredZeo
 	KLIB Kwb_free(&wb);
 
 }
@@ -249,14 +249,14 @@ KMETHOD ResultSet_setText(KonohaContext *kctx, kResultSet *o, size_t n, kbytes_t
 {
 
 	DBG_ASSERT(n < o->column_size);
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	o->column[n].ctype = knh_ResultSet_CTYPE__text;
 	o->column[n].start = strlen(o->databuf->text);
 	o->column[n].len = t.len;
 	KLIB Kwb_write(kctx, &wb, (const char*)(t.text), t.len);
-	const char *KUtilsWriteBuffer = KLIB Kwb_top(kctx, &wb, 0);
-	memcpy((void*)(o->databuf->text + o->column[n].start), KUtilsWriteBuffer, t.len); // including NUL terminate by ensuredZeo
+	const char *KGrowingBuffer = KLIB Kwb_top(kctx, &wb, 0);
+	memcpy((void*)(o->databuf->text + o->column[n].start), KGrowingBuffer, t.len); // including NUL terminate by ensuredZeo
 	KLIB Kwb_free(&wb);
 }
 
@@ -265,14 +265,14 @@ KMETHOD ResultSet_setText(KonohaContext *kctx, kResultSet *o, size_t n, kbytes_t
 KMETHOD ResultSet_setBlob(KonohaContext *kctx, kResultSet *o, size_t n, kbytes_t t)
 {
 	KNH_ASSERT(n < o->column_size);
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	o->column[n].ctype = knh_ResultSet_CTYPE__bytes;
 	o->column[n].start = strlen(o->databuf->text);
 	o->column[n].len = t.len;
 	KLIB Kwb_write(kctx, &wb, (const char*)(t.text), t.len);
-	const char *KUtilsWriteBuffer = KLIB Kwb_top(kctx, &wb, 0);
-	memcpy((void*)(o->databuf->text + o->column[n].start), KUtilsWriteBuffer, t.len); // including NUL terminate by ensuredZeo
+	const char *KGrowingBuffer = KLIB Kwb_top(kctx, &wb, 0);
+	memcpy((void*)(o->databuf->text + o->column[n].start), KGrowingBuffer, t.len); // including NUL terminate by ensuredZeo
 	KLIB Kwb_free(&wb);
 }
 

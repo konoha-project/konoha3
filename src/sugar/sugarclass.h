@@ -28,7 +28,7 @@
 /* --------------- */
 /* NameSpace */
 
-static void syntaxMap_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
+static void syntaxMap_reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
 {
 	kObjectVisitor *visitor = (kObjectVisitor *) thunk;
 	SugarSyntax *syn = (SugarSyntax*)p->unboxValue;

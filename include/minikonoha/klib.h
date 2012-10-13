@@ -68,7 +68,7 @@ static kinline kString* FileId_s_(KonohaContext *kctx, kfileline_t fileid)
 
 #define PackageId_s(X)    PackageId_s_(kctx, X)
 #define PackageId_t(X)    S_text(PackageId_s_(kctx, X))
-static kinline kString* PackageId_s_(KonohaContext *kctx, kpackage_t packageId)
+static kinline kString* PackageId_s_(KonohaContext *kctx, kpackageId_t packageId)
 {
 	DBG_ASSERT(packageId < kArray_size(kctx->share->packageIdList));
 	return kctx->share->packageIdList->stringItems[packageId];
@@ -145,15 +145,15 @@ static kinline KonohaClass *CT_p0(KonohaContext *kctx, KonohaClass *ct, ktype_t 
 }
 
 #define uNULL   ((uintptr_t)NULL)
-static kinline void map_addu(KonohaContext *kctx, KUtilsHashMap *kmp, uintptr_t hcode, uintptr_t unboxValue)
+static kinline void map_addu(KonohaContext *kctx, KHashMap *kmp, uintptr_t hcode, uintptr_t unboxValue)
 {
-	KUtilsHashMapEntry *e = KLIB Kmap_newEntry(kctx, kmp, hcode);
+	KHashMapEntry *e = KLIB Kmap_newEntry(kctx, kmp, hcode);
 	e->unboxValue = unboxValue;
 }
 
-static kinline uintptr_t map_getu(KonohaContext *kctx, KUtilsHashMap *kmp, uintptr_t hcode, uintptr_t def)
+static kinline uintptr_t map_getu(KonohaContext *kctx, KHashMap *kmp, uintptr_t hcode, uintptr_t def)
 {
-	KUtilsHashMapEntry *e = KLIB Kmap_get(kctx, kmp, hcode);
+	KHashMapEntry *e = KLIB Kmap_get(kctx, kmp, hcode);
 	while(e != NULL) {
 		if(e->hcode == hcode) return e->unboxValue;
 		e = e->next;

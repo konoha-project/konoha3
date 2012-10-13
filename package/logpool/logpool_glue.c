@@ -65,7 +65,7 @@ static void Log_free(KonohaContext *kctx, kObject *po)
 	o->rawptr = NULL;
 }
 
-static void Log_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb)
+static void Log_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KGrowingBuffer *wb)
 {
 	kRawPtr *self = (kRawPtr *) sfp[0].asObject;
 	struct Log *log = (struct Log *) self->rawptr;

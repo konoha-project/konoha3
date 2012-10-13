@@ -329,7 +329,7 @@ static KMETHOD Expression_DOLLAR(KonohaContext *kctx, KonohaStack *sfp)
 
 static kString *kToken_resolvedEscapeSequence(KonohaContext *kctx, kToken *tk, size_t start)
 {
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	const char *text = S_text(tk->text) + start;
 	const char *end  = S_text(tk->text) + S_size(tk->text);
@@ -458,7 +458,7 @@ static KMETHOD TypeCheck_Assign(KonohaContext *kctx, KonohaStack *sfp)
 				kParam *pa = Method_param(mtd);
 				if (pa->psize == 1) { /* transform "T1 A.get(T2)" to "void A.set(T2, T1)" */
 					kparamtype_t p[2] = {{pa->paramtypeItems[0].ty}, {pa->rtype}};
-					kparamid_t paramdom = KLIB Kparamdom(kctx, 2, p);
+					kparamId_t paramdom = KLIB Kparamdom(kctx, 2, p);
 					foundMethod = kNameSpace_getMethodBySignatureNULL(kctx, ns, cid, MN_toSETTER(sym), paramdom, 2, p);
 					if(foundMethod != NULL) {
 						KFieldSet(leftHandExpr->cons, leftHandExpr->cons->methodItems[0], foundMethod);
@@ -648,7 +648,7 @@ static kMethod *kStmt_lookupOverloadedMethod(KonohaContext *kctx, kStmt *stmt, k
 		}
 		p[i].ty = expr->cons->exprItems[i+2]->ty;
 	}
-	kparamid_t paramdom = KLIB Kparamdom(kctx, psize, p);
+	kparamId_t paramdom = KLIB Kparamdom(kctx, psize, p);
 	kMethod *foundMethod = kNameSpace_getMethodBySignatureNULL(kctx, Stmt_nameSpace(stmt), thisClass->typeId, mtd->mn, paramdom, psize, p);
 	DBG_P("paradom=%d, foundMethod=%p", paramdom, foundMethod);
 	return foundMethod;

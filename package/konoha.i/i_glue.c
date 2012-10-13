@@ -48,7 +48,7 @@ extern "C"{
 //	{0, NULL}
 //};
 //
-//static void MethodAttribute_p(KonohaContext *kctx, kMethod *mtd, KUtilsWriteBuffer *wb)
+//static void MethodAttribute_p(KonohaContext *kctx, kMethod *mtd, KGrowingBuffer *wb)
 //{
 //	uintptr_t i;
 //	for(i = 0; i < 30; i++) {
@@ -65,7 +65,7 @@ extern "C"{
 ////	}
 //}
 
-static void Method_writeAttributeToBuffer(KonohaContext *kctx, kMethod *mtd, KUtilsWriteBuffer *wb)
+static void Method_writeAttributeToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuffer *wb)
 {
 	size_t i;
 	for(i = 0; i < sizeof(MethodFlagData)/sizeof(const char*); i++) {
@@ -76,7 +76,7 @@ static void Method_writeAttributeToBuffer(KonohaContext *kctx, kMethod *mtd, KUt
 	}
 }
 
-static void kMethod_writeToBuffer(KonohaContext *kctx, kMethod *mtd, KUtilsWriteBuffer *wb)
+static void kMethod_writeToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuffer *wb)
 {
 	kParam *pa = Method_param(mtd);
 	Method_writeAttributeToBuffer(kctx, mtd, wb);
@@ -111,7 +111,7 @@ static void copyMethodList(KonohaContext *kctx, ktype_t cid, kArray *s, kArray *
 
 static void dumpMethod(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd)
 {
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	kMethod_writeToBuffer(kctx, mtd, &wb);
 	PLATAPI printf_i("%s\n", KLIB Kwb_top(kctx, &wb, 1));

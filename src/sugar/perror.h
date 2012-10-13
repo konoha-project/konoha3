@@ -49,7 +49,7 @@ static kString* SugarContext_vprintMessage(KonohaContext *kctx, kinfotag_t tagle
 	SugarContext *sugarContext = KonohaContext_getSugarContext(kctx);
 	if(isPrintMessage(kctx, sugarContext, taglevel)) {
 		const char *msg = TAG_t(taglevel);
-		KUtilsWriteBuffer wb;
+		KGrowingBuffer wb;
 		KLIB Kwb_init(&sugarContext->errorMessageBuffer, &wb);
 		size_t pos = wb.m->bytesize;
 		if(uline > 0) {

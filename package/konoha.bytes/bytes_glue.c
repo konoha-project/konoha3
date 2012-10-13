@@ -55,7 +55,7 @@ static void Bytes_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void Bytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void Bytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	kBytes *ba = (kBytes*)v[pos].asObject;
 	size_t i, j, n;
@@ -105,7 +105,7 @@ static void kmodiconv_free(KonohaContext *kctx, struct KonohaModule *baseh)
 static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromCoding, const char *toCoding)
 {
 	kiconv_t conv;
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 
 	char convBuf[CONV_BUFSIZE] = {0};
 	char *presentPtrFrom = fromBa->buf;
@@ -167,9 +167,9 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 	} /* end of converting loop */
 	PLATAPI iconv_close_i((uintptr_t)conv);
 
-	const char *KUtilsWriteBufferopChar = KLIB Kwb_top(kctx, &wb, 1);
+	const char *KGrowingBufferopChar = KLIB Kwb_top(kctx, &wb, 1);
 	struct kBytesVar *toBa = (struct kBytesVar*)KLIB new_kObject(kctx, CT_Bytes, processedTotalSize); // ensure bytes ends with Zero
-	memcpy(toBa->buf, KUtilsWriteBufferopChar, processedTotalSize); // including NUL terminate by ensuredZeo
+	memcpy(toBa->buf, KGrowingBufferopChar, processedTotalSize); // including NUL terminate by ensuredZeo
 	KLIB Kwb_free(&wb);
 	return toBa;
 }

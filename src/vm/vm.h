@@ -89,7 +89,7 @@ typedef void (*TraceFunc)(KonohaContext *kctx, KonohaStack *sfp, kfileline_t pli
 
 typedef struct {
 	kMethod *mtd;
-	ktype_t typeId; kparamid_t signature;
+	ktype_t typeId; kparamId_t signature;
 } kMethodInlineCache;
 
 #if defined(K_USING_THCODE_)
@@ -126,7 +126,7 @@ typedef struct VirtualMachineInstruction {
 struct kBasicBlockVar {
 	KonohaObjectHeader h;
 	kushort_t id;     kushort_t incoming;
-	KUtilsGrowingArray codeTable;
+	KGrowingArray codeTable;
 	kBasicBlock        *nextBlock;
 	kBasicBlock        *branchBlock;
 	VirtualMachineInstruction *code;

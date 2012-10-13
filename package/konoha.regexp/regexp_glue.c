@@ -136,7 +136,7 @@ static kArray *kStringToCharArray(KonohaContext *kctx, kString *bs, int istrim, 
 	return a;
 }
 
-static kString *kwb_newString(KonohaContext *kctx, KUtilsWriteBuffer *wb, int flg)
+static kString *kwb_newString(KonohaContext *kctx, KGrowingBuffer *wb, int flg)
 {
 	return KLIB new_kString(kctx, KLIB Kwb_top(kctx, wb, flg), Kwb_bytesize(wb), StringPolicy_POOL);
 }
@@ -328,7 +328,7 @@ static size_t knh_regexp_matched(kregmatch_t* r, size_t maxmatch)
 	return n;
 }
 
-static void WB_write_regexpfmt(KonohaContext *kctx, KUtilsWriteBuffer *wb, kbytes_t *fmt, const char *base, kregmatch_t *r, size_t matched)
+static void WB_write_regexpfmt(KonohaContext *kctx, KGrowingBuffer *wb, kbytes_t *fmt, const char *base, kregmatch_t *r, size_t matched)
 {
 	const char *ch = fmt->text;
 	const char *eof = ch + fmt->len; // end of fmt
@@ -379,7 +379,7 @@ static void RegExp_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void RegExp_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void RegExp_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	kRegExp *re = v[pos].asRegExp;
 	KLIB Kwb_printf(kctx, wb, "/%s/%s%s%s", S_text(re->pattern),
@@ -548,7 +548,7 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 	kbytes_t fmt = {S_size(sfp[2].asString), {S_text(sfp[2].asString)}};
 	kString *s = s0;
 	if(IS_NOTNULL(re) && S_size(re->pattern) > 0) {
-		KUtilsWriteBuffer wb;
+		KGrowingBuffer wb;
 		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 		const char *str = S_text(s0);  // necessary
 		const char *base = str;

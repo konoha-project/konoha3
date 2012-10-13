@@ -30,7 +30,7 @@
 void test_Karray(KonohaContext *kctx)
 {
     intptr_t i;
-    KUtilsGrowingArray a;
+    KGrowingArray a;
     kctx->klib->Karray_init(kctx, &a, 4 * sizeof(intptr_t));
     for (i = 0; i < 10; ++i) {
         if (a.bytesize == a.bytemax) {
