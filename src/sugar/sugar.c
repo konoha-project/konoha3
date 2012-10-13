@@ -81,13 +81,13 @@ kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, kfileline_t uli
 
 static void SugarContext_reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh, KObjectVisitor *visitor)
 {
-	SugarContext *base = (SugarContext*)baseh;
-	BEGIN_REFTRACE(4);
-	KREFTRACEv(base->preparedTokenList);
-	KREFTRACEv(base->errorMessageList);
-	KREFTRACEv(base->preparedGamma);
-	KREFTRACEv(base->definedMethodList);
-	END_REFTRACE();
+//	SugarContext *base = (SugarContext*)baseh;
+//	BEGIN_REFTRACE(4);
+//	KREFTRACEv(base->preparedTokenList);
+//	KREFTRACEv(base->errorMessageList);
+//	KREFTRACEv(base->preparedGamma);
+//	KREFTRACEv(base->definedMethodList);
+//	END_REFTRACE();
 }
 static void SugarContext_free(KonohaContext *kctx, struct KonohaModuleContext *baseh)
 {
@@ -102,11 +102,13 @@ static void SugarModule_setup(KonohaContext *kctx, struct KonohaModule *def, int
 		SugarContext *base = (SugarContext*)KCALLOC(sizeof(SugarContext), 1);
 		base->h.reftrace = SugarContext_reftrace;
 		base->h.free     = SugarContext_free;
-		KUnsafeFieldInit(base->preparedTokenList, new_(TokenArray, K_PAGESIZE/sizeof(void*)));
+
 		base->errorMessageCount = 0;
-		KUnsafeFieldInit(base->errorMessageList, new_(StringArray, 8));
-		KUnsafeFieldInit(base->definedMethodList, new_(MethodArray, 8));
-		KUnsafeFieldInit(base->preparedGamma, new_(Gamma, NULL));
+		base->preparedTokenList = new_(TokenArray, K_PAGESIZE/sizeof(void*), OnContextConstList);
+		base->errorMessageList  = new_(StringArray, 8, OnContextConstList);
+		base->definedMethodList = new_(MethodArray, 8, OnContextConstList);
+		base->preparedGamma     = new_(Gamma, NULL, OnContextConstList);
+
 		KLIB Karray_init(kctx, &base->errorMessageBuffer, K_PAGESIZE);
 		kctx->modlocal[MOD_sugar] = (KonohaModuleContext*)base;
 	}
@@ -142,7 +144,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	l->kNameSpace_getMethodBySignatureNULL  = kNameSpace_getMethodBySignatureNULL;
 
 	l->kNameSpace_compileAllDefinedMethods  = kNameSpace_compileAllDefinedMethods;
-	l->kNameSpace_reftraceSugarExtension =  kNameSpace_reftraceSugarExtension;
+//	l->kNameSpace_reftraceSugarExtension =  kNameSpace_reftraceSugarExtension;
 	l->kNameSpace_freeSugarExtension =  kNameSpace_freeSugarExtension;
 
 	KDEFINE_CLASS defToken = {0};
@@ -223,7 +225,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kNameSpace_defineSyntax    = kNameSpace_defineSyntax;
 	mod->kNameSpace_getSyntax       = kNameSpace_getSyntax;
 	mod->kArray_addSyntaxRule       = kArray_addSyntaxPattern;
-	mod->kNameSpace_setSugarFunc    = kNameSpace_setSugarFunc;
+//	mod->kNameSpace_setSugarFunc    = kNameSpace_setSugarFunc;
 	mod->kNameSpace_addSugarFunc    = kNameSpace_addSugarFunc;
 	mod->new_kBlock                 = new_kBlock;
 	mod->new_kStmt                  = new_kStmt;

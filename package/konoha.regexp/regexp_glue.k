@@ -6,27 +6,27 @@
 //import("konoha.class");
 //
 //int regexToken(Token tk, String source) {
-//    if (source.get(1) == "/" || source.get(1) == "*") {
+//    if(source.get(1) == "/" || source.get(1) == "*") {
 //        return 0;
 //    }
 //    int i = 1;
 //    int len = source.getSize();
 //    while (i < len) {
-//        if (source.get(i) == "\n") {
+//        if(source.get(i) == "\n") {
 //            "* must close with '/' *"
 //            return 0;
 //        }
-//        if (source.get(i-1) != "\\" && source.get(i) == "/") {
+//        if(source.get(i-1) != "\\" && source.get(i) == "/") {
 //            int end  = i + 1;
 //            int pos = end;
-//            if (end < len) {
-//                if (source.get(end) == "i") {
+//            if(end < len) {
+//                if(source.get(end) == "i") {
 //                    end = end + 1;
 //                }
 //            }
 //            String reg = source.substring(1, pos-2);
 //            String opt = "";
-//            if (pos == end) {
+//            if(pos == end) {
 //                "FIXME: String.substring(0, 0) is not return empty string";
 //            } else {
 //                opt = source.substring(pos, end-pos);

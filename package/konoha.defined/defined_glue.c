@@ -66,15 +66,15 @@ static void filterArrayList(KonohaContext *kctx, kNameSpace *ns, kArray *tokenLi
 {
 	int i;
 	for(i = beginIdx; i < endIdx; i++) {
-		if(i + 1 == endIdx || tokenList->tokenItems[i+1]->resolvedSyntaxInfo->keyword == KW_COMMA) {
-			kTokenVar *tk = tokenList->tokenVarItems[i];
+		if(i + 1 == endIdx || tokenList->TokenItems[i+1]->resolvedSyntaxInfo->keyword == KW_COMMA) {
+			kTokenVar *tk = tokenList->TokenVarItems[i];
 			if(tk->resolvedSyntaxInfo->keyword != KW_SymbolPattern) {  // defined
 				tk->resolvedSyntaxInfo = SYN_(ns, KW_TextPattern);  // switch to text pattern
 			}
 			i++;
 		}
 		while(i < endIdx) {
-			kTokenVar *tk = tokenList->tokenVarItems[i];
+			kTokenVar *tk = tokenList->TokenVarItems[i];
 			i++;
 			if(tk->resolvedSyntaxInfo->keyword == KW_COMMA) break;
 		}
@@ -86,8 +86,8 @@ static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(stmt, tokenList, beginIdx, currentIdx, endIdx);
 	if(beginIdx == currentIdx && beginIdx + 1 < endIdx) {
-		kTokenVar *definedToken = tokenList->tokenVarItems[beginIdx];   // defined
-		kTokenVar *pToken = tokenList->tokenVarItems[beginIdx+1];
+		kTokenVar *definedToken = tokenList->TokenVarItems[beginIdx];   // defined
+		kTokenVar *pToken = tokenList->TokenVarItems[beginIdx+1];
 		if(IS_Array(pToken->subTokenList)) {
 			kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, definedToken->resolvedSyntaxInfo, 1, definedToken);
 			filterArrayList(kctx, Stmt_nameSpace(stmt), pToken->subTokenList, 0, kArray_size(pToken->subTokenList));
@@ -96,17 +96,17 @@ static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static kbool_t defined_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t defined_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("defined"), 0, NULL, 0, Precedence_CStylePREUNARY, NULL, Expression_Defined, NULL, NULL, TypeCheck_Defined, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
 	return true;
 }
 
-static kbool_t defined_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t defined_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

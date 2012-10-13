@@ -124,7 +124,7 @@ static int BUILD_asmJMPF(KonohaContext *kctx, OPJMPF *op)
 	DBG_ASSERT(op->opcode == OPCODE_JMPF);
 	int swap = 0;
 #ifdef _CLASSICVM
-	if (CLASSICVM_BUILD_asmJMPF(kctx, bb, op, &swap)) {
+	if(CLASSICVM_BUILD_asmJMPF(kctx, bb, op, &swap)) {
 		return swap;
 	}
 #endif
@@ -365,7 +365,7 @@ static void BasicBlock_setjump(kBasicBlock *bb)
 static kByteCode* new_ByteCode(KonohaContext *kctx, kBasicBlock *beginBlock, kBasicBlock *endBlock)
 {
 #define CT_ByteCodeVar CT_ByteCode
-	kByteCodeVar *kcode = GCSAFE_new(ByteCodeVar, NULL);
+	kByteCodeVar *kcode = /*G*/new_(ByteCodeVar, NULL);
 	kBasicBlock *prev[1] = {};
 	kcode->fileid = ctxcode->uline; //TODO
 	kcode->codesize = BasicBlock_size(kctx, beginBlock, 0) * sizeof(VirtualMachineInstruction);
@@ -441,7 +441,7 @@ static void Method_threadCode(KonohaContext *kctx, kMethod *mtd, kByteCode *kcod
 		VirtualMachineInstruction *pc = mtd->pc_start;
 		while(1) {
 			dumpOPCODE(kctx, pc, mtd->pc_start);
-			if (pc->opcode == OPCODE_RET) {
+			if(pc->opcode == OPCODE_RET) {
 				break;
 			}
 			pc++;
@@ -617,11 +617,11 @@ static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack 
 
 static void CALL_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int shift, int espidx)
 {
-	kMethod *mtd = expr->cons->methodItems[0];
+	kMethod *mtd = expr->cons->MethodItems[0];
 	DBG_ASSERT(IS_Method(mtd));
 	int i, s = kMethod_is(Static, mtd) ? 2 : 1, thisidx = espidx + K_CALLDELTA;
 #ifdef _CLASSICVM
-	if (CLASSICVM_CALL_asm(kctx, mtd, expr, shift, espidx)) {
+	if(CLASSICVM_CALL_asm(kctx, mtd, expr, shift, espidx)) {
 		return;
 	}
 #endif
@@ -631,7 +631,7 @@ static void CALL_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int s
 		EXPR_asm(kctx, stmt, thisidx + i - 1, exprN, shift, thisidx + i - 1);
 	}
 	int argc = kArray_size(expr->cons) - 2;
-//	if (mtd->mn == MN_new && mtd->invokeMethodFunc == MethodFunc_abstract) {
+//	if(mtd->mn == MN_new && mtd->invokeMethodFunc == MethodFunc_abstract) {
 //		/* do nothing */
 //	} else
 //	if(kMethod_is(Final, mtd) || !kMethod_is(Virtual, mtd)) {
@@ -867,8 +867,8 @@ static void BLOCK_asm(KonohaContext *kctx, kBlock *bk, int shift)
 {
 	int i, espidx = (bk->esp->build == TEXPR_STACKTOP) ? shift + bk->esp->index : bk->esp->index;
 	//DBG_P("shift=%d, espidx=%d build=%d", shift, espidx, bk->esp->build);
-	for(i = 0; i < kArray_size(bk->stmtList); i++) {
-		kStmt *stmt = bk->stmtList->stmtItems[i];
+	for(i = 0; i < kArray_size(bk->StmtList); i++) {
+		kStmt *stmt = bk->StmtList->StmtItems[i];
 		if(stmt->syn == NULL) continue;
 		ctxcode->uline = stmt->uline;
 		switch(stmt->build) {
@@ -920,7 +920,7 @@ static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	ASM_LABEL(kctx, lbBEGIN);
 	BLOCK_asm(kctx, bk, 0);
 	ASM_LABEL(kctx, ctxcode->lbEND);
-	if (mtd->mn == MN_new) {
+	if(mtd->mn == MN_new) {
 		ASM(NMOV, OC_(K_RTNIDX), OC_(0), CT_(mtd->typeId));   // FIXME: Type 'This' must be resolved
 	}
 	ASM(RET);
@@ -983,12 +983,12 @@ static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack 
 {
 //	kMethod *mtd = sfp[K_MTDIDX].methodCallInfo;
 //	ktype_t rtype = mtd->pa->rtype;
-//	if (rtype != TY_void) {
-//		if (TY_isUnbox(rtype)) {
+//	if(rtype != TY_void) {
+//		if(TY_isUnbox(rtype)) {
 //			RETURNi_(0);
 //		} else {
 //			KonohaClass *ct = CT_(rtype);
-//			kObject *nulval = ct->defaultValueAsNull;
+//			kObject *nulval = ct->defaultNullValue_OnGlobalConstList;
 //			RETURN_(nulval);
 //		}
 //	}

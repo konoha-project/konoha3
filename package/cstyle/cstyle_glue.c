@@ -130,7 +130,7 @@ static KMETHOD TokenFunc_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		if(ch == '\'' && prev != '\\') {
 			if(IS_NOTNULL(tk)) {
-				KFieldSet(tk, tk->text, KLIB new_kString(kctx, source + 1, (pos-2), 0));
+				KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, source + 1, (pos-2), 0));
 				tk->unresolvedTokenType = SYM_("$SingleQuotedChar");
 			}
 			RETURNi_(pos);
@@ -147,7 +147,7 @@ static KMETHOD TypeCheck_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
-	if (S_size(tk->text) == 1) {
+	if(S_size(tk->text) == 1) {
 		int ch = S_text(tk->text)[0];
 		RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_int, ch));
 	}
@@ -162,18 +162,18 @@ static KMETHOD Expression_Indexer(KonohaContext *kctx, KonohaStack *sfp)
 	KonohaClass *genericsClass = NULL;
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	int nextIdx = SUGAR TokenUtils_parseTypePattern(kctx, ns, tokenList, beginIdx, endIdx, &genericsClass);
-	if (nextIdx != -1) {  // to avoid Func[T]
-		RETURN_(SUGAR kStmt_parseOperatorExpr(kctx, stmt, tokenList->tokenItems[beginIdx]->resolvedSyntaxInfo, tokenList, beginIdx, beginIdx, endIdx));
+	if(nextIdx != -1) {  // to avoid Func[T]
+		RETURN_(SUGAR kStmt_parseOperatorExpr(kctx, stmt, tokenList->TokenItems[beginIdx]->resolvedSyntaxInfo, tokenList, beginIdx, beginIdx, endIdx));
 	}
 	DBG_P("beginIdx=%d, endIdx=%d", beginIdx, endIdx);
-	kToken *currentToken = tokenList->tokenItems[operatorIdx];
-	if (beginIdx < operatorIdx) {
+	kToken *currentToken = tokenList->TokenItems[operatorIdx];
+	if(beginIdx < operatorIdx) {
 		kExpr *leftExpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
-		if (leftExpr == K_NULLEXPR) {
+		if(leftExpr == K_NULLEXPR) {
 			RETURN_(leftExpr);
 		}
 		/* transform 'Value0 [ Value1 ]=> (Call Value0 get (Value1)) */
-		kTokenVar *tkN = GCSAFE_new(TokenVar, 0);
+		kTokenVar *tkN = new_(TokenVar, 0, OnGcStack);
 		tkN->resolvedSymbol= MN_toGETTER(0);
 		tkN->uline = currentToken->uline;
 		SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
@@ -188,7 +188,7 @@ static KMETHOD Expression_Increment(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
 	DBG_P("beginIdx=%d, endIdx=%d", beginIdx, endIdx);
-	kToken *currentToken = tokenList->tokenItems[operatorIdx];
+	kToken *currentToken = tokenList->TokenItems[operatorIdx];
 	SugarSyntax *opSyntax = currentToken->resolvedSyntaxInfo;
 	TokenSequence macro = {Stmt_nameSpace(stmt), tokenList};
 	TokenSequence_push(kctx, macro);
@@ -198,7 +198,7 @@ static KMETHOD Expression_Increment(KonohaContext *kctx, KonohaStack *sfp)
 			{SYM_("X"), tokenList, operatorIdx+1, endIdx},
 			{0, NULL, 0, 0}, /* sentinel */
 		};
-		SUGAR TokenSequence_applyMacro(kctx, &macro, opSyntax->macroDataNULL, 0, 5, 1, macroParam);
+		SUGAR TokenSequence_applyMacro(kctx, &macro, opSyntax->macroDataNULL_OnList, 0, 5, 1, macroParam);
 	}
 	else {/* (beginIdx < operatorIdx) MACRO ${ int _ = X; X = (X) + 1; _} */
 		TokenSequence macro = {Stmt_nameSpace(stmt), tokenList};
@@ -206,7 +206,7 @@ static KMETHOD Expression_Increment(KonohaContext *kctx, KonohaStack *sfp)
 			{SYM_("X"), tokenList, beginIdx, operatorIdx},
 			{0, NULL, 0, 0}, /* sentinel */
 		};
-		SUGAR TokenSequence_applyMacro(kctx, &macro, opSyntax->macroDataNULL, 5, kArray_size(opSyntax->macroDataNULL), 1, macroParam);
+		SUGAR TokenSequence_applyMacro(kctx, &macro, opSyntax->macroDataNULL_OnList, 5, kArray_size(opSyntax->macroDataNULL_OnList), 1, macroParam);
 	}
 	kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx, NULL/*FIXME*/);
 	TokenSequence_pop(kctx, macro);
@@ -232,7 +232,7 @@ static kbool_t cstyle_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		{ KW_END, }, /* sentinental */
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, defLiteral, ns);
-	SUGAR kNameSpace_setTokenFunc(kctx, ns, SYM_("$SingleQuotedChar"), KonohaChar_Quote, new_SugarFunc(TokenFunc_SingleQuotedChar));
+	SUGAR kNameSpace_setTokenFunc(kctx, ns, SYM_("$SingleQuotedChar"), KonohaChar_Quote, new_SugarFunc(ns, TokenFunc_SingleQuotedChar));
 
 	KDEFINE_SYNTAX defExpression[] = {
 		{ SYM_("[]"), SYNFLAG_ExprPostfixOp2, NULL, Precedence_CStyleCALL, 0, NULL, Expression_Indexer, NULL, NULL, NULL, },
@@ -253,12 +253,12 @@ static kbool_t cstyle_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 
 // --------------------------------------------------------------------------
 
-static kbool_t cstyle_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t cstyle_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t cstyle_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t cstyle_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

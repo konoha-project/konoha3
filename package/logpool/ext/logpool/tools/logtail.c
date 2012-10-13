@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 {
     logpool_t *logpool;
     logpool = logpool_open_client(NULL, "0.0.0.0", 14801);
-    if (argc < 2) {
+    if(argc < 2) {
         fprintf(stderr, "usage: %s key value key value ...\n", argv[0]);
         goto L_error;
     }

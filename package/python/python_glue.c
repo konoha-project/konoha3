@@ -78,7 +78,7 @@ static void PyObject_free(KonohaContext *kctx, kObject *o)
 static void RETURN_PyObject_(KonohaContext *kctx, KonohaStack *sfp, PyObject *pyo)
 {
 	if(pyo != NULL) {
-		RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), (uintptr_t)pyo));
+		RETURN_(KLIB new_kObject(kctx, OnStack, KReturnType(sfp), (uintptr_t)pyo));
 	}
 	else {
 		// ERROR if python object is NULL
@@ -181,22 +181,22 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_ASSERT(po->self != NULL);
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb);
-	kString* s = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
+	kString* s = KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
 	KLIB Kwb_free(&wb);
 	RETURN_(s);
-	//if (PyString_Check(po->self)) {
+	//if(PyString_Check(po->self)) {
 	//	//dec
 	//	t = PyString_AsString(po->self);
 	//	RETURN_(KLIB new_kString(kctx, t, strlen(t), 0));
 	//}
-	//else if (PyUnicode_Check(po->self)) {
+	//else if(PyUnicode_Check(po->self)) {
 	//	//dec
 	//	PyObject* s = PyUnicode_AsUTF8String(po->self);
 	//	// [TODO] there is no t's NULL check. Is it OK?
 	//	t = PyString_AsString(s);
 	//	RETURN_(KLIB new_kString(kctx, t, strlen(t), 0));
 	//}
-	//else if (PyByteArray_Check(po->self)) {
+	//else if(PyByteArray_Check(po->self)) {
 	//	//dec
 	//	t = PyByteArray_AsString(po->self);
 	//	RETURN_(KLIB new_kString(kctx, t, strlen(t), 0));
@@ -236,7 +236,7 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 //	size_t i, n = kArray_size(a);
 //	Py_ssize_t pa_size = (n < PY_SSIZE_MAX)? n : PY_SSIZE_MAX - 1;
 //	PyObject* pa = PyList_New((Py_ssize_t)n);
-//	if (kArray_isUnboxData(a)) {
+//	if(kArray_isUnboxData(a)) {
 //		for (i = 0; i < pa_size; i++) {
 //			// [TODO] transfer array element to PyObject
 //			PyList_SetItem(pa, i, PyInt_FromLong(a->unboxItems[n]));
@@ -394,8 +394,8 @@ char** pyenv_split(char* line, char target)
 	char **tmp, **ret = (char**)malloc(sizeof(char**) * DEFAULT_SIZE);
 	memset(ret, '\0', sizeof(char**) * DEFAULT_SIZE);
 	while (line[0] != '\0'){
-		if (line[0] == target){
-			if (size >= maxsize) {
+		if(line[0] == target){
+			if(size >= maxsize) {
 				maxsize *= 2;
 				tmp = (char**)realloc(ret, maxsize);
 				assert(tmp != NULL);
@@ -431,7 +431,7 @@ static KMETHOD PyObject_import(KonohaContext *kctx, KonohaStack *sfp)
 	PyList_Append((PyObject*)ppath, PyString_FromString("."));
 	// add home dir to python search path.
 	const char *path = PLATAPI getenv_i("PYTHONPATH");
-	if (path != NULL) {
+	if(path != NULL) {
 		size_t i;
 		char** pathes = pyenv_split((char *)path, ':');
 		for (i = 0; pathes[i] != NULL; i++) {
@@ -569,12 +569,12 @@ static kbool_t python_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 	return true;
 }
 
-static kbool_t python_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t python_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t python_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t python_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

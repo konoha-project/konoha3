@@ -59,22 +59,22 @@ static int getopt_long(int argc, char * const *argv, const char *optstring, cons
 #include <ctype.h>
 static int getopt_long(int argc, char * const *argv, const char *optstring, const struct option *longopts, int *longindex)
 {
-	if (optind < argc) {
+	if(optind < argc) {
 		char *arg = argv[optind];
-		if (arg == 0)
+		if(arg == 0)
 			return -1;
-		if (arg[0] == '-' && arg[1] == '-') {
+		if(arg[0] == '-' && arg[1] == '-') {
 			const struct option *opt = longopts;
 			arg += 2;
 			while (opt->name) {
 				char *end = strchr(arg, '=');
-				if (end == 0 && opt->has_arg == no_argument) {
-					if (strcmp(arg, opt->name) == 0)
+				if(end == 0 && opt->has_arg == no_argument) {
+					if(strcmp(arg, opt->name) == 0)
 						*longindex = opt - longopts;
 					optind++;
 					return opt->val;
 				}
-				if (strncmp(arg, opt->name, end - arg) == 0) {
+				if(strncmp(arg, opt->name, end - arg) == 0) {
 					*longindex = opt - longopts;
 					optarg = end+1;
 					optind++;
@@ -83,12 +83,12 @@ static int getopt_long(int argc, char * const *argv, const char *optstring, cons
 				opt++;
 			}
 		}
-		else if (arg[0] == '-') {
+		else if(arg[0] == '-') {
 			arg += 1;
 			const char *c = optstring;
 			while (*c != 0) {
-				if (*c == arg[0]) {
-					if (*(c+1) == ':' && arg[1] == '=') {
+				if(*c == arg[0]) {
+					if(*(c+1) == ':' && arg[1] == '=') {
 						optarg = arg+2;
 					}
 					optind++;
@@ -178,13 +178,13 @@ static void TEST_reportCaughtException(const char *exceptionName, const char *sc
 //		size_t len0, len1;
 //		len0 = fread(buf0, 1, sizeof(buf0), fp0);
 //		len1 = fread(buf1, 1, sizeof(buf1), fp1);
-//		if (len0 != len1) {
+//		if(len0 != len1) {
 //			return 1;//FAILED
 //		}
-//		if (len0 == 0) {
+//		if(len0 == 0) {
 //			break;
 //		}
-//		if (memcmp(buf0, buf1, len0) != 0) {
+//		if(memcmp(buf0, buf1, len0) != 0) {
 //			return 1;//FAILED
 //		}
 //	}
@@ -208,7 +208,7 @@ static int check_result2(FILE *fp0, FILE *fp1)
 			if(strncmp(buf0, buf1, p - buf1 + 1) != 0) return 1; //FAILED;
 			continue;
 		}
-		if (strcmp(buf0, buf1) != 0) {
+		if(strcmp(buf0, buf1) != 0) {
 			return 1;//FAILED
 		}
 	}
@@ -390,18 +390,20 @@ static void konoha_startup(KonohaContext *kctx, const char *startup_script)
 
 static void CommandLine_setARGV(KonohaContext *kctx, int argc, char** argv)
 {
+	INIT_GCSTACK();
 	KonohaClass *CT_StringArray0 = CT_p0(kctx, CT_Array, TY_String);
-	kArray *a = (kArray*)KLIB new_kObject(kctx, CT_StringArray0, 0);
+	kArray *a = (kArray*)KLIB new_kObjectDontUseThis(kctx, CT_StringArray0, 0, _GcStack);
 	int i;
 	for(i = 0; i < argc; i++) {
 		DBG_P("argv=%d, '%s'", i, argv[i]);
-		KLIB kArray_add(kctx, a, KLIB new_kString(kctx, argv[i], strlen(argv[i]), StringPolicy_TEXT));
+		KLIB kArray_add(kctx, a, KLIB new_kString(kctx, _GcStack, argv[i], strlen(argv[i]), StringPolicy_TEXT));
 	}
 	KDEFINE_OBJECT_CONST ObjectData[] = {
 			{"SCRIPT_ARGV", CT_StringArray0->typeId, (kObject*)a},
 			{}
 	};
 	KLIB kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(ObjectData), 0);
+	RESET_GCSTACK();
 }
 
 static struct option long_options2[] = {
@@ -428,14 +430,14 @@ static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc
 	while (1) {
 		int option_index = 0;
 		int c = getopt_long (argc, argv, "icD:I:S:", long_options2, &option_index);
-		if (c == -1) break; /* Detect the end of the options. */
+		if(c == -1) break; /* Detect the end of the options. */
 		switch (c) {
 		case 0:
 			/* If this option set a flag, do nothing else now. */
-			if (long_options2[option_index].flag != 0)
+			if(long_options2[option_index].flag != 0)
 				break;
 			printf ("option %s", long_options2[option_index].name);
-			if (optarg)
+			if(optarg)
 				printf (" with arg %s", optarg);
 			printf ("\n");
 			break;

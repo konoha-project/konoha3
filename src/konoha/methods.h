@@ -31,6 +31,7 @@ extern "C" {
 #endif
 
 /* String */
+//## String Object.toString();
 static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KGrowingBuffer wb;
@@ -42,9 +43,9 @@ static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 	else {
 		kObject_writeToBuffer(kctx, sfp[0].asObject, false/*delim*/, &wb, sfp, 0);
 	}
-	kString* s = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
+	kString* returnValue = KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
 	KLIB Kwb_free(&wb);
-	RETURN_(s);
+	RETURN_(returnValue);
 }
 
 //## @Const method Boolean Boolean.opNOT();
@@ -144,7 +145,7 @@ static KMETHOD Int_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	char buf[40];
 	PLATAPI snprintf_i(buf, sizeof(buf), "%ld", (intptr_t)sfp[0].intValue);
-	RETURN_(KLIB new_kString(kctx, buf, strlen(buf), StringPolicy_ASCII));
+	RETURN_(KLIB new_kString(kctx, OnStack, buf, strlen(buf), StringPolicy_ASCII));
 }
 
 //## @Const method Object Boolean.box();
@@ -158,11 +159,11 @@ static KMETHOD Boolean_box(KonohaContext *kctx, KonohaStack *sfp)
 //## @Const method Object Int.box();
 static KMETHOD Int_box(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KonohaClass *c = O_ct(sfp[K_RTNIDX].asObject);
+	KonohaClass *c = KReturnType(sfp);
 	DBG_P("reqt=%s", CT_t(c));
 	DBG_ASSERT(CT_isUnbox(c));
 	sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;
-	RETURN_(KLIB new_kObject(kctx, c, sfp[0].unboxValue));
+	RETURN_(KLIB new_kObject(kctx, OnStack, c, sfp[0].unboxValue));
 }
 
 //## @Const method String String.toInt();
@@ -174,11 +175,11 @@ static KMETHOD String_toInt(KonohaContext *kctx, KonohaStack *sfp)
 //## @Const @Immutable method String String.opAdd(@Coercion String x);
 static KMETHOD String_opADD(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kString *lhs = sfp[0].asString, *rhs = sfp[1].asString;
-	int spol = (S_isASCII(lhs) && S_isASCII(rhs)) ? StringPolicy_ASCII : StringPolicy_UTF8;
-	kString *s = KLIB new_kString(kctx, NULL, S_size(lhs)+S_size(rhs), spol|StringPolicy_NOCOPY);
-	memcpy(s->buf, S_text(lhs), S_size(lhs));
-	memcpy(s->buf+S_size(lhs), S_text(rhs), S_size(rhs));
+	kString *leftHandString = sfp[0].asString, *rightHandString = sfp[1].asString;
+	int spol = (S_isASCII(leftHandString) && S_isASCII(rightHandString)) ? StringPolicy_ASCII : StringPolicy_UTF8;
+	kString *s = KLIB new_kString(kctx, OnStack, NULL, S_size(leftHandString)+S_size(rightHandString), spol|StringPolicy_NOCOPY);
+	memcpy(s->buf,  S_text(leftHandString), S_size(leftHandString));
+	memcpy(s->buf + S_size(leftHandString), S_text(rightHandString), S_size(rightHandString));
 	RETURN_(s);
 }
 
@@ -230,7 +231,7 @@ static KMETHOD System_assert(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kbool_t cond = sfp[1].boolValue;
 //	konoha_detectFailedAssert = false;
-	if (cond == false) {
+	if(cond == false) {
 		konoha_detectFailedAssert = true;
 		KLIB KonohaRuntime_raise(kctx, EXPT_("Assertion"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
 	}

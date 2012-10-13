@@ -95,7 +95,7 @@ void test_gc(KonohaContext *kctx)
 	/* small size */
 	for (i = 0; i < 10; ++i) {
 		for (j = 0; j < 100; ++j) {
-			kDummy *dummy = new_(Dummy, 0xdeadbeaf);
+			kDummy *dummy = new_(Dummy, 0xdeadbeaf, NULL);
 			assert(__init__ == dummy->x+1);
 		}
 		assert(__init__ == (i+1) * 100);
@@ -107,7 +107,7 @@ void test_gc(KonohaContext *kctx)
 	/* middle size */
 	for (i = 0; i < 100; ++i) {
 		for (j = 0; j < 1000; ++j) {
-			kDummy *dummy = new_(Dummy, 0xdeadbeaf);
+			kDummy *dummy = new_(Dummy, 0xdeadbeaf, NULL);
 			assert(__init__ == dummy->x+1);
 		}
 		assert(__init__ == (i+1) * 1000 + small_object_count);
@@ -143,7 +143,7 @@ static uintptr_t myffs(uintptr_t val)
 {
 	uintptr_t bit;
 
-	if (val == 0)
+	if(val == 0)
 		return 0;
 
 	for (bit = 1; !(val & 1); bit++)

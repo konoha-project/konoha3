@@ -31,18 +31,18 @@ void *logpool_memcache_init(logpool_t *ctx, logpool_param_t *p)
 #ifdef USE_BUFFER_REQ
     memcached_behavior_set (mc->st, MEMCACHED_BEHAVIOR_BUFFER_REQUESTS, 1);
 #endif
-    if (unlikely(mc->st == NULL)) {
+    if(unlikely(mc->st == NULL)) {
         /* TODO Error */
         abort();
     }
     servers = memcached_server_list_append(NULL, host, port, &rc);
-    if (unlikely(rc != MEMCACHED_SUCCESS)) {
+    if(unlikely(rc != MEMCACHED_SUCCESS)) {
         /* TODO Error */
         fprintf(stderr, "Error!! '%s'\n", memcached_strerror(mc->st, rc));
         abort();
     }
     rc = memcached_server_push(mc->st, servers);
-    if (unlikely(rc != MEMCACHED_SUCCESS)) {
+    if(unlikely(rc != MEMCACHED_SUCCESS)) {
         /* TODO Error */
         fprintf(stderr, "Error!! '%s'\n", memcached_strerror(mc->st, rc));
         abort();
@@ -57,7 +57,7 @@ void logpool_memcache_close(logpool_t *ctx)
     memcached_st *st = mc->st;
 #ifdef USE_BUFFER_REQ
     memcached_return_t rc = memcached_flush_buffers(st);
-    if (unlikely(rc != MEMCACHED_SUCCESS)) {
+    if(unlikely(rc != MEMCACHED_SUCCESS)) {
         /* TODO Error */
         fprintf(stderr, "Error!! '%s'\n", memcached_strerror(mc->st, rc));
         abort();
@@ -83,7 +83,7 @@ static void logpool_memcache_flush(logpool_t *ctx, void **args __UNUSED__)
     klen = p - (char*) key;
     mc->buf = buf_orig;
 
-    if (size) {
+    if(size) {
         void (*fn_delim)(logpool_t *) = ctx->formatter->fn_delim;
         fmt->fn(ctx, fmt->k.key, fmt->v.u, fmt->klen, fmt->vlen);
         ++fmt;
@@ -97,11 +97,11 @@ static void logpool_memcache_flush(logpool_t *ctx, void **args __UNUSED__)
     vlen = (char*) mc->buf - value;
     rc = memcached_set(mc->st, key, klen, value, vlen, 0, flags);
 #ifdef USE_BUFFER_REQ
-    if (unlikely(rc == MEMCACHED_BUFFERED)) {
+    if(unlikely(rc == MEMCACHED_BUFFERED)) {
     }
     else
 #endif
-    if (unlikely(rc != MEMCACHED_SUCCESS)) {
+    if(unlikely(rc != MEMCACHED_SUCCESS)) {
         /* TODO Error */
         fprintf(stderr, "Error!! '%s'\n", memcached_strerror(mc->st, rc));
         abort();

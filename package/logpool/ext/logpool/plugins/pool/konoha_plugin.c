@@ -107,7 +107,7 @@ void konoha_plugin_init(KonohaContextVar **konohap, memcached_st **mcp)
     memcached_server_list_st servers;
     memcached_return_t rc;
     servers = memcached_server_list_append(NULL, "127.0.0.1", 11211, &rc);
-    if (rc != MEMCACHED_SUCCESS) {
+    if(rc != MEMCACHED_SUCCESS) {
         fprintf(stderr, "memcached_server_list_append failed\n");
     }
     rc = memcached_server_push(*mcp, servers);
@@ -120,11 +120,11 @@ struct pool_plugin *konoha_plugin_get(KonohaContext *kctx, memcached_st *mc, cha
     uint32_t flags;
     memcached_return_t rc;
     char *script = memcached_get(mc, buf, strlen(buf), &vlen, &flags, &rc);
-    kObject *ev = KLIB new_kObject(kctx, CT_Int/*Dummy*/, (uintptr_t)req);
+    kObject *ev = KLIB new_kObjectDontUseThis(kctx, CT_Int/*Dummy*/, (uintptr_t)req);
     MODSUGAR_eval(kctx, script, 0);
     kNameSpace *ns = KNULL(NameSpace);
     kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_System, MN_("initPlugin"), 1, MPOL_PARAMSIZE|MPOL_FIRST);
-    if (mtd) {
+    if(mtd) {
         BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
         KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
         KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, ev);

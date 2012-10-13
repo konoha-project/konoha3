@@ -45,29 +45,29 @@ static void emit_newline(const char *str, int indent)
 
 static int MethodName_isBinaryOperator(KonohaContext *kctx, kmethodn_t mn)
 {
-	if (mn == MN_opADD ) return 1;
-	if (mn == MN_opSUB ) return 1;
-	if (mn == MN_opMUL ) return 1;
-	if (mn == MN_opDIV ) return 1;
-	if (mn == MN_opMOD ) return 1;
-	if (mn == MN_opEQ  ) return 1;
-	if (mn == MN_opNEQ ) return 1;
-	if (mn == MN_opLT  ) return 1;
-	if (mn == MN_opLTE ) return 1;
-	if (mn == MN_opGT  ) return 1;
-	if (mn == MN_opGTE ) return 1;
-	if (mn == MN_opLAND) return 1;
-	if (mn == MN_opLOR ) return 1;
-	if (mn == MN_opLXOR) return 1;
-	if (mn == MN_opLSFT) return 1;
-	if (mn == MN_opRSFT) return 1;
+	if(mn == MN_opADD ) return 1;
+	if(mn == MN_opSUB ) return 1;
+	if(mn == MN_opMUL ) return 1;
+	if(mn == MN_opDIV ) return 1;
+	if(mn == MN_opMOD ) return 1;
+	if(mn == MN_opEQ  ) return 1;
+	if(mn == MN_opNEQ ) return 1;
+	if(mn == MN_opLT  ) return 1;
+	if(mn == MN_opLTE ) return 1;
+	if(mn == MN_opGT  ) return 1;
+	if(mn == MN_opGTE ) return 1;
+	if(mn == MN_opLAND) return 1;
+	if(mn == MN_opLOR ) return 1;
+	if(mn == MN_opLXOR) return 1;
+	if(mn == MN_opLSFT) return 1;
+	if(mn == MN_opRSFT) return 1;
 	return 0;
 }
 
 static int MethodName_isUnaryOperator(KonohaContext *kctx, kmethodn_t mn)
 {
-	if (mn == MN_opSUB) return 1;
-	if (mn == MN_opNOT) return 1;
+	if(mn == MN_opSUB) return 1;
+	if(mn == MN_opNOT) return 1;
 	return 0;
 }
 
@@ -97,7 +97,7 @@ static void JSVisitor_visitReturnStmt(KonohaContext *kctx, IRBuilder *self, kStm
 {
 	emit_string_js("return ", "", "");
 	kExpr* expr = Stmt_getFirstExpr(kctx, stmt);
-	if (expr != NULL && IS_Expr(expr)) {
+	if(expr != NULL && IS_Expr(expr)) {
 		handleExpr(kctx, self, expr);
 	}
 	emit_newline(";", DUMPER(self)->indent);
@@ -106,7 +106,7 @@ static void JSVisitor_visitReturnStmt(KonohaContext *kctx, IRBuilder *self, kStm
 static void JSVisitor_visitIfStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
 {
 	DUMPER(self)->indent++;
-	emit_string_js("if (", "", "");
+	emit_string_js("if(", "", "");
 	handleExpr(kctx, self, Stmt_getFirstExpr(kctx, stmt));
 	emit_newline(") {", DUMPER(self)->indent++);
 	visitBlock(kctx, self, Stmt_getFirstBlock(kctx, stmt));
@@ -139,15 +139,15 @@ static void JSVisitor_visitUndefinedStmt(KonohaContext *kctx, IRBuilder *self, k
 
 static void JSVisitor_visitConstExpr(KonohaContext *kctx, IRBuilder *self, kExpr *expr)
 {
-	if (expr->ty == TY_System) {
+	if(expr->ty == TY_System) {
 		emit_string_js("System", "", "");
 		return;
-	} else if (Expr_isTerm(expr)) {
+	} else if(Expr_isTerm(expr)) {
 		int is_string = expr->ty == TY_String;
 		kToken *tk = (kToken*)expr->termToken;
-		if (is_string) emit_string_js("\"", "", "");
+		if(is_string) emit_string_js("\"", "", "");
 		emit_string_js(S_text(tk->text), "", "");
-		if (is_string) emit_string_js("\"", "", "");
+		if(is_string) emit_string_js("\"", "", "");
 		return;
 	}	
 	kObject *obj = expr->objectConstValue;
@@ -199,13 +199,13 @@ static void JSVisitor_visitFieldExpr(KonohaContext *kctx, IRBuilder *self, kExpr
 static void JSVisitor_visitCallExpr(KonohaContext *kctx, IRBuilder *self, kExpr *expr)
 {
 	kMethod *mtd = CallExpr_getMethod(expr);
-	if (kArray_size(expr->cons) == 2 && MethodName_isUnaryOperator(kctx, mtd->mn)) {
+	if(kArray_size(expr->cons) == 2 && MethodName_isUnaryOperator(kctx, mtd->mn)) {
 		emit_string_js("", T_mn(mtd->mn));
 		emit_string_js("(", "", "");
 		handleExpr(kctx, self, kExpr_at(expr, 1));
 		emit_string_js(")", "", "");
 	}
-	else if (MethodName_isBinaryOperator(kctx, mtd->mn)) {
+	else if(MethodName_isBinaryOperator(kctx, mtd->mn)) {
 		emit_string_js("(", "", "");
 		handleExpr(kctx, self, kExpr_at(expr, 1));
 		emit_string_js("", T_mn(mtd->mn));
@@ -221,7 +221,7 @@ static void JSVisitor_visitCallExpr(KonohaContext *kctx, IRBuilder *self, kExpr 
 		unsigned n = kArray_size(expr->cons);
 		for (i = 2; i < n;) {
 			handleExpr(kctx, self, kExpr_at(expr, i));
-			if (++i < n) {
+			if(++i < n) {
 				emit_string_js(", ", "", "");
 			}
 		}
@@ -236,7 +236,7 @@ static void JSVisitor_visitAndExpr(KonohaContext *kctx, IRBuilder *self, kExpr *
 	emit_string_js("(", "", "");
 	for (i = 1; i < kArray_size(expr->cons);) {
 		handleExpr(kctx, self, kExpr_at(expr, i));
-		if (++i < n) {
+		if(++i < n) {
 			emit_string_js(" && ", "", "");
 		}
 	}
@@ -250,7 +250,7 @@ static void JSVisitor_visitOrExpr(KonohaContext *kctx, IRBuilder *self, kExpr *e
 	emit_string_js("(", "", "");
 	for (i = 1; i < kArray_size(expr->cons);) {
 		handleExpr(kctx, self, kExpr_at(expr, i));
-		if (++i < n) {
+		if(++i < n) {
 			emit_string_js(" || ", "", "");
 		}
 	}
@@ -278,13 +278,13 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	kParam *pa = Method_param(mtd);
-	if (mtd->mn) {
+	if(mtd->mn) {
 		KLIB Kwb_printf(kctx, &wb, "%s.%s%s = function(", CT_t(CT_(mtd->typeId)), T_mn(mtd->mn));
 	} else {
 		KLIB Kwb_printf(kctx, &wb, "(function(", CT_t(CT_(mtd->typeId)), T_mn(mtd->mn));
 	}
 	for (i = 0; i < pa->psize; i++) {
-		if (i != 0) {
+		if(i != 0) {
 			KLIB Kwb_putc(kctx, &wb, ", ", 2);
 		}
 		KLIB Kwb_printf(kctx, &wb, "%s", SYM_t(pa->paramtypeItems[i].fn));
@@ -297,7 +297,7 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 static void JSVisitor_free(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
 {
 	KFREE(builder->local_fields, sizeof(int));
-	if (mtd->mn) {
+	if(mtd->mn) {
 		emit_newline("}", --DUMPER(builder)->indent);
 	} else {
 		emit_newline("})();", DUMPER(builder)->indent);

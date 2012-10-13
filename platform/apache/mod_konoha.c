@@ -49,7 +49,7 @@ static const char *apache_package_path = NULL;
 
 static const char *apache_formatPackagePath(char *buf, size_t bufsiz, const char *packageName, const char *ext)
 {
-	if (apache_package_path) {
+	if(apache_package_path) {
 		snprintf(buf, bufsiz, "%s/%s/%s%s", apache_package_path, packageName, packname(packageName), ext);
 		FILE *fp = fopen(buf, "r");
 		if(fp != NULL) {
@@ -165,13 +165,13 @@ static KMETHOD Request_logError(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Request_getHeadersIn(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRequest *self = (kRequest *) sfp[0].asObject;
-	RETURN_(KLIB new_kObject(kctx, CT_AprTable, (uintptr_t)self->r->headers_in));
+	RETURN_(KLIB new_kObjectDontUseThis(kctx, CT_AprTable, (uintptr_t)self->r->headers_in));
 }
 // ## AprTable Request.getHeadersOut();
 static KMETHOD Request_getHeadersOut(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRequest *self = (kRequest *) sfp[0].asObject;
-	RETURN_(KLIB new_kObject(kctx, CT_AprTable, (uintptr_t)self->r->headers_out));
+	RETURN_(KLIB new_kObjectDontUseThis(kctx, CT_AprTable, (uintptr_t)self->r->headers_out));
 }
 
 // ## void AprTable.add(String key, String val)
@@ -196,12 +196,12 @@ static KMETHOD AprTable_set(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD AprTable_getElts(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kAprTable *self = (kAprTable *) sfp[0].asObject;
-	kArray *arr = (kArray*)KLIB new_kObject(kctx, CT_Array, 0);
+	kArray *arr = (kArray*)KLIB new_kObjectDontUseThis(kctx, CT_Array, 0);
 	const apr_array_header_t *apr_arr = apr_table_elts(self->tbl);
 	const apr_table_entry_t *entries = (apr_table_entry_t *)apr_arr->elts;
 	int i=0;
 	for (i=0; i<apr_arr->nelts; i++) {
-		KLIB kArray_add(kctx, arr, (kAprTableEntry *)KLIB new_kObject(kctx, CT_AprTableEntry, (uintptr_t)entries));
+		KLIB kArray_add(kctx, arr, (kAprTableEntry *)KLIB new_kObjectDontUseThis(kctx, CT_AprTableEntry, (uintptr_t)entries));
 		entries++;
 	}
 	RETURN_(arr);
@@ -264,10 +264,10 @@ static int konoha_handler(request_rec *r)
 {
 	//konoha_config_t *conf = ap_get_module_config(
 	//		r->server->module_config, &konoha_module);
-	if (strcmp(r->handler, "konoha-script")) {
+	if(strcmp(r->handler, "konoha-script")) {
 		return DECLINED;
 	}
-	// if (r->method_number != M_GET) {
+	// if(r->method_number != M_GET) {
 	// 	 TODO 
 	// 	return HTTP_METHOD_NOT_ALLOWED;
 	// }
@@ -277,20 +277,20 @@ static int konoha_handler(request_rec *r)
 	//assert(cRequest != NULL);
 	r->content_encoding = "utf-8";
 	ap_log_rerror(APLOG_MARK, APLOG_CRIT, 0, r, "filename=%s", r->filename);
-	if (konoha_load(konoha, r->filename)) {
+	if(konoha_load(konoha, r->filename)) {
 		return DECLINED;
 	}
 
 	KonohaContext *kctx = konoha;
 	kNameSpace *ns = KNULL(NameSpace);
 	kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_System, MN_("handler"), -1);  // fixme
-	if (mtd == NULL) {
+	if(mtd == NULL) {
 		ap_log_rerror(APLOG_MARK, APLOG_CRIT, 0, r, "Apache.handler() not found");
 		return -1;
 	}
 
 	/* XXX: We assume Request Object may not be freed by GC */
-	kObject *req_obj = KLIB new_kObject(kctx, cRequest, (uintptr_t)r);
+	kObject *req_obj = KLIB new_kObjectDontUseThis(kctx, cRequest, (uintptr_t)r);
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, req_obj);
@@ -321,10 +321,10 @@ static const char *set_package_dir(cmd_parms *cmd, void *vp, const char *arg)
 	const char *err = ap_check_cmd_context(cmd, NOT_IN_FILES | NOT_IN_LIMIT);
 	konoha_config_t *conf = (konoha_config_t *)
 		ap_get_module_config(cmd->server->module_config, &konoha_module);
-	if (err != NULL) {
+	if(err != NULL) {
 		return err;
 	}
-	if (arg) {
+	if(arg) {
 		conf->package_dir = apr_pstrdup(cmd->pool, arg);
 	}
 	return NULL;

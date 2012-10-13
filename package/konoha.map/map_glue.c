@@ -81,7 +81,7 @@ static void kMap_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visit
 static void kMap_free(KonohaContext *kctx, kObject *o)
 {
 	kMap *map = (kMap*)o;
-	if (map->map != NULL) {
+	if(map->map != NULL) {
 		KLIB Kmap_free(kctx, map->map, NULL);
 	}
 }
@@ -182,10 +182,10 @@ static KMETHOD Map_keys(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMap *m = (kMap*)sfp[0].asObject;
 	KonohaClass *cArray = CT_p0(kctx, CT_Array, O_p0(m));
-	kArray *a = (kArray*)(KLIB new_kObject(kctx, cArray, m->map->size));
-	KUnsafeFieldSet(sfp[K_RTNIDX].asArray, a);
+	kArray *a = (kArray*)(KLIB new_kObjectDontUseThis(kctx, cArray, m->map->size, OnStack));
+	KPreSetReturn(a);
 	KLIB Kmap_each(kctx, m->map, (void*)a, MapEntry_appendKey);
-	RETURN_DefaultObjectValue();
+	KReturnPreSetValue(a);
 }
 
 //## Map<T> Map<T>.new();
@@ -212,7 +212,7 @@ static kbool_t map_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	SETSTRUCTNAME(defMap, Map);
 	defMap.cflag     = kClass_Final;
 	defMap.cparamsize = 1;
-	defMap.cparamItems = &cparam;
+	defMap.cParamItems = &cparam;
 	defMap.init      = kMap_init;
 	defMap.reftrace  = kMap_reftrace;
 	defMap.free      = kMap_free;
@@ -250,13 +250,13 @@ static KMETHOD TypeCheck_MapLiteral(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static kbool_t map_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t map_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
-	SUGAR kNameSpace_addSugarFunc(kctx, ns, KW_BlockPattern, SugarFunc_TypeCheck, new_SugarFunc(TypeCheck_MapLiteral));
+	SUGAR kNameSpace_addSugarFunc(kctx, ns, KW_BlockPattern, SugarFunc_TypeCheck, new_SugarFunc(ns, TypeCheck_MapLiteral));
 	return true;
 }
 
-static kbool_t map_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t map_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

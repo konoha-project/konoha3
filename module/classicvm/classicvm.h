@@ -102,7 +102,7 @@ static void CLASSICVM_BasicBlock_peephole(KonohaContext *kctx, kBasicBlock *bb)
 				_REMOVE(opP);
 			}
 		}
-		if (op->opcode == OPCODE_NMOV || op->opcode == OPCODE_OMOV) {
+		if(op->opcode == OPCODE_NMOV || op->opcode == OPCODE_OMOV) {
 			klr_NMOV_t *opNMOV = (klr_NMOV_t *) op;
 			if(opNMOV->a == opNMOV->b) {
 				_REMOVE(op);
@@ -245,41 +245,41 @@ static void ASM_CHKIDXC(KonohaContext *kctx, int aidx, int n)
 
 static kopcode_t OPimn(KonohaContext *kctx, kmethodn_t mn, int diff)
 {
-	if (mn == MN_opNEG ) return OPCODE_iNEG;
-	if (mn == MN_opADD ) return OPCODE_iADD + diff;
-	if (mn == MN_opSUB ) return OPCODE_iSUB + diff;
-	if (mn == MN_opMUL ) return OPCODE_iMUL + diff;
-	if (mn == MN_opDIV ) return OPCODE_iDIV + diff;
-	if (mn == MN_opMOD ) return OPCODE_iMOD + diff;
-	if (mn == MN_opEQ  ) return OPCODE_iEQ  + diff;
-	if (mn == MN_opNEQ ) return OPCODE_iNEQ + diff;
-	if (mn == MN_opLT  ) return OPCODE_iLT  + diff;
-	if (mn == MN_opLTE ) return OPCODE_iLTE + diff;
-	if (mn == MN_opGT  ) return OPCODE_iGT  + diff;
-	if (mn == MN_opGTE ) return OPCODE_iGTE + diff;
+	if(mn == MN_opNEG ) return OPCODE_iNEG;
+	if(mn == MN_opADD ) return OPCODE_iADD + diff;
+	if(mn == MN_opSUB ) return OPCODE_iSUB + diff;
+	if(mn == MN_opMUL ) return OPCODE_iMUL + diff;
+	if(mn == MN_opDIV ) return OPCODE_iDIV + diff;
+	if(mn == MN_opMOD ) return OPCODE_iMOD + diff;
+	if(mn == MN_opEQ  ) return OPCODE_iEQ  + diff;
+	if(mn == MN_opNEQ ) return OPCODE_iNEQ + diff;
+	if(mn == MN_opLT  ) return OPCODE_iLT  + diff;
+	if(mn == MN_opLTE ) return OPCODE_iLTE + diff;
+	if(mn == MN_opGT  ) return OPCODE_iGT  + diff;
+	if(mn == MN_opGTE ) return OPCODE_iGTE + diff;
 #ifdef OPCODE_iAND
-	if (mn == MN_opLAND) return OPCODE_iAND + diff;
-	if (mn == MN_opLOR ) return OPCODE_iOR  + diff;
-	if (mn == MN_opLXOR) return OPCODE_iXOR + diff;
-	if (mn == MN_opLSFT) return OPCODE_iLSFT+ diff;
-	if (mn == MN_opRSFT) return OPCODE_iRSFT+ diff;
+	if(mn == MN_opLAND) return OPCODE_iAND + diff;
+	if(mn == MN_opLOR ) return OPCODE_iOR  + diff;
+	if(mn == MN_opLXOR) return OPCODE_iXOR + diff;
+	if(mn == MN_opLSFT) return OPCODE_iLSFT+ diff;
+	if(mn == MN_opRSFT) return OPCODE_iRSFT+ diff;
 #endif
 	return OPCODE_NOP;
 }
 
 static kopcode_t OPfmn(KonohaContext *kctx, kmethodn_t mn, int diff)
 {
-	if (mn == MN_opNEG) return OPCODE_fNEG;
-	if (mn == MN_opADD) return OPCODE_fADD + diff;
-	if (mn == MN_opSUB) return OPCODE_fSUB + diff;
-	if (mn == MN_opMUL) return OPCODE_fMUL + diff;
-	if (mn == MN_opDIV) return OPCODE_fDIV + diff;
-	if (mn == MN_opEQ ) return OPCODE_fEQ  + diff;
-	if (mn == MN_opNEQ) return OPCODE_fNEQ + diff;
-	if (mn == MN_opLT ) return OPCODE_fLT  + diff;
-	if (mn == MN_opLTE) return OPCODE_fLTE + diff;
-	if (mn == MN_opGT ) return OPCODE_fGT  + diff;
-	if (mn == MN_opGTE) return OPCODE_fGTE + diff;
+	if(mn == MN_opNEG) return OPCODE_fNEG;
+	if(mn == MN_opADD) return OPCODE_fADD + diff;
+	if(mn == MN_opSUB) return OPCODE_fSUB + diff;
+	if(mn == MN_opMUL) return OPCODE_fMUL + diff;
+	if(mn == MN_opDIV) return OPCODE_fDIV + diff;
+	if(mn == MN_opEQ ) return OPCODE_fEQ  + diff;
+	if(mn == MN_opNEQ) return OPCODE_fNEQ + diff;
+	if(mn == MN_opLT ) return OPCODE_fLT  + diff;
+	if(mn == MN_opLTE) return OPCODE_fLTE + diff;
+	if(mn == MN_opGT ) return OPCODE_fGT  + diff;
+	if(mn == MN_opGTE) return OPCODE_fGTE + diff;
 	return OPCODE_NOP;
 }
 

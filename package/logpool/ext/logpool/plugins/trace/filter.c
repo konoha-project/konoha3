@@ -48,7 +48,7 @@ static void logpool_Filter_close(logpool_t *ctx)
 static void logpool_Filter_flush(logpool_t *ctx, void **args)
 {
     filter_t *filter = cast(filter_t *, ctx->connection);
-    if (filter->emitLog) {
+    if(filter->emitLog) {
         logpool_format_flush(ctx);
         cast(struct logpool *, ctx)->connection = filter->connection;
         filter->api->fn_flush(ctx, args);

@@ -128,7 +128,7 @@ static KMETHOD Expr_getSingle(KonohaContext *kctx, KonohaStack *sfp)
 
 static kArray *get_stack(KonohaContext *kctx, kArray *g)
 {
-	if (!g->ObjectItems[0]) {
+	if(!g->ObjectItems[0]) {
 		KFieldSet(g, g->ObjectItems[0], ((kObject*)new_(Array, 0)));
 	}
 	return (kArray*)g->ObjectItems[0];
@@ -280,7 +280,7 @@ static kObject *jitcache_get(KonohaContext *kctx, kMethod *mtd)
 	uintptr_t hcode = jitcache_hash(mtd);
 	KHashMap *map = kmodjit->jitcache;
 	KHashMapEntry *e = KLIB Kmap_get(kctx, map, hcode);
-	if (e) {
+	if(e) {
 		return (kObject*) e->unboxValue;
 	} else {
 		return K_NULL;
@@ -415,7 +415,7 @@ static KMETHOD Block_getEspIndex(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Block_getBlocks(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBlock *bk = (kBlock *) sfp[0].asObject;
-	RETURN_(bk->stmtList);
+	RETURN_(bk->StmtList);
 }
 
 //## int Array.getSize();
@@ -441,7 +441,7 @@ static KMETHOD Stmt_getObjectNULL(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kStmt *stmt = (kStmt*) sfp[0].asObject;
 	kObject *o = kStmt_getObjectNULL(kctx, stmt, sfp[1].intValue);
-	if (!o) {
+	if(!o) {
 		o = K_NULL;
 	}
 	RETURN_(o);
@@ -471,7 +471,7 @@ static KMETHOD Object_toExpr(KonohaContext *kctx, KonohaStack *sfp)
 
 kObject *boxing_jit(KonohaContext *kctx, ktype_t cid, uintptr_t data)
 {
-	return KLIB new_kObject(kctx, CT_(cid), data);
+	return KLIB new_kObjectDontUseThis(kctx, CT_(cid), data);
 }
 
 // --------------------------------------------------------------------------
@@ -545,7 +545,7 @@ static KMETHOD Array_erase(KonohaContext *kctx, KonohaStack *sfp)
 	size_t i, j = 0;
 	kArray *dst = new_(Array, (asize-1));
 	for (i = 0; i < asize; ++i) {
-		if (i != n) {
+		if(i != n) {
 			KFieldSet(dst, dst->ObjectItems[j], src->ObjectItems[i]);
 			++j;
 		}
@@ -849,12 +849,12 @@ static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 	return true;
 }
 
-static kbool_t ijit_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t ijit_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t ijit_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t ijit_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

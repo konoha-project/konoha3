@@ -11,7 +11,7 @@
 
 int main(int argc, char **argv)
 {
-    if (argc < 2) {
+    if(argc < 2) {
         fprintf(stderr, "usage: %s 'compiled-llvm-bitcode'\n", argv[0]);
         return 1;
     }
@@ -22,7 +22,7 @@ int main(int argc, char **argv)
     logpool_procedure(logpool, "tid_usage", strlen("tid_usage"));
     struct Log *logbuf = alloca(sizeof(struct Log) + 256);
     while (1) {
-        if (logpool_client_get(logpool, logbuf, 256) == NULL) {
+        if(logpool_client_get(logpool, logbuf, 256) == NULL) {
             break;
         }
         log_dump(stderr, "log=(", logbuf, ")\n", 1);

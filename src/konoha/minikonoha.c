@@ -76,9 +76,10 @@ static void KonohaStackRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx, 
 	for(i = 0; i < stacksize; i++) {
 		KUnsafeFieldInit(base->stack[i].asObject, K_NULL);
 	}
-	KUnsafeFieldInit(base->gcstack, new_(Array, K_PAGESIZE/sizeof(void*)));
+	KUnsafeFieldInit(base->ContextConstList, new_(Array, 8, OnField));
+	KUnsafeFieldInit(base->OptionalErrorInfo, TS_EMPTY);
+	base->gcstack_OnContextConstList = new_(Array, K_PAGESIZE/sizeof(void*), base->ContextConstList);
 	KLIB Karray_init(kctx, &base->cwb, K_PAGESIZE * 4);
-	KUnsafeFieldInit(base->optionalErrorMessage, TS_EMPTY);
 	ctx->esp = base->stack;
 	ctx->stack = base;
 }
@@ -91,8 +92,8 @@ static void KonohaStackRuntime_reftrace(KonohaContext *kctx, KonohaContextVar *c
 		KREFTRACEv(sp[0].asObject);
 		sp++;
 	}
-	KREFTRACEv(ctx->stack->gcstack);
-	KREFTRACEv(ctx->stack->optionalErrorMessage);
+	KREFTRACEv(ctx->stack->ContextConstList);
+	KREFTRACEv(ctx->stack->OptionalErrorInfo);
 	END_REFTRACE();
 }
 

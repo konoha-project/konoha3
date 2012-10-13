@@ -38,7 +38,7 @@ struct konohadev_t {
 	struct cdev cdev;
 	KonohaContext*  konoha;
 	char* buffer;
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,25))
+#if(LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,25))
 	struct semaphore sem;
 #endif
 };
@@ -203,7 +203,7 @@ static void knh_dev_setup(struct konohadev_t *dev)
 	sema_init(&dev->sem,1);
 
 	err = cdev_add(&dev->cdev, dev->id, 1);
-	if (err) {
+	if(err) {
 		printk(KERN_ALERT "%s:cdev_add() failed(%d)\n",msg,err);
 	}
 }

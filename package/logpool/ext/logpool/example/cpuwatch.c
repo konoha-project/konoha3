@@ -25,7 +25,7 @@ static char *loadFile(char *file, size_t *plen)
 
 int main(int argc, char **argv)
 {
-    if (argc < 2) {
+    if(argc < 2) {
         fprintf(stderr, "usage: %s 'script.k'\n", argv[0]);
         return 1;
     }
@@ -33,7 +33,7 @@ int main(int argc, char **argv)
     memcached_server_list_st servers;
     memcached_return_t rc;
     servers = memcached_server_list_append(NULL, "127.0.0.1", 11211, &rc);
-    if (rc != MEMCACHED_SUCCESS) {
+    if(rc != MEMCACHED_SUCCESS) {
         fprintf(stderr, "memcached_server_list_append failed\n");
     }
     rc = memcached_server_push(mc, servers);
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
     logpool_procedure(logpool, "cpu_watch", strlen("cpu_watch"));
     struct Log *logbuf = alloca(sizeof(struct Log) + 256);
     while (1) {
-        if (logpool_client_get(logpool, logbuf, 256) == NULL) {
+        if(logpool_client_get(logpool, logbuf, 256) == NULL) {
             break;
         }
         log_dump(stderr, "log=(", logbuf, ")\n", 1);

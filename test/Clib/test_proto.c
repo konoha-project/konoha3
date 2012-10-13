@@ -37,9 +37,9 @@ static void each(KonohaContext *kctx, void *thunk, KKeyValue *d)
 static void test_proto_value(KonohaContext *kctx)
 {
 	struct timeval timer;
-	kObject *o0 = new_(Object, 0);
-	kObject *o1 = new_(Object, 0);
-	kObject *o2 = new_(Object, 0);
+	kObject *o0 = new_(Object, 0, GcUnsafe);
+	kObject *o1 = new_(Object, 0, GcUnsafe);
+	kObject *o2 = new_(Object, 0, GcUnsafe);
 	uintptr_t i;
 
 	reset_timer(&timer);
@@ -149,9 +149,9 @@ static void each_object(KonohaContext *kctx, void *thunk, KKeyValue *d)
 static void test_proto_object(KonohaContext *kctx)
 {
 	struct timeval timer;
-	kObject *o0 = new_(Object, 0);
-	kObject *o1 = new_(Object, 0);
-	kObject *o2 = new_(Object, 0);
+	kObject *o0 = new_(Object, 0, GcUnsafe);
+	kObject *o1 = new_(Object, 0, GcUnsafe);
+	kObject *o2 = new_(Object, 0, GcUnsafe);
 	uintptr_t i;
 
 	reset_timer(&timer);

@@ -11,7 +11,7 @@ void main() {
 	int i = 0;
 	while(i < strs.getSize()) {
 		String line = strs[i];
-		if (line.search(/名詞/) > -1) {
+		if(line.search(/名詞/) > -1) {
 			String[] noun = line.split(/[ \t]+/);
 			System.p(noun[0]);
 		}

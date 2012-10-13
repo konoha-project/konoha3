@@ -56,9 +56,9 @@ static kExpr *TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *g
 	//DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", syn, syn->parentSyntaxNULL, PSYM_t(syn->keyword));
 	while(true) {
 		int index, size;
-		kFunc **funcItems = SugarSyntax_funcTable(kctx, syn, SugarFunc_TypeCheck, &size);
+		kFunc **FuncItems = SugarSyntax_funcTable(kctx, syn, SugarFunc_TypeCheck, &size);
 		for(index = size - 1; index >= 0; index--) {
-			kExpr *texpr = callTypeCheckFunc(kctx, funcItems[index], &callCount, stmt, expr, gma, reqty);
+			kExpr *texpr = callTypeCheckFunc(kctx, FuncItems[index], &callCount, stmt, expr, gma, reqty);
 			if(Stmt_isERR(stmt)) return K_NULLEXPR;
 			if(texpr->ty != TY_var) return texpr;
 		}
@@ -85,7 +85,7 @@ static void kExpr_putConstValue(KonohaContext *kctx, kExpr *expr, KonohaStack *s
 	} else if(expr->build == TEXPR_NCONST) {
 		sfp[0].unboxValue = expr->unboxConstValue;
 	} else if(expr->build == TEXPR_NEW) {
-		KUnsafeFieldSet(sfp[0].asObject, KLIB new_kObject(kctx, CT_(expr->ty), 0));
+		KUnsafeFieldSet(sfp[0].asObject, KLIB new_kObject(kctx, OnField, CT_(expr->ty), 0));
 	} else {
 		assert(expr->build == TEXPR_NULL);
 		KUnsafeFieldSet(sfp[0].asObject, KLIB Knull(kctx, CT_(expr->ty)));
@@ -96,10 +96,10 @@ static void kExpr_putConstValue(KonohaContext *kctx, kExpr *expr, KonohaStack *s
 static kExpr* kExprCall_toConstValue(KonohaContext *kctx, kExpr *expr, kArray *cons, ktype_t rtype)
 {
 	size_t i, size = kArray_size(cons), psize = size - 2;
-	kMethod *mtd = cons->methodItems[0];
+	kMethod *mtd = cons->MethodItems[0];
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + psize);
 	for(i = 1; i < size; i++) {
-		kExpr_putConstValue(kctx, cons->exprItems[i], lsfp + K_CALLDELTA + i - 1);
+		kExpr_putConstValue(kctx, cons->ExprItems[i], lsfp + K_CALLDELTA + i - 1);
 	}
 	{
 		KonohaStack *sfp = lsfp + K_CALLDELTA;
@@ -156,9 +156,9 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 static kExpr* kStmt_tyCheckExprAt(KonohaContext *kctx, kStmt *stmt, kExpr *exprP, size_t pos, kGamma *gma, ktype_t reqty, int pol)
 {
 	if(!Expr_isTerm(exprP) && pos < kArray_size(exprP->cons)) {
-		kExpr *expr = exprP->cons->exprItems[pos];
+		kExpr *expr = exprP->cons->ExprItems[pos];
 		expr = Expr_tyCheck(kctx, stmt, expr, gma, reqty, pol);
-		KFieldSet(exprP->cons, exprP->cons->exprItems[pos], expr);
+		KFieldSet(exprP->cons, exprP->cons->ExprItems[pos], expr);
 		return expr;
 	}
 	return K_NULLEXPR;
@@ -204,9 +204,9 @@ static kbool_t SugarSyntax_tyCheckStmt(KonohaContext *kctx, SugarSyntax *syn, kS
 	int callCount = 0;
 	while(true) {
 		int index, size;
-		kFunc **funcItems = SugarSyntax_funcTable(kctx, syn, SugarFunc_index, &size);
+		kFunc **FuncItems = SugarSyntax_funcTable(kctx, syn, SugarFunc_index, &size);
 		for(index = size - 1; index >= 0; index--) {
-			/*kbool_t result =*/ callStatementFunc(kctx, funcItems[index], &callCount, stmt, gma);
+			/*kbool_t result =*/ callStatementFunc(kctx, FuncItems[index], &callCount, stmt, gma);
 			if(Stmt_isDone(stmt)) return true;
 			if(Stmt_isERR(stmt)) return false;
 			if(stmt->build != TSTMT_UNDEFINED) {
@@ -230,8 +230,8 @@ static kbool_t SugarSyntax_tyCheckStmt(KonohaContext *kctx, SugarSyntax *syn, kS
 static kbool_t kBlock_tyCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
 {
 	int i, result = true, lvarsize = gma->genv->localScope.varsize;
-	for(i = 0; i < kArray_size(bk->stmtList); i++) {
-		kStmt *stmt = (kStmt*)bk->stmtList->ObjectItems[i];
+	for(i = 0; i < kArray_size(bk->StmtList); i++) {
+		kStmt *stmt = (kStmt*)bk->StmtList->ObjectItems[i];
 		if(Stmt_isDone(stmt)) continue;
 		KdumpStmt(kctx, stmt);
 		if(Stmt_isERR(stmt) || !SugarSyntax_tyCheckStmt(kctx, stmt->syn, stmt, gma)) {
@@ -279,9 +279,9 @@ static kBlock* kMethod_newBlock(KonohaContext *kctx, kMethod *mtd, kNameSpace *n
 {
 	const char *script = S_text(source);
 	if(IS_NULL(source) || script[0] == 0) {
-		DBG_ASSERT(IS_Token(mtd->sourceCodeToken));
-		script = S_text(mtd->sourceCodeToken->text);
-		uline = mtd->sourceCodeToken->uline;
+		DBG_ASSERT(IS_Token(mtd->SourceToken));
+		script = S_text(mtd->SourceToken->text);
+		uline = mtd->SourceToken->uline;
 	}
 	TokenSequence tokens = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList, 0};
 	TokenSequence_push(kctx, tokens);
@@ -377,8 +377,8 @@ static kstatus_t kBlock_genEvalCode(KonohaContext *kctx, kBlock *bk, kMethod *mt
 	kBlock_tyCheckAll(kctx, bk, gma);
 	GAMMA_POP(gma, &newgma);
 
-	kStmt *stmt = bk->stmtList->stmtItems[0];
-	if(stmt->syn == NULL && kArray_size(bk->stmtList) == 1) {
+	kStmt *stmt = bk->StmtList->StmtItems[0];
+	if(stmt->syn == NULL && kArray_size(bk->StmtList) == 1) {
 		kctx->stack->evalty = TY_void;
 		return K_CONTINUE;
 	}
@@ -419,7 +419,7 @@ static void TokenSequence_selectStatement(KonohaContext *kctx, TokenSequence *to
 {
 	int currentIdx, sourceEndIdx = source->endIdx, isPreviousIndent = false;
 	for(currentIdx = source->beginIdx; currentIdx < sourceEndIdx; currentIdx++) {
-		kToken *tk = source->tokenList->tokenItems[currentIdx];
+		kToken *tk = source->tokenList->TokenItems[currentIdx];
 		if(kToken_is(StatementSeparator, tk)) {
 			source->endIdx = currentIdx + 1;
 			break;
@@ -441,10 +441,10 @@ static void TokenSequence_selectStatement(KonohaContext *kctx, TokenSequence *to
 static kstatus_t TokenSequence_eval(KonohaContext *kctx, TokenSequence *source)
 {
 	kstatus_t status = K_CONTINUE;
-	kMethod *mtd = KLIB new_kMethod(kctx, kMethod_Static, 0, 0, NULL);
-	PUSH_GCSTACK(mtd);
+	INIT_GCSTACK();
+	kMethod *mtd = KLIB new_kMethod(kctx, _GcStack, kMethod_Static, 0, 0, NULL);
 	KLIB kMethod_setParam(kctx, mtd, TY_Object, 0, NULL);
-	kBlock *singleBlock = GCSAFE_new(Block, source->ns);
+	kBlock *singleBlock = new_(Block, source->ns, _GcStack);
 	TokenSequence tokens = {source->ns, source->tokenList};
 
 	while(source->beginIdx < source->endIdx) {
@@ -454,11 +454,11 @@ static kstatus_t TokenSequence_eval(KonohaContext *kctx, TokenSequence *source)
 			return K_BREAK;
 		}
 		while(tokens.beginIdx < tokens.endIdx) {
-			KLIB kArray_clear(kctx, singleBlock->stmtList, 0);
+			KLIB kArray_clear(kctx, singleBlock->StmtList, 0);
 			if(!kBlock_addNewStmt(kctx, singleBlock, &tokens)) {
 				return K_BREAK;
 			}
-			if(kArray_size(singleBlock->stmtList) > 0) {
+			if(kArray_size(singleBlock->StmtList) > 0) {
 				status = kBlock_genEvalCode(kctx, singleBlock, mtd);
 				if(status != K_CONTINUE) break;
 			}
@@ -466,6 +466,7 @@ static kstatus_t TokenSequence_eval(KonohaContext *kctx, TokenSequence *source)
 		TokenSequence_pop(kctx, tokens);
 		if(status != K_CONTINUE) break;
 	}
+	RESET_GCSTACK();
 	return status;
 }
 

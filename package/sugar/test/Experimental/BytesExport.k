@@ -29,7 +29,7 @@ int singleQuoteToken (Token tk, String source) {
 Expr tyCheckSingleQuotedChar(Stmt stmt, Expr expr, Gamma gma, int typeid) {
 	Token tk = expr.getTermToken();
 	String s = tk.getText();
-	if (s.getSize() == 1) {
+	if(s.getSize() == 1) {
 		expr.setUnboxConstValue(4, s.charCodeAt(0));
 	} else {
 		stmt.printError("single quote doesn't accept multi characters, '" + s + "'");

@@ -41,7 +41,7 @@ int main(int argc, char const* argv[])
     int i, size = LOGPOOL_TEST_COUNT(argc, argv);
     for (i = 0; i < size; ++i) {
         logpool_test_write(logpool);
-        if (i % 2) {
+        if(i % 2) {
             usleep(1);
         }
     }

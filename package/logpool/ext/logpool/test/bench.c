@@ -92,7 +92,7 @@ static char *write_d(char *const p, const char *const end, kuintptr_t uvalue)
         uvalue /= 10;
         p[i] = '0' + tmp;
         ++i;
-        if (uvalue == 0)
+        if(uvalue == 0)
             break;
     }
     reverse(p, p + i, i);

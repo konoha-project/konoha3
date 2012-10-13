@@ -41,8 +41,8 @@ unsigned long long cpu(int i) {
   static long long v = 20/*20%*/;
   float f = (float)(rand()%16);
   v += (long long)(f * sin(i) * factor[(int)f % ARRAY_SIZE(factor)]);
-  if (v < 0) v = rand() % 32;
-  if (v > 100) v = 100;
+  if(v < 0) v = rand() % 32;
+  if(v > 100) v = 100;
   return v;
 }
 
@@ -52,8 +52,8 @@ static unsigned long long mem(int i) {
   static unsigned long long v = 1024*4096/*4KB*/;
   float f = (float)(rand()%32);
   v += (long long)(f * sin(i) * factor[(int)f % ARRAY_SIZE(factor)]);
-  if (v < 0) v = rand() % 1024 + DEFAULT_MEM;
-  if (v > MAX_MEM) v = MAX_MEM;
+  if(v < 0) v = rand() % 1024 + DEFAULT_MEM;
+  if(v > MAX_MEM) v = MAX_MEM;
 #undef MAX_MEM
 #undef DEFAULT_MEM
   return v;
@@ -63,8 +63,8 @@ static unsigned long long net(int i) {
   static unsigned long long v = 0;
   float f = (float)(rand()%64);
   v += (long long)(f * sin(i) * factor[(int)f % ARRAY_SIZE(factor)]);
-  if (v < 0) v = rand() % 1024;
-  if (v > 1024*4096) v = 1024*4096;
+  if(v < 0) v = rand() % 1024;
+  if(v > 1024*4096) v = 1024*4096;
   return 0;
 }
 
@@ -74,7 +74,7 @@ static void emu(int interval, int step, int pid)
   logpool_t *logpool = logpool_open(NULL, &LOGAPI, LOGAPI_PARAM);
   int i;
   void *args;
-  if (verbose) {
+  if(verbose) {
     fprintf(stderr, "start emu %d %d %d\n", interval, step, pid);
   }
   for (i = 0; i < step; ++i) {
@@ -88,7 +88,7 @@ static void emu(int interval, int step, int pid)
   }
   logpool_close(logpool);
   logpool_global_exit();
-  if (verbose) {
+  if(verbose) {
     fprintf(stderr, "finish emu %d %d %d\n", interval, step, pid);
   }
 
@@ -99,16 +99,16 @@ static void start_procs(int procs, int steps, int interval)
   int i, pid[MAX_PROCS];
   int status;
 
-  if (procs > MAX_PROCS)
+  if(procs > MAX_PROCS)
     procs = MAX_PROCS;
 
   for (i = 0; i < procs; i++) {
     pid[i] = fork();
-    if (pid[i] == 0) {
+    if(pid[i] == 0) {
       emu(interval, steps, i);
       break;
     } else {
-      if (pid[i] < 0)
+      if(pid[i] < 0)
         perror("fork");
       usleep(10);
     }
@@ -131,12 +131,12 @@ int main(int argc, char * argv[])
   char *r = "10", *s = "1", *p = "1", *z = "100";
   int rate, procs, seed, steps;
   int c;
-  if (argc == 1)
+  if(argc == 1)
     usage();
 
   while (1) {
     c = getopt(argc, argv, "hr:p:s:p:Vz:v");
-    if (c == -1)
+    if(c == -1)
       break;
     switch (c) {
       case 'h':

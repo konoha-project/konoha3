@@ -67,7 +67,7 @@ static kbool_t konoha_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 	return true;
 }
 
-static kbool_t konoha_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t konoha_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	KImportPackage(ns, "konoha.namespace", pline);
 	KImportPackage(ns, "konoha.const",  pline);  // TopLevel
@@ -97,7 +97,7 @@ static kbool_t konoha_initNameSpace(KonohaContext *kctx, kNameSpace *packageName
 	return true;
 }
 
-static kbool_t konoha_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t konoha_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

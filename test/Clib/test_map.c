@@ -69,7 +69,7 @@ void test_Kmap(KonohaContext *kctx)
     }
     for (i = 0; i < 10; ++i) {
         KHashMapEntry *entry = KLIB Kmap_get(kctx, map, i);
-        if (i % 2 == 0) {
+        if(i % 2 == 0) {
             assert(entry == NULL);
         } else {
             assert(entry->unboxValue == i);

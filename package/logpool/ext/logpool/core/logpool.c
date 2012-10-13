@@ -46,7 +46,7 @@ static void logpool_flush(logpool_t *ctx, void *args)
 static int logpool_init_logkey(logpool_t *ctx, int priority, uint64_t v, short klen)
 {
     int emitLog = 1;//TODO ctx->formatter->fn_priority(ctx, priority);
-    if (emitLog) {
+    if(emitLog) {
         struct logpool *lctx = cast(struct logpool *, ctx);
         lctx->logkey.v.u = v;
         lctx->logkey.klen = klen;
@@ -90,7 +90,7 @@ void logpool_record_ap(logpool_t *ctx, void *args, int priority, char *trace_id,
     struct logdata logs[ctx->logfmt_capacity];
     for (i = 0; i < ctx->logfmt_capacity; ++i) {
         logs[i].type = va_arg(ap, int);
-        if (logs[i].type == 0)
+        if(logs[i].type == 0)
             break;
         logs[i].key  = va_arg(ap, char *);
         logs[i].val  = va_arg(ap, char *);
@@ -112,10 +112,10 @@ void logpool_format_flush(logpool_t *ctx)
 {
     struct logfmt *fmt = cast(struct logpool *, ctx)->fmt;
     size_t size = ctx->logfmt_size;
-    if (ctx->is_flushed)
+    if(ctx->is_flushed)
         return;
     ctx->fn_key(ctx, ctx->logkey.v.u, ctx->logkey.k.seq, ctx->logkey.klen);
-    if (size) {
+    if(size) {
         size_t i;
         void (*fn_delim)(logpool_t *) = ctx->formatter->fn_delim;
         /* unroled */
@@ -170,13 +170,13 @@ void logpool_global_init(int mode)
 {
     //assert(exec_mode == 0);
     exec_mode = mode;
-    if (mode == LOGPOOL_JIT) {
+    if(mode == LOGPOOL_JIT) {
 #ifdef LOGPOOL_USE_LLVM
         KeyAPI = logpool_llvm_api_init();
 #else
         assert(0 && "please enable USE_LLVM flag");
 #endif
-    } else if (mode == LOGPOOL_TRACE) {
+    } else if(mode == LOGPOOL_TRACE) {
         KeyAPI = logpool_trace_api_init();
     } else {
         KeyAPI = logpool_string_api_init();
@@ -188,7 +188,7 @@ extern void logpool_trace_api_deinit(void);
 void logpool_global_exit(void)
 {
     //assert(exec_mode != 0);
-    if (exec_mode == LOGPOOL_TRACE) {
+    if(exec_mode == LOGPOOL_TRACE) {
         logpool_trace_api_deinit();
     }
     exec_mode = 0;

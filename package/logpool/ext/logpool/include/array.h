@@ -34,7 +34,7 @@ static inline void ARRAY_##T##_set(ARRAY(T) *a, int idx, T *v){ \
 	memcpy(a->list+idx, v, sizeof(T));\
 }\
 static inline void ARRAY_##T##_add(ARRAY(T) *a, T *v) {\
-	if (a->size + 1 >= a->capacity) {\
+	if(a->size + 1 >= a->capacity) {\
 		a->capacity *= 2;\
 		a->list = (T*)realloc(a->list, sizeof(T) * a->capacity);\
 	}\

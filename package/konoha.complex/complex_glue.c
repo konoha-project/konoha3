@@ -615,7 +615,7 @@ static KMETHOD Complex_conj(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
 	double _Complex answer = conj(z);
-	kComplex *ret = (kComplex *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
+	kComplex *ret = (kComplex *)KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), 0, OnStack);
 	ret->z = answer;
 	RETURN_(ret);
 }
@@ -626,7 +626,7 @@ static KMETHOD Complex_conjf(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
 	float _Complex answer = conj(zf);
-	kComplex *ret = (kComplex *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
+	kComplex *ret = (kComplex *)KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), 0, OnStack);
 	ret->z = answer;
 	RETURN_(ret);
 }
@@ -637,7 +637,7 @@ static KMETHOD Complex_conjl(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
 	long double answer = conj(zl);
-	kComplex *ret = (kComplex *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
+	kComplex *ret = (kComplex *)KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), 0, OnStack);
 	ret->z = answer;
 	RETURN_(ret);
 }
@@ -748,12 +748,12 @@ static kbool_t Complex_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirst
 	return true;
 }
 
-static kbool_t Complex_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t Complex_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t Complex_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t Complex_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

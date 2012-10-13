@@ -128,7 +128,7 @@ static int check_result2(FILE *fp0, FILE *fp1)
 			if(strncmp(buf0, buf1, p - buf1 + 1) != 0) return 1; //FAILED;
 			continue;
 		}
-		if (strcmp(buf0, buf1) != 0) {
+		if(strcmp(buf0, buf1) != 0) {
 			return 1;//FAILED
 		}
 	}
@@ -307,7 +307,7 @@ static void konoha_startup(KonohaContext *kctx, const char *startup_script)
 static void CommandLine_setARGV(KonohaContext *kctx, int argc, char** argv)
 {
 	KonohaClass *CT_StringArray0 = CT_p0(kctx, CT_Array, TY_String);
-	kArray *a = (kArray*)KLIB new_kObject(kctx, CT_StringArray0, 0);
+	kArray *a = (kArray*)KLIB new_kObjectDontUseThis(kctx, CT_StringArray0, 0);
 	int i;
 	for(i = 0; i < argc; i++) {
 		DBG_P("argv=%d, '%s'", i, argv[i]);
@@ -642,12 +642,12 @@ static io_t *get_io_stats(pid_t pid, io_t *io)
 	struct stat statbuf;
 
 	sprintf(path, "/proc/%d", pid);
-	if (stat(path, &statbuf)) {
+	if(stat(path, &statbuf)) {
 		perror("stat");
 		return NULL;
 	}
 
-	if (file2str(path, "io", sbuf, sizeof sbuf) >= 0)
+	if(file2str(path, "io", sbuf, sizeof sbuf) >= 0)
 		str2io(sbuf, io);	/* parse /proc/#/io */
 
 	return io;
@@ -921,14 +921,14 @@ static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc
 	while (1) {
 		int option_index = 0;
 		int c = getopt_long(argc, argv, "ciD:I:S:", long_options2, &option_index);
-		if (c == -1) break; /* Detect the end of the options. */
+		if(c == -1) break; /* Detect the end of the options. */
 		switch (c) {
 		case 0:
 			/* If this option set a flag, do nothing else now. */
-			if (long_options2[option_index].flag != 0)
+			if(long_options2[option_index].flag != 0)
 				break;
 			printf ("option %s", long_options2[option_index].name);
-			if (optarg)
+			if(optarg)
 				printf (" with arg %s", optarg);
 			printf ("\n");
 			break;

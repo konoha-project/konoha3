@@ -41,8 +41,8 @@ static bool react_append_log(struct react *re, struct LogEntry *e, uint32_t id0,
         pmap_record_t r;
         r.v  = (uintptr_t) e;
         r.v2 = (uint32_t)  val.v;
-        if (poolmap_set2(map, data, klen, &r) == POOLMAP_UPDATE) {
-            if (djbhash(data, klen) == id0 && r.k == id1) {
+        if(poolmap_set2(map, data, klen, &r) == POOLMAP_UPDATE) {
+            if(djbhash(data, klen) == id0 && r.k == id1) {
                 //union u32 val_; val_.v = r.v2;
                 //char buf0[128] = {};
                 //char buf1[128] = {};
@@ -103,9 +103,9 @@ static bool react_apply(struct pool_plugin *_p, struct LogEntry *e, uint32_t sta
     char    *traceName = log_get_data(log) + log_get_length(log, 0);
     uint32_t traceID0 = djbhash(traceName, traceLen);
     uint32_t traceID1 = hash0(38873, traceName, traceLen);
-    if (p->r.traceID0 == traceID0 && p->r.traceID1 == traceID1) {
+    if(p->r.traceID0 == traceID0 && p->r.traceID1 == traceID1) {
         int update = react_append_log(&p->r, e, p->r.keyID0, p->r.keyID1);
-        if (update) {
+        if(update) {
             p->base.apply->Apply(_p->apply, e, update);
         } else {
             p->base.failed->Failed(_p->failed, e, update);

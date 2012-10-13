@@ -78,14 +78,14 @@ swapfunc(a, b, n, swaptype)
 }
 
 #define swap(a, b)					\
-	if (swaptype == 0) {				\
+	if(swaptype == 0) {				\
 		long t = *(long *)(a);			\
 		*(long *)(a) = *(long *)(b);		\
 		*(long *)(b) = t;			\
 	} else						\
 		swapfunc(a, b, es, swaptype)
 
-#define vecswap(a, b, n) 	if ((n) > 0) swapfunc(a, b, n, swaptype)
+#define vecswap(a, b, n) 	if((n) > 0) swapfunc(a, b, n, swaptype)
 
 #ifdef I_AM_QSORT_R
 #define	CMP(t, x, y) (cmp((t), (x), (y)))
@@ -118,7 +118,7 @@ qsort(void *a, size_t n, size_t es, cmp_t *cmp)
 
 loop:	SWAPINIT(a, es);
 	swap_cnt = 0;
-	if (n < 7) {
+	if(n < 7) {
 		for (pm = (char *)a + es; pm < (char *)a + n * es; pm += es)
 			for (pl = pm; 
 			     pl > (char *)a && CMP(thunk, pl - es, pl) > 0;
@@ -127,10 +127,10 @@ loop:	SWAPINIT(a, es);
 		return;
 	}
 	pm = (char *)a + (n / 2) * es;
-	if (n > 7) {
+	if(n > 7) {
 		pl = a;
 		pn = (char *)a + (n - 1) * es;
-		if (n > 40) {
+		if(n > 40) {
 			d = (n / 8) * es;
 			pl = med3(pl, pl + d, pl + 2 * d, cmp, thunk);
 			pm = med3(pm - d, pm, pm + d, cmp, thunk);
@@ -144,7 +144,7 @@ loop:	SWAPINIT(a, es);
 	pc = pd = (char *)a + (n - 1) * es;
 	for (;;) {
 		while (pb <= pc && (cmp_result = CMP(thunk, pb, a)) <= 0) {
-			if (cmp_result == 0) {
+			if(cmp_result == 0) {
 				swap_cnt = 1;
 				swap(pa, pb);
 				pa += es;
@@ -152,21 +152,21 @@ loop:	SWAPINIT(a, es);
 			pb += es;
 		}
 		while (pb <= pc && (cmp_result = CMP(thunk, pc, a)) >= 0) {
-			if (cmp_result == 0) {
+			if(cmp_result == 0) {
 				swap_cnt = 1;
 				swap(pc, pd);
 				pd -= es;
 			}
 			pc -= es;
 		}
-		if (pb > pc)
+		if(pb > pc)
 			break;
 		swap(pb, pc);
 		swap_cnt = 1;
 		pb += es;
 		pc -= es;
 	}
-	if (swap_cnt == 0) {  /* Switch to insertion sort */
+	if(swap_cnt == 0) {  /* Switch to insertion sort */
 		for (pm = (char *)a + es; pm < (char *)a + n * es; pm += es)
 			for (pl = pm; 
 			     pl > (char *)a && CMP(thunk, pl - es, pl) > 0;
@@ -180,13 +180,13 @@ loop:	SWAPINIT(a, es);
 	vecswap(a, pb - r, r);
 	r = min(pd - pc, pn - pd - es);
 	vecswap(pb, pn - r, r);
-	if ((r = pb - pa) > es)
+	if((r = pb - pa) > es)
 #ifdef I_AM_QSORT_R
 		qsort_r(a, r / es, es, thunk, cmp);
 #else
 		qsort(a, r / es, es, cmp);
 #endif
-	if ((r = pd - pc) > es) {
+	if((r = pd - pc) > es) {
 		/* Iterate rather than recurse to save stack space */
 		a = pn - r;
 		n = r / es;

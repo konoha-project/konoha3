@@ -13,17 +13,17 @@ struct io *io_open(char *host, int port, int mode, struct io_api *api)
 {
     struct io *io;
     short ev_mode = 0;
-    if (once) {
+    if(once) {
         once = 0;
-        if (evthread_use_pthreads() != 0) {
+        if(evthread_use_pthreads() != 0) {
             fprintf(stderr, "thread init error\n");
             return NULL;
         }
     }
 
-    if (mode & IO_MODE_READ)
+    if(mode & IO_MODE_READ)
         ev_mode |= EV_READ;
-    if (mode & IO_MODE_WRITE)
+    if(mode & IO_MODE_WRITE)
         ev_mode |= EV_WRITE;
 
     io = calloc(1, sizeof(*io));

@@ -92,7 +92,7 @@ static char *writeUnsingedIntToBuffer(uintptr_t uint, char *const buftop, const 
 		uint /= 10;
 		buftop[i] = '0' + tmp;
 		++i;
-		if (uint == 0)
+		if(uint == 0)
 			break;
 	}
 	reverse(buftop, buftop + i, i);

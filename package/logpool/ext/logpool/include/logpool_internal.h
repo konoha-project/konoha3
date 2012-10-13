@@ -49,8 +49,8 @@ void logpool_format_flush(struct logpool *ctx);
 #define LOGPOOL_DEBUG 1
 #define LOGPOOL_DEBUG_LEVEL 1
 #define debug_print(level, ...) do {\
-    if (level >= LOGPOOL_DEBUG_LEVEL) {\
-        if (LOGPOOL_DEBUG) {\
+    if(level >= LOGPOOL_DEBUG_LEVEL) {\
+        if(LOGPOOL_DEBUG) {\
             fprintf(stderr, "[%s:%d] ", __func__, __LINE__);\
             fprintf(stderr, ## __VA_ARGS__);\
             fprintf(stderr, "\n");\

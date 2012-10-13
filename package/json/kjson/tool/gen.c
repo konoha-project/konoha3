@@ -3,7 +3,7 @@
 int main() {
     int i;
     for (i=0;i<256;i++) {
-        if (i > 0 && i % 16 == 0) {
+        if(i > 0 && i % 16 == 0) {
             fprintf(stderr, "\n");
         }
         switch (i) {
