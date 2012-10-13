@@ -160,6 +160,10 @@ static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 	kMethod *mtd = KLIB new_kMethod(kctx, flag, 0/* typeId, is it OK? */, 0/* mn, is it OK? */, NULL);
 	PUSH_GCSTACK(mtd);
 	KLIB kMethod_setParam(kctx, mtd, pa->rtype, pa->psize, (kparamtype_t*)pa->paramtypeItems);
+	int i;
+	for (i = 0; i < pa->psize; i++) {
+		int index = SUGAR kGamma_declareLocalVariable(kctx, gma, pa->paramtypeItems[i].ty, pa->paramtypeItems[i].fn);
+	}
 	PUSH_GCSTACK(oldMethod);
 	gma->genv->currentWorkingMethod = mtd;
 	int ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);

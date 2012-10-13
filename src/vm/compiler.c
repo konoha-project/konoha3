@@ -680,7 +680,6 @@ static void ClosureExpr_genCode(KonohaContext *kctx, IRBuilder *self, kMethod *m
 	builder->a = self->a;
 	builder->currentStmt = self->currentStmt;
 	builder->shift = self->shift;
-	printf("stmtlistSize %d\n", kArray_size(bk->stmtList));
 	visitBlock(kctx, builder, bk);
 	builder->api.fn_free(kctx, builder, mtd);
 
