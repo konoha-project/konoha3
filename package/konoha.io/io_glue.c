@@ -410,7 +410,7 @@ static KMETHOD OutputStream_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kOutputStream *out = (kOutputStream*)sfp[0].o;
 	kString *path = sfp[1].asString;
-	const char *mode = IS_NULL(sfp[2].s) ? "w" : S_text(sfp[2].s);
+	const char *mode = IS_NULL(sfp[2].asString) ? "w" : S_text(sfp[2].asString);
 	FILE *fp = fopen(S_text(path), mode);
 	if(fp == NULL) {
 		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), sfp, sfp[K_RTNIDX].uline, NULL);

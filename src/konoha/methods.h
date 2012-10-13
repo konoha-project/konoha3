@@ -168,13 +168,13 @@ static KMETHOD Int_box(KonohaContext *kctx, KonohaStack *sfp)
 //## @Const method String String.toInt();
 static KMETHOD String_toInt(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_((kint_t)strtoll(S_text(sfp[0].s), NULL, 10));
+	RETURNi_((kint_t)strtoll(S_text(sfp[0].asString), NULL, 10));
 }
 
 //## @Const @Immutable method String String.opAdd(@Coercion String x);
 static KMETHOD String_opADD(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kString *lhs = sfp[0].s, *rhs = sfp[1].asString;
+	kString *lhs = sfp[0].asString, *rhs = sfp[1].asString;
 	int spol = (S_isASCII(lhs) && S_isASCII(rhs)) ? StringPolicy_ASCII : StringPolicy_UTF8;
 	kString *s = KLIB new_kString(kctx, NULL, S_size(lhs)+S_size(rhs), spol|StringPolicy_NOCOPY);
 	memcpy(s->buf, S_text(lhs), S_size(lhs));
@@ -186,7 +186,7 @@ static KMETHOD String_opADD(KonohaContext *kctx, KonohaStack *sfp)
 //## @Const method Boolean String.opEQ(String s);
 static KMETHOD String_opEQ(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kString *s0 = sfp[0].s;
+	kString *s0 = sfp[0].asString;
 	kString *s1 = sfp[1].asString;
 	if(S_size(s0) == S_size(s1)) {
 		RETURNb_(strncmp(S_text(s0), S_text(s1), S_size(s0)) == 0);
@@ -196,7 +196,7 @@ static KMETHOD String_opEQ(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD String_opNEQ(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kString *s0 = sfp[0].s;
+	kString *s0 = sfp[0].asString;
 	kString *s1 = sfp[1].asString;
 	if(S_size(s0) == S_size(s1)) {
 		RETURNb_(strncmp(S_text(s0), S_text(s1), S_size(s0)) != 0);

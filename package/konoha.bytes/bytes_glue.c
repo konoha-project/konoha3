@@ -217,7 +217,7 @@ static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, KonohaStack *sfp)
 //## @Const method Bytes String.asBytes();
 static KMETHOD String_asBytes(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kString* s = sfp[0].s;
+	kString* s = sfp[0].asString;
 	size_t size = S_size(s);
 	kBytes* ba = new_(Bytes, (size>0)?size+1:0);
 	if (size > 0) {

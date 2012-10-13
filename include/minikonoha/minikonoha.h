@@ -704,7 +704,6 @@ struct KonohaModuleContext {
 	kObject     *asObject;\
 	kObjectVar  *asObjectVar; \
 	kInt        *i; \
-	kString     *s; \
 	const struct kNumberVar     *asNumber;\
 	kString     *asString;\
 	kArray      *asArray;\

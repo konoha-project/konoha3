@@ -230,7 +230,7 @@ static KMETHOD Float_toString(KonohaContext *kctx, KonohaStack *sfp)
 /* String to float */
 static KMETHOD String_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNf_((kfloat_t)strtod(S_text(sfp[0].s), NULL));
+	RETURNf_((kfloat_t)strtod(S_text(sfp[0].asString), NULL));
 }
 
 //## @Const method Int Int.opMINUS();

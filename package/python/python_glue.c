@@ -139,7 +139,7 @@ static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 // [TODO] warning caused ... because some bytes_gule.h function (ex. kdlclose) is not use.
 //static KMETHOD Bytes_toPyObject(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	RETURN_PyObject(PyString_FromString(sfp[0].s));
+//	RETURN_PyObject(PyString_FromString(sfp[0].asString));
 //}
 //
 //static KMETHOD PyObject_toBytes(KonohaContext *kctx, KonohaStack *sfp)
@@ -170,7 +170,7 @@ static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD String_toPyObject(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_PyObject(PyUnicode_FromString(S_text(sfp[0].s)));
+	RETURN_PyObject(PyUnicode_FromString(S_text(sfp[0].asString)));
 }
 
 static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)

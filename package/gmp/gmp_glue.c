@@ -83,7 +83,7 @@ static KMETHOD Mpz_new_int(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Mpz_new_str(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *self = (kMpz*)sfp[0].asObject;
-	const char *src  = S_text(sfp[1].s);
+	const char *src  = S_text(sfp[1].asString);
 	mpz_set_str(self->mpz, src, 10);
 	RETURN_(self);
 }
@@ -113,7 +113,7 @@ static KMETHOD Int_toMpz(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD String_toMpz(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
-	const char *src  = S_text(sfp[0].s);
+	const char *src  = S_text(sfp[0].asString);
 	mpz_set_str(ret->mpz, src, 10);
 	RETURN_(ret);
 }
