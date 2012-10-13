@@ -40,7 +40,7 @@ struct kCurlVar {
 	CURL *curl;
 	/* used by CURLOPT_WRITEFUNCTION */
 	KonohaContext *lctx;
-	struct _kBytes *bytes;
+	struct kBytesVar *bytes;
 };
 
 /* Bytes call back */
@@ -48,7 +48,7 @@ static size_t write_Bytes(char *buffer, size_t size, size_t nitems, void *obj)
 {
 	kCurl *curl = (kCurl *) obj;
 	KonohaContext *kctx = curl->lctx;
-	struct _kBytes *res = (struct _kBytes *) curl->bytes;
+	struct kBytesVar *res = (struct kBytesVar *) curl->bytes;
 	char *buf = res->buf;
 	size *= nitems;
 	res->buf = (char *)KMALLOC(res->bytesize + size);
@@ -226,7 +226,7 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 	case CURLOPT_WRITEHEADER:
 		if(IS_Bytes(sfp[2].asObject)){
 			struct kCurlVar *c = (struct kCurlVar *)sfp[0].o;
-			KFieldSet(c, c->bytes, (struct _kBytes *)sfp[2].asBytes);
+			KFieldSet(c, c->bytes, (struct kBytesVar *)sfp[2].asBytes);
 			c->lctx = kctx;
 			curl_easy_setopt(curl, curlopt, (void *)c);
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_Bytes);

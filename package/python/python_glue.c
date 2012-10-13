@@ -151,7 +151,7 @@ static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 //	}
 //	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 //	O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb, 0);
-//	struct _kBytes* ba = (struct _kBytes*)new_Bytes(kctx, Kwb_bytesize(&wb));
+//	struct kBytesVar* ba = (struct kBytesVar*)new_Bytes(kctx, Kwb_bytesize(&wb));
 //	ba->buf = KLIB Kwb_top(kctx, &wb, 1);
 //	KLIB Kwb_free(&wb);
 //	RETURN_(ba);

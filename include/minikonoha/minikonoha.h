@@ -716,23 +716,16 @@ struct KonohaModuleContext {
 	kBlock      *asBlock;\
 	kGamma      *asGamma;\
 	const struct kExceptionVar  *asException;\
-	const struct _kFloat  *asFloat; \
-	const struct _kBytes  *asBytes; \
-	struct kRegExp  *asRegExp; \
-	const struct kFILEVar   *asFILE;\
+	const struct kFloatVar      *asFloat; \
+	const struct kBytesVar      *asBytes; \
+	struct kDate              *asDate;\
+	struct kRegExp            *asRegExp; \
+	const struct kFILEVar     *asFILE;\
 	struct _kIterator *itr; \
-	struct kClass  *c; \
-	struct kDate *dt;\
-	struct kRange  *range; \
-	struct kIterator *it; \
 	struct kMap           *m;    \
 	struct kInputStream  *in; \
 	struct kOutputStream *w;  \
-	struct kException         *e;\
-	struct kExceptionHandler  *hdr; \
-	struct kConverter         *conv;\
 	struct kContext           *cx;\
-	struct kScript            *scr;\
 	kint_t     dummy_intValue;\
 	kfloat_t   dummy_floatValue
 
@@ -1031,8 +1024,8 @@ typedef enum {
 #define S_setPooled(o,b)     TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local5,b)
 #define SIZEOF_INLINETEXT    (sizeof(void*)*8 - sizeof(kBytes))
 
-typedef const struct _kBytes kBytes;
-struct _kBytes {
+typedef const struct kBytesVar kBytes;
+struct kBytesVar {
 	KonohaObjectHeader h;
 	COMMON_BYTEARRAY;
 };

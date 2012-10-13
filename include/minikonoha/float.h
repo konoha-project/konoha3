@@ -50,8 +50,8 @@ typedef struct {
 	KonohaModuleContext h;
 } KonohaFloatModuleContext;
 
-typedef const struct _kFloat kFloat;
-struct _kFloat {
+typedef const struct kFloatVar kFloat;
+struct kFloatVar {
 	KonohaObjectHeader h;
 	kfloat_t floatValue;
 };

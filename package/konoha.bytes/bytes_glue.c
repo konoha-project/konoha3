@@ -38,7 +38,7 @@ extern "C"{
 static void Bytes_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	if ((size_t)conf <= 0) return;
-	struct _kBytes *ba = (struct _kBytes*)o;
+	struct kBytesVar *ba = (struct kBytesVar*)o;
 	ba->byteptr = NULL;
 	ba->byteptr = (const char *)KCALLOC((size_t)conf, 1);
 	if (ba->byteptr != NULL)	ba->bytesize = (size_t)conf;
@@ -47,7 +47,7 @@ static void Bytes_init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void Bytes_free(KonohaContext *kctx, kObject *o)
 {
-	struct _kBytes *ba = (struct _kBytes*)o;
+	struct kBytesVar *ba = (struct kBytesVar*)o;
 	if (ba->byteptr != NULL) {
 		KFREE(ba->buf, ba->bytesize);
 		ba->byteptr = NULL;
@@ -168,7 +168,7 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 	PLATAPI iconv_close_i((uintptr_t)conv);
 
 	const char *KUtilsWriteBufferopChar = KLIB Kwb_top(kctx, &wb, 1);
-	struct _kBytes *toBa = (struct _kBytes*)KLIB new_kObject(kctx, CT_Bytes, processedTotalSize); // ensure bytes ends with Zero
+	struct kBytesVar *toBa = (struct kBytesVar*)KLIB new_kObject(kctx, CT_Bytes, processedTotalSize); // ensure bytes ends with Zero
 	memcpy(toBa->buf, KUtilsWriteBufferopChar, processedTotalSize); // including NUL terminate by ensuredZeo
 	KLIB Kwb_free(&wb);
 	return toBa;
