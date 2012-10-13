@@ -279,18 +279,6 @@ static kbool_t KonohaClass_setClassFieldUnboxValue(KonohaContext *kctx, KonohaCl
 
 // --------------------------------------------------------------------------
 
-static kbool_t class_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
-{
-	KRequirePackage("konoha.new", pline);
-	//KSET_KLIB2(kMethod_indexOfField, KLIB2_Method_indexOfField, pline);
-	return true;
-}
-
-static kbool_t class_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
-
 // ----------------------------------------------------------------------------
 /* define class */
 
@@ -607,8 +595,23 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
+
+static kbool_t class_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+{
+	KRequirePackage("konoha.field", pline);
+	KRequirePackage("konoha.new", pline);
+	//KSET_KLIB2(kMethod_indexOfField, KLIB2_Method_indexOfField, pline);
+	return true;
+}
+
+static kbool_t class_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+{
+	return true;
+}
+
 static kbool_t class_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
+	KImportPackage(ns, "konoha.field", pline);
 	KImportPackage(ns, "konoha.new", pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("$ClassName"), 0, NULL, 0, 0, PatternMatch_ClassName, NULL, NULL, NULL, NULL, },
