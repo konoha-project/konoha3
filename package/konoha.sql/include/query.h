@@ -352,7 +352,7 @@ KMETHOD ResultSet_setNULL(KonohaContext *kctx, kResultSet *o, size_t n)
 
 /* ------------------------------------------------------------------------ */
 
-//static void Connection_reftrace(KonohaContext *kctx, void *po, kObjectVisitor *visitor)
+//static void Connection_reftrace(KonohaContext *kctx, void *po, KObjectVisitor *visitor)
 //{
 //	kConnection *o = (kConnection *)po;
 //	KNH_ADDREF(ctx, o->urn);

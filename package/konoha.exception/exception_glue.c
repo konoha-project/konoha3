@@ -176,7 +176,7 @@ static void Exception_init(KonohaContext *kctx, kObject *o, void *conf)
 	KFieldInit(e, e->stackTraceList, K_EMPTYARRAY);
 }
 
-static void Exception_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
+static void Exception_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	BEGIN_REFTRACE(2);
 	kExceptionVar *e = (kExceptionVar*)o;
@@ -196,7 +196,7 @@ static void kModuleException_setup(KonohaContext *kctx, KonohaModule *def, int n
 
 }
 
-static void kModuleException_reftrace(KonohaContext *kctx, KonohaModule *baseh, kObjectVisitor *visitor)
+static void kModuleException_reftrace(KonohaContext *kctx, KonohaModule *baseh, KObjectVisitor *visitor)
 {
 }
 

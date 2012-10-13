@@ -64,7 +64,7 @@ static void Person_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffe
 	KLIB Kwb_printf(kctx, wb, KINT_FMT, p->age);
 }
 
-static void Person_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
+static void Person_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	/* Garbage collector (GC) cannot recognize in which position of the field
 	 * an object exists. The function tells to GC which object should be traced. */

@@ -83,7 +83,7 @@ static void KonohaStackRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx, 
 	ctx->stack = base;
 }
 
-static void KonohaStackRuntime_reftrace(KonohaContext *kctx, KonohaContextVar *ctx, kObjectVisitor *visitor)
+static void KonohaStackRuntime_reftrace(KonohaContext *kctx, KonohaContextVar *ctx, KObjectVisitor *visitor)
 {
 	KonohaStack *sp = ctx->stack->stack;
 	BEGIN_REFTRACE((kctx->esp - sp) + 2);
@@ -170,7 +170,7 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 	return newctx;
 }
 
-static void KonohaContext_reftrace(KonohaContext *kctx, KonohaContextVar *ctx, kObjectVisitor *visitor)
+static void KonohaContext_reftrace(KonohaContext *kctx, KonohaContextVar *ctx, KObjectVisitor *visitor)
 {
 	size_t i;
 	if(IS_RootKonohaContext(kctx)) {
@@ -191,7 +191,7 @@ static void KonohaContext_reftrace(KonohaContext *kctx, KonohaContextVar *ctx, k
 	}
 }
 
-void KonohaContext_reftraceAll(KonohaContext *kctx, kObjectVisitor *visitor)
+void KonohaContext_reftraceAll(KonohaContext *kctx, KObjectVisitor *visitor)
 {
 	KonohaContext_reftrace(kctx, (KonohaContextVar*)kctx, visitor);
 }

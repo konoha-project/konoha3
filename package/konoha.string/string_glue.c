@@ -275,7 +275,7 @@ static char *String_getReference(KonohaContext *kctx, StringBase *s)
 	return NULL;
 }
 
-static void StringBase_reftrace(KonohaContext *kctx, StringBase *s, kObjectVisitor *visitor)
+static void StringBase_reftrace(KonohaContext *kctx, StringBase *s, KObjectVisitor *visitor)
 {
 	while (1) {
 		if (unlikely(!StringBase_isRope(s)))
@@ -291,7 +291,7 @@ static void StringBase_reftrace(KonohaContext *kctx, StringBase *s, kObjectVisit
 	}
 }
 
-static void String2_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
+static void String2_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	StringBase_reftrace(kctx, (StringBase *) o, visitor);
 }

@@ -292,7 +292,7 @@ static void kregexpshare_setup(KonohaContext *kctx, struct KonohaModule *def, in
 {
 }
 
-static void kregexpshare_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, kObjectVisitor *visitor)
+static void kregexpshare_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
 {
 }
 

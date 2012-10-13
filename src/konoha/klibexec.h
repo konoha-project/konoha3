@@ -386,7 +386,7 @@ void KONOHA_freeObjectField(KonohaContext *kctx, kObjectVar *o)
 	ct->free(kctx, o);
 }
 
-void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
+void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	unsigned map_size;
 	O_ct(o)->reftrace(kctx, o, visitor);

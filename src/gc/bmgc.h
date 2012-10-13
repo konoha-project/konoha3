@@ -1577,18 +1577,18 @@ static void mark_mstack(HeapManager *mng, kObject *o, MarkStack *mstack)
 }
 
 typedef struct ObjectGraphTracer {
-	kObjectVisitor base;
+	KObjectVisitor base;
 	HeapManager  *mng;
 	MarkStack    *mstack;
 } ObjectGraphTracer;
 
-static void ObjectGraphTracer_visit(kObjectVisitor *visitor, kObject *object)
+static void ObjectGraphTracer_visit(KObjectVisitor *visitor, kObject *object)
 {
 	ObjectGraphTracer *tracer = (ObjectGraphTracer *) visitor;
 	mark_mstack(tracer->mng, object, tracer->mstack);
 }
 
-static void ObjectGraphTracer_visitRange(kObjectVisitor *visitor, kObject **begin, kObject **end)
+static void ObjectGraphTracer_visitRange(KObjectVisitor *visitor, kObject **begin, kObject **end)
 {
 	ObjectGraphTracer *tracer = (ObjectGraphTracer *) visitor;
 	kObject **itr;
@@ -1627,7 +1627,7 @@ static void KupdateObjectField(kObject *parent, kObject *oldValPtr, kObject *new
 }
 
 #ifdef USE_GENERATIONAL_GC
-static void RememberSet_reftrace(KonohaContext *kctx, HeapManager *mng, kObjectVisitor *visitor)
+static void RememberSet_reftrace(KonohaContext *kctx, HeapManager *mng, KObjectVisitor *visitor)
 {
 	size_t i;
 	FOR_EACH_ARRAY_(mng->remember_sets, i) {

@@ -90,7 +90,7 @@ static int kThread_compareTo(kObject *o1, kObject *o2)
 	return pthread_equal(t1->thread, t2->thread) != 0 ? 0 : 1;
 }
 
-static void kThread_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
+static void kThread_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kThread *t = (kThread *)o;
 	BEGIN_REFTRACE(1);

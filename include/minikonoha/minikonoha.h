@@ -586,7 +586,7 @@ typedef struct KonohaValueVar                   KonohaValue;
 
 typedef struct KonohaModule        KonohaModule;
 typedef struct KonohaModuleContext KonohaModuleContext;
-struct kObjectVisitor;
+struct KObjectVisitor;
 
 struct KonohaContextVar {
 	uintptr_t                         safepoint; // set to 1
@@ -597,7 +597,7 @@ struct KonohaContextVar {
 	KonohaStackRuntimeVar            *stack;
 	KonohaModule                    **modshare;
 	KonohaModuleContext             **modlocal;
-	struct GcContext *gcContext;
+	struct GcContext                 *gcContext;
 };
 
 // share, local
@@ -677,14 +677,14 @@ struct KonohaModule {
 	const char *name;
 	int mod_id;
 	void (*setup)(KonohaContext*,    struct KonohaModule *, int newctx);
-	void (*reftrace)(KonohaContext*, struct KonohaModule *, struct kObjectVisitor *);
+	void (*reftrace)(KonohaContext*, struct KonohaModule *, struct KObjectVisitor *);
 	void (*free)(KonohaContext*,     struct KonohaModule *);
 	kmutex_t   *moduleMutex;
 };
 
 struct KonohaModuleContext {
 	uintptr_t unique;
-	void (*reftrace)(KonohaContext*, struct KonohaModuleContext *, struct kObjectVisitor *);
+	void (*reftrace)(KonohaContext*, struct KonohaModuleContext *, struct KObjectVisitor *);
 	void (*free)(KonohaContext*, struct KonohaModuleContext *);
 };
 
@@ -749,7 +749,7 @@ typedef enum {
 
 #define CLASSAPI \
 		void         (*init)(KonohaContext*, kObject*, void *conf);\
-		void         (*reftrace)(KonohaContext*, kObject*, struct kObjectVisitor *visitor);\
+		void         (*reftrace)(KonohaContext*, kObject*, struct KObjectVisitor *visitor);\
 		void         (*free)(KonohaContext*, kObject*);\
 		kObject*     (*fnull)(KonohaContext*, KonohaClass*);\
 		uintptr_t    (*unbox)(KonohaContext*, kObject*);\
@@ -1365,10 +1365,10 @@ struct KonohaPackageVar {
 struct klogconf_t;
 typedef struct GcContext GcContext;
 
-typedef struct kObjectVisitor {
-	void (*fn_visit)(struct kObjectVisitor *vistor, kObject *object);
-	void (*fn_visitRange)(struct kObjectVisitor *visitor, kObject **begin, kObject **end);
-} kObjectVisitor;
+typedef struct KObjectVisitor {
+	void (*fn_visit)(struct KObjectVisitor *vistor, kObject *object);
+	void (*fn_visitRange)(struct KObjectVisitor *visitor, kObject **begin, kObject **end);
+} KObjectVisitor;
 
 struct KonohaLibVar {
 	void* (*Kmalloc)(KonohaContext*, size_t);
@@ -1381,7 +1381,7 @@ struct KonohaLibVar {
 	void (*KscheduleGC)     (GcContext *gc);
 	struct kObjectVar *(*KallocObject)(GcContext *gc, KonohaClass *klass);
 	bool (*KisObject)   (GcContext *gc, void *ptr);
-	void (*KvisitObject)(struct kObjectVisitor *visitor, struct kObjectVar *obj);
+	void (*KvisitObject)(struct KObjectVisitor *visitor, struct kObjectVar *obj);
 
 	void  (*Kwrite_barrier)(KonohaContext *, kObject *);
 	void  (*KupdateObjectField)(kObject *parent, kObject *oldPtr, kObject *newVal);
@@ -1447,7 +1447,7 @@ struct KonohaLibVar {
 
 	kbool_t         (*KonohaRuntime_setModule)(KonohaContext*, int, struct KonohaModule *, kfileline_t);
 
-	void (*kNameSpace_reftraceSugarExtension)(KonohaContext *, kNameSpace *, struct kObjectVisitor *visitor);
+	void (*kNameSpace_reftraceSugarExtension)(KonohaContext *, kNameSpace *, struct KObjectVisitor *visitor);
 	void (*kNameSpace_freeSugarExtension)(KonohaContext *, kNameSpaceVar *);
 
 	KonohaPackage*   (*kNameSpace_requirePackage)(KonohaContext*, const char *, kfileline_t);

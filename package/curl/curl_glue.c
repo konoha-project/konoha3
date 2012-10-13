@@ -89,7 +89,7 @@ static void Curl_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void Curl_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
+static void Curl_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	struct kCurlVar *c = (struct kCurlVar*)o;
 	BEGIN_REFTRACE(1);

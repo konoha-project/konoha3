@@ -58,13 +58,13 @@ static void kmodjit_setup(KonohaContext *kctx, struct KonohaModule *def, int new
 
 static void val_reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
 {
-	kObjectVisitor *visitor = (kObjectVisitor *) thunk;
+	KObjectVisitor *visitor = (KObjectVisitor *) thunk;
 	BEGIN_REFTRACE(1);
 	KREFTRACEv(p->objectValue);
 	END_REFTRACE();
 }
 
-static void kmodjit_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, kObjectVisitor *visitor)
+static void kmodjit_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
 {
 	kmodjit_t *mod = (kmodjit_t *) baseh;
 	BEGIN_REFTRACE(3);
