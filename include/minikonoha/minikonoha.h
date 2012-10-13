@@ -700,7 +700,6 @@ struct KonohaModuleContext {
 	const char  *fname
 
 #define K_FRAME_MEMBER \
-	kObject     *o;\
 	kObject     *asObject;\
 	kObjectVar  *asObjectVar; \
 	const struct kNumberVar     *asNumber;\
@@ -1297,7 +1296,7 @@ struct _kSystem {
 #define KSetMethodCallStack(tsfp, UL, MTD, ARGC, DEFVAL) { \
 		tsfp[K_MTDIDX].mtdNC   = MTD; \
 		tsfp[K_SHIFTIDX].shift = 0;\
-		KUnsafeFieldSet(tsfp[K_RTNIDX].o, ((kObject*)DEFVAL));\
+		KUnsafeFieldSet(tsfp[K_RTNIDX].asObject, ((kObject*)DEFVAL));\
 		tsfp[K_RTNIDX].uline   = UL;\
 		KonohaRuntime_setesp(kctx, tsfp + ARGC + 1);\
 	} \
@@ -1307,7 +1306,7 @@ struct _kSystem {
 		tsfp[K_MTDIDX].mtdNC = MTD;\
 		tsfp[K_PCIDX].fname = __FILE__;\
 		tsfp[K_SHIFTIDX].shift = 0;\
-		KUnsafeFieldSet(tsfp[K_RTNIDX].o, ((kObject*)DEFVAL));\
+		KUnsafeFieldSet(tsfp[K_RTNIDX].asObject, ((kObject*)DEFVAL));\
 		tsfp[K_RTNIDX].uline = __LINE__;\
 		KonohaRuntime_setesp(kctx, tsfp + ARGC + 1);\
 		(MTD)->invokeMethodFunc(kctx, tsfp);\
@@ -1638,7 +1637,7 @@ typedef struct {
 } while (0)
 
 #define RETURN_(vv) do {\
-	KUnsafeFieldSet(sfp[(-(K_CALLDELTA))].o, ((kObject*)vv));\
+	KUnsafeFieldSet(sfp[(-(K_CALLDELTA))].asObject, ((kObject*)vv));\
 	KNH_SAFEPOINT(kctx, sfp);\
 	return; \
 } while (0)

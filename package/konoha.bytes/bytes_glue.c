@@ -57,7 +57,7 @@ static void Bytes_free(KonohaContext *kctx, kObject *o)
 
 static void Bytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
-	kBytes *ba = (kBytes*)v[pos].o;
+	kBytes *ba = (kBytes*)v[pos].asObject;
 	size_t i, j, n;
 	for(j = 0; j * 16 < ba->bytesize; j++) {
 		KLIB Kwb_printf(kctx, wb, "%08x", (int)(j*16));
@@ -327,7 +327,7 @@ static kbool_t bytes_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 
 static KMETHOD TokenFunc_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kTokenVar *tk = (kTokenVar *)sfp[1].o;
+	kTokenVar *tk = (kTokenVar *)sfp[1].asObject;
 	int ch, prev = '/', pos = 1;
 	const char *source = S_text(sfp[2].asString);
 	while((ch = source[pos++]) != 0) {

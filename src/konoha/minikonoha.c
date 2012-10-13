@@ -74,7 +74,7 @@ static void KonohaStackRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx, 
 	assert(stacksize>64);
 	base->stack_uplimit = base->stack + (stacksize - 64);
 	for(i = 0; i < stacksize; i++) {
-		KUnsafeFieldInit(base->stack[i].o, K_NULL);
+		KUnsafeFieldInit(base->stack[i].asObject, K_NULL);
 	}
 	KUnsafeFieldInit(base->gcstack, new_(Array, K_PAGESIZE/sizeof(void*)));
 	KLIB Karray_init(kctx, &base->cwb, K_PAGESIZE * 4);

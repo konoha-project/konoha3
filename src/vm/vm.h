@@ -227,12 +227,12 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 
 #define OPEXEC_NSET(A, N, CT) rbp[(A)].unboxValue = N
 #define OPEXEC_NMOV(A, B, CT) rbp[(A)].unboxValue = rbp[(B)].unboxValue
-#define OPEXEC_NMOVx(A, B, BX, CT) rbp[(A)].o = (rbp[(B)].asObjectVar)->fieldObjectItems[(BX)]
-#define OPEXEC_XNMOV(A, AX, B, CT) (rbp[(A)].asObjectVar)->fieldObjectItems[AX] = rbp[(B)].o
+#define OPEXEC_NMOVx(A, B, BX, CT) rbp[(A)].asObject = (rbp[(B)].asObjectVar)->fieldObjectItems[(BX)]
+#define OPEXEC_XNMOV(A, AX, B, CT) (rbp[(A)].asObjectVar)->fieldObjectItems[AX] = rbp[(B)].asObject
 
-#define OPEXEC_NEW(A, P, CT)   KUnsafeFieldSet(rbp[(A)].o, KLIB new_kObject(kctx, CT, P))
-#define OPEXEC_NULL(A, CT)     KUnsafeFieldSet(rbp[(A)].o, KLIB Knull(kctx, CT))
-#define OPEXEC_BOX(A, B, CT)   KUnsafeFieldSet(rbp[(A)].o, KLIB new_kObject(kctx, CT, rbp[(B)].intValue))
+#define OPEXEC_NEW(A, P, CT)   KUnsafeFieldSet(rbp[(A)].asObject, KLIB new_kObject(kctx, CT, P))
+#define OPEXEC_NULL(A, CT)     KUnsafeFieldSet(rbp[(A)].asObject, KLIB Knull(kctx, CT))
+#define OPEXEC_BOX(A, B, CT)   KUnsafeFieldSet(rbp[(A)].asObject, KLIB new_kObject(kctx, CT, rbp[(B)].intValue))
 #define OPEXEC_UNBOX(A, B, CT) rbp[(A)].unboxValue = N_toint(rbp[B].asObject)
 
 #define PC_NEXT(pc)   pc+1
@@ -244,7 +244,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #define OPEXEC_CALL(UL, THIS, espshift, CTO) do {\
 	kMethod *mtd_ = rbp[THIS+K_MTDIDX2].mtdNC;\
 	KonohaStack *sfp_ = SFP(rshift(rbp, THIS)); \
-	sfp_[K_RTNIDX].o = CTO;\
+	sfp_[K_RTNIDX].asObject = CTO;\
 	sfp_[K_RTNIDX].uline = UL;\
 	sfp_[K_SHIFTIDX].shift = THIS; \
 	sfp_[K_PCIDX].pc = PC_NEXT(pc);\
@@ -259,7 +259,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 	KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espshift)));\
 	OPEXEC_CHKSTACK(UL);\
 	rbp = rshift(rbp, THIS);\
-	rbp[K_ULINEIDX2-1].o = CTO;\
+	rbp[K_ULINEIDX2-1].asObject = CTO;\
 	rbp[K_ULINEIDX2].uline = UL;\
 	rbp[K_SHIFTIDX2].shift = THIS;\
 	rbp[K_PCIDX2].pc = PC_NEXT(pc);\
@@ -271,7 +271,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 	kMethod *mtd_ = mtdO;\
 	/*prefetch((mtd_)->invokeMethodFunc);*/\
 	KonohaStack *sfp_ = SFP(rshift(rbp, THIS)); \
-	sfp_[K_RTNIDX].o = CTO;\
+	sfp_[K_RTNIDX].asObject = CTO;\
 	sfp_[K_RTNIDX].uline = UL;\
 	sfp_[K_SHIFTIDX].shift = THIS; \
 	sfp_[K_PCIDX].pc = PC_NEXT(pc);\
@@ -549,7 +549,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 	KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espshift)));\
 	OPEXEC_CHKSTACK(UL);\
 	rbp = rshift(rbp, THIS);\
-	rbp[K_ULINEIDX2-1].o = CTO;\
+	rbp[K_ULINEIDX2-1].asObject = CTO;\
 	rbp[K_ULINEIDX2].uline = UL;\
 	rbp[K_SHIFTIDX2].shift = THIS;\
 	rbp[K_PCIDX2].pc = PC_NEXT(pc);\

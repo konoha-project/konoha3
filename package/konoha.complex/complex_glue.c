@@ -54,7 +54,7 @@ static KMETHOD Complex_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	/* You do not need to allocate object because
 	 * object is allocated by Runtime. */
-	kComplex *ret = (kComplex *) sfp[0].o;
+	kComplex *ret = (kComplex *) sfp[0].asObject;
 	double real = (double)sfp[1].floatValue;
 	double imaginary = (double)sfp[2].floatValue;
 	ret->z = real + I * imaginary;

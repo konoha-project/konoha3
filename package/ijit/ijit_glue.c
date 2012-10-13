@@ -150,7 +150,7 @@ static KMETHOD System_setValue(KonohaContext *kctx, KonohaStack *sfp)
 	kArray *stack = get_stack(kctx, g);
 	int index = sfp[1].intValue;
 	check_stack_size(kctx, stack, index);
-	kObject *o = sfp[2].o;
+	kObject *o = sfp[2].asObject;
 	KFieldSet(stack, stack->objectItems[index], o);
 	RETURNvoid_();
 }

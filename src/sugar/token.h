@@ -332,8 +332,8 @@ static int callTokenFunc(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, Tokenize
 {
 	DBG_ASSERT(IS_Func(fo));
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, fo->self);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, (kObject*)tk);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, fo->self);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, (kObject*)tk);
 	lsfp[K_CALLDELTA+1].unboxValue = (uintptr_t)tokenizer;
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asString, preparedString);
 	{

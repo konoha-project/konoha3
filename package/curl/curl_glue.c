@@ -225,7 +225,7 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 	case CURLOPT_STDERR:
 	case CURLOPT_WRITEHEADER:
 		if(IS_Bytes(sfp[2].asObject)){
-			struct kCurlVar *c = (struct kCurlVar *)sfp[0].o;
+			struct kCurlVar *c = (struct kCurlVar *)sfp[0].asObject;
 			KFieldSet(c, c->bytes, (struct kBytesVar *)sfp[2].asBytes);
 			c->lctx = kctx;
 			curl_easy_setopt(curl, curlopt, (void *)c);

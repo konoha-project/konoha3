@@ -58,7 +58,7 @@ static void Person_free(KonohaContext *kctx, kObject *o)
 static void Person_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
 	/* This function is called when serializing the object. */
-	struct Person *p = (struct Person *) v[pos].o;
+	struct Person *p = (struct Person *) v[pos].asObject;
 	KLIB Kwb_write(kctx, wb, S_text(p->name), S_size(p->name));
 	KLIB Kwb_write(kctx, wb, ",", 1);
 	KLIB Kwb_printf(kctx, wb, KINT_FMT, p->age);

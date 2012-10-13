@@ -641,7 +641,7 @@ static void DEFAULT_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteB
 	KLIB Kwb_write(kctx, wb, TEXTSIZE("{\"class\": \""));
 	KLIB Kwb_write(kctx, wb, TY_t(O_typeId(v[pos].asObject)), 0);
 	KLIB Kwb_write(kctx, wb, TEXTSIZE("\"}"));
-	//KLIB Kwb_printf(kctx, wb, "&%p(:%s)", sfp[pos].o, TY_t(O_typeId(sfp[pos].asObject)));
+	//KLIB Kwb_printf(kctx, wb, "&%p(:%s)", sfp[pos].asObject, TY_t(O_typeId(sfp[pos].asObject)));
 }
 
 static uintptr_t DEFAULT_unbox(KonohaContext *kctx, kObject *o)

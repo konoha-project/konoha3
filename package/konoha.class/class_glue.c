@@ -265,7 +265,7 @@ static kbool_t KonohaClass_setClassFieldUnboxValue(KonohaContext *kctx, KonohaCl
 //	kshortflag_t flag = (kshortflag_t)sfp[2].intValue;
 //	ktype_t ty = (ktype_t)sfp[3].intValue;
 //	kString *name = sfp[4].s;
-//	kObject *value = sfp[5].o;
+//	kObject *value = sfp[5].asObject;
 //	KonohaClassVar *ct = (KonohaClassVar*)kclass(cid, sfp[K_RTNIDX].uline);
 //	if(CT_isDefined(ct)) {
 //		kreportf(CritTag, sfp[K_RTNIDX].uline, "%s has no undefined field", TY_t(ct->typeId));

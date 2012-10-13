@@ -64,7 +64,7 @@ static void Log_free(CTX, kObject *po)
 
 static void Log_p(CTX, ksfp_t *sfp, int pos, kwb_t *wb)
 {
-	kRawPtr *self = (kRawPtr *) sfp[0].o;
+	kRawPtr *self = (kRawPtr *) sfp[0].asObject;
 	struct Log *log = (struct Log *) self->rawptr;
 	int i;
 	char *data = log_get_data(log);
@@ -94,10 +94,10 @@ static void Log_p(CTX, ksfp_t *sfp, int pos, kwb_t *wb)
 //## LogPool LogPool.new(String host, int port)
 static KMETHOD LogPool_new(CTX, ksfp_t *sfp _RIX)
 {
-	kRawPtr *ret = (kRawPtr *) sfp[0].o;
+	kRawPtr *ret = (kRawPtr *) sfp[0].asObject;
 	char *host = (char *) S_text(sfp[1].asString);
 	int   port = sfp[2].ivalue;
-	RawPtr_init(_ctx, sfp[0].o, logpool_open_client(NULL, host, port));
+	RawPtr_init(_ctx, sfp[0].asObject, logpool_open_client(NULL, host, port));
 	RETURN_(ret);
 }
 
@@ -119,7 +119,7 @@ static KMETHOD LogPool_get(CTX, ksfp_t *sfp _RIX)
 //## String Log.get(String key)
 static KMETHOD Log_get_(CTX, ksfp_t *sfp _RIX)
 {
-	kRawPtr *self = (kRawPtr *) sfp[0].o;
+	kRawPtr *self = (kRawPtr *) sfp[0].asObject;
 	struct Log *log = (struct Log *) self->rawptr;
 	char *key  = (char *) S_text(sfp[1].asString);
 	int   klen = S_size(sfp[1].asString);
@@ -143,7 +143,7 @@ static uintptr_t p_init(uintptr_t context)
 	memcpy(c, (struct konoha_context*) context, sizeof(*c));
 	CTX_t _ctx = c->konoha;
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, c->finit->self);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, c->finit->self);
 	KCALL(lsfp, 0, c->finit->mtd, 0, K_NULL);
 	END_LOCAL();
 	return (uintptr_t) c;
@@ -154,7 +154,7 @@ static uintptr_t p_exit(uintptr_t context)
 	struct konoha_context *c = malloc(sizeof(struct konoha_context));
 	CTX_t _ctx = c->konoha;
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, c->fexit->self);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, c->fexit->self);
 	KCALL(lsfp, 0, c->fexit->mtd, 0, K_NULL);
 	END_LOCAL();
 	bzero(c, sizeof(*c));
@@ -173,8 +173,8 @@ static uintptr_t p_func(uintptr_t context, struct LogEntry *e)
 	CTX_t _ctx = c->konoha;
 	kObject *log = (kObject *) Log_new(_ctx, (struct Log *) &e->data);
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, c->func->self);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, log);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, c->func->self);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, log);
 	KCALL(lsfp, 0, c->func->mtd, 0, K_NULL);
 	END_LOCAL();
 	return context;
@@ -284,7 +284,7 @@ static KMETHOD Response_create(CTX, ksfp_t *sfp _RIX)
 {
 	struct pool_plugin_response *p = POOL_PLUGIN_CLONE(pool_plugin_response);
 	kRawPtr *ret = (kRawPtr *) new_kObject(O_ct(sfp[K_RTNIDX].asObject), p);
-	kRawPtr *ev = (kRawPtr *) sfp[1].o;
+	kRawPtr *ev = (kRawPtr *) sfp[1].asObject;
 	p->bev = ev->rawptr;
 	RETURN_(ret);
 }
@@ -292,16 +292,16 @@ static KMETHOD Response_create(CTX, ksfp_t *sfp _RIX)
 // void PoolPlugin.apply(PoolPlugin p);
 static KMETHOD PoolPlugin_apply(CTX, ksfp_t *sfp _RIX)
 {
-	kRawPtr *self = (kRawPtr *) sfp[0].o;
-	kRawPtr *plug = (kRawPtr *) sfp[1].o;
+	kRawPtr *self = (kRawPtr *) sfp[0].asObject;
+	kRawPtr *plug = (kRawPtr *) sfp[1].asObject;
 	((struct pool_plugin *) self->rawptr)->apply = ((struct pool_plugin *) plug->rawptr);
 }
 
 // void PoolPlugin.failed(PoolPlugin p);
 static KMETHOD PoolPlugin_failed(CTX, ksfp_t *sfp _RIX)
 {
-	kRawPtr *self = (kRawPtr *) sfp[0].o;
-	kRawPtr *plug = (kRawPtr *) sfp[1].o;
+	kRawPtr *self = (kRawPtr *) sfp[0].asObject;
+	kRawPtr *plug = (kRawPtr *) sfp[1].asObject;
 	((struct pool_plugin *) self->rawptr)->failed = ((struct pool_plugin *) plug->rawptr);
 }
 

@@ -257,7 +257,7 @@ static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
 		for(i=0; i != asize; ++i) {
 			uintptr_t tmp = a->unboxItems[i];
 			BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, K_NULL);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
 			lsfp[K_CALLDELTA+1].unboxValue = tmp;
 			KCALL(lsfp, 0, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
 			END_LOCAL();
@@ -268,8 +268,8 @@ static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
 		for(i=0; i != asize; ++i) {
 			kObject *tmp  = a->objectItems[i];
 			BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, K_NULL);
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, tmp);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, tmp);
 			KCALL(lsfp, 0, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
 			END_LOCAL();
 			KFieldSet(ret, ret->objectItems[i], lsfp[0].asObject);
@@ -292,7 +292,7 @@ static KMETHOD Array_inject(KonohaContext *kctx, KonohaStack *sfp)
 		uintptr_t tmp = 0;
 		BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
 		for(i=0; i != asize; ++i) {
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, K_NULL);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
 			lsfp[K_CALLDELTA+1].unboxValue = tmp;
 			lsfp[K_CALLDELTA+2].unboxValue = a->unboxItems[i];
 			KCALL(lsfp, 0, f->mtd, 2, KLIB Knull(kctx, CT_(resolve_type)));
@@ -307,9 +307,9 @@ static KMETHOD Array_inject(KonohaContext *kctx, KonohaStack *sfp)
 		kObject *nulobj = KLIB Knull(kctx, CT_(resolve_type));
 		BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
 		for(i=0; i != asize; ++i) {
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, K_NULL);
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, tmp);
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+2].o, a->objectItems[i]);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, tmp);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asObject, a->objectItems[i]);
 			KCALL(lsfp, 0, f->mtd, 2, nulobj);
 			KUnsafeFieldSet(tmp, lsfp[0].asObject);
 		}
@@ -430,12 +430,12 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 //			obj = a->objectItems[i];
 //			DBG_ASSERT(O_ct(obj)->p);
 //			// before call system.p, push variables
-//			KUnsafeFieldSet(lsfp[0].o, obj);
+//			KUnsafeFieldSet(lsfp[0].asObject, obj);
 //			O_ct(obj)->p(kctx, lsfp, 0, &wb, 0);
 //			KLIB Kwb_printf(kctx, &wb, ",");
 //		}
 //		obj = a->objectItems[i];
-//		KUnsafeFieldSet(lsfp[0].o, obj);
+//		KUnsafeFieldSet(lsfp[0].asObject, obj);
 //		O_ct(obj)->p(kctx, lsfp, 0, &wb, 0);
 //		END_LOCAL();
 //

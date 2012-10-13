@@ -54,7 +54,7 @@ static void Mpz_free(KonohaContext *kctx, kObject *o)
 static void Mpz_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
 	/* This function is called when serializing the object. */
-	kMpz *p = (kMpz*)v[pos].o;
+	kMpz *p = (kMpz*)v[pos].asObject;
 	char *buf = mpz_get_str(NULL, 10, p->mpz);
 	KLIB Kwb_printf(kctx, wb, "%s", buf);
 	free(buf);

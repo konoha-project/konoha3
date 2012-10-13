@@ -78,7 +78,7 @@ static void DumpVisitor_visitConstExpr(KonohaContext *kctx, IRBuilder *self, kEx
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	KonohaStack sfp[1];
 	kObject *obj = expr->objectConstValue;
-	sfp[0].o = obj;
+	sfp[0].asObject = obj;
 	O_ct(obj)->p(kctx, sfp, 0, &wb, 0);
 	char  *str = (char *) KLIB Kwb_top(kctx, &wb, 0);
 	char buf[128];

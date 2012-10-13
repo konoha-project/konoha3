@@ -184,7 +184,7 @@ static int getNfd(kArray *a1, kArray *a2, kArray *a3)
 //## int System.accept(int socket, SockAddr remoteInfo);
 KMETHOD System_accept(KonohaContext *kctx, KonohaStack* sfp)
 {
-	struct _kSockAddr *sa = (struct _kSockAddr*)sfp[2].o;
+	struct _kSockAddr *sa = (struct _kSockAddr*)sfp[2].asObject;
 	struct sockaddr_in *addr = sa->sockaddr_in;
 	int addrLen = sizeof(struct sockaddr_in);
 

@@ -781,7 +781,7 @@ static kbool_t regexp_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 
 static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kTokenVar *tk = (kTokenVar *)sfp[1].o;
+	kTokenVar *tk = (kTokenVar *)sfp[1].asObject;
 	int ch, prev = '/', pos = 1;
 	const char *source = S_text(sfp[2].asString);
 	if(source[pos] == '*' || source[pos] == '/') {

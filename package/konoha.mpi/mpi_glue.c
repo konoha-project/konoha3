@@ -44,7 +44,7 @@ typedef struct {
 } kRawPtr;
 
 static inline kObject *new_ReturnCppObject(KonohaContext *kctx,KonohaStack *sfp, void *ptr) {
-	kObject *defobj = sfp[(-(K_CALLDELTA))].o;
+	kObject *defobj = sfp[(-(K_CALLDELTA))].asObject;
 	kObject *ret = KLIB new_kObject(kctx, O_ct(defobj), (uintptr_t)ptr);
 	((kRawPtr *)ret)->rawptr = ptr;
 	return ret;
