@@ -128,7 +128,7 @@ static char parseBinaryDigit(char c)
 
 static KMETHOD TokenFunc_ExtendedIntLiteral(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kTokenVar *tk = (kTokenVar *)sfp[1].o;
+	kTokenVar *tk = (kTokenVar *)sfp[1].asObject;
 	const char *source = S_text(sfp[2].asString);
 	const char *start = source, *end;
 	int c = *source++;

@@ -42,7 +42,7 @@ typedef struct {
 	kArray  *constPool;
 	kArray  *global_value;
 	FgenCode defaultCodeGen;
-	KUtilsHashMap *jitcache;
+	KHashMap *jitcache;
 	kfileline_t uline;
 	KonohaClass *cPointer;
 } kmodjit_t;
@@ -56,15 +56,15 @@ static void kmodjit_setup(KonohaContext *kctx, struct KonohaModule *def, int new
 	(void)kctx;(void)def;(void)newctx;
 }
 
-static void val_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
+static void val_reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
 {
-	kObjectVisitor *visitor = (kObjectVisitor *) thunk;
+	KObjectVisitor *visitor = (KObjectVisitor *) thunk;
 	BEGIN_REFTRACE(1);
 	KREFTRACEv(p->objectValue);
 	END_REFTRACE();
 }
 
-static void kmodjit_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, kObjectVisitor *visitor)
+static void kmodjit_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
 {
 	kmodjit_t *mod = (kmodjit_t *) baseh;
 	BEGIN_REFTRACE(3);
@@ -150,7 +150,7 @@ static KMETHOD System_setValue(KonohaContext *kctx, KonohaStack *sfp)
 	kArray *stack = get_stack(kctx, g);
 	int index = sfp[1].intValue;
 	check_stack_size(kctx, stack, index);
-	kObject *o = sfp[2].o;
+	kObject *o = sfp[2].asObject;
 	KFieldSet(stack, stack->objectItems[index], o);
 	RETURNvoid_();
 }
@@ -278,8 +278,8 @@ static uintptr_t jitcache_hash(kMethod *mtd)
 static kObject *jitcache_get(KonohaContext *kctx, kMethod *mtd)
 {
 	uintptr_t hcode = jitcache_hash(mtd);
-	KUtilsHashMap *map = kmodjit->jitcache;
-	KUtilsHashMapEntry *e = KLIB Kmap_get(kctx, map, hcode);
+	KHashMap *map = kmodjit->jitcache;
+	KHashMapEntry *e = KLIB Kmap_get(kctx, map, hcode);
 	if (e) {
 		return (kObject*) e->unboxValue;
 	} else {
@@ -290,8 +290,8 @@ static kObject *jitcache_get(KonohaContext *kctx, kMethod *mtd)
 static void jitcache_set(KonohaContext *kctx, kMethod *mtd, kObject *f)
 {
 	uintptr_t hcode = jitcache_hash(mtd);
-	KUtilsHashMap *map = kmodjit->jitcache;
-	KUtilsHashMapEntry *newe = KLIB Kmap_newEntry(kctx, map, hcode);
+	KHashMap *map = kmodjit->jitcache;
+	KHashMapEntry *newe = KLIB Kmap_newEntry(kctx, map, hcode);
 	newe->unboxValue = (uintptr_t) f;
 }
 
@@ -480,7 +480,7 @@ static kArray *create_array(KonohaContext *kctx, KonohaStack *sfp, int n)
 	int i;
 	kArray *a = new_(Array, 0);
 	for (i = 1; i <= n; ++i) {
-		KLIB kArray_add(kctx, a, sfp[i].o);
+		KLIB kArray_add(kctx, a, sfp[i].asObject);
 	}
 	return a;
 }
@@ -513,7 +513,7 @@ static KMETHOD Array_newN(KonohaContext *kctx, KonohaStack *sfp)
 	int i, n = sfp[1].intValue;
 	kArray *a = new_(Array, (uintptr_t)n);
 	for (i = 0; i < n; ++i) {
-		KLIB kArray_add(kctx, a, sfp[i].o);
+		KLIB kArray_add(kctx, a, sfp[i].asObject);
 	}
 	RETURN_(a);
 }
@@ -523,7 +523,7 @@ static KMETHOD Array_newN(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_getO(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].uline);
+	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].callerFileLine);
 	RETURN_(a->objectItems[n]);
 }
 // --------------------------------------------------------------------------
@@ -531,8 +531,8 @@ static KMETHOD Array_getO(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_setO(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].uline);
-	KFieldSet(a, a->objectItems[n], sfp[2].o);
+	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].callerFileLine);
+	KFieldSet(a, a->objectItems[n], sfp[2].asObject);
 	RETURNvoid_();
 }
 
@@ -540,7 +540,7 @@ static KMETHOD Array_setO(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_erase(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *src = sfp[0].asArray;
-	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(src), sfp[K_RTNIDX].uline);
+	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(src), sfp[K_RTNIDX].callerFileLine);
 	size_t asize = kArray_size(src);
 	size_t i, j = 0;
 	kArray *dst = new_(Array, (asize-1));
@@ -595,7 +595,7 @@ static KMETHOD Method_getReturnType(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Method_getFname(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].asMethod;
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	KLIB Kwb_printf(kctx, &wb, "%s%s", T_mn(mtd->mn));
 	kString *fname = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), StringPolicy_POOL);

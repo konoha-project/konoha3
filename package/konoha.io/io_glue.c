@@ -43,11 +43,11 @@ struct kio_t {
 		int  fd;
 		void *handler;
 		FILE *fp;
-		KUtilsWriteBuffer wb;
+		KGrowingBuffer wb;
 	};
 	void *handler2; // NULL
 	int  isRunning;
-	KUtilsGrowingArray buffer;
+	KGrowingArray buffer;
 	size_t top; size_t tail;
 	kbool_t (*_read)(KonohaContext *kctx, struct kio_t *);
 	size_t  (*_write)(KonohaContext *kctx, struct kio_t *, const char *buf, size_t bufsiz);
@@ -133,7 +133,7 @@ struct kInputStreamVar {
 	FILE_i *fp;
 	StreamApi *streamApi;
 	uintptr_t iconv;
-	KUtilsGrowingArray buffer;
+	KGrowingArray buffer;
 	size_t top; size_t tail;
 };
 
@@ -148,7 +148,7 @@ struct kOutputStreamVar {
 	FILE *fp;
 	StreamApi *streamApi;
 	uintptr_t iconv;
-	KUtilsGrowingArray buffer;
+	KGrowingArray buffer;
 };
 
 #ifdef _MSC_VER
@@ -207,7 +207,7 @@ static void kInputStream_free(KonohaContext *kctx, kObject *o)
 	kInputStream_close(kctx, (kInputStream*)o);
 }
 
-static size_t kInputStream_readToBuffer(KonohaContext *kctx, kInputStream *in, KUtilsGrowingArray *buffer)
+static size_t kInputStream_readToBuffer(KonohaContext *kctx, kInputStream *in, KGrowingArray *buffer)
 {
 	if(!(buffer->bytesize + K_PAGESIZE < buffer->bytemax)) {
 		KLIB Karray_expand(kctx, buffer, buffer->bytesize + K_PAGESIZE);
@@ -217,7 +217,7 @@ static size_t kInputStream_readToBuffer(KonohaContext *kctx, kInputStream *in, K
 	return n;
 }
 
-//static uintptr_t kOutputStream_writeBuffer(KonohaContext *kctx, kOutputStream *out, KUtilsGrowingArray *buffer, size_t offset)
+//static uintptr_t kOutputStream_writeBuffer(KonohaContext *kctx, kOutputStream *out, KGrowingArray *buffer, size_t offset)
 //{
 //	return out->streamApi->write_i(kctx, out->fp, buffer->bytebuf + offset, buffer->bytesize - offset);
 //}
@@ -300,7 +300,7 @@ static void kFile_free(KonohaContext *kctx, kObject *o)
 
 }
 
-static void kFile_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
+static void kFile_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kFile *file = (kFile *)o;
 	BEGIN_REFTRACE(1);
@@ -314,11 +314,11 @@ static void kFile_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visi
 //## method @Throwable InputStream InputStream.new(String urn);
 static KMETHOD InputStream_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kInputStream *in = (kInputStream*)sfp[0].o;
+	kInputStream *in = (kInputStream*)sfp[0].asObject;
 	kString *path = sfp[1].asString;
 	FILE *fp = fopen(S_text(path), "r");
 	if(fp == NULL) {
-		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), sfp, sfp[K_RTNIDX].uline, NULL);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
 	}
 	in->fp = (FILE_i*)fp;
 	in->streamApi = &FileStreamApi;
@@ -328,7 +328,7 @@ static KMETHOD InputStream_new(KonohaContext *kctx, KonohaStack *sfp)
 //## method @public Int InputStream.getByte()
 static KMETHOD InputStream_getByte(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kInputStream *in = (kInputStream*)sfp[0].o;
+	kInputStream *in = (kInputStream*)sfp[0].asObject;
 	if(!(in->top < in->buffer.bytemax) && !(in->streamApi->isEndOfStream(kctx, in->fp))) {
 		size_t readbyte = kInputStream_readToBuffer(kctx, in, &in->buffer);
 		if(readbyte == 0) {
@@ -387,19 +387,19 @@ static kString* kInputStream_readLine(KonohaContext *kctx,  kInputStream *in)
 //## method @Iterative String InputStream.readLine();
 static KMETHOD InputStream_readLine(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_(kInputStream_readLine(kctx, (kInputStream*)sfp[0].o));
+	RETURN_(kInputStream_readLine(kctx, (kInputStream*)sfp[0].asObject));
 }
 
 //## method void InputStream.close();
 static KMETHOD InputStream_close(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kInputStream_close(kctx, (kInputStream*)sfp[0].o);
+	kInputStream_close(kctx, (kInputStream*)sfp[0].asObject);
 }
 
 //## method @public boolean InputStream.isClosed()
 static KMETHOD InputStream_isClosed(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kInputStream *in = (kInputStream*)sfp[0].o;
+	kInputStream *in = (kInputStream*)sfp[0].asObject;
 	RETURNi_(!(in->streamApi->isEndOfStream(kctx, in->fp)));
 }
 
@@ -408,12 +408,12 @@ static KMETHOD InputStream_isClosed(KonohaContext *kctx, KonohaStack *sfp)
 //## method @Throwable OutputStream OutputStream.new(String path, String mode);
 static KMETHOD OutputStream_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kOutputStream *out = (kOutputStream*)sfp[0].o;
+	kOutputStream *out = (kOutputStream*)sfp[0].asObject;
 	kString *path = sfp[1].asString;
-	const char *mode = IS_NULL(sfp[2].s) ? "w" : S_text(sfp[2].s);
+	const char *mode = IS_NULL(sfp[2].asString) ? "w" : S_text(sfp[2].asString);
 	FILE *fp = fopen(S_text(path), mode);
 	if(fp == NULL) {
-		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), sfp, sfp[K_RTNIDX].uline, NULL);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
 	}
 	out->fp = (FILE*)fp;
 	out->streamApi = &FileStreamApi;
@@ -423,7 +423,7 @@ static KMETHOD OutputStream_new(KonohaContext *kctx, KonohaStack *sfp)
 //## method @public void OutputStream.putByte(int ch)
 static KMETHOD OutputStream_putByte(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kOutputStream *out = (kOutputStream*)sfp[0].o;
+	kOutputStream *out = (kOutputStream*)sfp[0].asObject;
 	char byte = (char)(sfp[1].intValue);
 	kOutputStream_write(kctx, out, &byte, 1);
 	RETURNvoid_();
@@ -432,7 +432,7 @@ static KMETHOD OutputStream_putByte(KonohaContext *kctx, KonohaStack *sfp)
 //## method void OutputStream.print(String value);
 static KMETHOD OutputStream_print(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kOutputStream *out = (kOutputStream*)sfp[0].o;
+	kOutputStream *out = (kOutputStream*)sfp[0].asObject;
 	kString *text = sfp[1].asString;
 	if(!HAS_ICONV(out->iconv) || S_isASCII(text)) {
 		kOutputStream_write(kctx, out, S_text(text), S_size(text));
@@ -445,7 +445,7 @@ static KMETHOD OutputStream_print(KonohaContext *kctx, KonohaStack *sfp)
 //## method void OutputStream.println(String value);
 static KMETHOD OutputStream_println(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kOutputStream *out = (kOutputStream*)sfp[0].o;
+	kOutputStream *out = (kOutputStream*)sfp[0].asObject;
 	kString *text = sfp[1].asString;
 	if(!HAS_ICONV(out->iconv) || S_isASCII(text)) {
 		kOutputStream_write(kctx, out, S_text(text), S_size(text));
@@ -462,20 +462,20 @@ static KMETHOD OutputStream_println(KonohaContext *kctx, KonohaStack *sfp)
 //## method void OutputStream.flush();
 static KMETHOD OutputStream_flush(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kOutputStream_flush(kctx, (kOutputStream*)sfp[0].o);
+	kOutputStream_flush(kctx, (kOutputStream*)sfp[0].asObject);
 	RETURNvoid_();
 }
 
 //## method void OutputStream.close();
 static KMETHOD OutputStream_close(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kOutputStream_close(kctx, (kOutputStream*)sfp[0].o);
+	kOutputStream_close(kctx, (kOutputStream*)sfp[0].asObject);
 }
 
 //## method @public boolean OutputStream.isClosed()
 static KMETHOD OutputStream_isClosed(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kOutputStream *in = (kOutputStream*)sfp[0].o;
+	kOutputStream *in = (kOutputStream*)sfp[0].asObject;
 	RETURNi_(!(in->streamApi->isEndOfStream(kctx, in->fp)));
 }
 
@@ -528,7 +528,7 @@ static KMETHOD System_isFile(KonohaContext *kctx, KonohaStack *sfp)
 //## method @public File File.new(String x)
 static KMETHOD File_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kFile *f = (kFile*)sfp[0].o;
+	kFile *f = (kFile*)sfp[0].asObject;
 	KFieldSet(f, f->path, sfp[1].asString);
 	RETURN_(f);
 }
@@ -536,14 +536,14 @@ static KMETHOD File_new(KonohaContext *kctx, KonohaStack *sfp)
 //## method @public boolean File.getPath()
 static KMETHOD File_getPath(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kFile *f = (kFile*)sfp[0].o;
+	kFile *f = (kFile*)sfp[0].asObject;
 	RETURN_(f->path);
 }
 
 //## method @public boolean File.exists()
 static KMETHOD File_exists(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kFile *f = (kFile*)sfp[0].o;
+	kFile *f = (kFile*)sfp[0].asObject;
 	const char *filename = S_text(f->path);
 #ifdef _MSC_VER
 	RETURNb_(GetFileAttributes(filename) != -1);
@@ -572,7 +572,7 @@ kbool_t GetLargeFileSize(const char *filename, unsigned long long *size)
 //## method @public boolean File.getSize()
 static KMETHOD File_getSize(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kFile *f = (kFile*)sfp[0].o;
+	kFile *f = (kFile*)sfp[0].asObject;
 	const char *filename = S_text(f->path);
 #ifdef _MSC_VER
 	unsigned long long size;
@@ -586,7 +586,7 @@ static KMETHOD File_getSize(KonohaContext *kctx, KonohaStack *sfp)
 //## method @public boolean File.isDir()
 static KMETHOD File_isDir(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kFile *f = (kFile*)sfp[0].o;
+	kFile *f = (kFile*)sfp[0].asObject;
 	const char *filename = S_text(f->path);
 #ifdef _MSC_VER
 	DWORD attr = GetFileAttributesA(filename);
@@ -600,7 +600,7 @@ static KMETHOD File_isDir(KonohaContext *kctx, KonohaStack *sfp)
 //## method @public boolean File.isFile()
 static KMETHOD File_isFile(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kFile *f = (kFile*)sfp[0].o;
+	kFile *f = (kFile*)sfp[0].asObject;
 	const char *filename = S_text(f->path);
 #ifdef _MSC_VER
 	DWORD attr = GetFileAttributesA(filename);
@@ -614,7 +614,7 @@ static KMETHOD File_isFile(KonohaContext *kctx, KonohaStack *sfp)
 //## method @public boolean File.rename(String newName)
 static KMETHOD File_rename(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kFile *f = (kFile*)sfp[0].o;
+	kFile *f = (kFile*)sfp[0].asObject;
 	const char *oldName = S_text(f->path);
 	const char *newName = S_text(sfp[1].asString);
 	RETURNb_(rename(oldName, newName) == 0); // success: true
@@ -623,7 +623,7 @@ static KMETHOD File_rename(KonohaContext *kctx, KonohaStack *sfp)
 //## method @public boolean File.remove()
 static KMETHOD File_remove(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kFile *f = (kFile*)sfp[0].o;
+	kFile *f = (kFile*)sfp[0].asObject;
 	const char *filename = S_text(f->path);
 	RETURNb_(remove(filename) == 0); // success: true
 }
@@ -631,7 +631,7 @@ static KMETHOD File_remove(KonohaContext *kctx, KonohaStack *sfp)
 //## method @public Array[String] File.list()
 static KMETHOD File_list(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kFile *f = (kFile*)sfp[0].o;
+	kFile *f = (kFile*)sfp[0].asObject;
 	const char *dirname = S_text(f->path);
 	kArray *a = new_(Array, 0);
 #ifdef _MSC_VER
@@ -668,7 +668,7 @@ static void kioshare_setup(KonohaContext *kctx, struct KonohaModule *def, int ne
 {
 }
 
-static void kioshare_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, kObjectVisitor *visitor)
+static void kioshare_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
 {
 	kioshare_t *base = (kioshare_t *)baseh;
 	BEGIN_REFTRACE(3);

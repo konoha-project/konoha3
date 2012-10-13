@@ -38,7 +38,7 @@ struct _kDynamic {
 //{
 //}
 //
-//static void Dynamic_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+//static void Dynamic_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 //{
 //}
 //
@@ -77,14 +77,14 @@ static KMETHOD Dynamic_(KonohaContext *kctx, KonohaStack *sfp)
 	if(mtd != NULL) {
 		if(kMethod_checkMethodCallStack(kctx, sfp, mtd, argc)) {
 			KonohaRuntime_setesp(kctx, kctx->esp - 1);
-			sfp[K_MTDIDX].mtdNC = mtd;
+			sfp[K_MTDIDX].methodCallInfo = mtd;
 			//kObject *returnValue = sfp[K_RTNIDX].asObject;
 			KonohaRuntime_callMethod(kctx, sfp);
 
 			return;
 		}
 	}
-	KLIB KonohaRuntime_raise(kctx, EXPT_("NoSuchMethod"), sfp, sfp[K_RTNIDX].uline, NULL);
+	KLIB KonohaRuntime_raise(kctx, EXPT_("NoSuchMethod"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
 }
 
 // --------------------------------------------------------------------------
@@ -104,7 +104,7 @@ static kbool_t dynamic_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	
 	KonohaClass *cDynamic = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDynamic, pline);
 //	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
-//		{"Array", TY_TYPE, (uintptr_t)CT_(TY_Array)},
+//		{"Array", VirtualType_KonohaClass, (uintptr_t)CT_(TY_Array)},
 //		{NULL},
 //	};
 //	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(ClassData), 0);

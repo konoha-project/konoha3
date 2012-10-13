@@ -426,7 +426,7 @@ static void dumpOPCODE(KonohaContext *kctx, VirtualMachineInstruction *c, Virtua
 
 static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 {
-	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].mtdNC));
+	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].methodCallInfo));
 	KonohaVirtualMachine_run(kctx, sfp, CODE_ENTER);
 }
 
@@ -965,7 +965,7 @@ static void ByteCode_init(KonohaContext *kctx, kObject *o, void *conf)
 	KFieldInit(b, b->source, TS_EMPTY);
 }
 
-static void ByteCode_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
+static void ByteCode_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kByteCode *b = (kByteCode*)o;
 	BEGIN_REFTRACE(1);
@@ -981,7 +981,7 @@ static void ByteCode_free(KonohaContext *kctx, kObject *o)
 
 static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack *sfp)
 {
-//	kMethod *mtd = sfp[K_MTDIDX].mtdNC;
+//	kMethod *mtd = sfp[K_MTDIDX].methodCallInfo;
 //	ktype_t rtype = mtd->pa->rtype;
 //	if (rtype != TY_void) {
 //		if (TY_isUnbox(rtype)) {
@@ -1010,7 +1010,7 @@ static void kMethod_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
 /* ------------------------------------------------------------------------ */
 /* [ctxcode] */
 
-static void ctxcode_reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh, kObjectVisitor *visitor)
+static void ctxcode_reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh, KObjectVisitor *visitor)
 {
 	ctxcode_t *base = (ctxcode_t*)baseh;
 	BEGIN_REFTRACE(2);

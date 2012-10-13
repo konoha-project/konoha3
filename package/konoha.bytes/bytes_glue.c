@@ -38,7 +38,7 @@ extern "C"{
 static void Bytes_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	if ((size_t)conf <= 0) return;
-	struct _kBytes *ba = (struct _kBytes*)o;
+	struct kBytesVar *ba = (struct kBytesVar*)o;
 	ba->byteptr = NULL;
 	ba->byteptr = (const char *)KCALLOC((size_t)conf, 1);
 	if (ba->byteptr != NULL)	ba->bytesize = (size_t)conf;
@@ -47,7 +47,7 @@ static void Bytes_init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void Bytes_free(KonohaContext *kctx, kObject *o)
 {
-	struct _kBytes *ba = (struct _kBytes*)o;
+	struct kBytesVar *ba = (struct kBytesVar*)o;
 	if (ba->byteptr != NULL) {
 		KFREE(ba->buf, ba->bytesize);
 		ba->byteptr = NULL;
@@ -55,9 +55,9 @@ static void Bytes_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void Bytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void Bytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
-	kBytes *ba = (kBytes*)v[pos].o;
+	kBytes *ba = (kBytes*)v[pos].asObject;
 	size_t i, j, n;
 	for(j = 0; j * 16 < ba->bytesize; j++) {
 		KLIB Kwb_printf(kctx, wb, "%08x", (int)(j*16));
@@ -88,7 +88,7 @@ static void kmodiconv_setup(KonohaContext *kctx, struct KonohaModule *def, int n
 {
 }
 
-static void kmodiconv_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, kObjectVisitor *visitor)
+static void kmodiconv_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
 {
 }
 
@@ -105,7 +105,7 @@ static void kmodiconv_free(KonohaContext *kctx, struct KonohaModule *baseh)
 static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromCoding, const char *toCoding)
 {
 	kiconv_t conv;
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 
 	char convBuf[CONV_BUFSIZE] = {0};
 	char *presentPtrFrom = fromBa->buf;
@@ -167,9 +167,9 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 	} /* end of converting loop */
 	PLATAPI iconv_close_i((uintptr_t)conv);
 
-	const char *KUtilsWriteBufferopChar = KLIB Kwb_top(kctx, &wb, 1);
-	struct _kBytes *toBa = (struct _kBytes*)KLIB new_kObject(kctx, CT_Bytes, processedTotalSize); // ensure bytes ends with Zero
-	memcpy(toBa->buf, KUtilsWriteBufferopChar, processedTotalSize); // including NUL terminate by ensuredZeo
+	const char *KGrowingBufferopChar = KLIB Kwb_top(kctx, &wb, 1);
+	struct kBytesVar *toBa = (struct kBytesVar*)KLIB new_kObject(kctx, CT_Bytes, processedTotalSize); // ensure bytes ends with Zero
+	memcpy(toBa->buf, KGrowingBufferopChar, processedTotalSize); // including NUL terminate by ensuredZeo
 	KLIB Kwb_free(&wb);
 	return toBa;
 }
@@ -177,7 +177,7 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 //## @Const method Bytes Bytes.encodeTo(String toEncoding);
 static KMETHOD Bytes_encodeTo(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kBytes *ba = sfp[0].ba;
+	kBytes *ba = sfp[0].asBytes;
 	kString *toCoding = sfp[1].asString;
 
 	RETURN_(convFromTo(kctx, ba, "UTF-8", S_text(toCoding)));
@@ -196,7 +196,7 @@ static kString *toString(KonohaContext *kctx, kBytes *ba)
 //## @Const method String Bytes.decodeFrom(String fromEncoding);
 static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kBytes* fromBa = sfp[0].ba;
+	kBytes* fromBa = sfp[0].asBytes;
 	kString*fromCoding = sfp[1].asString;
 	kBytes *toBa = NULL;
 	DBG_P("size=%d, '%s'", fromBa->bytesize, fromBa->buf);
@@ -217,7 +217,7 @@ static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, KonohaStack *sfp)
 //## @Const method Bytes String.asBytes();
 static KMETHOD String_asBytes(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kString* s = sfp[0].s;
+	kString* s = sfp[0].asString;
 	size_t size = S_size(s);
 	kBytes* ba = new_(Bytes, (size>0)?size+1:0);
 	if (size > 0) {
@@ -230,7 +230,7 @@ static KMETHOD String_asBytes(KonohaContext *kctx, KonohaStack *sfp)
 //## @Const method String Bytes.asString();
 static KMETHOD Bytes_asString(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kBytes *from = sfp[0].ba;
+	kBytes *from = sfp[0].asBytes;
 	kBytes *to = convFromTo(kctx, from, PLATAPI getSystemCharset(), "UTF-8");
 
 	RETURN_(toString(kctx, to));
@@ -239,23 +239,23 @@ static KMETHOD Bytes_asString(KonohaContext *kctx, KonohaStack *sfp)
 //## Int Bytes.get(Int n);
 static KMETHOD Bytes_get(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kBytes *ba = sfp[0].ba;
-	size_t n = check_index(kctx, sfp[1].intValue, ba->bytesize, sfp[K_RTNIDX].uline);
+	kBytes *ba = sfp[0].asBytes;
+	size_t n = check_index(kctx, sfp[1].intValue, ba->bytesize, sfp[K_RTNIDX].callerFileLine);
 	RETURNi_(ba->utext[n]);
 }
 
 //## method Int Bytes.set(Int n, Int c);
 static KMETHOD Bytes_set(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kBytes *ba = sfp[0].ba;
-	size_t n = check_index(kctx, sfp[1].intValue, ba->bytesize, sfp[K_RTNIDX].uline);
+	kBytes *ba = sfp[0].asBytes;
+	size_t n = check_index(kctx, sfp[1].intValue, ba->bytesize, sfp[K_RTNIDX].callerFileLine);
 	ba->buf[n] = sfp[2].intValue;
 	RETURNi_(ba->utext[n]);
 }
 
 static KMETHOD Bytes_setAll(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kBytes *ba = sfp[0].ba;
+	kBytes *ba = sfp[0].asBytes;
 	int bytesize = ba->bytesize;
 	int i;
 	for (i = 0; i < bytesize; i++) {
@@ -266,13 +266,13 @@ static KMETHOD Bytes_setAll(KonohaContext *kctx, KonohaStack *sfp)
 }
 static KMETHOD Bytes_getSize(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kBytes *ba = sfp[0].ba;
+	kBytes *ba = sfp[0].asBytes;
 	RETURNi_(ba->bytesize);
 }
 
 static KMETHOD Bytes_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), sfp[1].intValue));
+	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), sfp[1].intValue));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -327,7 +327,7 @@ static kbool_t bytes_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 
 static KMETHOD TokenFunc_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kTokenVar *tk = (kTokenVar *)sfp[1].o;
+	kTokenVar *tk = (kTokenVar *)sfp[1].asObject;
 	int ch, prev = '/', pos = 1;
 	const char *source = S_text(sfp[2].asString);
 	while((ch = source[pos++]) != 0) {

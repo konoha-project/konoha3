@@ -54,7 +54,7 @@ static void kJSON_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kJSON_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void kJSON_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	kJSON *json = (kJSON *)v[pos].asObject;
 	char *data = JSON_toString(json->json);
@@ -68,7 +68,7 @@ static void kJSON_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuf
 //## JSON JSON.new();
 static KMETHOD kJSON_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_(sfp[0].o);
+	RETURN_(sfp[0].asObject);
 }
 
 static kJSON *NewJsonObject(KonohaContext *kctx, KonohaStack *sfp, JSON val)

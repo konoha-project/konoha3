@@ -156,7 +156,7 @@ static void JSVisitor_visitConstExpr(KonohaContext *kctx, IRBuilder *self, kExpr
 
 static void JSVisitor_visitNConstExpr(KonohaContext *kctx, IRBuilder *self, kExpr *expr)
 {
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	KonohaStack sfp[1];
 	unsigned long unboxVal = expr->unboxConstValue;
@@ -275,7 +275,7 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 {
 	unsigned i;
 	builder->local_fields = (void *) KMALLOC(sizeof(int));
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	kParam *pa = Method_param(mtd);
 	if (mtd->mn) {

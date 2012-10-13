@@ -1012,7 +1012,7 @@ static void _THCODE(KonohaContext *kctx, VirtualMachineInstruction *pc, void **c
 
 static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 {
-	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].mtdNC));
+	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].methodCallInfo));
 	KonohaVirtualMachine_run(kctx, sfp, CODE_ENTER);
 }
 
@@ -1123,7 +1123,7 @@ static void ByteCode_init(KonohaContext *kctx, kObject *o, void *conf)
 	KFieldInit(b, b->source, TS_EMPTY);
 }
 
-static void ByteCode_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
+static void ByteCode_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kByteCode *b = (kByteCode*)o;
 	BEGIN_REFTRACE(1);
@@ -1137,7 +1137,7 @@ static void ByteCode_free(KonohaContext *kctx, kObject *o)
 	KFREE(b->code, b->codesize);
 }
 
-static void ctxcode_reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh, kObjectVisitor *visitor)
+static void ctxcode_reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh, KObjectVisitor *visitor)
 {
 	ctxcode_t *base = (ctxcode_t*)baseh;
 	BEGIN_REFTRACE(2);
@@ -1182,7 +1182,7 @@ static void kmodcode_setup(KonohaContext *kctx, struct KonohaModule *def, int ne
 	}
 }
 
-static void kmodcode_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, kObjectVisitor *visitor)
+static void kmodcode_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
 {
 	KModuleByteCode *base = (KModuleByteCode*)baseh;
 	BEGIN_REFTRACE(1);

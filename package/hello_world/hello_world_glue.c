@@ -55,16 +55,16 @@ static void Person_free(KonohaContext *kctx, kObject *o)
 	 */
 }
 
-static void Person_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void Person_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	/* This function is called when serializing the object. */
-	struct Person *p = (struct Person *) v[pos].o;
+	struct Person *p = (struct Person *) v[pos].asObject;
 	KLIB Kwb_write(kctx, wb, S_text(p->name), S_size(p->name));
 	KLIB Kwb_write(kctx, wb, ",", 1);
 	KLIB Kwb_printf(kctx, wb, KINT_FMT, p->age);
 }
 
-static void Person_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
+static void Person_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	/* Garbage collector (GC) cannot recognize in which position of the field
 	 * an object exists. The function tells to GC which object should be traced. */
@@ -87,7 +87,7 @@ static KMETHOD Person_new(KonohaContext *kctx, KonohaStack *sfp)
 	kString *name = sfp[1].asString;
 	kint_t   age  = sfp[2].intValue;
 	/* If you want to determine the type of the return value,
-	 * please check O_ct(sfp[K_RTNIDX].o) . */
+	 * please check O_ct(sfp[K_RTNIDX].asObject) . */
 	KFieldSet(p, p->name, name);
 	p->age = age;
 	RETURN_(p);

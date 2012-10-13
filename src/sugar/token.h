@@ -332,10 +332,10 @@ static int callTokenFunc(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, Tokenize
 {
 	DBG_ASSERT(IS_Func(fo));
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, fo->self);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, (kObject*)tk);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, fo->self);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, (kObject*)tk);
 	lsfp[K_CALLDELTA+1].unboxValue = (uintptr_t)tokenizer;
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].s, preparedString);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asString, preparedString);
 	{
 		KonohaStack *sfp = lsfp + K_CALLDELTA;
 		KSetMethodCallStack(sfp, 0/*UL*/, fo->mtd, 2, KLIB Knull(kctx, CT_Int));

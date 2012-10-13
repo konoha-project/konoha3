@@ -54,7 +54,7 @@ static KMETHOD Complex_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	/* You do not need to allocate object because
 	 * object is allocated by Runtime. */
-	kComplex *ret = (kComplex *) sfp[0].o;
+	kComplex *ret = (kComplex *) sfp[0].asObject;
 	double real = (double)sfp[1].floatValue;
 	double imaginary = (double)sfp[2].floatValue;
 	ret->z = real + I * imaginary;
@@ -615,7 +615,7 @@ static KMETHOD Complex_conj(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
 	double _Complex answer = conj(z);
-	kComplex *ret = (kComplex *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+	kComplex *ret = (kComplex *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 	ret->z = answer;
 	RETURN_(ret);
 }
@@ -626,7 +626,7 @@ static KMETHOD Complex_conjf(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
 	float _Complex answer = conj(zf);
-	kComplex *ret = (kComplex *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+	kComplex *ret = (kComplex *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 	ret->z = answer;
 	RETURN_(ret);
 }
@@ -637,7 +637,7 @@ static KMETHOD Complex_conjl(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
 	long double answer = conj(zl);
-	kComplex *ret = (kComplex *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+	kComplex *ret = (kComplex *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 	ret->z = answer;
 	RETURN_(ret);
 }

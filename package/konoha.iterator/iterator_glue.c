@@ -65,13 +65,13 @@ static void Iterator_init(KonohaContext *kctx, kObject *o, void *conf)
 
 static KMETHOD Iterator_hasNext(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kIterator *itr = sfp[0].itr;
+	kIterator *itr = sfp[0].asIterator;
 	RETURNb_(itr->hasNext(kctx, sfp));
 }
 
 static KMETHOD Iterator_next(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kIterator *itr = sfp[0].itr;
+	kIterator *itr = sfp[0].asIterator;
 	itr->setNextResult(kctx, sfp);
 }
 
@@ -132,14 +132,14 @@ static KMETHOD Array_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t String_hasNext(KonohaContext *kctx, KonohaStack* sfp)
 {
-	kIterator *itr = sfp[0].itr;
+	kIterator *itr = sfp[0].asIterator;
 	kString *s = (kString*)itr->source;
 	return (itr->current_pos < S_size(s));
 }
 
 static void String_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 {
-	kIterator *itr = sfp[0].itr;
+	kIterator *itr = sfp[0].asIterator;
 	kString *s = (kString*)itr->source;
 	const char *t = S_text(s) + itr->current_pos;
 	size_t charsize = utf8len(t[0]);
@@ -159,7 +159,7 @@ static KMETHOD String_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 /* ------------------------------------------------------------------------ */
 
 static void kmoditerator_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx) {}
-static void kmoditerator_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, kObjectVisitor *visitor) { }
+static void kmoditerator_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor) { }
 static void kmoditerator_free(KonohaContext *kctx, struct KonohaModule *baseh) { KFREE(baseh, sizeof(KonohaIteratorModule)); }
 
 #define _Public   kMethod_Public

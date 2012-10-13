@@ -32,10 +32,10 @@ static kExpr *callTypeCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef, k
 {
 	INIT_GCSTACK();
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, fo->self);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, (kObject*)stmt);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].o, (kObject*)expr);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+3].o, (kObject*)gma);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, fo->self);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, (kObject*)stmt);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asObject, (kObject*)expr);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+3].asObject, (kObject*)gma);
 	lsfp[K_CALLDELTA+4].intValue = reqty;
 	countRef[0] += 1;
 	{
@@ -185,9 +185,9 @@ static kbool_t kStmt_tyCheckByName(KonohaContext *kctx, kStmt *stmt, ksymbol_t c
 static kbool_t callStatementFunc(KonohaContext *kctx, kFunc *fo, int *countRef, kStmt *stmt, kGamma *gma)
 {
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 3);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, (kObject*)fo->self);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, (kObject*)stmt);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].o, (kObject*)gma);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, (kObject*)fo->self);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, (kObject*)stmt);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asObject, (kObject*)gma);
 	countRef[0] += 1;
 	{
 		KonohaStack *sfp = lsfp + K_CALLDELTA;
@@ -397,7 +397,7 @@ static kstatus_t kMethod_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtyp
 	BEGIN_LOCAL(lsfp, K_CALLDELTA);
 	KonohaStackRuntimeVar *runtime = kctx->stack;
 	if(runtime->evalty != TY_void) {
-		KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, runtime->stack[runtime->evalidx].o);
+		KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, runtime->stack[runtime->evalidx].asObject);
 		lsfp[K_CALLDELTA+1].intValue = runtime->stack[runtime->evalidx].intValue;
 	}
 	KonohaStack *sfp = lsfp + K_CALLDELTA;

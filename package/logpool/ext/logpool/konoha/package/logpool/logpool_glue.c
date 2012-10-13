@@ -64,7 +64,7 @@ static void Log_free(CTX, kObject *po)
 
 static void Log_p(CTX, ksfp_t *sfp, int pos, kwb_t *wb)
 {
-	kRawPtr *self = (kRawPtr *) sfp[0].o;
+	kRawPtr *self = (kRawPtr *) sfp[0].asObject;
 	struct Log *log = (struct Log *) self->rawptr;
 	int i;
 	char *data = log_get_data(log);
@@ -94,20 +94,20 @@ static void Log_p(CTX, ksfp_t *sfp, int pos, kwb_t *wb)
 //## LogPool LogPool.new(String host, int port)
 static KMETHOD LogPool_new(CTX, ksfp_t *sfp _RIX)
 {
-	kRawPtr *ret = (kRawPtr *) sfp[0].o;
-	char *host = (char *) S_text(sfp[1].s);
+	kRawPtr *ret = (kRawPtr *) sfp[0].asObject;
+	char *host = (char *) S_text(sfp[1].asString);
 	int   port = sfp[2].ivalue;
-	RawPtr_init(_ctx, sfp[0].o, logpool_open_client(NULL, host, port));
+	RawPtr_init(_ctx, sfp[0].asObject, logpool_open_client(NULL, host, port));
 	RETURN_(ret);
 }
 
 //## Log LogPool.get()
 static KMETHOD LogPool_get(CTX, ksfp_t *sfp _RIX)
 {
-	logpool_t *lp = (logpool_t *) ((kRawPtr *) sfp[0].o)->rawptr;
+	logpool_t *lp = (logpool_t *) ((kRawPtr *) sfp[0].asObject)->rawptr;
 	char *buf = malloc(256);
 	char *ret = logpool_client_get(lp, buf, 256);
-	kObject *log = new_kObject(O_ct(sfp[K_RTNIDX].o), NULL);
+	kObject *log = new_kObject(O_ct(sfp[K_RTNIDX].asObject), NULL);
 	if (ret == NULL) {
 		kObject_set(NullObject, log, 1);
 		free(buf);
@@ -119,10 +119,10 @@ static KMETHOD LogPool_get(CTX, ksfp_t *sfp _RIX)
 //## String Log.get(String key)
 static KMETHOD Log_get_(CTX, ksfp_t *sfp _RIX)
 {
-	kRawPtr *self = (kRawPtr *) sfp[0].o;
+	kRawPtr *self = (kRawPtr *) sfp[0].asObject;
 	struct Log *log = (struct Log *) self->rawptr;
-	char *key  = (char *) S_text(sfp[1].s);
-	int   klen = S_size(sfp[1].s);
+	char *key  = (char *) S_text(sfp[1].asString);
+	int   klen = S_size(sfp[1].asString);
 	int   vlen;
 	char *data = Log_get(log, key, klen, &vlen);
 	RETURN_(new_kString(data, vlen, StringPolicy_ASCII|StringPolicy_POOL));
@@ -143,7 +143,7 @@ static uintptr_t p_init(uintptr_t context)
 	memcpy(c, (struct konoha_context*) context, sizeof(*c));
 	CTX_t _ctx = c->konoha;
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, c->finit->self);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, c->finit->self);
 	KCALL(lsfp, 0, c->finit->mtd, 0, K_NULL);
 	END_LOCAL();
 	return (uintptr_t) c;
@@ -154,7 +154,7 @@ static uintptr_t p_exit(uintptr_t context)
 	struct konoha_context *c = malloc(sizeof(struct konoha_context));
 	CTX_t _ctx = c->konoha;
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, c->fexit->self);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, c->fexit->self);
 	KCALL(lsfp, 0, c->fexit->mtd, 0, K_NULL);
 	END_LOCAL();
 	bzero(c, sizeof(*c));
@@ -173,8 +173,8 @@ static uintptr_t p_func(uintptr_t context, struct LogEntry *e)
 	CTX_t _ctx = c->konoha;
 	kObject *log = (kObject *) Log_new(_ctx, (struct Log *) &e->data);
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, c->func->self);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, log);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, c->func->self);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, log);
 	KCALL(lsfp, 0, c->func->mtd, 0, K_NULL);
 	END_LOCAL();
 	return context;
@@ -196,7 +196,7 @@ static char *copy_string(CTX, kString *s)
 static KMETHOD Printer_create(CTX, ksfp_t *sfp _RIX)
 {
 	struct pool_plugin_print *p = POOL_PLUGIN_CLONE(pool_plugin_print);
-	kRawPtr *ret = (kRawPtr *) new_kObject(O_ct(sfp[K_RTNIDX].o), p);
+	kRawPtr *ret = (kRawPtr *) new_kObject(O_ct(sfp[K_RTNIDX].asObject), p);
 	RETURN_(ret);
 }
 
@@ -204,12 +204,12 @@ static KMETHOD Printer_create(CTX, ksfp_t *sfp _RIX)
 static KMETHOD ValFilter_create(CTX, ksfp_t *sfp _RIX)
 {
 	struct pool_plugin_val_filter *p = POOL_PLUGIN_CLONE(pool_plugin_val_filter);
-	kRawPtr *ret = (kRawPtr *) new_kObject(O_ct(sfp[K_RTNIDX].o), p);
-	p->klen = S_size(sfp[1].s);
-	p->key  = copy_string(_ctx, sfp[1].s);
-	p->vlen = S_size(sfp[2].s);
-	p->val  = copy_string(_ctx, sfp[2].s);
-	if (strncmp(S_text(sfp[3].s), "eq", 2) == 0) {
+	kRawPtr *ret = (kRawPtr *) new_kObject(O_ct(sfp[K_RTNIDX].asObject), p);
+	p->klen = S_size(sfp[1].asString);
+	p->key  = copy_string(_ctx, sfp[1].asString);
+	p->vlen = S_size(sfp[2].asString);
+	p->val  = copy_string(_ctx, sfp[2].asString);
+	if (strncmp(S_text(sfp[3].asString), "eq", 2) == 0) {
 		p->val_cmp = val_eq;
 	} else {
 		assert(0 && "TODO");
@@ -221,9 +221,9 @@ static KMETHOD ValFilter_create(CTX, ksfp_t *sfp _RIX)
 static KMETHOD KeyFilter_create(CTX, ksfp_t *sfp _RIX)
 {
 	struct pool_plugin_key_filter *p = POOL_PLUGIN_CLONE(pool_plugin_key_filter);
-	kRawPtr *ret = (kRawPtr *) new_kObject(O_ct(sfp[K_RTNIDX].o), p);
-	p->klen = S_size(sfp[1].s);
-	p->key  = copy_string(_ctx, sfp[2].s);
+	kRawPtr *ret = (kRawPtr *) new_kObject(O_ct(sfp[K_RTNIDX].asObject), p);
+	p->klen = S_size(sfp[1].asString);
+	p->key  = copy_string(_ctx, sfp[2].asString);
 	RETURN_(ret);
 }
 
@@ -231,9 +231,9 @@ static KMETHOD KeyFilter_create(CTX, ksfp_t *sfp _RIX)
 static KMETHOD React_create(CTX, ksfp_t *sfp _RIX)
 {
 	struct pool_plugin_react *p = POOL_PLUGIN_CLONE(pool_plugin_react);
-	kRawPtr *ret = (kRawPtr *) new_kObject(O_ct(sfp[K_RTNIDX].o), p);
-	p->conf.traceName = copy_string(_ctx, sfp[1].s);
-	p->conf.key       = copy_string(_ctx, sfp[2].s);
+	kRawPtr *ret = (kRawPtr *) new_kObject(O_ct(sfp[K_RTNIDX].asObject), p);
+	p->conf.traceName = copy_string(_ctx, sfp[1].asString);
+	p->conf.key       = copy_string(_ctx, sfp[2].asString);
 	RETURN_(ret);
 }
 
@@ -241,7 +241,7 @@ static KMETHOD React_create(CTX, ksfp_t *sfp _RIX)
 static KMETHOD Timer_create(CTX, ksfp_t *sfp _RIX)
 {
 	struct pool_plugin_timer *p = POOL_PLUGIN_CLONE(pool_plugin_timer);
-	kRawPtr *ret = (kRawPtr *) new_kObject(O_ct(sfp[K_RTNIDX].o), p);
+	kRawPtr *ret = (kRawPtr *) new_kObject(O_ct(sfp[K_RTNIDX].asObject), p);
 	p->timer = sfp[1].ivalue;
 	p->flag_start  = sfp[2].ivalue;
 	p->flag_cont   = sfp[3].ivalue;
@@ -253,7 +253,7 @@ static KMETHOD Timer_create(CTX, ksfp_t *sfp _RIX)
 static KMETHOD Copy_create(CTX, ksfp_t *sfp _RIX)
 {
 	struct pool_plugin_copy *p = POOL_PLUGIN_CLONE(pool_plugin_copy);
-	kRawPtr *ret = (kRawPtr *) new_kObject(O_ct(sfp[K_RTNIDX].o), p);
+	kRawPtr *ret = (kRawPtr *) new_kObject(O_ct(sfp[K_RTNIDX].asObject), p);
 	RETURN_(ret);
 }
 
@@ -271,7 +271,7 @@ static void *statics_init(CTX, kFunc *initFo, kFunc *exitFo, kFunc *funcFo)
 static KMETHOD Statics_create(CTX, ksfp_t *sfp _RIX)
 {
 	struct pool_plugin_statics *p = POOL_PLUGIN_CLONE(pool_plugin_statics);
-	kRawPtr *ret = (kRawPtr *) new_kObject(O_ct(sfp[K_RTNIDX].o), p);
+	kRawPtr *ret = (kRawPtr *) new_kObject(O_ct(sfp[K_RTNIDX].asObject), p);
 	p->context = (uintptr_t)statics_init(_ctx, sfp[1].fo, sfp[2].fo, sfp[3].fo);
 	p->finit = p_init;
 	p->fexit = p_exit;
@@ -283,8 +283,8 @@ static KMETHOD Statics_create(CTX, ksfp_t *sfp _RIX)
 static KMETHOD Response_create(CTX, ksfp_t *sfp _RIX)
 {
 	struct pool_plugin_response *p = POOL_PLUGIN_CLONE(pool_plugin_response);
-	kRawPtr *ret = (kRawPtr *) new_kObject(O_ct(sfp[K_RTNIDX].o), p);
-	kRawPtr *ev = (kRawPtr *) sfp[1].o;
+	kRawPtr *ret = (kRawPtr *) new_kObject(O_ct(sfp[K_RTNIDX].asObject), p);
+	kRawPtr *ev = (kRawPtr *) sfp[1].asObject;
 	p->bev = ev->rawptr;
 	RETURN_(ret);
 }
@@ -292,16 +292,16 @@ static KMETHOD Response_create(CTX, ksfp_t *sfp _RIX)
 // void PoolPlugin.apply(PoolPlugin p);
 static KMETHOD PoolPlugin_apply(CTX, ksfp_t *sfp _RIX)
 {
-	kRawPtr *self = (kRawPtr *) sfp[0].o;
-	kRawPtr *plug = (kRawPtr *) sfp[1].o;
+	kRawPtr *self = (kRawPtr *) sfp[0].asObject;
+	kRawPtr *plug = (kRawPtr *) sfp[1].asObject;
 	((struct pool_plugin *) self->rawptr)->apply = ((struct pool_plugin *) plug->rawptr);
 }
 
 // void PoolPlugin.failed(PoolPlugin p);
 static KMETHOD PoolPlugin_failed(CTX, ksfp_t *sfp _RIX)
 {
-	kRawPtr *self = (kRawPtr *) sfp[0].o;
-	kRawPtr *plug = (kRawPtr *) sfp[1].o;
+	kRawPtr *self = (kRawPtr *) sfp[0].asObject;
+	kRawPtr *plug = (kRawPtr *) sfp[1].asObject;
 	((struct pool_plugin *) self->rawptr)->failed = ((struct pool_plugin *) plug->rawptr);
 }
 
@@ -326,8 +326,8 @@ static char *loadFile(const char *file, size_t *plen)
 // LogPool LogPool.loadFile(String key, String file);
 static KMETHOD LogPool_loadFile(CTX, ksfp_t *sfp _RIX)
 {
-	logpool_t *lp = (logpool_t *) ((kRawPtr *) sfp[0].o)->rawptr;
-	kString *key  = sfp[1].s;
+	logpool_t *lp = (logpool_t *) ((kRawPtr *) sfp[0].asObject)->rawptr;
+	kString *key  = sfp[1].asString;
 	kString *file = sfp[2].s;
 	memcached_st *mc = memcached_create(NULL);
 	memcached_server_list_st servers;

@@ -33,15 +33,15 @@ extern "C"{
 
 #define OB_TYPE(obj) (((PyObject*)obj->self)->ob_type)
 
-typedef const struct _kPyObject kPyObject;
-struct _kPyObject {
+typedef const struct kPyObjectVar kPyObject;
+struct kPyObjectVar {
 	KonohaObjectHeader h;
 	PyObject *self;  // don't set NULL
 };
 
 static void PyObject_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct _kPyObject *pyo = (struct _kPyObject*)o;
+	struct kPyObjectVar *pyo = (struct kPyObjectVar*)o;
 	if(conf == NULL) {
 		pyo->self = Py_None;
 		Py_INCREF(Py_None);
@@ -51,9 +51,9 @@ static void PyObject_init(KonohaContext *kctx, kObject *o, void *conf)
 	}
 }
 
-static void PyObject_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void PyObject_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
-	PyObject *pyo =  ((kPyObject*)v[pos].o)->self;
+	PyObject *pyo =  ((kPyObject*)v[pos].asObject)->self;
 	PyObject* str = pyo->ob_type->tp_str(pyo);
 	Py_INCREF(str);
 	KLIB Kwb_printf(kctx, wb, "%s", PyString_AsString(str));
@@ -66,7 +66,7 @@ static void PyObject_free(KonohaContext *kctx, kObject *o)
 	// so, it is not free safe
 	// it is not better using NULL
 	// make struct null stab (or Py_None?).
-	struct _kPyObject *pyo = (struct _kPyObject*)o;
+	struct kPyObjectVar *pyo = (struct kPyObjectVar*)o;
 	//OB_TYPE(pyo)->tp_free(pyo->self);
 	Py_DECREF(pyo->self);
 	Py_INCREF(Py_None);
@@ -78,7 +78,7 @@ static void PyObject_free(KonohaContext *kctx, kObject *o)
 static void RETURN_PyObject_(KonohaContext *kctx, KonohaStack *sfp, PyObject *pyo)
 {
 	if(pyo != NULL) {
-		RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), (uintptr_t)pyo));
+		RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), (uintptr_t)pyo));
 	}
 	else {
 		// ERROR if python object is NULL
@@ -139,19 +139,19 @@ static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 // [TODO] warning caused ... because some bytes_gule.h function (ex. kdlclose) is not use.
 //static KMETHOD Bytes_toPyObject(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	RETURN_PyObject(PyString_FromString(sfp[0].s));
+//	RETURN_PyObject(PyString_FromString(sfp[0].asString));
 //}
 //
 //static KMETHOD PyObject_toBytes(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kPyObject *po = (kPyObject*)sfp[0].asObject;
-//	KUtilsWriteBuffer wb;
+//	KGrowingBuffer wb;
 //	if(po->self == NULL) {
 //		// [TODO] throw Exception
 //	}
 //	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 //	O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb, 0);
-//	struct _kBytes* ba = (struct _kBytes*)new_Bytes(kctx, Kwb_bytesize(&wb));
+//	struct kBytesVar* ba = (struct kBytesVar*)new_Bytes(kctx, Kwb_bytesize(&wb));
 //	ba->buf = KLIB Kwb_top(kctx, &wb, 1);
 //	KLIB Kwb_free(&wb);
 //	RETURN_(ba);
@@ -170,13 +170,13 @@ static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD String_toPyObject(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_PyObject(PyUnicode_FromString(S_text(sfp[0].s)));
+	RETURN_PyObject(PyUnicode_FromString(S_text(sfp[0].asString)));
 }
 
 static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kPyObject *po = (kPyObject*)sfp[0].asObject;
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	// assert
 	DBG_ASSERT(po->self != NULL);
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
@@ -202,7 +202,7 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 	//	RETURN_(KLIB new_kString(kctx, t, strlen(t), 0));
 	//}
 	//else {
-	//	KUtilsWriteBuffer wb;
+	//	KGrowingBuffer wb;
 	//	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	//	O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb, 0);
 	//	kString* s = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
@@ -453,14 +453,14 @@ static KMETHOD PyObject_(KonohaContext *kctx, KonohaStack *sfp)
 	//
 	int argc = kctx->esp - sfp - 2;   // believe me
 	kPyObject *pmod = (kPyObject*)sfp[0].asObject;
-	PyObject  *pFunc = PyObject_GetAttrString(pmod->self, S_text(kctx->esp[-1].s));
+	PyObject  *pFunc = PyObject_GetAttrString(pmod->self, S_text(kctx->esp[-1].asString));
 	PyObject  *pArgs = NULL, *pValue = NULL;
 	if(pFunc != NULL) {
 		if(PyCallable_Check(pFunc)) {
 			int i;
 			pArgs = PyTuple_New(argc);
 			for (i = 0; i < argc; ++i) {
-				pValue = ((kPyObject*)sfp[i+1].o)->self;
+				pValue = ((kPyObject*)sfp[i+1].asObject)->self;
 				Py_INCREF(pValue);
 				PyTuple_SetItem(pArgs, i, pValue);
 			}

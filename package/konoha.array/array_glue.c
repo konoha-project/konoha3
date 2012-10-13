@@ -36,7 +36,7 @@ extern "C"{
 static KMETHOD Array_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].uline);
+	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].callerFileLine);
 	if (kArray_isUnboxData(a)) {
 		RETURNd_(a->unboxItems[n]);
 	}
@@ -49,12 +49,12 @@ static KMETHOD Array_get(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].uline);
+	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].callerFileLine);
 	if (kArray_isUnboxData(a)) {
 		a->unboxItems[n] = sfp[2].unboxValue;
 	}
 	else {
-		KFieldSet(a, a->objectItems[n], sfp[2].o);
+		KFieldSet(a, a->objectItems[n], sfp[2].asObject);
 	}
 }
 
@@ -92,7 +92,7 @@ static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
 // Array
 struct _kAbstractArray {
 	KonohaObjectHeader h;
-	KUtilsGrowingArray a;
+	KGrowingArray a;
 };
 
 static void UnboxArray_ensureMinimumSize(KonohaContext *kctx, struct _kAbstractArray *a, size_t min)
@@ -257,7 +257,7 @@ static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
 		for(i=0; i != asize; ++i) {
 			uintptr_t tmp = a->unboxItems[i];
 			BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, K_NULL);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
 			lsfp[K_CALLDELTA+1].unboxValue = tmp;
 			KCALL(lsfp, 0, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
 			END_LOCAL();
@@ -268,11 +268,11 @@ static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
 		for(i=0; i != asize; ++i) {
 			kObject *tmp  = a->objectItems[i];
 			BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, K_NULL);
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, tmp);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, tmp);
 			KCALL(lsfp, 0, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
 			END_LOCAL();
-			KFieldSet(ret, ret->objectItems[i], lsfp[0].o);
+			KFieldSet(ret, ret->objectItems[i], lsfp[0].asObject);
 		}
 	}
 	kArray_setsize(ret, asize);
@@ -292,7 +292,7 @@ static KMETHOD Array_inject(KonohaContext *kctx, KonohaStack *sfp)
 		uintptr_t tmp = 0;
 		BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
 		for(i=0; i != asize; ++i) {
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, K_NULL);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
 			lsfp[K_CALLDELTA+1].unboxValue = tmp;
 			lsfp[K_CALLDELTA+2].unboxValue = a->unboxItems[i];
 			KCALL(lsfp, 0, f->mtd, 2, KLIB Knull(kctx, CT_(resolve_type)));
@@ -307,11 +307,11 @@ static KMETHOD Array_inject(KonohaContext *kctx, KonohaStack *sfp)
 		kObject *nulobj = KLIB Knull(kctx, CT_(resolve_type));
 		BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
 		for(i=0; i != asize; ++i) {
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, K_NULL);
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, tmp);
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+2].o, a->objectItems[i]);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, tmp);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asObject, a->objectItems[i]);
 			KCALL(lsfp, 0, f->mtd, 2, nulobj);
-			KUnsafeFieldSet(tmp, lsfp[0].o);
+			KUnsafeFieldSet(tmp, lsfp[0].asObject);
 		}
 		END_LOCAL();
 		RETURN_(tmp);
@@ -369,7 +369,7 @@ static KMETHOD Array_indexOf(KonohaContext *kctx, KonohaStack *sfp)
 		//TODO:Need to implement Object compareTo.
 		kObject *o = sfp[1].asObject;
 		for(i = 0; i < kArray_size(a); i++) {
-			KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplemented"), sfp, sfp[K_RTNIDX].uline, NULL);
+			KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplemented"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
 			if (O_ct(o)->compareObject(a->objectItems[i], o) == 0) {
 				res = i; break;
 			}
@@ -395,7 +395,7 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 		//TODO: Need to implement Object compareTo;
 		kObject *o = sfp[1].asObject;
 		for(i = kArray_size(a)- 1; i != 0; i--) {
-			KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplemented"), sfp, sfp[K_RTNIDX].uline, NULL);
+			KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplemented"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
 			if(O_ct(o)->compareObject(a->objectItems[i], o) == 0) {
 				break;
 			}
@@ -410,7 +410,7 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kArray *a = sfp[0].asArray;
 //	size_t i = 0;
-//	KUtilsWriteBuffer wb;
+//	KGrowingBuffer wb;
 //	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 //	if (kArray_size(a) < 1) {
 //		RETURN_(KNULL(String));
@@ -430,19 +430,19 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 //			obj = a->objectItems[i];
 //			DBG_ASSERT(O_ct(obj)->p);
 //			// before call system.p, push variables
-//			KUnsafeFieldSet(lsfp[0].o, obj);
+//			KUnsafeFieldSet(lsfp[0].asObject, obj);
 //			O_ct(obj)->p(kctx, lsfp, 0, &wb, 0);
 //			KLIB Kwb_printf(kctx, &wb, ",");
 //		}
 //		obj = a->objectItems[i];
-//		KUnsafeFieldSet(lsfp[0].o, obj);
+//		KUnsafeFieldSet(lsfp[0].asObject, obj);
 //		O_ct(obj)->p(kctx, lsfp, 0, &wb, 0);
 //		END_LOCAL();
 //
 //	}
-//	const char *KUtilsWriteBufferTopChar = KLIB Kwb_top(kctx, &wb, 0);
-//	size_t strsize = strlen(KUtilsWriteBufferTopChar);
-//	kString *ret = KLIB new_kString(kctx, KUtilsWriteBufferTopChar, strsize, 0);
+//	const char *KGrowingBufferTopChar = KLIB Kwb_top(kctx, &wb, 0);
+//	size_t strsize = strlen(KGrowingBufferTopChar);
+//	kString *ret = KLIB new_kString(kctx, KGrowingBufferTopChar, strsize, 0);
 //	KLIB Kwb_free(&wb);
 //	RETURN_(ret);
 //}
@@ -491,7 +491,7 @@ static KMETHOD Array_newList(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
-		{"Array", TY_TYPE, (uintptr_t)CT_(TY_Array)},
+		{"Array", VirtualType_KonohaClass, (uintptr_t)CT_(TY_Array)},
 		{NULL},
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(ClassData), 0);

@@ -136,7 +136,7 @@ static kArray *kStringToCharArray(KonohaContext *kctx, kString *bs, int istrim, 
 	return a;
 }
 
-static kString *kwb_newString(KonohaContext *kctx, KUtilsWriteBuffer *wb, int flg)
+static kString *kwb_newString(KonohaContext *kctx, KGrowingBuffer *wb, int flg)
 {
 	return KLIB new_kString(kctx, KLIB Kwb_top(kctx, wb, flg), Kwb_bytesize(wb), StringPolicy_POOL);
 }
@@ -292,7 +292,7 @@ static void kregexpshare_setup(KonohaContext *kctx, struct KonohaModule *def, in
 {
 }
 
-static void kregexpshare_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, kObjectVisitor *visitor)
+static void kregexpshare_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
 {
 }
 
@@ -328,7 +328,7 @@ static size_t knh_regexp_matched(kregmatch_t* r, size_t maxmatch)
 	return n;
 }
 
-static void WB_write_regexpfmt(KonohaContext *kctx, KUtilsWriteBuffer *wb, kbytes_t *fmt, const char *base, kregmatch_t *r, size_t matched)
+static void WB_write_regexpfmt(KonohaContext *kctx, KGrowingBuffer *wb, kbytes_t *fmt, const char *base, kregmatch_t *r, size_t matched)
 {
 	const char *ch = fmt->text;
 	const char *eof = ch + fmt->len; // end of fmt
@@ -379,9 +379,9 @@ static void RegExp_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void RegExp_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void RegExp_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
-	kRegExp *re = v[pos].re;
+	kRegExp *re = v[pos].asRegExp;
 	KLIB Kwb_printf(kctx, wb, "/%s/%s%s%s", S_text(re->pattern),
 			RegExp_isGlobal(re) ? "g" : "",
 			RegExp_isIgnoreCase(re) ? "i" : "",
@@ -449,7 +449,7 @@ static kArray *RegExp_execute(KonohaContext *kctx, kRegExp *re, kString *s0)
 
 static KMETHOD RegExp_getglobal(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(RegExp_isGlobal(sfp[0].re));
+	RETURNb_(RegExp_isGlobal(sfp[0].asRegExp));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -457,7 +457,7 @@ static KMETHOD RegExp_getglobal(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD RegExp_getignoreCase(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(RegExp_isIgnoreCase(sfp[0].re));
+	RETURNb_(RegExp_isIgnoreCase(sfp[0].asRegExp));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -465,7 +465,7 @@ static KMETHOD RegExp_getignoreCase(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD RegExp_getmultiline(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(RegExp_isMultiline(sfp[0].re));
+	RETURNb_(RegExp_isMultiline(sfp[0].asRegExp));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -473,7 +473,7 @@ static KMETHOD RegExp_getmultiline(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD RegExp_getsource(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_(sfp[0].re->pattern);
+	RETURN_(sfp[0].asRegExp->pattern);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -481,7 +481,7 @@ static KMETHOD RegExp_getsource(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD RegExp_getlastIndex(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(sfp[0].re->lastIndex);
+	RETURNi_(sfp[0].asRegExp->lastIndex);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -489,7 +489,7 @@ static KMETHOD RegExp_getlastIndex(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD RegExp_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RegExp_set(kctx, sfp[0].re, sfp[1].asString, KNULL(String));
+	RegExp_set(kctx, sfp[0].asRegExp, sfp[1].asString, KNULL(String));
 	RETURN_(sfp[0].asObject);
 }
 
@@ -498,7 +498,7 @@ static KMETHOD RegExp_new(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD RegExp_newwithOption(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RegExp_set(kctx, sfp[0].re, sfp[1].asString, sfp[2].asString);
+	RegExp_set(kctx, sfp[0].asRegExp, sfp[1].asString, sfp[2].asString);
 	RETURN_(sfp[0].asObject);
 }
 
@@ -507,7 +507,7 @@ static KMETHOD RegExp_newwithOption(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD String_search(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kRegExp *re = sfp[1].re;
+	kRegExp *re = sfp[1].asRegExp;
 	intptr_t loc = -1;
 	if(!IS_NULL(re) && S_size(re->pattern) > 0) {
 		kregmatch_t pmatch[2]; // modified by @utrhira
@@ -534,7 +534,7 @@ static KMETHOD String_search(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD String_match(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s0 = sfp[0].asString;
-	kRegExp *re = sfp[1].re;
+	kRegExp *re = sfp[1].asRegExp;
 	RETURN_(RegExp_execute(kctx, re, s0));
 }
 
@@ -544,11 +544,11 @@ static KMETHOD String_match(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s0 = sfp[0].asString;
-	kRegExp *re = sfp[1].re;
+	kRegExp *re = sfp[1].asRegExp;
 	kbytes_t fmt = {S_size(sfp[2].asString), {S_text(sfp[2].asString)}};
 	kString *s = s0;
 	if(IS_NOTNULL(re) && S_size(re->pattern) > 0) {
-		KUtilsWriteBuffer wb;
+		KGrowingBuffer wb;
 		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 		const char *str = S_text(s0);  // necessary
 		const char *base = str;
@@ -590,7 +590,7 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s0 = sfp[0].asString;
-	kRegExp *re = sfp[1].re;
+	kRegExp *re = sfp[1].asRegExp;
 	kArray *a = NULL;
 	if (IS_NOTNULL(re) && S_size(re->pattern) > 0) {
 		const char *str = S_text(s0);  // necessary
@@ -631,7 +631,7 @@ static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD String_splitwithSeparatorLimit(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s0 = sfp[0].asString;
-	kRegExp *re = sfp[1].re;
+	kRegExp *re = sfp[1].asRegExp;
 	kint_t limit = sfp[2].intValue;
 	if(limit < 0) {
 		/* ignore limit */
@@ -680,7 +680,7 @@ static KMETHOD String_splitwithSeparatorLimit(KonohaContext *kctx, KonohaStack *
 static KMETHOD RegExp_exec(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s0 = sfp[1].asString;
-	kRegExp *re = sfp[0].re;
+	kRegExp *re = sfp[0].asRegExp;
 	RETURN_(RegExp_execute(kctx, re, s0));
 }
 
@@ -690,7 +690,7 @@ static KMETHOD RegExp_exec(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD RegExp_test(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s0 = sfp[1].asString;
-	kRegExp *re = sfp[0].re;
+	kRegExp *re = sfp[0].asRegExp;
 	kbool_t matched = false;
 	if(IS_NOTNULL(re) && S_size(re->pattern) > 0) {
 		const char *str = S_text(s0);  // necessary
@@ -781,7 +781,7 @@ static kbool_t regexp_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 
 static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kTokenVar *tk = (kTokenVar *)sfp[1].o;
+	kTokenVar *tk = (kTokenVar *)sfp[1].asObject;
 	int ch, prev = '/', pos = 1;
 	const char *source = S_text(sfp[2].asString);
 	if(source[pos] == '*' || source[pos] == '/') {

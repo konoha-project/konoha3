@@ -35,7 +35,7 @@ extern "C"{
 
 struct kMapVar {
 	KonohaObjectHeader h;
-	KUtilsHashMap *map;
+	KHashMap *map;
 };
 
 #define Map_isUnboxData(o)    (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
@@ -50,24 +50,24 @@ static void kMap_init(KonohaContext *kctx, kObject *o, void *conf)
 	}
 }
 
-static void MapUnboxEntry_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
+static void MapUnboxEntry_reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
 {
-	kObjectVisitor *visitor = (kObjectVisitor *) thunk;
+	KObjectVisitor *visitor = (KObjectVisitor *) thunk;
 	BEGIN_REFTRACE(1);
 	KREFTRACEv(p->stringKey);
 	END_REFTRACE();
 }
 
-static void MapObjectEntry_reftrace(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
+static void MapObjectEntry_reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
 {
-	kObjectVisitor *visitor = (kObjectVisitor *) thunk;
+	KObjectVisitor *visitor = (KObjectVisitor *) thunk;
 	BEGIN_REFTRACE(2);
 	KREFTRACEn(p->stringKey);
 	KREFTRACEv(p->objectValue);
 	END_REFTRACE();
 }
 
-static void kMap_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
+static void kMap_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kMap *map = (kMap*)o;
 	if(TY_isUnbox(O_p0(map))) {
@@ -86,7 +86,7 @@ static void kMap_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-//static void kMap_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KUtilsWriteBuffer *wb)
+//static void kMap_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KGrowingBuffer *wb)
 //{
 //	// TODO
 //}
@@ -100,12 +100,12 @@ static uintptr_t String_hashCode(KonohaContext *kctx, kString *s)
 
 }
 
-static KUtilsHashMapEntry* kMap_getEntry(KonohaContext *kctx, kMap *m, kString *key, kbool_t isNewIfNULL)
+static KHashMapEntry* kMap_getEntry(KonohaContext *kctx, kMap *m, kString *key, kbool_t isNewIfNULL)
 {
 	uintptr_t hcode = String_hashCode(kctx, key);
 	const char *tkey = S_text(key);
 	size_t tlen = S_size(key);
-	KUtilsHashMapEntry *e = KLIB Kmap_get(kctx, m->map, hcode);
+	KHashMapEntry *e = KLIB Kmap_get(kctx, m->map, hcode);
 	while(e != NULL) {
 		if(e->hcode == hcode && tlen == S_size(e->stringKey) && strncmp(S_text(e->stringKey), tkey, tlen) == 0) {
 			return e;
@@ -127,7 +127,7 @@ static KUtilsHashMapEntry* kMap_getEntry(KonohaContext *kctx, kMap *m, kString *
 static KMETHOD Map_has(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMap *m = (kMap*)sfp[0].asObject;
-	KUtilsHashMapEntry *e = kMap_getEntry(kctx, m, sfp[1].asString, false/*new_if_NULL*/);
+	KHashMapEntry *e = kMap_getEntry(kctx, m, sfp[1].asString, false/*new_if_NULL*/);
 	RETURNd_((e != NULL));
 }
 
@@ -135,7 +135,7 @@ static KMETHOD Map_has(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Map_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMap *m = (kMap*)sfp[0].asObject;
-	KUtilsHashMapEntry *e = kMap_getEntry(kctx, m, sfp[1].asString, false/*new_if_NULL*/);
+	KHashMapEntry *e = kMap_getEntry(kctx, m, sfp[1].asString, false/*new_if_NULL*/);
 	if(Map_isUnboxData(m)) {
 		uintptr_t u = (e == NULL) ? 0 : e->unboxValue;
 		RETURNd_(u);
@@ -150,7 +150,7 @@ static KMETHOD Map_get(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Map_set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMap *m = (kMap*)sfp[0].asObject;
-	KUtilsHashMapEntry *e = kMap_getEntry(kctx, m, sfp[1].asString, true/*new_if_NULL*/);
+	KHashMapEntry *e = kMap_getEntry(kctx, m, sfp[1].asString, true/*new_if_NULL*/);
 	if(Map_isUnboxData(m)) {
 		e->unboxValue = sfp[2].unboxValue;
 	}
@@ -164,14 +164,14 @@ static KMETHOD Map_set(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Map_remove(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMap *m = (kMap*)sfp[0].asObject;
-	KUtilsHashMapEntry *e = kMap_getEntry(kctx, m, sfp[1].asString, false/*new_if_NULL*/);
+	KHashMapEntry *e = kMap_getEntry(kctx, m, sfp[1].asString, false/*new_if_NULL*/);
 	if(e != NULL) {
 		KLIB Kmap_remove(m->map, e);
 	}
 	RETURNvoid_();
 }
 
-static void MapEntry_appendKey(KonohaContext *kctx, KUtilsHashMapEntry *p, void *thunk)
+static void MapEntry_appendKey(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
 {
 	kArray *a = (kArray*)thunk;
 	KLIB kArray_add(kctx, a, p->stringKey);

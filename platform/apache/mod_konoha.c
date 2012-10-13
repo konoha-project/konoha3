@@ -157,7 +157,7 @@ static KMETHOD Request_logError(KonohaContext *kctx, KonohaStack *sfp)
 	kRequest *self = (kRequest *) sfp[0].asObject;
 	int level = sfp[1].intValue;
 	apr_status_t status = (apr_status_t)sfp[2].intValue;
-	const char *msg = S_text(sfp[3].s);
+	const char *msg = S_text(sfp[3].asString);
 	ap_log_rerror(APLOG_MARK, level, status, self->r, msg, NULL);
 	RETURNvoid_();
 }
@@ -179,7 +179,7 @@ static KMETHOD AprTable_add(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kAprTable *self = (kAprTable *) sfp[0].asObject;
 	const char *key = S_text(sfp[1].asString);
-	const char *val = S_text(sfp[2].s);
+	const char *val = S_text(sfp[2].asString);
 	apr_table_add(self->tbl, key, val);
 	RETURNvoid_();
 }
@@ -188,7 +188,7 @@ static KMETHOD AprTable_set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kAprTable *self = (kAprTable *) sfp[0].asObject;
 	const char *key = S_text(sfp[1].asString);
-	const char *val = S_text(sfp[2].s);
+	const char *val = S_text(sfp[2].asString);
 	apr_table_set(self->tbl, key, val);
 	RETURNvoid_();
 }
@@ -292,8 +292,8 @@ static int konoha_handler(request_rec *r)
 	/* XXX: We assume Request Object may not be freed by GC */
 	kObject *req_obj = KLIB new_kObject(kctx, cRequest, (uintptr_t)r);
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, K_NULL);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, req_obj);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, req_obj);
 	KCALL(lsfp, 0, mtd, 1, KLIB Knull(kctx, CT_Int));
 	END_LOCAL();
 	return lsfp[0].intValue;

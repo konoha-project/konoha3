@@ -51,10 +51,10 @@ static void Mpz_free(KonohaContext *kctx, kObject *o)
 	mpz_clear(mpz->mpz);
 }
 
-static void Mpz_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void Mpz_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	/* This function is called when serializing the object. */
-	kMpz *p = (kMpz*)v[pos].o;
+	kMpz *p = (kMpz*)v[pos].asObject;
 	char *buf = mpz_get_str(NULL, 10, p->mpz);
 	KLIB Kwb_printf(kctx, wb, "%s", buf);
 	free(buf);
@@ -83,7 +83,7 @@ static KMETHOD Mpz_new_int(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Mpz_new_str(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *self = (kMpz*)sfp[0].asObject;
-	const char *src  = S_text(sfp[1].s);
+	const char *src  = S_text(sfp[1].asString);
 	mpz_set_str(self->mpz, src, 10);
 	RETURN_(self);
 }
@@ -105,15 +105,15 @@ static KMETHOD Mpz_toInt(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Int_toMpz(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 	mpz_set_si(ret->mpz, sfp[0].intValue);
 	RETURN_(ret);
 }
 
 static KMETHOD String_toMpz(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
-	const char *src  = S_text(sfp[0].s);
+	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
+	const char *src  = S_text(sfp[0].asString);
 	mpz_set_str(ret->mpz, src, 10);
 	RETURN_(ret);
 }
@@ -139,7 +139,7 @@ static KMETHOD Mpz_isEven(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Mpz_power(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *self = (kMpz*)sfp[0].asObject;
-	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 	mpz_pow_ui(ret->mpz, self->mpz, sfp[1].intValue);
 	RETURN_(ret);
 }
@@ -180,7 +180,7 @@ static KMETHOD Mpz_opADD_int(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Int_opADD_mpz(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *rhs = (kMpz*)sfp[1].asObject;
-	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 	mpz_add_ui(ret->mpz, rhs->mpz, sfp[0].intValue);
 	RETURN_(ret);
 }
@@ -205,7 +205,7 @@ static KMETHOD Mpz_opSUB_int(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Int_opSUB_mpz(KonohaContext *kctx, KonohaStack *sfp)
 {	
 	kMpz *rhs = (kMpz*)sfp[1].asObject;
-	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 	mpz_set_si(ret->mpz, sfp[0].intValue);
 	mpz_sub(ret->mpz, ret->mpz, rhs->mpz);
 	RETURN_(ret);
@@ -231,7 +231,7 @@ static KMETHOD Mpz_opMUL_int(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Int_opMUL_mpz(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *rhs = (kMpz*)sfp[1].asObject;
-	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 	mpz_mul_ui(ret->mpz, rhs->mpz, sfp[0].intValue);
 	RETURN_(ret);
 }
@@ -256,7 +256,7 @@ static KMETHOD Mpz_opMOD_int(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Int_opMOD_mpz(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *rhs = (kMpz*)sfp[1].asObject;
-	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 	mpz_set_si(ret->mpz, sfp[0].intValue);
 	mpz_mod(ret->mpz, ret->mpz, rhs->mpz);
 	RETURN_(ret);
@@ -264,7 +264,7 @@ static KMETHOD Int_opMOD_mpz(KonohaContext *kctx, KonohaStack *sfp)
 
 static void THROW_ZeroDividedException(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].uline, NULL);
+	KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
 }
 
 static KMETHOD Mpz_opDIV(KonohaContext *kctx, KonohaStack *sfp)

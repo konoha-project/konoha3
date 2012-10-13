@@ -33,9 +33,10 @@ extern "C" {
 /* String */
 static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	if(TY_isUnbox(O_typeId(sfp[0].asObject))) {
+		//sfp[0].unboxValue = (sfp[0].asNumber)->unboxValue;
 		O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb);
 	}
 	else {
@@ -87,7 +88,7 @@ static KMETHOD Int_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kint_t n = sfp[1].intValue;
 	if(unlikely(n == 0)) {
-		KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].uline, NULL);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
 	}
 	RETURNi_(sfp[0].intValue / n);
 }
@@ -97,7 +98,7 @@ static KMETHOD Int_opMOD(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kint_t n = sfp[1].intValue;
 	if(unlikely(n == 0)) {
-		KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].uline, NULL);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
 	}
 	RETURNi_(sfp[0].intValue % n);
 }
@@ -167,13 +168,13 @@ static KMETHOD Int_box(KonohaContext *kctx, KonohaStack *sfp)
 //## @Const method String String.toInt();
 static KMETHOD String_toInt(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_((kint_t)strtoll(S_text(sfp[0].s), NULL, 10));
+	RETURNi_((kint_t)strtoll(S_text(sfp[0].asString), NULL, 10));
 }
 
 //## @Const @Immutable method String String.opAdd(@Coercion String x);
 static KMETHOD String_opADD(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kString *lhs = sfp[0].s, *rhs = sfp[1].asString;
+	kString *lhs = sfp[0].asString, *rhs = sfp[1].asString;
 	int spol = (S_isASCII(lhs) && S_isASCII(rhs)) ? StringPolicy_ASCII : StringPolicy_UTF8;
 	kString *s = KLIB new_kString(kctx, NULL, S_size(lhs)+S_size(rhs), spol|StringPolicy_NOCOPY);
 	memcpy(s->buf, S_text(lhs), S_size(lhs));
@@ -185,7 +186,7 @@ static KMETHOD String_opADD(KonohaContext *kctx, KonohaStack *sfp)
 //## @Const method Boolean String.opEQ(String s);
 static KMETHOD String_opEQ(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kString *s0 = sfp[0].s;
+	kString *s0 = sfp[0].asString;
 	kString *s1 = sfp[1].asString;
 	if(S_size(s0) == S_size(s1)) {
 		RETURNb_(strncmp(S_text(s0), S_text(s1), S_size(s0)) == 0);
@@ -195,7 +196,7 @@ static KMETHOD String_opEQ(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD String_opNEQ(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kString *s0 = sfp[0].s;
+	kString *s0 = sfp[0].asString;
 	kString *s1 = sfp[1].asString;
 	if(S_size(s0) == S_size(s1)) {
 		RETURNb_(strncmp(S_text(s0), S_text(s1), S_size(s0)) != 0);
@@ -231,14 +232,14 @@ static KMETHOD System_assert(KonohaContext *kctx, KonohaStack *sfp)
 //	konoha_detectFailedAssert = false;
 	if (cond == false) {
 		konoha_detectFailedAssert = true;
-		KLIB KonohaRuntime_raise(kctx, EXPT_("Assertion"), sfp, sfp[K_RTNIDX].uline, NULL);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("Assertion"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
 	}
 }
 
 //## method void System.p(@Coercion String msg);
 static KMETHOD System_p(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kfileline_t uline = sfp[K_RTNIDX].uline;
+	kfileline_t uline = sfp[K_RTNIDX].callerFileLine;
 	const char *text = (IS_NULL(sfp[1].asString)) ? K_NULLTEXT : S_text(sfp[1].asString);
 	kreportf(NoneTag, uline, "%s", text);
 }

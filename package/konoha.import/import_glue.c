@@ -38,7 +38,7 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 		RETURNb_(false);
 	}
 	ksymbol_t star = SYM_("*");
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	int i = 0;
 	if (i + 2 < kArray_size(tokenList)) {

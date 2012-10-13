@@ -30,6 +30,128 @@
 extern "C"{
 #endif
 
+#define _Public   kMethod_Public
+#define _Const    kMethod_Const
+#define _Im       kMethod_Immutable
+#define _Coercion kMethod_Coercion
+#define _F(F)   (intptr_t)(F)
+
+/* Symbol class */
+
+static ksymbol_t StringToKsymbol(KonohaContext *kctx, kString *key)
+{
+	return ksymbolA(S_text(key), S_size(key), _NEWID);
+}
+
+static void kSymbol_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+{
+	ksymbol_t symbol = (ksymbol_t)v[pos].unboxValue;
+	DBG_P(">>> symbol=%d, %s%s", symbol, PSYM_t(symbol));
+	KLIB Kwb_printf(kctx, wb, "%s%s", PSYM_t(symbol));
+}
+
+//## symbol String.toSymbol(String keyword);
+static KMETHOD String_toSymbol(KonohaContext *kctx, KonohaStack *sfp)
+{
+	ksymbol_t keyword = StringToKsymbol(kctx, sfp[0].asString);
+	DBG_P(">>> symbol=%d, %s%s", keyword, PSYM_t(keyword));
+	RETURNi_(keyword);
+}
+
+static KonohaClass *loadSymbolClass(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+{
+	static KDEFINE_CLASS defSymbol = {0};
+	defSymbol.structname = "symbol";
+	defSymbol.cflag = CFLAG_int;
+	defSymbol.init = CT_(TY_int)->init;
+	defSymbol.unbox = CT_(TY_int)->unbox;
+	defSymbol.p = kSymbol_p;
+	KonohaClass *cSymbol = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defSymbol, pline);
+	KDEFINE_METHOD MethodData[] = {
+		_Public|_Coercion|_Const, _F(String_toSymbol), TY_boolean, TY_String, MN_to(cSymbol->typeId), 0,
+		DEND,
+	};
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	return cSymbol;
+}
+
+// --------------------------------------------------------------------------
+/* NameSpace */
+
+static kbool_t SugarSyntax_hasSyntaxPatternList(SugarSyntax *syn)
+{
+	while(syn != NULL) {
+		if(syn->SyntaxPatternListNULL != NULL) return true;
+		syn = syn->parentSyntaxNULL;
+	}
+	return false;
+}
+
+static kbool_t SugarSyntax_hasSugarFunc(SugarSyntax *syn, int index)
+{
+	while(syn != NULL) {
+		if(syn->sugarFuncListTable[index] != NULL) return true;
+		syn = syn->parentSyntaxNULL;
+	}
+	return false;
+}
+
+//## boolean NameSpace.definedSyntax(symbol keyword);
+static KMETHOD NameSpace_definedSyntax(KonohaContext *kctx, KonohaStack *sfp)
+{
+	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
+	SugarSyntax* syn = SYN_(sfp[0].asNameSpace, keyword);
+	RETURNb_(syn != NULL);
+}
+
+//## boolean NameSpace.definedLiteral(symbol keyword);
+static KMETHOD NameSpace_definedLiteral(KonohaContext *kctx, KonohaStack *sfp)
+{
+	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
+	SugarSyntax* syn = SYN_(sfp[0].asNameSpace, keyword);
+	RETURNb_(SugarSyntax_hasSugarFunc(syn, SugarFunc_TokenFunc));
+}
+
+//## boolean NameSpace.definedStatement(symbol keyword);
+static KMETHOD NameSpace_definedStatement(KonohaContext *kctx, KonohaStack *sfp)
+{
+	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
+	SugarSyntax* syn = SYN_(sfp[0].asNameSpace, keyword);
+	RETURNb_(SugarSyntax_hasSyntaxPatternList(syn) && SugarSyntax_hasSugarFunc(syn, SugarFunc_Statement));
+}
+
+//## boolean NameSpace.definedExpression(symbol keyword);
+static KMETHOD NameSpace_definedExpression(KonohaContext *kctx, KonohaStack *sfp)
+{
+	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
+	SugarSyntax* syn = SYN_(sfp[0].asNameSpace, keyword);
+	RETURNb_(syn != NULL && (syn->precedence_op2 > 0 || syn->precedence_op1 > 0));
+}
+
+//## boolean NameSpace.definedBinaryOperator(symbol keyword);
+static KMETHOD NameSpace_definedBinaryOperator(KonohaContext *kctx, KonohaStack *sfp)
+{
+	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
+	SugarSyntax* syn = SYN_(sfp[0].asNameSpace, keyword);
+	RETURNb_(syn != NULL && (syn->precedence_op2 > 0));
+}
+
+static void loadNameSpaceMethodData(KonohaContext *kctx, kNameSpace *ns, int TY_symbol)
+{
+	int FN_keyword = SYM_("keyword");
+	KDEFINE_METHOD MethodData[] = {
+		_Public|_Im, _F(NameSpace_definedSyntax), TY_boolean, TY_NameSpace, MN_("definedSyntax"), 1, TY_symbol, FN_keyword,
+		_Public|_Im, _F(NameSpace_definedLiteral), TY_boolean, TY_NameSpace, MN_("definedLiteral"), 1, TY_symbol, FN_keyword,
+		_Public|_Im, _F(NameSpace_definedStatement), TY_boolean, TY_NameSpace, MN_("definedStatement"), 1, TY_symbol, FN_keyword,
+		_Public|_Im, _F(NameSpace_definedExpression), TY_boolean, TY_NameSpace, MN_("definedExpression"), 1, TY_symbol, FN_keyword,
+		_Public|_Im, _F(NameSpace_definedBinaryOperator), TY_boolean, TY_NameSpace, MN_("definedBinaryOperator"), 1, TY_symbol, FN_keyword,
+		DEND,
+	};
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+}
+
+/* Token */
+
 //## void Token.setKeyword(String keywork);
 static KMETHOD Token_setUnresolvedTokenType(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -308,24 +430,19 @@ static KMETHOD kStmt_printMessage2rintError(KonohaContext *kctx, KonohaStack *sf
 //	RETURN_(expr);
 //}
 
-
-
 // --------------------------------------------------------------------------
-
-#define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Coercion kMethod_Coercion
-#define _F(F)   (intptr_t)(F)
 
 static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
+	KonohaClass *cSymbol = loadSymbolClass(kctx, ns, pline);
 	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
-		{"Token", TY_TYPE, (uintptr_t)CT_Token},
-		{"Stmt", TY_TYPE,  (uintptr_t)CT_Stmt},
-		{"Expr", TY_TYPE,  (uintptr_t)CT_Expr},
-		{"Block", TY_TYPE, (uintptr_t)CT_Block},
-		{"Gamma", TY_TYPE, (uintptr_t)CT_Gamma},
-		{"NameSpace", TY_TYPE, (uintptr_t)CT_NameSpace},
+		{"Token", VirtualType_KonohaClass, (uintptr_t)CT_Token},
+		{"Stmt", VirtualType_KonohaClass,  (uintptr_t)CT_Stmt},
+		{"Expr", VirtualType_KonohaClass,  (uintptr_t)CT_Expr},
+		{"Block", VirtualType_KonohaClass, (uintptr_t)CT_Block},
+		{"Gamma", VirtualType_KonohaClass, (uintptr_t)CT_Gamma},
+		{"NameSpace", VirtualType_KonohaClass, (uintptr_t)CT_NameSpace},
+		{"symbol", VirtualType_KonohaClass, (uintptr_t)cSymbol},
 		{NULL},
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(ClassData), 0);
@@ -387,7 +504,8 @@ static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 //		_Public, _F(kStmt_printMessage2arsedExpr), TY_Expr, TY_Stmt, MN_("parseExpr"), 3, TY_TokenArray, FN_tokenList, TY_int, FN_s, TY_int, FN_e,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	loadNameSpaceMethodData(kctx, ns, cSymbol->typeId);
 	return true;
 }
 

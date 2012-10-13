@@ -79,7 +79,7 @@ kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, kfileline_t uli
 /* ------------------------------------------------------------------------ */
 /* [KonohaContext_getSugarContext(kctx)] */
 
-static void SugarContext_reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh, kObjectVisitor *visitor)
+static void SugarContext_reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh, KObjectVisitor *visitor)
 {
 	SugarContext *base = (SugarContext*)baseh;
 	BEGIN_REFTRACE(4);
@@ -112,7 +112,7 @@ static void SugarModule_setup(KonohaContext *kctx, struct KonohaModule *def, int
 	}
 }
 
-static void SugarModule_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, kObjectVisitor *visitor)
+static void SugarModule_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
 {
 }
 
@@ -184,12 +184,12 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	SugarModule_setup(kctx, &mod->h, 0);
 
 	KDEFINE_INT_CONST ClassData[] = {   // minikonoha defined class
-		{"void", TY_TYPE, (uintptr_t)CT_void},
-		{"boolean", TY_TYPE, (uintptr_t)CT_Boolean},
-		{"int",    TY_TYPE, (uintptr_t)CT_Int},
-		{"String", TY_TYPE, (uintptr_t)CT_String},
-		{"Func",   TY_TYPE, (uintptr_t)CT_Func},
-		{"System", TY_TYPE, (uintptr_t)CT_System},
+		{"void", VirtualType_KonohaClass, (uintptr_t)CT_void},
+		{"boolean", VirtualType_KonohaClass, (uintptr_t)CT_Boolean},
+		{"int",    VirtualType_KonohaClass, (uintptr_t)CT_Int},
+		{"String", VirtualType_KonohaClass, (uintptr_t)CT_String},
+		{"Func",   VirtualType_KonohaClass, (uintptr_t)CT_Func},
+		{"System", VirtualType_KonohaClass, (uintptr_t)CT_System},
 		{NULL},
 	};
 	kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(ClassData), 0);
@@ -251,14 +251,14 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 static KMETHOD NameSpace_loadScript(KonohaContext *kctx, KonohaStack *sfp)
 {
 	char pathbuf[256];
-	const char *path = PLATAPI formatTransparentPath(pathbuf, sizeof(pathbuf), FileId_t(sfp[K_RTNIDX].uline), S_text(sfp[1].asString));
-	RETURNb_(kNameSpace_loadScript(kctx, sfp[0].asNameSpace, path, sfp[K_RTNIDX].uline));
+	const char *path = PLATAPI formatTransparentPath(pathbuf, sizeof(pathbuf), FileId_t(sfp[K_RTNIDX].callerFileLine), S_text(sfp[1].asString));
+	RETURNb_(kNameSpace_loadScript(kctx, sfp[0].asNameSpace, path, sfp[K_RTNIDX].callerFileLine));
 }
 
 // boolean NameSpace.import(String pkgname);
 static KMETHOD NameSpace_importPackage(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(kNameSpace_importPackage(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), sfp[K_RTNIDX].uline));
+	RETURNb_(kNameSpace_importPackage(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), sfp[K_RTNIDX].callerFileLine));
 }
 
 // boolean NameSpace.import(String pkgname, String symbol);
@@ -266,7 +266,7 @@ static KMETHOD NameSpace_importPackageSymbol(KonohaContext *kctx, KonohaStack *s
 {
 	kString *key = sfp[2].asString;
 	ksymbol_t keyword = ksymbolA(S_text(key), S_size(key), _NEWID);
-	RETURNb_(kNameSpace_importPackageSymbol(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), keyword, sfp[K_RTNIDX].uline));
+	RETURNb_(kNameSpace_importPackageSymbol(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), keyword, sfp[K_RTNIDX].callerFileLine));
 }
 
 #define _Public kMethod_Public

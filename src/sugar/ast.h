@@ -36,8 +36,8 @@ static kExpr *callFuncExpression(KonohaContext *kctx, SugarSyntax *syn, kFunc *f
 {
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 6);
 	lsfp[K_CALLDELTA+0].unboxValue = (uintptr_t)syn;
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, fo->self);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, (kObject*)stmt);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, fo->self);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, (kObject*)stmt);
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asArray, tokenList);
 	lsfp[K_CALLDELTA+3].intValue = beginIdx;
 	lsfp[K_CALLDELTA+4].intValue = operatorIdx;
@@ -526,8 +526,8 @@ static int callPatternMatchFunc(KonohaContext *kctx, kFunc *fo, int *countRef, k
 {
 	INIT_GCSTACK();
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, fo->self);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, (kObject*)stmt);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, fo->self);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, (kObject*)stmt);
 	lsfp[K_CALLDELTA+2].intValue = name;
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+3].asArray, tokenList);
 	lsfp[K_CALLDELTA+4].intValue = beginIdx;
@@ -710,7 +710,7 @@ static int kStmt_parseBySyntaxPattern(KonohaContext *kctx, kStmt *stmt, int inde
 		if(currentSyntax->SyntaxPatternListNULL != NULL) {
 			int patternEndIdx = kArray_size(currentSyntax->SyntaxPatternListNULL);
 			TokenSequence tokens = {ns, tokenList, beginIdx, endIdx};
-			TokenSequence nrule  = {ns, currentSyntax->SyntaxPatternListNULL};
+			TokenSequence nrule  = {ns, currentSyntax->SyntaxPatternListNULL, 0, kArray_size(currentSyntax->SyntaxPatternListNULL)};
 			do {
 				patternEndIdx = TokenSequence_selectSyntaxPattern(kctx, &nrule, currentSyntax->SyntaxPatternListNULL, patternEndIdx);
 				errRule[0] = NULL; errRule[1] = NULL;

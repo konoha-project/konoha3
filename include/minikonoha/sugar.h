@@ -184,7 +184,7 @@ struct Tokenizer {
 #define VAR_PatternMatch(STMT, NAME, TLS, S, E)\
 		kStmt *STMT = (kStmt*)sfp[1].asObject;\
 		ksymbol_t NAME = (ksymbol_t)sfp[2].intValue;\
-		kArray *TLS = (kArray*)sfp[3].o;\
+		kArray *TLS = (kArray*)sfp[3].asObject;\
 		int S = (int)sfp[4].intValue;\
 		int E = (int)sfp[5].intValue;\
 		VAR_TRACE; (void)STMT; (void)NAME; (void)TLS; (void)S; (void)E
@@ -193,7 +193,7 @@ struct Tokenizer {
 #define VAR_Expression(STMT, TLS, S, C, E)\
 		SugarSyntax *syn = (SugarSyntax*)sfp[0].unboxValue;\
 		kStmt *STMT = (kStmt*)sfp[1].asObject;\
-		kArray *TLS = (kArray*)sfp[2].o;\
+		kArray *TLS = (kArray*)sfp[2].asObject;\
 		int S = (int)sfp[3].intValue;\
 		int C = (int)sfp[4].intValue;\
 		int E = (int)sfp[5].intValue;\
@@ -202,14 +202,14 @@ struct Tokenizer {
 // boolean Statement(Stmt stmt, Gamma gma)
 #define VAR_Statement(STMT, GMA)\
 		kStmt *STMT = (kStmt*)sfp[1].asObject;\
-		kGamma *GMA = (kGamma*)sfp[2].o;\
+		kGamma *GMA = (kGamma*)sfp[2].asObject;\
 		VAR_TRACE; (void)STMT; (void)GMA
 
 // Expr TypeCheck(Stmt stmt, Expr expr, Gamma gma, int typeid)
 #define VAR_TypeCheck(STMT, EXPR, GMA, TY) \
 		kStmt *STMT = (kStmt*)sfp[1].asObject;\
-		kExpr *EXPR = (kExpr*)sfp[2].o;\
-		kGamma *GMA = (kGamma*)sfp[3].o;\
+		kExpr *EXPR = (kExpr*)sfp[2].asObject;\
+		kGamma *GMA = (kGamma*)sfp[3].asObject;\
 		ktype_t TY = (ktype_t)sfp[4].intValue;\
 		VAR_TRACE; (void)STMT; (void)EXPR; (void)GMA; (void)TY
 
@@ -246,7 +246,7 @@ struct SugarSyntaxVar {
 	};
 	kshort_t tokenKonohaChar;
 	kshort_t precedence_op2;          kshort_t precedence_op1;
-	kpackage_t lastLoadedPackageId;
+	kpackageId_t lastLoadedPackageId;
 	kshort_t macroParamSize;
 	kArray                           *macroDataNULL;
 };
@@ -602,7 +602,7 @@ typedef struct {
 typedef struct {
 	KonohaModuleContext h;
 	kArray            *preparedTokenList;
-	KUtilsGrowingArray errorMessageBuffer;
+	KGrowingArray errorMessageBuffer;
 	kArray            *errorMessageList;
 	int                errorMessageCount;
 	kbool_t            isBlockedErrorMessage;

@@ -74,7 +74,7 @@ static void KonohaStackRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx, 
 	assert(stacksize>64);
 	base->stack_uplimit = base->stack + (stacksize - 64);
 	for(i = 0; i < stacksize; i++) {
-		KUnsafeFieldInit(base->stack[i].o, K_NULL);
+		KUnsafeFieldInit(base->stack[i].asObject, K_NULL);
 	}
 	KUnsafeFieldInit(base->gcstack, new_(Array, K_PAGESIZE/sizeof(void*)));
 	KLIB Karray_init(kctx, &base->cwb, K_PAGESIZE * 4);
@@ -83,12 +83,12 @@ static void KonohaStackRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx, 
 	ctx->stack = base;
 }
 
-static void KonohaStackRuntime_reftrace(KonohaContext *kctx, KonohaContextVar *ctx, kObjectVisitor *visitor)
+static void KonohaStackRuntime_reftrace(KonohaContext *kctx, KonohaContextVar *ctx, KObjectVisitor *visitor)
 {
 	KonohaStack *sp = ctx->stack->stack;
 	BEGIN_REFTRACE((kctx->esp - sp) + 2);
 	while(sp < ctx->esp) {
-		KREFTRACEv(sp[0].o);
+		KREFTRACEv(sp[0].asObject);
 		sp++;
 	}
 	KREFTRACEv(ctx->stack->gcstack);
@@ -170,7 +170,7 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 	return newctx;
 }
 
-static void KonohaContext_reftrace(KonohaContext *kctx, KonohaContextVar *ctx, kObjectVisitor *visitor)
+static void KonohaContext_reftrace(KonohaContext *kctx, KonohaContextVar *ctx, KObjectVisitor *visitor)
 {
 	size_t i;
 	if(IS_RootKonohaContext(kctx)) {
@@ -191,7 +191,7 @@ static void KonohaContext_reftrace(KonohaContext *kctx, KonohaContextVar *ctx, k
 	}
 }
 
-void KonohaContext_reftraceAll(KonohaContext *kctx, kObjectVisitor *visitor)
+void KonohaContext_reftraceAll(KonohaContext *kctx, KObjectVisitor *visitor)
 {
 	KonohaContext_reftrace(kctx, (KonohaContextVar*)kctx, visitor);
 }

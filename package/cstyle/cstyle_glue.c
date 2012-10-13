@@ -121,7 +121,7 @@ static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD TokenFunc_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kTokenVar *tk = (kTokenVar *)sfp[1].o;
+	kTokenVar *tk = (kTokenVar *)sfp[1].asObject;
 	int ch, prev = '/', pos = 1;
 	const char *source = S_text(sfp[2].asString);
 	while((ch = source[pos++]) != 0) {

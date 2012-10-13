@@ -43,7 +43,7 @@ extern "C" {
 
 static void THROW_ZeroDividedException(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].uline, NULL);
+	KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
 }
 
 // --------------------------------------------------------------------------
@@ -54,7 +54,7 @@ static void Float_init(KonohaContext *kctx, kObject *o, void *conf)
 	n->unboxValue = (uintptr_t)conf;  // conf is unboxed data
 }
 
-static void Float_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void Float_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	KLIB Kwb_printf(kctx, wb, KFLOAT_FMT, v[pos].floatValue);
 }
@@ -63,7 +63,7 @@ static void kmodfloat_setup(KonohaContext *kctx, struct KonohaModule *def, int n
 {
 }
 
-static void kmodfloat_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, kObjectVisitor *visitor)
+static void kmodfloat_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
 {
 }
 
@@ -230,7 +230,7 @@ static KMETHOD Float_toString(KonohaContext *kctx, KonohaStack *sfp)
 /* String to float */
 static KMETHOD String_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNf_((kfloat_t)strtod(S_text(sfp[0].s), NULL));
+	RETURNf_((kfloat_t)strtod(S_text(sfp[0].asString), NULL));
 }
 
 //## @Const method Int Int.opMINUS();

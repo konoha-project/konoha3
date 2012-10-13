@@ -83,7 +83,7 @@ static void kStat_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kStat_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void kStat_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	KLIB Kwb_printf(kctx, wb, "Stat :%p", v[pos].asObject);
 }
@@ -106,7 +106,7 @@ static void kDIR_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kDIR_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void kDIR_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	kDIR *dir = (kDIR*)v[pos].asObject;
 	DIR *dirp = dir->dirp;
@@ -134,7 +134,7 @@ static void kDirent_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kDirent_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void kDirent_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	struct _kDirent *dirent = (struct _kDirent *)v[pos].asObject;
 	struct dirent *entry = dirent->entry;
@@ -466,11 +466,11 @@ static KMETHOD System_stat(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = stat(path, &buf);
 	struct _kStat *stat = NULL;
 	if(ret != -1) {
-		stat = (struct _kStat *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), (uintptr_t)&buf);
+		stat = (struct _kStat *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), (uintptr_t)&buf);
 	}
 	else {
 		// TODO: throw
-		RETURN_(KLIB Knull(kctx, O_ct(sfp[K_RTNIDX].o)));
+		RETURN_(KLIB Knull(kctx, O_ct(sfp[K_RTNIDX].asObject)));
 	}
 	RETURN_(stat);
 }
@@ -483,7 +483,7 @@ static KMETHOD System_lstat(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = lstat(path, &buf);
 	struct _kStat *stat = NULL;
 	if(ret != -1) {
-		stat = (struct _kStat *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), (uintptr_t)&buf);
+		stat = (struct _kStat *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), (uintptr_t)&buf);
 	}
 	else {
 		// TODO: throw
@@ -499,7 +499,7 @@ static KMETHOD System_fstat(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = fstat(fd, &buf);
 	struct _kStat *stat = NULL;
 	if(ret != -1) {
-		stat = (struct _kStat *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), (uintptr_t)&buf);
+		stat = (struct _kStat *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), (uintptr_t)&buf);
 	}
 	else {
 		// TODO: throw
@@ -638,7 +638,7 @@ static KMETHOD System_opendir(KonohaContext *kctx, KonohaStack *sfp)
 	DIR *d = opendir(name);
 	struct _kDIR *dir;
 	if(d != NULL) {
-		dir = (struct _kDIR *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), (uintptr_t)d);
+		dir = (struct _kDIR *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), (uintptr_t)d);
 	}
 	else {
 		// TODO: throw
@@ -677,7 +677,7 @@ static KMETHOD DIR_read(KonohaContext *kctx, KonohaStack *sfp)
 	struct dirent entry;
 	struct dirent *result;
 	int ret;
-	ktype_t TY_Dirent = O_p0(sfp[K_RTNIDX].o);
+	ktype_t TY_Dirent = O_p0(sfp[K_RTNIDX].asObject);
 	KonohaClass *CT_Dirent = CT_(TY_Dirent);
 	kArray *a = (kArray*)KLIB new_kObject(kctx, CT_p0(kctx, CT_Array, TY_Dirent), 0);
 
