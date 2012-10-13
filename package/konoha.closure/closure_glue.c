@@ -136,9 +136,12 @@ static KMETHOD Expression_Closure(KonohaContext *kctx, KonohaStack *sfp)
 	kParam *pa = new_kParam(kctx, retClass->typeId, psize, p); /* GCSAFE */
 
 	/* syntax is OK */
-	nextIdx = TokenUtils_skipIndent(tokenList, nextIdx+1, kArray_size(tokenList));
-	TokenSequence blockSeq = {Stmt_nameSpace(stmt), tokenList, nextIdx, kArray_size(tokenList)};
+	//nextIdx = TokenUtils_skipIndent(tokenList, nextIdx, kArray_size(tokenList));
+	TokenSequence blockSeq = {Stmt_nameSpace(stmt), KonohaContext_getSugarContext(kctx)->preparedTokenList};
+	TokenSequence_push(kctx, blockSeq);
+	SUGAR TokenSequence_tokenize(kctx, &blockSeq,  S_text(tokenList->tokenItems[nextIdx]->text), tokenList->tokenItems[nextIdx]->uline);
 	kBlock *bkBody = SUGAR new_kBlock(kctx, stmt, NULL, &blockSeq); /* GCSAFE */
+	TokenSequence_pop(kctx, blockSeq);
 	SugarSyntax *synFunc = SYN_(Stmt_nameSpace(stmt), SYM_("function"));
 	kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, synFunc, 2, pa, bkBody);
 	RETURN_(expr);
@@ -148,28 +151,31 @@ static KMETHOD Expression_Closure(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
+	INIT_GCSTACK();
+	kExpr *retExpr = (kExpr*)K_NULL;
 	kParam *pa = expr->cons->paramItems[0];
 	kBlock *bk = (kBlock*)expr->cons->objectItems[1];
+	kMethod *oldMethod = gma->genv->currentWorkingMethod;
+	uintptr_t flag = 0;
+	kMethod *mtd = KLIB new_kMethod(kctx, flag, 0/* typeId, is it OK? */, 0/* mn, is it OK? */, NULL);
+	PUSH_GCSTACK(mtd);
+	KLIB kMethod_setParam(kctx, mtd, pa->rtype, pa->psize, (kparamtype_t*)pa->paramtypeItems);
+	PUSH_GCSTACK(oldMethod);
+	gma->genv->currentWorkingMethod = mtd;
 	int ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
+	gma->genv->currentWorkingMethod = oldMethod;
 	if (ret) {
-		INIT_GCSTACK();
-		uintptr_t flag = 0;
-		kMethod *mtd = KLIB new_kMethod(kctx, flag, 0/* typeId, is it OK? */, 0/* mn, is it OK? */, NULL);
-		PUSH_GCSTACK(mtd);
 		KonohaClass *ctFunc = KLIB KonohaClass_Generics(kctx, CT_Func, pa->rtype, pa->psize, (kparamtype_t*)pa->paramtypeItems);
 		kFuncVar *fo = (kFuncVar*)KLIB new_kObject(kctx, ctFunc, (uintptr_t)mtd);
 		KUnsafeFieldInit(fo->self, Stmt_nameSpace(stmt)->globalObjectNULL);
 		PUSH_GCSTACK(fo);
-		KLIB kMethod_setParam(kctx, mtd, pa->rtype, pa->psize, (kparamtype_t*)pa->paramtypeItems);
 		SUGAR kExpr_setConstValue(kctx, expr, fo->h.ct->typeId, (kObject*)fo);
-		//KLIB kObject_setObject(kctx, expr, SYM_("Func"), TY_Func, fo);
 		kExpr *bkExpr = new_ConstValueExpr(kctx, TY_Block, (kObject*)bk);
 		PUSH_GCSTACK(bk);
-		//KLIB kObject_setObject(kctx, expr, SYM_("Block"), TY_Block, bk);
-		kExpr *retExpr = SUGAR new_TypedConsExpr(kctx, TEXPR_CLOSURE, fo->h.ct->typeId, 2, expr, bkExpr);
-		RESET_GCSTACK();
-		RETURN_(retExpr);
+		retExpr = SUGAR new_TypedConsExpr(kctx, TEXPR_CLOSURE, fo->h.ct->typeId, 2, expr, bkExpr);
 	}
+	RESET_GCSTACK();
+	RETURN_(retExpr);
 }
 
 static kbool_t closure_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)

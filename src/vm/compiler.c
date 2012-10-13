@@ -657,8 +657,9 @@ static void KonohaVisitor_visitStackTopExpr(KonohaContext *kctx, IRBuilder *self
 	NMOV_asm(kctx, a, expr->ty, expr->index + shift);
 }
 
-static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk);
-static void ClosureExpr_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
+//static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk);
+static IRBuilder *createKonohaVisitor(IRBuilder *builder);
+static void ClosureExpr_genCode(KonohaContext *kctx, IRBuilder *self, kMethod *mtd, kBlock *bk)
 {
 	INIT_GCSTACK();
 	PUSH_GCSTACK(ctxcode->lbINIT);
@@ -671,8 +672,17 @@ static void ClosureExpr_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	kArray *codeList = ctxcode->codeList;
 	ctxcode->codeList = new_(Array, K_PAGESIZE/sizeof(void*));
 
-
-	kMethod_genCode(kctx, mtd, bk);
+	//kMethod_genCode(kctx, mtd, bk);
+	IRBuilder *builder, builderbuf;
+	builder = createKonohaVisitor(&builderbuf);
+	builder->api.fn_init(kctx, builder, mtd);
+	builder->espidx = self->espidx;
+	builder->a = self->a;
+	builder->currentStmt = self->currentStmt;
+	builder->shift = self->shift;
+	printf("stmtlistSize %d\n", kArray_size(bk->stmtList));
+	visitBlock(kctx, builder, bk);
+	builder->api.fn_free(kctx, builder, mtd);
 
 	ctxcode->lbINIT = lbINIT;
 	ctxcode->lbEND = lbEND;
@@ -695,11 +705,8 @@ static void KonohaVisitor_visitClosureExpr(KonohaContext *kctx, IRBuilder *self,
 	kExpr *funcExpr = kExpr_at(expr, 0);
 	kExpr *blockExpr = kExpr_at(expr, 1);
 	kFunc *fo = (kFunc*)funcExpr->objectConstValue;
-	printf("%zd\n", fo);
-	printf("%zd\n", K_NULL);
-	printf("%d\n", expr->ty);
 	kBlock *bk = (kBlock*)blockExpr->objectConstValue;
-	ClosureExpr_genCode(kctx, fo->mtd, bk);
+	ClosureExpr_genCode(kctx, self, fo->mtd, bk);
 	ASM(NSET, OC_(a), (uintptr_t)fo, CT_(expr->ty));
 }
 
