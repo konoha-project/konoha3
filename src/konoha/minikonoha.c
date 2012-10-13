@@ -122,7 +122,8 @@ static KonohaStack *KonohaRuntime_replicateStack(KonohaContext *kctx, KonohaStac
 	KonohaStack *newstack = (KonohaStack*)KCALLOC(sizeof(KonohaStack), kctx->platApi->stacksize);
 	int i = 0;
 	for (; i < espidx; i++) {
-		memcpy(newstack+i, stack+i, sizeof(KonohaStack));
+		/* for return value, displace stack index forward */
+		memcpy(newstack+i+K_CALLDELTA, stack+i, sizeof(KonohaStack));
 	}
 	return newstack;
 }

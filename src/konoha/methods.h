@@ -224,13 +224,15 @@ static KMETHOD Func_invoke(KonohaContext *kctx, KonohaStack *sfp)
 	 */
 	if (fo->env != NULL) {
 		size_t psize = Method_param(fo->mtd)->psize;
-		/* fo->env: callee environment (referenceing environment of a closure)
-		 * sfp    : caller environment
+		/* fo->env          : callee environment (referenceing environment of a closure)
+		 * env[0]           : where return value is stored
+		 * env[K_CALLDELTA] : index of self object
+		 * sfp              : caller environment
 		 * copy arguments of closure to change environment
 		 */
-		memcpy(fo->env+fo->espidx-psize, sfp+1, sizeof(KonohaStack)*psize);
-		KSELFCALL(fo->env, fo->mtd);
-		sfp[K_RTNIDX] = fo->env[K_RTNIDX];
+		memcpy(fo->env+fo->espidx-psize+K_CALLDELTA, sfp+1, sizeof(KonohaStack)*psize);
+		KSELFCALL(fo->env+K_CALLDELTA, fo->mtd);
+		sfp[K_RTNIDX] = fo->env[0/* K_RTNIDX + K_CALLDELTA*/];
 	} else {
 		KSELFCALL(sfp, fo->mtd);
 	}
