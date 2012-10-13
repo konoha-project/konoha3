@@ -290,10 +290,10 @@ static void Kmap_remove(KHashMap* kmap, KHashMapEntry *oe)
 
 // key management
 
-static void Kmap_addStringUnboxValue(KonohaContext *kctx, KHashMap *kmp, uintptr_t hcode, kString *stringKey, uintptr_t unboxValue)
+static void Kmap_addStringUnboxValue(KonohaContext *kctx, KHashMap *kmp, uintptr_t hcode, kString *StringKey, uintptr_t unboxValue)
 {
 	KHashMapEntry *e = KLIB Kmap_newEntry(kctx, kmp, hcode);
-	KUnsafeFieldInit(e->stringKey, stringKey);
+	KUnsafeFieldInit(e->StringKey, StringKey);
 	e->unboxValue = unboxValue;
 }
 
@@ -301,16 +301,16 @@ static ksymbol_t Kmap_getcode(KonohaContext *kctx, KHashMap *kmp, kArray *list, 
 {
 	KHashMapEntry *e = KLIB Kmap_get(kctx, kmp, hcode);
 	while(e != NULL) {
-		if(e->hcode == hcode && len == S_size(e->stringKey) && strncmp(S_text(e->stringKey), name, len) == 0) {
+		if(e->hcode == hcode && len == S_size(e->StringKey) && strncmp(S_text(e->StringKey), name, len) == 0) {
 			return (ksymbol_t)e->unboxValue;
 		}
 		e = e->next;
 	}
 	if(def == SYM_NEWID) {
-		kString *stringKey = KLIB new_kString(kctx, name, len, spol);
+		kString *StringKey = KLIB new_kString(kctx, name, len, spol);
 		uintptr_t sym = kArray_size(list);
-		KLIB kArray_add(kctx, list, stringKey);
-		Kmap_addStringUnboxValue(kctx, kmp, hcode, stringKey, sym);
+		KLIB kArray_add(kctx, list, StringKey);
+		Kmap_addStringUnboxValue(kctx, kmp, hcode, StringKey, sym);
 		return (ksymbol_t)sym;
 	}
 	return def;

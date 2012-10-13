@@ -143,7 +143,7 @@ static void test_proto_value(KonohaContext *kctx)
 static void each_object(KonohaContext *kctx, void *thunk, KKeyValue *d)
 {
 	uintptr_t *val = (uintptr_t *) thunk;
-	*val += (uintptr_t) d->objectValue;
+	*val += (uintptr_t) d->ObjectValue;
 }
 
 static void test_proto_object(KonohaContext *kctx)

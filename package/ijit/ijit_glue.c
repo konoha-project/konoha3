@@ -60,7 +60,7 @@ static void val_reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
 {
 	KObjectVisitor *visitor = (KObjectVisitor *) thunk;
 	BEGIN_REFTRACE(1);
-	KREFTRACEv(p->objectValue);
+	KREFTRACEv(p->ObjectValue);
 	END_REFTRACE();
 }
 

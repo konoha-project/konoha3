@@ -178,13 +178,13 @@ static void KonohaClass_addField(KonohaContext *kctx, KonohaClassVar *definedCla
 	}
 }
 
-static kbool_t KonohaClass_setClassFieldObjectValue(KonohaContext *kctx, KonohaClassVar *definedClass, ksymbol_t sym, kObject *objectValue)
+static kbool_t KonohaClass_setClassFieldObjectValue(KonohaContext *kctx, KonohaClassVar *definedClass, ksymbol_t sym, kObject *ObjectValue)
 {
 	int i;
 	for(i = definedClass->fieldsize; i >= 0; i--) {
-		if(definedClass->fieldItems[i].fn == sym  && O_ct(definedClass->defaultValueAsNullVar->fieldObjectItems[i]) == O_ct(objectValue)) {
+		if(definedClass->fieldItems[i].fn == sym  && O_ct(definedClass->defaultValueAsNullVar->fieldObjectItems[i]) == O_ct(ObjectValue)) {
 			kObjectVar *o = definedClass->defaultValueAsNullVar;
-			KFieldSet(o, o->fieldObjectItems[i], objectValue);
+			KFieldSet(o, o->fieldObjectItems[i], ObjectValue);
 			return true;
 		}
 	}

@@ -506,7 +506,7 @@ typedef struct {
 	ktype_t   ty;
 	union {
 		uintptr_t                unboxValue;  //unboxValue
-		kObject                 *ObjectValue;  //objectValue
+		kObject                 *ObjectValue;  //ObjectValue
 		kString                 *StringValue;  //stringValue
 	};
 } KKeyValue;
@@ -546,12 +546,12 @@ typedef struct KHashMapEntry {
 	union {
 		uintptr_t        key;
 		uintptr_t        unboxKey;
-		kString         *stringKey;
-		kParam          *paramKey;
+		kString         *StringKey;
+		kParam          *ParamKey;
 		void            *ptrKey;
 	};
 	union {
-		kObject         *objectValue;
+		kObject         *ObjectValue;
 		uintptr_t        unboxValue;
 		void            *ptrValue;
 	};
@@ -562,9 +562,9 @@ struct KHashMap {
 	KHashMapEntry  *arena;
 	KHashMapEntry  *unused;
 	KHashMapEntry **hentry;
-	size_t arenasize;
-	size_t size;
-	size_t hmax;
+	size_t          arenasize;
+	size_t          size;
+	size_t          hmax;
 };
 
 /* ------------------------------------------------------------------------ */

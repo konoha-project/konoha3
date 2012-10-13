@@ -450,7 +450,7 @@ static kparamId_t Kmap_getparamid(KonohaContext *kctx, KHashMap *kmp, kArray *li
 {
 	KHashMapEntry *e = KLIB Kmap_get(kctx, kmp, hcode);
 	while(e != NULL) {
-		if(e->hcode == hcode && f(rtype, psize, p, e->paramKey)) {
+		if(e->hcode == hcode && f(rtype, psize, p, e->ParamKey)) {
 			return (kparamId_t)e->unboxValue;
 		}
 		e = e->next;
@@ -459,7 +459,7 @@ static kparamId_t Kmap_getparamid(KonohaContext *kctx, KHashMap *kmp, kArray *li
 	uintptr_t paramid = kArray_size(list);
 	KLIB kArray_add(kctx, list, pa);
 	e = KLIB Kmap_newEntry(kctx, kmp, hcode);
-	KUnsafeFieldInit(e->paramKey, pa);
+	KUnsafeFieldInit(e->ParamKey, pa);
 	e->unboxValue = paramid;
 	return (kparamId_t)paramid;
 }
@@ -1121,7 +1121,7 @@ static void constPoolMap_reftrace(KonohaContext *kctx, KHashMapEntry *p, void *t
 {
 	KObjectVisitor *visitor = (KObjectVisitor *) thunk;
 	BEGIN_REFTRACE(1);
-	KREFTRACEv(p->objectValue);
+	KREFTRACEv(p->ObjectValue);
 	END_REFTRACE();
 }
 
