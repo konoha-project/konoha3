@@ -704,9 +704,11 @@ static void KonohaVisitor_visitClosureExpr(KonohaContext *kctx, IRBuilder *self,
 	kExpr *funcExpr = kExpr_at(expr, 0);
 	kExpr *blockExpr = kExpr_at(expr, 1);
 	kFunc *fo = (kFunc*)funcExpr->objectConstValue;
+	((kFuncVar*)fo)->espidx = espidx;
 	kBlock *bk = (kBlock*)blockExpr->objectConstValue;
 	ClosureExpr_genCode(kctx, self, fo->mtd, bk);
 	ASM(NSET, OC_(a), (uintptr_t)fo, CT_(expr->ty));
+	ASM(SETENV, OC_(a), espidx);
 }
 
 static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sfp);

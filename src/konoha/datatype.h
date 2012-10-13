@@ -582,6 +582,7 @@ static void Func_init(KonohaContext *kctx, kObject *o, void *conf)
 	kFuncVar *fo = (kFuncVar*)o;
 	KFieldInit(fo, fo->self, K_NULL);
 	KFieldInit(fo, fo->mtd, conf == NULL ? KNULL(Method) : (kMethod*)conf);
+	fo->env = NULL;
 	fo->adhocKeyForTokenFunc = 0;
 }
 

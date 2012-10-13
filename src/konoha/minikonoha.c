@@ -117,6 +117,16 @@ static kbool_t KonohaRuntime_setModule(KonohaContext *kctx, int x, KonohaModule 
 	return true;
 }
 
+static KonohaStack *KonohaRuntime_replicateStack(KonohaContext *kctx, KonohaStack *stack, int espidx)
+{
+	KonohaStack *newstack = (KonohaStack*)KCALLOC(sizeof(KonohaStack), kctx->platApi->stacksize);
+	int i = 0;
+	for (; i < espidx; i++) {
+		memcpy(newstack+i, stack+i, sizeof(KonohaStack));
+	}
+	return newstack;
+}
+
 /* ------------------------------------------------------------------------ */
 /* [kcontext] */
 
@@ -130,7 +140,8 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 	if(kctx == NULL) {  // NULL means first one
 		KonohaLibVar *klib = (KonohaLibVar*)calloc(sizeof(KonohaLib) + sizeof(KonohaContextVar), 1);
 		klib_init(klib);
-		klib->KonohaRuntime_setModule    = KonohaRuntime_setModule;
+		klib->KonohaRuntime_setModule         = KonohaRuntime_setModule;
+		klib->KonohaRuntime_replicateStack    = KonohaRuntime_replicateStack;
 		newctx = (KonohaContextVar*)(klib + 1);
 		newctx->klib = (KonohaLib*)klib;
 		newctx->platApi = platApi;
