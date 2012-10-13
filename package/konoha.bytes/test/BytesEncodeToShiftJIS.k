@@ -3,8 +3,8 @@
 import("konoha.bytes");
 
 void test () {
-	assert("hoge".asBytes().encodeTo("SHIFT_JIS").asString() == "hoge");
-	System.p("ほげほげ".asBytes().encodeTo("SHIFT_JIS").asString());
+	assert("hoge".toBytes().encodeTo("SHIFT_JIS").toString() == "hoge");
+	System.p("ほげほげ".toBytes().encodeTo("SHIFT_JIS").toString());
 }
 
 test();

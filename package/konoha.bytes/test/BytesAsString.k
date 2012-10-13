@@ -6,8 +6,8 @@ void f() {
     String a = "aaaaaaaaaaaaaaaa";
     String b = "bbbbbbbbbbbbbbbb";
     String c = a + b;
-    Bytes  t = c.asBytes();
-    assert("aaaaaaaaaaaaaaaabbbbbbbbbbbbbbbb" == t.asString());
+    Bytes  t = c.toBytes();
+    assert("aaaaaaaaaaaaaaaabbbbbbbbbbbbbbbb" == t.toString());
 }
 
 f();
