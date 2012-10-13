@@ -703,8 +703,8 @@ struct KonohaModuleContext {
 	kObject     *o;\
 	kObject     *asObject;\
 	kObjectVar  *asObjectVar; \
-	kInt        *i; \
 	const struct kNumberVar     *asNumber;\
+	kInt        *asInt; \
 	kString     *asString;\
 	kArray      *asArray;\
 	kMethod     *asMethod;\
@@ -716,8 +716,8 @@ struct KonohaModuleContext {
 	kBlock      *asBlock;\
 	kGamma      *asGamma;\
 	const struct kExceptionVar  *asException;\
-	const struct _kFloat  *f; \
-	const struct _kBytes  *ba; \
+	const struct _kFloat  *asFloat; \
+	const struct _kBytes  *asBytes; \
 	struct _kIterator *itr; \
 	struct kClass  *c; \
 	struct kDate *dt;\

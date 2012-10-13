@@ -177,7 +177,7 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 //## @Const method Bytes Bytes.encodeTo(String toEncoding);
 static KMETHOD Bytes_encodeTo(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kBytes *ba = sfp[0].ba;
+	kBytes *ba = sfp[0].asBytes;
 	kString *toCoding = sfp[1].asString;
 
 	RETURN_(convFromTo(kctx, ba, "UTF-8", S_text(toCoding)));
@@ -196,7 +196,7 @@ static kString *toString(KonohaContext *kctx, kBytes *ba)
 //## @Const method String Bytes.decodeFrom(String fromEncoding);
 static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kBytes* fromBa = sfp[0].ba;
+	kBytes* fromBa = sfp[0].asBytes;
 	kString*fromCoding = sfp[1].asString;
 	kBytes *toBa = NULL;
 	DBG_P("size=%d, '%s'", fromBa->bytesize, fromBa->buf);
@@ -230,7 +230,7 @@ static KMETHOD String_asBytes(KonohaContext *kctx, KonohaStack *sfp)
 //## @Const method String Bytes.asString();
 static KMETHOD Bytes_asString(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kBytes *from = sfp[0].ba;
+	kBytes *from = sfp[0].asBytes;
 	kBytes *to = convFromTo(kctx, from, PLATAPI getSystemCharset(), "UTF-8");
 
 	RETURN_(toString(kctx, to));
@@ -239,7 +239,7 @@ static KMETHOD Bytes_asString(KonohaContext *kctx, KonohaStack *sfp)
 //## Int Bytes.get(Int n);
 static KMETHOD Bytes_get(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kBytes *ba = sfp[0].ba;
+	kBytes *ba = sfp[0].asBytes;
 	size_t n = check_index(kctx, sfp[1].intValue, ba->bytesize, sfp[K_RTNIDX].uline);
 	RETURNi_(ba->utext[n]);
 }
@@ -247,7 +247,7 @@ static KMETHOD Bytes_get(KonohaContext *kctx, KonohaStack *sfp)
 //## method Int Bytes.set(Int n, Int c);
 static KMETHOD Bytes_set(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kBytes *ba = sfp[0].ba;
+	kBytes *ba = sfp[0].asBytes;
 	size_t n = check_index(kctx, sfp[1].intValue, ba->bytesize, sfp[K_RTNIDX].uline);
 	ba->buf[n] = sfp[2].intValue;
 	RETURNi_(ba->utext[n]);
@@ -255,7 +255,7 @@ static KMETHOD Bytes_set(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Bytes_setAll(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kBytes *ba = sfp[0].ba;
+	kBytes *ba = sfp[0].asBytes;
 	int bytesize = ba->bytesize;
 	int i;
 	for (i = 0; i < bytesize; i++) {
@@ -266,7 +266,7 @@ static KMETHOD Bytes_setAll(KonohaContext *kctx, KonohaStack *sfp)
 }
 static KMETHOD Bytes_getSize(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kBytes *ba = sfp[0].ba;
+	kBytes *ba = sfp[0].asBytes;
 	RETURNi_(ba->bytesize);
 }
 
