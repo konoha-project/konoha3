@@ -160,9 +160,9 @@ static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 	kMethod *mtd = KLIB new_kMethod(kctx, flag, 0/* typeId, is it OK? */, 0/* mn, is it OK? */, NULL);
 	PUSH_GCSTACK(mtd);
 	KLIB kMethod_setParam(kctx, mtd, pa->rtype, pa->psize, (kparamtype_t*)pa->paramtypeItems);
-	int i;
+	size_t i;
 	for (i = 0; i < pa->psize; i++) {
-		int index = SUGAR kGamma_declareLocalVariable(kctx, gma, pa->paramtypeItems[i].ty, pa->paramtypeItems[i].fn);
+		SUGAR kGamma_declareLocalVariable(kctx, gma, pa->paramtypeItems[i].ty, pa->paramtypeItems[i].fn);
 	}
 	PUSH_GCSTACK(oldMethod);
 	gma->genv->currentWorkingMethod = mtd;
@@ -185,7 +185,7 @@ static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t closure_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("function"), 0, NULL/*"\"function\" $Param \"=>\" $Type $Block"*/, Precedence_CStyleCOMMA, Precedence_CStyleCOMMA, NULL, Expression_Closure, NULL, NULL, TypeCheck_Closure, },
+		{ SYM_("function"), 0, NULL/*"\"function\" $Param \"=>\" $Type $Block"*/, Precedence_CStyleASSIGN-1, Precedence_CStyleASSIGN-1, NULL, Expression_Closure, NULL, NULL, TypeCheck_Closure, },
 		//{ SYM_("$ClosureDecl"), 0, "$ClosureDecl $Param \"=>\" $Type $Block", 0, 0, PatternMatch_Closure, NULL, NULL, Statement_closure, NULL, },
 		{ KW_END, },
 	};
