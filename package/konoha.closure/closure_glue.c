@@ -161,10 +161,14 @@ static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 		KUnsafeFieldInit(fo->self, Stmt_nameSpace(stmt)->globalObjectNULL);
 		PUSH_GCSTACK(fo);
 		KLIB kMethod_setParam(kctx, mtd, pa->rtype, pa->psize, (kparamtype_t*)pa->paramtypeItems);
-		KLIB kObject_setObject(kctx, expr, SYM_("Func"), TY_Func, fo);
-		KLIB kObject_setObject(kctx, expr, SYM_("Block"), TY_Block, bk);
+		SUGAR kExpr_setConstValue(kctx, expr, fo->h.ct->typeId, (kObject*)fo);
+		//KLIB kObject_setObject(kctx, expr, SYM_("Func"), TY_Func, fo);
+		kExpr *bkExpr = new_ConstValueExpr(kctx, TY_Block, (kObject*)bk);
+		PUSH_GCSTACK(bk);
+		//KLIB kObject_setObject(kctx, expr, SYM_("Block"), TY_Block, bk);
+		kExpr *retExpr = SUGAR new_TypedConsExpr(kctx, TEXPR_CLOSURE, fo->h.ct->typeId, 2, expr, bkExpr);
 		RESET_GCSTACK();
-		RETURN_(kExpr_typed(expr, CLOSURE, fo->h.ct->typeId));
+		RETURN_(retExpr);
 	}
 }
 

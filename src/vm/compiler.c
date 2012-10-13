@@ -657,13 +657,50 @@ static void KonohaVisitor_visitStackTopExpr(KonohaContext *kctx, IRBuilder *self
 	NMOV_asm(kctx, a, expr->ty, expr->index + shift);
 }
 
+static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk);
+static void ClosureExpr_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
+{
+	INIT_GCSTACK();
+	PUSH_GCSTACK(ctxcode->lbINIT);
+	PUSH_GCSTACK(ctxcode->lbEND);
+	PUSH_GCSTACK(ctxcode->currentWorkingBlock);
+	PUSH_GCSTACK(ctxcode->codeList);
+	kBasicBlock *lbINIT = ctxcode->lbINIT;
+	kBasicBlock *lbEND = ctxcode->lbEND;
+	kBasicBlock *currentWorkingBlock = ctxcode->currentWorkingBlock;
+	kArray *codeList = ctxcode->codeList;
+	ctxcode->codeList = new_(Array, K_PAGESIZE/sizeof(void*));
+
+
+	kMethod_genCode(kctx, mtd, bk);
+
+	ctxcode->lbINIT = lbINIT;
+	ctxcode->lbEND = lbEND;
+	ctxcode->currentWorkingBlock = currentWorkingBlock;
+	ctxcode->codeList = codeList;
+	RESET_GCSTACK();
+}
+
 static void KonohaVisitor_visitClosureExpr(KonohaContext *kctx, IRBuilder *self, kExpr *expr)
 {
-	//int shift = self->shift;
-	//int a = self->a;
-	//int espidx = self->espidx;
-	//DBG_ASSERT(expr->index + shift < espidx);
-	//NMOV_asm(kctx, a, expr->ty, expr->index + shift);
+	/*
+	 * [ClosureExpr] := function Param Block
+	 * expr->cons = [Func, Block]
+	 **/
+
+	int shift = self->shift;
+	int a = self->a;
+	int espidx = self->espidx;
+	DBG_ASSERT(expr->index + shift < espidx);
+	kExpr *funcExpr = kExpr_at(expr, 0);
+	kExpr *blockExpr = kExpr_at(expr, 1);
+	kFunc *fo = (kFunc*)funcExpr->objectConstValue;
+	printf("%zd\n", fo);
+	printf("%zd\n", K_NULL);
+	printf("%d\n", expr->ty);
+	kBlock *bk = (kBlock*)blockExpr->objectConstValue;
+	ClosureExpr_genCode(kctx, fo->mtd, bk);
+	ASM(NSET, OC_(a), (uintptr_t)fo, CT_(expr->ty));
 }
 
 static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sfp);
