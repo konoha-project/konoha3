@@ -211,7 +211,7 @@ KMETHOD System_bind(KonohaContext *kctx, KonohaStack* sfp)
 {
 	struct sockaddr_in addr;
 	toSockaddr(&addr,
-			(char*)sfp[2].s,
+			(char*)sfp[2].asString,
 			WORD2INT(sfp[3].intValue),
 			WORD2INT(sfp[4].intValue)
 	);
@@ -249,7 +249,7 @@ KMETHOD System_connect(KonohaContext *kctx, KonohaStack* sfp)
 {
 	struct sockaddr_in addr;
 	toSockaddr(&addr,
-				(char*)S_text(sfp[2].s),
+				(char*)S_text(sfp[2].asString),
 				WORD2INT(sfp[3].intValue),
 				WORD2INT(sfp[4].intValue)
 	);
@@ -370,7 +370,7 @@ KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack* sfp)
 //## int System.recv(int socket, byte[] buffer, int flags);
 static KMETHOD System_recv(KonohaContext *kctx, KonohaStack* sfp)
 {
-	kBytes *ba  = sfp[2].ba;
+	kBytes *ba  = sfp[2].asBytes;
 	int ret = recv(WORD2INT(sfp[1].intValue),
 					  ba->buf,
 					  ba->bytesize,
@@ -391,7 +391,7 @@ static KMETHOD System_recv(KonohaContext *kctx, KonohaStack* sfp)
 //	int addrLen = sizeof(addr);
 //	memset(&addr, 0, addrLen);
 //
-//	kBytes *ba  = sfp[2].ba;
+//	kBytes *ba  = sfp[2].asBytes;
 //	int ret = recvfrom(WORD2INT(sfp[1].intValue),
 //			  	  	  	   ba->buf,
 //			  	  	  	   ba->bytesize,
@@ -447,7 +447,7 @@ static KMETHOD System_select(KonohaContext *kctx, KonohaStack* sfp)
 //## int System.send(int socket, byte[] message, int flags);
 static KMETHOD System_send(KonohaContext *kctx, KonohaStack* sfp)
 {
-	kBytes *ba = sfp[2].ba;
+	kBytes *ba = sfp[2].asBytes;
 	// Broken Pipe Signal Mask
 #if !(defined(__APPLE__) || defined(__NetBSD__))
 	__sighandler_t oldset = signal(SIGPIPE, SIG_IGN);
@@ -487,9 +487,9 @@ static KMETHOD System_send(KonohaContext *kctx, KonohaStack* sfp)
 //## int System.sendto(int socket, Bytes message, int flags, String dstIP, int dstPort, int family);
 static KMETHOD System_sendto(KonohaContext *kctx, KonohaStack* sfp)
 {
-	kBytes *ba = sfp[2].ba;
+	kBytes *ba = sfp[2].asBytes;
 	struct sockaddr_in addr;
-	kString* s = sfp[4].s;
+	kString* s = sfp[4].asString;
 	toSockaddr(&addr, (char*)S_text(s), WORD2INT(sfp[5].intValue), WORD2INT(sfp[6].intValue));
 	// Broken Pipe Signal Mask
 #if !(defined(__APPLE__) || defined(__NetBSD__))

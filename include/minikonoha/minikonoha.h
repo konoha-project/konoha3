@@ -718,10 +718,11 @@ struct KonohaModuleContext {
 	const struct kExceptionVar  *asException;\
 	const struct _kFloat  *asFloat; \
 	const struct _kBytes  *asBytes; \
+	struct kRegExp  *asRegExp; \
+	const struct kFILEVar   *asFILE;\
 	struct _kIterator *itr; \
 	struct kClass  *c; \
 	struct kDate *dt;\
-	struct kRegExp  *re; \
 	struct kRange  *range; \
 	struct kIterator *it; \
 	struct kMap           *m;    \

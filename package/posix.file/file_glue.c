@@ -36,8 +36,8 @@
 extern "C"{
 #endif
 
-typedef const struct _kFILE kFILE;
-struct _kFILE {
+typedef const struct kFILEVar kFILE;
+struct kFILEVar {
 	KonohaObjectHeader h;
 	FILE *fp;
 	const char *realpath;
@@ -47,14 +47,14 @@ struct _kFILE {
 
 static void File_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct _kFILE *file = (struct _kFILE*)o;
+	struct kFILEVar *file = (struct kFILEVar*)o;
 	file->fp = (conf != NULL) ? conf : NULL;
 	file->realpath = NULL;
 }
 
 static void File_free(KonohaContext *kctx, kObject *o)
 {
-	struct _kFILE *file = (struct _kFILE*)o;
+	struct kFILEVar *file = (struct kFILEVar*)o;
 	if (file->fp != NULL) {
 		int ret = fclose(file->fp);
 		if (ret != 0) {
@@ -96,7 +96,7 @@ static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp)
 				LogText("errstr", strerror(errno))
 		);
 	}
-	struct _kFILE *file = (struct _kFILE*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), (uintptr_t)fp);
+	struct kFILEVar *file = (struct kFILEVar*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), (uintptr_t)fp);
 	file->realpath = realpath(S_text(s), NULL);
 	RETURN_(file);
 }
@@ -108,7 +108,7 @@ static KMETHOD File_read(KonohaContext *kctx, KonohaStack *sfp)
 	FILE *fp = file->fp;
 	size_t size = 0;
 	if(fp != NULL) {
-		kBytes *ba = sfp[1].ba;
+		kBytes *ba = sfp[1].asBytes;
 		size_t offset = (size_t)sfp[2].intValue;
 		size_t len = (size_t)sfp[3].intValue;
 		size = ba->bytesize;
@@ -138,7 +138,7 @@ static KMETHOD File_write(KonohaContext *kctx , KonohaStack *sfp)
 	FILE *fp = file->fp;
 	size_t size = 0;
 	if(fp != NULL) {
-		kBytes *ba = sfp[1].ba;
+		kBytes *ba = sfp[1].asBytes;
 		size_t offset = (size_t)sfp[2].intValue;
 		size_t len = (size_t)sfp[3].intValue;
 		size = ba->bytesize;
@@ -158,7 +158,7 @@ static KMETHOD File_write(KonohaContext *kctx , KonohaStack *sfp)
 //## @Native void File.close();
 static KMETHOD File_close(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kFILE *file = (struct _kFILE*)sfp[0].asObject;
+	struct kFILEVar *file = (struct kFILEVar*)sfp[0].asObject;
 	FILE *fp = file->fp;
 	if(fp != NULL) {
 		int ret = fclose(fp);
