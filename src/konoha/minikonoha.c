@@ -88,7 +88,7 @@ static void KonohaStackRuntime_reftrace(KonohaContext *kctx, KonohaContextVar *c
 	KonohaStack *sp = ctx->stack->stack;
 	BEGIN_REFTRACE((kctx->esp - sp) + 2);
 	while(sp < ctx->esp) {
-		KREFTRACEv(sp[0].o);
+		KREFTRACEv(sp[0].asObject);
 		sp++;
 	}
 	KREFTRACEv(ctx->stack->gcstack);

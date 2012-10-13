@@ -272,7 +272,7 @@ static KMETHOD Bytes_getSize(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Bytes_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), sfp[1].intValue));
+	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), sfp[1].intValue));
 }
 
 /* ------------------------------------------------------------------------ */

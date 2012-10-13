@@ -153,7 +153,7 @@ static KMETHOD System_getThrownException(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Exception_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_(sfp[0].o);
+	RETURN_(sfp[0].asObject);
 }
 
 // --------------------------------------------------------------------------

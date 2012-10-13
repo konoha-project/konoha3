@@ -233,7 +233,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #define OPEXEC_NEW(A, P, CT)   KUnsafeFieldSet(rbp[(A)].o, KLIB new_kObject(kctx, CT, P))
 #define OPEXEC_NULL(A, CT)     KUnsafeFieldSet(rbp[(A)].o, KLIB Knull(kctx, CT))
 #define OPEXEC_BOX(A, B, CT)   KUnsafeFieldSet(rbp[(A)].o, KLIB new_kObject(kctx, CT, rbp[(B)].intValue))
-#define OPEXEC_UNBOX(A, B, CT) rbp[(A)].unboxValue = N_toint(rbp[B].o)
+#define OPEXEC_UNBOX(A, B, CT) rbp[(A)].unboxValue = N_toint(rbp[B].asObject)
 
 #define PC_NEXT(pc)   pc+1
 
@@ -614,7 +614,7 @@ GOTO_PC(pc); \
 #define OPEXEC_TCAST(kctx, rtnidx, thisidx, rix, espidx, tmr) do {\
 	kTypeMap *tmr_ = tmr; \
 	KonohaStack *sfp_ = SFP(rshift(rbp,thisidx));\
-	KonohaClass scid = SP(tmr_)->scid, this_cid = O_typeId(sfp_[0].o);\
+	KonohaClass scid = SP(tmr_)->scid, this_cid = O_typeId(sfp_[0].asObject);\
 	if(this_cid != scid) {\
 		tmr_ = knh_findTypeMapNULL(kctx, scid, SP(tmr)->tcid);\
 		KUnsafeFieldSet(((klr_TCAST_t*)op)->cast, tmr_);\

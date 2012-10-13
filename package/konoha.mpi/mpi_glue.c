@@ -248,7 +248,7 @@ static KMETHOD MPIComm_scatter(KonohaContext *kctx, KonohaStack *sfp)
 	kMPIComm *comm = toRawPtr(kMPIComm *, sfp[0].asObject);
 	kMPIData *sdata = toRawPtr(kMPIData *, sfp[1].asObject);
 	int scount = sfp[2].intValue;
-	kMPIData *rdata = toRawPtr(kMPIData *, sfp[3].o);
+	kMPIData *rdata = toRawPtr(kMPIData *, sfp[3].asObject);
 	int rcount = sfp[4].intValue;
 	int root = sfp[5].intValue;
 	MPIData_extend(kctx, rdata, rcount);
@@ -263,7 +263,7 @@ static KMETHOD MPIComm_gather(KonohaContext *kctx, KonohaStack *sfp)
 	kMPIComm *comm = toRawPtr(kMPIComm *, sfp[0].asObject);
 	kMPIData *sdata = toRawPtr(kMPIData *, sfp[1].asObject);
 	int scount = sfp[2].intValue;
-	kMPIData *rdata = toRawPtr(kMPIData *, sfp[3].o);
+	kMPIData *rdata = toRawPtr(kMPIData *, sfp[3].asObject);
 	int rcount = sfp[4].intValue;
 	int root = sfp[5].intValue;
 	MPIData_extend(kctx, rdata, rcount);
@@ -278,7 +278,7 @@ static KMETHOD MPIComm_allGather(KonohaContext *kctx, KonohaStack *sfp)
 	kMPIComm *comm = toRawPtr(kMPIComm *, sfp[0].asObject);
 	kMPIData *sdata = toRawPtr(kMPIData *, sfp[1].asObject);
 	int scount = sfp[2].intValue;
-	kMPIData *rdata = toRawPtr(kMPIData *, sfp[3].o);
+	kMPIData *rdata = toRawPtr(kMPIData *, sfp[3].asObject);
 	int rcount = sfp[4].intValue;
 	MPIData_extend(kctx, rdata, rcount);
 	bool ret = (MPI_Allgather(getbuf(sdata), scount, sdata->type, getbuf(rdata),
@@ -292,7 +292,7 @@ static KMETHOD MPIComm_allToAll(KonohaContext *kctx, KonohaStack *sfp)
 	kMPIComm *comm = toRawPtr(kMPIComm *, sfp[0].asObject);
 	kMPIData *sdata = toRawPtr(kMPIData *, sfp[1].asObject);
 	int scount = sfp[2].intValue;
-	kMPIData *rdata = toRawPtr(kMPIData *, sfp[3].o);
+	kMPIData *rdata = toRawPtr(kMPIData *, sfp[3].asObject);
 	int rcount = sfp[4].intValue;
 	MPIData_extend(kctx, rdata, rcount);
 	bool ret = (MPI_Alltoall(getbuf(sdata), scount, sdata->type, getbuf(rdata), 
@@ -305,7 +305,7 @@ static KMETHOD MPIComm_reduce(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMPIComm *comm = toRawPtr(kMPIComm *, sfp[0].asObject);
 	kMPIData *sdata = toRawPtr(kMPIData *, sfp[1].asObject);
-	kMPIData *rdata = toRawPtr(kMPIData *, sfp[2].o);
+	kMPIData *rdata = toRawPtr(kMPIData *, sfp[2].asObject);
 	int rcount = sfp[3].intValue;
 	MPI_Op op = (MPI_Op)sfp[4].intValue;
 	int root = sfp[5].intValue;
@@ -320,7 +320,7 @@ static KMETHOD MPIComm_allReduce(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMPIComm *comm = toRawPtr(kMPIComm *, sfp[0].asObject);
 	kMPIData *sdata = toRawPtr(kMPIData *, sfp[1].asObject);
-	kMPIData *rdata = toRawPtr(kMPIData *, sfp[2].o);
+	kMPIData *rdata = toRawPtr(kMPIData *, sfp[2].asObject);
 	int rcount = sfp[3].intValue;
 	MPI_Op op = (MPI_Op)sfp[4].intValue;
 	MPIData_extend(kctx, rdata, rcount);
@@ -334,7 +334,7 @@ static KMETHOD MPIComm_scan(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMPIComm *comm = toRawPtr(kMPIComm *, sfp[0].asObject);
 	kMPIData *sdata = toRawPtr(kMPIData *, sfp[1].asObject);
-	kMPIData *rdata = toRawPtr(kMPIData *, sfp[2].o);
+	kMPIData *rdata = toRawPtr(kMPIData *, sfp[2].asObject);
 	int rcount = sfp[3].intValue;
 	MPI_Op op = (MPI_Op)sfp[4].intValue;
 	MPIData_extend(kctx, rdata, rcount);

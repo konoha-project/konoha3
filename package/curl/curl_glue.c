@@ -32,8 +32,8 @@
 extern "C" {
 #endif
 
-typedef const struct _kCurl kCurl;
-struct _kCurl {
+typedef const struct kCurlVar kCurl;
+struct kCurlVar {
 	KonohaObjectHeader h;
 	struct curl_slist *headers;
 	FILE *fp;
@@ -64,12 +64,12 @@ static size_t write_Bytes(char *buffer, size_t size, size_t nitems, void *obj)
 /* ------------------------------------------------------------------------ */
 
 #define Int_to(T, a)      ((T)a.intValue)
-#define String_to(T, a)   ((T)S_text(a.s))
+#define String_to(T, a)   ((T)S_text(a.asString))
 #define toCURL(o)         ((kCurl *)o)->curl
 
 static void Curl_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct _kCurl *c = (struct _kCurl *)o;
+	struct kCurlVar *c = (struct kCurlVar *)o;
 	c->headers = NULL;
 	c->fp = NULL;
 	c->curl = curl_easy_init();
@@ -79,7 +79,7 @@ static void Curl_init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void Curl_free(KonohaContext *kctx, kObject *o)
 {
-	struct _kCurl *c = (struct _kCurl*)o;
+	struct kCurlVar *c = (struct kCurlVar*)o;
 	if(c->curl != NULL) {
 		curl_easy_cleanup(c->curl);
 		c->curl = NULL;
@@ -91,17 +91,17 @@ static void Curl_free(KonohaContext *kctx, kObject *o)
 
 static void Curl_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
 {
-	struct _kCurl *c = (struct _kCurl*)o;
+	struct kCurlVar *c = (struct kCurlVar*)o;
 	BEGIN_REFTRACE(1);
 	KREFTRACEv(c->bytes);
 	END_REFTRACE();
 }
 
-//## Curl Curl.new();
-static KMETHOD Curl_new (KonohaContext *kctx, KonohaStack *sfp)
-{
-	RETURN_(sfp[K_RTNIDX].o);
-}
+////## Curl Curl.new();
+//static KMETHOD Curl_new (KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	RETURN_(sfp[K_RTNIDX].asObject);
+//}
 
 //##  void Curl.setOpt(int type, dynamic data);
 static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
@@ -142,9 +142,9 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 	case CURLOPT_UPLOAD:
 	case CURLOPT_VERBOSE: {
 		int boolValue = 1;
-		if(IS_NULL(sfp[2].o) ||
-				((IS_Boolean(sfp[2].o) && sfp[2].boolValue == 0)) ||
-				((IS_Int(sfp[2].o) && Int_to(int, sfp[2]) == 0))) {
+		if(IS_NULL(sfp[2].asObject) ||
+				((IS_Boolean(sfp[2].asObject) && sfp[2].boolValue == 0)) ||
+				((IS_Int(sfp[2].asObject) && Int_to(int, sfp[2]) == 0))) {
 			boolValue = 0;
 		}
 		curl_easy_setopt(curl, curlopt, boolValue);
@@ -174,7 +174,7 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 	case CURLOPT_TIMECONDITION:
 	case CURLOPT_TIMEOUT:
 	case CURLOPT_TIMEVALUE: {
-		if(IS_Int(sfp[2].o)) {
+		if(IS_Int(sfp[2].asObject)) {
 			curl_easy_setopt(curl, curlopt, Int_to(long, sfp[2]));
 		}
 		else {
@@ -212,7 +212,7 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 	case CURLOPT_URL:
 	case CURLOPT_USERAGENT:
 	case CURLOPT_USERPWD: {
-		if(IS_String(sfp[2].o)) {
+		if(IS_String(sfp[2].asObject)) {
 			curl_easy_setopt(curl, curlopt, String_to(char*,sfp[2]));
 		}
 		else {
@@ -224,9 +224,9 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 	case CURLOPT_FILE:
 	case CURLOPT_STDERR:
 	case CURLOPT_WRITEHEADER:
-		if(IS_Bytes(sfp[2].o)){
-			struct _kCurl *c = (struct _kCurl *)sfp[0].o;
-			KFieldSet(c, c->bytes, (struct _kBytes *)sfp[2].ba);
+		if(IS_Bytes(sfp[2].asObject)){
+			struct kCurlVar *c = (struct kCurlVar *)sfp[0].o;
+			KFieldSet(c, c->bytes, (struct _kBytes *)sfp[2].asBytes);
 			c->lctx = kctx;
 			curl_easy_setopt(curl, curlopt, (void *)c);
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_Bytes);
@@ -247,7 +247,7 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 	//	break;
 	//}
 	case CURLOPT_READDATA:
-		if (IS_String(sfp[2].o)) {
+		if (IS_String(sfp[2].asObject)) {
 			FILE* fp = ((kCurl*)sfp[0].asObject)->fp;
 			if ((fp = tmpfile()) == NULL) {
 				OLDTRACE_SWITCH_TO_KTrace(_DataFault,   // FIXME
@@ -276,7 +276,7 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 //## void Curl.appendHeader();
 static KMETHOD Curl_appendHeader(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kCurl* kcurl = (struct _kCurl*)sfp[0].asObject;
+	struct kCurlVar* kcurl = (struct kCurlVar*)sfp[0].asObject;
 	char *h = String_to(char*,sfp[1]);
 	kcurl->headers = curl_slist_append(kcurl->headers, h);
 	RETURNvoid_();
@@ -371,7 +371,7 @@ static kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	KonohaClass *cCurl = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defCurl, pline);
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Im, _F(Curl_new), TY_Curl, TY_Curl, MN_("new"), 0,
+//		_Public|_Const|_Im, _F(Curl_new), TY_Curl, TY_Curl, MN_("new"), 0,
 		_Public|_Const|_Im, _F(Curl_setOpt), TY_void, TY_Curl, MN_("setOpt"), 2, TY_int, FN_("type"), TY_Object/*FIXME TY_Dynamic*/, FN_("data"),
 		_Public|_Const|_Im, _F(Curl_appendHeader), TY_void, TY_Curl, MN_("appendHeader"), 1, TY_String, FN_("header"),
 		_Public|_Const|_Im, _F(Curl_perform), TY_boolean, TY_Curl, MN_("perform"), 0,

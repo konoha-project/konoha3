@@ -397,7 +397,7 @@ static kstatus_t kMethod_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtyp
 	BEGIN_LOCAL(lsfp, K_CALLDELTA);
 	KonohaStackRuntimeVar *runtime = kctx->stack;
 	if(runtime->evalty != TY_void) {
-		KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, runtime->stack[runtime->evalidx].o);
+		KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, runtime->stack[runtime->evalidx].asObject);
 		lsfp[K_CALLDELTA+1].intValue = runtime->stack[runtime->evalidx].intValue;
 	}
 	KonohaStack *sfp = lsfp + K_CALLDELTA;

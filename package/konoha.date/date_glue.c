@@ -96,7 +96,7 @@ struct _kDate {
 //## Date Date.new();
 static KMETHOD Date_new0(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kDate *d = (struct _kDate *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+	struct _kDate *d = (struct _kDate *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 	struct tm lt;
 	gettimeofday((struct timeval*)&(d->tv), NULL);
 	localtime_r((const time_t*)&(d->tv.tv_sec), &lt);
@@ -106,7 +106,7 @@ static KMETHOD Date_new0(KonohaContext *kctx, KonohaStack *sfp)
 //## Date Date.new(int milliseconds);
 static KMETHOD Date_new1(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kDate *d = (struct _kDate *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+	struct _kDate *d = (struct _kDate *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 	d->tv.tv_sec = sfp[1].intValue / 1000;
 	d->tv.tv_usec = sfp[1].intValue % 1000 * 1000;
 	RETURN_((kObject *)d);
@@ -115,14 +115,14 @@ static KMETHOD Date_new1(KonohaContext *kctx, KonohaStack *sfp)
 //## Date Date.new(String dateString); Not implemented
 //static KMETHOD Date_new2(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	struct _kDate *d = (struct _kDate *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+//	struct _kDate *d = (struct _kDate *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 //	RETURN_((kObject *)d);
 //}
 
 //## Date Date.new(int year, int month, int day, int hours, int minutes, int seconds, int milliseconds);
 static KMETHOD Date_new3(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kDate *d = (struct _kDate *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), 0);
+	struct _kDate *d = (struct _kDate *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 	struct tm lt = {};
 	if(sfp[1].intValue < 100) {
 		lt.tm_year = sfp[1].intValue;

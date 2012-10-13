@@ -185,7 +185,7 @@ static KMETHOD Thread_self(KonohaContext *kctx, KonohaStack *sfp)
 //## @Native boolean Thread.equal(Thread t);
 static KMETHOD Thread_equal(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(kThread_compareTo(sfp[0].o, sfp[1].o) == 0);
+	RETURNb_(kThread_compareTo(sfp[0].o, sfp[1].asObject) == 0);
 }
 
 /* ------------------------------------------------------------------------ */

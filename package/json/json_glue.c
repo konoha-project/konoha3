@@ -68,7 +68,7 @@ static void kJSON_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuf
 //## JSON JSON.new();
 static KMETHOD kJSON_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_(sfp[0].o);
+	RETURN_(sfp[0].asObject);
 }
 
 static kJSON *NewJsonObject(KonohaContext *kctx, KonohaStack *sfp, JSON val)

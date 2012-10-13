@@ -387,13 +387,13 @@ static kString* kInputStream_readLine(KonohaContext *kctx,  kInputStream *in)
 //## method @Iterative String InputStream.readLine();
 static KMETHOD InputStream_readLine(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_(kInputStream_readLine(kctx, (kInputStream*)sfp[0].o));
+	RETURN_(kInputStream_readLine(kctx, (kInputStream*)sfp[0].asObject));
 }
 
 //## method void InputStream.close();
 static KMETHOD InputStream_close(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kInputStream_close(kctx, (kInputStream*)sfp[0].o);
+	kInputStream_close(kctx, (kInputStream*)sfp[0].asObject);
 }
 
 //## method @public boolean InputStream.isClosed()
@@ -462,14 +462,14 @@ static KMETHOD OutputStream_println(KonohaContext *kctx, KonohaStack *sfp)
 //## method void OutputStream.flush();
 static KMETHOD OutputStream_flush(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kOutputStream_flush(kctx, (kOutputStream*)sfp[0].o);
+	kOutputStream_flush(kctx, (kOutputStream*)sfp[0].asObject);
 	RETURNvoid_();
 }
 
 //## method void OutputStream.close();
 static KMETHOD OutputStream_close(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kOutputStream_close(kctx, (kOutputStream*)sfp[0].o);
+	kOutputStream_close(kctx, (kOutputStream*)sfp[0].asObject);
 }
 
 //## method @public boolean OutputStream.isClosed()

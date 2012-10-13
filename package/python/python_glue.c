@@ -53,7 +53,7 @@ static void PyObject_init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void PyObject_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
-	PyObject *pyo =  ((kPyObject*)v[pos].o)->self;
+	PyObject *pyo =  ((kPyObject*)v[pos].asObject)->self;
 	PyObject* str = pyo->ob_type->tp_str(pyo);
 	Py_INCREF(str);
 	KLIB Kwb_printf(kctx, wb, "%s", PyString_AsString(str));
@@ -78,7 +78,7 @@ static void PyObject_free(KonohaContext *kctx, kObject *o)
 static void RETURN_PyObject_(KonohaContext *kctx, KonohaStack *sfp, PyObject *pyo)
 {
 	if(pyo != NULL) {
-		RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].o), (uintptr_t)pyo));
+		RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), (uintptr_t)pyo));
 	}
 	else {
 		// ERROR if python object is NULL
@@ -460,7 +460,7 @@ static KMETHOD PyObject_(KonohaContext *kctx, KonohaStack *sfp)
 			int i;
 			pArgs = PyTuple_New(argc);
 			for (i = 0; i < argc; ++i) {
-				pValue = ((kPyObject*)sfp[i+1].o)->self;
+				pValue = ((kPyObject*)sfp[i+1].asObject)->self;
 				Py_INCREF(pValue);
 				PyTuple_SetItem(pArgs, i, pValue);
 			}

@@ -54,7 +54,7 @@ static KMETHOD Array_set(KonohaContext *kctx, KonohaStack *sfp)
 		a->unboxItems[n] = sfp[2].unboxValue;
 	}
 	else {
-		KFieldSet(a, a->objectItems[n], sfp[2].o);
+		KFieldSet(a, a->objectItems[n], sfp[2].asObject);
 	}
 }
 
@@ -272,7 +272,7 @@ static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
 			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, tmp);
 			KCALL(lsfp, 0, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
 			END_LOCAL();
-			KFieldSet(ret, ret->objectItems[i], lsfp[0].o);
+			KFieldSet(ret, ret->objectItems[i], lsfp[0].asObject);
 		}
 	}
 	kArray_setsize(ret, asize);
@@ -311,7 +311,7 @@ static KMETHOD Array_inject(KonohaContext *kctx, KonohaStack *sfp)
 			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, tmp);
 			KUnsafeFieldSet(lsfp[K_CALLDELTA+2].o, a->objectItems[i]);
 			KCALL(lsfp, 0, f->mtd, 2, nulobj);
-			KUnsafeFieldSet(tmp, lsfp[0].o);
+			KUnsafeFieldSet(tmp, lsfp[0].asObject);
 		}
 		END_LOCAL();
 		RETURN_(tmp);
