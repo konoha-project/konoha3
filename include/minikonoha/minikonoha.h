@@ -717,15 +717,15 @@ struct KonohaModuleContext {
 	kGamma      *asGamma;\
 	const struct kExceptionVar  *asException;\
 	const struct kFloatVar      *asFloat; \
-	const struct kBytesVar      *asBytes; \
 	struct kDate              *asDate;\
 	struct kRegExp            *asRegExp; \
+	const struct kBytesVar      *asBytes; \
 	const struct kFILEVar     *asFILE;\
-	struct _kIterator *itr; \
-	struct kMap           *m;    \
-	struct kInputStream  *in; \
-	struct kOutputStream *w;  \
-	struct kContext           *cx;\
+	struct kIteratorVar *asIterator; \
+	struct kMap           *asMap;    \
+	struct kInputStream  *asInputStream; \
+	struct kOutputStream *asOutputStream;  \
+	struct kContext           *asContext;\
 	kint_t     dummy_intValue;\
 	kfloat_t   dummy_floatValue
 
