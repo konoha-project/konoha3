@@ -219,9 +219,15 @@ static KMETHOD Func_invoke(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_ASSERT(IS_Func(fo));
 	DBG_ASSERT(IS_Method(fo->mtd));
 	KUnsafeFieldSet(sfp[0].asObject, fo->self);
+	/* fo->env != NULL means
+	 * this func has referencing environment.
+	 */
 	if (fo->env != NULL) {
 		size_t psize = Method_param(fo->mtd)->psize;
-		printf("espidx: %d, psize: %d\n", fo->espidx, psize);
+		/* fo->env: callee environment (referenceing environment of a closure)
+		 * sfp    : caller environment
+		 * copy arguments of closure to change environment
+		 */
 		memcpy(fo->env+fo->espidx-psize, sfp+1, sizeof(KonohaStack)*psize);
 		KSELFCALL(fo->env, fo->mtd);
 		sfp[K_RTNIDX] = fo->env[K_RTNIDX];

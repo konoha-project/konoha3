@@ -136,7 +136,6 @@ static KMETHOD Expression_Closure(KonohaContext *kctx, KonohaStack *sfp)
 	kParam *pa = new_kParam(kctx, retClass->typeId, psize, p); /* GCSAFE */
 
 	/* syntax is OK */
-	//nextIdx = TokenUtils_skipIndent(tokenList, nextIdx, kArray_size(tokenList));
 	TokenSequence blockSeq = {Stmt_nameSpace(stmt), KonohaContext_getSugarContext(kctx)->preparedTokenList};
 	TokenSequence_push(kctx, blockSeq);
 	SUGAR TokenSequence_tokenize(kctx, &blockSeq,  S_text(tokenList->tokenItems[nextIdx]->text), tokenList->tokenItems[nextIdx]->uline);
@@ -161,13 +160,22 @@ static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 	PUSH_GCSTACK(mtd);
 	KLIB kMethod_setParam(kctx, mtd, pa->rtype, pa->psize, (kparamtype_t*)pa->paramtypeItems);
 	size_t i;
+
+	/* declare arguments of closure as local variable */
 	for (i = 0; i < pa->psize; i++) {
 		SUGAR kGamma_declareLocalVariable(kctx, gma, pa->paramtypeItems[i].ty, pa->paramtypeItems[i].fn);
 	}
 	PUSH_GCSTACK(oldMethod);
+
+	/* Type checker of a closure expression
+	 * now current working method is parent function,
+	 * thus we need to push a closure to current working method in order to checking type
+	 */
 	gma->genv->currentWorkingMethod = mtd;
 	int ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
 	gma->genv->currentWorkingMethod = oldMethod;
+
+	/* type check is OK */
 	if (ret) {
 		KonohaClass *ctFunc = KLIB KonohaClass_Generics(kctx, CT_Func, pa->rtype, pa->psize, (kparamtype_t*)pa->paramtypeItems);
 		kFuncVar *fo = (kFuncVar*)KLIB new_kObject(kctx, ctFunc, (uintptr_t)mtd);
