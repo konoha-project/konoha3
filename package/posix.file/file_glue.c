@@ -114,7 +114,7 @@ static KMETHOD File_read(KonohaContext *kctx, KonohaStack *sfp)
 		size = ba->bytesize;
 		if(!(offset < size)) {
 			// TODO: throw
-			kfileline_t uline = sfp[K_RTNIDX].uline;
+			kfileline_t uline = sfp[K_RTNIDX].callerFileLine;
 			kreportf(CritTag, uline, "OutOfRange!!, offset=%d, size=%d", offset, size);
 		}
 		if(len == 0) len = size - offset;

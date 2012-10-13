@@ -36,7 +36,7 @@ extern "C"{
 static KMETHOD Array_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].uline);
+	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].callerFileLine);
 	if (kArray_isUnboxData(a)) {
 		RETURNd_(a->unboxItems[n]);
 	}
@@ -49,7 +49,7 @@ static KMETHOD Array_get(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].uline);
+	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].callerFileLine);
 	if (kArray_isUnboxData(a)) {
 		a->unboxItems[n] = sfp[2].unboxValue;
 	}
@@ -369,7 +369,7 @@ static KMETHOD Array_indexOf(KonohaContext *kctx, KonohaStack *sfp)
 		//TODO:Need to implement Object compareTo.
 		kObject *o = sfp[1].asObject;
 		for(i = 0; i < kArray_size(a); i++) {
-			KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplemented"), sfp, sfp[K_RTNIDX].uline, NULL);
+			KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplemented"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
 			if (O_ct(o)->compareObject(a->objectItems[i], o) == 0) {
 				res = i; break;
 			}
@@ -395,7 +395,7 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 		//TODO: Need to implement Object compareTo;
 		kObject *o = sfp[1].asObject;
 		for(i = kArray_size(a)- 1; i != 0; i--) {
-			KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplemented"), sfp, sfp[K_RTNIDX].uline, NULL);
+			KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplemented"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
 			if(O_ct(o)->compareObject(a->objectItems[i], o) == 0) {
 				break;
 			}

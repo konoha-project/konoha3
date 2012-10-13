@@ -240,7 +240,7 @@ static KMETHOD Bytes_asString(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Bytes_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *ba = sfp[0].asBytes;
-	size_t n = check_index(kctx, sfp[1].intValue, ba->bytesize, sfp[K_RTNIDX].uline);
+	size_t n = check_index(kctx, sfp[1].intValue, ba->bytesize, sfp[K_RTNIDX].callerFileLine);
 	RETURNi_(ba->utext[n]);
 }
 
@@ -248,7 +248,7 @@ static KMETHOD Bytes_get(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Bytes_set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *ba = sfp[0].asBytes;
-	size_t n = check_index(kctx, sfp[1].intValue, ba->bytesize, sfp[K_RTNIDX].uline);
+	size_t n = check_index(kctx, sfp[1].intValue, ba->bytesize, sfp[K_RTNIDX].callerFileLine);
 	ba->buf[n] = sfp[2].intValue;
 	RETURNi_(ba->utext[n]);
 }

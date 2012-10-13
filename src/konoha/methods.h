@@ -88,7 +88,7 @@ static KMETHOD Int_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kint_t n = sfp[1].intValue;
 	if(unlikely(n == 0)) {
-		KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].uline, NULL);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
 	}
 	RETURNi_(sfp[0].intValue / n);
 }
@@ -98,7 +98,7 @@ static KMETHOD Int_opMOD(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kint_t n = sfp[1].intValue;
 	if(unlikely(n == 0)) {
-		KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].uline, NULL);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
 	}
 	RETURNi_(sfp[0].intValue % n);
 }
@@ -232,14 +232,14 @@ static KMETHOD System_assert(KonohaContext *kctx, KonohaStack *sfp)
 //	konoha_detectFailedAssert = false;
 	if (cond == false) {
 		konoha_detectFailedAssert = true;
-		KLIB KonohaRuntime_raise(kctx, EXPT_("Assertion"), sfp, sfp[K_RTNIDX].uline, NULL);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("Assertion"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
 	}
 }
 
 //## method void System.p(@Coercion String msg);
 static KMETHOD System_p(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kfileline_t uline = sfp[K_RTNIDX].uline;
+	kfileline_t uline = sfp[K_RTNIDX].callerFileLine;
 	const char *text = (IS_NULL(sfp[1].asString)) ? K_NULLTEXT : S_text(sfp[1].asString);
 	kreportf(NoneTag, uline, "%s", text);
 }

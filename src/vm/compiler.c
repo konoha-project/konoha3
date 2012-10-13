@@ -1012,7 +1012,7 @@ static void _THCODE(KonohaContext *kctx, VirtualMachineInstruction *pc, void **c
 
 static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 {
-	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].mtdNC));
+	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].methodCallInfo));
 	KonohaVirtualMachine_run(kctx, sfp, CODE_ENTER);
 }
 

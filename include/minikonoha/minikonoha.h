@@ -292,7 +292,7 @@ struct PlatformApiVar {
 #define LogUint(K,V)    LOG_u, (K), ((uintptr_t)V)
 #define LogText(K,V)    LOG_s, (K), (V)
 #define LogErrno        LOG_ERRNO
-#define LogScriptLine(sfp)   LogText("ScriptName", FileId_t(sfp[K_RTNIDX].uline)), LogUint("ScriptLine", (ushort_t)sfp[K_RTNIDX].uline)
+#define LogScriptLine(sfp)   LogText("ScriptName", FileId_t(sfp[K_RTNIDX].callerFileLine)), LogUint("ScriptLine", (ushort_t)sfp[K_RTNIDX].callerFileLine)
 
 #define KTrace(POLICY, LOGKEY, ...)    do {\
 		static logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|POLICY)};\
@@ -694,10 +694,9 @@ struct KonohaModuleContext {
 	kint_t      intValue; \
 	kfloat_t    floatValue; \
 	intptr_t    shift;  \
-	uintptr_t   uline; \
 	struct VirtualMachineInstruction  *pc; \
-	kMethod     *mtdNC; \
-	const char  *fname
+	kMethod     *methodCallInfo; \
+	uintptr_t    callerFileLine;
 
 #define K_FRAME_MEMBER \
 	kObject     *asObject;\
@@ -1280,7 +1279,7 @@ struct _kSystem {
 /* macros */
 
 #define KonohaRuntime_setesp(kctx, newesp)  ((KonohaContextVar*)kctx)->esp = (newesp)
-#define klr_setmtdNC(sfpA, mtdO)   sfpA.mtdNC = mtdO
+#define klr_setmethodCallInfo(sfpA, mtdO)   sfpA.methodCallInfo = mtdO
 
 #define BEGIN_LOCAL(V,N) \
 	KonohaStack *V = kctx->esp, *esp_ = kctx->esp; (void)V;((KonohaContextVar*)kctx)->esp = esp_+N;\
@@ -1289,36 +1288,35 @@ struct _kSystem {
 
 // if you want to ignore (exception), use KonohaRuntime_tryCallMethod
 #define KonohaRuntime_callMethod(kctx, sfp) { \
-		(sfp[K_MTDIDX].mtdNC)->invokeMethodFunc(kctx, sfp);\
-		sfp[K_MTDIDX].mtdNC = NULL;\
+		(sfp[K_MTDIDX].methodCallInfo)->invokeMethodFunc(kctx, sfp);\
+		sfp[K_MTDIDX].methodCallInfo = NULL;\
 	} \
 
 #define KSetMethodCallStack(tsfp, UL, MTD, ARGC, DEFVAL) { \
-		tsfp[K_MTDIDX].mtdNC   = MTD; \
+		tsfp[K_MTDIDX].methodCallInfo   = MTD; \
 		tsfp[K_SHIFTIDX].shift = 0;\
 		KUnsafeFieldSet(tsfp[K_RTNIDX].asObject, ((kObject*)DEFVAL));\
-		tsfp[K_RTNIDX].uline   = UL;\
+		tsfp[K_RTNIDX].callerFileLine   = UL;\
 		KonohaRuntime_setesp(kctx, tsfp + ARGC + 1);\
 	} \
 
 #define KCALL(LSFP, RIX, MTD, ARGC, DEFVAL) { \
 		KonohaStack *tsfp = LSFP + RIX + K_CALLDELTA;\
-		tsfp[K_MTDIDX].mtdNC = MTD;\
-		tsfp[K_PCIDX].fname = __FILE__;\
+		tsfp[K_MTDIDX].methodCallInfo = MTD;\
 		tsfp[K_SHIFTIDX].shift = 0;\
 		KUnsafeFieldSet(tsfp[K_RTNIDX].asObject, ((kObject*)DEFVAL));\
-		tsfp[K_RTNIDX].uline = __LINE__;\
+		tsfp[K_RTNIDX].callerFileLine = 0;\
 		KonohaRuntime_setesp(kctx, tsfp + ARGC + 1);\
 		(MTD)->invokeMethodFunc(kctx, tsfp);\
-		tsfp[K_MTDIDX].mtdNC = NULL;\
+		tsfp[K_MTDIDX].methodCallInfo = NULL;\
 	} \
 
 
 #define KSELFCALL(TSFP, MTD) { \
 		KonohaStack *tsfp = TSFP;\
-		tsfp[K_MTDIDX].mtdNC = MTD;\
+		tsfp[K_MTDIDX].methodCallInfo = MTD;\
 		(MTD)->invokeMethodFunc(kctx, tsfp);\
-		tsfp[K_MTDIDX].mtdNC = NULL;\
+		tsfp[K_MTDIDX].methodCallInfo = NULL;\
 	} \
 
 /* ----------------------------------------------------------------------- */
