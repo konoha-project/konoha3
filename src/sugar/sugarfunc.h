@@ -592,10 +592,10 @@ static kExpr* kStmt_tyCheckVariableNULL(KonohaContext *kctx, kStmt *stmt, kExpr 
 		return new_ConstValueExpr(kctx, ct->typeId, UPCAST(fo));
 	}
 	if(symbol != SYM_NONAME) {
-		KUtilsKeyValue *kv = kNameSpace_getConstNULL(kctx, ns, symbol);
+		KKeyValue *kv = kNameSpace_getConstNULL(kctx, ns, symbol);
 		if(kv != NULL) {
 			if(SYMKEY_isBOXED(kv->key)) {
-				SUGAR kExpr_setConstValue(kctx, expr, kv->ty, kv->objectValue);
+				SUGAR kExpr_setConstValue(kctx, expr, kv->ty, kv->ObjectValue);
 			}
 			else {
 				SUGAR kExpr_setUnboxConstValue(kctx, expr, kv->ty, kv->unboxValue);

@@ -501,15 +501,15 @@ typedef struct kGammaVar                kGammaVar;
 
 /* ------------------------------------------------------------------------ */
 
-typedef struct KUtilsKeyValue {
+typedef struct {
 	ksymbol_t key;
 	ktype_t   ty;
 	union {
 		uintptr_t                unboxValue;  //unboxValue
-		kObject                 *objectValue;  //objectValue
-		kString                 *stringValue;  //stringValue
+		kObject                 *ObjectValue;  //objectValue
+		kString                 *StringValue;  //stringValue
 	};
-} KUtilsKeyValue;
+} KKeyValue;
 
 #define COMMON_BYTEARRAY \
 	size_t bytesize;\
@@ -528,10 +528,9 @@ typedef struct KGrowingArray {
 	union {
 		char              *bytebuf;
 		const struct KonohaClassVar      **classItems;
-		KUtilsKeyValue    *keyValueItems;
+		KKeyValue    *keyValueItems;
 		struct VirtualMachineInstruction   *codeItems;
 		kObject        **objectItems;
-		kObjectVar     **refhead;  // stack->ref
 	};
 	size_t bytemax;
 } KGrowingArray;
@@ -1229,7 +1228,7 @@ struct kFuncVar {
 /* ------------------------------------------------------------------------ */
 /* NameSpace */
 
-#define kNameSpace_sizeConstTable(ns)    (ns->constTable.bytesize / sizeof(KUtilsKeyValue))
+#define kNameSpace_sizeConstTable(ns)    (ns->constTable.bytesize / sizeof(KKeyValue))
 
 struct kNameSpaceVar {
 	KonohaObjectHeader h;
@@ -1428,7 +1427,7 @@ struct KonohaLibVar {
 	void            (*kObject_setObject)(KonohaContext*, kAbstractObject *, ksymbol_t, ktype_t, kAbstractObject *);
 	uintptr_t       (*kObject_getUnboxValue)(KonohaContext*, kAbstractObject *, ksymbol_t, uintptr_t);
 	void            (*kObject_setUnboxValue)(KonohaContext*, kAbstractObject *, ksymbol_t, ktype_t, uintptr_t);
-	void            (*kObject_protoEach)(KonohaContext*, kAbstractObject *, void *thunk, void (*f)(KonohaContext*, void *, KUtilsKeyValue *d));
+	void            (*kObject_protoEach)(KonohaContext*, kAbstractObject *, void *thunk, void (*f)(KonohaContext*, void *, KKeyValue *d));
 	void            (*kObject_removeKey)(KonohaContext*, kAbstractObject *, ksymbol_t);
 
 	kString*        (*new_kString)(KonohaContext*, const char *, size_t, int);

@@ -93,9 +93,9 @@ static inline void protomap_dispose(Kprotomap_t *m)
 	m->h.base.api->_dispose(m);
 }
 
-static inline KUtilsKeyValue *protomap_get(Kprotomap_t *m, unsigned hash)
+static inline KKeyValue *protomap_get(Kprotomap_t *m, unsigned hash)
 {
-	return (KUtilsKeyValue *) m->h.base.api->_get(m, hash);
+	return (KKeyValue *) m->h.base.api->_get(m, hash);
 }
 
 static inline map_status_t protomap_set(Kprotomap_t **m, unsigned hash, unsigned type, void *val)
@@ -108,9 +108,9 @@ static inline void protomap_remove(Kprotomap_t *m, unsigned hash)
 	return m->h.base.api->_remove(m, hash);
 }
 
-static inline KUtilsKeyValue *protomap_next(Kprotomap_t *m, protomap_iterator *itr)
+static inline KKeyValue *protomap_next(Kprotomap_t *m, protomap_iterator *itr)
 {
-	return (KUtilsKeyValue *) m->h.base.api->_next(m, itr);
+	return (KKeyValue *) m->h.base.api->_next(m, itr);
 }
 
 static inline unsigned protomap_size(Kprotomap_t *m)
