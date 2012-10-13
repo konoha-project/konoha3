@@ -594,7 +594,7 @@ static kExpr* kStmt_tyCheckVariableNULL(KonohaContext *kctx, kStmt *stmt, kExpr 
 	if(symbol != SYM_NONAME) {
 		KKeyValue *kv = kNameSpace_getConstNULL(kctx, ns, symbol);
 		if(kv != NULL) {
-			if(SYMKEY_isBOXED(kv->key)) {
+			if(Symbol_isBoxedKey(kv->key)) {
 				SUGAR kExpr_setConstValue(kctx, expr, kv->ty, kv->ObjectValue);
 			}
 			else {

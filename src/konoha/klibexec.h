@@ -396,7 +396,7 @@ void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o, KObjectVisitor *visi
 		KKeyValue *d;
 		BEGIN_REFTRACE(map_size);
 		while ((d = protomap_next((Kprotomap_t *)o->h.kvproto, &itr)) != NULL) {
-			if(SYMKEY_isBOXED(d->key)) {
+			if(Symbol_isBoxedKey(d->key)) {
 				KREFTRACEv(d->ObjectValue);
 			}
 		}

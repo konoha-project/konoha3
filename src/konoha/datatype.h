@@ -555,7 +555,7 @@ static void kNameSpace_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor 
 	size_t i, size = kNameSpace_sizeConstTable(ns);
 	BEGIN_REFTRACE(size + 5);
 	for(i = 0; i < size; i++) {
-		if(SYMKEY_isBOXED(ns->constTable.keyValueItems[i].key)) {
+		if(Symbol_isBoxedKey(ns->constTable.keyValueItems[i].key)) {
 			KREFTRACEv(ns->constTable.keyValueItems[i].ObjectValue);
 		}
 	}

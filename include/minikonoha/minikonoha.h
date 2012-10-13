@@ -434,7 +434,7 @@ typedef struct {
 
 #define SYMKEY_BOXED            KFLAG_H3
 #define SYMKEY_unbox(sym)       (sym & ~(SYMKEY_BOXED))
-#define SYMKEY_isBOXED(sym)     ((sym & SYMKEY_BOXED) == SYMKEY_BOXED)
+#define Symbol_isBoxedKey(sym)     ((sym & SYMKEY_BOXED) == SYMKEY_BOXED)
 
 #define FN_COERCION             KFLAG_H3
 #define FN_Coersion             FN_COERCION
