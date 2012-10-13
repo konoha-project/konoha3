@@ -245,7 +245,7 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 //	else {
 //		for (i = 0; i < pa_size; i++) {
 //			// [TODO] transfer array element to PyObject
-//			//PyList_Append(pa, i, a->objectItems[n]);
+//			//PyList_Append(pa, i, a->ObjectItems[n]);
 //		}
 //	}
 //	RETURN_PyObject(pa);

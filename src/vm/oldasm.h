@@ -42,7 +42,7 @@
 
 #define BasicBlock_codesize(BB)  ((BB)->codeTable.bytesize / sizeof(VirtualMachineInstruction))
 #define BBOP(BB)     (BB)->codeTable.codeItems
-#define GammaBuilderLabel(n)   (kBasicBlock*)(ctxcode->lstacks->objectItems[n])
+#define GammaBuilderLabel(n)   (kBasicBlock*)(ctxcode->lstacks->ObjectItems[n])
 
 #define ASM(T, ...) do {												\
 	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};		\

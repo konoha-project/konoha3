@@ -42,7 +42,7 @@ static void ArrayNULL_appendArray(KonohaContext *kctx, kObject *p, kArray **arra
 			KFieldSet(p, arrayRef[0], new_(Array, kArray_size(a)));
 		}
 		for(i = 0; i < kArray_size(a); i++) {
-			kObject *o = a->objectItems[i];
+			kObject *o = a->ObjectItems[i];
 			KLIB kArray_add(kctx, arrayRef[0], o);
 		}
 	}

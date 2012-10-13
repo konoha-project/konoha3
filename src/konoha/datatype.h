@@ -299,7 +299,7 @@ static void kArray_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vis
 		size_t i;
 		BEGIN_REFTRACE(kArray_size(a));
 		for(i = 0; i < kArray_size(a); i++) {
-			KREFTRACEv(a->objectItems[i]);
+			KREFTRACEv(a->ObjectItems[i]);
 		}
 		END_REFTRACE();
 	}
@@ -324,7 +324,7 @@ static void kArray_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowing
 	}
 	else {
 		for(i = 0; i < kArray_size(a); i++) {
-			kObject *o = a->objectItems[i];
+			kObject *o = a->ObjectItems[i];
 			kObject_writeToBuffer(kctx, o, (i>0)/*delim*/, wb, values, pos+1);
 		}
 	}
@@ -345,8 +345,8 @@ static void kArray_add(KonohaContext *kctx, kArray *o, kObject *value)
 	size_t asize = kArray_size(o);
 	struct _kAbstractArray *a = (struct _kAbstractArray*)o;
 	kArray_ensureMinimumSize(kctx, a, asize+1);
-	DBG_ASSERT(a->a.objectItems[asize] == NULL);
-	KFieldInit(a, a->a.objectItems[asize], value);
+	DBG_ASSERT(a->a.ObjectItems[asize] == NULL);
+	KFieldInit(a, a->a.ObjectItems[asize], value);
 	a->a.bytesize = (asize+1) * sizeof(void*);
 }
 
@@ -359,8 +359,8 @@ static void kArray_insert(KonohaContext *kctx, kArray *o, size_t n, kObject *v)
 	}
 	else {
 		kArray_ensureMinimumSize(kctx, a, asize+1);
-		memmove(a->a.objectItems+(n+1), a->a.objectItems+n, sizeof(kObject*) * (asize - n));
-		KFieldInit(a, a->a.objectItems[n], v);
+		memmove(a->a.ObjectItems+(n+1), a->a.ObjectItems+n, sizeof(kObject*) * (asize - n));
+		KFieldInit(a, a->a.ObjectItems[n], v);
 		a->a.bytesize = (asize+1) * sizeof(void*);
 	}
 }
@@ -372,7 +372,7 @@ static void kArray_clear(KonohaContext *kctx, kArray *o, size_t n)
 	struct _kAbstractArray *a = (struct _kAbstractArray*)o;
 	DBG_ASSERT(asize >= n);
 	if(asize > n) {
-		bzero(a->a.objectItems + n, sizeof(void*) * (asize - n));  // RCGC
+		bzero(a->a.ObjectItems + n, sizeof(void*) * (asize - n));  // RCGC
 		a->a.bytesize = (n) * sizeof(void*);
 	}
 }

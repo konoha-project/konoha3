@@ -107,7 +107,7 @@ static void Array_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 	size_t n = itr->current_pos;
 	itr->current_pos += 1;
 	DBG_ASSERT(n < kArray_size(itr->arrayList));
-	RETURN_(itr->arrayList->objectItems[n]);
+	RETURN_(itr->arrayList->ObjectItems[n]);
 }
 
 static void Array_setNextResultUnbox(KonohaContext *kctx, KonohaStack* sfp)

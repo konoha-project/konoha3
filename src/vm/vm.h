@@ -941,7 +941,7 @@ GOTO_PC(pc); \
 	kArray *a_ = Ra_(aidx);\
 	size_t n_ = klr_array_index(N, kArray_size(a_));\
 	klr_array_check(n_, kArray_size(a_));\
-	kObject *v_ = (a_)->objectItems[n_];\
+	kObject *v_ = (a_)->ObjectItems[n_];\
 	klr_mov(Ro_(cidx), v_);\
 } while (0)
 
@@ -951,7 +951,7 @@ GOTO_PC(pc); \
 	kArray *a_ = Ra_(aidx);\
 	size_t n_ = klr_array_index(N, kArray_size(a_));\
 	klr_array_check(n_, kArray_size(a_));\
-	klr_mov((a_)->objectItems[n_], Ro_(vidx));\
+	klr_mov((a_)->ObjectItems[n_], Ro_(vidx));\
 	klr_mov(Ro_(cidx), Ro_(vidx));\
 } while (0)
 

@@ -526,11 +526,11 @@ typedef struct {
 typedef struct KGrowingArray {
 	size_t bytesize;
 	union {
-		char              *bytebuf;
+		char                              *bytebuf;
 		const struct KonohaClassVar      **classItems;
-		KKeyValue    *keyValueItems;
-		struct VirtualMachineInstruction   *codeItems;
-		kObject        **objectItems;
+		KKeyValue                         *keyValueItems;
+		struct VirtualMachineInstruction  *codeItems;
+		kObject                          **ObjectItems;
 	};
 	size_t bytemax;
 } KGrowingArray;
@@ -1064,7 +1064,7 @@ struct kArrayVar {
 #ifndef K_USING_NOFLOAT
 		kfloat_t               *kfloatItems;
 #endif
-		kObject        **objectItems;
+		kObject        **ObjectItems;
 		kString        **stringItems;
 		kParam         **paramItems;
 		kMethod        **methodItems;

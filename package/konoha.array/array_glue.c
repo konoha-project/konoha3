@@ -41,7 +41,7 @@ static KMETHOD Array_get(KonohaContext *kctx, KonohaStack *sfp)
 		RETURNd_(a->unboxItems[n]);
 	}
 	else {
-		RETURN_(a->objectItems[n]);
+		RETURN_(a->ObjectItems[n]);
 	}
 }
 
@@ -54,7 +54,7 @@ static KMETHOD Array_set(KonohaContext *kctx, KonohaStack *sfp)
 		a->unboxItems[n] = sfp[2].unboxValue;
 	}
 	else {
-		KFieldSet(a, a->objectItems[n], sfp[2].asObject);
+		KFieldSet(a, a->ObjectItems[n], sfp[2].asObject);
 	}
 }
 
@@ -78,12 +78,12 @@ static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
 	size_t asize = (size_t)sfp[1].intValue;
 	a->bytemax = asize * sizeof(uintptr_t);
 	kArray_setsize(a, asize);
-	a->objectItems = (kObject**)KCALLOC(a->bytemax, 1);
+	a->ObjectItems = (kObject**)KCALLOC(a->bytemax, 1);
 	if (!kArray_isUnboxData(a)) {
 		size_t i;
 		kObject *null = KLIB Knull(kctx, CT_(O_p0(a)));
 		for(i = 0; i < asize; i++) {
-			KFieldSet(a, a->objectItems[i], null);
+			KFieldSet(a, a->ObjectItems[i], null);
 		}
 	}
 	RETURN_(a);
@@ -109,7 +109,7 @@ static void UnboxArray_add(KonohaContext *kctx, kArray *o, uintptr_t value)
 	size_t asize = kArray_size(o);
 	struct _kAbstractArray *a = (struct _kAbstractArray*)o;
 	UnboxArray_ensureMinimumSize(kctx, a, asize+1);
-	DBG_ASSERT(a->a.objectItems[asize] == NULL);
+	DBG_ASSERT(a->a.ObjectItems[asize] == NULL);
 	o->unboxItems[asize] = value;
 	kArray_setsize(o, (asize+1));
 }
@@ -123,7 +123,7 @@ static void UnboxArray_insert(KonohaContext *kctx, kArray *o, size_t n, uintptr_
 	}
 	else {
 		UnboxArray_ensureMinimumSize(kctx, a, asize+1);
-		DBG_ASSERT(a->a.objectItems[asize] == NULL);
+		DBG_ASSERT(a->a.ObjectItems[asize] == NULL);
 		memmove(o->unboxItems+(n+1), o->unboxItems+n, sizeof(uintptr_t) * (asize - n));
 		o->unboxItems[n] = v;
 		kArray_setsize(o, (asize+1));
@@ -178,9 +178,9 @@ static KMETHOD Array_pop(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	else {
 		struct _kAbstractArray *a2 = (struct _kAbstractArray*)a;
-		kObject *value = a2->a.objectItems[n];
+		kObject *value = a2->a.ObjectItems[n];
 		kObject** null = NULL;
-		KFieldInit(a2, a2->a.objectItems[n], null);
+		KFieldInit(a2, a2->a.ObjectItems[n], null);
 		a2->a.bytesize = n * sizeof(uintptr_t);
 		RETURN_(value);
 	}
@@ -196,7 +196,7 @@ static void kArray_removeAt(KonohaContext *kctx, kArray *a, size_t n)
 	}
 	else {
 		struct _kAbstractArray *a2 = (struct _kAbstractArray*)a;
-		memmove(a2->a.objectItems+n, a2->a.objectItems+(n+1), sizeof(kObject*) * (asize - n - 1));
+		memmove(a2->a.ObjectItems+n, a2->a.ObjectItems+(n+1), sizeof(kObject*) * (asize - n - 1));
 		a2->a.bytesize = (asize - 1) * sizeof(uintptr_t);
 	}
 }
@@ -212,7 +212,7 @@ static KMETHOD Array_removeAt(KonohaContext *kctx, KonohaStack *sfp)
 		RETURNd_(v);
 	}
 	else {
-		kObject *value = a2->a.objectItems[n];
+		kObject *value = a2->a.ObjectItems[n];
 		kArray_removeAt(kctx, a, n);
 		RETURN_(value);
 	}
@@ -233,9 +233,9 @@ static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	else {
 		for(i = 0; i != asize_half; ++i){
-			kObject *temp = a->objectItems[asize - 1 - i];
-			KFieldSet(a, a->objectItems[asize - 1 - i], a->objectItems[i]);
-			KFieldSet(a, a->objectItems[i], temp);
+			kObject *temp = a->ObjectItems[asize - 1 - i];
+			KFieldSet(a, a->ObjectItems[asize - 1 - i], a->ObjectItems[i]);
+			KFieldSet(a, a->ObjectItems[i], temp);
 		}
 	}
 	RETURN_(a);
@@ -266,13 +266,13 @@ static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	else {
 		for(i=0; i != asize; ++i) {
-			kObject *tmp  = a->objectItems[i];
+			kObject *tmp  = a->ObjectItems[i];
 			BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
 			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
 			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, tmp);
 			KCALL(lsfp, 0, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
 			END_LOCAL();
-			KFieldSet(ret, ret->objectItems[i], lsfp[0].asObject);
+			KFieldSet(ret, ret->ObjectItems[i], lsfp[0].asObject);
 		}
 	}
 	kArray_setsize(ret, asize);
@@ -309,7 +309,7 @@ static KMETHOD Array_inject(KonohaContext *kctx, KonohaStack *sfp)
 		for(i=0; i != asize; ++i) {
 			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
 			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, tmp);
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asObject, a->objectItems[i]);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asObject, a->ObjectItems[i]);
 			KCALL(lsfp, 0, f->mtd, 2, nulobj);
 			KUnsafeFieldSet(tmp, lsfp[0].asObject);
 		}
@@ -328,7 +328,7 @@ static KMETHOD Array_shift(KonohaContext *kctx, KonohaStack *sfp)
 		RETURNd_(v);
 	}
 	else {
-		kObject *value = a2->a.objectItems[0];
+		kObject *value = a2->a.ObjectItems[0];
 		kArray_removeAt(kctx, a, 0);
 		RETURN_(value);
 	}
@@ -346,7 +346,7 @@ static KMETHOD Array_concat(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	} else {
 		for (i = 0; i < kArray_size(a1); i++){
-			KLIB kArray_add(kctx, a0, a1->objectItems[i]);
+			KLIB kArray_add(kctx, a0, a1->ObjectItems[i]);
 		}
 	}
 	RETURN_(a0);
@@ -370,7 +370,7 @@ static KMETHOD Array_indexOf(KonohaContext *kctx, KonohaStack *sfp)
 		kObject *o = sfp[1].asObject;
 		for(i = 0; i < kArray_size(a); i++) {
 			KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplemented"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
-			if (O_ct(o)->compareObject(a->objectItems[i], o) == 0) {
+			if (O_ct(o)->compareObject(a->ObjectItems[i], o) == 0) {
 				res = i; break;
 			}
 		}
@@ -396,7 +396,7 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 		kObject *o = sfp[1].asObject;
 		for(i = kArray_size(a)- 1; i != 0; i--) {
 			KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplemented"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
-			if(O_ct(o)->compareObject(a->objectItems[i], o) == 0) {
+			if(O_ct(o)->compareObject(a->ObjectItems[i], o) == 0) {
 				break;
 			}
 		}
@@ -427,14 +427,14 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 //		kObject *obj;
 //		BEGIN_LOCAL(lsfp, 1);
 //		for (i = 0; i < kArray_size(a) - 1; i++) {
-//			obj = a->objectItems[i];
+//			obj = a->ObjectItems[i];
 //			DBG_ASSERT(O_ct(obj)->p);
 //			// before call system.p, push variables
 //			KUnsafeFieldSet(lsfp[0].asObject, obj);
 //			O_ct(obj)->p(kctx, lsfp, 0, &wb, 0);
 //			KLIB Kwb_printf(kctx, &wb, ",");
 //		}
-//		obj = a->objectItems[i];
+//		obj = a->ObjectItems[i];
 //		KUnsafeFieldSet(lsfp[0].asObject, obj);
 //		O_ct(obj)->p(kctx, lsfp, 0, &wb, 0);
 //		END_LOCAL();
@@ -453,12 +453,12 @@ static KMETHOD Array_new(KonohaContext *kctx, KonohaStack *sfp)
 	size_t asize = (size_t)sfp[1].intValue;
 	a->bytemax = asize * sizeof(uintptr_t);
 	kArray_setsize(a, 0);
-	a->objectItems = (kObject**)KCALLOC(a->bytemax, 1);
+	a->ObjectItems = (kObject**)KCALLOC(a->bytemax, 1);
 	if (!kArray_isUnboxData(a)) {
 		size_t i;
 		kObject *null = KLIB Knull(kctx, CT_(O_p0(a)));
 		for(i = 0; i < asize; i++) {
-			KFieldSet(a, a->objectItems[i], null);
+			KFieldSet(a, a->ObjectItems[i], null);
 		}
 	}
 	RETURN_(a);

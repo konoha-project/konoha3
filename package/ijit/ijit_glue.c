@@ -92,13 +92,13 @@ static void check_stack_size(KonohaContext *kctx, kArray *stack, int n)
 static void set_value(KonohaContext *kctx, int index, kObject *o)
 {
 	kArray  *g = kmodjit->global_value;
-	KFieldSet(g, g->objectItems[index], o);
+	KFieldSet(g, g->ObjectItems[index], o);
 }
 
 static kObject *get_value(KonohaContext *kctx, int index)
 {
 	kArray  *g = kmodjit->global_value;
-	return g->objectItems[index];
+	return g->ObjectItems[index];
 }
 
 //## void System.setUline(int uline);
@@ -128,10 +128,10 @@ static KMETHOD Expr_getSingle(KonohaContext *kctx, KonohaStack *sfp)
 
 static kArray *get_stack(KonohaContext *kctx, kArray *g)
 {
-	if (!g->objectItems[0]) {
-		KFieldSet(g, g->objectItems[0], ((kObject*)new_(Array, 0)));
+	if (!g->ObjectItems[0]) {
+		KFieldSet(g, g->ObjectItems[0], ((kObject*)new_(Array, 0)));
 	}
-	return (kArray*)g->objectItems[0];
+	return (kArray*)g->ObjectItems[0];
 }
 
 //## Value System.getValue(int index);
@@ -140,7 +140,7 @@ static KMETHOD System_getValue(KonohaContext *kctx, KonohaStack *sfp)
 	kArray *g = kmodjit->global_value;
 	kArray *stack = get_stack(kctx, g);
 	int index = sfp[1].intValue;
-	RETURN_(stack->objectItems[index]);
+	RETURN_(stack->ObjectItems[index]);
 }
 
 //## void  System.setValue(int index, Value v);
@@ -151,7 +151,7 @@ static KMETHOD System_setValue(KonohaContext *kctx, KonohaStack *sfp)
 	int index = sfp[1].intValue;
 	check_stack_size(kctx, stack, index);
 	kObject *o = sfp[2].asObject;
-	KFieldSet(stack, stack->objectItems[index], o);
+	KFieldSet(stack, stack->ObjectItems[index], o);
 	RETURNvoid_();
 }
 
@@ -167,7 +167,7 @@ static KMETHOD System_clearValue(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD System_getModule(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray  *g = kmodjit->global_value;
-	kObject *o = g->objectItems[1] ? g->objectItems[1] : K_NULL;
+	kObject *o = g->ObjectItems[1] ? g->ObjectItems[1] : K_NULL;
 	RETURN_(o);
 }
 
@@ -524,7 +524,7 @@ static KMETHOD Array_getO(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
 	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].callerFileLine);
-	RETURN_(a->objectItems[n]);
+	RETURN_(a->ObjectItems[n]);
 }
 // --------------------------------------------------------------------------
 //## void Array.setO(int n, Object o);
@@ -532,7 +532,7 @@ static KMETHOD Array_setO(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
 	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].callerFileLine);
-	KFieldSet(a, a->objectItems[n], sfp[2].asObject);
+	KFieldSet(a, a->ObjectItems[n], sfp[2].asObject);
 	RETURNvoid_();
 }
 
@@ -546,7 +546,7 @@ static KMETHOD Array_erase(KonohaContext *kctx, KonohaStack *sfp)
 	kArray *dst = new_(Array, (asize-1));
 	for (i = 0; i < asize; ++i) {
 		if (i != n) {
-			KFieldSet(dst, dst->objectItems[j], src->objectItems[i]);
+			KFieldSet(dst, dst->ObjectItems[j], src->ObjectItems[i]);
 			++j;
 		}
 	}

@@ -231,7 +231,7 @@ static kbool_t kBlock_tyCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
 {
 	int i, result = true, lvarsize = gma->genv->localScope.varsize;
 	for(i = 0; i < kArray_size(bk->stmtList); i++) {
-		kStmt *stmt = (kStmt*)bk->stmtList->objectItems[i];
+		kStmt *stmt = (kStmt*)bk->stmtList->ObjectItems[i];
 		if(Stmt_isDone(stmt)) continue;
 		KdumpStmt(kctx, stmt);
 		if(Stmt_isERR(stmt) || !SugarSyntax_tyCheckStmt(kctx, stmt->syn, stmt, gma)) {

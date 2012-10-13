@@ -259,7 +259,7 @@ static kArray* kArray_slice(KonohaContext *kctx, kArray *a, int beginIdx, int en
 	kArray *newa = new_(Array, endIdx - beginIdx);
 	int i;
 	for(i = beginIdx; i < endIdx; i++) {
-		KLIB kArray_add(kctx, newa, a->objectItems[i]);
+		KLIB kArray_add(kctx, newa, a->ObjectItems[i]);
 	}
 	return newa;
 }

@@ -139,7 +139,7 @@ static KMETHOD Json_getArray(KonohaContext *kctx, KonohaStack *sfp)
 		RETURN_(KNULL(Array));
 	}
 	kArrayVar* a = (kArrayVar*)KLIB new_kObject(kctx, CT_Array, 0);
-	a->objectItems= (kObject**)ja;
+	a->ObjectItems= (kObject**)ja;
 	RETURN_(a);
 }
 
@@ -227,7 +227,7 @@ static KMETHOD Json_setArray(KonohaContext *kctx, KonohaStack *sfp)
 	CHECK_JSON(obj, RETURN_DefaultObjectValue());
 	const char *key = S_text(sfp[1].asString);
 	kArrayVar* a = (kArrayVar*)sfp[2].asArray;
-	json_t *ja = (json_t*)a->objectItems;
+	json_t *ja = (json_t*)a->ObjectItems;
 	json_object_set(obj, key, ja);
 	RETURNvoid_();
 }
@@ -354,7 +354,7 @@ static KMETHOD JsonArray_newArray(KonohaContext *kctx, KonohaStack *sfp)
 	a->bytemax = asize * sizeof(void*);
 	kArray_setsize((kArray*)a, asize);
 	//a->list = (kObject**)KCALLOC(a->bytemax, 1);
-	a->objectItems = (kObject**)json_array();
+	a->ObjectItems = (kObject**)json_array();
 	RETURN_(a);
 }
 
@@ -362,7 +362,7 @@ static KMETHOD JsonArray_newArray(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD JsonArray_add(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
-	json_t* ja = (json_t*)a->objectItems;
+	json_t* ja = (json_t*)a->ObjectItems;
 	if (!json_is_array(ja)) {
 		DBG_P("[ERROR]: Object is not Json Array.");
 		//KLIB KonohaRuntime_raise(kctx, 1, sfp, pline, msg);
@@ -378,7 +378,7 @@ static KMETHOD JsonArray_add(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD JsonArray_getSize(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	const json_t *ja = (json_t*)a->objectItems;
+	const json_t *ja = (json_t*)a->ObjectItems;
 	RETURNi_(json_array_size(ja));
 }
 
@@ -386,7 +386,7 @@ static KMETHOD JsonArray_getSize(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD JsonArray_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	json_t *ja = (json_t*)a->objectItems;
+	json_t *ja = (json_t*)a->ObjectItems;
 	struct _kJson *json = (struct _kJson*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
 	json->obj = json_array_get(ja, sfp[1].intValue);
 	RETURN_(json);
