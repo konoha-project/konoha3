@@ -2,5 +2,5 @@
 
 import("sugar");
 
-assert(definedStatement("+"));
+assert(definedBinaryOperator("+"));
 

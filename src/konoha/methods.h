@@ -36,6 +36,7 @@ static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 	KUtilsWriteBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	if(TY_isUnbox(O_typeId(sfp[0].asObject))) {
+		//sfp[0].unboxValue = (sfp[0].asNumber)->unboxValue;
 		O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb);
 	}
 	else {

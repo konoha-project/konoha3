@@ -46,7 +46,7 @@ static ksymbol_t StringToKsymbol(KonohaContext *kctx, kString *key)
 static void kSymbol_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
 {
 	ksymbol_t symbol = (ksymbol_t)v[pos].unboxValue;
-	DBG_P("%s%s", PSYM_t(symbol));
+	DBG_P(">>> symbol=%d, %s%s", symbol, PSYM_t(symbol));
 	KLIB Kwb_printf(kctx, wb, "%s%s", PSYM_t(symbol));
 }
 
@@ -54,6 +54,7 @@ static void kSymbol_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteB
 static KMETHOD String_toSymbol(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t keyword = StringToKsymbol(kctx, sfp[0].asString);
+	DBG_P(">>> symbol=%d, %s%s", keyword, PSYM_t(keyword));
 	RETURNi_(keyword);
 }
 
@@ -148,7 +149,6 @@ static void loadNameSpaceMethodData(KonohaContext *kctx, kNameSpace *ns, int TY_
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 }
-
 
 /* Token */
 

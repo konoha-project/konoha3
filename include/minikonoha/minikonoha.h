@@ -700,11 +700,12 @@ struct KonohaModuleContext {
 	const char  *fname
 
 #define K_FRAME_MEMBER \
-	kObject    *o;\
+	kObject     *o;\
 	kObject     *asObject;\
 	kObjectVar  *asObjectVar; \
 	kInt        *i; \
 	kString     *s; \
+	const struct kNumberVar     *asNumber;\
 	kString     *asString;\
 	kArray      *asArray;\
 	kMethod     *asMethod;\
