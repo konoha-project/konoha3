@@ -157,7 +157,7 @@ static KMETHOD Request_logError(KonohaContext *kctx, KonohaStack *sfp)
 	kRequest *self = (kRequest *) sfp[0].asObject;
 	int level = sfp[1].intValue;
 	apr_status_t status = (apr_status_t)sfp[2].intValue;
-	const char *msg = S_text(sfp[3].s);
+	const char *msg = S_text(sfp[3].asString);
 	ap_log_rerror(APLOG_MARK, level, status, self->r, msg, NULL);
 	RETURNvoid_();
 }
@@ -179,7 +179,7 @@ static KMETHOD AprTable_add(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kAprTable *self = (kAprTable *) sfp[0].asObject;
 	const char *key = S_text(sfp[1].asString);
-	const char *val = S_text(sfp[2].s);
+	const char *val = S_text(sfp[2].asString);
 	apr_table_add(self->tbl, key, val);
 	RETURNvoid_();
 }
@@ -188,7 +188,7 @@ static KMETHOD AprTable_set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kAprTable *self = (kAprTable *) sfp[0].asObject;
 	const char *key = S_text(sfp[1].asString);
-	const char *val = S_text(sfp[2].s);
+	const char *val = S_text(sfp[2].asString);
 	apr_table_set(self->tbl, key, val);
 	RETURNvoid_();
 }

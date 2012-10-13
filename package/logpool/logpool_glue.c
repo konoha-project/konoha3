@@ -210,9 +210,9 @@ static KMETHOD ValFilter_create(KonohaContext *kctx, KonohaStack *sfp)
 	kRawPtr *ret = (kRawPtr *) KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), (uintptr_t)p);
 	p->klen = S_size(sfp[1].asString);
 	p->key  = copy_string(kctx, sfp[1].asString);
-	p->vlen = S_size(sfp[2].s);
-	p->val  = copy_string(kctx, sfp[2].s);
-	if (strncmp(S_text(sfp[3].s), "eq", 2) == 0) {
+	p->vlen = S_size(sfp[2].asString);
+	p->val  = copy_string(kctx, sfp[2].asString);
+	if (strncmp(S_text(sfp[3].asString), "eq", 2) == 0) {
 		p->val_cmp = val_eq;
 	} else {
 		assert(0 && "TODO");
@@ -226,7 +226,7 @@ static KMETHOD KeyFilter_create(KonohaContext *kctx, KonohaStack *sfp)
 	struct pool_plugin_key_filter *p = POOL_PLUGIN_CLONE(pool_plugin_key_filter);
 	kRawPtr *ret = (kRawPtr *) KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), (uintptr_t)p);
 	p->klen = S_size(sfp[1].asString);
-	p->key  = copy_string(kctx, sfp[2].s);
+	p->key  = copy_string(kctx, sfp[2].asString);
 	RETURN_(ret);
 }
 
@@ -236,7 +236,7 @@ static KMETHOD React_create(KonohaContext *kctx, KonohaStack *sfp)
 	struct pool_plugin_react *p = POOL_PLUGIN_CLONE(pool_plugin_react);
 	kRawPtr *ret = (kRawPtr *) KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), (uintptr_t)p);
 	p->conf.traceName = copy_string(kctx, sfp[1].asString);
-	p->conf.key       = copy_string(kctx, sfp[2].s);
+	p->conf.key       = copy_string(kctx, sfp[2].asString);
 	RETURN_(ret);
 }
 

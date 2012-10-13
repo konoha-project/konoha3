@@ -33,15 +33,15 @@ extern "C"{
 
 #define OB_TYPE(obj) (((PyObject*)obj->self)->ob_type)
 
-typedef const struct _kPyObject kPyObject;
-struct _kPyObject {
+typedef const struct kPyObjectVar kPyObject;
+struct kPyObjectVar {
 	KonohaObjectHeader h;
 	PyObject *self;  // don't set NULL
 };
 
 static void PyObject_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct _kPyObject *pyo = (struct _kPyObject*)o;
+	struct kPyObjectVar *pyo = (struct kPyObjectVar*)o;
 	if(conf == NULL) {
 		pyo->self = Py_None;
 		Py_INCREF(Py_None);
@@ -66,7 +66,7 @@ static void PyObject_free(KonohaContext *kctx, kObject *o)
 	// so, it is not free safe
 	// it is not better using NULL
 	// make struct null stab (or Py_None?).
-	struct _kPyObject *pyo = (struct _kPyObject*)o;
+	struct kPyObjectVar *pyo = (struct kPyObjectVar*)o;
 	//OB_TYPE(pyo)->tp_free(pyo->self);
 	Py_DECREF(pyo->self);
 	Py_INCREF(Py_None);
@@ -453,7 +453,7 @@ static KMETHOD PyObject_(KonohaContext *kctx, KonohaStack *sfp)
 	//
 	int argc = kctx->esp - sfp - 2;   // believe me
 	kPyObject *pmod = (kPyObject*)sfp[0].asObject;
-	PyObject  *pFunc = PyObject_GetAttrString(pmod->self, S_text(kctx->esp[-1].s));
+	PyObject  *pFunc = PyObject_GetAttrString(pmod->self, S_text(kctx->esp[-1].asString));
 	PyObject  *pArgs = NULL, *pValue = NULL;
 	if(pFunc != NULL) {
 		if(PyCallable_Check(pFunc)) {

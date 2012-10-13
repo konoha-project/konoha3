@@ -207,9 +207,9 @@ static KMETHOD ValFilter_create(CTX, ksfp_t *sfp _RIX)
 	kRawPtr *ret = (kRawPtr *) new_kObject(O_ct(sfp[K_RTNIDX].asObject), p);
 	p->klen = S_size(sfp[1].asString);
 	p->key  = copy_string(_ctx, sfp[1].asString);
-	p->vlen = S_size(sfp[2].s);
-	p->val  = copy_string(_ctx, sfp[2].s);
-	if (strncmp(S_text(sfp[3].s), "eq", 2) == 0) {
+	p->vlen = S_size(sfp[2].asString);
+	p->val  = copy_string(_ctx, sfp[2].asString);
+	if (strncmp(S_text(sfp[3].asString), "eq", 2) == 0) {
 		p->val_cmp = val_eq;
 	} else {
 		assert(0 && "TODO");
@@ -223,7 +223,7 @@ static KMETHOD KeyFilter_create(CTX, ksfp_t *sfp _RIX)
 	struct pool_plugin_key_filter *p = POOL_PLUGIN_CLONE(pool_plugin_key_filter);
 	kRawPtr *ret = (kRawPtr *) new_kObject(O_ct(sfp[K_RTNIDX].asObject), p);
 	p->klen = S_size(sfp[1].asString);
-	p->key  = copy_string(_ctx, sfp[2].s);
+	p->key  = copy_string(_ctx, sfp[2].asString);
 	RETURN_(ret);
 }
 
@@ -233,7 +233,7 @@ static KMETHOD React_create(CTX, ksfp_t *sfp _RIX)
 	struct pool_plugin_react *p = POOL_PLUGIN_CLONE(pool_plugin_react);
 	kRawPtr *ret = (kRawPtr *) new_kObject(O_ct(sfp[K_RTNIDX].asObject), p);
 	p->conf.traceName = copy_string(_ctx, sfp[1].asString);
-	p->conf.key       = copy_string(_ctx, sfp[2].s);
+	p->conf.key       = copy_string(_ctx, sfp[2].asString);
 	RETURN_(ret);
 }
 
