@@ -717,7 +717,7 @@ struct KonohaModuleContext {
 	intptr_t    shift;  \
 	struct VirtualMachineInstruction  *pc; \
 	kMethod     *methodCallInfo; \
-	uintptr_t    callerFileLine;
+	uintptr_t    callerFileLine
 
 #define K_FRAME_MEMBER \
 	kObject     *asObject;\
@@ -1026,7 +1026,7 @@ struct kIntVar /* extends kNumber */ {
 typedef enum {
 	VirtualType_Text                  =   TY_void,    /*special use for const char*/
 	VirtualType_KonohaClass           =   TY_var,     /*special use for KonohaClass*/
-	VirtualType_StaticMethod          =   TY_0,       /*special use for Method*/
+	VirtualType_StaticMethod          =   TY_0        /*special use for Method*/
 } VirtualType;
 
 #define IS_String(o)              (O_typeId(o) == TY_String)
