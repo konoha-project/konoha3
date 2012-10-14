@@ -37,18 +37,18 @@ extern "C"{
 // Bytes_init
 static void Bytes_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	if ((size_t)conf <= 0) return;
+	if((size_t)conf <= 0) return;
 	struct kBytesVar *ba = (struct kBytesVar*)o;
 	ba->byteptr = NULL;
 	ba->byteptr = (const char *)KCALLOC((size_t)conf, 1);
-	if (ba->byteptr != NULL)	ba->bytesize = (size_t)conf;
+	if(ba->byteptr != NULL)	ba->bytesize = (size_t)conf;
 	else ba->bytesize = 0;
 }
 
 static void Bytes_free(KonohaContext *kctx, kObject *o)
 {
 	struct kBytesVar *ba = (struct kBytesVar*)o;
-	if (ba->byteptr != NULL) {
+	if(ba->byteptr != NULL) {
 		KFREE(ba->buf, ba->bytesize);
 		ba->byteptr = NULL;
 		ba->bytesize = 0;
@@ -102,7 +102,7 @@ static void kmodiconv_free(KonohaContext *kctx, struct KonohaModule *baseh)
 #define CONV_BUFSIZE 4096 // 4K
 #define MAX_STORE_BUFSIZE (CONV_BUFSIZE * 1024)// 4M
 
-static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromCoding, const char *toCoding)
+static kBytes* Convert_newBytes(KonohaContext *kctx, kArray *gcstack, kBytes *fromBa, const char *fromCoding, const char *toCoding)
 {
 	kiconv_t conv;
 	KGrowingBuffer wb;
@@ -117,12 +117,12 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 	outBytesLeft = CONV_BUFSIZE;
 	DBG_P("from='%s' inBytesLeft=%d, to='%s' outBytesLeft=%d", fromCoding, inBytesLeft, toCoding, outBytesLeft);
 
-	if (strncmp(fromCoding, toCoding, strlen(fromCoding)) == 0) {
+	if(strncmp(fromCoding, toCoding, strlen(fromCoding)) == 0) {
 		// no need to convert.
 		return fromBa;
 	}
 	conv = (kiconv_t)PLATAPI iconv_open_i(toCoding, fromCoding);
-	if (conv == (kiconv_t)(-1)) {
+	if(conv == (kiconv_t)(-1)) {
 		OLDTRACE_SWITCH_TO_KTrace(_UserInputFault,
 				LogText("@","iconv_open"),
 				LogText("from", fromCoding),
@@ -136,7 +136,7 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	while (inBytesLeft > 0 && iconv_ret == -1) {
 		iconv_ret = PLATAPI iconv_i((uintptr_t)conv, inbuf, &inBytesLeft, outbuf, &outBytesLeft);
-		if (iconv_ret == -1 && errno == E2BIG) {
+		if(iconv_ret == -1 && errno == E2BIG) {
 			// input is too big.
 			processedSize = CONV_BUFSIZE - outBytesLeft;
 			processedTotalSize += processedSize;
@@ -146,7 +146,7 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 //			outbuf = &presentPtrTo;
 			memset(convBuf, '\0', CONV_BUFSIZE);
 			outBytesLeft = CONV_BUFSIZE;
-		} else if (iconv_ret == -1) {
+		} else if(iconv_ret == -1) {
 			OLDTRACE_SWITCH_TO_KTrace(_DataFault,
 				LogText("@","iconv"),
 				LogText("from", "UTF-8"),
@@ -154,7 +154,7 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 				LogText("error", strerror(errno))
 			);
 			KLIB Kwb_free(&wb);
-			return (kBytes*)(CT_Bytes->defaultValueAsNull);
+			return (kBytes*)(CT_Bytes->defaultNullValue_OnGlobalConstList);
 
 		} else {
 			// finished. iconv_ret != -1
@@ -167,11 +167,11 @@ static kBytes* convFromTo(KonohaContext *kctx, kBytes *fromBa, const char *fromC
 	} /* end of converting loop */
 	PLATAPI iconv_close_i((uintptr_t)conv);
 
-	const char *KGrowingBufferopChar = KLIB Kwb_top(kctx, &wb, 1);
-	struct kBytesVar *toBa = (struct kBytesVar*)KLIB new_kObject(kctx, CT_Bytes, processedTotalSize); // ensure bytes ends with Zero
-	memcpy(toBa->buf, KGrowingBufferopChar, processedTotalSize); // including NUL terminate by ensuredZeo
+	const char *bufferTopChar = KLIB Kwb_top(kctx, &wb, 1);
+	struct kBytesVar *targetBytes = (struct kBytesVar*)KLIB new_kObjectDontUseThis(kctx, CT_Bytes, processedTotalSize, gcstack); // ensure bytes ends with Zero
+	memcpy(targetBytes->buf, bufferTopChar, processedTotalSize); // including NUL terminate by ensuredZeo
 	KLIB Kwb_free(&wb);
-	return toBa;
+	return targetBytes;
 }
 
 //## @Const method Bytes Bytes.encodeTo(String toEncoding);
@@ -180,60 +180,61 @@ static KMETHOD Bytes_encodeTo(KonohaContext *kctx, KonohaStack *sfp)
 	kBytes *ba = sfp[0].asBytes;
 	kString *toCoding = sfp[1].asString;
 
-	RETURN_(convFromTo(kctx, ba, "UTF-8", S_text(toCoding)));
+	RETURN_(Convert_newBytes(kctx, OnStack, ba, "UTF-8", S_text(toCoding)));
 }
 
-static kString *toString(KonohaContext *kctx, kBytes *ba)
+static kString *Convert_newString(KonohaContext *kctx, kArray *gcstack, kBytes *ba)
 {
-	if (ba->buf == NULL || ba->bytesize == 0) {
+	if(ba->buf == NULL || ba->bytesize == 0) {
 		return TS_EMPTY;
 	} else {
 		// At this point, we assuem 'ba' is null terminated.
-		return KLIB new_kString(kctx, ba->buf, ba->bytesize-1, 0);
+		return KLIB new_kString(kctx, gcstack, ba->buf, ba->bytesize-1, 0);
 	}
 }
 
 //## @Const method String Bytes.decodeFrom(String fromEncoding);
 static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kBytes* fromBa = sfp[0].asBytes;
-	kString*fromCoding = sfp[1].asString;
-	kBytes *toBa = NULL;
-	DBG_P("size=%d, '%s'", fromBa->bytesize, fromBa->buf);
-	DBG_P("fromCoding:%p, %s", fromCoding, S_text(fromCoding));
-	if (fromBa->bytesize == 0) {
+	kBytes* sourceBytes = sfp[0].asBytes;
+	kString*fromCharset = sfp[1].asString;
+	kBytes *targetBytes = NULL;
+//	DBG_P("size=%d, '%s'", sourceBytes->bytesize, sourceBytes->buf);
+//	DBG_P("fromCharset:%p, %s", fromCharset, S_text(fromCharset));
+	if(sourceBytes->bytesize == 0) {
 		RETURN_(KNULL(String));
 	}
-	if (fromCoding != (kString*)(CT_String->defaultValueAsNull)) {
-		toBa = convFromTo(kctx, fromBa, S_text(fromCoding), "UTF-8");
+	INIT_GCSTACK();
+	if(fromCharset != (kString*)(CT_String->defaultNullValue_OnGlobalConstList)) {
+		targetBytes = Convert_newBytes(kctx, _GcStack, sourceBytes, S_text(fromCharset), "UTF-8");
 	} else {
 		// conv from default encoding
-		toBa = convFromTo(kctx, fromBa, PLATAPI getSystemCharset(), "UTF-8");
+		targetBytes = Convert_newBytes(kctx, _GcStack, sourceBytes, PLATAPI getSystemCharset(), "UTF-8");
 	}
-	DBG_P("size=%d, '%s'", toBa->bytesize, toBa->buf);
-	RETURN_(toString(kctx, toBa));
+//	DBG_P("size=%d, '%s'", targetBytes->bytesize, targetBytes->buf);
+	KReturnWithRESET_GCSTACK(Convert_newString(kctx, _GcStack, targetBytes));
 }
 
 //## @Const method Bytes String.asBytes();
-static KMETHOD String_asBytes(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD String_toBytes(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString* s = sfp[0].asString;
 	size_t size = S_size(s);
-	kBytes* ba = new_(Bytes, (size>0)?size+1:0);
-	if (size > 0) {
+	kBytes* ba = new_(Bytes, (size>0)?size+1:0, OnStack);
+	if(size > 0) {
 		memcpy(ba->buf, S_text(s), size+1); // including NUL char
 		DBG_ASSERT(ba->buf[S_size(s)] == '\0');
 	}
 	RETURN_(ba);
 }
 
-//## @Const method String Bytes.asString();
-static KMETHOD Bytes_asString(KonohaContext *kctx, KonohaStack *sfp)
+//## @Const method String Bytes.toString();
+static KMETHOD Bytes_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *from = sfp[0].asBytes;
-	kBytes *to = convFromTo(kctx, from, PLATAPI getSystemCharset(), "UTF-8");
-
-	RETURN_(toString(kctx, to));
+	INIT_GCSTACK();
+	kBytes *to = Convert_newBytes(kctx, _GcStack, from, PLATAPI getSystemCharset(), "UTF-8");
+	KReturnWithRESET_GCSTACK(Convert_newString(kctx, _GcStack, to));
 }
 
 //## Int Bytes.get(Int n);
@@ -272,7 +273,7 @@ static KMETHOD Bytes_getSize(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Bytes_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), sfp[1].intValue));
+	RETURN_(KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), sfp[1].intValue, OnStack));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -305,8 +306,8 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	int FN_c = FN_("c");
 	int FN_size = FN_("size");
 	intptr_t methoddata[] = {
-		_Public|_Im|_Coercion, _F(String_asBytes), TY_Bytes,  TY_String, MN_("asBytes"),   0,
-		_Public|_Const|_Im|_Coercion, _F(Bytes_asString), TY_String, TY_Bytes,  MN_("asString"),  0,
+		_Public|_Im|_Coercion, _F(String_toBytes), TY_Bytes,  TY_String, MN_("toBytes"),   0,
+		_Public|_Const|_Im|_Coercion, _F(Bytes_toString), TY_String, TY_Bytes,  MN_("toString"),  0,
 		_Public|_Const,     _F(Bytes_encodeTo),   TY_Bytes,  TY_Bytes,  MN_("encodeTo"),    1, TY_String, FN_encoding,
 		_Public|_Const,     _F(Bytes_decodeFrom),   TY_String, TY_Bytes,  MN_("decodeFrom"),    1, TY_String, FN_encoding,
 		_Public|_Const|_Im,     _F(Bytes_get), TY_int, TY_Bytes, MN_("get"), 1, TY_int, FN_x,
@@ -336,7 +337,7 @@ static KMETHOD TokenFunc_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		if(ch == '\'' && prev != '\\') {
 			if(IS_NOTNULL(tk)) {
-				KFieldSet(tk, tk->text, KLIB new_kString(kctx, source + 1, (pos-2), 0));
+				KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, source + 1, (pos-2), 0));
 				tk->unresolvedTokenType = SYM_("$SingleQuotedChar");
 			}
 			RETURNi_(pos);
@@ -355,7 +356,7 @@ static KMETHOD TypeCheck_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 	kToken *tk = expr->termToken;
 	kString *s = tk->text;
 	DBG_P("string:'%s'", S_text(s));
-	if (S_size(s) == 1) {
+	if(S_size(s) == 1) {
 		int ch = S_text(s)[0];
 		RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_int, ch));
 	} else {
@@ -364,18 +365,18 @@ static KMETHOD TypeCheck_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(K_NULLEXPR);
 }
 
-static kbool_t bytes_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t bytes_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("$SingleQuotedChar"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_SingleQuotedChar, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
-	SUGAR kNameSpace_setTokenFunc(kctx, ns, SYM_("$SingleQuotedChar"), KonohaChar_Quote, new_SugarFunc(TokenFunc_SingleQuotedChar));
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
+	SUGAR kNameSpace_setTokenFunc(kctx, ns, SYM_("$SingleQuotedChar"), KonohaChar_Quote, new_SugarFunc(ns, TokenFunc_SingleQuotedChar));
 	return true;
 }
 
-static kbool_t bytes_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t bytes_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

@@ -84,7 +84,7 @@ static kbool_t isCommand(const char *cmd)
 	confstr(_CS_PATH, buf, bufsize);
 	char *pos, *p = buf;
 	while(pos < buf + bufsize) {
-		if ((pos = strchr(p, ':')) == NULL) {
+		if((pos = strchr(p, ':')) == NULL) {
 			if(checkPath(p, cmd)) return true;
 			break;
 		}
@@ -108,14 +108,14 @@ static kString *splitWhiteSpace(KonohaContext *kctx, kTokenArray *tokenList)
 	else {
 		/* Multiple tokens was passed (e.g. "dsh ls -la;"). */
 		for(i = 0; i < kArray_size(tokenList); i++) {
-			kToken *token = tokenList->tokenItems[i];
+			kToken *token = tokenList->TokenItems[i];
 			if(token->resolvedSymbol == SYM_("|")) {
 				// TODO: PIPE
 			}
 			else if(token->resolvedSymbol == SYM_("$")) {
 				// TODO: parse dollar token ($token)
 				size_t start = i;
-				while(i < kArray_size(tokenList) && !kToken_is(BeforeWhiteSpace, tokenList->tokenItems[i])) {
+				while(i < kArray_size(tokenList) && !kToken_is(BeforeWhiteSpace, tokenList->TokenItems[i])) {
 					++i;
 				}
 				const char *dollarstr = expandDollarToken(kctx, tokenList, start, i-1);
@@ -135,7 +135,7 @@ static kString *splitWhiteSpace(KonohaContext *kctx, kTokenArray *tokenList)
 			}
 		}
 	}
-	kString *cmd = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), 0);
+	kString *cmd = KLIB new_kString(kctx, GcUnsafe, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), 0);
 	KLIB Kwb_free(&wb);
 	return cmd;
 }
@@ -159,7 +159,7 @@ static KMETHOD Statement_dsh(KonohaContext *kctx, KonohaStack *sfp)
 
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	SugarSyntaxVar *syn = (SugarSyntaxVar*) SYN_(ns, KW_ExprMethodCall);
-	kTokenVar *callToken = GCSAFE_new(TokenVar, 0);
+	kTokenVar *callToken = new_(TokenVar, 0, OnGcStack);
 	kExpr *callExpr = new_ConstValueExpr(kctx, TY_String, UPCAST(cmd));
 	callToken->resolvedSymbol = MN_("call");
 	const char cname[] = "Subproc";
@@ -199,7 +199,7 @@ static kbool_t DSLib_isCommand(KonohaContext *kctx, const char *cmd)
 	confstr(_CS_PATH, buf, bufsize);
 	char *pos, *p = buf;
 	while(p < buf + bufsize) {
-		if ((pos = strchr(p, ':')) == NULL) {
+		if((pos = strchr(p, ':')) == NULL) {
 			if(DSLib_checkExecutablePath(kctx, p, cmd)) return true;
 			break;
 		}
@@ -214,7 +214,7 @@ static kbool_t DSLib_isCommand(KonohaContext *kctx, const char *cmd)
 static KMETHOD PatternMatch_Shell(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, nameid, tokenList, beginIdx, endIdx);
-	kToken *firstToken = tokenList->tokenItems[beginIdx];
+	kToken *firstToken = tokenList->TokenItems[beginIdx];
 	DBG_P("firstToken='%s', isCommand=%d", S_text(firstToken->text), DSLib_isCommand(kctx, S_text(firstToken->text)));
 	RETURNi_((firstToken->resolvedSyntaxInfo->keyword == KW_SymbolPattern && DSLib_isCommand(kctx, S_text(firstToken->text))) ? beginIdx : -1);
 }
@@ -231,7 +231,6 @@ static KMETHOD Statement_Shell(KonohaContext *kctx, KonohaStack *sfp)
 		else {
 			DBG_ASSERT(IS_Array(tokenList));
 			cmd = splitWhiteSpace(kctx, tokenList);  // forget GC
-			PUSH_GCSTACK(cmd);
 		}
 		DBG_P("cmd=%s", S_text(cmd));
 		system(S_text(cmd));  // FIXME: This is for demo
@@ -243,7 +242,7 @@ static KMETHOD Statement_Shell(KonohaContext *kctx, KonohaStack *sfp)
 // ----------------------------------------------------------------------------
 /* define class */
 
-static kbool_t shell_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t shell_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	//KImportPackage(ns, "dscript.dollar", pline);
 	KImportPackage(ns, "dscript.subproc", pline);
@@ -252,11 +251,11 @@ static kbool_t shell_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameS
 		{ SYM_("$Shell"), 0, "$Shell $Token*", 0, 0, PatternMatch_Shell, NULL, Statement_Shell, Statement_Shell},
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
 	return true;
 }
 
-static kbool_t shell_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t shell_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

@@ -52,7 +52,7 @@ static size_t write_Bytes(char *buffer, size_t size, size_t nitems, void *obj)
 	char *buf = res->buf;
 	size *= nitems;
 	res->buf = (char *)KMALLOC(res->bytesize + size);
-	if (res->bytesize) {
+	if(res->bytesize) {
 		memcpy(res->buf, (void *)buf, res->bytesize);
 		KFREE(buf, res->bytesize);
 	}
@@ -84,7 +84,7 @@ static void Curl_free(KonohaContext *kctx, kObject *o)
 		curl_easy_cleanup(c->curl);
 		c->curl = NULL;
 	}
-	if (c->fp != NULL) {
+	if(c->fp != NULL) {
 		fclose(c->fp);
 	}
 }
@@ -247,9 +247,9 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 	//	break;
 	//}
 	case CURLOPT_READDATA:
-		if (IS_String(sfp[2].asObject)) {
+		if(IS_String(sfp[2].asObject)) {
 			FILE* fp = ((kCurl*)sfp[0].asObject)->fp;
-			if ((fp = tmpfile()) == NULL) {
+			if((fp = tmpfile()) == NULL) {
 				OLDTRACE_SWITCH_TO_KTrace(_DataFault,   // FIXME
 						LogText("Curl.setOpt", "Could not set body CURLOPT.READDATA"),
 						LogUint("curlopt", curlopt)
@@ -287,7 +287,7 @@ static KMETHOD Curl_perform(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kCurl* kcurl = (kCurl*)sfp[0].asObject;
 	CURL* curl = toCURL(sfp[0].asObject);
-	if (kcurl->headers) {
+	if(kcurl->headers) {
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, kcurl->headers);
 	}
 	CURLcode res = curl_easy_perform(curl);
@@ -295,7 +295,7 @@ static KMETHOD Curl_perform(KonohaContext *kctx, KonohaStack *sfp)
 		// TODO ktrace
 		// KNH_NTRACE2(ctx, "Curl.perform", K_FAILED, KNH_LDATA(LOG_i("CURLcode", res), LOG_s("error", curl_easy_strerror(res))));
 	}
-	if (kcurl->fp != NULL) {
+	if(kcurl->fp != NULL) {
 		fclose(kcurl->fp);
 	}
 	RETURNb_((res == CURLE_OK));
@@ -332,7 +332,7 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 		case CURLINFO_EFFECTIVE_URL:
 		case CURLINFO_CONTENT_TYPE:
 			curl_easy_getinfo(curl, curlinfo, &strptr);
-			RETURN_(KLIB new_kString(kctx, strptr, strlen(strptr), 0));
+			RETURN_(KLIB new_kString(kctx, OnStack, strptr, strlen(strptr), 0));
 			break;
 		default: {
 			// TODO ktrace
@@ -488,12 +488,12 @@ static kbool_t curl_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 	return true;
 }
 
-static kbool_t curl_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t curl_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t curl_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t curl_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

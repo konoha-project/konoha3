@@ -64,10 +64,9 @@ static kString* SugarContext_vprintMessage(KonohaContext *kctx, kinfotag_t tagle
 		KLIB Kwb_vprintf(kctx, &wb, fmt, ap);
 		msg = KLIB Kwb_top(kctx, &wb, 1);
 		kreportf(taglevel, uline, "%s", msg + len);
-		kString *emsg = KLIB new_kString(kctx, msg, strlen(msg), 0);
-		KLIB kArray_add(kctx, sugarContext->errorMessageList, emsg);
+		kString *emsg = KLIB new_kString(kctx, sugarContext->errorMessageList, msg, strlen(msg), 0);
 		if(taglevel == ErrTag || taglevel == CritTag) {
-			sugarContext->errorMessageCount ++;
+			sugarContext->errorMessageCount++;
 		}
 		return emsg;
 	}
@@ -119,12 +118,12 @@ static kfileline_t kExpr_uline(KonohaContext *kctx, kExpr *expr, kfileline_t uli
 	if(a != NULL && IS_Array(a)) {
 		size_t i;
 		for(i=0; i < kArray_size(a); i++) {
-			tk = a->tokenItems[i];
+			tk = a->TokenItems[i];
 			if(IS_Token(tk) && tk->uline >= uline) {
 				return tk->uline;
 			}
 			if(IS_Expr(tk)) {
-				return kExpr_uline(kctx, a->exprItems[i], uline);
+				return kExpr_uline(kctx, a->ExprItems[i], uline);
 			}
 		}
 	}

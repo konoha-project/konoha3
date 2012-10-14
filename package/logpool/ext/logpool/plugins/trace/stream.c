@@ -25,15 +25,15 @@ struct io_plugin {
 };
 static int get_server_info(struct logpool_param_stream *pa, char *hostbuf)
 {
-    if (pa) {
+    if(pa) {
         memcpy(hostbuf, pa->host, strlen(pa->host));
         return pa->port;
     }
     char *serverinfo = PLATAPI getenv_i("LOGPOOL_SERVER");
     int  port = DEFAULT_PORT;
-    if (serverinfo) {
+    if(serverinfo) {
         char *pos;
-        if ((pos = strchr(serverinfo, ':')) != NULL) {
+        if((pos = strchr(serverinfo, ':')) != NULL) {
             port = strtol(pos+1, NULL, 10);
             memcpy(hostbuf, serverinfo, pos - serverinfo);
         } else {
@@ -103,7 +103,7 @@ static void logpool_io_flush(logpool_t *logpool, void **args __UNUSED__)
     cast(struct logpool *, logpool)->logfmt_size = 0;
     bufsize = (char*) lp->buf - buf_orig;
     ret = io_write(lp->io, buf_orig, bufsize);
-    if (ret != LOGPOOL_SUCCESS) {
+    if(ret != LOGPOOL_SUCCESS) {
         /* TODO Error */
         fprintf(stderr, "Error!!\n");
         abort();
@@ -218,7 +218,7 @@ void logpool_procedure(logpool_t *logpool, char *q, int qlen)
 void *logpool_client_get(logpool_t *logpool, void *logbuf, size_t bufsize)
 {
     struct io_plugin *lp = cast(struct io_plugin *, logpool->connection);
-    if (io_read(lp->io, (char*) logbuf, bufsize) == IO_FAILED)
+    if(io_read(lp->io, (char*) logbuf, bufsize) == IO_FAILED)
         return NULL;
     return (void*) logbuf;
 }

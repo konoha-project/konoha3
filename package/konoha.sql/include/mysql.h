@@ -79,7 +79,7 @@ kconn_t *MYSQL_qopen(KonohaContext *kctx, const char* url)
 			LogUint("port", port),
 			LogUint("errno", mysql_errno(db)),
 			LogText("error", mysql_error(db)));
-	//if (!mysql_real_connect(db, phost, puser, ppass, pdbnm, port, NULL, 0)) {
+	//if(!mysql_real_connect(db, phost, puser, ppass, pdbnm, port, NULL, 0)) {
 	//	knh_mysql_perror(kctx, db, 0);
 	//	mysql_close(db);
 	//	db = NULL;
@@ -92,13 +92,13 @@ kconn_t *MYSQL_qopen(KonohaContext *kctx, const char* url)
 int MYSQL_qnext(KonohaContext *kctx, kqcur_t *qcursor, kResultSet *rs)
 {
 	MYSQL_ROW row;
-	if ((row = mysql_fetch_row((MYSQL_RES*)qcursor)) != NULL) {
+	if((row = mysql_fetch_row((MYSQL_RES*)qcursor)) != NULL) {
 		OLDTRACE_SWITCH_TO_KTrace(_UserInputFault, LogText("@","mysql_fetch_row"));
 		int i;
 		kint_t ival;
 		kfloat_t fval;
 		for (i = 0; i < rs->column_size; i++) {
-			if (row[i] == NULL) {
+			if(row[i] == NULL) {
 				ResultSet_setNULL(kctx, rs, i);
 				continue;
 			}
@@ -141,10 +141,10 @@ kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char* sql, struct _kR
 {
 	MYSQL_RES *res = NULL;
 	MYSQL *db = (MYSQL*)hdr;
-	if (db == NULL) {
+	if(db == NULL) {
 		/* return NULL */
 	}
-	else if (rs == NULL) {
+	else if(rs == NULL) {
 		/* Connection.exec */
 		int r = mysql_query(db, sql);
 		if(r > 0) {
@@ -165,10 +165,10 @@ kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char* sql, struct _kR
 				LogUint("errno", mysql_errno(db)),
 				LogText("error", mysql_error(db))
 		);
-		if (r == 0) { 
+		if(r == 0) { 
 			res = mysql_store_result((MYSQL*)db);
-			if (res == NULL) { // NULL RESULT
-				if (mysql_errno(db) != 0) {
+			if(res == NULL) { // NULL RESULT
+				if(mysql_errno(db) != 0) {
 					mysql_free_result(res);
 					OLDTRACE_SWITCH_TO_KTrace(_UserInputFault,
 							LogText("@","mysql_sotre_result"),
@@ -218,7 +218,7 @@ void MYSQL_qclose(kconn_t *db)
 //static void MYSQL_qfree(kqcur_t *qcur)
 void MYSQL_qfree(kqcur_t *qcur)
 {
-	if (qcur != NULL) {
+	if(qcur != NULL) {
 		MYSQL_RES *res = (MYSQL_RES*)qcur;
 		mysql_free_result(res);
 	}

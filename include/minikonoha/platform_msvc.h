@@ -276,7 +276,7 @@ static int isEmptyChunk(const char *t, size_t len)
 static int loadScript(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *))
 {
 	int isSuccessfullyLoading = false;
-	if (isDir(filePath)) {
+	if(isDir(filePath)) {
 		return isSuccessfullyLoading;
 	}
 	FILE *fp = fopen(filePath, "r");

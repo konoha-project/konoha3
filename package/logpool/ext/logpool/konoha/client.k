@@ -9,7 +9,7 @@ void main() {
     lp.loadFile("dump", "query.k");
     while (true) {
         Log log = lp.get();
-        if (log.isNull()) {
+        if(log.isNull()) {
             break;
         }
         System.p(log);

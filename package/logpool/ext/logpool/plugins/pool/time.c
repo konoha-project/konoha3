@@ -27,7 +27,7 @@ static void LogList_check_timer(struct LogList *list, uint64_t current, uint64_t
     struct LogEntry *head;
     head = list->head->h.next;
     while (head) {
-        if (current - head->h.time < interval)
+        if(current - head->h.time < interval)
             break;
         DecRC(head);
         head = head->h.next;
@@ -39,7 +39,7 @@ static void LogList_check_interval(struct LogList *list)
     struct LogEntry *e, *next, *prev;
     e    = list->head->h.next;
     prev = list->head;
-    if (RC0(list->tail)) {
+    if(RC0(list->tail)) {
 #ifdef DEBUG
         struct LogEntry *head = e;
         while (head) {
@@ -51,7 +51,7 @@ static void LogList_check_interval(struct LogList *list)
     }
     while (e) {
         next = e->h.next;
-        if (!RC0(e))
+        if(!RC0(e))
             break;
         free(e);
         e = next;

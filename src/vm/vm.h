@@ -230,10 +230,10 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #define OPEXEC_NMOVx(A, B, BX, CT) rbp[(A)].asObject = (rbp[(B)].asObjectVar)->fieldObjectItems[(BX)]
 #define OPEXEC_XNMOV(A, AX, B, CT) (rbp[(A)].asObjectVar)->fieldObjectItems[AX] = rbp[(B)].asObject
 
-#define OPEXEC_NEW(A, P, CT)   KUnsafeFieldSet(rbp[(A)].asObject, KLIB new_kObject(kctx, CT, P))
+#define OPEXEC_NEW(A, P, CT)   KUnsafeFieldSet(rbp[(A)].asObject, KLIB new_kObject(kctx, OnStack, CT, P))
 #define OPEXEC_NULL(A, CT)     KUnsafeFieldSet(rbp[(A)].asObject, KLIB Knull(kctx, CT))
-#define OPEXEC_BOX(A, B, CT)   KUnsafeFieldSet(rbp[(A)].asObject, KLIB new_kObject(kctx, CT, rbp[(B)].intValue))
-#define OPEXEC_UNBOX(A, B, CT) rbp[(A)].unboxValue = N_toint(rbp[B].asObject)
+//#define OPEXEC_BOX(A, B, CT)   KUnsafeFieldSet(rbp[(A)].asObject, KLIB new_kObject(kctx, OnStack, CT, rbp[(B)].intValue))
+//#define OPEXEC_UNBOX(A, B, CT) rbp[(A)].unboxValue = N_toint(rbp[B].asObject)
 
 #define PC_NEXT(pc)   pc+1
 
@@ -941,7 +941,7 @@ GOTO_PC(pc); \
 	kArray *a_ = Ra_(aidx);\
 	size_t n_ = klr_array_index(N, kArray_size(a_));\
 	klr_array_check(n_, kArray_size(a_));\
-	kObject *v_ = (a_)->objectItems[n_];\
+	kObject *v_ = (a_)->ObjectItems[n_];\
 	klr_mov(Ro_(cidx), v_);\
 } while (0)
 
@@ -951,7 +951,7 @@ GOTO_PC(pc); \
 	kArray *a_ = Ra_(aidx);\
 	size_t n_ = klr_array_index(N, kArray_size(a_));\
 	klr_array_check(n_, kArray_size(a_));\
-	klr_mov((a_)->objectItems[n_], Ro_(vidx));\
+	klr_mov((a_)->ObjectItems[n_], Ro_(vidx));\
 	klr_mov(Ro_(cidx), Ro_(vidx));\
 } while (0)
 

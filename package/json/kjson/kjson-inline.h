@@ -112,7 +112,7 @@ static inline JSON JSONDouble_new(double val)
 
 static inline JSON JSONInt_new(int64_t val)
 {
-    if (val > (int64_t)INT32_MAX || val < (int64_t)INT32_MIN) {
+    if(val > (int64_t)INT32_MAX || val < (int64_t)INT32_MIN) {
         JSONInt64 *i64 = (JSONInt64 *) KJSON_MALLOC(sizeof(JSONInt64));
         i64->val = val;
         return toJSON(ValueIO(i64));
@@ -135,7 +135,7 @@ static inline unsigned JSON_length(JSON json)
 
 static inline JSON JSONArray_get(JSON json, unsigned index)
 {
-    if (JSON_TYPE_CHECK(Array, json)) {
+    if(JSON_TYPE_CHECK(Array, json)) {
         JSONArray *a = toAry(json.val);
         return (a)->list[index];
     } else {
@@ -145,7 +145,7 @@ static inline JSON JSONArray_get(JSON json, unsigned index)
 
 static inline int JSONObject_iterator_init(JSONObject_iterator *itr, JSON json)
 {
-    if (!JSON_type(json) ==  JSON_Object)
+    if(!JSON_type(json) ==  JSON_Object)
         return 0;
     itr->obj = toObj(json.val);
     itr->index = 0;

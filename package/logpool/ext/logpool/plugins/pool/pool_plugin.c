@@ -50,9 +50,9 @@ static void pool_plugin_nop_dispose(struct pool_plugin *p)
 
 struct pool_plugin *pool_plugin_init(struct pool_plugin *p)
 {
-    if (!p)
+    if(!p)
         return pool_plugin_nop_create(NULL);
-    if (p->flags) {
+    if(p->flags) {
         /* already inited */
         return p;
     }
@@ -75,7 +75,7 @@ void pool_process_log(struct pool_plugin *p, struct LogEntry *e)
 
 void pool_plugin_dispose(struct pool_plugin *p)
 {
-    if (p->Dispose)
+    if(p->Dispose)
         p->Dispose(p);
 }
 
@@ -88,7 +88,7 @@ char *LogEntry_get(struct LogEntry *e, char *key, int klen, int *vlen)
         char *next = log_iterator(log, data, i);
         uint16_t len0 = log_get_length(log, i*2+0);
         uint16_t len1 = log_get_length(log, i*2+1);
-        if (klen == len0 && strncmp(key, data, klen) == 0) {
+        if(klen == len0 && strncmp(key, data, klen) == 0) {
             *vlen = len1;
             return data+klen;
         }
@@ -139,7 +139,7 @@ void pool_exec(struct Log *log, int logsize, struct pool_list *plist)
     conn_t *c, *ce;
     FOR_EACH_ARRAY(plist->list, c, ce) {
         struct pool_plugin *p = c->p;
-        if (p) {
+        if(p) {
             p->Apply(p, newe, 0);
         }
     }
@@ -159,7 +159,7 @@ void pool_add(struct Procedure *q, struct bufferevent *bev, struct pool_list *l)
 #endif
 #if USE_KONOHA
     pool_plugin_t *plugin = konoha_plugin_get(l->konoha, l->mc, buf, strlen(buf), bev);
-    if (plugin == NULL)
+    if(plugin == NULL)
         fprintf(stderr, "%s was not loaded.\n", buf);
 #else
     fpool_plugin_init finit = (fpool_plugin_init) llcache_get(l->mc, buf);
@@ -175,7 +175,7 @@ void pool_delete_connection(struct pool_list *l, struct bufferevent *bev)
 {
     conn_t *c, *ce;
     FOR_EACH_ARRAY(l->list, c, ce) {
-        if (c->bev == bev) {
+        if(c->bev == bev) {
             fprintf(stderr, "connection dispose; %p, %p\n", c->bev, c->p);
             c->bev = NULL;
             c->p = NULL;

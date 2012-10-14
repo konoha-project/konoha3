@@ -81,7 +81,7 @@ class Node {
 
 	void setPropertyBool(String key, Boolean value) {
 		String str;
-		if (value) {
+		if(value) {
 			str = _post(this.properties + "/" + key, "true"); // [FIXME] is it ok?
 		}
 		else {
@@ -122,7 +122,7 @@ class Node {
 		int size = p.getSize();
 		int i = 0;
 		while (i < size) {
-			if (type == p[i].getString("type")) {
+			if(type == p[i].getString("type")) {
 				break;
 			}
 			i += 1;
@@ -138,7 +138,7 @@ class Node {
 		int size = p.getSize();
 		int i = 0;
 		while (i < size) {
-			if (type == p[i].getString("type")) {
+			if(type == p[i].getString("type")) {
 				break;
 			}
 			i += 1;

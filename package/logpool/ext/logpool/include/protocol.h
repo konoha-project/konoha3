@@ -78,7 +78,7 @@ static inline char *log_get_trace(struct Log *log)
 
 static inline void log_dump(FILE *fp, char *prefix, struct Log *log, char *suffix, int force)
 {
-    if (
+    if(
 #ifdef LOGPOOL_DEBUG
             LOGPOOL_DEBUG || 
 #endif
@@ -123,11 +123,11 @@ static inline int emit_message(char *buf, uint16_t protocol, uint16_t logsize, .
         val  = va_arg(ap, char *);
         loginfo[i*2+0] = klen;
         loginfo[i*2+1] = vlen;
-        if (klen) {
+        if(klen) {
             memcpy(buf, key, klen);
             buf = buf + klen;
         }
-        if (vlen) {
+        if(vlen) {
             memcpy(buf, val, vlen);
             buf = buf + vlen;
         }

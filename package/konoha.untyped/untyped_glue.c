@@ -48,12 +48,12 @@ static void DeclVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t 
 	kToken *termToken = termExpr->termToken;
 	if(Gamma_isTopLevel(gma)) {
 		kNameSpace *ns = Stmt_nameSpace(stmt);
-		if(ns->globalObjectNULL == NULL) {
+		if(ns->globalObjectNULL_OnList == NULL) {
 			kStmtToken_printMessage(kctx, stmt, termToken, ErrTag, "unavailable global variable");
 			return;
 		}
 		kStmtToken_printMessage(kctx, stmt, termToken, InfoTag, "global variable %s%s has type %s", PSYM_t(termToken->resolvedSymbol), TY_t(ty));
-		KLIB KonohaClass_addField(kctx, O_ct(ns->globalObjectNULL), kField_Getter|kField_Setter, ty, termToken->resolvedSymbol);
+		KLIB KonohaClass_addField(kctx, O_ct(ns->globalObjectNULL_OnList), kField_Getter|kField_Setter, ty, termToken->resolvedSymbol);
 	}
 	else {
 		kStmtToken_printMessage(kctx, stmt, termToken, InfoTag, "%s%s has type %s", PSYM_t(termToken->resolvedSymbol), TY_t(ty));
@@ -74,19 +74,19 @@ static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 			}
 		}
 		else {
-			KFieldSet(expr->cons, expr->cons->exprItems[1], texpr);
+			KFieldSet(expr->cons, expr->cons->ExprItems[1], texpr);
 		}
 	}
 }
 
-static kbool_t untyped_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t untyped_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	KImportPackage(ns, "konoha.var", pline);
-	SUGAR kNameSpace_addSugarFunc(kctx, ns, SYM_("="), SugarFunc_TypeCheck, new_SugarFunc(TypeCheck_UntypedAssign));
+	SUGAR kNameSpace_addSugarFunc(kctx, ns, SYM_("="), SugarFunc_TypeCheck, new_SugarFunc(packageNS, TypeCheck_UntypedAssign));
 	return true;
 }
 
-static kbool_t untyped_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t untyped_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

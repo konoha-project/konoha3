@@ -61,7 +61,7 @@ static void SockAddr_init(KonohaContext *kctx, kObject *o, void *conf)
 static void SockAddr_free(KonohaContext *kctx, kObject *o)
 {
 	struct _kSockAddr *sa = (struct _kSockAddr*)o;
-	if (sa->sockaddr_in != NULL) {
+	if(sa->sockaddr_in != NULL) {
 		KFREE(sa->sockaddr_in, sizeof(struct sockaddr_in));
 		sa->sockaddr_in = NULL;
 	}
@@ -82,7 +82,7 @@ void toSockaddr(struct sockaddr_in *addr, char *ip, const int port, const int fa
 // sockaddr_in* => Map
 //void fromSockaddr(KonohaContext *kctx, struct kMap* info, struct sockaddr_in addr)
 //{
-//	if (info != NULL ) {
+//	if(info != NULL ) {
 //		knh_DataMap_setString(kctx, info, "addr", inet_ntoa(addr.sin_addr));
 //		knh_DataMap_setInt(kctx, info, "port", ntohs(addr.sin_port));
 //		knh_DataMap_setInt(kctx, info, "family", addr.sin_family);
@@ -601,7 +601,7 @@ static KMETHOD System_socketpair(KonohaContext *kctx, KonohaStack* sfp)
 
 static KMETHOD SockAddr_new (KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_(KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0));
+	RETURN_(KLIB new_kObject(kctx, OnStack, KReturnType(sfp), 0));
 }
 
 // --------------------------------------------------------------------------
@@ -722,12 +722,12 @@ static kbool_t socket_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 	return true;
 }
 
-static kbool_t socket_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t socket_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t socket_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t socket_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

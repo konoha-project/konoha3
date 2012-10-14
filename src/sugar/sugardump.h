@@ -30,7 +30,7 @@
 static void dumpToken(KonohaContext *kctx, kToken *tk, int n)
 {
 	if(verbose_sugar) {
-		if (n < 0) n = (short)tk->uline;
+		if(n < 0) n = (short)tk->uline;
 		if(tk->resolvedSyntaxInfo == NULL) {
 			if(kToken_isIndent(tk)) {
 				DUMP_P("Token[%d] '%s' TokenType=%s%s indent=%d\n", n, Token_text(tk), PSYM_t(tk->unresolvedTokenType), tk->indent);
@@ -83,7 +83,7 @@ static void dumpTokenArray(KonohaContext *kctx, int nest, kArray *a, int s, int 
 {
 	if(verbose_sugar) {
 		while(s < e) {
-			kToken *tk = a->tokenItems[s];
+			kToken *tk = a->TokenItems[s];
 			dumpIndent(kctx, nest);
 			if(IS_Array(tk->subTokenList)) {
 				ksymbol_t closure = (tk->resolvedSyntaxInfo == NULL) ? tk->resolvedSymbol : tk->resolvedSyntaxInfo->keyword;
@@ -123,7 +123,7 @@ static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
 				DUMP_P("[%d] Expr: kw='%s%s', syn=%p, size=%ld", n, PSYM_t(expr->syn->keyword), expr->syn, kArray_size(expr->cons));
 				DUMP_P("\n");
 				for(i=0; i < kArray_size(expr->cons); i++) {
-					kObject *o = expr->cons->objectItems[i];
+					kObject *o = expr->cons->ObjectItems[i];
 					if(IS_Expr(o)) {
 						dumpExpr(kctx, i, nest+1, (kExpr*)o);
 					}
@@ -147,18 +147,18 @@ static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
 	}
 }
 
-static void dumpEntry(KonohaContext *kctx, void *arg, KUtilsKeyValue *d)
+static void dumpEntry(KonohaContext *kctx, void *arg, KKeyValue *d)
 {
 	if((d->key & SYMKEY_BOXED) == SYMKEY_BOXED) {
 		ksymbol_t key = ~SYMKEY_BOXED & d->key;
 		DUMP_P("key='%s%s': ", PSYM_t(key));
-		if(IS_Token(d->objectValue)) {
-			dumpToken(kctx, (kToken*)d->objectValue, -1);
-		} else if (IS_Expr(d->objectValue)) {
-			dumpExpr(kctx, 0, 0, (kExpr *) d->objectValue);
+		if(IS_Token(d->ObjectValue)) {
+			dumpToken(kctx, (kToken*)d->ObjectValue, -1);
+		} else if(IS_Expr(d->ObjectValue)) {
+			dumpExpr(kctx, 0, 0, (kExpr *) d->ObjectValue);
 		}
 		else {
-			DUMP_P("ObjectType %s\n", CT_t(O_ct(d->objectValue)));
+			DUMP_P("ObjectType %s\n", CT_t(O_ct(d->ObjectValue)));
 		}
 	}
 }

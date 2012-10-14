@@ -38,7 +38,7 @@ void cross(Vec v0, Vec v1, Vec v2) {
 void normalize(Vec v1) {
 	double q = dot(v1, v1);
 	double length = Math.sqrt(q);
-	if (length > 1.0e-10) {
+	if(length > 1.0e-10) {
 		v1.x = v1.x / length;
 		v1.y = v1.y / length;
 		v1.z = v1.z / length;
@@ -75,9 +75,9 @@ void interSectsSphere(Sphere s, RayIntersection isect) {
 	double c = dot(rs, rs) - s.radius * s.radius;
 	double d = b * b - c;
 
-	if (d > 0.0) {
+	if(d > 0.0) {
 		double t = -b - Math.sqrt(d);
-		if ((t > 0.0) && (t < isect.distance)) {
+		if((t > 0.0) && (t < isect.distance)) {
 			isect.distance = t;
 			isect.hit = true;
 
@@ -108,10 +108,10 @@ void interSectsPlane(Plane plane, RayIntersection isect) {
 	double d = -1.0 * dot(plane.position, plane.normal);
 	double v = dot(isect.rayDirection, plane.normal);
 
-	if (v > 0.0000000000000001 || v < -0.00000000000000001) {
+	if(v > 0.0000000000000001 || v < -0.00000000000000001) {
 		double t = -1.0 * (dot(isect.rayPosition, plane.normal) + d) / v;
 
-		if ((t > 0.0) && (t < isect.distance)) {
+		if((t > 0.0) && (t < isect.distance)) {
 			isect.distance = t;
 			isect.hit = true;
 			isect.hitPosition.x = isect.rayPosition.x + isect.rayDirection.x * t;
@@ -136,11 +136,11 @@ void getOrthoBasis (Vec normal, Vec[] orthoBasis) {
 	o2.y = normal.y;
 	o2.z = normal.z;
 
-	if ((normal.x < 0.6) && (normal.x > -0.6)) {
+	if((normal.x < 0.6) && (normal.x > -0.6)) {
 		o1.x  = 1.0;
-	} else if ((normal.y < 0.6) && (normal.y > -0.6)) {
+	} else if((normal.y < 0.6) && (normal.y > -0.6)) {
 		o1.y = 1.0;
-	} else if ((normal.z < 0.6) && (normal.z > -0.6)) {
+	} else if((normal.z < 0.6) && (normal.z > -0.6)) {
 		o1.z = 1.0;
 	}else {
 		o1.x = 1.0;
@@ -188,7 +188,7 @@ void getAmbientOcclusion(RayIntersection isect, Vec ambientOcclusion) {
 			interSectsSphere(spheres[2], occlsect);
 			interSectsPlane(plane,occlsect);
 
-			if (occlsect.hit) {
+			if(occlsect.hit) {
 				hitCount += 1;
 			}
 			i += 1;
@@ -206,8 +206,8 @@ void getAmbientOcclusion(RayIntersection isect, Vec ambientOcclusion) {
 
 int clamp(double value) {
 	int i = value * 255.5;
-	if (i > 255) i = 255;
-	else if (i < 0) i = 0;
+	if(i > 255) i = 255;
+	else if(i < 0) i = 0;
 	return i;
 }
 
@@ -245,7 +245,7 @@ void render(int[] byteImage, int width, int height, int numberOfSubSamples) {
 					interSectsSphere(spheres[2], isect);
 					interSectsPlane(plane, isect);
 
-					if (isect.hit == true) {
+					if(isect.hit == true) {
 						Vec ambientOcclusion = new Vec(0.0, 0.0, 0.0);
 						getAmbientOcclusion(isect, ambientOcclusion);
 

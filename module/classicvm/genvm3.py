@@ -427,7 +427,7 @@ def write_exec(f):
 //#define VMCOUNT(op)
 //#endif
 
-//#if (defined(K_USING_LINUX_) && (defined(__i386__) || defined(__x86_64__)) && (defined(__GNUC__) && __GNUC__ >= 3))
+//#if(defined(K_USING_LINUX_) && (defined(__i386__) || defined(__x86_64__)) && (defined(__GNUC__) && __GNUC__ >= 3))
 //#define K_USING_VMASMDISPATCH 1
 //#endif
 

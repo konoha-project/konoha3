@@ -73,7 +73,7 @@ static KMETHOD kJSON_new(KonohaContext *kctx, KonohaStack *sfp)
 
 static kJSON *NewJsonObject(KonohaContext *kctx, KonohaStack *sfp, JSON val)
 {
-	kJSON *json = (kJSON*)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
+	kJSON *json = (kJSON*)KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), 0);
 	json->json = val;
 	return json;
 }
@@ -83,7 +83,7 @@ static KMETHOD kJSON_parse(KonohaContext *kctx, KonohaStack *sfp)
 {
 	const char *text = S_text(sfp[1].asString);
 	JSON json = parseJSON(text, text+S_size(sfp[1].asString));
-	if (!json.bits) {
+	if(!json.bits) {
 		/* FIXME Error Handling */
 		RETURN_DefaultObjectValue();
 	}
@@ -236,14 +236,14 @@ static kbool_t JSON_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 	return true;
 }
 
-static kbool_t JSON_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t JSON_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	//KImportPackage("konoha.string", ns,  pline);
 	//KImportPackage("konoha.float", ns, pline);
 	return true;
 }
 
-static kbool_t JSON_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t JSON_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

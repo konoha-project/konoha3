@@ -127,15 +127,15 @@ static void kCond_free(KonohaContext *kctx, kObject *o)
 //## @Native Thread Thread.create(Func f)
 static KMETHOD Thread_create(KonohaContext *kctx, KonohaStack *sfp)
 {
+	INIT_GCSTACK();
 	kFunc *f = sfp[1].asFunc;
 	KLIB kNameSpace_compileAllDefinedMethods(kctx);
-	//kArray *args = sfp[2].a;
-	kThread *thread = (kThread *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
+	kThread *thread = (kThread *)KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), 0, _GcStack);
 	thread->rootCtx = kctx; //TODO getRootContext
 	thread->kctx = KLIB KonohaContext_init(kctx, kctx->platApi);
 	KFieldSet(thread, thread->func, f);
-	//KFieldSet(t, t->args, args);
 	pthread_create(&(thread->thread), NULL, spawn_start, thread);
+	RESET_GCSTACK(); // FIXME?? Not sure this is okay??
 	RETURN_(thread);
 }
 
@@ -176,7 +176,7 @@ static KMETHOD Thread_detach(KonohaContext *kctx, KonohaStack *sfp)
 //## @Native @Static Thread Thread.self();
 static KMETHOD Thread_self(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kThread *t = (kThread *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
+	kThread *t = (kThread *)KLIB new_kObject(kctx, OnStack, KReturnType(sfp), 0);
 	t->kctx = kctx;//FIXME
 	t->thread = pthread_self();
 	RETURN_(t);
@@ -328,12 +328,12 @@ static kbool_t thread_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 	return true;
 }
 
-static kbool_t thread_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t thread_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t thread_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t thread_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

@@ -3,8 +3,8 @@
 import("konoha.bytes");
 
 void test () {
-	 assert("hoge".asBytes().encodeTo("UTF-8").asString() == "hoge");
-	 assert("ほげほげ".asBytes().encodeTo("UTF-8").asString() == "ほげほげ");
+	 assert("hoge".toBytes().encodeTo("UTF-8").toString() == "hoge");
+	 assert("ほげほげ".toBytes().encodeTo("UTF-8").toString() == "ほげほげ");
 }
 
 test();

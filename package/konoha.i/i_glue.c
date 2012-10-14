@@ -103,7 +103,7 @@ static void copyMethodList(KonohaContext *kctx, ktype_t cid, kArray *s, kArray *
 {
 	size_t i;
 	for(i = 0; i < kArray_size(s); i++) {
-		kMethod *mtd = s->methodItems[i];
+		kMethod *mtd = s->MethodItems[i];
 		if(mtd->typeId != cid) continue;
 		KLIB kArray_add(kctx, d, mtd);
 	}
@@ -123,23 +123,23 @@ static void dumpMethodList(KonohaContext *kctx, KonohaStack *sfp, size_t start, 
 {
 	size_t i;
 	for(i = start; i < kArray_size(list); i++) {
-		dumpMethod(kctx, sfp, list->methodItems[i]);
+		dumpMethod(kctx, sfp, list->MethodItems[i]);
 	}
 }
 
 static KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
-	kArray *list = kctx->stack->gcstack;
+	kArray *list = kctx->stack->gcstack_OnContextConstList;
 	size_t start = kArray_size(list);
 	kNameSpace *ns = sfp[0].asNameSpace;
 	KonohaClass *ct = O_ct(sfp[1].asObject);
 	DBG_P("*** man %s", TY_t(ct->typeId));
 	while(ns != NULL) {
-		copyMethodList(kctx, ct->typeId, ns->methodList, list);
+		copyMethodList(kctx, ct->typeId, ns->methodList_OnList, list);
 		ns = ns->parentNULL;
 	}
-	copyMethodList(kctx, ct->typeId, ct->methodList, list);
+	copyMethodList(kctx, ct->typeId, ct->methodList_OnGlobalConstList, list);
 	dumpMethodList(kctx, sfp, start, list);
 	RESET_GCSTACK();
 }
@@ -164,12 +164,12 @@ static kbool_t i_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t
 	return true;
 }
 
-static kbool_t i_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t i_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t i_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t i_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

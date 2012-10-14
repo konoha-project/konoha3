@@ -54,7 +54,7 @@ static void MapUnboxEntry_reftrace(KonohaContext *kctx, KHashMapEntry *p, void *
 {
 	KObjectVisitor *visitor = (KObjectVisitor *) thunk;
 	BEGIN_REFTRACE(1);
-	KREFTRACEv(p->stringKey);
+	KREFTRACEv(p->StringKey);
 	END_REFTRACE();
 }
 
@@ -62,8 +62,8 @@ static void MapObjectEntry_reftrace(KonohaContext *kctx, KHashMapEntry *p, void 
 {
 	KObjectVisitor *visitor = (KObjectVisitor *) thunk;
 	BEGIN_REFTRACE(2);
-	KREFTRACEn(p->stringKey);
-	KREFTRACEv(p->objectValue);
+	KREFTRACEn(p->StringKey);
+	KREFTRACEv(p->ObjectValue);
 	END_REFTRACE();
 }
 
@@ -81,7 +81,7 @@ static void kMap_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visit
 static void kMap_free(KonohaContext *kctx, kObject *o)
 {
 	kMap *map = (kMap*)o;
-	if (map->map != NULL) {
+	if(map->map != NULL) {
 		KLIB Kmap_free(kctx, map->map, NULL);
 	}
 }
@@ -107,16 +107,16 @@ static KHashMapEntry* kMap_getEntry(KonohaContext *kctx, kMap *m, kString *key, 
 	size_t tlen = S_size(key);
 	KHashMapEntry *e = KLIB Kmap_get(kctx, m->map, hcode);
 	while(e != NULL) {
-		if(e->hcode == hcode && tlen == S_size(e->stringKey) && strncmp(S_text(e->stringKey), tkey, tlen) == 0) {
+		if(e->hcode == hcode && tlen == S_size(e->StringKey) && strncmp(S_text(e->StringKey), tkey, tlen) == 0) {
 			return e;
 		}
 		e = e->next;
 	}
 	if(isNewIfNULL) {
 		e = KLIB Kmap_newEntry(kctx, m->map, hcode);
-		KUnsafeFieldInit(e->stringKey, key);
+		KUnsafeFieldInit(e->StringKey, key);
 		if(!Map_isUnboxData(m)) {
-			KUnsafeFieldInit(e->objectValue, K_NULL);
+			KUnsafeFieldInit(e->ObjectValue, K_NULL);
 		}
 		return e;
 	}
@@ -141,7 +141,7 @@ static KMETHOD Map_get(KonohaContext *kctx, KonohaStack *sfp)
 		RETURNd_(u);
 	}
 	else if(e != NULL) {
-		RETURN_(e->objectValue);
+		RETURN_(e->ObjectValue);
 	}
 	RETURN_DefaultObjectValue();
 }
@@ -155,7 +155,7 @@ static KMETHOD Map_set(KonohaContext *kctx, KonohaStack *sfp)
 		e->unboxValue = sfp[2].unboxValue;
 	}
 	else {
-		KFieldSet(m, e->objectValue, sfp[2].asObject);
+		KFieldSet(m, e->ObjectValue, sfp[2].asObject);
 	}
 	RETURNvoid_();
 }
@@ -174,7 +174,7 @@ static KMETHOD Map_remove(KonohaContext *kctx, KonohaStack *sfp)
 static void MapEntry_appendKey(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
 {
 	kArray *a = (kArray*)thunk;
-	KLIB kArray_add(kctx, a, p->stringKey);
+	KLIB kArray_add(kctx, a, p->StringKey);
 }
 
 //## T0[] Map.keys();
@@ -182,10 +182,10 @@ static KMETHOD Map_keys(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMap *m = (kMap*)sfp[0].asObject;
 	KonohaClass *cArray = CT_p0(kctx, CT_Array, O_p0(m));
-	kArray *a = (kArray*)(KLIB new_kObject(kctx, cArray, m->map->size));
-	KUnsafeFieldSet(sfp[K_RTNIDX].asArray, a);
+	kArray *a = (kArray*)(KLIB new_kObjectDontUseThis(kctx, cArray, m->map->size, OnStack));
+	KPreSetReturn(a);
 	KLIB Kmap_each(kctx, m->map, (void*)a, MapEntry_appendKey);
-	RETURN_DefaultObjectValue();
+	KReturnPreSetValue(a);
 }
 
 //## Map<T> Map<T>.new();
@@ -212,7 +212,7 @@ static kbool_t map_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	SETSTRUCTNAME(defMap, Map);
 	defMap.cflag     = kClass_Final;
 	defMap.cparamsize = 1;
-	defMap.cparamItems = &cparam;
+	defMap.cParamItems = &cparam;
 	defMap.init      = kMap_init;
 	defMap.reftrace  = kMap_reftrace;
 	defMap.free      = kMap_free;
@@ -250,13 +250,13 @@ static KMETHOD TypeCheck_MapLiteral(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static kbool_t map_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t map_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
-	SUGAR kNameSpace_addSugarFunc(kctx, ns, KW_BlockPattern, SugarFunc_TypeCheck, new_SugarFunc(TypeCheck_MapLiteral));
+	SUGAR kNameSpace_addSugarFunc(kctx, ns, KW_BlockPattern, SugarFunc_TypeCheck, new_SugarFunc(ns, TypeCheck_MapLiteral));
 	return true;
 }
 
-static kbool_t map_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t map_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

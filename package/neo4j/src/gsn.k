@@ -5,7 +5,7 @@
 load("neo4j.k");
 
 Node addNode(GraphDatabaseService db, Node from, int i) {
-	if (i > 2) return null;
+	if(i > 2) return null;
 	Node node = db.createNode();
 	node.setPropertyString("title", "Goal");
 	node.setPropertyString("sentence", "hoge");

@@ -78,7 +78,7 @@ static int k_send_port (KonohaContext *kctx, mach_port_t remote_port, mach_port_
 	msg.task_port.type             = MACH_MSG_PORT_DESCRIPTOR;
 
 	err = mach_msg_send (&msg.header);
-	if (err != KERN_SUCCESS) {
+	if(err != KERN_SUCCESS) {
 		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
 				LogText("@", "mach_msg_send"),
 				LogText("msg", "mach msg failed")
@@ -111,9 +111,9 @@ static void init_resourcemonitor(KonohaContext *kctx, subproc_resource_mon_t *mo
 
 static int setup_resourcemonitor (KonohaContext *kctx, subproc_resource_mon_t *mon) {
 	kern_return_t err;
-	if (setup_recv_port(&(mon->parent_recv_port)) != 0) return -1;
+	if(setup_recv_port(&(mon->parent_recv_port)) != 0) return -1;
 	err = task_set_bootstrap_port(mach_task_self(), mon->parent_recv_port);
-	if (err != KERN_SUCCESS) {
+	if(err != KERN_SUCCESS) {
 		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
 				LogText("@", "failed to setup resourcemonitor")
 		);
@@ -136,10 +136,10 @@ static int cleanup_resourcemonitor(KonohaContext *kctx, subproc_resource_mon_t *
 static int setup_resourcemonitor_for_chlid(KonohaContext *kctx, subproc_resource_mon_t *mon) {
 
 	kern_return_t err = task_get_bootstrap_port(mach_task_self(), &(mon->parent_recv_port));
-	if (setup_recv_port(&(mon->child_recv_port)) != 0) return -1;
-	if (send_port (mon->parent_recv_port, mach_task_self()) != 0) return -1;
-	if (send_port(mon->parent_recv_port, mon->child_recv_port) != 0) return -1;
-	if (recv_port(mon->child_recv_port, &bootstrap_port) != 0) return -1;
+	if(setup_recv_port(&(mon->child_recv_port)) != 0) return -1;
+	if(send_port (mon->parent_recv_port, mach_task_self()) != 0) return -1;
+	if(send_port(mon->parent_recv_port, mon->child_recv_port) != 0) return -1;
+	if(recv_port(mon->child_recv_port, &bootstrap_port) != 0) return -1;
 	err = task_set_bootstrap_port(mach_task_self(), bootstrap_port);
 	return err;
 }
@@ -147,9 +147,9 @@ static int setup_resourcemonitor_for_chlid(KonohaContext *kctx, subproc_resource
 
 static int attach_resourcemonitor_for_child(KonohaContext *kctx, subproc_resource_mon_t *mon, int pid) {
 	kern_return_t err = task_set_bootstrap_port(mach_task_self(), bootstrap_port);
-	if (recv_port(mon->parent_recv_port, &(mon->task)) != 0) return -1;
-	if (recv_port(mon->parent_recv_port, &(mon->child_recv_port)) != 0) return -1;
-	if (send_port(mon->child_recv_port, bootstrap_port) != 0) return -1;
+	if(recv_port(mon->parent_recv_port, &(mon->task)) != 0) return -1;
+	if(recv_port(mon->parent_recv_port, &(mon->child_recv_port)) != 0) return -1;
+	if(send_port(mon->child_recv_port, bootstrap_port) != 0) return -1;
 	return err;
 }
 
@@ -160,9 +160,9 @@ static int attach_resourcemonitor_for_child(KonohaContext *kctx, subproc_resourc
 //	switch(res) {
 //	case R_MEMORY:
 //		do {
-//			if (KERN_SUCCESS != task_info(mon->task, TASK_BASIC_INFO, (task_info_t)&t_info, &t_info_count))
+//			if(KERN_SUCCESS != task_info(mon->task, TASK_BASIC_INFO, (task_info_t)&t_info, &t_info_count))
 //					break;
-//			if (mem < t_info.resident_size) mem = t_info.resident_size;
+//			if(mem < t_info.resident_size) mem = t_info.resident_size;
 //		}while (!usleep(SLEEP_NSEC));
 //		return mem;
 //	default:

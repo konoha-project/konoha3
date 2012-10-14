@@ -14,9 +14,9 @@ static char *loadFile(const char *file, size_t *file_len)
     assert(fp);
     while (1) {
         size = fread(buf, 1, 1024, fp);
-        if (size == 0)
+        if(size == 0)
             break;
-        if (str + offset + size > end) {
+        if(str + offset + size > end) {
             len *= 2;
             str = realloc(str, len);
             end = str + len;
@@ -169,7 +169,7 @@ int main(int argc, char const* argv[])
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 #endif
     size_t size = ARRAY_SIZE(files_default);
-    if (argc > 1) {
+    if(argc > 1) {
         files = argv+1;
         size  = argc-1;
     } else {

@@ -45,7 +45,7 @@ typedef struct {
 
 static inline kObject *new_ReturnCppObject(KonohaContext *kctx,KonohaStack *sfp, void *ptr) {
 	kObject *defobj = sfp[(-(K_CALLDELTA))].asObject;
-	kObject *ret = KLIB new_kObject(kctx, O_ct(defobj), (uintptr_t)ptr);
+	kObject *ret = KLIB new_kObjectDontUseThis(kctx, O_ct(defobj), (uintptr_t)ptr);
 	((kRawPtr *)ret)->rawptr = ptr;
 	return ret;
 }
@@ -67,7 +67,7 @@ static void MPIData_extend(KonohaContext *kctx, kMPIData *p, int size) {
 	if(p->size < newSize) {
 		switch(p->typeId) {
 		case KMPI_BYTES: {
-			kBytes *b = (kBytes *)KLIB new_kObject(kctx, CT_Bytes, (uintptr_t)newSize);
+			kBytes *b = (kBytes *)KLIB new_kObjectDontUseThis(kctx, CT_Bytes, (uintptr_t)newSize);
 			memcpy(b->buf, p->b->buf, p->size);
 			p->b = b;
 			p->size = newSize;
@@ -717,12 +717,12 @@ static kbool_t mpi_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime
 	return true;
 }
 
-static kbool_t mpi_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t mpi_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t mpi_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t mpi_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

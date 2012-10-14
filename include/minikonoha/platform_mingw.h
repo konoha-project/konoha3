@@ -186,7 +186,7 @@ static kbool_t isDir(const char *path)
 {
 	struct stat buf;
 	char pathbuf[K_PATHMAX];
-	if (stat(formatSystemPath(pathbuf, sizeof(pathbuf), path), &buf) == 0) {
+	if(stat(formatSystemPath(pathbuf, sizeof(pathbuf), path), &buf) == 0) {
 		return S_ISDIR(buf.st_mode);
 	}
 	return false;
@@ -282,7 +282,7 @@ static int isEmptyChunk(const char *t, size_t len)
 static int loadScript(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *))
 {
 	int isSuccessfullyLoading = false;
-	if (isDir(filePath)) {
+	if(isDir(filePath)) {
 		return isSuccessfullyLoading;
 	}
 	FILE *fp = fopen(filePath, "r");

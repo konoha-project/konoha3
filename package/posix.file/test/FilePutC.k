@@ -6,7 +6,7 @@ import("posix.file");
 
 void test() {
 	FILE f = System.fopen("files/opentest.txt", "r+");
-	if ( System.access("files/opentest.txt", F_OK) == -1) {
+	if( System.access("files/opentest.txt", F_OK) == -1) {
 	assert(f.putC(49) == false);
 	assert(f.putC(10) == false);
 	}

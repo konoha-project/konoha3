@@ -94,15 +94,15 @@ void init_by_array(unsigned long init_key[], int key_length)
         		  + init_key[j] + j; /* non linear */
 		mt[i] &= 0xffffffffUL; /* for WORDSIZE > 32 machines */
 		i++; j++;
-		if (i>=N) { mt[0] = mt[N-1]; i=1; }
-		if (j>=key_length) j=0;
+		if(i>=N) { mt[0] = mt[N-1]; i=1; }
+		if(j>=key_length) j=0;
 	}
 	for (k=N-1; k; k--) {
 		mt[i] = (mt[i] ^ ((mt[i-1] ^ (mt[i-1] >> 30)) * 1566083941UL))
         		  - i; /* non linear */
 		mt[i] &= 0xffffffffUL; /* for WORDSIZE > 32 machines */
 		i++;
-		if (i>=N) { mt[0] = mt[N-1]; i=1; }
+		if(i>=N) { mt[0] = mt[N-1]; i=1; }
 	}
 
 	mt[0] = 0x80000000UL; /* MSB is 1; assfileidng non-zero initial array */
@@ -115,10 +115,10 @@ unsigned long genrand_int32(void)
 	static unsigned long mag01[2]={0x0UL, MATRIX_A};
 	/* mag01[x] = x * MATRIX_A  for x=0,1 */
 
-	if (mti >= N) { /* generate N words at one time */
+	if(mti >= N) { /* generate N words at one time */
 		int kk;
 
-		if (mti == N+1)   /* if init_genrand() has not been called, */
+		if(mti == N+1)   /* if init_genrand() has not been called, */
 			init_genrand(5489UL); /* a default initial seed is used */
 
 		for (kk=0;kk<N-M;kk++) {
@@ -192,12 +192,12 @@ int main(void)
     printf("1000 outputs of genrand_int32()\n");
     for (i=0; i<1000; i++) {
       printf("%10lu ", genrand_int32());
-      if (i%5==4) printf("\n");
+      if(i%5==4) printf("\n");
     }
     printf("\n1000 outputs of genrand_real2()\n");
     for (i=0; i<1000; i++) {
       printf("%10.8f ", genrand_real2());
-      if (i%5==4) printf("\n");
+      if(i%5==4) printf("\n");
     }
     return 0;
 }
@@ -298,14 +298,14 @@ void init_by_array64(unsigned long long init_key[], unsigned long long key_lengt
         mt[i] = (mt[i] ^ ((mt[i-1] ^ (mt[i-1] >> 62)) * 3935559000370003845ULL))
           + init_key[j] + j; /* non linear */
         i++; j++;
-        if (i>=NN) { mt[0] = mt[NN-1]; i=1; }
-        if (j>=key_length) j=0;
+        if(i>=NN) { mt[0] = mt[NN-1]; i=1; }
+        if(j>=key_length) j=0;
     }
     for (k=NN-1; k; k--) {
         mt[i] = (mt[i] ^ ((mt[i-1] ^ (mt[i-1] >> 62)) * 2862933555777941757ULL))
           - i; /* non linear */
         i++;
-        if (i>=NN) { mt[0] = mt[NN-1]; i=1; }
+        if(i>=NN) { mt[0] = mt[NN-1]; i=1; }
     }
 
     mt[0] = 1ULL << 63; /* MSB is 1; assfileidng non-zero initial array */
@@ -319,11 +319,11 @@ unsigned long long genrand64_int64(void)
     unsigned long long x;
     static unsigned long long mag01[2]={0ULL, MATRIX_A};
 
-    if (mti >= NN) { /* generate NN words at one time */
+    if(mti >= NN) { /* generate NN words at one time */
 
         /* if init_genrand64() has not been called, */
         /* a default initial seed is used     */
-        if (mti == NN+1)
+        if(mti == NN+1)
             init_genrand64(5489ULL);
 
         for (i=0;i<NN-MM;i++) {
@@ -388,12 +388,12 @@ double genrand64_real3(void)
 //    printf("1000 outputs of genrand64_int64()\n");
 //    for (i=0; i<1000; i++) {
 //      printf("%20llu ", genrand64_int64());
-//      if (i%5==4) printf("\n");
+//      if(i%5==4) printf("\n");
 //    }
 //    printf("\n1000 outputs of genrand64_real2()\n");
 //    for (i=0; i<1000; i++) {
 //      printf("%10.8f ", genrand64_real2());
-//      if (i%5==4) printf("\n");
+//      if(i%5==4) printf("\n");
 //    }
 //    return 0;
 //}

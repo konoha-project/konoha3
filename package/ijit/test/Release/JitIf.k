@@ -1,7 +1,7 @@
 import("ijit");
 int g(int x) {
-    if (x >= 10) {
-        if (x > 100) {
+    if(x >= 10) {
+        if(x > 100) {
             return 10;
         } else {
             return 20;

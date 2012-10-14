@@ -9,7 +9,7 @@ int f () {
 	
 	while (i < 10) {
 		i = i + 1;
-		if (i == 5) {
+		if(i == 5) {
 			continue;
 		} else {
 			sum = sum + i;

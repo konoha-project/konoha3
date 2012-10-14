@@ -290,10 +290,10 @@ static void Kmap_remove(KHashMap* kmap, KHashMapEntry *oe)
 
 // key management
 
-static void Kmap_addStringUnboxValue(KonohaContext *kctx, KHashMap *kmp, uintptr_t hcode, kString *stringKey, uintptr_t unboxValue)
+static void Kmap_addStringUnboxValue(KonohaContext *kctx, KHashMap *kmp, uintptr_t hcode, kString *StringKey, uintptr_t unboxValue)
 {
 	KHashMapEntry *e = KLIB Kmap_newEntry(kctx, kmp, hcode);
-	KUnsafeFieldInit(e->stringKey, stringKey);
+	KUnsafeFieldInit(e->StringKey, StringKey);
 	e->unboxValue = unboxValue;
 }
 
@@ -301,15 +301,14 @@ static ksymbol_t Kmap_getcode(KonohaContext *kctx, KHashMap *kmp, kArray *list, 
 {
 	KHashMapEntry *e = KLIB Kmap_get(kctx, kmp, hcode);
 	while(e != NULL) {
-		if(e->hcode == hcode && len == S_size(e->stringKey) && strncmp(S_text(e->stringKey), name, len) == 0) {
+		if(e->hcode == hcode && len == S_size(e->StringKey) && strncmp(S_text(e->StringKey), name, len) == 0) {
 			return (ksymbol_t)e->unboxValue;
 		}
 		e = e->next;
 	}
 	if(def == SYM_NEWID) {
-		kString *stringKey = KLIB new_kString(kctx, name, len, spol);
 		uintptr_t sym = kArray_size(list);
-		KLIB kArray_add(kctx, list, stringKey);
+		kString *stringKey = KLIB new_kString(kctx, list, name, len, spol);
 		Kmap_addStringUnboxValue(kctx, kmp, hcode, stringKey, sym);
 		return (ksymbol_t)sym;
 	}
@@ -320,7 +319,7 @@ static kfileline_t KfileId(KonohaContext *kctx, const char *name, size_t len, in
 {
 	uintptr_t hcode = strhash(name, len);
 	KLock(kctx->share->filepackMutex);
-	kfileline_t uline = Kmap_getcode(kctx, kctx->share->fileidMapNN, kctx->share->fileidList, name, len, hcode, spol, def);
+	kfileline_t uline = Kmap_getcode(kctx, kctx->share->fileIdMap_KeyOnList, kctx->share->fileIdList_OnGlobalConstList, name, len, hcode, spol, def);
 	KUnlock(kctx->share->filepackMutex);
 	return uline << (sizeof(kshort_t) * 8);
 }
@@ -329,7 +328,7 @@ static kpackageId_t KpackageId(KonohaContext *kctx, const char *name, size_t len
 {
 	uintptr_t hcode = strhash(name, len);
 	KLock(kctx->share->filepackMutex);
-	kpackageId_t packid = Kmap_getcode(kctx, kctx->share->packageIdMapNN, kctx->share->packageIdList, name, len, hcode, spol | StringPolicy_ASCII, def);
+	kpackageId_t packid = Kmap_getcode(kctx, kctx->share->packageIdMap_KeyOnList, kctx->share->packageIdList_OnGlobalConstList, name, len, hcode, spol | StringPolicy_ASCII, def);
 	KUnlock(kctx->share->filepackMutex);
 	return packid;
 }
@@ -371,7 +370,7 @@ static ksymbol_t Ksymbol(KonohaContext *kctx, const char *name, size_t len, int 
 	}
 	uintptr_t hcode = strhash(name, len);
 	KLock(kctx->share->symbolMutex);
-	ksymbol_t sym = Kmap_getcode(kctx, kctx->share->symbolMapNN, kctx->share->symbolList, name, len, hcode, spol | StringPolicy_ASCII, def);
+	ksymbol_t sym = Kmap_getcode(kctx, kctx->share->symbolMap_KeyOnList, kctx->share->symbolList_OnGlobalConstList, name, len, hcode, spol | StringPolicy_ASCII, def);
 	KUnlock(kctx->share->symbolMutex);
 	return (sym == def) ? def : (sym | mask);
 }
@@ -391,13 +390,13 @@ void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o, KObjectVisitor *visi
 	unsigned map_size;
 	O_ct(o)->reftrace(kctx, o, visitor);
 	map_size = protomap_size((Kprotomap_t *)o->h.kvproto);
-	if (map_size) {
+	if(map_size) {
 		protomap_iterator itr = {0};
-		KUtilsKeyValue *d;
+		KKeyValue *d;
 		BEGIN_REFTRACE(map_size);
 		while ((d = protomap_next((Kprotomap_t *)o->h.kvproto, &itr)) != NULL) {
-			if(SYMKEY_isBOXED(d->key)) {
-				KREFTRACEv(d->objectValue);
+			if(Symbol_isBoxedKey(d->key)) {
+				KREFTRACEv(d->ObjectValue);
 			}
 		}
 		END_REFTRACE();
@@ -406,8 +405,8 @@ void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o, KObjectVisitor *visi
 
 static kObject* kObject_getObjectNULL(KonohaContext *kctx, kObject *o, ksymbol_t key, kObject *defval)
 {
-	KUtilsKeyValue *d = protomap_get((Kprotomap_t *)o->h.kvproto, key | SYMKEY_BOXED);
-	return (d != NULL) ? d->objectValue : defval;
+	KKeyValue *d = protomap_get((Kprotomap_t *)o->h.kvproto, key | SYMKEY_BOXED);
+	return (d != NULL) ? d->ObjectValue : defval;
 }
 
 static void kObject_setObject(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, ktype_t ty, kObject *val)
@@ -419,7 +418,7 @@ static void kObject_setObject(KonohaContext *kctx, kAbstractObject *o, ksymbol_t
 
 static uintptr_t kObject_getUnboxValue(KonohaContext *kctx, kObject *o, ksymbol_t key, uintptr_t defval)
 {
-	KUtilsKeyValue *d = protomap_get((Kprotomap_t *)o->h.kvproto, key);
+	KKeyValue *d = protomap_get((Kprotomap_t *)o->h.kvproto, key);
 	return (d != NULL) ? d->unboxValue : defval;
 }
 
@@ -431,7 +430,7 @@ static void kObject_setUnboxValue(KonohaContext *kctx, kObject *o, ksymbol_t key
 
 static void kObject_removeKey(KonohaContext *kctx, kObject *o, ksymbol_t key)
 {
-	KUtilsKeyValue *d = protomap_get((Kprotomap_t *)o->h.kvproto, key | SYMKEY_BOXED);
+	KKeyValue *d = protomap_get((Kprotomap_t *)o->h.kvproto, key | SYMKEY_BOXED);
 	if(d != NULL) {
 		d->key = 0; d->ty = 0; d->unboxValue = 0;
 	}
@@ -441,10 +440,10 @@ static void kObject_removeKey(KonohaContext *kctx, kObject *o, ksymbol_t key)
 	}
 }
 
-typedef void (*feach)(KonohaContext *kctx, void *, KUtilsKeyValue *d);
+typedef void (*feach)(KonohaContext *kctx, void *, KKeyValue *d);
 static void kObject_protoEach(KonohaContext *kctx, kObject *o, void *thunk, feach f)
 {
-	KUtilsKeyValue *r;
+	KKeyValue *r;
 	protomap_iterator itr = {0};
 	while ((r = protomap_next((Kprotomap_t *)o->h.kvproto, &itr)) != NULL) {
 		f(kctx, thunk, r);
@@ -488,7 +487,7 @@ static kbool_t KonohaRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp
 	memcpy(&lbuf, runtime->evaljmpbuf, sizeof(jmpbuf_i));
 	runtime->jump_bottom = sfp;
 	runtime->thrownScriptLine = 0;
-	KUnsafeFieldSet(runtime->optionalErrorMessage, TS_EMPTY);
+	KUnsafeFieldSet(runtime->OptionalErrorInfo, TS_EMPTY);
 	kbool_t result = true;
 	int jumpResult;
 	INIT_GCSTACK();
@@ -497,7 +496,7 @@ static kbool_t KonohaRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp
 	}
 	else {
 		const char *file = PLATAPI shortFilePath(FileId_t(runtime->thrownScriptLine));
-		PLATAPI reportCaughtException(SYM_t(jumpResult), file, (kushort_t)runtime->thrownScriptLine,  S_text(runtime->optionalErrorMessage));
+		PLATAPI reportCaughtException(SYM_t(jumpResult), file, (kushort_t)runtime->thrownScriptLine,  S_text(runtime->OptionalErrorInfo));
 		result = false;
 	}
 	RESET_GCSTACK();
@@ -506,14 +505,14 @@ static kbool_t KonohaRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp
 	return result;
 }
 
-static void KonohaRuntime_raise(KonohaContext *kctx, int symbol, KonohaStack *sfp, kfileline_t pline, kString *optionalErrorMessage)
+static void KonohaRuntime_raise(KonohaContext *kctx, int symbol, KonohaStack *sfp, kfileline_t pline, kString *OptionalErrorInfo)
 {
 	KonohaStackRuntimeVar *runtime = kctx->stack;
 	KNH_ASSERT(symbol != 0);
 	if(runtime->evaljmpbuf != NULL) {
 		runtime->thrownScriptLine = pline;
-		if(optionalErrorMessage != NULL) {
-			KUnsafeFieldSet(runtime->optionalErrorMessage, optionalErrorMessage);
+		if(OptionalErrorInfo != NULL) {
+			KUnsafeFieldSet(runtime->OptionalErrorInfo, OptionalErrorInfo);
 		}
 		PLATAPI longjmp_i(*runtime->evaljmpbuf, symbol);  // in setjmp 0 means good
 	}

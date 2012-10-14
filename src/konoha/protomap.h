@@ -93,9 +93,9 @@ static inline void protomap_dispose(Kprotomap_t *m)
 	m->h.base.api->_dispose(m);
 }
 
-static inline KUtilsKeyValue *protomap_get(Kprotomap_t *m, unsigned hash)
+static inline KKeyValue *protomap_get(Kprotomap_t *m, unsigned hash)
 {
-	return (KUtilsKeyValue *) m->h.base.api->_get(m, hash);
+	return (KKeyValue *) m->h.base.api->_get(m, hash);
 }
 
 static inline map_status_t protomap_set(Kprotomap_t **m, unsigned hash, unsigned type, void *val)
@@ -108,9 +108,9 @@ static inline void protomap_remove(Kprotomap_t *m, unsigned hash)
 	return m->h.base.api->_remove(m, hash);
 }
 
-static inline KUtilsKeyValue *protomap_next(Kprotomap_t *m, protomap_iterator *itr)
+static inline KKeyValue *protomap_next(Kprotomap_t *m, protomap_iterator *itr)
 {
-	return (KUtilsKeyValue *) m->h.base.api->_next(m, itr);
+	return (KKeyValue *) m->h.base.api->_next(m, itr);
 }
 
 static inline unsigned protomap_size(Kprotomap_t *m)
@@ -172,12 +172,12 @@ static map_status_t hashmap_set_no_resize(hashmap_t *m, map_record_t *rec)
 	unsigned i, idx = rec->hash & m->record_size_mask;
 	for (i = 0; i < DELTA; ++i) {
 		map_record_t *r = m->base.records+idx;
-		if (r->hash == 0 && r->type != rec->type) {
+		if(r->hash == 0 && r->type != rec->type) {
 			map_record_copy(r, rec);
 			++m->base.used_size;
 			return PROTOMAP_ADDED;
 		}
-		if (r->hash == rec->hash) {
+		if(r->hash == rec->hash) {
 			uintptr_t old = r->v;
 			map_record_copy(r, rec);
 			rec->v  = old;
@@ -200,7 +200,7 @@ static void hashmap_record_resize(hashmap_t *m)
 		hashmap_record_reset(m, newsize);
 		for (i = 0; i < oldsize; ++i) {
 			map_record_t *r = head + i;
-			if (r->hash != 0 && hashmap_set_no_resize(m, r) == PROTOMAP_FAILED)
+			if(r->hash != 0 && hashmap_set_no_resize(m, r) == PROTOMAP_FAILED)
 				continue;
 		}
 	} while (0);
@@ -211,7 +211,7 @@ static map_status_t hashmap_set(hashmap_t *m, map_record_t *rec)
 {
 	map_status_t res;
 	do {
-		if ((res = hashmap_set_no_resize(m, rec)) != PROTOMAP_FAILED)
+		if((res = hashmap_set_no_resize(m, rec)) != PROTOMAP_FAILED)
 			return res;
 		hashmap_record_resize(m);
 	} while (1);
@@ -223,7 +223,7 @@ static map_record_t *hashmap_get(hashmap_t *m, unsigned hash)
 	unsigned i, idx = hash & m->record_size_mask;
 	for (i = 0; i < DELTA; ++i) {
 		map_record_t *r = m->base.records+idx;
-		if (r->hash == hash) {
+		if(r->hash == hash) {
 			return r;
 		}
 		idx = (idx + 1) & m->record_size_mask;
@@ -233,7 +233,7 @@ static map_record_t *hashmap_get(hashmap_t *m, unsigned hash)
 
 static void hashmap_init(hashmap_t *m, unsigned init)
 {
-	if (init < MAP_INITSIZE)
+	if(init < MAP_INITSIZE)
 		init = MAP_INITSIZE;
 	hashmap_record_reset(m, 1U << (POWER_OF_TWO(init)));
 }
@@ -271,7 +271,7 @@ static void hashmap_api_remove(Kprotomap_t *_m, unsigned hash)
 {
 	hashmap_t *m = (hashmap_t *) _m;
 	map_record_t *r = hashmap_get(m, hash);
-	if (r) {
+	if(r) {
 		r->hash = 0;
 		r->type = 0;
 		m->base.used_size -= 1;
@@ -284,7 +284,7 @@ static map_record_t *hashmap_api_next(Kprotomap_t *_m, protomap_iterator *itr)
 	unsigned i, size = (m->record_size_mask);
 	for (i = itr->index; i <= size; ++i) {
 		map_record_t *r = hashmap_at(m, i);
-		if (r->hash != 0) {
+		if(r->hash != 0) {
 			itr->index = i+1;
 			return r;
 		}
@@ -355,10 +355,10 @@ static map_status_t dictmap_set(dictmap_t *m, map_record_t *rec)
 	for (i = 0; i < DICTMAP_THRESHOLD; ++i) {
 		unsigned hash = m->hash_list[i];
 		map_record_t *r = dictmap_at(m, i);
-		if (hash == 0 && unlikely(r->type == 0)) {
+		if(hash == 0 && unlikely(r->type == 0)) {
 			return dictmap_set_newentry(m, rec, i);
 		}
-		else if (hash == rec->hash) {
+		else if(hash == rec->hash) {
 			uintptr_t old = r->v;
 			dictmap_record_copy(r, rec);
 			rec->v  = old;
@@ -373,7 +373,7 @@ static map_record_t *dictmap_get(dictmap_t *m, unsigned hash)
 {
 	int i;
 	for (i = 0; i < DICTMAP_THRESHOLD; ++i) {
-		if (hash == m->hash_list[i]) {
+		if(hash == m->hash_list[i]) {
 			map_record_t *r = dictmap_at(m, i);
 			return r;
 		}
@@ -396,7 +396,7 @@ static void dictmap_api_remove(Kprotomap_t *_m, unsigned hash)
 {
 	dictmap_t *m = (dictmap_t *)_m;
 	map_record_t *r = dictmap_get(m, hash);
-	if (r) {
+	if(r) {
 		r->hash = 0;
 		r->type = 0;
 		m->base.used_size -= 1;
@@ -512,7 +512,7 @@ static Kprotomap_t *Kprotomap_new(unsigned init)
 static void protomap_delete(Kprotomap_t *m)
 {
 	protomap_dispose(m);
-	if (m != (Kprotomap_t *)&nullmap) {
+	if(m != (Kprotomap_t *)&nullmap) {
 		free(m);
 	}
 }

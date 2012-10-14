@@ -17,7 +17,7 @@ static uintptr_t p5_exit(uintptr_t context)
 {
     struct cpu_average *average = (struct cpu_average*) context;
     uintptr_t data = 0;
-    if (average->size) {
+    if(average->size) {
         data = average->sum/ average->size;
     }
     free(average);
@@ -29,7 +29,7 @@ static uintptr_t p5_func(uintptr_t context, struct LogEntry *e)
     int vlen;
     char *val = LogEntry_get(e, "cpu", strlen("cpu"), &vlen);
     char *end = val + vlen;
-    if (val) {
+    if(val) {
         uintptr_t cpu = strtol(val, &end, 10);
         average->sum  += cpu;
         average->size += 1;

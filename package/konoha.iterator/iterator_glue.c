@@ -107,7 +107,7 @@ static void Array_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 	size_t n = itr->current_pos;
 	itr->current_pos += 1;
 	DBG_ASSERT(n < kArray_size(itr->arrayList));
-	RETURN_(itr->arrayList->objectItems[n]);
+	RETURN_(itr->arrayList->ObjectItems[n]);
 }
 
 static void Array_setNextResultUnbox(KonohaContext *kctx, KonohaStack* sfp)
@@ -123,7 +123,7 @@ static KMETHOD Array_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
 	KonohaClass *cIterator = CT_p0(kctx, CT_Iterator, O_ct(a)->p0);
-	kIterator *itr = (kIterator*)KLIB new_kObject(kctx, cIterator, 0);
+	kIterator *itr = (kIterator*)KLIB new_kObjectDontUseThis(kctx, cIterator, 0, OnStack);
 	KFieldSet(itr, itr->arrayList, a);
 	itr->hasNext = Array_hasNext;
 	itr->setNextResult = TY_isUnbox(O_ct(a)->p0) ? Array_setNextResultUnbox : Array_setNextResult;
@@ -144,12 +144,12 @@ static void String_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 	const char *t = S_text(s) + itr->current_pos;
 	size_t charsize = utf8len(t[0]);
 	itr->current_pos += charsize;
-	RETURN_(KLIB new_kString(kctx, t, charsize, (charsize == 1) ? StringPolicy_ASCII : StringPolicy_UTF8));
+	RETURN_(KLIB new_kString(kctx, OnStack, t, charsize, (charsize == 1) ? StringPolicy_ASCII : StringPolicy_UTF8));
 }
 
 static KMETHOD String_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kIterator *itr = (kIterator*)KLIB new_kObject(kctx, CT_StringIterator, 0);
+	kIterator *itr = (kIterator*)KLIB new_kObjectDontUseThis(kctx, CT_StringIterator, 0, OnStack);
 	KFieldSet(itr, itr->source, sfp[0].asObject);
 	itr->hasNext = String_hasNext;
 	itr->setNextResult = String_setNextResult;
@@ -182,7 +182,7 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 	defIterator.cflag  = CFLAG_Iterator;
 	defIterator.init   = Iterator_init;
 	defIterator.cparamsize  = 1;
-	defIterator.cparamItems = &IteratorParam;
+	defIterator.cParamItems = &IteratorParam;
 
 	base->cIterator = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defIterator, pline);
 	base->cStringIterator = CT_p0(kctx, base->cIterator, TY_String);
@@ -203,12 +203,12 @@ static kbool_t iterator_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirs
 	return true;
 }
 
-static kbool_t iterator_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t iterator_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t iterator_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t iterator_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

@@ -3,8 +3,8 @@
 import("konoha.bytes");
 
 void test () {
-	assert("hoge".asBytes().encodeTo("EUC-JP").asString() == "hoge");
-	System.p("ほげほげ".asBytes().encodeTo("EUC-JP").asString());
+	assert("hoge".toBytes().encodeTo("EUC-JP").toString() == "hoge");
+	System.p("ほげほげ".toBytes().encodeTo("EUC-JP").toString());
 }
 
 test();

@@ -76,7 +76,7 @@ static KMETHOD Expression_isNull(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
 	if(operatorIdx + 2 == endIdx) {
 		DBG_P("checking .. x == null");
-		kTokenVar *tk = tokenList->tokenVarItems[operatorIdx+1];
+		kTokenVar *tk = tokenList->TokenVarItems[operatorIdx+1];
 		if(tk->resolvedSymbol == SYM_("null")) {
 			kExpr *leftHandExpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
 			tk->resolvedSymbol = SYM_("isNull");
@@ -91,7 +91,7 @@ static KMETHOD Expression_isNotNull(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
 	if(operatorIdx + 2 == endIdx) {
 		DBG_P("checking .. x != null");
-		kTokenVar *tk = tokenList->tokenVarItems[operatorIdx+1];
+		kTokenVar *tk = tokenList->TokenVarItems[operatorIdx+1];
 		if(tk->resolvedSymbol == SYM_("null")) {
 			kExpr *leftHandExpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
 			tk->resolvedSymbol = SYM_("isNotNull");
@@ -102,19 +102,19 @@ static KMETHOD Expression_isNotNull(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 
-static kbool_t null_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t null_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("null"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_null, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
-	SUGAR kNameSpace_addSugarFunc(kctx, ns, SYM_("=="), SugarFunc_Expression, new_SugarFunc(Expression_isNull));
-	SUGAR kNameSpace_addSugarFunc(kctx, ns, SYM_("!="), SugarFunc_Expression, new_SugarFunc(Expression_isNotNull));
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
+	SUGAR kNameSpace_addSugarFunc(kctx, ns, SYM_("=="), SugarFunc_Expression, new_SugarFunc(ns, Expression_isNull));
+	SUGAR kNameSpace_addSugarFunc(kctx, ns, SYM_("!="), SugarFunc_Expression, new_SugarFunc(ns, Expression_isNotNull));
 	return true;
 }
 
-static kbool_t null_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t null_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

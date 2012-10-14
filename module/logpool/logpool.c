@@ -72,9 +72,9 @@ static void kmodlogpool_setup(KonohaContext *kctx, struct KonohaModule *def, int
 		char *serverinfo = PLATAPI getenv_i("LOGPOOL_SERVER");
 		char host[128] = {0};
 		int  port = 14801;
-		if (serverinfo) {
+		if(serverinfo) {
 			char *pos;
-			if ((pos = strchr(serverinfo, ':')) != NULL) {
+			if((pos = strchr(serverinfo, ':')) != NULL) {
 				port = strtol(pos+1, NULL, 10);
 				memcpy(host, serverinfo, pos - serverinfo);
 			}
@@ -116,12 +116,12 @@ void MODLOGGER_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	base->trace[i] = 'A' + ch;
 	for(i = 1; i < 16; i++) {
 		t = t / 36;
-		if (t == 0)
+		if(t == 0)
 			t = rand();
 		ch = t % 36;
 		base->trace[i] = (ch < 10) ? '0' + ch : 'A' + (ch - 10);
 	}
-	if (IS_RootKonohaContext(ctx)) {
+	if(IS_RootKonohaContext(ctx)) {
 		kmodlogpool_setup(kctx, (KonohaModule*)base, 1);
 	}
 	KLIB KonohaRuntime_setModule(kctx, MOD_logger, (KonohaModule*)base, 0);

@@ -16,18 +16,18 @@ static void client_cb_event(struct bufferevent *bev, short events, void *ctx)
 {
     struct io *io = (struct io *) ctx;
     struct event_base *base = io->base;
-    if (events & BEV_EVENT_CONNECTED) {
+    if(events & BEV_EVENT_CONNECTED) {
         debug_print(0, "Connect okay.");
-    } else if (events & BEV_EVENT_TIMEOUT) {
+    } else if(events & BEV_EVENT_TIMEOUT) {
         debug_print(0, "server timeout");
         bufferevent_free(bev);
         event_base_loopexit(base, NULL);
         io->base = NULL;
         io->bev  = NULL;
-    } else if (events & (BEV_EVENT_ERROR|BEV_EVENT_EOF)) {
-        if (events & BEV_EVENT_ERROR) {
+    } else if(events & (BEV_EVENT_ERROR|BEV_EVENT_EOF)) {
+        if(events & BEV_EVENT_ERROR) {
             int err = bufferevent_socket_get_dns_error(bev);
-            if (err)
+            if(err)
                 fprintf(stderr, "DNS error: %s\n", evutil_gai_strerror(err));
         }
         bufferevent_free(bev);
@@ -62,7 +62,7 @@ static int io_client_init(struct io *io, char *host, int port, int ev_mode)
     dns_base = evdns_base_new(base, 1);
     int ret = bufferevent_socket_connect_hostname(bev,
             dns_base, AF_INET, host, port);
-    if (ret == -1) {
+    if(ret == -1) {
         bufferevent_free(bev);
         io->bev = NULL;
         return IO_FAILED;
@@ -101,7 +101,7 @@ static void client_thread_start(struct io *io)
 
 static int io_client_write(struct io *io, const void *data, uint32_t nbyte)
 {
-    if (io->bev == NULL || bufferevent_write(io->bev, data, nbyte) != 0) {
+    if(io->bev == NULL || bufferevent_write(io->bev, data, nbyte) != 0) {
         fprintf(stderr, "write error, v=('%p', %u)\n", data, nbyte);
         return IO_FAILED;
     }
@@ -111,28 +111,28 @@ static int io_client_write(struct io *io, const void *data, uint32_t nbyte)
 static int io_client_read(struct io *io, const void *data, uint32_t nbyte)
 {
     struct range_stream *cs;
-    if (io->cs == NULL) {
+    if(io->cs == NULL) {
         cs = range_stream_new(io, io->bev);
         io->cs = cs;
     } else {
         cs = io->cs;
     }
-    if (io->bev) {
+    if(io->bev) {
         int log_size;
         struct Log *log;
         //L_redo:;
         while (range_stream_empty(cs)) {
-            if ((io->flags & IO_MODE_THREAD) == 0) {
+            if((io->flags & IO_MODE_THREAD) == 0) {
                 break;
             }
             usleep(1);
         }
         log = range_stream_get(cs, &log_size);
-        if (log == NULL) {
+        if(log == NULL) {
             fprintf(stderr, "log is null\n");
             goto L_failed;
         }
-        if (log_data_process(log) == LOGPOOL_EVENT_QUIT) {
+        if(log_data_process(log) == LOGPOOL_EVENT_QUIT) {
             bufferevent_free(io->bev);
             debug_print(1, "stream connection close");
             return IO_FAILED;
@@ -147,9 +147,9 @@ static int io_client_read(struct io *io, const void *data, uint32_t nbyte)
 
 static int io_client_close(struct io *io)
 {
-    if (io->flags & IO_MODE_THREAD) {
+    if(io->flags & IO_MODE_THREAD) {
         event_base_loopexit(io->base, NULL);
-        if (pthread_join(io->thread, NULL) != 0) {
+        if(pthread_join(io->thread, NULL) != 0) {
             fprintf(stderr, "pthread join failure. %s\n", strerror(errno));
             abort();
             return IO_FAILED;
@@ -174,7 +174,7 @@ char *Log_get(struct Log *log, char *key, int klen, int *vlen)
         char *next = log_iterator(log, data, i);
         uint16_t len0 = log_get_length(log, i*2+0);
         uint16_t len1 = log_get_length(log, i*2+1);
-        if (klen == len0 && strncmp(key, data, klen) == 0) {
+        if(klen == len0 && strncmp(key, data, klen) == 0) {
             *vlen = len1;
             return data+klen;
         }

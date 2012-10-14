@@ -91,7 +91,7 @@ static inline char *put_d(char *p, uint64_t v)
 
 static inline char *put_i(char *p, int64_t value)
 {
-    if (value < 0) {
+    if(value < 0) {
         p[0] = '-'; p++;
         value = -value;
     }
@@ -146,7 +146,7 @@ static inline void string_builder_dispose(string_builder *sb)
 static inline char *string_builder_tostring(string_builder *sb,
         size_t *len, int ensureZero)
 {
-    if (ensureZero) {
+    if(ensureZero) {
         ARRAY_add(char, &sb->buf, '\0');
     }
     char *list = sb->buf.list;

@@ -80,11 +80,11 @@ static uint16_t nop_write_size(uintptr_t context, uint32_t state, uint16_t lengt
 static void nop_write_data(uintptr_t context, struct LogEntry *e, char *buf)
 {
     //for (i = 0; i < logsize; ++i) {
-    //    if (klen) {
+    //    if(klen) {
     //        memcpy(buf, key, klen);
     //        buf = buf + klen;
     //    }
-    //    if (vlen) {
+    //    if(vlen) {
     //        memcpy(buf, val, vlen);
     //        buf = buf + vlen;
     //    }

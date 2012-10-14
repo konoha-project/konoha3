@@ -52,7 +52,7 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 	kToken *tk = SUGAR kStmt_getToken(kctx, stmt, KW_BlockPattern, NULL);
 	if(tk != NULL && tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
 		INIT_GCSTACK();
-		kNameSpace *ns = GCSAFE_new(NameSpace, Stmt_nameSpace(stmt));
+		kNameSpace *ns = new_(NameSpace, Stmt_nameSpace(stmt), _GcStack);
 		kArray *a = KonohaContext_getSugarContext(kctx)->preparedTokenList;
 		TokenSequence range = {ns, a, kArray_size(a), kArray_size(a)};
 		SUGAR TokenSequence_tokenize(kctx, &range, S_text(tk->text), tk->uline);
@@ -63,17 +63,17 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNb_(result == K_CONTINUE);
 }
 
-static kbool_t namespace_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t namespace_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("namespace"), 0, "\"namespace\" $Block", 0, 0, NULL, NULL, Statement_namespace, NULL, NULL, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
 	return true;
 }
 
-static kbool_t namespace_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t namespace_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

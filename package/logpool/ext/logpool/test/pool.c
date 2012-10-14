@@ -23,7 +23,7 @@ uintptr_t p4_func(uintptr_t context, struct LogEntry *e)
     int vlen;
     char *val = LogEntry_get(e, "cpu", strlen("cpu"), &vlen);
     char *end = val + vlen;
-    if (val) {
+    if(val) {
         average->sum  += strtol(val, &end, 10);
         average->size += 1;
     }

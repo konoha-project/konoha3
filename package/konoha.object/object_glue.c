@@ -71,14 +71,14 @@ static kbool_t object_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 //static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	VAR_TypeCheck(stmt, expr, gma, reqty);
-//	kToken *tkN = expr->cons->tokenItems[0];
+//	kToken *tkN = expr->cons->TokenItems[0];
 //	ksymbol_t fn = tkN->resolvedSymbol;
 //	kExpr *self = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 1, gma, TY_var, 0);
 //	kNameSpace *ns = Stmt_nameSpace(stmt);
 //	if(self != K_NULLEXPR) {
 //		kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, self->ty, MN_toGETTER(fn), 0, MPOL_GETTER);
 //		if(mtd != NULL) {
-//			KFieldSet(expr->cons, expr->cons->methodItems[0], mtd);
+//			KFieldSet(expr->cons, expr->cons->MethodItems[0], mtd);
 //			RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, reqty));
 //		}
 //		SUGAR kStmt_printMessage2(kctx, stmt, tkN, ErrTag, "undefined field: %s", S_text(tkN->text));
@@ -88,18 +88,18 @@ static kbool_t object_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 
 // ----------------------------------------------------------------------------
 
-static kbool_t object_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t object_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	KImportPackage(ns, "konoha.subtype", pline);
 //	KDEFINE_SYNTAX SYNTAX[] = {
 //		{ .keyword = SYM_("."), TypeCheck_(Getter) },
 //		{ .keyword = KW_END, },
 //	};
-//	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
+//	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
 	return true;
 }
 
-static kbool_t object_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t object_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

@@ -27,7 +27,7 @@ static void test_string(void)
 //    int ans = 0, sum = 0;
 //    const char **files;
 //    size_t size = argc;
-//    if (argc > 0) {
+//    if(argc > 0) {
 //        files = (const char **) argv;
 //    } else {
 //        const char *files_default[] = {
@@ -57,7 +57,7 @@ static void test_string(void)
 //    int i;
 //    for (i = 0; i < size; i++) {
 //        FILE *fp;
-//        if ((fp = fopen(files[i], "r")) != NULL) {
+//        if((fp = fopen(files[i], "r")) != NULL) {
 //            char buf[1024];
 //            size_t len;
 //            while ((len = fread(buf, 1, sizeof(buf), fp)) > 0) {

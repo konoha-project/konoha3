@@ -3,7 +3,7 @@
 import("posix.fd");
 
 void test() {
-	if (System.access("files/symlinked.txt", F_OK) == 0) {
+	if(System.access("files/symlinked.txt", F_OK) == 0) {
 		System.unlink("files/symlinked.txt");
 	}
 	assert(System.symlink("files/newfile.txt", "files/symlinked.txt") == 0);

@@ -87,7 +87,7 @@ static KMETHOD Person_new(KonohaContext *kctx, KonohaStack *sfp)
 	kString *name = sfp[1].asString;
 	kint_t   age  = sfp[2].intValue;
 	/* If you want to determine the type of the return value,
-	 * please check O_ct(sfp[K_RTNIDX].asObject) . */
+	 * please check KReturnType(sfp) . */
 	KFieldSet(p, p->name, name);
 	p->age = age;
 	RETURN_(p);
@@ -103,7 +103,7 @@ static KMETHOD Person_say(KonohaContext *kctx, KonohaStack *sfp)
 	const char *text = S_text(name);
 	char *buf = (char *)alloca(16 + S_size(name));
 	sprintf(buf, "hello , %s!", text);
-	RETURN_(KLIB new_kString(kctx, buf, strlen(buf), StringPolicy_TEXT));
+	RETURN_(KLIB new_kString(kctx, OnStack, buf, strlen(buf), StringPolicy_TEXT));
 }
 
 /* You can attach the following annotations to each methods. */
@@ -153,12 +153,12 @@ static kbool_t HelloWorld_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFi
 	return true;
 }
 
-static kbool_t HelloWorld_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t HelloWorld_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }
 
-static kbool_t HelloWorld_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t HelloWorld_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

@@ -44,7 +44,7 @@ static kbool_t new_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime
 
 static kExpr* NewExpr(KonohaContext *kctx, SugarSyntax *syn, kToken *tk, ktype_t ty)
 {
-	kExprVar *expr = GCSAFE_new(ExprVar, syn);
+	kExprVar *expr = new_(ExprVar, syn, OnGcStack);
 	KFieldSet(expr, expr->termToken, tk);
 	Expr_setTerm(expr, 1);
 	expr->build = TEXPR_NEW;
@@ -56,20 +56,20 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(stmt, tokenList, beginIdx, currentIdx, endIdx);
 	DBG_ASSERT(beginIdx == currentIdx);
-	kTokenVar *newToken = tokenList->tokenVarItems[beginIdx];   // new Class (
+	kTokenVar *newToken = tokenList->TokenVarItems[beginIdx];   // new Class (
 	KonohaClass *foundClass = NULL;
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	int nextIdx = SUGAR TokenUtils_parseTypePattern(kctx, ns, tokenList, beginIdx + 1, endIdx, &foundClass);
 	if(nextIdx != -1 && nextIdx < kArray_size(tokenList)) {
-		kToken *nextTokenAfterClassName = tokenList->tokenItems[nextIdx];
-//		if (ct->typeId == TY_void) {
+		kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
+//		if(ct->typeId == TY_void) {
 //			RETURN_(SUGAR kStmt_printMessage2(kctx, stmt, tk1, ErrTag, "undefined class: %s", S_text(tk1->text)));
-//		} else if (CT_is(Virtual, ct)) {
+//		} else if(CT_is(Virtual, ct)) {
 //			SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "invalid application of 'new' to incomplete class %s", CT_t(ct));
 //		}
 		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {  // new C (...)
 			SugarSyntax *syn = SYN_(ns, KW_ExprMethodCall);
-			kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, newToken, NewExpr(kctx, syn, tokenList->tokenVarItems[beginIdx+1], foundClass->typeId));
+			kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, newToken, NewExpr(kctx, syn, tokenList->TokenVarItems[beginIdx+1], foundClass->typeId));
 			newToken->resolvedSymbol = MN_new;
 			RETURN_(expr);
 		}
@@ -79,23 +79,23 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 			KonohaClass *classT0 = NULL;
 			kExpr *expr;
 			int hasGenerics = -1;
-			if (kArray_size(subTokenList) > 0) {
+			if(kArray_size(subTokenList) > 0) {
 				hasGenerics = SUGAR TokenUtils_parseTypePattern(kctx, ns, subTokenList, 0, kArray_size(subTokenList), &classT0);
 			}
-			if (hasGenerics != -1) {
+			if(hasGenerics != -1) {
 				/* new Type1[Type2[]] => Type1<Type2>.new Or Type1<Type2>.newList */
 				KonohaClass *realType = CT_p0(kctx, foundClass, classT0->typeId);
 				SugarSyntax *syn;// = (realType->baseTypeId != TY_Array) ? SYN_(ns, KW_ExprMethodCall) : newsyn;
 				syn = newsyn;
 				newToken->resolvedSymbol = (realType->baseTypeId != TY_Array) ? MN_new : MN_("newArray");
 				expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, newToken,
-						NewExpr(kctx, syn, tokenList->tokenVarItems[beginIdx+1], realType->typeId));
+						NewExpr(kctx, syn, tokenList->TokenVarItems[beginIdx+1], realType->typeId));
 			} else {
 				/* new Type1[] => Array<Type1>.newList */
 				KonohaClass *arrayClass = CT_p0(kctx, CT_Array, foundClass->typeId);
 				newToken->resolvedSymbol = MN_("newArray");
 				expr = SUGAR new_UntypedCallStyleExpr(kctx, newsyn, 2, newToken,
-						NewExpr(kctx, newsyn, tokenList->tokenVarItems[beginIdx+1], arrayClass->typeId));
+						NewExpr(kctx, newsyn, tokenList->TokenVarItems[beginIdx+1], arrayClass->typeId));
 			}
 			RETURN_(expr);
 		}
@@ -105,17 +105,17 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 // ----------------------------------------------------------------------------
 /* define class */
 
-static kbool_t new_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t new_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("new"), 0, NULL, 0, Precedence_CStyleCALL, NULL, Expression_new, NULL, NULL, NULL, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
 	return true;
 }
 
-static kbool_t new_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t new_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
 {
 	return true;
 }

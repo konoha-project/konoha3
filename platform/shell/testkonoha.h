@@ -54,7 +54,7 @@ static int test_kvproto(KonohaContext *kctx)
 {
 	size_t i;
 	kObject *o = K_NULL;
-	assert(sizeof(KUtilsKeyValue) == sizeof(void*) * 2);
+	assert(sizeof(KKeyValue) == sizeof(void*) * 2);
 	for(i=0; i < sizeof(keys)/sizeof(uintptr_t); i++) {
 		ksymbol_t key = (ksymbol_t)keys[i];
 		KLIB kObject_setUnboxValue(kctx, o, key, TY_int, i);
