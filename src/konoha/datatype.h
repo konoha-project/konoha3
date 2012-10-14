@@ -53,20 +53,6 @@ static void kObject_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vi
 	END_REFTRACE();
 }
 
-static kObject *new_kObjectDontUseThis(KonohaContext *kctx, KonohaClass *ct, uintptr_t conf, kArray *gcstackNULL)
-{
-	DBG_ASSERT(ct->cstruct_size > 0);
-	kObjectVar *o = KLIB KallocObject(kctx->gcContext, ct);
-	o->h.magicflag = ct->magicflag;
-	o->h.ct = ct;
-	o->h.kvproto = (KGrowingArray*) Kprotomap_new(0);
-	ct->init(kctx, (kObject*)o, (void*)conf);
-	if(gcstackNULL != NULL) {
-		KLIB kArray_add(kctx, gcstackNULL, o);
-	}
-	return (kObject*)o;
-}
-
 static kObject *new_kObject(KonohaContext *kctx, kArray *gcstackNULL, KonohaClass *ct, uintptr_t conf)
 {
 	DBG_ASSERT(ct->cstruct_size > 0);
@@ -225,13 +211,13 @@ static kString* new_kString(KonohaContext *kctx, kArray *gcstack, const char *te
 	kStringVar *s = NULL; //knh_PtrMap_getS(kctx, ct->constPoolMapNULL, text, len);
 	if(s != NULL) return s;
 	if(TFLAG_is(int, spol, StringPolicy_TEXT)) {
-		s = (kStringVar*)new_kObjectDontUseThis(kctx, ct, 0, gcstack);
+		s = (kStringVar*)new_kObject(kctx, gcstack, ct, 0);
 		s->text = text;
 		s->bytesize = len;
 		S_setTextSgm(s, 1);
 	}
 	else if(len + 1 < sizeof(void*) * 2) {
-		s = (kStringVar*)new_kObjectDontUseThis(kctx, ct, 0, gcstack);
+		s = (kStringVar*)new_kObject(kctx, gcstack, ct, 0);
 		s->text = s->inline_text;
 		s->bytesize = len;
 		S_setTextSgm(s, 1);
@@ -242,7 +228,7 @@ static kString* new_kString(KonohaContext *kctx, kArray *gcstack, const char *te
 		s->buf[len] = '\0';
 	}
 	else {
-		s = (kStringVar*)new_kObjectDontUseThis(kctx, ct, 0, gcstack);
+		s = (kStringVar*)new_kObject(kctx, gcstack, ct, 0);
 		s->bytesize = len;
 		s->buf = (char*)KMalloc_UNTRACE(len+1);
 		S_setTextSgm(s, 0);
@@ -405,7 +391,7 @@ static kParam *new_Param(KonohaContext *kctx, kArray *gcstack, ktype_t rtype, in
 
 	KonohaClass *ct = CT_(TY_Param);
 	ct = KonohaClass_extendedBody(kctx, ct, sizeof(void*), psize * sizeof(kparamtype_t));
-	kParamVar *pa = (kParamVar*)new_kObjectDontUseThis(kctx, ct, 0, gcstack);
+	kParamVar *pa = (kParamVar*)new_kObject(kctx, gcstack, ct, 0);
 	pa->rtype = rtype;
 	pa->psize = psize;
 	if(psize > 0) {
