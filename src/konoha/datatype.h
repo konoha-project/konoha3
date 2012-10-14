@@ -388,7 +388,6 @@ static void kParam_init(KonohaContext *kctx, kObject *o, void *conf)
 
 static kParam *new_Param(KonohaContext *kctx, kArray *gcstack, ktype_t rtype, int psize, const kparamtype_t *p)
 {
-
 	KonohaClass *ct = CT_(TY_Param);
 	ct = KonohaClass_extendedBody(kctx, ct, sizeof(void*), psize * sizeof(kparamtype_t));
 	kParamVar *pa = (kParamVar*)new_kObject(kctx, gcstack, ct, 0);
