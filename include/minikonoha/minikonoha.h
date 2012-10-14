@@ -463,7 +463,7 @@ struct PlatformApiVar {
 	} while (0)
 
 #define KTraceApi(TRACE, POLICY, APINAME, ...)    do {\
-		static logconf_t _logconf = {isRecord|LOGPOOL_INIT|POLICY};\
+		static logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|POLICY)};\
 		if(trace != NULL && TFLAG_is(int, _logconf.policy, isRecord)) {\
 			PLATAPI traceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
 		}\

@@ -32,7 +32,7 @@
 /* checking header files can compile at g++ */
 int main(int argc, char const* argv[])
 {
-    KonohaContext* konoha = konoha_open(KonohaUtils_getDefaultPlatformApi());
-    konoha_close(konoha);
+//    KonohaContext* konoha = konoha_open(KonohaUtils_getDefaultPlatformApi());
+//    konoha_close(konoha);
     return 0;
 }
