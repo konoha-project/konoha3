@@ -62,7 +62,7 @@ extern "C" {
 
 // -------------------------------------------------------------------------
 
-static const char *getSystemCharset(void)
+static const char *isSystemCharsetUTF8(void)
 {
 	static char codepage[64];
 	snprintf(codepage, sizeof(codepage), "CP%d", (int)GetACP());
@@ -509,7 +509,7 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.setjmp_i        = ksetjmp;
 	plat.longjmp_i       = klongjmp;
 	loadIconv(&plat);
-	plat.getSystemCharset = getSystemCharset;
+	plat.isSystemCharsetUTF8 = isSystemCharsetUTF8;
 	plat.printf_i        = printf;
 	plat.vprintf_i       = vprintf;
 	plat.snprintf_i      = snprintf;  // avoid to use Xsnprintf

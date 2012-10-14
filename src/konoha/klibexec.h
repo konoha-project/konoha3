@@ -133,6 +133,33 @@ static void Kwb_free(KGrowingBuffer *wb)
 	m->bytesize = wb->pos;
 }
 
+static kbool_t Kwb_iconv(KonohaContext *kctx, KGrowingBuffer* wb, uintptr_t iconv, const char *sourceBuf, size_t sourceSize, KTraceInfo *trace)
+{
+	char convBuf[K_PAGESIZE];
+	char *presentPtrFrom = (char*)sourceBuf;
+	char *presentPtrTo = convBuf;
+	char ** inbuf = &presentPtrFrom;
+	char ** outbuf = &presentPtrTo;
+	size_t inBytesLeft = sourceSize, outBytesLeft = K_PAGESIZE;
+
+	while (inBytesLeft > 0) {
+		int isTooBig;
+		memset(convBuf, '\0', K_PAGESIZE);
+		size_t iconv_ret = PLATAPI iconv_i(kctx, iconv, inbuf, &inBytesLeft, outbuf, &outBytesLeft, &isTooBig, trace);
+		size_t processedSize = K_PAGESIZE - outBytesLeft;
+		KLIB Kwb_write(kctx, wb, convBuf, processedSize);
+		if(isTooBig) {   // input is too big. reset convbuf
+			presentPtrTo = convBuf;
+			outBytesLeft = K_PAGESIZE;
+			continue;
+		}
+		if(iconv_ret == -1) {
+			return false;
+		}
+	} /* end of converting loop */
+	return true;
+}
+
 // -------------------------------------------------------------------------
 // KHashMap
 

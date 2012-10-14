@@ -59,55 +59,132 @@ extern "C" {
 #endif
 
 #define kunused __attribute__((unused))
+
+
 // -------------------------------------------------------------------------
+/* I18N */
 
-static const char *getSystemCharset(void)
+static uintptr_t I18N_iconv_open(KonohaContext *kctx, const char *targetCharset, const char *sourceCharset, KTraceInfo *trace)
 {
-#if defined(K_USING_WINDOWS_)
-	static char codepage[64];
-	knh_snprintf(codepage, sizeof(codepage), "CP%d", (int)GetACP());
-	return codepage;
-#else
-	return "UTF-8";
-#endif
+	uintptr_t ic = (uintptr_t)iconv_open(targetCharset, sourceCharset);
+	if(ic == ICONV_NULL) {
+		KTraceApi(trace, DataFault|ScriptFault, "iconv_open",
+			LogText("tocode", targetCharset), LogText("fromcode", sourceCharset), LogErrno
+		);
+	}
+	return (uintptr_t)iconv;
 }
 
-typedef uintptr_t (*ficonv_open)(const char *, const char *);
-typedef size_t (*ficonv)(uintptr_t, char **, size_t *, char **, size_t *);
-typedef int    (*ficonv_close)(uintptr_t);
-
-static kunused uintptr_t dummy_iconv_open(const char *t, const char *f)
+static size_t I18N_iconv(KonohaContext *kctx, uintptr_t ic, char **outbuf, size_t *outBytesLeft, char **inbuf, size_t *inBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
 {
-	return -1;
-}
-static kunused size_t dummy_iconv(uintptr_t i, char **t, size_t *ts, char **f, size_t *fs)
-{
-	return 0;
-}
-static kunused int dummy_iconv_close(uintptr_t i)
-{
-	return 0;
+	DBG_ASSERT(ic != ICONV_NULL);
+	size_t iconv_ret = iconv((iconv_t)ic, inbuf, inBytesLeft, outbuf, outBytesLeft);
+	if(iconv_ret == ((size_t)-1)) {
+		if(errno == E2BIG) {   // input is too big.
+			isTooBigSourceRef[0] = true;
+			return iconv_ret;
+		}
+		KTraceApi(trace, DataFault, "iconv", LogErrno);
+	}
+	isTooBigSourceRef[0] = false;
+	return iconv_ret;
 }
 
-static void loadIconv(PlatformApiVar *plat)
+static int I18N_iconv_close(KonohaContext *kctx, uintptr_t ic)
 {
-#ifdef _ICONV_H
-	plat->iconv_open_i    = (ficonv_open)iconv_open;
-	plat->iconv_i         = (ficonv)iconv;
-	plat->iconv_close_i   = (ficonv_close)iconv_close;
-#else
-	void *handler = dlopen("libiconv" K_OSDLLEXT, RTLD_LAZY);
-	if(handler != NULL) {
-		plat->iconv_open_i = (ficonv_open)dlsym(handler, "iconv_open");
-		plat->iconv_i = (ficonv)dlsym(handler, "iconv");
-		plat->iconv_close_i = (ficonv_close)dlsym(handler, "iconv_close");
+	return iconv_close((iconv_t)ic);
+}
+
+static kbool_t I18N_isSystemCharsetUTF8(KonohaContext *kctx)
+{
+	const char *t = PLATAPI systemCharset;
+	return (t[0] == 'U' && t[5] == 0 && t[4] == '8' && t[3] == '-' && t[2] == 'F'); // "UTF-8"
+}
+
+static uintptr_t I18N_iconvSystemCharsetToUTF8(KonohaContext *kctx, KTraceInfo *trace)
+{
+	return PLATAPI iconv_open_i(kctx, "UTF-8", PLATAPI systemCharset, trace);
+}
+
+static uintptr_t I18N_iconvUTF8ToSystemCharset(KonohaContext *kctx, KTraceInfo *trace)
+{
+	return PLATAPI iconv_open_i(kctx, PLATAPI systemCharset, "UTF-8", trace);
+}
+
+static const char* I18N_formatKonohaPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
+{
+	uintptr_t ic = PLATAPI iconvUTF8ToSystemCharset(kctx, trace);
+	size_t newsize;
+	if(ic != ICONV_NULL) {
+		int isTooBig;
+		char *presentPtrFrom = (char*)path;
+		char ** inbuf = &presentPtrFrom;
+		char ** outbuf = &buf;
+		size_t inBytesLeft = pathsize, outBytesLeft = bufsiz - 1;
+		PLATAPI iconv_i(kctx, ic, inbuf, &inBytesLeft, outbuf, &outBytesLeft, &isTooBig, trace);
+		newsize = (bufsiz - 1) - outBytesLeft;
 	}
 	else {
-		plat->iconv_open_i = dummy_iconv_open;
-		plat->iconv_i = dummy_iconv;
-		plat->iconv_close_i = dummy_iconv_close;
+		DBG_ASSERT(bufsiz > pathsize);
+		memcpy(buf, path, pathsize);
+		newsize = pathsize;
 	}
-#endif /* _ICONV_H */
+	buf[newsize] = 0;
+	return (const char*)buf;  // stub (in case of no conversion)
+}
+
+static const char* I18N_formatSystemPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
+{
+	return path;  // stub (in case of no conversion)
+}
+
+//typedef uintptr_t (*ficonv_open)(const char *, const char *);
+//typedef size_t (*ficonv)(uintptr_t, char **, size_t *, char **, size_t *);
+//typedef int    (*ficonv_close)(uintptr_t);
+//
+//static kunused uintptr_t dummy_iconv_open(const char *t, const char *f)
+//{
+//	return -1;
+//}
+//static kunused size_t dummy_iconv(uintptr_t i, char **t, size_t *ts, char **f, size_t *fs)
+//{
+//	return 0;
+//}
+//static kunused int dummy_iconv_close(uintptr_t i)
+//{
+//	return 0;
+//}
+//
+
+static void loadI18N(PlatformApiVar *plat, const char *defaultCharSet)
+{
+	plat->systemCharset  = (defaultCharSet == NULL) ? "UTF-8" : defaultCharSet;
+	plat->iconv_open_i   = I18N_iconv_open;
+	plat->iconv_i        = I18N_iconv;
+	plat->iconv_close_i  = I18N_iconv_close;
+	plat->isSystemCharsetUTF8 = I18N_isSystemCharsetUTF8;
+	plat->iconvSystemCharsetToUTF8 = I18N_iconvSystemCharsetToUTF8;
+	plat->iconvUTF8ToSystemCharset = I18N_iconvUTF8ToSystemCharset;
+	plat->formatKonohaPath = I18N_formatKonohaPath;
+	plat->formatSystemPath = I18N_formatSystemPath;
+
+//#ifdef _ICONV_H
+//	plat->iconv_open_i    = (ficonv_open)iconv_open;
+//	plat->iconv_i         = (ficonv)iconv;
+//	plat->iconv_close_i   = (ficonv_close)iconv_close;
+//#else
+//	void *handler = dlopen("libiconv" K_OSDLLEXT, RTLD_LAZY);
+//	if(handler != NULL) {
+//		plat->iconv_open_i = (ficonv_open)dlsym(handler, "iconv_open");
+//		plat->iconv_i = (ficonv)dlsym(handler, "iconv");
+//		plat->iconv_close_i = (ficonv_close)dlsym(handler, "iconv_close");
+//	}
+//	else {
+//		plat->iconv_open_i = dummy_iconv_open;
+//		plat->iconv_i = dummy_iconv;
+//		plat->iconv_close_i = dummy_iconv_close;
+//	}
+//#endif /* _ICONV_H */
 }
 
 // -------------------------------------------------------------------------
@@ -172,21 +249,12 @@ static int pthread_mutex_init_recursive(kmutex_t *mutex)
 
 // -------------------------------------------------------------------------
 
-static const char* formatSystemPath(char *buf, size_t bufsiz, const char *path)
-{
-	return path;  // stub (in case of no conversion)
-}
-
-static const char* formatKonohaPath(char *buf, size_t bufsiz, const char *path)
-{
-	return path;  // stub (in case of no conversion)
-}
-
 static kbool_t isDir(const char *path)
 {
 	struct stat buf;
-	char pathbuf[K_PATHMAX];
-	if(stat(formatSystemPath(pathbuf, sizeof(pathbuf), path), &buf) == 0) {
+//	char pathbuf[K_PATHMAX];
+//	if(stat(I18N_formatSystemPath(pathbuf, sizeof(pathbuf), path), &buf) == 0) {
+	if(stat(path, &buf) == 0) {
 		return S_ISDIR(buf.st_mode);
 	}
 	return false;
@@ -488,7 +556,7 @@ static void PlatformApi_loadReadline(PlatformApiVar *plat)
 #define EBUFSIZ 1024
 #include "libcode/logtext_formatter.h"
 
-static void traceDataLog(void *logger, int logkey, logconf_t *logconf, ...)
+static void traceDataLog(KonohaContext *kctx, KTraceInfo *trace, int logkey, logconf_t *logconf, ...)
 {
 	char buf[EBUFSIZ];
 	va_list ap;
@@ -515,8 +583,8 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.free_i          = free;
 	plat.setjmp_i        = ksetjmp;
 	plat.longjmp_i       = klongjmp;
-	loadIconv(&plat);
-	plat.getSystemCharset = getSystemCharset;
+	loadI18N(&plat, "UTF-8");
+
 	plat.printf_i        = printf;
 	plat.vprintf_i       = vprintf;
 	plat.snprintf_i      = snprintf;  // avoid to use Xsnprintf
@@ -535,8 +603,6 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.shortFilePath       = shortFilePath;
 	plat.formatPackagePath   = formatPackagePath;
 	plat.formatTransparentPath = formatTransparentPath;
-	plat.formatKonohaPath = formatKonohaPath;
-	plat.formatSystemPath = formatSystemPath;
 	plat.loadPackageHandler  = loadPackageHandler;
 	plat.loadScript          = loadScript;
 	plat.beginTag            = beginTag;

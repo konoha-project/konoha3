@@ -117,212 +117,7 @@ typedef long long ssize_t;
 #endif
 
 /* ------------------------------------------------------------------------ */
-/* platform */
-
-typedef const struct PlatformApiVar  PlatformApi;
-typedef struct PlatformApiVar        PlatformApiVar;
-typedef const struct KonohaLibVar    KonohaLib;
-typedef struct KonohaLibVar          KonohaLibVar;
-
-#define TEXTSIZE(T)   T, (sizeof(T) - 1)
-#define PLATAPI (kctx->platApi)->
-#define KLIB    (kctx->klib)->
-
-#define KDEFINE_PACKAGE KonohaPackageHandler
-typedef struct KonohaPackageHandlerVar KonohaPackageHandler;
-typedef KonohaPackageHandler* (*PackageLoadFunc)(void);
-
-#ifndef jmpbuf_i
-#include <setjmp.h>
-#define jmpbuf_i jmp_buf
-#if defined(__MINGW64__)
-static inline int setjmp_mingw(_JBTYPE* t)
-{
-	return _setjmp(t, NULL);
-}
-#define ksetjmp  setjmp_mingw
-#elif defined(__MINGW32__) || defined(_MSC_VER)
-#define ksetjmp  _setjmp
-#else
-#define ksetjmp  setjmp
-#endif
-#define klongjmp longjmp
-#endif /*jmpbuf_i*/
-
-#ifdef _MSC_VER
-#include <malloc.h>
-#endif
-#define ALLOCA(T, SIZE) ((T*)alloca((SIZE) * sizeof(T)))
-
-#ifndef K_USE_PTHREAD
-typedef void kmutex_t;
-typedef void kmutexattr_t;
-#define KInitLock(X)
-#define KInitRrcureiveLock(X)
-#define KLock(X)
-#define KUnlock(X)
-#define KFreeLock(X)
-#else
-#include <pthread.h>
-typedef pthread_mutex_t     kmutex_t;
-typedef pthread_mutexattr_t kmutexattr_t;
-#define KInitLock(X)    do {\
-	X = (kmutex_t*)KCALLOC(sizeof(kmutex_t), 1);\
-	PLATAPI pthread_mutex_init_i(X, NULL);\
-} while (0)
-
-#define KInitRrcureiveLock(X)    PLATAPI pthread_mutex_init_recursive(X)
-#define KLock(X)        PLATAPI pthread_mutex_lock_i(X)
-#define KUnlock(X)      PLATAPI pthread_mutex_unlock_i(X)
-#define KFreeLock(X)    do {\
-	PLATAPI pthread_mutex_destroy_i(X);\
-	KFREE(X, sizeof(kmutex_t));\
-	X = NULL;\
-} while (0)
-
-#endif
-
-typedef enum {
-	CritTag, ErrTag, WarnTag, NoticeTag, InfoTag, DebugTag, NoneTag
-} kinfotag_t;
-
-typedef enum {
-	Unrecord = 0,
-	isRecord = 1,
-	// Fault
-	SystemFault       =  (1<<1),  /* os, file system, etc. */
-	ScriptFault       =  (1<<2),  /* programmer's mistake */
-	DataFault         =  (1<<3),  /* user input, data mistake */
-	ExternalFault     =  (1<<4),  /* networking or remote services */
-	UnknownFault      =  (1<<5),  /* other fault above */
-	// LogPoint
-	PeriodicPoint     =  (1<<6),  /* sampling */
-	PreactionPoint    =  (1<<7),  /* prediction WARN */
-	ActionPoint       =  (1<<8),
-	SecurityAudit     =  (1<<9),  /* security audit */
-	// Otehr flag
-	PrivacyCaution    =  (1<<10), /* including privacy information */
-	// Internal Use
-	LOGPOOL_INIT      =  (1<<12)
-} logpolicy_t;
-
-typedef struct logconf_t {
-	logpolicy_t policy;
-	void *formatter; // for precompiled formattings
-} logconf_t;
-
-struct PlatformApiVar {
-	// settings
-	const char *name;
-	size_t  stacksize;
-
-	// system info
-	const char* (*getenv_i)(const char*);
-
-	/* memory allocation / deallocation */
-	void *(*malloc_i)(size_t size);
-	void  (*free_i)  (void *ptr);
-
-	// setjmp
-	int     (*setjmp_i)(jmpbuf_i);
-	void    (*longjmp_i)(jmpbuf_i, int);
-
-	// iconv + system path
-	uintptr_t   (*iconv_open_i)(const char* tocode, const char* fromcode);
-	size_t      (*iconv_i)(uintptr_t iconv, char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft);
-	int         (*iconv_close_i)(uintptr_t iconv);
-	const char* (*getSystemCharset)(void);
-	const char* (*formatSystemPath)(char *buf, size_t bufsiz, const char *path);
-	const char* (*formatKonohaPath)(char *buf, size_t bufsiz, const char *path);
-
-	// time
-	unsigned long long (*getTimeMilliSecond)(void);
-
-	/* message */
-	int     (*printf_i)(const char *fmt, ...) __PRINTFMT(2, 3);
-	int     (*vprintf_i)(const char *fmt, va_list args);
-	int     (*snprintf_i)(char *str, size_t size, const char *fmt, ...);
-	int     (*vsnprintf_i)(char *str, size_t size, const char *fmt, va_list args);
-
-	void    (*qsort_i)(void *base, size_t nel, size_t width, int (*compar)(const void *, const void *));
-	// abort
-	void    (*exit_i)(int p);
-
-	// pthread
-	int     (*pthread_mutex_init_i)(kmutex_t *mutex, const kmutexattr_t *attr);
-	int     (*pthread_mutex_lock_i)(kmutex_t *mutex);
-	int     (*pthread_mutex_trylock_i)(kmutex_t *mutex);
-	int     (*pthread_mutex_unlock_i)(kmutex_t *mutex);
-	int     (*pthread_mutex_destroy_i)(kmutex_t *mutex);
-	int     (*pthread_mutex_init_recursive)(kmutex_t *mutex);
-
-	/* high-level functions */
-
-	// file load
-	const char* (*shortFilePath)(const char *path);
-	const char* (*formatPackagePath)(char *buf, size_t bufsiz, const char *packageName, const char *ext);
-	const char* (*formatTransparentPath)(char *buf, size_t bufsiz, const char *parent, const char *path);
-	KonohaPackageHandler* (*loadPackageHandler)(const char *packageName);
-	int (*loadScript)(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *));
-
-	// message (cui)
-	char*  (*readline_i)(const char *prompt);
-	int    (*add_history_i)(const char *);
-
-	const char* (*shortText)(const char *msg);
-	const char* (*beginTag)(kinfotag_t);
-	const char* (*endTag)(kinfotag_t);
-	void (*reportCaughtException)(const char *exceptionName, const char *scriptName, int line, const char *optionalMessage);
-	void  (*debugPrintf)(const char *file, const char *func, int line, const char *fmt, ...) __PRINTFMT(4, 5);
-
-	// logging, trace
-	const char *LOGGER_NAME;
-	void  (*syslog_i)(int priority, const char *message, ...) __PRINTFMT(2, 3);
-	void  (*vsyslog_i)(int priority, const char *message, va_list args);
-	void   *logger;  // logger handler
-	void  (*traceDataLog)(void *, int, logconf_t *, ...);
-	void  (*diagnosis)(void);
-};
-
-#define LOG_END   0
-#define LOG_s     1
-#define LOG_u     2
-#define LOG_ERRNO 3
-
-#define LogUint(K,V)    LOG_u, (K), ((uintptr_t)V)
-#define LogText(K,V)    LOG_s, (K), (V)
-#define LogErrno        LOG_ERRNO
-#define LogScriptLine(sfp)   LogText("ScriptName", FileId_t(sfp[K_RTNIDX].callerFileLine)), LogUint("ScriptLine", (ushort_t)sfp[K_RTNIDX].callerFileLine)
-
-#define KTrace(POLICY, LOGKEY, ...)    do {\
-		static logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|POLICY)};\
-		if(TFLAG_is(int, _logconf.policy, isRecord)) {\
-			PLATAPI traceDataLog(PLATAPI logger, LOGKEY, &_logconf, ## __VA_ARGS__, LOG_END);\
-		}\
-	} while (0)
-
-#define KTraceApi(POLICY, APINAME, ...)    do {\
-		static logconf_t _logconf = {isRecord|LOGPOOL_INIT|POLICY};\
-		if(TFLAG_is(int, _logconf.policy, isRecord)) {\
-			PLATAPI traceDataLog(PLATAPI logger, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
-		}\
-	} while (0)
-
-#define KSetElaspedTimer(TIMER)  TIMER = PLATAPI getTimeMilliSecond()
-
-#define KTraceApiElapsedTimer(POLICY, TPOLICY, APINAME, TIMER, ...)    do {\
-		static logconf_t _logconf = {isRecord|LOGPOOL_INIT|POLICY};\
-		unsigned long long elapsed_time = PLATAPI getTimeMilliSecond() - TIMER;\
-		if((elapsed_time) >= (TPOLICY) && TFLAG_is(int, _logconf.policy, isRecord)) {\
-			PLATAPI traceDataLog(PLATAPI logger, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), LogUint("ElapsedTime", elapsed_time), ## __VA_ARGS__, LOG_END);\
-		}\
-	} while (0)
-
-
-#define OLDTRACE_SWITCH_TO_KTrace(POLICY, ...)
-
-/* ------------------------------------------------------------------------ */
-/* type */
+/* datatype */
 
 #if defined(__LP64__) || defined(_WIN64)
 #define K_USING_SYS64_    1
@@ -464,6 +259,233 @@ typedef struct {
 #define MN_as(cid)           ((CT_(cid)->classNameSymbol) | MN_ASCID)
 #define MN_isASCID(mn)       ((SYM_UNMASK(mn)) == MN_ASCID)
 
+
+/* ------------------------------------------------------------------------ */
+/* platform */
+
+typedef const struct KonohaContextVar   KonohaContext;
+typedef struct KonohaContextVar         KonohaContextVar;
+
+typedef const struct PlatformApiVar  PlatformApi;
+typedef struct PlatformApiVar        PlatformApiVar;
+typedef const struct KonohaLibVar    KonohaLib;
+typedef struct KonohaLibVar          KonohaLibVar;
+
+#define TEXTSIZE(T)   T, (sizeof(T) - 1)
+#define PLATAPI (kctx->platApi)->
+#define KLIB    (kctx->klib)->
+
+#define KDEFINE_PACKAGE KonohaPackageHandler
+typedef struct KonohaPackageHandlerVar KonohaPackageHandler;
+typedef KonohaPackageHandler* (*PackageLoadFunc)(void);
+
+#define ICONV_NULL ((uintptr_t)-1)
+
+#ifndef jmpbuf_i
+#include <setjmp.h>
+#define jmpbuf_i jmp_buf
+#if defined(__MINGW64__)
+static inline int setjmp_mingw(_JBTYPE* t)
+{
+	return _setjmp(t, NULL);
+}
+#define ksetjmp  setjmp_mingw
+#elif defined(__MINGW32__) || defined(_MSC_VER)
+#define ksetjmp  _setjmp
+#else
+#define ksetjmp  setjmp
+#endif
+#define klongjmp longjmp
+#endif /*jmpbuf_i*/
+
+#ifdef _MSC_VER
+#include <malloc.h>
+#endif
+#define ALLOCA(T, SIZE) ((T*)alloca((SIZE) * sizeof(T)))
+
+#ifndef K_USE_PTHREAD
+typedef void kmutex_t;
+typedef void kmutexattr_t;
+#define KInitLock(X)
+#define KInitRrcureiveLock(X)
+#define KLock(X)
+#define KUnlock(X)
+#define KFreeLock(X)
+#else
+#include <pthread.h>
+typedef pthread_mutex_t     kmutex_t;
+typedef pthread_mutexattr_t kmutexattr_t;
+#define KInitLock(X)    do {\
+	X = (kmutex_t*)KCALLOC(sizeof(kmutex_t), 1);\
+	PLATAPI pthread_mutex_init_i(X, NULL);\
+} while (0)
+
+#define KInitRrcureiveLock(X)    PLATAPI pthread_mutex_init_recursive(X)
+#define KLock(X)        PLATAPI pthread_mutex_lock_i(X)
+#define KUnlock(X)      PLATAPI pthread_mutex_unlock_i(X)
+#define KFreeLock(X)    do {\
+	PLATAPI pthread_mutex_destroy_i(X);\
+	KFREE(X, sizeof(kmutex_t));\
+	X = NULL;\
+} while (0)
+
+#endif
+
+typedef enum {
+	CritTag, ErrTag, WarnTag, NoticeTag, InfoTag, DebugTag, NoneTag
+} kinfotag_t;
+
+typedef enum {
+	Unrecord = 0,
+	isRecord = 1,
+	// Fault
+	SystemFault       =  (1<<1),  /* os, file system, etc. */
+	ScriptFault       =  (1<<2),  /* programmer's mistake */
+	DataFault         =  (1<<3),  /* user input, data mistake */
+	ExternalFault     =  (1<<4),  /* networking or remote services */
+	UnknownFault      =  (1<<5),  /* other fault above */
+	// LogPoint
+	PeriodicPoint     =  (1<<6),  /* sampling */
+	PreactionPoint    =  (1<<7),  /* prediction WARN */
+	ActionPoint       =  (1<<8),
+	SecurityAudit     =  (1<<9),  /* security audit */
+	// Otehr flag
+	PrivacyCaution    =  (1<<10), /* including privacy information */
+	// Internal Use
+	LOGPOOL_INIT      =  (1<<12)
+} logpolicy_t;
+
+typedef struct logconf_t {
+	logpolicy_t policy;
+	void *formatter; // for precompiled formattings
+} logconf_t;
+
+typedef struct KTraceInfo {
+	struct KonohaStack *baseStack;
+	kfileline_t pline;
+} KTraceInfo;
+
+#define KMakeTrace(TRACENAME, sfp) \
+	KTraceInfo TRACENAME##REF_ = {sfp, sfp[K_RTNIDX].callerFileLine}, * TRACENAME = &TRACENAME##REF_;
+
+struct PlatformApiVar {
+	// settings
+	const char *name;
+	size_t  stacksize;
+
+	/* memory allocation / deallocation */
+	void *(*malloc_i)(size_t size);
+	void  (*free_i)  (void *ptr);
+
+	// setjmp
+	int     (*setjmp_i)(jmpbuf_i);
+	void    (*longjmp_i)(jmpbuf_i, int);
+
+	// system info
+	const char* (*getenv_i)(const char*);
+
+	// I18N
+	uintptr_t   (*iconv_open_i)(KonohaContext *, const char* tocode, const char* fromcode, KTraceInfo *);
+	size_t      (*iconv_i)(KonohaContext *, uintptr_t iconv, char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft, int *isTooBigRef, KTraceInfo *trace);
+	int         (*iconv_close_i)(KonohaContext *, uintptr_t iconv);
+	const char* systemCharset;
+	kbool_t     (*isSystemCharsetUTF8)(KonohaContext *);
+	uintptr_t   (*iconvUTF8ToSystemCharset)(KonohaContext *, KTraceInfo *);
+	uintptr_t   (*iconvSystemCharsetToUTF8)(KonohaContext *, KTraceInfo *);
+	const char* (*formatSystemPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
+	const char* (*formatKonohaPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
+
+	// time
+	unsigned long long (*getTimeMilliSecond)(void);
+
+	/* message */
+	int     (*printf_i)(const char *fmt, ...) __PRINTFMT(2, 3);
+	int     (*vprintf_i)(const char *fmt, va_list args);
+	int     (*snprintf_i)(char *str, size_t size, const char *fmt, ...);
+	int     (*vsnprintf_i)(char *str, size_t size, const char *fmt, va_list args);
+
+	void    (*qsort_i)(void *base, size_t nel, size_t width, int (*compar)(const void *, const void *));
+	// abort
+	void    (*exit_i)(int p);
+
+	// pthread
+	int     (*pthread_mutex_init_i)(kmutex_t *mutex, const kmutexattr_t *attr);
+	int     (*pthread_mutex_lock_i)(kmutex_t *mutex);
+	int     (*pthread_mutex_trylock_i)(kmutex_t *mutex);
+	int     (*pthread_mutex_unlock_i)(kmutex_t *mutex);
+	int     (*pthread_mutex_destroy_i)(kmutex_t *mutex);
+	int     (*pthread_mutex_init_recursive)(kmutex_t *mutex);
+
+	/* high-level functions */
+
+	// file load
+	const char* (*shortFilePath)(const char *path);
+	const char* (*formatPackagePath)(char *buf, size_t bufsiz, const char *packageName, const char *ext);
+	const char* (*formatTransparentPath)(char *buf, size_t bufsiz, const char *parent, const char *path);
+	KonohaPackageHandler* (*loadPackageHandler)(const char *packageName);
+	int (*loadScript)(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *));
+
+	// message (cui)
+	char*  (*readline_i)(const char *prompt);
+	int    (*add_history_i)(const char *);
+
+	const char* (*shortText)(const char *msg);
+	const char* (*beginTag)(kinfotag_t);
+	const char* (*endTag)(kinfotag_t);
+	void (*reportCaughtException)(const char *exceptionName, const char *scriptName, int line, const char *optionalMessage);
+	void  (*debugPrintf)(const char *file, const char *func, int line, const char *fmt, ...) __PRINTFMT(4, 5);
+
+	// logging, trace
+	const char *LOGGER_NAME;
+	void  (*syslog_i)(int priority, const char *message, ...) __PRINTFMT(2, 3);
+	void  (*vsyslog_i)(int priority, const char *message, va_list args);
+	void   *logger;  // logger handler
+	void  (*traceDataLog)(KonohaContext *kctx, KTraceInfo *trace, int, logconf_t *, ...);
+	void  (*diagnosis)(void);
+};
+
+#define LOG_END   0
+#define LOG_s     1
+#define LOG_u     2
+#define LOG_ERRNO 3
+
+#define LogUint(K,V)    LOG_u, (K), ((uintptr_t)V)
+#define LogText(K,V)    LOG_s, (K), (V)
+#define LogErrno        LOG_ERRNO
+#define LogLine(UL)     LogText("ScriptName", FileId_t(UL)), LogUint("ScriptLine", (kushort_t)(UL))
+#define LogScriptLine(sfp)   LogText("ScriptName", FileId_t(sfp[K_RTNIDX].callerFileLine)), LogUint("ScriptLine", (kushort_t)sfp[K_RTNIDX].callerFileLine)
+
+#define KTrace(POLICY, LOGKEY, ...)    do {\
+		static logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|POLICY)};\
+		if(TFLAG_is(int, _logconf.policy, isRecord)) {\
+			PLATAPI traceDataLog(PLATAPI logger, LOGKEY, &_logconf, ## __VA_ARGS__, LOG_END);\
+		}\
+	} while (0)
+
+#define KTraceApi(TRACE, POLICY, APINAME, ...)    do {\
+		static logconf_t _logconf = {isRecord|LOGPOOL_INIT|POLICY};\
+		if(trace != NULL && TFLAG_is(int, _logconf.policy, isRecord)) {\
+			PLATAPI traceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
+		}\
+	} while (0)
+
+#define KSetElaspedTimer(TIMER)  TIMER = PLATAPI getTimeMilliSecond()
+
+#define KTraceApiElapsedTimer(POLICY, TPOLICY, APINAME, TIMER, ...)    do {\
+		static logconf_t _logconf = {isRecord|LOGPOOL_INIT|POLICY};\
+		unsigned long long elapsed_time = PLATAPI getTimeMilliSecond() - TIMER;\
+		if((elapsed_time) >= (TPOLICY) && TFLAG_is(int, _logconf.policy, isRecord)) {\
+			PLATAPI traceDataLog(PLATAPI logger, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), LogUint("ElapsedTime", elapsed_time), ## __VA_ARGS__, LOG_END);\
+		}\
+	} while (0)
+
+
+#define OLDTRACE_SWITCH_TO_KTrace(POLICY, ...)
+
+/* ------------------------------------------------------------------------ */
+/* type */
+
+
 /* ------------------------------------------------------------------------ */
 
 #define kAbstractObject                 const void
@@ -569,8 +591,6 @@ struct KHashMap {
 
 /* ------------------------------------------------------------------------ */
 
-typedef const struct KonohaContextVar   KonohaContext;
-typedef struct KonohaContextVar         KonohaContextVar;
 typedef const struct KonohaClassVar     KonohaClass;
 typedef struct KonohaClassVar           KonohaClassVar;
 typedef struct KonohaClassField         KonohaClassField;

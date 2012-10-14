@@ -61,7 +61,7 @@ extern "C" {
 #define kunused __attribute__((unused))
 // -------------------------------------------------------------------------
 
-static const char *getSystemCharset(void)
+static const char *isSystemCharsetUTF8(void)
 {
 #if defined(K_USING_WINDOWS_)
 	static char codepage[64];
@@ -515,7 +515,7 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.setjmp_i        = ksetjmp;
 	plat.longjmp_i       = klongjmp;
 	loadIconv(&plat);
-	plat.getSystemCharset = getSystemCharset;
+	plat.isSystemCharsetUTF8 = isSystemCharsetUTF8;
 	plat.printf_i        = printf;
 	plat.vprintf_i       = vprintf;
 	plat.snprintf_i      = snprintf;  // avoid to use Xsnprintf

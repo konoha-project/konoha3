@@ -760,6 +760,7 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 	kArray *ret_a = KNULL(Array);
 	kSubproc *sp = (kSubproc*)sfp[0].asObject;
 	subprocData_t *p = sp->spd;
+	KMakeTrace(trace, sfp);
 	if(ONEXEC(p)) {
 		if((p->w.mode == M_PIPE) && (S_size(sfp[1].asString) > 0)) {
 			kString *s = sfp[1].asString;
@@ -798,7 +799,7 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 			ret_a = (kArray*)KLIB new_kObjectDontUseThis(kctx, CT_Array, 0, GcUnsafe);
 			if(p->r.mode == M_PIPE) {
 				if(!kPipeReadArray(kctx, ret_a, p->r.fp)) {
-					KTraceApi(SystemFault, "Subproc.communicate",
+					KTraceApi(trace, SystemFault, "Subproc.communicate",
 							LogText("@", "fread")
 					);
 				}
@@ -808,7 +809,7 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 			}
 			if(p->e.mode == M_PIPE) {
 				if(!kPipeReadArray(kctx, ret_a, p->e.fp)) {
-					KTraceApi(SystemFault, "Subproc.communicate",
+					KTraceApi(trace, SystemFault, "Subproc.communicate",
 							LogText("@", "fread")
 					);
 				}

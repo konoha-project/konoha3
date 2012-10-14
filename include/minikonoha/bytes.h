@@ -42,12 +42,6 @@
 //
 //#define IS_Bytes(O)      ((O)->h.ct == CT_Bytes)
 
-#ifdef HAVE_ICONV_H
-typedef iconv_t kiconv_t;
-#else
-typedef long    kiconv_t;
-#endif /* HAVE_ICONV_H */
-
 typedef struct {
 	KonohaModule h;
 	KonohaClass     *cBytes;

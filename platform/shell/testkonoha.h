@@ -100,16 +100,16 @@ static int test_kwb(KonohaContext *kctx)
 
 static int test_logger(KonohaContext *kctx)
 {
-	int v2 = 3;
-	int v3 = -3;
-	int i;
-	for (i = 0; i < 10; i++) {
-		KTrace(UnknownFault|PeriodicPoint, 0,
-			LogText("key1", "hello world"),
-			LogUint("key2", v2),
-			LogUint("key3", v3)
-		);
-	}
+//	int v2 = 3;
+//	int v3 = -3;
+//	int i;
+//	for (i = 0; i < 10; i++) {
+//		KTrace(UnknownFault|PeriodicPoint, 0,
+//			LogText("key1", "hello world"),
+//			LogUint("key2", v2),
+//			LogUint("key3", v3)
+//		);
+//	}
 	return 0;
 }
 #define FN(T)  #T, T

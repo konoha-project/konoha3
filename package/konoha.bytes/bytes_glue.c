@@ -89,79 +89,79 @@ static void kBytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffe
 #define CONV_BUFSIZE 4096 // 4K
 #define MAX_STORE_BUFSIZE (CONV_BUFSIZE * 1024)// 4M
 
-static kBytes* Convert_newBytes(KonohaContext *kctx, kArray *gcstack, kBytes *sourceBytes, const char *fromCharset, const char *toCharset)
-{
-	kiconv_t conv;
-	KGrowingBuffer wb;
-
-	char convBuf[CONV_BUFSIZE] = {0};
-	char *presentPtrFrom = sourceBytes->buf;
-	char ** inbuf = &presentPtrFrom;
-	char *presentPtrTo = convBuf;
-	char ** outbuf = &presentPtrTo;
-	size_t inBytesLeft, outBytesLeft;
-	inBytesLeft = sourceBytes->bytesize;
-	outBytesLeft = CONV_BUFSIZE;
-	//DBG_P("from='%s' inBytesLeft=%d, to='%s' outBytesLeft=%d", fromCharset, inBytesLeft, toCharset, outBytesLeft);
-
-	if(strncmp(fromCharset, toCharset, strlen(fromCharset)) == 0) {
-		// no need to convert.
-		return sourceBytes;
-	}
-	conv = (kiconv_t)PLATAPI iconv_open_i(toCharset, fromCharset);
-	if(conv == (kiconv_t)(-1)) {
-		OLDTRACE_SWITCH_TO_KTrace(_UserInputFault,
-				LogText("@","iconv_open"),
-				LogText("from", fromCharset),
-				LogText("to", toCharset)
-		);
-		// FIXME
-		return NULL;
-	}
-	size_t iconv_ret = -1;
-	size_t processedSize = 0;
-	size_t processedTotalSize = processedSize;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	while (inBytesLeft > 0 && iconv_ret == -1) {
-		iconv_ret = PLATAPI iconv_i((uintptr_t)conv, inbuf, &inBytesLeft, outbuf, &outBytesLeft);
-		if(iconv_ret == -1 && errno == E2BIG) {
-			// input is too big.
-			processedSize = CONV_BUFSIZE - outBytesLeft;
-			processedTotalSize += processedSize;
-			KLIB Kwb_printf(kctx, &wb, "%s", convBuf);
-			// reset convbuf
-			presentPtrTo = convBuf;
-//			outbuf = &presentPtrTo;
-			memset(convBuf, '\0', CONV_BUFSIZE);
-			outBytesLeft = CONV_BUFSIZE;
-		} else if(iconv_ret == -1) {
-			OLDTRACE_SWITCH_TO_KTrace(_DataFault,
-				LogText("@","iconv"),
-				LogText("from", "UTF-8"),
-				LogText("to", toCharset),
-				LogText("error", strerror(errno))
-			);
-			KLIB Kwb_free(&wb);
-			return NULL;   // FIXME
-			//return (kBytes*)(CT_Bytes->defaultNullValue_OnGlobalConstList);
-
-		} else {
-			// finished. iconv_ret != -1
-			processedSize = CONV_BUFSIZE - outBytesLeft;
-			processedTotalSize += processedSize;
-			DBG_P("conv_buf=%d outBytes=%d proceedSize=%d totalsize=%d", CONV_BUFSIZE, outBytesLeft, processedSize, processedTotalSize);
-			KLIB Kwb_write(kctx, &wb, convBuf, processedSize);
-			//KLIB Kwb_printf(kctx, &wb, "%s", convBuf);
-		}
-	} /* end of converting loop */
-	PLATAPI iconv_close_i((uintptr_t)conv);
-
-	const char *bufferTopChar = KLIB Kwb_top(kctx, &wb, 1);
-	struct kBytesVar *targetBytes = NULL; // FIXME (struct kBytesVar*)KLIB new_kObjectDontUseThis(kctx, CT_Bytes, processedTotalSize, gcstack); // ensure bytes ends with Zero
-	memcpy(targetBytes->buf, bufferTopChar, processedTotalSize); // including NUL terminate by ensuredZeo
-	KLIB Kwb_free(&wb);
-	return targetBytes;
-}
+//static kBytes* Convert_newBytes(KonohaContext *kctx, kArray *gcstack, kBytes *sourceBytes, const char *fromCharset, const char *toCharset)
+//{
+//	kiconv_t conv;
+//	KGrowingBuffer wb;
+//
+//	char convBuf[CONV_BUFSIZE] = {0};
+//	char *presentPtrFrom = sourceBytes->buf;
+//	char ** inbuf = &presentPtrFrom;
+//	char *presentPtrTo = convBuf;
+//	char ** outbuf = &presentPtrTo;
+//	size_t inBytesLeft, outBytesLeft;
+//	inBytesLeft = sourceBytes->bytesize;
+//	outBytesLeft = CONV_BUFSIZE;
+//	//DBG_P("from='%s' inBytesLeft=%d, to='%s' outBytesLeft=%d", fromCharset, inBytesLeft, toCharset, outBytesLeft);
+//
+//	if(strncmp(fromCharset, toCharset, strlen(fromCharset)) == 0) {
+//		// no need to convert.
+//		return sourceBytes;
+//	}
+//	conv = (kiconv_t)PLATAPI iconv_open_i(toCharset, fromCharset);
+//	if(conv == (kiconv_t)(-1)) {
+//		OLDTRACE_SWITCH_TO_KTrace(_UserInputFault,
+//				LogText("@","iconv_open"),
+//				LogText("from", fromCharset),
+//				LogText("to", toCharset)
+//		);
+//		// FIXME
+//		return NULL;
+//	}
+//	size_t iconv_ret = -1;
+//	size_t processedSize = 0;
+//	size_t processedTotalSize = processedSize;
+//	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+//	while (inBytesLeft > 0 && iconv_ret == -1) {
+//		iconv_ret = PLATAPI iconv_i((uintptr_t)conv, inbuf, &inBytesLeft, outbuf, &outBytesLeft);
+//		if(iconv_ret == -1 && errno == E2BIG) {
+//			// input is too big.
+//			processedSize = CONV_BUFSIZE - outBytesLeft;
+//			processedTotalSize += processedSize;
+//			KLIB Kwb_printf(kctx, &wb, "%s", convBuf);
+//			// reset convbuf
+//			presentPtrTo = convBuf;
+////			outbuf = &presentPtrTo;
+//			memset(convBuf, '\0', CONV_BUFSIZE);
+//			outBytesLeft = CONV_BUFSIZE;
+//		} else if(iconv_ret == -1) {
+//			OLDTRACE_SWITCH_TO_KTrace(_DataFault,
+//				LogText("@","iconv"),
+//				LogText("from", "UTF-8"),
+//				LogText("to", toCharset),
+//				LogText("error", strerror(errno))
+//			);
+//			KLIB Kwb_free(&wb);
+//			return NULL;   // FIXME
+//			//return (kBytes*)(CT_Bytes->defaultNullValue_OnGlobalConstList);
+//
+//		} else {
+//			// finished. iconv_ret != -1
+//			processedSize = CONV_BUFSIZE - outBytesLeft;
+//			processedTotalSize += processedSize;
+//			DBG_P("conv_buf=%d outBytes=%d proceedSize=%d totalsize=%d", CONV_BUFSIZE, outBytesLeft, processedSize, processedTotalSize);
+//			KLIB Kwb_write(kctx, &wb, convBuf, processedSize);
+//			//KLIB Kwb_printf(kctx, &wb, "%s", convBuf);
+//		}
+//	} /* end of converting loop */
+//	PLATAPI iconv_close_i((uintptr_t)conv);
+//
+//	const char *bufferTopChar = KLIB Kwb_top(kctx, &wb, 1);
+//	struct kBytesVar *targetBytes = NULL; // FIXME (struct kBytesVar*)KLIB new_kObjectDontUseThis(kctx, CT_Bytes, processedTotalSize, gcstack); // ensure bytes ends with Zero
+//	memcpy(targetBytes->buf, bufferTopChar, processedTotalSize); // including NUL terminate by ensuredZeo
+//	KLIB Kwb_free(&wb);
+//	return targetBytes;
+//}
 
 //## @Const method Bytes Bytes.encodeTo(String toEncoding);
 static KMETHOD Bytes_encodeTo(KonohaContext *kctx, KonohaStack *sfp)
@@ -178,6 +178,7 @@ static kString *Convert_newString(KonohaContext *kctx, kArray *gcstack, kBytes *
 		return TS_EMPTY;
 	} else {
 		// At this point, we assuem 'ba' is null terminated.
+		DBG_ASSERT(ba->buf[ba->bytesize-1] == '\0');
 		return KLIB new_kString(kctx, gcstack, ba->buf, ba->bytesize-1, 0);
 	}
 }
@@ -198,7 +199,7 @@ static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, KonohaStack *sfp)
 		targetBytes = Convert_newBytes(kctx, _GcStack, sourceBytes, S_text(fromCharset), "UTF-8");
 	} else {
 		// conv from default encoding
-		targetBytes = Convert_newBytes(kctx, _GcStack, sourceBytes, PLATAPI getSystemCharset(), "UTF-8");
+		targetBytes = Convert_newBytes(kctx, _GcStack, sourceBytes, PLATAPI isSystemCharsetUTF8(kctx), "UTF-8");
 	}
 //	DBG_P("size=%d, '%s'", targetBytes->bytesize, targetBytes->buf);
 	KReturnWithRESET_GCSTACK(Convert_newString(kctx, _GcStack, targetBytes));
@@ -222,7 +223,7 @@ static KMETHOD Bytes_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *from = sfp[0].asBytes;
 	INIT_GCSTACK();
-	kBytes *to = Convert_newBytes(kctx, _GcStack, from, PLATAPI getSystemCharset(), "UTF-8");
+	kBytes *to = Convert_newBytes(kctx, _GcStack, from, PLATAPI isSystemCharsetUTF8(kctx), "UTF-8");
 	KReturnWithRESET_GCSTACK(Convert_newString(kctx, _GcStack, to));
 }
 
