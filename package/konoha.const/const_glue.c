@@ -76,7 +76,7 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	}
 	kStmt_done(kctx, stmt);
-	RETURNb_(result);
+	KReturnUnboxValue(result);
 }
 
 static kbool_t const_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)

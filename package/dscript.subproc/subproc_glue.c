@@ -711,7 +711,7 @@ static KMETHOD Subproc_new(KonohaContext *kctx, KonohaStack *sfp)
 		KFieldSet(sp, p->command, sfp[1].asString);
 		p->closefds = sfp[2].boolValue;
 	}
-	RETURN_(sp);
+	KReturn(sp);
 }
 
 //## boolean Subproc.bg();
@@ -727,7 +727,7 @@ static KMETHOD Subproc_bg(KonohaContext *kctx, KonohaStack *sfp)
 //		KNH_NTRACE2(kctx, "package.subproc.bg ", K_PERROR, KNH_LDATA0);
 		}
 	}
-	RETURNb_( (ret == 0) );
+	KReturnUnboxValue( (ret == 0) );
 }
 
 //## @Throwable int Subproc.fg();
@@ -745,13 +745,13 @@ static KMETHOD Subproc_fg(KonohaContext *kctx, KonohaStack *sfp)
 //			KNH_NTHROW2(kctx, sfp, "Script!!", "subproc.fg :: timeout", K_FAILED, KNH_LDATA0);
 		}
 	}
-	RETURNi_( ret );
+	KReturnUnboxValue( ret );
 }
 
 //## @Throwable String Subproc.exec(String data);
 static KMETHOD Subproc_exec(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_(kSubproc_checkOutput(kctx, (kSubproc*)sfp[0].asObject, sfp[1].asString));
+	KReturn(kSubproc_checkOutput(kctx, (kSubproc*)sfp[0].asObject, sfp[1].asString));
 }
 
 //## @Throwable String[] Subproc.communicate(String input);
@@ -819,7 +819,7 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 			}
 		}
 	}
-	RETURN_( ret_a );
+	KReturn( ret_a );
 }
 
 //## @Restricted boolean Subproc.enableShellmode(boolean isShellmode);
@@ -831,7 +831,7 @@ static KMETHOD Subproc_enableShellmode(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret) {
 		p->shell = sfp[1].boolValue;
 	}
-	RETURNb_( ret );
+	KReturnUnboxValue( ret );
 }
 
 //## boolean Subproc.setEnv(Map env);
@@ -856,7 +856,7 @@ static KMETHOD Subproc_enableShellmode(KonohaContext *kctx, KonohaStack *sfp)
 //			knh_Array_add( ctx, p->env, new_String(ctx, buf) );
 //		}
 //	}
-//	RETURNb_( ret );
+//	KReturnUnboxValue( ret );
 //}
 
 //## boolean Subproc.setCwd(String cwd);
@@ -868,7 +868,7 @@ static KMETHOD Subproc_setCwd(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret) {
 		p->cwd = KLIB new_kString(kctx, GcUnsafe, S_text(sfp[1].asString), S_size(sfp[1].asString), 0);
 	}
-	RETURNb_( ret );
+	KReturnUnboxValue( ret );
 }
 
 //## boolean Subproc.setBufsize(int size);
@@ -880,7 +880,7 @@ static KMETHOD Subproc_setBufsize(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret) {
 		p->bufferSize = WORD2INT(sfp[1].intValue);
 	}
-	RETURNb_( ret );
+	KReturnUnboxValue( ret );
 }
 
 //## boolean Subproc.setFileIN(File in);
@@ -893,7 +893,7 @@ static KMETHOD Subproc_setFileIN(KonohaContext *kctx, KonohaStack *sfp)
 		kFILE *kfile = (kFILE*)sfp[1].asObject;
 		setFd(kctx, &p->w, M_FILE, kfile->fp);
 	}
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## boolean Subproc.setFileOUT(File out);
@@ -906,7 +906,7 @@ KMETHOD Subproc_setFileOUT(KonohaContext *kctx, KonohaStack *sfp)
 		kFILE *kfile = (kFILE *)sfp[1].asObject;
 		setFd(kctx, &p->r, M_FILE, kfile->fp);
 	}
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## boolean Subproc.setFileERR(File err);
@@ -919,7 +919,7 @@ KMETHOD Subproc_setFileERR(KonohaContext *kctx, KonohaStack *sfp)
 			kFILE *kfile = (kFILE *)sfp[1].asObject;
 			setFd(kctx, &p->e, M_FILE, kfile->fp);
 	}
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## boolean Subproc.setTimeout(int milisec);
@@ -931,7 +931,7 @@ KMETHOD Subproc_setFileERR(KonohaContext *kctx, KonohaStack *sfp)
 //		int time = WORD2INT(sfp[1].intValue);
 //		p->timeout = ( time > 0 ) ? time : 0;
 //	}
-//	RETURNb_( ret );
+//	KReturnUnboxValue( ret );
 //}
 
 ////## File Subproc.getIN();
@@ -944,7 +944,7 @@ KMETHOD Subproc_setFileERR(KonohaContext *kctx, KonohaStack *sfp)
 //			po = new_RawPtr(ctx, ClassTBL(khn_getFileClass(ctx)), p->w.fp);
 //		}
 //	}
-//	RETURN_( po );
+//	KReturn( po );
 //}
 
 //## File Subproc.getOUT();
@@ -957,7 +957,7 @@ KMETHOD Subproc_setFileERR(KonohaContext *kctx, KonohaStack *sfp)
 //			po = new_RawPtr(ctx, ClassTBL(khn_getFileClass(ctx)), p->r.fp);
 //		}
 //	}
-//	RETURN_( po );
+//	KReturn( po );
 //}
 
 //## File Subproc.getERR();
@@ -970,7 +970,7 @@ KMETHOD Subproc_setFileERR(KonohaContext *kctx, KonohaStack *sfp)
 //			po = new_RawPtr(ctx, ClassTBL(khn_getFileClass(ctx)), p->e.fp);
 //		}
 //	}
-//	RETURN_( po );
+//	KReturn( po );
 //}
 
 //## int Subproc.getPid();
@@ -978,7 +978,7 @@ static KMETHOD Subproc_getPid(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubproc *sp = (kSubproc*)sfp[0].asObject;
 	subprocData_t *p = sp->spd;
-	RETURNi_( (p!= NULL) ? p->cpid : -1 );
+	KReturnUnboxValue( (p!= NULL) ? p->cpid : -1 );
 }
 
 //## int Subproc.getTimeout();
@@ -986,7 +986,7 @@ static KMETHOD Subproc_getTimeout(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubproc *sp = (kSubproc*)sfp[0].asObject;
 	subprocData_t *p = sp->spd;
-	RETURNi_( (p!= NULL) ? p->timeout : -1 );
+	KReturnUnboxValue( (p!= NULL) ? p->timeout : -1 );
 }
 
 //## int Subproc.getReturncode();
@@ -994,7 +994,7 @@ static KMETHOD Subproc_getReturncode(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubproc *sp = (kSubproc*)sfp[0].asObject;
 	subprocData_t *p = sp->spd;
-	RETURNi_( (p!= NULL) ? p->status : -1 );
+	KReturnUnboxValue( (p!= NULL) ? p->status : -1 );
 }
 
 //## boolean Subproc.enablePipemodeIN(Boolean isPipemode);
@@ -1012,7 +1012,7 @@ static KMETHOD Subproc_enablePipemodeIN(KonohaContext *kctx, KonohaStack *sfp)
 			}
 		}
 	}
-	RETURNb_( ret );
+	KReturnUnboxValue( ret );
 }
 
 //## boolean Subproc.enablePipemodeOUT(Boolean isPipemode);
@@ -1030,7 +1030,7 @@ static KMETHOD Subproc_enablePipemodeOUT(KonohaContext *kctx, KonohaStack *sfp)
 			}
 		}
 	}
-	RETURNb_( ret );
+	KReturnUnboxValue( ret );
 }
 
 //## boolean Subproc.enablePipemodeERR(Boolean isPipemode);
@@ -1049,7 +1049,7 @@ static KMETHOD Subproc_enablePipemodeERR(KonohaContext *kctx, KonohaStack *sfp)
 			}
 		}
 	}
-	RETURNb_( ret );
+	KReturnUnboxValue( ret );
 }
 
 //## boolean Subproc.enableStandardIN(Boolean isStandard);
@@ -1068,7 +1068,7 @@ static KMETHOD Subproc_enableStandardIN(KonohaContext *kctx, KonohaStack *sfp)
 			}
 		}
 	}
-	RETURNb_( ret );
+	KReturnUnboxValue( ret );
 }
 
 //## boolean Subproc.enableStandardOUT(Boolean isStandard);
@@ -1086,7 +1086,7 @@ static KMETHOD Subproc_enableStandardOUT(KonohaContext *kctx, KonohaStack *sfp)
 			}
 		}
 	}
-	RETURNb_( ret );
+	KReturnUnboxValue( ret );
 }
 
 //## boolean Subproc.enableStandardERR(Boolean isStandard);
@@ -1104,7 +1104,7 @@ static KMETHOD Subproc_enableStandardERR(KonohaContext *kctx, KonohaStack *sfp)
 			}
 		}
 	}
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## boolean Subproc.enableERR2StdOUT(Boolean isStdout);
@@ -1122,7 +1122,7 @@ static KMETHOD Subproc_enableERR2StdOUT(KonohaContext *kctx, KonohaStack *sfp)
 			}
 		}
 	}
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## boolean Subproc.isShellmode();
@@ -1130,7 +1130,7 @@ static KMETHOD Subproc_isShellmode(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubproc *sp = (kSubproc*)sfp[0].asObject;
 	subprocData_t *p = sp->spd;
-	RETURNb_((p != NULL) ? (p->shell == 1) : 0);
+	KReturnUnboxValue((p != NULL) ? (p->shell == 1) : 0);
 }
 
 //## boolean Subproc.isPipemodeIN();
@@ -1138,7 +1138,7 @@ static KMETHOD Subproc_isPipemodeIN(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubproc *sp = (kSubproc*)sfp[0].asObject;
 	subprocData_t *p = sp->spd;
-	RETURNb_((p != NULL) ? (p->w.mode == M_PIPE) : 0);
+	KReturnUnboxValue((p != NULL) ? (p->w.mode == M_PIPE) : 0);
 }
 
 //## boolean Subproc.isPipemodeOUT();
@@ -1146,7 +1146,7 @@ static KMETHOD Subproc_isPipemodeOUT(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubproc *sp = (kSubproc*)sfp[0].asObject;
 	subprocData_t *p = sp->spd;
-	RETURNb_((p != NULL) ? (p->r.mode == M_PIPE) : 0);
+	KReturnUnboxValue((p != NULL) ? (p->r.mode == M_PIPE) : 0);
 }
 
 //## boolean Subproc.isPipemodeERR();
@@ -1154,7 +1154,7 @@ static KMETHOD Subproc_isPipemodeERR(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubproc *sp = (kSubproc*)sfp[0].asObject;
 	subprocData_t *p = sp->spd;
-	RETURNb_((p != NULL) ? (p->e.mode == M_PIPE) : 0);
+	KReturnUnboxValue((p != NULL) ? (p->e.mode == M_PIPE) : 0);
 }
 
 //## boolean Subproc.isStandardIN();
@@ -1162,7 +1162,7 @@ static KMETHOD Subproc_isStandardIN(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubproc *sp = (kSubproc*)sfp[0].asObject;
 	subprocData_t *p = sp->spd;
-	RETURNb_((p != NULL) ? (p->w.mode == M_NREDIRECT) : 0);
+	KReturnUnboxValue((p != NULL) ? (p->w.mode == M_NREDIRECT) : 0);
 }
 
 //## boolean Subproc.isStandardOUT();
@@ -1170,7 +1170,7 @@ static KMETHOD Subproc_isStandardOUT(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubproc *sp = (kSubproc*)sfp[0].asObject;
 	subprocData_t *p = sp->spd;
-	RETURNb_((p != NULL) ? (p->r.mode == M_NREDIRECT) : 0);
+	KReturnUnboxValue((p != NULL) ? (p->r.mode == M_NREDIRECT) : 0);
 }
 
 //## boolean Subproc.isStandardERR();
@@ -1178,7 +1178,7 @@ static KMETHOD Subproc_isStandardERR(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubproc *sp = (kSubproc*)sfp[0].asObject;
 	subprocData_t *p = sp->spd;
-	RETURNb_((p != NULL) ? (p->e.mode == M_NREDIRECT) : 0);
+	KReturnUnboxValue((p != NULL) ? (p->e.mode == M_NREDIRECT) : 0);
 }
 
 //## boolean Subproc.isERR2StdOUT();
@@ -1186,7 +1186,7 @@ static KMETHOD Subproc_isERR2StdOUT(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubproc *sp = (kSubproc*)sfp[0].asObject;
 	subprocData_t *p = sp->spd;
-	RETURNb_((p != NULL) ? (p->e.mode == M_STDOUT) : 0);
+	KReturnUnboxValue((p != NULL) ? (p->e.mode == M_STDOUT) : 0);
 }
 
 //## @Static int Subproc.call(String args);
@@ -1209,13 +1209,13 @@ static KMETHOD Subproc_isERR2StdOUT(KonohaContext *kctx, KonohaStack *sfp)
 //	} else if(WIFSTOPPED(status)) {
 //		ret = WSTOPSIG(status) * -1;
 //	}
-//	RETURNi_( ret );
+//	KReturnUnboxValue( ret );
 //}
 
 //## @Static String Subproc.checkOutput(String args);
 //static KMETHOD Subproc_checkOutput(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	RETURN_(kSubproc_checkOutput(kctx, /*G*/new_(Subproc, NULL), sfp[1].asString));
+//	KReturn(kSubproc_checkOutput(kctx, /*G*/new_(Subproc, NULL), sfp[1].asString));
 //}
 
 /* ------------------------------------------------------------------------ */

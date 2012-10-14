@@ -47,7 +47,7 @@ static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 			kStmt_typed(stmt, LOOP);
 		}
 	}
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 static KMETHOD Statement_do(KonohaContext *kctx, KonohaStack *sfp)
@@ -64,7 +64,7 @@ static KMETHOD Statement_do(KonohaContext *kctx, KonohaStack *sfp)
 			kStmt_typed(stmt, LOOP);  // FIXME
 		}
 	}
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 static KMETHOD Statement_CStyleFor(KonohaContext *kctx, KonohaStack *sfp)
@@ -81,7 +81,7 @@ static KMETHOD Statement_CStyleFor(KonohaContext *kctx, KonohaStack *sfp)
 			kStmt_typed(stmt, LOOP);
 		}
 	}
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 static inline kStmt* kStmt_getParentNULL(kStmt *stmt)
@@ -97,7 +97,7 @@ static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
 		if(kStmt_is(CatchBreak, p)) {
 			KLIB kObject_setObject(kctx, stmt, stmt->syn->keyword, TY_Stmt, p);
 			kStmt_typed(stmt, JUMP);
-			RETURNb_(true);
+			KReturnUnboxValue(true);
 		}
 	}
 	SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "break statement not within a loop");
@@ -111,7 +111,7 @@ static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 		if(kStmt_is(CatchContinue, p)) {
 			KLIB kObject_setObject(kctx, stmt, stmt->syn->keyword, TY_Stmt, p);
 			kStmt_typed(stmt, JUMP);
-			RETURNb_(true);
+			KReturnUnboxValue(true);
 		}
 	}
 	SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "continue statement not within a loop");
@@ -133,14 +133,14 @@ static KMETHOD TokenFunc_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 				KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, source + 1, (pos-2), 0));
 				tk->unresolvedTokenType = SYM_("$SingleQuotedChar");
 			}
-			RETURNi_(pos);
+			KReturnUnboxValue(pos);
 		}
 		prev = ch;
 	}
 	if(IS_NOTNULL(tk)) {
 		kreportf(ErrTag, tk->uline, "must close with \'");
 	}
-	RETURNi_(0);
+	KReturnUnboxValue(0);
 }
 
 static KMETHOD TypeCheck_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
@@ -149,9 +149,9 @@ static KMETHOD TypeCheck_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 	kToken *tk = expr->termToken;
 	if(S_size(tk->text) == 1) {
 		int ch = S_text(tk->text)[0];
-		RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_int, ch));
+		KReturn(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_int, ch));
 	}
-	RETURN_(K_NULLEXPR);
+	KReturn(K_NULLEXPR);
 }
 
 /* Expression */
@@ -163,14 +163,14 @@ static KMETHOD Expression_Indexer(KonohaContext *kctx, KonohaStack *sfp)
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	int nextIdx = SUGAR TokenUtils_parseTypePattern(kctx, ns, tokenList, beginIdx, endIdx, &genericsClass);
 	if(nextIdx != -1) {  // to avoid Func[T]
-		RETURN_(SUGAR kStmt_parseOperatorExpr(kctx, stmt, tokenList->TokenItems[beginIdx]->resolvedSyntaxInfo, tokenList, beginIdx, beginIdx, endIdx));
+		KReturn(SUGAR kStmt_parseOperatorExpr(kctx, stmt, tokenList->TokenItems[beginIdx]->resolvedSyntaxInfo, tokenList, beginIdx, beginIdx, endIdx));
 	}
 	DBG_P("beginIdx=%d, endIdx=%d", beginIdx, endIdx);
 	kToken *currentToken = tokenList->TokenItems[operatorIdx];
 	if(beginIdx < operatorIdx) {
 		kExpr *leftExpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
 		if(leftExpr == K_NULLEXPR) {
-			RETURN_(leftExpr);
+			KReturn(leftExpr);
 		}
 		/* transform 'Value0 [ Value1 ]=> (Call Value0 get (Value1)) */
 		kTokenVar *tkN = new_(TokenVar, 0, OnGcStack);
@@ -179,7 +179,7 @@ static KMETHOD Expression_Indexer(KonohaContext *kctx, KonohaStack *sfp)
 		SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
 		leftExpr  = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, tkN, leftExpr);
 		leftExpr = SUGAR kStmt_addExprParam(kctx, stmt, leftExpr, currentToken->subTokenList, 0, kArray_size(currentToken->subTokenList), "[");
-		RETURN_(SUGAR kStmt_rightJoinExpr(kctx, stmt, leftExpr, tokenList, operatorIdx + 1, endIdx));
+		KReturn(SUGAR kStmt_rightJoinExpr(kctx, stmt, leftExpr, tokenList, operatorIdx + 1, endIdx));
 	}
 	DBG_P("nothing");
 }
@@ -210,7 +210,7 @@ static KMETHOD Expression_Increment(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx, NULL/*FIXME*/);
 	TokenSequence_pop(kctx, macro);
-	RETURN_(expr);
+	KReturn(expr);
 }
 
 // --------------------------------------------------------------------------

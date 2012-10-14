@@ -43,12 +43,12 @@ static kbool_t Nothing_hasNext(KonohaContext *kctx, KonohaStack* sfp)
 static void Nothing_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kIterator *itr = (kIterator*)sfp[0].asObject;
-	RETURN_(itr->source);
+	KReturn(itr->source);
 }
 
 static void Nothing_setNextResultUnbox(KonohaContext *kctx, KonohaStack* sfp)
 {
-	RETURNi_(0);
+	KReturnUnboxValue(0);
 }
 
 static void Iterator_init(KonohaContext *kctx, kObject *o, void *conf)
@@ -66,7 +66,7 @@ static void Iterator_init(KonohaContext *kctx, kObject *o, void *conf)
 static KMETHOD Iterator_hasNext(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kIterator *itr = sfp[0].asIterator;
-	RETURNb_(itr->hasNext(kctx, sfp));
+	KReturnUnboxValue(itr->hasNext(kctx, sfp));
 }
 
 static KMETHOD Iterator_next(KonohaContext *kctx, KonohaStack *sfp)
@@ -92,7 +92,7 @@ static KMETHOD Iterator_next(KonohaContext *kctx, KonohaStack *sfp)
 //	KFieldSet(itr, itr->funcNext,sfp[2].asFunc);
 //	itr->hasNext = callFuncHasNext;
 //	itr->setNextResult = callFuncNext;
-//	RETURN_(itr);
+//	KReturn(itr);
 //}
 
 static kbool_t Array_hasNext(KonohaContext *kctx, KonohaStack* sfp)
@@ -107,7 +107,7 @@ static void Array_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 	size_t n = itr->current_pos;
 	itr->current_pos += 1;
 	DBG_ASSERT(n < kArray_size(itr->arrayList));
-	RETURN_(itr->arrayList->ObjectItems[n]);
+	KReturn(itr->arrayList->ObjectItems[n]);
 }
 
 static void Array_setNextResultUnbox(KonohaContext *kctx, KonohaStack* sfp)
@@ -116,7 +116,7 @@ static void Array_setNextResultUnbox(KonohaContext *kctx, KonohaStack* sfp)
 	size_t n = itr->current_pos;
 	itr->current_pos += 1;
 	DBG_ASSERT(n < kArray_size(itr->arrayList));
-	RETURNd_(itr->arrayList->kintItems[n]);
+	KReturnUnboxValue(itr->arrayList->kintItems[n]);
 }
 
 static KMETHOD Array_toIterator(KonohaContext *kctx, KonohaStack *sfp)
@@ -127,7 +127,7 @@ static KMETHOD Array_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 	KFieldSet(itr, itr->arrayList, a);
 	itr->hasNext = Array_hasNext;
 	itr->setNextResult = TY_isUnbox(O_ct(a)->p0) ? Array_setNextResultUnbox : Array_setNextResult;
-	RETURN_(itr);
+	KReturn(itr);
 }
 
 static kbool_t String_hasNext(KonohaContext *kctx, KonohaStack* sfp)
@@ -144,7 +144,7 @@ static void String_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 	const char *t = S_text(s) + itr->current_pos;
 	size_t charsize = utf8len(t[0]);
 	itr->current_pos += charsize;
-	RETURN_(KLIB new_kString(kctx, OnStack, t, charsize, (charsize == 1) ? StringPolicy_ASCII : StringPolicy_UTF8));
+	KReturn(KLIB new_kString(kctx, OnStack, t, charsize, (charsize == 1) ? StringPolicy_ASCII : StringPolicy_UTF8));
 }
 
 static KMETHOD String_toIterator(KonohaContext *kctx, KonohaStack *sfp)
@@ -153,7 +153,7 @@ static KMETHOD String_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 	KFieldSet(itr, itr->source, sfp[0].asObject);
 	itr->hasNext = String_hasNext;
 	itr->setNextResult = String_setNextResult;
-	RETURN_(itr);
+	KReturn(itr);
 }
 
 /* ------------------------------------------------------------------------ */

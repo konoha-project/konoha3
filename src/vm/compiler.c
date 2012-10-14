@@ -1083,7 +1083,7 @@ static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 
 static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(0);
+	KReturnUnboxValue(0);
 }
 
 static void kMethod_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)

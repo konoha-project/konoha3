@@ -100,7 +100,7 @@ static void Curl_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visit
 ////## Curl Curl.new();
 //static KMETHOD Curl_new (KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	RETURN_(sfp[K_RTNIDX].asObject);
+//	KReturn(sfp[K_RTNIDX].asObject);
 //}
 
 //##  void Curl.setOpt(int type, dynamic data);
@@ -270,7 +270,7 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 		break;
 	}
 	}
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 //## void Curl.appendHeader();
@@ -279,7 +279,7 @@ static KMETHOD Curl_appendHeader(KonohaContext *kctx, KonohaStack *sfp)
 	struct kCurlVar* kcurl = (struct kCurlVar*)sfp[0].asObject;
 	char *h = String_to(char*,sfp[1]);
 	kcurl->headers = curl_slist_append(kcurl->headers, h);
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 //## boolean Curl.perform();
@@ -298,7 +298,7 @@ static KMETHOD Curl_perform(KonohaContext *kctx, KonohaStack *sfp)
 	if(kcurl->fp != NULL) {
 		fclose(kcurl->fp);
 	}
-	RETURNb_((res == CURLE_OK));
+	KReturnUnboxValue((res == CURLE_OK));
 }
 
 ////## dynamic Curl.getInfo(int type);
@@ -314,7 +314,7 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 		case CURLINFO_HEADER_SIZE:
 		case CURLINFO_REQUEST_SIZE:
 			curl_easy_getinfo(curl, curlinfo, &lngptr);
-			RETURNi_(lngptr);
+			KReturnUnboxValue(lngptr);
 			break;
 		case CURLINFO_REDIRECT_TIME:
 		case CURLINFO_TOTAL_TIME:
@@ -327,12 +327,12 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 		case CURLINFO_SPEED_DOWNLOAD:
 		case CURLINFO_SPEED_UPLOAD:
 			curl_easy_getinfo(curl, curlinfo, &dblptr);
-			RETURNf_(dblptr);
+			KReturnFloatValue(dblptr);
 			break;
 		case CURLINFO_EFFECTIVE_URL:
 		case CURLINFO_CONTENT_TYPE:
 			curl_easy_getinfo(curl, curlinfo, &strptr);
-			RETURN_(KLIB new_kString(kctx, OnStack, strptr, strlen(strptr), 0));
+			KReturn(KLIB new_kString(kctx, OnStack, strptr, strlen(strptr), 0));
 			break;
 		default: {
 			// TODO ktrace
@@ -341,7 +341,7 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		}
 	}
-	RETURN_(K_NULL);
+	KReturn(K_NULL);
 }
 
 /* ------------------------------------------------------------------------ */

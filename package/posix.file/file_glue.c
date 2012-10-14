@@ -98,7 +98,7 @@ static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	struct kFILEVar *file = (struct kFILEVar*)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)fp);
 	file->realpath = realpath(S_text(s), NULL);
-	RETURN_(file);
+	KReturn(file);
 }
 
 //## @Native int File.read(Bytes buf, int offset, int len);
@@ -128,7 +128,7 @@ static KMETHOD File_read(KonohaContext *kctx, KonohaStack *sfp)
 			clearerr(fp);
 		}
 	}
-	RETURNi_(size);
+	KReturnUnboxValue(size);
 }
 
 //## @Native int File.write(Bytes buf, int offset, int len);
@@ -152,7 +152,7 @@ static KMETHOD File_write(KonohaContext *kctx , KonohaStack *sfp)
 			);
 		}
 	}
-	RETURNi_(size);
+	KReturnUnboxValue(size);
 }
 
 //## @Native void File.close();
@@ -171,7 +171,7 @@ static KMETHOD File_close(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		file->fp = NULL;
 	}
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 //## @Native int File.getC();
@@ -189,7 +189,7 @@ static KMETHOD File_getC(KonohaContext *kctx, KonohaStack *sfp)
 			);
 		}
 	}
-	RETURNi_(ch);
+	KReturnUnboxValue(ch);
 }
 
 //## @Native boolean File.putC(int ch);
@@ -205,9 +205,9 @@ static KMETHOD File_putC(KonohaContext *kctx, KonohaStack *sfp)
 					LogText("errstr", strerror(errno))
 			);
 		}
-		RETURNb_(ch != EOF);
+		KReturnUnboxValue(ch != EOF);
 	}
-	RETURNb_(0);
+	KReturnUnboxValue(0);
 }
 
 //## int System.umask(int cmask)
@@ -215,7 +215,7 @@ static KMETHOD System_umask(KonohaContext *kctx, KonohaStack *sfp)
 {
 	mode_t cmask = sfp[1].intValue;
 	mode_t ret = umask(cmask);
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.mkdir(String path, int mode)
@@ -227,7 +227,7 @@ static KMETHOD System_mkdir(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.rmdir(String path)
@@ -238,7 +238,7 @@ static KMETHOD System_rmdir(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.truncate(String path, int length)
@@ -250,7 +250,7 @@ static KMETHOD System_truncate(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.chmod(String path, int mode)
@@ -262,7 +262,7 @@ static KMETHOD System_chmod(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 // --------------------------------------------------------------------------

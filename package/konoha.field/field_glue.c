@@ -33,25 +33,25 @@ extern "C"{
 static KMETHOD MethodFunc_ObjectFieldGetter(KonohaContext *kctx, KonohaStack *sfp)
 {
 	size_t delta = sfp[K_MTDIDX].methodCallInfo->delta;
-	RETURN_((sfp[0].asObject)->fieldObjectItems[delta]);
+	KReturn((sfp[0].asObject)->fieldObjectItems[delta]);
 }
 static KMETHOD MethodFunc_UnboxFieldGetter(KonohaContext *kctx, KonohaStack *sfp)
 {
 	size_t delta = sfp[K_MTDIDX].methodCallInfo->delta;
-	RETURNd_((sfp[0].asObject)->fieldUnboxItems[delta]);
+	KReturnUnboxValue((sfp[0].asObject)->fieldUnboxItems[delta]);
 }
 static KMETHOD MethodFunc_ObjectFieldSetter(KonohaContext *kctx, KonohaStack *sfp)
 {
 	size_t delta = sfp[K_MTDIDX].methodCallInfo->delta;
 	kObjectVar *o = sfp[0].asObjectVar;
 	KFieldSet(o, o->fieldObjectItems[delta], sfp[1].asObject);
-	RETURN_(sfp[1].asObject);
+	KReturn(sfp[1].asObject);
 }
 static KMETHOD MethodFunc_UnboxFieldSetter(KonohaContext *kctx, KonohaStack *sfp)
 {
 	size_t delta = sfp[K_MTDIDX].methodCallInfo->delta;
 	(sfp[0].asObjectVar)->fieldUnboxItems[delta] = sfp[1].unboxValue;
-	RETURNd_(sfp[1].unboxValue);
+	KReturnUnboxValue(sfp[1].unboxValue);
 }
 static kMethod *new_FieldGetter(KonohaContext *kctx, kArray *gcstack, ktype_t cid, ksymbol_t sym, ktype_t ty, int idx)
 {
@@ -87,14 +87,14 @@ static KMETHOD MethodFunc_ObjectPrototypeGetter(KonohaContext *kctx, KonohaStack
 {
 	kMethod *mtd = sfp[K_MTDIDX].methodCallInfo;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
-	RETURN_(KLIB kObject_getObject(kctx, sfp[0].asObject, key, sfp[K_RTNIDX].asObject));
+	KReturn(KLIB kObject_getObject(kctx, sfp[0].asObject, key, sfp[K_RTNIDX].asObject));
 }
 
 static KMETHOD MethodFunc_UnboxPrototypeGetter(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[K_MTDIDX].methodCallInfo;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
-	RETURNd_(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, key, 0));
+	KReturnUnboxValue(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, key, 0));
 }
 
 static KMETHOD MethodFunc_ObjectPrototypeSetter(KonohaContext *kctx, KonohaStack *sfp)
@@ -102,7 +102,7 @@ static KMETHOD MethodFunc_ObjectPrototypeSetter(KonohaContext *kctx, KonohaStack
 	kMethod *mtd = sfp[K_MTDIDX].methodCallInfo;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
 	KLIB kObject_setObject(kctx, sfp[0].asObject, key, O_typeId(sfp[1].asObject), sfp[1].asObject);
-	RETURN_(sfp[1].asObject);
+	KReturn(sfp[1].asObject);
 }
 
 static KMETHOD MethodFunc_UnboxPrototypeSetter(KonohaContext *kctx, KonohaStack *sfp)
@@ -111,7 +111,7 @@ static KMETHOD MethodFunc_UnboxPrototypeSetter(KonohaContext *kctx, KonohaStack 
 	ksymbol_t key = (ksymbol_t)mtd->delta;
 	kParam *pa = Method_param(mtd);
 	KLIB kObject_setUnboxValue(kctx, sfp[0].asObject, key, pa->paramtypeItems[0].ty, sfp[1].unboxValue);
-	RETURNd_(sfp[1].unboxValue);
+	KReturnUnboxValue(sfp[1].unboxValue);
 }
 
 static kMethod *new_PrototypeGetter(KonohaContext *kctx, kArray *gcstack, ktype_t cid, ksymbol_t sym, ktype_t ty)
@@ -208,7 +208,7 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 		kMethod *mtd = KLIB kNameSpace_getGetterMethodNULL(kctx, ns, self->ty, fn, TY_var);
 		if(mtd != NULL) {
 			KFieldSet(expr->cons, expr->cons->MethodItems[0], mtd);
-			RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, reqty));
+			KReturn(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, reqty));
 		}
 		SUGAR kStmt_printMessage2(kctx, stmt, tkN, ErrTag, "undefined field: %s", S_text(tkN->text));
 	}

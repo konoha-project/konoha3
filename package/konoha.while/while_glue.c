@@ -58,7 +58,7 @@ static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 			kStmt_typed(stmt, LOOP);
 		}
 	}
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 static inline kStmt* kStmt_getParentNULL(kStmt *stmt)

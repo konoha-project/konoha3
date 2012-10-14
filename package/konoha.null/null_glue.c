@@ -34,14 +34,14 @@ extern "C"{
 static KMETHOD Object_isNull(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kObject *o = sfp[0].asObject;
-	RETURNb_(IS_NULL(o));
+	KReturnUnboxValue(IS_NULL(o));
 }
 
 //## Boolean Object.isNotNull();
 static KMETHOD Object_isNotNull(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kObject *o = sfp[0].asObject;
-	RETURNb_(!IS_NULL(o));
+	KReturnUnboxValue(!IS_NULL(o));
 }
 
 // --------------------------------------------------------------------------
@@ -68,7 +68,7 @@ static KMETHOD TypeCheck_null(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	if(reqty == TY_var) reqty = TY_Object;
-	RETURN_(SUGAR kExpr_setVariable(kctx, expr, gma, TEXPR_NULL, reqty, 0));
+	KReturn(SUGAR kExpr_setVariable(kctx, expr, gma, TEXPR_NULL, reqty, 0));
 }
 
 static KMETHOD Expression_isNull(KonohaContext *kctx, KonohaStack *sfp)
@@ -80,7 +80,7 @@ static KMETHOD Expression_isNull(KonohaContext *kctx, KonohaStack *sfp)
 		if(tk->resolvedSymbol == SYM_("null")) {
 			kExpr *leftHandExpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
 			tk->resolvedSymbol = SYM_("isNull");
-			RETURN_(SUGAR new_UntypedCallStyleExpr(kctx, SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall), 2, tk, leftHandExpr));
+			KReturn(SUGAR new_UntypedCallStyleExpr(kctx, SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall), 2, tk, leftHandExpr));
 		}
 	}
 	DBG_P("checking parent .. == ..");
@@ -95,7 +95,7 @@ static KMETHOD Expression_isNotNull(KonohaContext *kctx, KonohaStack *sfp)
 		if(tk->resolvedSymbol == SYM_("null")) {
 			kExpr *leftHandExpr = SUGAR kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, operatorIdx, NULL);
 			tk->resolvedSymbol = SYM_("isNotNull");
-			RETURN_(SUGAR new_UntypedCallStyleExpr(kctx, SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall), 2, tk, leftHandExpr));
+			KReturn(SUGAR new_UntypedCallStyleExpr(kctx, SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall), 2, tk, leftHandExpr));
 		}
 	}
 	DBG_P("checking parent .. != ..");

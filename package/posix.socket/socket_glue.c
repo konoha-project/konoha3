@@ -178,7 +178,7 @@ static int getNfd(kArray *a1, kArray *a2, kArray *a3)
 //				LogText("errstr", strerror(errno))
 //		);
 //	}
-//	RETURNi_(ret);
+//	KReturnUnboxValue(ret);
 //}
 
 //## int System.accept(int socket, SockAddr remoteInfo);
@@ -203,7 +203,7 @@ KMETHOD System_accept(KonohaContext *kctx, KonohaStack* sfp)
 				LogText("errstr", strerror(errno))
 		);
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.bind(int socket, String srcIP, int srcPort, int family);
@@ -226,7 +226,7 @@ KMETHOD System_bind(KonohaContext *kctx, KonohaStack* sfp)
 			LogText("errstr", strerror(errno))
 		);
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.close(int fd);
@@ -241,7 +241,7 @@ KMETHOD System_close(KonohaContext *kctx, KonohaStack* sfp)
 			LogText("errstr", strerror(errno))
 		);
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.connect(int socket, String dstIP, int dstPort, int family);
@@ -265,7 +265,7 @@ KMETHOD System_connect(KonohaContext *kctx, KonohaStack* sfp)
 			LogText("errstr", strerror(errno))
 		);
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.listen(int socket, int backlog);
@@ -279,7 +279,7 @@ KMETHOD System_listen(KonohaContext *kctx, KonohaStack* sfp)
 			LogText("errstr", strerror(errno))
 		);
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## String System.getsockname(int socket);
@@ -298,7 +298,7 @@ KMETHOD System_listen(KonohaContext *kctx, KonohaStack* sfp)
 //	} else {
 //		KNH_NTRACE2(kctx, "konoha.socket.name ", K_PERROR, KNH_LDATA0);
 //	}
-//	RETURN_(ret_s);
+//	KReturn(ret_s);
 //}
 
 //## int System.getsockopt(int socket, int option);
@@ -324,7 +324,7 @@ KMETHOD System_getsockopt(KonohaContext *kctx, KonohaStack* sfp)
 			LogText("errstr", strerror(errno))
 		);
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.setsockopt(int socket, int option, int value);
@@ -344,7 +344,7 @@ KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack* sfp)
 			LogText("errstr", strerror(errno))
 		);
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## Map System.getpeername(int socket);
@@ -364,7 +364,7 @@ KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack* sfp)
 //		KNH_NTRACE2(kctx, "konoha.socket.peername ", K_PERROR, KNH_LDATA0);
 //	}
 //
-//	RETURN_(ret_s );
+//	KReturn(ret_s );
 //}
 
 //## int System.recv(int socket, byte[] buffer, int flags);
@@ -381,7 +381,7 @@ static KMETHOD System_recv(KonohaContext *kctx, KonohaStack* sfp)
 				LogText("perror", strerror(errno))
 		);
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.recvfrom(int socket, byte[] buffer, int flags, Map remoteInfo);
@@ -403,7 +403,7 @@ static KMETHOD System_recv(KonohaContext *kctx, KonohaStack* sfp)
 //	} else {
 //		KNH_NTRACE2(kctx, "konoha.socket.recvfrom ", K_PERROR, KNH_LDATA0);
 //	}
-//	RETURNi_(ret);
+//	KReturnUnboxValue(ret);
 //}
 
 //## int System.select(int[] readsock, int[] writesock, int[] exceptsock, long timeoutSec, long timeoutUSec);
@@ -441,7 +441,7 @@ static KMETHOD System_select(KonohaContext *kctx, KonohaStack* sfp)
 		KLIB kArray_clear(kctx, a2, 0);
 		KLIB kArray_clear(kctx, a3, 0);
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.send(int socket, byte[] message, int flags);
@@ -481,7 +481,7 @@ static KMETHOD System_send(KonohaContext *kctx, KonohaStack* sfp)
 			);
 		}
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.sendto(int socket, Bytes message, int flags, String dstIP, int dstPort, int family);
@@ -524,7 +524,7 @@ static KMETHOD System_sendto(KonohaContext *kctx, KonohaStack* sfp)
 			);
 		}
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.shutdown(int socket, int how);
@@ -538,7 +538,7 @@ KMETHOD System_shutdown(KonohaContext *kctx, KonohaStack* sfp)
 			LogText("errstr", strerror(errno))
 		);
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.sockatmark(int socket);
@@ -552,7 +552,7 @@ KMETHOD System_sockatmark(KonohaContext *kctx, KonohaStack* sfp)
 			LogText("errstr", strerror(errno))
 		);
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.socket(int family, int type, int protocol);
@@ -568,7 +568,7 @@ KMETHOD System_socket(KonohaContext *kctx, KonohaStack* sfp)
 				LogText("errstr", strerror(errno))
 		);
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.socketpair(int family, int type, int protocol, int[] pairCSock);
@@ -593,7 +593,7 @@ static KMETHOD System_socketpair(KonohaContext *kctx, KonohaStack* sfp)
 			);
 		}
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 
@@ -601,7 +601,7 @@ static KMETHOD System_socketpair(KonohaContext *kctx, KonohaStack* sfp)
 
 static KMETHOD SockAddr_new (KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_(KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0));
+	KReturn(KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0));
 }
 
 // --------------------------------------------------------------------------

@@ -33,14 +33,14 @@ extern "C"{
 // Object.getTypeId()
 static KMETHOD Object_getTypeId(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(O_ct(sfp[0].asObject)->typeId);
+	KReturnUnboxValue(O_ct(sfp[0].asObject)->typeId);
 }
 
 // Object.instanceOf(Object o)
 static KMETHOD Object_instanceOf(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KonohaClass *selfClass = O_ct(sfp[0].asObject), *targetClass = O_ct(sfp[1].asObject);
-	RETURNb_(selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass));
+	KReturnUnboxValue(selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass));
 }
 
 static KMETHOD Object_as(KonohaContext *kctx, KonohaStack *sfp)
@@ -54,7 +54,7 @@ static KMETHOD Object_as(KonohaContext *kctx, KonohaStack *sfp)
 		returnValue = KLIB Knull(kctx, targetClass);
 	}
 	sfp[K_RTNIDX].unboxValue = O_unbox(returnValue);
-	RETURN_(returnValue);
+	KReturn(returnValue);
 }
 
 // --------------------------------------------------------------------------
@@ -93,7 +93,7 @@ static KMETHOD TypeCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 		KonohaClass *selfClass = CT_(selfExpr->ty), *targetClass = CT_(targetExpr->ty);
 		if(CT_is(Final, selfClass)) {
 			kbool_t staticSubType = (selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass));
-			RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_boolean, staticSubType));
+			KReturn(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_boolean, staticSubType));
 		}
 		kNameSpace *ns = Stmt_nameSpace(stmt);
 		kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_Object, MN_("<:"), 1);
@@ -102,7 +102,7 @@ static KMETHOD TypeCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 		kExpr *classValue = SUGAR kExpr_setConstValue(kctx,
 				expr->cons->ExprItems[2], targetExpr->ty, KLIB Knull(kctx, targetClass));
 		KFieldSet(expr->cons, expr->cons->ExprItems[2], classValue);
-		RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, TY_boolean));
+		KReturn(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, TY_boolean));
 	}
 }
 
@@ -114,7 +114,7 @@ static KMETHOD TypeCheck_As(KonohaContext *kctx, KonohaStack *sfp)
 	if(selfExpr != K_NULLEXPR && targetExpr != K_NULLEXPR) {
 		KonohaClass *selfClass = CT_(selfExpr->ty), *targetClass = CT_(targetExpr->ty);
 		if(selfExpr->ty == targetExpr->ty || selfClass->isSubType(kctx, selfClass, targetClass)) {
-			RETURN_(selfExpr);
+			KReturn(selfExpr);
 		}
 		kNameSpace *ns = Stmt_nameSpace(stmt);
 		kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_Object, MN_("as"), 0);
@@ -123,7 +123,7 @@ static KMETHOD TypeCheck_As(KonohaContext *kctx, KonohaStack *sfp)
 		kExpr *classValue = SUGAR kExpr_setConstValue(kctx,
 				expr->cons->ExprItems[2], targetExpr->ty, KLIB Knull(kctx, targetClass));
 		KFieldSet(expr->cons, expr->cons->ExprItems[2], classValue);
-		RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, targetClass->typeId));
+		KReturn(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, targetClass->typeId));
 	}
 }
 

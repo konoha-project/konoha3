@@ -145,12 +145,12 @@ static KMETHOD Statement_dsh(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_Statement(stmt, gma);
 	kTokenArray *tokenList = (kTokenArray *)kStmt_getObjectNULL(kctx, stmt, KW_TokenPattern);
 	if(tokenList == NULL) {
-		RETURNb_(false);
+		KReturnUnboxValue(false);
 	}
 
 	kString *cmd = splitWhiteSpace(kctx, tokenList);
 	if(cmd == NULL) {
-		RETURNb_(false);
+		KReturnUnboxValue(false);
 	}
 	DBG_P("cmd=%s", S_text(cmd));
 	DBG_P("iscommand=%d", isCommand(S_text(cmd)));
@@ -170,7 +170,7 @@ static KMETHOD Statement_dsh(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret) {
 		kStmt_typed(stmt, EXPR);
 	}
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 static kbool_t DSLib_checkExecutablePath(KonohaContext *kctx, const char *path, const char *cmd)
@@ -216,7 +216,7 @@ static KMETHOD PatternMatch_Shell(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_PatternMatch(stmt, nameid, tokenList, beginIdx, endIdx);
 	kToken *firstToken = tokenList->TokenItems[beginIdx];
 	DBG_P("firstToken='%s', isCommand=%d", S_text(firstToken->text), DSLib_isCommand(kctx, S_text(firstToken->text)));
-	RETURNi_((firstToken->resolvedSyntaxInfo->keyword == KW_SymbolPattern && DSLib_isCommand(kctx, S_text(firstToken->text))) ? beginIdx : -1);
+	KReturnUnboxValue((firstToken->resolvedSyntaxInfo->keyword == KW_SymbolPattern && DSLib_isCommand(kctx, S_text(firstToken->text))) ? beginIdx : -1);
 }
 
 static KMETHOD Statement_Shell(KonohaContext *kctx, KonohaStack *sfp)
@@ -236,7 +236,7 @@ static KMETHOD Statement_Shell(KonohaContext *kctx, KonohaStack *sfp)
 		system(S_text(cmd));  // FIXME: This is for demo
 		kStmt_done(kctx, stmt);
 	}
-	RETURNb_(false);
+	KReturnUnboxValue(false);
 }
 
 // ----------------------------------------------------------------------------

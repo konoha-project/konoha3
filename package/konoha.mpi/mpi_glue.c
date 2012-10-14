@@ -128,14 +128,14 @@ static void MPIData_ptr_free(KonohaContext *kctx , kObject *po)
 //## float MPI.getWtime();
 static KMETHOD MPI_getWtime(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNf_(MPI_Wtime());
+	KReturnFloatValue(MPI_Wtime());
 }
 
 /* ------------------------------------------------------------------------ */
 //## MPIComm MPIComm.getWorld();
 static KMETHOD MPIComm_getWorld(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(g_comm_world)));
+	KReturn(new_ReturnCppObject(kctx, sfp, WRAP(g_comm_world)));
 }
 
 //## int MPIComm.getRank();
@@ -144,7 +144,7 @@ static KMETHOD MPIComm_getRank(KonohaContext *kctx, KonohaStack *sfp)
 	kMPIComm *comm = toRawPtr(kMPIComm *, sfp[0].asObject);
 	int ret;
 	MPI_Comm_rank(comm->comm, &ret);
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int MPIComm.getSize();
@@ -153,7 +153,7 @@ static KMETHOD MPIComm_getSize(KonohaContext *kctx, KonohaStack *sfp)
 	kMPIComm *comm = toRawPtr(kMPIComm *, sfp[0].asObject);
 	int ret;
 	MPI_Comm_size(comm->comm, &ret);
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## boolean MPIComm.barrier();
@@ -163,7 +163,7 @@ static KMETHOD MPIComm_barrier(KonohaContext *kctx, KonohaStack *sfp)
 	OLDTRACE_SWITCH_TO_KTrace(LOGPOL_DEBUG, LogText("at", "MPI_Barrier"), LogText("#", "begin"), LOG_END);
 	bool ret = MPI_Barrier(comm->comm);
 	OLDTRACE_SWITCH_TO_KTrace(LOGPOL_DEBUG, LogText("at", "MPI_Barrier"), LogText("#", "finish"), LOG_END);
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -178,7 +178,7 @@ static KMETHOD MPIComm_send(KonohaContext *kctx, KonohaStack *sfp)
 	TRACE(LOGPOL_DEBUG, LogText("at", "MPI_Send"), LogText("#", "begin"), LogUint("dest", dest), LogUint("count", count), LOG_END);
 	bool ret = (MPI_Send(getbuf(data), count, data->type, dest, tag, comm->comm));
 	TRACE(LOGPOL_DEBUG, LogText("at", "MPI_Send"), LogText("#", "finish"), LOG_END);
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## boolean MPIComm.recv(MPIData data, int count, int src, int tag);
@@ -194,7 +194,7 @@ static KMETHOD MPIComm_recv(KonohaContext *kctx, KonohaStack *sfp)
 	TRACE(LOGPOL_DEBUG, LogText("at", "MPI_Recv"), LogText("#", "begin"), LogUint("src", src), LogUint("count", count), LOG_END);
 	bool ret = (MPI_Recv(getbuf(data), count, data->type, src, tag, comm->comm, &stat));
 	TRACE(LOGPOL_DEBUG, LogText("at", "MPI_Recv"), LogText("#", "finish"), LOG_END);
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## MPIRequest MPIComm.iSend(Bytes buf, int count, int dest, int tag);
@@ -209,7 +209,7 @@ static KMETHOD MPIComm_iSend(KonohaContext *kctx, KonohaStack *sfp)
 	TRACE(LOGPOL_DEBUG, LogText("at", "MPI_Isend"), LogText("#", "begin"), LogUint("dest", dest), LogUint("count", count), LOG_END);
 	MPI_Isend(getbuf(data), count, data->type, dest, tag, comm->comm, &ret->req);
 	TRACE(LOGPOL_DEBUG, LogText("at", "MPI_Isend"), LogText("#", "finish"), LOG_END);
-	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(ret)));
+	KReturn(new_ReturnCppObject(kctx, sfp, WRAP(ret)));
 }
 
 //## MPIRequest MPIComm.iRecv(Bytes buf, int count, int src, int tag);
@@ -225,7 +225,7 @@ static KMETHOD MPIComm_iRecv(KonohaContext *kctx, KonohaStack *sfp)
 	TRACE(LOGPOL_DEBUG, LogText("at", "MPI_Irecv"), LogText("#", "begin"), LogUint("src", src), LogUint("count", count), LOG_END);
 	MPI_Irecv(getbuf(data), count, data->type, src, tag, comm->comm, &ret->req);
 	TRACE(LOGPOL_DEBUG, LogText("at", "MPI_Irecv"), LogText("#", "finish"), LOG_END);
-	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(ret)));
+	KReturn(new_ReturnCppObject(kctx, sfp, WRAP(ret)));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -239,7 +239,7 @@ static KMETHOD MPIComm_bcast(KonohaContext *kctx, KonohaStack *sfp)
 	TRACE(LOGPOL_DEBUG, LogText("at", "MPI_Bcast"), LogText("#", "begin"), LogUint("root", root), LogUint("count", count), LOG_END);
 	bool ret = (MPI_Bcast(getbuf(sdata), count, sdata->type, root, comm->comm));
 	TRACE(LOGPOL_DEBUG, LogText("at", "MPI_Bcast"), LogText("#", "finish"), LOG_END);
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## boolean MPIComm.scatter(MPIData sdata, int scount, MPIData rdata, int rcount, int root_rank);
@@ -254,7 +254,7 @@ static KMETHOD MPIComm_scatter(KonohaContext *kctx, KonohaStack *sfp)
 	MPIData_extend(kctx, rdata, rcount);
 	bool ret = (MPI_Scatter(getbuf(sdata), scount, sdata->type, 
 			getbuf(rdata), rcount, rdata->type, root, comm->comm));
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## boolean MPIComm.gather(MPIData sdata, int scount, MPIData rdata, int rcount, int root_rank);
@@ -269,7 +269,7 @@ static KMETHOD MPIComm_gather(KonohaContext *kctx, KonohaStack *sfp)
 	MPIData_extend(kctx, rdata, rcount);
 	bool ret = (MPI_Gather(getbuf(sdata), scount, sdata->type, 
 			getbuf(rdata), rcount, rdata->type, root, comm->comm));
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## boolean MPIComm.allGather(MPIData sdata, int scount, MPIData rdata, int rcount);
@@ -283,7 +283,7 @@ static KMETHOD MPIComm_allGather(KonohaContext *kctx, KonohaStack *sfp)
 	MPIData_extend(kctx, rdata, rcount);
 	bool ret = (MPI_Allgather(getbuf(sdata), scount, sdata->type, getbuf(rdata),
 			rcount, rdata->type, comm->comm));
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## boolean MPIComm.allToAll(MPIData sdata, int scount, MPIData rdata, int rcount);
@@ -297,7 +297,7 @@ static KMETHOD MPIComm_allToAll(KonohaContext *kctx, KonohaStack *sfp)
 	MPIData_extend(kctx, rdata, rcount);
 	bool ret = (MPI_Alltoall(getbuf(sdata), scount, sdata->type, getbuf(rdata), 
 			rcount, rdata->type, comm->comm));
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## boolean MPIComm.reduce(MPIData sdata, MPIData rdata, int rcount, MPIOp op, int root_rank);
@@ -312,7 +312,7 @@ static KMETHOD MPIComm_reduce(KonohaContext *kctx, KonohaStack *sfp)
 	MPIData_extend(kctx, rdata, rcount);
 	bool ret = (MPI_Reduce(getbuf(sdata), getbuf(rdata), rcount, rdata->type, 
 			op, root, comm->comm));
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## boolean MPIComm.allReduce(MPIData sdata, MPIData rdata, int rcount, MPIOp op);
@@ -326,7 +326,7 @@ static KMETHOD MPIComm_allReduce(KonohaContext *kctx, KonohaStack *sfp)
 	MPIData_extend(kctx, rdata, rcount);
 	bool ret = (MPI_Allreduce(getbuf(sdata), getbuf(rdata), rcount, rdata->type, 
 			op, comm->comm));
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## boolean MPIComm.scan(MPIData sdata, MPIData rdata, int rcount, MPIOp op);
@@ -339,7 +339,7 @@ static KMETHOD MPIComm_scan(KonohaContext *kctx, KonohaStack *sfp)
 	MPI_Op op = (MPI_Op)sfp[4].intValue;
 	MPIData_extend(kctx, rdata, rcount);
 	bool ret = (MPI_Scan(getbuf(sdata), getbuf(rdata), rcount, rdata->type, op, comm->comm));
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## boolean MPIComm.reduceScatter(MPIData sdata, MPIData rdata, int[] rcounts, MPIOp op);
@@ -355,7 +355,7 @@ static KMETHOD MPIRequest_wait(KonohaContext *kctx, KonohaStack *sfp)
 	kMPIRequest *req = toRawPtr(kMPIRequest *, sfp[0].asObject);
 	MPI_Status stat;
 	bool ret = (MPI_Wait(&req->req, &stat));
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## boolean MPIRequest.test()
@@ -365,7 +365,7 @@ static KMETHOD MPIRequest_test(KonohaContext *kctx, KonohaStack *sfp)
 	MPI_Status stat;
 	int flag;
 	MPI_Test(&req->req, &flag, &stat);
-	RETURNb_(flag != 0);
+	KReturnUnboxValue(flag != 0);
 }
 
 //## boolean MPIRequest.cancel()
@@ -373,7 +373,7 @@ static KMETHOD MPIRequest_cancel(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMPIRequest *req = toRawPtr(kMPIRequest *, sfp[0].asObject);
 	bool ret = (MPI_Cancel(&req->req));
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -386,7 +386,7 @@ static KMETHOD MPIData_fromBytes(KonohaContext *kctx, KonohaStack *sfp)
 	d->size = sfp[1].asBytes->bytesize;
 	d->offset = 0;
 	d->typeId = KMPI_BYTES;
-	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(d)));
+	KReturn(new_ReturnCppObject(kctx, sfp, WRAP(d)));
 }
 
 ////## MPIData MPIData.fromIntArray(Array[int] a)
@@ -398,7 +398,7 @@ static KMETHOD MPIData_fromBytes(KonohaContext *kctx, KonohaStack *sfp)
 //	d->offset = 0;
 //	d->a = sfp[1].asArray;
 //	d->typeId = KMPI_IARRAY;
-//	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(d)));
+//	KReturn(new_ReturnCppObject(kctx, sfp, WRAP(d)));
 //}
 //
 ////## MPIData MPIData.fromFloatArray(Array[float] a)
@@ -410,13 +410,13 @@ static KMETHOD MPIData_fromBytes(KonohaContext *kctx, KonohaStack *sfp)
 //	d->offset = 0;
 //	d->a = sfp[1].asArray;
 //	d->typeId = KMPI_FARRAY;
-//	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(d)));
+//	KReturn(new_ReturnCppObject(kctx, sfp, WRAP(d)));
 //}
 
 //## Bytes MPIData.toBytes()
 static KMETHOD MPIData_toBytes(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_(toRawPtr(kMPIData *, sfp[0].asObject)->b);
+	KReturn(toRawPtr(kMPIData *, sfp[0].asObject)->b);
 }
 
 //## void MPIData.setOffset(int offset)
@@ -424,21 +424,21 @@ static KMETHOD MPIData_setOffset(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMPIData *d = toRawPtr(kMPIData *, sfp[0].asObject);
 	d->offset = sfp[1].intValue;
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 //## int MPIData.getOffset()
 static KMETHOD MPIData_getOffset(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMPIData *d = toRawPtr(kMPIData *, sfp[0].asObject);
-	RETURNi_(d->offset);
+	KReturnUnboxValue(d->offset);
 }
 
 //## int MPIData.getSize()
 static KMETHOD MPIData_getSize(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMPIData *d = toRawPtr(kMPIData *, sfp[0].asObject);
-	RETURNi_(d->size - d->offset);
+	KReturnUnboxValue(d->size - d->offset);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -452,7 +452,7 @@ static KMETHOD MPIData_newFloatArray(KonohaContext *kctx, KonohaStack *sfp)
 	d->offset = 0;
 	d->fa = KCalloc_UNTRACE(sizeof(kfloat_t), size);
 	d->typeId = KMPI_FARRAY;
-	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(d)));
+	KReturn(new_ReturnCppObject(kctx, sfp, WRAP(d)));
 }
 
 //## MPIData MPIData.newIntArray(int size)
@@ -465,7 +465,7 @@ static KMETHOD MPIData_newIntArray(KonohaContext *kctx, KonohaStack *sfp)
 	d->offset = 0;
 	d->fa = KCalloc_UNTRACE(sizeof(kint_t), size);
 	d->typeId = KMPI_IARRAY;
-	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(d)));
+	KReturn(new_ReturnCppObject(kctx, sfp, WRAP(d)));
 }
 
 //## float MPIData.getf(int n)
@@ -473,7 +473,7 @@ static KMETHOD MPIData_getf(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMPIData *sdata = toRawPtr(kMPIData *, sfp[0].asObject);
 	int n = sfp[1].intValue + sdata->offset;
-	RETURNf_(sdata->fa[n]);
+	KReturnFloatValue(sdata->fa[n]);
 }
 
 //## void MPIData.setf(int n, float v)
@@ -483,7 +483,7 @@ static KMETHOD MPIData_setf(KonohaContext *kctx, KonohaStack *sfp)
 	int n = sfp[1].intValue + sdata->offset;
 	double v = sfp[2].floatValue;
 	sdata->fa[n] = v;
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 //## int MPIData.geti(int n)
@@ -491,7 +491,7 @@ static KMETHOD MPIData_geti(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMPIData *sdata = toRawPtr(kMPIData *, sfp[0].asObject);
 	int n = sfp[1].intValue + sdata->offset;
-	RETURNi_(sdata->ia[n]);
+	KReturnUnboxValue(sdata->ia[n]);
 }
 
 //## void MPIData.seti(int n, int v)
@@ -501,7 +501,7 @@ static KMETHOD MPIData_seti(KonohaContext *kctx, KonohaStack *sfp)
 	int n = sfp[1].intValue + sdata->offset;
 	kint_t v = sfp[2].intValue;
 	sdata->ia[n] = v;
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 /* ------------------------------------------------------------------------ */

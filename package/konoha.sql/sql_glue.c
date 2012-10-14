@@ -224,7 +224,7 @@ static KMETHOD Connection_new(KonohaContext *kctx, KonohaStack *sfp)
 	//		break;
 	//}
 	con->db = con->dspi->qopen(kctx, dbname);
-	RETURN_(con);
+	KReturn(con);
 }
 
 static KMETHOD Connection_query(KonohaContext *kctx, KonohaStack *sfp)
@@ -243,7 +243,7 @@ static KMETHOD Connection_query(KonohaContext *kctx, KonohaStack *sfp)
 		//DP(rs)->qcurfree = knh_getQueryDSPI(kctx, K_DEFAULT_DSPI)->qcurfree;
 	}
 	KFieldSet(rs, rs->connection, c);
-	RETURN_(rs);
+	KReturn(rs);
 }
 
 static KMETHOD Connection_close(KonohaContext *kctx, KonohaStack *sfp)

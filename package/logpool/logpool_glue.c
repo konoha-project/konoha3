@@ -101,7 +101,7 @@ static KMETHOD LogPool_new(KonohaContext *kctx, KonohaStack *sfp)
 	char *host = (char *) S_text(sfp[1].asString);
 	int   port = sfp[2].intValue;
 	RawPtr_init(kctx, sfp[0].asObject, logpool_open_client(NULL, host, port));
-	RETURN_(ret);
+	KReturn(ret);
 }
 
 //## Log LogPool.get()
@@ -116,7 +116,7 @@ static KMETHOD LogPool_get(KonohaContext *kctx, KonohaStack *sfp)
 		free(buf);
 	}
 	RawPtr_init(kctx, log, buf);
-	RETURN_(log);
+	KReturn(log);
 }
 
 //## String Log.get(String key)
@@ -128,7 +128,7 @@ static KMETHOD Log_get_(KonohaContext *kctx, KonohaStack *sfp)
 	int   klen = S_size(sfp[1].asString);
 	int   vlen;
 	char *data = Log_get(log, key, klen, &vlen);
-	RETURN_(KLIB new_kString(kctx, data, vlen, StringPolicy_ASCII|StringPolicy_POOL));
+	KReturn(KLIB new_kString(kctx, data, vlen, StringPolicy_ASCII|StringPolicy_POOL));
 }
 
 // --------------------------------------------------------------------------
@@ -200,7 +200,7 @@ static KMETHOD Printer_create(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct pool_plugin_print *p = POOL_PLUGIN_CLONE(pool_plugin_print);
 	kRawPtr *ret = (kRawPtr *) KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), (uintptr_t)p);
-	RETURN_(ret);
+	KReturn(ret);
 }
 
 // PoolPlugin ValFilter.create(String key, String val, String op);
@@ -217,7 +217,7 @@ static KMETHOD ValFilter_create(KonohaContext *kctx, KonohaStack *sfp)
 	} else {
 		assert(0 && "TODO");
 	}
-	RETURN_(ret);
+	KReturn(ret);
 }
 
 // PoolPlugin KeyFilter.create(String key);
@@ -227,7 +227,7 @@ static KMETHOD KeyFilter_create(KonohaContext *kctx, KonohaStack *sfp)
 	kRawPtr *ret = (kRawPtr *) KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), (uintptr_t)p);
 	p->klen = S_size(sfp[1].asString);
 	p->key  = copy_string(kctx, sfp[2].asString);
-	RETURN_(ret);
+	KReturn(ret);
 }
 
 // PoolPlugin React.create(String traceName, String key);
@@ -237,7 +237,7 @@ static KMETHOD React_create(KonohaContext *kctx, KonohaStack *sfp)
 	kRawPtr *ret = (kRawPtr *) KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), (uintptr_t)p);
 	p->conf.traceName = copy_string(kctx, sfp[1].asString);
 	p->conf.key       = copy_string(kctx, sfp[2].asString);
-	RETURN_(ret);
+	KReturn(ret);
 }
 
 // PoolPlugin Timer.create(int timer, int startFlat, int contFlat, int finFlag);
@@ -249,7 +249,7 @@ static KMETHOD Timer_create(KonohaContext *kctx, KonohaStack *sfp)
 	p->flag_start  = sfp[2].intValue;
 	p->flag_cont   = sfp[3].intValue;
 	p->flag_finish = sfp[4].intValue;
-	RETURN_(ret);
+	KReturn(ret);
 }
 
 // PoolPlugin Copy.create();
@@ -257,7 +257,7 @@ static KMETHOD Copy_create(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct pool_plugin_copy *p = POOL_PLUGIN_CLONE(pool_plugin_copy);
 	kRawPtr *ret = (kRawPtr *) KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), (uintptr_t)p);
-	RETURN_(ret);
+	KReturn(ret);
 }
 
 static void *statics_init(KonohaContext *kctx, kFunc *initFo, kFunc *exitFo, kFunc *funcFo)
@@ -279,7 +279,7 @@ static KMETHOD Statics_create(KonohaContext *kctx, KonohaStack *sfp)
 	p->finit = p_init;
 	p->fexit = p_exit;
 	p->function = p_func;
-	RETURN_(ret);
+	KReturn(ret);
 }
 
 // PoolPlugin Response.create(Event ev);
@@ -289,7 +289,7 @@ static KMETHOD Response_create(KonohaContext *kctx, KonohaStack *sfp)
 	kRawPtr *ret = (kRawPtr *) KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), (uintptr_t)p);
 	kRawPtr *ev = (kRawPtr *) sfp[1].asObject;
 	p->bev = ev->rawptr;
-	RETURN_(ret);
+	KReturn(ret);
 }
 
 // void PoolPlugin.apply(PoolPlugin p);
@@ -338,7 +338,7 @@ static KMETHOD LogPool_loadFile(KonohaContext *kctx, KonohaStack *sfp)
 	servers = memcached_server_list_append(NULL, "127.0.0.1", 11211, &rc);
 	if(rc != MEMCACHED_SUCCESS) {
 		fprintf(stderr, "memcached_server_list_append failed\n");
-		RETURNvoid_();
+		KReturnVoid();
 	}
 
 	rc = memcached_server_push(mc, servers);
@@ -349,7 +349,7 @@ static KMETHOD LogPool_loadFile(KonohaContext *kctx, KonohaStack *sfp)
 	memcached_set(mc, S_text(key), S_size(key), script, len, 0, 0);
 	logpool_procedure(lp, (char*)S_text(key), S_size(key));
 	free(script);
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 // --------------------------------------------------------------------------

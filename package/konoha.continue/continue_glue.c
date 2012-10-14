@@ -58,11 +58,11 @@ static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 		if(kStmt_is(CatchContinue, p)) {
 			KLIB kObject_setObject(kctx, stmt, stmt->syn->keyword, TY_Stmt, p);
 			kStmt_typed(stmt, JUMP);
-			RETURNb_(true);
+			KReturnUnboxValue(true);
 		}
 	}
 	SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "continue statement not within a loop");
-	RETURNb_((false));
+	KReturnUnboxValue((false));
 }
 
 static kbool_t continue_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)

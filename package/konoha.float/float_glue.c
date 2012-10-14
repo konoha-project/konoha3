@@ -76,35 +76,35 @@ static void kmodfloat_free(KonohaContext *kctx, struct KonohaModule *baseh)
 
 static KMETHOD Float_opPlus(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNf_((sfp[0].floatValue));
+	KReturnFloatValue((sfp[0].floatValue));
 }
 
 /* float + float */
 static KMETHOD Float_opADD(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNf_(sfp[0].floatValue + sfp[1].floatValue);
+	KReturnFloatValue(sfp[0].floatValue + sfp[1].floatValue);
 }
 
 static KMETHOD Int_opADD(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNf_(sfp[0].intValue + sfp[1].floatValue);
+	KReturnFloatValue(sfp[0].intValue + sfp[1].floatValue);
 }
 
 /* float - float */
 static KMETHOD Float_opSUB(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNf_(sfp[0].floatValue - sfp[1].floatValue);
+	KReturnFloatValue(sfp[0].floatValue - sfp[1].floatValue);
 }
 
 static KMETHOD Int_opSUB(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNf_(sfp[0].intValue - sfp[1].floatValue);
+	KReturnFloatValue(sfp[0].intValue - sfp[1].floatValue);
 }
 
 /* float * float */
 static KMETHOD Float_opMUL(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNf_(sfp[0].floatValue * sfp[1].floatValue);
+	KReturnFloatValue(sfp[0].floatValue * sfp[1].floatValue);
 }
 
 /* float / float */
@@ -114,12 +114,12 @@ static KMETHOD Float_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 	if(unlikely(n == 0.0)) {
 		THROW_ZeroDividedException(kctx, sfp);
 	}
-	RETURNf_(sfp[0].floatValue / n);
+	KReturnFloatValue(sfp[0].floatValue / n);
 }
 
 static KMETHOD Int_opMUL(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNf_(sfp[0].intValue * sfp[1].floatValue);
+	KReturnFloatValue(sfp[0].intValue * sfp[1].floatValue);
 }
 
 /* float / float */
@@ -129,94 +129,94 @@ static KMETHOD Int_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 	if(unlikely(n == 0.0)) {
 		THROW_ZeroDividedException(kctx, sfp);
 	}
-	RETURNf_(sfp[0].intValue / n);
+	KReturnFloatValue(sfp[0].intValue / n);
 }
 
 /* float == float */
 static KMETHOD Float_opEQ(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(sfp[0].floatValue == sfp[1].floatValue);
+	KReturnUnboxValue(sfp[0].floatValue == sfp[1].floatValue);
 }
 
 /* float != float */
 static KMETHOD Float_opNEQ(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(sfp[0].floatValue != sfp[1].floatValue);
+	KReturnUnboxValue(sfp[0].floatValue != sfp[1].floatValue);
 }
 
 /* float < float */
 static KMETHOD Float_opLT(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(sfp[0].floatValue < sfp[1].floatValue);
+	KReturnUnboxValue(sfp[0].floatValue < sfp[1].floatValue);
 }
 
 /* float <= float */
 static KMETHOD Float_opLTE(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(sfp[0].floatValue <= sfp[1].floatValue);
+	KReturnUnboxValue(sfp[0].floatValue <= sfp[1].floatValue);
 }
 
 /* float > float */
 static KMETHOD Float_opGT(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(sfp[0].floatValue > sfp[1].floatValue);
+	KReturnUnboxValue(sfp[0].floatValue > sfp[1].floatValue);
 }
 
 /* float >= float */
 static KMETHOD Float_opGTE(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(sfp[0].floatValue >= sfp[1].floatValue);
+	KReturnUnboxValue(sfp[0].floatValue >= sfp[1].floatValue);
 }
 
 //////
 
 static KMETHOD Int_opEQ(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(sfp[0].intValue == sfp[1].floatValue);
+	KReturnUnboxValue(sfp[0].intValue == sfp[1].floatValue);
 }
 
 /* float != float */
 static KMETHOD Int_opNEQ(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(sfp[0].intValue != sfp[1].floatValue);
+	KReturnUnboxValue(sfp[0].intValue != sfp[1].floatValue);
 }
 
 
 /* float < float */
 static KMETHOD Int_opLT(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(sfp[0].intValue < sfp[1].floatValue);
+	KReturnUnboxValue(sfp[0].intValue < sfp[1].floatValue);
 }
 
 /* float <= float */
 static KMETHOD Int_opLTE(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(sfp[0].intValue <= sfp[1].floatValue);
+	KReturnUnboxValue(sfp[0].intValue <= sfp[1].floatValue);
 }
 
 /* float > float */
 static KMETHOD Int_opGT(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(sfp[0].intValue > sfp[1].floatValue);
+	KReturnUnboxValue(sfp[0].intValue > sfp[1].floatValue);
 }
 
 /* float >= float */
 static KMETHOD Int_opGTE(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(sfp[0].intValue >= sfp[1].floatValue);
+	KReturnUnboxValue(sfp[0].intValue >= sfp[1].floatValue);
 }
 
 
 /* float to int */
 static KMETHOD Float_toInt(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_((kint_t)sfp[0].floatValue);
+	KReturnUnboxValue((kint_t)sfp[0].floatValue);
 }
 
 /* float >= float */
 static KMETHOD Int_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNf_((kfloat_t)sfp[0].intValue);
+	KReturnFloatValue((kfloat_t)sfp[0].intValue);
 }
 
 /* float to String */
@@ -224,19 +224,19 @@ static KMETHOD Float_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	char buf[40];
 	PLATAPI snprintf_i(buf, sizeof(buf), KFLOAT_FMT, sfp[0].floatValue);
-	RETURN_(KLIB new_kString(kctx, OnStack, buf, strlen(buf), StringPolicy_ASCII));
+	KReturn(KLIB new_kString(kctx, OnStack, buf, strlen(buf), StringPolicy_ASCII));
 }
 
 /* String to float */
 static KMETHOD String_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNf_((kfloat_t)strtod(S_text(sfp[0].asString), NULL));
+	KReturnFloatValue((kfloat_t)strtod(S_text(sfp[0].asString), NULL));
 }
 
 //## @Const method Int Int.opMINUS();
 static KMETHOD Float_opMINUS(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNf_(-(sfp[0].floatValue));
+	KReturnFloatValue(-(sfp[0].floatValue));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -321,7 +321,7 @@ static KMETHOD TypeCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
 	sfp[4].floatValue = strtod(S_text(tk->text), NULL);   // just using tramsformation float
-	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_float, sfp[4].unboxValue));
+	KReturn(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_float, sfp[4].unboxValue));
 }
 
 static kbool_t float_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)

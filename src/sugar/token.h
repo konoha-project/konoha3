@@ -158,9 +158,9 @@ static int ParseAnnotation(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeni
 //			tk->resolvedSymbol = ksymbolA(S_text(tk->text), S_size(tk->text), SYM_NEWID) | MN_Annotation;
 //			tk->resolvedSyntaxInfo = SYN_(tokenizer->ns, KW_SymbolPattern);
 //		}
-//		RETURNi_(pos - tok_start);
+//		KReturnUnboxValue(pos - tok_start);
 //	}
-//	RETURNi_(0);
+//	KReturnUnboxValue(0);
 //}
 
 static int ParseOperator(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)

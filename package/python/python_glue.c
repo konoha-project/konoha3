@@ -73,12 +73,12 @@ static void PyObject_free(KonohaContext *kctx, kObject *o)
 	pyo->self = Py_None;
 }
 
-#define RETURN_PyObject(O)  RETURN_PyObject_(kctx, sfp, O)
+#define KReturnPyObject(O)  KReturnPyObject_(kctx, sfp, O)
 
-static void RETURN_PyObject_(KonohaContext *kctx, KonohaStack *sfp, PyObject *pyo)
+static void KReturnPyObject_(KonohaContext *kctx, KonohaStack *sfp, PyObject *pyo)
 {
 	if(pyo != NULL) {
-		RETURN_(KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)pyo));
+		KReturn(KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)pyo));
 	}
 	else {
 		// ERROR if python object is NULL
@@ -97,7 +97,7 @@ static void RETURN_PyObject_(KonohaContext *kctx, KonohaStack *sfp, PyObject *py
 
 static KMETHOD Int_toPyObject(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_PyObject(PyInt_FromLong(sfp[0].intValue));
+	KReturnPyObject(PyInt_FromLong(sfp[0].intValue));
 }
 
 static KMETHOD PyObject_toInt(KonohaContext *kctx, KonohaStack *sfp)
@@ -107,23 +107,23 @@ static KMETHOD PyObject_toInt(KonohaContext *kctx, KonohaStack *sfp)
 	if(PyErr_Occurred()) {
 		v = 0;
 	}
-	RETURNi_(v);
+	KReturnUnboxValue(v);
 }
 
 static KMETHOD Boolean_toPyObject(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_PyObject(PyBool_FromLong(sfp[0].intValue));
+	KReturnPyObject(PyBool_FromLong(sfp[0].intValue));
 }
 
 static KMETHOD PyObject_toBoolean(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kPyObject *po = (kPyObject*)sfp[0].asObject;
-	RETURNb_(po->self == Py_True ? 1 : 0);
+	KReturnUnboxValue(po->self == Py_True ? 1 : 0);
 }
 
 static KMETHOD Float_toPyObject(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_PyObject(PyFloat_FromDouble(sfp[0].floatValue));
+	KReturnPyObject(PyFloat_FromDouble(sfp[0].floatValue));
 }
 
 static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp)
@@ -133,13 +133,13 @@ static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 	if(PyErr_Occurred()) {
 		v = 0;
 	}
-	RETURNf_(v);
+	KReturnFloatValue(v);
 }
 
 // [TODO] warning caused ... because some bytes_gule.h function (ex. kdlclose) is not use.
 //static KMETHOD Bytes_toPyObject(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	RETURN_PyObject(PyString_FromString(sfp[0].asString));
+//	KReturnPyObject(PyString_FromString(sfp[0].asString));
 //}
 //
 //static KMETHOD PyObject_toBytes(KonohaContext *kctx, KonohaStack *sfp)
@@ -154,23 +154,23 @@ static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 //	struct kBytesVar* ba = (struct kBytesVar*)new_Bytes(kctx, Kwb_bytesize(&wb));
 //	ba->buf = KLIB Kwb_top(kctx, &wb, 1);
 //	KLIB Kwb_free(&wb);
-//	RETURN_(ba);
+//	KReturn(ba);
 //}
 
 //static KMETHOD Complex_toPyObject(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	//RETURN_PyObject(PyBool_FromLong(sfp[0].intValue));
+//	//KReturnPyObject(PyBool_FromLong(sfp[0].intValue));
 //}
 //
 //static KMETHOD PyObject_toComplex(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	//kPyObject *po = (kPyObject*)sfp[0].asObject;
-//	//RETURNb_(po->self == Py_True ? 1 : 0);
+//	//KReturnUnboxValue(po->self == Py_True ? 1 : 0);
 //}
 
 static KMETHOD String_toPyObject(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_PyObject(PyUnicode_FromString(S_text(sfp[0].asString)));
+	KReturnPyObject(PyUnicode_FromString(S_text(sfp[0].asString)));
 }
 
 static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
@@ -183,23 +183,23 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 	O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb);
 	kString* s = KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
 	KLIB Kwb_free(&wb);
-	RETURN_(s);
+	KReturn(s);
 	//if(PyString_Check(po->self)) {
 	//	//dec
 	//	t = PyString_AsString(po->self);
-	//	RETURN_(KLIB new_kString(kctx, t, strlen(t), 0));
+	//	KReturn(KLIB new_kString(kctx, t, strlen(t), 0));
 	//}
 	//else if(PyUnicode_Check(po->self)) {
 	//	//dec
 	//	PyObject* s = PyUnicode_AsUTF8String(po->self);
 	//	// [TODO] there is no t's NULL check. Is it OK?
 	//	t = PyString_AsString(s);
-	//	RETURN_(KLIB new_kString(kctx, t, strlen(t), 0));
+	//	KReturn(KLIB new_kString(kctx, t, strlen(t), 0));
 	//}
 	//else if(PyByteArray_Check(po->self)) {
 	//	//dec
 	//	t = PyByteArray_AsString(po->self);
-	//	RETURN_(KLIB new_kString(kctx, t, strlen(t), 0));
+	//	KReturn(KLIB new_kString(kctx, t, strlen(t), 0));
 	//}
 	//else {
 	//	KGrowingBuffer wb;
@@ -207,7 +207,7 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 	//	O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb, 0);
 	//	kString* s = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
 	//	KLIB Kwb_free(&wb);
-	//	RETURN_(s);
+	//	KReturn(s);
 	//}
 }
 
@@ -248,13 +248,13 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 //			//PyList_Append(pa, i, a->ObjectItems[n]);
 //		}
 //	}
-//	RETURN_PyObject(pa);
+//	KReturnPyObject(pa);
 //}
 
 //static KMETHOD PyObject_toList(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	//kPyObject *po = (kPyObject*)sfp[0].asObject;
-//	//RETURNb_(po->self == Py_True ? 1 : 0);
+//	//KReturnUnboxValue(po->self == Py_True ? 1 : 0);
 //}
 
 //static KMETHOD Dict_toPyObject(KonohaContext *kctx, KonohaStack *sfp)
@@ -382,7 +382,7 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 //## Boolean Python.eval(String script);
 static KMETHOD Python_eval(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(PyRun_SimpleString(S_text(sfp[1].asString)) == 0);
+	KReturnUnboxValue(PyRun_SimpleString(S_text(sfp[1].asString)) == 0);
 }
 
 #define DEFAULT_SIZE 16
@@ -441,7 +441,7 @@ static KMETHOD PyObject_import(KonohaContext *kctx, KonohaStack *sfp)
 		free(pathes);
 	}
 	PySys_SetObject("path", (PyObject*)ppath);
-	RETURN_PyObject(PyImport_ImportModule(S_text(sfp[1].asString)));
+	KReturnPyObject(PyImport_ImportModule(S_text(sfp[1].asString)));
 }
 
 //## PyObject PyObject.(PyObject o);
@@ -469,7 +469,7 @@ static KMETHOD PyObject_(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	Py_XDECREF(pFunc);
 	Py_XDECREF(pArgs);
-	RETURN_PyObject(pValue);
+	KReturnPyObject(pValue);
 }
 
 // --------------------------------------------------------------------------

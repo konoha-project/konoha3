@@ -45,43 +45,43 @@ static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	kString* returnValue = KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
 	KLIB Kwb_free(&wb);
-	RETURN_(returnValue);
+	KReturn(returnValue);
 }
 
 //## @Const method Boolean Boolean.opNOT();
 static KMETHOD Boolean_opNOT(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(!sfp[0].boolValue);
+	KReturnUnboxValue(!sfp[0].boolValue);
 }
 
 //## @Const method Boolean Boolean.opEQ(Boolean x);
 static KMETHOD Boolean_opEQ(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(sfp[0].boolValue == sfp[1].boolValue);
+	KReturnUnboxValue(sfp[0].boolValue == sfp[1].boolValue);
 }
 
 //## @Const method Int Int.opMINUS();
 static KMETHOD Int_opMINUS(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(-(sfp[0].intValue));
+	KReturnUnboxValue(-(sfp[0].intValue));
 }
 
 //## @Const method Int Int.opADD(Int x);
 static KMETHOD Int_opADD(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(sfp[0].intValue + sfp[1].intValue);
+	KReturnUnboxValue(sfp[0].intValue + sfp[1].intValue);
 }
 
 //## @Const method Int Int.opSUB(Int x);
 static KMETHOD Int_opSUB(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(sfp[0].intValue - sfp[1].intValue);
+	KReturnUnboxValue(sfp[0].intValue - sfp[1].intValue);
 }
 
 //## @Const method Int Int.opMUL(Int x);
 static KMETHOD Int_opMUL(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(sfp[0].intValue * sfp[1].intValue);
+	KReturnUnboxValue(sfp[0].intValue * sfp[1].intValue);
 }
 
 //## @Const method Int Int.opDIV(Int x);
@@ -91,7 +91,7 @@ static KMETHOD Int_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 	if(unlikely(n == 0)) {
 		KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
 	}
-	RETURNi_(sfp[0].intValue / n);
+	KReturnUnboxValue(sfp[0].intValue / n);
 }
 
 //## @Const method Int Int.opMOD(Int x);
@@ -101,43 +101,43 @@ static KMETHOD Int_opMOD(KonohaContext *kctx, KonohaStack *sfp)
 	if(unlikely(n == 0)) {
 		KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
 	}
-	RETURNi_(sfp[0].intValue % n);
+	KReturnUnboxValue(sfp[0].intValue % n);
 }
 
 //## @Const method Boolean Int.opEQ(Int x);
 static KMETHOD Int_opEQ(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(sfp[0].intValue == sfp[1].intValue);
+	KReturnUnboxValue(sfp[0].intValue == sfp[1].intValue);
 }
 
 //## @Const method Boolean Int.opNEQ(Int x);
 static KMETHOD Int_opNEQ(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(sfp[0].intValue != sfp[1].intValue);
+	KReturnUnboxValue(sfp[0].intValue != sfp[1].intValue);
 }
 
 //## @Const method Boolean Int.opLT(Int x);
 static KMETHOD Int_opLT(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(sfp[0].intValue < sfp[1].intValue);
+	KReturnUnboxValue(sfp[0].intValue < sfp[1].intValue);
 }
 
 //## @Const method Boolean Int.opLTE(Int x);
 static KMETHOD Int_opLTE(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(sfp[0].intValue <= sfp[1].intValue);
+	KReturnUnboxValue(sfp[0].intValue <= sfp[1].intValue);
 }
 
 //## @Const method Boolean Int.opGT(Int x);
 static KMETHOD Int_opGT(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(sfp[0].intValue > sfp[1].intValue);
+	KReturnUnboxValue(sfp[0].intValue > sfp[1].intValue);
 }
 
 //## @Const method Boolean Int.opGTE(Int x);
 static KMETHOD Int_opGTE(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(sfp[0].intValue >= sfp[1].intValue);
+	KReturnUnboxValue(sfp[0].intValue >= sfp[1].intValue);
 }
 
 //## @Const method String Int.asString();
@@ -145,7 +145,7 @@ static KMETHOD Int_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	char buf[40];
 	PLATAPI snprintf_i(buf, sizeof(buf), "%ld", (intptr_t)sfp[0].intValue);
-	RETURN_(KLIB new_kString(kctx, OnStack, buf, strlen(buf), StringPolicy_ASCII));
+	KReturn(KLIB new_kString(kctx, OnStack, buf, strlen(buf), StringPolicy_ASCII));
 }
 
 //## @Const method Object Boolean.box();
@@ -153,7 +153,7 @@ static KMETHOD Boolean_box(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBoolean *o = !!(sfp[0].unboxValue) ? K_TRUE : K_FALSE;
 	sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;
-	RETURN_(o);
+	KReturn(o);
 }
 
 //## @Const method Object Int.box();
@@ -163,13 +163,13 @@ static KMETHOD Int_box(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_P("reqt=%s", CT_t(c));
 	DBG_ASSERT(CT_isUnbox(c));
 	sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;
-	RETURN_(KLIB new_kObject(kctx, OnStack, c, sfp[0].unboxValue));
+	KReturn(KLIB new_kObject(kctx, OnStack, c, sfp[0].unboxValue));
 }
 
 //## @Const method String String.toInt();
 static KMETHOD String_toInt(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_((kint_t)strtoll(S_text(sfp[0].asString), NULL, 10));
+	KReturnUnboxValue((kint_t)strtoll(S_text(sfp[0].asString), NULL, 10));
 }
 
 //## @Const @Immutable method String String.opAdd(@Coercion String x);
@@ -180,7 +180,7 @@ static KMETHOD String_opADD(KonohaContext *kctx, KonohaStack *sfp)
 	kString *s = KLIB new_kString(kctx, OnStack, NULL, S_size(leftHandString)+S_size(rightHandString), spol|StringPolicy_NOCOPY);
 	memcpy(s->buf,  S_text(leftHandString), S_size(leftHandString));
 	memcpy(s->buf + S_size(leftHandString), S_text(rightHandString), S_size(rightHandString));
-	RETURN_(s);
+	KReturn(s);
 }
 
 //## @Const method Boolean String.equals(String s);
@@ -190,9 +190,9 @@ static KMETHOD String_opEQ(KonohaContext *kctx, KonohaStack *sfp)
 	kString *s0 = sfp[0].asString;
 	kString *s1 = sfp[1].asString;
 	if(S_size(s0) == S_size(s1)) {
-		RETURNb_(strncmp(S_text(s0), S_text(s1), S_size(s0)) == 0);
+		KReturnUnboxValue(strncmp(S_text(s0), S_text(s1), S_size(s0)) == 0);
 	}
-	RETURNb_(0);
+	KReturnUnboxValue(0);
 }
 
 static KMETHOD String_opNEQ(KonohaContext *kctx, KonohaStack *sfp)
@@ -200,9 +200,9 @@ static KMETHOD String_opNEQ(KonohaContext *kctx, KonohaStack *sfp)
 	kString *s0 = sfp[0].asString;
 	kString *s1 = sfp[1].asString;
 	if(S_size(s0) == S_size(s1)) {
-		RETURNb_(strncmp(S_text(s0), S_text(s1), S_size(s0)) != 0);
+		KReturnUnboxValue(strncmp(S_text(s0), S_text(s1), S_size(s0)) != 0);
 	}
-	RETURNb_(1);
+	KReturnUnboxValue(1);
 }
 
 //## This Func.new(Object self, Method mtd);
@@ -211,7 +211,7 @@ static KMETHOD Func_new(KonohaContext *kctx, KonohaStack *sfp)
 	kFuncVar *fo = (kFuncVar*)sfp[0].asFunc;
 	KFieldSet(fo, fo->self, sfp[1].asObject);
 	KFieldSet(fo, fo->mtd,  sfp[2].asMethod);
-	RETURN_(fo);
+	KReturn(fo);
 }
 
 //## @Hidden T0 Func.invoke();

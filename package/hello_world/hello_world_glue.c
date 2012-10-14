@@ -90,7 +90,7 @@ static KMETHOD Person_new(KonohaContext *kctx, KonohaStack *sfp)
 	 * please check KGetReturnType(sfp) . */
 	KFieldSet(p, p->name, name);
 	p->age = age;
-	RETURN_(p);
+	KReturn(p);
 }
 
 //## String Person.say();
@@ -103,7 +103,7 @@ static KMETHOD Person_say(KonohaContext *kctx, KonohaStack *sfp)
 	const char *text = S_text(name);
 	char *buf = (char *)alloca(16 + S_size(name));
 	sprintf(buf, "hello , %s!", text);
-	RETURN_(KLIB new_kString(kctx, OnStack, buf, strlen(buf), StringPolicy_TEXT));
+	KReturn(KLIB new_kString(kctx, OnStack, buf, strlen(buf), StringPolicy_TEXT));
 }
 
 /* You can attach the following annotations to each methods. */

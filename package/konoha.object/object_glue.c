@@ -33,7 +33,7 @@ extern "C"{
 
 static KMETHOD Object_getTypeId(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(O_ct(sfp[0].asObject)->typeId);
+	KReturnUnboxValue(O_ct(sfp[0].asObject)->typeId);
 }
 
 // --------------------------------------------------------------------------
@@ -79,11 +79,11 @@ static kbool_t object_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 //		kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, self->ty, MN_toGETTER(fn), 0, MPOL_GETTER);
 //		if(mtd != NULL) {
 //			KFieldSet(expr->cons, expr->cons->MethodItems[0], mtd);
-//			RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, reqty));
+//			KReturn(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, reqty));
 //		}
 //		SUGAR kStmt_printMessage2(kctx, stmt, tkN, ErrTag, "undefined field: %s", S_text(tkN->text));
 //	}
-//	RETURN_(K_NULLEXPR);
+//	KReturn(K_NULLEXPR);
 //}
 
 // ----------------------------------------------------------------------------

@@ -135,7 +135,7 @@ static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 			kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, IteratorExpr->ty, MN_to(TY_Iterator), 0);
 			if(mtd == NULL) {
 				kStmtExpr_printMessage(kctx, stmt, IteratorExpr, ErrTag, "expected Iterator expression after in");
-				RETURNb_(false);
+				KReturnUnboxValue(false);
 			}
 			IteratorExpr = SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_var, mtd, 1, IteratorExpr);
 			kStmt_setObject(kctx, stmt, KW_ExprPattern, IteratorExpr);
@@ -152,7 +152,7 @@ static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 			kStmt_typed(stmt, BLOCK);
 		}
 	}
-	RETURNb_(isOkay);
+	KReturnUnboxValue(isOkay);
 }
 
 static kbool_t foreach_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)

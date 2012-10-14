@@ -58,7 +58,7 @@ static KMETHOD Complex_new(KonohaContext *kctx, KonohaStack *sfp)
 	double real = (double)sfp[1].floatValue;
 	double imaginary = (double)sfp[2].floatValue;
 	ret->z = real + I * imaginary;
-	RETURN_(ret);
+	KReturn(ret);
 }
 
 //## Complex Complex.csin();
@@ -67,7 +67,7 @@ static KMETHOD Complex_csin(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
 	double ret = csin(z);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.csinf();
@@ -76,7 +76,7 @@ static KMETHOD Complex_csinf(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
 	float ret = csinf(zf);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.csinl();
@@ -85,7 +85,7 @@ static KMETHOD Complex_csinl(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
 	long double ret = csinl(zl);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.ccos();
@@ -94,7 +94,7 @@ static KMETHOD Complex_ccos(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
 	double ret = ccos(z);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.ccosf();
@@ -103,7 +103,7 @@ static KMETHOD Complex_ccosf(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
 	float  ret = ccosf(zf);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.ccosl();
@@ -112,7 +112,7 @@ static KMETHOD Complex_ccosl(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
 	long double ret = ccosl(zl);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.ctan();
@@ -121,7 +121,7 @@ static KMETHOD Complex_ctan(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
 	double ret = ctan(z);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.ctanf();
@@ -130,7 +130,7 @@ static KMETHOD Complex_ctanf(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
 	float ret = ctanf(zf);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.ctanl();
@@ -139,7 +139,7 @@ static KMETHOD Complex_ctanl(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
 	long double ret = ctanl(zl);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.casin();
@@ -148,7 +148,7 @@ static KMETHOD Complex_casin(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
 	double ret = casin(z);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.casinf();
@@ -157,7 +157,7 @@ static KMETHOD Complex_casinf(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
 	float ret = casinf(zf);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.casinl();
@@ -166,7 +166,7 @@ static KMETHOD Complex_casinl(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
 	long double ret = casinl(zl);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.cacos();
@@ -175,7 +175,7 @@ static KMETHOD Complex_cacos(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
 	double ret = cacos(z);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.cacos();
@@ -184,7 +184,7 @@ static KMETHOD Complex_cacosf(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
 	float ret = cacosf(zf);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.cacosl();
@@ -193,7 +193,7 @@ static KMETHOD Complex_cacosl(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
 	long double ret = cacosl(zl);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.catan();
@@ -202,7 +202,7 @@ static KMETHOD Complex_catan(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
 	double ret = catan(z);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.catanf();
@@ -211,7 +211,7 @@ static KMETHOD Complex_catanf(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
 	float ret = catanf(zf);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.catanl();
@@ -220,7 +220,7 @@ static KMETHOD Complex_catanl(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
 	long double ret = catanl(zl);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.csinh();
@@ -229,7 +229,7 @@ static KMETHOD Complex_csinh(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
 	double ret = csinh(z);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.csinhf();
@@ -238,7 +238,7 @@ static KMETHOD Complex_csinhf(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
 	float ret = csinh(zf);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.csinhl();
@@ -247,7 +247,7 @@ static KMETHOD Complex_csinhl(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
 	long double ret = csinh(zl);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.ccosh();
@@ -256,7 +256,7 @@ static KMETHOD Complex_ccosh(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
 	double ret = ccosh(z);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.ccoshf();
@@ -265,7 +265,7 @@ static KMETHOD Complex_ccoshf(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
 	float ret = ccosh(zf);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.ccoshl();
@@ -274,7 +274,7 @@ static KMETHOD Complex_ccoshl(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
 	long double ret = ccosh(zl);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.ctanh();
@@ -283,7 +283,7 @@ static KMETHOD Complex_ctanh(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
 	double ret = ctanh(z);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.ctanhf();
@@ -292,7 +292,7 @@ static KMETHOD Complex_ctanhf(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
 	float ret = ctanh(zf);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.ctanhl();
@@ -301,7 +301,7 @@ static KMETHOD Complex_ctanhl(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
 	long double ret = ctanh(zl);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.casinh();
@@ -310,7 +310,7 @@ static KMETHOD Complex_casinh(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
 	double ret = casinh(z);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.casinhf();
@@ -319,7 +319,7 @@ static KMETHOD Complex_casinhf(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
 	float ret = casinh(zf);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.casinhl();
@@ -328,7 +328,7 @@ static KMETHOD Complex_casinhl(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
 	long double ret = casinh(zl);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.cacosh();
@@ -337,7 +337,7 @@ static KMETHOD Complex_cacosh(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
 	double ret = cacosh(z);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.cacoshf();
@@ -346,7 +346,7 @@ static KMETHOD Complex_cacoshf(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
 	float ret = cacosh(zf);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.cacoshl();
@@ -355,7 +355,7 @@ static KMETHOD Complex_cacoshl(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
 	long double ret = cacosh(zl);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 //## Complex Complex.catanh();
 static KMETHOD Complex_catanh(KonohaContext *kctx, KonohaStack *sfp)
@@ -363,7 +363,7 @@ static KMETHOD Complex_catanh(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
 	double ret = catanh(z);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.catanhf();
@@ -372,7 +372,7 @@ static KMETHOD Complex_catanhf(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
 	float ret = catanh(zf);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.catanhl();
@@ -381,7 +381,7 @@ static KMETHOD Complex_catanhl(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
 	long double ret = catanh(zl);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.cexp();
@@ -390,7 +390,7 @@ static KMETHOD Complex_cexp(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
 	double ret = cexp(z);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.cexpf();
@@ -399,7 +399,7 @@ static KMETHOD Complex_cexpf(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
 	float ret = cexp(zf);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.cexpl();
@@ -408,7 +408,7 @@ static KMETHOD Complex_cexpl(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
 	long double ret = cexp(zl);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.clog();
@@ -417,7 +417,7 @@ static KMETHOD Complex_clog(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
 	double ret = clog(z);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.clogf();
@@ -426,7 +426,7 @@ static KMETHOD Complex_clogf(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
 	float ret = clog(zf);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.clogl();
@@ -435,7 +435,7 @@ static KMETHOD Complex_clogl(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
 	long double ret = clog(zl);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.cabs();
@@ -444,7 +444,7 @@ static KMETHOD Complex_cabs(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
 	double ret = cabs(z);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.cabsf();
@@ -453,7 +453,7 @@ static KMETHOD Complex_cabsf(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
 	float ret = cabs(zf);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.cabsl();
@@ -462,7 +462,7 @@ static KMETHOD Complex_cabsl(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
 	long double ret = cabs(zl);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.csqrt();
@@ -471,7 +471,7 @@ static KMETHOD Complex_csqrt(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
 	double ret = csqrt(z);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.csqrtf();
@@ -480,7 +480,7 @@ static KMETHOD Complex_csqrtf(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
 	float ret = csqrt(zf);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.csqrtl();
@@ -489,7 +489,7 @@ static KMETHOD Complex_csqrtl(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
 	long double ret = csqrt(zl);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.cpow();
@@ -501,7 +501,7 @@ static KMETHOD Complex_cpow(KonohaContext *kctx, KonohaStack *sfp)
 	double imaginary = (double)sfp[2].floatValue;
 	double _Complex y = real + I * imaginary;
 	double ret = cpow(x, y);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.cpowf();
@@ -513,7 +513,7 @@ static KMETHOD Complex_cpowf(KonohaContext *kctx, KonohaStack *sfp)
 	float imaginary = (float)sfp[2].floatValue;
 	float _Complex y = real + I * imaginary;
 	float ret = cpowf(x, y);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.cpowl();
@@ -525,7 +525,7 @@ static KMETHOD Complex_cpowl(KonohaContext *kctx, KonohaStack *sfp)
 	long double imaginary = (long double)sfp[2].floatValue;
 	long double _Complex y = real + I * imaginary;
 	long double ret = cpowl(x, y);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.creal();
@@ -534,7 +534,7 @@ static KMETHOD Complex_creal(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
 	double ret = creal(z);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.crealf();
@@ -543,7 +543,7 @@ static KMETHOD Complex_crealf(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
 	float ret = creal(zf);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.creall();
@@ -552,7 +552,7 @@ static KMETHOD Complex_creall(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
 	long double ret = creal(zl);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.cimag();
@@ -561,7 +561,7 @@ static KMETHOD Complex_cimag(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
 	double ret = cimag(z);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.cimagf();
@@ -570,7 +570,7 @@ static KMETHOD Complex_cimagf(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
 	float ret = cimag(zf);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.cimagl();
@@ -579,7 +579,7 @@ static KMETHOD Complex_cimagl(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
 	long double ret = cimag(zl);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.carg();
@@ -588,7 +588,7 @@ static KMETHOD Complex_carg(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
 	double ret = carg(z);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.cargf();
@@ -597,7 +597,7 @@ static KMETHOD Complex_cargf(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
 	float ret = carg(zf);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.cargl();
@@ -606,7 +606,7 @@ static KMETHOD Complex_cargl(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
 	long double ret = carg(zl);
-	RETURNf_(ret);
+	KReturnFloatValue(ret);
 }
 
 //## Complex Complex.conj();
@@ -617,7 +617,7 @@ static KMETHOD Complex_conj(KonohaContext *kctx, KonohaStack *sfp)
 	double _Complex answer = conj(z);
 	kComplex *ret = (kComplex *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
 	ret->z = answer;
-	RETURN_(ret);
+	KReturn(ret);
 }
 
 //## Complex Complex.conjf();
@@ -628,7 +628,7 @@ static KMETHOD Complex_conjf(KonohaContext *kctx, KonohaStack *sfp)
 	float _Complex answer = conj(zf);
 	kComplex *ret = (kComplex *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
 	ret->z = answer;
-	RETURN_(ret);
+	KReturn(ret);
 }
 
 //## Complex Complex.conjl();
@@ -639,7 +639,7 @@ static KMETHOD Complex_conjl(KonohaContext *kctx, KonohaStack *sfp)
 	long double answer = conj(zl);
 	kComplex *ret = (kComplex *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
 	ret->z = answer;
-	RETURN_(ret);
+	KReturn(ret);
 }
 
 /* You can attach the following annotations to each methods. */

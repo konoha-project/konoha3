@@ -148,12 +148,12 @@ static KMETHOD System_throw(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD System_getThrownException(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KonohaExceptionContext *ctx = KonohaContext_getExceptionContext(kctx);
-	RETURN_(ctx->thrownException);
+	KReturn(ctx->thrownException);
 }
 
 static KMETHOD Exception_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_(sfp[0].asObject);
+	KReturn(sfp[0].asObject);
 }
 
 // --------------------------------------------------------------------------
@@ -267,7 +267,7 @@ static KMETHOD Statement_try(KonohaContext *kctx, KonohaStack *sfp)
 	tryBlock     = SUGAR kStmt_getBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
 	ret = SUGAR kBlock_tyCheckAll(kctx, tryBlock,   gma);
 	if(ret == false) {
-		RETURNb_(ret);
+		KReturnUnboxValue(ret);
 	}
 
 	catchBlock   = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("catch"),   K_NULLBLOCK);
@@ -275,7 +275,7 @@ static KMETHOD Statement_try(KonohaContext *kctx, KonohaStack *sfp)
 	ret = SUGAR kBlock_tyCheckAll(kctx, tryBlock,   gma);
 	ret = SUGAR kBlock_tyCheckAll(kctx, catchBlock, gma);
 	if(ret == false) {
-		RETURNb_(ret);
+		KReturnUnboxValue(ret);
 	}
 	if(finallyBlock) {
 		ret = SUGAR kBlock_tyCheckAll(kctx, finallyBlock, gma);
@@ -283,7 +283,7 @@ static KMETHOD Statement_try(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret) {
 		kStmt_typed(stmt, TRY);
 	}
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 static KMETHOD Statement_catch(KonohaContext *kctx, KonohaStack *sfp)
@@ -306,9 +306,9 @@ static KMETHOD Statement_catch(KonohaContext *kctx, KonohaStack *sfp)
 		kStmt_done(kctx, stmt);
 	} else {
 		kStmt_printMessage(kctx, stmt, ErrTag, "upper stmt is not try/catch");
-		RETURNb_(false);
+		KReturnUnboxValue(false);
 	}
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 static KMETHOD Statement_finally(KonohaContext *kctx, KonohaStack *sfp)
@@ -327,7 +327,7 @@ static KMETHOD Statement_finally(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	}
 
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 static kbool_t exception_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)

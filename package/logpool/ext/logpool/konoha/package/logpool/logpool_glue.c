@@ -98,7 +98,7 @@ static KMETHOD LogPool_new(CTX, ksfp_t *sfp _RIX)
 	char *host = (char *) S_text(sfp[1].asString);
 	int   port = sfp[2].ivalue;
 	RawPtr_init(_ctx, sfp[0].asObject, logpool_open_client(NULL, host, port));
-	RETURN_(ret);
+	KReturn(ret);
 }
 
 //## Log LogPool.get()
@@ -113,7 +113,7 @@ static KMETHOD LogPool_get(CTX, ksfp_t *sfp _RIX)
 		free(buf);
 	}
 	RawPtr_init(_ctx, log, buf);
-	RETURN_(log);
+	KReturn(log);
 }
 
 //## String Log.get(String key)
@@ -125,7 +125,7 @@ static KMETHOD Log_get_(CTX, ksfp_t *sfp _RIX)
 	int   klen = S_size(sfp[1].asString);
 	int   vlen;
 	char *data = Log_get(log, key, klen, &vlen);
-	RETURN_(new_kString(data, vlen, StringPolicy_ASCII|StringPolicy_POOL));
+	KReturn(new_kString(data, vlen, StringPolicy_ASCII|StringPolicy_POOL));
 }
 
 // --------------------------------------------------------------------------
@@ -197,7 +197,7 @@ static KMETHOD Printer_create(CTX, ksfp_t *sfp _RIX)
 {
 	struct pool_plugin_print *p = POOL_PLUGIN_CLONE(pool_plugin_print);
 	kRawPtr *ret = (kRawPtr *) new_kObjectDontUseThis(KGetReturnType(sfp), p);
-	RETURN_(ret);
+	KReturn(ret);
 }
 
 // PoolPlugin ValFilter.create(String key, String val, String op);
@@ -214,7 +214,7 @@ static KMETHOD ValFilter_create(CTX, ksfp_t *sfp _RIX)
 	} else {
 		assert(0 && "TODO");
 	}
-	RETURN_(ret);
+	KReturn(ret);
 }
 
 // PoolPlugin KeyFilter.create(String key);
@@ -224,7 +224,7 @@ static KMETHOD KeyFilter_create(CTX, ksfp_t *sfp _RIX)
 	kRawPtr *ret = (kRawPtr *) new_kObjectDontUseThis(KGetReturnType(sfp), p);
 	p->klen = S_size(sfp[1].asString);
 	p->key  = copy_string(_ctx, sfp[2].asString);
-	RETURN_(ret);
+	KReturn(ret);
 }
 
 // PoolPlugin React.create(String traceName, String key);
@@ -234,7 +234,7 @@ static KMETHOD React_create(CTX, ksfp_t *sfp _RIX)
 	kRawPtr *ret = (kRawPtr *) new_kObjectDontUseThis(KGetReturnType(sfp), p);
 	p->conf.traceName = copy_string(_ctx, sfp[1].asString);
 	p->conf.key       = copy_string(_ctx, sfp[2].asString);
-	RETURN_(ret);
+	KReturn(ret);
 }
 
 // PoolPlugin Timer.create(int timer, int startFlat, int contFlat, int finFlag);
@@ -246,7 +246,7 @@ static KMETHOD Timer_create(CTX, ksfp_t *sfp _RIX)
 	p->flag_start  = sfp[2].ivalue;
 	p->flag_cont   = sfp[3].ivalue;
 	p->flag_finish = sfp[4].ivalue;
-	RETURN_(ret);
+	KReturn(ret);
 }
 
 // PoolPlugin Copy.create();
@@ -254,7 +254,7 @@ static KMETHOD Copy_create(CTX, ksfp_t *sfp _RIX)
 {
 	struct pool_plugin_copy *p = POOL_PLUGIN_CLONE(pool_plugin_copy);
 	kRawPtr *ret = (kRawPtr *) new_kObjectDontUseThis(KGetReturnType(sfp), p);
-	RETURN_(ret);
+	KReturn(ret);
 }
 
 static void *statics_init(CTX, kFunc *initFo, kFunc *exitFo, kFunc *funcFo)
@@ -276,7 +276,7 @@ static KMETHOD Statics_create(CTX, ksfp_t *sfp _RIX)
 	p->finit = p_init;
 	p->fexit = p_exit;
 	p->function = p_func;
-	RETURN_(ret);
+	KReturn(ret);
 }
 
 // PoolPlugin Response.create(Event ev);
@@ -286,7 +286,7 @@ static KMETHOD Response_create(CTX, ksfp_t *sfp _RIX)
 	kRawPtr *ret = (kRawPtr *) new_kObjectDontUseThis(KGetReturnType(sfp), p);
 	kRawPtr *ev = (kRawPtr *) sfp[1].asObject;
 	p->bev = ev->rawptr;
-	RETURN_(ret);
+	KReturn(ret);
 }
 
 // void PoolPlugin.apply(PoolPlugin p);
@@ -335,7 +335,7 @@ static KMETHOD LogPool_loadFile(CTX, ksfp_t *sfp _RIX)
 	servers = memcached_server_list_append(NULL, "127.0.0.1", 11211, &rc);
 	if(rc != MEMCACHED_SUCCESS) {
 		fprintf(stderr, "memcached_server_list_append failed\n");
-		RETURNvoid_();
+		KReturnVoid();
 	}
 
 	rc = memcached_server_push(mc, servers);
@@ -346,7 +346,7 @@ static KMETHOD LogPool_loadFile(CTX, ksfp_t *sfp _RIX)
 	memcached_set(mc, S_text(key), S_size(key), script, len, 0, 0);
 	logpool_procedure(lp, (char*)S_text(key), S_size(key));
 	free(script);
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 // --------------------------------------------------------------------------

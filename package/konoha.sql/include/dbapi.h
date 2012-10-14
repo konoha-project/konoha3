@@ -36,7 +36,7 @@
 
 KMETHOD ResultSet_next(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(knh_ResultSet_next(kctx, (kResultSet*)sfp[0].asObject));
+	KReturnUnboxValue(knh_ResultSet_next(kctx, (kResultSet*)sfp[0].asObject));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -85,7 +85,7 @@ static int knh_ResultSet_indexof_(KonohaContext *kctx, KonohaStack *sfp)
 ////			KNH_SETv(ctx, sfp[_rix].asObject, KNH_NULVAL(CLASS_Int));
 ////		}
 ////	}
-////	RETURNi_(res);
+////	KReturnUnboxValue(res);
 //}
 //
 ///* ------------------------------------------------------------------------ */
@@ -108,7 +108,7 @@ static int knh_ResultSet_indexof_(KonohaContext *kctx, KonohaStack *sfp)
 ////			KNH_SETv(ctx, sfp[_rix].asObject, KNH_NULVAL(CLASS_Float));
 ////		}
 ////	}
-////	RETURNf_(res);
+////	KReturnFloatValue(res);
 //}
 
 /* ------------------------------------------------------------------------ */
@@ -132,17 +132,17 @@ KMETHOD ResultSet_getString(KonohaContext *kctx, KonohaStack *sfp)
 		kbytes_t t = {o->column[n].len, {p}};
 		//kbytes_t t = {{p}, o->column[n].len};
 		//break;
-		RETURN_(KLIB new_kString(kctx, t.text, t.len, 0));
+		KReturn(KLIB new_kString(kctx, t.text, t.len, 0));
 		}
 	case knh_ResultSet_CTYPE__null :
 		break;
 	}
-	RETURN_(KLIB new_kString(kctx, "", 0, 0));
+	KReturn(KLIB new_kString(kctx, "", 0, 0));
 //	Object *v = KNH_NULL;
 //	if(n >= 0) {
 //		v = UPCAST(knh_ResultSet_getString(ctx, (kResultSet*)sfp[0].asObject, n));
 //	}
-//	RETURN_(v);
+//	KReturn(v);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -161,13 +161,13 @@ KMETHOD ResultSet_getString(KonohaContext *kctx, KonohaStack *sfp)
 //			kint_t val;
 //			knh_memcpy(&val, p, sizeof(kint_t));
 //			KNH_SETv(ctx, sfp[_rix].asObject, new_Int_(ctx, CLASS_Int, val));
-//			RETURNi_((*((kint_t*)p)));
+//			KReturnUnboxValue((*((kint_t*)p)));
 //		}
 //		case knh_ResultSet_CTYPE__float : {
 //			kfloat_t val;
 //			knh_memcpy(&val, p, sizeof(kfloat_t));
 //			KNH_SETv(ctx, sfp[_rix].asObject, new_Float_(ctx, CLASS_Float, val));
-//			RETURNf_((*((kfloat_t*)p)));
+//			KReturnFloatValue((*((kfloat_t*)p)));
 //		}
 //		case knh_ResultSet_CTYPE__text : {
 //			kbytes_t t = {{BA_totext(DP(o)->databuf) + DP(o)->column[n].start}, DP(o)->column[n].len};
@@ -186,7 +186,7 @@ KMETHOD ResultSet_getString(KonohaContext *kctx, KonohaStack *sfp)
 //			v = KNH_NULL;
 //		}
 //	}
-//	RETURN_(v);
+//	KReturn(v);
 //}
 //
 /* ------------------------------------------------------------------------ */

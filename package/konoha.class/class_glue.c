@@ -63,7 +63,7 @@ static kbool_t KonohaClass_setClassFieldUnboxValue(KonohaContext *kctx, KonohaCl
 //{
 //	KonohaClass *ct = KLIB kNameSpace_getClass(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), S_size(sfp[1].asString), NULL);
 //	kint_t cid = ct != NULL ? ct->typeId : sfp[2].intValue;
-//	RETURNi_(cid);
+//	KReturnUnboxValue(cid);
 //}
 
 // ----------------------------------------------------------------------------
@@ -323,11 +323,11 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 			superClass = CT_(Token_typeLiteral(tokenSuperClass));
 			if(CT_is(Final, superClass)) {
 				SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "%s is final", CT_t(superClass));
-				RETURNb_(false);
+				KReturnUnboxValue(false);
 			}
 			if(CT_is(Virtual, superClass)) {
 				SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "%s is still virtual", CT_t(superClass));
-				RETURNb_(false);
+				KReturnUnboxValue(false);
 			}
 		}
 		size_t initsize = (bk != NULL) ? declsize : initFieldSizeOfVirtualClass(superClass);
@@ -336,19 +336,19 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 	else {
 		if(declsize > 0 && !CT_is(Virtual, definedClass)) {
 			SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "%s has already defined", CT_t(definedClass));
-			RETURNb_(false);
+			KReturnUnboxValue(false);
 		}
 	}
 	if(bk != NULL) {
 		if(!kBlock_declClassField(kctx, bk, gma, definedClass)) {
-			RETURNb_(false);
+			KReturnUnboxValue(false);
 		}
 		CT_set(Virtual, definedClass, false);
 	}
 	kToken_setTypeId(kctx, tokenClassName, ns, definedClass->typeId);
 	kBlock_addMethodDeclStmt(kctx, bk, tokenClassName, stmt);
 	kStmt_done(kctx, stmt);
-	RETURNb_(true);
+	KReturnUnboxValue(true);
 }
 
 static KMETHOD PatternMatch_ClassName(KonohaContext *kctx, KonohaStack *sfp)
@@ -360,7 +360,7 @@ static KMETHOD PatternMatch_ClassName(KonohaContext *kctx, KonohaStack *sfp)
 		KLIB kObject_setObject(kctx, stmt, name, O_typeId(tk), tk);
 		returnIdx = beginIdx + 1;
 	}
-	RETURNi_(returnIdx);
+	KReturnUnboxValue(returnIdx);
 }
 
 // --------------------------------------------------------------------------
@@ -376,7 +376,7 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 		kMethod *mtd = KLIB kNameSpace_getGetterMethodNULL(kctx, ns, self->ty, fn, TY_var);
 		if(mtd != NULL) {
 			KFieldSet(expr->cons, expr->cons->MethodItems[0], mtd);
-			RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, reqty));
+			KReturn(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, reqty));
 		}
 		SUGAR kStmt_printMessage2(kctx, stmt, tkN, ErrTag, "undefined field: %s", S_text(tkN->text));
 	}

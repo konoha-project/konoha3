@@ -60,7 +60,7 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 		RESET_GCSTACK();
 		kStmt_done(kctx, stmt);
 	}
-	RETURNb_(result == K_CONTINUE);
+	KReturnUnboxValue(result == K_CONTINUE);
 }
 
 static kbool_t namespace_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)

@@ -136,7 +136,7 @@ static KMETHOD Thread_create(KonohaContext *kctx, KonohaStack *sfp)
 	KFieldSet(thread, thread->func, f);
 	pthread_create(&(thread->thread), NULL, spawn_start, thread);
 	RESET_GCSTACK(); // FIXME?? Not sure this is okay??
-	RETURN_(thread);
+	KReturn(thread);
 }
 
 //## @Native void Thread.join();
@@ -147,14 +147,14 @@ static KMETHOD Thread_join(KonohaContext *kctx, KonohaStack *sfp)
 	// TODO inc gcCounter
 	pthread_join(t->thread, &v);
 	// TODO dec gcCounter
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 //## @Native void Thread.exit();
 static KMETHOD Thread_exit(KonohaContext *kctx, KonohaStack *sfp)
 {
 	pthread_exit(NULL/*FIXME*/);
-	RETURNvoid_();
+	KReturnVoid();
 }
 	
 //## @Native void Thread.cancel();
@@ -162,7 +162,7 @@ static KMETHOD Thread_cancel(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kThread *t = (kThread *)sfp[0].asObject;
 	pthread_cancel(t->thread);
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 //## @Native void Thread.detach();
@@ -170,7 +170,7 @@ static KMETHOD Thread_detach(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kThread *t = (kThread *)sfp[0].asObject;
 	pthread_detach(t->thread);
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 //## @Native @Static Thread Thread.self();
@@ -179,13 +179,13 @@ static KMETHOD Thread_self(KonohaContext *kctx, KonohaStack *sfp)
 	kThread *t = (kThread *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
 	t->kctx = kctx;//FIXME
 	t->thread = pthread_self();
-	RETURN_(t);
+	KReturn(t);
 }
 
 //## @Native boolean Thread.equal(Thread t);
 static KMETHOD Thread_equal(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(kThread_compareTo(sfp[0].asObject, sfp[1].asObject) == 0);
+	KReturnUnboxValue(kThread_compareTo(sfp[0].asObject, sfp[1].asObject) == 0);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -193,7 +193,7 @@ static KMETHOD Thread_equal(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Mutex_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMutex *m = (kMutex *)sfp[0].asObject;
-	RETURN_(m);
+	KReturn(m);
 }
 
 //## @Native void Mutex.lock()
@@ -203,7 +203,7 @@ static KMETHOD Mutex_lock(KonohaContext *kctx, KonohaStack *sfp)
 	// TODO inc gcCounter
 	pthread_mutex_lock(&m->mutex);
 	// TODO dec gcCounter
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 //## @Native boolean Mutex.trylock()
@@ -211,7 +211,7 @@ static KMETHOD Mutex_trylock(KonohaContext *kctx, KonohaStack *sfp)
 {
 	// lock success: return true
 	kMutex *m = (kMutex *)sfp[0].asObject;
-	RETURNb_(pthread_mutex_trylock(&m->mutex) == 0);
+	KReturnUnboxValue(pthread_mutex_trylock(&m->mutex) == 0);
 }
 
 //## @Native void Mutex.unlock()
@@ -219,7 +219,7 @@ static KMETHOD Mutex_unlock(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMutex *m = (kMutex *)sfp[0].asObject;
 	pthread_mutex_unlock(&m->mutex);
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 /* ------------------------------------------------------------------------ */
@@ -227,7 +227,7 @@ static KMETHOD Mutex_unlock(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Cond_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kCond *c = (kCond *)sfp[0].asObject;
-	RETURN_(c);
+	KReturn(c);
 }
 
 //## @Native void Cond.wait(Mutex m)
@@ -238,7 +238,7 @@ static KMETHOD Cond_wait(KonohaContext *kctx, KonohaStack *sfp)
 	// TODO inc gcCounter
 	pthread_cond_wait(&c->cond, &m->mutex);
 	// TODO dec gcCounter
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 //## @Native void Cond.signal()
@@ -246,7 +246,7 @@ static KMETHOD Cond_signal(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kCond *c = (kCond *)sfp[0].asObject;
 	pthread_cond_signal(&c->cond);
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 //## @Native void Cond.broadcast()
@@ -254,7 +254,7 @@ static KMETHOD Cond_broadcast(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kCond *c = (kCond *)sfp[0].asObject;
 	pthread_cond_broadcast(&c->cond);
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 // --------------------------------------------------------------------------

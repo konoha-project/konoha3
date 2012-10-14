@@ -34,39 +34,39 @@ extern "C" {
 
 static KMETHOD Int_opPlus(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(+(sfp[0].intValue));
+	KReturnUnboxValue(+(sfp[0].intValue));
 }
 
 static KMETHOD Int_opCompl (KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(~sfp[0].intValue);
+	KReturnUnboxValue(~sfp[0].intValue);
 }
 
 static KMETHOD Int_opLSHIFT (KonohaContext *kctx, KonohaStack *sfp)
 {
 	int lshift = sfp[1].intValue;
-	RETURNi_(sfp[0].intValue << lshift);
+	KReturnUnboxValue(sfp[0].intValue << lshift);
 }
 
 static KMETHOD Int_opRSHIFT (KonohaContext *kctx, KonohaStack *sfp)
 {
 	int rshift = sfp[1].intValue;
-	RETURNi_(sfp[0].intValue >> rshift);
+	KReturnUnboxValue(sfp[0].intValue >> rshift);
 }
 
 static KMETHOD Int_opAND(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(sfp[0].intValue & sfp[1].intValue);
+	KReturnUnboxValue(sfp[0].intValue & sfp[1].intValue);
 }
 
 static KMETHOD Int_opOR(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(sfp[0].intValue | sfp[1].intValue);
+	KReturnUnboxValue(sfp[0].intValue | sfp[1].intValue);
 }
 
 static KMETHOD Int_opXOR(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(sfp[0].intValue ^ sfp[1].intValue);
+	KReturnUnboxValue(sfp[0].intValue ^ sfp[1].intValue);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -221,7 +221,7 @@ static KMETHOD TokenFunc_ExtendedIntLiteral(KonohaContext *kctx, KonohaStack *sf
 		KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, start, end - start, StringPolicy_ASCII));
 		tk->unresolvedTokenType = isFloat ? SYM_("$Float") : TokenType_INT;
 	}
-	RETURNi_(source - start);
+	KReturnUnboxValue(source - start);
 }
 
 static kint_t _kstrtoll(const char *p, char (*parseDigit)(char), int base)
@@ -264,7 +264,7 @@ static KMETHOD TypeCheck_ExtendedIntLiteral(KonohaContext *kctx, KonohaStack *sf
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
 	long long n = kstrtoll(S_text(tk->text));
-	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_int, (uintptr_t)n));
+	KReturn(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_int, (uintptr_t)n));
 }
 
 static kbool_t int_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)

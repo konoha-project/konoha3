@@ -35,7 +35,7 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_Statement(stmt, gma);
 	kTokenArray *tokenList = (kTokenArray *) kStmt_getObjectNULL(kctx, stmt, KW_TokenPattern);
 	if(tokenList == NULL) {
-		RETURNb_(false);
+		KReturnUnboxValue(false);
 	}
 	ksymbol_t star = SYM_("*");
 	KGrowingBuffer wb;
@@ -71,7 +71,7 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret) {
 		kStmt_typed(stmt, EXPR);
 	}
-	RETURNb_(ret);
+	KReturnUnboxValue(ret);
 }
 
 // --------------------------------------------------------------------------

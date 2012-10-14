@@ -362,7 +362,7 @@ static void RegExp_set(KonohaContext *kctx, kRegExp *re, kString *ptns, kString 
 
 static KMETHOD RegExp_getglobal(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(RegExp_isGlobal(sfp[0].asRegExp));
+	KReturnUnboxValue(RegExp_isGlobal(sfp[0].asRegExp));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -370,7 +370,7 @@ static KMETHOD RegExp_getglobal(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD RegExp_getignoreCase(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(RegExp_isIgnoreCase(sfp[0].asRegExp));
+	KReturnUnboxValue(RegExp_isIgnoreCase(sfp[0].asRegExp));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -378,7 +378,7 @@ static KMETHOD RegExp_getignoreCase(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD RegExp_getmultiline(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(RegExp_isMultiline(sfp[0].asRegExp));
+	KReturnUnboxValue(RegExp_isMultiline(sfp[0].asRegExp));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -386,7 +386,7 @@ static KMETHOD RegExp_getmultiline(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD RegExp_getsource(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_(sfp[0].asRegExp->pattern);
+	KReturn(sfp[0].asRegExp->pattern);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -394,7 +394,7 @@ static KMETHOD RegExp_getsource(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD RegExp_getlastIndex(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(sfp[0].asRegExp->lastIndex);
+	KReturnUnboxValue(sfp[0].asRegExp->lastIndex);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -403,7 +403,7 @@ static KMETHOD RegExp_getlastIndex(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD RegExp_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RegExp_set(kctx, sfp[0].asRegExp, sfp[1].asString, KNULL(String));
-	RETURN_(sfp[0].asObject);
+	KReturn(sfp[0].asObject);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -412,7 +412,7 @@ static KMETHOD RegExp_new(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD RegExp_new2(KonohaContext *kctx, KonohaStack *sfp)
 {
 	RegExp_set(kctx, sfp[0].asRegExp, sfp[1].asString, sfp[2].asString);
-	RETURN_(sfp[0].asObject);
+	KReturn(sfp[0].asObject);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -437,7 +437,7 @@ static KMETHOD String_search(KonohaContext *kctx, KonohaStack *sfp)
 			//LOG_regex(kctx, sfp, res, re, str);
 		}
 	}
-	RETURNi_(loc);
+	KReturnUnboxValue(loc);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -540,7 +540,7 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 		s = Kwb_newString(kctx, OnStack, &wb); // close cwb
 		KLIB Kwb_free(&wb);
 	}
-	RETURN_(s);
+	KReturn(s);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -644,7 +644,7 @@ static KMETHOD RegExp_test(KonohaContext *kctx, KonohaStack *sfp)
 	else {
 		re->lastIndex = 0;
 	}
-	RETURNb_(matched);
+	KReturnUnboxValue(matched);
 }
 
 // --------------------------------------------------------------------------
@@ -706,7 +706,7 @@ static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 	int ch, prev = '/', pos = 1;
 	const char *source = S_text(sfp[2].asString);
 	if(source[pos] == '*' || source[pos] == '/') {
-		RETURNi_(0);
+		KReturnUnboxValue(0);
 	}
 	/*FIXME: we need to care about context sensitive case*/
 	//int tokenListize = kArray_size(tenv->tokenList);
@@ -714,7 +714,7 @@ static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 	//	kToken *tkPrev = tenv->tokenList->TokenItems[tokenListize - 1];
 	//	if(tkPrev->unresolvedTokenType == TokenType_INT ||
 	//		(tkPrev->topCharHint != '(' && tkPrev->unresolvedTokenType == TokenType_SYMBOL)) {
-	//		RETURNi_(0);
+	//		KReturnUnboxValue(0);
 	//	}
 	//}
 	while((ch = source[pos++]) != 0) {
@@ -731,14 +731,14 @@ static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 				KLIB new_kString(kctx, a, source + pos0, pos-pos0, 0);
 				tk->unresolvedTokenType = SYM_("$RegExp");
 			}
-			RETURNi_(pos);
+			KReturnUnboxValue(pos);
 		}
 		prev = ch;
 	}
 	if(IS_NOTNULL(tk)) {
 		kreportf(ErrTag, tk->uline, "must close with /");
 	}
-	RETURNi_(pos-1);
+	KReturnUnboxValue(pos-1);
 }
 
 static KMETHOD TypeCheck_RegExp(KonohaContext *kctx, KonohaStack *sfp)
@@ -748,7 +748,7 @@ static KMETHOD TypeCheck_RegExp(KonohaContext *kctx, KonohaStack *sfp)
 	kRegExp *r = new_(RegExp, NULL, OnGcStack);
 	DBG_ASSERT(kArray_size(tk->subTokenList) == 2);
 	RegExp_set(kctx, r, tk->subTokenList->stringItems[0], tk->subTokenList->stringItems[1]);
-	RETURN_(SUGAR kExpr_setConstValue(kctx, expr, TY_RegExp, UPCAST(r)));
+	KReturn(SUGAR kExpr_setConstValue(kctx, expr, TY_RegExp, UPCAST(r)));
 }
 
 static kbool_t regexp_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)

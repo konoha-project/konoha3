@@ -42,32 +42,32 @@ extern "C"{
 
 static KMETHOD System_getpid(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(getpid());
+	KReturnUnboxValue(getpid());
 }
 
 static KMETHOD System_getppid(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(getppid());
+	KReturnUnboxValue(getppid());
 }
 
 static KMETHOD System_getuid(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(getuid());
+	KReturnUnboxValue(getuid());
 }
 
 static KMETHOD System_geteuid(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(geteuid());
+	KReturnUnboxValue(geteuid());
 }
 
 static KMETHOD System_getgid(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(getgid());
+	KReturnUnboxValue(getgid());
 }
 
 static KMETHOD System_getegid(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(getegid());
+	KReturnUnboxValue(getegid());
 }
 
 static KMETHOD System_getpgid(KonohaContext *kctx, KonohaStack *sfp)
@@ -77,7 +77,7 @@ static KMETHOD System_getpgid(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 static KMETHOD System_setpgid(KonohaContext *kctx, KonohaStack *sfp)
@@ -88,7 +88,7 @@ static KMETHOD System_setpgid(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 static KMETHOD System_chdir(KonohaContext *kctx, KonohaStack *sfp)
@@ -99,7 +99,7 @@ static KMETHOD System_chdir(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 static KMETHOD System_chroot(KonohaContext *kctx, KonohaStack *sfp)
@@ -110,7 +110,7 @@ static KMETHOD System_chroot(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 static KMETHOD System_getpriority(KonohaContext *kctx, KonohaStack *sfp)
@@ -122,7 +122,7 @@ static KMETHOD System_getpriority(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 static KMETHOD System_setpriority(KonohaContext *kctx, KonohaStack *sfp)
@@ -134,7 +134,7 @@ static KMETHOD System_setpriority(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 static KMETHOD System_getgroups(KonohaContext *kctx, KonohaStack *sfp)
@@ -145,7 +145,7 @@ static KMETHOD System_getgroups(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 static KMETHOD System_setgroups(KonohaContext *kctx, KonohaStack *sfp)
@@ -156,7 +156,7 @@ static KMETHOD System_setgroups(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.fork()
@@ -166,7 +166,7 @@ static KMETHOD System_fork(KonohaContext *kctx, KonohaStack *sfp)
 	if(pid == -1) {
 		// TODO: throw
 	}
-	RETURNi_(pid);
+	KReturnUnboxValue(pid);
 }
 
 //## int System.wait()
@@ -177,7 +177,7 @@ static KMETHOD System_wait(KonohaContext *kctx, KonohaStack *sfp)
 	if(pid == -1) {
 		// TODO: throw
 	}
-	RETURNi_(pid);
+	KReturnUnboxValue(pid);
 }
 
 //## int System.waitpid(int pid, int options)
@@ -190,7 +190,7 @@ static KMETHOD System_waitpid(KonohaContext *kctx, KonohaStack *sfp)
 	if(pid == -1) {
 		// TODO: throw
 	}
-	RETURNi_(pid);
+	KReturnUnboxValue(pid);
 }
 
 //## int System.setuid(int uid)
@@ -201,7 +201,7 @@ static KMETHOD System_setuid(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.seteuid(int euid)
@@ -212,7 +212,7 @@ static KMETHOD System_seteuid(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.setreuid(int ruid, int euid)
@@ -224,7 +224,7 @@ static KMETHOD System_setreuid(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.setgid(int gid)
@@ -235,7 +235,7 @@ static KMETHOD System_setgid(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.setegid(int euid)
@@ -246,7 +246,7 @@ static KMETHOD System_setegid(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.setregid(int rgid, int egid)
@@ -258,7 +258,7 @@ static KMETHOD System_setregid(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.setsid()
@@ -268,7 +268,7 @@ static KMETHOD System_setsid(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.getsid(int pid)
@@ -279,7 +279,7 @@ static KMETHOD System_getsid(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 /* ------------------------------------------------------------------------ */

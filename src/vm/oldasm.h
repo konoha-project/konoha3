@@ -985,14 +985,14 @@ static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack 
 //	ktype_t rtype = mtd->pa->rtype;
 //	if(rtype != TY_void) {
 //		if(TY_isUnbox(rtype)) {
-//			RETURNi_(0);
+//			KReturnUnboxValue(0);
 //		} else {
 //			KonohaClass *ct = CT_(rtype);
 //			kObject *nulval = ct->defaultNullValue_OnGlobalConstList;
-//			RETURN_(nulval);
+//			KReturn(nulval);
 //		}
 //	}
-	RETURNi_(0);
+	KReturnUnboxValue(0);
 }
 
 //static kbool_t Method_isAbstract(kMethod *mtd)

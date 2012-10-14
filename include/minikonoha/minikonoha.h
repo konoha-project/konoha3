@@ -1652,7 +1652,7 @@ typedef struct {
 	}\
 } while (0)
 
-#define KNH_SAFEPOINT(kctx, sfp) do {\
+#define KCheckSafePoint(kctx, sfp) do {\
 	KLIB KscheduleGC(kctx->gcContext);\
 } while (0)
 
@@ -1664,42 +1664,32 @@ typedef struct {
 #define KReturnWith(VAL, CLEANUP) do {\
 	KUnsafeFieldSet(sfp[K_RTNIDX].asObject, ((kObject*)VAL));\
 	CLEANUP;\
-	KNH_SAFEPOINT(kctx, sfp);\
+	KCheckSafePoint(kctx, sfp);\
 	return; \
 } while (0)
 
-#define RETURN_DefaultObjectValue() do {\
+#define KReturnDefaultObjectValue() do {\
 	return; \
 } while (0)
 
 
-#define RETURN_(vv) do {\
+#define KReturn(vv) do {\
 	KUnsafeFieldSet(sfp[(-(K_CALLDELTA))].asObject, ((kObject*)vv));\
-	KNH_SAFEPOINT(kctx, sfp);\
+	KCheckSafePoint(kctx, sfp);\
 	return; \
 } while (0)
 
-#define RETURNd_(d) do {\
-	sfp[(-(K_CALLDELTA))].unboxValue = d; \
+#define KReturnUnboxValue(d) do {\
+	sfp[K_RTNIDX].unboxValue = d; \
 	return; \
 } while (0)
 
-#define RETURNb_(c) do {\
-	sfp[(-(K_CALLDELTA))].boolValue = c; \
-	return; \
-} while (0)
-
-#define RETURNi_(c) do {\
-	sfp[(-(K_CALLDELTA))].intValue = c; \
-	return; \
-} while (0)
-
-#define RETURNf_(c) do {\
+#define KReturnFloatValue(c) do {\
 	sfp[(-(K_CALLDELTA))].floatValue = c; \
 	return; \
 } while (0)
 
-#define RETURNvoid_() do {\
+#define KReturnVoid() do {\
 	return; \
 } while (0)
 
