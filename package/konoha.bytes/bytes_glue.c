@@ -37,12 +37,10 @@ extern "C"{
 // Bytes_init
 static void Bytes_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	if((size_t)conf <= 0) return;
+	DBG_ASSERT(conf >= 0);
 	struct kBytesVar *ba = (struct kBytesVar*)o;
-	ba->byteptr = NULL;
 	ba->byteptr = (const char *)KCALLOC((size_t)conf, 1);
-	if(ba->byteptr != NULL)	ba->bytesize = (size_t)conf;
-	else ba->bytesize = 0;
+	ba->bytesize = (size_t)conf;
 }
 
 static void Bytes_free(KonohaContext *kctx, kObject *o)
@@ -189,6 +187,7 @@ static kString *Convert_newString(KonohaContext *kctx, kArray *gcstack, kBytes *
 		return TS_EMPTY;
 	} else {
 		// At this point, we assuem 'ba' is null terminated.
+		DBG_ASSERT(ba->buf[ba->bytesize-1] == '\0');
 		return KLIB new_kString(kctx, gcstack, ba->buf, ba->bytesize-1, 0);
 	}
 }
