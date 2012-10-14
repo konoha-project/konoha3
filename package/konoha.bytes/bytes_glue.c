@@ -312,13 +312,6 @@ static KMETHOD String_getBytes(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-//	kmodiconv_t *base = (kmodiconv_t*)KCALLOC(sizeof(kmodiconv_t), 1);
-//	base->h.name     = "iconv";
-//	base->h.setup    = kmodiconv_setup;
-//	base->h.reftrace = kmodiconv_reftrace;
-//	base->h.free     = kmodiconv_free;
-//	KLIB KonohaRuntime_setModule(kctx, MOD_iconv, &base->h, pline);
-
 	KDEFINE_CLASS defBytes = {0};
 	SETSTRUCTNAME(defBytes, Bytes);
 	defBytes.cflag   = kClass_Final;
@@ -344,7 +337,7 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public|_Const|_Im, _F(Bytes_setAll), TY_void, TY_Bytes, MN_("setAll"), 1, TY_int, FN_x,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, NULL, methoddata);
+	KLIB kNameSpace_loadMethodData(kctx, ns, methoddata);
 	return true;
 }
 

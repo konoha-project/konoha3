@@ -60,9 +60,10 @@ extern "C" {
 
 #define kunused __attribute__((unused))
 
-
 // -------------------------------------------------------------------------
 /* I18N */
+
+#ifdef HAVE_ICONV_H
 
 static uintptr_t I18N_iconv_open(KonohaContext *kctx, const char *targetCharset, const char *sourceCharset, KTraceInfo *trace)
 {
@@ -138,23 +139,49 @@ static const char* I18N_formatSystemPath(KonohaContext *kctx, char *buf, size_t 
 	return path;  // stub (in case of no conversion)
 }
 
-//typedef uintptr_t (*ficonv_open)(const char *, const char *);
-//typedef size_t (*ficonv)(uintptr_t, char **, size_t *, char **, size_t *);
-//typedef int    (*ficonv_close)(uintptr_t);
-//
-//static kunused uintptr_t dummy_iconv_open(const char *t, const char *f)
-//{
-//	return -1;
-//}
-//static kunused size_t dummy_iconv(uintptr_t i, char **t, size_t *ts, char **f, size_t *fs)
-//{
-//	return 0;
-//}
-//static kunused int dummy_iconv_close(uintptr_t i)
-//{
-//	return 0;
-//}
-//
+#else/*HAVE_ICONV_H*/
+
+static uintptr_t I18N_iconv_open(KonohaContext *kctx, const char *targetCharset, const char *sourceCharset, KTraceInfo *trace)
+{
+	return ICONV_NULL;
+}
+
+static size_t I18N_iconv(KonohaContext *kctx, uintptr_t ic, char **outbuf, size_t *outBytesLeft, char **inbuf, size_t *inBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
+{
+	return -1;
+}
+
+static int I18N_iconv_close(KonohaContext *kctx, uintptr_t ic)
+{
+	return -1;
+}
+
+static kbool_t I18N_isSystemCharsetUTF8(KonohaContext *kctx)
+{
+	return true;
+}
+
+static uintptr_t I18N_iconvSystemCharsetToUTF8(KonohaContext *kctx, KTraceInfo *trace)
+{
+	return ICONV_NULL;
+}
+
+static uintptr_t I18N_iconvUTF8ToSystemCharset(KonohaContext *kctx, KTraceInfo *trace)
+{
+	return ICONV_NULL;
+}
+
+static const char* I18N_formatKonohaPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
+{
+	return path;
+}
+
+static const char* I18N_formatSystemPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
+{
+	return path;  // stub (in case of no conversion)
+}
+
+#endif/*HAVE_ICONV_H*/
 
 static void loadI18N(PlatformApiVar *plat, const char *defaultCharSet)
 {
@@ -167,24 +194,6 @@ static void loadI18N(PlatformApiVar *plat, const char *defaultCharSet)
 	plat->iconvUTF8ToSystemCharset = I18N_iconvUTF8ToSystemCharset;
 	plat->formatKonohaPath = I18N_formatKonohaPath;
 	plat->formatSystemPath = I18N_formatSystemPath;
-
-//#ifdef _ICONV_H
-//	plat->iconv_open_i    = (ficonv_open)iconv_open;
-//	plat->iconv_i         = (ficonv)iconv;
-//	plat->iconv_close_i   = (ficonv_close)iconv_close;
-//#else
-//	void *handler = dlopen("libiconv" K_OSDLLEXT, RTLD_LAZY);
-//	if(handler != NULL) {
-//		plat->iconv_open_i = (ficonv_open)dlsym(handler, "iconv_open");
-//		plat->iconv_i = (ficonv)dlsym(handler, "iconv");
-//		plat->iconv_close_i = (ficonv_close)dlsym(handler, "iconv_close");
-//	}
-//	else {
-//		plat->iconv_open_i = dummy_iconv_open;
-//		plat->iconv_i = dummy_iconv;
-//		plat->iconv_close_i = dummy_iconv_close;
-//	}
-//#endif /* _ICONV_H */
 }
 
 // -------------------------------------------------------------------------

@@ -1415,6 +1415,7 @@ struct KonohaLibVar {
 	void                (*Kwb_printf)(KonohaContext*, KGrowingBuffer *, const char *fmt, ...);
 	const char*         (*Kwb_top)(KonohaContext*, KGrowingBuffer *, int);
 	void                (*Kwb_free)(KGrowingBuffer *);
+	kbool_t             (*Kwb_iconv)(KonohaContext *, KGrowingBuffer*, uintptr_t iconv, const char *, size_t, KTraceInfo *);
 
 	KHashMap*           (*Kmap_init)(KonohaContext*, size_t);
 	KHashMapEntry*      (*Kmap_newEntry)(KonohaContext*, KHashMap *, uintptr_t);

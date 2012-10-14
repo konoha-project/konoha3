@@ -560,6 +560,7 @@ static void klib_init(KonohaLibVar *l)
 	l->Kwb_printf    = Kwb_printf;
 	l->Kwb_top       = Kwb_top;
 	l->Kwb_free      = Kwb_free;
+	l->Kwb_iconv     = Kwb_iconv;
 	l->Kmap_init     = Kmap_init;
 	l->Kmap_free     = Kmap_free;
 	l->Kmap_each     = Kmap_each;
