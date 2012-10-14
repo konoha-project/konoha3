@@ -680,7 +680,7 @@ static inline void do_free(void *ptr, size_t size)
 
 static ssize_t klib_malloced = 0;
 
-static void *Kmalloc(KonohaContext *kctx, size_t s)
+static void *Kmalloc(KonohaContext *kctx, size_t s, KTraceInfo *trace)
 {
 	size_t *p = (size_t*)do_malloc(s
 #ifdef MEMORY_DEBUG
@@ -688,10 +688,8 @@ static void *Kmalloc(KonohaContext *kctx, size_t s)
 #endif
 			);
 	if(unlikely(p == NULL)) {
-		KTrace(SystemFault, 0,
-				LogText("at", "malloc"),
-				LogUint("size", s),
-				LogUint("malloced_size", klib_malloced));
+		KTraceApi(trace, SystemFault|DataFault, "malloc",
+			LogUint("size", s), LogUint("UsedMemorySize", klib_malloced));
 		THROW_OutOfMemory(kctx, s);
 	}
 #if GCDEBUG
@@ -1878,6 +1876,7 @@ static void KscheduleGC(HeapManager *mng)
 }
 
 /* ------------------------------------------------------------------------ */
+
 void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	if(IS_RootKonohaContext(ctx)) {

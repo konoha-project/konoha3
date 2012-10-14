@@ -480,10 +480,10 @@ static int kGamma_declareLocalVariable(KonohaContext *kctx, kGamma *gma, ktype_t
 	if(!(s->varsize < s->capacity)) {
 		s->capacity *= 2;
 		size_t asize = sizeof(GammaStackDecl) * s->capacity;
-		GammaStackDecl *v = (GammaStackDecl*)KMALLOC(asize);
+		GammaStackDecl *v = (GammaStackDecl*)KMalloc_UNTRACE(asize);
 		memcpy(v, s->varItems, asize/2);
 		if(s->allocsize > 0) {
-			KFREE(s->varItems, s->allocsize);
+			KFree(s->varItems, s->allocsize);
 		}
 		s->varItems = v;
 		s->allocsize = asize;
@@ -587,7 +587,7 @@ static kExpr* kStmt_tyCheckVariableNULL(KonohaContext *kctx, kStmt *stmt, kExpr 
 	if(mtd != NULL) {
 		kParam *pa = Method_param(mtd);
 		KonohaClass *ct = KLIB KonohaClass_Generics(kctx, CT_Func, pa->rtype, pa->psize, (kparamtype_t*)pa->paramtypeItems);
-		kFuncVar *fo = (kFuncVar*)KLIB new_kObjectDontUseThis(kctx, ct, (uintptr_t)mtd, OnGcStack);
+		kFuncVar *fo = (kFuncVar*)KLIB new_kObject(kctx, OnGcStack, ct, (uintptr_t)mtd);
 		KFieldSet(fo, fo->self, UPCAST(ns));
 		return new_ConstValueExpr(kctx, ct->typeId, UPCAST(fo));
 	}

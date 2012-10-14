@@ -202,12 +202,12 @@ static void kModuleException_reftrace(KonohaContext *kctx, KonohaModule *baseh, 
 
 static void kModuleException_free(KonohaContext *kctx, KonohaModule *baseh)
 {
-	KFREE(baseh, sizeof(KonohaExceptionModule));
+	KFree(baseh, sizeof(KonohaExceptionModule));
 }
 
 static kbool_t exception_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KonohaExceptionModule *mod = (KonohaExceptionModule*)KCALLOC(sizeof(KonohaExceptionModule), 1);
+	KonohaExceptionModule *mod = (KonohaExceptionModule*)KCalloc_UNTRACE(sizeof(KonohaExceptionModule), 1);
 	mod->h.name     = "exception";
 	mod->h.setup    = kModuleException_setup;
 	mod->h.reftrace = kModuleException_reftrace;

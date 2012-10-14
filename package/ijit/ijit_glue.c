@@ -79,7 +79,7 @@ static void kmodjit_free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 	kmodjit_t *modshare = (kmodjit_t*) baseh;
 	KLIB Kmap_free(kctx, modshare->jitcache, NULL);
-	KFREE(baseh, sizeof(kmodjit_t));
+	KFree(baseh, sizeof(kmodjit_t));
 }
 
 static void check_stack_size(KonohaContext *kctx, kArray *stack, int n)
@@ -710,7 +710,7 @@ static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	KRequirePackage("konoha.assign", pline);
 	KRequirePackage("konoha.null", pline);
 	KRequirePackage("konoha.string", pline);
-	kmodjit_t *base  = (kmodjit_t*)KCALLOC(sizeof(kmodjit_t), 1);
+	kmodjit_t *base  = (kmodjit_t*)KCalloc_UNTRACE(sizeof(kmodjit_t), 1);
 	base->h.name     = "ijit";
 	base->h.setup    = kmodjit_setup;
 	base->h.reftrace = kmodjit_reftrace;

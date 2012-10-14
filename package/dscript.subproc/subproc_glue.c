@@ -1226,7 +1226,7 @@ static void kSubproc_init(KonohaContext *kctx, kObject *o, void *conf)
 	if(conf != NULL) {
 		proc->spd = (subprocData_t*)conf;
 	} else {
-		subprocData_t *p = (subprocData_t*)KCALLOC(sizeof(subprocData_t), 1);
+		subprocData_t *p = (subprocData_t*)KCalloc_UNTRACE(sizeof(subprocData_t), 1);
 		p->command     = KNULL(String);
 		p->cwd         = KNULL(String);
 		p->env         = KNULL(Array);
@@ -1249,7 +1249,7 @@ static void kSubproc_free(KonohaContext *kctx, kObject *o)
 {
 	struct _kSubproc *proc = (struct _kSubproc*)o;
 	if(proc->spd != NULL) {
-		KFREE(proc->spd, sizeof(subprocData_t));
+		KFree(proc->spd, sizeof(subprocData_t));
 		proc->spd = NULL;
 	}
 }

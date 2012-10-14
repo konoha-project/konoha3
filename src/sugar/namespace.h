@@ -88,7 +88,7 @@ static SugarSyntax* kNameSpace_newSyntax(KonohaContext *kctx, kNameSpace *ns, Su
 		((kNameSpaceVar*)ns)->syntaxMapNN = KLIB Kmap_init(kctx, 0);
 	}
 	KHashMapEntry *e = KLIB Kmap_newEntry(kctx, ns->syntaxMapNN, (uintptr_t)keyword);
-	SugarSyntaxVar *syn = (SugarSyntaxVar*)KCALLOC(sizeof(SugarSyntax), 1);
+	SugarSyntaxVar *syn = (SugarSyntaxVar*)KCalloc_UNTRACE(sizeof(SugarSyntax), 1);
 	e->unboxValue = (uintptr_t)syn;
 	syn->parentSyntaxNULL = parentSyntax;
 	syn->keyword          = keyword;
@@ -916,7 +916,7 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackageId_t packageI
 			return NULL;
 		}
 	}
-	KonohaPackage *pack = (KonohaPackage*)KCALLOC(sizeof(KonohaPackage), 1);
+	KonohaPackage *pack = (KonohaPackage*)KCalloc_UNTRACE(sizeof(KonohaPackage), 1);
 	pack->packageId = packageId;
 	pack->packageNameSpace_OnGlobalConstList = ns;
 	pack->packageHandler = packageHandler;

@@ -163,7 +163,7 @@ static VirtualMachineInstruction *KonohaVirtualMachine_tryJump(KonohaContext *kc
 	KonohaStackRuntimeVar *base = kctx->stack;
 	jmpbuf_i lbuf = {};
 	if(base->evaljmpbuf == NULL) {
-		base->evaljmpbuf = (jmpbuf_i*)KCALLOC(sizeof(jmpbuf_i), 1);
+		base->evaljmpbuf = (jmpbuf_i*)KCalloc_UNTRACE(sizeof(jmpbuf_i), 1);
 	}
 	memcpy(&lbuf, base->evaljmpbuf, sizeof(jmpbuf_i));
 	if((jmpresult = PLATAPI setjmp_i(*base->evaljmpbuf)) == 0) {

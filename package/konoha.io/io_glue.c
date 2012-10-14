@@ -681,7 +681,7 @@ static void kioshare_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, K
 
 static void kioshare_free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
-	KFREE(baseh, sizeof(KIOModule));
+	KFree(baseh, sizeof(KIOModule));
 }
 
 #define _Public   kMethod_Public
@@ -691,7 +691,7 @@ static void kioshare_free(KonohaContext *kctx, struct KonohaModule *baseh)
 
 static kbool_t io_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KIOModule *mod = (KIOModule*)KCALLOC(sizeof(KIOModule), 1);
+	KIOModule *mod = (KIOModule*)KCalloc_UNTRACE(sizeof(KIOModule), 1);
 	mod->h.name     = "io";
 	mod->h.setup    = kioshare_setup;
 	mod->h.reftrace = kioshare_reftrace;

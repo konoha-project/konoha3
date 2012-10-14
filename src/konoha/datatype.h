@@ -167,7 +167,7 @@ static void kString_free(KonohaContext *kctx, kObject *o)
 {
 	kString *s = (kString*)o;
 	if(S_isMallocText(s)) {
-		KFREE(s->buf, S_size(s) + 1);
+		KFree(s->buf, S_size(s) + 1);
 	}
 }
 
@@ -244,7 +244,7 @@ static kString* new_kString(KonohaContext *kctx, kArray *gcstack, const char *te
 	else {
 		s = (kStringVar*)new_kObjectDontUseThis(kctx, ct, 0, gcstack);
 		s->bytesize = len;
-		s->buf = (char*)KMALLOC(len+1);
+		s->buf = (char*)KMalloc_UNTRACE(len+1);
 		S_setTextSgm(s, 0);
 		S_setMallocText(s, 1);
 		if(text != NULL) {
@@ -684,7 +684,7 @@ static kObject* DEFAULT_fnull(KonohaContext *kctx, KonohaClass *ct)
 static kObject* DEFAULT_fnullinit(KonohaContext *kctx, KonohaClass *ct)
 {
 	DBG_ASSERT(ct->defaultNullValue_OnGlobalConstList == NULL);
-	((KonohaClassVar*)ct)->defaultNullValue_OnGlobalConstList = KLIB new_kObjectDontUseThis(kctx, ct, 0, OnGlobalConstList);
+	((KonohaClassVar*)ct)->defaultNullValue_OnGlobalConstList = KLIB new_kObject(kctx, OnGlobalConstList, ct, 0);
 	kObject_set(NullObject, ct->defaultNullValue_OnGlobalConstList, true);
 	((KonohaClassVar*)ct)->fnull = DEFAULT_fnull;
 	return ct->defaultNullValue_OnGlobalConstList;
@@ -706,7 +706,7 @@ static KonohaClassVar* new_KonohaClass(KonohaContext *kctx, KonohaClass *bct, KD
 			KLIB Karray_expand(kctx, &share->classTable, share->classTable.bytemax * 2);
 		}
 		share->classTable.bytesize += sizeof(KonohaClassVar*);
-		ct = (KonohaClassVar*)KCALLOC(sizeof(KonohaClass), 1);
+		ct = (KonohaClassVar*)KCalloc_UNTRACE(sizeof(KonohaClass), 1);
 		share->classTable.classItems[newid] = (KonohaClass*)ct;
 	}
 	KUnlock(share->classTableMutex);
@@ -1058,7 +1058,7 @@ static void initKonohaLib(KonohaLibVar *l)
 {
 	l->Kclass                  = Kclass;
 	l->new_kObject             = new_kObject;
-	l->new_kObjectDontUseThis  = new_kObjectDontUseThis;
+//	l->new_kObjectDontUseThis  = new_kObjectDontUseThis;
 	l->new_kString             = new_kString;
 	l->new_kStringf            = new_kStringf;
 	//l->Kconv  = conv;
@@ -1077,7 +1077,7 @@ static void initKonohaLib(KonohaLibVar *l)
 
 static void KonohaRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
-	KonohaRuntimeVar *share = (KonohaRuntimeVar*)KCALLOC(sizeof(KonohaRuntime), 1);
+	KonohaRuntimeVar *share = (KonohaRuntimeVar*)KCalloc_UNTRACE(sizeof(KonohaRuntime), 1);
 	ctx->share = share;
 	KInitLock(share->classTableMutex);
 	KInitLock(share->filepackMutex);
@@ -1179,15 +1179,15 @@ static void KonohaRuntime_freeClassTable(KonohaContext *kctx)
 	size_t i, size = kctx->share->classTable.bytesize/sizeof(KonohaClassVar*);
 	for(i = 0; i < size; i++) {
 		if(cts[i]->fieldAllocSize > 0) {
-			KFREE(cts[i]->fieldItems, cts[i]->fieldAllocSize * sizeof(KonohaClassField));
+			KFree(cts[i]->fieldItems, cts[i]->fieldAllocSize * sizeof(KonohaClassField));
 		}
-		KFREE(cts[i], sizeof(KonohaClass));
+		KFree(cts[i], sizeof(KonohaClass));
 	}
 }
 
 static void packageMap_free(KonohaContext *kctx, void *p)
 {
-	KFREE(p, sizeof(KonohaPackage));
+	KFree(p, sizeof(KonohaPackage));
 }
 
 static void KonohaRuntime_free(KonohaContext *kctx, KonohaContextVar *ctx)
@@ -1208,6 +1208,6 @@ static void KonohaRuntime_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	KFreeLock(share->filepackMutex);
 	KFreeLock(share->symbolMutex);
 	KFreeLock(share->paramMutex);
-	KFREE(share, sizeof(KonohaRuntime));
+	KFree(share, sizeof(KonohaRuntime));
 }
 

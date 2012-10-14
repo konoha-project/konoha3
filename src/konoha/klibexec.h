@@ -30,13 +30,13 @@ static void Karray_init(KonohaContext *kctx, KGrowingArray *m, size_t bytemax)
 {
 	m->bytesize = 0;
 	m->bytemax  = bytemax;
-	m->bytebuf = (char*)KCALLOC(bytemax, 1);
+	m->bytebuf = (char*)KCalloc_UNTRACE(bytemax, 1);
 }
 
 static void Karray_resize(KonohaContext *kctx, KGrowingArray *m, size_t newsize)
 {
 	size_t oldsize = m->bytemax;
-	char *newbody = (char*)KMALLOC(newsize);
+	char *newbody = (char*)KMalloc_UNTRACE(newsize);
 	if(oldsize < newsize) {
 		memcpy(newbody, m->bytebuf, oldsize);
 		bzero(newbody + oldsize, newsize - oldsize);
@@ -44,7 +44,7 @@ static void Karray_resize(KonohaContext *kctx, KGrowingArray *m, size_t newsize)
 	else {
 		memcpy(newbody, m->bytebuf, newsize);
 	}
-	KFREE(m->bytebuf, oldsize);
+	KFree(m->bytebuf, oldsize);
 	m->bytebuf = newbody;
 	m->bytemax = newsize;
 }
@@ -64,7 +64,7 @@ static void Karray_expand(KonohaContext *kctx, KGrowingArray *m, size_t minsize)
 static void Karray_free(KonohaContext *kctx, KGrowingArray *m)
 {
 	if(m->bytemax > 0) {
-		KFREE(m->bytebuf, m->bytemax);
+		KFree(m->bytebuf, m->bytemax);
 		m->bytebuf = NULL;
 		m->bytesize = 0;
 		m->bytemax  = 0;
@@ -183,14 +183,14 @@ static void kmap_makeFreeList(KHashMap *kmap, size_t s, size_t e)
 static void kmap_rehash(KonohaContext *kctx, KHashMap *kmap)
 {
 	size_t i, newhmax = kmap->hmax * 2 + 1;
-	KHashMapEntry **newhentry = (KHashMapEntry**)KCALLOC(newhmax, sizeof(KHashMapEntry*));
+	KHashMapEntry **newhentry = (KHashMapEntry**)KCalloc_UNTRACE(newhmax, sizeof(KHashMapEntry*));
 	for(i = 0; i < kmap->arenasize / 2; i++) {
 		KHashMapEntry *e = kmap->arena + i;
 		kuint_t ni = e->hcode % newhmax;
 		e->next = newhentry[ni];
 		newhentry[ni] = e;
 	}
-	KFREE(kmap->hentry, kmap->hmax * sizeof(KHashMapEntry*));
+	KFree(kmap->hentry, kmap->hmax * sizeof(KHashMapEntry*));
 	kmap->hentry = newhentry;
 	kmap->hmax = newhmax;
 }
@@ -214,11 +214,11 @@ static KHashMapEntry *Kmap_newEntry(KonohaContext *kctx, KHashMap *kmap, kuint_t
 		size_t oarenasize = kmap->arenasize;
 		char *oarena = (char*)kmap->arena;
 		kmap->arenasize *= 2;
-		kmap->arena = (KHashMapEntry*)KMALLOC(kmap->arenasize * sizeof(KHashMapEntry));
+		kmap->arena = (KHashMapEntry*)KMalloc_UNTRACE(kmap->arenasize * sizeof(KHashMapEntry));
 		memcpy(kmap->arena, oarena, oarenasize * sizeof(KHashMapEntry));
 		kmap_shiftptr(kmap, (char*)kmap->arena - oarena);
 		kmap_makeFreeList(kmap, oarenasize, kmap->arenasize);
-		KFREE(oarena, oarenasize * sizeof(KHashMapEntry));
+		KFree(oarena, oarenasize * sizeof(KHashMapEntry));
 		kmap_rehash(kctx, kmap);
 	}
 	e = kmap->unused;
@@ -237,12 +237,12 @@ static KHashMapEntry *Kmap_newEntry(KonohaContext *kctx, KHashMap *kmap, kuint_t
 
 static KHashMap *Kmap_init(KonohaContext *kctx, size_t init)
 {
-	KHashMap *kmap = (KHashMap*)KCALLOC(sizeof(KHashMap), 1);
+	KHashMap *kmap = (KHashMap*)KCalloc_UNTRACE(sizeof(KHashMap), 1);
 	if(init < HMAP_INIT) init = HMAP_INIT;
 	kmap->arenasize = (init * 3) / 4;
-	kmap->arena = (KHashMapEntry*)KMALLOC(kmap->arenasize * sizeof(KHashMapEntry));
+	kmap->arena = (KHashMapEntry*)KMalloc_UNTRACE(kmap->arenasize * sizeof(KHashMapEntry));
 	kmap_makeFreeList(kmap, 0, kmap->arenasize);
-	kmap->hentry = (KHashMapEntry**)KCALLOC(init, sizeof(KHashMapEntry*));
+	kmap->hentry = (KHashMapEntry**)KCalloc_UNTRACE(init, sizeof(KHashMapEntry*));
 	kmap->hmax = init;
 	kmap->size = 0;
 	return (KHashMap*)kmap;
@@ -272,9 +272,9 @@ static void Kmap_free(KonohaContext *kctx, KHashMap *kmap, void (*f)(KonohaConte
 			}
 		}
 	}
-	KFREE(kmap->arena, sizeof(KHashMapEntry)*(kmap->arenasize));
-	KFREE(kmap->hentry, sizeof(KHashMapEntry*)*(kmap->hmax));
-	KFREE(kmap, sizeof(KHashMap));
+	KFree(kmap->arena, sizeof(KHashMapEntry)*(kmap->arenasize));
+	KFree(kmap->hentry, sizeof(KHashMapEntry*)*(kmap->hmax));
+	KFree(kmap, sizeof(KHashMap));
 }
 
 static KHashMapEntry *Kmap_getentry(KonohaContext *kctx, KHashMap* kmap, kuint_t hcode)
@@ -509,7 +509,7 @@ static kbool_t KonohaRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp
 	KonohaStack *jump_bottom = runtime->jump_bottom;
 	jmpbuf_i lbuf = {};
 	if(runtime->evaljmpbuf == NULL) {
-		runtime->evaljmpbuf = (jmpbuf_i*)KCALLOC(sizeof(jmpbuf_i), 1);
+		runtime->evaljmpbuf = (jmpbuf_i*)KCalloc_UNTRACE(sizeof(jmpbuf_i), 1);
 	}
 	memcpy(&lbuf, runtime->evaljmpbuf, sizeof(jmpbuf_i));
 	runtime->jump_bottom = sfp;

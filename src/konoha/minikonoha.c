@@ -68,9 +68,9 @@ static void knh_endContext(KonohaContext *kctx)
 static void KonohaStackRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx, size_t stacksize)
 {
 	size_t i;
-	KonohaStackRuntimeVar *base = (KonohaStackRuntimeVar*)KCALLOC(sizeof(KonohaStackRuntimeVar), 1);
+	KonohaStackRuntimeVar *base = (KonohaStackRuntimeVar*)KCalloc_UNTRACE(sizeof(KonohaStackRuntimeVar), 1);
 	base->stacksize = stacksize;
-	base->stack = (KonohaStack*)KCALLOC(sizeof(KonohaStack), stacksize);
+	base->stack = (KonohaStack*)KCalloc_UNTRACE(sizeof(KonohaStack), stacksize);
 	assert(stacksize>64);
 	base->stack_uplimit = base->stack + (stacksize - 64);
 	for(i = 0; i < stacksize; i++) {
@@ -100,11 +100,11 @@ static void KonohaStackRuntime_reftrace(KonohaContext *kctx, KonohaContextVar *c
 static void KonohaStackRuntime_free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	if(ctx->stack->evaljmpbuf != NULL) {
-		KFREE(ctx->stack->evaljmpbuf, sizeof(jmpbuf_i));
+		KFree(ctx->stack->evaljmpbuf, sizeof(jmpbuf_i));
 	}
 	KLIB Karray_free(kctx, &ctx->stack->cwb);
-	KFREE(ctx->stack->stack, sizeof(KonohaStack) * ctx->stack->stacksize);
-	KFREE(ctx->stack, sizeof(KonohaStackRuntimeVar));
+	KFree(ctx->stack->stack, sizeof(KonohaStack) * ctx->stack->stacksize);
+	KFree(ctx->stack, sizeof(KonohaStackRuntimeVar));
 }
 
 static kbool_t KonohaRuntime_setModule(KonohaContext *kctx, int x, KonohaModule *d, kfileline_t pline)
@@ -145,12 +145,12 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 		KonohaRuntime_init(kctx, newctx);
 	}
 	else {   // others take ctx as its parent
-		newctx = (KonohaContextVar*)KCALLOC(sizeof(KonohaContextVar), 1);
+		newctx = (KonohaContextVar*)KCalloc_UNTRACE(sizeof(KonohaContextVar), 1);
 		newctx->klib = kctx->klib;
 		newctx->platApi = kctx->platApi;
 		newctx->share = kctx->share;
 		newctx->modshare = kctx->modshare;
-		newctx->modlocal = (KonohaModuleContext**)KCALLOC(sizeof(KonohaModuleContext*), KonohaModule_MAXSIZE);
+		newctx->modlocal = (KonohaModuleContext**)KCalloc_UNTRACE(sizeof(KonohaModuleContext*), KonohaModule_MAXSIZE);
 		MODGC_init(kctx, newctx);
 	}
 	KonohaStackRuntime_init(kctx, newctx, platApi->stacksize);
@@ -224,8 +224,8 @@ static void KonohaContext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	}
 	else {
 		KLIB KdeleteGcContext(ctx->gcContext);
-		KFREE(ctx->modlocal, sizeof(KonohaModuleContext*) * KonohaModule_MAXSIZE);
-		KFREE(ctx, sizeof(KonohaContextVar));
+		KFree(ctx->modlocal, sizeof(KonohaModuleContext*) * KonohaModule_MAXSIZE);
+		KFree(ctx, sizeof(KonohaContextVar));
 	}
 }
 

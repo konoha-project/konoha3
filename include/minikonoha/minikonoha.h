@@ -316,7 +316,7 @@ typedef void kmutexattr_t;
 typedef pthread_mutex_t     kmutex_t;
 typedef pthread_mutexattr_t kmutexattr_t;
 #define KInitLock(X)    do {\
-	X = (kmutex_t*)KCALLOC(sizeof(kmutex_t), 1);\
+	X = (kmutex_t*)KCalloc_UNTRACE(sizeof(kmutex_t), 1);\
 	PLATAPI pthread_mutex_init_i(X, NULL);\
 } while (0)
 
@@ -325,7 +325,7 @@ typedef pthread_mutexattr_t kmutexattr_t;
 #define KUnlock(X)      PLATAPI pthread_mutex_unlock_i(X)
 #define KFreeLock(X)    do {\
 	PLATAPI pthread_mutex_destroy_i(X);\
-	KFREE(X, sizeof(kmutex_t));\
+	KFree(X, sizeof(kmutex_t));\
 	X = NULL;\
 } while (0)
 
@@ -1389,8 +1389,8 @@ typedef struct KObjectVisitor {
 } KObjectVisitor;
 
 struct KonohaLibVar {
-	void* (*Kmalloc)(KonohaContext*, size_t);
-	void* (*Kzmalloc)(KonohaContext*, size_t);
+	void* (*Kmalloc)(KonohaContext*, size_t, KTraceInfo *);
+	void* (*Kzmalloc)(KonohaContext*, size_t, KTraceInfo *);
 	void  (*Kfree)(KonohaContext*, void *, size_t);
 
 	/* Garbage Collection API */
@@ -1439,7 +1439,7 @@ struct KonohaLibVar {
 	kbool_t         (*KonohaClass_isSubtype)(KonohaContext*, KonohaClass *, KonohaClass *);
 	kbool_t         (*KonohaClass_addField)(KonohaContext*, KonohaClass *, int flag, ktype_t ty, ksymbol_t sym);
 
-	kObject*        (*new_kObjectDontUseThis)(KonohaContext*, KonohaClass *, uintptr_t, kArray *gcstackNULL);
+//	kObject*        (*new_kObjectDontUseThis)(KonohaContext*, KonohaClass *, uintptr_t, kArray *gcstackNULL);
 	kObject*        (*new_kObject)(KonohaContext*, kArray *gcstack, KonohaClass *, uintptr_t);
 	kbool_t         (*kObject_isManaged)(KonohaContext*, void *ptr);
 	kObject*        (*Knull)(KonohaContext*, KonohaClass *);
@@ -1501,9 +1501,11 @@ struct KonohaLibVar {
 
 #define UPCAST(o)         ((kObject*)o)
 
-#define KMALLOC(size)          KLIB Kmalloc(kctx, size)
-#define KCALLOC(size, item)    KLIB Kzmalloc(kctx, ((size) * (item)))
-#define KFREE(p, size)         KLIB Kfree(kctx, p, size)
+#define KMalloc(size, TRACE)           KLIB Kmalloc(kctx, size, TRACE)
+#define KCalloc(size, item, TRACE)     KLIB Kzmalloc(kctx, ((size) * (item)), TRACE)
+#define KMalloc_UNTRACE(size)          KLIB Kmalloc(kctx, size, NULL)
+#define KCalloc_UNTRACE(size, item)    KLIB Kzmalloc(kctx, ((size) * (item)), NULL)
+#define KFree(p, size)                 KLIB Kfree(kctx, p, size)
 
 //#define KLIB Kwb_write(W,...)          KLIB Kwb_putc(kctx,W, ## __VA_ARGS__, -1)
 #define Kwb_bytesize(W)                 (((W)->m)->bytesize - (W)->pos)

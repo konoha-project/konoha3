@@ -178,7 +178,7 @@ KMETHOD knh_ResultSet_initColumn(KonohaContext *kctx, kResultSet *o, size_t colu
 	//	for(i = 0; i < o->column_size; i++) {
 	//		KNH_FINALv(kctx, o->column[i].name);
 	//	}
-	//	KFREE(kctx, o->column, sizeof(kDBschema) * DP(o)->column_size);
+	//	KFree(kctx, o->column, sizeof(kDBschema) * DP(o)->column_size);
 	//	o->column = NULL;
 	//	if(o->qcur != NULL) {
 	//		o->qcurfree(o->qcur);
@@ -187,7 +187,7 @@ KMETHOD knh_ResultSet_initColumn(KonohaContext *kctx, kResultSet *o, size_t colu
 	//}
 	rs->column_size = column_size;
 	if(column_size > 0) {
-		rs->column = (struct _kDBschema*)KMALLOC(sizeof(kDBschema) * column_size);
+		rs->column = (struct _kDBschema*)KMalloc_UNTRACE(sizeof(kDBschema) * column_size);
 		for(i = 0; i < column_size; i++) {
 			rs->column[i].type = TY_String;
 			KFieldInit(o, o->column[i].name, TS_EMPTY);

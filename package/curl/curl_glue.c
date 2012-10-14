@@ -51,10 +51,10 @@ static size_t write_Bytes(char *buffer, size_t size, size_t nitems, void *obj)
 	struct kBytesVar *res = (struct kBytesVar *) curl->bytes;
 	char *buf = res->buf;
 	size *= nitems;
-	res->buf = (char *)KMALLOC(res->bytesize + size);
+	res->buf = (char *)KMalloc_UNTRACE(res->bytesize + size);
 	if(res->bytesize) {
 		memcpy(res->buf, (void *)buf, res->bytesize);
-		KFREE(buf, res->bytesize);
+		KFree(buf, res->bytesize);
 	}
 	memcpy(res->buf + res->bytesize, (void *)buffer, size);
 	res->bytesize += size;

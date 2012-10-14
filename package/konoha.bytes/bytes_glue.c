@@ -41,14 +41,14 @@ static void kBytes_init(KonohaContext *kctx, kObject *o, void *conf)
 	DBG_ASSERT((size_t)conf >= 0);
 	ba->bytesize = (size_t)conf;
 	ba->byteptr = NULL;
-	ba->byteptr = (ba->bytesize > 0) ? (const char *)KCALLOC((size_t)conf, 1) : NULL;
+	ba->byteptr = (ba->bytesize > 0) ? (const char *)KCalloc_UNTRACE((size_t)conf, 1) : NULL;
 }
 
 static void kBytes_free(KonohaContext *kctx, kObject *o)
 {
 	struct kBytesVar *ba = (struct kBytesVar*)o;
 	if(ba->byteptr != NULL) {
-		KFREE(ba->buf, ba->bytesize);
+		KFree(ba->buf, ba->bytesize);
 		ba->byteptr = NULL;
 		ba->bytesize = 0;
 	}

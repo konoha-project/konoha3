@@ -369,7 +369,7 @@ static kByteCode* new_ByteCode(KonohaContext *kctx, kBasicBlock *beginBlock, kBa
 	kBasicBlock *prev[1] = {};
 	kcode->fileid = ctxcode->uline; //TODO
 	kcode->codesize = BasicBlock_size(kctx, beginBlock, 0) * sizeof(VirtualMachineInstruction);
-	kcode->code = (VirtualMachineInstruction*)KCALLOC(kcode->codesize, 1);
+	kcode->code = (VirtualMachineInstruction*)KCalloc_UNTRACE(kcode->codesize, 1);
 	endBlock->code = kcode->code; // dummy
 	{
 		VirtualMachineInstruction *op = BasicBlock_copy(kctx, kcode->code, beginBlock, prev);
@@ -976,7 +976,7 @@ static void ByteCode_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *v
 static void ByteCode_free(KonohaContext *kctx, kObject *o)
 {
 	kByteCode *b = (kByteCode*)o;
-	KFREE(b->code, b->codesize);
+	KFree(b->code, b->codesize);
 }
 
 static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack *sfp)
@@ -1021,14 +1021,14 @@ static void ctxcode_reftrace(KonohaContext *kctx, struct KonohaModuleContext *ba
 static void ctxcode_free(KonohaContext *kctx, struct KonohaModuleContext *baseh)
 {
 	ctxcode_t *base = (ctxcode_t*)baseh;
-	KFREE(base, sizeof(ctxcode_t));
+	KFree(base, sizeof(ctxcode_t));
 }
 
 static void kmodcode_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
 {
 	if(!newctx) { // lazy setup
 		assert(kctx->modlocal[MOD_code] == NULL);
-		ctxcode_t *base = (ctxcode_t*)KCALLOC(sizeof(ctxcode_t), 1);
+		ctxcode_t *base = (ctxcode_t*)KCalloc_UNTRACE(sizeof(ctxcode_t), 1);
 		base->h.reftrace = ctxcode_reftrace;
 		base->h.free     = ctxcode_free;
 		KUnsafeFieldInit(base->codeList, new_(Array, K_PAGESIZE/sizeof(void*)));
@@ -1048,12 +1048,12 @@ static void kmodcode_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
 static void kmodcode_free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 //	KModuleByteCode *base = (KModuleByteCode*)baseh;
-	KFREE(baseh, sizeof(KModuleByteCode));
+	KFree(baseh, sizeof(KModuleByteCode));
 }
 
 void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
-	KModuleByteCode *base = (KModuleByteCode*)KCALLOC(sizeof(KModuleByteCode), 1);
+	KModuleByteCode *base = (KModuleByteCode*)KCalloc_UNTRACE(sizeof(KModuleByteCode), 1);
 	opcode_check();
 	base->h.name     = "minivm";
 	base->h.setup    = kmodcode_setup;

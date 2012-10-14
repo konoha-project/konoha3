@@ -153,7 +153,7 @@ static StringBase *LinerString_new(KonohaContext *kctx, StringBase *base, const 
 	LinerString *s = (LinerString *) base;
 	StringBase_setFlag(base, MASK_LINER);
 	s->base.length = len;
-	s->text = (char *) KMALLOC(len+1);
+	s->text = (char *) KMalloc_UNTRACE(len+1);
 	memcpy(s->text, text, len);
 	s->text[len] = '\0';
 	return base;
@@ -215,7 +215,7 @@ static void String2_free(KonohaContext *kctx, kObject *o)
 	StringBase *base = (StringBase*) o;
 	if((S_flag(base) & S_FLAG_EXTERNAL) == S_FLAG_LINER) {
 		assert(((LinerString *)base)->text == ((kString*)base)->buf);
-		KFREE(((LinerString *)base)->text, S_len(base)+1);
+		KFree(((LinerString *)base)->text, S_len(base)+1);
 	}
 }
 
@@ -249,7 +249,7 @@ static void write_text(StringBase *base, char *dest, int size)
 static LinerString *RopeString_flatten(KonohaContext *kctx, RopeString *rope)
 {
 	size_t length = S_len((StringBase *) rope);
-	char *dest = (char *) KMALLOC(length+1);
+	char *dest = (char *) KMalloc_UNTRACE(length+1);
 	size_t llen = S_len(rope->left);
 	write_text(rope->left,  dest,llen);
 	write_text(rope->right, dest+llen, length - llen);

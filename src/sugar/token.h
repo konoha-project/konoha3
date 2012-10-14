@@ -470,7 +470,7 @@ static const TokenizeFunc *kNameSpace_tokenMatrix(KonohaContext *kctx, kNameSpac
 {
 	if(ns->tokenMatrix == NULL) {
 		//DBG_ASSERT(KCHAR_MAX * sizeof(TokenizeFunc) == sizeof(MiniKonohaTokenMatrix));
-		TokenizeFunc *tokenMatrix = (TokenizeFunc*)KMALLOC(SIZEOF_TOKENMATRIX);
+		TokenizeFunc *tokenMatrix = (TokenizeFunc*)KMalloc_UNTRACE(SIZEOF_TOKENMATRIX);
 		if(ns->parentNULL != NULL && ns->parentNULL->tokenMatrix != NULL) {
 			memcpy(tokenMatrix, ns->parentNULL->tokenMatrix, sizeof(MiniKonohaTokenMatrix));
 			bzero(tokenMatrix + KCHAR_MAX, sizeof(MiniKonohaTokenMatrix));

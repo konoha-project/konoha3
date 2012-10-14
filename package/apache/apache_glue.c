@@ -78,7 +78,7 @@ static void kapacheshare_setup(KonohaContext *kctx, struct KonohaModule *def, in
 static void kapacheshare_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor) {}
 static void kapacheshare_free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
-	KFREE(baseh, sizeof(kapacheshare_t));
+	KFree(baseh, sizeof(kapacheshare_t));
 }
 
 
@@ -106,7 +106,7 @@ static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		STRUCTNAME(Apache),
 	};
 
-	kapacheshare_t *base = (kapacheshare_t*)KCALLOC(sizeof(kapacheshare_t), 1);
+	kapacheshare_t *base = (kapacheshare_t*)KCalloc_UNTRACE(sizeof(kapacheshare_t), 1);
 	base->h.name     = "apache";
 	base->h.setup    = kapacheshare_setup;
 	base->h.reftrace = kapacheshare_reftrace;

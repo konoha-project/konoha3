@@ -82,17 +82,17 @@ static void MPIData_extend(KonohaContext *kctx, kMPIData *p, int size) {
 			break;
 		}
 		case KMPI_FARRAY: {
-			kfloat_t *fa = KCALLOC(sizeof(kfloat_t), newSize);
+			kfloat_t *fa = KCalloc_UNTRACE(sizeof(kfloat_t), newSize);
 			memcpy(fa, p->fa, p->size * sizeof(kfloat_t));
-			KFREE(p->fa, p->size * sizeof(kfloat_t));
+			KFree(p->fa, p->size * sizeof(kfloat_t));
 			p->fa = fa;
 			p->size = newSize;
 			break;
 		}
 		case KMPI_IARRAY: {
-			kint_t *ia = KCALLOC(sizeof(kint_t), newSize);
+			kint_t *ia = KCalloc_UNTRACE(sizeof(kint_t), newSize);
 			memcpy(ia, p->ia, p->size * sizeof(kint_t));
-			KFREE(p->ia, p->size * sizeof(kint_t));
+			KFree(p->ia, p->size * sizeof(kint_t));
 			p->ia = ia;
 			p->size = newSize;
 			break;
@@ -105,19 +105,19 @@ static void MPIData_extend(KonohaContext *kctx, kMPIData *p, int size) {
 
 /* ------------------------------------------------------------------------ */
 static kMPIRequest *newMPIRequest(KonohaContext *kctx) {
-	kMPIRequest* p = (kMPIRequest*)KMALLOC(sizeof(kMPIRequest));
+	kMPIRequest* p = (kMPIRequest*)KMalloc_UNTRACE(sizeof(kMPIRequest));
 	return p;
 }
 
 static kMPIData *newMPIData(KonohaContext *kctx) {
-	kMPIData* p = (kMPIData*)KMALLOC(sizeof(kMPIData));
+	kMPIData* p = (kMPIData*)KMalloc_UNTRACE(sizeof(kMPIData));
 	return p;
 }
 
 static void MPIRequest_ptr_free(KonohaContext *kctx , kObject *po)
 {
 	kMPIRequest *p = toRawPtr(kMPIRequest *, po);
-	KFREE(p, sizeof(kMPIRequest));
+	KFree(p, sizeof(kMPIRequest));
 }
 
 static void MPIData_ptr_free(KonohaContext *kctx , kObject *po)
@@ -125,11 +125,11 @@ static void MPIData_ptr_free(KonohaContext *kctx , kObject *po)
 	kMPIData *p = toRawPtr(kMPIData *, po);
 	switch(p->typeId) {
 		case KMPI_BYTES: break;
-		case KMPI_FARRAY: KFREE(p->fa, p->size * sizeof(kfloat_t)); break;
-		case KMPI_IARRAY: KFREE(p->ia, p->size * sizeof(kint_t)); break;
+		case KMPI_FARRAY: KFree(p->fa, p->size * sizeof(kfloat_t)); break;
+		case KMPI_IARRAY: KFree(p->ia, p->size * sizeof(kint_t)); break;
 		default: abort();
 	}
-	KFREE(p, sizeof(kMPIData));
+	KFree(p, sizeof(kMPIData));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -474,7 +474,7 @@ static KMETHOD MPIData_newFloatArray(KonohaContext *kctx, KonohaStack *sfp)
 	d->type = MPI_DOUBLE;
 	d->size = size;
 	d->offset = 0;
-	d->fa = KCALLOC(sizeof(kfloat_t), size);
+	d->fa = KCalloc_UNTRACE(sizeof(kfloat_t), size);
 	d->typeId = KMPI_FARRAY;
 	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(d)));
 }
@@ -487,7 +487,7 @@ static KMETHOD MPIData_newIntArray(KonohaContext *kctx, KonohaStack *sfp)
 	d->type = MPI_LONG;
 	d->size = size;
 	d->offset = 0;
-	d->fa = KCALLOC(sizeof(kint_t), size);
+	d->fa = KCalloc_UNTRACE(sizeof(kint_t), size);
 	d->typeId = KMPI_IARRAY;
 	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(d)));
 }
@@ -561,7 +561,7 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 {
 	KRequirePackage("konoha.bytes", pline);
 	KRequirePackage("konoha.float", pline);
-	kmodmpi_t *base = (kmodmpi_t*)KCALLOC(sizeof(kmodmpi_t), 1);
+	kmodmpi_t *base = (kmodmpi_t*)KCalloc_UNTRACE(sizeof(kmodmpi_t), 1);
 	base->h.name     = "mpi";
 	base->h.setup    = kmodmpi_setup;
 	base->h.reftrace = kmodmpi_reftrace;
@@ -569,7 +569,7 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	KLIB KonohaRuntime_setModule(kctx, MOD_mpi, &base->h, pline);
 
 	MPI_Init(&argc, (char ***)&args);
-	g_comm_world = (kMPIComm *)KMALLOC(sizeof(kMPIComm));
+	g_comm_world = (kMPIComm *)KMalloc_UNTRACE(sizeof(kMPIComm));
 	g_comm_world->comm = MPI_COMM_WORLD;
 	static KDEFINE_CLASS MPIDef = {
 		.structname = "MPI",

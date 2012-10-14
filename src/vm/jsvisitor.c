@@ -274,7 +274,7 @@ static void JSVisitor_visitStackTopExpr(KonohaContext *kctx, IRBuilder *self, kE
 static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
 {
 	unsigned i;
-	builder->local_fields = (void *) KMALLOC(sizeof(int));
+	builder->local_fields = (void *) KMalloc_UNTRACE(sizeof(int));
 	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	kParam *pa = Method_param(mtd);
@@ -296,7 +296,7 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 
 static void JSVisitor_free(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
 {
-	KFREE(builder->local_fields, sizeof(int));
+	KFree(builder->local_fields, sizeof(int));
 	if(mtd->mn) {
 		emit_newline("}", --DUMPER(builder)->indent);
 	} else {

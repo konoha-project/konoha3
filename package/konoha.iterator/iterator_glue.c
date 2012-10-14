@@ -160,14 +160,14 @@ static KMETHOD String_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 
 static void kmoditerator_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx) {}
 static void kmoditerator_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor) { }
-static void kmoditerator_free(KonohaContext *kctx, struct KonohaModule *baseh) { KFREE(baseh, sizeof(KonohaIteratorModule)); }
+static void kmoditerator_free(KonohaContext *kctx, struct KonohaModule *baseh) { KFree(baseh, sizeof(KonohaIteratorModule)); }
 
 #define _Public   kMethod_Public
 #define _F(F)   (intptr_t)(F)
 
 static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KonohaIteratorModule *base = (KonohaIteratorModule*)KCALLOC(sizeof(KonohaIteratorModule), 1);
+	KonohaIteratorModule *base = (KonohaIteratorModule*)KCalloc_UNTRACE(sizeof(KonohaIteratorModule), 1);
 	base->h.name     = "iterator";
 	base->h.setup    = kmoditerator_setup;
 	base->h.reftrace = kmoditerator_reftrace;

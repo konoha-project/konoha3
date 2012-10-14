@@ -144,7 +144,7 @@ static void KonohaClass_initField(KonohaContext *kctx, KonohaClassVar *definedCl
 	definedClass->cstruct_size = size64((fieldsize * sizeof(kObject*)) + sizeof(KonohaObjectHeader));
 	DBG_P("superClass->fieldsize=%d, definedFieldSize=%d, cstruct_size=%d", superClass->fieldsize, fieldInitSize, definedClass->cstruct_size);
 	if(fieldsize > 0) {
-		definedClass->fieldItems = (KonohaClassField*)KCALLOC(fieldsize, sizeof(KonohaClassField));
+		definedClass->fieldItems = (KonohaClassField*)KCalloc_UNTRACE(fieldsize, sizeof(KonohaClassField));
 		definedClass->fieldAllocSize = fieldsize;
 		definedClass->fieldsize = superClass->fieldsize; /* supsize */
 		if(superClass->fieldsize > 0) {

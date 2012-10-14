@@ -78,7 +78,7 @@ static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
 	size_t asize = (size_t)sfp[1].intValue;
 	a->bytemax = asize * sizeof(uintptr_t);
 	kArray_setsize(a, asize);
-	a->ObjectItems = (kObject**)KCALLOC(a->bytemax, 1);
+	a->ObjectItems = (kObject**)KCalloc_UNTRACE(a->bytemax, 1);
 	if(!kArray_isUnboxData(a)) {
 		size_t i;
 		kObject *null = KLIB Knull(kctx, CT_(O_p0(a)));
@@ -454,7 +454,7 @@ static KMETHOD Array_new(KonohaContext *kctx, KonohaStack *sfp)
 	size_t asize = (size_t)sfp[1].intValue;
 	a->bytemax = asize * sizeof(uintptr_t);
 	kArray_setsize(a, 0);
-	a->ObjectItems = (kObject**)KCALLOC(a->bytemax, 1);
+	a->ObjectItems = (kObject**)KCalloc_UNTRACE(a->bytemax, 1);
 	if(!kArray_isUnboxData(a)) {
 		size_t i;
 		kObject *null = KLIB Knull(kctx, CT_(O_p0(a)));

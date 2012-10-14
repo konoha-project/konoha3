@@ -353,7 +353,7 @@ static KMETHOD JsonArray_newArray(KonohaContext *kctx, KonohaStack *sfp)
 	size_t asize = (size_t)sfp[1].intValue;
 	a->bytemax = asize * sizeof(void*);
 	kArray_setsize((kArray*)a, asize);
-	//a->list = (kObject**)KCALLOC(a->bytemax, 1);
+	//a->list = (kObject**)KCalloc_UNTRACE(a->bytemax, 1);
 	a->ObjectItems = (kObject**)json_array();
 	RETURN_(a);
 }

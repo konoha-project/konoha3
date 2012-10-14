@@ -55,14 +55,14 @@ struct _kSockAddr {
 static void SockAddr_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct _kSockAddr *sa = (struct _kSockAddr*)o;
-	sa->sockaddr_in = (struct sockaddr_in *)KCALLOC(sizeof(struct sockaddr_in), 1);
+	sa->sockaddr_in = (struct sockaddr_in *)KCalloc_UNTRACE(sizeof(struct sockaddr_in), 1);
 }
 
 static void SockAddr_free(KonohaContext *kctx, kObject *o)
 {
 	struct _kSockAddr *sa = (struct _kSockAddr*)o;
 	if(sa->sockaddr_in != NULL) {
-		KFREE(sa->sockaddr_in, sizeof(struct sockaddr_in));
+		KFree(sa->sockaddr_in, sizeof(struct sockaddr_in));
 		sa->sockaddr_in = NULL;
 	}
 }

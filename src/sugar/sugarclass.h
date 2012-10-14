@@ -58,7 +58,7 @@
 
 static void syntaxMap_free(KonohaContext *kctx, void *p)
 {
-	KFREE(p, sizeof(SugarSyntax));
+	KFree(p, sizeof(SugarSyntax));
 }
 
 static void kNameSpace_freeSugarExtension(KonohaContext *kctx, kNameSpaceVar *ns)
@@ -67,7 +67,7 @@ static void kNameSpace_freeSugarExtension(KonohaContext *kctx, kNameSpaceVar *ns
 		KLIB Kmap_free(kctx, ns->syntaxMapNN, syntaxMap_free);
 	}
 	if(ns->tokenMatrix != NULL) {
-		KFREE((void*)ns->tokenMatrix, SIZEOF_TOKENMATRIX);
+		KFree((void*)ns->tokenMatrix, SIZEOF_TOKENMATRIX);
 	}
 }
 

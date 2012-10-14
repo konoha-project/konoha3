@@ -272,7 +272,7 @@ static void ResultSet_free(KonohaContext *kctx, kObject *o)
 {
 	struct _kResultSet *rs = (struct _kResultSet *)o;
 	if(rs != NULL && rs->column_size > 0) {
-		KFREE((void*)rs->column, sizeof(kDBschema) * rs->column_size);
+		KFree((void*)rs->column, sizeof(kDBschema) * rs->column_size);
 	}
 }
 

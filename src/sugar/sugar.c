@@ -93,13 +93,13 @@ static void SugarContext_free(KonohaContext *kctx, struct KonohaModuleContext *b
 {
 	SugarContext *base = (SugarContext*)baseh;
 	KLIB Karray_free(kctx, &base->errorMessageBuffer);
-	KFREE(base, sizeof(SugarContext));
+	KFree(base, sizeof(SugarContext));
 }
 
 static void SugarModule_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
 {
 	if(!newctx && kctx->modlocal[MOD_sugar] == NULL) {
-		SugarContext *base = (SugarContext*)KCALLOC(sizeof(SugarContext), 1);
+		SugarContext *base = (SugarContext*)KCalloc_UNTRACE(sizeof(SugarContext), 1);
 		base->h.reftrace = SugarContext_reftrace;
 		base->h.free     = SugarContext_free;
 
@@ -120,12 +120,12 @@ static void SugarModule_reftrace(KonohaContext *kctx, struct KonohaModule *baseh
 
 static void SugarModule_free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
-	KFREE(baseh, sizeof(KModuleSugar));
+	KFree(baseh, sizeof(KModuleSugar));
 }
 
 void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
-	KModuleSugar *mod = (KModuleSugar*)KCALLOC(sizeof(KModuleSugar), 1);
+	KModuleSugar *mod = (KModuleSugar*)KCalloc_UNTRACE(sizeof(KModuleSugar), 1);
 	mod->h.name     = "sugar";
 	mod->h.setup    = SugarModule_setup;
 	mod->h.reftrace = SugarModule_reftrace;

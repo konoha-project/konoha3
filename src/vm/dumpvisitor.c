@@ -206,14 +206,14 @@ static void DumpVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMe
 		KLIB Kwb_printf(kctx, &wb, "%s %s", TY_t(pa->paramtypeItems[i].ty), SYM_t(pa->paramtypeItems[i].fn));
 	}
 	emit_string(KLIB Kwb_top(kctx, &wb, 1), "", ") {", 0);
-	builder->local_fields = (void *) KMALLOC(sizeof(int));
+	builder->local_fields = (void *) KMalloc_UNTRACE(sizeof(int));
 	DUMPER(builder)->indent = 0;
 }
 
 void DumpVisitor_free(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
 {
 	emit_string("}", "", "", 0);
-	KFREE(builder->local_fields, sizeof(int));
+	KFree(builder->local_fields, sizeof(int));
 }
 
 static IRBuilder *createDumpVisitor(IRBuilder *builder)

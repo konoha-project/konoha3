@@ -69,7 +69,7 @@ static void kmodfloat_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, 
 
 static void kmodfloat_free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
-	KFREE(baseh, sizeof(KonohaFloatModule));
+	KFree(baseh, sizeof(KonohaFloatModule));
 }
 
 // --------------------------------------------------------------------------
@@ -250,7 +250,7 @@ static KMETHOD Float_opMINUS(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	KonohaFloatModule *base = (KonohaFloatModule*)KCALLOC(sizeof(KonohaFloatModule), 1);
+	KonohaFloatModule *base = (KonohaFloatModule*)KCalloc_UNTRACE(sizeof(KonohaFloatModule), 1);
 	base->h.name     = "float";
 	base->h.setup    = kmodfloat_setup;
 	base->h.reftrace = kmodfloat_reftrace;

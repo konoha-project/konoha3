@@ -178,7 +178,7 @@
 //
 //static kregexp_t* pcre_regmalloc(KonohaContext *kctx, kString* s)
 //{
-//	PCRE_regexp_t *preg = (PCRE_regexp_t*) KMALLOC(sizeof(PCRE_regexp_t));
+//	PCRE_regexp_t *preg = (PCRE_regexp_t*) KMalloc_UNTRACE(sizeof(PCRE_regexp_t));
 //	return (kregexp_t *) preg;
 //}
 //
@@ -186,7 +186,7 @@
 //{
 //	PCRE_regexp_t *preg = (PCRE_regexp_t*)reg;
 //	pcre_free(preg->re);
-//	KFREE(preg, sizeof(PCRE_regexp_t));
+//	KFree(preg, sizeof(PCRE_regexp_t));
 //}
 //
 //static int pcre_nmatchsize(KonohaContext *kctx, kregexp_t *reg)
@@ -298,7 +298,7 @@
 //
 //static void kregexpshare_free(KonohaContext *kctx, struct KonohaModule *baseh)
 //{
-//	KFREE(baseh, sizeof(kregexpshare_t));
+//	KFree(baseh, sizeof(kregexpshare_t));
 //}
 //
 ///* ------------------------------------------------------------------------ */
@@ -736,7 +736,7 @@
 //
 //static kbool_t regexp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 //{
-//	kregexpshare_t *base = (kregexpshare_t*)KCALLOC(sizeof(kregexpshare_t), 1);
+//	kregexpshare_t *base = (kregexpshare_t*)KCalloc_UNTRACE(sizeof(kregexpshare_t), 1);
 //	base->h.name     = "regexp";
 //	base->h.setup    = kregexpshare_setup;
 //	base->h.reftrace = kregexpshare_reftrace;

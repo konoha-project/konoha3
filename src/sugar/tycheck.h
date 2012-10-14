@@ -265,7 +265,7 @@ static GammaAllocaData *kGamma_pop(KonohaContext *kctx, kGamma *gma, GammaAlloca
 	assert(checksum == newone);
 	gma->genv = oldone;
 	if(newone->localScope.allocsize > 0) {
-		KFREE(newone->localScope.varItems, newone->localScope.allocsize);
+		KFree(newone->localScope.varItems, newone->localScope.allocsize);
 	}
 	return newone;
 }

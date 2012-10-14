@@ -62,7 +62,7 @@ static void ctxlogpool_free(KonohaContext *kctx, struct KonohaModuleContext *bas
 {
 	ctxlogpool_t *base = (ctxlogpool_t*)baseh;
 	logpool_close(base->logpool);
-	KFREE(base, sizeof(ctxlogpool_t));
+	KFree(base, sizeof(ctxlogpool_t));
 }
 
 static void kmodlogpool_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
