@@ -959,10 +959,10 @@ static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD String_splitWithSeparator(KonohaContext *kctx, KonohaStack *sfp)
 {
+	INIT_GCSTACK();
 	kString *s0 = sfp[0].asString;
 	kString *separator = sfp[1].asString;
-	kArray *a = (kArray*)KLIB new_kObject(kctx, OnStack, CT_StringArray0, 0);
-	KPreSetReturn(a);
+	kArray *resultArray = (kArray*)KLIB new_kObject(kctx, _GcStack, CT_StringArray0, 0);
 
 	const char *start = S_text(s0);
 	const char *end = start + S_size(s0);
@@ -970,10 +970,10 @@ static KMETHOD String_splitWithSeparator(KonohaContext *kctx, KonohaStack *sfp)
 		size_t i;
 		for(i = 0; i < S_size(s0); i++) {
 			if(S_isASCII(s0)) {
-				KLIB new_kString(kctx, a, S_text(s0) + i, 1, StringPolicy_ASCII);
+				KLIB new_kString(kctx, resultArray, S_text(s0) + i, 1, StringPolicy_ASCII);
 			}
 			else {
-				new_StringMultiGet_UNSURE(kctx, a, s0, i);
+				new_StringMultiGet_UNSURE(kctx, resultArray, s0, i);
 			}
 		}
 	}
@@ -982,13 +982,13 @@ static KMETHOD String_splitWithSeparator(KonohaContext *kctx, KonohaStack *sfp)
 			const char *res = strstr(start, S_text(separator));
 			if(res == NULL) break;
 			if(res - start > 0) {
-				KLIB new_kString(kctx, a, start, res - start, StringPolicy_isASCII(s0));
+				KLIB new_kString(kctx, resultArray, start, res - start, StringPolicy_isASCII(s0));
 			}
 			start = res + S_size(separator);
 		}
-		KLIB new_kString(kctx, a, start, strlen(start), StringPolicy_isASCII(s0));
+		KLIB new_kString(kctx, resultArray, start, strlen(start), StringPolicy_isASCII(s0));
 	}
-	KReturnPreSetValue(a);
+	KReturnWith(resultArray, RESET_GCSTACK());
 }
 
 /* ------------------------------------------------------------------------ */
@@ -996,6 +996,7 @@ static KMETHOD String_splitWithSeparator(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD String_splitwithSeparatorLimit(KonohaContext *kctx, KonohaStack *sfp)
 {
+	INIT_GCSTACK();
 	kString *thisString = sfp[0].asString;
 	kString *separator = sfp[1].asString;
 	kint_t limit = sfp[2].intValue;
@@ -1004,8 +1005,7 @@ static KMETHOD String_splitwithSeparatorLimit(KonohaContext *kctx, KonohaStack *
 		/* ignore limit */
 		limit = length;
 	}
-	kArray *splittedStringArray = (kArray*)KLIB new_kObject(kctx, OnStack, CT_StringArray0, 0);
-	KPreSetReturn(splittedStringArray);
+	kArray *resultArray = (kArray*)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	const char *start = S_text(thisString);
 	const char *end = start + S_size(thisString);
 	if(S_size(separator) == 0) {
@@ -1015,10 +1015,10 @@ static KMETHOD String_splitwithSeparatorLimit(KonohaContext *kctx, KonohaStack *
 		}
 		for(i = 0; i < limit; i++) {
 			if(S_isASCII(thisString)) {
-				KLIB new_kString(kctx, splittedStringArray, S_text(thisString) + i, 1, StringPolicy_ASCII);
+				KLIB new_kString(kctx, resultArray, S_text(thisString) + i, 1, StringPolicy_ASCII);
 			}
 			else {
-				new_StringMultiGet_UNSURE(kctx, splittedStringArray, thisString, i);
+				new_StringMultiGet_UNSURE(kctx, resultArray, thisString, i);
 			}
 		}
 	}
@@ -1028,16 +1028,16 @@ static KMETHOD String_splitwithSeparatorLimit(KonohaContext *kctx, KonohaStack *
 			const char *res = strstr(start, S_text(separator));
 			if(res == NULL) break;
 			if(res - start > 0) {
-				KLIB new_kString(kctx, splittedStringArray, start, res - start, StringPolicy_isASCII(thisString));
+				KLIB new_kString(kctx, resultArray, start, res - start, StringPolicy_isASCII(thisString));
 				length++;
 			}
 			start = res + S_size(separator);
 		}
 		if(length < limit - 1) {
-			KLIB new_kString(kctx, splittedStringArray, start, strlen(start), StringPolicy_isASCII(thisString));
+			KLIB new_kString(kctx, resultArray, start, strlen(start), StringPolicy_isASCII(thisString));
 		}
 	}
-	KReturnPreSetValue(splittedStringArray);
+	KReturnWith(resultArray, RESET_GCSTACK());
 }
 
 /* ------------------------------------------------------------------------ */

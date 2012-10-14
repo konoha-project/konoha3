@@ -601,7 +601,7 @@ static KMETHOD System_socketpair(KonohaContext *kctx, KonohaStack* sfp)
 
 static KMETHOD SockAddr_new (KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_(KLIB new_kObject(kctx, OnStack, KReturnType(sfp), 0));
+	RETURN_(KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0));
 }
 
 // --------------------------------------------------------------------------

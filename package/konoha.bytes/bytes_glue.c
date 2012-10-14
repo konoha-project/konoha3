@@ -218,7 +218,7 @@ static KMETHOD Bytes_toString(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Bytes_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	size_t size = (size_t)sfp[1].intValue;
-	RETURN_(KLIB new_kObject(kctx, OnStack, KReturnType(sfp), size));
+	RETURN_(KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), size));
 }
 
 static KMETHOD Bytes_getSize(KonohaContext *kctx, KonohaStack *sfp)
@@ -280,7 +280,7 @@ static KMETHOD String_toBytes(KonohaContext *kctx, KonohaStack *sfp)
 	kString* thisString = sfp[0].asString;
 	size_t size = S_size(thisString);
 	if(PLATAPI isSystemCharsetUTF8(kctx)) {
-		RETURN_(new_kBytes(kctx, OnStack, KReturnType(sfp), S_text(thisString), size));
+		RETURN_(new_kBytes(kctx, OnStack, KGetReturnType(sfp), S_text(thisString), size));
 	}
 	else {
 		KMakeTrace(trace, sfp);
@@ -288,7 +288,7 @@ static KMETHOD String_toBytes(KonohaContext *kctx, KonohaStack *sfp)
 		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 		Kwb_convertCharset(kctx, &wb, PLATAPI systemCharset, "UTF-8", S_text(thisString), size, trace);
 		KReturnWith(
-			new_kBytes(kctx, OnStack, KReturnType(sfp), KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb)),
+			new_kBytes(kctx, OnStack, KGetReturnType(sfp), KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb)),
 			KLIB Kwb_free(&wb)
 		);
 	}

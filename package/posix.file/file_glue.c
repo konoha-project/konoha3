@@ -96,7 +96,7 @@ static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp)
 				LogText("errstr", strerror(errno))
 		);
 	}
-	struct kFILEVar *file = (struct kFILEVar*)KLIB new_kObject(kctx, OnStack, KReturnType(sfp), (uintptr_t)fp);
+	struct kFILEVar *file = (struct kFILEVar*)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)fp);
 	file->realpath = realpath(S_text(s), NULL);
 	RETURN_(file);
 }

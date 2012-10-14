@@ -73,7 +73,7 @@ static KMETHOD kJSON_new(KonohaContext *kctx, KonohaStack *sfp)
 
 static kJSON *NewJsonObject(KonohaContext *kctx, KonohaStack *sfp, JSON val)
 {
-	kJSON *json = (kJSON*)KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), 0);
+	kJSON *json = (kJSON*)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 	json->json = val;
 	return json;
 }

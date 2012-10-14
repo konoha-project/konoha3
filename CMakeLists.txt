@@ -76,7 +76,7 @@ set(PACKAGES
 	konoha.iterator
 	konoha.math
 	konoha.map
-	konoha.mpi
+#	konoha.mpi
 	konoha.namespace
 	konoha.new
 	konoha.null

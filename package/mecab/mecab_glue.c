@@ -129,7 +129,7 @@ static KMETHOD Tagger_parseToNode(KonohaContext *kctx, KonohaStack *sfp)
 	struct _kTagger *mecab = (struct _kTagger*)sfp[0].asObject;
 	const char *input = S_text(sfp[1].asString);
 	const mecab_node_t* node = mecab_sparse_tonode(mecab->mecab, input);
-	struct _kMecabNode* ret = (struct _kMecabNode*)KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), 0);
+	struct _kMecabNode* ret = (struct _kMecabNode*)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 	ret->node = node;
 	RETURN_(ret);
 }
@@ -159,7 +159,7 @@ static KMETHOD MecabNode_next(KonohaContext *kctx, KonohaStack *sfp)
 	mecab_node_t* next = node->node->next;
 	struct _kMecabNode* ret;
 	if(next != NULL) {
-		ret = (struct _kMecabNode*)KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), 0);
+		ret = (struct _kMecabNode*)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 		ret->node = next;
 		RETURN_(ret);
 	}
@@ -175,7 +175,7 @@ static KMETHOD MecabNode_prev(KonohaContext *kctx, KonohaStack *sfp)
 	mecab_node_t* prev = node->node->prev;
 	struct _kMecabNode* ret;
 	if(node != NULL) {
-		ret = (struct _kMecabNode*)KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), 0);
+		ret = (struct _kMecabNode*)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 		ret->node = prev;
 		RETURN_(ret);
 	}
@@ -191,7 +191,7 @@ static KMETHOD MecabNode_enext(KonohaContext *kctx, KonohaStack *sfp)
 	mecab_node_t* enext = node->node->enext;
 	struct _kMecabNode* ret;
 	if(node != NULL) {
-		ret = (struct _kMecabNode*)KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), 0);
+		ret = (struct _kMecabNode*)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 		ret->node = enext;
 		RETURN_(ret);
 	}
@@ -207,7 +207,7 @@ static KMETHOD MecabNode_bnext(KonohaContext *kctx, KonohaStack *sfp)
 	mecab_node_t* bnext = node->node->bnext;
 	struct _kMecabNode* ret = NULL;
 	if(node != NULL) {
-		ret = (struct _kMecabNode*)KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), 0);
+		ret = (struct _kMecabNode*)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 		ret->node = bnext;
 	}
 	RETURN_(ret);

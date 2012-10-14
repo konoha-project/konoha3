@@ -631,10 +631,10 @@ static KMETHOD File_remove(KonohaContext *kctx, KonohaStack *sfp)
 //## method @public Array[String] File.list()
 static KMETHOD File_list(KonohaContext *kctx, KonohaStack *sfp)
 {
+	INIT_GCSTACK();
 	kFile *f = (kFile*)sfp[0].asObject;
 	const char *dirname = S_text(f->path);
-	kArray *a = new_(Array, 0, OnStack);
-	KPreSetReturn(a);
+	kArray *resultArray = (kArray*)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 #ifdef _MSC_VER
 	HANDLE findhandle;
 	WIN32_FIND_DATA fileinfo;
@@ -654,13 +654,13 @@ static KMETHOD File_list(KonohaContext *kctx, KonohaStack *sfp)
 		while((e = readdir(dir)) != NULL) {
 			const char *fname = e->d_name;
 			if(strcmp(fname, ".") != 0 && strcmp(fname, "..") != 0) {
-				KLIB new_kString(kctx, a, fname, strlen(fname), 0);
+				KLIB new_kString(kctx, resultArray, fname, strlen(fname), 0);
 			}
 		}
 		closedir(dir);
 	}
 #endif
-	KReturnPreSetValue(a);
+	KReturnWith(resultArray, RESET_GCSTACK());
 }
 
 // --------------------------------------------------------------------------

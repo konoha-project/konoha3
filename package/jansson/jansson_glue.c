@@ -86,7 +86,7 @@ static void Jansson_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuff
 //## Json Json.new();
 static KMETHOD Json_new (KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kJson* json = (struct _kJson*)KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), 0);
+	struct _kJson* json = (struct _kJson*)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 	json->obj = json_object();
 	json_incref(json->obj);
 	RETURN_(json);
@@ -99,7 +99,7 @@ static KMETHOD Json_parse(KonohaContext *kctx, KonohaStack *sfp)
 	json_t* obj;
 	json_error_t err;
 	obj = json_loads(buf, 0, &err);
-	struct _kJson *ret = (struct _kJson*)KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), 0);
+	struct _kJson *ret = (struct _kJson*)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 	CHECK_JSON(obj, RETURN_((kJson*)KLIB Knull(kctx, O_ct(ret))));
 	obj = json_incref(obj);
 	ret->obj = obj;
@@ -115,7 +115,7 @@ static KMETHOD Json_getJson(KonohaContext *kctx, KonohaStack *sfp)
 	json_t* ret = json_object_get(obj, key);
 	CHECK_JSON(ret, RETURN_((kJson*)KLIB Knull(kctx, O_ct(sfp[0].asObject))));
 	ret = json_incref(ret);
-	struct _kJson *json = (struct _kJson*)KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), 0);
+	struct _kJson *json = (struct _kJson*)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 	json->obj = ret;
 	RETURN_(json);
 }
@@ -387,7 +387,7 @@ static KMETHOD JsonArray_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
 	json_t *ja = (json_t*)a->ObjectItems;
-	struct _kJson *json = (struct _kJson*)KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), 0);
+	struct _kJson *json = (struct _kJson*)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 	json->obj = json_array_get(ja, sfp[1].intValue);
 	RETURN_(json);
 }

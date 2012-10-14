@@ -456,8 +456,8 @@ struct PlatformApiVar {
 #define LogScriptLine(sfp)   LogText("ScriptName", FileId_t(sfp[K_RTNIDX].callerFileLine)), LogUint("ScriptLine", (kushort_t)sfp[K_RTNIDX].callerFileLine)
 
 #define KTrace(POLICY, LOGKEY, ...)    do {\
-		static logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|POLICY)};\
-		if(TFLAG_is(int, _logconf.policy, isRecord)) {\
+		static logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|(POLICY))};\
+		if(TFLAG_is(logpolicy_t, _logconf.policy, isRecord)) {\
 			PLATAPI traceDataLog(PLATAPI logger, LOGKEY, &_logconf, ## __VA_ARGS__, LOG_END);\
 		}\
 	} while (0)
@@ -474,7 +474,7 @@ struct PlatformApiVar {
 #define KTraceApiElapsedTimer(POLICY, TPOLICY, APINAME, TIMER, ...)    do {\
 		static logconf_t _logconf = {isRecord|LOGPOOL_INIT|POLICY};\
 		unsigned long long elapsed_time = PLATAPI getTimeMilliSecond() - TIMER;\
-		if((elapsed_time) >= (TPOLICY) && TFLAG_is(int, _logconf.policy, isRecord)) {\
+		if((elapsed_time) >= (TPOLICY) && TFLAG_is(logpolicy_t, _logconf.policy, isRecord)) {\
 			PLATAPI traceDataLog(PLATAPI logger, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), LogUint("ElapsedTime", elapsed_time), ## __VA_ARGS__, LOG_END);\
 		}\
 	} while (0)
@@ -1658,18 +1658,8 @@ typedef struct {
 
 // method macro
 
-#define KReturnType(sfp)  O_ct(sfp[K_RTNIDX].asObject)
-
-#define KPreSetReturn(VAL) \
-	int _UsingPreSetReturnValue = true;\
-	KUnsafeFieldSet(sfp[K_RTNIDX].asObject, ((kObject*)VAL))
-
-#define KReturnPreSetValue(VAL) do {\
-	(void)_UsingPreSetReturnValue;\
-	KNH_SAFEPOINT(kctx, sfp);\
-	return; \
-} while (0)
-
+#define KGetReturnObject(sfp)  (sfp[K_RTNIDX].asObject)
+#define KGetReturnType(sfp)    O_ct(sfp[K_RTNIDX].asObject)
 
 #define KReturnWith(VAL, CLEANUP) do {\
 	KUnsafeFieldSet(sfp[K_RTNIDX].asObject, ((kObject*)VAL));\
@@ -1677,14 +1667,6 @@ typedef struct {
 	KNH_SAFEPOINT(kctx, sfp);\
 	return; \
 } while (0)
-
-#define KReturnWithRESET_GCSTACK(VAL) do {\
-	KUnsafeFieldSet(sfp[K_RTNIDX].asObject, ((kObject*)VAL));\
-	RESET_GCSTACK();\
-	KNH_SAFEPOINT(kctx, sfp);\
-	return; \
-} while (0)
-
 
 #define RETURN_DefaultObjectValue() do {\
 	return; \

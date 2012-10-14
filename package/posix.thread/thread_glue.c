@@ -130,7 +130,7 @@ static KMETHOD Thread_create(KonohaContext *kctx, KonohaStack *sfp)
 	INIT_GCSTACK();
 	kFunc *f = sfp[1].asFunc;
 	KLIB kNameSpace_compileAllDefinedMethods(kctx);
-	kThread *thread = (kThread *)KLIB new_kObject(kctx, _GcStack, KReturnType(sfp), 0);
+	kThread *thread = (kThread *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	thread->rootCtx = kctx; //TODO getRootContext
 	thread->kctx = KLIB KonohaContext_init(kctx, kctx->platApi);
 	KFieldSet(thread, thread->func, f);
@@ -176,7 +176,7 @@ static KMETHOD Thread_detach(KonohaContext *kctx, KonohaStack *sfp)
 //## @Native @Static Thread Thread.self();
 static KMETHOD Thread_self(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kThread *t = (kThread *)KLIB new_kObject(kctx, OnStack, KReturnType(sfp), 0);
+	kThread *t = (kThread *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
 	t->kctx = kctx;//FIXME
 	t->thread = pthread_self();
 	RETURN_(t);

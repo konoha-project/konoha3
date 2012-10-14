@@ -45,11 +45,7 @@ typedef struct {
 
 static inline kObject *new_ReturnCppObject(KonohaContext *kctx,KonohaStack *sfp, void *ptr) {
 	kObject *defobj = sfp[(-(K_CALLDELTA))].asObject;
-<<<<<<< HEAD
-	kObject *ret = KLIB new_kObjectDontUseThis(kctx, O_ct(defobj), (uintptr_t)ptr, GcUnsafe);
-=======
 	kObject *ret = KLIB new_kObjectDontUseThis(kctx, O_ct(defobj), (uintptr_t)ptr, OnStack);
->>>>>>> c3954c25c7c0c6bc46e64e1ac2e46664a33975d5
 	((kRawPtr *)ret)->rawptr = ptr;
 	return ret;
 }
@@ -71,11 +67,7 @@ static void MPIData_extend(KonohaContext *kctx, kMPIData *p, int size) {
 	if(p->size < newSize) {
 		switch(p->typeId) {
 		case KMPI_BYTES: {
-<<<<<<< HEAD
-			kBytes *b = (kBytes *)KLIB new_kObjectDontUseThis(kctx, CT_Bytes, (uintptr_t)newSize, GcUnsafe);
-=======
 			kBytes *b = (kBytes *)KLIB new_kObjectDontUseThis(kctx, CT_Bytes, (uintptr_t)newSize, OnStack);
->>>>>>> c3954c25c7c0c6bc46e64e1ac2e46664a33975d5
 			memcpy(b->buf, p->b->buf, p->size);
 			p->b = b;
 			p->size = newSize;
@@ -384,7 +376,6 @@ static KMETHOD MPIRequest_cancel(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNb_(ret);
 }
 
-<<<<<<< HEAD
 /* ------------------------------------------------------------------------ */
 //## MPIData MPIData.fromBytes(Bytes b)
 static KMETHOD MPIData_fromBytes(KonohaContext *kctx, KonohaStack *sfp)
@@ -398,21 +389,6 @@ static KMETHOD MPIData_fromBytes(KonohaContext *kctx, KonohaStack *sfp)
 	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(d)));
 }
 
-=======
-///* ------------------------------------------------------------------------ */
-////## MPIData MPIData.fromBytes(Bytes b)
-//static KMETHOD MPIData_fromBytes(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kMPIData *d = newMPIData(kctx);
-//	d->type = MPI_CHAR;
-//	d->b = sfp[1].ba;
-//	d->size = sfp[1].ba->bytesize;
-//	d->offset = 0;
-//	d->typeId = KMPI_BYTES;
-//	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(d)));
-//}
-//
->>>>>>> c3954c25c7c0c6bc46e64e1ac2e46664a33975d5
 ////## MPIData MPIData.fromIntArray(Array[int] a)
 //static KMETHOD MPIData_fromIntArray(KonohaContext *kctx, KonohaStack *sfp)
 //{

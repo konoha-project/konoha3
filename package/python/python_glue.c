@@ -78,7 +78,7 @@ static void PyObject_free(KonohaContext *kctx, kObject *o)
 static void RETURN_PyObject_(KonohaContext *kctx, KonohaStack *sfp, PyObject *pyo)
 {
 	if(pyo != NULL) {
-		RETURN_(KLIB new_kObject(kctx, OnStack, KReturnType(sfp), (uintptr_t)pyo));
+		RETURN_(KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)pyo));
 	}
 	else {
 		// ERROR if python object is NULL

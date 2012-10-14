@@ -476,7 +476,7 @@ static void kArray_executeRegExp(KonohaContext *kctx, kArray *resultArray, kRegE
 static KMETHOD String_match(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
-	kArray *resultArray = (kArray*)KLIB new_kObject(kctx, _GcStack, KReturnType(sfp), 0);
+	kArray *resultArray = (kArray*)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	kArray_executeRegExp(kctx, resultArray, sfp[1].asRegExp, sfp[0].asString);
 	KReturnWith(resultArray, RESET_GCSTACK());
 }
@@ -485,7 +485,7 @@ static KMETHOD String_match(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD RegExp_exec(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
-	kArray *resultArray = (kArray*)KLIB new_kObject(kctx, _GcStack, KReturnType(sfp), 0);
+	kArray *resultArray = (kArray*)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	kArray_executeRegExp(kctx, resultArray, sfp[0].asRegExp, sfp[1].asString);
 	KReturnWith(resultArray, RESET_GCSTACK());
 }
@@ -592,7 +592,7 @@ static void kArray_split(KonohaContext *kctx, kArray *resultArray, kString *str,
 static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
-	kArray *resultArray = (kArray*)KLIB new_kObject(kctx, _GcStack, KReturnType(sfp), 0);
+	kArray *resultArray = (kArray*)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	kArray_split(kctx, resultArray, sfp[0].asString, sfp[1].asRegExp, S_size(sfp[0].asString));
 	KReturnWith(resultArray, RESET_GCSTACK());
 }
@@ -602,7 +602,7 @@ static KMETHOD String_splitWithLimit(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
 	int limit = sfp[2].intValue < 0 ? S_size(sfp[0].asString) : sfp[2].intValue;
-	kArray *resultArray = (kArray*)KLIB new_kObject(kctx, _GcStack, KReturnType(sfp), 0);
+	kArray *resultArray = (kArray*)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	kArray_split(kctx, resultArray, sfp[0].asString, sfp[1].asRegExp, limit);
 	KReturnWith(resultArray, RESET_GCSTACK());
 }

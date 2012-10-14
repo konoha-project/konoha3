@@ -467,11 +467,11 @@ static KMETHOD System_stat(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = stat(path, &buf);
 	struct kStatVar *stat = NULL;
 	if(ret != -1) {
-		stat = (struct kStatVar *)KLIB new_kObject(kctx, OnStack, KReturnType(sfp), (uintptr_t)&buf);
+		stat = (struct kStatVar *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)&buf);
 	}
 	else {
 		// TODO: throw
-		RETURN_(KLIB Knull(kctx, KReturnType(sfp)));
+		RETURN_(KLIB Knull(kctx, KGetReturnType(sfp)));
 	}
 	RETURN_(stat);
 }
@@ -484,7 +484,7 @@ static KMETHOD System_lstat(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = lstat(path, &buf);
 	struct kStatVar *stat = NULL;
 	if(ret != -1) {
-		stat = (struct kStatVar *)KLIB new_kObject(kctx, OnStack, KReturnType(sfp), (uintptr_t)&buf);
+		stat = (struct kStatVar *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)&buf);
 	}
 	else {
 		// TODO: throw
@@ -500,7 +500,7 @@ static KMETHOD System_fstat(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = fstat(fd, &buf);
 	struct kStatVar *stat = NULL;
 	if(ret != -1) {
-		stat = (struct kStatVar *)KLIB new_kObject(kctx, OnStack, KReturnType(sfp), (uintptr_t)&buf);
+		stat = (struct kStatVar *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)&buf);
 	}
 	else {
 		// TODO: throw
@@ -639,7 +639,7 @@ static KMETHOD System_opendir(KonohaContext *kctx, KonohaStack *sfp)
 	DIR *d = opendir(name);
 	struct kDirVar *dir;
 	if(d != NULL) {
-		dir = (struct kDirVar *)KLIB new_kObject(kctx, OnStack, KReturnType(sfp), (uintptr_t)d);
+		dir = (struct kDirVar *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)d);
 	}
 	else {
 		// TODO: throw
@@ -673,24 +673,18 @@ static KMETHOD DIR_getfd(KonohaContext *kctx, KonohaStack *sfp)
 //## Array[Dirent] DIR.read()
 static KMETHOD DIR_read(KonohaContext *kctx, KonohaStack *sfp)
 {
+	INIT_GCSTACK();
 	kDIR *dir = (kDIR *)sfp[0].asObject;
 	DIR *dirp = dir->dirp;
-	struct dirent entry;
-	struct dirent *result;
+	struct dirent entry, *result;
+	KonohaClass *CT_Dirent = CT_(O_p0(KGetReturnObject(sfp)));
+	kArray *resultArray = (kArray*)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	int ret;
-	ktype_t TY_Dirent = O_p0(sfp[K_RTNIDX].asObject);
-	KonohaClass *CT_Dirent = CT_(TY_Dirent);
-	kArray *a = (kArray*)KLIB new_kObject(kctx, OnStack, CT_p0(kctx, CT_Array, TY_Dirent), 0);
-	KPreSetReturn(a);
-
 	while((ret = readdir_r(dirp, &entry, &result)) == 0) {
 		if(result == NULL) break;
-		KLIB new_kObject(kctx, a, CT_Dirent, (uintptr_t)result);
+		KLIB new_kObject(kctx, resultArray, CT_Dirent, (uintptr_t)result);
 	}
-	if(ret != 0) {
-		// TODO: throw
-	}
-	KReturnPreSetValue(a);
+	KReturnWith(resultArray, RESET_GCSTACK());
 }
 
 //## void DIR.rewind()

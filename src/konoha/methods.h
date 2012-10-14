@@ -159,7 +159,7 @@ static KMETHOD Boolean_box(KonohaContext *kctx, KonohaStack *sfp)
 //## @Const method Object Int.box();
 static KMETHOD Int_box(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KonohaClass *c = KReturnType(sfp);
+	KonohaClass *c = KGetReturnType(sfp);
 	DBG_P("reqt=%s", CT_t(c));
 	DBG_ASSERT(CT_isUnbox(c));
 	sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;

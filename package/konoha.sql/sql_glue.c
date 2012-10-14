@@ -211,7 +211,7 @@ static KMETHOD Connection_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	//DBType type = (DBType)sfp[1].intValue;
 	const char *dbname = S_text(sfp[1].asString);
-	struct _kConnection* con = (struct _kConnection*)KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), 0);
+	struct _kConnection* con = (struct _kConnection*)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 	//switch(type) {
 	//	case USING_MYSQL:
 	con->dspi = &DB__mysql;
@@ -231,7 +231,7 @@ static KMETHOD Connection_query(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kConnection *c = (struct _kConnection*)sfp[0].asObject;
 	const char *query = S_text(sfp[1].asString);
-	struct _kResultSet* rs = (struct _kResultSet*)KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), 0);
+	struct _kResultSet* rs = (struct _kResultSet*)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 	kqcur_t *qcur = c->dspi->qexec(kctx, c->db, query, rs);
 	if(qcur != NULL) {
 		rs->qcur = qcur;
