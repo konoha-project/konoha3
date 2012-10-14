@@ -224,20 +224,20 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 	case CURLOPT_FILE:
 	case CURLOPT_STDERR:
 	case CURLOPT_WRITEHEADER:
-		if(IS_Bytes(sfp[2].asObject)){
-			struct kCurlVar *c = (struct kCurlVar *)sfp[0].asObject;
-			KFieldSet(c, c->bytes, (struct kBytesVar *)sfp[2].asBytes);
-			c->lctx = kctx;
-			curl_easy_setopt(curl, curlopt, (void *)c);
-			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_Bytes);
-		}
-		else {
-			//if(knh_Context_isStrict(ctx)) {
-			//KNH_THROW__T(ctx, "Type!!: data must be OutputStream");
-			//}
-			// TODO ktrace
-			//KNH_NTRACE2(ctx, "Curl.setOpt", K_FAILED, KNH_LDATA(LOG_msg("TypeError")));
-		}
+//		if(IS_Bytes(sfp[2].asObject)){
+//			struct kCurlVar *c = (struct kCurlVar *)sfp[0].asObject;
+//			KFieldSet(c, c->bytes, (struct kBytesVar *)sfp[2].asBytes);
+//			c->lctx = kctx;
+//			curl_easy_setopt(curl, curlopt, (void *)c);
+//			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_Bytes);
+//		}
+//		else {
+//			//if(knh_Context_isStrict(ctx)) {
+//			//KNH_THROW__T(ctx, "Type!!: data must be OutputStream");
+//			//}
+//			// TODO ktrace
+//			//KNH_NTRACE2(ctx, "Curl.setOpt", K_FAILED, KNH_LDATA(LOG_msg("TypeError")));
+//		}
 		break;
 	//case CURLOPT_WRITEFUNCTION: {
 	//	if(IS_OutputStream(sfp[2].w)) {
