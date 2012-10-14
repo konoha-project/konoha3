@@ -89,33 +89,6 @@ static void kBytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffe
 #define CONV_BUFSIZE 4096 // 4K
 #define MAX_STORE_BUFSIZE (CONV_BUFSIZE * 1024)// 4M
 
-static kbool_t Kwb_iconv(KonohaContext *kctx, KGrowingBuffer* wb, kiconv_t conv, const char *sourceBuf, size_t sourceSize)
-{
-	char convBuf[K_PAGESIZE];
-	char *presentPtrFrom = (char*)sourceBuf;
-	char *presentPtrTo = convBuf;
-	char ** inbuf = &presentPtrFrom;
-	char ** outbuf = &presentPtrTo;
-	size_t inBytesLeft = sourceSize, outBytesLeft = K_PAGESIZE;
-
-	while (inBytesLeft > 0) {
-		memset(convBuf, '\0', K_PAGESIZE);
-		size_t iconv_ret = PLATAPI iconv_i((uintptr_t)conv, inbuf, &inBytesLeft, outbuf, &outBytesLeft);
-		size_t processedSize = K_PAGESIZE - outBytesLeft;
-		KLIB Kwb_write(kctx, wb, convBuf, processedSize);
-		if(iconv_ret == -1) {
-			if(errno == E2BIG) {   // input is too big.
-				// reset convbuf
-				presentPtrTo = convBuf;
-				outBytesLeft = K_PAGESIZE;
-				continue;
-			}
-			return false;
-		}
-	} /* end of converting loop */
-	return true;
-}
-
 static kBytes* Convert_newBytes(KonohaContext *kctx, kArray *gcstack, kBytes *sourceBytes, const char *fromCharset, const char *toCharset)
 {
 	kiconv_t conv;
