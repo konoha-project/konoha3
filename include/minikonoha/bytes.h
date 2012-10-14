@@ -30,24 +30,17 @@
 #endif
 
 #include <string.h>
-#ifdef HAVE_ICONV_H
-#include <iconv.h>
-#endif /* HAVE_ICONV_H */
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /* ------------------------------------------------------------------------ */
 /* [class defs] */
 
-#define ctxiconv         ((ctxiconv_t*)kctx->mod[MOD_iconv])
-#define kmodiconv        ((kmodiconv_t*)kctx->modshare[MOD_iconv])
-#define IS_defineBytes() (kctx->modshare[MOD_iconv] != NULL)
-#define CT_Bytes         kmodiconv->cBytes
-#define TY_Bytes         kmodiconv->cBytes->typeId
-
-#define IS_Bytes(O)      ((O)->h.ct == CT_Bytes)
+//#define ctxiconv         ((ctxiconv_t*)kctx->mod[MOD_iconv])
+//#define kmodiconv        ((kmodiconv_t*)kctx->modshare[MOD_iconv])
+//#define IS_defineBytes() (kctx->modshare[MOD_iconv] != NULL)
+//#define CT_Bytes         kmodiconv->cBytes
+//#define TY_Bytes         kmodiconv->cBytes->typeId
+//
+//#define IS_Bytes(O)      ((O)->h.ct == CT_Bytes)
 
 #ifdef HAVE_ICONV_H
 typedef iconv_t kiconv_t;
@@ -67,8 +60,5 @@ typedef struct {
 	KonohaModuleContext h;
 } ctxiconv_t;
 
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
 
 #endif /* MODICONV_H_ */

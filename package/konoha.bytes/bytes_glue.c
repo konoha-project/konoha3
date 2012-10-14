@@ -35,17 +35,17 @@ extern "C"{
 /* ------------------------------------------------------------------------ */
 
 // Bytes_init
-static void Bytes_init(KonohaContext *kctx, kObject *o, void *conf)
+
+static void kBytes_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	if((size_t)conf <= 0) return;
 	struct kBytesVar *ba = (struct kBytesVar*)o;
+	DBG_ASSERT((size_t)conf >= 0);
+	ba->bytesize = (size_t)conf;
 	ba->byteptr = NULL;
-	ba->byteptr = (const char *)KCALLOC((size_t)conf, 1);
-	if(ba->byteptr != NULL)	ba->bytesize = (size_t)conf;
-	else ba->bytesize = 0;
+	ba->byteptr = (ba->bytesize > 0) ? (const char *)KCALLOC((size_t)conf, 1) : NULL;
 }
 
-static void Bytes_free(KonohaContext *kctx, kObject *o)
+static void kBytes_free(KonohaContext *kctx, kObject *o)
 {
 	struct kBytesVar *ba = (struct kBytesVar*)o;
 	if(ba->byteptr != NULL) {
@@ -55,9 +55,9 @@ static void Bytes_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void Bytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+static void kBytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
-	kBytes *ba = (kBytes*)v[pos].asObject;
+	kBytes *ba = v[pos].asBytes;
 	size_t i, j, n;
 	for(j = 0; j * 16 < ba->bytesize; j++) {
 		KLIB Kwb_printf(kctx, wb, "%08x", (int)(j*16));
@@ -84,51 +84,66 @@ static void Bytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer
 	}
 }
 
-static void kmodiconv_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
-{
-}
-
-static void kmodiconv_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
-{
-}
-
-static void kmodiconv_free(KonohaContext *kctx, struct KonohaModule *baseh)
-{
-	KFREE(baseh, sizeof(kmodiconv_t));
-}
-
 /* ------------------------------------------------------------------------ */
 
 #define CONV_BUFSIZE 4096 // 4K
 #define MAX_STORE_BUFSIZE (CONV_BUFSIZE * 1024)// 4M
 
-static kBytes* Convert_newBytes(KonohaContext *kctx, kArray *gcstack, kBytes *fromBa, const char *fromCoding, const char *toCoding)
+static kbool_t Kwb_iconv(KonohaContext *kctx, KGrowingBuffer* wb, kiconv_t conv, const char *sourceBuf, size_t sourceSize)
+{
+	char convBuf[K_PAGESIZE];
+	char *presentPtrFrom = (char*)sourceBuf;
+	char *presentPtrTo = convBuf;
+	char ** inbuf = &presentPtrFrom;
+	char ** outbuf = &presentPtrTo;
+	size_t inBytesLeft = sourceSize, outBytesLeft = K_PAGESIZE;
+
+	while (inBytesLeft > 0) {
+		memset(convBuf, '\0', K_PAGESIZE);
+		size_t iconv_ret = PLATAPI iconv_i((uintptr_t)conv, inbuf, &inBytesLeft, outbuf, &outBytesLeft);
+		size_t processedSize = K_PAGESIZE - outBytesLeft;
+		KLIB Kwb_write(kctx, wb, convBuf, processedSize);
+		if(iconv_ret == -1) {
+			if(errno == E2BIG) {   // input is too big.
+				// reset convbuf
+				presentPtrTo = convBuf;
+				outBytesLeft = K_PAGESIZE;
+				continue;
+			}
+			return false;
+		}
+	} /* end of converting loop */
+	return true;
+}
+
+static kBytes* Convert_newBytes(KonohaContext *kctx, kArray *gcstack, kBytes *sourceBytes, const char *fromCharset, const char *toCharset)
 {
 	kiconv_t conv;
 	KGrowingBuffer wb;
 
 	char convBuf[CONV_BUFSIZE] = {0};
-	char *presentPtrFrom = fromBa->buf;
+	char *presentPtrFrom = sourceBytes->buf;
 	char ** inbuf = &presentPtrFrom;
 	char *presentPtrTo = convBuf;
 	char ** outbuf = &presentPtrTo;
 	size_t inBytesLeft, outBytesLeft;
-	inBytesLeft = fromBa->bytesize;
+	inBytesLeft = sourceBytes->bytesize;
 	outBytesLeft = CONV_BUFSIZE;
-	DBG_P("from='%s' inBytesLeft=%d, to='%s' outBytesLeft=%d", fromCoding, inBytesLeft, toCoding, outBytesLeft);
+	//DBG_P("from='%s' inBytesLeft=%d, to='%s' outBytesLeft=%d", fromCharset, inBytesLeft, toCharset, outBytesLeft);
 
-	if(strncmp(fromCoding, toCoding, strlen(fromCoding)) == 0) {
+	if(strncmp(fromCharset, toCharset, strlen(fromCharset)) == 0) {
 		// no need to convert.
-		return fromBa;
+		return sourceBytes;
 	}
-	conv = (kiconv_t)PLATAPI iconv_open_i(toCoding, fromCoding);
+	conv = (kiconv_t)PLATAPI iconv_open_i(toCharset, fromCharset);
 	if(conv == (kiconv_t)(-1)) {
 		OLDTRACE_SWITCH_TO_KTrace(_UserInputFault,
 				LogText("@","iconv_open"),
-				LogText("from", fromCoding),
-				LogText("to", toCoding)
+				LogText("from", fromCharset),
+				LogText("to", toCharset)
 		);
-		return KNULL(Bytes);
+		// FIXME
+		return NULL;
 	}
 	size_t iconv_ret = -1;
 	size_t processedSize = 0;
@@ -150,11 +165,12 @@ static kBytes* Convert_newBytes(KonohaContext *kctx, kArray *gcstack, kBytes *fr
 			OLDTRACE_SWITCH_TO_KTrace(_DataFault,
 				LogText("@","iconv"),
 				LogText("from", "UTF-8"),
-				LogText("to", toCoding),
+				LogText("to", toCharset),
 				LogText("error", strerror(errno))
 			);
 			KLIB Kwb_free(&wb);
-			return (kBytes*)(CT_Bytes->defaultNullValue_OnGlobalConstList);
+			return NULL;   // FIXME
+			//return (kBytes*)(CT_Bytes->defaultNullValue_OnGlobalConstList);
 
 		} else {
 			// finished. iconv_ret != -1
@@ -168,7 +184,7 @@ static kBytes* Convert_newBytes(KonohaContext *kctx, kArray *gcstack, kBytes *fr
 	PLATAPI iconv_close_i((uintptr_t)conv);
 
 	const char *bufferTopChar = KLIB Kwb_top(kctx, &wb, 1);
-	struct kBytesVar *targetBytes = (struct kBytesVar*)KLIB new_kObjectDontUseThis(kctx, CT_Bytes, processedTotalSize, gcstack); // ensure bytes ends with Zero
+	struct kBytesVar *targetBytes = NULL; // FIXME (struct kBytesVar*)KLIB new_kObjectDontUseThis(kctx, CT_Bytes, processedTotalSize, gcstack); // ensure bytes ends with Zero
 	memcpy(targetBytes->buf, bufferTopChar, processedTotalSize); // including NUL terminate by ensuredZeo
 	KLIB Kwb_free(&wb);
 	return targetBytes;
@@ -215,12 +231,12 @@ static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnWithRESET_GCSTACK(Convert_newString(kctx, _GcStack, targetBytes));
 }
 
-//## @Const method Bytes String.asBytes();
+//## @Const method Bytes String.toBytes();
 static KMETHOD String_toBytes(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString* s = sfp[0].asString;
 	size_t size = S_size(s);
-	kBytes* ba = new_(Bytes, (size>0)?size+1:0, OnStack);
+	kBytes* ba = (kBytes*)KLIB new_kObject(kctx, OnStack, KReturnType(sfp), (size>0) ? size + 1 : 0);
 	if(size > 0) {
 		memcpy(ba->buf, S_text(s), size+1); // including NUL char
 		DBG_ASSERT(ba->buf[S_size(s)] == '\0');
@@ -273,7 +289,7 @@ static KMETHOD Bytes_getSize(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Bytes_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURN_(KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), sfp[1].intValue, OnStack));
+	RETURN_(KLIB new_kObject(kctx, OnStack, KReturnType(sfp), sfp[1].intValue));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -286,21 +302,22 @@ static KMETHOD Bytes_new(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
-	kmodiconv_t *base = (kmodiconv_t*)KCALLOC(sizeof(kmodiconv_t), 1);
-	base->h.name     = "iconv";
-	base->h.setup    = kmodiconv_setup;
-	base->h.reftrace = kmodiconv_reftrace;
-	base->h.free     = kmodiconv_free;
-	KLIB KonohaRuntime_setModule(kctx, MOD_iconv, &base->h, pline);
+//	kmodiconv_t *base = (kmodiconv_t*)KCALLOC(sizeof(kmodiconv_t), 1);
+//	base->h.name     = "iconv";
+//	base->h.setup    = kmodiconv_setup;
+//	base->h.reftrace = kmodiconv_reftrace;
+//	base->h.free     = kmodiconv_free;
+//	KLIB KonohaRuntime_setModule(kctx, MOD_iconv, &base->h, pline);
 
 	KDEFINE_CLASS defBytes = {0};
 	SETSTRUCTNAME(defBytes, Bytes);
 	defBytes.cflag   = kClass_Final;
-	defBytes.free    = Bytes_free;
-	defBytes.init    = Bytes_init;
-	defBytes.p       = Bytes_p;
+	defBytes.free    = kBytes_free;
+	defBytes.init    = kBytes_init;
+	defBytes.p       = kBytes_p;
 
-	base->cBytes = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defBytes, pline);
+	KonohaClass *cBytes = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defBytes, pline);
+	int TY_Bytes = cBytes->typeId;
 	int FN_encoding = FN_("encoding");
 	int FN_x = FN_("x");
 	int FN_c = FN_("c");
@@ -308,13 +325,13 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	intptr_t methoddata[] = {
 		_Public|_Im|_Coercion, _F(String_toBytes), TY_Bytes,  TY_String, MN_("toBytes"),   0,
 		_Public|_Const|_Im|_Coercion, _F(Bytes_toString), TY_String, TY_Bytes,  MN_("toString"),  0,
-		_Public|_Const,     _F(Bytes_encodeTo),   TY_Bytes,  TY_Bytes,  MN_("encodeTo"),    1, TY_String, FN_encoding,
-		_Public|_Const,     _F(Bytes_decodeFrom),   TY_String, TY_Bytes,  MN_("decodeFrom"),    1, TY_String, FN_encoding,
-		_Public|_Const|_Im,     _F(Bytes_get), TY_int, TY_Bytes, MN_("get"), 1, TY_int, FN_x,
-		_Public|_Const|_Im,     _F(Bytes_set), TY_int, TY_Bytes, MN_("set"), 2, TY_int, FN_x, TY_int, FN_c,
-		_Public|_Const|_Im,     _F(Bytes_setAll), TY_void, TY_Bytes, MN_("setAll"), 1, TY_int, FN_x,
-		_Public|_Const|_Im,     _F(Bytes_getSize), TY_int, TY_Bytes, MN_("getSize"), 0,
-		_Public|_Const|_Im,     _F(Bytes_new), TY_Bytes, TY_Bytes, MN_("new"), 1, TY_int, FN_size,
+		_Public|_Const, _F(Bytes_encodeTo),   TY_Bytes,  TY_Bytes,  MN_("encodeTo"),    1, TY_String, FN_encoding,
+		_Public|_Const, _F(Bytes_decodeFrom),   TY_String, TY_Bytes,  MN_("decodeFrom"),    1, TY_String, FN_encoding,
+		_Public|_Const|_Im, _F(Bytes_get), TY_int, TY_Bytes, MN_("get"), 1, TY_int, FN_x,
+		_Public|_Const|_Im, _F(Bytes_set), TY_int, TY_Bytes, MN_("set"), 2, TY_int, FN_x, TY_int, FN_c,
+		_Public|_Const|_Im, _F(Bytes_setAll), TY_void, TY_Bytes, MN_("setAll"), 1, TY_int, FN_x,
+		_Public|_Const|_Im, _F(Bytes_getSize), TY_int, TY_Bytes, MN_("getSize"), 0,
+		_Public|_Const|_Im, _F(Bytes_new), TY_Bytes, TY_Bytes, MN_("new"), 1, TY_int, FN_size,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, NULL, methoddata);
