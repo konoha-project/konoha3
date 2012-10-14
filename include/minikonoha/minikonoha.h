@@ -361,7 +361,7 @@ typedef struct logconf_t {
 } logconf_t;
 
 typedef struct KTraceInfo {
-	struct KonohaStack *baseStack;
+	struct KonohaValueVar *baseStack;
 	kfileline_t pline;
 } KTraceInfo;
 
@@ -1667,6 +1667,13 @@ typedef struct {
 	return; \
 } while (0)
 
+
+#define KReturnWith(VAL, CLEANUP) do {\
+	KUnsafeFieldSet(sfp[K_RTNIDX].asObject, ((kObject*)VAL));\
+	CLEANUP;\
+	KNH_SAFEPOINT(kctx, sfp);\
+	return; \
+} while (0)
 
 #define KReturnWithRESET_GCSTACK(VAL) do {\
 	KUnsafeFieldSet(sfp[K_RTNIDX].asObject, ((kObject*)VAL));\
