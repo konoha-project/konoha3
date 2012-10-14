@@ -180,12 +180,12 @@ static void MapEntry_appendKey(KonohaContext *kctx, KHashMapEntry *p, void *thun
 //## T0[] Map.keys();
 static KMETHOD Map_keys(KonohaContext *kctx, KonohaStack *sfp)
 {
+	INIT_GCSTACK();
 	kMap *m = (kMap*)sfp[0].asObject;
 	KonohaClass *cArray = CT_p0(kctx, CT_Array, O_p0(m));
-	kArray *a = (kArray*)(KLIB new_kObjectDontUseThis(kctx, cArray, m->map->size, OnStack));
-	KPreSetReturn(a);
+	kArray *a = (kArray*)(KLIB new_kObject(kctx, _GcStack, cArray, m->map->size));
 	KLIB Kmap_each(kctx, m->map, (void*)a, MapEntry_appendKey);
-	KReturnPreSetValue(a);
+	KReturnWith(a, RESET_GCSTACK());
 }
 
 //## Map<T> Map<T>.new();

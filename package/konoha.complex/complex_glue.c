@@ -615,7 +615,7 @@ static KMETHOD Complex_conj(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	double _Complex z = kc->z;
 	double _Complex answer = conj(z);
-	kComplex *ret = (kComplex *)KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), 0, OnStack);
+	kComplex *ret = (kComplex *)KLIB new_kObject(kctx, OnStack, KReturnType(sfp), 0);
 	ret->z = answer;
 	RETURN_(ret);
 }
@@ -626,7 +626,7 @@ static KMETHOD Complex_conjf(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	float _Complex zf = (float _Complex)kc->z;
 	float _Complex answer = conj(zf);
-	kComplex *ret = (kComplex *)KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), 0, OnStack);
+	kComplex *ret = (kComplex *)KLIB new_kObject(kctx, OnStack, KReturnType(sfp), 0);
 	ret->z = answer;
 	RETURN_(ret);
 }
@@ -637,7 +637,7 @@ static KMETHOD Complex_conjl(KonohaContext *kctx, KonohaStack *sfp)
 	kComplex *kc = (kComplex *) sfp[0].asObject;
 	long double _Complex zl = (long double _Complex)kc->z;
 	long double answer = conj(zl);
-	kComplex *ret = (kComplex *)KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), 0, OnStack);
+	kComplex *ret = (kComplex *)KLIB new_kObject(kctx, OnStack, KReturnType(sfp), 0);
 	ret->z = answer;
 	RETURN_(ret);
 }

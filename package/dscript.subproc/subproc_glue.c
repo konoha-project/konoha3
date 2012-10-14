@@ -796,7 +796,7 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 					LogText("errstr", strerror(errno))
 			);
 		} else {
-			ret_a = (kArray*)KLIB new_kObjectDontUseThis(kctx, CT_Array, 0, GcUnsafe);
+			ret_a = (kArray*)KLIB new_kObject(kctx, GcUnsafe, CT_Array, 0);
 			if(p->r.mode == M_PIPE) {
 				if(!kPipeReadArray(kctx, ret_a, p->r.fp)) {
 					KTraceApi(trace, SystemFault, "Subproc.communicate",

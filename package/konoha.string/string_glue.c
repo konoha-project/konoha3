@@ -949,7 +949,7 @@ static KMETHOD String_slice(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kArray *a = (kArray*)KLIB new_kObjectDontUseThis(kctx, CT_StringArray0, 0, OnStack);
+	kArray *a = (kArray*)KLIB new_kObject(kctx, OnStack, CT_StringArray0, 0);
 	KLIB kArray_add(kctx, a, sfp[0].asString);
 	RETURN_(a);
 }
@@ -961,7 +961,7 @@ static KMETHOD String_splitWithSeparator(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s0 = sfp[0].asString;
 	kString *separator = sfp[1].asString;
-	kArray *a = (kArray*)KLIB new_kObjectDontUseThis(kctx, CT_StringArray0, 0, OnStack);
+	kArray *a = (kArray*)KLIB new_kObject(kctx, OnStack, CT_StringArray0, 0);
 	KPreSetReturn(a);
 
 	const char *start = S_text(s0);

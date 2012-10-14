@@ -130,7 +130,7 @@ static KMETHOD Thread_create(KonohaContext *kctx, KonohaStack *sfp)
 	INIT_GCSTACK();
 	kFunc *f = sfp[1].asFunc;
 	KLIB kNameSpace_compileAllDefinedMethods(kctx);
-	kThread *thread = (kThread *)KLIB new_kObjectDontUseThis(kctx, KReturnType(sfp), 0, _GcStack);
+	kThread *thread = (kThread *)KLIB new_kObject(kctx, _GcStack, KReturnType(sfp), 0);
 	thread->rootCtx = kctx; //TODO getRootContext
 	thread->kctx = KLIB KonohaContext_init(kctx, kctx->platApi);
 	KFieldSet(thread, thread->func, f);

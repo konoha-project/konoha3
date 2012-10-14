@@ -244,14 +244,13 @@ static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
 /* Array[T] Array[T].map(Func[T,T] func) */
 static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
 {
+	INIT_GCSTACK();
 	kArray *a = sfp[0].asArray;
 	kFunc  *f = sfp[1].asFunc;
 	size_t asize = kArray_size(a);
 	ktype_t resolve_type = Method_returnType(f->mtd);  // FIXME
-
 	KonohaClass *CT_ArrayT0 = CT_p0(kctx, CT_Array, resolve_type);
-	kArrayVar *returnValue = (kArrayVar*)KLIB new_kObjectDontUseThis(kctx, CT_ArrayT0, asize, OnStack);
-	KPreSetReturn(returnValue);
+	kArrayVar *returnValue = (kArrayVar*)KLIB new_kObject(kctx, _GcStack, CT_ArrayT0, asize);
 
 	size_t i;
 	if(kArray_isUnboxData(a)) {
@@ -277,7 +276,7 @@ static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	}
 	kArray_setsize(returnValue, asize);
-	KReturnPreSetValue(returnValue);
+	KReturnWith(returnValue, RESET_GCSTACK());
 }
 
 /* T Array[T].inject(Func[T,T,T] func) */
@@ -303,8 +302,8 @@ static KMETHOD Array_inject(KonohaContext *kctx, KonohaStack *sfp)
 		RETURNd_(tmp);
 	}
 	else {
-		/* FIXME(GC) ::  Why ???*/
-		kObject *tmp = (kObject*) KLIB new_kObjectDontUseThis(kctx, CT_(resolve_type), 0, OnStack);
+		INIT_GCSTACK();
+		kObject *tmp = (kObject*) KLIB new_kObject(kctx, _GcStack, CT_(resolve_type), 0);
 		kObject *nulobj = KLIB Knull(kctx, CT_(resolve_type));
 		BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
 		for(i=0; i != asize; ++i) {
@@ -315,7 +314,7 @@ static KMETHOD Array_inject(KonohaContext *kctx, KonohaStack *sfp)
 			KUnsafeFieldSet(tmp, lsfp[0].asObject);
 		}
 		END_LOCAL();
-		RETURN_(tmp);
+		KReturnWith(tmp, RESET_GCSTACK());
 	}
 }
 

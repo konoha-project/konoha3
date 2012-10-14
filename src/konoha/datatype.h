@@ -1122,14 +1122,6 @@ static void KonohaRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	initStructData(kctx);
 }
 
-static void constPoolMap_reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
-{
-	KObjectVisitor *visitor = (KObjectVisitor *) thunk;
-	BEGIN_REFTRACE(1);
-	KREFTRACEv(p->ObjectValue);
-	END_REFTRACE();
-}
-
 //static void packageMap_reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
 //{
 //	KObjectVisitor *visitor = (KObjectVisitor *) thunk;
