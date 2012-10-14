@@ -45,7 +45,7 @@ typedef struct {
 
 static inline kObject *new_ReturnCppObject(KonohaContext *kctx,KonohaStack *sfp, void *ptr) {
 	kObject *defobj = sfp[(-(K_CALLDELTA))].asObject;
-	kObject *ret = KLIB new_kObjectDontUseThis(kctx, O_ct(defobj), (uintptr_t)ptr);
+	kObject *ret = KLIB new_kObjectDontUseThis(kctx, O_ct(defobj), (uintptr_t)ptr, OnStack);
 	((kRawPtr *)ret)->rawptr = ptr;
 	return ret;
 }
@@ -67,7 +67,7 @@ static void MPIData_extend(KonohaContext *kctx, kMPIData *p, int size) {
 	if(p->size < newSize) {
 		switch(p->typeId) {
 		case KMPI_BYTES: {
-			kBytes *b = (kBytes *)KLIB new_kObjectDontUseThis(kctx, CT_Bytes, (uintptr_t)newSize);
+			kBytes *b = (kBytes *)KLIB new_kObjectDontUseThis(kctx, CT_Bytes, (uintptr_t)newSize, OnStack);
 			memcpy(b->buf, p->b->buf, p->size);
 			p->b = b;
 			p->size = newSize;
@@ -376,19 +376,19 @@ static KMETHOD MPIRequest_cancel(KonohaContext *kctx, KonohaStack *sfp)
 	RETURNb_(ret);
 }
 
-/* ------------------------------------------------------------------------ */
-//## MPIData MPIData.fromBytes(Bytes b)
-static KMETHOD MPIData_fromBytes(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kMPIData *d = newMPIData(kctx);
-	d->type = MPI_CHAR;
-	d->b = sfp[1].ba;
-	d->size = sfp[1].ba->bytesize;
-	d->offset = 0;
-	d->typeId = KMPI_BYTES;
-	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(d)));
-}
-
+///* ------------------------------------------------------------------------ */
+////## MPIData MPIData.fromBytes(Bytes b)
+//static KMETHOD MPIData_fromBytes(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	kMPIData *d = newMPIData(kctx);
+//	d->type = MPI_CHAR;
+//	d->b = sfp[1].ba;
+//	d->size = sfp[1].ba->bytesize;
+//	d->offset = 0;
+//	d->typeId = KMPI_BYTES;
+//	RETURN_(new_ReturnCppObject(kctx, sfp, WRAP(d)));
+//}
+//
 ////## MPIData MPIData.fromIntArray(Array[int] a)
 //static KMETHOD MPIData_fromIntArray(KonohaContext *kctx, KonohaStack *sfp)
 //{
@@ -677,7 +677,7 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		_Public, _F(MPIRequest_cancel), TY_boolean, TY_MPIRequest, MN_("cancel"), 0,
 
 		/* class MPIData */
-		_Public|_Static, _F(MPIData_fromBytes), TY_MPIData, TY_MPIData, MN_("fromBytes"), 1, TY_Bytes, FN_("b"),
+		//_Public|_Static, _F(MPIData_fromBytes), TY_MPIData, TY_MPIData, MN_("fromBytes"), 1, TY_Bytes, FN_("b"),
 		//_Public|_Static, _F(MPIData_fromIntArray), TY_MPIData, TY_MPIData, MN_("fromIntArray"), 1, TY_Array, FN_("b"),
 		//_Public|_Static, _F(MPIData_fromFloatArray), TY_MPIData, TY_MPIData, MN_("fromFloatArray"), 1, TY_Array, FN_("b"),
 		_Public|_Static, _F(MPIData_newFloatArray), TY_MPIData, TY_MPIData, MN_("newFloatArray"), 1, TY_int, FN_("n"),

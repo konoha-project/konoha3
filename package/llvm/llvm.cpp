@@ -115,7 +115,6 @@ struct kRawPtr {
 };
 
 #define MOD_llvm 19/*TODO*/
-#define kllvmmod ((kllvmmod_t*)kctx->mod[MOD_llvm])
 #define kmodllvm ((kmodllvm_t*)kctx->modshare[MOD_llvm])
 #define CT_Value (kmodllvm)->cValue
 #define TY_Value (CT_Value)->typeId
@@ -143,7 +142,7 @@ inline void convert_array(std::vector<T> &vec, kArray *a)
 {
 	size_t size = kArray_size(a);
 	for (size_t i=0; i < size; i++) {
-		T v = konoha::object_cast<T>(a->objectItems[i]);
+		T v = konoha::object_cast<T>(a->ObjectItems[i]);
 		vec.push_back(v);
 	}
 }
@@ -180,26 +179,10 @@ typedef Type LLVMTYPE;
 extern "C" {
 #endif
 
-#define LLVM_TODO(str) do {\
-	fprintf(stderr, "(TODO: %s %d):", __func__, __LINE__);\
-	fprintf(stderr, "%s\n", str);\
-	abort();\
-} while (0)
-
-#define LLVM_WARN(str) do {\
-	fprintf(stderr, "(WARN: %s %d):", __func__, __LINE__);\
-	fprintf(stderr, "%s\n", str);\
-} while (0)
-
 #define _UNUSED_ __attribute__((unused))
 
-#define PKG_NULVAL(T) PKG_NULVAL_##T
-#define PKG_NULVAL_int    (0)
-#define PKG_NULVAL_float  (0.0)
-#define PKG_NULVAL_String (KNH_NULVAL(TY_String))
 #define WRAP(ptr) ((void*)ptr)
 #define Int_to(T, a)               ((T)a.intValue)
-#define DEFAPI(T) T
 
 static void Type_init(KonohaContext *kctx _UNUSED_, kObject *po, void *conf)
 {
@@ -212,15 +195,15 @@ static void Type_free(KonohaContext *kctx _UNUSED_, kObject *po)
 
 static inline kObject *new_CppObject(KonohaContext *kctx, const KonohaClass *ct, void *ptr)
 {
-	kObject *ret = KLIB new_kObject(kctx, ct, (uintptr_t)ptr);
+	kObject *ret = KLIB new_kObject(kctx, OnStack, ct, (uintptr_t)ptr);
 	konoha::SetRawPtr(ret, ptr);
 	return ret;
 }
 
 static inline kObject *new_ReturnCppObject(KonohaContext *kctx, KonohaStack *sfp, void *ptr)
 {
-	kObject *defobj = sfp[(-(K_CALLDELTA))].o;
-	kObject *ret = KLIB new_kObject(kctx, O_ct(defobj), (uintptr_t)ptr);
+	kObject *defobj = sfp[(-(K_CALLDELTA))].asObject;
+	kObject *ret = KLIB new_kObject(kctx, OnStack, O_ct(defobj), (uintptr_t)ptr);
 	konoha::SetRawPtr(ret, ptr);
 	return ret;
 }
@@ -507,8 +490,8 @@ static KMETHOD IRBuilder_createCondBr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *Cond = konoha::object_cast<Value *>(sfp[1].asObject);
-	BasicBlock *True = konoha::object_cast<BasicBlock *>(sfp[2].o);
-	BasicBlock *False = konoha::object_cast<BasicBlock *>(sfp[3].o);
+	BasicBlock *True = konoha::object_cast<BasicBlock *>(sfp[2].asObject);
+	BasicBlock *False = konoha::object_cast<BasicBlock *>(sfp[3].asObject);
 	BranchInst *ptr = self->CreateCondBr(Cond, True, False);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -519,7 +502,7 @@ static KMETHOD IRBuilder_createSwitch(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *V = konoha::object_cast<Value *>(sfp[1].asObject);
-	BasicBlock *Dest = konoha::object_cast<BasicBlock *>(sfp[2].o);
+	BasicBlock *Dest = konoha::object_cast<BasicBlock *>(sfp[2].asObject);
 	SwitchInst *ptr = self->CreateSwitch(V, Dest);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -540,8 +523,8 @@ static KMETHOD IRBuilder_createInvoke0(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *Callee = konoha::object_cast<Value *>(sfp[1].asObject);
-	BasicBlock *NormalDest = konoha::object_cast<BasicBlock *>(sfp[2].o);
-	BasicBlock *UnwindDest = konoha::object_cast<BasicBlock *>(sfp[3].o);
+	BasicBlock *NormalDest = konoha::object_cast<BasicBlock *>(sfp[2].asObject);
+	BasicBlock *UnwindDest = konoha::object_cast<BasicBlock *>(sfp[3].asObject);
 	InvokeInst *ptr = self->CreateInvoke(Callee, NormalDest, UnwindDest);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -552,9 +535,9 @@ static KMETHOD IRBuilder_createInvoke1(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *Callee = konoha::object_cast<Value *>(sfp[1].asObject);
-	BasicBlock *NormalDest = konoha::object_cast<BasicBlock *>(sfp[2].o);
-	BasicBlock *UnwindDest = konoha::object_cast<BasicBlock *>(sfp[3].o);
-	Value *Arg1 = konoha::object_cast<Value *>(sfp[4].o);
+	BasicBlock *NormalDest = konoha::object_cast<BasicBlock *>(sfp[2].asObject);
+	BasicBlock *UnwindDest = konoha::object_cast<BasicBlock *>(sfp[3].asObject);
+	Value *Arg1 = konoha::object_cast<Value *>(sfp[4].asObject);
 	InvokeInst *ptr = self->CreateInvoke(Callee, NormalDest, UnwindDest, Arg1);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -565,11 +548,11 @@ static KMETHOD IRBuilder_createInvoke3(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *Callee = konoha::object_cast<Value *>(sfp[1].asObject);
-	BasicBlock *NormalDest = konoha::object_cast<BasicBlock *>(sfp[2].o);
-	BasicBlock *UnwindDest = konoha::object_cast<BasicBlock *>(sfp[3].o);
-	Value *Arg1 = konoha::object_cast<Value *>(sfp[4].o);
-	Value *Arg2 = konoha::object_cast<Value *>(sfp[5].o);
-	Value *Arg3 = konoha::object_cast<Value *>(sfp[6].o);
+	BasicBlock *NormalDest = konoha::object_cast<BasicBlock *>(sfp[2].asObject);
+	BasicBlock *UnwindDest = konoha::object_cast<BasicBlock *>(sfp[3].asObject);
+	Value *Arg1 = konoha::object_cast<Value *>(sfp[4].asObject);
+	Value *Arg2 = konoha::object_cast<Value *>(sfp[5].asObject);
+	Value *Arg3 = konoha::object_cast<Value *>(sfp[6].asObject);
 	InvokeInst *ptr = self->CreateInvoke3(Callee, NormalDest, UnwindDest, Arg1, Arg2, Arg3);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -580,8 +563,8 @@ static KMETHOD IRBuilder_createInvoke3(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 //	Value *Callee = konoha::object_cast<Value *>(sfp[1].asObject);
-//	BasicBlock *NormalDest = konoha::object_cast<BasicBlock *>(sfp[2].o);
-//	BasicBlock *UnwindDest = konoha::object_cast<BasicBlock *>(sfp[3].o);
+//	BasicBlock *NormalDest = konoha::object_cast<BasicBlock *>(sfp[2].asObject);
+//	BasicBlock *UnwindDest = konoha::object_cast<BasicBlock *>(sfp[3].asObject);
 //	kArray *Args = (sfp[4].asArray);
 //	std::vector<Value*> List;
 //	konoha::convert_array(List, Args);
@@ -614,7 +597,7 @@ static KMETHOD IRBuilder_createAdd(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateAdd(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -625,7 +608,7 @@ static KMETHOD IRBuilder_createNSWAdd(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateNSWAdd(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -636,7 +619,7 @@ static KMETHOD IRBuilder_createNUWAdd(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateNUWAdd(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -647,7 +630,7 @@ static KMETHOD IRBuilder_createFAdd(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateFAdd(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -658,7 +641,7 @@ static KMETHOD IRBuilder_createSub(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateSub(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -669,7 +652,7 @@ static KMETHOD IRBuilder_createNSWSub(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateNSWSub(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -680,7 +663,7 @@ static KMETHOD IRBuilder_createNUWSub(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateNUWSub(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -691,7 +674,7 @@ static KMETHOD IRBuilder_createFSub(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateFSub(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -702,7 +685,7 @@ static KMETHOD IRBuilder_createMul(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateMul(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -713,7 +696,7 @@ static KMETHOD IRBuilder_createNSWMul(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateNSWMul(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -724,7 +707,7 @@ static KMETHOD IRBuilder_createNUWMul(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateNUWMul(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -735,7 +718,7 @@ static KMETHOD IRBuilder_createFMul(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateFMul(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -746,7 +729,7 @@ static KMETHOD IRBuilder_createUDiv(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateUDiv(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -761,7 +744,7 @@ static KMETHOD IRBuilder_createExactUDiv(KonohaContext *kctx, KonohaStack *sfp)
 #else
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateExactUDiv(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -773,7 +756,7 @@ static KMETHOD IRBuilder_createSDiv(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateSDiv(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -784,7 +767,7 @@ static KMETHOD IRBuilder_createExactSDiv(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateExactSDiv(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -795,7 +778,7 @@ static KMETHOD IRBuilder_createFDiv(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateFDiv(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -806,7 +789,7 @@ static KMETHOD IRBuilder_createURem(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateURem(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -817,7 +800,7 @@ static KMETHOD IRBuilder_createSRem(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateSRem(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -828,7 +811,7 @@ static KMETHOD IRBuilder_createFRem(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateFRem(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -839,7 +822,7 @@ static KMETHOD IRBuilder_createShl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateShl(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -850,7 +833,7 @@ static KMETHOD IRBuilder_createLShr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateLShr(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -861,7 +844,7 @@ static KMETHOD IRBuilder_createAShr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateAShr(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -872,7 +855,7 @@ static KMETHOD IRBuilder_createAnd(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateAnd(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -883,7 +866,7 @@ static KMETHOD IRBuilder_createOr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateOr(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -894,7 +877,7 @@ static KMETHOD IRBuilder_createXor(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateXor(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -955,7 +938,7 @@ static KMETHOD IRBuilder_createAlloca(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Type *Ty = konoha::object_cast<Type *>(sfp[1].asObject);
-	Value *ArraySize = konoha::object_cast<Value *>(sfp[2].o);
+	Value *ArraySize = konoha::object_cast<Value *>(sfp[2].asObject);
 	AllocaInst *ptr = self->CreateAlloca(Ty, ArraySize);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -987,7 +970,7 @@ static KMETHOD IRBuilder_createStore(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *Val = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *Ptr = konoha::object_cast<Value *>(sfp[2].o);
+	Value *Ptr = konoha::object_cast<Value *>(sfp[2].asObject);
 	kbool_t isVolatile = sfp[3].boolValue;
 	StoreInst *ptr = self->CreateStore(Val, Ptr, isVolatile);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
@@ -999,7 +982,7 @@ static KMETHOD IRBuilder_createStore(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 //	AtomicOrdering *Ordering = konoha::object_cast<AtomicOrdering *>(sfp[1].asObject);
-//	SynchronizationScope *SynchScope = konoha::object_cast<SynchronizationScope *>(sfp[2].o);
+//	SynchronizationScope *SynchScope = konoha::object_cast<SynchronizationScope *>(sfp[2].asObject);
 //	FenceInst *ptr = self->CreateFence(Ordering, SynchScope);
 //	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 //	RETURN_(p);
@@ -1010,10 +993,10 @@ static KMETHOD IRBuilder_createStore(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 //	Value *Ptr = konoha::object_cast<Value *>(sfp[1].asObject);
-//	Value *Cmp = konoha::object_cast<Value *>(sfp[2].o);
-//	Value *New = konoha::object_cast<Value *>(sfp[3].o);
-//	AtomicOrdering *Ordering = konoha::object_cast<AtomicOrdering *>(sfp[4].o);
-//	SynchronizationScope *SynchScope = konoha::object_cast<SynchronizationScope *>(sfp[5].o);
+//	Value *Cmp = konoha::object_cast<Value *>(sfp[2].asObject);
+//	Value *New = konoha::object_cast<Value *>(sfp[3].asObject);
+//	AtomicOrdering *Ordering = konoha::object_cast<AtomicOrdering *>(sfp[4].asObject);
+//	SynchronizationScope *SynchScope = konoha::object_cast<SynchronizationScope *>(sfp[5].asObject);
 //	AtomicCmpXchgInst *ptr = self->CreateAtomicCmpXchg(Ptr, Cmp, New, Ordering, SynchScope);
 //	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 //	RETURN_(p);
@@ -1023,7 +1006,7 @@ static KMETHOD IRBuilder_createStore(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD AllocaInst_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Type *Ty = konoha::object_cast<Type *>(sfp[1].asObject);
-	Value *ArraySize = konoha::object_cast<Value *>(sfp[2].o);
+	Value *ArraySize = konoha::object_cast<Value *>(sfp[2].asObject);
 	AllocaInst *ptr = new AllocaInst(Ty, ArraySize);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1033,7 +1016,7 @@ static KMETHOD AllocaInst_new(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD StoreInst_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Value *Val = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *Ptr = konoha::object_cast<Value *>(sfp[2].o);
+	Value *Ptr = konoha::object_cast<Value *>(sfp[2].asObject);
 	StoreInst *ptr = new StoreInst(Val, Ptr);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1095,7 +1078,7 @@ static KMETHOD IRBuilder_createGEP1(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *Ptr = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *Idx = konoha::object_cast<Value *>(sfp[2].o);
+	Value *Idx = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateGEP(Ptr, Idx);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1106,7 +1089,7 @@ static KMETHOD IRBuilder_createInBoundsGEP1(KonohaContext *kctx, KonohaStack *sf
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *Ptr = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *Idx = konoha::object_cast<Value *>(sfp[2].o);
+	Value *Idx = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateInBoundsGEP(Ptr, Idx);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1240,7 +1223,7 @@ static KMETHOD IRBuilder_createTrunc(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *V = konoha::object_cast<Value *>(sfp[1].asObject);
-	Type *DestTy = konoha::object_cast<Type *>(sfp[2].o);
+	Type *DestTy = konoha::object_cast<Type *>(sfp[2].asObject);
 	Value *ptr = self->CreateTrunc(V, DestTy);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1251,7 +1234,7 @@ static KMETHOD IRBuilder_createZExt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *V = konoha::object_cast<Value *>(sfp[1].asObject);
-	Type *DestTy = konoha::object_cast<Type *>(sfp[2].o);
+	Type *DestTy = konoha::object_cast<Type *>(sfp[2].asObject);
 	Value *ptr = self->CreateZExt(V, DestTy);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1262,7 +1245,7 @@ static KMETHOD IRBuilder_createSExt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *V = konoha::object_cast<Value *>(sfp[1].asObject);
-	Type *DestTy = konoha::object_cast<Type *>(sfp[2].o);
+	Type *DestTy = konoha::object_cast<Type *>(sfp[2].asObject);
 	Value *ptr = self->CreateSExt(V, DestTy);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1273,7 +1256,7 @@ static KMETHOD IRBuilder_createFPToUI(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *V = konoha::object_cast<Value *>(sfp[1].asObject);
-	Type *DestTy = konoha::object_cast<Type *>(sfp[2].o);
+	Type *DestTy = konoha::object_cast<Type *>(sfp[2].asObject);
 	Value *ptr = self->CreateFPToUI(V, DestTy);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1284,7 +1267,7 @@ static KMETHOD IRBuilder_createFPToSI(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *V = konoha::object_cast<Value *>(sfp[1].asObject);
-	Type *DestTy = konoha::object_cast<Type *>(sfp[2].o);
+	Type *DestTy = konoha::object_cast<Type *>(sfp[2].asObject);
 	Value *ptr = self->CreateFPToSI(V, DestTy);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1295,7 +1278,7 @@ static KMETHOD IRBuilder_createUIToFP(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *V = konoha::object_cast<Value *>(sfp[1].asObject);
-	Type *DestTy = konoha::object_cast<Type *>(sfp[2].o);
+	Type *DestTy = konoha::object_cast<Type *>(sfp[2].asObject);
 	Value *ptr = self->CreateUIToFP(V, DestTy);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1306,7 +1289,7 @@ static KMETHOD IRBuilder_createSIToFP(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *V = konoha::object_cast<Value *>(sfp[1].asObject);
-	Type *DestTy = konoha::object_cast<Type *>(sfp[2].o);
+	Type *DestTy = konoha::object_cast<Type *>(sfp[2].asObject);
 	Value *ptr = self->CreateSIToFP(V, DestTy);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1317,7 +1300,7 @@ static KMETHOD IRBuilder_createFPTrunc(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *V = konoha::object_cast<Value *>(sfp[1].asObject);
-	Type *DestTy = konoha::object_cast<Type *>(sfp[2].o);
+	Type *DestTy = konoha::object_cast<Type *>(sfp[2].asObject);
 	Value *ptr = self->CreateFPTrunc(V, DestTy);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1328,7 +1311,7 @@ static KMETHOD IRBuilder_createFPExt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *V = konoha::object_cast<Value *>(sfp[1].asObject);
-	Type *DestTy = konoha::object_cast<Type *>(sfp[2].o);
+	Type *DestTy = konoha::object_cast<Type *>(sfp[2].asObject);
 	Value *ptr = self->CreateFPExt(V, DestTy);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1339,7 +1322,7 @@ static KMETHOD IRBuilder_createPtrToInt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *V = konoha::object_cast<Value *>(sfp[1].asObject);
-	Type *DestTy = konoha::object_cast<Type *>(sfp[2].o);
+	Type *DestTy = konoha::object_cast<Type *>(sfp[2].asObject);
 	Value *ptr = self->CreatePtrToInt(V, DestTy);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1350,7 +1333,7 @@ static KMETHOD IRBuilder_createIntToPtr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *V = konoha::object_cast<Value *>(sfp[1].asObject);
-	Type *DestTy = konoha::object_cast<Type *>(sfp[2].o);
+	Type *DestTy = konoha::object_cast<Type *>(sfp[2].asObject);
 	Value *ptr = self->CreateIntToPtr(V, DestTy);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1361,7 +1344,7 @@ static KMETHOD IRBuilder_createBitCast(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *V = konoha::object_cast<Value *>(sfp[1].asObject);
-	Type *DestTy = konoha::object_cast<Type *>(sfp[2].o);
+	Type *DestTy = konoha::object_cast<Type *>(sfp[2].asObject);
 	Value *ptr = self->CreateBitCast(V, DestTy);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1372,7 +1355,7 @@ static KMETHOD IRBuilder_createZExtOrBitCast(KonohaContext *kctx, KonohaStack *s
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *V = konoha::object_cast<Value *>(sfp[1].asObject);
-	Type *DestTy = konoha::object_cast<Type *>(sfp[2].o);
+	Type *DestTy = konoha::object_cast<Type *>(sfp[2].asObject);
 	Value *ptr = self->CreateZExtOrBitCast(V, DestTy);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1383,7 +1366,7 @@ static KMETHOD IRBuilder_createSExtOrBitCast(KonohaContext *kctx, KonohaStack *s
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *V = konoha::object_cast<Value *>(sfp[1].asObject);
-	Type *DestTy = konoha::object_cast<Type *>(sfp[2].o);
+	Type *DestTy = konoha::object_cast<Type *>(sfp[2].asObject);
 	Value *ptr = self->CreateSExtOrBitCast(V, DestTy);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1394,7 +1377,7 @@ static KMETHOD IRBuilder_createTruncOrBitCast(KonohaContext *kctx, KonohaStack *
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *V = konoha::object_cast<Value *>(sfp[1].asObject);
-	Type *DestTy = konoha::object_cast<Type *>(sfp[2].o);
+	Type *DestTy = konoha::object_cast<Type *>(sfp[2].asObject);
 	Value *ptr = self->CreateTruncOrBitCast(V, DestTy);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1405,7 +1388,7 @@ static KMETHOD IRBuilder_createPointerCast(KonohaContext *kctx, KonohaStack *sfp
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *V = konoha::object_cast<Value *>(sfp[1].asObject);
-	Type *DestTy = konoha::object_cast<Type *>(sfp[2].o);
+	Type *DestTy = konoha::object_cast<Type *>(sfp[2].asObject);
 	Value *ptr = self->CreatePointerCast(V, DestTy);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1416,7 +1399,7 @@ static KMETHOD IRBuilder_createIntCast(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *V = konoha::object_cast<Value *>(sfp[1].asObject);
-	Type *DestTy = konoha::object_cast<Type *>(sfp[2].o);
+	Type *DestTy = konoha::object_cast<Type *>(sfp[2].asObject);
 	kbool_t isSigned = sfp[3].boolValue;
 	Value *ptr = self->CreateIntCast(V, DestTy, isSigned);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
@@ -1428,7 +1411,7 @@ static KMETHOD IRBuilder_createFPCast(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *V = konoha::object_cast<Value *>(sfp[1].asObject);
-	Type *DestTy = konoha::object_cast<Type *>(sfp[2].o);
+	Type *DestTy = konoha::object_cast<Type *>(sfp[2].asObject);
 	Value *ptr = self->CreateFPCast(V, DestTy);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1439,7 +1422,7 @@ static KMETHOD IRBuilder_createICmpEQ(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateICmpEQ(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1450,7 +1433,7 @@ static KMETHOD IRBuilder_createICmpNE(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateICmpNE(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1461,7 +1444,7 @@ static KMETHOD IRBuilder_createICmpUGT(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateICmpUGT(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1472,7 +1455,7 @@ static KMETHOD IRBuilder_createICmpUGE(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateICmpUGE(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1483,7 +1466,7 @@ static KMETHOD IRBuilder_createICmpULT(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateICmpULT(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1494,7 +1477,7 @@ static KMETHOD IRBuilder_createICmpULE(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateICmpULE(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1505,7 +1488,7 @@ static KMETHOD IRBuilder_createICmpSGT(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateICmpSGT(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1516,7 +1499,7 @@ static KMETHOD IRBuilder_createICmpSGE(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateICmpSGE(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1527,7 +1510,7 @@ static KMETHOD IRBuilder_createICmpSLT(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateICmpSLT(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1538,7 +1521,7 @@ static KMETHOD IRBuilder_createICmpSLE(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateICmpSLE(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1549,7 +1532,7 @@ static KMETHOD IRBuilder_createFCmpOEQ(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateFCmpOEQ(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1560,7 +1543,7 @@ static KMETHOD IRBuilder_createFCmpOGT(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateFCmpOGT(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1571,7 +1554,7 @@ static KMETHOD IRBuilder_createFCmpOGE(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateFCmpOGE(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1582,7 +1565,7 @@ static KMETHOD IRBuilder_createFCmpOLT(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateFCmpOLT(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1593,7 +1576,7 @@ static KMETHOD IRBuilder_createFCmpOLE(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateFCmpOLE(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1604,7 +1587,7 @@ static KMETHOD IRBuilder_createFCmpONE(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateFCmpONE(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1615,7 +1598,7 @@ static KMETHOD IRBuilder_createFCmpORD(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateFCmpORD(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1626,7 +1609,7 @@ static KMETHOD IRBuilder_createFCmpUNO(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateFCmpUNO(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1637,7 +1620,7 @@ static KMETHOD IRBuilder_createFCmpUEQ(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateFCmpUEQ(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1648,7 +1631,7 @@ static KMETHOD IRBuilder_createFCmpUGT(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateFCmpUGT(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1659,7 +1642,7 @@ static KMETHOD IRBuilder_createFCmpUGE(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateFCmpUGE(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1670,7 +1653,7 @@ static KMETHOD IRBuilder_createFCmpULT(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateFCmpULT(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1681,7 +1664,7 @@ static KMETHOD IRBuilder_createFCmpULE(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateFCmpULE(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1692,7 +1675,7 @@ static KMETHOD IRBuilder_createFCmpUNE(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateFCmpUNE(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1719,7 +1702,7 @@ static KMETHOD PHINode_addIncoming(KonohaContext *kctx _UNUSED_, KonohaStack *sf
 {
 	PHINode *self = konoha::object_cast<PHINode *>(sfp[0].asObject);
 	Value *v = konoha::object_cast<Value *>(sfp[1].asObject);
-	BasicBlock *bb = konoha::object_cast<BasicBlock *>(sfp[2].o);
+	BasicBlock *bb = konoha::object_cast<BasicBlock *>(sfp[2].asObject);
 	self->addIncoming(v, bb);
 	RETURNvoid_();
 }
@@ -1729,7 +1712,7 @@ static KMETHOD IRBuilder_createCall1(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *Callee = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *Arg = konoha::object_cast<Value *>(sfp[2].o);
+	Value *Arg = konoha::object_cast<Value *>(sfp[2].asObject);
 	CallInst *ptr = self->CreateCall(Callee, Arg);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1740,8 +1723,8 @@ static KMETHOD IRBuilder_createCall2(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *Callee = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *Arg1 = konoha::object_cast<Value *>(sfp[2].o);
-	Value *Arg2 = konoha::object_cast<Value *>(sfp[3].o);
+	Value *Arg1 = konoha::object_cast<Value *>(sfp[2].asObject);
+	Value *Arg2 = konoha::object_cast<Value *>(sfp[3].asObject);
 	CallInst *ptr = self->CreateCall2(Callee, Arg1, Arg2);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1752,9 +1735,9 @@ static KMETHOD IRBuilder_createCall3(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *Callee = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *Arg1 = konoha::object_cast<Value *>(sfp[2].o);
-	Value *Arg2 = konoha::object_cast<Value *>(sfp[3].o);
-	Value *Arg3 = konoha::object_cast<Value *>(sfp[4].o);
+	Value *Arg1 = konoha::object_cast<Value *>(sfp[2].asObject);
+	Value *Arg2 = konoha::object_cast<Value *>(sfp[3].asObject);
+	Value *Arg3 = konoha::object_cast<Value *>(sfp[4].asObject);
 	CallInst *ptr = self->CreateCall3(Callee, Arg1, Arg2, Arg3);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1765,10 +1748,10 @@ static KMETHOD IRBuilder_createCall4(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *Callee = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *Arg1 = konoha::object_cast<Value *>(sfp[2].o);
-	Value *Arg2 = konoha::object_cast<Value *>(sfp[3].o);
-	Value *Arg3 = konoha::object_cast<Value *>(sfp[4].o);
-	Value *Arg4 = konoha::object_cast<Value *>(sfp[5].o);
+	Value *Arg1 = konoha::object_cast<Value *>(sfp[2].asObject);
+	Value *Arg2 = konoha::object_cast<Value *>(sfp[3].asObject);
+	Value *Arg3 = konoha::object_cast<Value *>(sfp[4].asObject);
+	Value *Arg4 = konoha::object_cast<Value *>(sfp[5].asObject);
 	CallInst *ptr = self->CreateCall4(Callee, Arg1, Arg2, Arg3, Arg4);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1779,11 +1762,11 @@ static KMETHOD IRBuilder_createCall5(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *Callee = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *Arg1 = konoha::object_cast<Value *>(sfp[2].o);
-	Value *Arg2 = konoha::object_cast<Value *>(sfp[3].o);
-	Value *Arg3 = konoha::object_cast<Value *>(sfp[4].o);
-	Value *Arg4 = konoha::object_cast<Value *>(sfp[5].o);
-	Value *Arg5 = konoha::object_cast<Value *>(sfp[6].o);
+	Value *Arg1 = konoha::object_cast<Value *>(sfp[2].asObject);
+	Value *Arg2 = konoha::object_cast<Value *>(sfp[3].asObject);
+	Value *Arg3 = konoha::object_cast<Value *>(sfp[4].asObject);
+	Value *Arg4 = konoha::object_cast<Value *>(sfp[5].asObject);
+	Value *Arg5 = konoha::object_cast<Value *>(sfp[6].asObject);
 	CallInst *ptr = self->CreateCall5(Callee, Arg1, Arg2, Arg3, Arg4, Arg5);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1807,8 +1790,8 @@ static KMETHOD IRBuilder_createSelect(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *C = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *True = konoha::object_cast<Value *>(sfp[2].o);
-	Value *False = konoha::object_cast<Value *>(sfp[3].o);
+	Value *True = konoha::object_cast<Value *>(sfp[2].asObject);
+	Value *False = konoha::object_cast<Value *>(sfp[3].asObject);
 	Value *ptr = self->CreateSelect(C, True, False);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1819,7 +1802,7 @@ static KMETHOD IRBuilder_createVAArg(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *List = konoha::object_cast<Value *>(sfp[1].asObject);
-	Type *Ty = konoha::object_cast<Type *>(sfp[2].o);
+	Type *Ty = konoha::object_cast<Type *>(sfp[2].asObject);
 	VAArgInst *ptr = self->CreateVAArg(List, Ty);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1830,7 +1813,7 @@ static KMETHOD IRBuilder_createExtractElement(KonohaContext *kctx, KonohaStack *
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *Vec = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *Idx = konoha::object_cast<Value *>(sfp[2].o);
+	Value *Idx = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreateExtractElement(Vec, Idx);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1841,8 +1824,8 @@ static KMETHOD IRBuilder_createInsertElement(KonohaContext *kctx, KonohaStack *s
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *Vec = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *NewElt = konoha::object_cast<Value *>(sfp[2].o);
-	Value *Idx = konoha::object_cast<Value *>(sfp[3].o);
+	Value *NewElt = konoha::object_cast<Value *>(sfp[2].asObject);
+	Value *Idx = konoha::object_cast<Value *>(sfp[3].asObject);
 	Value *ptr = self->CreateInsertElement(Vec, NewElt, Idx);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1853,8 +1836,8 @@ static KMETHOD IRBuilder_createShuffleVector(KonohaContext *kctx, KonohaStack *s
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *V1 = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *V2 = konoha::object_cast<Value *>(sfp[2].o);
-	Value *Mask = konoha::object_cast<Value *>(sfp[3].o);
+	Value *V2 = konoha::object_cast<Value *>(sfp[2].asObject);
+	Value *Mask = konoha::object_cast<Value *>(sfp[3].asObject);
 	Value *ptr = self->CreateShuffleVector(V1, V2, Mask);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1878,7 +1861,7 @@ static KMETHOD IRBuilder_createShuffleVector(KonohaContext *kctx, KonohaStack *s
 //{
 //	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 //	Value *Agg = konoha::object_cast<Value *>(sfp[1].asObject);
-//	Value *Val = konoha::object_cast<Value *>(sfp[2].o);
+//	Value *Val = konoha::object_cast<Value *>(sfp[2].asObject);
 //	kArray *Idxs = sfp[2].asArray;
 //	std::vector<int> List;
 //	konoha::convert_array_int(List, Idxs);
@@ -1912,7 +1895,7 @@ static KMETHOD IRBuilder_createPtrDiff(KonohaContext *kctx, KonohaStack *sfp)
 {
 	IRBuilder<> *self = konoha::object_cast<IRBuilder<> *>(sfp[0].asObject);
 	Value *LHS = konoha::object_cast<Value *>(sfp[1].asObject);
-	Value *RHS = konoha::object_cast<Value *>(sfp[2].o);
+	Value *RHS = konoha::object_cast<Value *>(sfp[2].asObject);
 	Value *ptr = self->CreatePtrDiff(LHS, RHS);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -1995,7 +1978,7 @@ static KMETHOD BasicBlock_insertBefore(KonohaContext *kctx _UNUSED_, KonohaStack
 {
 	BasicBlock *self = konoha::object_cast<BasicBlock *>(sfp[0].asObject);
 	Instruction *inst0 = konoha::object_cast<Instruction *>(sfp[1].asObject);
-	Instruction *inst1 = konoha::object_cast<Instruction *>(sfp[2].o);
+	Instruction *inst1 = konoha::object_cast<Instruction *>(sfp[2].asObject);
 	self->getInstList().insert(inst0, inst1);
 	RETURNvoid_();
 }
@@ -2094,7 +2077,7 @@ static KMETHOD Module_getOrInsertFunction(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Module *self = konoha::object_cast<Module *>(sfp[0].asObject);
 	kString *name = sfp[1].asString;
-	FunctionType *fnTy = konoha::object_cast<FunctionType *>(sfp[2].o);
+	FunctionType *fnTy = konoha::object_cast<FunctionType *>(sfp[2].asObject);
 	Function *ptr = cast<Function>(self->getOrInsertFunction(S_text(name), fnTy));
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -2104,8 +2087,8 @@ static KMETHOD Module_getOrInsertFunction(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Function_create(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *name = sfp[1].asString;
-	FunctionType *fnTy = konoha::object_cast<FunctionType *>(sfp[2].o);
-	Module *m = konoha::object_cast<Module *>(sfp[3].o);
+	FunctionType *fnTy = konoha::object_cast<FunctionType *>(sfp[2].asObject);
+	Module *m = konoha::object_cast<Module *>(sfp[3].asObject);
 	kint_t v = sfp[4].intValue;
 	GlobalValue::LinkageTypes linkage = (GlobalValue::LinkageTypes) v;
 	Function *ptr = Function::Create(fnTy, linkage, S_text(name), m);
@@ -2165,7 +2148,7 @@ static int BasicBlock_compareTo(kObject *p1, kObject *p2)
 static KMETHOD BasicBlock_create(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Function * parent = konoha::object_cast<Function *>(sfp[1].asObject);
-	kString *name = sfp[2].s;
+	kString *name = sfp[2].asString;
 	const char *bbname = "";
 	if (IS_NOTNULL(name)) {
 		bbname = S_text(name);
@@ -2254,7 +2237,7 @@ static KMETHOD StructType_create(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *args = sfp[1].asArray;
 #if LLVM_VERSION > 209
-	kString *name = sfp[2].s;
+	kString *name = sfp[2].asString;
 #endif
 	kbool_t isPacked = sfp[3].boolValue;
 	StructType *ptr;
@@ -2350,10 +2333,10 @@ static KMETHOD ExecutionEngine_addGlobalMapping(KonohaContext *kctx _UNUSED_, Ko
 static KMETHOD GlobalVariable_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Module *m     = konoha::object_cast<Module *>(sfp[1].asObject);
-	Type *ty      = konoha::object_cast<Type *>(sfp[2].o);
-	Constant *c   = konoha::object_cast<Constant *>(sfp[3].o);
+	Type *ty      = konoha::object_cast<Type *>(sfp[2].asObject);
+	Constant *c   = konoha::object_cast<Constant *>(sfp[3].asObject);
 	GlobalValue::LinkageTypes linkage = (GlobalValue::LinkageTypes) sfp[4].intValue;
-	kString *name = sfp[5].s;
+	kString *name = sfp[5].asString;
 	bool isConstant = (c) ? true : false;
 	GlobalVariable *ptr = new GlobalVariable(*m, ty, isConstant, linkage, c, S_text(name));
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
@@ -2521,7 +2504,7 @@ static KMETHOD Function_getArguments(KonohaContext *kctx, KonohaStack *sfp)
 	/*FIXME Generics Array */
 	//ktype_t rtype = sfp[K_MTDIDX].mtdNC->pa->rtype;
 	//ktype_t cid = CT_(rtype)->p1;
-	kArray *a = new_(Array, 0);
+	kArray *a = new_(Array, 0, OnStack);
 	for (Function::arg_iterator I = func->arg_begin(), E = func->arg_end();
 			I != E; ++I) {
 		Value *v = I;
@@ -2860,7 +2843,7 @@ static KMETHOD ConstantExpr_getOffsetOf(KonohaContext *kctx, KonohaStack *sfp)
 //static KMETHOD ConstantExpr_getOffsetOf(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	Type* ty = konoha::object_cast<Type*>(sfp[1].asObject);
-//	Constant* fieldNo = konoha::object_cast<Constant*>(sfp[2].o);
+//	Constant* fieldNo = konoha::object_cast<Constant*>(sfp[2].asObject);
 //	Constant* ptr = ConstantExpr::getOffsetOf(ty, fieldNo);
 //	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 //	RETURN_(p);
@@ -2904,7 +2887,7 @@ static KMETHOD ConstantExpr_getNot(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getAdd(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr;
 #if LLVM_VERSION <= 209
 	ptr = ConstantExpr::getAdd(c1, c2);
@@ -2921,7 +2904,7 @@ static KMETHOD ConstantExpr_getAdd(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getFAdd(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getFAdd(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -2931,7 +2914,7 @@ static KMETHOD ConstantExpr_getFAdd(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getSub(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr;
 #if LLVM_VERSION <= 209
 	ptr = ConstantExpr::getSub(c1, c2);
@@ -2948,7 +2931,7 @@ static KMETHOD ConstantExpr_getSub(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getFSub(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getFSub(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -2958,7 +2941,7 @@ static KMETHOD ConstantExpr_getFSub(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getMul(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr;
 #if LLVM_VERSION <= 209
 	ptr = ConstantExpr::getMul(c1, c2);
@@ -2975,7 +2958,7 @@ static KMETHOD ConstantExpr_getMul(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getFMul(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getFMul(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -2985,7 +2968,7 @@ static KMETHOD ConstantExpr_getFMul(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getUDiv(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr;
 #if LLVM_VERSION <= 209
 	ptr = ConstantExpr::getUDiv(c1, c2);
@@ -3001,7 +2984,7 @@ static KMETHOD ConstantExpr_getUDiv(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getSDiv(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr;
 #if LLVM_VERSION <= 209
 	ptr = ConstantExpr::getSDiv(c1, c2);
@@ -3017,7 +3000,7 @@ static KMETHOD ConstantExpr_getSDiv(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getFDiv(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getFDiv(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3027,7 +3010,7 @@ static KMETHOD ConstantExpr_getFDiv(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getURem(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getURem(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3037,7 +3020,7 @@ static KMETHOD ConstantExpr_getURem(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getSRem(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getSRem(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3047,7 +3030,7 @@ static KMETHOD ConstantExpr_getSRem(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getFRem(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getFRem(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3057,7 +3040,7 @@ static KMETHOD ConstantExpr_getFRem(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getAnd(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getAnd(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3067,7 +3050,7 @@ static KMETHOD ConstantExpr_getAnd(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getOr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getOr(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3077,7 +3060,7 @@ static KMETHOD ConstantExpr_getOr(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getXor(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getXor(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3087,7 +3070,7 @@ static KMETHOD ConstantExpr_getXor(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getShl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr;
 #if LLVM_VERSION <= 209
 	ptr = ConstantExpr::getShl(c1, c2);
@@ -3104,7 +3087,7 @@ static KMETHOD ConstantExpr_getShl(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getLShr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr;
 #if LLVM_VERSION <= 209
 	ptr = ConstantExpr::getLShr(c1, c2);
@@ -3120,7 +3103,7 @@ static KMETHOD ConstantExpr_getLShr(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getAShr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr;
 #if LLVM_VERSION <= 209
 	ptr = ConstantExpr::getAShr(c1, c2);
@@ -3136,7 +3119,7 @@ static KMETHOD ConstantExpr_getAShr(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getTrunc(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Type* ty = konoha::object_cast<Type*>(sfp[2].o);
+	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getTrunc(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3146,7 +3129,7 @@ static KMETHOD ConstantExpr_getTrunc(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getSExt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Type* ty = konoha::object_cast<Type*>(sfp[2].o);
+	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getSExt(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3156,7 +3139,7 @@ static KMETHOD ConstantExpr_getSExt(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getZExt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Type* ty = konoha::object_cast<Type*>(sfp[2].o);
+	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getZExt(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3166,7 +3149,7 @@ static KMETHOD ConstantExpr_getZExt(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getFPTrunc(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Type* ty = konoha::object_cast<Type*>(sfp[2].o);
+	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getFPTrunc(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3176,7 +3159,7 @@ static KMETHOD ConstantExpr_getFPTrunc(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getFPExtend(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Type* ty = konoha::object_cast<Type*>(sfp[2].o);
+	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getFPExtend(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3186,7 +3169,7 @@ static KMETHOD ConstantExpr_getFPExtend(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getUIToFP(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Type* ty = konoha::object_cast<Type*>(sfp[2].o);
+	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getUIToFP(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3196,7 +3179,7 @@ static KMETHOD ConstantExpr_getUIToFP(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getSIToFP(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Type* ty = konoha::object_cast<Type*>(sfp[2].o);
+	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getSIToFP(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3206,7 +3189,7 @@ static KMETHOD ConstantExpr_getSIToFP(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getFPToUI(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Type* ty = konoha::object_cast<Type*>(sfp[2].o);
+	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getFPToUI(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3216,7 +3199,7 @@ static KMETHOD ConstantExpr_getFPToUI(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getFPToSI(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Type* ty = konoha::object_cast<Type*>(sfp[2].o);
+	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getFPToSI(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3226,7 +3209,7 @@ static KMETHOD ConstantExpr_getFPToSI(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getPtrToInt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Type* ty = konoha::object_cast<Type*>(sfp[2].o);
+	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getPtrToInt(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3236,7 +3219,7 @@ static KMETHOD ConstantExpr_getPtrToInt(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getIntToPtr(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Type* ty = konoha::object_cast<Type*>(sfp[2].o);
+	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getIntToPtr(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3246,7 +3229,7 @@ static KMETHOD ConstantExpr_getIntToPtr(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getBitCast(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Type* ty = konoha::object_cast<Type*>(sfp[2].o);
+	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getBitCast(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3274,7 +3257,7 @@ static KMETHOD ConstantExpr_getNUWNeg(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getNSWAdd(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getNSWAdd(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3284,7 +3267,7 @@ static KMETHOD ConstantExpr_getNSWAdd(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getNUWAdd(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getNUWAdd(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3294,7 +3277,7 @@ static KMETHOD ConstantExpr_getNUWAdd(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getNSWSub(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getNSWSub(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3304,7 +3287,7 @@ static KMETHOD ConstantExpr_getNSWSub(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getNUWSub(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getNUWSub(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3314,7 +3297,7 @@ static KMETHOD ConstantExpr_getNUWSub(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getNSWMul(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getNSWMul(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3324,7 +3307,7 @@ static KMETHOD ConstantExpr_getNSWMul(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getNUWMul(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getNUWMul(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3338,7 +3321,7 @@ static KMETHOD ConstantExpr_getNSWShl(KonohaContext *kctx, KonohaStack *sfp)
 	LLVM_TODO("NO SUPPORT");
 #else
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getNSWShl(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3353,7 +3336,7 @@ static KMETHOD ConstantExpr_getNUWShl(KonohaContext *kctx, KonohaStack *sfp)
 	LLVM_TODO("NO SUPPORT");
 #else
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getNUWShl(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3364,7 +3347,7 @@ static KMETHOD ConstantExpr_getNUWShl(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getExactSDiv(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getExactSDiv(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3378,7 +3361,7 @@ static KMETHOD ConstantExpr_getExactUDiv(KonohaContext *kctx, KonohaStack *sfp)
 	LLVM_TODO("NO SUPPORT");
 #else
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getExactUDiv(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3393,7 +3376,7 @@ static KMETHOD ConstantExpr_getExactAShr(KonohaContext *kctx, KonohaStack *sfp)
 	LLVM_TODO("NO SUPPORT");
 #else
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getExactAShr(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3408,7 +3391,7 @@ static KMETHOD ConstantExpr_getExactLShr(KonohaContext *kctx, KonohaStack *sfp)
 	LLVM_TODO("NO SUPPORT");
 #else
 	Constant* c1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* c2 = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getExactLShr(c1, c2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3419,7 +3402,7 @@ static KMETHOD ConstantExpr_getExactLShr(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getZExtOrBitCast(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Type* ty = konoha::object_cast<Type*>(sfp[2].o);
+	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getZExtOrBitCast(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3429,7 +3412,7 @@ static KMETHOD ConstantExpr_getZExtOrBitCast(KonohaContext *kctx, KonohaStack *s
 static KMETHOD ConstantExpr_getSExtOrBitCast(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Type* ty = konoha::object_cast<Type*>(sfp[2].o);
+	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getSExtOrBitCast(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3439,7 +3422,7 @@ static KMETHOD ConstantExpr_getSExtOrBitCast(KonohaContext *kctx, KonohaStack *s
 static KMETHOD ConstantExpr_getTruncOrBitCast(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Type* ty = konoha::object_cast<Type*>(sfp[2].o);
+	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getTruncOrBitCast(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3449,7 +3432,7 @@ static KMETHOD ConstantExpr_getTruncOrBitCast(KonohaContext *kctx, KonohaStack *
 static KMETHOD ConstantExpr_getPointerCast(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Type* ty = konoha::object_cast<Type*>(sfp[2].o);
+	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getPointerCast(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3459,7 +3442,7 @@ static KMETHOD ConstantExpr_getPointerCast(KonohaContext *kctx, KonohaStack *sfp
 static KMETHOD ConstantExpr_getIntegerCast(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Type* ty = konoha::object_cast<Type*>(sfp[2].o);
+	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
 	bool isSigned = sfp[3].boolValue;
 	Constant* ptr = ConstantExpr::getIntegerCast(c, ty, isSigned);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
@@ -3470,7 +3453,7 @@ static KMETHOD ConstantExpr_getIntegerCast(KonohaContext *kctx, KonohaStack *sfp
 static KMETHOD ConstantExpr_getFPCast(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Type* ty = konoha::object_cast<Type*>(sfp[2].o);
+	Type* ty = konoha::object_cast<Type*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getFPCast(c, ty);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3480,8 +3463,8 @@ static KMETHOD ConstantExpr_getFPCast(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getSelect(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* v1 = konoha::object_cast<Constant*>(sfp[2].o);
-	Constant* v2 = konoha::object_cast<Constant*>(sfp[3].o);
+	Constant* v1 = konoha::object_cast<Constant*>(sfp[2].asObject);
+	Constant* v2 = konoha::object_cast<Constant*>(sfp[3].asObject);
 	Constant* ptr = ConstantExpr::getSelect(c, v1, v2);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3504,7 +3487,7 @@ static KMETHOD ConstantExpr_getSelect(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD ConstantExpr_getElementPtr0(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* idx = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* idx = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr;
 #if LLVM_VERSION <= 209
 	Constant *IdxList[] = {idx};
@@ -3554,7 +3537,7 @@ static KMETHOD ConstantExpr_getInBoundsGetElementPtr0(KonohaContext *kctx, Konoh
 {
 	Constant* ptr;
 	Constant* c = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* idx = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* idx = konoha::object_cast<Constant*>(sfp[2].asObject);
 #if LLVM_VERSION <= 209
 	Constant *IdxList[] = {idx};
 	ptr = ConstantExpr::getInBoundsGetElementPtr(c, IdxList, 0);
@@ -3588,7 +3571,7 @@ static KMETHOD ConstantExpr_getInBoundsGetElementPtr(KonohaContext *kctx, Konoha
 static KMETHOD ConstantExpr_getExtractElement(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* vec = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* idx = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* idx = konoha::object_cast<Constant*>(sfp[2].asObject);
 	Constant* ptr = ConstantExpr::getExtractElement(vec, idx);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3598,8 +3581,8 @@ static KMETHOD ConstantExpr_getExtractElement(KonohaContext *kctx, KonohaStack *
 static KMETHOD ConstantExpr_getInsertElement(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* vec = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* elt = konoha::object_cast<Constant*>(sfp[2].o);
-	Constant* idx = konoha::object_cast<Constant*>(sfp[3].o);
+	Constant* elt = konoha::object_cast<Constant*>(sfp[2].asObject);
+	Constant* idx = konoha::object_cast<Constant*>(sfp[3].asObject);
 	Constant* ptr = ConstantExpr::getInsertElement(vec, elt, idx);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3609,8 +3592,8 @@ static KMETHOD ConstantExpr_getInsertElement(KonohaContext *kctx, KonohaStack *s
 static KMETHOD ConstantExpr_getShuffleVector(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* v1 = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* v2 = konoha::object_cast<Constant*>(sfp[2].o);
-	Constant* mask = konoha::object_cast<Constant*>(sfp[3].o);
+	Constant* v2 = konoha::object_cast<Constant*>(sfp[2].asObject);
+	Constant* mask = konoha::object_cast<Constant*>(sfp[3].asObject);
 	Constant* ptr = ConstantExpr::getShuffleVector(v1, v2, mask);
 	kObject* p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	RETURN_(p);
@@ -3637,7 +3620,7 @@ static KMETHOD ConstantExpr_getExtractValue(KonohaContext *kctx, KonohaStack *sf
 static KMETHOD ConstantExpr_getInsertValue(KonohaContext *kctx, KonohaStack *sfp)
 {
 	Constant* Agg = konoha::object_cast<Constant*>(sfp[1].asObject);
-	Constant* val = konoha::object_cast<Constant*>(sfp[2].o);
+	Constant* val = konoha::object_cast<Constant*>(sfp[2].asObject);
 	kArray* _list = sfp[3].asArray;
 	std::vector<unsigned> idxs(_list->kintItems, _list->kintItems+kArray_size(_list));
 	Constant* ptr;
@@ -4422,7 +4405,7 @@ static KMETHOD Instruction_setMetadata(KonohaContext *kctx _UNUSED_, KonohaStack
 #else
 	Instruction *inst = konoha::object_cast<Instruction *>(sfp[0].asObject);
 	Module *m = konoha::object_cast<Module *>(sfp[1].asObject);
-	kString *Str = sfp[2].s;
+	kString *Str = sfp[2].asString;
 	kint_t N = Int_to(kint_t,sfp[3]);
 	Value *Info[] = {
 		ConstantInt::get(Type::getInt32Ty(getGlobalContext()), N)
@@ -4602,7 +4585,7 @@ static void kmodllvm_setup(KonohaContext *kctx, struct KonohaModule *def, int ne
 	(void)kctx;(void)def;(void)newctx;
 }
 
-static void kmodllvm_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, kObjectVisitor *visitor)
+static void kmodllvm_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
 {
 	(void)kctx;(void)baseh;
 }
