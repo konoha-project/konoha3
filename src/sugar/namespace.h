@@ -493,7 +493,7 @@ static int comprMethod(const void *a, const void *b)
 
 static void kMethodList_matchMethod(KonohaContext *kctx, kArray *methodList, const size_t *sorted, ktype_t typeId, MethodMatchFunc MatchMethod, MethodMatch *option)
 {
-	size_t i, min = 0, max = sorted[0];
+	long i, min = 0, max = sorted[0];
 	long optkey = ((long)typeId << (sizeof(kshort_t)*8)) | option->mn;
 	if(kArray_size(methodList) - max > 8) {
 		max = kArray_size(methodList);

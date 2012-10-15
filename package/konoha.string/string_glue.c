@@ -88,7 +88,7 @@ typedef struct InlineString {
 	char inline_text[SIZEOF_INLINETEXT];
 } InlineString;
 
-static inline uint32_t S_flag(kStringBase *s)
+static inline uint32_t kStringBase_flag(kStringBase *s)
 {
 	uint32_t flag = ((~0U) & (s)->h.magicflag) >> S_FLAG_MASK_BASE;
 	DBG_ASSERT(flag <= S_FLAG_ROPE);
@@ -97,12 +97,12 @@ static inline uint32_t S_flag(kStringBase *s)
 
 static inline int kStringBase_isRope(kStringBase *s)
 {
-	return S_flag(s) == S_FLAG_ROPE;
+	return kStringBase_flag(s) == S_FLAG_ROPE;
 }
 
 static inline int kStringBase_isLiner(kStringBase *s)
 {
-	return S_flag(s) == S_FLAG_LINER;
+	return kStringBase_flag(s) == S_FLAG_LINER;
 }
 
 static void kStringBase_setFlag(kStringBase *s, uint32_t mask)
@@ -212,7 +212,7 @@ static kString *new_kString(KonohaContext *kctx, kArray *gcstack, const char *te
 static void String2_free(KonohaContext *kctx, kObject *o)
 {
 	kStringBase *base = (kStringBase*) o;
-	if((S_flag(base) & S_FLAG_EXTERNAL) == S_FLAG_LINER) {
+	if((kStringBase_flag(base) & S_FLAG_EXTERNAL) == S_FLAG_LINER) {
 		assert(((kLinerString *)base)->text == ((kString*)base)->buf);
 		KFree(((kLinerString *)base)->text, StringBase_length(base)+1);
 	}
@@ -223,7 +223,7 @@ static void write_text(kStringBase *base, char *dest, int size)
 	kRopeString *str;
 	size_t len;
 	while (1) {
-		switch (S_flag(base)) {
+		switch (kStringBase_flag(base)) {
 			case S_FLAG_LINER:
 			case S_FLAG_EXTERNAL:
 				memcpy(dest, ((kLinerString *) base)->text, size);
@@ -257,7 +257,7 @@ static kLinerString *kRopeString_flatten(KonohaContext *kctx, kRopeString *rope)
 
 static char *String_getReference(KonohaContext *kctx, kStringBase *s)
 {
-	uint32_t flag = S_flag(s);
+	uint32_t flag = kStringBase_flag(s);
 	switch (flag) {
 		case S_FLAG_LINER:
 		case S_FLAG_EXTERNAL:
