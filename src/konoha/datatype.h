@@ -530,19 +530,6 @@ static void kNameSpace_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor 
 {
 	kNameSpace *ns = (kNameSpace*)o;
 	KREFTRACEv(ns->NameSpaceConstList);
-//	KLIB kNameSpace_reftraceSugarExtension(kctx, ns, visitor);
-//	size_t i, size = kNameSpace_sizeConstTable(ns);
-//	BEGIN_REFTRACE(size + 5);
-//	for(i = 0; i < size; i++) {
-//		if(Symbol_isBoxedKey(ns->constTable.keyValueItems[i].key)) {
-//			KREFTRACEv(ns->constTable.keyValueItems[i].ObjectValue);
-//		}
-//	}
-//	KREFTRACEv(ns->methodList);
-//	KREFTRACEn(ns->parentNULL);
-//	KREFTRACEn(ns->globalObjectNULL);
-//	KREFTRACEn(ns->StmtPatternListNULL);
-//	END_REFTRACE();
 }
 
 static void kNameSpace_free(KonohaContext *kctx, kObject *o)
@@ -580,7 +567,7 @@ static void Func_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visit
 static KonohaClass *T_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass *self)
 {
 	kParam *cparam = CT_cparam(self);
-	DBG_P("ct=%s, self=%s", CT_t(ct), CT_t(self));
+	//DBG_P("ct=%s, self=%s", CT_t(ct), CT_t(self));
 	DBG_ASSERT(ct->optvalue < cparam->psize);
 	KonohaClass *pct = CT_(cparam->paramtypeItems[ct->optvalue].ty);
 	return pct->realtype(kctx, pct, self);
@@ -733,7 +720,7 @@ static KonohaClass *KonohaClass_extendedBody(KonohaContext *kctx, KonohaClass *c
 
 static KonohaClass *Generics_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass *self)
 {
-	DBG_P("trying resolve generic type: %s %s", CT_t(ct), CT_t(self));
+	//DBG_P("trying resolve generic type: %s %s", CT_t(ct), CT_t(self));
 	kParam *param = CT_cparam(ct);
 	int i;
 	kparamtype_t *p = ALLOCA(kparamtype_t, param->psize);
@@ -746,7 +733,7 @@ static KonohaClass *Generics_realtype(KonohaContext *kctx, KonohaClass *ct, Kono
 
 static KonohaClass *Func_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass *self)
 {
-	DBG_P("trying resolve generic type: %s %s", CT_t(ct), CT_t(self));
+	//DBG_P("trying resolve generic type: %s %s", CT_t(ct), CT_t(self));
 	KonohaClass *cReturn = CT_(ct->p0);
 	ktype_t rtype = cReturn->realtype(kctx, cReturn, self)->typeId;
 	kParam *param = CT_cparam(ct);
@@ -772,7 +759,7 @@ static void checkTypeVar(KonohaContext *kctx, KonohaClassVar *newct, ktype_t rty
 		}
 	}
 	if(isTypeVar) {
-		DBG_P("Generics %s has TypeVar", CT_t(newct));
+		//DBG_P("Generics %s has TypeVar", CT_t(newct));
 		newct->cflag |= kClass_TypeVar;
 		newct->realtype = newct->baseTypeId == TY_Func ? Func_realtype : Generics_realtype;
 	}

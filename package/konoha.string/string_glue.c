@@ -46,7 +46,6 @@ extern "C" {
  * ASCII-String    | xxxxxxxxxxxxxxxxxxxxxxxxx1xxxxxx
  * Pooled-String   | xxxxxxxxxxxxxxxxxxxxxxxxxx1xxxxx
  */
-#define S_isRope(o)          (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
 
 #define S_FLAG_MASK_BASE (7)
 #define S_FLAG_LINER     ((1UL << (0)))
@@ -62,6 +61,7 @@ extern "C" {
 #define MASK_EXTERNAL ((S_FLAG_EXTERNAL) << S_FLAG_MASK_BASE)
 
 #define S_len(s) ((s)->length)
+
 typedef struct StringBase {
 	KonohaObjectHeader h;
 	size_t length;
@@ -92,7 +92,7 @@ typedef struct InlineString {
 static inline uint32_t S_flag(StringBase *s)
 {
 	uint32_t flag = ((~0U) & (s)->h.magicflag) >> S_FLAG_MASK_BASE;
-	assert(flag <= S_FLAG_ROPE);
+	DBG_ASSERT(flag <= S_FLAG_ROPE);
 	return flag;
 }
 
@@ -108,12 +108,12 @@ static inline int StringBase_isLiner(StringBase *s)
 
 static void StringBase_setFlag(StringBase *s, uint32_t mask)
 {
-	s->h.magicflag |= mask;
+	s->h.magicflag |= (uintptr_t)mask;
 }
 
 static void StringBase_unsetFlag(StringBase *s, uint32_t mask)
 {
-	s->h.magicflag ^= mask;
+	s->h.magicflag ^= (uintptr_t)mask;
 }
 
 static StringBase *new_StringBase(KonohaContext *kctx, kArray* gcstack, uint32_t mask)
