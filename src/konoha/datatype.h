@@ -146,13 +146,13 @@ static void kString_init(KonohaContext *kctx, kObject *o, void *conf)
 	kStringVar *s = (kStringVar*)o;
 	s->text = "";
 	s->bytesize = 0;
-	S_setTextSgm(s, true);
+	kString_set(TextSgm, s, true);
 }
 
 static void kString_free(KonohaContext *kctx, kObject *o)
 {
 	kString *s = (kString*)o;
-	if(S_isMallocText(s)) {
+	if(kString_is(MallocText, s)) {
 		KFree(s->buf, S_size(s) + 1);
 	}
 }
@@ -202,25 +202,24 @@ static void kString_checkASCII(KonohaContext *kctx, kString *s)
 		case 1:     ch |= *p++;
 		} while(--n>0);
 	}
-	S_setASCII((kStringVar*)s, (ch < 128));
+	kString_set(ASCII, (kStringVar*)s, (ch < 128));
 }
 
 static kString* new_kString(KonohaContext *kctx, kArray *gcstack, const char *text, size_t len, int spol)
 {
 	KonohaClass *ct = CT_(TY_String);
-	kStringVar *s = NULL; //knh_PtrMap_getS(kctx, ct->constPoolMapNULL, text, len);
-	if(s != NULL) return s;
+	kStringVar *s = NULL;
 	if(TFLAG_is(int, spol, StringPolicy_TEXT)) {
 		s = (kStringVar*)new_kObject(kctx, gcstack, ct, 0);
 		s->text = text;
 		s->bytesize = len;
-		S_setTextSgm(s, 1);
+		kString_set(TextSgm, s, 1);
 	}
 	else if(len + 1 < sizeof(void*) * 2) {
 		s = (kStringVar*)new_kObject(kctx, gcstack, ct, 0);
 		s->text = s->inline_text;
 		s->bytesize = len;
-		S_setTextSgm(s, 1);
+		kString_set(TextSgm, s, 1);
 		if(text != NULL) {
 			DBG_ASSERT(!TFLAG_is(int, spol, StringPolicy_NOCOPY));
 			memcpy(s->ubuf, text, len);
@@ -231,8 +230,8 @@ static kString* new_kString(KonohaContext *kctx, kArray *gcstack, const char *te
 		s = (kStringVar*)new_kObject(kctx, gcstack, ct, 0);
 		s->bytesize = len;
 		s->buf = (char*)KMalloc_UNTRACE(len+1);
-		S_setTextSgm(s, 0);
-		S_setMallocText(s, 1);
+		kString_set(TextSgm, s, 0);
+		kString_set(MallocText, s, 1);
 		if(text != NULL) {
 			DBG_ASSERT(!TFLAG_is(int, spol, StringPolicy_NOCOPY));
 			memcpy(s->ubuf, text, len);
@@ -240,32 +239,14 @@ static kString* new_kString(KonohaContext *kctx, kArray *gcstack, const char *te
 		s->buf[len] = '\0';
 	}
 	if(TFLAG_is(int, spol, StringPolicy_ASCII)) {
-		S_setASCII(s, 1);
+		kString_set(ASCII, s, 1);
 	}
 	else if(TFLAG_is(int, spol, StringPolicy_UTF8)) {
-		S_setASCII(s, 0);
+		kString_set(ASCII, s, 0);
 	}
 	else {
 		kString_checkASCII(kctx, s);
 	}
-//	if(TFLAG_is(int, policy, StringPolicy_POOL)) {
-//		kmapSN_add(kctx, ct->constPoolMapNO, s);
-//		S_setPooled(s, 1);
-//	}
-	return s;
-}
-
-static kString* new_kStringf(KonohaContext *kctx, kArray *gcstack, int spol, const char *fmt, ...)
-{
-	KGrowingBuffer wb;
-	Kwb_init(&(kctx->stack->cwb), &wb);
-	va_list ap;
-	va_start(ap, fmt);
-	Kwb_vprintf(kctx, &wb, fmt, ap);
-	va_end(ap);
-	const char *text = Kwb_top(kctx, &wb, 1);
-	kString *s = new_kString(kctx, gcstack, text, Kwb_bytesize(&wb), spol);
-	KLIB Kwb_free(&wb);
 	return s;
 }
 
@@ -877,7 +858,7 @@ static KonohaClass *KonohaClass_define(KonohaContext *kctx, kpackageId_t package
 	if(name == NULL) {
 		const char *n = cdef->structname;
 		assert(n != NULL); // structname must be set;
-		ct->classNameSymbol = ksymbolSPOL(n, strlen(n), StringPolicy_ASCII|StringPolicy_POOL|StringPolicy_TEXT, _NEWID);
+		ct->classNameSymbol = ksymbolSPOL(n, strlen(n), StringPolicy_ASCII|StringPolicy_TEXT, _NEWID);
 	}
 	else {
 		ct->classNameSymbol = ksymbolA(S_text(name), S_size(name), _NEWID);
@@ -1033,7 +1014,7 @@ static void initStructData(KonohaContext *kctx)
 	for(i = 0; i <= TY_0; i++) {
 		KonohaClassVar *ct = (KonohaClassVar *)ctt[i];
 		const char *name = ct->DBG_NAME;
-		ct->classNameSymbol = ksymbolSPOL(name, strlen(name), StringPolicy_ASCII|StringPolicy_POOL|StringPolicy_TEXT, _NEWID);
+		ct->classNameSymbol = ksymbolSPOL(name, strlen(name), StringPolicy_ASCII|StringPolicy_TEXT, _NEWID);
 		KonohaClass_setName(kctx, ct, 0);
 	}
 	KLIB Knull(kctx, CT_NameSpace);
@@ -1043,21 +1024,21 @@ static void initKonohaLib(KonohaLibVar *l)
 {
 	l->Kclass                  = Kclass;
 	l->new_kObject             = new_kObject;
-//	l->new_kObjectDontUseThis  = new_kObjectDontUseThis;
 	l->new_kString             = new_kString;
-	l->new_kStringf            = new_kStringf;
-	//l->Kconv  = conv;
+
 	l->kArray_add           = (typeof(l->kArray_add))kArray_add;
 	l->kArray_insert        = (typeof(l->kArray_insert))kArray_insert;
 	l->kArray_clear         = kArray_clear;
-	l->new_kMethod          = new_kMethod;
-	l->Kparamdom            = Kparamdom;
-	l->kMethod_setParam     = kMethod_setParam;
-	l->kMethod_indexOfField = STUB_Method_indexOfField;
+
 	l->KonohaClass_define   = KonohaClass_define;
 	l->Knull = Knull;
 	l->KonohaClass_shortName = KonohaClass_shortName;
 	l->KonohaClass_Generics = KonohaClass_Generics;
+
+	l->new_kMethod          = new_kMethod;
+	l->Kparamdom            = Kparamdom;
+	l->kMethod_setParam     = kMethod_setParam;
+	l->kMethod_indexOfField = STUB_Method_indexOfField;
 }
 
 static void KonohaRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx)

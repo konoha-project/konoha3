@@ -434,7 +434,7 @@ static KMETHOD OutputStream_print(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kOutputStream *out = (kOutputStream*)sfp[0].asObject;
 	kString *text = sfp[1].asString;
-	if(!HAS_ICONV(out->iconv) || S_isASCII(text)) {
+	if(!HAS_ICONV(out->iconv) || kString_is(ASCII, text)) {
 		kOutputStream_write(kctx, out, S_text(text), S_size(text));
 	}
 	else {
@@ -447,7 +447,7 @@ static KMETHOD OutputStream_println(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kOutputStream *out = (kOutputStream*)sfp[0].asObject;
 	kString *text = sfp[1].asString;
-	if(!HAS_ICONV(out->iconv) || S_isASCII(text)) {
+	if(!HAS_ICONV(out->iconv) || kString_is(ASCII, text)) {
 		kOutputStream_write(kctx, out, S_text(text), S_size(text));
 	}
 	else {

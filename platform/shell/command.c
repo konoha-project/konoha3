@@ -512,7 +512,7 @@ static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc
 //{
 //	unsigned long long timer;
 //	KSetElaspedTimer(timer);
-//	KTraceApi(SystemFault|ActionPoint, "test", LogText("start", "test"), LogUint("count", 1), LOG_ERRNO);
+//	KTraceApi(SystemFault|SystemChangePoint, "test", LogText("start", "test"), LogUint("count", 1), LOG_ERRNO);
 //	KTraceApiElapsedTimer(SystemFault, 0/*ms*/, "syslog", timer);
 //}
 

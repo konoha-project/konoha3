@@ -272,8 +272,8 @@ typedef const struct KonohaLibVar    KonohaLib;
 typedef struct KonohaLibVar          KonohaLibVar;
 
 #define TEXTSIZE(T)   T, (sizeof(T) - 1)
-#define PLATAPI (kctx->platApi)->
-#define KLIB    (kctx->klib)->
+#define PLATAPI       (kctx->platApi)->
+#define KLIB          (kctx->klib)->
 
 #define KDEFINE_PACKAGE KonohaPackageHandler
 typedef struct KonohaPackageHandlerVar KonohaPackageHandler;
@@ -338,17 +338,17 @@ typedef enum {
 typedef enum {
 	Unrecord = 0,
 	isRecord = 1,
-	// Fault
-	SystemFault       =  (1<<1),  /* os, file system, etc. */
-	ScriptFault       =  (1<<2),  /* programmer's mistake */
-	DataFault         =  (1<<3),  /* user input, data mistake */
-	ExternalFault     =  (1<<4),  /* networking or remote services */
-	UnknownFault      =  (1<<5),  /* other fault above */
+	// ErrorPoint
+	SystemFault        =  (1<<1),  /* os, file system, etc. */
+	SoftwareFault      =  (1<<2),  /* programmer's mistake */
+	DataFault          =  (1<<3),  /* user input, data mistake */
+	ExternalFault      =  (1<<4),  /* networking or remote services */
+	UnknownFault       =  (1<<5),  /* if you can distingish fault above */
 	// LogPoint
-	PeriodicPoint     =  (1<<6),  /* sampling */
-	PreactionPoint    =  (1<<7),  /* prediction WARN */
-	ActionPoint       =  (1<<8),
-	SecurityAudit     =  (1<<9),  /* security audit */
+	PeriodicPoint      =  (1<<6),  /* sampling */
+	ResponseCheckPoint =  (1<<7),  /* log point to expect a long term action time*/
+	SystemChangePoint  =  (1<<8),  /* log point to make permament change on systems */
+	SecurityAudit      =  (1<<9),  /* security audit */
 	// Otehr flag
 	PrivacyCaution    =  (1<<10), /* including privacy information */
 	// Internal Use
@@ -1032,14 +1032,15 @@ typedef enum {
 #define IS_String(o)              (O_typeId(o) == TY_String)
 
 /* kObject_Local1 is reserved by konoha.string package */
-#define S_isTextSgm(o)       (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local2))
-#define S_setTextSgm(o,b)    TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local2,b)
-#define S_isMallocText(o)    (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local3))
-#define S_setMallocText(o,b) TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local3,b)
-#define S_isASCII(o)         (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local4))
-#define S_setASCII(o,b)      TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local4,b)
-#define S_isPooled(o)        (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local5))
-#define S_setPooled(o,b)     TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local5,b)
+
+#define StringFlag_Reserved   kString_Loacl1
+#define StringFlag_TextSgm    kObject_Local2
+#define StringFlag_MallocText kObject_Local3
+#define StringFlag_ASCII      kObject_Local4
+
+#define kString_is(P, o)        (TFLAG_is(uintptr_t,(o)->h.magicflag,StringFlag_##P))
+#define kString_set(P, o, b)    TFLAG_set(uintptr_t,(o)->h.magicflag,StringFlag_##P,b)
+
 #define SIZEOF_INLINETEXT    (sizeof(void*)*8 - sizeof(kBytes))
 
 typedef const struct kBytesVar kBytes;
@@ -1058,9 +1059,9 @@ typedef enum {
 	StringPolicy_TEXT     =     (1<<0),
 	StringPolicy_ASCII    =     (1<<1),
 	StringPolicy_UTF8     =     (1<<2),
-	StringPolicy_POOL     =     (1<<3),
-	StringPolicy_NOPOOL   =     (1<<5),
-	StringPolicy_NOCOPY   =     (1<<4)
+	StringPolicy_NOCOPY   =     (1<<3),
+	StringPolicy_NOPOOL   =     (1<<4),  /* in the future */
+	////	StringPolicy_POOL     =     (1<<3),
 } StringPolicy;
 
 #define K_NULLTEXT          "null"
@@ -1426,10 +1427,10 @@ struct KonohaLibVar {
 	ksymbol_t           (*Kmap_getcode)(KonohaContext*, KHashMap *, kArray *, const char *, size_t, uintptr_t, int, ksymbol_t);
 
 	KonohaContextVar *(*KonohaContext_init)(KonohaContext *rootContext, const PlatformApi *api);
-	void (*KonohaContext_free)(KonohaContext *rootContext, KonohaContextVar *ctx);
+	void              (*KonohaContext_free)(KonohaContext *rootContext, KonohaContextVar *ctx);
 
 	kfileline_t     (*KfileId)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
-	kpackageId_t      (*KpackageId)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
+	kpackageId_t    (*KpackageId)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
 	ksymbol_t       (*Ksymbol)(KonohaContext*, const char*, size_t, int spol, ksymbol_t def);
 
 	KonohaClass*    (*Kclass)(KonohaContext*, ktype_t, kfileline_t);
@@ -1439,7 +1440,6 @@ struct KonohaLibVar {
 	kbool_t         (*KonohaClass_isSubtype)(KonohaContext*, KonohaClass *, KonohaClass *);
 	kbool_t         (*KonohaClass_addField)(KonohaContext*, KonohaClass *, int flag, ktype_t ty, ksymbol_t sym);
 
-//	kObject*        (*new_kObjectDontUseThis)(KonohaContext*, KonohaClass *, uintptr_t, kArray *gcstackNULL);
 	kObject*        (*new_kObject)(KonohaContext*, kArray *gcstack, KonohaClass *, uintptr_t);
 	kbool_t         (*kObject_isManaged)(KonohaContext*, void *ptr);
 	kObject*        (*Knull)(KonohaContext*, KonohaClass *);
@@ -1451,7 +1451,7 @@ struct KonohaLibVar {
 	void            (*kObject_removeKey)(KonohaContext*, kAbstractObject *, ksymbol_t);
 
 	kString*        (*new_kString)(KonohaContext*, kArray *gcstack, const char *, size_t, int);
-	kString*        (*new_kStringf)(KonohaContext*, kArray *gcstack, int, const char *, ...);
+//	kString*        (*new_kStringf)(KonohaContext*, kArray *gcstack, int, const char *, ...);
 
 	void            (*kArray_add)(KonohaContext*, kArray *, kAbstractObject *);
 	void            (*kArray_insert)(KonohaContext*, kArray *, size_t, kAbstractObject *);
@@ -1516,7 +1516,7 @@ struct KonohaLibVar {
 
 #define PN_konoha                 0
 #define PackageId_sugar           1
-#define PN_(T)                    KLIB KpackageId(kctx, T, sizeof(T)-1, StringPolicy_TEXT|StringPolicy_ASCII|StringPolicy_POOL, _NEWID)
+#define PN_(T)                    KLIB KpackageId(kctx, T, sizeof(T)-1, StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
 
 #define ksymbolA(T, L, DEF)       KLIB Ksymbol(kctx, T, L, StringPolicy_ASCII, DEF)
 #define ksymbolSPOL(T, L, SPOL, DEF)       KLIB Ksymbol(kctx, T, L, SPOL, DEF)

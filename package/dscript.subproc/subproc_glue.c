@@ -350,7 +350,7 @@ static int knh_popen(KonohaContext *kctx, kString* command, subprocData_t *spd, 
 		setsid(); // separation from tty
 		if(!IS_NULL(spd->cwd)) { // TODO!!
 			if(chdir(S_text((spd->cwd))) != 0) {
-				OLDTRACE_SWITCH_TO_KTrace(_ScriptFault,
+				OLDTRACE_SWITCH_TO_KTrace(_SoftwareFault,
 						LogText("@", "chdir"),
 						LogText("cwd", S_text(spd->cwd)),
 						LogUint("errno", errno),
@@ -363,7 +363,7 @@ static int knh_popen(KonohaContext *kctx, kString* command, subprocData_t *spd, 
 		if(spd->shell == 0) {
 			// division of a commnad parameter
 			if(spSplit((char*)S_text(command), args) < 0){
-				OLDTRACE_SWITCH_TO_KTrace(_ScriptFault,
+				OLDTRACE_SWITCH_TO_KTrace(_SoftwareFault,
 						LogText("@", "spSplit"),
 						LogText("command", S_text(command))
 				);
@@ -384,7 +384,7 @@ static int knh_popen(KonohaContext *kctx, kString* command, subprocData_t *spd, 
 			// if its not, they will return with -1.
 			if(spd->shell == 0) {
 				if(execve(args[0], args, envs) == -1) {
-					OLDTRACE_SWITCH_TO_KTrace(_SystemFault | _ScriptFault,
+					OLDTRACE_SWITCH_TO_KTrace(_SystemFault | _SoftwareFault,
 							LogText("@", "execve"),
 							LogUint("errno", errno),
 							LogText("errstr", strerror(errno))
@@ -393,7 +393,7 @@ static int knh_popen(KonohaContext *kctx, kString* command, subprocData_t *spd, 
 			}
 			else {
 				if(execle("/bin/sh", "sh", "-c", S_text(command), NULL, envs) == -1) {
-					OLDTRACE_SWITCH_TO_KTrace(_SystemFault | _ScriptFault,
+					OLDTRACE_SWITCH_TO_KTrace(_SystemFault | _SoftwareFault,
 							LogText("@", "execle"),
 							LogUint("errno", errno),
 							LogText("errstr", strerror(errno))
@@ -403,7 +403,7 @@ static int knh_popen(KonohaContext *kctx, kString* command, subprocData_t *spd, 
 		} else {
 			if(spd->shell == 0) {
 				if(execvp(args[0], args) == -1) {
-					OLDTRACE_SWITCH_TO_KTrace(_SystemFault | _ScriptFault,
+					OLDTRACE_SWITCH_TO_KTrace(_SystemFault | _SoftwareFault,
 							LogText("@", "execvp"),
 							LogUint("errno", errno),
 							LogText("errstr", strerror(errno))
@@ -412,7 +412,7 @@ static int knh_popen(KonohaContext *kctx, kString* command, subprocData_t *spd, 
 			}
 			else {
 				if(execlp("sh", "sh", "-c", S_text(command), NULL) == -1) {
-					OLDTRACE_SWITCH_TO_KTrace(_SystemFault | _ScriptFault,
+					OLDTRACE_SWITCH_TO_KTrace(_SystemFault | _SoftwareFault,
 							LogText("@", "execlp"),
 							LogUint("errno", errno),
 							LogText("errstr", strerror(errno))

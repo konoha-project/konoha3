@@ -190,16 +190,16 @@ static void checkASCII(KonohaContext *kctx, StringBase *s, const char *text, siz
 		case 1:     ch |= *p++;
 		} while(--n>0);
 	}
-	S_setASCII((kStringVar*)s, (ch < 128));
+	kString_set(ASCII, (kStringVar*)s, (ch < 128));
 }
 
 static kString *new_kString(KonohaContext *kctx, kArray *gcstack, const char *text, size_t len, int policy)
 {
 	StringBase *s = (StringBase *) new_StringBase(kctx, gcstack, 0);
 	if(TFLAG_is(int, policy, StringPolicy_ASCII)) {
-		S_setASCII(s, 1);
+		kString_set(ASCII, s, 1);
 	} else if(TFLAG_is(int, policy, StringPolicy_UTF8)) {
-		S_setASCII(s, 0);
+		kString_set(ASCII, s, 0);
 	} else {
 		checkASCII(kctx, s, text, len);
 	}
@@ -341,9 +341,9 @@ static KMETHOD Rope_opADD(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ------------------------------------------------------------------------ */
 
-#define StringPolicy_isASCII(s)       (S_isASCII(s) ? StringPolicy_ASCII : 0)
+#define StringPolicy_isASCII(s)       (kString_is(ASCII, s) ? StringPolicy_ASCII : 0)
 #define S_msize(s)        text_mlen(S_text(s), S_size(s))
-#define S_length(s)       (S_isASCII(s) ? S_size(s) : S_msize(s))
+#define S_length(s)       (kString_is(ASCII, s) ? S_size(s) : S_msize(s))
 #define CT_StringArray0   CT_p0(kctx, CT_Array, TY_String)
 #define S_index(s, n)     ((n < 0) ? S_length(s) + n : n)
 #define S_compare(s0, s1) strncmp(S_text(s0), S_text(s1), (S_size(s0) < S_size(s1)) ? S_size(s1) : S_size(s0))
@@ -382,7 +382,7 @@ static size_t text_msize(const char *text, size_t size)
 
 static kString *new_StringMultiGet_UNSURE(KonohaContext *kctx, kArray *gcstack, kString *s, size_t n)
 {
-	DBG_ASSERT(!S_isASCII(s));
+	DBG_ASSERT(!kString_is(ASCII, s));
 	kString *ret = NULL;
 	const unsigned char *text = (const unsigned char *)S_text(s);
 	const unsigned char *start = text;
@@ -444,7 +444,7 @@ static kint_t kStringMulti_charAt(KonohaContext *kctx, kString *s, size_t n)
 
 static kString *new_SubStringMulti(KonohaContext *kctx, kArray *gcstack, kString *s, size_t moff, size_t mlen)
 {
-	DBG_ASSERT(!S_isASCII(s));
+	DBG_ASSERT(!kString_is(ASCII, s));
 	const unsigned char *text = (const unsigned char *)S_text(s);
 	const unsigned char *start = text;
 	size_t size = S_size(s);
@@ -485,10 +485,10 @@ static kString *new_SubString(KonohaContext *kctx, kArray *gcstack, kString *s0,
 	if(length == 0) {
 		return KNULL(String);
 	}
-	if(S_isASCII(s0)) {
+	if(kString_is(ASCII, s0)) {
 		start = check_index(kctx, start, S_size(s0), sfp[K_RTNIDX].callerFileLine);
 		const char *new_text = S_text(s0) + start;
-		ret = KLIB new_kString(kctx, gcstack, new_text, length, StringPolicy_ASCII|StringPolicy_POOL); // FIXME SPOL
+		ret = KLIB new_kString(kctx, gcstack, new_text, length, StringPolicy_ASCII); // FIXME SPOL
 	}
 	else {
 		ret = new_SubStringMulti(kctx, gcstack, s0, start, length);
@@ -605,7 +605,7 @@ static KMETHOD String_indexOf(KonohaContext *kctx, KonohaStack *sfp)
 		const char *p = strstr(t0, t1);
 		if(p != NULL) {
 			loc = p - t0;
-			if(!S_isASCII(s0)) {
+			if(!kString_is(ASCII, s0)) {
 				loc = text_mlen(t0, (size_t)loc);
 			}
 		}
@@ -634,7 +634,7 @@ static KMETHOD String_indexOfwithStart(KonohaContext *kctx, KonohaStack *sfp)
 	const char *p = strstr(t0, t1);
 	if(p != NULL) {
 		loc = p - t0;
-		if(!S_isASCII(s0)) {
+		if(!kString_is(ASCII, s0)) {
 			loc = text_mlen(t0, (size_t)loc);
 		}
 		KReturnUnboxValue(loc + start);
@@ -648,7 +648,7 @@ static kint_t S_lastIndexOf(KonohaContext *kctx, kString *s0, kString *s1, size_
 	const char *t1 = S_text(s1);
 	int len = S_size(s1);
 	if(len == 0) {
-		return S_isASCII(s0) ? start : text_mlen(t0, start);
+		return kString_is(ASCII, s0) ? start : text_mlen(t0, start);
 	}
 	kint_t loc;
 	for(loc = start - len; loc >= 0; loc--) {
@@ -656,7 +656,7 @@ static kint_t S_lastIndexOf(KonohaContext *kctx, kString *s0, kString *s1, size_
 			if(strncmp(t0 + loc, t1, len) == 0) break;
 		}
 	}
-	if(loc >= 0 && !S_isASCII(s0)) {
+	if(loc >= 0 && !kString_is(ASCII, s0)) {
 		loc = text_mlen(t0, (size_t)loc);
 	}
 	return (loc < 0) ? -1 : loc;
@@ -731,7 +731,7 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	}
 	KLIB Kwb_write(kctx, &wb, start, strlen(start)); // write out remaining string
-	KReturn(KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), StringPolicy_isASCII(s0)|StringPolicy_POOL));
+	KReturn(KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), StringPolicy_isASCII(s0)));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -776,9 +776,9 @@ static KMETHOD String_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s = sfp[0].asString;
 	size_t n = (size_t)sfp[1].intValue;
-	if(S_isASCII(s)) {
+	if(kString_is(ASCII, s)) {
 		n = check_index(kctx, sfp[1].intValue, S_size(s), sfp[K_RTNIDX].callerFileLine);
-		s = KLIB new_kString(kctx, OnStack, S_text(s) + n, 1, StringPolicy_POOL|StringPolicy_ASCII);
+		s = KLIB new_kString(kctx, OnStack, S_text(s) + n, 1, StringPolicy_ASCII);
 	}
 	else {
 		s = new_StringMultiGet_UNSURE(kctx, OnStack, s, n);
@@ -969,7 +969,7 @@ static KMETHOD String_splitWithSeparator(KonohaContext *kctx, KonohaStack *sfp)
 	if(S_size(separator) == 0) {
 		size_t i;
 		for(i = 0; i < S_size(s0); i++) {
-			if(S_isASCII(s0)) {
+			if(kString_is(ASCII, s0)) {
 				KLIB new_kString(kctx, resultArray, S_text(s0) + i, 1, StringPolicy_ASCII);
 			}
 			else {
@@ -1014,7 +1014,7 @@ static KMETHOD String_splitwithSeparatorLimit(KonohaContext *kctx, KonohaStack *
 			limit = length;
 		}
 		for(i = 0; i < limit; i++) {
-			if(S_isASCII(thisString)) {
+			if(kString_is(ASCII, thisString)) {
 				KLIB new_kString(kctx, resultArray, S_text(thisString) + i, 1, StringPolicy_ASCII);
 			}
 			else {

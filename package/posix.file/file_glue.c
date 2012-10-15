@@ -89,7 +89,7 @@ static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_P("fp=%p, filepath=%s", fp, S_text(s));
 	if(fp == NULL) {
 		// TODO: throw
-		OLDTRACE_SWITCH_TO_KTrace(_SystemFault|_ScriptFault,
+		OLDTRACE_SWITCH_TO_KTrace(_SystemFault|_SoftwareFault,
 				LogText("@", "fopen"),
 				LogText("path", S_text(s)),
 				LogUint("mode", mode),

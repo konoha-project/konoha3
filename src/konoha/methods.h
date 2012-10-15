@@ -176,7 +176,7 @@ static KMETHOD String_toInt(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD String_opADD(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *leftHandString = sfp[0].asString, *rightHandString = sfp[1].asString;
-	int spol = (S_isASCII(leftHandString) && S_isASCII(rightHandString)) ? StringPolicy_ASCII : StringPolicy_UTF8;
+	int spol = (kString_is(ASCII, leftHandString) && kString_is(ASCII, rightHandString)) ? StringPolicy_ASCII : StringPolicy_UTF8;
 	kString *s = KLIB new_kString(kctx, OnStack, NULL, S_size(leftHandString)+S_size(rightHandString), spol|StringPolicy_NOCOPY);
 	memcpy(s->buf,  S_text(leftHandString), S_size(leftHandString));
 	memcpy(s->buf + S_size(leftHandString), S_text(rightHandString), S_size(rightHandString));

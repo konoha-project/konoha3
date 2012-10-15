@@ -208,7 +208,7 @@ static void* Kmalloc(KonohaContext *kctx, size_t s)
 {
 	size_t *p = (size_t*)do_malloc(s + sizeof(size_t));
 	if(unlikely(p == NULL)) {
-		OLDTRACE_SWITCH_TO_KTrace(_ScriptFault|_SystemFault,
+		OLDTRACE_SWITCH_TO_KTrace(_SoftwareFault|_SystemFault,
 				LogText("!",  "OutOfMemory"),
 				LogText("at", "malloc"),
 				LogUint("size", s),
