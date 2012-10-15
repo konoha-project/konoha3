@@ -163,8 +163,8 @@ static StringBase *RopeString_new(KonohaContext *kctx, kArray *gcstack, StringBa
 {
 	RopeString *s = (RopeString *) new_StringBase(kctx, gcstack, MASK_ROPE);
 	s->base.length = len;
-	s->left  = left;
-	s->right = right;
+	KFieldInit(s, s->left, left);
+	KFieldInit(s, s->right, right);
 	return (StringBase *) s;
 }
 
@@ -256,7 +256,7 @@ static LinerString *RopeString_flatten(KonohaContext *kctx, RopeString *rope)
 	return RopeString_toLinerString(rope, dest, length);
 }
 
-static char *String_getReference(KonohaContext *kctx, StringBase *s)
+static char *StringBase_getTextReference(KonohaContext *kctx, StringBase *s)
 {
 	uint32_t flag = S_flag(s);
 	switch (flag) {
@@ -297,34 +297,33 @@ static void String2_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vi
 static uintptr_t String2_unbox(KonohaContext *kctx, kObject *o)
 {
 	StringBase *s = (StringBase*)o;
-	return (uintptr_t) String_getReference(kctx, s);
+	return (uintptr_t) StringBase_getTextReference(kctx, s);
 }
 
 static StringBase *StringBase_concat(KonohaContext *kctx, kArray *gcstack, kString *s0, kString *s1)
 {
 	StringBase *left = (StringBase*) s0, *right = (StringBase*) s1;
-	size_t llen, rlen, length;
-
-	llen = S_len(left);
-	if(llen == 0)
+	size_t leftLen = S_len(left);
+	if(leftLen == 0) {
 		return right;
-
-	rlen = S_len(right);
-	if(rlen == 0)
+	}
+	size_t rightLen = S_len(right);
+	if(rightLen == 0) {
 		return left;
+	}
+	size_t length = leftLen + rightLen;
 
-	length = llen + rlen;
-	if(length < SIZEOF_INLINETEXT) {
-		char *s0 = String_getReference(kctx, left);
-		char *s1 = String_getReference(kctx, right);
-		InlineString *ret = (InlineString *) new_StringBase(kctx, gcstack, MASK_INLINE);
+	if(length + 1 < SIZEOF_INLINETEXT) {
+		char *s0 = StringBase_getTextReference(kctx, left);
+		char *s1 = StringBase_getTextReference(kctx, right);
+		InlineString *resultString = (InlineString *) new_StringBase(kctx, gcstack, MASK_INLINE);
 		DBG_ASSERT(length < SIZEOF_INLINETEXT);
-		ret->base.length = length;
-		memcpy(ret->inline_text, s0, llen);
-		memcpy(ret->inline_text + llen, s1, rlen);
-		ret->inline_text[length] = '\0';
-		ret->text = ret->inline_text;
-		return (StringBase *) ret;
+		resultString->base.length = length;
+		memcpy(resultString->inline_text, s0, leftLen);
+		memcpy(resultString->inline_text + leftLen, s1, rightLen);
+		resultString->inline_text[length] = '\0';
+		resultString->text = resultString->inline_text;
+		return (StringBase *) resultString;
 	}
 	return RopeString_new(kctx, gcstack, left, right, length);
 }
