@@ -203,7 +203,7 @@ static KMETHOD Map_new(KonohaContext *kctx, KonohaStack *sfp)
 
 #define TY_Map cMap->typeId
 
-static kbool_t map_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t map_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	kparamtype_t cparam = {TY_Object};
 	KDEFINE_CLASS defMap = {0};
@@ -215,7 +215,7 @@ static kbool_t map_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	defMap.reftrace  = kMap_reftrace;
 	defMap.free      = kMap_free;
 
-	KonohaClass *cMap = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defMap, pline);
+	KonohaClass *cMap = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defMap, trace);
 	int FN_key = MN_("key");
 	int TY_Array0 = CT_p0(kctx, CT_Array, TY_0)->typeId;
 	KDEFINE_METHOD MethodData[] = {
@@ -231,7 +231,7 @@ static kbool_t map_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	return true;
 }
 
-static kbool_t map_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t map_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -248,13 +248,13 @@ static KMETHOD TypeCheck_MapLiteral(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static kbool_t map_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t map_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	SUGAR kNameSpace_addSugarFunc(kctx, ns, KW_BlockPattern, SugarFunc_TypeCheck, new_SugarFunc(ns, TypeCheck_MapLiteral));
 	return true;
 }
 
-static kbool_t map_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t map_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

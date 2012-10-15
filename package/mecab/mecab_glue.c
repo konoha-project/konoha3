@@ -335,7 +335,7 @@ static KMETHOD MecabNode_cost(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ------------------------------------------------------------------------ */
 
-static kbool_t mecab_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char **args, kfileline_t pline)
+static kbool_t mecab_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char **args, KTraceInfo *trace)
 {
 	static KDEFINE_CLASS TaggerDef = {
 		STRUCTNAME(Tagger),
@@ -351,8 +351,8 @@ static kbool_t mecab_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		.free = MecabNode_free,
 	};
 
-	KonohaClass *cTagger = KLIB kNameSpace_defineClass(kctx, ns, NULL, &TaggerDef, pline);
-	KonohaClass *cMecabNode = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MecabNodeDef, pline);
+	KonohaClass *cTagger = KLIB kNameSpace_defineClass(kctx, ns, NULL, &TaggerDef, trace);
+	KonohaClass *cMecabNode = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MecabNodeDef, trace);
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const, _F(Tagger_new),         TY_Tagger,  TY_Tagger, MN_("new"),   0,
@@ -393,21 +393,21 @@ static kbool_t mecab_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 			{_KVi(MECAB_EOS_NODE)},
 			{}
 	};
-	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), trace);
 	return true;
 }
 
-static kbool_t mecab_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t mecab_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t mecab_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t mecab_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t mecab_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t mecab_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

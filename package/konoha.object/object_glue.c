@@ -42,9 +42,9 @@ static KMETHOD Object_getTypeId(KonohaContext *kctx, KonohaStack *sfp)
 #define _Const    kMethod_Const
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t object_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t object_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.subtype", pline);
+	KRequirePackage("konoha.subtype", trace);
 	KDEFINE_INT_CONST ClassData[] = {   // add Object as available
 		{"Object", VirtualType_KonohaClass, (uintptr_t)CT_(TY_Object)},
 		{NULL},
@@ -58,7 +58,7 @@ static kbool_t object_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	return true;
 }
 
-static kbool_t object_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t object_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -85,9 +85,9 @@ static kbool_t object_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 
 // ----------------------------------------------------------------------------
 
-static kbool_t object_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t object_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
-	KImportPackage(ns, "konoha.subtype", pline);
+	KImportPackage(ns, "konoha.subtype", trace);
 //	KDEFINE_SYNTAX SYNTAX[] = {
 //		{ .keyword = SYM_("."), TypeCheck_(Getter) },
 //		{ .keyword = KW_END, },
@@ -96,7 +96,7 @@ static kbool_t object_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 	return true;
 }
 
-static kbool_t object_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t object_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

@@ -83,7 +83,7 @@ static KMETHOD kSHA1_Final(KonohaContext *kctx, KonohaStack *sfp)
 #define TY_openssl  (ct0->typeId)
 #define TY_Log      (ct1->typeId)
 
-static kbool_t openssl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t openssl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	static const char *names[] = {
 		"MD5",
@@ -101,7 +101,7 @@ static kbool_t openssl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	int i;
 	for (i = 0; i < 2; i++) {
 		Def.structname = names[i];
-		tbls[i] = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def, pline);
+		tbls[i] = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def, trace);
 	}
 
 	int FN_x = FN_("x");
@@ -119,17 +119,17 @@ static kbool_t openssl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	return true;
 }
 
-static kbool_t openssl_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t openssl_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t openssl_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t openssl_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t openssl_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t openssl_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

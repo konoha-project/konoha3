@@ -48,7 +48,7 @@ typedef struct {
 // -------------------------------------------------------------------------
 
 kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, size_t len, kfileline_t uline);
-kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, kfileline_t pline);
+kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, KTraceInfo *trace);
 
 // -------------------------------------------------------------------------
 // getopt

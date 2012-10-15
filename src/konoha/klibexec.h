@@ -482,16 +482,16 @@ static void kObject_protoEach(KonohaContext *kctx, kObject *o, void *thunk, feac
 /* debug mode */
 int verbose_debug = 0;
 
-static void Kreportf(KonohaContext *kctx, kinfotag_t level, kfileline_t pline, const char *fmt, ...)
+static void Kreportf(KonohaContext *kctx, kinfotag_t level, KTraceInfo *trace, const char *fmt, ...)
 {
 	if(level == DebugTag && !verbose_debug) return;
 	va_list ap;
 	va_start(ap , fmt);
 	const char *B = PLATAPI beginTag(level);
 	const char *E = PLATAPI endTag(level);
-	if(pline != 0) {
-		const char *file = FileId_t(pline);
-		PLATAPI printf_i("%s - %s(%s:%d) " , B, TAG_t(level), PLATAPI shortFilePath(file), (kushort_t)pline);
+	if(Trace_pline(trace) != 0) {
+		const char *file = FileId_t(trace->pline);
+		PLATAPI printf_i("%s - %s(%s:%d) " , B, TAG_t(level), PLATAPI shortFilePath(file), (kushort_t)trace->pline);
 	}
 	else {
 		PLATAPI printf_i("%s - %s" , B, TAG_t(level));
@@ -532,14 +532,14 @@ static kbool_t KonohaRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp
 	return result;
 }
 
-static void KonohaRuntime_raise(KonohaContext *kctx, int symbol, KonohaStack *sfp, kfileline_t pline, kString *OptionalErrorInfo)
+static void KonohaRuntime_raise(KonohaContext *kctx, int symbol, kString *optionalErrorInfo, KTraceInfo *trace)
 {
 	KonohaStackRuntimeVar *runtime = kctx->stack;
 	KNH_ASSERT(symbol != 0);
 	if(runtime->evaljmpbuf != NULL) {
-		runtime->thrownScriptLine = pline;
-		if(OptionalErrorInfo != NULL) {
-			KUnsafeFieldSet(runtime->OptionalErrorInfo, OptionalErrorInfo);
+		runtime->thrownScriptLine = Trace_pline(trace);
+		if(optionalErrorInfo != NULL) {
+			KUnsafeFieldSet(runtime->OptionalErrorInfo, optionalErrorInfo);
 		}
 		PLATAPI longjmp_i(*runtime->evaljmpbuf, symbol);  // in setjmp 0 means good
 	}

@@ -1274,9 +1274,9 @@ static void kSubproc_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *v
 #define CT_FILE   cFILE
 #define TY_FILE   cFILE->typeId
 
-static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KImportPackage(ns, "posix.file", pline);
+	KImportPackage(ns, "posix.file", trace);
 	KDEFINE_CLASS defSubproc = {
 		STRUCTNAME(Subproc),
 		.cflag    = kClass_Final,
@@ -1285,8 +1285,8 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		.reftrace = kSubproc_reftrace,
 	};
 
-	KonohaClass *cSubproc = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defSubproc, pline);
-//	base->cSubproc= KLIB kNameSpace_defineClass(kctx, ns, NULL, &defSubproc, pline);
+	KonohaClass *cSubproc = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defSubproc, trace);
+//	base->cSubproc= KLIB kNameSpace_defineClass(kctx, ns, NULL, &defSubproc, trace);
 	KonohaClass *cFILE = KLIB kNameSpace_getClass(kctx, ns, "posix.file.FILE", strlen("posix.file.FILE"), NULL);
 
 	kparamtype_t ps = {TY_String, FN_("str")};
@@ -1335,17 +1335,17 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	return true;
 }
 
-static kbool_t subproc_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t subproc_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t subproc_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t subproc_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t subproc_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t subproc_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

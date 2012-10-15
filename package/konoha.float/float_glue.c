@@ -43,7 +43,8 @@ extern "C" {
 
 static void THROW_ZeroDividedException(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
+	KMakeTrace(trace, sfp);
+	KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), NULL, trace);
 }
 
 // --------------------------------------------------------------------------
@@ -247,17 +248,17 @@ static KMETHOD Float_opMINUS(KonohaContext *kctx, KonohaStack *sfp)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KonohaFloatModule *base = (KonohaFloatModule*)KCalloc_UNTRACE(sizeof(KonohaFloatModule), 1);
 	base->h.name     = "float";
 	base->h.setup    = kmodfloat_setup;
 	base->h.reftrace = kmodfloat_reftrace;
 	base->h.free     = kmodfloat_free;
-	KLIB KonohaRuntime_setModule(kctx, MOD_float, &base->h, pline);
+	KLIB KonohaRuntime_setModule(kctx, MOD_float, &base->h, trace);
 
 	/* Use konoha.int package's Parser to parsing FloatLiteral */
-	KRequirePackage("konoha.int", pline);
+	KRequirePackage("konoha.int", trace);
 
 	KDEFINE_CLASS defFloat = {0};
 	SETUNBOXNAME(defFloat, float);
@@ -266,7 +267,7 @@ static kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	defFloat.init = Float_init;
 	defFloat.p     = Float_p;
 
-	base->cFloat = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defFloat, pline);
+	base->cFloat = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defFloat, trace);
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im, _F(Float_opPlus), TY_float, TY_float, MN_("+"), 0,
@@ -305,11 +306,11 @@ static kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		{"NaN", TY_float, NAN},
 		{}
 	};
-	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(FloatData), pline);
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(FloatData), trace);
 	return true;
 }
 
-static kbool_t float_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t float_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -323,7 +324,7 @@ static KMETHOD TypeCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_float, sfp[4].unboxValue));
 }
 
-static kbool_t float_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t float_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("$Float"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_Float, },
@@ -331,11 +332,11 @@ static kbool_t float_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, k
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
 
-	KImportPackage(ns, "konoha.int", pline);
+	KImportPackage(ns, "konoha.int", trace);
 	return true;
 }
 
-static kbool_t float_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t float_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

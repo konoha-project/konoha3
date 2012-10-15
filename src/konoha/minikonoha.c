@@ -107,11 +107,11 @@ static void KonohaStackRuntime_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	KFree(ctx->stack, sizeof(KonohaStackRuntimeVar));
 }
 
-static kbool_t KonohaRuntime_setModule(KonohaContext *kctx, int x, KonohaModule *d, kfileline_t pline)
+static kbool_t KonohaRuntime_setModule(KonohaContext *kctx, int x, KonohaModule *d, KTraceInfo *trace)
 {
 	if(kctx->modshare[x] != NULL) {
-		kreportf(ErrTag, pline, "module already registered: %s", kctx->modshare[x]->name);
-		KLIB KonohaRuntime_raise(kctx, EXPT_("PackageLoader"), NULL, pline, NULL);
+		kreportf(ErrTag, trace, "module already registered: %s", kctx->modshare[x]->name);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("PackageLoader"), NULL, trace);
 		return false;
 	}
 	kctx->modshare[x] = d;

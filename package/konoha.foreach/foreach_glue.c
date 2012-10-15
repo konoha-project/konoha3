@@ -35,12 +35,12 @@ extern "C" {
 
 // ---------------------------------------------------------------------------
 
-static kbool_t foreach_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t foreach_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t foreach_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t foreach_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -155,11 +155,11 @@ static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(isOkay);
 }
 
-static kbool_t foreach_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t foreach_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
-	KImportPackage(ns, "konoha.iterator", pline);
-	KImportPackage(ns, "konoha.break", pline);
-	KImportPackage(ns, "konoha.continue", pline);
+	KImportPackage(ns, "konoha.iterator", trace);
+	KImportPackage(ns, "konoha.break", trace);
+	KImportPackage(ns, "konoha.continue", trace);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("for"), 0, "\"for\" \"(\" [$Type] $Symbol \"in\" $Expr  \")\" [$Block] ", 0, 0, NULL, NULL, NULL, Statement_for, NULL, },
 		{ KW_END, },
@@ -168,7 +168,7 @@ static kbool_t foreach_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS,
 	return true;
 }
 
-static kbool_t foreach_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t foreach_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

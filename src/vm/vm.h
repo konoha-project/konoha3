@@ -85,7 +85,7 @@ typedef struct ksfx_t {
 } ksfx_t;
 
 typedef void (*ThreadCodeFunc)(KonohaContext *kctx, struct VirtualMachineInstruction *, void**);
-typedef void (*TraceFunc)(KonohaContext *kctx, KonohaStack *sfp, kfileline_t pline);
+typedef void (*TraceFunc)(KonohaContext *kctx, KonohaStack *sfp, KTraceInfo *trace);
 
 typedef struct {
 	kMethod *mtd;
@@ -179,7 +179,7 @@ static VirtualMachineInstruction *KonohaVirtualMachine_tryJump(KonohaContext *kc
 	return pc;
 }
 
-static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *sfp, kfileline_t pline)
+static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *sfp, kfileline_t uline)
 {
 	KCheckSafePoint(kctx, sfp);
 }
@@ -319,13 +319,14 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #define OPEXEC_BNOT(c, a)     rbp[c].boolValue = !(rbp[a].boolValue)
 
 #define OPEXEC_TRACE(UL, THIS, F) do {\
-	F(kctx, SFP(rshift(rbp, THIS)), UL);\
+	KMakeTraceUL(trace, SFP(rbp), UL);\
+	F(kctx, SFP(rshift(rbp, THIS)), trace);\
 } while (0)
 
 #define OPEXEC_CHKSTACK(UL) do {\
 	if(unlikely(kctx->esp > kctx->stack->stack_uplimit)) {\
-		kfileline_t uline = (UL == 0) ? rbp[K_ULINEIDX2].callerFileLine : UL;\
-		KLIB KonohaRuntime_raise(kctx, EXPT_("StackOverflow"), SFP(rbp), uline, NULL);\
+		KMakeTrace(trace, SFP(rbp));\
+		KLIB KonohaRuntime_raise(kctx, EXPT_("StackOverflow"), NULL, trace);\
 	}\
 	if(1) { \
 		kfileline_t uline = (UL == 0) ? rbp[K_ULINEIDX2].callerFileLine : UL;\
@@ -342,7 +343,8 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 } while (0)
 
 #define OPEXEC_ERROR(UL, msg, ESP) do {\
-	KLIB KonohaRuntime_raise(kctx, EXPT_("RuntimeScript"), SFP(rbp), UL, msg);\
+	KMakeTraceUL(trace, SFP(rbp), UL);\
+	KLIB KonohaRuntime_raise(kctx, EXPT_("RuntimeScript"), msg, trace);\
 } while (0)
 
 #define KLR_LDMTD(ctx, thisidx, ldmtd, hc, mtdO) do {\

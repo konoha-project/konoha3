@@ -33,12 +33,12 @@ extern "C" {
 
 // --------------------------------------------------------------------------
 
-static kbool_t continue_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t continue_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t continue_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t continue_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -65,7 +65,7 @@ static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue((false));
 }
 
-static kbool_t continue_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t continue_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("continue"), 0, "\"continue\" [ $Symbol ]", 0, 0, NULL, NULL, NULL, Statement_continue, NULL, },
@@ -75,7 +75,7 @@ static kbool_t continue_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS
 	return true;
 }
 
-static kbool_t continue_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t continue_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

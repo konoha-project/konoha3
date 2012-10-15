@@ -231,7 +231,8 @@ static KMETHOD Bytes_getSize(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Bytes_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *ba = sfp[0].asBytes;
-	size_t n = check_index(kctx, sfp[1].intValue, ba->bytesize, sfp[K_RTNIDX].callerFileLine);
+	size_t n = (size_t)sfp[1].intValue;
+	KCheckIndex(n, ba->bytesize);
 	KReturnUnboxValue(ba->utext[n]);
 }
 
@@ -239,7 +240,8 @@ static KMETHOD Bytes_get(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Bytes_set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *ba = sfp[0].asBytes;
-	size_t n = check_index(kctx, sfp[1].intValue, ba->bytesize, sfp[K_RTNIDX].callerFileLine);
+	size_t n = (size_t)sfp[1].intValue;
+	KCheckIndex(n, ba->bytesize);
 	ba->buf[n] = sfp[2].intValue;
 	KReturnUnboxValue(ba->utext[n]);
 }
@@ -310,7 +312,7 @@ static KMETHOD String_getBytes(KonohaContext *kctx, KonohaStack *sfp)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KDEFINE_CLASS defBytes = {0};
 	SETSTRUCTNAME(defBytes, Bytes);
@@ -319,7 +321,7 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	defBytes.init    = kBytes_init;
 	defBytes.p       = kBytes_p;
 
-	KonohaClass *cBytes = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defBytes, pline);
+	KonohaClass *cBytes = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defBytes, trace);
 	int TY_Bytes = cBytes->typeId;
 	int FN_encoding = FN_("encoding");
 	int FN_x = FN_("x");
@@ -341,7 +343,7 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	return true;
 }
 
-static kbool_t bytes_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t bytes_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -365,7 +367,7 @@ static KMETHOD TokenFunc_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 		prev = ch;
 	}
 	if(IS_NOTNULL(tk)) {
-		kreportf(ErrTag, tk->uline, "must close with \'");
+		SUGAR kToken_printMessage(kctx, tk, ErrTag, "must close with %s", "'");
 	}
 	KReturnUnboxValue(0);
 }
@@ -385,7 +387,7 @@ static KMETHOD TypeCheck_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(K_NULLEXPR);
 }
 
-static kbool_t bytes_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t bytes_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("$SingleQuotedChar"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_SingleQuotedChar, },
@@ -396,7 +398,7 @@ static kbool_t bytes_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, k
 	return true;
 }
 
-static kbool_t bytes_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t bytes_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

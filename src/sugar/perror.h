@@ -63,7 +63,8 @@ static kString* SugarContext_vprintMessage(KonohaContext *kctx, kinfotag_t tagle
 		size_t len = wb.m->bytesize - pos;
 		KLIB Kwb_vprintf(kctx, &wb, fmt, ap);
 		msg = KLIB Kwb_top(kctx, &wb, 1);
-		kreportf(taglevel, uline, "%s", msg + len);
+		KTraceInfo trace = {NULL, uline};
+		kreportf(taglevel, &trace, "%s", msg + len);
 		kString *emsg = KLIB new_kString(kctx, sugarContext->errorMessageList, msg, strlen(msg), 0);
 		if(taglevel == ErrTag || taglevel == CritTag) {
 			sugarContext->errorMessageCount++;

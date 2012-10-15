@@ -33,12 +33,12 @@ extern "C" {
 
 // --------------------------------------------------------------------------
 
-static kbool_t namespace_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t namespace_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t namespace_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t namespace_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -63,7 +63,7 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(result == K_CONTINUE);
 }
 
-static kbool_t namespace_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t namespace_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("namespace"), 0, "\"namespace\" $Block", 0, 0, NULL, NULL, Statement_namespace, NULL, NULL, },
@@ -73,7 +73,7 @@ static kbool_t namespace_initNameSpace(KonohaContext *kctx, kNameSpace *packageN
 	return true;
 }
 
-static kbool_t namespace_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t namespace_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

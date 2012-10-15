@@ -577,12 +577,12 @@ static KonohaClass *T_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass
 
 // ---------------
 
-static KonohaClass* Kclass(KonohaContext *kctx, ktype_t cid, kfileline_t pline)
+static KonohaClass* Kclass(KonohaContext *kctx, ktype_t cid, KTraceInfo *trace)
 {
 	KonohaRuntime *share = kctx->share;
 	if(!(cid < (share->classTable.bytesize/sizeof(KonohaClassVar*)))) {
-		kreportf(ErrTag, pline, "invalid typeId=%d", (int)cid);
-		KLIB KonohaRuntime_raise(kctx, EXPT_("InvalidParameter"), NULL, pline, NULL);
+		kreportf(ErrTag, trace, "invalid typeId=%d", (int)cid);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("InvalidParameter"), NULL, trace);
 	}
 	return share->classTable.classItems[cid];
 }
@@ -650,7 +650,7 @@ static kObject *Knull(KonohaContext *kctx, KonohaClass *ct)
 	return ct->fnull(kctx, ct);
 }
 
-static KonohaClassVar* new_KonohaClass(KonohaContext *kctx, KonohaClass *bct, KDEFINE_CLASS *s, kfileline_t pline)
+static KonohaClassVar* new_KonohaClass(KonohaContext *kctx, KonohaClass *bct, KDEFINE_CLASS *s, KTraceInfo *trace)
 {
 	KonohaRuntimeVar *share = (KonohaRuntimeVar *)kctx->share;
 	KonohaClassVar *ct;
@@ -699,7 +699,7 @@ static KonohaClassVar* new_KonohaClass(KonohaContext *kctx, KonohaClass *bct, KD
 		ct->initdef = s->initdef;
 	}
 	if(ct->initdef != NULL) {
-		ct->initdef(kctx, ct, pline);
+		ct->initdef(kctx, ct, trace);
 	}
 	return ct;
 }
@@ -828,9 +828,9 @@ static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 	return ct->shortClassNameNULL_OnGlobalConstList;
 }
 
-static void KonohaClass_setName(KonohaContext *kctx, KonohaClassVar *ct, kfileline_t pline)
+static void KonohaClass_setName(KonohaContext *kctx, KonohaClassVar *ct, KTraceInfo *trace)
 {
-	KLIB Kreportf(kctx, DebugTag, pline, "new class %s.%s", PackageId_t(ct->packageId), SYM_t(ct->classNameSymbol));
+	KLIB Kreportf(kctx, DebugTag, trace, "new class %s.%s", PackageId_t(ct->packageId), SYM_t(ct->classNameSymbol));
 	if(ct->methodList_OnGlobalConstList == NULL) {
 		ct->methodList_OnGlobalConstList = K_EMPTYARRAY;
 		if(ct->typeId > TY_Object) {
@@ -839,9 +839,9 @@ static void KonohaClass_setName(KonohaContext *kctx, KonohaClassVar *ct, kfileli
 	}
 }
 
-static KonohaClass *KonohaClass_define(KonohaContext *kctx, kpackageId_t packageId, kString *name, KDEFINE_CLASS *cdef, kfileline_t pline)
+static KonohaClass *KonohaClass_define(KonohaContext *kctx, kpackageId_t packageId, kString *name, KDEFINE_CLASS *cdef, KTraceInfo *trace)
 {
-	KonohaClassVar *ct = new_KonohaClass(kctx, NULL, cdef, pline);
+	KonohaClassVar *ct = new_KonohaClass(kctx, NULL, cdef, trace);
 	ct->packageId  = packageId;
 	ct->packageDomain = packageId;
 	if(name == NULL) {
@@ -852,7 +852,7 @@ static KonohaClass *KonohaClass_define(KonohaContext *kctx, kpackageId_t package
 	else {
 		ct->classNameSymbol = ksymbolA(S_text(name), S_size(name), _NEWID);
 	}
-	KonohaClass_setName(kctx, ct, pline);
+	KonohaClass_setName(kctx, ct, trace);
 	return (KonohaClass*)ct;
 }
 

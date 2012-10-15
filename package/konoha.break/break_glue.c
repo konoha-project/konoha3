@@ -33,12 +33,12 @@ extern "C" {
 
 // --------------------------------------------------------------------------
 
-static kbool_t break_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t break_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t break_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t break_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -65,7 +65,7 @@ static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(false);
 }
 
-static kbool_t break_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t break_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("break"), 0, "\"break\" [ $Symbol ]", 0, 0, NULL, NULL, NULL, Statement_break, NULL, },
@@ -75,7 +75,7 @@ static kbool_t break_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, k
 	return true;
 }
 
-static kbool_t break_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t break_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

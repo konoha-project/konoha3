@@ -263,7 +263,8 @@ static KMETHOD Int_opMOD_mpz(KonohaContext *kctx, KonohaStack *sfp)
 
 static void THROW_ZeroDividedException(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
+	KMakeTrace(trace, sfp);
+	KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), NULL, trace);
 }
 
 static KMETHOD Mpz_opDIV(KonohaContext *kctx, KonohaStack *sfp)
@@ -453,7 +454,7 @@ static KMETHOD Int_opNEQ_mpz(KonohaContext *kctx, KonohaStack *sfp)
 #define TY_Mpz     cMpz->typeId
 
 
-static kbool_t gmp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char **args, kfileline_t pline)
+static kbool_t gmp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char **args, KTraceInfo *trace)
 {
 	static KDEFINE_CLASS MpzDef = {0};
 	SETSTRUCTNAME(MpzDef, Mpz);
@@ -462,7 +463,7 @@ static kbool_t gmp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	MpzDef.free  = Mpz_free;
 	MpzDef.p     = Mpz_p;
 
-	KonohaClass *cMpz = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MpzDef, pline);
+	KonohaClass *cMpz = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MpzDef, trace);
 
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
@@ -522,17 +523,17 @@ static kbool_t gmp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	return true;
 }
 
-static kbool_t gmp_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t gmp_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t gmp_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t gmp_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t gmp_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t gmp_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

@@ -119,7 +119,7 @@ static kshortflag_t kStmt_parseClassFlag(KonohaContext *kctx, kStmt *stmt, kshor
 	return (kshortflag_t)SUGAR kStmt_parseFlag(kctx, stmt, ClassDeclFlag, cflag);
 }
 
-static KonohaClassVar* kNameSpace_defineClassName(KonohaContext *kctx, kNameSpace *ns, kshortflag_t cflag, kString *name, kfileline_t pline)
+static KonohaClassVar* kNameSpace_defineClassName(KonohaContext *kctx, kNameSpace *ns, kshortflag_t cflag, kString *name, KTraceInfo *trace)
 {
 	KDEFINE_CLASS defNewClass = {0};
 	defNewClass.cflag         = cflag | kClass_Nullable;
@@ -128,7 +128,7 @@ static KonohaClassVar* kNameSpace_defineClassName(KonohaContext *kctx, kNameSpac
 	defNewClass.superTypeId  = TY_Object; //superClass->typeId;
 	defNewClass.init = Object_initToMakeDefaultValueAsNull; // dummy for first generation of DefaultValueAsNull
 
-	KonohaClassVar *definedClass = (KonohaClassVar*)KLIB kNameSpace_defineClass(kctx, ns, name, &defNewClass, pline);
+	KonohaClassVar *definedClass = (KonohaClassVar*)KLIB kNameSpace_defineClass(kctx, ns, name, &defNewClass, trace);
 	KDEFINE_CLASS_CONST ClassData[] = {
 		{S_text(name), VirtualType_KonohaClass, definedClass},
 		{NULL},
@@ -310,7 +310,8 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 	KonohaClassVar *definedClass = (KonohaClassVar*)KLIB kNameSpace_getClass(kctx, ns, S_text(tokenClassName->text), S_size(tokenClassName->text), NULL);
 	if(definedClass == NULL) {   // Already defined
 		kshortflag_t cflag = kStmt_parseClassFlag(kctx, stmt, kClass_Virtual);
-		definedClass = kNameSpace_defineClassName(kctx, ns, cflag, tokenClassName->text, stmt->uline);
+		KMakeTraceUL(trace, sfp, stmt->uline);
+		definedClass = kNameSpace_defineClassName(kctx, ns, cflag, tokenClassName->text, trace);
 		isNewlyDefinedClass = true;
 	}
 	kBlock *bk = kStmt_parseClassBlockNULL(kctx, stmt, tokenClassName);
@@ -382,23 +383,23 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static kbool_t class_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t class_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.field", pline);
-	KRequirePackage("konoha.new", pline);
-	//KSET_KLIB2(kMethod_indexOfField, KLIB2_Method_indexOfField, pline);
+	KRequirePackage("konoha.field", trace);
+	KRequirePackage("konoha.new", trace);
+	//KSET_KLIB2(kMethod_indexOfField, KLIB2_Method_indexOfField, trace);
 	return true;
 }
 
-static kbool_t class_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t class_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t class_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t class_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
-	KImportPackage(ns, "konoha.field", pline);
-	KImportPackage(ns, "konoha.new", pline);
+	KImportPackage(ns, "konoha.field", trace);
+	KImportPackage(ns, "konoha.new", trace);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("$ClassName"), 0, NULL, 0, 0, PatternMatch_ClassName, NULL, NULL, NULL, NULL, },
 		{ SYM_("class"), 0, "\"class\" $ClassName [\"extends\" extends: $Type] [$Block]", 0, 0, NULL, NULL, Statement_class, NULL, NULL, },
@@ -409,7 +410,7 @@ static kbool_t class_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, k
 	return true;
 }
 
-static kbool_t class_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t class_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

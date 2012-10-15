@@ -619,7 +619,7 @@ static KMETHOD SockAddr_new (KonohaContext *kctx, KonohaStack *sfp)
 
 #define _KVi(T) #T, TY_int, T
 
-static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KDEFINE_CLASS defSockAddr = {
 		STRUCTNAME(SockAddr),
@@ -627,7 +627,7 @@ static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		.init = SockAddr_init,
 		.free = SockAddr_free,
 	};
-	KonohaClass *cSockAddr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defSockAddr, pline);
+	KonohaClass *cSockAddr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defSockAddr, trace);
 	kparamtype_t pi = {TY_int, FN_("intValue")};
 	KonohaClass *CT_IntArray = KLIB KonohaClass_Generics(kctx, CT_Array, TY_int, 1, &pi);
 	ktype_t TY_intArray = CT_IntArray->typeId;
@@ -714,21 +714,21 @@ static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 			{_KVi(SOMAXCONN)},
 			{}
 	};
-	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), trace);
 	return true;
 }
 
-static kbool_t socket_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t socket_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t socket_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t socket_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t socket_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t socket_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

@@ -58,7 +58,7 @@ static KMETHOD String_toSymbol(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(keyword);
 }
 
-static KonohaClass *loadSymbolClass(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
+static KonohaClass *loadSymbolClass(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	static KDEFINE_CLASS defSymbol = {0};
 	defSymbol.structname = "symbol";
@@ -66,7 +66,7 @@ static KonohaClass *loadSymbolClass(KonohaContext *kctx, kNameSpace *ns, kfileli
 	defSymbol.init = CT_(TY_int)->init;
 	defSymbol.unbox = CT_(TY_int)->unbox;
 	defSymbol.p = kSymbol_p;
-	KonohaClass *cSymbol = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defSymbol, pline);
+	KonohaClass *cSymbol = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defSymbol, trace);
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Coercion|_Const, _F(String_toSymbol), TY_boolean, TY_String, MN_to(cSymbol->typeId), 0,
 		DEND,
@@ -432,9 +432,9 @@ static KMETHOD kStmt_printMessage2rintError(KonohaContext *kctx, KonohaStack *sf
 
 // --------------------------------------------------------------------------
 
-static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KonohaClass *cSymbol = loadSymbolClass(kctx, ns, pline);
+	KonohaClass *cSymbol = loadSymbolClass(kctx, ns, trace);
 	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
 		{"Token", VirtualType_KonohaClass, (uintptr_t)CT_Token},
 		{"Stmt", VirtualType_KonohaClass,  (uintptr_t)CT_Stmt},
@@ -509,7 +509,7 @@ static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	return true;
 }
 
-static kbool_t sugar_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t sugar_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -570,7 +570,7 @@ static KMETHOD Statement_syntax(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(r);
 }
 
-static kbool_t sugar_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t sugar_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_INT_CONST IntData[] = {
 #define DEFINE_KEYWORD(KW) {#KW, TY_int, KW}
@@ -610,7 +610,7 @@ static kbool_t sugar_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, k
 #undef DEFINE_KEYWORD
 		{NULL},
 	};
-	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), trace);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("syntax"), 0, "\"syntax\" $Token $Token*", 0, 0, NULL, NULL, Statement_syntax, NULL, NULL, },
 		{ KW_END, },
@@ -619,7 +619,7 @@ static kbool_t sugar_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, k
 	return true;
 }
 
-static kbool_t sugar_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t sugar_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

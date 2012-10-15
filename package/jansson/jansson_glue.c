@@ -418,9 +418,9 @@ static KMETHOD JsonArray_get(KonohaContext *kctx, KonohaStack *sfp)
 
 #define _KVi(T)  #T, TY_int, T
 
-static kbool_t jansson_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t jansson_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.float", pline);
+	KRequirePackage("konoha.float", trace);
 	KDEFINE_CLASS JsonDef = {
 		.structname = "Json",
 		.typeId = TY_newid,
@@ -429,7 +429,7 @@ static kbool_t jansson_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		.free = Jansson_free,
 		.p    = Jansson_p,
 	};
-	KonohaClass *cJson = KLIB kNameSpace_defineClass(kctx, ns, NULL, &JsonDef, pline);
+	KonohaClass *cJson = KLIB kNameSpace_defineClass(kctx, ns, NULL, &JsonDef, trace);
 	ktype_t TY_JsonArray = CT_JsonArray->typeId;
 
 	ktype_t TY_StringArray0 = CT_StringArray0->typeId;
@@ -466,17 +466,17 @@ static kbool_t jansson_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	return true;
 }
 
-static kbool_t jansson_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t jansson_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t jansson_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t jansson_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t jansson_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t jansson_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

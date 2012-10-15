@@ -193,9 +193,9 @@ static KMETHOD kJSONArray_get(KonohaContext *kctx, KonohaStack *sfp)
 #define CT_JSON     cJSON
 #define TY_JSON     cJSON->typeId
 
-static kbool_t JSON_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t JSON_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.float", pline);
+	KRequirePackage("konoha.float", trace);
 	KDEFINE_CLASS JSONDef = {
 		STRUCTNAME(JSON),
 		.cflag = kClass_Final,
@@ -203,7 +203,7 @@ static kbool_t JSON_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		.free = kJSON_free,
 		.p    = kJSON_p,
 	};
-	KonohaClass *cJSON = KLIB kNameSpace_defineClass(kctx, ns, NULL, &JSONDef, pline);
+	KonohaClass *cJSON = KLIB kNameSpace_defineClass(kctx, ns, NULL, &JSONDef, trace);
 	kparamtype_t ps = {TY_JSON, FN_("json")};
 	KonohaClass *CT_JSONArray = KLIB KonohaClass_Generics(kctx, CT_Array, TY_JSON, 1, &ps);
 	ktype_t TY_JSONArray = CT_JSONArray->typeId;
@@ -231,19 +231,19 @@ static kbool_t JSON_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	return true;
 }
 
-static kbool_t JSON_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t JSON_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t JSON_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t JSON_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
-	//KImportPackage("konoha.string", ns,  pline);
-	//KImportPackage("konoha.float", ns, pline);
+	//KImportPackage("konoha.string", ns,  trace);
+	//KImportPackage("konoha.float", ns, trace);
 	return true;
 }
 
-static kbool_t JSON_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t JSON_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

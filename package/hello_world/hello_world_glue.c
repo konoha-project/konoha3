@@ -115,7 +115,7 @@ static KMETHOD Person_say(KonohaContext *kctx, KonohaStack *sfp)
 
 #define _F(F)     (intptr_t)(F)
 
-static kbool_t HelloWorld_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t HelloWorld_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	/* Class Definition */
 	/* If you want to create Generic class like Array<T>, see konoha.map package */
@@ -126,7 +126,7 @@ static kbool_t HelloWorld_initPackage(KonohaContext *kctx, kNameSpace *ns, int a
 	defPerson.p         = Person_p;
 	defPerson.reftrace  = Person_reftrace;
 	defPerson.free      = Person_free;
-	KonohaClass *PersonClass = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defPerson, pline);
+	KonohaClass *PersonClass = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defPerson, trace);
 
 	/* You can define methods with the following procedures. */
 	int TY_Person = PersonClass->typeId;
@@ -144,21 +144,21 @@ static kbool_t HelloWorld_initPackage(KonohaContext *kctx, kNameSpace *ns, int a
 		{"NARUTO_AGE", TY_int, 18},
 		{} /* <= sentinel */
 	};
-	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), trace);
 	return true;
 }
 
-static kbool_t HelloWorld_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t HelloWorld_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t HelloWorld_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t HelloWorld_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t HelloWorld_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t HelloWorld_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
