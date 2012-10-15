@@ -1043,21 +1043,21 @@ static void initKonohaLib(KonohaLibVar *l)
 {
 	l->Kclass                  = Kclass;
 	l->new_kObject             = new_kObject;
-//	l->new_kObjectDontUseThis  = new_kObjectDontUseThis;
 	l->new_kString             = new_kString;
-	l->new_kStringf            = new_kStringf;
-	//l->Kconv  = conv;
+
 	l->kArray_add           = (typeof(l->kArray_add))kArray_add;
 	l->kArray_insert        = (typeof(l->kArray_insert))kArray_insert;
 	l->kArray_clear         = kArray_clear;
-	l->new_kMethod          = new_kMethod;
-	l->Kparamdom            = Kparamdom;
-	l->kMethod_setParam     = kMethod_setParam;
-	l->kMethod_indexOfField = STUB_Method_indexOfField;
+
 	l->KonohaClass_define   = KonohaClass_define;
 	l->Knull = Knull;
 	l->KonohaClass_shortName = KonohaClass_shortName;
 	l->KonohaClass_Generics = KonohaClass_Generics;
+
+	l->new_kMethod          = new_kMethod;
+	l->Kparamdom            = Kparamdom;
+	l->kMethod_setParam     = kMethod_setParam;
+	l->kMethod_indexOfField = STUB_Method_indexOfField;
 }
 
 static void KonohaRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx)

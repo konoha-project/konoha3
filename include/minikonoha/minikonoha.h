@@ -1426,10 +1426,10 @@ struct KonohaLibVar {
 	ksymbol_t           (*Kmap_getcode)(KonohaContext*, KHashMap *, kArray *, const char *, size_t, uintptr_t, int, ksymbol_t);
 
 	KonohaContextVar *(*KonohaContext_init)(KonohaContext *rootContext, const PlatformApi *api);
-	void (*KonohaContext_free)(KonohaContext *rootContext, KonohaContextVar *ctx);
+	void              (*KonohaContext_free)(KonohaContext *rootContext, KonohaContextVar *ctx);
 
 	kfileline_t     (*KfileId)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
-	kpackageId_t      (*KpackageId)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
+	kpackageId_t    (*KpackageId)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
 	ksymbol_t       (*Ksymbol)(KonohaContext*, const char*, size_t, int spol, ksymbol_t def);
 
 	KonohaClass*    (*Kclass)(KonohaContext*, ktype_t, kfileline_t);
@@ -1439,7 +1439,6 @@ struct KonohaLibVar {
 	kbool_t         (*KonohaClass_isSubtype)(KonohaContext*, KonohaClass *, KonohaClass *);
 	kbool_t         (*KonohaClass_addField)(KonohaContext*, KonohaClass *, int flag, ktype_t ty, ksymbol_t sym);
 
-//	kObject*        (*new_kObjectDontUseThis)(KonohaContext*, KonohaClass *, uintptr_t, kArray *gcstackNULL);
 	kObject*        (*new_kObject)(KonohaContext*, kArray *gcstack, KonohaClass *, uintptr_t);
 	kbool_t         (*kObject_isManaged)(KonohaContext*, void *ptr);
 	kObject*        (*Knull)(KonohaContext*, KonohaClass *);
@@ -1451,7 +1450,7 @@ struct KonohaLibVar {
 	void            (*kObject_removeKey)(KonohaContext*, kAbstractObject *, ksymbol_t);
 
 	kString*        (*new_kString)(KonohaContext*, kArray *gcstack, const char *, size_t, int);
-	kString*        (*new_kStringf)(KonohaContext*, kArray *gcstack, int, const char *, ...);
+//	kString*        (*new_kStringf)(KonohaContext*, kArray *gcstack, int, const char *, ...);
 
 	void            (*kArray_add)(KonohaContext*, kArray *, kAbstractObject *);
 	void            (*kArray_insert)(KonohaContext*, kArray *, size_t, kAbstractObject *);
