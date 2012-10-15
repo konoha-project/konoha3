@@ -139,11 +139,11 @@ static void JSVisitor_visitUndefinedStmt(KonohaContext *kctx, IRBuilder *self, k
 
 static void JSVisitor_visitConstExpr(KonohaContext *kctx, IRBuilder *self, kExpr *expr)
 {
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	KonohaStack sfp[1];
 	kObject *obj = expr->objectConstValue;
-	sfp[0].o = obj;
+	sfp[0].asObject = obj;
 	O_ct(obj)->p(kctx, sfp, 0, &wb);
 	char  *str = (char *) KLIB Kwb_top(kctx, &wb, 0);
 	char buf[128];
@@ -197,6 +197,7 @@ static void JSVisitor_visitFieldExpr(KonohaContext *kctx, IRBuilder *self, kExpr
 static void JSVisitor_visitCallExpr(KonohaContext *kctx, IRBuilder *self, kExpr *expr)
 {
 	kMethod *mtd = CallExpr_getMethod(expr);
+
 	if(kArray_size(expr->cons) == 2 && MethodName_isUnaryOperator(kctx, mtd->mn)) {
 		emit_string_js("", T_mn(mtd->mn));
 		emit_string_js("(", "", "");
@@ -212,12 +213,19 @@ static void JSVisitor_visitCallExpr(KonohaContext *kctx, IRBuilder *self, kExpr 
 	}
 	else {
 		kExpr *receiver = kExpr_at(expr, 1);
-		if(receiver->build == TEXPR_NULL){
-			emit_string_js(CT_t(CT_(receiver->ty)), "", "");
+		if(receiver->ty == TY_NameSpace){
+			if(mtd->mn == MN_("import")){
+				kString *packageNameString = (kString*)kExpr_at(expr, 2)->objectConstValue;
+				KImportPackage((kNameSpace*)receiver->objectConstValue, S_text(packageNameString), expr->termToken->uline);
+			}
 		}else{
-			handleExpr(kctx, self, receiver);
+			if(receiver->build == TEXPR_NULL){
+				emit_string_js(CT_t(CT_(receiver->ty)), "", "");
+			}else{
+				handleExpr(kctx, self, receiver);
+			}
+			emit_string_js(".", "", "");
 		}
-		emit_string_js(".", "", "");
 		emit_string_js("", T_mn(mtd->mn));
 		emit_string_js("(", "", "");
 		unsigned i;
@@ -282,8 +290,10 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	kParam *pa = Method_param(mtd);
 	if(mtd->mn) {
+		kMethod_setFunc(kctx, mtd, NULL);
 		KLIB Kwb_printf(kctx, &wb, "%s.%s%s = function(", CT_t(CT_(mtd->typeId)), T_mn(mtd->mn));
 	} else {
+		KLIB kNameSpace_compileAllDefinedMethods(kctx);
 		KLIB Kwb_printf(kctx, &wb, "(function(", CT_t(CT_(mtd->typeId)), T_mn(mtd->mn));
 	}
 	for (i = 0; i < pa->psize; i++) {
@@ -300,12 +310,13 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 
 static void JSVisitor_free(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
 {
-	KFree(builder->local_fields, sizeof(int));
 	if(mtd->mn) {
 		emit_newline("}", --DUMPER(builder)->indent);
-	} else {
+	}else {
 		emit_newline("})();", DUMPER(builder)->indent);
 	}
+	KFree(builder->local_fields, sizeof(int));
+	builder->local_fields = NULL;
 }
 
 static IRBuilder *createJSVisitor(IRBuilder *builder)

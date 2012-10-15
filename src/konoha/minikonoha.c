@@ -46,20 +46,20 @@ extern "C" {
 
 static void konoha_init(void)
 {
-static int isInit = 0;
-if(isInit == 0) {
-	isInit = 1;
-}
+	static int isInit = 0;
+	if(isInit == 0) {
+		isInit = 1;
+	}
 }
 
 static void knh_beginContext(KonohaContext *kctx, void **bottom)
 {
-kctx->stack->cstack_bottom = bottom;
+	kctx->stack->cstack_bottom = bottom;
 }
 
 static void knh_endContext(KonohaContext *kctx)
 {
-kctx->stack->cstack_bottom = NULL;
+	kctx->stack->cstack_bottom = NULL;
 }
 
 /* ------------------------------------------------------------------------ */
