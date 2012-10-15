@@ -272,8 +272,8 @@ typedef const struct KonohaLibVar    KonohaLib;
 typedef struct KonohaLibVar          KonohaLibVar;
 
 #define TEXTSIZE(T)   T, (sizeof(T) - 1)
-#define PLATAPI (kctx->platApi)->
-#define KLIB    (kctx->klib)->
+#define PLATAPI       (kctx->platApi)->
+#define KLIB          (kctx->klib)->
 
 #define KDEFINE_PACKAGE KonohaPackageHandler
 typedef struct KonohaPackageHandlerVar KonohaPackageHandler;
@@ -338,17 +338,17 @@ typedef enum {
 typedef enum {
 	Unrecord = 0,
 	isRecord = 1,
-	// Fault
-	SystemFault       =  (1<<1),  /* os, file system, etc. */
-	ScriptFault       =  (1<<2),  /* programmer's mistake */
-	DataFault         =  (1<<3),  /* user input, data mistake */
-	ExternalFault     =  (1<<4),  /* networking or remote services */
-	UnknownFault      =  (1<<5),  /* other fault above */
+	// ErrorPoint
+	SystemFault        =  (1<<1),  /* os, file system, etc. */
+	SoftwareFault      =  (1<<2),  /* programmer's mistake */
+	DataFault          =  (1<<3),  /* user input, data mistake */
+	ExternalFault      =  (1<<4),  /* networking or remote services */
+	UnknownFault       =  (1<<5),  /* if you can distingish fault above */
 	// LogPoint
-	PeriodicPoint     =  (1<<6),  /* sampling */
-	PreactionPoint    =  (1<<7),  /* prediction WARN */
-	ActionPoint       =  (1<<8),
-	SecurityAudit     =  (1<<9),  /* security audit */
+	PeriodicPoint      =  (1<<6),  /* sampling */
+	ResponseCheckPoint =  (1<<7),  /* log point to expect a long term action time*/
+	SystemChangePoint  =  (1<<8),  /* log point to make permament change on systems */
+	SecurityAudit      =  (1<<9),  /* security audit */
 	// Otehr flag
 	PrivacyCaution    =  (1<<10), /* including privacy information */
 	// Internal Use
