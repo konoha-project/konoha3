@@ -366,7 +366,7 @@ typedef struct KTraceInfo {
 } KTraceInfo;
 
 #define KMakeTrace(TRACENAME, sfp) \
-	KTraceInfo TRACENAME##REF_ = {sfp, sfp[K_RTNIDX].callerFileLine}, * TRACENAME = &TRACENAME##REF_;
+	KTraceInfo TRACENAME##REF_ = {sfp, sfp[K_RTNIDX].callerFileLine}, * TRACENAME = &TRACENAME##REF_
 
 struct PlatformApiVar {
 	// settings
