@@ -255,19 +255,19 @@ static kString* new_kString(KonohaContext *kctx, kArray *gcstack, const char *te
 	return s;
 }
 
-static kString* new_kStringf(KonohaContext *kctx, kArray *gcstack, int spol, const char *fmt, ...)
-{
-	KGrowingBuffer wb;
-	Kwb_init(&(kctx->stack->cwb), &wb);
-	va_list ap;
-	va_start(ap, fmt);
-	Kwb_vprintf(kctx, &wb, fmt, ap);
-	va_end(ap);
-	const char *text = Kwb_top(kctx, &wb, 1);
-	kString *s = new_kString(kctx, gcstack, text, Kwb_bytesize(&wb), spol);
-	KLIB Kwb_free(&wb);
-	return s;
-}
+//static kString* new_kStringf(KonohaContext *kctx, kArray *gcstack, int spol, const char *fmt, ...)
+//{
+//	KGrowingBuffer wb;
+//	Kwb_init(&(kctx->stack->cwb), &wb);
+//	va_list ap;
+//	va_start(ap, fmt);
+//	Kwb_vprintf(kctx, &wb, fmt, ap);
+//	va_end(ap);
+//	const char *text = Kwb_top(kctx, &wb, 1);
+//	kString *s = new_kString(kctx, gcstack, text, Kwb_bytesize(&wb), spol);
+//	KLIB Kwb_free(&wb);
+//	return s;
+//}
 
 // Array
 struct _kAbstractArray {
