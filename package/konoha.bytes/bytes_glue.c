@@ -214,20 +214,20 @@ static KMETHOD Bytes_toString(KonohaContext *kctx, KonohaStack *sfp)
 //	KReturnWithRESET_GCSTACK(Convert_newString(kctx, _GcStack, to));
 }
 
-//## method Bytes Bytes.new(Int n);
+//## Bytes Bytes.new(int size);
 static KMETHOD Bytes_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	size_t size = (size_t)sfp[1].intValue;
 	KReturn(KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), size));
 }
-
+//## int Bytes.getSize();
 static KMETHOD Bytes_getSize(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *ba = sfp[0].asBytes;
 	KReturnUnboxValue(ba->bytesize);
 }
 
-//## Int Bytes.get(Int n);
+//## int Bytes.get(int n);
 static KMETHOD Bytes_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *ba = sfp[0].asBytes;
@@ -235,16 +235,16 @@ static KMETHOD Bytes_get(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ba->utext[n]);
 }
 
-//## method Int Bytes.set(Int n, Int c);
+//## void Bytes.set(int index, int c);
 static KMETHOD Bytes_set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *ba = sfp[0].asBytes;
-	size_t n = check_index(kctx, sfp[1].intValue, ba->bytesize, sfp[K_RTNIDX].callerFileLine);
-	ba->buf[n] = sfp[2].intValue;
-	KReturnUnboxValue(ba->utext[n]);
+	size_t index = check_index(kctx, sfp[1].intValue, ba->bytesize, sfp[K_RTNIDX].callerFileLine);
+	ba->buf[index] = sfp[2].intValue;
+	KReturnVoid();
 }
 
-//## int Bytes.setAll(int c);
+//## void Bytes.setAll(int c);
 static KMETHOD Bytes_setAll(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *ba = sfp[0].asBytes;
@@ -322,22 +322,23 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	KonohaClass *cBytes = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defBytes, pline);
 	int TY_Bytes = cBytes->typeId;
 	int FN_encoding = FN_("encoding");
+	int FN_index = FN_("index");
 	int FN_x = FN_("x");
 	int FN_c = FN_("c");
 	int FN_size = FN_("size");
-	intptr_t methoddata[] = {
-		_Public|_Im|_Coercion, _F(String_toBytes), TY_Bytes,  TY_String, MN_("toBytes"),   0,
-		_Public|_Const|_Im|_Coercion, _F(Bytes_toString), TY_String, TY_Bytes,  MN_("toString"),  0,
-//		_Public|_Const, _F(Bytes_encodeTo),   TY_Bytes,  TY_Bytes,  MN_("encodeTo"),    1, TY_String, FN_encoding,
-//		_Public|_Const, _F(Bytes_decodeFrom),   TY_String, TY_Bytes,  MN_("decodeFrom"),    1, TY_String, FN_encoding,
-		_Public|_Const|_Im, _F(Bytes_new), TY_Bytes, TY_Bytes, MN_("new"), 1, TY_int, FN_size,
-		_Public|_Const|_Im, _F(Bytes_getSize), TY_int, TY_Bytes, MN_("getSize"), 0,
-		_Public|_Const|_Im, _F(Bytes_get), TY_int, TY_Bytes, MN_("get"), 1, TY_int, FN_x,
-		_Public|_Const|_Im, _F(Bytes_set), TY_int, TY_Bytes, MN_("set"), 2, TY_int, FN_x, TY_int, FN_c,
-		_Public|_Const|_Im, _F(Bytes_setAll), TY_void, TY_Bytes, MN_("setAll"), 1, TY_int, FN_x,
+	KDEFINE_METHOD MethodData[] = {
+		_Public, _F(Bytes_new), TY_Bytes, TY_Bytes, MN_("new"), 1, TY_int, FN_size,
+		_Public|_Im, _F(Bytes_getSize), TY_int, TY_Bytes, MN_("getSize"), 0,
+		_Public|_Im, _F(Bytes_get), TY_int, TY_Bytes, MN_("get"), 1, TY_int, FN_index,
+		_Public, _F(Bytes_set), TY_void, TY_Bytes, MN_("set"), 2, TY_int, FN_index, TY_int, FN_c,
+		_Public, _F(Bytes_setAll), TY_void, TY_Bytes, MN_("setAll"), 1, TY_int, FN_c,
+		_Public|_Im|_Coercion, _F(String_toBytes), TY_Bytes,  TY_String, MN_to(TY_Bytes),   0,
+		_Public|_Im|_Coercion, _F(Bytes_toString), TY_String, TY_Bytes,  MN_to(TY_String),  0,
+		//		_Public|_Const, _F(Bytes_encodeTo),   TY_Bytes,  TY_Bytes,  MN_("encodeTo"),    1, TY_String, FN_encoding,
+		//		_Public|_Const, _F(Bytes_decodeFrom),   TY_String, TY_Bytes,  MN_("decodeFrom"),    1, TY_String, FN_encoding,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, methoddata);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	return true;
 }
 
