@@ -80,6 +80,7 @@ static void KonohaStackRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx, 
 	KUnsafeFieldInit(base->OptionalErrorInfo, TS_EMPTY);
 	base->gcstack_OnContextConstList = new_(Array, K_PAGESIZE/sizeof(void*), base->ContextConstList);
 	KLIB Karray_init(kctx, &base->cwb, K_PAGESIZE * 4);
+	base->visitor = kVisitor_KonohaVM;
 	ctx->esp = base->stack;
 	ctx->stack = base;
 }

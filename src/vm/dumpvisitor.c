@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+#define USE_DUMP_VISITOR
 #ifdef USE_DUMP_VISITOR
 #define DUMPER(BUILDER)  ((struct DumpVisitorLocal*)(BUILDER)->local_fields)
 
@@ -79,7 +79,7 @@ static void DumpVisitor_visitConstExpr(KonohaContext *kctx, IRBuilder *self, kEx
 	KonohaStack sfp[1];
 	kObject *obj = expr->objectConstValue;
 	sfp[0].asObject = obj;
-	O_ct(obj)->p(kctx, sfp, 0, &wb, 0);
+	O_ct(obj)->p(kctx, sfp, 0, &wb);
 	char  *str = (char *) KLIB Kwb_top(kctx, &wb, 0);
 	char buf[128];
 	snprintf(buf, 128, "CONST:%s:'%s'", CT_t(O_ct(obj)), str);
@@ -95,7 +95,7 @@ static void DumpVisitor_visitNConstExpr(KonohaContext *kctx, IRBuilder *self, kE
 	unsigned long unboxVal = expr->unboxConstValue;
 	KonohaClass *ct = CT_(expr->ty);
 	sfp[0].unboxValue = unboxVal;
-	ct->p(kctx, sfp, 0, &wb, 0);
+	ct->p(kctx, sfp, 0, &wb);
 	char  *str = (char *) KLIB Kwb_top(kctx, &wb, 0);
 	char buf[128];
 	snprintf(buf, 128, "NCONST:'%s'", str);

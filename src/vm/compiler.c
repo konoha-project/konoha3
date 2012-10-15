@@ -34,6 +34,8 @@ extern "C" {
 
 int verbose_code = 0;  // global variable
 
+static void kMethod_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func);
+
 /* ------------------------------------------------------------------------ */
 struct IRBuilder;
 
@@ -1052,27 +1054,27 @@ static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	}
 
 	IRBuilder *builder, builderbuf;
-#ifdef USE_DUMP_VISITOR
-	{
+	
+	switch(kctx->stack->visitor){
+	case kVisitor_Dump:
 		builder = createDumpVisitor(&builderbuf);
 		builder->api.fn_init(kctx, builder, mtd);
 		visitBlock(kctx, builder, bk);
 		builder->api.fn_free(kctx, builder, mtd);
-	}
-#endif
-#ifdef USE_JS_VISITOR
-	{
+		break;
+	case kVisitor_JS:
 		builder = createJSVisitor(&builderbuf);
 		builder->api.fn_init(kctx, builder, mtd);
 		visitBlock(kctx, builder, bk);
 		builder->api.fn_free(kctx, builder, mtd);
-	}
-#endif
-	{
+		break;
+	default:
+	case kVisitor_KonohaVM:
 		builder = createKonohaVisitor(&builderbuf);
 		builder->api.fn_init(kctx, builder, mtd);
 		visitBlock(kctx, builder, bk);
 		builder->api.fn_free(kctx, builder, mtd);
+		break;
 	}
 
 	RESET_GCSTACK();

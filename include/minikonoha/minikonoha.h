@@ -651,6 +651,8 @@ struct KonohaRuntimeVar {
 	KHashMap                 *paramdomMap_KeyOnList;
 };
 
+enum kVisitorType{ kVisitor_KonohaVM, kVisitor_Dump, kVisitor_JS };
+
 #define kContext_Debug          ((kshortflag_t)(1<<0))
 #define kContext_Interactive    ((kshortflag_t)(1<<1))
 #define kContext_CompileOnly    ((kshortflag_t)(1<<2))
@@ -659,6 +661,8 @@ struct KonohaRuntimeVar {
 #define KonohaContext_isCompileOnly(X)  (TFLAG_is(kshortflag_t,(X)->stack->flag, kContext_CompileOnly))
 #define KonohaContext_setInteractive(X)  TFLAG_set1(kshortflag_t, (X)->stack->flag, kContext_Interactive)
 #define KonohaContext_setCompileOnly(X)  TFLAG_set1(kshortflag_t, (X)->stack->flag, kContext_CompileOnly)
+
+#define KonohaContext_setVisitor(X, V) ((X)->stack->visitor = (V))
 
 struct KonohaStackRuntimeVar {
 	KonohaStack*               stack;
@@ -677,6 +681,7 @@ struct KonohaStackRuntimeVar {
 	kString                   *OptionalErrorInfo;
 	jmpbuf_i                  *evaljmpbuf;
 	KonohaStack               *jump_bottom;
+	enum kVisitorType          visitor;
 };
 
 // module
