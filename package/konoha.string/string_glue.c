@@ -365,6 +365,7 @@ static KMETHOD Rope_opADD(KonohaContext *kctx, KonohaStack *sfp)
 #define StringPolicy_isASCII(s)        (kString_is(ASCII, s) ? StringPolicy_ASCII : 0)
 #define CT_StringArray0                CT_p0(kctx, CT_Array, TY_String)
 
+/* ------------------------------------------------------------------------ */
 /*
  * Get the number of multibyte characters from text and bytesize.
  * e.g.) utf8_getMultibyteTextSize("あいうえお", 9) => 3
@@ -399,6 +400,7 @@ static size_t utf8_getMultibyteByteSize(const char *text, size_t size)
 static void THROW_OutOfStringBoundary(KonohaContext *kctx, KonohaStack *sfp, kint_t index)
 {
 	KMakeTrace(trace, sfp);
+	kreportf(CritTag, trace, "Script!!: out of string boundary %d", index);
 	KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfStringBoundary"), NULL, trace);
 }
 
@@ -425,7 +427,7 @@ static size_t kString_getIndex(KonohaContext *kctx, KonohaStack *sfp, kString *t
 
 static size_t kString_checkIndex(KonohaContext *kctx, KonohaStack *sfp, kString *this, kint_t index)
 {
-	if(index < 0 || (size_t)index > kString_getMultibyteSize(kctx, this)) {
+	if(unlikely(index < 0 || (size_t)index > kString_getMultibyteSize(kctx, this))) {
 		THROW_OutOfStringBoundary(kctx, sfp, index);
 	}
 	return (size_t)index;
@@ -516,9 +518,7 @@ static kString *new_SubString(KonohaContext *kctx, kArray *gcstack, kString *bas
 	else {
 		ret = new_SubStringMultiNULL(kctx, gcstack, baseString, start, length);
 		if(unlikely(ret == NULL)) {
-			KMakeTrace(trace, sfp);
-			kreportf(CritTag, trace, "Script!!: out of array index %ld", sfp[1].intValue);
-			KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfStringBoundary"), NULL, trace);
+			THROW_OutOfStringBoundary(kctx, sfp, start);
 		}
 	}
 	return ret;
@@ -544,7 +544,7 @@ static kint_t kString_lastIndexOf(KonohaContext *kctx, kString *s0, kString *s1,
 	return (loc < 0) ? -1 : loc;
 }
 
-static kString* kString_toupper(KonohaContext *kctx, kArray *gcstack, kString *thisString, size_t start)
+static kString *kString_toupper(KonohaContext *kctx, kArray *gcstack, kString *thisString, size_t start)
 {
 	size_t i, size = S_size(thisString);
 	kString *s = KLIB new_kString(kctx, gcstack, S_text(thisString), size, StringPolicy_isASCII(thisString)|StringPolicy_NOCOPY);
@@ -556,7 +556,7 @@ static kString* kString_toupper(KonohaContext *kctx, kArray *gcstack, kString *t
 	return s;
 }
 
-static kString* kString_tolower(KonohaContext *kctx, kArray *gcstack, kString *thisString, size_t start)
+static kString *kString_tolower(KonohaContext *kctx, kArray *gcstack, kString *thisString, size_t start)
 {
 	size_t i, size = S_size(thisString);
 	kString *s = KLIB new_kString(kctx, gcstack, S_text(thisString), size, StringPolicy_isASCII(thisString)|StringPolicy_NOCOPY);
@@ -695,6 +695,7 @@ static KMETHOD String_indexOfwithStart(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(-1);
 }
 
+//## int String.lastIndexOf(String searchvalue);
 static KMETHOD String_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s0 = sfp[0].asString;
