@@ -1,5 +1,5 @@
 #include <stdio.h>
-//#define USE_JS_VISITOR
+#define USE_JS_VISITOR
 #ifdef USE_JS_VISITOR
 #define DUMPER(BUILDER)  ((JSVisitorLocal*)(BUILDER)->local_fields)
 
@@ -139,19 +139,17 @@ static void JSVisitor_visitUndefinedStmt(KonohaContext *kctx, IRBuilder *self, k
 
 static void JSVisitor_visitConstExpr(KonohaContext *kctx, IRBuilder *self, kExpr *expr)
 {
-	if(expr->ty == TY_System) {
-		emit_string_js("System", "", "");
-		return;
-	} else if(Expr_isTerm(expr)) {
-		int is_string = expr->ty == TY_String;
-		kToken *tk = (kToken*)expr->termToken;
-		if(is_string) emit_string_js("\"", "", "");
-		emit_string_js(S_text(tk->text), "", "");
-		if(is_string) emit_string_js("\"", "", "");
-		return;
-	}	
+	KUtilsWriteBuffer wb;
+	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	KonohaStack sfp[1];
 	kObject *obj = expr->objectConstValue;
-	emit_string_js(CT_t(O_ct(obj)), "", "");
+	sfp[0].o = obj;
+	O_ct(obj)->p(kctx, sfp, 0, &wb);
+	char  *str = (char *) KLIB Kwb_top(kctx, &wb, 0);
+	char buf[128];
+	snprintf(buf, 128, "%s", str);
+	emit_string_js(buf, "", "");
+	KLIB Kwb_free(&wb);
 }
 
 static void JSVisitor_visitNConstExpr(KonohaContext *kctx, IRBuilder *self, kExpr *expr)
@@ -162,7 +160,7 @@ static void JSVisitor_visitNConstExpr(KonohaContext *kctx, IRBuilder *self, kExp
 	unsigned long unboxVal = expr->unboxConstValue;
 	KonohaClass *ct = CT_(expr->ty);
 	sfp[0].unboxValue = unboxVal;
-	ct->p(kctx, sfp, 0, &wb, 0);
+	ct->p(kctx, sfp, 0, &wb);
 	char  *str = (char *) KLIB Kwb_top(kctx, &wb, 0);
 	emit_string_js(str, "", "");
 	KLIB Kwb_free(&wb);
@@ -213,7 +211,12 @@ static void JSVisitor_visitCallExpr(KonohaContext *kctx, IRBuilder *self, kExpr 
 		emit_string_js(")", "", "");
 	}
 	else {
-		handleExpr(kctx, self, kExpr_at(expr, 1));
+		kExpr *receiver = kExpr_at(expr, 1);
+		if(receiver->build == TEXPR_NULL){
+			emit_string_js(CT_t(CT_(receiver->ty)), "", "");
+		}else{
+			handleExpr(kctx, self, receiver);
+		}
 		emit_string_js(".", "", "");
 		emit_string_js("", T_mn(mtd->mn));
 		emit_string_js("(", "", "");
@@ -284,10 +287,11 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 		KLIB Kwb_printf(kctx, &wb, "(function(", CT_t(CT_(mtd->typeId)), T_mn(mtd->mn));
 	}
 	for (i = 0; i < pa->psize; i++) {
-		if(i != 0) {
-			KLIB Kwb_putc(kctx, &wb, ", ", 2);
+		if (i != 0) {
+			KLIB Kwb_printf(kctx, &wb, ", %s", SYM_t(pa->paramtypeItems[i].fn));
+		}else{
+			KLIB Kwb_printf(kctx, &wb, "%s", SYM_t(pa->paramtypeItems[i].fn));
 		}
-		KLIB Kwb_printf(kctx, &wb, "%s", SYM_t(pa->paramtypeItems[i].fn));
 	}
 	emit_string_js(KLIB Kwb_top(kctx, &wb, 1), "", "");
 	emit_newline(") {", ++DUMPER(builder)->indent);
