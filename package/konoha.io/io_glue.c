@@ -343,7 +343,8 @@ static KMETHOD InputStream_getByte(KonohaContext *kctx, KonohaStack *sfp)
 
 static intptr_t findEndOfLine(KonohaContext *kctx, char *buf, size_t offset, size_t max, int *hasMultiByteChar, int *hasCarrigeReturn)
 {
-	int i, ch, prev = 0;
+	size_t i;
+	int ch, prev = 0;
 	for(i = offset; i < max; i++) {
 		ch = buf[i];
 		if(ch == '\n') {
@@ -360,26 +361,33 @@ static kString* kInputStream_readLine(KonohaContext *kctx,  kInputStream *in)
 {
 	int hasMultiByteChar = false, hasCarrigeReturn = false;
 	intptr_t endOfLineIdx;
+	int isClosed = false;
 	while((endOfLineIdx = findEndOfLine(kctx, in->buffer.bytebuf, in->top, in->buffer.bytesize, &hasMultiByteChar, &hasCarrigeReturn)) == -1) {
 		size_t readbyte = kInputStream_readToBuffer(kctx, in, &in->buffer);
-		if(readbyte == 0) endOfLineIdx = in->buffer.bytesize;
+		if(readbyte == 0) {
+			endOfLineIdx = in->buffer.bytesize;
+			isClosed = true;
+			break;
+		}
 	}
 	kString *lineString;
 	size_t len = hasCarrigeReturn ? endOfLineIdx - in->top - 1 : endOfLineIdx - in->top;
 	if(!hasMultiByteChar || !HAS_ICONV(in->iconv)) {
-		lineString = (endOfLineIdx - in->top == 0) ? KNULL(String)
-			: KLIB new_kString(kctx, OnStack, in->buffer.bytebuf + in->top, len, StringPolicy_ASCII);
+		lineString = KLIB new_kString(kctx, OnStack, in->buffer.bytebuf + in->top, len, StringPolicy_ASCII);
 	}
 	else {
 		//TODO;
 		lineString = KLIB new_kString(kctx, OnStack, in->buffer.bytebuf + in->top, len, StringPolicy_UTF8);
 	}
-	in->top += endOfLineIdx;
+	in->top = endOfLineIdx + 1;
 	if(in->top > K_PAGESIZE) {  // compaction
 		size_t newsize = in->buffer.bytesize - in->top;
 		memcpy(in->buffer.bytebuf, in->buffer.bytebuf + in->top, newsize);
 		in->top = 0;
 		in->buffer.bytesize = newsize;
+	}
+	if(isClosed) {
+		kInputStream_close(kctx, in);
 	}
 	return lineString;
 }
@@ -400,7 +408,7 @@ static KMETHOD InputStream_close(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD InputStream_isClosed(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kInputStream *in = (kInputStream*)sfp[0].asObject;
-	KReturnUnboxValue(!(in->streamApi->isEndOfStream(kctx, in->fp)));
+	KReturnUnboxValue(in->top == 0 && in->streamApi->isEndOfStream(kctx, in->fp));
 }
 
 /* ------------------------------------------------------------------------ */
