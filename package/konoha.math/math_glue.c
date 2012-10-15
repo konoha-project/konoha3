@@ -285,7 +285,7 @@ static kbool_t math_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, k
 KDEFINE_PACKAGE* math_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "math", "1.0");
+	KSetPackageName(d, "math", "1.0");
 	d.initPackage    = math_initPackage;
 	d.setupPackage   = math_setupPackage;
 	d.initNameSpace  = math_initNameSpace;

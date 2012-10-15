@@ -94,7 +94,7 @@ static kbool_t untyped_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS
 KDEFINE_PACKAGE* untyped_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "untyped", "1.0");
+	KSetPackageName(d, "untyped", "1.0");
 	d.initPackage    = untyped_initPackage;
 	d.setupPackage   = untyped_setupPackage;
 	d.initNameSpace  = untyped_initNameSpace;

@@ -176,7 +176,7 @@ static kbool_t foreach_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS
 KDEFINE_PACKAGE* foreach_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "foreach", "1.0");
+	KSetPackageName(d, "foreach", "1.0");
 	d.initPackage    = foreach_initPackage;
 	d.setupPackage   = foreach_setupPackage;
 	d.initNameSpace  = foreach_initNameSpace;

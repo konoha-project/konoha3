@@ -756,7 +756,7 @@ static kbool_t Complex_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS
 KDEFINE_PACKAGE* complex_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "hello_world", "1.0");
+	KSetPackageName(d, "hello_world", "1.0");
 	d.initPackage    = Complex_initPackage;
 	d.setupPackage   = Complex_setupPackage;
 	d.initNameSpace  = Complex_initNameSpace;

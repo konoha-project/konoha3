@@ -86,7 +86,7 @@ static kbool_t while_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 KDEFINE_PACKAGE* while_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "while", "1.0");
+	KSetPackageName(d, "while", "1.0");
 	d.initPackage    = while_initPackage;
 	d.setupPackage   = while_setupPackage;
 	d.initNameSpace  = while_initNameSpace;

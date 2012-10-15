@@ -83,7 +83,7 @@ static kbool_t break_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 KDEFINE_PACKAGE* break_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "break", "1.0");
+	KSetPackageName(d, "break", "1.0");
 	d.initPackage    = break_initPackage;
 	d.setupPackage   = break_setupPackage;
 	d.initNameSpace  = break_initNameSpace;

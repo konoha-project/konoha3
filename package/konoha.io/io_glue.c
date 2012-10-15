@@ -806,7 +806,7 @@ static kbool_t io_setNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kName
 KDEFINE_PACKAGE* io_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "io", "1.0");
+	KSetPackageName(d, "io", "1.0");
 	d.initPackage    = io_initPackage;
 	d.setupPackage   = io_setupPackage;
 	d.initNameSpace  = io_initNameSpace;

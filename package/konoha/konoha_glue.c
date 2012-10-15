@@ -105,7 +105,7 @@ static kbool_t konoha_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS,
 KDEFINE_PACKAGE* konoha_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "konoha", "1.0");
+	KSetPackageName(d, "konoha", "1.0");
 	d.initPackage    = konoha_initPackage;
 	d.setupPackage   = konoha_setupPackage;
 	d.initNameSpace  = konoha_initNameSpace;

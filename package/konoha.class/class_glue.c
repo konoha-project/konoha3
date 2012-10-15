@@ -419,7 +419,7 @@ static kbool_t class_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 KDEFINE_PACKAGE* class_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "class", "1.0");
+	KSetPackageName(d, "class", "1.0");
 	d.initPackage    = class_initPackage;
 	d.setupPackage   = class_setupPackage;
 	d.initNameSpace  = class_initNameSpace;

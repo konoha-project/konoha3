@@ -644,7 +644,7 @@ static kbool_t array_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 KDEFINE_PACKAGE* array_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "array", "1.0");
+	KSetPackageName(d, "array", "1.0");
 	d.initPackage    = array_initPackage;
 	d.setupPackage   = array_setupPackage;
 	d.initNameSpace  = array_initNameSpace;

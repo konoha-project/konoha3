@@ -97,7 +97,7 @@ static kbool_t const_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 KDEFINE_PACKAGE* const_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "const", "1.0");
+	KSetPackageName(d, "const", "1.0");
 	d.initPackage    = const_initPackage;
 	d.setupPackage   = const_setupPackage;
 	d.initNameSpace  = const_initNameSpace;

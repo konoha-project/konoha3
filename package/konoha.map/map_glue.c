@@ -262,7 +262,7 @@ static kbool_t map_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kN
 KDEFINE_PACKAGE* map_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "map", "1.0");
+	KSetPackageName(d, "map", "1.0");
 	d.initPackage    = map_initPackage;
 	d.setupPackage   = map_setupPackage;
 	d.initNameSpace  = map_initNameSpace;

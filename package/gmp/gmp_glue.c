@@ -542,7 +542,7 @@ static kbool_t gmp_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kN
 KDEFINE_PACKAGE* gmp_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "gmp", "1.0");
+	KSetPackageName(d, "gmp", "1.0");
 	d.initPackage    = gmp_initPackage;
 	d.setupPackage   = gmp_setupPackage;
 	d.initNameSpace  = gmp_initNameSpace;

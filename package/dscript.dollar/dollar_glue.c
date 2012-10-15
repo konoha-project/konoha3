@@ -106,7 +106,7 @@ static kbool_t dollar_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS,
 KDEFINE_PACKAGE* dollar_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "dscript", "1.0");
+	KSetPackageName(d, "dscript", "1.0");
 	d.initPackage    = dollar_initPackage;
 	d.setupPackage   = dollar_setupPackage;
 	d.initNameSpace  = dollar_initNameSpace;

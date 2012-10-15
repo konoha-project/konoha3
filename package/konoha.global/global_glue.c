@@ -145,7 +145,7 @@ static kbool_t global_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS,
 KDEFINE_PACKAGE* global_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "global", "1.0");
+	KSetPackageName(d, "global", "1.0");
 	d.initPackage    = global_initPackage;
 	d.setupPackage   = global_setupPackage;
 	d.initNameSpace  = global_initNameSpace;

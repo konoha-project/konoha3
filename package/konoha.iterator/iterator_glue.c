@@ -216,7 +216,7 @@ static kbool_t iterator_setupNameSpace(KonohaContext *kctx, kNameSpace *packageN
 KDEFINE_PACKAGE* iterator_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "iterator", "1.0");
+	KSetPackageName(d, "iterator", "1.0");
 	d.initPackage    = iterator_initPackage;
 	d.setupPackage   = iterator_setupPackage;
 	d.initNameSpace  = iterator_initNameSpace;

@@ -627,7 +627,7 @@ static kbool_t sugar_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 KDEFINE_PACKAGE* sugar_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "sugar", "1.0");
+	KSetPackageName(d, "sugar", "1.0");
 	d.initPackage    = sugar_initPackage;
 	d.setupPackage   = sugar_setupPackage;
 	d.initNameSpace  = sugar_initNameSpace;

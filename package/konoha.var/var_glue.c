@@ -58,7 +58,7 @@ static kbool_t var_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kN
 KDEFINE_PACKAGE* var_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "var", "1.0");
+	KSetPackageName(d, "var", "1.0");
 	d.initPackage    = var_initPackage;
 	d.setupPackage   = var_setupPackage;
 	d.initNameSpace  = var_initNameSpace;

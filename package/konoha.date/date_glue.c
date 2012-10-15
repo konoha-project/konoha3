@@ -685,7 +685,7 @@ static kbool_t date_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, k
 KDEFINE_PACKAGE* date_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "date", "1.0");
+	KSetPackageName(d, "date", "1.0");
 	d.initPackage    = date_initPackage;
 	d.setupPackage   = date_setupPackage;
 	d.initNameSpace  = date_initNameSpace;

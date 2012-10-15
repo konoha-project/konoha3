@@ -266,7 +266,7 @@ static kbool_t cstyle_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS,
 KDEFINE_PACKAGE* cstyle_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "cstyle", "1.0");
+	KSetPackageName(d, "cstyle", "1.0");
 	d.initPackage    = cstyle_initPackage;
 	d.setupPackage   = cstyle_setupPackage;
 	d.initNameSpace  = cstyle_initNameSpace;

@@ -142,7 +142,7 @@ static kbool_t dynamic_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS
 KDEFINE_PACKAGE* dynamic_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "dynamic", "1.0");
+	KSetPackageName(d, "dynamic", "1.0");
 	d.initPackage    = dynamic_initPackage;
 	d.setupPackage   = dynamic_setupPackage;
 	d.initNameSpace  = dynamic_initNameSpace;

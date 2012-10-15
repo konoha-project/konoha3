@@ -404,7 +404,7 @@ static kbool_t bytes_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 KDEFINE_PACKAGE* bytes_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "bytes", "1.0");
+	KSetPackageName(d, "bytes", "1.0");
 	d.initPackage    = bytes_initPackage;
 	d.setupPackage   = bytes_setupPackage;
 	d.initNameSpace  = bytes_initNameSpace;

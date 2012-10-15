@@ -104,7 +104,7 @@ static kbool_t import_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS,
 KDEFINE_PACKAGE* import_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "import", "1.0");
+	KSetPackageName(d, "import", "1.0");
 	d.initPackage    = import_initPackage;
 	d.setupPackage   = import_setupPackage;
 	d.initNameSpace  = import_initNameSpace;

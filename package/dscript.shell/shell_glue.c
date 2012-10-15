@@ -263,7 +263,7 @@ static kbool_t shell_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 KDEFINE_PACKAGE* shell_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "dscript.shell", "1.0");
+	KSetPackageName(d, "dscript.shell", "1.0");
 	d.initPackage    = shell_initPackage;
 	d.setupPackage   = shell_setupPackage;
 	d.initNameSpace  = shell_initNameSpace;

@@ -1343,7 +1343,7 @@ struct _kSystem {
 
 #define KPACKNAME(N, V) \
 	.name = N, .version = V, .konoha_checksum = K_CHECKSUM, .konoha_revision = K_REVISION
-#define KSETPACKNAME(VAR, N, V) \
+#define KSetPackageName(VAR, N, V) \
  	do{ VAR.name = N; VAR.version = V; VAR.konoha_checksum = K_CHECKSUM; VAR.konoha_revision = K_REVISION; } while(0)
 
 #define KPACKLIB(N, V) \
