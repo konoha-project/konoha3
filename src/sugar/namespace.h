@@ -36,11 +36,11 @@ static void kNameSpace_appendArrayRef(KonohaContext *kctx, kNameSpace *ns, kArra
 
 static void kNameSpace_appendArrayRefArray(KonohaContext *kctx, kNameSpace *ns, kArray **arrayRef, kArray *a)
 {
-	int i;
 	if(a != NULL) {
 		if(arrayRef[0] == NULL) {
 			arrayRef[0] = new_(Array, kArray_size(a), ns->NameSpaceConstList);
 		}
+		size_t i;
 		for(i = 0; i < kArray_size(a); i++) {
 			kObject *o = a->ObjectItems[i];
 			KLIB kArray_add(kctx, arrayRef[0], o);
@@ -493,7 +493,7 @@ static int comprMethod(const void *a, const void *b)
 
 static void kMethodList_matchMethod(KonohaContext *kctx, kArray *methodList, const size_t *sorted, ktype_t typeId, MethodMatchFunc MatchMethod, MethodMatch *option)
 {
-	long i, min = 0, max = sorted[0];
+	size_t i, min = 0, max = sorted[0];
 	long optkey = ((long)typeId << (sizeof(kshort_t)*8)) | option->mn;
 	if(kArray_size(methodList) - max > 8) {
 		max = kArray_size(methodList);

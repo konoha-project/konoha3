@@ -199,10 +199,8 @@ static KMETHOD Map_new(KonohaContext *kctx, KonohaStack *sfp)
 #define _Public   kMethod_Public
 #define _Const    kMethod_Const
 #define _Im       kMethod_Immutable
-#define _Coercion kMethod_Coercion
 #define _F(F)     (intptr_t)(F)
 
-#define CT_Map cMap
 #define TY_Map cMap->typeId
 
 static kbool_t map_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)

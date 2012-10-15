@@ -32,7 +32,6 @@ extern "C"{
 // --------------------------------------------------------------------------
 
 #define _Public   kMethod_Public
-#define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
 static KMETHOD NameSpace_setTransparentGlobalVariable_(KonohaContext *kctx, KonohaStack *sfp)

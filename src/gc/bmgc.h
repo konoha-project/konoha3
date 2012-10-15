@@ -147,7 +147,7 @@ struct ARRAY(T) {\
 	SizeTy size;\
 	SizeTy capacity;\
 }
-#define DEF_ARRAY_STRUCT(T)  DEF_ARRAY_STRUCT_(T, int)
+#define DEF_ARRAY_STRUCT(T)  DEF_ARRAY_STRUCT_(T, unsigned)
 
 #define DEF_ARRAY_T(T)\
 struct ARRAY(T);\
@@ -261,8 +261,8 @@ struct SubHeap {
 #endif
 	Segment *freelist;
 	Segment **seglist;
-	int seglist_size;
-	int seglist_max;
+	unsigned seglist_size;
+	unsigned seglist_max;
 };
 
 #define for_each_heap(H, I, HEAPS) \
@@ -305,11 +305,11 @@ struct Segment {
 	bitmap_t *base[SEGMENT_LEVEL];
 	const AllocationBlock *block;
 	int heap_klass;
-	int live_count;
+	unsigned int live_count;
 	struct Segment *next;
 #ifdef USE_GENERATIONAL_GC
 	bitmap_t *snapshots[SEGMENT_LEVEL];
-	int tenure_live_count;
+	unsigned int tenure_live_count;
 	bitmap_t *remember_set; /* for debug */
 #else
 	void *unused;
@@ -707,7 +707,7 @@ static void *Kmalloc(KonohaContext *kctx, size_t s, KTraceInfo *trace)
 	return (void*)p;
 }
 
-static void *Kzmalloc(KonohaContext *kctx, size_t s)
+static void *Kzmalloc(KonohaContext *kctx, size_t s, KTraceInfo *trace)
 {
 	size_t *p = (size_t*)do_calloc(1, s
 #ifdef MEMORY_DEBUG

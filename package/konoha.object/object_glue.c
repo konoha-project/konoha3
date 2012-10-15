@@ -40,9 +40,6 @@ static KMETHOD Object_getTypeId(KonohaContext *kctx, KonohaStack *sfp)
 
 #define _Public   kMethod_Public
 #define _Const    kMethod_Const
-#define _Hidden   kMethod_Hidden
-#define _Imm      kMethod_Immutable
-#define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
 static kbool_t object_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)

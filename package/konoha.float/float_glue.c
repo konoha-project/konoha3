@@ -245,7 +245,6 @@ static KMETHOD Float_opMINUS(KonohaContext *kctx, KonohaStack *sfp)
 #define _Const    kMethod_Const
 #define _Im       kMethod_Immutable
 #define _Coercion kMethod_Coercion
-#define _Static   kMethod_Static
 #define _F(F)   (intptr_t)(F)
 
 static kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)

@@ -597,15 +597,9 @@ static KMETHOD Date_toLocaleString(KonohaContext *kctx, KonohaStack *sfp)
 /* ------------------------------------------------------------------------ */
 
 #define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Coercion kMethod_Coercion
 #define _Im       kMethod_Immutable
-#define _Static   kMethod_Static
 #define _F(F)   (intptr_t)(F)
-
-#define CT_Date     cDate
 #define TY_Date     cDate->typeId
-#define IS_Date(O)  ((O)->h.ct == CT_Date)
 
 static kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
