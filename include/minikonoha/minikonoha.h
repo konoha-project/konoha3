@@ -1032,14 +1032,15 @@ typedef enum {
 #define IS_String(o)              (O_typeId(o) == TY_String)
 
 /* kObject_Local1 is reserved by konoha.string package */
-#define S_isTextSgm(o)       (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local2))
-#define S_setTextSgm(o,b)    TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local2,b)
-#define S_isMallocText(o)    (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local3))
-#define S_setMallocText(o,b) TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local3,b)
-#define S_isASCII(o)         (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local4))
-#define S_setASCII(o,b)      TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local4,b)
-#define S_isPooled(o)        (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local5))
-#define S_setPooled(o,b)     TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local5,b)
+
+#define StringFlag_Reserved   kString_Loacl1
+#define StringFlag_TextSgm    kObject_Local2
+#define StringFlag_MallocText kObject_Local3
+#define StringFlag_ASCII      kObject_Local4
+
+#define kString_is(P, o)        (TFLAG_is(uintptr_t,(o)->h.magicflag,StringFlag_##P))
+#define kString_set(P, o, b)    TFLAG_set(uintptr_t,(o)->h.magicflag,StringFlag_##P,b)
+
 #define SIZEOF_INLINETEXT    (sizeof(void*)*8 - sizeof(kBytes))
 
 typedef const struct kBytesVar kBytes;
@@ -1058,9 +1059,9 @@ typedef enum {
 	StringPolicy_TEXT     =     (1<<0),
 	StringPolicy_ASCII    =     (1<<1),
 	StringPolicy_UTF8     =     (1<<2),
-	StringPolicy_POOL     =     (1<<3),
-	StringPolicy_NOPOOL   =     (1<<5),
-	StringPolicy_NOCOPY   =     (1<<4)
+	StringPolicy_NOCOPY   =     (1<<3),
+	StringPolicy_NOPOOL   =     (1<<4),  /* in the future */
+	////	StringPolicy_POOL     =     (1<<3),
 } StringPolicy;
 
 #define K_NULLTEXT          "null"
@@ -1515,7 +1516,7 @@ struct KonohaLibVar {
 
 #define PN_konoha                 0
 #define PackageId_sugar           1
-#define PN_(T)                    KLIB KpackageId(kctx, T, sizeof(T)-1, StringPolicy_TEXT|StringPolicy_ASCII|StringPolicy_POOL, _NEWID)
+#define PN_(T)                    KLIB KpackageId(kctx, T, sizeof(T)-1, StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
 
 #define ksymbolA(T, L, DEF)       KLIB Ksymbol(kctx, T, L, StringPolicy_ASCII, DEF)
 #define ksymbolSPOL(T, L, SPOL, DEF)       KLIB Ksymbol(kctx, T, L, SPOL, DEF)

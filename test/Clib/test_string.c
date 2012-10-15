@@ -35,7 +35,7 @@ void test_kString(KonohaContext *kctx)
         s = KLIB new_kString(kctx, GcUnsafe, "abcd", 4, 0);
         assert(strcmp(S_text(s), "abcd") == 0);
         assert(S_size(s) == 4);
-        assert(S_isASCII(s) == 1);
+        assert(kString_is(ASCII, s) == 1);
     }
     for (i = 0; i < 100; ++i) {
         s = KLIB new_kString(kctx, GcUnsafe, "abcd", 4, 0);
@@ -49,7 +49,7 @@ void test_kString(KonohaContext *kctx)
         assert(strcmp(S_text(s), text) == 0);
         assert(S_size(s) == 20);
         assert(S_text(s) == text);
-        assert(S_isASCII(s) == 0);
+        assert(kString_is(ASCII, s) == 0);
     }
 }
 

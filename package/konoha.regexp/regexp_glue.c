@@ -84,8 +84,8 @@ static size_t utf8_strlen(const char *text, size_t len)
 //#define _NEVER  0/*StringPolicy_POOL*/
 //#define _ASCII  StringPolicy_ASCII
 //#define _UTF8   StringPolicy_UTF8
-//#define _SUB(s0) (S_isASCII(s0) ? _ASCII|_ALWAYS : _ALWAYS)
-//#define _SUBCHAR(s0) (S_isASCII(s0) ? _ASCII : 0)
+//#define _SUB(s0) (kString_is(ASCII, s0) ? _ASCII|_ALWAYS : _ALWAYS)
+//#define _SUBCHAR(s0) (kString_is(ASCII, s0) ? _ASCII : 0)
 //#define _CHARSIZE(len) (len==1 ? _ASCII : _UTF8)
 
 typedef struct {
@@ -349,7 +349,7 @@ static void RegExp_set(KonohaContext *kctx, kRegExp *re, kString *ptns, kString 
 	KFieldSet(re, re->pattern, ptns);
 	re->reg = pcre_regmalloc(kctx, ptns);
 	int cflags = pcre_parsecflags(kctx, opt);
-	if(!S_isASCII(ptns)) {
+	if(!kString_is(ASCII, ptns)) {
 		/* Add 'u' option when the pattern is multibyte string. */
 		cflags |= PCRE_UTF8;
 	}
@@ -428,7 +428,7 @@ static KMETHOD String_search(KonohaContext *kctx, KonohaStack *sfp)
 		int res = pcre_regexec(kctx, re->reg, str, 1, pmatch, re->eflags);
 		if(res == 0) {
 			loc = pmatch[0].rm_so;
-			if(loc != -1 && !S_isASCII(sfp[0].asString)) {
+			if(loc != -1 && !kString_is(ASCII, sfp[0].asString)) {
 				loc = utf8_strlen(str, loc);
 			}
 		}
@@ -444,7 +444,7 @@ static KMETHOD String_search(KonohaContext *kctx, KonohaStack *sfp)
 
 static void kArray_executeRegExp(KonohaContext *kctx, kArray *resultArray, kRegExp *regex, kString *s0)
 {
-	int stringPolicy = S_isASCII(s0) ? StringPolicy_ASCII : 0;
+	int stringPolicy = kString_is(ASCII, s0) ? StringPolicy_ASCII : 0;
 	if(IS_NOTNULL(regex) && S_size(regex->pattern) > 0) {
 		const char *s = S_text(s0);  // necessary
 		const char *base = s;
@@ -548,7 +548,7 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 
 static void kArray_split(KonohaContext *kctx, kArray *resultArray, kString *str, kRegExp *regex, int limit)
 {
-	int stringPolicy = S_isASCII(str) ? StringPolicy_ASCII : 0;
+	int stringPolicy = kString_is(ASCII, str) ? StringPolicy_ASCII : 0;
 	if(IS_NOTNULL(regex) && S_size(regex->pattern) > 0) {
 		const char *s = S_text(str);  // necessary
 		const char *eos = s + S_size(str);
@@ -573,7 +573,7 @@ static void kArray_split(KonohaContext *kctx, kArray *resultArray, kString *str,
 	else {
 		const unsigned char *s = (const unsigned char*)S_text(str);
 		size_t i, n = S_size(str);
-		if(S_isASCII(str)) {
+		if(kString_is(ASCII, str)) {
 			for(i = 0; i < n; i++) {
 				KLIB new_kString(kctx, resultArray, (const char*)s + i, 1, StringPolicy_ASCII);
 			}
