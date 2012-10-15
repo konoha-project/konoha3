@@ -1031,12 +1031,10 @@ typedef enum {
 
 #define IS_String(o)              (O_typeId(o) == TY_String)
 
-/* kObject_Local1 is reserved by konoha.string package */
-
-#define StringFlag_Reserved   kString_Loacl1
-#define StringFlag_TextSgm    kObject_Local2
-#define StringFlag_MallocText kObject_Local3
-#define StringFlag_ASCII      kObject_Local4
+#define StringFlag_RopeReserved   kString_Loacl1  /* Don't change */
+#define StringFlag_TextSgm        kObject_Local2  /* Don't change */
+#define StringFlag_MallocText     kObject_Local3  /* Don't change */
+#define StringFlag_ASCII          kObject_Local4
 
 #define kString_is(P, o)        (TFLAG_is(uintptr_t,(o)->h.magicflag,StringFlag_##P))
 #define kString_set(P, o, b)    TFLAG_set(uintptr_t,(o)->h.magicflag,StringFlag_##P,b)

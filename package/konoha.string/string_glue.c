@@ -91,7 +91,7 @@ typedef struct InlineString {
 static inline uint32_t S_flag(kStringBase *s)
 {
 	uint32_t flag = ((~0U) & (s)->h.magicflag) >> S_FLAG_MASK_BASE;
-	assert(flag <= S_FLAG_ROPE);
+	DBG_ASSERT(flag <= S_FLAG_ROPE);
 	return flag;
 }
 
@@ -107,12 +107,12 @@ static inline int kStringBase_isLiner(kStringBase *s)
 
 static void kStringBase_setFlag(kStringBase *s, uint32_t mask)
 {
-	s->h.magicflag |= mask;
+	s->h.magicflag |= (uintptr_t)mask;
 }
 
 static void kStringBase_unsetFlag(kStringBase *s, uint32_t mask)
 {
-	s->h.magicflag ^= mask;
+	s->h.magicflag ^= (uintptr_t)mask;
 }
 
 static kStringBase *new_kStringBase(KonohaContext *kctx, kArray* gcstack, uint32_t mask)
