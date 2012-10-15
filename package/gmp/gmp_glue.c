@@ -520,6 +520,18 @@ static KMETHOD Mpf_new_str(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(self);
 }
 
+static KMETHOD Mpf_getprec(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *self = (kMpf*)sfp[0].asObject;
+	KReturnUnboxValue(mpf_get_prec(self->mpf));
+}
+
+static KMETHOD Mpf_setprec(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *self = (kMpf*)sfp[0].asObject;
+	mpf_set_prec(self->mpf, sfp[1].intValue);
+}
+
 static KMETHOD Mpf_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpf *self = (kMpf*)sfp[0].asObject;
@@ -589,15 +601,23 @@ static KMETHOD Mpf_power(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Mpf_opMINUS(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpf *lhs = (kMpf*)sfp[0].asObject;
-	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
 	mpf_neg(ret->mpf, lhs->mpf);
+	KReturn(ret);
+}
+
+static KMETHOD Mpf_sqrt(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *self = (kMpf*)sfp[0].asObject;
+	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
+	mpf_sqrt(ret->mpf, self->mpf);
 	KReturn(ret);
 }
 
 static KMETHOD Mpf_abs(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpf *lhs = (kMpf*)sfp[0].asObject;
-	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
 	mpf_abs(ret->mpf, lhs->mpf);
 	KReturn(ret);
 }
@@ -997,6 +1017,8 @@ static kbool_t gmp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		_Public|_Const,     _F(Mpf_new_int),    TY_Mpf,     TY_Mpf, MN_("new"), 1, TY_int, FN_x,
 		_Public|_Const,     _F(Mpf_new_mpz),    TY_Mpf,     TY_Mpf, MN_("new"), 1, TY_Mpz, FN_x,
 		_Public|_Const,     _F(Mpf_new_str),    TY_Mpf,     TY_Mpf, MN_("new"), 1, TY_String, FN_x,
+		_Public|_Im,        _F(Mpf_getprec),    TY_Mpf,     TY_int, MN_("getprec"), 0,
+		_Public|            _F(Mpf_setprec),    TY_Mpf,     TY_void,MN_("setprec"), 1, TY_int, FN_x,
 		_Public|_Im|_Const|_Coercion, _F(Mpf_toString),   TY_String,  TY_Mpf, MN_to(TY_String),   0,
 		_Public|_Im|_Const|_Coercion, _F(Mpf_toInt),      TY_int,     TY_Mpf, MN_to(TY_int),   0,
 		_Public|_Im|_Const|_Coercion, _F(Mpf_toFloat),    TY_float,   TY_Mpf, MN_to(TY_float), 0,
@@ -1008,6 +1030,7 @@ static kbool_t gmp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		_Public|_Im|_Const, _F(Mpf_power),      TY_Mpf,     TY_Mpf, MN_("power"), 1, TY_int, FN_x,
 		_Public|_Im|_Const, _F(Mpf_opMINUS),    TY_Mpf,     TY_Mpf, MN_("-"),   0,
 		_Public|_Im|_Const, _F(Mpf_abs),        TY_Mpf,     TY_Mpf, MN_("abs"), 0,
+		_Public|_Im|_Const, _F(Mpf_sqrt),       TY_Mpf,     TY_Mpf, MN_("sqrt"), 0,
 		_Public|_Im|_Const, _F(Mpf_opADD),      TY_Mpf,     TY_Mpf, MN_("+"),   1, TY_Mpf, FN_x,
 		_Public|_Im|_Const, _F(Mpf_opADD_int),  TY_Mpf,     TY_Mpf, MN_("+"),   1, TY_int, FN_x,
 		_Public|_Im|_Const, _F(Int_opADD_mpf),  TY_Mpf,     TY_int, MN_("+"),   1, TY_Mpf, FN_x,
