@@ -38,7 +38,7 @@ static void emit_newline(const char *str, int indent)
 {
 	printf("%s\n", str);
 	int i;
-	for (i = 0; i < indent; i++) {
+	for(i = 0; i < indent; i++){
 		putchar(' ');
 	}
 }
@@ -97,7 +97,7 @@ static void JSVisitor_visitReturnStmt(KonohaContext *kctx, IRBuilder *self, kStm
 {
 	emit_string_js("return ", "", "");
 	kExpr* expr = Stmt_getFirstExpr(kctx, stmt);
-	if(expr != NULL && IS_Expr(expr)) {
+	if(expr != NULL && IS_Expr(expr)){
 		handleExpr(kctx, self, expr);
 	}
 	emit_newline(";", DUMPER(self)->indent);
@@ -108,7 +108,7 @@ static void JSVisitor_visitIfStmt(KonohaContext *kctx, IRBuilder *self, kStmt *s
 	DUMPER(self)->indent++;
 	emit_string_js("if(", "", "");
 	handleExpr(kctx, self, Stmt_getFirstExpr(kctx, stmt));
-	emit_newline(") {", DUMPER(self)->indent++);
+	emit_newline("){", DUMPER(self)->indent++);
 	visitBlock(kctx, self, Stmt_getFirstBlock(kctx, stmt));
 	emit_newline("} else {", --(DUMPER(self)->indent));
 	visitBlock(kctx, self, Stmt_getElseBlock(kctx, stmt));
@@ -121,7 +121,7 @@ static void JSVisitor_visitLoopStmt(KonohaContext *kctx, IRBuilder *self, kStmt 
 	DUMPER(self)->indent++;
 	emit_string_js("while(", "", "");
 	handleExpr(kctx, self, Stmt_getFirstExpr(kctx, stmt));
-	emit_newline(") {", DUMPER(self)->indent);
+	emit_newline("){", DUMPER(self)->indent);
 	visitBlock(kctx, self, Stmt_getFirstBlock(kctx, stmt));
 	emit_newline("}", DUMPER(self)->indent);
 	DUMPER(self)->indent--;
@@ -198,13 +198,13 @@ static void JSVisitor_visitCallExpr(KonohaContext *kctx, IRBuilder *self, kExpr 
 {
 	kMethod *mtd = CallExpr_getMethod(expr);
 
-	if(kArray_size(expr->cons) == 2 && MethodName_isUnaryOperator(kctx, mtd->mn)) {
+	if(kArray_size(expr->cons) == 2 && MethodName_isUnaryOperator(kctx, mtd->mn)){
 		emit_string_js("", T_mn(mtd->mn));
 		emit_string_js("(", "", "");
 		handleExpr(kctx, self, kExpr_at(expr, 1));
 		emit_string_js(")", "", "");
 	}
-	else if(MethodName_isBinaryOperator(kctx, mtd->mn)) {
+	else if(MethodName_isBinaryOperator(kctx, mtd->mn)){
 		emit_string_js("(", "", "");
 		handleExpr(kctx, self, kExpr_at(expr, 1));
 		emit_string_js("", T_mn(mtd->mn));
@@ -230,9 +230,9 @@ static void JSVisitor_visitCallExpr(KonohaContext *kctx, IRBuilder *self, kExpr 
 		emit_string_js("(", "", "");
 		unsigned i;
 		unsigned n = kArray_size(expr->cons);
-		for (i = 2; i < n;) {
+		for(i = 2; i < n;){
 			handleExpr(kctx, self, kExpr_at(expr, i));
-			if(++i < n) {
+			if(++i < n){
 				emit_string_js(", ", "", "");
 			}
 		}
@@ -245,9 +245,9 @@ static void JSVisitor_visitAndExpr(KonohaContext *kctx, IRBuilder *self, kExpr *
 	unsigned n = kArray_size(expr->cons);
 	unsigned i;
 	emit_string_js("(", "", "");
-	for (i = 1; i < kArray_size(expr->cons);) {
+	for(i = 1; i < kArray_size(expr->cons);){
 		handleExpr(kctx, self, kExpr_at(expr, i));
-		if(++i < n) {
+		if(++i < n){
 			emit_string_js(" && ", "", "");
 		}
 	}
@@ -259,9 +259,9 @@ static void JSVisitor_visitOrExpr(KonohaContext *kctx, IRBuilder *self, kExpr *e
 	unsigned n = kArray_size(expr->cons);
 	unsigned i;
 	emit_string_js("(", "", "");
-	for (i = 1; i < kArray_size(expr->cons);) {
+	for(i = 1; i < kArray_size(expr->cons);){
 		handleExpr(kctx, self, kExpr_at(expr, i));
-		if(++i < n) {
+		if(++i < n){
 			emit_string_js(" || ", "", "");
 		}
 	}
@@ -289,30 +289,31 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	kParam *pa = Method_param(mtd);
-	if(mtd->mn) {
+	if(mtd->mn){
 		kMethod_setFunc(kctx, mtd, NULL);
 		KLIB Kwb_printf(kctx, &wb, "%s.%s%s = function(", CT_t(CT_(mtd->typeId)), T_mn(mtd->mn));
-	} else {
+	}else{
 		KLIB kNameSpace_compileAllDefinedMethods(kctx);
 		KLIB Kwb_printf(kctx, &wb, "(function(", CT_t(CT_(mtd->typeId)), T_mn(mtd->mn));
 	}
-	for (i = 0; i < pa->psize; i++) {
-		if (i != 0) {
+	for(i = 0; i < pa->psize; i++){
+		if(i != 0){
 			KLIB Kwb_printf(kctx, &wb, ", %s", SYM_t(pa->paramtypeItems[i].fn));
 		}else{
 			KLIB Kwb_printf(kctx, &wb, "%s", SYM_t(pa->paramtypeItems[i].fn));
 		}
 	}
 	emit_string_js(KLIB Kwb_top(kctx, &wb, 1), "", "");
-	emit_newline(") {", ++DUMPER(builder)->indent);
+	emit_newline("){", ++DUMPER(builder)->indent);
 	DUMPER(builder)->indent = 0;
+	KLIB Kwb_free(&wb);
 }
 
 static void JSVisitor_free(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
 {
-	if(mtd->mn) {
+	if(mtd->mn){
 		emit_newline("}", --DUMPER(builder)->indent);
-	}else {
+	}else{
 		emit_newline("})();", DUMPER(builder)->indent);
 	}
 	KFree(builder->local_fields, sizeof(int));

@@ -883,7 +883,6 @@ static size_t BasicBlock_size(KonohaContext *kctx, kBasicBlock *bb, size_t c)
 
 static VirtualMachineInstruction* BasicBlock_copy(KonohaContext *kctx, VirtualMachineInstruction *dst, kBasicBlock *bb, kBasicBlock **prev)
 {
-	KLIB kNameSpace_compileAllDefinedMethods(kctx);
 	BasicBlock_setVisited(bb, 0);
 	DBG_ASSERT(!BasicBlock_isVisited(bb));
 //	DBG_P("BB%d: asm nextBlock=BB%d, branchBlock=BB%d", BB_(bb), BB_(bb->nextBlock), BB_(bb->branchBlock));
