@@ -36,11 +36,11 @@ static void kNameSpace_appendArrayRef(KonohaContext *kctx, kNameSpace *ns, kArra
 
 static void kNameSpace_appendArrayRefArray(KonohaContext *kctx, kNameSpace *ns, kArray **arrayRef, kArray *a)
 {
-	int i;
 	if(a != NULL) {
 		if(arrayRef[0] == NULL) {
 			arrayRef[0] = new_(Array, kArray_size(a), ns->NameSpaceConstList);
 		}
+		size_t i;
 		for(i = 0; i < kArray_size(a); i++) {
 			kObject *o = a->ObjectItems[i];
 			KLIB kArray_add(kctx, arrayRef[0], o);

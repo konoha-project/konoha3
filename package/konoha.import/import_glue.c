@@ -40,7 +40,7 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 	ksymbol_t star = SYM_("*");
 	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	int i = 0;
+	size_t i = 0;
 	if(i + 2 < kArray_size(tokenList)) {
 		for (; i < kArray_size(tokenList)-1; i+=2) {
 			/* name . */

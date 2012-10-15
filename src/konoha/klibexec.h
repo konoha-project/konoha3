@@ -153,7 +153,7 @@ static kbool_t Kwb_iconv(KonohaContext *kctx, KGrowingBuffer* wb, uintptr_t icon
 			outBytesLeft = K_PAGESIZE;
 			continue;
 		}
-		if(iconv_ret == -1) {
+		if(iconv_ret == (size_t)-1) {
 			return false;
 		}
 	} /* end of converting loop */

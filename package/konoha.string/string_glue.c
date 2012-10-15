@@ -60,75 +60,75 @@ extern "C" {
 #define MASK_INLINE   ((S_FLAG_INLINE  ) << S_FLAG_MASK_BASE)
 #define MASK_EXTERNAL ((S_FLAG_EXTERNAL) << S_FLAG_MASK_BASE)
 
-#define S_len(s) ((s)->length)
-
-typedef struct StringBase {
+#define StringBase_length(s) ((s)->length)
+typedef struct kStringBase {
 	KonohaObjectHeader h;
 	size_t length;
-} StringBase;
+} kStringBase;
 
-typedef struct LinerString {
-	StringBase base;
+typedef struct kLinerString {
+	kStringBase base;
 	char *text;
-} LinerString;
+} kLinerString;
 
-typedef struct ExternalString {
-	struct StringBase base;
+typedef struct kExternalString {
+	struct kStringBase base;
 	char *text;
-} ExternalString;
+} kExternalString;
 
-typedef struct RopeString {
-	struct StringBase base;
-	struct StringBase *left;
-	struct StringBase *right;
-} RopeString;
+typedef struct kRopeString {
+	struct kStringBase base;
+	struct kStringBase *left;
+	struct kStringBase *right;
+} kRopeString;
 
-typedef struct InlineString {
-	struct StringBase base;
+typedef struct kInlineString {
+	struct kStringBase base;
+	/* for binary compatibilty with kString, we need 'text' pointer */
 	char *text;
 	char inline_text[SIZEOF_INLINETEXT];
-} InlineString;
+} kInlineString;
 
-static inline uint32_t S_flag(StringBase *s)
+static inline uint32_t kStringBase_flag(kStringBase *s)
 {
 	uint32_t flag = ((~0U) & (s)->h.magicflag) >> S_FLAG_MASK_BASE;
 	DBG_ASSERT(flag <= S_FLAG_ROPE);
 	return flag;
 }
 
-static inline int StringBase_isRope(StringBase *s)
+static inline int kStringBase_isRope(kStringBase *s)
 {
-	return S_flag(s) == S_FLAG_ROPE;
+	return kStringBase_flag(s) == S_FLAG_ROPE;
 }
 
-static inline int StringBase_isLiner(StringBase *s)
+static inline int kStringBase_isLiner(kStringBase *s)
 {
-	return S_flag(s) == S_FLAG_LINER;
+	return kStringBase_flag(s) == S_FLAG_LINER;
 }
 
-static void StringBase_setFlag(StringBase *s, uint32_t mask)
+static void kStringBase_setFlag(kStringBase *s, uint32_t mask)
 {
 	s->h.magicflag |= (uintptr_t)mask;
 }
 
-static void StringBase_unsetFlag(StringBase *s, uint32_t mask)
+static void kStringBase_unsetFlag(kStringBase *s, uint32_t mask)
 {
 	s->h.magicflag ^= (uintptr_t)mask;
 }
 
-static StringBase *new_StringBase(KonohaContext *kctx, kArray* gcstack, uint32_t mask)
+static kStringBase *new_kStringBase(KonohaContext *kctx, kArray* gcstack, uint32_t mask)
 {
-	StringBase *s = (StringBase *)new_(String, 0, gcstack);
-	StringBase_unsetFlag(s, MASK_INLINE);
-	StringBase_setFlag(s, mask);
+	kStringBase *s = (kStringBase *)new_(String, 0, gcstack);
+	kStringBase_unsetFlag(s, MASK_INLINE);
+	kStringBase_setFlag(s, mask);
 	return s;
 }
 
-static StringBase *InlineString_new(KonohaContext *kctx, StringBase *base, const char *text, size_t len)
+static kStringBase *kInlineString_Init(KonohaContext *kctx, kStringBase *base, const char *text, size_t len)
 {
 	size_t i;
-	InlineString *s = (InlineString *) base;
-	StringBase_setFlag(base, MASK_INLINE);
+	kInlineString *s = (kInlineString *) base;
+	kStringBase_setFlag(base, MASK_INLINE);
 	s->base.length = len;
 	DBG_ASSERT(len < SIZEOF_INLINETEXT);
 	for (i = 0; i < len; ++i) {
@@ -139,19 +139,19 @@ static StringBase *InlineString_new(KonohaContext *kctx, StringBase *base, const
 	return base;
 }
 
-static StringBase *ExternalString_new(KonohaContext *kctx, StringBase *base, const char *text, size_t len)
+static kStringBase *kExternalString_Init(KonohaContext *kctx, kStringBase *base, const char *text, size_t len)
 {
-	ExternalString *s = (ExternalString *) base;
-	StringBase_setFlag(base, MASK_EXTERNAL);
+	kExternalString *s = (kExternalString *) base;
+	kStringBase_setFlag(base, MASK_EXTERNAL);
 	s->base.length = len;
 	s->text = (char *) text;
 	return base;
 }
 
-static StringBase *LinerString_new(KonohaContext *kctx, StringBase *base, const char *text, size_t len)
+static kStringBase *kLinerString_Init(KonohaContext *kctx, kStringBase *base, const char *text, size_t len)
 {
-	LinerString *s = (LinerString *) base;
-	StringBase_setFlag(base, MASK_LINER);
+	kLinerString *s = (kLinerString *) base;
+	kStringBase_setFlag(base, MASK_LINER);
 	s->base.length = len;
 	s->text = (char *) KMalloc_UNTRACE(len+1);
 	memcpy(s->text, text, len);
@@ -159,30 +159,31 @@ static StringBase *LinerString_new(KonohaContext *kctx, StringBase *base, const 
 	return base;
 }
 
-static StringBase *RopeString_new(KonohaContext *kctx, kArray *gcstack, StringBase *left, StringBase *right, size_t len)
+static kStringBase *kRopeString_Init(KonohaContext *kctx, kArray *gcstack, kStringBase *left, kStringBase *right, size_t len)
 {
-	RopeString *s = (RopeString *) new_StringBase(kctx, gcstack, MASK_ROPE);
+	kRopeString *s = (kRopeString *) new_kStringBase(kctx, gcstack, MASK_ROPE);
 	s->base.length = len;
-	KFieldInit(s, s->left, left);
-	KFieldInit(s, s->right, right);
-	return (StringBase *) s;
+	KUnsafeFieldInit(s->left,  left);
+	KUnsafeFieldInit(s->right, right);
+	KLIB Kwrite_barrier(kctx, (kObject*)s);
+	return (kStringBase *) s;
 }
 
-static LinerString *RopeString_toLinerString(RopeString *o, char *text, size_t len)
+static kLinerString *kRopeString_toLinerString(kRopeString *o, char *text, size_t len)
 {
-	LinerString *s = (LinerString *) o;
-	StringBase_unsetFlag((StringBase*)s, MASK_ROPE);
-	StringBase_setFlag((StringBase*)s, MASK_LINER);
+	kLinerString *s = (kLinerString *) o;
+	kStringBase_unsetFlag((kStringBase*)s, MASK_ROPE);
+	kStringBase_setFlag((kStringBase*)s, MASK_LINER);
 	s->base.length = len;
 	s->text = text;
 	return s;
 }
 
-static void checkASCII(KonohaContext *kctx, StringBase *s, const char *text, size_t length)
+static void checkASCII(KonohaContext *kctx, kStringBase *s, const char *text, size_t length)
 {
 	unsigned char ch = 0;
 	long len = length, n = (len + 3) / 4;
-	const unsigned char*p = (const unsigned char *) text;
+	const unsigned char * p = (const unsigned char *) text;
 	switch(len % 4) { /* Duff's device written by ide */
 		case 0: do{ ch |= *p++;
 		case 3:     ch |= *p++;
@@ -195,7 +196,7 @@ static void checkASCII(KonohaContext *kctx, StringBase *s, const char *text, siz
 
 static kString *new_kString(KonohaContext *kctx, kArray *gcstack, const char *text, size_t len, int policy)
 {
-	StringBase *s = (StringBase *) new_StringBase(kctx, gcstack, 0);
+	kStringBase *s = (kStringBase *) new_kStringBase(kctx, gcstack, 0);
 	if(TFLAG_is(int, policy, StringPolicy_ASCII)) {
 		kString_set(ASCII, s, 1);
 	} else if(TFLAG_is(int, policy, StringPolicy_UTF8)) {
@@ -204,39 +205,39 @@ static kString *new_kString(KonohaContext *kctx, kArray *gcstack, const char *te
 		checkASCII(kctx, s, text, len);
 	}
 	if(len < SIZEOF_INLINETEXT)
-		return (kString*) InlineString_new(kctx, s, text, len);
+		return (kString*) kInlineString_Init(kctx, s, text, len);
 	if(TFLAG_is(int, policy, StringPolicy_TEXT))
-		return (kString*) ExternalString_new(kctx, s, text, len);
-	return (kString*) LinerString_new(kctx, s, text, len);
+		return (kString*) kExternalString_Init(kctx, s, text, len);
+	return (kString*) kLinerString_Init(kctx, s, text, len);
 }
 
 static void String2_free(KonohaContext *kctx, kObject *o)
 {
-	StringBase *base = (StringBase*) o;
-	if((S_flag(base) & S_FLAG_EXTERNAL) == S_FLAG_LINER) {
-		assert(((LinerString *)base)->text == ((kString*)base)->buf);
-		KFree(((LinerString *)base)->text, S_len(base)+1);
+	kStringBase *base = (kStringBase*) o;
+	if((kStringBase_flag(base) & S_FLAG_EXTERNAL) == S_FLAG_LINER) {
+		assert(((kLinerString *)base)->text == ((kString*)base)->buf);
+		KFree(((kLinerString *)base)->text, StringBase_length(base)+1);
 	}
 }
 
-static void write_text(StringBase *base, char *dest, int size)
+static void write_text(kStringBase *base, char *dest, int size)
 {
-	RopeString *str;
+	kRopeString *str;
 	size_t len;
 	while (1) {
-		switch (S_flag(base)) {
+		switch (kStringBase_flag(base)) {
 			case S_FLAG_LINER:
 			case S_FLAG_EXTERNAL:
-				memcpy(dest, ((LinerString *) base)->text, size);
+				memcpy(dest, ((kLinerString *) base)->text, size);
 				return;
 			case S_FLAG_INLINE:
 				assert(base->length < SIZEOF_INLINETEXT);
-				memcpy(dest, ((InlineString *) base)->inline_text, size);
+				memcpy(dest, ((kInlineString *) base)->text, size);
 				return;
 			case S_FLAG_ROPE:
-				str = (RopeString *) base;
+				str = (kRopeString *) base;
 				assert(str->left->length + str->right->length == size);
-				len = S_len(str->left);
+				len = StringBase_length(str->left);
 				write_text(str->left, dest, len);
 				base = str->right;
 				dest += len;
@@ -246,26 +247,26 @@ static void write_text(StringBase *base, char *dest, int size)
 	}
 }
 
-static LinerString *RopeString_flatten(KonohaContext *kctx, RopeString *rope)
+static kLinerString *kRopeString_flatten(KonohaContext *kctx, kRopeString *rope)
 {
-	size_t length = S_len((StringBase *) rope);
+	size_t length = StringBase_length((kStringBase *) rope);
 	char *dest = (char *) KMalloc_UNTRACE(length+1);
-	size_t llen = S_len(rope->left);
+	size_t llen = StringBase_length(rope->left);
 	write_text(rope->left,  dest,llen);
 	write_text(rope->right, dest+llen, length - llen);
-	return RopeString_toLinerString(rope, dest, length);
+	return kRopeString_toLinerString(rope, dest, length);
 }
 
-static char *StringBase_getTextReference(KonohaContext *kctx, StringBase *s)
+static char *StringBase_getTextReference(KonohaContext *kctx, kStringBase *s)
 {
-	uint32_t flag = S_flag(s);
+	uint32_t flag = kStringBase_flag(s);
 	switch (flag) {
 		case S_FLAG_LINER:
 		case S_FLAG_EXTERNAL:
 		case S_FLAG_INLINE:
-			return ((LinerString*)s)->text;
+			return ((kLinerString*)s)->text;
 		case S_FLAG_ROPE:
-			return RopeString_flatten(kctx, (RopeString*)s)->text;
+			return kRopeString_flatten(kctx, (kRopeString*)s)->text;
 		default:
 			/*unreachable*/
 			assert(0);
@@ -273,13 +274,13 @@ static char *StringBase_getTextReference(KonohaContext *kctx, StringBase *s)
 	return NULL;
 }
 
-static void StringBase_reftrace(KonohaContext *kctx, StringBase *s, KObjectVisitor *visitor)
+static void kStringBase_reftrace(KonohaContext *kctx, kStringBase *s, KObjectVisitor *visitor)
 {
 	while (1) {
-		if(unlikely(!StringBase_isRope(s)))
+		if(unlikely(!kStringBase_isRope(s)))
 			break;
-		RopeString *rope = (RopeString *) s;
-		StringBase_reftrace(kctx, rope->left, visitor);
+		kRopeString *rope = (kRopeString *) s;
+		kStringBase_reftrace(kctx, rope->left, visitor);
 		BEGIN_REFTRACE(3);
 		KREFTRACEv(rope);//FIXME reftracing rope is needed?
 		KREFTRACEv(rope->left);
@@ -291,23 +292,23 @@ static void StringBase_reftrace(KonohaContext *kctx, StringBase *s, KObjectVisit
 
 static void String2_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
-	StringBase_reftrace(kctx, (StringBase *) o, visitor);
+	kStringBase_reftrace(kctx, (kStringBase *) o, visitor);
 }
 
 static uintptr_t String2_unbox(KonohaContext *kctx, kObject *o)
 {
-	StringBase *s = (StringBase*)o;
+	kStringBase *s = (kStringBase*)o;
 	return (uintptr_t) StringBase_getTextReference(kctx, s);
 }
 
-static StringBase *StringBase_concat(KonohaContext *kctx, kArray *gcstack, kString *s0, kString *s1)
+static kStringBase *kStringBase_concat(KonohaContext *kctx, kArray *gcstack, kString *s0, kString *s1)
 {
-	StringBase *left = (StringBase*) s0, *right = (StringBase*) s1;
-	size_t leftLen = S_len(left);
+	kStringBase *left = (kStringBase*) s0, *right = (kStringBase*) s1;
+	size_t leftLen = StringBase_length(left);
 	if(leftLen == 0) {
 		return right;
 	}
-	size_t rightLen = S_len(right);
+	size_t rightLen = StringBase_length(right);
 	if(rightLen == 0) {
 		return left;
 	}
@@ -316,16 +317,16 @@ static StringBase *StringBase_concat(KonohaContext *kctx, kArray *gcstack, kStri
 	if(length + 1 < SIZEOF_INLINETEXT) {
 		char *s0 = StringBase_getTextReference(kctx, left);
 		char *s1 = StringBase_getTextReference(kctx, right);
-		InlineString *resultString = (InlineString *) new_StringBase(kctx, gcstack, MASK_INLINE);
+		kInlineString *resultString = (kInlineString *) new_kStringBase(kctx, gcstack, MASK_INLINE);
 		DBG_ASSERT(length < SIZEOF_INLINETEXT);
 		resultString->base.length = length;
 		memcpy(resultString->inline_text, s0, leftLen);
 		memcpy(resultString->inline_text + leftLen, s1, rightLen);
 		resultString->inline_text[length] = '\0';
 		resultString->text = resultString->inline_text;
-		return (StringBase *) resultString;
+		return (kStringBase *) resultString;
 	}
-	return RopeString_new(kctx, gcstack, left, right, length);
+	return kRopeString_Init(kctx, gcstack, left, right, length);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -335,7 +336,7 @@ static StringBase *StringBase_concat(KonohaContext *kctx, kArray *gcstack, kStri
 static KMETHOD Rope_opADD(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *lhs = sfp[0].asString, *rhs = sfp[1].asString;
-	KReturn(StringBase_concat(kctx, OnStack, lhs, rhs));
+	KReturn(kStringBase_concat(kctx, OnStack, lhs, rhs));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -1081,7 +1082,6 @@ static KMETHOD String_valueOf(KonohaContext *kctx, KonohaStack *sfp)
 #define _Public   kMethod_Public
 #define _Static   kMethod_Static
 #define _Const    kMethod_Const
-#define _Coercion kMethod_Coercion
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 

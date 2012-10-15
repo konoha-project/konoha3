@@ -272,7 +272,6 @@ static KMETHOD NameSpace_importPackageSymbol(KonohaContext *kctx, KonohaStack *s
 }
 
 #define _Public kMethod_Public
-#define _Static kMethod_Static
 #define _F(F)   (intptr_t)(F)
 
 void MODSUGAR_loadMethod(KonohaContext *kctx)

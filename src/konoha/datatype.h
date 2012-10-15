@@ -382,7 +382,8 @@ static kParam *new_Param(KonohaContext *kctx, kArray *gcstack, ktype_t rtype, in
 
 static uintptr_t hashparamdom(int psize, const kparamtype_t *p)
 {
-	uintptr_t i, hcode = 0;
+	int i;
+	uintptr_t hcode = 0;
 	for(i = 0; i < psize; i++) {
 		hcode = p[i].ty + (31 * hcode);
 	}
@@ -391,7 +392,8 @@ static uintptr_t hashparamdom(int psize, const kparamtype_t *p)
 
 static uintptr_t hashparam(ktype_t rtype, int psize, const kparamtype_t *p)
 {
-	uintptr_t i, hcode = rtype;
+	int i;
+	uintptr_t hcode = rtype;
 	for(i = 0; i < psize; i++) {
 		hcode = (p[i].ty + p[i].fn) + (31 * hcode);
 	}
@@ -966,7 +968,7 @@ static void loadInitStructData(KonohaContext *kctx)
 		NULL,
 	};
 	KDEFINE_CLASS **dd = DATATYPES;
-	int cid = 0;
+	ktype_t cid = 0;
 	while(dd[cid] != NULL) {
 		DBG_ASSERT(dd[cid]->typeId == cid);
 		new_KonohaClass(kctx, NULL, dd[cid], 0);

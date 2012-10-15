@@ -201,7 +201,6 @@ static KMETHOD Math_random(KonohaContext *kctx, KonohaStack *sfp)
 
 #define _Public   kMethod_Public
 #define _Const    kMethod_Const
-#define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 #define _KVf(T) "MATH_" #T, TY_float, M_##T
 #define TY_Math  (cMath->typeId)
