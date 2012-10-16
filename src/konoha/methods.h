@@ -244,8 +244,7 @@ static KMETHOD System_assert(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD System_p(KonohaContext *kctx, KonohaStack *sfp)
 {
 	const char *text = (IS_NULL(sfp[1].asString)) ? K_NULLTEXT : S_text(sfp[1].asString);
-	KMakeTrace(trace, sfp);
-	kreportf(NoneTag, trace, "%s", text);
+	PLATAPI reportUserMessage(kctx, DebugTag, sfp[K_RTNIDX].callerFileLine, text, true/*isNewLine*/);
 }
 
 //## method void System.gc();

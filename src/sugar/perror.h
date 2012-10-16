@@ -51,24 +51,21 @@ static kString* SugarContext_vprintMessage(KonohaContext *kctx, kinfotag_t tagle
 		const char *msg = TAG_t(taglevel);
 		KGrowingBuffer wb;
 		KLIB Kwb_init(&sugarContext->errorMessageBuffer, &wb);
-		size_t pos = wb.m->bytesize;
 		if(uline > 0) {
 			const char *file = FileId_t(uline);
 			KLIB Kwb_printf(kctx, &wb, "%s(%s:%d) " , msg, PLATAPI shortFilePath(file), (kushort_t)uline);
 		}
 		else {
 			KLIB Kwb_printf(kctx, &wb, "%s" , msg);
-			DBG_ASSERT(uline > 0);
 		}
-		size_t len = wb.m->bytesize - pos;
 		KLIB Kwb_vprintf(kctx, &wb, fmt, ap);
 		msg = KLIB Kwb_top(kctx, &wb, 1);
-		KTraceInfo trace = {NULL, uline};
-		kreportf(taglevel, &trace, "%s", msg + len);
 		kString *emsg = KLIB new_kString(kctx, sugarContext->errorMessageList, msg, strlen(msg), 0);
+		PLATAPI reportCompilerMessage(kctx, taglevel, S_text(emsg));
 		if(taglevel == ErrTag || taglevel == CritTag) {
 			sugarContext->errorMessageCount++;
 		}
+		KLIB Kwb_free(&wb);
 		return emsg;
 	}
 	return NULL;

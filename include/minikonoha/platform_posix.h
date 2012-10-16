@@ -60,6 +60,8 @@ extern "C" {
 
 #define kunused __attribute__((unused))
 
+#include <minikonoha/klib.h>
+
 // -------------------------------------------------------------------------
 /* I18N */
 
@@ -582,6 +584,30 @@ static void diagnosis(void)
 {
 }
 
+// --------------------------------------------------------------------------
+
+static void UI_reportUserMessage(KonohaContext *kctx, kinfotag_t level, kfileline_t pline, const char *msg, int isNewLine)
+{
+	const char *beginTag = PLATAPI beginTag(level);
+	const char *endTag = PLATAPI endTag(level);
+	const char *LF = isNewLine ? "\n" : "";
+	if(pline > 0) {
+		const char *file = FileId_t(pline);
+		PLATAPI printf_i("%s - (%s:%d) %s%s%s" ,
+			beginTag, PLATAPI shortFilePath(file), (kushort_t)pline, msg, LF, endTag);
+	}
+	else {
+		PLATAPI printf_i("%s%s%s%s", beginTag,  msg, LF, endTag);
+	}
+}
+
+static void UI_reportCompilerMessage(KonohaContext *kctx, kinfotag_t level, const char *msg)
+{
+	const char *beginTag = PLATAPI beginTag(level);
+	const char *endTag = PLATAPI endTag(level);
+	PLATAPI printf_i("%s - %s%s\n", beginTag, msg, endTag);
+}
+
 static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 {
 	static PlatformApiVar plat = {};
@@ -633,6 +659,10 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.logger              = NULL;
 	plat.traceDataLog        = traceDataLog;
 	plat.diagnosis           = diagnosis;
+
+	plat.reportUserMessage     = UI_reportUserMessage;
+	plat.reportCompilerMessage = UI_reportCompilerMessage;
+
 	return (PlatformApi*)(&plat);
 }
 

@@ -447,6 +447,9 @@ struct PlatformApiVar {
 	void   *logger;  // logger handler
 	void  (*traceDataLog)(KonohaContext *kctx, KTraceInfo *trace, int, logconf_t *, ...);
 	void  (*diagnosis)(void);
+
+	void (*reportUserMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *, int isNewLine);
+	void (*reportCompilerMessage)(KonohaContext *, kinfotag_t, const char *);
 };
 
 #define LOG_END   0
