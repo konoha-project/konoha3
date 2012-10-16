@@ -174,7 +174,7 @@ static kbool_t i_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNam
 	return true;
 }
 
-KDEFINE_PACKAGE* i_init(void)
+KDEFINE_PACKAGE *i_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha.i", "1.0");

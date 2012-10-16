@@ -44,7 +44,7 @@ static int isPrintMessage(KonohaContext *kctx, SugarContext *sugarContext, kinfo
 	return true;
 }
 
-static kString* SugarContext_vprintMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t uline, const char *fmt, va_list ap)
+static kString *SugarContext_vprintMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t uline, const char *fmt, va_list ap)
 {
 	SugarContext *sugarContext = KonohaContext_getSugarContext(kctx);
 	if(isPrintMessage(kctx, sugarContext, taglevel)) {
@@ -74,7 +74,7 @@ static kString* SugarContext_vprintMessage(KonohaContext *kctx, kinfotag_t tagle
 	return NULL;
 }
 
-static kString* SugarContext_printMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t uline, const char *fmt, ...)
+static kString *SugarContext_printMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t uline, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -97,7 +97,7 @@ static void kToken_printMessage(KonohaContext *kctx, kTokenVar *tk, kinfotag_t t
 }
 
 #define Stmt_isERR(STMT)       ((STMT)->build == TSTMT_ERR)
-static SugarSyntax* kNameSpace_getSyntax(KonohaContext *kctx, kNameSpace *ns0, ksymbol_t kw, int isnew);
+static SugarSyntax *kNameSpace_getSyntax(KonohaContext *kctx, kNameSpace *ns0, ksymbol_t kw, int isnew);
 
 static void kStmt_toERR(KonohaContext *kctx, kStmt *stmt, kString *errmsg)
 {
@@ -131,7 +131,7 @@ static kfileline_t kExpr_uline(KonohaContext *kctx, kExpr *expr, kfileline_t uli
 	return uline;
 }
 
-static kExpr* kStmt_printMessage2(KonohaContext *kctx, kStmt *stmt, kToken *tk, kinfotag_t taglevel, const char *fmt, ...)
+static kExpr *kStmt_printMessage2(KonohaContext *kctx, kStmt *stmt, kToken *tk, kinfotag_t taglevel, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -177,7 +177,7 @@ static const char *kToken_t_(KonohaContext *kctx, kToken *tk)
 
 #ifdef USE_SMALLBUILD
 
-static kExpr* ERROR_SyntaxErrorToken(KonohaContext *kctx, kStmt *stmt, kToken *tk)
+static kExpr *ERROR_SyntaxErrorToken(KonohaContext *kctx, kStmt *stmt, kToken *tk)
 {
 	return kStmtToken_printMessage(kctx, stmt, tk, ErrTag, "syntax error at %s", Token_text(tk));
 }
@@ -186,7 +186,7 @@ static kExpr* ERROR_SyntaxErrorToken(KonohaContext *kctx, kStmt *stmt, kToken *t
 
 #else
 
-static kExpr* ERROR_UndefinedEscapeSequence(KonohaContext *kctx, kStmt *stmt, kToken *tk)
+static kExpr *ERROR_UndefinedEscapeSequence(KonohaContext *kctx, kStmt *stmt, kToken *tk)
 {
 	return kStmtToken_printMessage(kctx, stmt, tk, ErrTag, "undefined escape sequence: \"%s\"", S_text(tk->text));
 }

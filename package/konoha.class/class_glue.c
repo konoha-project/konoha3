@@ -119,7 +119,7 @@ static kshortflag_t kStmt_parseClassFlag(KonohaContext *kctx, kStmt *stmt, kshor
 	return (kshortflag_t)SUGAR kStmt_parseFlag(kctx, stmt, ClassDeclFlag, cflag);
 }
 
-static KonohaClassVar* kNameSpace_defineClassName(KonohaContext *kctx, kNameSpace *ns, kshortflag_t cflag, kString *name, KTraceInfo *trace)
+static KonohaClassVar *kNameSpace_defineClassName(KonohaContext *kctx, kNameSpace *ns, kshortflag_t cflag, kString *name, KTraceInfo *trace)
 {
 	KDEFINE_CLASS defNewClass = {0};
 	defNewClass.cflag         = cflag | kClass_Nullable;
@@ -163,7 +163,7 @@ static void KonohaClass_initField(KonohaContext *kctx, KonohaClassVar *definedCl
 
 /* Block */
 
-static kBlock* kStmt_parseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToken *tokenClassName)
+static kBlock *kStmt_parseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToken *tokenClassName)
 {
 	kBlock *bk = NULL;
 	kToken *blockToken = (kToken*)kStmt_getObject(kctx, stmt, KW_BlockPattern, NULL);
@@ -417,7 +417,7 @@ static kbool_t class_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE* class_init(void)
+KDEFINE_PACKAGE *class_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "class", "1.0");

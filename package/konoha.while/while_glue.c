@@ -61,7 +61,7 @@ static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
-static inline kStmt* kStmt_getParentNULL(kStmt *stmt)
+static inline kStmt *kStmt_getParentNULL(kStmt *stmt)
 {
 	return stmt->parentBlockNULL->parentStmtNULL;
 }
@@ -83,7 +83,7 @@ static kbool_t while_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 	return true;
 }
 
-KDEFINE_PACKAGE* while_init(void)
+KDEFINE_PACKAGE *while_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "while", "1.0");

@@ -136,7 +136,7 @@ static void test_object_iterator(void)
     JSON_free((JSON)o);
 }
 
-int main(int argc, char const* argv[])
+int main(int argc, char const *argv[])
 {
     const char **files;
     const char *files_default[] = {

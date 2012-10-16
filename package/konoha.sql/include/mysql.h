@@ -49,8 +49,8 @@ static void knh_mysql_perror(KonohaContext *kctx, MYSQL *db, int r)
 */
 /* ------------------------------------------------------------------------ */
 
-//static kconn_t *MYSQL_qopen(KonohaContext *kctx, const char* url)
-kconn_t *MYSQL_qopen(KonohaContext *kctx, const char* url)
+//static kconn_t *MYSQL_qopen(KonohaContext *kctx, const char *url)
+kconn_t *MYSQL_qopen(KonohaContext *kctx, const char *url)
 {
 	char *puser, user[MYSQL_USER_MAXLEN+1] = {0};
 	char *ppass, pass[MYSQL_PASS_MAXLEN+1] = {0}; // temporary defined
@@ -137,7 +137,7 @@ int MYSQL_qnext(KonohaContext *kctx, kqcur_t *qcursor, kResultSet *rs)
 /* ------------------------------------------------------------------------ */
 
 //static kqcur_t *MYSQL_query(KonohaContext *kctx, kconn_t *hdr, kbytes_t sql, kResultSet *rs)
-kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char* sql, struct _kResultSet *rs)
+kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char *sql, struct _kResultSet *rs)
 {
 	MYSQL_RES *res = NULL;
 	MYSQL *db = (MYSQL*)hdr;

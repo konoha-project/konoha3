@@ -99,7 +99,7 @@ static char *writeUnsingedIntToBuffer(uintptr_t uint, char *const buftop, const 
 	return buftop + i;
 }
 
-static char* writeKeyToBuffer(const char *key, size_t keylen, char *buftop, char *bufend)
+static char *writeKeyToBuffer(const char *key, size_t keylen, char *buftop, char *bufend)
 {
 	if(buftop < bufend) {
 		writeToBuffer('"', buftop, bufend);
@@ -117,7 +117,7 @@ static char* writeKeyToBuffer(const char *key, size_t keylen, char *buftop, char
 #define HasFault    (SystemFault|SoftwareFault|DataFault|ExternalFault)
 #define HasLocation (PeriodicPoint|ResponseCheckPoint|SystemChangePoint|SecurityAudit)
 
-static char* writePolicyToBuffer(logconf_t *logconf, char *buftop, char *bufend)
+static char *writePolicyToBuffer(logconf_t *logconf, char *buftop, char *bufend)
 {
 	if((logconf->policy & HasLocation)) {
 		buftop = writeKeyToBuffer(TEXTSIZE("TracePoint"), buftop, bufend);
@@ -171,7 +171,7 @@ static char* writePolicyToBuffer(logconf_t *logconf, char *buftop, char *bufend)
 	return buftop;
 }
 
-static char* writeErrnoToBuffer(logconf_t *logconf, char *buftop, char *bufend)
+static char *writeErrnoToBuffer(logconf_t *logconf, char *buftop, char *bufend)
 {
 	if((logconf->policy & HasFault)) {
 		buftop = writeKeyToBuffer(TEXTSIZE("Errno"), buftop, bufend);

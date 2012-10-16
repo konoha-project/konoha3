@@ -295,7 +295,7 @@ static kbool_t int_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kN
 	return true;
 }
 
-KDEFINE_PACKAGE* int_init(void)
+KDEFINE_PACKAGE *int_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "int", "1.0");

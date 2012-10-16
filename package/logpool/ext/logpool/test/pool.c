@@ -30,7 +30,7 @@ uintptr_t p4_func(uintptr_t context, struct LogEntry *e)
     return context;
 }
 
-int main(int argc, char const* argv[])
+int main(int argc, char const *argv[])
 {
     struct pool_plugin_print *p = POOL_PLUGIN_CLONE(pool_plugin_print);
     struct pool_plugin_val_filter *p0 = POOL_PLUGIN_CLONE(pool_plugin_val_filter);

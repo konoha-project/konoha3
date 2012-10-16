@@ -43,7 +43,7 @@ static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 	else {
 		kObject_writeToBuffer(kctx, sfp[0].asObject, false/*delim*/, &wb, sfp, 0);
 	}
-	kString* returnValue = KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
+	kString *returnValue = KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
 	KLIB Kwb_free(&wb);
 	KReturn(returnValue);
 }
@@ -219,7 +219,7 @@ static KMETHOD Func_new(KonohaContext *kctx, KonohaStack *sfp)
 //## @Hidden T0 Func.invoke();
 static KMETHOD Func_invoke(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kFunc* fo = sfp[0].asFunc;
+	kFunc *fo = sfp[0].asFunc;
 	DBG_ASSERT(IS_Func(fo));
 	DBG_ASSERT(IS_Method(fo->mtd));
 	KUnsafeFieldSet(sfp[0].asObject, fo->self);

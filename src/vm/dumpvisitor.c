@@ -34,7 +34,7 @@ static void DumpVisitor_visitBlockStmt(KonohaContext *kctx, IRBuilder *self, kSt
 static void DumpVisitor_visitReturnStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
 {
 	emit_string("Return", "", "", DUMPER(self)->indent);
-	kExpr* expr = Stmt_getFirstExpr(kctx, stmt);
+	kExpr *expr = Stmt_getFirstExpr(kctx, stmt);
 	if(expr != NULL && IS_Expr(expr)) {
 		handleExpr(kctx, self, expr);
 	}

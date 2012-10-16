@@ -112,7 +112,7 @@ static uintptr_t I18N_iconvUTF8ToSystemCharset(KonohaContext *kctx, KTraceInfo *
 	return PLATAPI iconv_open_i(kctx, PLATAPI systemCharset, "UTF-8", trace);
 }
 
-static const char* I18N_formatKonohaPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
+static const char *I18N_formatKonohaPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
 {
 	uintptr_t ic = PLATAPI iconvUTF8ToSystemCharset(kctx, trace);
 	size_t newsize;
@@ -134,7 +134,7 @@ static const char* I18N_formatKonohaPath(KonohaContext *kctx, char *buf, size_t 
 	return (const char*)buf;  // stub (in case of no conversion)
 }
 
-static const char* I18N_formatSystemPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
+static const char *I18N_formatSystemPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
 {
 	return path;  // stub (in case of no conversion)
 }
@@ -171,12 +171,12 @@ static uintptr_t I18N_iconvUTF8ToSystemCharset(KonohaContext *kctx, KTraceInfo *
 	return ICONV_NULL;
 }
 
-static const char* I18N_formatKonohaPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
+static const char *I18N_formatKonohaPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
 {
 	return path;
 }
 
-static const char* I18N_formatSystemPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
+static const char *I18N_formatSystemPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
 {
 	return path;  // stub (in case of no conversion)
 }
@@ -356,7 +356,7 @@ static int isEmptyChunk(const char *t, size_t len)
 	return true;
 }
 
-static int loadScript(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *))
+static int loadScript(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char *, long, int *, void *))
 {
 	int isSuccessfullyLoading = false;
 	if(isDir(filePath)) {
@@ -393,13 +393,13 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 	return isSuccessfullyLoading;
 }
 
-static const char* shortFilePath(const char *path)
+static const char *shortFilePath(const char *path)
 {
 	char *p = (char *) strrchr(path, '/');
 	return (p == NULL) ? path : (const char*)p+1;
 }
 
-static const char* shortText(const char *msg)
+static const char *shortText(const char *msg)
 {
 	return msg;
 }
@@ -422,13 +422,13 @@ static const char *formatTransparentPath(char *buf, size_t bufsiz, const char *p
 #define K_PREFIX  "/usr/local"
 #endif
 
-static const char* packname(const char *str)
+static const char *packname(const char *str)
 {
 	char *p = (char *) strrchr(str, '.');
 	return (p == NULL) ? str : (const char*)p+1;
 }
 
-static const char* formatPackagePath(char *buf, size_t bufsiz, const char *packageName, const char *ext)
+static const char *formatPackagePath(char *buf, size_t bufsiz, const char *packageName, const char *ext)
 {
 	FILE *fp = NULL;
 	char *path = getenv("KONOHA_PACKAGEPATH");
@@ -475,10 +475,10 @@ static KonohaPackageHandler *loadPackageHandler(const char *packageName)
 	return NULL;
 }
 
-static const char* beginTag(kinfotag_t t)
+static const char *beginTag(kinfotag_t t)
 {
 	DBG_ASSERT(t <= NoneTag);
-	static const char* tags[] = {
+	static const char *tags[] = {
 		"\x1b[1m\x1b[31m", /*CritTag*/
 		"\x1b[1m\x1b[31m", /*ErrTag*/
 		"\x1b[1m\x1b[31m", /*WarnTag*/
@@ -490,10 +490,10 @@ static const char* beginTag(kinfotag_t t)
 	return tags[(int)t];
 }
 
-static const char* endTag(kinfotag_t t)
+static const char *endTag(kinfotag_t t)
 {
 	DBG_ASSERT(t <= NoneTag);
-	static const char* tags[] = {
+	static const char *tags[] = {
 		"\x1b[0m", /*CritTag*/
 		"\x1b[0m", /*ErrTag*/
 		"\x1b[0m", /*WarnTag*/
@@ -549,7 +549,7 @@ static void PlatformApi_loadReadline(PlatformApiVar *plat)
 {
 	void *handler = dlopen("libreadline" K_OSDLLEXT, RTLD_LAZY);
 	if(handler != NULL) {
-		plat->readline_i = (char* (*)(const char*))dlsym(handler, "readline");
+		plat->readline_i = (char *(*)(const char*))dlsym(handler, "readline");
 		plat->add_history_i = (int (*)(const char*))dlsym(handler, "add_history");
 	}
 	if(plat->readline_i == NULL) {
@@ -582,7 +582,7 @@ static void diagnosis(void)
 {
 }
 
-static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
+static PlatformApi *KonohaUtils_getDefaultPlatformApi(void)
 {
 	static PlatformApiVar plat = {};
 	plat.name            = "shell";

@@ -21,7 +21,7 @@ static void emit_log(struct LogList *list, int i)
     LogList_append(list, (struct Log *) buf, logSize);
 }
 
-int main(int argc, char const* argv[])
+int main(int argc, char const *argv[])
 {
     struct LogList list;
     LogList_init(&list);

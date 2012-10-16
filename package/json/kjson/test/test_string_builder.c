@@ -1,6 +1,6 @@
 #include "kstring_builder.h"
 #include <stdio.h>
-int main(int argc, char const* argv[])
+int main(int argc, char const *argv[])
 {
     string_builder builder;
     int i;

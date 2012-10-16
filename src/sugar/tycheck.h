@@ -93,7 +93,7 @@ static void kExpr_putConstValue(KonohaContext *kctx, kExpr *expr, KonohaStack *s
 	}
 }
 
-static kExpr* kExprCall_toConstValue(KonohaContext *kctx, kExpr *expr, kArray *cons, ktype_t rtype)
+static kExpr *kExprCall_toConstValue(KonohaContext *kctx, kExpr *expr, kArray *cons, ktype_t rtype)
 {
 	size_t i, size = kArray_size(cons), psize = size - 2;
 	kMethod *mtd = cons->MethodItems[0];
@@ -153,7 +153,7 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 	return texpr;
 }
 
-static kExpr* kStmt_tyCheckExprAt(KonohaContext *kctx, kStmt *stmt, kExpr *exprP, size_t pos, kGamma *gma, ktype_t reqty, int pol)
+static kExpr *kStmt_tyCheckExprAt(KonohaContext *kctx, kStmt *stmt, kExpr *exprP, size_t pos, kGamma *gma, ktype_t reqty, int pol)
 {
 	if(!Expr_isTerm(exprP) && pos < kArray_size(exprP->cons)) {
 		kExpr *expr = exprP->cons->ExprItems[pos];
@@ -275,7 +275,7 @@ static GammaAllocaData *kGamma_pop(KonohaContext *kctx, kGamma *gma, GammaAlloca
 
 // --------------------------------------------------------------------------
 
-static kBlock* kMethod_newBlock(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns, kString *source, kfileline_t uline)
+static kBlock *kMethod_newBlock(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns, kString *source, kfileline_t uline)
 {
 	const char *script = S_text(source);
 	if(IS_NULL(source) || script[0] == 0) {

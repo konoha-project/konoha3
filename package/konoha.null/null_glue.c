@@ -119,7 +119,7 @@ static kbool_t null_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, k
 	return true;
 }
 
-KDEFINE_PACKAGE* null_init(void)
+KDEFINE_PACKAGE *null_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "null", "1.0");

@@ -42,7 +42,7 @@ static kbool_t dollar_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 
 // --------------------------------------------------------------------------
 
-//static kExpr* Expression_DollarSymbol(KonohaContext *kctx, kStmt *stmt, kToken *tk)
+//static kExpr *Expression_DollarSymbol(KonohaContext *kctx, kStmt *stmt, kToken *tk)
 //{
 //
 //}
@@ -103,7 +103,7 @@ static kbool_t dollar_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS,
 	return true;
 }
 
-KDEFINE_PACKAGE* dollar_init(void)
+KDEFINE_PACKAGE *dollar_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "dscript", "1.0");

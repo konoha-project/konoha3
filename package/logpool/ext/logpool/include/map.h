@@ -44,7 +44,7 @@ static inline uint32_t poolmap_size(poolmap_t *m)
 
 int pool_global_init(void);
 int pool_global_deinit(void);
-poolmap_t* poolmap_new(uint32_t init, fn_keygen fkey, fn_keycmp fcmp, fn_efree ffree);
+poolmap_t *poolmap_new(uint32_t init, fn_keygen fkey, fn_keycmp fcmp, fn_efree ffree);
 void poolmap_delete(poolmap_t *m);
 pmap_record_t *poolmap_get(poolmap_t *m, char *key, uint32_t tlen);
 pmap_status_t poolmap_set(poolmap_t *m, char *key, uint32_t klen, void *val);

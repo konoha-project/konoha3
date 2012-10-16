@@ -96,7 +96,7 @@ static void JSVisitor_visitBlockStmt(KonohaContext *kctx, IRBuilder *self, kStmt
 static void JSVisitor_visitReturnStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
 {
 	emit_string_js("return ", "", "");
-	kExpr* expr = Stmt_getFirstExpr(kctx, stmt);
+	kExpr *expr = Stmt_getFirstExpr(kctx, stmt);
 	if(expr != NULL && IS_Expr(expr)) {
 		handleExpr(kctx, self, expr);
 	}

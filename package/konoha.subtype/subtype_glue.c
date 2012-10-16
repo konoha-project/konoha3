@@ -147,7 +147,7 @@ static kbool_t subtype_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE* subtype_init(void)
+KDEFINE_PACKAGE *subtype_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "subtype", "1.0");

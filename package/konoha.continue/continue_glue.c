@@ -45,7 +45,7 @@ static kbool_t continue_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirs
 
 // --------------------------------------------------------------------------
 
-static inline kStmt* kStmt_getParentNULL(kStmt *stmt)
+static inline kStmt *kStmt_getParentNULL(kStmt *stmt)
 {
 	return stmt->parentBlockNULL->parentStmtNULL;
 }
@@ -80,7 +80,7 @@ static kbool_t continue_setupNameSpace(KonohaContext *kctx, kNameSpace *packageN
 	return true;
 }
 
-KDEFINE_PACKAGE* continue_init(void)
+KDEFINE_PACKAGE *continue_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "continue", "1.0");

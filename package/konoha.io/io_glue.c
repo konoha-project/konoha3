@@ -358,7 +358,7 @@ static intptr_t findEndOfLine(KonohaContext *kctx, char *buf, size_t offset, siz
 	return -1; // not found
 }
 
-static kString* kInputStream_readLine(KonohaContext *kctx,  kInputStream *in)
+static kString *kInputStream_readLine(KonohaContext *kctx,  kInputStream *in)
 {
 	int hasMultiByteChar = false, hasCarrigeReturn = false;
 	intptr_t endOfLineIdx;
@@ -813,7 +813,7 @@ static kbool_t io_setNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kName
 	return true;
 }
 
-KDEFINE_PACKAGE* io_init(void)
+KDEFINE_PACKAGE *io_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "io", "1.0");

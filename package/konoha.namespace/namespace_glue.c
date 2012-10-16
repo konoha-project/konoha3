@@ -78,7 +78,7 @@ static kbool_t namespace_setupNameSpace(KonohaContext *kctx, kNameSpace *package
 	return true;
 }
 
-KDEFINE_PACKAGE* namespace_init(void)
+KDEFINE_PACKAGE *namespace_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "namespace", "1.0");

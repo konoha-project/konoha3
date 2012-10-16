@@ -456,7 +456,7 @@ static kbool_t logpool_setupKonohaSpace(CTX, kKonohaSpace *ks, kline_t trace)
 {
 	return true;
 }
-KDEFINE_PACKAGE* logpool_init(void)
+KDEFINE_PACKAGE *logpool_init(void)
 {
 	logpool_global_init(LOGPOOL_DEFAULT);
 	static KDEFINE_PACKAGE d = {

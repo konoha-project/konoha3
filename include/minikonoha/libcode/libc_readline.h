@@ -25,7 +25,7 @@
 #ifndef LIBC_READLINE_H_
 #define LIBC_READLINE_H_
 
-static char* readline(const char* prompt)
+static char *readline(const char *prompt)
 {
 	static int checkCTL = 0;
 	int ch, pos = 0;
@@ -55,7 +55,7 @@ static char* readline(const char* prompt)
 	return p;
 }
 
-static int add_history(const char* line)
+static int add_history(const char *line)
 {
 	// dummy
 	return 0;

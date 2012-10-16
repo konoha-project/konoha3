@@ -123,7 +123,7 @@ static kbool_t KonohaRuntime_setModule(KonohaContext *kctx, int x, KonohaModule 
 
 static void KonohaContext_free(KonohaContext *kctx, KonohaContextVar *ctx);
 
-static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformApi *platApi)
+static KonohaContextVar *new_KonohaContext(KonohaContext *kctx, const PlatformApi *platApi)
 {
 	KonohaContextVar *newctx;
 	static volatile size_t ctxid_counter = 0;
@@ -235,18 +235,18 @@ static void KonohaContext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 #define BEGIN_(kctx) knh_beginContext(kctx, (void**)&kctx)
 #define END_(kctx)   knh_endContext(kctx)
 
-KonohaContext* konoha_open(const PlatformApi *platform)
+KonohaContext *konoha_open(const PlatformApi *platform)
 {
 	konoha_init();
 	return (KonohaContext*)new_KonohaContext(NULL, platform);
 }
 
-void konoha_close(KonohaContext* konoha)
+void konoha_close(KonohaContext *konoha)
 {
 	KonohaContext_free(konoha, (KonohaContextVar*)konoha);
 }
 
-kbool_t konoha_load(KonohaContext* konoha, const char *scriptname)
+kbool_t konoha_load(KonohaContext *konoha, const char *scriptname)
 {
 	BEGIN_(konoha);
 	kbool_t res = (MODSUGAR_loadScript(konoha, scriptname, strlen(scriptname), 0) == K_CONTINUE);
@@ -254,7 +254,7 @@ kbool_t konoha_load(KonohaContext* konoha, const char *scriptname)
 	return res;
 }
 
-kbool_t konoha_eval(KonohaContext* konoha, const char *script, kfileline_t uline)
+kbool_t konoha_eval(KonohaContext *konoha, const char *script, kfileline_t uline)
 {
 	BEGIN_(konoha);
 	kbool_t res = (MODSUGAR_eval(konoha, script, uline) == K_CONTINUE);

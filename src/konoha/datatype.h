@@ -30,7 +30,7 @@
 #define typeof decltype
 #endif
 
-static kObject* DEFAULT_fnull(KonohaContext *kctx, KonohaClass *ct);
+static kObject *DEFAULT_fnull(KonohaContext *kctx, KonohaClass *ct);
 static void kArray_add(KonohaContext *kctx, kArray *o, kObject *value);
 
 static void kObject_init(KonohaContext *kctx, kObject *o, void *conf)
@@ -130,7 +130,7 @@ static void kBoolean_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuf
 	}
 }
 
-static kObject* kBoolean_fnull(KonohaContext *kctx, KonohaClass *ct)
+static kObject *kBoolean_fnull(KonohaContext *kctx, KonohaClass *ct)
 {
 	return (kObject*)K_FALSE;
 }
@@ -205,7 +205,7 @@ static void kString_checkASCII(KonohaContext *kctx, kString *s)
 	kString_set(ASCII, (kStringVar*)s, (ch < 128));
 }
 
-static kString* new_kString(KonohaContext *kctx, kArray *gcstack, const char *text, size_t len, int spol)
+static kString *new_kString(KonohaContext *kctx, kArray *gcstack, const char *text, size_t len, int spol)
 {
 	KonohaClass *ct = CT_(TY_String);
 	kStringVar *s = NULL;
@@ -486,9 +486,9 @@ static void kMethod_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vi
 }
 
 #define CT_MethodVar CT_Method
-static kMethod* new_kMethod(KonohaContext *kctx, kArray *gcstack, uintptr_t flag, ktype_t cid, kmethodn_t mn, MethodFunc func)
+static kMethod *new_kMethod(KonohaContext *kctx, kArray *gcstack, uintptr_t flag, ktype_t cid, kmethodn_t mn, MethodFunc func)
 {
-	kMethodVar* mtd = new_(MethodVar, NULL, gcstack);
+	kMethodVar *mtd = new_(MethodVar, NULL, gcstack);
 	mtd->flag       = flag;
 	mtd->typeId     = cid;
 	mtd->mn         = mn;
@@ -496,11 +496,11 @@ static kMethod* new_kMethod(KonohaContext *kctx, kArray *gcstack, uintptr_t flag
 	return mtd;
 }
 
-static kParam* kMethod_setParam(KonohaContext *kctx, kMethod *mtd_, ktype_t rtype, int psize, const kparamtype_t *p)
+static kParam *kMethod_setParam(KonohaContext *kctx, kMethod *mtd_, ktype_t rtype, int psize, const kparamtype_t *p)
 {
 	kparamId_t paramId = Kparam(kctx, rtype, psize, p);
 	if(mtd_ != NULL) {
-		kMethodVar* mtd = (kMethodVar*)mtd_;
+		kMethodVar *mtd = (kMethodVar*)mtd_;
 		mtd->paramdom = Kparamdom(kctx, psize, p);
 		mtd->paramid  = paramId;
 	}
@@ -578,7 +578,7 @@ static KonohaClass *T_realtype(KonohaContext *kctx, KonohaClass *ct, KonohaClass
 
 // ---------------
 
-static KonohaClass* Kclass(KonohaContext *kctx, ktype_t cid, KTraceInfo *trace)
+static KonohaClass *Kclass(KonohaContext *kctx, ktype_t cid, KTraceInfo *trace)
 {
 	KonohaRuntime *share = kctx->share;
 	if(!(cid < (share->classTable.bytesize/sizeof(KonohaClassVar*)))) {
@@ -616,7 +616,7 @@ static uintptr_t DEFAULT_unbox(KonohaContext *kctx, kObject *o)
 	return 0;
 }
 
-static kbool_t DEFAULT_isSubType(KonohaContext *kctx, KonohaClass* ct, KonohaClass *t)
+static kbool_t DEFAULT_isSubType(KonohaContext *kctx, KonohaClass *ct, KonohaClass *t)
 {
 	if(t->typeId == TY_Object) return true;
 	while(ct->superTypeId != TY_Object) {
@@ -626,18 +626,18 @@ static kbool_t DEFAULT_isSubType(KonohaContext *kctx, KonohaClass* ct, KonohaCla
 	return false;
 }
 
-static KonohaClass* DEFAULT_realtype(KonohaContext *kctx, KonohaClass* c, KonohaClass *self)
+static KonohaClass *DEFAULT_realtype(KonohaContext *kctx, KonohaClass *c, KonohaClass *self)
 {
 	return c;
 }
 
-static kObject* DEFAULT_fnull(KonohaContext *kctx, KonohaClass *ct)
+static kObject *DEFAULT_fnull(KonohaContext *kctx, KonohaClass *ct)
 {
 	DBG_ASSERT(ct->defaultNullValue_OnGlobalConstList != NULL);
 	return ct->defaultNullValue_OnGlobalConstList;
 }
 
-static kObject* DEFAULT_fnullinit(KonohaContext *kctx, KonohaClass *ct)
+static kObject *DEFAULT_fnullinit(KonohaContext *kctx, KonohaClass *ct)
 {
 	DBG_ASSERT(ct->defaultNullValue_OnGlobalConstList == NULL);
 	((KonohaClassVar*)ct)->defaultNullValue_OnGlobalConstList = KLIB new_kObject(kctx, OnGlobalConstList, ct, 0);
@@ -651,7 +651,7 @@ static kObject *Knull(KonohaContext *kctx, KonohaClass *ct)
 	return ct->fnull(kctx, ct);
 }
 
-static KonohaClassVar* new_KonohaClass(KonohaContext *kctx, KonohaClass *bct, KDEFINE_CLASS *s, KTraceInfo *trace)
+static KonohaClassVar *new_KonohaClass(KonohaContext *kctx, KonohaClass *bct, KDEFINE_CLASS *s, KTraceInfo *trace)
 {
 	KonohaRuntimeVar *share = (KonohaRuntimeVar *)kctx->share;
 	KonohaClassVar *ct;
@@ -793,7 +793,7 @@ static KonohaClass *KonohaClass_Generics(KonohaContext *kctx, KonohaClass *ct, k
 	return ct->searchSimilarClassNULL;
 }
 
-static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
+static kString *KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 {
 	if(ct->shortClassNameNULL_OnGlobalConstList == NULL) {
 		if(ct->cparamdom == 0 && ct->baseTypeId != TY_Func) {

@@ -88,7 +88,7 @@ static void kBytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffe
 #define CONV_BUFSIZE 4096 // 4K
 #define MAX_STORE_BUFSIZE (CONV_BUFSIZE * 1024)// 4M
 
-//static kBytes* Convert_newBytes(KonohaContext *kctx, kArray *gcstack, kBytes *sourceBytes, const char *fromCharset, const char *toCharset)
+//static kBytes *Convert_newBytes(KonohaContext *kctx, kArray *gcstack, kBytes *sourceBytes, const char *fromCharset, const char *toCharset)
 //{
 //	kiconv_t conv;
 //	KGrowingBuffer wb;
@@ -185,7 +185,7 @@ static void kBytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffe
 ////## @Const method String Bytes.decodeFrom(String fromEncoding);
 //static KMETHOD Bytes_decodeFrom(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	kBytes* sourceBytes = sfp[0].asBytes;
+//	kBytes *sourceBytes = sfp[0].asBytes;
 //	kString*fromCharset = sfp[1].asString;
 //	kBytes *targetBytes = NULL;
 ////	DBG_P("size=%d, '%s'", sourceBytes->bytesize, sourceBytes->buf);
@@ -258,7 +258,7 @@ static KMETHOD Bytes_setAll(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 
-static void Kwb_convertCharset(KonohaContext *kctx, KGrowingBuffer* wb, const char *targetCharset, const char *sourceCharset, const char *sourceBuf, size_t sourceSize, KTraceInfo *trace)
+static void Kwb_convertCharset(KonohaContext *kctx, KGrowingBuffer *wb, const char *targetCharset, const char *sourceCharset, const char *sourceBuf, size_t sourceSize, KTraceInfo *trace)
 {
 	uintptr_t iconv = PLATAPI iconv_open_i(kctx, targetCharset, sourceCharset, trace);
 	if(iconv != ICONV_NULL) {
@@ -267,9 +267,9 @@ static void Kwb_convertCharset(KonohaContext *kctx, KGrowingBuffer* wb, const ch
 	}
 }
 
-static kBytes* new_kBytes(KonohaContext *kctx, kArray *gcstack, KonohaClass *c, const char *buf, size_t bufsiz)
+static kBytes *new_kBytes(KonohaContext *kctx, kArray *gcstack, KonohaClass *c, const char *buf, size_t bufsiz)
 {
-	kBytes* ba = (kBytes*) KLIB new_kObject(kctx, gcstack, c, bufsiz);
+	kBytes *ba = (kBytes*) KLIB new_kObject(kctx, gcstack, c, bufsiz);
 	if(bufsiz > 0) {
 		memcpy(ba->buf, buf, bufsiz);
 	}
@@ -279,7 +279,7 @@ static kBytes* new_kBytes(KonohaContext *kctx, kArray *gcstack, KonohaClass *c, 
 //## @Const Bytes String.toBytes();
 static KMETHOD String_toBytes(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kString* thisString = sfp[0].asString;
+	kString *thisString = sfp[0].asString;
 	size_t size = S_size(thisString);
 	if(PLATAPI isSystemCharsetUTF8(kctx)) {
 		KReturn(new_kBytes(kctx, OnStack, KGetReturnType(sfp), S_text(thisString), size));
@@ -404,7 +404,7 @@ static kbool_t bytes_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 	return true;
 }
 
-KDEFINE_PACKAGE* bytes_init(void)
+KDEFINE_PACKAGE *bytes_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "bytes", "1.0");

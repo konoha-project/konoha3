@@ -23,7 +23,7 @@ static void *thread_main(void *args)
     return NULL;
 }
 
-int main(int argc, char const* argv[])
+int main(int argc, char const *argv[])
 {
     logpool_global_init(LOGPOOL_TRACE);
 #define N 16

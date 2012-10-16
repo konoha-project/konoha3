@@ -97,12 +97,12 @@ static void MPIData_extend(KonohaContext *kctx, kMPIData *p, int size) {
 
 /* ------------------------------------------------------------------------ */
 static kMPIRequest *newMPIRequest(KonohaContext *kctx) {
-	kMPIRequest* p = (kMPIRequest*)KMalloc_UNTRACE(sizeof(kMPIRequest));
+	kMPIRequest *p = (kMPIRequest*)KMalloc_UNTRACE(sizeof(kMPIRequest));
 	return p;
 }
 
 static kMPIData *newMPIData(KonohaContext *kctx) {
-	kMPIData* p = (kMPIData*)KMalloc_UNTRACE(sizeof(kMPIData));
+	kMPIData *p = (kMPIData*)KMalloc_UNTRACE(sizeof(kMPIData));
 	return p;
 }
 
@@ -669,7 +669,7 @@ static kbool_t mpi_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kN
 	return true;
 }
 
-KDEFINE_PACKAGE* mpi_init(void)
+KDEFINE_PACKAGE *mpi_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("mpi", "1.0"),

@@ -64,7 +64,7 @@ static uintptr_t entry_keygen(char *key, uint32_t len)
     return (uintptr_t) key;
 }
 
-int main(int argc, char const* argv[])
+int main(int argc, char const *argv[])
 {
     int i;
     pool_global_init();

@@ -116,7 +116,7 @@ static void kStringBase_unsetFlag(kStringBase *s, uint32_t mask)
 	s->h.magicflag ^= (uintptr_t)mask;
 }
 
-static kStringBase *new_kStringBase(KonohaContext *kctx, kArray* gcstack, uint32_t mask)
+static kStringBase *new_kStringBase(KonohaContext *kctx, kArray *gcstack, uint32_t mask)
 {
 	kStringBase *s = (kStringBase *)new_(String, 0, gcstack);
 	kStringBase_unsetFlag(s, MASK_INLINE);
@@ -387,7 +387,7 @@ static size_t utf8_multiByteLength(const char *s_text, size_t s_size)
 	return size;
 }
 
-// uft8_byteOffset("あいうえお", 3) ==> 9
+// uft8_byteOffset("ããããã", 3) ==> 9
 static size_t uft8_byteOffset(const char *text, size_t index)
 {
 	const unsigned char *start = (const unsigned char *)text;
@@ -854,7 +854,7 @@ static KMETHOD String_substrWithLength(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ------------------------------------------------------------------------ */
 
-static kString* kString_toupper(KonohaContext *kctx, kArray *gcstack, kString *thisString, size_t start)
+static kString *kString_toupper(KonohaContext *kctx, kArray *gcstack, kString *thisString, size_t start)
 {
 	size_t i, size = S_size(thisString);
 	kString *s = KLIB new_kString(kctx, gcstack, S_text(thisString), size, StringPolicy_isASCII(thisString)|StringPolicy_NOCOPY);
@@ -881,7 +881,7 @@ static KMETHOD String_toUpper(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(thisString);
 }
 
-static kString* kString_tolower(KonohaContext *kctx, kArray *gcstack, kString *thisString, size_t start)
+static kString *kString_tolower(KonohaContext *kctx, kArray *gcstack, kString *thisString, size_t start)
 {
 	size_t i, size = S_size(thisString);
 	kString *s = KLIB new_kString(kctx, gcstack, S_text(thisString), size, StringPolicy_isASCII(thisString)|StringPolicy_NOCOPY);
@@ -1185,7 +1185,7 @@ static kbool_t string_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS,
 	return true;
 }
 
-KDEFINE_PACKAGE* string_init(void)
+KDEFINE_PACKAGE *string_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "String", "1.0");

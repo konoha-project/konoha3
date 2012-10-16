@@ -79,7 +79,7 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObj
 
 // ---------------------------------------------------------------------------
 
-static kStmt* TypeDeclAndMakeSetter(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr, kExpr *valueExpr, kObject *scr)
+static kStmt *TypeDeclAndMakeSetter(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr, kExpr *valueExpr, kObject *scr)
 {
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	kMethod *mtd = Object_newProtoSetterNULL(kctx, stmt, scr, ty, termExpr->termToken->resolvedSymbol);
@@ -144,7 +144,7 @@ static kbool_t global_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS,
 	return true;
 }
 
-KDEFINE_PACKAGE* global_init(void)
+KDEFINE_PACKAGE *global_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "global", "1.0");

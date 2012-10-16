@@ -104,7 +104,7 @@ static pmap_record_t *pmap_get_(poolmap_t *m, uint32_t hash, uintptr_t key)
     return NULL;
 }
 
-poolmap_t* poolmap_new(uint32_t init, fn_keygen fkey, fn_keycmp fcmp, fn_efree ffree)
+poolmap_t *poolmap_new(uint32_t init, fn_keygen fkey, fn_keycmp fcmp, fn_efree ffree)
 {
     poolmap_t *m = cast(poolmap_t *, map_do_malloc(sizeof(*m)));
     if(init < POOLMAP_INITSIZE)

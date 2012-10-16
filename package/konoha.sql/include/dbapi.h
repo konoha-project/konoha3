@@ -117,7 +117,7 @@ static int knh_ResultSet_indexof_(KonohaContext *kctx, KonohaStack *sfp)
 KMETHOD ResultSet_getString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int n = knh_ResultSet_indexof_(kctx, sfp);
-	kResultSet* o = (kResultSet*)sfp[0].asObject;
+	kResultSet *o = (kResultSet*)sfp[0].asObject;
 	DBG_ASSERT(n < o->column_size);
 	const char *p = o->databuf->text + o->column[n].start;
 	switch(o->column[n].ctype) {

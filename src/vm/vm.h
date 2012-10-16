@@ -135,7 +135,7 @@ struct kBasicBlockVar {
 
 struct kByteCodeVar {
 	KonohaObjectHeader h;
-	VirtualMachineInstruction*   code;
+	VirtualMachineInstruction *code;
 	size_t    codesize;
 	kString  *source;
 	kfileline_t   fileid;
@@ -154,7 +154,7 @@ static void kNameSpace_lookupMethodWithInlineCache(KonohaContext *kctx, KonohaSt
 	sfp[K_MTDIDX].methodCallInfo = mtd;
 }
 
-static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *, KonohaStack *, VirtualMachineInstruction *);
+static VirtualMachineInstruction *KonohaVirtualMachine_run(KonohaContext *, KonohaStack *, VirtualMachineInstruction *);
 
 static VirtualMachineInstruction *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStack *sfp, VirtualMachineInstruction *pc)
 {
@@ -662,14 +662,14 @@ GOTO_PC(pc); \
 #ifdef K_USING_SETJMP_
 
 #define OPEXEC_TRY(PC, JUMP, hn) do {\
-	kExceptionHandler* _hdr = Rh_(hn); \
+	kExceptionHandler *_hdr = Rh_(hn); \
 	if(!IS_ExceptionHandler(_hdr)) { \
 		_hdr = new_(ExceptionHandler); \
 		klr_mov(Ro_(hn), _hdr); \
 	} \
 	int jump = knh_setjmp(DP(_hdr)->jmpbuf); \
 	if(jump == 0) {\
-		knh_ExceptionHandlerEX_t* _hdrEX = DP(Rh_(hn));\
+		knh_ExceptionHandlerEX_t *_hdrEX = DP(Rh_(hn));\
 		_hdrEX->pc = PC_NEXT(pc); \
 		_hdrEX->op = op;\
 		_hdrEX->sfpidx = (SFP(rbp) - ctx->stack); \
@@ -679,7 +679,7 @@ GOTO_PC(pc); \
 		((KonohaContextVar*)ctx)->ehdrNC = _hdr; \
 	} else { \
 		_hdr = ctx->ehdrNC;\
-		knh_ExceptionHandlerEX_t* _hdrEX = DP(_hdr);\
+		knh_ExceptionHandlerEX_t *_hdrEX = DP(_hdr);\
 		pc = _hdrEX->pc; \
 		rbp = RBP(ctx->stack + _hdrEX->sfpidx);\
 		KonohaRuntime_setesp(ctx, (ctx->stack + _hdr->espidx));\
@@ -690,7 +690,7 @@ GOTO_PC(pc); \
 } while (0)
 
 #define OPEXEC_TRYEND(ctx, hn) do {\
-	kExceptionHandler* _hdr = Rh_(hn); \
+	kExceptionHandler *_hdr = Rh_(hn); \
 	DBG_ASSERT(IS_ExceptionHandler(_hdr)); \
 	((KonohaContextVar*)ctx)->ehdrNC = _hdr->parentNC;\
 	klr_mov(ctx, Ro_(hn), KNH_TNULL(ExceptionHandler));\
@@ -699,14 +699,14 @@ GOTO_PC(pc); \
 #else
 
 #define OPEXEC_TRY(PC, JUMP, hn) do {\
-	kExceptionHandler* _hdr = Rh_(hn); \
+	kExceptionHandler *_hdr = Rh_(hn); \
 	if(!IS_ExceptionHandler(_hdr)) { \
 		_hdr = new_(ExceptionHandler); \
 		klr_mov(ctx, Ro_(hn), _hdr); \
 	} \
 	_hdr = ExceptionHandler_setjmp(ctx, _hdr); \
 	if(_hdr == NULL) {\
-		knh_ExceptionHandlerEX_t* _hdrEX = DP(Rh_(hn));\
+		knh_ExceptionHandlerEX_t *_hdrEX = DP(Rh_(hn));\
 		_hdrEX->pc  = PC_NEXT(pc); \
 		_hdrEX->op  = op;\
 		_hdrEX->sfpidx = (SFP(rbp) - ctx->stack); \
@@ -715,7 +715,7 @@ GOTO_PC(pc); \
 		_hdr->parentNC = ctx->ehdrNC;\
 		((KonohaContextVar*)ctx)->ehdrNC = _hdr; \
 	} else { \
-		knh_ExceptionHandlerEX_t* _hdrEX = DP(_hdr);\
+		knh_ExceptionHandlerEX_t *_hdrEX = DP(_hdr);\
 		pc = _hdrEX->pc; \
 		rbp = RBP(ctx->stack + _hdrEX->sfpidx);\
 		KonohaRuntime_setesp(ctx, (ctx->stack + _hdr->espidx));\
@@ -726,7 +726,7 @@ GOTO_PC(pc); \
 } while (0)
 
 #define OPEXEC_TRYEND(ctx, hn) do {\
-	kExceptionHandler* _hdr = Rh_(hn); \
+	kExceptionHandler *_hdr = Rh_(hn); \
 	DBG_ASSERT(IS_ExceptionHandler(_hdr)); \
 	DP(_hdr)->return_address = NULL;\
 	DP(_hdr)->frame_address  = NULL;\

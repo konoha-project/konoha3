@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-int main(int argc, char const* argv[])
+int main(int argc, char const *argv[])
 {
     struct qengine *e = qengine_init();
     struct qcode *c;

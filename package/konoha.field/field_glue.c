@@ -231,7 +231,7 @@ static kbool_t field_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE* field_init(void)
+KDEFINE_PACKAGE *field_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "field", "1.0");

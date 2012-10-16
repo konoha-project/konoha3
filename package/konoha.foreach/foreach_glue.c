@@ -47,14 +47,14 @@ static kbool_t foreach_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirst
 
 #define TY_isIterator(T)     (CT_(T)->baseTypeId == TY_Iterator)
 
-static kToken* new_TypeToken(KonohaContext *kctx, kNameSpace *ns, ktype_t typeId)
+static kToken *new_TypeToken(KonohaContext *kctx, kNameSpace *ns, ktype_t typeId)
 {
 	kToken *TypeToken = new_(Token, 0, OnGcStack);
 	kToken_setTypeId(kctx, TypeToken, ns, typeId);
 	return TypeToken;
 }
 
-static kToken* new_ParsedExprToken(KonohaContext *kctx, kNameSpace *ns, kExpr *expr)
+static kToken *new_ParsedExprToken(KonohaContext *kctx, kNameSpace *ns, kExpr *expr)
 {
 	kTokenVar *ParsedExprToken = new_(TokenVar, 0, OnGcStack);
 	ParsedExprToken->resolvedSyntaxInfo = SYN_(ns, KW_ExprPattern);
@@ -173,7 +173,7 @@ static kbool_t foreach_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS
 	return true;
 }
 
-KDEFINE_PACKAGE* foreach_init(void)
+KDEFINE_PACKAGE *foreach_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "foreach", "1.0");

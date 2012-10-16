@@ -84,7 +84,7 @@ static KMETHOD Statement_CStyleFor(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
-static inline kStmt* kStmt_getParentNULL(kStmt *stmt)
+static inline kStmt *kStmt_getParentNULL(kStmt *stmt)
 {
 	return stmt->parentBlockNULL->parentStmtNULL;
 }
@@ -263,7 +263,7 @@ static kbool_t cstyle_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS,
 	return true;
 }
 
-KDEFINE_PACKAGE* cstyle_init(void)
+KDEFINE_PACKAGE *cstyle_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "cstyle", "1.0");

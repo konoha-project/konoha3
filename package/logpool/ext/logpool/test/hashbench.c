@@ -35,7 +35,7 @@ static inline uint64_t getTime(void)
     return tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }
 
-int main(int argc, char const* argv[])
+int main(int argc, char const *argv[])
 {
     int i, j;
     uint32_t h = 0;

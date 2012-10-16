@@ -338,7 +338,7 @@ static kbool_t thread_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS,
 	return true;
 }
 
-KDEFINE_PACKAGE* thread_init(void)
+KDEFINE_PACKAGE *thread_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("thread", "1.0"),

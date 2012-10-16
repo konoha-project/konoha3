@@ -103,7 +103,7 @@ static kbool_t object_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS,
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE* object_init(void)
+KDEFINE_PACKAGE *object_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "object", "1.0");

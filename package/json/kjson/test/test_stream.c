@@ -81,7 +81,7 @@ static void test_string(void)
 //    }
 //}
 
-int main(int argc, char const* argv[])
+int main(int argc, char const *argv[])
 {
     test_string();
     //test_file(argc-1, argv+1);

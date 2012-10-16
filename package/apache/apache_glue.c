@@ -149,7 +149,7 @@ static kbool_t apache_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS,
 	return true;
 }
 
-KDEFINE_PACKAGE* apache_init(void)
+KDEFINE_PACKAGE *apache_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("apache", "1.0"),

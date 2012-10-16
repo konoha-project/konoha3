@@ -11,7 +11,7 @@ static void test_whitespace(char *data, size_t length)
     JSON_free(json);
 }
 
-int main(int argc, char const* argv[])
+int main(int argc, char const *argv[])
 {
     // whitespace test
     size_t i, length = 1024 * 1024;

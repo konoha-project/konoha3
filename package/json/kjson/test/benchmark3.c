@@ -62,7 +62,7 @@ static void test2()
     fclose(fp);
 }
 
-int main(int argc, char const* argv[])
+int main(int argc, char const *argv[])
 {
     int i, size = 1;
     fprintf(stderr, "benchmark3\n");

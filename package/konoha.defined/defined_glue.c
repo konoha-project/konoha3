@@ -111,7 +111,7 @@ static kbool_t defined_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS
 	return true;
 }
 
-KDEFINE_PACKAGE* defined_init(void)
+KDEFINE_PACKAGE *defined_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "defined", "1.0");
