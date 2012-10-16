@@ -82,7 +82,7 @@ static void kapacheshare_free(KonohaContext *kctx, struct KonohaModule *baseh)
 }
 
 
-static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	static KDEFINE_CLASS Def = {
 		STRUCTNAME(Request),
@@ -111,7 +111,7 @@ static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	base->h.setup    = kapacheshare_setup;
 	base->h.reftrace = kapacheshare_reftrace;
 	base->h.free     = kapacheshare_free;
-	KLIB KonohaRuntime_setModule(kctx, MOD_APACHE, &base->h, pline);
+	KLIB KonohaRuntime_setModule(kctx, MOD_APACHE, &base->h, trace);
 	base->cRequest = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def, 0);
 	base->cAprTable = KLIB kNameSpace_defineClass(kctx, ns, NULL, &aprTableDef, 0);
 	base->cAprTableEntry = KLIB kNameSpace_defineClass(kctx, ns, NULL, &aprTableEntryDef, 0);
@@ -134,17 +134,17 @@ static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	return true;
 }
 
-static kbool_t apache_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t apache_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t apache_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t apache_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t apache_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t apache_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

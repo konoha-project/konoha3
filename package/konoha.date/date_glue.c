@@ -601,13 +601,13 @@ static KMETHOD Date_toLocaleString(KonohaContext *kctx, KonohaStack *sfp)
 #define _F(F)   (intptr_t)(F)
 #define TY_Date     cDate->typeId
 
-static kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KDEFINE_CLASS defDate = {0};
 	SETSTRUCTNAME(defDate, Date);
 	defDate.cflag = kClass_Final;
 
-	KonohaClass *cDate = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDate, pline);
+	KonohaClass *cDate = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDate, trace);
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Date_new0), TY_Date, TY_Date, MN_("new"), 0,
@@ -667,17 +667,17 @@ static kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	return true;
 }
 
-static kbool_t date_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t date_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t date_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t date_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t date_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t date_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
@@ -685,7 +685,7 @@ static kbool_t date_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, k
 KDEFINE_PACKAGE* date_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "date", "1.0");
+	KSetPackageName(d, "date", "1.0");
 	d.initPackage    = date_initPackage;
 	d.setupPackage   = date_setupPackage;
 	d.initNameSpace  = date_initNameSpace;

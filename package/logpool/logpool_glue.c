@@ -360,7 +360,7 @@ static KMETHOD LogPool_loadFile(KonohaContext *kctx, KonohaStack *sfp)
 #define TY_Logpool  (ct0->typeId)
 #define TY_Log      (ct1->typeId)
 
-static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	int i;
 	static KDEFINE_CLASS Def0 = {
@@ -369,7 +369,7 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		.init = RawPtr_init,
 		.free = Logpool_free,
 	};
-	KonohaClass *ct0 = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def0, pline);
+	KonohaClass *ct0 = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def0, trace);
 
 	static KDEFINE_CLASS Def1 = {
 		.structname = "Log"/*structname*/,
@@ -378,7 +378,7 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		.free = Log_free,
 		.p    = Log_p,
 	};
-	KonohaClass *ct1 = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def1, pline);
+	KonohaClass *ct1 = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def1, trace);
 
 	static KDEFINE_CLASS Def2 = {
 		.structname = "PoolPlugin",
@@ -386,7 +386,7 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		.init = RawPtr_init,
 		.free = RawPtr_free,
 	};
-	KonohaClass *ct2 = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def2, pline);
+	KonohaClass *ct2 = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def2, trace);
 #define TY_Plugin ct2->typeId
 	static KDEFINE_CLASS Def3 = {
 		.structname = "",
@@ -417,7 +417,7 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 
 	for (i = 0; i < 8; i++) {
 		Def3.structname = names[i];
-		tbls[i] = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def3, pline);
+		tbls[i] = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def3, trace);
 	}
 
 	int FN_x = FN_("x");
@@ -445,17 +445,17 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	return true;
 }
 
-static kbool_t logpool_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t logpool_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t logpool_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t logpool_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t logpool_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t logpool_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

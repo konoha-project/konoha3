@@ -270,7 +270,7 @@ static KMETHOD Cond_broadcast(KonohaContext *kctx, KonohaStack *sfp)
 #define TY_Mutex  cMutex->typeId
 #define TY_Cond   cCond->typeId
 
-static kbool_t thread_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t thread_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KDEFINE_CLASS defThread = {
 		STRUCTNAME(Thread),
@@ -292,9 +292,9 @@ static kbool_t thread_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		.init  = kCond_init,
 		.free  = kCond_free,
 	};
-	KonohaClass *cThread = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defThread, pline);
-	KonohaClass *cMutex  = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defMutex, pline);
-	KonohaClass *cCond   = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defCond, pline);
+	KonohaClass *cThread = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defThread, trace);
+	KonohaClass *cMutex  = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defMutex, trace);
+	KonohaClass *cCond   = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defCond, trace);
 	
 	kparamtype_t P_Func[] = {{}};
 	int TY_FUNC = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_void, 0, P_Func))->typeId;
@@ -323,17 +323,17 @@ static kbool_t thread_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	return true;
 }
 
-static kbool_t thread_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t thread_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t thread_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t thread_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t thread_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t thread_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

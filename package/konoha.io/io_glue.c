@@ -318,7 +318,8 @@ static KMETHOD InputStream_new(KonohaContext *kctx, KonohaStack *sfp)
 	kString *path = sfp[1].asString;
 	FILE *fp = fopen(S_text(path), "r");
 	if(fp == NULL) {
-		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
+		KMakeTrace(trace, sfp);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), NULL, trace);
 	}
 	in->fp = (FILE_i*)fp;
 	in->streamApi = &FileStreamApi;
@@ -421,7 +422,8 @@ static KMETHOD OutputStream_new(KonohaContext *kctx, KonohaStack *sfp)
 	const char *mode = IS_NULL(sfp[2].asString) ? "w" : S_text(sfp[2].asString);
 	FILE *fp = fopen(S_text(path), mode);
 	if(fp == NULL) {
-		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
+		KMakeTrace(trace, sfp);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), NULL, trace);
 	}
 	out->fp = (FILE*)fp;
 	out->streamApi = &FileStreamApi;
@@ -697,14 +699,14 @@ static void kioshare_free(KonohaContext *kctx, struct KonohaModule *baseh)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t io_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t io_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KIOModule *mod = (KIOModule*)KCalloc_UNTRACE(sizeof(KIOModule), 1);
 	mod->h.name     = "io";
 	mod->h.setup    = kioshare_setup;
 	mod->h.reftrace = kioshare_reftrace;
 	mod->h.free     = kioshare_free;
-	KLIB KonohaRuntime_setModule(kctx, MOD_IO, &mod->h, pline);
+	KLIB KonohaRuntime_setModule(kctx, MOD_IO, &mod->h, trace);
 
 	KDEFINE_CLASS defInputStream = {0};
 	SETSTRUCTNAME(defInputStream, InputStream);
@@ -726,9 +728,9 @@ static kbool_t io_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 	defFile.free     = kFile_free;
 	
 
-	KonohaClass *cInputStream  = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defInputStream, pline);
-	KonohaClass *cOutputStream = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defOutputStream, pline);
-	KonohaClass *cFile         = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defFile, pline);
+	KonohaClass *cInputStream  = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defInputStream, trace);
+	KonohaClass *cOutputStream = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defOutputStream, trace);
+	KonohaClass *cFile         = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defFile, trace);
 	int TY_InputStream = cInputStream->typeId;
 	int TY_OutputStream = cOutputStream->typeId;
 	int TY_File = cFile->typeId;
@@ -796,17 +798,17 @@ static kbool_t io_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 	return true;
 }
 
-static kbool_t io_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t io_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t io_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t io_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t io_setNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t io_setNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
@@ -814,7 +816,7 @@ static kbool_t io_setNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kName
 KDEFINE_PACKAGE* io_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "io", "1.0");
+	KSetPackageName(d, "io", "1.0");
 	d.initPackage    = io_initPackage;
 	d.setupPackage   = io_setupPackage;
 	d.initNameSpace  = io_initNameSpace;

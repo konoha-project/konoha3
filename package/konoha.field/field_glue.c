@@ -183,14 +183,14 @@ static kbool_t KonohaClass_addField(KonohaContext *kctx, KonohaClass *ct, int fl
 
 // --------------------------------------------------------------------------
 
-static kbool_t field_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t field_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KSET_KLIB2(kMethod_indexOfField, KLIB2_Method_indexOfField, pline);
-	KSET_KLIB2(KonohaClass_addField, KonohaClass_addField, pline);
+	KSET_KLIB2(kMethod_indexOfField, KLIB2_Method_indexOfField, trace);
+	KSET_KLIB2(KonohaClass_addField, KonohaClass_addField, trace);
 	return true;
 }
 
-static kbool_t field_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t field_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -214,7 +214,7 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static kbool_t field_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t field_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("."), 0, NULL, -1, 0, NULL, NULL, NULL, NULL, TypeCheck_Getter, },
@@ -224,7 +224,7 @@ static kbool_t field_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, k
 	return true;
 }
 
-static kbool_t field_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t field_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
@@ -234,7 +234,7 @@ static kbool_t field_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 KDEFINE_PACKAGE* field_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "field", "1.0");
+	KSetPackageName(d, "field", "1.0");
 	d.initPackage    = field_initPackage;
 	d.setupPackage   = field_setupPackage;
 	d.initNameSpace  = field_initNameSpace;

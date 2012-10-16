@@ -319,13 +319,13 @@ static void String2_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vi
 
 static uintptr_t String2_unbox(KonohaContext *kctx, kObject *o)
 {
-	kStringBase *s = (kStringBase*)o;
+	kStringBase *s = (kStringBase *)o;
 	return (uintptr_t) StringBase_getTextReference(kctx, s);
 }
 
 static kStringBase *kStringBase_concat(KonohaContext *kctx, kArray *gcstack, kString *s0, kString *s1)
 {
-	kStringBase *left = (kStringBase*) s0, *right = (kStringBase*) s1;
+	kStringBase *left = (kStringBase *) s0, *right = (kStringBase*) s1;
 	size_t leftLen = StringBase_length(left);
 	if(leftLen == 0) {
 		return right;
@@ -363,7 +363,7 @@ static KMETHOD Rope_opADD(KonohaContext *kctx, KonohaStack *sfp)
 /* ------------------------------------------------------------------------ */
 
 #define StringPolicy_isASCII(s)       (kString_is(ASCII, s) ? StringPolicy_ASCII : 0)
-#define S_msize(s)        text_mlen(S_text(s), S_size(s))
+#define S_msize(s)        utf8_multiByteLength(S_text(s), S_size(s))
 #define S_length(s)       (kString_is(ASCII, s) ? S_size(s) : S_msize(s))
 #define CT_StringArray0   CT_p0(kctx, CT_Array, TY_String)
 #define S_index(s, n)     ((n < 0) ? S_length(s) + n : n)
@@ -374,9 +374,8 @@ static KMETHOD Rope_opADD(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ------------------------------------------------------------------------ */
 
-static size_t text_mlen(const char *s_text, size_t s_size)
+static size_t utf8_multiByteLength(const char *s_text, size_t s_size)
 {
-#ifdef K_USING_UTF8
 	size_t size = 0;
 	const unsigned char *start = (const unsigned char*)s_text;
 	const unsigned char *end = start + s_size;
@@ -386,16 +385,14 @@ static size_t text_mlen(const char *s_text, size_t s_size)
 		start += ulen;
 	}
 	return size;
-#else
-	return s_size;
-#endif
 }
 
-static size_t text_msize(const char *text, size_t size)
+// uft8_byteOffset("あいうえお", 3) ==> 9
+static size_t uft8_byteOffset(const char *text, size_t index)
 {
 	const unsigned char *start = (const unsigned char *)text;
 	size_t i, mindex = 0;
-	for(i = 0; i < size; i++) {
+	for(i = 0; i < index; i++) {
 		mindex += utf8len(*(start + mindex));
 	}
 	return mindex;
@@ -507,15 +504,16 @@ static kString *new_SubString(KonohaContext *kctx, kArray *gcstack, kString *s0,
 		return KNULL(String);
 	}
 	if(kString_is(ASCII, s0)) {
-		start = check_index(kctx, start, S_size(s0), sfp[K_RTNIDX].callerFileLine);
+		KCheckIndex(start, S_size(s0));
 		const char *new_text = S_text(s0) + start;
 		ret = KLIB new_kString(kctx, gcstack, new_text, length, StringPolicy_ASCII); // FIXME SPOL
 	}
 	else {
 		ret = new_SubStringMulti(kctx, gcstack, s0, start, length);
 		if(unlikely(ret == NULL)) {
-			kreportf(CritTag, sfp[K_RTNIDX].callerFileLine, "Script!!: out of array index %ld", sfp[1].intValue);
-			KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfStringBoundary"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
+			KMakeTrace(trace, sfp);
+			kreportf(CritTag, trace, "Script!!: out of array index %ld", sfp[1].intValue);
+			KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfStringBoundary"), NULL, trace);
 		}
 	}
 	return ret;
@@ -627,7 +625,7 @@ static KMETHOD String_indexOf(KonohaContext *kctx, KonohaStack *sfp)
 		if(p != NULL) {
 			loc = p - t0;
 			if(!kString_is(ASCII, s0)) {
-				loc = text_mlen(t0, (size_t)loc);
+				loc = utf8_multiByteLength(t0, (size_t)loc);
 			}
 		}
 		KReturnUnboxValue(loc);
@@ -649,14 +647,14 @@ static KMETHOD String_indexOfwithStart(KonohaContext *kctx, KonohaStack *sfp)
 	long loc = -1;
 	const char *t0 = S_text(s0);
 	if(start > 0) {
-		t0 += text_msize(t0, start);
+		t0 += uft8_byteOffset(t0, start);
 	}
 	const char *t1 = S_text(s1);
 	const char *p = strstr(t0, t1);
 	if(p != NULL) {
 		loc = p - t0;
 		if(!kString_is(ASCII, s0)) {
-			loc = text_mlen(t0, (size_t)loc);
+			loc = utf8_multiByteLength(t0, (size_t)loc);
 		}
 		KReturnUnboxValue(loc + start);
 	}
@@ -669,7 +667,7 @@ static kint_t S_lastIndexOf(KonohaContext *kctx, kString *s0, kString *s1, size_
 	const char *t1 = S_text(s1);
 	int len = S_size(s1);
 	if(len == 0) {
-		return kString_is(ASCII, s0) ? start : text_mlen(t0, start);
+		return kString_is(ASCII, s0) ? start : utf8_multiByteLength(t0, start);
 	}
 	kint_t loc;
 	for(loc = start - len; loc >= 0; loc--) {
@@ -678,7 +676,7 @@ static kint_t S_lastIndexOf(KonohaContext *kctx, kString *s0, kString *s1, size_
 		}
 	}
 	if(loc >= 0 && !kString_is(ASCII, s0)) {
-		loc = text_mlen(t0, (size_t)loc);
+		loc = utf8_multiByteLength(t0, (size_t)loc);
 	}
 	return (loc < 0) ? -1 : loc;
 }
@@ -703,7 +701,7 @@ static KMETHOD String_lastIndexOfwithStart(KonohaContext *kctx, KonohaStack *sfp
 	kString *s1 = sfp[1].asString;
 	const char *t0 = S_text(s0);
 	kint_t start = S_range(s0, sfp[2].intValue);
-	KReturnUnboxValue(S_lastIndexOf(kctx, s0, s1, text_msize(t0, start + 1)));
+	KReturnUnboxValue(S_lastIndexOf(kctx, s0, s1, uft8_byteOffset(t0, start + 1)));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -798,14 +796,14 @@ static KMETHOD String_get(KonohaContext *kctx, KonohaStack *sfp)
 	kString *s = sfp[0].asString;
 	size_t n = (size_t)sfp[1].intValue;
 	if(kString_is(ASCII, s)) {
-		n = check_index(kctx, sfp[1].intValue, S_size(s), sfp[K_RTNIDX].callerFileLine);
+		KCheckIndex(n, S_size(s));
 		s = KLIB new_kString(kctx, OnStack, S_text(s) + n, 1, StringPolicy_ASCII);
 	}
 	else {
 		s = new_StringMultiGet_UNSURE(kctx, OnStack, s, n);
 		if(unlikely(s == NULL)) {
-			kreportf(CritTag, sfp[K_RTNIDX].callerFileLine, "Script!!: out of array index %ld", (int)n);
-			KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfStringBoundary"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
+			KMakeTrace(trace, sfp);
+			KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfStringBoundary"), NULL, trace);
 		}
 	}
 	KReturn(s);
@@ -818,10 +816,10 @@ static KMETHOD String_charCodeAt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	size_t n = (size_t)sfp[1].intValue;
 	kint_t ccode = kStringMulti_charAt(kctx, sfp[0].asString, n);
-	if(unlikely(ccode == -1)) {
-		kreportf(CritTag, sfp[K_RTNIDX].callerFileLine, "Script!!: out of array index %ld", (int)n);
-		KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfStringBoundary"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
-	}
+//	if(unlikely(ccode == -1)) {
+//		kreportf(CritTag, sfp[K_RTNIDX].callerFileLine, "Script!!: out of array index %ld", (int)n);
+//		KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfStringBoundary"), NULL, trace);
+//	}
 	KReturnUnboxValue(ccode);
 }
 
@@ -1106,7 +1104,7 @@ static KMETHOD String_valueOf(KonohaContext *kctx, KonohaStack *sfp)
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	int FN_s = FN_("s");
 	int FN_n = FN_("n");
@@ -1164,25 +1162,25 @@ static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 
-	KSET_TYFUNC(CT_String, unbox, String2, pline);
-	KSET_TYFUNC(CT_String, free, String2, pline);
-	KSET_TYFUNC(CT_String, reftrace, String2, pline);
-	KSET_KLIB(new_kString, pline);
+	KSET_TYFUNC(CT_String, unbox, String2, trace);
+	KSET_TYFUNC(CT_String, free, String2, trace);
+	KSET_TYFUNC(CT_String, reftrace, String2, trace);
+	KSET_KLIB(new_kString, trace);
 
 	return true;
 }
 
-static kbool_t string_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t string_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t string_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t string_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t string_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t string_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
@@ -1190,7 +1188,7 @@ static kbool_t string_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS,
 KDEFINE_PACKAGE* string_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "String", "1.0");
+	KSetPackageName(d, "String", "1.0");
 	d.initPackage    = string_initPackage;
 	d.setupPackage   = string_setupPackage;
 	d.initNameSpace  = string_initNameSpace;

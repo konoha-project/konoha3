@@ -80,11 +80,11 @@ static KMETHOD Dynamic_(KonohaContext *kctx, KonohaStack *sfp)
 			sfp[K_MTDIDX].methodCallInfo = mtd;
 			//kObject *returnValue = sfp[K_RTNIDX].asObject;
 			KonohaRuntime_callMethod(kctx, sfp);
-
 			return;
 		}
 	}
-	KLIB KonohaRuntime_raise(kctx, EXPT_("NoSuchMethod"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
+	KMakeTrace(trace, sfp);
+	KLIB KonohaRuntime_raise(kctx, EXPT_("NoSuchMethod"), NULL, trace);
 }
 
 // --------------------------------------------------------------------------
@@ -93,14 +93,14 @@ static KMETHOD Dynamic_(KonohaContext *kctx, KonohaStack *sfp)
 #define _Im       kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t dynamic_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t dynamic_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 
 	static KDEFINE_CLASS defDynamic = {0};
 	defDynamic.structname = "dynamic";
 	defDynamic.cflag = kClass_Final|kClass_TypeVar;
 	
-	KonohaClass *cDynamic = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDynamic, pline);
+	KonohaClass *cDynamic = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDynamic, trace);
 //	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
 //		{"Array", VirtualType_KonohaClass, (uintptr_t)CT_(TY_Array)},
 //		{NULL},
@@ -124,17 +124,17 @@ static kbool_t dynamic_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	return true;
 }
 
-static kbool_t dynamic_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t dynamic_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t dynamic_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t dynamic_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t dynamic_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t dynamic_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
@@ -142,7 +142,7 @@ static kbool_t dynamic_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS
 KDEFINE_PACKAGE* dynamic_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "dynamic", "1.0");
+	KSetPackageName(d, "dynamic", "1.0");
 	d.initPackage    = dynamic_initPackage;
 	d.setupPackage   = dynamic_setupPackage;
 	d.initNameSpace  = dynamic_initNameSpace;

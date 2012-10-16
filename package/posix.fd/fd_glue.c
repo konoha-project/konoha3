@@ -827,7 +827,7 @@ static KMETHOD System_fchdir(KonohaContext *kctx, KonohaStack *sfp)
 
 #define _KVi(T) #T, TY_int, T
 
-static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KDEFINE_CLASS defStat = {
 		STRUCTNAME(Stat),
@@ -836,7 +836,7 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		.free  = kStat_free,
 		.p     = kStat_p
 	};
-	KonohaClass *cStat = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defStat, pline);
+	KonohaClass *cStat = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defStat, trace);
 
 	KDEFINE_CLASS defDIR = {
 		STRUCTNAME(DIR),
@@ -845,7 +845,7 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		.free  = kDIR_free,
 		.p     = kDIR_p
 	};
-	KonohaClass *cDIR = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDIR, pline);
+	KonohaClass *cDIR = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDIR, trace);
 
 	KDEFINE_CLASS defDirent = {
 		STRUCTNAME(Dirent),
@@ -854,7 +854,7 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		.free  = kDirent_free,
 		.p     = kDirent_p
 	};
-	KonohaClass *cDirent = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDirent, pline);
+	KonohaClass *cDirent = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDirent, trace);
 	KonohaClass *CT_DirentArray0 = CT_p0(kctx, CT_Array, cDirent->typeId);
 	ktype_t TY_DirentArray0 = CT_DirentArray0->typeId;
 
@@ -960,17 +960,17 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 	return true;
 }
 
-static kbool_t fd_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t fd_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t fd_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t fd_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t fd_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t fd_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

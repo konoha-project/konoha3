@@ -357,7 +357,7 @@ static KMETHOD LogPool_loadFile(CTX, ksfp_t *sfp _RIX)
 #define TY_Logpool  (ct0->cid)
 #define TY_Log      (ct1->cid)
 
-static kbool_t logpool_initPackage(CTX, kKonohaSpace *ks, int argc, const char**args, kline_t pline)
+static kbool_t logpool_initPackage(CTX, kKonohaSpace *ks, int argc, const char**args, kline_t trace)
 {
 	int i;
 	static KDEFINE_CLASS Def0 = {
@@ -366,7 +366,7 @@ static kbool_t logpool_initPackage(CTX, kKonohaSpace *ks, int argc, const char**
 		.init = RawPtr_init,
 		.free = Logpool_free,
 	};
-	kclass_t *ct0 = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &Def0, pline);
+	kclass_t *ct0 = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &Def0, trace);
 
 	static KDEFINE_CLASS Def1 = {
 		.structname = "Log"/*structname*/,
@@ -375,7 +375,7 @@ static kbool_t logpool_initPackage(CTX, kKonohaSpace *ks, int argc, const char**
 		.free = Log_free,
 		.p    = Log_p,
 	};
-	kclass_t *ct1 = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &Def1, pline);
+	kclass_t *ct1 = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &Def1, trace);
 
 	static KDEFINE_CLASS Def2 = {
 		.structname = "PoolPlugin",
@@ -383,7 +383,7 @@ static kbool_t logpool_initPackage(CTX, kKonohaSpace *ks, int argc, const char**
 		.init = RawPtr_init,
 		.free = RawPtr_free,
 	};
-	kclass_t *ct2 = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &Def2, pline);
+	kclass_t *ct2 = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &Def2, trace);
 #define TY_Plugin ct2->cid
 	static KDEFINE_CLASS Def3 = {
 		.structname = "",
@@ -414,7 +414,7 @@ static kbool_t logpool_initPackage(CTX, kKonohaSpace *ks, int argc, const char**
 
 	for (i = 0; i < 8; i++) {
 		Def3.structname = names[i];
-		tbls[i] = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &Def3, pline);
+		tbls[i] = Konoha_addClassDef(ks->packid, ks->packdom, NULL, &Def3, trace);
 	}
 
 	int FN_x = FN_("x");
@@ -442,17 +442,17 @@ static kbool_t logpool_initPackage(CTX, kKonohaSpace *ks, int argc, const char**
 	return true;
 }
 
-static kbool_t logpool_setupPackage(CTX, kKonohaSpace *ks, kline_t pline)
+static kbool_t logpool_setupPackage(CTX, kKonohaSpace *ks, kline_t trace)
 {
 	return true;
 }
 
-static kbool_t logpool_initKonohaSpace(CTX,  kKonohaSpace *ks, kline_t pline)
+static kbool_t logpool_initKonohaSpace(CTX,  kKonohaSpace *ks, kline_t trace)
 {
 	return true;
 }
 
-static kbool_t logpool_setupKonohaSpace(CTX, kKonohaSpace *ks, kline_t pline)
+static kbool_t logpool_setupKonohaSpace(CTX, kKonohaSpace *ks, kline_t trace)
 {
 	return true;
 }

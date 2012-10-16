@@ -24,6 +24,7 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
+#include <minikonoha/float.h>
 #include <gmp.h>
 
 #ifdef __cplusplus
@@ -32,8 +33,19 @@ extern "C" {
 
 typedef struct _kMpz {
 	KonohaObjectHeader h;
-	mpz_t mpz; // mpz_t is pointer
+	mpz_t mpz; // mpz_t is pointer; you don't need put '*'.
 } kMpz;
+
+typedef struct _kMpf {
+	KonohaObjectHeader h;
+	mpf_t mpf; // mpf_t is pointer
+} kMpf;
+
+static void THROW_ZeroDividedException(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KMakeTrace(trace, sfp);
+	KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), NULL, trace);
+}
 
 /* ------------------------------------------------------------------------ */
 /* [API methods] */
@@ -172,7 +184,8 @@ static KMETHOD Mpz_opADD_int(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *lhs = (kMpz*)sfp[0].asObject;
 	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
-	mpz_add_ui(ret->mpz, lhs->mpz, sfp[1].intValue);
+	mpz_set_si(ret->mpz, sfp[1].intValue);
+	mpz_add(ret->mpz, ret->mpz, lhs->mpz);
 	KReturn(ret);
 }
 
@@ -180,7 +193,8 @@ static KMETHOD Int_opADD_mpz(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *rhs = (kMpz*)sfp[1].asObject;
 	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
-	mpz_add_ui(ret->mpz, rhs->mpz, sfp[0].intValue);
+	mpz_set_si(ret->mpz, sfp[0].intValue);
+	mpz_add(ret->mpz, ret->mpz, rhs->mpz);
 	KReturn(ret);
 }
 
@@ -197,7 +211,8 @@ static KMETHOD Mpz_opSUB_int(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *lhs = (kMpz*)sfp[0].asObject;
 	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
-	mpz_sub_ui(ret->mpz, lhs->mpz, sfp[1].intValue);
+	mpz_set_si(ret->mpz, sfp[1].intValue);
+	mpz_sub(ret->mpz, lhs->mpz, ret->mpz);
 	KReturn(ret);
 }
 
@@ -223,7 +238,7 @@ static KMETHOD Mpz_opMUL_int(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *lhs = (kMpz*)sfp[0].asObject;
 	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
-	mpz_mul_ui(ret->mpz, lhs->mpz, sfp[1].intValue);
+	mpz_mul_si(ret->mpz, lhs->mpz, sfp[1].intValue);
 	KReturn(ret);
 }
 
@@ -231,7 +246,7 @@ static KMETHOD Int_opMUL_mpz(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *rhs = (kMpz*)sfp[1].asObject;
 	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
-	mpz_mul_ui(ret->mpz, rhs->mpz, sfp[0].intValue);
+	mpz_mul_si(ret->mpz, rhs->mpz, sfp[0].intValue);
 	KReturn(ret);
 }
 
@@ -248,7 +263,8 @@ static KMETHOD Mpz_opMOD_int(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMpz *lhs = (kMpz*)sfp[0].asObject;
 	kMpz *ret = (kMpz*)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
-	mpz_mod_ui(ret->mpz, lhs->mpz, sfp[1].intValue);
+	mpz_set_si(ret->mpz, sfp[1].intValue);
+	mpz_mod(ret->mpz, lhs->mpz, ret->mpz);
 	KReturn(ret);
 }
 
@@ -259,11 +275,6 @@ static KMETHOD Int_opMOD_mpz(KonohaContext *kctx, KonohaStack *sfp)
 	mpz_set_si(ret->mpz, sfp[0].intValue);
 	mpz_mod(ret->mpz, ret->mpz, rhs->mpz);
 	KReturn(ret);
-}
-
-static void THROW_ZeroDividedException(KonohaContext *kctx, KonohaStack *sfp)
-{
-	KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
 }
 
 static KMETHOD Mpz_opDIV(KonohaContext *kctx, KonohaStack *sfp)
@@ -287,7 +298,8 @@ static KMETHOD Mpz_opDIV_int(KonohaContext *kctx, KonohaStack *sfp)
 	if(unlikely(rhs == 0)){
 		THROW_ZeroDividedException(kctx, sfp);
 	}else{
-		mpz_tdiv_q_ui(ret->mpz, lhs->mpz, rhs);
+		mpz_set_si(ret->mpz, rhs);
+		mpz_tdiv_q(ret->mpz, lhs->mpz, ret->mpz);
 	}
 	KReturn(ret);
 }
@@ -441,6 +453,479 @@ static KMETHOD Int_opNEQ_mpz(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(kInt_cmp_mpz(kctx, sfp) != 0);
 }
 
+/* ------------------------------------------------------------------------ */
+/* [API methods] */
+/* Mpf class  */
+
+static void Mpf_init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kMpf *mpf = (kMpf *)o;
+	mpf_init(mpf->mpf);
+}
+
+static void Mpf_free(KonohaContext *kctx, kObject *o)
+{
+	kMpf *mpf = (kMpf *)o;
+	mpf_clear(mpf->mpf);
+}
+
+static void Mpf_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+{
+	/* This function is called when serializing the object. */
+	kMpf *p = (kMpf*)v[pos].asObject;
+	char buf[1024];
+	gmp_snprintf(buf, 1024, "%.Fg", p->mpf);
+	KLIB Kwb_printf(kctx, wb, "%s", buf);
+}
+
+static KMETHOD Mpf_new(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturn(sfp[0].asObject);
+}
+
+static KMETHOD Mpf_new_mpf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *self = (kMpf*)sfp[0].asObject;
+	kMpf *src  = (kMpf*)sfp[1].asObject;
+	mpf_set(self->mpf, src->mpf);
+	KReturn(self);
+}
+
+static KMETHOD Mpf_new_int(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *self = (kMpf*)sfp[0].asObject;
+	mpf_set_si(self->mpf, sfp[1].intValue);
+	KReturn(self);
+}
+
+static KMETHOD Mpf_new_mpz(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *self = (kMpf*)sfp[0].asObject;
+	kMpz *src  = (kMpz*)sfp[1].asObject;
+	mpf_set_z(self->mpf, src->mpz);
+	KReturn(self);
+}
+
+static KMETHOD Mpf_new_float(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *self = (kMpf*)sfp[0].asObject;
+	mpf_set_d(self->mpf, sfp[1].floatValue);
+	KReturn(self);
+}
+
+static KMETHOD Mpf_new_str(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *self = (kMpf*)sfp[0].asObject;
+	const char *src  = S_text(sfp[1].asString);
+	mpf_set_str(self->mpf, src, 10);
+	KReturn(self);
+}
+
+static KMETHOD Mpf_getprec(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *self = (kMpf*)sfp[0].asObject;
+	KReturnUnboxValue(mpf_get_prec(self->mpf));
+}
+
+static KMETHOD Mpf_setprec(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *self = (kMpf*)sfp[0].asObject;
+	mpf_set_prec(self->mpf, sfp[1].intValue);
+}
+
+static KMETHOD Mpf_toString(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *self = (kMpf*)sfp[0].asObject;
+	char buf[1024]; // FIXME: find better way to get length of converted string.
+	gmp_snprintf(buf, 1024, "%.Fg", self->mpf);
+	KReturn(KLIB new_kString(kctx, OnStack, buf, strlen(buf), StringPolicy_ASCII));
+}
+
+static KMETHOD Mpf_toInt(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *self = (kMpf*)sfp[0].asObject;
+	KReturnUnboxValue(mpf_get_si(self->mpf));
+}
+
+static KMETHOD Mpf_toFloat(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *self = (kMpf*)sfp[0].asObject;
+	KReturnUnboxValue(mpf_get_d(self->mpf));
+}
+
+static KMETHOD Int_toMpf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
+	mpf_set_si(ret->mpf, sfp[0].intValue);
+	KReturn(ret);
+}
+
+static KMETHOD Float_toMpf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
+	mpf_set_d(ret->mpf, sfp[0].floatValue);
+	KReturn(ret);
+}
+
+static KMETHOD String_toMpf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
+	const char *src  = S_text(sfp[0].asString);
+	mpf_set_str(ret->mpf, src, 10);
+	KReturn(ret);
+}
+
+static KMETHOD Mpz_toMpf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpz *self = (kMpz*)sfp[0].asObject;
+	kMpf *ret  = (kMpf*)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
+	mpf_set_z(ret->mpf, self->mpz);
+	KReturn(ret);
+}
+
+static KMETHOD Mpf_toMpz(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *self = (kMpf*)sfp[0].asObject;
+	kMpz *ret  = (kMpz*)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
+	mpz_set_f(ret->mpz, self->mpf);
+	KReturn(ret);
+}
+
+static KMETHOD Mpf_power(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *self = (kMpf*)sfp[0].asObject;
+	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
+	mpf_pow_ui(ret->mpf, self->mpf, sfp[1].intValue);
+	KReturn(ret);
+}
+
+static KMETHOD Mpf_opMINUS(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *lhs = (kMpf*)sfp[0].asObject;
+	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
+	mpf_neg(ret->mpf, lhs->mpf);
+	KReturn(ret);
+}
+
+static KMETHOD Mpf_sqrt(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *self = (kMpf*)sfp[0].asObject;
+	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
+	mpf_sqrt(ret->mpf, self->mpf);
+	KReturn(ret);
+}
+
+static KMETHOD Mpf_abs(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *lhs = (kMpf*)sfp[0].asObject;
+	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
+	mpf_abs(ret->mpf, lhs->mpf);
+	KReturn(ret);
+}
+
+static KMETHOD Mpf_opADD(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *lhs = (kMpf*)sfp[0].asObject;
+	kMpf *rhs = (kMpf*)sfp[1].asObject;
+	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	mpf_add(ret->mpf, lhs->mpf, rhs->mpf);
+	KReturn(ret);
+}
+
+static KMETHOD Mpf_opADD_int(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *lhs = (kMpf*)sfp[0].asObject;
+	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	mpf_set_si(ret->mpf, sfp[1].intValue);
+	mpf_add(ret->mpf, lhs->mpf, ret->mpf);
+	KReturn(ret);
+}
+
+static KMETHOD Int_opADD_mpf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *rhs = (kMpf*)sfp[1].asObject;
+	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
+	mpf_set_si(ret->mpf, sfp[0].intValue);
+	mpf_add(ret->mpf, rhs->mpf, ret->mpf);
+	KReturn(ret);
+}
+
+static KMETHOD Mpf_opSUB(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *lhs = (kMpf*)sfp[0].asObject;
+	kMpf *rhs = (kMpf*)sfp[1].asObject;
+	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	mpf_sub(ret->mpf, lhs->mpf, rhs->mpf);
+	KReturn(ret);
+}
+
+static KMETHOD Mpf_opSUB_int(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *lhs = (kMpf*)sfp[0].asObject;
+	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	mpf_set_si(ret->mpf, sfp[1].intValue);
+	mpf_sub(ret->mpf, lhs->mpf, ret->mpf);
+	KReturn(ret);
+}
+
+static KMETHOD Int_opSUB_mpf(KonohaContext *kctx, KonohaStack *sfp)
+{	
+	kMpf *rhs = (kMpf*)sfp[1].asObject;
+	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
+	mpf_set_si(ret->mpf, sfp[0].intValue);
+	mpf_sub(ret->mpf, ret->mpf, rhs->mpf);
+	KReturn(ret);
+}
+
+static KMETHOD Mpf_opMUL(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *lhs = (kMpf*)sfp[0].asObject;
+	kMpf *rhs = (kMpf*)sfp[1].asObject;
+	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	mpf_mul(ret->mpf, lhs->mpf, rhs->mpf);
+	KReturn(ret);
+}
+
+static KMETHOD Mpf_opMUL_int(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *lhs = (kMpf*)sfp[0].asObject;
+	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	mpf_set_si(ret->mpf, sfp[1].intValue);
+	mpf_mul(ret->mpf, lhs->mpf, ret->mpf);
+	KReturn(ret);
+}
+
+static KMETHOD Int_opMUL_mpf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *rhs = (kMpf*)sfp[1].asObject;
+	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
+	mpf_set_si(ret->mpf, sfp[0].intValue);
+	mpf_mul(ret->mpf, rhs->mpf, ret->mpf);
+	KReturn(ret);
+}
+
+static KMETHOD Mpf_opDIV(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *lhs = (kMpf*)sfp[0].asObject;
+	kMpf *rhs = (kMpf*)sfp[1].asObject;
+	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	if(unlikely(mpf_sgn(rhs->mpf) == 0)){
+		THROW_ZeroDividedException(kctx, sfp);
+	}else{
+		mpf_div(ret->mpf, lhs->mpf, rhs->mpf);
+	}
+	KReturn(ret);
+}
+
+static KMETHOD Mpf_opDIV_int(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf  *lhs = (kMpf*)sfp[0].asObject;
+	kint_t rhs = sfp[1].intValue;
+	kMpf  *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, O_ct(lhs), 0);
+	if(unlikely(rhs == 0)){
+		THROW_ZeroDividedException(kctx, sfp);
+	}else{
+		mpf_set_si(ret->mpf, rhs);
+		mpf_div(ret->mpf, lhs->mpf, ret->mpf);
+	}
+	KReturn(ret);
+}
+
+static KMETHOD Int_opDIV_mpf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *rhs = (kMpf*)sfp[1].asObject;
+	kMpf *ret = (kMpf*)KLIB new_kObject(kctx, OnStack, O_ct(rhs), 0);
+	if(unlikely(mpf_sgn(rhs->mpf) == 0)){
+		THROW_ZeroDividedException(kctx, sfp);
+	}else{
+		mpf_set_si(ret->mpf, sfp[0].intValue);
+		mpf_div(ret->mpf, ret->mpf, rhs->mpf);
+	}
+	KReturn(ret);
+}
+
+static int kMpf_cmp(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *lhs = (kMpf*)sfp[0].asObject;
+	kMpf *rhs = (kMpf*)sfp[1].asObject;
+	return mpf_cmp(lhs->mpf, rhs->mpf);
+}
+
+static int kMpf_cmp_int(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *lhs = (kMpf*)sfp[0].asObject;
+	return mpf_cmp_si(lhs->mpf, sfp[1].intValue);
+}
+
+static int kInt_cmp_mpf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *rhs = (kMpf*)sfp[1].asObject;
+	return -mpf_cmp_si(rhs->mpf, sfp[0].intValue);
+}
+
+static int kMpf_cmp_float(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *lhs = (kMpf*)sfp[0].asObject;
+	return mpf_cmp_d(lhs->mpf, sfp[1].floatValue);
+}
+
+static int kFloat_cmp_mpf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kMpf *rhs = (kMpf*)sfp[1].asObject;
+	return -mpf_cmp_d(rhs->mpf, sfp[0].floatValue);
+}
+
+static KMETHOD Mpf_opLT(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kMpf_cmp(kctx, sfp) < 0);
+}
+
+static KMETHOD Mpf_opGT(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kMpf_cmp(kctx, sfp) > 0);
+}
+
+static KMETHOD Mpf_opEQ(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kMpf_cmp(kctx, sfp) == 0);
+}
+
+static KMETHOD Mpf_opLTEQ(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kMpf_cmp(kctx, sfp) <= 0);
+}
+
+static KMETHOD Mpf_opGTEQ(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kMpf_cmp(kctx, sfp) >= 0);
+}
+
+static KMETHOD Mpf_opNEQ(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kMpf_cmp(kctx, sfp) != 0);
+}
+
+static KMETHOD Mpf_opLT_int(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kMpf_cmp_int(kctx, sfp) < 0);
+}
+
+static KMETHOD Mpf_opGT_int(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kMpf_cmp_int(kctx, sfp) > 0);
+}
+
+static KMETHOD Mpf_opEQ_int(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kMpf_cmp_int(kctx, sfp) == 0);
+}
+
+static KMETHOD Mpf_opLTEQ_int(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kMpf_cmp_int(kctx, sfp) <= 0);
+}
+
+static KMETHOD Mpf_opGTEQ_int(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kMpf_cmp_int(kctx, sfp) >= 0);
+}
+
+static KMETHOD Mpf_opNEQ_int(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kMpf_cmp_int(kctx, sfp) != 0);
+}
+
+static KMETHOD Int_opLT_mpf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kInt_cmp_mpf(kctx, sfp) < 0);
+}
+
+static KMETHOD Int_opGT_mpf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kInt_cmp_mpf(kctx, sfp) > 0);
+}
+
+static KMETHOD Int_opEQ_mpf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kInt_cmp_mpf(kctx, sfp) == 0);
+}
+
+static KMETHOD Int_opLTEQ_mpf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kInt_cmp_mpf(kctx, sfp) <= 0);
+}
+
+static KMETHOD Int_opGTEQ_mpf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kInt_cmp_mpf(kctx, sfp) >= 0);
+}
+
+static KMETHOD Int_opNEQ_mpf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kInt_cmp_mpf(kctx, sfp) != 0);
+}
+
+static KMETHOD Mpf_opLT_float(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kMpf_cmp_float(kctx, sfp) < 0);
+}
+
+static KMETHOD Mpf_opGT_float(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kMpf_cmp_float(kctx, sfp) > 0);
+}
+
+static KMETHOD Mpf_opEQ_float(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kMpf_cmp_float(kctx, sfp) == 0);
+}
+
+static KMETHOD Mpf_opLTEQ_float(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kMpf_cmp_float(kctx, sfp) <= 0);
+}
+
+static KMETHOD Mpf_opGTEQ_float(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kMpf_cmp_float(kctx, sfp) >= 0);
+}
+
+static KMETHOD Mpf_opNEQ_float(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kMpf_cmp_float(kctx, sfp) != 0);
+}
+
+static KMETHOD Float_opLT_mpf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kFloat_cmp_mpf(kctx, sfp) < 0);
+}
+
+static KMETHOD Float_opGT_mpf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kFloat_cmp_mpf(kctx, sfp) > 0);
+}
+
+static KMETHOD Float_opEQ_mpf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kFloat_cmp_mpf(kctx, sfp) == 0);
+}
+
+static KMETHOD Float_opLTEQ_mpf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kFloat_cmp_mpf(kctx, sfp) <= 0);
+}
+
+static KMETHOD Float_opGTEQ_mpf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kFloat_cmp_mpf(kctx, sfp) >= 0);
+}
+
+static KMETHOD Float_opNEQ_mpf(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(kFloat_cmp_mpf(kctx, sfp) != 0);
+}
+
+
 
 /* ------------------------------------------------------------------------ */
 
@@ -451,21 +936,32 @@ static KMETHOD Int_opNEQ_mpz(KonohaContext *kctx, KonohaStack *sfp)
 #define _F(F)   (intptr_t)(F)
 
 #define TY_Mpz     cMpz->typeId
+#define TY_Mpf     cMpf->typeId
 
 
-static kbool_t gmp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char **args, kfileline_t pline)
+static kbool_t gmp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char **args, KTraceInfo *trace)
 {
+	KRequirePackage("konoha.float", trace);
+
 	static KDEFINE_CLASS MpzDef = {0};
 	SETSTRUCTNAME(MpzDef, Mpz);
 	MpzDef.cflag = kClass_Final;
 	MpzDef.init  = Mpz_init;
 	MpzDef.free  = Mpz_free;
 	MpzDef.p     = Mpz_p;
+	static KDEFINE_CLASS MpfDef = {0};
+	SETSTRUCTNAME(MpfDef, Mpf);
+	MpfDef.cflag = kClass_Final;
+	MpfDef.init  = Mpf_init;
+	MpfDef.free  = Mpf_free;
+	MpfDef.p     = Mpf_p;
 
-	KonohaClass *cMpz = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MpzDef, pline);
-
+	KonohaClass *cMpz = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MpzDef, trace);
+	KonohaClass *cMpf = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MpfDef, trace);
+	
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
+		// Mpz
 		_Public|_Const,     _F(Mpz_new),        TY_Mpz,	    TY_Mpz, MN_("new"), 0,
 		_Public|_Const,     _F(Mpz_new_mpz),    TY_Mpz,     TY_Mpz, MN_("new"), 1, TY_Mpz, FN_x,
 		_Public|_Const,     _F(Mpz_new_int),    TY_Mpz,     TY_Mpz, MN_("new"), 1, TY_int, FN_x,
@@ -515,6 +1011,67 @@ static kbool_t gmp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		_Public|_Im|_Const, _F(Int_opLTEQ_mpz), TY_boolean, TY_int, MN_("<="),  1, TY_Mpz, FN_x,
 		_Public|_Im|_Const, _F(Int_opGTEQ_mpz), TY_boolean, TY_int, MN_(">="),  1, TY_Mpz, FN_x,
 		_Public|_Im|_Const, _F(Int_opNEQ_mpz),  TY_boolean, TY_int, MN_("!="),  1, TY_Mpz, FN_x,
+		// Mpf
+		_Public|_Const,     _F(Mpf_new),        TY_Mpf,	    TY_Mpf, MN_("new"), 0,
+		_Public|_Const,     _F(Mpf_new_mpf),    TY_Mpf,     TY_Mpf, MN_("new"), 1, TY_Mpf, FN_x,
+		_Public|_Const,     _F(Mpf_new_int),    TY_Mpf,     TY_Mpf, MN_("new"), 1, TY_int, FN_x,
+		_Public|_Const,     _F(Mpf_new_mpz),    TY_Mpf,     TY_Mpf, MN_("new"), 1, TY_Mpz, FN_x,
+		_Public|_Const,     _F(Mpf_new_str),    TY_Mpf,     TY_Mpf, MN_("new"), 1, TY_String, FN_x,
+		_Public|_Im,        _F(Mpf_getprec),    TY_Mpf,     TY_int, MN_("getprec"), 0,
+		_Public|            _F(Mpf_setprec),    TY_Mpf,     TY_void,MN_("setprec"), 1, TY_int, FN_x,
+		_Public|_Im|_Const|_Coercion, _F(Mpf_toString),   TY_String,  TY_Mpf, MN_to(TY_String),   0,
+		_Public|_Im|_Const|_Coercion, _F(Mpf_toInt),      TY_int,     TY_Mpf, MN_to(TY_int),   0,
+		_Public|_Im|_Const|_Coercion, _F(Mpf_toFloat),    TY_float,   TY_Mpf, MN_to(TY_float), 0,
+		_Public|_Im|_Const|_Coercion, _F(Int_toMpf),      TY_Mpf,     TY_int, MN_to(TY_Mpf),   0,
+		_Public|_Im|_Const|_Coercion, _F(Float_toMpf),    TY_Mpf,     TY_float, MN_to(TY_Mpf),   0,
+		_Public|_Im|_Const, _F(Mpz_toMpf),      TY_Mpf,     TY_Mpz, MN_to(TY_Mpf),   0,
+		_Public|_Im|_Const, _F(Mpf_toMpz),      TY_Mpz,     TY_Mpf, MN_to(TY_Mpz),   0,
+		_Public|_Im|_Const, _F(String_toMpf),   TY_Mpf,     TY_String, MN_to(TY_Mpf),   0,
+		_Public|_Im|_Const, _F(Mpf_power),      TY_Mpf,     TY_Mpf, MN_("power"), 1, TY_int, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opMINUS),    TY_Mpf,     TY_Mpf, MN_("-"),   0,
+		_Public|_Im|_Const, _F(Mpf_abs),        TY_Mpf,     TY_Mpf, MN_("abs"), 0,
+		_Public|_Im|_Const, _F(Mpf_sqrt),       TY_Mpf,     TY_Mpf, MN_("sqrt"), 0,
+		_Public|_Im|_Const, _F(Mpf_opADD),      TY_Mpf,     TY_Mpf, MN_("+"),   1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opADD_int),  TY_Mpf,     TY_Mpf, MN_("+"),   1, TY_int, FN_x,
+		_Public|_Im|_Const, _F(Int_opADD_mpf),  TY_Mpf,     TY_int, MN_("+"),   1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opSUB),      TY_Mpf,     TY_Mpf, MN_("-"),   1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opSUB_int),  TY_Mpf,     TY_Mpf, MN_("-"),   1, TY_int, FN_x,
+		_Public|_Im|_Const, _F(Int_opSUB_mpf),  TY_Mpf,     TY_int, MN_("-"),   1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opMUL),      TY_Mpf,     TY_Mpf, MN_("*"),   1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opMUL_int),  TY_Mpf,     TY_Mpf, MN_("*"),   1, TY_int, FN_x,
+		_Public|_Im|_Const, _F(Int_opMUL_mpf),  TY_Mpf,     TY_int, MN_("*"),   1, TY_Mpf, FN_x,
+		_Public|_Im       , _F(Mpf_opDIV),      TY_Mpf,     TY_Mpf, MN_("/"),   1, TY_Mpf, FN_x,
+		_Public|_Im       , _F(Mpf_opDIV_int),  TY_Mpf,     TY_Mpf, MN_("/"),   1, TY_int, FN_x,
+		_Public|_Im       , _F(Int_opDIV_mpf),  TY_Mpf,     TY_int, MN_("/"),   1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opLT),       TY_boolean, TY_Mpf, MN_("<"),   1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opGT),       TY_boolean, TY_Mpf, MN_(">"),   1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opEQ),       TY_boolean, TY_Mpf, MN_("=="),  1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opLTEQ),     TY_boolean, TY_Mpf, MN_("<="),  1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opGTEQ),     TY_boolean, TY_Mpf, MN_(">="),  1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opNEQ),      TY_boolean, TY_Mpf, MN_("!="),  1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opLT_int),   TY_boolean, TY_Mpf, MN_("<"),   1, TY_int, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opGT_int),   TY_boolean, TY_Mpf, MN_(">"),   1, TY_int, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opEQ_int),   TY_boolean, TY_Mpf, MN_("=="),  1, TY_int, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opLTEQ_int), TY_boolean, TY_Mpf, MN_("<="),  1, TY_int, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opGTEQ_int), TY_boolean, TY_Mpf, MN_(">="),  1, TY_int, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opNEQ_int),  TY_boolean, TY_Mpf, MN_("!="),  1, TY_int, FN_x,
+		_Public|_Im|_Const, _F(Int_opLT_mpf),   TY_boolean, TY_int, MN_("<"),   1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Int_opGT_mpf),   TY_boolean, TY_int, MN_(">"),   1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Int_opEQ_mpf),   TY_boolean, TY_int, MN_("=="),  1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Int_opLTEQ_mpf), TY_boolean, TY_int, MN_("<="),  1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Int_opGTEQ_mpf), TY_boolean, TY_int, MN_(">="),  1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Int_opNEQ_mpf),  TY_boolean, TY_int, MN_("!="),  1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opGT_float),   TY_boolean, TY_Mpf, MN_(">"),   1, TY_float, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opEQ_float),   TY_boolean, TY_Mpf, MN_("=="),  1, TY_float, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opLTEQ_float), TY_boolean, TY_Mpf, MN_("<="),  1, TY_float, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opGTEQ_float), TY_boolean, TY_Mpf, MN_(">="),  1, TY_float, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opNEQ_float),  TY_boolean, TY_Mpf, MN_("!="),  1, TY_float, FN_x,
+		_Public|_Im|_Const, _F(Float_opLT_mpf),   TY_boolean, TY_float, MN_("<"),   1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Float_opGT_mpf),   TY_boolean, TY_float, MN_(">"),   1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Float_opEQ_mpf),   TY_boolean, TY_float, MN_("=="),  1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Float_opLTEQ_mpf), TY_boolean, TY_float, MN_("<="),  1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Float_opGTEQ_mpf), TY_boolean, TY_float, MN_(">="),  1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Float_opNEQ_mpf),  TY_boolean, TY_float, MN_("!="),  1, TY_Mpf, FN_x,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
@@ -522,17 +1079,18 @@ static kbool_t gmp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	return true;
 }
 
-static kbool_t gmp_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t gmp_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t gmp_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t gmp_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
+	KImportPackage(ns, "konoha.float", trace);
 	return true;
 }
 
-static kbool_t gmp_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t gmp_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
@@ -542,7 +1100,7 @@ static kbool_t gmp_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kN
 KDEFINE_PACKAGE* gmp_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "gmp", "1.0");
+	KSetPackageName(d, "gmp", "1.0");
 	d.initPackage    = gmp_initPackage;
 	d.setupPackage   = gmp_setupPackage;
 	d.initNameSpace  = gmp_initNameSpace;

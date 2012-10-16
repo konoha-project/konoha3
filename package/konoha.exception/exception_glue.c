@@ -205,14 +205,14 @@ static void kModuleException_free(KonohaContext *kctx, KonohaModule *baseh)
 	KFree(baseh, sizeof(KonohaExceptionModule));
 }
 
-static kbool_t exception_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t exception_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KonohaExceptionModule *mod = (KonohaExceptionModule*)KCalloc_UNTRACE(sizeof(KonohaExceptionModule), 1);
 	mod->h.name     = "exception";
 	mod->h.setup    = kModuleException_setup;
 	mod->h.reftrace = kModuleException_reftrace;
 	mod->h.free     = kModuleException_free;
-	KLIB KonohaRuntime_setModule(kctx, MOD_exception, &mod->h, pline);
+	KLIB KonohaRuntime_setModule(kctx, MOD_exception, &mod->h, trace);
 	KDEFINE_CLASS defException = {
 		STRUCTNAME(Exception),
 		.cflag = CFLAG_Exception,
@@ -220,7 +220,7 @@ static kbool_t exception_initPackage(KonohaContext *kctx, kNameSpace *ns, int ar
 		.reftrace = Exception_reftrace,
 		.p     = Exception_p,
 	};
-	mod->cException = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defException, pline);
+	mod->cException = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defException, trace);
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Exception_new), TY_Exception,  TY_Exception, MN_("new"), 0, _Public|_Hidden, _F(System_throw), TY_void,  TY_System, MN_("throw"), 1, TY_Exception, FN_("e"),
@@ -231,7 +231,7 @@ static kbool_t exception_initPackage(KonohaContext *kctx, kNameSpace *ns, int ar
 	return true;
 }
 
-static kbool_t exception_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t exception_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -330,7 +330,7 @@ static KMETHOD Statement_finally(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
-static kbool_t exception_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t exception_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("try"), Statement_(try), .rule = "\"try\" $Block [ \"catch\" \"(\" $Type $Symbol \")\" catch: $Block ] [ \"finally\" finally: $Block ]",},
@@ -342,7 +342,7 @@ static kbool_t exception_initNameSpace(KonohaContext *kctx, kNameSpace *packageN
 	return true;
 }
 
-static kbool_t exception_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t exception_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

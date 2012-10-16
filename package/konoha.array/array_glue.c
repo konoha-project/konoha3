@@ -36,7 +36,8 @@ extern "C"{
 static KMETHOD Array_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].callerFileLine);
+	size_t n = (size_t)sfp[1].intValue;
+	KCheckIndex(n, kArray_size(a));
 	if(kArray_isUnboxData(a)) {
 		KReturnUnboxValue(a->unboxItems[n]);
 	}
@@ -49,7 +50,8 @@ static KMETHOD Array_get(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].callerFileLine);
+	size_t n = (size_t)sfp[1].intValue;
+	KCheckIndex(n, kArray_size(a));
 	if(kArray_isUnboxData(a)) {
 		a->unboxItems[n] = sfp[2].unboxValue;
 	}
@@ -369,7 +371,8 @@ static KMETHOD Array_indexOf(KonohaContext *kctx, KonohaStack *sfp)
 		//TODO:Need to implement Object compareTo.
 		kObject *o = sfp[1].asObject;
 		for(i = 0; i < kArray_size(a); i++) {
-			KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplemented"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
+			KMakeTrace(trace, sfp);
+			KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplemented"), NULL, trace);
 			if(O_ct(o)->compareObject(a->ObjectItems[i], o) == 0) {
 				res = i; break;
 			}
@@ -395,7 +398,8 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 		//TODO: Need to implement Object compareTo;
 		kObject *o = sfp[1].asObject;
 		for(i = kArray_size(a)- 1; i != 0; i--) {
-			KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplemented"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
+			KMakeTrace(trace, sfp);
+			KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplemented"), NULL, trace);
 			if(O_ct(o)->compareObject(a->ObjectItems[i], o) == 0) {
 				break;
 			}
@@ -488,7 +492,7 @@ static KMETHOD Array_newList(KonohaContext *kctx, KonohaStack *sfp)
 #define _Im       kMethod_Immutable
 #define _F(F)     (intptr_t)(F)
 
-static kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
 		{"Array", VirtualType_KonohaClass, (uintptr_t)CT_(TY_Array)},
@@ -534,7 +538,7 @@ static kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	return true;
 }
 
-static kbool_t array_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t array_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -626,7 +630,7 @@ static KMETHOD Expression_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static kbool_t array_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t array_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ KW_BracketGroup, SYNFLAG_ExprPostfixOp2, NULL, Precedence_CStyleCALL, 0, NULL, Expression_Bracket, NULL, NULL, TypeCheck_Bracket, },
@@ -636,7 +640,7 @@ static kbool_t array_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, k
 	return true;
 }
 
-static kbool_t array_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t array_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
@@ -644,7 +648,7 @@ static kbool_t array_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 KDEFINE_PACKAGE* array_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "array", "1.0");
+	KSetPackageName(d, "array", "1.0");
 	d.initPackage    = array_initPackage;
 	d.setupPackage   = array_setupPackage;
 	d.initNameSpace  = array_initNameSpace;

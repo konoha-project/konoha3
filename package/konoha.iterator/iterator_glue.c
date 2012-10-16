@@ -165,14 +165,14 @@ static void kmoditerator_free(KonohaContext *kctx, struct KonohaModule *baseh) {
 #define _Public   kMethod_Public
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KonohaIteratorModule *base = (KonohaIteratorModule*)KCalloc_UNTRACE(sizeof(KonohaIteratorModule), 1);
 	base->h.name     = "iterator";
 	base->h.setup    = kmoditerator_setup;
 	base->h.reftrace = kmoditerator_reftrace;
 	base->h.free     = kmoditerator_free;
-	KLIB KonohaRuntime_setModule(kctx, MOD_iterator, &base->h, pline);
+	KLIB KonohaRuntime_setModule(kctx, MOD_iterator, &base->h, trace);
 
 	kparamtype_t IteratorParam = {0};
 	IteratorParam.ty = TY_Object;
@@ -184,7 +184,7 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 	defIterator.cparamsize  = 1;
 	defIterator.cParamItems = &IteratorParam;
 
-	base->cIterator = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defIterator, pline);
+	base->cIterator = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defIterator, trace);
 	base->cStringIterator = CT_p0(kctx, base->cIterator, TY_String);
 	base->cGenericIterator = CT_p0(kctx, base->cIterator, TY_0);
 	KDEFINE_METHOD MethodData[] = {
@@ -198,17 +198,17 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 	return true;
 }
 
-static kbool_t iterator_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t iterator_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t iterator_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t iterator_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t iterator_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t iterator_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
@@ -216,7 +216,7 @@ static kbool_t iterator_setupNameSpace(KonohaContext *kctx, kNameSpace *packageN
 KDEFINE_PACKAGE* iterator_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "iterator", "1.0");
+	KSetPackageName(d, "iterator", "1.0");
 	d.initPackage    = iterator_initPackage;
 	d.setupPackage   = iterator_setupPackage;
 	d.initNameSpace  = iterator_initNameSpace;

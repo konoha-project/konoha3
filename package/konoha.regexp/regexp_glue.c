@@ -655,14 +655,14 @@ static KMETHOD RegExp_test(KonohaContext *kctx, KonohaStack *sfp)
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t regexp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t regexp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	kregexpshare_t *base = (kregexpshare_t*)KCalloc_UNTRACE(sizeof(kregexpshare_t), 1);
 	base->h.name     = "regexp";
 	base->h.setup    = kregexpshare_setup;
 	base->h.reftrace = kregexpshare_reftrace;
 	base->h.free     = kregexpshare_free;
-	KLIB KonohaRuntime_setModule(kctx, MOD_REGEXP, &base->h, pline);
+	KLIB KonohaRuntime_setModule(kctx, MOD_REGEXP, &base->h, trace);
 
 	KDEFINE_CLASS RegExpDef = {
 		STRUCTNAME(RegExp),
@@ -671,7 +671,7 @@ static kbool_t regexp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		.free = RegExp_free,
 		.p    = RegExp_p,
 	};
-	base->cRegExp = KLIB kNameSpace_defineClass(kctx, ns, NULL, &RegExpDef, pline);
+	base->cRegExp = KLIB kNameSpace_defineClass(kctx, ns, NULL, &RegExpDef, trace);
 
 	ktype_t TY_StringArray0 = CT_StringArray0->typeId;
 	KDEFINE_METHOD MethodData[] = {
@@ -695,7 +695,7 @@ static kbool_t regexp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	return true;
 }
 
-static kbool_t regexp_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t regexp_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -736,7 +736,7 @@ static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 		prev = ch;
 	}
 	if(IS_NOTNULL(tk)) {
-		kreportf(ErrTag, tk->uline, "must close with /");
+		SUGAR kToken_printMessage(kctx, tk, ErrTag, "must close with %s", "/");
 	}
 	KReturnUnboxValue(pos-1);
 }
@@ -751,7 +751,7 @@ static KMETHOD TypeCheck_RegExp(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(SUGAR kExpr_setConstValue(kctx, expr, TY_RegExp, UPCAST(r)));
 }
 
-static kbool_t regexp_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t regexp_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("$RegExp"),  TypeCheck_(RegExp), },
@@ -763,7 +763,7 @@ static kbool_t regexp_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 	return true;
 }
 
-static kbool_t regexp_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t regexp_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }

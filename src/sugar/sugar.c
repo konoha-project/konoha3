@@ -253,14 +253,16 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 static KMETHOD NameSpace_loadScript(KonohaContext *kctx, KonohaStack *sfp)
 {
 	char pathbuf[256];
+	KMakeTrace(trace, sfp);
 	const char *path = PLATAPI formatTransparentPath(pathbuf, sizeof(pathbuf), FileId_t(sfp[K_RTNIDX].callerFileLine), S_text(sfp[1].asString));
-	KReturnUnboxValue(kNameSpace_loadScript(kctx, sfp[0].asNameSpace, path, sfp[K_RTNIDX].callerFileLine));
+	KReturnUnboxValue(kNameSpace_loadScript(kctx, sfp[0].asNameSpace, path, trace));
 }
 
 // boolean NameSpace.import(String pkgname);
 static KMETHOD NameSpace_importPackage(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KReturnUnboxValue(kNameSpace_importPackage(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), sfp[K_RTNIDX].callerFileLine));
+	KMakeTrace(trace, sfp);
+	KReturnUnboxValue(kNameSpace_importPackage(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), trace));
 }
 
 // boolean NameSpace.import(String pkgname, String symbol);
@@ -268,7 +270,8 @@ static KMETHOD NameSpace_importPackageSymbol(KonohaContext *kctx, KonohaStack *s
 {
 	kString *key = sfp[2].asString;
 	ksymbol_t keyword = ksymbolA(S_text(key), S_size(key), _NEWID);
-	KReturnUnboxValue(kNameSpace_importPackageSymbol(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), keyword, sfp[K_RTNIDX].callerFileLine));
+	KMakeTrace(trace, sfp);
+	KReturnUnboxValue(kNameSpace_importPackageSymbol(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), keyword, trace));
 }
 
 #define _Public kMethod_Public

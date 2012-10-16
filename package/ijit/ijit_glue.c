@@ -523,7 +523,7 @@ static KMETHOD Array_newN(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_getO(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].callerFileLine);
+	size_t n = KCheckIndex(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].callerFileLine);
 	KReturn(a->ObjectItems[n]);
 }
 // --------------------------------------------------------------------------
@@ -531,7 +531,7 @@ static KMETHOD Array_getO(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_setO(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].callerFileLine);
+	size_t n = KCheckIndex(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].callerFileLine);
 	KFieldSet(a, a->ObjectItems[n], sfp[2].asObject);
 	KReturnVoid();
 }
@@ -540,7 +540,7 @@ static KMETHOD Array_setO(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_erase(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *src = sfp[0].asArray;
-	size_t n = check_index(kctx, sfp[1].intValue, kArray_size(src), sfp[K_RTNIDX].callerFileLine);
+	size_t n = KCheckIndex(kctx, sfp[1].intValue, kArray_size(src), sfp[K_RTNIDX].callerFileLine);
 	size_t asize = kArray_size(src);
 	size_t i, j = 0;
 	kArray *dst = new_(Array, (asize-1));
@@ -702,14 +702,14 @@ static void _kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	END_LOCAL();
 }
 
-static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KRequirePackage("sugar", pline);
-	KRequirePackage("konoha.float", pline);
-	KRequirePackage("llvm", pline);
-	KRequirePackage("konoha.assign", pline);
-	KRequirePackage("konoha.null", pline);
-	KRequirePackage("konoha.string", pline);
+	KRequirePackage("sugar", trace);
+	KRequirePackage("konoha.float", trace);
+	KRequirePackage("llvm", trace);
+	KRequirePackage("konoha.assign", trace);
+	KRequirePackage("konoha.null", trace);
+	KRequirePackage("konoha.string", trace);
 	kmodjit_t *base  = (kmodjit_t*)KCalloc_UNTRACE(sizeof(kmodjit_t), 1);
 	base->h.name     = "ijit";
 	base->h.setup    = kmodjit_setup;
@@ -726,20 +726,20 @@ static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	static KDEFINE_CLASS PointerDef = {
 		STRUCTNAME(Pointer)
 	};
-	base->cPointer = KLIB kNameSpace_defineClass(kctx, ns, NULL, &PointerDef, pline);
+	base->cPointer = KLIB kNameSpace_defineClass(kctx, ns, NULL, &PointerDef, trace);
 
 	//FIXME
 	//KDEFINE_INT_CONST IntData[] = {
 	//	{"PTRSIZE", TY_int, sizeof(void*)},
 	//	{NULL},
 	//};
-	//KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
+	//KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), trace);
 
-	KLIB KonohaRuntime_setModule(kctx, MOD_jit, &base->h, pline);
+	KLIB KonohaRuntime_setModule(kctx, MOD_jit, &base->h, trace);
 	return true;
 }
 
-static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	/* Array[Expr] */
 	kparamtype_t P_ExprArray[] = {{TY_Expr}};
@@ -849,12 +849,12 @@ static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 	return true;
 }
 
-static kbool_t ijit_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t ijit_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t ijit_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t ijit_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
