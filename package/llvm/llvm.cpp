@@ -4602,16 +4602,16 @@ static void kmodllvm_free(KonohaContext *kctx, struct KonohaModule *baseh)
 #define _Im       kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char **args, kfileline_t pline)
+static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char **args, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.float", pline);
+	KRequirePackage("konoha.float", trace);
 	(void)argc;(void)args;
 	kmodllvm_t *base = (kmodllvm_t*)KCalloc_UNTRACE(sizeof(kmodllvm_t), 1);
 	base->h.name     = "llvm";
 	base->h.setup    = kmodllvm_setup;
 	base->h.reftrace = kmodllvm_reftrace;
 	base->h.free     = kmodllvm_free;
-	KLIB KonohaRuntime_setModule(kctx, MOD_llvm, &base->h, pline);
+	KLIB KonohaRuntime_setModule(kctx, MOD_llvm, &base->h, trace);
 
 #define DEFINE_CLASS_CPP(\
 	/*const char * */structname,\
@@ -4690,7 +4690,7 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 
 
 	static KDEFINE_CLASS ValueDef = DEFINE_CLASS_0("Value", 0, 0, 0);
-	base->cValue = KLIB kNameSpace_defineClass(kctx, ns, NULL, &ValueDef, pline);
+	base->cValue = KLIB kNameSpace_defineClass(kctx, ns, NULL, &ValueDef, trace);
 
 	static const char *TypeDefName[] = {
 		"Type",
@@ -4722,22 +4722,22 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		}
 	}
 	static KDEFINE_CLASS BasicBlockDef = DEFINE_CLASS_0("LLVMBasicBlock",0, 0, BasicBlock_compareTo);
-	CT_BasicBlock = KLIB kNameSpace_defineClass(kctx, ns, NULL, &BasicBlockDef, pline);
+	CT_BasicBlock = KLIB kNameSpace_defineClass(kctx, ns, NULL, &BasicBlockDef, trace);
 
 	static KDEFINE_CLASS IRBuilderDef = DEFINE_CLASS_0("IRBuilder", 0, 0, 0);
-	CT_IRBuilder = KLIB kNameSpace_defineClass(kctx, ns, NULL, &IRBuilderDef, pline);
+	CT_IRBuilder = KLIB kNameSpace_defineClass(kctx, ns, NULL, &IRBuilderDef, trace);
 #if LLVM_VERSION >= 300
 	static KDEFINE_CLASS PassManagerBuilderDef = DEFINE_CLASS_0("PassManagerBuilder",
 			PassManagerBuilder_ptr_init, PassManagerBuilder_ptr_free, 0);
-	KonohaClass *CT_PassManagerBuilder = KLIB kNameSpace_defineClass(kctx, ns, NULL, &PassManagerBuilderDef, pline);
+	KonohaClass *CT_PassManagerBuilder = KLIB kNameSpace_defineClass(kctx, ns, NULL, &PassManagerBuilderDef, trace);
 #define TY_PassManagerBuilder         (CT_PassManagerBuilder)->typeId
 #endif
 	static KDEFINE_CLASS PassManagerDef = DEFINE_CLASS_0("PassManager",
 		PassManager_ptr_init, PassManager_ptr_free, 0);
 	static KDEFINE_CLASS FunctionPassManagerDef = DEFINE_CLASS_0("FunctionPassManager",
 			FunctionPassManager_ptr_init, FunctionPassManager_ptr_free, 0);
-	KonohaClass *CT_PassManager = KLIB kNameSpace_defineClass(kctx, ns, NULL, &PassManagerDef, pline);
-	KonohaClass *CT_FunctionPassManager = KLIB kNameSpace_defineClass(kctx, ns, NULL, &FunctionPassManagerDef, pline);
+	KonohaClass *CT_PassManager = KLIB kNameSpace_defineClass(kctx, ns, NULL, &PassManagerDef, trace);
+	KonohaClass *CT_FunctionPassManager = KLIB kNameSpace_defineClass(kctx, ns, NULL, &FunctionPassManagerDef, trace);
 	KonohaClass *CT_InstTBL[21];
 	{
 		static const char *InstDefName[] = {
@@ -4773,7 +4773,7 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		//InstDef.free = Inst_free;
 		for (unsigned int i = 0; i < ARRAY_SIZE(InstDefName); i++) {
 			InstDef.structname = InstDefName[i];
-			CT_InstTBL[i] = KLIB kNameSpace_defineClass(kctx, ns, NULL, &InstDef, pline);
+			CT_InstTBL[i] = KLIB kNameSpace_defineClass(kctx, ns, NULL, &InstDef, trace);
 		}
 	}
 #define TY_Instruction         (CT_InstTBL[ 0])->typeId
@@ -4813,7 +4813,7 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		//InstDef.free = Inst_free;
 		for (int i = 0; i < 4; i++) {
 			PassDef.structname = PassDefName[i];
-			CT_PassTBL[i] = KLIB kNameSpace_defineClass(kctx, ns, NULL, &PassDef, pline);
+			CT_PassTBL[i] = KLIB kNameSpace_defineClass(kctx, ns, NULL, &PassDef, trace);
 		}
 	}
 #define TY_Pass          (CT_PassTBL[0])->typeId
@@ -5241,9 +5241,9 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	return true;
 }
 
-static kbool_t llvm_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t llvm_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
-	(void)kctx;(void)ns;(void)pline;
+	(void)kctx;(void)ns;(void)trace;
 	return true;
 }
 

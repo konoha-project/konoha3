@@ -460,15 +460,9 @@ struct PlatformApiVar {
 #define LogUint(K,V)    LOG_u, (K), ((uintptr_t)V)
 #define LogText(K,V)    LOG_s, (K), (V)
 #define LogErrno        LOG_ERRNO
-#define LogLine(UL)     LogText("ScriptName", FileId_t(UL)), LogUint("ScriptLine", (kushort_t)(UL))
-#define LogScriptLine(sfp)   LogText("ScriptName", FileId_t(sfp[K_RTNIDX].callerFileLine)), LogUint("ScriptLine", (kushort_t)sfp[K_RTNIDX].callerFileLine)
+//#define LogLine(UL)     LogText("ScriptName", FileId_t(UL)), LogUint("ScriptLine", (kushort_t)(UL))
+//#define LogScriptLine(sfp)   LogText("ScriptName", FileId_t(sfp[K_RTNIDX].callerFileLine)), LogUint("ScriptLine", (kushort_t)sfp[K_RTNIDX].callerFileLine)
 
-#define KTrace(POLICY, LOGKEY, ...)    do {\
-		static logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|(POLICY))};\
-		if(TFLAG_is(logpolicy_t, _logconf.policy, isRecord)) {\
-			PLATAPI traceDataLog(PLATAPI logger, LOGKEY, &_logconf, ## __VA_ARGS__, LOG_END);\
-		}\
-	} while (0)
 
 #define KTraceApi(TRACE, POLICY, APINAME, ...)    do {\
 		static logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|POLICY)};\
@@ -477,13 +471,17 @@ struct PlatformApiVar {
 		}\
 	} while (0)
 
-#define KSetElaspedTimer(TIMER)  TIMER = PLATAPI getTimeMilliSecond()
-
-#define KTraceApiElapsedTimer(POLICY, TPOLICY, APINAME, TIMER, ...)    do {\
-		static logconf_t _logconf = {isRecord|LOGPOOL_INIT|POLICY};\
-		unsigned long long elapsed_time = PLATAPI getTimeMilliSecond() - TIMER;\
-		if((elapsed_time) >= (TPOLICY) && TFLAG_is(logpolicy_t, _logconf.policy, isRecord)) {\
-			PLATAPI traceDataLog(PLATAPI logger, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), LogUint("ElapsedTime", elapsed_time), ## __VA_ARGS__, LOG_END);\
+#define KTraceResponseCheckPoint(TRACE, POLICY, APINAME, STMT, ...)    do {\
+		static logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|POLICY)};\
+		if(trace != NULL && TFLAG_is(int, _logconf.policy, isRecord)) {\
+			uint64_t _startTime = PLATAPI getTimeMilliSecond();\
+			PLATAPI traceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
+			STMT;\
+			uint64_t _endTime = PLATAPI getTimeMilliSecond();\
+			PLATAPI traceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), LogUint("ElapsedTime", (_endTime - _startTime)), ## __VA_ARGS__, LOG_END);\
+			counter++;\
+		}else { \
+			STMT;\
 		}\
 	} while (0)
 
