@@ -205,14 +205,14 @@ static void kBytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffe
 //}
 
 //## @Const String Bytes.toString();
-static KMETHOD Bytes_toString(KonohaContext *kctx, KonohaStack *sfp)
-{
+//static KMETHOD Bytes_toString(KonohaContext *kctx, KonohaStack *sfp)
+//{
 //	kBytes *from = sfp[0].asBytes;
 //	INIT_GCSTACK();
 //
 //	kBytes *to = Convert_newBytes(kctx, _GcStack, from, PLATAPI isSystemCharsetUTF8(kctx), "UTF-8");
 //	KReturnWithRESET_GCSTACK(Convert_newString(kctx, _GcStack, to));
-}
+//}
 
 //## Bytes Bytes.new(int size);
 static KMETHOD Bytes_new(KonohaContext *kctx, KonohaStack *sfp)
@@ -260,10 +260,10 @@ static KMETHOD Bytes_setAll(KonohaContext *kctx, KonohaStack *sfp)
 
 static void Kwb_convertCharset(KonohaContext *kctx, KGrowingBuffer* wb, const char *targetCharset, const char *sourceCharset, const char *sourceBuf, size_t sourceSize, KTraceInfo *trace)
 {
-	uintptr_t iconv = PLATAPI iconv_open_i(kctx, targetCharset, sourceCharset, trace);
-	if(iconv != ICONV_NULL) {
-		//KLIB Kwb_iconv(kctx, wb, iconv, sourceBuf, sourceSize, trace);
-		PLATAPI iconv_close_i(kctx, iconv);
+	uintptr_t conv = PLATAPI iconv_open_i(kctx, targetCharset, sourceCharset, trace);
+	if(conv != ICONV_NULL) {
+		KLIB Kwb_iconv(kctx, wb, conv, sourceBuf, sourceSize, trace);
+		PLATAPI iconv_close_i(kctx, conv);
 	}
 }
 
@@ -296,14 +296,44 @@ static KMETHOD String_toBytes(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-//## Bytes String.getBytes(String charset);
-static KMETHOD String_getBytes(KonohaContext *kctx, KonohaStack *sfp)
+#include <stdio.h>
+//## String String.new(Bytes ba);
+static KMETHOD String_new_fromBytes_withDefaultDecode(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kBytes *ba = sfp[1].asBytes;
+	kString *rets;
+	if(ba->buf == NULL || ba->bytesize == 0) {
+		 rets = TS_EMPTY;
+	} else {
+		// At this point, we assuem 'ba' is null terminated.
+		//fprintf(stderr, "[%d, %d]:'%c', '%s'\n", ba->bytesize, strlen(ba->buf), ba->buf[ba->bytesize], ba->buf);
+		DBG_ASSERT(ba->buf[ba->bytesize] == '\0');
+		KMakeTrace(trace, sfp);
+		KGrowingBuffer wb;
+		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+		Kwb_convertCharset(kctx, &wb, "UTF-8", PLATAPI systemCharset, ba->buf, ba->bytesize, trace);
+
+		rets = KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), 0);
+	}
+	KReturn(rets);
+}
+
+
+//## String String.new(Bytes ba, int offset, int length);
+static KMETHOD String_new_fromSubBytes_withDefaultDecode(KonohaContext *kctx, KonohaStack *sfp)
+{
+}
+//## String String.new(Bytes ba, int offset, int length, String charset);
+static KMETHOD String_new_fromSubBytes_withSpecifiedDecode(KonohaContext *kctx, KonohaStack *sfp)
 {
 
 }
 
+//## String String.new(Bytes ba, String charset);
+static KMETHOD String_new_fromBytes_withSpecifiedDecode(KonohaContext *kctx, KonohaStack *sfp)
+{
 
-
+}
 /* ------------------------------------------------------------------------ */
 
 #define _Public   kMethod_Public
@@ -335,9 +365,13 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public, _F(Bytes_set), TY_void, TY_Bytes, MN_("set"), 2, TY_int, FN_index, TY_int, FN_c,
 		_Public, _F(Bytes_setAll), TY_void, TY_Bytes, MN_("setAll"), 1, TY_int, FN_c,
 		_Public|_Im|_Coercion, _F(String_toBytes), TY_Bytes,  TY_String, MN_to(TY_Bytes),   0,
-		_Public|_Im|_Coercion, _F(Bytes_toString), TY_String, TY_Bytes,  MN_to(TY_String),  0,
+//		_Public|_Im|_Coercion, _F(Bytes_toString), TY_String, TY_Bytes,  MN_to(TY_String),  0,
 		//		_Public|_Const, _F(Bytes_encodeTo),   TY_Bytes,  TY_Bytes,  MN_("encodeTo"),    1, TY_String, FN_encoding,
 		//		_Public|_Const, _F(Bytes_decodeFrom),   TY_String, TY_Bytes,  MN_("decodeFrom"),    1, TY_String, FN_encoding,
+		_Public, _F(String_new_fromBytes_withDefaultDecode), TY_String, TY_String, MN_("new"), 1, TY_Bytes, FN_("ba"),
+		_Public, _F(String_new_fromSubBytes_withDefaultDecode), TY_String, TY_String, MN_("new"), 3, TY_Bytes, FN_("ba"), TY_int, FN_("offset"), TY_int, FN_("length"),
+		_Public, _F(String_new_fromSubBytes_withSpecifiedDecode), TY_String, TY_String, MN_("new"), 4, TY_Bytes, FN_("ba"), TY_int, FN_("offset"), TY_int, FN_("length"), TY_String, FN_("charset"),
+		_Public, _F(String_new_fromBytes_withSpecifiedDecode), TY_String, TY_String, MN_("new"), 2, TY_Bytes, FN_("ba"), TY_String, FN_("charset"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
