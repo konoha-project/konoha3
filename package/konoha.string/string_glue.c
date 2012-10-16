@@ -161,12 +161,12 @@ static kStringBase *kLinerString_Init(KonohaContext *kctx, kStringBase *base, co
 
 static kStringBase *kRopeString_Init(KonohaContext *kctx, kArray *gcstack, kStringBase *left, kStringBase *right, size_t len)
 {
-	kRopeString *s = (kRopeString *) new_kStringBase(kctx, gcstack, MASK_ROPE);
-	s->base.length = len;
-	KUnsafeFieldInit(s->left,  left);
-	KUnsafeFieldInit(s->right, right);
-	KLIB Kwrite_barrier(kctx, (kObject*)s);
-	return (kStringBase *) s;
+	kRopeString *rope = (kRopeString *) new_kStringBase(kctx, gcstack, MASK_ROPE);
+	rope->base.length = len;
+	KUnsafeFieldInit(rope->left,  left);
+	KUnsafeFieldInit(rope->right, right);
+	KLIB Kwrite_barrier(kctx, (kObject*)rope);
+	return (kStringBase *) rope;
 }
 
 static kLinerString *kRopeString_toLinerString(kRopeString *o, char *text, size_t len)
@@ -220,28 +220,58 @@ static void String2_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void write_text(kStringBase *base, char *dest, int size)
+static void Stack_init(KonohaContext *kctx, KGrowingArray *stack)
 {
+	KLIB Karray_init(kctx, stack, 4 * sizeof(kStringBase**));
+}
+
+static void Stack_push(KonohaContext *kctx, KGrowingArray *stack, kStringBase *str)
+{
+	size_t index = stack->bytesize / sizeof(kStringBase*);
+	if(stack->bytesize == stack->bytemax) {
+		KLIB Karray_expand(kctx, stack, stack->bytemax * 2);
+	}
+	stack->ObjectItems[index] = (kObject *) str;
+	stack->bytesize += sizeof(kStringBase*);
+}
+
+static kStringBase *Stack_pop(KonohaContext *kctx, KGrowingArray *stack)
+{
+	size_t index = (stack->bytesize / sizeof(kStringBase*));
+	if (index == 0) {
+		return NULL;
+	}
+	kStringBase *str = stack->ObjectItems[index-1];
+	stack->bytesize -= sizeof(kStringBase*);
+	return str;
+}
+
+static void Stack_dispose(KonohaContext *kctx, KGrowingArray *stack)
+{
+	KLIB Karray_free(kctx, stack);
+}
+
+static void copyText(KonohaContext *kctx, KGrowingArray *stack, char *dest, size_t size)
+{
+	kStringBase *base;
 	kRopeString *str;
 	size_t len;
-	while (1) {
+	while((base = Stack_pop(kctx, stack)) != NULL) {
 		switch (kStringBase_flag(base)) {
 			case S_FLAG_LINER:
 			case S_FLAG_EXTERNAL:
-				memcpy(dest, ((kLinerString *) base)->text, size);
-				return;
+				memcpy(dest, ((kLinerString *) base)->text, base->length);
+				dest += base->length;
+				break;
 			case S_FLAG_INLINE:
 				assert(base->length < SIZEOF_INLINETEXT);
-				memcpy(dest, ((kInlineString *) base)->text, size);
-				return;
+				memcpy(dest, ((kInlineString *) base)->inline_text, base->length);
+				dest += base->length;
+				break;
 			case S_FLAG_ROPE:
 				str = (kRopeString *) base;
-				assert(str->left->length + str->right->length == size);
-				len = StringBase_length(str->left);
-				write_text(str->left, dest, len);
-				base = str->right;
-				dest += len;
-				size -= len;
+				Stack_push(kctx, stack, str->right);
+				Stack_push(kctx, stack, str->left);
 				break;
 		}
 	}
@@ -250,10 +280,13 @@ static void write_text(kStringBase *base, char *dest, int size)
 static kLinerString *kRopeString_flatten(KonohaContext *kctx, kRopeString *rope)
 {
 	size_t length = StringBase_length((kStringBase *) rope);
-	char *dest = (char *) KMalloc_UNTRACE(length+1);
-	size_t llen = StringBase_length(rope->left);
-	write_text(rope->left,  dest,llen);
-	write_text(rope->right, dest+llen, length - llen);
+	char  *dest = (char *) KMalloc_UNTRACE(length+1);
+	KGrowingArray stack;
+	Stack_init(kctx, &stack);
+	Stack_push(kctx, &stack, rope->right);
+	Stack_push(kctx, &stack, rope->left);
+	copyText(kctx, &stack, dest, length);
+	Stack_dispose(kctx, &stack);
 	return kRopeString_toLinerString(rope, dest, length);
 }
 
@@ -274,25 +307,14 @@ static char *StringBase_getTextReference(KonohaContext *kctx, kStringBase *s)
 	return NULL;
 }
 
-static void kStringBase_reftrace(KonohaContext *kctx, kStringBase *s, KObjectVisitor *visitor)
-{
-	while (1) {
-		if(unlikely(!kStringBase_isRope(s)))
-			break;
-		kRopeString *rope = (kRopeString *) s;
-		kStringBase_reftrace(kctx, rope->left, visitor);
-		BEGIN_REFTRACE(3);
-		KREFTRACEv(rope);//FIXME reftracing rope is needed?
-		KREFTRACEv(rope->left);
-		KREFTRACEv(rope->right);
-		END_REFTRACE();
-		s = rope->right;
-	}
-}
-
 static void String2_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
-	kStringBase_reftrace(kctx, (kStringBase *) o, visitor);
+	kStringBase *s = (kStringBase *) o;
+	if(kStringBase_isRope(s)) {
+		kRopeString *rope = (kRopeString *) s;
+		KREFTRACEv(rope->left);
+		KREFTRACEv(rope->right);
+	}
 }
 
 static uintptr_t String2_unbox(KonohaContext *kctx, kObject *o)
@@ -315,16 +337,15 @@ static kStringBase *kStringBase_concat(KonohaContext *kctx, kArray *gcstack, kSt
 	size_t length = leftLen + rightLen;
 
 	if(length + 1 < SIZEOF_INLINETEXT) {
-		char *s0 = StringBase_getTextReference(kctx, left);
-		char *s1 = StringBase_getTextReference(kctx, right);
-		kInlineString *resultString = (kInlineString *) new_kStringBase(kctx, gcstack, MASK_INLINE);
-		DBG_ASSERT(length < SIZEOF_INLINETEXT);
-		resultString->base.length = length;
-		memcpy(resultString->inline_text, s0, leftLen);
-		memcpy(resultString->inline_text + leftLen, s1, rightLen);
-		resultString->inline_text[length] = '\0';
-		resultString->text = resultString->inline_text;
-		return (kStringBase *) resultString;
+		char *leftChar = StringBase_getTextReference(kctx, left);
+		char *rightChar = StringBase_getTextReference(kctx, right);
+		kInlineString *result = (kInlineString *) new_kStringBase(kctx, gcstack, MASK_INLINE);
+		result->base.length = length;
+		memcpy(result->inline_text, leftChar, leftLen);
+		memcpy(result->inline_text + leftLen, rightChar, rightLen);
+		result->inline_text[length] = '\0';
+		result->text = result->inline_text;
+		return (kStringBase *) result;
 	}
 	return kRopeString_Init(kctx, gcstack, left, right, length);
 }
