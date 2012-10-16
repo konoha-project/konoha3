@@ -124,7 +124,7 @@ static kStringBase *new_kStringBase(KonohaContext *kctx, kArray* gcstack, uint32
 	return s;
 }
 
-static kStringBase *kInlineString_Init(KonohaContext *kctx, kStringBase *base, const char *text, size_t len)
+static kStringBase *kStringBase_InitInline(KonohaContext *kctx, kStringBase *base, const char *text, size_t len)
 {
 	size_t i;
 	kInlineString *s = (kInlineString *) base;
@@ -139,7 +139,7 @@ static kStringBase *kInlineString_Init(KonohaContext *kctx, kStringBase *base, c
 	return base;
 }
 
-static kStringBase *kExternalString_Init(KonohaContext *kctx, kStringBase *base, const char *text, size_t len)
+static kStringBase *kStringBase_InitExternal(KonohaContext *kctx, kStringBase *base, const char *text, size_t len)
 {
 	kExternalString *s = (kExternalString *) base;
 	kStringBase_setFlag(base, MASK_EXTERNAL);
@@ -148,7 +148,7 @@ static kStringBase *kExternalString_Init(KonohaContext *kctx, kStringBase *base,
 	return base;
 }
 
-static kStringBase *kLinerString_Init(KonohaContext *kctx, kStringBase *base, const char *text, size_t len)
+static kStringBase *kStringBase_InitLiner(KonohaContext *kctx, kStringBase *base, const char *text, size_t len)
 {
 	kLinerString *s = (kLinerString *) base;
 	kStringBase_setFlag(base, MASK_LINER);
@@ -159,7 +159,7 @@ static kStringBase *kLinerString_Init(KonohaContext *kctx, kStringBase *base, co
 	return base;
 }
 
-static kStringBase *kRopeString_Init(KonohaContext *kctx, kArray *gcstack, kStringBase *left, kStringBase *right, size_t len)
+static kStringBase *kStringBase_InitRope(KonohaContext *kctx, kArray *gcstack, kStringBase *left, kStringBase *right, size_t len)
 {
 	kRopeString *rope = (kRopeString *) new_kStringBase(kctx, gcstack, MASK_ROPE);
 	rope->base.length = len;
@@ -205,10 +205,10 @@ static kString *new_kString(KonohaContext *kctx, kArray *gcstack, const char *te
 		checkASCII(kctx, s, text, len);
 	}
 	if(len < SIZEOF_INLINETEXT)
-		return (kString*) kInlineString_Init(kctx, s, text, len);
+		return (kString*) kStringBase_InitInline(kctx, s, text, len);
 	if(TFLAG_is(int, policy, StringPolicy_TEXT))
-		return (kString*) kExternalString_Init(kctx, s, text, len);
-	return (kString*) kLinerString_Init(kctx, s, text, len);
+		return (kString*) kStringBase_InitExternal(kctx, s, text, len);
+	return (kString*) kStringBase_InitLiner(kctx, s, text, len);
 }
 
 static void String2_free(KonohaContext *kctx, kObject *o)
@@ -290,7 +290,7 @@ static kLinerString *kRopeString_flatten(KonohaContext *kctx, kRopeString *rope)
 	return kRopeString_toLinerString(rope, dest, length);
 }
 
-static char *StringBase_getTextReference(KonohaContext *kctx, kStringBase *s)
+static char *kStringBase_getTextReference(KonohaContext *kctx, kStringBase *s)
 {
 	uint32_t flag = kStringBase_flag(s);
 	switch (flag) {
@@ -320,7 +320,7 @@ static void String2_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vi
 static uintptr_t String2_unbox(KonohaContext *kctx, kObject *o)
 {
 	kStringBase *s = (kStringBase *)o;
-	return (uintptr_t) StringBase_getTextReference(kctx, s);
+	return (uintptr_t) kStringBase_getTextReference(kctx, s);
 }
 
 static kStringBase *kStringBase_concat(KonohaContext *kctx, kArray *gcstack, kString *s0, kString *s1)
@@ -337,8 +337,8 @@ static kStringBase *kStringBase_concat(KonohaContext *kctx, kArray *gcstack, kSt
 	size_t length = leftLen + rightLen;
 
 	if(length + 1 < SIZEOF_INLINETEXT) {
-		char *leftChar = StringBase_getTextReference(kctx, left);
-		char *rightChar = StringBase_getTextReference(kctx, right);
+		char *leftChar = kStringBase_getTextReference(kctx, left);
+		char *rightChar = kStringBase_getTextReference(kctx, right);
 		kInlineString *result = (kInlineString *) new_kStringBase(kctx, gcstack, MASK_INLINE);
 		result->base.length = length;
 		memcpy(result->inline_text, leftChar, leftLen);
@@ -347,13 +347,14 @@ static kStringBase *kStringBase_concat(KonohaContext *kctx, kArray *gcstack, kSt
 		result->text = result->inline_text;
 		return (kStringBase *) result;
 	}
-	return kRopeString_Init(kctx, gcstack, left, right, length);
+	return kStringBase_InitRope(kctx, gcstack, left, right, length);
 }
 
 /* ------------------------------------------------------------------------ */
 
 //## String String.concat(String rhs);
 //## String String.opADD(String rhs);
+
 static KMETHOD Rope_opADD(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *lhs = sfp[0].asString, *rhs = sfp[1].asString;
@@ -362,8 +363,8 @@ static KMETHOD Rope_opADD(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ------------------------------------------------------------------------ */
 
-#define StringPolicy_isASCII(s)        (kString_is(ASCII, s) ? StringPolicy_ASCII : 0)
-#define CT_StringArray0                CT_p0(kctx, CT_Array, TY_String)
+#define StringPolicy_maskASCII(s)      (kString_is(ASCII, s) ? StringPolicy_ASCII : 0)
+//#define CT_StringArray0                CT_p0(kctx, CT_Array, TY_String)
 
 /*
  * Get the number of multibyte characters from text and bytesize.
@@ -547,7 +548,7 @@ static kint_t kString_lastIndexOf(KonohaContext *kctx, kString *s0, kString *s1,
 static kString* kString_toupper(KonohaContext *kctx, kArray *gcstack, kString *thisString, size_t start)
 {
 	size_t i, size = S_size(thisString);
-	kString *s = KLIB new_kString(kctx, gcstack, S_text(thisString), size, StringPolicy_isASCII(thisString)|StringPolicy_NOCOPY);
+	kString *s = KLIB new_kString(kctx, gcstack, S_text(thisString), size, StringPolicy_maskASCII(thisString)|StringPolicy_NOCOPY);
 	char *text = (char *) S_text(s);
 	for(i = start; i < size; i++) {
 		int ch = text[i];
@@ -559,7 +560,7 @@ static kString* kString_toupper(KonohaContext *kctx, kArray *gcstack, kString *t
 static kString* kString_tolower(KonohaContext *kctx, kArray *gcstack, kString *thisString, size_t start)
 {
 	size_t i, size = S_size(thisString);
-	kString *s = KLIB new_kString(kctx, gcstack, S_text(thisString), size, StringPolicy_isASCII(thisString)|StringPolicy_NOCOPY);
+	kString *s = KLIB new_kString(kctx, gcstack, S_text(thisString), size, StringPolicy_maskASCII(thisString)|StringPolicy_NOCOPY);
 	char *text = (char *) S_text(s);
 	for(i = start; i < size; i++) {
 		int ch = text[i];
@@ -755,7 +756,7 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	}
 	KLIB Kwb_write(kctx, &wb, start, strlen(start)); // write out remaining string
-	KReturn(KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), StringPolicy_isASCII(s0)));
+	KReturn(KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), StringPolicy_maskASCII(s0)));
 }
 
 //## String String.trim();
@@ -775,7 +776,7 @@ static KMETHOD String_trim(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	}
 	if(S_size(sfp[0].asString) > len) {
-		ret = KLIB new_kString(kctx, OnStack, s, len, StringPolicy_isASCII(sfp[0].asString));
+		ret = KLIB new_kString(kctx, OnStack, s, len, StringPolicy_maskASCII(sfp[0].asString));
 	}
 	else {
 		ret = sfp[0].asString;
@@ -951,11 +952,11 @@ static KMETHOD String_splitWithSeparator(KonohaContext *kctx, KonohaStack *sfp)
 			const char *res = strstr(start, S_text(separator));
 			if(res == NULL) break;
 			if(res - start > 0) {
-				KLIB new_kString(kctx, resultArray, start, res - start, StringPolicy_isASCII(s0));
+				KLIB new_kString(kctx, resultArray, start, res - start, StringPolicy_maskASCII(s0));
 			}
 			start = res + S_size(separator);
 		}
-		KLIB new_kString(kctx, resultArray, start, strlen(start), StringPolicy_isASCII(s0));
+		KLIB new_kString(kctx, resultArray, start, strlen(start), StringPolicy_maskASCII(s0));
 	}
 	KReturnWith(resultArray, RESET_GCSTACK());
 }
@@ -995,13 +996,13 @@ static KMETHOD String_splitwithSeparatorLimit(KonohaContext *kctx, KonohaStack *
 			const char *res = strstr(start, S_text(separator));
 			if(res == NULL) break;
 			if(res - start > 0) {
-				KLIB new_kString(kctx, resultArray, start, res - start, StringPolicy_isASCII(thisString));
+				KLIB new_kString(kctx, resultArray, start, res - start, StringPolicy_maskASCII(thisString));
 				length++;
 			}
 			start = res + S_size(separator);
 		}
 		if(length < (size_t)(limit - 1)) {
-			KLIB new_kString(kctx, resultArray, start, strlen(start), StringPolicy_isASCII(thisString));
+			KLIB new_kString(kctx, resultArray, start, strlen(start), StringPolicy_maskASCII(thisString));
 		}
 	}
 	KReturnWith(resultArray, RESET_GCSTACK());
