@@ -77,7 +77,7 @@ void logpool_record_list(logpool_t *ctx, void *args, int priority, char *trace_i
     assert(logsize < ctx->logfmt_capacity);
     logpool_init_logkey(ctx, priority, (uintptr_t) trace_id, strlen(trace_id));
     for (i = 0; i < logsize; ++i) {
-        f = ((logFn*)ctx->formatter)[logfn_index[logs->type]];
+        f = ((logFn *)ctx->formatter)[logfn_index[logs->type]];
         append_fmtdata(ctx, logs->key, (uint64_t)logs->val, f, logs->klen, logs->vlen);
         ++logs;
     }
@@ -147,7 +147,7 @@ logpool_t *logpool_open_trace(logpool_t *parent, char *host, int port)
     param.host = host;
     param.port = port;
     extern struct logapi STREAM_API;
-    return logpool_open(parent, &STREAM_API, (struct logpool_param*) &param);
+    return logpool_open(parent, &STREAM_API, (struct logpool_param *) &param);
 }
 
 void logpool_close(logpool_t *p)

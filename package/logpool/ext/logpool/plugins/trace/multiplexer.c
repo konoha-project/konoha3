@@ -95,7 +95,7 @@ static int logpool_Multiplexer_priority(logpool_t *ctx, int priority)
         e->api->Fn(ctx, key, v, klen, vlen);\
     }\
     cast(struct logpool *, ctx)->connection = mul;\
-} while (0)
+} while(0)
 
 static void logpool_Multiplexer_null(logpool_t *ctx, const char *key, uint64_t v, short klen, short vlen)
 {

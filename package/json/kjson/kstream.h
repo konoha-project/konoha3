@@ -100,7 +100,7 @@ static void string_input_stream_deinit(input_stream *ins)
 static input_stream *new_string_input_stream(const char *buf, size_t len, long flags)
 {
     void *args[] = {
-        (void*)buf, (void*)len
+        (void *)buf, (void *)len
     };
     input_stream *ins = new_input_stream(args, flags);
     return ins;

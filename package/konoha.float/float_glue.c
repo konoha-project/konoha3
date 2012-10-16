@@ -51,7 +51,7 @@ static void THROW_ZeroDividedException(KonohaContext *kctx, KonohaStack *sfp)
 
 static void Float_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	kNumberVar *n = (kNumberVar*)o;  // kFloat has the same structure
+	kNumberVar *n = (kNumberVar *)o;  // kFloat has the same structure
 	n->unboxValue = (uintptr_t)conf;  // conf is unboxed data
 }
 
@@ -250,7 +250,7 @@ static KMETHOD Float_opMINUS(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t float_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	KonohaFloatModule *base = (KonohaFloatModule*)KCalloc_UNTRACE(sizeof(KonohaFloatModule), 1);
+	KonohaFloatModule *base = (KonohaFloatModule *)KCalloc_UNTRACE(sizeof(KonohaFloatModule), 1);
 	base->h.name     = "float";
 	base->h.setup    = kmodfloat_setup;
 	base->h.reftrace = kmodfloat_reftrace;

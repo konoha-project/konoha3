@@ -37,7 +37,7 @@ extern "C"{
 
 static void kBytes_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct kBytesVar *ba = (struct kBytesVar*)o;
+	struct kBytesVar *ba = (struct kBytesVar *)o;
 	DBG_ASSERT((size_t)conf >= 0);
 	ba->bytesize = (size_t)conf;
 	ba->byteptr = NULL;
@@ -46,7 +46,7 @@ static void kBytes_init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void kBytes_free(KonohaContext *kctx, kObject *o)
 {
-	struct kBytesVar *ba = (struct kBytesVar*)o;
+	struct kBytesVar *ba = (struct kBytesVar *)o;
 	if(ba->byteptr != NULL) {
 		KFree(ba->buf, ba->bytesize);
 		ba->byteptr = NULL;
@@ -121,7 +121,7 @@ static void kBytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffe
 //	size_t processedSize = 0;
 //	size_t processedTotalSize = processedSize;
 //	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-//	while (inBytesLeft > 0 && iconv_ret == -1) {
+//	while(inBytesLeft > 0 && iconv_ret == -1) {
 //		iconv_ret = PLATAPI iconv_i((uintptr_t)conv, inbuf, &inBytesLeft, outbuf, &outBytesLeft);
 //		if(iconv_ret == -1 && errno == E2BIG) {
 //			// input is too big.
@@ -142,7 +142,7 @@ static void kBytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffe
 //			);
 //			KLIB Kwb_free(&wb);
 //			return NULL;   // FIXME
-//			//return (kBytes*)(CT_Bytes->defaultNullValue_OnGlobalConstList);
+//			//return (kBytes *)(CT_Bytes->defaultNullValue_OnGlobalConstList);
 //
 //		} else {
 //			// finished. iconv_ret != -1
@@ -156,7 +156,7 @@ static void kBytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffe
 //	PLATAPI iconv_close_i((uintptr_t)conv);
 //
 //	const char *bufferTopChar = KLIB Kwb_top(kctx, &wb, 1);
-//	struct kBytesVar *targetBytes = NULL; // FIXME (struct kBytesVar*)KLIB new_kObjectDontUseThis(kctx, CT_Bytes, processedTotalSize, gcstack); // ensure bytes ends with Zero
+//	struct kBytesVar *targetBytes = NULL; // FIXME (struct kBytesVar *)KLIB new_kObjectDontUseThis(kctx, CT_Bytes, processedTotalSize, gcstack); // ensure bytes ends with Zero
 //	memcpy(targetBytes->buf, bufferTopChar, processedTotalSize); // including NUL terminate by ensuredZeo
 //	KLIB Kwb_free(&wb);
 //	return targetBytes;
@@ -194,7 +194,7 @@ static void kBytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffe
 //		KReturn(KNULL(String));
 //	}
 //	INIT_GCSTACK();
-//	if(fromCharset != (kString*)(CT_String->defaultNullValue_OnGlobalConstList)) {
+//	if(fromCharset != (kString *)(CT_String->defaultNullValue_OnGlobalConstList)) {
 //		targetBytes = Convert_newBytes(kctx, _GcStack, sourceBytes, S_text(fromCharset), "UTF-8");
 //	} else {
 //		// conv from default encoding
@@ -269,7 +269,7 @@ static void Kwb_convertCharset(KonohaContext *kctx, KGrowingBuffer* wb, const ch
 
 static kBytes* new_kBytes(KonohaContext *kctx, kArray *gcstack, KonohaClass *c, const char *buf, size_t bufsiz)
 {
-	kBytes* ba = (kBytes*) KLIB new_kObject(kctx, gcstack, c, bufsiz);
+	kBytes* ba = (kBytes *) KLIB new_kObject(kctx, gcstack, c, bufsiz);
 	if(bufsiz > 0) {
 		memcpy(ba->buf, buf, bufsiz);
 	}
@@ -383,7 +383,7 @@ static kbool_t bytes_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 //		int ch = S_text(s)[0];
 //		KReturn(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_int, ch));
 //	} else {
-//		SUGAR kStmt_printMessage2(kctx, stmt, (kToken*)expr, ErrTag, "single quote doesn't accept multi characters, '%s'", S_text(s));
+//		SUGAR kStmt_printMessage2(kctx, stmt, (kToken *)expr, ErrTag, "single quote doesn't accept multi characters, '%s'", S_text(s));
 //	}
 //	KReturn(K_NULLEXPR);
 //}

@@ -77,7 +77,7 @@ typedef struct {
 
 static void Object_initToMakeDefaultValueAsNull(KonohaContext *kctx, kObject *o, void *conf)
 {
-	kObjectVar *of = (kObjectVar*)o;
+	kObjectVar *of = (kObjectVar *)o;
 	KonohaClass *c = O_ct(o);
 	bzero(of->fieldObjectItems, c->cstruct_size - sizeof(KonohaObjectHeader));
 }
@@ -86,7 +86,7 @@ static void ObjectField_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	KonohaClass *c = O_ct(o);
 	size_t fieldsize = c->fieldsize;
-	memcpy(((kObjectVar *)o)->fieldObjectItems, c->defaultNullValue_OnGlobalConstList->fieldObjectItems, fieldsize * sizeof(void*));
+	memcpy(((kObjectVar *)o)->fieldObjectItems, c->defaultNullValue_OnGlobalConstList->fieldObjectItems, fieldsize * sizeof(void *));
 }
 
 static void ObjectField_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
@@ -128,7 +128,7 @@ static KonohaClassVar* kNameSpace_defineClassName(KonohaContext *kctx, kNameSpac
 	defNewClass.superTypeId  = TY_Object; //superClass->typeId;
 	defNewClass.init = Object_initToMakeDefaultValueAsNull; // dummy for first generation of DefaultValueAsNull
 
-	KonohaClassVar *definedClass = (KonohaClassVar*)KLIB kNameSpace_defineClass(kctx, ns, name, &defNewClass, trace);
+	KonohaClassVar *definedClass = (KonohaClassVar *)KLIB kNameSpace_defineClass(kctx, ns, name, &defNewClass, trace);
 	KDEFINE_CLASS_CONST ClassData[] = {
 		{S_text(name), VirtualType_KonohaClass, definedClass},
 		{NULL},
@@ -141,10 +141,10 @@ static KonohaClassVar* kNameSpace_defineClassName(KonohaContext *kctx, kNameSpac
 static void KonohaClass_initField(KonohaContext *kctx, KonohaClassVar *definedClass, KonohaClass *superClass, size_t fieldInitSize)
 {
 	size_t fieldsize = superClass->fieldsize + fieldInitSize;
-	definedClass->cstruct_size = size64((fieldsize * sizeof(kObject*)) + sizeof(KonohaObjectHeader));
+	definedClass->cstruct_size = size64((fieldsize * sizeof(kObject *)) + sizeof(KonohaObjectHeader));
 	DBG_P("superClass->fieldsize=%d, definedFieldSize=%d, cstruct_size=%d", superClass->fieldsize, fieldInitSize, definedClass->cstruct_size);
 	if(fieldsize > 0) {
-		definedClass->fieldItems = (KonohaClassField*)KCalloc_UNTRACE(fieldsize, sizeof(KonohaClassField));
+		definedClass->fieldItems = (KonohaClassField *)KCalloc_UNTRACE(fieldsize, sizeof(KonohaClassField));
 		definedClass->fieldAllocSize = fieldsize;
 		definedClass->fieldsize = superClass->fieldsize; /* supsize */
 		if(superClass->fieldsize > 0) {
@@ -153,7 +153,7 @@ static void KonohaClass_initField(KonohaContext *kctx, KonohaClassVar *definedCl
 	}
 	definedClass->fnull(kctx, definedClass);  // first generation of DefaultValueAsNull
 	superClass->fnull(kctx, superClass); // ensure default value of super class
-	memcpy(definedClass->defaultNullValueVar_OnGlobalConstList->fieldObjectItems, superClass->defaultNullValueVar_OnGlobalConstList->fieldObjectItems, sizeof(kObject*) * superClass->fieldsize);
+	memcpy(definedClass->defaultNullValueVar_OnGlobalConstList->fieldObjectItems, superClass->defaultNullValueVar_OnGlobalConstList->fieldObjectItems, sizeof(kObject *) * superClass->fieldsize);
 	definedClass->init     = ObjectField_init;
 	definedClass->reftrace = ObjectField_reftrace;
 	definedClass->superTypeId = superClass->typeId;
@@ -166,7 +166,7 @@ static void KonohaClass_initField(KonohaContext *kctx, KonohaClassVar *definedCl
 static kBlock* kStmt_parseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToken *tokenClassName)
 {
 	kBlock *bk = NULL;
-	kToken *blockToken = (kToken*)kStmt_getObject(kctx, stmt, KW_BlockPattern, NULL);
+	kToken *blockToken = (kToken *)kStmt_getObject(kctx, stmt, KW_BlockPattern, NULL);
 	if(blockToken != NULL && blockToken->resolvedSyntaxInfo->keyword == KW_BlockPattern) {
 		const char *cname = S_text(tokenClassName->text);
 		TokenSequence range = {Stmt_nameSpace(stmt), KonohaContext_getSugarContext(kctx)->preparedTokenList};
@@ -298,7 +298,7 @@ static void kBlock_addMethodDeclStmt(KonohaContext *kctx, kBlock *bk, kToken *to
 
 static inline size_t initFieldSizeOfVirtualClass(KonohaClass *superClass)
 {
-	return size64(sizeof(KonohaObjectHeader) + (superClass->fieldsize + 4) * sizeof(kObject*)) / sizeof(kObject*);
+	return size64(sizeof(KonohaObjectHeader) + (superClass->fieldsize + 4) * sizeof(kObject *)) / sizeof(kObject *);
 }
 
 static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
@@ -307,7 +307,7 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 	kToken *tokenClassName = SUGAR kStmt_getToken(kctx, stmt, SYM_("$ClassName"), NULL);
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	int isNewlyDefinedClass = false;
-	KonohaClassVar *definedClass = (KonohaClassVar*)KLIB kNameSpace_getClass(kctx, ns, S_text(tokenClassName->text), S_size(tokenClassName->text), NULL);
+	KonohaClassVar *definedClass = (KonohaClassVar *)KLIB kNameSpace_getClass(kctx, ns, S_text(tokenClassName->text), S_size(tokenClassName->text), NULL);
 	if(definedClass == NULL) {   // Already defined
 		kshortflag_t cflag = kStmt_parseClassFlag(kctx, stmt, kClass_Virtual);
 		KMakeTraceUL(trace, sfp, stmt->uline);

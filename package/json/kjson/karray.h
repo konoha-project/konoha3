@@ -49,7 +49,7 @@ typedef struct ARRAY(T) ARRAY(T)
 
 #define DEF_ARRAY_OP(T)\
 static inline ARRAY(T) *ARRAY_init_##T (ARRAY(T) *a, size_t initsize) {\
-    a->list = (T*) KJSON_MALLOC(sizeof(T)*initsize);\
+    a->list = (T *) KJSON_MALLOC(sizeof(T)*initsize);\
     a->capacity  = initsize;\
     a->size  = 0;\
     return a;\
@@ -63,15 +63,15 @@ static inline void ARRAY_##T##_set(ARRAY(T) *a, int idx, T *v) {\
 static inline void ARRAY_##T##_add(ARRAY(T) *a, T *v) {\
     if(a->size + 1 >= a->capacity) {\
         a->capacity *= 2;\
-        a->list = (T*)realloc(a->list, sizeof(T) * a->capacity);\
+        a->list = (T *)realloc(a->list, sizeof(T) * a->capacity);\
     }\
     ARRAY_##T##_set(a, a->size++, v);\
 }\
 static inline void ARRAY_##T##_ensureSize(ARRAY(T) *a, size_t size) {\
-    while (a->size + size >= a->capacity) {\
+    while(a->size + size >= a->capacity) {\
         a->capacity *= 2;\
     }\
-    a->list = (T*)realloc(a->list, sizeof(T) * a->capacity);\
+    a->list = (T *)realloc(a->list, sizeof(T) * a->capacity);\
 }\
 static inline void ARRAY_##T##_dispose(ARRAY(T) *a) {\
     KJSON_FREE(a->list);\
@@ -82,7 +82,7 @@ static inline void ARRAY_##T##_dispose(ARRAY(T) *a) {\
 
 #define DEF_ARRAY_OP_NOPOINTER(T)\
 static inline ARRAY(T) *ARRAY_init_##T (ARRAY(T) *a, size_t initsize) {\
-    a->list = (T*) KJSON_MALLOC(sizeof(T)*initsize);\
+    a->list = (T *) KJSON_MALLOC(sizeof(T)*initsize);\
     a->capacity  = initsize;\
     a->size  = 0;\
     return a;\
@@ -96,15 +96,15 @@ static inline void ARRAY_##T##_set(ARRAY(T) *a, int idx, T v) {\
 static inline void ARRAY_##T##_add(ARRAY(T) *a, T v) {\
     if(a->size + 1 >= a->capacity) {\
         a->capacity *= 2;\
-        a->list = (T*)realloc(a->list, sizeof(T) * a->capacity);\
+        a->list = (T *)realloc(a->list, sizeof(T) * a->capacity);\
     }\
     ARRAY_##T##_set(a, a->size++, v);\
 }\
 static inline void ARRAY_##T##_ensureSize(ARRAY(T) *a, size_t size) {\
-    while (a->size + size >= a->capacity) {\
+    while(a->size + size >= a->capacity) {\
         a->capacity *= 2;\
     }\
-    a->list = (T*)realloc(a->list, sizeof(T) * a->capacity);\
+    a->list = (T *)realloc(a->list, sizeof(T) * a->capacity);\
 }\
 static inline void ARRAY_##T##_dispose(ARRAY(T) *a) {\
     KJSON_FREE(a->list);\
@@ -127,7 +127,7 @@ static inline void ARRAY_##T##_dispose(ARRAY(T) *a) {\
 #define ARRAY_init_1(T, a, e1) do {\
     ARRAY_init(T, a, 4);\
     ARRAY_add(T, a, e1);\
-} while (0)
+} while(0)
 
 #define FOR_EACH_ARRAY_(a, x, i)\
     for(i=0, x = ARRAY_n(a, i); i < ARRAY_size(a); x = ARRAY_n(a,(++i)))

@@ -43,8 +43,8 @@ extern "C" {
 /* ------------------------------------------------------------------------ */
 /* [class defs] */
 
-#define ctxposix         ((ctxposix_t*)kctx->mod[MOD_posix])
-#define kmodposix        ((kmodposix_t*)kctx->modshare[MOD_posix])
+#define ctxposix         ((ctxposix_t *)kctx->mod[MOD_posix])
+#define kmodposix        ((kmodposix_t *)kctx->modshare[MOD_posix])
 #define IS_definePosix() (kctx->modshare[MOD_posix] != NULL)
 #define CT_Posix         kmodposix->cPosix
 #define TY_Posix         kmodposix->cPosix->typeId

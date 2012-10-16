@@ -46,7 +46,7 @@ int main(int argc, char **argv)
     memcached_set(mc, "cpu_watch", strlen("cpu_watch"), script, script_len, 0, 0);
     logpool_procedure(logpool, "cpu_watch", strlen("cpu_watch"));
     struct Log *logbuf = alloca(sizeof(struct Log) + 256);
-    while (1) {
+    while(1) {
         if(logpool_client_get(logpool, logbuf, 256) == NULL) {
             break;
         }

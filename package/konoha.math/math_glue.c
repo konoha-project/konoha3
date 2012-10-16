@@ -272,7 +272,7 @@ static kbool_t math_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 	return true;
 }
 
-KDEFINE_PACKAGE* math_init(void)
+KDEFINE_PACKAGE *math_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "math", "1.0");

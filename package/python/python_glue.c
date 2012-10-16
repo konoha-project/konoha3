@@ -31,7 +31,7 @@
 extern "C"{
 #endif
 
-#define OB_TYPE(obj) (((PyObject*)obj->self)->ob_type)
+#define OB_TYPE(obj) (((PyObject *)obj->self)->ob_type)
 
 typedef const struct kPyObjectVar kPyObject;
 struct kPyObjectVar {
@@ -41,20 +41,20 @@ struct kPyObjectVar {
 
 static void PyObject_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct kPyObjectVar *pyo = (struct kPyObjectVar*)o;
+	struct kPyObjectVar *pyo = (struct kPyObjectVar *)o;
 	if(conf == NULL) {
 		pyo->self = Py_None;
 		Py_INCREF(Py_None);
 	}
 	else {
-		pyo->self = (PyObject*)conf;
+		pyo->self = (PyObject *)conf;
 	}
 }
 
 static void PyObject_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
-	PyObject *pyo =  ((kPyObject*)v[pos].asObject)->self;
-	PyObject* str = pyo->ob_type->tp_str(pyo);
+	PyObject *pyo =  ((kPyObject *)v[pos].asObject)->self;
+	PyObject *str = pyo->ob_type->tp_str(pyo);
 	Py_INCREF(str);
 	KLIB Kwb_printf(kctx, wb, "%s", PyString_AsString(str));
 	Py_DECREF(str);
@@ -66,7 +66,7 @@ static void PyObject_free(KonohaContext *kctx, kObject *o)
 	// so, it is not free safe
 	// it is not better using NULL
 	// make struct null stab (or Py_None?).
-	struct kPyObjectVar *pyo = (struct kPyObjectVar*)o;
+	struct kPyObjectVar *pyo = (struct kPyObjectVar *)o;
 	//OB_TYPE(pyo)->tp_free(pyo->self);
 	Py_DECREF(pyo->self);
 	Py_INCREF(Py_None);
@@ -102,7 +102,7 @@ static KMETHOD Int_toPyObject(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD PyObject_toInt(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kPyObject *po = (kPyObject*)sfp[0].asObject;
+	kPyObject *po = (kPyObject *)sfp[0].asObject;
 	long v = PyInt_AsLong(po->self);
 	if(PyErr_Occurred()) {
 		v = 0;
@@ -117,7 +117,7 @@ static KMETHOD Boolean_toPyObject(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD PyObject_toBoolean(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kPyObject *po = (kPyObject*)sfp[0].asObject;
+	kPyObject *po = (kPyObject *)sfp[0].asObject;
 	KReturnUnboxValue(po->self == Py_True ? 1 : 0);
 }
 
@@ -128,7 +128,7 @@ static KMETHOD Float_toPyObject(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kPyObject *po = (kPyObject*)sfp[0].asObject;
+	kPyObject *po = (kPyObject *)sfp[0].asObject;
 	double v = PyFloat_AsDouble(po->self);
 	if(PyErr_Occurred()) {
 		v = 0;
@@ -144,14 +144,14 @@ static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 //
 //static KMETHOD PyObject_toBytes(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	kPyObject *po = (kPyObject*)sfp[0].asObject;
+//	kPyObject *po = (kPyObject *)sfp[0].asObject;
 //	KGrowingBuffer wb;
 //	if(po->self == NULL) {
 //		// [TODO] throw Exception
 //	}
 //	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 //	O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb, 0);
-//	struct kBytesVar* ba = (struct kBytesVar*)new_Bytes(kctx, Kwb_bytesize(&wb));
+//	struct kBytesVar *ba = (struct kBytesVar *)new_Bytes(kctx, Kwb_bytesize(&wb));
 //	ba->buf = KLIB Kwb_top(kctx, &wb, 1);
 //	KLIB Kwb_free(&wb);
 //	KReturn(ba);
@@ -164,7 +164,7 @@ static KMETHOD PyObject_toFloat(KonohaContext *kctx, KonohaStack *sfp)
 //
 //static KMETHOD PyObject_toComplex(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	//kPyObject *po = (kPyObject*)sfp[0].asObject;
+//	//kPyObject *po = (kPyObject *)sfp[0].asObject;
 //	//KReturnUnboxValue(po->self == Py_True ? 1 : 0);
 //}
 
@@ -175,13 +175,13 @@ static KMETHOD String_toPyObject(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kPyObject *po = (kPyObject*)sfp[0].asObject;
+	kPyObject *po = (kPyObject *)sfp[0].asObject;
 	KGrowingBuffer wb;
 	// assert
 	DBG_ASSERT(po->self != NULL);
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb);
-	kString* s = KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
+	kString *s = KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
 	KLIB Kwb_free(&wb);
 	KReturn(s);
 	//if(PyString_Check(po->self)) {
@@ -191,7 +191,7 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 	//}
 	//else if(PyUnicode_Check(po->self)) {
 	//	//dec
-	//	PyObject* s = PyUnicode_AsUTF8String(po->self);
+	//	PyObject *s = PyUnicode_AsUTF8String(po->self);
 	//	// [TODO] there is no t's NULL check. Is it OK?
 	//	t = PyString_AsString(s);
 	//	KReturn(KLIB new_kString(kctx, t, strlen(t), 0));
@@ -205,7 +205,7 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 	//	KGrowingBuffer wb;
 	//	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	//	O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb, 0);
-	//	kString* s = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
+	//	kString *s = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
 	//	KLIB Kwb_free(&wb);
 	//	KReturn(s);
 	//}
@@ -235,7 +235,7 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 //	kArray *a = sfp[0].asArray;
 //	size_t i, n = kArray_size(a);
 //	Py_ssize_t pa_size = (n < PY_SSIZE_MAX)? n : PY_SSIZE_MAX - 1;
-//	PyObject* pa = PyList_New((Py_ssize_t)n);
+//	PyObject *pa = PyList_New((Py_ssize_t)n);
 //	if(kArray_isUnboxData(a)) {
 //		for (i = 0; i < pa_size; i++) {
 //			// [TODO] transfer array element to PyObject
@@ -253,7 +253,7 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 
 //static KMETHOD PyObject_toList(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	//kPyObject *po = (kPyObject*)sfp[0].asObject;
+//	//kPyObject *po = (kPyObject *)sfp[0].asObject;
 //	//KReturnUnboxValue(po->self == Py_True ? 1 : 0);
 //}
 
@@ -387,13 +387,13 @@ static KMETHOD Python_eval(KonohaContext *kctx, KonohaStack *sfp)
 
 #define DEFAULT_SIZE 16
 
-char** pyenv_split(char* line, char target)
+char **pyenv_split(char *line, char target)
 {
-	char* c = line;
+	char *c = line;
 	size_t slen, size = 0, maxsize = DEFAULT_SIZE;
 	char **tmp, **ret = (char**)malloc(sizeof(char**) * DEFAULT_SIZE);
 	memset(ret, '\0', sizeof(char**) * DEFAULT_SIZE);
-	while (line[0] != '\0'){
+	while(line[0] != '\0'){
 		if(line[0] == target){
 			if(size >= maxsize) {
 				maxsize *= 2;
@@ -403,7 +403,7 @@ char** pyenv_split(char* line, char target)
 				memcpy(ret, tmp, maxsize);
 			}
 			slen = line - c + 1;
-			char* p = (char*)malloc(slen);
+			char *p = (char *)malloc(slen);
 			memset(p, '\0', slen);
 			strncpy(p, c, slen - 1);
 			ret[size] = p;
@@ -414,7 +414,7 @@ char** pyenv_split(char* line, char target)
 		line++;
 	}
 	slen = line - c;
-	char* p = (char*)malloc(slen);
+	char *p = (char *)malloc(slen);
 	memset(p, '\0', slen);
 	strncpy(p, c, slen);
 	ret[size] = p;
@@ -426,21 +426,21 @@ char** pyenv_split(char* line, char target)
 static KMETHOD PyObject_import(KonohaContext *kctx, KonohaStack *sfp)
 {
 	PySys_SetPath("."); // add home dir to python search path.
-	PyListObject* ppath;
-	ppath = (PyListObject*)PyList_New(0);
-	PyList_Append((PyObject*)ppath, PyString_FromString("."));
+	PyListObject *ppath;
+	ppath = (PyListObject *)PyList_New(0);
+	PyList_Append((PyObject *)ppath, PyString_FromString("."));
 	// add home dir to python search path.
 	const char *path = PLATAPI getenv_i("PYTHONPATH");
 	if(path != NULL) {
 		size_t i;
-		char** pathes = pyenv_split((char *)path, ':');
+		char **pathes = pyenv_split((char *)path, ':');
 		for (i = 0; pathes[i] != NULL; i++) {
-			PyList_Append((PyObject*)ppath, PyString_FromString(pathes[i]));
+			PyList_Append((PyObject *)ppath, PyString_FromString(pathes[i]));
 			free(pathes[i]);
 		}
 		free(pathes);
 	}
-	PySys_SetObject("path", (PyObject*)ppath);
+	PySys_SetObject("path", (PyObject *)ppath);
 	KReturnPyObject(PyImport_ImportModule(S_text(sfp[1].asString)));
 }
 
@@ -452,7 +452,7 @@ static KMETHOD PyObject_(KonohaContext *kctx, KonohaStack *sfp)
 	// [TODO] Support class method.
 	//
 	int argc = kctx->esp - sfp - 2;   // believe me
-	kPyObject *pmod = (kPyObject*)sfp[0].asObject;
+	kPyObject *pmod = (kPyObject *)sfp[0].asObject;
 	PyObject  *pFunc = PyObject_GetAttrString(pmod->self, S_text(kctx->esp[-1].asString));
 	PyObject  *pArgs = NULL, *pValue = NULL;
 	if(pFunc != NULL) {
@@ -460,7 +460,7 @@ static KMETHOD PyObject_(KonohaContext *kctx, KonohaStack *sfp)
 			int i;
 			pArgs = PyTuple_New(argc);
 			for (i = 0; i < argc; ++i) {
-				pValue = ((kPyObject*)sfp[i+1].asObject)->self;
+				pValue = ((kPyObject *)sfp[i+1].asObject)->self;
 				Py_INCREF(pValue);
 				PyTuple_SetItem(pArgs, i, pValue);
 			}
@@ -569,7 +569,7 @@ static kbool_t python_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 	return true;
 }
 
-KDEFINE_PACKAGE* python_init(void)
+KDEFINE_PACKAGE *python_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("python", "1.0"),

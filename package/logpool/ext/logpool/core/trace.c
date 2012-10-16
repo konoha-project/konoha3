@@ -103,7 +103,7 @@ static void trace_thread_start(struct io *io)
 {
     pthread_mutex_lock(&io->lock);
     pthread_create(&io->thread, NULL, trace_thread_main, io);
-    while (1) {
+    while(1) {
         if(pthread_mutex_trylock(&io->lock) == 0) {
             pthread_mutex_unlock(&io->lock);
             break;
@@ -124,8 +124,8 @@ static int io_tracer_write(struct io *io, const void *data, uint32_t nbyte)
 
 static int io_tracer_read(struct io *io, const void *data, uint32_t nbyte)
 {
-    int len = bufferevent_read(io->bev, (char*)data, nbyte);
-    debug_print(1, "read: len=[%d] data=[%s]\n", len, (char*)data);
+    int len = bufferevent_read(io->bev, (char *)data, nbyte);
+    debug_print(1, "read: len=[%d] data=[%s]\n", len, (char *)data);
     return IO_OK;
 }
 

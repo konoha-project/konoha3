@@ -57,7 +57,7 @@ static void reverse(char *const start, char *const end)
 {
     char *m = start + (end - start) / 2;
     char tmp, *s = start, *e = end - 1;
-    while (s < m) {
+    while(s < m) {
         tmp  = *s;
         *s++ = *e;
         *e-- = tmp;
@@ -74,7 +74,7 @@ static inline char *put_x(char *p, uint64_t v)
     char *base = p;
     do {
         *p++ = toHexChar(v % 16);
-    } while ((v /= 16) != 0);
+    } while((v /= 16) != 0);
     reverse(base, p);
     return p;
 }
@@ -84,7 +84,7 @@ static inline char *put_d(char *p, uint64_t v)
     char *base = p;
     do {
         *p++ = '0' + (v % 10);
-    } while ((v /= 10) != 0);
+    } while((v /= 10) != 0);
     reverse(base, p);
     return p;
 }
@@ -126,7 +126,7 @@ static inline void string_builder_add_string_no_check(string_builder *sb, const 
 {
     char *p = sb->buf.list + ARRAY_size(sb->buf);
     const char *const e = s + len;
-    while (s < e) {
+    while(s < e) {
         *p++ = *s++;
     }
     sb->buf.size += len;

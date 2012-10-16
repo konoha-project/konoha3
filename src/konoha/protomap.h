@@ -123,7 +123,7 @@ static inline unsigned protomap_size(Kprotomap_t *m)
 #endif
 
 #ifndef BITS
-#define BITS (sizeof(void*) * 8)
+#define BITS (sizeof(void *) * 8)
 #endif
 
 #ifndef POWER_OF_TWO
@@ -203,7 +203,7 @@ static void hashmap_record_resize(hashmap_t *m)
 			if(r->hash != 0 && hashmap_set_no_resize(m, r) == PROTOMAP_FAILED)
 				continue;
 		}
-	} while (0);
+	} while(0);
 	_FREE(head, oldsize*sizeof(map_record_t));
 }
 
@@ -214,7 +214,7 @@ static map_status_t hashmap_set(hashmap_t *m, map_record_t *rec)
 		if((res = hashmap_set_no_resize(m, rec)) != PROTOMAP_FAILED)
 			return res;
 		hashmap_record_resize(m);
-	} while (1);
+	} while(1);
 	return PROTOMAP_FAILED;
 }
 

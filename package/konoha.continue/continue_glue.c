@@ -45,7 +45,7 @@ extern "C" {
 //
 //// --------------------------------------------------------------------------
 //
-//static inline kStmt* kStmt_getParentNULL(kStmt *stmt)
+//static inline kStmt *kStmt_getParentNULL(kStmt *stmt)
 //{
 //	return stmt->parentBlockNULL->parentStmtNULL;
 //}
@@ -80,7 +80,7 @@ extern "C" {
 //	return true;
 //}
 //
-//KDEFINE_PACKAGE* continue_init(void)
+//KDEFINE_PACKAGE *continue_init(void)
 //{
 //	static KDEFINE_PACKAGE d = {0};
 //	KSetPackageName(d, "while", "1.0");

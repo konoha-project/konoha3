@@ -63,7 +63,7 @@ static pmap_status_t pmap_set_no_resize(poolmap_t *m, pmap_record_t *rec)
             return POOLMAP_UPDATE;
         }
         idx = (idx + 1) & m->mask;
-    } while (i++ < m->used_size);
+    } while(i++ < m->used_size);
     assert(0);
 }
 
@@ -100,7 +100,7 @@ static pmap_record_t *pmap_get_(poolmap_t *m, uint32_t hash, uintptr_t key)
             return r;
         }
         idx = (idx + 1) & m->mask;
-    } while (i++ < m->used_size);
+    } while(i++ < m->used_size);
     return NULL;
 }
 

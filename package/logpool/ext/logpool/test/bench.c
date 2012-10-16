@@ -87,7 +87,7 @@ static void reverse(char *const start, char *const end, const int len)
 static char *write_d(char *const p, const char *const end, kuintptr_t uvalue)
 {
     int i = 0;
-    while (p + i < end) {
+    while(p + i < end) {
         int tmp = uvalue % 10;
         uvalue /= 10;
         p[i] = '0' + tmp;
@@ -182,7 +182,7 @@ static void ntrace(CTX ctx, const char *event, int pe, const knh_ldata2_t *d)
     p = write_b(p, ebuf, ctx->trace, strlen(ctx->trace));
     p[0] = '+'; p++;
     p = write_d(p, ebuf, ctx->seq);
-    ((kcontext_t*)ctx)->seq += 1;
+    ((kcontext_t *)ctx)->seq += 1;
     p[0] = ' '; p++;
     p = write_b(p, ebuf, event, strlen(event));
     if(pe % 2 == 1) {
@@ -230,7 +230,7 @@ static void ntrace(CTX ctx, const char *event, int pe, const knh_ldata2_t *d)
 #define NTRACE(ctx, event, pe, L) do {\
     knh_ldata_t ldata[] = L;\
     ntrace(ctx, event, pe, (const knh_ldata2_t *) ldata);\
-} while (0)
+} while(0)
 
 #define N 10000000
 
@@ -249,7 +249,7 @@ uint64_t konoha_ntrace1(CTX ctx)
 {
     int pid  = 0x10;
     int pgid = 0x20;
-    void *p  = (void*) 0xdeadbeaf;
+    void *p  = (void *) 0xdeadbeaf;
     int i;
     kuint64_t s = knh_getTimeMilliSecond();
     for (i = 0; i < N; ++i) {
@@ -271,7 +271,7 @@ uint64_t logpool_ntrace1(ltrace_t *ltrace)
 {
     int pid  = 0x10;
     int pgid = 0x20;
-    void *p  = (void*) 0xdeadbeaf;
+    void *p  = (void *) 0xdeadbeaf;
     int i;
     uint64_t s = knh_getTimeMilliSecond();
     for (i = 0; i < N; ++i) {
@@ -305,7 +305,7 @@ uint64_t logpool_ntrace_jit1(ltrace_t *ltrace)
 {
     int pid  = 0x10;
     int pgid = 0x20;
-    void *p  = (void*) 0xdeadbeaf;
+    void *p  = (void *) 0xdeadbeaf;
     int i;
     uint64_t s = knh_getTimeMilliSecond();
     for (i = 0; i < N; ++i) {

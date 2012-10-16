@@ -99,8 +99,8 @@ static SugarSyntax* kNameSpace_getSyntax(KonohaContext *kctx, kNameSpace *ns0, k
 static void kStmt_toERR(KonohaContext *kctx, kStmt *stmt, kString *errmsg)
 {
 	if(errmsg != NULL) { // not in case of isBlockedErrorMessage
-		((kStmtVar*)stmt)->syn   = SYN_(Stmt_nameSpace(stmt), KW_ERR);
-		((kStmtVar*)stmt)->build = TSTMT_ERR;
+		((kStmtVar *)stmt)->syn   = SYN_(Stmt_nameSpace(stmt), KW_ERR);
+		((kStmtVar *)stmt)->build = TSTMT_ERR;
 		KLIB kObject_setObject(kctx, stmt, KW_ERR, TY_String, errmsg);
 	}
 }
@@ -138,7 +138,7 @@ static kExpr* kStmt_printMessage2(KonohaContext *kctx, kStmt *stmt, kToken *tk, 
 			uline = tk->uline;
 		}
 		else if(IS_Expr(tk)) {
-			uline = kExpr_uline(kctx, (kExpr*)tk, uline);
+			uline = kExpr_uline(kctx, (kExpr *)tk, uline);
 		}
 	}
 	kString *errmsg = SugarContext_vprintMessage(kctx, taglevel, uline, fmt, ap);

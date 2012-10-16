@@ -35,7 +35,7 @@ static bool react_append_log(struct react *re, struct LogEntry *e, uint32_t id0,
         char *next = log_iterator(log, data, i);
         klen = log_get_length(log, i*2+0);
         vlen = log_get_length(log, i*2+1);
-        val.t[0] = (data+klen/*=val*/) - ((char*)e);
+        val.t[0] = (data+klen/*=val*/) - ((char *)e);
         val.t[1] = vlen;
 
         pmap_record_t r;
@@ -46,7 +46,7 @@ static bool react_append_log(struct react *re, struct LogEntry *e, uint32_t id0,
                 //union u32 val_; val_.v = r.v2;
                 //char buf0[128] = {};
                 //char buf1[128] = {};
-                //memcpy(buf0, (char*)r.v+val_.t[0], val_.t[1]);
+                //memcpy(buf0, (char *)r.v+val_.t[0], val_.t[1]);
                 //memcpy(buf1, data+klen, vlen);
                 //fprintf(stderr, "val '%s'=>'%s'\n", buf0, buf1);
                 update |= pmap_record_val_eq(&r, data+klen, vlen);
@@ -98,7 +98,7 @@ static void react_delete(struct react *re)
 static bool react_apply(struct pool_plugin *_p, struct LogEntry *e, uint32_t state)
 {
     struct pool_plugin_react *p = (struct pool_plugin_react *) _p;
-    struct Log *log = (struct Log*)&e->data;
+    struct Log *log = (struct Log *)&e->data;
     uint16_t traceLen  = log_get_length(log, 1);
     char    *traceName = log_get_data(log) + log_get_length(log, 0);
     uint32_t traceID0 = djbhash(traceName, traceLen);

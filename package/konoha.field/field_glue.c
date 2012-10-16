@@ -62,7 +62,7 @@ static kMethod *new_FieldGetter(KonohaContext *kctx, kArray *gcstack, ktype_t ci
 	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_UnboxFieldGetter : MethodFunc_ObjectFieldGetter;
 	kMethod *mtd = KLIB new_kMethod(kctx, gcstack, kMethod_Public|kMethod_Immutable, cid, mn, f);
 	KLIB kMethod_setParam(kctx, mtd, ty, 0, NULL);
-	((kMethodVar*)mtd)->delta = idx;  // FIXME
+	((kMethodVar *)mtd)->delta = idx;  // FIXME
 	return mtd;
 }
 
@@ -73,7 +73,7 @@ static kMethod *new_FieldSetter(KonohaContext *kctx, kArray *gcstack, ktype_t ci
 	kparamtype_t p = {ty, FN_("x")};
 	kMethod *mtd = KLIB new_kMethod(kctx, gcstack, kMethod_Public, cid, mn, f);
 	KLIB kMethod_setParam(kctx, mtd, ty, 1, &p);
-	((kMethodVar*)mtd)->delta = idx;   // FIXME
+	((kMethodVar *)mtd)->delta = idx;   // FIXME
 	return mtd;
 }
 
@@ -123,7 +123,7 @@ static kMethod *new_PrototypeGetter(KonohaContext *kctx, kArray *gcstack, ktype_
 	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_UnboxPrototypeGetter : MethodFunc_ObjectPrototypeGetter;
 	kMethod *mtd = KLIB new_kMethod(kctx, gcstack, kMethod_Public|kMethod_Immutable, cid, mn, f);
 	KLIB kMethod_setParam(kctx, mtd, ty, 0, NULL);
-	((kMethodVar*)mtd)->delta = sym;
+	((kMethodVar *)mtd)->delta = sym;
 	return mtd;
 }
 
@@ -134,7 +134,7 @@ static kMethod *new_PrototypeSetter(KonohaContext *kctx, kArray *gcstack, ktype_
 	kparamtype_t p = {ty, FN_("x")};
 	kMethod *mtd = KLIB new_kMethod(kctx, gcstack, kMethod_Public, cid, mn, f);
 	KLIB kMethod_setParam(kctx, mtd, ty, 1, &p);
-	((kMethodVar*)mtd)->delta = sym;
+	((kMethodVar *)mtd)->delta = sym;
 	return mtd;
 }
 
@@ -142,11 +142,11 @@ static kbool_t KonohaClass_addField(KonohaContext *kctx, KonohaClass *ct, int fl
 {
 	int pos = ct->fieldsize;
 	if(unlikely(ct->methodList_OnGlobalConstList == K_EMPTYARRAY)) {
-		((KonohaClassVar*)ct)->methodList_OnGlobalConstList = new_(MethodArray, 8, OnGlobalConstList);
+		((KonohaClassVar *)ct)->methodList_OnGlobalConstList = new_(MethodArray, 8, OnGlobalConstList);
 	}
 	INIT_GCSTACK();
 	if(pos < ct->fieldAllocSize) {
-		KonohaClassVar *definedClass = (KonohaClassVar*)ct;
+		KonohaClassVar *definedClass = (KonohaClassVar *)ct;
 		definedClass->fieldsize += 1;
 		definedClass->fieldItems[pos].flag = flag;
 		definedClass->fieldItems[pos].ty = ty;

@@ -33,8 +33,8 @@
 extern "C" {
 #endif
 
-#define KonohaContext_getIteratorContext(kctx)          ((KonohaIteratorModuleContext*)kctx->mod[MOD_iterator])
-#define KonohaContext_getIteratorModule(kctx)           ((KonohaIteratorModule*)kctx->modshare[MOD_iterator])
+#define KonohaContext_getIteratorContext(kctx)          ((KonohaIteratorModuleContext *)kctx->mod[MOD_iterator])
+#define KonohaContext_getIteratorModule(kctx)           ((KonohaIteratorModule *)kctx->modshare[MOD_iterator])
 #define IS_DefinedIterator()    (kctx->modshare[MOD_iterator] != NULL)
 
 #define CFLAG_Iterator         kClass_Final
@@ -59,7 +59,7 @@ typedef struct {
 struct kIteratorVar {
 	KonohaObjectHeader h;
 	kbool_t (*hasNext)(KonohaContext *kctx, KonohaStack *);
-	void    (*setNextResult)(KonohaContext *kctx, KonohaStack*);
+	void    (*setNextResult)(KonohaContext *kctx, KonohaStack *);
 	size_t current_pos;
 	union {
 		kObject  *source;

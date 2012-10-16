@@ -68,7 +68,7 @@ extern "C"{
 static void Method_writeAttributeToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuffer *wb)
 {
 	size_t i;
-	for(i = 0; i < sizeof(MethodFlagData)/sizeof(const char*); i++) {
+	for(i = 0; i < sizeof(MethodFlagData)/sizeof(const char *); i++) {
 		uintptr_t flagmask = 1 << i;
 		if((mtd->flag && flagmask) == flagmask) {
 			KLIB Kwb_printf(kctx, wb, "@%s ", MethodFlagData[i]);

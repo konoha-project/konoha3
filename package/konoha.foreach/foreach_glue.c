@@ -49,7 +49,7 @@ static kToken* new_ParsedExprToken(KonohaContext *kctx, kNameSpace *ns, kExpr *e
 	kTokenVar *ParsedExprToken = new_(TokenVar, 0, OnGcStack);
 	ParsedExprToken->resolvedSyntaxInfo = SYN_(ns, KW_ExprPattern);
 	KFieldSet(ParsedExprToken, ParsedExprToken->parsedExpr, expr);
-	return (kToken*)ParsedExprToken;
+	return (kToken *)ParsedExprToken;
 }
 
 static void MacroSet_setTokenAt(KonohaContext *kctx, MacroSet *macroSet, int index, kArray *tokenList, const char *symbol, ...)
@@ -61,7 +61,7 @@ static void MacroSet_setTokenAt(KonohaContext *kctx, MacroSet *macroSet, int ind
 	kToken *tk;
 	va_list ap;
 	va_start(ap , symbol);
-	while((tk = va_arg(ap, kToken*)) != NULL) {
+	while((tk = va_arg(ap, kToken *)) != NULL) {
 		DBG_ASSERT(IS_Token(tk));
 		KLIB kArray_add(kctx, tokenList, tk);
 	}

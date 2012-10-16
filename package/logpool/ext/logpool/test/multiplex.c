@@ -15,8 +15,8 @@ static struct logpool_param_file FILE_API_PARAM = {
 static struct logpool_param_multiplexer MULTIPREXED_STRING_FILE_API_PARAM = {
     8, 2,
     {
-        {&STRING_API, (struct logpool_param*)&STRING_API_PARAM},
-        {&FILE_API,  (struct logpool_param*)&FILE_API_PARAM}
+        {&STRING_API, (struct logpool_param *)&STRING_API_PARAM},
+        {&FILE_API,  (struct logpool_param *)&FILE_API_PARAM}
     }
 };
 
@@ -27,8 +27,8 @@ static struct logpool_param_filter FILTERED_STRING_API_PARAM = {
 static struct logpool_param_multiplexer MULTIPREXED_STRING_FILTERED_STRING_API_PARAM = {
     8, 2,
     {
-        {&STRING_API, (struct logpool_param*)&STRING_API_PARAM},
-        {&FILTER_API, (struct logpool_param*)&FILTERED_STRING_API_PARAM}
+        {&STRING_API, (struct logpool_param *)&STRING_API_PARAM},
+        {&FILTER_API, (struct logpool_param *)&FILTERED_STRING_API_PARAM}
     }
 };
 

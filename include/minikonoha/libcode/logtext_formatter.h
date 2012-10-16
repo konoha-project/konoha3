@@ -87,7 +87,7 @@ static void reverse(char *const start, char *const end, const int len)
 static char *writeUnsingedIntToBuffer(uintptr_t uint, char *const buftop, const char *const bufend)
 {
 	int i = 0;
-	while (buftop + i < bufend) {
+	while(buftop + i < bufend) {
 		int tmp = uint % 10;
 		uint /= 10;
 		buftop[i] = '0' + tmp;
@@ -194,14 +194,14 @@ static void writeDataLogToBuffer(logconf_t *logconf, va_list ap, char *buftop, c
 		}
 		switch(logtype) {
 		case LOG_s: {
-			const char *key = va_arg(ap, const char*);
-			const char *text = va_arg(ap, const char*);
+			const char *key = va_arg(ap, const char *);
+			const char *text = va_arg(ap, const char *);
 			buftop = writeKeyToBuffer(key, strlen(key), buftop, bufend);
 			buftop = writeTextToBuffer(text, buftop, bufend);
 			break;
 		}
 		case LOG_u: {
-			const char *key = va_arg(ap, const char*);
+			const char *key = va_arg(ap, const char *);
 			buftop = writeKeyToBuffer(key, strlen(key), buftop, bufend);
 			buftop = writeUnsingedIntToBuffer(va_arg(ap, uintptr_t), buftop, bufend);
 			break;

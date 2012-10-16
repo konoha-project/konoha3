@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#define BITS (sizeof(void*) * 8)
+#define BITS (sizeof(void *) * 8)
 #define CLZ(n) __builtin_clzl(n)
 #define ALIGN(x,n)  (((x)+((n)-1))&(~((n)-1)))
 
@@ -18,13 +18,13 @@ typedef struct buffer {
 static inline void put_char2(char *p, int8_t c0, int8_t c1)
 {
     uint16_t v = (c1 << 8) | c0;
-    *(uint16_t*)p = v;
+    *(uint16_t *)p = v;
 }
 
 static inline void put_char4(char *p, int8_t c0, int8_t c1, int8_t c2, int8_t c3)
 {
     uint32_t v = (c3 << 24) | (c2 << 16) | (c1 << 8) | c0;
-    *(uint32_t*)p = v;
+    *(uint32_t *)p = v;
 }
 
 static inline void buf_put_char(buffer_t *buf, char c)
@@ -74,7 +74,7 @@ static inline char *put_hex(char *const start, uint64_t v)
     do {
         unsigned char c = 0xf & (v >> i);
         *(p++) = __digit__[c];
-    } while ((i -= 4) >= 0);
+    } while((i -= 4) >= 0);
     return p;
 }
 
@@ -82,7 +82,7 @@ static void reverse(char *const start, char *const end)
 {
     char *m = start + (end - start) / 2;
     char tmp, *s = start, *e = end - 1;
-    while (s < m) {
+    while(s < m) {
         tmp  = *s;
         *s++ = *e;
         *e-- = tmp;
@@ -94,7 +94,7 @@ static inline char *put_d(char *p, uint64_t v)
     char *base = p;
     do {
         *p++ = '0' + ((uint8_t)(v % 10));
-    } while ((v /= 10) != 0);
+    } while((v /= 10) != 0);
 
     reverse(base, p);
     return p;
@@ -132,7 +132,7 @@ static inline char *put_f(char *p, double f)
 static inline char *put_string(char *p, const char *s, short size)
 {
     const char *e = s + size;
-    while (s < e) {
+    while(s < e) {
         *p++ = *s++;
     }
     return p;
