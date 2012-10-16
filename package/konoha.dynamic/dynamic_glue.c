@@ -83,8 +83,7 @@ static KMETHOD Dynamic_(KonohaContext *kctx, KonohaStack *sfp)
 			return;
 		}
 	}
-	KMakeTrace(trace, sfp);
-	KLIB KonohaRuntime_raise(kctx, EXPT_("NoSuchMethod"), NULL, trace);
+	KLIB KonohaRuntime_raise(kctx, EXPT_("NoSuchMethod"), SoftwareFault, NULL, sfp);
 }
 
 // --------------------------------------------------------------------------

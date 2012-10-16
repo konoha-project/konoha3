@@ -398,8 +398,7 @@ static size_t utf8_getMultibyteByteSize(const char *text, size_t size)
 
 static void THROW_OutOfStringBoundary(KonohaContext *kctx, KonohaStack *sfp, kint_t index)
 {
-	KMakeTrace(trace, sfp);
-	KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfStringBoundary"), NULL, trace);
+	KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfStringBoundary"), SoftwareFault, NULL, sfp);
 }
 
 static size_t kString_getMultibyteSize(KonohaContext *kctx, kString *this)
@@ -516,9 +515,9 @@ static kString *new_SubString(KonohaContext *kctx, kArray *gcstack, kString *bas
 	else {
 		ret = new_SubStringMultiNULL(kctx, gcstack, baseString, start, length);
 		if(unlikely(ret == NULL)) {
-			KMakeTrace(trace, sfp);
-			kreportf(CritTag, trace, "Script!!: out of array index %ld", sfp[1].intValue);
-			KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfStringBoundary"), NULL, trace);
+//			KMakeTrace(trace, sfp);
+//			kreportf(CritTag, trace, "Script!!: out of array index %ld", sfp[1].intValue);
+			KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfStringBoundary"), SoftwareFault, NULL, sfp);
 		}
 	}
 	return ret;

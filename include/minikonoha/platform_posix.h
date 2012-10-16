@@ -518,25 +518,25 @@ static void debugPrintf(const char *file, const char *func, int line, const char
 	va_end(ap);
 }
 
-static void reportCaughtException(const char *exceptionName, const char *scriptName, int line, const char *optionalMessage)
-{
-	if(line != 0) {
-		if(optionalMessage != NULL && optionalMessage[0] != 0) {
-			fprintf(stderr, " ** (%s:%d) %s: %s\n", scriptName, line, exceptionName, optionalMessage);
-		}
-		else {
-			fprintf(stderr, " ** (%s:%d) %s\n", scriptName, line, exceptionName);
-		}
-	}
-	else {
-		if(optionalMessage != NULL && optionalMessage[0] != 0) {
-			fprintf(stderr, " ** %s: %s\n", exceptionName, optionalMessage);
-		}
-		else {
-			fprintf(stderr, " ** %s\n", exceptionName);
-		}
-	}
-}
+//static void reportCaughtException(const char *exceptionName, const char *scriptName, int line, const char *optionalMessage)
+//{
+//	if(line != 0) {
+//		if(optionalMessage != NULL && optionalMessage[0] != 0) {
+//			fprintf(stderr, " ** (%s:%d) %s: %s\n", scriptName, line, exceptionName, optionalMessage);
+//		}
+//		else {
+//			fprintf(stderr, " ** (%s:%d) %s\n", scriptName, line, exceptionName);
+//		}
+//	}
+//	else {
+//		if(optionalMessage != NULL && optionalMessage[0] != 0) {
+//			fprintf(stderr, " ** %s: %s\n", exceptionName, optionalMessage);
+//		}
+//		else {
+//			fprintf(stderr, " ** %s\n", exceptionName);
+//		}
+//	}
+//}
 
 
 static void NOP_debugPrintf(const char *file, const char *func, int line, const char *fmt, ...)
@@ -607,6 +607,76 @@ static void UI_reportCompilerMessage(KonohaContext *kctx, kinfotag_t level, cons
 	PLATAPI printf_i("%s - %s%s\n", beginTag, msg, endTag);
 }
 
+static void Kwb_writeValue(KonohaContext *kctx, KGrowingBuffer *wb, KonohaClass *c, KonohaStack *sfp)
+{
+	if(CT_isUnbox(c)) {
+		c->p(kctx, sfp, 0, wb);
+	}
+	else {
+		KLIB kObject_writeToBuffer(kctx, sfp[0].asObject, false/*delim*/, wb, NULL, 0);
+	}
+}
+
+static void UI_reportException(KonohaContext *kctx, const char *exceptionName, int fault, const char *optionalMessage, KonohaStack *bottomStack, KonohaStack *topStack)
+{
+	PLATAPI printf_i("%s", PLATAPI beginTag(ErrTag));
+	if(optionalMessage != NULL && optionalMessage[0] != 0) {
+		PLATAPI printf_i("%s: SoftwareFault %s", exceptionName, optionalMessage);
+	}
+	else {
+		PLATAPI printf_i("%s:", exceptionName);
+		if(TFLAG_is(int, fault, SoftwareFault)) {
+			PLATAPI printf_i(" SoftwareFault");
+		}
+		if(TFLAG_is(int, fault, DataFault)) {
+			PLATAPI printf_i(" DataFault");
+		}
+		if(TFLAG_is(int, fault, SystemFault)) {
+			PLATAPI printf_i(" SystemFault");
+		}
+		if(TFLAG_is(int, fault, ExternalFault)) {
+			PLATAPI printf_i(" ExternalFault");
+		}
+	}
+	PLATAPI printf_i("%s\n\n", PLATAPI endTag(ErrTag));
+	PLATAPI printf_i("%sStackTrace\n", PLATAPI beginTag(InfoTag));
+
+	KonohaStack *sfp = topStack;
+	KGrowingBuffer wb;
+	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	while(bottomStack < sfp) {
+		kMethod *mtd = sfp[K_MTDIDX].methodCallInfo;
+		kfileline_t uline = sfp[K_RTNIDX].callerFileLine;
+		const char *file = PLATAPI shortFilePath(FileId_t(uline));
+		PLATAPI printf_i(" [%ld] (%s:%d) %s.%s%s(", (sfp - kctx->stack->stack), file, (kushort_t)uline, Method_t(mtd));
+		KonohaClass *cThis = CT_(mtd->typeId);
+		if(!CT_isUnbox(cThis)) {
+			cThis = O_ct(sfp[0].asObject);
+		}
+		if(!kMethod_is(Static, mtd)) {
+			Kwb_writeValue(kctx, &wb, cThis, sfp);
+			PLATAPI printf_i("this=(%s) %s, ", CT_t(cThis), KLIB Kwb_top(kctx, &wb, 1));
+			KLIB Kwb_free(&wb);
+		}
+		int i;
+		kParam *param = Method_param(mtd);
+		for(i = 0; i < param->psize; i++) {
+			if(i > 0) {
+				PLATAPI printf_i(", ");
+			}
+			KonohaClass *c = CT_(param->paramtypeItems[i].ty);
+			c = c->realtype(kctx, c, cThis);
+			Kwb_writeValue(kctx, &wb, c, sfp + i + 1);
+			PLATAPI printf_i("%s=(%s) %s", SYM_t(SYM_UNMASK(param->paramtypeItems[i].fn)), CT_t(c), KLIB Kwb_top(kctx, &wb, 1));
+			KLIB Kwb_free(&wb);
+		}
+		PLATAPI printf_i(")\n");
+		sfp = sfp[K_SHIFTIDX].previousStack;
+	}
+	KLIB Kwb_free(&wb);
+	PLATAPI printf_i("%s\n", PLATAPI endTag(InfoTag));
+}
+
 // --------------------------------------------------------------------------
 
 static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
@@ -644,7 +714,6 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.beginTag            = beginTag;
 	plat.endTag              = endTag;
 	plat.shortText           = shortText;
-	plat.reportCaughtException = reportCaughtException;
 	plat.debugPrintf         = (!verbose_debug) ? NOP_debugPrintf : debugPrintf;
 
 	// timer
@@ -663,6 +732,7 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 
 	plat.reportUserMessage     = UI_reportUserMessage;
 	plat.reportCompilerMessage = UI_reportCompilerMessage;
+	plat.reportException       = UI_reportException;
 
 	return (PlatformApi *)(&plat);
 }

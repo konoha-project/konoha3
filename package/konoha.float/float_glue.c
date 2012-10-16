@@ -43,8 +43,7 @@ extern "C" {
 
 static void THROW_ZeroDividedException(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KMakeTrace(trace, sfp);
-	KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), NULL, trace);
+	KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), SoftwareFault, NULL, sfp);
 }
 
 // --------------------------------------------------------------------------

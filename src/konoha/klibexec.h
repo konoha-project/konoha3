@@ -506,14 +506,14 @@ static void Kreportf(KonohaContext *kctx, kinfotag_t level, KTraceInfo *trace, c
 static kbool_t KonohaRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KonohaStackRuntimeVar *runtime = kctx->stack;
-	KonohaStack *jump_bottom = runtime->jump_bottom;
+	KonohaStack *bottomStack = runtime->bottomStack;
 	jmpbuf_i lbuf = {};
 	if(runtime->evaljmpbuf == NULL) {
-		runtime->evaljmpbuf = (jmpbuf_i *)KCalloc_UNTRACE(sizeof(jmpbuf_i), 1);
+		KMakeTrace(trace, sfp);
+		runtime->evaljmpbuf = (jmpbuf_i *)KCalloc(sizeof(jmpbuf_i), 1, trace);
 	}
 	memcpy(&lbuf, runtime->evaljmpbuf, sizeof(jmpbuf_i));
-	runtime->jump_bottom = sfp;
-	runtime->thrownScriptLine = 0;
+	runtime->bottomStack = sfp;
 	KUnsafeFieldSet(runtime->OptionalErrorInfo, TS_EMPTY);
 	kbool_t result = true;
 	int jumpResult;
@@ -522,22 +522,22 @@ static kbool_t KonohaRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp
 		KonohaRuntime_callMethod(kctx, sfp);
 	}
 	else {
-		const char *file = PLATAPI shortFilePath(FileId_t(runtime->thrownScriptLine));
-		PLATAPI reportCaughtException(SYM_t(jumpResult), file, (kushort_t)runtime->thrownScriptLine,  S_text(runtime->OptionalErrorInfo));
+		PLATAPI reportException(kctx, SYM_t(jumpResult), runtime->faultInfo, S_text(runtime->OptionalErrorInfo), runtime->bottomStack, runtime->topStack);
 		result = false;
 	}
 	RESET_GCSTACK();
-	runtime->jump_bottom = jump_bottom;
+	runtime->bottomStack = bottomStack;
 	memcpy(runtime->evaljmpbuf, &lbuf, sizeof(jmpbuf_i));
 	return result;
 }
 
-static void KonohaRuntime_raise(KonohaContext *kctx, int symbol, kString *optionalErrorInfo, KTraceInfo *trace)
+static void KonohaRuntime_raise(KonohaContext *kctx, int symbol, int fault, kString *optionalErrorInfo, KonohaStack *top)
 {
 	KonohaStackRuntimeVar *runtime = kctx->stack;
 	KNH_ASSERT(symbol != 0);
 	if(runtime->evaljmpbuf != NULL) {
-		runtime->thrownScriptLine = Trace_pline(trace);
+		runtime->topStack = top;
+		runtime->faultInfo = fault;
 		if(optionalErrorInfo != NULL) {
 			KUnsafeFieldSet(runtime->OptionalErrorInfo, optionalErrorInfo);
 		}

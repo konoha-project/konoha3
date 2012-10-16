@@ -178,8 +178,7 @@ static kinline const char* TAG_t(kinfotag_t t)
 
 #define KCheckIndex(N, MAX) \
 	if(unlikely (!(((size_t)N) < ((size_t)MAX)))) {\
-		KMakeTrace(trace, sfp);\
-		KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfArrayBoundary"), NULL, trace);\
+		KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfArrayBoundary"), SoftwareFault, NULL, sfp);\
 	}\
 
 

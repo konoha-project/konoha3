@@ -582,8 +582,7 @@ static KonohaClass* Kclass(KonohaContext *kctx, ktype_t cid, KTraceInfo *trace)
 {
 	KonohaRuntime *share = kctx->share;
 	if(!(cid < (share->classTable.bytesize/sizeof(KonohaClassVar *)))) {
-		kreportf(ErrTag, trace, "invalid typeId=%d", (int)cid);
-		KLIB KonohaRuntime_raise(kctx, EXPT_("InvalidParameter"), NULL, trace);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("InvalidParameter"), SoftwareFault, NULL, trace->baseStack);
 	}
 	return share->classTable.classItems[cid];
 }
@@ -1015,6 +1014,7 @@ static void initKonohaLib(KonohaLibVar *l)
 	l->Kclass                  = Kclass;
 	l->new_kObject             = new_kObject;
 	l->new_kString             = new_kString;
+	l->kObject_writeToBuffer   = kObject_writeToBuffer;
 
 	l->kArray_add           = (typeof(l->kArray_add))kArray_add;
 	l->kArray_insert        = (typeof(l->kArray_insert))kArray_insert;

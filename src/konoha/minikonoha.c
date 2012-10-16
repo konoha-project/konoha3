@@ -111,7 +111,7 @@ static kbool_t KonohaRuntime_setModule(KonohaContext *kctx, int x, KonohaModule 
 {
 	if(kctx->modshare[x] != NULL) {
 		kreportf(ErrTag, trace, "module already registered: %s", kctx->modshare[x]->name);
-		KLIB KonohaRuntime_raise(kctx, EXPT_("PackageLoader"), NULL, trace);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("PackageLoader"), SoftwareFault, NULL, trace->baseStack);
 		return false;
 	}
 	kctx->modshare[x] = d;

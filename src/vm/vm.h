@@ -203,7 +203,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 	(void)op;\
 	VirtualMachineInstruction *vpc = PC_NEXT(pc);\
 	pc = (rbp[K_MTDIDX2].methodCallInfo)->pc_start;\
-	rbp[K_SHIFTIDX2].shift = 0;\
+	/*rbp[K_SHIFTIDX2].shift = 0;*/\
 	rbp[K_PCIDX2].pc = vpc;\
 	GOTO_PC(pc); \
 } while(0)
@@ -244,9 +244,10 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #define OPEXEC_CALL(UL, THIS, espshift, CTO) do {\
 	kMethod *mtd_ = rbp[THIS+K_MTDIDX2].methodCallInfo;\
 	KonohaStack *sfp_ = SFP(rshift(rbp, THIS)); \
-	sfp_[K_RTNIDX].asObject = CTO;\
+	KUnsafeFieldSet(sfp_[K_RTNIDX].asObject, CTO);\
 	sfp_[K_RTNIDX].callerFileLine = UL;\
-	sfp_[K_SHIFTIDX].shift = THIS; \
+	/*sfp_[K_SHIFTIDX].shift = THIS; */\
+	sfp_[K_SHIFTIDX].previousStack = SFP(rbp);\
 	sfp_[K_PCIDX].pc = PC_NEXT(pc);\
 	sfp_[K_MTDIDX].methodCallInfo = mtd_;\
 	KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espshift)));\
@@ -256,38 +257,33 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 
 #define OPEXEC_VCALL(UL, THIS, espshift, mtdO, CTO) do {\
 	kMethod *mtd_ = mtdO;\
+	KonohaStack *baseStack = SFP(rbp);\
 	KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espshift)));\
 	OPEXEC_CHKSTACK(UL);\
 	rbp = rshift(rbp, THIS);\
 	rbp[K_ULINEIDX2-1].asObject = CTO;\
 	rbp[K_ULINEIDX2].callerFileLine = UL;\
-	rbp[K_SHIFTIDX2].shift = THIS;\
+	/*rbp[K_SHIFTIDX2].shift = THIS;*/\
+	rbp[K_SHIFTIDX2].previousStack = baseStack;\
 	rbp[K_PCIDX2].pc = PC_NEXT(pc);\
 	pc = (mtd_)->pc_start;\
 	GOTO_PC(pc); \
 } while(0)
 
-#define OPEXEC_SCALL(UL, THIS, espshift, mtdO, CTO) do {\
-	kMethod *mtd_ = mtdO;\
-	/*prefetch((mtd_)->invokeMethodFunc);*/\
-	KonohaStack *sfp_ = SFP(rshift(rbp, THIS)); \
-	sfp_[K_RTNIDX].asObject = CTO;\
-	sfp_[K_RTNIDX].callerFileLine = UL;\
-	sfp_[K_SHIFTIDX].shift = THIS; \
-	sfp_[K_PCIDX].pc = PC_NEXT(pc);\
-	sfp_[K_MTDIDX].methodCallInfo = mtd_;\
-	KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espshift)));\
-	(mtd_)->invokeMethodFunc(kctx, sfp_); \
-	sfp_[K_MTDIDX].methodCallInfo = NULL;\
+#define OPEXEC_RET0() do {\
+	(void)op;\
+	VirtualMachineInstruction *vpc = rbp[K_PCIDX2].pc;\
+	intptr_t vshift = rbp[K_SHIFTIDX2].shift;\
+	rbp[K_MTDIDX2].methodCallInfo = NULL;\
+	rbp = rshift(rbp, -vshift); \
+	pc = vpc; \
+	GOTO_PC(pc);\
 } while(0)
-
 
 #define OPEXEC_RET() do {\
 	(void)op;\
-	intptr_t vshift = rbp[K_SHIFTIDX2].shift;\
 	VirtualMachineInstruction *vpc = rbp[K_PCIDX2].pc;\
-	rbp[K_MTDIDX2].methodCallInfo = NULL;\
-	rbp = rshift(rbp, -vshift); \
+	rbp = (krbp_t *)rbp[K_SHIFTIDX2].previousStack;\
 	pc = vpc; \
 	GOTO_PC(pc);\
 } while(0)
@@ -325,8 +321,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 
 #define OPEXEC_CHKSTACK(UL) do {\
 	if(unlikely(kctx->esp > kctx->stack->stack_uplimit)) {\
-		KMakeTrace(trace, SFP(rbp));\
-		KLIB KonohaRuntime_raise(kctx, EXPT_("StackOverflow"), NULL, trace);\
+		KLIB KonohaRuntime_raise(kctx, EXPT_("StackOverflow"), SoftwareFault, NULL, SFP(rbp));\
 	}\
 	kfileline_t uline = (UL == 0) ? rbp[K_ULINEIDX2].callerFileLine : UL;\
 	KonohaVirtualMachine_onSafePoint(kctx, (KonohaStack *)rbp, uline);\
@@ -339,8 +334,8 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 } while(0)
 
 #define OPEXEC_ERROR(UL, msg, ESP) do {\
-	KMakeTraceUL(trace, SFP(rbp), UL);\
-	KLIB KonohaRuntime_raise(kctx, EXPT_("RuntimeScript"), msg, trace);\
+	SFP(rbp)[K_RTNIDX].callerFileLine = UL;\
+	KLIB KonohaRuntime_raise(kctx, EXPT_("RuntimeScript"), SoftwareFault, msg, SFP(rbp));\
 } while(0)
 
 #define KLR_LDMTD(ctx, thisidx, ldmtd, hc, mtdO) do {\

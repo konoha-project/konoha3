@@ -437,7 +437,7 @@ struct PlatformApiVar {
 	const char* (*shortText)(const char *msg);
 	const char* (*beginTag)(kinfotag_t);
 	const char* (*endTag)(kinfotag_t);
-	void (*reportCaughtException)(const char *exceptionName, const char *scriptName, int line, const char *optionalMessage);
+//	void (*reportCaughtException)(const char *exceptionName, const char *scriptName, int line, const char *optionalMessage);
 	void  (*debugPrintf)(const char *file, const char *func, int line, const char *fmt, ...) __PRINTFMT(4, 5);
 
 	// logging, trace
@@ -450,6 +450,7 @@ struct PlatformApiVar {
 
 	void (*reportUserMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *, int isNewLine);
 	void (*reportCompilerMessage)(KonohaContext *, kinfotag_t, const char *);
+	void (*reportException)(KonohaContext *, const char *, int fault, const char *, struct KonohaValueVar *bottomStack, struct KonohaValueVar *topStack);
 };
 
 #define LOG_END   0
@@ -462,6 +463,13 @@ struct PlatformApiVar {
 #define LogErrno        LOG_ERRNO
 //#define LogLine(UL)     LogText("ScriptName", FileId_t(UL)), LogUint("ScriptLine", (kushort_t)(UL))
 //#define LogScriptLine(sfp)   LogText("ScriptName", FileId_t(sfp[K_RTNIDX].callerFileLine)), LogUint("ScriptLine", (kushort_t)sfp[K_RTNIDX].callerFileLine)
+
+#define KTraceErrorPoint(TRACE, POLICY, APINAME, ...)    do {\
+		static logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|POLICY)};\
+		if(trace != NULL && TFLAG_is(int, _logconf.policy, isRecord)) { \
+			PLATAPI traceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
+		}\
+	} while(0)
 
 
 #define KTraceApi(TRACE, POLICY, APINAME, ...)    do {\
@@ -679,10 +687,11 @@ struct KonohaStackRuntimeVar {
 	void*                      cstack_bottom;  // for GC
 	ktype_t                    evalty;
 	kushort_t                  evalidx;
-	kfileline_t                thrownScriptLine;
 	kString                   *OptionalErrorInfo;
+	int                        faultInfo;
 	jmpbuf_i                  *evaljmpbuf;
-	KonohaStack               *jump_bottom;
+	KonohaStack               *bottomStack;
+	KonohaStack               *topStack;
 };
 
 // module
@@ -720,7 +729,8 @@ struct KonohaModuleContext {
 	kbool_t     boolValue; \
 	kint_t      intValue; \
 	kfloat_t    floatValue; \
-	intptr_t    shift;  \
+	struct KonohaValueVar *previousStack;\
+	intptr_t    shift0;  \
 	struct VirtualMachineInstruction  *pc; \
 	kMethod     *methodCallInfo; \
 	uintptr_t    callerFileLine
@@ -1309,31 +1319,33 @@ struct _kSystem {
 
 #define END_LOCAL() ((KonohaContextVar *)kctx)->esp = esp_;
 
-// if you want to ignore (exception), use KonohaRuntime_tryCallMethod
-#define KonohaRuntime_callMethod(kctx, sfp) { \
-		(sfp[K_MTDIDX].methodCallInfo)->invokeMethodFunc(kctx, sfp);\
-		sfp[K_MTDIDX].methodCallInfo = NULL;\
-	} \
-
 #define KSetMethodCallStack(tsfp, UL, MTD, ARGC, DEFVAL) { \
-		tsfp[K_MTDIDX].methodCallInfo   = MTD; \
-		tsfp[K_SHIFTIDX].shift = 0;\
+		tsfp[K_MTDIDX].methodCallInfo = MTD; \
 		KUnsafeFieldSet(tsfp[K_RTNIDX].asObject, ((kObject *)DEFVAL));\
 		tsfp[K_RTNIDX].callerFileLine   = UL;\
 		KonohaRuntime_setesp(kctx, tsfp + ARGC + 1);\
 	} \
 
-#define KCALL(LSFP, RIX, MTD, ARGC, DEFVAL) { \
-		KonohaStack *tsfp = LSFP + RIX + K_CALLDELTA;\
-		tsfp[K_MTDIDX].methodCallInfo = MTD;\
-		tsfp[K_SHIFTIDX].shift = 0;\
-		KUnsafeFieldSet(tsfp[K_RTNIDX].asObject, ((kObject *)DEFVAL));\
-		tsfp[K_RTNIDX].callerFileLine = 0;\
-		KonohaRuntime_setesp(kctx, tsfp + ARGC + 1);\
-		(MTD)->invokeMethodFunc(kctx, tsfp);\
-		tsfp[K_MTDIDX].methodCallInfo = NULL;\
+// if you want to ignore (exception), use KonohaRuntime_tryCallMethod
+#define KonohaRuntime_callMethod(kctx, sfp) { \
+		sfp[K_SHIFTIDX].previousStack = kctx->stack->topStack;\
+		kctx->stack->topStack = sfp;\
+		(sfp[K_MTDIDX].methodCallInfo)->invokeMethodFunc(kctx, sfp);\
+		kctx->stack->topStack = sfp[K_SHIFTIDX].previousStack;\
 	} \
 
+#define KCALL(LSFP, RIX, MTD, ARGC, DEFVAL)
+
+//#define KCALL(LSFP, RIX, MTD, ARGC, DEFVAL) { \
+//		KonohaStack *tsfp = LSFP + RIX + K_CALLDELTA;\
+//		tsfp[K_MTDIDX].methodCallInfo = MTD;\
+//		tsfp[K_SHIFTIDX].shift = 0;\
+//		KUnsafeFieldSet(tsfp[K_RTNIDX].asObject, ((kObject *)DEFVAL));\
+//		tsfp[K_RTNIDX].callerFileLine = 0;\
+//		KonohaRuntime_setesp(kctx, tsfp + ARGC + 1);\
+//		(MTD)->invokeMethodFunc(kctx, tsfp);\
+//		tsfp[K_MTDIDX].methodCallInfo = NULL;\
+//	} \
 
 #define KSELFCALL(TSFP, MTD) { \
 		KonohaStack *tsfp = TSFP;\
@@ -1453,6 +1465,7 @@ struct KonohaLibVar {
 	void            (*kObject_setUnboxValue)(KonohaContext*, kAbstractObject *, ksymbol_t, ktype_t, uintptr_t);
 	void            (*kObject_protoEach)(KonohaContext*, kAbstractObject *, void *thunk, void (*f)(KonohaContext*, void *, KKeyValue *d));
 	void            (*kObject_removeKey)(KonohaContext*, kAbstractObject *, ksymbol_t);
+	void            (*kObject_writeToBuffer)(KonohaContext *, kObject *, int, KGrowingBuffer *, KonohaValue *, int);
 
 	kString*        (*new_kString)(KonohaContext*, kArray *gcstack, const char *, size_t, int);
 //	kString*        (*new_kStringf)(KonohaContext*, kArray *gcstack, int, const char *, ...);
@@ -1492,7 +1505,7 @@ struct KonohaLibVar {
 	// code generator package
 	void             (*KCodeGen)(KonohaContext*, kMethod *, kBlock *);
 	kbool_t          (*KonohaRuntime_tryCallMethod)(KonohaContext *, KonohaStack *);
-	void             (*KonohaRuntime_raise)(KonohaContext*, int symbol, kString *Nullable, KTraceInfo *);
+	void             (*KonohaRuntime_raise)(KonohaContext*, int symbol, int fault, kString *Nullable, KonohaStack *);
 	void             (*Kreportf)(KonohaContext*, kinfotag_t, KTraceInfo *, const char *fmt, ...);
 };
 

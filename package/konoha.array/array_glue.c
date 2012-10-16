@@ -371,8 +371,8 @@ static KMETHOD Array_indexOf(KonohaContext *kctx, KonohaStack *sfp)
 		//TODO:Need to implement Object compareTo.
 		kObject *o = sfp[1].asObject;
 		for(i = 0; i < kArray_size(a); i++) {
-			KMakeTrace(trace, sfp);
-			KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplemented"), NULL, trace);
+//			KMakeTrace(trace, sfp);
+//			KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplemented"), NULL, trace);
 			if(O_ct(o)->compareObject(a->ObjectItems[i], o) == 0) {
 				res = i; break;
 			}
@@ -398,8 +398,8 @@ static KMETHOD Array_lastIndexOf(KonohaContext *kctx, KonohaStack *sfp)
 		//TODO: Need to implement Object compareTo;
 		kObject *o = sfp[1].asObject;
 		for(i = kArray_size(a)- 1; i != 0; i--) {
-			KMakeTrace(trace, sfp);
-			KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplemented"), NULL, trace);
+//			KMakeTrace(trace, sfp);
+//			KLIB KonohaRuntime_raise(kctx, EXPT_("NotImplemented"), NULL, trace);
 			if(O_ct(o)->compareObject(a->ObjectItems[i], o) == 0) {
 				break;
 			}

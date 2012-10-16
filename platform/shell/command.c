@@ -160,9 +160,11 @@ static int TEST_printf(const char *fmt, ...)
 	return res;
 }
 
-static void TEST_reportCaughtException(const char *exceptionName, const char *scriptName, int line, const char *optionalMessage)
+static void TEST_reportCaughtException(KonohaContext *kctx, const char *exceptionName, int fault, const char *optionalMessage, KonohaStack *bottom, KonohaStack *sfp)
 {
-	if(line != 0) {
+	if(sfp != NULL) {
+		const char* scriptName = PLATAPI shortFilePath(FileId_t(sfp[K_RTNIDX].callerFileLine));
+		int line = (kushort_t)sfp[K_RTNIDX].callerFileLine;
 		fprintf(stdlog, " ** %s (%s:%d)\n", exceptionName, scriptName, line);
 	}
 	else {
@@ -481,7 +483,7 @@ static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc
 			plat->beginTag  = TEST_begin;
 			plat->endTag    = TEST_end;
 			plat->shortText = TEST_shortText;
-			plat->reportCaughtException = TEST_reportCaughtException;
+			plat->reportException = TEST_reportCaughtException;
 			return KonohaContext_test(konoha, optarg);
 
 		case '?':

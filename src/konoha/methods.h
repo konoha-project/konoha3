@@ -90,7 +90,7 @@ static KMETHOD Int_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 	kint_t n = sfp[1].intValue;
 	if(unlikely(n == 0)) {
 		KMakeTrace(trace, sfp);
-		KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), NULL, trace);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), SoftwareFault, NULL, trace->baseStack);
 	}
 	KReturnUnboxValue(sfp[0].intValue / n);
 }
@@ -101,7 +101,7 @@ static KMETHOD Int_opMOD(KonohaContext *kctx, KonohaStack *sfp)
 	kint_t n = sfp[1].intValue;
 	if(unlikely(n == 0)) {
 		KMakeTrace(trace, sfp);
-		KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), NULL, trace);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), SoftwareFault, NULL, trace->baseStack);
 	}
 	KReturnUnboxValue(sfp[0].intValue % n);
 }
@@ -236,7 +236,7 @@ static KMETHOD System_assert(KonohaContext *kctx, KonohaStack *sfp)
 	if(cond == false) {
 		KMakeTrace(trace, sfp);
 		konoha_detectFailedAssert = true;
-		KLIB KonohaRuntime_raise(kctx, EXPT_("Assertion"), NULL, trace);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("Assertion"), SoftwareFault, NULL, trace->baseStack);
 	}
 }
 

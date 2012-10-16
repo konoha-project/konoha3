@@ -870,8 +870,8 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackageId_t packageI
 	const char *path = PLATAPI formatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_glue.k");
 	KonohaPackageHandler *packageHandler = PLATAPI loadPackageHandler(packageName);
 	if(path == NULL && packageHandler == NULL) {
-		KLIB Kreportf(kctx, ErrTag, trace, "package not found: %s path=%s", packageName, PLATAPI shortText(pathbuf));
-		KLIB KonohaRuntime_raise(kctx, EXPT_("PackageLoader"), NULL, trace);
+		//KLIB Kreportf(kctx, ErrTag, trace, "package not found: %s path=%s", packageName, PLATAPI shortText(pathbuf));
+		KLIB KonohaRuntime_raise(kctx, EXPT_("PackageNotFound"), SoftwareFault|SystemFault, NULL, trace->baseStack);
 		return NULL;
 	}
 	kNameSpace *ns = new_PackageNameSpace_OnGlobalConstList(kctx, packageId, packageId);
