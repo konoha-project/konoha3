@@ -1,6 +1,8 @@
 // written by unknown (maybe ide)
+// added by kimio
 
 import("cstyle");
+import("konoha.string");
 
 void f() {
 	int i = 0;
