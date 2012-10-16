@@ -8,7 +8,6 @@ void test() {
 	assert("Hello, world".charAt(2) == "l");
 	assert("Hello, world".charAt(3) == "l");
 	assert("Hello, world".charAt(4) == "o");
-	assert("Hello, world".charAt(999) == "");
 }
 
 test();

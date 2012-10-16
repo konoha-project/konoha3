@@ -42,7 +42,7 @@ static kbool_t Nothing_hasNext(KonohaContext *kctx, KonohaStack* sfp)
 
 static void Nothing_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 {
-	kIterator *itr = (kIterator*)sfp[0].asObject;
+	kIterator *itr = (kIterator *)sfp[0].asObject;
 	KReturn(itr->source);
 }
 
@@ -53,7 +53,7 @@ static void Nothing_setNextResultUnbox(KonohaContext *kctx, KonohaStack* sfp)
 
 static void Iterator_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	kIterator *itr = (kIterator*)o;
+	kIterator *itr = (kIterator *)o;
 	int isUnboxEntry = TY_isUnbox(O_ct(itr)->p0);
 	KFieldInit(itr, itr->source, K_NULL);
 	itr->current_pos = 0;
@@ -87,7 +87,7 @@ static KMETHOD Iterator_next(KonohaContext *kctx, KonohaStack *sfp)
 //
 //static KMETHOD Iterator_new(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	kIterator *itr = (kIterator*)sfp[0].asObject;
+//	kIterator *itr = (kIterator *)sfp[0].asObject;
 //	KFieldSet(itr, itr->funcHasNext, sfp[1].fo);
 //	KFieldSet(itr, itr->funcNext,sfp[2].asFunc);
 //	itr->hasNext = callFuncHasNext;
@@ -97,13 +97,13 @@ static KMETHOD Iterator_next(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t Array_hasNext(KonohaContext *kctx, KonohaStack* sfp)
 {
-	kIterator *itr = (kIterator*)sfp[0].asObject;
+	kIterator *itr = (kIterator *)sfp[0].asObject;
 	return (itr->current_pos < kArray_size(itr->arrayList));
 }
 
 static void Array_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 {
-	kIterator *itr = (kIterator*)sfp[0].asObject;
+	kIterator *itr = (kIterator *)sfp[0].asObject;
 	size_t n = itr->current_pos;
 	itr->current_pos += 1;
 	DBG_ASSERT(n < kArray_size(itr->arrayList));
@@ -112,7 +112,7 @@ static void Array_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 
 static void Array_setNextResultUnbox(KonohaContext *kctx, KonohaStack* sfp)
 {
-	kIterator *itr = (kIterator*)sfp[0].asObject;
+	kIterator *itr = (kIterator *)sfp[0].asObject;
 	size_t n = itr->current_pos;
 	itr->current_pos += 1;
 	DBG_ASSERT(n < kArray_size(itr->arrayList));
@@ -123,7 +123,7 @@ static KMETHOD Array_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
 	KonohaClass *cIterator = CT_p0(kctx, CT_Iterator, O_ct(a)->p0);
-	kIterator *itr = (kIterator*)KLIB new_kObject(kctx, OnStack, cIterator, 0);
+	kIterator *itr = (kIterator *)KLIB new_kObject(kctx, OnStack, cIterator, 0);
 	KFieldSet(itr, itr->arrayList, a);
 	itr->hasNext = Array_hasNext;
 	itr->setNextResult = TY_isUnbox(O_ct(a)->p0) ? Array_setNextResultUnbox : Array_setNextResult;
@@ -133,14 +133,14 @@ static KMETHOD Array_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t String_hasNext(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kIterator *itr = sfp[0].asIterator;
-	kString *s = (kString*)itr->source;
+	kString *s = (kString *)itr->source;
 	return (itr->current_pos < S_size(s));
 }
 
 static void String_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kIterator *itr = sfp[0].asIterator;
-	kString *s = (kString*)itr->source;
+	kString *s = (kString *)itr->source;
 	const char *t = S_text(s) + itr->current_pos;
 	size_t charsize = utf8len(t[0]);
 	itr->current_pos += charsize;
@@ -149,7 +149,7 @@ static void String_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 
 static KMETHOD String_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kIterator *itr = (kIterator*)KLIB new_kObject(kctx, OnStack, CT_StringIterator, 0);
+	kIterator *itr = (kIterator *)KLIB new_kObject(kctx, OnStack, CT_StringIterator, 0);
 	KFieldSet(itr, itr->source, sfp[0].asObject);
 	itr->hasNext = String_hasNext;
 	itr->setNextResult = String_setNextResult;
@@ -165,14 +165,14 @@ static void kmoditerator_free(KonohaContext *kctx, struct KonohaModule *baseh) {
 #define _Public   kMethod_Public
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KonohaIteratorModule *base = (KonohaIteratorModule*)KCalloc_UNTRACE(sizeof(KonohaIteratorModule), 1);
+	KonohaIteratorModule *base = (KonohaIteratorModule *)KCalloc_UNTRACE(sizeof(KonohaIteratorModule), 1);
 	base->h.name     = "iterator";
 	base->h.setup    = kmoditerator_setup;
 	base->h.reftrace = kmoditerator_reftrace;
 	base->h.free     = kmoditerator_free;
-	KLIB KonohaRuntime_setModule(kctx, MOD_iterator, &base->h, pline);
+	KLIB KonohaRuntime_setModule(kctx, MOD_iterator, &base->h, trace);
 
 	kparamtype_t IteratorParam = {0};
 	IteratorParam.ty = TY_Object;
@@ -184,7 +184,7 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 	defIterator.cparamsize  = 1;
 	defIterator.cParamItems = &IteratorParam;
 
-	base->cIterator = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defIterator, pline);
+	base->cIterator = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defIterator, trace);
 	base->cStringIterator = CT_p0(kctx, base->cIterator, TY_String);
 	base->cGenericIterator = CT_p0(kctx, base->cIterator, TY_0);
 	KDEFINE_METHOD MethodData[] = {
@@ -198,17 +198,7 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 	return true;
 }
 
-static kbool_t iterator_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t iterator_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t iterator_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t iterator_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -216,11 +206,9 @@ static kbool_t iterator_setupNameSpace(KonohaContext *kctx, kNameSpace *packageN
 KDEFINE_PACKAGE* iterator_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "iterator", "1.0");
+	KSetPackageName(d, "iterator", "1.0");
 	d.initPackage    = iterator_initPackage;
 	d.setupPackage   = iterator_setupPackage;
-	d.initNameSpace  = iterator_initNameSpace;
-	d.setupNameSpace = iterator_setupNameSpace;
 	return &d;
 }
 

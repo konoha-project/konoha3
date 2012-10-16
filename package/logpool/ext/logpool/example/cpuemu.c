@@ -134,7 +134,7 @@ int main(int argc, char * argv[])
   if(argc == 1)
     usage();
 
-  while (1) {
+  while(1) {
     c = getopt(argc, argv, "hr:p:s:p:Vz:v");
     if(c == -1)
       break;

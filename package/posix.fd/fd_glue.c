@@ -64,7 +64,7 @@ struct kDirentVar {
 
 static void kStat_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct kStatVar *stat = (struct kStatVar*)o;
+	struct kStatVar *stat = (struct kStatVar *)o;
 	if(conf != NULL) {
 		stat->stat = (struct stat *)PLATAPI malloc_i(sizeof(struct stat));
 		memcpy(stat->stat, conf, sizeof(struct stat));
@@ -90,13 +90,13 @@ static void kStat_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer
 
 static void kDIR_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct kDirVar *dir = (struct kDirVar*)o;
+	struct kDirVar *dir = (struct kDirVar *)o;
 	dir->dirp = conf;
 }
 
 static void kDIR_free(KonohaContext *kctx, kObject *o)
 {
-	struct kDirVar *dir = (struct kDirVar*)o;
+	struct kDirVar *dir = (struct kDirVar *)o;
 	if(dir->dirp != NULL) {
 		int ret = closedir(dir->dirp);
 		if(ret == -1) {
@@ -108,14 +108,14 @@ static void kDIR_free(KonohaContext *kctx, kObject *o)
 
 static void kDIR_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
-	kDIR *dir = (kDIR*)v[pos].asObject;
+	kDIR *dir = (kDIR *)v[pos].asObject;
 	DIR *dirp = dir->dirp;
 	KLIB Kwb_printf(kctx, wb, "DIR :%p", dirp);
 }
 
 static void kDirent_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct kDirentVar *dirent = (struct kDirentVar*)o;
+	struct kDirentVar *dirent = (struct kDirentVar *)o;
 	if(conf != NULL) {
 		dirent->entry = (struct dirent *)PLATAPI malloc_i(sizeof(struct dirent));
 		memcpy(dirent->entry, conf, sizeof(struct dirent));
@@ -127,7 +127,7 @@ static void kDirent_init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void kDirent_free(KonohaContext *kctx, kObject *o)
 {
-	struct kDirentVar *dirent = (struct kDirentVar*)o;
+	struct kDirentVar *dirent = (struct kDirentVar *)o;
 	if(dirent->entry != NULL) {
 		PLATAPI free_i(dirent->entry);
 		dirent->entry = NULL;
@@ -211,7 +211,7 @@ static KMETHOD System_fchmod(KonohaContext *kctx, KonohaStack *sfp)
 //## @Native int File.ioctl(int request, String[] args)
 //staic KMETHOD File_ioctl(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	kFile *file = (kFile*)sfp[0].asObject;
+//	kFile *file = (kFile *)sfp[0].asObject;
 //	FILE *fp = file->fp;
 //	int request  = int_to(int, sfp[1]);
 //	char *argp = String_to(char*, sfp[2]);
@@ -678,7 +678,7 @@ static KMETHOD DIR_read(KonohaContext *kctx, KonohaStack *sfp)
 	DIR *dirp = dir->dirp;
 	struct dirent entry, *result;
 	KonohaClass *CT_Dirent = CT_(O_p0(KGetReturnObject(sfp)));
-	kArray *resultArray = (kArray*)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
+	kArray *resultArray = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	int ret;
 	while((ret = readdir_r(dirp, &entry, &result)) == 0) {
 		if(result == NULL) break;
@@ -827,7 +827,7 @@ static KMETHOD System_fchdir(KonohaContext *kctx, KonohaStack *sfp)
 
 #define _KVi(T) #T, TY_int, T
 
-static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KDEFINE_CLASS defStat = {
 		STRUCTNAME(Stat),
@@ -836,7 +836,7 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		.free  = kStat_free,
 		.p     = kStat_p
 	};
-	KonohaClass *cStat = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defStat, pline);
+	KonohaClass *cStat = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defStat, trace);
 
 	KDEFINE_CLASS defDIR = {
 		STRUCTNAME(DIR),
@@ -845,7 +845,7 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		.free  = kDIR_free,
 		.p     = kDIR_p
 	};
-	KonohaClass *cDIR = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDIR, pline);
+	KonohaClass *cDIR = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDIR, trace);
 
 	KDEFINE_CLASS defDirent = {
 		STRUCTNAME(Dirent),
@@ -854,7 +854,7 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		.free  = kDirent_free,
 		.p     = kDirent_p
 	};
-	KonohaClass *cDirent = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDirent, pline);
+	KonohaClass *cDirent = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDirent, trace);
 	KonohaClass *CT_DirentArray0 = CT_p0(kctx, CT_Array, cDirent->typeId);
 	ktype_t TY_DirentArray0 = CT_DirentArray0->typeId;
 
@@ -960,17 +960,7 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 	return true;
 }
 
-static kbool_t fd_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t fd_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t fd_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t fd_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -983,8 +973,6 @@ KDEFINE_PACKAGE* fd_init(void)
 		KPACKNAME("fd", "1.0"),
 		.initPackage    = fd_initPackage,
 		.setupPackage   = fd_setupPackage,
-		.initNameSpace  = fd_initNameSpace,
-		.setupNameSpace = fd_setupNameSpace,
 	};
 	return &d;
 }

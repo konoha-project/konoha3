@@ -77,7 +77,7 @@ typedef struct {
 
 static void Object_initToMakeDefaultValueAsNull(KonohaContext *kctx, kObject *o, void *conf)
 {
-	kObjectVar *of = (kObjectVar*)o;
+	kObjectVar *of = (kObjectVar *)o;
 	KonohaClass *c = O_ct(o);
 	bzero(of->fieldObjectItems, c->cstruct_size - sizeof(KonohaObjectHeader));
 }
@@ -86,7 +86,7 @@ static void ObjectField_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	KonohaClass *c = O_ct(o);
 	size_t fieldsize = c->fieldsize;
-	memcpy(((kObjectVar *)o)->fieldObjectItems, c->defaultNullValue_OnGlobalConstList->fieldObjectItems, fieldsize * sizeof(void*));
+	memcpy(((kObjectVar *)o)->fieldObjectItems, c->defaultNullValue_OnGlobalConstList->fieldObjectItems, fieldsize * sizeof(void *));
 }
 
 static void ObjectField_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
@@ -119,7 +119,7 @@ static kshortflag_t kStmt_parseClassFlag(KonohaContext *kctx, kStmt *stmt, kshor
 	return (kshortflag_t)SUGAR kStmt_parseFlag(kctx, stmt, ClassDeclFlag, cflag);
 }
 
-static KonohaClassVar* kNameSpace_defineClassName(KonohaContext *kctx, kNameSpace *ns, kshortflag_t cflag, kString *name, kfileline_t pline)
+static KonohaClassVar* kNameSpace_defineClassName(KonohaContext *kctx, kNameSpace *ns, kshortflag_t cflag, kString *name, KTraceInfo *trace)
 {
 	KDEFINE_CLASS defNewClass = {0};
 	defNewClass.cflag         = cflag | kClass_Nullable;
@@ -128,7 +128,7 @@ static KonohaClassVar* kNameSpace_defineClassName(KonohaContext *kctx, kNameSpac
 	defNewClass.superTypeId  = TY_Object; //superClass->typeId;
 	defNewClass.init = Object_initToMakeDefaultValueAsNull; // dummy for first generation of DefaultValueAsNull
 
-	KonohaClassVar *definedClass = (KonohaClassVar*)KLIB kNameSpace_defineClass(kctx, ns, name, &defNewClass, pline);
+	KonohaClassVar *definedClass = (KonohaClassVar *)KLIB kNameSpace_defineClass(kctx, ns, name, &defNewClass, trace);
 	KDEFINE_CLASS_CONST ClassData[] = {
 		{S_text(name), VirtualType_KonohaClass, definedClass},
 		{NULL},
@@ -141,10 +141,10 @@ static KonohaClassVar* kNameSpace_defineClassName(KonohaContext *kctx, kNameSpac
 static void KonohaClass_initField(KonohaContext *kctx, KonohaClassVar *definedClass, KonohaClass *superClass, size_t fieldInitSize)
 {
 	size_t fieldsize = superClass->fieldsize + fieldInitSize;
-	definedClass->cstruct_size = size64((fieldsize * sizeof(kObject*)) + sizeof(KonohaObjectHeader));
+	definedClass->cstruct_size = size64((fieldsize * sizeof(kObject *)) + sizeof(KonohaObjectHeader));
 	DBG_P("superClass->fieldsize=%d, definedFieldSize=%d, cstruct_size=%d", superClass->fieldsize, fieldInitSize, definedClass->cstruct_size);
 	if(fieldsize > 0) {
-		definedClass->fieldItems = (KonohaClassField*)KCalloc_UNTRACE(fieldsize, sizeof(KonohaClassField));
+		definedClass->fieldItems = (KonohaClassField *)KCalloc_UNTRACE(fieldsize, sizeof(KonohaClassField));
 		definedClass->fieldAllocSize = fieldsize;
 		definedClass->fieldsize = superClass->fieldsize; /* supsize */
 		if(superClass->fieldsize > 0) {
@@ -153,7 +153,7 @@ static void KonohaClass_initField(KonohaContext *kctx, KonohaClassVar *definedCl
 	}
 	definedClass->fnull(kctx, definedClass);  // first generation of DefaultValueAsNull
 	superClass->fnull(kctx, superClass); // ensure default value of super class
-	memcpy(definedClass->defaultNullValueVar_OnGlobalConstList->fieldObjectItems, superClass->defaultNullValueVar_OnGlobalConstList->fieldObjectItems, sizeof(kObject*) * superClass->fieldsize);
+	memcpy(definedClass->defaultNullValueVar_OnGlobalConstList->fieldObjectItems, superClass->defaultNullValueVar_OnGlobalConstList->fieldObjectItems, sizeof(kObject *) * superClass->fieldsize);
 	definedClass->init     = ObjectField_init;
 	definedClass->reftrace = ObjectField_reftrace;
 	definedClass->superTypeId = superClass->typeId;
@@ -166,7 +166,7 @@ static void KonohaClass_initField(KonohaContext *kctx, KonohaClassVar *definedCl
 static kBlock* kStmt_parseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToken *tokenClassName)
 {
 	kBlock *bk = NULL;
-	kToken *blockToken = (kToken*)kStmt_getObject(kctx, stmt, KW_BlockPattern, NULL);
+	kToken *blockToken = (kToken *)kStmt_getObject(kctx, stmt, KW_BlockPattern, NULL);
 	if(blockToken != NULL && blockToken->resolvedSyntaxInfo->keyword == KW_BlockPattern) {
 		const char *cname = S_text(tokenClassName->text);
 		TokenSequence range = {Stmt_nameSpace(stmt), KonohaContext_getSugarContext(kctx)->preparedTokenList};
@@ -298,7 +298,7 @@ static void kBlock_addMethodDeclStmt(KonohaContext *kctx, kBlock *bk, kToken *to
 
 static inline size_t initFieldSizeOfVirtualClass(KonohaClass *superClass)
 {
-	return size64(sizeof(KonohaObjectHeader) + (superClass->fieldsize + 4) * sizeof(kObject*)) / sizeof(kObject*);
+	return size64(sizeof(KonohaObjectHeader) + (superClass->fieldsize + 4) * sizeof(kObject *)) / sizeof(kObject *);
 }
 
 static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
@@ -307,10 +307,11 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 	kToken *tokenClassName = SUGAR kStmt_getToken(kctx, stmt, SYM_("$ClassName"), NULL);
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	int isNewlyDefinedClass = false;
-	KonohaClassVar *definedClass = (KonohaClassVar*)KLIB kNameSpace_getClass(kctx, ns, S_text(tokenClassName->text), S_size(tokenClassName->text), NULL);
+	KonohaClassVar *definedClass = (KonohaClassVar *)KLIB kNameSpace_getClass(kctx, ns, S_text(tokenClassName->text), S_size(tokenClassName->text), NULL);
 	if(definedClass == NULL) {   // Already defined
 		kshortflag_t cflag = kStmt_parseClassFlag(kctx, stmt, kClass_Virtual);
-		definedClass = kNameSpace_defineClassName(kctx, ns, cflag, tokenClassName->text, stmt->uline);
+		KMakeTraceUL(trace, sfp, stmt->uline);
+		definedClass = kNameSpace_defineClassName(kctx, ns, cflag, tokenClassName->text, trace);
 		isNewlyDefinedClass = true;
 	}
 	kBlock *bk = kStmt_parseClassBlockNULL(kctx, stmt, tokenClassName);
@@ -382,34 +383,29 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static kbool_t class_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t class_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.field", pline);
-	KRequirePackage("konoha.new", pline);
-	//KSET_KLIB2(kMethod_indexOfField, KLIB2_Method_indexOfField, pline);
-	return true;
-}
-
-static kbool_t class_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t class_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
-{
-	KImportPackage(ns, "konoha.field", pline);
-	KImportPackage(ns, "konoha.new", pline);
+//	KImportPackage(ns, "konoha.field", trace);
+//	KImportPackage(ns, "konoha.new", trace);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("$ClassName"), 0, NULL, 0, 0, PatternMatch_ClassName, NULL, NULL, NULL, NULL, },
 		{ SYM_("class"), 0, "\"class\" $ClassName [\"extends\" extends: $Type] [$Block]", 0, 0, NULL, NULL, Statement_class, NULL, NULL, },
 		{ SYM_("."), 0, NULL, -1, 0, NULL, NULL, NULL, NULL, TypeCheck_Getter, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t class_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t class_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	KRequirePackage("konoha.field", trace);
+	KRequirePackage("konoha.new", trace);
+	class_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t class_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -419,11 +415,9 @@ static kbool_t class_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 KDEFINE_PACKAGE* class_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "class", "1.0");
+	KSetPackageName(d, "class", "1.0");
 	d.initPackage    = class_initPackage;
 	d.setupPackage   = class_setupPackage;
-	d.initNameSpace  = class_initNameSpace;
-	d.setupNameSpace = class_setupNameSpace;
 	return &d;
 }
 

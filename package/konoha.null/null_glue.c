@@ -44,25 +44,22 @@ static KMETHOD Object_isNotNull(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(!IS_NULL(o));
 }
 
-// --------------------------------------------------------------------------
 
 #define _F(F) (intptr_t)(F)
-static kbool_t null_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+
+static kbool_t null_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	intptr_t MethodData[] = {
+	KDEFINE_METHOD MethodData[] = {
 		kMethod_Public, _F(Object_isNull), TY_boolean, TY_Object, MN_("isNull"), 0,
 		kMethod_Public, _F(Object_isNotNull), TY_boolean, TY_Object, MN_("isNotNull"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
-
 	return true;
 }
 
-static kbool_t null_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
+// --------------------------------------------------------------------------
+/* Syntax */
 
 static KMETHOD TypeCheck_null(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -102,19 +99,29 @@ static KMETHOD Expression_isNotNull(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 
-static kbool_t null_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t null_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("null"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_null, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	SUGAR kNameSpace_addSugarFunc(kctx, ns, SYM_("=="), SugarFunc_Expression, new_SugarFunc(ns, Expression_isNull));
 	SUGAR kNameSpace_addSugarFunc(kctx, ns, SYM_("!="), SugarFunc_Expression, new_SugarFunc(ns, Expression_isNotNull));
 	return true;
 }
 
-static kbool_t null_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+
+// ----
+
+static kbool_t null_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	null_defineMethod(kctx, ns, trace);
+	null_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t null_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -122,11 +129,9 @@ static kbool_t null_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, k
 KDEFINE_PACKAGE* null_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "null", "1.0");
+	KSetPackageName(d, "null", "1.0");
 	d.initPackage    = null_initPackage;
 	d.setupPackage   = null_setupPackage;
-	d.initNameSpace  = null_initNameSpace;
-	d.setupNameSpace = null_setupNameSpace;
 	return &d;
 }
 

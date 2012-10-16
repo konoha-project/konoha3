@@ -57,7 +57,7 @@ void logpool_format_flush(struct logpool *ctx);
             fflush(stderr);\
         }\
     }\
-} while (0)
+} while(0)
 
 #ifdef __cplusplus
 }

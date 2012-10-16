@@ -35,7 +35,7 @@ static void server_read_callback(struct bufferevent *bev, void *ctx)
     struct range_stream *cs = (struct range_stream *) ctx;
     struct io *io = cs->io;
     debug_print(0, "read_cb bev=%p", bev);
-    while (!range_stream_empty(cs)) {
+    while(!range_stream_empty(cs)) {
         int log_size;
         struct Log *log = range_stream_get(cs, &log_size);
         if(log == NULL) {
@@ -46,7 +46,7 @@ static void server_read_callback(struct bufferevent *bev, void *ctx)
         switch (log_data_protocol(log)) {
         case LOGPOOL_EVENT_READ:
             debug_print(1, "R %d %d, '%s'", log->klen, log->vlen, data);
-            pool_add((struct Procedure*) log, bev, io->pool);
+            pool_add((struct Procedure *) log, bev, io->pool);
             break;
         case LOGPOOL_EVENT_WRITE:
 #if LOGPOOL_DEBUG >= 1

@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #ifdef USE_DUMP_VISITOR
-#define DUMPER(BUILDER)  ((struct DumpVisitorLocal*)(BUILDER)->local_fields)
+#define DUMPER(BUILDER)  ((struct DumpVisitorLocal *)(BUILDER)->local_fields)
 
 #ifdef __cplusplus
 extern "C" {

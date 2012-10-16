@@ -31,73 +31,36 @@
 extern "C" {
 #endif
 
-static kbool_t konoha_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t konoha_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.namespace", pline);
-	KRequirePackage("konoha.const", pline);
-	KRequirePackage("konoha.global", pline);
-	KRequirePackage("konoha.class", pline);       // subtype
+	KRequirePackage("cstyle",  trace);  // continue, break
 
-	KRequirePackage("konoha.null", pline);
+	KRequirePackage("konoha.namespace", trace);
+	KRequirePackage("konoha.const", trace);
+	KRequirePackage("konoha.global", trace);
+	KRequirePackage("konoha.class", trace);       // subtype
 
-	KRequirePackage("konoha.while",  pline);  // continue, break
+	KRequirePackage("konoha.null", trace);
 
-	KRequirePackage("konoha.var", pline);
+	KRequirePackage("konoha.var", trace);
 
-	KRequirePackage("konoha.object", pline);  // subtype
-	KRequirePackage("konoha.int", pline);
+	KRequirePackage("konoha.object", trace);  // subtype
+	KRequirePackage("konoha.int", trace);
 #ifndef K_USING_NOFLOAT
-	KRequirePackage("konoha.float", pline);
+	KRequirePackage("konoha.float", trace);
 #endif
-	KRequirePackage("konoha.string", pline);
-	KRequirePackage("konoha.array", pline);
-	KRequirePackage("konoha.map", pline);
-	KRequirePackage("konoha.iterator", pline);
+	KRequirePackage("konoha.string", trace);
+	KRequirePackage("konoha.array", trace);
+	KRequirePackage("konoha.map", trace);
+	KRequirePackage("konoha.iterator", trace);
 
-
-	KRequirePackage("konoha.assign", pline);
-	KRequirePackage("konoha.io", pline);
-
+	KRequirePackage("konoha.assign", trace);
+	KRequirePackage("konoha.io", trace);
 
 	return true;
 }
 
-static kbool_t konoha_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t konoha_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
-{
-	KImportPackage(ns, "konoha.namespace", pline);
-	KImportPackage(ns, "konoha.const",  pline);  // TopLevel
-	KImportPackage(ns, "konoha.global", pline);
-	KImportPackage(ns, "konoha.class",  pline);
-
-	KImportPackage(ns, "konoha.null", pline);    // Operator
-
-	KImportPackage(ns, "konoha.while",  pline);
-
-	KImportPackage(ns, "konoha.var",  pline);
-
-	KImportPackage(ns, "konoha.object", pline);  // subtype
-	KImportPackage(ns, "konoha.int",  pline);
-	KImportPackage(ns, "konoha.float", pline);
-	KImportPackage(ns, "konoha.string", pline);
-
-	KImportPackage(ns, "konoha.date", pline);
-	KImportPackage(ns, "konoha.array", pline);
-	KImportPackage(ns, "konoha.map", pline);
-	KImportPackage(ns, "konoha.iterator", pline);
-
-	KImportPackage(ns, "konoha.assign", pline);
-
-	KImportPackage(ns, "konoha.io", pline);
-
-	return true;
-}
-
-static kbool_t konoha_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t konoha_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -105,11 +68,9 @@ static kbool_t konoha_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS,
 KDEFINE_PACKAGE* konoha_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "konoha", "1.0");
+	KSetPackageName(d, "konoha", "1.0");
 	d.initPackage    = konoha_initPackage;
 	d.setupPackage   = konoha_setupPackage;
-	d.initNameSpace  = konoha_initNameSpace;
-	d.setupNameSpace = konoha_setupNameSpace;
 	return &d;
 }
 

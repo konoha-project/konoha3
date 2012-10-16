@@ -51,23 +51,21 @@ static kString* SugarContext_vprintMessage(KonohaContext *kctx, kinfotag_t tagle
 		const char *msg = TAG_t(taglevel);
 		KGrowingBuffer wb;
 		KLIB Kwb_init(&sugarContext->errorMessageBuffer, &wb);
-		size_t pos = wb.m->bytesize;
 		if(uline > 0) {
 			const char *file = FileId_t(uline);
 			KLIB Kwb_printf(kctx, &wb, "%s(%s:%d) " , msg, PLATAPI shortFilePath(file), (kushort_t)uline);
 		}
 		else {
 			KLIB Kwb_printf(kctx, &wb, "%s" , msg);
-			DBG_ASSERT(uline > 0);
 		}
-		size_t len = wb.m->bytesize - pos;
 		KLIB Kwb_vprintf(kctx, &wb, fmt, ap);
 		msg = KLIB Kwb_top(kctx, &wb, 1);
-		kreportf(taglevel, uline, "%s", msg + len);
 		kString *emsg = KLIB new_kString(kctx, sugarContext->errorMessageList, msg, strlen(msg), 0);
+		PLATAPI reportCompilerMessage(kctx, taglevel, S_text(emsg));
 		if(taglevel == ErrTag || taglevel == CritTag) {
 			sugarContext->errorMessageCount++;
 		}
+		KLIB Kwb_free(&wb);
 		return emsg;
 	}
 	return NULL;
@@ -101,8 +99,8 @@ static SugarSyntax* kNameSpace_getSyntax(KonohaContext *kctx, kNameSpace *ns0, k
 static void kStmt_toERR(KonohaContext *kctx, kStmt *stmt, kString *errmsg)
 {
 	if(errmsg != NULL) { // not in case of isBlockedErrorMessage
-		((kStmtVar*)stmt)->syn   = SYN_(Stmt_nameSpace(stmt), KW_ERR);
-		((kStmtVar*)stmt)->build = TSTMT_ERR;
+		((kStmtVar *)stmt)->syn   = SYN_(Stmt_nameSpace(stmt), KW_ERR);
+		((kStmtVar *)stmt)->build = TSTMT_ERR;
 		KLIB kObject_setObject(kctx, stmt, KW_ERR, TY_String, errmsg);
 	}
 }
@@ -140,7 +138,7 @@ static kExpr* kStmt_printMessage2(KonohaContext *kctx, kStmt *stmt, kToken *tk, 
 			uline = tk->uline;
 		}
 		else if(IS_Expr(tk)) {
-			uline = kExpr_uline(kctx, (kExpr*)tk, uline);
+			uline = kExpr_uline(kctx, (kExpr *)tk, uline);
 		}
 	}
 	kString *errmsg = SugarContext_vprintMessage(kctx, taglevel, uline, fmt, ap);

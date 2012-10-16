@@ -12,7 +12,7 @@ static char *loadFile(const char *file, size_t *file_len)
     FILE *fp = fopen(file, "r");
     char buf[1024];
     assert(fp);
-    while (1) {
+    while(1) {
         size = fread(buf, 1, 1024, fp);
         if(size == 0)
             break;

@@ -41,7 +41,7 @@ int main(int argc, char **argv)
     extern struct lio_api trace_api;
     struct lio *lio = lio_open("0.0.0.0", 14801,
             LIO_MODE_READ|LIO_MODE_WRITE, &trace_api);
-    while (i < 1000) {
+    while(i < 1000) {
         fprintf(stderr, "start\n");
         emit(lio, i++);
         fprintf(stderr, "end\n");

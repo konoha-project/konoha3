@@ -29,18 +29,6 @@
 extern "C" {
 #endif
 
-/* ------------------------------------------------------------------------ */
-
-static kbool_t defined_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t defined_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
-
 //----------------------------------------------------------------------------
 
 static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
@@ -96,29 +84,28 @@ static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static kbool_t defined_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t defined_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("defined"), 0, NULL, 0, Precedence_CStylePREUNARY, NULL, Expression_Defined, NULL, NULL, TypeCheck_Defined, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t defined_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t defined_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
+
 
 KDEFINE_PACKAGE* defined_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "defined", "1.0");
+	KSetPackageName(d, "konoha", "1.0");
 	d.initPackage    = defined_initPackage;
 	d.setupPackage   = defined_setupPackage;
-	d.initNameSpace  = defined_initNameSpace;
-	d.setupNameSpace = defined_setupNameSpace;
 	return &d;
 }
 

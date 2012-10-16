@@ -97,12 +97,12 @@ static void MPIData_extend(KonohaContext *kctx, kMPIData *p, int size) {
 
 /* ------------------------------------------------------------------------ */
 static kMPIRequest *newMPIRequest(KonohaContext *kctx) {
-	kMPIRequest* p = (kMPIRequest*)KMalloc_UNTRACE(sizeof(kMPIRequest));
+	kMPIRequest* p = (kMPIRequest *)KMalloc_UNTRACE(sizeof(kMPIRequest));
 	return p;
 }
 
 static kMPIData *newMPIData(KonohaContext *kctx) {
-	kMPIData* p = (kMPIData*)KMalloc_UNTRACE(sizeof(kMPIData));
+	kMPIData* p = (kMPIData *)KMalloc_UNTRACE(sizeof(kMPIData));
 	return p;
 }
 
@@ -533,16 +533,16 @@ static void kmodmpi_free(KonohaContext *kctx, struct KonohaModule *baseh)
 
 #define MOD_mpi 19/*TODO*/
 
-static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.bytes", pline);
-	KRequirePackage("konoha.float", pline);
-	kmodmpi_t *base = (kmodmpi_t*)KCalloc_UNTRACE(sizeof(kmodmpi_t), 1);
+	KRequirePackage("konoha.bytes", trace);
+	KRequirePackage("konoha.float", trace);
+	kmodmpi_t *base = (kmodmpi_t *)KCalloc_UNTRACE(sizeof(kmodmpi_t), 1);
 	base->h.name     = "mpi";
 	base->h.setup    = kmodmpi_setup;
 	base->h.reftrace = kmodmpi_reftrace;
 	base->h.free     = kmodmpi_free;
-	KLIB KonohaRuntime_setModule(kctx, MOD_mpi, &base->h, pline);
+	KLIB KonohaRuntime_setModule(kctx, MOD_mpi, &base->h, trace);
 
 	MPI_Init(&argc, (char ***)&args);
 	g_comm_world = (kMPIComm *)KMalloc_UNTRACE(sizeof(kMPIComm));
@@ -569,11 +569,11 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	//	.structname = "MPIOp",
 	//	.typeId = TY_newid
 	//};
-	KonohaClass *CT_MPI = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MPIDef, pline);
-	KonohaClass *CT_MPIComm = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MPICommDef, pline);
-	KonohaClass *CT_MPIRequest = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MPIRequestDef, pline);
-	KonohaClass *CT_MPIData = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MPIDataDef, pline);
-	//KonohaClass *CT_MPIOp = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MPIOpDef, pline);
+	KonohaClass *CT_MPI = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MPIDef, trace);
+	KonohaClass *CT_MPIComm = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MPICommDef, trace);
+	KonohaClass *CT_MPIRequest = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MPIRequestDef, trace);
+	KonohaClass *CT_MPIData = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MPIDataDef, trace);
+	//KonohaClass *CT_MPIOp = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MPIOpDef, trace);
 #define TY_MPI         (CT_MPI->typeId)
 #define TY_MPIComm     (CT_MPIComm->typeId)
 #define TY_MPIRequest  (CT_MPIRequest->typeId)
@@ -650,21 +650,11 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 			{"BXOR", TY_MPIOp, (kint_t)MPI_BXOR},
 			{}
 	};
-	KLIB kNameSpace_loadConstData(kctx, ns, (const char **)OpData, pline);
+	KLIB kNameSpace_loadConstData(kctx, ns, (const char **)OpData, trace);
 	return true;
 }
 
-static kbool_t mpi_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t mpi_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t mpi_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t mpi_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -675,8 +665,6 @@ KDEFINE_PACKAGE* mpi_init(void)
 		KPACKNAME("mpi", "1.0"),
 		.initPackage    = mpi_initPackage,
 		.setupPackage   = mpi_setupPackage,
-		.initNameSpace  = mpi_initNameSpace,
-		.setupNameSpace = mpi_setupNameSpace,
 	};
 	return &d;
 }

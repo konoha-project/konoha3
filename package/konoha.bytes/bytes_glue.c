@@ -37,7 +37,7 @@ extern "C"{
 
 static void kBytes_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct kBytesVar *ba = (struct kBytesVar*)o;
+	struct kBytesVar *ba = (struct kBytesVar *)o;
 	DBG_ASSERT((size_t)conf >= 0);
 	ba->bytesize = (size_t)conf;
 	ba->byteptr = NULL;
@@ -46,7 +46,7 @@ static void kBytes_init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void kBytes_free(KonohaContext *kctx, kObject *o)
 {
-	struct kBytesVar *ba = (struct kBytesVar*)o;
+	struct kBytesVar *ba = (struct kBytesVar *)o;
 	if(ba->byteptr != NULL) {
 		KFree(ba->buf, ba->bytesize);
 		ba->byteptr = NULL;
@@ -121,7 +121,7 @@ static void kBytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffe
 //	size_t processedSize = 0;
 //	size_t processedTotalSize = processedSize;
 //	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-//	while (inBytesLeft > 0 && iconv_ret == -1) {
+//	while(inBytesLeft > 0 && iconv_ret == -1) {
 //		iconv_ret = PLATAPI iconv_i((uintptr_t)conv, inbuf, &inBytesLeft, outbuf, &outBytesLeft);
 //		if(iconv_ret == -1 && errno == E2BIG) {
 //			// input is too big.
@@ -142,7 +142,7 @@ static void kBytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffe
 //			);
 //			KLIB Kwb_free(&wb);
 //			return NULL;   // FIXME
-//			//return (kBytes*)(CT_Bytes->defaultNullValue_OnGlobalConstList);
+//			//return (kBytes *)(CT_Bytes->defaultNullValue_OnGlobalConstList);
 //
 //		} else {
 //			// finished. iconv_ret != -1
@@ -156,7 +156,7 @@ static void kBytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffe
 //	PLATAPI iconv_close_i((uintptr_t)conv);
 //
 //	const char *bufferTopChar = KLIB Kwb_top(kctx, &wb, 1);
-//	struct kBytesVar *targetBytes = NULL; // FIXME (struct kBytesVar*)KLIB new_kObjectDontUseThis(kctx, CT_Bytes, processedTotalSize, gcstack); // ensure bytes ends with Zero
+//	struct kBytesVar *targetBytes = NULL; // FIXME (struct kBytesVar *)KLIB new_kObjectDontUseThis(kctx, CT_Bytes, processedTotalSize, gcstack); // ensure bytes ends with Zero
 //	memcpy(targetBytes->buf, bufferTopChar, processedTotalSize); // including NUL terminate by ensuredZeo
 //	KLIB Kwb_free(&wb);
 //	return targetBytes;
@@ -194,7 +194,7 @@ static void kBytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffe
 //		KReturn(KNULL(String));
 //	}
 //	INIT_GCSTACK();
-//	if(fromCharset != (kString*)(CT_String->defaultNullValue_OnGlobalConstList)) {
+//	if(fromCharset != (kString *)(CT_String->defaultNullValue_OnGlobalConstList)) {
 //		targetBytes = Convert_newBytes(kctx, _GcStack, sourceBytes, S_text(fromCharset), "UTF-8");
 //	} else {
 //		// conv from default encoding
@@ -231,7 +231,8 @@ static KMETHOD Bytes_getSize(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Bytes_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *ba = sfp[0].asBytes;
-	size_t n = check_index(kctx, sfp[1].intValue, ba->bytesize, sfp[K_RTNIDX].callerFileLine);
+	size_t n = (size_t)sfp[1].intValue;
+	KCheckIndex(n, ba->bytesize);
 	KReturnUnboxValue(ba->utext[n]);
 }
 
@@ -239,8 +240,9 @@ static KMETHOD Bytes_get(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Bytes_set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *ba = sfp[0].asBytes;
-	size_t index = check_index(kctx, sfp[1].intValue, ba->bytesize, sfp[K_RTNIDX].callerFileLine);
-	ba->buf[index] = sfp[2].intValue;
+	size_t n = (size_t)sfp[1].intValue;
+	KCheckIndex(n, ba->bytesize);
+	ba->buf[n] = sfp[2].intValue;
 	KReturnVoid();
 }
 
@@ -267,7 +269,7 @@ static void Kwb_convertCharset(KonohaContext *kctx, KGrowingBuffer* wb, const ch
 
 static kBytes* new_kBytes(KonohaContext *kctx, kArray *gcstack, KonohaClass *c, const char *buf, size_t bufsiz)
 {
-	kBytes* ba = (kBytes*) KLIB new_kObject(kctx, gcstack, c, bufsiz);
+	kBytes* ba = (kBytes *) KLIB new_kObject(kctx, gcstack, c, bufsiz);
 	if(bufsiz > 0) {
 		memcpy(ba->buf, buf, bufsiz);
 	}
@@ -310,7 +312,7 @@ static KMETHOD String_getBytes(KonohaContext *kctx, KonohaStack *sfp)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KDEFINE_CLASS defBytes = {0};
 	SETSTRUCTNAME(defBytes, Bytes);
@@ -319,7 +321,7 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	defBytes.init    = kBytes_init;
 	defBytes.p       = kBytes_p;
 
-	KonohaClass *cBytes = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defBytes, pline);
+	KonohaClass *cBytes = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defBytes, trace);
 	int TY_Bytes = cBytes->typeId;
 	int FN_encoding = FN_("encoding");
 	int FN_index = FN_("index");
@@ -342,74 +344,72 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	return true;
 }
 
-static kbool_t bytes_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t bytes_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
-static KMETHOD TokenFunc_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kTokenVar *tk = (kTokenVar *)sfp[1].asObject;
-	int ch, prev = '/', pos = 1;
-	const char *source = S_text(sfp[2].asString);
-	while((ch = source[pos++]) != 0) {
-		if(ch == '\n') {
-			break;
-		}
-		if(ch == '\'' && prev != '\\') {
-			if(IS_NOTNULL(tk)) {
-				KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, source + 1, (pos-2), 0));
-				tk->unresolvedTokenType = SYM_("$SingleQuotedChar");
-			}
-			KReturnUnboxValue(pos);
-		}
-		prev = ch;
-	}
-	if(IS_NOTNULL(tk)) {
-		kreportf(ErrTag, tk->uline, "must close with \'");
-	}
-	KReturnUnboxValue(0);
-}
+//static KMETHOD TokenFunc_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	kTokenVar *tk = (kTokenVar *)sfp[1].asObject;
+//	int ch, prev = '/', pos = 1;
+//	const char *source = S_text(sfp[2].asString);
+//	while((ch = source[pos++]) != 0) {
+//		if(ch == '\n') {
+//			break;
+//		}
+//		if(ch == '\'' && prev != '\\') {
+//			if(IS_NOTNULL(tk)) {
+//				KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, source + 1, (pos-2), 0));
+//				tk->unresolvedTokenType = SYM_("$SingleQuotedChar");
+//			}
+//			KReturnUnboxValue(pos);
+//		}
+//		prev = ch;
+//	}
+//	if(IS_NOTNULL(tk)) {
+//		SUGAR kToken_printMessage(kctx, tk, ErrTag, "must close with %s", "'");
+//	}
+//	KReturnUnboxValue(0);
+//}
+//
+//static KMETHOD TypeCheck_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	VAR_TypeCheck(stmt, expr, gma, reqty);
+//	kToken *tk = expr->termToken;
+//	kString *s = tk->text;
+//	DBG_P("string:'%s'", S_text(s));
+//	if(S_size(s) == 1) {
+//		int ch = S_text(s)[0];
+//		KReturn(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_int, ch));
+//	} else {
+//		SUGAR kStmt_printMessage2(kctx, stmt, (kToken *)expr, ErrTag, "single quote doesn't accept multi characters, '%s'", S_text(s));
+//	}
+//	KReturn(K_NULLEXPR);
+//}
 
-static KMETHOD TypeCheck_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_TypeCheck(stmt, expr, gma, reqty);
-	kToken *tk = expr->termToken;
-	kString *s = tk->text;
-	DBG_P("string:'%s'", S_text(s));
-	if(S_size(s) == 1) {
-		int ch = S_text(s)[0];
-		KReturn(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_int, ch));
-	} else {
-		SUGAR kStmt_printMessage2(kctx, stmt, (kToken*)expr, ErrTag, "single quote doesn't accept multi characters, '%s'", S_text(s));
-	}
-	KReturn(K_NULLEXPR);
-}
-
-static kbool_t bytes_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
-{
-	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("$SingleQuotedChar"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_SingleQuotedChar, },
-		{ KW_END, },
-	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
-	SUGAR kNameSpace_setTokenFunc(kctx, ns, SYM_("$SingleQuotedChar"), KonohaChar_Quote, new_SugarFunc(ns, TokenFunc_SingleQuotedChar));
-	return true;
-}
-
-static kbool_t bytes_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
-{
-	return true;
-}
+//static kbool_t bytes_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+//{
+//	KDEFINE_SYNTAX SYNTAX[] = {
+//		{ SYM_("$SingleQuotedChar"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_SingleQuotedChar, },
+//		{ KW_END, },
+//	};
+//	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
+//	SUGAR kNameSpace_setTokenFunc(kctx, ns, SYM_("$SingleQuotedChar"), KonohaChar_Quote, new_SugarFunc(ns, TokenFunc_SingleQuotedChar));
+//	return true;
+//}
+//
+//static kbool_t bytes_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+//{
+//	return true;
+//}
 
 KDEFINE_PACKAGE* bytes_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "bytes", "1.0");
+	KSetPackageName(d, "konoha", "1.0");
 	d.initPackage    = bytes_initPackage;
 	d.setupPackage   = bytes_setupPackage;
-	d.initNameSpace  = bytes_initNameSpace;
-	d.setupNameSpace = bytes_setupNameSpace;
 	return &d;
 }
 

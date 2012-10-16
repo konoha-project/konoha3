@@ -30,6 +30,9 @@
 extern "C"{
 #endif
 
+// ---------------------------------------------------------------------------
+/* KLIB extension */
+
 static KMETHOD MethodFunc_ObjectFieldGetter(KonohaContext *kctx, KonohaStack *sfp)
 {
 	size_t delta = sfp[K_MTDIDX].methodCallInfo->delta;
@@ -59,7 +62,7 @@ static kMethod *new_FieldGetter(KonohaContext *kctx, kArray *gcstack, ktype_t ci
 	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_UnboxFieldGetter : MethodFunc_ObjectFieldGetter;
 	kMethod *mtd = KLIB new_kMethod(kctx, gcstack, kMethod_Public|kMethod_Immutable, cid, mn, f);
 	KLIB kMethod_setParam(kctx, mtd, ty, 0, NULL);
-	((kMethodVar*)mtd)->delta = idx;  // FIXME
+	((kMethodVar *)mtd)->delta = idx;  // FIXME
 	return mtd;
 }
 
@@ -70,7 +73,7 @@ static kMethod *new_FieldSetter(KonohaContext *kctx, kArray *gcstack, ktype_t ci
 	kparamtype_t p = {ty, FN_("x")};
 	kMethod *mtd = KLIB new_kMethod(kctx, gcstack, kMethod_Public, cid, mn, f);
 	KLIB kMethod_setParam(kctx, mtd, ty, 1, &p);
-	((kMethodVar*)mtd)->delta = idx;   // FIXME
+	((kMethodVar *)mtd)->delta = idx;   // FIXME
 	return mtd;
 }
 
@@ -120,7 +123,7 @@ static kMethod *new_PrototypeGetter(KonohaContext *kctx, kArray *gcstack, ktype_
 	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_UnboxPrototypeGetter : MethodFunc_ObjectPrototypeGetter;
 	kMethod *mtd = KLIB new_kMethod(kctx, gcstack, kMethod_Public|kMethod_Immutable, cid, mn, f);
 	KLIB kMethod_setParam(kctx, mtd, ty, 0, NULL);
-	((kMethodVar*)mtd)->delta = sym;
+	((kMethodVar *)mtd)->delta = sym;
 	return mtd;
 }
 
@@ -131,7 +134,7 @@ static kMethod *new_PrototypeSetter(KonohaContext *kctx, kArray *gcstack, ktype_
 	kparamtype_t p = {ty, FN_("x")};
 	kMethod *mtd = KLIB new_kMethod(kctx, gcstack, kMethod_Public, cid, mn, f);
 	KLIB kMethod_setParam(kctx, mtd, ty, 1, &p);
-	((kMethodVar*)mtd)->delta = sym;
+	((kMethodVar *)mtd)->delta = sym;
 	return mtd;
 }
 
@@ -139,11 +142,11 @@ static kbool_t KonohaClass_addField(KonohaContext *kctx, KonohaClass *ct, int fl
 {
 	int pos = ct->fieldsize;
 	if(unlikely(ct->methodList_OnGlobalConstList == K_EMPTYARRAY)) {
-		((KonohaClassVar*)ct)->methodList_OnGlobalConstList = new_(MethodArray, 8, OnGlobalConstList);
+		((KonohaClassVar *)ct)->methodList_OnGlobalConstList = new_(MethodArray, 8, OnGlobalConstList);
 	}
 	INIT_GCSTACK();
 	if(pos < ct->fieldAllocSize) {
-		KonohaClassVar *definedClass = (KonohaClassVar*)ct;
+		KonohaClassVar *definedClass = (KonohaClassVar *)ct;
 		definedClass->fieldsize += 1;
 		definedClass->fieldItems[pos].flag = flag;
 		definedClass->fieldItems[pos].ty = ty;
@@ -183,20 +186,6 @@ static kbool_t KonohaClass_addField(KonohaContext *kctx, KonohaClass *ct, int fl
 
 // --------------------------------------------------------------------------
 
-static kbool_t field_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
-{
-	KSET_KLIB2(kMethod_indexOfField, KLIB2_Method_indexOfField, pline);
-	KSET_KLIB2(KonohaClass_addField, KonohaClass_addField, pline);
-	return true;
-}
-
-static kbool_t field_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
-
-// --------------------------------------------------------------------------
-
 static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
@@ -214,17 +203,27 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static kbool_t field_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t field_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("."), 0, NULL, -1, 0, NULL, NULL, NULL, NULL, TypeCheck_Getter, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t field_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+// --------------------------------------------------------------------------
+
+static kbool_t field_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	KSET_KLIB2(kMethod_indexOfField, KLIB2_Method_indexOfField, trace);
+	KSET_KLIB2(KonohaClass_addField, KonohaClass_addField, trace);
+	field_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t field_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -234,11 +233,9 @@ static kbool_t field_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 KDEFINE_PACKAGE* field_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "field", "1.0");
+	KSetPackageName(d, "field", "1.0");
 	d.initPackage    = field_initPackage;
 	d.setupPackage   = field_setupPackage;
-	d.initNameSpace  = field_initNameSpace;
-	d.setupNameSpace = field_setupNameSpace;
 	return &d;
 }
 

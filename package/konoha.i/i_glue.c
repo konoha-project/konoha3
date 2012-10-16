@@ -68,7 +68,7 @@ extern "C"{
 static void Method_writeAttributeToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuffer *wb)
 {
 	size_t i;
-	for(i = 0; i < sizeof(MethodFlagData)/sizeof(const char*); i++) {
+	for(i = 0; i < sizeof(MethodFlagData)/sizeof(const char *); i++) {
 		uintptr_t flagmask = 1 << i;
 		if((mtd->flag && flagmask) == flagmask) {
 			KLIB Kwb_printf(kctx, wb, "@%s ", MethodFlagData[i]);
@@ -149,7 +149,7 @@ static KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp)
 #define _Public   kMethod_Public
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(NameSpace_man), TY_void, TY_NameSpace, MN_("man"), 1, TY_Object, FN_("x") | FN_COERCION,
@@ -159,17 +159,7 @@ static kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, cons
 	return true;
 }
 
-static kbool_t i_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t i_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t i_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t i_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -177,11 +167,9 @@ static kbool_t i_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNam
 KDEFINE_PACKAGE* i_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "konoha.i", "1.0");
+	KSetPackageName(d, "konoha.i", "1.0");
 	d.initPackage    = i_initPackage;
 	d.setupPackage   = i_setupPackage;
-	d.initNameSpace  = i_initNameSpace;
-	d.setupNameSpace = i_setupNameSpace;
 	return &d;
 }
 

@@ -176,14 +176,12 @@ static kinline const char* TAG_t(kinfotag_t t)
 	return tags[(int)t];
 }
 
-static kinline size_t check_index(KonohaContext *kctx, kint_t n, size_t max, kfileline_t pline)
-{
-	size_t n1 = (size_t)n;
-	if(unlikely(!(n1 < max))) {
-		KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfArrayBoundary"), NULL, pline, NULL);
-	}
-	return n1;
-}
+#define KCheckIndex(N, MAX) \
+	if(unlikely (!(((size_t)N) < ((size_t)MAX)))) {\
+		KMakeTrace(trace, sfp);\
+		KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfArrayBoundary"), NULL, trace);\
+	}\
+
 
 #ifdef USE_STRINGLIB
 
@@ -213,7 +211,7 @@ static const char _utf8len[] = {
 //{
 //	DBG_ASSERT(mtd != mtd2);
 //	DBG_ASSERT(mtd->proceedNUL == NULL);
-//	KFieldInit(mtd, ((kMethodVar*)mtd)->proceedNUL, mtd2);
+//	KFieldInit(mtd, ((kMethodVar *)mtd)->proceedNUL, mtd2);
 //}
 
 #ifdef __cplusplus

@@ -40,7 +40,7 @@ static inline void LIST_OP(T, append) (LIST(T) *list, T v) {\
 }\
 static inline void LIST_OP(T, each) (LIST(T) *list, void (*f)(ELEM(T) *e, void *arg), void *arg) {\
     ELEM(T) *e = list->head->next, *next;\
-    while (e) {\
+    while(e) {\
         next = e->next;\
         f(e, arg);\
         e = next;\

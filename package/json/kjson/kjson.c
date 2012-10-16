@@ -130,7 +130,7 @@ static void _JSONArray_append(JSONArray *a, JSON o)
 {
     if(a->length + 1 >= a->capacity) {
         uint32_t newsize = 1 << LOG2(a->capacity * 2 + 1);
-        a->list = (JSON*) KJSON_REALLOC(a->list, newsize * sizeof(JSON));
+        a->list = (JSON *) KJSON_REALLOC(a->list, newsize * sizeof(JSON));
         a->capacity = newsize;
     }
     a->list[a->length++] = o;
@@ -554,7 +554,7 @@ static void JSONObject_toString(string_builder *sb, JSON json)
     JSONObject *o = toObj(json.val);
     if((r = kmap_next(&o->child, &itr)) != NULL) {
         goto L_internal;
-        while ((r = kmap_next(&o->child, &itr)) != NULL) {
+        while((r = kmap_next(&o->child, &itr)) != NULL) {
             string_builder_add(sb, ',');
             L_internal:
             _JSONString_toString(sb, r->k);
@@ -627,7 +627,7 @@ static void JSONUString_toString(string_builder *sb, JSON json)
     const char *e = o->str + o->length;
     string_builder_ensure_size(sb, o->length+2/* = strlen("\"\") */);
     string_builder_add(sb, '"');
-    while (s < e) {
+    while(s < e) {
         unsigned char c = *s;
         string_builder_ensure_size(sb, 8);
         if(c & 0x80) {
@@ -774,7 +774,7 @@ static void JSONObject_dump(FILE *fp, JSON json)
     kmap_iterator itr = {0};
     fputs("{", fp);
     JSONObject *o = toObj(json.val);
-    while ((r = kmap_next(&o->child, &itr)) != NULL) {
+    while((r = kmap_next(&o->child, &itr)) != NULL) {
         fprintf(fp, "\"%s\" : ", r->k->str);
         JSON_dump(fp, (JSON)r->v);
         fputs(",", fp);
@@ -823,7 +823,7 @@ static inline uint32_t djbhash(const char *p, uint32_t len)
     uint32_t hash = 5381;
     const unsigned char *      s = (const unsigned char *) p;
     const unsigned char *const e = (const unsigned char *const) p + len;
-    while (s < e) {
+    while(s < e) {
         hash = ((hash << 5) + hash) + *s++;
     }
     return (hash & 0x7fffffff);
@@ -903,7 +903,7 @@ static void hashmap_record_resize(hashmap_t *m)
             if(r->hash && hashmap_set_no_resize(m, r) == KMAP_FAILED)
                 continue;
         }
-    } while (0);
+    } while(0);
     KJSON_FREE(head/*, oldsize*sizeof(map_record_t)*/);
 }
 
@@ -914,7 +914,7 @@ static map_status_t hashmap_set(hashmap_t *m, map_record_t *rec)
         if((res = hashmap_set_no_resize(m, rec)) != KMAP_FAILED)
             return res;
         hashmap_record_resize(m);
-    } while (1);
+    } while(1);
     /* unreachable */
     return KMAP_FAILED;
 }

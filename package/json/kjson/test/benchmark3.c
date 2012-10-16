@@ -19,7 +19,7 @@ static void test0()
     char buf[SIZE], *str;
     FILE *fp = fopen(JSON_FILE, "r");
     reset_timer();
-    while ((str = loadLine(fp, buf)) != NULL) {
+    while((str = loadLine(fp, buf)) != NULL) {
         len = strlen(str);
         filesize += len;
     }
@@ -33,7 +33,7 @@ static void test1()
     char buf[SIZE], *str;
     FILE *fp = fopen(JSON_FILE, "r");
     reset_timer();
-    while ((str = loadLine(fp, buf)) != NULL) {
+    while((str = loadLine(fp, buf)) != NULL) {
         len = strlen(str);
         JSON json = parseJSON(str, str+len);
         assert(JSON_type(json) == JSON_Object);
@@ -49,7 +49,7 @@ static void test2()
     char buf[SIZE], *str;
     FILE *fp = fopen(JSON_FILE, "r");
     reset_timer();
-    while ((str = loadLine(fp, buf)) != NULL) {
+    while((str = loadLine(fp, buf)) != NULL) {
         len = strlen(str);
         JSON json = parseJSON(str, str+len);
         char *p = JSON_toStringWithLength(json, &len);

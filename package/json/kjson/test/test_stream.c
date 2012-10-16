@@ -12,7 +12,7 @@ static void test_string(void)
         buf[i] = i;
         ans += (char)i;
     }
-    input_stream *ins = new_string_input_stream((const char*)buf, 1024, 0);
+    input_stream *ins = new_string_input_stream((const char *)buf, 1024, 0);
     int sum = 0;
     char cur;
     for_each_istream(ins, cur) {
@@ -60,7 +60,7 @@ static void test_string(void)
 //        if((fp = fopen(files[i], "r")) != NULL) {
 //            char buf[1024];
 //            size_t len;
-//            while ((len = fread(buf, 1, sizeof(buf), fp)) > 0) {
+//            while((len = fread(buf, 1, sizeof(buf), fp)) > 0) {
 //                int j;
 //                for (j = 0; j < len; j++) {
 //                    ans += (char)buf[j];
@@ -69,7 +69,7 @@ static void test_string(void)
 //            fclose(fp);
 //        }
 //
-//        input_stream *ins = new_file_input_stream((char*)files[i], 1024);
+//        input_stream *ins = new_file_input_stream((char *)files[i], 1024);
 //        input_stream_iterator itr = {};
 //        char cur;
 //        for_each_istream(ins, itr, cur) {

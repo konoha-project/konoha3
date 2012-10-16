@@ -7,7 +7,7 @@ extern "C" {
 
 static bool print_apply(struct pool_plugin *p, struct LogEntry *e, uint32_t state)
 {
-    log_dump(stderr, "", (struct Log*) &e->data, "\n", 1);
+    log_dump(stderr, "", (struct Log *) &e->data, "\n", 1);
     p->apply->Apply(p->apply, e, state);
     return true;
 }

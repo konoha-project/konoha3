@@ -33,17 +33,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-// --------------------------------------------------------------------------
-
-static kbool_t shell_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t shell_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
 
 // --------------------------------------------------------------------------
 
@@ -158,7 +147,7 @@ static KMETHOD Statement_dsh(KonohaContext *kctx, KonohaStack *sfp)
 	//TODO: generate eval("cmd") syntax
 
 	kNameSpace *ns = Stmt_nameSpace(stmt);
-	SugarSyntaxVar *syn = (SugarSyntaxVar*) SYN_(ns, KW_ExprMethodCall);
+	SugarSyntaxVar *syn = (SugarSyntaxVar *) SYN_(ns, KW_ExprMethodCall);
 	kTokenVar *callToken = new_(TokenVar, 0, OnGcStack);
 	kExpr *callExpr = new_ConstValueExpr(kctx, TY_String, UPCAST(cmd));
 	callToken->resolvedSymbol = MN_("call");
@@ -226,7 +215,7 @@ static KMETHOD Statement_Shell(KonohaContext *kctx, KonohaStack *sfp)
 	if(tokenList != NULL) {
 		kString *cmd = NULL;
 		if(IS_Token(tokenList)) {
-			cmd = ((kToken*)tokenList)->text;
+			cmd = ((kToken *)tokenList)->text;
 		}
 		else {
 			DBG_ASSERT(IS_Array(tokenList));
@@ -242,20 +231,26 @@ static KMETHOD Statement_Shell(KonohaContext *kctx, KonohaStack *sfp)
 // ----------------------------------------------------------------------------
 /* define class */
 
-static kbool_t shell_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t shell_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	//KImportPackage(ns, "dscript.dollar", pline);
-	KImportPackage(ns, "dscript.subproc", pline);
+	//KImportPackage(ns, "dscript.dollar", trace);
+	KImportPackage(ns, "dscript.subproc", trace);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("dsh"), 0, "\"dsh\" $Token*", 0, 0, NULL, NULL, Statement_dsh, Statement_dsh, NULL, },
 		{ SYM_("$Shell"), 0, "$Shell $Token*", 0, 0, PatternMatch_Shell, NULL, Statement_Shell, Statement_Shell},
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t shell_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t shell_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	shell_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t shell_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -263,11 +258,9 @@ static kbool_t shell_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 KDEFINE_PACKAGE* shell_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "dscript.shell", "1.0");
+	KSetPackageName(d, "dshell", "1.0");
 	d.initPackage    = shell_initPackage;
 	d.setupPackage   = shell_setupPackage;
-	d.initNameSpace  = shell_initNameSpace;
-	d.setupNameSpace = shell_setupNameSpace;
 	return &d;
 }
 

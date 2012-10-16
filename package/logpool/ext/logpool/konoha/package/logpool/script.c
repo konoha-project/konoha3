@@ -14,7 +14,7 @@ static char *loadFile(char *file, size_t *plen)
     if((f = fopen(file, "r")) != NULL) {
         char buf[1024];
         size_t len = 0;
-        while ((len = fread(buf, 1, sizeof(buf), f)) > 0) {
+        while((len = fread(buf, 1, sizeof(buf), f)) > 0) {
             assert(p - script < 1024);
             memcpy(p, buf, len);
             p += len;
@@ -48,7 +48,7 @@ int main(int argc, char **argv)
     memcached_set(mc, "dump_init", strlen("dump_init"), script, script_len, 0, 0);
     logpool_procedure(logpool, "dump", strlen("dump"));
     struct Log *logbuf = alloca(sizeof(struct Log) + 256);
-    while (1) {
+    while(1) {
         if(logpool_client_get(logpool, logbuf, 256) == NULL) {
             break;
         }

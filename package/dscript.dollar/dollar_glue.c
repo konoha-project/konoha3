@@ -30,23 +30,7 @@ extern "C" {
 #endif
 // --------------------------------------------------------------------------
 
-static kbool_t dollar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t dollar_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
-
 // --------------------------------------------------------------------------
-
-//static kExpr* Expression_DollarSymbol(KonohaContext *kctx, kStmt *stmt, kToken *tk)
-//{
-//
-//}
-
 
 static KMETHOD Expression_dollar(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -88,17 +72,23 @@ static KMETHOD Expression_dollar(KonohaContext *kctx, KonohaStack *sfp)
 // ----------------------------------------------------------------------------
 /* define class */
 
-static kbool_t dollar_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t dollar_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("$"), 0, NULL, 0, Precedence_CStyleCALL, NULL, Expression_dollar, NULL, NULL, NULL, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t dollar_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t dollar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	dollar_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t dollar_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -106,11 +96,9 @@ static kbool_t dollar_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS,
 KDEFINE_PACKAGE* dollar_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "dscript", "1.0");
+	KSetPackageName(d, "dscript", "1.0");
 	d.initPackage    = dollar_initPackage;
 	d.setupPackage   = dollar_setupPackage;
-	d.initNameSpace  = dollar_initNameSpace;
-	d.setupNameSpace = dollar_setupNameSpace;
 	return &d;
 }
 

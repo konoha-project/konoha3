@@ -3,7 +3,7 @@
 
 #ifndef APACHE_GLUE_H
 #define APACHE_GLUE_H
-#define kapacheshare      ((kapacheshare_t*)kctx->modshare[MOD_APACHE])
+#define kapacheshare      ((kapacheshare_t *)kctx->modshare[MOD_APACHE])
 #define CT_Request        kapacheshare->cRequest
 #define CT_AprTable       kapacheshare->cAprTable
 #define CT_AprTableEntry  kapacheshare->cAprTableEntry

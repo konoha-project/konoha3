@@ -89,7 +89,8 @@ static KMETHOD Int_opDIV(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kint_t n = sfp[1].intValue;
 	if(unlikely(n == 0)) {
-		KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
+		KMakeTrace(trace, sfp);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), NULL, trace);
 	}
 	KReturnUnboxValue(sfp[0].intValue / n);
 }
@@ -99,7 +100,8 @@ static KMETHOD Int_opMOD(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kint_t n = sfp[1].intValue;
 	if(unlikely(n == 0)) {
-		KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
+		KMakeTrace(trace, sfp);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("ZeroDivided"), NULL, trace);
 	}
 	KReturnUnboxValue(sfp[0].intValue % n);
 }
@@ -208,7 +210,7 @@ static KMETHOD String_opNEQ(KonohaContext *kctx, KonohaStack *sfp)
 //## This Func.new(Object self, Method mtd);
 static KMETHOD Func_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kFuncVar *fo = (kFuncVar*)sfp[0].asFunc;
+	kFuncVar *fo = (kFuncVar *)sfp[0].asFunc;
 	KFieldSet(fo, fo->self, sfp[1].asObject);
 	KFieldSet(fo, fo->mtd,  sfp[2].asMethod);
 	KReturn(fo);
@@ -232,17 +234,17 @@ static KMETHOD System_assert(KonohaContext *kctx, KonohaStack *sfp)
 	kbool_t cond = sfp[1].boolValue;
 //	konoha_detectFailedAssert = false;
 	if(cond == false) {
+		KMakeTrace(trace, sfp);
 		konoha_detectFailedAssert = true;
-		KLIB KonohaRuntime_raise(kctx, EXPT_("Assertion"), sfp, sfp[K_RTNIDX].callerFileLine, NULL);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("Assertion"), NULL, trace);
 	}
 }
 
 //## method void System.p(@Coercion String msg);
 static KMETHOD System_p(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kfileline_t uline = sfp[K_RTNIDX].callerFileLine;
 	const char *text = (IS_NULL(sfp[1].asString)) ? K_NULLTEXT : S_text(sfp[1].asString);
-	kreportf(NoneTag, uline, "%s", text);
+	PLATAPI reportUserMessage(kctx, DebugTag, sfp[K_RTNIDX].callerFileLine, text, true/*isNewLine*/);
 }
 
 //## method void System.gc();

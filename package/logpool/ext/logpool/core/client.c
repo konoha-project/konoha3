@@ -94,7 +94,7 @@ static void *client_thread_main(void *args)
 static void client_thread_start(struct io *io)
 {
     pthread_create(&io->thread, NULL, client_thread_main, io);
-    while (io->flags & IO_MODE_THREAD) {
+    while(io->flags & IO_MODE_THREAD) {
         mfence();
     }
 }
@@ -121,7 +121,7 @@ static int io_client_read(struct io *io, const void *data, uint32_t nbyte)
         int log_size;
         struct Log *log;
         //L_redo:;
-        while (range_stream_empty(cs)) {
+        while(range_stream_empty(cs)) {
             if((io->flags & IO_MODE_THREAD) == 0) {
                 break;
             }
@@ -137,7 +137,7 @@ static int io_client_read(struct io *io, const void *data, uint32_t nbyte)
             debug_print(1, "stream connection close");
             return IO_FAILED;
         }
-        memcpy((void*)data, log, nbyte);
+        memcpy((void *)data, log, nbyte);
         return IO_OK;
     }
     debug_print(1, "stream was not connected");

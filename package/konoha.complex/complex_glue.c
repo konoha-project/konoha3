@@ -646,17 +646,17 @@ static KMETHOD Complex_conjl(KonohaContext *kctx, KonohaStack *sfp)
 #define _Public   kMethod_Public
 #define _F(F)     (intptr_t)(F)
 
-static kbool_t Complex_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t Complex_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	/* Class Definition */
 	/* If you want to create Generic class like Array<T>, see konoha.map package */
-	KRequirePackage("konoha.float", pline);
+	KRequirePackage("konoha.float", trace);
 	KDEFINE_CLASS defComplex = {0};
 	SETSTRUCTNAME(defComplex, Complex);
 	defComplex.cflag     = kClass_Final;
 	defComplex.init      = Complex_init;
 	defComplex.free      = Complex_free;
-	KonohaClass *ComplexClass = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defComplex, pline);
+	KonohaClass *ComplexClass = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defComplex, trace);
 
 	/* You can define methods with the following procedures. */
 	int TY_Complex = ComplexClass->typeId;
@@ -734,21 +734,11 @@ static kbool_t Complex_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		{"FLOAT_EPSILON", TY_float, DBL_EPSILON},
 		{} /* <= sentinel */
 	};
-	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(FloatData), pline);
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(FloatData), trace);
 	return true;
 }
 
-static kbool_t Complex_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t Complex_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t Complex_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t Complex_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -756,11 +746,9 @@ static kbool_t Complex_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS
 KDEFINE_PACKAGE* complex_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "hello_world", "1.0");
+	KSetPackageName(d, "konoha", "1.0");
 	d.initPackage    = Complex_initPackage;
 	d.setupPackage   = Complex_setupPackage;
-	d.initNameSpace  = Complex_initNameSpace;
-	d.setupNameSpace = Complex_setupNameSpace;
 	return &d;
 }
 

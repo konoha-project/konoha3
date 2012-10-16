@@ -66,7 +66,7 @@ static KMETHOD Object_as(KonohaContext *kctx, KonohaStack *sfp)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t subtype_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t subtype_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	int FN_type = FN_("type");
 	KDEFINE_METHOD MethodData[] = {
@@ -79,10 +79,7 @@ static kbool_t subtype_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	return true;
 }
 
-static kbool_t subtype_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
+/* Syntax */
 
 static KMETHOD TypeCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -127,20 +124,27 @@ static KMETHOD TypeCheck_As(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-// ----------------------------------------------------------------------------
-
-static kbool_t subtype_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+static kbool_t subtype_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("<:"), 0, NULL, Precedence_CStyleMUL, 0, NULL, NULL, NULL, NULL, TypeCheck_InstanceOf, },
 		{ SYM_("as"), 0, NULL, Precedence_CStyleMUL, 0, NULL, NULL, NULL, NULL, TypeCheck_As},
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t subtype_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, kfileline_t pline)
+// ----
+
+static kbool_t subtype_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	subtype_defineMethod(kctx, ns, trace);
+	subtype_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t subtype_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -150,11 +154,9 @@ static kbool_t subtype_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS
 KDEFINE_PACKAGE* subtype_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "subtype", "1.0");
+	KSetPackageName(d, "subtype", "1.0");
 	d.initPackage    = subtype_initPackage;
 	d.setupPackage   = subtype_setupPackage;
-	d.initNameSpace  = subtype_initNameSpace;
-	d.setupNameSpace = subtype_setupNameSpace;
 	return &d;
 }
 
