@@ -327,24 +327,12 @@ static kbool_t sql_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime
 	return true;
 }
 
-static kbool_t sql_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t sql_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 KDEFINE_PACKAGE* sql_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("sql", "1.0"),
 		.initPackage    = sql_initPackage,
 		.setupPackage   = sql_setupPackage,
-		.initNameSpace  = sql_initNameSpace,
-		.setupNameSpace = sql_setupNameSpace,
 	};
 	return &d;
 }

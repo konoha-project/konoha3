@@ -31,15 +31,15 @@ extern "C"{
 
 // --------------------------------------------------------------------------
 
-#define _Public   kMethod_Public
-#define _F(F)   (intptr_t)(F)
-
 static KMETHOD NameSpace_setTransparentGlobalVariable_(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kNameSpace_set(TransparentGlobalVariable, sfp[0].asNameSpace, sfp[1].boolValue);
 }
 
-static	kbool_t global_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+#define _Public   kMethod_Public
+#define _F(F)   (intptr_t)(F)
+
+static	kbool_t global_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KRequirePackage("konoha.field", trace);
 	KDEFINE_METHOD MethodData[] = {
@@ -50,10 +50,7 @@ static	kbool_t global_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	return true;
 }
 
-static kbool_t global_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
-{
-	return true;
-}
+// ---------------------------------------------------------------------------
 
 static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObject *o, ktype_t ty, ksymbol_t symbol)
 {
@@ -76,8 +73,6 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObj
 	KLIB KonohaClass_addField(kctx, O_ct(o), flag, ty, symbol);
 	return KLIB kNameSpace_getSetterMethodNULL(kctx, ns, cid, symbol, ty);
 }
-
-// ---------------------------------------------------------------------------
 
 static kStmt* TypeDeclAndMakeSetter(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr, kExpr *valueExpr, kObject *scr)
 {
@@ -132,14 +127,23 @@ static KMETHOD Statement_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(result);
 }
 
-static kbool_t global_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t global_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KImportPackage(ns, "konoha.field", trace);
 	SUGAR kNameSpace_addSugarFunc(kctx, ns, KW_TypeDeclPattern, SugarFunc_TopLevelStatement, new_SugarFunc(ns, Statement_GlobalTypeDecl));
 	return kNameSpace_initGlobalObject(kctx, ns, trace);
 }
 
-static kbool_t global_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+// -------
+
+static	kbool_t global_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	global_defineMethod(kctx, ns, trace);
+	global_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t global_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -147,11 +151,9 @@ static kbool_t global_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS,
 KDEFINE_PACKAGE* global_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "global", "1.0");
+	KSetPackageName(d, "konoha", "1.0");
 	d.initPackage    = global_initPackage;
 	d.setupPackage   = global_setupPackage;
-	d.initNameSpace  = global_initNameSpace;
-	d.setupNameSpace = global_setupNameSpace;
 	return &d;
 }
 

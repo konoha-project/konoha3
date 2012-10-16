@@ -492,7 +492,7 @@ static KMETHOD Array_newList(KonohaContext *kctx, KonohaStack *sfp)
 #define _Im       kMethod_Immutable
 #define _F(F)     (intptr_t)(F)
 
-static kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t array_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
 		{"Array", VirtualType_KonohaClass, (uintptr_t)CT_(TY_Array)},
@@ -538,10 +538,8 @@ static kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	return true;
 }
 
-static kbool_t array_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
-{
-	return true;
-}
+// ---------------------------------------------------------------------------
+/* Syntax */
 
 static KMETHOD TypeCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -630,17 +628,24 @@ static KMETHOD Expression_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static kbool_t array_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t array_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ KW_BracketGroup, SYNFLAG_ExprPostfixOp2, NULL, Precedence_CStyleCALL, 0, NULL, Expression_Bracket, NULL, NULL, TypeCheck_Bracket, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t array_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	array_defineMethod(kctx, ns, trace);
+	array_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t array_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -651,8 +656,6 @@ KDEFINE_PACKAGE* array_init(void)
 	KSetPackageName(d, "array", "1.0");
 	d.initPackage    = array_initPackage;
 	d.setupPackage   = array_setupPackage;
-	d.initNameSpace  = array_initNameSpace;
-	d.setupNameSpace = array_setupNameSpace;
 	return &d;
 }
 

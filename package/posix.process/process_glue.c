@@ -348,16 +348,6 @@ static kbool_t process_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirst
 	return true;
 }
 
-static kbool_t process_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t process_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 KDEFINE_PACKAGE* process_init(void)
 {
 	static KDEFINE_PACKAGE d = {
@@ -365,8 +355,6 @@ KDEFINE_PACKAGE* process_init(void)
 		KPACKLIB("POSIX.1", "1.0"),
 		.initPackage    = process_initPackage,
 		.setupPackage   = process_setupPackage,
-		.initNameSpace  = process_initNameSpace,
-		.setupNameSpace = process_setupNameSpace,
 	};
 	return &d;
 }

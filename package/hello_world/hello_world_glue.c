@@ -153,24 +153,12 @@ static kbool_t HelloWorld_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFi
 	return true;
 }
 
-static kbool_t HelloWorld_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t HelloWorld_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 KDEFINE_PACKAGE* hello_world_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "hello_world", "1.0");
+	KSetPackageName(d, "/* SET LIBRARY NAME */", "/* SET LIBRARY VERSION */");
 	d.initPackage    = HelloWorld_initPackage;
 	d.setupPackage   = HelloWorld_setupPackage;
-	d.initNameSpace  = HelloWorld_initNameSpace;
-	d.setupNameSpace = HelloWorld_setupNameSpace;
 	return &d;
 }
 

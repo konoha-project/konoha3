@@ -272,24 +272,12 @@ static kbool_t math_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 	return true;
 }
 
-static kbool_t math_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	KImportPackage(ns, "konoha.float", trace);
-	return true;
-}
-
-static kbool_t math_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
 KDEFINE_PACKAGE* math_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "math", "1.0");
 	d.initPackage    = math_initPackage;
 	d.setupPackage   = math_setupPackage;
-	d.initNameSpace  = math_initNameSpace;
-	d.setupNameSpace = math_setupNameSpace;
 	return &d;
 }
 

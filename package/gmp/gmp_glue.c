@@ -1084,17 +1084,6 @@ static kbool_t gmp_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime
 	return true;
 }
 
-static kbool_t gmp_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	KImportPackage(ns, "konoha.float", trace);
-	return true;
-}
-
-static kbool_t gmp_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 /* ======================================================================== */
 
 KDEFINE_PACKAGE* gmp_init(void)
@@ -1103,8 +1092,6 @@ KDEFINE_PACKAGE* gmp_init(void)
 	KSetPackageName(d, "gmp", "1.0");
 	d.initPackage    = gmp_initPackage;
 	d.setupPackage   = gmp_setupPackage;
-	d.initNameSpace  = gmp_initNameSpace;
-	d.setupNameSpace = gmp_setupNameSpace;
 	return &d;
 }
 

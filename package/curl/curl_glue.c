@@ -488,24 +488,12 @@ static kbool_t curl_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 	return true;
 }
 
-static kbool_t curl_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t curl_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 KDEFINE_PACKAGE* curl_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("curl", "1.0"),
 		.initPackage    = curl_initPackage,
 		.setupPackage   = curl_setupPackage,
-		.initNameSpace  = curl_initNameSpace,
-		.setupNameSpace = curl_setupNameSpace,
 	};
 	return &d;
 }

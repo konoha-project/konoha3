@@ -1282,7 +1282,7 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ TOKEN(return), SYNFLAG_StmtBreakExec, "\"return\" [$Expr]", 0, 0, NULL, NULL, NULL, Statement_return, NULL, },
 		{ KW_END, },
 	};
-	kNameSpace_defineSyntax(kctx, ns, SYNTAX, ns);
+	kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 }
 
 /* ------------------------------------------------------------------------ */

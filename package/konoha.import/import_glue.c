@@ -78,25 +78,15 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t import_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	return true;
-}
-
-static kbool_t import_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t import_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("import"), 0, "\"import\" $Token $Token* [ \".*\"] ", 0, 0, NULL, NULL, Statement_import, NULL, NULL, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t import_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t import_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -107,8 +97,6 @@ KDEFINE_PACKAGE* import_init(void)
 	KSetPackageName(d, "import", "1.0");
 	d.initPackage    = import_initPackage;
 	d.setupPackage   = import_setupPackage;
-	d.initNameSpace  = import_initNameSpace;
-	d.setupNameSpace = import_setupNameSpace;
 	return &d;
 }
 

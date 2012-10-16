@@ -31,65 +31,63 @@
 extern "C" {
 #endif
 
-// --------------------------------------------------------------------------
-
-static kbool_t continue_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t continue_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
-{
-	return true;
-}
-
-// --------------------------------------------------------------------------
-
-static inline kStmt* kStmt_getParentNULL(kStmt *stmt)
-{
-	return stmt->parentBlockNULL->parentStmtNULL;
-}
-
-static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_Statement(stmt, gma);
-	kStmt *p = stmt;
-	while((p = kStmt_getParentNULL(p)) != NULL) {
-		if(kStmt_is(CatchContinue, p)) {
-			KLIB kObject_setObject(kctx, stmt, stmt->syn->keyword, TY_Stmt, p);
-			kStmt_typed(stmt, JUMP);
-			KReturnUnboxValue(true);
-		}
-	}
-	SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "continue statement not within a loop");
-	KReturnUnboxValue((false));
-}
-
-static kbool_t continue_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("continue"), 0, "\"continue\" [ $Symbol ]", 0, 0, NULL, NULL, NULL, Statement_continue, NULL, },
-		{ KW_END, },
-	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
-	return true;
-}
-
-static kbool_t continue_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-KDEFINE_PACKAGE* continue_init(void)
-{
-	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "continue", "1.0");
-	d.initPackage    = continue_initPackage;
-	d.setupPackage   = continue_setupPackage;
-	d.initNameSpace  = continue_initNameSpace;
-	d.setupNameSpace = continue_setupNameSpace;
-	return &d;
-}
+//// --------------------------------------------------------------------------
+//
+//static kbool_t continue_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+//{
+//	return true;
+//}
+//
+//static kbool_t continue_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+//{
+//	return true;
+//}
+//
+//// --------------------------------------------------------------------------
+//
+//static inline kStmt* kStmt_getParentNULL(kStmt *stmt)
+//{
+//	return stmt->parentBlockNULL->parentStmtNULL;
+//}
+//
+//static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	VAR_Statement(stmt, gma);
+//	kStmt *p = stmt;
+//	while((p = kStmt_getParentNULL(p)) != NULL) {
+//		if(kStmt_is(CatchContinue, p)) {
+//			KLIB kObject_setObject(kctx, stmt, stmt->syn->keyword, TY_Stmt, p);
+//			kStmt_typed(stmt, JUMP);
+//			KReturnUnboxValue(true);
+//		}
+//	}
+//	SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "continue statement not within a loop");
+//	KReturnUnboxValue((false));
+//}
+//
+//static kbool_t continue_initNameSpace(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
+//{
+//	KDEFINE_SYNTAX SYNTAX[] = {
+//		{ SYM_("continue"), 0, "\"continue\" [ $Symbol ]", 0, 0, NULL, NULL, NULL, Statement_continue, NULL, },
+//		{ KW_END, },
+//	};
+//	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
+//	return true;
+//}
+//
+//static kbool_t continue_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+//{
+//	return true;
+//}
+//
+//KDEFINE_PACKAGE* continue_init(void)
+//{
+//	static KDEFINE_PACKAGE d = {0};
+//	KSetPackageName(d, "while", "1.0");
+//	d.initPackage    = continue_initPackage;
+//	d.setupPackage   = continue_setupPackage;
+//	return &d;
+//}
 
 #ifdef __cplusplus
 }

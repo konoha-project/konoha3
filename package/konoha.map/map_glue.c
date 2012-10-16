@@ -203,7 +203,7 @@ static KMETHOD Map_new(KonohaContext *kctx, KonohaStack *sfp)
 
 #define TY_Map cMap->typeId
 
-static kbool_t map_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t map_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	kparamtype_t cparam = {TY_Object};
 	KDEFINE_CLASS defMap = {0};
@@ -231,11 +231,6 @@ static kbool_t map_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	return true;
 }
 
-static kbool_t map_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
-{
-	return true;
-}
-
 /* ----------------------------------------------------------------------- */
 
 static KMETHOD TypeCheck_MapLiteral(KonohaContext *kctx, KonohaStack *sfp)
@@ -248,13 +243,20 @@ static KMETHOD TypeCheck_MapLiteral(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static kbool_t map_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t map_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	SUGAR kNameSpace_addSugarFunc(kctx, ns, KW_BlockPattern, SugarFunc_TypeCheck, new_SugarFunc(ns, TypeCheck_MapLiteral));
 	return true;
 }
 
-static kbool_t map_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t map_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	map_defineMethod(kctx, ns, trace);
+	map_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t map_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -265,8 +267,6 @@ KDEFINE_PACKAGE* map_init(void)
 	KSetPackageName(d, "map", "1.0");
 	d.initPackage    = map_initPackage;
 	d.setupPackage   = map_setupPackage;
-	d.initNameSpace  = map_initNameSpace;
-	d.setupNameSpace = map_setupNameSpace;
 	return &d;
 }
 

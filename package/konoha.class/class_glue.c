@@ -383,34 +383,29 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static kbool_t class_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t class_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.field", trace);
-	KRequirePackage("konoha.new", trace);
-	//KSET_KLIB2(kMethod_indexOfField, KLIB2_Method_indexOfField, trace);
-	return true;
-}
-
-static kbool_t class_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t class_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	KImportPackage(ns, "konoha.field", trace);
-	KImportPackage(ns, "konoha.new", trace);
+//	KImportPackage(ns, "konoha.field", trace);
+//	KImportPackage(ns, "konoha.new", trace);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("$ClassName"), 0, NULL, 0, 0, PatternMatch_ClassName, NULL, NULL, NULL, NULL, },
 		{ SYM_("class"), 0, "\"class\" $ClassName [\"extends\" extends: $Type] [$Block]", 0, 0, NULL, NULL, Statement_class, NULL, NULL, },
 		{ SYM_("."), 0, NULL, -1, 0, NULL, NULL, NULL, NULL, TypeCheck_Getter, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t class_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t class_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	KRequirePackage("konoha.field", trace);
+	KRequirePackage("konoha.new", trace);
+	class_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t class_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -423,8 +418,6 @@ KDEFINE_PACKAGE* class_init(void)
 	KSetPackageName(d, "class", "1.0");
 	d.initPackage    = class_initPackage;
 	d.setupPackage   = class_setupPackage;
-	d.initNameSpace  = class_initNameSpace;
-	d.setupNameSpace = class_setupNameSpace;
 	return &d;
 }
 

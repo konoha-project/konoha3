@@ -672,24 +672,12 @@ static kbool_t date_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 	return true;
 }
 
-static kbool_t date_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t date_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 KDEFINE_PACKAGE* date_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "date", "1.0");
 	d.initPackage    = date_initPackage;
 	d.setupPackage   = date_setupPackage;
-	d.initNameSpace  = date_initNameSpace;
-	d.setupNameSpace = date_setupNameSpace;
 	return &d;
 }
 

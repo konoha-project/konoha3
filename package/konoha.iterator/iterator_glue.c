@@ -203,24 +203,12 @@ static kbool_t iterator_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirs
 	return true;
 }
 
-static kbool_t iterator_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t iterator_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 KDEFINE_PACKAGE* iterator_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "iterator", "1.0");
 	d.initPackage    = iterator_initPackage;
 	d.setupPackage   = iterator_setupPackage;
-	d.initNameSpace  = iterator_initNameSpace;
-	d.setupNameSpace = iterator_setupNameSpace;
 	return &d;
 }
 

@@ -31,16 +31,6 @@ extern "C"{
 
 // --------------------------------------------------------------------------
 
-static kbool_t assign_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t assign_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
-{
-	return true;
-}
-
 static KMETHOD Expression_BinarySugar(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
@@ -62,7 +52,7 @@ static KMETHOD Expression_BinarySugar(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static kbool_t assign_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t assign_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("+="), (SYNFLAG_ExprLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
@@ -76,7 +66,7 @@ static kbool_t assign_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 		{ SYM_(">>="), (SYNFLAG_ExprLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("+="), 2,  "X Y X = (X) + (Y)");
 	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("-="), 2,  "X Y X = (X) - (Y)");
 	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("*="), 2,  "X Y X = (X) * (Y)");
@@ -89,19 +79,24 @@ static kbool_t assign_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 	return true;
 }
 
-static kbool_t assign_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t assign_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	assign_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t assign_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
+
 KDEFINE_PACKAGE* assign_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "assign", "1.0");
+	KSetPackageName(d, "konoha", "1.0");
 	d.initPackage    = assign_initPackage;
 	d.setupPackage   = assign_setupPackage;
-	d.initNameSpace  = assign_initNameSpace;
-	d.setupNameSpace = assign_setupNameSpace;
 	return &d;
 }
 

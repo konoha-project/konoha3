@@ -33,17 +33,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-// --------------------------------------------------------------------------
-
-static kbool_t shell_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t shell_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
-{
-	return true;
-}
 
 // --------------------------------------------------------------------------
 
@@ -242,7 +231,7 @@ static KMETHOD Statement_Shell(KonohaContext *kctx, KonohaStack *sfp)
 // ----------------------------------------------------------------------------
 /* define class */
 
-static kbool_t shell_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t shell_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	//KImportPackage(ns, "dscript.dollar", trace);
 	KImportPackage(ns, "dscript.subproc", trace);
@@ -251,11 +240,17 @@ static kbool_t shell_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, k
 		{ SYM_("$Shell"), 0, "$Shell $Token*", 0, 0, PatternMatch_Shell, NULL, Statement_Shell, Statement_Shell},
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t shell_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t shell_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	shell_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t shell_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -263,11 +258,9 @@ static kbool_t shell_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 KDEFINE_PACKAGE* shell_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "dscript.shell", "1.0");
+	KSetPackageName(d, "dshell", "1.0");
 	d.initPackage    = shell_initPackage;
 	d.setupPackage   = shell_setupPackage;
-	d.initNameSpace  = shell_initNameSpace;
-	d.setupNameSpace = shell_setupNameSpace;
 	return &d;
 }
 

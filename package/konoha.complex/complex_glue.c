@@ -743,24 +743,12 @@ static kbool_t Complex_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirst
 	return true;
 }
 
-static kbool_t Complex_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t Complex_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 KDEFINE_PACKAGE* complex_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "hello_world", "1.0");
+	KSetPackageName(d, "konoha", "1.0");
 	d.initPackage    = Complex_initPackage;
 	d.setupPackage   = Complex_setupPackage;
-	d.initNameSpace  = Complex_initNameSpace;
-	d.setupNameSpace = Complex_setupNameSpace;
 	return &d;
 }
 

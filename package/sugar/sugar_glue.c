@@ -432,6 +432,8 @@ static KMETHOD kStmt_printMessage2rintError(KonohaContext *kctx, KonohaStack *sf
 
 // --------------------------------------------------------------------------
 
+static kbool_t RENAMEME_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace);
+
 static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KonohaClass *cSymbol = loadSymbolClass(kctx, ns, trace);
@@ -506,6 +508,7 @@ static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	loadNameSpaceMethodData(kctx, ns, cSymbol->typeId);
+	RENAMEME_initNameSpace(kctx, ns, ns, trace);
 	return true;
 }
 
@@ -570,7 +573,7 @@ static KMETHOD Statement_syntax(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(r);
 }
 
-static kbool_t sugar_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t RENAMEME_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_INT_CONST IntData[] = {
 #define DEFINE_KEYWORD(KW) {#KW, TY_int, KW}
@@ -615,12 +618,7 @@ static kbool_t sugar_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, k
 		{ SYM_("syntax"), 0, "\"syntax\" $Token $Token*", 0, 0, NULL, NULL, Statement_syntax, NULL, NULL, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
-	return true;
-}
-
-static kbool_t sugar_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
@@ -630,8 +628,6 @@ KDEFINE_PACKAGE* sugar_init(void)
 	KSetPackageName(d, "sugar", "1.0");
 	d.initPackage    = sugar_initPackage;
 	d.setupPackage   = sugar_setupPackage;
-	d.initNameSpace  = sugar_initNameSpace;
-	d.setupNameSpace = sugar_setupNameSpace;
 	return &d;
 }
 

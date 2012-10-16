@@ -1367,8 +1367,8 @@ struct KonohaPackageHandlerVar {
 	const char *note;
 	kbool_t (*initPackage)   (KonohaContext *kctx, kNameSpace *, int, const char**, KTraceInfo *);
 	kbool_t (*setupPackage)  (KonohaContext *kctx, kNameSpace *, isFirstTime_t, KTraceInfo *);
-	kbool_t (*initNameSpace) (KonohaContext *kctx, kNameSpace *, kNameSpace *, KTraceInfo *);
-	kbool_t (*setupNameSpace)(KonohaContext *kctx, kNameSpace *, kNameSpace *, KTraceInfo *);
+//	kbool_t (*initNameSpace) (KonohaContext *kctx, kNameSpace *, kNameSpace *, KTraceInfo *);
+//	kbool_t (*setupNameSpace)(KonohaContext *kctx, kNameSpace *, kNameSpace *, KTraceInfo *);
 	const char *konoha_revision;
 };
 
@@ -1378,7 +1378,7 @@ struct KonohaPackageVar {
 	kpackageId_t                 packageId;
 	kNameSpace                  *packageNameSpace_OnGlobalConstList;
 	KonohaPackageHandler        *packageHandler;
-	kfileline_t                  exportScriptUri;
+//	kfileline_t                  exportScriptUri;
 };
 
 /* ----------------------------------------------------------------------- */

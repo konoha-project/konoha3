@@ -349,69 +349,67 @@ static kbool_t bytes_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 	return true;
 }
 
-static KMETHOD TokenFunc_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kTokenVar *tk = (kTokenVar *)sfp[1].asObject;
-	int ch, prev = '/', pos = 1;
-	const char *source = S_text(sfp[2].asString);
-	while((ch = source[pos++]) != 0) {
-		if(ch == '\n') {
-			break;
-		}
-		if(ch == '\'' && prev != '\\') {
-			if(IS_NOTNULL(tk)) {
-				KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, source + 1, (pos-2), 0));
-				tk->unresolvedTokenType = SYM_("$SingleQuotedChar");
-			}
-			KReturnUnboxValue(pos);
-		}
-		prev = ch;
-	}
-	if(IS_NOTNULL(tk)) {
-		SUGAR kToken_printMessage(kctx, tk, ErrTag, "must close with %s", "'");
-	}
-	KReturnUnboxValue(0);
-}
+//static KMETHOD TokenFunc_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	kTokenVar *tk = (kTokenVar *)sfp[1].asObject;
+//	int ch, prev = '/', pos = 1;
+//	const char *source = S_text(sfp[2].asString);
+//	while((ch = source[pos++]) != 0) {
+//		if(ch == '\n') {
+//			break;
+//		}
+//		if(ch == '\'' && prev != '\\') {
+//			if(IS_NOTNULL(tk)) {
+//				KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, source + 1, (pos-2), 0));
+//				tk->unresolvedTokenType = SYM_("$SingleQuotedChar");
+//			}
+//			KReturnUnboxValue(pos);
+//		}
+//		prev = ch;
+//	}
+//	if(IS_NOTNULL(tk)) {
+//		SUGAR kToken_printMessage(kctx, tk, ErrTag, "must close with %s", "'");
+//	}
+//	KReturnUnboxValue(0);
+//}
+//
+//static KMETHOD TypeCheck_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	VAR_TypeCheck(stmt, expr, gma, reqty);
+//	kToken *tk = expr->termToken;
+//	kString *s = tk->text;
+//	DBG_P("string:'%s'", S_text(s));
+//	if(S_size(s) == 1) {
+//		int ch = S_text(s)[0];
+//		KReturn(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_int, ch));
+//	} else {
+//		SUGAR kStmt_printMessage2(kctx, stmt, (kToken*)expr, ErrTag, "single quote doesn't accept multi characters, '%s'", S_text(s));
+//	}
+//	KReturn(K_NULLEXPR);
+//}
 
-static KMETHOD TypeCheck_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_TypeCheck(stmt, expr, gma, reqty);
-	kToken *tk = expr->termToken;
-	kString *s = tk->text;
-	DBG_P("string:'%s'", S_text(s));
-	if(S_size(s) == 1) {
-		int ch = S_text(s)[0];
-		KReturn(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_int, ch));
-	} else {
-		SUGAR kStmt_printMessage2(kctx, stmt, (kToken*)expr, ErrTag, "single quote doesn't accept multi characters, '%s'", S_text(s));
-	}
-	KReturn(K_NULLEXPR);
-}
-
-static kbool_t bytes_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("$SingleQuotedChar"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_SingleQuotedChar, },
-		{ KW_END, },
-	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
-	SUGAR kNameSpace_setTokenFunc(kctx, ns, SYM_("$SingleQuotedChar"), KonohaChar_Quote, new_SugarFunc(ns, TokenFunc_SingleQuotedChar));
-	return true;
-}
-
-static kbool_t bytes_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
+//static kbool_t bytes_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+//{
+//	KDEFINE_SYNTAX SYNTAX[] = {
+//		{ SYM_("$SingleQuotedChar"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_SingleQuotedChar, },
+//		{ KW_END, },
+//	};
+//	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
+//	SUGAR kNameSpace_setTokenFunc(kctx, ns, SYM_("$SingleQuotedChar"), KonohaChar_Quote, new_SugarFunc(ns, TokenFunc_SingleQuotedChar));
+//	return true;
+//}
+//
+//static kbool_t bytes_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+//{
+//	return true;
+//}
 
 KDEFINE_PACKAGE* bytes_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "bytes", "1.0");
+	KSetPackageName(d, "konoha", "1.0");
 	d.initPackage    = bytes_initPackage;
 	d.setupPackage   = bytes_setupPackage;
-	d.initNameSpace  = bytes_initNameSpace;
-	d.setupNameSpace = bytes_setupNameSpace;
 	return &d;
 }
 

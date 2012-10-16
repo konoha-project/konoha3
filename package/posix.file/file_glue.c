@@ -314,16 +314,6 @@ static kbool_t file_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 	return true;
 }
 
-static kbool_t file_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t file_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 // --------------------------------------------------------------------------
 
 KDEFINE_PACKAGE* file_init(void)
@@ -332,8 +322,6 @@ KDEFINE_PACKAGE* file_init(void)
 		KPACKNAME("file", "1.0"),
 		.initPackage    = file_initPackage,
 		.setupPackage   = file_setupPackage,
-		.initNameSpace  = file_initNameSpace,
-		.setupNameSpace = file_setupNameSpace,
 	};
 	return &d;
 }

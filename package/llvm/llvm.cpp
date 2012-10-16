@@ -5247,18 +5247,6 @@ static kbool_t llvm_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 	return true;
 }
 
-static kbool_t llvm_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
-{
-	(void)kctx;(void)ns;(void)pline;
-	return true;
-}
-
-static kbool_t llvm_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
-{
-	(void)kctx;(void)ns;(void)pline;
-	return true;
-}
-
 KDEFINE_PACKAGE* llvm_init(void)
 {
 	InitializeNativeTarget();
@@ -5267,8 +5255,6 @@ KDEFINE_PACKAGE* llvm_init(void)
 		"llvm", "3.0", "", "", "",
 		llvm_initPackage,
 		llvm_setupPackage,
-		llvm_initNameSpace,
-		llvm_setupNameSpace,
 		K_REVISION
 	};
 

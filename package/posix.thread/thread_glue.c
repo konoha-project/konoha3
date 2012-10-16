@@ -328,24 +328,12 @@ static kbool_t thread_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 	return true;
 }
 
-static kbool_t thread_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t thread_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 KDEFINE_PACKAGE* thread_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("thread", "1.0"),
 		.initPackage    = thread_initPackage,
 		.setupPackage   = thread_setupPackage,
-		.initNameSpace  = thread_initNameSpace,
-		.setupNameSpace = thread_setupNameSpace,
 	};
 	return &d;
 }

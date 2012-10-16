@@ -1340,16 +1340,6 @@ static kbool_t subproc_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirst
 	return true;
 }
 
-static kbool_t subproc_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t subproc_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 // --------------------------------------------------------------------------
 
 KDEFINE_PACKAGE* subproc_init(void)
@@ -1358,8 +1348,6 @@ KDEFINE_PACKAGE* subproc_init(void)
 		KPACKNAME("subproc", "1.0"),
 		.initPackage    = subproc_initPackage,
 		.setupPackage   = subproc_setupPackage,
-		.initNameSpace  = subproc_initNameSpace,
-		.setupNameSpace = subproc_setupNameSpace,
 	};
 	return &d;
 }

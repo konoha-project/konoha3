@@ -402,16 +402,6 @@ static kbool_t mecab_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 	return true;
 }
 
-static kbool_t mecab_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t mecab_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 /* ======================================================================== */
 
 KDEFINE_PACKAGE* mecab_init(void)
@@ -420,8 +410,6 @@ KDEFINE_PACKAGE* mecab_init(void)
 		KPACKNAME("mecab", "1.0"),
 		.initPackage    = mecab_initPackage,
 		.setupPackage   = mecab_setupPackage,
-		.initNameSpace  = mecab_initNameSpace,
-		.setupNameSpace = mecab_setupNameSpace,
 	};
 	return &d;
 }

@@ -471,24 +471,12 @@ static kbool_t jansson_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirst
 	return true;
 }
 
-static kbool_t jansson_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t jansson_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 KDEFINE_PACKAGE* jansson_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("jansson", "1.0"),
 		.initPackage    = jansson_initPackage,
 		.setupPackage   = jansson_setupPackage,
-		.initNameSpace  = jansson_initNameSpace,
-		.setupNameSpace = jansson_setupNameSpace,
 	};
 	return &d;
 }

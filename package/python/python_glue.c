@@ -569,24 +569,12 @@ static kbool_t python_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 	return true;
 }
 
-static kbool_t python_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t python_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 KDEFINE_PACKAGE* python_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("python", "1.0"),
 		.initPackage    = python_initPackage,
 		.setupPackage   = python_setupPackage,
-		.initNameSpace  = python_initNameSpace,
-		.setupNameSpace = python_setupNameSpace,
 	};
 	return &d;
 }

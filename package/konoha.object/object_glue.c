@@ -65,52 +65,12 @@ static kbool_t object_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 
 // --------------------------------------------------------------------------
 
-//static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	VAR_TypeCheck(stmt, expr, gma, reqty);
-//	kToken *tkN = expr->cons->TokenItems[0];
-//	ksymbol_t fn = tkN->resolvedSymbol;
-//	kExpr *self = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 1, gma, TY_var, 0);
-//	kNameSpace *ns = Stmt_nameSpace(stmt);
-//	if(self != K_NULLEXPR) {
-//		kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, self->ty, MN_toGETTER(fn), 0, MPOL_GETTER);
-//		if(mtd != NULL) {
-//			KFieldSet(expr->cons, expr->cons->MethodItems[0], mtd);
-//			KReturn(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, reqty));
-//		}
-//		SUGAR kStmt_printMessage2(kctx, stmt, tkN, ErrTag, "undefined field: %s", S_text(tkN->text));
-//	}
-//	KReturn(K_NULLEXPR);
-//}
-
-// ----------------------------------------------------------------------------
-
-static kbool_t object_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	KImportPackage(ns, "konoha.subtype", trace);
-//	KDEFINE_SYNTAX SYNTAX[] = {
-//		{ .keyword = SYM_("."), TypeCheck_(Getter) },
-//		{ .keyword = KW_END, },
-//	};
-//	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
-	return true;
-}
-
-static kbool_t object_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-// --------------------------------------------------------------------------
-
 KDEFINE_PACKAGE* object_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "object", "1.0");
+	KSetPackageName(d, "konoha", "1.0");
 	d.initPackage    = object_initPackage;
 	d.setupPackage   = object_setupPackage;
-	d.initNameSpace  = object_initNameSpace;
-	d.setupNameSpace = object_setupNameSpace;
 	return &d;
 }
 

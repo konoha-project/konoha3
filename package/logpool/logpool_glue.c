@@ -450,15 +450,6 @@ static kbool_t logpool_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirst
 	return true;
 }
 
-static kbool_t logpool_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t logpool_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
 KDEFINE_PACKAGE* logpool_init(void)
 {
 	logpool_global_init(LOGPOOL_DEFAULT);
@@ -466,8 +457,6 @@ KDEFINE_PACKAGE* logpool_init(void)
 		KPACKNAME("logpool", "1.0"),
 		.initPackage    = logpool_initPackage,
 		.setupPackage   = logpool_setupPackage,
-		.initNameSpace  = logpool_initNameSpace,
-		.setupNameSpace = logpool_setupNameSpace,
 	};
 	return &d;
 }

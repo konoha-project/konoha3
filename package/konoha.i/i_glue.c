@@ -164,24 +164,12 @@ static kbool_t i_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t
 	return true;
 }
 
-static kbool_t i_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t i_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 KDEFINE_PACKAGE* i_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha.i", "1.0");
 	d.initPackage    = i_initPackage;
 	d.setupPackage   = i_setupPackage;
-	d.initNameSpace  = i_initNameSpace;
-	d.setupNameSpace = i_setupNameSpace;
 	return &d;
 }
 

@@ -36,21 +36,11 @@ static kbool_t var_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		{"var", VirtualType_KonohaClass, (uintptr_t)CT_(TY_var)},
 		{NULL},
 	};
-	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(ClassData), 0);
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(ClassData), trace);
 	return true;
 }
 
 static kbool_t var_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t var_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t var_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
@@ -61,8 +51,6 @@ KDEFINE_PACKAGE* var_init(void)
 	KSetPackageName(d, "var", "1.0");
 	d.initPackage    = var_initPackage;
 	d.setupPackage   = var_setupPackage;
-	d.initNameSpace  = var_initNameSpace;
-	d.setupNameSpace = var_setupNameSpace;
 	return &d;
 }
 

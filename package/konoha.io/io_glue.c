@@ -795,24 +795,12 @@ static kbool_t io_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_
 	return true;
 }
 
-static kbool_t io_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t io_setNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 KDEFINE_PACKAGE* io_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "io", "1.0");
 	d.initPackage    = io_initPackage;
 	d.setupPackage   = io_setupPackage;
-	d.initNameSpace  = io_initNameSpace;
-	d.setupNameSpace = io_setNameSpace;
 	return &d;
 }
 

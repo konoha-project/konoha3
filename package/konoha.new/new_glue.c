@@ -28,17 +28,6 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
-// --------------------------------------------------------------------------
-
-static kbool_t new_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t new_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
-{
-	return true;
-}
 
 // --------------------------------------------------------------------------
 
@@ -105,17 +94,25 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 // ----------------------------------------------------------------------------
 /* define class */
 
-static kbool_t new_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t new_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("new"), 0, NULL, 0, Precedence_CStyleCALL, NULL, Expression_new, NULL, NULL, NULL, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t new_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+// --------------------------------------------------------------------------
+
+static kbool_t new_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	new_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t new_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -126,8 +123,6 @@ KDEFINE_PACKAGE* new_init(void)
 	KSetPackageName(d, "new", "1.0");
 	d.initPackage    = new_initPackage;
 	d.setupPackage   = new_setupPackage;
-	d.initNameSpace  = new_initNameSpace;
-	d.setupNameSpace = new_setupNameSpace;
 	return &d;
 }
 

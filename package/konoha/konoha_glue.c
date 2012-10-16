@@ -33,14 +33,14 @@ extern "C" {
 
 static kbool_t konoha_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
+	KRequirePackage("cstyle",  trace);  // continue, break
+
 	KRequirePackage("konoha.namespace", trace);
 	KRequirePackage("konoha.const", trace);
 	KRequirePackage("konoha.global", trace);
 	KRequirePackage("konoha.class", trace);       // subtype
 
 	KRequirePackage("konoha.null", trace);
-
-	KRequirePackage("konoha.while",  trace);  // continue, break
 
 	KRequirePackage("konoha.var", trace);
 
@@ -54,50 +54,13 @@ static kbool_t konoha_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	KRequirePackage("konoha.map", trace);
 	KRequirePackage("konoha.iterator", trace);
 
-
 	KRequirePackage("konoha.assign", trace);
 	KRequirePackage("konoha.io", trace);
-
 
 	return true;
 }
 
 static kbool_t konoha_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t konoha_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	KImportPackage(ns, "konoha.namespace", trace);
-	KImportPackage(ns, "konoha.const",  trace);  // TopLevel
-	KImportPackage(ns, "konoha.global", trace);
-	KImportPackage(ns, "konoha.class",  trace);
-
-	KImportPackage(ns, "konoha.null", trace);    // Operator
-
-	KImportPackage(ns, "konoha.while",  trace);
-
-	KImportPackage(ns, "konoha.var",  trace);
-
-	KImportPackage(ns, "konoha.object", trace);  // subtype
-	KImportPackage(ns, "konoha.int",  trace);
-	KImportPackage(ns, "konoha.float", trace);
-	KImportPackage(ns, "konoha.string", trace);
-
-	KImportPackage(ns, "konoha.date", trace);
-	KImportPackage(ns, "konoha.array", trace);
-	KImportPackage(ns, "konoha.map", trace);
-	KImportPackage(ns, "konoha.iterator", trace);
-
-	KImportPackage(ns, "konoha.assign", trace);
-
-	KImportPackage(ns, "konoha.io", trace);
-
-	return true;
-}
-
-static kbool_t konoha_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 {
 	return true;
 }
@@ -108,8 +71,6 @@ KDEFINE_PACKAGE* konoha_init(void)
 	KSetPackageName(d, "konoha", "1.0");
 	d.initPackage    = konoha_initPackage;
 	d.setupPackage   = konoha_setupPackage;
-	d.initNameSpace  = konoha_initNameSpace;
-	d.setupNameSpace = konoha_setupNameSpace;
 	return &d;
 }
 

@@ -1087,24 +1087,12 @@ static kbool_t string_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 	return true;
 }
 
-static kbool_t string_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t string_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 KDEFINE_PACKAGE* string_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "String", "1.0");
 	d.initPackage    = string_initPackage;
 	d.setupPackage   = string_setupPackage;
-	d.initNameSpace  = string_initNameSpace;
-	d.setupNameSpace = string_setupNameSpace;
 	return &d;
 }
 

@@ -723,24 +723,12 @@ static kbool_t socket_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 	return true;
 }
 
-static kbool_t socket_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t socket_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 KDEFINE_PACKAGE* socket_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("socket", "1.0"),
 		.initPackage    = socket_initPackage,
 		.setupPackage   = socket_setupPackage,
-		.initNameSpace  = socket_initNameSpace,
-		.setupNameSpace = socket_setupNameSpace,
 	};
 	return &d;
 }

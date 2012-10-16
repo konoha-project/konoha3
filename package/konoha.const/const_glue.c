@@ -31,15 +31,6 @@ extern "C"{
 
 // --------------------------------------------------------------------------
 
-static kbool_t const_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t const_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
-{
-	return true;
-}
 
 // --------------------------------------------------------------------------
 
@@ -80,17 +71,23 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(result);
 }
 
-static kbool_t const_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t const_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("const"), 0, "\"const\" $Symbol \"=\" $Expr", 0, 0, NULL, NULL, Statement_ConstDecl, NULL, NULL, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t const_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t const_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	const_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t const_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -101,8 +98,6 @@ KDEFINE_PACKAGE* const_init(void)
 	KSetPackageName(d, "const", "1.0");
 	d.initPackage    = const_initPackage;
 	d.setupPackage   = const_setupPackage;
-	d.initNameSpace  = const_initNameSpace;
-	d.setupNameSpace = const_setupNameSpace;
 	return &d;
 }
 

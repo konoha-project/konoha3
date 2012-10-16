@@ -30,6 +30,9 @@
 extern "C"{
 #endif
 
+// ---------------------------------------------------------------------------
+/* KLIB extension */
+
 static KMETHOD MethodFunc_ObjectFieldGetter(KonohaContext *kctx, KonohaStack *sfp)
 {
 	size_t delta = sfp[K_MTDIDX].methodCallInfo->delta;
@@ -183,20 +186,6 @@ static kbool_t KonohaClass_addField(KonohaContext *kctx, KonohaClass *ct, int fl
 
 // --------------------------------------------------------------------------
 
-static kbool_t field_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
-{
-	KSET_KLIB2(kMethod_indexOfField, KLIB2_Method_indexOfField, trace);
-	KSET_KLIB2(KonohaClass_addField, KonohaClass_addField, trace);
-	return true;
-}
-
-static kbool_t field_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
-{
-	return true;
-}
-
-// --------------------------------------------------------------------------
-
 static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
@@ -214,17 +203,27 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static kbool_t field_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t field_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("."), 0, NULL, -1, 0, NULL, NULL, NULL, NULL, TypeCheck_Getter, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t field_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+// --------------------------------------------------------------------------
+
+static kbool_t field_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	KSET_KLIB2(kMethod_indexOfField, KLIB2_Method_indexOfField, trace);
+	KSET_KLIB2(KonohaClass_addField, KonohaClass_addField, trace);
+	field_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t field_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -237,8 +236,6 @@ KDEFINE_PACKAGE* field_init(void)
 	KSetPackageName(d, "field", "1.0");
 	d.initPackage    = field_initPackage;
 	d.setupPackage   = field_setupPackage;
-	d.initNameSpace  = field_initNameSpace;
-	d.setupNameSpace = field_setupNameSpace;
 	return &d;
 }
 

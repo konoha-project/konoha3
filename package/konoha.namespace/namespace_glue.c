@@ -33,18 +33,6 @@ extern "C" {
 
 // --------------------------------------------------------------------------
 
-static kbool_t namespace_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t namespace_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
-{
-	return true;
-}
-
-// --------------------------------------------------------------------------
-
 static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Statement(stmt, gma);
@@ -63,17 +51,25 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(result == K_CONTINUE);
 }
 
-static kbool_t namespace_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t namespace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("namespace"), 0, "\"namespace\" $Block", 0, 0, NULL, NULL, Statement_namespace, NULL, NULL, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t namespace_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+// --------------------------------------------------------------------------
+
+static kbool_t namespace_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	namespace_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t namespace_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -81,11 +77,9 @@ static kbool_t namespace_setupNameSpace(KonohaContext *kctx, kNameSpace *package
 KDEFINE_PACKAGE* namespace_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "namespace", "1.0");
+	KSetPackageName(d, "konoha", "1.0");
 	d.initPackage    = namespace_initPackage;
 	d.setupPackage   = namespace_setupPackage;
-	d.initNameSpace  = namespace_initNameSpace;
-	d.setupNameSpace = namespace_setupNameSpace;
 	return &d;
 }
 

@@ -35,16 +35,6 @@ extern "C" {
 
 // ---------------------------------------------------------------------------
 
-static kbool_t foreach_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t foreach_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
-{
-	return true;
-}
-
 #define TY_isIterator(T)     (CT_(T)->baseTypeId == TY_Iterator)
 
 static kToken* new_TypeToken(KonohaContext *kctx, kNameSpace *ns, ktype_t typeId)
@@ -155,32 +145,36 @@ static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(isOkay);
 }
 
-static kbool_t foreach_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t foreach_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	KImportPackage(ns, "konoha.iterator", trace);
-	KImportPackage(ns, "konoha.break", trace);
-	KImportPackage(ns, "konoha.continue", trace);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("for"), 0, "\"for\" \"(\" [$Type] $Symbol \"in\" $Expr  \")\" [$Block] ", 0, 0, NULL, NULL, NULL, Statement_for, NULL, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t foreach_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t foreach_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	KImportPackage(ns, "konoha.iterator", trace);
+	KImportPackage(ns, "cstyle", trace);
+	foreach_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t foreach_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
+
 
 KDEFINE_PACKAGE* foreach_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "foreach", "1.0");
+	KSetPackageName(d, "konoha", "1.0");
 	d.initPackage    = foreach_initPackage;
 	d.setupPackage   = foreach_setupPackage;
-	d.initNameSpace  = foreach_initNameSpace;
-	d.setupNameSpace = foreach_setupNameSpace;
 	return &d;
 }
 

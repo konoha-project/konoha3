@@ -965,16 +965,6 @@ static kbool_t fd_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_
 	return true;
 }
 
-static kbool_t fd_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t fd_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 // --------------------------------------------------------------------------
 
 KDEFINE_PACKAGE* fd_init(void)
@@ -983,8 +973,6 @@ KDEFINE_PACKAGE* fd_init(void)
 		KPACKNAME("fd", "1.0"),
 		.initPackage    = fd_initPackage,
 		.setupPackage   = fd_setupPackage,
-		.initNameSpace  = fd_initNameSpace,
-		.setupNameSpace = fd_setupNameSpace,
 	};
 	return &d;
 }

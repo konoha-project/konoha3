@@ -225,13 +225,13 @@ static kbool_t cstyle_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		{ SYM_("continue"), 0, "\"continue\"", 0, 0, NULL, NULL, NULL, Statement_continue, NULL, },
 		{ KW_END, }, /* sentinental */
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, defStatement, ns);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, defStatement);
 
 	KDEFINE_SYNTAX defLiteral[] = {
 		{ SYM_("$SingleQuotedChar"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_SingleQuotedChar, },
 		{ KW_END, }, /* sentinental */
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, defLiteral, ns);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, defLiteral);
 	SUGAR kNameSpace_setTokenFunc(kctx, ns, SYM_("$SingleQuotedChar"), KonohaChar_Quote, new_SugarFunc(ns, TokenFunc_SingleQuotedChar));
 
 	KDEFINE_SYNTAX defExpression[] = {
@@ -240,7 +240,7 @@ static kbool_t cstyle_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		{ SYM_("--"), SYNFLAG_ExprPostfixOp2, NULL, Precedence_CStyleCALL, Precedence_CStylePREUNARY, NULL, Expression_Increment,},
 		{ KW_END, }, /* sentinental */
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, defExpression, ns);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, defExpression);
 	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("++"), 1,  "X X = (X) + 1 X ${int _ = X; X = (X) + 1; _}");
 	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("--"), 1,  "X X = (X) - 1 X ${int _ = X; X = (X) - 1; _}");
 	return true;
@@ -253,24 +253,12 @@ static kbool_t cstyle_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 
 // --------------------------------------------------------------------------
 
-static kbool_t cstyle_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t cstyle_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 KDEFINE_PACKAGE* cstyle_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "cstyle", "1.0");
 	d.initPackage    = cstyle_initPackage;
 	d.setupPackage   = cstyle_setupPackage;
-	d.initNameSpace  = cstyle_initNameSpace;
-	d.setupNameSpace = cstyle_setupNameSpace;
 	return &d;
 }
 

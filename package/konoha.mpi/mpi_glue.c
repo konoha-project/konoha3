@@ -659,24 +659,12 @@ static kbool_t mpi_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime
 	return true;
 }
 
-static kbool_t mpi_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t mpi_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 KDEFINE_PACKAGE* mpi_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("mpi", "1.0"),
 		.initPackage    = mpi_initPackage,
 		.setupPackage   = mpi_setupPackage,
-		.initNameSpace  = mpi_initNameSpace,
-		.setupNameSpace = mpi_setupNameSpace,
 	};
 	return &d;
 }

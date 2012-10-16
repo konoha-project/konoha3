@@ -655,7 +655,7 @@ static KMETHOD RegExp_test(KonohaContext *kctx, KonohaStack *sfp)
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t regexp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t regexp_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	kregexpshare_t *base = (kregexpshare_t*)KCalloc_UNTRACE(sizeof(kregexpshare_t), 1);
 	base->h.name     = "regexp";
@@ -692,11 +692,6 @@ static kbool_t regexp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
-	return true;
-}
-
-static kbool_t regexp_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
-{
 	return true;
 }
 
@@ -751,19 +746,25 @@ static KMETHOD TypeCheck_RegExp(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(SUGAR kExpr_setConstValue(kctx, expr, TY_RegExp, UPCAST(r)));
 }
 
-static kbool_t regexp_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t regexp_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ .keyword = SYM_("$RegExp"),  TypeCheck_(RegExp), },
 		{ .keyword = KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
-
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	SUGAR kNameSpace_setTokenFunc(kctx, ns, SYM_("$RegExp"), KonohaChar_Slash, new_SugarFunc(ns, TokenFunc_JavaScriptRegExp));
 	return true;
 }
 
-static kbool_t regexp_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t regexp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	regexp_defineMethod(kctx, ns, trace);
+	regexp_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t regexp_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -774,8 +775,6 @@ KDEFINE_PACKAGE* regexp_init(void)
 		KPACKNAME("regexp", "1.0"),
 		.initPackage    = regexp_initPackage,
 		.setupPackage   = regexp_setupPackage,
-		.initNameSpace  = regexp_initNameSpace,
-		.setupNameSpace = regexp_setupNameSpace,
 	};
 	return &d;
 }

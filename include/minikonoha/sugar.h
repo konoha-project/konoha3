@@ -542,7 +542,7 @@ typedef struct {
 	KonohaClass *cTokenArray;
 
 	SugarSyntax*    (*kNameSpace_getSyntax)(KonohaContext *, kNameSpace *, ksymbol_t, int);
-	void            (*kNameSpace_defineSyntax)(KonohaContext *, kNameSpace *, KDEFINE_SYNTAX *, kNameSpace *packageNS);
+	void            (*kNameSpace_defineSyntax)(KonohaContext *, kNameSpace *, KDEFINE_SYNTAX *);
 	kbool_t         (*kArray_addSyntaxRule)(KonohaContext *, kArray *ruleList, TokenSequence *sourceRange);
 	SugarSyntaxVar* (*kNameSpace_setTokenFunc)(KonohaContext *, kNameSpace *, ksymbol_t, int ch, kFunc *);
 //	SugarSyntaxVar* (*kNameSpace_setSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);

@@ -139,24 +139,12 @@ static kbool_t apache_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 	return true;
 }
 
-static kbool_t apache_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t apache_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 KDEFINE_PACKAGE* apache_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("apache", "1.0"),
 		.initPackage    = apache_initPackage,
 		.setupPackage   = apache_setupPackage,
-		.initNameSpace  = apache_initNameSpace,
-		.setupNameSpace = apache_setupNameSpace,
 	};
 	return &d;
 }

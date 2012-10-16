@@ -42,46 +42,41 @@ static kbool_t while_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 	return true;
 }
 
-// --------------------------------------------------------------------------
-
-static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
-{
-	VAR_Statement(stmt, gma);
-	DBG_P("while statement .. ");
-	int ret = false;
-	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_boolean, 0)) {
-		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
-		kStmt_set(CatchContinue, stmt, true);  // set before tyCheckAll
-		kStmt_set(CatchBreak, stmt, true);
-		ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
-		if(ret) {
-			kStmt_typed(stmt, LOOP);
-		}
-	}
-	KReturnUnboxValue(ret);
-}
-
-static inline kStmt* kStmt_getParentNULL(kStmt *stmt)
-{
-	return stmt->parentBlockNULL->parentStmtNULL;
-}
-
-static kbool_t while_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	KImportPackage(ns, "konoha.break", trace);
-	KImportPackage(ns, "konoha.continue", trace);
-	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("while"), 0, "\"while\" \"(\" $Expr \")\" $Block", 0, 0, NULL, NULL, NULL, Statement_while, NULL, },
-		{ KW_END, },
-	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
-	return true;
-}
-
-static kbool_t while_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
+//// --------------------------------------------------------------------------
+//
+//static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	VAR_Statement(stmt, gma);
+//	DBG_P("while statement .. ");
+//	int ret = false;
+//	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_boolean, 0)) {
+//		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
+//		kStmt_set(CatchContinue, stmt, true);  // set before tyCheckAll
+//		kStmt_set(CatchBreak, stmt, true);
+//		ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
+//		if(ret) {
+//			kStmt_typed(stmt, LOOP);
+//		}
+//	}
+//	KReturnUnboxValue(ret);
+//}
+//
+//static inline kStmt* kStmt_getParentNULL(kStmt *stmt)
+//{
+//	return stmt->parentBlockNULL->parentStmtNULL;
+//}
+//
+//static kbool_t while_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+//{
+//	KImportPackage(ns, "konoha.break", trace);
+//	KImportPackage(ns, "konoha.continue", trace);
+//	KDEFINE_SYNTAX SYNTAX[] = {
+//		{ SYM_("while"), 0, "\"while\" \"(\" $Expr \")\" $Block", 0, 0, NULL, NULL, NULL, Statement_while, NULL, },
+//		{ KW_END, },
+//	};
+//	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
+//	return true;
+//}
 
 KDEFINE_PACKAGE* while_init(void)
 {
@@ -89,8 +84,6 @@ KDEFINE_PACKAGE* while_init(void)
 	KSetPackageName(d, "while", "1.0");
 	d.initPackage    = while_initPackage;
 	d.setupPackage   = while_setupPackage;
-	d.initNameSpace  = while_initNameSpace;
-	d.setupNameSpace = while_setupNameSpace;
 	return &d;
 }
 

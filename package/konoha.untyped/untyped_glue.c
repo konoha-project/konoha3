@@ -30,17 +30,7 @@ extern "C"{
 #endif
 
 // --------------------------------------------------------------------------
-
-static kbool_t untyped_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
-{
-	KRequirePackage("konoha.var", trace);
-	return true;
-}
-
-static kbool_t untyped_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
-{
-	return true;
-}
+/* Decl */
 
 static void DeclVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr)
 {
@@ -79,14 +69,14 @@ static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static kbool_t untyped_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t untyped_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KImportPackage(ns, "konoha.var", trace);
-	SUGAR kNameSpace_addSugarFunc(kctx, ns, SYM_("="), SugarFunc_TypeCheck, new_SugarFunc(packageNS, TypeCheck_UntypedAssign));
+	KRequirePackage("konoha.var", trace);
+	SUGAR kNameSpace_addSugarFunc(kctx, ns, SYM_("="), SugarFunc_TypeCheck, new_SugarFunc(ns, TypeCheck_UntypedAssign));
 	return true;
 }
 
-static kbool_t untyped_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t untyped_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -94,11 +84,9 @@ static kbool_t untyped_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS
 KDEFINE_PACKAGE* untyped_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "untyped", "1.0");
+	KSetPackageName(d, "konoha", "1.0");
 	d.initPackage    = untyped_initPackage;
 	d.setupPackage   = untyped_setupPackage;
-	d.initNameSpace  = untyped_initNameSpace;
-	d.setupNameSpace = untyped_setupNameSpace;
 	return &d;
 }
 

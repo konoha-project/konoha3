@@ -234,14 +234,14 @@ static void SugarSyntax_setMethodFunc(KonohaContext *kctx, kNameSpace *ns, Sugar
 	}
 }
 
-static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE_SYNTAX *syndef, kNameSpace *packageNS)
+static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE_SYNTAX *syndef)
 {
 	MethodFunc pPatternMatch = NULL, pExpression = NULL, pStatement = NULL, pTypeCheck = NULL;
 	kFunc *mPatternMatch = NULL, *mExpression = NULL, *mStatement = NULL, *mTypeCheck = NULL;
 	while(syndef->keyword != KW_END) {
 		SugarSyntaxVar* syn = (SugarSyntaxVar*)kNameSpace_getSyntax(kctx, ns, syndef->keyword, 1/*isnew*/);
 		DBG_ASSERT(syn != NULL);
-		syn->lastLoadedPackageId = packageNS->packageId;
+		syn->lastLoadedPackageId = ns->packageId;
 		syn->flag  |= ((kshortflag_t)syndef->flag);
 		if(syndef->precedence_op1 > 0) {
 			syn->precedence_op1 = syndef->precedence_op1;
@@ -272,7 +272,7 @@ static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 			}
 		}
 		DBG_ASSERT(syn == SYN_(ns, syndef->keyword));
-		KLIB Kreportf(kctx, DebugTag, 0, "@%s new syntax %s%s", PackageId_t(packageNS->packageId), PSYM_t(syn->keyword));
+		KLIB Kreportf(kctx, DebugTag, 0, "@%s new syntax %s%s", PackageId_t(ns->packageId), PSYM_t(syn->keyword));
 		syndef++;
 	}
 }
@@ -883,14 +883,14 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackageId_t packageI
 			return NULL;
 		}
 	}
-	KonohaPackage *pack = (KonohaPackage*)KCalloc_UNTRACE(sizeof(KonohaPackage), 1);
+	KonohaPackage *pack = (KonohaPackage*)KCalloc(sizeof(KonohaPackage), 1, trace);
 	pack->packageId = packageId;
 	pack->packageNameSpace_OnGlobalConstList = ns;
 	pack->packageHandler = packageHandler;
-	path = PLATAPI formatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_exports.k");
-	if(path != NULL) {
-		pack->exportScriptUri = KLIB KfileId(kctx, pathbuf, strlen(pathbuf), 0, _NEWID) | 1;
-	}
+//	path = PLATAPI formatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_exports.k");
+//	if(path != NULL) {
+//		pack->exportScriptUri = KLIB KfileId(kctx, pathbuf, strlen(pathbuf), 0, _NEWID) | 1;
+//	}
 	return pack;
 }
 
@@ -987,19 +987,19 @@ static kbool_t kNameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, con
 	DBG_ASSERT(ns != NULL);
 	if(pack != NULL) {
 		kbool_t isContinousLoading = kNameSpace_importAll(kctx, ns, pack->packageNameSpace_OnGlobalConstList, trace);
-		if(isContinousLoading && pack->packageHandler != NULL && pack->packageHandler->initNameSpace != NULL) {
-			isContinousLoading = pack->packageHandler->initNameSpace(kctx, pack->packageNameSpace_OnGlobalConstList, ns, trace);
-		}
-		if(isContinousLoading && pack->exportScriptUri != 0) {
-			const char *scriptPath = FileId_t(pack->exportScriptUri);
-			kfileline_t uline = pack->exportScriptUri | (kfileline_t)1;
-			SugarThunk thunk = {kctx, ns};
-			isContinousLoading = PLATAPI loadScript(scriptPath, uline, (void*)&thunk, evalHookFunc);
-		}
-		if(isContinousLoading && pack->packageHandler != NULL && pack->packageHandler->setupNameSpace != NULL) {
-			isContinousLoading = pack->packageHandler->setupNameSpace(kctx, pack->packageNameSpace_OnGlobalConstList, ns, trace);
-		}
-		return true;
+//		if(isContinousLoading && pack->packageHandler != NULL && pack->packageHandler->initNameSpace != NULL) {
+//			isContinousLoading = pack->packageHandler->initNameSpace(kctx, pack->packageNameSpace_OnGlobalConstList, ns, trace);
+//		}
+//		if(isContinousLoading && pack->exportScriptUri != 0) {
+//			const char *scriptPath = FileId_t(pack->exportScriptUri);
+//			kfileline_t uline = pack->exportScriptUri | (kfileline_t)1;
+//			SugarThunk thunk = {kctx, ns};
+//			isContinousLoading = PLATAPI loadScript(scriptPath, uline, (void*)&thunk, evalHookFunc);
+//		}
+//		if(isContinousLoading && pack->packageHandler != NULL && pack->packageHandler->setupNameSpace != NULL) {
+//			isContinousLoading = pack->packageHandler->setupNameSpace(kctx, pack->packageNameSpace_OnGlobalConstList, ns, trace);
+//		}
+		return isContinousLoading;
 	}
 	return false;
 }

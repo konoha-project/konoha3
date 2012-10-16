@@ -95,17 +95,10 @@ static KMETHOD Dynamic_(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t dynamic_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-
 	static KDEFINE_CLASS defDynamic = {0};
 	defDynamic.structname = "dynamic";
 	defDynamic.cflag = kClass_Final|kClass_TypeVar;
-	
 	KonohaClass *cDynamic = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDynamic, trace);
-//	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
-//		{"Array", VirtualType_KonohaClass, (uintptr_t)CT_(TY_Array)},
-//		{NULL},
-//	};
-//	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(ClassData), 0);
 
 	int TY_Dynamic = cDynamic->typeId;
 	KDEFINE_METHOD MethodData[] = {
@@ -113,14 +106,6 @@ static kbool_t dynamic_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
-//	if(IS_DefinedFloat()) {
-//		KDEFINE_METHOD MethodData[] = {
-//			_Public|_Const|_Im|_Coercion, _F(Dynamic_toObject), TY_float, TY_Dynamic, MN_to(TY_float), 0,
-//			_Public|_Const|_Im|_Coercion, _F(Float_toObject), TY_Dynamic, TY_float, MN_to(TY_Dynamic), 0,
-//			DEND,
-//		};
-//		KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
-//	}
 	return true;
 }
 
@@ -129,24 +114,12 @@ static kbool_t dynamic_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirst
 	return true;
 }
 
-static kbool_t dynamic_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t dynamic_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 KDEFINE_PACKAGE* dynamic_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "dynamic", "1.0");
+	KSetPackageName(d, "konoha", "1.0");
 	d.initPackage    = dynamic_initPackage;
 	d.setupPackage   = dynamic_setupPackage;
-	d.initNameSpace  = dynamic_initNameSpace;
-	d.setupNameSpace = dynamic_setupNameSpace;
 	return &d;
 }
 

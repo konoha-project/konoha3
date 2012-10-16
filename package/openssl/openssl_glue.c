@@ -124,23 +124,12 @@ static kbool_t openssl_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirst
 	return true;
 }
 
-static kbool_t openssl_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t openssl_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
 KDEFINE_PACKAGE* openssl_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("openssl", "1.0"),
 		.initPackage    = openssl_initPackage,
 		.setupPackage   = openssl_setupPackage,
-		.initNameSpace  = openssl_initNameSpace,
-		.setupNameSpace = openssl_setupNameSpace,
 	};
 	return &d;
 }

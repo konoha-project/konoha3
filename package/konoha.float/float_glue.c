@@ -248,7 +248,7 @@ static KMETHOD Float_opMINUS(KonohaContext *kctx, KonohaStack *sfp)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t float_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KonohaFloatModule *base = (KonohaFloatModule*)KCalloc_UNTRACE(sizeof(KonohaFloatModule), 1);
 	base->h.name     = "float";
@@ -256,9 +256,6 @@ static kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	base->h.reftrace = kmodfloat_reftrace;
 	base->h.free     = kmodfloat_free;
 	KLIB KonohaRuntime_setModule(kctx, MOD_float, &base->h, trace);
-
-	/* Use konoha.int package's Parser to parsing FloatLiteral */
-	KRequirePackage("konoha.int", trace);
 
 	KDEFINE_CLASS defFloat = {0};
 	SETUNBOXNAME(defFloat, float);
@@ -310,12 +307,8 @@ static kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	return true;
 }
 
-static kbool_t float_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
-{
-	return true;
-}
-
 //----------------------------------------------------------------------------
+
 static KMETHOD TypeCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
@@ -324,22 +317,32 @@ static KMETHOD TypeCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_float, sfp[4].unboxValue));
 }
 
-static kbool_t float_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t float_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("$Float"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_Float, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNS);
-
-	KImportPackage(ns, "konoha.int", trace);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t float_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+//---
+
+static kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	/* Use konoha.int package's Parser to parsing FloatLiteral */
+	KRequirePackage("konoha.int", trace);
+	float_defineMethod(kctx, ns, trace);
+	float_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t float_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
+
 
 KDEFINE_PACKAGE* float_init(void)
 {
@@ -347,8 +350,6 @@ KDEFINE_PACKAGE* float_init(void)
 	KSetPackageName(d, "float", "1.0");
 	d.initPackage    = float_initPackage;
 	d.setupPackage   = float_setupPackage;
-	d.initNameSpace  = float_initNameSpace;
-	d.setupNameSpace = float_setupNameSpace;
 	return &d;
 }
 

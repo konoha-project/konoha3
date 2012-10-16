@@ -849,24 +849,12 @@ static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 	return true;
 }
 
-static kbool_t ijit_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
-static kbool_t ijit_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
-{
-	return true;
-}
-
 KDEFINE_PACKAGE* ijit_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("ijit", "1.0"),
 		.initPackage    = ijit_initPackage,
 		.setupPackage   = ijit_setupPackage,
-		.initNameSpace  = ijit_initNameSpace,
-		.setupNameSpace = ijit_setupNameSpace,
 	};
 	return &d;
 }
