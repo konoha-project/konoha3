@@ -130,7 +130,7 @@ static void _JSONArray_append(JSONArray *a, JSON o)
 {
     if(a->length + 1 >= a->capacity) {
         uint32_t newsize = 1 << LOG2(a->capacity * 2 + 1);
-        a->list = (JSON *) KJSON_REALLOC(a->list, newsize * sizeof(JSON));
+        a->list = (JSON*) KJSON_REALLOC(a->list, newsize * sizeof(JSON));
         a->capacity = newsize;
     }
     a->list[a->length++] = o;

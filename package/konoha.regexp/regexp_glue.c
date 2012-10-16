@@ -70,7 +70,7 @@ typedef void kregexp_t;
 static size_t utf8_strlen(const char *text, size_t len)
 {
 	size_t size = 0;
-	const unsigned char *s = (const unsigned char *)text;
+	const unsigned char *s = (const unsigned char*)text;
 	const unsigned char *eos = s + len;
 	while (s < eos) {
 		size_t ulen = utf8len(s[0]);
@@ -96,7 +96,7 @@ typedef struct {
 
 /* ------------------------------------------------------------------------ */
 
-#define kregexpshare      ((kregexpshare_t *)kctx->modshare[MOD_REGEXP])
+#define kregexpshare      ((kregexpshare_t*)kctx->modshare[MOD_REGEXP])
 #define CT_RegExp         kregexpshare->cRegExp
 #define TY_RegExp         kregexpshare->cRegExp->typeId
 
@@ -127,20 +127,20 @@ typedef struct {
 
 static kregexp_t *pcre_regmalloc(KonohaContext *kctx, kString *s)
 {
-	PCRE_regexp_t *preg = (PCRE_regexp_t *) KMalloc_UNTRACE(sizeof(PCRE_regexp_t));
+	PCRE_regexp_t *preg = (PCRE_regexp_t*) KMalloc_UNTRACE(sizeof(PCRE_regexp_t));
 	return (kregexp_t *) preg;
 }
 
 static void pcre_regfree(KonohaContext *kctx, kregexp_t *reg)
 {
-	PCRE_regexp_t *preg = (PCRE_regexp_t *)reg;
+	PCRE_regexp_t *preg = (PCRE_regexp_t*)reg;
 	pcre_free(preg->re);
 	KFree(preg, sizeof(PCRE_regexp_t));
 }
 
 static int pcre_nmatchsize(KonohaContext *kctx, kregexp_t *reg)
 {
-	PCRE_regexp_t *preg = (PCRE_regexp_t *)reg;
+	PCRE_regexp_t *preg = (PCRE_regexp_t*)reg;
 	int capsize = 0;
 	if(pcre_fullinfo(preg->re, NULL, PCRE_INFO_CAPTURECOUNT, &capsize) != 0) {
 		return KREGEXP_MATCHSIZE;
@@ -189,21 +189,21 @@ static int pcre_parseeflags(KonohaContext *kctx, const char *option)
 
 //static size_t pcre_regerror(int res, kregexp_t *reg, char *ebuf, size_t ebufsize)
 //{
-//	PCRE_regexp_t *pcre = (PCRE_regexp_t *)reg;
+//	PCRE_regexp_t *pcre = (PCRE_regexp_t*)reg;
 //	snprintf(ebuf, ebufsize, "[%d]: %s", pcre->erroffset, pcre->err);
 //	return (pcre->err != NULL) ? strlen(pcre->err) : 0;
 //}
 
 static int pcre_regcomp(KonohaContext *kctx, kregexp_t *reg, const char *pattern, int cflags)
 {
-	PCRE_regexp_t *preg = (PCRE_regexp_t *)reg;
+	PCRE_regexp_t *preg = (PCRE_regexp_t*)reg;
 	preg->re = pcre_compile(pattern, cflags, &preg->err, &preg->erroffset, NULL);
 	return (preg->re != NULL) ? 0 : -1;
 }
 
 static int pcre_regexec(KonohaContext *kctx, kregexp_t *reg, const char *str, size_t nmatch, kregmatch_t p[], int eflags)
 {
-	PCRE_regexp_t *preg = (PCRE_regexp_t *)reg;
+	PCRE_regexp_t *preg = (PCRE_regexp_t*)reg;
 	int res, nm_count, nvector[nmatch*3];
 	nvector[0] = 0;
 	size_t idx, matched = nmatch;
@@ -228,7 +228,7 @@ static int pcre_regexec(KonohaContext *kctx, kregexp_t *reg, const char *str, si
 				int n_idx = (tbl_ptr[0] << 8) | tbl_ptr[1];
 				unsigned char *n_name = tbl_ptr + 2;
 				p[n_idx].rm_name = n_name;
-				p[n_idx].rm_namelen = strlen((char *)n_name);
+				p[n_idx].rm_namelen = strlen((char*)n_name);
 				tbl_ptr += nm_entry_size;
 			}
 		}
@@ -317,7 +317,7 @@ static void Kwb_writeRegexFormat(KonohaContext *kctx, KGrowingBuffer *wb, const 
 
 static void RegExp_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	kRegExp *re = (kRegExp *)o;
+	kRegExp *re = (kRegExp*)o;
 	re->reg = NULL;
 	re->eflags = 0;
 	re->pattern = KNULL(String);
@@ -326,7 +326,7 @@ static void RegExp_init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void RegExp_free(KonohaContext *kctx, kObject *o)
 {
-	kRegExp *re = (kRegExp *)o;
+	kRegExp *re = (kRegExp*)o;
 	if(re->reg != NULL) {
 		pcre_regfree(kctx, re->reg);
 	}
@@ -476,7 +476,7 @@ static void kArray_executeRegExp(KonohaContext *kctx, kArray *resultArray, kRegE
 static KMETHOD String_match(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
-	kArray *resultArray = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
+	kArray *resultArray = (kArray*)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	kArray_executeRegExp(kctx, resultArray, sfp[1].asRegExp, sfp[0].asString);
 	KReturnWith(resultArray, RESET_GCSTACK());
 }
@@ -485,7 +485,7 @@ static KMETHOD String_match(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD RegExp_exec(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
-	kArray *resultArray = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
+	kArray *resultArray = (kArray*)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	kArray_executeRegExp(kctx, resultArray, sfp[0].asRegExp, sfp[1].asString);
 	KReturnWith(resultArray, RESET_GCSTACK());
 }
@@ -571,17 +571,17 @@ static void kArray_split(KonohaContext *kctx, kArray *resultArray, kString *str,
 		}
 	}
 	else {
-		const unsigned char *s = (const unsigned char *)S_text(str);
+		const unsigned char *s = (const unsigned char*)S_text(str);
 		size_t i, n = S_size(str);
 		if(kString_is(ASCII, str)) {
 			for(i = 0; i < n; i++) {
-				KLIB new_kString(kctx, resultArray, (const char *)s + i, 1, StringPolicy_ASCII);
+				KLIB new_kString(kctx, resultArray, (const char*)s + i, 1, StringPolicy_ASCII);
 			}
 		}
 		else {
 			for(i = 0; i < n; i++) {
 				int len = utf8len(s[i]);
-				KLIB new_kString(kctx, resultArray, (const char *)s + i, len, len == 1 ? StringPolicy_ASCII: StringPolicy_UTF8);
+				KLIB new_kString(kctx, resultArray, (const char*)s + i, len, len == 1 ? StringPolicy_ASCII: StringPolicy_UTF8);
 				i += len;
 			}
 		}
@@ -592,7 +592,7 @@ static void kArray_split(KonohaContext *kctx, kArray *resultArray, kString *str,
 static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
-	kArray *resultArray = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
+	kArray *resultArray = (kArray*)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	kArray_split(kctx, resultArray, sfp[0].asString, sfp[1].asRegExp, S_size(sfp[0].asString));
 	KReturnWith(resultArray, RESET_GCSTACK());
 }
@@ -602,7 +602,7 @@ static KMETHOD String_splitWithLimit(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
 	int limit = sfp[2].intValue < 0 ? S_size(sfp[0].asString) : sfp[2].intValue;
-	kArray *resultArray = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
+	kArray *resultArray = (kArray*)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	kArray_split(kctx, resultArray, sfp[0].asString, sfp[1].asRegExp, limit);
 	KReturnWith(resultArray, RESET_GCSTACK());
 }
@@ -657,7 +657,7 @@ static KMETHOD RegExp_test(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t regexp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	kregexpshare_t *base = (kregexpshare_t *)KCalloc_UNTRACE(sizeof(kregexpshare_t), 1);
+	kregexpshare_t *base = (kregexpshare_t*)KCalloc_UNTRACE(sizeof(kregexpshare_t), 1);
 	base->h.name     = "regexp";
 	base->h.setup    = kregexpshare_setup;
 	base->h.reftrace = kregexpshare_reftrace;
@@ -725,7 +725,7 @@ static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 			int pos0 = pos;
 			while(isalpha(source[pos])) pos++;
 			if(IS_NOTNULL(tk)) {
-				kArray *a = (kArray *)KLIB new_kObject(kctx, OnField, CT_StringArray0, 2); // FIXME
+				kArray *a = (kArray*)KLIB new_kObject(kctx, OnField, CT_StringArray0, 2); // FIXME
 				KFieldSet(tk, tk->subTokenList, a);
 				KLIB new_kString(kctx, a, source + 1, (pos0-2), 0);
 				KLIB new_kString(kctx, a, source + pos0, pos-pos0, 0);

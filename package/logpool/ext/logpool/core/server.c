@@ -46,7 +46,7 @@ static void server_read_callback(struct bufferevent *bev, void *ctx)
         switch (log_data_protocol(log)) {
         case LOGPOOL_EVENT_READ:
             debug_print(1, "R %d %d, '%s'", log->klen, log->vlen, data);
-            pool_add((struct Procedure *) log, bev, io->pool);
+            pool_add((struct Procedure*) log, bev, io->pool);
             break;
         case LOGPOOL_EVENT_WRITE:
 #if LOGPOOL_DEBUG >= 1

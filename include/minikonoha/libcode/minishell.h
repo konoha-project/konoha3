@@ -116,7 +116,7 @@ static void shell(KonohaContext *kctx)
 		kstatus_t status = readstmt(kctx, &wb, &inc);
 		if(status == K_BREAK) break;
 		if(status == K_CONTINUE && Kwb_bytesize(&wb) > 0) {
-			status = (kstatus_t)konoha_eval((KonohaContext *)kctx, KLIB Kwb_top(kctx, &wb, 1), uline);
+			status = (kstatus_t)konoha_eval((KonohaContext*)kctx, KLIB Kwb_top(kctx, &wb, 1), uline);
 			uline += inc;
 			KLIB Kwb_free(&wb);
 			if(status != K_FAILED) {

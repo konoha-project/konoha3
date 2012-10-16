@@ -197,14 +197,14 @@ static void writeDataLogToBuffer(logconf_t *logconf, va_list ap, char *buftop, c
 		}
 		switch(logtype) {
 		case LOG_s: {
-			const char *key = va_arg(ap, const char *);
-			const char *text = va_arg(ap, const char *);
+			const char *key = va_arg(ap, const char*);
+			const char *text = va_arg(ap, const char*);
 			buftop = writeKeyToBuffer(key, strlen(key), buftop, bufend);
 			buftop = writeTextToBuffer(text, buftop, bufend);
 			break;
 		}
 		case LOG_u: {
-			const char *key = va_arg(ap, const char *);
+			const char *key = va_arg(ap, const char*);
 			buftop = writeKeyToBuffer(key, strlen(key), buftop, bufend);
 			buftop = writeUnsingedIntToBuffer(va_arg(ap, uintptr_t), buftop, bufend);
 			break;

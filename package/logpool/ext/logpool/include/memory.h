@@ -6,7 +6,7 @@
 
 #define cast(T, V) ((T)(V))
 #define CLZ(n) __builtin_clzl(n)
-#define BITS (sizeof(void *) * 8)
+#define BITS (sizeof(void*) * 8)
 #define SizeToKlass(N) ((uint32_t)(BITS - CLZ(N - 1)))
 
 #ifdef USE_NO_CHECK_MALLOC

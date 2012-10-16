@@ -109,7 +109,7 @@ static void UnboxArray_ensureMinimumSize(KonohaContext *kctx, struct _kAbstractA
 static void UnboxArray_add(KonohaContext *kctx, kArray *o, uintptr_t value)
 {
 	size_t asize = kArray_size(o);
-	struct _kAbstractArray *a = (struct _kAbstractArray *)o;
+	struct _kAbstractArray *a = (struct _kAbstractArray*)o;
 	UnboxArray_ensureMinimumSize(kctx, a, asize+1);
 	DBG_ASSERT(a->a.ObjectItems[asize] == NULL);
 	o->unboxItems[asize] = value;
@@ -119,7 +119,7 @@ static void UnboxArray_add(KonohaContext *kctx, kArray *o, uintptr_t value)
 static void UnboxArray_insert(KonohaContext *kctx, kArray *o, size_t n, uintptr_t v)
 {
 	size_t asize = kArray_size(o);
-	struct _kAbstractArray *a = (struct _kAbstractArray *)o;
+	struct _kAbstractArray *a = (struct _kAbstractArray*)o;
 	if(!(n < asize)) {
 		UnboxArray_add(kctx, o, v);
 	}
@@ -179,7 +179,7 @@ static KMETHOD Array_pop(KonohaContext *kctx, KonohaStack *sfp)
 		KReturnUnboxValue(v);
 	}
 	else {
-		struct _kAbstractArray *a2 = (struct _kAbstractArray *)a;
+		struct _kAbstractArray *a2 = (struct _kAbstractArray*)a;
 		kObject *value = a2->a.ObjectItems[n];
 		kObject** null = NULL;
 		KFieldInit(a2, a2->a.ObjectItems[n], null);
@@ -197,8 +197,8 @@ static void kArray_removeAt(KonohaContext *kctx, kArray *a, size_t n)
 		kArray_setsize(a2, asize - 1);
 	}
 	else {
-		struct _kAbstractArray *a2 = (struct _kAbstractArray *)a;
-		memmove(a2->a.ObjectItems+n, a2->a.ObjectItems+(n+1), sizeof(kObject *) * (asize - n - 1));
+		struct _kAbstractArray *a2 = (struct _kAbstractArray*)a;
+		memmove(a2->a.ObjectItems+n, a2->a.ObjectItems+(n+1), sizeof(kObject*) * (asize - n - 1));
 		a2->a.bytesize = (asize - 1) * sizeof(uintptr_t);
 	}
 }
@@ -207,7 +207,7 @@ static KMETHOD Array_removeAt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
 	int n = (int)sfp[1].unboxValue;
-	struct _kAbstractArray *a2 = (struct _kAbstractArray *)a;
+	struct _kAbstractArray *a2 = (struct _kAbstractArray*)a;
 	if(kArray_isUnboxData(a)) {
 		uintptr_t v = a->unboxItems[n];
 		kArray_removeAt(kctx, a, n);
@@ -252,7 +252,7 @@ static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
 	size_t asize = kArray_size(a);
 	ktype_t resolve_type = Method_returnType(f->mtd);  // FIXME
 	KonohaClass *CT_ArrayT0 = CT_p0(kctx, CT_Array, resolve_type);
-	kArrayVar *returnValue = (kArrayVar *)KLIB new_kObject(kctx, _GcStack, CT_ArrayT0, asize);
+	kArrayVar *returnValue = (kArrayVar*)KLIB new_kObject(kctx, _GcStack, CT_ArrayT0, asize);
 
 	size_t i;
 	if(kArray_isUnboxData(a)) {
@@ -305,7 +305,7 @@ static KMETHOD Array_inject(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	else {
 		INIT_GCSTACK();
-		kObject *tmp = (kObject *) KLIB new_kObject(kctx, _GcStack, CT_(resolve_type), 0);
+		kObject *tmp = (kObject*) KLIB new_kObject(kctx, _GcStack, CT_(resolve_type), 0);
 		kObject *nulobj = KLIB Knull(kctx, CT_(resolve_type));
 		BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
 		for(i=0; i != asize; ++i) {
@@ -323,7 +323,7 @@ static KMETHOD Array_inject(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_shift(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	struct _kAbstractArray *a2 = (struct _kAbstractArray *)a;
+	struct _kAbstractArray *a2 = (struct _kAbstractArray*)a;
 	if(kArray_isUnboxData(a)) {
 		uintptr_t v = a->unboxItems[0];
 		kArray_removeAt(kctx, a, 0);
@@ -470,7 +470,7 @@ static KMETHOD Array_new(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Array_newList(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
+	kArrayVar *a = (kArrayVar*)sfp[0].asObject;
 	KonohaStack *p = sfp+1;
 	if(kArray_isUnboxData(a)) {
 		for(; p < kctx->esp; p++) {

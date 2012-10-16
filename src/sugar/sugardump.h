@@ -125,12 +125,12 @@ static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
 				for(i=0; i < kArray_size(expr->cons); i++) {
 					kObject *o = expr->cons->ObjectItems[i];
 					if(IS_Expr(o)) {
-						dumpExpr(kctx, i, nest+1, (kExpr *)o);
+						dumpExpr(kctx, i, nest+1, (kExpr*)o);
 					}
 					else {
 						dumpIndent(kctx, nest+1);
 						if(O_ct(o) == CT_Token) {
-							kToken *tk = (kToken *)o;
+							kToken *tk = (kToken*)o;
 							DUMP_P("[%d] O: %s ", i, CT_t(o->h.ct));
 							dumpToken(kctx, tk, -1);
 						}
@@ -153,7 +153,7 @@ static void dumpEntry(KonohaContext *kctx, void *arg, KKeyValue *d)
 		ksymbol_t key = ~SYMKEY_BOXED & d->key;
 		DUMP_P("key='%s%s': ", PSYM_t(key));
 		if(IS_Token(d->ObjectValue)) {
-			dumpToken(kctx, (kToken *)d->ObjectValue, -1);
+			dumpToken(kctx, (kToken*)d->ObjectValue, -1);
 		} else if(IS_Expr(d->ObjectValue)) {
 			dumpExpr(kctx, 0, 0, (kExpr *) d->ObjectValue);
 		}

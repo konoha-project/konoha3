@@ -71,7 +71,7 @@ static int ParseBackSlash(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeniz
 		if(tokenizer->currentLine != 0) {
 			tokenizer->currentLine += 1;
 		}
-		return ParseIndent(kctx, (kTokenVar *)KNULL(Token), tokenizer, pos+2);
+		return ParseIndent(kctx, (kTokenVar*)KNULL(Token), tokenizer, pos+2);
 	}
 	return pos+1;
 }
@@ -333,7 +333,7 @@ static int callTokenFunc(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, Tokenize
 	DBG_ASSERT(IS_Func(fo));
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, fo->self);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, (kObject *)tk);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, (kObject*)tk);
 	lsfp[K_CALLDELTA+1].unboxValue = (uintptr_t)tokenizer;
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asString, preparedString);
 	{
@@ -370,7 +370,7 @@ static int Tokenizer_doEach(KonohaContext *kctx, Tokenizer *tokenizer, int kchar
 	if(tokenizer->FuncItems[kchar] != NULL) {
 		int i, size;
 		kFunc **FuncItems = Tokenizer_funcTable(kctx, tokenizer, kchar, &size);
-		kStringVar *preparedString = (kStringVar *)tokenizer->preparedString;
+		kStringVar *preparedString = (kStringVar*)tokenizer->preparedString;
 		preparedString->text = tokenizer->source + tok_start;   // this is a really bad manner !!
 		preparedString->bytesize = tokenizer->sourceLength - tok_start;
 		for(i = size - 1; i >= 0; i--) {
@@ -459,7 +459,7 @@ static int ParseLazyBlock(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeniz
 			level++; pos++;
 		}
 		else {
-			pos = Tokenizer_doEach(kctx, tokenizer, ch, pos, (kTokenVar *)K_NULLTOKEN);
+			pos = Tokenizer_doEach(kctx, tokenizer, ch, pos, (kTokenVar*)K_NULLTOKEN);
 		}
 	}
 	ERROR_UnclosedToken(kctx, tk, "}");
@@ -470,7 +470,7 @@ static const TokenizeFunc *kNameSpace_tokenMatrix(KonohaContext *kctx, kNameSpac
 {
 	if(ns->tokenMatrix == NULL) {
 		//DBG_ASSERT(KCHAR_MAX * sizeof(TokenizeFunc) == sizeof(MiniKonohaTokenMatrix));
-		TokenizeFunc *tokenMatrix = (TokenizeFunc *)KMalloc_UNTRACE(SIZEOF_TOKENMATRIX);
+		TokenizeFunc *tokenMatrix = (TokenizeFunc*)KMalloc_UNTRACE(SIZEOF_TOKENMATRIX);
 		if(ns->parentNULL != NULL && ns->parentNULL->tokenMatrix != NULL) {
 			memcpy(tokenMatrix, ns->parentNULL->tokenMatrix, sizeof(MiniKonohaTokenMatrix));
 			bzero(tokenMatrix + KCHAR_MAX, sizeof(MiniKonohaTokenMatrix));
@@ -480,9 +480,9 @@ static const TokenizeFunc *kNameSpace_tokenMatrix(KonohaContext *kctx, kNameSpac
 			memcpy(tokenMatrix, MiniKonohaTokenMatrix, sizeof(MiniKonohaTokenMatrix));
 			bzero(tokenMatrix + KCHAR_MAX, sizeof(MiniKonohaTokenMatrix));
 		}
-		((kNameSpaceVar *)ns)->tokenMatrix = (void *)tokenMatrix;
+		((kNameSpaceVar*)ns)->tokenMatrix = (void*)tokenMatrix;
 	}
-	return (TokenizeFunc *)ns->tokenMatrix;
+	return (TokenizeFunc*)ns->tokenMatrix;
 }
 
 static kFunc **kNameSpace_tokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns)

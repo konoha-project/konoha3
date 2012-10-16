@@ -86,7 +86,7 @@ static void Jansson_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuff
 //## Json Json.new();
 static KMETHOD Json_new (KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kJson *json = (struct _kJson *)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
+	struct _kJson *json = (struct _kJson*)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 	json->obj = json_object();
 	json_incref(json->obj);
 	KReturn(json);
@@ -99,8 +99,8 @@ static KMETHOD Json_parse(KonohaContext *kctx, KonohaStack *sfp)
 	json_t *obj;
 	json_error_t err;
 	obj = json_loads(buf, 0, &err);
-	struct _kJson *ret = (struct _kJson *)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
-	CHECK_JSON(obj, KReturn((kJson *)KLIB Knull(kctx, O_ct(ret))));
+	struct _kJson *ret = (struct _kJson*)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
+	CHECK_JSON(obj, KReturn((kJson*)KLIB Knull(kctx, O_ct(ret))));
 	obj = json_incref(obj);
 	ret->obj = obj;
 	KReturn(ret);
@@ -109,13 +109,13 @@ static KMETHOD Json_parse(KonohaContext *kctx, KonohaStack *sfp)
 //## Json Json.getJson(String key);
 static KMETHOD Json_getJson(KonohaContext *kctx, KonohaStack *sfp)
 {
-	json_t *obj = ((struct _kJson *)sfp[0].asObject)->obj;
-	CHECK_JSON(obj, KReturn((kJson *)KLIB Knull(kctx, O_ct(sfp[0].asObject))));
+	json_t *obj = ((struct _kJson*)sfp[0].asObject)->obj;
+	CHECK_JSON(obj, KReturn((kJson*)KLIB Knull(kctx, O_ct(sfp[0].asObject))));
 	const char *key = S_text(sfp[1].asString);
 	json_t *ret = json_object_get(obj, key);
-	CHECK_JSON(ret, KReturn((kJson *)KLIB Knull(kctx, O_ct(sfp[0].asObject))));
+	CHECK_JSON(ret, KReturn((kJson*)KLIB Knull(kctx, O_ct(sfp[0].asObject))));
 	ret = json_incref(ret);
-	struct _kJson *json = (struct _kJson *)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
+	struct _kJson *json = (struct _kJson*)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 	json->obj = ret;
 	KReturn(json);
 }
@@ -123,12 +123,12 @@ static KMETHOD Json_getJson(KonohaContext *kctx, KonohaStack *sfp)
 //## Array Json.getArray();
 static KMETHOD Json_getArray(KonohaContext *kctx, KonohaStack *sfp)
 {
-	json_t *obj = ((struct _kJson *)sfp[0].asObject)->obj;
+	json_t *obj = ((struct _kJson*)sfp[0].asObject)->obj;
 	CHECK_JSON(obj, KReturn(KNULL(Array)));
 	const char *key = S_text(sfp[1].asString);
 	json_t *ja;
 	if(key == NULL) {
-		ja = ((struct _kJson *)sfp[0].asObject)->obj;
+		ja = ((struct _kJson*)sfp[0].asObject)->obj;
 		ja = json_incref(ja);
 	}
 	else {
@@ -138,7 +138,7 @@ static KMETHOD Json_getArray(KonohaContext *kctx, KonohaStack *sfp)
 	if(!json_is_array(ja)) {
 		KReturn(KNULL(Array));
 	}
-	kArrayVar *a = (kArrayVar *)KLIB new_kObjectDontUseThis(kctx, CT_Array, 0);
+	kArrayVar *a = (kArrayVar*)KLIB new_kObjectDontUseThis(kctx, CT_Array, 0);
 	a->ObjectItems= (kObject**)ja;
 	KReturn(a);
 }
@@ -146,7 +146,7 @@ static KMETHOD Json_getArray(KonohaContext *kctx, KonohaStack *sfp)
 //## Boolean Json.getBool(String key);
 static KMETHOD Json_getBool(KonohaContext *kctx, KonohaStack *sfp)
 {
-	json_t *obj = ((struct _kJson *)sfp[0].asObject)->obj;
+	json_t *obj = ((struct _kJson*)sfp[0].asObject)->obj;
 	CHECK_JSON(obj, KReturnUnboxValue(false));
 	const char *key = S_text(sfp[1].asString);
 	json_t *json = json_object_get(obj, key);
@@ -160,7 +160,7 @@ static KMETHOD Json_getBool(KonohaContext *kctx, KonohaStack *sfp)
 //## float Json.getFloat(String key);
 static KMETHOD Json_getFloat(KonohaContext *kctx, KonohaStack *sfp)
 {
-	json_t *obj = ((struct _kJson *)sfp[0].asObject)->obj;
+	json_t *obj = ((struct _kJson*)sfp[0].asObject)->obj;
 	CHECK_JSON(obj, KReturnFloatValue(0.0));
 	const char *key = S_text(sfp[1].asString);
 	json_t *ret = json_object_get(obj, key);
@@ -175,7 +175,7 @@ static KMETHOD Json_getFloat(KonohaContext *kctx, KonohaStack *sfp)
 //## int Json.getInt(String key);
 static KMETHOD Json_getInt(KonohaContext *kctx, KonohaStack *sfp)
 {
-	json_t *obj = ((struct _kJson *)sfp[0].asObject)->obj;
+	json_t *obj = ((struct _kJson*)sfp[0].asObject)->obj;
 	CHECK_JSON(obj, KReturnUnboxValue(0));
 	const char *key = S_text(sfp[1].asString);
 	json_t *ret = json_object_get(obj, key);
@@ -189,7 +189,7 @@ static KMETHOD Json_getInt(KonohaContext *kctx, KonohaStack *sfp)
 //## String Json.getString(String key);
 static KMETHOD Json_getString(KonohaContext *kctx, KonohaStack *sfp)
 {
-	json_t *obj = ((struct _kJson *)sfp[0].asObject)->obj;
+	json_t *obj = ((struct _kJson*)sfp[0].asObject)->obj;
 	CHECK_JSON(obj, KReturn(KNULL(String)));
 	const char *key = S_text(sfp[1].asString);
 	json_t *ret = json_object_get(obj, key);
@@ -207,10 +207,10 @@ static KMETHOD Json_getString(KonohaContext *kctx, KonohaStack *sfp)
 //## void Json.setJson(String key, Json value);
 static KMETHOD Json_setJson(KonohaContext *kctx, KonohaStack *sfp)
 {
-	json_t *obj = ((struct _kJson *)sfp[0].asObject)->obj;
+	json_t *obj = ((struct _kJson*)sfp[0].asObject)->obj;
 	CHECK_JSON(obj, KReturnDefaultObjectValue());
 	const char *key = S_text(sfp[1].asString);
-	json_t *val = ((struct _kJson *)sfp[2].asObject)->obj;
+	json_t *val = ((struct _kJson*)sfp[2].asObject)->obj;
 	CHECK_JSON(val, KReturnDefaultObjectValue());
 	int ret = json_object_set(obj, key, val);
 	if(ret < 0) {
@@ -223,11 +223,11 @@ static KMETHOD Json_setJson(KonohaContext *kctx, KonohaStack *sfp)
 //## void Json.setArray(String key, Json[] a);
 static KMETHOD Json_setArray(KonohaContext *kctx, KonohaStack *sfp)
 {
-	json_t *obj = ((struct _kJson *)sfp[0].asObject)->obj;
+	json_t *obj = ((struct _kJson*)sfp[0].asObject)->obj;
 	CHECK_JSON(obj, KReturnDefaultObjectValue());
 	const char *key = S_text(sfp[1].asString);
-	kArrayVar *a = (kArrayVar *)sfp[2].asArray;
-	json_t *ja = (json_t *)a->ObjectItems;
+	kArrayVar *a = (kArrayVar*)sfp[2].asArray;
+	json_t *ja = (json_t*)a->ObjectItems;
 	json_object_set(obj, key, ja);
 	KReturnVoid();
 }
@@ -235,7 +235,7 @@ static KMETHOD Json_setArray(KonohaContext *kctx, KonohaStack *sfp)
 //## void Json.setBool(String key, String value);
 static KMETHOD Json_setBool(KonohaContext *kctx, KonohaStack *sfp)
 {
-	json_t *obj = ((struct _kJson *)sfp[0].asObject)->obj;
+	json_t *obj = ((struct _kJson*)sfp[0].asObject)->obj;
 	CHECK_JSON(obj, KReturnDefaultObjectValue());
 	const char *key = S_text(sfp[1].asString);
 	kbool_t bval = sfp[2].boolValue;
@@ -257,7 +257,7 @@ static KMETHOD Json_setBool(KonohaContext *kctx, KonohaStack *sfp)
 //## void Json.setFloat(String key, String value);
 static KMETHOD Json_setFloat(KonohaContext *kctx, KonohaStack *sfp)
 {
-	json_t *obj = ((struct _kJson *)sfp[0].asObject)->obj;
+	json_t *obj = ((struct _kJson*)sfp[0].asObject)->obj;
 	CHECK_JSON(obj, KReturnDefaultObjectValue());
 	const char *key = S_text(sfp[1].asString);
 	float fval = sfp[2].floatValue;
@@ -278,7 +278,7 @@ static KMETHOD Json_setFloat(KonohaContext *kctx, KonohaStack *sfp)
 //## void Json.setInt(String key, int value);
 static KMETHOD Json_setInt(KonohaContext *kctx, KonohaStack *sfp)
 {
-	json_t *obj = ((struct _kJson *)sfp[0].asObject)->obj;
+	json_t *obj = ((struct _kJson*)sfp[0].asObject)->obj;
 	CHECK_JSON(obj, KReturnDefaultObjectValue());
 	const char *key = S_text(sfp[1].asString);
 	kint_t ival = sfp[2].intValue;
@@ -299,7 +299,7 @@ static KMETHOD Json_setInt(KonohaContext *kctx, KonohaStack *sfp)
 //## void Json.setString(String key, String value);
 static KMETHOD Json_setString(KonohaContext *kctx, KonohaStack *sfp)
 {
-	json_t *obj = ((struct _kJson *)sfp[0].asObject)->obj;
+	json_t *obj = ((struct _kJson*)sfp[0].asObject)->obj;
 	CHECK_JSON(obj, KReturnDefaultObjectValue());
 	const char *key = S_text(sfp[1].asString);
 	const char *stringValue = S_text(sfp[2].asString);
@@ -320,8 +320,8 @@ static KMETHOD Json_setString(KonohaContext *kctx, KonohaStack *sfp)
 //## String[] Json.getKeys();
 static KMETHOD Json_getKeys(KonohaContext *kctx, KonohaStack *sfp)
 {
-	json_t *obj = ((struct _kJson *)sfp[0].asObject)->obj;
-	kArray *a = (kArray *)KLIB new_kObjectDontUseThis(kctx, CT_StringArray0, 0);
+	json_t *obj = ((struct _kJson*)sfp[0].asObject)->obj;
+	kArray *a = (kArray*)KLIB new_kObjectDontUseThis(kctx, CT_StringArray0, 0);
 	CHECK_JSON(obj, KReturn(KNULL(Array)));
 	const char *key;
 	void *iter = json_object_iter(obj);
@@ -336,7 +336,7 @@ static KMETHOD Json_getKeys(KonohaContext *kctx, KonohaStack *sfp)
 //## String Json.dump();
 static KMETHOD Json_dump(KonohaContext *kctx, KonohaStack *sfp)
 {
-	json_t *obj = ((struct _kJson *)sfp[0].asObject)->obj;
+	json_t *obj = ((struct _kJson*)sfp[0].asObject)->obj;
 	CHECK_JSON(obj, KReturnDefaultObjectValue());
 	char *data = json_dumps(obj, JSON_ENSURE_ASCII);
 	if(data == NULL) {
@@ -351,8 +351,8 @@ static KMETHOD JsonArray_newArray(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
 	size_t asize = (size_t)sfp[1].intValue;
-	a->bytemax = asize * sizeof(void *);
-	kArray_setsize((kArray *)a, asize);
+	a->bytemax = asize * sizeof(void*);
+	kArray_setsize((kArray*)a, asize);
 	//a->list = (kObject**)KCalloc_UNTRACE(a->bytemax, 1);
 	a->ObjectItems = (kObject**)json_array();
 	KReturn(a);
@@ -362,13 +362,13 @@ static KMETHOD JsonArray_newArray(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD JsonArray_add(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
-	json_t *ja = (json_t *)a->ObjectItems;
+	json_t *ja = (json_t*)a->ObjectItems;
 	if(!json_is_array(ja)) {
 		DBG_P("[ERROR]: Object is not Json Array.");
 		//KLIB KonohaRuntime_raise(kctx, 1, sfp, pline, msg);
 		KReturnDefaultObjectValue();
 	}
-	struct _kJson *json = (struct _kJson *)sfp[1].asObject;
+	struct _kJson *json = (struct _kJson*)sfp[1].asObject;
 	json_array_append(ja, json->obj);
 	json_incref(json->obj);
 	KReturnVoid();
@@ -378,7 +378,7 @@ static KMETHOD JsonArray_add(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD JsonArray_getSize(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	const json_t *ja = (json_t *)a->ObjectItems;
+	const json_t *ja = (json_t*)a->ObjectItems;
 	KReturnUnboxValue(json_array_size(ja));
 }
 
@@ -386,8 +386,8 @@ static KMETHOD JsonArray_getSize(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD JsonArray_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	json_t *ja = (json_t *)a->ObjectItems;
-	struct _kJson *json = (struct _kJson *)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
+	json_t *ja = (json_t*)a->ObjectItems;
+	struct _kJson *json = (struct _kJson*)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 	json->obj = json_array_get(ja, sfp[1].intValue);
 	KReturn(json);
 }

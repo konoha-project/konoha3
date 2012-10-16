@@ -40,8 +40,8 @@ typedef struct kBasicBlockVar         kBasicBlock;
 typedef const struct kByteCodeVar     kByteCode;
 typedef struct kByteCodeVar           kByteCodeVar;
 
-#define ctxcode          ((ctxcode_t *)kctx->modlocal[MOD_code])
-#define kmodcode         ((KModuleByteCode *)kctx->modshare[MOD_code])
+#define ctxcode          ((ctxcode_t*)kctx->modlocal[MOD_code])
+#define kmodcode         ((KModuleByteCode*)kctx->modshare[MOD_code])
 #define CT_BasicBlock    kmodcode->cBasicBlock
 #define TY_BasicBlock    kmodcode->cBasicBlock->typeId
 #define CT_ByteCode      kmodcode->cByteCode
@@ -121,7 +121,7 @@ typedef struct VirtualMachineInstruction {
 /* ------------------------------------------------------------------------ */
 
 #define BasicBlock_isVisited(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
-#define BasicBlock_setVisited(o,B)   TFLAG_set(uintptr_t,((kObjectVar *)o)->h.magicflag,kObject_Local1,B)
+#define BasicBlock_setVisited(o,B)   TFLAG_set(uintptr_t,((kObjectVar*)o)->h.magicflag,kObject_Local1,B)
 
 struct kBasicBlockVar {
 	KonohaObjectHeader h;
@@ -163,7 +163,7 @@ static VirtualMachineInstruction *KonohaVirtualMachine_tryJump(KonohaContext *kc
 	KonohaStackRuntimeVar *base = kctx->stack;
 	jmpbuf_i lbuf = {};
 	if(base->evaljmpbuf == NULL) {
-		base->evaljmpbuf = (jmpbuf_i *)KCalloc_UNTRACE(sizeof(jmpbuf_i), 1);
+		base->evaljmpbuf = (jmpbuf_i*)KCalloc_UNTRACE(sizeof(jmpbuf_i), 1);
 	}
 	memcpy(&lbuf, base->evaljmpbuf, sizeof(jmpbuf_i));
 	if((jmpresult = PLATAPI setjmp_i(*base->evaljmpbuf)) == 0) {
@@ -187,9 +187,9 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 //-------------------------------------------------------------------------
 
 #define rshift(rbp, x_) (rbp+(x_))
-#define SFP(rbp)  ((KonohaStack *)(rbp))
+#define SFP(rbp)  ((KonohaStack*)(rbp))
 #define SFPIDX(n) ((n)/2)
-#define RBP(sfp)  ((krbp_t *)(sfp))
+#define RBP(sfp)  ((krbp_t*)(sfp))
 
 #define OPEXEC_NOP() (void)op
 
@@ -310,7 +310,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 } while (0)
 
 #define OPEXEC_TRYJMP(PC, JUMP) do {\
-	pc = KonohaVirtualMachine_tryJump(kctx, (KonohaStack *)rbp, PC+1);\
+	pc = KonohaVirtualMachine_tryJump(kctx, (KonohaStack*)rbp, PC+1);\
 	if(pc == NULL) {\
 		OPEXEC_JMP(PC, JUMP); \
 	} \
@@ -329,13 +329,13 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 		KLIB KonohaRuntime_raise(kctx, EXPT_("StackOverflow"), NULL, trace);\
 	}\
 	kfileline_t uline = (UL == 0) ? rbp[K_ULINEIDX2].callerFileLine : UL;\
-	KonohaVirtualMachine_onSafePoint(kctx, (KonohaStack *)rbp, uline);\
+	KonohaVirtualMachine_onSafePoint(kctx, (KonohaStack*)rbp, uline);\
 } while (0)
 
 
 #define OPEXEC_SAFEPOINT(UL, espidx) do {\
 	KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espidx)));\
-	KonohaVirtualMachine_onSafePoint(kctx, (KonohaStack *)rbp, UL); \
+	KonohaVirtualMachine_onSafePoint(kctx, (KonohaStack*)rbp, UL); \
 } while (0)
 
 #define OPEXEC_ERROR(UL, msg, ESP) do {\
@@ -364,11 +364,11 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #define Rx_(x)    (rshift(rbp,x)->ox)
 
 #define RXo_(x)    (Rx_(x.i)->fieldObjectItems[x.n])
-//#define RXd_(x)   (*((kunbox_t *) Rx_(x.i)->fields+x.n))
-#define RXd_(x)   (*((kint_t *) Rx_(x.i)->fields+x.n))
-#define SFP(rbp)  ((KonohaStack *)(rbp))
+//#define RXd_(x)   (*((kunbox_t*) Rx_(x.i)->fields+x.n))
+#define RXd_(x)   (*((kint_t*) Rx_(x.i)->fields+x.n))
+#define SFP(rbp)  ((KonohaStack*)(rbp))
 #define SFPIDX(n) ((n)/2)
-#define RBP(sfp)  ((krbp_t *)(sfp))
+#define RBP(sfp)  ((krbp_t*)(sfp))
 
 #define PC_PREV(pc)   pc-1
 
@@ -445,8 +445,8 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 
 #ifdef K_USING_GENGC
 #define klr_xmov(parent, v1, v2) do {\
-	kObject *v1_ = (kObject *)v1;\
-	kObject *v2_ = (kObject *)v2;\
+	kObject *v1_ = (kObject*)v1;\
+	kObject *v2_ = (kObject*)v2;\
 	knh_Object_RCinc(v2_);\
 	knh_Object_RCdec(v1_);\
 	if(Object_isRC0(v1_)) {\
@@ -457,8 +457,8 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 } while (0)
 
 #define klr_mov(ctx, v1, v2) do {\
-	kObject *v1_ = (kObject *)v1;\
-	kObject *v2_ = (kObject *)v2;\
+	kObject *v1_ = (kObject*)v1;\
+	kObject *v2_ = (kObject*)v2;\
 	knh_Object_RCinc(v2_);\
 	knh_Object_RCdec(v1_);\
 	if(Object_isRC0(v1_)) {\
@@ -470,8 +470,8 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #else
 
 #define klr_mov(v1, v2) do {\
-	kObject *v1_ = (kObject *)v1;\
-	kObject *v2_ = (kObject *)v2;\
+	kObject *v1_ = (kObject*)v1;\
+	kObject *v2_ = (kObject*)v2;\
 	knh_Object_RCinc(v2_);\
 	knh_Object_RCdec(v1_);\
 	if(Object_isRC0(v1_)) {\
@@ -583,7 +583,7 @@ GOTO_PC(pc); \
 #define OPEXEC_THUNK(rtnidx, thisidx, espshift, mtdO) do {\
 	kMethod *mtd_ = mtdO == NULL ? rbp[thisidx+K_MTDIDX2].methodCallInfo : mtdO;\
 	KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espshift)));\
-	knh_stack_newThunk(kctx, (KonohaStack *)rshift(rbp, thisidx));\
+	knh_stack_newThunk(kctx, (KonohaStack*)rshift(rbp, thisidx));\
 } while (0)
 
 #define OPEXEC_FUNCCALL() do {\
@@ -615,7 +615,7 @@ GOTO_PC(pc); \
 	KonohaClass scid = SP(tmr_)->scid, this_cid = O_typeId(sfp_[0].asObject);\
 	if(this_cid != scid) {\
 		tmr_ = knh_findTypeMapNULL(kctx, scid, SP(tmr)->tcid);\
-		KUnsafeFieldSet(((klr_TCAST_t *)op)->cast, tmr_);\
+		KUnsafeFieldSet(((klr_TCAST_t*)op)->cast, tmr_);\
 	}\
 	KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espidx)));\
 	knh_TypeMap_exec(kctx, tmr_, sfp_, rix); \
@@ -628,7 +628,7 @@ GOTO_PC(pc); \
 		KonohaClass scid = SP(tmr_)->scid;\
 		if(this_cid != scid) {\
 			tmr_ = knh_findTypeMapNULL(kctx, scid, tcid);\
-			KNH_SETv(((klr_ACAST_t *)op)->cast, tmr_);\
+			KNH_SETv(((klr_ACAST_t*)op)->cast, tmr_);\
 		}\
 		/*KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espidx)));*/\
 		knh_TypeMap_exec(kctx, tmr_, SFP(rshift(rbp,thisidx)), rix); \
@@ -639,7 +639,7 @@ GOTO_PC(pc); \
 
 /* ------------------------------------------------------------------------ */
 
-#define OPEXEC_ONCE(PC, JUMP) ((klr_ONCE_t *)op)->opcode = OPCODE_JMP
+#define OPEXEC_ONCE(PC, JUMP) ((klr_ONCE_t*)op)->opcode = OPCODE_JMP
 
 #define OPEXEC_bNUL(c, a)  Rb_(c) = IS_NULL(Ro_(a))
 #define OPEXEC_bNN(c, a)   Rb_(c) = IS_NOTNULL(Ro_(a))
@@ -676,7 +676,7 @@ GOTO_PC(pc); \
 		_hdr = Rh_(hn);\
 		_hdr->espidx = (ctx->esp - ctx->stack); \
 		_hdr->parentNC = ctx->ehdrNC;\
-		((KonohaContextVar *)ctx)->ehdrNC = _hdr; \
+		((KonohaContextVar*)ctx)->ehdrNC = _hdr; \
 	} else { \
 		_hdr = ctx->ehdrNC;\
 		knh_ExceptionHandlerEX_t *_hdrEX = DP(_hdr);\
@@ -684,7 +684,7 @@ GOTO_PC(pc); \
 		rbp = RBP(ctx->stack + _hdrEX->sfpidx);\
 		KonohaRuntime_setesp(ctx, (ctx->stack + _hdr->espidx));\
 		op = _hdrEX->op;\
-		((KonohaContextVar *)ctx)->ehdrNC = _hdr->parentNC;\
+		((KonohaContextVar*)ctx)->ehdrNC = _hdr->parentNC;\
 		OPEXEC_JMP(PC, JUMP);\
 	}\
 } while (0)
@@ -692,7 +692,7 @@ GOTO_PC(pc); \
 #define OPEXEC_TRYEND(ctx, hn) do {\
 	kExceptionHandler *_hdr = Rh_(hn); \
 	DBG_ASSERT(IS_ExceptionHandler(_hdr)); \
-	((KonohaContextVar *)ctx)->ehdrNC = _hdr->parentNC;\
+	((KonohaContextVar*)ctx)->ehdrNC = _hdr->parentNC;\
 	klr_mov(ctx, Ro_(hn), KNH_TNULL(ExceptionHandler));\
 } while (0)
 
@@ -713,14 +713,14 @@ GOTO_PC(pc); \
 		_hdr = Rh_(hn);\
 		_hdr->espidx = (ctx->esp - ctx->stack); \
 		_hdr->parentNC = ctx->ehdrNC;\
-		((KonohaContextVar *)ctx)->ehdrNC = _hdr; \
+		((KonohaContextVar*)ctx)->ehdrNC = _hdr; \
 	} else { \
 		knh_ExceptionHandlerEX_t *_hdrEX = DP(_hdr);\
 		pc = _hdrEX->pc; \
 		rbp = RBP(ctx->stack + _hdrEX->sfpidx);\
 		KonohaRuntime_setesp(ctx, (ctx->stack + _hdr->espidx));\
 		op = _hdrEX->op;\
-		((KonohaContextVar *)ctx)->ehdrNC = _hdr->parentNC;\
+		((KonohaContextVar*)ctx)->ehdrNC = _hdr->parentNC;\
 		OPEXEC_JMP(PC, JUMP);\
 	}\
 } while (0)
@@ -730,7 +730,7 @@ GOTO_PC(pc); \
 	DBG_ASSERT(IS_ExceptionHandler(_hdr)); \
 	DP(_hdr)->return_address = NULL;\
 	DP(_hdr)->frame_address  = NULL;\
-	((KonohaContextVar *)ctx)->ehdrNC = _hdr->parentNC;\
+	((KonohaContextVar*)ctx)->ehdrNC = _hdr->parentNC;\
 	klr_mov(ctx, Ro_(hn), KNH_TNULL(ExceptionHandler));\
 } while (0)
 

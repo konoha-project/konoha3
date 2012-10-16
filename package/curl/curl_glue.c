@@ -79,7 +79,7 @@ static void Curl_init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void Curl_free(KonohaContext *kctx, kObject *o)
 {
-	struct kCurlVar *c = (struct kCurlVar *)o;
+	struct kCurlVar *c = (struct kCurlVar*)o;
 	if(c->curl != NULL) {
 		curl_easy_cleanup(c->curl);
 		c->curl = NULL;
@@ -91,7 +91,7 @@ static void Curl_free(KonohaContext *kctx, kObject *o)
 
 static void Curl_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
-	struct kCurlVar *c = (struct kCurlVar *)o;
+	struct kCurlVar *c = (struct kCurlVar*)o;
 	BEGIN_REFTRACE(1);
 	KREFTRACEv(c->bytes);
 	END_REFTRACE();
@@ -248,7 +248,7 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 	//}
 	case CURLOPT_READDATA:
 		if(IS_String(sfp[2].asObject)) {
-			FILE *fp = ((kCurl *)sfp[0].asObject)->fp;
+			FILE *fp = ((kCurl*)sfp[0].asObject)->fp;
 			if((fp = tmpfile()) == NULL) {
 				OLDTRACE_SWITCH_TO_KTrace(_DataFault,   // FIXME
 						LogText("Curl.setOpt", "Could not set body CURLOPT.READDATA"),
@@ -276,7 +276,7 @@ static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
 //## void Curl.appendHeader();
 static KMETHOD Curl_appendHeader(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct kCurlVar *kcurl = (struct kCurlVar *)sfp[0].asObject;
+	struct kCurlVar *kcurl = (struct kCurlVar*)sfp[0].asObject;
 	char *h = String_to(char *,sfp[1]);
 	kcurl->headers = curl_slist_append(kcurl->headers, h);
 	KReturnVoid();
@@ -285,7 +285,7 @@ static KMETHOD Curl_appendHeader(KonohaContext *kctx, KonohaStack *sfp)
 //## boolean Curl.perform();
 static KMETHOD Curl_perform(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kCurl *kcurl = (kCurl *)sfp[0].asObject;
+	kCurl *kcurl = (kCurl*)sfp[0].asObject;
 	CURL *curl = toCURL(sfp[0].asObject);
 	if(kcurl->headers) {
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, kcurl->headers);

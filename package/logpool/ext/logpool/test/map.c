@@ -13,7 +13,7 @@ static void poolmap_dump(poolmap_t *m)
         ++i;
 #if 0
         fprintf(stderr, "{h=0x%08x, key=%s, v=%s}\n",
-                r->hash, (char *)r->k, (char *)r->v);
+                r->hash, (char*)r->k, (char*)r->v);
 #endif
     }
     fprintf(stderr, "poolmap.size:%d\n", poolmap_size(m));
@@ -31,16 +31,16 @@ static void load(poolmap_t *m, const char *fname)
         bzero(str, size);
         str[0] = len;
         memcpy(str+1, buffer, len-1);
-        //fprintf(stderr, "key '%s' %d %p\n", (char *)(str+1), len, str);
-        poolmap_set(m, (char *)(str+1), len-1, (char *)(str+1));
+        //fprintf(stderr, "key '%s' %d %p\n", (char*)(str+1), len, str);
+        poolmap_set(m, (char*)(str+1), len-1, (char*)(str+1));
     }
     fclose(fp);
 }
 
 static int entry_key_eq(uintptr_t k0, uintptr_t k1)
 {
-    uint32_t *l0 = (uint32_t *)k0;
-    uint32_t *l1 = (uint32_t *)k1;
+    uint32_t *l0 = (uint32_t*)k0;
+    uint32_t *l1 = (uint32_t*)k1;
     char *s0 = (char *) (l0);
     char *s1 = (char *) (l1);
     //fprintf(stderr, "cmp '%s' %d, '%s' %d %p %p\n", s0, l0[-1], s1, l1[-1], s0, s1);
@@ -51,7 +51,7 @@ static int entry_key_eq(uintptr_t k0, uintptr_t k1)
 
 static void entry_free(pmap_record_t *r)
 {
-    uint32_t *l = (uint32_t *)r->k;
+    uint32_t *l = (uint32_t*)r->k;
     char *s0 = (char *) l;
     assert(l[-1] > 0);
     //fprintf(stderr, "fre '%s' %d %p\n", s0, l[-1], s0);

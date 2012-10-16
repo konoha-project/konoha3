@@ -64,7 +64,7 @@ struct kDirentVar {
 
 static void kStat_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct kStatVar *stat = (struct kStatVar *)o;
+	struct kStatVar *stat = (struct kStatVar*)o;
 	if(conf != NULL) {
 		stat->stat = (struct stat *)PLATAPI malloc_i(sizeof(struct stat));
 		memcpy(stat->stat, conf, sizeof(struct stat));
@@ -90,13 +90,13 @@ static void kStat_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer
 
 static void kDIR_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct kDirVar *dir = (struct kDirVar *)o;
+	struct kDirVar *dir = (struct kDirVar*)o;
 	dir->dirp = conf;
 }
 
 static void kDIR_free(KonohaContext *kctx, kObject *o)
 {
-	struct kDirVar *dir = (struct kDirVar *)o;
+	struct kDirVar *dir = (struct kDirVar*)o;
 	if(dir->dirp != NULL) {
 		int ret = closedir(dir->dirp);
 		if(ret == -1) {
@@ -108,14 +108,14 @@ static void kDIR_free(KonohaContext *kctx, kObject *o)
 
 static void kDIR_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
-	kDIR *dir = (kDIR *)v[pos].asObject;
+	kDIR *dir = (kDIR*)v[pos].asObject;
 	DIR *dirp = dir->dirp;
 	KLIB Kwb_printf(kctx, wb, "DIR :%p", dirp);
 }
 
 static void kDirent_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct kDirentVar *dirent = (struct kDirentVar *)o;
+	struct kDirentVar *dirent = (struct kDirentVar*)o;
 	if(conf != NULL) {
 		dirent->entry = (struct dirent *)PLATAPI malloc_i(sizeof(struct dirent));
 		memcpy(dirent->entry, conf, sizeof(struct dirent));
@@ -127,7 +127,7 @@ static void kDirent_init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void kDirent_free(KonohaContext *kctx, kObject *o)
 {
-	struct kDirentVar *dirent = (struct kDirentVar *)o;
+	struct kDirentVar *dirent = (struct kDirentVar*)o;
 	if(dirent->entry != NULL) {
 		PLATAPI free_i(dirent->entry);
 		dirent->entry = NULL;
@@ -211,7 +211,7 @@ static KMETHOD System_fchmod(KonohaContext *kctx, KonohaStack *sfp)
 //## @Native int File.ioctl(int request, String[] args)
 //staic KMETHOD File_ioctl(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	kFile *file = (kFile *)sfp[0].asObject;
+//	kFile *file = (kFile*)sfp[0].asObject;
 //	FILE *fp = file->fp;
 //	int request  = int_to(int, sfp[1]);
 //	char *argp = String_to(char *, sfp[2]);
@@ -678,7 +678,7 @@ static KMETHOD DIR_read(KonohaContext *kctx, KonohaStack *sfp)
 	DIR *dirp = dir->dirp;
 	struct dirent entry, *result;
 	KonohaClass *CT_Dirent = CT_(O_p0(KGetReturnObject(sfp)));
-	kArray *resultArray = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
+	kArray *resultArray = (kArray*)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	int ret;
 	while((ret = readdir_r(dirp, &entry, &result)) == 0) {
 		if(result == NULL) break;

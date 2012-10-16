@@ -53,14 +53,14 @@ static inline uint16_t log_data_process(struct Log *data)
 static inline char *log_get_data(struct Log *log)
 {
     int offset = LOG_PROTOCOL_FIELDS+(log->logsize)*2;
-    uint16_t *p = (uint16_t *)log;
+    uint16_t *p = (uint16_t*)log;
     return (char *)(p + offset);
 }
 
 static inline uint16_t log_get_length(struct Log *log, uint16_t idx)
 {
     int offset = LOG_PROTOCOL_FIELDS+idx;
-    return ((uint16_t *)log)[offset];
+    return ((uint16_t*)log)[offset];
 }
 
 static inline char *log_iterator(struct Log *log, char *cur, uint16_t idx)
@@ -114,7 +114,7 @@ static inline int emit_message(char *buf, uint16_t protocol, uint16_t logsize, .
     va_start(ap, logsize);
     tmp->protocol = protocol;
     tmp->logsize  = logsize;
-    loginfo = ((uint16_t *)buf) + LOG_PROTOCOL_FIELDS;
+    loginfo = ((uint16_t*)buf) + LOG_PROTOCOL_FIELDS;
     buf = (char *) (loginfo + logsize * 2);
     for (i = 0; i < logsize; ++i) {
         klen = (uint16_t) va_arg(ap, unsigned long);

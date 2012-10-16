@@ -8,7 +8,7 @@ typedef struct kRawPtr {
 	KonohaObjectHeader h;
 	void *rawptr;
 } kRawPtr;
-#define RawPtr(o) (((kRawPtr *)o)->rawptr)
+#define RawPtr(o) (((kRawPtr*)o)->rawptr)
 
 #define DEF_TYPE(T) typedef struct T T
 #define DEF_ENUM(T) typedef enum T T

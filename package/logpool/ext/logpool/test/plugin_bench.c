@@ -28,7 +28,7 @@ uint64_t ntrace1(ltrace_t *ltrace)
 {
     int pid  = 0x10;
     int pgid = 0x20;
-    void *p  = (void *) 0xdeadbeaf;
+    void *p  = (void*) 0xdeadbeaf;
     int i;
     uint64_t s = getTimeMilliSecond();
     for (i = 0; i < N; ++i) {
@@ -38,9 +38,9 @@ uint64_t ntrace1(ltrace_t *ltrace)
     return e - s;
 }
 static void *MEMCACHE_API_PARAM[] = {
-    (void *) 1024,
-    (void *) "0.0.0.0",
-    (void *) 11211L
+    (void*) 1024,
+    (void*) "0.0.0.0",
+    (void*) 11211L
 };
 extern logapi_t MEMCACHE_API;
 

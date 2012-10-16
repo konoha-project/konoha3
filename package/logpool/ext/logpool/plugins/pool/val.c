@@ -8,7 +8,7 @@ extern "C" {
 static bool val_apply(struct pool_plugin *_p, struct LogEntry *e, uint32_t state)
 {
     struct pool_plugin_val_filter *p = (struct pool_plugin_val_filter *) _p;
-    struct Log *log = (struct Log *)&e->data;
+    struct Log *log = (struct Log*)&e->data;
     uint16_t i;
     char *data = log_get_data(log);
     for (i = 0; i < log->logsize; ++i) {

@@ -32,7 +32,7 @@
 extern "C" {
 #endif
 
-#define IS_RootKonohaContext(o)   (kctx == (KonohaContext *)o)
+#define IS_RootKonohaContext(o)   (kctx == (KonohaContext*)o)
 
 // These functions are local functions in minikonoha binary.
 // Don't call from packages directly   (kimio)

@@ -91,7 +91,7 @@ void bench_json(void)
         unsigned int i;
         yajl_gen_array_open(g);
         for(i=0; i < TASK_STR_LEN; ++i) {
-            yajl_gen_string(g, (const unsigned char *)TASK_STR_PTR, i);
+            yajl_gen_string(g, (const unsigned char*)TASK_STR_PTR, i);
         }
         yajl_gen_array_close(g);
     }
@@ -212,7 +212,7 @@ void bench_kjson(void)
         unsigned int i;
         o = JSONArray_new();
         for(i=0; i < TASK_STR_LEN; ++i) {
-            JSON v = JSONString_new((char *)TASK_STR_PTR, i);
+            JSON v = JSONString_new((char*)TASK_STR_PTR, i);
             JSONArray_append(o, v);
         }
     }

@@ -73,7 +73,7 @@ static KMETHOD kJSON_new(KonohaContext *kctx, KonohaStack *sfp)
 
 static kJSON *NewJsonObject(KonohaContext *kctx, KonohaStack *sfp, JSON val)
 {
-	kJSON *json = (kJSON *)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
+	kJSON *json = (kJSON*)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 	json->json = val;
 	return json;
 }
@@ -93,7 +93,7 @@ static KMETHOD kJSON_parse(KonohaContext *kctx, KonohaStack *sfp)
 //## JSON JSON.get(String key);
 static KMETHOD kJSON_get(KonohaContext *kctx, KonohaStack *sfp)
 {
-	JSON obj = ((kJSON *)sfp[0].asObject)->json;
+	JSON obj = ((kJSON*)sfp[0].asObject)->json;
 	const char *key = S_text(sfp[1].asString);
 	JSON json = JSON_get(obj, key);
 	KReturn(NewJsonObject(kctx, sfp, json));
@@ -102,7 +102,7 @@ static KMETHOD kJSON_get(KonohaContext *kctx, KonohaStack *sfp)
 //## JSONArray JSON.getArray();
 static KMETHOD kJSON_getArray(KonohaContext *kctx, KonohaStack *sfp)
 {
-	JSON obj = ((kJSON *)sfp[0].asObject)->json;
+	JSON obj = ((kJSON*)sfp[0].asObject)->json;
 	const char *key = S_text(sfp[1].asString);
 	JSON json = JSON_get(obj, key);
 	KReturn(NewJsonObject(kctx, sfp, json));
@@ -111,7 +111,7 @@ static KMETHOD kJSON_getArray(KonohaContext *kctx, KonohaStack *sfp)
 //## JSONBool JSON.getBool(String key);
 static KMETHOD kJSON_getBool(KonohaContext *kctx, KonohaStack *sfp)
 {
-	JSON obj = ((kJSON *)sfp[0].asObject)->json;
+	JSON obj = ((kJSON*)sfp[0].asObject)->json;
 	const char *key = S_text(sfp[1].asString);
 	bool json = JSON_getBool(obj, key);
 	KReturnUnboxValue(json);
@@ -120,7 +120,7 @@ static KMETHOD kJSON_getBool(KonohaContext *kctx, KonohaStack *sfp)
 //## JSONFloat JSON.getFloat(String key);
 static KMETHOD kJSON_getFloat(KonohaContext *kctx, KonohaStack *sfp)
 {
-	JSON obj = ((kJSON *)sfp[0].asObject)->json;
+	JSON obj = ((kJSON*)sfp[0].asObject)->json;
 	const char *key = S_text(sfp[1].asString);
 	double json = JSON_getDouble(obj, key);
 	KReturnFloatValue(json);
@@ -129,7 +129,7 @@ static KMETHOD kJSON_getFloat(KonohaContext *kctx, KonohaStack *sfp)
 //## String JSON.getInt(String key);
 static KMETHOD kJSON_getInt(KonohaContext *kctx, KonohaStack *sfp)
 {
-	JSON obj = ((kJSON *)sfp[0].asObject)->json;
+	JSON obj = ((kJSON*)sfp[0].asObject)->json;
 	const char *key = S_text(sfp[1].asString);
 	int32_t json = JSON_getInt(obj, key);
 	KReturnUnboxValue(json);
@@ -138,7 +138,7 @@ static KMETHOD kJSON_getInt(KonohaContext *kctx, KonohaStack *sfp)
 //## String JSON.getString(String key);
 static KMETHOD kJSON_getString(KonohaContext *kctx, KonohaStack *sfp)
 {
-	JSON obj = ((kJSON *)sfp[0].asObject)->json;
+	JSON obj = ((kJSON*)sfp[0].asObject)->json;
 	const char *key = S_text(sfp[1].asString);
 	size_t len;
 	const char *text = JSON_getString(obj, key, &len);
@@ -150,8 +150,8 @@ static KMETHOD kJSON_set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s = sfp[1].asString;
 	JSON obj, key, val;
-	obj = ((kJSON *)sfp[0].asObject)->json;
-	val = ((kJSON *)sfp[2].asObject)->json;
+	obj = ((kJSON*)sfp[0].asObject)->json;
+	val = ((kJSON*)sfp[2].asObject)->json;
 	key = JSONString_new(S_text(s), S_size(s));
 	JSONObject_set(obj, key, val);
 	KReturnVoid();
@@ -162,8 +162,8 @@ static KMETHOD kJSON_set(KonohaContext *kctx, KonohaStack *sfp)
 //## void JSONArray.append(JSON json);
 static KMETHOD kJSONArray_append(KonohaContext *kctx, KonohaStack *sfp)
 {
-	JSON obj = ((kJSON *)sfp[0].asObject)->json;
-	JSON val = ((kJSON *)sfp[1].asObject)->json;
+	JSON obj = ((kJSON*)sfp[0].asObject)->json;
+	JSON val = ((kJSON*)sfp[1].asObject)->json;
 	JSONArray_append(obj, val);
 	KReturnVoid();
 }
@@ -171,14 +171,14 @@ static KMETHOD kJSONArray_append(KonohaContext *kctx, KonohaStack *sfp)
 //## int JSON.getSize();
 static KMETHOD kJSONArray_getSize(KonohaContext *kctx, KonohaStack *sfp)
 {
-	JSON obj = ((kJSON *)sfp[0].asObject)->json;
+	JSON obj = ((kJSON*)sfp[0].asObject)->json;
 	KReturnUnboxValue(JSON_length(obj));
 }
 
 //## JSON JSONArray.get(int index);
 static KMETHOD kJSONArray_get(KonohaContext *kctx, KonohaStack *sfp)
 {
-	JSON obj = ((kJSON *)sfp[0].asObject)->json;
+	JSON obj = ((kJSON*)sfp[0].asObject)->json;
 	JSON json = JSONArray_get(obj, sfp[1].intValue);
 	KReturn(NewJsonObject(kctx, sfp, json));
 }

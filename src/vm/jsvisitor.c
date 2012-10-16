@@ -1,7 +1,7 @@
 #include <stdio.h>
 //#define USE_JS_VISITOR
 #ifdef USE_JS_VISITOR
-#define DUMPER(BUILDER)  ((JSVisitorLocal *)(BUILDER)->local_fields)
+#define DUMPER(BUILDER)  ((JSVisitorLocal*)(BUILDER)->local_fields)
 
 #ifdef __cplusplus
 extern "C" {
@@ -144,7 +144,7 @@ static void JSVisitor_visitConstExpr(KonohaContext *kctx, IRBuilder *self, kExpr
 		return;
 	} else if(Expr_isTerm(expr)) {
 		int is_string = expr->ty == TY_String;
-		kToken *tk = (kToken *)expr->termToken;
+		kToken *tk = (kToken*)expr->termToken;
 		if(is_string) emit_string_js("\"", "", "");
 		emit_string_js(S_text(tk->text), "", "");
 		if(is_string) emit_string_js("\"", "", "");
@@ -180,7 +180,7 @@ static void JSVisitor_visitNullExpr(KonohaContext *kctx, IRBuilder *self, kExpr 
 
 static void JSVisitor_visitLocalExpr(KonohaContext *kctx, IRBuilder *self, kExpr *expr)
 {
-	kToken *tk = (kToken *)expr->termToken;
+	kToken *tk = (kToken*)expr->termToken;
 	emit_string_js(S_text(tk->text), "", "");
 }
 

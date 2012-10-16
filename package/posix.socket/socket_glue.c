@@ -54,13 +54,13 @@ struct _kSockAddr {
 
 static void SockAddr_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct _kSockAddr *sa = (struct _kSockAddr *)o;
+	struct _kSockAddr *sa = (struct _kSockAddr*)o;
 	sa->sockaddr_in = (struct sockaddr_in *)KCalloc_UNTRACE(sizeof(struct sockaddr_in), 1);
 }
 
 static void SockAddr_free(KonohaContext *kctx, kObject *o)
 {
-	struct _kSockAddr *sa = (struct _kSockAddr *)o;
+	struct _kSockAddr *sa = (struct _kSockAddr*)o;
 	if(sa->sockaddr_in != NULL) {
 		KFree(sa->sockaddr_in, sizeof(struct sockaddr_in));
 		sa->sockaddr_in = NULL;
@@ -166,8 +166,8 @@ static int getNfd(kArray *a1, kArray *a2, kArray *a3)
 //
 //	int ret = accept(
 //			WORD2INT(sfp[1].intValue),
-//			(struct sockaddr *)&addr,
-//			(socklen_t *)&addrLen
+//			(struct sockaddr*)&addr,
+//			(socklen_t*)&addrLen
 //	);
 //	if(ret >= 0 ) {
 //		 fromSockaddr(kctx, sfp[2].m, addr);
@@ -184,14 +184,14 @@ static int getNfd(kArray *a1, kArray *a2, kArray *a3)
 //## int System.accept(int socket, SockAddr remoteInfo);
 KMETHOD System_accept(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kSockAddr *sa = (struct _kSockAddr *)sfp[2].asObject;
+	struct _kSockAddr *sa = (struct _kSockAddr*)sfp[2].asObject;
 	struct sockaddr_in *addr = sa->sockaddr_in;
 	int addrLen = sizeof(struct sockaddr_in);
 
 	int ret = accept(
 			WORD2INT(sfp[1].intValue),
 			(struct sockaddr *)addr,
-			(socklen_t *)&addrLen
+			(socklen_t*)&addrLen
 	);
 	if(ret >= 0) {
 //		fromSockaddr(kctx, sa, addr);
@@ -211,12 +211,12 @@ KMETHOD System_bind(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct sockaddr_in addr;
 	toSockaddr(&addr,
-			(char *)sfp[2].asString,
+			(char*)sfp[2].asString,
 			WORD2INT(sfp[3].intValue),
 			WORD2INT(sfp[4].intValue)
 	);
 	int ret = bind(WORD2INT(sfp[1].intValue),
-			(struct sockaddr *)&addr,
+			(struct sockaddr*)&addr,
 			sizeof(addr)
 	);
 	if(ret != 0) {
@@ -249,13 +249,13 @@ KMETHOD System_connect(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct sockaddr_in addr;
 	toSockaddr(&addr,
-				(char *)S_text(sfp[2].asString),
+				(char*)S_text(sfp[2].asString),
 				WORD2INT(sfp[3].intValue),
 				WORD2INT(sfp[4].intValue)
 	);
 
 	int ret = connect(WORD2INT(sfp[1].intValue),
-			(struct sockaddr *)&addr,
+			(struct sockaddr*)&addr,
 			sizeof(addr)
 	);
 	if(ret != 0) {
@@ -291,8 +291,8 @@ KMETHOD System_listen(KonohaContext *kctx, KonohaStack *sfp)
 //
 //	kMap *ret_s = KNH_TNULL(Map);
 //	if(getsockname(WORD2INT(sfp[1].intValue),
-//					   (struct sockaddr *)&addr,
-//					   (socklen_t *)&addrLen ) == 0 ) {
+//					   (struct sockaddr*)&addr,
+//					   (socklen_t*)&addrLen ) == 0 ) {
 //		ret_s = new_DataMap(ctx);
 //		fromSockaddr(kctx, ret_s, addr);
 //	} else {
@@ -312,7 +312,7 @@ KMETHOD System_getsockopt(KonohaContext *kctx, KonohaStack *sfp)
 			SOL_SOCKET,
 			(int)sfp[2].intValue,
 			&val,
-			(socklen_t *)&valLen
+			(socklen_t*)&valLen
 	);
 	if(ret == 0) {
 		ret = val;
@@ -356,8 +356,8 @@ KMETHOD System_setsockopt(KonohaContext *kctx, KonohaStack *sfp)
 //
 //	kMap *ret_s = KNH_TNULL(Map);
 //	if(getpeername(WORD2INT(sfp[1].intValue),
-//					   (struct sockaddr *)&addr,
-//					   (socklen_t *)&addrLen ) == 0 ) {
+//					   (struct sockaddr*)&addr,
+//					   (socklen_t*)&addrLen ) == 0 ) {
 //		ret_s = new_DataMap(ctx);
 //		fromSockaddr(kctx, ret_s, addr);
 //	} else {
@@ -397,7 +397,7 @@ static KMETHOD System_recv(KonohaContext *kctx, KonohaStack *sfp)
 //			  	  	  	   ba->bytesize,
 //			  	  	  	   (int)sfp[3].intValue,
 //			  	  	  	   (struct sockaddr *)&addr,
-//			  	  	  	   (socklen_t *)&addrLen );
+//			  	  	  	   (socklen_t*)&addrLen );
 //	if(ret >= 0 ) {
 //		fromSockaddr(kctx, sfp[4].m, addr);
 //	} else {
@@ -490,7 +490,7 @@ static KMETHOD System_sendto(KonohaContext *kctx, KonohaStack *sfp)
 	kBytes *ba = sfp[2].asBytes;
 	struct sockaddr_in addr;
 	kString *s = sfp[4].asString;
-	toSockaddr(&addr, (char *)S_text(s), WORD2INT(sfp[5].intValue), WORD2INT(sfp[6].intValue));
+	toSockaddr(&addr, (char*)S_text(s), WORD2INT(sfp[5].intValue), WORD2INT(sfp[6].intValue));
 	// Broken Pipe Signal Mask
 #if !(defined(__APPLE__) || defined(__NetBSD__))
 	__sighandler_t oldset = signal(SIGPIPE, SIG_IGN);

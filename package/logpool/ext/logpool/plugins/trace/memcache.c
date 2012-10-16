@@ -80,7 +80,7 @@ static void logpool_memcache_flush(logpool_t *ctx, void **args __UNUSED__)
 
     mc->buf = key;
     p = ctx->fn_key(ctx, ctx->logkey.v.u, ctx->logkey.k.seq, ctx->logkey.klen);
-    klen = p - (char *) key;
+    klen = p - (char*) key;
     mc->buf = buf_orig;
 
     if(size) {
@@ -94,7 +94,7 @@ static void logpool_memcache_flush(logpool_t *ctx, void **args __UNUSED__)
         cast(struct logpool *, ctx)->logfmt_size = 0;
     }
 
-    vlen = (char *) mc->buf - value;
+    vlen = (char*) mc->buf - value;
     rc = memcached_set(mc->st, key, klen, value, vlen, 0, flags);
 #ifdef USE_BUFFER_REQ
     if(unlikely(rc == MEMCACHED_BUFFERED)) {

@@ -43,7 +43,7 @@ struct kMapVar {
 
 static void kMap_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	kMap *map = (kMap *)o;
+	kMap *map = (kMap*)o;
 	map->map = KLIB Kmap_init(kctx, 17);
 	if(TY_isUnbox(O_p0(map))) {
 		Map_setUnboxData(map, true);
@@ -69,7 +69,7 @@ static void MapObjectEntry_reftrace(KonohaContext *kctx, KHashMapEntry *p, void 
 
 static void kMap_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
-	kMap *map = (kMap *)o;
+	kMap *map = (kMap*)o;
 	if(TY_isUnbox(O_p0(map))) {
 		KLIB Kmap_each(kctx, map->map, (void *)visitor, MapUnboxEntry_reftrace);
 	}
@@ -80,7 +80,7 @@ static void kMap_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visit
 
 static void kMap_free(KonohaContext *kctx, kObject *o)
 {
-	kMap *map = (kMap *)o;
+	kMap *map = (kMap*)o;
 	if(map->map != NULL) {
 		KLIB Kmap_free(kctx, map->map, NULL);
 	}
@@ -126,7 +126,7 @@ static KHashMapEntry *kMap_getEntry(KonohaContext *kctx, kMap *m, kString *key, 
 //## method Boolean Map.has(T1 key);
 static KMETHOD Map_has(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kMap *m = (kMap *)sfp[0].asObject;
+	kMap *m = (kMap*)sfp[0].asObject;
 	KHashMapEntry *e = kMap_getEntry(kctx, m, sfp[1].asString, false/*new_if_NULL*/);
 	KReturnUnboxValue((e != NULL));
 }
@@ -134,7 +134,7 @@ static KMETHOD Map_has(KonohaContext *kctx, KonohaStack *sfp)
 //## T0 Map.get(String key);
 static KMETHOD Map_get(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kMap *m = (kMap *)sfp[0].asObject;
+	kMap *m = (kMap*)sfp[0].asObject;
 	KHashMapEntry *e = kMap_getEntry(kctx, m, sfp[1].asString, false/*new_if_NULL*/);
 	if(Map_isUnboxData(m)) {
 		uintptr_t u = (e == NULL) ? 0 : e->unboxValue;
@@ -149,7 +149,7 @@ static KMETHOD Map_get(KonohaContext *kctx, KonohaStack *sfp)
 //## method void Map.set(String key, T0 value);
 static KMETHOD Map_set(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kMap *m = (kMap *)sfp[0].asObject;
+	kMap *m = (kMap*)sfp[0].asObject;
 	KHashMapEntry *e = kMap_getEntry(kctx, m, sfp[1].asString, true/*new_if_NULL*/);
 	if(Map_isUnboxData(m)) {
 		e->unboxValue = sfp[2].unboxValue;
@@ -163,7 +163,7 @@ static KMETHOD Map_set(KonohaContext *kctx, KonohaStack *sfp)
 //## method void Map.remove(String key);
 static KMETHOD Map_remove(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kMap *m = (kMap *)sfp[0].asObject;
+	kMap *m = (kMap*)sfp[0].asObject;
 	KHashMapEntry *e = kMap_getEntry(kctx, m, sfp[1].asString, false/*new_if_NULL*/);
 	if(e != NULL) {
 		KLIB Kmap_remove(m->map, e);
@@ -173,7 +173,7 @@ static KMETHOD Map_remove(KonohaContext *kctx, KonohaStack *sfp)
 
 static void MapEntry_appendKey(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
 {
-	kArray *a = (kArray *)thunk;
+	kArray *a = (kArray*)thunk;
 	KLIB kArray_add(kctx, a, p->StringKey);
 }
 
@@ -181,10 +181,10 @@ static void MapEntry_appendKey(KonohaContext *kctx, KHashMapEntry *p, void *thun
 static KMETHOD Map_keys(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
-	kMap *m = (kMap *)sfp[0].asObject;
+	kMap *m = (kMap*)sfp[0].asObject;
 	KonohaClass *cArray = CT_p0(kctx, CT_Array, O_p0(m));
-	kArray *a = (kArray *)(KLIB new_kObject(kctx, _GcStack, cArray, m->map->size));
-	KLIB Kmap_each(kctx, m->map, (void *)a, MapEntry_appendKey);
+	kArray *a = (kArray*)(KLIB new_kObject(kctx, _GcStack, cArray, m->map->size));
+	KLIB Kmap_each(kctx, m->map, (void*)a, MapEntry_appendKey);
 	KReturnWith(a, RESET_GCSTACK());
 }
 

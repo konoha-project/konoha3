@@ -16,7 +16,7 @@ static void test_obj()
     assert(strncmp(s, "{\"a\":true,\"b\":100,\"c\":3.14}", len) == 0);
     JSON_free(o);
     fprintf(stderr, "'%s'\n", s);
-    free((char *)s);
+    free((char*)s);
 }
 static void test_array()
 {

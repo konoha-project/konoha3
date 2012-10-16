@@ -33,8 +33,8 @@
 extern "C" {
 #endif
 
-#define KonohaContext_getFloatModule(kctx)    ((KonohaFloatModule *)kctx->modshare[MOD_float])
-#define KonohaContext_getFloatContext(kctx)   ((KonohaFloatModuleContext *)kctx->mod[MOD_float])
+#define KonohaContext_getFloatModule(kctx)    ((KonohaFloatModule*)kctx->modshare[MOD_float])
+#define KonohaContext_getFloatContext(kctx)   ((KonohaFloatModuleContext*)kctx->mod[MOD_float])
 #define IS_DefinedFloat() (kctx->modshare[MOD_float] != NULL)
 #define CT_Float          (KonohaContext_getFloatModule(kctx)->cFloat)
 #define TY_float          (CT_Float->typeId)

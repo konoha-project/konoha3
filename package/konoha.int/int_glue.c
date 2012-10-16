@@ -283,7 +283,7 @@ static kbool_t int_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNa
 
 	SUGAR kNameSpace_setTokenFunc(kctx, ns, KW_NumberPattern, KonohaChar_Digit, new_SugarFunc(ns, TokenFunc_ExtendedIntLiteral));
 
-	SugarSyntaxVar *syn = (SugarSyntaxVar *)SUGAR kNameSpace_getSyntax(kctx, ns, SYM_("+"), 0);
+	SugarSyntaxVar *syn = (SugarSyntaxVar*)SUGAR kNameSpace_getSyntax(kctx, ns, SYM_("+"), 0);
 	if(syn != NULL) {
 		syn->precedence_op1  = Precedence_CStylePREUNARY;
 	}

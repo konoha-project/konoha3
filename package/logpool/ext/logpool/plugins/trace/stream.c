@@ -47,7 +47,7 @@ static int get_server_info(struct logpool_param_stream *pa, char *hostbuf)
 
 static uint16_t *emit_header(char *buf, int protocol, int logsize)
 {
-    struct Message *msg = ((struct Message *)buf);
+    struct Message *msg = ((struct Message*)buf);
     msg->crc32 = 0;
     msg->protocol = LOGPOOL_EVENT_WRITE;
     msg->logsize  = logsize;
@@ -60,7 +60,7 @@ static void *logpool_io_init(logpool_t *logpool, logpool_param_t *p)
     struct io_plugin *lp;
     lp = cast(struct io_plugin *, logpool_string_init(logpool, p));
     char host[128] = {};
-    int port = get_server_info((struct logpool_param_stream *) p, host);
+    int port = get_server_info((struct logpool_param_stream*) p, host);
     lp->io = io_open_trace(host, port);
     return cast(void *, lp);
 }
@@ -101,7 +101,7 @@ static void logpool_io_flush(logpool_t *logpool, void **args __UNUSED__)
         ++fmt;
     }
     cast(struct logpool *, logpool)->logfmt_size = 0;
-    bufsize = (char *) lp->buf - buf_orig;
+    bufsize = (char*) lp->buf - buf_orig;
     ret = io_write(lp->io, buf_orig, bufsize);
     if(ret != LOGPOOL_SUCCESS) {
         /* TODO Error */
@@ -167,7 +167,7 @@ static void *logpool_io_client_init(logpool_t *logpool, logpool_param_t *p)
     extern struct io_api client_api;
     struct io_plugin *lp;
     struct logpool_param_stream *args = cast(struct logpool_param_stream *, p);
-    char *host = (char *) args->host;
+    char *host = (char*) args->host;
     long port = args->port;
 
     lp = cast(struct io_plugin *, logpool_string_init(logpool, p));
@@ -203,7 +203,7 @@ logpool_t *logpool_open_client(logpool_t *parent, char *host, int port)
     logpool_global_init(LOGPOOL_DEFAULT);
     param.host = host;
     param.port = port;
-    return logpool_open(parent, &CLIENT_API, (struct logpool_param *) &param);
+    return logpool_open(parent, &CLIENT_API, (struct logpool_param*) &param);
 }
 
 void logpool_procedure(logpool_t *logpool, char *q, int qlen)
@@ -218,9 +218,9 @@ void logpool_procedure(logpool_t *logpool, char *q, int qlen)
 void *logpool_client_get(logpool_t *logpool, void *logbuf, size_t bufsize)
 {
     struct io_plugin *lp = cast(struct io_plugin *, logpool->connection);
-    if(io_read(lp->io, (char *) logbuf, bufsize) == IO_FAILED)
+    if(io_read(lp->io, (char*) logbuf, bufsize) == IO_FAILED)
         return NULL;
-    return (void *) logbuf;
+    return (void*) logbuf;
 }
 
 #ifdef __cplusplus

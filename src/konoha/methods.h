@@ -210,7 +210,7 @@ static KMETHOD String_opNEQ(KonohaContext *kctx, KonohaStack *sfp)
 //## This Func.new(Object self, Method mtd);
 static KMETHOD Func_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kFuncVar *fo = (kFuncVar *)sfp[0].asFunc;
+	kFuncVar *fo = (kFuncVar*)sfp[0].asFunc;
 	KFieldSet(fo, fo->self, sfp[1].asObject);
 	KFieldSet(fo, fo->mtd,  sfp[2].asMethod);
 	KReturn(fo);

@@ -124,8 +124,8 @@ static int io_tracer_write(struct io *io, const void *data, uint32_t nbyte)
 
 static int io_tracer_read(struct io *io, const void *data, uint32_t nbyte)
 {
-    int len = bufferevent_read(io->bev, (char *)data, nbyte);
-    debug_print(1, "read: len=[%d] data=[%s]\n", len, (char *)data);
+    int len = bufferevent_read(io->bev, (char*)data, nbyte);
+    debug_print(1, "read: len=[%d] data=[%s]\n", len, (char*)data);
     return IO_OK;
 }
 

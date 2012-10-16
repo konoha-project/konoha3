@@ -8,7 +8,7 @@ extern "C"{
 
 static void RawPtr_free(KonohaContext *kctx, kObject *po)
 {
-	kRawPtr *o = (kRawPtr *)(po);
+	kRawPtr *o = (kRawPtr*)(po);
 	if(o->rawptr) {
 		free(o->rawptr);
 	}
@@ -16,7 +16,7 @@ static void RawPtr_free(KonohaContext *kctx, kObject *po)
 }
 static void RawPtr_init(KonohaContext *kctx, kObject *po, void *conf)
 {
-	kRawPtr *o = (kRawPtr *)(po);
+	kRawPtr *o = (kRawPtr*)(po);
 	o->rawptr = conf;
 }
 

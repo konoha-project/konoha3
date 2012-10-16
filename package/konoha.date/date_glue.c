@@ -99,10 +99,10 @@ static KMETHOD Date_new0(KonohaContext *kctx, KonohaStack *sfp)
 {
 	//It isn't necessary?
 	//struct kDateVar *d = (struct kDateVar *)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
-	struct kDateVar *d = (struct kDateVar *)sfp[0].asDate;
+	struct kDateVar *d = (struct kDateVar*)sfp[0].asDate;
 	struct tm lt;
-	gettimeofday((struct timeval *)&(d->tv), NULL);
-	localtime_r((const time_t *)&(d->tv.tv_sec), &lt);
+	gettimeofday((struct timeval*)&(d->tv), NULL);
+	localtime_r((const time_t*)&(d->tv.tv_sec), &lt);
 	KReturn((kObject *)d);
 }
 
@@ -110,7 +110,7 @@ static KMETHOD Date_new0(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Date_new1(KonohaContext *kctx, KonohaStack *sfp)
 {
 	//struct kDateVar *d = (struct kDateVar *)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
-	struct kDateVar *d = (struct kDateVar *)sfp[0].asDate;
+	struct kDateVar *d = (struct kDateVar*)sfp[0].asDate;
 	d->tv.tv_sec = sfp[1].intValue / 1000;
 	d->tv.tv_usec = sfp[1].intValue % 1000 * 1000;
 	KReturn((kObject *)d);
@@ -127,7 +127,7 @@ static KMETHOD Date_new1(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Date_new3(KonohaContext *kctx, KonohaStack *sfp)
 {
 	//struct kDateVar *d = (struct kDateVar *)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
-	struct kDateVar *d = (struct kDateVar *)sfp[0].asDate;
+	struct kDateVar *d = (struct kDateVar*)sfp[0].asDate;
 	struct tm lt = {};
 	if(sfp[1].intValue < 100) {
 		lt.tm_year = sfp[1].intValue;

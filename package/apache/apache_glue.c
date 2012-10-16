@@ -41,37 +41,37 @@ extern "C"{
 static void Request_init(KonohaContext *kctx, kObject *po, void *conf)
 {
 	(void)kctx;
-	((kRequest *)po)->r = (request_rec *) conf;
+	((kRequest*)po)->r = (request_rec *) conf;
 }
 
 static void Request_free(KonohaContext *kctx, kObject *po)
 {
 	(void)kctx;
-((kRequest *)po)->r = NULL;
+((kRequest*)po)->r = NULL;
 }
 
 static void AprTable_init(KonohaContext *kctx, kObject *po, void *conf)
 {
 	(void)kctx;
-	((kAprTable *)po)->tbl = (apr_table_t *) conf;
+	((kAprTable*)po)->tbl = (apr_table_t *) conf;
 }
 
 static void AprTable_free(KonohaContext *kctx, kObject *po)
 {
 	(void)kctx;
-	((kAprTable *)po)->tbl = NULL;
+	((kAprTable*)po)->tbl = NULL;
 }
 
 static void AprTableEntry_init(KonohaContext *kctx, kObject *po, void *conf)
 {
 	(void)kctx;
-	((kAprTableEntry *)po)->entry = (apr_table_entry_t *) conf;
+	((kAprTableEntry*)po)->entry = (apr_table_entry_t *) conf;
 }
 
 static void AprTableEntry_free(KonohaContext *kctx, kObject *po)
 {
 	(void)kctx;
-	((kAprTableEntry *)po)->entry = NULL;
+	((kAprTableEntry*)po)->entry = NULL;
 }
 
 static void kapacheshare_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx) {}
@@ -106,7 +106,7 @@ static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		STRUCTNAME(Apache),
 	};
 
-	kapacheshare_t *base = (kapacheshare_t *)KCalloc_UNTRACE(sizeof(kapacheshare_t), 1);
+	kapacheshare_t *base = (kapacheshare_t*)KCalloc_UNTRACE(sizeof(kapacheshare_t), 1);
 	base->h.name     = "apache";
 	base->h.setup    = kapacheshare_setup;
 	base->h.reftrace = kapacheshare_reftrace;
