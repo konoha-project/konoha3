@@ -354,7 +354,7 @@ static kBasicBlock* ASM_JMPF(KonohaContext *kctx, int flocal, kBasicBlock *lbJUM
 	return lbJUMP;
 }
 
-static void ASM_SAFEPOINT(KonohaContext *kctx, int espidx)
+static void ASM_SAFEPOINT(KonohaContext *kctx, kfileline_t uline, int espidx)
 {
 	kBasicBlock *bb = ctxcode->currentWorkingBlock;
 	size_t i;
@@ -362,7 +362,7 @@ static void ASM_SAFEPOINT(KonohaContext *kctx, int espidx)
 		VirtualMachineInstruction *op = BBOP(bb) + i;
 		if(op->opcode == OPCODE_SAFEPOINT) return;
 	}
-	ASM(SAFEPOINT, SFP_(espidx));
+	ASM(SAFEPOINT, uline, SFP_(espidx));
 }
 
 static void NMOV_asm(KonohaContext *kctx, int a, ktype_t ty, int b)
@@ -441,7 +441,7 @@ static void KonohaVisitor_visitLoopStmt(KonohaContext *kctx, IRBuilder *self, kS
 	kStmt_setLabelBlock(kctx, stmt, SYM_("continue"), lbCONTINUE);
 	kStmt_setLabelBlock(kctx, stmt, SYM_("break"),    lbBREAK);
 	ASM_LABEL(kctx, lbCONTINUE);
-	ASM_SAFEPOINT(kctx, espidx);
+	ASM_SAFEPOINT(kctx, stmt->uline, espidx);
 	self->a = espidx;
 	KonohaVisitor_asmJMPIF(kctx, self, Stmt_getFirstExpr(kctx, stmt), 0/*FALSE*/, lbBREAK);
 	self->a = a;

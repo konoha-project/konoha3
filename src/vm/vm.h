@@ -327,18 +327,14 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 		kfileline_t uline = (UL == 0) ? rbp[K_ULINEIDX2].callerFileLine : UL;\
 		KLIB KonohaRuntime_raise(kctx, EXPT_("StackOverflow"), SFP(rbp), uline, NULL);\
 	}\
-	if(1) { \
-		kfileline_t uline = (UL == 0) ? rbp[K_ULINEIDX2].callerFileLine : UL;\
-		KonohaVirtualMachine_onSafePoint(kctx, (KonohaStack*)rbp, uline);\
-	} \
+	kfileline_t uline = (UL == 0) ? rbp[K_ULINEIDX2].callerFileLine : UL;\
+	KonohaVirtualMachine_onSafePoint(kctx, (KonohaStack*)rbp, uline);\
 } while (0)
 
 
 #define OPEXEC_SAFEPOINT(UL, espidx) do {\
-	if(1) { \
-		KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espidx)));\
-		KonohaVirtualMachine_onSafePoint(kctx, (KonohaStack*)rbp, UL); \
-	} \
+	KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espidx)));\
+	KonohaVirtualMachine_onSafePoint(kctx, (KonohaStack*)rbp, UL); \
 } while (0)
 
 #define OPEXEC_ERROR(UL, msg, ESP) do {\
