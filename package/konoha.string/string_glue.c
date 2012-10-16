@@ -404,17 +404,17 @@ static void THROW_OutOfStringBoundary(KonohaContext *kctx, KonohaStack *sfp, kin
 	KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfStringBoundary"), NULL, trace);
 }
 
-static size_t kString_getMultibyteSize(KonohaContext *kctx, kString *this)
+static size_t kString_getMultibyteSize(KonohaContext *kctx, kString *thisString)
 {
-	if(kString_is(ASCII, this)) {
-		return S_size(this);
+	if(kString_is(ASCII, thisString)) {
+		return S_size(thisString);
 	}
-	return utf8_getMultibyteTextSize(S_text(this), S_size(this));
+	return utf8_getMultibyteTextSize(S_text(thisString), S_size(thisString));
 }
 
-static size_t kString_getIndex(KonohaContext *kctx, KonohaStack *sfp, kString *this, kint_t index)
+static size_t kString_getIndex(KonohaContext *kctx, KonohaStack *sfp, kString *thisString, kint_t index)
 {
-	size_t multibyteSize = kString_getMultibyteSize(kctx, this);
+	size_t multibyteSize = kString_getMultibyteSize(kctx, thisString);
 	if(index < 0 && (size_t)-index < multibyteSize) {
 		return multibyteSize + index;
 	}
@@ -425,9 +425,9 @@ static size_t kString_getIndex(KonohaContext *kctx, KonohaStack *sfp, kString *t
 	return 0;
 }
 
-static size_t kString_checkIndex(KonohaContext *kctx, KonohaStack *sfp, kString *this, kint_t index)
+static size_t kString_checkIndex(KonohaContext *kctx, KonohaStack *sfp, kString *thisString, kint_t index)
 {
-	if(unlikely(index < 0 || (size_t)index > kString_getMultibyteSize(kctx, this))) {
+	if(unlikely(index < 0 || (size_t)index > kString_getMultibyteSize(kctx, thisString))) {
 		THROW_OutOfStringBoundary(kctx, sfp, index);
 	}
 	return (size_t)index;
