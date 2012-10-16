@@ -253,16 +253,16 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 static KMETHOD NameSpace_loadScript(KonohaContext *kctx, KonohaStack *sfp)
 {
 	char pathbuf[256];
-	KMakeTrace(trace, sfp);
 	const char *path = PLATAPI formatTransparentPath(pathbuf, sizeof(pathbuf), FileId_t(sfp[K_RTNIDX].callerFileLine), S_text(sfp[1].asString));
-	KReturnUnboxValue(kNameSpace_loadScript(kctx, sfp[0].asNameSpace, path, trace));
+	KMakeTrace(trace, sfp);
+	kNameSpace_loadScript(kctx, sfp[0].asNameSpace, path, trace);
 }
 
 // boolean NameSpace.import(String pkgname);
 static KMETHOD NameSpace_importPackage(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KMakeTrace(trace, sfp);
-	KReturnUnboxValue(kNameSpace_importPackage(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), trace));
+	kNameSpace_importPackage(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), trace);
 }
 
 // boolean NameSpace.import(String pkgname, String symbol);
@@ -271,7 +271,7 @@ static KMETHOD NameSpace_importPackageSymbol(KonohaContext *kctx, KonohaStack *s
 	kString *key = sfp[2].asString;
 	ksymbol_t keyword = ksymbolA(S_text(key), S_size(key), _NEWID);
 	KMakeTrace(trace, sfp);
-	KReturnUnboxValue(kNameSpace_importPackageSymbol(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), keyword, trace));
+	kNameSpace_importPackageSymbol(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), keyword, trace);
 }
 
 #define _Public kMethod_Public
@@ -280,9 +280,9 @@ static KMETHOD NameSpace_importPackageSymbol(KonohaContext *kctx, KonohaStack *s
 void MODSUGAR_loadMethod(KonohaContext *kctx)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(NameSpace_importPackage), TY_boolean, TY_NameSpace, MN_("import"), 1, TY_String, FN_("name"),
-		_Public, _F(NameSpace_importPackageSymbol), TY_boolean, TY_NameSpace, MN_("import"), 2, TY_String, FN_("name"), TY_String, FN_("symbol"),
-		_Public, _F(NameSpace_loadScript), TY_boolean, TY_NameSpace, MN_("load"), 1, TY_String, FN_("path"),
+		_Public, _F(NameSpace_importPackage), TY_void, TY_NameSpace, MN_("import"), 1, TY_String, FN_("name"),
+		_Public, _F(NameSpace_importPackageSymbol), TY_void, TY_NameSpace, MN_("import"), 2, TY_String, FN_("name"), TY_String, FN_("symbol"),
+		_Public, _F(NameSpace_loadScript), TY_void, TY_NameSpace, MN_("load"), 1, TY_String, FN_("path"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);
