@@ -78,14 +78,20 @@ static int ParseBackSlash(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeniz
 
 static int ParseNumber(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
-	int ch, pos = tok_start;
+	int ch, pos = tok_start, tokenType = TokenType_INT;
 	const char *ts = tokenizer->source;
 	while((ch = ts[pos++]) != 0) {
+		if(ch == '.') {
+			if(isalnum(ts[pos])) {
+				tokenType = SYM_("$Float");
+				continue;
+			}
+		}
 		if(!isalnum(ch)) break;
 	}
 	if(IS_NOTNULL(tk)) {
 		KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, ts + tok_start, (pos-1)-tok_start, StringPolicy_ASCII));
-		tk->unresolvedTokenType = TokenType_INT;
+		tk->unresolvedTokenType = tokenType;
 	}
 	return pos - 1;  // next
 }

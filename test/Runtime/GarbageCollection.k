@@ -1,6 +1,6 @@
 // written by unknown (maybe ide)
 
-import("cstyle");
+import("cstyle", "while");
 
 void f() {
 	int i = 0;
