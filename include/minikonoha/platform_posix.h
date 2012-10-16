@@ -564,15 +564,14 @@ static void PlatformApi_loadReadline(PlatformApiVar *plat)
 
 // --------------------------------------------------------------------------
 
-#define EBUFSIZ 1024
 #include "libcode/logtext_formatter.h"
 
 static void traceDataLog(KonohaContext *kctx, KTraceInfo *trace, int logkey, logconf_t *logconf, ...)
 {
-	char buf[EBUFSIZ];
+	char buf[K_PAGESIZE];
 	va_list ap;
 	va_start(ap, logconf);
-	writeDataLogToBuffer(logconf, ap, buf, buf + (EBUFSIZ - 4));
+	writeDataLogToBuffer(logconf, ap, buf, buf + (K_PAGESIZE - 4));
 	syslog(LOG_NOTICE, "%s", buf);
 	if(verbose_debug) {
 		fprintf(stderr, "TRACE %s\n", buf);
@@ -607,6 +606,8 @@ static void UI_reportCompilerMessage(KonohaContext *kctx, kinfotag_t level, cons
 	const char *endTag = PLATAPI endTag(level);
 	PLATAPI printf_i("%s - %s%s\n", beginTag, msg, endTag);
 }
+
+// --------------------------------------------------------------------------
 
 static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 {

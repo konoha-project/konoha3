@@ -120,16 +120,19 @@ static char* writeKeyToBuffer(const char *key, size_t keylen, char *buftop, char
 static char* writePolicyToBuffer(logconf_t *logconf, char *buftop, char *bufend)
 {
 	if((logconf->policy & HasLocation)) {
-		buftop = writeKeyToBuffer(TEXTSIZE("TracePoint"), buftop, bufend);
+		buftop = writeKeyToBuffer(TEXTSIZE("LogPoint"), buftop, bufend);
 		writeToBuffer('"', buftop, bufend);
 		if(TFLAG_is(int, logconf->policy, PeriodicPoint)) {
-			buftop = writeFixedTextToBuffer(TEXTSIZE("Periodic,"), buftop, bufend);
+			buftop = writeFixedTextToBuffer(TEXTSIZE("PeriodicPoint,"), buftop, bufend);
 		}
 		if(TFLAG_is(int, logconf->policy, ResponseCheckPoint)) {
-			buftop = writeFixedTextToBuffer(TEXTSIZE("PreAction,"), buftop, bufend);
+			buftop = writeFixedTextToBuffer(TEXTSIZE("ResponseCheckPoint,"), buftop, bufend);
 		}
 		if(TFLAG_is(int, logconf->policy, SystemChangePoint)) {
-			buftop = writeFixedTextToBuffer(TEXTSIZE("Action,"), buftop, bufend);
+			buftop = writeFixedTextToBuffer(TEXTSIZE("SystemChangePoint,"), buftop, bufend);
+		}
+		if((logconf->policy & HasFault)) {
+			buftop = writeFixedTextToBuffer(TEXTSIZE("ErrorPoint,"), buftop, bufend);
 		}
 		if(TFLAG_is(int, logconf->policy, SecurityAudit)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("SecurityAudit,"), buftop, bufend);
@@ -162,12 +165,6 @@ static char* writePolicyToBuffer(logconf_t *logconf, char *buftop, char *bufend)
 		buftop[1] = ' ';
 		buftop+=2;
 	}
-//	if(TFLAG_is(int, logconf->policy, PrivacyCaution)) {
-//		buftop = writeTextToBuffer("PrivacyCaution\": \"true", buftop, bufend);
-//		buftop[0] = ',';
-//		buftop[1] = ' ';
-//		buftop+=2;
-//	}
 	return buftop;
 }
 
