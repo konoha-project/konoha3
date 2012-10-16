@@ -103,6 +103,7 @@ static void dumpEval(KonohaContext *kctx, KGrowingBuffer *wb)
 		CT_(ty)->p(kctx, lsfp, 0, wb);
 		fflush(stdout);
 		PLATAPI printf_i(" (%s) %s\n", TY_t(ty), KLIB Kwb_top(kctx, wb,1));
+		base->evalty = TY_void;
 	}
 }
 
