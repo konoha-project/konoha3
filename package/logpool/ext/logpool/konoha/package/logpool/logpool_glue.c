@@ -39,17 +39,17 @@ typedef struct kRawPtr {
 
 static void RawPtr_init(CTX, kObject *po, void *conf)
 {
-	kRawPtr *o = (kRawPtr*)(po);
+	kRawPtr *o = (kRawPtr *)(po);
 	o->rawptr = conf;
 }
 static void RawPtr_free(CTX, kObject *po)
 {
-	kRawPtr *o = (kRawPtr*)(po);
+	kRawPtr *o = (kRawPtr *)(po);
 	o->rawptr = NULL;
 }
 static void Logpool_free(CTX, kObject *po)
 {
-	kRawPtr *o = (kRawPtr*)(po);
+	kRawPtr *o = (kRawPtr *)(po);
 	if(o->rawptr) {
 		logpool_close(o->rawptr);
 		o->rawptr = NULL;
@@ -57,7 +57,7 @@ static void Logpool_free(CTX, kObject *po)
 }
 static void Log_free(CTX, kObject *po)
 {
-	kRawPtr *o = (kRawPtr*)(po);
+	kRawPtr *o = (kRawPtr *)(po);
 	free(o->rawptr);
 	o->rawptr = NULL;
 }
@@ -140,7 +140,7 @@ struct konoha_context {
 static uintptr_t p_init(uintptr_t context)
 {
 	struct konoha_context *c = malloc(sizeof(struct konoha_context));
-	memcpy(c, (struct konoha_context*) context, sizeof(*c));
+	memcpy(c, (struct konoha_context *) context, sizeof(*c));
 	CTX_t _ctx = c->konoha;
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, c->finit->self);
@@ -264,7 +264,7 @@ static void *statics_init(CTX, kFunc *initFo, kFunc *exitFo, kFunc *funcFo)
 	KUnsafeFieldSet(c->finit, initFo);
 	KUnsafeFieldSet(c->fexit, exitFo);
 	KUnsafeFieldSet(c->func,  funcFo);
-	return (void*) c;
+	return (void *) c;
 }
 
 // PoolPlugin Statics.create(Func initFo, Func exitFo, Func func);
@@ -344,7 +344,7 @@ static KMETHOD LogPool_loadFile(CTX, ksfp_t *sfp _RIX)
 	size_t len;
 	char *script = loadFile(S_text(file), &len);
 	memcached_set(mc, S_text(key), S_size(key), script, len, 0, 0);
-	logpool_procedure(lp, (char*)S_text(key), S_size(key));
+	logpool_procedure(lp, (char *)S_text(key), S_size(key));
 	free(script);
 	KReturnVoid();
 }

@@ -33,9 +33,9 @@ static kExpr *callTypeCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef, k
 	INIT_GCSTACK();
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, fo->self);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, (kObject*)stmt);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asObject, (kObject*)expr);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+3].asObject, (kObject*)gma);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, (kObject *)stmt);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asObject, (kObject *)expr);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+3].asObject, (kObject *)gma);
 	lsfp[K_CALLDELTA+4].intValue = reqty;
 	countRef[0] += 1;
 	{
@@ -46,7 +46,7 @@ static kExpr *callTypeCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef, k
 	END_LOCAL();
 	RESET_GCSTACK();
 	DBG_ASSERT(IS_Expr(lsfp[0].asObject));
-	return (kExpr*)lsfp[0].asObject;
+	return (kExpr *)lsfp[0].asObject;
 }
 
 static kExpr *TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, int reqty)
@@ -166,7 +166,7 @@ static kExpr *kStmt_tyCheckExprAt(KonohaContext *kctx, kStmt *stmt, kExpr *exprP
 
 static kbool_t kStmt_tyCheckByName(KonohaContext *kctx, kStmt *stmt, ksymbol_t classNameSymbol, kGamma *gma, ktype_t reqty, int pol)
 {
-	kExpr *expr = (kExpr*)kStmt_getObjectNULL(kctx, stmt, classNameSymbol);
+	kExpr *expr = (kExpr *)kStmt_getObjectNULL(kctx, stmt, classNameSymbol);
 	if(expr != NULL && IS_Expr(expr)) {
 		kExpr *texpr = Expr_tyCheck(kctx, stmt, expr, gma, reqty, pol);
 //		DBG_P("reqty=%s, texpr->ty=%s isnull=%d", TY_t(reqty), TY_t(texpr->ty), (texpr == K_NULLEXPR));
@@ -185,9 +185,9 @@ static kbool_t kStmt_tyCheckByName(KonohaContext *kctx, kStmt *stmt, ksymbol_t c
 static kbool_t callStatementFunc(KonohaContext *kctx, kFunc *fo, int *countRef, kStmt *stmt, kGamma *gma)
 {
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 3);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, (kObject*)fo->self);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, (kObject*)stmt);
-	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asObject, (kObject*)gma);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, (kObject *)fo->self);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, (kObject *)stmt);
+	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asObject, (kObject *)gma);
 	countRef[0] += 1;
 	{
 		KonohaStack *sfp = lsfp + K_CALLDELTA;
@@ -231,7 +231,7 @@ static kbool_t kBlock_tyCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
 {
 	int i, result = true, lvarsize = gma->genv->localScope.varsize;
 	for(i = 0; i < kArray_size(bk->StmtList); i++) {
-		kStmt *stmt = (kStmt*)bk->StmtList->ObjectItems[i];
+		kStmt *stmt = (kStmt *)bk->StmtList->ObjectItems[i];
 		if(Stmt_isDone(stmt)) continue;
 		KdumpStmt(kctx, stmt);
 		if(Stmt_isERR(stmt) || !SugarSyntax_tyCheckStmt(kctx, stmt->syn, stmt, gma)) {
@@ -346,7 +346,7 @@ static void kGamma_initIt(KonohaContext *kctx, GammaAllocaData *genv, kParam *pa
 static ktype_t kStmt_checkReturnType(KonohaContext *kctx, kStmt *stmt)
 {
 	if(stmt->syn != NULL && stmt->syn->keyword == KW_ExprPattern) {
-		kExpr *expr = (kExpr*)kStmt_getObjectNULL(kctx, stmt, KW_ExprPattern);
+		kExpr *expr = (kExpr *)kStmt_getObjectNULL(kctx, stmt, KW_ExprPattern);
 		DBG_ASSERT(expr != NULL);
 		if(expr->ty != TY_void) {
 			kStmt_setsyn(stmt, SYN_(Stmt_nameSpace(stmt), KW_return));

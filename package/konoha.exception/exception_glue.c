@@ -46,8 +46,8 @@ struct kExceptionVar {
 
 #define CFLAG_Exception                            kClass_Final
 
-#define KonohaContext_getExceptionModule(kctx)           ((KonohaExceptionModule*)kctx->modshare[MOD_exception])
-#define KonohaContext_getExceptionContext(kctx)          ((KonohaExceptionContext*)kctx->modlocal[MOD_exception])
+#define KonohaContext_getExceptionModule(kctx)           ((KonohaExceptionModule *)kctx->modshare[MOD_exception])
+#define KonohaContext_getExceptionContext(kctx)          ((KonohaExceptionContext *)kctx->modlocal[MOD_exception])
 #define CT_Exception         KonohaContext_getExceptionModule(kctx)->cException
 #define TY_Exception         KonohaContext_getExceptionModule(kctx)->cException->typeId
 #define IS_Exception(e)      (O_ct(e) == CT_Exception)
@@ -168,7 +168,7 @@ static KMETHOD Exception_new(KonohaContext *kctx, KonohaStack *sfp)
 
 static void Exception_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	kExceptionVar *e = (kExceptionVar*)o;
+	kExceptionVar *e = (kExceptionVar *)o;
 	e->flag = 0;
 	e->faultId = 0;
 	e->uline = 0;
@@ -179,7 +179,7 @@ static void Exception_init(KonohaContext *kctx, kObject *o, void *conf)
 static void Exception_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	BEGIN_REFTRACE(2);
-	kExceptionVar *e = (kExceptionVar*)o;
+	kExceptionVar *e = (kExceptionVar *)o;
 	KREFTRACEv(e->message);
 	KREFTRACEv(e->StackTraceList);
 	END_REFTRACE();
@@ -207,7 +207,7 @@ static void kModuleException_free(KonohaContext *kctx, KonohaModule *baseh)
 
 static kbool_t exception_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KonohaExceptionModule *mod = (KonohaExceptionModule*)KCalloc_UNTRACE(sizeof(KonohaExceptionModule), 1);
+	KonohaExceptionModule *mod = (KonohaExceptionModule *)KCalloc_UNTRACE(sizeof(KonohaExceptionModule), 1);
 	mod->h.name     = "exception";
 	mod->h.setup    = kModuleException_setup;
 	mod->h.reftrace = kModuleException_reftrace;

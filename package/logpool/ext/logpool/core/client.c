@@ -137,7 +137,7 @@ static int io_client_read(struct io *io, const void *data, uint32_t nbyte)
             debug_print(1, "stream connection close");
             return IO_FAILED;
         }
-        memcpy((void*)data, log, nbyte);
+        memcpy((void *)data, log, nbyte);
         return IO_OK;
     }
     debug_print(1, "stream was not connected");

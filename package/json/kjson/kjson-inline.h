@@ -30,7 +30,7 @@
 #define KJSON_INLINE_H_
 
 #ifndef LOG2
-#define LOG2(N) ((uint32_t)((sizeof(void*) * 8) - __builtin_clzl(N - 1)))
+#define LOG2(N) ((uint32_t)((sizeof(void *) * 8) - __builtin_clzl(N - 1)))
 #endif
 
 #ifdef __cplusplus
@@ -156,7 +156,7 @@ static inline JSON JSONObject_iterator_next(JSONObject_iterator *itr, JSON *val)
 {
     JSONObject *o = itr->obj;
     map_record_t *r;
-    while ((r = kmap_next(&o->child, (kmap_iterator*) itr)) != NULL) {
+    while ((r = kmap_next(&o->child, (kmap_iterator *) itr)) != NULL) {
         *val = toJSON(ValueP(r->v));
         return toJSON(ValueS(r->k));
     }

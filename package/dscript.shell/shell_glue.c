@@ -158,7 +158,7 @@ static KMETHOD Statement_dsh(KonohaContext *kctx, KonohaStack *sfp)
 	//TODO: generate eval("cmd") syntax
 
 	kNameSpace *ns = Stmt_nameSpace(stmt);
-	SugarSyntaxVar *syn = (SugarSyntaxVar*) SYN_(ns, KW_ExprMethodCall);
+	SugarSyntaxVar *syn = (SugarSyntaxVar *) SYN_(ns, KW_ExprMethodCall);
 	kTokenVar *callToken = new_(TokenVar, 0, OnGcStack);
 	kExpr *callExpr = new_ConstValueExpr(kctx, TY_String, UPCAST(cmd));
 	callToken->resolvedSymbol = MN_("call");
@@ -226,7 +226,7 @@ static KMETHOD Statement_Shell(KonohaContext *kctx, KonohaStack *sfp)
 	if(tokenList != NULL) {
 		kString *cmd = NULL;
 		if(IS_Token(tokenList)) {
-			cmd = ((kToken*)tokenList)->text;
+			cmd = ((kToken *)tokenList)->text;
 		}
 		else {
 			DBG_ASSERT(IS_Array(tokenList));

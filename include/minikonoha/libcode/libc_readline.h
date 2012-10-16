@@ -50,7 +50,7 @@ static char *readline(const char *prompt)
 		pos++;
 	}
 	if(ch == EOF) return NULL;
-	char *p = (char*)malloc(pos+1);
+	char *p = (char *)malloc(pos+1);
 	memcpy(p, linebuf, pos+1);
 	return p;
 }

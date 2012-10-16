@@ -62,7 +62,7 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 	KLIB Kwb_write(kctx, &wb, S_text(name), S_size(name));
 	kString *pkgname = KLIB new_kString(kctx, OnField, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
 	kExpr *ePKG = new_ConstValueExpr(kctx, TY_String, UPCAST(pkgname));
-	SugarSyntaxVar *syn1 = (SugarSyntaxVar*) SYN_(ns, KW_ExprMethodCall);
+	SugarSyntaxVar *syn1 = (SugarSyntaxVar *) SYN_(ns, KW_ExprMethodCall);
 	kTokenVar *tkImport = /*G*/new_(TokenVar, 0, OnGcStack);
 	tkImport->resolvedSymbol = MN_("import");
 	kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, syn1, 3, tkImport, new_ConstValueExpr(kctx, O_typeId(ns), UPCAST(ns)), ePKG);

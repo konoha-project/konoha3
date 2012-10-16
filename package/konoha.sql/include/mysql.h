@@ -61,7 +61,7 @@ kconn_t *MYSQL_qopen(KonohaContext *kctx, const char *url)
 	url += 8; // skip: 'mysql://'
 	const char *btstr = url;
 	sscanf(btstr, "%16[^ :\r\n\t]:%255[^ @\r\n\t]@%255[^ :\r\n\t]:%5d/%64[^ \r\n\t]",
-			(char*)&user, (char*)&pass, (char*)&host, &port, (char*)&dbnm); // consider to buffer over run
+			(char *)&user, (char *)&pass, (char *)&host, &port, (char *)&dbnm); // consider to buffer over run
 
 	puser = (user[0]) ? user : NULL;
 	ppass = (pass[0]) ? pass : NULL;
@@ -84,7 +84,7 @@ kconn_t *MYSQL_qopen(KonohaContext *kctx, const char *url)
 	//	mysql_close(db);
 	//	db = NULL;
 	//}
-	return (kconn_t*)db;
+	return (kconn_t *)db;
 }
 /* ------------------------------------------------------------------------ */
 
@@ -92,7 +92,7 @@ kconn_t *MYSQL_qopen(KonohaContext *kctx, const char *url)
 int MYSQL_qnext(KonohaContext *kctx, kqcur_t *qcursor, kResultSet *rs)
 {
 	MYSQL_ROW row;
-	if((row = mysql_fetch_row((MYSQL_RES*)qcursor)) != NULL) {
+	if((row = mysql_fetch_row((MYSQL_RES *)qcursor)) != NULL) {
 		OLDTRACE_SWITCH_TO_KTrace(_UserInputFault, LogText("@","mysql_fetch_row"));
 		int i;
 		kint_t ival;
@@ -140,7 +140,7 @@ int MYSQL_qnext(KonohaContext *kctx, kqcur_t *qcursor, kResultSet *rs)
 kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char *sql, struct _kResultSet *rs)
 {
 	MYSQL_RES *res = NULL;
-	MYSQL *db = (MYSQL*)hdr;
+	MYSQL *db = (MYSQL *)hdr;
 	if(db == NULL) {
 		/* return NULL */
 	}
@@ -158,7 +158,7 @@ kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char *sql, struct _kR
 	}
 	else {
 		/* Connection.query */
-		int r = mysql_query((MYSQL*)db, sql);
+		int r = mysql_query((MYSQL *)db, sql);
 		OLDTRACE_SWITCH_TO_KTrace(_UserInputFault,
 				LogText("@","mysql_query"),
 				LogText("query", sql),
@@ -166,7 +166,7 @@ kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char *sql, struct _kR
 				LogText("error", mysql_error(db))
 		);
 		if(r == 0) { 
-			res = mysql_store_result((MYSQL*)db);
+			res = mysql_store_result((MYSQL *)db);
 			if(res == NULL) { // NULL RESULT
 				if(mysql_errno(db) != 0) {
 					mysql_free_result(res);
@@ -210,7 +210,7 @@ kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char *sql, struct _kR
 //static void MYSQL_qclose(KonohaContext *kctx, kconn_t *hdr)
 void MYSQL_qclose(kconn_t *db)
 {
-	mysql_close((MYSQL*)db);
+	mysql_close((MYSQL *)db);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -219,7 +219,7 @@ void MYSQL_qclose(kconn_t *db)
 void MYSQL_qfree(kqcur_t *qcur)
 {
 	if(qcur != NULL) {
-		MYSQL_RES *res = (MYSQL_RES*)qcur;
+		MYSQL_RES *res = (MYSQL_RES *)qcur;
 		mysql_free_result(res);
 	}
 }

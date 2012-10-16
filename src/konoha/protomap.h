@@ -123,7 +123,7 @@ static inline unsigned protomap_size(Kprotomap_t *m)
 #endif
 
 #ifndef BITS
-#define BITS (sizeof(void*) * 8)
+#define BITS (sizeof(void *) * 8)
 #endif
 
 #ifndef POWER_OF_TWO

@@ -13,7 +13,7 @@
 //static const char *l_packname(const char *str)
 //{
 //	char *p = strrchr(str, '.');
-//	return (p == NULL) ? str : (const char*)p+1;
+//	return (p == NULL) ? str : (const char *)p+1;
 //}
 //
 //static const char *l_packagepath(char *buf, size_t bufsiz, const char *fname)
@@ -37,7 +37,7 @@
 //		snprintf(buf, bufsiz, K_PREFIX "/konoha2/package" "/%s/%s_glue.k", fname, l_packname(fname));
 //	}
 //#endif
-//	return (const char*)buf;
+//	return (const char *)buf;
 //}
 //
 //static const char *l_exportpath(char *pathbuf, size_t bufsiz, const char *pname)
@@ -47,7 +47,7 @@
 //	FILE *fp = fopen(pathbuf, "r");
 //	if(fp != NULL) {
 //		fclose(fp);
-//		return (const char*)pathbuf;
+//		return (const char *)pathbuf;
 //	}
 //	return NULL;
 //}
@@ -98,7 +98,7 @@ extern kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, kfilelin
 
 void konoha_plugin_init(KonohaContextVar **konohap, memcached_st **mcp)
 {
-    *konohap = (KonohaContextVar*)konoha_open(&logpool_platform);
+    *konohap = (KonohaContextVar *)konoha_open(&logpool_platform);
     *mcp = memcached_create(NULL);
     KonohaContext *kctx = *konohap;
     kNameSpace *ns = KNULL(NameSpace);
@@ -131,7 +131,7 @@ struct pool_plugin *konoha_plugin_get(KonohaContext *kctx, memcached_st *mc, cha
         KCALL(lsfp, 0, mtd, 2, K_NULL);
         END_LOCAL();
         kObject *ret = lsfp[0].asObject;
-        struct pool_plugin *plugin = (struct pool_plugin *) ((struct kRawPtr*) ret)->rawptr;
+        struct pool_plugin *plugin = (struct pool_plugin *) ((struct kRawPtr *) ret)->rawptr;
         plugin = pool_plugin_init(plugin);
         return plugin;
     }

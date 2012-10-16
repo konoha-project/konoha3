@@ -534,12 +534,12 @@ static SugarSyntaxVar *kNameSpace_guessSyntaxFromTokenList(KonohaContext *kctx, 
 			if(isSubKeyword(kctx, tokenList, beginIdx, endIdx)) {
 				char buf[256];
 				PLATAPI snprintf_i(buf, sizeof(buf), "%s_%s", S_text(tokenList->TokenItems[beginIdx]->text), S_text(tokenList->TokenItems[beginIdx+1]->text));
-				kw = ksymbolA((const char*)buf, strlen(buf), SYM_NEWID);
+				kw = ksymbolA((const char *)buf, strlen(buf), SYM_NEWID);
 			}
 			else {
 				kw = ksymbolA(S_text(tokenList->TokenItems[beginIdx]->text), S_size(tokenList->TokenItems[beginIdx]->text), SYM_NEWID);
 			}
-			return (SugarSyntaxVar*)NEWSYN_(ns, kw);
+			return (SugarSyntaxVar *)NEWSYN_(ns, kw);
 		}
 	}
 	return NULL;
@@ -549,7 +549,7 @@ static KMETHOD Statement_syntax(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kbool_t r = 0;
 	VAR_Statement(stmt, gma);
-	kTokenArray *tokenList = (kTokenArray*)kStmt_getObject(kctx, stmt, KW_TokenPattern, NULL);
+	kTokenArray *tokenList = (kTokenArray *)kStmt_getObject(kctx, stmt, KW_TokenPattern, NULL);
 	if(tokenList != NULL) {
 		FIXME_ASSERT(IS_Array(tokenList));  // tokenList can be Token
 		kNameSpace *ns = Stmt_nameSpace(stmt);

@@ -165,15 +165,15 @@ static kStringBase *kRopeString_Init(KonohaContext *kctx, kArray *gcstack, kStri
 	rope->base.length = len;
 	KUnsafeFieldInit(rope->left,  left);
 	KUnsafeFieldInit(rope->right, right);
-	KLIB Kwrite_barrier(kctx, (kObject*)rope);
+	KLIB Kwrite_barrier(kctx, (kObject *)rope);
 	return (kStringBase *) rope;
 }
 
 static kLinerString *kRopeString_toLinerString(kRopeString *o, char *text, size_t len)
 {
 	kLinerString *s = (kLinerString *) o;
-	kStringBase_unsetFlag((kStringBase*)s, MASK_ROPE);
-	kStringBase_setFlag((kStringBase*)s, MASK_LINER);
+	kStringBase_unsetFlag((kStringBase *)s, MASK_ROPE);
+	kStringBase_setFlag((kStringBase *)s, MASK_LINER);
 	s->base.length = len;
 	s->text = text;
 	return s;
@@ -191,7 +191,7 @@ static void checkASCII(KonohaContext *kctx, kStringBase *s, const char *text, si
 		case 1:     ch |= *p++;
 		} while(--n>0);
 	}
-	kString_set(ASCII, (kStringVar*)s, (ch < 128));
+	kString_set(ASCII, (kStringVar *)s, (ch < 128));
 }
 
 static kString *new_kString(KonohaContext *kctx, kArray *gcstack, const char *text, size_t len, int policy)
@@ -205,17 +205,17 @@ static kString *new_kString(KonohaContext *kctx, kArray *gcstack, const char *te
 		checkASCII(kctx, s, text, len);
 	}
 	if(len < SIZEOF_INLINETEXT)
-		return (kString*) kInlineString_Init(kctx, s, text, len);
+		return (kString *) kInlineString_Init(kctx, s, text, len);
 	if(TFLAG_is(int, policy, StringPolicy_TEXT))
-		return (kString*) kExternalString_Init(kctx, s, text, len);
-	return (kString*) kLinerString_Init(kctx, s, text, len);
+		return (kString *) kExternalString_Init(kctx, s, text, len);
+	return (kString *) kLinerString_Init(kctx, s, text, len);
 }
 
 static void String2_free(KonohaContext *kctx, kObject *o)
 {
-	kStringBase *base = (kStringBase*) o;
+	kStringBase *base = (kStringBase *) o;
 	if((kStringBase_flag(base) & S_FLAG_EXTERNAL) == S_FLAG_LINER) {
-		assert(((kLinerString *)base)->text == ((kString*)base)->buf);
+		assert(((kLinerString *)base)->text == ((kString *)base)->buf);
 		KFree(((kLinerString *)base)->text, StringBase_length(base)+1);
 	}
 }
@@ -227,22 +227,22 @@ static void Stack_init(KonohaContext *kctx, KGrowingArray *stack)
 
 static void Stack_push(KonohaContext *kctx, KGrowingArray *stack, kStringBase *str)
 {
-	size_t index = stack->bytesize / sizeof(kStringBase*);
+	size_t index = stack->bytesize / sizeof(kStringBase *);
 	if(stack->bytesize == stack->bytemax) {
 		KLIB Karray_expand(kctx, stack, stack->bytemax * 2);
 	}
 	stack->ObjectItems[index] = (kObject *) str;
-	stack->bytesize += sizeof(kStringBase*);
+	stack->bytesize += sizeof(kStringBase *);
 }
 
 static kStringBase *Stack_pop(KonohaContext *kctx, KGrowingArray *stack)
 {
-	size_t index = (stack->bytesize / sizeof(kStringBase*));
+	size_t index = (stack->bytesize / sizeof(kStringBase *));
 	if (index == 0) {
 		return NULL;
 	}
 	kStringBase *str = stack->ObjectItems[index-1];
-	stack->bytesize -= sizeof(kStringBase*);
+	stack->bytesize -= sizeof(kStringBase *);
 	return str;
 }
 
@@ -297,9 +297,9 @@ static char *StringBase_getTextReference(KonohaContext *kctx, kStringBase *s)
 		case S_FLAG_LINER:
 		case S_FLAG_EXTERNAL:
 		case S_FLAG_INLINE:
-			return ((kLinerString*)s)->text;
+			return ((kLinerString *)s)->text;
 		case S_FLAG_ROPE:
-			return kRopeString_flatten(kctx, (kRopeString*)s)->text;
+			return kRopeString_flatten(kctx, (kRopeString *)s)->text;
 		default:
 			/*unreachable*/
 			assert(0);
@@ -325,7 +325,7 @@ static uintptr_t String2_unbox(KonohaContext *kctx, kObject *o)
 
 static kStringBase *kStringBase_concat(KonohaContext *kctx, kArray *gcstack, kString *s0, kString *s1)
 {
-	kStringBase *left = (kStringBase *) s0, *right = (kStringBase*) s1;
+	kStringBase *left = (kStringBase *) s0, *right = (kStringBase *) s1;
 	size_t leftLen = StringBase_length(left);
 	if(leftLen == 0) {
 		return right;
@@ -377,7 +377,7 @@ static KMETHOD Rope_opADD(KonohaContext *kctx, KonohaStack *sfp)
 static size_t utf8_multiByteLength(const char *s_text, size_t s_size)
 {
 	size_t size = 0;
-	const unsigned char *start = (const unsigned char*)s_text;
+	const unsigned char *start = (const unsigned char *)s_text;
 	const unsigned char *end = start + s_size;
 	while (start < end) {
 		size_t ulen = utf8len(start[0]);
@@ -387,7 +387,7 @@ static size_t utf8_multiByteLength(const char *s_text, size_t s_size)
 	return size;
 }
 
-// uft8_byteOffset("ããããã", 3) ==> 9
+// uft8_byteOffset("あいうえお", 3) ==> 9
 static size_t uft8_byteOffset(const char *text, size_t index)
 {
 	const unsigned char *start = (const unsigned char *)text;
@@ -968,7 +968,7 @@ static KMETHOD String_slice(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kArray *a = (kArray*)KLIB new_kObject(kctx, OnStack, CT_StringArray0, 0);
+	kArray *a = (kArray *)KLIB new_kObject(kctx, OnStack, CT_StringArray0, 0);
 	KLIB kArray_add(kctx, a, sfp[0].asString);
 	KReturn(a);
 }
@@ -981,7 +981,7 @@ static KMETHOD String_splitWithSeparator(KonohaContext *kctx, KonohaStack *sfp)
 	INIT_GCSTACK();
 	kString *s0 = sfp[0].asString;
 	kString *separator = sfp[1].asString;
-	kArray *resultArray = (kArray*)KLIB new_kObject(kctx, _GcStack, CT_StringArray0, 0);
+	kArray *resultArray = (kArray *)KLIB new_kObject(kctx, _GcStack, CT_StringArray0, 0);
 
 	const char *start = S_text(s0);
 	const char *end = start + S_size(s0);
@@ -1024,7 +1024,7 @@ static KMETHOD String_splitwithSeparatorLimit(KonohaContext *kctx, KonohaStack *
 		/* ignore limit */
 		limit = length;
 	}
-	kArray *resultArray = (kArray*)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
+	kArray *resultArray = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	const char *start = S_text(thisString);
 	const char *end = start + S_size(thisString);
 	if(S_size(separator) == 0) {

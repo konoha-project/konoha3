@@ -49,7 +49,7 @@ static kExpr *NewExpr(KonohaContext *kctx, SugarSyntax *syn, kToken *tk, ktype_t
 	Expr_setTerm(expr, 1);
 	expr->build = TEXPR_NEW;
 	expr->ty = ty;
-	return (kExpr*)expr;
+	return (kExpr *)expr;
 }
 
 static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)

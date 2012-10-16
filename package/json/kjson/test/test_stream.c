@@ -12,7 +12,7 @@ static void test_string(void)
         buf[i] = i;
         ans += (char)i;
     }
-    input_stream *ins = new_string_input_stream((const char*)buf, 1024, 0);
+    input_stream *ins = new_string_input_stream((const char *)buf, 1024, 0);
     int sum = 0;
     char cur;
     for_each_istream(ins, cur) {
@@ -69,7 +69,7 @@ static void test_string(void)
 //            fclose(fp);
 //        }
 //
-//        input_stream *ins = new_file_input_stream((char*)files[i], 1024);
+//        input_stream *ins = new_file_input_stream((char *)files[i], 1024);
 //        input_stream_iterator itr = {};
 //        char cur;
 //        for_each_istream(ins, itr, cur) {

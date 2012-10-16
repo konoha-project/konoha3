@@ -15,7 +15,7 @@ static void emit_procedure(struct io *io, char *q)
 
 static void read_log(struct io *io, struct Log *tmp)
 {
-    io_read(io, (char*) tmp, 128);
+    io_read(io, (char *) tmp, 128);
 }
 
 int main(int argc, char **argv)

@@ -13,7 +13,7 @@ static char *emit_message_header(char *buf, uint16_t protocol, uint16_t logsize,
 
     tmp->protocol = protocol;
     tmp->logsize  = logsize;
-    loginfo = ((uint16_t*)buf) + LOG_PROTOCOL_FIELDS;
+    loginfo = ((uint16_t *)buf) + LOG_PROTOCOL_FIELDS;
     buf = (char *) (loginfo + logsize * 2);
     for (i = 0; i < logsize; ++i) {
         loginfo[i*2+0] = (uint16_t) lengths[i*2+0];
@@ -35,7 +35,7 @@ static bool create_apply(struct pool_plugin *_p, struct LogEntry *e, uint32_t st
     }
     uint16_t entry_size = sizeof(struct LogEntry)+sizeof(uint16_t)*2*logsize+datasize;
     struct LogEntry *newe = malloc(entry_size);
-    char *buf = emit_message_header((char*)&newe->data, LOGPOOL_EVENT_WRITE, logsize, lengths);
+    char *buf = emit_message_header((char *)&newe->data, LOGPOOL_EVENT_WRITE, logsize, lengths);
     newe->h.size = entry_size;
     newe->h.next = NULL;
     newe->h.time = e->h.time;

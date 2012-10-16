@@ -97,12 +97,12 @@ static void MPIData_extend(KonohaContext *kctx, kMPIData *p, int size) {
 
 /* ------------------------------------------------------------------------ */
 static kMPIRequest *newMPIRequest(KonohaContext *kctx) {
-	kMPIRequest *p = (kMPIRequest*)KMalloc_UNTRACE(sizeof(kMPIRequest));
+	kMPIRequest *p = (kMPIRequest *)KMalloc_UNTRACE(sizeof(kMPIRequest));
 	return p;
 }
 
 static kMPIData *newMPIData(KonohaContext *kctx) {
-	kMPIData *p = (kMPIData*)KMalloc_UNTRACE(sizeof(kMPIData));
+	kMPIData *p = (kMPIData *)KMalloc_UNTRACE(sizeof(kMPIData));
 	return p;
 }
 
@@ -537,7 +537,7 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 {
 	KRequirePackage("konoha.bytes", trace);
 	KRequirePackage("konoha.float", trace);
-	kmodmpi_t *base = (kmodmpi_t*)KCalloc_UNTRACE(sizeof(kmodmpi_t), 1);
+	kmodmpi_t *base = (kmodmpi_t *)KCalloc_UNTRACE(sizeof(kmodmpi_t), 1);
 	base->h.name     = "mpi";
 	base->h.setup    = kmodmpi_setup;
 	base->h.reftrace = kmodmpi_reftrace;

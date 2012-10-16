@@ -133,7 +133,7 @@ static int pthread_mutex_init_recursive(kmutex_t *mutex)
 	bzero(&attr, sizeof(pthread_mutexattr_t));
 	pthread_mutexattr_init(&attr);
 	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-	return pthread_mutex_init((pthread_mutex_t*)mutex, &attr);
+	return pthread_mutex_init((pthread_mutex_t *)mutex, &attr);
 }
 
 #else
@@ -288,7 +288,7 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 	FILE *fp = fopen(filePath, "r");
 	if(fp != NULL) {
 		SimpleBuffer simpleBuffer;
-		simpleBuffer.buffer = (char*)malloc(K_PAGESIZE);
+		simpleBuffer.buffer = (char *)malloc(K_PAGESIZE);
 		simpleBuffer.allocSize = K_PAGESIZE;
 		isSuccessfullyLoading = true;
 		while(!feof(fp)) {
@@ -297,7 +297,7 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 			memset(simpleBuffer.buffer, 0, simpleBuffer.allocSize);
 			simpleBuffer.size = 0;
 			uline = readChunk(fp, uline, &simpleBuffer);
-			const char *script = (const char*)simpleBuffer.buffer;
+			const char *script = (const char *)simpleBuffer.buffer;
 			if(sline == 1 && simpleBuffer.size > 2 && script[0] == '#' && script[1] == '!') {
 				// fall through this line
 				simpleBuffer.size = 0;
@@ -319,7 +319,7 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 static const char *shortFilePath(const char *path)
 {
 	char *p = (char *) strrchr(path, '/');
-	return (p == NULL) ? path : (const char*)p+1;
+	return (p == NULL) ? path : (const char *)p+1;
 }
 
 static const char *shortText(const char *msg)
@@ -335,7 +335,7 @@ static const char *formatTransparentPath(char *buf, size_t bufsiz, const char *p
 		if(len < bufsiz) {
 			memcpy(buf, parentPath, len);
 			snprintf(buf + len, bufsiz - len, "%s", path);
-			return (const char*)buf;
+			return (const char *)buf;
 		}
 	}
 	return path;
@@ -348,7 +348,7 @@ static const char *formatTransparentPath(char *buf, size_t bufsiz, const char *p
 static const char *packname(const char *str)
 {
 	char *p = (char *) strrchr(str, '.');
-	return (p == NULL) ? str : (const char*)p+1;
+	return (p == NULL) ? str : (const char *)p+1;
 }
 
 static const char *formatPackagePath(char *buf, size_t bufsiz, const char *packageName, const char *ext)
@@ -369,14 +369,14 @@ static const char *formatPackagePath(char *buf, size_t bufsiz, const char *packa
 	fp = fopen(buf, "r");
 	if(fp != NULL) {
 		fclose(fp);
-		return (const char*)buf;
+		return (const char *)buf;
 	}
 	snprintf(buf, bufsiz, K_PREFIX "/minikonoha/package" "/%s/%s%s", packageName, packname(packageName), ext);
 #endif
 	fp = fopen(buf, "r");
 	if(fp != NULL) {
 		fclose(fp);
-		return (const char*)buf;
+		return (const char *)buf;
 	}
 	return NULL;
 }
@@ -472,8 +472,8 @@ static void PlatformApi_loadReadline(PlatformApiVar *plat)
 {
 	HMODULE handler = LoadLibrary("libreadline" K_OSDLLEXT);
 	if(handler != NULL) {
-		plat->readline_i = (char *(*)(const char*))GetProcAddress(handler, "readline");
-		plat->add_history_i = (int (*)(const char*))GetProcAddress(handler, "add_history");
+		plat->readline_i = (char *(*)(const char *))GetProcAddress(handler, "readline");
+		plat->add_history_i = (int (*)(const char *))GetProcAddress(handler, "add_history");
 	}
 	if(plat->readline_i == NULL) {
 		plat->readline_i = readline;
@@ -509,7 +509,7 @@ static PlatformApi *KonohaUtils_getDefaultPlatformApi(void)
 	static PlatformApiVar plat = {};
 	plat.name            = "shell";
 	plat.stacksize       = K_PAGESIZE * 4;
-	plat.getenv_i        =  (const char *(*)(const char*))getenv;
+	plat.getenv_i        =  (const char *(*)(const char *))getenv;
 	plat.malloc_i        = malloc;
 	plat.free_i          = free;
 	plat.setjmp_i        = ksetjmp;
@@ -557,7 +557,7 @@ static PlatformApi *KonohaUtils_getDefaultPlatformApi(void)
 	plat.logger              = NULL;
 	plat.traceDataLog        = traceDataLog;
 	plat.diagnosis           = diagnosis;
-	return (PlatformApi*)(&plat);
+	return (PlatformApi *)(&plat);
 }
 
 #ifdef __cplusplus

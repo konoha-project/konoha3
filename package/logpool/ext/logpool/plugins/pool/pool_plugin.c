@@ -82,7 +82,7 @@ void pool_plugin_dispose(struct pool_plugin *p)
 char *LogEntry_get(struct LogEntry *e, char *key, int klen, int *vlen)
 {
     uint16_t i;
-    struct Log *log = (struct Log*)&e->data;
+    struct Log *log = (struct Log *)&e->data;
     char *data = log_get_data(log);
     for (i = 0; i < log->logsize; ++i) {
         char *next = log_iterator(log, data, i);
