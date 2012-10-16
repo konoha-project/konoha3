@@ -364,7 +364,6 @@ static KMETHOD Rope_opADD(KonohaContext *kctx, KonohaStack *sfp)
 /* ------------------------------------------------------------------------ */
 
 #define StringPolicy_maskASCII(s)      (kString_is(ASCII, s) ? StringPolicy_ASCII : 0)
-//#define CT_StringArray0                CT_p0(kctx, CT_Array, TY_String)
 
 /*
  * Get the number of multibyte characters from text and bytesize.
@@ -921,7 +920,7 @@ static KMETHOD String_slice(KonohaContext *kctx, KonohaStack *sfp)
 //## String[] String.split();
 static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kArray *a = (kArray *)KLIB new_kObject(kctx, OnStack, CT_StringArray0, 0);
+	kArray *a = (kArray *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
 	KLIB kArray_add(kctx, a, sfp[0].asString);
 	KReturn(a);
 }
@@ -932,7 +931,7 @@ static KMETHOD String_splitWithSeparator(KonohaContext *kctx, KonohaStack *sfp)
 	INIT_GCSTACK();
 	kString *s0 = sfp[0].asString;
 	kString *separator = sfp[1].asString;
-	kArray *resultArray = (kArray *)KLIB new_kObject(kctx, _GcStack, CT_StringArray0, 0);
+	kArray *resultArray = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 
 	const char *start = S_text(s0);
 	const char *end = start + S_size(s0);
@@ -1048,6 +1047,8 @@ static KMETHOD String_valueOf(KonohaContext *kctx, KonohaStack *sfp)
 #define _Im     kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
+#define CT_StringArray0                CT_p0(kctx, CT_Array, TY_String)
+
 static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	int FN_s = FN_("s");
@@ -1124,7 +1125,7 @@ static kbool_t string_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 KDEFINE_PACKAGE* string_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "String", "1.0");
+	KSetPackageName(d, "konoha", "1.0");
 	d.initPackage    = string_initPackage;
 	d.setupPackage   = string_setupPackage;
 	return &d;
