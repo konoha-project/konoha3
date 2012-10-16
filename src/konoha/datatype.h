@@ -152,7 +152,7 @@ static void kString_init(KonohaContext *kctx, kObject *o, void *conf)
 static void kString_free(KonohaContext *kctx, kObject *o)
 {
 	kString *s = (kString*)o;
-	if(kString_is(MallocText, s)) {
+	if(!kString_is(TextSgm, s)) {
 		KFree(s->buf, S_size(s) + 1);
 	}
 }
@@ -214,6 +214,7 @@ static kString* new_kString(KonohaContext *kctx, kArray *gcstack, const char *te
 		s->text = text;
 		s->bytesize = len;
 		kString_set(TextSgm, s, 1);
+		kString_set(MallocText, s, 1);
 	}
 	else if(len + 1 < sizeof(void*) * 2) {
 		s = (kStringVar*)new_kObject(kctx, gcstack, ct, 0);

@@ -265,7 +265,7 @@ static void copyText(KonohaContext *kctx, KGrowingArray *stack, char *dest, size
 				break;
 			case S_FLAG_INLINE:
 				assert(base->length < SIZEOF_INLINETEXT);
-				memcpy(dest, ((kInlineString *) base)->inline_text, base->length);
+				memcpy(dest, ((kInlineString *) base)->text, base->length);
 				dest += base->length;
 				break;
 			case S_FLAG_ROPE:
