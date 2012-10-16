@@ -326,7 +326,7 @@ static kbool_t file_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, k
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE *file_init(void)
+KDEFINE_PACKAGE* file_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("file", "1.0"),

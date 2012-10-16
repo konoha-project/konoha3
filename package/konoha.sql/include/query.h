@@ -40,11 +40,11 @@ static void NOP_qfree(kqcur_t *qcur)
 {
 }
 
-static void *NOP_qopen(KonohaContext *kctx, const char *url)
+static void *NOP_qopen(KonohaContext *kctx, const char* url)
 {
 	return NULL;
 }
-static kqcur_t *NOP_query(KonohaContext *kctx, void *hdr, const char *sql, struct _kResultSet *rs)
+static kqcur_t *NOP_query(KonohaContext *kctx, void *hdr, const char* sql, struct _kResultSet *rs)
 {
 	return NULL;
 }
@@ -142,7 +142,7 @@ int knh_bytes_parsefloat(kbytes_t t, kfloat_t *value)
 
 kbool_t knh_ResultSet_next(KonohaContext *kctx, kResultSet *o)
 {
-	struct _kResultSet *rs = (struct _kResultSet*)o;
+	struct _kResultSet* rs = (struct _kResultSet*)o;
 	if(o->qcur != NULL) {
 		if(rs->connection->dspi->qcurnext(kctx, rs->qcur, rs)) {
 			rs->count += 1;
@@ -172,7 +172,7 @@ void knh_ResultSet_close(KonohaContext *kctx, kResultSet *o)
 KMETHOD knh_ResultSet_initColumn(KonohaContext *kctx, kResultSet *o, size_t column_size)
 {
 	size_t i;
-	struct _kResultSet *rs = (struct _kResultSet*)o;
+	struct _kResultSet* rs = (struct _kResultSet*)o;
 	// [TODO]
 	//if(o->column_size != 0) {
 	//	for(i = 0; i < o->column_size; i++) {
@@ -200,7 +200,7 @@ KMETHOD knh_ResultSet_initColumn(KonohaContext *kctx, kResultSet *o, size_t colu
 
 /* ------------------------------------------------------------------------ */
 
-int knh_ResultSet_findColumn(KonohaContext *kctx, kResultSet *o, const char *name)
+int knh_ResultSet_findColumn(KonohaContext *kctx, kResultSet *o, const char* name)
 {
 	size_t i = 0;
 	for(i = 0; i < o->column_size; i++) {
@@ -346,7 +346,7 @@ KMETHOD ResultSet_setNULL(KonohaContext *kctx, kResultSet *o, size_t n)
 
 ///* ------------------------------------------------------------------------ */
 //
-//kString *_ResultSet_getString(KonohaContext *kctx, kResultSet *o, size_t n)
+//kString* _ResultSet_getString(KonohaContext *kctx, kResultSet *o, size_t n)
 //{
 //}
 
@@ -360,7 +360,7 @@ KMETHOD ResultSet_setNULL(KonohaContext *kctx, kResultSet *o, size_t n)
 //	return NULL;
 //}
 
-void mysql_qcurfree(kqcur_t *qcur)
+void mysql_qcurfree(kqcur_t* qcur)
 {
 }
 

@@ -236,7 +236,7 @@ static kbool_t exception_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFir
 	return true;
 }
 
-static kStmt *Stmt_lookupTryOrCatchStmtNULL(KonohaContext *kctx, kStmt *stmt)
+static kStmt* Stmt_lookupTryOrCatchStmtNULL(KonohaContext *kctx, kStmt *stmt)
 {
 	int i;
 	kArray *bka = stmt->parentBlockNULL->StmtList;
@@ -347,7 +347,7 @@ static kbool_t exception_setupNameSpace(KonohaContext *kctx, kNameSpace *package
 	return true;
 }
 
-KDEFINE_PACKAGE *exception_init(void)
+KDEFINE_PACKAGE* exception_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("exception", "1.0"),

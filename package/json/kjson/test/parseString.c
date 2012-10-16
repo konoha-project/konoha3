@@ -24,7 +24,7 @@ static void show_timer(const char *s)
 //static const unsigned int TASK_STR_LEN = 1<<15;
 static const unsigned int TASK_INT_NUM = 1<<20;
 static const unsigned int TASK_STR_LEN = 1<<11;
-static const char *TASK_STR_PTR;
+static const char* TASK_STR_PTR;
 
 static int loop_count = 2;
 void bench_kjson(void)
@@ -62,9 +62,9 @@ void bench_kjson(void)
     free(buf);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
-    char *str = malloc(TASK_STR_LEN);
+    char* str = malloc(TASK_STR_LEN);
     memset(str, 'a', TASK_STR_LEN);
     TASK_STR_PTR = str;
     if(argc > 1 && strncmp(argv[1], "-t", 2) == 0) {

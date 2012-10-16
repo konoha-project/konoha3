@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "kjson.h"
 
-int main(int argc, char const *argv[])
+int main(int argc, char const* argv[])
 {
 #define SIZE_OF(T) "%d\n", sizeof(T)
     fprintf(stderr, SIZE_OF(JSON));

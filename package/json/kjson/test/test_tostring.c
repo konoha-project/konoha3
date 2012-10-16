@@ -115,7 +115,7 @@ static void test_string()
 
 #undef STRING
 }
-int main(int argc, char const *argv[])
+int main(int argc, char const* argv[])
 {
     test_int();
     test_double();

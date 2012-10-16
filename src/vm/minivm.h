@@ -51,7 +51,7 @@ typedef struct OPNSET {
 	KCODE_HEAD;
 	kreg_t a;
 	kint_t n;
-	KonohaClass *ty;
+	KonohaClass* ty;
 } OPNSET;
 
 #define OPCODE_NMOV ((kopcode_t)5)
@@ -59,7 +59,7 @@ typedef struct OPNMOV {
 	KCODE_HEAD;
 	kreg_t a;
 	kreg_t b;
-	KonohaClass *ty;
+	KonohaClass* ty;
 } OPNMOV;
 
 #define OPCODE_NMOVx ((kopcode_t)6)
@@ -68,7 +68,7 @@ typedef struct OPNMOVx {
 	kreg_t a;
 	kreg_t b;
 	uintptr_t bx;
-	KonohaClass *ty;
+	KonohaClass* ty;
 } OPNMOVx;
 
 #define OPCODE_XNMOV ((kopcode_t)7)
@@ -77,7 +77,7 @@ typedef struct OPXNMOV {
 	kreg_t a;
 	uintptr_t ax;
 	kreg_t b;
-	KonohaClass *ty;
+	KonohaClass* ty;
 } OPXNMOV;
 
 #define OPCODE_NEW ((kopcode_t)8)
@@ -85,22 +85,22 @@ typedef struct OPNEW {
 	KCODE_HEAD;
 	kreg_t a;
 	uintptr_t p;
-	KonohaClass *ty;
+	KonohaClass* ty;
 } OPNEW;
 
 #define OPCODE_NULL ((kopcode_t)9)
 typedef struct OPNULL {
 	KCODE_HEAD;
 	kreg_t a;
-	KonohaClass *ty;
+	KonohaClass* ty;
 } OPNULL;
 
 #define OPCODE_LOOKUP ((kopcode_t)10)
 typedef struct OPLOOKUP {
 	KCODE_HEAD;
 	kreg_t thisidx;
-	kNameSpace *ns;
-	kMethod *mtd;
+	kNameSpace* ns;
+	kMethod* mtd;
 } OPLOOKUP;
 
 #define OPCODE_CALL ((kopcode_t)11)
@@ -109,7 +109,7 @@ typedef struct OPCALL {
 	uintptr_t uline;
 	kreg_t thisidx;
 	kreg_t espshift;
-	kObject *tyo;
+	kObject* tyo;
 } OPCALL;
 
 #define OPCODE_RET ((kopcode_t)12)
@@ -157,7 +157,7 @@ typedef struct OPYIELD {
 typedef struct OPERROR {
 	KCODE_HEAD;
 	uintptr_t uline;
-	kString *msg;
+	kString* msg;
 	kreg_t esp;
 } OPERROR;
 
@@ -329,7 +329,7 @@ static kbool_t kopcode_hasjump(kopcode_t opcode)
 #define GOTO_PC(pc)         GOTO_NEXT()
 #endif/*K_USING_THCODE_*/
 
-static VirtualMachineInstruction *KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, VirtualMachineInstruction *pc)
+static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, VirtualMachineInstruction *pc)
 {
 #ifdef K_USING_THCODE_
 	static void *OPJUMP[] = {

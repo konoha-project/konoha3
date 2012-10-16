@@ -150,7 +150,7 @@ static void show_version(KonohaContext *kctx)
 	PLATAPI printf_i("\n");
 }
 
-static kbool_t konoha_shell(KonohaContext *konoha)
+static kbool_t konoha_shell(KonohaContext* konoha)
 {
 	show_version(konoha);
 	shell(konoha);

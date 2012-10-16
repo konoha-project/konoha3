@@ -35,18 +35,18 @@
 extern "C" {
 #endif
 
-static kbool_t Nothing_hasNext(KonohaContext *kctx, KonohaStack *sfp)
+static kbool_t Nothing_hasNext(KonohaContext *kctx, KonohaStack* sfp)
 {
 	return false;
 }
 
-static void Nothing_setNextResult(KonohaContext *kctx, KonohaStack *sfp)
+static void Nothing_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kIterator *itr = (kIterator*)sfp[0].asObject;
 	KReturn(itr->source);
 }
 
-static void Nothing_setNextResultUnbox(KonohaContext *kctx, KonohaStack *sfp)
+static void Nothing_setNextResultUnbox(KonohaContext *kctx, KonohaStack* sfp)
 {
 	KReturnUnboxValue(0);
 }
@@ -95,13 +95,13 @@ static KMETHOD Iterator_next(KonohaContext *kctx, KonohaStack *sfp)
 //	KReturn(itr);
 //}
 
-static kbool_t Array_hasNext(KonohaContext *kctx, KonohaStack *sfp)
+static kbool_t Array_hasNext(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kIterator *itr = (kIterator*)sfp[0].asObject;
 	return (itr->current_pos < kArray_size(itr->arrayList));
 }
 
-static void Array_setNextResult(KonohaContext *kctx, KonohaStack *sfp)
+static void Array_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kIterator *itr = (kIterator*)sfp[0].asObject;
 	size_t n = itr->current_pos;
@@ -110,7 +110,7 @@ static void Array_setNextResult(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(itr->arrayList->ObjectItems[n]);
 }
 
-static void Array_setNextResultUnbox(KonohaContext *kctx, KonohaStack *sfp)
+static void Array_setNextResultUnbox(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kIterator *itr = (kIterator*)sfp[0].asObject;
 	size_t n = itr->current_pos;
@@ -130,14 +130,14 @@ static KMETHOD Array_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(itr);
 }
 
-static kbool_t String_hasNext(KonohaContext *kctx, KonohaStack *sfp)
+static kbool_t String_hasNext(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kIterator *itr = sfp[0].asIterator;
 	kString *s = (kString*)itr->source;
 	return (itr->current_pos < S_size(s));
 }
 
-static void String_setNextResult(KonohaContext *kctx, KonohaStack *sfp)
+static void String_setNextResult(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kIterator *itr = sfp[0].asIterator;
 	kString *s = (kString*)itr->source;
@@ -213,7 +213,7 @@ static kbool_t iterator_setupNameSpace(KonohaContext *kctx, kNameSpace *packageN
 	return true;
 }
 
-KDEFINE_PACKAGE *iterator_init(void)
+KDEFINE_PACKAGE* iterator_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "iterator", "1.0");

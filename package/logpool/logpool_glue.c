@@ -134,7 +134,7 @@ static KMETHOD Log_get_(KonohaContext *kctx, KonohaStack *sfp)
 // --------------------------------------------------------------------------
 struct konoha_context {
 	uintptr_t id;
-	KonohaContext *konoha;
+	KonohaContext* konoha;
 	kFunc *func;
 	kFunc *finit;
 	kFunc *fexit;
@@ -459,7 +459,7 @@ static kbool_t logpool_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS
 {
 	return true;
 }
-KDEFINE_PACKAGE *logpool_init(void)
+KDEFINE_PACKAGE* logpool_init(void)
 {
 	logpool_global_init(LOGPOOL_DEFAULT);
 	static KDEFINE_PACKAGE d = {

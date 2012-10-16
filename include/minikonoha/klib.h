@@ -59,7 +59,7 @@ static kinline uintptr_t strhash(const char *name, size_t len)
 
 #define FileId_s(X)  FileId_s_(kctx, X)
 #define FileId_t(X)  S_text(FileId_s_(kctx, X))
-static kinline kString *FileId_s_(KonohaContext *kctx, kfileline_t fileid)
+static kinline kString* FileId_s_(KonohaContext *kctx, kfileline_t fileid)
 {
 	kfileline_t n = (fileid >> (sizeof(kshort_t) * 8));
 	DBG_ASSERT(n < kArray_size(kctx->share->fileIdList_OnGlobalConstList));
@@ -68,7 +68,7 @@ static kinline kString *FileId_s_(KonohaContext *kctx, kfileline_t fileid)
 
 #define PackageId_s(X)    PackageId_s_(kctx, X)
 #define PackageId_t(X)    S_text(PackageId_s_(kctx, X))
-static kinline kString *PackageId_s_(KonohaContext *kctx, kpackageId_t packageId)
+static kinline kString* PackageId_s_(KonohaContext *kctx, kpackageId_t packageId)
 {
 	DBG_ASSERT(packageId < kArray_size(kctx->share->packageIdList_OnGlobalConstList));
 	return kctx->share->packageIdList_OnGlobalConstList->stringItems[packageId];
@@ -76,14 +76,14 @@ static kinline kString *PackageId_s_(KonohaContext *kctx, kpackageId_t packageId
 
 #define CT_s(X)   CT_s_(kctx, X)
 #define CT_t(X)   S_text(CT_s_(kctx, X))
-static kinline kString *CT_s_(KonohaContext *kctx, KonohaClass *ct)
+static kinline kString* CT_s_(KonohaContext *kctx, KonohaClass *ct)
 {
 	return kctx->klib->KonohaClass_shortName(kctx, ct);
 }
 
 #define TY_s(X)   TY_s_(kctx, X)
 #define TY_t(X)   S_text(TY_s(X))
-static kinline kString *TY_s_(KonohaContext *kctx, ktype_t ty)
+static kinline kString* TY_s_(KonohaContext *kctx, ktype_t ty)
 {
 	DBG_ASSERT(ty < KARRAYSIZE(kctx->share->classTable.bytemax, intptr));
 	return CT_s_(kctx, CT_(ty));
@@ -91,7 +91,7 @@ static kinline kString *TY_s_(KonohaContext *kctx, ktype_t ty)
 
 #define SYM_s(sym)   SYM_s_(kctx, sym)
 #define SYM_t(sym)   S_text(SYM_s_(kctx, sym))
-static kinline kString *SYM_s_(KonohaContext *kctx, ksymbol_t sym)
+static kinline kString* SYM_s_(KonohaContext *kctx, ksymbol_t sym)
 {
 	size_t index = (size_t) SYM_UNMASK(sym);
 //	if(!(index < kArray_size(kctx->share->symbolList_OnGlobalConstList))) {
@@ -102,11 +102,11 @@ static kinline kString *SYM_s_(KonohaContext *kctx, ksymbol_t sym)
 }
 
 #define PSYM_t(sym)   SYM_PRE(sym),S_text(SYM_s_(kctx, sym))
-static kinline const char *SYM_PRE(ksymbol_t sym)
+static kinline const char* SYM_PRE(ksymbol_t sym)
 {
 	size_t mask = ((size_t)(SYM_HEAD(sym)) >> ((sizeof(ksymbol_t) * 8)-3));
 	DBG_ASSERT(mask < 8);
-	static const char *prefixes[] = {
+	static const char* prefixes[] = {
 		/*000*/ "",   /*001*/ "set", /*010*/ "get", /*011*/ "@",
 		/*100*/ "is", /*101*/ "",    /*110*/ "to",  /*111*/ "$",
 	};
@@ -161,10 +161,10 @@ static kinline uintptr_t map_getu(KonohaContext *kctx, KHashMap *kmp, uintptr_t 
 	return def;
 }
 
-static kinline const char *TAG_t(kinfotag_t t)
+static kinline const char* TAG_t(kinfotag_t t)
 {
 	DBG_ASSERT(t <= NoneTag);
-	static const char *tags[] = {
+	static const char* tags[] = {
 		"(error) ", /*CritTag*/
 		"(error) ", /*ErrTag*/
 		"(warning) ", /*WarnTag*/

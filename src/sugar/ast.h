@@ -104,7 +104,7 @@ static int kStmt_findOperator(KonohaContext *kctx, kStmt *stmt, kArray *tokenLis
 	return idx;
 }
 
-static kExpr *kStmt_parseExpr(KonohaContext *kctx, kStmt *stmt, kArray *tokenList, int beginIdx, int endIdx, const char *hintBeforeText)
+static kExpr* kStmt_parseExpr(KonohaContext *kctx, kStmt *stmt, kArray *tokenList, int beginIdx, int endIdx, const char *hintBeforeText)
 {
 	if(!Stmt_isERR(stmt)) {
 		if(beginIdx < endIdx) {
@@ -169,7 +169,7 @@ static int TokenUtils_skipIndent(kArray *tokenList, int currentIdx, int endIdx)
 }
 
 static int TokenUtils_parseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KonohaClass **classRef);
-static KonohaClass *TokenUtils_parseGenericsType(KonohaContext *kctx, kNameSpace *ns, KonohaClass *baseClass, kArray *tokenList, int beginIdx, int endIdx)
+static KonohaClass* TokenUtils_parseGenericsType(KonohaContext *kctx, kNameSpace *ns, KonohaClass *baseClass, kArray *tokenList, int beginIdx, int endIdx)
 {
 	size_t currentIdx = beginIdx, psize = 0;
 	kparamtype_t *p = ALLOCA(kparamtype_t, endIdx);
@@ -254,7 +254,7 @@ static kbool_t TokenSequence_expandMacro(KonohaContext *kctx, TokenSequence *tok
 	return false;
 }
 
-static kArray *new_kArraySubset(KonohaContext *kctx, kArray *gcstack, kArray *a, int beginIdx, int endIdx)
+static kArray* new_kArraySubset(KonohaContext *kctx, kArray *gcstack, kArray *a, int beginIdx, int endIdx)
 {
 	kArray *newa = new_(Array, endIdx - beginIdx, gcstack);
 	int i;
@@ -264,7 +264,7 @@ static kArray *new_kArraySubset(KonohaContext *kctx, kArray *gcstack, kArray *a,
 	return newa;
 }
 
-static kTokenVar *kToken_expandGroupMacro(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns, MacroSet *macroParam, kArray *gcstack)
+static kTokenVar* kToken_expandGroupMacro(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns, MacroSet *macroParam, kArray *gcstack)
 {
 	TokenSequence source = {ns, tk->subTokenList, 0, kArray_size(tk->subTokenList)};
 	if(source.endIdx > 0) {
@@ -307,7 +307,7 @@ static kbool_t TokenSequence_applyMacro(KonohaContext *kctx, TokenSequence *toke
 static void TokenSequence_applyMacroGroup(KonohaContext *kctx, TokenSequence *tokens, kArray *macroTokenList, int paramsize, kToken *groupToken)
 {
 	int i;
-	MacroSet *mp = ALLOCA(MacroSet, paramsize+1);
+	MacroSet* mp = ALLOCA(MacroSet, paramsize+1);
 	DBG_ASSERT(paramsize < kArray_size(macroTokenList));
 	for(i = 0; i < paramsize; i++) {
 		mp[i].symbol = macroTokenList->TokenItems[i]->resolvedSymbol;
@@ -369,7 +369,7 @@ static int TokenSequence_addGroup(KonohaContext *kctx, TokenSequence *tokens, Ma
 	}
 }
 
-static kTokenVar *kToken_transformToBraceGroup(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns, MacroSet *macroSet)
+static kTokenVar* kToken_transformToBraceGroup(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns, MacroSet *macroSet)
 {
 	TokenSequence source = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
 	TokenSequence_push(kctx, source);
@@ -393,7 +393,7 @@ static int TokenUtils_count(kArray *tokenList, int beginIdx, int endIdx, ksymbol
 	return count;
 }
 
-static kToken *new_CommaToken(KonohaContext *kctx, kArray *gcstack)
+static kToken* new_CommaToken(KonohaContext *kctx, kArray *gcstack)
 {
 	kTokenVar *tk = new_(TokenVar, KW_COMMA, gcstack);
 	tk->topCharHint = ',';
@@ -631,7 +631,7 @@ static int kStmt_matchSyntaxPattern(KonohaContext *kctx, kStmt *stmt, TokenSeque
 	return tokenIdx;
 }
 
-static SugarSyntax *kStmt_resolveStatementSyntax(KonohaContext *kctx, kStmt *stmt, kArray *tokenList, int beginIdx, int endIdx)
+static SugarSyntax* kStmt_resolveStatementSyntax(KonohaContext *kctx, kStmt *stmt, kArray *tokenList, int beginIdx, int endIdx)
 {
 	kToken *tk = tokenList->TokenItems[beginIdx];
 	SugarSyntax *syn = tk->resolvedSyntaxInfo;
@@ -660,7 +660,7 @@ static SugarSyntax *kStmt_resolveStatementSyntax(KonohaContext *kctx, kStmt *stm
 
 #define KWSTMT_t(kw)  StatementName(kctx, kw), StatementType(kw)
 
-static const char *StatementName(KonohaContext *kctx, ksymbol_t keyword)
+static const char* StatementName(KonohaContext *kctx, ksymbol_t keyword)
 {
 	const char *statement = SYM_t(keyword);
 #ifndef USE_SMALLBUILD
@@ -671,7 +671,7 @@ static const char *StatementName(KonohaContext *kctx, ksymbol_t keyword)
 	return statement;
 }
 
-static const char *StatementType(ksymbol_t keyword)
+static const char* StatementType(ksymbol_t keyword)
 {
 #ifdef USE_SMALLBUILD
 	return "";
@@ -839,7 +839,7 @@ static kBlock *new_kBlock(KonohaContext *kctx, kStmt *parent, MacroSet *macro, T
 	return (kBlock*)bk;
 }
 
-static kBlock *kStmt_getBlock(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, ksymbol_t kw, kBlock *def)
+static kBlock* kStmt_getBlock(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, ksymbol_t kw, kBlock *def)
 {
 	kBlock *bk = (kBlock*)kStmt_getObjectNULL(kctx, stmt, kw);
 	if(bk == NULL) return def;

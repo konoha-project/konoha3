@@ -17,13 +17,13 @@ struct range_stream *range_stream_new(struct io *io, struct bufferevent *bev)
     cs->len = 0;
     cs->buffer = malloc(IO_BUFFER_SIZE);
     cs->cur = cs->buffer;
-    debug_print(0, "*New *len=%d, buffer=%p", cs->len, cs->buffer);
+    debug_print(0, "*New* len=%d, buffer=%p", cs->len, cs->buffer);
     return cs;
 }
 
 void range_stream_delete(struct range_stream *cs)
 {
-    debug_print(0, "*Del *len=%d, buffer=%p", cs->len, cs->buffer);
+    debug_print(0, "*Del* len=%d, buffer=%p", cs->len, cs->buffer);
     free(cs->buffer);
     bzero(cs, sizeof(*cs));
 }

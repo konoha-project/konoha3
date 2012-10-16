@@ -132,7 +132,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->h.free     = SugarModule_free;
 	KLIB KonohaRuntime_setModule(kctx, MOD_sugar, (KonohaModule*)mod, 0);
 
-	KonohaLibVar *l = (KonohaLibVar*)ctx->klib;
+	KonohaLibVar* l = (KonohaLibVar*)ctx->klib;
 	l->kNameSpace_getClass       = kNameSpace_getClass;
 	l->kNameSpace_defineClass    = kNameSpace_defineClass;
 	l->kNameSpace_loadMethodData = kNameSpace_loadMethodData;

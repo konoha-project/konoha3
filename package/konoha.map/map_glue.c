@@ -100,7 +100,7 @@ static uintptr_t String_hashCode(KonohaContext *kctx, kString *s)
 
 }
 
-static KHashMapEntry *kMap_getEntry(KonohaContext *kctx, kMap *m, kString *key, kbool_t isNewIfNULL)
+static KHashMapEntry* kMap_getEntry(KonohaContext *kctx, kMap *m, kString *key, kbool_t isNewIfNULL)
 {
 	uintptr_t hcode = String_hashCode(kctx, key);
 	const char *tkey = S_text(key);
@@ -259,7 +259,7 @@ static kbool_t map_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kN
 	return true;
 }
 
-KDEFINE_PACKAGE *map_init(void)
+KDEFINE_PACKAGE* map_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "map", "1.0");

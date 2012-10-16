@@ -125,7 +125,7 @@ typedef struct {
 
 /* ------------------------------------------------------------------------ */
 
-static kregexp_t *pcre_regmalloc(KonohaContext *kctx, kString *s)
+static kregexp_t* pcre_regmalloc(KonohaContext *kctx, kString* s)
 {
 	PCRE_regexp_t *preg = (PCRE_regexp_t*) KMalloc_UNTRACE(sizeof(PCRE_regexp_t));
 	return (kregexp_t *) preg;
@@ -196,7 +196,7 @@ static int pcre_parseeflags(KonohaContext *kctx, const char *option)
 
 static int pcre_regcomp(KonohaContext *kctx, kregexp_t *reg, const char *pattern, int cflags)
 {
-	PCRE_regexp_t *preg = (PCRE_regexp_t*)reg;
+	PCRE_regexp_t* preg = (PCRE_regexp_t*)reg;
 	preg->re = pcre_compile(pattern, cflags, &preg->err, &preg->erroffset, NULL);
 	return (preg->re != NULL) ? 0 : -1;
 }
@@ -274,7 +274,7 @@ static void kRegExp_setOptions(kRegExp *re, const char *option)
 	}
 }
 
-static size_t knh_regexp_matched(kregmatch_t *r, size_t maxmatch)
+static size_t knh_regexp_matched(kregmatch_t* r, size_t maxmatch)
 {
 	size_t n = 0;
 	for (; n < maxmatch && r[n].rm_so != -1; n++) {}
@@ -502,7 +502,7 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *s0 = sfp[0].asString;
 	kRegExp *re = sfp[1].asRegExp;
-	const char *fmttext = S_text(sfp[2].asString);
+	const char* fmttext = S_text(sfp[2].asString);
 	size_t fmtlen = S_size(sfp[2].asString);
 	kString *s = s0;
 	if(IS_NOTNULL(re) && S_size(re->pattern) > 0) {
@@ -768,7 +768,7 @@ static kbool_t regexp_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS,
 	return true;
 }
 
-KDEFINE_PACKAGE *regexp_init(void)
+KDEFINE_PACKAGE* regexp_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("regexp", "1.0"),

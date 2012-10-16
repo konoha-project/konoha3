@@ -153,7 +153,7 @@ static char *write_o(char *p, char *ebuf, const knh_ldata2_t *d)
     return NULL; // TODO
 }
 
-typedef char *(*writedata)(char *, char *, const knh_ldata2_t *);
+typedef char* (*writedata)(char *, char *, const knh_ldata2_t *);
 
 static writedata writeldata[] = {
     NULL,
@@ -186,7 +186,7 @@ static void ntrace(CTX ctx, const char *event, int pe, const knh_ldata2_t *d)
     p[0] = ' '; p++;
     p = write_b(p, ebuf, event, strlen(event));
     if(pe % 2 == 1) {
-        p = write_b(p, ebuf, "*FAILED *", strlen("*FAILED *"));
+        p = write_b(p, ebuf, "*FAILED* ", strlen("*FAILED* "));
         logtype = LOG_ERR;
     }
     else {

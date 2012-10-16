@@ -114,7 +114,7 @@ static void Kwb_printf(KonohaContext *kctx, KGrowingBuffer *wb, const char *fmt,
 	va_end(ap);
 }
 
-static const char *Kwb_top(KonohaContext *kctx, KGrowingBuffer *wb, int ensureZero)
+static const char* Kwb_top(KonohaContext *kctx, KGrowingBuffer *wb, int ensureZero)
 {
 	KGrowingArray *m = wb->m;
 	if(ensureZero) {
@@ -133,7 +133,7 @@ static void Kwb_free(KGrowingBuffer *wb)
 	m->bytesize = wb->pos;
 }
 
-static kbool_t Kwb_iconv(KonohaContext *kctx, KGrowingBuffer *wb, uintptr_t iconv, const char *sourceBuf, size_t sourceSize, KTraceInfo *trace)
+static kbool_t Kwb_iconv(KonohaContext *kctx, KGrowingBuffer* wb, uintptr_t iconv, const char *sourceBuf, size_t sourceSize, KTraceInfo *trace)
 {
 	char convBuf[K_PAGESIZE];
 	char *presentPtrFrom = (char*)sourceBuf;
@@ -277,7 +277,7 @@ static void Kmap_free(KonohaContext *kctx, KHashMap *kmap, void (*f)(KonohaConte
 	KFree(kmap, sizeof(KHashMap));
 }
 
-static KHashMapEntry *Kmap_getentry(KonohaContext *kctx, KHashMap *kmap, kuint_t hcode)
+static KHashMapEntry *Kmap_getentry(KonohaContext *kctx, KHashMap* kmap, kuint_t hcode)
 {
 	KHashMapEntry **hlist = kmap->hentry;
 	size_t idx = hcode % kmap->hmax;
@@ -298,7 +298,7 @@ static void kmap_unuse(KHashMap *kmap, KHashMapEntry *e)
 	kmap->size--;
 }
 
-static void Kmap_remove(KHashMap *kmap, KHashMapEntry *oe)
+static void Kmap_remove(KHashMap* kmap, KHashMapEntry *oe)
 {
 	KHashMapEntry **hlist = kmap->hentry;
 	size_t idx = oe->hcode % kmap->hmax;
@@ -430,7 +430,7 @@ void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o, KObjectVisitor *visi
 	}
 }
 
-static kObject *kObject_getObjectNULL(KonohaContext *kctx, kObject *o, ksymbol_t key, kObject *defval)
+static kObject* kObject_getObjectNULL(KonohaContext *kctx, kObject *o, ksymbol_t key, kObject *defval)
 {
 	KKeyValue *d = protomap_get((Kprotomap_t *)o->h.kvproto, key | SYMKEY_BOXED);
 	return (d != NULL) ? d->ObjectValue : defval;

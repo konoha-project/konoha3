@@ -77,7 +77,7 @@ unsigned int crc32(unsigned char *block, int len)
 //#include <stdio.h>
 //#include <string.h>
 //#include <assert.h>
-//int main(int argc, char const *argv[])
+//int main(int argc, char const* argv[])
 //{
 //	char *s = "Hello, World!";
 //	int l = strlen(s);

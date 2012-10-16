@@ -214,7 +214,7 @@ static KMETHOD System_fchmod(KonohaContext *kctx, KonohaStack *sfp)
 //	kFile *file = (kFile*)sfp[0].asObject;
 //	FILE *fp = file->fp;
 //	int request  = int_to(int, sfp[1]);
-//	char *argp = String_to(char *, sfp[2]);
+//	char *argp = String_to(char*, sfp[2]);
 //	if(fp == NULL) KReturnUnboxValue(0);
 //	int fd = fileno(fp);
 //	if(fd == -1) {
@@ -977,7 +977,7 @@ static kbool_t fd_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNa
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE *fd_init(void)
+KDEFINE_PACKAGE* fd_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("fd", "1.0"),

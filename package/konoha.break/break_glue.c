@@ -45,7 +45,7 @@ static kbool_t break_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 
 // --------------------------------------------------------------------------
 
-static inline kStmt *kStmt_getParentNULL(kStmt *stmt)
+static inline kStmt* kStmt_getParentNULL(kStmt *stmt)
 {
 	return stmt->parentBlockNULL->parentStmtNULL;
 }
@@ -80,7 +80,7 @@ static kbool_t break_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, 
 	return true;
 }
 
-KDEFINE_PACKAGE *break_init(void)
+KDEFINE_PACKAGE* break_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "break", "1.0");

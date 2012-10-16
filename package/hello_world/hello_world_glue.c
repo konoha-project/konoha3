@@ -163,7 +163,7 @@ static kbool_t HelloWorld_setupNameSpace(KonohaContext *kctx, kNameSpace *packag
 	return true;
 }
 
-KDEFINE_PACKAGE *hello_world_init(void)
+KDEFINE_PACKAGE* hello_world_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "hello_world", "1.0");

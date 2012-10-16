@@ -42,7 +42,7 @@ static kbool_t new_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime
 
 // --------------------------------------------------------------------------
 
-static kExpr *NewExpr(KonohaContext *kctx, SugarSyntax *syn, kToken *tk, ktype_t ty)
+static kExpr* NewExpr(KonohaContext *kctx, SugarSyntax *syn, kToken *tk, ktype_t ty)
 {
 	kExprVar *expr = new_(ExprVar, syn, OnGcStack);
 	KFieldSet(expr, expr->termToken, tk);
@@ -120,7 +120,7 @@ static kbool_t new_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kN
 	return true;
 }
 
-KDEFINE_PACKAGE *new_init(void)
+KDEFINE_PACKAGE* new_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "new", "1.0");

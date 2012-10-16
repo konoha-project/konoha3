@@ -10,13 +10,13 @@
 #define K_PREFIX  "/usr/local"
 #endif
 
-//static const char *l_packname(const char *str)
+//static const char* l_packname(const char *str)
 //{
 //	char *p = strrchr(str, '.');
 //	return (p == NULL) ? str : (const char*)p+1;
 //}
 //
-//static const char *l_packagepath(char *buf, size_t bufsiz, const char *fname)
+//static const char* l_packagepath(char *buf, size_t bufsiz, const char *fname)
 //{
 //	char *path = PLATAPI getenv_i("KONOHA_PACKAGEPATH"), *local = "";
 //	if(path == NULL) {
@@ -40,7 +40,7 @@
 //	return (const char*)buf;
 //}
 //
-//static const char *l_exportpath(char *pathbuf, size_t bufsiz, const char *pname)
+//static const char* l_exportpath(char *pathbuf, size_t bufsiz, const char *pname)
 //{
 //	char *p = strrchr(pathbuf, '/');
 //	snprintf(p, bufsiz - (p  - pathbuf), "/%s_exports.k", l_packname(pname));

@@ -364,7 +364,7 @@ static kFunc** Tokenizer_funcTable(KonohaContext *kctx, Tokenizer *tokenizer, in
 	return (kFunc**)&(tokenizer->FuncItems[kchar]);
 }
 
-static int Tokenizer_doEach(KonohaContext *kctx, Tokenizer *tokenizer, int kchar, int tok_start, kTokenVar *tk)
+static int Tokenizer_doEach(KonohaContext *kctx, Tokenizer *tokenizer, int kchar, int tok_start, kTokenVar* tk)
 {
 	int pos;
 	if(tokenizer->FuncItems[kchar] != NULL) {

@@ -45,9 +45,9 @@
 typedef struct {
 	KonohaModule h;
 	KonohaClass     *cBytes;
-	//kbool_t      (*encode)(const char *from, const char *to, const char *text, size_t len, KGrowingBuffer *wb);
-	//const char *fmt;
-	//const char *locale;
+	//kbool_t      (*encode)(const char* from, const char* to, const char* text, size_t len, KGrowingBuffer* wb);
+	//const char*  fmt;
+	//const char*  locale;
 } kmodiconv_t;
 
 typedef struct {

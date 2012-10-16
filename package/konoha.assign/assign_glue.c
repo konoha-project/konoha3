@@ -94,7 +94,7 @@ static kbool_t assign_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS,
 	return true;
 }
 
-KDEFINE_PACKAGE *assign_init(void)
+KDEFINE_PACKAGE* assign_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "assign", "1.0");

@@ -59,7 +59,7 @@ extern int sigignore (int __sig);
 
 typedef struct {
 	int mode;                              // the kind of identifier
-	FILE *fp;                              // file stream pointer
+	FILE* fp;                              // file stream pointer
 } pfd_t;                                   // pipe fd structure
 
 
@@ -185,7 +185,7 @@ L_ERR:;
  *         -1 is Internal Error
  *         -2 is the maximum error of the number of parameters
  */
-static int spSplit(char *str, char *args[]) {
+static int spSplit(char* str, char* args[]) {
 
 	if( (str == NULL) || (args == NULL) ) {
 		return -1;
@@ -223,7 +223,7 @@ static int spSplit(char *str, char *args[]) {
  *         -1 is Internal Error
  */
 
-static int knh_popen(KonohaContext *kctx, kString *command, subprocData_t *spd, int defaultMode)
+static int knh_popen(KonohaContext *kctx, kString* command, subprocData_t *spd, int defaultMode)
 {
 	if(IS_NULL(command) || S_size(command) == 0) {
 		return -1;
@@ -572,7 +572,7 @@ static inline void initFd(pfd_t *p) {
 }
 
 // for setFileXXX & PipemodeXXX(true) & enableStandardXXX(true) & enableERR2StdOUT(true)
-static void setFd(KonohaContext *kctx, pfd_t *p, int changeMode, FILE *ptr) {
+static void setFd(KonohaContext *kctx, pfd_t *p, int changeMode, FILE* ptr) {
 	if(((p->mode == M_PIPE) || (p->mode == M_FILE)) && !(p->mode == changeMode)) {
 		// warning of the pipe or file mode overwrite
 		//char *msg = (p->mode == M_PIPE) ? "pipe has already set, but we overwrite it." :
@@ -1352,7 +1352,7 @@ static kbool_t subproc_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE *subproc_init(void)
+KDEFINE_PACKAGE* subproc_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("subproc", "1.0"),

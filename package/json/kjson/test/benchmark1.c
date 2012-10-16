@@ -21,7 +21,7 @@ static const unsigned int TASK_INT_NUM = 1<<24;
 static const unsigned int TASK_STR_LEN = 1<<15;
 //static const unsigned int TASK_INT_NUM = 1<<20;
 //static const unsigned int TASK_STR_LEN = 1<<12;
-static const char *TASK_STR_PTR;
+static const char* TASK_STR_PTR;
 
 void bench_json(void)
 {
@@ -118,7 +118,7 @@ void bench_msgpack(void)
 #ifdef USE_MSGPACK
     puts("== MessagePack ==");
     msgpack_sbuffer *sbuf = msgpack_sbuffer_new();
-    msgpack_packer *mpk = msgpack_packer_new(sbuf, msgpack_sbuffer_write);
+    msgpack_packer* mpk = msgpack_packer_new(sbuf, msgpack_sbuffer_write);
 
     msgpack_unpacker mpac;
     msgpack_unpacker_init(&mpac, MSGPACK_UNPACKER_INIT_BUFFER_SIZE);
@@ -232,9 +232,9 @@ void bench_kjson(void)
     free(buf);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
-    char *str = malloc(TASK_STR_LEN);
+    char* str = malloc(TASK_STR_LEN);
     memset(str, 'a', TASK_STR_LEN);
     TASK_STR_PTR = str;
     if(argc > 1 && strcmp(argv[1], "-t") == 0) {

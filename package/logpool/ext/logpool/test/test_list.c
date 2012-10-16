@@ -12,7 +12,7 @@ static void LIST_dump(ELEM(int) *e, void *arg)
     fprintf(stderr, "%d\n", e->v);
 }
 
-int main(int argc, char const *argv[])
+int main(int argc, char const* argv[])
 {
     LIST(int) *l = LIST_new(int);
     unsigned i;

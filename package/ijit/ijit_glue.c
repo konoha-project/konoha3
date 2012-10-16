@@ -859,7 +859,7 @@ static kbool_t ijit_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, k
 	return true;
 }
 
-KDEFINE_PACKAGE *ijit_init(void)
+KDEFINE_PACKAGE* ijit_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("ijit", "1.0"),

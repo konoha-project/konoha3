@@ -166,12 +166,12 @@ static int pthread_mutex_init_recursive(kmutex_t *mutex)
 
 // -------------------------------------------------------------------------
 
-static const char *formatSystemPath(char *buf, size_t bufsiz, const char *path)
+static const char* formatSystemPath(char *buf, size_t bufsiz, const char *path)
 {
 	return path;  // stub (in case of no conversion)
 }
 
-static const char *formatKonohaPath(char *buf, size_t bufsiz, const char *path)
+static const char* formatKonohaPath(char *buf, size_t bufsiz, const char *path)
 {
 	return path;  // stub (in case of no conversion)
 }
@@ -273,7 +273,7 @@ static int isEmptyChunk(const char *t, size_t len)
 	return true;
 }
 
-static int loadScript(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char *, long, int *, void *))
+static int loadScript(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *))
 {
 	int isSuccessfullyLoading = false;
 	if(isDir(filePath)) {
@@ -310,13 +310,13 @@ static int loadScript(const char *filePath, long uline, void *thunk, int (*evalF
 	return isSuccessfullyLoading;
 }
 
-static const char *shortFilePath(const char *path)
+static const char* shortFilePath(const char *path)
 {
 	char *p = (char *) strrchr(path, '/');
 	return (p == NULL) ? path : (const char*)p+1;
 }
 
-static const char *shortText(const char *msg)
+static const char* shortText(const char *msg)
 {
 	return msg;
 }
@@ -339,13 +339,13 @@ static const char *formatTransparentPath(char *buf, size_t bufsiz, const char *p
 #define K_PREFIX  "/usr/local"
 #endif
 
-static const char *packname(const char *str)
+static const char* packname(const char *str)
 {
 	char *p = (char *) strrchr(str, '.');
 	return (p == NULL) ? str : (const char*)p+1;
 }
 
-static const char *formatPackagePath(char *buf, size_t bufsiz, const char *packageName, const char *ext)
+static const char* formatPackagePath(char *buf, size_t bufsiz, const char *packageName, const char *ext)
 {
 	FILE *fp = NULL;
 	char *path = getenv("KONOHA_PACKAGEPATH");
@@ -392,10 +392,10 @@ static KonohaPackageHandler *loadPackageHandler(const char *packageName)
 	return NULL;
 }
 
-static const char *beginTag(kinfotag_t t)
+static const char* beginTag(kinfotag_t t)
 {
 	DBG_ASSERT(t <= NoneTag);
-	static const char *tags[] = {
+	static const char* tags[] = {
 		"", /*CritTag*/
 		"", /*ErrTag*/
 		"", /*WarnTag*/
@@ -407,10 +407,10 @@ static const char *beginTag(kinfotag_t t)
 	return tags[(int)t];
 }
 
-static const char *endTag(kinfotag_t t)
+static const char* endTag(kinfotag_t t)
 {
 	DBG_ASSERT(t <= NoneTag);
-	static const char *tags[] = {
+	static const char* tags[] = {
 		"", /*CritTag*/
 		"", /*ErrTag*/
 		"", /*WarnTag*/
@@ -466,7 +466,7 @@ static void PlatformApi_loadReadline(PlatformApiVar *plat)
 {
 	HMODULE handler = LoadLibrary("libreadline" K_OSDLLEXT);
 	if(handler != NULL) {
-		plat->readline_i = (char *(*)(const char*))GetProcAddress(handler, "readline");
+		plat->readline_i = (char* (*)(const char*))GetProcAddress(handler, "readline");
 		plat->add_history_i = (int (*)(const char*))GetProcAddress(handler, "add_history");
 	}
 	if(plat->readline_i == NULL) {
@@ -498,7 +498,7 @@ static void traceDataLog(void *logger, int logkey, logconf_t *logconf, ...)
 static void diagnosis(void) {
 }
 
-static PlatformApi *KonohaUtils_getDefaultPlatformApi(void)
+static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 {
 	static PlatformApiVar plat = {};
 	plat.name            = "shell";

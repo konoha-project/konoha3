@@ -117,7 +117,7 @@ typedef struct {
 //kbool_t knh_ResultSet_next(KonohaContext *kctx, kResultSet *o);
 //kString *knh_ResultSet_getName(KonohaContext *kctx, kResultSet *o, size_t n);
 //int knh_ResultSet_findColumn(KonohaContext *kctx, kResultSet *o, kbytes_t name);
-//kString *knh_ResultSet_getString(KonohaContext *kctx, kResultSet *o, size_t n);
+//kString* knh_ResultSet_getString(KonohaContext *kctx, kResultSet *o, size_t n);
 //void knh_ResultSet_close(KonohaContext *kctx, kResultSet *o);
 //
 //KMETHOD knh_ResultSet_initColumn(KonohaContext *kctx, kResultSet *o, size_t column_size);
@@ -158,13 +158,13 @@ static const knh_ResultSetDef_t ResultSetDef = {
 struct _kQueryDPI_t {
 	int   type;
 	const char *name;
-	void *(*qopen)(KonohaContext *kctx, const char *db);
-	kqcur_t *(*qexec)(KonohaContext *kctx, void *db, const char *query, struct _kResultSet *rs);
-	void   (*qclose)(void *hdr);
-	//kconn_t *(*qopen)(KonohaContext *kctx, kbytes_t);
-	//kqcur_t *(*qexec)(KonohaContext *kctx, kconn_t *, kbytes_t, kResultSet*);
+	void* (*qopen)(KonohaContext* kctx, const char* db);
+	kqcur_t* (*qexec)(KonohaContext* kctx, void* db, const char* query, struct _kResultSet* rs);
+	void   (*qclose)(void* hdr);
+	//kconn_t* (*qopen)(KonohaContext *kctx, kbytes_t);
+	//kqcur_t* (*qexec)(KonohaContext *kctx, kconn_t *, kbytes_t, kResultSet*);
 	//void   (*qclose)(KonohaContext *kctx, kconn_t *);
-	int    (*qcurnext)(KonohaContext *kctx, kqcur_t *qcur, kResultSet *rs);
+	int    (*qcurnext)(KonohaContext* kctx, kqcur_t * qcur, kResultSet* rs);
 	void   (*qcurfree)(kqcur_t *);
 };
 
@@ -211,7 +211,7 @@ static KMETHOD Connection_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	//DBType type = (DBType)sfp[1].intValue;
 	const char *dbname = S_text(sfp[1].asString);
-	struct _kConnection *con = (struct _kConnection*)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
+	struct _kConnection* con = (struct _kConnection*)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 	//switch(type) {
 	//	case USING_MYSQL:
 	con->dspi = &DB__mysql;
@@ -231,7 +231,7 @@ static KMETHOD Connection_query(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kConnection *c = (struct _kConnection*)sfp[0].asObject;
 	const char *query = S_text(sfp[1].asString);
-	struct _kResultSet *rs = (struct _kResultSet*)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
+	struct _kResultSet* rs = (struct _kResultSet*)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 	kqcur_t *qcur = c->dspi->qexec(kctx, c->db, query, rs);
 	if(qcur != NULL) {
 		rs->qcur = qcur;
@@ -248,7 +248,7 @@ static KMETHOD Connection_query(KonohaContext *kctx, KonohaStack *sfp)
 
 static KMETHOD Connection_close(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kConnection *con = (struct _kConnection*)sfp[0].asObject;
+	struct _kConnection* con = (struct _kConnection*)sfp[0].asObject;
 	con->dspi->qclose(con->db);
 }
 
@@ -261,7 +261,7 @@ static void ResultSet_init(KonohaContext *kctx, kObject *o, void *conf)
 	rs->qcur = NULL;
 	rs->column_size = 0;
 	rs->column = NULL;
-	kBytes *ba = (kBytes*)KLIB new_kObjectDontUseThis(kctx, CT_Bytes, RESULTSET_BUFSIZE);
+	kBytes* ba = (kBytes*)KLIB new_kObjectDontUseThis(kctx, CT_Bytes, RESULTSET_BUFSIZE);
 	KFieldInit(rs, rs->databuf, ba);
 	KFieldInit(rs, rs->connection, K_NULL);
 	rs->qcurfree = NULL;
@@ -337,7 +337,7 @@ static kbool_t sql_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kN
 	return true;
 }
 
-KDEFINE_PACKAGE *sql_init(void)
+KDEFINE_PACKAGE* sql_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("sql", "1.0"),
