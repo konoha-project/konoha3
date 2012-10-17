@@ -207,7 +207,7 @@ static KMETHOD Math_random(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.float", trace);
+	KImportPackage(ns, "konoha.float", trace);
 	static KDEFINE_CLASS MathDef = {0};
 	MathDef.structname = "Math"; /*structname*/
 	MathDef.typeId = TY_newid; /*cid*/

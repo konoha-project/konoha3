@@ -984,10 +984,12 @@ static KonohaPackage *kNameSpace_requirePackage(KonohaContext *kctx, const char 
 static kbool_t kNameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, const char *name, KTraceInfo *trace)
 {
 	kpackageId_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
-	KonohaPackage *pack = getPackageNULL(kctx, packageId, trace);
-	DBG_ASSERT(ns != NULL);
-	if(pack != NULL) {
-		return kNameSpace_importAll(kctx, ns, pack->packageNameSpace_OnGlobalConstList, trace);
+	if(ns->packageId != packageId) {
+		KonohaPackage *pack = getPackageNULL(kctx, packageId, trace);
+		DBG_ASSERT(ns != NULL);
+		if(pack != NULL) {
+			return kNameSpace_importAll(kctx, ns, pack->packageNameSpace_OnGlobalConstList, trace);
+		}
 	}
 	return false;
 }
@@ -995,9 +997,11 @@ static kbool_t kNameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, con
 static kbool_t kNameSpace_importPackageSymbol(KonohaContext *kctx, kNameSpace *ns, const char *name, ksymbol_t keyword, KTraceInfo *trace)
 {
 	kpackageId_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
-	KonohaPackage *pack = getPackageNULL(kctx, packageId, trace);
-	if(pack != NULL) {
-		return kNameSpace_importSymbol(kctx, ns, pack->packageNameSpace_OnGlobalConstList, keyword, trace);
+	if(ns->packageId != packageId) {
+		KonohaPackage *pack = getPackageNULL(kctx, packageId, trace);
+		if(pack != NULL) {
+			return kNameSpace_importSymbol(kctx, ns, pack->packageNameSpace_OnGlobalConstList, keyword, trace);
+		}
 	}
 	return false;
 }

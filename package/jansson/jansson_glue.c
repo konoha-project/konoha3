@@ -420,7 +420,7 @@ static KMETHOD JsonArray_get(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t jansson_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.float", trace);
+	KImportPackage(ns, "konoha.float", trace);
 	KDEFINE_CLASS JsonDef = {
 		.structname = "Json",
 		.typeId = TY_newid,

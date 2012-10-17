@@ -44,7 +44,7 @@ static KMETHOD Object_getTypeId(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t object_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.subtype", trace);
+	KImportPackage(ns, "konoha.subtype", trace);
 	KDEFINE_INT_CONST ClassData[] = {   // add Object as available
 		{"Object", VirtualType_KonohaClass, (uintptr_t)CT_(TY_Object)},
 		{NULL},
