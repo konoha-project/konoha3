@@ -33,7 +33,22 @@
 #define NAN (INFINITY-INFINITY)
 #else
 #include <math.h> /* for INFINATE, NAN */
+
+#ifndef INFINITY
+#ifdef __GNUC__
+#define INFINITY (__builtin_inff())
+#elif defined(HUGE_VAL)
 #endif
+#endif /* !defined(INFINITY) */
+
+#ifndef NAN
+#ifdef __GNUC__
+#define NAN (__builtin_nanf(""))
+#else
+#define NAN (0.0/0)
+#endif
+#endif
+#endif /* !defined(NAN) */
 
 #ifdef __cplusplus
 extern "C" {
