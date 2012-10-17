@@ -133,7 +133,7 @@ static void Kwb_free(KGrowingBuffer *wb)
 	m->bytesize = wb->pos;
 }
 
-static kbool_t Kwb_iconv(KonohaContext *kctx, KGrowingBuffer* wb, uintptr_t iconv, const char *sourceBuf, size_t sourceSize, KTraceInfo *trace)
+static kbool_t Kwb_iconv(KonohaContext *kctx, KGrowingBuffer* wb, uintptr_t ic, const char *sourceBuf, size_t sourceSize, KTraceInfo *trace)
 {
 	char convBuf[K_PAGESIZE];
 	char *presentPtrFrom = (char *)sourceBuf;
@@ -145,7 +145,8 @@ static kbool_t Kwb_iconv(KonohaContext *kctx, KGrowingBuffer* wb, uintptr_t icon
 	while(inBytesLeft > 0) {
 		int isTooBig;
 		memset(convBuf, '\0', K_PAGESIZE);
-		size_t iconv_ret = PLATAPI iconv_i(kctx, iconv, inbuf, &inBytesLeft, outbuf, &outBytesLeft, &isTooBig, trace);
+//		size_t iconv_ret = PLATAPI iconv_i(kctx, iconv, inbuf, &inBytesLeft, outbuf, &outBytesLeft, &isTooBig, trace);
+		size_t iconv_ret = PLATAPI iconv_i_memcpyStyle(kctx, ic, outbuf, &outBytesLeft, inbuf, &inBytesLeft, &isTooBig, trace);
 		size_t processedSize = K_PAGESIZE - outBytesLeft;
 		KLIB Kwb_write(kctx, wb, convBuf, processedSize);
 		if(isTooBig) {   // input is too big. reset convbuf

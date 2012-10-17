@@ -392,6 +392,7 @@ struct PlatformApiVar {
 	// I18N
 	uintptr_t   (*iconv_open_i)(KonohaContext *, const char* tocode, const char* fromcode, KTraceInfo *);
 	size_t      (*iconv_i)(KonohaContext *, uintptr_t iconv, char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft, int *isTooBigRef, KTraceInfo *trace);
+	size_t      (*iconv_i_memcpyStyle)(KonohaContext *, uintptr_t iconv, char **outbuf, size_t *outbytesleft, char **inbuf, size_t *inbytesleft, int *isTooBigRef, KTraceInfo *trace);
 	int         (*iconv_close_i)(KonohaContext *, uintptr_t iconv);
 	const char* systemCharset;
 	kbool_t     (*isSystemCharsetUTF8)(KonohaContext *);
