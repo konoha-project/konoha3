@@ -75,10 +75,25 @@ static uintptr_t I18N_iconv_open(KonohaContext *kctx, const char *targetCharset,
 			LogText("tocode", targetCharset), LogText("fromcode", sourceCharset), LogErrno
 		);
 	}
-	return (uintptr_t)iconv;
+	return (uintptr_t)ic;
 }
 
-static size_t I18N_iconv(KonohaContext *kctx, uintptr_t ic, char **outbuf, size_t *outBytesLeft, char **inbuf, size_t *inBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
+static size_t I18N_iconv_memcpyStyle(KonohaContext *kctx, uintptr_t ic, char **outbuf, size_t *outBytesLeft, char **inbuf, size_t *inBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
+{
+	DBG_ASSERT(ic != ICONV_NULL);
+	size_t iconv_ret = iconv((iconv_t)ic, inbuf, inBytesLeft, outbuf, outBytesLeft);
+	if(iconv_ret == ((size_t)-1)) {
+		if(errno == E2BIG) {   // input is too big.
+			isTooBigSourceRef[0] = true;
+			return iconv_ret;
+		}
+		KTraceApi(trace, DataFault, "iconv", LogErrno);
+	}
+	isTooBigSourceRef[0] = false;
+	return iconv_ret;
+}
+
+static size_t I18N_iconv(KonohaContext *kctx, uintptr_t ic, char **inbuf, size_t *inBytesLeft, char **outbuf, size_t *outBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
 {
 	DBG_ASSERT(ic != ICONV_NULL);
 	size_t iconv_ret = iconv((iconv_t)ic, inbuf, inBytesLeft, outbuf, outBytesLeft);
@@ -124,7 +139,7 @@ static const char* I18N_formatKonohaPath(KonohaContext *kctx, char *buf, size_t 
 		char ** inbuf = &presentPtrFrom;
 		char ** outbuf = &buf;
 		size_t inBytesLeft = pathsize, outBytesLeft = bufsiz - 1;
-		PLATAPI iconv_i(kctx, ic, inbuf, &inBytesLeft, outbuf, &outBytesLeft, &isTooBig, trace);
+		PLATAPI iconv_i_memcpyStyle(kctx, ic, outbuf, &outBytesLeft, inbuf, &inBytesLeft, &isTooBig, trace);
 		newsize = (bufsiz - 1) - outBytesLeft;
 	}
 	else {
@@ -148,7 +163,12 @@ static uintptr_t I18N_iconv_open(KonohaContext *kctx, const char *targetCharset,
 	return ICONV_NULL;
 }
 
-static size_t I18N_iconv(KonohaContext *kctx, uintptr_t ic, char **outbuf, size_t *outBytesLeft, char **inbuf, size_t *inBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
+static size_t I18N_iconv_memcpyStyle(KonohaContext *kctx, uintptr_t ic, char **outbuf, size_t *outBytesLeft, char **inbuf, size_t *inBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
+{
+	return -1;
+}
+
+static size_t I18N_iconv(KonohaContext *kctx, uintptr_t ic, char **inbuf, size_t *inBytesLeft, char **outbuf, size_t *outBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
 {
 	return -1;
 }
@@ -190,6 +210,7 @@ static void loadI18N(PlatformApiVar *plat, const char *defaultCharSet)
 	plat->systemCharset  = (defaultCharSet == NULL) ? "UTF-8" : defaultCharSet;
 	plat->iconv_open_i   = I18N_iconv_open;
 	plat->iconv_i        = I18N_iconv;
+	plat->iconv_i_memcpyStyle = I18N_iconv_memcpyStyle;
 	plat->iconv_close_i  = I18N_iconv_close;
 	plat->isSystemCharsetUTF8 = I18N_isSystemCharsetUTF8;
 	plat->iconvSystemCharsetToUTF8 = I18N_iconvSystemCharsetToUTF8;
