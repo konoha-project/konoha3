@@ -96,14 +96,18 @@ static int TEST_printf(const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
+	stdlog_count++;
 	int res = vfprintf(stdlog, fmt, ap);
 	va_end(ap);
 	return res;
 }
 
-static void TEST_reportCaughtException(const char *exceptionName, const char *scriptName, int line, const char *optionalMessage)
+static void TEST_reportCaughtException(KonohaContext *kctx, const char *exceptionName, int fault, const char *optionalMessage, KonohaStack *bottom, KonohaStack *sfp)
 {
-	if(line != 0) {
+	stdlog_count++;
+	if(sfp != NULL) {
+		const char* scriptName = PLATAPI shortFilePath(FileId_t(sfp[K_RTNIDX].callerFileLine));
+		int line = (kushort_t)sfp[K_RTNIDX].callerFileLine;
 		fprintf(stdlog, " ** %s (%s:%d)\n", exceptionName, scriptName, line);
 	}
 	else {
@@ -306,18 +310,20 @@ static void konoha_startup(KonohaContext *kctx, const char *startup_script)
 
 static void CommandLine_setARGV(KonohaContext *kctx, int argc, char** argv)
 {
+	INIT_GCSTACK();
 	KonohaClass *CT_StringArray0 = CT_p0(kctx, CT_Array, TY_String);
-	kArray *a = (kArray*)KLIB new_kObjectDontUseThis(kctx, CT_StringArray0, 0);
+	kArray *a = (kArray*)KLIB new_kObject(kctx, _GcStack, CT_StringArray0, 0);
 	int i;
 	for(i = 0; i < argc; i++) {
 		DBG_P("argv=%d, '%s'", i, argv[i]);
-		KLIB kArray_add(kctx, a, KLIB new_kString(kctx, argv[i], strlen(argv[i]), StringPolicy_TEXT));
+		KLIB kArray_add(kctx, a, KLIB new_kString(kctx, _GcStack, argv[i], strlen(argv[i]), StringPolicy_TEXT));
 	}
 	KDEFINE_OBJECT_CONST ObjectData[] = {
 			{"SCRIPT_ARGV", CT_StringArray0->typeId, (kObject*)a},
 			{}
 	};
 	KLIB kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(ObjectData), 0);
+	RESET_GCSTACK();
 }
 
 // -------------------------------------------------------------------------
@@ -983,7 +989,7 @@ static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc
 			plat->beginTag  = TEST_begin;
 			plat->endTag    = TEST_end;
 			plat->shortText = TEST_shortText;
-			plat->reportCaughtException = TEST_reportCaughtException;
+			plat->reportException = TEST_reportCaughtException;
 			return KonohaContext_test(konoha, optarg);
 
 		case '?':
