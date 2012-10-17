@@ -961,11 +961,11 @@ static kbool_t gmp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
 		// Mpz
-		_Public|_Const,     _F(Mpz_new),        TY_Mpz,	    TY_Mpz, MN_("new"), 0,
+		_Public|_Const,     _F(Mpz_new),        TY_Mpz,     TY_Mpz, MN_("new"), 0,
 		_Public|_Const,     _F(Mpz_new_mpz),    TY_Mpz,     TY_Mpz, MN_("new"), 1, TY_Mpz, FN_x,
 		_Public|_Const,     _F(Mpz_new_int),    TY_Mpz,     TY_Mpz, MN_("new"), 1, TY_int, FN_x,
 		_Public|_Const,     _F(Mpz_new_str),    TY_Mpz,     TY_Mpz, MN_("new"), 1, TY_String, FN_x,
-		_Public|_Im|_Const|_Coercion, _F(Mpz_toString),   TY_String,  TY_Mpz, MN_to(TY_String),   0,
+		_Public|_Im|_Const          , _F(Mpz_toString),   TY_String,  TY_Mpz, MN_to(TY_String),   0,
 		_Public|_Im|_Const|_Coercion, _F(Mpz_toInt),      TY_int,     TY_Mpz, MN_to(TY_int),   0,
 		_Public|_Im|_Const|_Coercion, _F(Int_toMpz),      TY_Mpz,     TY_int, MN_to(TY_Mpz),   0,
 		_Public|_Im|_Const, _F(String_toMpz),   TY_Mpz,     TY_String, MN_to(TY_Mpz),   0,
@@ -1011,14 +1011,14 @@ static kbool_t gmp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		_Public|_Im|_Const, _F(Int_opGTEQ_mpz), TY_boolean, TY_int, MN_(">="),  1, TY_Mpz, FN_x,
 		_Public|_Im|_Const, _F(Int_opNEQ_mpz),  TY_boolean, TY_int, MN_("!="),  1, TY_Mpz, FN_x,
 		// Mpf
-		_Public|_Const,     _F(Mpf_new),        TY_Mpf,	    TY_Mpf, MN_("new"), 0,
+		_Public|_Const,     _F(Mpf_new),        TY_Mpf,     TY_Mpf, MN_("new"), 0,
 		_Public|_Const,     _F(Mpf_new_mpf),    TY_Mpf,     TY_Mpf, MN_("new"), 1, TY_Mpf, FN_x,
 		_Public|_Const,     _F(Mpf_new_int),    TY_Mpf,     TY_Mpf, MN_("new"), 1, TY_int, FN_x,
 		_Public|_Const,     _F(Mpf_new_mpz),    TY_Mpf,     TY_Mpf, MN_("new"), 1, TY_Mpz, FN_x,
 		_Public|_Const,     _F(Mpf_new_str),    TY_Mpf,     TY_Mpf, MN_("new"), 1, TY_String, FN_x,
 		_Public|_Im,        _F(Mpf_getprec),    TY_Mpf,     TY_int, MN_("getprec"), 0,
-		_Public|            _F(Mpf_setprec),    TY_Mpf,     TY_void,MN_("setprec"), 1, TY_int, FN_x,
-		_Public|_Im|_Const|_Coercion, _F(Mpf_toString),   TY_String,  TY_Mpf, MN_to(TY_String),   0,
+		_Public,            _F(Mpf_setprec),    TY_Mpf,     TY_void,MN_("setprec"), 1, TY_int, FN_x,
+		_Public|_Im|_Const          , _F(Mpf_toString),   TY_String,  TY_Mpf, MN_to(TY_String),   0,
 		_Public|_Im|_Const|_Coercion, _F(Mpf_toInt),      TY_int,     TY_Mpf, MN_to(TY_int),   0,
 		_Public|_Im|_Const|_Coercion, _F(Mpf_toFloat),    TY_float,   TY_Mpf, MN_to(TY_float), 0,
 		_Public|_Im|_Const|_Coercion, _F(Int_toMpf),      TY_Mpf,     TY_int, MN_to(TY_Mpf),   0,
