@@ -50,7 +50,7 @@ static void kSymbol_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuff
 	KLIB Kwb_printf(kctx, wb, "%s%s", PSYM_t(symbol));
 }
 
-//## symbol String.toSymbol(String keyword);
+//## symbol String.toSymbol();
 static KMETHOD String_toSymbol(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t keyword = StringToKsymbol(kctx, sfp[0].asString);
@@ -68,7 +68,7 @@ static KonohaClass *loadSymbolClass(KonohaContext *kctx, kNameSpace *ns, KTraceI
 	defSymbol.p = kSymbol_p;
 	KonohaClass *cSymbol = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defSymbol, trace);
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Coercion|_Const, _F(String_toSymbol), TY_boolean, TY_String, MN_to(cSymbol->typeId), 0,
+		_Public|_Coercion|_Const, _F(String_toSymbol), cSymbol->typeId, TY_String, MN_to(cSymbol->typeId), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
