@@ -1337,16 +1337,16 @@ struct _kSystem {
 
 #define KCALL(LSFP, RIX, MTD, ARGC, DEFVAL)
 
-//#define KCALL(LSFP, RIX, MTD, ARGC, DEFVAL) { \
-//		KonohaStack *tsfp = LSFP + RIX + K_CALLDELTA;\
-//		tsfp[K_MTDIDX].methodCallInfo = MTD;\
-//		tsfp[K_SHIFTIDX].shift = 0;\
-//		KUnsafeFieldSet(tsfp[K_RTNIDX].asObject, ((kObject *)DEFVAL));\
-//		tsfp[K_RTNIDX].callerFileLine = 0;\
-//		KonohaRuntime_setesp(kctx, tsfp + ARGC + 1);\
-//		(MTD)->invokeMethodFunc(kctx, tsfp);\
-//		tsfp[K_MTDIDX].methodCallInfo = NULL;\
-//	} \
+#define KCALL_DONTUSETHIS(LSFP, RIX, MTD, ARGC, DEFVAL) { \
+		KonohaStack *tsfp = LSFP + RIX + K_CALLDELTA;\
+		tsfp[K_MTDIDX].methodCallInfo = MTD;\
+		tsfp[K_SHIFTIDX].shift = 0;\
+		KUnsafeFieldSet(tsfp[K_RTNIDX].asObject, ((kObject *)DEFVAL));\
+		tsfp[K_RTNIDX].callerFileLine = 0;\
+		KonohaRuntime_setesp(kctx, tsfp + ARGC + 1);\
+		(MTD)->invokeMethodFunc(kctx, tsfp);\
+		tsfp[K_MTDIDX].methodCallInfo = NULL;\
+	} \
 
 #define KSELFCALL(TSFP, MTD) { \
 		KonohaStack *tsfp = TSFP;\

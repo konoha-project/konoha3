@@ -967,9 +967,7 @@ static kbool_t kNameSpace_importAll(KonohaContext *kctx, kNameSpace *ns, kNameSp
 				return false;
 			}
 		}
-		if(targetNS->stmtPatternListNULL_OnList != NULL) {
-			kNameSpace_appendArrayRefArray(kctx, ns, &ns->stmtPatternListNULL_OnList, targetNS->stmtPatternListNULL_OnList);
-		}
+		kNameSpace_appendArrayRefArray(kctx, ns, &ns->stmtPatternListNULL_OnList, targetNS->stmtPatternListNULL_OnList);
 		kNameSpace_importSyntaxAll(kctx, ns, targetNS, trace);
 		for(i = 0; i < kArray_size(targetNS->methodList_OnList); i++) {
 			kMethod *mtd = targetNS->methodList_OnList->MethodItems[i];
