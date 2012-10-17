@@ -519,7 +519,7 @@ static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc
 		interactive_flag = 1;
 		KonohaContext_setInteractive(konoha);
 	}
-	if(ret && interactive_flag) {
+	if(interactive_flag) {
 		CommandLine_import(konoha, "konoha.i");
 		ret = konoha_shell(konoha);
 	}
