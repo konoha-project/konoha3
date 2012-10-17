@@ -863,7 +863,7 @@ static kbool_t kNameSpace_loadScript(KonohaContext *kctx, kNameSpace *ns, const 
 // Package Management */
 
 #define CT_NameSpaceVar CT_NameSpace
-static kNameSpace *new_PackageNameSpace_OnGlobalConstList(KonohaContext *kctx, kpackageId_t packageDomain, kpackageId_t packageId)
+static kNameSpace *new_PackageNameSpace(KonohaContext *kctx, kpackageId_t packageId)
 {
 	kNameSpaceVar *ns = new_(NameSpaceVar, KNULL(NameSpace), OnGlobalConstList);
 	ns->packageId = packageId;
@@ -881,7 +881,7 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackageId_t packageI
 		KLIB KonohaRuntime_raise(kctx, EXPT_("PackageNotFound"), SoftwareFault|SystemFault, NULL, trace->baseStack);
 		return NULL;
 	}
-	kNameSpace *ns = new_PackageNameSpace_OnGlobalConstList(kctx, packageId, packageId);
+	kNameSpace *ns = new_PackageNameSpace(kctx, packageId);
 	if(packageHandler != NULL && packageHandler->initPackage != NULL) {
 		packageHandler->initPackage(kctx, ns, 0, NULL, trace);
 	}
@@ -894,10 +894,6 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackageId_t packageI
 	pack->packageId = packageId;
 	pack->packageNameSpace_OnGlobalConstList = ns;
 	pack->packageHandler = packageHandler;
-//	path = PLATAPI formatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_exports.k");
-//	if(path != NULL) {
-//		pack->exportScriptUri = KLIB KfileId(kctx, pathbuf, strlen(pathbuf), 0, _NEWID) | 1;
-//	}
 	return pack;
 }
 
@@ -993,20 +989,7 @@ static kbool_t kNameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, con
 	KonohaPackage *pack = getPackageNULL(kctx, packageId, trace);
 	DBG_ASSERT(ns != NULL);
 	if(pack != NULL) {
-		kbool_t isContinousLoading = kNameSpace_importAll(kctx, ns, pack->packageNameSpace_OnGlobalConstList, trace);
-//		if(isContinousLoading && pack->packageHandler != NULL && pack->packageHandler->initNameSpace != NULL) {
-//			isContinousLoading = pack->packageHandler->initNameSpace(kctx, pack->packageNameSpace_OnGlobalConstList, ns, trace);
-//		}
-//		if(isContinousLoading && pack->exportScriptUri != 0) {
-//			const char *scriptPath = FileId_t(pack->exportScriptUri);
-//			kfileline_t uline = pack->exportScriptUri | (kfileline_t)1;
-//			SugarThunk thunk = {kctx, ns};
-//			isContinousLoading = PLATAPI loadScript(scriptPath, uline, (void *)&thunk, evalHookFunc);
-//		}
-//		if(isContinousLoading && pack->packageHandler != NULL && pack->packageHandler->setupNameSpace != NULL) {
-//			isContinousLoading = pack->packageHandler->setupNameSpace(kctx, pack->packageNameSpace_OnGlobalConstList, ns, trace);
-//		}
-		return isContinousLoading;
+		return kNameSpace_importAll(kctx, ns, pack->packageNameSpace_OnGlobalConstList, trace);
 	}
 	return false;
 }
@@ -1028,7 +1011,7 @@ kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len,
 	}
 	INIT_GCSTACK();
 	kpackageId_t packageId = KLIB KpackageId(kctx, "main", sizeof("main")-1, 0, _NEWID);
-	kNameSpace *ns = new_PackageNameSpace_OnGlobalConstList(kctx, packageId, packageId);
+	kNameSpace *ns = new_PackageNameSpace(kctx, packageId);
 	kstatus_t result = (kstatus_t)kNameSpace_loadScript(kctx, ns, path, trace);
 	RESET_GCSTACK();
 	return result;
