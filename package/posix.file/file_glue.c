@@ -101,14 +101,14 @@ static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(file);
 }
 
-//## @Native int File.read(Bytes buf, int offset, int len);
+//## int File.read(Bytes buf, int offset, int len);
 static KMETHOD File_read(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFILE *file = (kFILE *)sfp[0].asObject;
 	FILE *fp = file->fp;
 	size_t size = 0;
 	if(fp != NULL) {
-		kBytes *ba = sfp[1].asBytes;
+		struct kBytesVar *ba = (struct kBytesVar*)sfp[1].asBytes;
 		size_t offset = (size_t)sfp[2].intValue;
 		size_t len = (size_t)sfp[3].intValue;
 		size = ba->bytesize;
@@ -277,6 +277,8 @@ static KMETHOD System_chmod(KonohaContext *kctx, KonohaStack *sfp)
 #define TY_File         cFile->typeId
 #define IS_File(O)      ((O)->h.ct == CT_File)
 
+#define TY_Bytes        cBytes->typeId
+
 static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KImportPackage(ns, "konoha.bytes", trace);
@@ -288,7 +290,8 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		.p     = File_p,
 	};
 	KonohaClass *cFile = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defFile, trace);
-
+	KonohaClass *cBytes = KLIB kNameSpace_getClass(kctx, ns, "konoha.bytes.Bytes", strlen("konoha.bytes.Bytes"), NULL);
+	
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Static|_Const|_Im, _F(System_fopen), TY_File, TY_System, MN_("fopen"), 2, TY_String, FN_("path"), TY_String, FN_("mode"),
 		_Public|_Const|_Im, _F(File_close), TY_void, TY_File, MN_("close"), 0,
@@ -297,12 +300,11 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public|_Static|_Const|_Im, _F(System_umask), TY_int, TY_System, MN_("umask"), 1, TY_int, FN_("cmask"),
 		_Public|_Static|_Const|_Im, _F(System_mkdir), TY_int, TY_System, MN_("mkdir"), 2, TY_String, FN_("path"), TY_int, FN_("mode"),
 		_Public|_Static|_Const|_Im, _F(System_rmdir), TY_int, TY_System, MN_("rmdir"), 1, TY_String, FN_("path"),
-		_Public|_Static|_Const|_Im, _F(System_truncate), TY_int, TY_System, MN_("truncate"), 2, TY_String, FN_("path"), TY_int, FN_("length"),
-		_Public|_Static|_Const|_Im, _F(System_chmod), TY_int, TY_System, MN_("chmod"), 2, TY_String, FN_("path"), TY_int, FN_("mode"),
+		_Public|_Static|_Im, _F(System_truncate), TY_int, TY_System, MN_("truncate"), 2, TY_String, FN_("path"), TY_int, FN_("length"),
+		_Public|_Static|_Im, _F(System_chmod), TY_int, TY_System, MN_("chmod"), 2, TY_String, FN_("path"), TY_int, FN_("mode"),
 		// the function below uses Bytes
-		// FIXME
-//		_Public|_Const, _F(File_write), TY_int, TY_File, MN_("write"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
-//		_Public|_Const, _F(File_read), TY_int, TY_File, MN_("read"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
+		_Public|_Im, _F(File_write), TY_int, TY_File, MN_("write"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
+		_Public|_Im, _F(File_read), TY_int, TY_File, MN_("read"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
