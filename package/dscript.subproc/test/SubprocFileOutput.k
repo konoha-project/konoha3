@@ -1,8 +1,10 @@
 // written by shinpei
-import ("konoha.new");
-import( "dscript.subproc");
 
-void test () {
+import("konoha.new");
+import("konoha.file");
+import("dscript.subproc");
+
+void test() {
 	Subproc p = new Subproc("echo hoge", false);
 	FILE f = System.fopen("files/output.txt", "w");
 	p.setFileOUT(f);
@@ -10,5 +12,6 @@ void test () {
 	// need enough time
 	f.close();
 }
+
 test();
 
