@@ -40,13 +40,26 @@ extern "C" {
 #define CT_Float          (KGetKonohaCommonModule()->cFloat)
 #define TY_float          (CT_Float->typeId)
 #define IS_Float(O)       ((O)->h.ct == CT_Float)
-
 #define KFLOAT_FMT        "%.6e"
+
+#define CFLAG_Iterator         kClass_Final
+#define CT_Iterator            KGetKonohaCommonModule()->cIterator
+#define TY_Iterator            KGetKonohaCommonModule()->cIterator->typeId
+#define CT_StringIterator      KGetKonohaCommonModule()->cStringIterator
+#define TY_StringIterator      KGetKonohaCommonModule()->cStringIterator->typeId
+
+#define IS_Iterator(O)         (O_ct(O)->baseTypeId == TY_Iterator)
 
 typedef struct {
 	KonohaModule h;
 	KonohaClass *cFloat;
+
+	KonohaClass *cIterator;
+	KonohaClass *cStringIterator;
+	KonohaClass *cGenericIterator;
+
 	KonohaClass *cBytes;
+	KonohaClass *cFile;
 } KonohaCommonModule;
 
 typedef struct {
@@ -59,15 +72,38 @@ struct kFloatVar {
 	kfloat_t floatValue;
 };
 
-typedef const struct kFILEVar    kFILE;
-typedef struct kFILEVar          kFILEVar;
+typedef struct {
+	KonohaModule h;
+	KonohaClass *cIterator;
+	KonohaClass *cStringIterator;
+	KonohaClass *cGenericIterator;
+} KonohaIteratorModule;
 
-struct kFILEVar {
+typedef struct {
+	KonohaModuleContext h;
+} KonohaIteratorModuleContext;
+
+typedef struct kIteratorVar kIterator;
+struct kIteratorVar {
+	KonohaObjectHeader h;
+	kbool_t (*hasNext)(KonohaContext *kctx, KonohaStack *);
+	void    (*setNextResult)(KonohaContext *kctx, KonohaStack *);
+	size_t current_pos;
+	union {
+		kObject  *source;
+		kArray   *arrayList;
+		kFunc    *funcHasNext;
+	};
+	kFunc        *funcNext;
+};
+
+typedef struct kFileVar  kFile;
+
+struct kFileVar {
 	KonohaObjectHeader h;
 	FILE *fp;
 	const char *realpath;
 };
-
 
 #ifdef __cplusplus
 } /* extern "C" */

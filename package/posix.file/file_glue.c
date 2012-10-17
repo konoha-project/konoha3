@@ -36,8 +36,8 @@
 extern "C"{
 #endif
 
-typedef const struct kFILEVar kFILE;
-struct kFILEVar {
+typedef const struct kFileVar kFile;
+struct kFileVar {
 	KonohaObjectHeader h;
 	FILE *fp;
 	const char *realpath;
@@ -47,14 +47,14 @@ struct kFILEVar {
 
 static void File_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct kFILEVar *file = (struct kFILEVar *)o;
+	struct kFileVar *file = (struct kFileVar *)o;
 	file->fp = (conf != NULL) ? conf : NULL;
 	file->realpath = NULL;
 }
 
 static void File_free(KonohaContext *kctx, kObject *o)
 {
-	struct kFILEVar *file = (struct kFILEVar *)o;
+	struct kFileVar *file = (struct kFileVar *)o;
 	if(file->fp != NULL) {
 		int ret = fclose(file->fp);
 		if(ret != 0) {
@@ -74,7 +74,7 @@ static void File_free(KonohaContext *kctx, kObject *o)
 
 static void File_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
-	kFILE *file = (kFILE *)v[pos].asObject;
+	kFile *file = (kFile *)v[pos].asObject;
 	FILE *fp = file->fp;
 	KLIB Kwb_printf(kctx, wb, "FILE :%p, path=%s", fp, file->realpath);
 }
@@ -96,7 +96,7 @@ static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp)
 				LogText("errstr", strerror(errno))
 		);
 	}
-	struct kFILEVar *file = (struct kFILEVar *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)fp);
+	struct kFileVar *file = (struct kFileVar *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)fp);
 	file->realpath = realpath(S_text(s), NULL);
 	KReturn(file);
 }
@@ -104,7 +104,7 @@ static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp)
 //## int File.read(Bytes buf, int offset, int len);
 static KMETHOD File_read(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kFILE *file = (kFILE *)sfp[0].asObject;
+	kFile *file = (kFile *)sfp[0].asObject;
 	FILE *fp = file->fp;
 	size_t size = 0;
 	if(fp != NULL) {
@@ -133,7 +133,7 @@ static KMETHOD File_read(KonohaContext *kctx, KonohaStack *sfp)
 //## @Native int File.write(Bytes buf, int offset, int len);
 static KMETHOD File_write(KonohaContext *kctx , KonohaStack *sfp)
 {
-	kFILE *file = (kFILE *)sfp[0].asObject;
+	kFile *file = (kFile *)sfp[0].asObject;
 	FILE *fp = file->fp;
 	size_t size = 0;
 	if(fp != NULL) {
@@ -157,7 +157,7 @@ static KMETHOD File_write(KonohaContext *kctx , KonohaStack *sfp)
 //## @Native void File.close();
 static KMETHOD File_close(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct kFILEVar *file = (struct kFILEVar *)sfp[0].asObject;
+	struct kFileVar *file = (struct kFileVar *)sfp[0].asObject;
 	FILE *fp = file->fp;
 	if(fp != NULL) {
 		int ret = fclose(fp);
@@ -176,7 +176,7 @@ static KMETHOD File_close(KonohaContext *kctx, KonohaStack *sfp)
 //## @Native int File.getC();
 static KMETHOD File_getC(KonohaContext *kctx, KonohaStack *sfp)
 {
-	FILE *fp = ((kFILE *)sfp[0].asObject)->fp;
+	FILE *fp = ((kFile *)sfp[0].asObject)->fp;
 	int ch = EOF;
 	if(fp != NULL) {
 		ch = fgetc(fp);
@@ -194,7 +194,7 @@ static KMETHOD File_getC(KonohaContext *kctx, KonohaStack *sfp)
 //## @Native boolean File.putC(int ch);
 static KMETHOD File_putC(KonohaContext *kctx, KonohaStack *sfp)
 {
-	FILE *fp = ((kFILE *)sfp[0].asObject)->fp;
+	FILE *fp = ((kFile *)sfp[0].asObject)->fp;
 	if(fp != NULL) {
 		int ch = fputc(sfp[1].intValue, fp);
 		if(ch == EOF) {
@@ -283,7 +283,9 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 {
 	KImportPackage(ns, "konoha.bytes", trace);
 	KDEFINE_CLASS defFile = {
-		STRUCTNAME(FILE),
+		.structname = "FILE",
+		.typeId = TY_newid,
+		.cstruct_size = sizeof(kFile),
 		.cflag = kClass_Final,
 		.init  = File_init,
 		.free  = File_free,

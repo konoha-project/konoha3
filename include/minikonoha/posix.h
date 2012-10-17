@@ -60,10 +60,10 @@ typedef struct {
 	KonohaModuleContext h;
 } ctxposix_t;
 
-typedef const struct kFILEVar    kFILE;
-typedef struct kFILEVar          kFILEVar;
+typedef const struct kFileVar    kFile;
+typedef struct kFileVar          kFileVar;
 
-struct kFILEVar {
+struct kFileVar {
 	KonohaObjectHeader h;
 	FILE *fp;
 	const char *realpath;

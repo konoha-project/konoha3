@@ -852,7 +852,7 @@ static KMETHOD Subproc_setFileIN(KonohaContext *kctx, KonohaStack *sfp)
 	kSubproc *sp = (kSubproc *)sfp[0].asObject;
 	int ret = PREEXEC(sp);
 	if(ret) {
-		kFILE *kfile = (kFILE *)sfp[1].asObject;
+		kFile *kfile = (kFile *)sfp[1].asObject;
 		setFd(kctx,(pfd_t*)&sp->wmode, M_FILE, kfile->fp);
 	}
 	KReturnUnboxValue(ret);
@@ -864,7 +864,7 @@ KMETHOD Subproc_setFileOUT(KonohaContext *kctx, KonohaStack *sfp)
 	struct kSubprocVar *sp = (struct kSubprocVar *)sfp[0].asObject;
 	int ret = PREEXEC(sp);
 	if(ret) {
-		kFILE *kfile = (kFILE *)sfp[1].asObject;
+		kFile *kfile = (kFile *)sfp[1].asObject;
 		setFd(kctx, (pfd_t*)&sp->rmode, M_FILE, kfile->fp);
 	}
 	KReturnUnboxValue(ret);
@@ -876,7 +876,7 @@ KMETHOD Subproc_setFileERR(KonohaContext *kctx, KonohaStack *sfp)
 	struct kSubprocVar *sp = (struct kSubprocVar *)sfp[0].asObject;
 	int ret = PREEXEC(sp);
 	if(ret) {
-			kFILE *kfile = (kFILE *)sfp[1].asObject;
+			kFile *kfile = (kFile *)sfp[1].asObject;
 			setFd(kctx, (pfd_t*)&sp->emode, M_FILE, kfile->fp);
 	}
 	KReturnUnboxValue(ret);
