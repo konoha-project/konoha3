@@ -1337,7 +1337,7 @@ struct _kSystem {
 
 #define KCALL(LSFP, RIX, MTD, ARGC, DEFVAL)
 
-#define KCALL_DONTUSETHIS(LSFP, RIX, MTD, ARGC, DEFVAL) { \
+#define KCALL_DONT_USE_THIS(LSFP, RIX, MTD, ARGC, DEFVAL) { \
 		KonohaStack *tsfp = LSFP + RIX + K_CALLDELTA;\
 		tsfp[K_MTDIDX].methodCallInfo = MTD;\
 		tsfp[K_SHIFTIDX].shift = 0;\
@@ -1381,8 +1381,6 @@ struct KonohaPackageHandlerVar {
 	const char *note;
 	kbool_t (*initPackage)   (KonohaContext *kctx, kNameSpace *, int, const char**, KTraceInfo *);
 	kbool_t (*setupPackage)  (KonohaContext *kctx, kNameSpace *, isFirstTime_t, KTraceInfo *);
-//	kbool_t (*initNameSpace) (KonohaContext *kctx, kNameSpace *, kNameSpace *, KTraceInfo *);
-//	kbool_t (*setupNameSpace)(KonohaContext *kctx, kNameSpace *, kNameSpace *, KTraceInfo *);
 	const char *konoha_revision;
 };
 
@@ -1392,7 +1390,6 @@ struct KonohaPackageVar {
 	kpackageId_t                 packageId;
 	kNameSpace                  *packageNameSpace_OnGlobalConstList;
 	KonohaPackageHandler        *packageHandler;
-//	kfileline_t                  exportScriptUri;
 };
 
 /* ----------------------------------------------------------------------- */

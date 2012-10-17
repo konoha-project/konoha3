@@ -255,7 +255,6 @@ static void copyText(KonohaContext *kctx, KGrowingArray *stack, char *dest, size
 {
 	kStringBase *base;
 	kRopeString *str;
-	size_t len;
 	while((base = Stack_pop(kctx, stack)) != NULL) {
 		switch (kStringBase_flag(base)) {
 			case S_FLAG_LINER:
