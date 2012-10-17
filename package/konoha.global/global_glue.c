@@ -131,7 +131,7 @@ static kbool_t global_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 {
 	KImportPackage(ns, "konoha.field", trace);
 	SUGAR kNameSpace_addSugarFunc(kctx, ns, KW_TypeDeclPattern, SugarFunc_TopLevelStatement, new_SugarFunc(ns, Statement_GlobalTypeDecl));
-	return kNameSpace_initGlobalObject(kctx, ns, trace);
+	return true;
 }
 
 // -------
