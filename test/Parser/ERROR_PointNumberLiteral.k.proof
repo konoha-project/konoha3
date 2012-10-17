@@ -1,2 +1,2 @@
- - (error) (ERROR_PointNumberLiteral.k:2) syntax error: expression .
+ - (error) (ERROR_PointNumberLiteral.k:2) undefined pattern: $Float
 Q.E.D.

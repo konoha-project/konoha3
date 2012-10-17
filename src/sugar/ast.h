@@ -504,7 +504,11 @@ static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, M
 			else {
 				tk->resolvedSyntaxInfo = SYN_(tokens->ns, tk->unresolvedTokenType);
 				if(!kToken_is(StatementSeparator, tk) && tk->unresolvedTokenType != TokenType_INDENT) {
-					DBG_ASSERT(tk->resolvedSyntaxInfo != NULL);
+					if(tk->resolvedSyntaxInfo == NULL) {
+						kToken_printMessage(kctx, tk, ErrTag, "undefined pattern: %s%s", PSYM_t(tk->unresolvedTokenType));
+						source->SourceConfig.foundErrorToken = tk;
+						goto RETURN_ERROR;
+					}
 				}
 			}
 		}
@@ -515,6 +519,7 @@ static int TokenSequence_resolved2(KonohaContext *kctx, TokenSequence *tokens, M
 		ERROR_UnclosedToken(kctx, (kTokenVar *)source->SourceConfig.openToken, (const char *)buf);
 		source->SourceConfig.foundErrorToken = source->SourceConfig.openToken;
 	}
+	RETURN_ERROR:;
 	TokenSequence_end(kctx, tokens);
 	return source->endIdx;
 }
