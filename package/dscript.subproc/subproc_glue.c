@@ -1110,9 +1110,9 @@ static KMETHOD Subproc_isERR2StdOUT(KonohaContext *kctx, KonohaStack *sfp)
 static void kSubproc_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct kSubprocVar *proc = (struct kSubprocVar *)o;
-	proc->command     = KNULL(String);
-	proc->cwd         = KNULL(String);
-	proc->env         = KNULL(Array);
+	KUnsafeFieldInit(proc->command, KNULL(String));
+	KUnsafeFieldInit(proc->cwd, KNULL(String));
+	KUnsafeFieldInit(proc->env, KNULL(Array));
 	proc->cpid        = -1;
 	proc->flag        = 0;
 	proc->timeout     = DEF_TIMEOUT;
@@ -1126,7 +1126,17 @@ static void kSubproc_init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void kSubproc_free(KonohaContext *kctx, kObject *o)
 {
-
+	struct kSubprocVar *proc = (struct kSubprocVar *)o;
+	//TODO: free objects, env, command, cwd
+	if(proc->rfp != NULL) {
+		fclose(proc->rfp);
+	}
+	if(proc->wfp != NULL) {
+		fclose(proc->wfp);
+	}
+	if(proc->efp != NULL) {
+		fclose(proc->efp);
+	}
 }
 
 static void kSubproc_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
