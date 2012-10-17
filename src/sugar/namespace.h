@@ -26,24 +26,28 @@
 // ---------------------------------------------------------------------------
 // Utils
 
-static void kNameSpace_appendArrayRef(KonohaContext *kctx, kNameSpace *ns, kArray **arrayRef, kObject *o)
+static void kNameSpace_appendArrayRef(KonohaContext *kctx, kNameSpace *ns, const kArray **arrayRef, kObject *o)
 {
 	if(arrayRef[0] == NULL) {
-		arrayRef[0] = new_(Array, 0, ns->NameSpaceConstList);
+		((kArray**)arrayRef)[0] = new_(Array, 0, ns->NameSpaceConstList);
 	}
+	DBG_ASSERT(IS_Array(arrayRef[0]));
 	KLIB kArray_add(kctx, arrayRef[0], o);
+	//DBG_P(">>>> Array %p size=%d", arrayRef[0], kArray_size(arrayRef[0]));
 }
 
-static void kNameSpace_appendArrayRefArray(KonohaContext *kctx, kNameSpace *ns, kArray **arrayRef, kArray *a)
+static void kNameSpace_appendArrayRefArray(KonohaContext *kctx, kNameSpace *ns, kArray const **arrayRef, kArray *aList)
 {
-	if(a != NULL) {
-		if(arrayRef[0] == NULL) {
-			arrayRef[0] = new_(Array, kArray_size(a), ns->NameSpaceConstList);
-		}
+	if(aList != NULL) {
 		size_t i;
-		for(i = 0; i < kArray_size(a); i++) {
-			kObject *o = a->ObjectItems[i];
+		if(arrayRef[0] == NULL) {
+			((kArray**)arrayRef)[0] = new_(Array, kArray_size(aList), ns->NameSpaceConstList);
+		}
+		DBG_ASSERT(IS_Array(arrayRef[0]));
+		for(i = 0; i < kArray_size(aList); i++) {
+			kObject *o = aList->ObjectItems[i];
 			KLIB kArray_add(kctx, arrayRef[0], o);
+			//DBG_P(">>>> Array %p size=%d", arrayRef[0], kArray_size(arrayRef[0]));
 		}
 	}
 }
@@ -962,6 +966,9 @@ static kbool_t kNameSpace_importAll(KonohaContext *kctx, kNameSpace *ns, kNameSp
 			if(!kNameSpace_mergeConstData(kctx, (kNameSpaceVar *)ns, targetNS->constTable.keyValueItems, kNameSpace_sizeConstTable(targetNS), trace)) {
 				return false;
 			}
+		}
+		if(targetNS->stmtPatternListNULL_OnList != NULL) {
+			kNameSpace_appendArrayRefArray(kctx, ns, &ns->stmtPatternListNULL_OnList, targetNS->stmtPatternListNULL_OnList);
 		}
 		kNameSpace_importSyntaxAll(kctx, ns, targetNS, trace);
 		for(i = 0; i < kArray_size(targetNS->methodList_OnList); i++) {
