@@ -282,6 +282,25 @@ static KMETHOD System_getsid(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
+//## int System.sleep(int sec)
+static KMETHOD System_sleep(KonohaContext *kctx, KonohaStack *sfp)
+{
+	unsigned int sec = sfp[1].intValue;
+	unsigned int left = sleep(sec);
+	KReturnUnboxValue(left);
+}
+
+//## boolean System.usleep(int usec)
+static KMETHOD System_usleep(KonohaContext *kctx, KonohaStack *sfp)
+{
+	unsigned int usec = sfp[1].intValue;
+	int ret = usleep(usec);
+	if(ret != 0) {
+		// TODO KTraceApi
+	}
+	KReturnUnboxValue(ret == 0);
+}
+
 /* ------------------------------------------------------------------------ */
 
 #define _Public   kMethod_Public
@@ -325,6 +344,8 @@ static kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public|_Static, _F(System_setregid), TY_int, TY_System, MN_("setrguid"), 2, TY_int, FN_("rgid"), TY_int, FN_("egid"),
 		_Public|_Static, _F(System_setsid), TY_int, TY_System, MN_("setsid"), 0,
 		_Public|_Static, _F(System_getsid), TY_int, TY_System, MN_("getsid"), 1, TY_int, FN_("pid"),
+		_Public|_Static, _F(System_sleep), TY_int, TY_System, MN_("sleep"), 1, TY_int, FN_("sec"),
+		_Public|_Static, _F(System_usleep), TY_boolean, TY_System, MN_("usleep"), 1, TY_int, FN_("usec"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
