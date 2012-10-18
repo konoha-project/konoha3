@@ -704,7 +704,16 @@ static void KonohaVisitor_visitClosureExpr(KonohaContext *kctx, IRBuilder *self,
 	kExpr *funcExpr = kExpr_at(expr, 0);
 	kExpr *blockExpr = kExpr_at(expr, 1);
 	kFunc *fo = (kFunc*)funcExpr->objectConstValue;
-	((kFuncVar*)fo)->espidx = espidx;
+	if(a + 1 == espidx) {
+		/* In this block, closure is defined like below.
+		 * Func[] f = function () => int {...};
+		 * Function f is never used and should be ignored inside closure.
+		 * Set espidx to espidx-1 to generate code properly.
+		 */
+		((kFuncVar*)fo)->espidx = espidx-1;
+	} else {
+		((kFuncVar*)fo)->espidx = espidx;
+	}
 	kBlock *bk = (kBlock*)blockExpr->objectConstValue;
 	ClosureExpr_genCode(kctx, self, fo->mtd, bk);
 	ASM(NSET, OC_(a), (uintptr_t)fo, CT_(expr->ty));
