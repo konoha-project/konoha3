@@ -474,6 +474,12 @@ struct PlatformApiVar {
 		}\
 	} while(0)
 
+#define KTraceChangeSystemPoint(TRACE, APINAME, ...)    do {\
+		logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|SystemChangePoint)};\
+		if(trace != NULL && TFLAG_is(int, _logconf.policy, isRecord)) { \
+			PLATAPI traceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
+		}\
+	} while(0)
 
 #define KTraceApi(TRACE, POLICY, APINAME, ...)    do {\
 		static logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|POLICY)};\
@@ -703,6 +709,8 @@ struct KonohaStackRuntimeVar {
 #define MOD_gc         1
 #define MOD_code       2
 #define MOD_sugar      3
+#define MOD_konoha     6
+
 #define MOD_exception  5
 #define MOD_float      11
 #define MOD_iterator   12
@@ -714,10 +722,11 @@ struct KonohaStackRuntimeVar {
 
 struct KonohaModule {
 	const char *name;
-	int mod_id;
+	int   mod_id;
 	void (*setup)(KonohaContext*,    struct KonohaModule *, int newctx);
 	void (*reftrace)(KonohaContext*, struct KonohaModule *, struct KObjectVisitor *);
 	void (*free)(KonohaContext*,     struct KonohaModule *);
+	size_t      allocSize;
 	kmutex_t   *moduleMutex;
 };
 

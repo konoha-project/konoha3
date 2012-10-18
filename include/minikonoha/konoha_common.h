@@ -37,6 +37,11 @@ extern "C" {
 #define KGetKonohaCommonContext()   ((KonohaCommonModuleContext *)kctx->mod[MOD_konoha])
 #define KDefinedKonohaCommonModule() (kctx->modshare[MOD_float] != NULL)
 
+#define KRequireKonohaCommon() \
+	if(KGetKonohaCommonModule() == NULL) {\
+		KonohaCommonModule_init(kctx);\
+	}\
+
 #define CT_Float          (KGetKonohaCommonModule()->cFloat)
 #define TY_float          (CT_Float->typeId)
 #define IS_Float(O)       ((O)->h.ct == CT_Float)
@@ -62,9 +67,29 @@ typedef struct {
 	KonohaClass *cFile;
 } KonohaCommonModule;
 
-typedef struct {
-	KonohaModuleContext h;
-} KonohaCommonModuleContext;
+static void kmodfloat_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
+{
+}
+
+static void kmodfloat_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
+{
+}
+
+static void kmodfloat_free(KonohaContext *kctx, struct KonohaModule *baseh)
+{
+	KFree(baseh, sizeof(KonohaCommonModule));
+}
+
+static void KonohaCommonModule_init(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
+{
+	KonohaCommonModule *base = (KonohaCommonModule *)KCalloc(sizeof(KonohaCommonModule), 1, trace);
+	base->h.name     = "konoha";
+	base->h.setup    = kmodfloat_setup;
+	base->h.reftrace = kmodfloat_reftrace;
+	base->h.free     = kmodfloat_free;
+	KLIB KonohaRuntime_setModule(kctx, MOD_konoha, &base->h, trace);
+}
+
 
 typedef const struct kFloatVar kFloat;
 struct kFloatVar {
@@ -97,13 +122,22 @@ struct kIteratorVar {
 	kFunc        *funcNext;
 };
 
-typedef struct kFileVar  kFile;
+/* .... */
+
+typedef struct kFileVar kFile;
 
 struct kFileVar {
 	KonohaObjectHeader h;
+#ifdef USE_FILE
 	FILE *fp;
-	const char *realpath;
+#else
+	void *fp;
+#endif/*USE_FILE*/
+	kString *PathInfoNULL;
+	uintptr_t readerIconv;
+	uintptr_t writerIconv;
 };
+
 
 #ifdef __cplusplus
 } /* extern "C" */
