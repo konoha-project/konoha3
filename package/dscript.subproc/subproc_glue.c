@@ -1170,7 +1170,7 @@ static void kSubproc_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *v
 
 static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KImportPackage(ns, "posix.file", trace);
+	KRequirePackage("posix.file", trace);
 	KDEFINE_CLASS defSubproc = {
 		STRUCTNAME(Subproc),
 		.cflag    = kClass_Final,

@@ -282,7 +282,7 @@ static void ResultSet_free(KonohaContext *kctx, kObject *o)
 
 static kbool_t sql_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KImportPackage(ns, "konoha.bytes", trace);
+	KRequirePackage("konoha.bytes", trace);
 
 	static KDEFINE_CLASS ConnectionDef = {
 		STRUCTNAME(Connection),

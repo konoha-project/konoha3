@@ -68,8 +68,8 @@ static kbool_t while_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTi
 //
 //static kbool_t while_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 //{
-//	KImportPackage(ns, "konoha.break", trace);
-//	KImportPackage(ns, "konoha.continue", trace);
+//	KRequirePackage("konoha.break", trace);
+//	KRequirePackage("konoha.continue", trace);
 //	KDEFINE_SYNTAX SYNTAX[] = {
 //		{ SYM_("while"), 0, "\"while\" \"(\" $Expr \")\" $Block", 0, 0, NULL, NULL, NULL, Statement_while, NULL, },
 //		{ KW_END, },

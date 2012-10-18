@@ -157,8 +157,9 @@ static kbool_t foreach_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceI
 
 static kbool_t foreach_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KImportPackage(ns, "konoha.iterator", trace);
-	KImportPackage(ns, "cstyle", trace);
+	KRequirePackage("konoha.iterator", trace);
+	KImportPackageSymbol(ns, "cstyle", "break", trace);
+	KImportPackageSymbol(ns, "cstyle", "continue", trace);
 	foreach_defineSyntax(kctx, ns, trace);
 	return true;
 }

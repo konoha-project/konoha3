@@ -286,8 +286,9 @@ void MODSUGAR_loadMethod(KonohaContext *kctx)
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);
-	KSET_KLIB2(kNameSpace_requirePackage, kNameSpace_requirePackage, 0);
-	KSET_KLIB2(kNameSpace_importPackage, kNameSpace_importPackage, 0);
+	KSET_KLIB2(kNameSpace_requirePackage, kNameSpace_requirePackage, NULL);
+	KSET_KLIB2(kNameSpace_importPackage, kNameSpace_importPackage, NULL);
+	KSET_KLIB2(kNameSpace_importPackageSymbol, kNameSpace_importPackageSymbol, NULL);
 }
 
 #ifdef __cplusplus

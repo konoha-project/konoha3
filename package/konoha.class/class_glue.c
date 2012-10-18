@@ -385,8 +385,6 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t class_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-//	KImportPackage(ns, "konoha.field", trace);
-//	KImportPackage(ns, "konoha.new", trace);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("$ClassName"), 0, NULL, 0, 0, PatternMatch_ClassName, NULL, NULL, NULL, NULL, },
 		{ SYM_("class"), 0, "\"class\" $ClassName [\"extends\" extends: $Type] [$Block]", 0, 0, NULL, NULL, Statement_class, NULL, NULL, },
@@ -399,8 +397,8 @@ static kbool_t class_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 
 static kbool_t class_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KImportPackage(ns, "konoha.field", trace);
-	KImportPackage(ns, "konoha.new", trace);
+	KRequirePackage("konoha.field", trace);
+	//KRequirePackage("konoha.new", trace);
 	class_defineSyntax(kctx, ns, trace);
 	return true;
 }

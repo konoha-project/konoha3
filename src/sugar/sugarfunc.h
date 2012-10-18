@@ -379,6 +379,7 @@ static KMETHOD TypeCheck_TextLiteral(KonohaContext *kctx, KonohaStack *sfp)
 			KReturn(ERROR_UndefinedEscapeSequence(kctx, stmt, tk));
 		}
 	}
+	kString_set(Literal, ((kStringVar *)text), true);
 	KReturn(SUGAR kExpr_setConstValue(kctx, expr, TY_String, UPCAST(text)));
 }
 

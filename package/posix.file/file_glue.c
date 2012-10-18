@@ -50,101 +50,6 @@ struct kFileVar {
 	uintptr_t writerIconv;
 };
 
-static int guessFaultFromErrno(KonohaContext *kctx, int fault)
-{
-	int foundErrno = errno;
-	switch(errno) {  // C Standard Library
-	case EDOM: /*Results from a parameter outside a function's domain, for example sqrt(-1) */
-	case ERANGE: /* Results from a result outside a function's range, for example strtol("0xfffffffff",NULL,0) */
-	case EILSEQ: /* Results from an illegal byte sequence */
-		return fault | SoftwareFault;
-	}
-
-	switch(errno) {
-	case EPERM:  /* 1. Operation not permitted (Linux) */
-		return fault | SoftwareFault | DataFault;
-	case ENOENT: /* 2. No such file or directory */
-		return fault | SoftwareFault | DataFault;
-	case ESRCH:  /* 3. No such process */
-		return fault | SystemFault | SoftwareFault | DataFault;
-	case EINTR: /* 4. Interrupted system call */
-		return fault;
-	case EIO: /* 5. I/O error */
-		return fault | SystemFault ;
-	case ENXIO:  /* 6. No such device or address */
-		return fault | SoftwareFault | DataFault | SystemFault;
-	case E2BIG:  /* 7. Arg list too long */
-		return fault | SoftwareFault | DataFault;
-	case ENOEXEC: /* 8. Exec format error */
-		return fault | SystemFault;
-	case EBADF:  /* 9. Bad file number */
-		return fault | SoftwareFault;
-	case ECHILD: /* 10. No child processes */
-		return fault | SoftwareFault | SystemFault;
-	case EAGAIN: /* 11. Try again */
-		return 0;  /* not fault */
-	case ENOMEM: /* 12. Out of memory */
-		/* If you try to exec() another process or just ask for more memory in this process */
-		return fault | SoftwareFault | SystemFault;
-	case EACCES: /* 13. Permission denied */
-		return fault | DataFault;
-	case EFAULT: /* 14 Bad address */
-		return fault | SoftwareFault; /* At the C-Level */
-	case ENOTBLK: /* 15 Block device required */
-		return fault | SystemFault; /* in case of unmount device */
-	case EBUSY: /* 16 Device or resource busy */
-		return fault | SystemFault;
-	case EEXIST: /*17 File exists */
-		return fault | SoftwareFault | DataFault | SystemFault;
-	case EXDEV:  /* 18. Cross-device link */
-		return fault | SystemFault;
-	case ENODEV: /* 19 No such device */
-	case ENOTDIR: /*20 Not a directory */
-	case EISDIR: /* 21 Is a directory */
-		return fault | SoftwareFault | DataFault | SystemFault;
-	case EINVAL: /* 22 Invalid argument */
-		/* EINVAL gets used a lot.
-		 * TCP has the concept of "out of band data" (urgent data).
-		 * If a reading process checks for this, and there isn't any, it get EINVAL.
-		 * The plock() function ( which locks areas of a process into memory) returns this
-		 * if you attempt to use it twice on the same memory segment.
-		 * If you try to specify SIGKILL or SIGSTOP to sigaction(), you'll get this return.
-		 * The readv() and writev() calls complain this way if you give them too large an array of buffers.
-		 * As mentioned above, drivers may return this for inappropriate ioctl() calls.
-		 * The mmap() call will return this if you've specified a specific address but that address can't be used.
-		 * A seek() to before the beginning of a file returns this.
-		 * Streams use this if you attempt to link a stream onto itself. It's used for many IPC errors also. */
-		return fault | SoftwareFault | DataFault | SystemFault;
-	case ENFILE:  /* 23. File table overflow */
-		return fault | SoftwareFault | DataFault | SystemFault;
-	case EMFILE: /* 24. Too many open files */
-		return fault | SoftwareFault;
-	case ENOTTY: /* 25 Not a typewriter */
-		return fault | SoftwareFault | DataFault | SystemFault;
-	case ETXTBSY:  /* 26 Text file busy */
-		/* It's illegal to write to a binary while it is executing- */
-		return fault | SoftwareFault;
-	case EFBIG: /* 27 File too large */
-		return fault | SoftwareFault;
-	case ENOSPC: /* 28 No space left on device */
-	case ESPIPE: /* 29 Illegal seek */
-		return fault | SoftwareFault;
-	case EROFS:  /* 30 Read-only file system */
-		return fault | SoftwareFault | DataFault;
-	case EMLINK: /* 31 Too many links */
-		return fault | SoftwareFault | DataFault;
-	case EPIPE: /* 32 Broken pipe */
-		return fault | SystemFault | DataFault;
-	}
-	return fault;
-}
-
-//static int diagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
-//{
-//	if(TFLAG_is(int, fault, SystemError)) {
-//		fault =
-//	}
-//}
 
 /* ------------------------------------------------------------------------ */
 
@@ -185,19 +90,21 @@ static void File_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer 
 }
 
 /* ------------------------------------------------------------------------ */
-//## @Native @Throwable FILE System.fopen(String path, String mode);
+//## FILE System.fopen(String path, String mode);
 
 static KMETHOD Libc_fopen(KonohaContext *kctx, KonohaStack *sfp)
 {
+	KMakeTrace(trace, sfp);
 	char buffer[K_PATHMAX];
-	KMakeTrace(trace, sfp);  // FIXME
+	kString *path = sfp[1].asString;
 	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, K_PATHMAX, S_text(sfp[1].asString), S_size(sfp[1].asString), trace);
 	const char *mode = S_text(sfp[2].asString);
 	FILE *fp = fopen(systemPath, mode);
 	if(fp == NULL) {
-		KTraceErrorPoint(trace, SoftwareFault|SystemFault|DataFault, "fopen",
+		int fault = PLATAPI diagnosisFaultType(kctx, SystemError | kString_guessDataFault(path), trace);
+		KTraceErrorPoint(trace, fault, "fopen",
 			LogText("filename", S_text(sfp[1].asString)), LogText("mode", mode), LogErrno);
-		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SoftwareFault|SystemFault|DataFault, NULL, sfp);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), fault, NULL, sfp);
 	}
 	struct kFileVar *file = (struct kFileVar *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)fp);
 	file->realpath = realpath(systemPath, NULL);
@@ -424,7 +331,7 @@ static KMETHOD System_chmod(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KImportPackage(ns, "konoha.bytes", trace);
+	KRequirePackage("konoha.bytes", trace);
 	KDEFINE_CLASS defFile = {
 		.structname = "FILE",
 		.typeId = TY_newid,

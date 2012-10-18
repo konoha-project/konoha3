@@ -704,12 +704,12 @@ static void _kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 
 static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KImportPackage(ns, "sugar", trace);
-	KImportPackage(ns, "konoha.float", trace);
-	KImportPackage(ns, "llvm", trace);
-	KImportPackage(ns, "konoha.assign", trace);
-	KImportPackage(ns, "konoha.null", trace);
-	KImportPackage(ns, "konoha.string", trace);
+	KRequirePackage("sugar", trace);
+	KRequirePackage("konoha.float", trace);
+	KRequirePackage("llvm", trace);
+	KRequirePackage("konoha.assign", trace);
+	KRequirePackage("konoha.null", trace);
+	KRequirePackage("konoha.string", trace);
 	kmodjit_t *base  = (kmodjit_t *)KCalloc_UNTRACE(sizeof(kmodjit_t), 1);
 	base->h.name     = "ijit";
 	base->h.setup    = kmodjit_setup;

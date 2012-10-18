@@ -41,7 +41,7 @@ static KMETHOD NameSpace_setTransparentGlobalVariable_(KonohaContext *kctx, Kono
 
 static	kbool_t global_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	KImportPackage(ns, "konoha.field", trace);
+	KRequirePackage("konoha.field", trace);
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(NameSpace_setTransparentGlobalVariable_), TY_void, TY_NameSpace, MN_("setTransparentGlobalVariable"), 1, TY_boolean, FN_("enabled"),
 		DEND,

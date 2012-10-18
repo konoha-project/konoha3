@@ -583,6 +583,106 @@ static void PlatformApi_loadReadline(PlatformApiVar *plat)
 	}
 }
 
+
+static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int fault)
+{
+	switch(errno) {  // C Standard Library
+	case EDOM: /*Results from a parameter outside a function's domain, for example sqrt(-1) */
+	case ERANGE: /* Results from a result outside a function's range, for example strtol("0xfffffffff",NULL,0) */
+	case EILSEQ: /* Results from an illegal byte sequence */
+		return fault | SoftwareFault;
+	}
+
+	switch(errno) {
+	case EPERM:  /* 1. Operation not permitted (Linux) */
+		return fault | SoftwareFault;
+	case ENOENT: /* 2. No such file or directory */
+		return fault | SoftwareFault | SystemFault;
+	case ESRCH:  /* 3. No such process */
+		return fault | SystemFault | SoftwareFault;
+	case EINTR: /* 4. Interrupted system call */
+		return fault;
+	case EIO: /* 5. I/O error */
+		return fault | SystemFault ;
+	case ENXIO:  /* 6. No such device or address */
+		return fault | SoftwareFault | SystemFault;
+	case E2BIG:  /* 7. Arg list too long */
+		return fault | SoftwareFault | DataFault;
+	case ENOEXEC: /* 8. Exec format error */
+		return fault | SystemFault;
+	case EBADF:  /* 9. Bad file number */
+		return fault | SoftwareFault;
+	case ECHILD: /* 10. No child processes */
+		return fault | SoftwareFault | SystemFault;
+	case EAGAIN: /* 11. Try again */
+		return fault;  /* not fault */
+	case ENOMEM: /* 12. Out of memory */
+		/* If you try to exec() another process or just ask for more memory in this process */
+		return fault | SoftwareFault | SystemFault;
+	case EACCES: /* 13. Permission denied */
+		return fault | SystemFault;
+	case EFAULT: /* 14 Bad address */
+		return fault | SoftwareFault; /* At the C-Level */
+	case ENOTBLK: /* 15 Block device required */
+		return fault | SystemFault; /* in case of unmount device */
+	case EBUSY: /* 16 Device or resource busy */
+		return fault | SystemFault;
+	case EEXIST: /*17 File exists */
+		return fault | SoftwareFault | SystemFault;
+	case EXDEV:  /* 18. Cross-device link */
+		return fault | SystemFault;
+	case ENODEV: /* 19 No such device */
+	case ENOTDIR: /*20 Not a directory */
+	case EISDIR: /* 21 Is a directory */
+		return fault | SoftwareFault | SystemFault;
+	case EINVAL: /* 22 Invalid argument */
+		/* EINVAL gets used a lot.
+		 * TCP has the concept of "out of band data" (urgent data).
+		 * If a reading process checks for this, and there isn't any, it get EINVAL.
+		 * The plock() function ( which locks areas of a process into memory) returns this
+		 * if you attempt to use it twice on the same memory segment.
+		 * If you try to specify SIGKILL or SIGSTOP to sigaction(), you'll get this return.
+		 * The readv() and writev() calls complain this way if you give them too large an array of buffers.
+		 * As mentioned above, drivers may return this for inappropriate ioctl() calls.
+		 * The mmap() call will return this if you've specified a specific address but that address can't be used.
+		 * A seek() to before the beginning of a file returns this.
+		 * Streams use this if you attempt to link a stream onto itself. It's used for many IPC errors also. */
+		return fault | SoftwareFault | SystemFault;
+	case ENFILE:  /* 23. File table overflow */
+		return fault | SoftwareFault | SystemFault;
+	case EMFILE: /* 24. Too many open files */
+		return fault | SoftwareFault;
+	case ENOTTY: /* 25 Not a typewriter */
+		return fault | SoftwareFault | SystemFault;
+	case ETXTBSY:  /* 26 Text file busy */
+		/* It's illegal to write to a binary while it is executing- */
+		return fault | SoftwareFault;
+	case EFBIG: /* 27 File too large */
+		return fault | SoftwareFault;
+	case ENOSPC: /* 28 No space left on device */
+	case ESPIPE: /* 29 Illegal seek */
+		return fault | SoftwareFault;
+	case EROFS:  /* 30 Read-only file system */
+		return fault | SoftwareFault;
+	case EMLINK: /* 31 Too many links */
+		return fault | SoftwareFault;
+	case EPIPE: /* 32 Broken pipe */
+		return fault | SystemFault | DataFault;
+	}
+	return SoftwareFault |SystemFault;
+}
+
+static int DEOS_diagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
+{
+	if(TFLAG_is(int, fault, SystemError)) {
+		fault = DEOS_guessFaultFromErrno(kctx, fault);
+	}
+	if(fault == 0) {
+		fault = SoftwareFault | DataFault | SystemFault;  // unsure
+	}
+	return fault;
+}
+
 // --------------------------------------------------------------------------
 
 #include "libcode/logtext_formatter.h"
@@ -750,6 +850,7 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.logger              = NULL;
 	plat.traceDataLog        = traceDataLog;
 	plat.diagnosis           = diagnosis;
+	plat.diagnosisFaultType  = DEOS_diagnosisFaultType;
 
 	plat.reportUserMessage     = UI_reportUserMessage;
 	plat.reportCompilerMessage = UI_reportCompilerMessage;
