@@ -350,9 +350,11 @@ typedef enum {
 	SystemChangePoint  =  (1<<8),  /* log point to make permament change on systems */
 	SecurityAudit      =  (1<<9),  /* security audit */
 	// Otehr flag
-	PrivacyCaution    =  (1<<10), /* including privacy information */
+	PrivacyCaution     =  (1<<10), /* including privacy information */
 	// Internal Use
-	LOGPOOL_INIT      =  (1<<12)
+	SystemError        =  (1<<11),
+	HasEvidence        =  (1<<12),
+	LOGPOOL_INIT       =  (1<<17),
 } logpolicy_t;
 
 typedef struct logconf_t {
