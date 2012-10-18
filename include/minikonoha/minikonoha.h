@@ -354,7 +354,7 @@ typedef enum {
 	// Internal Use
 	SystemError        =  (1<<11),
 	HasEvidence        =  (1<<12),
-	LOGPOOL_INIT       =  (1<<17),
+	LOGPOOL_INIT       =  (1<<17)
 } logpolicy_t;
 
 typedef struct logconf_t {
