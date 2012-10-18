@@ -155,6 +155,7 @@ static int TEST_printf(const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
+	stdlog_count++;
 	int res = vfprintf(stdlog, fmt, ap);
 	va_end(ap);
 	return res;
