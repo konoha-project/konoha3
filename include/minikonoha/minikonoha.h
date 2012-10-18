@@ -350,9 +350,11 @@ typedef enum {
 	SystemChangePoint  =  (1<<8),  /* log point to make permament change on systems */
 	SecurityAudit      =  (1<<9),  /* security audit */
 	// Otehr flag
-	PrivacyCaution    =  (1<<10), /* including privacy information */
+	PrivacyCaution     =  (1<<10), /* including privacy information */
 	// Internal Use
-	LOGPOOL_INIT      =  (1<<12)
+	SystemError        =  (1<<11),
+	HasEvidence        =  (1<<12),
+	LOGPOOL_INIT       =  (1<<17),
 } logpolicy_t;
 
 typedef struct logconf_t {
@@ -756,7 +758,7 @@ struct KonohaModuleContext {
 	struct kDateVar             *asDate;\
 	struct kRegExp            *asRegExp; \
 	const struct kBytesVar      *asBytes; \
-	const struct kFILEVar     *asFILE;\
+	const struct kFileVar     *asFILE;\
 	struct kIteratorVar *asIterator; \
 	struct kMap           *asMap;    \
 	struct kInputStream  *asInputStream; \
@@ -1337,8 +1339,7 @@ struct _kSystem {
 
 #define KCALL(LSFP, RIX, MTD, ARGC, DEFVAL)
 
-#if 0
-#define KCALL(LSFP, RIX, MTD, ARGC, DEFVAL) { \
+#define KCALL_DONT_USE_THIS(LSFP, RIX, MTD, ARGC, DEFVAL) { \
 		KonohaStack *tsfp = LSFP + RIX + K_CALLDELTA;\
 		tsfp[K_MTDIDX].methodCallInfo = MTD;\
 		tsfp[K_SHIFTIDX].shift = 0;\
@@ -1347,8 +1348,7 @@ struct _kSystem {
 		KonohaRuntime_setesp(kctx, tsfp + ARGC + 1);\
 		(MTD)->invokeMethodFunc(kctx, tsfp);\
 		tsfp[K_MTDIDX].methodCallInfo = NULL;\
-	}
-#endif
+	} \
 
 #define KSELFCALL(TSFP, MTD) { \
 		KonohaStack *tsfp = TSFP;\
@@ -1383,8 +1383,6 @@ struct KonohaPackageHandlerVar {
 	const char *note;
 	kbool_t (*initPackage)   (KonohaContext *kctx, kNameSpace *, int, const char**, KTraceInfo *);
 	kbool_t (*setupPackage)  (KonohaContext *kctx, kNameSpace *, isFirstTime_t, KTraceInfo *);
-//	kbool_t (*initNameSpace) (KonohaContext *kctx, kNameSpace *, kNameSpace *, KTraceInfo *);
-//	kbool_t (*setupNameSpace)(KonohaContext *kctx, kNameSpace *, kNameSpace *, KTraceInfo *);
 	const char *konoha_revision;
 };
 
@@ -1394,7 +1392,6 @@ struct KonohaPackageVar {
 	kpackageId_t                 packageId;
 	kNameSpace                  *packageNameSpace_OnGlobalConstList;
 	KonohaPackageHandler        *packageHandler;
-//	kfileline_t                  exportScriptUri;
 };
 
 /* ----------------------------------------------------------------------- */
@@ -1564,7 +1561,7 @@ struct KonohaLibVar {
 #define kArray_setsize(A, N)      ((kArrayVar *)A)->bytesize = (N) * sizeof(void *)
 #define new_kParam(CTX, R, PSIZE, P)       (KLIB kMethod_setParam(CTX, NULL, R, PSIZE, P))
 
-#define KRequirePackage(NAME, UL)       if(!KLIB kNameSpace_requirePackage(kctx, NAME, UL)) return false;
+//#define KRequirePackage(NAME, UL)       if(!KLIB kNameSpace_requirePackage(kctx, NAME, UL)) return false;
 #define KImportPackage(NS, NAME, UL)    if(!KLIB kNameSpace_importPackage(kctx, NS, NAME, UL)) return false;
 
 typedef intptr_t  KDEFINE_METHOD;

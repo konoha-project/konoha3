@@ -41,7 +41,7 @@ static KMETHOD NameSpace_setTransparentGlobalVariable_(KonohaContext *kctx, Kono
 
 static	kbool_t global_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.field", trace);
+	KImportPackage(ns, "konoha.field", trace);
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(NameSpace_setTransparentGlobalVariable_), TY_void, TY_NameSpace, MN_("setTransparentGlobalVariable"), 1, TY_boolean, FN_("enabled"),
 		DEND,
@@ -131,7 +131,7 @@ static kbool_t global_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 {
 	KImportPackage(ns, "konoha.field", trace);
 	SUGAR kNameSpace_addSugarFunc(kctx, ns, KW_TypeDeclPattern, SugarFunc_TopLevelStatement, new_SugarFunc(ns, Statement_GlobalTypeDecl));
-	return kNameSpace_initGlobalObject(kctx, ns, trace);
+	return true;
 }
 
 // -------

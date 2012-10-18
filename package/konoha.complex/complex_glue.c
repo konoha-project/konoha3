@@ -650,7 +650,7 @@ static kbool_t Complex_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 {
 	/* Class Definition */
 	/* If you want to create Generic class like Array<T>, see konoha.map package */
-	KRequirePackage("konoha.float", trace);
+	KImportPackage(ns, "konoha.float", trace);
 	KDEFINE_CLASS defComplex = {0};
 	SETSTRUCTNAME(defComplex, Complex);
 	defComplex.cflag     = kClass_Final;

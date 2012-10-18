@@ -399,8 +399,8 @@ static kbool_t class_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 
 static kbool_t class_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.field", trace);
-	KRequirePackage("konoha.new", trace);
+	KImportPackage(ns, "konoha.field", trace);
+	KImportPackage(ns, "konoha.new", trace);
 	class_defineSyntax(kctx, ns, trace);
 	return true;
 }

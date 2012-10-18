@@ -225,7 +225,7 @@ KonohaContext* konoha_create(KonohaClass **cRequest)
 	PlatformApi *apache_platform = getApachePlatform();
 	KonohaContext* kctx = konoha_open(apache_platform);
 	kNameSpace *ns = KNULL(NameSpace);
-	KRequirePackage("apache", 0);
+	KImportPackage(ns, "apache", 0);
 	*cRequest = CT_Request;
 #define _P    kMethod_Public
 #define _F(F) (intptr_t)(F)

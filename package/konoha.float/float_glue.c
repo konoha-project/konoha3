@@ -33,7 +33,22 @@
 #define NAN (INFINITY-INFINITY)
 #else
 #include <math.h> /* for INFINATE, NAN */
+
+#ifndef INFINITY
+#ifdef __GNUC__
+#define INFINITY (__builtin_inff())
+#elif defined(HUGE_VAL)
 #endif
+#endif /* !defined(INFINITY) */
+
+#ifndef NAN
+#ifdef __GNUC__
+#define NAN (__builtin_nanf(""))
+#else
+#define NAN (0.0/0)
+#endif
+#endif
+#endif /* !defined(NAN) */
 
 #ifdef __cplusplus
 extern "C" {
@@ -331,7 +346,7 @@ static kbool_t float_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 static kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	/* Use konoha.int package's Parser to parsing FloatLiteral */
-	KRequirePackage("konoha.int", trace);
+	KImportPackage(ns, "konoha.int", trace);
 	float_defineMethod(kctx, ns, trace);
 	float_defineSyntax(kctx, ns, trace);
 	return true;

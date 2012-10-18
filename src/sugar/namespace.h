@@ -26,23 +26,25 @@
 // ---------------------------------------------------------------------------
 // Utils
 
-static void kNameSpace_appendArrayRef(KonohaContext *kctx, kNameSpace *ns, kArray **arrayRef, kObject *o)
+static void kNameSpace_appendArrayRef(KonohaContext *kctx, kNameSpace *ns, const kArray **arrayRef, kObject *o)
 {
 	if(arrayRef[0] == NULL) {
-		arrayRef[0] = new_(Array, 0, ns->NameSpaceConstList);
+		((kArray**)arrayRef)[0] = new_(Array, 0, ns->NameSpaceConstList);
 	}
+	DBG_ASSERT(IS_Array(arrayRef[0]));
 	KLIB kArray_add(kctx, arrayRef[0], o);
 }
 
-static void kNameSpace_appendArrayRefArray(KonohaContext *kctx, kNameSpace *ns, kArray **arrayRef, kArray *a)
+static void kNameSpace_appendArrayRefArray(KonohaContext *kctx, kNameSpace *ns, kArray const **arrayRef, kArray *aList)
 {
-	if(a != NULL) {
-		if(arrayRef[0] == NULL) {
-			arrayRef[0] = new_(Array, kArray_size(a), ns->NameSpaceConstList);
-		}
+	if(aList != NULL) {
 		size_t i;
-		for(i = 0; i < kArray_size(a); i++) {
-			kObject *o = a->ObjectItems[i];
+		if(arrayRef[0] == NULL) {
+			((kArray**)arrayRef)[0] = new_(Array, kArray_size(aList), ns->NameSpaceConstList);
+		}
+		DBG_ASSERT(IS_Array(arrayRef[0]));
+		for(i = 0; i < kArray_size(aList); i++) {
+			kObject *o = aList->ObjectItems[i];
 			KLIB kArray_add(kctx, arrayRef[0], o);
 		}
 	}
@@ -121,6 +123,7 @@ static kFunc** SugarSyntax_funcTable(KonohaContext *kctx, SugarSyntax *syn, int 
 static kbool_t kNameSpace_importSyntax(KonohaContext *kctx, kNameSpace *ns, SugarSyntax *target, KTraceInfo *trace)
 {
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_getSyntax(kctx, ns, target->keyword, true/*isNew*/);
+	//DBG_P("<<<< packageId=%s,%s >>>>", PackageId_t(syn->lastLoadedPackageId), PackageId_t(target->lastLoadedPackageId));
 	if(syn->lastLoadedPackageId != target->lastLoadedPackageId) {
 		int index;
 		KLIB Kreportf(kctx, DebugTag, 0, "@%s importing syntax %s%s", PackageId_t(ns->packageId), PSYM_t(syn->keyword));
@@ -197,19 +200,19 @@ static SugarSyntax* kNameSpace_getSyntax(KonohaContext *kctx, kNameSpace *ns, ks
 	return (isNew) ? kNameSpace_newSyntax(kctx, ns, NULL, keyword) : NULL;
 }
 
-//static SugarSyntaxVar *kNameSpace_setSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, size_t idx, kFunc *fo)
-//{
-//	assert(idx < SugarFunc_SIZE);
-//	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_getSyntax(kctx, ns, keyword, 1/*new*/);
-//	KSafeFieldSet(ns, syn->sugarFuncTable[idx], fo);
-//	return syn;
-//}
-
 static SugarSyntaxVar *kNameSpace_addSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, size_t idx, kFunc *funcObject)
 {
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_getSyntax(kctx, ns, keyword, 1/*new*/);
 	DBG_ASSERT(idx < SugarFunc_SIZE);
 	kNameSpace_addFuncList(kctx, ns, syn->sugarFuncListTable, idx, funcObject);
+	syn->lastLoadedPackageId = ns->packageId;
+//	// set default function
+//	if(syn->parentSyntaxNULL == NULL && syn->sugarFuncTable[SugarFunc_Expression] == NULL) {
+//		DBG_ASSERT(syn->precedence_op2 == 0 && syn->precedence_op1 == 0);
+//		kFunc *fo = SYN_(ns, KW_ExprTerm)->sugarFuncTable[SugarFunc_Expression];
+//		DBG_ASSERT(fo != NULL);
+//		KFieldInit(ns, syn->sugarFuncTable[SugarFunc_Expression], fo);
+//	}
 	return syn;
 }
 
@@ -220,6 +223,7 @@ static SugarSyntaxVar *kNameSpace_setTokenFunc(KonohaContext *kctx, kNameSpace *
 	kNameSpace_addFuncList(kctx, ns, list, konohaChar, fo);
 	syn->tokenKonohaChar = konohaChar;
 	syn->sugarFuncTable[SugarFunc_TokenFunc] = fo;  // added in addFuncList
+	syn->lastLoadedPackageId = ns->packageId;
 	return syn;
 }
 
@@ -856,7 +860,7 @@ static kbool_t kNameSpace_loadScript(KonohaContext *kctx, kNameSpace *ns, const 
 // Package Management */
 
 #define CT_NameSpaceVar CT_NameSpace
-static kNameSpace *new_PackageNameSpace_OnGlobalConstList(KonohaContext *kctx, kpackageId_t packageDomain, kpackageId_t packageId)
+static kNameSpace *new_PackageNameSpace(KonohaContext *kctx, kpackageId_t packageId)
 {
 	kNameSpaceVar *ns = new_(NameSpaceVar, KNULL(NameSpace), OnGlobalConstList);
 	ns->packageId = packageId;
@@ -874,7 +878,7 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackageId_t packageI
 		KLIB KonohaRuntime_raise(kctx, EXPT_("PackageNotFound"), SoftwareFault|SystemFault, NULL, trace->baseStack);
 		return NULL;
 	}
-	kNameSpace *ns = new_PackageNameSpace_OnGlobalConstList(kctx, packageId, packageId);
+	kNameSpace *ns = new_PackageNameSpace(kctx, packageId);
 	if(packageHandler != NULL && packageHandler->initPackage != NULL) {
 		packageHandler->initPackage(kctx, ns, 0, NULL, trace);
 	}
@@ -887,10 +891,6 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackageId_t packageI
 	pack->packageId = packageId;
 	pack->packageNameSpace_OnGlobalConstList = ns;
 	pack->packageHandler = packageHandler;
-//	path = PLATAPI formatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_exports.k");
-//	if(path != NULL) {
-//		pack->exportScriptUri = KLIB KfileId(kctx, pathbuf, strlen(pathbuf), 0, _NEWID) | 1;
-//	}
 	return pack;
 }
 
@@ -960,6 +960,7 @@ static kbool_t kNameSpace_importAll(KonohaContext *kctx, kNameSpace *ns, kNameSp
 				return false;
 			}
 		}
+		kNameSpace_appendArrayRefArray(kctx, ns, &ns->stmtPatternListNULL_OnList, targetNS->stmtPatternListNULL_OnList);
 		kNameSpace_importSyntaxAll(kctx, ns, targetNS, trace);
 		for(i = 0; i < kArray_size(targetNS->methodList_OnList); i++) {
 			kMethod *mtd = targetNS->methodList_OnList->MethodItems[i];
@@ -983,23 +984,12 @@ static KonohaPackage *kNameSpace_requirePackage(KonohaContext *kctx, const char 
 static kbool_t kNameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, const char *name, KTraceInfo *trace)
 {
 	kpackageId_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
-	KonohaPackage *pack = getPackageNULL(kctx, packageId, trace);
-	DBG_ASSERT(ns != NULL);
-	if(pack != NULL) {
-		kbool_t isContinousLoading = kNameSpace_importAll(kctx, ns, pack->packageNameSpace_OnGlobalConstList, trace);
-//		if(isContinousLoading && pack->packageHandler != NULL && pack->packageHandler->initNameSpace != NULL) {
-//			isContinousLoading = pack->packageHandler->initNameSpace(kctx, pack->packageNameSpace_OnGlobalConstList, ns, trace);
-//		}
-//		if(isContinousLoading && pack->exportScriptUri != 0) {
-//			const char *scriptPath = FileId_t(pack->exportScriptUri);
-//			kfileline_t uline = pack->exportScriptUri | (kfileline_t)1;
-//			SugarThunk thunk = {kctx, ns};
-//			isContinousLoading = PLATAPI loadScript(scriptPath, uline, (void *)&thunk, evalHookFunc);
-//		}
-//		if(isContinousLoading && pack->packageHandler != NULL && pack->packageHandler->setupNameSpace != NULL) {
-//			isContinousLoading = pack->packageHandler->setupNameSpace(kctx, pack->packageNameSpace_OnGlobalConstList, ns, trace);
-//		}
-		return isContinousLoading;
+	if(ns->packageId != packageId) {
+		KonohaPackage *pack = getPackageNULL(kctx, packageId, trace);
+		DBG_ASSERT(ns != NULL);
+		if(pack != NULL) {
+			return kNameSpace_importAll(kctx, ns, pack->packageNameSpace_OnGlobalConstList, trace);
+		}
 	}
 	return false;
 }
@@ -1007,9 +997,11 @@ static kbool_t kNameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, con
 static kbool_t kNameSpace_importPackageSymbol(KonohaContext *kctx, kNameSpace *ns, const char *name, ksymbol_t keyword, KTraceInfo *trace)
 {
 	kpackageId_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
-	KonohaPackage *pack = getPackageNULL(kctx, packageId, trace);
-	if(pack != NULL) {
-		return kNameSpace_importSymbol(kctx, ns, pack->packageNameSpace_OnGlobalConstList, keyword, trace);
+	if(ns->packageId != packageId) {
+		KonohaPackage *pack = getPackageNULL(kctx, packageId, trace);
+		if(pack != NULL) {
+			return kNameSpace_importSymbol(kctx, ns, pack->packageNameSpace_OnGlobalConstList, keyword, trace);
+		}
 	}
 	return false;
 }
@@ -1021,7 +1013,7 @@ kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len,
 	}
 	INIT_GCSTACK();
 	kpackageId_t packageId = KLIB KpackageId(kctx, "main", sizeof("main")-1, 0, _NEWID);
-	kNameSpace *ns = new_PackageNameSpace_OnGlobalConstList(kctx, packageId, packageId);
+	kNameSpace *ns = new_PackageNameSpace(kctx, packageId);
 	kstatus_t result = (kstatus_t)kNameSpace_loadScript(kctx, ns, path, trace);
 	RESET_GCSTACK();
 	return result;

@@ -535,8 +535,8 @@ static void kmodmpi_free(KonohaContext *kctx, struct KonohaModule *baseh)
 
 static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.bytes", trace);
-	KRequirePackage("konoha.float", trace);
+	KImportPackage(ns, "konoha.bytes", trace);
+	KImportPackage(ns, "konoha.float", trace);
 	kmodmpi_t *base = (kmodmpi_t *)KCalloc_UNTRACE(sizeof(kmodmpi_t), 1);
 	base->h.name     = "mpi";
 	base->h.setup    = kmodmpi_setup;
