@@ -288,7 +288,7 @@ static kBasicBlock* new_BasicBlockLABEL(KonohaContext *kctx)
 	return bb;
 }
 
-static void BasicBlock_add(KonohaContext *kctx, kBasicBlock *bb, kushort_t line, VirtualMachineInstruction *op, size_t size)
+static void BasicBlock_add(KonohaContext *kctx, kBasicBlock *bb, kfileline_t line, VirtualMachineInstruction *op, size_t size)
 {
 	if(bb->codeTable.bytemax == 0) {
 		KLIB Karray_init(kctx, &(bb->codeTable), 1 * sizeof(VirtualMachineInstruction));
@@ -1211,7 +1211,7 @@ static void ByteCode_free(KonohaContext *kctx, kObject *o)
 	
 	qsort(list, i, sizeof(ByteCode_log), cmp);
 	for(j = 0; j < i; j++) {
-		fprintf(stderr, "file = [%s] line = %d, total_count = %d\n", list[j].file, list[j].line, list[j].total_count);
+		fprintf(stderr, "[%s, %d, %d]\n", list[j].file, list[j].line, list[j].total_count);
 //TODO syslog
 	}
 	/* for(i = 0; i < filelog_memory_index; i++) { */
