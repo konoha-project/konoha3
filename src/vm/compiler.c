@@ -165,7 +165,7 @@ static void visitBlock(KonohaContext *kctx, IRBuilder *builder, kBlock *bk)
 	int espidx = builder->espidx;
 	int shift = builder->shift;
 	builder->espidx = (bk->esp->build == TEXPR_STACKTOP) ? shift + bk->esp->index : bk->esp->index;
-	int i;
+	size_t i;
 	for (i = 0; i < kArray_size(bk->StmtList); i++) {
 		kStmt *stmt = bk->StmtList->StmtItems[i];
 		if(stmt->syn == NULL) continue;

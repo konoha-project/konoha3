@@ -254,4 +254,5 @@ static IRBuilder *createDumpVisitor(IRBuilder *builder)
 }
 #endif
 
+#undef DUMPER
 #endif /* USE_DUMP_VISITOR */
