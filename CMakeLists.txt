@@ -93,7 +93,7 @@ set(PACKAGES
 	cstyle
 	llvm
 	posix.process
-##	posix.file ## obsolete
+	posix.path
 	posix.fd
 	posix.socket
 	posix.thread
