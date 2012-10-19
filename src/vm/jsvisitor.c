@@ -23,6 +23,7 @@
  ***************************************************************************/
 
 #ifdef USE_JS_VISITOR
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {

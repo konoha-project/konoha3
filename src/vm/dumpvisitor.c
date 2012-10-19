@@ -23,6 +23,8 @@
  ***************************************************************************/
 
 #ifdef USE_DUMP_VISITOR
+#include <stdio.h>
+
 #define DUMPER(BUILDER)  ((struct DumpVisitorLocal *)(BUILDER)->local_fields)
 
 #ifdef __cplusplus
