@@ -1,6 +1,8 @@
-import("curl");
-import("konoha");
+// written by unknown
+
+import("konoha.new");
 import("konoha.bytes");
+import("curl");
 
 void test() {
 	Curl c = new Curl();
@@ -9,7 +11,7 @@ void test() {
 	c.setOpt(CURLOPT_URL, "http://www.google.com");
 	c.setOpt(CURLOPT_WRITEDATA, buf);
 	c.perform();
-	assert(buf.size >= 221);
+	assert(buf.getSize() >= 221);
 }
 
 test();

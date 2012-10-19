@@ -505,7 +505,7 @@ struct PlatformApiVar {
 			STMT;\
 			uint64_t _endTime = PLATAPI getTimeMilliSecond();\
 			PLATAPI traceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), LogUint("ElapsedTime", (_endTime - _startTime)), ## __VA_ARGS__, LOG_END);\
-			counter++;\
+			/*counter++;*/\
 		}else { \
 			STMT;\
 		}\
