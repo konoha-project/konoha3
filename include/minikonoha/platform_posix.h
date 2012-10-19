@@ -761,7 +761,7 @@ static void UI_reportException(KonohaContext *kctx, const char *exceptionName, i
 			PLATAPI printf_i("this=(%s) %s, ", CT_t(cThis), KLIB Kwb_top(kctx, &wb, 1));
 			KLIB Kwb_free(&wb);
 		}
-		uint i;
+		unsigned i;
 		kParam *param = Method_param(mtd);
 		for(i = 0; i < param->psize; i++) {
 			if(i > 0) {
