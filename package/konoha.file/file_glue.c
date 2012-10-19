@@ -126,9 +126,9 @@ static void File_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer 
 }
 
 /* ------------------------------------------------------------------------ */
-//## FILE System.fopen(String path, String mode);
 
-static KMETHOD Libc_fopen(KonohaContext *kctx, KonohaStack *sfp)
+//## FILE System.fopen(String path, String mode);
+static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KMakeTrace(trace, sfp);
 	char buffer[K_PATHMAX];
@@ -137,7 +137,7 @@ static KMETHOD Libc_fopen(KonohaContext *kctx, KonohaStack *sfp)
 	const char *mode = S_text(sfp[2].asString);
 	FILE *fp = fopen(systemPath, mode);
 	if(fp == NULL) {
-		int fault = PLATAPI diagnosisFaultType(kctx, kString_guessUserFault(path), trace);
+		int fault = PLATAPI diagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "fopen",
 			LogText("filename", S_text(path)), LogText("mode", mode), LogErrno);
 		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), fault, NULL, sfp);
@@ -159,6 +159,28 @@ static KMETHOD Libc_fopen(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		KReturnWith(file, RESET_GCSTACK());
 	}
+}
+
+//## boolean System.fclose(FILE fp);
+static KMETHOD System_fclose(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kFile *file = sfp[1].asFILE;
+	if(file->fp != NULL) {
+		KMakeTrace(trace, sfp);
+		kFile_close(kctx, file, trace);
+	}
+	KReturnVoid();
+}
+
+//## @Native void File.close();
+static KMETHOD File_close(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kFile *file = (kFile *)sfp[0].asObject;
+	if(file->fp != NULL) {
+		KMakeTrace(trace, sfp);
+		kFile_close(kctx, file, trace);
+	}
+	KReturnVoid();
 }
 
 static void MethodLib_FileRead(KonohaContext *kctx, KonohaStack *sfp, kFile *file, kBytes *ba, size_t offset, size_t len)
@@ -249,17 +271,6 @@ static KMETHOD File_write3(KonohaContext *kctx , KonohaStack *sfp)
 	MethodLib_FileWrite(kctx, sfp, (kFile*)sfp[0].asObject, sfp[1].asBytes, sfp[2].intValue, sfp[3].intValue);
 }
 
-//## @Native void File.close();
-static KMETHOD File_close(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kFile *file = (kFile *)sfp[0].asObject;
-	if(file->fp != NULL) {
-		KMakeTrace(trace, sfp);
-		kFile_close(kctx, file, trace);
-	}
-	KReturnVoid();
-}
-
 //## @Native int File.getc();
 static KMETHOD File_getc(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -278,60 +289,60 @@ static KMETHOD File_putc(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 
-//## int System.umask(int cmask)
-static KMETHOD System_umask(KonohaContext *kctx, KonohaStack *sfp)
-{
-	mode_t cmask = sfp[1].intValue;
-	mode_t ret = umask(cmask);
-	KReturnUnboxValue(ret);
-}
-
-//## int System.mkdir(String path, int mode)
-static KMETHOD System_mkdir(KonohaContext *kctx, KonohaStack *sfp)
-{
-	const char *path = S_text(sfp[1].asString);
-	mode_t mode = sfp[2].intValue;
-	int ret = mkdir(path, mode);
-	if(ret == -1) {
-		// TODO: throw
-	}
-	KReturnUnboxValue(ret);
-}
-
-//## int System.rmdir(String path)
-static KMETHOD System_rmdir(KonohaContext *kctx, KonohaStack *sfp)
-{
-	const char *path = S_text(sfp[1].asString);
-	int ret = rmdir(path);
-	if(ret == -1) {
-		// TODO: throw
-	}
-	KReturnUnboxValue(ret);
-}
-
-//## int System.truncate(String path, int length)
-static KMETHOD System_truncate(KonohaContext *kctx, KonohaStack *sfp)
-{
-	const char *path = S_text(sfp[1].asString);
-	off_t length = sfp[2].intValue;
-	int ret = truncate(path, length);
-	if(ret == -1) {
-		// TODO: throw
-	}
-	KReturnUnboxValue(ret);
-}
-
-//## int System.chmod(String path, int mode)
-static KMETHOD System_chmod(KonohaContext *kctx, KonohaStack *sfp)
-{
-	const char *path = S_text(sfp[1].asString);
-	mode_t mode = sfp[2].intValue;
-	int ret = chmod(path, mode);
-	if(ret == -1) {
-		// TODO: throw
-	}
-	KReturnUnboxValue(ret);
-}
+////## int System.umask(int cmask)
+//static KMETHOD System_umask(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	mode_t cmask = sfp[1].intValue;
+//	mode_t ret = umask(cmask);
+//	KReturnUnboxValue(ret);
+//}
+//
+////## int System.mkdir(String path, int mode)
+//static KMETHOD System_mkdir(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	const char *path = S_text(sfp[1].asString);
+//	mode_t mode = sfp[2].intValue;
+//	int ret = mkdir(path, mode);
+//	if(ret == -1) {
+//		// TODO: throw
+//	}
+//	KReturnUnboxValue(ret);
+//}
+//
+////## int System.rmdir(String path)
+//static KMETHOD System_rmdir(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	const char *path = S_text(sfp[1].asString);
+//	int ret = rmdir(path);
+//	if(ret == -1) {
+//		// TODO: throw
+//	}
+//	KReturnUnboxValue(ret);
+//}
+//
+////## int System.truncate(String path, int length)
+//static KMETHOD System_truncate(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	const char *path = S_text(sfp[1].asString);
+//	off_t length = sfp[2].intValue;
+//	int ret = truncate(path, length);
+//	if(ret == -1) {
+//		// TODO: throw
+//	}
+//	KReturnUnboxValue(ret);
+//}
+//
+////## int System.chmod(String path, int mode)
+//static KMETHOD System_chmod(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	const char *path = S_text(sfp[1].asString);
+//	mode_t mode = sfp[2].intValue;
+//	int ret = chmod(path, mode);
+//	if(ret == -1) {
+//		// TODO: throw
+//	}
+//	KReturnUnboxValue(ret);
+//}
 
 // --------------------------------------------------------------------------
 
@@ -359,7 +370,8 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		KGetKonohaCommonModule()->cFile = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defFile, trace);
 	}
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static|_Im, _F(Libc_fopen), TY_File, TY_System, MN_("fopen"), 2, TY_String, FN_("filename"), TY_String, FN_("mode"),
+		_Public|_Static, _F(System_fopen), TY_File, TY_System, MN_("fopen"), 2, TY_String, FN_("filename"), TY_String, FN_("mode"),
+		_Public|_Static, _F(System_fclose), TY_void, TY_System, MN_("fclose"), 1, TY_File,
 		_Public, _F(File_close), TY_void, TY_File, MN_("close"), 0,
 		_Public, _F(File_getc), TY_int, TY_File, MN_("getc"), 0,
 		_Public, _F(File_putc), TY_void, TY_File, MN_("putc"), 1, TY_int, FN_("char"),

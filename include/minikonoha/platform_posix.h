@@ -626,7 +626,7 @@ static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 		 * The mmap() call will return this if you've specified a specific address but that address can't be used.
 		 * A seek() to before the beginning of a file returns this.
 		 * Streams use this if you attempt to link a stream onto itself. It's used for many IPC errors also. */
-		return userFault | SoftwareFault | SystemFault;
+		return SoftwareFault;
 	case ENFILE:  /* 23. File table overflow */
 		return userFault | SoftwareFault | SystemFault;
 	case EMFILE: /* 24. Too many open files */
@@ -659,6 +659,7 @@ static kbool_t DEOS_checkSoftwareTestIsPass(KonohaContext *kctx, const char *fil
 
 static int DEOS_diagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
 {
+	//DBG_P("IN fault=%d %d,%d,%d,%d", fault, TFLAG_is(int, fault, SoftwareFault), TFLAG_is(int, fault, UserFault), TFLAG_is(int, fault, SystemFault), TFLAG_is(int, fault, ExternalFault));
 	if(TFLAG_is(int, fault, SystemError)) {
 		fault = DEOS_guessFaultFromErrno(kctx, fault);
 	}
@@ -684,11 +685,11 @@ static void traceDataLog(KonohaContext *kctx, KTraceInfo *trace, int logkey, log
 	char buf[K_PAGESIZE];
 	va_list ap;
 	va_start(ap, logconf);
-	writeDataLogToBuffer(logconf, ap, buf, buf + (K_PAGESIZE - 4));
+	writeDataLogToBuffer(kctx, logconf, ap, buf, buf + (K_PAGESIZE - 4), trace);
 	int level = (logconf->policy & HasFault) ? LOG_ERR : LOG_NOTICE;
 	PLATAPI syslog_i(level, "%s", buf);
-	if(verbose_debug) {
-		fprintf(stderr, "TRACE %s\n", buf);
+	if(verbose_debug || KonohaContext_isInteractive(kctx)) {
+		fprintf(stderr, "SYSLOG %s\n", buf);
 	}
 	va_end(ap);
 }

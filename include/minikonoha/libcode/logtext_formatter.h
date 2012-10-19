@@ -117,7 +117,7 @@ static char* writeKeyToBuffer(const char *key, size_t keylen, char *buftop, char
 #define HasFault    (SystemFault|SoftwareFault|UserFault|ExternalFault)
 #define HasLocation (PeriodicPoint|ResponseCheckPoint|SystemChangePoint|SecurityAudit)
 
-static char* writePolicyToBuffer(logconf_t *logconf, char *buftop, char *bufend)
+static char* writePolicyToBuffer(KonohaContext *kctx, logconf_t *logconf, char *buftop, char *bufend, KTraceInfo *trace)
 {
 	if((logconf->policy & HasLocation)) {
 		buftop = writeKeyToBuffer(TEXTSIZE("LogPoint"), buftop, bufend);
@@ -131,9 +131,6 @@ static char* writePolicyToBuffer(logconf_t *logconf, char *buftop, char *bufend)
 		if(TFLAG_is(int, logconf->policy, SystemChangePoint)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("SystemChangePoint,"), buftop, bufend);
 		}
-		if((logconf->policy & HasFault)) {
-			buftop = writeFixedTextToBuffer(TEXTSIZE("ErrorPoint,"), buftop, bufend);
-		}
 		if(TFLAG_is(int, logconf->policy, SecurityAudit)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("SecurityAudit,"), buftop, bufend);
 		}
@@ -143,6 +140,13 @@ static char* writePolicyToBuffer(logconf_t *logconf, char *buftop, char *bufend)
 		buftop+=2;
 	}
 	if((logconf->policy & HasFault)) {
+		if(!(logconf->policy & HasLocation)) {
+			buftop = writeKeyToBuffer(TEXTSIZE("LogPoint"), buftop, bufend);
+			buftop = writeTextToBuffer("ErrorPoint", buftop, bufend);
+			buftop[0] = ',';
+			buftop[1] = ' ';
+			buftop+=2;
+		}
 		buftop = writeKeyToBuffer(TEXTSIZE("FaultType"), buftop, bufend);
 		writeToBuffer('"', buftop, bufend);
 		if(TFLAG_is(int, logconf->policy, SystemFault)) {
@@ -165,6 +169,14 @@ static char* writePolicyToBuffer(logconf_t *logconf, char *buftop, char *bufend)
 		buftop[1] = ' ';
 		buftop+=2;
 	}
+	if(trace != NULL) {
+		buftop = writeKeyToBuffer(TEXTSIZE("ScriptName"), buftop, bufend);
+		buftop = writeTextToBuffer(FileId_t(trace->pline), buftop, bufend);
+		buftop[0] = ','; buftop[1] = ' '; buftop += 2;
+		buftop = writeKeyToBuffer(TEXTSIZE("ScriptLine"), buftop, bufend);
+		buftop = writeUnsingedIntToBuffer((uintptr_t)(kushort_t)trace->pline, buftop, bufend);
+		buftop[0] = ','; buftop[1] = ' '; buftop += 2;
+	}
 	return buftop;
 }
 
@@ -181,11 +193,11 @@ static char* writeErrnoToBuffer(logconf_t *logconf, char *buftop, char *bufend)
 	return buftop;
 }
 
-static void writeDataLogToBuffer(logconf_t *logconf, va_list ap, char *buftop, char *bufend)
+static void writeDataLogToBuffer(KonohaContext *kctx, logconf_t *logconf, va_list ap, char *buftop, char *bufend, KTraceInfo *trace)
 {
 	int c = 0, logtype;
 	buftop[0] = '{'; buftop++;
-	buftop = writePolicyToBuffer(logconf, buftop, bufend);
+	buftop = writePolicyToBuffer(kctx, logconf, buftop, bufend, trace);
 	while((logtype = va_arg(ap, int)) != LOG_END) {
 		if(c > 0 && buftop + 3 < bufend) {
 			buftop[0] = ',';
