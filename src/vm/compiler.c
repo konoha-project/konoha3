@@ -21,11 +21,12 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
-
+#include <stdio.h>
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include "vm.h"
 #include "minivm.h"
+#include "minivm_common.h"
 /* ************************************************************************ */
 
 #ifdef __cplusplus
@@ -1156,9 +1157,67 @@ static void ByteCode_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *v
 	END_REFTRACE();
 }
 
+typedef struct _ByteCode_log {
+	int line;
+	int total_count;
+	const char *file;
+} ByteCode_log;
+
+int cmp(void *p0, void *p1)
+{
+	ByteCode_log *a = (ByteCode_log *) p0;
+	ByteCode_log *b = (ByteCode_log *) p1;
+	return a->line > b->line;
+}
+
+static const char *fetch_from_filelog_memory(int key)
+{
+	int i = 0;
+	FileLog_Map *map;
+	for(i = 0; i < filelog_memory_index; i++) {
+		map = filelog_memory[i];
+		if(key == map->key) {
+			return map->value;
+		}
+	}
+	return NULL;
+}
+
 static void ByteCode_free(KonohaContext *kctx, kObject *o)
 {
 	kByteCode *b = (kByteCode *)o;
+	VirtualMachineInstruction *pc = b->code;
+	kfileline_t uline = 0;
+	ByteCode_log list[1024];
+	int key;
+	int i = 0, j;
+	
+	while (1) {
+		if (pc->opcode == OPCODE_RET) {
+			break;
+		}
+		if(pc->count > 0) {
+			if(uline != pc->line) {
+				uline = pc->line;
+				list[i].line = (short)pc->line;
+				list[i].total_count = pc->count;
+				key = (uline >> (sizeof(kushort_t) * 8));
+				list[i].file = fetch_from_filelog_memory(key);
+				i++;
+			}
+		}
+		pc++;
+	}
+	
+	qsort(list, i, sizeof(ByteCode_log), cmp);
+	for(j = 0; j < i; j++) {
+		fprintf(stderr, "file = [%s] line = %d, total_count = %d\n", list[j].file, list[j].line, list[j].total_count);
+//TODO syslog
+	}
+	/* for(i = 0; i < filelog_memory_index; i++) { */
+	/* 	KFree((char *)filelog_memory[i]->value, sizeof(strlen(filelog_memory[i]->value + 1))); */
+	/* 	KFree(filelog_memory[i], sizeof(FileLog_Map)); */
+	/* } */
 	KFree(b->code, b->codesize);
 }
 
