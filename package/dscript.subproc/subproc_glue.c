@@ -127,7 +127,7 @@ struct kSubprocVar {
 
 #define CT_Subproc         cSubproc
 #define TY_Subproc         cSubproc->typeId
-#define IS_Subproc(O)      ((O)->h.ct == CT_Subproc)
+#define IS_Subproc(O)      (O_ct(O) == CT_Subproc)
 
 /* ------------------------------------------------------------------------ */
 /* [global varibals]

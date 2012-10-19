@@ -722,10 +722,9 @@ struct KonohaStackRuntimeVar {
 
 struct KonohaModule {
 	const char *name;
-	int   mod_id;
-	void (*setup)(KonohaContext*,    struct KonohaModule *, int newctx);
-	void (*reftrace)(KonohaContext*, struct KonohaModule *, struct KObjectVisitor *);
-	void (*free)(KonohaContext*,     struct KonohaModule *);
+	int         mod_id;
+	void        (*setupModuleContext)(KonohaContext*, struct KonohaModule *, int newctx);
+	void        (*freeModule)(KonohaContext*, struct KonohaModule *);
 	size_t      allocSize;
 	kmutex_t   *moduleMutex;
 };
@@ -765,7 +764,7 @@ struct KonohaModuleContext {
 	const struct kExceptionVar  *asException;\
 	const struct kFloatVar      *asFloat; \
 	struct kDateVar             *asDate;\
-	struct kRegExp            *asRegExp; \
+	struct kRegExpVar           *asRegExp; \
 	const struct kBytesVar      *asBytes; \
 	const struct kFileVar     *asFILE;\
 	struct kIteratorVar *asIterator; \

@@ -185,7 +185,6 @@ static KMETHOD File_read3(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD File_readLine(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFile *file = (kFile *)sfp[0].asObject;
-	FILE *fp = file->fp;
 	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	int ch, pos = 0, hasUTF8 = false, bufferCount = 0, policy = StringPolicy_ASCII;
@@ -343,42 +342,28 @@ static KMETHOD System_chmod(KonohaContext *kctx, KonohaStack *sfp)
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-#define CT_File         cFile
-#define TY_File         cFile->typeId
-#define IS_File(O)      ((O)->h.ct == CT_File)
-
-#define TY_Bytes        cBytes->typeId
-
 static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
+	KRequireKonohaCommonModule(trace);
 	KRequirePackage("konoha.bytes", trace);
-	KDEFINE_CLASS defFile = {
-		.structname = "FILE",
-		.typeId = TY_newid,
-		.cstruct_size = sizeof(kFile),
-		.cflag = kClass_Final,
-		.init  = File_init,
-		.free  = File_free,
-		.p     = File_p,
-	};
-	KonohaClass *cFile = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defFile, trace);
-//	KonohaClass *cBytes = KLIB kNameSpace_getClass(kctx, ns, "konoha.bytes.Bytes", strlen("konoha.bytes.Bytes"), NULL);
-	
+	if(CT_File == NULL) {
+		KDEFINE_CLASS defFile = {
+			.structname = "FILE",
+			.typeId = TY_newid,
+			.cstruct_size = sizeof(kFile),
+			.cflag = kClass_Final,
+			.init  = File_init,
+			.free  = File_free,
+			.p     = File_p,
+		};
+		KGetKonohaCommonModule()->cFile = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defFile, trace);
+	}
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Static|_Im, _F(Libc_fopen), TY_File, TY_System, MN_("fopen"), 2, TY_String, FN_("filename"), TY_String, FN_("mode"),
 		_Public, _F(File_close), TY_void, TY_File, MN_("close"), 0,
 		_Public, _F(File_getc), TY_int, TY_File, MN_("getc"), 0,
 		_Public, _F(File_putc), TY_void, TY_File, MN_("putc"), 1, TY_int, FN_("char"),
 		_Public, _F(File_readLine), TY_String, TY_File, MN_("readLine"), 0,
-
-		_Public|_Static|_Const|_Im, _F(System_umask), TY_int, TY_System, MN_("umask"), 1, TY_int, FN_("cmask"),
-		_Public|_Static|_Const|_Im, _F(System_mkdir), TY_int, TY_System, MN_("mkdir"), 2, TY_String, FN_("path"), TY_int, FN_("mode"),
-		_Public|_Static|_Const|_Im, _F(System_rmdir), TY_int, TY_System, MN_("rmdir"), 1, TY_String, FN_("path"),
-		_Public|_Static|_Im, _F(System_truncate), TY_int, TY_System, MN_("truncate"), 2, TY_String, FN_("path"), TY_int, FN_("length"),
-		_Public|_Static|_Im, _F(System_chmod), TY_int, TY_System, MN_("chmod"), 2, TY_String, FN_("path"), TY_int, FN_("mode"),
-		// the function below uses Bytes
-//		_Public|_Im, _F(File_write3), TY_int, TY_File, MN_("write"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
-//		_Public|_Im, _F(File_read3), TY_int, TY_File, MN_("read"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
@@ -387,6 +372,22 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 
 static kbool_t file_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
+	if(CT_Bytes != NULL) {
+		KDEFINE_METHOD MethodData[] = {
+			_Public|_Im, _F(File_write3), TY_int, TY_File, MN_("write"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
+			_Public|_Im, _F(File_read3),  TY_int, TY_File, MN_("read"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
+			DEND,
+		};
+		KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	}
+//		_Public|_Static|_Const|_Im, _F(System_umask), TY_int, TY_System, MN_("umask"), 1, TY_int, FN_("cmask"),
+//		_Public|_Static|_Const|_Im, _F(System_mkdir), TY_int, TY_System, MN_("mkdir"), 2, TY_String, FN_("path"), TY_int, FN_("mode"),
+//		_Public|_Static|_Const|_Im, _F(System_rmdir), TY_int, TY_System, MN_("rmdir"), 1, TY_String, FN_("path"),
+//		_Public|_Static|_Im, _F(System_truncate), TY_int, TY_System, MN_("truncate"), 2, TY_String, FN_("path"), TY_int, FN_("length"),
+//		_Public|_Static|_Im, _F(System_chmod), TY_int, TY_System, MN_("chmod"), 2, TY_String, FN_("path"), TY_int, FN_("mode"),
+//		// the function below uses Bytes
+//	};
+//	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	return true;
 }
 

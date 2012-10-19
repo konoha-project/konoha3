@@ -54,7 +54,7 @@ int verbose_sugar = 0;
 static kstatus_t kNameSpace_eval(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline)
 {
 	kstatus_t result;
-	kmodsugar->h.setup(kctx, (KonohaModule *)kmodsugar, 0/*lazy*/);
+	kmodsugar->h.setupModuleContext(kctx, (KonohaModule *)kmodsugar, 0/*lazy*/);
 	INIT_GCSTACK();
 	{
 		TokenSequence tokens = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
@@ -72,7 +72,7 @@ kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, kfileline_t uli
 	if(verbose_sugar) {
 		DUMP_P("\n>>>----\n'%s'\n------\n", script);
 	}
-	kmodsugar->h.setup(kctx, (KonohaModule *)kmodsugar, 0/*lazy*/);
+	kmodsugar->h.setupModuleContext(kctx, (KonohaModule *)kmodsugar, 0/*lazy*/);
 	return kNameSpace_eval(kctx, KNULL(NameSpace), script, uline);    // FIXME
 }
 
@@ -114,22 +114,12 @@ static void SugarModule_setup(KonohaContext *kctx, struct KonohaModule *def, int
 	}
 }
 
-static void SugarModule_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
-{
-}
-
-static void SugarModule_free(KonohaContext *kctx, struct KonohaModule *baseh)
-{
-	KFree(baseh, sizeof(KModuleSugar));
-}
-
 void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	KModuleSugar *mod = (KModuleSugar *)KCalloc_UNTRACE(sizeof(KModuleSugar), 1);
 	mod->h.name     = "sugar";
-	mod->h.setup    = SugarModule_setup;
-	mod->h.reftrace = SugarModule_reftrace;
-	mod->h.free     = SugarModule_free;
+	mod->h.allocSize = sizeof(KModuleSugar);
+	mod->h.setupModuleContext    = SugarModule_setup;
 	KLIB KonohaRuntime_setModule(kctx, MOD_sugar, (KonohaModule *)mod, 0);
 
 	KonohaLibVar* l = (KonohaLibVar *)ctx->klib;

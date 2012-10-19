@@ -49,7 +49,7 @@ extern "C" {
 #define CT_Posix         kmodposix->cPosix
 #define TY_Posix         kmodposix->cPosix->typeId
 
-#define IS_Posix(O)      ((O)->h.ct == CT_Posix);
+#define IS_Posix(O)      (O_ct(O) == CT_Posix);
 
 typedef struct {
 	KonohaModule h;

@@ -40,7 +40,7 @@
 //#define CT_Bytes         kmodiconv->cBytes
 //#define TY_Bytes         kmodiconv->cBytes->typeId
 //
-//#define IS_Bytes(O)      ((O)->h.ct == CT_Bytes)
+//#define IS_Bytes(O)      (O_ct(O) == CT_Bytes)
 
 typedef struct {
 	KonohaModule h;

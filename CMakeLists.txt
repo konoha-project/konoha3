@@ -104,7 +104,7 @@ set(PACKAGES
 ##	jansson
 	mecab
 	python
-	apache
+#	apache   ## removed Module bugs
 #	openssl
 #	logpool
 	gmp

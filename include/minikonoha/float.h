@@ -38,7 +38,7 @@ extern "C" {
 #define IS_DefinedFloat() (kctx->modshare[MOD_float] != NULL)
 #define CT_Float          (KonohaContext_getFloatModule(kctx)->cFloat)
 #define TY_float          (CT_Float->typeId)
-#define IS_Float(O)       ((O)->h.ct == CT_Float)
+#define IS_Float(O)       (O_ct(O) == CT_Float)
 #define KFLOAT_FMT        "%.6e"
 
 typedef struct {

@@ -1048,7 +1048,7 @@ static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	DBG_P("START CODE GENERATION..");
 	INIT_GCSTACK();
 	if(ctxcode == NULL) {
-		kmodcode->h.setup(kctx, NULL, 1);
+		kmodcode->header.setupModuleContext(kctx, NULL, 1/*new ctx*/);
 	}
 
 	IRBuilder *builder, builderbuf;
@@ -1181,28 +1181,15 @@ static void kmodcode_setup(KonohaContext *kctx, struct KonohaModule *def, int ne
 	}
 }
 
-static void kmodcode_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
-{
-	KModuleByteCode *base = (KModuleByteCode *)baseh;
-	BEGIN_REFTRACE(1);
-	KREFTRACEn(base->codeNull);
-	END_REFTRACE();
-}
-
-static void kmodcode_free(KonohaContext *kctx, struct KonohaModule *baseh)
-{
-	KFree(baseh, sizeof(KModuleByteCode));
-}
-
 void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	KModuleByteCode *base = (KModuleByteCode *)KCalloc_UNTRACE(sizeof(KModuleByteCode), 1);
 	opcode_check();
-	base->h.name     = "minivm";
-	base->h.setup    = kmodcode_setup;
-	base->h.reftrace = kmodcode_reftrace;
-	base->h.free     = kmodcode_free;
-	KLIB KonohaRuntime_setModule(kctx, MOD_code, &base->h, 0);
+	base->header.name      = "minivm";
+	base->header.allocSize = sizeof(KModuleByteCode);
+	base->header.setupModuleContext    = kmodcode_setup;
+	KLIB KonohaRuntime_setModule(kctx, MOD_code, &base->header, 0);
+
 	KDEFINE_CLASS defBasicBlock = {0};
 	SETSTRUCTNAME(defBasicBlock, BasicBlock);
 	defBasicBlock.init = BasicBlock_init;
@@ -1216,7 +1203,7 @@ void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	
 	base->cBasicBlock = KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defBasicBlock, 0);
 	base->cByteCode = KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defByteCode, 0);
-	kmodcode_setup(kctx, &base->h, 0);
+	kmodcode_setup(kctx, &base->header, 0);
 	KonohaLibVar *l = (KonohaLibVar *)kctx->klib;
 	l->kMethod_genCode = kMethod_genCode;
 	l->kMethod_setFunc = kMethod_setFunc;

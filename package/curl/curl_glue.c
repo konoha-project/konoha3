@@ -354,7 +354,7 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 
 #define CT_Curl     cCurl
 #define TY_Curl     cCurl->typeId
-#define IS_Curl(O)  ((O)->h.ct == CT_Curl)
+#define IS_Curl(O)  (O_ct(O) == CT_Curl)
 
 #define _KVi(T)  #T, TY_int, T
 

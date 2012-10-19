@@ -241,7 +241,7 @@ static kStringBase *Stack_pop(KonohaContext *kctx, KGrowingArray *stack)
 	if(index == 0) {
 		return NULL;
 	}
-	kStringBase *str = stack->ObjectItems[index-1];
+	kStringBase *str = (kStringBase *)stack->ObjectItems[index-1];
 	stack->bytesize -= sizeof(kStringBase *);
 	return str;
 }

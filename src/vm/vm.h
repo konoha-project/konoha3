@@ -46,17 +46,17 @@ typedef struct kByteCodeVar           kByteCodeVar;
 #define TY_BasicBlock    kmodcode->cBasicBlock->typeId
 #define CT_ByteCode      kmodcode->cByteCode
 
-#define IS_BasicBlock(O)  ((O)->h.ct == CT_BasicBlock)
-#define IS_ByteCode(O)    ((O)->h.ct == CT_ByteCode)
+#define IS_BasicBlock(O)  (O_ct(O) == CT_BasicBlock)
+#define IS_ByteCode(O)    (O_ct(O) == CT_ByteCode)
 
 #define CODE_ENTER        kmodcode->PRECOMPILED_ENTER
 #define CODE_NCALL        kmodcode->PRECOMPILED_NCALL
 
 typedef struct {
-	KonohaModule     h;
-	KonohaClass    *cBasicBlock;
-	KonohaClass    *cByteCode;
-	kByteCode      *codeNull;
+	KonohaModule     header;
+	KonohaClass     *cBasicBlock;
+	KonohaClass     *cByteCode;
+	kByteCode       *codeNull;
 	struct VirtualMachineInstruction  *PRECOMPILED_ENTER;
 	struct VirtualMachineInstruction  *PRECOMPILED_NCALL;
 } KModuleByteCode;

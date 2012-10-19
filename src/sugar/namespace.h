@@ -1008,7 +1008,7 @@ static kbool_t kNameSpace_importPackageSymbol(KonohaContext *kctx, kNameSpace *n
 kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, KTraceInfo *trace)
 {
 	if(KonohaContext_getSugarContext(kctx) == NULL) {
-		kmodsugar->h.setup(kctx, (KonohaModule *)kmodsugar, 0/*lazy*/);
+		kmodsugar->h.setupModuleContext(kctx, (KonohaModule *)kmodsugar, 0/*lazy*/);
 	}
 	INIT_GCSTACK();
 	kpackageId_t packageId = KLIB KpackageId(kctx, "main", sizeof("main")-1, 0, _NEWID);

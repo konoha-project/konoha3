@@ -36,7 +36,7 @@ extern "C" {
 
 #define CT_Json          cJson
 #define TY_Json          cJson->typeId
-#define IS_Json(O)       ((O)->h.ct == CT_Json)
+#define IS_Json(O)       (O_ct(O) == CT_Json)
 #define CT_JsonArray     CT_p0(kctx, CT_Array, TY_Json)
 
 #define CT_StringArray0   CT_p0(kctx, CT_Array, TY_String)

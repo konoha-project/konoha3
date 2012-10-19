@@ -615,7 +615,7 @@ static KMETHOD SockAddr_new (KonohaContext *kctx, KonohaStack *sfp)
 
 #define CT_SockAddr         cSockAddr
 #define TY_SockAddr         cSockAddr->typeId
-#define IS_SockAddr(O)      ((O)->h.ct == CT_SockAddr)
+#define IS_SockAddr(O)      (O_ct(O) == CT_SockAddr)
 
 #define _KVi(T) #T, TY_int, T
 

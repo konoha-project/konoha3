@@ -59,7 +59,7 @@ struct _kConnection {
 
 #define CT_Connection     cConnection
 #define TY_Connection     cConnection->typeId
-#define IS_Connection(O)  ((O)->h.ct == CT_Connection)
+#define IS_Connection(O)  (O_ct(O) == CT_Connection)
 
 /* ------------------------------------------------------------------------ */
 /* [ResultSet] */
@@ -93,7 +93,7 @@ struct _kResultSet{
 
 #define CT_ResultSet     cResultSet
 #define TY_ResultSet     cResultSet->typeId
-#define IS_ResultSet(O)  ((O)->h.ct == CT_ResultSet)
+#define IS_ResultSet(O)  (O_ct(O) == CT_ResultSet)
 
 /* ------------------------------------------------------------------------ */
 /* [bytes struct] */

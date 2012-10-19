@@ -26,7 +26,7 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-#include <minikonoha/float.h>
+#include <minikonoha/konoha_common.h>
 
 #ifdef _MSC_VER
 #define INFINITY (DBL_MAX+DBL_MAX)
@@ -74,18 +74,6 @@ static void Float_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer
 	KLIB Kwb_printf(kctx, wb, KFLOAT_FMT, v[pos].floatValue);
 }
 
-static void kmodfloat_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
-{
-}
-
-static void kmodfloat_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
-{
-}
-
-static void kmodfloat_free(KonohaContext *kctx, struct KonohaModule *baseh)
-{
-	KFree(baseh, sizeof(KonohaFloatModule));
-}
 
 // --------------------------------------------------------------------------
 
@@ -264,21 +252,16 @@ static KMETHOD Float_opMINUS(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t float_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	KonohaFloatModule *base = (KonohaFloatModule *)KCalloc_UNTRACE(sizeof(KonohaFloatModule), 1);
-	base->h.name     = "float";
-	base->h.setup    = kmodfloat_setup;
-	base->h.reftrace = kmodfloat_reftrace;
-	base->h.free     = kmodfloat_free;
-	KLIB KonohaRuntime_setModule(kctx, MOD_float, &base->h, trace);
-
-	KDEFINE_CLASS defFloat = {0};
-	SETUNBOXNAME(defFloat, float);
-	defFloat.cstruct_size = sizeof(kFloat);
-	defFloat.cflag = CFLAG_int;
-	defFloat.init = Float_init;
-	defFloat.p     = Float_p;
-
-	base->cFloat = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defFloat, trace);
+	KRequireKonohaCommonModule(trace);
+	if(CT_Float == NULL) {
+		KDEFINE_CLASS defFloat = {0};
+		SETUNBOXNAME(defFloat, float);
+		defFloat.cstruct_size = sizeof(kFloat);
+		defFloat.cflag = CFLAG_int;
+		defFloat.init = Float_init;
+		defFloat.p     = Float_p;
+		CT_Float = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defFloat, trace);
+	}
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const|_Im, _F(Float_opPlus), TY_float, TY_float, MN_("+"), 0,

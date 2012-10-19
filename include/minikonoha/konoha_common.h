@@ -34,30 +34,17 @@ extern "C" {
 #endif
 
 #define KGetKonohaCommonModule()    ((KonohaCommonModule *)kctx->modshare[MOD_konoha])
-#define KGetKonohaCommonContext()   ((KonohaCommonModuleContext *)kctx->mod[MOD_konoha])
 #define KDefinedKonohaCommonModule() (kctx->modshare[MOD_float] != NULL)
 
-#define KRequireKonohaCommon() \
-	if(KGetKonohaCommonModule() == NULL) {\
-		KonohaCommonModule_init(kctx);\
+#define KRequireKonohaCommonModule(TRACE) \
+	if (KGetKonohaCommonModule() == NULL) {\
+		KonohaCommonModule_init(kctx, TRACE);\
 	}\
-
-#define CT_Float          (KGetKonohaCommonModule()->cFloat)
-#define TY_float          (CT_Float->typeId)
-#define IS_Float(O)       ((O)->h.ct == CT_Float)
-#define KFLOAT_FMT        "%.6e"
-
-#define CFLAG_Iterator         kClass_Final
-#define CT_Iterator            KGetKonohaCommonModule()->cIterator
-#define TY_Iterator            KGetKonohaCommonModule()->cIterator->typeId
-#define CT_StringIterator      KGetKonohaCommonModule()->cStringIterator
-#define TY_StringIterator      KGetKonohaCommonModule()->cStringIterator->typeId
-
-#define IS_Iterator(O)         (O_ct(O)->baseTypeId == TY_Iterator)
 
 typedef struct {
 	KonohaModule h;
 	KonohaClass *cFloat;
+	KonohaClass *cRegExp;
 
 	KonohaClass *cIterator;
 	KonohaClass *cStringIterator;
@@ -67,29 +54,36 @@ typedef struct {
 	KonohaClass *cFile;
 } KonohaCommonModule;
 
-static void kmodfloat_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
-{
-}
 
-static void kmodfloat_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
-{
-}
-
-static void kmodfloat_free(KonohaContext *kctx, struct KonohaModule *baseh)
-{
-	KFree(baseh, sizeof(KonohaCommonModule));
-}
-
-static void KonohaCommonModule_init(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
+static void KonohaCommonModule_init(KonohaContext *kctx, KTraceInfo *trace)
 {
 	KonohaCommonModule *base = (KonohaCommonModule *)KCalloc(sizeof(KonohaCommonModule), 1, trace);
-	base->h.name     = "konoha";
-	base->h.setup    = kmodfloat_setup;
-	base->h.reftrace = kmodfloat_reftrace;
-	base->h.free     = kmodfloat_free;
+	base->h.name      = "KonohaCommon";
+	base->h.allocSize = sizeof(KonohaCommonModule);
 	KLIB KonohaRuntime_setModule(kctx, MOD_konoha, &base->h, trace);
 }
 
+/* ------------------------------------------------------------------------ */
+/* Bytes */
+
+#define CT_Bytes         (KGetKonohaCommonModule()->cBytes)
+#define TY_Bytes         ((CT_Bytes)->typeId)
+#define IS_Bytes(O)      (O_ct(O) == CT_Bytes)
+
+/* ------------------------------------------------------------------------ */
+/* Bytes */
+
+#define CT_RegExp         (KGetKonohaCommonModule()->cRegExp)
+#define TY_RegExp         ((CT_RegExp)->typeId)
+#define IS_RegExp(O)      (O_ct(O) == CT_RegExp)
+
+/* ------------------------------------------------------------------------ */
+/* Float */
+
+#define CT_Float          (KGetKonohaCommonModule()->cFloat)
+#define TY_float          ((CT_Float)->typeId)
+#define IS_Float(O)       (O_ct(O) == CT_Float)
+#define KFLOAT_FMT        "%.6e"
 
 typedef const struct kFloatVar kFloat;
 struct kFloatVar {
@@ -97,16 +91,18 @@ struct kFloatVar {
 	kfloat_t floatValue;
 };
 
-typedef struct {
-	KonohaModule h;
-	KonohaClass *cIterator;
-	KonohaClass *cStringIterator;
-	KonohaClass *cGenericIterator;
-} KonohaIteratorModule;
+/* ------- */
+/* Iterator */
 
-typedef struct {
-	KonohaModuleContext h;
-} KonohaIteratorModuleContext;
+#define CFLAG_Iterator         kClass_Final
+#define CT_Iterator            KGetKonohaCommonModule()->cIterator
+#define TY_Iterator            KGetKonohaCommonModule()->cIterator->typeId
+#define CT_StringIterator      KGetKonohaCommonModule()->cStringIterator
+#define TY_StringIterator      KGetKonohaCommonModule()->cStringIterator->typeId
+#define CT_GenericIterator      KGetKonohaCommonModule()->cGenericIterator
+#define TY_GenericIterator      KGetKonohaCommonModule()->cGenericIterator->typeId
+
+#define IS_Iterator(O)         (O_ct(O)->baseTypeId == TY_Iterator)
 
 typedef struct kIteratorVar kIterator;
 struct kIteratorVar {
@@ -123,6 +119,10 @@ struct kIteratorVar {
 };
 
 /* .... */
+
+#define CT_File         KGetKonohaCommonModule()->cFile
+#define TY_File         (CT_File)->typeId
+#define IS_File(O)      (O_ct(O) == CT_File)
 
 typedef struct kFileVar kFile;
 
