@@ -78,7 +78,7 @@ static uintptr_t I18N_iconv_open(KonohaContext *kctx, const char *targetCharset,
 	return (uintptr_t)ic;
 }
 
-static size_t I18N_iconv_memcpyStyle(KonohaContext *kctx, uintptr_t ic, char **outbuf, size_t *outBytesLeft, char **inbuf, size_t *inBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
+static size_t I18N_iconv_memcpyStyle(KonohaContext *kctx, uintptr_t ic, char **outbuf, size_t *outBytesLeft, ICONV_INBUF_CONST char **inbuf, size_t *inBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
 {
 	DBG_ASSERT(ic != ICONV_NULL);
 	size_t iconv_ret = iconv((iconv_t)ic, inbuf, inBytesLeft, outbuf, outBytesLeft);
@@ -93,7 +93,7 @@ static size_t I18N_iconv_memcpyStyle(KonohaContext *kctx, uintptr_t ic, char **o
 	return iconv_ret;
 }
 
-static size_t I18N_iconv(KonohaContext *kctx, uintptr_t ic, char **inbuf, size_t *inBytesLeft, char **outbuf, size_t *outBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
+static size_t I18N_iconv(KonohaContext *kctx, uintptr_t ic, ICONV_INBUF_CONST char **inbuf, size_t *inBytesLeft, char **outbuf, size_t *outBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
 {
 	DBG_ASSERT(ic != ICONV_NULL);
 	size_t iconv_ret = iconv((iconv_t)ic, inbuf, inBytesLeft, outbuf, outBytesLeft);
@@ -135,8 +135,8 @@ static const char* I18N_formatKonohaPath(KonohaContext *kctx, char *buf, size_t 
 	size_t newsize;
 	if(ic != ICONV_NULL) {
 		int isTooBig;
-		char *presentPtrFrom = (char *)path;
-		char ** inbuf = &presentPtrFrom;
+		ICONV_INBUF_CONST char *presentPtrFrom = (ICONV_INBUF_CONST char *)path;	// too dirty?
+		ICONV_INBUF_CONST char ** inbuf = &presentPtrFrom;
 		char ** outbuf = &buf;
 		size_t inBytesLeft = pathsize, outBytesLeft = bufsiz - 1;
 		PLATAPI iconv_i_memcpyStyle(kctx, ic, outbuf, &outBytesLeft, inbuf, &inBytesLeft, &isTooBig, trace);
@@ -163,12 +163,12 @@ static uintptr_t I18N_iconv_open(KonohaContext *kctx, const char *targetCharset,
 	return ICONV_NULL;
 }
 
-static size_t I18N_iconv_memcpyStyle(KonohaContext *kctx, uintptr_t ic, char **outbuf, size_t *outBytesLeft, char **inbuf, size_t *inBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
+static size_t I18N_iconv_memcpyStyle(KonohaContext *kctx, uintptr_t ic, char **outbuf, size_t *outBytesLeft, ICONV_INBUF_CONST char **inbuf, size_t *inBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
 {
 	return -1;
 }
 
-static size_t I18N_iconv(KonohaContext *kctx, uintptr_t ic, char **inbuf, size_t *inBytesLeft, char **outbuf, size_t *outBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
+static size_t I18N_iconv(KonohaContext *kctx, uintptr_t ic, ICONV_INBUF_CONST char **inbuf, size_t *inBytesLeft, char **outbuf, size_t *outBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
 {
 	return -1;
 }
@@ -772,7 +772,7 @@ static void UI_reportException(KonohaContext *kctx, const char *exceptionName, i
 			PLATAPI printf_i("this=(%s) %s, ", CT_t(cThis), KLIB Kwb_top(kctx, &wb, 1));
 			KLIB Kwb_free(&wb);
 		}
-		int i;
+		unsigned i;
 		kParam *param = Method_param(mtd);
 		for(i = 0; i < param->psize; i++) {
 			if(i > 0) {
