@@ -563,57 +563,57 @@ static void PlatformApi_loadReadline(PlatformApiVar *plat)
 }
 
 
-static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int fault)
+static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 {
 	switch(errno) {  // C Standard Library
-	case EDOM: /*Results from a parameter outside a function's domain, for example sqrt(-1) */
+	case EDOM:   /*Results from a parameter outside a function's domain, for example sqrt(-1) */
 	case ERANGE: /* Results from a result outside a function's range, for example strtol("0xfffffffff",NULL,0) */
 	case EILSEQ: /* Results from an illegal byte sequence */
-		return fault | SoftwareFault;
+		return userFault | SoftwareFault;
 	}
 
 	switch(errno) {
 	case EPERM:  /* 1. Operation not permitted (Linux) */
-		return fault | SoftwareFault;
+		return userFault | SoftwareFault;
 	case ENOENT: /* 2. No such file or directory */
-		return fault | SoftwareFault | SystemFault;
+		return userFault | SoftwareFault | SystemFault;
 	case ESRCH:  /* 3. No such process */
-		return fault | SystemFault | SoftwareFault;
+		return userFault | SystemFault | SoftwareFault;
 	case EINTR: /* 4. Interrupted system call */
-		return fault;
+		return SystemFault;
 	case EIO: /* 5. I/O error */
-		return fault | SystemFault ;
+		return SystemFault ;
 	case ENXIO:  /* 6. No such device or address */
-		return fault | SoftwareFault | SystemFault;
+		return userFault | SoftwareFault | SystemFault;
 	case E2BIG:  /* 7. Arg list too long */
-		return fault | SoftwareFault | UserFault;
+		return userFault | SoftwareFault | UserFault;
 	case ENOEXEC: /* 8. Exec format error */
-		return fault | SystemFault;
+		return SystemFault;
 	case EBADF:  /* 9. Bad file number */
-		return fault | SoftwareFault;
+		return userFault | SoftwareFault;
 	case ECHILD: /* 10. No child processes */
-		return fault | SoftwareFault | SystemFault;
+		return userFault | SoftwareFault | SystemFault;
 	case EAGAIN: /* 11. Try again */
-		return fault;  /* not fault */
+		return userFault;  /* not fault */
 	case ENOMEM: /* 12. Out of memory */
 		/* If you try to exec() another process or just ask for more memory in this process */
-		return fault | SoftwareFault | SystemFault;
+		return userFault | SoftwareFault | SystemFault;
 	case EACCES: /* 13. Permission denied */
-		return fault | SystemFault;
+		return userFault | SystemFault;
 	case EFAULT: /* 14 Bad address */
-		return fault | SoftwareFault; /* At the C-Level */
+		return userFault | SoftwareFault; /* At the C-Level */
 	case ENOTBLK: /* 15 Block device required */
-		return fault | SystemFault; /* in case of unmount device */
+		return SystemFault; /* in case of unmount device */
 	case EBUSY: /* 16 Device or resource busy */
-		return fault | SystemFault;
+		return SystemFault;
 	case EEXIST: /*17 File exists */
-		return fault | SoftwareFault | SystemFault;
+		return userFault | SoftwareFault | SystemFault;
 	case EXDEV:  /* 18. Cross-device link */
-		return fault | SystemFault;
+		return SystemFault;
 	case ENODEV: /* 19 No such device */
 	case ENOTDIR: /*20 Not a directory */
 	case EISDIR: /* 21 Is a directory */
-		return fault | SoftwareFault | SystemFault;
+		return userFault | SoftwareFault | SystemFault;
 	case EINVAL: /* 22 Invalid argument */
 		/* EINVAL gets used a lot.
 		 * TCP has the concept of "out of band data" (urgent data).
@@ -626,29 +626,29 @@ static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int fault)
 		 * The mmap() call will return this if you've specified a specific address but that address can't be used.
 		 * A seek() to before the beginning of a file returns this.
 		 * Streams use this if you attempt to link a stream onto itself. It's used for many IPC errors also. */
-		return fault | SoftwareFault | SystemFault;
+		return userFault | SoftwareFault | SystemFault;
 	case ENFILE:  /* 23. File table overflow */
-		return fault | SoftwareFault | SystemFault;
+		return userFault | SoftwareFault | SystemFault;
 	case EMFILE: /* 24. Too many open files */
-		return fault | SoftwareFault;
+		return userFault | SoftwareFault;
 	case ENOTTY: /* 25 Not a typewriter */
-		return fault | SoftwareFault | SystemFault;
+		return userFault | SoftwareFault | SystemFault;
 	case ETXTBSY:  /* 26 Text file busy */
 		/* It's illegal to write to a binary while it is executing- */
-		return fault | SoftwareFault;
+		return userFault | SoftwareFault;
 	case EFBIG: /* 27 File too large */
-		return fault | SoftwareFault;
+		return userFault | SoftwareFault;
 	case ENOSPC: /* 28 No space left on device */
 	case ESPIPE: /* 29 Illegal seek */
-		return fault | SoftwareFault;
+		return userFault | SoftwareFault;
 	case EROFS:  /* 30 Read-only file system */
-		return fault | SoftwareFault;
+		return userFault | SoftwareFault;
 	case EMLINK: /* 31 Too many links */
-		return fault | SoftwareFault;
+		return userFault | SoftwareFault;
 	case EPIPE: /* 32 Broken pipe */
-		return fault | SystemFault | UserFault;
+		return userFault | SystemFault | UserFault;
 	}
-	return SoftwareFault |SystemFault;
+	return userFault | SoftwareFault |SystemFault;
 }
 
 static kbool_t DEOS_checkSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
