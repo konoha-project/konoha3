@@ -368,10 +368,12 @@ static void CommandLine_import(KonohaContext *kctx, char *packageName)
 	size_t len = strlen(packageName)+1;
 	char *bufname = ALLOCA(char, len);
 	memcpy(bufname, packageName, len);
+	BEGIN_LOCAL(lsfp, K_CALLDELTA);
 	KMakeTrace(trace, kctx->esp);
 	if(!(KLIB kNameSpace_importPackage(kctx, KNULL(NameSpace), bufname, trace))) {
 		PLATAPI exit_i(EXIT_FAILURE);
 	}
+	END_LOCAL();
 }
 
 static void konoha_startup(KonohaContext *kctx, const char *startup_script)
