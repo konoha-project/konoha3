@@ -667,7 +667,7 @@ static int DEOS_diagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *t
 	}
 	if(TFLAG_is(int, fault, SoftwareFault)) {
 		if(DEOS_checkSoftwareTestIsPass(kctx, FileId_t(trace->pline), (kushort_t)trace->pline)) {
-			TFLAG_set0(int, fault, SoftwareFault);
+			//TFLAG_set0(int, fault, SoftwareFault);
 		}
 	}
 	return fault;
