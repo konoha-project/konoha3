@@ -778,7 +778,7 @@ static kMethod* kExpr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kE
 {
 	kExpr *firstExpr = kExpr_at(exprN, 0);
 	kToken *termToken = firstExpr->termToken;
-	ksymbol_t fsymbol = termToken->resolvedSymbol; /*ksymbolA(S_text(termToken->text), S_size(termToken->text), SYM_NONAME)*/;
+	ksymbol_t fsymbol = termToken->resolvedSymbol;
 	GammaAllocaData *genv = gma->genv;
 	int i;
 	for(i = genv->localScope.varsize - 1; i >= 0; i--) {
@@ -787,9 +787,10 @@ static kMethod* kExpr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kE
 			return NULL;
 		}
 	}
+	int paramsize = kArray_size(exprN->cons) - 2;
 	if(genv->localScope.varItems[0].ty != TY_void) {
 		DBG_ASSERT(genv->this_cid == genv->localScope.varItems[0].ty);
-		kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, genv->this_cid, fsymbol, kArray_size(exprN->cons) - 2);
+		kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, genv->this_cid, fsymbol, paramsize);
 		if(mtd != NULL) {
 			KFieldSet(exprN->cons, exprN->cons->ExprItems[1], new_VariableExpr(kctx, gma, TEXPR_LOCAL, gma->genv->this_cid, 0));
 			return mtd;
@@ -810,7 +811,21 @@ static kMethod* kExpr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kE
 		}
 	}
 	{
-		int paramsize = kArray_size(exprN->cons) - 2;
+		KKeyValue* kvs = kNameSpace_getConstNULL(kctx, ns, fsymbol);
+		DBG_P("fsymbol=%s%s, kvs=%p", PSYM_t(fsymbol), kvs);
+		if(kvs != NULL && kvs->ty == VirtualType_StaticMethod) {
+			ktype_t cid = (ktype_t)kvs->unboxValue;
+			ksymbol_t alias = (ksymbol_t)(kvs->unboxValue >> (sizeof(ktype_t) * 8));
+			kMethod *mtd = kNameSpace_getMethodByParamSizeNULL(kctx, ns, cid, alias, paramsize);
+			DBG_P("cid = %d, alias=%d", cid, alias);
+			DBG_P("mtd=%p, @Static=%d", mtd, 1/*kMethod_is(Static, mtd)*/);
+			if(mtd != NULL && kMethod_is(Static, mtd)) {
+				KFieldSet(exprN->cons, exprN->cons->ExprItems[1], new_ConstValueExpr(kctx, cid, KLIB Knull(kctx, CT_(cid))));
+				return mtd;
+			}
+		}
+	}
+	{
 		kMethod *mtd = kNameSpace_getMethodByParamSizeNULL(kctx, ns, O_typeId(ns), fsymbol, paramsize);
 		if(mtd != NULL) {
 			KFieldSet(exprN->cons, exprN->cons->ExprItems[1], new_ConstValueExpr(kctx, O_typeId(ns), UPCAST(ns)));

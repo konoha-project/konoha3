@@ -33,6 +33,7 @@ extern "C" {
 
 // --------------------------------------------------------------------------
 
+
 static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Statement(stmt, gma);
@@ -60,6 +61,12 @@ static kbool_t namespace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTrac
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
+
+// --------------------------------------------------------------------------
+
+
+
+
 
 // --------------------------------------------------------------------------
 

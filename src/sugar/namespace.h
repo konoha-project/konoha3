@@ -1005,6 +1005,40 @@ static kbool_t kNameSpace_importPackageSymbol(KonohaContext *kctx, kNameSpace *n
 	return false;
 }
 
+// --------------------------------------------------------------------------
+
+static void kNameSpace_setStaticFunction(KonohaContext *kctx, kNameSpace *ns, kArray *list, ktype_t cid, KTraceInfo *trace)
+{
+	size_t i;
+	for(i = 0; i < kArray_size(list); i++) {
+		kMethod *mtd = list->MethodItems[i];
+		if(kMethod_is(Static, mtd) && mtd->typeId == cid) {
+			uintptr_t mtdinfo = ((uintptr_t)cid | (((uintptr_t)mtd->mn) << (sizeof(ktype_t) * 8)));
+			KLIB kNameSpace_setConstData(kctx, ns, mtd->mn, VirtualType_StaticMethod, mtdinfo, trace);
+		}
+	}
+}
+
+static void kNameSpace_useStaticFunction(KonohaContext *kctx, kNameSpace *ns, KonohaClass *ct, KTraceInfo *trace)
+{
+	kNameSpace *currentNS = ns;
+	while(currentNS != NULL) {
+		kNameSpace_setStaticFunction(kctx, ns, currentNS->methodList_OnList, ct->typeId, trace);
+		currentNS = currentNS->parentNULL;
+	}
+	kNameSpace_setStaticFunction(kctx, ns, ct->methodList_OnGlobalConstList, ct->typeId, trace);
+}
+
+//## void NameSpace.useStaticFunction(Object *o);
+static KMETHOD NameSpace_useStaticFunction(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KMakeTrace(trace, sfp);
+	kNameSpace_useStaticFunction(kctx, sfp[0].asNameSpace, O_ct(sfp[1].asObject), trace);
+	KReturnVoid();
+}
+
+// --------------------------------------------------------------------------
+
 kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, KTraceInfo *trace)
 {
 	if(KonohaContext_getSugarContext(kctx) == NULL) {

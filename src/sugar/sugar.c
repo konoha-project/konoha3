@@ -272,12 +272,14 @@ void MODSUGAR_loadMethod(KonohaContext *kctx)
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(NameSpace_importPackage), TY_void, TY_NameSpace, MN_("import"), 1, TY_String, FN_("name"),
 		_Public, _F(NameSpace_importPackageSymbol), TY_void, TY_NameSpace, MN_("import"), 2, TY_String, FN_("name"), TY_String, FN_("symbol"),
+		_Public, _F(NameSpace_useStaticFunction), TY_void, TY_NameSpace, MN_("useStaticFunction"), 1, TY_Object, FN_("class"),
 		_Public, _F(NameSpace_loadScript), TY_void, TY_NameSpace, MN_("load"), 1, TY_String, FN_("path"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);
-	KSET_KLIB2(kNameSpace_requirePackage, kNameSpace_requirePackage, NULL);
-	KSET_KLIB2(kNameSpace_importPackage, kNameSpace_importPackage, NULL);
+
+	KSET_KLIB2(kNameSpace_requirePackage,      kNameSpace_requirePackage, NULL);
+	KSET_KLIB2(kNameSpace_importPackage,       kNameSpace_importPackage, NULL);
 	KSET_KLIB2(kNameSpace_importPackageSymbol, kNameSpace_importPackageSymbol, NULL);
 }
 
