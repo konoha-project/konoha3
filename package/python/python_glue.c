@@ -553,7 +553,7 @@ static kbool_t python_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
-	if(CT_Float != NULL) {
+	if(KDefinedKonohaCommonModule() == true && CT_Float != NULL) {
 		KDEFINE_METHOD MethodData[] = {
 			_Public|_Const|_Im|_Coercion, _F(PyObject_toFloat), TY_float, TY_PyObject, MN_to(TY_float), 0,
 			_Public|_Const|_Im|_Coercion, _F(Float_toPyObject), TY_PyObject, TY_float, MN_to(TY_PyObject), 0,
