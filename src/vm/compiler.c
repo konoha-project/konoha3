@@ -1211,13 +1211,15 @@ static void ByteCode_free(KonohaContext *kctx, kObject *o)
 	
 	qsort(list, i, sizeof(ByteCode_log), cmp);
 	for(j = 0; j < i; j++) {
-		fprintf(stderr, "[%s, %d, %d]\n", list[j].file, list[j].line, list[j].total_count);
+		fprintf(stderr, "{\"%s/%d\" : %d}\n", list[j].file, list[j].line, list[j].total_count); //To berkeley DB
+		fprintf(stderr, "{\"script_id\": \"%s\", \"line\": %d, \"count\": %d}\n", list[j].file, list[j].line, list[j].total_count); //To syslog
 //TODO syslog
 	}
-	/* for(i = 0; i < filelog_memory_index; i++) { */
-	/* 	KFree((char *)filelog_memory[i]->value, sizeof(strlen(filelog_memory[i]->value + 1))); */
-	/* 	KFree(filelog_memory[i], sizeof(FileLog_Map)); */
-	/* } */
+//TODO
+//	for(i = 0; i < filelog_memory_index; i++) {
+//		KFree((char *)filelog_memory[i]->value, sizeof(strlen(filelog_memory[i]->value + 1)));
+//		KFree(filelog_memory[i], sizeof(FileLog_Map));
+//	}
 	KFree(b->code, b->codesize);
 }
 
