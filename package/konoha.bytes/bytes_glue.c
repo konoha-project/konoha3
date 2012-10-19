@@ -24,7 +24,7 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-#include <minikonoha/bytes.h>
+#include <minikonoha/konoha_common.h>
 
 #include <stdio.h>
 #ifdef __cplusplus
@@ -84,8 +84,8 @@ static void kBytes_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffe
 
 /* ------------------------------------------------------------------------ */
 
-#define CONV_BUFSIZE 4096 // 4K
-#define MAX_STORE_BUFSIZE (CONV_BUFSIZE * 1024)// 4M
+//#define CONV_BUFSIZE 4096 // 4K
+//#define MAX_STORE_BUFSIZE (CONV_BUFSIZE * 1024)// 4M
 
 //## @Const String Bytes.toString();
 //static KMETHOD Bytes_toString(KonohaContext *kctx, KonohaStack *sfp)
@@ -255,7 +255,7 @@ static KMETHOD String_new_fromBytes_withSpecifiedDecode(KonohaContext *kctx, Kon
 /* ------------------------------------------------------------------------ */
 
 #define _Public   kMethod_Public
-#define _Const    kMethod_Const
+//#define _Const    kMethod_Const
 #define _Im       kMethod_Immutable
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
@@ -269,11 +269,9 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	defBytes.init    = kBytes_init;
 	defBytes.p       = kBytes_p;
 
-	KonohaClass *cBytes = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defBytes, trace);
-	int TY_Bytes = cBytes->typeId;
-	int FN_encoding = FN_("encoding");
+	//int FN_encoding = FN_("encoding");
 	int FN_index = FN_("index");
-	int FN_x = FN_("x");
+	//int FN_x = FN_("x");
 	int FN_c = FN_("c");
 	int FN_size = FN_("size");
 	KDEFINE_METHOD MethodData[] = {
