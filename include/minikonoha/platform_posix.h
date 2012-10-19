@@ -651,6 +651,12 @@ static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int fault)
 	return SoftwareFault |SystemFault;
 }
 
+static kbool_t DEOS_checkSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
+{
+	DBG_P("filename='%s', line=%d", filename, line);
+	return true;
+}
+
 static int DEOS_diagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
 {
 	if(TFLAG_is(int, fault, SystemError)) {
@@ -658,6 +664,11 @@ static int DEOS_diagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *t
 	}
 	if(fault == 0) {
 		fault = SoftwareFault | UserFault | SystemFault;  // unsure
+	}
+	if(TFLAG_is(int, fault, SoftwareFault)) {
+		if(DEOS_checkSoftwareTestIsPass(kctx, FileId_t(trace->pline), (kushort_t)trace->pline)) {
+			TFLAG_set0(int, fault, SoftwareFault);
+		}
 	}
 	return fault;
 }
