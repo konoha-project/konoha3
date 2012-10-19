@@ -1238,7 +1238,7 @@ struct kMethodVar {
 		FmethodCallCC         callcc_1;
 	};
 	uintptr_t         flag;
-	ktype_t           typeId;      kmethodn_t  mn;
+	ktype_t           typeId;       kmethodn_t  mn;
 	kparamId_t        paramid;      kparamId_t paramdom;
 	kshort_t          delta;        kpackageId_t packageId;
 	kToken           *SourceToken;

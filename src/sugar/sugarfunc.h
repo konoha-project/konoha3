@@ -812,13 +812,10 @@ static kMethod* kExpr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kE
 	}
 	{
 		KKeyValue* kvs = kNameSpace_getConstNULL(kctx, ns, fsymbol);
-		DBG_P("fsymbol=%s%s, kvs=%p", PSYM_t(fsymbol), kvs);
 		if(kvs != NULL && kvs->ty == VirtualType_StaticMethod) {
 			ktype_t cid = (ktype_t)kvs->unboxValue;
 			ksymbol_t alias = (ksymbol_t)(kvs->unboxValue >> (sizeof(ktype_t) * 8));
 			kMethod *mtd = kNameSpace_getMethodByParamSizeNULL(kctx, ns, cid, alias, paramsize);
-			DBG_P("cid = %d, alias=%d", cid, alias);
-			DBG_P("mtd=%p, @Static=%d", mtd, 1/*kMethod_is(Static, mtd)*/);
 			if(mtd != NULL && kMethod_is(Static, mtd)) {
 				KFieldSet(exprN->cons, exprN->cons->ExprItems[1], new_ConstValueExpr(kctx, cid, KLIB Knull(kctx, CT_(cid))));
 				return mtd;

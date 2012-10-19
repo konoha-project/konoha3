@@ -264,16 +264,51 @@ static KMETHOD NameSpace_importPackageSymbol(KonohaContext *kctx, KonohaStack *s
 	kNameSpace_importPackageSymbol(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), keyword, trace);
 }
 
+static void kNameSpace_setStaticFunction(KonohaContext *kctx, kNameSpace *ns, kArray *list, kpackageId_t packageId, ktype_t cid, KTraceInfo *trace)
+{
+	size_t i;
+	for(i = 0; i < kArray_size(list); i++) {
+		kMethod *mtd = list->MethodItems[i];
+		if(kMethod_is(Static, mtd) && mtd->typeId == cid && (packageId == mtd->packageId || packageId == -1)) {
+			uintptr_t mtdinfo = ((uintptr_t)cid | (((uintptr_t)mtd->mn) << (sizeof(ktype_t) * 8)));
+			KLIB kNameSpace_setConstData(kctx, ns, mtd->mn, VirtualType_StaticMethod, mtdinfo, trace);
+		}
+	}
+}
+
+//## void NameSpace.useStaticFunction(Object o);
+static KMETHOD NameSpace_useStaticFunction(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KMakeTrace(trace, sfp);
+	KonohaClass *ct = O_ct(sfp[1].asObject);
+	kNameSpace_setStaticFunction(kctx, sfp[0].asNameSpace, ct->methodList_OnGlobalConstList, -1, ct->typeId, trace);
+	KReturnVoid();
+}
+
+//## void NameSpace.useStaticFunction(String package, Object o);
+static KMETHOD NameSpace_useStaticFunction2(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KMakeTrace(trace, sfp);
+	kpackageId_t packageId = KLIB KpackageId(kctx, S_text(sfp[1].asString), S_size(sfp[1].asString), 0, _NEWID);
+	KonohaPackage *pack = getPackageNULL(kctx, packageId, trace);
+	if(pack != NULL) {
+		KonohaClass *ct = O_ct(sfp[2].asObject);
+		kNameSpace_setStaticFunction(kctx, sfp[0].asNameSpace, ct->methodList_OnGlobalConstList, packageId, ct->typeId, trace);
+	}
+	KReturnVoid();
+}
+
 #define _Public kMethod_Public
 #define _F(F)   (intptr_t)(F)
 
 void MODSUGAR_loadMethod(KonohaContext *kctx)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(NameSpace_importPackage), TY_void, TY_NameSpace, MN_("import"), 1, TY_String, FN_("name"),
-		_Public, _F(NameSpace_importPackageSymbol), TY_void, TY_NameSpace, MN_("import"), 2, TY_String, FN_("name"), TY_String, FN_("symbol"),
+		_Public, _F(NameSpace_importPackage), TY_void, TY_NameSpace, MN_("import"), 1, TY_String, FN_("package"),
+		_Public, _F(NameSpace_importPackageSymbol), TY_void, TY_NameSpace, MN_("import"), 2, TY_String, FN_("package"), TY_String, FN_("symbol"),
 		_Public, _F(NameSpace_useStaticFunction), TY_void, TY_NameSpace, MN_("useStaticFunction"), 1, TY_Object, FN_("class"),
-		_Public, _F(NameSpace_loadScript), TY_void, TY_NameSpace, MN_("load"), 1, TY_String, FN_("path"),
+		_Public, _F(NameSpace_useStaticFunction2), TY_void, TY_NameSpace, MN_("useStaticFunction"), 2, TY_String, FN_("package"), TY_Object, FN_("class"),
+		_Public, _F(NameSpace_loadScript), TY_void, TY_NameSpace, MN_("load"), 1, TY_String, FN_("filename"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);
