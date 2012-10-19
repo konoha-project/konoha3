@@ -123,6 +123,8 @@ struct kIteratorVar {
 #define CT_File         KGetKonohaCommonModule()->cFile
 #define TY_File         (CT_File)->typeId
 #define IS_File(O)      (O_ct(O) == CT_File)
+#define CT_FILE         KGetKonohaCommonModule()->cFile
+#define TY_FILE         (CT_File)->typeId
 
 typedef struct kFileVar kFile;
 

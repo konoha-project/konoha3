@@ -30,7 +30,7 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-#include <minikonoha/float.h>
+#include <minikonoha/konoha_common.h>
 #include "mt19937ar.h"
 
 #ifdef __cplusplus

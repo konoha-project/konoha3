@@ -27,7 +27,7 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/klib.h>
-#include <minikonoha/float.h>
+#include <minikonoha/konoha_common.h>
 #include <jansson.h>
 
 #ifdef __cplusplus

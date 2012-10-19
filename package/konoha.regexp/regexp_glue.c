@@ -720,6 +720,7 @@ static kbool_t regexp_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 static kbool_t regexp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
+	KRequireKonohaCommonModule(trace);
 	regexp_defineMethod(kctx, ns, trace);
 	regexp_defineSyntax(kctx, ns, trace);
 	return true;
@@ -733,7 +734,7 @@ static kbool_t regexp_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 KDEFINE_PACKAGE* regexp_init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("regexp", "1.0"),
+		KPACKNAME("konoha", "1.0"),
 		.initPackage    = regexp_initPackage,
 		.setupPackage   = regexp_setupPackage,
 	};

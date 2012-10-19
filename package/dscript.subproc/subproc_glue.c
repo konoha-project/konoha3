@@ -22,11 +22,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/bytes.h>
-#include <minikonoha/posix.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -37,6 +32,11 @@
 #include <poll.h>
 #include <signal.h>
 #include <sys/time.h>
+
+#define USE_FILE 1
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
+#include <minikonoha/konoha_common.h>
 
 #if defined(__linux__)
 #include <linux/version.h>
@@ -1165,12 +1165,11 @@ static void kSubproc_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *v
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-#define CT_FILE   cFILE
-#define TY_FILE   cFILE->typeId
-
 static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
+	KRequireKonohaCommonModule(trace);
 	KRequirePackage("posix.file", trace);
+
 	KDEFINE_CLASS defSubproc = {
 		STRUCTNAME(Subproc),
 		.cflag    = kClass_Final,
@@ -1181,7 +1180,6 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 
 	KonohaClass *cSubproc = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defSubproc, trace);
 //	base->cSubproc= KLIB kNameSpace_defineClass(kctx, ns, NULL, &defSubproc, trace);
-	KonohaClass *cFILE = KLIB kNameSpace_getClass(kctx, ns, "posix.file.FILE", strlen("posix.file.FILE"), NULL);
 
 	kparamtype_t ps = {TY_String, FN_("str")};
 	KonohaClass *CT_StringArray2 = KLIB KonohaClass_Generics(kctx, CT_Array, TY_String, 1, &ps);

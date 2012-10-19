@@ -24,7 +24,7 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-#include <minikonoha/float.h>
+#include <minikonoha/konoha_common.h>
 #include <minikonoha/bytes.h>
 #include <stdio.h>
 #define TRACE(POLICY, ...) OLDTRACE_SWITCH_TO_KTrace(POLICY, __VA_ARGS__);

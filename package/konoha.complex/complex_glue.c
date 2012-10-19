@@ -22,11 +22,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <minikonoha/minikonoha.h>
-#include <minikonoha/sugar.h>
-#include <minikonoha/float.h>
 #include <stdio.h>
 #include <complex.h>
+
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/sugar.h>
+#include <minikonoha/konoha_common.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -648,8 +649,6 @@ static KMETHOD Complex_conjl(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t Complex_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	/* Class Definition */
-	/* If you want to create Generic class like Array<T>, see konoha.map package */
 	KRequirePackage("konoha.float", trace);
 	KDEFINE_CLASS defComplex = {0};
 	SETSTRUCTNAME(defComplex, Complex);

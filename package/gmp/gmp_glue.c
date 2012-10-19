@@ -24,7 +24,7 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-#include <minikonoha/float.h>
+#include <minikonoha/konoha_common.h>
 #include <gmp.h>
 
 #ifdef __cplusplus
