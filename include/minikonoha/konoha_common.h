@@ -71,7 +71,7 @@ static void KonohaCommonModule_init(KonohaContext *kctx, KTraceInfo *trace)
 #define IS_Bytes(O)      (O_ct(O) == CT_Bytes)
 
 /* ------------------------------------------------------------------------ */
-/* Bytes */
+/* RegExp */
 
 #define CT_RegExp         (KGetKonohaCommonModule()->cRegExp)
 #define TY_RegExp         ((CT_RegExp)->typeId)

@@ -25,7 +25,7 @@
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/klib.h"
 #include "minikonoha/sugar.h"
-#include "minikonoha/float.h"
+#include "minikonoha/konoha_common.h"
 #include "minikonoha/gc.h"
 #include "minikonoha/platform.h"
 
