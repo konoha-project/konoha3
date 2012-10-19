@@ -368,7 +368,8 @@ static void CommandLine_import(KonohaContext *kctx, char *packageName)
 	size_t len = strlen(packageName)+1;
 	char *bufname = ALLOCA(char, len);
 	memcpy(bufname, packageName, len);
-	if(!(KLIB kNameSpace_importPackage(kctx, KNULL(NameSpace), bufname, 0))) {
+	KMakeTrace(trace, kctx->esp);
+	if(!(KLIB kNameSpace_importPackage(kctx, KNULL(NameSpace), bufname, trace))) {
 		PLATAPI exit_i(EXIT_FAILURE);
 	}
 }
