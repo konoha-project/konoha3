@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.assign");
+import("konoha.new");
 import("konoha.class");
 
 class Person {

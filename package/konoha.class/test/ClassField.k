@@ -1,6 +1,7 @@
 // written by shunsuke shida
 // modified by kimio kuramitsu
 
+import("konoha.new");
 import("konoha.class");
 
 class C {

@@ -1,5 +1,7 @@
+// written by unknown
+
+import("konoha.new");
 import("konoha.class");
-import("konoha.assign");
 
 class A;
 
