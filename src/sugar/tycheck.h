@@ -310,7 +310,6 @@ static kbool_t kMethod_compile(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns
 	INIT_GCSTACK();
 	kGamma *gma = KonohaContext_getSugarContext(kctx)->preparedGamma;
 	kBlock *bk = kMethod_newBlock(kctx, mtd, ns, text, uline);
-	DBG_P("@@@@@@@@@ NS=%p", ns);
 	GammaStackDecl lvarItems[32] = {};
 	GammaAllocaData newgma = {0};
 	newgma.currentWorkingMethod = mtd;
@@ -469,7 +468,6 @@ static kstatus_t TokenSequence_eval(KonohaContext *kctx, TokenSequence *source)
 	RESET_GCSTACK();
 	return status;
 }
-
 
 /* ------------------------------------------------------------------------ */
 

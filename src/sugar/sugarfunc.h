@@ -774,22 +774,22 @@ static KMETHOD TypeCheck_MethodCall(KonohaContext *kctx, KonohaStack *sfp)
 
 static kExpr *Expr_tyCheckFuncParams(KonohaContext *kctx, kStmt *stmt, kExpr *expr, KonohaClass *ct, kGamma *gma);
 
-static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kExpr *exprN, kGamma *gma, ktype_t reqty)
+static kMethod* kExpr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kExpr *exprN, kGamma *gma, ktype_t reqty)
 {
 	kExpr *firstExpr = kExpr_at(exprN, 0);
 	kToken *termToken = firstExpr->termToken;
-	ksymbol_t fn = ksymbolA(S_text(termToken->text), S_size(termToken->text), SYM_NONAME);
+	ksymbol_t fsymbol = termToken->resolvedSymbol; /*ksymbolA(S_text(termToken->text), S_size(termToken->text), SYM_NONAME)*/;
 	GammaAllocaData *genv = gma->genv;
 	int i;
 	for(i = genv->localScope.varsize - 1; i >= 0; i--) {
-		if(genv->localScope.varItems[i].fn == fn && TY_isFunc(genv->localScope.varItems[i].ty)) {
+		if(genv->localScope.varItems[i].fn == fsymbol && TY_isFunc(genv->localScope.varItems[i].ty)) {
 			SUGAR kExpr_setVariable(kctx, firstExpr, gma, TEXPR_LOCAL, genv->localScope.varItems[i].ty, i);
 			return NULL;
 		}
 	}
 	if(genv->localScope.varItems[0].ty != TY_void) {
 		DBG_ASSERT(genv->this_cid == genv->localScope.varItems[0].ty);
-		kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, genv->this_cid, fn, kArray_size(exprN->cons) - 2);
+		kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, genv->this_cid, fsymbol, kArray_size(exprN->cons) - 2);
 		if(mtd != NULL) {
 			KFieldSet(exprN->cons, exprN->cons->ExprItems[1], new_VariableExpr(kctx, gma, TEXPR_LOCAL, gma->genv->this_cid, 0));
 			return mtd;
@@ -797,13 +797,13 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kEx
 		KonohaClass *ct = CT_(genv->this_cid);
 		if(ct->fieldsize) {
 			for(i = ct->fieldsize; i >= 0; i--) {
-				if(ct->fieldItems[i].fn == fn && TY_isFunc(ct->fieldItems[i].ty)) {
+				if(ct->fieldItems[i].fn == fsymbol && TY_isFunc(ct->fieldItems[i].ty)) {
 					SUGAR kExpr_setVariable(kctx, firstExpr, gma, TEXPR_FIELD, ct->fieldItems[i].ty, longid((kshort_t)i, 0));
 					return NULL;
 				}
 			}
 		}
-		mtd = kNameSpace_getGetterMethodNULL(kctx, ns, genv->this_cid, fn, TY_var);
+		mtd = kNameSpace_getGetterMethodNULL(kctx, ns, genv->this_cid, fsymbol, TY_var);
 		if(mtd != NULL && TY_isFunc(Method_returnType(mtd))) {
 			KFieldSet(exprN->cons, exprN->cons->ExprItems[0], new_GetterExpr(kctx, termToken, mtd, new_VariableExpr(kctx, gma, TEXPR_LOCAL, genv->this_cid, 0)));
 			return NULL;
@@ -811,7 +811,7 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kEx
 	}
 	{
 		int paramsize = kArray_size(exprN->cons) - 2;
-		kMethod *mtd = kNameSpace_getMethodByParamSizeNULL(kctx, ns, O_typeId(ns), fn, paramsize);
+		kMethod *mtd = kNameSpace_getMethodByParamSizeNULL(kctx, ns, O_typeId(ns), fsymbol, paramsize);
 		if(mtd != NULL) {
 			KFieldSet(exprN->cons, exprN->cons->ExprItems[1], new_ConstValueExpr(kctx, O_typeId(ns), UPCAST(ns)));
 			return mtd;
@@ -819,7 +819,7 @@ static kMethod* Expr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kEx
 	}
 	if((Gamma_isTopLevel(gma) || kNameSpace_isAllowed(TransparentGlobalVariable,ns)) && ns->globalObjectNULL_OnList != NULL) {
 		ktype_t cid = O_typeId(ns->globalObjectNULL_OnList);
-		kMethod *mtd = kNameSpace_getGetterMethodNULL(kctx, ns, cid, fn, TY_var);
+		kMethod *mtd = kNameSpace_getGetterMethodNULL(kctx, ns, cid, fsymbol, TY_var);
 		if(mtd != NULL && TY_isFunc(Method_returnType(mtd))) {
 			KFieldSet(exprN->cons, exprN->cons->ExprItems[0], new_GetterExpr(kctx, termToken, mtd, new_ConstValueExpr(kctx, cid, ns->globalObjectNULL_OnList)));
 			return NULL;
@@ -835,7 +835,7 @@ static KMETHOD TypeCheck_FuncStyleCall(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_ASSERT(IS_Expr(kExpr_at(expr, 0)));
 	DBG_ASSERT(expr->cons->ObjectItems[1] == K_NULL);
 	if(Expr_isSymbolTerm(kExpr_at(expr, 0))) {
-		kMethod *mtd = Expr_lookUpFuncOrMethod(kctx, Stmt_nameSpace(stmt), expr, gma, reqty);
+		kMethod *mtd = kExpr_lookUpFuncOrMethod(kctx, Stmt_nameSpace(stmt), expr, gma, reqty);
 		if(mtd != NULL) {
 			if(kMethod_is(Overloaded, mtd)) {
 				DBG_P("overloaded found %s.%s%s", Method_t(mtd));
