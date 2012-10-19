@@ -2,7 +2,7 @@
 
 import("konoha.new");
 import("konoha.bytes");
-import("posix.file");
+import("konoha.file");
 
 void test() {
 	FILE f = System.fopen("files/eucjp.txt", "r");

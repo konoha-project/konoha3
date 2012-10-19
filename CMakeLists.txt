@@ -66,6 +66,7 @@ set(PACKAGES
 	konoha.defined
 	konoha.dynamic
 	konoha.field
+	konoha.file
 	konoha.float
 	konoha.foreach
 	konoha.global
@@ -92,7 +93,7 @@ set(PACKAGES
 	cstyle
 	llvm
 	posix.process
-	posix.file
+##	posix.file ## obsolete
 	posix.fd
 	posix.socket
 	posix.thread

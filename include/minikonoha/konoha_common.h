@@ -140,7 +140,6 @@ struct kFileVar {
 	uintptr_t writerIconv;
 };
 
-
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

@@ -6,7 +6,7 @@ import("konoha.math");
 import("konoha.class");
 import("konoha.bytes");
 import("konoha.string");
-import("posix.file");
+import("konoha.file");
 
 int width = 256;
 int height = 256;

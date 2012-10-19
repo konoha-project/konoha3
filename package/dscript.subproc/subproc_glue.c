@@ -1168,7 +1168,7 @@ static void kSubproc_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *v
 static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KRequireKonohaCommonModule(trace);
-	KRequirePackage("posix.file", trace);
+	KRequirePackage("konoha.file", trace);
 
 	KDEFINE_CLASS defSubproc = {
 		STRUCTNAME(Subproc),
