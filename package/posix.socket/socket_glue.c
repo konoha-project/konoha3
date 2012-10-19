@@ -24,7 +24,7 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-#include <minikonoha/bytes.h>
+#include <minikonoha/konoha_common.h>
 
 #include <unistd.h>
 #include <arpa/inet.h>

@@ -27,7 +27,7 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/klib.h>
-#include <minikonoha/iterator.h>
+#include <minikonoha/konoha_common.h>
 
 #ifdef __cplusplus
 extern "C" {
