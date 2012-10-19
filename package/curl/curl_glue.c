@@ -307,7 +307,7 @@ static KMETHOD Curl_setOptString(KonohaContext *kctx, KonohaStack *sfp)
 	CURLoption curlopt = (CURLoption)sfp[1].intValue;
 	switch(curlopt) {
 	case CURLOPT_URL: {
-
+		KFieldInit(kcurl, kcurl->URLInfoNULL, sfp[2].asString);
 	}
 
 	case CURLOPT_CAINFO:
@@ -441,7 +441,7 @@ static int diagnosisCurlFaultType(KonohaContext *kctx, CURLcode res, int UserFau
 		return UserFault | SystemFault;
 	case CURLE_URL_MALFORMAT:           /* 3 */
 		return UserFault | SoftwareFault;
-	case CURLE_OBSOLETE4:               /* 4 - NOT USED */
+	//case CURLE_OBSOLETE4:               /* 4 - NOT USED */
 	case CURLE_COULDNT_RESOLVE_PROXY:   /* 5 */
 	case CURLE_COULDNT_RESOLVE_HOST:    /* 6 */
 		return UserFault | SoftwareFault | ExternalFault;
@@ -701,6 +701,7 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KRequireKonohaCommonModule(trace);
+	KRequirePackage("konoha.file", trace);
 
 	KDEFINE_CLASS defCurl = {
 		STRUCTNAME(Curl),
