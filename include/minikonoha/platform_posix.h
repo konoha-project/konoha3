@@ -539,27 +539,6 @@ static void debugPrintf(const char *file, const char *func, int line, const char
 	va_end(ap);
 }
 
-//static void reportCaughtException(const char *exceptionName, const char *scriptName, int line, const char *optionalMessage)
-//{
-//	if(line != 0) {
-//		if(optionalMessage != NULL && optionalMessage[0] != 0) {
-//			fprintf(stderr, " ** (%s:%d) %s: %s\n", scriptName, line, exceptionName, optionalMessage);
-//		}
-//		else {
-//			fprintf(stderr, " ** (%s:%d) %s\n", scriptName, line, exceptionName);
-//		}
-//	}
-//	else {
-//		if(optionalMessage != NULL && optionalMessage[0] != 0) {
-//			fprintf(stderr, " ** %s: %s\n", exceptionName, optionalMessage);
-//		}
-//		else {
-//			fprintf(stderr, " ** %s\n", exceptionName);
-//		}
-//	}
-//}
-
-
 static void NOP_debugPrintf(const char *file, const char *func, int line, const char *fmt, ...)
 {
 }
@@ -687,13 +666,16 @@ static int DEOS_diagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *t
 
 #include "libcode/logtext_formatter.h"
 
+#define HasFault    (SystemFault|SoftwareFault|UserFault|ExternalFault)
+
 static void traceDataLog(KonohaContext *kctx, KTraceInfo *trace, int logkey, logconf_t *logconf, ...)
 {
 	char buf[K_PAGESIZE];
 	va_list ap;
 	va_start(ap, logconf);
 	writeDataLogToBuffer(logconf, ap, buf, buf + (K_PAGESIZE - 4));
-	syslog(LOG_NOTICE, "%s", buf);
+	int level = (logconf->policy & HasFault) ? LOG_ERR : LOG_NOTICE;
+	PLATAPI syslog_i(level, "%s", buf);
 	if(verbose_debug) {
 		fprintf(stderr, "TRACE %s\n", buf);
 	}
@@ -759,7 +741,7 @@ static void UI_reportException(KonohaContext *kctx, const char *exceptionName, i
 			PLATAPI printf_i(" ExternalFault");
 		}
 	}
-	PLATAPI printf_i("%s\n\n", PLATAPI endTag(ErrTag));
+	PLATAPI printf_i("%s\n", PLATAPI endTag(ErrTag));
 	PLATAPI printf_i("%sStackTrace\n", PLATAPI beginTag(InfoTag));
 
 	KonohaStack *sfp = topStack;
