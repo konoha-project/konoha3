@@ -71,7 +71,7 @@ static uintptr_t I18N_iconv_open(KonohaContext *kctx, const char *targetCharset,
 {
 	uintptr_t ic = (uintptr_t)iconv_open(targetCharset, sourceCharset);
 	if(ic == ICONV_NULL) {
-		KTraceApi(trace, DataFault|SoftwareFault, "iconv_open",
+		KTraceApi(trace, UserFault|SoftwareFault, "iconv_open",
 			LogText("tocode", targetCharset), LogText("fromcode", sourceCharset), LogErrno
 		);
 	}
@@ -87,7 +87,7 @@ static size_t I18N_iconv_memcpyStyle(KonohaContext *kctx, uintptr_t ic, char **o
 			isTooBigSourceRef[0] = true;
 			return iconv_ret;
 		}
-		KTraceApi(trace, DataFault, "iconv", LogErrno);
+		KTraceApi(trace, UserFault, "iconv", LogErrno);
 	}
 	isTooBigSourceRef[0] = false;
 	return iconv_ret;
@@ -102,7 +102,7 @@ static size_t I18N_iconv(KonohaContext *kctx, uintptr_t ic, char **inbuf, size_t
 			isTooBigSourceRef[0] = true;
 			return iconv_ret;
 		}
-		KTraceApi(trace, DataFault, "iconv", LogErrno);
+		KTraceApi(trace, UserFault, "iconv", LogErrno);
 	}
 	isTooBigSourceRef[0] = false;
 	return iconv_ret;
@@ -607,7 +607,7 @@ static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int fault)
 	case ENXIO:  /* 6. No such device or address */
 		return fault | SoftwareFault | SystemFault;
 	case E2BIG:  /* 7. Arg list too long */
-		return fault | SoftwareFault | DataFault;
+		return fault | SoftwareFault | UserFault;
 	case ENOEXEC: /* 8. Exec format error */
 		return fault | SystemFault;
 	case EBADF:  /* 9. Bad file number */
@@ -667,7 +667,7 @@ static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int fault)
 	case EMLINK: /* 31 Too many links */
 		return fault | SoftwareFault;
 	case EPIPE: /* 32 Broken pipe */
-		return fault | SystemFault | DataFault;
+		return fault | SystemFault | UserFault;
 	}
 	return SoftwareFault |SystemFault;
 }
@@ -678,7 +678,7 @@ static int DEOS_diagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *t
 		fault = DEOS_guessFaultFromErrno(kctx, fault);
 	}
 	if(fault == 0) {
-		fault = SoftwareFault | DataFault | SystemFault;  // unsure
+		fault = SoftwareFault | UserFault | SystemFault;  // unsure
 	}
 	return fault;
 }
@@ -749,8 +749,8 @@ static void UI_reportException(KonohaContext *kctx, const char *exceptionName, i
 		if(TFLAG_is(int, fault, SoftwareFault)) {
 			PLATAPI printf_i(" SoftwareFault");
 		}
-		if(TFLAG_is(int, fault, DataFault)) {
-			PLATAPI printf_i(" DataFault");
+		if(TFLAG_is(int, fault, UserFault)) {
+			PLATAPI printf_i(" UserFault");
 		}
 		if(TFLAG_is(int, fault, SystemFault)) {
 			PLATAPI printf_i(" SystemFault");

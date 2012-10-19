@@ -341,7 +341,7 @@ typedef enum {
 	// ErrorPoint
 	SystemFault        =  (1<<1),  /* os, file system, etc. */
 	SoftwareFault      =  (1<<2),  /* programmer's mistake */
-	DataFault          =  (1<<3),  /* user input, data mistake */
+	UserFault          =  (1<<3),  /* user input, data mistake */
 	ExternalFault      =  (1<<4),  /* networking or remote services */
 	UnknownFault       =  (1<<5),  /* if you can distingish fault above */
 	// LogPoint
@@ -1066,7 +1066,7 @@ typedef enum {
 
 #define kString_is(P, o)        (TFLAG_is(uintptr_t,(o)->h.magicflag,StringFlag_##P))
 #define kString_set(P, o, b)    TFLAG_set(uintptr_t,(o)->h.magicflag,StringFlag_##P,b)
-#define kString_guessDataFault(S)    ((kString_is(Literal, S)) ? 0 : DataFault)
+#define kString_guessUserFault(S)    ((kString_is(Literal, S)) ? 0 : UserFault)
 
 #define SIZEOF_INLINETEXT    (sizeof(void *)*8 - sizeof(kBytes))
 

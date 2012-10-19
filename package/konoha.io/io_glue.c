@@ -318,7 +318,7 @@
 //	kString *path = sfp[1].asString;
 //	FILE *fp = fopen(S_text(path), "r");
 //	if(fp == NULL) {
-//		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SoftwareFault|DataFault|SystemFault, NULL, sfp);
+//		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SoftwareFault|UserFault|SystemFault, NULL, sfp);
 //	}
 //	in->fp = (FILE_i *)fp;
 //	in->streamApi = &FileStreamApi;
@@ -421,7 +421,7 @@
 //	const char *mode = IS_NULL(sfp[2].asString) ? "w" : S_text(sfp[2].asString);
 //	FILE *fp = fopen(S_text(path), mode);
 //	if(fp == NULL) {
-//		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SoftwareFault|DataFault|SystemFault, NULL, sfp);
+//		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SoftwareFault|UserFault|SystemFault, NULL, sfp);
 //	}
 //	out->fp = (FILE *)fp;
 //	out->streamApi = &FileStreamApi;

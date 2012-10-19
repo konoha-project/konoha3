@@ -114,7 +114,7 @@ static char* writeKeyToBuffer(const char *key, size_t keylen, char *buftop, char
 	return buftop;
 }
 
-#define HasFault    (SystemFault|SoftwareFault|DataFault|ExternalFault)
+#define HasFault    (SystemFault|SoftwareFault|UserFault|ExternalFault)
 #define HasLocation (PeriodicPoint|ResponseCheckPoint|SystemChangePoint|SecurityAudit)
 
 static char* writePolicyToBuffer(logconf_t *logconf, char *buftop, char *bufend)
@@ -151,8 +151,8 @@ static char* writePolicyToBuffer(logconf_t *logconf, char *buftop, char *bufend)
 		if(TFLAG_is(int, logconf->policy, SoftwareFault)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("SoftwareFault,"), buftop, bufend);
 		}
-		if(TFLAG_is(int, logconf->policy, DataFault)) {
-			buftop = writeFixedTextToBuffer(TEXTSIZE("DataFault,"), buftop, bufend);
+		if(TFLAG_is(int, logconf->policy, UserFault)) {
+			buftop = writeFixedTextToBuffer(TEXTSIZE("UserFault,"), buftop, bufend);
 		}
 		if(TFLAG_is(int, logconf->policy, ExternalFault)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("ExternalFault,"), buftop, bufend);
