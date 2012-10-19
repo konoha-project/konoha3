@@ -160,8 +160,11 @@ static void JSVisitor_visitIfStmt(KonohaContext *kctx, IRBuilder *self, kStmt *s
 	JSVisitor_emitNewLine(kctx, self, "){");
 	DUMPER(self)->indent++;
 	visitBlock(kctx, self, Stmt_getFirstBlock(kctx, stmt));
-	JSVisitor_emitNewLineToUnderLevel(kctx, self, "}else{");
-	visitBlock(kctx, self, Stmt_getElseBlock(kctx, stmt));
+	kBlock *elseBlock = Stmt_getElseBlock(kctx, stmt);
+	if(elseBlock != K_NULLBLOCK){
+		JSVisitor_emitNewLineToUnderLevel(kctx, self, "}else{");
+		visitBlock(kctx, self, elseBlock);
+	}
 	JSVisitor_emitNewLineToUnderLevel(kctx, self, "}");
 	DUMPER(self)->indent--;
 }
@@ -180,6 +183,25 @@ static void JSVisitor_visitLoopStmt(KonohaContext *kctx, IRBuilder *self, kStmt 
 static void JSVisitor_visitJumpStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
 {
 	JSVisitor_emitString(kctx, self, "Jump", "", "");
+}
+
+static void JSVisitor_visitTryStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
+{
+	JSVisitor_emitNewLine(kctx, self, "try{");
+	DUMPER(self)->indent++;
+	visitBlock(kctx, self, Stmt_getFirstBlock(kctx, stmt));
+	kBlock *catchBlock   = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("catch"),   K_NULLBLOCK);
+	kBlock *finallyBlock = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("finally"), K_NULLBLOCK);
+	if(catchBlock != K_NULLBLOCK){
+		JSVisitor_emitNewLineToUnderLevel(kctx, self, "}catch(e){");
+		visitBlock(kctx, self, catchBlock);
+	}
+	if(finallyBlock != K_NULLBLOCK){
+		JSVisitor_emitNewLineToUnderLevel(kctx, self, "}finally{");
+		visitBlock(kctx, self, finallyBlock);
+	}
+	JSVisitor_emitNewLineToUnderLevel(kctx, self, "}");
+	DUMPER(self)->indent--;
 }
 
 static void JSVisitor_visitUndefinedStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
