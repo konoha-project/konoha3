@@ -228,6 +228,8 @@ static kBasicBlock *kStmt_getLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbo
 
 /* ------------------------------------------------------------------------ */
 #if !defined(PLATAPIFORM_KERNEL) || !defined(USE_SMALLBUILD)
+#define USE_DUMP_VISITOR
+#define USE_JS_VISITOR
 #include "dumpvisitor.c"
 #include "jsvisitor.c"
 #endif
