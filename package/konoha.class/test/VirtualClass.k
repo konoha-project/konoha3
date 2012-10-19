@@ -1,5 +1,6 @@
 // written by kimio kuramitsu
 
+import("konoha.new");
 import("konoha.class");
 
 class C;
