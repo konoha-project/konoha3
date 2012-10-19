@@ -43,23 +43,23 @@ struct kCurlVar {
 	struct kBytesVar *bytes;
 };
 
-/* Bytes call back */
-static size_t write_Bytes(char *buffer, size_t size, size_t nitems, void *obj)
-{
-	kCurl *curl = (kCurl *) obj;
-	KonohaContext *kctx = curl->lctx;
-	struct kBytesVar *res = (struct kBytesVar *) curl->bytes;
-	char *buf = res->buf;
-	size *= nitems;
-	res->buf = (char *)KMalloc_UNTRACE(res->bytesize + size);
-	if(res->bytesize) {
-		memcpy(res->buf, (void *)buf, res->bytesize);
-		KFree(buf, res->bytesize);
-	}
-	memcpy(res->buf + res->bytesize, (void *)buffer, size);
-	res->bytesize += size;
-	return size;
-}
+///* Bytes call back */
+//static size_t write_Bytes(char *buffer, size_t size, size_t nitems, void *obj)
+//{
+//	kCurl *curl = (kCurl *) obj;
+//	KonohaContext *kctx = curl->lctx;
+//	struct kBytesVar *res = (struct kBytesVar *) curl->bytes;
+//	char *buf = res->buf;
+//	size *= nitems;
+//	res->buf = (char *)KMalloc_UNTRACE(res->bytesize + size);
+//	if(res->bytesize) {
+//		memcpy(res->buf, (void *)buf, res->bytesize);
+//		KFree(buf, res->bytesize);
+//	}
+//	memcpy(res->buf + res->bytesize, (void *)buffer, size);
+//	res->bytesize += size;
+//	return size;
+//}
 
 /* ------------------------------------------------------------------------ */
 
@@ -97,11 +97,11 @@ static void Curl_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visit
 	END_REFTRACE();
 }
 
-////## Curl Curl.new();
-//static KMETHOD Curl_new (KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	KReturn(sfp[K_RTNIDX].asObject);
-//}
+//## Curl Curl.new();
+static KMETHOD Curl_new (KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturn(sfp[0].asObject);
+}
 
 //##  void Curl.setOpt(int type, dynamic data);
 static KMETHOD Curl_setOpt(KonohaContext *kctx, KonohaStack *sfp)
@@ -290,7 +290,12 @@ static KMETHOD Curl_perform(KonohaContext *kctx, KonohaStack *sfp)
 	if(kcurl->headers) {
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, kcurl->headers);
 	}
-	CURLcode res = curl_easy_perform(curl);
+	KMakeTrace(trace, sfp);
+	CURLcode res;
+	//TODO: use correct logging policy
+	KTraceResponseCheckPoint(trace, SystemFault, "curl_easy_perform",
+			res = curl_easy_perform(curl)
+			);
 	if(res != CURLE_OK){
 		// TODO ktrace
 		// KNH_NTRACE2(ctx, "Curl.perform", K_FAILED, KNH_LDATA(LOG_i("CURLcode", res), LOG_s("error", curl_easy_strerror(res))));
@@ -348,13 +353,13 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 
 #define _Public   kMethod_Public
 #define _Const    kMethod_Const
-#define _Coercion kMethod_Coercion
+//#define _Coercion kMethod_Coercion
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-#define CT_Curl     cCurl
+//#define CT_Curl     cCurl
 #define TY_Curl     cCurl->typeId
-#define IS_Curl(O)  (O_ct(O) == CT_Curl)
+//#define IS_Curl(O)  (O_ct(O) == CT_Curl)
 
 #define _KVi(T)  #T, TY_int, T
 
@@ -371,7 +376,7 @@ static kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	KonohaClass *cCurl = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defCurl, trace);
 
 	KDEFINE_METHOD MethodData[] = {
-//		_Public|_Const|_Im, _F(Curl_new), TY_Curl, TY_Curl, MN_("new"), 0,
+		_Public|_Const|_Im, _F(Curl_new), TY_Curl, TY_Curl, MN_("new"), 0,
 		_Public|_Const|_Im, _F(Curl_setOpt), TY_void, TY_Curl, MN_("setOpt"), 2, TY_int, FN_("type"), TY_Object/*FIXME TY_Dynamic*/, FN_("data"),
 		_Public|_Const|_Im, _F(Curl_appendHeader), TY_void, TY_Curl, MN_("appendHeader"), 1, TY_String, FN_("header"),
 		_Public|_Const|_Im, _F(Curl_perform), TY_boolean, TY_Curl, MN_("perform"), 0,
