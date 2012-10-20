@@ -25,9 +25,10 @@
 /* ************************************************************************ */
 
 #include <minikonoha/minikonoha.h>
+#include <minikonoha/konoha_common.h>
 #include <minikonoha/sugar.h>
-#include <minikonoha/float.h>
-#include <minikonoha/bytes.h>
+//#include <minikonoha/float.h>
+//#include <minikonoha/bytes.h>
 #include <konoha_sql.config.h>
 
 #ifdef __cplusplus
@@ -79,7 +80,6 @@ struct _kResultSet{
 	size_t              rowidx;
 };
 
-#define CT_ResultSet     cResultSet
 #define TY_ResultSet     cResultSet->typeId
 
 /* ------------------------------------------------------------------------ */
@@ -102,8 +102,8 @@ struct _kQueryDPI_t {
 #define kResultSet_CTYPE__integer 1
 #define kResultSet_CTYPE__float   2
 #define kResultSet_CTYPE__text    3  /* UTF-8*/
-#define kResultSet_CTYPE__bytes   4
-#define kResultSet_CTYPE__Object  5
+//#define kResultSet_CTYPE__bytes   4
+//#define kResultSet_CTYPE__Object  5
 
 #define RESULTSET_BUFSIZE 256
 #define K_DSPI_QUERY 1
@@ -224,7 +224,9 @@ static KMETHOD Connection_new(KonohaContext *kctx, KonohaStack *sfp)
 #endif
 	}
 	else {
+#if (!MYSQL_INCLUDED_ | !SQLITE_INCLUDED_ | !PSQL_INCLUDED_)
 L_ReturnNULL:
+#endif
 		con->dspi = &DB__NOP;
 		//KReturn((kConnection*)KLIB Knull(kctx, O_ct(sfp[0].asObject)));
 	}
@@ -357,6 +359,7 @@ static int _ResultSet_indexof_(KonohaContext *kctx, KonohaStack *sfp)
 	else if(IS_String(sfp[1].asObject)) {
 		int loc = _ResultSet_findColumn(kctx, o, S_text(sfp[1].asString));
 		if(loc == -1) {
+			//THROW_OutOfRange(ctx, sfp, sfp[1].ivalue, (o)->column_size);
 		}
 		return loc;
 	}
@@ -445,7 +448,7 @@ KMETHOD ResultSet_getFloat(KonohaContext *kctx, KonohaStack *sfp)
 //## String ResultSet.getString(String n);
 KMETHOD ResultSet_getString(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int n = _ResultSet_indexof_(kctx, sfp);
+	size_t n = (size_t)_ResultSet_indexof_(kctx, sfp);
 	kResultSet* rs = (kResultSet*)sfp[0].asObject;
 	DBG_ASSERT(n < rs->column_size);
 	const char *p = rs->databuf.bytebuf + rs->column[n].start;
@@ -513,7 +516,7 @@ KMETHOD ResultSet_getString(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t sql_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.bytes", trace);
+	//KRequirePackage("konoha.float", trace);
 
 	static KDEFINE_CLASS ConnectionDef = {
 		STRUCTNAME(Connection),
