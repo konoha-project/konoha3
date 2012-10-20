@@ -1,11 +1,10 @@
-import("konoha.class");
-import("konoha.while");
+import("konoha.new");
+import("cstyle", "while");
 import("konoha.int");
 import("konoha.float");
 import("konoha.string");
 import("konoha.array");
 import("konoha.assign");
-
 import("jansson");
 
 void main() {
