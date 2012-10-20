@@ -80,6 +80,7 @@ static void KonohaStackRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx, 
 	KUnsafeFieldInit(base->OptionalErrorInfo, TS_EMPTY);
 	base->gcstack_OnContextConstList = new_(Array, K_PAGESIZE/sizeof(void *), base->ContextConstList);
 	KLIB Karray_init(kctx, &base->cwb, K_PAGESIZE * 4);
+	base->visitor = kVisitor_KonohaVM;
 	ctx->esp = base->stack;
 	ctx->stack = base;
 }
@@ -163,8 +164,10 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 	else {
 		int i;
 		for(i = 0; i < KonohaModule_MAXSIZE; i++) {
-			if(newctx->modshare[i] != NULL && newctx->modshare[i]->setup != NULL) {
-				newctx->modshare[i]->setup((KonohaContext *)newctx, newctx->modshare[i], true);
+			KonohaModule *mod = newctx->modshare[i];
+			if(mod == NULL) continue;
+			if(mod->setupModuleContext != NULL) {
+				mod->setupModuleContext((KonohaContext *)newctx, mod, true);
 			}
 		}
 	}
@@ -176,12 +179,6 @@ static void KonohaContext_reftrace(KonohaContext *kctx, KonohaContextVar *ctx, K
 	size_t i;
 	if(IS_RootKonohaContext(kctx)) {
 		KonohaRuntime_reftrace(kctx, ctx, visitor);
-		for(i = 0; i < KonohaModule_MAXSIZE; i++) {
-			KonohaModule *p = ctx->modshare[i];
-			if(p != NULL && p->reftrace != NULL) {
-				p->reftrace(kctx, p, visitor);
-			}
-		}
 	}
 	KonohaStackRuntime_reftrace(kctx, ctx, visitor);
 	for(i = 0; i < KonohaModule_MAXSIZE; i++) {
@@ -211,8 +208,12 @@ static void KonohaContext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 		KonohaLibVar *kklib = (KonohaLibVar *)ctx - 1;
 		for(i = 0; i < KonohaModule_MAXSIZE; i++) {
 			KonohaModule *p = ctx->modshare[i];
-			if(p != NULL && p->free != NULL) {
-				p->free(kctx, p);
+			if(p == NULL) continue;
+			if(p->allocSize > 0) {
+				KFree(p, p->allocSize);
+			}
+			else if(p->freeModule != NULL) {
+				p->freeModule(kctx, p);
 			}
 		}
 		KLIB KdeleteGcContext(ctx->gcContext);

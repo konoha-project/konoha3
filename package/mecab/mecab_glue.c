@@ -70,11 +70,11 @@ static void Tagger_free(KonohaContext *kctx, kObject *o)
 
 #define CT_Tagger     cTagger
 #define TY_Tagger     cTagger->typeId
-#define IS_Tagger(O)  ((O)->h.ct == CT_Tagger)
+#define IS_Tagger(O)  (O_ct(O) == CT_Tagger)
 
 #define CT_MecabNode     cMecabNode
 #define TY_MecabNode     cMecabNode->typeId
-#define IS_MecabNode(O)  ((O)->h.ct == CT_MecabNode)
+#define IS_MecabNode(O)  (O_ct(O) == CT_MecabNode)
 
 #define _KVi(T)  #T, TY_int, T
 

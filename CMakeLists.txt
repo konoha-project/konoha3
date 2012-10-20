@@ -66,6 +66,7 @@ set(PACKAGES
 	konoha.defined
 	konoha.dynamic
 	konoha.field
+	konoha.file
 	konoha.float
 	konoha.foreach
 	konoha.global
@@ -92,7 +93,7 @@ set(PACKAGES
 	cstyle
 	llvm
 	posix.process
-	posix.file
+	posix.path
 	posix.fd
 	posix.socket
 	posix.thread
@@ -104,7 +105,7 @@ set(PACKAGES
 ##	jansson
 	mecab
 	python
-	apache
+#	apache   ## removed Module bugs
 #	openssl
 #	logpool
 	gmp

@@ -151,6 +151,7 @@ static KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
+	KImportPackage(ns, "konoha.global", trace);
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(NameSpace_man), TY_void, TY_NameSpace, MN_("man"), 1, TY_Object, FN_("x") | FN_COERCION,
 		DEND,

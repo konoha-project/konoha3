@@ -977,8 +977,7 @@ static kbool_t kNameSpace_importAll(KonohaContext *kctx, kNameSpace *ns, kNameSp
 static KonohaPackage *kNameSpace_requirePackage(KonohaContext *kctx, const char *name, KTraceInfo *trace)
 {
 	kpackageId_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
-	KonohaPackage *pack = getPackageNULL(kctx, packageId, trace);
-	return pack;
+	return getPackageNULL(kctx, packageId, trace);
 }
 
 static kbool_t kNameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, const char *name, KTraceInfo *trace)
@@ -1009,7 +1008,7 @@ static kbool_t kNameSpace_importPackageSymbol(KonohaContext *kctx, kNameSpace *n
 kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, KTraceInfo *trace)
 {
 	if(KonohaContext_getSugarContext(kctx) == NULL) {
-		kmodsugar->h.setup(kctx, (KonohaModule *)kmodsugar, 0/*lazy*/);
+		kmodsugar->h.setupModuleContext(kctx, (KonohaModule *)kmodsugar, 0/*lazy*/);
 	}
 	INIT_GCSTACK();
 	kpackageId_t packageId = KLIB KpackageId(kctx, "main", sizeof("main")-1, 0, _NEWID);

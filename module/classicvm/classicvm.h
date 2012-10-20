@@ -1,4 +1,4 @@
-#include <minikonoha/float.h>
+#include <minikonoha/konoha_common.h>
 #ifndef CLASSICVM_H_
 #define CLASSICVM_H_
 

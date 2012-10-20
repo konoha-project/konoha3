@@ -24,7 +24,7 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-#include <minikonoha/bytes.h>
+#include <minikonoha/konoha_common.h>
 
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -457,7 +457,7 @@ static KMETHOD System_send(KonohaContext *kctx, KonohaStack* sfp)
 	sig_t ret_signal = SIG_ERR;
 #endif
 	if(oldset == SIG_ERR) {
-		OLDTRACE_SWITCH_TO_KTrace(_DataFault,
+		OLDTRACE_SWITCH_TO_KTrace(_UserFault,
 				LogText("@", "signal"),
 				LogText("perror", strerror(errno))
 		);
@@ -467,7 +467,7 @@ static KMETHOD System_send(KonohaContext *kctx, KonohaStack* sfp)
 					  ba->bytesize,
 					  (int)sfp[3].intValue );
 	if(ret < 0) {
-		OLDTRACE_SWITCH_TO_KTrace(_DataFault,
+		OLDTRACE_SWITCH_TO_KTrace(_UserFault,
 				LogText("@", "send"),
 				LogText("perror", strerror(errno))
 		);
@@ -475,7 +475,7 @@ static KMETHOD System_send(KonohaContext *kctx, KonohaStack* sfp)
 	if(oldset != SIG_ERR) {
 		ret_signal = signal(SIGPIPE, oldset);
 		if(ret_signal == SIG_ERR) {
-			OLDTRACE_SWITCH_TO_KTrace(_DataFault,
+			OLDTRACE_SWITCH_TO_KTrace(_UserFault,
 					LogText("@", "signal"),
 					LogText("perror", strerror(errno))
 			);
@@ -615,7 +615,7 @@ static KMETHOD SockAddr_new (KonohaContext *kctx, KonohaStack *sfp)
 
 #define CT_SockAddr         cSockAddr
 #define TY_SockAddr         cSockAddr->typeId
-#define IS_SockAddr(O)      ((O)->h.ct == CT_SockAddr)
+#define IS_SockAddr(O)      (O_ct(O) == CT_SockAddr)
 
 #define _KVi(T) #T, TY_int, T
 

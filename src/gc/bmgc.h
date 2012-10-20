@@ -688,7 +688,7 @@ static void *Kmalloc(KonohaContext *kctx, size_t s, KTraceInfo *trace)
 #endif
 			);
 	if(unlikely(p == NULL)) {
-		KTraceApi(trace, SystemFault|DataFault, "malloc",
+		KTraceApi(trace, SystemFault|UserFault, "malloc",
 			LogUint("size", s), LogUint("UsedMemorySize", klib_malloced));
 		THROW_OutOfMemory(kctx, s);
 	}

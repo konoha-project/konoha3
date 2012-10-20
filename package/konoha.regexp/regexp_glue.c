@@ -28,6 +28,7 @@
 #include <minikonoha/sugar.h>
 #include <minikonoha/klib.h>
 #include <pcre.h>
+#include <minikonoha/konoha_common.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -80,14 +81,6 @@ static size_t utf8_strlen(const char *text, size_t len)
 	return size;
 }
 
-//#define _ALWAYS 0/*StringPolicy_POOL*/
-//#define _NEVER  0/*StringPolicy_POOL*/
-//#define _ASCII  StringPolicy_ASCII
-//#define _UTF8   StringPolicy_UTF8
-//#define _SUB(s0) (kString_is(ASCII, s0) ? _ASCII|_ALWAYS : _ALWAYS)
-//#define _SUBCHAR(s0) (kString_is(ASCII, s0) ? _ASCII : 0)
-//#define _CHARSIZE(len) (len==1 ? _ASCII : _UTF8)
-
 typedef struct {
 	pcre *re;
 	const char *err;
@@ -96,19 +89,8 @@ typedef struct {
 
 /* ------------------------------------------------------------------------ */
 
-#define kregexpshare      ((kregexpshare_t *)kctx->modshare[MOD_REGEXP])
-#define CT_RegExp         kregexpshare->cRegExp
-#define TY_RegExp         kregexpshare->cRegExp->typeId
-
-#define IS_RegExp(O)      ((O)->h.ct == CT_RegExp)
-
-typedef struct {
-	KonohaModule h;
-	KonohaClass *cRegExp;
-} kregexpshare_t;
-
-typedef struct kRegExp kRegExp;
-struct kRegExp {
+typedef struct kRegExpVar kRegExp;
+struct kRegExpVar {
 	KonohaObjectHeader h;
 	kregexp_t *reg;
 	int eflags;      // regexp flag
@@ -236,22 +218,6 @@ static int pcre_regexec(KonohaContext *kctx, kregexp_t *reg, const char *str, si
 	return res;
 }
 
-/* ------------------------------------------------------------------------ */
-
-static void kregexpshare_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
-{
-
-}
-
-static void kregexpshare_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
-{
-
-}
-
-static void kregexpshare_free(KonohaContext *kctx, struct KonohaModule *baseh)
-{
-	KFree(baseh, sizeof(kregexpshare_t));
-}
 
 /* ------------------------------------------------------------------------ */
 
@@ -657,21 +623,16 @@ static KMETHOD RegExp_test(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t regexp_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	kregexpshare_t *base = (kregexpshare_t *)KCalloc_UNTRACE(sizeof(kregexpshare_t), 1);
-	base->h.name     = "regexp";
-	base->h.setup    = kregexpshare_setup;
-	base->h.reftrace = kregexpshare_reftrace;
-	base->h.free     = kregexpshare_free;
-	KLIB KonohaRuntime_setModule(kctx, MOD_REGEXP, &base->h, trace);
-
-	KDEFINE_CLASS RegExpDef = {
-		STRUCTNAME(RegExp),
-		.cflag = 0,
-		.init = RegExp_init,
-		.free = RegExp_free,
-		.p    = RegExp_p,
-	};
-	base->cRegExp = KLIB kNameSpace_defineClass(kctx, ns, NULL, &RegExpDef, trace);
+	if(CT_RegExp == NULL) {
+		KDEFINE_CLASS RegExpDef = {
+			STRUCTNAME(RegExp),
+			.cflag = 0,
+			.init = RegExp_init,
+			.free = RegExp_free,
+			.p    = RegExp_p,
+		};
+		CT_RegExp = KLIB kNameSpace_defineClass(kctx, ns, NULL, &RegExpDef, trace);
+	}
 
 	ktype_t TY_StringArray0 = CT_StringArray0->typeId;
 	KDEFINE_METHOD MethodData[] = {
@@ -759,6 +720,7 @@ static kbool_t regexp_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 static kbool_t regexp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
+	KRequireKonohaCommonModule(trace);
 	regexp_defineMethod(kctx, ns, trace);
 	regexp_defineSyntax(kctx, ns, trace);
 	return true;
@@ -772,7 +734,7 @@ static kbool_t regexp_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 KDEFINE_PACKAGE* regexp_init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("regexp", "1.0"),
+		KPACKNAME("konoha", "1.0"),
 		.initPackage    = regexp_initPackage,
 		.setupPackage   = regexp_setupPackage,
 	};

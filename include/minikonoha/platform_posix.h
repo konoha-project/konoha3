@@ -71,14 +71,14 @@ static uintptr_t I18N_iconv_open(KonohaContext *kctx, const char *targetCharset,
 {
 	uintptr_t ic = (uintptr_t)iconv_open(targetCharset, sourceCharset);
 	if(ic == ICONV_NULL) {
-		KTraceApi(trace, DataFault|SoftwareFault, "iconv_open",
+		KTraceApi(trace, UserFault|SoftwareFault, "iconv_open",
 			LogText("tocode", targetCharset), LogText("fromcode", sourceCharset), LogErrno
 		);
 	}
 	return (uintptr_t)ic;
 }
 
-static size_t I18N_iconv_memcpyStyle(KonohaContext *kctx, uintptr_t ic, char **outbuf, size_t *outBytesLeft, char **inbuf, size_t *inBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
+static size_t I18N_iconv_memcpyStyle(KonohaContext *kctx, uintptr_t ic, char **outbuf, size_t *outBytesLeft, ICONV_INBUF_CONST char **inbuf, size_t *inBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
 {
 	DBG_ASSERT(ic != ICONV_NULL);
 	size_t iconv_ret = iconv((iconv_t)ic, inbuf, inBytesLeft, outbuf, outBytesLeft);
@@ -87,13 +87,13 @@ static size_t I18N_iconv_memcpyStyle(KonohaContext *kctx, uintptr_t ic, char **o
 			isTooBigSourceRef[0] = true;
 			return iconv_ret;
 		}
-		KTraceApi(trace, DataFault, "iconv", LogErrno);
+		KTraceApi(trace, UserFault, "iconv", LogErrno);
 	}
 	isTooBigSourceRef[0] = false;
 	return iconv_ret;
 }
 
-static size_t I18N_iconv(KonohaContext *kctx, uintptr_t ic, char **inbuf, size_t *inBytesLeft, char **outbuf, size_t *outBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
+static size_t I18N_iconv(KonohaContext *kctx, uintptr_t ic, ICONV_INBUF_CONST char **inbuf, size_t *inBytesLeft, char **outbuf, size_t *outBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
 {
 	DBG_ASSERT(ic != ICONV_NULL);
 	size_t iconv_ret = iconv((iconv_t)ic, inbuf, inBytesLeft, outbuf, outBytesLeft);
@@ -102,7 +102,7 @@ static size_t I18N_iconv(KonohaContext *kctx, uintptr_t ic, char **inbuf, size_t
 			isTooBigSourceRef[0] = true;
 			return iconv_ret;
 		}
-		KTraceApi(trace, DataFault, "iconv", LogErrno);
+		KTraceApi(trace, UserFault, "iconv", LogErrno);
 	}
 	isTooBigSourceRef[0] = false;
 	return iconv_ret;
@@ -135,8 +135,8 @@ static const char* I18N_formatKonohaPath(KonohaContext *kctx, char *buf, size_t 
 	size_t newsize;
 	if(ic != ICONV_NULL) {
 		int isTooBig;
-		char *presentPtrFrom = (char *)path;
-		char ** inbuf = &presentPtrFrom;
+		ICONV_INBUF_CONST char *presentPtrFrom = (ICONV_INBUF_CONST char *)path;	// too dirty?
+		ICONV_INBUF_CONST char ** inbuf = &presentPtrFrom;
 		char ** outbuf = &buf;
 		size_t inBytesLeft = pathsize, outBytesLeft = bufsiz - 1;
 		PLATAPI iconv_i_memcpyStyle(kctx, ic, outbuf, &outBytesLeft, inbuf, &inBytesLeft, &isTooBig, trace);
@@ -163,12 +163,12 @@ static uintptr_t I18N_iconv_open(KonohaContext *kctx, const char *targetCharset,
 	return ICONV_NULL;
 }
 
-static size_t I18N_iconv_memcpyStyle(KonohaContext *kctx, uintptr_t ic, char **outbuf, size_t *outBytesLeft, char **inbuf, size_t *inBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
+static size_t I18N_iconv_memcpyStyle(KonohaContext *kctx, uintptr_t ic, char **outbuf, size_t *outBytesLeft, ICONV_INBUF_CONST char **inbuf, size_t *inBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
 {
 	return -1;
 }
 
-static size_t I18N_iconv(KonohaContext *kctx, uintptr_t ic, char **inbuf, size_t *inBytesLeft, char **outbuf, size_t *outBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
+static size_t I18N_iconv(KonohaContext *kctx, uintptr_t ic, ICONV_INBUF_CONST char **inbuf, size_t *inBytesLeft, char **outbuf, size_t *outBytesLeft, int *isTooBigSourceRef, KTraceInfo *trace)
 {
 	return -1;
 }
@@ -539,27 +539,6 @@ static void debugPrintf(const char *file, const char *func, int line, const char
 	va_end(ap);
 }
 
-//static void reportCaughtException(const char *exceptionName, const char *scriptName, int line, const char *optionalMessage)
-//{
-//	if(line != 0) {
-//		if(optionalMessage != NULL && optionalMessage[0] != 0) {
-//			fprintf(stderr, " ** (%s:%d) %s: %s\n", scriptName, line, exceptionName, optionalMessage);
-//		}
-//		else {
-//			fprintf(stderr, " ** (%s:%d) %s\n", scriptName, line, exceptionName);
-//		}
-//	}
-//	else {
-//		if(optionalMessage != NULL && optionalMessage[0] != 0) {
-//			fprintf(stderr, " ** %s: %s\n", exceptionName, optionalMessage);
-//		}
-//		else {
-//			fprintf(stderr, " ** %s\n", exceptionName);
-//		}
-//	}
-//}
-
-
 static void NOP_debugPrintf(const char *file, const char *func, int line, const char *fmt, ...)
 {
 }
@@ -583,9 +562,122 @@ static void PlatformApi_loadReadline(PlatformApiVar *plat)
 	}
 }
 
+
+static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
+{
+	switch(errno) {  // C Standard Library
+	case EDOM:   /*Results from a parameter outside a function's domain, for example sqrt(-1) */
+	case ERANGE: /* Results from a result outside a function's range, for example strtol("0xfffffffff",NULL,0) */
+	case EILSEQ: /* Results from an illegal byte sequence */
+		return userFault | SoftwareFault;
+	}
+
+	switch(errno) {
+	case EPERM:  /* 1. Operation not permitted (Linux) */
+		return userFault | SoftwareFault;
+	case ENOENT: /* 2. No such file or directory */
+		return userFault | SoftwareFault | SystemFault;
+	case ESRCH:  /* 3. No such process */
+		return userFault | SystemFault | SoftwareFault;
+	case EINTR: /* 4. Interrupted system call */
+		return SystemFault;
+	case EIO: /* 5. I/O error */
+		return SystemFault ;
+	case ENXIO:  /* 6. No such device or address */
+		return userFault | SoftwareFault | SystemFault;
+	case E2BIG:  /* 7. Arg list too long */
+		return userFault | SoftwareFault | UserFault;
+	case ENOEXEC: /* 8. Exec format error */
+		return SystemFault;
+	case EBADF:  /* 9. Bad file number */
+		return userFault | SoftwareFault;
+	case ECHILD: /* 10. No child processes */
+		return userFault | SoftwareFault | SystemFault;
+	case EAGAIN: /* 11. Try again */
+		return userFault;  /* not fault */
+	case ENOMEM: /* 12. Out of memory */
+		/* If you try to exec() another process or just ask for more memory in this process */
+		return userFault | SoftwareFault | SystemFault;
+	case EACCES: /* 13. Permission denied */
+		return userFault | SystemFault;
+	case EFAULT: /* 14 Bad address */
+		return userFault | SoftwareFault; /* At the C-Level */
+	case ENOTBLK: /* 15 Block device required */
+		return SystemFault; /* in case of unmount device */
+	case EBUSY: /* 16 Device or resource busy */
+		return SystemFault;
+	case EEXIST: /*17 File exists */
+		return userFault | SoftwareFault | SystemFault;
+	case EXDEV:  /* 18. Cross-device link */
+		return SystemFault;
+	case ENODEV: /* 19 No such device */
+	case ENOTDIR: /*20 Not a directory */
+	case EISDIR: /* 21 Is a directory */
+		return userFault | SoftwareFault | SystemFault;
+	case EINVAL: /* 22 Invalid argument */
+		/* EINVAL gets used a lot.
+		 * TCP has the concept of "out of band data" (urgent data).
+		 * If a reading process checks for this, and there isn't any, it get EINVAL.
+		 * The plock() function ( which locks areas of a process into memory) returns this
+		 * if you attempt to use it twice on the same memory segment.
+		 * If you try to specify SIGKILL or SIGSTOP to sigaction(), you'll get this return.
+		 * The readv() and writev() calls complain this way if you give them too large an array of buffers.
+		 * As mentioned above, drivers may return this for inappropriate ioctl() calls.
+		 * The mmap() call will return this if you've specified a specific address but that address can't be used.
+		 * A seek() to before the beginning of a file returns this.
+		 * Streams use this if you attempt to link a stream onto itself. It's used for many IPC errors also. */
+		return userFault | SoftwareFault | SystemFault;
+	case ENFILE:  /* 23. File table overflow */
+		return userFault | SoftwareFault | SystemFault;
+	case EMFILE: /* 24. Too many open files */
+		return userFault | SoftwareFault;
+	case ENOTTY: /* 25 Not a typewriter */
+		return userFault | SoftwareFault | SystemFault;
+	case ETXTBSY:  /* 26 Text file busy */
+		/* It's illegal to write to a binary while it is executing- */
+		return userFault | SoftwareFault;
+	case EFBIG: /* 27 File too large */
+		return userFault | SoftwareFault;
+	case ENOSPC: /* 28 No space left on device */
+	case ESPIPE: /* 29 Illegal seek */
+		return userFault | SoftwareFault;
+	case EROFS:  /* 30 Read-only file system */
+		return userFault | SoftwareFault;
+	case EMLINK: /* 31 Too many links */
+		return userFault | SoftwareFault;
+	case EPIPE: /* 32 Broken pipe */
+		return userFault | SystemFault | UserFault;
+	}
+	return userFault | SoftwareFault |SystemFault;
+}
+
+static kbool_t DEOS_checkSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
+{
+	DBG_P("filename='%s', line=%d", filename, line);
+	return true;
+}
+
+static int DEOS_diagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
+{
+	if(TFLAG_is(int, fault, SystemError)) {
+		fault = DEOS_guessFaultFromErrno(kctx, fault);
+	}
+	if(fault == 0) {
+		fault = SoftwareFault | UserFault | SystemFault;  // unsure
+	}
+	if(TFLAG_is(int, fault, SoftwareFault)) {
+		if(DEOS_checkSoftwareTestIsPass(kctx, FileId_t(trace->pline), (kushort_t)trace->pline)) {
+			//TFLAG_set0(int, fault, SoftwareFault);
+		}
+	}
+	return fault;
+}
+
 // --------------------------------------------------------------------------
 
 #include "libcode/logtext_formatter.h"
+
+#define HasFault    (SystemFault|SoftwareFault|UserFault|ExternalFault)
 
 static void traceDataLog(KonohaContext *kctx, KTraceInfo *trace, int logkey, logconf_t *logconf, ...)
 {
@@ -593,7 +685,8 @@ static void traceDataLog(KonohaContext *kctx, KTraceInfo *trace, int logkey, log
 	va_list ap;
 	va_start(ap, logconf);
 	writeDataLogToBuffer(logconf, ap, buf, buf + (K_PAGESIZE - 4));
-	syslog(LOG_NOTICE, "%s", buf);
+	int level = (logconf->policy & HasFault) ? LOG_ERR : LOG_NOTICE;
+	PLATAPI syslog_i(level, "%s", buf);
 	if(verbose_debug) {
 		fprintf(stderr, "TRACE %s\n", buf);
 	}
@@ -649,8 +742,8 @@ static void UI_reportException(KonohaContext *kctx, const char *exceptionName, i
 		if(TFLAG_is(int, fault, SoftwareFault)) {
 			PLATAPI printf_i(" SoftwareFault");
 		}
-		if(TFLAG_is(int, fault, DataFault)) {
-			PLATAPI printf_i(" DataFault");
+		if(TFLAG_is(int, fault, UserFault)) {
+			PLATAPI printf_i(" UserFault");
 		}
 		if(TFLAG_is(int, fault, SystemFault)) {
 			PLATAPI printf_i(" SystemFault");
@@ -659,7 +752,7 @@ static void UI_reportException(KonohaContext *kctx, const char *exceptionName, i
 			PLATAPI printf_i(" ExternalFault");
 		}
 	}
-	PLATAPI printf_i("%s\n\n", PLATAPI endTag(ErrTag));
+	PLATAPI printf_i("%s\n", PLATAPI endTag(ErrTag));
 	PLATAPI printf_i("%sStackTrace\n", PLATAPI beginTag(InfoTag));
 
 	KonohaStack *sfp = topStack;
@@ -679,7 +772,7 @@ static void UI_reportException(KonohaContext *kctx, const char *exceptionName, i
 			PLATAPI printf_i("this=(%s) %s, ", CT_t(cThis), KLIB Kwb_top(kctx, &wb, 1));
 			KLIB Kwb_free(&wb);
 		}
-		int i;
+		unsigned i;
 		kParam *param = Method_param(mtd);
 		for(i = 0; i < param->psize; i++) {
 			if(i > 0) {
@@ -750,6 +843,7 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.logger              = NULL;
 	plat.traceDataLog        = traceDataLog;
 	plat.diagnosis           = diagnosis;
+	plat.diagnosisFaultType  = DEOS_diagnosisFaultType;
 
 	plat.reportUserMessage     = UI_reportUserMessage;
 	plat.reportCompilerMessage = UI_reportCompilerMessage;

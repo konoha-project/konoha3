@@ -106,7 +106,7 @@
 #undef PACKAGE_VERSION
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/sugar.h"
-#include "minikonoha/float.h"
+#include "minikonoha/konoha_common.h"
 #include <stdio.h>
 
 struct kRawPtr {
@@ -4585,11 +4585,6 @@ static void kmodllvm_setup(KonohaContext *kctx, struct KonohaModule *def, int ne
 	(void)kctx;(void)def;(void)newctx;
 }
 
-static void kmodllvm_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
-{
-	(void)kctx;(void)baseh;
-}
-
 static void kmodllvm_free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 	KFree(baseh, sizeof(kmodllvm_t));
@@ -4604,13 +4599,12 @@ static void kmodllvm_free(KonohaContext *kctx, struct KonohaModule *baseh)
 
 static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char **args, KTraceInfo *trace)
 {
-	KRequirePackage("konoha.float", trace);
+	KRequireKonohaCommonModule(trace)
 	(void)argc;(void)args;
 	kmodllvm_t *base = (kmodllvm_t*)KCalloc_UNTRACE(sizeof(kmodllvm_t), 1);
 	base->h.name     = "llvm";
-	base->h.setup    = kmodllvm_setup;
-	base->h.reftrace = kmodllvm_reftrace;
-	base->h.free     = kmodllvm_free;
+	base->h.setupModuleContext = kmodllvm_setup;
+	base->h.freeModule         = kmodllvm_free;
 	KLIB KonohaRuntime_setModule(kctx, MOD_llvm, &base->h, trace);
 
 #define DEFINE_CLASS_CPP(\

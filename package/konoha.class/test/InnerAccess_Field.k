@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.assign");
+import("konoha.new");
 import("konoha.class");
 
 class C {
@@ -30,4 +30,3 @@ void test() {
 
 test();
 
-		

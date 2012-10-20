@@ -30,7 +30,7 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-#include <minikonoha/float.h>
+#include <minikonoha/konoha_common.h>
 #include "mt19937ar.h"
 
 #ifdef __cplusplus
@@ -207,8 +207,9 @@ static KMETHOD Math_random(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KImportPackage(ns, "konoha.float", trace);
+	KRequirePackage("konoha.float", trace);
 	static KDEFINE_CLASS MathDef = {0};
+	MathDef.cflag = kClass_Singleton|kClass_Final;
 	MathDef.structname = "Math"; /*structname*/
 	MathDef.typeId = TY_newid; /*cid*/
 

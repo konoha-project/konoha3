@@ -101,7 +101,7 @@ static int getopt_long(int argc, char * const *argv, const char *optstring, cons
 	return -1;
 }
 
-#endif
+#endif /*__GNUC__ */
 
 #ifdef __cplusplus
 extern "C" {
@@ -368,9 +368,12 @@ static void CommandLine_import(KonohaContext *kctx, char *packageName)
 	size_t len = strlen(packageName)+1;
 	char *bufname = ALLOCA(char, len);
 	memcpy(bufname, packageName, len);
-	if(!(KLIB kNameSpace_importPackage(kctx, KNULL(NameSpace), bufname, 0))) {
+	BEGIN_LOCAL(lsfp, K_CALLDELTA);
+	KMakeTrace(trace, kctx->esp);
+	if(!(KLIB kNameSpace_importPackage(kctx, KNULL(NameSpace), bufname, trace))) {
 		PLATAPI exit_i(EXIT_FAILURE);
 	}
+	END_LOCAL();
 }
 
 static void konoha_startup(KonohaContext *kctx, const char *startup_script)
@@ -411,17 +414,18 @@ static void CommandLine_setARGV(KonohaContext *kctx, int argc, char** argv)
 
 static struct option long_options2[] = {
 	/* These options set a flag. */
-	{"verbose", no_argument,       &verbose_debug, 1},
-	{"verbose:gc",    no_argument, &verbose_gc, 1},
-	{"verbose:sugar", no_argument, &verbose_sugar, 1},
-	{"verbose:code",  no_argument, &verbose_code, 1},
-	{"interactive", no_argument,   0, 'i'},
-	{"typecheck",   no_argument,   0, 'c'},
-	{"define",    required_argument, 0, 'D'},
-	{"import",    required_argument, 0, 'I'},
-	{"startwith", required_argument, 0, 'S'},
-	{"test",  required_argument, 0, 'T'},
-	{"test-with",  required_argument, 0, 'T'},
+	{"verbose",       no_argument,       &verbose_debug, 1},
+	{"verbose:gc",    no_argument,       &verbose_gc,    1},
+	{"verbose:sugar", no_argument,       &verbose_sugar, 1},
+	{"verbose:code",  no_argument,       &verbose_code,  1},
+	{"format",        required_argument, 0, 'f'},
+	{"interactive",   no_argument,       0, 'i'},
+	{"typecheck",     no_argument,       0, 'c'},
+	{"define",        required_argument, 0, 'D'},
+	{"import",        required_argument, 0, 'I'},
+	{"startwith",     required_argument, 0, 'S'},
+	{"test",          required_argument, 0, 'T'},
+	{"test-with",     required_argument, 0, 'T'},
 	{"builtin-test",  required_argument, 0, 'B'},
 	{NULL, 0, 0, 0},
 };
@@ -432,7 +436,7 @@ static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc
 	int scriptidx = 0;
 	while (1) {
 		int option_index = 0;
-		int c = getopt_long (argc, argv, "icD:I:S:", long_options2, &option_index);
+		int c = getopt_long (argc, argv, "icD:I:S:f:", long_options2, &option_index);
 		if(c == -1) break; /* Detect the end of the options. */
 		switch (c) {
 		case 0:
@@ -489,6 +493,17 @@ static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc
 
 		case '?':
 			/* getopt_long already printed an error message. */
+			break;
+
+		case 'f':
+			//printf("%s\n", optarg);
+			if(strcmp(optarg, "JS") == 0){
+				KonohaContext_setVisitor(konoha, kVisitor_JS);
+			}else if(strcmp(optarg, "Dump") == 0){
+				KonohaContext_setVisitor(konoha, kVisitor_Dump);
+			}else{
+				KonohaContext_setVisitor(konoha, kVisitor_KonohaVM);
+			}
 			break;
 
 		default:

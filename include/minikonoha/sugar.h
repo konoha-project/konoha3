@@ -499,7 +499,7 @@ struct kGammaVar {
 /* ------------------------------------------------------------------------ */
 
 #define KonohaContext_getSugarContext(kctx)    ((SugarContext *)kctx->modlocal[MOD_sugar])
-#define kmodsugar       ((KModuleSugar *)kctx->modshare[MOD_sugar])
+#define kmodsugar       ((KModuleSugar*)kctx->modshare[MOD_sugar])
 #define CT_Token        kmodsugar->cToken
 #define CT_Expr         kmodsugar->cExpr
 #define CT_Stmt         kmodsugar->cStmt
@@ -519,12 +519,12 @@ struct kGammaVar {
 #define CT_StmtArray            CT_Array
 #define kStmtArray              kArray
 
-#define IS_NameSpace(O)  ((O)->h.ct == CT_NameSpace)
-#define IS_Token(O)  ((O)->h.ct == CT_Token)
-#define IS_Expr(O)   ((O)->h.ct == CT_Expr)
-#define IS_Stmt(O)   ((O)->h.ct == CT_Stmt)
-#define IS_Block(O)  ((O)->h.ct == CT_Block)
-#define IS_Gamma(O)  ((O)->h.ct == CT_Gamma)
+#define IS_NameSpace(O)  (O_ct(O) == CT_NameSpace)
+#define IS_Token(O)  (O_ct(O) == CT_Token)
+#define IS_Expr(O)   (O_ct(O) == CT_Expr)
+#define IS_Stmt(O)   (O_ct(O) == CT_Stmt)
+#define IS_Block(O)  (O_ct(O) == CT_Block)
+#define IS_Gamma(O)  (O_ct(O) == CT_Gamma)
 
 #define K_NULLTOKEN  (kToken *)((CT_Token)->defaultNullValue_OnGlobalConstList)
 #define K_NULLEXPR   (kExpr *)((CT_Expr)->defaultNullValue_OnGlobalConstList)

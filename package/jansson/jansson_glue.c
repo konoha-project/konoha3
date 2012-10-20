@@ -27,7 +27,7 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/klib.h>
-#include <minikonoha/float.h>
+#include <minikonoha/konoha_common.h>
 #include <jansson.h>
 
 #ifdef __cplusplus
@@ -416,7 +416,7 @@ static KMETHOD JsonArray_get(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t jansson_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KImportPackage(ns, "konoha.float", trace);
+	KRequirePackage("konoha.float", trace);
 	KDEFINE_CLASS JsonDef = {
 		.structname = "Json",
 		.typeId = TY_newid,

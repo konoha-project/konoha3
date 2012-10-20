@@ -116,6 +116,15 @@ typedef long long ssize_t;
 #define __func__ __FUNCTION__
 #endif
 
+/*
+ * differ prototype definition in *BSD and linux.
+ */
+#if defined(__NetBSD__)
+#define	ICONV_INBUF_CONST	const
+#else
+#define	ICONV_INBUF_CONST
+#endif
+
 /* ------------------------------------------------------------------------ */
 /* datatype */
 
@@ -341,7 +350,7 @@ typedef enum {
 	// ErrorPoint
 	SystemFault        =  (1<<1),  /* os, file system, etc. */
 	SoftwareFault      =  (1<<2),  /* programmer's mistake */
-	DataFault          =  (1<<3),  /* user input, data mistake */
+	UserFault          =  (1<<3),  /* user input, data mistake */
 	ExternalFault      =  (1<<4),  /* networking or remote services */
 	UnknownFault       =  (1<<5),  /* if you can distingish fault above */
 	// LogPoint
@@ -354,7 +363,7 @@ typedef enum {
 	// Internal Use
 	SystemError        =  (1<<11),
 	HasEvidence        =  (1<<12),
-	LOGPOOL_INIT       =  (1<<17),
+	LOGPOOL_INIT       =  (1<<17)
 } logpolicy_t;
 
 typedef struct logconf_t {
@@ -393,8 +402,8 @@ struct PlatformApiVar {
 
 	// I18N
 	uintptr_t   (*iconv_open_i)(KonohaContext *, const char* tocode, const char* fromcode, KTraceInfo *);
-	size_t      (*iconv_i)(KonohaContext *, uintptr_t iconv, char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft, int *isTooBigRef, KTraceInfo *trace);
-	size_t      (*iconv_i_memcpyStyle)(KonohaContext *, uintptr_t iconv, char **outbuf, size_t *outbytesleft, char **inbuf, size_t *inbytesleft, int *isTooBigRef, KTraceInfo *trace);
+	size_t      (*iconv_i)(KonohaContext *, uintptr_t iconv, ICONV_INBUF_CONST char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft, int *isTooBigRef, KTraceInfo *trace);
+	size_t      (*iconv_i_memcpyStyle)(KonohaContext *, uintptr_t iconv, char **outbuf, size_t *outbytesleft, ICONV_INBUF_CONST char **inbuf, size_t *inbytesleft, int *isTooBigRef, KTraceInfo *trace);
 	int         (*iconv_close_i)(KonohaContext *, uintptr_t iconv);
 	const char* systemCharset;
 	kbool_t     (*isSystemCharsetUTF8)(KonohaContext *);
@@ -451,6 +460,8 @@ struct PlatformApiVar {
 	void  (*traceDataLog)(KonohaContext *kctx, KTraceInfo *trace, int, logconf_t *, ...);
 	void  (*diagnosis)(void);
 
+	int (*diagnosisFaultType)(KonohaContext *, int fault, KTraceInfo *);
+
 	void (*reportUserMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *, int isNewLine);
 	void (*reportCompilerMessage)(KonohaContext *, kinfotag_t, const char *);
 	void (*reportException)(KonohaContext *, const char *, int fault, const char *, struct KonohaValueVar *bottomStack, struct KonohaValueVar *topStack);
@@ -464,16 +475,20 @@ struct PlatformApiVar {
 #define LogUint(K,V)    LOG_u, (K), ((uintptr_t)V)
 #define LogText(K,V)    LOG_s, (K), (V)
 #define LogErrno        LOG_ERRNO
-//#define LogLine(UL)     LogText("ScriptName", FileId_t(UL)), LogUint("ScriptLine", (kushort_t)(UL))
-//#define LogScriptLine(sfp)   LogText("ScriptName", FileId_t(sfp[K_RTNIDX].callerFileLine)), LogUint("ScriptLine", (kushort_t)sfp[K_RTNIDX].callerFileLine)
 
 #define KTraceErrorPoint(TRACE, POLICY, APINAME, ...)    do {\
-		static logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|POLICY)};\
+		logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|POLICY)};\
 		if(trace != NULL && TFLAG_is(int, _logconf.policy, isRecord)) { \
 			PLATAPI traceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
 		}\
 	} while(0)
 
+#define KTraceChangeSystemPoint(TRACE, APINAME, ...)    do {\
+		logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|SystemChangePoint)};\
+		if(trace != NULL && TFLAG_is(int, _logconf.policy, isRecord)) { \
+			PLATAPI traceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
+		}\
+	} while(0)
 
 #define KTraceApi(TRACE, POLICY, APINAME, ...)    do {\
 		static logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|POLICY)};\
@@ -490,7 +505,7 @@ struct PlatformApiVar {
 			STMT;\
 			uint64_t _endTime = PLATAPI getTimeMilliSecond();\
 			PLATAPI traceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), LogUint("ElapsedTime", (_endTime - _startTime)), ## __VA_ARGS__, LOG_END);\
-			counter++;\
+			/*counter++;*/\
 		}else { \
 			STMT;\
 		}\
@@ -668,6 +683,8 @@ struct KonohaRuntimeVar {
 	KHashMap                 *paramdomMap_KeyOnList;
 };
 
+enum kVisitorType{ kVisitor_KonohaVM, kVisitor_Dump, kVisitor_JS };
+
 #define kContext_Debug          ((kshortflag_t)(1<<0))
 #define kContext_Interactive    ((kshortflag_t)(1<<1))
 #define kContext_CompileOnly    ((kshortflag_t)(1<<2))
@@ -676,6 +693,8 @@ struct KonohaRuntimeVar {
 #define KonohaContext_isCompileOnly(X)  (TFLAG_is(kshortflag_t,(X)->stack->flag, kContext_CompileOnly))
 #define KonohaContext_setInteractive(X)  TFLAG_set1(kshortflag_t, (X)->stack->flag, kContext_Interactive)
 #define KonohaContext_setCompileOnly(X)  TFLAG_set1(kshortflag_t, (X)->stack->flag, kContext_CompileOnly)
+
+#define KonohaContext_setVisitor(X, V) ((X)->stack->visitor = (V))
 
 struct KonohaStackRuntimeVar {
 	KonohaStack*               stack;
@@ -695,6 +714,7 @@ struct KonohaStackRuntimeVar {
 	jmpbuf_i                  *evaljmpbuf;
 	KonohaStack               *bottomStack;
 	KonohaStack               *topStack;
+	enum kVisitorType          visitor;
 };
 
 // module
@@ -703,6 +723,8 @@ struct KonohaStackRuntimeVar {
 #define MOD_gc         1
 #define MOD_code       2
 #define MOD_sugar      3
+#define MOD_konoha     6
+
 #define MOD_exception  5
 #define MOD_float      11
 #define MOD_iterator   12
@@ -714,10 +736,10 @@ struct KonohaStackRuntimeVar {
 
 struct KonohaModule {
 	const char *name;
-	int mod_id;
-	void (*setup)(KonohaContext*,    struct KonohaModule *, int newctx);
-	void (*reftrace)(KonohaContext*, struct KonohaModule *, struct KObjectVisitor *);
-	void (*free)(KonohaContext*,     struct KonohaModule *);
+	int         mod_id;
+	void        (*setupModuleContext)(KonohaContext*, struct KonohaModule *, int newctx);
+	void        (*freeModule)(KonohaContext*, struct KonohaModule *);
+	size_t      allocSize;
 	kmutex_t   *moduleMutex;
 };
 
@@ -756,7 +778,7 @@ struct KonohaModuleContext {
 	const struct kExceptionVar  *asException;\
 	const struct kFloatVar      *asFloat; \
 	struct kDateVar             *asDate;\
-	struct kRegExp            *asRegExp; \
+	struct kRegExpVar           *asRegExp; \
 	const struct kBytesVar      *asBytes; \
 	const struct kFileVar     *asFILE;\
 	struct kIteratorVar *asIterator; \
@@ -1054,9 +1076,11 @@ typedef enum {
 #define StringFlag_TextSgm        kObject_Local2  /* Don't change */
 #define StringFlag_MallocText     kObject_Local3  /* Don't change */
 #define StringFlag_ASCII          kObject_Local4
+#define StringFlag_Literal        kObject_Local5
 
 #define kString_is(P, o)        (TFLAG_is(uintptr_t,(o)->h.magicflag,StringFlag_##P))
 #define kString_set(P, o, b)    TFLAG_set(uintptr_t,(o)->h.magicflag,StringFlag_##P,b)
+#define kString_guessUserFault(S)    ((kString_is(Literal, S)) ? 0 : UserFault)
 
 #define SIZEOF_INLINETEXT    (sizeof(void *)*8 - sizeof(kBytes))
 
@@ -1488,6 +1512,8 @@ struct KonohaLibVar {
 
 	KonohaPackage*   (*kNameSpace_requirePackage)(KonohaContext*, const char *, KTraceInfo *);
 	kbool_t          (*kNameSpace_importPackage)(KonohaContext*, kNameSpace*, const char *, KTraceInfo *);
+	kbool_t          (*kNameSpace_importPackageSymbol)(KonohaContext *, kNameSpace *, const char *, ksymbol_t keyword, KTraceInfo *);
+
 	KonohaClass*     (*kNameSpace_getClass)(KonohaContext*, kNameSpace *, const char *, size_t, KonohaClass *);
 	KonohaClass*     (*kNameSpace_defineClass)(KonohaContext*, kNameSpace *, kString *, KDEFINE_CLASS *, KTraceInfo *);
 
@@ -1561,8 +1587,9 @@ struct KonohaLibVar {
 #define kArray_setsize(A, N)      ((kArrayVar *)A)->bytesize = (N) * sizeof(void *)
 #define new_kParam(CTX, R, PSIZE, P)       (KLIB kMethod_setParam(CTX, NULL, R, PSIZE, P))
 
-//#define KRequirePackage(NAME, UL)       if(!KLIB kNameSpace_requirePackage(kctx, NAME, UL)) return false;
-#define KImportPackage(NS, NAME, UL)    if(!KLIB kNameSpace_importPackage(kctx, NS, NAME, UL)) return false;
+#define KRequirePackage(NAME, TRACE)       if(!KLIB kNameSpace_requirePackage(kctx, NAME, TRACE)) { return false; } else {}
+#define KImportPackage(NS, NAME, TRACE)    if(!KLIB kNameSpace_importPackage(kctx, NS, NAME, TRACE)) { return false; } else {}
+#define KImportPackageSymbol(NS, NAME, SYMBOL, TRACE) if(!KLIB kNameSpace_importPackageSymbol(kctx, NS, NAME, SYM_(SYMBOL), TRACE)) { return false; } else {}
 
 typedef intptr_t  KDEFINE_METHOD;
 

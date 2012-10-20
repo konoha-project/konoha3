@@ -34,6 +34,8 @@ extern "C" {
 
 int verbose_code = 0;  // global variable
 
+static void kMethod_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func);
+
 /* ------------------------------------------------------------------------ */
 struct IRBuilder;
 
@@ -104,6 +106,8 @@ typedef struct DumpVisitor {
 
 typedef struct DumpVisitorLocal {
 	int indent;
+	kbool_t isIndentEmitted;
+	kMethod *visitingMethod;
 } DumpVisitorLocal;
 
 typedef DumpVisitor JSVisitor;
@@ -161,7 +165,7 @@ static void visitBlock(KonohaContext *kctx, IRBuilder *builder, kBlock *bk)
 	int espidx = builder->espidx;
 	int shift = builder->shift;
 	builder->espidx = (bk->esp->build == TEXPR_STACKTOP) ? shift + bk->esp->index : bk->esp->index;
-	int i;
+	size_t i;
 	for (i = 0; i < kArray_size(bk->StmtList); i++) {
 		kStmt *stmt = bk->StmtList->StmtItems[i];
 		if(stmt->syn == NULL) continue;
@@ -223,7 +227,9 @@ static kBasicBlock *kStmt_getLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbo
 }
 
 /* ------------------------------------------------------------------------ */
-#ifndef PLATAPIFORM_KERNEL
+#if !defined(PLATAPIFORM_KERNEL) || !defined(USE_SMALLBUILD)
+#define USE_DUMP_VISITOR
+#define USE_JS_VISITOR
 #include "dumpvisitor.c"
 #include "jsvisitor.c"
 #endif
@@ -1048,31 +1054,37 @@ static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	DBG_P("START CODE GENERATION..");
 	INIT_GCSTACK();
 	if(ctxcode == NULL) {
-		kmodcode->h.setup(kctx, NULL, 1);
+		kmodcode->header.setupModuleContext(kctx, NULL, 1/*new ctx*/);
 	}
 
 	IRBuilder *builder, builderbuf;
-#ifdef USE_DUMP_VISITOR
-	{
+
+#ifdef USE_SMALLBUILD
+#define visitorType kVisitor_KonohaVM
+#else
+#define visitorType (kctx->stack->visitor)
+#endif
+	
+	switch(visitorType){
+	case kVisitor_Dump:
 		builder = createDumpVisitor(&builderbuf);
 		builder->api.fn_init(kctx, builder, mtd);
 		visitBlock(kctx, builder, bk);
 		builder->api.fn_free(kctx, builder, mtd);
-	}
-#endif
-#ifdef USE_JS_VISITOR
-	{
+		break;
+	case kVisitor_JS:
 		builder = createJSVisitor(&builderbuf);
 		builder->api.fn_init(kctx, builder, mtd);
 		visitBlock(kctx, builder, bk);
 		builder->api.fn_free(kctx, builder, mtd);
-	}
-#endif
-	{
+		break;
+	default:
+	case kVisitor_KonohaVM:
 		builder = createKonohaVisitor(&builderbuf);
 		builder->api.fn_init(kctx, builder, mtd);
 		visitBlock(kctx, builder, bk);
 		builder->api.fn_free(kctx, builder, mtd);
+		break;
 	}
 
 	RESET_GCSTACK();
@@ -1181,28 +1193,15 @@ static void kmodcode_setup(KonohaContext *kctx, struct KonohaModule *def, int ne
 	}
 }
 
-static void kmodcode_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
-{
-	KModuleByteCode *base = (KModuleByteCode *)baseh;
-	BEGIN_REFTRACE(1);
-	KREFTRACEn(base->codeNull);
-	END_REFTRACE();
-}
-
-static void kmodcode_free(KonohaContext *kctx, struct KonohaModule *baseh)
-{
-	KFree(baseh, sizeof(KModuleByteCode));
-}
-
 void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	KModuleByteCode *base = (KModuleByteCode *)KCalloc_UNTRACE(sizeof(KModuleByteCode), 1);
 	opcode_check();
-	base->h.name     = "minivm";
-	base->h.setup    = kmodcode_setup;
-	base->h.reftrace = kmodcode_reftrace;
-	base->h.free     = kmodcode_free;
-	KLIB KonohaRuntime_setModule(kctx, MOD_code, &base->h, 0);
+	base->header.name      = "minivm";
+	base->header.allocSize = sizeof(KModuleByteCode);
+	base->header.setupModuleContext    = kmodcode_setup;
+	KLIB KonohaRuntime_setModule(kctx, MOD_code, &base->header, 0);
+
 	KDEFINE_CLASS defBasicBlock = {0};
 	SETSTRUCTNAME(defBasicBlock, BasicBlock);
 	defBasicBlock.init = BasicBlock_init;
@@ -1216,7 +1215,7 @@ void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	
 	base->cBasicBlock = KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defBasicBlock, 0);
 	base->cByteCode = KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defByteCode, 0);
-	kmodcode_setup(kctx, &base->h, 0);
+	kmodcode_setup(kctx, &base->header, 0);
 	KonohaLibVar *l = (KonohaLibVar *)kctx->klib;
 	l->kMethod_genCode = kMethod_genCode;
 	l->kMethod_setFunc = kMethod_setFunc;

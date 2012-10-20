@@ -7,7 +7,7 @@ import("konoha.class");
 import("konoha.string");
 import("konoha.bytes");
 import("jansson");
-import("posix.file");
+import("konoha.file");
 import("konoha.subproc");
 
 class DSERequest {

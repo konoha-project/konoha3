@@ -155,7 +155,7 @@ static KMETHOD System_lseek(KonohaContext *kctx, KonohaStack *sfp)
 	off_t ret_offset = lseek(fd, offset, whence);
 	if(ret_offset == -1) {
 		// TODO: throw
-		OLDTRACE_SWITCH_TO_KTrace(_DataFault,
+		OLDTRACE_SWITCH_TO_KTrace(_UserFault,
 			   LogText("@", "lseek"),
 			   LogUint("offset", offset),
 			   LogUint("whence", whence),

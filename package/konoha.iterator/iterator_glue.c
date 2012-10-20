@@ -28,7 +28,7 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/klib.h>
-#include <minikonoha/iterator.h>
+#include <minikonoha/konoha_common.h>
 
 
 #ifdef __cplusplus
@@ -158,39 +158,32 @@ static KMETHOD String_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ------------------------------------------------------------------------ */
 
-static void kmoditerator_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx) {}
-static void kmoditerator_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor) { }
-static void kmoditerator_free(KonohaContext *kctx, struct KonohaModule *baseh) { KFree(baseh, sizeof(KonohaIteratorModule)); }
-
 #define _Public   kMethod_Public
 #define _F(F)   (intptr_t)(F)
 
 static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KonohaIteratorModule *base = (KonohaIteratorModule *)KCalloc_UNTRACE(sizeof(KonohaIteratorModule), 1);
-	base->h.name     = "iterator";
-	base->h.setup    = kmoditerator_setup;
-	base->h.reftrace = kmoditerator_reftrace;
-	base->h.free     = kmoditerator_free;
-	KLIB KonohaRuntime_setModule(kctx, MOD_iterator, &base->h, trace);
+	KRequireKonohaCommonModule(trace);
+	if(CT_Iterator == NULL) {
+		kparamtype_t IteratorParam = {0};
+		IteratorParam.ty = TY_Object;
 
-	kparamtype_t IteratorParam = {0};
-	IteratorParam.ty = TY_Object;
+		KDEFINE_CLASS defIterator = {0};
+		SETSTRUCTNAME(defIterator, Iterator);
+		defIterator.cflag  = CFLAG_Iterator;
+		defIterator.init   = Iterator_init;
+		defIterator.cparamsize  = 1;
+		defIterator.cParamItems = &IteratorParam;
 
-	KDEFINE_CLASS defIterator = {0};
-	SETSTRUCTNAME(defIterator, Iterator);
-	defIterator.cflag  = CFLAG_Iterator;
-	defIterator.init   = Iterator_init;
-	defIterator.cparamsize  = 1;
-	defIterator.cParamItems = &IteratorParam;
+		CT_Iterator = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defIterator, trace);
+		CT_StringIterator = CT_p0(kctx, CT_Iterator, TY_String);
+		CT_GenericIterator = CT_p0(kctx, CT_Iterator, TY_0);
+	}
 
-	base->cIterator = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defIterator, trace);
-	base->cStringIterator = CT_p0(kctx, base->cIterator, TY_String);
-	base->cGenericIterator = CT_p0(kctx, base->cIterator, TY_0);
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Iterator_hasNext), TY_boolean, TY_Iterator, MN_("hasNext"), 0,
 		_Public, _F(Iterator_next), TY_0, TY_Iterator, MN_("next"), 0,
-		_Public, _F(Array_toIterator),  base->cGenericIterator->typeId, TY_Array, MN_("toIterator"), 0,
+		_Public, _F(Array_toIterator),  TY_GenericIterator, TY_Array, MN_("toIterator"), 0,
 		_Public, _F(String_toIterator), TY_StringIterator, TY_String, MN_("toIterator"), 0,
 		DEND,
 	};

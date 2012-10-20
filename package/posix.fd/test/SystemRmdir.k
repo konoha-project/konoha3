@@ -2,7 +2,7 @@
 
 import("konoha.bytes");
 import("posix.fd");
-import("posix.file");
+import("konoha.file");
 
 void test() {
 	System.mkdir("hoge", 0777);
