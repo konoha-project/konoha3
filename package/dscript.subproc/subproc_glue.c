@@ -414,14 +414,17 @@ static int kSubproc_popen(KonohaContext *kctx, kSubproc *proc, int defaultMode, 
 		CLEANUP_RESOURCE_MONITOR(proc);
 #endif
 		if(rmode == M_PIPE) {
+			DBG_P("rfp is set");
 			KFieldSet(proc, proc->rfp, (kFile *)KLIB new_kObject(kctx, OnField, CT_FILE, (intptr_t)fdopen(c2p[0], "r")));
 			close(c2p[1]);
 		}
 		if(wmode == M_PIPE) {
+			DBG_P("wfp is set");
 			KFieldSet(proc, proc->wfp, (kFile *)KLIB new_kObject(kctx, OnField, CT_FILE, (intptr_t)fdopen(p2c[1], "w")));
 			close(p2c[0]);
 		}
 		if(emode == M_PIPE) {
+			DBG_P("efp is set");
 			KFieldSet(proc, proc->efp, (kFile *)KLIB new_kObject(kctx, OnField, CT_FILE, (intptr_t)fdopen(err[0], "r")));
 			close(err[1]);
 		}
@@ -634,7 +637,7 @@ static kArray *kSubproc_communicate(KonohaContext *kctx, kSubproc *proc, kString
 {
 	kArray *ret_a = (kArray *)KLIB new_kObject(kctx, OnStack, CT_p0(kctx, CT_Array, TY_String), 0);
 	if(kSubproc_is(OnExec, proc)) {
-		if((proc->wmode == M_PIPE) && (S_size(input) > 0)) {
+		if(proc->wmode == M_PIPE) {
 			// The measure against panic,
 			// if "Broken Pipe" is detected at the time of writing.
 #ifndef __APPLE__
@@ -642,13 +645,11 @@ static kArray *kSubproc_communicate(KonohaContext *kctx, kSubproc *proc, kString
 #else
 			sig_t oldset = signal(SIGPIPE, SIG_IGN);
 #endif
-			if(fwrite(S_text(input), sizeof(char), S_size(input), proc->wfp->fp) > 0) {
-				fclose(proc->wfp->fp);
-				proc->wfp->fp = NULL;
-			}
-			else {
+			if(S_size(input) > 0 && !fwrite(S_text(input), sizeof(char), S_size(input), proc->wfp->fp) > 0) {
 				KTraceApi(trace, SystemFault, "fwrite", LogErrno);
 			}
+			fclose(proc->wfp->fp);
+			proc->wfp->fp = NULL;
 			if(oldset != SIG_ERR) {
 				signal(SIGPIPE, oldset);
 			}
@@ -861,14 +862,14 @@ KMETHOD Subproc_setFileERR(KonohaContext *kctx, KonohaStack *sfp)
 KMETHOD Subproc_getFileIN(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubproc *proc = (kSubproc *)sfp[0].asObject;
-	KReturn(proc->rfp);
+	KReturn(proc->wfp);
 }
 
 //## FILE Subproc.getFileOUT();
 KMETHOD Subproc_getFileOUT(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubproc *proc = (kSubproc *)sfp[0].asObject;
-	KReturn(proc->wfp);
+	KReturn(proc->rfp);
 }
 
 //## FILE Subproc.getFileERR();
@@ -1124,9 +1125,9 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public, _F(Subproc_setFileIN), TY_boolean, TY_Subproc, MN_("setFileIN"), 1, TY_FILE, FN_("file"),
 		_Public, _F(Subproc_setFileOUT), TY_boolean, TY_Subproc, MN_("setFileOUT"), 1, TY_FILE, FN_("file"),
 		_Public, _F(Subproc_setFileERR), TY_boolean, TY_Subproc, MN_("setFileERR"), 1, TY_FILE, FN_("file"),
-		_Public, _F(Subproc_getFileIN), TY_boolean, TY_Subproc, MN_("getFileIN"), 0,
-		_Public, _F(Subproc_getFileOUT), TY_boolean, TY_Subproc, MN_("getFileOUT"), 0,
-		_Public, _F(Subproc_getFileERR), TY_boolean, TY_Subproc, MN_("getFileERR"), 0,
+		_Public, _F(Subproc_getFileIN), TY_FILE, TY_Subproc, MN_("getFileIN"), 0,
+		_Public, _F(Subproc_getFileOUT), TY_FILE, TY_Subproc, MN_("getFileOUT"), 0,
+		_Public, _F(Subproc_getFileERR), TY_FILE, TY_Subproc, MN_("getFileERR"), 0,
 		_Public|_Im, _F(Subproc_getTimeout), TY_int, TY_Subproc, MN_("getTimeout"), 0,
 		_Public|_Im, _F(Subproc_getReturncode), TY_int, TY_Subproc, MN_("getReturncode"), 0,
 		DEND,
