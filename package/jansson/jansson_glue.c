@@ -34,7 +34,9 @@
 extern "C" {
 #endif
 
+#define CT_Json          cJson
 #define TY_Json          cJson->typeId
+#define IS_Json(O)       (O_ct(O) == CT_Json)
 #define CT_JsonArray     CT_p0(kctx, CT_Array, TY_Json)
 
 #define CT_StringArray0   CT_p0(kctx, CT_Array, TY_String)
@@ -84,7 +86,7 @@ static void Jansson_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuff
 //## Json Json.new();
 static KMETHOD Json_new (KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kJson* json = (struct _kJson *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
+	struct _kJson* json = (struct _kJson *)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 	json->obj = json_object();
 	json_incref(json->obj);
 	KReturn(json);
@@ -97,7 +99,7 @@ static KMETHOD Json_parse(KonohaContext *kctx, KonohaStack *sfp)
 	json_t* obj;
 	json_error_t err;
 	obj = json_loads(buf, 0, &err);
-	struct _kJson* ret = (struct _kJson *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
+	struct _kJson *ret = (struct _kJson *)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 	CHECK_JSON(obj, KReturn((kJson *)KLIB Knull(kctx, O_ct(ret))));
 	obj = json_incref(obj);
 	ret->obj = obj;
@@ -113,7 +115,7 @@ static KMETHOD Json_getJson(KonohaContext *kctx, KonohaStack *sfp)
 	json_t* ret = json_object_get(obj, key);
 	CHECK_JSON(ret, KReturn((kJson *)KLIB Knull(kctx, O_ct(sfp[0].asObject))));
 	ret = json_incref(ret);
-	struct _kJson* json = (struct _kJson *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
+	struct _kJson *json = (struct _kJson *)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 	json->obj = ret;
 	KReturn(json);
 }
@@ -136,7 +138,7 @@ static KMETHOD Json_getArray(KonohaContext *kctx, KonohaStack *sfp)
 	if(!json_is_array(ja)) {
 		KReturn(KNULL(Array));
 	}
-	kArrayVar* a = (kArrayVar *)KLIB new_kObject(kctx, OnStack, CT_Array, 0);
+	kArrayVar* a = (kArrayVar *)KLIB new_kObjectDontUseThis(kctx, CT_Array, 0);
 	a->ObjectItems= (kObject**)ja;
 	KReturn(a);
 }
@@ -199,7 +201,7 @@ static KMETHOD Json_getString(KonohaContext *kctx, KonohaStack *sfp)
 	if(str == NULL) {
 		KReturn(KNULL(String));
 	}
-	KReturn(KLIB new_kString(kctx, GcUnsafe, str, strlen(str), 0));
+	KReturn(KLIB new_kString(kctx, str, strlen(str), 0));
 }
 
 //## void Json.setJson(String key, Json value);
@@ -319,14 +321,14 @@ static KMETHOD Json_setString(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Json_getKeys(KonohaContext *kctx, KonohaStack *sfp)
 {
 	json_t* obj = ((struct _kJson *)sfp[0].asObject)->obj;
-	kArray* a = (kArray *)KLIB new_kObject(kctx, OnStack, CT_StringArray0, 0);
+	kArray *a = (kArray *)KLIB new_kObjectDontUseThis(kctx, CT_StringArray0, 0);
 	CHECK_JSON(obj, KReturn(KNULL(Array)));
 	const char* key;
 	void* iter = json_object_iter(obj);
 	while(iter) {
 		key = json_object_iter_key(iter);
 		iter = json_object_iter_next(obj, iter);
-		KLIB kArray_add(kctx, a, KLIB new_kString(kctx, GcUnsafe, key, strlen(key), StringPolicy_ASCII));
+		KLIB kArray_add(kctx, a, KLIB new_kString(kctx, key, strlen(key), StringPolicy_POOL|StringPolicy_ASCII));
 	}
 	KReturn(a);
 }
@@ -340,7 +342,7 @@ static KMETHOD Json_dump(KonohaContext *kctx, KonohaStack *sfp)
 	if(data == NULL) {
 		KReturn(KNULL(String));
 	}
-	KReturn(KLIB new_kString(kctx, GcUnsafe, data, strlen(data), 0));
+	KReturn(KLIB new_kString(kctx, data, strlen(data), 0));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -385,7 +387,7 @@ static KMETHOD JsonArray_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
 	json_t *ja = (json_t *)a->ObjectItems;
-	struct _kJson* json = (struct _kJson *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
+	struct _kJson *json = (struct _kJson *)KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), 0);
 	json->obj = json_array_get(ja, sfp[1].intValue);
 	KReturn(json);
 }
@@ -409,10 +411,12 @@ static KMETHOD JsonArray_get(KonohaContext *kctx, KonohaStack *sfp)
 
 #define _Public   kMethod_Public
 #define _Const    kMethod_Const
+#define _Coercion kMethod_Coercion
 #define _Static   kMethod_Static
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
+#define _KVi(T)  #T, TY_int, T
 
 static kbool_t jansson_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {

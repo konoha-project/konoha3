@@ -1,12 +1,12 @@
 import("konoha.class");
-import("cstyle", "while");
+import("konoha.while");
 import("konoha.int");
 import("konoha.float");
 import("konoha.string");
 import("konoha.array");
 import("konoha.assign");
 
-import("jansson");
+K.import("jansson");
 
 void main() {
 	String sample = "{\"int\": 10, \"float\": 1.0, \"string\": \"hoge\", \"bool\": true, \"array\": [{\"foo\": \"bar\"}, {\"hoge\": \"huga\"}], \"json\": {\"foo\": \"bar\", \"hoge\": \"huga\"}}"
@@ -42,7 +42,7 @@ void main() {
 	String[] keys = parsed.getKeys();
 	i = 0;
 	while(i < keys.getSize()) {
-		System.p(keys[i]);
+		p(keys[i]);
 		i += 1;
 	}
 }
