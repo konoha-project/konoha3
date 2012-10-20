@@ -49,6 +49,11 @@
 #include <dlfcn.h>
 #include <sys/stat.h>
 #include <errno.h>
+/*==========<<<for Berkeley DB>>>==========*/
+#include <sys/types.h>
+#include <string.h>
+//#include <db.h>
+/*=========================================*/
 
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
@@ -72,8 +77,8 @@ static uintptr_t I18N_iconv_open(KonohaContext *kctx, const char *targetCharset,
 	uintptr_t ic = (uintptr_t)iconv_open(targetCharset, sourceCharset);
 	if(ic == ICONV_NULL) {
 		KTraceApi(trace, UserFault|SoftwareFault, "iconv_open",
-			LogText("tocode", targetCharset), LogText("fromcode", sourceCharset), LogErrno
-		);
+				  LogText("tocode", targetCharset), LogText("fromcode", sourceCharset), LogErrno
+			);
 	}
 	return (uintptr_t)ic;
 }
@@ -755,9 +760,84 @@ static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 	return userFault | SoftwareFault |SystemFault;
 }
 
+
+//#define DATABASE "test.db"
+//
+//static kbool_t fetch_CoverageLog_from_Berkeley_DB(KonohaContext *kctx, const char *key)
+//{
+//	DB *dbp = NULL;
+//	DBC *dbcp = NULL;
+//	DBT DB_key, DB_data;
+//	int ret, t_ret;
+//
+//	ret = db_create(&dbp, NULL, 0);
+//	if (ret != 0) {
+//		fprintf(stderr, "db_create: %s\n", db_strerror(ret));
+//		goto err;
+//	}
+//
+//	ret = dbp->open(dbp, NULL, DATABASE, NULL, DB_BTREE, DB_RDONLY, 0);
+//	if (ret != 0) {
+//		dbp->err(dbp, ret, "%s", DATABASE);
+//		goto err;
+//	}
+//	
+//	ret = dbp->cursor(dbp, NULL, &dbcp, 0);
+//	if (ret != 0) {
+//		dbp->err(dbp, ret, "%s", DATABASE);
+//		goto err;
+//	}
+//	
+//	while (1) {
+//		memset(&DB_key, 0, sizeof(DB_key));
+//		memset(&DB_data, 0, sizeof(DB_data));
+//
+//		ret = dbcp->c_get(dbcp, &DB_key, &DB_data, DB_NEXT);
+//		if (ret == DB_NOTFOUND) {
+//			ret = 0;
+//			dbcp->c_close(dbcp);
+//			dbp->close(dbp, 0);
+//			return false;
+//		}
+//		else if (ret != 0) {
+//			dbp->err(dbp, ret, "%s", DATABASE);
+//			goto err;
+//		}
+//		if(strncmp(key, DB_key.data, strlen(key)) == 0) {
+//			printf("%.*s\n", (int)DB_data.size, (char *)DB_data.data);
+//			dbcp->c_close(dbcp);
+//			dbp->close(dbp, 0);
+//			return true;
+//		}
+//	}
+//
+//err:
+//	if (dbcp) {
+//		t_ret = dbcp->c_close(dbcp);
+//		if (t_ret != 0 && ret == 0)
+//			ret = t_ret;
+//	}
+//	
+//	if (dbp) {
+//		t_ret = dbp->close(dbp, 0);
+//		if (t_ret != 0 && ret == 0)
+//			ret = t_ret;
+//	}
+//	
+////	exit(ret);
+//	return false;
+//}
+
 static kbool_t DEOS_checkSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
 {
 	DBG_P("filename='%s', line=%d", filename, line);
+//	
+//#define N 64
+//	kbool_t res;
+//	char key[N] = {'\0'};
+//	snprintf(key, N, "\"%s/%d\"", filename, line);
+//	res = fetch_CoverageLog_from_Berkeley_DB(kctx, key);
+//	return res;
 	return true;
 }
 
