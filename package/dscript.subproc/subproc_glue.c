@@ -407,7 +407,7 @@ static int kSubproc_popen(KonohaContext *kctx, kSubproc *proc, int defaultMode, 
 		_exit(1);
 	default:
 		// parent process normal route
-#if defined(kSubproc_ENABLE_RESOURCEMONITOR)
+#if defined(SUBPROC_ENABLE_RESOURCEMONITOR)
 /		ATTACH_RESOURCE_MONITOR_FOR_CHILD(proc, pid);
 //		size_t mem = FETCH_MEM_FROM_RESOURCE_MONITOR(sp);
 //		fprintf(stderr, "menusage:%.1fM\n", (double)mem / (1024.0 * 1024.0));
@@ -418,11 +418,11 @@ static int kSubproc_popen(KonohaContext *kctx, kSubproc *proc, int defaultMode, 
 			close(c2p[1]);
 		}
 		if(wmode == M_PIPE) {
-			KFieldSet(proc, proc->wfp, (kFile *)KLIB new_kObject(kctx, OnField, CT_FILE, (intptr_t)fdopen(c2p[0], "w")));
+			KFieldSet(proc, proc->wfp, (kFile *)KLIB new_kObject(kctx, OnField, CT_FILE, (intptr_t)fdopen(p2c[1], "w")));
 			close(p2c[0]);
 		}
 		if(emode == M_PIPE) {
-			KFieldSet(proc, proc->efp, (kFile *)KLIB new_kObject(kctx, OnField, CT_FILE, (intptr_t)fdopen(c2p[0], "r")));
+			KFieldSet(proc, proc->efp, (kFile *)KLIB new_kObject(kctx, OnField, CT_FILE, (intptr_t)fdopen(err[0], "r")));
 			close(err[1]);
 		}
 	}
@@ -560,8 +560,9 @@ static void killWait(int pid) {
 	getPidStatus(pid, &status); // this wait is in order not to leave a zombie process.
 }
 
-static kString *kPipeReadString(KonohaContext *kctx, FILE *fp)
+static kString *kFile_readAll(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
 {
+	FILE *fp = file->fp;
 	char buf[K_PAGESIZE];
 	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
@@ -575,10 +576,16 @@ static kString *kPipeReadString(KonohaContext *kctx, FILE *fp)
 		}
 	}
 	if(ferror(fp)) {
+		KTraceApi(trace, SoftwareFault|UserFault, "fread");
+		clearerr(fp);
+		fclose(fp);
+		file->fp = NULL;
 		return KNULL(String);
 	}
 	kString *ret = KLIB new_kString(kctx, GcUnsafe, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), 0);
 	KLIB Kwb_free(&wb);
+	fclose(fp);
+	file->fp = NULL;
 	return ret;
 }
 
@@ -600,7 +607,7 @@ static kString *kSubproc_checkOutput(KonohaContext *kctx, kSubproc *p, kString *
 			//todo: error
 		}
 		else if((proc->rmode == M_PIPE) || (proc->rmode == M_DEFAULT) ) {
-			ret_s = kPipeReadString(kctx, proc->rfp->fp);
+			ret_s = kFile_readAll(kctx, proc->rfp, trace);
 			if(IS_NULL(ret_s)) {
 				// todo: error
 			}
@@ -621,6 +628,60 @@ static kString *kSubproc_checkOutput(KonohaContext *kctx, kSubproc *p, kString *
 	val.it_value.tv_sec = 0;
 	setitimer(ITIMER_REAL, &val, NULL);
 	return ret_s;
+}
+
+static kArray *kSubproc_communicate(KonohaContext *kctx, kSubproc *proc, kString *input, KTraceInfo *trace)
+{
+	kArray *ret_a = (kArray *)KLIB new_kObject(kctx, OnStack, CT_p0(kctx, CT_Array, TY_String), 0);
+	if(kSubproc_is(OnExec, proc)) {
+		if((proc->wmode == M_PIPE) && (S_size(input) > 0)) {
+			// The measure against panic,
+			// if "Broken Pipe" is detected at the time of writing.
+#ifndef __APPLE__
+			__sighandler_t oldset = signal(SIGPIPE, SIG_IGN);
+#else
+			sig_t oldset = signal(SIGPIPE, SIG_IGN);
+#endif
+			if(fwrite(S_text(input), sizeof(char), S_size(input), proc->wfp->fp) > 0) {
+				fclose(proc->wfp->fp);
+				proc->wfp->fp = NULL;
+			}
+			else {
+				KTraceApi(trace, SystemFault, "fwrite", LogErrno);
+			}
+			if(oldset != SIG_ERR) {
+				signal(SIGPIPE, oldset);
+			}
+		}
+		if(kSubproc_wait(kctx, proc, trace) == S_TIMEOUT) {
+			kSubproc_set(TimeoutKill, proc, true);
+			killWait(proc->cpid);
+			//TODO: raise error
+		}
+		else {
+			if(proc->rmode == M_PIPE) {
+				kString *readstr = kFile_readAll(kctx, proc->rfp, trace);
+				if(IS_NULL(readstr)) {
+					//TODO;  raise error
+				}
+				KLIB kArray_add(kctx, ret_a, readstr);
+			}
+			else {
+				KLIB kArray_add(kctx, ret_a, KNULL(String));
+			}
+			if(proc->emode == M_PIPE) {
+				kString *readstr = kFile_readAll(kctx, proc->efp, trace);
+				if(IS_NULL(readstr)) {
+					// TODO: raise error
+				}
+				KLIB kArray_add(kctx, ret_a, readstr);
+			}
+			else {
+				KLIB kArray_add(kctx, ret_a, KNULL(String));
+			}
+		}
+	}
+	return ret_a;
 }
 
 /* ------------------------------------------------------------------------ */
@@ -689,63 +750,22 @@ static KMETHOD Subproc_exec(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(kSubproc_checkOutput(kctx, (kSubproc *)sfp[0].asObject, sfp[1].asString, trace));
 }
 
-//## String[] Subproc.communicate(String input);
-static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
+//## String[] Subproc.communicate();
+static KMETHOD Subproc_communicate0(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kArray *ret_a = (kArray *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
 	kSubproc *proc = (kSubproc *)sfp[0].asObject;
+	kString *input = KNULL(String);
 	KMakeTrace(trace, sfp);
-	if(kSubproc_is(OnExec, proc)) {
-		if((proc->wmode == M_PIPE) && (S_size(sfp[1].asString) > 0)) {
-			kString *s = sfp[1].asString;
-			// The measure against panic,
-			// if "Broken Pipe" is detected at the time of writing.
-#ifndef __APPLE__
-			__sighandler_t oldset = signal(SIGPIPE, SIG_IGN);
-#else
-			sig_t oldset = signal(SIGPIPE, SIG_IGN);
-#endif
-			if(fwrite(S_text(s), sizeof(char), S_size(s), proc->wfp->fp) > 0) {
-				fclose(proc->wfp->fp);
-				proc->wfp->fp = NULL;
-			}
-			else {
-				KTraceApi(trace, SystemFault, "fwrite", LogErrno);
-			}
-			if(oldset != SIG_ERR) {
-				signal(SIGPIPE, oldset);
-			}
-		}
-		if(kSubproc_wait(kctx, proc, trace) == S_TIMEOUT) {
-			kSubproc_set(TimeoutKill, proc, true);
-			killWait(proc->cpid);
-			//TODO: raise error
-		}
-		else {
-			if(proc->rmode == M_PIPE) {
-				kString *readstr = kPipeReadString(kctx, proc->rfp->fp);
-				if(IS_NULL(readstr)) {
-					//TODO;  raise error
-				}
-				KLIB kArray_add(kctx, ret_a, readstr);
-			}
-			else {
-				KLIB kArray_add(kctx, ret_a, KNULL(String));
-			}
-			if(proc->emode == M_PIPE) {
-				kString *readstr = kPipeReadString(kctx, proc->efp->fp);
-				if(IS_NULL(readstr)) {
-					// TODO: raise error
-					readstr = KNULL(String);
-				}
-				KLIB kArray_add(kctx, ret_a, readstr);
-			}
-			else {
-				KLIB kArray_add(kctx, ret_a, KNULL(String));
-			}
-		}
-	}
-	KReturn(ret_a);
+	KReturn(kSubproc_communicate(kctx, proc, input, trace));
+}
+
+//## String[] Subproc.communicate(String input);
+static KMETHOD Subproc_communicate1(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kSubproc *proc = (kSubproc *)sfp[0].asObject;
+	kString *input = sfp[1].asString;
+	KMakeTrace(trace, sfp);
+	KReturn(kSubproc_communicate(kctx, proc, input, trace));
 }
 
 //## @Restricted boolean Subproc.enableShellmode(boolean isShellmode);
@@ -1077,7 +1097,8 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public, _F(Subproc_fg), TY_int, TY_Subproc, MN_("fg"), 0,
 		_Public, _F(Subproc_bg), TY_boolean, TY_Subproc, MN_("bg"), 0,
 		_Public, _F(Subproc_exec), TY_String, TY_Subproc, MN_("exec"), 1, TY_String, FN_("command"),
-		_Public, _F(Subproc_communicate), TY_StringArray, TY_Subproc, MN_("communicate"), 1, TY_String, FN_("input"),
+		_Public, _F(Subproc_communicate0), TY_StringArray, TY_Subproc, MN_("communicate"), 0,
+		_Public, _F(Subproc_communicate1), TY_StringArray, TY_Subproc, MN_("communicate"), 1, TY_String, FN_("input"),
 //		_Public, _F(Subproc_poll), TY_int, TY_Subproc, MN_("poll"), 0,
 //		_Public, _F(Subproc_wait), TY_int, TY_Subproc, MN_("wait"), 0,
 //		_Public, _F(Subproc_sendSignal), TY_boolean, TY_Subproc, MN_("sendSignal"), 1 TY_int, FN_("signal"),
