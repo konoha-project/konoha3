@@ -1212,7 +1212,7 @@ static void ByteCode_free(KonohaContext *kctx, kObject *o)
 	qsort(list, i, sizeof(ByteCode_log), cmp);
 	for(j = 0; j < i; j++) {
 		fprintf(stderr, "{\"%s/%d\" : %d}\n", list[j].file, list[j].line, list[j].total_count); //To berkeley DB
-		fprintf(stderr, "{\"script_id\": \"%s\", \"line\": %d, \"count\": %d}\n", list[j].file, list[j].line, list[j].total_count); //To syslog
+		//fprintf(stderr, "{\"script_id\": \"%s\", \"line\": %d, \"count\": %d}\n", list[j].file, list[j].line, list[j].total_count); //To syslog
 //TODO syslog
 	}
 //TODO
