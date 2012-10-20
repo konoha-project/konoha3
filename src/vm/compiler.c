@@ -21,12 +21,19 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
-#include <stdio.h>
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include "vm.h"
 #include "minivm.h"
 #include "minivm_common.h"
+/*==========<<<for Berkeley DB>>>=========*/
+#include <stdio.h>
+#include <sys/types.h>
+#include <stdlib.h>
+#include <string.h>
+#include <db.h>
+/*========================================*/
+
 /* ************************************************************************ */
 
 #ifdef __cplusplus
@@ -144,19 +151,19 @@ static void handleExpr(KonohaContext *kctx, IRBuilder *builder, kExpr *expr)
 	int espidx = builder->espidx;
 	int shift = builder->shift;
 	switch(expr->build) {
-		case TEXPR_CONST:    builder->api.visitConstExpr(kctx, builder, expr);  break;
-		case TEXPR_NEW:      builder->api.visitNewExpr(kctx, builder, expr);    break;
-		case TEXPR_NULL:     builder->api.visitNullExpr(kctx, builder, expr);   break;
-		case TEXPR_NCONST:   builder->api.visitNConstExpr(kctx, builder, expr); break;
-		case TEXPR_LOCAL:    builder->api.visitLocalExpr(kctx, builder, expr);  break;
-		case TEXPR_BLOCK:    builder->api.visitBlockExpr(kctx, builder, expr);  break;
-		case TEXPR_FIELD:    builder->api.visitFieldExpr(kctx, builder, expr);  break;
-		case TEXPR_CALL:     builder->api.visitCallExpr(kctx, builder, expr);   break;
-		case TEXPR_AND:      builder->api.visitAndExpr(kctx, builder, expr);    break;
-		case TEXPR_OR:       builder->api.visitOrExpr(kctx, builder, expr);     break;
-		case TEXPR_LET:      builder->api.visitLetExpr(kctx, builder, expr);    break;
-		case TEXPR_STACKTOP: builder->api.visitStackTopExpr(kctx, builder, expr);break;
-		default: DBG_ABORT("unknown expr=%d", expr->build);
+	case TEXPR_CONST:    builder->api.visitConstExpr(kctx, builder, expr);  break;
+	case TEXPR_NEW:      builder->api.visitNewExpr(kctx, builder, expr);    break;
+	case TEXPR_NULL:     builder->api.visitNullExpr(kctx, builder, expr);   break;
+	case TEXPR_NCONST:   builder->api.visitNConstExpr(kctx, builder, expr); break;
+	case TEXPR_LOCAL:    builder->api.visitLocalExpr(kctx, builder, expr);  break;
+	case TEXPR_BLOCK:    builder->api.visitBlockExpr(kctx, builder, expr);  break;
+	case TEXPR_FIELD:    builder->api.visitFieldExpr(kctx, builder, expr);  break;
+	case TEXPR_CALL:     builder->api.visitCallExpr(kctx, builder, expr);   break;
+	case TEXPR_AND:      builder->api.visitAndExpr(kctx, builder, expr);    break;
+	case TEXPR_OR:       builder->api.visitOrExpr(kctx, builder, expr);     break;
+	case TEXPR_LET:      builder->api.visitLetExpr(kctx, builder, expr);    break;
+	case TEXPR_STACKTOP: builder->api.visitStackTopExpr(kctx, builder, expr);break;
+	default: DBG_ABORT("unknown expr=%d", expr->build);
 	}
 	builder->a = a;
 	builder->espidx = espidx;
@@ -257,27 +264,25 @@ static kBasicBlock *kStmt_getLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbo
 
 #define ASM(T, ...) do {\
 	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};\
-	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_;\
+	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_; \
 	BUILD_asm(kctx, &tmp_.op, sizeof(OP##T));\
 } while(0)
 
-#if 0
 #define ASMop(T, OP, ...) do {\
 	OP##T op_ = {TADDR, OP, ASMLINE, ## __VA_ARGS__};\
-	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_;\
+	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_; \
 	BUILD_asm(kctx, &tmp_.op, sizeof(OP##T));\
 } while(0)
 
 #define ASMbranch(T, lb, ...) do {\
 	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, NULL, ## __VA_ARGS__};\
-	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_;\
-	ASM_BRANCH_(kctx, lb, &tmp_.op, sizeof(OP##T)); \
+	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_; \
+	ASM_BRANCH_(kctx, lb, &tmp_.op, sizeof(OP##T));\
 } while(0)
-#endif
 
-#define kBasicBlock_add(bb, T, ...) do { \
+#define kBasicBlock_add(bb, T, ...) do {\
 	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};\
-	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_;\
+	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_; \
 	BasicBlock_add(kctx, bb, 0, &tmp_.op, sizeof(OP##T));\
 } while(0)
 
@@ -740,7 +745,7 @@ static void BasicBlock_strip0(KonohaContext *kctx, kBasicBlock *bb)
 		if(BasicBlock_isVisited(bb)) return;
 		BasicBlock_setVisited(bb, 1);
 		if(bb->branchBlock != NULL) {
-			L_JUMP:; {
+		L_JUMP:; {
 				kBasicBlock *bbJ = (kBasicBlock *)bb->branchBlock;
 				if(bbJ->codeTable.bytesize == 0) {
 					if(bbJ->branchBlock != NULL && bbJ->nextBlock == NULL) {
@@ -773,7 +778,7 @@ static void BasicBlock_strip0(KonohaContext *kctx, kBasicBlock *bb)
 			bb = bb->nextBlock;
 			continue;
 		}
-		L_NEXT:;
+	L_NEXT:;
 		if(bb->nextBlock != NULL) {
 			kBasicBlock *bbN = bb->nextBlock;
 			if(bbN->codeTable.bytesize == 0) {
@@ -873,7 +878,7 @@ static size_t BasicBlock_peephole(KonohaContext *kctx, kBasicBlock *bb)
 
 static size_t BasicBlock_size(KonohaContext *kctx, kBasicBlock *bb, size_t c)
 {
-	L_TAIL:;
+L_TAIL:;
 	if(bb == NULL || BasicBlock_isVisited(bb)) return c;
 	BasicBlock_setVisited(bb, 1);
 	if(bb->nextBlock != NULL) {
@@ -987,29 +992,29 @@ static void dumpOPCODE(KonohaContext *kctx, VirtualMachineInstruction *c, Virtua
 	for (i = 0; i < size; i++) {
 		DUMP_P(" ");
 		switch(vmt[i]) {
-			case VMT_VOID: break;
-			case VMT_ADDR:
-				if(pc_start == NULL) {
-					DUMP_P("%p", c->p[i]);
-				}
-				else {
-					DUMP_P("L%d", (int)((VirtualMachineInstruction *)c->p[i] - pc_start));
-				}
-				break;
-			case VMT_R:
-				DUMP_P("sfp[%d,r=%d]", (int)c->data[i]/2, (int)c->data[i]);
-				break;
-			case VMT_U:
-				DUMP_P("u%lu", c->data[i]); break;
-			case VMT_I:
-			case VMT_INT:
-				DUMP_P("i%ld", c->data[i]); break;
-			case VMT_F:
-				DUMP_P("function(%p)", c->p[i]); break;
-			case VMT_CID:
-				DUMP_P("CT(%s)", CT_t(c->ct[i])); break;
-			case VMT_CO:
-				DUMP_P("CT(%s)", CT_t(O_ct(c->o[i]))); break;
+		case VMT_VOID: break;
+		case VMT_ADDR:
+			if(pc_start == NULL) {
+				DUMP_P("%p", c->p[i]);
+			}
+			else {
+				DUMP_P("L%d", (int)((VirtualMachineInstruction *)c->p[i] - pc_start));
+			}
+			break;
+		case VMT_R:
+			DUMP_P("sfp[%d,r=%d]", (int)c->data[i]/2, (int)c->data[i]);
+			break;
+		case VMT_U:
+			DUMP_P("u%lu", c->data[i]); break;
+		case VMT_I:
+		case VMT_INT:
+			DUMP_P("i%ld", c->data[i]); break;
+		case VMT_F:
+			DUMP_P("function(%p)", c->p[i]); break;
+		case VMT_CID:
+			DUMP_P("CT(%s)", CT_t(c->ct[i])); break;
+		case VMT_CO:
+			DUMP_P("CT(%s)", CT_t(O_ct(c->o[i]))); break;
 		}/*switch*/
 	}
 	DUMP_P("\n");
@@ -1183,35 +1188,42 @@ static const char *fetch_from_filelog_memory(int key)
 	return NULL;
 }
 
-static void ByteCode_free(KonohaContext *kctx, kObject *o)
+static void store_CoverageLog_to_Berkeley_DB(KonohaContext *kctx, const char *key, int value);
+
+static void detect_PassLine_from_ByteCode(KonohaContext *kctx, VirtualMachineInstruction *pc)
 {
-	kByteCode *b = (kByteCode *)o;
-	VirtualMachineInstruction *pc = b->code;
+#define N 64
 	kfileline_t uline = 0;
 	ByteCode_log list[1024];
-	int key;
+	int key_for_fetch;
 	int i = 0, j;
-	
+	char key[N] = {'\0'};
+
 	while (1) {
 		if (pc->opcode == OPCODE_RET) {
 			break;
 		}
 		if(pc->count > 0) {
-			if(uline != pc->line) {
+			if((short)uline != (short)pc->line) {
 				uline = pc->line;
 				list[i].line = (short)pc->line;
 				list[i].total_count = pc->count;
-				key = (uline >> (sizeof(kushort_t) * 8));
-				list[i].file = fetch_from_filelog_memory(key);
+				key_for_fetch = (uline >> (sizeof(kushort_t) * 8));
+				list[i].file = fetch_from_filelog_memory(key_for_fetch);
 				i++;
-			}
+				}
 		}
 		pc++;
 	}
 	
 	qsort(list, i, sizeof(ByteCode_log), cmp);
+
 	for(j = 0; j < i; j++) {
-		fprintf(stderr, "{\"%s/%d\" : %d}\n", list[j].file, list[j].line, list[j].total_count); //To berkeley DB
+		//fprintf(stderr, "{\"%s/%d\" : %d}\n", list[j].file, list[j].line, list[j].total_count); //To berkeley DB
+		snprintf(key, N, "\"%s/%d\"", list[j].file, list[j].line);
+		//fprintf(stderr, "\n");
+		fprintf(stderr, "%s\n", key);
+		store_CoverageLog_to_Berkeley_DB(kctx, key, list[j].total_count);
 		//fprintf(stderr, "{\"script_id\": \"%s\", \"line\": %d, \"count\": %d}\n", list[j].file, list[j].line, list[j].total_count); //To syslog
 //TODO syslog
 	}
@@ -1220,6 +1232,62 @@ static void ByteCode_free(KonohaContext *kctx, kObject *o)
 //		KFree((char *)filelog_memory[i]->value, sizeof(strlen(filelog_memory[i]->value + 1)));
 //		KFree(filelog_memory[i], sizeof(FileLog_Map));
 //	}
+}
+
+static void store_CoverageLog_to_Berkeley_DB(KonohaContext *kctx, const char *key, int value)
+{
+#define DATABASE "test.db" //TODO change name for ET.
+#define N 64
+	DB *dbp = NULL;
+	DBT DB_key, DB_data;
+	int ret, t_ret;
+	char tmpvalue[N] = {'\0'};
+
+	ret = db_create(&dbp, NULL, 0);
+	if (ret != 0) {
+		fprintf(stderr, "db_create: %s\n", db_strerror(ret));
+		goto err;
+	}
+
+	ret = dbp->open(dbp, NULL, DATABASE, NULL, DB_BTREE,
+					DB_CREATE | DB_BTREE, 0664);
+	if (ret != 0) {
+		dbp->err(dbp, ret, "%s", DATABASE);
+		goto err;
+	}
+
+	memset(&DB_key, 0, sizeof(DB_key));
+	memset(&DB_data, 0, sizeof(DB_data));
+	DB_key.data = key;
+	DB_key.size = strlen(key);
+
+	sprintf(tmpvalue, "%d", value); // int to string.
+	DB_data.data = tmpvalue;
+	DB_data.size = strlen(tmpvalue);
+
+	ret = dbp->put(dbp, NULL, &DB_key, &DB_data, DB_NOOVERWRITE);
+	if (ret != 0) {
+		/*This is only alert.*/
+		//dbp->err(dbp, ret, "DB->put");
+		if (ret != DB_KEYEXIST)
+			goto err;
+	}
+
+err:;
+	if (dbp) {
+		t_ret = dbp->close(dbp, 0);
+		if (t_ret != 0 && ret == 0)
+			ret = t_ret;
+	}
+
+//	exit(ret);
+}
+
+static void ByteCode_free(KonohaContext *kctx, kObject *o)
+{
+	kByteCode *b = (kByteCode *)o;
+	VirtualMachineInstruction *pc = b->code;
+	detect_PassLine_from_ByteCode(kctx, pc);
 	KFree(b->code, b->codesize);
 }
 

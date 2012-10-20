@@ -152,6 +152,7 @@ endif()
 
 find_library(HAVE_LIBDL    NAMES dl)
 find_library(HAVE_LIBICONV NAMES iconv)
+find_library(HAVE_LIBDB    NAMES db)
 
 check_type_size("void *" SIZEOF_VOIDP)
 check_type_size(long     SIZEOF_LONG)
@@ -211,6 +212,10 @@ endif(HAVE_LIBDL)
 if(HAVE_LIBICONV)
 	set(ExtraLibs ${ExtraLibs} ${HAVE_LIBICONV})
 endif(HAVE_LIBICONV)
+
+if(HAVE_LIBDB)
+	set(ExtraLibs ${ExtraLibs} ${HAVE_LIBDB})
+endif(HAVE_LIBDB)
 
 macro(POP _STR _DELIM _RESULT)
 	string(REPLACE ${_DELIM} ";" _tmp ${_STR})
