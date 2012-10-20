@@ -1,38 +1,33 @@
 /****************************************************************************
- * KONOHA COPYRIGHT, LICENSE NOTICE, AND DISCRIMER
+ * Copyright (c) 2012, the Konoha project authors. All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * Copyright (c)  2010-      Konoha Team konohaken@googlegroups.com
- * All rights reserved.
- *
- * You may choose one of the following two licenses when you use konoha.
- * See www.konohaware.org/license.html for further information.
- *
- * (1) GNU Lesser General Public License 3.0 (with KONOHA_UNDER_LGPL3)
- * (2) Konoha Software Foundation License 1.0
+ *  * Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *  * Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
- * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
  * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************/
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ***************************************************************************/
 
-// **************************************************************************
-// LIST OF CONTRIBUTERS
-//  kimio - Kimio Kuramitsu, Yokohama National University, Japan
-//  uh    - Yutaro Hiraoka, Yokohama National University, Japan
-//  yoan  - Motoki Yoan, Yokohama National University, Japan
-//  shinpei_nkt  - Shinpei Nakata, Yokohama National University, Japan (ntrace)
-// **************************************************************************
+/* ************************************************************************ */
 
+// [TODO] check if platform has not mysql.h
 #include <mysql.h>
+#define _MSC_VER
+#include "sql_common.h"
 
 #define MYSQL_USER_MAXLEN 16
 #define MYSQL_PASS_MAXLEN 255
@@ -41,16 +36,20 @@
 
 /* ======================================================================== */
 
+extern kQueryDSPI_t DB__mysql;
+
+/* ======================================================================== */
+
 /*
-static void knh_mysql_perror(KonohaContext *kctx, MYSQL *db, int r)
+static void kmysql_perror(KonohaContext *kctx, MYSQL *db, int r)
 {
 //	KNH_SYSLOG(kctx, LOG_WARNING, "MysqlError", "'%s'", mysql_error(db));
 }
 */
 /* ------------------------------------------------------------------------ */
 
-//static kconn_t *MYSQL_qopen(KonohaContext *kctx, const char* url)
-kconn_t *MYSQL_qopen(KonohaContext *kctx, const char* url)
+//static void *MYSQL_qopen(KonohaContext *kctx, const char* url)
+void *MYSQL_qopen(KonohaContext *kctx, const char* url)
 {
 	char *puser, user[MYSQL_USER_MAXLEN+1] = {0};
 	char *ppass, pass[MYSQL_PASS_MAXLEN+1] = {0}; // temporary defined
@@ -79,39 +78,37 @@ kconn_t *MYSQL_qopen(KonohaContext *kctx, const char* url)
 			LogUint("port", port),
 			LogUint("errno", mysql_errno(db)),
 			LogText("error", mysql_error(db)));
-	//if(!mysql_real_connect(db, phost, puser, ppass, pdbnm, port, NULL, 0)) {
-	//	knh_mysql_perror(kctx, db, 0);
-	//	mysql_close(db);
-	//	db = NULL;
-	//}
-	return (kconn_t *)db;
+	return (void*)db;
 }
 /* ------------------------------------------------------------------------ */
 
 //static int MYSQL_qnext(KonohaContext *kctx, kqcur_t *qcur, kResultSet *rs)
-int MYSQL_qnext(KonohaContext *kctx, kqcur_t *qcursor, kResultSet *rs)
+int MYSQL_qnext(KonohaContext *kctx, kqcur_t *qcursor, struct _kResultSet *rs)
 {
 	MYSQL_ROW row;
-	if((row = mysql_fetch_row((MYSQL_RES *)qcursor)) != NULL) {
+	MYSQL_RES* res = (MYSQL_RES*)qcursor;
+	int i;
+	int num_fields = mysql_num_fields(res);
+	if ((row = mysql_fetch_row(res)) != NULL) {
 		OLDTRACE_SWITCH_TO_KTrace(_UserInputFault, LogText("@","mysql_fetch_row"));
-		int i;
 		kint_t ival;
 		kfloat_t fval;
-		for (i = 0; i < rs->column_size; i++) {
-			if(row[i] == NULL) {
-				ResultSet_setNULL(kctx, rs, i);
+		for (i = 0; i < num_fields; i++) {
+		//for (i = 0; i < rs->column_size; i++) {
+			if (row[i] == NULL) {
+				_ResultSet_setNULL(kctx, rs, i);
 				continue;
 			}
 			switch (rs->column[i].dbtype) {
 			case MYSQL_TYPE_TINY:     case MYSQL_TYPE_SHORT:
 			case MYSQL_TYPE_INT24:    case MYSQL_TYPE_LONG:
 			case MYSQL_TYPE_LONGLONG: case MYSQL_TYPE_YEAR:
-				knh_bytes_parseint(B(row[i]), &ival);
-				ResultSet_setInt(kctx, rs, i, ival);
+				ival = parseInt((char*)row[i], strlen((char*)row[i]));
+				_ResultSet_setInt(kctx, rs, i, ival);
 				break;
 			case MYSQL_TYPE_FLOAT: case MYSQL_TYPE_DOUBLE:
-				knh_bytes_parsefloat(B(row[i]), &fval);
-				ResultSet_setFloat(kctx, rs, i, fval);
+				fval = parseFloat((char*)row[i], strlen((char*)row[i]));
+				_ResultSet_setFloat(kctx, rs, i, fval);
 				break;
 			case MYSQL_TYPE_NEWDECIMAL: case MYSQL_TYPE_STRING:
 			case MYSQL_TYPE_VAR_STRING: case MYSQL_TYPE_TINY_BLOB:
@@ -119,12 +116,12 @@ int MYSQL_qnext(KonohaContext *kctx, kqcur_t *qcursor, kResultSet *rs)
 			case MYSQL_TYPE_LONG_BLOB:  case MYSQL_TYPE_BIT:
 			case MYSQL_TYPE_TIME:       case MYSQL_TYPE_DATE:
 			case MYSQL_TYPE_DATETIME:   case MYSQL_TYPE_TIMESTAMP:
-				ResultSet_setText(kctx, rs, i, B(row[i]));
+				_ResultSet_setText(kctx, rs, i, (char*)row[i], strlen((char*)row[i]));
 				break;
 			case MYSQL_TYPE_NULL:
 			default:
 				//KNH_SYSLOG(kctx, LOG_WARNING, "mysql", "mysql_qnext(dbtype)='unknown datatype [%d]'", DP(rs)->column[i].dbtype);
-				ResultSet_setNULL(kctx, rs, i);
+				_ResultSet_setNULL(kctx, rs, i);
 				break;
 			}
 		} /* for */
@@ -136,7 +133,7 @@ int MYSQL_qnext(KonohaContext *kctx, kqcur_t *qcursor, kResultSet *rs)
 }
 /* ------------------------------------------------------------------------ */
 
-//static kqcur_t *MYSQL_query(KonohaContext *kctx, kconn_t *hdr, kbytes_t sql, kResultSet *rs)
+//static kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, kbytes_t sql, kResultSet *rs)
 kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char* sql, struct _kResultSet *rs)
 {
 	MYSQL_RES *res = NULL;
@@ -165,10 +162,10 @@ kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char* sql, struct _kR
 				LogUint("errno", mysql_errno(db)),
 				LogText("error", mysql_error(db))
 		);
-		if(r == 0) { 
-			res = mysql_store_result((MYSQL *)db);
-			if(res == NULL) { // NULL RESULT
-				if(mysql_errno(db) != 0) {
+		if (r == 0) { // success
+			res = mysql_store_result((MYSQL*)db);
+			if (res == NULL) { // NULL RESULT
+				if (mysql_errno(db) != 0) {
 					mysql_free_result(res);
 					OLDTRACE_SWITCH_TO_KTrace(_UserInputFault,
 							LogText("@","mysql_sotre_result"),
@@ -184,22 +181,32 @@ kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char* sql, struct _kR
 				}
 			}
 			else {
-				knh_ResultSet_initColumn(kctx, rs, (size_t)mysql_num_fields(res));
+				_ResultSet_initColumn(kctx, rs, (size_t)mysql_num_fields(res));
 				OLDTRACE_SWITCH_TO_KTrace(_UserInputFault,
 							LogText("@","mysql_sotre_result"),
 							LogUint("errno", mysql_errno(db)),
 							LogText("error", mysql_error(db))
 					);
-				int i = 0;
+				size_t i = 0;
 				MYSQL_FIELD *field = NULL;
 				while((field = mysql_fetch_field(res))) {
 					rs->column[i].dbtype = field->type;
-					kString *s = KLIB new_kString(kctx, field->name, strlen(field->name), 0);
-					//ResultSet_setName(kctx, rs, i, s);
+					kString *s = KLIB new_kString(kctx, GcUnsafe, field->name, strlen(field->name), 0);
 					DBG_ASSERT(i < rs->column_size);
 					KFieldSet(rs, rs->column[i].name, s);
 					i++;
 				}
+				//int num_fields = mysql_num_fields(res), k, j = 0;
+				//MYSQL_ROW row;
+				//while ((row = mysql_fetch_row(res))) {
+				//	for (k = 0; k < num_fields; k++) {
+				//		fprintf(stderr, "[%d] %s\n", j, row[k]);
+				//	}
+				//	j++;
+				//}
+				//mysql_free_result(res);
+				//mysql_close(db);
+				//exit(1);
 			}
 		}
 	}
@@ -207,8 +214,8 @@ kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char* sql, struct _kR
 }
 /* ------------------------------------------------------------------------ */
 
-//static void MYSQL_qclose(KonohaContext *kctx, kconn_t *hdr)
-void MYSQL_qclose(kconn_t *db)
+//static void MYSQL_qclose(KonohaContext *kctx, void *hdr)
+void MYSQL_qclose(void *db)
 {
 	mysql_close((MYSQL *)db);
 }
@@ -224,7 +231,11 @@ void MYSQL_qfree(kqcur_t *qcur)
 	}
 }
 
-//const knh_QueryDSPI_t DB__mysql = {
-//	K_DSPI_QUERY, "mysql",
-//	MYSQL_qopen, MYSQL_query, MYSQL_qclose, MYSQL_qnext, MYSQL_qfree
-//};
+/* ------------------------------------------------------------------------ */
+/* [prototype function] */
+
+const kQueryDSPI_t DB__mysql = {
+	K_DSPI_QUERY, "mysql",
+	MYSQL_qopen, MYSQL_query, MYSQL_qclose, MYSQL_qnext, MYSQL_qfree
+};
+/* ------------------------------------------------------------------------ */
