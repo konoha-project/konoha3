@@ -1,9 +1,11 @@
 // written by shinpei
-import ("konoha.new");
-import( "dscript.subproc");
-import ("konoha.array");
 
-void test () {
+import("konoha.new");
+import("konoha.array");
+import("konoha.file");
+import("dscript.subproc");
+
+void test() {
 	Subproc p = new Subproc("cat", false);
 	p.enablePipemodeOUT(true);
 	FILE f = System.fopen("files/helloworld.txt", "r");

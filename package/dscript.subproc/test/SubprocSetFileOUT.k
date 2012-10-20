@@ -1,8 +1,10 @@
 // written by shinpei
+
 import("konoha.new");
+import("konoha.file");
 import("dscript.subproc");
 
-void test () {
+void test() {
 	Subproc s = new Subproc("echo hello", false);
 	FILE f = System.fopen("/dev/null", "w");
 	s.setFileOUT(f);
