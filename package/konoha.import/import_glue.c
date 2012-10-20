@@ -29,6 +29,8 @@
 extern "C"{
 #endif
 
+#define makeStringConstValue(kctx, text) new_ConstValueExpr(kctx, TY_String, UPCAST(text))
+
 static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int ret = false;
@@ -37,37 +39,58 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 	if(tokenList == NULL) {
 		KReturnUnboxValue(false);
 	}
-	ksymbol_t star = SYM_("*");
-	KGrowingBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	size_t i = 0;
-	if(i + 2 < kArray_size(tokenList)) {
-		for (; i < kArray_size(tokenList)-1; i+=2) {
-			/* name . */
-			kToken *tk  = tokenList->TokenItems[i+0];
-			//assert(tk->keyword  == TokenType_SYMBOL);
-			//assert(dot->keyword == KW_DOT);
-			if(i+2 < kArray_size(tokenList)) {
-				kToken *startTk = tokenList->TokenItems[i+2];
-				if(startTk->resolvedSyntaxInfo->keyword == star) {
-					break;
-				}
-			}
-			KLIB Kwb_write(kctx, &wb, S_text(tk->text), S_size(tk->text));
-			KLIB Kwb_write(kctx, &wb, ".", 1);
-		}
-	}
 	kNameSpace *ns = Stmt_nameSpace(stmt);
-	kString *name = tokenList->TokenItems[i]->text;
-	KLIB Kwb_write(kctx, &wb, S_text(name), S_size(name));
-	kString *pkgname = KLIB new_kString(kctx, OnField, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
-	kExpr *ePKG = new_ConstValueExpr(kctx, TY_String, UPCAST(pkgname));
-	SugarSyntaxVar *syn1 = (SugarSyntaxVar *) SYN_(ns, KW_ExprMethodCall);
+	SugarSyntaxVar *syn = (SugarSyntaxVar *) SYN_(ns, KW_ExprMethodCall);
+	kExpr *expr;
 	kTokenVar *tkImport = /*G*/new_(TokenVar, 0, OnGcStack);
 	tkImport->resolvedSymbol = MN_("import");
-	kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, syn1, 3, tkImport, new_ConstValueExpr(kctx, O_typeId(ns), UPCAST(ns)), ePKG);
+	if(IS_Token(tokenList)) {
+		/* case : import("konoha.import"); */
+		kTokenArray *list = ((kToken *) tokenList)->subTokenList;
+		if (kArray_size(list) == 1) {
+			kExpr *param0 = makeStringConstValue(kctx, list->TokenItems[0]->text);
+			expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 3,
+					tkImport, new_ConstValueExpr(kctx, O_typeId(ns), UPCAST(ns)), param0);
+		}
+		else if (kArray_size(list) == 2) {
+			kExpr *param0 = makeStringConstValue(kctx, list->TokenItems[0]->text);
+			kExpr *param1 = makeStringConstValue(kctx, list->TokenItems[1]->text);
+			expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 4,
+					tkImport, new_ConstValueExpr(kctx, O_typeId(ns), UPCAST(ns)),
+					param0, param1);
+		} else {
+			KReturnUnboxValue(false);
+		}
+	} else {
+		KGrowingBuffer wb;
+		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+		/* case : import konoha.import */
+		ksymbol_t star = SYM_("*");
+		size_t i = 0;
+		if(i + 2 < kArray_size(tokenList)) {
+			for (; i < kArray_size(tokenList)-1; i+=2) {
+				/* name . */
+				kToken *tk  = tokenList->TokenItems[i+0];
+				if(i+2 < kArray_size(tokenList)) {
+					kToken *startTk = tokenList->TokenItems[i+2];
+					if(startTk->resolvedSyntaxInfo->keyword == star) {
+						break;
+					}
+				}
+				KLIB Kwb_write(kctx, &wb, S_text(tk->text), S_size(tk->text));
+				KLIB Kwb_write(kctx, &wb, ".", 1);
+			}
+		}
+		kString *name = tokenList->TokenItems[i]->text;
+		KLIB Kwb_write(kctx, &wb, S_text(name), S_size(name));
+
+		kString *pkgname = KLIB new_kString(kctx, OnGcStack, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
+		kExpr *ePKG = makeStringConstValue(kctx, pkgname);
+		expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 3, tkImport, new_ConstValueExpr(kctx, O_typeId(ns), UPCAST(ns)), ePKG);
+	}
+
 	KLIB kObject_setObject(kctx, stmt, KW_ExprPattern, TY_Expr, expr);
-	ret = SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_boolean, 0);
+	ret = SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_void, TPOL_ALLOWVOID);
 	if(ret) {
 		kStmt_typed(stmt, EXPR);
 	}

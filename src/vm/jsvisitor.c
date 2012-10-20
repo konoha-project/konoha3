@@ -144,7 +144,7 @@ static void JSVisitor_visitBlockStmt(KonohaContext *kctx, IRBuilder *self, kStmt
 
 static void JSVisitor_visitReturnStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
 {
-	if(DUMPER(self)->visitingMethod->mn != NULL){
+	if(DUMPER(self)->visitingMethod->mn != 0){
 		JSVisitor_emitString(kctx, self, "return ", "", "");
 	}
 	kExpr* expr = Stmt_getFirstExpr(kctx, stmt);
@@ -267,18 +267,27 @@ static void JSVisitor_visitFieldExpr(KonohaContext *kctx, IRBuilder *self, kExpr
 	JSVisitor_emitString(kctx, self, "FIELD", "", "");
 }
 
+static bool JSVisitor_importPackage(KonohaContext *kctx, kNameSpace *ns, kString *package, kfileline_t uline)
+{
+	KImportPackage(ns, S_text(package), NULL);
+	return true;
+}
+
 static void JSVisitor_ConvertAndEmitMethodName(KonohaContext *kctx, IRBuilder *self, kExpr *expr, kExpr *receiver, kMethod *mtd)
 {
-	const char *methodName = ALLOCA(char, strlen(SYM_PRE(mtd->mn)) + strlen(SYM_t(mtd->mn)) + 1);
-	const char *typeName   = CT_t(CT_(receiver->ty));
-	sprintf(methodName, "%s%s", T_mn(mtd->mn));
+	KGrowingBuffer wb;
+	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_printf(kctx, &wb, "%s%s", T_mn(mtd->mn));
+
+	const char *methodName = KLIB Kwb_top(kctx, &wb, 1);
 	if(receiver->ty == TY_System && methodName[0] == 'p'){
 		JSVisitor_emitString(kctx, self, "console.log", "", "");
 	}else{
 		if(receiver->ty == TY_NameSpace){
 			if(mtd->mn == MN_("import")){
 				kString *packageNameString = (kString*)kExpr_at(expr, 2)->objectConstValue;
-				KImportPackage((kNameSpace*)receiver->objectConstValue, S_text(packageNameString), expr->termToken->uline);
+				kNameSpace *ns = (kNameSpace*)receiver->objectConstValue;
+				JSVisitor_importPackage(kctx, ns, packageNameString, expr->termToken->uline);
 				JSVisitor_emitString(kctx, self, "//", "", "");
 			}
 		}else{
@@ -382,7 +391,7 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	kParam *pa = Method_param(mtd);
-	if(mtd->mn != NULL){
+	if(mtd->mn != 0){
 		kMethod_setFunc(kctx, mtd, NULL);
 		if(mtd->typeId == TY_NameSpace){
 			KLIB Kwb_printf(kctx, &wb, "%s%s = function(", T_mn(mtd->mn));
@@ -409,7 +418,7 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 
 static void JSVisitor_free(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
 {
-	if(mtd->mn != NULL){
+	if(mtd->mn != 0){
 		DUMPER(builder)->indent--;
 		JSVisitor_emitNewLine(kctx, builder, "}");
 	}else{
@@ -433,4 +442,5 @@ static IRBuilder *createJSVisitor(IRBuilder *builder)
 }
 #endif
 
+#undef DUMPER
 #endif /* USE_JS_VISITOR */
