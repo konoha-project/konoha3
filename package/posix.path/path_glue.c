@@ -43,35 +43,33 @@ extern "C"{
 #endif
 
 #define LogFileName(S)     LogText("filename", S)
-#define LogFile(F) LogText("filename", kFile_textPath(kctx, F))
+#define LogMode(mode)      LogUint("mode", mode)
 
 static const char* kFile_textPath(KonohaContext *kctx, kFile *file)
 {
 	return (file->PathInfoNULL == NULL) ? "unknown" : S_text(file->PathInfoNULL);
 }
 
-static int TRACE_fgetc(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
-{
-	int ch = fgetc(file->fp);
-	if(ferror(file->fp) != 0) {
-		KTraceErrorPoint(trace, SystemFault, "fgetc", LogFile(file), LogErrno);
-		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
-	}
-	return ch;
-}
-
-static int TRACE_fputc(KonohaContext *kctx, kFile *file, int ch, KTraceInfo *trace)
-{
-	if(fputc(ch, file->fp) != 0) {
-		KTraceErrorPoint(trace, SystemFault, "fputc", LogFile(file), LogErrno);
-		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
-	}
-	return ch;
-}
+//static int TRACE_fgetc(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
+//{
+//	int ch = fgetc(file->fp);
+//	if(ferror(file->fp) != 0) {
+//		KTraceErrorPoint(trace, SystemFault, "fgetc", LogFile(file), LogErrno);
+//		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
+//	}
+//	return ch;
+//}
+//
+//static int TRACE_fputc(KonohaContext *kctx, kFile *file, int ch, KTraceInfo *trace)
+//{
+//	if(fputc(ch, file->fp) != 0) {
+//		KTraceErrorPoint(trace, SystemFault, "fputc", LogFileName(file), LogErrno);
+//		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
+//	}
+//	return ch;
+//}
 
 /* ------------------------------------------------------------------------ */
-//## FILE System.fopen(String path, String mode);
-
 
 //## int System.umask(int cmask)
 static KMETHOD System_umask(KonohaContext *kctx, KonohaStack *sfp)
@@ -81,55 +79,77 @@ static KMETHOD System_umask(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
+//## int System.chmod(String path, int mode)
+static KMETHOD System_chmod(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KMakeTrace(trace, sfp);
+	char buffer[K_PATHMAX];
+	kString *path = sfp[1].asString;
+	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), S_text(path), S_size(path), trace);
+	mode_t mode = (mode_t)sfp[2].intValue;
+	int ret = chmod(path, mode);
+	if(ret == -1) {
+		KTraceErrorPoint(trace, SystemFault, "chmod", LogFileName(S_text(path)), LogMode(mode), LogErrno);
+	}
+	else {
+		KTraceChangeSystemPoint(trace, "chmod", LogFileName(S_text(path)), LogMode(mode));
+	}
+	KReturnUnboxValue(ret != -1);
+}
+
 //## boolean System.mkdir(String path, int mode)
 static KMETHOD System_mkdir(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KMakeTrace(trace, sfp);
-	char buffer[PLATAPI FilePathMax];
+	char buffer[K_PATHMAX];
 	kString *path = sfp[1].asString;
 	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), S_text(path), S_size(path), trace);
 	mode_t mode = (mode_t)sfp[2].intValue;
 	int ret = mkdir(systemPath, mode);
 	if(ret == -1) {
-		KTraceErrorPoint(trace, SystemFault, "mkdir", LogFile(S_text(path)), LogErrno);
+		KTraceErrorPoint(trace, SystemFault, "mkdir", LogFileName(S_text(path)), LogMode(mode), LogErrno);
+	}
+	else {
+		KTraceChangeSystemPoint(trace, "mkdir", LogFileName(S_text(path)), LogMode(mode));
 	}
 	KReturnUnboxValue(ret != -1);
 }
 
-//## int System.rmdir(String path)
+//## boolean System.rmdir(String path)
 static KMETHOD System_rmdir(KonohaContext *kctx, KonohaStack *sfp)
 {
-
-	const char *path = S_text(sfp[1].asString);
-	int ret = rmdir(path);
+	KMakeTrace(trace, sfp);
+	char buffer[K_PATHMAX];
+	kString *path = sfp[1].asString;
+	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), S_text(path), S_size(path), trace);
+	int ret = rmdir(systemPath);
 	if(ret == -1) {
-		// TODO: throw
+		int fault = PLATAPI diagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
+		KTraceErrorPoint(trace, fault, "rmdir", LogFileName(S_text(path)), LogErrno);
 	}
-	KReturnUnboxValue(ret);
+	else {
+		KTraceChangeSystemPoint(trace, "rmdir", LogFileName(S_text(path)));
+	}
+	KReturnUnboxValue(ret != -1);
 }
 
-//## int System.truncate(String path, int length)
+//## boolean System.truncate(String path, int length)
 static KMETHOD System_truncate(KonohaContext *kctx, KonohaStack *sfp)
 {
-	const char *path = S_text(sfp[1].asString);
-	off_t length = sfp[2].intValue;
-	int ret = truncate(path, length);
+	KMakeTrace(trace, sfp);
+	char buffer[K_PATHMAX];
+	kString *path = sfp[1].asString;
+	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), S_text(path), S_size(path), trace);
+	off_t length = (off_t)sfp[2].intValue;
+	int ret = truncate(systemPath, length);
 	if(ret == -1) {
-		// TODO: throw
+		int fault = PLATAPI diagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
+		KTraceErrorPoint(trace, fault, "truncate", LogFileName(S_text(path)), LogUint("length", length), LogErrno);
 	}
-	KReturnUnboxValue(ret);
-}
-
-//## int System.chmod(String path, int mode)
-static KMETHOD System_chmod(KonohaContext *kctx, KonohaStack *sfp)
-{
-	const char *path = S_text(sfp[1].asString);
-	mode_t mode = sfp[2].intValue;
-	int ret = chmod(path, mode);
-	if(ret == -1) {
-		// TODO: throw
+	else {
+		KTraceChangeSystemPoint(trace, "truncate", LogFileName(S_text(path)), LogUint("length", length));
 	}
-	KReturnUnboxValue(ret);
+	KReturnUnboxValue(ret != -1);
 }
 
 // --------------------------------------------------------------------------
@@ -143,25 +163,21 @@ static KMETHOD System_chmod(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t path_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KRequireKonohaCommonModule(trace);
-	KRequirePackage("konoha.file", trace);
-	KRequirePackage("konoha.bytes", trace);
+	//	KRequireKonohaCommonModule(trace);
+	KDEFINE_METHOD MethodData[] = {
+		_Public|_Static|_Const|_Im, _F(System_umask), TY_int, TY_System, MN_("umask"), 1, TY_int, FN_("cmask"),
+		_Public|_Static, _F(System_mkdir), TY_boolean, TY_System, MN_("mkdir"), 2, TY_String, FN_("path"), TY_int, FN_("mode"),
+		_Public|_Static, _F(System_rmdir), TY_boolean, TY_System, MN_("rmdir"), 1, TY_String, FN_("path"),
+		_Public|_Static|_Im, _F(System_truncate), TY_boolean, TY_System, MN_("truncate"), 2, TY_String, FN_("path"), TY_int, FN_("length"),
+		_Public|_Static|_Im, _F(System_chmod), TY_int, TY_System, MN_("chmod"), 2, TY_String, FN_("path"), TY_int, FN_("mode"),
+		DEND,
+	};
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	return true;
 }
 
 static kbool_t path_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
-	if(CT_Bytes != NULL) {
-		KDEFINE_METHOD MethodData[] = {
-			_Public|_Static|_Const|_Im, _F(System_umask), TY_int, TY_System, MN_("umask"), 1, TY_int, FN_("cmask"),
-			_Public|_Static|_Const|_Im, _F(System_mkdir), TY_int, TY_System, MN_("mkdir"), 2, TY_String, FN_("path"), TY_int, FN_("mode"),
-			_Public|_Static|_Const|_Im, _F(System_rmdir), TY_int, TY_System, MN_("rmdir"), 1, TY_String, FN_("path"),
-			_Public|_Static|_Im, _F(System_truncate), TY_int, TY_System, MN_("truncate"), 2, TY_String, FN_("path"), TY_int, FN_("length"),
-			_Public|_Static|_Im, _F(System_chmod), TY_int, TY_System, MN_("chmod"), 2, TY_String, FN_("path"), TY_int, FN_("mode"),
-			DEND,
-		};
-		KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
-	}
 	return true;
 }
 
