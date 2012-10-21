@@ -780,7 +780,7 @@ struct KonohaModuleContext {
 	struct kDateVar             *asDate;\
 	struct kRegExpVar           *asRegExp; \
 	const struct kBytesVar      *asBytes; \
-	const struct kFileVar     *asFILE;\
+	struct kFileVar     *asFile;\
 	struct kIteratorVar *asIterator; \
 	struct kMap           *asMap;    \
 	struct kInputStream  *asInputStream; \
