@@ -566,8 +566,6 @@ static void PlatformApi_loadReadline(PlatformApiVar *plat)
 static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 {
 	switch(errno) {  // C Standard Library
-	case EDOM:   /*Results from a parameter outside a function's domain, for example sqrt(-1) */
-	case ERANGE: /* Results from a result outside a function's range, for example strtol("0xfffffffff",NULL,0) */
 	case EILSEQ: /* Results from an illegal byte sequence */
 		return userFault | SoftwareFault;
 	}
@@ -639,6 +637,7 @@ static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 	case EFBIG: /* 27 File too large */
 		return userFault | SoftwareFault;
 	case ENOSPC: /* 28 No space left on device */
+		return SoftwareFault | SystemFault;
 	case ESPIPE: /* 29 Illegal seek */
 		return userFault | SoftwareFault;
 	case EROFS:  /* 30 Read-only file system */
@@ -647,6 +646,21 @@ static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 		return userFault | SoftwareFault;
 	case EPIPE: /* 32 Broken pipe */
 		return userFault | SystemFault | UserFault;
+	case EDOM: /* 33 Math argument out of domain of func */
+		/*Results from a parameter outside a function's domain, for example sqrt(-1) */
+	case ERANGE: /* 34 Math result not representable */
+		/* Results from a result outside a function's range, for example strtol("0xfffffffff",NULL,0) */
+		return userFault | SoftwareFault;
+	case EDEADLK:       /* 35 Resource deadlock would occur */
+		return SoftwareFault |SystemFault;
+	case ENAMETOOLONG:  /* 36 File name too long */
+		return userFault | SoftwareFault;
+	case ENOLCK: /* 37 No record locks available UNSURE*/
+	case ENOSYS: /* 38 Function not implemented  UNSHRE*/
+	case ENOTEMPTY: /* 39 Directory not empty */
+		return userFault | SoftwareFault | SystemFault;
+	case ELOOP: /* 40 Too many symbolic links encountered */
+		return SystemFault;
 	}
 	return userFault | SoftwareFault |SystemFault;
 }
