@@ -67,7 +67,7 @@ static int TRACE_fputc(KonohaContext *kctx, kFile *file, int ch, KTraceInfo *tra
 		KTraceErrorPoint(trace, SystemFault, "fputc", LogFile(file), LogErrno);
 		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
 	}
-	else {
+	else if(!kFile_is(ChangeLessStream, file)) {
 		KTraceChangeSystemPoint(trace, "fputc", LogFile(file), LogWrittenByte(1));
 	}
 	return ch;
@@ -90,7 +90,7 @@ static size_t TRACE_fwrite(KonohaContext *kctx, kFile *file, const char *buf, si
 		KTraceErrorPoint(trace, SystemFault, "fwrite", LogFile(file), LogErrno);
 		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
 	}
-	if(size > 0) {
+	if(size > 0 && !kFile_is(ChangeLessStream, file)) {
 		KTraceChangeSystemPoint(trace, "fwrite", LogFile(file), LogWrittenByte(size));
 	}
 	return size;
@@ -388,6 +388,61 @@ static KMETHOD File_scriptPath(KonohaContext *kctx, KonohaStack *sfp)
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
+static void file_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
+{
+	KDEFINE_METHOD MethodData[] = {
+		_Public|_Static|_Const, _F(File_scriptPath), TY_String, TY_File, MN_("scriptPath"), 1, TY_String, FN_("filename"),
+		_Public|_Static, _F(System_fopen), TY_File, TY_System, MN_("fopen"), 2, TY_String, FN_("filename"), TY_String, FN_("mode"),
+		_Public|_Static, _F(System_fclose), TY_void, TY_System, MN_("fclose"), 1, TY_File, FN_("file"),
+		_Public, _F(File_close), TY_void, TY_File, MN_("close"), 0,
+		_Public, _F(File_getc), TY_int, TY_File, MN_("getc"), 0,
+		_Public, _F(File_putc), TY_void, TY_File, MN_("putc"), 1, TY_int, FN_("char"),
+		_Public, _F(File_readLine), TY_String, TY_File, MN_("readLine"), 0,
+		_Public, _F(File_print), TY_String, TY_File, MN_("print"), 1, TY_String, FN_("str"),
+		_Public, _F(File_println), TY_void, TY_File, MN_("println"), 1, TY_String, FN_("str"),
+		_Public, _F(File_println0), TY_void, TY_File, MN_("println"), 0,
+		_Public, _F(File_flush), TY_void, TY_File, MN_("flush"), 0,
+		DEND,
+	};
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+}
+
+typedef struct {
+	const char *key;
+	uintptr_t ty;
+	kFile *value;
+} KDEFINE_FILE_CONST;
+
+static kFile* new_File(KonohaContext *kctx, kArray *gcstack, FILE *fp, const char *pathInfo, size_t len, KTraceInfo *trace)
+{
+	kFile *file = new_(File, fp, gcstack);
+	file->fp = fp;
+	KFieldInit(file, file->PathInfoNULL, KLIB new_kString(kctx, OnField, pathInfo, len, StringPolicy_ASCII|StringPolicy_TEXT));
+	kFile_set(ChangeLessStream, file, true);
+	if(!PLATAPI isSystemCharsetUTF8(kctx)) {
+		if(fp == stdin) {
+			file->readerIconv = PLATAPI iconvSystemCharsetToUTF8(kctx, trace);
+		}
+		else {
+			file->writerIconv = PLATAPI iconvUTF8ToSystemCharset(kctx, trace);
+		}
+	}
+	return file;
+}
+
+static void file_defineConst(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
+{
+	INIT_GCSTACK();
+	KDEFINE_FILE_CONST FileData[] = {
+		{"stdin", TY_File,  new_File(kctx, _GcStack, stdin, TEXTSIZE("/dev/stdin"), trace)},
+		{"stdout", TY_File, new_File(kctx, _GcStack, stdin, TEXTSIZE("/dev/stdout"), trace)},
+		{"stderr", TY_File, new_File(kctx, _GcStack, stdin, TEXTSIZE("/dev/stderr"), trace)},
+		{NULL}, /* sentinel */
+	};
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(FileData), trace);
+	RESET_GCSTACK();
+}
+
 static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KRequireKonohaCommonModule(trace);
@@ -404,21 +459,8 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		};
 		CT_File = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defFile, trace);
 	}
-	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static|_Const, _F(File_scriptPath), TY_String, TY_File, MN_("scriptPath"), 1, TY_String, FN_("filename"),
-		_Public|_Static, _F(System_fopen), TY_File, TY_System, MN_("fopen"), 2, TY_String, FN_("filename"), TY_String, FN_("mode"),
-		_Public|_Static, _F(System_fclose), TY_void, TY_System, MN_("fclose"), 1, TY_File, FN_("file"),
-		_Public, _F(File_close), TY_void, TY_File, MN_("close"), 0,
-		_Public, _F(File_getc), TY_int, TY_File, MN_("getc"), 0,
-		_Public, _F(File_putc), TY_void, TY_File, MN_("putc"), 1, TY_int, FN_("char"),
-		_Public, _F(File_readLine), TY_String, TY_File, MN_("readLine"), 0,
-		_Public, _F(File_print), TY_String, TY_File, MN_("print"), 1, TY_String, FN_("str"),
-		_Public, _F(File_println), TY_void, TY_File, MN_("println"), 1, TY_String, FN_("str"),
-		_Public, _F(File_println0), TY_void, TY_File, MN_("println"), 0,
-		_Public, _F(File_flush), TY_void, TY_File, MN_("flush"), 0,
-		DEND,
-	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	file_defineConst(kctx, ns, trace);
+	file_defineMethod(kctx, ns, trace);
 	return true;
 }
 
@@ -440,7 +482,7 @@ static kbool_t file_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 KDEFINE_PACKAGE* file_init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("libc", "1.0"),
+		KPACKNAME("konoha", "1.0"),
 		.initPackage    = file_initPackage,
 		.setupPackage   = file_setupPackage,
 	};

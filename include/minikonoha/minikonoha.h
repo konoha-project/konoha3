@@ -1190,14 +1190,15 @@ static const char* MethodFlagData[] = {
 #define kMethod_CCompatible        ((uintptr_t)(1<<11))
 #define kMethod_JSCompatible         ((uintptr_t)(1<<12))
 #define kMethod_JCompatible          ((uintptr_t)(1<<13))
+#define kMethod_Accountable          ((uintptr_t)(1<<14))
 
 // internal
-#define kMethod_Hidden               ((uintptr_t)(1<<14))
-#define kMethod_Abstract             ((uintptr_t)(1<<15))
-#define kMethod_Overloaded           ((uintptr_t)(1<<16))
-#define kMethod_Override             ((uintptr_t)(1<<17))
-#define kMethod_DynamicCall          ((uintptr_t)(1<<18))
-#define kMethod_Warning              ((uintptr_t)(1<<19))
+#define kMethod_Hidden               ((uintptr_t)(1<<15))
+#define kMethod_Abstract             ((uintptr_t)(1<<16))
+#define kMethod_Overloaded           ((uintptr_t)(1<<17))
+#define kMethod_Override             ((uintptr_t)(1<<18))
+#define kMethod_DynamicCall          ((uintptr_t)(1<<19))
+#define kMethod_Warning              ((uintptr_t)(1<<20))
 
 #define kMethod_WeakCoercion         kMethod_Coercion|kMethod_Warning
 

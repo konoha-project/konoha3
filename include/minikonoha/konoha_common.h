@@ -77,6 +77,7 @@ static void KonohaCommonModule_init(KonohaContext *kctx, KTraceInfo *trace)
 #define TY_RegExp         ((CT_RegExp)->typeId)
 #define IS_RegExp(O)      (O_ct(O) == CT_RegExp)
 
+
 /* ------------------------------------------------------------------------ */
 /* Float */
 
@@ -125,6 +126,10 @@ struct kIteratorVar {
 #define IS_File(O)      (O_ct(O) == CT_File)
 #define CT_FILE         KGetKonohaCommonModule()->cFile
 #define TY_FILE         (CT_File)->typeId
+
+#define kFileFlag_ChangeLessStream    kObject_Local1
+#define kFile_is(P, o)    (TFLAG_is(uintptr_t,(o)->h.magicflag, kFileFlag_##P))
+#define kFile_set(P, o, b) TFLAG_set(uintptr_t,(o)->h.magicflag, kFileFlag_##P, b)
 
 typedef struct kFileVar kFile;
 
