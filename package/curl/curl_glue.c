@@ -615,11 +615,13 @@ static int diagnosisCurlFaultType(KonohaContext *kctx, CURLcode res, int UserFau
 		return SystemFault;
 	case CURLE_SSL_ISSUER_ERROR:        /* 83 - Issuer check failed.  (Added in
 	                                    7.19.0) */
+#if LIBCURL_VERSION_MAJOR >= 7 && LIBCURL_VERSION_MINOR >= 20
 	case CURLE_FTP_PRET_FAILED:         /* 84 - a PRET command failed */
 	case CURLE_RTSP_CSEQ_ERROR:         /* 85 - mismatch of RTSP CSeq numbers */
 	case CURLE_RTSP_SESSION_ERROR:      /* 86 - mismatch of RTSP Session Identifiers */
 	case CURLE_FTP_BAD_FILE_LIST:       /* 87 - unable to parse FTP file list */
 	case CURLE_CHUNK_FAILED:            /* 88 - chunk callback reported error */
+#endif
 		return SystemFault | ExternalFault;
 	case CURL_LAST: break;
 	}
