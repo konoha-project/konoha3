@@ -436,6 +436,7 @@ struct PlatformApiVar {
 	/* high-level functions */
 
 	// file load
+	size_t FilePathMax;
 	const char* (*shortFilePath)(const char *path);
 	const char* (*formatPackagePath)(char *buf, size_t bufsiz, const char *packageName, const char *ext);
 	const char* (*formatTransparentPath)(char *buf, size_t bufsiz, const char *parent, const char *path);

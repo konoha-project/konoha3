@@ -821,6 +821,7 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.pthread_mutex_trylock_i = pthread_mutex_trylock;
 	plat.pthread_mutex_destroy_i = pthread_mutex_destroy;
 
+	plat.FilePathMax         = 1024;
 	plat.shortFilePath       = shortFilePath;
 	plat.formatPackagePath   = formatPackagePath;
 	plat.formatTransparentPath = formatTransparentPath;

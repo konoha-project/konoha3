@@ -44,6 +44,7 @@ extern "C"{
 
 #define LogFileName(S)     LogText("filename", S)
 #define LogFile(F) LogText("filename", kFile_textPath(kctx, F))
+#define LogWrittenByte(size)  LogUint("WrittenByteSize", size)
 
 static const char* kFile_textPath(KonohaContext *kctx, kFile *file)
 {
@@ -66,6 +67,9 @@ static int TRACE_fputc(KonohaContext *kctx, kFile *file, int ch, KTraceInfo *tra
 		KTraceErrorPoint(trace, SystemFault, "fputc", LogFile(file), LogErrno);
 		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
 	}
+	else {
+		KTraceChangeSystemPoint(trace, "fputc", LogFile(file), LogWrittenByte(1));
+	}
 	return ch;
 }
 
@@ -86,7 +90,18 @@ static size_t TRACE_fwrite(KonohaContext *kctx, kFile *file, const char *buf, si
 		KTraceErrorPoint(trace, SystemFault, "fwrite", LogFile(file), LogErrno);
 		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
 	}
+	if(size > 0) {
+		KTraceChangeSystemPoint(trace, "fwrite", LogFile(file), LogWrittenByte(size));
+	}
 	return size;
+}
+
+static void TRACE_fflush(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
+{
+	fflush(file->fp);
+	if(ferror(file->fp) != 0){
+		KTraceErrorPoint(trace, SystemFault, "fflush", LogFile(file), LogErrno);
+	}
 }
 
 /* ------------------------------------------------------------------------ */
@@ -107,7 +122,7 @@ static void kFile_close(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
 	if(ret != 0) {
 		KTraceErrorPoint(trace, SoftwareFault|SystemFault, "fclose", LogErrno);
 	}
-	file->fp = NULL;
+	//file->fp = NULL;
 	if(file->readerIconv != ICONV_NULL) {
 		PLATAPI iconv_close_i(kctx, file->readerIconv);
 		file->readerIconv = ICONV_NULL;
@@ -270,6 +285,14 @@ static KMETHOD File_readLine(KonohaContext *kctx, KonohaStack *sfp)
 	);
 }
 
+//## void File.flush();
+static KMETHOD File_flush(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kFile   *file = sfp[0].asFile;
+	KMakeTrace(trace, sfp);
+	TRACE_fflush(kctx, file, trace);
+}
+
 //## void File.print(String line);
 static KMETHOD File_print(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -302,8 +325,6 @@ static KMETHOD File_println(KonohaContext *kctx, KonohaStack *sfp)
 	File_print(kctx, sfp);
 	File_println0(kctx, sfp);
 }
-
-
 
 static void MethodLib_FileRead(KonohaContext *kctx, KonohaStack *sfp, kFile *file, kBytes *ba, size_t offset, size_t len)
 {
@@ -344,6 +365,19 @@ static KMETHOD File_write3(KonohaContext *kctx , KonohaStack *sfp)
 	MethodLib_FileWrite(kctx, sfp, (kFile*)sfp[0].asObject, sfp[1].asBytes, sfp[2].intValue, sfp[3].intValue);
 }
 
+/* ------------------------------------------------------------------------ */
+
+//## @Const String File.scriptPath(String path);
+static KMETHOD File_scriptPath(KonohaContext *kctx, KonohaStack *sfp)
+{
+	char scriptPathBuf[PLATAPI FilePathMax];
+	const char *scriptPath = PLATAPI formatTransparentPath(scriptPathBuf, sizeof(scriptPathBuf), FileId_t(sfp[K_RTNIDX].callerFileLine), S_text(sfp[1].asString));
+	kStringVar *resultValue = (kStringVar*)KLIB new_kString(kctx, OnStack, scriptPath, strlen(scriptPath), 0);
+	if(kString_is(Literal, sfp[1].asString)) {
+		kString_set(Literal, resultValue, true);
+	}
+	KReturn(resultValue);
+}
 
 // --------------------------------------------------------------------------
 
@@ -371,6 +405,7 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		CT_File = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defFile, trace);
 	}
 	KDEFINE_METHOD MethodData[] = {
+		_Public|_Static|_Const, _F(File_scriptPath), TY_String, TY_File, MN_("scriptPath"), 1, TY_String, FN_("filename"),
 		_Public|_Static, _F(System_fopen), TY_File, TY_System, MN_("fopen"), 2, TY_String, FN_("filename"), TY_String, FN_("mode"),
 		_Public|_Static, _F(System_fclose), TY_void, TY_System, MN_("fclose"), 1, TY_File, FN_("file"),
 		_Public, _F(File_close), TY_void, TY_File, MN_("close"), 0,
@@ -378,8 +413,9 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public, _F(File_putc), TY_void, TY_File, MN_("putc"), 1, TY_int, FN_("char"),
 		_Public, _F(File_readLine), TY_String, TY_File, MN_("readLine"), 0,
 		_Public, _F(File_print), TY_String, TY_File, MN_("print"), 1, TY_String, FN_("str"),
-		_Public, _F(File_println), TY_String, TY_File, MN_("println"), 1, TY_String, FN_("str"),
-		_Public, _F(File_println), TY_String, TY_File, MN_("println"), 0,
+		_Public, _F(File_println), TY_void, TY_File, MN_("println"), 1, TY_String, FN_("str"),
+		_Public, _F(File_println0), TY_void, TY_File, MN_("println"), 0,
+		_Public, _F(File_flush), TY_void, TY_File, MN_("flush"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);

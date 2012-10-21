@@ -102,18 +102,18 @@ typedef const struct kSubprocVar kSubproc;
 struct kSubprocVar {
 	KonohaObjectHeader h;
 	kshortflag_t   flag;
-	//	kbool_t shell;                         // shell mode [true/false]
-	//	kbool_t closefds;                      // closefds   [true/false]
-	//	kbool_t bg;                            // bg mode    [true/false]
+	//	kbool_t shell;                     // shell mode [true/false]
+	//	kbool_t closefds;                  // closefds   [true/false]
+	//	kbool_t bg;                        // bg mode    [true/false]
 	kArray *env;                           // child process environment
 	kString *command;                      // child process command
 	kString *cwd;                          // child process current working directory
 	int   rmode;
-	FILE *rfp;                               // child process output identifier
+	FILE *rfp;                             // child process output identifier
 	int   wmode;
-	FILE  *wfp;                               // child process input identifier
+	FILE  *wfp;                            // child process input identifier
 	int   emode;
-	FILE  *efp;                               // child process error identifier
+	FILE  *efp;                            // child process error identifier
 	int cpid;                              // child process ID
 	int bufferSize;                        // buffer size (unused)
 	int timeout;                           // child process timeout value
@@ -227,6 +227,7 @@ L_ERR:;
  *         -1 is Internal Error
  *         -2 is the maximum error of the number of parameters
  */
+
 static int spSplit(char* str, char* args[]) {
 
 	if( (str == NULL) || (args == NULL) ) {
