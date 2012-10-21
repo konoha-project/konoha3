@@ -1,5 +1,5 @@
 import("konoha.math");
-
+import("konoha.float");
 System.p(Math.abs(4));
 System.p(Math.fabs(9.0));
 System.p(Math.pow(3.0, 4.0));
