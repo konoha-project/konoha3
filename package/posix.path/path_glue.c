@@ -70,62 +70,6 @@ static int TRACE_fputc(KonohaContext *kctx, kFile *file, int ch, KTraceInfo *tra
 }
 
 /* ------------------------------------------------------------------------ */
-
-static void File_init(KonohaContext *kctx, kObject *o, void *conf)
-{
-	struct kFileVar *file = (struct kFileVar *)o;
-	file->fp = (conf != NULL) ? conf : NULL;
-	file->PathInfoNULL = NULL;
-	file->readerIconv = ICONV_NULL;
-	file->writerIconv = ICONV_NULL;
-}
-
-static void kFile_close(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
-{
-	DBG_ASSERT(file->fp != NULL);
-	int ret = fclose(file->fp);
-	if(ret != 0) {
-		KTraceErrorPoint(trace, SoftwareFault|SystemFault, "fclose", LogErrno);
-	}
-	file->fp = NULL;
-	if(file->readerIconv != ICONV_NULL) {
-		PLATAPI iconv_close_i(kctx, file->readerIconv);
-		file->readerIconv = ICONV_NULL;
-	}
-	if(file->writerIconv != ICONV_NULL) {
-		PLATAPI iconv_close_i(kctx, file->writerIconv);
-		file->writerIconv = ICONV_NULL;
-	}
-}
-
-static void kFile_checkEOF(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
-{
-	DBG_ASSERT(file->fp != NULL);
-	if(feof(file->fp) != 0) {
-		kFile_close(kctx, file, trace);
-	}
-}
-
-static void File_free(KonohaContext *kctx, kObject *o)
-{
-	struct kFileVar *file = (struct kFileVar *)o;
-	if(file->fp != NULL) {
-		kFile_close(kctx, file, NULL/*trace*/);
-	}
-}
-
-static void File_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
-{
-	kFile *file = (kFile *)v[pos].asObject;
-	if(file->PathInfoNULL != NULL) {
-		KLIB Kwb_write(kctx, wb, S_text(file->PathInfoNULL), S_size(file->PathInfoNULL));
-	}
-	else {
-		KLIB Kwb_printf(kctx, wb, "FILE:%p", file->fp);
-	}
-}
-
-/* ------------------------------------------------------------------------ */
 //## FILE System.fopen(String path, String mode);
 
 
@@ -137,21 +81,25 @@ static KMETHOD System_umask(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
-//## int System.mkdir(String path, int mode)
+//## boolean System.mkdir(String path, int mode)
 static KMETHOD System_mkdir(KonohaContext *kctx, KonohaStack *sfp)
 {
-	const char *path = S_text(sfp[1].asString);
-	mode_t mode = sfp[2].intValue;
-	int ret = mkdir(path, mode);
+	KMakeTrace(trace, sfp);
+	char buffer[PLATAPI FilePathMax];
+	kString *path = sfp[1].asString;
+	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), S_text(path), S_size(path), trace);
+	mode_t mode = (mode_t)sfp[2].intValue;
+	int ret = mkdir(systemPath, mode);
 	if(ret == -1) {
-		// TODO: throw
+		KTraceErrorPoint(trace, SystemFault, "mkdir", LogFile(S_text(path)), LogErrno);
 	}
-	KReturnUnboxValue(ret);
+	KReturnUnboxValue(ret != -1);
 }
 
 //## int System.rmdir(String path)
 static KMETHOD System_rmdir(KonohaContext *kctx, KonohaStack *sfp)
 {
+
 	const char *path = S_text(sfp[1].asString);
 	int ret = rmdir(path);
 	if(ret == -1) {

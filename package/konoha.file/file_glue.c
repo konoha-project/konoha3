@@ -167,9 +167,9 @@ static void File_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer 
 static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KMakeTrace(trace, sfp);
-	char buffer[K_PATHMAX];
+	char buffer[PLATAPI FilePathMax];
 	kString *path = sfp[1].asString;
-	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, K_PATHMAX, S_text(sfp[1].asString), S_size(sfp[1].asString), trace);
+	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), S_text(path), S_size(path), trace);
 	const char *mode = S_text(sfp[2].asString);
 	FILE *fp = fopen(systemPath, mode);
 	if(fp == NULL) {
