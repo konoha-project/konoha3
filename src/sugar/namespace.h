@@ -152,6 +152,7 @@ static kbool_t kNameSpace_importSyntax(KonohaContext *kctx, kNameSpace *ns, Suga
 			for(j = 0; j < size; j++) {
 				kNameSpace_setTokenFuncMatrix(kctx, ns, target->tokenKonohaChar, FuncItems[j]);
 			}
+			syn->tokenKonohaChar = target->tokenKonohaChar;
 		}
 		syn->lastLoadedPackageId = target->lastLoadedPackageId;
 	}
