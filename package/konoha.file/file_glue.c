@@ -138,6 +138,7 @@ static void kFile_checkEOF(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
 	DBG_ASSERT(file->fp != NULL);
 	if(feof(file->fp) != 0) {
 		kFile_close(kctx, file, trace);
+		file->fp = NULL;  /* input stream is automatically closed */
 	}
 }
 
@@ -223,7 +224,7 @@ static KMETHOD File_getc(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFile *file = (kFile *)sfp[0].asObject;
 	KMakeTrace(trace, sfp);
-	int ch = TRACE_fgetc(kctx, file, trace);
+	int ch = file->fp == NULL ? EOF : TRACE_fgetc(kctx, file, trace);
 	KReturnUnboxValue(ch);
 }
 
@@ -240,49 +241,55 @@ static KMETHOD File_putc(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD File_readLine(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kFile *file = (kFile *)sfp[0].asObject;
-	KGrowingBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	int ch, pos = 0, hasUTF8 = false, bufferCount = 0, policy = StringPolicy_ASCII;
-	char buffer[K_PAGESIZE];
-	KMakeTrace(trace, sfp);
-	while((ch == TRACE_fgetc(kctx, file, trace)) != EOF) {
-		if(ch == '\r') continue;
-		if(ch == '\n') {
-			if(bufferCount == 0 && (!hasUTF8 || file->readerIconv == ICONV_NULL)) {
-				KReturn(KLIB new_kString(kctx, OnStack, buffer, pos, policy));
+	if(file->fp != NULL) {
+		KGrowingBuffer wb;
+		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+		int ch, pos = 0, hasUTF8 = false, bufferCount = 0, policy = StringPolicy_ASCII;
+		char buffer[K_PAGESIZE];
+		KMakeTrace(trace, sfp);
+		while((ch = TRACE_fgetc(kctx, file, trace)) != EOF) {
+			//DBG_P("ch='%c', pos=%d", ch, pos);
+			if(ch == '\r') continue;
+			if(ch == '\n') {
+				if(bufferCount == 0 && (!hasUTF8 || file->readerIconv == ICONV_NULL)) {
+					KReturn(KLIB new_kString(kctx, OnStack, buffer, pos, policy));
+				}
+				break;
 			}
-			break;
+			if(ch > 127) {
+				hasUTF8 = true;
+				policy = StringPolicy_UTF8;
+			}
+			buffer[pos] = ch; pos++;
+			if(!(pos < K_PAGESIZE)) {
+				if(hasUTF8 && file->readerIconv != ICONV_NULL) {
+					KLIB Kwb_iconv(kctx, &wb, file->readerIconv, buffer, pos, trace);
+				}
+				else {
+					KLIB Kwb_write(kctx, &wb, buffer, pos);
+				}
+				bufferCount++;
+				hasUTF8 = false;
+				pos = 0;
+			}
 		}
-		if(ch > 127) {
-			hasUTF8 = true;
-			policy = StringPolicy_UTF8;
-		}
-		buffer[pos] = ch; pos++;
-		if(!(pos < K_PAGESIZE)) {
+		if(pos > 0) {
 			if(hasUTF8 && file->readerIconv != ICONV_NULL) {
 				KLIB Kwb_iconv(kctx, &wb, file->readerIconv, buffer, pos, trace);
 			}
 			else {
 				KLIB Kwb_write(kctx, &wb, buffer, pos);
 			}
-			bufferCount++;
-			hasUTF8 = false;
-			pos = 0;
 		}
+		kFile_checkEOF(kctx, file, trace);
+		KReturnWith(
+			KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), policy),
+			KLIB Kwb_free(&wb)
+		);
 	}
-	if(pos > 0) {
-		if(hasUTF8 && file->readerIconv != ICONV_NULL) {
-			KLIB Kwb_iconv(kctx, &wb, file->readerIconv, buffer, pos, trace);
-		}
-		else {
-			KLIB Kwb_write(kctx, &wb, buffer, pos);
-		}
+	else {
+		KReturn(KNULL(String));
 	}
-	kFile_checkEOF(kctx, file, trace);
-	KReturnWith(
-		KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), policy),
-		KLIB Kwb_free(&wb)
-	);
 }
 
 //## void File.flush();
@@ -419,8 +426,8 @@ static void file_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *t
 		_Public, _F(File_getc), TY_int, TY_File, MN_("getc"), 0,
 		_Public, _F(File_putc), TY_void, TY_File, MN_("putc"), 1, TY_int, FN_("char"),
 		_Public, _F(File_readLine), TY_String, TY_File, MN_("readLine"), 0,
-		_Public, _F(File_print), TY_String, TY_File, MN_("print"), 1, TY_String, FN_("str"),
-		_Public, _F(File_println), TY_void, TY_File, MN_("println"), 1, TY_String, FN_("str"),
+		_Public, _F(File_print), TY_String, TY_File, MN_("print"), 1, TY_String, FN_("str")|FN_COERCION,
+		_Public, _F(File_println), TY_void, TY_File, MN_("println"), 1, TY_String, FN_("str")|FN_COERCION,
 		_Public, _F(File_println0), TY_void, TY_File, MN_("println"), 0,
 		_Public, _F(File_flush), TY_void, TY_File, MN_("flush"), 0,
 		DEND,
