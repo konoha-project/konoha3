@@ -2,7 +2,7 @@
 import("konoha.assign");
 import("konoha.class");
 import("konoha.date");
-
+import("konoha.new");
 void f() {
 	Date d = new Date(2012, 9, 10, 18, 46, 30, 10);
 	assert(d.getUTCDate() == 10);

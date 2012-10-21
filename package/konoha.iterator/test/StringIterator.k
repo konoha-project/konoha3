@@ -1,7 +1,7 @@
 // written by shinpei
 
 import("konoha.iterator")
-import("konoha.while")
+import("cstyle", "while");
 
 void iteratorTest () {
 	String str = "hello,world";
