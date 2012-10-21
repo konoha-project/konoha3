@@ -2116,7 +2116,11 @@ static KMETHOD Function_dump(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
 static KMETHOD Function_addFnAttr(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
 {
 	Function *F = konoha::object_cast<Function *>(sfp[0].asObject);
+#if LLVM_VERSION == 302
+	Attributes::AttrVal N = (Attributes::AttrVal) sfp[1].intValue;
+#else
 	Attributes N = (Attributes) sfp[1].intValue;
+#endif
 	F->addFnAttr(N);
 	KReturnVoid();
 }
@@ -2476,6 +2480,7 @@ static KMETHOD FunctionPassManager_run(KonohaContext *kctx _UNUSED_, KonohaStack
 	KReturnVoid();
 }
 
+#if LLVM_VERSION < 302
 //## TargetData ExecutionEngine.getTargetData();
 static KMETHOD ExecutionEngine_getTargetData(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -2484,6 +2489,7 @@ static KMETHOD ExecutionEngine_getTargetData(KonohaContext *kctx, KonohaStack *s
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
 }
+#endif
 
 //## void Method.setFunction(NativeFunction func);
 static KMETHOD kMethod_setFunction(KonohaContext *kctx, KonohaStack *sfp)
@@ -4508,12 +4514,16 @@ static KDEFINE_INT_CONST IntGlobalVariable[] = {
 	{NULL, 0, 0}
 };
 
-#if LLVM_VERSION >= 301
+#if LLVM_VERSION == 301
 #define C_(S) {#S , TY_int, S ## _i}
+#elif LLVM_VERSION == 302
+#define C_(S) {#S , TY_int, Attributes::S}
 #else
 #define C_(S) {#S , TY_int, S}
 #endif
+#if LLVM_VERSION <= 301
 using namespace llvm::Attribute;
+#endif
 static KDEFINE_INT_CONST IntAttributes[] = {
 	C_(None),
 	C_(ZExt),
@@ -5024,7 +5034,9 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public, _F(FunctionPassManager_add), TY_void, TY_FunctionPassManager, MN_("add"), 1, TY_Pass, FN_("p"),
 		_Public, _F(FunctionPassManager_run), TY_void, TY_FunctionPassManager, MN_("run"), 1, TY_Function, FN_("func"),
 		_Public, _F(FunctionPassManager_doInitialization), TY_void, TY_FunctionPassManager, MN_("doInitialization"), 0,
+#if LLVM_VERSION < 302
 		_Public, _F(ExecutionEngine_getTargetData), TY_String/*TODO*/, TY_ExecutionEngine, MN_("getTargetData"), 0,
+#endif
 		_Public, _F(Argument_new), TY_Value/*TODO*/, TY_Argument, MN_("new"), 1, TY_Type, FN_("type"),
 		_Public, _F(Value_replaceAllUsesWith), TY_void, TY_Value, MN_("replaceAllUsesWith"), 1, TY_Value, FN_("v"),
 		_Public, _F(Value_setName), TY_void, TY_Value, MN_("setName"), 1, TY_String, FN_("name"),
@@ -5237,7 +5249,7 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 
 static kbool_t llvm_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
-	(void)kctx;(void)ns;(void)trace;
+	(void)kctx;(void)ns;(void)isFirstTime;(void)trace;
 	return true;
 }
 
