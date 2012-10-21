@@ -2,10 +2,11 @@
 
 import("konoha.new");
 import("konoha.file");
+import("konoha.array");
 import("dscript.subproc");
 
 void test() {
-	Subproc p = new Subproc("echo hoge", false);
+	Subproc p = new Subproc(["echo", "hoge"], false);
 	FILE f = System.fopen("files/output.txt", "w");
 	p.setFileOUT(f);
 	assert(p.fg() == 0);

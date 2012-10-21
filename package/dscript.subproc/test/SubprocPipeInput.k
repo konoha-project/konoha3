@@ -1,11 +1,12 @@
 // written by shinpei
-import ("konoha.new");
-import( "dscript.subproc");
-import ("konoha.array");
+
+import("konoha.new");
+import("konoha.array");
+import("dscript.subproc");
 
 // echo 'hello world' | cat
-void test () {
-	Subproc p = new Subproc("cat", false);
+void test() {
+	Subproc p = new Subproc(["cat"], false);
 	p.enablePipemodeOUT(true);
 	p.enablePipemodeIN(true);
 	p.bg();

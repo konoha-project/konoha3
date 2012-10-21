@@ -1,10 +1,11 @@
 // written by shinpei
-import ("konoha.new");
-import( "dscript.subproc");
-import ("konoha.array");
 
-void test () {
-	Subproc p = new Subproc("echo hoge", false);
+import("konoha.new");
+import("konoha.array");
+import("dscript.subproc");
+
+void test() {
+	Subproc p = new Subproc(["echo", "hoge"], false);
 	p.enablePipemodeOUT(true);
 	p.bg();
 	String[] ret = p.communicate("");

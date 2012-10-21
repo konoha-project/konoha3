@@ -72,7 +72,6 @@ enum {
 };
 
 // subproc macro
-#define MAXARGS            128				// the number maximum of parameters for spSplit
 #define DELAY              1000				// the adjustment value at the time of signal transmission
 #define DEF_TIMEOUT        10 * 1000		// default timeout valx
 //#define DEF_TIMEOUT -1
@@ -93,11 +92,11 @@ typedef struct kSubprocVar kSubproc;
 struct kSubprocVar {
 	KonohaObjectHeader h;
 	kArray  *env;     // child process environment
-	kString *command; // child process command
 	kString *cwd;     // child process current working directory
 	kFile   *rfp;     // input stream
 	kFile   *wfp;     // output stream
 	kFile   *efp;     // err stream
+	char   **args;    // child process command
 	int      rmode;   // input stream mode
 	int      wmode;   // output stream mode
 	int      emode;   // err stream mode
@@ -111,7 +110,6 @@ static void kSubproc_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kSubproc *proc = (kSubproc *)o;
 	proc->env      = KNULL(Array);
-	proc->command  = KNULL(String);
 	proc->cwd      = KNULL(String);
 	proc->rfp      = KNULL(File);
 	proc->wfp      = KNULL(File);
@@ -128,11 +126,23 @@ static void kSubproc_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *v
 {
 	kSubproc *proc = (kSubproc *)o;
 	KREFTRACEv(proc->env);
-	KREFTRACEv(proc->command);
 	KREFTRACEv(proc->cwd);
 	KREFTRACEv(proc->rfp);
 	KREFTRACEv(proc->wfp);
 	KREFTRACEv(proc->efp);
+}
+
+static void kSubproc_free(KonohaContext *kctx, kObject *o)
+{
+	kSubproc *proc = (kSubproc *)o;
+	if(proc->args != NULL) {
+		size_t i;
+		for(i = 0; proc->args[i] != NULL; i++) {
+			free(proc->args[i]);
+		}
+		free(proc->args);
+		proc->args = NULL;
+	}
 }
 
 /* ------------------------------------------------------------------------ */
@@ -148,6 +158,22 @@ static int fgPid;
 static void keyIntHandler(int sig) { kill(fgPid, SIGINT); }
 
 /* ------------------------------------------------------------------------ */
+
+static void initArgs(KonohaContext *kctx, kSubproc *proc, kArray *args)
+{
+	size_t asize = kArray_size(args);
+	DBG_ASSERT(proc->args == NULL);
+	proc->args = (char **)malloc(sizeof(char *) * (asize + 1));
+	size_t i;
+	for(i = 0; i < asize; i++) {
+		kString *arg = args->stringItems[i];
+		size_t size = S_size(arg);
+		proc->args[i] = (char *)malloc(sizeof(char) * (size + 1));
+		memcpy(proc->args[i], S_text(arg), size);
+		proc->args[i][size] = '\0';
+	}
+	proc->args[asize] = NULL;
+}
 
 #if defined (__APPLE__) || defined(__USE_LOCAL_PIPE2__)
 // for fg & bg & exec & restart
@@ -181,50 +207,6 @@ L_ERR:;
 }
 #endif
 
-// for argSplit & fg & bg & exec & restart
-// ===========================================================================
-// <example>
-// char str[12], *args[2];
-// strcpy(str, "Hello world");
-// int param = spSplit( str, args );
-// if(param > 0 ) {
-//    printf("param:%d args[0]:%s args[1]:%s\n", param, args[0], args[1]);
-// }
-//	else {
-//     printf("spSplit error[%d]\n", param);
-// }
-// ---------------------------------------------------------------------------
-// output:
-//     param:2 args[0]:Hello args[1]:world
-// ===========================================================================
-/**
- * @return number of parameter (zero or more)
- *         -1 is Internal Error
- *         -2 is the maximum error of the number of parameters
- */
-
-static int spSplit(char* str, char* args[]) {
-
-	if((str == NULL) || (args == NULL)) {
-		return -1;
-	}
-	int index;
-	char *cp = str;
-	for(index = 0; index <= MAXARGS; index++) {
-		if(index == MAXARGS) {
-			return -2;
-		}
-		else if((args[index] = strtok(cp, " ")) == NULL) {
-			break;
-		}
-		else {
-			cp = NULL;
-		}
-	}
-	// number of parameter
-	return index;
-}
-
 // for getIN & getOUT & getERR
 /**
  * @return "konoha.posix.File" class id
@@ -245,8 +227,8 @@ static int spSplit(char* str, char* args[]) {
 
 static int kSubproc_popen(KonohaContext *kctx, kSubproc *proc, int defaultMode, KTraceInfo *trace)
 {
-	kString *command = proc->command;
-	if(IS_NULL(command) || S_size(command) == 0) {
+	char **args = proc->args;
+	if(args == NULL || strlen(args[0]) == 0) {
 		return -1;
 	}
 	pid_t pid  = -1;
@@ -352,17 +334,19 @@ static int kSubproc_popen(KonohaContext *kctx, kSubproc *proc, int defaultMode, 
 		}
 		setsid(); // separate from tty
 		if(IS_NOTNULL(proc->cwd)) {
-			if(chdir(S_text((proc->cwd))) != 0) {
+			if(chdir(S_text(proc->cwd)) != 0) {
 				KTraceApi(trace, SystemFault|UserFault, "chrdir", LogErrno);
 				_exit(1);
 			}
 		}
-		char *args[MAXARGS];
-		if(!kSubproc_is(Shell, proc)) {
-			// division of a commnad parameter
-			if(spSplit((char*)S_text(command), args) < 0){
-				//TODO: error
-				args[0] = NULL;
+		KGrowingBuffer wb;
+		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+		if(kSubproc_is(Shell, proc)) {
+			// concatinate args array to string
+			size_t i;
+			for(i = 0; args[i] != NULL; i++) {
+				KLIB Kwb_write(kctx, &wb, args[i], strlen(args[i]));
+				KLIB Kwb_write(kctx, &wb, " ", 1);
 			}
 		}
 		if(IS_NOTNULL(proc->env)) {
@@ -383,7 +367,7 @@ static int kSubproc_popen(KonohaContext *kctx, kSubproc *proc, int defaultMode, 
 				}
 			}
 			else {
-				if(execle("/bin/sh", "sh", "-c", S_text(command), NULL, envs) == -1) {
+				if(execle("/bin/sh", "sh", "-c", KLIB Kwb_top(kctx, &wb, 0), NULL, envs) == -1) {
 					KTraceApi(trace, SystemFault|UserFault, "execle", LogErrno);
 				}
 			}
@@ -395,11 +379,12 @@ static int kSubproc_popen(KonohaContext *kctx, kSubproc *proc, int defaultMode, 
 				}
 			}
 			else {
-				if(execlp("sh", "sh", "-c", S_text(command), NULL) == -1) {
+				if(execlp("sh", "sh", "-c", KLIB Kwb_top(kctx, &wb, 0), NULL) == -1) {
 					KTraceApi(trace, SystemFault|UserFault, "execlp", LogErrno);
 				}
 			}
 		}
+		KLIB Kwb_free(&wb);
 		perror("kSubproc_popen :");
 		_exit(1);
 	default:
@@ -589,47 +574,6 @@ static kString *kFile_readAll(KonohaContext *kctx, kFile *file, KTraceInfo *trac
 	return ret;
 }
 
-static kString *kSubproc_checkOutput(KonohaContext *kctx, kSubproc *p, kString *command, KTraceInfo *trace)
-{
-	kSubproc *proc = (kSubproc *)p;
-	kString *ret_s = KNULL(String);
-	if(kSubproc_is(OnExec, proc)) {
-		return ret_s;
-	}
-	kSubproc_set(TimeoutKill, proc, false);
-	KFieldSet(proc, proc->command, command);
-	int pid = kSubproc_popen(kctx, proc, M_PIPE, trace);
-	if(pid > 0) {
-		proc->cpid = pid;
-		if(kSubproc_wait(kctx, proc, trace) == S_TIMEOUT) {
-			kSubproc_set(TimeoutKill, proc, true);
-			killWait(pid);
-			//todo: error
-		}
-		else if((proc->rmode == M_PIPE) || (proc->rmode == M_DEFAULT) ) {
-			ret_s = kFile_readAll(kctx, proc->rfp, trace);
-			if(IS_NULL(ret_s)) {
-				// todo: error
-			}
-		}
-		else if(proc->rmode == M_FILE) {
-			char *msg = " will be ignored.";
-			char *cmd = (char *)command;
-			char mbuf[strlen(msg)+strlen(cmd)+1];
-			snprintf(mbuf, sizeof(mbuf), "'%s'%s", cmd, msg);
-		}
-	}
-	else {
-		//toro popen error
-	}
-	// remove alarm
-	struct itimerval val;
-	getitimer(ITIMER_REAL, &val);
-	val.it_value.tv_sec = 0;
-	setitimer(ITIMER_REAL, &val, NULL);
-	return ret_s;
-}
-
 static kArray *kSubproc_communicate(KonohaContext *kctx, kSubproc *proc, kString *input, KTraceInfo *trace)
 {
 	kArray *ret_a = (kArray *)KLIB new_kObject(kctx, OnStack, CT_p0(kctx, CT_Array, TY_String), 0);
@@ -684,22 +628,24 @@ static kArray *kSubproc_communicate(KonohaContext *kctx, kSubproc *proc, kString
 
 /* ------------------------------------------------------------------------ */
 
-//## Subproc Subproc.new(String command);
+//## Subproc Subproc.new(String[] args);
 static KMETHOD Subproc_new1(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubproc *proc = (kSubproc *)sfp[0].asObject;
-	KFieldSet(proc, proc->command, sfp[1].asString);
+	kArray *args = sfp[1].asArray;
+	initArgs(kctx, proc, args);
 	// By default, closefds is set to false
 	// (file descriptor will not be closed automatically).
 	kSubproc_set(CloseFds, proc, false);
 	KReturn(proc);
 }
 
-//## Subproc Subproc.new(String command, boolean closefds);
+//## Subproc Subproc.new(String[] args, boolean closefds);
 static KMETHOD Subproc_new2(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubproc *proc = (kSubproc *)sfp[0].asObject;
-	KFieldSet(proc, proc->command, sfp[1].asString);
+	kArray *args = sfp[1].asArray;
+	initArgs(kctx, proc, args);
 	if(sfp[2].boolValue) {
 		kSubproc_set(CloseFds, proc, true);
 	}
@@ -737,13 +683,6 @@ static KMETHOD Subproc_fg(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	}
 	KReturnUnboxValue(ret);
-}
-
-//## String Subproc.exec(String data);
-static KMETHOD Subproc_exec(KonohaContext *kctx, KonohaStack *sfp)
-{
-	KMakeTrace(trace, sfp);
-	KReturn(kSubproc_checkOutput(kctx, (kSubproc *)sfp[0].asObject, sfp[1].asString, trace));
 }
 
 //## String[] Subproc.communicate();
@@ -1079,6 +1018,7 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		STRUCTNAME(Subproc),
 		.cflag    = kClass_Final,
 		.init     = kSubproc_init,
+		.free     = kSubproc_free,
 		.reftrace = kSubproc_reftrace,
 	};
 
@@ -1087,11 +1027,10 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	ktype_t TY_StringArray = CT_StringArray0->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(Subproc_new1), TY_Subproc, TY_Subproc, MN_("new"), 1, TY_String, FN_("command"),
-		_Public, _F(Subproc_new2), TY_Subproc, TY_Subproc, MN_("new"), 2, TY_String, FN_("command"), TY_boolean, FN_("closefds"),
+		_Public, _F(Subproc_new1), TY_Subproc, TY_Subproc, MN_("new"), 1, TY_StringArray, FN_("args"),
+		_Public, _F(Subproc_new2), TY_Subproc, TY_Subproc, MN_("new"), 2, TY_StringArray, FN_("args"), TY_boolean, FN_("closefds"),
 		_Public, _F(Subproc_fg), TY_int, TY_Subproc, MN_("fg"), 0,
 		_Public, _F(Subproc_bg), TY_boolean, TY_Subproc, MN_("bg"), 0,
-		_Public, _F(Subproc_exec), TY_String, TY_Subproc, MN_("exec"), 1, TY_String, FN_("command"),
 		_Public, _F(Subproc_communicate0), TY_StringArray, TY_Subproc, MN_("communicate"), 0,
 		_Public, _F(Subproc_communicate1), TY_StringArray, TY_Subproc, MN_("communicate"), 1, TY_String, FN_("input"),
 //		_Public, _F(Subproc_poll), TY_int, TY_Subproc, MN_("poll"), 0,
