@@ -151,6 +151,24 @@ static KMETHOD TypeCheck_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
 		int ch = S_text(tk->text)[0];
 		KReturn(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_int, ch));
 	}
+	else if(S_size(tk->text) == 2) {
+		int ch = S_text(tk->text)[0];
+		if(ch == '\\') {
+			ch = S_text(tk->text)[1];
+			switch(ch) {
+			case '\'': ch = '\''; break;
+			case '\\': ch = '\\'; break;
+			case 'b':  ch = '\b'; break;
+			case 'f':  ch = '\f'; break;
+			case 'n':  ch = '\n'; break;
+			case 'r':  ch = '\r'; break;
+			case 't':  ch = '\t'; break;
+			default:
+				KReturn(K_NULLEXPR);
+			}
+			KReturn(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_int, ch));
+		}
+	}
 	KReturn(K_NULLEXPR);
 }
 
