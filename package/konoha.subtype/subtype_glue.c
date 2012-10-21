@@ -99,7 +99,7 @@ static KMETHOD TypeCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 		kExpr *classValue = SUGAR kExpr_setConstValue(kctx,
 				expr->cons->ExprItems[2], targetExpr->ty, KLIB Knull(kctx, targetClass));
 		KFieldSet(expr->cons, expr->cons->ExprItems[2], classValue);
-		KReturn(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, TY_boolean));
+		KReturn(SUGAR kStmtExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, TY_boolean));
 	}
 }
 
@@ -120,7 +120,7 @@ static KMETHOD TypeCheck_As(KonohaContext *kctx, KonohaStack *sfp)
 		kExpr *classValue = SUGAR kExpr_setConstValue(kctx,
 				expr->cons->ExprItems[2], targetExpr->ty, KLIB Knull(kctx, targetClass));
 		KFieldSet(expr->cons, expr->cons->ExprItems[2], classValue);
-		KReturn(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, targetClass->typeId));
+		KReturn(SUGAR kStmtExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, targetClass->typeId));
 	}
 }
 

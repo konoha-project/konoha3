@@ -206,7 +206,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kStmt_tyCheckExprAt        = kStmt_tyCheckExprAt;
 	mod->kStmt_tyCheckByName        = kStmt_tyCheckByName;
 	mod->kBlock_tyCheckAll          = kBlock_tyCheckAll;
-	mod->kStmt_tyCheckCallParamExpr = kStmt_tyCheckCallParamExpr;
+	mod->kStmtExpr_TypeCheckCallParam = kStmtExpr_TypeCheckCallParam;
 	mod->new_TypedCallExpr          = new_TypedCallExpr;
 	mod->kGamma_declareLocalVariable = kGamma_declareLocalVariable;
 	mod->kStmt_declType             = kStmt_declType;

@@ -367,6 +367,24 @@ static KMETHOD File_write3(KonohaContext *kctx , KonohaStack *sfp)
 
 /* ------------------------------------------------------------------------ */
 
+//## void setReaderCharset(String charset);
+static KMETHOD File_setReaderCharset(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kFile   *file = sfp[0].asFile;
+	KMakeTrace(trace, sfp);
+	file->readerIconv = PLATAPI iconv_open_i(kctx, "UTF-8", S_text(sfp[1].asString), trace);
+}
+
+//## void setWriterCharset(String charset);
+static KMETHOD File_setWriterCharset(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kFile   *file = sfp[0].asFile;
+	KMakeTrace(trace, sfp);
+	file->writerIconv = PLATAPI iconv_open_i(kctx, S_text(sfp[1].asString), "UTF-8", trace);
+}
+
+/* ------------------------------------------------------------------------ */
+
 //## @Const String File.scriptPath(String path);
 static KMETHOD File_scriptPath(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -392,6 +410,9 @@ static void file_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *t
 {
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Static|_Const, _F(File_scriptPath), TY_String, TY_File, MN_("scriptPath"), 1, TY_String, FN_("filename"),
+		_Public, _F(File_setWriterCharset), TY_void, TY_File, MN_("setWriterCharset"), 1, TY_String, FN_("charset"),
+		_Public, _F(File_setReaderCharset), TY_void, TY_File, MN_("setReaderCharset"), 1, TY_String, FN_("charset"),
+
 		_Public|_Static, _F(System_fopen), TY_File, TY_System, MN_("fopen"), 2, TY_String, FN_("filename"), TY_String, FN_("mode"),
 		_Public|_Static, _F(System_fclose), TY_void, TY_System, MN_("fclose"), 1, TY_File, FN_("file"),
 		_Public, _F(File_close), TY_void, TY_File, MN_("close"), 0,

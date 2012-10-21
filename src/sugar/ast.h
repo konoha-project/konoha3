@@ -579,7 +579,7 @@ static int kStmt_matchSyntaxPattern(KonohaContext *kctx, kStmt *stmt, TokenSeque
 		kToken *ruleToken = patterns->tokenList->TokenItems[patternIdx];
 		L_ReDo:;
 		tokenIdx = TokenUtils_skipIndent(tokens->tokenList, tokenIdx, tokens->endIdx);
-		DBG_P("patternIdx=%d, tokenIdx=%d, tokenEndIdx=%d", patternIdx, tokenIdx, tokens->endIdx);
+		//DBG_P("patternIdx=%d, tokenIdx=%d, tokenEndIdx=%d", patternIdx, tokenIdx, tokens->endIdx);
 		if(tokenIdx < tokens->endIdx) {
 			kToken *tk = tokens->tokenList->TokenItems[tokenIdx];
 			errRuleRef[1] = tk;
@@ -641,7 +641,7 @@ static SugarSyntax* kStmt_resolveStatementSyntax(KonohaContext *kctx, kStmt *stm
 	kToken *tk = tokenList->TokenItems[beginIdx];
 	SugarSyntax *syn = tk->resolvedSyntaxInfo;
 	kNameSpace *ns = Stmt_nameSpace(stmt);
-	DBG_P(">>>>>>>>>>>>>>>>>>> finding SugarSyntax=%s%s syn->syntaxPatternListNULL=%p", PSYM_t(syn->keyword), syn->syntaxPatternListNULL_OnList);
+	//DBG_P(">>>>>>>>>>>>>>>>>>> finding SugarSyntax=%s%s syn->syntaxPatternListNULL=%p", PSYM_t(syn->keyword), syn->syntaxPatternListNULL_OnList);
 	if(syn->syntaxPatternListNULL_OnList == NULL) {
 		kNameSpace *currentNameSpace = ns;
 		while(currentNameSpace != NULL) {
@@ -650,7 +650,7 @@ static SugarSyntax* kStmt_resolveStatementSyntax(KonohaContext *kctx, kStmt *stm
 				int i;
 				for(i = kArray_size(stmtPatternList) - 1; i >=0; i--) {
 					kToken *patternToken = stmtPatternList->TokenItems[i];
-					DBG_P(">>>>>>>>>> searching patternToken=%s%s", PSYM_t(patternToken->resolvedSymbol));
+					//DBG_P(">>>>>>>>>> searching patternToken=%s%s", PSYM_t(patternToken->resolvedSymbol));
 					if(SugarSyntax_matchPattern(kctx, patternToken->resolvedSyntaxInfo, patternToken, stmt, 0, tokenList, beginIdx, endIdx) != -1) {
 						return SYN_(ns, patternToken->stmtEntryKey);
 					}

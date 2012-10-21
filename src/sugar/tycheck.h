@@ -93,7 +93,7 @@ static void kExpr_putConstValue(KonohaContext *kctx, kExpr *expr, KonohaStack *s
 	}
 }
 
-static kExpr* kExprCall_toConstValue(KonohaContext *kctx, kExpr *expr, kArray *cons, ktype_t rtype)
+static kExpr* kStmtExpr_ToConstValue(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kArray *cons, ktype_t rtype)
 {
 	size_t i, size = kArray_size(cons), psize = size - 2;
 	kMethod *mtd = cons->MethodItems[0];
@@ -103,7 +103,7 @@ static kExpr* kExprCall_toConstValue(KonohaContext *kctx, kExpr *expr, kArray *c
 	}
 	{
 		KonohaStack *sfp = lsfp + K_CALLDELTA;
-		KSetMethodCallStack(sfp, 0/*UL*/, mtd, psize, KLIB Knull(kctx, CT_(expr->ty)));
+		KSetMethodCallStack(sfp, stmt->uline, mtd, psize, KLIB Knull(kctx, CT_(expr->ty)));
 		KonohaRuntime_callMethod(kctx, sfp);
 	}
 	END_LOCAL();

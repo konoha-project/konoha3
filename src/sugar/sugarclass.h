@@ -167,7 +167,7 @@ static kExpr* new_TypedConsExpr(KonohaContext *kctx, int build, ktype_t ty, int 
 	return (kExpr *)expr;
 }
 
-static kExpr *kStmt_tyCheckCallParamExpr(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kMethod *mtd, kGamma *gma, ktype_t reqty);
+static kExpr *kStmtExpr_TypeCheckCallParam(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kMethod *mtd, kGamma *gma, ktype_t reqty);
 
 static kExpr* new_TypedCallExpr(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kMethod *mtd, int n, ...)
 {
@@ -180,7 +180,7 @@ static kExpr* new_TypedCallExpr(KonohaContext *kctx, kStmt *stmt, kGamma *gma, k
 	va_end(ap);
 	expr->build = TEXPR_CALL;
 	expr->ty = ty;
-	return kStmt_tyCheckCallParamExpr(kctx, stmt, (kExpr *)expr, mtd, gma, ty);
+	return kStmtExpr_TypeCheckCallParam(kctx, stmt, (kExpr *)expr, mtd, gma, ty);
 }
 
 
