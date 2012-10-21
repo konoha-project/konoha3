@@ -590,7 +590,7 @@ static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 	case ENOEXEC: /* 8. Exec format error */
 		return SystemFault;
 	case EBADF:  /* 9. Bad file number */
-		return userFault | SoftwareFault;
+		return SoftwareFault;
 	case ECHILD: /* 10. No child processes */
 		return userFault | SoftwareFault | SystemFault;
 	case EAGAIN: /* 11. Try again */
