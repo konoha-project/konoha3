@@ -329,7 +329,7 @@ static kbool_t float_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 static kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	/* Use konoha.int package's Parser to parsing FloatLiteral */
-	//KRequirePackage("konoha.int", trace);
+	KImportPackageSymbol(ns, "konoha.int", "$Number", trace);
 	float_defineMethod(kctx, ns, trace);
 	float_defineSyntax(kctx, ns, trace);
 	return true;

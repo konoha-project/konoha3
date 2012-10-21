@@ -152,6 +152,7 @@ static kbool_t kNameSpace_importSyntax(KonohaContext *kctx, kNameSpace *ns, Suga
 			for(j = 0; j < size; j++) {
 				kNameSpace_setTokenFuncMatrix(kctx, ns, target->tokenKonohaChar, FuncItems[j]);
 			}
+			syn->tokenKonohaChar = target->tokenKonohaChar;
 		}
 		syn->lastLoadedPackageId = target->lastLoadedPackageId;
 	}
@@ -382,6 +383,8 @@ static void SetKeyValue(KonohaContext *kctx, KKeyValue *kv, ksymbol_t key, ktype
 	if(ty == VirtualType_Text) {
 		const char *textData = (const char *)unboxValue;
 		kv->ty = TY_String;
+		/*FIXME(ide) VirtualType_Text (a.k.a. TY_void) is unboxed type */
+		kv->key = key | SYMKEY_BOXED;
 		kv->StringValue = KLIB new_kString(kctx, gcstack, textData, strlen(textData), StringPolicy_TEXT);
 	}
 	else {

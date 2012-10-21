@@ -2,6 +2,7 @@
 
 import("konoha.assign");
 import("konoha.class");
+import("konoha.new");
 
 class C {
 	int x;

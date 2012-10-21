@@ -2,7 +2,7 @@
 import("konoha.assign");
 import("konoha.class");
 import("konoha.date");
-
+import("konoha.new");
 void f() {
 	Date d = new Date();
 	d.setDate(15);

@@ -1,3 +1,2 @@
- - (error) Script!!: out of string boundary 999
- ** OutOfStringBoundaryException
+ ** OutOfStringBoundaryException ((konoha.c):0)
 Q.E.D.

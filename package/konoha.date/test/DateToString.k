@@ -4,7 +4,7 @@ import("konoha.class");
 import("konoha.string");
 import("konoha.regexp");
 import("konoha.date");
-
+import("konoha.new");
 void f() {
 	Date d = new Date();
 	assert(d.toDateString().search(/[A-Z][a-z]*\s[A-Z][a-z]*\s\d{1,2}\s\d{4}/) == 0);

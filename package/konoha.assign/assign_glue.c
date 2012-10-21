@@ -54,6 +54,10 @@ static KMETHOD Expression_BinarySugar(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t assign_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
+	KImportPackageSymbol(ns, "konoha.int", "<<", trace);
+	KImportPackageSymbol(ns, "konoha.int", ">>", trace);
+	KImportPackageSymbol(ns, "konoha.int", "&", trace);
+	KImportPackageSymbol(ns, "konoha.int", "|", trace);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("+="), (SYNFLAG_ExprLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
 		{ SYM_("-="), (SYNFLAG_ExprLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
