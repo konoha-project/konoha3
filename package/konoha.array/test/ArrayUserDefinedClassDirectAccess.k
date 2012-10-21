@@ -2,6 +2,7 @@
 
 import("konoha.array");
 import("konoha.class");
+import("konoha.new");
 
 class Person {
 	int age;

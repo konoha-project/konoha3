@@ -2,6 +2,7 @@
 
 import("konoha.array");
 import("konoha.class");
+import("konoha.new");
 void f () {
 	int[] ia = new int[0];
 	ia.add(4);
