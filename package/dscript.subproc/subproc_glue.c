@@ -297,7 +297,7 @@ static int kSubproc_popen(KonohaContext *kctx, kSubproc *proc, int defaultMode, 
 	case 0:
 		// child process normal route
 		//	SETUP_RESOURCE_MONITOR_FOR_CHILD(sp);
-		if(wmode == M_PIPE){
+		if(wmode == M_PIPE) {
 			close(0);
 			if(dup2(p2c[0], 0) == -1) {
 				KTraceApi(trace, SystemFault, "dup2", LogErrno);
@@ -358,7 +358,6 @@ static int kSubproc_popen(KonohaContext *kctx, kSubproc *proc, int defaultMode, 
 			}
 		}
 		char *args[MAXARGS];
-		//		if(sp->shell == 0) {
 		if(!kSubproc_is(Shell, proc)) {
 			// division of a commnad parameter
 			if(spSplit((char*)S_text(command), args) < 0){
@@ -378,7 +377,6 @@ static int kSubproc_popen(KonohaContext *kctx, kSubproc *proc, int defaultMode, 
 			envs[num] = NULL;
 			// exec load new process image if success.
 			// if its not, they will return with -1.
-			//			if(sp->shell == 0) {
 			if(!kSubproc_is(Shell, proc)) {
 				if(execve(args[0], args, envs) == -1) {
 					KTraceApi(trace, SystemFault|UserFault, "execve", LogErrno);
@@ -391,7 +389,6 @@ static int kSubproc_popen(KonohaContext *kctx, kSubproc *proc, int defaultMode, 
 			}
 		}
 		else {
-			//			if(sp->shell == 0) {
 			if(!kSubproc_is(Shell, proc)) {
 				if(execvp(args[0], args) == -1) {
 					KTraceApi(trace, SystemFault|UserFault, "execvp", LogErrno);
@@ -717,7 +714,6 @@ static KMETHOD Subproc_bg(KonohaContext *kctx, KonohaStack *sfp)
 	if(!kSubproc_is(OnExec, proc)) {
 		KMakeTrace(trace, sfp);
 		kSubproc_set(TimeoutKill, proc, false);
-		//sp->bg = 1;
 		kSubproc_set(Background, proc, true);
 		if((ret = kSubproc_start(kctx, proc, trace)) != 0 ) {
 			// todo : proc_strat error
@@ -734,7 +730,6 @@ static KMETHOD Subproc_fg(KonohaContext *kctx, KonohaStack *sfp)
 	if(!kSubproc_is(OnExec, proc)) {
 		KMakeTrace(trace, sfp);
 		kSubproc_set(TimeoutKill, proc, false);
-		//sp->bg = 0;
 		kSubproc_set(Background, proc, false);
 		if((ret = kSubproc_start(kctx, proc, trace)) == S_TIMEOUT ) {
 			kSubproc_set(TimeoutKill, proc, true);
@@ -775,7 +770,6 @@ static KMETHOD Subproc_enableShellmode(KonohaContext *kctx, KonohaStack *sfp)
 	kSubproc *proc = (kSubproc *)sfp[0].asObject;
 	int ret = !kSubproc_is(OnExec, proc);
 	if(ret) {
-		//		sp->shell = sfp[1].boolValue;
 		if(sfp[1].boolValue) {
 			kSubproc_set(Shell, proc, true);
 		}
