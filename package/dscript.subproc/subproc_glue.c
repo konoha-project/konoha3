@@ -123,10 +123,17 @@ struct kSubprocVar {
 	//SUBPROC_RESOURCEMON_INSTANCE;
 };
 
+// TRACE
+
+
+
 // SubProc is new one
 
+#define kSubProc_is(P, S)            (TFLAG_is(uintptr_t, (S)->h.magicflag, kSubProcFlag_##P))
+#define kSubProc_set(P, S, T)         TFLAG_set(uintptr_t,(S)->h.magicflag, kSubProcFlag_##P, T)
+
 #define kSubProcFlag_CLOSEFDS         ((kshortflag_t)(1<<0))
-#define kSubProcFlag_BACKGROUND       ((kshortflag_t)(1<<1))
+#define kSubProcFlag_RunningBackground       ((kshortflag_t)(1<<1))
 #define kSubProcFlag_SHELL            ((kshortflag_t)(1<<2))
 
 typedef struct kSubProcVar kSubProc;
@@ -136,14 +143,10 @@ struct kSubProcVar {
 	kshortflag_t   flag;
 	kString *Command;
 	kArray  *ArgumentList;
-	kFile   *In;
-	kFile   *Out;
-	kFile   *Err;
-	int cpid;                              // child process ID
-	int bufferSize;                        // buffer size (unused)
-	int timeout;                           // child process timeout value
-	int status;                            // waitpid status
-	int timeoutKill;                       // child process Timeout ending flag [true/false]
+	kFile   *InNULL;
+	kFile   *OutNULL;
+	kFile   *ErrNULL;
+	int childProcessId;
 };
 
 static void kSubProc_init(KonohaContext *kctx, kObject *o, void *conf)
@@ -152,30 +155,390 @@ static void kSubProc_init(KonohaContext *kctx, kObject *o, void *conf)
 	sbp->flag        = 0;
 	KFieldInit(sbp, sbp->Command, KNULL(String));
 	KFieldInit(sbp, sbp->ArgumentList, K_EMPTYARRAY);
-	KFieldInit(sbp, sbp->In, NULL);
-	sbp->cpid        = -1;
-	sbp->timeout     = DEF_TIMEOUT;
-	sbp->bufferSize  = 0;
-	sbp->timeoutKill = 0;
+	sbp->InNULL  = NULL;
+	sbp->OutNULL = NULL;
+	sbp->ErrNULL = NULL;
 }
 
-static void kSubproc_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+static void kSubProc_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kSubProc *sbp = (kSubProc*)o;
 	KREFTRACEv(sbp->Command);
 	KREFTRACEv(sbp->ArgumentList);
-	KREFTRACEv(sbp->In);
-	KREFTRACEv(sbp->Out);
-	KREFTRACEv(sbp->Err);
+	KREFTRACEn(sbp->InNULL);
+	KREFTRACEn(sbp->OutNULL);
+	KREFTRACEn(sbp->ErrNULL);
 }
 
-static void kSubproc_free(KonohaContext *kctx, kObject *o)
+static void cleanUp_fds(int *fds)
 {
+	if(fds[0] != -1) close(fds[0]);
+	if(fds[1] != -1) close(fds[1]);
 }
 
+static int TRACE_pipe2(KonohaContext *kctx, int *fds, int flags, KTraceInfo *trace)
+{
+	int val;
+	int p[2];
+	if( pipe(p) == -1 ) {
+		KTraceErrorPoint(trace, SystemFault, "pipe", LogErrno);
+		return -1;
+	}
+	if( (val=fcntl(p[0], F_GETFL, 0)) == -1 ) {
+		goto L_ERR;
+	}
+	if( fcntl(p[0], F_SETFL, val | flags) == -1 ) {
+		goto L_ERR;
+	}
+	if( (val=fcntl(p[1], F_GETFL, 0)) == -1 ) {
+		goto L_ERR;
+	}
+	if( fcntl(p[1], F_SETFL, val | flags) == -1 ) {
+		goto L_ERR;
+	}
+	fds[0] = p[0];
+	fds[1] = p[1];
+	return 0;
+L_ERR:;
+	{
+		KTraceErrorPoint(trace, SystemFault, "fcntl", LogErrno);
+		cleanUp_fds(p);
+		return -1;
+	}
+}
 
+static void dup2_or_exit(int fd, int fd2)
+{
+	if(fd != fd2) {
+		close(fd2);
+		if(dup2(fd, fd2) == -1) {
+			_exit(1);  // terminate calling process
+		}
+	}
+}
 
+static kFile *new_PipeFile(KonohaContext *kctx, kArray *gcstack, int fd, const char *mode, kString *command, KTraceInfo *trace)
+{
+	FILE *fp = fdopen(fd, mode);
+	if(fp == NULL) {
+		KTraceErrorPoint(trace, SystemFault, "fdopen", LogUint("fildes", fd), LogText("mode", mode), LogErrno);
+	}
+	struct kFileVar *file = (struct kFileVar *)KLIB new_kObject(kctx, gcstack, CT_File, (uintptr_t)fp);
+	KFieldInit(file, file->PathInfoNULL, command);
+	if(!PLATAPI isSystemCharsetUTF8(kctx)) {
+		if(mode[0] == 'r') {
+			file->readerIconv = PLATAPI iconvSystemCharsetToUTF8(kctx, trace);
+		}
+		else {
+			file->writerIconv = PLATAPI iconvUTF8ToSystemCharset(kctx, trace);
+		}
+	}
+	kFile_set(ChangeLessStream, file, true);
+	return file;
+}
 
+static void kSubProc_execOnChild(KonohaContext *kctx, kSubProc *sbp, KTraceInfo *trace)
+{
+	size_t i;
+	char *args[kArray_size(sbp->ArgumentList) + 2];
+	args[0] = (char*)S_text(sbp->Command);
+	args[kArray_size(sbp->ArgumentList) + 1] = NULL;
+	for(i = 0; i < kArray_size(sbp->ArgumentList) + 2; i++) {
+		args[i+1] = (char*)S_text(sbp->ArgumentList->StmtItems[i]);
+	}
+	//	shell mode execlp("sh", "sh", "-c", S_text(command), NULL);
+	if(execvp(args[0], args) == -1) {
+		int fault = PLATAPI diagnosisFaultType(kctx, kString_guessUserFault(sbp->Command)|SystemError, trace);
+		KTraceErrorPoint(trace, fault, "execvp", LogErrno);
+		_exit(1);
+	}
+}
+
+static int kSubProc_exec(KonohaContext *kctx, kSubProc *sbp, KTraceInfo *trace)
+{
+	int c2p[2] = {-1, -1}, p2c[2] = {-1, -1}, errPipe[2] = {-1, -1};
+	if(sbp->InNULL == NULL) {
+		if(TRACE_pipe2(kctx, p2c, O_NONBLOCK, trace) != 0) {
+			return -1;
+		}
+	}
+	if(sbp->OutNULL == NULL) {
+		if(TRACE_pipe2(kctx, c2p, O_NONBLOCK, trace) != 0) {
+			cleanUp_fds(p2c);
+			return -1;
+		}
+	}
+	if(sbp->ErrNULL == NULL) {
+		if(TRACE_pipe2(kctx, errPipe, O_NONBLOCK, trace) != 0) {
+			cleanUp_fds(c2p);
+			cleanUp_fds(p2c);
+			return -1;
+		}
+	}
+	pid_t pid = fork();
+	switch(pid) {
+	case -1: { // parent process illegal route
+		KTraceErrorPoint(trace, SystemFault, "fork", LogErrno);
+		cleanUp_fds(c2p);
+		cleanUp_fds(p2c);
+		cleanUp_fds(errPipe);
+	}
+	break;
+	case 0: // child process normal route
+		if(sbp->InNULL != NULL) {
+			dup2_or_exit(fileno(sbp->InNULL->fp), 0);
+		}
+		else {
+			dup2_or_exit(p2c[0], 0);
+			cleanUp_fds(p2c);
+		}
+		if(sbp->OutNULL != NULL) {
+			dup2_or_exit(fileno(sbp->OutNULL->fp), 1);
+		}
+		else {
+			dup2_or_exit(c2p[0], 1);
+			cleanUp_fds(c2p);
+		}
+		if(sbp->ErrNULL != NULL) {
+			dup2_or_exit(fileno(sbp->ErrNULL->fp), 2);
+		}
+		else {
+			dup2_or_exit(errPipe[1], 2);  // why err[1] ?
+			cleanUp_fds(errPipe);
+		}
+		{
+			int cfd, maxfd = sysconf(_SC_OPEN_MAX);
+			for(cfd = 3; maxfd; cfd++) {
+				close(cfd);  // close files except for 0, 1, and 2
+			}
+		}
+		setsid(); // separate from tty
+//		if(!IS_NULL(sp->cwd)) { // TODO!!
+//			if(chdir(S_text((sp->cwd))) != 0) {
+//				//TODO: trace
+//				_exit(1);
+//			}
+//		}
+		kSubProc_execOnChild(kctx, sbp, trace);
+	default:
+		if(p2c[1] == -1) {
+			KFieldInit(sbp, sbp->InNULL, new_PipeFile(kctx, OnField, p2c[1], "w", sbp->Command, trace));
+			close(p2c[0]);
+		}
+		if(c2p[0] == -1) {
+			KFieldSet(sbp, sbp->OutNULL, new_PipeFile(kctx, OnField, c2p[0], "r", sbp->Command, trace));
+			close(c2p[1]);
+		}
+		if(errPipe[0] == -1) {
+			KFieldSet(sbp, sbp->ErrNULL, new_PipeFile(kctx, OnField, errPipe[0], "r", sbp->Command, trace));
+			close(errPipe[1]);
+		}
+	}
+	return pid;
+}
+
+static void kSubProc_wait(KonohaContext *kctx, kSubProc *sbp, int pid, KTraceInfo *trace)
+{
+	int stat;
+	pid_t childid = waitpid(pid, &stat, WUNTRACED);  // is it OK?
+	if(childid == -1) {
+		KTraceErrorPoint(trace, SystemFault, "waitpid", LogErrno);
+	}
+}
+
+//static int kSubProc_waitWithTimer(KonohaContext *kctx, kSubProc *sbp, KTraceInfo *trace)
+//{
+//#ifndef __APPLE__
+//	__sighandler_t alarm_oldset  = SIG_ERR;
+//	__sighandler_t keyInt_oldset = SIG_ERR;
+//	__sighandler_t ret = SIG_ERR;
+//#else
+//	sig_t alarm_oldset  = SIG_ERR;
+//	sig_t keyInt_oldset = SIG_ERR;
+//	sig_t ret = SIG_ERR;
+//#endif
+//	if(timeout > 0) {
+//		if(sigsetjmp(env, 1)) {
+//			// wait timeout return route
+//			setitimer(ITIMER_REAL, NULL, NULL);
+//			if(alarm_oldset != SIG_ERR) {
+//				ret = signal(SIGALRM, alarm_oldset);
+//			}
+//			else {
+//				ret = signal(SIGALRM, SIG_DFL);
+//			}
+//			if(ret == SIG_ERR) {
+//				//todo : tracesetitimer
+//			}
+//			return S_TIMEOUT;
+//		}
+//	}
+//	if(!FLAG_is(flag, SUBPROC_BACKGROUND)/*bg != 1*/) {
+//		// SIGINT registration
+//		fgPid = pid;
+//		keyInt_oldset = signal(SIGINT, keyIntHandler);
+//	}
+//	if(timeout > 0) {
+//		// SIGALRM registration
+//		struct itimerval its;
+//		its.it_value.tv_sec  = timeout / 1000;
+//		its.it_value.tv_usec = (timeout % 1000) * 1000;
+//		its.it_interval.tv_sec  = 0;
+//		its.it_interval.tv_usec = 0;
+//		setitimer(ITIMER_REAL, &its, NULL);
+//		alarm_oldset = signal(SIGALRM, alarmHandler);
+//	}
+//	int stat;
+//	waitpid(pid, &stat, WUNTRACED);
+//	if(timeout > 0) {
+//		// SIGALRM release
+//		struct itimerval its;
+//		its.it_value.tv_sec = 0;
+//		its.it_value.tv_usec = 0;
+//		its.it_interval.tv_sec = 0;
+//		its.it_interval.tv_usec = 0;
+//		setitimer(ITIMER_REAL, &its, NULL);
+//		if(alarm_oldset != SIG_ERR) {
+//			signal(SIGALRM, alarm_oldset);
+//		}
+//		else {
+//			signal(SIGALRM, SIG_DFL);
+//		}
+//	}
+//	if(FLAG_is(flag, SUBPROC_BACKGROUND)/*bg != 1*/) {
+//		// SIGINT release
+//		if(keyInt_oldset != SIG_ERR) {
+//			ret = signal(SIGINT, keyInt_oldset);
+//		}
+//		else {
+//			ret = signal(SIGINT, SIG_DFL);
+//		}
+//		if(ret == SIG_ERR) {
+//			// todo: error
+//		}
+//	}
+//	if(status != NULL) {
+//		*status = stat;
+//	}
+//	// return value creation
+//	if(WIFSIGNALED(stat)) {
+//		return WTERMSIG(stat) * -1;
+//	} else if( WIFSTOPPED(stat) ) {
+//		return WSTOPSIG(stat) * -1;
+//	} else {
+//		return S_EXIT;
+//	}
+//}
+
+//## SubProc SubProc.new(String cmd);
+static KMETHOD SubProc_new(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kSubProc *sbp = (kSubProc *)sfp[0].asObject;
+	KFieldSet(sbp, sbp->Command, sfp[1].asString);
+	KReturn(sbp);
+}
+
+//## void SubProc.setArgumentList(String[] a);
+static KMETHOD SubProc_setArgumentList(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kSubProc *sbp = (kSubProc *)sfp[0].asObject;
+	KFieldSet(sbp, sbp->ArgumentList, sfp[1].asArray);
+	KReturnVoid();
+}
+
+//## int SubProc.bg();
+static KMETHOD SubProc_bg(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kSubProc *sbp = (kSubProc *)sfp[0].asObject;
+	kSubProc_set(RunningBackground, sbp, true);
+	KMakeTrace(trace, sfp);
+	int pid = kSubProc_exec(kctx, sbp, trace);
+	KReturnUnboxValue(pid);
+}
+
+//## void SubProc.fg();
+static KMETHOD SubProc_fg(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kSubProc *sbp = (kSubProc *)sfp[0].asObject;
+	KMakeTrace(trace, sfp);
+	int pid = kSubProc_exec(kctx, sbp, trace);
+	if(pid > 0) {
+		kSubProc_wait(kctx, sbp, pid, trace);
+	}
+	KReturnVoid();
+}
+
+//## void SubProc.connect(SubProc next);
+static KMETHOD SubProc_connect(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kSubProc *sbp  = (kSubProc *)sfp[0].asObject;
+	kSubProc *sbp2 = (kSubProc *)sfp[1].asObject;
+	KMakeTrace(trace, sfp);
+	// TODO
+}
+
+#define _Public   kMethod_Public
+#define _Static   kMethod_Static
+#define _Im kMethod_Immutable
+#define _F(F)   (intptr_t)(F)
+
+static kbool_t subproc_initSubProc(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
+{
+	KDEFINE_CLASS defSubProc = {
+		STRUCTNAME(SubProc),
+		.cflag    = kClass_Final,
+		.init     = kSubProc_init,
+		.reftrace = kSubProc_reftrace,
+	};
+	KonohaClass *cSubproc = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defSubProc, trace);
+
+	kparamtype_t ps = {TY_String, FN_("str")};
+	KonohaClass *CT_StringArray2 = KLIB KonohaClass_Generics(kctx, CT_Array, TY_String, 1, &ps);
+	ktype_t TY_StringArray = CT_StringArray2->typeId, TY_SubProc = cSubproc->typeId;
+
+	KDEFINE_METHOD MethodData[] = {
+		_Public, _F(SubProc_new),    TY_SubProc, TY_SubProc, MN_("new"), 1, TY_String, FN_("command"),
+		_Public, _F(SubProc_setArgumentList), TY_void, TY_SubProc, MN_("setArgumentList"), 1, TY_StringArray, FN_("arguments"),
+		_Public, _F(SubProc_fg), TY_int, TY_SubProc, MN_("fg"), 0,
+		_Public, _F(SubProc_bg), TY_void, TY_SubProc, MN_("bg"), 0,
+
+//		_Public|_Im, _F(Subproc_exec), TY_String, TY_Subproc, MN_("exec"), 1, TY_String, FN_("data"),
+//		_Public|_Im, _F(Subproc_communicate), TY_StringArray, TY_Subproc, MN_("communicate"), 1, TY_String, FN_("input"),
+//		_Public|_Im, _F(Subproc_poll), TY_int, TY_Subproc, MN_("poll"), 0,
+//		_Public|_Im, _F(Subproc_wait), TY_int, TY_Subproc, MN_("wait"), 0,
+//		_Public|_Im, _F(Subproc_sendSignal), TY_boolean, TY_Subproc, MN_("sendSignal"), 1 TY_int, FN_("signal"),
+//		_Public|_Im, _F(Subproc_terminate), TY_boolean, TY_Subproc, MN_("terminate"), 0,
+//		_Public|_Im, _F(Subproc_getPid), TY_int, TY_Subproc, MN_("getPid"), 0,
+//		_Public|_Im, _F(Subproc_enableShellmode), TY_boolean, TY_Subproc, MN_("enableShellmode"), 1, TY_boolean, FN_("isShellmode"),
+//		_Public|_Im, _F(Subproc_enablePipemodeIN), TY_boolean, TY_Subproc, MN_("enablePipemodeIN"), 1, TY_boolean, FN_("isPipemode"),
+//		_Public|_Im, _F(Subproc_enablePipemodeOUT), TY_boolean, TY_Subproc, MN_("enablePipemodeOUT"), 1, TY_boolean, FN_("isPipemode"),
+//		_Public|_Im, _F(Subproc_enablePipemodeERR), TY_boolean, TY_Subproc, MN_("enablePipemodeERR"), 1, TY_boolean, FN_("isPipemode"),
+//		_Public|_Im, _F(Subproc_enableStandardIN), TY_boolean, TY_Subproc, MN_("enableStandardIN"), 1, TY_boolean, FN_("isStandard"),
+//		_Public|_Im, _F(Subproc_enableStandardOUT), TY_boolean, TY_Subproc, MN_("enableStandardOUT"), 1, TY_boolean, FN_("isStandard"),
+//		_Public|_Im, _F(Subproc_enableStandardERR), TY_boolean, TY_Subproc, MN_("enableStandardERR"), 1, TY_boolean, FN_("isStandard"),
+//		_Public|_Im, _F(Subproc_isShellmode), TY_boolean, TY_Subproc, MN_("isShellmode"), 0,
+//		_Public|_Im, _F(Subproc_isPipemodeIN), TY_boolean, TY_Subproc, MN_("isPipemodeIN"), 0,
+//		_Public|_Im, _F(Subproc_isPipemodeOUT), TY_boolean, TY_Subproc, MN_("isPipemodeOUT"), 0,
+//		_Public|_Im, _F(Subproc_isPipemodeERR), TY_boolean, TY_Subproc, MN_("isPipemodeERR"), 0,
+//		_Public|_Im, _F(Subproc_isStandardIN), TY_boolean, TY_Subproc, MN_("isStandardIN"), 0,
+//		_Public|_Im, _F(Subproc_isStandardOUT), TY_boolean, TY_Subproc, MN_("isStandardOUT"), 0,
+//		_Public|_Im, _F(Subproc_isStandardERR), TY_boolean, TY_Subproc, MN_("isStandardERR"), 0,
+//		_Public|_Im, _F(Subproc_isERR2StdOUT), TY_boolean, TY_Subproc, MN_("isERR2StdOUT"), 0,
+//		_Public|_Static|_Im, _F(Subproc_call), TY_int, TY_Subproc, MN_("call"), 1, TY_String, FN_("args"),
+//		_Public|_Static|_Im, _F(Subproc_checkOutput), TY_String, TY_Subproc, MN_("checkOutput"), 1, TY_String, FN_("data"),
+//		_Public|_Im, _F(Subproc_setCwd), TY_boolean, TY_Subproc, MN_("setCwd"), 1, TY_String, FN_("cwd"),
+//		_Public|_Im, _F(Subproc_setBufsize), TY_boolean, TY_Subproc, MN_("setBufsize"), 1, TY_int, FN_("bufsize"),
+//		_Public|_Im, _F(Subproc_setFileIN), TY_boolean, TY_Subproc, MN_("setFileIN"), 1, TY_FILE, FN_("file"),
+//		_Public|_Im, _F(Subproc_setFileOUT), TY_boolean, TY_Subproc, MN_("setFileOUT"), 1, TY_FILE, FN_("file"),
+//		_Public|_Im, _F(Subproc_setFileERR), TY_boolean, TY_Subproc, MN_("setFileERR"), 1, TY_FILE, FN_("file"),
+//		_Public|_Im, _F(Subproc_getTimeout), TY_int, TY_Subproc, MN_("getTimeout"), 0,
+//		_Public|_Im, _F(Subproc_getReturncode), TY_int, TY_Subproc, MN_("getReturncode"), 0,
+//		_Public|_Im, _F(Subproc_enableERR2StdOUT), TY_boolean, TY_Subproc, MN_("enableERR2StdOUT"), 1, TY_boolean, FN_("isStdout"),
+		DEND,
+	};
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	return true;
+}
 
 /* ------------------------------------------------------------------------ */
 /* [class defs] */
@@ -283,7 +646,8 @@ L_ERR:;
  *         -2 is the maximum error of the number of parameters
  */
 
-static int spSplit(char* str, char* args[]) {
+static int spSplit(char* str, char* args[])
+{
 
 	if( (str == NULL) || (args == NULL) ) {
 		return -1;
@@ -595,7 +959,9 @@ static int subproc_wait(KonohaContext *kctx, int pid, kshortflag_t flag, int tim
  * @return in the case of foreground, it is start status of a child process
  *         in the case of background, it is termination status of a child process
  */
-static int proc_start(KonohaContext *kctx, struct kSubprocVar *sp) {
+
+static int proc_start(KonohaContext *kctx, struct kSubprocVar *sp)
+{
 	int ret = S_PREEXECUTION;
 	int pid = subproc_popen(kctx, sp->command, sp, M_NREDIRECT );
 	if(pid > 0) {
@@ -1227,7 +1593,8 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 {
 	KRequireKonohaCommonModule(trace);
 	KRequirePackage("konoha.file", trace);
-
+	subproc_initSubProc(kctx, ns, trace);
+	// old subproc ..
 	KDEFINE_CLASS defSubproc = {
 		STRUCTNAME(Subproc),
 		.cflag    = kClass_Final,

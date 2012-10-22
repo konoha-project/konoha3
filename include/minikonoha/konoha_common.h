@@ -135,8 +135,8 @@ struct kIteratorVar {
 
 
 #define kFileFlag_ChangeLessStream    kObject_Local1
-#define kFile_is(P, o)    (TFLAG_is(uintptr_t,(o)->h.magicflag, kFileFlag_##P))
-#define kFile_set(P, o, b) TFLAG_set(uintptr_t,(o)->h.magicflag, kFileFlag_##P, b)
+#define kFile_is(P, o)        (TFLAG_is(uintptr_t,(o)->h.magicflag, kFileFlag_##P))
+#define kFile_set(P, o, b)     TFLAG_set(uintptr_t,(o)->h.magicflag, kFileFlag_##P, b)
 
 typedef struct kFileVar kFile;
 
