@@ -1,5 +1,8 @@
 import("gmp");
-import("konoha")
+import("konoha.class")
+import("konoha.new")
+import("konoha.assign")
+import("cstyle")
 
 void main() {
 	Mpz n1 = new Mpz(10000);
