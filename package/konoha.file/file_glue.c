@@ -463,8 +463,8 @@ static void file_defineConst(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *tr
 	INIT_GCSTACK();
 	KDEFINE_FILE_CONST FileData[] = {
 		{"stdin", TY_File,  new_File(kctx, _GcStack, stdin, TEXTSIZE("/dev/stdin"), trace)},
-		{"stdout", TY_File, new_File(kctx, _GcStack, stdin, TEXTSIZE("/dev/stdout"), trace)},
-		{"stderr", TY_File, new_File(kctx, _GcStack, stdin, TEXTSIZE("/dev/stderr"), trace)},
+		{"stdout", TY_File, new_File(kctx, _GcStack, stdout, TEXTSIZE("/dev/stdout"), trace)},
+		{"stderr", TY_File, new_File(kctx, _GcStack, stderr, TEXTSIZE("/dev/stderr"), trace)},
 		{NULL}, /* sentinel */
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(FileData), trace);
