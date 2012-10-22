@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <sys/resource.h>
 #include <sys/time.h>
+
 #include <grp.h>
 #ifdef __linux__
 #include <sys/wait.h>
@@ -85,28 +86,6 @@ static KMETHOD System_setpgid(KonohaContext *kctx, KonohaStack *sfp)
 	int pid = sfp[1].intValue;
 	int pgid = sfp[2].intValue;
 	int ret = setpgid(pid, pgid);
-	if(ret == -1) {
-		// TODO: throw
-	}
-	KReturnUnboxValue(ret);
-}
-
-static KMETHOD System_chdir(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kString *s = sfp[1].asString;
-	const char *dir = S_text(s);
-	int ret = chdir(dir);
-	if(ret == -1) {
-		// TODO: throw
-	}
-	KReturnUnboxValue(ret);
-}
-
-static KMETHOD System_chroot(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kString *s = sfp[1].asString;
-	const char *root = S_text(s);
-	int ret = chroot(root);
 	if(ret == -1) {
 		// TODO: throw
 	}
@@ -327,8 +306,6 @@ static kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public|_Static, _F(System_getegid), TY_int, TY_System, MN_("getegid"), 0,
 		_Public|_Static, _F(System_getpgid), TY_int, TY_System, MN_("getpgid"), 1, TY_int, FN_("pid"),
 		_Public|_Static, _F(System_setpgid), TY_int, TY_System, MN_("setpgid"), 2, TY_int, FN_("pid"), TY_int, FN_("pgid"),
-		_Public|_Static, _F(System_chdir), TY_int, TY_System, MN_("chdir"), 1, TY_String, FN_("pathname"),
-		_Public|_Static, _F(System_chroot), TY_int, TY_System, MN_("chroot"), 1, TY_String, FN_("pathname"),
 		_Public|_Static, _F(System_getpriority), TY_int, TY_System, MN_("getpriority"), 2, TY_int, FN_("which"), TY_int, FN_("who"),
 		_Public|_Static, _F(System_setpriority), TY_int, TY_System, MN_("setpriority"), 3, TY_int, FN_("which"), TY_int, FN_("who"), TY_int, FN_("priority"),
 		_Public|_Static, _F(System_getgroups), TY_int, TY_System, MN_("getgroups"), 2, TY_int, FN_("size"), TY_intArray, FN_("list[]"),

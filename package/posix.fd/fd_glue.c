@@ -165,14 +165,6 @@ static KMETHOD System_lseek(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue((int)ret_offset);
 }
 
-//## @Native String System.getCwd()
-static KMETHOD System_getCwd(KonohaContext *kctx, KonohaStack *sfp)
-{
-	char filepath[256] = {0};
-	char *cwd = getcwd(filepath, 256);
-	KReturn(KLIB new_kString(kctx, OnStack, cwd, strlen(cwd), 0));
-}
-
 //## boolean System.ftruncate(int fd, int length)
 static KMETHOD System_ftruncate(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -259,156 +251,6 @@ static KMETHOD System_sync(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret == 0);
 }
 
-static KMETHOD System_link(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kString *s1 = sfp[1].asString;
-	kString *s2 = sfp[2].asString;
-	const char *oldpath = S_text(s1);
-	const char *newpath = S_text(s2);
-	int ret = link(oldpath, newpath);
-	if(ret == -1) {
-		// TODO: throw
-		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
-			   LogText("@", "link"),
-			   LogText("oldpath", oldpath),
-			   LogText("newpath", newpath),
-			   KeyValue_p("errstr", strerror(errno))
-			);
-	}
-	KReturnUnboxValue(ret);
-}
-
-static KMETHOD System_unlink(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kString *s = sfp[1].asString;
-	const char *pathname = S_text(s);
-	int ret = unlink(pathname);
-	if(ret == -1) {
-		// TODO: throw
-		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
-			   LogText("@", "unlink"),
-			   LogText("pathname", pathname),
-			   KeyValue_p("errstr", strerror(errno))
-			);
-	}
-	KReturnUnboxValue(ret);
-}
-
-static KMETHOD System_rename(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kString *s1 = sfp[1].asString;
-	kString *s2 = sfp[2].asString;
-	const char *oldpath = S_text(s1);
-	const char *newpath = S_text(s2);
-	int ret = rename(oldpath, newpath);
-	if(ret == -1) {
-		// TODO: throw
-		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
-			   LogText("@", "rename"),
-			   LogText("oldpath", oldpath),
-			   LogText("newpath", newpath),
-			   KeyValue_p("errstr", strerror(errno))
-			);
-	}
-	KReturnUnboxValue(ret);
-}
-
-static KMETHOD System_rmdir(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kString *s = sfp[1].asString;
-	const char *pathname = S_text(s);
-	int ret = rmdir(pathname);
-	if(ret == -1) {
-		// TODO: throw
-		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
-			   LogText("@", "rmdir"),
-			   LogText("pathname", pathname),
-			   KeyValue_p("errstr", strerror(errno))
-			);
-	}
-	KReturnUnboxValue(ret);
-}
-
-static KMETHOD System_symlink(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kString *s1 = sfp[1].asString;
-	kString *s2 = sfp[2].asString;
-	const char *oldpath = S_text(s1);
-	const char *newpath = S_text(s2);
-	int ret = symlink(oldpath, newpath);
-	if(ret == -1) {
-		// TODO: throw
-		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
-			   LogText("@", "symlink"),
-			   LogText("oldpath", oldpath),
-			   LogText("newpath", newpath),
-			   KeyValue_p("errstr", strerror(errno))
-			);
-	}
-	KReturnUnboxValue(ret);
-}
-
-static KMETHOD System_readlink(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kString *s1 = sfp[1].asString;
-	const char *pathname = S_text(s1);
-	char pathbuf[PATHMAX];
-	ssize_t ret = readlink(pathname, pathbuf, PATHMAX);
-	if(ret == -1) {
-		// TODO: throw
-		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
-			   LogText("@", "readlink"),
-			   LogText("pathname", pathname),
-			   KeyValue_p("errstr", strerror(errno))
-			);
-		pathbuf[0] = '\0';
-	}
-	else {
-		pathbuf[ret] = '\0';
-	}
-	KReturn(KLIB new_kString(kctx, OnStack, pathbuf, strlen(pathbuf), 0));
-}
-
-static KMETHOD System_chown(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kString *s = sfp[1].asString;
-	const char *pathname = S_text(s);
-	uid_t owner = sfp[2].intValue;
-	gid_t group = sfp[3].intValue;
-	int ret = chown(pathname, owner, group);
-	if(ret == -1) {
-		// TODO: throw
-		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
-			   LogText("@", "chown"),
-			   LogText("pathname", pathname),
-			   LogUint("owner", owner),
-			   LogUint("group", group),
-			   KeyValue_p("errstr", strerror(errno))
-			);
-	}
-	KReturnUnboxValue(ret);
-}
-
-static KMETHOD System_lchown(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kString *s = sfp[1].asString;
-	const char *pathname = S_text(s);
-	uid_t owner = sfp[2].intValue;
-	gid_t group = sfp[3].intValue;
-	int ret = lchown(pathname, owner, group);
-	if(ret == -1) {
-		// TODO: throw
-		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
-			   LogText("@", "lchown"),
-			   LogText("pathname", pathname),
-			   LogUint("owner", owner),
-			   LogUint("group", group),
-			   KeyValue_p("errstr", strerror(errno))
-			);
-	}
-	KReturnUnboxValue(ret);
-}
-
 static KMETHOD System_fchown(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int fd = sfp[1].intValue;
@@ -427,24 +269,6 @@ static KMETHOD System_fchown(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
-static KMETHOD System_access(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kString *s = sfp[1].asString;
-	const char *pathname = S_text(s);
-	int mode = sfp[2].intValue;
-	int ret = access(pathname, mode);
-	if(ret == -1) {
-		// TODO: throw
-		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
-			   LogText("@", "access"),
-			   LogText("pathname", pathname),
-			   LogUint("mode", mode),
-			   KeyValue_p("errstr", strerror(errno))
-			);
-	}
-	KReturnUnboxValue(ret);
-}
-
 static KMETHOD System_fsync(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int fd = sfp[1].intValue;
@@ -457,39 +281,6 @@ static KMETHOD System_fsync(KonohaContext *kctx, KonohaStack *sfp)
 			);
 	}
 	KReturnUnboxValue(ret);
-}
-
-//## Stat System.stat(String path)
-static KMETHOD System_stat(KonohaContext *kctx, KonohaStack *sfp)
-{
-	const char *path = S_text(sfp[1].asString);
-	struct stat buf;
-	int ret = stat(path, &buf);
-	struct kStatVar *stat = NULL;
-	if(ret != -1) {
-		stat = (struct kStatVar *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)&buf);
-	}
-	else {
-		// TODO: throw
-		KReturn(KLIB Knull(kctx, KGetReturnType(sfp)));
-	}
-	KReturn(stat);
-}
-
-//## Stat System.lstat(String path)
-static KMETHOD System_lstat(KonohaContext *kctx, KonohaStack *sfp)
-{
-	const char *path = S_text(sfp[1].asString);
-	struct stat buf;
-	int ret = lstat(path, &buf);
-	struct kStatVar *stat = NULL;
-	if(ret != -1) {
-		stat = (struct kStatVar *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)&buf);
-	}
-	else {
-		// TODO: throw
-	}
-	KReturn(stat);
 }
 
 //## Stat System.fstat(int fd)
@@ -859,26 +650,14 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 	ktype_t TY_DirentArray0 = CT_DirentArray0->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static|_Const|_Im, _F(System_lseek), TY_int, TY_System, MN_("lseek"), 3, TY_int, FN_("fd"), TY_int, FN_("offset"), TY_int, FN_("whence"),
-		_Public|_Static|_Const|_Im, _F(System_getCwd), TY_String, TY_System, MN_("getCwd"), 0,
-		_Public|_Static|_Const|_Im, _F(System_ftruncate), TY_boolean, TY_System, MN_("ftruncate"), 2, TY_int, FN_("fd"), TY_int, FN_("length"),
-		_Public|_Static|_Const|_Im, _F(System_fchmod), TY_boolean, TY_System, MN_("fchmod"), 2, TY_int, FN_("fd"), TY_int, FN_("length"),
-		_Public|_Static|_Const|_Im, _F(System_flock), TY_boolean, TY_System, MN_("flock"), 2, TY_int, FN_("fd"), TY_int, FN_("operation"),
-		_Public|_Static|_Const|_Im, _F(System_sync), TY_boolean, TY_System, MN_("sync"), 1, TY_int, FN_("fd"),
-		_Public|_Static|_Const|_Im, _F(System_link), TY_int, TY_System, MN_("link"), 2, TY_String, FN_("oldpath"), TY_String, FN_("newpath"),
-		_Public|_Static|_Const|_Im, _F(System_unlink), TY_int, TY_System, MN_("unlink"), 1, TY_String, FN_("pathname"),
-		_Public|_Static|_Const|_Im, _F(System_rename), TY_int, TY_System, MN_("rename"), 2, TY_String, FN_("oldpath"), TY_String, FN_("newpath"),
-		_Public|_Static|_Const|_Im, _F(System_rmdir), TY_int, TY_System, MN_("rmdir"), 1, TY_String, FN_("pathname"),
-		_Public|_Static|_Const|_Im, _F(System_symlink), TY_int, TY_System, MN_("symlink"), 2, TY_String, FN_("oldpath"), TY_String, FN_("newpath"),
-		_Public|_Static|_Const|_Im, _F(System_readlink), TY_String, TY_System, MN_("readlink"), 1, TY_String, FN_("pathname"),
-		_Public|_Static|_Const|_Im, _F(System_chown), TY_int, TY_System, MN_("chown"), 3, TY_String, FN_("pathname"), TY_int, FN_("owner"), TY_int, FN_("group"),
-		_Public|_Static|_Const|_Im, _F(System_lchown), TY_int, TY_System, MN_("lchown"), 3, TY_String, FN_("pathname"), TY_int, FN_("owner"), TY_int, FN_("group"),
-		_Public|_Static|_Const|_Im, _F(System_fchown), TY_int, TY_System, MN_("fchown"), 3, TY_int, FN_("pd"), TY_int, FN_("owner"), TY_int, FN_("group"),
-		_Public|_Static|_Const|_Im, _F(System_access), TY_int, TY_System, MN_("access"), 2, TY_String, FN_("pathname"), TY_int, FN_("mode"),
-		_Public|_Static|_Const|_Im, _F(System_fsync), TY_int, TY_System, MN_("fsync"), 1, TY_int, FN_("fd"),
-		_Public|_Static|_Const|_Im, _F(System_stat), TY_Stat, TY_System, MN_("stat"), 1, TY_String, FN_("path"),
-		_Public|_Static|_Const|_Im, _F(System_lstat), TY_Stat, TY_System, MN_("lstat"), 1, TY_String, FN_("path"),
-		_Public|_Static|_Const|_Im, _F(System_fstat), TY_Stat, TY_System, MN_("fstat"), 1, TY_int, FN_("fd"),
+		_Public|_Static, _F(System_lseek), TY_int, TY_System, MN_("lseek"), 3, TY_int, FN_("fd"), TY_int, FN_("offset"), TY_int, FN_("whence"),
+		_Public|_Static, _F(System_ftruncate), TY_boolean, TY_System, MN_("ftruncate"), 2, TY_int, FN_("fd"), TY_int, FN_("length"),
+		_Public|_Static, _F(System_fchmod), TY_boolean, TY_System, MN_("fchmod"), 2, TY_int, FN_("fd"), TY_int, FN_("length"),
+		_Public|_Static, _F(System_flock), TY_boolean, TY_System, MN_("flock"), 2, TY_int, FN_("fd"), TY_int, FN_("operation"),
+		_Public|_Static, _F(System_sync), TY_boolean, TY_System, MN_("sync"), 1, TY_int, FN_("fd"),
+		_Public|_Static, _F(System_fchown), TY_int, TY_System, MN_("fchown"), 3, TY_int, FN_("pd"), TY_int, FN_("owner"), TY_int, FN_("group"),
+		_Public|_Static, _F(System_fsync), TY_int, TY_System, MN_("fsync"), 1, TY_int, FN_("fd"),
+		_Public|_Static, _F(System_fstat), TY_Stat, TY_System, MN_("fstat"), 1, TY_int, FN_("fd"),
 		_Public|_Const|_Im, _F(Stat_getst_dev), TY_int, TY_Stat, MN_("getst_dev"), 0,
 		_Public|_Const|_Im, _F(Stat_getst_ino), TY_int, TY_Stat, MN_("getst_ino"), 0,
 		_Public|_Const|_Im, _F(Stat_getst_mode), TY_int, TY_Stat, MN_("getst_mode"), 0,
