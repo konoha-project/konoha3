@@ -6,7 +6,7 @@ import("konoha.array");
 import("dscript.subproc");
 
 void test() {
-	Subproc s = new Subproc("echo hi 3>&1 1>&2 2>&3", false);
+	Subproc s = new Subproc(["echo", "hi", "3>&1", "1>&2", "2>&3"], false);
 	s.enableShellmode(true);
 	//before execution
 	assert(s.isERR2StdOUT() == false);

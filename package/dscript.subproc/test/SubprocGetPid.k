@@ -1,17 +1,18 @@
 //Written by Joseph
 
 import("konoha.new");
+import("konoha.array");
 import("dscript.subproc");
 
 void test() {
-	Subproc s = new Subproc("echo \"hi\"", false);
+	Subproc s = new Subproc(["echo", "hi"], false);
 	//before execution
 	assert(s.getPid() == -1);
 	s.fg();
 	//after execution
 	assert(s.getPid() > 0);
 
-	s = new Subproc("echo \"hello\"", true);
+	s = new Subproc(["echo", "hello"], true);
 	//before execution
 	assert(s.getPid() == -1);
 	s.bg();

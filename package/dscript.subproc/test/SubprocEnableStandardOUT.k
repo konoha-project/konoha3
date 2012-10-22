@@ -1,10 +1,11 @@
 //Written by Joseph
 
 import("konoha.new");
+import("konoha.array");
 import("dscript.subproc");
 
 void test() {
-	Subproc s = new Subproc("echo \"hi\"", false);
+	Subproc s = new Subproc(["echo", "hi"], false);
 	//before execution
 	assert(s.isStandardOUT() == false);
 	assert(s.enableStandardOUT(true));
