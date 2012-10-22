@@ -1168,8 +1168,8 @@ struct kParamVar {
 #ifdef USE_MethodFlagData
 static const char* MethodFlagData[] = {
 	"Public", "Virtual", "Final", "Const", "Static", "Immutable",
-	"Coercion", "Restricted", "FastCall", "SmartReturn", "Variadic",
-	"CCompatible", "JSCompatible", "JavaCompatible",
+	"Coercion", "Restricted", "FastCall", "SmartReturn", "Variadic", "Iterative",
+	"CCompatible", "JSCompatible", "JavaCompatible", "Accountable",
 };
 #endif
 
@@ -1187,20 +1187,22 @@ static const char* MethodFlagData[] = {
 #define kMethod_FastCall             ((uintptr_t)(1<<8))
 #define kMethod_SmartReturn          ((uintptr_t)(1<<9))
 #define kMethod_Variadic             ((uintptr_t)(1<<10))
+#define kMethod_Iterative            ((uintptr_t)(1<<11))
 
 // compatible
-#define kMethod_CCompatible          ((uintptr_t)(1<<11))
-#define kMethod_JSCompatible         ((uintptr_t)(1<<12))
-#define kMethod_JCompatible          ((uintptr_t)(1<<13))
-#define kMethod_Accountable          ((uintptr_t)(1<<14))
+#define kMethod_CCompatible          ((uintptr_t)(1<<12))
+#define kMethod_JSCompatible         ((uintptr_t)(1<<13))
+#define kMethod_JCompatible          ((uintptr_t)(1<<14))
+#define kMethod_Accountable          ((uintptr_t)(1<<15))
 
 // internal
-#define kMethod_Hidden               ((uintptr_t)(1<<15))
-#define kMethod_Abstract             ((uintptr_t)(1<<16))
-#define kMethod_Overloaded           ((uintptr_t)(1<<17))
-#define kMethod_Override             ((uintptr_t)(1<<18))
-#define kMethod_DynamicCall          ((uintptr_t)(1<<19))
-#define kMethod_Warning              ((uintptr_t)(1<<20))
+#define kMethod_Hidden               ((uintptr_t)(1<<16))
+#define kMethod_Abstract             ((uintptr_t)(1<<17))
+#define kMethod_Overloaded           ((uintptr_t)(1<<18))
+#define kMethod_Override             ((uintptr_t)(1<<19))
+#define kMethod_DynamicCall          ((uintptr_t)(1<<20))
+
+#define kMethod_Warning              ((uintptr_t)(1<<21))
 
 #define kMethod_WeakCoercion         kMethod_Coercion|kMethod_Warning
 

@@ -73,48 +73,6 @@ static int TRACE_fputc(KonohaContext *kctx, kFile *file, int ch, KTraceInfo *tra
 	return ch;
 }
 
-static size_t TRACE_fread(KonohaContext *kctx, kFile *file, char *buf, size_t bufsiz, KTraceInfo *trace)
-{
-	size_t size = fread(buf, 1, bufsiz, file->fp);
-	if(ferror(file->fp) != 0){
-		KTraceErrorPoint(trace, SystemFault, "fread", LogFile(file), LogErrno);
-		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
-	}
-	return size;
-}
-
-static size_t TRACE_fwrite(KonohaContext *kctx, kFile *file, const char *buf, size_t bufsiz, KTraceInfo *trace)
-{
-	size_t size = fwrite(buf, 1, bufsiz, file->fp);
-	if(ferror(file->fp) != 0){
-		KTraceErrorPoint(trace, SystemFault, "fwrite", LogFile(file), LogErrno);
-		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
-	}
-	if(size > 0 && !kFile_is(ChangeLessStream, file)) {
-		KTraceChangeSystemPoint(trace, "fwrite", LogFile(file), LogWrittenByte(size));
-	}
-	return size;
-}
-
-static void TRACE_fflush(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
-{
-	fflush(file->fp);
-	if(ferror(file->fp) != 0){
-		KTraceErrorPoint(trace, SystemFault, "fflush", LogFile(file), LogErrno);
-	}
-}
-
-/* ------------------------------------------------------------------------ */
-
-static void File_init(KonohaContext *kctx, kObject *o, void *conf)
-{
-	struct kFileVar *file = (struct kFileVar *)o;
-	file->fp = (conf != NULL) ? conf : NULL;
-	file->PathInfoNULL = NULL;
-	file->readerIconv = ICONV_NULL;
-	file->writerIconv = ICONV_NULL;
-}
-
 static void kFile_close(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
 {
 	DBG_ASSERT(file->fp != NULL);
@@ -142,7 +100,56 @@ static void kFile_checkEOF(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
 	}
 }
 
-static void File_free(KonohaContext *kctx, kObject *o)
+static size_t TRACE_fread(KonohaContext *kctx, kFile *file, char *buf, size_t bufsiz, KTraceInfo *trace)
+{
+	size_t size = fread(buf, 1, bufsiz, file->fp);
+	if(ferror(file->fp) != 0){
+		KTraceErrorPoint(trace, SystemFault, "fread", LogFile(file), LogErrno);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
+	}
+	kFile_checkEOF(kctx, file, trace);
+	return size;
+}
+
+static size_t TRACE_fwrite(KonohaContext *kctx, kFile *file, const char *buf, size_t bufsiz, KTraceInfo *trace)
+{
+	size_t size = fwrite(buf, 1, bufsiz, file->fp);
+	if(ferror(file->fp) != 0){
+		KTraceErrorPoint(trace, SystemFault, "fwrite", LogFile(file), LogErrno);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
+	}
+	if(size > 0 && !kFile_is(ChangeLessStream, file)) {
+		KTraceChangeSystemPoint(trace, "fwrite", LogFile(file), LogWrittenByte(size));
+	}
+	return size;
+}
+
+static void TRACE_fflush(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
+{
+	fflush(file->fp);
+	if(ferror(file->fp) != 0){
+		KTraceErrorPoint(trace, SystemFault, "fflush", LogFile(file), LogErrno);
+	}
+}
+
+/* ------------------------------------------------------------------------ */
+
+static void kFile_init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	struct kFileVar *file = (struct kFileVar *)o;
+	file->fp = (conf != NULL) ? conf : NULL;
+	file->PathInfoNULL = NULL;
+	file->readerIconv = ICONV_NULL;
+	file->writerIconv = ICONV_NULL;
+}
+
+static void kFile_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+{
+	kFile *file = (kFile *)o;
+	KREFTRACEn(file->PathInfoNULL);
+}
+
+static void kFile_free(KonohaContext *kctx, kObject *o)
 {
 	struct kFileVar *file = (struct kFileVar *)o;
 	if(file->fp != NULL) {
@@ -150,7 +157,7 @@ static void File_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void File_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+static void kFile_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	kFile *file = (kFile *)v[pos].asObject;
 	if(file->PathInfoNULL != NULL) {
@@ -333,43 +340,62 @@ static KMETHOD File_println(KonohaContext *kctx, KonohaStack *sfp)
 	File_println0(kctx, sfp);
 }
 
-static void MethodLib_FileRead(KonohaContext *kctx, KonohaStack *sfp, kFile *file, kBytes *ba, size_t offset, size_t len)
+//## int File.read(Bytes buf);
+static KMETHOD File_read(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KCheckIndex(offset, ba->bytesize);
-	KCheckIndex(offset+len, ba->bytesize);
-	size_t size = fread(ba->buf + offset, 1, len, file->fp);
+	kFile *file = sfp[0].asFile;
+	kBytes *ba  = sfp[1].asBytes;
 	KMakeTrace(trace, sfp);
-	if(ferror(file->fp) != 0) {
-		KTraceErrorPoint(trace, SystemFault, "fread", LogFile(file), LogErrno);
-		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, sfp);
-	}
-	kFile_checkEOF(kctx, file, trace);
-	KReturnUnboxValue(size);
+	size_t readbyte = TRACE_fread(kctx, file, ba->buf, ba->bytesize, trace);
+	KReturnUnboxValue(readbyte);
 }
 
 //## int File.read(Bytes buf, int offset, int len);
 static KMETHOD File_read3(KonohaContext *kctx, KonohaStack *sfp)
 {
-	MethodLib_FileRead(kctx, sfp, (kFile*)sfp[0].asObject, sfp[1].asBytes, sfp[2].intValue, sfp[3].intValue);
+	kFile *file = sfp[0].asFile;
+	kBytes *ba  = sfp[1].asBytes;
+	size_t offset = (size_t) sfp[2].intValue;
+	KCheckIndex(offset, ba->bytesize);
+	size_t len    = (size_t) sfp[3].intValue;
+	if(len == 0) {
+		len = ba->bytesize - offset;
+	}
+	else {
+		KCheckIndex(offset + len, ba->bytesize);
+	}
+	KMakeTrace(trace, sfp);
+	size_t readbyte = TRACE_fread(kctx, file, ba->buf + offset, len, trace);
+	KReturnUnboxValue(readbyte);
 }
 
-static void MethodLib_FileWrite(KonohaContext *kctx, KonohaStack *sfp, kFile *file, kBytes *ba, size_t offset, size_t len)
+//## @Native int File.write(Bytes buf);
+static KMETHOD File_write(KonohaContext *kctx , KonohaStack *sfp)
 {
-	KCheckIndex(offset, ba->bytesize);
-	KCheckIndex(offset+len, ba->bytesize);
-	size_t size = fwrite(ba->buf + offset, 1, len, file->fp);
-	if(ferror(file->fp) != 0){
-		KMakeTrace(trace, sfp);
-		KTraceErrorPoint(trace, SystemFault, "fwrite", LogFile(file), LogErrno);
-		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, sfp);
-	}
-	KReturnUnboxValue(size);
+	kFile *file = sfp[0].asFile;
+	kBytes *ba  = sfp[1].asBytes;
+	KMakeTrace(trace, sfp);
+	size_t writtenbyte = TRACE_fwrite(kctx, file, ba->buf, ba->bytesize, trace);
+	KReturnUnboxValue(writtenbyte);
 }
 
 //## @Native int File.write(Bytes buf, int offset, int len);
 static KMETHOD File_write3(KonohaContext *kctx , KonohaStack *sfp)
 {
-	MethodLib_FileWrite(kctx, sfp, (kFile*)sfp[0].asObject, sfp[1].asBytes, sfp[2].intValue, sfp[3].intValue);
+	kFile *file = sfp[0].asFile;
+	kBytes *ba  = sfp[1].asBytes;
+	size_t offset = (size_t) sfp[2].intValue;
+	KCheckIndex(offset, ba->bytesize);
+	size_t len    = (size_t) sfp[3].intValue;
+	if(len == 0) {
+		len = ba->bytesize - offset;
+	}
+	else {
+		KCheckIndex(offset + len, ba->bytesize);
+	}
+	KMakeTrace(trace, sfp);
+	size_t writtenbyte = TRACE_fwrite(kctx, file, ba->buf + offset, len, trace);
+	KReturnUnboxValue(writtenbyte);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -481,9 +507,10 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 			.typeId = TY_newid,
 			.cstruct_size = sizeof(kFile),
 			.cflag = kClass_Final,
-			.init  = File_init,
-			.free  = File_free,
-			.p     = File_p,
+			.init  = kFile_init,
+			.reftrace = kFile_reftrace,
+			.free  = kFile_free,
+			.p     = kFile_p,
 		};
 		CT_File = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defFile, trace);
 	}
@@ -494,10 +521,12 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 
 static kbool_t file_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
-	if(CT_Bytes != NULL) {
+	if(CT_Bytes != NULL && KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_Bytes, MN_("read"), 3) == NULL) {
 		KDEFINE_METHOD MethodData[] = {
-			_Public|_Im, _F(File_write3), TY_int, TY_File, MN_("write"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
-			_Public|_Im, _F(File_read3),  TY_int, TY_File, MN_("read"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
+			_Public, _F(File_read),   TY_int, TY_File, MN_("read"), 1, TY_Bytes, FN_("buf"),
+			_Public, _F(File_read3),  TY_int, TY_File, MN_("read"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
+			_Public, _F(File_write),  TY_int, TY_File, MN_("write"), 1, TY_Bytes, FN_("buf"),
+			_Public, _F(File_write3), TY_int, TY_File, MN_("write"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
 			DEND,
 		};
 		KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);

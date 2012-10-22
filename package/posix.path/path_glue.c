@@ -355,89 +355,173 @@ static KMETHOD System_rmdir(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret != -1);
 }
 
-///* DIR */
-//
-//typedef struct kDirVar kDIR;
-//struct kDirVar {
-//	KonohaObjectHeader h;
-//	DIR *dirp;
-//};
-//
-//static void kDIR_init(KonohaContext *kctx, kObject *o, void *conf)
-//{
-//	struct kDirVar *dir = (struct kDirVar *)o;
-//	dir->dirp = conf;
-//}
-//
-//static void kDIR_free(KonohaContext *kctx, kObject *o)
-//{
-//	struct kDirVar *dir = (struct kDirVar *)o;
-//	if(dir->dirp != NULL) {
-//		int ret = closedir(dir->dirp);
-//		if(ret == -1) {
-//			// TODO: throw
-//		}
-//		dir->dirp = NULL;
-//	}
-//}
-//
-//static void kDIR_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
-//{
-//	kDIR *dir = (kDIR *)v[pos].asObject;
-//	DIR *dirp = dir->dirp;
-//	KLIB Kwb_printf(kctx, wb, "DIR :%p", dirp);
-//}
-//
-////## DIR System.opendir(String path)
-//static KMETHOD System_opendir(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	KMakeTrace(trace, sfp);
-//	char buffer[K_PATHMAX];
-//	kString *path = sfp[1].asString;
-//	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), S_text(path), S_size(path), trace);
-//	DIR *d = opendir(systemPath);
-//	if(d == NULL) {
-//		int fault = PLATAPI diagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
-//		KTraceErrorPoint(trace, fault, "opendir", LogText("dirname", S_text(path)), LogErrno);
-//		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), fault, NULL, sfp);
-//	}
-//	KReturn(KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)d));
-//}
-//
-////## void DIR.close()
-//static KMETHOD DIR_close(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kDIR *dir = (kDIR *)sfp[0].asObject;
-//	if(dir->dirp != NULL) {
-//		int ret = closedir(dir->dirp);
-//		if(ret == -1) {
-//			KMakeTrace(trace, sfp);
-//			KTraceErrorPoint(trace, SystemFault, "closedir", LogErrno);
-//		}
-//		dir->dirp = NULL;
-//	}
-//	KReturnVoid();
-//}
-//
-////## String DIR.readFileName()
-//static KMETHOD DIR_readFileName(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kDIR *dir = (kDIR *)sfp[0].asObject;
-//	if(dir->dirp != NULL) {
-//		struct dirent entry, *result;
-//		int ret = readdir_r(dir->dirp, &entry, &result);
-//		if(result != NULL) {
-//			char *d_name = result->d_name;
-//			KReturn(KLIB new_kString(kctx, OnStack, d_name, strlen(d_name), StringPolicy_SystemInfo));
-//		}
-//		if(ret == -1) {
-//			KMakeTrace(trace, sfp);
-//			KTraceErrorPoint(trace, SystemFault, "readdir", LogErrno);
-//		}
-//		dir->dirp = NULL;
-//	}
-//	KReturn(KNULL(String));
-//}
+/* DIR */
+
+typedef struct kDirVar kDir;
+struct kDirVar {
+	KonohaObjectHeader h;
+	DIR *dirp;
+	kString *PathInfoNULL;
+	uintptr_t readerIconv;
+};
+
+static void kDir_init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kDir *dir = (kDir *)o;
+	dir->dirp = conf;
+	dir->PathInfoNULL = NULL;
+	dir->readerIconv  = ICONV_NULL;
+}
+
+static void kDir_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+{
+	kDir *dir = (kDir *)o;
+	KREFTRACEn(dir->PathInfoNULL);
+}
+
+static void kDir_close(KonohaContext *kctx, kDir *dir)
+{
+	if(dir->dirp != NULL) {
+		closedir(dir->dirp);
+		dir->dirp = NULL;
+	}
+	if(dir->readerIconv != ICONV_NULL) {
+		PLATAPI iconv_close_i(kctx, dir->readerIconv);
+		dir->readerIconv = ICONV_NULL;
+	}
+}
+
+static void kDir_free(KonohaContext *kctx, kObject *o)
+{
+	kDir_close(kctx, (kDir *)o);
+}
+
+static void kDir_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+{
+	kDir *dir = (kDir *)v[pos].asObject;
+	KLIB Kwb_printf(kctx, wb, "DIR: %s", S_text(dir->PathInfoNULL));
+}
+
+//## DIR System.opendir(String path)
+static KMETHOD System_opendir(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KMakeTrace(trace, sfp);
+	char buffer[K_PATHMAX];
+	kString *path = sfp[1].asString;
+	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), S_text(path), S_size(path), trace);
+	DIR *d = opendir(systemPath);
+	if(d == NULL) {
+		int fault = PLATAPI diagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
+		KTraceErrorPoint(trace, fault, "opendir", LogText("dirname", S_text(path)), LogErrno);
+		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), fault, NULL, sfp);
+	}
+	kDir *dir = (kDir *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)d);
+	KFieldSet(dir, dir->PathInfoNULL, path);
+	if(!PLATAPI isSystemCharsetUTF8(kctx)) {
+		dir->readerIconv = PLATAPI iconvSystemCharsetToUTF8(kctx, trace);
+	}
+	KReturn(dir);
+}
+
+//## void DIR.close()
+static KMETHOD DIR_close(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kDir_close(kctx, (kDir *)sfp[0].asObject);
+	KReturnVoid();
+}
+
+//## String DIR.readFileName()
+static KMETHOD DIR_readFileName(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kDir *dir = (kDir *)sfp[0].asObject;
+	if(dir->dirp != NULL) {
+		KMakeTrace(trace, sfp);
+		struct dirent entry, *result;
+		int ret = readdir_r(dir->dirp, &entry, &result);
+		if(result != NULL) {
+			char *d_name = result->d_name;
+			if(dir->readerIconv == ICONV_NULL) {
+				KReturn(KLIB new_kString(kctx, OnStack, d_name, strlen(d_name), StringPolicy_SystemInfo));
+			}
+			else {
+				KGrowingBuffer wb;
+				KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+				KLIB Kwb_iconv(kctx, &wb, dir->readerIconv, d_name, strlen(d_name), trace);
+				KReturnWith(
+					KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), StringPolicy_SystemInfo),
+					KLIB Kwb_free(&wb)
+				);
+			}
+		}
+		if(ret == -1) {
+			KTraceErrorPoint(trace, SystemFault, "readdir", LogErrno);
+		}
+		kDir_close(kctx, dir);
+	}
+	KReturn(KNULL(String));
+}
+
+//## String DIR.readPath()
+static KMETHOD DIR_readPath(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kDir *dir = (kDir *)sfp[0].asObject;
+	if(dir->dirp != NULL) {
+		KMakeTrace(trace, sfp);
+		struct dirent entry, *result;
+		int ret = readdir_r(dir->dirp, &entry, &result);
+		if(result != NULL) {
+			char *d_name = result->d_name, delim[2] = {'/', 0};
+			KGrowingBuffer wb;
+			KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+			KLIB Kwb_write(kctx, &wb, S_text(dir->PathInfoNULL), S_size(dir->PathInfoNULL));
+			KLIB Kwb_write(kctx, &wb, delim, 1);
+			if(dir->readerIconv != ICONV_NULL) {
+				KLIB Kwb_write(kctx, &wb, d_name, strlen(d_name));
+			}
+			else {
+				KLIB Kwb_iconv(kctx, &wb, dir->readerIconv, d_name, strlen(d_name), trace);
+			}
+			KReturnWith(
+				KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), StringPolicy_SystemInfo),
+				KLIB Kwb_free(&wb)
+			);
+		}
+		if(ret == -1) {
+			KTraceErrorPoint(trace, SystemFault, "readdir", LogErrno);
+		}
+		kDir_close(kctx, dir);
+	}
+	KReturn(KNULL(String));
+}
+
+#define _Public   kMethod_Public
+#define _Static   kMethod_Static
+#define _C        kMethod_CCompatible
+#define _F(F)   (intptr_t)(F)
+#define _Iter     kMethod_Iterative
+
+static void path_defineDIR(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
+{
+	KDEFINE_CLASS defDIR = {};
+	defDIR.structname = "DIR";
+	defDIR.typeId = TY_newid;
+	defDIR.cstruct_size = sizeof(struct kDirVar);
+	defDIR.cflag = kClass_Final;
+	defDIR.init  = kDir_init;
+	defDIR.reftrace  = kDir_reftrace;
+	defDIR.free  = kDir_free;
+	defDIR.p     = kDir_p;
+	KonohaClass *cDIR = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDIR, trace);
+	int TY_DIR = cDIR->typeId;
+	KDEFINE_METHOD MethodData[] = {
+		_Public|_Static|_C, _F(System_opendir),   TY_DIR,    TY_System, MN_("opendir"),  1, TY_String, FN_("dirname"),
+		_Public,            _F(DIR_close),        TY_void,   TY_DIR,    MN_("close"), 0,
+		_Public|_Iter,      _F(DIR_readFileName), TY_String, TY_DIR,    MN_("readFileName"), 0,
+		_Public|_Iter,      _F(DIR_readPath),     TY_String, TY_DIR,    MN_("readPath"), 0,
+		DEND,
+	};
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+}
 
 // --------------------------------------------------------------------------
 /* stat */
@@ -477,13 +561,6 @@ static KMETHOD System_lstat(KonohaContext *kctx, KonohaStack *sfp)
 
 // --------------------------------------------------------------------------
 
-#define _Public   kMethod_Public
-#define _Static   kMethod_Static
-#define _C        kMethod_CCompatible
-#define _Coercion kMethod_Coercion
-#define _Im kMethod_Immutable
-#define _F(F)   (intptr_t)(F)
-
 static kbool_t path_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	//	KRequireKonohaCommonModule(trace);
@@ -504,6 +581,7 @@ static kbool_t path_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public|_Static|_C, _F(System_symlink),  TY_boolean, TY_System, MN_("symlink"), 2, TY_String, FN_("oldpath"), TY_String, FN_("newpath"),
 		_Public|_Static|_C, _F(System_readlink), TY_String,  TY_System, MN_("readlink"), 1, TY_String, FN_("path"),
 
+		// isdir() is not posix api
 		_Public|_Static,    _F(System_isDir),    TY_boolean, TY_System, MN_("isdir"),    1, TY_String, FN_("path"),
 		_Public|_Static|_C, _F(System_mkdir),    TY_boolean, TY_System, MN_("mkdir"),    2, TY_String, FN_("path"), TY_int, FN_("mode"),
 		_Public|_Static|_C, _F(System_rmdir),    TY_boolean, TY_System, MN_("rmdir"),    1, TY_String, FN_("path"),

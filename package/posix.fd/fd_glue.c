@@ -48,7 +48,7 @@ struct kStatVar {
 	struct stat *stat;
 };
 
-typedef const struct kDirVar kDIR;
+typedef const struct kDirVar kDir;
 struct kDirVar {
 	KonohaObjectHeader h;
 	DIR *dirp;
@@ -88,13 +88,13 @@ static void kStat_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer
 	KLIB Kwb_printf(kctx, wb, "Stat :%p", v[pos].asObject);
 }
 
-static void kDIR_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kDir_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct kDirVar *dir = (struct kDirVar *)o;
 	dir->dirp = conf;
 }
 
-static void kDIR_free(KonohaContext *kctx, kObject *o)
+static void kDir_free(KonohaContext *kctx, kObject *o)
 {
 	struct kDirVar *dir = (struct kDirVar *)o;
 	if(dir->dirp != NULL) {
@@ -106,9 +106,9 @@ static void kDIR_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kDIR_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+static void kDir_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
-	kDIR *dir = (kDIR *)v[pos].asObject;
+	kDir *dir = (kDir *)v[pos].asObject;
 	DIR *dirp = dir->dirp;
 	KLIB Kwb_printf(kctx, wb, "DIR :%p", dirp);
 }
@@ -453,7 +453,7 @@ static KMETHOD DIR_close(KonohaContext *kctx, KonohaStack *sfp)
 //## int DIR.getfd()
 static KMETHOD DIR_getfd(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kDIR *dir = (kDIR *)sfp[0].asObject;
+	kDir *dir = (kDir *)sfp[0].asObject;
 	int fd = dirfd(dir->dirp);
 	if(fd == -1) {
 		// TODO: throw
@@ -465,7 +465,7 @@ static KMETHOD DIR_getfd(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD DIR_read(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
-	kDIR *dir = (kDIR *)sfp[0].asObject;
+	kDir *dir = (kDir *)sfp[0].asObject;
 	DIR *dirp = dir->dirp;
 	struct dirent entry, *result;
 	KonohaClass *CT_Dirent = CT_(O_p0(KGetReturnObject(sfp)));
@@ -481,7 +481,7 @@ static KMETHOD DIR_read(KonohaContext *kctx, KonohaStack *sfp)
 //## void DIR.rewind()
 static KMETHOD DIR_rewind(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kDIR *dir = (kDIR *)sfp[0].asObject;
+	kDir *dir = (kDir *)sfp[0].asObject;
 	DIR *dirp = dir->dirp;
 	rewinddir(dirp);
 	KReturnVoid();
@@ -490,7 +490,7 @@ static KMETHOD DIR_rewind(KonohaContext *kctx, KonohaStack *sfp)
 //## void DIR.seek(int loc)
 static KMETHOD DIR_seek(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kDIR *dir = (kDIR *)sfp[0].asObject;
+	kDir *dir = (kDir *)sfp[0].asObject;
 	DIR *dirp = dir->dirp;
 	long loc = sfp[1].intValue;
 	seekdir(dirp, loc);
@@ -500,7 +500,7 @@ static KMETHOD DIR_seek(KonohaContext *kctx, KonohaStack *sfp)
 //## int DIR.tell()
 static KMETHOD DIR_tell(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kDIR *dir = (kDIR *)sfp[0].asObject;
+	kDir *dir = (kDir *)sfp[0].asObject;
 	DIR *dirp = dir->dirp;
 	long ret = telldir(dirp);
 	if(ret == -1) {
@@ -629,15 +629,6 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 	};
 	KonohaClass *cStat = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defStat, trace);
 
-	KDEFINE_CLASS defDIR = {
-		STRUCTNAME(DIR),
-		.cflag = kClass_Final,
-		.init  = kDIR_init,
-		.free  = kDIR_free,
-		.p     = kDIR_p
-	};
-	KonohaClass *cDIR = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDIR, trace);
-
 	KDEFINE_CLASS defDirent = {
 		STRUCTNAME(Dirent),
 		.cflag = kClass_Final,
@@ -686,20 +677,20 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 #ifdef HAVE_STRUCT_STAT_ST_BIRTHTIME
 		_Public|_Const|_Im, _F(Stat_getst_birthtime), TY_int, TY_Stat, MN_("getst_birthtime"), 0,
 #endif /* HAVE_STRUCT_STAT_ST_BIRTHTIME */
-		_Public|_Static|_Const|_Im, _F(System_opendir), TY_DIR, TY_System, MN_("opendir"), 1, TY_String, FN_("dirname"),
-		_Public|_Const|_Im, _F(DIR_close), TY_int, TY_DIR, MN_("close"), 0,
-		_Public|_Const|_Im, _F(DIR_getfd), TY_int, TY_DIR, MN_("getfd"), 0,
-		_Public|_Const|_Im, _F(DIR_read), TY_DirentArray0, TY_DIR, MN_("read"), 0,
-		_Public|_Const|_Im, _F(DIR_rewind), TY_void, TY_DIR, MN_("rewind"), 0,
-		_Public|_Const|_Im, _F(DIR_seek), TY_void, TY_DIR, MN_("seek"), 1, TY_int, FN_("loc"),
-		_Public|_Const|_Im, _F(DIR_tell), TY_int, TY_DIR, MN_("tell"), 0,
-		_Public|_Const|_Im, _F(Dirent_getd_ino), TY_int, TY_Dirent, MN_("getd_ino"), 0,
-#ifdef _DIRENT_HAVE_D_OFF
-		_Public|_Const|_Im, _F(Dirent_getd_off), TY_int, TY_Dirent, MN_("getd_off"), 0,
-#endif /* _DIRENT_HAVE_D_OFF */
-		_Public|_Const|_Im, _F(Dirent_getd_reclen), TY_int, TY_Dirent, MN_("getd_reclen"), 0,
-		_Public|_Const|_Im, _F(Dirent_getd_type), TY_int, TY_Dirent, MN_("getd_type"), 0,
-		_Public|_Const|_Im, _F(Dirent_getd_name), TY_String, TY_Dirent, MN_("getd_name"), 0,
+//		_Public|_Static|_Const|_Im, _F(System_opendir), TY_DIR, TY_System, MN_("opendir"), 1, TY_String, FN_("dirname"),
+//		_Public|_Const|_Im, _F(DIR_close), TY_int, TY_DIR, MN_("close"), 0,
+//		_Public|_Const|_Im, _F(DIR_getfd), TY_int, TY_DIR, MN_("getfd"), 0,
+//		_Public|_Const|_Im, _F(DIR_read), TY_DirentArray0, TY_DIR, MN_("read"), 0,
+//		_Public|_Const|_Im, _F(DIR_rewind), TY_void, TY_DIR, MN_("rewind"), 0,
+//		_Public|_Const|_Im, _F(DIR_seek), TY_void, TY_DIR, MN_("seek"), 1, TY_int, FN_("loc"),
+//		_Public|_Const|_Im, _F(DIR_tell), TY_int, TY_DIR, MN_("tell"), 0,
+//		_Public|_Const|_Im, _F(Dirent_getd_ino), TY_int, TY_Dirent, MN_("getd_ino"), 0,
+//#ifdef _DIRENT_HAVE_D_OFF
+//		_Public|_Const|_Im, _F(Dirent_getd_off), TY_int, TY_Dirent, MN_("getd_off"), 0,
+//#endif /* _DIRENT_HAVE_D_OFF */
+//		_Public|_Const|_Im, _F(Dirent_getd_reclen), TY_int, TY_Dirent, MN_("getd_reclen"), 0,
+//		_Public|_Const|_Im, _F(Dirent_getd_type), TY_int, TY_Dirent, MN_("getd_type"), 0,
+//		_Public|_Const|_Im, _F(Dirent_getd_name), TY_String, TY_Dirent, MN_("getd_name"), 0,
 		_Public|_Static|_Const|_Im, _F(System_getdtablesize), TY_int, TY_System, MN_("getdtablesize"), 0,
 		_Public|_Static|_Im, _F(System_open), TY_int, TY_System, MN_("open"), 2, TY_String, FN_("pathname"), TY_int, FN_("flags"),
 		_Public|_Static|_Im, _F(System_open_mode), TY_int, TY_System, MN_("open"), 3, TY_String, FN_("pathname"), TY_int, FN_("flags"), TY_int, FN_("mode"),
