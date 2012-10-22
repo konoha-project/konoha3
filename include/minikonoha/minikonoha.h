@@ -734,6 +734,7 @@ struct KonohaStackRuntimeVar {
 //#define MOD_llvm       15
 #define MOD_REGEXP     16
 #define MOD_APACHE     17
+#define MOD_EVENT      18
 
 struct KonohaModule {
 	const char *name;
@@ -1443,6 +1444,9 @@ struct KonohaLibVar {
 	struct kObjectVar *(*KallocObject)(GcContext *gc, KonohaClass *klass);
 	bool (*KisObject)   (GcContext *gc, void *ptr);
 	void (*KvisitObject)(struct KObjectVisitor *visitor, struct kObjectVar *obj);
+
+	/* Event Handler API */
+	void (*KscheduleEvent)  (KonohaContext *);
 
 	void  (*Kwrite_barrier)(KonohaContext *, kObject *);
 	void  (*KupdateObjectField)(kObject *parent, kObject *oldPtr, kObject *newVal);
