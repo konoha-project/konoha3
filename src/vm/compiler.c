@@ -21,11 +21,21 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
+
+#define K_USE_TRACEVM
+
+#ifdef K_USE_TRACEVM
+#define K_USE_PTHREAD
+#endif /*K_USE_TRACEVM*/
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include "vm.h"
-#include "minivm.h"
+#ifdef K_USE_TRACEVM
+#include "tracevm.h"
 #include "minivm_common.h"
+#else
+#include "minivm.h"
+#endif /*K_USE_TRACEVM*/
 /*==========<<<for Berkeley DB>>>=========*/
 #include <stdio.h>
 #include <sys/types.h>
