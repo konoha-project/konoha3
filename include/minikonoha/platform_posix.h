@@ -597,7 +597,7 @@ static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 		/* If you try to exec() another process or just ask for more memory in this process */
 		return userFault | SoftwareFault | SystemFault;
 	case EACCES: /* 13. Permission denied */
-		return userFault | SystemFault;
+		return UserFault | SystemFault;  /* running software can be wrong.. */
 	case EFAULT: /* 14 Bad address */
 		return userFault | SoftwareFault; /* At the C-Level */
 	case ENOTBLK: /* 15 Block device required */
