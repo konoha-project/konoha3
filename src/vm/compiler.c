@@ -1228,8 +1228,8 @@ static void detect_PassLine_from_ByteCode(KonohaContext *kctx, VirtualMachineIns
 	qsort(list, i, sizeof(ByteCode_log), cmp);
 
 	for(j = 0; j < i; j++) {
-//		fprintf(stderr, "{\"%s:%d\" : %d}\n", list[j].file, list[j].line, list[j].total_count); //To berkeley DB
-		PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"%s:%d\" : %d}\n", list[j].file, list[j].line, list[j].total_count); //To berkeley DB
+		fprintf(stderr, "{\"%s:%d\" : %d}\n", list[j].file, list[j].line, list[j].total_count); //To berkeley DB
+		PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"script_name\":\"%s\", \"line\":%d , \"count\": %d}", list[j].file, list[j].line, list[j].total_count);
 		snprintf(key, N, "\"%s:%d\"", list[j].file, list[j].line);
 		//fprintf(stderr, "%s, %d\n", key, list[j].total_count);
 		store_CoverageLog_to_Berkeley_DB(kctx, key, list[j].total_count);
