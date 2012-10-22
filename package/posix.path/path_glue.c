@@ -23,12 +23,13 @@
  ***************************************************************************/
 
 #define USE_FILE 1
+#include <stdio.h>
+#include <errno.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/file.h>
-#include <errno.h>
-#include <stdio.h>
+#include <dirent.h>
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
@@ -353,6 +354,90 @@ static KMETHOD System_rmdir(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	KReturnUnboxValue(ret != -1);
 }
+
+///* DIR */
+//
+//typedef struct kDirVar kDIR;
+//struct kDirVar {
+//	KonohaObjectHeader h;
+//	DIR *dirp;
+//};
+//
+//static void kDIR_init(KonohaContext *kctx, kObject *o, void *conf)
+//{
+//	struct kDirVar *dir = (struct kDirVar *)o;
+//	dir->dirp = conf;
+//}
+//
+//static void kDIR_free(KonohaContext *kctx, kObject *o)
+//{
+//	struct kDirVar *dir = (struct kDirVar *)o;
+//	if(dir->dirp != NULL) {
+//		int ret = closedir(dir->dirp);
+//		if(ret == -1) {
+//			// TODO: throw
+//		}
+//		dir->dirp = NULL;
+//	}
+//}
+//
+//static void kDIR_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+//{
+//	kDIR *dir = (kDIR *)v[pos].asObject;
+//	DIR *dirp = dir->dirp;
+//	KLIB Kwb_printf(kctx, wb, "DIR :%p", dirp);
+//}
+//
+////## DIR System.opendir(String path)
+//static KMETHOD System_opendir(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	KMakeTrace(trace, sfp);
+//	char buffer[K_PATHMAX];
+//	kString *path = sfp[1].asString;
+//	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), S_text(path), S_size(path), trace);
+//	DIR *d = opendir(systemPath);
+//	if(d == NULL) {
+//		int fault = PLATAPI diagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
+//		KTraceErrorPoint(trace, fault, "opendir", LogText("dirname", S_text(path)), LogErrno);
+//		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), fault, NULL, sfp);
+//	}
+//	KReturn(KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)d));
+//}
+//
+////## void DIR.close()
+//static KMETHOD DIR_close(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	kDIR *dir = (kDIR *)sfp[0].asObject;
+//	if(dir->dirp != NULL) {
+//		int ret = closedir(dir->dirp);
+//		if(ret == -1) {
+//			KMakeTrace(trace, sfp);
+//			KTraceErrorPoint(trace, SystemFault, "closedir", LogErrno);
+//		}
+//		dir->dirp = NULL;
+//	}
+//	KReturnVoid();
+//}
+//
+////## String DIR.readFileName()
+//static KMETHOD DIR_readFileName(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	kDIR *dir = (kDIR *)sfp[0].asObject;
+//	if(dir->dirp != NULL) {
+//		struct dirent entry, *result;
+//		int ret = readdir_r(dir->dirp, &entry, &result);
+//		if(result != NULL) {
+//			char *d_name = result->d_name;
+//			KReturn(KLIB new_kString(kctx, OnStack, d_name, strlen(d_name), StringPolicy_SystemInfo));
+//		}
+//		if(ret == -1) {
+//			KMakeTrace(trace, sfp);
+//			KTraceErrorPoint(trace, SystemFault, "readdir", LogErrno);
+//		}
+//		dir->dirp = NULL;
+//	}
+//	KReturn(KNULL(String));
+//}
 
 // --------------------------------------------------------------------------
 /* stat */
