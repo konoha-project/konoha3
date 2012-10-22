@@ -1187,7 +1187,7 @@ static const char* MethodFlagData[] = {
 #define kMethod_Variadic             ((uintptr_t)(1<<10))
 
 // compatible
-#define kMethod_CCompatible        ((uintptr_t)(1<<11))
+#define kMethod_CCompatible          ((uintptr_t)(1<<11))
 #define kMethod_JSCompatible         ((uintptr_t)(1<<12))
 #define kMethod_JCompatible          ((uintptr_t)(1<<13))
 #define kMethod_Accountable          ((uintptr_t)(1<<14))
