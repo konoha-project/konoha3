@@ -100,6 +100,7 @@ set(PACKAGES
 	dscript.dollar
 	dscript.subproc
 	dscript.shell
+	dscript.eventlistener
 	curl
 ##	ijit
 ##	jansson
