@@ -446,6 +446,33 @@ static KMETHOD SubProc_setArgumentList(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 
+//## void SubProc.setInputStream(File f);
+static KMETHOD SubProc_setInputStream(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kSubProc *sbp = (kSubProc *)sfp[0].asObject;
+	kFile *file   = sfp[1].asFile;
+	KSafeFieldSet(sbp, sbp->InNULL, file);
+	KReturnVoid();
+}
+
+//## void SubProc.setOutputStream(File f);
+static KMETHOD SubProc_setOutputStream(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kSubProc *sbp = (kSubProc *)sfp[0].asObject;
+	kFile *file   = sfp[1].asFile;
+	KSafeFieldSet(sbp, sbp->OutNULL, file);
+	KReturnVoid();
+}
+
+//## void SubProc.setErrorStream(File f);
+static KMETHOD SubProc_setErrorStream(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kSubProc *sbp = (kSubProc *)sfp[0].asObject;
+	kFile *file   = sfp[1].asFile;
+	KSafeFieldSet(sbp, sbp->ErrNULL, file);
+	KReturnVoid();
+}
+
 //## int SubProc.bg();
 static KMETHOD SubProc_bg(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -468,13 +495,21 @@ static KMETHOD SubProc_fg(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 
-//## void SubProc.connect(SubProc next);
+//## void SubProc.connect(SubProc next, boolean WithError);
 static KMETHOD SubProc_connect(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubProc *sbp  = (kSubProc *)sfp[0].asObject;
 	kSubProc *sbp2 = (kSubProc *)sfp[1].asObject;
-	KMakeTrace(trace, sfp);
-	// TODO
+//	if(sbp->InNULL != NULL) {
+//		KSafeFieldSet(sbp, sbp2->OutNULL, sbp->InNULL);
+//	}
+	if(sbp->OutNULL != NULL) {
+		KSafeFieldSet(sbp, sbp2->InNULL, sbp->OutNULL);
+	}
+	if(sfp[2].boolValue && sbp->ErrNULL != NULL) {
+		KSafeFieldSet(sbp, sbp2->InNULL, sbp->ErrNULL);
+	}
+	KReturnVoid();
 }
 
 #define _Public   kMethod_Public
@@ -499,6 +534,11 @@ static kbool_t subproc_initSubProc(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(SubProc_new),    TY_SubProc, TY_SubProc, MN_("new"), 1, TY_String, FN_("command"),
 		_Public, _F(SubProc_setArgumentList), TY_void, TY_SubProc, MN_("setArgumentList"), 1, TY_StringArray, FN_("arguments"),
+		_Public, _F(SubProc_setInputStream), TY_void, TY_SubProc, MN_("setInputStream"), 1, TY_File, FN_("stream"),
+		_Public, _F(SubProc_setOutputStream), TY_void, TY_SubProc, MN_("setOutputStream"), 1, TY_File, FN_("stream"),
+		_Public, _F(SubProc_setErrorStream), TY_void, TY_SubProc, MN_("setErrorStream"), 1, TY_File, FN_("stream"),
+		_Public, _F(SubProc_connect), TY_void, TY_SubProc, MN_("connect"), 2, TY_SubProc, FN_("next"), TY_boolean, FN_("error"),
+
 		_Public, _F(SubProc_fg), TY_int, TY_SubProc, MN_("fg"), 0,
 		_Public, _F(SubProc_bg), TY_void, TY_SubProc, MN_("bg"), 0,
 
