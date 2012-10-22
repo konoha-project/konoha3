@@ -52,6 +52,9 @@ typedef struct {
 
 	KonohaClass *cBytes;
 	KonohaClass *cFile;
+	struct kFileVar       *fileStdIn_OnGlobalConstList;
+	struct kFileVar       *fileStdOut_OnGlobalConstList;
+	struct kFileVar       *fileStdErr_OnGlobalConstList;
 } KonohaCommonModule;
 
 
@@ -126,6 +129,10 @@ struct kIteratorVar {
 #define IS_File(O)      (O_ct(O) == CT_File)
 #define CT_FILE         KGetKonohaCommonModule()->cFile
 #define TY_FILE         (CT_File)->typeId
+#define KFileStdIn       KGetKonohaCommonModule()->fileStdIn_OnGlobalConstList
+#define KFileStdOut      KGetKonohaCommonModule()->fileStdOut_OnGlobalConstList
+#define KFileStdErr      KGetKonohaCommonModule()->fileStdErr_OnGlobalConstList
+
 
 #define kFileFlag_ChangeLessStream    kObject_Local1
 #define kFile_is(P, o)    (TFLAG_is(uintptr_t,(o)->h.magicflag, kFileFlag_##P))

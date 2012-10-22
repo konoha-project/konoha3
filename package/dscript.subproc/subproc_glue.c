@@ -98,14 +98,15 @@ typedef struct {
 #define SUBPROC_unsetBackground(P) (FLAG_unset((P)->flag, SUBPROC_BACKGROUND))
 #define SUBPROC_unsetShell(P) (FLAG_unset((P)->flag, SUBPROC_SHELL))
 
-typedef const struct kSubprocVar kSubproc;
+typedef struct kSubprocVar kSubproc;
+
 struct kSubprocVar {
 	KonohaObjectHeader h;
 	kshortflag_t   flag;
 	//	kbool_t shell;                     // shell mode [true/false]
 	//	kbool_t closefds;                  // closefds   [true/false]
 	//	kbool_t bg;                        // bg mode    [true/false]
-	kArray *env;                           // child process environment
+	kArray  *env;                           // child process environment
 	kString *command;                      // child process command
 	kString *cwd;                          // child process current working directory
 	int   rmode;
@@ -122,6 +123,60 @@ struct kSubprocVar {
 	//SUBPROC_RESOURCEMON_INSTANCE;
 };
 
+// SubProc is new one
+
+#define kSubProcFlag_CLOSEFDS         ((kshortflag_t)(1<<0))
+#define kSubProcFlag_BACKGROUND       ((kshortflag_t)(1<<1))
+#define kSubProcFlag_SHELL            ((kshortflag_t)(1<<2))
+
+typedef struct kSubProcVar kSubProc;
+
+struct kSubProcVar {
+	KonohaObjectHeader h;
+	kshortflag_t   flag;
+	kString *Command;
+	kArray  *ArgumentList;
+	kFile   *In;
+	kFile   *Out;
+	kFile   *Err;
+	int cpid;                              // child process ID
+	int bufferSize;                        // buffer size (unused)
+	int timeout;                           // child process timeout value
+	int status;                            // waitpid status
+	int timeoutKill;                       // child process Timeout ending flag [true/false]
+};
+
+static void kSubProc_init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kSubProc *sbp = (kSubProc*)o;
+	sbp->flag        = 0;
+	KFieldInit(sbp, sbp->Command, KNULL(String));
+	KFieldInit(sbp, sbp->ArgumentList, K_EMPTYARRAY);
+	KFieldInit(sbp, sbp->In, NULL);
+	sbp->cpid        = -1;
+	sbp->timeout     = DEF_TIMEOUT;
+	sbp->bufferSize  = 0;
+	sbp->timeoutKill = 0;
+}
+
+static void kSubproc_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+{
+	kSubProc *sbp = (kSubProc*)o;
+	KREFTRACEv(sbp->Command);
+	KREFTRACEv(sbp->ArgumentList);
+	KREFTRACEv(sbp->In);
+	KREFTRACEv(sbp->Out);
+	KREFTRACEv(sbp->Err);
+}
+
+static void kSubproc_free(KonohaContext *kctx, kObject *o)
+{
+}
+
+
+
+
+
 /* ------------------------------------------------------------------------ */
 /* [class defs] */
 
@@ -130,14 +185,14 @@ struct kSubprocVar {
 #define IS_Subproc(O)      (O_ct(O) == CT_Subproc)
 
 /* ------------------------------------------------------------------------ */
-/* [global varibals]
- */
+/* [global variables] */
 
 static jmp_buf env;
 
 static void alarmHandler(int sig) {
-		siglongjmp(env, 1);
+	siglongjmp(env, 1);
 }
+
 static int fgPid;
 static void keyIntHandler(int sig) { kill(fgPid, SIGINT); }
 
@@ -450,6 +505,7 @@ static int subproc_popen(KonohaContext *kctx, kString* command, kSubproc *p, int
 /**
  * @return termination status of a child process
  */
+
 static int subproc_wait(KonohaContext *kctx, int pid, kshortflag_t flag, int timeout, int *status ) {
 
 #ifndef __APPLE__
@@ -564,6 +620,7 @@ static inline void initFd(pfd_t *p) {
 }
 
 // for setFileXXX & PipemodeXXX(true) & enableStandardXXX(true) & enableERR2StdOUT(true)
+
 static void setFd(KonohaContext *kctx, pfd_t *p, int changeMode, FILE* ptr) {
 	if(((p->mode == M_PIPE) || (p->mode == M_FILE)) && !(p->mode == changeMode)) {
 		// warning of the pipe or file mode overwrite
@@ -688,7 +745,7 @@ static kString *kSubproc_checkOutput(KonohaContext *kctx, kSubproc *p, kString *
 //## Subproc Subproc.new(String cmd, boolean closefds);
 static KMETHOD Subproc_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct kSubprocVar *sp = (struct kSubprocVar *)sfp[0].asObject;
+	kSubproc *sp = (kSubproc *)sfp[0].asObject;
 	KFieldSet(sp, sp->command, sfp[1].asString);
 	if (sfp[2].boolValue) SUBPROC_setCloseFds(sp);
 	KReturn(sp);
@@ -697,7 +754,7 @@ static KMETHOD Subproc_new(KonohaContext *kctx, KonohaStack *sfp)
 //## boolean Subproc.bg();
 static KMETHOD Subproc_bg(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct kSubprocVar *sp = (struct kSubprocVar *)sfp[0].asObject;
+	kSubproc *sp = (kSubproc *)sfp[0].asObject;
 	int ret = -1;
 	if(PREEXEC(sp)) {
 		sp->timeoutKill = 0;
@@ -713,7 +770,7 @@ static KMETHOD Subproc_bg(KonohaContext *kctx, KonohaStack *sfp)
 //## int Subproc.fg();
 static KMETHOD Subproc_fg(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct kSubprocVar *sp = (struct kSubprocVar *)sfp[0].asObject;
+	kSubproc *sp = (kSubproc *)sfp[0].asObject;
 	int ret = S_PREEXECUTION;
 	if(PREEXEC(sp)) {
 		sp->timeoutKill = 0;
@@ -737,7 +794,7 @@ static KMETHOD Subproc_exec(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *ret_a = KNULL(Array);
-	struct kSubprocVar *sp = (struct kSubprocVar *)sfp[0].asObject;
+	kSubproc *sp = (kSubproc *)sfp[0].asObject;
 	KMakeTrace(trace, sfp);
 	if(ONEXEC(sp)) {
 		if((sp->wmode == M_PIPE) && (S_size(sfp[1].asString) > 0)) {
@@ -791,7 +848,7 @@ static KMETHOD Subproc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 //## @Restricted boolean Subproc.enableShellmode(boolean isShellmode);
 static KMETHOD Subproc_enableShellmode(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct kSubprocVar *sp = (struct kSubprocVar *)sfp[0].asObject;
+	kSubproc *sp = (kSubproc *)sfp[0].asObject;
 	int ret = PREEXEC(sp);
 	if(ret) {
 		//		sp->shell = sfp[1].boolValue;
@@ -828,7 +885,7 @@ static KMETHOD Subproc_enableShellmode(KonohaContext *kctx, KonohaStack *sfp)
 //## boolean Subproc.setCwd(String cwd);
 static KMETHOD Subproc_setCwd(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct kSubprocVar *sp = (struct kSubprocVar *)sfp[0].asObject;
+	kSubproc *sp = (kSubproc *)sfp[0].asObject;
 	int ret = PREEXEC(sp);
 	if(ret) {
 		sp->cwd = KLIB new_kString(kctx, GcUnsafe, S_text(sfp[1].asString), S_size(sfp[1].asString), 0);
@@ -839,7 +896,7 @@ static KMETHOD Subproc_setCwd(KonohaContext *kctx, KonohaStack *sfp)
 //## boolean Subproc.setBufsize(int size);
 static KMETHOD Subproc_setBufsize(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct kSubprocVar *sp = (struct kSubprocVar *)sfp[0].asObject;
+	kSubproc *sp = (kSubproc *)sfp[0].asObject;
 	int ret = PREEXEC(sp);
 	if(ret) {
 		sp->bufferSize = WORD2INT(sfp[1].intValue);
@@ -862,7 +919,7 @@ static KMETHOD Subproc_setFileIN(KonohaContext *kctx, KonohaStack *sfp)
 //## boolean Subproc.setFileOUT(File out);
 KMETHOD Subproc_setFileOUT(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct kSubprocVar *sp = (struct kSubprocVar *)sfp[0].asObject;
+	kSubproc *sp = (kSubproc *)sfp[0].asObject;
 	int ret = PREEXEC(sp);
 	if(ret) {
 		kFile *kfile = (kFile *)sfp[1].asObject;
@@ -874,7 +931,7 @@ KMETHOD Subproc_setFileOUT(KonohaContext *kctx, KonohaStack *sfp)
 //## boolean Subproc.setFileERR(File err);
 KMETHOD Subproc_setFileERR(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct kSubprocVar *sp = (struct kSubprocVar *)sfp[0].asObject;
+	kSubproc *sp = (kSubproc *)sfp[0].asObject;
 	int ret = PREEXEC(sp);
 	if(ret) {
 			kFile *kfile = (kFile *)sfp[1].asObject;
