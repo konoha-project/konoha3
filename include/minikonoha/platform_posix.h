@@ -52,7 +52,7 @@
 /*==========<<<for Berkeley DB>>>==========*/
 #include <sys/types.h>
 #include <string.h>
-//#include <db.h>
+#include <db.h>
 /*=========================================*/
 
 #ifdef HAVE_ICONV_H
@@ -241,7 +241,7 @@ static unsigned long long getTimeMilliSecond(void)
 #ifdef K_USE_PTHREAD
 #include <pthread.h>
 
-static int pthread_mutex_init_recursive(kmutex_t *mutex)
+static int _pthread_mutex_init_recursive(kmutex_t *mutex)
 {
 	pthread_mutexattr_t attr;
 	bzero(&attr, sizeof(pthread_mutexattr_t));
@@ -252,32 +252,32 @@ static int pthread_mutex_init_recursive(kmutex_t *mutex)
 
 #else
 
-static int pthread_mutex_destroy(kmutex_t *mutex)
+static int _pthread_mutex_destroy(kmutex_t *mutex)
 {
 	return 0;
 }
 
-static int pthread_mutex_init(kmutex_t *mutex, const kmutexattr_t *attr)
+static int _pthread_mutex_init(kmutex_t *mutex, const kmutexattr_t *attr)
 {
 	return 0;
 }
 
-static int pthread_mutex_lock(kmutex_t *mutex)
+static int _pthread_mutex_lock(kmutex_t *mutex)
 {
 	return 0;
 }
 
-static int pthread_mutex_trylock(kmutex_t *mutex)
+static int _pthread_mutex_trylock(kmutex_t *mutex)
 {
 	return 0;
 }
 
-static int pthread_mutex_unlock(kmutex_t *mutex)
+static int _pthread_mutex_unlock(kmutex_t *mutex)
 {
 	return 0;
 }
 
-static int pthread_mutex_init_recursive(kmutex_t *mutex)
+static int _pthread_mutex_init_recursive(kmutex_t *mutex)
 {
 	return 0;
 }
@@ -761,84 +761,83 @@ static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 }
 
 
-//#define DATABASE "test.db"
-//
-//static kbool_t fetch_CoverageLog_from_Berkeley_DB(KonohaContext *kctx, const char *key)
-//{
-//	DB *dbp = NULL;
-//	DBC *dbcp = NULL;
-//	DBT DB_key, DB_data;
-//	int ret, t_ret;
-//
-//	ret = db_create(&dbp, NULL, 0);
-//	if (ret != 0) {
-//		fprintf(stderr, "db_create: %s\n", db_strerror(ret));
-//		goto err;
-//	}
-//
-//	ret = dbp->open(dbp, NULL, DATABASE, NULL, DB_BTREE, DB_RDONLY, 0);
-//	if (ret != 0) {
-//		dbp->err(dbp, ret, "%s", DATABASE);
-//		goto err;
-//	}
-//	
-//	ret = dbp->cursor(dbp, NULL, &dbcp, 0);
-//	if (ret != 0) {
-//		dbp->err(dbp, ret, "%s", DATABASE);
-//		goto err;
-//	}
-//	
-//	while (1) {
-//		memset(&DB_key, 0, sizeof(DB_key));
-//		memset(&DB_data, 0, sizeof(DB_data));
-//
-//		ret = dbcp->c_get(dbcp, &DB_key, &DB_data, DB_NEXT);
-//		if (ret == DB_NOTFOUND) {
-//			ret = 0;
-//			dbcp->c_close(dbcp);
-//			dbp->close(dbp, 0);
-//			return false;
-//		}
-//		else if (ret != 0) {
-//			dbp->err(dbp, ret, "%s", DATABASE);
-//			goto err;
-//		}
-//		if(strncmp(key, DB_key.data, strlen(key)) == 0) {
-//			printf("%.*s\n", (int)DB_data.size, (char *)DB_data.data);
-//			dbcp->c_close(dbcp);
-//			dbp->close(dbp, 0);
-//			return true;
-//		}
-//	}
-//
-//err:
-//	if (dbcp) {
-//		t_ret = dbcp->c_close(dbcp);
-//		if (t_ret != 0 && ret == 0)
-//			ret = t_ret;
-//	}
-//	
-//	if (dbp) {
-//		t_ret = dbp->close(dbp, 0);
-//		if (t_ret != 0 && ret == 0)
-//			ret = t_ret;
-//	}
-//	
-////	exit(ret);
-//	return false;
-//}
+#define DATABASE "test.db"
+
+static kbool_t fetch_CoverageLog_from_Berkeley_DB(KonohaContext *kctx, const char *key)
+{
+	DB *dbp = NULL;
+	DBC *dbcp = NULL;
+	DBT DB_key, DB_data;
+	int ret, t_ret;
+
+	ret = db_create(&dbp, NULL, 0);
+	if (ret != 0) {
+		fprintf(stderr, "db_create: %s\n", db_strerror(ret));
+		goto err;
+	}
+
+	ret = dbp->open(dbp, NULL, DATABASE, NULL, DB_BTREE, DB_RDONLY, 0);
+	if (ret != 0) {
+		dbp->err(dbp, ret, "%s", DATABASE);
+		goto err;
+	}
+	
+	ret = dbp->cursor(dbp, NULL, &dbcp, 0);
+	if (ret != 0) {
+		dbp->err(dbp, ret, "%s", DATABASE);
+		goto err;
+	}
+	
+	while (1) {
+		memset(&DB_key, 0, sizeof(DB_key));
+		memset(&DB_data, 0, sizeof(DB_data));
+
+		ret = dbcp->c_get(dbcp, &DB_key, &DB_data, DB_NEXT);
+		if (ret == DB_NOTFOUND) {
+			ret = 0;
+			dbcp->c_close(dbcp);
+			dbp->close(dbp, 0);
+			return false;
+		}
+		else if (ret != 0) {
+			dbp->err(dbp, ret, "%s", DATABASE);
+			goto err;
+		}
+		if(strncmp(key, (const char *)DB_key.data, strlen(key)) == 0) {
+			printf("%.*s\n", (int)DB_data.size, (char *)DB_data.data);
+			dbcp->c_close(dbcp);
+			dbp->close(dbp, 0);
+			return true;
+		}
+	}
+
+err:
+	if (dbcp) {
+		t_ret = dbcp->c_close(dbcp);
+		if (t_ret != 0 && ret == 0)
+			ret = t_ret;
+	}
+	
+	if (dbp) {
+		t_ret = dbp->close(dbp, 0);
+		if (t_ret != 0 && ret == 0)
+			ret = t_ret;
+	}
+	
+	exit(ret);
+	return false;
+}
 
 static kbool_t DEOS_checkSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
 {
 	DBG_P("filename='%s', line=%d", filename, line);
-//	
-//#define N 64
-//	kbool_t res;
-//	char key[N] = {'\0'};
-//	snprintf(key, N, "\"%s/%d\"", filename, line);
-//	res = fetch_CoverageLog_from_Berkeley_DB(kctx, key);
-//	return res;
-	return true;
+	
+#define N 64
+	kbool_t res;
+	char key[N] = {'\0'};
+	snprintf(key, N, "\"%s/%d\"", filename, line);
+	res = fetch_CoverageLog_from_Berkeley_DB(kctx, key);
+	return res;
 }
 
 static int DEOS_diagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
@@ -998,12 +997,12 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.exit_i          = exit;
 
 	// mutex
-	plat.pthread_mutex_init_i = pthread_mutex_init;
-	plat.pthread_mutex_init_recursive = pthread_mutex_init_recursive;
-	plat.pthread_mutex_lock_i = pthread_mutex_lock;
-	plat.pthread_mutex_unlock_i = pthread_mutex_unlock;
-	plat.pthread_mutex_trylock_i = pthread_mutex_trylock;
-	plat.pthread_mutex_destroy_i = pthread_mutex_destroy;
+	plat.pthread_mutex_init_i = _pthread_mutex_init;
+	plat.pthread_mutex_init_recursive = _pthread_mutex_init_recursive;
+	plat.pthread_mutex_lock_i = _pthread_mutex_lock;
+	plat.pthread_mutex_unlock_i = _pthread_mutex_unlock;
+	plat.pthread_mutex_trylock_i = _pthread_mutex_trylock;
+	plat.pthread_mutex_destroy_i = _pthread_mutex_destroy;
 
 	plat.FilePathMax         = 1024;
 	plat.shortFilePath       = shortFilePath;
