@@ -22,20 +22,15 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#define K_USE_TRACEVM
-
-#ifdef K_USE_TRACEVM
-#define K_USE_PTHREAD
-#endif /*K_USE_TRACEVM*/
+//#define K_USE_PTHREAD
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include "vm.h"
+
+//#define K_USE_TRACEVM
 #ifdef K_USE_TRACEVM
 #include "tracevm.h"
 #include "minivm_common.h"
-#else
-#include "minivm.h"
-#endif /*K_USE_TRACEVM*/
 /*==========<<<for Berkeley DB>>>=========*/
 #include <stdio.h>
 #include <sys/types.h>
@@ -43,6 +38,9 @@
 #include <string.h>
 #include <db.h>
 /*========================================*/
+#else
+#include "minivm.h"
+#endif /*K_USE_TRACEVM*/
 
 /* ************************************************************************ */
 
@@ -1172,6 +1170,7 @@ static void ByteCode_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *v
 	END_REFTRACE();
 }
 
+#ifdef K_USE_TRACEVM
 typedef struct _ByteCode_log {
 	int line;
 	int total_count;
@@ -1232,7 +1231,7 @@ static void detect_PassLine_from_ByteCode(KonohaContext *kctx, VirtualMachineIns
 		//fprintf(stderr, "{\"%s/%d\" : %d}\n", list[j].file, list[j].line, list[j].total_count); //To berkeley DB
 		snprintf(key, N, "\"%s/%d\"", list[j].file, list[j].line);
 		//fprintf(stderr, "\n");
-		fprintf(stderr, "%s\n", key);
+		fprintf(stderr, "%s, %d\n", key, list[j].total_count);
 		store_CoverageLog_to_Berkeley_DB(kctx, key, list[j].total_count);
 		//fprintf(stderr, "{\"script_id\": \"%s\", \"line\": %d, \"count\": %d}\n", list[j].file, list[j].line, list[j].total_count); //To syslog
 //TODO syslog
@@ -1292,12 +1291,15 @@ err:;
 
 //	exit(ret);
 }
+#endif/*K_USE_TRACEVM*/
 
 static void ByteCode_free(KonohaContext *kctx, kObject *o)
 {
 	kByteCode *b = (kByteCode *)o;
 	VirtualMachineInstruction *pc = b->code;
+#ifdef K_USE_TRACEVM
 	detect_PassLine_from_ByteCode(kctx, pc);
+#endif
 	KFree(b->code, b->codesize);
 }
 
