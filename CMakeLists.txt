@@ -433,6 +433,11 @@ foreach(f ${test_files})
 		"KONOHA_PACKAGEPATH=${PARENT_BINARY_DIR}/package")
 endforeach(f ${test_files})
 
+if(USE_TRACEVM)
+add_definitions(-DK_USE_PTHREAD)
+add_definitions(-DK_USE_TRACEVM)
+endif(USE_TRACEVM)
+
 add_subdirectory(platform/dse)
 add_subdirectory(platform/apache)
 add_subdirectory(platform/logger-shell)

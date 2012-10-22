@@ -25,7 +25,11 @@
 #ifndef PLATFORM_POSIX_H_
 #define PLATFORM_POSIX_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* platform configuration */
+//#define K_USE_PTHREAD
 
 #ifndef K_OSDLLEXT
 #if defined(__APPLE__)
@@ -49,19 +53,18 @@
 #include <dlfcn.h>
 #include <sys/stat.h>
 #include <errno.h>
+#ifdef K_USE_TRACEVM
 /*==========<<<for Berkeley DB>>>==========*/
 #include <sys/types.h>
 #include <string.h>
 #include <db.h>
 /*=========================================*/
+#endif/*K_USE_TRACEVM*/
 
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
 #endif /* HAVE_ICONV_H */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #define kunused __attribute__((unused))
 
@@ -238,10 +241,14 @@ static unsigned long long getTimeMilliSecond(void)
 
 // -------------------------------------------------------------------------
 
+//#define K_USE_TRACEVM
 #ifdef K_USE_PTHREAD
+//#if defined(K_USE_PTHREAD) || defined(K_USE_TRACEVM)
 #include <pthread.h>
+//#include <db.h>
 
-static int _pthread_mutex_init_recursive(kmutex_t *mutex)
+
+static int pthread_mutex_init_recursive(kmutex_t *mutex)
 {
 	pthread_mutexattr_t attr;
 	bzero(&attr, sizeof(pthread_mutexattr_t));
@@ -252,37 +259,37 @@ static int _pthread_mutex_init_recursive(kmutex_t *mutex)
 
 #else
 
-static int _pthread_mutex_destroy(kmutex_t *mutex)
+static int pthread_mutex_destroy(kmutex_t *mutex)
 {
 	return 0;
 }
 
-static int _pthread_mutex_init(kmutex_t *mutex, const kmutexattr_t *attr)
+static int pthread_mutex_init(kmutex_t *mutex, const kmutexattr_t *attr)
 {
 	return 0;
 }
 
-static int _pthread_mutex_lock(kmutex_t *mutex)
+static int pthread_mutex_lock(kmutex_t *mutex)
 {
 	return 0;
 }
 
-static int _pthread_mutex_trylock(kmutex_t *mutex)
+static int pthread_mutex_trylock(kmutex_t *mutex)
 {
 	return 0;
 }
 
-static int _pthread_mutex_unlock(kmutex_t *mutex)
+static int pthread_mutex_unlock(kmutex_t *mutex)
 {
 	return 0;
 }
 
-static int _pthread_mutex_init_recursive(kmutex_t *mutex)
+static int pthread_mutex_init_recursive(kmutex_t *mutex)
 {
 	return 0;
 }
 
-#endif
+#endif /*defined(K_USE_PTHREAD) || defined(K_USE_TRACEVM)*/
 
 // -------------------------------------------------------------------------
 
@@ -760,7 +767,7 @@ static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 	return userFault | SoftwareFault |SystemFault;
 }
 
-
+#ifdef K_USE_TRACEVM
 #define DATABASE "test.db"
 
 static kbool_t fetch_CoverageLog_from_Berkeley_DB(KonohaContext *kctx, const char *key)
@@ -827,17 +834,21 @@ err:
 	exit(ret);
 	return false;
 }
+#endif/*K_USE_TRACEVM*/
 
 static kbool_t DEOS_checkSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
 {
 	DBG_P("filename='%s', line=%d", filename, line);
-	
+#ifdef K_USE_TRACEVM	
 #define N 64
 	kbool_t res;
 	char key[N] = {'\0'};
 	snprintf(key, N, "\"%s/%d\"", filename, line);
 	res = fetch_CoverageLog_from_Berkeley_DB(kctx, key);
 	return res;
+#else
+	return true;
+#endif
 }
 
 static int DEOS_diagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
@@ -997,12 +1008,12 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.exit_i          = exit;
 
 	// mutex
-	plat.pthread_mutex_init_i = _pthread_mutex_init;
-	plat.pthread_mutex_init_recursive = _pthread_mutex_init_recursive;
-	plat.pthread_mutex_lock_i = _pthread_mutex_lock;
-	plat.pthread_mutex_unlock_i = _pthread_mutex_unlock;
-	plat.pthread_mutex_trylock_i = _pthread_mutex_trylock;
-	plat.pthread_mutex_destroy_i = _pthread_mutex_destroy;
+	plat.pthread_mutex_init_i = pthread_mutex_init;
+	plat.pthread_mutex_init_recursive = pthread_mutex_init_recursive;
+	plat.pthread_mutex_lock_i = pthread_mutex_lock;
+	plat.pthread_mutex_unlock_i = pthread_mutex_unlock;
+	plat.pthread_mutex_trylock_i = pthread_mutex_trylock;
+	plat.pthread_mutex_destroy_i = pthread_mutex_destroy;
 
 	plat.FilePathMax         = 1024;
 	plat.shortFilePath       = shortFilePath;
