@@ -1104,7 +1104,7 @@ typedef enum {
 	StringPolicy_UTF8     =     (1<<2),
 	StringPolicy_NOCOPY   =     (1<<3),
 	StringPolicy_NOPOOL   =     (1<<4),   /* in the future */
-	StringPolicy_SystemInfo =   (1<<5),
+	StringPolicy_SystemInfo =   (1<<5)
 	////	StringPolicy_POOL     =     (1<<3),
 } StringPolicy;
 

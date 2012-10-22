@@ -1037,6 +1037,76 @@ static KMETHOD String_valueOf(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 // --------------------------------------------------------------------------
+// String Interpolation
+
+static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_TypeCheck(stmt, expr, gma, reqty);
+	kToken  *tk   = expr->termToken;
+	kString *text = tk->text;
+	INIT_GCSTACK();
+	const char *start = NULL, *end = NULL;
+	const char *str = S_text(text);
+	expr = SUGAR kExpr_setConstValue(kctx, expr, TY_String, UPCAST(text));
+	kNameSpace *ns = Stmt_nameSpace(stmt);
+	kMethod *concat = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_String, MN_("+"), 1);
+
+	expr = new_ConstValueExpr(kctx, TY_String, UPCAST(TS_EMPTY));
+	while(true) {
+		start = strstr(str, "${");
+		if(start == NULL) {
+			break;
+		}
+		if(start == strstr(str, "${}")) {
+			str += 3;
+			continue;
+		}
+		end = strchr(start, '}');
+		if(end == NULL) {
+			break;
+		}
+
+		KGrowingBuffer wb;
+		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+		KLIB Kwb_write(kctx, &wb, "(", 1);
+		KLIB Kwb_write(kctx, &wb, start+2, end-(start+2));
+		KLIB Kwb_write(kctx, &wb, ")", 1);
+
+		TokenSequence range = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
+		TokenSequence_push(kctx, range);
+		const char *buf = KLIB Kwb_top(kctx, &wb, 1);
+		SUGAR TokenSequence_tokenize(kctx, &range, buf, 0);
+
+		{
+			TokenSequence tokens = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
+			TokenSequence_push(kctx, tokens);
+			SUGAR TokenSequence_resolved(kctx, &tokens, NULL, &range, range.beginIdx);
+			/* +1 means for skiping first indent token. */
+			kExpr *newexpr = SUGAR kStmt_parseExpr(kctx, stmt, tokens.tokenList, tokens.beginIdx+1, tokens.endIdx, NULL);
+			TokenSequence_pop(kctx, tokens);
+
+			if(start - str > 0) {
+				kExpr *first = new_ConstValueExpr(kctx, TY_String,
+						UPCAST(KLIB new_kString(kctx, OnGcStack, str, (start - str), 0)));
+				expr = SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_String, concat, 2, expr, first);
+			}
+			expr = SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_String, concat, 2, expr, newexpr);
+		}
+		TokenSequence_pop(kctx, range);
+		KLIB Kwb_free(&wb);
+		str = end + 1;
+	}
+
+	if((start == NULL) || (start != NULL && end == NULL)) {
+		kExpr *rest = new_ConstValueExpr(kctx, TY_String,
+				UPCAST(KLIB new_kString(kctx, OnGcStack, str, strlen(str), 0)));
+		expr = SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_String, concat, 2, expr, rest);
+	}
+	KReturnWith(expr, RESET_GCSTACK());
+}
+
+
+// --------------------------------------------------------------------------
 
 #define _Public kMethod_Public
 #define _Static kMethod_Static
@@ -1054,6 +1124,12 @@ static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	int FN_index = FN_("index");
 	int FN_start = FN_("start");
 	ktype_t TY_StringArray0 = CT_StringArray0->typeId;
+
+	KDEFINE_SYNTAX SYNTAX[] = {
+		{ KW_TextPattern, 0,  NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_ExtendedTextLiteral, },
+		{ KW_END, },
+	};
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 
 	kMethod *concat = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_String, MN_("+"), 1);
 	if(concat != NULL) {

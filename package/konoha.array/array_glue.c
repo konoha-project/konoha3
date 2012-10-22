@@ -494,6 +494,7 @@ static KMETHOD Array_newList(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t array_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
+	KImportPackageSymbol(ns, "cstyle", "[]", trace);
 	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
 		{"Array", VirtualType_KonohaClass, (uintptr_t)CT_(TY_Array)},
 		{NULL},
