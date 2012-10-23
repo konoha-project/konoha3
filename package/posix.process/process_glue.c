@@ -280,6 +280,17 @@ static KMETHOD System_usleep(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret == 0);
 }
 
+//## int System.system(String command)
+static KMETHOD System_system(KonohaContext *kctx, KonohaStack *sfp)
+{
+	const char *command = S_text(sfp[1].asString);
+	int ret = system(command);
+	if(ret != 0) {
+		// TODO KTraceApi
+	}
+	KReturnUnboxValue(ret);
+}
+
 /* ------------------------------------------------------------------------ */
 
 #define _Public   kMethod_Public
@@ -323,6 +334,7 @@ static kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public|_Static, _F(System_getsid), TY_int, TY_System, MN_("getsid"), 1, TY_int, FN_("pid"),
 		_Public|_Static, _F(System_sleep), TY_int, TY_System, MN_("sleep"), 1, TY_int, FN_("sec"),
 		_Public|_Static, _F(System_usleep), TY_boolean, TY_System, MN_("usleep"), 1, TY_int, FN_("usec"),
+		_Public|_Static, _F(System_system), TY_int, TY_System, MN_("system"), 1, TY_String, FN_("command"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);

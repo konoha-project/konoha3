@@ -1,6 +1,8 @@
 // written by chenji
 
-import("konoha.while");
+import("konoha.array");
+import("cstyle", "while");
+import("cstyle", "break");
 import("konoha.string");
 import("konoha.null");
 import("sugar");
@@ -13,7 +15,7 @@ int tokenFuncSingleQuotedChar(Token tk, String source) {
 			break;
 		}
 		if(ch == 39/*'\''*/ && prev != 92/*'\\'*/) {
-			if(tk != null) {
+			if(tk.isNotNull()) {
 				tk.setText(source.substr(1, pos - 1));
 				tk.setUnresolvedTokenType("$SingleQuotedChar");
 			}
@@ -22,7 +24,7 @@ int tokenFuncSingleQuotedChar(Token tk, String source) {
 		prev = ch;
 		pos = pos + 1;
 	}
-	if(tk != null) {
+	if(tk.isNotNull()) {
 		//FIXME: kreportf
 		System.p("must close with \'");
 	}
@@ -42,8 +44,17 @@ Expr typeCheckSingleQuotedChar(Stmt stmt, Expr expr, Gamma gma, int reqty) {
 	return null;
 }
 
+Expr expressionSingleQuotedChar(Stmt stmt, Token[] tokenList, int beginIdx, int operatorIdx, int endIdx) {
+	if(beginIdx == operatorIdx) {
+		Token tk = tokenList[operatorIdx];
+		return stmt.rightJoinExpr(tk.newUntypedExpr(), tokenList, operatorIdx+1, endIdx);
+	}
+	return null;
+}
+
 addTypeCheck("$SingleQuotedChar", typeCheckSingleQuotedChar);
 setTokenFunc("$SingleQuotedChar", 17/*KonohaChar_Quote*/, tokenFuncSingleQuotedChar);
+addExpression("$SingleQuotedChar", expressionSingleQuotedChar);
 
 void test() {
 	int i = 'i';
