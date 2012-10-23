@@ -1039,12 +1039,66 @@ static KMETHOD String_valueOf(KonohaContext *kctx, KonohaStack *sfp)
 // --------------------------------------------------------------------------
 // String Interpolation
 
+/* copied from src/sugar/sugarfunc.h */
+static kString *kToken_resolvedEscapeSequence(KonohaContext *kctx, kToken *tk, size_t start)
+{
+	KGrowingBuffer wb;
+	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	const char *text = S_text(tk->text) + start;
+	const char *end  = S_text(tk->text) + S_size(tk->text);
+	KLIB Kwb_write(kctx, &wb, S_text(tk->text), start);
+	while(text < end) {
+		int ch = *text;
+		if(ch == '\\' && *(text+1) != '\0') {
+			switch (*(text+1)) {
+			/*
+			 * compatible with ECMA-262
+			 * http://ecma-international.org/ecma-262/5.1/#sec-7.8.4
+			 */
+			case 'b':  ch = '\b'; text++; break;
+			case 't':  ch = '\t'; text++; break;
+			case 'n':  ch = '\n'; text++; break;
+			case 'v':  ch = '\v'; text++; break;
+			case 'f':  ch = '\f'; text++; break;
+			case 'r':  ch = '\r'; text++; break;
+			case '"':  ch = '"';  text++; break;
+			case '\'': ch = '\''; text++; break;
+			case '\\': ch = '\\'; text++; break;
+			default: return NULL;
+			}
+		}
+		{
+			char buf[1] = {ch};
+			KLIB Kwb_write(kctx, &wb, (const char *)buf, 1);
+		}
+		text++;
+	}
+	kString *s = KLIB new_kString(kctx, OnGcStack, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
+	KLIB Kwb_free(&wb);
+	return s;
+}
+
+static kString *remove_escapes(KonohaContext *kctx, kToken *tk)
+{
+	kString *text = tk->text;
+	if(kToken_is(RequiredReformat, tk)) {
+		const char *escape = strchr(S_text(text), '\\');
+		DBG_ASSERT(escape != NULL);
+		text = kToken_resolvedEscapeSequence(kctx, tk, escape - S_text(text));
+	}
+	return text;
+}
+
 static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken  *tk   = expr->termToken;
-	kString *text = tk->text;
 	INIT_GCSTACK();
+	kString *text = remove_escapes(kctx, tk);
+	if(text == NULL) {
+		KReturnWith(K_NULLEXPR, RESET_GCSTACK());
+	}
+
 	const char *start = NULL, *end = NULL;
 	const char *str = S_text(text);
 	expr = SUGAR kExpr_setConstValue(kctx, expr, TY_String, UPCAST(text));
