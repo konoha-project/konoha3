@@ -251,10 +251,11 @@ static void kSubProc_execOnChild(KonohaContext *kctx, kSubProc *sbp, KTraceInfo 
 	for(i = 0; i < kArray_size(sbp->ArgumentList); i++) {
 		args[i+1] = (char*)S_text(sbp->ArgumentList->StmtItems[i]);
 	}
+	KTraceChangeSystemPoint(trace, "execvp", LogText("command", args[0]), LogTextArray("argv", args));
 	//	shell mode execlp("sh", "sh", "-c", S_text(command), NULL);
 	if(execvp(args[0], args) == -1) {
 		int fault = PLATAPI diagnosisFaultType(kctx, kString_guessUserFault(sbp->Command)|SystemError, trace);
-		KTraceErrorPoint(trace, fault, "execvp", LogErrno);
+		KTraceErrorPoint(trace, fault, "execvp", LogText("command", args[0]), LogTextArray("argv", args), LogErrno);
 		_exit(1);
 	}
 }
