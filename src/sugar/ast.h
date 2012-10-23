@@ -707,7 +707,7 @@ static int kStmt_parseBySyntaxPattern(KonohaContext *kctx, kStmt *stmt, int inde
 	SugarSyntax *stmtSyntax = kStmt_resolveStatementSyntax(kctx, stmt, tokenList, beginIdx, endIdx);
 	((kStmtVar *)stmt)->syn = stmtSyntax;
 	//DBG_P(">>>>>>>>>>>>>>>>>>> Found SugarSyntax=%s%s", KWSTMT_t(stmtSyntax->keyword));
-	kToken *errRule[2];
+	kToken *errRule[2] = {};
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	SugarSyntax *currentSyntax = stmtSyntax;
 	while(currentSyntax != NULL) {
