@@ -209,6 +209,7 @@ L_ERR:;
 
 static void dup2_or_exit(int fd, int fd2)
 {
+	fprintf(stderr, ">>>>> fd=%d, fd2=%d\n", fd, fd2);
 	if(fd != fd2) {
 		close(fd2);
 		if(dup2(fd, fd2) == -1) {
@@ -243,7 +244,7 @@ static void kSubProc_execOnChild(KonohaContext *kctx, kSubProc *sbp, KTraceInfo 
 	char *args[kArray_size(sbp->ArgumentList) + 2];
 	args[0] = (char*)S_text(sbp->Command);
 	args[kArray_size(sbp->ArgumentList) + 1] = NULL;
-	for(i = 0; i < kArray_size(sbp->ArgumentList) + 2; i++) {
+	for(i = 0; i < kArray_size(sbp->ArgumentList); i++) {
 		args[i+1] = (char*)S_text(sbp->ArgumentList->StmtItems[i]);
 	}
 	//	shell mode execlp("sh", "sh", "-c", S_text(command), NULL);
@@ -308,8 +309,8 @@ static int kSubProc_exec(KonohaContext *kctx, kSubProc *sbp, KTraceInfo *trace)
 		}
 		{
 			int cfd, maxfd = sysconf(_SC_OPEN_MAX);
-			for(cfd = 3; maxfd; cfd++) {
-				close(cfd);  // close files except for 0, 1, and 2
+			for(cfd = 3; cfd < maxfd; cfd++) {
+				close(cfd);  // close fildes except for 0, 1, and 2
 			}
 		}
 		setsid(); // separate from tty
@@ -320,16 +321,17 @@ static int kSubProc_exec(KonohaContext *kctx, kSubProc *sbp, KTraceInfo *trace)
 //			}
 //		}
 		kSubProc_execOnChild(kctx, sbp, trace);
+		break;
 	default:
-		if(p2c[1] == -1) {
+		if(sbp->InNULL == NULL) {
 			KFieldInit(sbp, sbp->InNULL, new_PipeFile(kctx, OnField, p2c[1], "w", sbp->Command, trace));
 			close(p2c[0]);
 		}
-		if(c2p[0] == -1) {
+		if(sbp->OutNULL == NULL) {
 			KFieldSet(sbp, sbp->OutNULL, new_PipeFile(kctx, OnField, c2p[0], "r", sbp->Command, trace));
 			close(c2p[1]);
 		}
-		if(errPipe[0] == -1) {
+		if(sbp->ErrNULL == NULL) {
 			KFieldSet(sbp, sbp->ErrNULL, new_PipeFile(kctx, OnField, errPipe[0], "r", sbp->Command, trace));
 			close(errPipe[1]);
 		}
@@ -538,7 +540,6 @@ static kbool_t subproc_initSubProc(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		_Public, _F(SubProc_setOutputStream), TY_void, TY_SubProc, MN_("setOutputStream"), 1, TY_File, FN_("stream"),
 		_Public, _F(SubProc_setErrorStream), TY_void, TY_SubProc, MN_("setErrorStream"), 1, TY_File, FN_("stream"),
 		_Public, _F(SubProc_connect), TY_void, TY_SubProc, MN_("connect"), 2, TY_SubProc, FN_("next"), TY_boolean, FN_("error"),
-
 		_Public, _F(SubProc_fg), TY_int, TY_SubProc, MN_("fg"), 0,
 		_Public, _F(SubProc_bg), TY_void, TY_SubProc, MN_("bg"), 0,
 
