@@ -808,14 +808,14 @@ static void UI_reportUserMessage(KonohaContext *kctx, kinfotag_t level, kfilelin
 {
 	const char *beginTag = PLATAPI beginTag(level);
 	const char *endTag = PLATAPI endTag(level);
-	const char *LF = isNewLine ? "\n" : "";
+	const char *kLF = isNewLine ? "\n" : "";
 	if(pline > 0) {
 		const char *file = FileId_t(pline);
 		PLATAPI printf_i("%s - (%s:%d) %s%s%s" ,
-			beginTag, PLATAPI shortFilePath(file), (kushort_t)pline, msg, LF, endTag);
+			beginTag, PLATAPI shortFilePath(file), (kushort_t)pline, msg, kLF, endTag);
 	}
 	else {
-		PLATAPI printf_i("%s%s%s%s", beginTag,  msg, LF, endTag);
+		PLATAPI printf_i("%s%s%s%s", beginTag,  msg, kLF, endTag);
 	}
 }
 

@@ -106,7 +106,7 @@ static KMETHOD Request_puts(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Request_getMethod(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRequest *self = (kRequest *) sfp[0].asObject;
-	KReturn(KLIB new_kString(kctx, self->r->method, strlen(self->r->method), 0));
+	KReturn(KLIB new_kString(kctx, OnStack, self->r->method, strlen(self->r->method), 0));
 }
 // ## String Request.getArgs();
 static KMETHOD Request_getArgs(KonohaContext *kctx, KonohaStack *sfp)
@@ -115,25 +115,25 @@ static KMETHOD Request_getArgs(KonohaContext *kctx, KonohaStack *sfp)
 	if(self->r->args == NULL) {
 		KReturn(KNULL(String));
 	}
-	KReturn(KLIB new_kString(kctx, self->r->args, strlen(self->r->args), 0));
+	KReturn(KLIB new_kString(kctx, OnStack, self->r->args, strlen(self->r->args), 0));
 }
 // ## String Request.getUri();
 static KMETHOD Request_getUri(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRequest *self = (kRequest *) sfp[0].asObject;
-	KReturn(KLIB new_kString(kctx, self->r->uri, strlen(self->r->uri), 0));
+	KReturn(KLIB new_kString(kctx, OnStack, self->r->uri, strlen(self->r->uri), 0));
 }
 // ## String Request.getPathInfo();
 static KMETHOD Request_getPathInfo(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRequest *self = (kRequest *) sfp[0].asObject;
-	KReturn(KLIB new_kString(kctx, self->r->path_info, strlen(self->r->path_info), 0));
+	KReturn(KLIB new_kString(kctx, OnStack, self->r->path_info, strlen(self->r->path_info), 0));
 }
 // ## String Request.getHandler();
 static KMETHOD Request_getHandler(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRequest *self = (kRequest *) sfp[0].asObject;
-	KReturn(KLIB new_kString(kctx, self->r->handler, strlen(self->r->handler), 0));
+	KReturn(KLIB new_kString(kctx, OnStack, self->r->handler, strlen(self->r->handler), 0));
 }
 // ## void Request.setContentType(String type);
 static KMETHOD Request_setContentType(KonohaContext *kctx, KonohaStack *sfp)
@@ -165,13 +165,13 @@ static KMETHOD Request_logError(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Request_getHeadersIn(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRequest *self = (kRequest *) sfp[0].asObject;
-	KReturn(KLIB new_kObjectDontUseThis(kctx, CT_AprTable, (uintptr_t)self->r->headers_in));
+	KReturn(KLIB new_kObject(kctx, OnStack, CT_AprTable, (uintptr_t)self->r->headers_in));
 }
 // ## AprTable Request.getHeadersOut();
 static KMETHOD Request_getHeadersOut(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRequest *self = (kRequest *) sfp[0].asObject;
-	KReturn(KLIB new_kObjectDontUseThis(kctx, CT_AprTable, (uintptr_t)self->r->headers_out));
+	KReturn(KLIB new_kObject(kctx, OnStack,CT_AprTable, (uintptr_t)self->r->headers_out));
 }
 
 // ## void AprTable.add(String key, String val)
@@ -196,12 +196,12 @@ static KMETHOD AprTable_set(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD AprTable_getElts(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kAprTable *self = (kAprTable *) sfp[0].asObject;
-	kArray *arr = (kArray*)KLIB new_kObjectDontUseThis(kctx, CT_Array, 0);
+	kArray *arr = (kArray*)KLIB new_kObject(kctx, OnStack, CT_Array, 0);
 	const apr_array_header_t *apr_arr = apr_table_elts(self->tbl);
 	const apr_table_entry_t *entries = (apr_table_entry_t *)apr_arr->elts;
 	int i=0;
 	for (i=0; i<apr_arr->nelts; i++) {
-		KLIB kArray_add(kctx, arr, (kAprTableEntry *)KLIB new_kObjectDontUseThis(kctx, CT_AprTableEntry, (uintptr_t)entries));
+		KLIB kArray_add(kctx, arr, (kAprTableEntry *)KLIB new_kObject(kctx, OnStack, CT_AprTableEntry, (uintptr_t)entries));
 		entries++;
 	}
 	KReturn(arr);
@@ -210,13 +210,13 @@ static KMETHOD AprTable_getElts(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD AprTableEntry_getKey(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kAprTableEntry *self = (kAprTableEntry *) sfp[0].asObject;
-	KReturn(KLIB new_kString(kctx, self->entry->key, strlen(self->entry->key), 0));
+	KReturn(KLIB new_kString(kctx, OnStack, self->entry->key, strlen(self->entry->key), 0));
 }
 // ## void AprTableEntry.getVal()
 static KMETHOD AprTableEntry_getVal(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kAprTableEntry *self = (kAprTableEntry *) sfp[0].asObject;
-	KReturn(KLIB new_kString(kctx, self->entry->val, strlen(self->entry->val), 0));
+	KReturn(KLIB new_kString(kctx, OnStack, self->entry->val, strlen(self->entry->val), 0));
 }
 // class methodList end ==============================================================================================
 
@@ -290,11 +290,15 @@ static int konoha_handler(request_rec *r)
 	}
 
 	/* XXX: We assume Request Object may not be freed by GC */
-	kObject *req_obj = KLIB new_kObjectDontUseThis(kctx, cRequest, (uintptr_t)r);
+	kObject *req_obj = KLIB new_kObject(kctx, OnStack, cRequest, (uintptr_t)r);
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, req_obj);
-	KCALL(lsfp, 0, mtd, 1, KLIB Knull(kctx, CT_Int));
+	{
+		KonohaStack *sfp = lsfp + K_CALLDELTA;
+		KSetMethodCallStack(sfp, 0/*UL*/, mtd, 1, KLIB Knull(kctx, CT_Int));
+		KonohaRuntime_callMethod(kctx, sfp);
+	}
 	END_LOCAL();
 	return lsfp[0].intValue;
 }
