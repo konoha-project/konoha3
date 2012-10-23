@@ -171,7 +171,8 @@ static int TokenUtils_skipIndent(kArray *tokenList, int currentIdx, int endIdx)
 static int TokenUtils_parseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx, KonohaClass **classRef);
 static KonohaClass* TokenUtils_parseGenericsType(KonohaContext *kctx, kNameSpace *ns, KonohaClass *baseClass, kArray *tokenList, int beginIdx, int endIdx)
 {
-	size_t currentIdx = beginIdx, psize = 0;
+	int currentIdx = beginIdx;
+	size_t psize = 0;
 	kparamtype_t *p = ALLOCA(kparamtype_t, endIdx);
 	while(currentIdx < endIdx) {
 		KonohaClass *paramClass = NULL;
