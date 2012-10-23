@@ -53,12 +53,30 @@ extern "C" {
 
 #define DUMPER(BUILDER)  ((JSVisitorLocal*)(BUILDER)->local_fields)
 
+enum kSymbolPrefix{
+	kSymbolPrefix_NONE,
+	kSymbolPrefix_SET,
+	kSymbolPrefix_GET,
+	kSymbolPrefix_AT,
+	kSymbolPrefix_IS,
+	kSymbolPrefix_UNKNOWN,
+	kSymbolPrefix_TO,
+	kSymbolPrefix_DOLLAR,
+};
+
+static enum kSymbolPrefix SYM_PRE_ID(ksymbol_t sym)
+{
+	size_t mask = ((size_t)(SYM_HEAD(sym)) >> ((sizeof(ksymbol_t) * 8)-3));
+	DBG_ASSERT(mask < 8);
+	return (enum kSymbolPrefix)mask;
+}
+
 static void JSVisitor_emitIndent(KonohaContext *kctx, IRBuilder *self)
 {
-	if(!DUMPER(self)->isIndentEmitted){
+	if(!DUMPER(self)->isIndentEmitted) {
 		int i;
 		//printf("%d: ", DUMPER(self)->indent);
-		for(i = 0; i < DUMPER(self)->indent; i++){
+		for(i = 0; i < DUMPER(self)->indent; i++) {
 			printf("    ");
 		}
 		DUMPER(self)->isIndentEmitted = true;
@@ -128,7 +146,7 @@ static void JSVisitor_visitErrStmt(KonohaContext *kctx, IRBuilder *self, kStmt *
 static void JSVisitor_visitExprStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
 {
 	kExpr *expr = Stmt_getFirstExpr(kctx, stmt);
-	if(expr->build == TEXPR_LET){
+	if(expr->build == TEXPR_LET) {
 		JSVisitor_emitString(kctx, self, "var ", "", "");
 	}
 	handleExpr(kctx, self, expr);
@@ -144,11 +162,11 @@ static void JSVisitor_visitBlockStmt(KonohaContext *kctx, IRBuilder *self, kStmt
 
 static void JSVisitor_visitReturnStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
 {
-	if(DUMPER(self)->visitingMethod->mn != 0){
+	if(DUMPER(self)->visitingMethod->mn != 0) {
 		JSVisitor_emitString(kctx, self, "return ", "", "");
 	}
 	kExpr* expr = Stmt_getFirstExpr(kctx, stmt);
-	if(expr != NULL && IS_Expr(expr)){
+	if(expr != NULL && IS_Expr(expr)) {
 		handleExpr(kctx, self, expr);
 	}
 	JSVisitor_emitNewLine(kctx, self, ";");
@@ -158,11 +176,11 @@ static void JSVisitor_visitIfStmt(KonohaContext *kctx, IRBuilder *self, kStmt *s
 {
 	JSVisitor_emitString(kctx, self, "if(", "", "");
 	handleExpr(kctx, self, Stmt_getFirstExpr(kctx, stmt));
-	JSVisitor_emitNewLine(kctx, self, "){");
+	JSVisitor_emitNewLine(kctx, self, ") {");
 	DUMPER(self)->indent++;
 	visitBlock(kctx, self, Stmt_getFirstBlock(kctx, stmt));
 	kBlock *elseBlock = Stmt_getElseBlock(kctx, stmt);
-	if(elseBlock != K_NULLBLOCK){
+	if(elseBlock != K_NULLBLOCK) {
 		JSVisitor_emitNewLineToUnderLevel(kctx, self, "}else{");
 		visitBlock(kctx, self, elseBlock);
 	}
@@ -174,7 +192,7 @@ static void JSVisitor_visitLoopStmt(KonohaContext *kctx, IRBuilder *self, kStmt 
 {
 	JSVisitor_emitString(kctx, self, "while(", "", "");
 	handleExpr(kctx, self, Stmt_getFirstExpr(kctx, stmt));
-	JSVisitor_emitNewLine(kctx, self, "){");
+	JSVisitor_emitNewLine(kctx, self, ") {");
 	DUMPER(self)->indent++;
 	visitBlock(kctx, self, Stmt_getFirstBlock(kctx, stmt));
 	JSVisitor_emitNewLineToUnderLevel(kctx, self, "}");
@@ -193,11 +211,11 @@ static void JSVisitor_visitTryStmt(KonohaContext *kctx, IRBuilder *self, kStmt *
 	visitBlock(kctx, self, Stmt_getFirstBlock(kctx, stmt));
 	kBlock *catchBlock   = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("catch"),   K_NULLBLOCK);
 	kBlock *finallyBlock = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("finally"), K_NULLBLOCK);
-	if(catchBlock != K_NULLBLOCK){
-		JSVisitor_emitNewLineToUnderLevel(kctx, self, "}catch(e){");
+	if(catchBlock != K_NULLBLOCK) {
+		JSVisitor_emitNewLineToUnderLevel(kctx, self, "}catch(e) {");
 		visitBlock(kctx, self, catchBlock);
 	}
-	if(finallyBlock != K_NULLBLOCK){
+	if(finallyBlock != K_NULLBLOCK) {
 		JSVisitor_emitNewLineToUnderLevel(kctx, self, "}finally{");
 		visitBlock(kctx, self, finallyBlock);
 	}
@@ -276,29 +294,47 @@ static bool JSVisitor_importPackage(KonohaContext *kctx, kNameSpace *ns, kString
 static void JSVisitor_ConvertAndEmitMethodName(KonohaContext *kctx, IRBuilder *self, kExpr *expr, kExpr *receiver, kMethod *mtd)
 {
 	KGrowingBuffer wb;
+	KonohaClass *globalObjectClass = KLIB kNameSpace_getClass(kctx, self->currentStmt->parentBlockNULL->BlockNameSpace, "GlobalObject", 12, NULL);
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	KLIB Kwb_printf(kctx, &wb, "%s%s", T_mn(mtd->mn));
 
 	const char *methodName = KLIB Kwb_top(kctx, &wb, 1);
-	if(receiver->ty == TY_System && methodName[0] == 'p'){
+	if(receiver->ty == TY_System && methodName[0] == 'p') {
 		JSVisitor_emitString(kctx, self, "console.log", "", "");
 	}else{
-		if(receiver->ty == TY_NameSpace){
-			if(mtd->mn == MN_("import")){
-				kString *packageNameString = (kString*)kExpr_at(expr, 2)->objectConstValue;
-				kNameSpace *ns = (kNameSpace*)receiver->objectConstValue;
-				JSVisitor_importPackage(kctx, ns, packageNameString, expr->termToken->uline);
-				JSVisitor_emitString(kctx, self, "//", "", "");
-			}
-		}else{
-			if(receiver->build == TEXPR_NULL){
+		if(receiver->ty == TY_NameSpace && mtd->mn == MN_("import")) {
+			kString *packageNameString = (kString*)kExpr_at(expr, 2)->objectConstValue;
+			kNameSpace *ns = (kNameSpace*)receiver->objectConstValue;
+			JSVisitor_importPackage(kctx, ns, packageNameString, expr->termToken->uline);
+			JSVisitor_emitString(kctx, self, "//", "", "");
+		}else if(CT_(receiver->ty) != globalObjectClass) {
+			if(receiver->build == TEXPR_NULL) {
 				JSVisitor_emitString(kctx, self, CT_t(CT_(receiver->ty)), "", "");
 			}else{
 				handleExpr(kctx, self, receiver);
 			}
-			JSVisitor_emitString(kctx, self, ".", "", "");
 		}
-		JSVisitor_emitString(kctx, self, "", T_mn(mtd->mn));
+		switch(SYM_PRE_ID(mtd->mn)) {
+		case kSymbolPrefix_GET:
+			if(CT_(receiver->ty) == globalObjectClass) {
+				JSVisitor_emitString(kctx, self, "", SYM_t(mtd->mn), "");
+			}else{
+				JSVisitor_emitString(kctx, self, ".", SYM_t(mtd->mn), "");
+			}
+			break;
+		case kSymbolPrefix_SET:
+			if(CT_(receiver->ty) == globalObjectClass) {
+				JSVisitor_emitString(kctx, self, "var ", SYM_t(mtd->mn), " = ");
+			}else{
+				JSVisitor_emitString(kctx, self, ".", SYM_t(mtd->mn), " = ");
+			}
+			break;
+		case kSymbolPrefix_TO:
+			break;
+		default:
+			JSVisitor_emitString(kctx, self, ".", T_mn(mtd->mn));
+			break;
+		}
 	}
 }
 
@@ -306,35 +342,45 @@ static void JSVisitor_visitCallExpr(KonohaContext *kctx, IRBuilder *self, kExpr 
 {
 	kMethod *mtd = CallExpr_getMethod(expr);
 
-	if(kArray_size(expr->cons) == 2 && MethodName_isUnaryOperator(kctx, mtd->mn)){
+	if(kArray_size(expr->cons) == 2 && MethodName_isUnaryOperator(kctx, mtd->mn)) {
 		JSVisitor_emitString(kctx, self, T_mn(mtd->mn), "(");
 		handleExpr(kctx, self, kExpr_at(expr, 1));
 		JSVisitor_emitString(kctx, self, ")", "", "");
 	}
-	else if(MethodName_isBinaryOperator(kctx, mtd->mn)){
+	else if(MethodName_isBinaryOperator(kctx, mtd->mn)) {
 		JSVisitor_emitString(kctx, self, "(", "", "");
 		handleExpr(kctx, self, kExpr_at(expr, 1));
 		JSVisitor_emitString(kctx, self, " ", SYM_t(mtd->mn), " ");
 		handleExpr(kctx, self, kExpr_at(expr, 2));
 		JSVisitor_emitString(kctx, self, ")", "", "");
 	}
-	else {
+	else{
 		kExpr *receiver = kExpr_at(expr, 1);
-		if(mtd == DUMPER(self)->visitingMethod){
+		if(mtd == DUMPER(self)->visitingMethod) {
 			JSVisitor_emitString(kctx, self, "arguments.callee", "", "");
 		}else{
 			JSVisitor_ConvertAndEmitMethodName(kctx, self, expr, receiver, mtd);
 		}
-		JSVisitor_emitString(kctx, self, "(", "", "");
-		unsigned i;
-		unsigned n = kArray_size(expr->cons);
-		for(i = 2; i < n;){
-			handleExpr(kctx, self, kExpr_at(expr, i));
-			if(++i < n){
-				JSVisitor_emitString(kctx, self, ", ", "", "");
+		switch(SYM_PRE_ID(mtd->mn)) {
+		case kSymbolPrefix_GET:
+		case kSymbolPrefix_TO:
+			break;
+		case kSymbolPrefix_SET:
+			handleExpr(kctx, self, kExpr_at(expr, 2));
+			break;
+		default:{
+			unsigned i;
+			unsigned n = kArray_size(expr->cons);
+			JSVisitor_emitString(kctx, self, "(", "", "");
+			for(i = 2; i < n;) {
+				handleExpr(kctx, self, kExpr_at(expr, i));
+				if(++i < n) {
+					JSVisitor_emitString(kctx, self, ", ", "", "");
+				}
 			}
-		}
-		JSVisitor_emitString(kctx, self, ")", "", "");
+			JSVisitor_emitString(kctx, self, ")", "", "");
+			break;
+		}}
 	}
 }
 
@@ -343,9 +389,9 @@ static void JSVisitor_visitAndExpr(KonohaContext *kctx, IRBuilder *self, kExpr *
 	unsigned n = kArray_size(expr->cons);
 	unsigned i;
 	JSVisitor_emitString(kctx, self, "(", "", "");
-	for(i = 1; i < kArray_size(expr->cons);){
+	for(i = 1; i < kArray_size(expr->cons);) {
 		handleExpr(kctx, self, kExpr_at(expr, i));
-		if(++i < n){
+		if(++i < n) {
 			JSVisitor_emitString(kctx, self, " && ", "", "");
 		}
 	}
@@ -357,9 +403,9 @@ static void JSVisitor_visitOrExpr(KonohaContext *kctx, IRBuilder *self, kExpr *e
 	unsigned n = kArray_size(expr->cons);
 	unsigned i;
 	JSVisitor_emitString(kctx, self, "(", "", "");
-	for(i = 1; i < kArray_size(expr->cons);){
+	for(i = 1; i < kArray_size(expr->cons);) {
 		handleExpr(kctx, self, kExpr_at(expr, i));
-		if(++i < n){
+		if(++i < n) {
 			JSVisitor_emitString(kctx, self, " || ", "", "");
 		}
 	}
@@ -391,22 +437,22 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	kParam *pa = Method_param(mtd);
-	if(mtd->mn != 0){
+	if(mtd->mn != 0) {
 		kMethod_setFunc(kctx, mtd, NULL);
-		if(mtd->typeId == TY_NameSpace){
+		if(mtd->typeId == TY_NameSpace) {
 			KLIB Kwb_printf(kctx, &wb, "%s%s = function(", T_mn(mtd->mn));
 		}else{
 			KLIB Kwb_printf(kctx, &wb, "%s.%s%s = function(", CT_t(CT_(mtd->typeId)), T_mn(mtd->mn));
 		}
-		for(i = 0; i < pa->psize; i++){
-			if(i != 0){
+		for(i = 0; i < pa->psize; i++) {
+			if(i != 0) {
 				KLIB Kwb_printf(kctx, &wb, ", %s", SYM_t(pa->paramtypeItems[i].fn));
 			}else{
 				KLIB Kwb_printf(kctx, &wb, "%s", SYM_t(pa->paramtypeItems[i].fn));
 			}
 		}
 		JSVisitor_emitString(kctx, builder, KLIB Kwb_top(kctx, &wb, 1), "", "");
-		JSVisitor_emitNewLine(kctx, builder, "){");
+		JSVisitor_emitNewLine(kctx, builder, ") {");
 		DUMPER(builder)->indent++;
 	}else{
 		KLIB kNameSpace_compileAllDefinedMethods(kctx);
@@ -418,7 +464,7 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 
 static void JSVisitor_free(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
 {
-	if(mtd->mn != 0){
+	if(mtd->mn != 0) {
 		DUMPER(builder)->indent--;
 		JSVisitor_emitNewLine(kctx, builder, "}");
 	}else{
