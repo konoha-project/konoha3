@@ -188,18 +188,18 @@ static int TRACE_pipe2(KonohaContext *kctx, int *fds, int flags, KTraceInfo *tra
 		return -1;
 	}
 	fprintf(stderr, "??? pid=%d, dfs[0]=%d, fds[1]=%d\n", getpid(), p[0], p[1]);
-	if( (val=fcntl(p[0], F_GETFL, 0)) == -1 ) {
-		goto L_ERR;
-	}
-	if( fcntl(p[0], F_SETFL, val | flags) == -1 ) {
-		goto L_ERR;
-	}
-	if( (val=fcntl(p[1], F_GETFL, 0)) == -1 ) {
-		goto L_ERR;
-	}
-	if( fcntl(p[1], F_SETFL, val | flags) == -1 ) {
-		goto L_ERR;
-	}
+//	if( (val=fcntl(p[0], F_GETFL, 0)) == -1 ) {
+//		goto L_ERR;
+//	}
+//	if( fcntl(p[0], F_SETFL, val | flags) == -1 ) {
+//		goto L_ERR;
+//	}
+//	if( (val=fcntl(p[1], F_GETFL, 0)) == -1 ) {
+//		goto L_ERR;
+//	}
+//	if( fcntl(p[1], F_SETFL, val | flags) == -1 ) {
+//		goto L_ERR;
+//	}
 	fds[0] = p[0];
 	fds[1] = p[1];
 	return 0;
