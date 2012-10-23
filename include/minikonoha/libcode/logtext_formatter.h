@@ -99,6 +99,21 @@ static char *writeUnsingedIntToBuffer(uintptr_t uint, char *const buftop, const 
 	return buftop + i;
 }
 
+// the last entry of args must be NULL
+static char *writeCharArrayToBuffer(const char** args, char *buftop, char *bufend)
+{
+	int i;
+	buftop[0] = '['; buftop += 1;
+	for(i = 0; args[i] != NULL; i++) {
+		buftop = writeTextToBuffer(args[i], buftop, bufend);
+		if(args[i+1] != NULL) {
+			buftop[0] = ','; buftop[1] = ' '; buftop += 2;
+		}
+	}
+	buftop[0] = ']';
+	return buftop + 1;
+}
+
 static char* writeKeyToBuffer(const char *key, size_t keylen, char *buftop, char *bufend)
 {
 	if(buftop < bufend) {
@@ -220,6 +235,12 @@ static void writeDataLogToBuffer(KonohaContext *kctx, logconf_t *logconf, va_lis
 		}
 		case LOG_ERRNO : {
 			buftop = writeErrnoToBuffer(logconf, buftop, bufend);
+			break;
+		}
+		case LOG_a : {
+			const char *key = va_arg(ap, const char *);
+			buftop = writeKeyToBuffer(key, strlen(key), buftop, bufend);
+			buftop = writeCharArrayToBuffer(va_arg(ap, const char**), buftop, bufend);
 			break;
 		}
 		}

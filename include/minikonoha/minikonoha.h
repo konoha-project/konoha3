@@ -472,9 +472,11 @@ struct PlatformApiVar {
 #define LOG_s     1
 #define LOG_u     2
 #define LOG_ERRNO 3
+#define LOG_a     4 /*char **/
 
 #define LogUint(K,V)    LOG_u, (K), ((uintptr_t)V)
 #define LogText(K,V)    LOG_s, (K), (V)
+#define LogTextArray(K,V)  LOG_a, (K), (V)
 #define LogErrno        LOG_ERRNO
 
 #define KTraceErrorPoint(TRACE, POLICY, APINAME, ...)    do {\
