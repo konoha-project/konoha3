@@ -88,7 +88,7 @@ set(PACKAGES
 	konoha.var
 	sugar
 	cstyle
-	llvm
+	cstyle.libc
 	posix.process
 	posix.path
 	posix.fd
@@ -99,6 +99,7 @@ set(PACKAGES
 	dscript.shell
 	dscript.eventlistener
 	curl
+	llvm
 ##	ijit
 ##	jansson
 	mecab
