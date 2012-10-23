@@ -430,6 +430,7 @@ foreach(f ${test_files})
 		"KONOHA_PACKAGEPATH=${PARENT_BINARY_DIR}/package")
 endforeach(f ${test_files})
 
+option(USE_TRACEVM "Use tracevm" ON)
 if(USE_TRACEVM)
 add_definitions(-DK_USE_PTHREAD)
 add_definitions(-DK_USE_TRACEVM)
