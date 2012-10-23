@@ -1487,7 +1487,7 @@ struct KonohaLibVar {
 	KonohaClass*    (*Kclass)(KonohaContext*, ktype_t, KTraceInfo *);
 	kString*        (*KonohaClass_shortName)(KonohaContext*, KonohaClass *ct);
 	KonohaClass*    (*KonohaClass_define)(KonohaContext*, kpackageId_t, kString *, KDEFINE_CLASS *, KTraceInfo *);
-	KonohaClass*    (*KonohaClass_Generics)(KonohaContext*, KonohaClass *, ktype_t rty, int psize, kparamtype_t *p);
+	KonohaClass*    (*KonohaClass_Generics)(KonohaContext*, KonohaClass *, ktype_t rty, kushort_t psize, kparamtype_t *p);
 	kbool_t         (*KonohaClass_isSubtype)(KonohaContext*, KonohaClass *, KonohaClass *);
 	kbool_t         (*KonohaClass_addField)(KonohaContext*, KonohaClass *, int flag, ktype_t ty, ksymbol_t sym);
 
@@ -1509,9 +1509,9 @@ struct KonohaLibVar {
 	void            (*kArray_insert)(KonohaContext*, kArray *, size_t, kAbstractObject *);
 	void            (*kArray_clear)(KonohaContext*, kArray *, size_t);
 
-	kparamId_t      (*Kparamdom)(KonohaContext*, int, const kparamtype_t *);
+	kparamId_t      (*Kparamdom)(KonohaContext*, kushort_t, const kparamtype_t *);
 	kMethod *       (*new_kMethod)(KonohaContext*, kArray *gcstack, uintptr_t, ktype_t, kmethodn_t, MethodFunc);
-	kParam*         (*kMethod_setParam)(KonohaContext*, kMethod *, ktype_t, int, const kparamtype_t *);
+	kParam*         (*kMethod_setParam)(KonohaContext*, kMethod *, ktype_t, kushort_t, const kparamtype_t *);
 	void            (*kMethod_setFunc)(KonohaContext*, kMethod*, MethodFunc);
 	void            (*kMethod_genCode)(KonohaContext*, kMethod*, kBlock *bk);
 	intptr_t        (*kMethod_indexOfField)(kMethod *);

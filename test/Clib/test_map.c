@@ -41,7 +41,7 @@ static void reftrace2(KonohaContext *kctx, void *e)
 
 void test_Kmap(KonohaContext *kctx)
 {
-    int i;
+    uintptr_t i;
     KHashMap* map = KLIB Kmap_init(kctx, 4);
     for (i = 0; i < 10; ++i) {
         KHashMapEntry *entry = KLIB Kmap_newEntry(kctx, map, i);

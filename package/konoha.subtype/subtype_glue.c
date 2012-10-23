@@ -63,7 +63,6 @@ static KMETHOD Object_as(KonohaContext *kctx, KonohaStack *sfp)
 #define _Const    kMethod_Const
 #define _Hidden   kMethod_Hidden
 #define _Imm    kMethod_Immutable
-#define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
 static kbool_t subtype_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)

@@ -91,6 +91,24 @@ static void DumpVisitor_visitJumpStmt(KonohaContext *kctx, IRBuilder *self, kStm
 	emit_string("Jump", "", "", DUMPER(self)->indent);
 }
 
+static void DumpVisitor_visitTryStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
+{
+	DUMPER(self)->indent++;
+	emit_string("Try", "", "", DUMPER(self)->indent - 1);
+	visitBlock(kctx, self, Stmt_getFirstBlock(kctx, stmt));
+	kBlock *catchBlock   = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("catch"),   K_NULLBLOCK);
+	kBlock *finallyBlock = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("finally"), K_NULLBLOCK);
+	if(catchBlock != K_NULLBLOCK){
+		emit_string("Catch", "", "", DUMPER(self)->indent - 1);
+		visitBlock(kctx, self, catchBlock);
+	}
+	if(finallyBlock != K_NULLBLOCK){
+		emit_string("Finally", "", "", DUMPER(self)->indent - 1);
+		visitBlock(kctx, self, finallyBlock);
+	}
+	DUMPER(self)->indent--;
+}
+
 static void DumpVisitor_visitUndefinedStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
 {
 	emit_string("UNDEF", "", "", DUMPER(self)->indent);

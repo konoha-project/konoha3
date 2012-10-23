@@ -96,12 +96,12 @@ static void JSVisitor_emitString(KonohaContext *kctx, IRBuilder *self, const cha
 	printf("%s%s%s", prefix, str, suffix);
 }
 
-static void JSVisitor_emitStringToUnderLevel(KonohaContext *kctx, IRBuilder *self, const char* prefix, const char* str, const char* suffix)
-{
-	DUMPER(self)->indent--;
-	JSVisitor_emitString(kctx, self, prefix, str, suffix);
-	DUMPER(self)->indent++;
-}
+//static void JSVisitor_emitStringToUnderLevel(KonohaContext *kctx, IRBuilder *self, const char* prefix, const char* str, const char* suffix)
+//{
+//	DUMPER(self)->indent--;
+//	JSVisitor_emitString(kctx, self, prefix, str, suffix);
+//	DUMPER(self)->indent++;
+//}
 
 static void JSVisitor_emitNewLineToUnderLevel(KonohaContext *kctx, IRBuilder *self, const char* endline)
 {

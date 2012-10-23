@@ -52,6 +52,7 @@ struct IRBuilderAPI {
 	VisitStmt_t visitIfStmt;
 	VisitStmt_t visitLoopStmt;
 	VisitStmt_t visitJumpStmt;
+	VisitStmt_t visitTryStmt;
 	VisitStmt_t visitUndefinedStmt;
 	VisitExpr_t visitConstExpr;
 	VisitExpr_t visitNConstExpr;
@@ -77,6 +78,7 @@ struct IRBuilderAPI {
 	OP(IfStmt)\
 	OP(LoopStmt)\
 	OP(JumpStmt)\
+	OP(TryStmt)\
 	OP(UndefinedStmt)\
 	OP(ConstExpr)\
 	OP(NConstExpr)\
@@ -129,6 +131,7 @@ static void handleStmt(KonohaContext *kctx, IRBuilder *builder, kStmt *stmt)
 		case TSTMT_IF:     builder->api.visitIfStmt(kctx, builder, stmt);     break;
 		case TSTMT_LOOP:   builder->api.visitLoopStmt(kctx, builder, stmt);   break;
 		case TSTMT_JUMP:   builder->api.visitJumpStmt(kctx, builder, stmt);   break;
+		case TSTMT_TRY:    builder->api.visitTryStmt(kctx, builder, stmt);    break;
 		default: builder->api.visitUndefinedStmt(kctx, builder, stmt);        break;
 	}
 	builder->currentStmt = beforeStmt;
@@ -247,7 +250,6 @@ static kBasicBlock *kStmt_getLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbo
 #define OC_(sfpidx)       ((sfpidx) * 2)
 #define TC_(sfpidx, TYPE) ((TY_isUnbox(TYPE)) ? NC_(sfpidx) : OC_(sfpidx))
 #define SFP_(sfpidx)   ((sfpidx) * 2)
-#define RIX_(rix)      rix
 
 #define BasicBlock_codesize(BB)  ((BB)->codeTable.bytesize / sizeof(VirtualMachineInstruction))
 #define BBOP(BB)     (BB)->codeTable.codeItems
@@ -258,6 +260,7 @@ static kBasicBlock *kStmt_getLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbo
 	BUILD_asm(kctx, &tmp_.op, sizeof(OP##T));\
 } while(0)
 
+#if 0
 #define ASMop(T, OP, ...) do {\
 	OP##T op_ = {TADDR, OP, ASMLINE, ## __VA_ARGS__};\
 	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_;\
@@ -269,6 +272,7 @@ static kBasicBlock *kStmt_getLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbo
 	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_;\
 	ASM_BRANCH_(kctx, lb, &tmp_.op, sizeof(OP##T)); \
 } while(0)
+#endif
 
 #define kBasicBlock_add(bb, T, ...) do { \
 	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};\
@@ -465,6 +469,18 @@ static void KonohaVisitor_visitJumpStmt(KonohaContext *kctx, IRBuilder *self, kS
 	DBG_ASSERT(lbJUMP != NULL && IS_BasicBlock(lbJUMP));
 	ASM_JMP(kctx, lbJUMP);
 }
+
+static void KonohaVisitor_visitTryStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
+{
+	//FIXME
+	//kBlock *catchBlock   = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("catch"),   K_NULLBLOCK);
+	//kBlock *finallyBlock = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("finally"), K_NULLBLOCK);
+	//if(catchBlock != K_NULLBLOCK){
+	//}
+	//if(finallyBlock != K_NULLBLOCK){
+	//}
+}
+
 
 static void KonohaVisitor_visitUndefinedStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
 {
@@ -853,8 +869,6 @@ static size_t BasicBlock_peephole(KonohaContext *kctx, kBasicBlock *bb)
 	}
 	return BasicBlock_codesize(bb); /*bbsize*/;
 }
-
-#define BB_(bb)   (bb != NULL) ? bb->id : -1
 
 static size_t BasicBlock_size(KonohaContext *kctx, kBasicBlock *bb, size_t c)
 {

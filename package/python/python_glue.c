@@ -31,7 +31,7 @@
 extern "C"{
 #endif
 
-#define OB_TYPE(obj) (((PyObject *)obj->self)->ob_type)
+#//define OB_TYPE(obj) (((PyObject *)obj->self)->ob_type)
 
 typedef const struct kPyObjectVar kPyObject;
 struct kPyObjectVar {
@@ -227,8 +227,8 @@ static KMETHOD PyObject_toString(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //}
 
-#define _BITS 8
-#define PY_SSIZE_MAX (size_t)(1 << 31)
+//#define _BITS 8
+//#define PY_SSIZE_MAX (size_t)(1 << 31)
 
 //static KMETHOD Array_toPyObject(KonohaContext *kctx, KonohaStack *sfp)
 //{

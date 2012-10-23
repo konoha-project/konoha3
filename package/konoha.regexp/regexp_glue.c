@@ -27,8 +27,8 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/klib.h>
-#include <pcre.h>
 #include <minikonoha/konoha_common.h>
+#include <pcre.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -186,19 +186,19 @@ static int pcre_regcomp(KonohaContext *kctx, kregexp_t *reg, const char *pattern
 static int pcre_regexec(KonohaContext *kctx, kregexp_t *reg, const char *str, size_t nmatch, kregmatch_t p[], int eflags)
 {
 	PCRE_regexp_t *preg = (PCRE_regexp_t *)reg;
-	int res, nm_count, nvector[nmatch*3];
+	int res, nvector[nmatch*3];
 	nvector[0] = 0;
 	size_t idx, matched = nmatch;
 	if(strlen(str) == 0) return -1;
 	if((res = pcre_exec(preg->re, NULL, str, strlen(str), 0, eflags, nvector, nmatch*3)) >= 0) {
-		matched = (res > 0 && res < nmatch) ? res : nmatch;
+		size_t nm_count = 0;
+		matched = (res > 0 && (size_t)res < nmatch) ? (size_t)res : nmatch;
 		res = 0;
 		for (idx = 0; idx < matched; idx++) {
 			p[idx].rm_so = nvector[2*idx];
 			p[idx].rm_eo = nvector[2*idx+1];
 		}
 		p[idx].rm_so = -1;
-		nm_count = 0;
 		pcre_fullinfo(preg->re, NULL, PCRE_INFO_NAMECOUNT, &nm_count);
 		if(nm_count > 0) {
 			unsigned char *nm_table;
@@ -415,9 +415,9 @@ static void kArray_executeRegExp(KonohaContext *kctx, kArray *resultArray, kRegE
 		const char *s = S_text(s0);  // necessary
 		const char *base = s;
 		const char *eos = base + S_size(s0);
-		size_t nmatch = pcre_nmatchsize(kctx, regex->reg);
+		size_t i, nmatch = pcre_nmatchsize(kctx, regex->reg);
 		kregmatch_t *p, pmatch[nmatch+1];
-		int i, isGlobalOption = RegExp_isGlobal(regex);
+		int isGlobalOption = RegExp_isGlobal(regex);
 		do {
 			int res = pcre_regexec(kctx, regex->reg, s, nmatch, pmatch, regex->eflags);
 			if(res != 0) {
@@ -512,7 +512,7 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 /* ------------------------------------------------------------------------ */
 /* split */
 
-static void kArray_split(KonohaContext *kctx, kArray *resultArray, kString *str, kRegExp *regex, int limit)
+static void kArray_split(KonohaContext *kctx, kArray *resultArray, kString *str, kRegExp *regex, size_t limit)
 {
 	int stringPolicy = kString_is(ASCII, str) ? StringPolicy_ASCII : 0;
 	if(IS_NOTNULL(regex) && S_size(regex->pattern) > 0) {
@@ -567,7 +567,7 @@ static KMETHOD String_split(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD String_splitWithLimit(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
-	int limit = sfp[2].intValue < 0 ? S_size(sfp[0].asString) : sfp[2].intValue;
+	size_t limit = sfp[2].intValue < 0 ? S_size(sfp[0].asString) : (size_t) sfp[2].intValue;
 	kArray *resultArray = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	kArray_split(kctx, resultArray, sfp[0].asString, sfp[1].asRegExp, limit);
 	KReturnWith(resultArray, RESET_GCSTACK());
@@ -585,9 +585,9 @@ static KMETHOD RegExp_test(KonohaContext *kctx, KonohaStack *sfp)
 		const char *str = S_text(s0);  // necessary
 		const char *base = str;
 		const char *eos = base + S_size(s0);
-		size_t nmatch = pcre_nmatchsize(kctx, re->reg);
+		size_t i, nmatch = pcre_nmatchsize(kctx, re->reg);
 		kregmatch_t *p, pmatch[nmatch+1];
-		int i, isGlobalOption = RegExp_isGlobal(re);
+		int isGlobalOption = RegExp_isGlobal(re);
 		do {
 			int res = pcre_regexec(kctx, re->reg, str, nmatch, pmatch, re->eflags);
 			if(res != 0) {
@@ -615,10 +615,9 @@ static KMETHOD RegExp_test(KonohaContext *kctx, KonohaStack *sfp)
 
 // --------------------------------------------------------------------------
 
-#define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Coercion kMethod_Coercion
-#define _Im kMethod_Immutable
+#define _Public kMethod_Public
+#define _Const  kMethod_Const
+#define _Im     kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
 static kbool_t regexp_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)

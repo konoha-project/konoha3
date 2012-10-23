@@ -55,7 +55,7 @@ extern "C" {
 #define S_FLAG_EXTERNAL  (S_FLAG_LINER | S_FLAG_NOFREE)
 
 #define MASK_LINER    ((S_FLAG_LINER   ) << S_FLAG_MASK_BASE)
-#define MASK_NOFREE   ((S_FLAG_NOFREE  ) << S_FLAG_MASK_BASE)
+//#define MASK_NOFREE ((S_FLAG_NOFREE  ) << S_FLAG_MASK_BASE)
 #define MASK_ROPE     ((S_FLAG_ROPE    ) << S_FLAG_MASK_BASE)
 #define MASK_INLINE   ((S_FLAG_INLINE  ) << S_FLAG_MASK_BASE)
 #define MASK_EXTERNAL ((S_FLAG_EXTERNAL) << S_FLAG_MASK_BASE)
@@ -84,7 +84,7 @@ typedef struct kRopeString {
 
 typedef struct kInlineString {
 	struct kStringBase base;
-	/* for binary compatibilty with kString, we need 'text' pointer */
+	/* for binary compatibility with kString, we need 'text' pointer */
 	char *text;
 	char inline_text[SIZEOF_INLINETEXT];
 } kInlineString;
