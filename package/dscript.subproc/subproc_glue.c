@@ -181,13 +181,13 @@ static void cleanUp_fds(int *fds)
 
 static int TRACE_pipe2(KonohaContext *kctx, int *fds, int flags, KTraceInfo *trace)
 {
-	int val;
+	//int val;
 	int p[2];
 	if( pipe(p) == -1 ) {
 		KTraceErrorPoint(trace, SystemFault, "pipe", LogErrno);
 		return -1;
 	}
-	fprintf(stderr, "??? pid=%d, dfs[0]=%d, fds[1]=%d\n", getpid(), p[0], p[1]);
+//	fprintf(stderr, "??? pid=%d, dfs[0]=%d, fds[1]=%d\n", getpid(), p[0], p[1]);
 //	if( (val=fcntl(p[0], F_GETFL, 0)) == -1 ) {
 //		goto L_ERR;
 //	}
@@ -203,17 +203,17 @@ static int TRACE_pipe2(KonohaContext *kctx, int *fds, int flags, KTraceInfo *tra
 	fds[0] = p[0];
 	fds[1] = p[1];
 	return 0;
-L_ERR:;
-	{
-		KTraceErrorPoint(trace, SystemFault, "fcntl", LogErrno);
-		cleanUp_fds(p);
-		return -1;
-	}
+//L_ERR:;
+//	{
+//		KTraceErrorPoint(trace, SystemFault, "fcntl", LogErrno);
+//		cleanUp_fds(p);
+//		return -1;
+//	}
 }
 
 static void dup2_or_exit(int fd, int fd2)
 {
-	fprintf(stderr, ">>>>> pid=%d, fd=%d, fd2=%d\n", getpid(), fd, fd2);
+	//fprintf(stderr, ">>>>> pid=%d, fd=%d, fd2=%d\n", getpid(), fd, fd2);
 	if(fd != fd2) {
 		close(fd2);
 		if(dup2(fd, fd2) == -1) {
@@ -327,9 +327,9 @@ static int kSubProc_exec(KonohaContext *kctx, kSubProc *sbp, KTraceInfo *trace)
 		kSubProc_execOnChild(kctx, sbp, trace);
 		break;
 	default:
-		fprintf(stderr, "??? pid=%d, p2c[0]=%d, p2c[1]=%d\n", getpid(), p2c[0], p2c[1]);
-		fprintf(stderr, "??? pid=%d, c2p[0]=%d, c2p[1]=%d\n", getpid(), c2p[0], c2p[1]);
-		fprintf(stderr, "??? pid=%d, err[0]=%d, err[1]=%d\n", getpid(), errPipe[0], errPipe[1]);
+//		fprintf(stderr, "??? pid=%d, p2c[0]=%d, p2c[1]=%d\n", getpid(), p2c[0], p2c[1]);
+//		fprintf(stderr, "??? pid=%d, c2p[0]=%d, c2p[1]=%d\n", getpid(), c2p[0], c2p[1]);
+//		fprintf(stderr, "??? pid=%d, err[0]=%d, err[1]=%d\n", getpid(), errPipe[0], errPipe[1]);
 		if(sbp->InNULL == NULL) {
 			KFieldInit(sbp, sbp->InNULL, new_PipeFile(kctx, OnField, p2c[W], "w", sbp->Command, trace));
 			close(p2c[R]);
