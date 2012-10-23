@@ -56,12 +56,10 @@ set(PACKAGES
 	konoha
 	konoha.array
 	konoha.assign
-#	konoha.break
 	konoha.bytes
 	konoha.class
 	konoha.complex
 	konoha.const
-#	konoha.continue
 	konoha.date
 	konoha.defined
 	konoha.dynamic
@@ -88,7 +86,6 @@ set(PACKAGES
 ##	konoha.sql
 	konoha.untyped
 	konoha.var
-#	konoha.while
 	sugar
 	cstyle
 	llvm
@@ -108,7 +105,6 @@ set(PACKAGES
 	python
 #	apache   ## removed Module bugs
 #	openssl
-#	logpool
 	gmp
 )
 
