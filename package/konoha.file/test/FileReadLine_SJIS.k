@@ -4,7 +4,7 @@ import("konoha.null");
 import("konoha.file");
 void test() {
 	String file = FILE.scriptPath("files/sjis_kanji.txt");
-	FILE fp = System.fopen(file, "r");
+	FILE fp = new FILE(file, "r");
 	fp.setReaderCharset("SJIS");
 	String line;
 	while((line = fp.readLine()) != null) {

@@ -4,7 +4,7 @@ import("konoha.null");
 import("konoha.file");
 void test() {
 	String file = FILE.scriptPath("files/ascii.txt");
-	FILE fp = System.fopen(file, "r");
+	FILE fp = new FILE(file, "r");
 	String line;
 	while((line = fp.readLine()) != null) {
 		stdout.println(line);

@@ -170,8 +170,8 @@ static void kFile_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer
 
 /* ------------------------------------------------------------------------ */
 
-//## FILE System.fopen(String path, String mode);
-static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp)
+//## FILE FILE.new(String path, String mode);
+static KMETHOD File_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KMakeTrace(trace, sfp);
 	char buffer[PLATAPI FilePathMax];
@@ -202,17 +202,6 @@ static KMETHOD System_fopen(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		KReturnWith(file, RESET_GCSTACK());
 	}
-}
-
-//## boolean System.fclose(FILE fp);
-static KMETHOD System_fclose(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kFile *file = sfp[1].asFile;
-	if(file->fp != NULL) {
-		KMakeTrace(trace, sfp);
-		kFile_close(kctx, file, trace);
-	}
-	KReturnVoid();
 }
 
 //## @Native void File.close();
@@ -446,8 +435,7 @@ static void file_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *t
 		_Public, _F(File_setWriterCharset), TY_void, TY_File, MN_("setWriterCharset"), 1, TY_String, FN_("charset"),
 		_Public, _F(File_setReaderCharset), TY_void, TY_File, MN_("setReaderCharset"), 1, TY_String, FN_("charset"),
 
-		_Public|_Static, _F(System_fopen), TY_File, TY_System, MN_("fopen"), 2, TY_String, FN_("filename"), TY_String, FN_("mode"),
-		_Public|_Static, _F(System_fclose), TY_void, TY_System, MN_("fclose"), 1, TY_File, FN_("file"),
+		_Public, _F(File_new), TY_File, TY_File, MN_("new"), 2, TY_String, FN_("filename"), TY_String, FN_("mode"),
 		_Public, _F(File_close), TY_void, TY_File, MN_("close"), 0,
 		_Public, _F(File_getc), TY_int, TY_File, MN_("getc"), 0,
 		_Public, _F(File_putc), TY_void, TY_File, MN_("putc"), 1, TY_int, FN_("char"),
