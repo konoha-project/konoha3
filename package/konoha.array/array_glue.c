@@ -309,7 +309,7 @@ static KMETHOD Array_inject(KonohaContext *kctx, KonohaStack *sfp)
 		kObject *nulobj = KLIB Knull(kctx, CT_(resolve_type));
 		BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
 		for(i=0; i != asize; ++i) {
-			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
+			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, nulobj);
 			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, tmp);
 			KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asObject, a->ObjectItems[i]);
 			KCALL(lsfp, 0, f->mtd, 2, nulobj);
@@ -494,6 +494,7 @@ static KMETHOD Array_newList(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t array_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
+	KRequireKonohaCommonModule(trace);
 	KImportPackageSymbol(ns, "cstyle", "[]", trace);
 	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
 		{"Array", VirtualType_KonohaClass, (uintptr_t)CT_(TY_Array)},

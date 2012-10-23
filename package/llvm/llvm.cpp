@@ -211,6 +211,7 @@ static inline kObject *new_ReturnCppObject(KonohaContext *kctx, KonohaStack *sfp
 //## @Const method Boolean Type.opEQ(Type value);
 static KMETHOD Type_opEQ(KonohaContext *kctx, KonohaStack *sfp)
 {
+	(void)kctx;
 	Type *p1 = konoha::object_cast<Type *>(sfp[0].asObject);
 	Type *p2 = konoha::object_cast<Type *>(sfp[1].asObject);
 	KReturnUnboxValue(p1 == p2);
@@ -2323,6 +2324,7 @@ static KMETHOD ExecutionEngine_getPointerToFunction(KonohaContext *kctx, KonohaS
 	void *ptr = ee->getPointerToFunction(func);
 	//kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturnUnboxValue((uintptr_t)ptr);
+	(void)kctx;
 }
 //## @Native void ExecutionEngine.addGlobalMapping(GlobalVariable g, int addr);
 static KMETHOD ExecutionEngine_addGlobalMapping(KonohaContext *kctx _UNUSED_, KonohaStack *sfp)
@@ -4709,7 +4711,7 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 #define TY_BasicBlock  (CT_BasicBlock)->typeId
 #define TY_IRBuilder   (CT_IRBuilder)->typeId
 #define TY_Type         (CT_TypeTBL[0])->typeId
-#define TY_integerType  (CT_TypeTBL[1])->typeId
+//#define TY_integerType  (CT_TypeTBL[1])->typeId
 #define TY_PointerType  (CT_TypeTBL[2])->typeId
 #define TY_FunctionType (CT_TypeTBL[3])->typeId
 #define TY_ArrayType    (CT_TypeTBL[4])->typeId

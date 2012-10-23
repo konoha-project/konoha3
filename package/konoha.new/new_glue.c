@@ -49,7 +49,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 	KonohaClass *foundClass = NULL;
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	int nextIdx = SUGAR TokenUtils_parseTypePattern(kctx, ns, tokenList, beginIdx + 1, endIdx, &foundClass);
-	if(nextIdx != -1 && nextIdx < kArray_size(tokenList)) {
+	if(nextIdx != -1 && (size_t)nextIdx < kArray_size(tokenList)) {
 		kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
 //		if(ct->typeId == TY_void) {
 //			KReturn(SUGAR kStmt_printMessage2(kctx, stmt, tk1, ErrTag, "undefined class: %s", S_text(tk1->text)));

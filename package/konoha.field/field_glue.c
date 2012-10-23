@@ -140,7 +140,7 @@ static kMethod *new_PrototypeSetter(KonohaContext *kctx, kArray *gcstack, ktype_
 
 static kbool_t KonohaClass_addField(KonohaContext *kctx, KonohaClass *ct, int flag, ktype_t ty, ksymbol_t sym)
 {
-	int pos = ct->fieldsize;
+	kushort_t pos = ct->fieldsize;
 	if(unlikely(ct->methodList_OnGlobalConstList == K_EMPTYARRAY)) {
 		((KonohaClassVar *)ct)->methodList_OnGlobalConstList = new_(MethodArray, 8, OnGlobalConstList);
 	}

@@ -675,8 +675,8 @@ static inline void kToken_setTypeId(KonohaContext *kctx, kToken *tk, kNameSpace 
 	((kTokenVar *)tk)->resolvedSyntaxInfo = kmodsugar->kNameSpace_getSyntax(kctx, ns, KW_TypePattern, 0);
 }
 
-#define Stmt_nameSpace(STMT)   kStmt_nameSpace(kctx, STMT)
-static inline kNameSpace *kStmt_nameSpace(KonohaContext *kctx, kStmt *stmt)
+#define Stmt_nameSpace(STMT)   kStmt_nameSpace(STMT)
+static inline kNameSpace *kStmt_nameSpace(/*KonohaContext *kctx, */kStmt *stmt)
 {
 	return stmt->parentBlockNULL->BlockNameSpace;
 }
