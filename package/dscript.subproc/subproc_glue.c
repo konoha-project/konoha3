@@ -129,6 +129,9 @@ struct kSubprocVar {
 
 // SubProc is new one
 
+#define R     0
+#define W     1
+
 #define kSubProc_is(P, S)            (TFLAG_is(uintptr_t, (S)->h.magicflag, kSubProcFlag_##P))
 #define kSubProc_set(P, S, T)         TFLAG_set(uintptr_t,(S)->h.magicflag, kSubProcFlag_##P, T)
 
@@ -184,6 +187,7 @@ static int TRACE_pipe2(KonohaContext *kctx, int *fds, int flags, KTraceInfo *tra
 		KTraceErrorPoint(trace, SystemFault, "pipe", LogErrno);
 		return -1;
 	}
+	fprintf(stderr, "??? pid=%d, dfs[0]=%d, fds[1]=%d\n", getpid(), p[0], p[1]);
 	if( (val=fcntl(p[0], F_GETFL, 0)) == -1 ) {
 		goto L_ERR;
 	}
@@ -209,7 +213,7 @@ L_ERR:;
 
 static void dup2_or_exit(int fd, int fd2)
 {
-	fprintf(stderr, ">>>>> fd=%d, fd2=%d\n", fd, fd2);
+	fprintf(stderr, ">>>>> pid=%d, fd=%d, fd2=%d\n", getpid(), fd, fd2);
 	if(fd != fd2) {
 		close(fd2);
 		if(dup2(fd, fd2) == -1) {
@@ -290,21 +294,21 @@ static int kSubProc_exec(KonohaContext *kctx, kSubProc *sbp, KTraceInfo *trace)
 			dup2_or_exit(fileno(sbp->InNULL->fp), 0);
 		}
 		else {
-			dup2_or_exit(p2c[0], 0);
+			dup2_or_exit(p2c[R], 0);
 			cleanUp_fds(p2c);
 		}
 		if(sbp->OutNULL != NULL) {
 			dup2_or_exit(fileno(sbp->OutNULL->fp), 1);
 		}
 		else {
-			dup2_or_exit(c2p[0], 1);
+			dup2_or_exit(c2p[W], 1);
 			cleanUp_fds(c2p);
 		}
 		if(sbp->ErrNULL != NULL) {
 			dup2_or_exit(fileno(sbp->ErrNULL->fp), 2);
 		}
 		else {
-			dup2_or_exit(errPipe[1], 2);  // why err[1] ?
+			dup2_or_exit(errPipe[W], 2);
 			cleanUp_fds(errPipe);
 		}
 		{
@@ -323,17 +327,20 @@ static int kSubProc_exec(KonohaContext *kctx, kSubProc *sbp, KTraceInfo *trace)
 		kSubProc_execOnChild(kctx, sbp, trace);
 		break;
 	default:
+		fprintf(stderr, "??? pid=%d, p2c[0]=%d, p2c[1]=%d\n", getpid(), p2c[0], p2c[1]);
+		fprintf(stderr, "??? pid=%d, c2p[0]=%d, c2p[1]=%d\n", getpid(), c2p[0], c2p[1]);
+		fprintf(stderr, "??? pid=%d, err[0]=%d, err[1]=%d\n", getpid(), errPipe[0], errPipe[1]);
 		if(sbp->InNULL == NULL) {
-			KFieldInit(sbp, sbp->InNULL, new_PipeFile(kctx, OnField, p2c[1], "w", sbp->Command, trace));
-			close(p2c[0]);
+			KFieldInit(sbp, sbp->InNULL, new_PipeFile(kctx, OnField, p2c[W], "w", sbp->Command, trace));
+			close(p2c[R]);
 		}
 		if(sbp->OutNULL == NULL) {
-			KFieldSet(sbp, sbp->OutNULL, new_PipeFile(kctx, OnField, c2p[0], "r", sbp->Command, trace));
-			close(c2p[1]);
+			KFieldInit(sbp, sbp->OutNULL, new_PipeFile(kctx, OnField, c2p[R], "r", sbp->Command, trace));
+			close(c2p[W]);
 		}
 		if(sbp->ErrNULL == NULL) {
-			KFieldSet(sbp, sbp->ErrNULL, new_PipeFile(kctx, OnField, errPipe[0], "r", sbp->Command, trace));
-			close(errPipe[1]);
+			KFieldInit(sbp, sbp->ErrNULL, new_PipeFile(kctx, OnField, errPipe[R], "r", sbp->Command, trace));
+			close(errPipe[W]);
 		}
 	}
 	return pid;
@@ -497,8 +504,8 @@ static KMETHOD SubProc_fg(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 
-//## void SubProc.connect(SubProc next, boolean WithError);
-static KMETHOD SubProc_connect(KonohaContext *kctx, KonohaStack *sfp)
+//## void SubProc.pipe(SubProc next, boolean WithError);
+static KMETHOD SubProc_pipe(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kSubProc *sbp  = (kSubProc *)sfp[0].asObject;
 	kSubProc *sbp2 = (kSubProc *)sfp[1].asObject;
@@ -539,7 +546,7 @@ static kbool_t subproc_initSubProc(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		_Public, _F(SubProc_setInputStream), TY_void, TY_SubProc, MN_("setInputStream"), 1, TY_File, FN_("stream"),
 		_Public, _F(SubProc_setOutputStream), TY_void, TY_SubProc, MN_("setOutputStream"), 1, TY_File, FN_("stream"),
 		_Public, _F(SubProc_setErrorStream), TY_void, TY_SubProc, MN_("setErrorStream"), 1, TY_File, FN_("stream"),
-		_Public, _F(SubProc_connect), TY_void, TY_SubProc, MN_("connect"), 2, TY_SubProc, FN_("next"), TY_boolean, FN_("error"),
+		_Public, _F(SubProc_pipe), TY_void, TY_SubProc, MN_("pipe"), 2, TY_SubProc, FN_("next"), TY_boolean, FN_("error"),
 		_Public, _F(SubProc_fg), TY_int, TY_SubProc, MN_("fg"), 0,
 		_Public, _F(SubProc_bg), TY_void, TY_SubProc, MN_("bg"), 0,
 
