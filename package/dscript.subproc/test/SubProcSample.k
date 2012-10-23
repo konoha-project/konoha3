@@ -2,7 +2,6 @@
 
 import("dscript.subproc");
 import("konoha.file");
-import("konoha.new");
 
 void test() {
 	SubProc p = new SubProc("ls");
@@ -10,7 +9,6 @@ void test() {
 	p.setOutputStream(stdout);
 	p.setErrorStream(stdout);
 	p.fg();
-	System.p("hi");
 }
 
 test();
