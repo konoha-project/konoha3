@@ -261,9 +261,6 @@ static KMETHOD Cond_broadcast(KonohaContext *kctx, KonohaStack *sfp)
 
 #define _Public   kMethod_Public
 #define _Static   kMethod_Static
-#define _Const    kMethod_Const
-#define _Coercion kMethod_Coercion
-#define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
 #define TY_Thread cThread->typeId

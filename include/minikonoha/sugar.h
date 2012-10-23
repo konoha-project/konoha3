@@ -689,6 +689,7 @@ static inline void Stmt_setsyn(KonohaContext *kctx, kStmt *stmt, SugarSyntax *sy
 	//	DBG_P("DONE: STMT='%s'", PSYM_t(syn->keyword));
 	//}
 	((kStmtVar *)stmt)->syn = syn;
+	(void)kctx;
 }
 static inline kbool_t Stmt_isDone(kStmt *stmt)
 {

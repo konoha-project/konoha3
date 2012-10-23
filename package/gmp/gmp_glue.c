@@ -957,7 +957,7 @@ static kbool_t gmp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 
 	KonohaClass *cMpz = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MpzDef, trace);
 	KonohaClass *cMpf = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MpfDef, trace);
-	
+
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
 		// Mpz
@@ -1012,6 +1012,7 @@ static kbool_t gmp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		_Public|_Im|_Const, _F(Int_opNEQ_mpz),  TY_boolean, TY_int, MN_("!="),  1, TY_Mpz, FN_x,
 		// Mpf
 		_Public|_Const,     _F(Mpf_new),        TY_Mpf,     TY_Mpf, MN_("new"), 0,
+		_Public|_Const,     _F(Mpf_new_float),  TY_Mpf,     TY_Mpf, MN_("new"), 1, TY_float, FN_x,
 		_Public|_Const,     _F(Mpf_new_mpf),    TY_Mpf,     TY_Mpf, MN_("new"), 1, TY_Mpf, FN_x,
 		_Public|_Const,     _F(Mpf_new_int),    TY_Mpf,     TY_Mpf, MN_("new"), 1, TY_int, FN_x,
 		_Public|_Const,     _F(Mpf_new_mpz),    TY_Mpf,     TY_Mpf, MN_("new"), 1, TY_Mpz, FN_x,
@@ -1060,6 +1061,7 @@ static kbool_t gmp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		_Public|_Im|_Const, _F(Int_opLTEQ_mpf), TY_boolean, TY_int, MN_("<="),  1, TY_Mpf, FN_x,
 		_Public|_Im|_Const, _F(Int_opGTEQ_mpf), TY_boolean, TY_int, MN_(">="),  1, TY_Mpf, FN_x,
 		_Public|_Im|_Const, _F(Int_opNEQ_mpf),  TY_boolean, TY_int, MN_("!="),  1, TY_Mpf, FN_x,
+		_Public|_Im|_Const, _F(Mpf_opLT_float),   TY_boolean, TY_Mpf, MN_("<"),   1, TY_float, FN_x,
 		_Public|_Im|_Const, _F(Mpf_opGT_float),   TY_boolean, TY_Mpf, MN_(">"),   1, TY_float, FN_x,
 		_Public|_Im|_Const, _F(Mpf_opEQ_float),   TY_boolean, TY_Mpf, MN_("=="),  1, TY_float, FN_x,
 		_Public|_Im|_Const, _F(Mpf_opLTEQ_float), TY_boolean, TY_Mpf, MN_("<="),  1, TY_float, FN_x,
