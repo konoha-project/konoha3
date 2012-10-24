@@ -25,7 +25,11 @@
 #ifndef PLATFORM_POSIX_H_
 #define PLATFORM_POSIX_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* platform configuration */
+//#define K_USE_PTHREAD
 
 #ifndef K_OSDLLEXT
 #if defined(__APPLE__)
@@ -49,14 +53,18 @@
 #include <dlfcn.h>
 #include <sys/stat.h>
 #include <errno.h>
+//#ifdef K_USE_TRACEVM
+/*==========<<<for Berkeley DB>>>==========*/
+#include <sys/types.h>
+#include <string.h>
+#include <db.h>
+/*=========================================*/
+//#endif/*K_USE_TRACEVM*/
 
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
 #endif /* HAVE_ICONV_H */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #define kunused __attribute__((unused))
 
@@ -72,8 +80,8 @@ static uintptr_t I18N_iconv_open(KonohaContext *kctx, const char *targetCharset,
 	uintptr_t ic = (uintptr_t)iconv_open(targetCharset, sourceCharset);
 	if(ic == ICONV_NULL) {
 		KTraceApi(trace, UserFault|SoftwareFault, "iconv_open",
-			LogText("tocode", targetCharset), LogText("fromcode", sourceCharset), LogErrno
-		);
+				  LogText("tocode", targetCharset), LogText("fromcode", sourceCharset), LogErrno
+			);
 	}
 	return (uintptr_t)ic;
 }
@@ -233,8 +241,12 @@ static unsigned long long getTimeMilliSecond(void)
 
 // -------------------------------------------------------------------------
 
+//#define K_USE_TRACEVM
 #ifdef K_USE_PTHREAD
+//#if defined(K_USE_PTHREAD) || defined(K_USE_TRACEVM)
 #include <pthread.h>
+//#include <db.h>
+
 
 static int pthread_mutex_init_recursive(kmutex_t *mutex)
 {
@@ -277,7 +289,7 @@ static int pthread_mutex_init_recursive(kmutex_t *mutex)
 	return 0;
 }
 
-#endif
+#endif /*defined(K_USE_PTHREAD) || defined(K_USE_TRACEVM)*/
 
 // -------------------------------------------------------------------------
 
@@ -755,10 +767,86 @@ static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 	return userFault | SoftwareFault |SystemFault;
 }
 
+#define DATABASE "test.db"
+
+static kbool_t fetch_CoverageLog_from_Berkeley_DB(KonohaContext *kctx, const char *key)
+{
+	DB *dbp = NULL;
+	DBC *dbcp = NULL;
+	DBT DB_key, DB_data;
+	int ret, t_ret;
+
+	ret = db_create(&dbp, NULL, 0);
+	if (ret != 0) {
+		fprintf(stderr, "db_create: %s\n", db_strerror(ret));
+		goto err;
+	}
+
+	ret = dbp->open(dbp, NULL, DATABASE, NULL, DB_BTREE, DB_RDONLY, 0);
+	if (ret != 0) {
+		dbp->err(dbp, ret, "%s", DATABASE);
+		goto err;
+	}
+	
+	ret = dbp->cursor(dbp, NULL, &dbcp, 0);
+	if (ret != 0) {
+		dbp->err(dbp, ret, "%s", DATABASE);
+		goto err;
+	}
+	
+	while (1) {
+		memset(&DB_key, 0, sizeof(DB_key));
+		memset(&DB_data, 0, sizeof(DB_data));
+
+		ret = dbcp->c_get(dbcp, &DB_key, &DB_data, DB_NEXT);
+		if (ret == DB_NOTFOUND) {
+			ret = 0;
+			dbcp->c_close(dbcp);
+			dbp->close(dbp, 0);
+			return false;
+		}
+		else if (ret != 0) {
+			dbp->err(dbp, ret, "%s", DATABASE);
+			goto err;
+		}
+		if(strncmp(key, (const char *)DB_key.data, strlen(key)) == 0) {
+			//PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"event\": \"DiagnosisFaultType\", \"script_name\": \"%s\", \"line:%s, \"count\":%s, }", DB_key.data, DB_data.data);
+			dbcp->c_close(dbcp);
+			dbp->close(dbp, 0);
+			return true;
+		}
+	}
+
+err:
+	if (dbcp) {
+		t_ret = dbcp->c_close(dbcp);
+		if (t_ret != 0 && ret == 0)
+			ret = t_ret;
+	}
+	
+	if (dbp) {
+		t_ret = dbp->close(dbp, 0);
+		if (t_ret != 0 && ret == 0)
+			ret = t_ret;
+	}
+	
+	exit(ret);
+	return false;
+}
+
 static kbool_t DEOS_checkSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
 {
 	DBG_P("filename='%s', line=%d", filename, line);
-	return true;
+	if(!KonohaContext_isTrace(kctx)) {
+#define N 64
+		kbool_t res;
+		char key[N] = {'\0'};
+		snprintf(key, N, "\"%s:%d\"", filename, line);
+		res = fetch_CoverageLog_from_Berkeley_DB(kctx, key);
+		return res;
+	}else{
+		return true;
+	}
 }
 
 static int DEOS_diagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
@@ -772,7 +860,7 @@ static int DEOS_diagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *t
 	}
 	if(TFLAG_is(int, fault, SoftwareFault)) {
 		if(DEOS_checkSoftwareTestIsPass(kctx, FileId_t(trace->pline), (kushort_t)trace->pline)) {
-			//TFLAG_set0(int, fault, SoftwareFault);
+			TFLAG_set(int, fault, SoftwareFault, false);
 		}
 	}
 	return fault;
