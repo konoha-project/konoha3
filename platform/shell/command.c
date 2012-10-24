@@ -427,8 +427,7 @@ static struct option long_options2[] = {
 	{"test",            required_argument, 0, 'T'},
 	{"test-with",       required_argument, 0, 'T'},
 	{"builtin-test",    required_argument, 0, 'B'},
-	{"trace:test",      no_argument,       0, 'F'},
-	{"trace:operation", no_argument,       0, 'G'},
+	{"trace",           no_argument,       0, 'F'},
 	{NULL, 0, 0, 0},
 };
 
@@ -471,11 +470,7 @@ static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc
 			break;
 
 		case 'F':
-			KonohaContext_setTraceTest(konoha);
-			break;
-
-		case 'G':
-			KonohaContext_setTraceOperation(konoha);
+			KonohaContext_setTrace(konoha);
 			break;
 
 		case 'I':
