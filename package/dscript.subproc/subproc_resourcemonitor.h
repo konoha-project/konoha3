@@ -55,7 +55,7 @@ enum e_resource{
 
  #if defined(__APPLE__)
  #include "subproc_resourcemonitor_mac.h"
- #elif defined(__linux__)
+ #elif defined(__linux__) || defined(__NetBSD__)
  #include "subproc_resourcemonitor_linux.h"
  #else
 	// TODO: for example, BSD
