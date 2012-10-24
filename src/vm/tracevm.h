@@ -330,6 +330,13 @@ static kbool_t kopcode_hasjump(kopcode_t opcode)
 #define GOTO_PC(pc)         GOTO_NEXT()
 #endif/*K_USING_THCODE_*/
 
+#define EMITCOVERAGE_ELEMENT do {\
+	if(KonohaContext_isTrace(kctx)) {\
+		op->count++;\
+		emitCoverage_element(kctx, pc);\
+	}\
+} while(0)
+
 static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, VirtualMachineInstruction *pc)
 {
 #ifdef K_USING_THCODE_
@@ -347,117 +354,117 @@ static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *kctx, 
 
 	CASE(NOP) {
 		OPNOP *op = (OPNOP *)pc;
-		OPEXEC_NOP(); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_NOP(); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(THCODE) {
 		OPTHCODE *op = (OPTHCODE *)pc;
-		OPEXEC_THCODE(op->threadCode); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_THCODE(op->threadCode); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(ENTER) {
 		OPENTER *op = (OPENTER *)pc;
-		OPEXEC_ENTER(); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_ENTER(); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(EXIT) {
 		OPEXIT *op = (OPEXIT *)pc;
-		OPEXEC_EXIT(); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_EXIT(); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(NSET) {
 		OPNSET *op = (OPNSET *)pc;
-		OPEXEC_NSET(op->a, op->n, op->ty); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_NSET(op->a, op->n, op->ty); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(NMOV) {
 		OPNMOV *op = (OPNMOV *)pc;
-		OPEXEC_NMOV(op->a, op->b, op->ty); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_NMOV(op->a, op->b, op->ty); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(NMOVx) {
 		OPNMOVx *op = (OPNMOVx *)pc;
-		OPEXEC_NMOVx(op->a, op->b, op->bx, op->ty); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_NMOVx(op->a, op->b, op->bx, op->ty); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(XNMOV) {
 		OPXNMOV *op = (OPXNMOV *)pc;
-		OPEXEC_XNMOV(op->a, op->ax, op->b, op->ty); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_XNMOV(op->a, op->ax, op->b, op->ty); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(NEW) {
 		OPNEW *op = (OPNEW *)pc;
-		OPEXEC_NEW(op->a, op->p, op->ty); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_NEW(op->a, op->p, op->ty); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(NULL) {
 		OPNULL *op = (OPNULL *)pc;
-		OPEXEC_NULL(op->a, op->ty); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_NULL(op->a, op->ty); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(LOOKUP) {
 		OPLOOKUP *op = (OPLOOKUP *)pc;
-		OPEXEC_LOOKUP(op->thisidx, op->ns, op->mtd); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_LOOKUP(op->thisidx, op->ns, op->mtd); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(CALL) {
 		OPCALL *op = (OPCALL *)pc;
-		OPEXEC_CALL(op->uline, op->thisidx, op->espshift, op->tyo); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_CALL(op->uline, op->thisidx, op->espshift, op->tyo); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(RET) {
 		OPRET *op = (OPRET *)pc;
-		OPEXEC_RET(); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_RET(); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(NCALL) {
 		OPNCALL *op = (OPNCALL *)pc;
-		OPEXEC_NCALL(); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_NCALL(); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(BNOT) {
 		OPBNOT *op = (OPBNOT *)pc;
-		OPEXEC_BNOT(op->c, op->a); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_BNOT(op->c, op->a); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(JMP) {
 		OPJMP *op = (OPJMP *)pc;
-		OPEXEC_JMP(pc = op->jumppc, JUMP); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_JMP(pc = op->jumppc, JUMP); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(JMPF) {
 		OPJMPF *op = (OPJMPF *)pc;
-		OPEXEC_JMPF(pc = op->jumppc, JUMP, op->a); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_JMPF(pc = op->jumppc, JUMP, op->a); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(TRYJMP) {
 		OPTRYJMP *op = (OPTRYJMP *)pc;
-		OPEXEC_TRYJMP(pc = op->jumppc, JUMP); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_TRYJMP(pc = op->jumppc, JUMP); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(YIELD) {
 		OPYIELD *op = (OPYIELD *)pc;
-		OPEXEC_YIELD(); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_YIELD(); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(ERROR) {
 		OPERROR *op = (OPERROR *)pc;
-		OPEXEC_ERROR(op->uline, op->msg, op->esp); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_ERROR(op->uline, op->msg, op->esp); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(SAFEPOINT) {
 		OPSAFEPOINT *op = (OPSAFEPOINT *)pc;
-		OPEXEC_SAFEPOINT(op->uline, op->esp); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_SAFEPOINT(op->uline, op->esp); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(CHKSTACK) {
 		OPCHKSTACK *op = (OPCHKSTACK *)pc;
-		OPEXEC_CHKSTACK(op->uline); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_CHKSTACK(op->uline); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(TRACE) {
 		OPTRACE *op = (OPTRACE *)pc;
-		OPEXEC_TRACE(op->uline, op->thisidx, op->trace); op->count++; emitCoverage_element(kctx, pc); pc++;
+		OPEXEC_TRACE(op->uline, op->thisidx, op->trace); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	DISPATCH_END(pc);
