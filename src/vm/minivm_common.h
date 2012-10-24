@@ -1,3 +1,6 @@
+#ifndef MINIVM_COMMON_H
+#define MINIVM_COMMON_H
+
 typedef struct _FileLog_Map {
 	int key;
 	const char* value;
@@ -8,7 +11,8 @@ typedef struct _FileLog_Map {
 int filelog_memory_index = 0;
 FileLog_Map *filelog_memory[FILELOG_MEMORY_SIZE] = {NULL};
 
-FileLog_Map *new_FileLog_Map(KonohaContext* kctx, int key, const char* value) {
+static FileLog_Map *new_FileLog_Map(KonohaContext* kctx, int key, const char* value)
+{
 	FileLog_Map *ret = (FileLog_Map *)KMalloc_UNTRACE(sizeof(FileLog_Map));
 	ret->key = key;
 	ret->value = (const char *)KMalloc_UNTRACE(strlen(value) + 1);
@@ -17,7 +21,7 @@ FileLog_Map *new_FileLog_Map(KonohaContext* kctx, int key, const char* value) {
 	return ret;
 }
 
-void emitCoverage_element(KonohaContext* kctx, VirtualMachineInstruction *pc)
+static void emitCoverage_element(KonohaContext* kctx, VirtualMachineInstruction *pc)
 {
 	int i;
 	kfileline_t uline = 0;
@@ -53,3 +57,5 @@ void emitCoverage_element(KonohaContext* kctx, VirtualMachineInstruction *pc)
 		}
 	}
 }
+
+#endif /* end of include guard */

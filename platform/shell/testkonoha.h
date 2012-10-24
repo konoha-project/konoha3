@@ -41,7 +41,7 @@ static uintptr_t keys[] = {
 
 static int checkkvs(size_t key, uintptr_t val)
 {
-	long i;
+	uintptr_t i;
 	for(i= (sizeof(keys)/sizeof(uintptr_t)) - 1; i >= 0; i--) {
 		if(keys[i] == key) {
 			return (val == i);

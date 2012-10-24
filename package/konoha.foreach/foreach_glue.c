@@ -103,7 +103,7 @@ static void kStmt_appendBlock(KonohaContext *kctx, kStmt *stmt, kBlock *bk)
 {
 	if(bk != NULL) {
 		kBlock *block = SUGAR kStmt_getBlock(kctx, stmt, Stmt_nameSpace(stmt), KW_BlockPattern, NULL);
-		int i;
+		size_t i;
 		for(i = 0; i < kArray_size(bk->StmtList); i++) {
 			KLIB kArray_add(kctx, block->StmtList, bk->StmtList->StmtItems[i]);
 		}

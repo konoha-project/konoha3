@@ -28,8 +28,8 @@
 #include "vm.h"
 
 #ifdef K_USE_TRACEVM
-#include "tracevm.h"
 #include "minivm_common.h"
+#include "tracevm.h"
 #if defined(HAVE_DB_H)
 #include <stdio.h>
 #include <sys/types.h>

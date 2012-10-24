@@ -566,7 +566,7 @@ static KMETHOD TypeCheck_Block(KonohaContext *kctx, KonohaStack *sfp)
 			uline = stmt->uline;
 		}
 		if(lastExpr != NULL) {
-			int lvarsize = gma->genv->localScope.varsize;
+			size_t lvarsize = gma->genv->localScope.varsize;
 			int popBlockScopeShiftSize = gma->genv->blockScopeShiftSize;
 			gma->genv->blockScopeShiftSize = lvarsize;
 			if(!kBlock_tyCheckAll(kctx, bk, gma)) {
@@ -766,7 +766,7 @@ static kExpr *kStmtExpr_TypeCheckCallParam(KonohaContext *kctx, kStmt *stmt, kEx
 
 static kExpr* tyCheckDynamicCallParams(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kMethod *mtd, kGamma *gma, kString *name, kmethodn_t mn, ktype_t reqty)
 {
-	int i;
+	size_t i;
 	kParam *pa = Method_param(mtd);
 	ktype_t ptype = (pa->psize == 0) ? TY_Object : pa->paramtypeItems[0].ty;
 	for(i = 2; i < kArray_size(expr->cons); i++) {
