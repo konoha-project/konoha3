@@ -1,7 +1,6 @@
 //Written by Joseph
 
-import("konoha.bytes");
-import("konoha.file");
+import("posix.path");
 
 void test() {
 	int u = System.umask(5);

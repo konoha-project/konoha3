@@ -1,13 +1,12 @@
 //Written by Joseph
 
-import("konoha.int");
-import("posix.process");
+import("posix.path");
 
 void test() {
-	assert(System.chdir("../") == 0);
-	assert(System.chdir("/") == 0);
-	assert(System.chdir("../notexist") == -1);
-	assert(System.chdir("~/") == -1);
+	assert(System.chdir("../"));
+	assert(System.chdir("/"));
+	assert(!System.chdir("../notexist"));
+	assert(!System.chdir("~/"));
 }
 
 test();

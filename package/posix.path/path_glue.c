@@ -147,6 +147,20 @@ static KMETHOD System_chmod(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret != -1);
 }
 
+static path_defineAccessConst(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
+{
+	KDEFINE_INT_CONST intData[] = {
+		/*for System.access*/
+		{_KVi(R_OK)},
+		{_KVi(W_OK)},
+		{_KVi(X_OK)},
+		{_KVi(F_OK)},
+		{NULL} /* sentinel */
+	};
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(intData), 0);
+}
+
+// boolean System.access(String path, int mode);
 static KMETHOD System_access(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KMakeTrace(trace, sfp);
@@ -593,6 +607,7 @@ static kbool_t path_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	path_defineAccessConst(kctx, ns, trace);
 	return true;
 }
 
