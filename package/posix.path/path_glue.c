@@ -147,7 +147,7 @@ static KMETHOD System_chmod(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret != -1);
 }
 
-static path_defineAccessConst(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
+static void path_defineAccessConst(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_INT_CONST intData[] = {
 		/*for System.access*/
@@ -538,42 +538,6 @@ static void path_defineDIR(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trac
 }
 
 // --------------------------------------------------------------------------
-/* stat */
-
-//## Stat System.stat(String path)
-static KMETHOD System_stat(KonohaContext *kctx, KonohaStack *sfp)
-{
-	const char *path = S_text(sfp[1].asString);
-	struct stat buf;
-	int ret = stat(path, &buf);
-	struct kStatVar *stat = NULL;
-	if(ret != -1) {
-		stat = (struct kStatVar *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)&buf);
-	}
-	else {
-		// TODO: throw
-		KReturn(KLIB Knull(kctx, KGetReturnType(sfp)));
-	}
-	KReturn(stat);
-}
-
-//## Stat System.lstat(String path)
-static KMETHOD System_lstat(KonohaContext *kctx, KonohaStack *sfp)
-{
-	const char *path = S_text(sfp[1].asString);
-	struct stat buf;
-	int ret = lstat(path, &buf);
-	struct kStatVar *stat = NULL;
-	if(ret != -1) {
-		stat = (struct kStatVar *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)&buf);
-	}
-	else {
-		// TODO: throw
-	}
-	KReturn(stat);
-}
-
-// --------------------------------------------------------------------------
 
 static kbool_t path_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
@@ -608,6 +572,7 @@ static kbool_t path_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	path_defineAccessConst(kctx, ns, trace);
+	path_defineDIR(kctx, ns, trace);
 	return true;
 }
 

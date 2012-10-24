@@ -42,104 +42,6 @@ extern "C"{
 #endif
 /* ------------------------------------------------------------------------ */
 
-typedef const struct kStatVar kStat;
-struct kStatVar {
-	KonohaObjectHeader h;
-	struct stat *stat;
-};
-
-typedef const struct kDirVar kDir;
-struct kDirVar {
-	KonohaObjectHeader h;
-	DIR *dirp;
-};
-
-typedef const struct kDirentVar kDirent;
-struct kDirentVar {
-	KonohaObjectHeader h;
-	struct dirent *entry;
-};
-
-/* ------------------------------------------------------------------------ */
-
-static void kStat_init(KonohaContext *kctx, kObject *o, void *conf)
-{
-	struct kStatVar *stat = (struct kStatVar *)o;
-	if(conf != NULL) {
-		stat->stat = (struct stat *)PLATAPI malloc_i(sizeof(struct stat));
-		memcpy(stat->stat, conf, sizeof(struct stat));
-	}
-	else {
-		stat->stat = NULL;
-	}
-}
-
-static void kStat_free(KonohaContext *kctx, kObject *o)
-{
-	struct kStatVar *stat = (struct kStatVar *)o;
-	if(stat->stat != NULL) {
-		PLATAPI free_i(stat->stat);
-		stat->stat = NULL;
-	}
-}
-
-static void kStat_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
-{
-	KLIB Kwb_printf(kctx, wb, "Stat :%p", v[pos].asObject);
-}
-
-static void kDir_init(KonohaContext *kctx, kObject *o, void *conf)
-{
-	struct kDirVar *dir = (struct kDirVar *)o;
-	dir->dirp = conf;
-}
-
-static void kDir_free(KonohaContext *kctx, kObject *o)
-{
-	struct kDirVar *dir = (struct kDirVar *)o;
-	if(dir->dirp != NULL) {
-		int ret = closedir(dir->dirp);
-		if(ret == -1) {
-			// TODO: throw
-		}
-		dir->dirp = NULL;
-	}
-}
-
-static void kDir_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
-{
-	kDir *dir = (kDir *)v[pos].asObject;
-	DIR *dirp = dir->dirp;
-	KLIB Kwb_printf(kctx, wb, "DIR :%p", dirp);
-}
-
-static void kDirent_init(KonohaContext *kctx, kObject *o, void *conf)
-{
-	struct kDirentVar *dirent = (struct kDirentVar *)o;
-	if(conf != NULL) {
-		dirent->entry = (struct dirent *)PLATAPI malloc_i(sizeof(struct dirent));
-		memcpy(dirent->entry, conf, sizeof(struct dirent));
-	}
-	else {
-		dirent->entry = NULL;
-	}
-}
-
-static void kDirent_free(KonohaContext *kctx, kObject *o)
-{
-	struct kDirentVar *dirent = (struct kDirentVar *)o;
-	if(dirent->entry != NULL) {
-		PLATAPI free_i(dirent->entry);
-		dirent->entry = NULL;
-	}
-}
-
-static void kDirent_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
-{
-	struct kDirentVar *dirent = (struct kDirentVar *)v[pos].asObject;
-	struct dirent *entry = dirent->entry;
-	KLIB Kwb_printf(kctx, wb, "Dirent :%p", entry);
-}
 
 /* ------------------------------------------------------------------------ */
 /* FILE low-level*/
@@ -283,278 +185,6 @@ static KMETHOD System_fsync(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
-//## Stat System.fstat(int fd)
-static KMETHOD System_fstat(KonohaContext *kctx, KonohaStack *sfp)
-{
-	int fd = sfp[1].intValue;
-	struct stat buf;
-	int ret = fstat(fd, &buf);
-	struct kStatVar *stat = NULL;
-	if(ret != -1) {
-		stat = (struct kStatVar *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)&buf);
-	}
-	else {
-		// TODO: throw
-	}
-	KReturn(stat);
-}
-
-//## int Stat.getst_dev()
-static KMETHOD Stat_getst_dev(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kStat *stat = (kStat *)sfp[0].asObject;
-	KReturnUnboxValue(stat->stat->st_dev);
-}
-
-//## int Stat.getst_ino()
-static KMETHOD Stat_getst_ino(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kStat *stat = (kStat *)sfp[0].asObject;
-	KReturnUnboxValue(stat->stat->st_ino);
-}
-
-//## int Stat.getst_mode()
-static KMETHOD Stat_getst_mode(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kStat *stat = (kStat *)sfp[0].asObject;
-	KReturnUnboxValue(stat->stat->st_mode);
-}
-
-//## int Stat.getst_nlink()
-static KMETHOD Stat_getst_nlink(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kStat *stat = (kStat *)sfp[0].asObject;
-	KReturnUnboxValue(stat->stat->st_nlink);
-}
-
-//## int Stat.getst_uid()
-static KMETHOD Stat_getst_uid(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kStat *stat = (kStat *)sfp[0].asObject;
-	KReturnUnboxValue(stat->stat->st_uid);
-}
-
-//## int Stat.getst_gid()
-static KMETHOD Stat_getst_gid(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kStat *stat = (kStat *)sfp[0].asObject;
-	KReturnUnboxValue(stat->stat->st_gid);
-}
-
-//## int Stat.getst_size()
-static KMETHOD Stat_getst_size(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kStat *stat = (kStat *)sfp[0].asObject;
-	KReturnUnboxValue(stat->stat->st_size);
-}
-
-//## int Stat.getst_atime()
-static KMETHOD Stat_getst_atime(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kStat *stat = (kStat *)sfp[0].asObject;
-	KReturnUnboxValue(stat->stat->st_atime);
-}
-
-//## int Stat.getst_mtime()
-static KMETHOD Stat_getst_mtime(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kStat *stat = (kStat *)sfp[0].asObject;
-	KReturnUnboxValue(stat->stat->st_mtime);
-}
-
-//## int Stat.getst_ctime()
-static KMETHOD Stat_getst_ctime(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kStat *stat = (kStat *)sfp[0].asObject;
-	KReturnUnboxValue(stat->stat->st_ctime);
-}
-
-#ifdef HAVE_STRUCT_STAT_ST_RDEV
-//## int Stat.getst_rdev()
-static KMETHOD Stat_getst_rdev(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kStat *stat = (kStat *)sfp[0].asObject;
-	KReturnUnboxValue(stat->stat->st_rdev);
-}
-#endif /* HAVE_STRUCT_STAT_ST_RDEV */
-
-#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
-//## int Stat.getst_blocks()
-static KMETHOD Stat_getst_blocks(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kStat *stat = (kStat *)sfp[0].asObject;
-	KReturnUnboxValue(stat->stat->st_blocks);
-}
-#endif /* HAVE_STRUCT_STAT_ST_BLOCKS */
-
-#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
-//## int Stat.getst_blksize()
-static KMETHOD Stat_getst_blksize(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kStat *stat = (kStat *)sfp[0].asObject;
-	KReturnUnboxValue(stat->stat->st_blksize);
-}
-#endif /* HAVE_STRUCT_STAT_ST_BLKSIZE */
-
-#ifdef HAVE_STRUCT_STAT_ST_FLAGS
-//## int Stat.getst_flags()
-static KMETHOD Stat_getst_flags(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kStat *stat = (kStat *)sfp[0].asObject;
-	KReturnUnboxValue(stat->stat->st_flags);
-}
-#endif /* HAVE_STRUCT_STAT_ST_FLAGS */
-
-#ifdef HAVE_STRUCT_STAT_ST_GEN
-//## int Stat.getst_gen()
-static KMETHOD Stat_getst_gen(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kStat *stat = (kStat *)sfp[0].asObject;
-	KReturnUnboxValue(stat->stat->st_gen);
-}
-#endif /* HAVE_STRUCT_STAT_ST_GEN */
-
-#ifdef HAVE_STRUCT_STAT_ST_BIRTHTIME
-//## int Stat.getst_birthtime()
-static KMETHOD Stat_getst_birthtime(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kStat *stat = (kStat *)sfp[0].asObject;
-	KReturnUnboxValue(stat->stat->st_birthtime);
-}
-#endif /* HAVE_STRUCT_STAT_ST_BIRTHTIME */
-
-//## DIR System.opendir(String name)
-static KMETHOD System_opendir(KonohaContext *kctx, KonohaStack *sfp)
-{
-	const char *name = S_text(sfp[1].asString);
-	DIR *d = opendir(name);
-	struct kDirVar *dir;
-	if(d != NULL) {
-		dir = (struct kDirVar *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)d);
-	}
-	else {
-		// TODO: throw
-	}
-	KReturn(dir);
-}
-
-//## int DIR.close()
-static KMETHOD DIR_close(KonohaContext *kctx, KonohaStack *sfp)
-{
-	struct kDirVar *dir = (struct kDirVar *)sfp[0].asObject;
-	int ret = closedir(dir->dirp);
-	if(ret == -1) {
-		// TODO: throw
-	}
-	dir->dirp = NULL;
-	KReturnUnboxValue(ret);
-}
-
-//## int DIR.getfd()
-static KMETHOD DIR_getfd(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kDir *dir = (kDir *)sfp[0].asObject;
-	int fd = dirfd(dir->dirp);
-	if(fd == -1) {
-		// TODO: throw
-	}
-	KReturnUnboxValue(fd);
-}
-
-//## Array[Dirent] DIR.read()
-static KMETHOD DIR_read(KonohaContext *kctx, KonohaStack *sfp)
-{
-	INIT_GCSTACK();
-	kDir *dir = (kDir *)sfp[0].asObject;
-	DIR *dirp = dir->dirp;
-	struct dirent entry, *result;
-	KonohaClass *CT_Dirent = CT_(O_p0(KGetReturnObject(sfp)));
-	kArray *resultArray = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
-	int ret;
-	while((ret = readdir_r(dirp, &entry, &result)) == 0) {
-		if(result == NULL) break;
-		KLIB new_kObject(kctx, resultArray, CT_Dirent, (uintptr_t)result);
-	}
-	KReturnWith(resultArray, RESET_GCSTACK());
-}
-
-//## void DIR.rewind()
-static KMETHOD DIR_rewind(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kDir *dir = (kDir *)sfp[0].asObject;
-	DIR *dirp = dir->dirp;
-	rewinddir(dirp);
-	KReturnVoid();
-}
-
-//## void DIR.seek(int loc)
-static KMETHOD DIR_seek(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kDir *dir = (kDir *)sfp[0].asObject;
-	DIR *dirp = dir->dirp;
-	long loc = sfp[1].intValue;
-	seekdir(dirp, loc);
-	KReturnVoid();
-}
-
-//## int DIR.tell()
-static KMETHOD DIR_tell(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kDir *dir = (kDir *)sfp[0].asObject;
-	DIR *dirp = dir->dirp;
-	long ret = telldir(dirp);
-	if(ret == -1) {
-		// TODO: throw
-	}
-	KReturnUnboxValue(ret);
-}
-
-//## int Dirent.getd_ino()
-static KMETHOD Dirent_getd_ino(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kDirent *dirent = (kDirent *)sfp[0].asObject;
-	struct dirent *entry = dirent->entry;
-	ino_t d_ino = entry->d_ino;
-	KReturnUnboxValue(d_ino);
-}
-
-#ifdef _DIRENT_HAVE_D_OFF
-//## int Dirent.getd_off()
-static KMETHOD Dirent_getd_off(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kDirent *dirent = (kDirent *)sfp[0].asObject;
-	struct dirent *entry = dirent->entry;
-	off_t d_off = entry->d_off;
-	KReturnUnboxValue(d_off);
-}
-#endif /* _DIRENT_HAVE_D_OFF */
-
-//## int Dirent.getd_reclen()
-static KMETHOD Dirent_getd_reclen(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kDirent *dirent = (kDirent *)sfp[0].asObject;
-	struct dirent *entry = dirent->entry;
-	unsigned short d_reclen = entry->d_reclen;
-	KReturnUnboxValue(d_reclen);
-}
-
-//## int Dirent.getd_type()
-static KMETHOD Dirent_getd_type(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kDirent *dirent = (kDirent *)sfp[0].asObject;
-	struct dirent *entry = dirent->entry;
-	unsigned char d_type = entry->d_type;
-	KReturnUnboxValue(d_type);
-}
-
-//## String Dirent.getd_name()
-static KMETHOD Dirent_getd_name(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kDirent *dirent = (kDirent *)sfp[0].asObject;
-	struct dirent *entry = dirent->entry;
-	char *d_name = entry->d_name;
-	KReturn(KLIB new_kString(kctx, OnStack, d_name, strlen(d_name), 0));
-}
 
 //## int System.getdtablesize()
 static KMETHOD System_getdtablesize(KonohaContext *kctx, KonohaStack *sfp)
@@ -618,26 +248,6 @@ static KMETHOD System_fchdir(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KDEFINE_CLASS defStat = {
-		STRUCTNAME(Stat),
-		.cflag = kClass_Final,
-		.init  = kStat_init,
-		.free  = kStat_free,
-		.p     = kStat_p
-	};
-	KonohaClass *cStat = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defStat, trace);
-
-	KDEFINE_CLASS defDirent = {
-		STRUCTNAME(Dirent),
-		.cflag = kClass_Final,
-		.init  = kDirent_init,
-		.free  = kDirent_free,
-		.p     = kDirent_p
-	};
-	KonohaClass *cDirent = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDirent, trace);
-	KonohaClass *CT_DirentArray0 = CT_p0(kctx, CT_Array, cDirent->typeId);
-	ktype_t TY_DirentArray0 = CT_DirentArray0->typeId;
-
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Static, _F(System_lseek), TY_int, TY_System, MN_("lseek"), 3, TY_int, FN_("fd"), TY_int, FN_("offset"), TY_int, FN_("whence"),
 		_Public|_Static, _F(System_ftruncate), TY_boolean, TY_System, MN_("ftruncate"), 2, TY_int, FN_("fd"), TY_int, FN_("length"),
@@ -646,49 +256,6 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		_Public|_Static, _F(System_sync), TY_boolean, TY_System, MN_("sync"), 1, TY_int, FN_("fd"),
 		_Public|_Static, _F(System_fchown), TY_int, TY_System, MN_("fchown"), 3, TY_int, FN_("pd"), TY_int, FN_("owner"), TY_int, FN_("group"),
 		_Public|_Static, _F(System_fsync), TY_int, TY_System, MN_("fsync"), 1, TY_int, FN_("fd"),
-		_Public|_Static, _F(System_fstat), TY_Stat, TY_System, MN_("fstat"), 1, TY_int, FN_("fd"),
-		_Public|_Const|_Im, _F(Stat_getst_dev), TY_int, TY_Stat, MN_("getst_dev"), 0,
-		_Public|_Const|_Im, _F(Stat_getst_ino), TY_int, TY_Stat, MN_("getst_ino"), 0,
-		_Public|_Const|_Im, _F(Stat_getst_mode), TY_int, TY_Stat, MN_("getst_mode"), 0,
-		_Public|_Const|_Im, _F(Stat_getst_nlink), TY_int, TY_Stat, MN_("getst_nlink"), 0,
-		_Public|_Const|_Im, _F(Stat_getst_uid), TY_int, TY_Stat, MN_("getst_uid"), 0,
-		_Public|_Const|_Im, _F(Stat_getst_gid), TY_int, TY_Stat, MN_("getst_gid"), 0,
-		_Public|_Const|_Im, _F(Stat_getst_size), TY_int, TY_Stat, MN_("getst_size"), 0,
-		_Public|_Const|_Im, _F(Stat_getst_atime), TY_int, TY_Stat, MN_("getst_atime"), 0,
-		_Public|_Const|_Im, _F(Stat_getst_mtime), TY_int, TY_Stat, MN_("getst_mtime"), 0,
-		_Public|_Const|_Im, _F(Stat_getst_ctime), TY_int, TY_Stat, MN_("getst_ctime"), 0,
-#ifdef HAVE_STRUCT_STAT_ST_RDEV
-		_Public|_Const|_Im, _F(Stat_getst_rdev), TY_int, TY_Stat, MN_("getst_rdev"), 0,
-#endif /* HAVE_STRUCT_STAT_ST_RDEV */
-#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
-		_Public|_Const|_Im, _F(Stat_getst_blocks), TY_int, TY_Stat, MN_("getst_blocks"), 0,
-#endif /* HAVE_STRUCT_STAT_ST_BLOCKS */
-#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
-		_Public|_Const|_Im, _F(Stat_getst_blksize), TY_int, TY_Stat, MN_("getst_blksize"), 0,
-#endif /* HAVE_STRUCT_STAT_ST_BLKSIZE */
-#ifdef HAVE_STRUCT_STAT_ST_FLAGS
-		_Public|_Const|_Im, _F(Stat_getst_flags), TY_int, TY_Stat, MN_("getst_flags"), 0,
-#endif /* HAVE_STRUCT_STAT_ST_FLAGS */
-#ifdef HAVE_STRUCT_STAT_ST_GEN
-		_Public|_Const|_Im, _F(Stat_getst_gen), TY_int, TY_Stat, MN_("getst_gen"), 0,
-#endif /* HAVE_STRUCT_STAT_ST_GEN */
-#ifdef HAVE_STRUCT_STAT_ST_BIRTHTIME
-		_Public|_Const|_Im, _F(Stat_getst_birthtime), TY_int, TY_Stat, MN_("getst_birthtime"), 0,
-#endif /* HAVE_STRUCT_STAT_ST_BIRTHTIME */
-//		_Public|_Static|_Const|_Im, _F(System_opendir), TY_DIR, TY_System, MN_("opendir"), 1, TY_String, FN_("dirname"),
-//		_Public|_Const|_Im, _F(DIR_close), TY_int, TY_DIR, MN_("close"), 0,
-//		_Public|_Const|_Im, _F(DIR_getfd), TY_int, TY_DIR, MN_("getfd"), 0,
-//		_Public|_Const|_Im, _F(DIR_read), TY_DirentArray0, TY_DIR, MN_("read"), 0,
-//		_Public|_Const|_Im, _F(DIR_rewind), TY_void, TY_DIR, MN_("rewind"), 0,
-//		_Public|_Const|_Im, _F(DIR_seek), TY_void, TY_DIR, MN_("seek"), 1, TY_int, FN_("loc"),
-//		_Public|_Const|_Im, _F(DIR_tell), TY_int, TY_DIR, MN_("tell"), 0,
-//		_Public|_Const|_Im, _F(Dirent_getd_ino), TY_int, TY_Dirent, MN_("getd_ino"), 0,
-//#ifdef _DIRENT_HAVE_D_OFF
-//		_Public|_Const|_Im, _F(Dirent_getd_off), TY_int, TY_Dirent, MN_("getd_off"), 0,
-//#endif /* _DIRENT_HAVE_D_OFF */
-//		_Public|_Const|_Im, _F(Dirent_getd_reclen), TY_int, TY_Dirent, MN_("getd_reclen"), 0,
-//		_Public|_Const|_Im, _F(Dirent_getd_type), TY_int, TY_Dirent, MN_("getd_type"), 0,
-//		_Public|_Const|_Im, _F(Dirent_getd_name), TY_String, TY_Dirent, MN_("getd_name"), 0,
 		_Public|_Static|_Const|_Im, _F(System_getdtablesize), TY_int, TY_System, MN_("getdtablesize"), 0,
 		_Public|_Static|_Im, _F(System_open), TY_int, TY_System, MN_("open"), 2, TY_String, FN_("pathname"), TY_int, FN_("flags"),
 		_Public|_Static|_Im, _F(System_open_mode), TY_int, TY_System, MN_("open"), 3, TY_String, FN_("pathname"), TY_int, FN_("flags"), TY_int, FN_("mode"),
@@ -697,11 +264,6 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	KDEFINE_INT_CONST intData[] = {
-		/*for System.access*/
-		{KDefineConstInt(R_OK)},
-		{KDefineConstInt(W_OK)},
-		{KDefineConstInt(X_OK)},
-		{KDefineConstInt(F_OK)},
 		/*for System.lseek*/
 		{KDefineConstInt(SEEK_SET)},
 		{KDefineConstInt(SEEK_CUR)},
@@ -722,7 +284,7 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		{KDefineConstInt(O_NONBLOCK)},
 		{KDefineConstInt(O_NDELAY)},
 		{KDefineConstInt(O_NOCTTY)},
-		{}
+		{NULL}, /* sentinel */
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(intData), 0);
 	return true;
@@ -738,7 +300,7 @@ static kbool_t fd_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_
 KDEFINE_PACKAGE* fd_init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("fd", "1.0"),
+		KPACKNAME("posix", "1.0"),
 		.initPackage    = fd_initPackage,
 		.setupPackage   = fd_setupPackage,
 	};

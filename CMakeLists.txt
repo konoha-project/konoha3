@@ -69,7 +69,7 @@ set(PACKAGES
 	konoha.foreach
 	konoha.global
 	konoha.i
-	konoha.io
+#	konoha.io
 	konoha.import
 	konoha.int
 	konoha.iterator
@@ -89,10 +89,11 @@ set(PACKAGES
 	sugar
 	cstyle
 	cstyle.libc
-	posix.process
-	posix.path
 	posix.fd
+	posix.path
+	posix.process
 	posix.socket
+	posix.stat
 	posix.thread
 	dscript.dollar
 	dscript.subproc

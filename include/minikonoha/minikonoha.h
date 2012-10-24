@@ -474,6 +474,7 @@ struct PlatformApiVar {
 #define LOG_ERRNO 3
 #define LOG_a     4 /*char **/
 
+#define LogInt(K,V)     LOG_u, (K), ((intptr_t)V)
 #define LogUint(K,V)    LOG_u, (K), ((uintptr_t)V)
 #define LogText(K,V)    LOG_s, (K), (V)
 #define LogTextArray(K,V)  LOG_a, (K), (V)
