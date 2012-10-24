@@ -49,30 +49,6 @@ extern "C"{
 #define LogOwner(o)        LogUint("owner", o)
 #define LogGroup(o)        LogUint("group", o)
 
-//static const char* kFile_textPath(KonohaContext *kctx, kFile *file)
-//{
-//	return (file->PathInfoNULL == NULL) ? "unknown" : S_text(file->PathInfoNULL);
-//}
-//
-//static int TRACE_fgetc(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
-//{
-//	int ch = fgetc(file->fp);
-//	if(ferror(file->fp) != 0) {
-//		KTraceErrorPoint(trace, SystemFault, "fgetc", LogFile(file), LogErrno);
-//		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
-//	}
-//	return ch;
-//}
-//
-//static int TRACE_fputc(KonohaContext *kctx, kFile *file, int ch, KTraceInfo *trace)
-//{
-//	if(fputc(ch, file->fp) != 0) {
-//		KTraceErrorPoint(trace, SystemFault, "fputc", LogFileName(file), LogErrno);
-//		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
-//	}
-//	return ch;
-//}
-
 /* ------------------------------------------------------------------------ */
 
 //## String getcwd()
@@ -88,6 +64,24 @@ static KMETHOD System_getcwd(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	else {
 		KTraceErrorPoint(trace, SystemFault, "getcwd", LogErrno);
+		KReturn(KNULL(String));
+	}
+}
+
+//## String System.realpath(String path)
+static KMETHOD System_realpath(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KMakeTrace(trace, sfp);
+	char buffer[K_PATHMAX], filepath[K_PATHMAX] = {0};
+	kString *path = sfp[1].asString;
+	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), S_text(path), S_size(path), trace);
+	char *cwd = realpath(systemPath, filepath);
+	if(cwd != NULL) {
+		const char *konohaPath = PLATAPI formatKonohaPath(kctx, buffer, sizeof(buffer), cwd, strlen(cwd), trace);
+		KReturn(KLIB new_kString(kctx, OnStack, konohaPath, strlen(konohaPath), 0));
+	}
+	else {
+		KTraceErrorPoint(trace, SystemFault, "realpath", LogFileName(S_text(path)), LogErrno);
 		KReturn(KNULL(String));
 	}
 }
@@ -544,6 +538,7 @@ static kbool_t path_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	//	KRequireKonohaCommonModule(trace);
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Static|_C, _F(System_getcwd),   TY_String,  TY_System, MN_("getcwd"), 0,
+		_Public|_Static|_C, _F(System_realpath), TY_String,  TY_System, MN_("realpath"),  1, TY_String, FN_("path"),
 		_Public|_Static|_C, _F(System_chdir),    TY_boolean, TY_System, MN_("chdir"),  1, TY_String, FN_("path"),
 		_Public|_Static|_C, _F(System_chroot),   TY_boolean, TY_System, MN_("chroot"), 1, TY_String, FN_("path"),
 

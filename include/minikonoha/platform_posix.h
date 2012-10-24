@@ -139,9 +139,9 @@ static uintptr_t I18N_iconvUTF8ToSystemCharset(KonohaContext *kctx, KTraceInfo *
 
 static const char* I18N_formatKonohaPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
 {
-	uintptr_t ic = PLATAPI iconvUTF8ToSystemCharset(kctx, trace);
 	size_t newsize;
-	if(ic != ICONV_NULL) {
+	if(!PLATAPI isSystemCharsetUTF8(kctx)) {
+		uintptr_t ic = PLATAPI iconvUTF8ToSystemCharset(kctx, trace);
 		int isTooBig;
 		ICONV_INBUF_CONST char *presentPtrFrom = (ICONV_INBUF_CONST char *)path;	// too dirty?
 		ICONV_INBUF_CONST char ** inbuf = &presentPtrFrom;
@@ -161,7 +161,26 @@ static const char* I18N_formatKonohaPath(KonohaContext *kctx, char *buf, size_t 
 
 static const char* I18N_formatSystemPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
 {
-	return path;  // stub (in case of no conversion)
+	size_t newsize;
+	if(!PLATAPI isSystemCharsetUTF8(kctx)) {
+		DBG_P(">>>>>>>>>>>>>>>>>>>> path = '%s', pathsize=%d", path, pathsize);
+		uintptr_t ic = PLATAPI iconvSystemCharsetToUTF8(kctx, trace);
+		int isTooBig;
+		ICONV_INBUF_CONST char *presentPtrFrom = (ICONV_INBUF_CONST char *)path;	// too dirty?
+		ICONV_INBUF_CONST char ** inbuf = &presentPtrFrom;
+		char ** outbuf = &buf;
+		size_t inBytesLeft = pathsize, outBytesLeft = bufsiz - 1;
+		PLATAPI iconv_i_memcpyStyle(kctx, ic, outbuf, &outBytesLeft, inbuf, &inBytesLeft, &isTooBig, trace);
+		newsize = (bufsiz - 1) - outBytesLeft;
+		DBG_P(">>>>>>>>>>>>>>>>>>>> buf = '%s', newsize=%d", buf, newsize);
+	}
+	else {
+		DBG_ASSERT(bufsiz > pathsize);
+		memcpy(buf, path, pathsize);
+		newsize = pathsize;
+	}
+	buf[newsize] = 0;
+	return (const char *)buf;  // stub (in case of no conversion)
 }
 
 #else/*HAVE_ICONV_H*/
@@ -839,16 +858,16 @@ err:
 static kbool_t DEOS_checkSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
 {
 	DBG_P("filename='%s', line=%d", filename, line);
-	if(!KonohaContext_isTrace(kctx)) {
-#define N 64
-		kbool_t res;
-		char key[N] = {'\0'};
-		snprintf(key, N, "\"%s:%d\"", filename, line);
-		res = fetch_CoverageLog_from_Berkeley_DB(kctx, key);
-		return res;
-	}else{
+//	if(!KonohaContext_isTrace(kctx)) {
+//#define N 64
+//		kbool_t res;
+//		char key[N] = {'\0'};
+//		snprintf(key, N, "\"%s:%d\"", filename, line);
+//		res = fetch_CoverageLog_from_Berkeley_DB(kctx, key);
+//		return res;
+//	}else{
 		return true;
-	}
+//	}
 }
 
 static int DEOS_diagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
