@@ -10,6 +10,9 @@
 /* Define to 1 if you have the <stdbool.h> header file. */
 #cmakedefine HAVE_STDBOOL_H 1
 
+/* Define to 1 if you have the <db.h> header file. */
+#cmakedefine HAVE_DB_H 1
+
 /* Define to 1 if you have the `dl' library (-ldl). */
 #cmakedefine HAVE_LIBDL 1
 

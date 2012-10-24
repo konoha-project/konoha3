@@ -169,6 +169,7 @@ check_include_files(dlfcn.h HAVE_DLFCN_H)
 check_include_files(iconv.h HAVE_ICONV_H)
 check_include_files(syslog.h HAVE_SYSLOG_H)
 check_include_files(stdbool.h HAVE_STDBOOL_H)
+check_include_files(db.h      HAVE_DB_H)
 
 set(_HEADERS stdio.h stdlib.h string.h ctype.h)
 if(UNIX)

@@ -767,10 +767,11 @@ static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 	return userFault | SoftwareFault |SystemFault;
 }
 
-#define DATABASE "test.db"
-
 static kbool_t fetch_CoverageLog_from_Berkeley_DB(KonohaContext *kctx, const char *key)
 {
+#if defined(HAVE_DB_H) && defined(__linux__)
+#define DATABASE "test.db"
+
 	DB *dbp = NULL;
 	DBC *dbcp = NULL;
 	DBT DB_key, DB_data;
@@ -831,6 +832,7 @@ err:
 	}
 	
 	exit(ret);
+#endif
 	return false;
 }
 
