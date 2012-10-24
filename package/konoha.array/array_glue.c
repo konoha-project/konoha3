@@ -194,11 +194,13 @@ static void kArray_removeAt(KonohaContext *kctx, kArray *a, size_t n)
 	if(kArray_isUnboxData(a)) {
 		kArrayVar *a2 = (kArrayVar *)a;
 		memmove(a2->unboxItems+n, a2->unboxItems+(n+1), sizeof(uintptr_t) * (asize - n - 1));
+		bzero(a2->unboxItems+(asize-1), sizeof(uintptr_t));
 		kArray_setsize(a2, asize - 1);
 	}
 	else {
 		struct _kAbstractArray *a2 = (struct _kAbstractArray *)a;
 		memmove(a2->a.ObjectItems+n, a2->a.ObjectItems+(n+1), sizeof(kObject *) * (asize - n - 1));
+		bzero(a2->a.ObjectItems+(asize-1), sizeof(kObject *));
 		a2->a.bytesize = (asize - 1) * sizeof(uintptr_t);
 	}
 }
