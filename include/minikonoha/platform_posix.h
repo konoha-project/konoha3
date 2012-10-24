@@ -810,7 +810,7 @@ static kbool_t fetch_CoverageLog_from_Berkeley_DB(KonohaContext *kctx, const cha
 			goto err;
 		}
 		if(strncmp(key, (const char *)DB_key.data, strlen(key)) == 0) {
-			//PLATAPI syslog_i(5/*LOG_NOTICE*/, "Systemfault {\"script_name:line\":%s, \"count\": %s}", DB_key.data, DB_data.data);
+			PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"event\": \"DiagnosisFaultType\", \"script_name\": \"%s\", \"line:%s, \"count\":%s, }", DB_key.data, DB_data.data);
 			//fprintf(stderr, "key %s\n", key);
 			//fprintf(stderr, "key.data %s\n", (const char *) DB_key.data);
 			//fprintf(stderr, "coverage cleared %.*s%.*s\n", (int)DB_data.size, (char *)DB_data.data);
@@ -841,12 +841,16 @@ err:
 static kbool_t DEOS_checkSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
 {
 	DBG_P("filename='%s', line=%d", filename, line);
+	if(KonohaContext_isTraceOperation(kctx)) {
 #define N 64
-	kbool_t res;
-	char key[N] = {'\0'};
-	snprintf(key, N, "\"%s:%d\"", filename, line);
-	res = fetch_CoverageLog_from_Berkeley_DB(kctx, key);
-	return res;
+		kbool_t res;
+		char key[N] = {'\0'};
+		snprintf(key, N, "\"%s:%d\"", filename, line);
+		res = fetch_CoverageLog_from_Berkeley_DB(kctx, key);
+		return res;
+	}else{
+		return true;
+	}
 }
 
 static int DEOS_diagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
