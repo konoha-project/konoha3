@@ -151,10 +151,10 @@ static path_defineAccessConst(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *t
 {
 	KDEFINE_INT_CONST intData[] = {
 		/*for System.access*/
-		{_KVi(R_OK)},
-		{_KVi(W_OK)},
-		{_KVi(X_OK)},
-		{_KVi(F_OK)},
+		{KDefineConstInt(R_OK)},
+		{KDefineConstInt(W_OK)},
+		{KDefineConstInt(X_OK)},
+		{KDefineConstInt(F_OK)},
 		{NULL} /* sentinel */
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(intData), 0);

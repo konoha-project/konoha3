@@ -1606,6 +1606,8 @@ typedef intptr_t  KDEFINE_METHOD;
 
 #define KonohaConst_(D)  ((const char **)D)
 
+#define KDefineConstInt(T) #T, TY_int, T
+
 typedef struct {
 	const char *key;
 	uintptr_t ty;

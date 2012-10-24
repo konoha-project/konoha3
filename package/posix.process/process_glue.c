@@ -299,7 +299,7 @@ static KMETHOD System_system(KonohaContext *kctx, KonohaStack *sfp)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-#define _KVi(T) #T, TY_int, T
+#define KDefineConstInt(T) #T, TY_int, T
 
 static kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
@@ -339,14 +339,14 @@ static kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	KDEFINE_INT_CONST intData[] = {
-		{_KVi(SIGHUP)},
-		{_KVi(SIGINT)},
-		{_KVi(SIGABRT)},
-		{_KVi(SIGKILL)},
+		{KDefineConstInt(SIGHUP)},
+		{KDefineConstInt(SIGINT)},
+		{KDefineConstInt(SIGABRT)},
+		{KDefineConstInt(SIGKILL)},
 		/*for System.setpriority*/
-		{_KVi(PRIO_PROCESS)},
-		{_KVi(PRIO_PGRP)},
-		{_KVi(PRIO_USER)},
+		{KDefineConstInt(PRIO_PROCESS)},
+		{KDefineConstInt(PRIO_PGRP)},
+		{KDefineConstInt(PRIO_USER)},
 		{}
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(intData), 0);

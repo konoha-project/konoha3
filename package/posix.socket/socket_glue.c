@@ -622,7 +622,7 @@ static KMETHOD SockAddr_new (KonohaContext *kctx, KonohaStack *sfp)
 #define TY_SockAddr         cSockAddr->typeId
 #define IS_SockAddr(O)      (O_ct(O) == CT_SockAddr)
 
-#define _KVi(T) #T, TY_int, T
+#define KDefineConstInt(T) #T, TY_int, T
 
 static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
@@ -663,60 +663,60 @@ static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	KDEFINE_INT_CONST IntData[] = {
-			{_KVi(PF_LOCAL)},
-			{_KVi(PF_UNIX)},
-			{_KVi(PF_INET)},
-			{_KVi(PF_INET6)},
-			{_KVi(PF_APPLETALK)},
+			{KDefineConstInt(PF_LOCAL)},
+			{KDefineConstInt(PF_UNIX)},
+			{KDefineConstInt(PF_INET)},
+			{KDefineConstInt(PF_INET6)},
+			{KDefineConstInt(PF_APPLETALK)},
 #ifdef __linux___
-			{_KVi(PF_PACKET)},
+			{KDefineConstInt(PF_PACKET)},
 #endif
-			{_KVi(AF_LOCAL)},
-			{_KVi(AF_UNIX)},
-			{_KVi(AF_INET)},
-			{_KVi(AF_INET6)},
-			{_KVi(AF_APPLETALK)},
+			{KDefineConstInt(AF_LOCAL)},
+			{KDefineConstInt(AF_UNIX)},
+			{KDefineConstInt(AF_INET)},
+			{KDefineConstInt(AF_INET6)},
+			{KDefineConstInt(AF_APPLETALK)},
 #ifdef __linux___
-			{_KVi(AF_PACKET)},
+			{KDefineConstInt(AF_PACKET)},
 #endif
 			// Types of sockets
-			{_KVi(SOCK_STREAM)},
-			{_KVi(SOCK_DGRAM)},
-			{_KVi(SOCK_RAW)},
-			{_KVi(SOCK_RDM)},
+			{KDefineConstInt(SOCK_STREAM)},
+			{KDefineConstInt(SOCK_DGRAM)},
+			{KDefineConstInt(SOCK_RAW)},
+			{KDefineConstInt(SOCK_RDM)},
 			// send & recv flags
-			{_KVi(MSG_OOB)},
-			{_KVi(MSG_PEEK)},
-			{_KVi(MSG_DONTROUTE)},
-			{_KVi(MSG_OOB)},
-			{_KVi(MSG_TRUNC)},
-			{_KVi(MSG_DONTWAIT)},
-			{_KVi(MSG_EOR)},
-			{_KVi(MSG_WAITALL)},
+			{KDefineConstInt(MSG_OOB)},
+			{KDefineConstInt(MSG_PEEK)},
+			{KDefineConstInt(MSG_DONTROUTE)},
+			{KDefineConstInt(MSG_OOB)},
+			{KDefineConstInt(MSG_TRUNC)},
+			{KDefineConstInt(MSG_DONTWAIT)},
+			{KDefineConstInt(MSG_EOR)},
+			{KDefineConstInt(MSG_WAITALL)},
 #ifdef	__linux__
-			{_KVi(MSG_CONFIRM)},
-			{_KVi(MSG_ERRQUEUE)},
-			{_KVi(MSG_NOSIGNAL)},
-			{_KVi(MSG_MORE)},
+			{KDefineConstInt(MSG_CONFIRM)},
+			{KDefineConstInt(MSG_ERRQUEUE)},
+			{KDefineConstInt(MSG_NOSIGNAL)},
+			{KDefineConstInt(MSG_MORE)},
 #endif
 			// socket options
-			{_KVi(SO_REUSEADDR)},
-			{_KVi(SO_TYPE)},
-			{_KVi(SO_ERROR)},
-			{_KVi(SO_DONTROUTE)},
-			{_KVi(SO_BROADCAST)},
-			{_KVi(SO_SNDBUF)},
-			{_KVi(SO_RCVBUF)},
-			{_KVi(SO_KEEPALIVE)},
-			{_KVi(SO_OOBINLINE)},
+			{KDefineConstInt(SO_REUSEADDR)},
+			{KDefineConstInt(SO_TYPE)},
+			{KDefineConstInt(SO_ERROR)},
+			{KDefineConstInt(SO_DONTROUTE)},
+			{KDefineConstInt(SO_BROADCAST)},
+			{KDefineConstInt(SO_SNDBUF)},
+			{KDefineConstInt(SO_RCVBUF)},
+			{KDefineConstInt(SO_KEEPALIVE)},
+			{KDefineConstInt(SO_OOBINLINE)},
 #ifdef	__linux__
-			{_KVi(SO_NO_CHECK)},
-			{_KVi(SO_PRIORITY)},
+			{KDefineConstInt(SO_NO_CHECK)},
+			{KDefineConstInt(SO_PRIORITY)},
 #endif
-			{_KVi(SHUT_RD)},
-			{_KVi(SHUT_WR)},
-			{_KVi(SHUT_RDWR)},
-			{_KVi(SOMAXCONN)},
+			{KDefineConstInt(SHUT_RD)},
+			{KDefineConstInt(SHUT_WR)},
+			{KDefineConstInt(SHUT_RDWR)},
+			{KDefineConstInt(SOMAXCONN)},
 			{}
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), trace);

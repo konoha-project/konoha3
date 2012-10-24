@@ -70,7 +70,7 @@ static void Tagger_free(KonohaContext *kctx, kObject *o)
 
 #define TY_MecabNode     cMecabNode->typeId
 
-#define _KVi(T)  #T, TY_int, T
+#define KDefineConstInt(T)  #T, TY_int, T
 
 /* ------------------------------------------------------------------------ */
 /* [API methods] */
@@ -381,10 +381,10 @@ static kbool_t mecab_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 
 	KDEFINE_INT_CONST IntData[] = {
-			{_KVi(MECAB_NOR_NODE)},
-			{_KVi(MECAB_UNK_NODE)},
-			{_KVi(MECAB_BOS_NODE)},
-			{_KVi(MECAB_EOS_NODE)},
+			{KDefineConstInt(MECAB_NOR_NODE)},
+			{KDefineConstInt(MECAB_UNK_NODE)},
+			{KDefineConstInt(MECAB_BOS_NODE)},
+			{KDefineConstInt(MECAB_EOS_NODE)},
 			{}
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), trace);

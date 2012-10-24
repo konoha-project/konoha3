@@ -616,8 +616,6 @@ static KMETHOD System_fchdir(KonohaContext *kctx, KonohaStack *sfp)
 #define CT_Dirent       cDirent
 #define TY_Dirent       cDirent->typeId
 
-#define _KVi(T) #T, TY_int, T
-
 static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KDEFINE_CLASS defStat = {
@@ -700,30 +698,30 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	KDEFINE_INT_CONST intData[] = {
 		/*for System.access*/
-		{_KVi(R_OK)},
-		{_KVi(W_OK)},
-		{_KVi(X_OK)},
-		{_KVi(F_OK)},
+		{KDefineConstInt(R_OK)},
+		{KDefineConstInt(W_OK)},
+		{KDefineConstInt(X_OK)},
+		{KDefineConstInt(F_OK)},
 		/*for System.lseek*/
-		{_KVi(SEEK_SET)},
-		{_KVi(SEEK_CUR)},
-		{_KVi(SEEK_END)},
+		{KDefineConstInt(SEEK_SET)},
+		{KDefineConstInt(SEEK_CUR)},
+		{KDefineConstInt(SEEK_END)},
 		/*for System.flock*/
-		{_KVi(LOCK_SH)},
-		{_KVi(LOCK_EX)},
-		{_KVi(LOCK_UN)},
-		{_KVi(LOCK_NB)},
+		{KDefineConstInt(LOCK_SH)},
+		{KDefineConstInt(LOCK_EX)},
+		{KDefineConstInt(LOCK_UN)},
+		{KDefineConstInt(LOCK_NB)},
 		/*for System.open*/
-		{_KVi(O_RDONLY)},
-		{_KVi(O_WRONLY)},
-		{_KVi(O_RDWR)},
-		{_KVi(O_CREAT)},
-		{_KVi(O_EXCL)},
-		{_KVi(O_TRUNC)},
-		{_KVi(O_APPEND)},
-		{_KVi(O_NONBLOCK)},
-		{_KVi(O_NDELAY)},
-		{_KVi(O_NOCTTY)},
+		{KDefineConstInt(O_RDONLY)},
+		{KDefineConstInt(O_WRONLY)},
+		{KDefineConstInt(O_RDWR)},
+		{KDefineConstInt(O_CREAT)},
+		{KDefineConstInt(O_EXCL)},
+		{KDefineConstInt(O_TRUNC)},
+		{KDefineConstInt(O_APPEND)},
+		{KDefineConstInt(O_NONBLOCK)},
+		{KDefineConstInt(O_NDELAY)},
+		{KDefineConstInt(O_NOCTTY)},
 		{}
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(intData), 0);
