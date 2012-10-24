@@ -2,15 +2,16 @@ import("cstyle", "while");
 import("posix.process");
 import("dscript.eventlistener");
 
-void enqEvent(Event e) {
-	System.p(e.getProperty("event"));
+void callback(Event e) {
+	System.p("handler property=" + e.getProperty("event"));
 }
 
 void test() {
-	System.setEnqFunc(enqEvent);
+	EventHandler.setCallBack("hoge", callback);
 	SignalEventListener.start();
+
 	while(true) {
-		System.sleep(1);
+		System.usleep(1000);
 	}
 }
 

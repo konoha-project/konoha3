@@ -2,7 +2,7 @@ import("konoha.new");
 import("konoha.const");
 import("konoha.bytes");
 import("konoha.string");
-import("posix.file");
+import("konoha.file");
 import("dscript.subproc");
 import("jansson");
 
@@ -12,17 +12,17 @@ void sendHttpEvent() {
 	Json sdata = new Json();
 	sdata.setString("event", "hoge");
 	String req = sdata.dump();
-	FILE mailbox = System.fopen("/usr/local/minikonoha/dse/mailbox", "a");
+	FILE mailbox = new FILE("/usr/local/minikonoha/dse/mailbox", "a");
 	req = req + "\n";
 	int len = req.getSize();
-	mailbox.write(req.asBytes(), 0, len);
+	mailbox.write(req.toBytes());
 	mailbox.close();
-	FILE pid = System.fopen("/usr/local/minikonoha/dse/pid", "r");
+	FILE pid = new FILE("/usr/local/minikonoha/dse/pid", "r");
 	Bytes buf = new Bytes(BUFSIZ);
 	buf.setAll(0);
-	pid.read(buf, 0, BUFSIZ);
+	pid.read(buf);
 	pid.close();
-	Subproc s = new Subproc("kill -USR1 " + buf.asString(), false);
+	Subproc s = new Subproc("kill -USR1 " + buf.toString(), false);
 	s.fg();
 }
 
