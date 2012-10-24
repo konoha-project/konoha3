@@ -266,7 +266,7 @@ static void signalEventHandler(KonohaContext *kctx)
 		pthread_exit(NULL);
 	}
 
-	flock(mailbox->_file, LOCK_EX);
+	flock(fileno(mailbox), LOCK_EX);
 	while(true) {
 		if(fgets(buf, BUFSIZE, mailbox) == NULL) break;
 		rawEvent = createRawEvent(kctx, (unsigned char *)buf);
@@ -275,7 +275,7 @@ static void signalEventHandler(KonohaContext *kctx)
 		}
 	}
 	initMailbox(mailboxPath);
-	flock(mailbox->_file, LOCK_UN);
+	flock(fileno(mailbox), LOCK_UN);
 	fclose(mailbox);
 }
 
