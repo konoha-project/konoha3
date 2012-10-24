@@ -837,11 +837,7 @@ err:
 static kbool_t DEOS_checkSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
 {
 	DBG_P("filename='%s', line=%d", filename, line);
-<<<<<<< HEAD
 	if(!KonohaContext_isTrace(kctx)) {
-=======
-	if(KonohaContext_isTraceOperation(kctx)) {
->>>>>>> 61e37b7b38541f3984df1618b33fb840f28e0524
 #define N 64
 		kbool_t res;
 		char key[N] = {'\0'};

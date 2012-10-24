@@ -1,5 +1,3 @@
-//#ifdef K_USE_TRACEVM
-
 typedef struct _FileLog_Map {
 	int key;
 	const char* value;
@@ -55,5 +53,3 @@ void emitCoverage_element(KonohaContext* kctx, VirtualMachineInstruction *pc)
 		}
 	}
 }
-
-//#endif
