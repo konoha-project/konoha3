@@ -235,7 +235,7 @@ set(PARENT_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
 macro(add_test_with_property test_name)
 	add_test(${test_name} ${TEST_BIN} ${ARGN})
-	set_tests_properties(${test_name} PROPERTIES TIMEOUT 10)
+	set_tests_properties(${test_name} PROPERTIES TIMEOUT 5)
 	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT
 		"KONOHA_PACKAGEPATH=${PARENT_BINARY_DIR}/package")
 endmacro(add_test_with_property test_name)
