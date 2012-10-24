@@ -1169,6 +1169,8 @@ static void ByteCode_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *v
 	END_REFTRACE();
 }
 
+#ifdef K_USE_TRACEVM/*added by kimio */
+
 typedef struct _ByteCode_log {
 	int line;
 	int total_count;
@@ -1286,12 +1288,16 @@ err:;
 //	exit(ret);
 }
 
+#endif/*K_USE_TRACEVM*/
+
 static void ByteCode_free(KonohaContext *kctx, kObject *o)
 {
 	kByteCode *b = (kByteCode *)o;
-	VirtualMachineInstruction *pc = b->code;
 	if(KonohaContext_isTrace(kctx)) {
+		VirtualMachineInstruction *pc = b->code;
+#ifdef K_USE_TRACEVM/*added by kimio */
 		detect_PassLine_from_ByteCode(kctx, pc);
+#endif/*K_USE_TRACEVM*/
 	}
 	KFree(b->code, b->codesize);
 }

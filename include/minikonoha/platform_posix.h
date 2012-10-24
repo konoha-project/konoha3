@@ -161,7 +161,24 @@ static const char* I18N_formatKonohaPath(KonohaContext *kctx, char *buf, size_t 
 
 static const char* I18N_formatSystemPath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *trace)
 {
-	return path;  // stub (in case of no conversion)
+	uintptr_t ic = PLATAPI iconvSystemCharsetToUTF8(kctx, trace);
+	size_t newsize;
+	if(ic != ICONV_NULL) {
+		int isTooBig;
+		ICONV_INBUF_CONST char *presentPtrFrom = (ICONV_INBUF_CONST char *)path;	// too dirty?
+		ICONV_INBUF_CONST char ** inbuf = &presentPtrFrom;
+		char ** outbuf = &buf;
+		size_t inBytesLeft = pathsize, outBytesLeft = bufsiz - 1;
+		PLATAPI iconv_i_memcpyStyle(kctx, ic, outbuf, &outBytesLeft, inbuf, &inBytesLeft, &isTooBig, trace);
+		newsize = (bufsiz - 1) - outBytesLeft;
+	}
+	else {
+		DBG_ASSERT(bufsiz > pathsize);
+		memcpy(buf, path, pathsize);
+		newsize = pathsize;
+	}
+	buf[newsize] = 0;
+	return (const char *)buf;  // stub (in case of no conversion)
 }
 
 #else/*HAVE_ICONV_H*/
@@ -767,86 +784,86 @@ static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 	return userFault | SoftwareFault |SystemFault;
 }
 
-#define DATABASE "test.db"
-
-static kbool_t fetch_CoverageLog_from_Berkeley_DB(KonohaContext *kctx, const char *key)
-{
-	DB *dbp = NULL;
-	DBC *dbcp = NULL;
-	DBT DB_key, DB_data;
-	int ret, t_ret;
-
-	ret = db_create(&dbp, NULL, 0);
-	if (ret != 0) {
-		fprintf(stderr, "db_create: %s\n", db_strerror(ret));
-		goto err;
-	}
-
-	ret = dbp->open(dbp, NULL, DATABASE, NULL, DB_BTREE, DB_RDONLY, 0);
-	if (ret != 0) {
-		dbp->err(dbp, ret, "%s", DATABASE);
-		goto err;
-	}
-	
-	ret = dbp->cursor(dbp, NULL, &dbcp, 0);
-	if (ret != 0) {
-		dbp->err(dbp, ret, "%s", DATABASE);
-		goto err;
-	}
-	
-	while (1) {
-		memset(&DB_key, 0, sizeof(DB_key));
-		memset(&DB_data, 0, sizeof(DB_data));
-
-		ret = dbcp->c_get(dbcp, &DB_key, &DB_data, DB_NEXT);
-		if (ret == DB_NOTFOUND) {
-			ret = 0;
-			dbcp->c_close(dbcp);
-			dbp->close(dbp, 0);
-			return false;
-		}
-		else if (ret != 0) {
-			dbp->err(dbp, ret, "%s", DATABASE);
-			goto err;
-		}
-		if(strncmp(key, (const char *)DB_key.data, strlen(key)) == 0) {
-			//PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"event\": \"DiagnosisFaultType\", \"script_name\": \"%s\", \"line:%s, \"count\":%s, }", DB_key.data, DB_data.data);
-			dbcp->c_close(dbcp);
-			dbp->close(dbp, 0);
-			return true;
-		}
-	}
-
-err:
-	if (dbcp) {
-		t_ret = dbcp->c_close(dbcp);
-		if (t_ret != 0 && ret == 0)
-			ret = t_ret;
-	}
-	
-	if (dbp) {
-		t_ret = dbp->close(dbp, 0);
-		if (t_ret != 0 && ret == 0)
-			ret = t_ret;
-	}
-	
-	exit(ret);
-	return false;
-}
+//#define DATABASE "test.db"
+//
+//static kbool_t fetch_CoverageLog_from_Berkeley_DB(KonohaContext *kctx, const char *key)
+//{
+//	DB *dbp = NULL;
+//	DBC *dbcp = NULL;
+//	DBT DB_key, DB_data;
+//	int ret, t_ret;
+//
+//	ret = db_create(&dbp, NULL, 0);
+//	if (ret != 0) {
+//		fprintf(stderr, "db_create: %s\n", db_strerror(ret));
+//		goto err;
+//	}
+//
+//	ret = dbp->open(dbp, NULL, DATABASE, NULL, DB_BTREE, DB_RDONLY, 0);
+//	if (ret != 0) {
+//		dbp->err(dbp, ret, "%s", DATABASE);
+//		goto err;
+//	}
+//
+//	ret = dbp->cursor(dbp, NULL, &dbcp, 0);
+//	if (ret != 0) {
+//		dbp->err(dbp, ret, "%s", DATABASE);
+//		goto err;
+//	}
+//
+//	while (1) {
+//		memset(&DB_key, 0, sizeof(DB_key));
+//		memset(&DB_data, 0, sizeof(DB_data));
+//
+//		ret = dbcp->c_get(dbcp, &DB_key, &DB_data, DB_NEXT);
+//		if (ret == DB_NOTFOUND) {
+//			ret = 0;
+//			dbcp->c_close(dbcp);
+//			dbp->close(dbp, 0);
+//			return false;
+//		}
+//		else if (ret != 0) {
+//			dbp->err(dbp, ret, "%s", DATABASE);
+//			goto err;
+//		}
+//		if(strncmp(key, (const char *)DB_key.data, strlen(key)) == 0) {
+//			//PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"event\": \"DiagnosisFaultType\", \"script_name\": \"%s\", \"line:%s, \"count\":%s, }", DB_key.data, DB_data.data);
+//			dbcp->c_close(dbcp);
+//			dbp->close(dbp, 0);
+//			return true;
+//		}
+//	}
+//
+//err:
+//	if (dbcp) {
+//		t_ret = dbcp->c_close(dbcp);
+//		if (t_ret != 0 && ret == 0)
+//			ret = t_ret;
+//	}
+//
+//	if (dbp) {
+//		t_ret = dbp->close(dbp, 0);
+//		if (t_ret != 0 && ret == 0)
+//			ret = t_ret;
+//	}
+//
+//	exit(ret);
+//	return false;
+//}
 
 static kbool_t DEOS_checkSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
 {
 	DBG_P("filename='%s', line=%d", filename, line);
-	if(!KonohaContext_isTrace(kctx)) {
-#define N 64
-		kbool_t res;
-		char key[N] = {'\0'};
-		snprintf(key, N, "\"%s:%d\"", filename, line);
-		res = fetch_CoverageLog_from_Berkeley_DB(kctx, key);
-		return res;
-	}else{
+//	if(!KonohaContext_isTrace(kctx)) {
+//#define N 64
+//		kbool_t res;
+//		char key[N] = {'\0'};
+//		snprintf(key, N, "\"%s:%d\"", filename, line);
+//		res = fetch_CoverageLog_from_Berkeley_DB(kctx, key);
+//		return res;
+//	}else{
 		return true;
-	}
+//	}
 }
 
 static int DEOS_diagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
