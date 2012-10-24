@@ -53,13 +53,11 @@ extern "C" {
 #include <dlfcn.h>
 #include <sys/stat.h>
 #include <errno.h>
-//#ifdef K_USE_TRACEVM
-/*==========<<<for Berkeley DB>>>==========*/
+#if defined(K_USE_TRACEVM) && defined(HAVE_DB_H)
 #include <sys/types.h>
 #include <string.h>
 #include <db.h>
-/*=========================================*/
-//#endif/*K_USE_TRACEVM*/
+#endif /*defined(K_USE_TRACEVM) && defined(HAVE_DB_H)*/
 
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
