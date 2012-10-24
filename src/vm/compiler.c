@@ -1290,7 +1290,7 @@ static void ByteCode_free(KonohaContext *kctx, kObject *o)
 {
 	kByteCode *b = (kByteCode *)o;
 	VirtualMachineInstruction *pc = b->code;
-	if(KonohaContext_isTrace(kctx)) {
+	if(KonohaContext_isTraceTest(kctx)) {
 		detect_PassLine_from_ByteCode(kctx, pc);
 	}
 	KFree(b->code, b->codesize);
