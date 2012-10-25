@@ -57,11 +57,11 @@ static KMETHOD System_lseek(KonohaContext *kctx, KonohaStack *sfp)
 	off_t ret_offset = lseek(fd, offset, whence);
 	if(ret_offset == -1) {
 		// TODO: throw
-		OLDTRACE_SWITCH_TO_KTrace(_UserFault,
-			   LogText("@", "lseek"),
-			   LogUint("offset", offset),
-			   LogUint("whence", whence),
-			   LogText("errstr", strerror(errno))
+		KMakeTrace(trace, sfp);
+		int fault = PLATAPI diagnosisFaultType(kctx, SystemError, trace);
+		KTraceErrorPoint(trace, fault, "lseek",
+						LogUint("offset", offset),
+						LogUint("whence", whence)
 			);
 	}
 	KReturnUnboxValue((int)ret_offset);
@@ -75,10 +75,11 @@ static KMETHOD System_ftruncate(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = ftruncate(fd, length);
 	if(ret != 0) {
 		// TODO: throw
-		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
-			   LogText("@", "ftruncate"),
-			   LogUint("length", length),
-			   LogText("errstr", strerror(errno))
+		KMakeTrace(trace, sfp);
+		int fault = PLATAPI diagnosisFaultType(kctx, SystemError, trace);
+		KTraceErrorPoint(trace, fault, "ftruncate",
+						LogUint("fd", fd),
+						LogUint("length", length)
 			);
 	}
 	KReturnUnboxValue(ret == 0);
@@ -92,10 +93,11 @@ static KMETHOD System_fchmod(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = fchmod(fd, mode);
 	if(ret != -1) {
 		// TODO: throw
-		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
-			   LogText("@", "fchmod"),
-			   LogUint("mode", mode),
-			   LogText("errstr", strerror(errno))
+		KMakeTrace(trace, sfp);
+		int fault = PLATAPI diagnosisFaultType(kctx, SystemError, trace);
+		KTraceErrorPoint(trace, fault, "fchmod",
+						LogUint("fd", fd),
+						LogUint("mode", mode)
 			);
 	}
 	KReturnUnboxValue(ret == 0);
@@ -129,10 +131,11 @@ static KMETHOD System_flock(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = flock(fd, operation);
 	if(ret == -1) {
 		// TODO: throw
-		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
-			   LogText("@", "flock"),
-			   LogUint("operation", operation),
-			   LogText("errstr", strerror(errno))
+		KMakeTrace(trace, sfp);
+		int fault = PLATAPI diagnosisFaultType(kctx, SystemError, trace);
+		KTraceErrorPoint(trace, fault, "flock",
+						LogUint("fd", fd),
+						LogUint("operation", operation)
 			);
 	}
 	KReturnUnboxValue(ret == 0);
@@ -145,10 +148,9 @@ static KMETHOD System_sync(KonohaContext *kctx, KonohaStack *sfp)
 	int ret =  fsync(fd);
 	if(ret == -1) {
 		// TODO: throw
-		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
-			   LogText("@", "fsync"),
-			   KeyValue_p("errstr", strerror(errno))
-			);
+		KMakeTrace(trace, sfp);
+		int fault = PLATAPI diagnosisFaultType(kctx, SystemError, trace);
+		KTraceErrorPoint(trace, fault, "sync", LogUint("fd", fd));
 	}
 	KReturnUnboxValue(ret == 0);
 }
@@ -161,14 +163,15 @@ static KMETHOD System_fchown(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = fchown(fd, owner, group);
 	if(ret == -1) {
 		// TODO: throw
-		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
-			   LogText("@", "fchown"),
-			   LogUint("owner", owner),
-			   LogUint("group", group),
-			   KeyValue_p("errstr", strerror(errno))
+		KMakeTrace(trace, sfp);
+		int fault = PLATAPI diagnosisFaultType(kctx, SystemError, trace);
+		KTraceErrorPoint(trace, fault, "fchown",
+						LogUint("fd", fd),
+						LogUint("owner", owner),
+						LogUint("group", group)
 			);
 	}
-	KReturnUnboxValue(ret);
+	KReturnUnboxValue(ret == 0);
 }
 
 static KMETHOD System_fsync(KonohaContext *kctx, KonohaStack *sfp)
@@ -177,12 +180,11 @@ static KMETHOD System_fsync(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = fsync(fd);
 	if(ret == -1) {
 		// TODO: throw
-		OLDTRACE_SWITCH_TO_KTrace(_SystemFault,
-			   LogText("@", "fsync"),
-			   KeyValue_p("errstr", strerror(errno))
-			);
+		KMakeTrace(trace, sfp);
+		int fault = PLATAPI diagnosisFaultType(kctx, SystemError, trace);
+		KTraceErrorPoint(trace, fault, "fsync", LogUint("fd", fd));
 	}
-	KReturnUnboxValue(ret);
+	KReturnUnboxValue(ret == 0);
 }
 
 
@@ -202,6 +204,12 @@ static KMETHOD System_open(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = open(pathname, flags);
 	if(ret == -1) {
 		// TODO: throw
+		KMakeTrace(trace, sfp);
+		int fault = PLATAPI diagnosisFaultType(kctx, kString_guessUserFault(s)|SystemError, trace);
+		KTraceErrorPoint(trace, fault, "open",
+						LogText("pathname", pathname),
+						LogUint("flags", flags)
+			);
 	}
 	KReturnUnboxValue(ret);
 }
@@ -216,6 +224,13 @@ static KMETHOD System_open_mode(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = open(pathname, flags, mode);
 	if(ret == -1) {
 		// TODO: throw
+		KMakeTrace(trace, sfp);
+		int fault = PLATAPI diagnosisFaultType(kctx, kString_guessUserFault(s)|SystemError, trace);
+		KTraceErrorPoint(trace, fault, "open_mode",
+						LogText("pathname", pathname),
+						LogUint("flags", flags),
+						LogUint("mode", mode)
+			);
 	}
 	KReturnUnboxValue(ret);
 }
@@ -223,11 +238,15 @@ static KMETHOD System_open_mode(KonohaContext *kctx, KonohaStack *sfp)
 //## int System.fchdir(int fd)
 static KMETHOD System_fchdir(KonohaContext *kctx, KonohaStack *sfp)
 {
-	int ch = fchdir(sfp[1].intValue);
-	if(ch == -1) {
+	int fd = fchdir(sfp[1].intValue);
+	if(fd == -1) {
 		// TODO: throw
+		KMakeTrace(trace, sfp);
+		int fault = PLATAPI diagnosisFaultType(kctx, SystemError, trace);
+		KTraceErrorPoint(trace, fault, "fchdir", LogUint("fd", fd));
+
 	}
-	KReturnUnboxValue(ch);
+	KReturnUnboxValue(fd == 0);
 }
 
 // --------------------------------------------------------------------------
@@ -249,17 +268,17 @@ static KMETHOD System_fchdir(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static, _F(System_lseek), TY_int, TY_System, MN_("lseek"), 3, TY_int, FN_("fd"), TY_int, FN_("offset"), TY_int, FN_("whence"),
+		_Public|_Static, _F(System_lseek),     TY_int,     TY_System, MN_("lseek"),     3, TY_int, FN_("fd"), TY_int, FN_("offset"), TY_int, FN_("whence"),
 		_Public|_Static, _F(System_ftruncate), TY_boolean, TY_System, MN_("ftruncate"), 2, TY_int, FN_("fd"), TY_int, FN_("length"),
-		_Public|_Static, _F(System_fchmod), TY_boolean, TY_System, MN_("fchmod"), 2, TY_int, FN_("fd"), TY_int, FN_("length"),
-		_Public|_Static, _F(System_flock), TY_boolean, TY_System, MN_("flock"), 2, TY_int, FN_("fd"), TY_int, FN_("operation"),
-		_Public|_Static, _F(System_sync), TY_boolean, TY_System, MN_("sync"), 1, TY_int, FN_("fd"),
-		_Public|_Static, _F(System_fchown), TY_int, TY_System, MN_("fchown"), 3, TY_int, FN_("pd"), TY_int, FN_("owner"), TY_int, FN_("group"),
-		_Public|_Static, _F(System_fsync), TY_int, TY_System, MN_("fsync"), 1, TY_int, FN_("fd"),
+		_Public|_Static, _F(System_fchmod),    TY_boolean, TY_System, MN_("fchmod"),    2, TY_int, FN_("fd"), TY_int, FN_("length"),
+		_Public|_Static, _F(System_flock),     TY_boolean, TY_System, MN_("flock"),     2, TY_int, FN_("fd"), TY_int, FN_("operation"),
+		_Public|_Static, _F(System_sync),      TY_boolean, TY_System, MN_("sync"),      1, TY_int, FN_("fd"),
+		_Public|_Static, _F(System_fchown),    TY_boolean, TY_System, MN_("fchown"),    3, TY_int, FN_("pd"), TY_int, FN_("owner"),  TY_int, FN_("group"),
+		_Public|_Static, _F(System_fsync),     TY_boolean, TY_System, MN_("fsync"),     1, TY_int, FN_("fd"),
 		_Public|_Static|_Const|_Im, _F(System_getdtablesize), TY_int, TY_System, MN_("getdtablesize"), 0,
-		_Public|_Static|_Im, _F(System_open), TY_int, TY_System, MN_("open"), 2, TY_String, FN_("pathname"), TY_int, FN_("flags"),
-		_Public|_Static|_Im, _F(System_open_mode), TY_int, TY_System, MN_("open"), 3, TY_String, FN_("pathname"), TY_int, FN_("flags"), TY_int, FN_("mode"),
-		_Public|_Static|_Im, _F(System_fchdir), TY_int, TY_System, MN_("fchdir"), 1, TY_int, FN_("fd"),
+		_Public|_Static|_Im, _F(System_open),      TY_int,     TY_System, MN_("open"),   2, TY_String, FN_("pathname"), TY_int, FN_("flags"),
+		_Public|_Static|_Im, _F(System_open_mode), TY_int,     TY_System, MN_("open"),   3, TY_String, FN_("pathname"), TY_int, FN_("flags"), TY_int, FN_("mode"),
+		_Public|_Static|_Im, _F(System_fchdir),    TY_boolean, TY_System, MN_("fchdir"), 1, TY_int,    FN_("fd"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
