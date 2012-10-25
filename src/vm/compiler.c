@@ -28,15 +28,15 @@
 #include "vm.h"
 
 #ifdef K_USE_TRACEVM
-#include "tracevm.h"
 #include "minivm_common.h"
-/*==========<<<for Berkeley DB>>>=========*/
+#include "tracevm.h"
+#if defined(HAVE_DB_H)
 #include <stdio.h>
 #include <sys/types.h>
 #include <stdlib.h>
 #include <string.h>
 #include <db.h>
-/*========================================*/
+#endif /*defined(HAVE_DB_H)*/
 #else
 #include "minivm.h"
 #endif /*K_USE_TRACEVM*/
@@ -1241,6 +1241,7 @@ static void detect_PassLine_from_ByteCode(KonohaContext *kctx, VirtualMachineIns
 
 static void store_CoverageLog_to_Berkeley_DB(KonohaContext *kctx, const char *key, int value)
 {
+#if defined(HAVE_DB_H) && defined(__linux__)
 #define DATABASE "test.db" //TODO change name for ET.
 #define N 64
 	DB *dbp = NULL;
@@ -1285,7 +1286,7 @@ err:;
 			ret = t_ret;
 	}
 
-//	exit(ret);
+#endif /* defined(HAVE_DB_H) && defined(__linux__) */
 }
 
 #endif/*K_USE_TRACEVM*/

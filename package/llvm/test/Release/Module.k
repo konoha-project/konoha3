@@ -3,7 +3,7 @@ import("konoha.float");
 import("llvm");
 
 void f() {
-	Module m = Module.new("hello");
+	Module m = new Module("hello");
 	m.dump();
 }
 
