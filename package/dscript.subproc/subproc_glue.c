@@ -502,7 +502,7 @@ static KMETHOD SubProc_fg(KonohaContext *kctx, KonohaStack *sfp)
 	if(pid > 0) {
 		kSubProc_wait(kctx, sbp, pid, trace);
 	}
-	KReturnVoid();
+	KReturnUnboxValue(pid);
 }
 
 //## void SubProc.pipe(SubProc next, boolean WithError);

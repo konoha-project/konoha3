@@ -1740,6 +1740,11 @@ typedef struct {
 	return; \
 } while(0)
 
+#define KReturnInt(d) do {\
+	sfp[K_RTNIDX].intValue = d; \
+	return; \
+} while(0)
+
 #define KReturnUnboxValue(d) do {\
 	sfp[K_RTNIDX].unboxValue = d; \
 	return; \
