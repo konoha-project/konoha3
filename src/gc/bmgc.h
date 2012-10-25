@@ -47,7 +47,7 @@ extern "C" {
 
 /* memory config */
 
-#define GC_USE_DEFERREDSWEEP 1
+//#define GC_USE_DEFERREDSWEEP 1
 #define USE_SAFEPOINT_POLICY 1
 #define SUBHEAP_DEFAULT_SEGPOOL_SIZE (128)/* 128 * SEGMENT_SIZE(128k) = 16MB*/
 #define SUBHEAP_KLASS_MIN  5 /* 1 <<  5 == 32 */
@@ -1760,6 +1760,7 @@ static void bmgc_gc_sweep(HeapManager *mng)
 
 static void bitmapMarkingGC(HeapManager *mng, enum gc_mode mode)
 {
+	printf("gc start\n");
 	gc_info("GC starting");
 	bitmap_reset(&mng->flags, 0);
 	bmgc_gc_init(mng, mode);
@@ -1831,6 +1832,7 @@ static kObjectVar *KallocObject(HeapManager *mng, KonohaClass *ct)
 {
 	size_t size = ct->cstruct_size;
 	kObjectVar *o = (kObjectVar*)bm_malloc_internal(mng, size);
+	if (o == 0x101022200) asm("int3");
 	OBJECT_INIT(o);
 #if GCDEBUG
 	OLDTRACE_SWITCH_TO_KTrace(LOGPOL_DEBUG,

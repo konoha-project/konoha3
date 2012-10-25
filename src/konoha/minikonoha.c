@@ -119,12 +119,8 @@ static kbool_t KonohaRuntime_setModule(KonohaContext *kctx, int x, KonohaModule 
 
 static KonohaStack *KonohaRuntime_replicateStack(KonohaContext *kctx, KonohaStack *stack, int espidx)
 {
-	KonohaStack *newstack = (KonohaStack*)KCALLOC(sizeof(KonohaStack), kctx->platApi->stacksize);
-	int i = 0;
-	for (; i < espidx; i++) {
-		/* for return value, displace stack index forward */
-		memcpy(newstack+i+K_CALLDELTA, stack+i, sizeof(KonohaStack));
-	}
+	KonohaStack *newstack = (KonohaStack*)KCALLOC(sizeof(KonohaStack), espidx);
+	memcpy(newstack, stack, sizeof(KonohaStack) * espidx);
 	return newstack;
 }
 

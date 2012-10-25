@@ -569,6 +569,7 @@ static void kNameSpace_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor 
 
 static void kNameSpace_free(KonohaContext *kctx, kObject *o)
 {
+	printf("namespace_free\n");
 	kNameSpaceVar *ns = (kNameSpaceVar*)o;
 	KLIB kNameSpace_freeSugarExtension(kctx, ns);
 	KLIB Karray_free(kctx, &ns->constTable);
@@ -593,6 +594,18 @@ static void Func_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visit
 	KREFTRACEv(fo->self);
 	KREFTRACEv(fo->mtd);
 	END_REFTRACE();
+	if (fo->env != NULL) {
+		printf("func_reftrace\n");
+		BEGIN_REFTRACE(fo->espidx);
+		int i = 0;
+		for (; i < fo->espidx; i++) {
+			KREFTRACEn(fo->env[i].asObject);
+			if (IS_String(fo->env[i].asObject)) {
+				//printf("espidx[%d], string %s\n", i, fo->env[i].asString->text);
+			}
+		}
+		END_REFTRACE();
+	}
 }
 
 static void Func_free(KonohaContext *kctx, kObject *o)

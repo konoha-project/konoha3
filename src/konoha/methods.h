@@ -224,15 +224,24 @@ static KMETHOD Func_invoke(KonohaContext *kctx, KonohaStack *sfp)
 	 */
 	if (fo->env != NULL) {
 		size_t psize = Method_param(fo->mtd)->psize;
+		printf("invoke fo->env: %s\n", fo->env[2].asString->text);
+		printf("global object inside %d\n", sfp[0].asObject->h.ct->typeId);
 		/* fo->env          : callee environment (referenceing environment of a closure)
 		 * env[0]           : where return value is stored
 		 * env[K_CALLDELTA] : index of self object
 		 * sfp              : caller environment
 		 * copy arguments of closure to change environment
 		 */
-		memcpy(fo->env+fo->espidx-psize+K_CALLDELTA, sfp+1, sizeof(KonohaStack)*psize);
-		KSELFCALL(fo->env+K_CALLDELTA, fo->mtd);
-		sfp[K_RTNIDX] = fo->env[0/* K_RTNIDX + K_CALLDELTA*/];
+		//memcpy(fo->env+fo->espidx-psize+K_CALLDELTA, sfp+1, sizeof(KonohaStack)*psize);
+		//KSELFCALL(fo->env+K_CALLDELTA, fo->mtd);
+		//sfp[K_RTNIDX] = fo->env[0/* K_RTNIDX + K_CALLDELTA*/];
+		//printf("should be 1: %d\n", sfp[1].intValue);
+		memcpy(sfp+fo->espidx-1, sfp+1, sizeof(KonohaStack)*psize);
+		memcpy(sfp, fo->env, sizeof(KonohaStack)*(fo->espidx-1));
+		//printf("should be 10: %d\n", sfp[1].intValue);
+		KonohaRuntime_setesp(kctx, sfp+fo->espidx+psize);
+		KSELFCALL(sfp, fo->mtd);
+		memcpy(fo->env, sfp, sizeof(KonohaStack)*fo->espidx);
 	} else {
 		KSELFCALL(sfp, fo->mtd);
 	}

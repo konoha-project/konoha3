@@ -100,6 +100,11 @@ struct _kGlobalObject {
 	KonohaObjectHeader h;
 };
 
+static void kGlobalObject_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
+{
+	printf("global object\n");
+}
+
 static kbool_t kNameSpace_initGlobalObject(KonohaContext *kctx, kNameSpace *ns, kfileline_t pline)
 {
 	if(ns->globalObjectNULL == NULL) {
@@ -108,9 +113,12 @@ static kbool_t kNameSpace_initGlobalObject(KonohaContext *kctx, kNameSpace *ns, 
 		defGlobalObject.typeId = TY_newid;
 		defGlobalObject.cflag = kClass_Singleton|kClass_Final;
 		defGlobalObject.cstruct_size = sizeof(kGlobalObject);
+		//defGlobalObject.reftrace = kGlobalObject_reftrace; 
 
 		KonohaClass *cGlobalObject = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defGlobalObject, pline);
+		printf("globalobject %d\n", cGlobalObject->typeId);
 		KFieldInit(ns, ((kNameSpaceVar*)ns)->globalObjectNULL, KLIB Knull(kctx, cGlobalObject));
+		printf("%p\n", ns);
 		return KLIB kNameSpace_setConstData(kctx, ns, SYM_("global"), cGlobalObject->typeId, (uintptr_t)ns->globalObjectNULL, pline);
 	}
 	return true;

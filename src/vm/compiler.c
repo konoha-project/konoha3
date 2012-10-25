@@ -362,6 +362,7 @@ static void ASM_SAFEPOINT(KonohaContext *kctx, int espidx)
 {
 	kBasicBlock *bb = ctxcode->currentWorkingBlock;
 	size_t i;
+	printf("safepoint %d\n", espidx);
 	for (i = 0; i < BasicBlock_codesize(bb); i++) {
 		VirtualMachineInstruction *op = BBOP(bb) + i;
 		if (op->opcode == OPCODE_SAFEPOINT) return;
@@ -476,6 +477,7 @@ static void KonohaVisitor_visitConstExpr(KonohaContext *kctx, IRBuilder *self, k
 	DBG_ASSERT(!TY_isUnbox(expr->ty));
 	DBG_ASSERT(Expr_hasObjectConstValue(expr));
 	v = BUILD_addConstPool(kctx, v);
+	if (v->h.ct->typeId == 22) printf("const global object\n");
 	ASM(NSET, OC_(a), (uintptr_t)v, CT_(expr->ty));
 }
 
@@ -703,10 +705,11 @@ static void KonohaVisitor_visitClosureExpr(KonohaContext *kctx, IRBuilder *self,
 	DBG_ASSERT(expr->index + shift < espidx);
 	kExpr *funcExpr = kExpr_at(expr, 0);
 	kExpr *blockExpr = kExpr_at(expr, 1);
-	kFunc *fo = (kFunc*)funcExpr->objectConstValue;
+	kFuncVar *fo = (kFuncVar*)funcExpr->objectConstValue;
 	if(a + 1 == espidx) {
 		/* In this block, closure is defined like below.
 		 * Func[] f = function () => int {...};
+		 * Otherwise (means a+1!=espidx) closure is not defined as local variable.
 		 * Function f is never used and should be ignored inside closure.
 		 * Set espidx to espidx-1 to generate code properly.
 		 */
@@ -716,6 +719,7 @@ static void KonohaVisitor_visitClosureExpr(KonohaContext *kctx, IRBuilder *self,
 	}
 	kBlock *bk = (kBlock*)blockExpr->objectConstValue;
 	ClosureExpr_genCode(kctx, self, fo->mtd, bk);
+	fo = BUILD_addConstPool(kctx, fo);
 	ASM(NSET, OC_(a), (uintptr_t)fo, CT_(expr->ty));
 	ASM(SETENV, OC_(a), espidx);
 }
