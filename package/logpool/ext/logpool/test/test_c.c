@@ -15,7 +15,7 @@ static void emit_procedure(struct io *io, char *q)
 
 static void read_log(struct io *io, struct Log *tmp)
 {
-    io_read(io, (char*) tmp, 128);
+    io_read(io, (char *) tmp, 128);
 }
 
 int main(int argc, char **argv)
@@ -25,7 +25,7 @@ int main(int argc, char **argv)
             IO_MODE_READ|IO_MODE_WRITE, &client_api);
     emit_procedure(io, "match tid tid0");
     struct Log *log = alloca(sizeof(struct Log) + 256);
-    while (1) {
+    while(1) {
         char kbuf[16] = {};
         char vbuf[128] = {};
         read_log(io, log);

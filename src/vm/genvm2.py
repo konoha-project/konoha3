@@ -150,10 +150,10 @@ SETENV     0                  a:ro esp:ro
 #MOVe   a:sfpidx xspidx:u
 
 #CHKSTACK   0                 n:sfpidx
-#LDMTD      0                 thisidx:sfpidx loadmtd:f cache:hcache mtdNC:mtd
-#SCALL      _DEF|_JIT         a:r thisidx:sfpidx espshift:sfpidx mtdNC:mtd
-#VCALL      _DEF|_JIT         a:r thisidx:sfpidx espshift:sfpidx mtdNC:mtd
-#VCALL_     _DEF|_JIT         a:r thisidx:sfpidx espshift:sfpidx mtdNC:mtd
+#LDMTD      0                 thisidx:sfpidx loadmtd:f cache:hcache methodCallInfo:mtd
+#SCALL      _DEF|_JIT         a:r thisidx:sfpidx espshift:sfpidx methodCallInfo:mtd
+#VCALL      _DEF|_JIT         a:r thisidx:sfpidx espshift:sfpidx methodCallInfo:mtd
+#VCALL_     _DEF|_JIT         a:r thisidx:sfpidx espshift:sfpidx methodCallInfo:mtd
 #FASTCALL0  _DEF|_JIT         a:r thisidx:sfpidx rix:i espshift:sfpidx fcall:f
 
 #TR         _DEF|_JIT         a:r  b:sfpidx rix:i cid:cid tr:f
@@ -426,7 +426,7 @@ def write_exec(f):
 	write_chapter(f, '[exec]')
 	f.write('''
 
-//#if (defined(K_USING_LINUX_) && (defined(__i386__) || defined(__x86_64__)) && (defined(__GNUC__) && __GNUC__ >= 3))
+//#if(defined(K_USING_LINUX_) && (defined(__i386__) || defined(__x86_64__)) && (defined(__GNUC__) && __GNUC__ >= 3))
 //#define K_USING_VMASMDISPATCH 1
 //#endif
 

@@ -3,6 +3,7 @@
 import("konoha.untyped");
 import("konoha.null");
 import("konoha.object");
+import("konoha.subtype", "<:");
 
 void test() {
 	o = null;

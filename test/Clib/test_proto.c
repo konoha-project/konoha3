@@ -28,7 +28,7 @@ static void show_timer(struct timeval *timer, const char *s)
 #define COUNT 20000
 #define SUM   199990000
 
-static void each(KonohaContext *kctx, void *thunk, KUtilsKeyValue *d)
+static void each(KonohaContext *kctx, void *thunk, KKeyValue *d)
 {
 	uintptr_t *val = (uintptr_t *) thunk;
 	*val += d->unboxValue;
@@ -37,9 +37,9 @@ static void each(KonohaContext *kctx, void *thunk, KUtilsKeyValue *d)
 static void test_proto_value(KonohaContext *kctx)
 {
 	struct timeval timer;
-	kObject *o0 = new_(Object, 0);
-	kObject *o1 = new_(Object, 0);
-	kObject *o2 = new_(Object, 0);
+	kObject *o0 = new_(Object, 0, GcUnsafe);
+	kObject *o1 = new_(Object, 0, GcUnsafe);
+	kObject *o2 = new_(Object, 0, GcUnsafe);
 	uintptr_t i;
 
 	reset_timer(&timer);
@@ -140,18 +140,18 @@ static void test_proto_value(KonohaContext *kctx)
 }
 
 #if 0
-static void each_object(KonohaContext *kctx, void *thunk, KUtilsKeyValue *d)
+static void each_object(KonohaContext *kctx, void *thunk, KKeyValue *d)
 {
 	uintptr_t *val = (uintptr_t *) thunk;
-	*val += (uintptr_t) d->objectValue;
+	*val += (uintptr_t) d->ObjectValue;
 }
 
 static void test_proto_object(KonohaContext *kctx)
 {
 	struct timeval timer;
-	kObject *o0 = new_(Object, 0);
-	kObject *o1 = new_(Object, 0);
-	kObject *o2 = new_(Object, 0);
+	kObject *o0 = new_(Object, 0, GcUnsafe);
+	kObject *o1 = new_(Object, 0, GcUnsafe);
+	kObject *o2 = new_(Object, 0, GcUnsafe);
 	uintptr_t i;
 
 	reset_timer(&timer);

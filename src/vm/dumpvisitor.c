@@ -1,7 +1,31 @@
-#include <stdio.h>
+/****************************************************************************
+ * Copyright (c) 2012, the Konoha project authors. All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *  * Redistributions of source code must retain the above copyright notice,
+ *	this list of conditions and the following disclaimer.
+ *  * Redistributions in binary form must reproduce the above copyright
+ *	notice, this list of conditions and the following disclaimer in the
+ *	documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ***************************************************************************/
 
 #ifdef USE_DUMP_VISITOR
-#define DUMPER(BUILDER)  ((struct DumpVisitorLocal*)(BUILDER)->local_fields)
+#include <stdio.h>
+
+#define DUMPER(BUILDER)  ((struct DumpVisitorLocal *)(BUILDER)->local_fields)
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,7 +59,7 @@ static void DumpVisitor_visitReturnStmt(KonohaContext *kctx, IRBuilder *self, kS
 {
 	emit_string("Return", "", "", DUMPER(self)->indent);
 	kExpr* expr = Stmt_getFirstExpr(kctx, stmt);
-	if (expr != NULL && IS_Expr(expr)) {
+	if(expr != NULL && IS_Expr(expr)) {
 		handleExpr(kctx, self, expr);
 	}
 }
@@ -67,6 +91,24 @@ static void DumpVisitor_visitJumpStmt(KonohaContext *kctx, IRBuilder *self, kStm
 	emit_string("Jump", "", "", DUMPER(self)->indent);
 }
 
+static void DumpVisitor_visitTryStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
+{
+	DUMPER(self)->indent++;
+	emit_string("Try", "", "", DUMPER(self)->indent - 1);
+	visitBlock(kctx, self, Stmt_getFirstBlock(kctx, stmt));
+	kBlock *catchBlock   = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("catch"),   K_NULLBLOCK);
+	kBlock *finallyBlock = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("finally"), K_NULLBLOCK);
+	if(catchBlock != K_NULLBLOCK){
+		emit_string("Catch", "", "", DUMPER(self)->indent - 1);
+		visitBlock(kctx, self, catchBlock);
+	}
+	if(finallyBlock != K_NULLBLOCK){
+		emit_string("Finally", "", "", DUMPER(self)->indent - 1);
+		visitBlock(kctx, self, finallyBlock);
+	}
+	DUMPER(self)->indent--;
+}
+
 static void DumpVisitor_visitUndefinedStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
 {
 	emit_string("UNDEF", "", "", DUMPER(self)->indent);
@@ -74,12 +116,12 @@ static void DumpVisitor_visitUndefinedStmt(KonohaContext *kctx, IRBuilder *self,
 
 static void DumpVisitor_visitConstExpr(KonohaContext *kctx, IRBuilder *self, kExpr *expr)
 {
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	KonohaStack sfp[1];
 	kObject *obj = expr->objectConstValue;
-	sfp[0].o = obj;
-	O_ct(obj)->p(kctx, sfp, 0, &wb, 0);
+	sfp[0].asObject = obj;
+	O_ct(obj)->p(kctx, sfp, 0, &wb);
 	char  *str = (char *) KLIB Kwb_top(kctx, &wb, 0);
 	char buf[128];
 	snprintf(buf, 128, "CONST:%s:'%s'", CT_t(O_ct(obj)), str);
@@ -89,13 +131,13 @@ static void DumpVisitor_visitConstExpr(KonohaContext *kctx, IRBuilder *self, kEx
 
 static void DumpVisitor_visitNConstExpr(KonohaContext *kctx, IRBuilder *self, kExpr *expr)
 {
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	KonohaStack sfp[1];
 	unsigned long unboxVal = expr->unboxConstValue;
 	KonohaClass *ct = CT_(expr->ty);
 	sfp[0].unboxValue = unboxVal;
-	ct->p(kctx, sfp, 0, &wb, 0);
+	ct->p(kctx, sfp, 0, &wb);
 	char  *str = (char *) KLIB Kwb_top(kctx, &wb, 0);
 	char buf[128];
 	snprintf(buf, 128, "NCONST:'%s'", str);
@@ -136,7 +178,7 @@ static void DumpVisitor_visitFieldExpr(KonohaContext *kctx, IRBuilder *self, kEx
 
 static void DumpVisitor_visitCallExpr(KonohaContext *kctx, IRBuilder *self, kExpr *expr)
 {
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	kMethod *mtd = CallExpr_getMethod(expr);
 	KLIB Kwb_printf(kctx, &wb, "CALL: '%s%s'", T_mn(mtd->mn));
@@ -192,28 +234,33 @@ static void DumpVisitor_visitStackTopExpr(KonohaContext *kctx, IRBuilder *self, 
 	emit_string("STACKTOP", "", "", DUMPER(self)->indent);
 }
 
+static void DumpVisitor_visitClosureExpr(KonohaContext *kctx, IRBuilder *self, kExpr *expr)
+{
+	emit_string("CLOSURE", "", "", DUMPER(self)->indent);
+}
+
 static void DumpVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
 {
 	unsigned i;
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	kParam *pa = Method_param(mtd);
 	KLIB Kwb_printf(kctx, &wb, "METHOD %s%s(", T_mn(mtd->mn));
 	for (i = 0; i < pa->psize; i++) {
-		if (i != 0) {
+		if(i != 0) {
 			KLIB Kwb_write(kctx, &wb, ", ", 2);
 		}
 		KLIB Kwb_printf(kctx, &wb, "%s %s", TY_t(pa->paramtypeItems[i].ty), SYM_t(pa->paramtypeItems[i].fn));
 	}
 	emit_string(KLIB Kwb_top(kctx, &wb, 1), "", ") {", 0);
-	builder->local_fields = (void *) KMALLOC(sizeof(int));
+	builder->local_fields = (void *) KMalloc_UNTRACE(sizeof(int));
 	DUMPER(builder)->indent = 0;
 }
 
 void DumpVisitor_free(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
 {
 	emit_string("}", "", "", 0);
-	KFREE(builder->local_fields, sizeof(int));
+	KFree(builder->local_fields, sizeof(int));
 }
 
 static IRBuilder *createDumpVisitor(IRBuilder *builder)
@@ -230,4 +277,5 @@ static IRBuilder *createDumpVisitor(IRBuilder *builder)
 }
 #endif
 
-#endif
+#undef DUMPER
+#endif /* USE_DUMP_VISITOR */

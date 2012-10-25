@@ -60,9 +60,9 @@ static void *spawn_start(void *v)
 	// TODO Exception handling
 	// TODO push func arguments
 
-	BEGIN_LOCAL(lsfp, K_CALLDELTA+0);
-	KCALL(lsfp, 0, t->func->mtd, 0, K_NULL);
-	END_LOCAL();
+//	BEGIN_LOCAL(lsfp, K_CALLDELTA+0);
+//	KCALL(lsfp, 0, t->func->mtd, 0, K_NULL);
+//	END_LOCAL();
 
 	KLIB KonohaContext_free(t->rootCtx, (KonohaContextVar *)kctx);
 	t->kctx = NULL;
@@ -90,7 +90,7 @@ static int kThread_compareTo(kObject *o1, kObject *o2)
 	return pthread_equal(t1->thread, t2->thread) != 0 ? 0 : 1;
 }
 
-static void kThread_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
+static void kThread_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kThread *t = (kThread *)o;
 	BEGIN_REFTRACE(1);
@@ -127,150 +127,147 @@ static void kCond_free(KonohaContext *kctx, kObject *o)
 //## @Native Thread Thread.create(Func f)
 static KMETHOD Thread_create(KonohaContext *kctx, KonohaStack *sfp)
 {
+	INIT_GCSTACK();
 	kFunc *f = sfp[1].asFunc;
 	KLIB kNameSpace_compileAllDefinedMethods(kctx);
-	//kArray *args = sfp[2].a;
-	kThread *thread = (kThread *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
+	kThread *thread = (kThread *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	thread->rootCtx = kctx; //TODO getRootContext
 	thread->kctx = KLIB KonohaContext_init(kctx, kctx->platApi);
 	KFieldSet(thread, thread->func, f);
-	//KFieldSet(t, t->args, args);
 	pthread_create(&(thread->thread), NULL, spawn_start, thread);
-	RETURN_(thread);
+	RESET_GCSTACK(); // FIXME?? Not sure this is okay??
+	KReturn(thread);
 }
 
 //## @Native void Thread.join();
 static KMETHOD Thread_join(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kThread *t = (kThread *)sfp[0].o;
+	kThread *t = (kThread *)sfp[0].asObject;
 	void *v;
 	// TODO inc gcCounter
 	pthread_join(t->thread, &v);
 	// TODO dec gcCounter
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 //## @Native void Thread.exit();
 static KMETHOD Thread_exit(KonohaContext *kctx, KonohaStack *sfp)
 {
 	pthread_exit(NULL/*FIXME*/);
-	RETURNvoid_();
+	KReturnVoid();
 }
 	
 //## @Native void Thread.cancel();
 static KMETHOD Thread_cancel(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kThread *t = (kThread *)sfp[0].o;
+	kThread *t = (kThread *)sfp[0].asObject;
 	pthread_cancel(t->thread);
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 //## @Native void Thread.detach();
 static KMETHOD Thread_detach(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kThread *t = (kThread *)sfp[0].o;
+	kThread *t = (kThread *)sfp[0].asObject;
 	pthread_detach(t->thread);
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 //## @Native @Static Thread Thread.self();
 static KMETHOD Thread_self(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kThread *t = (kThread *)KLIB new_kObject(kctx, O_ct(sfp[K_RTNIDX].asObject), 0);
+	kThread *t = (kThread *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
 	t->kctx = kctx;//FIXME
 	t->thread = pthread_self();
-	RETURN_(t);
+	KReturn(t);
 }
 
 //## @Native boolean Thread.equal(Thread t);
 static KMETHOD Thread_equal(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNb_(kThread_compareTo(sfp[0].o, sfp[1].o) == 0);
+	KReturnUnboxValue(kThread_compareTo(sfp[0].asObject, sfp[1].asObject) == 0);
 }
 
 /* ------------------------------------------------------------------------ */
 //## @Native Mutex Mutex.new()
 static KMETHOD Mutex_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kMutex *m = (kMutex *)sfp[0].o;
-	RETURN_(m);
+	kMutex *m = (kMutex *)sfp[0].asObject;
+	KReturn(m);
 }
 
 //## @Native void Mutex.lock()
 static KMETHOD Mutex_lock(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kMutex *m = (kMutex *)sfp[0].o;
+	kMutex *m = (kMutex *)sfp[0].asObject;
 	// TODO inc gcCounter
 	pthread_mutex_lock(&m->mutex);
 	// TODO dec gcCounter
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 //## @Native boolean Mutex.trylock()
 static KMETHOD Mutex_trylock(KonohaContext *kctx, KonohaStack *sfp)
 {
 	// lock success: return true
-	kMutex *m = (kMutex *)sfp[0].o;
-	RETURNb_(pthread_mutex_trylock(&m->mutex) == 0);
+	kMutex *m = (kMutex *)sfp[0].asObject;
+	KReturnUnboxValue(pthread_mutex_trylock(&m->mutex) == 0);
 }
 
 //## @Native void Mutex.unlock()
 static KMETHOD Mutex_unlock(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kMutex *m = (kMutex *)sfp[0].o;
+	kMutex *m = (kMutex *)sfp[0].asObject;
 	pthread_mutex_unlock(&m->mutex);
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 /* ------------------------------------------------------------------------ */
 //## @Native Cond Cond.new()
 static KMETHOD Cond_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kCond *c = (kCond *)sfp[0].o;
-	RETURN_(c);
+	kCond *c = (kCond *)sfp[0].asObject;
+	KReturn(c);
 }
 
 //## @Native void Cond.wait(Mutex m)
 static KMETHOD Cond_wait(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kCond *c = (kCond *)sfp[0].o;
-	kMutex *m = (kMutex *)sfp[1].o;
+	kCond *c = (kCond *)sfp[0].asObject;
+	kMutex *m = (kMutex *)sfp[1].asObject;
 	// TODO inc gcCounter
 	pthread_cond_wait(&c->cond, &m->mutex);
 	// TODO dec gcCounter
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 //## @Native void Cond.signal()
 static KMETHOD Cond_signal(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kCond *c = (kCond *)sfp[0].o;
+	kCond *c = (kCond *)sfp[0].asObject;
 	pthread_cond_signal(&c->cond);
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 //## @Native void Cond.broadcast()
 static KMETHOD Cond_broadcast(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kCond *c = (kCond *)sfp[0].o;
+	kCond *c = (kCond *)sfp[0].asObject;
 	pthread_cond_broadcast(&c->cond);
-	RETURNvoid_();
+	KReturnVoid();
 }
 
 // --------------------------------------------------------------------------
 
 #define _Public   kMethod_Public
 #define _Static   kMethod_Static
-#define _Const    kMethod_Const
-#define _Coercion kMethod_Coercion
-#define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
 #define TY_Thread cThread->typeId
 #define TY_Mutex  cMutex->typeId
 #define TY_Cond   cCond->typeId
 
-static kbool_t thread_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t thread_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KDEFINE_CLASS defThread = {
 		STRUCTNAME(Thread),
@@ -292,9 +289,9 @@ static kbool_t thread_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		.init  = kCond_init,
 		.free  = kCond_free,
 	};
-	KonohaClass *cThread = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defThread, pline);
-	KonohaClass *cMutex  = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defMutex, pline);
-	KonohaClass *cCond   = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defCond, pline);
+	KonohaClass *cThread = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defThread, trace);
+	KonohaClass *cMutex  = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defMutex, trace);
+	KonohaClass *cCond   = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defCond, trace);
 	
 	kparamtype_t P_Func[] = {{}};
 	int TY_FUNC = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_void, 0, P_Func))->typeId;
@@ -323,17 +320,7 @@ static kbool_t thread_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	return true;
 }
 
-static kbool_t thread_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t thread_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t thread_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t thread_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -344,8 +331,6 @@ KDEFINE_PACKAGE* thread_init(void)
 		KPACKNAME("thread", "1.0"),
 		.initPackage    = thread_initPackage,
 		.setupPackage   = thread_setupPackage,
-		.initNameSpace  = thread_initNameSpace,
-		.setupNameSpace = thread_setupNameSpace,
 	};
 	return &d;
 }

@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <sys/resource.h>
 #include <sys/time.h>
+
 #include <grp.h>
 #ifdef __linux__
 #include <sys/wait.h>
@@ -42,32 +43,32 @@ extern "C"{
 
 static KMETHOD System_getpid(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(getpid());
+	KReturnUnboxValue(getpid());
 }
 
 static KMETHOD System_getppid(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(getppid());
+	KReturnUnboxValue(getppid());
 }
 
 static KMETHOD System_getuid(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(getuid());
+	KReturnUnboxValue(getuid());
 }
 
 static KMETHOD System_geteuid(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(geteuid());
+	KReturnUnboxValue(geteuid());
 }
 
 static KMETHOD System_getgid(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(getgid());
+	KReturnUnboxValue(getgid());
 }
 
 static KMETHOD System_getegid(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(getegid());
+	KReturnUnboxValue(getegid());
 }
 
 static KMETHOD System_getpgid(KonohaContext *kctx, KonohaStack *sfp)
@@ -77,7 +78,7 @@ static KMETHOD System_getpgid(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 static KMETHOD System_setpgid(KonohaContext *kctx, KonohaStack *sfp)
@@ -88,29 +89,7 @@ static KMETHOD System_setpgid(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
-}
-
-static KMETHOD System_chdir(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kString *s = sfp[1].asString;
-	const char *dir = S_text(s);
-	int ret = chdir(dir);
-	if(ret == -1) {
-		// TODO: throw
-	}
-	RETURNi_(ret);
-}
-
-static KMETHOD System_chroot(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kString *s = sfp[1].asString;
-	const char *root = S_text(s);
-	int ret = chroot(root);
-	if(ret == -1) {
-		// TODO: throw
-	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 static KMETHOD System_getpriority(KonohaContext *kctx, KonohaStack *sfp)
@@ -122,7 +101,7 @@ static KMETHOD System_getpriority(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 static KMETHOD System_setpriority(KonohaContext *kctx, KonohaStack *sfp)
@@ -134,7 +113,7 @@ static KMETHOD System_setpriority(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 static KMETHOD System_getgroups(KonohaContext *kctx, KonohaStack *sfp)
@@ -145,7 +124,7 @@ static KMETHOD System_getgroups(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 static KMETHOD System_setgroups(KonohaContext *kctx, KonohaStack *sfp)
@@ -156,7 +135,7 @@ static KMETHOD System_setgroups(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.fork()
@@ -166,7 +145,7 @@ static KMETHOD System_fork(KonohaContext *kctx, KonohaStack *sfp)
 	if(pid == -1) {
 		// TODO: throw
 	}
-	RETURNi_(pid);
+	KReturnUnboxValue(pid);
 }
 
 //## int System.wait()
@@ -177,7 +156,7 @@ static KMETHOD System_wait(KonohaContext *kctx, KonohaStack *sfp)
 	if(pid == -1) {
 		// TODO: throw
 	}
-	RETURNi_(pid);
+	KReturnUnboxValue(pid);
 }
 
 //## int System.waitpid(int pid, int options)
@@ -190,7 +169,7 @@ static KMETHOD System_waitpid(KonohaContext *kctx, KonohaStack *sfp)
 	if(pid == -1) {
 		// TODO: throw
 	}
-	RETURNi_(pid);
+	KReturnUnboxValue(pid);
 }
 
 //## int System.setuid(int uid)
@@ -201,7 +180,7 @@ static KMETHOD System_setuid(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.seteuid(int euid)
@@ -212,7 +191,7 @@ static KMETHOD System_seteuid(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.setreuid(int ruid, int euid)
@@ -224,7 +203,7 @@ static KMETHOD System_setreuid(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.setgid(int gid)
@@ -235,7 +214,7 @@ static KMETHOD System_setgid(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.setegid(int euid)
@@ -246,7 +225,7 @@ static KMETHOD System_setegid(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.setregid(int rgid, int egid)
@@ -258,7 +237,7 @@ static KMETHOD System_setregid(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.setsid()
@@ -268,7 +247,7 @@ static KMETHOD System_setsid(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
 }
 
 //## int System.getsid(int pid)
@@ -279,7 +258,37 @@ static KMETHOD System_getsid(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 	}
-	RETURNi_(ret);
+	KReturnUnboxValue(ret);
+}
+
+//## int System.sleep(int sec)
+static KMETHOD System_sleep(KonohaContext *kctx, KonohaStack *sfp)
+{
+	unsigned int sec = sfp[1].intValue;
+	unsigned int left = sleep(sec);
+	KReturnUnboxValue(left);
+}
+
+//## boolean System.usleep(int usec)
+static KMETHOD System_usleep(KonohaContext *kctx, KonohaStack *sfp)
+{
+	unsigned int usec = sfp[1].intValue;
+	int ret = usleep(usec);
+	if(ret != 0) {
+		// TODO KTraceApi
+	}
+	KReturnUnboxValue(ret == 0);
+}
+
+//## int System.system(String command)
+static KMETHOD System_system(KonohaContext *kctx, KonohaStack *sfp)
+{
+	const char *command = S_text(sfp[1].asString);
+	int ret = system(command);
+	if(ret != 0) {
+		// TODO KTraceApi
+	}
+	KReturnUnboxValue(ret);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -290,9 +299,9 @@ static KMETHOD System_getsid(KonohaContext *kctx, KonohaStack *sfp)
 #define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-#define _KVi(T) #T, TY_int, T
+#define KDefineConstInt(T) #T, TY_int, T
 
-static kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	kparamtype_t p = { .ty = TY_int,  };
 	KonohaClass *cintArray = KLIB KonohaClass_Generics(kctx, CT_(TY_Array), TY_void, 1, &p);
@@ -308,8 +317,6 @@ static kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public|_Static, _F(System_getegid), TY_int, TY_System, MN_("getegid"), 0,
 		_Public|_Static, _F(System_getpgid), TY_int, TY_System, MN_("getpgid"), 1, TY_int, FN_("pid"),
 		_Public|_Static, _F(System_setpgid), TY_int, TY_System, MN_("setpgid"), 2, TY_int, FN_("pid"), TY_int, FN_("pgid"),
-		_Public|_Static, _F(System_chdir), TY_int, TY_System, MN_("chdir"), 1, TY_String, FN_("pathname"),
-		_Public|_Static, _F(System_chroot), TY_int, TY_System, MN_("chroot"), 1, TY_String, FN_("pathname"),
 		_Public|_Static, _F(System_getpriority), TY_int, TY_System, MN_("getpriority"), 2, TY_int, FN_("which"), TY_int, FN_("who"),
 		_Public|_Static, _F(System_setpriority), TY_int, TY_System, MN_("setpriority"), 3, TY_int, FN_("which"), TY_int, FN_("who"), TY_int, FN_("priority"),
 		_Public|_Static, _F(System_getgroups), TY_int, TY_System, MN_("getgroups"), 2, TY_int, FN_("size"), TY_intArray, FN_("list[]"),
@@ -325,35 +332,28 @@ static kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public|_Static, _F(System_setregid), TY_int, TY_System, MN_("setrguid"), 2, TY_int, FN_("rgid"), TY_int, FN_("egid"),
 		_Public|_Static, _F(System_setsid), TY_int, TY_System, MN_("setsid"), 0,
 		_Public|_Static, _F(System_getsid), TY_int, TY_System, MN_("getsid"), 1, TY_int, FN_("pid"),
+		_Public|_Static, _F(System_sleep), TY_int, TY_System, MN_("sleep"), 1, TY_int, FN_("sec"),
+		_Public|_Static, _F(System_usleep), TY_boolean, TY_System, MN_("usleep"), 1, TY_int, FN_("usec"),
+		_Public|_Static, _F(System_system), TY_int, TY_System, MN_("system"), 1, TY_String, FN_("command"),
 		DEND,
 	};
 	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 	KDEFINE_INT_CONST intData[] = {
-		{_KVi(SIGHUP)},
-		{_KVi(SIGINT)},
-		{_KVi(SIGABRT)},
-		{_KVi(SIGKILL)},
+		{KDefineConstInt(SIGHUP)},
+		{KDefineConstInt(SIGINT)},
+		{KDefineConstInt(SIGABRT)},
+		{KDefineConstInt(SIGKILL)},
 		/*for System.setpriority*/
-		{_KVi(PRIO_PROCESS)},
-		{_KVi(PRIO_PGRP)},
-		{_KVi(PRIO_USER)},
+		{KDefineConstInt(PRIO_PROCESS)},
+		{KDefineConstInt(PRIO_PGRP)},
+		{KDefineConstInt(PRIO_USER)},
 		{}
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(intData), 0);
 	return true;
 }
 
-static kbool_t process_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t process_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t process_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t process_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -365,8 +365,6 @@ KDEFINE_PACKAGE* process_init(void)
 		KPACKLIB("POSIX.1", "1.0"),
 		.initPackage    = process_initPackage,
 		.setupPackage   = process_setupPackage,
-		.initNameSpace  = process_initNameSpace,
-		.setupNameSpace = process_setupNameSpace,
 	};
 	return &d;
 }

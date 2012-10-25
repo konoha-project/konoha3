@@ -87,16 +87,31 @@ static void reverse(char *const start, char *const end, const int len)
 static char *writeUnsingedIntToBuffer(uintptr_t uint, char *const buftop, const char *const bufend)
 {
 	int i = 0;
-	while (buftop + i < bufend) {
+	while(buftop + i < bufend) {
 		int tmp = uint % 10;
 		uint /= 10;
 		buftop[i] = '0' + tmp;
 		++i;
-		if (uint == 0)
+		if(uint == 0)
 			break;
 	}
 	reverse(buftop, buftop + i, i);
 	return buftop + i;
+}
+
+// the last entry of args must be NULL
+static char *writeCharArrayToBuffer(const char** args, char *buftop, char *bufend)
+{
+	int i;
+	buftop[0] = '['; buftop += 1;
+	for(i = 0; args[i] != NULL; i++) {
+		buftop = writeTextToBuffer(args[i], buftop, bufend);
+		if(args[i+1] != NULL) {
+			buftop[0] = ','; buftop[1] = ' '; buftop += 2;
+		}
+	}
+	buftop[0] = ']';
+	return buftop + 1;
 }
 
 static char* writeKeyToBuffer(const char *key, size_t keylen, char *buftop, char *bufend)
@@ -114,22 +129,22 @@ static char* writeKeyToBuffer(const char *key, size_t keylen, char *buftop, char
 	return buftop;
 }
 
-#define HasFault    (SystemFault|ScriptFault|DataFault|ExternalFault)
-#define HasLocation (PeriodicPoint|PreactionPoint|ActionPoint|SecurityAudit)
+#define HasFault    (SystemFault|SoftwareFault|UserFault|ExternalFault)
+#define HasLocation (PeriodicPoint|ResponseCheckPoint|SystemChangePoint|SecurityAudit)
 
-static char* writePolicyToBuffer(logconf_t *logconf, char *buftop, char *bufend)
+static char* writePolicyToBuffer(KonohaContext *kctx, logconf_t *logconf, char *buftop, char *bufend, KTraceInfo *trace)
 {
 	if((logconf->policy & HasLocation)) {
-		buftop = writeKeyToBuffer(TEXTSIZE("TracePoint"), buftop, bufend);
+		buftop = writeKeyToBuffer(TEXTSIZE("LogPoint"), buftop, bufend);
 		writeToBuffer('"', buftop, bufend);
 		if(TFLAG_is(int, logconf->policy, PeriodicPoint)) {
-			buftop = writeFixedTextToBuffer(TEXTSIZE("Periodic,"), buftop, bufend);
+			buftop = writeFixedTextToBuffer(TEXTSIZE("PeriodicPoint,"), buftop, bufend);
 		}
-		if(TFLAG_is(int, logconf->policy, PreactionPoint)) {
-			buftop = writeFixedTextToBuffer(TEXTSIZE("PreAction,"), buftop, bufend);
+		if(TFLAG_is(int, logconf->policy, ResponseCheckPoint)) {
+			buftop = writeFixedTextToBuffer(TEXTSIZE("ResponseCheckPoint,"), buftop, bufend);
 		}
-		if(TFLAG_is(int, logconf->policy, ActionPoint)) {
-			buftop = writeFixedTextToBuffer(TEXTSIZE("Action,"), buftop, bufend);
+		if(TFLAG_is(int, logconf->policy, SystemChangePoint)) {
+			buftop = writeFixedTextToBuffer(TEXTSIZE("SystemChangePoint,"), buftop, bufend);
 		}
 		if(TFLAG_is(int, logconf->policy, SecurityAudit)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("SecurityAudit,"), buftop, bufend);
@@ -140,16 +155,23 @@ static char* writePolicyToBuffer(logconf_t *logconf, char *buftop, char *bufend)
 		buftop+=2;
 	}
 	if((logconf->policy & HasFault)) {
+		if(!(logconf->policy & HasLocation)) {
+			buftop = writeKeyToBuffer(TEXTSIZE("LogPoint"), buftop, bufend);
+			buftop = writeTextToBuffer("ErrorPoint", buftop, bufend);
+			buftop[0] = ',';
+			buftop[1] = ' ';
+			buftop+=2;
+		}
 		buftop = writeKeyToBuffer(TEXTSIZE("FaultType"), buftop, bufend);
 		writeToBuffer('"', buftop, bufend);
 		if(TFLAG_is(int, logconf->policy, SystemFault)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("SystemFault,"), buftop, bufend);
 		}
-		if(TFLAG_is(int, logconf->policy, ScriptFault)) {
-			buftop = writeFixedTextToBuffer(TEXTSIZE("ScriptFault,"), buftop, bufend);
+		if(TFLAG_is(int, logconf->policy, SoftwareFault)) {
+			buftop = writeFixedTextToBuffer(TEXTSIZE("SoftwareFault,"), buftop, bufend);
 		}
-		if(TFLAG_is(int, logconf->policy, DataFault)) {
-			buftop = writeFixedTextToBuffer(TEXTSIZE("DataFault,"), buftop, bufend);
+		if(TFLAG_is(int, logconf->policy, UserFault)) {
+			buftop = writeFixedTextToBuffer(TEXTSIZE("UserFault,"), buftop, bufend);
 		}
 		if(TFLAG_is(int, logconf->policy, ExternalFault)) {
 			buftop = writeFixedTextToBuffer(TEXTSIZE("ExternalFault,"), buftop, bufend);
@@ -162,12 +184,14 @@ static char* writePolicyToBuffer(logconf_t *logconf, char *buftop, char *bufend)
 		buftop[1] = ' ';
 		buftop+=2;
 	}
-//	if(TFLAG_is(int, logconf->policy, PrivacyCaution)) {
-//		buftop = writeTextToBuffer("PrivacyCaution\": \"true", buftop, bufend);
-//		buftop[0] = ',';
-//		buftop[1] = ' ';
-//		buftop+=2;
-//	}
+	if(trace != NULL) {
+		buftop = writeKeyToBuffer(TEXTSIZE("ScriptName"), buftop, bufend);
+		buftop = writeTextToBuffer(FileId_t(trace->pline), buftop, bufend);
+		buftop[0] = ','; buftop[1] = ' '; buftop += 2;
+		buftop = writeKeyToBuffer(TEXTSIZE("ScriptLine"), buftop, bufend);
+		buftop = writeUnsingedIntToBuffer((uintptr_t)(kushort_t)trace->pline, buftop, bufend);
+		buftop[0] = ','; buftop[1] = ' '; buftop += 2;
+	}
 	return buftop;
 }
 
@@ -184,11 +208,11 @@ static char* writeErrnoToBuffer(logconf_t *logconf, char *buftop, char *bufend)
 	return buftop;
 }
 
-static void writeDataLogToBuffer(logconf_t *logconf, va_list ap, char *buftop, char *bufend)
+static void writeDataLogToBuffer(KonohaContext *kctx, logconf_t *logconf, va_list ap, char *buftop, char *bufend, KTraceInfo *trace)
 {
 	int c = 0, logtype;
 	buftop[0] = '{'; buftop++;
-	buftop = writePolicyToBuffer(logconf, buftop, bufend);
+	buftop = writePolicyToBuffer(kctx, logconf, buftop, bufend, trace);
 	while((logtype = va_arg(ap, int)) != LOG_END) {
 		if(c > 0 && buftop + 3 < bufend) {
 			buftop[0] = ',';
@@ -197,20 +221,26 @@ static void writeDataLogToBuffer(logconf_t *logconf, va_list ap, char *buftop, c
 		}
 		switch(logtype) {
 		case LOG_s: {
-			const char *key = va_arg(ap, const char*);
-			const char *text = va_arg(ap, const char*);
+			const char *key = va_arg(ap, const char *);
+			const char *text = va_arg(ap, const char *);
 			buftop = writeKeyToBuffer(key, strlen(key), buftop, bufend);
 			buftop = writeTextToBuffer(text, buftop, bufend);
 			break;
 		}
 		case LOG_u: {
-			const char *key = va_arg(ap, const char*);
+			const char *key = va_arg(ap, const char *);
 			buftop = writeKeyToBuffer(key, strlen(key), buftop, bufend);
 			buftop = writeUnsingedIntToBuffer(va_arg(ap, uintptr_t), buftop, bufend);
 			break;
 		}
 		case LOG_ERRNO : {
 			buftop = writeErrnoToBuffer(logconf, buftop, bufend);
+			break;
+		}
+		case LOG_a : {
+			const char *key = va_arg(ap, const char *);
+			buftop = writeKeyToBuffer(key, strlen(key), buftop, bufend);
+			buftop = writeCharArrayToBuffer(va_arg(ap, const char**), buftop, bufend);
 			break;
 		}
 		}

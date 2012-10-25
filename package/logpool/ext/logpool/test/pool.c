@@ -13,17 +13,17 @@ uintptr_t p4_init(uintptr_t context)
 }
 uintptr_t p4_exit(uintptr_t context)
 {
-    struct cpu_average *average = (struct cpu_average*) context;
+    struct cpu_average *average = (struct cpu_average *) context;
     free(average);
     return 0;
 }
 uintptr_t p4_func(uintptr_t context, struct LogEntry *e)
 {
-    struct cpu_average *average = (struct cpu_average*) context;
+    struct cpu_average *average = (struct cpu_average *) context;
     int vlen;
     char *val = LogEntry_get(e, "cpu", strlen("cpu"), &vlen);
     char *end = val + vlen;
-    if (val) {
+    if(val) {
         average->sum  += strtol(val, &end, 10);
         average->size += 1;
     }

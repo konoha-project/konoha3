@@ -13,9 +13,9 @@ static uintptr_t p5_init(uintptr_t context)
 
 static uintptr_t p5_exit(uintptr_t context)
 {
-    struct tid_average *average = (struct tid_average*) context;
+    struct tid_average *average = (struct tid_average *) context;
     uintptr_t data = 0;
-    if (average->size) {
+    if(average->size) {
         data = average->sum/ average->size;
     }
     free(average);
@@ -23,11 +23,11 @@ static uintptr_t p5_exit(uintptr_t context)
 }
 static uintptr_t p5_func(uintptr_t context, struct LogEntry *e)
 {
-    struct tid_average *average = (struct tid_average*) context;
+    struct tid_average *average = (struct tid_average *) context;
     int vlen;
     char *val = LogEntry_get(e, "tid", strlen("tid"), &vlen);
     char *end = val + vlen;
-    if (val) {
+    if(val) {
         average->sum  += strtol(val, &end, 10);
         average->size += 1;
     }

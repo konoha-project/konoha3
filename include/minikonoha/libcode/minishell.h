@@ -56,7 +56,7 @@ static int checkstmt(const char *t, size_t len)
 	return 1;
 }
 
-static kstatus_t readstmt(KonohaContext *kctx, KUtilsWriteBuffer *wb, kfileline_t *uline)
+static kstatus_t readstmt(KonohaContext *kctx, KGrowingBuffer *wb, kfileline_t *uline)
 {
 	int line = 1;
 	kstatus_t status = K_CONTINUE;
@@ -94,7 +94,7 @@ static kstatus_t readstmt(KonohaContext *kctx, KUtilsWriteBuffer *wb, kfileline_
 	return status;
 }
 
-static void dumpEval(KonohaContext *kctx, KUtilsWriteBuffer *wb)
+static void dumpEval(KonohaContext *kctx, KGrowingBuffer *wb)
 {
 	KonohaStackRuntimeVar *base = kctx->stack;
 	ktype_t ty = base->evalty;
@@ -102,13 +102,14 @@ static void dumpEval(KonohaContext *kctx, KUtilsWriteBuffer *wb)
 		KonohaStack *lsfp = base->stack + base->evalidx;
 		CT_(ty)->p(kctx, lsfp, 0, wb);
 		fflush(stdout);
-		PLATAPI printf_i("TYPE=%s EVAL=%s\n", TY_t(ty), KLIB Kwb_top(kctx, wb,1));
+		PLATAPI printf_i(" (%s) %s\n", TY_t(ty), KLIB Kwb_top(kctx, wb,1));
+		base->evalty = TY_void;
 	}
 }
 
 static void shell(KonohaContext *kctx)
 {
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	kfileline_t uline = FILEID_("(shell)") | 1;
 	while(1) {
@@ -116,7 +117,7 @@ static void shell(KonohaContext *kctx)
 		kstatus_t status = readstmt(kctx, &wb, &inc);
 		if(status == K_BREAK) break;
 		if(status == K_CONTINUE && Kwb_bytesize(&wb) > 0) {
-			status = (kstatus_t)konoha_eval((KonohaContext*)kctx, KLIB Kwb_top(kctx, &wb, 1), uline);
+			status = (kstatus_t)konoha_eval((KonohaContext *)kctx, KLIB Kwb_top(kctx, &wb, 1), uline);
 			uline += inc;
 			KLIB Kwb_free(&wb);
 			if(status != K_FAILED) {

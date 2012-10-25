@@ -33,14 +33,14 @@ extern "C"{
 // Object.getTypeId()
 static KMETHOD Object_getTypeId(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(O_ct(sfp[0].asObject)->typeId);
+	KReturnUnboxValue(O_ct(sfp[0].asObject)->typeId);
 }
 
 // Object.instanceOf(Object o)
 static KMETHOD Object_instanceOf(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KonohaClass *selfClass = O_ct(sfp[0].asObject), *targetClass = O_ct(sfp[1].asObject);
-	RETURNb_(selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass));
+	KReturnUnboxValue(selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass));
 }
 
 static KMETHOD Object_as(KonohaContext *kctx, KonohaStack *sfp)
@@ -54,7 +54,7 @@ static KMETHOD Object_as(KonohaContext *kctx, KonohaStack *sfp)
 		returnValue = KLIB Knull(kctx, targetClass);
 	}
 	sfp[K_RTNIDX].unboxValue = O_unbox(returnValue);
-	RETURN_(returnValue);
+	KReturn(returnValue);
 }
 
 // --------------------------------------------------------------------------
@@ -63,10 +63,9 @@ static KMETHOD Object_as(KonohaContext *kctx, KonohaStack *sfp)
 #define _Const    kMethod_Const
 #define _Hidden   kMethod_Hidden
 #define _Imm    kMethod_Immutable
-#define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t subtype_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t subtype_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	int FN_type = FN_("type");
 	KDEFINE_METHOD MethodData[] = {
@@ -79,10 +78,7 @@ static kbool_t subtype_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	return true;
 }
 
-static kbool_t subtype_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
+/* Syntax */
 
 static KMETHOD TypeCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -93,16 +89,16 @@ static KMETHOD TypeCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 		KonohaClass *selfClass = CT_(selfExpr->ty), *targetClass = CT_(targetExpr->ty);
 		if(CT_is(Final, selfClass)) {
 			kbool_t staticSubType = (selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass));
-			RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_boolean, staticSubType));
+			KReturn(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_boolean, staticSubType));
 		}
 		kNameSpace *ns = Stmt_nameSpace(stmt);
 		kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_Object, MN_("<:"), 1);
 		DBG_ASSERT(mtd != NULL);
-		KFieldSet(expr->cons, expr->cons->methodItems[0], mtd);
+		KFieldSet(expr->cons, expr->cons->MethodItems[0], mtd);
 		kExpr *classValue = SUGAR kExpr_setConstValue(kctx,
-				expr->cons->exprItems[2], targetExpr->ty, KLIB Knull(kctx, targetClass));
-		KFieldSet(expr->cons, expr->cons->exprItems[2], classValue);
-		RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, TY_boolean));
+				expr->cons->ExprItems[2], targetExpr->ty, KLIB Knull(kctx, targetClass));
+		KFieldSet(expr->cons, expr->cons->ExprItems[2], classValue);
+		KReturn(SUGAR kStmtExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, TY_boolean));
 	}
 }
 
@@ -114,33 +110,40 @@ static KMETHOD TypeCheck_As(KonohaContext *kctx, KonohaStack *sfp)
 	if(selfExpr != K_NULLEXPR && targetExpr != K_NULLEXPR) {
 		KonohaClass *selfClass = CT_(selfExpr->ty), *targetClass = CT_(targetExpr->ty);
 		if(selfExpr->ty == targetExpr->ty || selfClass->isSubType(kctx, selfClass, targetClass)) {
-			RETURN_(selfExpr);
+			KReturn(selfExpr);
 		}
 		kNameSpace *ns = Stmt_nameSpace(stmt);
 		kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_Object, MN_("as"), 0);
 		DBG_ASSERT(mtd != NULL);
-		KFieldSet(expr->cons, expr->cons->methodItems[0], mtd);
+		KFieldSet(expr->cons, expr->cons->MethodItems[0], mtd);
 		kExpr *classValue = SUGAR kExpr_setConstValue(kctx,
-				expr->cons->exprItems[2], targetExpr->ty, KLIB Knull(kctx, targetClass));
-		KFieldSet(expr->cons, expr->cons->exprItems[2], classValue);
-		RETURN_(SUGAR kStmt_tyCheckCallParamExpr(kctx, stmt, expr, mtd, gma, targetClass->typeId));
+				expr->cons->ExprItems[2], targetExpr->ty, KLIB Knull(kctx, targetClass));
+		KFieldSet(expr->cons, expr->cons->ExprItems[2], classValue);
+		KReturn(SUGAR kStmtExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, targetClass->typeId));
 	}
 }
 
-// ----------------------------------------------------------------------------
-
-static kbool_t subtype_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t subtype_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("<:"), 0, NULL, Precedence_CStyleMUL, 0, NULL, NULL, NULL, NULL, TypeCheck_InstanceOf, },
 		{ SYM_("as"), 0, NULL, Precedence_CStyleMUL, 0, NULL, NULL, NULL, NULL, TypeCheck_As},
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t subtype_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+// ----
+
+static kbool_t subtype_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	subtype_defineMethod(kctx, ns, trace);
+	subtype_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t subtype_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -150,11 +153,9 @@ static kbool_t subtype_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNa
 KDEFINE_PACKAGE* subtype_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "subtype", "1.0");
+	KSetPackageName(d, "subtype", "1.0");
 	d.initPackage    = subtype_initPackage;
 	d.setupPackage   = subtype_setupPackage;
-	d.initNameSpace  = subtype_initNameSpace;
-	d.setupNameSpace = subtype_setupNameSpace;
 	return &d;
 }
 

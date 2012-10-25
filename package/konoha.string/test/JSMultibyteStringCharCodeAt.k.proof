@@ -1,3 +1,2 @@
- - (error) Script!!: out of array index 999
- ** OutOfStringBoundaryException
+ ** OutOfStringBoundaryException (JSMultibyteStringCharCodeAt.k:7)
 Q.E.D.

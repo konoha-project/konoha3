@@ -32,19 +32,19 @@
 extern "C" {
 #endif
 
-#define IS_RootKonohaContext(o)   (kctx == (KonohaContext*)o)
+#define IS_RootKonohaContext(o)   (kctx == (KonohaContext *)o)
 
 // These functions are local functions in minikonoha binary.
 // Don't call from packages directly   (kimio)
 
-void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o, struct kObjectVisitor *);  // called from MODGC
+void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o, struct KObjectVisitor *);  // called from MODGC
 void KONOHA_freeObjectField(KonohaContext *kctx, kObjectVar *o);       // callled from MODGC
 
 void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx);
 //void MODCODE_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk);
 
 void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx);
-kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, kfileline_t pline);
+kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, KTraceInfo *trace);
 kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, kfileline_t uline);
 
 void MODSUGAR_loadMethod(KonohaContext *kctx);

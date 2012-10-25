@@ -1,6 +1,7 @@
 // written by kimio kuramitsu
 
 import("konoha.object");
+import("konoha.subtype", "<:");
 
 void test() {
 	Object o;

@@ -21,7 +21,7 @@ int main(int argc, char **argv)
     logpool_global_init(LOGPOOL_TRACE);
     logpool_t *logpool = logpool_open(NULL, &LOGAPI, LOGAPI_PARAM);
     void *logpool_args;
-    if (argc < 2) {
+    if(argc < 2) {
         fprintf(stderr, "usage: %s key value key value ...\n", argv[0]);
         goto L_error;
     }

@@ -1,5 +1,5 @@
 import("konoha.bytes");
-import("posix.file");
+import("konoha.file");
 import("konoha");
 
 void f() {

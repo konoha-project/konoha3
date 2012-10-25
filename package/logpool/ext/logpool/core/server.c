@@ -14,12 +14,12 @@ static void server_event_callback(struct bufferevent *bev, short events, void *c
 {
     struct range_stream *cs = (struct range_stream *) ctx;
     struct io *io = cs->io;
-    if (events & BEV_EVENT_EOF) {
+    if(events & BEV_EVENT_EOF) {
         debug_print(1, "client disconnect");
         range_stream_delete(cs);
         pool_delete_connection(io->pool, bev);
         bufferevent_free(bev);
-    } else if (events & BEV_EVENT_TIMEOUT) {
+    } else if(events & BEV_EVENT_TIMEOUT) {
         debug_print(1, "client timeout e=%p, events=%x", bev, events);
         pool_delete_connection(io->pool, bev);
         bufferevent_free(bev);
@@ -35,10 +35,10 @@ static void server_read_callback(struct bufferevent *bev, void *ctx)
     struct range_stream *cs = (struct range_stream *) ctx;
     struct io *io = cs->io;
     debug_print(0, "read_cb bev=%p", bev);
-    while (!range_stream_empty(cs)) {
+    while(!range_stream_empty(cs)) {
         int log_size;
         struct Log *log = range_stream_get(cs, &log_size);
-        if (log == NULL) {
+        if(log == NULL) {
             break;
         }
         char *data = log_get_data((struct Log *) log);
@@ -46,7 +46,7 @@ static void server_read_callback(struct bufferevent *bev, void *ctx)
         switch (log_data_protocol(log)) {
         case LOGPOOL_EVENT_READ:
             debug_print(1, "R %d %d, '%s'", log->klen, log->vlen, data);
-            pool_add((struct Procedure*) log, bev, io->pool);
+            pool_add((struct Procedure *) log, bev, io->pool);
             break;
         case LOGPOOL_EVENT_WRITE:
 #if LOGPOOL_DEBUG >= 1
@@ -87,7 +87,7 @@ static void server_accept_callback(struct evconnlistener *lev, evutil_socket_t f
             (unsigned short) ntohs(((struct sockaddr_in *) sa)->sin_port), fd);
 
     bev = bufferevent_socket_new(base, fd, BEV_OPT_CLOSE_ON_FREE);
-    if (bev == NULL) {
+    if(bev == NULL) {
         debug_print(0, "bufferevent_socket_new() failed");
         evutil_closesocket(fd);
         return;
@@ -120,7 +120,7 @@ static int io_server_init(struct io *io, char *host, int port, int ev_mode)
             LEV_OPT_REUSEABLE | LEV_OPT_CLOSE_ON_FREE, -1,
             (struct sockaddr *) &sin, sizeof(sin));
     debug_print(9, "host=%s, port=%d", host, port);
-    if (lev == NULL) {
+    if(lev == NULL) {
         debug_print(9, "bind() failed");
         return IO_FAILED;
     }
@@ -131,7 +131,7 @@ static int io_server_init(struct io *io, char *host, int port, int ev_mode)
 
 static int io_server_write(struct io *io, const void *data, uint32_t nbyte)
 {
-    if (bufferevent_write(io->bev, data, nbyte) != 0) {
+    if(bufferevent_write(io->bev, data, nbyte) != 0) {
         fprintf(stderr, "write error, v=('%p', %u)\n", data, nbyte);
         return IO_FAILED;
     }

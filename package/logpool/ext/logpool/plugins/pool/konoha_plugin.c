@@ -13,7 +13,7 @@
 //static const char* l_packname(const char *str)
 //{
 //	char *p = strrchr(str, '.');
-//	return (p == NULL) ? str : (const char*)p+1;
+//	return (p == NULL) ? str : (const char *)p+1;
 //}
 //
 //static const char* l_packagepath(char *buf, size_t bufsiz, const char *fname)
@@ -37,7 +37,7 @@
 //		snprintf(buf, bufsiz, K_PREFIX "/konoha2/package" "/%s/%s_glue.k", fname, l_packname(fname));
 //	}
 //#endif
-//	return (const char*)buf;
+//	return (const char *)buf;
 //}
 //
 //static const char* l_exportpath(char *pathbuf, size_t bufsiz, const char *pname)
@@ -47,7 +47,7 @@
 //	FILE *fp = fopen(pathbuf, "r");
 //	if(fp != NULL) {
 //		fclose(fp);
-//		return (const char*)pathbuf;
+//		return (const char *)pathbuf;
 //	}
 //	return NULL;
 //}
@@ -98,7 +98,7 @@ extern kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, kfilelin
 
 void konoha_plugin_init(KonohaContextVar **konohap, memcached_st **mcp)
 {
-    *konohap = (KonohaContextVar*)konoha_open(&logpool_platform);
+    *konohap = (KonohaContextVar *)konoha_open(&logpool_platform);
     *mcp = memcached_create(NULL);
     KonohaContext *kctx = *konohap;
     kNameSpace *ns = KNULL(NameSpace);
@@ -107,7 +107,7 @@ void konoha_plugin_init(KonohaContextVar **konohap, memcached_st **mcp)
     memcached_server_list_st servers;
     memcached_return_t rc;
     servers = memcached_server_list_append(NULL, "127.0.0.1", 11211, &rc);
-    if (rc != MEMCACHED_SUCCESS) {
+    if(rc != MEMCACHED_SUCCESS) {
         fprintf(stderr, "memcached_server_list_append failed\n");
     }
     rc = memcached_server_push(*mcp, servers);
@@ -120,18 +120,18 @@ struct pool_plugin *konoha_plugin_get(KonohaContext *kctx, memcached_st *mc, cha
     uint32_t flags;
     memcached_return_t rc;
     char *script = memcached_get(mc, buf, strlen(buf), &vlen, &flags, &rc);
-    kObject *ev = KLIB new_kObject(kctx, CT_Int/*Dummy*/, (uintptr_t)req);
+    kObject *ev = KLIB new_kObjectDontUseThis(kctx, CT_Int/*Dummy*/, (uintptr_t)req);
     MODSUGAR_eval(kctx, script, 0);
     kNameSpace *ns = KNULL(NameSpace);
     kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_System, MN_("initPlugin"), 1, MPOL_PARAMSIZE|MPOL_FIRST);
-    if (mtd) {
+    if(mtd) {
         BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
-        KUnsafeFieldSet(lsfp[K_CALLDELTA+0].o, K_NULL);
-        KUnsafeFieldSet(lsfp[K_CALLDELTA+1].o, ev);
+        KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
+        KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, ev);
         KCALL(lsfp, 0, mtd, 2, K_NULL);
         END_LOCAL();
-        kObject *ret = lsfp[0].o;
-        struct pool_plugin *plugin = (struct pool_plugin *) ((struct kRawPtr*) ret)->rawptr;
+        kObject *ret = lsfp[0].asObject;
+        struct pool_plugin *plugin = (struct pool_plugin *) ((struct kRawPtr *) ret)->rawptr;
         plugin = pool_plugin_init(plugin);
         return plugin;
     }

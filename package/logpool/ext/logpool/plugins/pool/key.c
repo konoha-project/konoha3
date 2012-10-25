@@ -8,13 +8,13 @@ extern "C" {
 static bool key_apply(struct pool_plugin *_p, struct LogEntry *e, uint32_t state)
 {
     struct pool_plugin_key_filter *p = (struct pool_plugin_key_filter *) _p;
-    struct Log *log = (struct Log*)&e->data;
+    struct Log *log = (struct Log *)&e->data;
     uint16_t i;
     char *data = log_get_data(log);
     for (i = 0; i < log->logsize; ++i) {
         char *next = log_iterator(log, data, i);
         uint16_t klen = log_get_length(log, i*2+0);
-        if (klen == p->klen && strncmp(p->key, data, klen) == 0) {
+        if(klen == p->klen && strncmp(p->key, data, klen) == 0) {
             _p->apply->Apply(_p->apply, e, 0);
             return true;
         }

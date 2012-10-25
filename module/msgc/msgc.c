@@ -208,7 +208,7 @@ static void* Kmalloc(KonohaContext *kctx, size_t s)
 {
 	size_t *p = (size_t*)do_malloc(s + sizeof(size_t));
 	if(unlikely(p == NULL)) {
-		OLDTRACE_SWITCH_TO_KTrace(_ScriptFault|_SystemFault,
+		OLDTRACE_SWITCH_TO_KTrace(_SoftwareFault|_SystemFault,
 				LogText("!",  "OutOfMemory"),
 				LogText("at", "malloc"),
 				LogUint("size", s),
@@ -507,7 +507,7 @@ static void gc_extendObjectArena2(KonohaContext *kctx)
 
 static MarkStack *mstack_init(KonohaContext *kctx, MarkStack *mstack)
 {
-	if (mstack->capacity == 0) {
+	if(mstack->capacity == 0) {
 		mstack->capacity_log2 = 12;
 		mstack->capacity = (1 << mstack->capacity_log2) - 1;
 		DBG_ASSERT(K_PAGESIZE == 1 << 12);
@@ -520,7 +520,7 @@ static MarkStack *mstack_init(KonohaContext *kctx, MarkStack *mstack)
 static void mstack_push(KonohaContext *kctx, MarkStack *mstack, kObject *ref)
 {
 	size_t ntail = (mstack->tail + 1) & mstack->capacity;
-	if (unlikely(ntail == 0)) {
+	if(unlikely(ntail == 0)) {
 		size_t capacity = 1 << mstack->capacity_log2;
 		size_t stacksize = sizeof(kObject*) * capacity;
 		mstack->stack = (kObject**)do_realloc(mstack->stack, stacksize, stacksize * 2);
@@ -535,7 +535,7 @@ static void mstack_push(KonohaContext *kctx, MarkStack *mstack, kObject *ref)
 static kObject *mstack_next(MarkStack *mstack)
 {
 	kObject *ref = NULL;
-	if (likely(mstack->tail != 0)) {
+	if(likely(mstack->tail != 0)) {
 		mstack->tail -=1;
 		ref = mstack->stack[mstack->tail];
 		prefetch_(ref, 0, 0);
@@ -762,7 +762,7 @@ void MODGC_check_malloced_size(KonohaContext *kctx)
 	for(atindex = 0; atindex < size; atindex++) {\
 		uintptr_t start = (uintptr_t)oat[atindex].head##n;\
 		uintptr_t end   = (uintptr_t)oat[atindex].bottom##n;\
-		if (start < o && o < end) {\
+		if(start < o && o < end) {\
 			return true;\
 		}\
 	}\

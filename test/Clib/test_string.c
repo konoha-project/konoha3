@@ -32,24 +32,24 @@ void test_kString(KonohaContext *kctx)
     intptr_t i;
     kString *s;
     for (i = 0; i < 100; ++i) {
-        s = KLIB new_kString(kctx, "abcd", 4, 0);
+        s = KLIB new_kString(kctx, GcUnsafe, "abcd", 4, 0);
         assert(strcmp(S_text(s), "abcd") == 0);
         assert(S_size(s) == 4);
-        assert(S_isASCII(s) == 1);
+        assert(kString_is(ASCII, s) == 1);
     }
     for (i = 0; i < 100; ++i) {
-        s = KLIB new_kString(kctx, "abcd", 4, 0);
+        s = KLIB new_kString(kctx, GcUnsafe, "abcd", 4, 0);
         assert(strcmp(S_text(s), "abcd") == 0);
         assert(S_size(s) == 4);
         assert(S_text(s) == (char*)s->inline_text);
     }
     for (i = 0; i < 100; ++i) {
         static const char *text = "12345678901234567890";
-        s = KLIB new_kString(kctx, text, 20, StringPolicy_TEXT | StringPolicy_UTF8);
+        s = KLIB new_kString(kctx, GcUnsafe, text, 20, StringPolicy_TEXT | StringPolicy_UTF8);
         assert(strcmp(S_text(s), text) == 0);
         assert(S_size(s) == 20);
         assert(S_text(s) == text);
-        assert(S_isASCII(s) == 0);
+        assert(kString_is(ASCII, s) == 0);
     }
 }
 

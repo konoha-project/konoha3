@@ -1,5 +1,5 @@
 // written by shinpei
-import("konoha.while");
+import("cstyle", "while");
 import("konoha.new");
 import("konoha.iterator");
 import("konoha.array");

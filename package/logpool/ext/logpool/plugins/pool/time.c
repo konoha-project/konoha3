@@ -26,8 +26,8 @@ static void LogList_check_timer(struct LogList *list, uint64_t current, uint64_t
 {
     struct LogEntry *head;
     head = list->head->h.next;
-    while (head) {
-        if (current - head->h.time < interval)
+    while(head) {
+        if(current - head->h.time < interval)
             break;
         DecRC(head);
         head = head->h.next;
@@ -39,19 +39,19 @@ static void LogList_check_interval(struct LogList *list)
     struct LogEntry *e, *next, *prev;
     e    = list->head->h.next;
     prev = list->head;
-    if (RC0(list->tail)) {
+    if(RC0(list->tail)) {
 #ifdef DEBUG
         struct LogEntry *head = e;
-        while (head) {
+        while(head) {
             assert(RC0(head));
             head = head->h.next;
         }
 #endif
         list->tail = list->head;
     }
-    while (e) {
+    while(e) {
         next = e->h.next;
-        if (!RC0(e))
+        if(!RC0(e))
             break;
         free(e);
         e = next;
@@ -74,7 +74,7 @@ static void LogList_append(struct LogList *list, struct LogEntry *log, uint64_t 
 //{
 //    struct LogEntry *e = list->head;
 //    int i = 0;
-//    while (e) {
+//    while(e) {
 //        e = e->h.next;
 //        ++i;
 //    }
@@ -84,7 +84,7 @@ static void LogList_append(struct LogList *list, struct LogEntry *log, uint64_t 
 static void LogList_dispose(struct LogList *list)
 {
     struct LogEntry *e = list->head, *next;
-    while (e) {
+    while(e) {
         next = e->h.next;
         free(e);
         e = next;
@@ -99,7 +99,7 @@ static bool timer_apply(struct pool_plugin *_p, struct LogEntry *e, uint32_t sta
     head = p->list.head->h.next;
     //fprintf(stderr, "emit %d %d\n", LogList_size(&p->list), p->timer);
     p->base.apply->Apply(_p->apply, e, p->flag_start);
-    while (head) {
+    while(head) {
         next = head->h.next;
         p->base.apply->Apply(_p->apply, head, p->flag_cont);
         head = next;

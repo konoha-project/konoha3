@@ -41,7 +41,7 @@ static uintptr_t keys[] = {
 
 static int checkkvs(size_t key, uintptr_t val)
 {
-	long i;
+	uintptr_t i;
 	for(i= (sizeof(keys)/sizeof(uintptr_t)) - 1; i >= 0; i--) {
 		if(keys[i] == key) {
 			return (val == i);
@@ -54,7 +54,7 @@ static int test_kvproto(KonohaContext *kctx)
 {
 	size_t i;
 	kObject *o = K_NULL;
-	assert(sizeof(KUtilsKeyValue) == sizeof(void*) * 2);
+	assert(sizeof(KKeyValue) == sizeof(void*) * 2);
 	for(i=0; i < sizeof(keys)/sizeof(uintptr_t); i++) {
 		ksymbol_t key = (ksymbol_t)keys[i];
 		KLIB kObject_setUnboxValue(kctx, o, key, TY_int, i);
@@ -81,9 +81,9 @@ static int test_kwb(KonohaContext *kctx)
 {
 	const char *t= "0123456789012345678901234567890123456789";
 	size_t i = 0;
-	KUtilsGrowingArray buf;
+	KGrowingArray buf;
 	KLIB Karray_init(kctx, &buf, 64);
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&buf, &wb);
 	KLIB Kwb_printf(kctx, &wb, "%s%s%s%s", t, t, t, t);
 	t = KLIB Kwb_top(kctx, &wb, 1);
@@ -100,16 +100,16 @@ static int test_kwb(KonohaContext *kctx)
 
 static int test_logger(KonohaContext *kctx)
 {
-	int v2 = 3;
-	int v3 = -3;
-	int i;
-	for (i = 0; i < 10; i++) {
-		KTrace(UnknownFault|PeriodicPoint, 0,
-			LogText("key1", "hello world"),
-			LogUint("key2", v2),
-			LogUint("key3", v3)
-		);
-	}
+//	int v2 = 3;
+//	int v3 = -3;
+//	int i;
+//	for (i = 0; i < 10; i++) {
+//		KTrace(UnknownFault|PeriodicPoint, 0,
+//			LogText("key1", "hello world"),
+//			LogUint("key2", v2),
+//			LogUint("key3", v3)
+//		);
+//	}
 	return 0;
 }
 #define FN(T)  #T, T

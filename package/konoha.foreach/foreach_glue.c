@@ -27,7 +27,7 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/klib.h>
-#include <minikonoha/iterator.h>
+#include <minikonoha/konoha_common.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,31 +35,21 @@ extern "C" {
 
 // ---------------------------------------------------------------------------
 
-static kbool_t foreach_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t foreach_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
-
 #define TY_isIterator(T)     (CT_(T)->baseTypeId == TY_Iterator)
 
 static kToken* new_TypeToken(KonohaContext *kctx, kNameSpace *ns, ktype_t typeId)
 {
-	kToken *TypeToken = GCSAFE_new(Token, 0);
+	kToken *TypeToken = new_(Token, 0, OnGcStack);
 	kToken_setTypeId(kctx, TypeToken, ns, typeId);
 	return TypeToken;
 }
 
 static kToken* new_ParsedExprToken(KonohaContext *kctx, kNameSpace *ns, kExpr *expr)
 {
-	kTokenVar *ParsedExprToken = GCSAFE_new(TokenVar, 0);
+	kTokenVar *ParsedExprToken = new_(TokenVar, 0, OnGcStack);
 	ParsedExprToken->resolvedSyntaxInfo = SYN_(ns, KW_ExprPattern);
 	KFieldSet(ParsedExprToken, ParsedExprToken->parsedExpr, expr);
-	return (kToken*)ParsedExprToken;
+	return (kToken *)ParsedExprToken;
 }
 
 static void MacroSet_setTokenAt(KonohaContext *kctx, MacroSet *macroSet, int index, kArray *tokenList, const char *symbol, ...)
@@ -71,7 +61,7 @@ static void MacroSet_setTokenAt(KonohaContext *kctx, MacroSet *macroSet, int ind
 	kToken *tk;
 	va_list ap;
 	va_start(ap , symbol);
-	while((tk = va_arg(ap, kToken*)) != NULL) {
+	while((tk = va_arg(ap, kToken *)) != NULL) {
 		DBG_ASSERT(IS_Token(tk));
 		KLIB kArray_add(kctx, tokenList, tk);
 	}
@@ -113,9 +103,9 @@ static void kStmt_appendBlock(KonohaContext *kctx, kStmt *stmt, kBlock *bk)
 {
 	if(bk != NULL) {
 		kBlock *block = SUGAR kStmt_getBlock(kctx, stmt, Stmt_nameSpace(stmt), KW_BlockPattern, NULL);
-		int i;
-		for(i = 0; i < kArray_size(bk->stmtList); i++) {
-			KLIB kArray_add(kctx, block->stmtList, bk->stmtList->stmtItems[i]);
+		size_t i;
+		for(i = 0; i < kArray_size(bk->StmtList); i++) {
+			KLIB kArray_add(kctx, block->StmtList, bk->StmtList->StmtItems[i]);
 		}
 	}
 }
@@ -135,13 +125,13 @@ static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 			kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, IteratorExpr->ty, MN_to(TY_Iterator), 0);
 			if(mtd == NULL) {
 				kStmtExpr_printMessage(kctx, stmt, IteratorExpr, ErrTag, "expected Iterator expression after in");
-				RETURNb_(false);
+				KReturnUnboxValue(false);
 			}
 			IteratorExpr = SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_var, mtd, 1, IteratorExpr);
 			kStmt_setObject(kctx, stmt, KW_ExprPattern, IteratorExpr);
 		}
 		kBlock *block = new_MacroBlock(kctx, stmt, new_TypeToken(kctx, ns, IteratorExpr->ty), new_ParsedExprToken(kctx, ns, IteratorExpr), TypeToken, VariableToken);
-		kStmt *IfStmt = block->stmtList->stmtItems[1]; // @see macro;
+		kStmt *IfStmt = block->StmtList->StmtItems[1]; // @see macro;
 		kStmt_appendBlock(kctx, IfStmt, SUGAR kStmt_getBlock(kctx, stmt, ns, KW_BlockPattern, NULL));
 		kStmt_set(CatchBreak, IfStmt, true);
 		kStmt_set(CatchContinue, IfStmt, true);
@@ -152,35 +142,40 @@ static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 			kStmt_typed(stmt, BLOCK);
 		}
 	}
-	RETURNb_(isOkay);
+	KReturnUnboxValue(isOkay);
 }
 
-static kbool_t foreach_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t foreach_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	KImportPackage(ns, "konoha.iterator", pline);
-	KImportPackage(ns, "konoha.break", pline);
-	KImportPackage(ns, "konoha.continue", pline);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("for"), 0, "\"for\" \"(\" [$Type] $Symbol \"in\" $Expr  \")\" [$Block] ", 0, 0, NULL, NULL, NULL, Statement_for, NULL, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t foreach_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t foreach_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	KRequirePackage("konoha.iterator", trace);
+	KImportPackageSymbol(ns, "cstyle", "break", trace);
+	KImportPackageSymbol(ns, "cstyle", "continue", trace);
+	foreach_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t foreach_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
+
 
 KDEFINE_PACKAGE* foreach_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "foreach", "1.0");
+	KSetPackageName(d, "konoha", "1.0");
 	d.initPackage    = foreach_initPackage;
 	d.setupPackage   = foreach_setupPackage;
-	d.initNameSpace  = foreach_initNameSpace;
-	d.setupNameSpace = foreach_setupNameSpace;
 	return &d;
 }
 

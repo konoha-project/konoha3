@@ -55,16 +55,16 @@ static void Person_free(KonohaContext *kctx, kObject *o)
 	 */
 }
 
-static void Person_p(KonohaContext *kctx, KonohaValue *v, int pos, KUtilsWriteBuffer *wb)
+static void Person_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	/* This function is called when serializing the object. */
-	struct Person *p = (struct Person *) v[pos].o;
+	struct Person *p = (struct Person *) v[pos].asObject;
 	KLIB Kwb_write(kctx, wb, S_text(p->name), S_size(p->name));
 	KLIB Kwb_write(kctx, wb, ",", 1);
 	KLIB Kwb_printf(kctx, wb, KINT_FMT, p->age);
 }
 
-static void Person_reftrace(KonohaContext *kctx, kObject *o, kObjectVisitor *visitor)
+static void Person_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	/* Garbage collector (GC) cannot recognize in which position of the field
 	 * an object exists. The function tells to GC which object should be traced. */
@@ -87,10 +87,10 @@ static KMETHOD Person_new(KonohaContext *kctx, KonohaStack *sfp)
 	kString *name = sfp[1].asString;
 	kint_t   age  = sfp[2].intValue;
 	/* If you want to determine the type of the return value,
-	 * please check O_ct(sfp[K_RTNIDX].o) . */
+	 * please check KGetReturnType(sfp) . */
 	KFieldSet(p, p->name, name);
 	p->age = age;
-	RETURN_(p);
+	KReturn(p);
 }
 
 //## String Person.say();
@@ -103,7 +103,7 @@ static KMETHOD Person_say(KonohaContext *kctx, KonohaStack *sfp)
 	const char *text = S_text(name);
 	char *buf = (char *)alloca(16 + S_size(name));
 	sprintf(buf, "hello , %s!", text);
-	RETURN_(KLIB new_kString(kctx, buf, strlen(buf), StringPolicy_TEXT));
+	KReturn(KLIB new_kString(kctx, OnStack, buf, strlen(buf), StringPolicy_TEXT));
 }
 
 /* You can attach the following annotations to each methods. */
@@ -115,7 +115,7 @@ static KMETHOD Person_say(KonohaContext *kctx, KonohaStack *sfp)
 
 #define _F(F)     (intptr_t)(F)
 
-static kbool_t HelloWorld_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t HelloWorld_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	/* Class Definition */
 	/* If you want to create Generic class like Array<T>, see konoha.map package */
@@ -126,7 +126,7 @@ static kbool_t HelloWorld_initPackage(KonohaContext *kctx, kNameSpace *ns, int a
 	defPerson.p         = Person_p;
 	defPerson.reftrace  = Person_reftrace;
 	defPerson.free      = Person_free;
-	KonohaClass *PersonClass = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defPerson, pline);
+	KonohaClass *PersonClass = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defPerson, trace);
 
 	/* You can define methods with the following procedures. */
 	int TY_Person = PersonClass->typeId;
@@ -144,21 +144,11 @@ static kbool_t HelloWorld_initPackage(KonohaContext *kctx, kNameSpace *ns, int a
 		{"NARUTO_AGE", TY_int, 18},
 		{} /* <= sentinel */
 	};
-	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), trace);
 	return true;
 }
 
-static kbool_t HelloWorld_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t HelloWorld_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t HelloWorld_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t HelloWorld_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -166,11 +156,9 @@ static kbool_t HelloWorld_setupNameSpace(KonohaContext *kctx, kNameSpace *packag
 KDEFINE_PACKAGE* hello_world_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "hello_world", "1.0");
+	KSetPackageName(d, "/* SET LIBRARY NAME */", "/* SET LIBRARY VERSION */");
 	d.initPackage    = HelloWorld_initPackage;
 	d.setupPackage   = HelloWorld_setupPackage;
-	d.initNameSpace  = HelloWorld_initNameSpace;
-	d.setupNameSpace = HelloWorld_setupNameSpace;
 	return &d;
 }
 

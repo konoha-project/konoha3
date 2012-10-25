@@ -46,10 +46,10 @@
 
 // for debug
 #define DEBUG_PRINT(fmt, ...) do { \
-	if (verbose_debug) fprintf(stderr, fmt "\n", ##__VA_ARGS__); \
+	if(verbose_debug) fprintf(stderr, fmt "\n", ##__VA_ARGS__); \
 } while (0)
 #define DEBUG_ASSERT(stmt) do { \
-	if (verbose_debug) assert(stmt); \
+	if(verbose_debug) assert(stmt); \
 } while (0)
 
 // for memory management
@@ -130,11 +130,11 @@ static char  *scriptdir = NULL;
 static void *dse_malloc(size_t size)
 {
 	void *ptr = malloc(size);
-	if (ptr == NULL) {
+	if(ptr == NULL) {
 		DEBUG_PRINT("malloc failed");
 		size = 0;
 	}
-	if (verbose_debug) {
+	if(verbose_debug) {
 		totalMalloc += size;
 		fprintf(stderr, "totalMalloc:%ld @dse_malloc()\n", totalMalloc);
 	}
@@ -144,7 +144,7 @@ static void *dse_malloc(size_t size)
 static void dse_free(void *ptr, size_t size)
 {
 	free(ptr);
-	if (verbose_debug) {
+	if(verbose_debug) {
 		totalMalloc -= size;
 		fprintf(stderr, "totalMalloc:%ld @dse_free()\n", totalMalloc);
 		assert(totalMalloc >= 0);
@@ -277,15 +277,15 @@ static void dse_define(KonohaContext *kctx, Message *msg)
 {
 	if(msg != NULL) {
 		KDEFINE_TEXT_CONST TextData[] = {
-			{"DSE_MESSAGE", TY_TEXT, (char *)msg->data},
-			{"DSE_SCRIPT_DIR", TY_TEXT, scriptdir},
+			{"DSE_MESSAGE", VirtualType_Text, (char *)msg->data},
+			{"DSE_SCRIPT_DIR", VirtualType_Text, scriptdir},
 			{}
 		};
 		KLIB kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(TextData), 0);
 	}
 	else {
 		KDEFINE_TEXT_CONST TextData[] = {
-			{"DSE_SCRIPT_DIR", TY_TEXT, scriptdir},
+			{"DSE_SCRIPT_DIR", VirtualType_Text, scriptdir},
 			{}
 		};
 		KLIB kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(TextData), 0);

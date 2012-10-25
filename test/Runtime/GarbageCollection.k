@@ -1,6 +1,6 @@
 // written by unknown (maybe ide)
-import("konoha.while");
-import("konoha.assign");
+
+import("cstyle", "while");
 
 void f() {
 	int i = 0;

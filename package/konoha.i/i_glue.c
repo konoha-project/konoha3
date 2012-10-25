@@ -48,7 +48,7 @@ extern "C"{
 //	{0, NULL}
 //};
 //
-//static void MethodAttribute_p(KonohaContext *kctx, kMethod *mtd, KUtilsWriteBuffer *wb)
+//static void MethodAttribute_p(KonohaContext *kctx, kMethod *mtd, KGrowingBuffer *wb)
 //{
 //	uintptr_t i;
 //	for(i = 0; i < 30; i++) {
@@ -65,10 +65,10 @@ extern "C"{
 ////	}
 //}
 
-static void Method_writeAttributeToBuffer(KonohaContext *kctx, kMethod *mtd, KUtilsWriteBuffer *wb)
+static void Method_writeAttributeToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuffer *wb)
 {
 	size_t i;
-	for(i = 0; i < sizeof(MethodFlagData)/sizeof(const char*); i++) {
+	for(i = 0; i < sizeof(MethodFlagData)/sizeof(const char *); i++) {
 		uintptr_t flagmask = 1 << i;
 		if((mtd->flag && flagmask) == flagmask) {
 			KLIB Kwb_printf(kctx, wb, "@%s ", MethodFlagData[i]);
@@ -76,7 +76,7 @@ static void Method_writeAttributeToBuffer(KonohaContext *kctx, kMethod *mtd, KUt
 	}
 }
 
-static void kMethod_writeToBuffer(KonohaContext *kctx, kMethod *mtd, KUtilsWriteBuffer *wb)
+static void kMethod_writeToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuffer *wb)
 {
 	kParam *pa = Method_param(mtd);
 	Method_writeAttributeToBuffer(kctx, mtd, wb);
@@ -103,7 +103,7 @@ static void copyMethodList(KonohaContext *kctx, ktype_t cid, kArray *s, kArray *
 {
 	size_t i;
 	for(i = 0; i < kArray_size(s); i++) {
-		kMethod *mtd = s->methodItems[i];
+		kMethod *mtd = s->MethodItems[i];
 		if(mtd->typeId != cid) continue;
 		KLIB kArray_add(kctx, d, mtd);
 	}
@@ -111,7 +111,7 @@ static void copyMethodList(KonohaContext *kctx, ktype_t cid, kArray *s, kArray *
 
 static void dumpMethod(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd)
 {
-	KUtilsWriteBuffer wb;
+	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	kMethod_writeToBuffer(kctx, mtd, &wb);
 	PLATAPI printf_i("%s\n", KLIB Kwb_top(kctx, &wb, 1));
@@ -123,23 +123,23 @@ static void dumpMethodList(KonohaContext *kctx, KonohaStack *sfp, size_t start, 
 {
 	size_t i;
 	for(i = start; i < kArray_size(list); i++) {
-		dumpMethod(kctx, sfp, list->methodItems[i]);
+		dumpMethod(kctx, sfp, list->MethodItems[i]);
 	}
 }
 
 static KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
-	kArray *list = kctx->stack->gcstack;
+	kArray *list = kctx->stack->gcstack_OnContextConstList;
 	size_t start = kArray_size(list);
 	kNameSpace *ns = sfp[0].asNameSpace;
 	KonohaClass *ct = O_ct(sfp[1].asObject);
 	DBG_P("*** man %s", TY_t(ct->typeId));
 	while(ns != NULL) {
-		copyMethodList(kctx, ct->typeId, ns->methodList, list);
+		copyMethodList(kctx, ct->typeId, ns->methodList_OnList, list);
 		ns = ns->parentNULL;
 	}
-	copyMethodList(kctx, ct->typeId, ct->methodList, list);
+	copyMethodList(kctx, ct->typeId, ct->methodList_OnGlobalConstList, list);
 	dumpMethodList(kctx, sfp, start, list);
 	RESET_GCSTACK();
 }
@@ -149,8 +149,9 @@ static KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp)
 #define _Public   kMethod_Public
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
+	KImportPackage(ns, "konoha.global", trace);
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(NameSpace_man), TY_void, TY_NameSpace, MN_("man"), 1, TY_Object, FN_("x") | FN_COERCION,
 		DEND,
@@ -159,17 +160,7 @@ static kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, cons
 	return true;
 }
 
-static kbool_t i_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t i_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t i_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t i_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -177,11 +168,9 @@ static kbool_t i_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpac
 KDEFINE_PACKAGE* i_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "konoha.i", "1.0");
+	KSetPackageName(d, "konoha.i", "1.0");
 	d.initPackage    = i_initPackage;
 	d.setupPackage   = i_setupPackage;
-	d.initNameSpace  = i_initNameSpace;
-	d.setupNameSpace = i_setupNameSpace;
 	return &d;
 }
 

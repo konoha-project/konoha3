@@ -34,39 +34,39 @@ extern "C" {
 
 static KMETHOD Int_opPlus(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(+(sfp[0].intValue));
+	KReturnUnboxValue(+(sfp[0].intValue));
 }
 
 static KMETHOD Int_opCompl (KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(~sfp[0].intValue);
+	KReturnUnboxValue(~sfp[0].intValue);
 }
 
 static KMETHOD Int_opLSHIFT (KonohaContext *kctx, KonohaStack *sfp)
 {
 	int lshift = sfp[1].intValue;
-	RETURNi_(sfp[0].intValue << lshift);
+	KReturnUnboxValue(sfp[0].intValue << lshift);
 }
 
 static KMETHOD Int_opRSHIFT (KonohaContext *kctx, KonohaStack *sfp)
 {
 	int rshift = sfp[1].intValue;
-	RETURNi_(sfp[0].intValue >> rshift);
+	KReturnUnboxValue(sfp[0].intValue >> rshift);
 }
 
 static KMETHOD Int_opAND(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(sfp[0].intValue & sfp[1].intValue);
+	KReturnUnboxValue(sfp[0].intValue & sfp[1].intValue);
 }
 
 static KMETHOD Int_opOR(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(sfp[0].intValue | sfp[1].intValue);
+	KReturnUnboxValue(sfp[0].intValue | sfp[1].intValue);
 }
 
 static KMETHOD Int_opXOR(KonohaContext *kctx, KonohaStack *sfp)
 {
-	RETURNi_(sfp[0].intValue ^ sfp[1].intValue);
+	KReturnUnboxValue(sfp[0].intValue ^ sfp[1].intValue);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -76,7 +76,7 @@ static KMETHOD Int_opXOR(KonohaContext *kctx, KonohaStack *sfp)
 #define _Im       kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t int_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t int_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
@@ -97,14 +97,12 @@ static kbool_t int_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		{"INT_MIN", TY_int, KINT_MIN},
 		{NULL},
 	};
-	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), pline);
+	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), trace);
 	return true;
 }
 
-static kbool_t int_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
+// --------------------------------------------------------------------------
+/* Syntax */
 
 static char parseHexDigit(char c)
 {
@@ -128,7 +126,7 @@ static char parseBinaryDigit(char c)
 
 static KMETHOD TokenFunc_ExtendedIntLiteral(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kTokenVar *tk = (kTokenVar *)sfp[1].o;
+	kTokenVar *tk = (kTokenVar *)sfp[1].asObject;
 	const char *source = S_text(sfp[2].asString);
 	const char *start = source, *end;
 	int c = *source++;
@@ -146,7 +144,7 @@ static KMETHOD TokenFunc_ExtendedIntLiteral(KonohaContext *kctx, KonohaStack *sf
 	int base = 10;
 	bool isFloat = false;
 	char (*parseDigit)(char) = parseDecimalDigit;
-	if (c == '0') {
+	if(c == '0') {
 		c = *source++;
 		switch (c) {
 			case 'b':
@@ -163,8 +161,8 @@ static KMETHOD TokenFunc_ExtendedIntLiteral(KonohaContext *kctx, KonohaStack *sf
 		}
 	}
 	for (; (c = *source) != 0; ++source) {
-		if (c == '_') continue;
-		if (parseDigit(c) == -1)
+		if(c == '_') continue;
+		if(parseDigit(c) == -1)
 			break;
 	}
 
@@ -180,48 +178,48 @@ static KMETHOD TokenFunc_ExtendedIntLiteral(KonohaContext *kctx, KonohaStack *sf
 	 * EXP    = E digits
 	 * E      = 'e' | 'e+' | 'e-' | 'E' | 'E+' | 'E-'
 	 */
-	if (base != 10 && c != '.' && c != 'e' && c != 'E') {
+	if(base != 10 && c != '.' && c != 'e' && c != 'E') {
 		goto L_emit;
 	}
-	if (c == '.') {
+	if(c == '.') {
 		isFloat = true;
 		source++;
 		for (; (c = *source) != 0; ++source) {
-			if (c == '_') continue;
-			if (parseDecimalDigit(c) == -1)
+			if(c == '_') continue;
+			if(parseDecimalDigit(c) == -1)
 				break;
 		}
 	}
-	if (c == 'e' || c == 'E') {
+	if(c == 'e' || c == 'E') {
 		isFloat = true;
 		c = *(++source);
-		if (!('0' <= c && c <= '9') && !(c == '+' || c == '-')) {
+		if(!('0' <= c && c <= '9') && !(c == '+' || c == '-')) {
 			source--;
 			goto L_emit;
 		}
-		if (c == '+' || c == '-') {
+		if(c == '+' || c == '-') {
 			c = *source++;
 		}
 		for (; (c = *source) != 0; ++source) {
-			if (c == '_') continue;
-			if (parseDecimalDigit(c) == -1)
+			if(c == '_') continue;
+			if(parseDecimalDigit(c) == -1)
 				break;
 		}
 	}
 
 	L_emit:;
-	if (IS_NOTNULL(tk)) {
+	if(IS_NOTNULL(tk)) {
 		/* skip unit */
 		for (; (c = *source) != 0; ++source) {
-			if (c == '_') continue;
-			if (!isalpha(c))
+			if(c == '_') continue;
+			if(!isalpha(c))
 				break;
 		}
 		end = source;
-		KFieldSet(tk, tk->text, KLIB new_kString(kctx, start, end - start, StringPolicy_ASCII));
+		KFieldSet(tk, tk->text, KLIB new_kString(kctx, OnField, start, end - start, StringPolicy_ASCII));
 		tk->unresolvedTokenType = isFloat ? SYM_("$Float") : TokenType_INT;
 	}
-	RETURNi_(source - start);
+	KReturnUnboxValue(source - start);
 }
 
 static kint_t _kstrtoll(const char *p, char (*parseDigit)(char), int base)
@@ -229,12 +227,12 @@ static kint_t _kstrtoll(const char *p, char (*parseDigit)(char), int base)
 	long long tmp = 0, prev = 0;
 	char c;
 	for (; (c = *p) != 0; ++p) {
-		if (c == '_') continue;
+		if(c == '_') continue;
 		c = parseDigit(c);
-		if (c == -1)
+		if(c == -1)
 			break;
 		tmp = tmp * base + c;
-		if (tmp < prev) {
+		if(tmp < prev) {
 			/* Overflow!! */
 			return 0;
 		}
@@ -245,14 +243,14 @@ static kint_t _kstrtoll(const char *p, char (*parseDigit)(char), int base)
 
 static kint_t kstrtoll(const char *p)
 {
-	if (*p == '0') {
-		if (*(p+1) == 'x' || *(p+1) == 'X') {
+	if(*p == '0') {
+		if(*(p+1) == 'x' || *(p+1) == 'X') {
 		return _kstrtoll(p+2, parseHexDigit, 16);
 		}
-		if (*(p+1) == 'b') {
+		if(*(p+1) == 'b') {
 			return _kstrtoll(p+2, parseBinaryDigit, 2);
 		}
-		if ('0' <= *(p+1) && *(p+1) <= '7') {
+		if('0' <= *(p+1) && *(p+1) <= '7') {
 			return _kstrtoll(p+1, parseOctalDigit, 8);
 		}
 	}
@@ -264,10 +262,10 @@ static KMETHOD TypeCheck_ExtendedIntLiteral(KonohaContext *kctx, KonohaStack *sf
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
 	long long n = kstrtoll(S_text(tk->text));
-	RETURN_(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_int, (uintptr_t)n));
+	KReturn(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_int, (uintptr_t)n));
 }
 
-static kbool_t int_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t int_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ KW_NumberPattern, 0,  NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_ExtendedIntLiteral, },
@@ -279,18 +277,24 @@ static kbool_t int_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpa
 		{ SYM_("^"),  0, NULL, Precedence_CStyleBITXOR, 0,                     NULL, NULL, NULL, NULL, NULL, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
+	SUGAR kNameSpace_setTokenFunc(kctx, ns, KW_NumberPattern, KonohaChar_Digit, new_SugarFunc(ns, TokenFunc_ExtendedIntLiteral));
 
-	SUGAR kNameSpace_setTokenFunc(kctx, ns, KW_NumberPattern, KonohaChar_Digit, new_SugarFunc(TokenFunc_ExtendedIntLiteral));
-
-	SugarSyntaxVar *syn = (SugarSyntaxVar*)SUGAR kNameSpace_getSyntax(kctx, ns, SYM_("+"), 0);
+	SugarSyntaxVar *syn = (SugarSyntaxVar *)SUGAR kNameSpace_getSyntax(kctx, ns, SYM_("+"), 0);
 	if(syn != NULL) {
 		syn->precedence_op1  = Precedence_CStylePREUNARY;
 	}
 	return true;
 }
 
-static kbool_t int_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t int_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	int_defineMethod(kctx, ns, trace);
+	int_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t int_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -298,11 +302,9 @@ static kbool_t int_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSp
 KDEFINE_PACKAGE* int_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "int", "1.0");
+	KSetPackageName(d, "konoha", "1.0");
 	d.initPackage    = int_initPackage;
 	d.setupPackage   = int_setupPackage;
-	d.initNameSpace  = int_initNameSpace;
-	d.setupNameSpace = int_setupNameSpace;
 	return &d;
 }
 

@@ -65,7 +65,7 @@ static int attach_resourcemonitor_for_child(KonohaContext *kctx, subproc_resourc
 	char statm[32];
 	sprintf(&statm[0], "/proc/%d/statm", pid);
 	mon->procfs = fopen(statm, "r");
-	if (mon->procfs == NULL) {
+	if(mon->procfs == NULL) {
 		DBG_P("cannot open proc filesystem:%s\n", statm);
 	}
 	return 0;
@@ -80,8 +80,8 @@ static int attach_resourcemonitor_for_child(KonohaContext *kctx, subproc_resourc
 //		do {
 //			vm = 0;
 //			fscanf(mon->procfs, "%ld %ld ", &dummy, &vm); // get resident
-//			if (mem < vm) mem = vm;
-//			if (!vm) break;
+//			if(mem < vm) mem = vm;
+//			if(!vm) break;
 //		} while(!usleep(SLEEP_NSEC));
 //		mem *= getpagesize();
 //	default:

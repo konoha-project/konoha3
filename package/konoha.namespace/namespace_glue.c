@@ -33,17 +33,6 @@ extern "C" {
 
 // --------------------------------------------------------------------------
 
-static kbool_t namespace_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t namespace_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
-
-// --------------------------------------------------------------------------
 
 static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -52,7 +41,7 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 	kToken *tk = SUGAR kStmt_getToken(kctx, stmt, KW_BlockPattern, NULL);
 	if(tk != NULL && tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
 		INIT_GCSTACK();
-		kNameSpace *ns = GCSAFE_new(NameSpace, Stmt_nameSpace(stmt));
+		kNameSpace *ns = new_(NameSpace, Stmt_nameSpace(stmt), _GcStack);
 		kArray *a = KonohaContext_getSugarContext(kctx)->preparedTokenList;
 		TokenSequence range = {ns, a, kArray_size(a), kArray_size(a)};
 		SUGAR TokenSequence_tokenize(kctx, &range, S_text(tk->text), tk->uline);
@@ -60,20 +49,34 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 		RESET_GCSTACK();
 		kStmt_done(kctx, stmt);
 	}
-	RETURNb_(result == K_CONTINUE);
+	KReturnUnboxValue(result == K_CONTINUE);
 }
 
-static kbool_t namespace_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t namespace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("namespace"), 0, "\"namespace\" $Block", 0, 0, NULL, NULL, Statement_namespace, NULL, NULL, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 
-static kbool_t namespace_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+// --------------------------------------------------------------------------
+
+
+
+
+
+// --------------------------------------------------------------------------
+
+static kbool_t namespace_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	namespace_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t namespace_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
@@ -81,11 +84,9 @@ static kbool_t namespace_setupNameSpace(KonohaContext *kctx, kNameSpace *package
 KDEFINE_PACKAGE* namespace_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "namespace", "1.0");
+	KSetPackageName(d, "konoha", "1.0");
 	d.initPackage    = namespace_initPackage;
 	d.setupPackage   = namespace_setupPackage;
-	d.initNameSpace  = namespace_initNameSpace;
-	d.setupNameSpace = namespace_setupNameSpace;
 	return &d;
 }
 

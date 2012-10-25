@@ -8,71 +8,71 @@ extern "C"{
 
 static void RawPtr_free(KonohaContext *kctx, kObject *po)
 {
-	kRawPtr *o = (kRawPtr*)(po);
-	if (o->rawptr) {
+	kRawPtr *o = (kRawPtr *)(po);
+	if(o->rawptr) {
 		free(o->rawptr);
 	}
 	o->rawptr = NULL;
 }
 static void RawPtr_init(KonohaContext *kctx, kObject *po, void *conf)
 {
-	kRawPtr *o = (kRawPtr*)(po);
+	kRawPtr *o = (kRawPtr *)(po);
 	o->rawptr = conf;
 }
 
 static KMETHOD kMD5_Init(KonohaContext *kctx, KonohaStack *sfp)
 {
-	MD5state_st* c = malloc(sizeof(*c));
+	MD5state_st *c = malloc(sizeof(*c));
 	int ret_ = MD5_Init(c);
 	RawPtr_init(kctx, sfp[0].asObject, c);
-	RETURN_(sfp[0].asObject);
+	KReturn(sfp[0].asObject);
 }
 static KMETHOD kMD5_Update(KonohaContext *kctx, KonohaStack *sfp)
 {
-	MD5state_st* c = RawPtr(sfp[0].asObject);
-	unsigned char* data = (unsigned char *) S_text(sfp[1].asString);
+	MD5state_st *c = RawPtr(sfp[0].asObject);
+	unsigned char *data = (unsigned char *) S_text(sfp[1].asString);
 	unsigned long len = S_size(sfp[1].asString);
 	int ret_ = MD5_Update(c, data, len);
-	RETURNi_(ret_);
+	KReturnUnboxValue(ret_);
 }
 static KMETHOD kMD5_Final(KonohaContext *kctx, KonohaStack *sfp)
 {
 	unsigned char MD[MD5_DIGEST_LENGTH];
-	MD5state_st* c = RawPtr(sfp[0].asObject);
+	MD5state_st *c = RawPtr(sfp[0].asObject);
 	int ret_ = MD5_Final(MD, c);
 	int i;
 	char MD_S[MD5_DIGEST_LENGTH*2+1];
 	for (i = 0; i < MD5_DIGEST_LENGTH; i++) {
 		snprintf(MD_S+i*2, MD5_DIGEST_LENGTH*2+1, "%02x", MD[i]);
 	}
-	RETURN_(KLIB new_kString(kctx, MD_S, MD5_DIGEST_LENGTH*2, StringPolicy_ASCII));
+	KReturn(KLIB new_kString(kctx, MD_S, MD5_DIGEST_LENGTH*2, StringPolicy_ASCII));
 }
 static KMETHOD kSHA1_Init(KonohaContext *kctx, KonohaStack *sfp)
 {
-	SHAstate_st* c = malloc(sizeof(*c));
+	SHAstate_st *c = malloc(sizeof(*c));
 	int ret_ = SHA1_Init(c);
 	RawPtr_init(kctx, sfp[0].asObject, c);
-	RETURN_(sfp[0].asObject);
+	KReturn(sfp[0].asObject);
 }
 static KMETHOD kSHA1_Update(KonohaContext *kctx, KonohaStack *sfp)
 {
-	SHAstate_st* c = RawPtr(sfp[0].asObject);
-	unsigned char* data = (unsigned char *) S_text(sfp[1].asString);
+	SHAstate_st *c = RawPtr(sfp[0].asObject);
+	unsigned char *data = (unsigned char *) S_text(sfp[1].asString);
 	unsigned long len = S_size(sfp[1].asString);
 	int ret_ = SHA1_Update(c, data, len);
-	RETURNi_(ret_);
+	KReturnUnboxValue(ret_);
 }
 static KMETHOD kSHA1_Final(KonohaContext *kctx, KonohaStack *sfp)
 {
 	unsigned char SHA[SHA_DIGEST_LENGTH];
-	SHAstate_st* c = RawPtr(sfp[0].asObject);
+	SHAstate_st *c = RawPtr(sfp[0].asObject);
 	int ret_ = SHA1_Final(SHA, c);
 	int i;
 	char SHA_S[SHA_DIGEST_LENGTH*2+1];
 	for (i = 0; i < SHA_DIGEST_LENGTH; i++) {
 		snprintf(SHA_S+i*2, SHA_DIGEST_LENGTH*2+1, "%02x", SHA[i]);
 	}
-	RETURN_(KLIB new_kString(kctx, SHA_S, SHA_DIGEST_LENGTH*2, StringPolicy_ASCII));
+	KReturn(KLIB new_kString(kctx, SHA_S, SHA_DIGEST_LENGTH*2, StringPolicy_ASCII));
 }
 // --------------------------------------------------------------------------
 
@@ -83,7 +83,7 @@ static KMETHOD kSHA1_Final(KonohaContext *kctx, KonohaStack *sfp)
 #define TY_openssl  (ct0->typeId)
 #define TY_Log      (ct1->typeId)
 
-static kbool_t openssl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
+static kbool_t openssl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	static const char *names[] = {
 		"MD5",
@@ -101,7 +101,7 @@ static kbool_t openssl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	int i;
 	for (i = 0; i < 2; i++) {
 		Def.structname = names[i];
-		tbls[i] = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def, pline);
+		tbls[i] = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def, trace);
 	}
 
 	int FN_x = FN_("x");
@@ -119,28 +119,17 @@ static kbool_t openssl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	return true;
 }
 
-static kbool_t openssl_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
+static kbool_t openssl_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
-static kbool_t openssl_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t openssl_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
-{
-	return true;
-}
-KDEFINE_PACKAGE* openssl_init(void)
+KDEFINE_PACKAGE *openssl_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("openssl", "1.0"),
 		.initPackage    = openssl_initPackage,
 		.setupPackage   = openssl_setupPackage,
-		.initNameSpace  = openssl_initNameSpace,
-		.setupNameSpace = openssl_setupNameSpace,
 	};
 	return &d;
 }

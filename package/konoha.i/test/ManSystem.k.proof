@@ -1,0 +1,3 @@
+@Public void System.p(@Coercion String s)
+@Public void System.gc()
+Q.E.D.

@@ -1,13 +1,17 @@
 // written by imasahiro
+// modified shinpei nakata
+
 import("konoha.string");
 import("konoha.bytes");
+import("konoha.new");
 
-void f() {
-    String a = "aaaaaaaaaaaaaaaa";
-    String b = "bbbbbbbbbbbbbbbb";
-    String c = a + b;
-    Bytes  t = c.asBytes();
-    assert("aaaaaaaaaaaaaaaabbbbbbbbbbbbbbbb" == t.asString());
+void test() {
+    String a  = "aaaaaaaaaaaaaaaa";
+    String b  = "bbbbbbbbbbbbbbbb";
+    String c  = a + b;
+    Bytes  t  = c.toBytes();
+    String ab = new String(t);
+    assert("aaaaaaaaaaaaaaaabbbbbbbbbbbbbbbb" == ab);
 }
 
-f();
+test();

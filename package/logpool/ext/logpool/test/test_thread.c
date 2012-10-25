@@ -30,10 +30,10 @@ int main(int argc, char const* argv[])
     pthread_t threads[N];
     long i;
     for (i = 0; i < N; i++) {
-        pthread_create(&threads[i], NULL, thread_main, (void*)i);
+        pthread_create(&threads[i], NULL, thread_main, (void *)i);
     }
     for (i = 0; i < N; i++) {
-        if (pthread_join(threads[i], NULL) != 0) {
+        if(pthread_join(threads[i], NULL) != 0) {
             fprintf(stderr, "join error\n");
         }
     }

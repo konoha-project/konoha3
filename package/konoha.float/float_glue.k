@@ -13,11 +13,11 @@
 //     int che  = "e".charCodeAt(0);
 //     int che2 = "E".charCodeAt(0);
 //     int c = source.charCodeAt(i);
-//     if (c == ch0) {
+//     if(c == ch0) {
 //         i = i + 1;
 //         c = source.charCodeAt(i);
 //     }
-//     else if (ch0 <= c && c <= ch9) {
+//     else if(ch0 <= c && c <= ch9) {
 //         i = i + 1;
 //         c = source.charCodeAt(i);
 //         while (ch0 <= c && c <= ch9 && i < len) {
@@ -25,13 +25,13 @@
 //             c = source.charCodeAt(i);
 //         }
 //     }
-//     if (c != ".".charCodeAt(0) && c != che && c != che2) {
+//     if(c != ".".charCodeAt(0) && c != che && c != che2) {
 //         String intText = source.substring(0, i);
 //         tk.setKeyword("$Number");
 //         tk.setText(intText);
 //         return i;
 //     }
-//     if (c == ".".charCodeAt(0)) {
+//     if(c == ".".charCodeAt(0)) {
 //         i = i + 1;
 //         c = source.charCodeAt(i);
 //         while (ch0 <= c && c <= ch9 && i < len) {
@@ -39,10 +39,10 @@
 //             c = source.charCodeAt(i);
 //         }
 //     }
-//     if (c == che || c == che2) {
+//     if(c == che || c == che2) {
 //         i = i + 1;
 //         c = source.charCodeAt(i);
-//         if (c == "+".charCodeAt(0) || c == "-".charCodeAt(0)) {
+//         if(c == "+".charCodeAt(0) || c == "-".charCodeAt(0)) {
 //             i = i + 1;
 //             c = source.charCodeAt(i);
 //         }

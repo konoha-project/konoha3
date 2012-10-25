@@ -1,7 +1,8 @@
 // written by kimio kuramitsu
 
-import("konoha.class");
+import("konoha.new");
 import("konoha.null");
+import("konoha.class");
 
 class C {
 	C self;

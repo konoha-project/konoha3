@@ -62,16 +62,16 @@ static kinline uintptr_t strhash(const char *name, size_t len)
 static kinline kString* FileId_s_(KonohaContext *kctx, kfileline_t fileid)
 {
 	kfileline_t n = (fileid >> (sizeof(kshort_t) * 8));
-	DBG_ASSERT(n < kArray_size(kctx->share->fileidList));
-	return kctx->share->fileidList->stringItems[n];
+	DBG_ASSERT(n < kArray_size(kctx->share->fileIdList_OnGlobalConstList));
+	return kctx->share->fileIdList_OnGlobalConstList->stringItems[n];
 }
 
 #define PackageId_s(X)    PackageId_s_(kctx, X)
 #define PackageId_t(X)    S_text(PackageId_s_(kctx, X))
-static kinline kString* PackageId_s_(KonohaContext *kctx, kpackage_t packageId)
+static kinline kString* PackageId_s_(KonohaContext *kctx, kpackageId_t packageId)
 {
-	DBG_ASSERT(packageId < kArray_size(kctx->share->packageIdList));
-	return kctx->share->packageIdList->stringItems[packageId];
+	DBG_ASSERT(packageId < kArray_size(kctx->share->packageIdList_OnGlobalConstList));
+	return kctx->share->packageIdList_OnGlobalConstList->stringItems[packageId];
 }
 
 #define CT_s(X)   CT_s_(kctx, X)
@@ -94,11 +94,11 @@ static kinline kString* TY_s_(KonohaContext *kctx, ktype_t ty)
 static kinline kString* SYM_s_(KonohaContext *kctx, ksymbol_t sym)
 {
 	size_t index = (size_t) SYM_UNMASK(sym);
-//	if(!(index < kArray_size(kctx->share->symbolList))) {
-//		DBG_P("index=%d, size=%d", index, kArray_size(kctx->share->symbolList));
+//	if(!(index < kArray_size(kctx->share->symbolList_OnGlobalConstList))) {
+//		DBG_P("index=%d, size=%d", index, kArray_size(kctx->share->symbolList_OnGlobalConstList));
 //	}
-	DBG_ASSERT(index < kArray_size(kctx->share->symbolList));
-	return kctx->share->symbolList->stringItems[index];
+	DBG_ASSERT(index < kArray_size(kctx->share->symbolList_OnGlobalConstList));
+	return kctx->share->symbolList_OnGlobalConstList->stringItems[index];
 }
 
 #define PSYM_t(sym)   SYM_PRE(sym),S_text(SYM_s_(kctx, sym))
@@ -117,8 +117,8 @@ static kinline const char* SYM_PRE(ksymbol_t sym)
 static kinline kbool_t sym_equals(KonohaContext *kctx, ksymbol_t s1, ksymbol_t s2)
 {
 	if(SYM_HEAD(s1) == SYM_HEAD(s2)) {
-		const char *t1 = S_text(kctx->share->symbolList->stringItems[SYM_UNMASK(s1)]);
-		const char *t2 = S_text(kctx->share->symbolList->stringItems[SYM_UNMASK(s2)]);
+		const char *t1 = S_text(kctx->share->symbolList_OnGlobalConstList->stringItems[SYM_UNMASK(s1)]);
+		const char *t2 = S_text(kctx->share->symbolList_OnGlobalConstList->stringItems[SYM_UNMASK(s2)]);
 		while(1) {
 			if(t1[0] != t2[0]) {
 				if(t1[0] == '_') { t1++; continue; }
@@ -145,15 +145,15 @@ static kinline KonohaClass *CT_p0(KonohaContext *kctx, KonohaClass *ct, ktype_t 
 }
 
 #define uNULL   ((uintptr_t)NULL)
-static kinline void map_addu(KonohaContext *kctx, KUtilsHashMap *kmp, uintptr_t hcode, uintptr_t unboxValue)
+static kinline void map_addu(KonohaContext *kctx, KHashMap *kmp, uintptr_t hcode, uintptr_t unboxValue)
 {
-	KUtilsHashMapEntry *e = KLIB Kmap_newEntry(kctx, kmp, hcode);
+	KHashMapEntry *e = KLIB Kmap_newEntry(kctx, kmp, hcode);
 	e->unboxValue = unboxValue;
 }
 
-static kinline uintptr_t map_getu(KonohaContext *kctx, KUtilsHashMap *kmp, uintptr_t hcode, uintptr_t def)
+static kinline uintptr_t map_getu(KonohaContext *kctx, KHashMap *kmp, uintptr_t hcode, uintptr_t def)
 {
-	KUtilsHashMapEntry *e = KLIB Kmap_get(kctx, kmp, hcode);
+	KHashMapEntry *e = KLIB Kmap_get(kctx, kmp, hcode);
 	while(e != NULL) {
 		if(e->hcode == hcode) return e->unboxValue;
 		e = e->next;
@@ -176,14 +176,11 @@ static kinline const char* TAG_t(kinfotag_t t)
 	return tags[(int)t];
 }
 
-static kinline size_t check_index(KonohaContext *kctx, kint_t n, size_t max, kfileline_t pline)
-{
-	size_t n1 = (size_t)n;
-	if(unlikely(!(n1 < max))) {
-		KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfArrayBoundary"), NULL, pline, NULL);
-	}
-	return n1;
-}
+#define KCheckIndex(N, MAX) \
+	if(unlikely (!(((size_t)N) < ((size_t)MAX)))) {\
+		KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfArrayBoundary"), SoftwareFault, NULL, sfp);\
+	}\
+
 
 #ifdef USE_STRINGLIB
 
@@ -213,7 +210,7 @@ static const char _utf8len[] = {
 //{
 //	DBG_ASSERT(mtd != mtd2);
 //	DBG_ASSERT(mtd->proceedNUL == NULL);
-//	KFieldInit(mtd, ((kMethodVar*)mtd)->proceedNUL, mtd2);
+//	KFieldInit(mtd, ((kMethodVar *)mtd)->proceedNUL, mtd2);
 //}
 
 #ifdef __cplusplus

@@ -31,20 +31,10 @@ extern "C"{
 
 // --------------------------------------------------------------------------
 
-static kbool_t assign_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
-{
-	return true;
-}
-
-static kbool_t assign_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, kfileline_t pline)
-{
-	return true;
-}
-
 static KMETHOD Expression_BinarySugar(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Expression(stmt, tokenList, beginIdx, operatorIdx, endIdx);
-	kToken *opToken = tokenList->tokenItems[operatorIdx];
+	kToken *opToken = tokenList->TokenItems[operatorIdx];
 	SugarSyntax *opSyntax = opToken->resolvedSyntaxInfo;
 	if(opSyntax->macroParamSize == 2) {
 		TokenSequence macro = {Stmt_nameSpace(stmt), tokenList};
@@ -55,15 +45,19 @@ static KMETHOD Expression_BinarySugar(KonohaContext *kctx, KonohaStack *sfp)
 			{0, NULL, 0, 0},
 		};
 		macro.TargetPolicy.RemovingIndent = true;
-		SUGAR TokenSequence_applyMacro(kctx, &macro, opSyntax->macroDataNULL, 0, kArray_size(opSyntax->macroDataNULL), opSyntax->macroParamSize, macroParam);
+		SUGAR TokenSequence_applyMacro(kctx, &macro, opSyntax->macroDataNULL_OnList, 0, kArray_size(opSyntax->macroDataNULL_OnList), opSyntax->macroParamSize, macroParam);
 		kExpr *expr = SUGAR kStmt_parseExpr(kctx, stmt, macro.tokenList, macro.beginIdx, macro.endIdx, NULL);
 		TokenSequence_pop(kctx, macro);
-		RETURN_(expr);
+		KReturn(expr);
 	}
 }
 
-static kbool_t assign_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t assign_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
+	KImportPackageSymbol(ns, "konoha.int", "<<", trace);
+	KImportPackageSymbol(ns, "konoha.int", ">>", trace);
+	KImportPackageSymbol(ns, "konoha.int", "&", trace);
+	KImportPackageSymbol(ns, "konoha.int", "|", trace);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("+="), (SYNFLAG_ExprLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
 		{ SYM_("-="), (SYNFLAG_ExprLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
@@ -76,7 +70,7 @@ static kbool_t assign_initNameSpace(KonohaContext *kctx, kNameSpace *packageName
 		{ SYM_(">>="), (SYNFLAG_ExprLeftJoinOp2), NULL, Precedence_CStyleASSIGN, 0, NULL, Expression_BinarySugar, NULL, NULL, NULL, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("+="), 2,  "X Y X = (X) + (Y)");
 	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("-="), 2,  "X Y X = (X) - (Y)");
 	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("*="), 2,  "X Y X = (X) * (Y)");
@@ -89,19 +83,24 @@ static kbool_t assign_initNameSpace(KonohaContext *kctx, kNameSpace *packageName
 	return true;
 }
 
-static kbool_t assign_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
+static kbool_t assign_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+{
+	assign_defineSyntax(kctx, ns, trace);
+	return true;
+}
+
+static kbool_t assign_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
 	return true;
 }
 
+
 KDEFINE_PACKAGE* assign_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSETPACKNAME(d, "assign", "1.0");
+	KSetPackageName(d, "konoha", "1.0");
 	d.initPackage    = assign_initPackage;
 	d.setupPackage   = assign_setupPackage;
-	d.initNameSpace  = assign_initNameSpace;
-	d.setupNameSpace = assign_setupNameSpace;
 	return &d;
 }
 

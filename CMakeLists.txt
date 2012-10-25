@@ -56,28 +56,27 @@ set(PACKAGES
 	konoha
 	konoha.array
 	konoha.assign
-	konoha.break
 	konoha.bytes
 	konoha.class
 	konoha.closure
 	konoha.complex
 	konoha.const
-	konoha.continue
 	konoha.date
 	konoha.defined
 	konoha.dynamic
 	konoha.field
+	konoha.file
 	konoha.float
 	konoha.foreach
 	konoha.global
 	konoha.i
-	konoha.io
+#	konoha.io
 	konoha.import
 	konoha.int
 	konoha.iterator
 	konoha.math
 	konoha.map
-	konoha.mpi
+#	konoha.mpi
 	konoha.namespace
 	konoha.new
 	konoha.null
@@ -88,27 +87,28 @@ set(PACKAGES
 ##	konoha.sql
 	konoha.untyped
 	konoha.var
-	konoha.while
+	konoha.eventlistener
 	sugar
 	cstyle
-	llvm
-	posix.process
-	posix.file
+	cstyle.libc
 	posix.fd
+	posix.path
+	posix.process
 	posix.socket
+	posix.stat
 	posix.thread
 	dscript.dollar
 	dscript.subproc
 	dscript.shell
 	curl
+	llvm
 ##	ijit
 ##	jansson
 	mecab
 	python
-	apache
+#	apache   ## removed Module bugs
 #	openssl
-#	logpool
-#	gmp
+	gmp
 )
 
 set(PACKAGE_NAME    ${PROJECT_NAME})
@@ -124,6 +124,9 @@ set(K_PREFIX ${CMAKE_INSTALL_PREFIX})
 
 set(INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR})
+if(${CMAKE_SYSTEM_NAME} MATCHES "NetBSD")
+	set(INCLUDE_DIRS ${INCLUDE_DIRS} /usr/pkg/include)
+endif(${CMAKE_SYSTEM_NAME} MATCHES "NetBSD")
 include_directories(${INCLUDE_DIRS})
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -149,8 +152,9 @@ if(MSVC OR MINGW)
 	set(K_OSDLLEXT ".dll")
 endif()
 
-find_library(HAVE_LIBDL NAMES dl)
-find_library(HAVE_LIBM  NAMES m)
+find_library(HAVE_LIBDL    NAMES dl)
+find_library(HAVE_LIBICONV NAMES iconv)
+find_library(HAVE_LIBDB    NAMES db)
 
 check_type_size("void *" SIZEOF_VOIDP)
 check_type_size(long     SIZEOF_LONG)
@@ -166,6 +170,7 @@ check_include_files(dlfcn.h HAVE_DLFCN_H)
 check_include_files(iconv.h HAVE_ICONV_H)
 check_include_files(syslog.h HAVE_SYSLOG_H)
 check_include_files(stdbool.h HAVE_STDBOOL_H)
+check_include_files(db.h      HAVE_DB_H)
 
 set(_HEADERS stdio.h stdlib.h string.h ctype.h)
 if(UNIX)
@@ -206,6 +211,14 @@ set(ExtraLibs)
 if(HAVE_LIBDL)
 	set(ExtraLibs ${ExtraLibs} ${HAVE_LIBDL})
 endif(HAVE_LIBDL)
+
+if(HAVE_LIBICONV)
+	set(ExtraLibs ${ExtraLibs} ${HAVE_LIBICONV})
+endif(HAVE_LIBICONV)
+
+if(HAVE_LIBDB)
+	set(ExtraLibs ${ExtraLibs} ${HAVE_LIBDB})
+endif(HAVE_LIBDB)
 
 macro(POP _STR _DELIM _RESULT)
 	string(REPLACE ${_DELIM} ";" _tmp ${_STR})
@@ -334,6 +347,18 @@ macro(create_package_project _PKGNAME)
 		add_custom_target(copy_${PACKAGE_SCRIPT_CODE} ALL DEPENDS
 			${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_SCRIPT_CODE})
 	endif(PACKAGE_SCRIPT_CODE)
+	# for copy test files
+	if(PACKAGE_TEST_FILE)
+		foreach(testfile ${PACKAGE_TEST_FILE})
+			add_custom_command(OUTPUT
+				${CMAKE_CURRENT_BINARY_DIR}/${testfile}
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different
+				${CMAKE_CURRENT_SOURCE_DIR}/test/${testfile}
+				${CMAKE_CURRENT_BINARY_DIR}/${testfile})
+		endforeach(testfile ${PACKAGE_TEST_FILE})
+		add_custom_target(copy_${_PKGNAME}_testfile ALL DEPENDS
+			${PACKAGE_TEST_FILE})
+	endif(PACKAGE_TEST_FILE)
 endmacro(create_package_project)
 
 macro(add_konoha_package PKGNAME)
@@ -410,6 +435,11 @@ foreach(f ${test_files})
 	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT
 		"KONOHA_PACKAGEPATH=${PARENT_BINARY_DIR}/package")
 endforeach(f ${test_files})
+
+option(USE_TRACEVM "Use tracevm" ON)
+if(USE_TRACEVM)
+	add_definitions(-DK_USE_TRACEVM)
+endif(USE_TRACEVM)
 
 add_subdirectory(platform/dse)
 add_subdirectory(platform/apache)

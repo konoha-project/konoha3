@@ -1,15 +1,24 @@
 import("konoha");
+import("konoha.new");
+import("konoha.float");
 import("konoha.sql");
+import("cstyle", "while");
 
-String USER_NAME = ""; // Enter Your MySQL UserName
-String PASSWD = ""     // Enter Your MySQL Password
 
 void main() {
-	Connection con = new Connection("mysql://" + USER_NAME + ":" + PASSWD + "@localhost:3306/information_schema");
-	ResultSet r = con.query("SELECT * FROM INFORMATION_SCHEMA.SCHEMATA");
+	String USER_NAME = "root"; // Enter Your MySQL UserName
+	String PASSWD = "ybkkbhc"     // Enter Your MySQL Password
+	Connection con = new Connection("mysql://" + USER_NAME + ":" + PASSWD + "@localhost:3306");
+	ResultSet r = con.query("USE konoha");
+	ResultSet r = con.query("SELECT * FROM people");
 	while(r.next()) {
-		System.p(r.getString("SCHEMA_NAME"));
+		System.p(" ----------------------- ");
+		System.p("name:\t\t" + r.getString("name"));
+		System.p("age:\t\t" + r.getInt("age"));
+		System.p("height:\t\t" + r.getFloat("height"));
+		System.p("village:\t" + r.getString("village"));
 	}
+	System.p(" ----------------------- ");
 	con.close();
 }
 

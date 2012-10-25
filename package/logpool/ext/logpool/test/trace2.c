@@ -16,7 +16,7 @@ static struct logpool_param_stream TRACE_API_PARAM = {
 static int get_count(int argc, const char **argv)
 {
     char *env = PLATAPI getenv_i("LOGPOOL_TESTCASE_SIZE");
-    if (!env && argc > 1) {
+    if(!env && argc > 1) {
         env = (char *) argv[1];
     }
     env = (env) ? env : "100";
@@ -53,7 +53,7 @@ int main(int argc, char const* argv[])
     int i, size = LOGPOOL_TEST_COUNT(argc, argv);
     for (i = 0; i < size; ++i) {
         logpool_test_write(logpool);
-        if (i % 2) {
+        if(i % 2) {
             usleep(1);
         }
     }

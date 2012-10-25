@@ -1,8 +1,12 @@
 // written by Atsushi Uchida
-import("konoha.class");
+
+import("konoha.new");
 import("konoha.const");
+import("konoha.class");
+
 const A = 10;
 const B = "abcd";
+
 class C {
     void f() {
         assert(A == 10);
@@ -10,4 +14,9 @@ class C {
     }
 }
 
-new C().f();
+void test() {
+	C c = new C();
+	c.f();
+}
+
+test();

@@ -8,7 +8,7 @@ void constructKonohaTypes(Module m);
 
 @Public Value IRBuilder.getValueFromSfp(Value sfp, Type rTy, int sfpidx) {
 	int idx;
-	if (rTy == ktype["objectPtrTy"])
+	if(rTy == ktype["objectPtrTy"])
 		idx = 0;
 	else
 		idx = 1;
