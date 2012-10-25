@@ -230,7 +230,7 @@ static KMETHOD Func_invoke(KonohaContext *kctx, KonohaStack *sfp)
 		size_t psize = Method_param(fo->mtd)->psize;
 		/* ENVIRONMENT MAPPING
 		 * fo->env          : callee environment (referenceing environment of a closure)
-		 * sfp[1 ~ psize+1] : arguments
+		 * sfp[1 ~ psize]   : arguments
 		 * sfp[0]           : function
 		 * sfp[ ~ -1]       : caller environment
 		 * copy arguments of closure to change environment
