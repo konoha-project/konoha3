@@ -151,7 +151,7 @@ static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 	kBlock *bk = (kBlock*)expr->cons->ObjectItems[1];
 	kMethod *oldMethod = gma->genv->currentWorkingMethod;
 	uintptr_t flag = 0;
-	kMethod *mtd = KLIB new_kMethod(kctx, _GcStack, flag, 0/* typeId, is it OK? */, 0/* mn, is it OK? */, NULL);
+	kMethod *mtd = KLIB new_kMethod(kctx, _GcStack, flag, 0/*typeId*/, 0/*mn*/, NULL);
 	PUSH_GCSTACK2(mtd);
 	KLIB kMethod_setParam(kctx, mtd, pa->rtype, pa->psize, (kparamtype_t*)pa->paramtypeItems);
 	size_t i;
@@ -184,22 +184,10 @@ static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(retExpr);
 }
 
-//static kbool_t closure_initNameSpace(KonohaContext *kctx, kNameSpace *packageNameSpace, kNameSpace *ns, kfileline_t pline)
-//{
-//	KDEFINE_SYNTAX SYNTAX[] = {
-//		{ SYM_("function"), 0, NULL/*"\"function\" $Param \"=>\" $Type $Block"*/, Precedence_CStyleASSIGN-1, Precedence_CStyleASSIGN-1, NULL, Expression_Closure, NULL, NULL, TypeCheck_Closure, },
-//		//{ SYM_("$ClosureDecl"), 0, "$ClosureDecl $Param \"=>\" $Type $Block", 0, 0, PatternMatch_Closure, NULL, NULL, Statement_closure, NULL, },
-//		{ KW_END, },
-//	};
-//	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, packageNameSpace);
-//	return true;
-//}
-
 static kbool_t closure_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, kfileline_t pline)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("function"), 0, NULL/*"\"function\" $Param \"=>\" $Type $Block"*/, Precedence_CStyleASSIGN-1, Precedence_CStyleASSIGN-1, NULL, Expression_Closure, NULL, NULL, TypeCheck_Closure, },
-		//{ SYM_("$ClosureDecl"), 0, "$ClosureDecl $Param \"=>\" $Type $Block", 0, 0, PatternMatch_Closure, NULL, NULL, Statement_closure, NULL, },
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
@@ -219,7 +207,5 @@ KDEFINE_PACKAGE* closure_init(void)
 	KSetPackageName(d, "closure", "1.0");
 	d.initPackage = closure_initPackage;
 	d.setupPackage = closure_setupPackage;
-	//d.initNameSpace = closure_initNameSpace;
-	//d.setupNameSpace = closure_setupNameSpace;
 	return &d;
 }

@@ -102,7 +102,6 @@ static kbool_t kNameSpace_initGlobalObject(KonohaContext *kctx, kNameSpace *ns, 
 		defGlobalObject.typeId = TY_newid;
 		defGlobalObject.cflag = kClass_Singleton|kClass_Final;
 		defGlobalObject.cstruct_size = sizeof(kGlobalObject);
-		//defGlobalObject.reftrace = kGlobalObject_reftrace; 
 
 		KonohaClass *cGlobalObject = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defGlobalObject, trace);
 		((kNameSpaceVar *)ns)->globalObjectNULL_OnList =  KLIB Knull(kctx, cGlobalObject);

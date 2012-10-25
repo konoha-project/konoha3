@@ -551,7 +551,6 @@ static void Func_init(KonohaContext *kctx, kObject *o, void *conf)
 	KFieldInit(fo, fo->self, K_NULL);
 	KFieldInit(fo, fo->mtd, conf == NULL ? KNULL(Method) : (kMethod *)conf);
 	fo->env = NULL;
-	fo->adhocKeyForTokenFunc = 0;
 }
 
 static void Func_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
@@ -566,9 +565,6 @@ static void Func_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visit
 		int i = 0;
 		for (; i < fo->espidx; i++) {
 			KREFTRACEn(fo->env[i].asObject);
-			if (IS_String(fo->env[i].asObject)) {
-				//printf("espidx[%d], string %s\n", i, fo->env[i].asString->text);
-			}
 		}
 		END_REFTRACE();
 	}

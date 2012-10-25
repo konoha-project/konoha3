@@ -1298,7 +1298,6 @@ struct kFuncVar {
 	kMethod *mtd;
 	KonohaStack *env; // used for closure
 	int espidx; // index where closure is defined
-	int adhocKeyForTokenFunc;   // as name implies,
 };
 
 /* ------------------------------------------------------------------------ */

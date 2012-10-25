@@ -509,7 +509,6 @@ static void KonohaVisitor_visitConstExpr(KonohaContext *kctx, IRBuilder *self, k
 	DBG_ASSERT(!TY_isUnbox(expr->ty));
 	DBG_ASSERT(Expr_hasObjectConstValue(expr));
 	v = BUILD_addConstPool(kctx, v);
-	if (v->h.ct->typeId == 22) printf("const global object\n");
 	ASM(NSET, OC_(a), (uintptr_t)v, CT_(expr->ty));
 }
 
@@ -691,7 +690,6 @@ static void KonohaVisitor_visitStackTopExpr(KonohaContext *kctx, IRBuilder *self
 	NMOV_asm(kctx, a, expr->ty, expr->index + shift);
 }
 
-//static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk);
 static IRBuilder *createKonohaVisitor(IRBuilder *builder);
 static void ClosureExpr_genCode(KonohaContext *kctx, IRBuilder *self, kMethod *mtd, kBlock *bk)
 {
