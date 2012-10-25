@@ -646,21 +646,56 @@ static kMethod *kNameSpace_getNameSpaceFuncNULL(KonohaContext *kctx, kNameSpace 
 	return kNameSpace_matchMethodNULL(kctx, ns, O_typeId(ns), MethodMatch_Func, &m);
 }
 
-static ksymbol_t anotherSymbol(KonohaContext *kctx, ksymbol_t symbol)
+//static ksymbol_t FindAnotherSymbol(KonohaContext *kctx, ksymbol_t symbol)
+//{
+//	kString *s = SYM_s(symbol);
+//	size_t len = S_size(s);
+//	char *t = ALLOCA(char, len+1);
+//	memcpy(t, S_text(s), len);
+//	t[len]=0;
+//	if(isupper(t[0])) {
+//		t[0] = tolower(t[0]);
+//	}
+//	else {
+//		t[0] = toupper(t[0]);
+//	}
+//	DBG_P("'%s' => '%s'", S_text(s), t);
+//	return KLIB Ksymbol(kctx, (const char *)t, len, 0, SYM_NONAME);
+//}
+
+static size_t CheckAnotherSymbol(KonohaContext *kctx, ksymbol_t *resolved, size_t foundNames, char *buffer, size_t len)
 {
-	kString *s = SYM_s(symbol);
-	size_t len = S_size(s);
-	char *t = ALLOCA(char, len+1);
-	memcpy(t, S_text(s), len);
-	t[len]=0;
-	if(isupper(t[0])) {
-		t[0] = tolower(t[0]);
+	DBG_P("CHECKING NEWNAME: '%s'", buffer);
+	resolved[foundNames] = KLIB Ksymbol(kctx, (const char *)buffer, len, 0, SYM_NONAME);
+	if(resolved[foundNames] != SYM_NONAME) {
+		foundNames++;
+	}
+	return foundNames;
+}
+
+#define ANOTHER_NAME_MAXSIZ 4
+
+static size_t FindAnotherSymbol(KonohaContext *kctx, ksymbol_t symbol, ksymbol_t *resolved)
+{
+	const char *name = SYM_t(symbol);
+	size_t i, foundNames = 0, len = S_size(SYM_s(symbol));
+	char *buffer = ALLOCA(char, len+1);
+	memcpy(buffer, name, len);
+	buffer[len] = 0;
+	if(isupper(buffer[0])) {
+		buffer[0] = tolower(buffer[0]);  // FirstName => firstName, Firstname  => firstname
+		foundNames = CheckAnotherSymbol(kctx, resolved, foundNames, buffer, len);
+		for(i = 0; i < len; i++) {
+			buffer[i] = tolower(buffer[i]);
+		}
+		foundNames = CheckAnotherSymbol(kctx, resolved, foundNames, buffer, len);
 	}
 	else {
-		t[0] = toupper(t[0]);
+		buffer[0] = toupper(buffer[0]);  // firstName => FirstName, firstname => FirstName
+		foundNames = CheckAnotherSymbol(kctx, resolved, foundNames, buffer, len);
 	}
-	DBG_P("'%s' => '%s'", S_text(s), t);
-	return KLIB Ksymbol(kctx, (const char *)t, len, 0, SYM_NONAME);
+	DBG_ASSERT(foundNames < ANOTHER_NAME_MAXSIZ);
+	return foundNames;
 }
 
 static kMethod *kNameSpace_getGetterMethodNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ksymbol_t symbol, ktype_t type)
@@ -670,9 +705,14 @@ static kMethod *kNameSpace_getGetterMethodNULL(KonohaContext *kctx, kNameSpace *
 		m.mn = MN_toGETTER(symbol);
 		m.paramsize = 0;
 		kMethod *mtd = kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_Param0, &m);
-		if(mtd == NULL && ((symbol = anotherSymbol(kctx, symbol)) != SYM_NONAME)) {
-			m.mn = MN_toGETTER(symbol);
-			mtd = kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_Param0, &m);
+		if(mtd == NULL) {
+			ksymbol_t anotherSymbols[ANOTHER_NAME_MAXSIZ];
+			size_t i, foundNames = FindAnotherSymbol(kctx, symbol, anotherSymbols);
+			for(i = 0; i < foundNames; i++) {
+				m.mn = MN_toGETTER(anotherSymbols[i]);
+				mtd = kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_Param0, &m);
+				if(mtd != NULL) break;
+			}
 		}
 		return mtd;
 	}
@@ -695,9 +735,14 @@ static kMethod *kNameSpace_getSetterMethodNULL(KonohaContext *kctx, kNameSpace *
 			func = MethodMatch_Signature;
 		}
 		kMethod *mtd = kNameSpace_matchMethodNULL(kctx, ns, cid, func, &m);
-		if(mtd == NULL && ((symbol = anotherSymbol(kctx, symbol)) != SYM_NONAME)) {
-			m.mn = MN_toSETTER(symbol);
-			mtd = kNameSpace_matchMethodNULL(kctx, ns, cid, func, &m);
+		if(mtd == NULL) {
+			ksymbol_t anotherSymbols[ANOTHER_NAME_MAXSIZ];
+			size_t i, foundNames = FindAnotherSymbol(kctx, symbol, anotherSymbols);
+			for(i = 0; i < foundNames; i++) {
+				m.mn = MN_toSETTER(anotherSymbols[i]);
+				mtd = kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_Param0, &m);
+				if(mtd != NULL) break;
+			}
 		}
 		return mtd;
 	}
