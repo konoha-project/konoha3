@@ -1,6 +1,6 @@
 import("cstyle", "while");
 import("posix.process");
-import("dscript.eventlistener");
+import("konoha.eventlistener");
 
 void callback(Event e) {
 	System.p("handler property=" + e.getProperty("event"));
@@ -8,7 +8,7 @@ void callback(Event e) {
 
 void test() {
 	EventHandler.setCallBack("hoge", callback);
-	SignalEventListener.start();
+	HttpEventListener.start("0.0.0.0", 8080);
 
 	while(true) {
 		System.usleep(1000);
