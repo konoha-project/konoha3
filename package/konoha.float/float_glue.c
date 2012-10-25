@@ -293,7 +293,7 @@ static kbool_t float_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		_Public|_Const|_Im, _F(Float_opMINUS), TY_float, TY_float, MN_("-"), 0,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	KDEFINE_FLOAT_CONST FloatData[] = {
 		{"FLOAT_EPSILON", TY_float, DBL_EPSILON},
 		{"Infinity", TY_float, INFINITY},

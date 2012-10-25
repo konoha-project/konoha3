@@ -839,7 +839,7 @@ static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
 	KonohaLibVar *l = (KonohaLibVar *)kctx->klib;
 	l->kMethod_genCode = GenCodeDefault;

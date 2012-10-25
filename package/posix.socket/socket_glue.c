@@ -661,7 +661,7 @@ static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 //		_Public|_Static|_Const|_Im, _F(System_send), TY_int, TY_System, MN_("send"), 3, TY_int, FN_("fd"), TY_Bytes, FN_("msg"), TY_int, FN_("flags"),
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	KDEFINE_INT_CONST IntData[] = {
 			{KDefineConstInt(PF_LOCAL)},
 			{KDefineConstInt(PF_UNIX)},

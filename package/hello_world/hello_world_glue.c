@@ -137,7 +137,7 @@ static kbool_t HelloWorld_initPackage(KonohaContext *kctx, kNameSpace *ns, int a
 		_Public, _F(Person_say), TY_String, TY_Person, MN_("say"), 0,
 		DEND, /* <= sentinel */
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
 	/* You can define constant variable with the following procedures. */
 	KDEFINE_INT_CONST IntData[] = {

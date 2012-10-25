@@ -1193,7 +1193,7 @@ static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 			_Public|_Const|_Im, _F(Rope_opADD), TY_String, TY_String, MN_("+"), 1, TY_String, FN_s,
 			DEND
 		};
-		KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+		KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	}
 
 	KDEFINE_METHOD MethodData[] = {
@@ -1235,7 +1235,7 @@ static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		_Public|_Const|_Im, _F(String_toLower),    TY_String, TY_String, MN_("toLower"), 0,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
 	KSET_TYFUNC(CT_String, unbox, String2, trace);
 	KSET_TYFUNC(CT_String, free, String2, trace);

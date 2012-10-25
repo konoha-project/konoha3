@@ -374,6 +374,7 @@ typedef struct logconf_t {
 typedef struct KTraceInfo {
 	struct KonohaValueVar *baseStack;
 	kfileline_t pline;
+	int errorSymbol;  int faultType;
 } KTraceInfo;
 
 #define KMakeTrace(TRACENAME, sfp) \
@@ -1213,7 +1214,7 @@ static const char* MethodFlagData[] = {
 #define kMethod_WeakCoercion         kMethod_Coercion|kMethod_Warning
 
 #define kMethod_is(P, MTD)            (TFLAG_is(uintptr_t, (MTD)->flag, kMethod_##P))
-#define kMethod_set(P, MTD, B)        TFLAG_set(uintptr_t, ((kMethodVar *)MTD)->flag, kMethod_##P, B)
+#define kMethod_set(P, MTD, B)        TFLAG_set(uintptr_t, (MTD)->flag, kMethod_##P, B)
 
 #define Method_isTransCast(mtd)    MN_isTOCID(mtd->mn)
 #define Method_isCast(mtd)         MN_isASCID(mtd->mn)
@@ -1514,7 +1515,7 @@ struct KonohaLibVar {
 	void            (*kArray_clear)(KonohaContext*, kArray *, size_t);
 
 	kparamId_t      (*Kparamdom)(KonohaContext*, kushort_t, const kparamtype_t *);
-	kMethod *       (*new_kMethod)(KonohaContext*, kArray *gcstack, uintptr_t, ktype_t, kmethodn_t, MethodFunc);
+	kMethodVar*     (*new_kMethod)(KonohaContext*, kArray *gcstack, uintptr_t, ktype_t, kmethodn_t, MethodFunc);
 	kParam*         (*kMethod_setParam)(KonohaContext*, kMethod *, ktype_t, kushort_t, const kparamtype_t *);
 	void            (*kMethod_setFunc)(KonohaContext*, kMethod*, MethodFunc);
 	void            (*kMethod_genCode)(KonohaContext*, kMethod*, kBlock *bk);
@@ -1534,7 +1535,7 @@ struct KonohaLibVar {
 
 	kbool_t          (*kNameSpace_setConstData)(KonohaContext *, kNameSpace *, ksymbol_t, ktype_t, uintptr_t, KTraceInfo *);
 	kbool_t          (*kNameSpace_loadConstData)(KonohaContext*, kNameSpace *, const char **d, KTraceInfo *);
-	void             (*kNameSpace_loadMethodData)(KonohaContext*, kNameSpace *, intptr_t *);
+	void             (*kNameSpace_LoadMethodData)(KonohaContext*, kNameSpace *, intptr_t *, KTraceInfo *);
 
 	kMethod*         (*kNameSpace_getGetterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ksymbol_t mn, ktype_t);
 	kMethod*         (*kNameSpace_getSetterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ksymbol_t mn, ktype_t);

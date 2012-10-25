@@ -1254,20 +1254,11 @@ static KMETHOD Statement_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 	if(TY_is(Final, typeId)) { flag |= kMethod_Final; }
 	if(pa != NULL) {  // if pa is NULL, error is printed out.
 		INIT_GCSTACK();
-		kMethod *mtd = KLIB new_kMethod(kctx, _GcStack, flag, typeId, mn, NULL);
+		kMethodVar *mtd = (kMethodVar*)KLIB new_kMethod(kctx, _GcStack, flag, typeId, mn, NULL);
 		KLIB kMethod_setParam(kctx, mtd, pa->rtype, pa->psize, (kparamtype_t *)pa->paramtypeItems);
-		kMethod *foundMethod = kNameSpace_addMethod(kctx, ns, mtd);
-		if(foundMethod != NULL) {
-			pa = NULL;
-			if(mtd->typeId == foundMethod->typeId) {
-				kStmt_printMessage(kctx, stmt, ErrTag, "method %s.%s%s has already defined", Method_t(mtd));
-			}
-			else {
-				kStmt_printMessage(kctx, stmt, ErrTag, "method %s.%s%s is final", Method_t(mtd));
-			}
-		}
-		if(pa != NULL) {
-			kMethod_setLazyCompilation(kctx, (kMethodVar *)mtd, stmt, ns);
+		KMakeTrace(trace, sfp);
+		if(kNameSpace_AddMethod(kctx, ns, mtd, trace)) {
+			kMethod_setLazyCompilation(kctx, mtd, stmt, ns);
 		}
 		RESET_GCSTACK();
 	}

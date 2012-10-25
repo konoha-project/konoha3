@@ -726,7 +726,7 @@ static kbool_t Complex_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public, _F(Complex_conjl),   TY_Complex, TY_Complex, MN_("conjl"), 0,
 		DEND, /* <= sentinel */
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
 	/* You can define constant variable with the following procedures. */
 	KDEFINE_FLOAT_CONST FloatData[] = {

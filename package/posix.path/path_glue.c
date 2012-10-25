@@ -528,7 +528,7 @@ static void path_defineDIR(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trac
 		_Public|_Iter,      _F(DIR_readPath),     TY_String, TY_DIR,    MN_("readPath"), 0,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 }
 
 // --------------------------------------------------------------------------
@@ -565,7 +565,7 @@ static kbool_t path_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	path_defineAccessConst(kctx, ns, trace);
 	path_defineDIR(kctx, ns, trace);
 	return true;

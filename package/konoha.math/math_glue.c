@@ -252,7 +252,7 @@ static kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 			_Public, _F(Math_random), TY_float, TY_Math, MN_("random"), 0,
 			DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
 	KDEFINE_FLOAT_CONST FloatData[] = {
 			{_KVf(E)},

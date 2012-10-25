@@ -91,7 +91,7 @@ static kbool_t int_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		//_Public|_Const|_Im, _F(Int_opDEC), TY_int, TY_int, MN_("opDEC"), 0,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	KDEFINE_INT_CONST IntData[] = {
 		{"INT_MAX", TY_int, KINT_MAX},
 		{"INT_MIN", TY_int, KINT_MIN},

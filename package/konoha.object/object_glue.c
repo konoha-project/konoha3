@@ -54,7 +54,7 @@ static kbool_t object_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		_Public|_Const, _F(Object_getTypeId), TY_int, TY_Object, MN_("getTypeId"), 0,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	return true;
 }
 

@@ -446,7 +446,7 @@ static void file_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *t
 		_Public, _F(File_flush), TY_void, TY_File, MN_("flush"), 0,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 }
 
 typedef struct {
@@ -518,7 +518,7 @@ static kbool_t file_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 			_Public, _F(File_write3), TY_int, TY_File, MN_("write"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
 			DEND,
 		};
-		KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+		KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	}
 	return true;
 }

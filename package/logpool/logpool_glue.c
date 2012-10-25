@@ -441,7 +441,7 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_P   , _F(PoolPlugin_failed), TY_void,  TY_Plugin   , MN_("failed"), 1, TY_Plugin, FN_x,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	return true;
 }
 

@@ -54,7 +54,7 @@ static kbool_t null_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo
 		kMethod_Public, _F(Object_isNotNull), TY_boolean, TY_Object, MN_("isNotNull"), 0,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	return true;
 }
 

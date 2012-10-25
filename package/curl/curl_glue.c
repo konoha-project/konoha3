@@ -723,7 +723,7 @@ static kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public|_Im, _F(Curl_getInfo), TY_Object/*FIXME TY_Dynamic*/, TY_Curl, MN_("getInfo"), 1, TY_int, FN_("type"),
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
 	KDEFINE_INT_CONST IntData[] = {
 		{KDefineConstInt(CURLOPT_AUTOREFERER)},

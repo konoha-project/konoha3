@@ -585,7 +585,7 @@ static kbool_t subproc_initSubProc(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 //		_Public|_Im, _F(Subproc_enableERR2StdOUT), TY_boolean, TY_Subproc, MN_("enableERR2StdOUT"), 1, TY_boolean, FN_("isStdout"),
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	return true;
 }
 
@@ -1702,7 +1702,7 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public|_Im, _F(Subproc_enableERR2StdOUT), TY_boolean, TY_Subproc, MN_("enableERR2StdOUT"), 1, TY_boolean, FN_("isStdout"),
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	return true;
 }
 

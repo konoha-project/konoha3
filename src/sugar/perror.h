@@ -44,25 +44,30 @@ static int isPrintMessage(KonohaContext *kctx, SugarContext *sugarContext, kinfo
 	return true;
 }
 
+static kString* new_StringMessage(KonohaContext *kctx, kArray *gcstack, KGrowingBuffer *wb, kinfotag_t taglevel, kfileline_t uline, const char *fmt, va_list ap)
+{
+	const char *msg = TAG_t(taglevel);
+	if(uline > 0) {
+		const char *file = FileId_t(uline);
+		KLIB Kwb_printf(kctx, wb, "%s(%s:%d) " , msg, PLATAPI shortFilePath(file), (kushort_t)uline);
+	}
+	else {
+		KLIB Kwb_printf(kctx, wb, "%s" , msg);
+	}
+	KLIB Kwb_vprintf(kctx, wb, fmt, ap);
+	msg = KLIB Kwb_top(kctx, wb, 0);
+	return KLIB new_kString(kctx, gcstack, msg, Kwb_bytesize(wb), 0);
+}
+
 static kString* SugarContext_vprintMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t uline, const char *fmt, va_list ap)
 {
 	SugarContext *sugarContext = KonohaContext_getSugarContext(kctx);
 	if(isPrintMessage(kctx, sugarContext, taglevel)) {
-		const char *msg = TAG_t(taglevel);
 		KGrowingBuffer wb;
 		KLIB Kwb_init(&sugarContext->errorMessageBuffer, &wb);
-		if(uline > 0) {
-			const char *file = FileId_t(uline);
-			KLIB Kwb_printf(kctx, &wb, "%s(%s:%d) " , msg, PLATAPI shortFilePath(file), (kushort_t)uline);
-		}
-		else {
-			KLIB Kwb_printf(kctx, &wb, "%s" , msg);
-		}
-		KLIB Kwb_vprintf(kctx, &wb, fmt, ap);
-		msg = KLIB Kwb_top(kctx, &wb, 1);
-		kString *emsg = KLIB new_kString(kctx, sugarContext->errorMessageList, msg, strlen(msg), 0);
+		kString *emsg = new_StringMessage(kctx, sugarContext->errorMessageList, &wb, taglevel, uline, fmt, ap);
 		PLATAPI reportCompilerMessage(kctx, taglevel, S_text(emsg));
-		if(taglevel == ErrTag || taglevel == CritTag) {
+		if(taglevel <= ErrTag) {
 			sugarContext->errorMessageCount++;
 		}
 		KLIB Kwb_free(&wb);
@@ -148,6 +153,40 @@ static kExpr* kStmt_printMessage2(KonohaContext *kctx, kStmt *stmt, kToken *tk, 
 	va_end(ap);
 	return K_NULLEXPR;
 }
+
+extern int verbose_debug;
+
+static void TRACE_PrintMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_t taglevel, const char *fmt, ...)
+{
+	if(taglevel == DebugTag && !verbose_debug) return;
+	va_list ap;
+	va_start(ap, fmt);
+	if(trace !=NULL && IS_Stmt(trace->baseStack[1].asStmt)) {
+		kStmt *stmt = trace->baseStack[1].asStmt;
+		kfileline_t uline = stmt->uline;
+		kString *emsg = SugarContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
+		if(taglevel <= ErrTag && !Stmt_isERR(stmt)) {
+			kStmt_toERR(kctx, stmt, emsg);
+		}
+	}
+	else {
+		INIT_GCSTACK();
+		KGrowingBuffer wb;
+		KLIB Kwb_init(&kctx->stack->cwb, &wb);
+		kString *emsg = new_StringMessage(kctx, _GcStack, &wb, taglevel, Trace_pline(trace), fmt, ap);
+		PLATAPI reportCompilerMessage(kctx, taglevel, S_text(emsg));
+		if(taglevel <= ErrTag && trace != NULL && trace->errorSymbol != 0 && trace->faultType != 0) {
+			KLIB Kwb_free(&wb);
+			va_end(ap);
+			KLIB KonohaRuntime_raise(kctx, trace->errorSymbol, trace->faultType, emsg, trace->baseStack);
+			return; /* in case of that KonohaRuntime_raise cannot jump; */
+		}
+		KLIB Kwb_free(&wb);
+		RESET_GCSTACK();
+	}
+	va_end(ap);
+}
+
 
 #define Token_text(tk) kToken_t_(kctx, tk)
 

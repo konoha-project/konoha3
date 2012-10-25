@@ -792,7 +792,7 @@
 //		_Public|_Static, _F(System_getErr), TY_OutputStream, TY_System, MN_("getErr"), 0,
 //		DEND,
 //	};
-//	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);
+//	KLIB kNameSpace_LoadMethodData(kctx, NULL, MethodData);
 //	return true;
 //}
 //

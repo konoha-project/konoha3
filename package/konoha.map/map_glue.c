@@ -227,7 +227,7 @@ static kbool_t map_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		_Public|_Im|_Const, _F(Map_keys), TY_Array0, TY_Map, MN_("keys"), 0,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	return true;
 }
 

@@ -227,7 +227,7 @@
 //		_Public|_Hidden, _F(System_getThrownException), TY_Exception, TY_System, MN_("getThrownException"), 0,
 //		DEND,
 //	};
-//	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+//	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 //	return true;
 //}
 //

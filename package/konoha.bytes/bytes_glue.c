@@ -275,7 +275,7 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public, _F(String_new_fromSubBytes_withSpecifiedDecode), TY_String, TY_String, MN_("new"), 4, TY_Bytes, FN_("ba"), TY_int,    FN_("offset"), TY_int, FN_("length"), TY_String, FN_("charset"),
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	return true;
 }
 

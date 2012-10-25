@@ -337,7 +337,7 @@ static kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public|_Static, _F(System_system), TY_int, TY_System, MN_("system"), 1, TY_String, FN_("command"),
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	KDEFINE_INT_CONST intData[] = {
 		{KDefineConstInt(SIGHUP)},
 		{KDefineConstInt(SIGINT)},

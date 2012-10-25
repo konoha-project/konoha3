@@ -104,7 +104,7 @@ static kbool_t dynamic_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public|_Im, _F(Dynamic_), TY_Object, TY_Dynamic, MN_(""), 0,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	return true;
 }
 

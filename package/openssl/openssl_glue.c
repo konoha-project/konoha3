@@ -115,7 +115,7 @@ static kbool_t openssl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	return true;
 }
 

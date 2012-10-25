@@ -281,7 +281,7 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		_Public|_Static|_Im, _F(System_fchdir),    TY_boolean, TY_System, MN_("fchdir"), 1, TY_int,    FN_("fd"),
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	KDEFINE_INT_CONST intData[] = {
 		/*for System.lseek*/
 		{KDefineConstInt(SEEK_SET)},

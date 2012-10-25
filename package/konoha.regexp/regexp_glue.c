@@ -651,7 +651,7 @@ static kbool_t regexp_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		/*JS*/_Public|_Const|_Im, _F(RegExp_test),    TY_boolean, TY_RegExp,  MN_("test"), 1, TY_String, FN_("str"),
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	return true;
 }
 

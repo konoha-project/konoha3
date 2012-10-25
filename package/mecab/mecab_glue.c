@@ -378,7 +378,7 @@ static kbool_t mecab_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public|_Const, _F(MecabNode_cost),        TY_int,  TY_MecabNode, MN_("cost"), 0,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
 	KDEFINE_INT_CONST IntData[] = {
 			{KDefineConstInt(MECAB_NOR_NODE)},

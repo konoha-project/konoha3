@@ -552,14 +552,14 @@ static kbool_t python_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		_Public|_Im, _F(PyObject_), TY_PyObject, TY_PyObject, 0, 1, TY_PyObject, 0,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	if(KDefinedKonohaCommonModule() == true && CT_Float != NULL) {
 		KDEFINE_METHOD MethodData[] = {
 			_Public|_Const|_Im|_Coercion, _F(PyObject_toFloat), TY_float, TY_PyObject, MN_to(TY_float), 0,
 			_Public|_Const|_Im|_Coercion, _F(Float_toPyObject), TY_PyObject, TY_float, MN_to(TY_PyObject), 0,
 			DEND,
 		};
-		KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+		KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	}
 	return true;
 }

@@ -298,7 +298,7 @@ static void LoadDefaultMethod(KonohaContext *kctx, kNameSpace *ns)
 		_Static|_Public|_Immutable, _F(System_gc), TY_void, TY_System, MN_("gc"), 0,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, NULL);
 }
 
 #ifdef __cplusplus

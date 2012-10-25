@@ -227,7 +227,7 @@ static kbool_t JSON_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public|_Const|_Im, _F(kJSONArray_getSize),TY_int,   TY_JSONArray, MN_("getSize"),0,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	return true;
 }
 

@@ -71,7 +71,7 @@ static KonohaClass *loadSymbolClass(KonohaContext *kctx, kNameSpace *ns, KTraceI
 		_Public|_Coercion|_Const, _F(String_toSymbol), cSymbol->typeId, TY_String, MN_to(cSymbol->typeId), 0,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	return cSymbol;
 }
 
@@ -202,7 +202,7 @@ static KMETHOD NameSpace_addTypeCheck(KonohaContext *kctx, KonohaStack *sfp)
 
 // --------------------------------------------------------------------------
 
-static void loadNameSpaceMethodData(KonohaContext *kctx, kNameSpace *ns, int TY_symbol)
+static void LoadNameSpaceMethodData(KonohaContext *kctx, kNameSpace *ns, int TY_symbol, KTraceInfo *trace)
 {
 	int FN_keyword = SYM_("keyword");
 	int FN_func = SYM_("func");
@@ -239,7 +239,7 @@ static void loadNameSpaceMethodData(KonohaContext *kctx, kNameSpace *ns, int TY_
 		_Public, _F(NameSpace_addTypeCheck), TY_void, TY_NameSpace, MN_("addTypeCheck"), 2, TY_symbol, FN_keyword, TY_FuncTypeCheck, FN_func,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 }
 
 // --------------------------------------------------------------------------
@@ -598,8 +598,8 @@ static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public, _F(Token_isBeforeWhiteSpace), TY_boolean, TY_Token, MN_("isBeforeWhiteSpace"), 0,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
-	loadNameSpaceMethodData(kctx, ns, TY_symbol);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
+	LoadNameSpaceMethodData(kctx, ns, TY_symbol, trace);
 	RENAMEME_initNameSpace(kctx, ns, ns, trace);
 	return true;
 }

@@ -662,7 +662,7 @@ static kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public, _F(Date_toGMTString), TY_String, TY_Date, MN_("toUTCString"), 0,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
 	return true;
 }

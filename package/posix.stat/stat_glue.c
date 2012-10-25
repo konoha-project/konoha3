@@ -337,7 +337,7 @@ static void stat_defineClassAndMethod(KonohaContext *kctx, kNameSpace *ns, KTrac
 
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 }
 
 

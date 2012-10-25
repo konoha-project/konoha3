@@ -187,7 +187,7 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 		_Public, _F(String_toIterator), TY_StringIterator, TY_String, MN_("toIterator"), 0,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	return true;
 }
 

@@ -125,7 +125,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	KonohaLibVar* l = (KonohaLibVar *)ctx->klib;
 	l->kNameSpace_getClass       = kNameSpace_getClass;
 	l->kNameSpace_defineClass    = kNameSpace_defineClass;
-	l->kNameSpace_loadMethodData = kNameSpace_loadMethodData;
+	l->kNameSpace_LoadMethodData = kNameSpace_LoadMethodData;
 	l->kNameSpace_setConstData   = kNameSpace_setConstData;
 	l->kNameSpace_loadConstData  = kNameSpace_loadConstData;
 	l->kNameSpace_getGetterMethodNULL  = kNameSpace_getGetterMethodNULL;
@@ -311,10 +311,10 @@ void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns)
 		_Public, _F(NameSpace_loadScript), TY_void, TY_NameSpace, MN_("load"), 1, TY_String, FN_("filename"),
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, NULL);
 
 	KSET_KLIB2(kNameSpace_requirePackage,      kNameSpace_requirePackage, NULL);
-	KSET_KLIB2(kNameSpace_importPackage,       kNameSpace_importPackage, NULL);
+	KSET_KLIB2(kNameSpace_importPackage,       kNameSpace_importPackage,  NULL);
 	KSET_KLIB2(kNameSpace_importPackageSymbol, kNameSpace_importPackageSymbol, NULL);
 }
 

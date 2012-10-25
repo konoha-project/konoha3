@@ -1075,7 +1075,7 @@ static kbool_t gmp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		_Public|_Im|_Const, _F(Float_opNEQ_mpf),  TY_boolean, TY_float, MN_("!="),  1, TY_Mpf, FN_x,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
 	return true;
 }

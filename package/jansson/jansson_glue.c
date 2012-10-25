@@ -456,7 +456,7 @@ static kbool_t jansson_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		_Public|_Const|_Im, _F(JsonArray_getSize), TY_int,    TY_JsonArray, MN_("getSize"), 0,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	return true;
 }
 

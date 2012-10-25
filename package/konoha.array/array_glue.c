@@ -538,7 +538,7 @@ static kbool_t array_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		_Public|kMethod_Hidden, _F(Array_newList), TY_Array, TY_Array, MN_("newList"), 0,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	return true;
 }
 

@@ -551,7 +551,7 @@ static kbool_t sql_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		_Public, _F(ResultSet_next), TY_boolean, TY_ResultSet, MN_("next"), 0,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	return true;
 }
 

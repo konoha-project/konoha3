@@ -513,7 +513,7 @@ static kbool_t eventlistener_initPackage(KonohaContext *kctx, kNameSpace *ns, in
 		_Public|_Static, _F(System_setEnqFunc), TY_void, TY_System, MN_("setEnqFunc"), 1, TY_EnqFunc, FN_("f"),
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
 	return true;
 }

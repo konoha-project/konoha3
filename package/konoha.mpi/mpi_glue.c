@@ -636,7 +636,7 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		_Public, _F(MPIData_getSize), TY_int, TY_MPIData, MN_("getSize"), 0, 
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, NULL, MethodData);
 	KDEFINE_INT_CONST OpData[] = {
 			{"MAX",  TY_MPIOp, (kint_t)MPI_MAX},
 			{"MIN",  TY_MPIOp, (kint_t)MPI_MIN},
