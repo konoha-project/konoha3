@@ -752,6 +752,16 @@ static kMethod *kNameSpace_getMethodByParamSizeNULL(KonohaContext *kctx, kNameSp
 	return mtd;
 }
 
+static kMethod *kNameSpace_getMethodToCheckOverloadNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ksymbol_t symbol, int paramsize)
+{
+	MethodMatch m = {};
+	m.mn = symbol;
+	m.paramsize = paramsize;
+	MethodMatchFunc func = paramsize == 0 ? MethodMatch_Param0 : MethodMatch_ParamSize;
+	if(paramsize == -1) func = MethodMatch_ParamNoCheck;
+	return kNameSpace_matchMethodNULL(kctx, ns, cid, func, &m);
+}
+
 static kMethod *kNameSpace_getMethodBySignatureNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ksymbol_t symbol, int paramdom, int paramsize, kparamtype_t *param)
 {
 	MethodMatch m = {};
@@ -794,18 +804,18 @@ static kbool_t kNameSpace_AddMethod(KonohaContext *kctx, kNameSpace *ns, kMethod
 			return false;
 		}
 		else {
-			if(!kMethod_is(Virtual, foundMethod) || kMethod_is(Final, foundMethod)) {
-				TRACE_PrintMessage(kctx, trace, ErrTag, "final method: %s.%s%s", Method_t(foundMethod));
-				return false;
-			}
 			if(!kMethod_is(Final, foundMethod)) {
 				TRACE_PrintMessage(kctx, trace, DebugTag, 0, "@%s overriding method %s.%s%s on %s.%s%s", PackageId_t(ns->packageId), Method_t(mtd), Method_t(foundMethod));
 				kMethod_set(Virtual, ((kMethodVar*)foundMethod), true);
 			}
+			else {
+				TRACE_PrintMessage(kctx, trace, ErrTag, "final method: %s.%s%s", Method_t(foundMethod));
+				return false;
+			}
 		}
 	}
 	else {
-		foundMethod = kNameSpace_getMethodByParamSizeNULL(kctx, ns, ct->typeId, mtd->mn, Method_paramsize(mtd));
+		foundMethod = kNameSpace_getMethodToCheckOverloadNULL(kctx, ns, ct->typeId, mtd->mn, Method_paramsize(mtd));
 		if(foundMethod != NULL && foundMethod->mn == mtd->mn) {
 			kMethod_set(Overloaded, ((kMethodVar*)foundMethod), true);
 			kMethod_set(Overloaded, mtd, true);
@@ -844,7 +854,7 @@ static void kNameSpace_LoadMethodData(KonohaContext *kctx, kNameSpace *ns, intpt
 			p[i].fn = (ksymbol_t)d[1];
 			d += 2;
 		}
-		kMethod *mtd = KLIB new_kMethod(kctx, _GcStack, flag, cid, mn, f);
+		kMethodVar *mtd = KLIB new_kMethod(kctx, _GcStack, flag, cid, mn, f);
 		KLIB kMethod_setParam(kctx, mtd, rtype, psize, p);
 		kNameSpace_AddMethod(kctx, ns, mtd, trace);
 	}

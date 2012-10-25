@@ -30,12 +30,6 @@
 extern "C"{
 #endif
 
-// Object.getTypeId()
-static KMETHOD Object_getTypeId(KonohaContext *kctx, KonohaStack *sfp)
-{
-	KReturnUnboxValue(O_ct(sfp[0].asObject)->typeId);
-}
-
 // Object.instanceOf(Object o)
 static KMETHOD Object_instanceOf(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -69,7 +63,6 @@ static kbool_t subtype_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceI
 {
 	int FN_type = FN_("type");
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const, _F(Object_getTypeId), TY_int, TY_Object, MN_("getTypeId"), 0,
 		_Public|_Hidden|_Imm|_Const, _F(Object_instanceOf), TY_boolean, TY_Object, MN_("<:"), 1, TY_Object, FN_type,
 		_Public|_Hidden|_Imm|_Const|kMethod_SmartReturn, _F(Object_as), TY_Object, TY_Object, MN_("as"), 1, TY_Object, FN_type,
 		DEND,
