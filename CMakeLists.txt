@@ -86,6 +86,7 @@ set(PACKAGES
 ##	konoha.sql
 	konoha.untyped
 	konoha.var
+	konoha.eventlistener
 	sugar
 	cstyle
 	cstyle.libc
@@ -98,7 +99,6 @@ set(PACKAGES
 	dscript.dollar
 	dscript.subproc
 	dscript.shell
-	dscript.eventlistener
 	curl
 	llvm
 ##	ijit
