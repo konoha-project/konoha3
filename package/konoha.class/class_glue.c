@@ -34,7 +34,7 @@ extern "C"{
 static kbool_t KonohaClass_setClassFieldObjectValue(KonohaContext *kctx, KonohaClassVar *definedClass, ksymbol_t sym, kObject *ObjectValue)
 {
 	int i;
-	for(i = definedClass->fieldsize; i >= 0; i--) {
+	for(i = definedClass->fieldsize - 1; i >= 0; i--) {
 		if(definedClass->fieldItems[i].fn == sym  && O_ct(definedClass->defaultNullValueVar_OnGlobalConstList->fieldObjectItems[i]) == O_ct(ObjectValue)) {
 			kObjectVar *o = definedClass->defaultNullValueVar_OnGlobalConstList;
 			KFieldSet(o, o->fieldObjectItems[i], ObjectValue);
@@ -47,7 +47,7 @@ static kbool_t KonohaClass_setClassFieldObjectValue(KonohaContext *kctx, KonohaC
 static kbool_t KonohaClass_setClassFieldUnboxValue(KonohaContext *kctx, KonohaClassVar *definedClass, ksymbol_t sym, uintptr_t unboxValue)
 {
 	int i;
-	for(i = definedClass->fieldsize; i >= 0; i--) {
+	for(i = definedClass->fieldsize - 1; i >= 0; i--) {
 		if(definedClass->fieldItems[i].fn == sym  && TY_isUnbox(definedClass->fieldItems[i].ty)) {
 			definedClass->defaultNullValueVar_OnGlobalConstList->fieldUnboxItems[i] = unboxValue;
 			return true;
