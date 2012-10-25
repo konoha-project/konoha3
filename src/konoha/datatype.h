@@ -562,7 +562,6 @@ static void Func_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visit
 	KREFTRACEv(fo->mtd);
 	END_REFTRACE();
 	if (fo->env != NULL) {
-		printf("func_reftrace\n");
 		BEGIN_REFTRACE(fo->espidx);
 		int i = 0;
 		for (; i < fo->espidx; i++) {

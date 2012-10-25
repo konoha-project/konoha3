@@ -174,7 +174,6 @@ static KMETHOD TypeCheck_Closure(KonohaContext *kctx, KonohaStack *sfp)
 	if (ret) {
 		KonohaClass *ctFunc = KLIB KonohaClass_Generics(kctx, CT_Func, pa->rtype, pa->psize, (kparamtype_t*)pa->paramtypeItems);
 		kFuncVar *fo = (kFuncVar*)KLIB new_kObject(kctx, _GcStack, ctFunc, (uintptr_t)mtd);
-		KUnsafeFieldInit(fo->self, Stmt_nameSpace(stmt)->globalObjectNULL_OnList);
 		PUSH_GCSTACK2(fo);
 		SUGAR kExpr_setConstValue(kctx, expr, fo->h.ct->typeId, (kObject*)fo);
 		kExpr *bkExpr = new_ConstValueExpr(kctx, TY_Block, (kObject*)bk);

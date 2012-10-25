@@ -383,7 +383,6 @@ static void ASM_SAFEPOINT(KonohaContext *kctx, kfileline_t uline, int espidx)
 {
 	kBasicBlock *bb = ctxcode->currentWorkingBlock;
 	size_t i;
-	printf("safepoint %d\n", espidx);
 	for (i = 0; i < BasicBlock_codesize(bb); i++) {
 		VirtualMachineInstruction *op = BBOP(bb) + i;
 		if(op->opcode == OPCODE_SAFEPOINT) return;
@@ -696,7 +695,6 @@ static void KonohaVisitor_visitStackTopExpr(KonohaContext *kctx, IRBuilder *self
 static IRBuilder *createKonohaVisitor(IRBuilder *builder);
 static void ClosureExpr_genCode(KonohaContext *kctx, IRBuilder *self, kMethod *mtd, kBlock *bk)
 {
-	asm("int3");
 	INIT_GCSTACK();
 	PUSH_GCSTACK2(ctxcode->lbINIT);
 	PUSH_GCSTACK2(ctxcode->lbEND);

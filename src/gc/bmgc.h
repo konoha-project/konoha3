@@ -1758,7 +1758,6 @@ static void bmgc_gc_sweep(HeapManager *mng)
 
 static void bitmapMarkingGC(HeapManager *mng, enum gc_mode mode)
 {
-	printf("gc start\n");
 	gc_info("GC starting");
 	bitmap_reset(&mng->flags, 0);
 	bmgc_gc_init(mng, mode);
