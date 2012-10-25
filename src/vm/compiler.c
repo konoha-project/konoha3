@@ -22,7 +22,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#define K_USE_PTHREAD
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include "vm.h"

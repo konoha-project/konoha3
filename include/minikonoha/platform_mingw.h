@@ -52,6 +52,10 @@
 #include <iconv.h>
 #endif /* HAVE_ICONV_H */
 
+#ifdef K_USE_PTHREAD
+#include <pthread.h>
+#endif
+
 #include <windows.h>
 
 #ifdef __cplusplus
@@ -124,51 +128,43 @@ static unsigned long long getTimeMilliSecond(void)
 
 // -------------------------------------------------------------------------
 
-#ifdef K_USE_PTHREAD
-#include <pthread.h>
-
-static int pthread_mutex_init_recursive(kmutex_t *mutex)
+static int kpthread_mutex_destroy(kmutex_t *mutex)
 {
+	return 0;
+}
+
+static int kpthread_mutex_init(kmutex_t *mutex, const kmutexattr_t *attr)
+{
+	return 0;
+}
+
+static int kpthread_mutex_lock(kmutex_t *mutex)
+{
+	return 0;
+}
+
+static int kpthread_mutex_trylock(kmutex_t *mutex)
+{
+	return 0;
+}
+
+static int kpthread_mutex_unlock(kmutex_t *mutex)
+{
+	return 0;
+}
+
+static int kpthread_mutex_init_recursive(kmutex_t *mutex)
+{
+#ifdef K_USE_PTHREAD
 	pthread_mutexattr_t attr;
 	bzero(&attr, sizeof(pthread_mutexattr_t));
 	pthread_mutexattr_init(&attr);
 	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
 	return pthread_mutex_init((pthread_mutex_t *)mutex, &attr);
-}
-
 #else
-
-static int pthread_mutex_destroy(kmutex_t *mutex)
-{
 	return 0;
-}
-
-static int pthread_mutex_init(kmutex_t *mutex, const kmutexattr_t *attr)
-{
-	return 0;
-}
-
-static int pthread_mutex_lock(kmutex_t *mutex)
-{
-	return 0;
-}
-
-static int pthread_mutex_trylock(kmutex_t *mutex)
-{
-	return 0;
-}
-
-static int pthread_mutex_unlock(kmutex_t *mutex)
-{
-	return 0;
-}
-
-static int pthread_mutex_init_recursive(kmutex_t *mutex)
-{
-	return 0;
-}
-
 #endif
+}
 
 // -------------------------------------------------------------------------
 
@@ -524,12 +520,12 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.exit_i          = exit;
 
 	// mutex
-	plat.pthread_mutex_init_i = pthread_mutex_init;
-	plat.pthread_mutex_init_recursive = pthread_mutex_init_recursive;
-	plat.pthread_mutex_lock_i = pthread_mutex_lock;
-	plat.pthread_mutex_unlock_i = pthread_mutex_unlock;
-	plat.pthread_mutex_trylock_i = pthread_mutex_trylock;
-	plat.pthread_mutex_destroy_i = pthread_mutex_destroy;
+	plat.pthread_mutex_init_i = kpthread_mutex_init;
+	plat.pthread_mutex_init_recursive = kpthread_mutex_init_recursive;
+	plat.pthread_mutex_lock_i    = kpthread_mutex_lock;
+	plat.pthread_mutex_unlock_i  = kpthread_mutex_unlock;
+	plat.pthread_mutex_trylock_i = kpthread_mutex_trylock;
+	plat.pthread_mutex_destroy_i = kpthread_mutex_destroy;
 
 	plat.shortFilePath       = shortFilePath;
 	plat.formatPackagePath   = formatPackagePath;

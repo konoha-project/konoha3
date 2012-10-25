@@ -437,8 +437,7 @@ endforeach(f ${test_files})
 
 option(USE_TRACEVM "Use tracevm" ON)
 if(USE_TRACEVM)
-add_definitions(-DK_USE_PTHREAD)
-add_definitions(-DK_USE_TRACEVM)
+	add_definitions(-DK_USE_TRACEVM)
 endif(USE_TRACEVM)
 
 add_subdirectory(platform/dse)
