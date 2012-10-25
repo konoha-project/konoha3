@@ -646,28 +646,11 @@ static kMethod *kNameSpace_getNameSpaceFuncNULL(KonohaContext *kctx, kNameSpace 
 	return kNameSpace_matchMethodNULL(kctx, ns, O_typeId(ns), MethodMatch_Func, &m);
 }
 
-//static ksymbol_t FindAnotherSymbol(KonohaContext *kctx, ksymbol_t symbol)
-//{
-//	kString *s = SYM_s(symbol);
-//	size_t len = S_size(s);
-//	char *t = ALLOCA(char, len+1);
-//	memcpy(t, S_text(s), len);
-//	t[len]=0;
-//	if(isupper(t[0])) {
-//		t[0] = tolower(t[0]);
-//	}
-//	else {
-//		t[0] = toupper(t[0]);
-//	}
-//	DBG_P("'%s' => '%s'", S_text(s), t);
-//	return KLIB Ksymbol(kctx, (const char *)t, len, 0, SYM_NONAME);
-//}
-
 static size_t CheckAnotherSymbol(KonohaContext *kctx, ksymbol_t *resolved, size_t foundNames, char *buffer, size_t len)
 {
-	DBG_P("CHECKING NEWNAME: '%s'", buffer);
 	resolved[foundNames] = KLIB Ksymbol(kctx, (const char *)buffer, len, 0, SYM_NONAME);
 	if(resolved[foundNames] != SYM_NONAME) {
+		DBG_P("CHECKING ANOTHER NAME: '%s'", buffer);
 		foundNames++;
 	}
 	return foundNames;
@@ -740,7 +723,7 @@ static kMethod *kNameSpace_getSetterMethodNULL(KonohaContext *kctx, kNameSpace *
 			size_t i, foundNames = FindAnotherSymbol(kctx, symbol, anotherSymbols);
 			for(i = 0; i < foundNames; i++) {
 				m.mn = MN_toSETTER(anotherSymbols[i]);
-				mtd = kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_Param0, &m);
+				mtd = kNameSpace_matchMethodNULL(kctx, ns, cid, func, &m);
 				if(mtd != NULL) break;
 			}
 		}
@@ -756,7 +739,17 @@ static kMethod *kNameSpace_getMethodByParamSizeNULL(KonohaContext *kctx, kNameSp
 	m.paramsize = paramsize;
 	MethodMatchFunc func = paramsize == 0 ? MethodMatch_Param0 : MethodMatch_ParamSize;
 	if(paramsize == -1) func = MethodMatch_ParamNoCheck;
-	return kNameSpace_matchMethodNULL(kctx, ns, cid, func, &m);
+	kMethod *mtd = kNameSpace_matchMethodNULL(kctx, ns, cid, func, &m);
+	if(mtd == NULL) {
+		ksymbol_t anotherSymbols[ANOTHER_NAME_MAXSIZ];
+		size_t i, foundNames = FindAnotherSymbol(kctx, symbol, anotherSymbols);
+		for(i = 0; i < foundNames; i++) {
+			m.mn = anotherSymbols[i];
+			mtd = kNameSpace_matchMethodNULL(kctx, ns, cid, func, &m);
+			if(mtd != NULL) break;
+		}
+	}
+	return mtd;
 }
 
 static kMethod *kNameSpace_getMethodBySignatureNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ksymbol_t symbol, int paramdom, int paramsize, kparamtype_t *param)
