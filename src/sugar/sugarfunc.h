@@ -1128,7 +1128,7 @@ static void kNameSpace_compileAllDefinedMethods(KonohaContext *kctx)
 	size_t i, size = kArray_size(KonohaContext_getSugarContext(kctx)->definedMethodList);
 	for (i = 0; i < size; ++i) {
 		kMethod *mtd = KonohaContext_getSugarContext(kctx)->definedMethodList->MethodItems[i];
-		if(mtd->invokeMethodFunc == MethodFunc_lazyCompilation) {
+		if(mtd != NULL && mtd->invokeMethodFunc == MethodFunc_lazyCompilation) {
 			kString *text = mtd->SourceToken->text;
 			kfileline_t uline = mtd->SourceToken->uline;
 			kMethod_compile(kctx, mtd, mtd->LazyCompileNameSpace, text, uline);
