@@ -301,7 +301,7 @@ static KMETHOD NameSpace_useStaticFunction2(KonohaContext *kctx, KonohaStack *sf
 #define _Public kMethod_Public
 #define _F(F)   (intptr_t)(F)
 
-void MODSUGAR_loadMethod(KonohaContext *kctx)
+void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns)
 {
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(NameSpace_importPackage), TY_void, TY_NameSpace, MN_("import"), 1, TY_String, FN_("package"),
@@ -311,7 +311,7 @@ void MODSUGAR_loadMethod(KonohaContext *kctx)
 		_Public, _F(NameSpace_loadScript), TY_void, TY_NameSpace, MN_("load"), 1, TY_String, FN_("filename"),
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 
 	KSET_KLIB2(kNameSpace_requirePackage,      kNameSpace_requirePackage, NULL);
 	KSET_KLIB2(kNameSpace_importPackage,       kNameSpace_importPackage, NULL);

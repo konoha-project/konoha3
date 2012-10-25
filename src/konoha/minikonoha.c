@@ -158,8 +158,8 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 	if(IS_RootKonohaContext(newctx)) {
 		MODCODE_init(kctx, newctx);
 		MODSUGAR_init(kctx, newctx);
-		Konoha_loadDefaultMethod(kctx);
-		MODSUGAR_loadMethod(kctx);
+		LoadDefaultMethod(kctx, KNULL(NameSpace));
+		LoadDefaultSugarMethod(kctx, KNULL(NameSpace));
 	}
 	else {
 		int i;

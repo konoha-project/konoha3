@@ -47,7 +47,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx);
 kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, KTraceInfo *trace);
 kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, kfileline_t uline);
 
-void MODSUGAR_loadMethod(KonohaContext *kctx);
+void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns);
 
 #ifdef __cplusplus
 } /* extern "C" */

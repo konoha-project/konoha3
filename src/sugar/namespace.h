@@ -780,7 +780,7 @@ static kMethod *kMethod_replaceWith(KonohaContext *kctx, kMethodVar *oldMethod, 
 static kMethod *kNameSpace_addMethod(KonohaContext *kctx, kNameSpace *ns, kMethod *mtd)
 {
 	KonohaClass *ct = CT_(mtd->typeId);
-	if(mtd->packageId == 0 && ns != NULL) {
+	if(mtd->packageId == 0 /* && ns != NULL*/) {
 		((kMethodVar *)mtd)->packageId = ns->packageId;
 		KLIB Kreportf(kctx, DebugTag, 0, "@%s loading method %s.%s%s", PackageId_t(ns->packageId), Method_t(mtd));
 	}

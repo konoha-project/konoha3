@@ -263,7 +263,7 @@ static KMETHOD System_gc(KonohaContext *kctx, KonohaStack *sfp)
 #define _Override  kMethod_Override
 #define _F(F)      (intptr_t)(F)
 
-static void Konoha_loadDefaultMethod(KonohaContext *kctx)
+static void LoadDefaultMethod(KonohaContext *kctx, kNameSpace *ns)
 {
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
@@ -298,7 +298,7 @@ static void Konoha_loadDefaultMethod(KonohaContext *kctx)
 		_Static|_Public|_Immutable, _F(System_gc), TY_void, TY_System, MN_("gc"), 0,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, NULL, MethodData);
+	KLIB kNameSpace_loadMethodData(kctx, ns, MethodData);
 }
 
 #ifdef __cplusplus
