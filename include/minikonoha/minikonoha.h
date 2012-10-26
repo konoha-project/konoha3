@@ -284,10 +284,15 @@ typedef struct KonohaLibVar          KonohaLibVar;
 #define PLATAPI       (kctx->platApi)->
 #define KLIB          (kctx->klib)->
 
+typedef enum {
+	VerboseModule, ReleaseModule, ExperimentalModule,
+} ModuleType;
+
+typedef kbool_t (*ModuleLoadFunc)(KonohaFactory *, ModuleType);
+
 #define KDEFINE_PACKAGE KonohaPackageHandler
 typedef struct KonohaPackageHandlerVar KonohaPackageHandler;
 typedef KonohaPackageHandler* (*PackageLoadFunc)(void);
-typedef kbool_t (*ModuleLoadFunc)(KonohaFactory *, int verbose);
 
 #define ICONV_NULL ((uintptr_t)-1)
 
@@ -424,6 +429,7 @@ struct KonohaFactory {
 	int     (*pthread_mutex_init_recursive)(kmutex_t *mutex);
 
 	/* high-level functions */
+	kbool_t  (*LoadRuntimeModule)(struct KonohaFactory*, const char *moduleName, ModuleType);
 
 	// file load
 	size_t FilePathMax;

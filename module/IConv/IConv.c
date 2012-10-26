@@ -39,7 +39,7 @@ static uintptr_t I18N_iconv_open(KonohaContext *kctx, const char *targetCharset,
 	if(ic == ICONV_NULL) {
 		KTraceApi(trace, UserFault|SoftwareFault, "iconv_open",
 				  LogText("tocode", targetCharset), LogText("fromcode", sourceCharset), LogErrno
-			);
+		);
 	}
 	return (uintptr_t)ic;
 }

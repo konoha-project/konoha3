@@ -423,6 +423,7 @@ static struct option long_options2[] = {
 	{"typecheck",       no_argument,       0, 'c'},
 	{"define",          required_argument, 0, 'D'},
 	{"import",          required_argument, 0, 'I'},
+	{"module",          required_argument, 0, 'M'},
 	{"startwith",       required_argument, 0, 'S'},
 	{"test",            required_argument, 0, 'T'},
 	{"test-with",       required_argument, 0, 'T'},
@@ -475,6 +476,10 @@ static int konoha_parseopt(KonohaContext* konoha, KonohaFactory *plat, int argc,
 
 		case 'I':
 			CommandLine_import(konoha, optarg);
+			break;
+
+		case 'M':
+			// already checked in KonohaFactory_SetDefaultModule
 			break;
 
 		case 'S':
