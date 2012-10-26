@@ -1297,6 +1297,8 @@ struct kFuncVar {
 	KonohaObjectHeader h;
 	kObject *self;
 	kMethod *mtd;
+	KonohaStack *env; // used for closure
+	int espidx; // index where closure is defined
 };
 
 /* ------------------------------------------------------------------------ */
@@ -1522,6 +1524,7 @@ struct KonohaLibVar {
 	intptr_t        (*kMethod_indexOfField)(kMethod *);
 
 	kbool_t         (*KonohaRuntime_setModule)(KonohaContext*, int, struct KonohaModule *, KTraceInfo *);
+	KonohaStack*    (*KonohaRuntime_replicateStack)(KonohaContext*, KonohaStack *stack, int espidx);
 
 //	void (*kNameSpace_reftraceSugarExtension)(KonohaContext *, kNameSpace *, struct KObjectVisitor *visitor);
 	void (*kNameSpace_freeSugarExtension)(KonohaContext *, kNameSpaceVar *);

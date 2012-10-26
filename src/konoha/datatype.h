@@ -543,13 +543,14 @@ static void kNameSpace_free(KonohaContext *kctx, kObject *o)
 }
 
 // ---------------
-// System
+// Func
 
 static void Func_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kFuncVar *fo = (kFuncVar *)o;
 	KFieldInit(fo, fo->self, K_NULL);
 	KFieldInit(fo, fo->mtd, conf == NULL ? KNULL(Method) : (kMethod *)conf);
+	fo->env = NULL;
 }
 
 static void Func_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
@@ -559,6 +560,22 @@ static void Func_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visit
 	KREFTRACEv(fo->self);
 	KREFTRACEv(fo->mtd);
 	END_REFTRACE();
+	if (fo->env != NULL) {
+		BEGIN_REFTRACE(fo->espidx);
+		int i = 0;
+		for (; i < fo->espidx; i++) {
+			KREFTRACEn(fo->env[i].asObject);
+		}
+		END_REFTRACE();
+	}
+}
+
+static void Func_free(KonohaContext *kctx, kObject *o)
+{
+	kFuncVar *fo = (kFuncVar*)o;
+	if (fo->env != NULL) {
+		KFree(fo->env, sizeof(KonohaStack) * kctx->platApi->stacksize);
+	}
 }
 
 // ---------------
@@ -935,6 +952,7 @@ static void loadInitStructData(KonohaContext *kctx)
 	SETTYNAME(defFunc, Func);
 	defFunc.init = Func_init;
 	defFunc.reftrace = Func_reftrace;
+	defFunc.free = Func_free;
 	
 	KDEFINE_CLASS defNameSpace = {0};
 	SETTYNAME(defNameSpace, NameSpace);
