@@ -22,10 +22,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#ifdef _MSC_VER
-#define typeof decltype
-#endif
-
 static void Karray_init(KonohaContext *kctx, KGrowingArray *m, size_t bytemax)
 {
 	m->bytesize = 0;
@@ -431,49 +427,53 @@ void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o, KObjectVisitor *visi
 	}
 }
 
-static kObject* kObject_getObjectNULL(KonohaContext *kctx, kObject *o, ksymbol_t key, kObject *defval)
+static kObject* kObject_getObjectNULL(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, kAbstractObject *defval)
 {
-	KKeyValue *d = protomap_get((Kprotomap_t *)o->h.kvproto, key | SYMKEY_BOXED);
+	kObject *v = (kObject *)o;
+	KKeyValue *d = protomap_get((Kprotomap_t *)v->h.kvproto, key | SYMKEY_BOXED);
 	return (d != NULL) ? d->ObjectValue : defval;
 }
 
-static void kObject_setObject(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, ktype_t ty, kObject *val)
+static void kObject_setObject(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, ktype_t ty, kAbstractObject *val)
 {
 	kObjectVar *v = (kObjectVar *)o;
 	protomap_set((Kprotomap_t **)&v->h.kvproto, key | SYMKEY_BOXED, ty, (void *)val);
 	KLIB Kwrite_barrier(kctx, v);
 }
 
-static uintptr_t kObject_getUnboxValue(KonohaContext *kctx, kObject *o, ksymbol_t key, uintptr_t defval)
+static uintptr_t kObject_getUnboxValue(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, uintptr_t defval)
 {
-	KKeyValue *d = protomap_get((Kprotomap_t *)o->h.kvproto, key);
+	kObject *v = (kObject *)o;
+	KKeyValue *d = protomap_get((Kprotomap_t *)v->h.kvproto, key);
 	return (d != NULL) ? d->unboxValue : defval;
 }
 
-static void kObject_setUnboxValue(KonohaContext *kctx, kObject *o, ksymbol_t key, ktype_t ty, uintptr_t unboxValue)
+static void kObject_setUnboxValue(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, ktype_t ty, uintptr_t unboxValue)
 {
 	kObjectVar *v = (kObjectVar *)o;
 	protomap_set((Kprotomap_t **)&v->h.kvproto, key, ty, (void *)unboxValue);
 }
 
-static void kObject_removeKey(KonohaContext *kctx, kObject *o, ksymbol_t key)
+static void kObject_removeKey(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key)
 {
-	KKeyValue *d = protomap_get((Kprotomap_t *)o->h.kvproto, key | SYMKEY_BOXED);
+	kObjectVar *v = (kObjectVar *)o;
+	KKeyValue *d = protomap_get((Kprotomap_t *)v->h.kvproto, key | SYMKEY_BOXED);
 	if(d != NULL) {
 		d->key = 0; d->ty = 0; d->unboxValue = 0;
 	}
-	d = protomap_get((Kprotomap_t *)o->h.kvproto, key);
+	d = protomap_get((Kprotomap_t *)v->h.kvproto, key);
 	if(d != NULL) {
 		d->key = 0; d->ty = 0; d->unboxValue = 0;
 	}
 }
 
 typedef void (*feach)(KonohaContext *kctx, void *, KKeyValue *d);
-static void kObject_protoEach(KonohaContext *kctx, kObject *o, void *thunk, feach f)
+static void kObject_protoEach(KonohaContext *kctx, kAbstractObject *o, void *thunk, feach f)
 {
+	kObjectVar *v = (kObjectVar *)o;
 	KKeyValue *r;
 	protomap_iterator itr = {0};
-	while((r = protomap_next((Kprotomap_t *)o->h.kvproto, &itr)) != NULL) {
+	while((r = protomap_next((Kprotomap_t *)v->h.kvproto, &itr)) != NULL) {
 		f(kctx, thunk, r);
 	}
 }
@@ -569,12 +569,12 @@ static void klib_init(KonohaLibVar *l)
 	l->Kmap_get      = Kmap_getentry;
 	l->Kmap_remove   = Kmap_remove;
 	l->Kmap_getcode  = Kmap_getcode;
-	l->kObject_getObject     = (typeof(l->kObject_getObject))kObject_getObjectNULL;
-	l->kObject_setObject     = (typeof(l->kObject_setObject))kObject_setObject;
-	l->kObject_getUnboxValue = (typeof(l->kObject_getUnboxValue))kObject_getUnboxValue;
-	l->kObject_setUnboxValue = (typeof(l->kObject_setUnboxValue))kObject_setUnboxValue;
-	l->kObject_removeKey     = (typeof(l->kObject_removeKey))kObject_removeKey;
-	l->kObject_protoEach     = (typeof(l->kObject_protoEach))kObject_protoEach;
+	l->kObject_getObject     = kObject_getObjectNULL;
+	l->kObject_setObject     = kObject_setObject;
+	l->kObject_getUnboxValue = kObject_getUnboxValue;
+	l->kObject_setUnboxValue = kObject_setUnboxValue;
+	l->kObject_removeKey     = kObject_removeKey;
+	l->kObject_protoEach     = kObject_protoEach;
 	l->KfileId       = KfileId;
 	l->KpackageId    = KpackageId;
 	l->Ksymbol       = Ksymbol;
