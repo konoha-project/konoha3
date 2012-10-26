@@ -46,8 +46,6 @@ extern "C" {
 
 #define WORD2INT(val) (sizeof(val)==8) ? (val&0x7FFFFFFF)|((val>>32)&0x80000000) : val
 
-#define KNH_NTRACE2(...) KNH_TODO("ntrace")
-
 typedef const struct _kSockAddr kSockAddr;
 struct _kSockAddr {
 	KonohaObjectHeader h;
@@ -55,8 +53,6 @@ struct _kSockAddr {
 };
 
 /* ------------------------------------------------------------------------ */
-#define ADDRBUFSIZE 256
-
 static void SockAddr_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct _kSockAddr *sa = (struct _kSockAddr *)o;
@@ -101,7 +97,7 @@ static fd_set* toFd(fd_set* s, kArray *a )
 		return NULL;
 	}
 	FD_ZERO(s);
-	int indx;
+	size_t indx;
 	int fd;
 	for(indx = 0; indx < kArray_size(a); indx++ ) {
 		fd = WORD2INT(a->kintItems[indx]);
@@ -116,7 +112,7 @@ static fd_set* toFd(fd_set* s, kArray *a )
 static void fromFd(KonohaContext *kctx, fd_set* s, kArray *a )
 {
 	if(s != NULL && kArray_size(a) > 0 ) {
-		int indx;
+		size_t indx;
 		for(indx = 0; indx < kArray_size(a); indx++ ) {
 			if(!FD_ISSET(WORD2INT(a->kintItems[indx]), s) ) {
 //				kArray_remove(a, indx);
@@ -130,7 +126,7 @@ static int getArrayMax(kArray *a)
 {
 	int ret = -1;
 	if(kArray_size(a) > 0) {
-		int cnt;
+		size_t cnt;
 		int fd;
 		for(cnt = 0; cnt < kArray_size(a); cnt++) {
 			if((fd = WORD2INT(a->kintItems[cnt])) > ret) {
@@ -614,13 +610,10 @@ static KMETHOD SockAddr_new (KonohaContext *kctx, KonohaStack *sfp)
 #define _Public   kMethod_Public
 #define _Const    kMethod_Const
 #define _Static   kMethod_Static
-#define _Coercion kMethod_Coercion
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-#define CT_SockAddr         cSockAddr
 #define TY_SockAddr         cSockAddr->typeId
-#define IS_SockAddr(O)      (O_ct(O) == CT_SockAddr)
 
 #define KDefineConstInt(T) #T, TY_int, T
 

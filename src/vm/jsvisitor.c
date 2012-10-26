@@ -542,7 +542,7 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 			if(base->typeId != TY_Object) {
 				JSVisitor_emitNewLine(kctx, builder, "_super.call(this);");
 			}
-			int i;
+			kushort_t i;
 			KonohaClassField *field = class->fieldItems;
 			kObject *constList = class->defaultNullValue_OnGlobalConstList;
 			for(i = 0; i < class->fieldsize; ++i) {

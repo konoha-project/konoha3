@@ -846,16 +846,16 @@ err:
 static kbool_t DEOS_checkSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
 {
 	DBG_P("filename='%s', line=%d", filename, line);
-//	if(!KonohaContext_isTrace(kctx)) {
-//#define N 64
-//		kbool_t res;
-//		char key[N] = {'\0'};
-//		snprintf(key, N, "\"%s:%d\"", filename, line);
-//		res = fetch_CoverageLog_from_Berkeley_DB(kctx, key);
-//		return res;
-//	}else{
+	if(!KonohaContext_isTrace(kctx)) {
+#define N 64
+		kbool_t res;
+		char key[N] = {'\0'};
+		snprintf(key, N, "\"%s:%d\"", filename, line);
+		res = fetch_CoverageLog_from_Berkeley_DB(kctx, key);
+		return res;
+	}else{
 		return true;
-//	}
+	}
 }
 
 static int DEOS_diagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
