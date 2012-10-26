@@ -903,7 +903,7 @@ static struct option long_options2[] = {
 	{NULL,            0,                 0,               0},
 };
 
-static int konoha_parseopt(KonohaContext* konoha, KFactoryApi *plat, int argc, char **argv)
+static int konoha_parseopt(KonohaContext* konoha, KonohaFactory *plat, int argc, char **argv)
 {
 	char lineOfArgs[128];
 	char *p = lineOfArgs;
@@ -1062,7 +1062,7 @@ int main(int argc, char *argv[])
 		verbose_code = 1;
 	}
 	PlatformApi *logger_platform = KonohaUtils_getDefaultPlatformApi();
-	KFactoryApi *logger_platformVar = (KFactoryApi *)logger_platform;
+	KonohaFactory *logger_platformVar = (KonohaFactory *)logger_platform;
 	logger_platformVar->diagnosis = _diagnosis;
 	KonohaContext* konoha = konoha_open(logger_platform);
 	ret = konoha_parseopt(konoha, logger_platformVar, argc, argv);

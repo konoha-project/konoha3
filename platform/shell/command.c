@@ -431,7 +431,7 @@ static struct option long_options2[] = {
 	{NULL, 0, 0, 0},
 };
 
-static int konoha_parseopt(KonohaContext* konoha, KFactoryApi *plat, int argc, char **argv)
+static int konoha_parseopt(KonohaContext* konoha, KonohaFactory *plat, int argc, char **argv)
 {
 	kbool_t ret = true;
 	int scriptidx = 0;
@@ -553,7 +553,7 @@ int main(int argc, char *argv[])
 	}
 	PlatformApi *plat = KonohaUtils_getDefaultPlatformApi();
 	KonohaContext* konoha = konoha_open(plat);
-	ret = konoha_parseopt(konoha, (KFactoryApi*)plat, argc, argv);
+	ret = konoha_parseopt(konoha, (KonohaFactory*)plat, argc, argv);
 	konoha_close(konoha);
 	return ret ? konoha_detectFailedAssert: 0;
 }
@@ -565,7 +565,7 @@ int main(int argc, char *argv[])
 //	KonohaFactory_InitRuntime(factory, "MiniVm");
 //	KonohaFactory_InitGC(factory, "ConcurrentBitMapGC");
 //	KonohaContext* konoha = KonohaFactory_newKonohaContext(factory);
-//	ret = konoha_parseopt(konoha, (KFactoryApi*)plat, argc, argv);
+//	ret = konoha_parseopt(konoha, (KonohaFactory*)plat, argc, argv);
 //	konoha_close(konoha);
 //	return ret ? konoha_detectFailedAssert: 0;
 //}

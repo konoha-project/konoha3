@@ -82,7 +82,7 @@ static const char* apache_endTag(kinfotag_t t) { (void)t; return ""; }
 
 static PlatformApi *getApachePlatform()
 {
-	KFactoryApi *apache_platformvar = (KFactoryApi *)KonohaUtils_getDefaultPlatformApi();
+	KonohaFactory *apache_platformvar = (KonohaFactory *)KonohaUtils_getDefaultPlatformApi();
 	apache_platformvar->name               = "apache";
 	apache_platformvar->stacksize          = K_PAGESIZE;
 	apache_platformvar->formatPackagePath  = apache_formatPackagePath;

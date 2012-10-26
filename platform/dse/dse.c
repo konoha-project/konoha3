@@ -375,7 +375,7 @@ static void DSE_start(DSE *dse, const char *addr, int ip)
 	int i;
 	pthread_t thread_pool[threadsize];
 	PlatformApi *dse_platform = KonohaUtils_getDefaultPlatformApi();
-	KFactoryApi *dse_platformVar = (KFactoryApi *)dse_platform;
+	KonohaFactory *dse_platformVar = (KonohaFactory *)dse_platform;
 	dse_platformVar->name = "dse";
 	dse_platformVar->syslog_i = lplog;
 	struct targs args = {

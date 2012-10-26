@@ -275,8 +275,8 @@ typedef struct {
 typedef const struct KonohaContextVar   KonohaContext;
 typedef struct KonohaContextVar         KonohaContextVar;
 
-typedef const struct KFactoryApi  PlatformApi;
-typedef struct KFactoryApi        KFactoryApi;
+typedef const struct KonohaFactory  PlatformApi;
+typedef struct KonohaFactory        KonohaFactory;
 typedef const struct KonohaLibVar    KonohaLib;
 typedef struct KonohaLibVar          KonohaLibVar;
 
@@ -287,6 +287,7 @@ typedef struct KonohaLibVar          KonohaLibVar;
 #define KDEFINE_PACKAGE KonohaPackageHandler
 typedef struct KonohaPackageHandlerVar KonohaPackageHandler;
 typedef KonohaPackageHandler* (*PackageLoadFunc)(void);
+typedef kbool_t (*ModuleLoadFunc)(KonohaFactory *, int verbose);
 
 #define ICONV_NULL ((uintptr_t)-1)
 
@@ -385,7 +386,7 @@ typedef struct KTraceInfo {
 
 #define Trace_pline(trace) (trace == NULL ? 0 : trace->pline)
 
-struct KFactoryApi {
+struct KonohaFactory {
 	// settings
 	const char *name;
 	size_t  stacksize;
@@ -400,18 +401,6 @@ struct KFactoryApi {
 
 	// system info
 	const char* (*getenv_i)(const char *);
-
-	// I18N
-	uintptr_t   (*iconv_open_i)(KonohaContext *, const char* tocode, const char* fromcode, KTraceInfo *);
-	size_t      (*iconv_i)(KonohaContext *, uintptr_t iconv, ICONV_INBUF_CONST char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft, int *isTooBigRef, KTraceInfo *trace);
-	size_t      (*iconv_i_memcpyStyle)(KonohaContext *, uintptr_t iconv, char **outbuf, size_t *outbytesleft, ICONV_INBUF_CONST char **inbuf, size_t *inbytesleft, int *isTooBigRef, KTraceInfo *trace);
-	int         (*iconv_close_i)(KonohaContext *, uintptr_t iconv);
-	const char* systemCharset;
-	kbool_t     (*isSystemCharsetUTF8)(KonohaContext *);
-	uintptr_t   (*iconvUTF8ToSystemCharset)(KonohaContext *, KTraceInfo *);
-	uintptr_t   (*iconvSystemCharsetToUTF8)(KonohaContext *, KTraceInfo *);
-	const char* (*formatSystemPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
-	const char* (*formatKonohaPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
 
 	// time
 	unsigned long long (*getTimeMilliSecond)(void);
@@ -454,6 +443,7 @@ struct KFactoryApi {
 //	void (*reportCaughtException)(const char *exceptionName, const char *scriptName, int line, const char *optionalMessage);
 	void  (*debugPrintf)(const char *file, const char *func, int line, const char *fmt, ...) __PRINTFMT(4, 5);
 
+
 	// logging, trace
 	const char *LOGGER_NAME;
 	void  (*syslog_i)(int priority, const char *message, ...) __PRINTFMT(2, 3);
@@ -467,6 +457,19 @@ struct KFactoryApi {
 	void (*reportUserMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *, int isNewLine);
 	void (*reportCompilerMessage)(KonohaContext *, kinfotag_t, const char *);
 	void (*reportException)(KonohaContext *, const char *, int fault, const char *, struct KonohaValueVar *bottomStack, struct KonohaValueVar *topStack);
+
+	// I18N Module
+	const char* Module_I18N;
+	uintptr_t   (*iconv_open_i)(KonohaContext *, const char* tocode, const char* fromcode, KTraceInfo *);
+	size_t      (*iconv_i)(KonohaContext *, uintptr_t iconv, ICONV_INBUF_CONST char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft, int *isTooBigRef, KTraceInfo *trace);
+	size_t      (*iconv_i_memcpyStyle)(KonohaContext *, uintptr_t iconv, char **outbuf, size_t *outbytesleft, ICONV_INBUF_CONST char **inbuf, size_t *inbytesleft, int *isTooBigRef, KTraceInfo *trace);
+	int         (*iconv_close_i)(KonohaContext *, uintptr_t iconv);
+	const char* systemCharset;
+	kbool_t     (*isSystemCharsetUTF8)(KonohaContext *);
+	uintptr_t   (*iconvUTF8ToSystemCharset)(KonohaContext *, KTraceInfo *);
+	uintptr_t   (*iconvSystemCharsetToUTF8)(KonohaContext *, KTraceInfo *);
+	const char* (*formatSystemPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
+	const char* (*formatKonohaPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
 };
 
 #define LOG_END   0
@@ -1420,7 +1423,7 @@ struct KonohaPackageHandlerVar {
 	const char *note;
 	kbool_t (*initPackage)     (KonohaContext *kctx, kNameSpace *, int, const char**, KTraceInfo *);
 	kbool_t (*setupPackage)    (KonohaContext *kctx, kNameSpace *, isFirstTime_t, KTraceInfo *);
-	kbool_t (*loadPlatformApi) (KFactoryApi *platapi);
+	kbool_t (*loadPlatformApi) (KonohaFactory *platapi);
 	const char *konoha_revision;
 };
 

@@ -232,7 +232,7 @@ static const char* I18N_formatSystemPath(KonohaContext *kctx, char *buf, size_t 
 
 #endif/*HAVE_ICONV_H*/
 
-static void loadI18N(KFactoryApi *plat, const char *defaultCharSet)
+static void loadI18N(KonohaFactory *plat, const char *defaultCharSet)
 {
 	plat->systemCharset  = (defaultCharSet == NULL) ? "UTF-8" : defaultCharSet;
 	plat->iconv_open_i   = I18N_iconv_open;
@@ -517,6 +517,51 @@ static KonohaPackageHandler *loadPackageHandler(const char *packageName)
 	return NULL;
 }
 
+static const kbool_t HasFile(char *path)
+{
+	FILE *fp = fopen(path, "r");
+	if(fp != NULL) {
+		fclose(fp);
+		return true;
+	}
+	return false;
+}
+
+static kbool_t FormatModulePath(char *buf, size_t bufsiz, const char *moduleName, const char *ext)
+{
+	char *path = getenv("KONOHA_HOME");
+	const char *local = "/module";
+	if(path == NULL) {
+		path = getenv("HOME");
+		local = "/.minikonoha/module";
+	}
+	snprintf(buf, bufsiz, "%s%s/%s/%s%s", path, local, moduleName, moduleName, ext);
+#ifdef K_PREFIX
+	if(!HasFile(buf)) {
+		snprintf(buf, bufsiz, K_PREFIX "/lib/minikonoha/" K_VERSION "/module" "/%s/%s%s", moduleName, moduleName, ext);
+	}
+#endif
+	return HasFile(buf);
+}
+
+static kbool_t LoadRuntimeModule(KonohaFactory *factory, const char *moduleName, int verboseOption)
+{
+	char pathbuf[256];
+	if(FormatModulePath(pathbuf, sizeof(pathbuf), moduleName, K_OSDLLEXT)) {
+		void *gluehdr = dlopen(pathbuf, RTLD_LAZY);
+		if(gluehdr != NULL) {
+			char funcbuf[256];
+			snprintf(funcbuf, sizeof(funcbuf), "Load%sModule", moduleName);
+			ModuleLoadFunc load = (ModuleLoadFunc)dlsym(gluehdr, funcbuf);
+			if(load != NULL) {
+				return load(factory, verboseOption);
+			}
+		}
+	}
+	return false;
+}
+
+
 static const char* beginTag(kinfotag_t t)
 {
 	DBG_ASSERT(t <= NoneTag);
@@ -560,13 +605,14 @@ static void debugPrintf(const char *file, const char *func, int line, const char
 
 static void NOP_debugPrintf(const char *file, const char *func, int line, const char *fmt, ...)
 {
+
 }
 
 // --------------------------------------------------------------------------
 
 #include "libcode/libc_readline.h"
 
-static void PlatformApi_loadReadline(KFactoryApi *plat)
+static void PlatformApi_loadReadline(KonohaFactory *plat)
 {
 	void *handler = dlopen("libreadline" K_OSDLLEXT, RTLD_LAZY);
 	if(handler != NULL) {
@@ -997,7 +1043,7 @@ static void UI_reportException(KonohaContext *kctx, const char *exceptionName, i
 
 static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 {
-	static KFactoryApi plat = {};
+	static KonohaFactory plat = {};
 	plat.name            = "shell";
 	plat.stacksize       = K_PAGESIZE * 4;
 	plat.getenv_i        =  (const char *(*)(const char *))getenv;

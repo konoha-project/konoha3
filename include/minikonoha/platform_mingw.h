@@ -93,7 +93,7 @@ static kunused int dummy_iconv_close(uintptr_t i)
 	return 0;
 }
 
-static void loadIconv(KFactoryApi *plat)
+static void loadIconv(KonohaFactory *plat)
 {
 #ifdef _ICONV_H
 	plat->iconv_open_i    = (ficonv_open)iconv_open;
@@ -464,7 +464,7 @@ static void NOP_debugPrintf(const char *file, const char *func, int line, const 
 
 #include "libcode/libc_readline.h"
 
-static void PlatformApi_loadReadline(KFactoryApi *plat)
+static void PlatformApi_loadReadline(KonohaFactory *plat)
 {
 	HMODULE handler = LoadLibrary("libreadline" K_OSDLLEXT);
 	if(handler != NULL) {
@@ -502,7 +502,7 @@ static void diagnosis(void) {
 
 static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 {
-	static KFactoryApi plat = {};
+	static KonohaFactory plat = {};
 	plat.name            = "shell";
 	plat.stacksize       = K_PAGESIZE * 4;
 	plat.getenv_i        =  (const char *(*)(const char *))getenv;
