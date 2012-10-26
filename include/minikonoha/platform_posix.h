@@ -273,30 +273,68 @@ static int kpthread_mutex_init_recursive(kmutex_t *mutex)
 #endif
 }
 
-static int kpthread_mutex_destroy(kmutex_t *mutex)
+#ifndef K_USE_PTHREAD
+static int pthread_create(kthread_t *thread, const kthread_attr_t *attr, void *(*f)(void *), void *arg)
 {
 	return 0;
 }
 
-static int kpthread_mutex_init(kmutex_t *mutex, const kmutexattr_t *attr)
+static int pthread_join(kthread_t thread, void **v)
 {
 	return 0;
 }
 
-static int kpthread_mutex_lock(kmutex_t *mutex)
+static int pthread_mutex_destroy(kmutex_t *mutex)
 {
 	return 0;
 }
 
-static int kpthread_mutex_trylock(kmutex_t *mutex)
+static int pthread_mutex_init(kmutex_t *mutex, const kmutexattr_t *attr)
 {
 	return 0;
 }
 
-static int kpthread_mutex_unlock(kmutex_t *mutex)
+static int pthread_mutex_lock(kmutex_t *mutex)
 {
 	return 0;
 }
+
+static int pthread_mutex_trylock(kmutex_t *mutex)
+{
+	return 0;
+}
+
+static int pthread_mutex_unlock(kmutex_t *mutex)
+{
+	return 0;
+}
+
+static int pthread_cond_init(kmutex_cond_t *cond, const kmutex_condattr_t *attr)
+{
+	return 0;
+}
+
+static int pthread_cond_wait(kmutex_cond_t *cond, kmutex_t *mutex)
+{
+	return 0;
+}
+
+static int pthread_cond_signal(kmutex_cond_t *cond)
+{
+	return 0;
+}
+
+static int pthread_cond_broadcast(kmutex_cond_t *cond)
+{
+	return 0;
+}
+
+static int pthread_cond_destroy(kmutex_cond_t *cond)
+{
+	return 0;
+}
+
+#endif
 
 // -------------------------------------------------------------------------
 
@@ -1014,13 +1052,20 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.qsort_i         = qsort;
 	plat.exit_i          = exit;
 
-	// mutex
-	plat.pthread_mutex_init_i = kpthread_mutex_init;
+	// pthread / mutex / cond
+	plat.pthread_create_i        = pthread_create;
+	plat.pthread_join_i          = pthread_join;
+	plat.pthread_mutex_init_i    = pthread_mutex_init;
 	plat.pthread_mutex_init_recursive = kpthread_mutex_init_recursive;
-	plat.pthread_mutex_lock_i    = kpthread_mutex_lock;
-	plat.pthread_mutex_unlock_i  = kpthread_mutex_unlock;
-	plat.pthread_mutex_trylock_i = kpthread_mutex_trylock;
-	plat.pthread_mutex_destroy_i = kpthread_mutex_destroy;
+	plat.pthread_mutex_lock_i    = pthread_mutex_lock;
+	plat.pthread_mutex_unlock_i  = pthread_mutex_unlock;
+	plat.pthread_mutex_trylock_i = pthread_mutex_trylock;
+	plat.pthread_mutex_destroy_i = pthread_mutex_destroy;
+	plat.pthread_cond_init_i     = pthread_cond_init;
+	plat.pthread_cond_wait_i     = pthread_cond_wait;
+	plat.pthread_cond_signal_i   = pthread_cond_signal;
+	plat.pthread_cond_broadcast_i= pthread_cond_broadcast;
+	plat.pthread_cond_destroy_i  = pthread_cond_destroy;
 
 	plat.FilePathMax         = 1024;
 	plat.shortFilePath       = shortFilePath;

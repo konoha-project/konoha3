@@ -453,6 +453,7 @@ static uintptr_t kObject_getUnboxValue(KonohaContext *kctx, kObject *o, ksymbol_
 static void kObject_setUnboxValue(KonohaContext *kctx, kObject *o, ksymbol_t key, ktype_t ty, uintptr_t unboxValue)
 {
 	kObjectVar *v = (kObjectVar *)o;
+	KLIB Kwrite_barrier(kctx, v);
 	protomap_set((Kprotomap_t **)&v->h.kvproto, key, ty, (void *)unboxValue);
 }
 

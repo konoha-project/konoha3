@@ -313,8 +313,12 @@ static inline int setjmp_mingw(_JBTYPE* t)
 #define ALLOCA(T, SIZE) ((T *)alloca((SIZE) * sizeof(T)))
 
 #ifndef K_USE_PTHREAD
+typedef void *kthread_t;
+typedef void kthread_attr_t;
 typedef void kmutex_t;
 typedef void kmutexattr_t;
+typedef void kmutex_cond_t;
+typedef void kmutex_condattr_t;
 #define KInitLock(X)
 #define KInitRrcureiveLock(X)
 #define KLock(X)
@@ -322,8 +326,12 @@ typedef void kmutexattr_t;
 #define KFreeLock(X)
 #else
 #include <pthread.h>
+typedef pthread_t           kthread_t;
+typedef pthread_attr_t      kthread_attr_t;
 typedef pthread_mutex_t     kmutex_t;
 typedef pthread_mutexattr_t kmutexattr_t;
+typedef pthread_condattr_t  kmutex_condattr_t;
+typedef pthread_cond_t      kmutex_cond_t;
 #define KInitLock(X)    do {\
 	X = (kmutex_t *)KCalloc_UNTRACE(sizeof(kmutex_t), 1);\
 	PLATAPI pthread_mutex_init_i(X, NULL);\
@@ -427,12 +435,19 @@ struct PlatformApiVar {
 	void    (*exit_i)(int p);
 
 	// pthread
+	int     (*pthread_create_i)(kthread_t *thread, const kthread_attr_t *attr, void *(*f)(void *), void *arg);
+	int     (*pthread_join_i)(kthread_t thread, void **);
 	int     (*pthread_mutex_init_i)(kmutex_t *mutex, const kmutexattr_t *attr);
 	int     (*pthread_mutex_lock_i)(kmutex_t *mutex);
 	int     (*pthread_mutex_trylock_i)(kmutex_t *mutex);
 	int     (*pthread_mutex_unlock_i)(kmutex_t *mutex);
 	int     (*pthread_mutex_destroy_i)(kmutex_t *mutex);
 	int     (*pthread_mutex_init_recursive)(kmutex_t *mutex);
+	int     (*pthread_cond_init_i)(kmutex_cond_t *cond, const kmutex_condattr_t *attr);
+	int     (*pthread_cond_wait_i)(kmutex_cond_t *cond, kmutex_t *mutex);
+	int     (*pthread_cond_signal_i)(kmutex_cond_t *cond);
+	int     (*pthread_cond_broadcast_i)(kmutex_cond_t *cond);
+	int     (*pthread_cond_destroy_i)(kmutex_cond_t *cond);
 
 	/* high-level functions */
 
