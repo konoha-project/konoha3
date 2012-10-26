@@ -234,12 +234,12 @@ static KMETHOD Statement_Shell(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t shell_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KRequirePackage("dscript.subproc", trace);
-	KDEFINE_SYNTAX SYNTAX[] = {
-		{ SYM_("dsh"), 0, "\"dsh\" $Token*", 0, 0, NULL, NULL, Statement_dsh, Statement_dsh, NULL, },
-		{ SYM_("$Shell"), 0, "$Shell $Token*", 0, 0, PatternMatch_Shell, NULL, Statement_Shell, Statement_Shell},
-		{ KW_END, },
-	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
+	//KDEFINE_SYNTAX SYNTAX[] = {
+	//	{ SYM_("dsh"), 0, "\"dsh\" $Token*", 0, 0, NULL, NULL, Statement_dsh, Statement_dsh, NULL, },
+	//	{ SYM_("$Shell"), 0, "$Shell $Token*", 0, 0, PatternMatch_Shell, NULL, Statement_Shell, Statement_Shell},
+	//	{ KW_END, },
+	//};
+	//SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
 	return true;
 }
 

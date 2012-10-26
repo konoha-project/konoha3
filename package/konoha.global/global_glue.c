@@ -39,8 +39,21 @@ static KMETHOD NameSpace_setTransparentGlobalVariable_(KonohaContext *kctx, Kono
 #define _Public   kMethod_Public
 #define _F(F)   (intptr_t)(F)
 
+typedef const struct _kGlobalObject kGlobalObject;
+struct _kGlobalObject {
+	KonohaObjectHeader h;
+};
+
 static	kbool_t global_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
+	KDEFINE_CLASS defGlobalObject = {0};
+	defGlobalObject.structname = "GlobalObject";
+	defGlobalObject.typeId = TY_newid;
+	defGlobalObject.cflag = kClass_Singleton|kClass_Final;
+	defGlobalObject.cstruct_size = sizeof(kGlobalObject);
+
+	KLIB kNameSpace_defineClass(kctx, ns, NULL, &defGlobalObject, trace);
+
 	KRequirePackage("konoha.field", trace);
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(NameSpace_setTransparentGlobalVariable_), TY_void, TY_NameSpace, MN_("setTransparentGlobalVariable"), 1, TY_boolean, FN_("enabled"),
@@ -89,21 +102,11 @@ static kStmt* TypeDeclAndMakeSetter(KonohaContext *kctx, kStmt *stmt, kGamma *gm
 	return NULL;
 }
 
-typedef const struct _kGlobalObject kGlobalObject;
-struct _kGlobalObject {
-	KonohaObjectHeader h;
-};
-
 static kbool_t kNameSpace_initGlobalObject(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	if(ns->globalObjectNULL_OnList == NULL) {
-		KDEFINE_CLASS defGlobalObject = {0};
-		defGlobalObject.structname = "GlobalObject";
-		defGlobalObject.typeId = TY_newid;
-		defGlobalObject.cflag = kClass_Singleton|kClass_Final;
-		defGlobalObject.cstruct_size = sizeof(kGlobalObject);
-
-		KonohaClass *cGlobalObject = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defGlobalObject, trace);
+		const char *cname = "GlobalObject";
+		KonohaClass *cGlobalObject = KLIB kNameSpace_getClass(kctx, ns, cname, strlen(cname), NULL);
 		((kNameSpaceVar *)ns)->globalObjectNULL_OnList =  KLIB Knull(kctx, cGlobalObject);
 		return KLIB kNameSpace_setConstData(kctx, ns, SYM_("global"), cGlobalObject->typeId, (uintptr_t)ns->globalObjectNULL_OnList, trace);
 	}
