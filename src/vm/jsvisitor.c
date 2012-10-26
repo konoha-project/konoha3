@@ -475,6 +475,11 @@ static void JSVisitor_visitStackTopExpr(KonohaContext *kctx, IRBuilder *self, kE
 	JSVisitor_emitString(kctx, self, "/*FIXME*/STACKTOP", "", "");
 }
 
+static void JSVisitor_visitClosureExpr(KonohaContext *kctx, IRBuilder *self, kExpr *expr)
+{
+	/* TODO */
+}
+
 static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
 {
 	unsigned i;
