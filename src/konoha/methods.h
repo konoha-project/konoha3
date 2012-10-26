@@ -223,7 +223,27 @@ static KMETHOD Func_invoke(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_ASSERT(IS_Func(fo));
 	DBG_ASSERT(IS_Method(fo->mtd));
 	KUnsafeFieldSet(sfp[0].asObject, fo->self);
-	KSELFCALL(sfp, fo->mtd);
+	/* fo->env != NULL means
+	 * this func has referencing environment.
+	 */
+	if (fo->env != NULL) {
+		size_t psize = Method_param(fo->mtd)->psize;
+		/* ENVIRONMENT MAPPING
+		 * fo->env          : callee environment (referenceing environment of a closure)
+		 * sfp[1 ~ psize]   : arguments
+		 * sfp[0]           : function
+		 * sfp[ ~ -1]       : caller environment
+		 * copy arguments of closure to change environment
+		 */
+		memcpy(sfp+fo->espidx-1, sfp+1, sizeof(KonohaStack)*psize);
+		memcpy(sfp, fo->env, sizeof(KonohaStack)*(fo->espidx-1));
+		KonohaRuntime_setesp(kctx, sfp+fo->espidx+psize);
+		KSELFCALL(sfp, fo->mtd);
+		memcpy(fo->env, sfp, sizeof(KonohaStack)*fo->espidx);
+		GC_WRITE_BARRIER(kctx, fo, NULL, NULL); /* Closure needs to be set for write barrier in order to mark environment object */
+	} else {
+		KSELFCALL(sfp, fo->mtd);
+	}
 }
 
 int konoha_detectFailedAssert = false;

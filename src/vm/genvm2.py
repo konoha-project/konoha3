@@ -37,6 +37,7 @@ ERROR      0                  uline:u msg:String esp:ro
 SAFEPOINT  0                  uline:u esp:ro
 CHKSTACK   0                  uline:u
 TRACE      0                  uline:u thisidx:ro trace:f
+SETENV     0                  a:ro esp:ro
 
 #SCALL      0                 uline:u thisidx:ro espshift:ro mtd:Method  tyo:co
 #VCALL      0                  uline:u thisidx:ro espshift:ro mtd:Method  tyo:co

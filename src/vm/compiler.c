@@ -80,6 +80,7 @@ struct IRBuilderAPI {
 	VisitExpr_t visitOrExpr;
 	VisitExpr_t visitLetExpr;
 	VisitExpr_t visitStackTopExpr;
+	VisitExpr_t visitClosureExpr;
 	void (*fn_init)(KonohaContext *kctx, struct IRBuilder *builder, kMethod *method);
 	void (*fn_free)(KonohaContext *kctx, struct IRBuilder *builder, kMethod *method);
 };
@@ -105,7 +106,8 @@ struct IRBuilderAPI {
 	OP(AndExpr)\
 	OP(OrExpr)\
 	OP(LetExpr)\
-	OP(StackTopExpr)
+	OP(StackTopExpr)\
+	OP(ClosureExpr)
 
 struct IRBuilder {
 	struct IRBuilderAPI api;
@@ -157,19 +159,20 @@ static void handleExpr(KonohaContext *kctx, IRBuilder *builder, kExpr *expr)
 	int espidx = builder->espidx;
 	int shift = builder->shift;
 	switch(expr->build) {
-	case TEXPR_CONST:    builder->api.visitConstExpr(kctx, builder, expr);  break;
-	case TEXPR_NEW:      builder->api.visitNewExpr(kctx, builder, expr);    break;
-	case TEXPR_NULL:     builder->api.visitNullExpr(kctx, builder, expr);   break;
-	case TEXPR_NCONST:   builder->api.visitNConstExpr(kctx, builder, expr); break;
-	case TEXPR_LOCAL:    builder->api.visitLocalExpr(kctx, builder, expr);  break;
-	case TEXPR_BLOCK:    builder->api.visitBlockExpr(kctx, builder, expr);  break;
-	case TEXPR_FIELD:    builder->api.visitFieldExpr(kctx, builder, expr);  break;
-	case TEXPR_CALL:     builder->api.visitCallExpr(kctx, builder, expr);   break;
-	case TEXPR_AND:      builder->api.visitAndExpr(kctx, builder, expr);    break;
-	case TEXPR_OR:       builder->api.visitOrExpr(kctx, builder, expr);     break;
-	case TEXPR_LET:      builder->api.visitLetExpr(kctx, builder, expr);    break;
-	case TEXPR_STACKTOP: builder->api.visitStackTopExpr(kctx, builder, expr);break;
-	default: DBG_ABORT("unknown expr=%d", expr->build);
+		case TEXPR_CONST:    builder->api.visitConstExpr(kctx, builder, expr);    break;
+		case TEXPR_NEW:      builder->api.visitNewExpr(kctx, builder, expr);      break;
+		case TEXPR_NULL:     builder->api.visitNullExpr(kctx, builder, expr);     break;
+		case TEXPR_NCONST:   builder->api.visitNConstExpr(kctx, builder, expr);   break;
+		case TEXPR_LOCAL:    builder->api.visitLocalExpr(kctx, builder, expr);    break;
+		case TEXPR_BLOCK:    builder->api.visitBlockExpr(kctx, builder, expr);    break;
+		case TEXPR_FIELD:    builder->api.visitFieldExpr(kctx, builder, expr);    break;
+		case TEXPR_CALL:     builder->api.visitCallExpr(kctx, builder, expr);     break;
+		case TEXPR_AND:      builder->api.visitAndExpr(kctx, builder, expr);      break;
+		case TEXPR_OR:       builder->api.visitOrExpr(kctx, builder, expr);       break;
+		case TEXPR_LET:      builder->api.visitLetExpr(kctx, builder, expr);      break;
+		case TEXPR_STACKTOP: builder->api.visitStackTopExpr(kctx, builder, expr); break;
+		case TEXPR_CLOSURE:  builder->api.visitClosureExpr(kctx, builder, expr);  break;
+		default: DBG_ABORT("unknown expr=%d", expr->build);
 	}
 	builder->a = a;
 	builder->espidx = espidx;
@@ -685,6 +688,70 @@ static void KonohaVisitor_visitStackTopExpr(KonohaContext *kctx, IRBuilder *self
 	int espidx = self->espidx;
 	DBG_ASSERT(expr->index + shift < espidx);
 	NMOV_asm(kctx, a, expr->ty, expr->index + shift);
+}
+
+static IRBuilder *createKonohaVisitor(IRBuilder *builder);
+static void ClosureExpr_genCode(KonohaContext *kctx, IRBuilder *self, kMethod *mtd, kBlock *bk)
+{
+	INIT_GCSTACK();
+	PUSH_GCSTACK2(ctxcode->lbINIT);
+	PUSH_GCSTACK2(ctxcode->lbEND);
+	PUSH_GCSTACK2(ctxcode->currentWorkingBlock);
+	PUSH_GCSTACK2(ctxcode->codeList);
+	kBasicBlock *lbINIT = ctxcode->lbINIT;
+	kBasicBlock *lbEND = ctxcode->lbEND;
+	kBasicBlock *currentWorkingBlock = ctxcode->currentWorkingBlock;
+	kArray *codeList = ctxcode->codeList;
+	ctxcode->codeList = new_(Array, K_PAGESIZE/sizeof(void*), _GcStack);
+
+	//kMethod_genCode(kctx, mtd, bk);
+	IRBuilder *builder, builderbuf;
+	builder = createKonohaVisitor(&builderbuf);
+	builder->api.fn_init(kctx, builder, mtd);
+	builder->espidx = self->espidx;
+	builder->a = self->a;
+	builder->currentStmt = self->currentStmt;
+	builder->shift = self->shift;
+	visitBlock(kctx, builder, bk);
+	builder->api.fn_free(kctx, builder, mtd);
+
+	ctxcode->lbINIT = lbINIT;
+	ctxcode->lbEND = lbEND;
+	ctxcode->currentWorkingBlock = currentWorkingBlock;
+	ctxcode->codeList = codeList;
+	RESET_GCSTACK();
+}
+
+static void KonohaVisitor_visitClosureExpr(KonohaContext *kctx, IRBuilder *self, kExpr *expr)
+{
+	/*
+	 * [ClosureExpr] := function Param Block
+	 * expr->cons = [Func, Block]
+	 **/
+
+	int shift = self->shift;
+	int a = self->a;
+	int espidx = self->espidx;
+	DBG_ASSERT(expr->index + shift < espidx);
+	kExpr *funcExpr = kExpr_at(expr, 0);
+	kExpr *blockExpr = kExpr_at(expr, 1);
+	kFuncVar *fo = (kFuncVar*)funcExpr->objectConstValue;
+	if(a + 1 == espidx) {
+		/* In this block, closure is defined like below.
+		 * Func[] f = function () => int {...};
+		 * Otherwise (means a+1!=espidx) closure is not defined as local variable.
+		 * Function f is never used and should be ignored inside closure.
+		 * Set espidx to espidx-1 to generate code properly.
+		 */
+		((kFuncVar*)fo)->espidx = espidx-1;
+	} else {
+		((kFuncVar*)fo)->espidx = espidx;
+	}
+	kBlock *bk = (kBlock*)blockExpr->objectConstValue;
+	ClosureExpr_genCode(kctx, self, fo->mtd, bk);
+	fo = BUILD_addConstPool(kctx, fo);
+	ASM(NSET, OC_(a), (uintptr_t)fo, CT_(expr->ty));
+	ASM(SETENV, OC_(a), espidx);
 }
 
 static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sfp);

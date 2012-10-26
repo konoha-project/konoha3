@@ -183,8 +183,14 @@ typedef struct OPTRACE {
 	TraceFunc trace;
 } OPTRACE;
 
+#define OPCODE_SETENV ((kopcode_t)23)
+typedef struct OPSETENV {
+	KCODE_HEAD;
+	kreg_t a;
+	kreg_t esp;
+} OPSETENV;
 	
-#define KOPCODE_MAX ((kopcode_t)23)
+#define KOPCODE_MAX ((kopcode_t)24)
 
 #define VMT_VOID       0
 #define VMT_ADDR       1
@@ -244,6 +250,7 @@ static const kOPDATA_t OPDATA[] = {
 	{"SAFEPOINT", 0, 2, { VMT_U, VMT_RO, VMT_VOID}}, 
 	{"CHKSTACK", 0, 1, { VMT_U, VMT_VOID}}, 
 	{"TRACE", 0, 3, { VMT_U, VMT_RO, VMT_F, VMT_VOID}}, 
+	{"SETENV", 0, 2, { VMT_RO, VMT_RO, VMT_VOID}}, 
 };
 
 static void opcode_check(void)
@@ -271,6 +278,7 @@ static void opcode_check(void)
 	assert(sizeof(OPSAFEPOINT) <= sizeof(VirtualMachineInstruction));
 	assert(sizeof(OPCHKSTACK) <= sizeof(VirtualMachineInstruction));
 	assert(sizeof(OPTRACE) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPSETENV) <= sizeof(VirtualMachineInstruction));
 }
 
 static const char *T_opcode(kopcode_t opcode)
@@ -346,7 +354,7 @@ static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *kctx, 
 		&&L_NEW, &&L_NULL, &&L_LOOKUP, &&L_CALL, 
 		&&L_RET, &&L_NCALL, &&L_BNOT, &&L_JMP, 
 		&&L_JMPF, &&L_TRYJMP, &&L_YIELD, &&L_ERROR, 
-		&&L_SAFEPOINT, &&L_CHKSTACK, &&L_TRACE, 
+		&&L_SAFEPOINT, &&L_CHKSTACK, &&L_TRACE, &&L_SETENV
 	};
 #endif
 	krbp_t *rbp = (krbp_t *)sfp0;
@@ -467,6 +475,11 @@ static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *kctx, 
 		OPEXEC_TRACE(op->uline, op->thisidx, op->trace); EMITCOVERAGE_ELEMENT; pc++;
 		GOTO_NEXT();
 	}
+	CASE(SETENV) {
+		OPSETENV *op = (OPSETENV*)pc;
+		OPEXEC_SETENV(op->a, op->esp); EMITCOVERAGE_ELEMENT; pc++;
+		GOTO_NEXT();
+	} 
 	DISPATCH_END(pc);
 	L_RETURN:;
 	return pc;

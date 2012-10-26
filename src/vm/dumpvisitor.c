@@ -234,6 +234,11 @@ static void DumpVisitor_visitStackTopExpr(KonohaContext *kctx, IRBuilder *self, 
 	emit_string("STACKTOP", "", "", DUMPER(self)->indent);
 }
 
+static void DumpVisitor_visitClosureExpr(KonohaContext *kctx, IRBuilder *self, kExpr *expr)
+{
+	emit_string("CLOSURE", "", "", DUMPER(self)->indent);
+}
+
 static void DumpVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
 {
 	unsigned i;
