@@ -20,3 +20,11 @@ void test() {
 }
 
 test();
+
+void test1() {
+    String[] a = ("あい".split(""));
+    assert(a[0] == "あ");
+    assert(a[1] == "い");
+}
+
+test1();

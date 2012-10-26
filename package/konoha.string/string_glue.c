@@ -935,11 +935,14 @@ static KMETHOD String_splitWithSeparator(KonohaContext *kctx, KonohaStack *sfp)
 	const char *end = start + S_size(s0);
 	if(S_size(separator) == 0) {
 		size_t i;
-		for(i = 0; i < S_size(s0); i++) {
-			if(kString_is(ASCII, s0)) {
+		if(kString_is(ASCII, s0)) {
+			for(i = 0; i < S_size(s0); i++) {
 				KLIB new_kString(kctx, resultArray, S_text(s0) + i, 1, StringPolicy_ASCII);
 			}
-			else {
+		}
+		else {
+			size_t len = kString_getMultibyteSize(kctx, s0);
+			for(i = 0; i < len; i++) {
 				new_SubString(kctx, resultArray, s0, i, 1, sfp);
 			}
 		}
