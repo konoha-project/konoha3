@@ -275,8 +275,8 @@ typedef struct {
 typedef const struct KonohaContextVar   KonohaContext;
 typedef struct KonohaContextVar         KonohaContextVar;
 
-typedef const struct PlatformApiVar  PlatformApi;
-typedef struct PlatformApiVar        PlatformApiVar;
+typedef const struct KFactoryApi  PlatformApi;
+typedef struct KFactoryApi        KFactoryApi;
 typedef const struct KonohaLibVar    KonohaLib;
 typedef struct KonohaLibVar          KonohaLibVar;
 
@@ -385,7 +385,7 @@ typedef struct KTraceInfo {
 
 #define Trace_pline(trace) (trace == NULL ? 0 : trace->pline)
 
-struct PlatformApiVar {
+struct KFactoryApi {
 	// settings
 	const char *name;
 	size_t  stacksize;
@@ -1418,8 +1418,9 @@ struct KonohaPackageHandlerVar {
 	const char *libname;
 	const char *libversion;
 	const char *note;
-	kbool_t (*initPackage)   (KonohaContext *kctx, kNameSpace *, int, const char**, KTraceInfo *);
-	kbool_t (*setupPackage)  (KonohaContext *kctx, kNameSpace *, isFirstTime_t, KTraceInfo *);
+	kbool_t (*initPackage)     (KonohaContext *kctx, kNameSpace *, int, const char**, KTraceInfo *);
+	kbool_t (*setupPackage)    (KonohaContext *kctx, kNameSpace *, isFirstTime_t, KTraceInfo *);
+	kbool_t (*loadPlatformApi) (KFactoryApi *platapi);
 	const char *konoha_revision;
 };
 
@@ -1448,6 +1449,7 @@ struct KonohaLibVar {
 	void  (*Kfree)(KonohaContext*, void *, size_t);
 
 	/* Garbage Collection API */
+	/* This Must be Going to PlatformApi */
 	GcContext *(*KnewGcContext)(KonohaContext *kctx);
 	void (*KdeleteGcContext)(GcContext *gc);
 	void (*KscheduleGC)     (GcContext *gc);

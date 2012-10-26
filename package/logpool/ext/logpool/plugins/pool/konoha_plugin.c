@@ -65,7 +65,7 @@ static void dbg_p(const char *file, const char *func, int L, const char *fmt, ..
     va_end(ap);
 }
 
-static const PlatformApiVar logpool_platform = {
+static const KFactoryApi logpool_platform = {
     .name      = "shell",
     .stacksize = K_PAGESIZE * 4,
     .malloc_i  = malloc,

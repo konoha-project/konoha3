@@ -232,7 +232,7 @@ static const char* I18N_formatSystemPath(KonohaContext *kctx, char *buf, size_t 
 
 #endif/*HAVE_ICONV_H*/
 
-static void loadI18N(PlatformApiVar *plat, const char *defaultCharSet)
+static void loadI18N(KFactoryApi *plat, const char *defaultCharSet)
 {
 	plat->systemCharset  = (defaultCharSet == NULL) ? "UTF-8" : defaultCharSet;
 	plat->iconv_open_i   = I18N_iconv_open;
@@ -566,7 +566,7 @@ static void NOP_debugPrintf(const char *file, const char *func, int line, const 
 
 #include "libcode/libc_readline.h"
 
-static void PlatformApi_loadReadline(PlatformApiVar *plat)
+static void PlatformApi_loadReadline(KFactoryApi *plat)
 {
 	void *handler = dlopen("libreadline" K_OSDLLEXT, RTLD_LAZY);
 	if(handler != NULL) {
@@ -997,7 +997,7 @@ static void UI_reportException(KonohaContext *kctx, const char *exceptionName, i
 
 static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 {
-	static PlatformApiVar plat = {};
+	static KFactoryApi plat = {};
 	plat.name            = "shell";
 	plat.stacksize       = K_PAGESIZE * 4;
 	plat.getenv_i        =  (const char *(*)(const char *))getenv;

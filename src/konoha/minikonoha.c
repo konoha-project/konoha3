@@ -263,6 +263,7 @@ kbool_t konoha_eval(KonohaContext* konoha, const char *script, kfileline_t uline
 	return res;
 }
 
+
 #ifdef __cplusplus
 }
 #endif
