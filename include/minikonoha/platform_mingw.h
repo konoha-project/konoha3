@@ -347,7 +347,7 @@ static const char* packname(const char *str)
 	return (p == NULL) ? str : (const char *)p+1;
 }
 
-static const char* formatPackagePath(char *buf, size_t bufsiz, const char *packageName, const char *ext)
+static const char* FormatPackagePath(char *buf, size_t bufsiz, const char *packageName, const char *ext)
 {
 	FILE *fp = NULL;
 	char *path = getenv("KONOHA_PACKAGEPATH");
@@ -377,10 +377,10 @@ static const char* formatPackagePath(char *buf, size_t bufsiz, const char *packa
 	return NULL;
 }
 
-static KonohaPackageHandler *loadPackageHandler(const char *packageName)
+static KonohaPackageHandler *LoadPackageHandler(const char *packageName)
 {
 	char pathbuf[256];
-	formatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_glue" K_OSDLLEXT);
+	FormatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_glue" K_OSDLLEXT);
 	HMODULE gluehdr = LoadLibrary(pathbuf);
 	//fprintf(stderr, "pathbuf=%s, gluehdr=%p", pathbuf, gluehdr);
 	if(gluehdr != NULL) {
@@ -528,11 +528,11 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.pthread_mutex_destroy_i = kpthread_mutex_destroy;
 
 	plat.shortFilePath       = shortFilePath;
-	plat.formatPackagePath   = formatPackagePath;
+	plat.FormatPackagePath   = FormatPackagePath;
 	plat.formatTransparentPath = formatTransparentPath;
 	plat.formatKonohaPath = formatKonohaPath;
 	plat.formatSystemPath = formatSystemPath;
-	plat.loadPackageHandler  = loadPackageHandler;
+	plat.LoadPackageHandler  = LoadPackageHandler;
 	plat.loadScript          = loadScript;
 	plat.beginTag            = beginTag;
 	plat.endTag              = endTag;

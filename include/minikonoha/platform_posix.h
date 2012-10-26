@@ -70,6 +70,99 @@ extern "C" {
 
 #include <minikonoha/klib.h>
 
+#ifndef K_PREFIX
+#define K_PREFIX  "/usr/local"
+#endif
+
+// -------------------------------------------------------------------------
+/* LoadRuntimeModule */
+
+static kbool_t HasFile(char *path)
+{
+	FILE *fp = fopen(path, "r");
+	if(fp != NULL) {
+		fclose(fp);
+		return true;
+	}
+	return false;
+}
+
+static kbool_t FormatModulePath(KonohaFactory *factory, char *buf, size_t bufsiz, const char *moduleName, const char *ext)
+{
+	const char *path = factory->getenv_i("KONOHA_HOME");
+	const char *local = "/module";
+	if(path == NULL) {
+		path = factory->getenv_i("HOME");
+		local = "/.minikonoha/module";
+	}
+	snprintf(buf, bufsiz, "%s%s/%s/%s%s", path, local, moduleName, moduleName, ext);
+#ifdef K_PREFIX
+	if(!HasFile(buf)) {
+		snprintf(buf, bufsiz, K_PREFIX "/lib/minikonoha/" K_VERSION "/module" "/%s/%s%s", moduleName, moduleName, ext);
+	}
+#endif
+	return HasFile(buf);
+}
+
+static kbool_t LoadRuntimeModule(KonohaFactory *factory, const char *moduleName, ModuleType type)
+{
+	char pathbuf[K_PATHMAX];
+	if(FormatModulePath(factory, pathbuf, sizeof(pathbuf), moduleName, K_OSDLLEXT)) {
+		void *gluehdr = dlopen(pathbuf, RTLD_LAZY);  // don't close until the program ends
+		if(gluehdr != NULL) {
+			char funcbuf[256];
+			snprintf(funcbuf, sizeof(funcbuf), "Load%sModule", moduleName);
+			ModuleLoadFunc load = (ModuleLoadFunc)dlsym(gluehdr, funcbuf);
+			if(load != NULL) {
+				return load(factory, type);
+			}
+		}
+	}
+	return false;
+}
+
+// -------------------------------------------------------------------------
+/* Package */
+
+static const char* ShortPackageName(const char *str)
+{
+	char *p = (char *) strrchr(str, '.');
+	return (p == NULL) ? str : (const char *)p+1;
+}
+
+static const char* FormatPackagePath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *packageName, const char *ext)
+{
+	const char *path = PLATAPI getenv_i("KONOHA_HOME");
+	const char *local = "/package";
+	if(path == NULL) {
+		path = PLATAPI getenv_i("HOME");
+		local = "/.minikonoha/package";
+	}
+	snprintf(buf, bufsiz, "%s%s/%s/%s%s", path, local, packageName, ShortPackageName(packageName), ext);
+#ifdef K_PREFIX
+	if(!HasFile(buf)) {
+		snprintf(buf, bufsiz, K_PREFIX "/lib/minikonoha/" K_VERSION "/package" "/%s/%s%s", packageName, ShortPackageName(packageName), ext);
+	}
+#endif
+	return HasFile(buf) ? (const char *)buf : NULL;
+}
+
+static KonohaPackageHandler *LoadPackageHandler(KonohaContext *kctx, const char *packageName)
+{
+	char pathbuf[256];
+	FormatPackagePath(kctx, pathbuf, sizeof(pathbuf), packageName, "_glue" K_OSDLLEXT);
+	void *gluehdr = dlopen(pathbuf, RTLD_LAZY);
+	if(gluehdr != NULL) {
+		char funcbuf[80];
+		snprintf(funcbuf, sizeof(funcbuf), "%s_init", ShortPackageName(packageName));
+		PackageLoadFunc f = (PackageLoadFunc)dlsym(gluehdr, funcbuf);
+		if(f != NULL) {
+			return f();
+		}
+	}
+	return NULL;
+}
+
 // -------------------------------------------------------------------------
 /* I18N */
 
@@ -460,106 +553,7 @@ static const char *formatTransparentPath(char *buf, size_t bufsiz, const char *p
 	return path;
 }
 
-#ifndef K_PREFIX
-#define K_PREFIX  "/usr/local"
-#endif
 
-static const char* packname(const char *str)
-{
-	char *p = (char *) strrchr(str, '.');
-	return (p == NULL) ? str : (const char *)p+1;
-}
-
-static const char* formatPackagePath(char *buf, size_t bufsiz, const char *packageName, const char *ext)
-{
-	FILE *fp = NULL;
-	char *path = getenv("KONOHA_PACKAGEPATH");
-	const char *local = "";
-	if(path == NULL) {
-		path = getenv("KONOHA_HOME");
-		local = "/package";
-	}
-	if(path == NULL) {
-		path = getenv("HOME");
-		local = "/.minikonoha/package";
-	}
-	snprintf(buf, bufsiz, "%s%s/%s/%s%s", path, local, packageName, packname(packageName), ext);
-#ifdef K_PREFIX
-	fp = fopen(buf, "r");
-	if(fp != NULL) {
-		fclose(fp);
-		return (const char *)buf;
-	}
-	snprintf(buf, bufsiz, K_PREFIX "/lib/minikonoha/" K_VERSION "/package" "/%s/%s%s", packageName, packname(packageName), ext);
-#endif
-	fp = fopen(buf, "r");
-	if(fp != NULL) {
-		fclose(fp);
-		return (const char *)buf;
-	}
-	return NULL;
-}
-
-static KonohaPackageHandler *loadPackageHandler(const char *packageName)
-{
-	char pathbuf[256];
-	formatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_glue" K_OSDLLEXT);
-	void *gluehdr = dlopen(pathbuf, RTLD_LAZY);
-	//fprintf(stderr, "pathbuf=%s, gluehdr=%p", pathbuf, gluehdr);
-	if(gluehdr != NULL) {
-		char funcbuf[80];
-		snprintf(funcbuf, sizeof(funcbuf), "%s_init", packname(packageName));
-		PackageLoadFunc f = (PackageLoadFunc)dlsym(gluehdr, funcbuf);
-		if(f != NULL) {
-			return f();
-		}
-	}
-	return NULL;
-}
-
-static const kbool_t HasFile(char *path)
-{
-	FILE *fp = fopen(path, "r");
-	if(fp != NULL) {
-		fclose(fp);
-		return true;
-	}
-	return false;
-}
-
-static kbool_t FormatModulePath(char *buf, size_t bufsiz, const char *moduleName, const char *ext)
-{
-	char *path = getenv("KONOHA_HOME");
-	const char *local = "/module";
-	if(path == NULL) {
-		path = getenv("HOME");
-		local = "/.minikonoha/module";
-	}
-	snprintf(buf, bufsiz, "%s%s/%s/%s%s", path, local, moduleName, moduleName, ext);
-#ifdef K_PREFIX
-	if(!HasFile(buf)) {
-		snprintf(buf, bufsiz, K_PREFIX "/lib/minikonoha/" K_VERSION "/module" "/%s/%s%s", moduleName, moduleName, ext);
-	}
-#endif
-	return HasFile(buf);
-}
-
-static kbool_t LoadRuntimeModule(KonohaFactory *factory, const char *moduleName, int verboseOption)
-{
-	char pathbuf[256];
-	if(FormatModulePath(pathbuf, sizeof(pathbuf), moduleName, K_OSDLLEXT)) {
-		void *gluehdr = dlopen(pathbuf, RTLD_LAZY);
-		if(gluehdr != NULL) {
-			char funcbuf[256];
-			snprintf(funcbuf, sizeof(funcbuf), "Load%sModule", moduleName);
-			ModuleLoadFunc load = (ModuleLoadFunc)dlsym(gluehdr, funcbuf);
-			if(load != NULL) {
-				return load(factory, verboseOption);
-			}
-		}
-	}
-	return false;
-}
 
 
 static const char* beginTag(kinfotag_t t)
@@ -1069,11 +1063,11 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.pthread_mutex_destroy_i = kpthread_mutex_destroy;
 
 	plat.LoadRuntimeModule   = LoadRuntimeModule;
-	plat.FilePathMax         = 1024;
+	plat.FormatPackagePath   = FormatPackagePath;
+	plat.LoadPackageHandler  = LoadPackageHandler;
+
 	plat.shortFilePath       = shortFilePath;
-	plat.formatPackagePath   = formatPackagePath;
 	plat.formatTransparentPath = formatTransparentPath;
-	plat.loadPackageHandler  = loadPackageHandler;
 	plat.loadScript          = loadScript;
 	plat.beginTag            = beginTag;
 	plat.endTag              = endTag;

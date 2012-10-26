@@ -432,11 +432,11 @@ struct KonohaFactory {
 	kbool_t  (*LoadRuntimeModule)(struct KonohaFactory*, const char *moduleName, ModuleType);
 
 	// file load
-	size_t FilePathMax;
+	const char* (*FormatPackagePath)(KonohaContext *, char *buf, size_t bufsiz, const char *packageName, const char *ext);
+	KonohaPackageHandler* (*LoadPackageHandler)(KonohaContext *, const char *packageName);
+
 	const char* (*shortFilePath)(const char *path);
-	const char* (*formatPackagePath)(char *buf, size_t bufsiz, const char *packageName, const char *ext);
 	const char* (*formatTransparentPath)(char *buf, size_t bufsiz, const char *parent, const char *path);
-	KonohaPackageHandler* (*loadPackageHandler)(const char *packageName);
 	int (*loadScript)(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *));
 
 	// message (cui)
@@ -446,7 +446,6 @@ struct KonohaFactory {
 	const char* (*shortText)(const char *msg);
 	const char* (*beginTag)(kinfotag_t);
 	const char* (*endTag)(kinfotag_t);
-//	void (*reportCaughtException)(const char *exceptionName, const char *scriptName, int line, const char *optionalMessage);
 	void  (*debugPrintf)(const char *file, const char *func, int line, const char *fmt, ...) __PRINTFMT(4, 5);
 
 
