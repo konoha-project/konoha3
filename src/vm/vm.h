@@ -321,6 +321,15 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 	F(kctx, SFP(rshift(rbp, THIS)), trace);\
 } while(0)
 
+#define OPEXEC_SETENV(A, ESPIDX) do {\
+	kFunc *fo = rbp[A].asFunc;\
+	kFuncVar *newfo = KLIB new_kObject(kctx, OnStack, fo->h.ct, (uintptr_t)fo->mtd);\
+	newfo->espidx = fo->espidx;\
+	rbp[A].asFunc = newfo;\
+	KUnsafeFieldInit(newfo->self, fo->self);\
+	newfo->env = KLIB KonohaRuntime_replicateStack(kctx, sfp0, ESPIDX);\
+} while (0)
+
 #define OPEXEC_CHKSTACK(UL) do {\
 	if(unlikely(kctx->esp > kctx->stack->stack_uplimit)) {\
 		KLIB KonohaRuntime_raise(kctx, EXPT_("StackOverflow"), SoftwareFault, NULL, SFP(rbp));\

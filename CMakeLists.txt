@@ -58,6 +58,7 @@ set(PACKAGES
 	konoha.assign
 	konoha.bytes
 	konoha.class
+	konoha.closure
 	konoha.complex
 	konoha.const
 	konoha.date

@@ -86,6 +86,7 @@ extern "C" {
 #define KW_if        (2+KW_void)
 #define KW_else      (3+KW_void)
 #define KW_return    (4+KW_void)
+#define KW_function  (5+KW_void)
 
 typedef enum {
 	TokenType_INDENT = 1,
@@ -386,6 +387,7 @@ typedef enum {
 	TEXPR_OR,
 	TEXPR_LET,
 	TEXPR_STACKTOP,
+	TEXPR_CLOSURE,
 
 	TSTMT_EXPR,  // this must be the first stmt
 	TSTMT_BLOCK,
@@ -570,6 +572,7 @@ typedef struct {
 
 	kExpr*       (*new_UntypedTermExpr)(KonohaContext *, kToken *tk);
 	kExpr*       (*new_UntypedCallStyleExpr)(KonohaContext *, SugarSyntax *syn, int n, ...);
+	kExpr*       (*new_TypedConsExpr)(KonohaContext *, SugarSyntax *syn, int n, ...);
 	kExpr*       (*kStmt_parseOperatorExpr)(KonohaContext *, kStmt *, SugarSyntax *, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx);
 	kExpr*       (*kStmt_parseExpr)(KonohaContext *, kStmt *, kArray *tokenList, int s, int e, const char *hintBeforeText);
 	kExpr*       (*kStmt_addExprParam)(KonohaContext *, kStmt *, kExpr *, kArray *tokenList, int, int, const char *hintBeforeText);
