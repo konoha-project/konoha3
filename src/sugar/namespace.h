@@ -805,7 +805,7 @@ static kbool_t kNameSpace_AddMethod(KonohaContext *kctx, kNameSpace *ns, kMethod
 		}
 		else {
 			if(!kMethod_is(Final, foundMethod)) {
-				TRACE_PrintMessage(kctx, trace, DebugTag, 0, "@%s overriding method %s.%s%s on %s.%s%s", PackageId_t(ns->packageId), Method_t(mtd), Method_t(foundMethod));
+				TRACE_PrintMessage(kctx, trace, DebugTag, "@%s overriding method %s.%s%s on %s.%s%s", PackageId_t(ns->packageId), Method_t(mtd), Method_t(foundMethod));
 				kMethod_set(Virtual, ((kMethodVar*)foundMethod), true);
 			}
 			else {
