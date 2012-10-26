@@ -15,3 +15,5 @@ void test() {
 	System.gc();
 	assert(g("bye") == "hi, bye");
 }
+
+test();

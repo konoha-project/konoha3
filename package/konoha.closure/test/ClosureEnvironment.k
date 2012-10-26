@@ -13,3 +13,5 @@ void test() {
 	assert(g(1) == 1);
 	assert(g(2) == 3);
 }
+
+test();
