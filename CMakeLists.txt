@@ -102,7 +102,7 @@ set(PACKAGES
 	curl
 	llvm
 ##	ijit
-##	jansson
+	jansson
 	mecab
 	python
 #	apache   ## removed Module bugs
