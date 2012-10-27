@@ -23,13 +23,9 @@
  ***************************************************************************/
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
+#include <sys/stat.h>
 #include <fcntl.h>
-#include <errno.h>
-#include <poll.h>
 #include <signal.h>
 #include <sys/time.h>
 
@@ -150,6 +146,7 @@ struct kSubProcVar {
 	kFile   *OutNULL;
 	kFile   *ErrNULL;
 	int childProcessId;
+	int status;
 };
 
 static void kSubProc_init(KonohaContext *kctx, kObject *o, void *conf)
@@ -260,6 +257,19 @@ static void kSubProc_execOnChild(KonohaContext *kctx, kSubProc *sbp, KTraceInfo 
 	}
 }
 
+static kbool_t ignoreSigchld(KonohaContext *kctx, KTraceInfo *trace)
+{
+	/* Ignore SIGCHLD signale to prevent zombie process. */
+	struct sigaction sa;
+	sa.sa_handler = SIG_IGN;
+	sa.sa_flags = SA_NOCLDWAIT;
+	if(sigaction(SIGCHLD, &sa, NULL) == -1) {
+		KTraceApi(trace, SystemFault, "sigaction", LogErrno);
+		return false;
+	}
+	return true;
+}
+
 static int kSubProc_exec(KonohaContext *kctx, kSubProc *sbp, KTraceInfo *trace)
 {
 	int c2p[2] = {-1, -1}, p2c[2] = {-1, -1}, errPipe[2] = {-1, -1};
@@ -320,6 +330,11 @@ static int kSubProc_exec(KonohaContext *kctx, kSubProc *sbp, KTraceInfo *trace)
 		}
 		if(!KonohaContext_Is(Interactive, kctx)) {
 			setsid(); // separate from tty
+			// prevent child process from getting tty again
+			if(fork()) {
+				exit(0);
+			}
+			ignoreSigchld(kctx, trace);
 		}
 //		if(!IS_NULL(sp->cwd)) { // TODO!!
 //			if(chdir(S_text((sp->cwd))) != 0) {
@@ -351,8 +366,10 @@ static int kSubProc_exec(KonohaContext *kctx, kSubProc *sbp, KTraceInfo *trace)
 
 static void kSubProc_wait(KonohaContext *kctx, kSubProc *sbp, int pid, KTraceInfo *trace)
 {
-	int stat;
-	pid_t childid = waitpid(pid, &stat, WUNTRACED);  // is it OK?
+	pid_t childid;
+	KTraceResponseCheckPoint(trace, 0, "waitpid",
+		childid = waitpid(pid, &sbp->status, WUNTRACED) // is it OK?
+	);
 	if(childid == -1) {
 		KTraceErrorPoint(trace, SystemFault, "waitpid", LogErrno);
 	}
@@ -384,6 +401,25 @@ static kString *kFILE_readAll(KonohaContext *kctx, kArray *gcstack, kFile *file,
 	}
 	KLIB Kwb_free(&wb);
 	return ret;
+}
+
+static kbool_t checkExecutablePath(KonohaContext *kctx, const char *path, const char *cmd)
+{
+	char buf[PATH_MAX];
+	struct stat sb;
+	const char *fullpath;
+	if(path != NULL) {
+		snprintf(buf, PATH_MAX, "%s/%s", path, cmd);
+		fullpath = buf;
+	}
+	else {
+		fullpath = cmd;
+	}
+	DBG_P("path='%s'", fullpath);
+	if(lstat(fullpath, &sb) == -1) {
+		return false;
+	}
+	return (sb.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH));
 }
 
 //static int kSubProc_waitWithTimer(KonohaContext *kctx, kSubProc *sbp, KTraceInfo *trace)
@@ -565,6 +601,7 @@ static KMETHOD SubProc_fg(KonohaContext *kctx, KonohaStack *sfp)
 	if(pid > 0) {
 		kSubProc_wait(kctx, sbp, pid, trace);
 	}
+	sbp->childProcessId = pid;
 	KReturnUnboxValue(pid);
 }
 
@@ -605,8 +642,57 @@ static KMETHOD SubProc_communicate(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnWith(resultArray, RESET_GCSTACK());
 }
 
+//## int SubProc.getPid();
+static KMETHOD SubProc_getPid(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kSubProc *sbp = (kSubProc *)sfp[0].asObject;
+	KReturnUnboxValue(sbp->childProcessId);
+}
+
+//## int SubProc.getStatus();
+static KMETHOD SubProc_getStatus(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kSubProc *sbp = (kSubProc *)sfp[0].asObject;
+	int status = sbp->status;
+	int ret = sbp->status;
+	if(WIFEXITED(status)) {
+		ret = WEXITSTATUS(status);
+	}
+	else if(WIFSIGNALED(status)) {
+		ret = WTERMSIG(status);
+	}
+	else if(WIFSTOPPED(status)) {
+		ret = WSTOPSIG(status);
+	}
+	KReturnUnboxValue(ret);
+}
+
+//## boolean SubProc.isCommand(String command);
+static KMETHOD SubProc_isCommand(KonohaContext *kctx, KonohaStack *sfp)
+{
+	const char *cmd = S_text(sfp[1].asString);
+	size_t bufsize = confstr(_CS_PATH, NULL, 0);
+	char buf[bufsize];
+	confstr(_CS_PATH, buf, bufsize);
+	char *pos, *p = buf;
+	while(p < buf + bufsize) {
+		if((pos = strchr(p, ':')) == NULL) {
+			if(checkExecutablePath(kctx, p, cmd)) {
+				KReturnUnboxValue(true);
+			}
+			break;
+		}
+		p[pos - p] = '\0';
+		if(checkExecutablePath(kctx, p, cmd)) {
+			KReturnUnboxValue(true);
+		}
+		p = pos + 1;
+	}
+	KReturnUnboxValue(false);
+}
+
 #define _Public   kMethod_Public
-//#define _Static   kMethod_Static
+#define _Static   kMethod_Static
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
@@ -637,6 +723,9 @@ static kbool_t subproc_initSubProc(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		_Public,     _F(SubProc_fg),              TY_int, TY_SubProc, MN_("fg"), 0,
 		_Public,     _F(SubProc_bg),              TY_void, TY_SubProc, MN_("bg"), 0,
 		_Public,     _F(SubProc_communicate),     TY_StringArray, TY_SubProc, MN_("communicate"), 1, TY_String, FN_("input"),
+		_Public|_Im, _F(SubProc_getPid),          TY_int, TY_SubProc, MN_("getPid"), 0,
+		_Public|_Im, _F(SubProc_getStatus),       TY_int, TY_SubProc, MN_("getStatus"), 0,
+		_Public|_Static|_Im, _F(SubProc_isCommand), TY_boolean, TY_SubProc, MN_("isCommand"), 1, TY_String, FN_("command"),
 
 //		_Public|_Im, _F(Subproc_exec), TY_String, TY_Subproc, MN_("exec"), 1, TY_String, FN_("data"),
 //		_Public|_Im, _F(Subproc_communicate), TY_StringArray, TY_Subproc, MN_("communicate"), 1, TY_String, FN_("input"),
@@ -1736,6 +1825,7 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	KRequireKonohaCommonModule(trace);
 	KRequirePackage("konoha.file", trace);
 	subproc_initSubProc(kctx, ns, trace);
+
 	// old subproc ..
 	KDEFINE_CLASS defSubproc = {
 		STRUCTNAME(Subproc),
