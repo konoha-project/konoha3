@@ -175,8 +175,6 @@ static const char *getOptionSymbol(CURLoption opt)
 
 /* ------------------------------------------------------------------------ */
 
-#define Int_to(T, a)      ((T)a.intValue)
-#define String_to(T, a)   ((T)S_text(a.asString))
 #define toCURL(o)         ((kCurl *)o)->curl
 
 static void Curl_init(KonohaContext *kctx, kObject *o, void *conf)
@@ -211,7 +209,7 @@ static KMETHOD Curl_new(KonohaContext *kctx, KonohaStack *sfp)  // Don't remove
 	KReturn(sfp[0].asObject);
 }
 
-//##  void Curl.setOpt(int type, boolean data);
+//## void Curl.setOpt(int type, boolean data);
 static KMETHOD Curl_setOptBoolean(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kCurl* kcurl = (kCurl *)sfp[0].asObject;
@@ -259,7 +257,7 @@ static KMETHOD Curl_setOptBoolean(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-
+//## void Curl.setOpt(int type, int data);
 static KMETHOD Curl_setOptInt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kCurl* kcurl = (kCurl *)sfp[0].asObject;
@@ -299,6 +297,7 @@ static KMETHOD Curl_setOptInt(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 
+//## void Curl.setOpt(int type, String data);
 static KMETHOD Curl_setOptString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kCurl* kcurl = (kCurl *)sfp[0].asObject;
@@ -347,6 +346,7 @@ static KMETHOD Curl_setOptString(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 
+//## void Curl.setOpt(int type, FILE data);
 static KMETHOD Curl_setOptFile(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kCurl* kcurl = (kCurl *)sfp[0].asObject;
@@ -623,7 +623,9 @@ static int diagnosisCurlFaultType(KonohaContext *kctx, CURLcode res, int UserFau
 	case CURLE_CHUNK_FAILED:            /* 88 - chunk callback reported error */
 #endif
 		return SystemFault | ExternalFault;
-	case CURL_LAST: break;
+	case CURL_LAST:
+	default:
+		break;
 	}
 	return UserFault | SystemFault| SoftwareFault | ExternalFault;
 }
@@ -644,6 +646,51 @@ static KMETHOD Curl_perform(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue((res == CURLE_OK));
 }
 
+// writedata for Curl.receiveString()
+struct ReceiveBuffer {
+	KonohaContext *kctx;
+	KGrowingBuffer wb;
+};
+
+// writefunction for Curl.receiveString()
+static size_t writeToBuffer(void *buffer, size_t size, size_t nmemb, void *obj)
+{
+	struct ReceiveBuffer *rbuf = (struct ReceiveBuffer *)obj;
+	KonohaContext *kctx = rbuf->kctx;
+	size_t writeSize = size * nmemb;
+	KLIB Kwb_write(kctx, &rbuf->wb, (char *)buffer, writeSize);
+	return writeSize;
+}
+
+//## String Curl.receiveString();
+static KMETHOD Curl_receiveString(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kCurl* kcurl = (kCurl *)sfp[0].asObject;
+
+	/* presets */
+	struct ReceiveBuffer rbuf = {0};
+	rbuf.kctx = kctx;
+	KLIB Kwb_init(&(kctx->stack->cwb), &rbuf.wb);
+	curl_easy_setopt(kcurl->curl, CURLOPT_WRITEFUNCTION, writeToBuffer);
+	curl_easy_setopt(kcurl->curl, CURLOPT_WRITEDATA, &rbuf);
+
+	/* perform */
+	KMakeTrace(trace, sfp);
+	CURLcode res;
+	KTraceResponseCheckPoint(trace, 0, "curl_easy_perform",
+		res = curl_easy_perform(kcurl->curl)
+	);
+	if(res != CURLE_OK) {
+		int fault = diagnosisCurlFaultType(kctx, res, (kcurl->URLInfoNULL == NULL) ? 0 : kString_guessUserFault(kcurl->URLInfoNULL));
+		KTraceErrorPoint(trace, fault, "curl_easy_perform", LogURL(kcurl), LogCurlStrError(res));
+	}
+
+	KReturnWith(
+		KLIB new_kString(rbuf.kctx, OnStack, KLIB Kwb_top(rbuf.kctx, &rbuf.wb, 0), Kwb_bytesize(&rbuf.wb), 0),
+		KLIB Kwb_free(&rbuf.wb)
+	);
+}
+
 ////## dynamic Curl.getInfo(int type);
 static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -652,7 +699,7 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 	long lngptr = 0;
 	double dblptr = 0;
 	if(curl != NULL) {
-		kint_t curlinfo = Int_to(int , sfp[1]);
+		kint_t curlinfo = sfp[1].intValue;
 		switch(curlinfo) {
 		case CURLINFO_HEADER_SIZE:
 		case CURLINFO_REQUEST_SIZE:
@@ -690,7 +737,6 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 /* ------------------------------------------------------------------------ */
 
 #define _Public   kMethod_Public
-#define _Const    kMethod_Const
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
@@ -720,6 +766,7 @@ static kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public, _F(Curl_setOptFile),    TY_void, TY_Curl, MN_("setOpt"), 2, TY_int, FN_("option"), TY_File,    FN_("data"),
 //		_Public, _F(Curl_appendHeader), TY_void, TY_Curl, MN_("appendHeader"), 1, TY_String, FN_("header"),
 		_Public, _F(Curl_perform), TY_boolean, TY_Curl, MN_("perform"), 0,
+		_Public, _F(Curl_receiveString), TY_String, TY_Curl, MN_("receiveString"), 0,
 		_Public|_Im, _F(Curl_getInfo), TY_Object/*FIXME TY_Dynamic*/, TY_Curl, MN_("getInfo"), 1, TY_int, FN_("type"),
 		DEND,
 	};
