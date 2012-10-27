@@ -62,6 +62,9 @@ static int ParseLineFeed(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenize
 	if(tokenizer->currentLine != 0) {
 		tokenizer->currentLine += 1;
 	}
+	if(IS_NOTNULL(tk)) {
+		kToken_set(StatementSeparator, tk, true);
+	}
 	return ParseIndent(kctx, tk, tokenizer, pos+1);
 }
 
