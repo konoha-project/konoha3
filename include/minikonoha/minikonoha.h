@@ -434,10 +434,12 @@ struct KonohaFactory {
 	// file load
 	const char* (*FormatPackagePath)(KonohaContext *, char *buf, size_t bufsiz, const char *packageName, const char *ext);
 	KonohaPackageHandler* (*LoadPackageHandler)(KonohaContext *, const char *packageName);
+	void (*BEFORE_LoadScript)(KonohaContext *, const char *filename);
+	int (*loadScript)(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *));
+	void (*AFTER_LoadScript)(KonohaContext *, const char *filename);
 
 	const char* (*shortFilePath)(const char *path);
 	const char* (*formatTransparentPath)(char *buf, size_t bufsiz, const char *parent, const char *path);
-	int (*loadScript)(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *));
 
 	// message (cui)
 	char*  (*readline_i)(const char *prompt);
@@ -450,6 +452,7 @@ struct KonohaFactory {
 
 
 	// logging, trace
+	kbool_t detectedAssertionFailure;
 	const char *LOGGER_NAME;
 	void  (*syslog_i)(int priority, const char *message, ...) __PRINTFMT(2, 3);
 	void  (*vsyslog_i)(int priority, const char *message, va_list args);
@@ -475,6 +478,12 @@ struct KonohaFactory {
 	uintptr_t   (*iconvSystemCharsetToUTF8)(KonohaContext *, KTraceInfo *);
 	const char* (*formatSystemPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
 	const char* (*formatKonohaPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
+
+	// VirtualMachine
+	kbool_t     (*IsSupportedVirtualCode)(int opcode);
+	void        (*EncodeVirtcalCode)(void *, int opcode, ...);
+	void *      (*RunVirtualMachine)(KonohaContext *kctx, void *sfp, void *pc);
+	void        (*InitVisitor)(KonohaContext *kctx);
 };
 
 #define LOG_END   0
@@ -1817,7 +1826,7 @@ typedef struct {
 ///* Konoha API */
 extern KonohaContext* konoha_open(const PlatformApi *);
 extern void konoha_close(KonohaContext* konoha);
-extern kbool_t konoha_load(KonohaContext* konoha, const char *scriptfile);
+extern kbool_t Konoha_Load(KonohaContext* konoha, const char *scriptfile);
 extern kbool_t konoha_eval(KonohaContext* konoha, const char *script, kfileline_t uline);
 extern kbool_t konoha_run(KonohaContext* konoha);  // TODO
 

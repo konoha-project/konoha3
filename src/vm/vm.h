@@ -188,6 +188,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 
 //-------------------------------------------------------------------------
 
+#define PC_NEXT(pc)   pc+1
 #define rshift(rbp, x_) (rbp+(x_))
 #define SFP(rbp)  ((KonohaStack *)(rbp))
 #define SFPIDX(n) ((n)/2)
@@ -237,7 +238,6 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 //#define OPEXEC_BOX(A, B, CT)   KUnsafeFieldSet(rbp[(A)].asObject, KLIB new_kObject(kctx, OnStack, CT, rbp[(B)].intValue))
 //#define OPEXEC_UNBOX(A, B, CT) rbp[(A)].unboxValue = N_toint(rbp[B].asObject)
 
-#define PC_NEXT(pc)   pc+1
 
 #define OPEXEC_LOOKUP(THIS, NS, MTD) do {\
 	kNameSpace_lookupMethodWithInlineCache(kctx, SFP(rshift(rbp, THIS)), NS, (kMethod**)&MTD);\

@@ -163,6 +163,9 @@ static KonohaPackageHandler *LoadPackageHandler(KonohaContext *kctx, const char 
 	return NULL;
 }
 
+static void BEFORE_LoadScript(KonohaContext *kctx, const char *filename) { }
+static void AFTER_LoadScript(KonohaContext *kctx, const char *filename)  { }
+
 // -------------------------------------------------------------------------
 /* I18N */
 
@@ -1065,6 +1068,8 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.LoadRuntimeModule   = LoadRuntimeModule;
 	plat.FormatPackagePath   = FormatPackagePath;
 	plat.LoadPackageHandler  = LoadPackageHandler;
+	plat.BEFORE_LoadScript   = BEFORE_LoadScript;
+	plat.AFTER_LoadScript    = AFTER_LoadScript;
 
 	plat.shortFilePath       = shortFilePath;
 	plat.formatTransparentPath = formatTransparentPath;

@@ -143,7 +143,7 @@ static const char* I18N_formatSystemPath(KonohaContext *kctx, char *buf, size_t 
 
 // -------------------------------------------------------------------------
 
-kbool_t LoadIConvModule(KonohaFactory *factory, int optionVerbose)
+kbool_t LoadIConvModule(KonohaFactory *factory, ModuleType type)
 {
 	factory->Module_I18N              = "IConv";
 	factory->systemCharset            = "UTF-8";

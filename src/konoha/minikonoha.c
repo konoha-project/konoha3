@@ -247,11 +247,13 @@ void konoha_close(KonohaContext* konoha)
 	KonohaContext_free(konoha, (KonohaContextVar *)konoha);
 }
 
-kbool_t konoha_load(KonohaContext* konoha, const char *scriptname)
+kbool_t konoha_load(KonohaContext* kctx, const char *scriptname)
 {
-	BEGIN_(konoha);
-	kbool_t res = (MODSUGAR_loadScript(konoha, scriptname, strlen(scriptname), 0) == K_CONTINUE);
-	END_(konoha);
+	PLATAPI BEFORE_LoadScript(kctx, scriptname);
+	BEGIN_(kctx);
+	kbool_t res = (MODSUGAR_loadScript(kctx, scriptname, strlen(scriptname), 0) == K_CONTINUE);
+	END_(kctx);
+	PLATAPI AFTER_LoadScript(kctx, scriptname);
 	return res;
 }
 
@@ -280,9 +282,9 @@ void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformA
 	SetPlatformApi(factory);
 	for(i = 0; i < argc; i++) {
 		const char *t = argv[i];
-		if(t[0] == '-' && t[1] == 'M') {
+		if(t[0] == '-' && t[1] == 'M') {   /* -MName */
 			const char *moduleName = t + 2;
-			if(moduleName[0] == 0 && i+1 < argc) {
+			if(moduleName[0] == 0 && i+1 < argc) {  /* -M Name */
 				i++;
 				moduleName = argv[i];
 			}

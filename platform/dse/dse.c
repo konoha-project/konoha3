@@ -316,7 +316,7 @@ static void *dse_dispatch(void *arg)
 		// DEBUG_PRINT("%s", msg);
 		KonohaContext* konoha = konoha_open(dse_platform);
 		dse_define(konoha, msg);
-		ret = konoha_load(konoha, script);
+		ret = Konoha_Load(konoha, script);
 		konoha_close(konoha);
 		Message_delete(msg);
 	}
