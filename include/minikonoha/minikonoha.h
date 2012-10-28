@@ -1297,7 +1297,8 @@ typedef kbool_t (*MethodMatchFunc)(KonohaContext *kctx, kMethod *mtd, MethodMatc
 #define K_SHIFTIDX  (-3)
 #define K_PCIDX     (-2)
 #define K_MTDIDX    (-1)
-#define K_DYNSIDX   (-1)
+#define K_NSIDX     (-2)
+#define K_TRACEIDX  (-2)
 
 //#define K_NEXTIDX    2
 #define K_ULINEIDX2  (-7)

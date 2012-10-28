@@ -194,7 +194,7 @@ static void kArray_removeAt(KonohaContext *kctx, kArray *a, size_t n)
 	if(kArray_isUnboxData(a)) {
 		kArrayVar *a2 = (kArrayVar *)a;
 		memmove(a2->unboxItems+n, a2->unboxItems+(n+1), sizeof(uintptr_t) * (asize - n - 1));
-		a2->unboxItems[asize-1] = NULL;
+		a2->unboxItems[asize-1] = 0;
 		kArray_setsize(a2, asize - 1);
 	}
 	else {
