@@ -1,0 +1,7 @@
+find_library(HAVE_LIBICONV NAMES iconv)
+check_include_files(iconv.h HAVE_ICONV_H)
+if(HAVE_LIBICONV AND HAVE_ICONV_H)
+	set(MODULE_EXTRA_LIBRARY ${HAVE_LIBICONV})
+	set(MODULE_SOURCE_CODE IConv.c)
+	add_konoha_module(IConv)
+endif(HAVE_LIBICONV AND HAVE_ICONV_H)
