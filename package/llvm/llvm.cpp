@@ -5262,8 +5262,7 @@ KDEFINE_PACKAGE* llvm_init(void)
 		K_CHECKSUM,
 		"llvm", "3.0", "", "", "",
 		llvm_initPackage,
-		llvm_setupPackage,
-		K_REVISION
+		llvm_setupPackage
 	};
 
 	return &d;

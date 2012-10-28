@@ -372,6 +372,8 @@ macro(add_konoha_package PKGNAME)
 	endif (__BUILD)
 endmacro(add_konoha_package)
 
+add_subdirectory(module)
+
 foreach(dir ${PACKAGES})
 	set(dir "${CMAKE_CURRENT_SOURCE_DIR}/package/${dir}")
 	if(IS_DIRECTORY ${dir} AND EXISTS ${dir}/CMakeLists.txt)
