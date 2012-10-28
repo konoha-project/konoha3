@@ -1098,7 +1098,7 @@ void jit_init() {
 	Type KonohaModuleContext = StructType.create(a0, "KonohaModuleContext", false);
 	Type KonohaStackRuntimeVar = StructType.create(a0, "KonohaStackRuntimeVar", false);
 	Type klogger_t = StructType.create(a0, "klogger_t", false);
-	Type VirtualMachineInstruction = StructType.create(a0, "VirtualMachineInstruction", false);
+	Type VirtualCode = StructType.create(a0, "VirtualCode", false);
 	/*------- KonohaObjectHeader ------*/
 	Array[Type] KonohaObjectHeaderTy = new Type[4];
 	KonohaObjectHeaderTy.set(0, getLongTy() /* magicflag */ );
@@ -1156,7 +1156,7 @@ void jit_init() {
 	Array[Type] kMethodTy = new Type[13];
 	kMethodTy.set(0, KonohaObjectHeader /* h */ );
 	kMethodTy.set(1, PointerType.get(funcTy) /* invokeMethodFunc */ /*union*/);
-	kMethodTy.set(2, PointerType.get(VirtualMachineInstruction) /* pc_start */ /*union*/);
+	kMethodTy.set(2, PointerType.get(VirtualCode) /* pc_start */ /*union*/);
 	kMethodTy.set(3, getLongTy() /* flag */ );
 	kMethodTy.set(4, Type.getInt32Ty() /* cid */ );
 	kMethodTy.set(5, Type.getInt32Ty() /* mn */ );

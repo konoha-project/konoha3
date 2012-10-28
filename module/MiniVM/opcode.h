@@ -28,7 +28,7 @@
 /* virtual machine */
 
 typedef intptr_t   kreg_t;
-typedef void (*ThreadCodeFunc)(KonohaContext *kctx, struct VirtualMachineInstruction *, void**);
+typedef void (*ThreadCodeFunc)(KonohaContext *kctx, struct VirtualCode *, void**);
 typedef void (*TraceFunc)(KonohaContext *kctx, KonohaStack *sfp, KTraceInfo *trace);
 
 typedef struct {
@@ -37,6 +37,7 @@ typedef struct {
 } kMethodInlineCache;
 
 #if defined(USE_DIRECT_THREADED_CODE)
+#define OP_(T)  NULL, 0, OPCODE_##T, 0
 #define KCODE_HEAD \
 	void *codeaddr; \
 	size_t count; \
@@ -44,6 +45,7 @@ typedef struct {
 	kfileline_t line
 
 #else
+#define OP_(T)  0, OPCODE_##T, 0
 #define KCODE_HEAD \
 	size_t count; \
 	kopcode_t opcode; \
@@ -51,7 +53,7 @@ typedef struct {
 
 #endif/*USE_DIRECT_THREADED_CODE*/
 
-typedef struct VirtualMachineInstruction {
+typedef struct VirtualCode {
 	KCODE_HEAD;
 	union {
 		intptr_t data[5];
@@ -60,7 +62,7 @@ typedef struct VirtualMachineInstruction {
 		KonohaClass *ct[5];
 		char *u[5];
 	};
-} VirtualMachineInstruction;
+} VirtualCode;
 
 typedef enum {
 	OPCODE_NOP,
@@ -263,7 +265,7 @@ typedef struct OPRET {
 
 #define OPEXEC_RET() do {\
 	(void)op;\
-	VirtualMachineInstruction *vpc = rbp[K_PCIDX2].pc;\
+	VirtualCode *vpc = rbp[K_PCIDX2].pc;\
 	rbp = (krbp_t *)rbp[K_SHIFTIDX2].previousStack;\
 	pc = vpc; \
 	GOTO_PC(pc);\
@@ -296,7 +298,7 @@ typedef struct OPBNOT {
 #define VPARAM_JMP       1, VMT_ADDR
 typedef struct OPJMP {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 } OPJMP;
 
 #define OPEXEC_JMP(PC, JUMP) do {\
@@ -308,7 +310,7 @@ typedef struct OPJMP {
 #define VPARAM_JMPF      2, VMT_ADDR, VMT_R
 typedef struct OPJMPF {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 } OPJMPF;
 
@@ -322,7 +324,7 @@ typedef struct OPJMPF {
 #define VPARAM_TRYJMP      1, VMT_ADDR
 typedef struct OPTRYJMP {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 } OPTRYJMP;
 
 #define OPEXEC_TRYJMP(PC, JUMP) do {\
@@ -399,54 +401,6 @@ typedef struct OPTRACE {
 	F(kctx, (KonohaStack *)(rbp + THIS), trace);\
 } while(0)
 
-/* ------------------------------------------------------------------------ */
-/* [data] */
 
-#define _CONST 1
-#define _JIT   (1<<1)
-#define _DEF   (1<<2)
-typedef struct {
-	const char *name;
-	kshortflag_t   flag;
-	kushort_t size;
-	VirtualCodeType arg1;
-	VirtualCodeType arg2;
-	VirtualCodeType arg3;
-	VirtualCodeType arg4;
-} kOPDATA_t;
-
-#define OPSPEC(T)  #T, 0, VPARAM_##T
-
-static const kOPDATA_t OPDATA[] = {
-	{OPSPEC(NOP)},
-	{OPSPEC(THCODE)},
-	{OPSPEC(ENTER)},
-	{OPSPEC(EXIT)},
-	{OPSPEC(NMOV)},
-	{OPSPEC(NMOVx)},
-	{OPSPEC(XNMOV)},
-	{OPSPEC(NEW)},
-	{OPSPEC(NULL)},
-	{OPSPEC(LOOKUP)},
-	{OPSPEC(CALL)},
-	{OPSPEC(RET)},
-	{OPSPEC(NCALL)},
-	{OPSPEC(BNOT)},
-	{OPSPEC(JMP)},
-	{OPSPEC(JMPF)},
-	{OPSPEC(TRYJMP)},
-	{OPSPEC(YIELD)},
-	{OPSPEC(ERROR)},
-	{OPSPEC(SAFEPOINT)},
-	{OPSPEC(CHKSTACK)},
-	{OPSPEC(TRACE)},
-};
-
-//static const char *T_opcode(int opcode)
-//{
-//	return OPDATA[opcode].name;
-//}
-
-/* ------------------------------------------------------------------------ */
 
 #endif /* MINIVM_H */

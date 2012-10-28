@@ -605,7 +605,7 @@ typedef struct KGrowingArray {
 		char                              *bytebuf;
 		const struct KonohaClassVar      **classItems;
 		KKeyValue                         *keyValueItems;
-		struct VirtualMachineInstruction  *codeItems;
+		struct VirtualCode  *codeItems;
 		kObject                          **ObjectItems;
 	};
 	size_t bytemax;
@@ -782,7 +782,7 @@ struct KonohaModuleContext {
 	kfloat_t    floatValue; \
 	struct KonohaValueVar *previousStack;\
 	intptr_t    shift0;  \
-	struct VirtualMachineInstruction  *pc; \
+	struct VirtualCode  *pc; \
 	kMethod     *methodCallInfo; \
 	uintptr_t    callerFileLine
 
@@ -1254,7 +1254,7 @@ static const char* MethodFlagData[] = {
 #define KMETHODCC  int  /*CC_FASTCALL_*/
 typedef KMETHOD   (*MethodFunc)(KonohaContext*, KonohaStack *);
 typedef KMETHOD   (*FastCallMethodFunc)(KonohaContext*, KonohaStack * _KFASTCALL);
-typedef KMETHODCC (*FmethodCallCC)(KonohaContext*, KonohaStack *, int, int, struct VirtualMachineInstruction *);
+typedef KMETHODCC (*FmethodCallCC)(KonohaContext*, KonohaStack *, int, int, struct VirtualCode *);
 #endif
 
 struct kMethodVar {
@@ -1264,7 +1264,7 @@ struct kMethodVar {
 		FastCallMethodFunc      invokeFastCallMethodFunc;
 	};
 	union {/* body*/
-		struct VirtualMachineInstruction        *pc_start;
+		struct VirtualCode        *pc_start;
 		FmethodCallCC         callcc_1;
 	};
 	uintptr_t         flag;

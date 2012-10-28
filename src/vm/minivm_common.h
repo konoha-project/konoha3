@@ -21,7 +21,7 @@ typedef struct _FileLog_Map {
 //	return ret;
 //}
 //
-static void emitCoverage_element(KonohaContext* kctx, VirtualMachineInstruction *pc)
+static void emitCoverage_element(KonohaContext* kctx, VirtualCode *pc)
 {
 //	int i;
 //	kfileline_t uline = 0;

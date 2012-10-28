@@ -118,13 +118,13 @@ typedef struct klr_BNOT_t {
 #define OPCODE_JMP ((kopcode_t)16)
 typedef struct klr_JMP_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 } klr_JMP_t;
 
 #define OPCODE_JMPF ((kopcode_t)17)
 typedef struct klr_JMPF_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 } klr_JMPF_t;
 
@@ -754,7 +754,7 @@ typedef struct klr_fCAST_t {
 #define OPCODE_JMP_ ((kopcode_t)96)
 typedef struct klr_JMP__t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 } klr_JMP__t;
 
 #define OPCODE_NGETIDX ((kopcode_t)97)
@@ -828,28 +828,28 @@ typedef struct klr_OSETIDXC_t {
 #define OPCODE_bJNUL ((kopcode_t)105)
 typedef struct klr_bJNUL_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 } klr_bJNUL_t;
 
 #define OPCODE_bJNN ((kopcode_t)106)
 typedef struct klr_bJNN_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 } klr_bJNN_t;
 
 #define OPCODE_bJNOT ((kopcode_t)107)
 typedef struct klr_bJNOT_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 } klr_bJNOT_t;
 
 #define OPCODE_iJEQ ((kopcode_t)108)
 typedef struct klr_iJEQ_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kreg_t b;
 } klr_iJEQ_t;
@@ -857,7 +857,7 @@ typedef struct klr_iJEQ_t {
 #define OPCODE_iJNEQ ((kopcode_t)109)
 typedef struct klr_iJNEQ_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kreg_t b;
 } klr_iJNEQ_t;
@@ -865,7 +865,7 @@ typedef struct klr_iJNEQ_t {
 #define OPCODE_iJLT ((kopcode_t)110)
 typedef struct klr_iJLT_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kreg_t b;
 } klr_iJLT_t;
@@ -873,7 +873,7 @@ typedef struct klr_iJLT_t {
 #define OPCODE_iJLTE ((kopcode_t)111)
 typedef struct klr_iJLTE_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kreg_t b;
 } klr_iJLTE_t;
@@ -881,7 +881,7 @@ typedef struct klr_iJLTE_t {
 #define OPCODE_iJGT ((kopcode_t)112)
 typedef struct klr_iJGT_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kreg_t b;
 } klr_iJGT_t;
@@ -889,7 +889,7 @@ typedef struct klr_iJGT_t {
 #define OPCODE_iJGTE ((kopcode_t)113)
 typedef struct klr_iJGTE_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kreg_t b;
 } klr_iJGTE_t;
@@ -897,7 +897,7 @@ typedef struct klr_iJGTE_t {
 #define OPCODE_iJEQC ((kopcode_t)114)
 typedef struct klr_iJEQC_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kint_t n;
 } klr_iJEQC_t;
@@ -905,7 +905,7 @@ typedef struct klr_iJEQC_t {
 #define OPCODE_iJNEQC ((kopcode_t)115)
 typedef struct klr_iJNEQC_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kint_t n;
 } klr_iJNEQC_t;
@@ -913,7 +913,7 @@ typedef struct klr_iJNEQC_t {
 #define OPCODE_iJLTC ((kopcode_t)116)
 typedef struct klr_iJLTC_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kint_t n;
 } klr_iJLTC_t;
@@ -921,7 +921,7 @@ typedef struct klr_iJLTC_t {
 #define OPCODE_iJLTEC ((kopcode_t)117)
 typedef struct klr_iJLTEC_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kint_t n;
 } klr_iJLTEC_t;
@@ -929,7 +929,7 @@ typedef struct klr_iJLTEC_t {
 #define OPCODE_iJGTC ((kopcode_t)118)
 typedef struct klr_iJGTC_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kint_t n;
 } klr_iJGTC_t;
@@ -937,7 +937,7 @@ typedef struct klr_iJGTC_t {
 #define OPCODE_iJGTEC ((kopcode_t)119)
 typedef struct klr_iJGTEC_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kint_t n;
 } klr_iJGTEC_t;
@@ -945,7 +945,7 @@ typedef struct klr_iJGTEC_t {
 #define OPCODE_fJEQ ((kopcode_t)120)
 typedef struct klr_fJEQ_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kreg_t b;
 } klr_fJEQ_t;
@@ -953,7 +953,7 @@ typedef struct klr_fJEQ_t {
 #define OPCODE_fJNEQ ((kopcode_t)121)
 typedef struct klr_fJNEQ_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kreg_t b;
 } klr_fJNEQ_t;
@@ -961,7 +961,7 @@ typedef struct klr_fJNEQ_t {
 #define OPCODE_fJLT ((kopcode_t)122)
 typedef struct klr_fJLT_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kreg_t b;
 } klr_fJLT_t;
@@ -969,7 +969,7 @@ typedef struct klr_fJLT_t {
 #define OPCODE_fJLTE ((kopcode_t)123)
 typedef struct klr_fJLTE_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kreg_t b;
 } klr_fJLTE_t;
@@ -977,7 +977,7 @@ typedef struct klr_fJLTE_t {
 #define OPCODE_fJGT ((kopcode_t)124)
 typedef struct klr_fJGT_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kreg_t b;
 } klr_fJGT_t;
@@ -985,7 +985,7 @@ typedef struct klr_fJGT_t {
 #define OPCODE_fJGTE ((kopcode_t)125)
 typedef struct klr_fJGTE_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kreg_t b;
 } klr_fJGTE_t;
@@ -993,7 +993,7 @@ typedef struct klr_fJGTE_t {
 #define OPCODE_fJEQC ((kopcode_t)126)
 typedef struct klr_fJEQC_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kfloat_t n;
 } klr_fJEQC_t;
@@ -1001,7 +1001,7 @@ typedef struct klr_fJEQC_t {
 #define OPCODE_fJNEQC ((kopcode_t)127)
 typedef struct klr_fJNEQC_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kfloat_t n;
 } klr_fJNEQC_t;
@@ -1009,7 +1009,7 @@ typedef struct klr_fJNEQC_t {
 #define OPCODE_fJLTC ((kopcode_t)128)
 typedef struct klr_fJLTC_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kfloat_t n;
 } klr_fJLTC_t;
@@ -1017,7 +1017,7 @@ typedef struct klr_fJLTC_t {
 #define OPCODE_fJLTEC ((kopcode_t)129)
 typedef struct klr_fJLTEC_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kfloat_t n;
 } klr_fJLTEC_t;
@@ -1025,7 +1025,7 @@ typedef struct klr_fJLTEC_t {
 #define OPCODE_fJGTC ((kopcode_t)130)
 typedef struct klr_fJGTC_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kfloat_t n;
 } klr_fJGTC_t;
@@ -1033,7 +1033,7 @@ typedef struct klr_fJGTC_t {
 #define OPCODE_fJGTEC ((kopcode_t)131)
 typedef struct klr_fJGTEC_t {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 	kfloat_t n;
 } klr_fJGTEC_t;
@@ -1229,140 +1229,140 @@ static const kOPDATA_t OPDATA[] = {
 
 static void opcode_check(void)
 {
-	assert(sizeof(klr_NOP_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_THCODE_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_ENTER_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_EXIT_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_NSET_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_NMOV_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_NMOVx_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_XNMOV_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_NEW_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_NULL_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_BOX_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_UNBOX_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_CALL_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_RET_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_NCALL_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_BNOT_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_JMP_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_JMPF_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_SAFEPOINT_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_ERROR_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_NNMOV_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_NSET2_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_NSET3_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_NSET4_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iINC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iDEC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_bNUL_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_bNN_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iNEG_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fNEG_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iADD_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iSUB_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iMUL_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iDIV_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iMOD_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iEQ_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iNEQ_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iLT_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iLTE_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iGT_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iGTE_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iAND_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iOR_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iXOR_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iLSFT_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iRSFT_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iADDC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iSUBC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iMULC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iDIVC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iMODC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iEQC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iNEQC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iLTC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iLTEC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iGTC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iGTEC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iANDC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iORC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iXORC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iLSFTC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iRSFTC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fADD_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fSUB_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fMUL_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fDIV_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fEQ_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fNEQ_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fLT_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fLTE_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fGT_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fGTE_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fADDC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fSUBC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fMULC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fDIVC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fEQC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fNEQC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fLTC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fLTEC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fGTC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fGTEC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_OSET_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_OMOV_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_OOMOV_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_ONMOV_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_OSET2_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_OSET3_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_OSET4_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_CHKSTACK_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_LDMTD_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_SCALL_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_VCALL_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_VCALL__t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iCAST_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fCAST_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_JMP__t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_NGETIDX_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_NSETIDX_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_NGETIDXC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_NSETIDXC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_OGETIDX_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_OSETIDX_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_OGETIDXC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_OSETIDXC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_bJNUL_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_bJNN_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_bJNOT_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iJEQ_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iJNEQ_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iJLT_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iJLTE_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iJGT_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iJGTE_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iJEQC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iJNEQC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iJLTC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iJLTEC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iJGTC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_iJGTEC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fJEQ_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fJNEQ_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fJLT_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fJLTE_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fJGT_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fJGTE_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fJEQC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fJNEQC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fJLTC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fJLTEC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fJGTC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_fJGTEC_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_CHKIDX_t) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(klr_CHKIDXC_t) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(klr_NOP_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_THCODE_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_ENTER_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_EXIT_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_NSET_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_NMOV_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_NMOVx_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_XNMOV_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_NEW_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_NULL_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_BOX_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_UNBOX_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_CALL_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_RET_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_NCALL_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_BNOT_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_JMP_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_JMPF_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_SAFEPOINT_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_ERROR_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_NNMOV_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_NSET2_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_NSET3_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_NSET4_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iINC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iDEC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_bNUL_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_bNN_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iNEG_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fNEG_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iADD_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iSUB_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iMUL_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iDIV_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iMOD_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iEQ_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iNEQ_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iLT_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iLTE_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iGT_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iGTE_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iAND_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iOR_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iXOR_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iLSFT_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iRSFT_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iADDC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iSUBC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iMULC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iDIVC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iMODC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iEQC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iNEQC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iLTC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iLTEC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iGTC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iGTEC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iANDC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iORC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iXORC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iLSFTC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iRSFTC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fADD_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fSUB_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fMUL_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fDIV_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fEQ_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fNEQ_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fLT_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fLTE_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fGT_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fGTE_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fADDC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fSUBC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fMULC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fDIVC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fEQC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fNEQC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fLTC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fLTEC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fGTC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fGTEC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_OSET_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_OMOV_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_OOMOV_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_ONMOV_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_OSET2_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_OSET3_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_OSET4_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_CHKSTACK_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_LDMTD_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_SCALL_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_VCALL_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_VCALL__t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iCAST_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fCAST_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_JMP__t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_NGETIDX_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_NSETIDX_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_NGETIDXC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_NSETIDXC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_OGETIDX_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_OSETIDX_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_OGETIDXC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_OSETIDXC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_bJNUL_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_bJNN_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_bJNOT_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iJEQ_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iJNEQ_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iJLT_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iJLTE_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iJGT_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iJGTE_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iJEQC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iJNEQC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iJLTC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iJLTEC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iJGTC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_iJGTEC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fJEQ_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fJNEQ_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fJLT_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fJLTE_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fJGT_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fJGTE_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fJEQC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fJNEQC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fJLTC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fJLTEC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fJGTC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_fJGTEC_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_CHKIDX_t) <= sizeof(VirtualCode));
+	assert(sizeof(klr_CHKIDXC_t) <= sizeof(VirtualCode));
 }
 
 static const char *T_opcode(kopcode_t opcode)
@@ -1434,7 +1434,7 @@ static kbool_t kopcode_hasjump(kopcode_t opcode)
 #define GOTO_PC(pc)         GOTO_NEXT()
 #endif/*USE_DIRECT_THREADED_CODE*/
 
-static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, VirtualMachineInstruction *pc)
+static VirtualCode* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, VirtualCode *pc)
 {
 #ifdef USE_DIRECT_THREADED_CODE
 	static void *OPJUMP[] = {

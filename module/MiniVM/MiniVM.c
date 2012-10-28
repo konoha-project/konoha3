@@ -27,6 +27,7 @@
 #include <iconv.h>
 #include <errno.h>
 #include <minikonoha/minikonoha.h>
+#include <minikonoha/klib.h>
 #include "opcode.h"
 
 #ifdef __cplusplus
@@ -36,8 +37,85 @@ extern "C" {
 /* ------------------------------------------------------------------------ */
 /* [data] */
 
+typedef struct {
+	const char *name;
+	kshortflag_t   flag;
+	kushort_t argsize;
+	VirtualCodeType arg1;
+	VirtualCodeType arg2;
+	VirtualCodeType arg3;
+	VirtualCodeType arg4;
+} kOPDATA_t;
 
+#define OPSPEC(T)  #T, 0, VPARAM_##T
+
+static const kOPDATA_t OPDATA[] = {
+	{OPSPEC(NOP)},
+	{OPSPEC(THCODE)},
+	{OPSPEC(ENTER)},
+	{OPSPEC(EXIT)},
+	{OPSPEC(NMOV)},
+	{OPSPEC(NMOVx)},
+	{OPSPEC(XNMOV)},
+	{OPSPEC(NEW)},
+	{OPSPEC(NULL)},
+	{OPSPEC(LOOKUP)},
+	{OPSPEC(CALL)},
+	{OPSPEC(RET)},
+	{OPSPEC(NCALL)},
+	{OPSPEC(BNOT)},
+	{OPSPEC(JMP)},
+	{OPSPEC(JMPF)},
+	{OPSPEC(TRYJMP)},
+	{OPSPEC(YIELD)},
+	{OPSPEC(ERROR)},
+	{OPSPEC(SAFEPOINT)},
+	{OPSPEC(CHKSTACK)},
+	{OPSPEC(TRACE)},
+};
+
+static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeType type, VirtualCode *c, size_t i, VirtualCode *pc_start)
+{
+	switch(type) {
+	case VMT_VOID: break;
+	case VMT_ADDR:
+		KLIB Kwb_printf(kctx, wb, " L%d", (int)((VirtualCode *)c->p[i] - pc_start));
+		break;
+	case VMT_R:
+		KLIB Kwb_printf(kctx, wb, " sfp[%d,r=%d]", (int)c->data[i]/2, (int)c->data[i]);
+		break;
+	case VMT_U:
+		KLIB Kwb_printf(kctx, wb, " u(%lu, ", c->data[i]); break;
+	case VMT_F:
+		KLIB Kwb_printf(kctx, wb, " function(%p)", c->p[i]); break;
+	case VMT_TY:
+		KLIB Kwb_printf(kctx, wb, "(%s)", CT_t(c->ct[i])); break;
+	}/*switch*/
+}
+
+static void DumpOpCode(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c, VirtualCode *pc_start)
+{
+	KLIB Kwb_printf(kctx, wb, "[L%d:%d] %s(%d)", (int)(c - pc_start), c->line, OPDATA[c->opcode].name, (int)c->opcode);
+	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg1, c, 0, pc_start);
+	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg2, c, 1, pc_start);
+	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg3, c, 2, pc_start);
+	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg4, c, 3, pc_start);
+	KLIB Kwb_printf(kctx, wb, "\n");
+}
+
+/* ------------------------------------------------------------------------ */
 /* VirtualMacine */
+
+static void _THCODE(KonohaContext *kctx, VirtualCode *pc, void **codeaddr)
+{
+#ifdef USE_DIRECT_THREADED_CODE
+	while(1) {
+		pc->codeaddr = codeaddr[pc->opcode];
+		if(pc->opcode == OPCODE_RET || pc->opcode == OPCODE_EXIT) break;
+		pc++;
+	}
+#endif
+}
 
 static void kNameSpace_lookupMethodWithInlineCache(KonohaContext *kctx, KonohaStack *sfp, kNameSpace *ns, kMethod **cache)
 {
@@ -50,9 +128,9 @@ static void kNameSpace_lookupMethodWithInlineCache(KonohaContext *kctx, KonohaSt
 	sfp[K_MTDIDX].methodCallInfo = mtd;
 }
 
-static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *, KonohaStack *, VirtualMachineInstruction *);
+static VirtualCode* KonohaVirtualMachine_run(KonohaContext *, KonohaStack *, VirtualCode *);
 
-static VirtualMachineInstruction *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStack *sfp, VirtualMachineInstruction *pc)
+static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStack *sfp, VirtualCode *pc)
 {
 	int jmpresult;
 	INIT_GCSTACK();
@@ -111,7 +189,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #define GOTO_PC(pc)         GOTO_NEXT()
 #endif/*USE_DIRECT_THREADED_CODE*/
 
-static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, VirtualMachineInstruction *pc)
+static VirtualCode* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, VirtualCode *pc)
 {
 #ifdef USE_DIRECT_THREADED_CODE
 	static void *OPJUMP[] = {
@@ -243,6 +321,33 @@ static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *kctx, 
 	DISPATCH_END(pc);
 	L_RETURN:;
 	return pc;
+}
+
+static struct VirtualCode  *BOOTCODE_ENTER = NULL;
+static struct VirtualCode  *BOOTCODE_NCALL = NULL;
+
+static void SetUpBootCode(KonohaContext *kctx)
+{
+	if(BOOTCODE_ENTER != NULL) {
+		static struct VirtualCode InitCode[6] = {};
+		struct OPTHCODE thcode = {OP_(THCODE), _THCODE};
+		struct OPNCALL ncall = {OP_(NCALL)};
+		struct OPENTER enter = {OP_(ENTER)};
+		struct OPEXIT  exit  = {OP_(EXIT)};
+		memcpy(InitCode,   &thcode, sizeof(VirtualCode));
+		memcpy(InitCode+1, &ncall,  sizeof(VirtualCode));
+		memcpy(InitCode+2, &enter,  sizeof(VirtualCode));
+		memcpy(InitCode+3, &exit,   sizeof(VirtualCode));
+		VirtualCode *pc = KonohaVirtualMachine_run(kctx, kctx->esp, InitCode);
+		BOOTCODE_NCALL = pc;
+		BOOTCODE_ENTER = pc+1;
+	}
+}
+
+static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
+{
+	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].methodCallInfo));
+	KonohaVirtualMachine_run(kctx, sfp, BOOTCODE_ENTER);
 }
 
 // -------------------------------------------------------------------------

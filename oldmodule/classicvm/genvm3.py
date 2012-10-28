@@ -297,7 +297,7 @@ typedef struct %s {
 		n, t = a.split(':')
 		if t == "addr" :
 			f.write('''
-	VirtualMachineInstruction  *jumppc;''')
+	VirtualCode  *jumppc;''')
 		else:
 			f.write('''
 	%s %s;''' % (getctype(t, n), n))
@@ -366,7 +366,7 @@ static void opcode_check(void)
 {''')
 	for kc in KCODE_LIST:
 		f.write('''
-	assert(sizeof(%s) <= sizeof(VirtualMachineInstruction));''' % (kc.ctype))
+	assert(sizeof(%s) <= sizeof(VirtualCode));''' % (kc.ctype))
 	f.write('''
 }
 
@@ -459,7 +459,7 @@ def write_exec(f):
 #define GOTO_PC(pc)         GOTO_NEXT()
 #endif/*USE_DIRECT_THREADED_CODE*/
 
-static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, VirtualMachineInstruction *pc)
+static VirtualCode* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, VirtualCode *pc)
 {
 #ifdef USE_DIRECT_THREADED_CODE
 	static void *OPJUMP[] = {''')

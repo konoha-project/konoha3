@@ -33,38 +33,38 @@
 #endif/*USE_DIRECT_THREADED_CODE*/
 #define ASMLINE  0
 
-#define OP_T(T) union { VirtualMachineInstruction op; T op_; }
+#define OP_T(T) union { VirtualCode op; T op_; }
 
 #define NC_(sfpidx)    (((sfpidx) * 2) + 1)
 #define OC_(sfpidx)    ((sfpidx) * 2)
 #define SFP_(sfpidx)   ((sfpidx) * 2)
 #define RIX_(rix)      rix
 
-#define BasicBlock_codesize(BB)  ((BB)->codeTable.bytesize / sizeof(VirtualMachineInstruction))
+#define BasicBlock_codesize(BB)  ((BB)->codeTable.bytesize / sizeof(VirtualCode))
 #define BBOP(BB)     (BB)->codeTable.codeItems
 #define GammaBuilderLabel(n)   (kBasicBlock *)(ctxcode->lstacks->ObjectItems[n])
 
 #define ASM(T, ...) do {												\
 	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};		\
-	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_; \
+	union { VirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
 	BUILD_asm(kctx, &tmp_.op, sizeof(OP##T));						\
 } while(0)
 
 #define ASMop(T, OP, ...) do {											\
 	OP##T op_ = {TADDR, OP, ASMLINE, ## __VA_ARGS__};				\
-	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_; \
+	union { VirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
 	BUILD_asm(kctx, &tmp_.op, sizeof(OP##T));						\
 } while(0)
 
 #define ASMbranch(T, lb, ...) do {										\
 	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, NULL, ## __VA_ARGS__};	\
-	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_; \
+	union { VirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
 	ASM_BRANCH_(kctx, lb, &tmp_.op, sizeof(OP##T));					\
 } while(0)
 
 #define kBasicBlock_add(bb, T, ...) do {								\
 	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};		\
-	union { VirtualMachineInstruction op; OP##T op_; } tmp_; tmp_.op_ = op_; \
+	union { VirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
 	BasicBlock_add(kctx, bb, 0, &tmp_.op, sizeof(OP##T));			\
 } while(0)
 
@@ -98,21 +98,21 @@ static kBasicBlock* new_BasicBlockLABEL(KonohaContext *kctx)
 	return bb;
 }
 
-static void BasicBlock_add(KonohaContext *kctx, kBasicBlock *bb, kushort_t line, VirtualMachineInstruction *op, size_t size)
+static void BasicBlock_add(KonohaContext *kctx, kBasicBlock *bb, kushort_t line, VirtualCode *op, size_t size)
 {
 	if(bb->codeTable.bytemax == 0) {
-		KLIB Karray_init(kctx, &(bb->codeTable), 1 * sizeof(VirtualMachineInstruction));
+		KLIB Karray_init(kctx, &(bb->codeTable), 1 * sizeof(VirtualCode));
 	}
 	else if(bb->codeTable.bytesize == bb->codeTable.bytemax) {
-		KLIB Karray_expand(kctx, &(bb->codeTable), 4 * sizeof(VirtualMachineInstruction));
+		KLIB Karray_expand(kctx, &(bb->codeTable), 4 * sizeof(VirtualCode));
 	}
-	VirtualMachineInstruction *tailcode = bb->codeTable.codeItems + (bb->codeTable.bytesize/sizeof(VirtualMachineInstruction));
-	memcpy(tailcode, op, size == 0 ? sizeof(VirtualMachineInstruction) : size);
+	VirtualCode *tailcode = bb->codeTable.codeItems + (bb->codeTable.bytesize/sizeof(VirtualCode));
+	memcpy(tailcode, op, size == 0 ? sizeof(VirtualCode) : size);
 	tailcode->line = line;
-	bb->codeTable.bytesize += sizeof(VirtualMachineInstruction);
+	bb->codeTable.bytesize += sizeof(VirtualCode);
 }
 
-static void BUILD_asm(KonohaContext *kctx, VirtualMachineInstruction *op, size_t opsize)
+static void BUILD_asm(KonohaContext *kctx, VirtualCode *op, size_t opsize)
 {
 	assert(op->opcode != OPCODE_JMPF);
 	BasicBlock_add(kctx, ctxcode->currentWorkingBlock, ctxcode->uline, op, opsize);
@@ -128,7 +128,7 @@ static int BUILD_asmJMPF(KonohaContext *kctx, OPJMPF *op)
 		return swap;
 	}
 #endif
-	BasicBlock_add(kctx, bb, ctxcode->uline, (VirtualMachineInstruction *)op, 0);
+	BasicBlock_add(kctx, bb, ctxcode->uline, (VirtualCode *)op, 0);
 	return swap;
 }
 
@@ -257,22 +257,22 @@ static size_t BasicBlock_peephole(KonohaContext *kctx, kBasicBlock *bb)
 	CLASSICVM_BasicBlock_peephole(kctx, bb);
 #endif
 	for(i = 0; i < BasicBlock_codesize(bb); i++) {
-		VirtualMachineInstruction *op = BBOP(bb) + i;
+		VirtualCode *op = BBOP(bb) + i;
 		if(op->opcode == OPCODE_NOP) {
 			bbsize--;
 		}
 	}
 	if(bbsize < BasicBlock_codesize(bb)) {
-		VirtualMachineInstruction *opD = BBOP(bb);
+		VirtualCode *opD = BBOP(bb);
 		for(i = 0; i < BasicBlock_codesize(bb); i++) {
-			VirtualMachineInstruction *opS = BBOP(bb) + i;
+			VirtualCode *opS = BBOP(bb) + i;
 			if(opS->opcode == OPCODE_NOP) continue;
 			if(opD != opS) {
 				*opD = *opS;
 			}
 			opD++;
 		}
-		((kBasicBlock *)bb)->codeTable.bytesize = bbsize * sizeof(VirtualMachineInstruction);
+		((kBasicBlock *)bb)->codeTable.bytesize = bbsize * sizeof(VirtualCode);
 	}
 	return BasicBlock_codesize(bb); /*bbsize*/;
 }
@@ -308,7 +308,7 @@ static size_t BasicBlock_size(KonohaContext *kctx, kBasicBlock *bb, size_t c)
 	goto L_TAIL;
 }
 
-static VirtualMachineInstruction* BasicBlock_copy(KonohaContext *kctx, VirtualMachineInstruction *dst, kBasicBlock *bb, kBasicBlock **prev)
+static VirtualCode* BasicBlock_copy(KonohaContext *kctx, VirtualCode *dst, kBasicBlock *bb, kBasicBlock **prev)
 {
 	BasicBlock_setVisited(bb, 0);
 	DBG_ASSERT(!BasicBlock_isVisited(bb));
@@ -325,7 +325,7 @@ static VirtualMachineInstruction* BasicBlock_copy(KonohaContext *kctx, VirtualMa
 	}
 	bb->code = dst;
 	if(BasicBlock_codesize(bb) > 0) {
-		memcpy(dst, BBOP(bb), sizeof(VirtualMachineInstruction) * BasicBlock_codesize(bb));
+		memcpy(dst, BBOP(bb), sizeof(VirtualCode) * BasicBlock_codesize(bb));
 		if(bb->branchBlock != NULL) {
 			bb->opjmp = (dst + (BasicBlock_codesize(bb) - 1));
 		}
@@ -368,11 +368,11 @@ static kByteCode* new_ByteCode(KonohaContext *kctx, kBasicBlock *beginBlock, kBa
 	kByteCodeVar *kcode = /*G*/new_(ByteCodeVar, NULL);
 	kBasicBlock *prev[1] = {};
 	kcode->fileid = ctxcode->uline; //TODO
-	kcode->codesize = BasicBlock_size(kctx, beginBlock, 0) * sizeof(VirtualMachineInstruction);
-	kcode->code = (VirtualMachineInstruction *)KCalloc_UNTRACE(kcode->codesize, 1);
+	kcode->codesize = BasicBlock_size(kctx, beginBlock, 0) * sizeof(VirtualCode);
+	kcode->code = (VirtualCode *)KCalloc_UNTRACE(kcode->codesize, 1);
 	endBlock->code = kcode->code; // dummy
 	{
-		VirtualMachineInstruction *op = BasicBlock_copy(kctx, kcode->code, beginBlock, prev);
+		VirtualCode *op = BasicBlock_copy(kctx, kcode->code, beginBlock, prev);
 		DBG_ASSERT(op - kcode->code > 0);
 		endBlock->code = NULL;
 		BasicBlock_copy(kctx, op, endBlock, prev);
@@ -383,7 +383,7 @@ static kByteCode* new_ByteCode(KonohaContext *kctx, kBasicBlock *beginBlock, kBa
 
 /* ------------------------------------------------------------------------ */
 
-static void dumpOPCODE(KonohaContext *kctx, VirtualMachineInstruction *c, VirtualMachineInstruction *pc_start)
+static void dumpOPCODE(KonohaContext *kctx, VirtualCode *c, VirtualCode *pc_start)
 {
 	size_t i, size = OPDATA[c->opcode].size;
 	const kushort_t *vmt = OPDATA[c->opcode].types;
@@ -402,7 +402,7 @@ static void dumpOPCODE(KonohaContext *kctx, VirtualMachineInstruction *c, Virtua
 				DUMP_P("%p", c->p[i]);
 			}
 			else {
-				DUMP_P("L%d", (int)((VirtualMachineInstruction *)c->p[i] - pc_start));
+				DUMP_P("L%d", (int)((VirtualCode *)c->p[i] - pc_start));
 			}
 			break;
 		case VMT_R:
@@ -438,7 +438,7 @@ static void Method_threadCode(KonohaContext *kctx, kMethod *mtd, kByteCode *kcod
 	Wmtd->pc_start = KonohaVirtualMachine_run(kctx, kctx->esp + 1, kcode->code);
 	if(verbose_code) {
 		DBG_P("DUMP CODE");
-		VirtualMachineInstruction *pc = mtd->pc_start;
+		VirtualCode *pc = mtd->pc_start;
 		while(1) {
 			dumpOPCODE(kctx, pc, mtd->pc_start);
 			if(pc->opcode == OPCODE_RET) {
@@ -744,7 +744,7 @@ static void ASM_SAFEPOINT(KonohaContext *kctx, int espidx)
 	kBasicBlock *bb = ctxcode->currentWorkingBlock;
 	size_t i;
 	for(i = 0; i < BasicBlock_codesize(bb); i++) {
-		VirtualMachineInstruction *op = BBOP(bb) + i;
+		VirtualCode *op = BBOP(bb) + i;
 		if(op->opcode == OPCODE_SAFEPOINT) return;
 	}
 	ASM(SAFEPOINT, SFP_(espidx));
@@ -829,7 +829,7 @@ static void ASMBranch(KonohaContext *kctx, kBasicBlock *jumpBB)
 	kBasicBlock *bb = ctxcode->currentWorkingBlock;
 	kBasicBlock *newbb = new_BasicBlockLABEL(kctx);
 	OPTRYJMP op_ = {TADDR, OPCODE_TRYJMP, ASMLINE, NULL};
-	union { VirtualMachineInstruction op; OPTRYJMP op_; } tmp_; tmp_.op_ = op_;
+	union { VirtualCode op; OPTRYJMP op_; } tmp_; tmp_.op_ = op_;
 	BUILD_asm(kctx, &tmp_.op, sizeof(OPTRYJMP));
 
 	bb->branchBlock = jumpBB; jumpBB->incoming += 1;
@@ -887,7 +887,7 @@ static void BLOCK_asm(KonohaContext *kctx, kBlock *bk, int shift)
 
 /* ------------------------------------------------------------------------ */
 
-static void _THCODE(KonohaContext *kctx, VirtualMachineInstruction *pc, void **codeaddr)
+static void _THCODE(KonohaContext *kctx, VirtualCode *pc, void **codeaddr)
 {
 #ifdef USE_DIRECT_THREADED_CODE
 	while(1) {
@@ -1091,7 +1091,7 @@ void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		ia->nextBlock = ib;
 		kByteCode *kcode = new_ByteCode(kctx, ia, ib);
 		KUnsafeFieldInit(kmodcode->codeNull, kcode);
-		VirtualMachineInstruction *pc = KonohaVirtualMachine_run(kctx, kctx->esp, kcode->code);
+		VirtualCode *pc = KonohaVirtualMachine_run(kctx, kctx->esp, kcode->code);
 		CODE_ENTER = pc;
 		CODE_ENTER = pc+1;
 		KLIB kArray_clear(kctx, ctxcode->codeList, 0);

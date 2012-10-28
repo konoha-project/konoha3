@@ -133,20 +133,20 @@ typedef struct OPBNOT {
 #define OPCODE_JMP ((kopcode_t)15)
 typedef struct OPJMP {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 } OPJMP;
 
 #define OPCODE_JMPF ((kopcode_t)16)
 typedef struct OPJMPF {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 	kreg_t a;
 } OPJMPF;
 
 #define OPCODE_TRYJMP ((kopcode_t)17)
 typedef struct OPTRYJMP {
 	KCODE_HEAD;
-	VirtualMachineInstruction  *jumppc;
+	VirtualCode  *jumppc;
 } OPTRYJMP;
 
 #define OPCODE_YIELD ((kopcode_t)18)
@@ -248,29 +248,29 @@ static const kOPDATA_t OPDATA[] = {
 
 static void opcode_check(void)
 {
-	assert(sizeof(OPNOP) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPTHCODE) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPENTER) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPEXIT) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPNSET) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPNMOV) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPNMOVx) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPXNMOV) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPNEW) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPNULL) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPLOOKUP) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPCALL) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPRET) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPNCALL) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPBNOT) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPJMP) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPJMPF) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPTRYJMP) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPYIELD) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPERROR) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPSAFEPOINT) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPCHKSTACK) <= sizeof(VirtualMachineInstruction));
-	assert(sizeof(OPTRACE) <= sizeof(VirtualMachineInstruction));
+	assert(sizeof(OPNOP) <= sizeof(VirtualCode));
+	assert(sizeof(OPTHCODE) <= sizeof(VirtualCode));
+	assert(sizeof(OPENTER) <= sizeof(VirtualCode));
+	assert(sizeof(OPEXIT) <= sizeof(VirtualCode));
+	assert(sizeof(OPNSET) <= sizeof(VirtualCode));
+	assert(sizeof(OPNMOV) <= sizeof(VirtualCode));
+	assert(sizeof(OPNMOVx) <= sizeof(VirtualCode));
+	assert(sizeof(OPXNMOV) <= sizeof(VirtualCode));
+	assert(sizeof(OPNEW) <= sizeof(VirtualCode));
+	assert(sizeof(OPNULL) <= sizeof(VirtualCode));
+	assert(sizeof(OPLOOKUP) <= sizeof(VirtualCode));
+	assert(sizeof(OPCALL) <= sizeof(VirtualCode));
+	assert(sizeof(OPRET) <= sizeof(VirtualCode));
+	assert(sizeof(OPNCALL) <= sizeof(VirtualCode));
+	assert(sizeof(OPBNOT) <= sizeof(VirtualCode));
+	assert(sizeof(OPJMP) <= sizeof(VirtualCode));
+	assert(sizeof(OPJMPF) <= sizeof(VirtualCode));
+	assert(sizeof(OPTRYJMP) <= sizeof(VirtualCode));
+	assert(sizeof(OPYIELD) <= sizeof(VirtualCode));
+	assert(sizeof(OPERROR) <= sizeof(VirtualCode));
+	assert(sizeof(OPSAFEPOINT) <= sizeof(VirtualCode));
+	assert(sizeof(OPCHKSTACK) <= sizeof(VirtualCode));
+	assert(sizeof(OPTRACE) <= sizeof(VirtualCode));
 }
 
 static const char *T_opcode(kopcode_t opcode)
@@ -337,7 +337,7 @@ static kbool_t kopcode_hasjump(kopcode_t opcode)
 	}\
 } while(0)
 
-static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, VirtualMachineInstruction *pc)
+static VirtualCode* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, VirtualCode *pc)
 {
 #ifdef USE_DIRECT_THREADED_CODE
 	static void *OPJUMP[] = {
