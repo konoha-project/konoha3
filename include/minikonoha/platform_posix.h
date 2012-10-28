@@ -95,10 +95,10 @@ static kbool_t FormatModulePath(KonohaFactory *factory, char *buf, size_t bufsiz
 		path = factory->getenv_i("HOME");
 		local = "/.minikonoha/module";
 	}
-	snprintf(buf, bufsiz, "%s%s/%s/%s%s", path, local, moduleName, moduleName, ext);
+	snprintf(buf, bufsiz, "%s%s/%s%s", path, local, moduleName, ext);
 #ifdef K_PREFIX
 	if(!HasFile(buf)) {
-		snprintf(buf, bufsiz, K_PREFIX "/lib/minikonoha/" K_VERSION "/module" "/%s/%s%s", moduleName, moduleName, ext);
+		snprintf(buf, bufsiz, K_PREFIX "/lib/minikonoha/" K_VERSION "/module" "/%s%s", moduleName, ext);
 	}
 #endif
 	return HasFile(buf);
@@ -1099,6 +1099,66 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.reportException       = UI_reportException;
 
 	return (PlatformApi *)(&plat);
+}
+
+static void PosixFactory(KonohaFactory *factory)
+{
+	factory->name            = "shell";
+	factory->stacksize       = K_PAGESIZE * 4;
+	factory->getenv_i        =  (const char *(*)(const char *))getenv;
+	factory->malloc_i        = malloc;
+	factory->free_i          = free;
+	factory->setjmp_i        = ksetjmp;
+	factory->longjmp_i       = klongjmp;
+	loadI18N(factory, "UTF-8");
+
+	factory->printf_i        = printf;
+	factory->vprintf_i       = vprintf;
+	factory->snprintf_i      = snprintf;  // avoid to use Xsnprintf
+	factory->vsnprintf_i     = vsnprintf; // retreating..
+	factory->qsort_i         = qsort;
+	factory->exit_i          = exit;
+
+	// mutex
+	factory->pthread_mutex_init_i = kpthread_mutex_init;
+	factory->pthread_mutex_init_recursive = kpthread_mutex_init_recursive;
+	factory->pthread_mutex_lock_i    = kpthread_mutex_lock;
+	factory->pthread_mutex_unlock_i  = kpthread_mutex_unlock;
+	factory->pthread_mutex_trylock_i = kpthread_mutex_trylock;
+	factory->pthread_mutex_destroy_i = kpthread_mutex_destroy;
+
+	factory->LoadRuntimeModule   = LoadRuntimeModule;
+	factory->FormatPackagePath   = FormatPackagePath;
+	factory->LoadPackageHandler  = LoadPackageHandler;
+	factory->BEFORE_LoadScript   = BEFORE_LoadScript;
+	factory->AFTER_LoadScript    = AFTER_LoadScript;
+
+	factory->shortFilePath       = shortFilePath;
+	factory->formatTransparentPath = formatTransparentPath;
+	factory->loadScript          = loadScript;
+	factory->beginTag            = beginTag;
+	factory->endTag              = endTag;
+	factory->shortText           = shortText;
+	factory->debugPrintf         = (!verbose_debug) ? NOP_debugPrintf : debugPrintf;
+
+	// timer
+	factory->getTimeMilliSecond  = getTimeMilliSecond;
+
+	// readline
+	PlatformApi_loadReadline(factory);
+
+	// logger
+	factory->LOGGER_NAME         = "syslog";
+	factory->syslog_i            = syslog;
+	factory->vsyslog_i           = vsyslog;
+	factory->logger              = NULL;
+	factory->traceDataLog        = traceDataLog;
+	factory->diagnosis           = diagnosis;
+	factory->diagnosisFaultType  = DEOS_diagnosisFaultType;
+
+	factory->reportUserMessage     = UI_reportUserMessage;
+	factory->reportCompilerMessage = UI_reportCompilerMessage;
+	factory->reportException       = UI_reportException;
 }
 
 #ifdef __cplusplus

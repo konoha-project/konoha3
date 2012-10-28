@@ -266,7 +266,7 @@ static int KonohaContext_test(KonohaContext *kctx, const char *testname)
 	PLATAPI snprintf_i(result_file, 256,  "%s.tested", script_file);
 	FILE *fp = fopen(correct_file, "r");
 	stdlog = fopen(result_file, "w");
-	konoha_load((KonohaContext*)kctx, script_file);
+	konoha_load(kctx, script_file);
 	fprintf(stdlog, "Q.E.D.\n");   // Q.E.D.
 	fclose(stdlog);
 
@@ -432,8 +432,9 @@ static struct option long_options2[] = {
 	{NULL, 0, 0, 0},
 };
 
-static int konoha_parseopt(KonohaContext* konoha, KonohaFactory *plat, int argc, char **argv)
+static int konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
 {
+	KonohaFactory *plat = (KonohaFactory*)konoha->platApi;
 	kbool_t ret = true;
 	int scriptidx = 0;
 	while (1) {
@@ -547,33 +548,38 @@ static int konoha_parseopt(KonohaContext* konoha, KonohaFactory *plat, int argc,
 // -------------------------------------------------------------------------
 // ** main **
 
-int main(int argc, char *argv[])
-{
-	kbool_t ret = 1;
-	if(getenv("KONOHA_DEBUG") != NULL) {
-		verbose_debug = 1;
-		verbose_gc = 1;
-		verbose_sugar = 1;
-		verbose_code = 1;
-	}
-	PlatformApi *plat = KonohaUtils_getDefaultPlatformApi();
-	KonohaContext* konoha = konoha_open(plat);
-	ret = konoha_parseopt(konoha, (KonohaFactory*)plat, argc, argv);
-	konoha_close(konoha);
-	return ret ? konoha_detectFailedAssert: 0;
-}
-
-//int main2(int argc, char *argv[])
+//int main(int argc, char *argv[])
 //{
 //	kbool_t ret = 1;
-//	KonohaFactory *factory = KonohaFactory_GetDefault();
-//	KonohaFactory_InitRuntime(factory, "MiniVm");
-//	KonohaFactory_InitGC(factory, "ConcurrentBitMapGC");
-//	KonohaContext* konoha = KonohaFactory_newKonohaContext(factory);
+//	if(getenv("KONOHA_DEBUG") != NULL) {
+//		verbose_debug = 1;
+//		verbose_gc = 1;
+//		verbose_sugar = 1;
+//		verbose_code = 1;
+//	}
+//	PlatformApi *plat = KonohaUtils_getDefaultPlatformApi();
+//	KonohaContext* konoha = konoha_open(plat);
 //	ret = konoha_parseopt(konoha, (KonohaFactory*)plat, argc, argv);
 //	konoha_close(konoha);
 //	return ret ? konoha_detectFailedAssert: 0;
 //}
+
+
+void KonohaFactory_LoadRuntimeModule(KonohaFactory *factory, const char *name, ModuleType option);
+void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), int argc, char **argv);
+KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory);
+void Konoha_Destroy(KonohaContext *kctx);
+
+int main(int argc, char *argv[])
+{
+	kbool_t ret = 1;
+	struct KonohaFactory factory = {};
+	KonohaFactory_SetDefaultFactory(&factory, PosixFactory, argc, argv);
+	KonohaContext* konoha = KonohaFactory_CreateKonoha(&factory);
+	ret = konoha_parseopt(konoha, argc, argv);
+	Konoha_Destroy(konoha);
+	return ret ? konoha_detectFailedAssert: 0;
+}
 
 #ifdef __cplusplus
 }
