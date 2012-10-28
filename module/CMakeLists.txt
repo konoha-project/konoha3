@@ -11,7 +11,7 @@ set(KONOHA_MODULE_DIR
 
 macro(add_konoha_module ModuleName)
 	MESSAGE(STATUS "Compiling ${ModuleName} Module")
-	ENABLE_COVERAGE_INFO_IF_ENABLE()
+	ENABLE_COVERAGE_INFO_IF_ENABLE(MODULE_EXTRA_LIBRARY)
 	add_library(${ModuleName} SHARED ${MODULE_SOURCE_CODE})
 	target_link_libraries(${ModuleName} ${MODULE_EXTRA_LIBRARY})
 	set_target_properties(${ModuleName} PROPERTIES PREFIX "")
