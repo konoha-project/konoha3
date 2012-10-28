@@ -217,9 +217,9 @@ typedef struct {
 	kshortflag_t   flag;
 	kushort_t size;
 	kushort_t types[6];
-} kOPDATA_t;
+} DEFINE_OPSPEC;
 
-static const kOPDATA_t OPDATA[] = {
+static const DEFINE_OPSPEC OPDATA[] = {
 	{"NOP", 0, 0, { VMT_VOID}}, 
 	{"THCODE", 0, 1, { VMT_F, VMT_VOID}}, 
 	{"ENTER", 0, 0, { VMT_VOID}}, 

@@ -37,19 +37,17 @@ typedef struct {
 } kMethodInlineCache;
 
 #if defined(USE_DIRECT_THREADED_CODE)
-#define OP_(T)  NULL, 0, OPCODE_##T, 0
+#define OP_(T)  NULL, OPCODE_##T, 0
 #define KCODE_HEAD \
 	void *codeaddr; \
-	size_t count; \
 	kushort_t opcode; \
-	kfileline_t line
+	kushort_t line
 
 #else
-#define OP_(T)  0, OPCODE_##T, 0
+#define OP_(T)  OPCODE_##T, 0
 #define KCODE_HEAD \
-	size_t count; \
 	kopcode_t opcode; \
-	kfileline_t line  \
+	kushort_t line  \
 
 #endif/*USE_DIRECT_THREADED_CODE*/
 
@@ -69,6 +67,7 @@ typedef enum {
 	OPCODE_THCODE,
 	OPCODE_ENTER,
 	OPCODE_EXIT,
+	// OPCODE_CALLBACK,
 	OPCODE_NSET,
 	OPCODE_NMOV,
 	OPCODE_NMOVx,
@@ -153,6 +152,20 @@ typedef struct OPEXIT {
 	goto L_RETURN;\
 } while(0)
 
+/* NCALL */
+#define VPARAM_NCALL     0
+typedef struct OPNCALL {
+	KCODE_HEAD;
+} OPNCALL;
+
+#define OPEXEC_NCALL() do {\
+	(void)op;\
+	(rbp[K_MTDIDX2].methodCallInfo)->invokeMethodFunc(kctx, (KonohaStack *)(rbp));\
+	OPEXEC_RET();\
+} while(0)
+
+
+
 
 /* NSET */
 #define VPARAM_NSET        3, VMT_R, VMT_U, VMT_TY
@@ -208,6 +221,7 @@ typedef struct OPNEW {
 	uintptr_t p;
 	KonohaClass* ty;
 } OPNEW;
+
 
 #define OPEXEC_NEW(A, P, CT)   rbp[(A)].asObject = KLIB new_kObject(kctx, OnStack, CT, P)
 
@@ -269,18 +283,6 @@ typedef struct OPRET {
 	rbp = (krbp_t *)rbp[K_SHIFTIDX2].previousStack;\
 	pc = vpc; \
 	GOTO_PC(pc);\
-} while(0)
-
-/* NCALL */
-#define VPARAM_NCALL     0
-typedef struct OPNCALL {
-	KCODE_HEAD;
-} OPNCALL;
-
-#define OPEXEC_NCALL() do {\
-	(void)op;\
-	(rbp[K_MTDIDX2].methodCallInfo)->invokeMethodFunc(kctx, (KonohaStack *)(rbp));\
-	OPEXEC_RET();\
 } while(0)
 
 
@@ -401,6 +403,4 @@ typedef struct OPTRACE {
 	F(kctx, (KonohaStack *)(rbp + THIS), trace);\
 } while(0)
 
-
-
-#endif /* MINIVM_H */
+#endif /* OPCODE_H */

@@ -480,10 +480,11 @@ struct KonohaFactory {
 	const char* (*formatKonohaPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
 
 	// VirtualMachine
-	kbool_t     (*IsSupportedVirtualCode)(int opcode);
-	void        (*EncodeVirtcalCode)(void *, int opcode, ...);
-	void *      (*RunVirtualMachine)(KonohaContext *kctx, void *sfp, void *pc);
-	void        (*InitVisitor)(KonohaContext *kctx);
+	const char             *Module_VirtualMachine;
+	kbool_t               (*IsSupportedVirtualCode)(int opcode);
+	struct VirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, void *sfp, struct VirtualCode *pc);
+	void */*MethodFunc*/  (*GetVirtualMachineMethodFunc)(void);
+	struct VirtualCode*   (*GetBootCodeOfNativeMethodCall)(void);
 };
 
 #define LOG_END   0
@@ -1244,18 +1245,11 @@ static const char* MethodFlagData[] = {
 /* method data */
 #define DEND     (-1)
 
-#ifdef K_USING_WIN32_
-//#define KMETHOD  void CC_EXPORT
-//#define ITRNEXT int   CC_EXPORT
-//typedef void (CC_EXPORT *MethodFunc)(KonohaContext*, KonohaStack *);
-//typedef int  (CC_EXPORT *knh_Fitrnext)(KonohaContext*, KonohaStack *);
-#else
 #define KMETHOD    void  /*CC_FASTCALL_*/
 #define KMETHODCC  int  /*CC_FASTCALL_*/
 typedef KMETHOD   (*MethodFunc)(KonohaContext*, KonohaStack *);
 typedef KMETHOD   (*FastCallMethodFunc)(KonohaContext*, KonohaStack * _KFASTCALL);
 typedef KMETHODCC (*FmethodCallCC)(KonohaContext*, KonohaStack *, int, int, struct VirtualCode *);
-#endif
 
 struct kMethodVar {
 	KonohaObjectHeader     h;

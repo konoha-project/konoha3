@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/klib.h>
+#include <minikonoha/sugar.h>
 #include "opcode.h"
 
 #ifdef __cplusplus
@@ -45,33 +46,33 @@ typedef struct {
 	VirtualCodeType arg2;
 	VirtualCodeType arg3;
 	VirtualCodeType arg4;
-} kOPDATA_t;
+} DEFINE_OPSPEC;
 
-#define OPSPEC(T)  #T, 0, VPARAM_##T
+#define OPSPEC_(T)  #T, 0, VPARAM_##T
 
-static const kOPDATA_t OPDATA[] = {
-	{OPSPEC(NOP)},
-	{OPSPEC(THCODE)},
-	{OPSPEC(ENTER)},
-	{OPSPEC(EXIT)},
-	{OPSPEC(NMOV)},
-	{OPSPEC(NMOVx)},
-	{OPSPEC(XNMOV)},
-	{OPSPEC(NEW)},
-	{OPSPEC(NULL)},
-	{OPSPEC(LOOKUP)},
-	{OPSPEC(CALL)},
-	{OPSPEC(RET)},
-	{OPSPEC(NCALL)},
-	{OPSPEC(BNOT)},
-	{OPSPEC(JMP)},
-	{OPSPEC(JMPF)},
-	{OPSPEC(TRYJMP)},
-	{OPSPEC(YIELD)},
-	{OPSPEC(ERROR)},
-	{OPSPEC(SAFEPOINT)},
-	{OPSPEC(CHKSTACK)},
-	{OPSPEC(TRACE)},
+static const DEFINE_OPSPEC OPDATA[] = {
+	{OPSPEC_(NOP)},
+	{OPSPEC_(THCODE)},
+	{OPSPEC_(ENTER)},
+	{OPSPEC_(EXIT)},
+	{OPSPEC_(NMOV)},
+	{OPSPEC_(NMOVx)},
+	{OPSPEC_(XNMOV)},
+	{OPSPEC_(NEW)},
+	{OPSPEC_(NULL)},
+	{OPSPEC_(LOOKUP)},
+	{OPSPEC_(CALL)},
+	{OPSPEC_(RET)},
+	{OPSPEC_(NCALL)},
+	{OPSPEC_(BNOT)},
+	{OPSPEC_(JMP)},
+	{OPSPEC_(JMPF)},
+	{OPSPEC_(TRYJMP)},
+	{OPSPEC_(YIELD)},
+	{OPSPEC_(ERROR)},
+	{OPSPEC_(SAFEPOINT)},
+	{OPSPEC_(CHKSTACK)},
+	{OPSPEC_(TRACE)},
 };
 
 static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeType type, VirtualCode *c, size_t i, VirtualCode *pc_start)
@@ -101,6 +102,11 @@ static void DumpOpCode(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c, 
 	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg3, c, 2, pc_start);
 	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg4, c, 3, pc_start);
 	KLIB Kwb_printf(kctx, wb, "\n");
+}
+
+static void WriteVirtualCode(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c)
+{
+
 }
 
 /* ------------------------------------------------------------------------ */
@@ -189,7 +195,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #define GOTO_PC(pc)         GOTO_NEXT()
 #endif/*USE_DIRECT_THREADED_CODE*/
 
-static VirtualCode* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, VirtualCode *pc)
+static struct VirtualCode* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, struct VirtualCode *pc)
 {
 #ifdef USE_DIRECT_THREADED_CODE
 	static void *OPJUMP[] = {
@@ -323,10 +329,12 @@ static VirtualCode* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *s
 	return pc;
 }
 
+// -------------------------------------------------------------------------
+
 static struct VirtualCode  *BOOTCODE_ENTER = NULL;
 static struct VirtualCode  *BOOTCODE_NCALL = NULL;
 
-static void SetUpBootCode(KonohaContext *kctx)
+static void SetUpBootCode(void)
 {
 	if(BOOTCODE_ENTER != NULL) {
 		static struct VirtualCode InitCode[6] = {};
@@ -338,10 +346,15 @@ static void SetUpBootCode(KonohaContext *kctx)
 		memcpy(InitCode+1, &ncall,  sizeof(VirtualCode));
 		memcpy(InitCode+2, &enter,  sizeof(VirtualCode));
 		memcpy(InitCode+3, &exit,   sizeof(VirtualCode));
-		VirtualCode *pc = KonohaVirtualMachine_run(kctx, kctx->esp, InitCode);
+		VirtualCode *pc = KonohaVirtualMachine_run(NULL, NULL, InitCode);
 		BOOTCODE_NCALL = pc;
 		BOOTCODE_ENTER = pc+1;
 	}
+}
+
+static kbool_t IsSupportedVirtualCode(int opcode)
+{
+	return (((size_t)opcode) < OPCODE_MAX);
 }
 
 static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
@@ -350,10 +363,37 @@ static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sf
 	KonohaVirtualMachine_run(kctx, sfp, BOOTCODE_ENTER);
 }
 
+static MethodFunc GetVritualMachineMethodFunc(void)
+{
+	return MethodFunc_runVirtualMachine;
+}
+
+static struct VirtualCode* GetBootCodeOfNativeMethodCall(void)
+{
+	return BOOTCODE_NCALL;
+}
+
+//static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	KReturnUnboxValue(0);
+//}
+//
+//static void kMethod_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
+//{
+//	func = (func != NULL) ? func : MethodFunc_invokeAbstractMethod;
+//	((kMethodVar *)mtd)->invokeMethodFunc = func;
+//	((kMethodVar *)mtd)->pc_start = BOOTCODE_NCALL;
+//}
+
 // -------------------------------------------------------------------------
 
 kbool_t LoadMiniVMModule(KonohaFactory *factory, ModuleType type)
 {
+	SetUpBootCode();
+	factory->IsSupportedVirtualCode        = IsSupportedVirtualCode;
+	factory->RunVirtualMachine             = KonohaVirtualMachine_run;
+	factory->GetVirtualMachineMethodFunc   = GetVritualMachineMethodFunc;
+	factory->GetBootCodeOfNativeMethodCall = GetBootCodeOfNativeMethodCall;
 	return true;
 }
 
