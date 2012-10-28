@@ -438,7 +438,7 @@ static int konoha_parseopt(KonohaContext* konoha, KonohaFactory *plat, int argc,
 	int scriptidx = 0;
 	while (1) {
 		int option_index = 0;
-		int c = getopt_long (argc, argv, "icD:I:S:f:", long_options2, &option_index);
+		int c = getopt_long (argc, argv, "icD:I:M:S:f:", long_options2, &option_index);
 		if(c == -1) break; /* Detect the end of the options. */
 		switch (c) {
 		case 0:
