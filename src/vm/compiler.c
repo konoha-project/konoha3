@@ -251,11 +251,11 @@ static kBasicBlock *kStmt_getLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbo
 #include "jsvisitor.c"
 #endif
 /* ------------------------------------------------------------------------ */
-#if defined(K_USING_THCODE_)
+#if defined(USE_DIRECT_THREADED_CODE)
 #define TADDR   NULL, 0/*counter*/
 #else
 #define TADDR   0/*counter*/
-#endif/*K_USING_THCODE_*/
+#endif/*USE_DIRECT_THREADED_CODE*/
 #define ASMLINE  0
 
 #define OP_T(T) union { VirtualMachineInstruction op; T op_; }
@@ -1028,7 +1028,7 @@ static void dumpOPCODE(KonohaContext *kctx, VirtualMachineInstruction *c, Virtua
 
 static void _THCODE(KonohaContext *kctx, VirtualMachineInstruction *pc, void **codeaddr)
 {
-#ifdef K_USING_THCODE_
+#ifdef USE_DIRECT_THREADED_CODE
 	while(1) {
 		pc->codeaddr = codeaddr[pc->opcode];
 		if(pc->opcode == OPCODE_RET) break;

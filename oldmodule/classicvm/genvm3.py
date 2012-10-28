@@ -431,7 +431,7 @@ def write_exec(f):
 //#define K_USING_VMASMDISPATCH 1
 //#endif
 
-#ifdef K_USING_THCODE_
+#ifdef USE_DIRECT_THREADED_CODE
 #define CASE(x)  L_##x :
 #define NEXT_OP   (pc->codeaddr)
 #define JUMP      *(NEXT_OP)
@@ -447,7 +447,7 @@ def write_exec(f):
 #define DISPATCH_START(pc) goto *OPJUMP[pc->opcode]
 #define DISPATCH_END(pc)
 #define GOTO_PC(pc)        GOTO_NEXT()
-#else/*K_USING_THCODE_*/
+#else/*USE_DIRECT_THREADED_CODE*/
 #define OPJUMP      NULL
 #define CASE(x)     case OPCODE_##x :
 #define NEXT_OP     L_HEAD
@@ -457,11 +457,11 @@ def write_exec(f):
 #define DISPATCH_START(pc) L_HEAD:;switch(pc->opcode) {
 #define DISPATCH_END(pc)   } /*KNH_DIE("unknown opcode=%d", (int)pc->opcode)*/;
 #define GOTO_PC(pc)         GOTO_NEXT()
-#endif/*K_USING_THCODE_*/
+#endif/*USE_DIRECT_THREADED_CODE*/
 
 static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, VirtualMachineInstruction *pc)
 {
-#ifdef K_USING_THCODE_
+#ifdef USE_DIRECT_THREADED_CODE
 	static void *OPJUMP[] = {''')
 	c = 0
 	for kc in KCODE_LIST:

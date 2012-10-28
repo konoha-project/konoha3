@@ -32,7 +32,7 @@ extern "C" {
 #endif
 
 #ifndef _MSC_VER
-#define K_USING_THCODE_
+#define USE_DIRECT_THREADED_CODE
 #endif
 
 typedef struct kBasicBlockVar         kBasicBlock;
@@ -91,7 +91,7 @@ typedef struct {
 	ktype_t typeId; kparamId_t signature;
 } kMethodInlineCache;
 
-#if defined(K_USING_THCODE_)
+#if defined(USE_DIRECT_THREADED_CODE)
 #define KCODE_HEAD \
 	void *codeaddr; \
 	size_t count; \
@@ -104,7 +104,7 @@ typedef struct {
 	kopcode_t opcode; \
 	kfileline_t line  \
 
-#endif/*K_USING_THCODE_*/
+#endif/*USE_DIRECT_THREADED_CODE*/
 
 typedef struct VirtualMachineInstruction {
 	KCODE_HEAD;
