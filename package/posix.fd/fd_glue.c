@@ -33,9 +33,9 @@
 #include <dirent.h>
 //#include "fdconfig.h"
 
-#ifndef PATHMAX
-#define PATHMAX 256
-#endif /*PATHMAX*/
+//#ifndef PATHMAX
+//#define PATHMAX 256
+//#endif /*PATHMAX*/
 
 #ifdef __cplusplus
 extern "C"{
@@ -244,9 +244,29 @@ static KMETHOD System_fchdir(KonohaContext *kctx, KonohaStack *sfp)
 		KMakeTrace(trace, sfp);
 		int fault = PLATAPI diagnosisFaultType(kctx, SystemError, trace);
 		KTraceErrorPoint(trace, fault, "fchdir", LogUint("fd", fd));
-
 	}
 	KReturnUnboxValue(fd == 0);
+}
+
+//## boolean System.isatty(int fd);
+static KMETHOD System_isatty(KonohaContext *kctx, KonohaStack *sfp)
+{
+	int fd = sfp[1].intValue;
+	KReturnUnboxValue(isatty(fd) == 1);
+}
+
+//## String System.ttyname(int fd);
+static KMETHOD System_ttyname(KonohaContext *kctx, KonohaStack *sfp)
+{
+	int fd = sfp[1].intValue;
+	char buf[K_PAGESIZE];
+	int ret = ttyname_r(fd, buf, sizeof(buf));
+	if(ret != 0) {
+		KMakeTrace(trace, sfp);
+		int fault = PLATAPI diagnosisFaultType(kctx, SystemError, trace);
+		KTraceErrorPoint(trace, fault, "ttyname", LogUint("fd", fd), LogErrno);
+	}
+	KReturn(KLIB new_kString(kctx, OnStack, buf, strlen(buf), 0));
 }
 
 // --------------------------------------------------------------------------
@@ -254,16 +274,16 @@ static KMETHOD System_fchdir(KonohaContext *kctx, KonohaStack *sfp)
 #define _Public   kMethod_Public
 #define _Const    kMethod_Const
 #define _Static   kMethod_Static
-#define _Coercion kMethod_Coercion
+//#define _Coercion kMethod_Coercion
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-#define CT_Stat         cStat
-#define TY_Stat         cStat->typeId
-#define CT_DIR          cDIR
-#define TY_DIR          cDIR->typeId
-#define CT_Dirent       cDirent
-#define TY_Dirent       cDirent->typeId
+//#define CT_Stat         cStat
+//#define TY_Stat         cStat->typeId
+//#define CT_DIR          cDIR
+//#define TY_DIR          cDIR->typeId
+//#define CT_Dirent       cDirent
+//#define TY_Dirent       cDirent->typeId
 
 static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
@@ -279,6 +299,8 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 		_Public|_Static|_Im, _F(System_open),      TY_int,     TY_System, MN_("open"),   2, TY_String, FN_("pathname"), TY_int, FN_("flags"),
 		_Public|_Static|_Im, _F(System_open_mode), TY_int,     TY_System, MN_("open"),   3, TY_String, FN_("pathname"), TY_int, FN_("flags"), TY_int, FN_("mode"),
 		_Public|_Static|_Im, _F(System_fchdir),    TY_boolean, TY_System, MN_("fchdir"), 1, TY_int,    FN_("fd"),
+		_Public|_Static|_Im, _F(System_isatty),    TY_boolean, TY_System, MN_("isatty"), 1, TY_int,    FN_("fd"),
+		_Public|_Static|_Im, _F(System_ttyname),   TY_String, TY_System, MN_("ttyname"), 1, TY_int,    FN_("fd"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
