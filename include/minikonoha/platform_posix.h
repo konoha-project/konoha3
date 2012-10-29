@@ -556,9 +556,6 @@ static const char *formatTransparentPath(char *buf, size_t bufsiz, const char *p
 	return path;
 }
 
-
-
-
 static const char* beginTag(kinfotag_t t)
 {
 	DBG_ASSERT(t <= NoneTag);
@@ -1105,12 +1102,11 @@ static void PosixFactory(KonohaFactory *factory)
 {
 	factory->name            = "shell";
 	factory->stacksize       = K_PAGESIZE * 4;
-	factory->getenv_i        =  (const char *(*)(const char *))getenv;
+	factory->getenv_i        = (const char *(*)(const char *))getenv;
 	factory->malloc_i        = malloc;
 	factory->free_i          = free;
 	factory->setjmp_i        = ksetjmp;
 	factory->longjmp_i       = klongjmp;
-	loadI18N(factory, "UTF-8");
 
 	factory->printf_i        = printf;
 	factory->vprintf_i       = vprintf;
@@ -1120,41 +1116,43 @@ static void PosixFactory(KonohaFactory *factory)
 	factory->exit_i          = exit;
 
 	// mutex
-	factory->pthread_mutex_init_i = kpthread_mutex_init;
+	factory->pthread_mutex_init_i         = kpthread_mutex_init;
 	factory->pthread_mutex_init_recursive = kpthread_mutex_init_recursive;
-	factory->pthread_mutex_lock_i    = kpthread_mutex_lock;
-	factory->pthread_mutex_unlock_i  = kpthread_mutex_unlock;
-	factory->pthread_mutex_trylock_i = kpthread_mutex_trylock;
-	factory->pthread_mutex_destroy_i = kpthread_mutex_destroy;
+	factory->pthread_mutex_lock_i         = kpthread_mutex_lock;
+	factory->pthread_mutex_unlock_i       = kpthread_mutex_unlock;
+	factory->pthread_mutex_trylock_i      = kpthread_mutex_trylock;
+	factory->pthread_mutex_destroy_i      = kpthread_mutex_destroy;
 
-	factory->LoadRuntimeModule   = LoadRuntimeModule;
-	factory->FormatPackagePath   = FormatPackagePath;
-	factory->LoadPackageHandler  = LoadPackageHandler;
-	factory->BEFORE_LoadScript   = BEFORE_LoadScript;
-	factory->AFTER_LoadScript    = AFTER_LoadScript;
+	factory->LoadRuntimeModule     = LoadRuntimeModule;
+	factory->FormatPackagePath     = FormatPackagePath;
+	factory->LoadPackageHandler    = LoadPackageHandler;
+	factory->BEFORE_LoadScript     = BEFORE_LoadScript;
+	factory->AFTER_LoadScript      = AFTER_LoadScript;
 
-	factory->shortFilePath       = shortFilePath;
+	factory->shortFilePath         = shortFilePath;
 	factory->formatTransparentPath = formatTransparentPath;
-	factory->loadScript          = loadScript;
-	factory->beginTag            = beginTag;
-	factory->endTag              = endTag;
-	factory->shortText           = shortText;
-	factory->debugPrintf         = (!verbose_debug) ? NOP_debugPrintf : debugPrintf;
+	factory->loadScript            = loadScript;
+	factory->beginTag              = beginTag;
+	factory->endTag                = endTag;
+	factory->shortText             = shortText;
+	factory->debugPrintf           = (!verbose_debug) ? NOP_debugPrintf : debugPrintf;
 
 	// timer
-	factory->getTimeMilliSecond  = getTimeMilliSecond;
+	factory->getTimeMilliSecond    = getTimeMilliSecond;
+
+	loadI18N(factory, "UTF-8");
 
 	// readline
 	PlatformApi_loadReadline(factory);
 
 	// logger
-	factory->LOGGER_NAME         = "syslog";
-	factory->syslog_i            = syslog;
-	factory->vsyslog_i           = vsyslog;
-	factory->logger              = NULL;
-	factory->traceDataLog        = traceDataLog;
-	factory->diagnosis           = diagnosis;
-	factory->diagnosisFaultType  = DEOS_diagnosisFaultType;
+	factory->LOGGER_NAME           = "syslog";
+	factory->syslog_i              = syslog;
+	factory->vsyslog_i             = vsyslog;
+	factory->logger                = NULL;
+	factory->traceDataLog          = traceDataLog;
+	factory->diagnosis             = diagnosis;
+	factory->diagnosisFaultType    = DEOS_diagnosisFaultType;
 
 	factory->reportUserMessage     = UI_reportUserMessage;
 	factory->reportCompilerMessage = UI_reportCompilerMessage;
