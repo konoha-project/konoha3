@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 find ./test -maxdepth 3 -name '*.k' | while read utest; do
 	#echo "testing $utest .."
