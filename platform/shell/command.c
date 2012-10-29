@@ -266,7 +266,7 @@ static int KonohaContext_test(KonohaContext *kctx, const char *testname)
 	PLATAPI snprintf_i(result_file, 256,  "%s.tested", script_file);
 	FILE *fp = fopen(correct_file, "r");
 	stdlog = fopen(result_file, "w");
-	konoha_load((KonohaContext*)kctx, script_file);
+	konoha_load(kctx, script_file);
 	fprintf(stdlog, "Q.E.D.\n");   // Q.E.D.
 	fclose(stdlog);
 
@@ -423,6 +423,7 @@ static struct option long_options2[] = {
 	{"typecheck",       no_argument,       0, 'c'},
 	{"define",          required_argument, 0, 'D'},
 	{"import",          required_argument, 0, 'I'},
+	{"module",          required_argument, 0, 'M'},
 	{"startwith",       required_argument, 0, 'S'},
 	{"test",            required_argument, 0, 'T'},
 	{"test-with",       required_argument, 0, 'T'},
@@ -431,13 +432,14 @@ static struct option long_options2[] = {
 	{NULL, 0, 0, 0},
 };
 
-static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc, char **argv)
+static int konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
 {
+	KonohaFactory *plat = (KonohaFactory*)konoha->platApi;
 	kbool_t ret = true;
 	int scriptidx = 0;
 	while (1) {
 		int option_index = 0;
-		int c = getopt_long (argc, argv, "icD:I:S:f:", long_options2, &option_index);
+		int c = getopt_long (argc, argv, "icD:I:M:S:f:", long_options2, &option_index);
 		if(c == -1) break; /* Detect the end of the options. */
 		switch (c) {
 		case 0:
@@ -475,6 +477,10 @@ static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc
 
 		case 'I':
 			CommandLine_import(konoha, optarg);
+			break;
+
+		case 'M':
+			// already checked in KonohaFactory_SetDefaultModule
 			break;
 
 		case 'S':
@@ -542,19 +548,36 @@ static int konoha_parseopt(KonohaContext* konoha, PlatformApiVar *plat, int argc
 // -------------------------------------------------------------------------
 // ** main **
 
+//int main(int argc, char *argv[])
+//{
+//	kbool_t ret = 1;
+//	if(getenv("KONOHA_DEBUG") != NULL) {
+//		verbose_debug = 1;
+//		verbose_gc = 1;
+//		verbose_sugar = 1;
+//		verbose_code = 1;
+//	}
+//	PlatformApi *plat = KonohaUtils_getDefaultPlatformApi();
+//	KonohaContext* konoha = konoha_open(plat);
+//	ret = konoha_parseopt(konoha, (KonohaFactory*)plat, argc, argv);
+//	konoha_close(konoha);
+//	return ret ? konoha_detectFailedAssert: 0;
+//}
+
+
+void KonohaFactory_LoadRuntimeModule(KonohaFactory *factory, const char *name, ModuleType option);
+void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), int argc, char **argv);
+KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory);
+void Konoha_Destroy(KonohaContext *kctx);
+
 int main(int argc, char *argv[])
 {
 	kbool_t ret = 1;
-	if(getenv("KONOHA_DEBUG") != NULL) {
-		verbose_debug = 1;
-		verbose_gc = 1;
-		verbose_sugar = 1;
-		verbose_code = 1;
-	}
-	PlatformApi *plat = KonohaUtils_getDefaultPlatformApi();
-	KonohaContext* konoha = konoha_open(plat);
-	ret = konoha_parseopt(konoha, (PlatformApiVar*)plat, argc, argv);
-	konoha_close(konoha);
+	struct KonohaFactory factory = {};
+	KonohaFactory_SetDefaultFactory(&factory, PosixFactory, argc, argv);
+	KonohaContext* konoha = KonohaFactory_CreateKonoha(&factory);
+	ret = konoha_parseopt(konoha, argc, argv);
+	Konoha_Destroy(konoha);
 	return ret ? konoha_detectFailedAssert: 0;
 }
 

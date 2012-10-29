@@ -70,6 +70,102 @@ extern "C" {
 
 #include <minikonoha/klib.h>
 
+#ifndef K_PREFIX
+#define K_PREFIX  "/usr/local"
+#endif
+
+// -------------------------------------------------------------------------
+/* LoadRuntimeModule */
+
+static kbool_t HasFile(char *path)
+{
+	FILE *fp = fopen(path, "r");
+	if(fp != NULL) {
+		fclose(fp);
+		return true;
+	}
+	return false;
+}
+
+static kbool_t FormatModulePath(KonohaFactory *factory, char *buf, size_t bufsiz, const char *moduleName, const char *ext)
+{
+	const char *path = factory->getenv_i("KONOHA_HOME");
+	const char *local = "/module";
+	if(path == NULL) {
+		path = factory->getenv_i("HOME");
+		local = "/.minikonoha/module";
+	}
+	snprintf(buf, bufsiz, "%s%s/%s%s", path, local, moduleName, ext);
+#ifdef K_PREFIX
+	if(!HasFile(buf)) {
+		snprintf(buf, bufsiz, K_PREFIX "/lib/minikonoha/" K_VERSION "/module" "/%s%s", moduleName, ext);
+	}
+#endif
+	return HasFile(buf);
+}
+
+static kbool_t LoadRuntimeModule(KonohaFactory *factory, const char *moduleName, ModuleType type)
+{
+	char pathbuf[K_PATHMAX];
+	if(FormatModulePath(factory, pathbuf, sizeof(pathbuf), moduleName, K_OSDLLEXT)) {
+		void *gluehdr = dlopen(pathbuf, RTLD_LAZY);  // don't close until the program ends
+		if(gluehdr != NULL) {
+			char funcbuf[256];
+			snprintf(funcbuf, sizeof(funcbuf), "Load%sModule", moduleName);
+			ModuleLoadFunc load = (ModuleLoadFunc)dlsym(gluehdr, funcbuf);
+			if(load != NULL) {
+				return load(factory, type);
+			}
+		}
+	}
+	return false;
+}
+
+// -------------------------------------------------------------------------
+/* Package */
+
+static const char* ShortPackageName(const char *str)
+{
+	char *p = (char *) strrchr(str, '.');
+	return (p == NULL) ? str : (const char *)p+1;
+}
+
+static const char* FormatPackagePath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *packageName, const char *ext)
+{
+	const char *path = PLATAPI getenv_i("KONOHA_HOME");
+	const char *local = "/package";
+	if(path == NULL) {
+		path = PLATAPI getenv_i("HOME");
+		local = "/.minikonoha/package";
+	}
+	snprintf(buf, bufsiz, "%s%s/%s/%s%s", path, local, packageName, ShortPackageName(packageName), ext);
+#ifdef K_PREFIX
+	if(!HasFile(buf)) {
+		snprintf(buf, bufsiz, K_PREFIX "/lib/minikonoha/" K_VERSION "/package" "/%s/%s%s", packageName, ShortPackageName(packageName), ext);
+	}
+#endif
+	return HasFile(buf) ? (const char *)buf : NULL;
+}
+
+static KonohaPackageHandler *LoadPackageHandler(KonohaContext *kctx, const char *packageName)
+{
+	char pathbuf[256];
+	FormatPackagePath(kctx, pathbuf, sizeof(pathbuf), packageName, "_glue" K_OSDLLEXT);
+	void *gluehdr = dlopen(pathbuf, RTLD_LAZY);
+	if(gluehdr != NULL) {
+		char funcbuf[80];
+		snprintf(funcbuf, sizeof(funcbuf), "%s_init", ShortPackageName(packageName));
+		PackageLoadFunc f = (PackageLoadFunc)dlsym(gluehdr, funcbuf);
+		if(f != NULL) {
+			return f();
+		}
+	}
+	return NULL;
+}
+
+static void BEFORE_LoadScript(KonohaContext *kctx, const char *filename) { }
+static void AFTER_LoadScript(KonohaContext *kctx, const char *filename)  { }
+
 // -------------------------------------------------------------------------
 /* I18N */
 
@@ -232,7 +328,7 @@ static const char* I18N_formatSystemPath(KonohaContext *kctx, char *buf, size_t 
 
 #endif/*HAVE_ICONV_H*/
 
-static void loadI18N(PlatformApiVar *plat, const char *defaultCharSet)
+static void loadI18N(KonohaFactory *plat, const char *defaultCharSet)
 {
 	plat->systemCharset  = (defaultCharSet == NULL) ? "UTF-8" : defaultCharSet;
 	plat->iconv_open_i   = I18N_iconv_open;
@@ -495,62 +591,8 @@ static const char *formatTransparentPath(char *buf, size_t bufsiz, const char *p
 	return path;
 }
 
-#ifndef K_PREFIX
-#define K_PREFIX  "/usr/local"
-#endif
 
-static const char* packname(const char *str)
-{
-	char *p = (char *) strrchr(str, '.');
-	return (p == NULL) ? str : (const char *)p+1;
-}
 
-static const char* formatPackagePath(char *buf, size_t bufsiz, const char *packageName, const char *ext)
-{
-	FILE *fp = NULL;
-	char *path = getenv("KONOHA_PACKAGEPATH");
-	const char *local = "";
-	if(path == NULL) {
-		path = getenv("KONOHA_HOME");
-		local = "/package";
-	}
-	if(path == NULL) {
-		path = getenv("HOME");
-		local = "/.minikonoha/package";
-	}
-	snprintf(buf, bufsiz, "%s%s/%s/%s%s", path, local, packageName, packname(packageName), ext);
-#ifdef K_PREFIX
-	fp = fopen(buf, "r");
-	if(fp != NULL) {
-		fclose(fp);
-		return (const char *)buf;
-	}
-	snprintf(buf, bufsiz, K_PREFIX "/lib/minikonoha/" K_VERSION "/package" "/%s/%s%s", packageName, packname(packageName), ext);
-#endif
-	fp = fopen(buf, "r");
-	if(fp != NULL) {
-		fclose(fp);
-		return (const char *)buf;
-	}
-	return NULL;
-}
-
-static KonohaPackageHandler *loadPackageHandler(const char *packageName)
-{
-	char pathbuf[256];
-	formatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_glue" K_OSDLLEXT);
-	void *gluehdr = dlopen(pathbuf, RTLD_LAZY);
-	//fprintf(stderr, "pathbuf=%s, gluehdr=%p", pathbuf, gluehdr);
-	if(gluehdr != NULL) {
-		char funcbuf[80];
-		snprintf(funcbuf, sizeof(funcbuf), "%s_init", packname(packageName));
-		PackageLoadFunc f = (PackageLoadFunc)dlsym(gluehdr, funcbuf);
-		if(f != NULL) {
-			return f();
-		}
-	}
-	return NULL;
-}
 
 static const char* beginTag(kinfotag_t t)
 {
@@ -595,13 +637,14 @@ static void debugPrintf(const char *file, const char *func, int line, const char
 
 static void NOP_debugPrintf(const char *file, const char *func, int line, const char *fmt, ...)
 {
+
 }
 
 // --------------------------------------------------------------------------
 
 #include "libcode/libc_readline.h"
 
-static void PlatformApi_loadReadline(PlatformApiVar *plat)
+static void PlatformApi_loadReadline(KonohaFactory *plat)
 {
 	void *handler = dlopen("libreadline" K_OSDLLEXT, RTLD_LAZY);
 	if(handler != NULL) {
@@ -881,16 +924,16 @@ err:
 static kbool_t DEOS_checkSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
 {
 	DBG_P("filename='%s', line=%d", filename, line);
-//	if(!KonohaContext_isTrace(kctx)) {
-//#define N 64
-//		kbool_t res;
-//		char key[N] = {'\0'};
-//		snprintf(key, N, "\"%s:%d\"", filename, line);
-//		res = fetch_CoverageLog_from_Berkeley_DB(kctx, key);
-//		return res;
-//	}else{
+	if(!KonohaContext_isTrace(kctx)) {
+#define N 64
+		kbool_t res;
+		char key[N] = {'\0'};
+		snprintf(key, N, "\"%s:%d\"", filename, line);
+		res = fetch_CoverageLog_from_Berkeley_DB(kctx, key);
+		return res;
+	}else{
 		return true;
-//	}
+	}
 }
 
 static int DEOS_diagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
@@ -1032,7 +1075,7 @@ static void UI_reportException(KonohaContext *kctx, const char *exceptionName, i
 
 static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 {
-	static PlatformApiVar plat = {};
+	static KonohaFactory plat = {};
 	plat.name            = "shell";
 	plat.stacksize       = K_PAGESIZE * 4;
 	plat.getenv_i        =  (const char *(*)(const char *))getenv;
@@ -1064,11 +1107,14 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.pthread_cond_broadcast_i= kpthread_cond_broadcast;
 	plat.pthread_cond_destroy_i  = kpthread_cond_destroy;
 
-	plat.FilePathMax         = 1024;
+	plat.LoadRuntimeModule   = LoadRuntimeModule;
+	plat.FormatPackagePath   = FormatPackagePath;
+	plat.LoadPackageHandler  = LoadPackageHandler;
+	plat.BEFORE_LoadScript   = BEFORE_LoadScript;
+	plat.AFTER_LoadScript    = AFTER_LoadScript;
+
 	plat.shortFilePath       = shortFilePath;
-	plat.formatPackagePath   = formatPackagePath;
 	plat.formatTransparentPath = formatTransparentPath;
-	plat.loadPackageHandler  = loadPackageHandler;
 	plat.loadScript          = loadScript;
 	plat.beginTag            = beginTag;
 	plat.endTag              = endTag;
@@ -1095,6 +1141,66 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.reportException       = UI_reportException;
 
 	return (PlatformApi *)(&plat);
+}
+
+static void PosixFactory(KonohaFactory *factory)
+{
+	factory->name            = "shell";
+	factory->stacksize       = K_PAGESIZE * 4;
+	factory->getenv_i        =  (const char *(*)(const char *))getenv;
+	factory->malloc_i        = malloc;
+	factory->free_i          = free;
+	factory->setjmp_i        = ksetjmp;
+	factory->longjmp_i       = klongjmp;
+	loadI18N(factory, "UTF-8");
+
+	factory->printf_i        = printf;
+	factory->vprintf_i       = vprintf;
+	factory->snprintf_i      = snprintf;  // avoid to use Xsnprintf
+	factory->vsnprintf_i     = vsnprintf; // retreating..
+	factory->qsort_i         = qsort;
+	factory->exit_i          = exit;
+
+	// mutex
+	factory->pthread_mutex_init_i = kpthread_mutex_init;
+	factory->pthread_mutex_init_recursive = kpthread_mutex_init_recursive;
+	factory->pthread_mutex_lock_i    = kpthread_mutex_lock;
+	factory->pthread_mutex_unlock_i  = kpthread_mutex_unlock;
+	factory->pthread_mutex_trylock_i = kpthread_mutex_trylock;
+	factory->pthread_mutex_destroy_i = kpthread_mutex_destroy;
+
+	factory->LoadRuntimeModule   = LoadRuntimeModule;
+	factory->FormatPackagePath   = FormatPackagePath;
+	factory->LoadPackageHandler  = LoadPackageHandler;
+	factory->BEFORE_LoadScript   = BEFORE_LoadScript;
+	factory->AFTER_LoadScript    = AFTER_LoadScript;
+
+	factory->shortFilePath       = shortFilePath;
+	factory->formatTransparentPath = formatTransparentPath;
+	factory->loadScript          = loadScript;
+	factory->beginTag            = beginTag;
+	factory->endTag              = endTag;
+	factory->shortText           = shortText;
+	factory->debugPrintf         = (!verbose_debug) ? NOP_debugPrintf : debugPrintf;
+
+	// timer
+	factory->getTimeMilliSecond  = getTimeMilliSecond;
+
+	// readline
+	PlatformApi_loadReadline(factory);
+
+	// logger
+	factory->LOGGER_NAME         = "syslog";
+	factory->syslog_i            = syslog;
+	factory->vsyslog_i           = vsyslog;
+	factory->logger              = NULL;
+	factory->traceDataLog        = traceDataLog;
+	factory->diagnosis           = diagnosis;
+	factory->diagnosisFaultType  = DEOS_diagnosisFaultType;
+
+	factory->reportUserMessage     = UI_reportUserMessage;
+	factory->reportCompilerMessage = UI_reportCompilerMessage;
+	factory->reportException       = UI_reportException;
 }
 
 #ifdef __cplusplus

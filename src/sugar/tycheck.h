@@ -229,7 +229,8 @@ static kbool_t SugarSyntax_tyCheckStmt(KonohaContext *kctx, SugarSyntax *syn, kS
 
 static kbool_t kBlock_tyCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
 {
-	int i, result = true, lvarsize = gma->genv->localScope.varsize;
+	size_t i;
+	int result = true, lvarsize = gma->genv->localScope.varsize;
 	for(i = 0; i < kArray_size(bk->StmtList); i++) {
 		kStmt *stmt = (kStmt *)bk->StmtList->ObjectItems[i];
 		if(Stmt_isDone(stmt)) continue;

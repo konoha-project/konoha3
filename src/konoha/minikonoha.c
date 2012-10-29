@@ -247,11 +247,13 @@ void konoha_close(KonohaContext* konoha)
 	KonohaContext_free(konoha, (KonohaContextVar *)konoha);
 }
 
-kbool_t konoha_load(KonohaContext* konoha, const char *scriptname)
+kbool_t konoha_load(KonohaContext* kctx, const char *scriptname)
 {
-	BEGIN_(konoha);
-	kbool_t res = (MODSUGAR_loadScript(konoha, scriptname, strlen(scriptname), 0) == K_CONTINUE);
-	END_(konoha);
+	PLATAPI BEFORE_LoadScript(kctx, scriptname);
+	BEGIN_(kctx);
+	kbool_t res = (MODSUGAR_loadScript(kctx, scriptname, strlen(scriptname), 0) == K_CONTINUE);
+	END_(kctx);
+	PLATAPI AFTER_LoadScript(kctx, scriptname);
 	return res;
 }
 
@@ -262,6 +264,50 @@ kbool_t konoha_eval(KonohaContext* konoha, const char *script, kfileline_t uline
 	END_(konoha);
 	return res;
 }
+
+// -------------------------------------------------------------------------
+/* Factory */
+
+void KonohaFactory_LoadRuntimeModule(KonohaFactory *factory, const char *name, ModuleType option)
+{
+	if(!factory->LoadRuntimeModule(factory, name, option)) {
+		factory->printf_i("failed to load module: %s\n", name);
+		factory->exit_i(1);
+	}
+}
+
+void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), int argc, const char **argv)
+{
+	int i;
+	SetPlatformApi(factory);
+	for(i = 0; i < argc; i++) {
+		const char *t = argv[i];
+		if(t[0] == '-' && t[1] == 'M') {   /* -MName */
+			const char *moduleName = t + 2;
+			if(moduleName[0] == 0 && i+1 < argc) {  /* -M Name */
+				i++;
+				moduleName = argv[i];
+			}
+			KonohaFactory_LoadRuntimeModule(factory, moduleName, ReleaseModule);
+		}
+	}
+}
+
+KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory)
+{
+	KonohaFactory *platapi = (KonohaFactory *)factory->malloc_i(sizeof(KonohaFactory));
+	memcpy(platapi, factory, sizeof(KonohaFactory));
+	konoha_init();
+	return (KonohaContext *)new_KonohaContext(NULL, (PlatformApi *)platapi);
+}
+
+void Konoha_Destroy(KonohaContext *kctx)
+{
+	KonohaFactory *platapi = (KonohaFactory*)kctx->platApi;
+	KonohaContext_free(kctx, (KonohaContextVar *)kctx);
+	platapi->free_i(platapi);
+}
+
 
 #ifdef __cplusplus
 }

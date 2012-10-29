@@ -1,2 +1,2 @@
- ** OutOfStringBoundaryException (JSMultibyteStringCharAt.k:11)
+ ** IndexOutOfBoundsException (JSMultibyteStringCharAt.k:11)
 Q.E.D.

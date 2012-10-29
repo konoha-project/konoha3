@@ -120,7 +120,7 @@ static KMETHOD Bytes_setAll(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kBytes *ba = sfp[0].asBytes;
 	int bytesize = ba->bytesize;
-	memset(ba->buf, sfp[2].intValue, bytesize);
+	memset(ba->buf, sfp[1].intValue, bytesize);
 	KReturnVoid();
 }
 

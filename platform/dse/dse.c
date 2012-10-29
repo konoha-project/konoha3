@@ -316,7 +316,7 @@ static void *dse_dispatch(void *arg)
 		// DEBUG_PRINT("%s", msg);
 		KonohaContext* konoha = konoha_open(dse_platform);
 		dse_define(konoha, msg);
-		ret = konoha_load(konoha, script);
+		ret = Konoha_Load(konoha, script);
 		konoha_close(konoha);
 		Message_delete(msg);
 	}
@@ -375,7 +375,7 @@ static void DSE_start(DSE *dse, const char *addr, int ip)
 	int i;
 	pthread_t thread_pool[threadsize];
 	PlatformApi *dse_platform = KonohaUtils_getDefaultPlatformApi();
-	PlatformApiVar *dse_platformVar = (PlatformApiVar *)dse_platform;
+	KonohaFactory *dse_platformVar = (KonohaFactory *)dse_platform;
 	dse_platformVar->name = "dse";
 	dse_platformVar->syslog_i = lplog;
 	struct targs args = {

@@ -174,7 +174,7 @@ static void kFile_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer
 static KMETHOD File_new(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KMakeTrace(trace, sfp);
-	char buffer[PLATAPI FilePathMax];
+	char buffer[K_PATHMAX];
 	kString *path = sfp[1].asString;
 	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), S_text(path), S_size(path), trace);
 	const char *mode = S_text(sfp[2].asString);
@@ -410,7 +410,7 @@ static KMETHOD File_setWriterCharset(KonohaContext *kctx, KonohaStack *sfp)
 //## @Const String File.scriptPath(String path);
 static KMETHOD File_scriptPath(KonohaContext *kctx, KonohaStack *sfp)
 {
-	char scriptPathBuf[PLATAPI FilePathMax];
+	char scriptPathBuf[K_PATHMAX];
 	const char *scriptPath = PLATAPI formatTransparentPath(scriptPathBuf, sizeof(scriptPathBuf), FileId_t(sfp[K_RTNIDX].callerFileLine), S_text(sfp[1].asString));
 	kStringVar *resultValue = (kStringVar*)KLIB new_kString(kctx, OnStack, scriptPath, strlen(scriptPath), 0);
 	if(kString_is(Literal, sfp[1].asString)) {

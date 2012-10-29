@@ -506,7 +506,6 @@ static kbool_t python_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		_Public|_Const|_Im|_Coercion, _F(Int_toPyObject), TY_PyObject, TY_int, MN_to(TY_PyObject), 0,
 		_Public|_Const|_Im|_Coercion, _F(PyObject_toString), TY_String, TY_PyObject, MN_to(TY_String), 0,
 		_Public|_Const|_Im|_Coercion, _F(String_toPyObject), TY_PyObject, TY_String, MN_to(TY_PyObject), 0,
-		_Public|_Const|_Im|_Coercion, _F(PyObject_toString), TY_String, TY_PyObject, MN_("toString"),  0,
 		//_Public,                      _F(Array_add), TY_void, TY_Array, MN_("add"), 1, TY_0, FN_("value"),
 		// [TODO] add following konoha class.
 		//_Public|_Const|_Im|_Coercion, _F(PyObject_toList), TY_Array, TY_PyObject, MN_to(TY_Array), 0,

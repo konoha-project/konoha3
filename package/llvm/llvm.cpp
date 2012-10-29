@@ -5241,7 +5241,7 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		_Public|_Const|_Coercion|_Im, _F(Object_toLLVMBasicBlock), TY_BasicBlock, TY_Object, MN_to(TY_BasicBlock), 0,
 		DEND,
 	};
-	KLIB kNameSpace_loadMethodData(kctx, NULL, methoddata);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, methoddata, trace);
 	KLIB kNameSpace_loadConstData(kctx, ns, (const char **)IntAttributes, 0);
 	KLIB kNameSpace_loadConstData(kctx, ns, (const char **)IntIntrinsic, 0);
 	KLIB kNameSpace_loadConstData(kctx, ns, (const char **)IntGlobalVariable, 0);
@@ -5262,8 +5262,7 @@ KDEFINE_PACKAGE* llvm_init(void)
 		K_CHECKSUM,
 		"llvm", "3.0", "", "", "",
 		llvm_initPackage,
-		llvm_setupPackage,
-		K_REVISION
+		llvm_setupPackage
 	};
 
 	return &d;

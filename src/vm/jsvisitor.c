@@ -326,6 +326,13 @@ static void JSVisitor_ConvertAndEmitMethodName(KonohaContext *kctx, IRBuilder *s
 			JSVisitor_emitString(kctx, self, "new ", CT_t(CT_(receiver->ty)), "");
 			KLIB Kwb_free(&wb);
 			return;
+		}else if(strcmp(SYM_t(mtd->mn), "newList") == 0) {
+			KLIB Kwb_free(&wb);
+			return;
+		}else if(strcmp(SYM_t(mtd->mn), "newArray") == 0) {
+			JSVisitor_emitString(kctx, self, "new Array", "", "");
+			KLIB Kwb_free(&wb);
+			return;
 		}else if(!isGlobal) {
 			if(receiver->build == TEXPR_NULL) {
 				JSVisitor_emitString(kctx, self, CT_t(CT_(receiver->ty)), "", "");
@@ -335,16 +342,28 @@ static void JSVisitor_ConvertAndEmitMethodName(KonohaContext *kctx, IRBuilder *s
 		}
 		switch(SYM_PRE_ID(mtd->mn)) {
 		case kSymbolPrefix_GET:
-			if(!isGlobal) {
-				JSVisitor_emitString(kctx, self, ".", "", "");
+			if(kArray_size(expr->cons) > 2) {
+				JSVisitor_emitString(kctx, self, "[", "", "");
+				handleExpr(kctx, self, kExpr_at(expr, 2));
+				JSVisitor_emitString(kctx, self, "]", "", "");
+			}else{
+				if(!isGlobal) {
+					JSVisitor_emitString(kctx, self, ".", "", "");
+				}
+				JSVisitor_emitString(kctx, self, "", SYM_t(mtd->mn), "");
 			}
-			JSVisitor_emitString(kctx, self, "", SYM_t(mtd->mn), "");
 			break;
 		case kSymbolPrefix_SET:
-			if(isGlobal) {
-				JSVisitor_emitString(kctx, self, "var ", "", "");
+			if(kArray_size(expr->cons) > 3) {
+				JSVisitor_emitString(kctx, self, "[", "", "");
+				handleExpr(kctx, self, kExpr_at(expr, 2));
+				JSVisitor_emitString(kctx, self, "]", "", "");
 			}else{
-				JSVisitor_emitString(kctx, self, ".", "", "");
+				if(isGlobal) {
+					JSVisitor_emitString(kctx, self, "var ", "", "");
+				}else{
+					JSVisitor_emitString(kctx, self, ".", "", "");
+				}
 			}
 			JSVisitor_emitString(kctx, self, "", SYM_t(mtd->mn), " = ");
 			break;
@@ -364,6 +383,7 @@ static void JSVisitor_ConvertAndEmitMethodName(KonohaContext *kctx, IRBuilder *s
 static void JSVisitor_visitCallExpr(KonohaContext *kctx, IRBuilder *self, kExpr *expr)
 {
 	kMethod *mtd = CallExpr_getMethod(expr);
+	kbool_t isArray = false;
 
 	if(kArray_size(expr->cons) == 2 && MethodName_isUnaryOperator(kctx, mtd->mn)) {
 		JSVisitor_emitString(kctx, self, T_mn(mtd->mn), "(");
@@ -381,7 +401,9 @@ static void JSVisitor_visitCallExpr(KonohaContext *kctx, IRBuilder *self, kExpr 
 		kExpr *receiver = kExpr_at(expr, 1);
 		if(mtd == DUMPER(self)->visitingMethod) {
 			JSVisitor_emitString(kctx, self, "arguments.callee", "", "");
-		}else{
+		}else if(strcmp(SYM_t(mtd->mn), "newList") == 0) {
+			isArray = true;
+		}else {
 			JSVisitor_ConvertAndEmitMethodName(kctx, self, expr, receiver, mtd);
 		}
 		switch(SYM_PRE_ID(mtd->mn)) {
@@ -389,19 +411,23 @@ static void JSVisitor_visitCallExpr(KonohaContext *kctx, IRBuilder *self, kExpr 
 		case kSymbolPrefix_TO:
 			break;
 		case kSymbolPrefix_SET:
-			handleExpr(kctx, self, kExpr_at(expr, 2));
+			if(kArray_size(expr->cons) > 3) {
+				handleExpr(kctx, self, kExpr_at(expr, 3));
+			}else{
+				handleExpr(kctx, self, kExpr_at(expr, 2));
+			}
 			break;
 		default:{
 			unsigned i;
 			unsigned n = kArray_size(expr->cons);
-			JSVisitor_emitString(kctx, self, "(", "", "");
+			JSVisitor_emitString(kctx, self, isArray ? "[" : "(", "", "");
 			for(i = 2; i < n;) {
 				handleExpr(kctx, self, kExpr_at(expr, i));
 				if(++i < n) {
 					JSVisitor_emitString(kctx, self, ", ", "", "");
 				}
 			}
-			JSVisitor_emitString(kctx, self, ")", "", "");
+			JSVisitor_emitString(kctx, self, isArray ? "]" : ")", "", "");
 			break;
 		}}
 	}
@@ -516,7 +542,7 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 			if(base->typeId != TY_Object) {
 				JSVisitor_emitNewLine(kctx, builder, "_super.call(this);");
 			}
-			int i;
+			kushort_t i;
 			KonohaClassField *field = class->fieldItems;
 			kObject *constList = class->defaultNullValue_OnGlobalConstList;
 			for(i = 0; i < class->fieldsize; ++i) {

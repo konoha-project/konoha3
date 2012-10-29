@@ -32,7 +32,7 @@ extern "C" {
 #endif
 
 #ifndef _MSC_VER
-#define K_USING_THCODE_
+#define USE_DIRECT_THREADED_CODE
 #endif
 
 typedef struct kBasicBlockVar         kBasicBlock;
@@ -56,8 +56,8 @@ typedef struct {
 	KonohaClass     *cBasicBlock;
 	KonohaClass     *cByteCode;
 	kByteCode       *codeNull;
-	struct VirtualMachineInstruction  *PRECOMPILED_ENTER;
-	struct VirtualMachineInstruction  *PRECOMPILED_NCALL;
+	struct VirtualCode  *PRECOMPILED_ENTER;
+	struct VirtualCode  *PRECOMPILED_NCALL;
 } KModuleByteCode;
 
 typedef struct {
@@ -83,7 +83,7 @@ typedef struct ksfx_t {
 	ksfpidx_t n;
 } ksfx_t;
 
-typedef void (*ThreadCodeFunc)(KonohaContext *kctx, struct VirtualMachineInstruction *, void**);
+typedef void (*ThreadCodeFunc)(KonohaContext *kctx, struct VirtualCode *, void**);
 typedef void (*TraceFunc)(KonohaContext *kctx, KonohaStack *sfp, KTraceInfo *trace);
 
 typedef struct {
@@ -91,7 +91,7 @@ typedef struct {
 	ktype_t typeId; kparamId_t signature;
 } kMethodInlineCache;
 
-#if defined(K_USING_THCODE_)
+#if defined(USE_DIRECT_THREADED_CODE)
 #define KCODE_HEAD \
 	void *codeaddr; \
 	size_t count; \
@@ -104,9 +104,9 @@ typedef struct {
 	kopcode_t opcode; \
 	kfileline_t line  \
 
-#endif/*K_USING_THCODE_*/
+#endif/*USE_DIRECT_THREADED_CODE*/
 
-typedef struct VirtualMachineInstruction {
+typedef struct VirtualCode {
 	KCODE_HEAD;
 	union {
 		intptr_t data[5];
@@ -115,7 +115,7 @@ typedef struct VirtualMachineInstruction {
 		KonohaClass *ct[5];
 		char *u[5];
 	};
-} VirtualMachineInstruction;
+} VirtualCode;
 
 /* ------------------------------------------------------------------------ */
 
@@ -128,13 +128,13 @@ struct kBasicBlockVar {
 	KGrowingArray codeTable;
 	kBasicBlock        *nextBlock;
 	kBasicBlock        *branchBlock;
-	VirtualMachineInstruction *code;
-	VirtualMachineInstruction *opjmp;
+	VirtualCode *code;
+	VirtualCode *opjmp;
 };
 
 struct kByteCodeVar {
 	KonohaObjectHeader h;
-	VirtualMachineInstruction*   code;
+	VirtualCode*   code;
 	size_t    codesize;
 	kString  *source;
 	kfileline_t   fileid;
@@ -153,9 +153,9 @@ static void kNameSpace_lookupMethodWithInlineCache(KonohaContext *kctx, KonohaSt
 	sfp[K_MTDIDX].methodCallInfo = mtd;
 }
 
-static VirtualMachineInstruction* KonohaVirtualMachine_run(KonohaContext *, KonohaStack *, VirtualMachineInstruction *);
+static VirtualCode* KonohaVirtualMachine_run(KonohaContext *, KonohaStack *, VirtualCode *);
 
-static VirtualMachineInstruction *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStack *sfp, VirtualMachineInstruction *pc)
+static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStack *sfp, VirtualCode *pc)
 {
 	int jmpresult;
 	INIT_GCSTACK();
@@ -188,6 +188,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 
 //-------------------------------------------------------------------------
 
+#define PC_NEXT(pc)   pc+1
 #define rshift(rbp, x_) (rbp+(x_))
 #define SFP(rbp)  ((KonohaStack *)(rbp))
 #define SFPIDX(n) ((n)/2)
@@ -203,7 +204,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 
 #define OPEXEC_ENTER() do {\
 	(void)op;\
-	VirtualMachineInstruction *vpc = PC_NEXT(pc);\
+	VirtualCode *vpc = PC_NEXT(pc);\
 	pc = (rbp[K_MTDIDX2].methodCallInfo)->pc_start;\
 	/*rbp[K_SHIFTIDX2].shift = 0;*/\
 	rbp[K_PCIDX2].pc = vpc;\
@@ -237,7 +238,6 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 //#define OPEXEC_BOX(A, B, CT)   KUnsafeFieldSet(rbp[(A)].asObject, KLIB new_kObject(kctx, OnStack, CT, rbp[(B)].intValue))
 //#define OPEXEC_UNBOX(A, B, CT) rbp[(A)].unboxValue = N_toint(rbp[B].asObject)
 
-#define PC_NEXT(pc)   pc+1
 
 #define OPEXEC_LOOKUP(THIS, NS, MTD) do {\
 	kNameSpace_lookupMethodWithInlineCache(kctx, SFP(rshift(rbp, THIS)), NS, (kMethod**)&MTD);\
@@ -274,7 +274,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 
 #define OPEXEC_RET0() do {\
 	(void)op;\
-	VirtualMachineInstruction *vpc = rbp[K_PCIDX2].pc;\
+	VirtualCode *vpc = rbp[K_PCIDX2].pc;\
 	intptr_t vshift = rbp[K_SHIFTIDX2].shift;\
 	rbp[K_MTDIDX2].methodCallInfo = NULL;\
 	rbp = rshift(rbp, -vshift); \
@@ -284,7 +284,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 
 #define OPEXEC_RET() do {\
 	(void)op;\
-	VirtualMachineInstruction *vpc = rbp[K_PCIDX2].pc;\
+	VirtualCode *vpc = rbp[K_PCIDX2].pc;\
 	rbp = (krbp_t *)rbp[K_SHIFTIDX2].previousStack;\
 	pc = vpc; \
 	GOTO_PC(pc);\
@@ -589,7 +589,7 @@ GOTO_PC(pc); \
 } while(0)
 
 #define OPEXEC_VEXEC() do {\
-	VirtualMachineInstruction *vpc = PC_NEXT(pc);\
+	VirtualCode *vpc = PC_NEXT(pc);\
 	pc = (rbp[K_MTDIDX2].methodCallInfo)->pc_start;\
 	rbp[K_SHIFTIDX2].shift = 0;\
 	rbp[K_PCIDX2].pc = vpc;\

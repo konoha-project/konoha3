@@ -26,12 +26,8 @@
 #define PARAMDOM_void                  0
 #define PARAMDOM_DefaultGenericsParam  1
 
-#ifdef _MSC_VER
-#define typeof decltype
-#endif
-
 static kObject* DEFAULT_fnull(KonohaContext *kctx, KonohaClass *ct);
-static void kArray_add(KonohaContext *kctx, kArray *o, kObject *value);
+static void kArray_add(KonohaContext *kctx, kArray *o, kAbstractObject *);
 
 static void kObject_init(KonohaContext *kctx, kObject *o, void *conf)
 {
@@ -319,7 +315,7 @@ static void kArray_ensureMinimumSize(KonohaContext *kctx, struct _kAbstractArray
 	}
 }
 
-static void kArray_add(KonohaContext *kctx, kArray *o, kObject *value)
+static void kArray_add(KonohaContext *kctx, kArray *o, kAbstractObject *value)
 {
 	size_t asize = kArray_size(o);
 	struct _kAbstractArray *a = (struct _kAbstractArray *)o;
@@ -329,7 +325,7 @@ static void kArray_add(KonohaContext *kctx, kArray *o, kObject *value)
 	a->a.bytesize = (asize+1) * sizeof(void *);
 }
 
-static void kArray_insert(KonohaContext *kctx, kArray *o, size_t n, kObject *v)
+static void kArray_insert(KonohaContext *kctx, kArray *o, size_t n, kAbstractObject *v)
 {
 	size_t asize = kArray_size(o);
 	struct _kAbstractArray *a = (struct _kAbstractArray *)o;
@@ -486,7 +482,7 @@ static void kMethod_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vi
 }
 
 #define CT_MethodVar CT_Method
-static kMethod* new_kMethod(KonohaContext *kctx, kArray *gcstack, uintptr_t flag, ktype_t cid, kmethodn_t mn, MethodFunc func)
+static kMethodVar* new_kMethod(KonohaContext *kctx, kArray *gcstack, uintptr_t flag, ktype_t cid, kmethodn_t mn, MethodFunc func)
 {
 	kMethodVar* mtd = new_(MethodVar, NULL, gcstack);
 	mtd->flag       = flag;
@@ -1016,8 +1012,8 @@ static void initKonohaLib(KonohaLibVar *l)
 	l->new_kString             = new_kString;
 	l->kObject_writeToBuffer   = kObject_writeToBuffer;
 
-	l->kArray_add           = (typeof(l->kArray_add))kArray_add;
-	l->kArray_insert        = (typeof(l->kArray_insert))kArray_insert;
+	l->kArray_add           = kArray_add;
+	l->kArray_insert        = kArray_insert;
 	l->kArray_clear         = kArray_clear;
 
 	l->KonohaClass_define   = KonohaClass_define;

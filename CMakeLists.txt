@@ -102,7 +102,7 @@ set(PACKAGES
 	curl
 	llvm
 ##	ijit
-##	jansson
+	jansson
 	mecab
 	python
 #	apache   ## removed Module bugs
@@ -257,9 +257,9 @@ macro(add_konoha_test test_name test_file)
 			set_tests_properties(${test_name} PROPERTIES TIMEOUT 10)
 		endif(TEST_STRESS)
 	else(test_name MATCHES "Stress")
-		if(NOT test_name MATCHES "Shell")
+		if(NOT test_name MATCHES "^Shell")
 			add_test_with_property(${test_name} --test-with ${test_file})
-		endif(NOT test_name MATCHES "Shell")
+		endif(NOT test_name MATCHES "^Shell")
 	endif(test_name MATCHES "Stress")
 endmacro(add_konoha_test test_name test_file)
 
@@ -297,12 +297,16 @@ macro(PKGNAME _STR _RESULT)
 	POP(${_tmp} "." ${_RESULT})
 endmacro()
 
-macro(create_package_project _PKGNAME)
-	project(${_PKGNAME})
+macro(ENABLE_COVERAGE_INFO_IF_ENABLE VARNAME)
 	if(TEST_COVERAGE)
 		add_definitions(-fprofile-arcs -ftest-coverage)
-		set(PACKAGE_EXTRA_LIBRARY ${PACKAGE_EXTRA_LIBRARY} -fprofile-arcs -ftest-coverage)
+		set(${VARNAME} ${${VARNAME}} -fprofile-arcs -ftest-coverage)
 	endif(TEST_COVERAGE)
+endmacro(ENABLE_COVERAGE_INFO_IF_ENABLE VARNAME)
+
+macro(create_package_project _PKGNAME)
+	project(${_PKGNAME})
+	ENABLE_COVERAGE_INFO_IF_ENABLE(PACKAGE_EXTRA_LIBRARY)
 	file(GLOB_RECURSE test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/*.k)
 	foreach(f ${test_files})
 		string(REPLACE // / f ${f})
@@ -373,6 +377,8 @@ macro(add_konoha_package PKGNAME)
 		create_package_project(${PKGNAME})
 	endif (__BUILD)
 endmacro(add_konoha_package)
+
+add_subdirectory(module)
 
 foreach(dir ${PACKAGES})
 	set(dir "${CMAKE_CURRENT_SOURCE_DIR}/package/${dir}")

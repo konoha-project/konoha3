@@ -22,7 +22,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#define USE_FILE 1
 #include <stdio.h>
 #include <errno.h>
 #include <unistd.h>
@@ -33,7 +32,6 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-//#include <minikonoha/konoha_common.h>
 
 #ifdef __cplusplus
 extern "C"{

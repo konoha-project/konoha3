@@ -93,7 +93,7 @@ static kunused int dummy_iconv_close(uintptr_t i)
 	return 0;
 }
 
-static void loadIconv(PlatformApiVar *plat)
+static void loadIconv(KonohaFactory *plat)
 {
 #ifdef _ICONV_H
 	plat->iconv_open_i    = (ficonv_open)iconv_open;
@@ -347,7 +347,7 @@ static const char* packname(const char *str)
 	return (p == NULL) ? str : (const char *)p+1;
 }
 
-static const char* formatPackagePath(char *buf, size_t bufsiz, const char *packageName, const char *ext)
+static const char* FormatPackagePath(char *buf, size_t bufsiz, const char *packageName, const char *ext)
 {
 	FILE *fp = NULL;
 	char *path = getenv("KONOHA_PACKAGEPATH");
@@ -377,10 +377,10 @@ static const char* formatPackagePath(char *buf, size_t bufsiz, const char *packa
 	return NULL;
 }
 
-static KonohaPackageHandler *loadPackageHandler(const char *packageName)
+static KonohaPackageHandler *LoadPackageHandler(const char *packageName)
 {
 	char pathbuf[256];
-	formatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_glue" K_OSDLLEXT);
+	FormatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_glue" K_OSDLLEXT);
 	HMODULE gluehdr = LoadLibrary(pathbuf);
 	//fprintf(stderr, "pathbuf=%s, gluehdr=%p", pathbuf, gluehdr);
 	if(gluehdr != NULL) {
@@ -464,7 +464,7 @@ static void NOP_debugPrintf(const char *file, const char *func, int line, const 
 
 #include "libcode/libc_readline.h"
 
-static void PlatformApi_loadReadline(PlatformApiVar *plat)
+static void PlatformApi_loadReadline(KonohaFactory *plat)
 {
 	HMODULE handler = LoadLibrary("libreadline" K_OSDLLEXT);
 	if(handler != NULL) {
@@ -502,7 +502,7 @@ static void diagnosis(void) {
 
 static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 {
-	static PlatformApiVar plat = {};
+	static KonohaFactory plat = {};
 	plat.name            = "shell";
 	plat.stacksize       = K_PAGESIZE * 4;
 	plat.getenv_i        =  (const char *(*)(const char *))getenv;
@@ -528,11 +528,11 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.pthread_mutex_destroy_i = kpthread_mutex_destroy;
 
 	plat.shortFilePath       = shortFilePath;
-	plat.formatPackagePath   = formatPackagePath;
+	plat.FormatPackagePath   = FormatPackagePath;
 	plat.formatTransparentPath = formatTransparentPath;
 	plat.formatKonohaPath = formatKonohaPath;
 	plat.formatSystemPath = formatSystemPath;
-	plat.loadPackageHandler  = loadPackageHandler;
+	plat.LoadPackageHandler  = LoadPackageHandler;
 	plat.loadScript          = loadScript;
 	plat.beginTag            = beginTag;
 	plat.endTag              = endTag;

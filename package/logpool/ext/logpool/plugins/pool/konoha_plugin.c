@@ -65,7 +65,7 @@ static void dbg_p(const char *file, const char *func, int L, const char *fmt, ..
     va_end(ap);
 }
 
-static const PlatformApiVar logpool_platform = {
+static const KonohaFactory logpool_platform = {
     .name      = "shell",
     .stacksize = K_PAGESIZE * 4,
     .malloc_i  = malloc,
@@ -80,9 +80,9 @@ static const PlatformApiVar logpool_platform = {
     .vsnprintf_i     = vsnprintf,
     .qsort_i         = qsort,
     .exit_i          = exit,
-    .formatPackagePath  = formatPackagePath,
+    .FormatPackagePath  = FormatPackagePath,
     .formatTransparentPath = formatTransparentPath,
-    .loadPackageHandler = loadPackageHandler,
+    .LoadPackageHandler = LoadPackageHandler,
     .loadScript         = loadScript,
     .beginTag           = beginTag,
     .endTag             = endTag,

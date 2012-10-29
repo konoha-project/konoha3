@@ -114,7 +114,6 @@ static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
 			dumpToken(kctx, expr->termToken, -1);
 		}
 		else {
-			int i;
 			if(expr->syn == NULL) {
 				DUMP_P("[%d] Expr: kw=NULL, size=%ld", n, kArray_size(expr->cons));
 				DBG_ASSERT(IS_Array(expr->cons));
@@ -122,6 +121,7 @@ static void dumpExpr(KonohaContext *kctx, int n, int nest, kExpr *expr)
 			else {
 				DUMP_P("[%d] Expr: kw='%s%s', syn=%p, size=%ld", n, PSYM_t(expr->syn->keyword), expr->syn, kArray_size(expr->cons));
 				DUMP_P("\n");
+				size_t i;
 				for(i=0; i < kArray_size(expr->cons); i++) {
 					kObject *o = expr->cons->ObjectItems[i];
 					if(IS_Expr(o)) {

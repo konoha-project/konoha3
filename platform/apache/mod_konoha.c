@@ -47,7 +47,7 @@ typedef struct konoha_config {
 module AP_MODULE_DECLARE_DATA konoha_module;
 static const char *apache_package_path = NULL;
 
-static const char *apache_formatPackagePath(char *buf, size_t bufsiz, const char *packageName, const char *ext)
+static const char *apache_FormatPackagePath(char *buf, size_t bufsiz, const char *packageName, const char *ext)
 {
 	if(apache_package_path) {
 		snprintf(buf, bufsiz, "%s/%s/%s%s", apache_package_path, packageName, packname(packageName), ext);
@@ -57,13 +57,13 @@ static const char *apache_formatPackagePath(char *buf, size_t bufsiz, const char
 			return buf;
 		}
 	}
-	return formatPackagePath(buf, bufsiz, packageName, ext);
+	return FormatPackagePath(buf, bufsiz, packageName, ext);
 }
 
-static KonohaPackageHandler *apache_loadPackageHandler(const char *packageName)
+static KonohaPackageHandler *apache_LoadPackageHandler(const char *packageName)
 {
 	char pathbuf[256];
-	apache_formatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_glue" K_OSDLLEXT);
+	apache_FormatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_glue" K_OSDLLEXT);
 	void *gluehdr = dlopen(pathbuf, RTLD_LAZY);
 	//fprintf(stderr, "pathbuf=%s, gluehdr=%p", pathbuf, gluehdr);
 	if(gluehdr != NULL) {
@@ -82,11 +82,11 @@ static const char* apache_endTag(kinfotag_t t) { (void)t; return ""; }
 
 static PlatformApi *getApachePlatform()
 {
-	PlatformApiVar *apache_platformvar = (PlatformApiVar *)KonohaUtils_getDefaultPlatformApi();
+	KonohaFactory *apache_platformvar = (KonohaFactory *)KonohaUtils_getDefaultPlatformApi();
 	apache_platformvar->name               = "apache";
 	apache_platformvar->stacksize          = K_PAGESIZE;
-	apache_platformvar->formatPackagePath  = apache_formatPackagePath;
-	apache_platformvar->loadPackageHandler = apache_loadPackageHandler;
+	apache_platformvar->FormatPackagePath  = apache_FormatPackagePath;
+	apache_platformvar->LoadPackageHandler = apache_LoadPackageHandler;
 	apache_platformvar->beginTag           = apache_beginTag;
 	apache_platformvar->endTag             = apache_endTag;
 	return (PlatformApi *)apache_platformvar;
@@ -277,7 +277,7 @@ static int konoha_handler(request_rec *r)
 	//assert(cRequest != NULL);
 	r->content_encoding = "utf-8";
 	ap_log_rerror(APLOG_MARK, APLOG_CRIT, 0, r, "filename=%s", r->filename);
-	if(konoha_load(konoha, r->filename)) {
+	if(Konoha_Load(konoha, r->filename)) {
 		return DECLINED;
 	}
 

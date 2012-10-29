@@ -275,14 +275,20 @@ typedef struct {
 typedef const struct KonohaContextVar   KonohaContext;
 typedef struct KonohaContextVar         KonohaContextVar;
 
-typedef const struct PlatformApiVar  PlatformApi;
-typedef struct PlatformApiVar        PlatformApiVar;
+typedef const struct KonohaFactory  PlatformApi;
+typedef struct KonohaFactory        KonohaFactory;
 typedef const struct KonohaLibVar    KonohaLib;
 typedef struct KonohaLibVar          KonohaLibVar;
 
 #define TEXTSIZE(T)   T, (sizeof(T) - 1)
 #define PLATAPI       (kctx->platApi)->
 #define KLIB          (kctx->klib)->
+
+typedef enum {
+	VerboseModule, ReleaseModule, ExperimentalModule
+} ModuleType;
+
+typedef kbool_t (*ModuleLoadFunc)(KonohaFactory *, ModuleType);
 
 #define KDEFINE_PACKAGE KonohaPackageHandler
 typedef struct KonohaPackageHandlerVar KonohaPackageHandler;
@@ -393,7 +399,7 @@ typedef struct KTraceInfo {
 
 #define Trace_pline(trace) (trace == NULL ? 0 : trace->pline)
 
-struct PlatformApiVar {
+struct KonohaFactory {
 	// settings
 	const char *name;
 	size_t  stacksize;
@@ -408,18 +414,6 @@ struct PlatformApiVar {
 
 	// system info
 	const char* (*getenv_i)(const char *);
-
-	// I18N
-	uintptr_t   (*iconv_open_i)(KonohaContext *, const char* tocode, const char* fromcode, KTraceInfo *);
-	size_t      (*iconv_i)(KonohaContext *, uintptr_t iconv, ICONV_INBUF_CONST char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft, int *isTooBigRef, KTraceInfo *trace);
-	size_t      (*iconv_i_memcpyStyle)(KonohaContext *, uintptr_t iconv, char **outbuf, size_t *outbytesleft, ICONV_INBUF_CONST char **inbuf, size_t *inbytesleft, int *isTooBigRef, KTraceInfo *trace);
-	int         (*iconv_close_i)(KonohaContext *, uintptr_t iconv);
-	const char* systemCharset;
-	kbool_t     (*isSystemCharsetUTF8)(KonohaContext *);
-	uintptr_t   (*iconvUTF8ToSystemCharset)(KonohaContext *, KTraceInfo *);
-	uintptr_t   (*iconvSystemCharsetToUTF8)(KonohaContext *, KTraceInfo *);
-	const char* (*formatSystemPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
-	const char* (*formatKonohaPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
 
 	// time
 	unsigned long long (*getTimeMilliSecond)(void);
@@ -450,14 +444,17 @@ struct PlatformApiVar {
 	int     (*pthread_cond_destroy_i)(kmutex_cond_t *cond);
 
 	/* high-level functions */
+	kbool_t  (*LoadRuntimeModule)(struct KonohaFactory*, const char *moduleName, ModuleType);
 
 	// file load
-	size_t FilePathMax;
-	const char* (*shortFilePath)(const char *path);
-	const char* (*formatPackagePath)(char *buf, size_t bufsiz, const char *packageName, const char *ext);
-	const char* (*formatTransparentPath)(char *buf, size_t bufsiz, const char *parent, const char *path);
-	KonohaPackageHandler* (*loadPackageHandler)(const char *packageName);
+	const char* (*FormatPackagePath)(KonohaContext *, char *buf, size_t bufsiz, const char *packageName, const char *ext);
+	KonohaPackageHandler* (*LoadPackageHandler)(KonohaContext *, const char *packageName);
+	void (*BEFORE_LoadScript)(KonohaContext *, const char *filename);
 	int (*loadScript)(const char *filePath, long uline, void *thunk, int (*evalFunc)(const char*, long, int *, void *));
+	void (*AFTER_LoadScript)(KonohaContext *, const char *filename);
+
+	const char* (*shortFilePath)(const char *path);
+	const char* (*formatTransparentPath)(char *buf, size_t bufsiz, const char *parent, const char *path);
 
 	// message (cui)
 	char*  (*readline_i)(const char *prompt);
@@ -466,10 +463,11 @@ struct PlatformApiVar {
 	const char* (*shortText)(const char *msg);
 	const char* (*beginTag)(kinfotag_t);
 	const char* (*endTag)(kinfotag_t);
-//	void (*reportCaughtException)(const char *exceptionName, const char *scriptName, int line, const char *optionalMessage);
 	void  (*debugPrintf)(const char *file, const char *func, int line, const char *fmt, ...) __PRINTFMT(4, 5);
 
+
 	// logging, trace
+	kbool_t detectedAssertionFailure;
 	const char *LOGGER_NAME;
 	void  (*syslog_i)(int priority, const char *message, ...) __PRINTFMT(2, 3);
 	void  (*vsyslog_i)(int priority, const char *message, va_list args);
@@ -482,6 +480,26 @@ struct PlatformApiVar {
 	void (*reportUserMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *, int isNewLine);
 	void (*reportCompilerMessage)(KonohaContext *, kinfotag_t, const char *);
 	void (*reportException)(KonohaContext *, const char *, int fault, const char *, struct KonohaValueVar *bottomStack, struct KonohaValueVar *topStack);
+
+	// I18N Module
+	const char* Module_I18N;
+	uintptr_t   (*iconv_open_i)(KonohaContext *, const char* tocode, const char* fromcode, KTraceInfo *);
+	size_t      (*iconv_i)(KonohaContext *, uintptr_t iconv, ICONV_INBUF_CONST char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft, int *isTooBigRef, KTraceInfo *trace);
+	size_t      (*iconv_i_memcpyStyle)(KonohaContext *, uintptr_t iconv, char **outbuf, size_t *outbytesleft, ICONV_INBUF_CONST char **inbuf, size_t *inbytesleft, int *isTooBigRef, KTraceInfo *trace);
+	int         (*iconv_close_i)(KonohaContext *, uintptr_t iconv);
+	const char* systemCharset;
+	kbool_t     (*isSystemCharsetUTF8)(KonohaContext *);
+	uintptr_t   (*iconvUTF8ToSystemCharset)(KonohaContext *, KTraceInfo *);
+	uintptr_t   (*iconvSystemCharsetToUTF8)(KonohaContext *, KTraceInfo *);
+	const char* (*formatSystemPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
+	const char* (*formatKonohaPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
+
+	// VirtualMachine
+	const char             *Module_VirtualMachine;
+	kbool_t               (*IsSupportedVirtualCode)(int opcode);
+	struct VirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, void *sfp, struct VirtualCode *pc);
+	void */*MethodFunc*/  (*GetVirtualMachineMethodFunc)(void);
+	struct VirtualCode*   (*GetBootCodeOfNativeMethodCall)(void);
 };
 
 #define LOG_END   0
@@ -603,7 +621,7 @@ typedef struct KGrowingArray {
 		char                              *bytebuf;
 		const struct KonohaClassVar      **classItems;
 		KKeyValue                         *keyValueItems;
-		struct VirtualMachineInstruction  *codeItems;
+		struct VirtualCode  *codeItems;
 		kObject                          **ObjectItems;
 	};
 	size_t bytemax;
@@ -780,7 +798,7 @@ struct KonohaModuleContext {
 	kfloat_t    floatValue; \
 	struct KonohaValueVar *previousStack;\
 	intptr_t    shift0;  \
-	struct VirtualMachineInstruction  *pc; \
+	struct VirtualCode  *pc; \
 	kMethod     *methodCallInfo; \
 	uintptr_t    callerFileLine
 
@@ -996,9 +1014,6 @@ struct KonohaClassField {
 /* ------------------------------------------------------------------------ */
 /* Object */
 
-/* magic flag */
-#define MAGICFLAG(f)             (K_OBJECT_MAGIC | ((kmagicflag_t)(f) & K_CFLAGMASK))
-
 // common
 #define kObject_NullObject       ((kmagicflag_t)(1<<0))
 #define kObject_GCFlag           ((kmagicflag_t)(1<<1))
@@ -1016,9 +1031,10 @@ struct KonohaClassField {
 #define kObject_is(P, O, A)      (TFLAG_is(kmagicflag_t,(O)->h.magicflag, kObject_##P))
 #define kObject_set(P, O, B)     TFLAG_set(kmagicflag_t, ((kObjectVar *)O)->h.magicflag, kObject_##P, B)
 
-#define kObject_MagicMask           (1|1<<2|1<<3|1<<4|1<<5|1<<6|1<<7|1<<8|1<<9)
-#define kObject_magic(O)            (uintptr_t)((O)->.magicflag >> 10)
-#define kObject_setMagic(O,MAGIC)   ((kObjectVar *)O)->h.magicflag = ((((uintptr_t)M) << 10) & ((O)->.magicflag & kObject_MagicFlag))
+#define kObject_hashCode(O)          (uintptr_t)((O)->h.magicflag >> (sizeof(kushort_t)*8))
+#define kObject_flags(O)             ((kushort_t)((O)->h.magicflag))
+#define kObject_setHashCode(O, HASH) ((kObjectVar *)O)->h.magicflag = (((uintptr_t)HASH) << (sizeof(kushort_t)*8) | kObject_flags(O))
+//#define kObject_setMagic(O, MAGIC)   ((kObjectVar *)O)->h.magicflag = ((((uintptr_t)M) << 10) & ((O)->.magicflag & kObject_MagicFlag))
 
 #define IS_NULL(o)                 ((((o)->h.magicflag) & kObject_NullObject) == kObject_NullObject)
 #define IS_NOTNULL(o)              ((((o)->h.magicflag) & kObject_NullObject) != kObject_NullObject)
@@ -1242,18 +1258,11 @@ static const char* MethodFlagData[] = {
 /* method data */
 #define DEND     (-1)
 
-#ifdef K_USING_WIN32_
-//#define KMETHOD  void CC_EXPORT
-//#define ITRNEXT int   CC_EXPORT
-//typedef void (CC_EXPORT *MethodFunc)(KonohaContext*, KonohaStack *);
-//typedef int  (CC_EXPORT *knh_Fitrnext)(KonohaContext*, KonohaStack *);
-#else
 #define KMETHOD    void  /*CC_FASTCALL_*/
 #define KMETHODCC  int  /*CC_FASTCALL_*/
 typedef KMETHOD   (*MethodFunc)(KonohaContext*, KonohaStack *);
 typedef KMETHOD   (*FastCallMethodFunc)(KonohaContext*, KonohaStack * _KFASTCALL);
-typedef KMETHODCC (*FmethodCallCC)(KonohaContext*, KonohaStack *, int, int, struct VirtualMachineInstruction *);
-#endif
+typedef KMETHODCC (*FmethodCallCC)(KonohaContext*, KonohaStack *, int, int, struct VirtualCode *);
 
 struct kMethodVar {
 	KonohaObjectHeader     h;
@@ -1262,7 +1271,7 @@ struct kMethodVar {
 		FastCallMethodFunc      invokeFastCallMethodFunc;
 	};
 	union {/* body*/
-		struct VirtualMachineInstruction        *pc_start;
+		struct VirtualCode        *pc_start;
 		FmethodCallCC         callcc_1;
 	};
 	uintptr_t         flag;
@@ -1280,8 +1289,8 @@ struct kMethodVar {
 typedef struct MethodMatch {
 	kNameSpace   *ns;
 	ksymbol_t     mn;
-	int           paramsize;
-	int           paramdom;
+	kushort_t     paramsize;
+	kparamId_t    paramdom;
 	kparamtype_t *param;
 	kbool_t       isBreak;
 	kMethod      *foundMethodNULL;
@@ -1295,7 +1304,8 @@ typedef kbool_t (*MethodMatchFunc)(KonohaContext *kctx, kMethod *mtd, MethodMatc
 #define K_SHIFTIDX  (-3)
 #define K_PCIDX     (-2)
 #define K_MTDIDX    (-1)
-#define K_DYNSIDX   (-1)
+#define K_NSIDX     (-2)
+#define K_TRACEIDX  (-2)
 
 //#define K_NEXTIDX    2
 #define K_ULINEIDX2  (-7)
@@ -1433,8 +1443,9 @@ struct KonohaPackageHandlerVar {
 	const char *libname;
 	const char *libversion;
 	const char *note;
-	kbool_t (*initPackage)   (KonohaContext *kctx, kNameSpace *, int, const char**, KTraceInfo *);
-	kbool_t (*setupPackage)  (KonohaContext *kctx, kNameSpace *, isFirstTime_t, KTraceInfo *);
+	kbool_t (*initPackage)     (KonohaContext *kctx, kNameSpace *, int, const char**, KTraceInfo *);
+	kbool_t (*setupPackage)    (KonohaContext *kctx, kNameSpace *, isFirstTime_t, KTraceInfo *);
+	kbool_t (*loadPlatformApi) (KonohaFactory *platapi);
 	const char *konoha_revision;
 };
 
@@ -1463,6 +1474,7 @@ struct KonohaLibVar {
 	void  (*Kfree)(KonohaContext*, void *, size_t);
 
 	/* Garbage Collection API */
+	/* This Must be Going to PlatformApi */
 	GcContext *(*KnewGcContext)(KonohaContext *kctx);
 	void (*KdeleteGcContext)(GcContext *gc);
 	void (*KscheduleGC)     (GcContext *gc);
@@ -1822,7 +1834,7 @@ typedef struct {
 ///* Konoha API */
 extern KonohaContext* konoha_open(const PlatformApi *);
 extern void konoha_close(KonohaContext* konoha);
-extern kbool_t konoha_load(KonohaContext* konoha, const char *scriptfile);
+extern kbool_t Konoha_Load(KonohaContext* konoha, const char *scriptfile);
 extern kbool_t konoha_eval(KonohaContext* konoha, const char *script, kfileline_t uline);
 extern kbool_t konoha_run(KonohaContext* konoha);  // TODO
 
