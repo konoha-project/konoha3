@@ -285,7 +285,7 @@ typedef struct KonohaLibVar          KonohaLibVar;
 #define KLIB          (kctx->klib)->
 
 typedef enum {
-	VerboseModule, ReleaseModule, ExperimentalModule,
+	VerboseModule, ReleaseModule, ExperimentalModule
 } ModuleType;
 
 typedef kbool_t (*ModuleLoadFunc)(KonohaFactory *, ModuleType);
