@@ -44,7 +44,6 @@ extern "C" {
 #endif
 
 //#define MEMORY_DEBUG 1
-#define DEBUG_CONCGC 1
 
 /* memory config */
 
@@ -2030,14 +2029,10 @@ static void concgc_start_the_world(HeapManager *mng, enum GCPhase phase)
 	PLATAPI pthread_cond_broadcast_i(&mng->start_cond);
 }
 
-#define getTime() (clock() * 1000000 / CLOCKS_PER_SEC)
 static void *concgc_thread_entry(void *o)
 {
 	HeapManager *mng = (HeapManager *)o;
 	KonohaContext *kctx = mng->kctx;
-#ifdef DEBUG_CONCGC
-	int max_stoptime = 0;
-#endif
 	int count = 0;
 	enum gc_mode mode = GC_MAJOR_FLAG;// only major gc now
 	while(true) {
@@ -2048,50 +2043,27 @@ static void *concgc_thread_entry(void *o)
 		tracer.mng    = mng;
 		tracer.mstack = mstack;
 		bmgc_gc_init(mng, mode);
-
-		// init and firstmark phase *STW
+		// init and firstmark phase
 		concgc_stop_the_world(mng, GCPHASE_INIT);
 		if(mng->phase == GCPHASE_EXIT) break;
-#ifdef DEBUG_CONCGC
-		int time_start = getTime();
-		int time_markconc, time_markrem;
-#endif
 		((KonohaLibVar*)kctx->klib)->Kwrite_barrier = Kwrite_barrier_concmark_phase;
 		((KonohaLibVar*)kctx->klib)->KupdateObjectField = KupdateObjectField_concmark_phase;
 		KonohaContext_reftraceAll(kctx, &tracer.base);
 		if(count++ > 8) {
-			// concurrent mark
+			// concurrent mark phase
 			concgc_start_the_world(mng, GCPHASE_MARK_CONC);
-#ifdef DEBUG_CONCGC
-			time_markconc = getTime();
-#endif
 			concgc_mark(mng, mstack, &tracer.base);
-			// remset mark
+			// remset mark phase
 			concgc_stop_the_world(mng, GCPHASE_MARK_REM);
 			if(mng->phase == GCPHASE_EXIT) break;
-#ifdef DEBUG_CONCGC
-			time_markrem = getTime();
-#endif
 			RememberSet_reftrace(kctx, mng, &tracer.base, mstack);
 			concgc_mark(mng, mstack, &tracer.base);
 		} else {
-			// mark
-#ifdef DEBUG_CONCGC
-			time_markconc = getTime();
-			time_markrem = time_markconc;
-#endif
+			// mark phase
 			concgc_mark(mng, mstack, &tracer.base);
 		}
-
-		// sweep
+		// sweep phase
 		bmgc_gc_sweep(mng);
-#ifdef DEBUG_CONCGC
-		int time_end = getTime();
-		int rmtime = time_end - time_markrem;
-		if(rmtime > max_stoptime) max_stoptime = rmtime;
-		fprintf(stderr, "**GC-END concmark=%dns remark&sweep=%dns maxstop=%d\n", 
-				time_markrem-time_markconc, rmtime, max_stoptime);
-#endif
 		KSET_KLIB(Kwrite_barrier, 0);
 		KSET_KLIB(KupdateObjectField, 0);
 		concgc_start_the_world(mng, GCPHASE_NONE);
