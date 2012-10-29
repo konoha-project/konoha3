@@ -50,7 +50,7 @@ static KMETHOD KString_charAt(KonohaContext *kctx,  KonohaStack *sfp)
 	RETURNchar(ret);
 }
 
-// Returns the character 
+// Returns the character
 //##["@Public", "int", "String_codePointAt", "int index", "@Returns the character "]
 static KMETHOD KString_codePointAt(KonohaContext *kctx,  KonohaStack *sfp)
 {
@@ -64,7 +64,7 @@ static KMETHOD KString_codePointAt(KonohaContext *kctx,  KonohaStack *sfp)
 	//RETURNint(ret);
 }
 
-// Returns the character 
+// Returns the character
 //##["@Public", "int", "String_codePointBefore", "int index", "@Returns the character "]
 static KMETHOD KString_codePointBefore(KonohaContext *kctx,  KonohaStack *sfp)
 {
@@ -352,12 +352,12 @@ static kbool_t LoadJavaAPI(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trac
 		_Public|_Const|_Im, _F(KString_compareTo), TY_int, TY_String, MN_("compareTo"), 1, TY_String, FN_("anotherString"),
 		_Public|_Const|_Im, _F(KString_compareToIgnoreCase), TY_int, TY_String, MN_("compareToIgnoreCase"), 1, TY_String, FN_("str"),
 		_Public|_Const|_Im, _F(KString_endsWith), TY_boolean, TY_String, MN_("endsWith"), 1, TY_String, FN_("suffix"),
-		_Public|_Const    , _F(KString_hashCode), TY_int, TY_String, MN_("hashCode"), 0, 
+		_Public|_Const    , _F(KString_hashCode), TY_int, TY_String, MN_("hashCode"), 0,
 		_Public|_Const|_Im, _F(KString_indexOf0), TY_int, TY_String, MN_("indexOf"), 2, TY_int, FN_("ch"),TY_int, FN_("fromIndex"),
 		_Public|_Const|_Im, _F(KString_indexOf1), TY_int, TY_String, MN_("indexOf"), 2, TY_String, FN_("str"),TY_int, FN_("fromIndex"),
 		_Public|_Const|_Im, _F(KString_lastIndexOf0), TY_int, TY_String, MN_("lastIndexOf"), 2, TY_int, FN_("ch"),TY_int, FN_("fromIndex"),
 		_Public|_Const|_Im, _F(KString_lastIndexOf1), TY_int, TY_String, MN_("lastIndexOf"), 2, TY_String, FN_("str"),TY_int, FN_("fromIndex"),
-		_Public|_Const|_Im, _F(KString_length), TY_int, TY_String, MN_("length"), 0, 
+		_Public|_Const|_Im, _F(KString_length), TY_int, TY_String, MN_("length"), 0,
 		_Public|_Const|_Im, _F(KString_matches), TY_boolean, TY_String, MN_("matches"), 1, TY_String, FN_("regex"),
 		_Public|_Const|_Im, _F(KString_offsetByCodePoints), TY_int, TY_String, MN_("offsetByCodePoints"), 2, TY_int, FN_("index"),TY_int, FN_("codePointOffset"),
 		_Public|_Const|_Im, _F(KString_regionMatches), TY_boolean, TY_String, MN_("regionMaches"), 5, TY_boolean, FN_("ignoreCase"),TY_int, FN_("toffset"),TY_String, FN_("other"),TY_int, FN_("ooffset"),TY_int, FN_("len"),

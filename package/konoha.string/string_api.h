@@ -48,14 +48,14 @@ static kushort_t String_hashCode(KonohaContext *kctx, kString *self)
 
 /*
  * Get the bytesize from text and number of multibyte characters.
- * e.g.) utf8_getMultibyteByteSize("あいうえお", 3) => 9
+ * e.g.) MultibyteText_bytesize("あいうえお", 3) => 9
  */
 static size_t MultibyteText_bytesize(const char *text, size_t size)
 {
-	const unsigned char *start = (const unsigned char *)text;
+	const unsigned char *pos = (const unsigned char *)text;
 	size_t i, mindex = 0;
 	for(i = 0; i < size; i++) {
-		mindex += utf8len(*(start + mindex));
+		mindex += utf8len(*(pos + mindex));
 	}
 	return mindex;
 }
@@ -79,12 +79,12 @@ static size_t MultibyteText_length(const char *text, size_t size)
 static size_t UTFString_length(KonohaContext *kctx, kString *self)
 {
 	size_t size = 0;
-	const unsigned char *start = (const unsigned char *)S_text(self);
-	const unsigned char *end = start + S_size(self);
-	while(start < end) {
-		size_t ulen = utf8len(start[0]);
+	const unsigned char *pos = (const unsigned char *)S_text(self);
+	const unsigned char *end = pos + S_size(self);
+	assert(!kString_is(ASCII, self));
+	while(pos < end) {
 		size++;
-		start += ulen;
+		pos += utf8len(*pos);
 	}
 	return size;
 }
@@ -92,8 +92,7 @@ static size_t UTFString_length(KonohaContext *kctx, kString *self)
 static size_t String_length(KonohaContext *kctx, kString *self)
 {
 	size_t bytesize = S_size(self);
-	return (kString_is(ASCII, self)) ?
-		bytesize : UTFString_length(kctx, self);
+	return (kString_is(ASCII, self)) ? bytesize : UTFString_length(kctx, self);
 }
 
 static unsigned char String_charAt(KonohaContext *kctx, kString *self, size_t index)
@@ -344,6 +343,7 @@ static kString *new_UTF8SubString(KonohaContext *kctx, kString *self, size_t off
 {
 	const unsigned char *text, *pos, *end;
 	size_t beginIndex, endIndex;
+	assert(!kString_is(ASCII, self));
 	text       = (const unsigned char *) S_text(self);
 	beginIndex = MultibyteText_bytesize((const char *)text, offset);
 	pos        = text + beginIndex;

@@ -46,40 +46,6 @@ extern "C" {
 #endif
 /* ------------------------------------------------------------------------ */
 
-//static void THROW_OutOfStringBoundary(KonohaContext *kctx, KonohaStack *sfp, kint_t index)
-//{
-//	KLIB KonohaRuntime_raise(kctx, EXPT_("OutOfStringBoundary"), SoftwareFault, NULL, sfp);
-//}
-//
-//static size_t kString_getMultibyteSize(KonohaContext *kctx, kString *this)
-//{
-//	if(kString_is(ASCII, this)) {
-//		return S_size(this);
-//	}
-//	return utf8_getMultibyteTextSize(S_text(this), S_size(this));
-//}
-//
-//static size_t kString_getIndex(KonohaContext *kctx, KonohaStack *sfp, kString *this, kint_t index)
-//{
-//	size_t multibyteSize = kString_getMultibyteSize(kctx, this);
-//	if(index < 0 && (size_t)-index < multibyteSize) {
-//		return multibyteSize + index;
-//	}
-//	if((size_t)index < multibyteSize) {
-//		return index;
-//	}
-//	THROW_OutOfStringBoundary(kctx, sfp, index);
-//	return 0;
-//}
-//
-//static size_t kString_checkIndex(KonohaContext *kctx, KonohaStack *sfp, kString *this, kint_t index)
-//{
-//	if(index < 0 || (size_t)index > kString_getMultibyteSize(kctx, this)) {
-//		THROW_OutOfStringBoundary(kctx, sfp, index);
-//	}
-//	return (size_t)index;
-//}
-//
 //static kint_t kStringMulti_charAt(KonohaContext *kctx, kString *s, size_t n)
 //{
 //	const unsigned char *text = (const unsigned char *)S_text(s);
@@ -145,24 +111,6 @@ static KMETHOD String_opGTE(KonohaContext *kctx, KonohaStack *sfp)
 	int res = String_compareTo(kctx, sfp[0].asString, sfp[1].asString);
 	KReturnUnboxValue(res >= 0);
 }
-
-///* http://ecma-international.org/ecma-262/5.1/#sec-15.5.4.9 */
-////## int String.localeCompare(String that);
-//static KMETHOD String_localeCompare(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	kString *s0 = sfp[0].asString;
-//	kString *s1 = sfp[1].asString;
-//	kint_t ret = 0;
-//	int res = kString_compare(kctx, s0, s1);
-//	if(res < 0) {
-//		ret = -1;
-//	}
-//	else if(res > 0) {
-//		ret = 1;
-//	}
-//	KReturnUnboxValue(ret);
-//}
-//
 
 //## String String.get(int index);
 static KMETHOD String_get(KonohaContext *kctx, KonohaStack *sfp)
@@ -378,7 +326,6 @@ static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		_JS|_Public|_Static|_Const|_Im, _F(String_fromCharCode), TY_String, TY_String, MN_("fromCharCode"), 1, TY_int, FN_n,
 		_Public|_Const|_Im, _F(String_get),        TY_String, TY_String, MN_("get"), 1, TY_int, FN_n,
 		_JS|_Public|_Const|_Im, _F(KString_charAt), TY_int, TY_String, MN_("charCodeAt"), 1, TY_int, FN_n,
-		//_JS|_Public|_Const|_Im, _F(String_localeCompare), TY_int, TY_String, MN_("localeCompare"), 1, TY_String, FN_("that"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
