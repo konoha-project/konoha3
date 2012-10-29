@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 konoha=$1
 script=$2
