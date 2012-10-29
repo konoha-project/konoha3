@@ -1,2 +1,2 @@
- ** OutOfStringBoundaryException (JSStringCharCodeAt.k:7)
+ ** IndexOutOfBoundsException (JSStringCharCodeAt.k:7)
 Q.E.D.
