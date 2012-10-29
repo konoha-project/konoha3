@@ -981,9 +981,6 @@ struct KonohaClassField {
 /* ------------------------------------------------------------------------ */
 /* Object */
 
-/* magic flag */
-#define MAGICFLAG(f)             (K_OBJECT_MAGIC | ((kmagicflag_t)(f) & K_CFLAGMASK))
-
 // common
 #define kObject_NullObject       ((kmagicflag_t)(1<<0))
 #define kObject_GCFlag           ((kmagicflag_t)(1<<1))
@@ -1001,9 +998,10 @@ struct KonohaClassField {
 #define kObject_is(P, O, A)      (TFLAG_is(kmagicflag_t,(O)->h.magicflag, kObject_##P))
 #define kObject_set(P, O, B)     TFLAG_set(kmagicflag_t, ((kObjectVar *)O)->h.magicflag, kObject_##P, B)
 
-#define kObject_MagicMask           (1|1<<2|1<<3|1<<4|1<<5|1<<6|1<<7|1<<8|1<<9)
-#define kObject_magic(O)            (uintptr_t)((O)->.magicflag >> 10)
-#define kObject_setMagic(O,MAGIC)   ((kObjectVar *)O)->h.magicflag = ((((uintptr_t)M) << 10) & ((O)->.magicflag & kObject_MagicFlag))
+#define kObject_hashCode(O)          (uintptr_t)((O)->h.magicflag >> (sizeof(kushort_t)*8))
+#define kObject_flags(O)             ((kushort_t)((O)->h.magicflag))
+#define kObject_setHashCode(O, HASH) ((kObjectVar *)O)->h.magicflag = (((uintptr_t)HASH) << (sizeof(kushort_t)*8) | kObject_flags(O))
+//#define kObject_setMagic(O, MAGIC)   ((kObjectVar *)O)->h.magicflag = ((((uintptr_t)M) << 10) & ((O)->.magicflag & kObject_MagicFlag))
 
 #define IS_NULL(o)                 ((((o)->h.magicflag) & kObject_NullObject) == kObject_NullObject)
 #define IS_NOTNULL(o)              ((((o)->h.magicflag) & kObject_NullObject) != kObject_NullObject)
