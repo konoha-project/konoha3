@@ -34,7 +34,7 @@ set(RUNTIME
 
 set(KONOHA_GC_MODULE "" CACHE STRING "konoha gc module")
 if(KONOHA_GC_MODULE)
-	set(GC module/${KONOHA_GC_MODULE}gc/${KONOHA_GC_MODULE}gc.c)
+	set(GC oldmodule/${KONOHA_GC_MODULE}gc/${KONOHA_GC_MODULE}gc.c)
 else(KONOHA_GC_MODULE)
 	set(GC src/gc/gc.c)
 endif(KONOHA_GC_MODULE)
