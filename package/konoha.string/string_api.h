@@ -130,12 +130,16 @@ static kushort_t String_hashCode(KonohaContext *kctx, kString *self)
 static size_t String_length(KonohaContext *kctx, kString *self)
 {
 	size_t bytesize = S_size(self);
-	return (kString_is(ASCII, self)) ? bytesize : UTFString_length(kctx, self);
+	return (kString_is(ASCII, self)) ? bytesize : MultibyteString_length(kctx, self);
 }
 
 static uint32_t String_charAt(KonohaContext *kctx, kString *self, size_t index)
 {
 	const char *text = S_text(self);
+	if(kString_is(ASCII, self)) {
+		return text[index];
+	}
+
 	unsigned char *s = (unsigned char *) (text + MultibyteText_length(text, index));
 	unsigned char *e = (unsigned char *) (text + S_size(self));
 	uint32_t v = 0;
@@ -426,7 +430,7 @@ static kArray *String_split(KonohaContext *kctx, kArray *ret, kString *self, kSt
 			}
 		}
 		else {
-			size_t len = UTFString_length(kctx, self);
+			size_t len = MultibyteString_length(kctx, self);
 			for(i = 0; i < len; i++) {
 				KLIB kArray_add(kctx, ret, new_UTF8SubString(kctx, self, i, 1));
 			}
