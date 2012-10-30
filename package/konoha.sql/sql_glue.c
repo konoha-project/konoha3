@@ -27,8 +27,6 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/konoha_common.h>
 #include <minikonoha/sugar.h>
-//#include <minikonoha/float.h>
-//#include <minikonoha/bytes.h>
 #include <konoha_sql.config.h>
 
 #ifdef __cplusplus
@@ -262,6 +260,23 @@ static KMETHOD Connection_close(KonohaContext *kctx, KonohaStack *sfp)
 	con->db = NULL;
 }
 
+#ifdef MYSQL_INCLUDED_
+
+//## int Connection.getInsertId();
+KMETHOD Connection_getInsertId(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kConnection *c = (kConnection*)sfp[0].asObject;
+	kint_t ret = 0;
+	if (strncmp(c->dspi->name, "mysql", sizeof("mysql")) == 0) {
+		ret = (kint_t)mysql_insert_id((MYSQL*)c->db);
+	}
+	else {
+		// [TODO] throw exeption when another dbms use this method.
+	}
+	KReturnUnboxValue(ret);
+}
+
+#endif
 /* ======================================================================== */
 /* ------------------------------------------------------------------------ */
 /* [ResultSet Class Define] */
@@ -351,7 +366,7 @@ static int _ResultSet_indexof_(KonohaContext *kctx, KonohaStack *sfp)
 	if(IS_Int(sfp[1].asObject)) {
 		size_t n = (size_t)sfp[1].intValue;
 		if(!(n < o->column_size)) {
-			//THROW_OutOfRange(ctx, sfp, sfp[1].ivalue, (o)->column_size);
+			//THROW_OutOfRange(ctx, sfp, sfp[1].intValue, (o)->column_size);
 			return -1;
 		}
 		return n;
@@ -359,7 +374,7 @@ static int _ResultSet_indexof_(KonohaContext *kctx, KonohaStack *sfp)
 	else if(IS_String(sfp[1].asObject)) {
 		int loc = _ResultSet_findColumn(kctx, o, S_text(sfp[1].asString));
 		if(loc == -1) {
-			//THROW_OutOfRange(ctx, sfp, sfp[1].ivalue, (o)->column_size);
+			//THROW_OutOfRange(ctx, sfp, sfp[1].intValue, (o)->column_size);
 		}
 		return loc;
 	}
@@ -388,6 +403,29 @@ KMETHOD ResultSet_next(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
+//## int ResultSet.getSize();
+KMETHOD ResultSet_getSize(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct _kResultSet* rs = (struct _kResultSet*)sfp[0].asObject;
+	KReturnUnboxValue(rs->column_size);
+}
+
+//## String ResultSet.getName(Int n);
+KMETHOD ResultSet_getName(KonohaContext *kctx, KonohaStack *sfp)
+{
+	struct _kResultSet* rs = (struct _kResultSet*)sfp[0].asObject;
+	size_t n = (size_t)sfp[1].intValue;
+	kString *ret = TS_EMPTY;
+	if(n < rs->column_size) {
+		KNH_ASSERT(n < rs->column_size);
+		const char* raw_name = S_text(rs->column[n].name);
+		ret = KLIB new_kString(kctx, GcUnsafe, raw_name, strlen(raw_name), 0);
+	}
+	else {
+		//THROW_OutOfRange(kctx, sfp, sfp[1].intValue, rs->column_size);
+	}
+	KReturn(ret);
+}
 /* ------------------------------------------------------------------------ */
 /* [getter/setter] */
 
@@ -516,7 +554,7 @@ KMETHOD ResultSet_getString(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t sql_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	//KRequirePackage("konoha.float", trace);
+	KRequirePackage("konoha.float", trace);
 
 	static KDEFINE_CLASS ConnectionDef = {
 		STRUCTNAME(Connection),
@@ -543,12 +581,17 @@ static kbool_t sql_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 		_Public, _F(Connection_new), TY_Connection, TY_Connection, MN_("new"), 1, TY_String, FN_("dbname"),
 		_Public, _F(Connection_close), TY_void, TY_Connection, MN_("close"), 0,
 		_Public, _F(Connection_query), TY_ResultSet, TY_Connection, MN_("query"), 1, TY_String, FN_("query"),
+#ifdef MYSQL_INCLUDED_
+		_Public, _F(Connection_getInsertId), TY_int, TY_Connection, MN_("getInsertId"), 0,
+#endif
 
 		/* ResultSet method */
 		_Public, _F(ResultSet_getInt), TY_int, TY_ResultSet, MN_("getInt"), 1, TY_String, FN_("query"),
 		_Public, _F(ResultSet_getFloat), TY_float, TY_ResultSet, MN_("getFloat"), 1, TY_String, FN_("query"),
 		_Public, _F(ResultSet_getString), TY_String, TY_ResultSet, MN_("getString"), 1, TY_String, FN_("query"),
 		_Public, _F(ResultSet_next), TY_boolean, TY_ResultSet, MN_("next"), 0,
+		_Public, _F(ResultSet_getSize), TY_int, TY_ResultSet, MN_("getSize"), 0,
+		_Public, _F(ResultSet_getName), TY_String, TY_ResultSet, MN_("getName"), 1, TY_int, FN_("idx"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
