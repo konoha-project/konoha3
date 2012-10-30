@@ -29,6 +29,63 @@
 extern "C" {
 #endif
 
+/*
+ * Get the bytesize from text and number of multibyte characters.
+ * e.g.) MultibyteText_bytesize("あいうえお", 3) => 9
+ */
+static size_t MultibyteText_bytesize(const char *text, size_t size)
+{
+	const unsigned char *pos = (const unsigned char *)text;
+	size_t i, mindex = 0;
+	for(i = 0; i < size; i++) {
+		mindex += utf8len(*(pos + mindex));
+	}
+	return mindex;
+}
+
+/*
+ * Get the number of multibyte characters from text and bytesize.
+ * e.g.) MultibyteText_length("あいうえお", 9) => 3
+ */
+static size_t MultibyteText_length(const char *text, size_t size)
+{
+	size_t length = 0;
+	const unsigned char *pos = (const unsigned char *)text;
+	const unsigned char *end = pos + size;
+	while(pos < end) {
+		pos += utf8len(*pos);
+		length++;
+	}
+	return length;
+}
+
+static int MultiByteChar_length(unsigned char s)
+{
+	uint8_t u = (uint8_t) s;
+	assert (u >= 0x80);
+	if (0xc2 <= u && u <= 0xdf)
+		return 2;
+	else if (0xe0 <= u && u <= 0xef)
+		return 3;
+	else if (0xf0 <= u && u <= 0xf4)
+		return 4;
+	//assert(0 && "Invalid encoding");
+	return 0;
+}
+
+static size_t MultibyteString_length(KonohaContext *kctx, kString *self)
+{
+	size_t size = 0;
+	const unsigned char *pos = (const unsigned char *)S_text(self);
+	const unsigned char *end = pos + S_size(self);
+	assert(!kString_is(ASCII, self));
+	while(pos < end) {
+		size++;
+		pos += utf8len(*pos);
+	}
+	return size;
+}
+
 #define StringPolicy_maskASCII(S)  (kString_is(ASCII, S) ? StringPolicy_ASCII : 0)
 
 static int String_compareTo(KonohaContext *kctx, kString *self, kString *that)
@@ -70,59 +127,30 @@ static kushort_t String_hashCode(KonohaContext *kctx, kString *self)
 	return hash;
 }
 
-/*
- * Get the bytesize from text and number of multibyte characters.
- * e.g.) MultibyteText_bytesize("あいうえお", 3) => 9
- */
-static size_t MultibyteText_bytesize(const char *text, size_t size)
-{
-	const unsigned char *pos = (const unsigned char *)text;
-	size_t i, mindex = 0;
-	for(i = 0; i < size; i++) {
-		mindex += utf8len(*(pos + mindex));
-	}
-	return mindex;
-}
-
-/*
- * Get the number of multibyte characters from text and bytesize.
- * e.g.) utf8_getMultibyteTextSize("あいうえお", 9) => 3
- */
-static size_t MultibyteText_length(const char *text, size_t size)
-{
-	size_t length = 0;
-	const unsigned char *pos = (const unsigned char *)text;
-	const unsigned char *end = pos + size;
-	while(pos < end) {
-		pos += utf8len(*pos);
-		length++;
-	}
-	return length;
-}
-
-static size_t UTFString_length(KonohaContext *kctx, kString *self)
-{
-	size_t size = 0;
-	const unsigned char *pos = (const unsigned char *)S_text(self);
-	const unsigned char *end = pos + S_size(self);
-	assert(!kString_is(ASCII, self));
-	while(pos < end) {
-		size++;
-		pos += utf8len(*pos);
-	}
-	return size;
-}
-
 static size_t String_length(KonohaContext *kctx, kString *self)
 {
 	size_t bytesize = S_size(self);
 	return (kString_is(ASCII, self)) ? bytesize : UTFString_length(kctx, self);
 }
 
-static unsigned char String_charAt(KonohaContext *kctx, kString *self, size_t index)
+static uint32_t String_charAt(KonohaContext *kctx, kString *self, size_t index)
 {
 	const char *text = S_text(self);
-	return (unsigned char) text[index];
+	unsigned char *s = (unsigned char *) (text + MultibyteText_length(text, index));
+	unsigned char *e = (unsigned char *) (text + S_size(self));
+	uint32_t v = 0;
+	int i, length = MultiByteChar_length((unsigned char) (*s));
+	if (length == 2) v = *s++ & 0x1f;
+	else if (length == 3) v = *s++ & 0xf;
+	else if (length == 4) v = *s++ & 0x7;
+	for (i = 1; i < length && s < e; ++i) {
+		uint8_t tmp = (uint8_t) *s++;
+		if (tmp < 0x80 || tmp > 0xbf) {
+			return 0;
+		}
+		v = (v << 6) | (tmp & 0x3f);
+	}
+	return v;
 }
 
 static bool String_startsWith(KonohaContext *kctx, kString *self, kString *prefix, size_t toffset)

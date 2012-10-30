@@ -46,44 +46,6 @@ extern "C" {
 #endif
 /* ------------------------------------------------------------------------ */
 
-//static kint_t kStringMulti_charAt(KonohaContext *kctx, kString *s, size_t n)
-//{
-//	const unsigned char *text = (const unsigned char *)S_text(s);
-//	const unsigned char *start = utf8_getMultibyteByteSize((const char *)text, n) + text;
-//
-//	if((int)n < 0) {
-//		return -1;
-//	}
-//	if(start < text + S_size(s)) {
-//		const unsigned char *buf = start;
-//		unsigned short ret = 0;
-//		size_t utfsize = utf8len(buf[0]);
-//		switch(utfsize) {
-//		case 4:
-//			ret = ((buf[0] & 7) << 18) | ((buf[1] & 63) << 12) |
-//				((buf[2] & 63) << 6) | (buf[3] & 63);
-//			break;
-//		case 3:
-//			ret = ((buf[0] & 63) << 12) | ((buf[1] & 63) << 6) |
-//				(buf[2] & 63);
-//			break;
-//		case 2:
-//			ret = ((buf[0] & 63) << 6) | (buf[1] & 63);
-//			break;
-//		case 1:
-//			ret = buf[0];
-//			break;
-//		default:
-//			DBG_ASSERT(false);
-//			break;
-//		}
-//		return ret;
-//	}
-//	return -1;
-//}
-//
-/* ------------------------------------------------------------------------ */
-
 //## boolean String.<(String s);
 static KMETHOD String_opLT(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -125,18 +87,6 @@ static KMETHOD String_get(KonohaContext *kctx, KonohaStack *sfp)
 		new_UTF8SubString(kctx, self, offset, 1);
 	KReturn(ret);
 }
-
-////## int String.charCodeAt(int index);
-//static KMETHOD String_charCodeAt(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	size_t n = (size_t)sfp[1].intValue;
-//	kint_t ccode = kStringMulti_charAt(kctx, sfp[0].asString, n);
-//	if(unlikely(ccode == -1)) {
-//		THROW_OutOfStringBoundary(kctx, sfp, n);
-//	}
-//	KReturnUnboxValue(ccode);
-//}
-//
 
 //## String String.fromCharCode(int charCode);
 static KMETHOD String_fromCharCode(KonohaContext *kctx, KonohaStack *sfp)

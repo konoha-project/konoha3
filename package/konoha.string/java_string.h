@@ -70,8 +70,8 @@ static KMETHOD KString_charAt(KonohaContext *kctx,  KonohaStack *sfp)
 	if(index > S_size(self)) {
 		Throw_IndexOutOfBoundsException(kctx, sfp, sfp[1].intValue);
 	}
-	unsigned char ret = String_charAt(kctx, self, index);
-	RETURNchar(ret);
+	uint32_t ret = String_charAt(kctx, self, index);
+	RETURNint(ret);
 }
 
 // Returns the character
