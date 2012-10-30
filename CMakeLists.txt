@@ -153,6 +153,7 @@ endif()
 
 find_library(HAVE_LIBDL    NAMES dl)
 find_library(HAVE_LIBICONV NAMES iconv)
+find_library(HAVE_PTHREAD  NAMES pthread)
 find_library(HAVE_LIBDB    NAMES db)
 
 check_type_size("void *" SIZEOF_VOIDP)
@@ -207,6 +208,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
 		${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 set(ExtraLibs)
+set(ExtraLibs ${ExtraLibs} ${HAVE_PTHREAD})
 if(HAVE_LIBDL)
 	set(ExtraLibs ${ExtraLibs} ${HAVE_LIBDL})
 endif(HAVE_LIBDL)
