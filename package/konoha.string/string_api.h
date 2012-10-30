@@ -281,7 +281,7 @@ static kString* String_replace(KonohaContext *kctx, kString *self, const char *o
 	KLIB Kwb_write(kctx, &wb, newText, newLen);
 	text = pos + oldLen;
 	while((pos = strstr(text, oldText)) != NULL) {
-		KLIB Kwb_write(kctx, &wb, pos, pos - text);
+		KLIB Kwb_write(kctx, &wb, text, pos - text);
 		KLIB Kwb_write(kctx, &wb, newText, newLen);
 		text = pos + oldLen;
 	}
