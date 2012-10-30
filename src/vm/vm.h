@@ -231,13 +231,12 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #define OPEXEC_NSET(A, N, CT) rbp[(A)].unboxValue = N
 #define OPEXEC_NMOV(A, B, CT) rbp[(A)].unboxValue = rbp[(B)].unboxValue
 #define OPEXEC_NMOVx(A, B, BX, CT) rbp[(A)].asObject = (rbp[(B)].asObjectVar)->fieldObjectItems[(BX)]
-#define OPEXEC_XNMOV(A, AX, B, CT) (rbp[(A)].asObjectVar)->fieldObjectItems[AX] = rbp[(B)].asObject
+#define OPEXEC_XNMOV(A, AX, B, CT) KFieldSet(rbp[(A)].asObjectVar, (rbp[(A)].asObjectVar)->fieldObjectItems[AX], rbp[(B)].asObject)
 
 #define OPEXEC_NEW(A, P, CT)   KUnsafeFieldSet(rbp[(A)].asObject, KLIB new_kObject(kctx, OnStack, CT, P))
 #define OPEXEC_NULL(A, CT)     KUnsafeFieldSet(rbp[(A)].asObject, KLIB Knull(kctx, CT))
 //#define OPEXEC_BOX(A, B, CT)   KUnsafeFieldSet(rbp[(A)].asObject, KLIB new_kObject(kctx, OnStack, CT, rbp[(B)].intValue))
 //#define OPEXEC_UNBOX(A, B, CT) rbp[(A)].unboxValue = N_toint(rbp[B].asObject)
-
 
 #define OPEXEC_LOOKUP(THIS, NS, MTD) do {\
 	kNameSpace_lookupMethodWithInlineCache(kctx, SFP(rshift(rbp, THIS)), NS, (kMethod**)&MTD);\
