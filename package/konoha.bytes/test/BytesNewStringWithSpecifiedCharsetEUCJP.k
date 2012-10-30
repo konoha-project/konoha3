@@ -2,7 +2,7 @@
 
 import("konoha.new");
 import("konoha.bytes");
-import("konoha.file");
+import("cstyle.libc");
 
 void test() {
 	FILE f = System.fopen("files/eucjp.txt", "r");
