@@ -369,6 +369,8 @@ static int kpthread_mutex_init_recursive(kmutex_t *mutex)
 #endif
 }
 
+#ifdef K_USE_PTHREAD
+
 static int kpthread_create(kthread_t *thread, const kthread_attr_t *attr, void *(*start_routine)(void *), void *arg)
 {
 	return pthread_create(thread, attr, start_routine, arg);
@@ -428,6 +430,70 @@ static int kpthread_cond_destroy(kmutex_cond_t *cond)
 {
 	return pthread_cond_destroy(cond);
 }
+
+#else
+
+static int kpthread_create(kthread_t *thread, const kthread_attr_t *attr, void *(*start_routine)(void *), void *arg)
+{
+	return 0;
+}
+
+static int kpthread_join(kthread_t thread, void **value_ptr)
+{
+	return 0;
+}
+
+static int kpthread_mutex_destroy(kmutex_t *mutex)
+{
+	return 0;
+}
+
+static int kpthread_mutex_init(kmutex_t *mutex, const kmutexattr_t *attr)
+{
+	return 0;
+}
+
+static int kpthread_mutex_lock(kmutex_t *mutex)
+{
+	return 0;
+}
+
+static int kpthread_mutex_trylock(kmutex_t *mutex)
+{
+	return 0;
+}
+
+static int kpthread_mutex_unlock(kmutex_t *mutex)
+{
+	return 0;
+}
+
+static int kpthread_cond_init(kmutex_cond_t *cond, const kmutex_condattr_t *attr)
+{
+	return 0;
+}
+
+static int kpthread_cond_wait(kmutex_cond_t *cond, kmutex_t *mutex)
+{
+	return 0;
+}
+
+static int kpthread_cond_signal(kmutex_cond_t *cond)
+{
+	return 0;
+}
+
+static int kpthread_cond_broadcast(kmutex_cond_t *cond)
+{
+	return 0;
+}
+
+static int kpthread_cond_destroy(kmutex_cond_t *cond)
+{
+	return 0;
+}
+
+#endif
 
 // -------------------------------------------------------------------------
 

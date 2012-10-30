@@ -56,7 +56,7 @@ extern "C" {
 #define MIN_ALIGN (1UL << SUBHEAP_KLASS_MIN)
 
 #ifdef USE_CONCURRENT_GC
-# define GCSTART_MARGINE 80/100
+# define GCSTART_MARGINE 65/100
 # define HEAPEXPAND_MARGINE 75/100
 #endif
 
