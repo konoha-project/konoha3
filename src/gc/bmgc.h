@@ -56,7 +56,7 @@ extern "C" {
 #define MIN_ALIGN (1UL << SUBHEAP_KLASS_MIN)
 
 #ifdef USE_CONCURRENT_GC
-# define GCSTART_MARGINE 65/100
+# define GCSTART_MARGINE 80/100
 # define HEAPEXPAND_MARGINE 75/100
 #endif
 
@@ -1781,7 +1781,7 @@ static void KupdateObjectField_concmark_phase(kObject *parent, kObject *oldValPt
 #endif
 
 #if defined(USE_GENERATIONAL_GC) || defined(USE_CONCURRENT_GC)
-static void RememberSet_reftrace(KonohaContext *kctx, HeapManager *mng, KObjectVisitor *visitor, MarkStack *mstack)
+static void RememberSet_reftrace(KonohaContext *kctx, HeapManager *mng, KObjectVisitor *visitor)
 {
 	size_t i;
 	FOR_EACH_ARRAY_(mng->remember_sets, i) {
@@ -1835,7 +1835,7 @@ static void bmgc_gc_mark(HeapManager *mng, enum gc_mode mode)
 	KonohaContext_reftraceAll(kctx, &tracer.base);
 #ifdef USE_GENERATIONAL_GC
 	if(mode & GC_MINOR) {
-		RememberSet_reftrace(kctx, mng, &tracer.base, mstack);
+		RememberSet_reftrace(kctx, mng, &tracer.base);
 	}
 #endif
 	ref = mstack_next(mstack);
@@ -2056,7 +2056,7 @@ static void *concgc_thread_entry(void *o)
 			// remset mark phase
 			concgc_stop_the_world(mng, GCPHASE_MARK_REM);
 			if(mng->phase == GCPHASE_EXIT) break;
-			RememberSet_reftrace(kctx, mng, &tracer.base, mstack);
+			RememberSet_reftrace(kctx, mng, &tracer.base);
 			concgc_mark(mng, mstack, &tracer.base);
 		} else {
 			// mark phase

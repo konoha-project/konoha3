@@ -1162,12 +1162,19 @@ static void PosixFactory(KonohaFactory *factory)
 	factory->exit_i          = exit;
 
 	// mutex
-	factory->pthread_mutex_init_i = kpthread_mutex_init;
+	factory->pthread_create_i        = kpthread_create;
+	factory->pthread_join_i          = kpthread_join;
+	factory->pthread_mutex_init_i    = kpthread_mutex_init;
 	factory->pthread_mutex_init_recursive = kpthread_mutex_init_recursive;
 	factory->pthread_mutex_lock_i    = kpthread_mutex_lock;
 	factory->pthread_mutex_unlock_i  = kpthread_mutex_unlock;
 	factory->pthread_mutex_trylock_i = kpthread_mutex_trylock;
 	factory->pthread_mutex_destroy_i = kpthread_mutex_destroy;
+	factory->pthread_cond_init_i     = kpthread_cond_init;
+	factory->pthread_cond_wait_i     = kpthread_cond_wait;
+	factory->pthread_cond_signal_i   = kpthread_cond_signal;
+	factory->pthread_cond_broadcast_i= kpthread_cond_broadcast;
+	factory->pthread_cond_destroy_i  = kpthread_cond_destroy;
 
 	factory->LoadRuntimeModule   = LoadRuntimeModule;
 	factory->FormatPackagePath   = FormatPackagePath;
