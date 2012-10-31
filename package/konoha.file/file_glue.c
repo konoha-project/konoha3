@@ -351,7 +351,7 @@ static KMETHOD File_read3(KonohaContext *kctx, KonohaStack *sfp)
 		len = ba->bytesize - offset;
 	}
 	else {
-		KCheckIndex(offset + len, ba->bytesize);
+		KCheckIndex(offset + len - 1, ba->bytesize);
 	}
 	KMakeTrace(trace, sfp);
 	size_t readbyte = TRACE_fread(kctx, file, ba->buf + offset, len, trace);
@@ -380,7 +380,7 @@ static KMETHOD File_write3(KonohaContext *kctx , KonohaStack *sfp)
 		len = ba->bytesize - offset;
 	}
 	else {
-		KCheckIndex(offset + len, ba->bytesize);
+		KCheckIndex(offset + len - 1, ba->bytesize);
 	}
 	KMakeTrace(trace, sfp);
 	size_t writtenbyte = TRACE_fwrite(kctx, file, ba->buf + offset, len, trace);
