@@ -387,7 +387,7 @@ static kbool_t LoadJavaAPI(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trac
 		_Public|_Const|_Im, _F(KString_regionMatches), TY_boolean, TY_String, MN_("regionMaches"), 5, TY_boolean, FN_("ignoreCase"),TY_int, FN_("toffset"),TY_String, FN_("other"),TY_int, FN_("ooffset"),TY_int, FN_("len"),
 		_Public|_Const|_Im, _F(KString_replace), TY_String, TY_String, MN_("replace"), 2, TY_char, FN_("oldChar"),TY_char, FN_("newChar"),
 		_Public|_Const|_Im, _F(KString_replaceAll), TY_String, TY_String, MN_("replaceAll"), 2, TY_String, FN_("regex"),TY_String, FN_("replacement"),
-		_Public|_Const|_Im, _F(KString_replaceFirst), TY_String, TY_String, MN_("repalceFirst"), 2, TY_String, FN_("regex"),TY_String, FN_("replacement"),
+		_Public|_Const|_Im, _F(KString_replaceFirst), TY_String, TY_String, MN_("replaceFirst"), 2, TY_String, FN_("regex"),TY_String, FN_("replacement"),
 		_Public|_Const|_Im, _F(KString_split), TYPE_Array(String), TY_String, MN_("split"), 2, TY_String, FN_("regex"),TY_int, FN_("limit"),
 		_Public|_Const|_Im, _F(KString_startsWith), TY_boolean, TY_String, MN_("startsWith"), 2, TY_String, FN_("prefix"),TY_int, FN_("toffset"),
 		_Public|_Const|_Im, _F(KString_substring), TY_String, TY_String, MN_("substring"), 2, TY_int, FN_("beginIndex"),TY_int, FN_("endIndex"),
