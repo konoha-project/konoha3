@@ -369,6 +369,80 @@ static int kpthread_mutex_init_recursive(kmutex_t *mutex)
 #endif
 }
 
+#ifdef K_USE_PTHREAD
+
+static int kpthread_create(kthread_t *thread, const kthread_attr_t *attr, void *(*start_routine)(void *), void *arg)
+{
+	return pthread_create(thread, attr, start_routine, arg);
+}
+
+static int kpthread_join(kthread_t thread, void **value_ptr)
+{
+	return pthread_join(thread, value_ptr);
+}
+
+static int kpthread_mutex_destroy(kmutex_t *mutex)
+{
+	return pthread_mutex_destroy(mutex);
+}
+
+static int kpthread_mutex_init(kmutex_t *mutex, const kmutexattr_t *attr)
+{
+	return pthread_mutex_init(mutex, attr);
+}
+
+static int kpthread_mutex_lock(kmutex_t *mutex)
+{
+	return pthread_mutex_lock(mutex);
+}
+
+static int kpthread_mutex_trylock(kmutex_t *mutex)
+{
+	return pthread_mutex_trylock(mutex);
+}
+
+static int kpthread_mutex_unlock(kmutex_t *mutex)
+{
+	return pthread_mutex_unlock(mutex);
+}
+
+static int kpthread_cond_init(kmutex_cond_t *cond, const kmutex_condattr_t *attr)
+{
+	return pthread_cond_init(cond, attr);
+}
+
+static int kpthread_cond_wait(kmutex_cond_t *cond, kmutex_t *mutex)
+{
+	return pthread_cond_wait(cond, mutex);
+}
+
+static int kpthread_cond_signal(kmutex_cond_t *cond)
+{
+	return pthread_cond_signal(cond);
+}
+
+static int kpthread_cond_broadcast(kmutex_cond_t *cond)
+{
+	return pthread_cond_broadcast(cond);
+}
+
+static int kpthread_cond_destroy(kmutex_cond_t *cond)
+{
+	return pthread_cond_destroy(cond);
+}
+
+#else
+
+static int kpthread_create(kthread_t *thread, const kthread_attr_t *attr, void *(*start_routine)(void *), void *arg)
+{
+	return 0;
+}
+
+static int kpthread_join(kthread_t thread, void **value_ptr)
+{
+	return 0;
+}
+
 static int kpthread_mutex_destroy(kmutex_t *mutex)
 {
 	return 0;
@@ -393,6 +467,33 @@ static int kpthread_mutex_unlock(kmutex_t *mutex)
 {
 	return 0;
 }
+
+static int kpthread_cond_init(kmutex_cond_t *cond, const kmutex_condattr_t *attr)
+{
+	return 0;
+}
+
+static int kpthread_cond_wait(kmutex_cond_t *cond, kmutex_t *mutex)
+{
+	return 0;
+}
+
+static int kpthread_cond_signal(kmutex_cond_t *cond)
+{
+	return 0;
+}
+
+static int kpthread_cond_broadcast(kmutex_cond_t *cond)
+{
+	return 0;
+}
+
+static int kpthread_cond_destroy(kmutex_cond_t *cond)
+{
+	return 0;
+}
+
+#endif
 
 // -------------------------------------------------------------------------
 
@@ -1057,13 +1158,20 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.qsort_i         = qsort;
 	plat.exit_i          = exit;
 
-	// mutex
-	plat.pthread_mutex_init_i = kpthread_mutex_init;
+	// pthread / mutex / cond
+	plat.pthread_create_i        = kpthread_create;
+	plat.pthread_join_i          = kpthread_join;
+	plat.pthread_mutex_init_i    = kpthread_mutex_init;
 	plat.pthread_mutex_init_recursive = kpthread_mutex_init_recursive;
 	plat.pthread_mutex_lock_i    = kpthread_mutex_lock;
 	plat.pthread_mutex_unlock_i  = kpthread_mutex_unlock;
 	plat.pthread_mutex_trylock_i = kpthread_mutex_trylock;
 	plat.pthread_mutex_destroy_i = kpthread_mutex_destroy;
+	plat.pthread_cond_init_i     = kpthread_cond_init;
+	plat.pthread_cond_wait_i     = kpthread_cond_wait;
+	plat.pthread_cond_signal_i   = kpthread_cond_signal;
+	plat.pthread_cond_broadcast_i= kpthread_cond_broadcast;
+	plat.pthread_cond_destroy_i  = kpthread_cond_destroy;
 
 	plat.LoadRuntimeModule   = LoadRuntimeModule;
 	plat.FormatPackagePath   = FormatPackagePath;
@@ -1115,23 +1223,30 @@ static void PosixFactory(KonohaFactory *factory)
 	factory->exit_i          = exit;
 
 	// mutex
-	factory->pthread_mutex_init_i         = kpthread_mutex_init;
+	factory->pthread_create_i        = kpthread_create;
+	factory->pthread_join_i          = kpthread_join;
+	factory->pthread_mutex_init_i    = kpthread_mutex_init;
 	factory->pthread_mutex_init_recursive = kpthread_mutex_init_recursive;
-	factory->pthread_mutex_lock_i         = kpthread_mutex_lock;
-	factory->pthread_mutex_unlock_i       = kpthread_mutex_unlock;
-	factory->pthread_mutex_trylock_i      = kpthread_mutex_trylock;
-	factory->pthread_mutex_destroy_i      = kpthread_mutex_destroy;
+	factory->pthread_mutex_lock_i    = kpthread_mutex_lock;
+	factory->pthread_mutex_unlock_i  = kpthread_mutex_unlock;
+	factory->pthread_mutex_trylock_i = kpthread_mutex_trylock;
+	factory->pthread_mutex_destroy_i = kpthread_mutex_destroy;
+	factory->pthread_cond_init_i     = kpthread_cond_init;
+	factory->pthread_cond_wait_i     = kpthread_cond_wait;
+	factory->pthread_cond_signal_i   = kpthread_cond_signal;
+	factory->pthread_cond_broadcast_i= kpthread_cond_broadcast;
+	factory->pthread_cond_destroy_i  = kpthread_cond_destroy;
 
-	factory->LoadRuntimeModule     = LoadRuntimeModule;
-	factory->FormatPackagePath     = FormatPackagePath;
-	factory->LoadPackageHandler    = LoadPackageHandler;
-	factory->BEFORE_LoadScript     = BEFORE_LoadScript;
-	factory->AFTER_LoadScript      = AFTER_LoadScript;
+	factory->LoadRuntimeModule   = LoadRuntimeModule;
+	factory->FormatPackagePath   = FormatPackagePath;
+	factory->LoadPackageHandler  = LoadPackageHandler;
+	factory->BEFORE_LoadScript   = BEFORE_LoadScript;
+	factory->AFTER_LoadScript    = AFTER_LoadScript;
 
-	factory->shortFilePath         = shortFilePath;
+	factory->shortFilePath       = shortFilePath;
 	factory->formatTransparentPath = formatTransparentPath;
 	factory->loadScript            = loadScript;
-	factory->ReportDebugMessage           = (!verbose_debug) ? NOP_ReportDebugMessage : ReportDebugMessage;
+	factory->ReportDebugMessage    = (!verbose_debug) ? NOP_ReportDebugMessage : ReportDebugMessage;
 
 	// timer
 	factory->getTimeMilliSecond    = getTimeMilliSecond;

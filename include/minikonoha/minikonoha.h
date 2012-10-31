@@ -319,8 +319,12 @@ static inline int setjmp_mingw(_JBTYPE* t)
 #define ALLOCA(T, SIZE) ((T *)alloca((SIZE) * sizeof(T)))
 
 #ifndef K_USE_PTHREAD
+typedef void *kthread_t;
+typedef void kthread_attr_t;
 typedef void kmutex_t;
 typedef void kmutexattr_t;
+typedef void kmutex_cond_t;
+typedef void kmutex_condattr_t;
 #define KInitLock(X)
 #define KInitRrcureiveLock(X)
 #define KLock(X)
@@ -328,8 +332,12 @@ typedef void kmutexattr_t;
 #define KFreeLock(X)
 #else
 #include <pthread.h>
+typedef pthread_t           kthread_t;
+typedef pthread_attr_t      kthread_attr_t;
 typedef pthread_mutex_t     kmutex_t;
 typedef pthread_mutexattr_t kmutexattr_t;
+typedef pthread_condattr_t  kmutex_condattr_t;
+typedef pthread_cond_t      kmutex_cond_t;
 #define KInitLock(X)    do {\
 	X = (kmutex_t *)KCalloc_UNTRACE(sizeof(kmutex_t), 1);\
 	PLATAPI pthread_mutex_init_i(X, NULL);\
@@ -391,6 +399,9 @@ typedef struct KTraceInfo {
 
 #define Trace_pline(trace) (trace == NULL ? 0 : trace->pline)
 
+typedef uint64_t KJson_t;
+typedef uintptr_t KJsonContext;
+
 struct KonohaFactory {
 	// settings
 	const char *name;
@@ -421,12 +432,19 @@ struct KonohaFactory {
 	void    (*exit_i)(int p);
 
 	// pthread
+	int     (*pthread_create_i)(kthread_t *thread, const kthread_attr_t *attr, void *(*f)(void *), void *arg);
+	int     (*pthread_join_i)(kthread_t thread, void **);
 	int     (*pthread_mutex_init_i)(kmutex_t *mutex, const kmutexattr_t *attr);
 	int     (*pthread_mutex_lock_i)(kmutex_t *mutex);
 	int     (*pthread_mutex_trylock_i)(kmutex_t *mutex);
 	int     (*pthread_mutex_unlock_i)(kmutex_t *mutex);
 	int     (*pthread_mutex_destroy_i)(kmutex_t *mutex);
 	int     (*pthread_mutex_init_recursive)(kmutex_t *mutex);
+	int     (*pthread_cond_init_i)(kmutex_cond_t *cond, const kmutex_condattr_t *attr);
+	int     (*pthread_cond_wait_i)(kmutex_cond_t *cond, kmutex_t *mutex);
+	int     (*pthread_cond_signal_i)(kmutex_cond_t *cond);
+	int     (*pthread_cond_broadcast_i)(kmutex_cond_t *cond);
+	int     (*pthread_cond_destroy_i)(kmutex_cond_t *cond);
 
 	/* high-level functions */
 	kbool_t  (*LoadRuntimeModule)(struct KonohaFactory*, const char *moduleName, ModuleType);
@@ -486,6 +504,39 @@ struct KonohaFactory {
 	struct VirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, void *sfp, struct VirtualCode *pc);
 	void */*MethodFunc*/  (*GetVirtualMachineMethodFunc)(void);
 	struct VirtualCode*   (*GetBootCodeOfNativeMethodCall)(void);
+
+	/* JSON_API { */
+	const char  *Module_Json;
+	KJsonContext JsonContext;
+	/* JSON New/Delete API */
+	KJson_t      (*JsonNull_new_i)(KJsonContext jctx);
+	KJson_t      (*JsonInt_new_i)(KJsonContext jctx, int64_t);
+	KJson_t      (*JsonDouble_new_i)(KJsonContext jctx, double);
+	KJson_t      (*JsonString_new_i)(KJsonContext jctx, const char *text, size_t length);
+	KJson_t      (*JsonArray_new_i)(KJsonContext  jctx);
+	KJson_t      (*JsonObject_new_i)(KJsonContext jctx);
+	void         (*Json_free_i)(KJsonContext jctx, KJson_t);
+	/* JSON Parse/ToString API */
+	KJson_t      (*Json_parse_i)(KJsonContext jctx, const char *text, size_t length);
+	const char  *(*Json_toString_i)(KJsonContext jctx, KJson_t json, size_t *lengthPtr);
+	/* JSON => KonohaObject */
+	kbool_t      (*JsonToObject_i)(KJsonContext jctx, KonohaContext *kctx, KJson_t json, ktype_t RequestType, struct KonohaValueVar *);
+	/* JSONObject API */
+	void         (*JsonObject_set_i)(KJsonContext jctx, KJson_t json, const char *Key, size_t KeyLen, KJson_t);
+	KJson_t      (*JsonObject_get_i)(KJsonContext jctx, KJson_t json, const char *Key, size_t KeyLen);
+	kbool_t      (*JsonObject_getBool_i)(KJsonContext jctx, KJson_t json, const char *Key, size_t KeyLen);
+	int64_t      (*JsonObject_getInt_i)(KJsonContext jctx, KJson_t json, const char *Key, size_t KeyLen);
+	double       (*JsonObject_getDouble_i)(KJsonContext jctx, KJson_t json, const char *Key, size_t KeyLen);
+	const char  *(*JsonObject_getString_i)(KJsonContext jctx, KJson_t json, const char *Key, size_t KeyLen, size_t *ValLen);
+	KJson_t      (*JsonObject_getArray_i)(KJsonContext jctx, KJson_t json, const char *Key, size_t KeyLen);
+	KJson_t      (*JsonObject_getObject_i)(KJsonContext jctx, KJson_t json, const char *Key, size_t KeyLen);
+	void         (*JsonObject_each_i)(KJsonContext jctx, KJson_t json, void (*Func)(KJson_t, KJson_t, void *), void *thunk);
+	/* JSONArray API */
+	void         (*JsonArray_append_i)(KJsonContext jctx, KJson_t json, KJson_t value);
+	KJson_t      (*JsonArray_get_i)(KJsonContext jctx, KJson_t json, size_t idx);
+	void         (*JsonArray_set_i)(KJsonContext jctx, KJson_t json, size_t idx, KJson_t value);
+	KJson_t      (*Json_length_i)(KJsonContext jctx, KJson_t json);
+	/* } JSON_API */
 };
 
 #define LOG_END   0

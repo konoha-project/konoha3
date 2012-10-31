@@ -8,7 +8,7 @@ import("jansson");
 
 const BUFSIZ = 8;
 
-void sendHttpEvent() {
+void sendSignalEvent() {
 	Json sdata = new Json();
 	sdata.setString("event", "hoge");
 	String req = sdata.dump();
@@ -22,12 +22,12 @@ void sendHttpEvent() {
 	buf.setAll(0);
 	pid.read(buf);
 	pid.close();
-	Subproc s = new Subproc("kill -USR1 " + buf.toString(), false);
+	Subproc s = new Subproc("kill -USR1 " + new String(buf), false);
 	s.fg();
 }
 
 void test() {
-	sendHttpEvent();
+	sendSignalEvent();
 }
 
 test();

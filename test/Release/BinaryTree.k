@@ -1,5 +1,5 @@
 import("konoha.assign");
-import("konoha.while");
+import("cstyle", "while");
 import("konoha.class");
 import("konoha.global");
 import("konoha.null");

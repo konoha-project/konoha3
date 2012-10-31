@@ -1,0 +1,21 @@
+import("konoha.sql");
+import("cstyle", "while");
+
+void main() {
+	String USER_NAME = ""; // Enter Your MySQL UserName
+	String PASSWD = ""     // Enter Your MySQL Password
+	Connection con = new Connection("mysql://" + USER_NAME + ":" + PASSWD + "@localhost:3306");
+	ResultSet r = con.query("USE konoha");
+	ResultSet r = con.query("SELECT * FROM people");
+	while(r.next()) {
+		System.p(" ----------------------- ");
+		System.p(r.getName(0) + ":\t\t" + r.getString("name"));
+		System.p(r.getName(1) + ":\t\t" + r.getString("age"));
+		System.p(r.getName(2) + ":\t\t" + r.getString("height"));
+		System.p(r.getName(3) + ":\t\t" + r.getString("village"));
+	}
+	System.p(" ----------------------- ");
+	con.close();
+}
+
+main();

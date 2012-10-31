@@ -351,7 +351,7 @@ static KMETHOD File_read3(KonohaContext *kctx, KonohaStack *sfp)
 		len = ba->bytesize - offset;
 	}
 	else {
-		KCheckIndex(offset + len, ba->bytesize);
+		KCheckIndex(offset + len - 1, ba->bytesize);
 	}
 	KMakeTrace(trace, sfp);
 	size_t readbyte = TRACE_fread(kctx, file, ba->buf + offset, len, trace);
@@ -380,11 +380,31 @@ static KMETHOD File_write3(KonohaContext *kctx , KonohaStack *sfp)
 		len = ba->bytesize - offset;
 	}
 	else {
-		KCheckIndex(offset + len, ba->bytesize);
+		KCheckIndex(offset + len - 1, ba->bytesize);
 	}
 	KMakeTrace(trace, sfp);
 	size_t writtenbyte = TRACE_fwrite(kctx, file, ba->buf + offset, len, trace);
 	KReturnUnboxValue(writtenbyte);
+}
+
+//## boolean FILE.isatty();
+static KMETHOD FILE_isatty(KonohaContext *kctx , KonohaStack *sfp)
+{
+	kFile *file = sfp[0].asFile;
+	int fd = fileno(file->fp);
+	KReturnUnboxValue(isatty(fd) == 1);
+}
+
+//## int FILE.getfileno();
+static KMETHOD FILE_getfileno(KonohaContext *kctx , KonohaStack *sfp)
+{
+	kFile *file = sfp[0].asFile;
+	int fd = fileno(file->fp);
+	// If 'fp' is an invalid stream, fileno() returns -1.
+	// However it is checked when FILE.new() is called.
+	// Therefore an error should not occur here.
+	DBG_ASSERT(fd != -1);
+	KReturnUnboxValue(fd);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -424,7 +444,7 @@ static KMETHOD File_scriptPath(KonohaContext *kctx, KonohaStack *sfp)
 #define _Public   kMethod_Public
 #define _Const    kMethod_Const
 #define _Static   kMethod_Static
-#define _Coercion kMethod_Coercion
+//#define _Coercion kMethod_Coercion
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
@@ -444,6 +464,8 @@ static void file_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *t
 		_Public, _F(File_println), TY_void, TY_File, MN_("println"), 1, TY_String, FN_("str")|FN_COERCION,
 		_Public, _F(File_println0), TY_void, TY_File, MN_("println"), 0,
 		_Public, _F(File_flush), TY_void, TY_File, MN_("flush"), 0,
+		_Public|_Const|_Im, _F(FILE_isatty), TY_boolean, TY_File, MN_("isatty"), 0,
+		_Public|_Const|_Im, _F(FILE_getfileno), TY_int, TY_File, MN_("getfileno"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

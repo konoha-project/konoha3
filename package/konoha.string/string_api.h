@@ -1,9 +1,90 @@
+/****************************************************************************
+ * Copyright (c) 2012, the Konoha project authors. All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *  * Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *  * Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ***************************************************************************/
+
 #ifndef STRING_API_H
 #define STRING_API_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*
+ * Get the bytesize from text and number of multibyte characters.
+ * e.g.) MultibyteText_bytesize("あいうえお", 3) => 9
+ */
+static size_t MultibyteText_bytesize(const char *text, size_t size)
+{
+	const unsigned char *pos = (const unsigned char *)text;
+	size_t i, mindex = 0;
+	for(i = 0; i < size; i++) {
+		mindex += utf8len(*(pos + mindex));
+	}
+	return mindex;
+}
+
+/*
+ * Get the number of multibyte characters from text and bytesize.
+ * e.g.) MultibyteText_length("あいうえお", 9) => 3
+ */
+static size_t MultibyteText_length(const char *text, size_t size)
+{
+	size_t length = 0;
+	const unsigned char *pos = (const unsigned char *)text;
+	const unsigned char *end = pos + size;
+	while(pos < end) {
+		pos += utf8len(*pos);
+		length++;
+	}
+	return length;
+}
+
+static int MultiByteChar_length(unsigned char s)
+{
+	uint8_t u = (uint8_t) s;
+	assert (u >= 0x80);
+	if (0xc2 <= u && u <= 0xdf)
+		return 2;
+	else if (0xe0 <= u && u <= 0xef)
+		return 3;
+	else if (0xf0 <= u && u <= 0xf4)
+		return 4;
+	//assert(0 && "Invalid encoding");
+	return 0;
+}
+
+static size_t MultibyteString_length(KonohaContext *kctx, kString *self)
+{
+	size_t size = 0;
+	const unsigned char *pos = (const unsigned char *)S_text(self);
+	const unsigned char *end = pos + S_size(self);
+	assert(!kString_is(ASCII, self));
+	while(pos < end) {
+		size++;
+		pos += utf8len(*pos);
+	}
+	return size;
+}
 
 #define StringPolicy_maskASCII(S)  (kString_is(ASCII, S) ? StringPolicy_ASCII : 0)
 
@@ -46,59 +127,34 @@ static kushort_t String_hashCode(KonohaContext *kctx, kString *self)
 	return hash;
 }
 
-/*
- * Get the bytesize from text and number of multibyte characters.
- * e.g.) MultibyteText_bytesize("あいうえお", 3) => 9
- */
-static size_t MultibyteText_bytesize(const char *text, size_t size)
-{
-	const unsigned char *pos = (const unsigned char *)text;
-	size_t i, mindex = 0;
-	for(i = 0; i < size; i++) {
-		mindex += utf8len(*(pos + mindex));
-	}
-	return mindex;
-}
-
-/*
- * Get the number of multibyte characters from text and bytesize.
- * e.g.) utf8_getMultibyteTextSize("あいうえお", 9) => 3
- */
-static size_t MultibyteText_length(const char *text, size_t size)
-{
-	size_t length = 0;
-	const unsigned char *pos = (const unsigned char *)text;
-	const unsigned char *end = pos + size;
-	while(pos < end) {
-		pos += utf8len(*pos);
-		length++;
-	}
-	return length;
-}
-
-static size_t UTFString_length(KonohaContext *kctx, kString *self)
-{
-	size_t size = 0;
-	const unsigned char *pos = (const unsigned char *)S_text(self);
-	const unsigned char *end = pos + S_size(self);
-	assert(!kString_is(ASCII, self));
-	while(pos < end) {
-		size++;
-		pos += utf8len(*pos);
-	}
-	return size;
-}
-
 static size_t String_length(KonohaContext *kctx, kString *self)
 {
 	size_t bytesize = S_size(self);
-	return (kString_is(ASCII, self)) ? bytesize : UTFString_length(kctx, self);
+	return (kString_is(ASCII, self)) ? bytesize : MultibyteString_length(kctx, self);
 }
 
-static unsigned char String_charAt(KonohaContext *kctx, kString *self, size_t index)
+static uint32_t String_charAt(KonohaContext *kctx, kString *self, size_t index)
 {
 	const char *text = S_text(self);
-	return (unsigned char) text[index];
+	if(kString_is(ASCII, self)) {
+		return text[index];
+	}
+
+	unsigned char *s = (unsigned char *) (text + MultibyteText_length(text, index));
+	unsigned char *e = (unsigned char *) (text + S_size(self));
+	uint32_t v = 0;
+	int i, length = MultiByteChar_length((unsigned char) (*s));
+	if (length == 2) v = *s++ & 0x1f;
+	else if (length == 3) v = *s++ & 0xf;
+	else if (length == 4) v = *s++ & 0x7;
+	for (i = 1; i < length && s < e; ++i) {
+		uint8_t tmp = (uint8_t) *s++;
+		if (tmp < 0x80 || tmp > 0xbf) {
+			return 0;
+		}
+		v = (v << 6) | (tmp & 0x3f);
+	}
+	return v;
 }
 
 static bool String_startsWith(KonohaContext *kctx, kString *self, kString *prefix, size_t toffset)
@@ -225,7 +281,7 @@ static kString* String_replace(KonohaContext *kctx, kString *self, const char *o
 	KLIB Kwb_write(kctx, &wb, newText, newLen);
 	text = pos + oldLen;
 	while((pos = strstr(text, oldText)) != NULL) {
-		KLIB Kwb_write(kctx, &wb, pos, pos - text);
+		KLIB Kwb_write(kctx, &wb, text, pos - text);
 		KLIB Kwb_write(kctx, &wb, newText, newLen);
 		text = pos + oldLen;
 	}
@@ -374,7 +430,7 @@ static kArray *String_split(KonohaContext *kctx, kArray *ret, kString *self, kSt
 			}
 		}
 		else {
-			size_t len = UTFString_length(kctx, self);
+			size_t len = MultibyteString_length(kctx, self);
 			for(i = 0; i < len; i++) {
 				KLIB kArray_add(kctx, ret, new_UTF8SubString(kctx, self, i, 1));
 			}

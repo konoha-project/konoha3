@@ -9,8 +9,9 @@ import("konoha.global");
 import("konoha.const");
 import("konoha.class");
 import("konoha.array");
-import("konoha.while");
+import("cstyle", "while");
 import("konoha.assign");
+import("konoha.new");
 setTransparentGlobalVariable(true);
 
 const width = 64;

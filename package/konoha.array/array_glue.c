@@ -263,7 +263,11 @@ static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
 			BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
 			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
 			lsfp[K_CALLDELTA+1].unboxValue = tmp;
-			KCALL(lsfp, 0, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
+			{
+				KonohaStack *sfp = lsfp + K_CALLDELTA;
+				KSetMethodCallStack(sfp, 0/*UL*/, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
+				KonohaRuntime_callMethod(kctx, sfp);
+			}
 			END_LOCAL();
 			returnValue->unboxItems[i] = lsfp[0].unboxValue;
 		}
@@ -274,7 +278,11 @@ static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
 			BEGIN_LOCAL(lsfp, K_CALLDELTA + 1);
 			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
 			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, tmp);
-			KCALL(lsfp, 0, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
+			{
+				KonohaStack *sfp = lsfp + K_CALLDELTA;
+				KSetMethodCallStack(sfp, 0/*UL*/, f->mtd, 1, KLIB Knull(kctx, CT_(resolve_type)));
+				KonohaRuntime_callMethod(kctx, sfp);
+			}
 			END_LOCAL();
 			KFieldSet(returnValue, returnValue->ObjectItems[i], lsfp[0].asObject);
 		}
@@ -299,7 +307,11 @@ static KMETHOD Array_inject(KonohaContext *kctx, KonohaStack *sfp)
 			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
 			lsfp[K_CALLDELTA+1].unboxValue = tmp;
 			lsfp[K_CALLDELTA+2].unboxValue = a->unboxItems[i];
-			KCALL(lsfp, 0, f->mtd, 2, KLIB Knull(kctx, CT_(resolve_type)));
+			{
+				KonohaStack *sfp = lsfp + K_CALLDELTA;
+				KSetMethodCallStack(sfp, 0/*UL*/, f->mtd, 2, KLIB Knull(kctx, CT_(resolve_type)));
+				KonohaRuntime_callMethod(kctx, sfp);
+			}
 			tmp = lsfp[0].unboxValue;
 		}
 		END_LOCAL();
@@ -314,7 +326,11 @@ static KMETHOD Array_inject(KonohaContext *kctx, KonohaStack *sfp)
 			KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, nulobj);
 			KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, tmp);
 			KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asObject, a->ObjectItems[i]);
-			KCALL(lsfp, 0, f->mtd, 2, nulobj);
+			{
+				KonohaStack *sfp = lsfp + K_CALLDELTA;
+				KSetMethodCallStack(sfp, 0/*UL*/, f->mtd, 2, nulobj);
+				KonohaRuntime_callMethod(kctx, sfp);
+			}
 			KUnsafeFieldSet(tmp, lsfp[0].asObject);
 		}
 		END_LOCAL();

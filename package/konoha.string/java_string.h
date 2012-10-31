@@ -1,3 +1,27 @@
+/****************************************************************************
+ * Copyright (c) 2012, the Konoha project authors. All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *  * Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *  * Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ***************************************************************************/
+
 #ifndef JAVA_STRING_H
 #define JAVA_STRING_H
 #ifdef __cplusplus
@@ -46,8 +70,8 @@ static KMETHOD KString_charAt(KonohaContext *kctx,  KonohaStack *sfp)
 	if(index > S_size(self)) {
 		Throw_IndexOutOfBoundsException(kctx, sfp, sfp[1].intValue);
 	}
-	unsigned char ret = String_charAt(kctx, self, index);
-	RETURNchar(ret);
+	uint32_t ret = String_charAt(kctx, self, index);
+	RETURNint(ret);
 }
 
 // Returns the character
@@ -363,7 +387,7 @@ static kbool_t LoadJavaAPI(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trac
 		_Public|_Const|_Im, _F(KString_regionMatches), TY_boolean, TY_String, MN_("regionMaches"), 5, TY_boolean, FN_("ignoreCase"),TY_int, FN_("toffset"),TY_String, FN_("other"),TY_int, FN_("ooffset"),TY_int, FN_("len"),
 		_Public|_Const|_Im, _F(KString_replace), TY_String, TY_String, MN_("replace"), 2, TY_char, FN_("oldChar"),TY_char, FN_("newChar"),
 		_Public|_Const|_Im, _F(KString_replaceAll), TY_String, TY_String, MN_("replaceAll"), 2, TY_String, FN_("regex"),TY_String, FN_("replacement"),
-		_Public|_Const|_Im, _F(KString_replaceFirst), TY_String, TY_String, MN_("repalceFirst"), 2, TY_String, FN_("regex"),TY_String, FN_("replacement"),
+		_Public|_Const|_Im, _F(KString_replaceFirst), TY_String, TY_String, MN_("replaceFirst"), 2, TY_String, FN_("regex"),TY_String, FN_("replacement"),
 		_Public|_Const|_Im, _F(KString_split), TYPE_Array(String), TY_String, MN_("split"), 2, TY_String, FN_("regex"),TY_int, FN_("limit"),
 		_Public|_Const|_Im, _F(KString_startsWith), TY_boolean, TY_String, MN_("startsWith"), 2, TY_String, FN_("prefix"),TY_int, FN_("toffset"),
 		_Public|_Const|_Im, _F(KString_substring), TY_String, TY_String, MN_("substring"), 2, TY_int, FN_("beginIndex"),TY_int, FN_("endIndex"),

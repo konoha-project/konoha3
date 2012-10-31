@@ -94,9 +94,9 @@ typedef struct {
 #define SUBPROC_setBackground(P) (FLAG_set((P)->flag, SUBPROC_BACKGROUND))
 #define SUBPROC_setShell(P)      (FLAG_set((P)->flag, SUBPROC_SHELL))
 
-#define SUBPROC_unsetCloseFds(P) (FLAG_unset((P)->flag, SUBPROC_CLOSEFDS))
+//#define SUBPROC_unsetCloseFds(P) (FLAG_unset((P)->flag, SUBPROC_CLOSEFDS))
 #define SUBPROC_unsetBackground(P) (FLAG_unset((P)->flag, SUBPROC_BACKGROUND))
-#define SUBPROC_unsetShell(P) (FLAG_unset((P)->flag, SUBPROC_SHELL))
+//#define SUBPROC_unsetShell(P) (FLAG_unset((P)->flag, SUBPROC_SHELL))
 
 typedef struct kSubprocVar kSubproc;
 
@@ -132,12 +132,12 @@ struct kSubprocVar {
 #define R     0
 #define W     1
 
-#define kSubProc_is(P, S)            (TFLAG_is(uintptr_t, (S)->h.magicflag, kSubProcFlag_##P))
+//#define kSubProc_is(P, S)            (TFLAG_is(uintptr_t, (S)->h.magicflag, kSubProcFlag_##P))
 #define kSubProc_set(P, S, T)         TFLAG_set(uintptr_t,(S)->h.magicflag, kSubProcFlag_##P, T)
 
-#define kSubProcFlag_CLOSEFDS         ((kshortflag_t)(1<<0))
+//#define kSubProcFlag_CLOSEFDS         ((kshortflag_t)(1<<0))
 #define kSubProcFlag_RunningBackground       ((kshortflag_t)(1<<1))
-#define kSubProcFlag_SHELL            ((kshortflag_t)(1<<2))
+//#define kSubProcFlag_SHELL            ((kshortflag_t)(1<<2))
 
 typedef struct kSubProcVar kSubProc;
 
@@ -356,6 +356,35 @@ static void kSubProc_wait(KonohaContext *kctx, kSubProc *sbp, int pid, KTraceInf
 	}
 }
 
+static kString *kFILE_readAll(KonohaContext *kctx, kArray *gcstack, kFile *file, KTraceInfo *trace)
+{
+	char buf[K_PAGESIZE];
+	KGrowingBuffer wb;
+	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	while(1) {
+		size_t size = fread(buf, 1, sizeof(buf), file->fp);
+		if(size > 0) {
+			KLIB Kwb_write(kctx, &wb, buf, size);
+		}
+		else {
+			break;
+		}
+	}
+	if(ferror(file->fp)) {
+		// We should not use LogErrno here
+		KTraceErrorPoint(trace, SystemFault, "fread");
+		clearerr(file->fp);
+		fclose(file->fp);
+		file->fp = NULL;
+		return KNULL(String);
+	}
+	kString *ret = KLIB new_kString(kctx, gcstack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), 0);
+	KLIB Kwb_free(&wb);
+	fclose(file->fp);
+	file->fp = NULL;
+	return ret;
+}
+
 //static int kSubProc_waitWithTimer(KonohaContext *kctx, kSubProc *sbp, KTraceInfo *trace)
 //{
 //#ifndef __APPLE__
@@ -440,6 +469,8 @@ static void kSubProc_wait(KonohaContext *kctx, kSubProc *sbp, int pid, KTraceInf
 //	}
 //}
 
+/* ------------------------------------------------------------------------ */
+
 //## SubProc SubProc.new(String cmd);
 static KMETHOD SubProc_new(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -483,6 +514,36 @@ static KMETHOD SubProc_setErrorStream(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 
+//## FILE SubProc.getInputStream();
+static KMETHOD SubProc_getInputStream(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kSubProc *sbp = (kSubProc *)sfp[0].asObject;
+	if(sbp->InNULL == NULL) {
+		KReturn(KNULL(File));
+	}
+	KReturn(sbp->InNULL);
+}
+
+//## FILE SubProc.getOutputStream();
+static KMETHOD SubProc_getOutputStream(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kSubProc *sbp = (kSubProc *)sfp[0].asObject;
+	if(sbp->OutNULL == NULL) {
+		KReturn(KNULL(File));
+	}
+	KReturn(sbp->OutNULL);
+}
+
+//## FILE SubProc.getErrorStream();
+static KMETHOD SubProc_getErrorStream(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kSubProc *sbp = (kSubProc *)sfp[0].asObject;
+	if(sbp->ErrNULL == NULL) {
+		KReturn(KNULL(File));
+	}
+	KReturn(sbp->ErrNULL);
+}
+
 //## int SubProc.bg();
 static KMETHOD SubProc_bg(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -490,6 +551,7 @@ static KMETHOD SubProc_bg(KonohaContext *kctx, KonohaStack *sfp)
 	kSubProc_set(RunningBackground, sbp, true);
 	KMakeTrace(trace, sfp);
 	int pid = kSubProc_exec(kctx, sbp, trace);
+	sbp->childProcessId = pid;
 	KReturnUnboxValue(pid);
 }
 
@@ -522,8 +584,28 @@ static KMETHOD SubProc_pipe(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 
+//## String[] SubProc.communicate(String input);
+static KMETHOD SubProc_communicate(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kSubProc *sbp  = (kSubProc *)sfp[0].asObject;
+	kString *input = sfp[1].asString;
+	KMakeTrace(trace, sfp);
+	if(fwrite(S_text(input), sizeof(char), S_size(input), sbp->InNULL->fp) > 0) {
+		fclose(sbp->InNULL->fp);
+		sbp->InNULL->fp = NULL;
+	} else {
+		KTraceErrorPoint(trace, SystemFault, "fwrite", LogErrno);
+	}
+	kSubProc_wait(kctx, sbp, sbp->childProcessId, trace);
+	INIT_GCSTACK();
+	kArray *resultArray = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
+	KLIB kArray_add(kctx, resultArray, kFILE_readAll(kctx, OnField, sbp->OutNULL, trace));
+	KLIB kArray_add(kctx, resultArray, kFILE_readAll(kctx, OnField, sbp->ErrNULL, trace));
+	KReturnWith(resultArray, RESET_GCSTACK());
+}
+
 #define _Public   kMethod_Public
-#define _Static   kMethod_Static
+//#define _Static   kMethod_Static
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
@@ -542,14 +624,18 @@ static kbool_t subproc_initSubProc(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 	ktype_t TY_StringArray = CT_StringArray2->typeId, TY_SubProc = cSubproc->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(SubProc_new),    TY_SubProc, TY_SubProc, MN_("new"), 1, TY_String, FN_("command"),
-		_Public, _F(SubProc_setArgumentList), TY_void, TY_SubProc, MN_("setArgumentList"), 1, TY_StringArray, FN_("arguments"),
-		_Public, _F(SubProc_setInputStream), TY_void, TY_SubProc, MN_("setInputStream"), 1, TY_File, FN_("stream"),
-		_Public, _F(SubProc_setOutputStream), TY_void, TY_SubProc, MN_("setOutputStream"), 1, TY_File, FN_("stream"),
-		_Public, _F(SubProc_setErrorStream), TY_void, TY_SubProc, MN_("setErrorStream"), 1, TY_File, FN_("stream"),
-		_Public, _F(SubProc_pipe), TY_void, TY_SubProc, MN_("pipe"), 2, TY_SubProc, FN_("next"), TY_boolean, FN_("error"),
-		_Public, _F(SubProc_fg), TY_int, TY_SubProc, MN_("fg"), 0,
-		_Public, _F(SubProc_bg), TY_void, TY_SubProc, MN_("bg"), 0,
+		_Public,     _F(SubProc_new),             TY_SubProc, TY_SubProc, MN_("new"), 1, TY_String, FN_("command"),
+		_Public,     _F(SubProc_setArgumentList), TY_void, TY_SubProc, MN_("setArgumentList"), 1, TY_StringArray, FN_("arguments"),
+		_Public,     _F(SubProc_setInputStream),  TY_void, TY_SubProc, MN_("setInputStream"), 1, TY_File, FN_("stream"),
+		_Public,     _F(SubProc_setOutputStream), TY_void, TY_SubProc, MN_("setOutputStream"), 1, TY_File, FN_("stream"),
+		_Public,     _F(SubProc_setErrorStream),  TY_void, TY_SubProc, MN_("setErrorStream"), 1, TY_File, FN_("stream"),
+		_Public|_Im, _F(SubProc_getInputStream),  TY_File, TY_SubProc, MN_("getInputStream"), 0,
+		_Public|_Im, _F(SubProc_getOutputStream), TY_File, TY_SubProc, MN_("getOutputStream"), 0,
+		_Public|_Im, _F(SubProc_getErrorStream),  TY_File, TY_SubProc, MN_("getErrorStream"), 0,
+		_Public,     _F(SubProc_pipe),            TY_void, TY_SubProc, MN_("pipe"), 2, TY_SubProc, FN_("next"), TY_boolean, FN_("error"),
+		_Public,     _F(SubProc_fg),              TY_int, TY_SubProc, MN_("fg"), 0,
+		_Public,     _F(SubProc_bg),              TY_void, TY_SubProc, MN_("bg"), 0,
+		_Public,     _F(SubProc_communicate),     TY_StringArray, TY_SubProc, MN_("communicate"), 1, TY_String, FN_("input"),
 
 //		_Public|_Im, _F(Subproc_exec), TY_String, TY_Subproc, MN_("exec"), 1, TY_String, FN_("data"),
 //		_Public|_Im, _F(Subproc_communicate), TY_StringArray, TY_Subproc, MN_("communicate"), 1, TY_String, FN_("input"),
@@ -592,9 +678,9 @@ static kbool_t subproc_initSubProc(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 /* ------------------------------------------------------------------------ */
 /* [class defs] */
 
-#define CT_Subproc         cSubproc
+//#define CT_Subproc         cSubproc
 #define TY_Subproc         cSubproc->typeId
-#define IS_Subproc(O)      (O_ct(O) == CT_Subproc)
+//#define IS_Subproc(O)      (O_ct(O) == CT_Subproc)
 
 /* ------------------------------------------------------------------------ */
 /* [global variables] */
@@ -626,7 +712,7 @@ enum {
 };
 
 // child process status code
-#define S_RUNNING          -300			// running
+//#define S_RUNNING          -300			// running
 #define S_PREEXECUTION     -400			// preexecution
 #define S_TIMEOUT          -500			// tiomeout
 #define S_EXIT             0			// terminate
@@ -1640,7 +1726,7 @@ static void kSubproc_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *v
 /* ------------------------------------------------------------------------ */
 
 #define _Public   kMethod_Public
-#define _Static   kMethod_Static
+//#define _Static   kMethod_Static
 #define _Im kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 

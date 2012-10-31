@@ -34,7 +34,7 @@ set(RUNTIME
 
 set(KONOHA_GC_MODULE "" CACHE STRING "konoha gc module")
 if(KONOHA_GC_MODULE)
-	set(GC module/${KONOHA_GC_MODULE}gc/${KONOHA_GC_MODULE}gc.c)
+	set(GC oldmodule/${KONOHA_GC_MODULE}gc/${KONOHA_GC_MODULE}gc.c)
 else(KONOHA_GC_MODULE)
 	set(GC src/gc/gc.c)
 endif(KONOHA_GC_MODULE)
@@ -102,6 +102,7 @@ set(PACKAGES
 	curl
 	llvm
 ##	ijit
+	json
 	jansson
 	mecab
 	python
@@ -153,6 +154,7 @@ endif()
 
 find_library(HAVE_LIBDL    NAMES dl)
 find_library(HAVE_LIBICONV NAMES iconv)
+find_library(HAVE_PTHREAD  NAMES pthread)
 find_library(HAVE_LIBDB    NAMES db)
 
 check_type_size("void *" SIZEOF_VOIDP)
@@ -207,6 +209,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
 		${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 set(ExtraLibs)
+set(ExtraLibs ${ExtraLibs} ${HAVE_PTHREAD})
 if(HAVE_LIBDL)
 	set(ExtraLibs ${ExtraLibs} ${HAVE_LIBDL})
 endif(HAVE_LIBDL)
