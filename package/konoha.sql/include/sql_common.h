@@ -31,7 +31,6 @@
 #include<stdio.h>
 #include<minikonoha/minikonoha.h>
 #include<minikonoha/sugar.h>
-#include<minikonoha/bytes.h>
 
 /* ------------------------------------------------------------------------ */
 /* [bytes API] */
