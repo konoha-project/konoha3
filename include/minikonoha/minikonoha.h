@@ -445,10 +445,9 @@ struct KonohaFactory {
 	char*  (*readline_i)(const char *prompt);
 	int    (*add_history_i)(const char *);
 
-	const char* (*shortText)(const char *msg);
-	const char* (*beginTag)(kinfotag_t);
-	const char* (*endTag)(kinfotag_t);
-	void  (*debugPrintf)(const char *file, const char *func, int line, const char *fmt, ...) __PRINTFMT(4, 5);
+//	const char* (*shortText)(const char *msg);
+//	const char* (*beginTag)(kinfotag_t);
+//	const char* (*endTag)(kinfotag_t);
 
 
 	// logging, trace
@@ -462,9 +461,11 @@ struct KonohaFactory {
 
 	int (*diagnosisFaultType)(KonohaContext *, int fault, KTraceInfo *);
 
-	void (*reportUserMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *, int isNewLine);
-	void (*reportCompilerMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *);
-	void (*reportException)(KonohaContext *, const char *, int fault, const char *, struct KonohaValueVar *bottomStack, struct KonohaValueVar *topStack);
+	void (*ReportUserMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *, int isNewLine);
+	void (*ReportCompilerMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *);
+	void (*ReportCaughtException)(KonohaContext *, const char *, int fault, const char *, struct KonohaValueVar *bottomStack, struct KonohaValueVar *topStack);
+	void (*ReportDebugMessage)(const char *file, const char *func, int line, const char *fmt, ...) __PRINTFMT(4, 5);
+
 
 	// I18N Module
 	const char* Module_I18N;
@@ -1785,8 +1786,8 @@ typedef struct {
 #define TODO_ASSERT(a)      assert(a)
 #endif /* _MSC_VER */
 #define SAFECHECK(T)        (T)
-#define DBG_P(fmt, ...)     PLATAPI debugPrintf(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__)
-#define DBG_ABORT(fmt, ...) PLATAPI debugPrintf(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__); PLATAPI exit_i(EXIT_FAILURE)
+#define DBG_P(fmt, ...)     PLATAPI ReportDebugMessage(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__)
+#define DBG_ABORT(fmt, ...) PLATAPI ReportDebugMessage(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__); PLATAPI exit_i(EXIT_FAILURE)
 #define DUMP_P(fmt, ...)    PLATAPI printf_i(fmt, ## __VA_ARGS__)
 #else
 #define SAFECHECK(T)        (1)

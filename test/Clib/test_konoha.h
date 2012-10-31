@@ -49,7 +49,7 @@ static const char* exportpath(char *pathbuf, size_t bufsiz, const char *pname)
 
 static const char* begin(kinfotag_t t) { return ""; }
 static const char* end(kinfotag_t t) { return ""; }
-static void debugPrintf(const char *file, const char *func, int line, const char *fmt, ...) {}
+static void ReportDebugMessage(const char *file, const char *func, int line, const char *fmt, ...) {}
 
 
 static PlatformApi plat = {
@@ -75,7 +75,7 @@ static PlatformApi plat = {
 	exportpath,
 	begin,
 	end,
-	debugPrintf,
+	ReportDebugMessage,
 };
 
 #endif /* end of include guard */

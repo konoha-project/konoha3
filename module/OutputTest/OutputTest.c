@@ -111,7 +111,7 @@ static void AFTER_LoadScript(KonohaContext *kctx, const char *filename)
 	}
 }
 
-static void NOP_debugPrintf(const char *file, const char *func, int line, const char *fmt, ...)
+static void NOP_ReportDebugMessage(const char *file, const char *func, int line, const char *fmt, ...)
 {
 
 }
@@ -147,21 +147,21 @@ static int TEST_printf(const char *fmt, ...)
 	return res;
 }
 
-static void TEST_reportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t pline, const char *msg)
+static void TEST_ReportUserMessage(KonohaContext *kctx, kinfotag_t level, kfileline_t pline, const char *msg, int isNewLine)
 {
-	fprintf(stdlog, "%s: line=%d\n", TAG_t(taglevel), (int)(kushort_t)pline);
+	const char *kLF = isNewLine ? "\n" : "";
+	PLATAPI printf_i("LINE%d: '%s'%s" ,(int)(kushort_t)pline, msg, kLF);
+}
+
+static void TEST_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t pline, const char *msg)
+{
+	PLATAPI printf_i("LINE%d: %s", (int)(kushort_t)pline, TAG_t(taglevel));
 }
 
 static void TEST_reportCaughtException(KonohaContext *kctx, const char *exceptionName, int fault, const char *optionalMessage, KonohaStack *bottom, KonohaStack *sfp)
 {
-	if(sfp != NULL) {
-		const char* scriptName = PLATAPI shortFilePath(FileId_t(sfp[K_RTNIDX].callerFileLine));
-		int line = (kushort_t)sfp[K_RTNIDX].callerFileLine;
-		fprintf(stdlog, " ** %s (%s:%d)\n", exceptionName, scriptName, line);
-	}
-	else {
-		fprintf(stdlog, " ** %s\n", exceptionName);
-	}
+	int line = (sfp != NULL) ? (kushort_t)sfp[K_RTNIDX].callerFileLine : 0;
+	PLATAPI printf_i("LINE%d: %s\n", line, exceptionName);
 }
 
 // -------------------------------------------------------------------------
@@ -171,14 +171,16 @@ kbool_t LoadOutputTestModule(KonohaFactory *factory, ModuleType type)
 	factory->BEFORE_LoadScript = BEFORE_LoadScript;
 	factory->AFTER_LoadScript  = AFTER_LoadScript;
 
-	factory->debugPrintf     = NOP_debugPrintf;
+	factory->ReportDebugMessage     = NOP_ReportDebugMessage;
 	factory->printf_i        = TEST_printf;
 	factory->vprintf_i       = TEST_vprintf;
 	factory->beginTag        = TEST_begin;
 	factory->endTag          = TEST_end;
 	factory->shortText       = TEST_shortText;
-	factory->reportCompilerMessage = TEST_reportCompilerMessage;
-	factory->reportException = TEST_reportCaughtException;
+
+	factory->ReportUserMessage     = TEST_ReportUserMessage;
+	factory->ReportCompilerMessage = TEST_ReportCompilerMessage;
+	factory->ReportCaughtException       = TEST_reportCaughtException;
 	return true;
 }
 

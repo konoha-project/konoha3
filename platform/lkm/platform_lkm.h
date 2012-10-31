@@ -128,7 +128,7 @@ static inline void syslog(int i,const char *msg, ...)
 	(void)i;(void)msg;
 }
 
-static inline void kdebugPrintf(const char *file, const char *func, int line, const char *fmt, ...)
+static inline void kReportDebugMessage(const char *file, const char *func, int line, const char *fmt, ...)
 {
 	(void)file;(void)func;
 }

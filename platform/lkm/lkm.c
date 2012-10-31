@@ -151,7 +151,7 @@ PlatformApi* platform_kernel(void)
 		//.exportpath  = NULL,
 		.beginTag      = kbegin,
 		.endTag        = kend,
-		.debugPrintf   = kdebugPrintf
+		.ReportDebugMessage   = kReportDebugMessage
 	};
 	return (PlatformApi*)(&plat);
 }

@@ -983,13 +983,13 @@ static int konoha_parseopt(KonohaContext* konoha, KonohaFactory *plat, int argc,
 			verbose_sugar = 0;
 			verbose_gc    = 0;
 			verbose_code  = 0;
-			plat->debugPrintf = NOP_debugPrintf;
+			plat->ReportDebugMessage = NOP_ReportDebugMessage;
 			plat->printf_i  = TEST_printf;
 			plat->vprintf_i = TEST_vprintf;
 			plat->beginTag  = TEST_begin;
 			plat->endTag    = TEST_end;
 			plat->shortText = TEST_shortText;
-			plat->reportException = TEST_reportCaughtException;
+			plat->ReportCaughtException = TEST_reportCaughtException;
 			return KonohaContext_test(konoha, optarg);
 
 		case '?':

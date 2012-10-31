@@ -86,7 +86,7 @@ static const KonohaFactory logpool_platform = {
     .loadScript         = loadScript,
     .beginTag           = beginTag,
     .endTag             = endTag,
-    .debugPrintf        = dbg_p
+    .ReportDebugMessage        = dbg_p
 };
 
 struct kRawPtr {

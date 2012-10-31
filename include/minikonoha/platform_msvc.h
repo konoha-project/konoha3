@@ -422,7 +422,7 @@ static const char* endTag(kinfotag_t t)
 	return tags[(int)t];
 }
 
-static void debugPrintf(const char *file, const char *func, int line, const char *fmt, ...)
+static void ReportDebugMessage(const char *file, const char *func, int line, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap , fmt);
@@ -454,7 +454,7 @@ static void reportCaughtException(const char *exceptionName, const char *scriptN
 }
 
 
-static void NOP_debugPrintf(const char *file, const char *func, int line, const char *fmt, ...)
+static void NOP_ReportDebugMessage(const char *file, const char *func, int line, const char *fmt, ...)
 {
 }
 
@@ -536,7 +536,7 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.endTag              = endTag;
 	plat.shortText           = shortText;
 	plat.reportCaughtException = reportCaughtException;
-	plat.debugPrintf         = (!verbose_debug) ? NOP_debugPrintf : debugPrintf;
+	plat.ReportDebugMessage         = (!verbose_debug) ? NOP_ReportDebugMessage : ReportDebugMessage;
 
 	// timer
 	plat.getTimeMilliSecond  = getTimeMilliSecond;

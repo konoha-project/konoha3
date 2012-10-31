@@ -586,7 +586,7 @@ static const char* endTag(kinfotag_t t)
 	return tags[(int)t];
 }
 
-static void debugPrintf(const char *file, const char *func, int line, const char *fmt, ...)
+static void ReportDebugMessage(const char *file, const char *func, int line, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap , fmt);
@@ -597,7 +597,7 @@ static void debugPrintf(const char *file, const char *func, int line, const char
 	va_end(ap);
 }
 
-static void NOP_debugPrintf(const char *file, const char *func, int line, const char *fmt, ...)
+static void NOP_ReportDebugMessage(const char *file, const char *func, int line, const char *fmt, ...)
 {
 
 }
@@ -941,7 +941,7 @@ static void diagnosis(void)
 
 // --------------------------------------------------------------------------
 
-static void UI_reportUserMessage(KonohaContext *kctx, kinfotag_t level, kfileline_t pline, const char *msg, int isNewLine)
+static void UI_ReportUserMessage(KonohaContext *kctx, kinfotag_t level, kfileline_t pline, const char *msg, int isNewLine)
 {
 	const char *beginTag = PLATAPI beginTag(level);
 	const char *endTag = PLATAPI endTag(level);
@@ -956,7 +956,7 @@ static void UI_reportUserMessage(KonohaContext *kctx, kinfotag_t level, kfilelin
 	}
 }
 
-static void UI_reportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t pline, const char *msg)
+static void UI_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t pline, const char *msg)
 {
 	const char *beginTag = PLATAPI beginTag(taglevel);
 	const char *endTag = PLATAPI endTag(taglevel);
@@ -973,7 +973,7 @@ static void Kwb_writeValue(KonohaContext *kctx, KGrowingBuffer *wb, KonohaClass 
 	}
 }
 
-static void UI_reportException(KonohaContext *kctx, const char *exceptionName, int fault, const char *optionalMessage, KonohaStack *bottomStack, KonohaStack *topStack)
+static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionName, int fault, const char *optionalMessage, KonohaStack *bottomStack, KonohaStack *topStack)
 {
 	PLATAPI printf_i("%s", PLATAPI beginTag(ErrTag));
 	if(optionalMessage != NULL && optionalMessage[0] != 0) {
@@ -1074,7 +1074,7 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.beginTag            = beginTag;
 	plat.endTag              = endTag;
 	plat.shortText           = shortText;
-	plat.debugPrintf         = (!verbose_debug) ? NOP_debugPrintf : debugPrintf;
+	plat.ReportDebugMessage         = (!verbose_debug) ? NOP_ReportDebugMessage : ReportDebugMessage;
 
 	// timer
 	plat.getTimeMilliSecond  = getTimeMilliSecond;
@@ -1091,10 +1091,9 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.diagnosis           = diagnosis;
 	plat.diagnosisFaultType  = DEOS_diagnosisFaultType;
 
-	plat.reportUserMessage     = UI_reportUserMessage;
-	plat.reportCompilerMessage = UI_reportCompilerMessage;
-	plat.reportException       = UI_reportException;
-
+	plat.ReportUserMessage      = UI_ReportUserMessage;
+	plat.ReportCompilerMessage  = UI_ReportCompilerMessage;
+	plat.ReportCaughtException  = UI_ReportCaughtException;
 	return (PlatformApi *)(&plat);
 }
 
@@ -1135,7 +1134,7 @@ static void PosixFactory(KonohaFactory *factory)
 	factory->beginTag              = beginTag;
 	factory->endTag                = endTag;
 	factory->shortText             = shortText;
-	factory->debugPrintf           = (!verbose_debug) ? NOP_debugPrintf : debugPrintf;
+	factory->ReportDebugMessage           = (!verbose_debug) ? NOP_ReportDebugMessage : ReportDebugMessage;
 
 	// timer
 	factory->getTimeMilliSecond    = getTimeMilliSecond;
@@ -1154,9 +1153,10 @@ static void PosixFactory(KonohaFactory *factory)
 	factory->diagnosis             = diagnosis;
 	factory->diagnosisFaultType    = DEOS_diagnosisFaultType;
 
-	factory->reportUserMessage     = UI_reportUserMessage;
-	factory->reportCompilerMessage = UI_reportCompilerMessage;
-	factory->reportException       = UI_reportException;
+	factory->ReportUserMessage     = UI_ReportUserMessage;
+	factory->ReportCompilerMessage = UI_ReportCompilerMessage;
+	factory->ReportCaughtException = UI_ReportCaughtException;
+
 }
 
 #ifdef __cplusplus
