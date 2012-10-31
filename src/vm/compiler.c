@@ -27,7 +27,6 @@
 #include "vm.h"
 
 #ifdef K_USE_TRACEVM
-#include "minivm_common.h"
 #include "tracevm.h"
 #if defined(HAVE_DB_H)
 #include <stdio.h>
@@ -1168,137 +1167,9 @@ static void ByteCode_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *v
 	END_REFTRACE();
 }
 
-#ifdef USE_TRACEVM/*added by kimio */
-
-typedef struct _ByteCode_log {
-	int line;
-	int total_count;
-	const char *file;
-} ByteCode_log;
-
-int cmp(void *p0, void *p1)
-{
-	ByteCode_log *a = (ByteCode_log *) p0;
-	ByteCode_log *b = (ByteCode_log *) p1;
-	return a->line > b->line;
-}
-
-static const char *fetch_from_filelog_memory(int key)
-{
-	int i = 0;
-	FileLog_Map *map;
-	for(i = 0; i < filelog_memory_index; i++) {
-		map = filelog_memory[i];
-		if(key == map->key) {
-			return map->value;
-		}
-	}
-	return NULL;
-}
-
-static void store_CoverageLog_to_Berkeley_DB(KonohaContext *kctx, const char *key, int value);
-
-static void detect_PassLine_from_ByteCode(KonohaContext *kctx, VirtualCode *pc)
-{
-#define N 64
-	kfileline_t uline = 0;
-	ByteCode_log list[1024];
-	int key_for_fetch;
-	int i = 0, j;
-	char key[N] = {'\0'};
-
-	while (1) {
-		if (pc->opcode == OPCODE_RET) {
-			break;
-		}
-		if(pc->count > 0) {
-			if((short)uline != (short)pc->line) {
-				uline = pc->line;
-				list[i].line = (short)pc->line;
-				list[i].total_count = pc->count;
-				key_for_fetch = (uline >> (sizeof(kushort_t) * 8));
-				list[i].file = fetch_from_filelog_memory(key_for_fetch);
-				i++;
-				}
-		}
-		pc++;
-	}
-	
-	//qsort(list, i, sizeof(ByteCode_log), cmp);
-
-	for(j = 0; j < i; j++) {
-		PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"script_name\":\"%s\", \"line\":%d , \"count\": %d}", list[j].file, list[j].line, list[j].total_count);
-		snprintf(key, N, "\"%s:%d\"", list[j].file, list[j].line);
-		store_CoverageLog_to_Berkeley_DB(kctx, key, list[j].total_count);
-	}
-//TODO
-//	for(i = 0; i < filelog_memory_index; i++) {
-//		KFree((char *)filelog_memory[i]->value, sizeof(strlen(filelog_memory[i]->value + 1)));
-//		KFree(filelog_memory[i], sizeof(FileLog_Map));
-//	}
-}
-
-static void store_CoverageLog_to_Berkeley_DB(KonohaContext *kctx, const char *key, int value)
-{
-#if defined(HAVE_DB_H) && defined(__linux__)
-#define DATABASE "test.db" //TODO change name for ET.
-#define N 64
-	DB *dbp = NULL;
-	DBT DB_key, DB_data;
-	int ret, t_ret;
-	char tmpvalue[N] = {'\0'};
-
-	ret = db_create(&dbp, NULL, 0);
-	if (ret != 0) {
-		fprintf(stderr, "db_create: %s\n", db_strerror(ret));
-		goto err;
-	}
-
-	ret = dbp->open(dbp, NULL, DATABASE, NULL, DB_BTREE,
-					DB_CREATE | DB_BTREE, 0664);
-	if (ret != 0) {
-		dbp->err(dbp, ret, "%s", DATABASE);
-		goto err;
-	}
-
-	memset(&DB_key, 0, sizeof(DB_key));
-	memset(&DB_data, 0, sizeof(DB_data));
-	DB_key.data = key;
-	DB_key.size = strlen(key);
-
-	sprintf(tmpvalue, "%d", value); // int to string.
-	DB_data.data = tmpvalue;
-	DB_data.size = strlen(tmpvalue);
-
-	ret = dbp->put(dbp, NULL, &DB_key, &DB_data, DB_NOOVERWRITE);
-	if (ret != 0) {
-		/*This is only alert.*/
-		//dbp->err(dbp, ret, "DB->put");
-		if (ret != DB_KEYEXIST)
-			goto err;
-	}
-
-err:;
-	if (dbp) {
-		t_ret = dbp->close(dbp, 0);
-		if (t_ret != 0 && ret == 0)
-			ret = t_ret;
-	}
-
-#endif /* defined(HAVE_DB_H) && defined(__linux__) */
-}
-
-#endif/*K_USE_TRACEVM*/
-
 static void ByteCode_free(KonohaContext *kctx, kObject *o)
 {
 	kByteCode *b = (kByteCode *)o;
-	if(KonohaContext_isTrace(kctx)) {
-#ifdef USE_TRACEVM/*added by kimio */
-		VirtualCode *pc = b->code;
-		detect_PassLine_from_ByteCode(kctx, pc);
-#endif/*K_USE_TRACEVM*/
-	}
 	KFree(b->code, b->codesize);
 }
 
