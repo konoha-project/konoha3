@@ -1,6 +1,3 @@
-import("konoha");
-import("konoha.new");
-import("konoha.float");
 import("konoha.sql");
 import("cstyle", "while");
 
