@@ -102,8 +102,8 @@ static void AFTER_LoadScript(KonohaContext *kctx, const char *filename)
 		}
 		else {
 			fprintf(stdout, "no proof file: %s\n", filename);
+			fprintf(stdout, "[FAIL]: %s\n", filename);
 		}
-		fprintf(stdout, "[FAIL]: %s\n", filename);
 	}
 	fclose(fp);
 	if(!isPassed) {
