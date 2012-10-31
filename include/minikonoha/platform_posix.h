@@ -956,10 +956,10 @@ static void UI_reportUserMessage(KonohaContext *kctx, kinfotag_t level, kfilelin
 	}
 }
 
-static void UI_reportCompilerMessage(KonohaContext *kctx, kinfotag_t level, const char *msg)
+static void UI_reportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t pline, const char *msg)
 {
-	const char *beginTag = PLATAPI beginTag(level);
-	const char *endTag = PLATAPI endTag(level);
+	const char *beginTag = PLATAPI beginTag(taglevel);
+	const char *endTag = PLATAPI endTag(taglevel);
 	PLATAPI printf_i("%s - %s%s\n", beginTag, msg, endTag);
 }
 

@@ -463,7 +463,7 @@ struct KonohaFactory {
 	int (*diagnosisFaultType)(KonohaContext *, int fault, KTraceInfo *);
 
 	void (*reportUserMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *, int isNewLine);
-	void (*reportCompilerMessage)(KonohaContext *, kinfotag_t, const char *);
+	void (*reportCompilerMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *);
 	void (*reportException)(KonohaContext *, const char *, int fault, const char *, struct KonohaValueVar *bottomStack, struct KonohaValueVar *topStack);
 
 	// I18N Module

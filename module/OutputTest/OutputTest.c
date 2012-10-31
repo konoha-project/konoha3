@@ -147,6 +147,11 @@ static int TEST_printf(const char *fmt, ...)
 	return res;
 }
 
+static void TEST_reportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t pline, const char *msg)
+{
+	fprintf(stdlog, "%s: line=%d\n", TAG_t(taglevel), (int)(kushort_t)pline);
+}
+
 static void TEST_reportCaughtException(KonohaContext *kctx, const char *exceptionName, int fault, const char *optionalMessage, KonohaStack *bottom, KonohaStack *sfp)
 {
 	if(sfp != NULL) {
@@ -172,6 +177,7 @@ kbool_t LoadOutputTestModule(KonohaFactory *factory, ModuleType type)
 	factory->beginTag        = TEST_begin;
 	factory->endTag          = TEST_end;
 	factory->shortText       = TEST_shortText;
+	factory->reportCompilerMessage = TEST_reportCompilerMessage;
 	factory->reportException = TEST_reportCaughtException;
 	return true;
 }
