@@ -1,8 +1,0 @@
- - (JsonGetMtd.k:26) 10
- - (JsonGetMtd.k:27) 1.000000
- - (JsonGetMtd.k:28) hoge
- - (JsonGetMtd.k:29) true
- - (JsonGetMtd.k:33) {"foo": "bar"}
- - (JsonGetMtd.k:33) {"hoge": "huga"}
- - (JsonGetMtd.k:36) {"foo": "bar", "hoge": "huga"}
-Q.E.D.
