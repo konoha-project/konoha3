@@ -28,14 +28,23 @@ import("konoha.array");
 import("konoha.null");
 import("konoha.const");
 import("konoha.file");
-import("konoha.new");
+import("konoha.global");
 import("posix.path");
 import("dscript.subproc");
-import("konoha.global");
 import("sugar");
 
 int subproc_id = 0;
 const DEBUG = false;
+
+@Public String FILE.readAll() {
+	String ret = "";
+	String line = this.readLine();
+	while(line != null) {
+		ret = ret + line + "\n";
+		line = this.readLine();
+	}
+	return ret;
+}
 
 String[] concatTokenList(Token[] tokenList) {
 	int i = 0;
@@ -85,6 +94,14 @@ String[] slice(String[] a, int s, int length) {
 	return ret;
 }
 
+boolean isCommandUseTty(String cmd) {
+	// TODO: consider using isatty.
+	if(cmd == "less" || cmd == "man") {
+		return true;
+	}
+	return false;
+}
+
 String generateSubProcSequence(String[] args) {
 	if(DEBUG) {
 		System.p(args);
@@ -111,20 +128,24 @@ String generateSubProcSequence(String[] args) {
 		else {
 			argsize = index - startindex - 1;
 		}
-		if(DEBUG) {
-			System.p(startindex); System.p(index); System.p(argsize);
-			System.p(redirectindex);
-		}
 		varname = getVarName();
 		ret = ret + "SubProc " + varname + " = new SubProc(\"" + args[startindex] + "\");\n";
 		if(argsize > 0) {
 			ret = ret + varname + ".setArgumentList(" + slice(args, startindex + 1, argsize) + ");\n";
 		}
 		if(index >= 0) {
-			if(prevname != "") {
+			if(prevname != "" && !isCommandUseTty(args[startindex])) {
 				ret = ret + prevname + ".pipe(" + varname + ", false);\n";
 			}
-			ret = ret + varname + ".fg();\n";
+			if(isCommandUseTty(args[startindex])) {
+				ret = ret + varname + ".bg();\n";
+				if(prevname != "") {
+					ret = ret + varname + ".communicate(" + prevname + ".getOutputStream().readAll());\n";
+				}
+			}
+			else {
+				ret = ret + varname + ".fg();\n";
+			}
 		}
 		else {
 			if(redirectindex >= 0) {
@@ -133,11 +154,22 @@ String generateSubProcSequence(String[] args) {
 			}
 			else {
 				ret = ret + varname + ".setOutputStream(stdout);\n";
+				if(isCommandUseTty(args[startindex])) {
+					ret = ret + varname + ".setErrorStream(stderr);\n";
+				}
 			}
-			if(prevname != "") {
+			if(prevname != "" && !isCommandUseTty(args[startindex])) {
 				ret = ret + prevname + ".pipe(" + varname + ", false);\n";
 			}
-			ret = ret + varname + ".fg();\n";
+			if(isCommandUseTty(args[startindex])) {
+				ret = ret + varname + ".bg();\n";
+				if(prevname != "") {
+					ret = ret + varname + ".communicate(" + prevname + ".getOutputStream().readAll());\n";
+				}
+			}
+			else {
+				ret = ret + varname + ".fg();\n";
+			}
 			break;
 		}
 		prevname = varname;
