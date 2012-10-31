@@ -102,6 +102,7 @@ set(PACKAGES
 	curl
 	llvm
 ##	ijit
+	json
 	jansson
 	mecab
 	python
