@@ -311,8 +311,9 @@ static void ResultSet_free(KonohaContext *kctx, kObject *o)
 static void ResultSet_reftrace(KonohaContext *kctx, kObject *p, KObjectVisitor *visitor)
 {
 	struct _kResultSet *rs = (struct _kResultSet *)p;
-	BEGIN_REFTRACE(2);
+	BEGIN_REFTRACE(3);
 	KREFTRACEv(rs->connection);
+	KREFTRACEv(rs->column->name);
 	KREFTRACEv(rs->tableName);
 	END_REFTRACE();
 }
@@ -417,9 +418,8 @@ KMETHOD ResultSet_getName(KonohaContext *kctx, KonohaStack *sfp)
 	size_t n = (size_t)sfp[1].intValue;
 	kString *ret = TS_EMPTY;
 	if(n < rs->column_size) {
-		KNH_ASSERT(n < rs->column_size);
-		const char* raw_name = S_text(rs->column[n].name);
-		ret = KLIB new_kString(kctx, GcUnsafe, raw_name, strlen(raw_name), 0);
+		DBG_ASSERT(n < rs->column_size);
+		ret = rs->column[n].name;
 	}
 	else {
 		//THROW_OutOfRange(kctx, sfp, sfp[1].intValue, rs->column_size);
