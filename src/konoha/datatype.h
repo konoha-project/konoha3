@@ -826,7 +826,7 @@ static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 
 static void KonohaClass_setName(KonohaContext *kctx, KonohaClassVar *ct, KTraceInfo *trace)
 {
-	KLIB Kreportf(kctx, DebugTag, trace, "new class %s.%s", PackageId_t(ct->packageId), SYM_t(ct->classNameSymbol));
+	KLIB ReportRuntimeMessage(kctx, trace, DebugTag, "new class %s.%s", PackageId_t(ct->packageId), SYM_t(ct->classNameSymbol));
 	if(ct->methodList_OnGlobalConstList == NULL) {
 		ct->methodList_OnGlobalConstList = K_EMPTYARRAY;
 		if(ct->typeId > TY_Object) {

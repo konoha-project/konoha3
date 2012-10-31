@@ -126,7 +126,7 @@ static kbool_t kNameSpace_importSyntax(KonohaContext *kctx, kNameSpace *ns, Suga
 	//DBG_P("<<<< packageId=%s,%s >>>>", PackageId_t(syn->lastLoadedPackageId), PackageId_t(target->lastLoadedPackageId));
 	if(syn->lastLoadedPackageId != target->lastLoadedPackageId) {
 		int index;
-		KLIB Kreportf(kctx, DebugTag, 0, "@%s importing syntax %s%s", PackageId_t(ns->packageId), PSYM_t(syn->keyword));
+		KLIB ReportRuntimeMessage(kctx, trace, DebugTag, "@%s importing syntax %s%s", PackageId_t(ns->packageId), PSYM_t(syn->keyword));
 		syn->flag = target->flag;
 		syn->precedence_op1 = target->precedence_op1;
 		syn->precedence_op2 = target->precedence_op2;
@@ -232,7 +232,7 @@ static void SugarSyntax_setMethodFunc(KonohaContext *kctx, kNameSpace *ns, Sugar
 	}
 }
 
-static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE_SYNTAX *syndef)
+static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE_SYNTAX *syndef, KTraceInfo *trace)
 {
 	MethodFunc pPatternMatch = NULL, pExpression = NULL, pStatement = NULL, pTypeCheck = NULL;
 	kFunc *mPatternMatch = NULL, *mExpression = NULL, *mStatement = NULL, *mTypeCheck = NULL;
@@ -270,7 +270,7 @@ static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 			}
 		}
 		DBG_ASSERT(syn == SYN_(ns, syndef->keyword));
-		KLIB Kreportf(kctx, DebugTag, 0, "@%s new syntax %s%s", PackageId_t(ns->packageId), PSYM_t(syn->keyword));
+		KLIB ReportRuntimeMessage(kctx, trace, DebugTag, "@%s new syntax %s%s", PackageId_t(ns->packageId), PSYM_t(syn->keyword));
 		syndef++;
 	}
 }
@@ -354,7 +354,7 @@ static kbool_t kNameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns,
 		if(Symbol_isBoxedKey(unboxKey)) {
 			KLIB kArray_add(kctx, ns->NameSpaceConstList, ns->constTable.keyValueItems[i].ObjectValue);
 		}
-		KLIB Kreportf(kctx, DebugTag, 0, "@%s loading const %s%s as %s", PackageId_t(ns->packageId), PSYM_t(SYMKEY_unbox(unboxKey)), TY_t(ns->constTable.keyValueItems[i].ty));
+		KLIB ReportRuntimeMessage(kctx, trace, DebugTag, "@%s loading const %s%s as %s", PackageId_t(ns->packageId), PSYM_t(SYMKEY_unbox(unboxKey)), TY_t(ns->constTable.keyValueItems[i].ty));
 	}
 	nitems = size + nitems;
 	ns->constTable.bytesize = nitems * sizeof(KKeyValue);
@@ -897,7 +897,7 @@ static kbool_t kNameSpace_loadScript(KonohaContext *kctx, kNameSpace *ns, const 
 	SugarThunk thunk = {kctx, ns};
 	kfileline_t uline = uline_init(kctx, path, 1, true/*isRealPath*/);
 	if(!(PLATAPI loadScript(path, uline, (void *)&thunk, evalHookFunc))) {
-		kreportf(ErrTag, trace, "failed to load script: %s", PLATAPI shortText(path));
+		KLIB ReportRuntimeMessage(kctx, trace, ErrTag, "failed to load script: %s", path);
 		return false;
 	}
 	return true;
@@ -992,7 +992,7 @@ static kbool_t kNameSpace_isImported(KonohaContext *kctx, kNameSpace *ns, kNameS
 {
 	KKeyValue *value = kNameSpace_getLocalConstNULL(kctx, ns, target->packageId | KW_PATTERN);
 	if(value != NULL) {
-		kreportf(DebugTag, trace, "package %s has already imported in %s", PackageId_t(ns->packageId), PackageId_t(target->packageId));
+		KLIB ReportRuntimeMessage(kctx, trace, DebugTag, "package %s has already imported in %s", PackageId_t(ns->packageId), PackageId_t(target->packageId));
 		return true;
 	}
 	return false;

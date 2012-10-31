@@ -331,11 +331,10 @@ static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
 	LoadJavaAPI(kctx, ns, trace);
-	KSET_TYFUNC(CT_String, unbox, String2, trace);
-	KSET_TYFUNC(CT_String, free, String2, trace);
-	KSET_TYFUNC(CT_String, reftrace, String2, trace);
-	KSET_KLIB(new_kString, trace);
-
+	KSetClassFunc(ns->packageId, CT_String, unbox, String2_unbox, trace);
+	KSetClassFunc(ns->packageId, CT_String, free, String2_free, trace);
+	KSetClassFunc(ns->packageId, CT_String, reftrace, String2_reftrace, trace);
+	KSetKLibFunc(ns->packageId, new_kString, new_kString, trace);
 	return true;
 }
 

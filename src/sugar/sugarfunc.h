@@ -1322,7 +1322,7 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 		{ SYM_("new"), 0, NULL, 0, Precedence_CStyleCALL, NULL, Expression_new, NULL, NULL, NULL, },
 		{ KW_END, },
 	};
-	kNameSpace_defineSyntax(kctx, ns, SYNTAX);
+	kNameSpace_defineSyntax(kctx, ns, SYNTAX, NULL);
 }
 
 /* ------------------------------------------------------------------------ */

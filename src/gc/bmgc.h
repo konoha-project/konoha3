@@ -1880,16 +1880,16 @@ static void KscheduleGC(HeapManager *mng)
 void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	if(IS_RootKonohaContext(ctx)) {
-		KSET_KLIB(Kmalloc, 0);
-		KSET_KLIB(Kzmalloc, 0);
-		KSET_KLIB(Kfree, 0);
-		KSET_KLIB(Kwrite_barrier, 0);
-		KSET_KLIB(KnewGcContext, 0);
-		KSET_KLIB(KdeleteGcContext, 0);
-		KSET_KLIB(KscheduleGC, 0);
-		KSET_KLIB(KallocObject, 0);
-		KSET_KLIB(KupdateObjectField, 0);
-		KSET_KLIB(KisObject, 0);
+		KSetKLibFunc(0, Kmalloc, Kmalloc, 0);
+		KSetKLibFunc(0, Kzmalloc, Kzmalloc, 0);
+		KSetKLibFunc(0, Kfree, Kfree, 0);
+		KSetKLibFunc(0, Kwrite_barrier, Kwrite_barrier, 0);
+		KSetKLibFunc(0, KnewGcContext, KnewGcContext, 0);
+		KSetKLibFunc(0, KdeleteGcContext, KdeleteGcContext, 0);
+		KSetKLibFunc(0, KscheduleGC, KscheduleGC, 0);
+		KSetKLibFunc(0, KallocObject, KallocObject, 0);
+		KSetKLibFunc(0, KupdateObjectField, KupdateObjectField, 0);
+		KSetKLibFunc(0, KisObject, KisObject, 0);
 
 		assert(sizeof(BlockHeader) <= MIN_ALIGN
 				&& "Minimum size of Object may lager than sizeof BlockHeader");

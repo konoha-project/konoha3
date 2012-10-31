@@ -1561,7 +1561,7 @@ struct KonohaLibVar {
 	void             (*KCodeGen)(KonohaContext*, kMethod *, kBlock *);
 	kbool_t          (*KonohaRuntime_tryCallMethod)(KonohaContext *, KonohaStack *);
 	void             (*KonohaRuntime_raise)(KonohaContext*, int symbol, int fault, kString *Nullable, KonohaStack *);
-	void             (*Kreportf)(KonohaContext*, kinfotag_t, KTraceInfo *, const char *fmt, ...);
+	void             (*ReportRuntimeMessage)(KonohaContext *, KTraceInfo *, kinfotag_t, const char *fmt, ...);
 };
 
 #define K_NULL            (kctx->share->constNull_OnGlobalConstList)
@@ -1653,30 +1653,22 @@ typedef struct {
 #define kreportf(LEVEL, UL, fmt, ...)  KLIB Kreportf(kctx, LEVEL, UL, fmt, ## __VA_ARGS__)
 #define kraise(PARAM)                  KLIB KonohaRuntime_raise(kctx, PARAM)
 
-#define KSET_KLIB(T, UL)   do {\
-	void *func = kctx->klib->T;\
-	((KonohaLibVar *)kctx->klib)->T = T;\
-	if(func != NULL) {\
-		kreportf(DebugTag, UL, "override of klib->" #T ", file=%s, line=%d", __FILE__, __LINE__);\
-	}\
-} while(0)
 
-#define KSET_KLIB2(T, F, UL)   do {\
+#define KSetKLibFunc(PKGID, T, F, TRACE)   do {\
 	void *func = kctx->klib->T;\
 	((KonohaLibVar *)kctx->klib)->T = F;\
-	if(func != NULL) {\
-		kreportf(DebugTag, UL, "override of kklib->" #T ", file=%s, line=%d", __FILE__, __LINE__);\
+	if(TRACE && func != NULL) {\
+		KLIB ReportRuntimeMessage(kctx, TRACE, DebugTag, "overriding KLIB function " #T " in %s", PackageId_t(PKGID));\
 	}\
 } while(0)
 
-#define KSET_TYFUNC(ct, T, PREFIX, UL)   do {\
-	void *func = ct->T;\
-	((KonohaClassVar *)ct)->T = PREFIX##_##T;\
-	if(func != NULL) {\
-		kreportf(DebugTag, UL, "override of %s->" #T ", file=%s, line=%d", CT_t(ct), __FILE__, __LINE__);\
-	}\
-} while(0)
-
+#define KSetClassFunc(PKGID, C, T, F, TRACE)   do {\
+		void *func = C->T;\
+		((KonohaClassVar *)C)->T = F;\
+		if(TRACE && func != NULL) {\
+			KLIB ReportRuntimeMessage(kctx, TRACE, DebugTag, "overriding CLASS %s funcion " #T " in %s", CT_t(C), PackageId_t(PKGID)) ;\
+		}\
+	}while(0)\
 
 /* [GarbageCollection] */
 

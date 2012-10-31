@@ -556,35 +556,6 @@ static const char *formatTransparentPath(char *buf, size_t bufsiz, const char *p
 	return path;
 }
 
-static const char* beginTag(kinfotag_t t)
-{
-	DBG_ASSERT(t <= NoneTag);
-	static const char* tags[] = {
-		"\x1b[1m\x1b[31m", /*CritTag*/
-		"\x1b[1m\x1b[31m", /*ErrTag*/
-		"\x1b[1m\x1b[31m", /*WarnTag*/
-		"\x1b[1m", /*NoticeTag*/
-		"\x1b[1m", /*InfoTag*/
-		"", /*DebugTag*/
-		"", /* NoneTag*/
-	};
-	return tags[(int)t];
-}
-
-static const char* endTag(kinfotag_t t)
-{
-	DBG_ASSERT(t <= NoneTag);
-	static const char* tags[] = {
-		"\x1b[0m", /*CritTag*/
-		"\x1b[0m", /*ErrTag*/
-		"\x1b[0m", /*WarnTag*/
-		"\x1b[0m", /*NoticeTag*/
-		"\x1b[0m", /*InfoTag*/
-		"", /* Debug */
-		"", /* NoneTag*/
-	};
-	return tags[(int)t];
-}
 
 static void ReportDebugMessage(const char *file, const char *func, int line, const char *fmt, ...)
 {
@@ -941,15 +912,47 @@ static void diagnosis(void)
 
 // --------------------------------------------------------------------------
 
+
+static const char* BeginTag(KonohaContext *kctx, kinfotag_t t)
+{
+	DBG_ASSERT(t <= NoneTag);
+	if(KonohaContext_isInteractive(kctx)) t = NoneTag;
+	static const char* tags[] = {
+		"\x1b[1m\x1b[31m", /*CritTag*/
+		"\x1b[1m\x1b[31m", /*ErrTag*/
+		"\x1b[1m\x1b[31m", /*WarnTag*/
+		"\x1b[1m", /*NoticeTag*/
+		"\x1b[1m", /*InfoTag*/
+		"", /*DebugTag*/
+		"", /* NoneTag*/
+	};
+	return tags[(int)t];
+}
+
+static const char* EndTag(KonohaContext *kctx, kinfotag_t t)
+{
+	DBG_ASSERT(t <= NoneTag);
+	if(KonohaContext_isInteractive(kctx)) t = NoneTag;
+	static const char* tags[] = {
+			"\x1b[0m", /*CritTag*/
+			"\x1b[0m", /*ErrTag*/
+			"\x1b[0m", /*WarnTag*/
+			"\x1b[0m", /*NoticeTag*/
+			"\x1b[0m", /*InfoTag*/
+			"", /* Debug */
+			"", /* NoneTag*/
+	};
+	return tags[(int)t];
+}
+
 static void UI_ReportUserMessage(KonohaContext *kctx, kinfotag_t level, kfileline_t pline, const char *msg, int isNewLine)
 {
-	const char *beginTag = PLATAPI beginTag(level);
-	const char *endTag = PLATAPI endTag(level);
+	const char *beginTag = BeginTag(kctx, level);
+	const char *endTag = EndTag(kctx, level);
 	const char *kLF = isNewLine ? "\n" : "";
 	if(pline > 0) {
 		const char *file = FileId_t(pline);
-		PLATAPI printf_i("%s - (%s:%d) %s%s%s" ,
-			beginTag, PLATAPI shortFilePath(file), (kushort_t)pline, msg, kLF, endTag);
+		PLATAPI printf_i("%s - (%s:%d) %s%s%s" , beginTag, PLATAPI shortFilePath(file), (kushort_t)pline, msg, kLF, endTag);
 	}
 	else {
 		PLATAPI printf_i("%s%s%s%s", beginTag,  msg, kLF, endTag);
@@ -958,8 +961,8 @@ static void UI_ReportUserMessage(KonohaContext *kctx, kinfotag_t level, kfilelin
 
 static void UI_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t pline, const char *msg)
 {
-	const char *beginTag = PLATAPI beginTag(taglevel);
-	const char *endTag = PLATAPI endTag(taglevel);
+	const char *beginTag = BeginTag(kctx, taglevel);
+	const char *endTag = EndTag(kctx, taglevel);
 	PLATAPI printf_i("%s - %s%s\n", beginTag, msg, endTag);
 }
 
@@ -975,7 +978,7 @@ static void Kwb_writeValue(KonohaContext *kctx, KGrowingBuffer *wb, KonohaClass 
 
 static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionName, int fault, const char *optionalMessage, KonohaStack *bottomStack, KonohaStack *topStack)
 {
-	PLATAPI printf_i("%s", PLATAPI beginTag(ErrTag));
+	PLATAPI printf_i("%s", BeginTag(kctx, ErrTag));
 	if(optionalMessage != NULL && optionalMessage[0] != 0) {
 		PLATAPI printf_i("%s: SoftwareFault %s", exceptionName, optionalMessage);
 	}
@@ -994,8 +997,8 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 			PLATAPI printf_i(" ExternalFault");
 		}
 	}
-	PLATAPI printf_i("%s\n", PLATAPI endTag(ErrTag));
-	PLATAPI printf_i("%sStackTrace\n", PLATAPI beginTag(InfoTag));
+	PLATAPI printf_i("%s\n", EndTag(kctx, ErrTag));
+	PLATAPI printf_i("%sStackTrace\n", BeginTag(kctx, InfoTag));
 
 	KonohaStack *sfp = topStack;
 	KGrowingBuffer wb;
@@ -1030,7 +1033,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 		sfp = sfp[K_SHIFTIDX].previousStack;
 	}
 	KLIB Kwb_free(&wb);
-	PLATAPI printf_i("%s\n", PLATAPI endTag(InfoTag));
+	PLATAPI printf_i("%s\n", EndTag(kctx, InfoTag));
 }
 
 // --------------------------------------------------------------------------
@@ -1071,9 +1074,6 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	plat.shortFilePath       = shortFilePath;
 	plat.formatTransparentPath = formatTransparentPath;
 	plat.loadScript          = loadScript;
-	plat.beginTag            = beginTag;
-	plat.endTag              = endTag;
-	plat.shortText           = shortText;
 	plat.ReportDebugMessage         = (!verbose_debug) ? NOP_ReportDebugMessage : ReportDebugMessage;
 
 	// timer
@@ -1131,9 +1131,6 @@ static void PosixFactory(KonohaFactory *factory)
 	factory->shortFilePath         = shortFilePath;
 	factory->formatTransparentPath = formatTransparentPath;
 	factory->loadScript            = loadScript;
-	factory->beginTag              = beginTag;
-	factory->endTag                = endTag;
-	factory->shortText             = shortText;
 	factory->ReportDebugMessage           = (!verbose_debug) ? NOP_ReportDebugMessage : ReportDebugMessage;
 
 	// timer

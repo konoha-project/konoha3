@@ -116,21 +116,6 @@ static void NOP_ReportDebugMessage(const char *file, const char *func, int line,
 
 }
 
-static const char* TEST_begin(kinfotag_t t)
-{
-	return "";
-}
-
-static const char* TEST_end(kinfotag_t t)
-{
-	return "";
-}
-
-static const char* TEST_shortText(const char *msg)
-{
-	return "(omitted..)";
-}
-
 static int TEST_vprintf(const char *fmt, va_list ap)
 {
 	stdlog_count++;
@@ -174,9 +159,6 @@ kbool_t LoadOutputTestModule(KonohaFactory *factory, ModuleType type)
 	factory->ReportDebugMessage     = NOP_ReportDebugMessage;
 	factory->printf_i        = TEST_printf;
 	factory->vprintf_i       = TEST_vprintf;
-	factory->beginTag        = TEST_begin;
-	factory->endTag          = TEST_end;
-	factory->shortText       = TEST_shortText;
 
 	factory->ReportUserMessage     = TEST_ReportUserMessage;
 	factory->ReportCompilerMessage = TEST_ReportCompilerMessage;

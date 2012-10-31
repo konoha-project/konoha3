@@ -496,9 +496,6 @@ static int konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
 			plat->ReportDebugMessage = NOP_ReportDebugMessage;
 			plat->printf_i  = TEST_printf;
 			plat->vprintf_i = TEST_vprintf;
-			plat->beginTag  = TEST_begin;
-			plat->endTag    = TEST_end;
-			plat->shortText = TEST_shortText;
 			plat->ReportCaughtException = TEST_reportCaughtException;
 			return KonohaContext_test(konoha, optarg);
 

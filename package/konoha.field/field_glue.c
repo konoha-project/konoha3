@@ -217,8 +217,8 @@ static kbool_t field_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 
 static kbool_t field_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
-	KSET_KLIB2(kMethod_indexOfField, KLIB2_Method_indexOfField, trace);
-	KSET_KLIB2(KonohaClass_addField, KonohaClass_addField, trace);
+	KSetKLibFunc(ns->packageId, kMethod_indexOfField, KLIB2_Method_indexOfField, trace);
+	KSetKLibFunc(ns->packageId, KonohaClass_addField, KonohaClass_addField, trace);
 	field_defineSyntax(kctx, ns, trace);
 	return true;
 }

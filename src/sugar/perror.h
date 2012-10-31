@@ -154,14 +154,14 @@ static kExpr* kStmt_printMessage2(KonohaContext *kctx, kStmt *stmt, kToken *tk, 
 	return K_NULLEXPR;
 }
 
-extern int verbose_debug;
+int verbose_debug;
 
-static void TRACE_PrintMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_t taglevel, const char *fmt, ...)
+void TRACE_PrintMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_t taglevel, const char *fmt, ...)
 {
 	if(taglevel == DebugTag && !verbose_debug) return;
 	va_list ap;
 	va_start(ap, fmt);
-	if(trace !=NULL && IS_Stmt(trace->baseStack[1].asStmt)) {
+	if(trace !=NULL && IS_Stmt(trace->baseStack[1].asStmt)) {  // Static Compiler Message
 		kStmt *stmt = trace->baseStack[1].asStmt;
 		kfileline_t uline = stmt->uline;
 		kString *emsg = SugarContext_vprintMessage(kctx, taglevel, uline, fmt, ap);

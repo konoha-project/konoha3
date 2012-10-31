@@ -480,30 +480,6 @@ static void kObject_protoEach(KonohaContext *kctx, kAbstractObject *o, void *thu
 
 // -------------------------------------------------------------------------
 
-/* debug mode */
-int verbose_debug = 0;
-
-static void Kreportf(KonohaContext *kctx, kinfotag_t level, KTraceInfo *trace, const char *fmt, ...)
-{
-	if(level == DebugTag && !verbose_debug) return;
-	va_list ap;
-	va_start(ap , fmt);
-	const char *B = PLATAPI beginTag(level);
-	const char *E = PLATAPI endTag(level);
-	if(Trace_pline(trace) != 0) {
-		const char *file = FileId_t(trace->pline);
-		PLATAPI printf_i("%s - %s(%s:%d) " , B, TAG_t(level), PLATAPI shortFilePath(file), (kushort_t)trace->pline);
-	}
-	else {
-		PLATAPI printf_i("%s - %s" , B, TAG_t(level));
-	}
-	PLATAPI vprintf_i(fmt, ap);
-	PLATAPI printf_i("%s\n", E);
-	va_end(ap);
-}
-
-// -------------------------------------------------------------------------
-
 static kbool_t KonohaRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KonohaStackRuntimeVar *runtime = kctx->stack;
@@ -549,6 +525,8 @@ static void KonohaRuntime_raise(KonohaContext *kctx, int symbol, int fault, kStr
 
 /* ------------------------------------------------------------------------ */
 
+void TRACE_PrintMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_t taglevel, const char *fmt, ...);
+
 static void klib_init(KonohaLibVar *l)
 {
 	l->Karray_init   = Karray_init;
@@ -578,7 +556,7 @@ static void klib_init(KonohaLibVar *l)
 	l->KfileId       = KfileId;
 	l->KpackageId    = KpackageId;
 	l->Ksymbol       = Ksymbol;
-	l->Kreportf      = Kreportf;
 	l->KonohaRuntime_tryCallMethod = KonohaRuntime_tryCallMethod;
 	l->KonohaRuntime_raise         = KonohaRuntime_raise;
+	l->ReportRuntimeMessage        = TRACE_PrintMessage; /* perror.h */
 }

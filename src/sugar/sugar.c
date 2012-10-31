@@ -303,6 +303,10 @@ static KMETHOD NameSpace_useStaticFunction2(KonohaContext *kctx, KonohaStack *sf
 
 void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns)
 {
+	KSetKLibFunc(0, ReportRuntimeMessage,           TRACE_PrintMessage,           NULL);
+	KSetKLibFunc(0, kNameSpace_requirePackage,      kNameSpace_requirePackage,      NULL);
+	KSetKLibFunc(0, kNameSpace_importPackage,       kNameSpace_importPackage,       NULL);
+	KSetKLibFunc(0, kNameSpace_importPackageSymbol, kNameSpace_importPackageSymbol, NULL);
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(NameSpace_importPackage), TY_void, TY_NameSpace, MN_("import"), 1, TY_String, FN_("package"),
 		_Public, _F(NameSpace_importPackageSymbol), TY_void, TY_NameSpace, MN_("import"), 2, TY_String, FN_("package"), TY_String, FN_("symbol"),
@@ -312,10 +316,6 @@ void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns)
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, NULL);
-
-	KSET_KLIB2(kNameSpace_requirePackage,      kNameSpace_requirePackage, NULL);
-	KSET_KLIB2(kNameSpace_importPackage,       kNameSpace_importPackage,  NULL);
-	KSET_KLIB2(kNameSpace_importPackageSymbol, kNameSpace_importPackageSymbol, NULL);
 }
 
 #ifdef __cplusplus
