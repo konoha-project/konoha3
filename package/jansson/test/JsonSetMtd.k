@@ -15,32 +15,32 @@ void main() {
 	// Set Json
 
 	// int -> json
-	parsed.setInt("int", 10);
+	parsed.set("int", 10);
 
 	// float -> json
-	parsed.setFloat("float", 1.0);
+	parsed.set("float", 1.0);
 
 	// String -> json
-	parsed.setString("string", "hoge");
+	parsed.set("string", "hoge");
 
 	// Boolean -> json
-	parsed.setBool("bool", true);
+	parsed.set("bool", true);
 
 	// Json -> json
 	Json json = new Json();
-	json.setString("foo", "bar");
-	json.setString("hoge", "fuga");
-	parsed.setJson("json", json);
+	json.set("foo", "bar");
+	json.set("hoge", "fuga");
+	parsed.set("json", json);
 
 	// Json[] -> json
 	Json[] ja = new Json[0];
 	json = new Json();
-	json.setString("foo", "bar");
+	json.set("foo", "bar");
 	ja.add(json);
 	json = new Json();
-	json.setString("hoge", "fuga");
+	json.set("hoge", "fuga");
 	ja.add(json);
-	parsed.setArray("array", ja);
+	parsed.set("array", ja);
 
 	// Get Json
 	System.p(parsed.getInt("int"));
