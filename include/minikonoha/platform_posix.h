@@ -1017,7 +1017,7 @@ static void diagnosis(void)
 static const char* BeginTag(KonohaContext *kctx, kinfotag_t t)
 {
 	DBG_ASSERT(t <= NoneTag);
-	if(KonohaContext_isInteractive(kctx)) t = NoneTag;
+	if(!KonohaContext_isInteractive(kctx)) t = NoneTag;
 	static const char* tags[] = {
 		"\x1b[1m\x1b[31m", /*CritTag*/
 		"\x1b[1m\x1b[31m", /*ErrTag*/
@@ -1033,7 +1033,7 @@ static const char* BeginTag(KonohaContext *kctx, kinfotag_t t)
 static const char* EndTag(KonohaContext *kctx, kinfotag_t t)
 {
 	DBG_ASSERT(t <= NoneTag);
-	if(KonohaContext_isInteractive(kctx)) t = NoneTag;
+	if(!KonohaContext_isInteractive(kctx)) t = NoneTag;
 	static const char* tags[] = {
 			"\x1b[0m", /*CritTag*/
 			"\x1b[0m", /*ErrTag*/

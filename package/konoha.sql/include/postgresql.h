@@ -104,7 +104,7 @@ static void *POSTGRESQL_qopen(KonohaContext *kctx, const char* url)
 	return (void*)conn;
 }
 
-static int POSTGRESQL_qnext(KonohaContext *kctx, kqcur_t *qcur, struct _kResultSet *rs)
+static int POSTGRESQL_qnext(KonohaContext *kctx, kqcur_t *qcur, kResultSet *rs)
 {
 	PGresult* res = (PGresult*)qcur;
 	size_t i, column_size = (size_t)PQnfields(res), row_size = PQntuples(res);
@@ -144,7 +144,7 @@ static int POSTGRESQL_qnext(KonohaContext *kctx, kqcur_t *qcur, struct _kResultS
 	}
 }
 
-static kqcur_t *POSTGRESQL_query(KonohaContext *kctx, void *db, const char* sql, struct _kResultSet *rs)
+static kqcur_t *POSTGRESQL_query(KonohaContext *kctx, void *db, const char* sql, kResultSet *rs)
 {
 	PGresult* res;
 	if(rs == NULL) {
@@ -192,7 +192,7 @@ static void POSTGRESQL_qfree(kqcur_t *qcur)
 //	sqlite3_finalize(stmt);
 }
 
-const kQueryDSPI_t DB__postgresql = {
+const QueryDriver PostgreSQLDriver = {
 	K_DSPI_QUERY, "postgresql",
 	POSTGRESQL_qopen, POSTGRESQL_query, POSTGRESQL_qclose, POSTGRESQL_qnext, POSTGRESQL_qfree
 };

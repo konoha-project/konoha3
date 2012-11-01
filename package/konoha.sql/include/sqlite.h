@@ -37,7 +37,7 @@
 
 /* ======================================================================== */
 
-extern kQueryDSPI_t DB__mysql;
+extern QueryDriver MySQLDriver;
 
 /* ======================================================================== */
 
@@ -61,7 +61,7 @@ void *SQLITE3_qopen(KonohaContext* kctx,  const char* db)
 	return (void*)db_sqlite3;
 }
 
-int SQLITE3_qnext(KonohaContext* kctx, kqcur_t *qcur, struct _kResultSet *rs)
+int SQLITE3_qnext(KonohaContext* kctx, kqcur_t *qcur, kResultSet *rs)
 {
 	sqlite3_stmt *stmt = (sqlite3_stmt*)qcur;
 	int r = sqlite3_step(stmt);
@@ -100,7 +100,7 @@ int SQLITE3_qnext(KonohaContext* kctx, kqcur_t *qcur, struct _kResultSet *rs)
 	return 0;  /* NOMORE */
 }
 
-kqcur_t *SQLITE3_query(KonohaContext* kctx, void *db, const char* query, struct _kResultSet *rs)
+kqcur_t *SQLITE3_query(KonohaContext* kctx, void *db, const char* query, kResultSet *rs)
 {
 	if(rs == NULL) {
 		int r = sqlite3_exec((sqlite3*)db, query, NULL, NULL, NULL);
@@ -154,7 +154,7 @@ void SQLITE3_qfree(kqcur_t *qcur)
 	sqlite3_finalize(stmt);
 }
 
-const kQueryDSPI_t DB__sqlite3 = {
+const QueryDriver SQLLite3Driver = {
 	K_DSPI_QUERY, "sqlite3",
 	SQLITE3_qopen, SQLITE3_query, SQLITE3_qclose, SQLITE3_qnext, SQLITE3_qfree
 };

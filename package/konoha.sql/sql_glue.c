@@ -26,85 +26,14 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/konoha_common.h>
-#include <minikonoha/sugar.h>
-#include <konoha_sql.config.h>
+#include <minikonoha/klib.h>
+
+//#include <minikonoha/sugar.h>
+#include "konoha_sql.config.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/* ======================================================================== */
-/* [struct] */
-/* ------------------------------------------------------------------------ */
-/* [Connection] */
-
-typedef const struct _kQueryDPI_t kQueryDSPI_t;
-typedef const struct _kConnection kConnection;
-
-struct _kConnection {
-	KonohaObjectHeader  h;
-	void                *db;
-	const struct _kQueryDPI_t *dspi;
-};
-
-#define TY_Connection     cConnection->typeId
-
-/* ------------------------------------------------------------------------ */
-/* [ResultSet] */
-
-typedef const struct DBschema DBschema;
-
-struct DBschema {
-	ktype_t   type;   // konoha defined type
-	kushort_t ctype;  // ResultSet defined type. ... Is it obsolate?
-	kString   *name;
-	size_t    start;
-	size_t    len;
-	int       dbtype; // DBMS defined type
-};
-
-typedef void kqcur_t;
-
-typedef const struct _kResultSet kResultSet;
-struct _kResultSet{
-	KonohaObjectHeader  h;
-	kConnection         *connection;
-	void                *qcur;
-	void                (*qcurfree)(kqcur_t *); /* necessary if conn is closed before */
-	kString             *tableName;
-	kushort_t           column_size;
-	struct DBschema     *column;
-	KGrowingArray       databuf;
-	size_t              rowidx;
-};
-
-#define TY_ResultSet     cResultSet->typeId
-
-/* ------------------------------------------------------------------------ */
-/* K_DSPI_QUERY */
-
-struct _kQueryDPI_t {
-	int   type;
-	const char *name;
-	void* (*qopen)(KonohaContext* kctx, const char* db);
-	kqcur_t* (*qexec)(KonohaContext* kctx, void* db, const char* query, struct _kResultSet* rs);
-	void   (*qclose)(void* hdr);
-	int    (*qcurnext)(KonohaContext* kctx, kqcur_t * qcur, struct _kResultSet* rs);
-	void   (*qcurfree)(kqcur_t *);
-};
-
-/* ------------------------------------------------------------------------ */
-/* [Macros] */
-
-#define kResultSet_CTYPE__null    0
-#define kResultSet_CTYPE__integer 1
-#define kResultSet_CTYPE__float   2
-#define kResultSet_CTYPE__text    3  /* UTF-8*/
-//#define kResultSet_CTYPE__bytes   4
-//#define kResultSet_CTYPE__Object  5
-
-#define RESULTSET_BUFSIZE 256
-#define K_DSPI_QUERY 1
 
 #ifdef MYSQL_INCLUDED_
 #include "include/mysql.h"
@@ -118,65 +47,101 @@ struct _kQueryDPI_t {
 #include "include/postgresql.h"
 #endif
 
+/* ======================================================================== */
+/* [Connection] */
+
+typedef const struct QueryDriver QueryDriver;
+typedef struct kConnectionVar kConnection;
+typedef struct kResultSetVar  kResultSet;
+typedef struct DBschema DBschema;
+
+typedef void kqcur_t;
+
+struct QueryDriver {
+	int   type;
+	const char *name;
+	void* (*qopen)(KonohaContext* kctx, const char* db, KTraceInfo *trace);
+	kqcur_t* (*qexec)(KonohaContext* kctx, void* db, const char* query, kResultSet* rs, KTraceInfo *trace);
+	void   (*qclose)(void* hdr);
+	int    (*qcurnext)(KonohaContext* kctx, kqcur_t * qcur, kResultSet* rs, KTraceInfo *trace);
+	void   (*qcurfree)(kqcur_t *);
+};
+
+struct kConnectionVar {
+	KonohaObjectHeader  h;
+	void                *db;
+	QueryDriver *driver;
+};
+
+#define TY_Connection     cConnection->typeId
+
+/* [ResultSet] */
+
+struct DBschema {
+	ktype_t   type;   // konoha defined type
+	kushort_t ctype;  // ResultSet defined type. ... Is it obsolate?
+	kString   *name;
+	size_t    start;
+	size_t    len;
+	int       dbtype; // DBMS defined type
+};
+
+struct kResultSetVar {
+	KonohaObjectHeader  h;
+	kConnection         *connection;
+	void                *qcur;
+	void                (*qcurfree)(kqcur_t *); /* necessary if conn is closed before */
+	kushort_t           column_size;
+	kString             *tableName;
+	struct DBschema     *column;
+	KGrowingArray       databuf;
+	size_t              rowidx;
+};
+
+#define TY_ResultSet     cResultSet->typeId
+
+/* ------------------------------------------------------------------------ */
+/* [Macros] */
+
+typedef enum {
+	kResultSet_CTYPE__null,
+	kResultSet_CTYPE__integer,
+	kResultSet_CTYPE__float,
+	kResultSet_CTYPE__text,
+} kResultSet_CTYPE;
+
+#define RESULTSET_BUFSIZE 256
+#define K_DSPI_QUERY 1
 
 /* ======================================================================== */
 /* ------------------------------------------------------------------------ */
 /* [NOP DB Driver] */
 
-void NOP_qfree(kqcur_t *qcur)
-{
-}
 
-void *NOP_qopen(KonohaContext *kctx, const char* url)
+void *NOP_qopen(KonohaContext *kctx, const char* url, KTraceInfo *trace)
 {
 	return NULL;
 }
-kqcur_t *NOP_query(KonohaContext *kctx, void *hdr, const char* sql, struct _kResultSet *rs)
+kqcur_t *NOP_query(KonohaContext *kctx, void *hdr, const char* sql, kResultSet *rs, KTraceInfo *trace)
 {
 	return NULL;
 }
 void NOP_qclose(void *db)
 {
 }
-int NOP_qnext(KonohaContext *kctx, kqcur_t *qcur, struct _kResultSet *rs)
+int NOP_qnext(KonohaContext *kctx, kqcur_t *qcur, kResultSet *rs, KTraceInfo *trace)
 {
 	return 0;  /* NOMORE */
 }
+void NOP_qfree(kqcur_t *qcur)
+{
+}
 
-static kQueryDSPI_t DB__NOP = {
-	K_DSPI_QUERY, "NOP",
-	NOP_qopen, NOP_query, NOP_qclose, NOP_qnext, NOP_qfree
+static QueryDriver NoQueryDriver = {
+	K_DSPI_QUERY, "NOP", NOP_qopen, NOP_query, NOP_qclose, NOP_qnext, NOP_qfree
 };
 
-/* ======================================================================== */
-/* ------------------------------------------------------------------------ */
-/* [Connection Class Define] */
-
-static void Connection_init(KonohaContext *kctx, kObject *o, void *conf)
-{
-	struct _kConnection *con = (struct _kConnection*)o;
-	con->db = NULL;
-	con->dspi = NULL;
-}
-
-static void Connection_free(KonohaContext *kctx, kObject *o)
-{
-	struct _kConnection *con = (struct _kConnection*)o;
-	if (con->db != NULL) {
-		con->dspi->qclose(con->db);
-		con->db = NULL;
-	}
-	con->dspi = NULL;
-}
-
-static void Connection_reftrace(KonohaContext *kctx, kObject *p, KObjectVisitor *visitor)
-{
-}
-
-/* ------------------------------------------------------------------------ */
-/* [Connection API] */
-
-int dbName_Length(const char* p) {
+static int HandlerNameLength(const char* p) {
 	char ch;
 	ch = p[0];
 	int i = 0;
@@ -187,77 +152,100 @@ int dbName_Length(const char* p) {
 		i++;
 		ch = p[i];
 	}
-	return -1;
+	return i;
 }
+
+static QueryDriver* LoadQueryDriver(KonohaContext *kctx, const char *dburl)
+{
+	int len = HandlerNameLength(dburl);
+#ifdef MYSQL_INCLUDED_
+	if (strncmp(dburl, "mysql", len) == 0) {
+		return &MySQLDriver;
+	}
+#endif
+#ifdef SQLITE_INCLUDED_
+	if (strncmp(dburl, "sqlite3", len) == 0) {
+		return &SQLLite3Driver;
+	}
+#endif
+#ifdef PSQL_INCLUDED_
+	if (strncmp(dburl, "postgresql", len) == 0) {
+		con->driver = &PostgreSQLDriver;
+	}
+#endif
+	return &NoQueryDriver;
+}
+
+/* ------------------------------------------------------------------------ */
+/* [Connection Class Define] */
+
+static void kConnection_init(KonohaContext *kctx, kObject *o, void *conf)
+{
+	kConnection *con = (kConnection*)o;
+	con->db = conf;
+	con->driver = &NoQueryDriver;
+}
+
+static void kConnection_reftrace(KonohaContext *kctx, kObject *p, KObjectVisitor *visitor)
+{
+}
+
+static void kConnection_free(KonohaContext *kctx, kObject *o)
+{
+	kConnection *con = (kConnection*)o;
+	if (con->db != NULL) {
+		con->driver->qclose(con->db);
+		con->db = NULL;
+	}
+	con->driver = &NoQueryDriver;  // safety
+}
+
+/* ------------------------------------------------------------------------ */
+/* [Connection API] */
+
 
 #define DB_NAMESIZE 32
 
-//## Connection Connection.new();
+//## Connection Connection.new(String dburl);
 static KMETHOD Connection_new(KonohaContext *kctx, KonohaStack *sfp)
 {
-	const char *query = S_text(sfp[1].asString);
-	struct _kConnection* con = (struct _kConnection*)KLIB new_kObject(kctx, OnStack, O_ct(sfp[K_RTNIDX].asObject), 0);
-	int len = dbName_Length(query);
-	char dbname[DB_NAMESIZE] = {0};
-	strncpy(dbname, query, len);
-	if (strncmp(dbname, "mysql", len) == 0) {
-#ifdef MYSQL_INCLUDED_
-		con->dspi = &DB__mysql;
-#else
-		goto L_ReturnNULL;
-#endif
+	KMakeTrace(trace, sfp);
+	const char *dburl = S_text(sfp[1].asString);
+	QueryDriver *driver = LoadQueryDriver(kctx, dburl);
+	void *db = driver->qopen(kctx, dburl, trace);
+	if(db != NULL) {
+		kConnection* con = (kConnection *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)db);
+		con->driver = driver;
+		KReturn(con);
 	}
-	else if (strncmp(dbname, "sqlite3", len) == 0) {
-#ifdef SQLITE_INCLUDED_
-		con->dspi = &DB__sqlite3;
-#else
-		goto L_ReturnNULL;
-#endif
-	}
-	else if (strncmp(dbname, "postgresql", len) == 0) {
-#ifdef PSQL_INCLUDED_
-		con->dspi = &DB__postgresql;
-#else
-		goto L_ReturnNULL;
-#endif
-	}
-	else {
-#if (!MYSQL_INCLUDED_ | !SQLITE_INCLUDED_ | !PSQL_INCLUDED_)
-L_ReturnNULL:
-#endif
-		con->dspi = &DB__NOP;
-		//KReturn((kConnection*)KLIB Knull(kctx, O_ct(sfp[0].asObject)));
-	}
-	con->db = con->dspi->qopen(kctx, query);
-	KReturn(con);
 }
 
 //## ResultSet Connection.query(String query);
 static KMETHOD Connection_query(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kConnection *c = (struct _kConnection *)sfp[0].asObject;
+	INIT_GCSTACK();
+	KMakeTrace(trace, sfp);
+	kConnection *conn = (kConnection *)sfp[0].asObject;
 	const char *query = S_text(sfp[1].asString);
-	struct _kResultSet* rs = (struct _kResultSet *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
-	kqcur_t *qcur = c->dspi->qexec(kctx, c->db, query, rs);
+	kResultSet* rs = (kResultSet *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), (uintptr_t)conn);
+	kqcur_t *qcur = conn->driver->qexec(kctx, conn->db, query, rs, trace);
 	if(qcur != NULL) {
 		rs->qcur = qcur;
-		rs->qcurfree = c->dspi->qcurfree;
+		rs->qcurfree = conn->driver->qcurfree;
 	}
 	else {
 		rs->qcur = NULL;
 		rs->qcurfree = NULL;
-		//DP(rs)->qcurfree = kgetQueryDSPI(kctx, K_DEFAULT_DSPI)->qcurfree;
 	}
-	KFieldSet(rs, rs->connection, c);
-	KReturn(rs);
+	KReturnWith(rs, RESET_GCSTACK());
 }
 
 //## void Connection.close();
 static KMETHOD Connection_close(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kConnection* con = (struct _kConnection *)sfp[0].asObject;
-	con->dspi->qclose(con->db);
-	con->db = NULL;
+	kConnection* conn = (kConnection *)sfp[0].asObject;
+	conn->driver->qclose(conn->db);
+	conn->db = NULL;
 }
 
 #ifdef MYSQL_INCLUDED_
@@ -267,7 +255,7 @@ KMETHOD Connection_getInsertId(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kConnection *c = (kConnection*)sfp[0].asObject;
 	kint_t ret = 0;
-	if (strncmp(c->dspi->name, "mysql", sizeof("mysql")) == 0) {
+	if (strncmp(c->driver->name, "mysql", sizeof("mysql")) == 0) {
 		ret = (kint_t)mysql_insert_id((MYSQL*)c->db);
 	}
 	else {
@@ -277,48 +265,46 @@ KMETHOD Connection_getInsertId(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 #endif
-/* ======================================================================== */
+
 /* ------------------------------------------------------------------------ */
 /* [ResultSet Class Define] */
 
-static void ResultSet_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kResultSet_init(KonohaContext *kctx, kObject *o, void *conf)
 {
-	struct _kResultSet *rs = (struct _kResultSet *)o;
+	kResultSet *rs = (kResultSet *)o;
 	rs->qcur = NULL;
 	rs->column_size = 0;
 	rs->column = NULL;
 	KLIB Karray_init(kctx, &rs->databuf, RESULTSET_BUFSIZE);
-	KFieldInit(rs, rs->connection, NULL);
+	KFieldInit(rs, rs->connection, (kConnection *)conf);
 	KFieldInit(rs, rs->tableName, KNULL(String));
 	rs->qcurfree = NULL;
 	rs->rowidx = 0;
 }
 
-static void ResultSet_free(KonohaContext *kctx, kObject *o)
+static void kResultSet_reftrace(KonohaContext *kctx, kObject *p, KObjectVisitor *visitor)
 {
-	struct _kResultSet *rs = (struct _kResultSet *)o;
-	if(rs != NULL && rs->column_size > 0) {
+	kResultSet *rs = (kResultSet *)p;
+	KREFTRACEv(rs->connection);
+	KREFTRACEv(rs->column->name);
+	KREFTRACEv(rs->tableName);
+}
+
+static void kResultSet_free(KonohaContext *kctx, kObject *o)
+{
+	kResultSet *rs = (kResultSet *)o;
+	if(rs->column_size > 0) {
 		KFree((void *)rs->column, sizeof(DBschema) * rs->column_size);
 	}
 	if(rs->qcur != NULL) {
 		rs->qcurfree(rs->qcur);
 		rs->qcur = NULL;
-		//rs->qcurfree = kgetQueryDSPI(ctx, t)->qcurfree;
 	}
 	rs->connection = NULL;
 }
 
-static void ResultSet_reftrace(KonohaContext *kctx, kObject *p, KObjectVisitor *visitor)
-{
-	struct _kResultSet *rs = (struct _kResultSet *)p;
-	BEGIN_REFTRACE(3);
-	KREFTRACEv(rs->connection);
-	KREFTRACEv(rs->column->name);
-	KREFTRACEv(rs->tableName);
-	END_REFTRACE();
-}
 
-static void ResultSet_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+static void kResultSet_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	//KLIB Kwb_printf(kctx, wb, "%s", "{");
 	//size_t n;
@@ -352,7 +338,7 @@ static void ResultSet_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBu
 /* ------------------------------------------------------------------------ */
 /* [ResultSet inner function] */
 
-int _ResultSet_findColumn(KonohaContext *kctx, kResultSet *o, const char* name)
+static int _ResultSet_findColumn(KonohaContext *kctx, kResultSet *o, const char* name)
 {
 	size_t i = 0;
 	for(i = 0; i < o->column_size; i++) {
@@ -386,20 +372,21 @@ static int _ResultSet_indexof_(KonohaContext *kctx, KonohaStack *sfp)
 /* [ResultSet API] */
 
 //## Boolean ResultSet.next();
+
 KMETHOD ResultSet_next(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kResultSet* rs = (struct _kResultSet*)sfp[0].asObject;
+	kResultSet* rs = (kResultSet*)sfp[0].asObject;
 	kbool_t ret = false;
-	if(rs->qcur != NULL) {
-		if(rs->connection->dspi->qcurnext(kctx, rs->qcur, rs)) {
-			rs->rowidx++;
-			ret = true;
-		}
-		else {
-			rs->qcurfree(rs->qcur);
-			rs->qcur = NULL;
-			//o->qcurfree = kgetQueryDSPI(ctx, t)->qcurfree;
-		}
+	DBG_ASSERT(rs->qcur != NULL);
+	KMakeTrace(trace, sfp);
+	if(rs->connection->driver->qcurnext(kctx, rs->qcur, rs, trace)) {
+		rs->rowidx++;
+		ret = true;
+	}
+	else {
+		rs->qcurfree(rs->qcur);
+		rs->qcur = NULL;
+		//o->qcurfree = kgetQueryDSPI(ctx, t)->qcurfree;
 	}
 	KReturnUnboxValue(ret);
 }
@@ -407,24 +394,17 @@ KMETHOD ResultSet_next(KonohaContext *kctx, KonohaStack *sfp)
 //## int ResultSet.getSize();
 KMETHOD ResultSet_getSize(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kResultSet* rs = (struct _kResultSet*)sfp[0].asObject;
+	kResultSet* rs = (kResultSet*)sfp[0].asObject;
 	KReturnUnboxValue(rs->column_size);
 }
 
 //## String ResultSet.getName(Int n);
 KMETHOD ResultSet_getName(KonohaContext *kctx, KonohaStack *sfp)
 {
-	struct _kResultSet* rs = (struct _kResultSet*)sfp[0].asObject;
+	kResultSet* rs = (kResultSet*)sfp[0].asObject;
 	size_t n = (size_t)sfp[1].intValue;
-	kString *ret = TS_EMPTY;
-	if(n < rs->column_size) {
-		DBG_ASSERT(n < rs->column_size);
-		ret = rs->column[n].name;
-	}
-	else {
-		//THROW_OutOfRange(kctx, sfp, sfp[1].intValue, rs->column_size);
-	}
-	KReturn(ret);
+	KCheckIndex(n, rs->column_size);
+	KReturn(rs->column[n].name);
 }
 /* ------------------------------------------------------------------------ */
 /* [getter/setter] */
@@ -503,7 +483,7 @@ KMETHOD ResultSet_getString(KonohaContext *kctx, KonohaStack *sfp)
 	case kResultSet_CTYPE__null :
 		break;
 	}
-	KReturn(KLIB new_kString(kctx, GcUnsafe, "", 0, 0));
+	KReturn(TS_EMPTY);
 }
 
 //## method dynamic ResultSet.get(dynamic n);
@@ -559,18 +539,18 @@ static kbool_t sql_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	static KDEFINE_CLASS ConnectionDef = {
 		STRUCTNAME(Connection),
 		.cflag = kClass_Final,
-		.init = Connection_init,
-		.free = Connection_free,
-		.reftrace = Connection_reftrace,
+		.init = kConnection_init,
+		.free = kConnection_free,
+		.reftrace = kConnection_reftrace,
 	};
 
 	static KDEFINE_CLASS ResultSetDef = {
 		STRUCTNAME(ResultSet),
 		.cflag = kClass_Final,
-		.init = ResultSet_init,
-		.free = ResultSet_free,
-		.reftrace = ResultSet_reftrace,
-		.p = ResultSet_p,
+		.init = kResultSet_init,
+		.free = kResultSet_free,
+		.reftrace = kResultSet_reftrace,
+		.p = kResultSet_p,
 	};
 
 	KonohaClass *cConnection = KLIB kNameSpace_defineClass(kctx, ns, NULL, &ConnectionDef, trace);
@@ -606,7 +586,7 @@ static kbool_t sql_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime
 KDEFINE_PACKAGE* sql_init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("sql", "1.0"),
+		KPACKNAME("Simple Sql", "1.0"),
 		.initPackage    = sql_initPackage,
 		.setupPackage   = sql_setupPackage,
 	};

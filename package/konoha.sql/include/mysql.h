@@ -36,7 +36,7 @@
 
 /* ======================================================================== */
 
-extern kQueryDSPI_t DB__mysql;
+extern QueryDriver MySQLDriver;
 
 /* ======================================================================== */
 
@@ -83,7 +83,7 @@ void *MYSQL_qopen(KonohaContext *kctx, const char* url)
 /* ------------------------------------------------------------------------ */
 
 //static int MYSQL_qnext(KonohaContext *kctx, kqcur_t *qcur, kResultSet *rs)
-int MYSQL_qnext(KonohaContext *kctx, kqcur_t *qcursor, struct _kResultSet *rs)
+int MYSQL_qnext(KonohaContext *kctx, kqcur_t *qcursor, kResultSet *rs)
 {
 	MYSQL_ROW row;
 	MYSQL_RES* res = (MYSQL_RES*)qcursor;
@@ -134,7 +134,7 @@ int MYSQL_qnext(KonohaContext *kctx, kqcur_t *qcursor, struct _kResultSet *rs)
 /* ------------------------------------------------------------------------ */
 
 //static kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, kbytes_t sql, kResultSet *rs)
-kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char* sql, struct _kResultSet *rs)
+kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char* sql, kResultSet *rs)
 {
 	MYSQL_RES *res = NULL;
 	MYSQL *db = (MYSQL *)hdr;
@@ -234,7 +234,7 @@ void MYSQL_qfree(kqcur_t *qcur)
 /* ------------------------------------------------------------------------ */
 /* [prototype function] */
 
-const kQueryDSPI_t DB__mysql = {
+const QueryDriver MySQLDriver = {
 	K_DSPI_QUERY, "mysql",
 	MYSQL_qopen, MYSQL_query, MYSQL_qclose, MYSQL_qnext, MYSQL_qfree
 };

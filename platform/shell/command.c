@@ -130,21 +130,6 @@ extern int verbose_gc;
 static FILE *stdlog;
 static int   stdlog_count = 0;
 
-static const char* TEST_begin(kinfotag_t t)
-{
-	return "";
-}
-
-static const char* TEST_end(kinfotag_t t)
-{
-	return "";
-}
-
-static const char* TEST_shortText(const char *msg)
-{
-	return "(omitted..)";
-}
-
 static int TEST_vprintf(const char *fmt, va_list ap)
 {
 	stdlog_count++;
