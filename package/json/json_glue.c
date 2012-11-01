@@ -52,7 +52,7 @@ static void kJson_free(KonohaContext *kctx, kObject *o)
 {
 	kJson *json = (kJson *)o;
 	if(json->json != 0) {
-		PLATAPI Json_free_i(PLATAPI JsonContext, json->json);
+		PLATAPI DeleteJson(PLATAPI JsonContext, json->json);
 	}
 }
 
@@ -85,7 +85,7 @@ static kJson *NewJsonObject(KonohaContext *kctx, KonohaStack *sfp, KJson_t val)
 static KMETHOD kJson_parse(KonohaContext *kctx, KonohaStack *sfp)
 {
 	const char *text = S_text(sfp[1].asString);
-	KJson_t json = PLATAPI Json_parse_i(PLATAPI JsonContext, text, S_size(sfp[1].asString));
+	KJson_t json = PLATAPI ParseJson(PLATAPI JsonContext, text, S_size(sfp[1].asString));
 	if(json == 0) {
 		KReturnDefaultObjectValue();
 	}
@@ -221,7 +221,7 @@ static KMETHOD Float_toJson(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD String_toJson(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kString *Val = sfp[0].asString;
-	KJson_t json = PLATAPI Json_parse_i(PLATAPI JsonContext, S_text(Val), S_size(Val));
+	KJson_t json = PLATAPI ParseJson(PLATAPI JsonContext, S_text(Val), S_size(Val));
 	if(json != 0) {
 		KReturn(NewJsonObject(kctx, sfp, json));
 	}
@@ -234,7 +234,7 @@ static KMETHOD Array_toJson(KonohaContext *kctx, KonohaStack *sfp)
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb);
 	const char *text = KLIB Kwb_top(kctx, &wb, 1);
-	KJson_t json = PLATAPI Json_parse_i(PLATAPI JsonContext, text, Kwb_bytesize(&wb));
+	KJson_t json = PLATAPI ParseJson(PLATAPI JsonContext, text, Kwb_bytesize(&wb));
 	if(json != 0) {
 		KReturn(NewJsonObject(kctx, sfp, json));
 	}

@@ -400,7 +400,7 @@ typedef struct KTraceInfo {
 #define Trace_pline(trace) (trace == NULL ? 0 : trace->pline)
 
 typedef uint64_t KJson_t;
-typedef uintptr_t KJsonContext;
+struct JsonBuf;
 
 struct KonohaFactory {
 	// settings
@@ -505,37 +505,50 @@ struct KonohaFactory {
 	void */*MethodFunc*/  (*GetVirtualMachineMethodFunc)(void);
 	struct VirtualCode*   (*GetBootCodeOfNativeMethodCall)(void);
 
-	/* JSON_API { */
+	/* JSON_API */
 	const char  *Module_Json;
-	KJsonContext JsonContext;
+	void        *JsonHandler;  // define this in each module if necessary
+	// Official API
+	kbool_t     (*ParseJson)(KonohaContext *, struct JsonBuf *, const char *, size_t, KTraceInfo *);
+	void        (*FreeJson)(KonohaContext *, struct JsonBuf *);
+	const char* (*JsonToNewText)(KonohaContext *, struct JsonBuf *);
+//	void        (*WriteJsonToBuffer)(KonohaContext *, KGrowingBuffer *, struct JsonBuf *);
+	kbool_t     (*GetJsonKeyValue)(KonohaContext *, struct JsonBuf *, const char *key, size_t keylen, struct JsonBuf *newbuf);
+	kbool_t     (*SetJsonKeyValue)(KonohaContext *, struct JsonBuf *, const char *key, size_t keylen, struct JsonBuf *otherbuf);
+	int64_t     (*GetJsonInteger)(KonohaContext *, struct JsonBuf *, const char *key, size_t keylen, int64_t defval);
+	kbool_t     (*SetJsonInteger)(KonohaContext *, struct JsonBuf *, const char *key, size_t keylen, int64_t val);
+	const char* (*GetJsonText)(KonohaContext *, struct JsonBuf *, const char *key, size_t keylen, const char *);
+	kbool_t     (*SetJsonText)(KonohaContext *, struct JsonBuf *, const char *key, size_t keylen, const char *text);
+
+	// Unofficial (under reviewing..)
 	/* JSON New/Delete API */
-	KJson_t      (*JsonNull_new_i)(KJsonContext jctx);
-	KJson_t      (*JsonInt_new_i)(KJsonContext jctx, int64_t);
-	KJson_t      (*JsonDouble_new_i)(KJsonContext jctx, double);
-	KJson_t      (*JsonString_new_i)(KJsonContext jctx, const char *text, size_t length);
-	KJson_t      (*JsonArray_new_i)(KJsonContext  jctx);
-	KJson_t      (*JsonObject_new_i)(KJsonContext jctx);
-	void         (*Json_free_i)(KJsonContext jctx, KJson_t);
+	KJson_t      (*JsonNull_new_i)(KonohaContext *);   // unnecessary ParseJson("null")
+	KJson_t      (*JsonInt_new_i)(KonohaContext *, int64_t);   // ParseJson("111")
+	KJson_t      (*JsonDouble_new_i)(KonohaContext *, double);  // ParseJson("111.111")
+	KJson_t      (*JsonString_new_i)(KonohaContext *, const char *text, size_t length);  // ParseJson("\"111\"")
+	KJson_t      (*JsonArray_new_i)(KonohaContext *);  // unnecessary ParseJson("[]")
+	KJson_t      (*JsonObject_new_i)(KonohaContext *); // unnecessary ParseJson("{}")
+//	void         (*DeleteJson)(KonohaContext *, KonohaJson *);
 	/* JSON Parse/ToString API */
-	KJson_t      (*Json_parse_i)(KJsonContext jctx, const char *text, size_t length);
-	const char  *(*Json_toString_i)(KJsonContext jctx, KJson_t json, size_t *lengthPtr);
+//	KonohaJson*  (*ParseJson)(KonohaContext *, const char *text, size_t length);
+	const char  *(*Json_toString_i)(KonohaContext *, KJson_t json, size_t *lengthPtr);
 	/* JSON => KonohaObject */
-	kbool_t      (*JsonToObject_i)(KJsonContext jctx, KonohaContext *kctx, KJson_t json, ktype_t RequestType, struct KonohaValueVar *);
+	kbool_t      (*JsonToObject_i)(KonohaContext *, KonohaContext *kctx, KJson_t json, ktype_t RequestType, struct KonohaValueVar *);
 	/* JSONObject API */
-	void         (*JsonObject_set_i)(KJsonContext jctx, KJson_t json, const char *Key, size_t KeyLen, KJson_t);
-	KJson_t      (*JsonObject_get_i)(KJsonContext jctx, KJson_t json, const char *Key, size_t KeyLen);
-	kbool_t      (*JsonObject_getBool_i)(KJsonContext jctx, KJson_t json, const char *Key, size_t KeyLen);
-	int64_t      (*JsonObject_getInt_i)(KJsonContext jctx, KJson_t json, const char *Key, size_t KeyLen);
-	double       (*JsonObject_getDouble_i)(KJsonContext jctx, KJson_t json, const char *Key, size_t KeyLen);
-	const char  *(*JsonObject_getString_i)(KJsonContext jctx, KJson_t json, const char *Key, size_t KeyLen, size_t *ValLen);
-	KJson_t      (*JsonObject_getArray_i)(KJsonContext jctx, KJson_t json, const char *Key, size_t KeyLen);
-	KJson_t      (*JsonObject_getObject_i)(KJsonContext jctx, KJson_t json, const char *Key, size_t KeyLen);
-	void         (*JsonObject_each_i)(KJsonContext jctx, KJson_t json, void (*Func)(KJson_t, KJson_t, void *), void *thunk);
+	void         (*JsonObject_set_i)(KonohaContext *, KJson_t json, const char *Key, size_t KeyLen, KJson_t);
+	KJson_t      (*JsonObject_get_i)(KonohaContext *, KJson_t json, const char *Key, size_t KeyLen);
+	kbool_t      (*JsonObject_getBool_i)(KonohaContext *, KJson_t json, const char *Key, size_t KeyLen);
+	int64_t      (*JsonObject_getInt_i)(KonohaContext *, KJson_t json, const char *Key, size_t KeyLen);
+	double       (*JsonObject_getDouble_i)(KonohaContext *, KJson_t json, const char *Key, size_t KeyLen);
+	const char  *(*JsonObject_getString_i)(KonohaContext *, KJson_t json, const char *Key, size_t KeyLen, size_t *ValLen);
+	KJson_t      (*JsonObject_getArray_i)(KonohaContext *, KJson_t json, const char *Key, size_t KeyLen);
+	KJson_t      (*JsonObject_getObject_i)(KonohaContext *, KJson_t json, const char *Key, size_t KeyLen);
+	void         (*JsonObject_each_i)(KonohaContext *, KJson_t json, void (*Func)(KJson_t, KJson_t, void *), void *thunk);
 	/* JSONArray API */
-	void         (*JsonArray_append_i)(KJsonContext jctx, KJson_t json, KJson_t value);
-	KJson_t      (*JsonArray_get_i)(KJsonContext jctx, KJson_t json, size_t idx);
-	void         (*JsonArray_set_i)(KJsonContext jctx, KJson_t json, size_t idx, KJson_t value);
-	KJson_t      (*Json_length_i)(KJsonContext jctx, KJson_t json);
+	void         (*JsonArray_append_i)(KonohaContext *, KJson_t json, KJson_t value);
+	KJson_t      (*JsonArray_get_i)(KonohaContext *, KJson_t json, size_t idx);
+	void         (*JsonArray_set_i)(KonohaContext *, KJson_t json, size_t idx, KJson_t value);
+	KJson_t      (*Json_length_i)(KonohaContext *, KJson_t json);
 	/* } JSON_API */
 };
 
