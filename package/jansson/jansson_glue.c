@@ -36,10 +36,9 @@ extern "C" {
 
 #define TY_Json          cJson->typeId
 #define CT_JsonArray     CT_p0(kctx, CT_Array, TY_Json)
-
 #define CT_StringArray0   CT_p0(kctx, CT_Array, TY_String)
 
-typedef truct kJanssonVar kJson;
+typedef struct kJanssonVar kJson;
 struct kJanssonVar {
 	KonohaObjectHeader h;
 	json_t *obj;
