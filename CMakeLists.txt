@@ -83,7 +83,7 @@ set(PACKAGES
 	konoha.regexp
 	konoha.string
 	konoha.subtype
-##	konoha.sql
+##konoha.sql
 	konoha.untyped
 	konoha.var
 	konoha.eventlistener
