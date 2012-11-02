@@ -305,78 +305,93 @@ macro(ENABLE_COVERAGE_INFO_IF_ENABLE VARNAME)
 	endif(TEST_COVERAGE)
 endmacro(ENABLE_COVERAGE_INFO_IF_ENABLE VARNAME)
 
-macro(create_package_project _PKGNAME)
-	project(${_PKGNAME})
-	ENABLE_COVERAGE_INFO_IF_ENABLE(PACKAGE_EXTRA_LIBRARY)
-	file(GLOB_RECURSE test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/*.k)
-	foreach(f ${test_files})
-		string(REPLACE // / f ${f})
-		string(REPLACE ${PARENT_SOURCE_DIR}/package/ "" test_name ${f})
-		string(REPLACE /test "" test_name ${test_name})
-		add_konoha_test(${test_name} ${f})
-		if(PACKAGE_ENV)
-			set_tests_properties(${test_name} PROPERTIES ENVIRONMENT ${PACKAGE_ENV})
-		endif(PACKAGE_ENV)
-	endforeach(f ${test_files})
-	set(CMAKE_BUILD_TYPE ${KONOHA_BUILD_TYPE})
-	PKGNAME(${_PKGNAME} _PACKAGE_NAME)
-	set(LIB  "${_PACKAGE_NAME}_glue")
-	set(_PACKAGE_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
-	set(_PACKAGE_STRING  ${CMAKE_PROJECT_NAME}-${_PACKAGE_VERSION})
-	set(_KONOHA_PACKAGE_DIR lib/minikonoha/${SO_VERSION}/package/${KONOHA_VERSION}/${PROJECT_NAME})
-	set(CMAKE_C_FLAGS_${uppercase_CMAKE_BUILD_TYPE}
-		"${CMAKE_C_FLAGS_${uppercase_CMAKE_BUILD_TYPE}} ${PACKAGE_C_FLAGS}")
-	set(CMAKE_CXX_FLAGS_${uppercase_CMAKE_BUILD_TYPE}
-		"${CMAKE_CXX_FLAGS_${uppercase_CMAKE_BUILD_TYPE}} ${PACKAGE_CXX_FLAGS}")
-	set(_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
-			${CMAKE_CURRENT_SOURCE_DIR}/include  ${CMAKE_CURRENT_BINARY_DIR}
-			${KONOHA_INCLUDE_DIRS}
-			${_PACKAGE_INCLUDE_DIR})
-	include_directories(${_INCLUDE_DIRS})
-	list(LENGTH PACKAGE_SOURCE_CODE LEN)
-	if(${LEN} GREATER 0)
-		add_library(${LIB} SHARED ${PACKAGE_SOURCE_CODE})
-		SET_CXX_PROPERTY_IF_MSVC(${LIB} ${PACKAGE_SOURCE_CODE})
-		set_target_properties(${LIB} PROPERTIES PREFIX "")
-		if(PACKAGE_EXTRA_LIBRARY)
-			target_link_libraries(${LIB} ${PACKAGE_EXTRA_LIBRARY})
-		endif(PACKAGE_EXTRA_LIBRARY)
-		install(TARGETS ${LIB} DESTINATION ${_KONOHA_PACKAGE_DIR})
-	endif(${LEN} GREATER 0)
-	if(PACKAGE_SCRIPT_CODE)
-		install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGE_SCRIPT_CODE}
-			DESTINATION ${_KONOHA_PACKAGE_DIR})
-		add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_SCRIPT_CODE}
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different
-			${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGE_SCRIPT_CODE}
-			${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_SCRIPT_CODE})
-		add_custom_target(copy_${PACKAGE_SCRIPT_CODE} ALL DEPENDS
-			${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_SCRIPT_CODE})
-	endif(PACKAGE_SCRIPT_CODE)
-	# for copy test files
-	if(PACKAGE_TEST_FILE)
-		foreach(testfile ${PACKAGE_TEST_FILE})
-			add_custom_command(OUTPUT
-				${CMAKE_CURRENT_BINARY_DIR}/${testfile}
-				COMMAND ${CMAKE_COMMAND} -E copy_if_different
-				${CMAKE_CURRENT_SOURCE_DIR}/test/${testfile}
-				${CMAKE_CURRENT_BINARY_DIR}/${testfile})
-		endforeach(testfile ${PACKAGE_TEST_FILE})
-		add_custom_target(copy_${_PKGNAME}_testfile ALL DEPENDS
-			${PACKAGE_TEST_FILE})
-	endif(PACKAGE_TEST_FILE)
-endmacro(create_package_project)
+macro(show_package_warning)
+	if(TEST_COVERAGE)
+		set(MSG_STATUS SEND_ERROR)
+	else(TEST_COVERAGE)
+		set(MSG_STATUS WARNING)
+	endif(TEST_COVERAGE)
+	if(ARGV1)
+		message(${MSG_STATUS} "Disabled ${ARGV0} package because ${ARGV1} not found")
+	else(ARGV1)
+		message(${MSG_STATUS} "Disabled ${ARGV0} package")
+	endif(ARGV1)
+endmacro(show_package_warning)
 
-macro(add_konoha_package PKGNAME)
-	set(__BUILD true)
-	foreach(arg ${ARGN})
-		if (NOT ${arg})
-			set(__BUILD false)
-		endif (NOT ${arg})
-	endforeach(arg ${ARGN})
-	if (__BUILD)
-		create_package_project(${PKGNAME})
-	endif (__BUILD)
+macro(find_package_extra_library)
+	foreach(_PKGLIB ${ARGN})
+		find_library(HAVE_LIB${_PKGLIB} NAMES ${_PKGLIB})
+		if(HAVE_LIB${_PKGLIB})
+			set(PACKAGE_EXTRA_LIBRARY ${PACKAGE_EXTRA_LIBRARY} ${HAVE_LIB${_PKGLIB}})
+		else(HAVE_LIB${_PKGLIB})
+			show_package_warning(${_PKGNAME} ${_PKGLIB})
+			set(__NOT_BUILD true)
+		endif(HAVE_LIB${_PKGLIB})
+	endforeach(_PKGLIB ${ARGN})
+endmacro(find_package_extra_library)
+
+macro(add_konoha_package _PKGNAME)
+	if(NOT __NOT_BUILD)
+		project(${_PKGNAME})
+		ENABLE_COVERAGE_INFO_IF_ENABLE(PACKAGE_EXTRA_LIBRARY)
+		file(GLOB_RECURSE test_files ${CMAKE_CURRENT_SOURCE_DIR}/test/*.k)
+		foreach(f ${test_files})
+			string(REPLACE // / f ${f})
+			string(REPLACE ${PARENT_SOURCE_DIR}/package/ "" test_name ${f})
+			string(REPLACE /test "" test_name ${test_name})
+			add_konoha_test(${test_name} ${f})
+			if(PACKAGE_ENV)
+				set_tests_properties(${test_name} PROPERTIES ENVIRONMENT ${PACKAGE_ENV})
+			endif(PACKAGE_ENV)
+		endforeach(f ${test_files})
+		set(CMAKE_BUILD_TYPE ${KONOHA_BUILD_TYPE})
+		PKGNAME(${_PKGNAME} _PACKAGE_NAME)
+		set(LIB  "${_PACKAGE_NAME}_glue")
+		set(_PACKAGE_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
+		set(_PACKAGE_STRING  ${CMAKE_PROJECT_NAME}-${_PACKAGE_VERSION})
+		set(_KONOHA_PACKAGE_DIR lib/minikonoha/${SO_VERSION}/package/${KONOHA_VERSION}/${PROJECT_NAME})
+		set(CMAKE_C_FLAGS_${uppercase_CMAKE_BUILD_TYPE}
+			"${CMAKE_C_FLAGS_${uppercase_CMAKE_BUILD_TYPE}} ${PACKAGE_C_FLAGS}")
+		set(CMAKE_CXX_FLAGS_${uppercase_CMAKE_BUILD_TYPE}
+			"${CMAKE_CXX_FLAGS_${uppercase_CMAKE_BUILD_TYPE}} ${PACKAGE_CXX_FLAGS}")
+		set(_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
+				${CMAKE_CURRENT_SOURCE_DIR}/include  ${CMAKE_CURRENT_BINARY_DIR}
+				${KONOHA_INCLUDE_DIRS}
+				${_PACKAGE_INCLUDE_DIR})
+		include_directories(${_INCLUDE_DIRS})
+		list(LENGTH PACKAGE_SOURCE_CODE LEN)
+		if(${LEN} GREATER 0)
+			add_library(${LIB} SHARED ${PACKAGE_SOURCE_CODE})
+			SET_CXX_PROPERTY_IF_MSVC(${LIB} ${PACKAGE_SOURCE_CODE})
+			set_target_properties(${LIB} PROPERTIES PREFIX "")
+			if(PACKAGE_EXTRA_LIBRARY)
+				target_link_libraries(${LIB} ${PACKAGE_EXTRA_LIBRARY})
+			endif(PACKAGE_EXTRA_LIBRARY)
+			install(TARGETS ${LIB} DESTINATION ${_KONOHA_PACKAGE_DIR})
+		endif(${LEN} GREATER 0)
+		if(PACKAGE_SCRIPT_CODE)
+			install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGE_SCRIPT_CODE}
+				DESTINATION ${_KONOHA_PACKAGE_DIR})
+			add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_SCRIPT_CODE}
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different
+				${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGE_SCRIPT_CODE}
+				${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_SCRIPT_CODE})
+			add_custom_target(copy_${PACKAGE_SCRIPT_CODE} ALL DEPENDS
+				${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_SCRIPT_CODE})
+		endif(PACKAGE_SCRIPT_CODE)
+		# for copy test files
+		if(PACKAGE_TEST_FILE)
+			foreach(testfile ${PACKAGE_TEST_FILE})
+				add_custom_command(OUTPUT
+					${CMAKE_CURRENT_BINARY_DIR}/${testfile}
+					COMMAND ${CMAKE_COMMAND} -E copy_if_different
+					${CMAKE_CURRENT_SOURCE_DIR}/test/${testfile}
+					${CMAKE_CURRENT_BINARY_DIR}/${testfile})
+			endforeach(testfile ${PACKAGE_TEST_FILE})
+			add_custom_target(copy_${_PKGNAME}_testfile ALL DEPENDS
+				${PACKAGE_TEST_FILE})
+		endif(PACKAGE_TEST_FILE)
+	endif(NOT __NOT_BUILD)
 endmacro(add_konoha_package)
 
 add_subdirectory(module)
