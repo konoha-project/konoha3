@@ -475,11 +475,6 @@ struct KonohaFactory {
 	char*  (*readline_i)(const char *prompt);
 	int    (*add_history_i)(const char *);
 
-//	const char* (*shortText)(const char *msg);
-//	const char* (*beginTag)(kinfotag_t);
-//	const char* (*endTag)(kinfotag_t);
-
-
 	// logging, trace
 	kbool_t detectedAssertionFailure;
 	const char *LOGGER_NAME;

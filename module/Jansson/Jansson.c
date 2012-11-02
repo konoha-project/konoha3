@@ -22,8 +22,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#ifdef USE_JANSSON
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -269,4 +267,3 @@ kbool_t LoadJanssonModule(KonohaFactory *factory, ModuleType type)
 } /* extern "C" */
 #endif
 
-#endif
