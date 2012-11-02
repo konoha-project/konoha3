@@ -1,7 +1,4 @@
--------------------------------------------------------------------------------
 JSON(JavaScript Object Notation) parser for KonohaScript
--------------------------------------------------------------------------------
-
 
 [![Build Status](https://secure.travis-ci.org/imasahiro/kjson.png)](http://travis-ci.org/imasahiro/kjson)
 

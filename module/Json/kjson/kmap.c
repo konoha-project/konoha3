@@ -37,40 +37,9 @@ extern "C" {
 #define likely(x)     __builtin_expect(!!(x), 1)
 #endif
 
-static uint32_t fnv1a(const char *p, uint32_t len)
-{
-    uint32_t hash = 0x811C9DC5;
-    const uint8_t *s = (const uint8_t *) p;
-    const uint8_t *e = (const uint8_t *) p + len;
-    while (s < e) {
-        hash = (*s++ ^ hash) * 0x01000193;
-    }
-    return hash;
-}
-
-static unsigned JSONString_hashCode(JSONString *key)
-{
-    if (!key->hashcode)
-        key->hashcode = fnv1a(key->str, key->length);
-    return key->hashcode;
-}
-
-static int JSONString_equal(JSONString *k0, JSONString *k1)
-{
-    if (k0->length != k1->length)
-        return 0;
-    if (JSONString_hashCode(k0) != JSONString_hashCode(k1))
-        return 0;
-    if (k0->str[0] != k1->str[0])
-        return 0;
-    return strncmp(k0->str, k1->str, k0->length) == 0;
-}
-
 static void map_record_copy(map_record_t *dst, const map_record_t *src)
 {
     *dst = *src;
-    // which one is faster??
-    //memcpy(dst, src, sizeof(map_record_t));
 }
 
 /* [HASHMAP] */
@@ -91,14 +60,14 @@ static void hashmap_record_reset(hashmap_t *m, size_t newsize)
 static map_status_t hashmap_set_no_resize(hashmap_t *m, map_record_t *rec)
 {
     unsigned i, idx = rec->hash & m->record_size_mask;
-    for (i = 0; i < DELTA; ++i) {
+    for(i = 0; i < DELTA; ++i) {
         map_record_t *r = m->base.records+idx;
-        if (r->hash == 0) {
+        if(r->hash == 0) {
             map_record_copy(r, rec);
             ++m->used_size;
             return KMAP_ADDED;
         }
-        if (r->hash == rec->hash && JSONString_equal(r->k, rec->k)) {
+        if(r->hash == rec->hash && JSONString_equal(r->k, rec->k)) {
             JSON_free(toJSON(ValueP(r->v)));
             map_record_copy(r, rec);
             return KMAP_UPDATE;
@@ -110,19 +79,17 @@ static map_status_t hashmap_set_no_resize(hashmap_t *m, map_record_t *rec)
 
 static void hashmap_record_resize(hashmap_t *m, unsigned newsize)
 {
+    unsigned i;
     unsigned oldsize = (m->record_size_mask+1);
     map_record_t *head = m->base.records;
 
-    do {
-        unsigned i;
-        newsize *= 2;
-        hashmap_record_reset(m, newsize);
-        for (i = 0; i < oldsize; ++i) {
-            map_record_t *r = head + i;
-            if (r->hash && hashmap_set_no_resize(m, r) == KMAP_FAILED)
-                continue;
-        }
-    } while (0);
+    newsize *= 2;
+    hashmap_record_reset(m, newsize);
+    for(i = 0; i < oldsize; ++i) {
+        map_record_t *r = head + i;
+        if(r->hash && hashmap_set_no_resize(m, r) == KMAP_FAILED)
+            continue;
+    }
     free(head/*, oldsize*sizeof(map_record_t)*/);
 }
 
@@ -130,10 +97,10 @@ static map_status_t hashmap_set(hashmap_t *m, map_record_t *rec)
 {
     map_status_t res;
     do {
-        if ((res = hashmap_set_no_resize(m, rec)) != KMAP_FAILED)
+        if((res = hashmap_set_no_resize(m, rec)) != KMAP_FAILED)
             return res;
         hashmap_record_resize(m, (m->record_size_mask+1)*2);
-    } while (1);
+    } while(1);
     /* unreachable */
     return KMAP_FAILED;
 }
@@ -141,9 +108,9 @@ static map_status_t hashmap_set(hashmap_t *m, map_record_t *rec)
 static map_record_t *hashmap_get(hashmap_t *m, unsigned hash, JSONString *key)
 {
     unsigned i, idx = hash & m->record_size_mask;
-    for (i = 0; i < DELTA; ++i) {
+    for(i = 0; i < DELTA; ++i) {
         map_record_t *r = m->base.records+idx;
-        if (r->hash == hash && JSONString_equal(r->k, key)) {
+        if(r->hash == hash && JSONString_equal(r->k, key)) {
             return r;
         }
         idx = (idx + 1) & m->record_size_mask;
@@ -153,7 +120,7 @@ static map_record_t *hashmap_get(hashmap_t *m, unsigned hash, JSONString *key)
 
 static void hashmap_init(hashmap_t *m, unsigned init)
 {
-    if (init < KMAP_INITSIZE)
+    if(init < KMAP_INITSIZE)
         init = KMAP_INITSIZE;
     hashmap_record_reset(m, 1U << LOG2(init));
 }
@@ -167,10 +134,11 @@ static void hashmap_api_dispose(kmap_t *_m)
 {
     hashmap_t *m = (hashmap_t *) _m;
     unsigned i, size = (m->record_size_mask+1);
-    for (i = 0; i < size; ++i) {
+    for(i = 0; i < size; ++i) {
         map_record_t *r = hashmap_at(m, i);
-        if (r->hash) {
-            JSON_free(toJSON(ValueS(r->k)));
+        if(r->hash) {
+            JSONString *key = r->k;
+            JSON_free(toJSON(ValueS(key)));
         }
     }
     free(m->base.records/*, (m->record_size_mask+1) * sizeof(map_record_t)*/);
@@ -199,7 +167,7 @@ static void hashmap_api_remove(kmap_t *_m, JSONString *key)
     hashmap_t *m = (hashmap_t *) _m;
     unsigned hash = JSONString_hashCode(key);
     map_record_t *r = hashmap_get(m, hash, key);
-    if (r) {
+    if(r) {
         r->hash = 0; r->k = NULL;
         m->used_size -= 1;
     }
@@ -209,9 +177,9 @@ static map_record_t *hashmap_api_next(kmap_t *_m, kmap_iterator *itr)
 {
     hashmap_t *m = (hashmap_t *) _m;
     unsigned i, size = (m->record_size_mask+1);
-    for (i = itr->index; i < size; ++i) {
+    for(i = itr->index; i < size; ++i) {
         map_record_t *r = hashmap_at(m, i);
-        if (r->hash) {
+        if(r->hash) {
             itr->index = i+1;
             return r;
         }
@@ -221,7 +189,7 @@ static map_record_t *hashmap_api_next(kmap_t *_m, kmap_iterator *itr)
     return NULL;
 }
 
-const kmap_api_t HASH = {
+const kmap_api_t HASH_API = {
     hashmap_api_get,
     hashmap_api_set,
     hashmap_api_next,
@@ -237,7 +205,7 @@ static kmap_t *dictmap_init(dictmap_t *m)
     const size_t allocSize = sizeof(map_record_t)*DICTMAP_THRESHOLD;
     m->base.records = (map_record_t *) malloc(allocSize);
     m->used_size = 0;
-    for (i = 0; i < DICTMAP_THRESHOLD; ++i) {
+    for(i = 0; i < DICTMAP_THRESHOLD; ++i) {
         m->hash_list[i] = 0;
     }
     return (kmap_t *) m;
@@ -251,7 +219,7 @@ static void dictmap_api_init(kmap_t *_m, unsigned init)
 static void dictmap_convert2hashmap(dictmap_t *_m)
 {
     hashmap_t *m = (hashmap_t *) _m;
-    m->base.api = &HASH;
+    m->base.api = &HASH_API;
     m->record_size_mask = DICTMAP_THRESHOLD-1;
     hashmap_record_resize(m, DELTA);
 }
@@ -273,14 +241,14 @@ static map_status_t dictmap_set_new(dictmap_t *m, map_record_t *rec, int i)
 static map_status_t dictmap_set(dictmap_t *m, map_record_t *rec)
 {
     int i;
-    for (i = 0; i < DICTMAP_THRESHOLD; ++i) {
+    for(i = 0; i < DICTMAP_THRESHOLD; ++i) {
         unsigned hash = m->hash_list[i];
-        if (hash == 0) {
+        if(hash == 0) {
             return dictmap_set_new(m, rec, i);
         }
-        else if (hash == rec->hash) {
+        else if(hash == rec->hash) {
             map_record_t *r = dictmap_at(m, i);
-            if (!unlikely(JSONString_equal(r->k, rec->k))) {
+            if(!unlikely(JSONString_equal(r->k, rec->k))) {
                 continue;
             }
             JSON_free(toJSON(ValueP(r->v)));
@@ -295,10 +263,10 @@ static map_status_t dictmap_set(dictmap_t *m, map_record_t *rec)
 static map_record_t *dictmap_get(dictmap_t *m, unsigned hash, JSONString *key)
 {
     int i;
-    for (i = 0; i < DICTMAP_THRESHOLD; ++i) {
-        if (hash == m->hash_list[i]) {
+    for(i = 0; i < DICTMAP_THRESHOLD; ++i) {
+        if(hash == m->hash_list[i]) {
             map_record_t *r = dictmap_at(m, i);
-            if (JSONString_equal(r->k, key)) {
+            if(JSONString_equal(r->k, key)) {
                 return r;
             }
         }
@@ -321,7 +289,7 @@ static void dictmap_api_remove(kmap_t *_m, JSONString *key)
     dictmap_t *m = (dictmap_t *)_m;
     unsigned hash = JSONString_hashCode(key);
     map_record_t *r = dictmap_get(m, hash, key);
-    if (r) {
+    if(r) {
         r->hash = 0; r->k = 0;
         m->used_size -= 1;
     }
@@ -331,7 +299,7 @@ static map_record_t *dictmap_api_next(kmap_t *_m, kmap_iterator *itr)
 {
     dictmap_t *m = (dictmap_t *)_m;
     unsigned i;
-    for (i = itr->index; i < m->used_size; ++i) {
+    for(i = itr->index; i < m->used_size; ++i) {
         map_record_t *r = dictmap_at(m, i);
         itr->index = i+1;
         return r;
@@ -352,17 +320,18 @@ static void dictmap_api_dispose(kmap_t *_m)
 {
     dictmap_t *m = (dictmap_t *)_m;
     unsigned i;
-    for (i = 0; i < m->used_size; ++i) {
-        if (likely(m->hash_list[i])) {
+    for(i = 0; i < m->used_size; ++i) {
+        if(likely(m->hash_list[i])) {
             map_record_t *r = dictmap_at(m, i);
-            _JSONString_free(r->k);
+            JSONString *key = r->k;
+            _JSONString_free(key);
             JSON_free(toJSON(ValueP(r->v)));
         }
     }
     free(m->base.records/*, m->used_size * sizeof(map_record_t)*/);
 }
 
-const kmap_api_t DICT = {
+const kmap_api_t DICT_API = {
     dictmap_api_get,
     dictmap_api_set,
     dictmap_api_next,

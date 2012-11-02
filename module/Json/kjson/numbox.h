@@ -34,17 +34,18 @@
 #define TagBase     (TagBaseMask << TagBitShift)
 
 enum NumBoxTag {
-    TagDouble   = (TagBaseMask | 0x0ULL) << TagBitShift,
-    TagDouble2  = (TagBaseMask | 0x7ULL) << TagBitShift,
-    TagInt32    = (TagBaseMask | 0x2ULL) << TagBitShift,
-    TagBoolean  = (TagBaseMask | 0x4ULL) << TagBitShift,
-    TagNull     = (TagBaseMask | 0x6ULL) << TagBitShift,
-    TagObject   = (TagBaseMask | 0x3ULL) << TagBitShift,
-    TagString   = (TagBaseMask | 0x1ULL) << TagBitShift,
-    TagUString  = (TagBaseMask | 0x9ULL) << TagBitShift,
-    TagArray    = (TagBaseMask | 0x5ULL) << TagBitShift,
-    TagInt64    = (TagBaseMask | 0xbULL) << TagBitShift
+    FlagDouble   = 0x00,
+    FlagInt32    = 0x02,
+    FlagBoolean  = 0x04,
+    FlagNull     = 0x06,
+    FlagObject   = 0x03,
+    FlagString   = 0x01,
+    FlagUString  = 0x09,
+    FlagArray    = 0x05,
+    FlagInt64    = 0x0b,
 };
+
+#define TAG(T) ((TagBaseMask | (uint64_t)(Flag##T)) << TagBitShift)
 
 union JSONValue;
 struct JSONObject;
@@ -71,29 +72,31 @@ static inline Value ValueF(double d) {
 static inline Value ValueI(int32_t ival) {
     uint64_t n = (uint64_t)ival;
     n = n & 0x00000000ffffffffLL;
-    Value v; v.bits = n | TagInt32; return v;
+    Value v; v.bits = n | TAG(Int32); return v;
 }
 
 static inline Value ValueIO(struct JSONInt64 *oval) {
-    Value v; v.bits = toU64((long)oval) | TagInt64; return v;
+    Value v; v.bits = toU64((long)oval) | TAG(Int64); return v;
 }
 static inline Value ValueB(bool bval) {
-    Value v; v.bits = (uint64_t)bval | TagBoolean; return v;
+    Value v; v.bits = (uint64_t)bval | TAG(Boolean); return v;
 }
 static inline Value ValueO(struct JSONObject *oval) {
-    Value v; v.bits = toU64((long)oval) | TagObject; return v;
+    Value v; v.bits = toU64((long)oval) | TAG(Object); return v;
 }
 static inline Value ValueS(struct JSONString *sval) {
-    Value v; v.bits = toU64((long)sval) | TagString; return v;
+    Value v; v.bits = toU64((long)sval) | TAG(String);
+    return v;
 }
 static inline Value ValueU(struct JSONString *sval) {
-    Value v; v.bits = toU64((long)sval) | TagUString; return v;
+    Value v; v.bits = toU64((long)sval) | TAG(UString);
+    return v;
 }
 static inline Value ValueA(struct JSONArray *aval) {
-    Value v; v.bits = toU64((long)aval) | TagArray; return v;
+    Value v; v.bits = toU64((long)aval) | TAG(Array); return v;
 }
 static inline Value ValueN() {
-    Value v; v.bits = TagNull; return v;
+    Value v; v.bits = TAG(Null); return v;
 }
 static inline Value ValueP(uint64_t bits) {
     Value v; v.bits = bits; return v;
@@ -106,46 +109,46 @@ static inline double toDouble(Value v) {
 static inline int32_t toInt32(Value v) {
     return (int32_t) Val(v);
 }
-static inline long toLong(Value v) {
-    return (long) Val(v);
+static inline intptr_t toPtr(Value v) {
+    return (intptr_t) Val(v);
 }
 static inline bool toBool(Value v) {
     return (bool) Val(v);
 }
 static inline struct JSONObject *toObj(Value v) {
-    return (struct JSONObject *) toLong(v);
+    return (struct JSONObject *) toPtr(v);
 }
 static inline struct JSONString *toStr(Value v) {
-    return (struct JSONString *) toLong(v);
+    return (struct JSONString *) toPtr(v);
 }
 static inline struct JSONString *toUStr(Value v) {
-    return (struct JSONString *) toLong(v);
+    return (struct JSONString *) toPtr(v);
 }
 static inline struct JSONArray *toAry(Value v) {
-    return (struct JSONArray *) toLong(v);
+    return (struct JSONArray *) toPtr(v);
 }
 static inline struct JSONInt64 *toInt64(Value v) {
-    return (struct JSONInt64 *) toLong(v);
+    return (struct JSONInt64 *) toPtr(v);
 }
 static inline bool IsDouble(Value v) {
-    return Tag(v) <= TagDouble;
+    return Tag(v) <= TAG(Double);
 }
 static inline bool IsInt32(Value v) {
-    return Tag(v) == TagInt32;
+    return Tag(v) == TAG(Int32);
 }
 static inline bool IsBool(Value v) {
-    return Tag(v) == TagBoolean;
+    return Tag(v) == TAG(Boolean);
 }
 static inline bool IsObj(Value v) {
-    return Tag(v) == TagObject;
+    return Tag(v) == TAG(Object);
 }
 static inline bool IsStr(Value v) {
-    return Tag(v) == TagString;
+    return Tag(v) == TAG(String);
 }
 static inline bool IsAry(Value v) {
-    return Tag(v) == TagArray;
+    return Tag(v) == TAG(Array);
 }
 static inline bool IsNull(Value v) {
-    return Tag(v) == TagNull;
+    return Tag(v) == TAG(Null);
 }
 #endif /* end of include guard */

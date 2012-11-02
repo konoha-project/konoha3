@@ -41,33 +41,36 @@ extern "C" {
 
 typedef enum kjson_type {
     /** ($type & 1 == 0) means $type extends Number */
-    JSON_Double   =  0, /* 0b00000 */
-    JSON_String   =  1, /* 0b00001 */
-    JSON_Int32    =  2, /* 0b00010 */
-    JSON_Object   =  3, /* 0b00011 */
-    JSON_Bool     =  4, /* 0b00100 */
-    JSON_Array    =  5, /* 0b00101 */
-    JSON_Null     =  6, /* 0b00110 */
-    JSON_UString  =  9, /* 0b01001 */
-    JSON_Int64    = 11, /* 0b01011 */
-    JSON_Error    = 15, /* 0b01111 */
-    JSON_reserved =  7  /* 0b00111 '7' is reserved by numbox */
+    JSON_Double   =  0, /* 0b0000 */
+    JSON_String   =  1, /* 0b0001 */
+    JSON_Int32    =  2, /* 0b0010 */
+    JSON_Object   =  3, /* 0b0011 */
+    JSON_Bool     =  4, /* 0b0100 */
+    JSON_Array    =  5, /* 0b0101 */
+    JSON_Null     =  6, /* 0b0110 */
+    JSON_UString  =  9, /* 0b1001 */
+    JSON_Int64    = 11, /* 0b1011 */
+    JSON_Error    = 15, /* 0b1111 */
+    JSON_reserved =  7  /* 0b0111 '7' is reserved by numbox */
 } kjson_type;
 
 union JSONValue;
 typedef union JSONValue JSON;
 
+#define JSONSTRING_INLINE_SIZE (sizeof(void*)*2)
 typedef struct JSONString {
+    const char *str;
     unsigned length;
     unsigned hashcode;
-    const char *str;
+    char text[JSONSTRING_INLINE_SIZE];
 } JSONString;
 typedef JSONString JSONUString;
 
+DEF_ARRAY_STRUCT0(JSON, unsigned);
+DEF_ARRAY_T(JSON);
+
 typedef struct JSONArray {
-    int  length;
-    int  capacity;
-    JSON *list;
+    ARRAY(JSON) array;
 } JSONArray;
 
 typedef Value JSONNumber;
@@ -78,7 +81,6 @@ typedef JSONNumber JSONDouble;
 typedef JSONNumber JSONBool;
 
 typedef struct JSONInt64 {
-    kjson_type type;
     int64_t val;
 } JSONInt64;
 
@@ -95,18 +97,69 @@ union JSONValue {
     uint64_t bits;
 };
 
+#ifndef KJSON_MALLOC
+#define KJSON_MALLOC(N) malloc(N)
+#define KJSON_FREE(PTR) free(PTR)
+#endif
+DEF_ARRAY_OP_NOPOINTER(JSON);
+#undef KJSON_MALLOC
+#undef KJSON_FREE
+
 typedef JSONNumber JSONNull;
 
+static inline JSON JSON_NOP(void)
+{
+    JSON def = {{0}};
+    return def;
+}
+
+static inline bool JSON_isValid(JSON json)
+{
+    return json.bits != 0;
+}
+
 /* [Getter API] */
-KJSON_API JSON *JSON_getArray(JSON json, const char *key, size_t *len);
-KJSON_API const char *JSON_getString(JSON json, const char *key, size_t *len);
-KJSON_API double JSON_getDouble(JSON json, const char *key, size_t len);
-KJSON_API bool JSON_getBool(JSON json, const char *key, size_t len);
-KJSON_API int JSON_getInt(JSON json, const char *key, size_t len);
 KJSON_API JSON JSON_get(JSON json, const char *key, size_t len);
+static inline int JSON_getInt(JSON json, const char *key, size_t len)
+{
+    JSON v = JSON_get(json, key, len);
+    return JSON_isValid(v) ? toInt32(v.val) : 0;
+}
+
+static inline bool JSON_getBool(JSON json, const char *key, size_t len)
+{
+    JSON v = JSON_get(json, key, len);
+    return JSON_isValid(v) ? toBool(v.val) : 0; }
+
+static inline double JSON_getDouble(JSON json, const char *key, size_t len)
+{
+    JSON v = JSON_get(json, key, len);
+    return JSON_isValid(v) ? toDouble(v.val) : 0;
+}
+
+static inline const char *JSON_getString(JSON json, const char *key, size_t *len)
+{
+    JSON obj = JSON_get(json, key, *len);
+    if(!JSON_isValid(obj))
+        return NULL;
+    JSONString *s = toStr(obj.val);
+    *len = s->length;
+    return s->str;
+}
+
+static inline JSON *JSON_getArray(JSON json, const char *key, size_t *len)
+{
+    JSON obj = JSON_get(json, key, *len);
+    if(!JSON_isValid(obj))
+        return NULL;
+    JSONArray *a = toAry(obj.val);
+    *len = a->array.size;
+    return a->array.list;
+}
 
 /* [Other API] */
-KJSON_API void JSONObject_set(JSONMemoryPool *jm, JSON obj, JSON key, JSON value);
+KJSON_API void JSONObject_setObject(JSONMemoryPool *jm, JSON obj, JSON key, JSON value);
+KJSON_API void JSONObject_set(JSONMemoryPool *jm, JSON obj, const char *key, size_t len, JSON value);
 KJSON_API void JSONArray_append(JSONMemoryPool *jm, JSON ary, JSON o);
 KJSON_API void JSON_free(JSON o);
 
@@ -119,11 +172,6 @@ static inline char *JSON_toString(JSON json)
     return s;
 }
 
-static inline bool JSON_isValid(JSON json)
-{
-    return json.bits != 0;
-}
-
 static inline kjson_type JSON_type(JSON json) {
     Value v; v.bits = (uint64_t)json.val.bits;
     uint64_t tag = Tag(v);
@@ -133,13 +181,10 @@ static inline kjson_type JSON_type(JSON json) {
 
 #define JSON_TYPE_CHECK(T, O) (JSON_type(((JSON)O)) == JSON_##T)
 
-#define JSON_ARRAY_EACH(json, A, I, E) JSON_ARRAY_EACH_(json, A, I, E, 0)
-#define JSON_ARRAY_EACH_(json, A, I, E, N)\
-    if (!JSON_type((json)) == JSON_Array) {} else\
-        if (!(A = toAry((json).val)) != 0) {}\
-        else\
-        for (I = (A)->list + N,\
-                E = (A)->list+(A)->length; I != E; ++I)
+#define JSON_ARRAY_EACH(json, A, I, E)\
+    if(!JSON_type((json)) == JSON_Array) {} else\
+        if(!(A = toAry((json).val)) != 0) {}\
+        else FOR_EACH_ARRAY(A->array, I, E)
 
 typedef struct JSONObject_iterator {
     long index;
@@ -147,10 +192,10 @@ typedef struct JSONObject_iterator {
 } JSONObject_iterator;
 
 #define JSON_OBJECT_EACH(O, ITR, KEY, VAL)\
-    if (!JSON_TYPE_CHECK(Object, O)) {} else\
-    if (!(JSONObject_iterator_init(&ITR, O))) {}\
+    if(!JSON_TYPE_CHECK(Object, O)) {} else\
+    if(!(JSONObject_iterator_init(&ITR, O))) {}\
     else\
-    for (KEY = JSONObject_iterator_next(&ITR, &VAL); KEY.bits;\
+    for(KEY = JSONObject_iterator_next(&ITR, &VAL); KEY.bits;\
             KEY = JSONObject_iterator_next(&ITR, &VAL))
 
 #ifdef __cplusplus
@@ -203,6 +248,12 @@ static inline int32_t JSONInt_get(JSON json)
     return toInt32(json.val);
 }
 
+static inline int64_t JSONInt64_get(JSON json)
+{
+    JSONInt64 *i = toInt64(json.val);
+    return i->val;
+}
+
 static inline double JSONDouble_get(JSON json)
 {
     return toDouble(json.val);
@@ -213,18 +264,22 @@ static inline int JSONBool_get(JSON json)
     return toBool(json.val);
 }
 
-static void JSONString_InitHashCode(JSONString *key) { key->hashcode = 0; }
+static inline JSONString *JSONString_init(JSONString *buffer, const char *str, size_t length)
+{
+    buffer->str      = str;
+    buffer->length   = length;
+    buffer->hashcode = 0;
+    return buffer;
+}
 
 /* [New API] */
 static inline JSON JSONString_new(JSONMemoryPool *jm, const char *s, size_t len)
 {
     bool malloced;
     JSONString *o = (JSONString *) JSONMemoryPool_Alloc(jm, sizeof(*o), &malloced);
-    o->str = (const char *) malloc(len+1);
-    o->length = len;
-    memcpy((char *)o->str, s, len);
-    ((char*)o->str)[len] = 0;
-    JSONString_InitHashCode(o);
+    char *str = (len > JSONSTRING_INLINE_SIZE) ? (char *) malloc(len) : o->text;
+    memcpy(str, s, len);
+    JSONString_init(o, (const char *)str, len);
     return toJSON(ValueS(o));
 }
 
@@ -233,21 +288,19 @@ static inline JSON JSONNull_new()
     return toJSON(ValueN());
 }
 
-static inline JSON JSONObject_new(JSONMemoryPool *jm)
+static inline JSON JSONObject_new(JSONMemoryPool *jm, unsigned map_size)
 {
     bool malloced;
     JSONObject *o = (JSONObject *) JSONMemoryPool_Alloc(jm, sizeof(*o), &malloced);
-    kmap_init(&(o->child), 0);
+    kmap_init(&(o->child), map_size);
     return toJSON(ValueO(o));
 }
 
-static inline JSON JSONArray_new(JSONMemoryPool *jm)
+static inline JSON JSONArray_new(JSONMemoryPool *jm, unsigned elm_size)
 {
     bool malloced;
     JSONArray *o = (JSONArray *) JSONMemoryPool_Alloc(jm, sizeof(*o), &malloced);
-    o->length   = 0;
-    o->capacity = 4;
-    o->list   = (JSON *) malloc(sizeof(JSON)*4);
+    ARRAY_init(JSON, &o->array, elm_size);
     return toJSON(ValueA(o));
 }
 
@@ -258,7 +311,7 @@ static inline JSON JSONDouble_new(double val)
 
 static inline JSON JSONInt_new(JSONMemoryPool *jm, int64_t val)
 {
-    if (val > INT32_MAX || val < INT32_MIN) {
+    if(val > INT32_MAX || val < INT32_MIN) {
         bool malloced;
         JSONInt64 *i64 = (JSONInt64 *) JSONMemoryPool_Alloc(jm, sizeof(JSONInt64), &malloced);
         i64->val = val;
@@ -277,22 +330,31 @@ static inline unsigned JSON_length(JSON json)
 {
     assert((JSON_type(json) & 0x3) == 0x1);
     JSONArray *a = toAry(json.val);
-    return a->length;
+    return ARRAY_size(a->array);
 }
 
 static inline JSON JSONArray_get(JSON json, unsigned index)
 {
-    if (JSON_TYPE_CHECK(Array, json)) {
-        JSONArray *a = toAry(json.val);
-        return (a)->list[index];
+    JSONArray *a = toAry(json.val);
+    if(JSON_TYPE_CHECK(Array, json) && index < a->array.size) {
+        return ARRAY_get(JSON, &a->array, index);
     } else {
-        return JSONNull_new();
+        return JSON_NOP();
     }
+}
+static inline bool JSONArray_set(JSON json, unsigned index, JSON val)
+{
+    JSONArray *a = toAry(json.val);
+    if(JSON_TYPE_CHECK(Array, json) && index < a->array.size) {
+        ARRAY_set(JSON, &a->array, index, val);
+        return true;
+    }
+    return false;
 }
 
 static inline int JSONObject_iterator_init(JSONObject_iterator *itr, JSON json)
 {
-    if (!JSON_type(json) ==  JSON_Object)
+    if(!JSON_TYPE_CHECK(Object, json))
         return 0;
     itr->obj = toObj(json.val);
     itr->index = 0;
@@ -303,9 +365,10 @@ static inline JSON JSONObject_iterator_next(JSONObject_iterator *itr, JSON *val)
 {
     JSONObject *o = itr->obj;
     map_record_t *r;
-    while ((r = kmap_next(&o->child, (kmap_iterator*) itr)) != NULL) {
+    while((r = kmap_next(&o->child, (kmap_iterator*) itr)) != NULL) {
+        JSONString *key = r->k;
         *val = toJSON(ValueP(r->v));
-        return toJSON(ValueS(r->k));
+        return toJSON(ValueS(key));
     }
     JSON obj; obj.bits = 0;
     *val = obj;

@@ -83,7 +83,7 @@ static inline void JSONMemoryPool_Init(JSONMemoryPool *pool)
     int i;
     ARRAY_init(PageData,  &pool->array, MAX_ALIGN_LOG2 - MIN_ALIGN_LOG2);
     ARRAY_init(BlockInfo, &pool->current_block, MAX_ALIGN_LOG2 - MIN_ALIGN_LOG2);
-    for (i = MIN_ALIGN_LOG2; i <= MAX_ALIGN_LOG2; ++i) {
+    for(i = MIN_ALIGN_LOG2; i <= MAX_ALIGN_LOG2; ++i) {
         PageData page;
         BlockInfo block;
         ARRAY_init(CharPtr, &page.block, 4);
@@ -98,7 +98,7 @@ static inline void JSONMemoryPool_Init(JSONMemoryPool *pool)
 static void *JSONMemoryPool_Alloc(JSONMemoryPool *pool, size_t n, bool *malloced)
 {
     assert(n > 0);
-    if (unlikely(n > (1 << MAX_ALIGN_LOG2))) {
+    if(unlikely(n > (1 << MAX_ALIGN_LOG2))) {
         *malloced = true;
         return malloc(n);
     }
@@ -106,7 +106,7 @@ static void *JSONMemoryPool_Alloc(JSONMemoryPool *pool, size_t n, bool *malloced
     size_t size = ALIGN(n, 1 << MIN_ALIGN_LOG2);
     unsigned index = LOG2(size) - MIN_ALIGN_LOG2;
     BlockInfo *block = ARRAY_get(BlockInfo, &pool->current_block, index);
-    if (likely((block->current + size - block->base) <= MEMORYBLOCK_SIZE)) {
+    if(likely((block->current + size - block->base) <= MEMORYBLOCK_SIZE)) {
         char *ptr = block->current;
         block->current = block->current + size;
         return (void *) ptr;

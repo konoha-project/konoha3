@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-#include "./kjson/kjson.c"
+#include "kjson/kjson.c"
 #include <minikonoha/minikonoha.h>
 
 // -------------------------------------------------------------------------
@@ -36,53 +36,27 @@ struct JsonBuf {
 	uint64_t json_i;
 };
 
-/* please export below */
-
-//typedef enum kjson_type {
-//    /** ($type & 1 == 0) means $type extends Number */
-//    JSON_Double   =  0, /* 0b00000 */
-//    JSON_String   =  1, /* 0b00001 */
-//    JSON_Int32    =  2, /* 0b00010 */
-//    JSON_Object   =  3, /* 0b00011 */
-//    JSON_Bool     =  4, /* 0b00100 */
-//    JSON_Array    =  5, /* 0b00101 */
-//    JSON_Null     =  6, /* 0b00110 */
-//    JSON_UString  =  9, /* 0b01001 */
-//    JSON_Int64    = 11, /* 0b01011 */
-//    JSON_Error    = 15, /* 0b01111 */
-//    JSON_reserved =  7  /* 0b00111 '7' is reserved by numbox */
-//} kjson_type;
-//
-//static inline kjson_type JSON_type(JSON json) {
-//    Value v; v.bits = (uint64_t)json.val.bits;
-//    uint64_t tag = Tag(v);
-//    return (IsDouble((v)))?
-//        JSON_Double : (kjson_type) ((tag >> TagBitShift) & 15);
-//}
-//
-//#define JSON_TYPE_CHECK(T, O) (JSON_type(((JSON)O)) == JSON_##T)
-
 static kbool_t IsJsonType(struct JsonBuf *jsonbuf, KJSONTYPE type)
 {
-//	switch(type) {
-//		case KJSON_OBJECT:   return JSON_TYPE_CHECK(toJSON(jsonbuf->json_i), Object);
-//		case KJSON_ARRAY:    return JSON_TYPE_CHECK(toJSON(jsonbuf->json_i), Array);
-//		case KJSON_STRING:   return JSON_TYPE_CHECK(toJSON(jsonbuf->json_i), String);
-//		case KJSON_INT:      return JSON_TYPE_CHECK(toJSON(jsonbuf->json_i), Int32);
-//		case KJSON_DOUBLE:   return JSON_TYPE_CHECK(toJSON(jsonbuf->json_i), Double);
-//		case KJSON_BOOLEAN:  return JSON_TYPE_CHECK(toJSON(jsonbuf->json_i), Bool);
-//		case KJSON_NULL:     return JSON_TYPE_CHECK(toJSON(jsonbuf->json_i), Null);
-//		case KJSON_INT64:    return JSON_TYPE_CHECK(toJSON(jsonbuf->json_i), Int64); /* Int64 */
-//		case KJSON_LONG:     return JSON_TYPE_CHECK(toJSON(jsonbuf->json_i), Int32);
-//	}
+	switch(type) {
+	case KJSON_OBJECT:  return JSON_TYPE_CHECK(Object, toJSON(jsonbuf->json_i));
+	case KJSON_ARRAY:   return JSON_TYPE_CHECK(Array , toJSON(jsonbuf->json_i));
+	case KJSON_STRING:  return JSON_TYPE_CHECK(String, toJSON(jsonbuf->json_i));
+	case KJSON_INT:     return JSON_TYPE_CHECK(Int32 , toJSON(jsonbuf->json_i));
+	case KJSON_DOUBLE:  return JSON_TYPE_CHECK(Double, toJSON(jsonbuf->json_i));
+	case KJSON_BOOLEAN: return JSON_TYPE_CHECK(Bool  , toJSON(jsonbuf->json_i));
+	case KJSON_NULL:    return JSON_TYPE_CHECK(Null  , toJSON(jsonbuf->json_i));
+	case KJSON_INT64:   return JSON_TYPE_CHECK(Int64 , toJSON(jsonbuf->json_i));
+	case KJSON_LONG:    return JSON_TYPE_CHECK(Int32 , toJSON(jsonbuf->json_i));
+	}
 	return false; /* imf */
 }
 
 static uint64_t NewJsonI(JSONMemoryPool *pool, KJSONTYPE type, va_list ap)
 {
 	switch(type) {
-		case KJSON_OBJECT:   return JSONObject_new(pool).bits;
-		case KJSON_ARRAY:    return JSONArray_new(pool).bits;
+		case KJSON_OBJECT:   return JSONObject_new(pool, 0).bits;
+		case KJSON_ARRAY:    return JSONArray_new(pool, 0).bits;
 		case KJSON_STRING:   {
 			const char *s = va_arg(ap, const char*);
 			return JSONString_new(pool, s, strlen(s)).bits;
@@ -97,7 +71,7 @@ static uint64_t NewJsonI(JSONMemoryPool *pool, KJSONTYPE type, va_list ap)
 	return 0;
 }
 
-static struct JsonBuf* CreateJson(KonohaContext *kctx, struct JsonBuf *jsonbuf, KJSONTYPE type, ...)
+static struct JsonBuf *CreateJson(KonohaContext *kctx, struct JsonBuf *jsonbuf, KJSONTYPE type, ...)
 {
 	va_list ap;
 	va_start(ap, type);
@@ -109,7 +83,7 @@ static struct JsonBuf* CreateJson(KonohaContext *kctx, struct JsonBuf *jsonbuf, 
 static kbool_t ParseJson(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *text, size_t length, KTraceInfo *trace)
 {
 	jsonbuf->json_i = parseJSON((JSONMemoryPool *)(PLATAPI JsonHandler), text, text + length).bits;
-	return true;  // what happens when the text is broken ?
+	return jsonbuf->json_i != 0;
 }
 
 static void FreeJson(KonohaContext *kctx, struct JsonBuf *jsonbuf)
@@ -117,12 +91,11 @@ static void FreeJson(KonohaContext *kctx, struct JsonBuf *jsonbuf)
 	JSON_free(toJSON(jsonbuf->json_i));
 }
 
-static const char* JsonToNewText(KonohaContext *kctx, struct JsonBuf *jsonbuf)
+static const char *JsonToNewText(KonohaContext *kctx, struct JsonBuf *jsonbuf)
 {
-	/* FIXME: I don't understand how to use this api at all (by kimio) */
-	const char *text = JSON_toStringWithLength(toJSON(jsonbuf->json_i), NULL);
-//	*lengthPtr = *lengthPtr - 1;
-	return text;  // is it okay to free?
+	size_t length;
+	const char *text = JSON_toStringWithLength(toJSON(jsonbuf->json_i), &length);
+	return text; /* need free */
 }
 
 static size_t DoJsonEach(KonohaContext *kctx, struct JsonBuf *jsonbuf, void *thunk, void (*doEach)(KonohaContext *, const char *, struct JsonBuf *, void *))
@@ -148,14 +121,18 @@ static size_t DoJsonEach(KonohaContext *kctx, struct JsonBuf *jsonbuf, void *thu
 static kbool_t RetrieveJsonKeyValue(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, struct JsonBuf *newbuf)
 {
 	newbuf->json_i = JSON_get(toJSON(jsonbuf->json_i), key, KeyLen(key, keylen_or_zero)).bits;
-	return true; /* always ? */
+	return newbuf->json_i != 0;
 }
 
 static kbool_t SetJsonKeyValue(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, struct JsonBuf *otherbuf)
 {
-	JSON tmp = JSONString_new((JSONMemoryPool *)(PLATAPI JsonHandler), key, KeyLen(key, keylen_or_zero));
-	JSONObject_set((JSONMemoryPool *)(PLATAPI JsonHandler), toJSON(jsonbuf->json_i), tmp, toJSON(otherbuf->json_i));
-	return true; /* always ? */
+	if(!JSON_TYPE_CHECK(Object, toJSON(jsonbuf->json_i))) {
+		return false;
+	}
+	size_t keylen = KeyLen(key, keylen_or_zero);
+	JSONObject_set((JSONMemoryPool *)(PLATAPI JsonHandler), toJSON(jsonbuf->json_i),
+			key, keylen, toJSON(otherbuf->json_i));
+	return true;
 }
 
 static kbool_t SetJsonValue(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, KJSONTYPE type, ...)
@@ -165,8 +142,9 @@ static kbool_t SetJsonValue(KonohaContext *kctx, struct JsonBuf *jsonbuf, const 
 	JSON val = toJSON(NewJsonI((JSONMemoryPool *)(PLATAPI JsonHandler), type, ap));
 	kbool_t ret = true;
 	if(key != NULL) {
-		JSON tmp = JSONString_new((JSONMemoryPool *)(PLATAPI JsonHandler), key, KeyLen(key, keylen_or_zero));
-		JSONObject_set((JSONMemoryPool *)(PLATAPI JsonHandler), toJSON(jsonbuf->json_i), tmp, val);
+		size_t keylen = KeyLen(key, keylen_or_zero);
+		JSONObject_set((JSONMemoryPool *)(PLATAPI JsonHandler),
+				toJSON(jsonbuf->json_i), key, keylen, val);
 	}
 	else {
 		jsonbuf->json_i = val.bits;
@@ -177,27 +155,34 @@ static kbool_t SetJsonValue(KonohaContext *kctx, struct JsonBuf *jsonbuf, const 
 
 static kbool_t GetJsonBoolean(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, kbool_t defval)
 {
-	//return (key != NULL) ? JSON_getBool(toJSON(jsonbuf->json_i), key, KeyLen(key, keylen_or_zero)) : toBool(toJSON(jsonbuf->json_i));
-	return false; /* imf */
+	if(key == NULL)
+		return JSONBool_get(toJSON(jsonbuf->json_i));
+	return JSON_getBool(toJSON(jsonbuf->json_i), key, KeyLen(key, keylen_or_zero));
 }
 
 static int64_t GetJsonInt(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, int64_t defval)
 {
-	//return (key != NULL) ? JSON_getInt(toJSON(jsonbuf->json_i), key, KeyLen(key, keylen_or_zero)) : toInt(jsonbuf->json_i);
-	return false; /* imf */
+	if(key == NULL) {
+		if(JSON_TYPE_CHECK(Int32, toJSON(jsonbuf->json_i))) {
+			return JSONInt_get(toJSON(jsonbuf->json_i));
+		}
+	}
+	return JSON_getInt(toJSON(jsonbuf->json_i), key, KeyLen(key, keylen_or_zero));
 }
 
 static double GetJsonFloat(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, double defval)
 {
-	//return (key != NULL) ? JSON_getDouble(toJSON(jsonbuf->json_i), key, KeyLen(key, keylen_or_zero)) : toDouble(jsonbuf->json_i);
-	return false; /* imf */
+	if(key == NULL)
+		JSONDouble_get(toJSON(jsonbuf->json_i));
+	return JSON_getDouble(toJSON(jsonbuf->json_i), key, KeyLen(key, keylen_or_zero));
 }
 
-static const char* GetJsonText(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, const char *defval)
+static const char *GetJsonText(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, const char *defval)
 {
-	size_t ValLen ; /* What is this ? */
-	//return (key != NULL) ? JSON_getString(toJSON(jsonbuf->json_i), key, KeyLen(key, keylen_or_zero), &ValLen) : toString(jsonbuf->json_i);
-	return false; /* imf */
+	if(key == NULL)
+		JSONString_get(toJSON(jsonbuf->json_i));
+	size_t length = KeyLen(key, keylen_or_zero);
+	return JSON_getString(toJSON(jsonbuf->json_i), key, &length);
 }
 
 static size_t GetJsonSize(KonohaContext *kctx, struct JsonBuf *jsonbuf)
@@ -207,25 +192,30 @@ static size_t GetJsonSize(KonohaContext *kctx, struct JsonBuf *jsonbuf)
 
 static kbool_t RetrieveJsonArrayIndex(KonohaContext *kctx, struct JsonBuf *jsonbuf, size_t index, struct JsonBuf *otherbuf)
 {
-//	JSONArray_get(jsonbuf->json_i, )
-//	json_t *obj = json_array_get(jsonbuf->jsonobj, index);
-//	if(obj != NULL) {
-//		SetJsonBuf(otherbuf, obj);
-//		return true;
-//	}
-	return true; /* always? */
+	if(JSON_TYPE_CHECK(Array, toJSON(jsonbuf->json_i))) {
+		otherbuf->json_i = JSONArray_get(toJSON(jsonbuf->json_i), index).bits;
+		return otherbuf->json_i == 0;
+	}
+	return false;
 }
 
 static kbool_t SetJsonArrayIndex(KonohaContext *kctx, struct JsonBuf *jsonbuf, size_t index, struct JsonBuf *otherbuf)
 {
-	//JSONArray_set(json, idx, value);
+	if(JSON_TYPE_CHECK(Array, toJSON(jsonbuf->json_i))) {
+		JSONArray_set(toJSON(jsonbuf->json_i), index, toJSON(otherbuf->json_i));
+		return true;
+	}
 	return false;
 }
 
 static kbool_t AppendJsonArray(KonohaContext *kctx, struct JsonBuf *jsonbuf, struct JsonBuf *otherbuf)
 {
-	JSONArray_append((JSONMemoryPool *)(PLATAPI JsonHandler), toJSON(jsonbuf->json_i), toJSON(otherbuf->json_i));
-	return true; /* always? */
+	if(JSON_TYPE_CHECK(Array, toJSON(jsonbuf->json_i))) {
+		JSONArray_append((JSONMemoryPool *)(PLATAPI JsonHandler),
+				toJSON(jsonbuf->json_i), toJSON(otherbuf->json_i));
+		return true;
+	}
+	return false;
 }
 
 // -------------------------------------------------------------------------
@@ -233,7 +223,6 @@ static kbool_t AppendJsonArray(KonohaContext *kctx, struct JsonBuf *jsonbuf, str
 kbool_t LoadJsonModule(KonohaFactory *factory, ModuleType type)
 {
 	factory->Module_Json            = "Json (i version)";
-	factory->Module_Json            = "jansson";
 	factory->IsJsonType             = IsJsonType;
 	factory->CreateJson             = CreateJson;
 	factory->ParseJson              = ParseJson;
