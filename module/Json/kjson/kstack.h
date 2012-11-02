@@ -22,71 +22,62 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdbool.h>
+#ifndef KJSON_H
+#include "kjson.h"
+#endif
 
-#include "kstack.h"
-
-#ifndef KJSON_STREAM_H
-#define KJSON_STREAM_H
+#ifndef KSTACK_H
+#define KSTACK_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct input_stream {
-    const uint8_t *pos;
-    const uint8_t *end;
-    kstack_t stack;
-} input_stream;
+#ifndef KJSON_MALLOC
+#define KJSON_MALLOC(N) malloc(N)
+#define KJSON_FREE(PTR) free(PTR)
+#endif
 
-static inline const uint8_t *_input_stream_save(input_stream *ins)
+typedef ARRAY(JSON) kstack_t;
+
+static inline unsigned kstack_size(kstack_t *stack)
 {
-    return ins->pos;
+    return stack->size;
 }
 
-static inline void _input_stream_resume(input_stream *ins, const uint8_t *pos)
+static inline void kstack_init(kstack_t *stack)
 {
-    ins->pos = pos;
+    ARRAY_init(JSON, stack, 8);
 }
 
-static inline uint8_t string_input_stream_next(input_stream *ins)
+static inline void kstack_deinit(kstack_t *stack)
 {
-    return *(ins->pos)++;
+    assert(kstack_size(stack) == 0);
+    ARRAY_dispose(JSON, stack);
 }
 
-static inline bool string_input_stream_eos(input_stream *ins)
+static inline void kstack_push(kstack_t *stack, JSON v)
 {
-    return ins->pos != ins->end;
+    ARRAY_add(JSON, stack, v);
 }
 
-#define for_each_istream(INS, CUR)\
-    for(CUR = string_input_stream_next(INS);\
-            string_input_stream_eos(INS); CUR = string_input_stream_next(INS))
-
-static input_stream *new_string_input_stream(input_stream *ins, const char *buf, size_t len)
+static inline JSON kstack_pop(kstack_t *stack)
 {
-    const uint8_t *text = (const uint8_t *) buf;
-    ins->pos = text;
-    ins->end = text + len + 1;
-    kstack_init(&ins->stack);
-    return ins;
+    unsigned size = --stack->size;
+    assert(size >= 0);
+    return ARRAY_get(JSON, stack, size);
 }
 
-static void string_input_stream_deinit(input_stream *ins)
+static inline void kstack_move(kstack_t *stack, JSON *list, unsigned beginIdx, unsigned length)
 {
-    ins->pos = ins->end = NULL;
-    kstack_deinit(&ins->stack);
+    memcpy(list, stack->list+beginIdx, length*sizeof(JSON));
+    stack->size -= length;
 }
 
-static void input_stream_delete(input_stream *ins)
-{
-    string_input_stream_deinit(ins);
-}
+#undef KJSON_MALLOC
+#undef KJSON_FREE
 
 #ifdef __cplusplus
-}
+} /* extern "C" */
 #endif
 #endif /* end of include guard */

@@ -64,14 +64,14 @@ static void reverse(char *const start, char *const end)
 {
     char *m = start + (end - start) / 2;
     char tmp, *s = start, *e = end - 1;
-    while (s < m) {
+    while(s < m) {
         tmp  = *s;
         *s++ = *e;
         *e-- = tmp;
     }
 }
 
-static inline char toHexChar(unsigned char c)
+static inline char toHexChar(uint8_t c)
 {
     return c < 10 ? c + '0': c - 10 + 'a';
 }
@@ -81,7 +81,7 @@ static inline char *put_x(char *p, uint64_t v)
     char *base = p;
     do {
         *p++ = toHexChar(v % 16);
-    } while ((v /= 16) != 0);
+    } while((v /= 16) != 0);
     reverse(base, p);
     return p;
 }
@@ -91,14 +91,14 @@ static inline char *put_d(char *p, uint64_t v)
     char *base = p;
     do {
         *p++ = '0' + (v % 10);
-    } while ((v /= 10) != 0);
+    } while((v /= 10) != 0);
     reverse(base, p);
     return p;
 }
 
 static inline char *put_i(char *p, int64_t value)
 {
-    if (value < 0) {
+    if(value < 0) {
         p[0] = '-'; p++;
         value = -value;
     }
@@ -141,7 +141,7 @@ static inline void string_builder_add_string_no_check(string_builder *sb, const 
     memcpy(p, s, len);
 #else
     const char *const e = s + len;
-    while (s < e) {
+    while(s < e) {
         *p++ = *s++;
     }
 #endif
@@ -162,7 +162,7 @@ static inline void string_builder_dispose(string_builder *sb)
 static inline char *string_builder_tostring(string_builder *sb,
         size_t *len, int ensureZero)
 {
-    if (ensureZero) {
+    if(ensureZero) {
         ARRAY_add(char, &sb->buf, '\0');
     }
     char *list = sb->buf.list;

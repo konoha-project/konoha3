@@ -411,7 +411,7 @@ typedef enum {
     KJSON_BOOLEAN,
     KJSON_NULL,
     KJSON_INT64,
-    KJSON_LONG,
+    KJSON_LONG
 } KJSONTYPE;
 
 struct KonohaFactory {

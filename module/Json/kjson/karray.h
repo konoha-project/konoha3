@@ -33,6 +33,10 @@
 extern "C" {
 #endif
 
+#ifndef LOG2
+#define LOG2(N) ((unsigned)((sizeof(void*) * 8) - __builtin_clzl(N - 1)))
+#endif
+
 /* ARRAY */
 #define ARRAY(T) ARRAY_##T##_t
 #define DEF_ARRAY_STRUCT0(T, SizeTy)\
@@ -55,7 +59,10 @@ static inline ARRAY(T) *ARRAY_init_##T (ARRAY(T) *a, size_t initsize) {\
     return a;\
 }\
 static inline void ARRAY_##T##_ensureSize(ARRAY(T) *a, size_t size) {\
-    while (a->size + size >= a->capacity) {\
+    if(a->size + size <= a->capacity) {\
+        return;\
+    }\
+    while(a->size + size > a->capacity) {\
         a->capacity *= 2;\
     }\
     a->list = (T*)realloc(a->list, sizeof(T) * a->capacity);\
@@ -67,8 +74,8 @@ static inline void ARRAY_##T##_dispose(ARRAY(T) *a) {\
     a->list     = NULL;\
 }\
 static inline void ARRAY_##T##_add(ARRAY(T) *a, ValueType v) {\
-    if (a->size + 1 >= a->capacity) {\
-        a->capacity *= 2;\
+    if(a->size + 1 >= a->capacity) {\
+        a->capacity = 1 << LOG2(a->capacity * 2 + 1);\
         a->list = (T*)realloc(a->list, sizeof(T) * a->capacity);\
     }\
     ARRAY_##T##_set(a, a->size++, v);\
@@ -106,13 +113,17 @@ DEF_ARRAY_OP__(T, T)
 #define ARRAY_init_1(T, a, e1) do {\
     ARRAY_init(T, a, 4);\
     ARRAY_add(T, a, e1);\
-} while (0)
+} while(0)
 
 #define FOR_EACH_ARRAY_(a, x, i)\
     for(i=0, x = ARRAY_n(a, i); i < ARRAY_size(a); x = ARRAY_n(a,(++i)))
 
+#define ARRAY_BEGIN(A) ARRAY_n(A, 0)
+#define ARRAY_END(A)   ARRAY_n(A,ARRAY_size(A))
+
 #define FOR_EACH_ARRAY(a, x, e)\
-    for(x = ARRAY_n(a, 0), e = ARRAY_n(a,ARRAY_size(a)); x != e; ++x)
+    for(x = ARRAY_BEGIN(a), e = ARRAY_END(a); x != e; ++x)
+
 
 #ifdef __cplusplus
 }
