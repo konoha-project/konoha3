@@ -1,0 +1,4 @@
+##
+## export KONOHA_TESTPROFILE=standard minikonoha -MOutputTest ${file}
+standard -MOutputTest
+cstyle   -MOutputTest -Icstyle
