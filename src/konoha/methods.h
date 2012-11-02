@@ -226,16 +226,13 @@ static KMETHOD Func_invoke(KonohaContext *kctx, KonohaStack *sfp)
 	KSELFCALL(sfp, fo->mtd);
 }
 
-int konoha_detectFailedAssert = false;
-
 //## @Const @Static void System.assert(boolean x)
 static KMETHOD System_assert(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kbool_t cond = sfp[1].boolValue;
-//	konoha_detectFailedAssert = false;
 	if(cond == false) {
 		KMakeTrace(trace, sfp);
-		konoha_detectFailedAssert = true;
+		((KonohaFactory*)kctx->platApi)->exitStatus = 1;  // just in case
 		KLIB KonohaRuntime_raise(kctx, EXPT_("Assertion"), SoftwareFault, NULL, trace->baseStack);
 	}
 }

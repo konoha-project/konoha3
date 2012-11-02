@@ -99,8 +99,10 @@ static void AFTER_LoadScript(KonohaContext *kctx, const char *filename)
 		FILE *fp2 = fopen(result_file, "r");
 		int ret = check_result2(fp, fp2);
 		if(ret != 0) {
+			fprintf(stdout, "stdlog_count=%d, exitStatus=%d\n", stdlog_count, kctx->platApi->exitStatus);
 			fprintf(stdout, "proof file mismatched: %s\n", proof_file);
 			((KonohaFactory*)kctx->platApi)->exitStatus = 78;
+			fprintf(stdout, "stdlog_count=%d, exitStatus=%d\n", stdlog_count, kctx->platApi->exitStatus);
 		}
 		else {
 			((KonohaFactory*)kctx->platApi)->exitStatus = 0;
@@ -108,6 +110,7 @@ static void AFTER_LoadScript(KonohaContext *kctx, const char *filename)
 		fclose(fp);
 		fclose(fp2);
 	}
+	fprintf(stdout, "stdlog_count=%d, exitStatus=%d\n", stdlog_count, kctx->platApi->exitStatus);
 }
 
 static void NOP_ReportDebugMessage(const char *file, const char *func, int line, const char *fmt, ...)
@@ -154,11 +157,11 @@ kbool_t LoadOutputTestModule(KonohaFactory *factory, ModuleType type)
 	factory->AFTER_LoadScript  = AFTER_LoadScript;
 
 	factory->ReportDebugMessage     = NOP_ReportDebugMessage;
-	factory->printf_i        = TEST_printf;
-	factory->vprintf_i       = TEST_vprintf;
+	factory->printf_i               = TEST_printf;
+	factory->vprintf_i              = TEST_vprintf;
 
-	factory->ReportUserMessage     = TEST_ReportUserMessage;
-	factory->ReportCompilerMessage = TEST_ReportCompilerMessage;
+	factory->ReportUserMessage           = TEST_ReportUserMessage;
+	factory->ReportCompilerMessage       = TEST_ReportCompilerMessage;
 	factory->ReportCaughtException       = TEST_reportCaughtException;
 	return true;
 }

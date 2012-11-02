@@ -476,7 +476,7 @@ struct KonohaFactory {
 	int    (*add_history_i)(const char *);
 
 	// logging, trace
-	kbool_t exitStatus;
+	int   exitStatus;
 	const char *LOGGER_NAME;
 	void  (*syslog_i)(int priority, const char *message, ...) __PRINTFMT(2, 3);
 	void  (*vsyslog_i)(int priority, const char *message, va_list args);

@@ -174,8 +174,6 @@ static void make_report(const char *testname)
 	}
 }
 
-extern int konoha_detectFailedAssert;
-
 static int KonohaContext_test(KonohaContext *kctx, const char *testname)
 {
 	int ret = 1; //FAILED
@@ -196,11 +194,12 @@ static int KonohaContext_test(KonohaContext *kctx, const char *testname)
 		ret = check_result2(fp, fp2);
 		if(ret == 0) {
 			fprintf(stdout, "[PASS]: %s\n", testname);
+			((KonohaFactory*)kctx->platApi)->exitStatus = 0;
 		}
 		else {
 			fprintf(stdout, "[FAIL]: %s\n", testname);
-			make_report(testname);
-			konoha_detectFailedAssert = 1;
+			//make_report(testname);
+			((KonohaFactory*)kctx->platApi)->exitStatus = 1;
 		}
 		fclose(fp);
 		fclose(fp2);
@@ -210,12 +209,12 @@ static int KonohaContext_test(KonohaContext *kctx, const char *testname)
 		if(stdlog_count == 0) {
 			if(konoha_detectFailedAssert == 0) {
 				fprintf(stdout, "[PASS]: %s\n", testname);
-				return 0; // OK
+				((KonohaFactory*)kctx->platApi)->exitStatus = 0;
 			}
 		}
 		else {
 			fprintf(stdout, "no proof file: %s\n", testname);
-			konoha_detectFailedAssert = 1;
+			((KonohaFactory*)kctx->platApi)->exitStatus = 1;
 		}
 		fprintf(stdout, "[FAIL]: %s\n", testname);
 		return 1;

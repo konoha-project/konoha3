@@ -18,7 +18,7 @@ function run_test { # count max profile options, file
 	echo -n "[$1/$2] running test $4 $5 .."
 	KONOHA_TESTPROFILE=$3 minikonoha $4 $5 > /dev/null
 	result=$?
-	echo $result
+	#echo $result
 	if [ $result -eq 0 ] ; then
 		echo "[PASS]"
 		PASS=$(($PASS + 1))
@@ -28,6 +28,10 @@ function run_test { # count max profile options, file
 		cat $5 >> "${OUTFILE}.txt"
 		echo "RESULT:" >> "${OUTFILE}.txt"
 		KONOHA_TESTPROFILE=$3 minikonoha $4 $5 >> "${OUTFILE}.txt"
+		if [ $result -eq 78 ] ; then
+			echo "diff $5.$3_proof $5.$3_tested" >> "${OUTFILE}.txt"
+			diff $5.$3_proof $5.$3_tested >> "${OUTFILE}.txt"
+		fi
 		echo >> "${OUTFILE}.txt"
 	fi
 }
