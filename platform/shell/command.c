@@ -417,7 +417,7 @@ static struct option long_options2[] = {
 	{NULL, 0, 0, 0},
 };
 
-static int konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
+static void konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
 {
 	KonohaFactory *plat = (KonohaFactory*)konoha->platApi;
 	kbool_t ret = true;
@@ -500,7 +500,8 @@ static int konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
 			break;
 
 		default:
-			return 1;
+			((KonohaFactory*)konoha->platApi)->exitStatus = 1;
+			return;
 		}
 	}
 	scriptidx = optind;
@@ -516,7 +517,9 @@ static int konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
 		CommandLine_import(konoha, "konoha.i");
 		ret = konoha_shell(konoha);
 	}
-	return (ret == true) ? 0 : 1;
+	if(ret != true) {
+		((KonohaFactory*)konoha->platApi)->exitStatus = 1;
+	}
 }
 
 //static void testDataLog(KonohaContext *kctx)
@@ -550,17 +553,15 @@ static int konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
 void KonohaFactory_LoadRuntimeModule(KonohaFactory *factory, const char *name, ModuleType option);
 void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), int argc, char **argv);
 KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory);
-void Konoha_Destroy(KonohaContext *kctx);
+int Konoha_Destroy(KonohaContext *kctx);
 
 int main(int argc, char *argv[])
 {
-	kbool_t ret = 1;
 	struct KonohaFactory factory = {};
 	KonohaFactory_SetDefaultFactory(&factory, PosixFactory, argc, argv);
 	KonohaContext* konoha = KonohaFactory_CreateKonoha(&factory);
-	ret = konoha_parseopt(konoha, argc, argv);
-	Konoha_Destroy(konoha);
-	return ret ? konoha_detectFailedAssert: 0;
+	konoha_parseopt(konoha, argc, argv);
+	return Konoha_Destroy(konoha);
 }
 
 #ifdef __cplusplus

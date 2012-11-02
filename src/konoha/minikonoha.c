@@ -300,11 +300,13 @@ KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory)
 	return (KonohaContext *)new_KonohaContext(NULL, (PlatformApi *)platapi);
 }
 
-void Konoha_Destroy(KonohaContext *kctx)
+int Konoha_Destroy(KonohaContext *kctx)
 {
 	KonohaFactory *platapi = (KonohaFactory*)kctx->platApi;
+	int exitStatus = platapi->exitStatus;
 	KonohaContext_free(kctx, (KonohaContextVar *)kctx);
 	platapi->free_i(platapi);
+	return exitStatus;
 }
 
 

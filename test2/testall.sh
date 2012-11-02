@@ -4,7 +4,7 @@
 GLOBALSCORE=0
 GLOBALMAX=0
 
-OUTFILE=result
+OUTFILE=ckonoha
 
 if [ -f "${OUTFILE}.txt" ] ; then
 	rm -rf "${OUTFILE}.txt"
@@ -57,5 +57,20 @@ run_test 6 8 cstyle "-MOutputTest -Icstyle" 0001_Assertion/Assertion_TopLevelFal
 run_test 7 8 cstyle "-MOutputTest -Icstyle" 0001_Assertion/Assertion_TopLevelTrue.k
 run_test 8 8 cstyle "-MOutputTest -Icstyle" 0001_Assertion/Assertion_True.k
 record_result 0001_Assertion $PASS 8
+## 0002_SystemPrint
+PASS=0
+run_test 1 12 standard "-MOutputTest" 0002_SystemPrint/SystemPrint_HelloWorld.k
+run_test 2 12 standard "-MOutputTest" 0002_SystemPrint/SystemPrint_Integer.k
+run_test 3 12 standard "-MOutputTest" 0002_SystemPrint/SystemPrint_Number.k
+run_test 4 12 standard "-MOutputTest" 0002_SystemPrint/SystemPrint_TopLevel.k
+run_test 5 12 standard "-MOutputTest" 0002_SystemPrint/SystemPrint_Variable.k
+run_test 6 12 standard "-MOutputTest" 0002_SystemPrint/SystemPrint_VariableInt.k
+run_test 7 12 cstyle "-MOutputTest -Icstyle" 0002_SystemPrint/SystemPrint_HelloWorld.k
+run_test 8 12 cstyle "-MOutputTest -Icstyle" 0002_SystemPrint/SystemPrint_Integer.k
+run_test 9 12 cstyle "-MOutputTest -Icstyle" 0002_SystemPrint/SystemPrint_Number.k
+run_test 10 12 cstyle "-MOutputTest -Icstyle" 0002_SystemPrint/SystemPrint_TopLevel.k
+run_test 11 12 cstyle "-MOutputTest -Icstyle" 0002_SystemPrint/SystemPrint_Variable.k
+run_test 12 12 cstyle "-MOutputTest -Icstyle" 0002_SystemPrint/SystemPrint_VariableInt.k
+record_result 0002_SystemPrint $PASS 12
 total
 
