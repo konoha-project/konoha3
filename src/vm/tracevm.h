@@ -333,7 +333,6 @@ static kbool_t kopcode_hasjump(kopcode_t opcode)
 #define EMITCOVERAGE_ELEMENT do {\
 	if(KonohaContext_isTrace(kctx)) {\
 		op->count++;\
-		emitCoverage_element(kctx, pc);\
 	}\
 } while(0)
 
