@@ -447,7 +447,7 @@ static void MODEVENT_init(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace
 	mod->h.freeModule = EventModule_free;
 	KLIB KonohaRuntime_setModule(kctx, MOD_EVENT, (KonohaModule *)mod, 0);
 
-	KSET_KLIB(KscheduleEvent, 0);
+	KSetKLibFunc(ns->packageId, KscheduleEvent, KscheduleEvent, trace);
 
 	KDEFINE_CLASS defEvent = {
 		STRUCTNAME(Event),
