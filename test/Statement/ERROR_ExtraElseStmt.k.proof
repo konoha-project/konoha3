@@ -1,3 +1,0 @@
- - (error) (ERROR_ExtraElseStmt.k:10) else is not statement
- ** RuntimeScriptException (ERROR_ExtraElseStmt.k:10)
-Q.E.D.

@@ -1,2 +1,0 @@
- - (error) (StringLiteral_EscapeBell.k:3) undefined escape sequence: "hello,\aworld"
-Q.E.D.

@@ -1,0 +1,5 @@
+## export KONOHA_TESTPROFILE=standard minikonoha -MOutputTest ${file}
+iconv        -MIConv
+jansson      -MJansson
+output       -MOutputTest
+minivm       -MMiniVM

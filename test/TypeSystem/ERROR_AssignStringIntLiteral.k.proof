@@ -1,3 +1,0 @@
- - (error) (ERROR_AssignStringIntLiteral.k:5) String is requested, but int is given
- ** RuntimeScriptException (ERROR_AssignStringIntLiteral.k:5)
-Q.E.D.
