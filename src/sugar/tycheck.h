@@ -150,8 +150,8 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 			if(kMethod_is(Coercion, mtd) || FLAG_is(pol, TPOL_COERCION)) {
 				return new_TypedCallExpr(kctx, stmt, gma, reqty, mtd, 1, texpr);
 			}
-			if(kNameSpace_IsAllowed(StrongConvertion, ns)) {
-				kStmtExpr_printMessage(kctx, stmt, expr, ErrTag, "implicit type conversion: %s to %s", TY_t(texpr->ty), TY_t(reqty));
+			if(kNameSpace_IsAllowed(ImplicitCoercion, ns)) {
+				kStmtExpr_printMessage(kctx, stmt, expr, ErrTag, "implicit type coercion: %s to %s", TY_t(texpr->ty), TY_t(reqty));
 				return new_TypedCallExpr(kctx, stmt, gma, reqty, mtd, 1, texpr);
 			}
 		}

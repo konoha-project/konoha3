@@ -30,17 +30,34 @@ extern "C"{
 #endif
 
 // Object.getTypeId()
-
 static KMETHOD Object_getTypeId(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KReturnUnboxValue(O_ct(sfp[0].asObject)->typeId);
 }
 
-// --------------------------------------------------------------------------
 
 #define _Public   kMethod_Public
 #define _Const    kMethod_Const
 #define _F(F)   (intptr_t)(F)
+
+// void NameSpace_AllowImplicitCoercion(boolean t)
+static KMETHOD NameSpace_AllowImplicitCoercion(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kNameSpaceVar *ns = (kNameSpaceVar*)sfp[0].asNameSpace;
+	kNameSpace_Set(ImplicitCoercion, ns, sfp[1].boolValue);
+}
+
+static void object_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
+{
+	KDEFINE_METHOD MethodData[] = {
+		_Public|_Const, _F(Object_getTypeId), TY_int, TY_Object, MN_("getTypeId"), 0,
+		_Public|_Const, _F(NameSpace_AllowImplicitCoercion), TY_void, TY_NameSpace, MN_("AllowImplicitCoercion"), 1, TY_boolean, FN_("allow"),
+		DEND,
+	};
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
+}
+
+// --------------------------------------------------------------------------
 
 static kbool_t object_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
@@ -50,11 +67,7 @@ static kbool_t object_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		{NULL},
 	};
 	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(ClassData), 0);
-	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const, _F(Object_getTypeId), TY_int, TY_Object, MN_("getTypeId"), 0,
-		DEND,
-	};
-	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
+	object_defineMethod(kctx, ns, trace);
 	return true;
 }
 
