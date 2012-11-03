@@ -713,7 +713,7 @@ static kbool_t regexp_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		{ .keyword = KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
-	SUGAR kNameSpace_setTokenFunc(kctx, ns, SYM_("$RegExp"), KonohaChar_Slash, new_SugarFunc(ns, TokenFunc_JavaScriptRegExp));
+	SUGAR kNameSpace_SetTokenFunc(kctx, ns, SYM_("$RegExp"), KonohaChar_Slash, new_SugarFunc(ns, TokenFunc_JavaScriptRegExp));
 	return true;
 }
 

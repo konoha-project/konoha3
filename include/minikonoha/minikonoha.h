@@ -1414,14 +1414,16 @@ struct kNameSpaceVar {
 // NameSpace_syntaxOption
 
 #define kNameSpace_DefaultSyntaxOption               kNameSpace_ImplicitField|kNameSpace_NoSemiColon
-#define kNameSpace_isAllowed(P, ns)                  (TFLAG_is(kshortflag_t, (ns)->syntaxOption, kNameSpace_##P))
-#define kNameSpace_set(P, ns, B)                     TFLAG_set(kshortflag_t, ((kNameSpaceVar *)ns)->syntaxOption, kNameSpace_##P, B)
+#define kNameSpace_IsAllowed(P, ns)                  (TFLAG_is(kshortflag_t, (ns)->syntaxOption, kNameSpace_##P))
+#define kNameSpace_Set(P, ns, B)                     TFLAG_set(kshortflag_t, ((kNameSpaceVar *)ns)->syntaxOption, kNameSpace_##P, B)
 
 #define kNameSpace_NoSemiColon                       ((kshortflag_t)(1<<1))
 
 #define kNameSpace_TypeInference                     ((kshortflag_t)(1<<2))
 #define kNameSpace_ImplicitField                     ((kshortflag_t)(1<<3))
 #define kNameSpace_TransparentGlobalVariable         ((kshortflag_t)(1<<4))
+
+#define kNameSpace_StrongConvertion                  ((kshortflag_t)(1<<5))
 
 /* ------------------------------------------------------------------------ */
 /* System */
@@ -1626,7 +1628,7 @@ struct KonohaLibVar {
 	KonohaClass*     (*kNameSpace_getClass)(KonohaContext*, kNameSpace *, const char *, size_t, KonohaClass *);
 	KonohaClass*     (*kNameSpace_defineClass)(KonohaContext*, kNameSpace *, kString *, KDEFINE_CLASS *, KTraceInfo *);
 
-	kbool_t          (*kNameSpace_setConstData)(KonohaContext *, kNameSpace *, ksymbol_t, ktype_t, uintptr_t, KTraceInfo *);
+	kbool_t          (*kNameSpace_SetConstData)(KonohaContext *, kNameSpace *, ksymbol_t, ktype_t, uintptr_t, KTraceInfo *);
 	kbool_t          (*kNameSpace_loadConstData)(KonohaContext*, kNameSpace *, const char **d, KTraceInfo *);
 	void             (*kNameSpace_LoadMethodData)(KonohaContext*, kNameSpace *, intptr_t *, KTraceInfo *);
 

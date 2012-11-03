@@ -125,6 +125,7 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 	}
 	if(Stmt_isERR(stmt)) texpr = K_NULLEXPR;
 	if(texpr != K_NULLEXPR) {
+		kNameSpace *ns = Stmt_nameSpace(stmt);
 		//DBG_P("type=%s, reqty=%s", TY_t(expr->ty), TY_t(reqty));
 		if(texpr->ty == TY_void) {
 			if(!FLAG_is(pol, TPOL_ALLOWVOID)) {
@@ -138,15 +139,21 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 		if(CT_isa(kctx, texpr->ty, reqty)) {
 			if(TY_isUnbox(texpr->ty) && !TY_isUnbox(reqty)) {
 				ktype_t unboxType = texpr->ty == TY_boolean ? TY_boolean : TY_int;
-				kMethod *mtd = kNameSpace_getMethodByParamSizeNULL(kctx, Stmt_nameSpace(stmt), unboxType, MN_box, 0);
+				kMethod *mtd = kNameSpace_getMethodByParamSizeNULL(kctx, ns, unboxType, MN_box, 0);
 				return new_TypedCallExpr(kctx, stmt, gma, texpr->ty, mtd, 1, texpr);
 			}
 			return texpr;
 		}
-		kMethod *mtd = kNameSpace_getCastMethodNULL(kctx, Stmt_nameSpace(stmt), texpr->ty, reqty);
+		kMethod *mtd = kNameSpace_getCastMethodNULL(kctx, ns, texpr->ty, reqty);
 		DBG_P("finding cast %s => %s: %p", TY_t(texpr->ty), TY_t(reqty), mtd);
-		if(mtd != NULL && (kMethod_is(Coercion, mtd) || FLAG_is(pol, TPOL_COERCION))) {
-			return new_TypedCallExpr(kctx, stmt, gma, reqty, mtd, 1, texpr);
+		if(mtd != NULL) {
+			if(kMethod_is(Coercion, mtd) || FLAG_is(pol, TPOL_COERCION)) {
+				return new_TypedCallExpr(kctx, stmt, gma, reqty, mtd, 1, texpr);
+			}
+			if(kNameSpace_IsAllowed(StrongConvertion, ns)) {
+				kStmtExpr_printMessage(kctx, stmt, expr, ErrTag, "implicit type conversion: %s to %s", TY_t(texpr->ty), TY_t(reqty));
+				return new_TypedCallExpr(kctx, stmt, gma, reqty, mtd, 1, texpr);
+			}
 		}
 		return kStmtExpr_printMessage(kctx, stmt, expr, ErrTag, "%s is requested, but %s is given", TY_t(reqty), TY_t(texpr->ty));
 	}

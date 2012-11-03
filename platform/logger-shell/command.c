@@ -269,7 +269,7 @@ static void CommandLine_define(KonohaContext *kctx, char *keyvalue)
 			ty = VirtualType_Text;
 			unboxValue = (uintptr_t)(p+1);
 		}
-		if(!KLIB kNameSpace_setConstData(kctx, KNULL(NameSpace), key, ty, unboxValue, 0)) {
+		if(!KLIB kNameSpace_SetConstData(kctx, KNULL(NameSpace), key, ty, unboxValue, 0)) {
 			PLATAPI exit_i(EXIT_FAILURE);
 		}
 	}

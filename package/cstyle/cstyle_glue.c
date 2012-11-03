@@ -278,16 +278,16 @@ static kbool_t cstyle_defineAssign(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
-	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("+="), 2,  "X Y X = (X) + (Y)");
-	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("-="), 2,  "X Y X = (X) - (Y)");
-	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("*="), 2,  "X Y X = (X) * (Y)");
-	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("/="), 2,  "X Y X = (X) / (Y)");
-	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("%="), 2,  "X Y X = (X) % (Y)");
-	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("|="), 2,  "X Y X = (X) | (Y)");
-	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("&="), 2,  "X Y X = (X) & (Y)");
-	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("<<="), 2, "X Y X = (X) << (Y)");
-	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_(">>="), 2, "X Y X = (X) >> (Y)");
-	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("^="), 2,  "X Y X = (X) ^ (Y)");
+	SUGAR kNameSpace_SetMacroData(kctx, ns, SYM_("+="), 2,  "X Y X = (X) + (Y)");
+	SUGAR kNameSpace_SetMacroData(kctx, ns, SYM_("-="), 2,  "X Y X = (X) - (Y)");
+	SUGAR kNameSpace_SetMacroData(kctx, ns, SYM_("*="), 2,  "X Y X = (X) * (Y)");
+	SUGAR kNameSpace_SetMacroData(kctx, ns, SYM_("/="), 2,  "X Y X = (X) / (Y)");
+	SUGAR kNameSpace_SetMacroData(kctx, ns, SYM_("%="), 2,  "X Y X = (X) % (Y)");
+	SUGAR kNameSpace_SetMacroData(kctx, ns, SYM_("|="), 2,  "X Y X = (X) | (Y)");
+	SUGAR kNameSpace_SetMacroData(kctx, ns, SYM_("&="), 2,  "X Y X = (X) & (Y)");
+	SUGAR kNameSpace_SetMacroData(kctx, ns, SYM_("<<="), 2, "X Y X = (X) << (Y)");
+	SUGAR kNameSpace_SetMacroData(kctx, ns, SYM_(">>="), 2, "X Y X = (X) >> (Y)");
+	SUGAR kNameSpace_SetMacroData(kctx, ns, SYM_("^="), 2,  "X Y X = (X) ^ (Y)");
 	return true;
 }
 
@@ -310,7 +310,7 @@ static kbool_t cstyle_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		{ KW_END, }, /* sentinental */
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, defLiteral);
-	SUGAR kNameSpace_setTokenFunc(kctx, ns, SYM_("$SingleQuotedChar"), KonohaChar_Quote, new_SugarFunc(ns, TokenFunc_SingleQuotedChar));
+	SUGAR kNameSpace_SetTokenFunc(kctx, ns, SYM_("$SingleQuotedChar"), KonohaChar_Quote, new_SugarFunc(ns, TokenFunc_SingleQuotedChar));
 
 	KDEFINE_SYNTAX defExpression[] = {
 		{ SYM_("[]"), SYNFLAG_ExprPostfixOp2, NULL, Precedence_CStyleCALL, 0, NULL, Expression_Indexer, NULL, NULL, NULL, },
@@ -319,8 +319,8 @@ static kbool_t cstyle_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		{ KW_END, }, /* sentinental */
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, defExpression);
-	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("++"), 1,  "X X = (X) + 1 X ${int _ = X; X = (X) + 1; _}");
-	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("--"), 1,  "X X = (X) - 1 X ${int _ = X; X = (X) - 1; _}");
+	SUGAR kNameSpace_SetMacroData(kctx, ns, SYM_("++"), 1,  "X X = (X) + 1 X ${int _ = X; X = (X) + 1; _}");
+	SUGAR kNameSpace_SetMacroData(kctx, ns, SYM_("--"), 1,  "X X = (X) - 1 X ${int _ = X; X = (X) - 1; _}");
 	cstyle_defineAssign(kctx, ns, trace);
 	return true;
 }

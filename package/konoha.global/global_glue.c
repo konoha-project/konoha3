@@ -33,7 +33,7 @@ extern "C"{
 
 static KMETHOD NameSpace_setTransparentGlobalVariable_(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kNameSpace_set(TransparentGlobalVariable, sfp[0].asNameSpace, sfp[1].boolValue);
+	kNameSpace_Set(TransparentGlobalVariable, sfp[0].asNameSpace, sfp[1].boolValue);
 }
 
 #define _Public   kMethod_Public
@@ -108,7 +108,7 @@ static kbool_t kNameSpace_initGlobalObject(KonohaContext *kctx, kNameSpace *ns, 
 		const char *cname = "GlobalObject";
 		KonohaClass *cGlobalObject = KLIB kNameSpace_getClass(kctx, ns, cname, strlen(cname), NULL);
 		((kNameSpaceVar *)ns)->globalObjectNULL_OnList =  KLIB Knull(kctx, cGlobalObject);
-		return KLIB kNameSpace_setConstData(kctx, ns, SYM_("global"), cGlobalObject->typeId, (uintptr_t)ns->globalObjectNULL_OnList, trace);
+		return KLIB kNameSpace_SetConstData(kctx, ns, SYM_("global"), cGlobalObject->typeId, (uintptr_t)ns->globalObjectNULL_OnList, trace);
 	}
 	return true;
 }

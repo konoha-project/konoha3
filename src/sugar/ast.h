@@ -332,7 +332,7 @@ static void TokenSequence_applyMacroGroup(KonohaContext *kctx, TokenSequence *to
 	TokenSequence_applyMacro(kctx, tokens, macroTokenList, 0, kArray_size(macroTokenList), paramsize, mp);
 }
 
-static void kNameSpace_setMacroData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int paramsize, const char *data)
+static void kNameSpace_SetMacroData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int paramsize, const char *data)
 {
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)SUGAR kNameSpace_getSyntax(kctx, ns, keyword, /*new*/true);
 	TokenSequence source = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};

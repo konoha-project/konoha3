@@ -72,7 +72,7 @@ static void kNameSpace_addFuncList(KonohaContext *kctx, kNameSpace *ns, kArray *
 
 static kFunc **kNameSpace_tokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns);
 
-static void kNameSpace_setTokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns, int konohaChar, kFunc *fo)
+static void kNameSpace_SetTokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns, int konohaChar, kFunc *fo)
 {
 	kArray **list = (kArray**)kNameSpace_tokenFuncMatrix(kctx, ns);
 	kNameSpace_addFuncList(kctx, ns, list, konohaChar, fo);
@@ -150,7 +150,7 @@ static kbool_t kNameSpace_importSyntax(KonohaContext *kctx, kNameSpace *ns, Suga
 			int j, size;
 			kFunc **FuncItems = SugarSyntax_funcTable(kctx, target, SugarFunc_TokenFunc, &size);
 			for(j = 0; j < size; j++) {
-				kNameSpace_setTokenFuncMatrix(kctx, ns, target->tokenKonohaChar, FuncItems[j]);
+				kNameSpace_SetTokenFuncMatrix(kctx, ns, target->tokenKonohaChar, FuncItems[j]);
 			}
 			syn->tokenKonohaChar = target->tokenKonohaChar;
 		}
@@ -210,7 +210,7 @@ static SugarSyntaxVar *kNameSpace_addSugarFunc(KonohaContext *kctx, kNameSpace *
 	return syn;
 }
 
-static SugarSyntaxVar *kNameSpace_setTokenFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int konohaChar, kFunc *fo)
+static SugarSyntaxVar *kNameSpace_SetTokenFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int konohaChar, kFunc *fo)
 {
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_getSyntax(kctx, ns, keyword, 1/*new*/);
 	kArray **list = (kArray**)kNameSpace_tokenFuncMatrix(kctx, ns);
@@ -386,7 +386,7 @@ static void SetKeyValue(KonohaContext *kctx, KKeyValue *kv, ksymbol_t key, ktype
 	}
 }
 
-static kbool_t kNameSpace_setConstData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t key, ktype_t ty, uintptr_t unboxValue, KTraceInfo *trace)
+static kbool_t kNameSpace_SetConstData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t key, ktype_t ty, uintptr_t unboxValue, KTraceInfo *trace)
 {
 	INIT_GCSTACK();
 	KKeyValue kv;
@@ -448,7 +448,7 @@ static KonohaClass *kNameSpace_getClass(KonohaContext *kctx, kNameSpace *ns, con
 static KonohaClass *kNameSpace_defineClass(KonohaContext *kctx, kNameSpace *ns, kString *name, KDEFINE_CLASS *cdef, KTraceInfo *trace)
 {
 	KonohaClass *ct = KLIB KonohaClass_define(kctx, ns->packageId, name, cdef, trace);
-	if(!KLIB kNameSpace_setConstData(kctx, ns, ct->classNameSymbol, VirtualType_KonohaClass, (uintptr_t)ct, trace)) {
+	if(!KLIB kNameSpace_SetConstData(kctx, ns, ct->classNameSymbol, VirtualType_KonohaClass, (uintptr_t)ct, trace)) {
 		return NULL;
 	}
 	return ct;
@@ -1016,7 +1016,7 @@ static kbool_t kNameSpace_importAll(KonohaContext *kctx, kNameSpace *ns, kNameSp
 			}
 		}
 		// record imported
-		return kNameSpace_setConstData(kctx, ns, targetNS->packageId | KW_PATTERN, TY_int, targetNS->packageId, trace);
+		return kNameSpace_SetConstData(kctx, ns, targetNS->packageId | KW_PATTERN, TY_int, targetNS->packageId, trace);
 	}
 	return false;
 }

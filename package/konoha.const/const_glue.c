@@ -61,7 +61,7 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		if(result) {
 			KMakeTraceUL(trace, sfp, stmt->uline);
-			result = KLIB kNameSpace_setConstData(kctx, ns, unboxKey, type, unboxValue, trace);
+			result = KLIB kNameSpace_SetConstData(kctx, ns, unboxKey, type, unboxValue, trace);
 		}
 		else {
 			kStmt_printMessage(kctx, stmt, ErrTag, "constant value is expected: %s%s", PSYM_t(unboxKey));

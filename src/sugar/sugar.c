@@ -126,7 +126,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	l->kNameSpace_getClass       = kNameSpace_getClass;
 	l->kNameSpace_defineClass    = kNameSpace_defineClass;
 	l->kNameSpace_LoadMethodData = kNameSpace_LoadMethodData;
-	l->kNameSpace_setConstData   = kNameSpace_setConstData;
+	l->kNameSpace_SetConstData   = kNameSpace_SetConstData;
 	l->kNameSpace_loadConstData  = kNameSpace_loadConstData;
 	l->kNameSpace_getGetterMethodNULL  = kNameSpace_getGetterMethodNULL;
 	l->kNameSpace_getSetterMethodNULL  = kNameSpace_getSetterMethodNULL;
@@ -186,10 +186,10 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	};
 	kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(ClassData), 0);
 
-	mod->kNameSpace_setTokenFunc       = kNameSpace_setTokenFunc;
+	mod->kNameSpace_SetTokenFunc       = kNameSpace_SetTokenFunc;
 	mod->TokenSequence_tokenize        = TokenSequence_tokenize;
 	mod->TokenSequence_applyMacro      = TokenSequence_applyMacro;
-	mod->kNameSpace_setMacroData       = kNameSpace_setMacroData;
+	mod->kNameSpace_SetMacroData       = kNameSpace_SetMacroData;
 	mod->TokenSequence_resolved        = TokenSequence_resolved2;
 	mod->TokenSequence_eval            = TokenSequence_eval;
 	mod->TokenUtils_parseTypePattern     = TokenUtils_parseTypePattern;
@@ -215,7 +215,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kNameSpace_defineSyntax    = kNameSpace_defineSyntax;
 	mod->kNameSpace_getSyntax       = kNameSpace_getSyntax;
 	mod->kArray_addSyntaxRule       = kArray_addSyntaxPattern;
-//	mod->kNameSpace_setSugarFunc    = kNameSpace_setSugarFunc;
+//	mod->kNameSpace_SetSugarFunc    = kNameSpace_SetSugarFunc;
 	mod->kNameSpace_addSugarFunc    = kNameSpace_addSugarFunc;
 	mod->new_kBlock                 = new_kBlock;
 	mod->new_kStmt                  = new_kStmt;
@@ -264,14 +264,14 @@ static KMETHOD NameSpace_importPackageSymbol(KonohaContext *kctx, KonohaStack *s
 	kNameSpace_importPackageSymbol(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), keyword, trace);
 }
 
-static void kNameSpace_setStaticFunction(KonohaContext *kctx, kNameSpace *ns, kArray *list, kpackageId_t packageId, ktype_t cid, KTraceInfo *trace)
+static void kNameSpace_SetStaticFunction(KonohaContext *kctx, kNameSpace *ns, kArray *list, kpackageId_t packageId, ktype_t cid, KTraceInfo *trace)
 {
 	size_t i;
 	for(i = 0; i < kArray_size(list); i++) {
 		kMethod *mtd = list->MethodItems[i];
 		if(kMethod_is(Static, mtd) && mtd->typeId == cid && (packageId == mtd->packageId || packageId == -1)) {
 			uintptr_t mtdinfo = ((uintptr_t)cid | (((uintptr_t)mtd->mn) << (sizeof(ktype_t) * 8)));
-			KLIB kNameSpace_setConstData(kctx, ns, mtd->mn, VirtualType_StaticMethod, mtdinfo, trace);
+			KLIB kNameSpace_SetConstData(kctx, ns, mtd->mn, VirtualType_StaticMethod, mtdinfo, trace);
 		}
 	}
 }
@@ -281,7 +281,7 @@ static KMETHOD NameSpace_useStaticFunction(KonohaContext *kctx, KonohaStack *sfp
 {
 	KMakeTrace(trace, sfp);
 	KonohaClass *ct = O_ct(sfp[1].asObject);
-	kNameSpace_setStaticFunction(kctx, sfp[0].asNameSpace, ct->methodList_OnGlobalConstList, -1, ct->typeId, trace);
+	kNameSpace_SetStaticFunction(kctx, sfp[0].asNameSpace, ct->methodList_OnGlobalConstList, -1, ct->typeId, trace);
 	KReturnVoid();
 }
 
@@ -293,7 +293,7 @@ static KMETHOD NameSpace_useStaticFunction2(KonohaContext *kctx, KonohaStack *sf
 	KonohaPackage *pack = getPackageNULL(kctx, packageId, trace);
 	if(pack != NULL) {
 		KonohaClass *ct = O_ct(sfp[2].asObject);
-		kNameSpace_setStaticFunction(kctx, sfp[0].asNameSpace, ct->methodList_OnGlobalConstList, packageId, ct->typeId, trace);
+		kNameSpace_SetStaticFunction(kctx, sfp[0].asNameSpace, ct->methodList_OnGlobalConstList, packageId, ct->typeId, trace);
 	}
 	KReturnVoid();
 }

@@ -544,10 +544,10 @@ typedef struct {
 	SugarSyntax*    (*kNameSpace_getSyntax)(KonohaContext *, kNameSpace *, ksymbol_t, int);
 	void            (*kNameSpace_defineSyntax)(KonohaContext *, kNameSpace *, KDEFINE_SYNTAX *);
 	kbool_t         (*kArray_addSyntaxRule)(KonohaContext *, kArray *ruleList, TokenSequence *sourceRange);
-	SugarSyntaxVar* (*kNameSpace_setTokenFunc)(KonohaContext *, kNameSpace *, ksymbol_t, int ch, kFunc *);
-//	SugarSyntaxVar* (*kNameSpace_setSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
+	SugarSyntaxVar* (*kNameSpace_SetTokenFunc)(KonohaContext *, kNameSpace *, ksymbol_t, int ch, kFunc *);
+//	SugarSyntaxVar* (*kNameSpace_SetSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
 	SugarSyntaxVar* (*kNameSpace_addSugarFunc)(KonohaContext *, kNameSpace *, ksymbol_t kw, size_t idx, kFunc *);
-	void            (*kNameSpace_setMacroData)(KonohaContext *, kNameSpace *, ksymbol_t, int, const char *);
+	void            (*kNameSpace_SetMacroData)(KonohaContext *, kNameSpace *, ksymbol_t, int, const char *);
 
 	void        (*TokenSequence_tokenize)(KonohaContext *, TokenSequence *, const char *, kfileline_t);
 	kbool_t     (*TokenSequence_applyMacro)(KonohaContext *, TokenSequence *, kArray *, int, int, size_t, MacroSet *);

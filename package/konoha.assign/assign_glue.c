@@ -71,15 +71,15 @@ static kbool_t assign_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
-	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("+="), 2,  "X Y X = (X) + (Y)");
-	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("-="), 2,  "X Y X = (X) - (Y)");
-	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("*="), 2,  "X Y X = (X) * (Y)");
-	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("/="), 2,  "X Y X = (X) / (Y)");
-	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("%="), 2,  "X Y X = (X) % (Y)");
-	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("|="), 2,  "X Y X = (X) | (Y)");
-	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("&="), 2,  "X Y X = (X) & (Y)");
-	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_("<<="), 2, "X Y X = (X) << (Y)");
-	SUGAR kNameSpace_setMacroData(kctx, ns, SYM_(">>="), 2, "X Y X = (X) >> (Y)");
+	SUGAR kNameSpace_SetMacroData(kctx, ns, SYM_("+="), 2,  "X Y X = (X) + (Y)");
+	SUGAR kNameSpace_SetMacroData(kctx, ns, SYM_("-="), 2,  "X Y X = (X) - (Y)");
+	SUGAR kNameSpace_SetMacroData(kctx, ns, SYM_("*="), 2,  "X Y X = (X) * (Y)");
+	SUGAR kNameSpace_SetMacroData(kctx, ns, SYM_("/="), 2,  "X Y X = (X) / (Y)");
+	SUGAR kNameSpace_SetMacroData(kctx, ns, SYM_("%="), 2,  "X Y X = (X) % (Y)");
+	SUGAR kNameSpace_SetMacroData(kctx, ns, SYM_("|="), 2,  "X Y X = (X) | (Y)");
+	SUGAR kNameSpace_SetMacroData(kctx, ns, SYM_("&="), 2,  "X Y X = (X) & (Y)");
+	SUGAR kNameSpace_SetMacroData(kctx, ns, SYM_("<<="), 2, "X Y X = (X) << (Y)");
+	SUGAR kNameSpace_SetMacroData(kctx, ns, SYM_(">>="), 2, "X Y X = (X) >> (Y)");
 	return true;
 }
 

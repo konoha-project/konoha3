@@ -64,7 +64,7 @@ static KMETHOD PatternMatch_Expression(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
 	INIT_GCSTACK();
 	int returnIdx = -1;
-	endIdx = TokenUtils_findEndOfStatement(kctx, tokenList, beginIdx, endIdx, kNameSpace_isAllowed(NoSemiColon, Stmt_nameSpace(stmt)));
+	endIdx = TokenUtils_findEndOfStatement(kctx, tokenList, beginIdx, endIdx, kNameSpace_IsAllowed(NoSemiColon, Stmt_nameSpace(stmt)));
 	kExpr *expr = kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, endIdx, NULL);
 	if(expr != K_NULLEXPR) {
 		KdumpExpr(kctx, expr);
@@ -595,7 +595,7 @@ static kExpr* kStmt_tyCheckVariableNULL(KonohaContext *kctx, kStmt *stmt, kExpr 
 			return SUGAR kExpr_setVariable(kctx, expr, gma, TEXPR_LOCAL, genv->localScope.varItems[i].ty, i);
 		}
 	}
-	if(kNameSpace_isAllowed(ImplicitField, ns)) {
+	if(kNameSpace_IsAllowed(ImplicitField, ns)) {
 		if(genv->localScope.varItems[0].ty != TY_void) {
 			DBG_ASSERT(genv->this_cid == genv->localScope.varItems[0].ty);
 			KonohaClass *ct = CT_(genv->this_cid);
@@ -612,7 +612,7 @@ static kExpr* kStmt_tyCheckVariableNULL(KonohaContext *kctx, kStmt *stmt, kExpr 
 			}
 		}
 	}
-	if((Gamma_isTopLevel(gma) || kNameSpace_isAllowed(TransparentGlobalVariable, ns)) && ns->globalObjectNULL_OnList != NULL) {
+	if((Gamma_isTopLevel(gma) || kNameSpace_IsAllowed(TransparentGlobalVariable, ns)) && ns->globalObjectNULL_OnList != NULL) {
 		ktype_t cid = O_typeId(ns->globalObjectNULL_OnList);
 		kMethod *mtd = kNameSpace_getGetterMethodNULL(kctx, ns, cid, symbol, TY_var);
 		if(mtd != NULL) {
@@ -864,7 +864,7 @@ static kMethod* kExpr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kE
 			return mtd;
 		}
 	}
-	if((Gamma_isTopLevel(gma) || kNameSpace_isAllowed(TransparentGlobalVariable,ns)) && ns->globalObjectNULL_OnList != NULL) {
+	if((Gamma_isTopLevel(gma) || kNameSpace_IsAllowed(TransparentGlobalVariable,ns)) && ns->globalObjectNULL_OnList != NULL) {
 		ktype_t cid = O_typeId(ns->globalObjectNULL_OnList);
 		kMethod *mtd = kNameSpace_getGetterMethodNULL(kctx, ns, cid, fsymbol, TY_var);
 		if(mtd != NULL && TY_isFunc(Method_returnType(mtd))) {
