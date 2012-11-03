@@ -36,7 +36,7 @@ static int isPrintMessage(KonohaContext *kctx, SugarContext *sugarContext, kinfo
 	if(sugarContext->isBlockedErrorMessage) return false;
 	if(verbose_sugar) return true;
 	if(taglevel == InfoTag) {
-		if(KonohaContext_isInteractive(kctx) || KonohaContext_isCompileOnly(kctx)) {
+		if(KonohaContext_Is(Interactive, kctx) || KonohaContext_Is(CompileOnly, kctx) || KonohaContext_Is(Debug, kctx)) {
 			return true;
 		}
 		return false;

@@ -1293,7 +1293,7 @@ err:;
 static void ByteCode_free(KonohaContext *kctx, kObject *o)
 {
 	kByteCode *b = (kByteCode *)o;
-	if(KonohaContext_isTrace(kctx)) {
+	if(KonohaContext_Is(Trace, kctx)) {
 #ifdef USE_TRACEVM/*added by kimio */
 		VirtualCode *pc = b->code;
 		detect_PassLine_from_ByteCode(kctx, pc);

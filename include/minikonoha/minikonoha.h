@@ -792,14 +792,11 @@ enum kVisitorType{ kVisitor_KonohaVM, kVisitor_Dump, kVisitor_JS };
 #define kContext_Debug          ((kshortflag_t)(1<<0))
 #define kContext_Interactive    ((kshortflag_t)(1<<1))
 #define kContext_CompileOnly    ((kshortflag_t)(1<<2))
-#define kContext_Trace          ((kshortflag_t)(1<<3))
+#define kContext_Test           ((kshortflag_t)(1<<3))
+#define kContext_Trace          ((kshortflag_t)(1<<4))
 
-#define KonohaContext_isInteractive(X)   (TFLAG_is(kshortflag_t,(X)->stack->flag, kContext_Interactive))
-#define KonohaContext_isCompileOnly(X)   (TFLAG_is(kshortflag_t,(X)->stack->flag, kContext_CompileOnly))
-#define KonohaContext_isTrace(X)         (TFLAG_is(kshortflag_t,(X)->stack->flag, kContext_Trace))
-#define KonohaContext_setInteractive(X)   TFLAG_set1(kshortflag_t, (X)->stack->flag, kContext_Interactive)
-#define KonohaContext_setCompileOnly(X)   TFLAG_set1(kshortflag_t, (X)->stack->flag, kContext_CompileOnly)
-#define KonohaContext_setTrace(X)         TFLAG_set1(kshortflag_t, (X)->stack->flag, kContext_Trace)
+#define KonohaContext_Is(P, X)   (TFLAG_is(kshortflag_t,(X)->stack->flag, kContext_##P))
+#define KonohaContext_Set(P, X)   TFLAG_set1(kshortflag_t, (X)->stack->flag, kContext_##P)
 
 #define KonohaContext_setVisitor(X, V) ((X)->stack->visitor = (V))
 
@@ -1304,9 +1301,10 @@ static const char* MethodFlagData[] = {
 #define kMethod_Abstract             ((uintptr_t)(1<<17))
 #define kMethod_Overloaded           ((uintptr_t)(1<<18))
 #define kMethod_Override             ((uintptr_t)(1<<19))
-#define kMethod_DynamicCall          ((uintptr_t)(1<<20))
+#define kMethod_IgnoredOverride      ((uintptr_t)(1<<20))
+#define kMethod_DynamicCall          ((uintptr_t)(1<<21))
 
-#define kMethod_Warning              ((uintptr_t)(1<<21))
+#define kMethod_Warning              ((uintptr_t)(1<<22))
 
 #define kMethod_WeakCoercion         kMethod_Coercion|kMethod_Warning
 

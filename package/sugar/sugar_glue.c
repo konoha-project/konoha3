@@ -962,7 +962,7 @@ static kbool_t RENAMEME_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS
 		{ SYM_("syntax"), 0, "\"syntax\" $Token*", 0, 0, NULL, NULL, Statement_syntax, NULL, NULL, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, trace);
 	return true;
 }
 

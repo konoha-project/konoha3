@@ -439,25 +439,26 @@ static void konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
 
 		case 'c': {
 			compileonly_flag = 1;
-			KonohaContext_setCompileOnly(konoha);
+			KonohaContext_Set(CompileOnly, konoha);
 		}
 		break;
 
 		case 'i': {
 			interactive_flag = 1;
-			KonohaContext_setInteractive(konoha);
+			KonohaContext_Set(Interactive, konoha);
 		}
 		break;
 
 		case 'B':
-			return CommandLine_doBuiltInTest(konoha, optarg);
+			CommandLine_doBuiltInTest(konoha, optarg);
+			return;
 
 		case 'D':
 			CommandLine_define(konoha, optarg);
 			break;
 
 		case 'F':
-			KonohaContext_setTrace(konoha);
+			KonohaContext_Set(Trace, konoha);
 			break;
 
 		case 'I':
@@ -466,6 +467,9 @@ static void konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
 
 		case 'M':
 			// already checked in KonohaFactory_SetDefaultModule
+			if(optarg != NULL && strcmp(optarg, "OutputTest") == 0) {
+				KonohaContext_Set(Debug, konoha);
+			}
 			break;
 
 		case 'S':
@@ -482,7 +486,8 @@ static void konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
 			plat->printf_i  = TEST_printf;
 			plat->vprintf_i = TEST_vprintf;
 			plat->ReportCaughtException = TEST_reportCaughtException;
-			return KonohaContext_test(konoha, optarg);
+			KonohaContext_test(konoha, optarg);
+			return;
 
 		case '?':
 			/* getopt_long already printed an error message. */
@@ -511,44 +516,16 @@ static void konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
 	}
 	else {
 		interactive_flag = 1;
-		KonohaContext_setInteractive(konoha);
+		KonohaContext_Set(Interactive, konoha);
 	}
 	if(interactive_flag) {
 		CommandLine_import(konoha, "konoha.i");
 		ret = konoha_shell(konoha);
 	}
-//	if(ret != true) {
-//		((KonohaFactory*)konoha->platApi)->exitStatus = 1;
-//	}
 }
-
-//static void testDataLog(KonohaContext *kctx)
-//{
-//	unsigned long long timer;
-//	KSetElaspedTimer(timer);
-//	KTraceApi(SystemFault|SystemChangePoint, "test", LogText("start", "test"), LogUint("count", 1), LOG_ERRNO);
-//	KTraceApiElapsedTimer(SystemFault, 0/*ms*/, "syslog", timer);
-//}
 
 // -------------------------------------------------------------------------
 // ** main **
-
-//int main(int argc, char *argv[])
-//{
-//	kbool_t ret = 1;
-//	if(getenv("KONOHA_DEBUG") != NULL) {
-//		verbose_debug = 1;
-//		verbose_gc = 1;
-//		verbose_sugar = 1;
-//		verbose_code = 1;
-//	}
-//	PlatformApi *plat = KonohaUtils_getDefaultPlatformApi();
-//	KonohaContext* konoha = konoha_open(plat);
-//	ret = konoha_parseopt(konoha, (KonohaFactory*)plat, argc, argv);
-//	konoha_close(konoha);
-//	return ret ? konoha_detectFailedAssert: 0;
-//}
-
 
 void KonohaFactory_LoadRuntimeModule(KonohaFactory *factory, const char *name, ModuleType option);
 void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), int argc, char **argv);
@@ -557,6 +534,12 @@ int Konoha_Destroy(KonohaContext *kctx);
 
 int main(int argc, char *argv[])
 {
+	if(getenv("KONOHA_DEBUG") != NULL) {
+		verbose_debug = 1;
+		verbose_gc = 1;
+		verbose_sugar = 1;
+		verbose_code = 1;
+	}
 	struct KonohaFactory factory = {};
 	KonohaFactory_SetDefaultFactory(&factory, PosixFactory, argc, argv);
 	KonohaContext* konoha = KonohaFactory_CreateKonoha(&factory);

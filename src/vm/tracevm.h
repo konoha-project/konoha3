@@ -331,7 +331,7 @@ static kbool_t kopcode_hasjump(kopcode_t opcode)
 #endif/*USE_DIRECT_THREADED_CODE*/
 
 #define EMITCOVERAGE_ELEMENT do {\
-	if(KonohaContext_isTrace(kctx)) {\
+	if(KonohaContext_Is(Trace, kctx)) {\
 		op->count++;\
 		emitCoverage_element(kctx, pc);\
 	}\

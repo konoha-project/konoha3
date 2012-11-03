@@ -151,7 +151,7 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 				return new_TypedCallExpr(kctx, stmt, gma, reqty, mtd, 1, texpr);
 			}
 			if(kNameSpace_IsAllowed(ImplicitCoercion, ns)) {
-				kStmtExpr_printMessage(kctx, stmt, expr, ErrTag, "implicit type coercion: %s to %s", TY_t(texpr->ty), TY_t(reqty));
+				kStmtExpr_printMessage(kctx, stmt, expr, InfoTag, "implicit type coercion: %s to %s", TY_t(texpr->ty), TY_t(reqty));
 				return new_TypedCallExpr(kctx, stmt, gma, reqty, mtd, 1, texpr);
 			}
 		}

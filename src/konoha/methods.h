@@ -31,22 +31,6 @@ extern "C" {
 #endif
 
 /* String */
-//## String Object.toString();
-static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
-{
-	KGrowingBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	if(TY_isUnbox(O_typeId(sfp[0].asObject))) {
-		//sfp[0].unboxValue = (sfp[0].asNumber)->unboxValue;
-		O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb);
-	}
-	else {
-		kObject_writeToBuffer(kctx, sfp[0].asObject, false/*delim*/, &wb, sfp, 0);
-	}
-	kString* returnValue = KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
-	KLIB Kwb_free(&wb);
-	KReturn(returnValue);
-}
 
 //## @Const method Boolean Boolean.opNOT();
 static KMETHOD Boolean_opNOT(KonohaContext *kctx, KonohaStack *sfp)
@@ -264,7 +248,6 @@ static void LoadDefaultMethod(KonohaContext *kctx, kNameSpace *ns)
 {
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Immutable|_Const, _F(Object_toString), TY_String, TY_Object, MN_to(TY_String), 0,
 		_Public|_Immutable|_Const, _F(Boolean_opNOT), TY_boolean, TY_boolean, MN_("!"), 0,
 		_Public|_Immutable|_Const, _F(Boolean_opEQ), TY_boolean, TY_boolean, MN_("=="), 1, TY_boolean, FN_x,
 		_Public|_Immutable|_Const, _F(Int_opNEQ), TY_boolean, TY_boolean, MN_("!="), 1, TY_boolean, FN_x,

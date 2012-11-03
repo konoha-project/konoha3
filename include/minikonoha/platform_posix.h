@@ -958,7 +958,7 @@ err:
 static kbool_t DEOS_checkSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
 {
 	DBG_P("filename='%s', line=%d", filename, line);
-	if(!KonohaContext_isTrace(kctx)) {
+	if(!KonohaContext_Is(Trace, kctx)) {
 #define N 64
 		kbool_t res;
 		char key[N] = {'\0'};
@@ -1001,7 +1001,7 @@ static void traceDataLog(KonohaContext *kctx, KTraceInfo *trace, int logkey, log
 	writeDataLogToBuffer(kctx, logconf, ap, buf, buf + (K_PAGESIZE - 4), trace);
 	int level = (logconf->policy & HasFault) ? LOG_ERR : LOG_NOTICE;
 	PLATAPI syslog_i(level, "%s", buf);
-	if(verbose_debug || KonohaContext_isInteractive(kctx)) {
+	if(verbose_debug || KonohaContext_Is(Interactive, kctx)) {
 		fprintf(stderr, "SYSLOG %s\n", buf);
 	}
 	va_end(ap);
@@ -1017,7 +1017,7 @@ static void diagnosis(void)
 static const char* BeginTag(KonohaContext *kctx, kinfotag_t t)
 {
 	DBG_ASSERT(t <= NoneTag);
-	if(!KonohaContext_isInteractive(kctx)) t = NoneTag;
+	if(!KonohaContext_Is(Interactive, kctx)) t = NoneTag;
 	static const char* tags[] = {
 		"\x1b[1m\x1b[31m", /*CritTag*/
 		"\x1b[1m\x1b[31m", /*ErrTag*/
@@ -1033,7 +1033,7 @@ static const char* BeginTag(KonohaContext *kctx, kinfotag_t t)
 static const char* EndTag(KonohaContext *kctx, kinfotag_t t)
 {
 	DBG_ASSERT(t <= NoneTag);
-	if(!KonohaContext_isInteractive(kctx)) t = NoneTag;
+	if(!KonohaContext_Is(Interactive, kctx)) t = NoneTag;
 	static const char* tags[] = {
 			"\x1b[0m", /*CritTag*/
 			"\x1b[0m", /*ErrTag*/
