@@ -206,5 +206,40 @@ run_test 60 62 cstyle "-MOutputTest -Icstyle" 0004_FuncDeclReturn/FuncDeclReturn
 run_test 61 62 cstyle "-MOutputTest -Icstyle" 0004_FuncDeclReturn/FuncDeclReturn_UnboxOverload30.k
 run_test 62 62 cstyle "-MOutputTest -Icstyle" 0004_FuncDeclReturn/FuncDeclReturn_Void.k
 record_result 0004_FuncDeclReturn $PASS 62
+## 0005_TypeDecl
+PASS=0
+run_test 1 26 minimum "-MOutputTest" 0005_TypeDecl/TypeDecl_Int.k
+run_test 2 26 minimum "-MOutputTest" 0005_TypeDecl/TypeDecl_Int0.k
+run_test 3 26 minimum "-MOutputTest" 0005_TypeDecl/TypeDecl_Int0Int0Int.k
+run_test 4 26 minimum "-MOutputTest" 0005_TypeDecl/TypeDecl_Int0Int0Int0.k
+run_test 5 26 minimum "-MOutputTest" 0005_TypeDecl/TypeDecl_Int0IntInt.k
+run_test 6 26 minimum "-MOutputTest" 0005_TypeDecl/TypeDecl_Int0IntInt0.k
+run_test 7 26 minimum "-MOutputTest" 0005_TypeDecl/TypeDecl_IntInt0Int.k
+run_test 8 26 minimum "-MOutputTest" 0005_TypeDecl/TypeDecl_IntIntInt.k
+run_test 9 26 minimum "-MOutputTest" 0005_TypeDecl/TypeDecl_IntIntInt0.k
+run_test 10 26 minimum "-MOutputTest" 0005_TypeDecl/TypeDecl_String.k
+run_test 11 26 minimum "-MOutputTest" 0005_TypeDecl/TypeDecl_UnderScore.k
+run_test 12 26 minimum "-MOutputTest" 0005_TypeDecl/TypeDecl_UnknownType.k
+run_test 13 26 minimum "-MOutputTest" 0005_TypeDecl/TypeDecl_UpperCaseVariable.k
+run_test 14 26 cstyle "-MOutputTest -Icstyle" 0005_TypeDecl/TypeDecl_Int.k
+run_test 15 26 cstyle "-MOutputTest -Icstyle" 0005_TypeDecl/TypeDecl_Int0.k
+run_test 16 26 cstyle "-MOutputTest -Icstyle" 0005_TypeDecl/TypeDecl_Int0Int0Int.k
+run_test 17 26 cstyle "-MOutputTest -Icstyle" 0005_TypeDecl/TypeDecl_Int0Int0Int0.k
+run_test 18 26 cstyle "-MOutputTest -Icstyle" 0005_TypeDecl/TypeDecl_Int0IntInt.k
+run_test 19 26 cstyle "-MOutputTest -Icstyle" 0005_TypeDecl/TypeDecl_Int0IntInt0.k
+run_test 20 26 cstyle "-MOutputTest -Icstyle" 0005_TypeDecl/TypeDecl_IntInt0Int.k
+run_test 21 26 cstyle "-MOutputTest -Icstyle" 0005_TypeDecl/TypeDecl_IntIntInt.k
+run_test 22 26 cstyle "-MOutputTest -Icstyle" 0005_TypeDecl/TypeDecl_IntIntInt0.k
+run_test 23 26 cstyle "-MOutputTest -Icstyle" 0005_TypeDecl/TypeDecl_String.k
+run_test 24 26 cstyle "-MOutputTest -Icstyle" 0005_TypeDecl/TypeDecl_UnderScore.k
+run_test 25 26 cstyle "-MOutputTest -Icstyle" 0005_TypeDecl/TypeDecl_UnknownType.k
+run_test 26 26 cstyle "-MOutputTest -Icstyle" 0005_TypeDecl/TypeDecl_UpperCaseVariable.k
+record_result 0005_TypeDecl $PASS 26
+## 0006_Assignment
+PASS=0
+record_result 0006_Assignment $PASS 0
+## 0007_IfStatement
+PASS=0
+record_result 0007_IfStatement $PASS 0
 total
 

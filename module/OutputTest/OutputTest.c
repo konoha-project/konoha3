@@ -40,7 +40,7 @@ static FILE *stdlog2 = NULL;
 static const char *GetProfile()
 {
 	char *p = getenv("KONOHA_TESTPROFILE");
-	return (p == NULL)? "unknown" : (const char*)p;
+	return (p == NULL)? "minimum" /* for compatibility */: (const char*)p;
 }
 
 static FILE *GetLogFile(void)
@@ -110,7 +110,6 @@ static void AFTER_LoadScript(KonohaContext *kctx, const char *filename)
 		fclose(fp);
 		fclose(fp2);
 	}
-	fprintf(stdout, "stdlog_count=%d, exitStatus=%d\n", stdlog_count, kctx->platApi->exitStatus);
 }
 
 static void NOP_ReportDebugMessage(const char *file, const char *func, int line, const char *fmt, ...)
@@ -140,7 +139,7 @@ static void TEST_ReportUserMessage(KonohaContext *kctx, kinfotag_t level, kfilel
 
 static void TEST_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t pline, const char *msg)
 {
-	PLATAPI printf_i("LINE%d: %s", (int)(kushort_t)pline, TAG_t(taglevel));
+	PLATAPI printf_i("LINE%d: %s\n", (int)(kushort_t)pline, TAG_t(taglevel));
 }
 
 static void TEST_reportCaughtException(KonohaContext *kctx, const char *exceptionName, int fault, const char *optionalMessage, KonohaStack *bottom, KonohaStack *sfp)

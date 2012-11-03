@@ -20,6 +20,8 @@ GPATH
 GRTAGS
 GTAGS
 *.k.tested
+*_tested
+
 .cproject
 .project
 
