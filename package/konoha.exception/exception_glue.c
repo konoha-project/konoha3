@@ -338,7 +338,7 @@
 //		{ .keyword = SYM_("finally"), Statement_(finally), .rule = "\"finally\" $Block ",},
 //		{ .keyword = KW_END, },
 //	};
-//	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
+//	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, trace);
 //	return true;
 //}
 //

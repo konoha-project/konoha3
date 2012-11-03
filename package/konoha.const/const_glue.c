@@ -77,7 +77,7 @@ static kbool_t const_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		{ SYM_("const"), 0, "\"const\" $Symbol \"=\" $Expr", 0, 0, NULL, NULL, Statement_ConstDecl, NULL, NULL, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, trace);
 	return true;
 }
 

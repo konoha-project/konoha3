@@ -97,7 +97,7 @@ static kbool_t new_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		{ SYM_("new"), 0, NULL, 0, Precedence_CStyleCALL, NULL, Expression_new, NULL, NULL, NULL, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX);
+	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, trace);
 	return true;
 }
 
