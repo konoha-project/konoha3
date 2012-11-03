@@ -1,4 +1,4 @@
-import("konoha.assign");
+// import("konoha.assign"); Don't use any more
 import("cstyle", "while");
 import("konoha.class");
 import("konoha.global");

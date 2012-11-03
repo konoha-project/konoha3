@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
 import("konoha.class");
-import("konoha.assign");
+// import("konoha.assign"); Don't use any more
 
 @Interface class Point {
 	int x;

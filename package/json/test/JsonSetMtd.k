@@ -4,7 +4,7 @@ import("konoha.int");
 import("konoha.float");
 import("konoha.string");
 import("konoha.array");
-import("konoha.assign");
+// import("konoha.assign"); Don't use any more
 import("json");
 
 void main() {

@@ -10,7 +10,7 @@ How many routes are there through a 20^20 grid?
 import("cstyle");
 import("konoha.class");
 import("konoha.new");
-import("konoha.assign");
+// import("konoha.assign"); Don't use any more
 import("gmp")
 
 Mpz fact(int n){

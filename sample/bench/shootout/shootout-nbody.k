@@ -9,7 +9,7 @@ import("cstyle");
 import("konoha.const");
 import("konoha.float");
 import("konoha.class");
-import("konoha.assign");
+// import("konoha.assign"); Don't use any more
 import("konoha.array");
 import("konoha.math");
 

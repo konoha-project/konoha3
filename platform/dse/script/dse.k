@@ -2,7 +2,7 @@
 // reviewed by nakata
 
 import("konoha.global");
-import("konoha.assign");
+// import("konoha.assign"); Don't use any more
 import("konoha.class");
 import("konoha.string");
 import("konoha.bytes");

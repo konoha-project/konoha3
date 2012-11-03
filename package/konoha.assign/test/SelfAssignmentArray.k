@@ -1,6 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.assign");
+// import("konoha.assign"); Don't use any more
 import("konoha.array"); // if Ok
 
 void test() {

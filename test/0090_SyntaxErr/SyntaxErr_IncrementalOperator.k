@@ -1,5 +1,5 @@
 // reported by Atsushi Uchida
-import("konoha.assign");
+// import("konoha.assign"); Don't use any more
 
 void f() {
     int i = 0;

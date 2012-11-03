@@ -1,7 +1,7 @@
 // import("sugar");
 // import("konoha.while");
 // import("konoha.string");
-// import("konoha.assign");
+// // import("konoha.assign"); Don't use any more
 
 // int singleQuoteToken (Token tk, String source) {
 // 	String ch, prev = "'";

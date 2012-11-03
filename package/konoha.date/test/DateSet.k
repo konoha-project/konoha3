@@ -1,5 +1,5 @@
 // written by okamoto
-import("konoha.assign");
+// import("konoha.assign"); Don't use any more
 import("konoha.class");
 import("konoha.date");
 import("konoha.new");

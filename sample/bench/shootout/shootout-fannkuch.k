@@ -5,7 +5,7 @@
  */
 
 import("cstyle");
-import("konoha.assign");
+// import("konoha.assign"); Don't use any more
 import("konoha.const");
 import("konoha.array");
 import("konoha.new");

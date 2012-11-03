@@ -8,7 +8,7 @@ What is the largest prime factor of the number 600851475143 ?
 */
 
 
-import("konoha.assign");
+// import("konoha.assign"); Don't use any more
 import("cstyle");
 import("konoha.math");
 import("gmp");

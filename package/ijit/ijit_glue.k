@@ -2,7 +2,7 @@ import("sugar");
 import("konoha.float");
 import("llvm");
 import("konoha.array");
-import("konoha.assign");
+// import("konoha.assign"); Don't use any more
 import("konoha.null");
 import("konoha.string");
 import("konoha.class");

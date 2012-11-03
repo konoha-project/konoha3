@@ -1,5 +1,5 @@
 import("konoha.while");
-import("konoha.assign");
+// import("konoha.assign"); Don't use any more
 import("konoha.array");
 import("apache");
 

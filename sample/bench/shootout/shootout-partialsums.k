@@ -6,7 +6,7 @@
 
 import("cstyle");
 import("konoha.float");
-import("konoha.assign");
+// import("konoha.assign"); Don't use any more
 import("konoha.const");
 import("konoha.math");
 const N=2500000;

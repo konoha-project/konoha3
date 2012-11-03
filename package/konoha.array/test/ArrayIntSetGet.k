@@ -1,6 +1,6 @@
 /* written by shinpei */
 import("konoha.new");
-import("konoha.assign");
+// import("konoha.assign"); Don't use any more
 import("konoha.array");
 
 void f() {
