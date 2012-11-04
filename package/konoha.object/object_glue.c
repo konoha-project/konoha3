@@ -63,22 +63,7 @@ static KMETHOD Object_instanceOf(KonohaContext *kctx, KonohaStack *sfp)
 // @SmartReturn Object Object.as(Object target)
 static KMETHOD Object_as(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KonohaClass *selfClass = O_ct(sfp[0].asObject), *targetClass = O_ct(sfp[1].asObject);
-	kObject *returnValue;
-	if(selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass)) {
-		returnValue = sfp[0].asObject;
-	}
-	else {
-		returnValue = KLIB Knull(kctx, targetClass);
-	}
-	sfp[K_RTNIDX].unboxValue = O_unbox(returnValue);
-	KReturn(returnValue);
-}
-
-// @SmartReturn Object Object.to(Object target)
-static KMETHOD Object_to(KonohaContext *kctx, KonohaStack *sfp)
-{
-	KonohaClass *selfClass = O_ct(sfp[0].asObject), *targetClass = O_ct(sfp[1].asObject);
+	KonohaClass *selfClass = O_ct(sfp[0].asObject), *targetClass = KGetReturnType(sfp);
 	kObject *returnValue;
 	if(selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass)) {
 		returnValue = sfp[0].asObject;
@@ -113,7 +98,6 @@ static void object_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		_Public|_Im|_Const|_Final, _F(Object_getTypeId), TY_int, TY_Object, MN_("getTypeId"), 0,
 		_Public|_Hidden|_Im|_Const, _F(Object_instanceOf), TY_boolean, TY_Object, MN_("<:"), 1, TY_Object, FN_("type"),
 		_Public|_Hidden|_Im|_Const|kMethod_SmartReturn, _F(Object_as), TY_Object, TY_Object, MN_("as"), 0,
-		_Public|_Hidden|_Im|_Const|kMethod_SmartReturn, _F(Object_to), TY_Object, TY_Object, MN_("to"), 0,
 		_Public|_Const|_Ignored, _F(NameSpace_AllowImplicitCoercion), TY_void, TY_NameSpace, MN_("AllowImplicitCoercion"), 1, TY_boolean, FN_("allow"),
 		DEND,
 	};
@@ -154,10 +138,13 @@ static KMETHOD TypeCheck_as(KonohaContext *kctx, KonohaStack *sfp)
 		if(selfExpr->ty == targetExpr->ty || selfClass->isSubType(kctx, selfClass, targetClass)) {
 			KReturn(selfExpr);
 		}
-		kNameSpace *ns = Stmt_nameSpace(stmt);
-		kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_Object, MN_("as"), 0);
-		DBG_ASSERT(mtd != NULL);
-		KReturn(SUGAR kStmtExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, targetClass->typeId));
+		if(selfClass->isSubType(kctx, targetClass, selfClass)) {
+			kNameSpace *ns = Stmt_nameSpace(stmt);
+			kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_Object, MN_("as"), 0);
+			DBG_ASSERT(mtd != NULL);
+			KReturn(SUGAR kStmtExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, targetClass->typeId));
+		}
+		KReturn(kStmtExpr_printMessage(kctx, stmt, selfExpr, ErrTag, "unable to downcast: %s as %s", TY_t(selfExpr->ty), TY_t(targetExpr->ty)));
 	}
 }
 
@@ -171,19 +158,16 @@ static KMETHOD TypeCheck_to(KonohaContext *kctx, KonohaStack *sfp)
 		if(selfExpr->ty == targetExpr->ty || selfClass->isSubType(kctx, selfClass, targetClass)) {
 			KReturn(selfExpr);
 		}
-		kMethod *mtd = KLIB kNameSpace_GetConverterMethodNULL(kctx, ns, selfExpr->ty, targetExpr->ty);
-		if(mtd != NULL) {
-			KReturn(SUGAR kStmtExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, targetClass->typeId));
-		}
-		if()
-		if() {
-			KReturn(selfExpr);
-		}
-
-
 		kNameSpace *ns = Stmt_nameSpace(stmt);
-		kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_Object, MN_("as"), 0);
-		DBG_ASSERT(mtd != NULL);
+		kMethod *mtd = KLIB kNameSpace_GetCoercionMethodNULL(kctx, ns, selfExpr->ty, targetExpr->ty);
+		if(mtd == NULL) {
+			mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, selfExpr->ty, MN_("to"), 0);
+			DBG_ASSERT(mtd != NULL);
+			if(mtd->typeId != selfExpr->ty) {
+				KReturn(kStmtExpr_printMessage(kctx, stmt, selfExpr, ErrTag, "undefined coercion: %s to %s", TY_t(selfExpr->ty), TY_t(targetExpr->ty)));
+			}
+		}
+		KReturn(SUGAR kStmtExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, targetClass->typeId));
 	}
 }
 
@@ -192,7 +176,8 @@ static kbool_t subtype_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceI
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("<:"), 0, NULL, Precedence_CStyleMUL, 0, NULL, NULL, NULL, NULL, TypeCheck_InstanceOf, },
-		{ SYM_("as"), 0, NULL, Precedence_CStyleMUL, 0, NULL, NULL, NULL, NULL, TypeCheck_ts},
+		{ SYM_("as"), 0, NULL, Precedence_CStyleMUL, 0, NULL, NULL, NULL, NULL, TypeCheck_as},
+		{ SYM_("to"), 0, NULL, Precedence_CStyleMUL, 0, NULL, NULL, NULL, NULL, TypeCheck_to},
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, trace);

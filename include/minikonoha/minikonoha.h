@@ -262,7 +262,6 @@ typedef struct {
 #define MN_ASCID      (KFLAG_H0|KFLAG_H2)
 #define MN_GETTER     KFLAG_H1
 #define MN_SETTER     KFLAG_H2
-#define MN_MASK
 
 #define MN_UNMASK(mn)        (mn & (~(KFLAG_H1|KFLAG_H2)))
 #define MN_isGETTER(mn)      (SYM_HEAD(mn) == MN_GETTER)
@@ -274,7 +273,7 @@ typedef struct {
 #define MN_isTOCID(mn)       ((SYM_UNMASK(mn)) == MN_TOCID)
 #define MN_as(cid)           ((cid) | MN_ASCID)
 #define MN_isASCID(mn)       ((SYM_UNMASK(mn)) == MN_ASCID)
-#define MethodName_t(mn)     PRESYM_(mn), ((mn & MN_TYPEID) == MN_TYPEID ? TY_t(SYM_UNMASK(mn)) : SYM_t(SYM_UNMASK(mn)))
+#define MethodName_t(mn)     PSYM_t(mn), ((mn & MN_TYPEID) == MN_TYPEID ? TY_t(SYM_UNMASK(mn)) : SYM_t(SYM_UNMASK(mn)))
 
 //#define MN_to(cid)           ((CT_(cid)->classNameSymbol) | MN_TOCID)
 //#define MN_isTOCID(mn)       ((SYM_UNMASK(mn)) == MN_TOCID)
@@ -1495,7 +1494,6 @@ struct _kSystem {
 		KonohaStack *tsfp = TSFP;\
 		tsfp[K_MTDIDX].methodCallInfo = MTD;\
 		(MTD)->invokeMethodFunc(kctx, tsfp);\
-		tsfp[K_MTDIDX].methodCallInfo = NULL;\
 	} \
 
 /* ----------------------------------------------------------------------- */
@@ -1645,7 +1643,7 @@ struct KonohaLibVar {
 
 	kMethod*         (*kNameSpace_getGetterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ksymbol_t mn, ktype_t);
 	kMethod*         (*kNameSpace_getSetterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ksymbol_t mn, ktype_t);
-	kMethod*         (*kNameSpace_GetConverterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ktype_t tcid);
+	kMethod*         (*kNameSpace_GetCoercionMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ktype_t tcid);
 	kMethod*         (*kNameSpace_getMethodByParamSizeNULL)(KonohaContext*, kNameSpace *, ktype_t cid, kmethodn_t mn, int paramsize);
 	kMethod*         (*kNameSpace_getMethodBySignatureNULL)(KonohaContext*, kNameSpace *, ktype_t cid, kmethodn_t mn, int paramdom, int paramsize, kparamtype_t *);
 	void             (*kNameSpace_compileAllDefinedMethods)(KonohaContext *kctx);
@@ -1820,6 +1818,7 @@ typedef struct {
 
 #define KGetReturnObject(sfp)  (sfp[K_RTNIDX].asObject)
 #define KGetReturnType(sfp)    O_ct(sfp[K_RTNIDX].asObject)
+#define KGetLexicalNameSpace(sfp)    sfp[K_NSIDX].asNameSpace
 
 #define KReturnWith(VAL, CLEANUP) do {\
 	KUnsafeFieldSet(sfp[K_RTNIDX].asObject, ((kObject *)VAL));\
