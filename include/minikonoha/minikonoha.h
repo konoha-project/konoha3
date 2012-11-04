@@ -41,13 +41,7 @@ extern "C" {
 #define K_MINOR_VERSION 2
 #define K_PATCH_LEVEL   0
 
-#ifndef K_YEAR
-#define K_YEAR     2012
-#define K_MONTH      11
-#define K_DAY         5
-#define K_HOUR        1
-#endif
-
+#include<minikonoha/stardate.h>
 #define K_DATE      ((K_YEAR - 2006) * (12 * 24 * 32) + (K_MONTH * (24 * 32) + ((K_DAY * 24) + K_HOUR)))
 
 #ifndef K_REVISION

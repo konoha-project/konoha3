@@ -15,12 +15,14 @@
 #
 *~
 *.orig
+*.py
 *.pyc
 GPATH
 GRTAGS
 GTAGS
 *.k.tested
 *_tested
+OLD
 
 .cproject
 .project
