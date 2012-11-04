@@ -244,29 +244,42 @@ typedef struct {
 #define FN_Coersion             FN_COERCION
 #define FN_isCOERCION(fn)       ((fn & FN_COERCION) == FN_COERCION)
 
-//#define MN_ISBOOL     KFLAG_H0
-#define MN_GETTER     KFLAG_H1
-#define MN_SETTER     KFLAG_H2
-
 #define MN_Annotation        (KFLAG_H1|KFLAG_H2)
 #define MN_isAnnotation(S)   ((S & KW_PATTERN) == MN_Annotation)
-
-#define MN_TOCID             (KFLAG_H0|KFLAG_H1)
-#define MN_ASCID             (KFLAG_H0|KFLAG_H1|KFLAG_H2)
 #define KW_PATTERN           (KFLAG_H0|KFLAG_H1|KFLAG_H2)
 #define KW_isPATTERN(S)      ((S & KW_PATTERN) == KW_PATTERN)
 
-//#define MN_isISBOOL(mn)      (SYM_HEAD(mn) == MN_ISBOOL)
-//#define MN_toISBOOL(mn)      ((SYM_UNMASK(mn)) | MN_ISBOOL)
-#define MN_isGETTER(mn)      (SYM_HEAD(mn) == MN_GETTER)
-#define MN_toGETTER(mn)      ((SYM_UNMASK(mn)) | MN_GETTER)
-#define MN_isSETTER(mn)      (SYM_HEAD(mn) == MN_SETTER)
-#define MN_toSETTER(mn)      ((SYM_UNMASK(mn)) | MN_SETTER)
 
-#define MN_to(cid)           ((CT_(cid)->classNameSymbol) | MN_TOCID)
+/* MethodName
+ * 110   to$(TypeId)
+ * 101   as${TypeId}
+ * 010   get${symbol}
+ * 001   set${symbol}
+ */
+
+#define MN_TYPEID     KFLAG_H0
+#define MN_TOCID      (KFLAG_H0|KFLAG_H1)
+#define MN_ASCID      (KFLAG_H0|KFLAG_H2)
+#define MN_GETTER     KFLAG_H1
+#define MN_SETTER     KFLAG_H2
+#define MN_MASK
+
+#define MN_UNMASK(mn)        (mn & (~(KFLAG_H1|KFLAG_H2)))
+#define MN_isGETTER(mn)      (SYM_HEAD(mn) == MN_GETTER)
+#define MN_toGETTER(mn)      ((MN_UNMASK(mn)) | MN_GETTER)
+#define MN_isSETTER(mn)      (SYM_HEAD(mn) == MN_SETTER)
+#define MN_toSETTER(mn)      ((MN_UNMASK(mn)) | MN_SETTER)
+
+#define MN_to(cid)           ((cid) | MN_TOCID)
 #define MN_isTOCID(mn)       ((SYM_UNMASK(mn)) == MN_TOCID)
-#define MN_as(cid)           ((CT_(cid)->classNameSymbol) | MN_ASCID)
+#define MN_as(cid)           ((cid) | MN_ASCID)
 #define MN_isASCID(mn)       ((SYM_UNMASK(mn)) == MN_ASCID)
+#define MethodName_t(mn)     PRESYM_(mn), ((mn & MN_TYPEID) == MN_TYPEID ? TY_t(SYM_UNMASK(mn)) : SYM_t(SYM_UNMASK(mn)))
+
+//#define MN_to(cid)           ((CT_(cid)->classNameSymbol) | MN_TOCID)
+//#define MN_isTOCID(mn)       ((SYM_UNMASK(mn)) == MN_TOCID)
+//#define MN_as(cid)           ((CT_(cid)->classNameSymbol) | MN_ASCID)
+//#define MN_isASCID(mn)       ((SYM_UNMASK(mn)) == MN_ASCID)
 
 
 /* ------------------------------------------------------------------------ */
@@ -1317,7 +1330,7 @@ static const char* MethodFlagData[] = {
 #define Method_param(mtd)        kctx->share->paramList_OnGlobalConstList->ParamItems[mtd->paramid]
 #define Method_returnType(mtd)   ((Method_param(mtd))->rtype)
 #define Method_paramsize(mtd)    ((Method_param(mtd))->psize)
-#define Method_t(mtd)            TY_t((mtd)->typeId),PSYM_t((mtd)->mn)
+#define Method_t(mtd)            TY_t((mtd)->typeId),  MethodName_t((mtd)->mn)
 
 /* method data */
 #define DEND     (-1)
@@ -1632,9 +1645,9 @@ struct KonohaLibVar {
 
 	kMethod*         (*kNameSpace_getGetterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ksymbol_t mn, ktype_t);
 	kMethod*         (*kNameSpace_getSetterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ksymbol_t mn, ktype_t);
+	kMethod*         (*kNameSpace_GetConverterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ktype_t tcid);
 	kMethod*         (*kNameSpace_getMethodByParamSizeNULL)(KonohaContext*, kNameSpace *, ktype_t cid, kmethodn_t mn, int paramsize);
 	kMethod*         (*kNameSpace_getMethodBySignatureNULL)(KonohaContext*, kNameSpace *, ktype_t cid, kmethodn_t mn, int paramdom, int paramsize, kparamtype_t *);
-
 	void             (*kNameSpace_compileAllDefinedMethods)(KonohaContext *kctx);
 
 	// code generator package

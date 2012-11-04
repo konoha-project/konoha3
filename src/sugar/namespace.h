@@ -589,17 +589,17 @@ static kbool_t CT_isa(KonohaContext *kctx, ktype_t cid1, ktype_t cid2)
 	return ct->isSubType(kctx, ct, t);
 }
 
-static kMethod *kNameSpace_getCastMethodNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ktype_t tcid)
+static kMethod *kNameSpace_getCoercionMethodNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ktype_t tcid)
 {
 	MethodMatch m = {};
 	m.mn = MN_to(tcid);
 	m.paramsize = 0;
-	kMethod *mtd = kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_Param0, &m);
-	if(mtd == NULL) {
-		m.mn = MN_as(tcid);
-		mtd = kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_Param0, &m);
-	}
-	return mtd;
+	return kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_Param0, &m);
+//	if(mtd == NULL) {
+//		m.mn = MN_as(tcid);
+//		mtd = kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_Param0, &m);
+//	}
+//	return mtd;
 }
 
 static kbool_t MethodMatch_Signature(KonohaContext *kctx, kMethod *mtd, MethodMatch *m)
@@ -618,7 +618,7 @@ static kbool_t MethodMatch_Signature(KonohaContext *kctx, kMethod *mtd, MethodMa
 					if(CT_isa(kctx, m->param[i].ty, param->paramtypeItems[i].ty)) {
 						continue;
 					}
-					kMethod *castMethod = kNameSpace_getCastMethodNULL(kctx, m->ns, m->param[i].ty, param->paramtypeItems[i].ty);
+					kMethod *castMethod = kNameSpace_getCoercionMethodNULL(kctx, m->ns, m->param[i].ty, param->paramtypeItems[i].ty);
 					if(castMethod != NULL && (kMethod_is(Coercion, castMethod) || FN_isCOERCION(param->paramtypeItems[i].fn))) {
 						continue;
 					}

@@ -228,7 +228,7 @@ static kbool_t kStmt_addClassField(KonohaContext *kctx, kStmt *stmt, kGamma *gma
 		if(Expr_isTerm(lexpr)) {
 			kString *name = lexpr->termToken->text;
 			ksymbol_t symbol = ksymbolA(S_text(name), S_size(name), SYM_NEWID);
-			kExpr *vexpr =  SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 2, gma, ty, 0);
+			kExpr *vexpr =  SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 2, gma, ty, 0);
 			if(vexpr == K_NULLEXPR) return false;
 			if(vexpr->build == TEXPR_CONST) {
 				KLIB KonohaClass_addField(kctx, definedClass, flag, ty, symbol);
@@ -371,7 +371,7 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *tkN = expr->cons->TokenItems[0];
 	ksymbol_t fn = tkN->resolvedSymbol;
-	kExpr *self = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 1, gma, TY_var, 0);
+	kExpr *self = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 1, gma, TY_var, 0);
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	if(self != K_NULLEXPR) {
 		kMethod *mtd = KLIB kNameSpace_getGetterMethodNULL(kctx, ns, self->ty, fn, TY_var);

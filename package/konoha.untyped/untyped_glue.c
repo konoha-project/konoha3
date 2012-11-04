@@ -58,7 +58,7 @@ static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 	if(Expr_isSymbolTerm(leftHandExpr)) {
 		kExpr *texpr = SUGAR kStmt_tyCheckVariableNULL(kctx, stmt, leftHandExpr, gma, TY_var);
 		if(texpr == NULL) {
-			kExpr *rightHandExpr = SUGAR kStmt_tyCheckExprAt(kctx, stmt, expr, 2, gma, TY_var, 0);
+			kExpr *rightHandExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 2, gma, TY_var, 0);
 			if(rightHandExpr != K_NULLEXPR) {
 				DeclVariable(kctx, stmt, gma, rightHandExpr->ty, leftHandExpr);
 			}
