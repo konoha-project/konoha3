@@ -307,7 +307,7 @@ static void JSVisitor_ConvertAndEmitMethodName(KonohaContext *kctx, IRBuilder *s
 	KGrowingBuffer wb;
 	KonohaClass *globalObjectClass = KLIB kNameSpace_getClass(kctx, self->currentStmt->parentBlockNULL->BlockNameSpace, "GlobalObject", 12, NULL);
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	KLIB Kwb_printf(kctx, &wb, "%s%s", T_mn(mtd->mn));
+	KLIB Kwb_printf(kctx, &wb, "%s%s", MethodName_t(mtd->mn));
 
 	isGlobal = (CT_(receiver->ty) == globalObjectClass || receiver->ty == TY_NameSpace);
 
@@ -373,7 +373,7 @@ static void JSVisitor_ConvertAndEmitMethodName(KonohaContext *kctx, IRBuilder *s
 			if(!isGlobal){
 				JSVisitor_emitString(kctx, self, ".", "", "");
 			}
-			JSVisitor_emitString(kctx, self, "", T_mn(mtd->mn));
+			JSVisitor_emitString(kctx, self, "", MethodName_t(mtd->mn));
 			break;
 		}
 	}
@@ -386,7 +386,7 @@ static void JSVisitor_visitCallExpr(KonohaContext *kctx, IRBuilder *self, kExpr 
 	kbool_t isArray = false;
 
 	if(kArray_size(expr->cons) == 2 && MethodName_isUnaryOperator(kctx, mtd->mn)) {
-		JSVisitor_emitString(kctx, self, T_mn(mtd->mn), "(");
+		JSVisitor_emitString(kctx, self, MethodName_t(mtd->mn), "(");
 		handleExpr(kctx, self, kExpr_at(expr, 1));
 		JSVisitor_emitString(kctx, self, ")", "", "");
 	}
@@ -493,7 +493,7 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 	if(mtd->mn != 0) {
 		kMethod_setFunc(kctx, mtd, NULL);
 		if(mtd->typeId == TY_NameSpace) {
-			KLIB Kwb_printf(kctx, &wb, "%s%s = function(", T_mn(mtd->mn));
+			KLIB Kwb_printf(kctx, &wb, "%s%s = function(", MethodName_t(mtd->mn));
 		}else if(strcmp(SYM_t(mtd->mn), "new") == 0) {
 			isConstractor = true;
 			if(base->typeId != TY_Object) {
@@ -503,10 +503,10 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 			}
 		}else if(kMethod_is(Static, mtd)) {
 			KLIB kNameSpace_compileAllDefinedMethods(kctx);
-			KLIB Kwb_printf(kctx, &wb, "%s.%s%s = function(", CT_t(CT_(mtd->typeId)), T_mn(mtd->mn));
+			KLIB Kwb_printf(kctx, &wb, "%s.%s%s = function(", CT_t(CT_(mtd->typeId)), MethodName_t(mtd->mn));
 		}else{
 			KLIB kNameSpace_compileAllDefinedMethods(kctx);
-			KLIB Kwb_printf(kctx, &wb, "%s.prototype.%s%s = function(", CT_t(CT_(mtd->typeId)), T_mn(mtd->mn));
+			KLIB Kwb_printf(kctx, &wb, "%s.prototype.%s%s = function(", CT_t(CT_(mtd->typeId)), MethodName_t(mtd->mn));
 		}
 		for(i = 0; i < pa->psize; i++) {
 			if(i != 0) {

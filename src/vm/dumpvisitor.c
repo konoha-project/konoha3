@@ -181,7 +181,7 @@ static void DumpVisitor_visitCallExpr(KonohaContext *kctx, IRBuilder *self, kExp
 	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	kMethod *mtd = CallExpr_getMethod(expr);
-	KLIB Kwb_printf(kctx, &wb, "CALL: '%s%s'", T_mn(mtd->mn));
+	KLIB Kwb_printf(kctx, &wb, "CALL: '%s%s'", MethodName_t(mtd->mn));
 	DUMPER(self)->indent++;
 	emit_string(KLIB Kwb_top(kctx, &wb, 1), "(", "", DUMPER(self)->indent);
 	DUMPER(self)->indent++;
@@ -240,7 +240,7 @@ static void DumpVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMe
 	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	kParam *pa = Method_param(mtd);
-	KLIB Kwb_printf(kctx, &wb, "METHOD %s%s(", T_mn(mtd->mn));
+	KLIB Kwb_printf(kctx, &wb, "METHOD %s%s(", MethodName_t(mtd->mn));
 	for (i = 0; i < pa->psize; i++) {
 		if(i != 0) {
 			KLIB Kwb_write(kctx, &wb, ", ", 2);

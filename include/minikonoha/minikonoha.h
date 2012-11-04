@@ -273,7 +273,7 @@ typedef struct {
 #define MN_isTOCID(mn)       ((SYM_UNMASK(mn)) == MN_TOCID)
 #define MN_as(cid)           ((cid) | MN_ASCID)
 #define MN_isASCID(mn)       ((SYM_UNMASK(mn)) == MN_ASCID)
-#define MethodName_t(mn)     PSYM_t(mn), ((mn & MN_TYPEID) == MN_TYPEID ? TY_t(SYM_UNMASK(mn)) : SYM_t(SYM_UNMASK(mn)))
+#define MethodName_t(mn)     SYM_PRE(mn), ((mn & MN_TYPEID) == MN_TYPEID ? TY_t(SYM_UNMASK(mn)) : SYM_t(SYM_UNMASK(mn)))
 
 //#define MN_to(cid)           ((CT_(cid)->classNameSymbol) | MN_TOCID)
 //#define MN_isTOCID(mn)       ((SYM_UNMASK(mn)) == MN_TOCID)
@@ -1688,7 +1688,6 @@ struct KonohaLibVar {
 #define FN_(T)                    KLIB Ksymbol(kctx, T, (sizeof(T)-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
 #define MN_(T)                    KLIB Ksymbol(kctx, T, (sizeof(T)-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
 #define MN_box                    MN_("box")
-#define T_mn(X)                   SYM_PRE(X), SYM_t(X)
 
 #define MN_new                    37  /* @see KW_return + 1*/
 

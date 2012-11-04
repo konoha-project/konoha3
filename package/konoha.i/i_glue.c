@@ -80,7 +80,7 @@ static void kMethod_writeToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuf
 {
 	kParam *pa = Method_param(mtd);
 	Method_writeAttributeToBuffer(kctx, mtd, wb);
-	KLIB Kwb_printf(kctx, wb, "%s %s.%s%s", TY_t(pa->rtype), TY_t(mtd->typeId), T_mn(mtd->mn));
+	KLIB Kwb_printf(kctx, wb, "%s %s.%s%s", TY_t(pa->rtype), TY_t(mtd->typeId), MethodName_t(mtd->mn));
 	{
 		size_t i;
 		KLIB Kwb_write(kctx, wb, "(", 1);
