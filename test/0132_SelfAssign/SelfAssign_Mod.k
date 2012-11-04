@@ -1,10 +1,10 @@
 // written by kimio kuramitsu
 
-// import("konoha.assign"); Don't use any more
+import("cstyle"); 
 
 void test() {
-	int a = 3;
-	a -= 1;
+	int a = 6;
+	a %= 4;
 	assert(a == 2);
 }
 

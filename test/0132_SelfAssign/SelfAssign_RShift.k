@@ -1,7 +1,6 @@
 // written by kimio kuramitsu
 
-import("konoha.int");
-// import("konoha.assign"); Don't use any more
+import("cstyle"); 
 
 void test() {
 	int a = 2;

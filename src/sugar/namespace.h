@@ -783,13 +783,15 @@ static void kMethod_ReplaceWith(KonohaContext *kctx, kMethodVar *oldMethod, kMet
 	*newMethod = tempMethod;
 }
 
-
 static kbool_t kNameSpace_AddMethod(KonohaContext *kctx, kNameSpace *ns, kMethodVar *mtd, KTraceInfo *trace)
 {
 	KonohaClass *ct = CT_(mtd->typeId);
 	if(mtd->packageId == 0) {
 		((kMethodVar *)mtd)->packageId = ns->packageId;
 		TRACE_PrintMessage(kctx, trace, DebugTag, "@%s loading method %s.%s%s", PackageId_t(ns->packageId), Method_t(mtd));
+	}
+	if(CT_is(Final, ct)) {
+		kMethod_set(Final, mtd, true);
 	}
 	kMethod *foundMethod = kNameSpace_GetMethodBySignatureNULL(kctx, ns, ct->typeId, mtd->mn, mtd->paramdom, 0, NULL);
 	if(foundMethod != NULL) {  // same signature

@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
-// import("konoha.assign"); Don't use any more
 import("konoha.array"); // if Ok
+import("cstyle");
 
 void test() {
 	int[] a = [0, 0];

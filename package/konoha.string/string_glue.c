@@ -274,14 +274,14 @@ static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		_JS|_Public|_Const|_Im, _F(KString_length), TY_int, TY_String, MN_("getlength"), 0,
 		_JS|_Public|_Const|_Im, _F(String_get), TY_String, TY_String, MN_("charAt"), 1, TY_int, FN_n,
 		_JS|_Public|_Static|_Const|_Im, _F(String_fromCharCode), TY_String, TY_String, MN_("fromCharCode"), 1, TY_int, FN_n,
-		_Public|_Const|_Im, _F(String_get),        TY_String, TY_String, MN_("get"), 1, TY_int, FN_n,
+		_JS|_Public|_Const|_Im|kMethod_Override, _F(String_get),        TY_String, TY_String, MN_("get"), 1, TY_int, FN_n,  /* [c] */
 		_JS|_Public|_Const|_Im, _F(KString_charAt), TY_int, TY_String, MN_("charCodeAt"), 1, TY_int, FN_n,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
 	// It is good to move these apis to other package such as java.string
-	// LoadJavaAPI(kctx, ns, trace);
+	LoadJavaAPI(kctx, ns, trace);
 	KSetClassFunc(ns->packageId, CT_String, unbox, String2_unbox, trace);
 	KSetClassFunc(ns->packageId, CT_String, free, String2_free, trace);
 	KSetClassFunc(ns->packageId, CT_String, reftrace, String2_reftrace, trace);

@@ -1,8 +1,7 @@
 // written by kimio kuramitsu
 
-// import("konoha.assign"); Don't use any more
 import("konoha.class");
-import("konoha.new");
+import("cstyle");
 
 class C {
 	int x;

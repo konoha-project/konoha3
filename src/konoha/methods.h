@@ -56,6 +56,13 @@ static KMETHOD Object_to(KonohaContext *kctx, KonohaStack *sfp)
 
 /* String */
 
+//## @Const method Boolean Boolean.toString();
+static KMETHOD Boolean_toString(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kString *s = (sfp[0].boolValue) ? SYM_s(SYM_("true")) : SYM_s(SYM_("false"));
+	KReturn(s);
+}
+
 //## @Const method Boolean Boolean.opNOT();
 static KMETHOD Boolean_opNOT(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -272,6 +279,7 @@ static void LoadDefaultMethod(KonohaContext *kctx, kNameSpace *ns)
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Hidden|_Im|_Const|kMethod_SmartReturn|_Virtual, _F(Object_to), TY_Object, TY_Object, MN_("to"), 0,
+		_Public|_Im|_Const, _F(Boolean_toString), TY_String, TY_boolean, MN_to(TY_String), 0,
 		_Public|_Im|_Const, _F(Boolean_opNOT), TY_boolean, TY_boolean, MN_("!"), 0,
 		_Public|_Im|_Const, _F(Boolean_opEQ), TY_boolean, TY_boolean, MN_("=="), 1, TY_boolean, FN_x,
 		_Public|_Im|_Const, _F(Int_opNEQ), TY_boolean, TY_boolean, MN_("!="), 1, TY_boolean, FN_x,

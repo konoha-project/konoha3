@@ -1,7 +1,9 @@
 /*
  * Konoha String Package
  * written by imasahiro
+ * rewritten by kimio
  */
+
 @Public boolean String.equals(String anObject) {
     if (this.hashCode() != anObject.hashCode()) {
         return false;
