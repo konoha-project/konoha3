@@ -169,7 +169,7 @@ void TRACE_PrintMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_t tagle
 			kStmt_toERR(kctx, stmt, emsg);
 		}
 	}
-	else {
+	else /* if(kctx->stack != NULL)*/ {  // TO AVOID SEGV
 		INIT_GCSTACK();
 		KGrowingBuffer wb;
 		KLIB Kwb_init(&kctx->stack->cwb, &wb);
@@ -186,7 +186,6 @@ void TRACE_PrintMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_t tagle
 	}
 	va_end(ap);
 }
-
 
 #define Token_text(tk) kToken_t_(kctx, tk)
 
