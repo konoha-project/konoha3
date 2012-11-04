@@ -283,7 +283,7 @@ static int konoha_handler(request_rec *r)
 
 	KonohaContext *kctx = konoha;
 	kNameSpace *ns = KNULL(NameSpace);
-	kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_System, MN_("handler"), -1);  // fixme
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, TY_System, MN_("handler"), -1);  // fixme
 	if(mtd == NULL) {
 		ap_log_rerror(APLOG_MARK, APLOG_CRIT, 0, r, "Apache.handler() not found");
 		return -1;

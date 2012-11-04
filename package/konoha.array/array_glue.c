@@ -587,7 +587,7 @@ static KMETHOD TypeCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 	if(requestClass == NULL) {
 		requestClass = (paramType == TY_var) ? CT_Array : CT_p0(kctx, CT_Array, paramType);
 	}
-	kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, Stmt_nameSpace(stmt), TY_Array, MN_("newList"), -1);
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_nameSpace(stmt), TY_Array, MN_("newList"), -1);
 	DBG_ASSERT(mtd != NULL);
 	KFieldSet(expr, expr->cons->MethodItems[0], mtd);
 	KFieldSet(expr, expr->cons->ExprItems[1], SUGAR kExpr_setVariable(kctx, NULL, gma, TEXPR_NEW, requestClass->typeId, 0));

@@ -123,16 +123,16 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	KLIB KonohaRuntime_setModule(kctx, MOD_sugar, (KonohaModule *)mod, 0);
 
 	KonohaLibVar* l = (KonohaLibVar *)ctx->klib;
-	l->kNameSpace_getClass       = kNameSpace_getClass;
+	l->kNameSpace_GetClass       = kNameSpace_GetClass;
 	l->kNameSpace_defineClass    = kNameSpace_defineClass;
 	l->kNameSpace_LoadMethodData = kNameSpace_LoadMethodData;
 	l->kNameSpace_SetConstData   = kNameSpace_SetConstData;
 	l->kNameSpace_loadConstData  = kNameSpace_loadConstData;
-	l->kNameSpace_getGetterMethodNULL  = kNameSpace_getGetterMethodNULL;
-	l->kNameSpace_getSetterMethodNULL  = kNameSpace_getSetterMethodNULL;
-	l->kNameSpace_getMethodByParamSizeNULL  = kNameSpace_getMethodByParamSizeNULL;
-	l->kNameSpace_getMethodBySignatureNULL  = kNameSpace_getMethodBySignatureNULL;
-
+	l->kNameSpace_GetGetterMethodNULL  = kNameSpace_GetGetterMethodNULL;
+	l->kNameSpace_GetSetterMethodNULL  = kNameSpace_GetSetterMethodNULL;
+	l->kNameSpace_GetCoercionMethodNULL = kNameSpace_GetCoercionMethodNULL;
+	l->kNameSpace_GetMethodByParamSizeNULL  = kNameSpace_GetMethodByParamSizeNULL;
+	l->kNameSpace_GetMethodBySignatureNULL  = kNameSpace_GetMethodBySignatureNULL;
 	l->kNameSpace_compileAllDefinedMethods  = kNameSpace_compileAllDefinedMethods;
 //	l->kNameSpace_reftraceSugarExtension =  kNameSpace_reftraceSugarExtension;
 	l->kNameSpace_freeSugarExtension =  kNameSpace_freeSugarExtension;
@@ -213,7 +213,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kStmt_tyCheckVariableNULL  = kStmt_tyCheckVariableNULL;
 
 	mod->kNameSpace_defineSyntax    = kNameSpace_defineSyntax;
-	mod->kNameSpace_getSyntax       = kNameSpace_getSyntax;
+	mod->kNameSpace_GetSyntax       = kNameSpace_GetSyntax;
 	mod->kArray_addSyntaxRule       = kArray_addSyntaxPattern;
 //	mod->kNameSpace_SetSugarFunc    = kNameSpace_SetSugarFunc;
 	mod->kNameSpace_addSugarFunc    = kNameSpace_addSugarFunc;

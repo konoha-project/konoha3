@@ -194,7 +194,7 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 	kExpr *self = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 1, gma, TY_var, 0);
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	if(self != K_NULLEXPR) {
-		kMethod *mtd = KLIB kNameSpace_getGetterMethodNULL(kctx, ns, self->ty, fn, TY_var);
+		kMethod *mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, self->ty, fn, TY_var);
 		if(mtd != NULL) {
 			KFieldSet(expr->cons, expr->cons->MethodItems[0], mtd);
 			KReturn(SUGAR kStmtExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, reqty));

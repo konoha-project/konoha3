@@ -139,12 +139,12 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 		if(CT_isa(kctx, texpr->ty, reqty)) {
 			if(TY_isUnbox(texpr->ty) && !TY_isUnbox(reqty)) {
 				ktype_t unboxType = texpr->ty == TY_boolean ? TY_boolean : TY_int;
-				kMethod *mtd = kNameSpace_getMethodByParamSizeNULL(kctx, ns, unboxType, MN_box, 0);
+				kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, ns, unboxType, MN_box, 0);
 				return new_TypedCallExpr(kctx, stmt, gma, texpr->ty, mtd, 1, texpr);
 			}
 			return texpr;
 		}
-		kMethod *mtd = kNameSpace_getCoercionMethodNULL(kctx, ns, texpr->ty, reqty);
+		kMethod *mtd = kNameSpace_GetCoercionMethodNULL(kctx, ns, texpr->ty, reqty);
 		DBG_P("finding cast %s => %s: %p", TY_t(texpr->ty), TY_t(reqty), mtd);
 		if(mtd != NULL) {
 			if(kMethod_is(Coercion, mtd) || FLAG_is(pol, TPOL_COERCION)) {

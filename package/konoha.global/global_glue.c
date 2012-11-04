@@ -69,12 +69,12 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObj
 {
 	ktype_t cid = O_typeId(o);
 	kNameSpace *ns = Stmt_nameSpace(stmt);
-	kMethod *mtd = KLIB kNameSpace_getSetterMethodNULL(kctx, ns, cid, symbol, TY_var);
+	kMethod *mtd = KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, cid, symbol, TY_var);
 	if(mtd != NULL) {
 		SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "already defined name: %s", SYM_t(symbol));
 		return NULL;
 	}
-	mtd = KLIB kNameSpace_getGetterMethodNULL(kctx, ns, cid, symbol, TY_var);
+	mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, cid, symbol, TY_var);
 	if(mtd != NULL && Method_returnType(mtd) != ty) {
 		SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "differently defined name: %s", SYM_t(symbol));
 		return NULL;
@@ -84,7 +84,7 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObj
 		flag |= kField_Getter;
 	}
 	KLIB KonohaClass_addField(kctx, O_ct(o), flag, ty, symbol);
-	return KLIB kNameSpace_getSetterMethodNULL(kctx, ns, cid, symbol, ty);
+	return KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, cid, symbol, ty);
 }
 
 static kStmt* TypeDeclAndMakeSetter(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr, kExpr *valueExpr, kObject *scr)
@@ -106,7 +106,7 @@ static kbool_t kNameSpace_initGlobalObject(KonohaContext *kctx, kNameSpace *ns, 
 {
 	if(ns->globalObjectNULL_OnList == NULL) {
 		const char *cname = "GlobalObject";
-		KonohaClass *cGlobalObject = KLIB kNameSpace_getClass(kctx, ns, cname, strlen(cname), NULL);
+		KonohaClass *cGlobalObject = KLIB kNameSpace_GetClass(kctx, ns, cname, strlen(cname), NULL);
 		((kNameSpaceVar *)ns)->globalObjectNULL_OnList =  KLIB Knull(kctx, cGlobalObject);
 		return KLIB kNameSpace_SetConstData(kctx, ns, SYM_("global"), cGlobalObject->typeId, (uintptr_t)ns->globalObjectNULL_OnList, trace);
 	}

@@ -99,7 +99,7 @@ static void kToken_printMessage(KonohaContext *kctx, kTokenVar *tk, kinfotag_t t
 }
 
 #define Stmt_isERR(STMT)       ((STMT)->build == TSTMT_ERR)
-static SugarSyntax* kNameSpace_getSyntax(KonohaContext *kctx, kNameSpace *ns0, ksymbol_t kw, int isnew);
+static SugarSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns0, ksymbol_t kw, int isnew);
 
 static void kStmt_toERR(KonohaContext *kctx, kStmt *stmt, kString *errmsg)
 {

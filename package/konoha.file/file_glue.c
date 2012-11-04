@@ -532,7 +532,7 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 
 static kbool_t file_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
 {
-	if(CT_Bytes != NULL && KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_Bytes, MN_("read"), 3) == NULL) {
+	if(CT_Bytes != NULL && KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, TY_Bytes, MN_("read"), 3) == NULL) {
 		KDEFINE_METHOD MethodData[] = {
 			_Public, _F(File_read),   TY_int, TY_File, MN_("read"), 1, TY_Bytes, FN_("buf"),
 			_Public, _F(File_read3),  TY_int, TY_File, MN_("read"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),

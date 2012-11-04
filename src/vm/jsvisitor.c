@@ -305,7 +305,7 @@ static void JSVisitor_ConvertAndEmitMethodName(KonohaContext *kctx, IRBuilder *s
 {
 	kbool_t isGlobal = false;
 	KGrowingBuffer wb;
-	KonohaClass *globalObjectClass = KLIB kNameSpace_getClass(kctx, self->currentStmt->parentBlockNULL->BlockNameSpace, "GlobalObject", 12, NULL);
+	KonohaClass *globalObjectClass = KLIB kNameSpace_GetClass(kctx, self->currentStmt->parentBlockNULL->BlockNameSpace, "GlobalObject", 12, NULL);
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	KLIB Kwb_printf(kctx, &wb, "%s%s", MethodName_t(mtd->mn));
 

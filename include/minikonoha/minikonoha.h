@@ -1634,18 +1634,18 @@ struct KonohaLibVar {
 	kbool_t          (*kNameSpace_importPackage)(KonohaContext*, kNameSpace*, const char *, KTraceInfo *);
 	kbool_t          (*kNameSpace_importPackageSymbol)(KonohaContext *, kNameSpace *, const char *, ksymbol_t keyword, KTraceInfo *);
 
-	KonohaClass*     (*kNameSpace_getClass)(KonohaContext*, kNameSpace *, const char *, size_t, KonohaClass *);
+	KonohaClass*     (*kNameSpace_GetClass)(KonohaContext*, kNameSpace *, const char *, size_t, KonohaClass *);
 	KonohaClass*     (*kNameSpace_defineClass)(KonohaContext*, kNameSpace *, kString *, KDEFINE_CLASS *, KTraceInfo *);
 
 	kbool_t          (*kNameSpace_SetConstData)(KonohaContext *, kNameSpace *, ksymbol_t, ktype_t, uintptr_t, KTraceInfo *);
 	kbool_t          (*kNameSpace_loadConstData)(KonohaContext*, kNameSpace *, const char **d, KTraceInfo *);
 	void             (*kNameSpace_LoadMethodData)(KonohaContext*, kNameSpace *, intptr_t *, KTraceInfo *);
 
-	kMethod*         (*kNameSpace_getGetterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ksymbol_t mn, ktype_t);
-	kMethod*         (*kNameSpace_getSetterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ksymbol_t mn, ktype_t);
+	kMethod*         (*kNameSpace_GetGetterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ksymbol_t mn, ktype_t);
+	kMethod*         (*kNameSpace_GetSetterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ksymbol_t mn, ktype_t);
 	kMethod*         (*kNameSpace_GetCoercionMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ktype_t tcid);
-	kMethod*         (*kNameSpace_getMethodByParamSizeNULL)(KonohaContext*, kNameSpace *, ktype_t cid, kmethodn_t mn, int paramsize);
-	kMethod*         (*kNameSpace_getMethodBySignatureNULL)(KonohaContext*, kNameSpace *, ktype_t cid, kmethodn_t mn, int paramdom, int paramsize, kparamtype_t *);
+	kMethod*         (*kNameSpace_GetMethodByParamSizeNULL)(KonohaContext*, kNameSpace *, ktype_t cid, kmethodn_t mn, int paramsize);
+	kMethod*         (*kNameSpace_GetMethodBySignatureNULL)(KonohaContext*, kNameSpace *, ktype_t cid, kmethodn_t mn, int paramdom, int paramsize, kparamtype_t *);
 	void             (*kNameSpace_compileAllDefinedMethods)(KonohaContext *kctx);
 
 	// code generator package

@@ -541,7 +541,7 @@ typedef struct {
 	KonohaClass *cGamma;
 	KonohaClass *cTokenArray;
 
-	SugarSyntax*    (*kNameSpace_getSyntax)(KonohaContext *, kNameSpace *, ksymbol_t, int);
+	SugarSyntax*    (*kNameSpace_GetSyntax)(KonohaContext *, kNameSpace *, ksymbol_t, int);
 	void            (*kNameSpace_defineSyntax)(KonohaContext *, kNameSpace *, KDEFINE_SYNTAX *, KTraceInfo *);
 	kbool_t         (*kArray_addSyntaxRule)(KonohaContext *, kArray *ruleList, TokenSequence *sourceRange);
 	SugarSyntaxVar* (*kNameSpace_SetTokenFunc)(KonohaContext *, kNameSpace *, ksymbol_t, int ch, kFunc *);
@@ -634,7 +634,7 @@ static kExpr* kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, k
 #define TY_Gamma                           kmodsugar->cGamma->typeId
 #define TY_TokenArray                      kmodsugar->cTokenArray->typeId
 
-#define SYN_(KS, KW)                       kNameSpace_getSyntax(kctx, KS, KW, 0)
+#define SYN_(KS, KW)                       kNameSpace_GetSyntax(kctx, KS, KW, 0)
 
 
 #else/*SUGAR_EXPORTS*/
@@ -648,8 +648,8 @@ static kExpr* kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, k
 #define TY_TokenArray                        SUGAR cTokenArray->typeId
 
 //#define KW_(T)                               _e->keyword(kctx, T, sizeof(T)-1, SYM_NONAME)
-#define SYN_(KS, KW)                         SUGAR kNameSpace_getSyntax(kctx, KS, KW, 0)
-#define NEWSYN_(KS, KW)                      (SugarSyntaxVar *)(SUGAR kNameSpace_getSyntax(kctx, KS, KW, 1))
+#define SYN_(KS, KW)                         SUGAR kNameSpace_GetSyntax(kctx, KS, KW, 0)
+#define NEWSYN_(KS, KW)                      (SugarSyntaxVar *)(SUGAR kNameSpace_GetSyntax(kctx, KS, KW, 1))
 
 #endif/*SUGAR_EXPORTS*/
 
@@ -672,7 +672,7 @@ static kExpr* kExpr_setVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, k
 static inline void kToken_setTypeId(KonohaContext *kctx, kToken *tk, kNameSpace *ns, ktype_t type)
 {
 	((kTokenVar *)tk)->resolvedTypeId = type;
-	((kTokenVar *)tk)->resolvedSyntaxInfo = kmodsugar->kNameSpace_getSyntax(kctx, ns, KW_TypePattern, 0);
+	((kTokenVar *)tk)->resolvedSyntaxInfo = kmodsugar->kNameSpace_GetSyntax(kctx, ns, KW_TypePattern, 0);
 }
 
 #define Stmt_nameSpace(STMT)   kStmt_nameSpace(STMT)

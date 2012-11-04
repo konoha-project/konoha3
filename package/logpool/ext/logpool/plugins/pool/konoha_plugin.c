@@ -123,7 +123,7 @@ struct pool_plugin *konoha_plugin_get(KonohaContext *kctx, memcached_st *mc, cha
     kObject *ev = KLIB new_kObjectDontUseThis(kctx, CT_Int/*Dummy*/, (uintptr_t)req);
     MODSUGAR_eval(kctx, script, 0);
     kNameSpace *ns = KNULL(NameSpace);
-    kMethod *mtd = KLIB kNameSpace_getMethodByParamSizeNULL(kctx, ns, TY_System, MN_("initPlugin"), 1, MPOL_PARAMSIZE|MPOL_FIRST);
+    kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, TY_System, MN_("initPlugin"), 1, MPOL_PARAMSIZE|MPOL_FIRST);
     if(mtd) {
         BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
         KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);

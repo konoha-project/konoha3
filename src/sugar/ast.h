@@ -204,7 +204,7 @@ static int TokenUtils_parseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArr
 		nextIdx = beginIdx + 1;
 	}
 	else if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern) { // check
-		foundClass = KLIB kNameSpace_getClass(kctx, ns, S_text(tk->text), S_size(tk->text), NULL);
+		foundClass = KLIB kNameSpace_GetClass(kctx, ns, S_text(tk->text), S_size(tk->text), NULL);
 		if(foundClass != NULL) {
 			//kToken_setTypeId(kctx, tk, ns, foundClass->typeId);
 			nextIdx = beginIdx + 1;
@@ -334,7 +334,7 @@ static void TokenSequence_applyMacroGroup(KonohaContext *kctx, TokenSequence *to
 
 static void kNameSpace_SetMacroData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int paramsize, const char *data)
 {
-	SugarSyntaxVar *syn = (SugarSyntaxVar *)SUGAR kNameSpace_getSyntax(kctx, ns, keyword, /*new*/true);
+	SugarSyntaxVar *syn = (SugarSyntaxVar *)SUGAR kNameSpace_GetSyntax(kctx, ns, keyword, /*new*/true);
 	TokenSequence source = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
 	TokenSequence_push(kctx, source);
 	TokenSequence_tokenize(kctx, &source, data, 0);
