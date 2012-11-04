@@ -134,7 +134,7 @@ static void shell(KonohaContext *kctx)
 static void show_version(KonohaContext *kctx)
 {
 	int i;
-	PLATAPI printf_i(K_PROGNAME " " K_VERSION " (%s) (%s, %s)\n", K_CODENAME, K_REVISION, __DATE__);
+	PLATAPI printf_i(K_PROGNAME " " K_VERSION " (%s) (%s, %lu, %s)\n", K_CODENAME, K_REVISION, K_DATE, __DATE__);
 #if defined(__GNUC__)
 	PLATAPI printf_i("[gcc %s]\n", __VERSION__);
 #elif defined(_MSC_VER)

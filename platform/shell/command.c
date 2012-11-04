@@ -252,7 +252,8 @@ static struct option long_options2[] = {
 	{"startwith",       required_argument, 0, 'S'},
 	{"builtin-test",    required_argument, 0, 'B'},
 	{"trace",           no_argument,       0, 'F'},
-	{NULL, 0, 0, 0},
+	{"id",              no_argument,       0, 'q'},
+	{NULL, 0, 0, 0},  /* sentinel */
 };
 
 static void konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
@@ -261,7 +262,7 @@ static void konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
 	int scriptidx = 0;
 	while (1) {
 		int option_index = 0;
-		int c = getopt_long (argc, argv, "icD:I:M:S:f:", long_options2, &option_index);
+		int c = getopt_long (argc, argv, "icqD:I:M:S:f:", long_options2, &option_index);
 		if(c == -1) break; /* Detect the end of the options. */
 		switch (c) {
 		case 0:
@@ -283,6 +284,12 @@ static void konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
 		case 'i': {
 			interactive_flag = 1;
 			KonohaContext_Set(Interactive, konoha);
+		}
+		break;
+
+		case 'q': {
+			fprintf(stdout, "%s-%lu\n", K_VERSION, K_DATE);
+			exit(0);  //
 		}
 		break;
 

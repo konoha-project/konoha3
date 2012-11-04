@@ -1040,7 +1040,7 @@ static void KonohaRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	KInitLock(share->paramMutex);
 
 	initKonohaLib((KonohaLibVar *)kctx->klib);
-	KLIB Karray_init(kctx, &share->classTable, K_TYTABLE_INIT * sizeof(KonohaClass));
+	KLIB Karray_init(kctx, &share->classTable, K_CLASSTABLE_INITSIZE * sizeof(KonohaClass));
 	loadInitStructData(kctx);
 
 	KUnsafeFieldInit(share->GlobalConstList, new_(Array, 8, OnField));
