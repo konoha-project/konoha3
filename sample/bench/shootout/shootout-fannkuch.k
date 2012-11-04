@@ -10,7 +10,7 @@ import("konoha.const");
 import("konoha.array");
 import("konoha.new");
 import("konoha.class");
-import("konoha.int");
+import("cstyle"); // konoha.int was obsolete
 
 const N=9;
 int max(int a, int b) {

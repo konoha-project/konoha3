@@ -646,9 +646,31 @@ record_result 0096_NoType $PASS 1
 ## 0100_CStyle
 PASS=0
 record_result 0100_CStyle $PASS 0
-## 0131_IntOp
+## 0131_Int
 PASS=0
-record_result 0131_IntOp $PASS 0
+run_test 1 22 minimum "-MOutputTest" 0131_Int/Int_ConstMAX.k
+run_test 2 22 minimum "-MOutputTest" 0131_Int/Int_ConstMIN.k
+run_test 3 22 minimum "-MOutputTest" 0131_Int/Int_LiteralBinary.k
+run_test 4 22 minimum "-MOutputTest" 0131_Int/Int_LiteralDecimal.k
+run_test 5 22 minimum "-MOutputTest" 0131_Int/Int_LiteralHexical.k
+run_test 6 22 minimum "-MOutputTest" 0131_Int/Int_LiteralLong.k
+run_test 7 22 minimum "-MOutputTest" 0131_Int/Int_LiteralOctal.k
+run_test 8 22 minimum "-MOutputTest" 0131_Int/Int_LiteralSIUnit.k
+run_test 9 22 minimum "-MOutputTest" 0131_Int/Int_OpAdd.k
+run_test 10 22 minimum "-MOutputTest" 0131_Int/Int_OpBoundaryOperation.k
+run_test 11 22 minimum "-MOutputTest" 0131_Int/Int_OpDiv.k
+run_test 12 22 minimum "-MOutputTest" 0131_Int/Int_OpEquals.k
+run_test 13 22 minimum "-MOutputTest" 0131_Int/Int_OpGreaterThan.k
+run_test 14 22 minimum "-MOutputTest" 0131_Int/Int_OpGreaterThanOrEquals.k
+run_test 15 22 minimum "-MOutputTest" 0131_Int/Int_OpIntegerNegatives.k
+run_test 16 22 minimum "-MOutputTest" 0131_Int/Int_OpLessThan.k
+run_test 17 22 minimum "-MOutputTest" 0131_Int/Int_OpLessThanOrEquals.k
+run_test 18 22 minimum "-MOutputTest" 0131_Int/Int_OpMod.k
+run_test 19 22 minimum "-MOutputTest" 0131_Int/Int_OpMul.k
+run_test 20 22 minimum "-MOutputTest" 0131_Int/Int_OpNotEquals.k
+run_test 21 22 minimum "-MOutputTest" 0131_Int/Int_OpPriority.k
+run_test 22 22 minimum "-MOutputTest" 0131_Int/Int_OpSub.k
+record_result 0131_Int $PASS 22
 ## 0132_SelfAssign
 PASS=0
 run_test 1 12 minimum "-MOutputTest" 0132_SelfAssign/SelfAssign.k
@@ -726,10 +748,47 @@ run_test 1 1 minimum "-MOutputTest" 0209_ImplicitCoercion/ImplicitCoercion.k
 record_result 0209_ImplicitCoercion $PASS 1
 ## 0210_Float
 PASS=0
-record_result 0210_Float $PASS 0
+run_test 1 27 minimum "-MOutputTest" 0210_Float/Float_Const.k
+run_test 2 27 minimum "-MOutputTest" 0210_Float/Float_Op.k
+run_test 3 27 minimum "-MOutputTest" 0210_Float/Float_OpAddAdd.k
+run_test 4 27 minimum "-MOutputTest" 0210_Float/Float_OpAddDiv.k
+run_test 5 27 minimum "-MOutputTest" 0210_Float/Float_OpAddMul.k
+run_test 6 27 minimum "-MOutputTest" 0210_Float/Float_OpAddSub.k
+run_test 7 27 minimum "-MOutputTest" 0210_Float/Float_OpDivAdd.k
+run_test 8 27 minimum "-MOutputTest" 0210_Float/Float_OpDivDiv.k
+run_test 9 27 minimum "-MOutputTest" 0210_Float/Float_OpDivMul.k
+run_test 10 27 minimum "-MOutputTest" 0210_Float/Float_OpDivSub.k
+run_test 11 27 minimum "-MOutputTest" 0210_Float/Float_OpEquals.k
+run_test 12 27 minimum "-MOutputTest" 0210_Float/Float_OpGreaterThan.k
+run_test 13 27 minimum "-MOutputTest" 0210_Float/Float_OpGreaterThanOrEquals.k
+run_test 14 27 minimum "-MOutputTest" 0210_Float/Float_OpLessThan.k
+run_test 15 27 minimum "-MOutputTest" 0210_Float/Float_OpLessThanOrEquals.k
+run_test 16 27 minimum "-MOutputTest" 0210_Float/Float_OpMulAdd.k
+run_test 17 27 minimum "-MOutputTest" 0210_Float/Float_OpMulDiv.k
+run_test 18 27 minimum "-MOutputTest" 0210_Float/Float_OpMulMul.k
+run_test 19 27 minimum "-MOutputTest" 0210_Float/Float_OpMulSub.k
+run_test 20 27 minimum "-MOutputTest" 0210_Float/Float_OpNotEquals.k
+run_test 21 27 minimum "-MOutputTest" 0210_Float/Float_OpSubAdd.k
+run_test 22 27 minimum "-MOutputTest" 0210_Float/Float_OpSubDiv.k
+run_test 23 27 minimum "-MOutputTest" 0210_Float/Float_OpSubMul.k
+run_test 24 27 minimum "-MOutputTest" 0210_Float/Float_OpSubSub.k
+run_test 25 27 minimum "-MOutputTest" 0210_Float/Float_Sqrt.k
+run_test 26 27 minimum "-MOutputTest" 0210_Float/FloatLiteral.k
+run_test 27 27 minimum "-MOutputTest" 0210_Float/FloatLiteralWithUnit.k
+record_result 0210_Float $PASS 27
 ## 0211_IntFloat
 PASS=0
-record_result 0211_IntFloat $PASS 0
+run_test 1 10 minimum "-MOutputTest" 0211_IntFloat/IntFloat_Add.k
+run_test 2 10 minimum "-MOutputTest" 0211_IntFloat/IntFloat_CmpEqual.k
+run_test 3 10 minimum "-MOutputTest" 0211_IntFloat/IntFloat_CmpLessThan.k
+run_test 4 10 minimum "-MOutputTest" 0211_IntFloat/IntFloat_CmpLessThanEqual.k
+run_test 5 10 minimum "-MOutputTest" 0211_IntFloat/IntFloat_CmpMoreThan.k
+run_test 6 10 minimum "-MOutputTest" 0211_IntFloat/IntFloat_CmpMoreThanEqual.k
+run_test 7 10 minimum "-MOutputTest" 0211_IntFloat/IntFloat_CmpNotEqual.k
+run_test 8 10 minimum "-MOutputTest" 0211_IntFloat/IntFloat_Div.k
+run_test 9 10 minimum "-MOutputTest" 0211_IntFloat/IntFloat_Mul.k
+run_test 10 10 minimum "-MOutputTest" 0211_IntFloat/IntFloat_Sub.k
+record_result 0211_IntFloat $PASS 10
 ## 0212_Math
 PASS=0
 record_result 0212_Math $PASS 0

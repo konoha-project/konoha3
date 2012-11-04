@@ -87,7 +87,7 @@ static void KonohaCommonModule_init(KonohaContext *kctx, KTraceInfo *trace)
 #define CT_Float          (KGetKonohaCommonModule()->cFloat)
 #define TY_float          ((CT_Float)->typeId)
 #define IS_Float(O)       (O_ct(O) == CT_Float)
-#define KFLOAT_FMT        "%.6e"
+#define KFLOAT_FMT        "%.3f"  // NEVER CHANGE THIS
 
 typedef const struct kFloatVar kFloat;
 struct kFloatVar {

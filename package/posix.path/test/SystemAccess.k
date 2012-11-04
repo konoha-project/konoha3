@@ -1,6 +1,6 @@
 //Written by Joseph
 
-import("konoha.int");
+import("cstyle"); // konoha.int was obsolete
 import("posix.path");
 
 void test() {

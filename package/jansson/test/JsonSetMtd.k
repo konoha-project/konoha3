@@ -1,6 +1,6 @@
 import("konoha.new");
 import("cstyle", "while");
-import("konoha.int");
+import("cstyle"); // konoha.int was obsolete
 import("konoha.float");
 import("konoha.string");
 import("konoha.array");

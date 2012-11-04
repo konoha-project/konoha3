@@ -3,7 +3,7 @@ import("cstyle", "while");
 import("konoha.class");
 import("konoha.global");
 import("konoha.null");
-import("konoha.int");
+import("cstyle"); // konoha.int was obsolete
 import("konoha.array");
 import("konoha.const");
 setTransparentGlobalVariable(true);

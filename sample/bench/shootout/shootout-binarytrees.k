@@ -10,7 +10,7 @@ import("konoha.class");
 import("konoha.null");
 import("konoha.global");
 import("konoha.const");
-import("konoha.int");
+import("cstyle"); // konoha.int was obsolete
 
 const MINDEPTH = 4;
 const N=14;
