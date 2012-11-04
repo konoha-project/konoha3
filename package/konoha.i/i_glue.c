@@ -22,6 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+#include<stdio.h>
 #define  USE_MethodFlagData
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
@@ -31,46 +32,12 @@
 extern "C"{
 #endif
 
-//struct fn {
-//	uintptr_t  flag;
-//	const char *aname;
-//};
-//
-//#define _P(T)  kMethod_##T, #T
-//
-//static struct fn attrs[] = {
-//	{_P(Public)}, {_P(Static)}, {_P(Const)}, {_P(Abstract)},
-//	{_P(Virtual)}, {_P(Final)}, /*{_P(Overloaded)},*/
-//	{_P(Coercion)}, {_P(SmartReturn)},
-//	{_P(Restricted)}, {_P(Immutable)},
-////	{_P(FASTCALL)}, {_P(CALLCC)},
-//	{_P(Hidden)},
-//	{0, NULL}
-//};
-//
-//static void MethodAttribute_p(KonohaContext *kctx, kMethod *mtd, KGrowingBuffer *wb)
-//{
-//	uintptr_t i;
-//	for(i = 0; i < 30; i++) {
-//		if(attrs[i].aname == NULL) break;
-//		if((attrs[i].flag & mtd->flag) == attrs[i].flag) {
-//			KLIB Kwb_printf(kctx, wb, "@%s ", attrs[i].aname);
-//		}
-//	}
-//	if(Method_isCast(mtd)) {
-//		KLIB Kwb_printf(kctx, wb, "@Cast ");
-//	}
-////	if(Method_isTransCast(mtd)) {
-////		KLIB Kwb_printf(kctx, wb, "@T ");
-////	}
-//}
-
 static void Method_writeAttributeToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuffer *wb)
 {
 	size_t i;
 	for(i = 0; i < sizeof(MethodFlagData)/sizeof(const char *); i++) {
 		uintptr_t flagmask = 1 << i;
-		if((mtd->flag && flagmask) == flagmask) {
+		if((mtd->flag & flagmask) == flagmask) {
 			KLIB Kwb_printf(kctx, wb, "@%s ", MethodFlagData[i]);
 		}
 	}
