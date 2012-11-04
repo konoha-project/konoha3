@@ -585,11 +585,11 @@ static void KonohaVisitor_visitCallExpr(KonohaContext *kctx, IRBuilder *self, kE
 		ASM(NSET, NC_(thisidx-1), (intptr_t)mtd, CT_Method);
 		if(kMethod_is(Virtual, mtd)) {
 			// set namespace to enable method lookups
-			ASM(NSET, NC_(thisidx-2), (intptr_t)Stmt_nameSpace(self->currentStmt), CT_NameSpace);
+			ASM(NSET, OC_(thisidx-2), (intptr_t)Stmt_nameSpace(self->currentStmt), CT_NameSpace);
 		}
 	}
 	else {
-		ASM(NSET, NC_(thisidx-2), (intptr_t)Stmt_nameSpace(self->currentStmt), CT_NameSpace);
+		ASM(NSET, OC_(thisidx-2), (intptr_t)Stmt_nameSpace(self->currentStmt), CT_NameSpace);
 		ASM(LOOKUP, SFP_(thisidx), Stmt_nameSpace(self->currentStmt), mtd);
 	}
 

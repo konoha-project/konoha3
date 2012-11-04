@@ -288,7 +288,7 @@ static void konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
 		break;
 
 		case 'q': {
-			fprintf(stdout, "%s-%lu\n", K_VERSION, K_DATE);
+			fprintf(stdout, "%s-%lu\n", K_VERSION, (long unsigned)K_DATE);
 			exit(0);  //
 		}
 		break;

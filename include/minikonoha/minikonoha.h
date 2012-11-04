@@ -1799,7 +1799,7 @@ typedef struct {
 
 #define KGetReturnObject(sfp)  (sfp[K_RTNIDX].asObject)
 #define KGetReturnType(sfp)    O_ct(sfp[K_RTNIDX].asObject)
-#define KGetLexicalNameSpace(sfp)    sfp[K_NSIDX].calledNameSpace
+#define KGetLexicalNameSpace(sfp)    sfp[K_NSIDX].asNameSpace
 
 #define KReturnWith(VAL, CLEANUP) do {\
 	KUnsafeFieldSet(sfp[K_RTNIDX].asObject, ((kObject *)VAL));\

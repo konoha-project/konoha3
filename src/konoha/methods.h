@@ -36,7 +36,6 @@ extern "C" {
 static KMETHOD Object_to(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KonohaClass *selfClass = O_ct(sfp[0].asObject), *targetClass = KGetReturnType(sfp);
-
 	if(selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass)) {
 		sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;
 		KReturn(sfp[0].asObject);

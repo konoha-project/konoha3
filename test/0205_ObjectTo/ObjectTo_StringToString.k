@@ -1,6 +1,6 @@
 // written by kimio
 
-import("konoha.object")
+import("konoha.object");
 
 void test() {
 	String s = "12356";
