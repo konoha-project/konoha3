@@ -125,167 +125,7 @@ extern int verbose_gc;
 #include <minikonoha/libcode/minishell.h>
 
 // -------------------------------------------------------------------------
-// KonohaContext*est
-
-static FILE *stdlog;
-static int   stdlog_count = 0;
-
-static int TEST_vprintf(const char *fmt, va_list ap)
-{
-	stdlog_count++;
-	return vfprintf(stdlog, fmt, ap);
-}
-
-static int TEST_printf(const char *fmt, ...)
-{
-	va_list ap;
-	va_start(ap, fmt);
-	stdlog_count++;
-	int res = vfprintf(stdlog, fmt, ap);
-	va_end(ap);
-	return res;
-}
-
-static void TEST_reportCaughtException(KonohaContext *kctx, const char *exceptionName, int fault, const char *optionalMessage, KonohaStack *bottom, KonohaStack *sfp)
-{
-	if(sfp != NULL) {
-		const char* scriptName = PLATAPI shortFilePath(FileId_t(sfp[K_RTNIDX].callerFileLine));
-		int line = (kushort_t)sfp[K_RTNIDX].callerFileLine;
-		fprintf(stdlog, " ** %s (%s:%d)\n", exceptionName, scriptName, line);
-	}
-	else {
-		fprintf(stdlog, " ** %s\n", exceptionName);
-	}
-}
-
-//static int check_result2(FILE *fp0, FILE *fp1)
-//{
-//	char buf0[128];
-//	char buf1[128];
-//	while (true) {
-//		size_t len0, len1;
-//		len0 = fread(buf0, 1, sizeof(buf0), fp0);
-//		len1 = fread(buf1, 1, sizeof(buf1), fp1);
-//		if(len0 != len1) {
-//			return 1;//FAILED
-//		}
-//		if(len0 == 0) {
-//			break;
-//		}
-//		if(memcmp(buf0, buf1, len0) != 0) {
-//			return 1;//FAILED
-//		}
-//	}
-//	return 0; //OK
-//}
-
-static int check_result2(FILE *fp0, FILE *fp1)
-{
-	char buf0[4096];
-	char buf1[4096];
-	while (fgets(buf0, sizeof(buf0), fp0) != NULL) {
-		char *p = fgets(buf1, sizeof(buf1), fp1);
-		if(p == NULL) return 1;//FAILED
-		if((p = strstr(buf0, "(error) (")) != NULL) {
-			p = strstr(p+8, ")");
-			if(strncmp(buf0, buf1, p - buf1 + 1) != 0) return 1; //FAILED;
-			continue;
-		}
-		if((p = strstr(buf0, "(warning) (")) != NULL) {
-			p = strstr(p+10, ")");
-			if(strncmp(buf0, buf1, p - buf1 + 1) != 0) return 1; //FAILED;
-			continue;
-		}
-		if(strcmp(buf0, buf1) != 0) {
-			return 1;//FAILED
-		}
-	}
-	return 0; //OK
-}
-
-static void make_report(const char *testname)
-{
-	char *path = getenv("KONOHA_REPORT");
-	if(path != NULL) {
-		char report_file[256];
-		char script_file[256];
-		char correct_file[256];
-		char result_file[256];
-		snprintf(report_file, 256,  "%s/REPORT_%s.txt", path, shortFilePath(testname));
-		snprintf(script_file, 256,  "%s", testname);
-		snprintf(correct_file, 256, "%s.proof", script_file);
-		snprintf(result_file, 256,  "%s.tested", script_file);
-		FILE *fp = fopen(report_file, "w");
-		FILE *fp2 = fopen(script_file, "r");
-		int ch;
-		while((ch = fgetc(fp2)) != EOF) {
-			fputc(ch, fp);
-		}
-		fclose(fp2);
-		fprintf(fp, "Expected Result (in %s)\n=====\n", result_file);
-		fp2 = fopen(correct_file, "r");
-		while((ch = fgetc(fp2)) != EOF) {
-			fputc(ch, fp);
-		}
-		fclose(fp2);
-		fprintf(fp, "Result (in %s)\n=====\n", result_file);
-		fp2 = fopen(result_file, "r");
-		while((ch = fgetc(fp2)) != EOF) {
-			fputc(ch, fp);
-		}
-		fclose(fp2);
-		fclose(fp);
-	}
-}
-
-static int KonohaContext_test(KonohaContext *kctx, const char *testname)
-{
-	int ret = 1; //FAILED
-	char script_file[256];
-	char correct_file[256];
-	char result_file[256];
-	PLATAPI snprintf_i(script_file, 256,  "%s", testname);
-	PLATAPI snprintf_i(correct_file, 256, "%s.proof", script_file);
-	PLATAPI snprintf_i(result_file, 256,  "%s.tested", script_file);
-	FILE *fp = fopen(correct_file, "r");
-	stdlog = fopen(result_file, "w");
-	konoha_load(kctx, script_file);
-	fprintf(stdlog, "Q.E.D.\n");   // Q.E.D.
-	fclose(stdlog);
-
-	if(fp != NULL) {
-		FILE *fp2 = fopen(result_file, "r");
-		ret = check_result2(fp, fp2);
-		if(ret == 0) {
-			fprintf(stdout, "[PASS]: %s\n", testname);
-			((KonohaFactory*)kctx->platApi)->exitStatus = 0;
-		}
-		else {
-			fprintf(stdout, "[FAIL]: %s\n", testname);
-			make_report(testname);
-			((KonohaFactory*)kctx->platApi)->exitStatus = 1;
-		}
-		fclose(fp);
-		fclose(fp2);
-	}
-	else {
-		//fprintf(stdout, "stdlog_count: %d\n", stdlog_count);
-		if(stdlog_count == 0) {
-			if(((KonohaFactory*)kctx->platApi)->exitStatus == 0) {
-				fprintf(stdout, "[PASS]: %s\n", testname);
-				return 0; // OK
-			}
-		}
-		else {
-			fprintf(stdout, "no proof file: %s\n", testname);
-			((KonohaFactory*)kctx->platApi)->exitStatus = 1;
-		}
-		fprintf(stdout, "[FAIL]: %s\n", testname);
-		((KonohaFactory*)kctx->platApi)->exitStatus = 1;
-		return 1;
-	}
-	return ret;
-}
+// KonohaContext
 
 #ifdef _MSC_VER
 #define strcasecmp stricmp
@@ -410,8 +250,6 @@ static struct option long_options2[] = {
 	{"import",          required_argument, 0, 'I'},
 	{"module",          required_argument, 0, 'M'},
 	{"startwith",       required_argument, 0, 'S'},
-	{"test",            required_argument, 0, 'T'},
-	{"test-with",       required_argument, 0, 'T'},
 	{"builtin-test",    required_argument, 0, 'B'},
 	{"trace",           no_argument,       0, 'F'},
 	{NULL, 0, 0, 0},
@@ -419,7 +257,6 @@ static struct option long_options2[] = {
 
 static void konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
 {
-	KonohaFactory *plat = (KonohaFactory*)konoha->platApi;
 	kbool_t ret = true;
 	int scriptidx = 0;
 	while (1) {
@@ -469,25 +306,16 @@ static void konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
 			// already checked in KonohaFactory_SetDefaultModule
 			if(optarg != NULL && strcmp(optarg, "OutputTest") == 0) {
 				KonohaContext_Set(Debug, konoha);
+				verbose_debug = 0;
+				verbose_sugar = 0;
+				verbose_gc    = 0;
+				verbose_code  = 0;
 			}
 			break;
 
 		case 'S':
 			konoha_startup(konoha, optarg);
 			break;
-
-		case 'T':
-//			DUMP_P ("option --test-with `%s'\n", optarg);
-			verbose_debug = 0;
-			verbose_sugar = 0;
-			verbose_gc    = 0;
-			verbose_code  = 0;
-			plat->ReportDebugMessage = NOP_ReportDebugMessage;
-			plat->printf_i  = TEST_printf;
-			plat->vprintf_i = TEST_vprintf;
-			plat->ReportCaughtException = TEST_reportCaughtException;
-			KonohaContext_test(konoha, optarg);
-			return;
 
 		case '?':
 			/* getopt_long already printed an error message. */

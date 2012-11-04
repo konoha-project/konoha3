@@ -76,6 +76,27 @@ static int check_result2(FILE *fp0, FILE *fp1)
 	return 0; //OK
 }
 
+//static int check_result2(FILE *fp0, FILE *fp1)
+//{
+//	char buf0[128];
+//	char buf1[128];
+//	while (true) {
+//		size_t len0, len1;
+//		len0 = fread(buf0, 1, sizeof(buf0), fp0);
+//		len1 = fread(buf1, 1, sizeof(buf1), fp1);
+//		if(len0 != len1) {
+//			return 1;//FAILED
+//		}
+//		if(len0 == 0) {
+//			break;
+//		}
+//		if(memcmp(buf0, buf1, len0) != 0) {
+//			return 1;//FAILED
+//		}
+//	}
+//	return 0; //OK
+//}
+
 static void AFTER_LoadScript(KonohaContext *kctx, const char *filename)
 {
 	int stdlog_count = 0;
