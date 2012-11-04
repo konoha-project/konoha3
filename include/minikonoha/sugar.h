@@ -519,7 +519,6 @@ struct kGammaVar {
 #define CT_StmtArray            CT_Array
 #define kStmtArray              kArray
 
-#define IS_NameSpace(O)  (O_ct(O) == CT_NameSpace)
 #define IS_Token(O)  (O_ct(O) == CT_Token)
 #define IS_Expr(O)   (O_ct(O) == CT_Expr)
 #define IS_Stmt(O)   (O_ct(O) == CT_Stmt)

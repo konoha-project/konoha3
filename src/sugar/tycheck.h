@@ -148,7 +148,6 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 			return texpr;
 		}
 		kMethod *mtd = kNameSpace_GetCoercionMethodNULL(kctx, ns, texpr->ty, reqty);
-		DBG_P("finding cast %s => %s: %p", TY_t(texpr->ty), TY_t(reqty), mtd);
 		if(mtd != NULL) {
 			if(kMethod_is(Coercion, mtd) || FLAG_is(pol, TypeCheckPolicy_COERCION)) {
 				return new_TypedCallExpr(kctx, stmt, gma, reqty, mtd, 1, texpr);

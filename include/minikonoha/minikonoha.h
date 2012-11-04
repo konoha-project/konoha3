@@ -844,7 +844,8 @@ struct KonohaModuleContext {
 	struct KonohaValueVar *previousStack;\
 	intptr_t    shift0;  \
 	struct VirtualCode  *pc; \
-	kMethod     *methodCallInfo; \
+	kMethod     *methodCallInfo;\
+	kNameSpace  *namespaceInfo;\
 	uintptr_t    callerFileLine
 
 #define K_FRAME_MEMBER \
@@ -1351,7 +1352,7 @@ typedef kbool_t (*MethodMatchFunc)(KonohaContext *kctx, kMethod *mtd, MethodMatc
 #define K_PCIDX     (-2)
 #define K_MTDIDX    (-1)
 #define K_NSIDX     (-2)
-#define K_TRACEIDX  (-2)
+#define K_TRACEIDX  (-3)
 
 //#define K_NEXTIDX    2
 #define K_ULINEIDX2  (-7)
@@ -1372,6 +1373,8 @@ struct kFuncVar {
 
 /* ------------------------------------------------------------------------ */
 /* NameSpace */
+
+#define IS_NameSpace(O)  (O_ct(O) == CT_NameSpace)
 
 #define kNameSpace_sizeConstTable(ns)    (ns->constTable.bytesize / sizeof(KKeyValue))
 
@@ -1787,7 +1790,7 @@ typedef struct {
 
 #define KGetReturnObject(sfp)  (sfp[K_RTNIDX].asObject)
 #define KGetReturnType(sfp)    O_ct(sfp[K_RTNIDX].asObject)
-#define KGetLexicalNameSpace(sfp)    sfp[K_NSIDX].asNameSpace
+#define KGetLexicalNameSpace(sfp)    sfp[K_NSIDX].namespaceInfo
 
 #define KReturnWith(VAL, CLEANUP) do {\
 	KUnsafeFieldSet(sfp[K_RTNIDX].asObject, ((kObject *)VAL));\

@@ -594,12 +594,9 @@ static kMethod *kNameSpace_GetCoercionMethodNULL(KonohaContext *kctx, kNameSpace
 	MethodMatch m = {};
 	m.mn = MN_to(tcid);
 	m.paramsize = 0;
-	return kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_Param0, &m);
-//	if(mtd == NULL) {
-//		m.mn = MN_as(tcid);
-//		mtd = kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_Param0, &m);
-//	}
-//	return mtd;
+	kMethod *mtd = kNameSpace_matchMethodNULL(kctx, ns, cid, MethodMatch_Param0, &m);
+	DBG_P("finding cast %s => %s: %p", TY_t(cid), TY_t(tcid), mtd);
+	return mtd;
 }
 
 static kbool_t MethodMatch_Signature(KonohaContext *kctx, kMethod *mtd, MethodMatch *m)
