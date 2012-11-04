@@ -55,7 +55,7 @@ set(PACKAGES
 ## add konoha.xx package in an alphabetical order 
 	konoha
 	konoha.array
-	konoha.assign
+	## konoha.assign     use cstyle
 	konoha.bytes
 	konoha.class
 	konoha.complex
@@ -71,18 +71,18 @@ set(PACKAGES
 	konoha.i
 #	konoha.io
 	konoha.import
-	konoha.int
+##	konoha.int       use cstyle
 	konoha.iterator
 	konoha.math
 	konoha.map
 #	konoha.mpi
 	konoha.namespace
 	konoha.new
-	konoha.null
+#	konoha.null  use cstyle
 	konoha.object
 	konoha.regexp
 	konoha.string
-	konoha.subtype
+##	konoha.subtype   use cstyle
 ##konoha.sql
 	konoha.untyped
 	konoha.var
