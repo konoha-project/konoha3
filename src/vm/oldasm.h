@@ -426,7 +426,7 @@ static void dumpOPCODE(KonohaContext *kctx, VirtualCode *c, VirtualCode *pc_star
 
 static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 {
-	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].methodCallInfo));
+	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].calledMethod));
 	KonohaVirtualMachine_run(kctx, sfp, CODE_ENTER);
 }
 
@@ -981,7 +981,7 @@ static void ByteCode_free(KonohaContext *kctx, kObject *o)
 
 static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack *sfp)
 {
-//	kMethod *mtd = sfp[K_MTDIDX].methodCallInfo;
+//	kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 //	ktype_t rtype = mtd->pa->rtype;
 //	if(rtype != TY_void) {
 //		if(TY_isUnbox(rtype)) {

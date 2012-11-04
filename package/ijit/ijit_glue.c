@@ -523,7 +523,7 @@ static KMETHOD Array_newN(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_getO(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	size_t n = KCheckIndex(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].callerFileLine);
+	size_t n = KCheckIndex(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].calledFileLine);
 	KReturn(a->ObjectItems[n]);
 }
 // --------------------------------------------------------------------------
@@ -531,7 +531,7 @@ static KMETHOD Array_getO(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_setO(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	size_t n = KCheckIndex(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].callerFileLine);
+	size_t n = KCheckIndex(kctx, sfp[1].intValue, kArray_size(a), sfp[K_RTNIDX].calledFileLine);
 	KFieldSet(a, a->ObjectItems[n], sfp[2].asObject);
 	KReturnVoid();
 }
@@ -540,7 +540,7 @@ static KMETHOD Array_setO(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_erase(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *src = sfp[0].asArray;
-	size_t n = KCheckIndex(kctx, sfp[1].intValue, kArray_size(src), sfp[K_RTNIDX].callerFileLine);
+	size_t n = KCheckIndex(kctx, sfp[1].intValue, kArray_size(src), sfp[K_RTNIDX].calledFileLine);
 	size_t asize = kArray_size(src);
 	size_t i, j = 0;
 	kArray *dst = new_(Array, (asize-1));

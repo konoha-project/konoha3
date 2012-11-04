@@ -35,24 +35,24 @@ extern "C"{
 
 static KMETHOD MethodFunc_ObjectFieldGetter(KonohaContext *kctx, KonohaStack *sfp)
 {
-	size_t delta = sfp[K_MTDIDX].methodCallInfo->delta;
+	size_t delta = sfp[K_MTDIDX].calledMethod->delta;
 	KReturn((sfp[0].asObject)->fieldObjectItems[delta]);
 }
 static KMETHOD MethodFunc_UnboxFieldGetter(KonohaContext *kctx, KonohaStack *sfp)
 {
-	size_t delta = sfp[K_MTDIDX].methodCallInfo->delta;
+	size_t delta = sfp[K_MTDIDX].calledMethod->delta;
 	KReturnUnboxValue((sfp[0].asObject)->fieldUnboxItems[delta]);
 }
 static KMETHOD MethodFunc_ObjectFieldSetter(KonohaContext *kctx, KonohaStack *sfp)
 {
-	size_t delta = sfp[K_MTDIDX].methodCallInfo->delta;
+	size_t delta = sfp[K_MTDIDX].calledMethod->delta;
 	kObjectVar *o = sfp[0].asObjectVar;
 	KFieldSet(o, o->fieldObjectItems[delta], sfp[1].asObject);
 	KReturn(sfp[1].asObject);
 }
 static KMETHOD MethodFunc_UnboxFieldSetter(KonohaContext *kctx, KonohaStack *sfp)
 {
-	size_t delta = sfp[K_MTDIDX].methodCallInfo->delta;
+	size_t delta = sfp[K_MTDIDX].calledMethod->delta;
 	(sfp[0].asObjectVar)->fieldUnboxItems[delta] = sfp[1].unboxValue;
 	KReturnUnboxValue(sfp[1].unboxValue);
 }
@@ -88,21 +88,21 @@ static intptr_t KLIB2_Method_indexOfField(kMethod *mtd)
 
 static KMETHOD MethodFunc_ObjectPrototypeGetter(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kMethod *mtd = sfp[K_MTDIDX].methodCallInfo;
+	kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
 	KReturn(KLIB kObject_getObject(kctx, sfp[0].asObject, key, sfp[K_RTNIDX].asObject));
 }
 
 static KMETHOD MethodFunc_UnboxPrototypeGetter(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kMethod *mtd = sfp[K_MTDIDX].methodCallInfo;
+	kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
 	KReturnUnboxValue(KLIB kObject_getUnboxValue(kctx, sfp[0].asObject, key, 0));
 }
 
 static KMETHOD MethodFunc_ObjectPrototypeSetter(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kMethod *mtd = sfp[K_MTDIDX].methodCallInfo;
+	kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
 	KLIB kObject_setObject(kctx, sfp[0].asObject, key, O_typeId(sfp[1].asObject), sfp[1].asObject);
 	KReturn(sfp[1].asObject);
@@ -110,7 +110,7 @@ static KMETHOD MethodFunc_ObjectPrototypeSetter(KonohaContext *kctx, KonohaStack
 
 static KMETHOD MethodFunc_UnboxPrototypeSetter(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kMethod *mtd = sfp[K_MTDIDX].methodCallInfo;
+	kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
 	kParam *pa = Method_param(mtd);
 	KLIB kObject_setUnboxValue(kctx, sfp[0].asObject, key, pa->paramtypeItems[0].ty, sfp[1].unboxValue);

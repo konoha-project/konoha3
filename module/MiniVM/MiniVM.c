@@ -131,7 +131,7 @@ static void kNameSpace_lookupMethodWithInlineCache(KonohaContext *kctx, KonohaSt
 		mtd = KLIB kNameSpace_GetMethodBySignatureNULL(kctx, ns, typeId, mtd->mn, mtd->paramdom, 0, NULL);
 		cache[0] = mtd;
 	}
-	sfp[K_MTDIDX].methodCallInfo = mtd;
+	sfp[K_MTDIDX].calledMethod = mtd;
 }
 
 static VirtualCode* KonohaVirtualMachine_run(KonohaContext *, KonohaStack *, VirtualCode *);
@@ -359,7 +359,7 @@ static kbool_t IsSupportedVirtualCode(int opcode)
 
 static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 {
-	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].methodCallInfo));
+	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].calledMethod));
 	KonohaVirtualMachine_run(kctx, sfp, BOOTCODE_ENTER);
 }
 

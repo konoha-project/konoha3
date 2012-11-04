@@ -243,7 +243,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 static KMETHOD NameSpace_loadScript(KonohaContext *kctx, KonohaStack *sfp)
 {
 	char pathbuf[512];
-	const char *path = PLATAPI formatTransparentPath(pathbuf, sizeof(pathbuf), FileId_t(sfp[K_RTNIDX].callerFileLine), S_text(sfp[1].asString));
+	const char *path = PLATAPI formatTransparentPath(pathbuf, sizeof(pathbuf), FileId_t(sfp[K_RTNIDX].calledFileLine), S_text(sfp[1].asString));
 	KMakeTrace(trace, sfp);
 	kNameSpace_loadScript(kctx, sfp[0].asNameSpace, path, trace);
 }

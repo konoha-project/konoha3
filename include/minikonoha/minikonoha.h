@@ -404,7 +404,7 @@ typedef struct KTraceInfo {
 } KTraceInfo;
 
 #define KMakeTrace(TRACENAME, sfp) \
-	KTraceInfo TRACENAME##REF_ = {sfp, sfp[K_RTNIDX].callerFileLine}, *TRACENAME = &TRACENAME##REF_;
+	KTraceInfo TRACENAME##REF_ = {sfp, sfp[K_RTNIDX].calledFileLine}, *TRACENAME = &TRACENAME##REF_;
 
 #define KMakeTraceUL(TRACENAME, sfp, UL) \
 	KTraceInfo TRACENAME##REF_ = {sfp, UL}, *TRACENAME = &TRACENAME##REF_;
@@ -844,9 +844,9 @@ struct KonohaModuleContext {
 	struct KonohaValueVar *previousStack;\
 	intptr_t    shift0;  \
 	struct VirtualCode  *pc; \
-	kMethod     *methodCallInfo;\
-	kNameSpace  *namespaceInfo;\
-	uintptr_t    callerFileLine
+	kMethod     *calledMethod;\
+	kNameSpace  *calledNameSpace;\
+	uintptr_t    calledFileLine
 
 #define K_FRAME_MEMBER \
 	kObject     *asObject;\
@@ -1428,7 +1428,7 @@ struct _kSystem {
 /* macros */
 
 #define KonohaRuntime_setesp(kctx, newesp)  ((KonohaContextVar *)kctx)->esp = (newesp)
-#define klr_setmethodCallInfo(sfpA, mtdO)   sfpA.methodCallInfo = mtdO
+#define klr_setcalledMethod(sfpA, mtdO)   sfpA.calledMethod = mtdO
 
 #define BEGIN_LOCAL(V,N) \
 	KonohaStack *V = kctx->esp, *esp_ = kctx->esp; (void)V;((KonohaContextVar *)kctx)->esp = esp_+N;\
@@ -1436,9 +1436,9 @@ struct _kSystem {
 #define END_LOCAL() ((KonohaContextVar *)kctx)->esp = esp_;
 
 #define KSetMethodCallStack(tsfp, UL, MTD, ARGC, DEFVAL) { \
-		tsfp[K_MTDIDX].methodCallInfo = MTD; \
+		tsfp[K_MTDIDX].calledMethod = MTD; \
 		KUnsafeFieldSet(tsfp[K_RTNIDX].asObject, ((kObject *)DEFVAL));\
-		tsfp[K_RTNIDX].callerFileLine   = UL;\
+		tsfp[K_RTNIDX].calledFileLine   = UL;\
 		KonohaRuntime_setesp(kctx, tsfp + ARGC + 1);\
 	} \
 
@@ -1446,7 +1446,7 @@ struct _kSystem {
 #define KonohaRuntime_callMethod(kctx, sfp) { \
 		sfp[K_SHIFTIDX].previousStack = kctx->stack->topStack;\
 		kctx->stack->topStack = sfp;\
-		(sfp[K_MTDIDX].methodCallInfo)->invokeMethodFunc(kctx, sfp);\
+		(sfp[K_MTDIDX].calledMethod)->invokeMethodFunc(kctx, sfp);\
 		kctx->stack->topStack = sfp[K_SHIFTIDX].previousStack;\
 	} \
 
@@ -1454,18 +1454,18 @@ struct _kSystem {
 
 #define KCALL_DONT_USE_THIS(LSFP, RIX, MTD, ARGC, DEFVAL) { \
 		KonohaStack *tsfp = LSFP + RIX + K_CALLDELTA;\
-		tsfp[K_MTDIDX].methodCallInfo = MTD;\
+		tsfp[K_MTDIDX].calledMethod = MTD;\
 		tsfp[K_SHIFTIDX].shift = 0;\
 		KUnsafeFieldSet(tsfp[K_RTNIDX].asObject, ((kObject *)DEFVAL));\
-		tsfp[K_RTNIDX].callerFileLine = 0;\
+		tsfp[K_RTNIDX].calledFileLine = 0;\
 		KonohaRuntime_setesp(kctx, tsfp + ARGC + 1);\
 		(MTD)->invokeMethodFunc(kctx, tsfp);\
-		tsfp[K_MTDIDX].methodCallInfo = NULL;\
+		tsfp[K_MTDIDX].calledMethod = NULL;\
 	} \
 
 #define KSELFCALL(TSFP, MTD) { \
 		KonohaStack *tsfp = TSFP;\
-		tsfp[K_MTDIDX].methodCallInfo = MTD;\
+		tsfp[K_MTDIDX].calledMethod = MTD;\
 		(MTD)->invokeMethodFunc(kctx, tsfp);\
 	} \
 
@@ -1790,7 +1790,7 @@ typedef struct {
 
 #define KGetReturnObject(sfp)  (sfp[K_RTNIDX].asObject)
 #define KGetReturnType(sfp)    O_ct(sfp[K_RTNIDX].asObject)
-#define KGetLexicalNameSpace(sfp)    sfp[K_NSIDX].namespaceInfo
+#define KGetLexicalNameSpace(sfp)    sfp[K_NSIDX].calledNameSpace
 
 #define KReturnWith(VAL, CLEANUP) do {\
 	KUnsafeFieldSet(sfp[K_RTNIDX].asObject, ((kObject *)VAL));\

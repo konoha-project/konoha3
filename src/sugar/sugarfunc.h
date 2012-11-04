@@ -1104,7 +1104,7 @@ static KMETHOD Statement_TypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD MethodFunc_lazyCompilation(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KonohaStack *esp = kctx->esp;
-	kMethod *mtd = sfp[K_MTDIDX].methodCallInfo;
+	kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 	kString *text = mtd->SourceToken->text;
 	kfileline_t uline = mtd->SourceToken->uline;
 	kMethod_compile(kctx, mtd, mtd->LazyCompileNameSpace, text, uline);

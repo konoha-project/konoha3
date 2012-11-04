@@ -431,7 +431,7 @@ static KMETHOD File_setWriterCharset(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD File_scriptPath(KonohaContext *kctx, KonohaStack *sfp)
 {
 	char scriptPathBuf[K_PATHMAX];
-	const char *scriptPath = PLATAPI formatTransparentPath(scriptPathBuf, sizeof(scriptPathBuf), FileId_t(sfp[K_RTNIDX].callerFileLine), S_text(sfp[1].asString));
+	const char *scriptPath = PLATAPI formatTransparentPath(scriptPathBuf, sizeof(scriptPathBuf), FileId_t(sfp[K_RTNIDX].calledFileLine), S_text(sfp[1].asString));
 	kStringVar *resultValue = (kStringVar*)KLIB new_kString(kctx, OnStack, scriptPath, strlen(scriptPath), 0);
 	if(kString_is(Literal, sfp[1].asString)) {
 		kString_set(Literal, resultValue, true);

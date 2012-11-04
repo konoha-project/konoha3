@@ -46,7 +46,7 @@ static KMETHOD Object_to(KonohaContext *kctx, KonohaStack *sfp)
 		DBG_ASSERT(IS_NameSpace(ns));
 		kMethod *mtd = KLIB kNameSpace_GetCoercionMethodNULL(kctx, ns, selfClass->typeId, targetClass->typeId);
 		if(mtd != NULL) {
-			sfp[K_MTDIDX].methodCallInfo = mtd;
+			sfp[K_MTDIDX].calledMethod = mtd;
 			mtd->invokeMethodFunc(kctx, sfp);
 			return;
 		}
@@ -257,7 +257,7 @@ static KMETHOD System_assert(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD System_p(KonohaContext *kctx, KonohaStack *sfp)
 {
 	const char *text = (IS_NULL(sfp[1].asString)) ? K_NULLTEXT : S_text(sfp[1].asString);
-	PLATAPI ReportUserMessage(kctx, DebugTag, sfp[K_RTNIDX].callerFileLine, text, true/*isNewLine*/);
+	PLATAPI ReportUserMessage(kctx, DebugTag, sfp[K_RTNIDX].calledFileLine, text, true/*isNewLine*/);
 }
 
 //## method void System.gc();

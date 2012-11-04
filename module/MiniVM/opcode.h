@@ -136,7 +136,7 @@ typedef struct OPENTER {
 #define OPEXEC_ENTER() do {\
 	(void)op;\
 	rbp[K_PCIDX2].pc = PC_NEXT(pc);\
-	pc = (rbp[K_MTDIDX2].methodCallInfo)->pc_start;\
+	pc = (rbp[K_MTDIDX2].calledMethod)->pc_start;\
 	GOTO_PC(pc); \
 } while(0)
 
@@ -160,7 +160,7 @@ typedef struct OPNCALL {
 
 #define OPEXEC_NCALL() do {\
 	(void)op;\
-	(rbp[K_MTDIDX2].methodCallInfo)->invokeMethodFunc(kctx, (KonohaStack *)(rbp));\
+	(rbp[K_MTDIDX2].calledMethod)->invokeMethodFunc(kctx, (KonohaStack *)(rbp));\
 	OPEXEC_RET();\
 } while(0)
 
@@ -260,13 +260,13 @@ typedef struct OPCALL {
 } OPCALL;
 
 #define OPEXEC_CALL(UL, THIS, espshift, CTO) do {\
-	kMethod *mtd_ = rbp[THIS+K_MTDIDX2].methodCallInfo;\
+	kMethod *mtd_ = rbp[THIS+K_MTDIDX2].calledMethod;\
 	KonohaStack *sfp_ = (KonohaStack *)(rbp + THIS); \
 	KUnsafeFieldSet(sfp_[K_RTNIDX].asObject, CTO);\
-	sfp_[K_RTNIDX].callerFileLine = UL;\
+	sfp_[K_RTNIDX].calledFileLine = UL;\
 	sfp_[K_SHIFTIDX].previousStack = (KonohaStack *)(rbp);\
 	sfp_[K_PCIDX].pc = PC_NEXT(pc);\
-	sfp_[K_MTDIDX].methodCallInfo = mtd_;\
+	sfp_[K_MTDIDX].calledMethod = mtd_;\
 	KonohaRuntime_setesp(kctx, (KonohaStack *)(rbp + espshift));\
 	(mtd_)->invokeMethodFunc(kctx, sfp_); \
 } while(0)
@@ -357,7 +357,7 @@ typedef struct OPERROR {
 } OPERROR;
 
 #define OPEXEC_ERROR(UL, msg, ESP) do {\
-	((KonohaStack *)rbp)[K_RTNIDX].callerFileLine = UL;\
+	((KonohaStack *)rbp)[K_RTNIDX].calledFileLine = UL;\
 	KLIB KonohaRuntime_raise(kctx, EXPT_("RuntimeScript"), SoftwareFault, msg, (KonohaStack *)rbp);\
 } while(0)
 
@@ -385,7 +385,7 @@ typedef struct OPCHKSTACK {
 	if(unlikely(kctx->esp > kctx->stack->stack_uplimit)) {\
 		KLIB KonohaRuntime_raise(kctx, EXPT_("StackOverflow"), SoftwareFault, NULL, (KonohaStack *)(rbp));\
 	}\
-	kfileline_t uline = (UL == 0) ? rbp[K_ULINEIDX2].callerFileLine : UL;\
+	kfileline_t uline = (UL == 0) ? rbp[K_ULINEIDX2].calledFileLine : UL;\
 	KonohaVirtualMachine_onSafePoint(kctx, (KonohaStack *)rbp, uline);\
 } while(0)
 

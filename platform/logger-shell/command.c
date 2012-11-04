@@ -106,8 +106,8 @@ static void TEST_reportCaughtException(KonohaContext *kctx, const char *exceptio
 {
 	stdlog_count++;
 	if(sfp != NULL) {
-		const char* scriptName = PLATAPI shortFilePath(FileId_t(sfp[K_RTNIDX].callerFileLine));
-		int line = (kushort_t)sfp[K_RTNIDX].callerFileLine;
+		const char* scriptName = PLATAPI shortFilePath(FileId_t(sfp[K_RTNIDX].calledFileLine));
+		int line = (kushort_t)sfp[K_RTNIDX].calledFileLine;
 		fprintf(stdlog, " ** %s (%s:%d)\n", exceptionName, scriptName, line);
 	}
 	else {

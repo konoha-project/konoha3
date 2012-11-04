@@ -148,7 +148,7 @@ static void TEST_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel,
 
 static void TEST_reportCaughtException(KonohaContext *kctx, const char *exceptionName, int fault, const char *optionalMessage, KonohaStack *bottom, KonohaStack *sfp)
 {
-	int line = (sfp != NULL) ? (kushort_t)sfp[K_RTNIDX].callerFileLine : 0;
+	int line = (sfp != NULL) ? (kushort_t)sfp[K_RTNIDX].calledFileLine : 0;
 	PLATAPI printf_i("LINE%d: %s\n", line, exceptionName);
 }
 

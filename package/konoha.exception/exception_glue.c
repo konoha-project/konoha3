@@ -68,10 +68,10 @@
 //
 //static void kException_addStackTrace(KonohaContext *kctx, KonohaStack *sfp, kException *e)
 //{
-//	kMethod *mtd = sfp[K_MTDIDX].methodCallInfo;
+//	kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 //	KGrowingBuffer wb;
 //	KLIB Kwb_init(&kctx->stack->cwb, &wb);
-//	kfileline_t uline = sfp[K_RTNIDX].callerFileLine;
+//	kfileline_t uline = sfp[K_RTNIDX].calledFileLine;
 //	if(uline > 0) {
 //		const char *file = FileId_t(uline);
 //		KLIB Kwb_printf(kctx, &wb, "(%s:%d) %s.%s%s" , PLATAPI shortFilePath(file), (kushort_t)uline, Method_t(mtd));
@@ -107,9 +107,9 @@
 //
 //static kbool_t isCalledMethod(KonohaContext *kctx, KonohaStack *sfp)
 //{
-////	kMethod *mtd = sfp[0].methodCallInfo;
+////	kMethod *mtd = sfp[0].calledMethod;
 ////	if(knh_isObject(kctx, mtd) && IS_Method(mtd)) {
-////		//DBG_P("FOUND methodCallInfo: shift=%d, pc=%d", sfp[-2].shift, sfp[-1].pc);
+////		//DBG_P("FOUND calledMethod: shift=%d, pc=%d", sfp[-2].shift, sfp[-1].pc);
 ////		return true;
 ////	}
 //	return false;
@@ -123,9 +123,9 @@
 //		KonohaStack *p = (sfp == NULL) ? kctx->esp : sfp - 1;
 //		KonohaStack *bottom = kctx->stack->jump_bottom;
 //		while(bottom < p) {
-//			if(p[0].methodCallInfo != NULL && isCalledMethod(kctx, p)) {
+//			if(p[0].calledMethod != NULL && isCalledMethod(kctx, p)) {
 //				kException_addStackTrace(kctx, p+1, e);
-//				p[0].methodCallInfo = 0;
+//				p[0].calledMethod = 0;
 //				//p = p[-1];
 //			}
 //			p--;
