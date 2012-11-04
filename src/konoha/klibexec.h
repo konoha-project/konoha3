@@ -363,22 +363,14 @@ static ksymbol_t Ksymbol(KonohaContext *kctx, const char *name, size_t len, int 
 	int ch0 = name[0], ch1 = name[1];
 	if(def != SYM_NEWRAW) {
 		if(ch1 == 'e' && name[2] == 't') {
-			if(ch0 == 'g'/* || ch0 == 'G'*/) {
+			if(ch0 == 'g' || ch0 == 'G') {
 				len -= 3; name += 3;
 				mask = MN_GETTER;
 			}
-			else if(ch0 == 's'/* || ch0 == 'S'*/) {
+			else if(ch0 == 's' || ch0 == 'S') {
 				len -= 3; name += 3;
 				mask = MN_SETTER;
 			}
-		}
-//		else if(ch1 == 's' && (ch0 == 'i'/* || ch0 == 'I'*/)) {
-//			len -= 2; name += 2;
-//			mask = MN_ISBOOL;
-//		}
-		else if(ch1 == 'o' && (ch0 == 't'/* || ch0 == 'T'*/)) {
-			len -= 2; name += 2;
-			mask = MN_TOCID;
 		}
 		else if(ch0 == '@') {
 			len -= 1; name += 1;
