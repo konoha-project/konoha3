@@ -280,53 +280,7 @@ static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
-	/**
-MiniKonoha 0.2 (Old Riga) (0b9d1831, Nov  4 2012)
-[gcc 4.2.1 (Based on Apple Inc. build 5658) (LLVM build 2336.9.00)]
-options: minivm sugar
->>> import("konoha.string")
-Reading symbols for shared libraries . done
-
-Program received signal EXC_BAD_ACCESS, Could not access memory.
-Reason: KERN_INVALID_ADDRESS at address: 0x00000000000000e0
-0x000000010001c897 in KonohaClass_shortName (kctx=0x100100fa8, ct=0x0) at datatype.h:793
-793		if(ct->shortClassNameNULL_OnGlobalConstList == NULL) {
-(gdb) bt
-#0  0x000000010001c897 in KonohaClass_shortName (kctx=0x100100fa8, ct=0x0) at datatype.h:793
-#1  0x000000010002660f in CT_s_ (kctx=0x100100fa8, ct=0x0) at klib.h:81
-#2  0x00000001000266aa in TY_s_ (kctx=0x100100fa8, ty=118) at klib.h:89
-#3  0x000000010002e23d in kNameSpace_AddMethod (kctx=0x100100fa8, ns=0x101022b00, mtd=0x101023c80, trace=0x7fff5fbfeff8)
-    at namespace.h:792
-#4  0x000000010002f206 in kNameSpace_LoadMethodData (kctx=0x100100fa8, ns=0x101022b00, data=0x7fff5fbfe148, trace=0x7fff5fbfeff8)
-    at namespace.h:859
-#5  0x000000010024897f in LoadJavaAPI (kctx=0x100100fa8, ns=0x101022b00, trace=0x7fff5fbfeff8) at java_string.h:399
-#6  0x000000010024a8f8 in string_initPackage (kctx=0x100100fa8, ns=0x101022b00, argc=0, args=0x0, trace=0x7fff5fbfeff8)
-    at string_glue.c:283
-#7  0x000000010002f7bd in loadPackageNULL (kctx=0x100100fa8, packageId=5, trace=0x7fff5fbfeff8) at namespace.h:930
-#8  0x000000010002f937 in getPackageNULL (kctx=0x100100fa8, packageId=5, trace=0x7fff5fbfeff8) at namespace.h:951
-#9  0x0000000100030072 in kNameSpace_importPackage (kctx=0x100100fa8, ns=0x101020080, name=0x101005868 "konoha.string",
-    trace=0x7fff5fbfeff8) at namespace.h:1034
-#10 0x0000000100047923 in NameSpace_importPackage (kctx=0x100100fa8, sfp=0x100200080) at sugar.c:255
-#11 0x0000000100049999 in KonohaVirtualMachine_run (kctx=0x100100fa8, sfp0=0x100200040, pc=0x1001137c8) at tracevm.h:412
-#12 0x00000001000552c6 in MethodFunc_runVirtualMachine (kctx=0x100100fa8, sfp=0x100200040) at compiler.c:1045
-#13 0x00000001000184f0 in KonohaRuntime_tryCallMethod (kctx=0x100100fa8, sfp=0x100200040) at klibexec.h:500
-#14 0x000000010003a51e in kMethod_runEval (kctx=0x100100fa8, mtd=0x101022700, rtype=0) at tycheck.h:413
-#15 0x000000010003a395 in kBlock_genEvalCode (kctx=0x100100fa8, bk=0x101005940, mtd=0x101022700) at tycheck.h:398
-#16 0x000000010003a95f in TokenSequence_eval (kctx=0x100100fa8, source=0x7fff5fbff6f0) at tycheck.h:469
-#17 0x000000010004674d in kNameSpace_eval (kctx=0x100100fa8, ns=0x101020080, script=0x10081ba00 "import(\"konoha.string\")",
-    uline=8589934593) at sugar.c:63
-#18 0x00000001000468e7 in MODSUGAR_eval (kctx=0x100100fa8, script=0x10081ba00 "import(\"konoha.string\")", uline=8589934593)
-    at sugar.c:76
-#19 0x000000010002194e in konoha_eval (konoha=0x100100fa8, script=0x10081ba00 "import(\"konoha.string\")", uline=8589934593)
-    at minikonoha.c:262
-#20 0x0000000100008a33 in shell (kctx=0x100100fa8) at minishell.h:120
-#21 0x0000000100008c44 in konoha_shell (konoha=0x100100fa8) at minishell.h:157
-#22 0x000000010000a98e in konoha_parseopt (konoha=0x100100fa8, argc=1, argv=0x7fff5fbffbd0) at command.c:523
-#23 0x000000010000aaa5 in main (argc=1, argv=0x7fff5fbffbd0) at command.c:546
-(gdb) The program is running.  Exit anyway? (y or n) y
-	 */
-
-	// This cause SEGV
+	// It is good to move these apis to other package such as java.string
 	// LoadJavaAPI(kctx, ns, trace);
 	KSetClassFunc(ns->packageId, CT_String, unbox, String2_unbox, trace);
 	KSetClassFunc(ns->packageId, CT_String, free, String2_free, trace);
