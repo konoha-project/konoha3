@@ -34,7 +34,7 @@ extern "C" {
 // -------------------------------------------------------------------------
 // JenkinsTest
 
-static const char *filename2;
+static const char *filename2 = NULL;
 static FILE *stdlog2 = NULL;
 
 static const char *GetProfile()
@@ -46,6 +46,7 @@ static const char *GetProfile()
 static FILE *GetLogFile(void)
 {
 	if(stdlog2 == NULL) {
+		if(filename2 == NULL) return stdout;
 		char result_file[256];
 		snprintf(result_file, sizeof(result_file), "%s.%s_tested", filename2, GetProfile());
 		stdlog2 = fopen(result_file, "w");
@@ -59,7 +60,7 @@ static FILE *GetLogFile(void)
 
 static void BEFORE_LoadScript(KonohaContext *kctx, const char *filename)
 {
-	filename = (filename == NULL) ? "shell" : filename;
+	//filename = (filename == NULL) ? "shell" : filename;
 	filename2 = filename;
 }
 
@@ -77,27 +78,6 @@ static int check_result2(FILE *fp0, FILE *fp1)
 	return 0; //OK
 }
 
-//static int check_result2(FILE *fp0, FILE *fp1)
-//{
-//	char buf0[128];
-//	char buf1[128];
-//	while (true) {
-//		size_t len0, len1;
-//		len0 = fread(buf0, 1, sizeof(buf0), fp0);
-//		len1 = fread(buf1, 1, sizeof(buf1), fp1);
-//		if(len0 != len1) {
-//			return 1;//FAILED
-//		}
-//		if(len0 == 0) {
-//			break;
-//		}
-//		if(memcmp(buf0, buf1, len0) != 0) {
-//			return 1;//FAILED
-//		}
-//	}
-//	return 0; //OK
-//}
-
 static void AFTER_LoadScript(KonohaContext *kctx, const char *filename)
 {
 	int stdlog_count = 0;
@@ -108,7 +88,7 @@ static void AFTER_LoadScript(KonohaContext *kctx, const char *filename)
 	}
 	//if(PLATAPI exitStatus != 0) return;
 	if(stdlog_count != 0) {
-		filename = (filename == NULL) ? "shell" : filename;
+		//filename = (filename == NULL) ? "shell" : filename;
 		char proof_file[256];
 		char result_file[256];
 		PLATAPI snprintf_i(proof_file, sizeof(proof_file), "%s.%s_proof",  filename, GetProfile());
@@ -120,12 +100,11 @@ static void AFTER_LoadScript(KonohaContext *kctx, const char *filename)
 			return;
 		}
 		FILE *fp2 = fopen(result_file, "r");
+		DBG_ASSERT(fp2 != NULL);
 		int ret = check_result2(fp, fp2);
 		if(ret != 0) {
-			fprintf(stdout, "stdlog_count=%d, exitStatus=%d\n", stdlog_count, kctx->platApi->exitStatus);
 			fprintf(stdout, "proof file mismatched: %s\n", proof_file);
 			((KonohaFactory*)kctx->platApi)->exitStatus = 78;
-			fprintf(stdout, "stdlog_count=%d, exitStatus=%d\n", stdlog_count, kctx->platApi->exitStatus);
 		}
 		else {
 			((KonohaFactory*)kctx->platApi)->exitStatus = 0;
@@ -162,7 +141,9 @@ static void TEST_ReportUserMessage(KonohaContext *kctx, kinfotag_t level, kfilel
 
 static void TEST_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t pline, const char *msg)
 {
-	PLATAPI printf_i("LINE%d: %s\n", (int)(kushort_t)pline, TAG_t(taglevel));
+	if(taglevel < DebugTag) {
+		PLATAPI printf_i("LINE%d: %s\n", (int)(kushort_t)pline, TAG_t(taglevel));
+	}
 }
 
 static void TEST_reportCaughtException(KonohaContext *kctx, const char *exceptionName, int fault, const char *optionalMessage, KonohaStack *bottom, KonohaStack *sfp)
