@@ -4,7 +4,7 @@ import("konoha.array");
 import("cstyle", "while");
 import("cstyle", "break");
 import("konoha.string");
-import("konoha.null");
+import("cstyle"); // konoha.null is obsolate; use cstyle
 import("sugar");
 
 int tokenFuncSingleQuotedChar(Token tk, String source) {

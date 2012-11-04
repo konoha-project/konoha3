@@ -1,4 +1,4 @@
-import("konoha.while");
+import("cstyle"); // use cstyle
 // import("konoha.assign"); Don't use any more
 import("konoha.array");
 import("apache");

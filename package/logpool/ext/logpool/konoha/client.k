@@ -1,7 +1,7 @@
 import("konoha");
 import("konoha.assignment");
-import("konoha.while");
-import("konoha.null");
+import("cstyle"); // use cstyle
+import("cstyle"); // konoha.null is obsolate; use cstyle
 import("logpool");
 
 void main() {

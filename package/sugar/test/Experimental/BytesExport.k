@@ -1,7 +1,7 @@
 // written by shinpei
 
 import("sugar");
-import("konoha.while");
+import("cstyle"); // use cstyle
 import("konoha.string");
 //// import("konoha.assign"); Don't use any more
 

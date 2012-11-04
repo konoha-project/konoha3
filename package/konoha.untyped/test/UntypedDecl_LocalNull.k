@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
 import("konoha.untyped");
-import("konoha.null");
+import("cstyle"); // konoha.null is obsolate; use cstyle
 import("konoha.object");
 import("konoha.subtype", "<:");
 

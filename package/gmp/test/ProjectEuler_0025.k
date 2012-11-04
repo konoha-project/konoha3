@@ -23,7 +23,7 @@ What is the first term in the Fibonacci sequence to contain 1000 digits?
 import("konoha.class");
 import("konoha.new");
 // import("konoha.assign"); Don't use any more
-import("konoha.null");
+import("cstyle"); // konoha.null is obsolate; use cstyle
 import("cstyle");
 import("gmp")
 

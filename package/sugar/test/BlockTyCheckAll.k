@@ -1,6 +1,6 @@
 // written by chenji
 
-import("konoha.null");
+import("cstyle"); // konoha.null is obsolate; use cstyle
 import("sugar");
 
 syntax "hoge" $Block;

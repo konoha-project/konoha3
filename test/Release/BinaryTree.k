@@ -2,7 +2,7 @@
 import("cstyle", "while");
 import("konoha.class");
 import("konoha.global");
-import("konoha.null");
+import("cstyle"); // konoha.null is obsolate; use cstyle
 import("cstyle"); // konoha.int was obsolete
 import("konoha.array");
 import("konoha.const");

@@ -1,7 +1,7 @@
 // written by kimio
 
 import("konoha.class");
-import("konoha.null");
+import("cstyle"); // konoha.null is obsolate; use cstyle
 
 class C {
 	int x;

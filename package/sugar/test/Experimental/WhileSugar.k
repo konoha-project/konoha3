@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
 import("sugar");
-import("konoha.null");
+import("cstyle"); // konoha.null is obsolate; use cstyle
 
 sugar "while" "(" $Expr ")" $Block
 
