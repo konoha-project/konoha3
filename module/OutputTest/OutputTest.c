@@ -59,6 +59,7 @@ static FILE *GetLogFile(void)
 
 static void BEFORE_LoadScript(KonohaContext *kctx, const char *filename)
 {
+	filename = (filename == NULL) ? "shell" : filename;
 	filename2 = filename;
 }
 
@@ -107,6 +108,7 @@ static void AFTER_LoadScript(KonohaContext *kctx, const char *filename)
 	}
 	//if(PLATAPI exitStatus != 0) return;
 	if(stdlog_count != 0) {
+		filename = (filename == NULL) ? "shell" : filename;
 		char proof_file[256];
 		char result_file[256];
 		PLATAPI snprintf_i(proof_file, sizeof(proof_file), "%s.%s_proof",  filename, GetProfile());
