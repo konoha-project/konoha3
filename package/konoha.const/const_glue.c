@@ -40,7 +40,7 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 	kNameSpace *ns = Stmt_nameSpace(stmt);
 	kToken *SymbolToken = SUGAR kStmt_getToken(kctx, stmt, KW_SymbolPattern, NULL);
 	ksymbol_t unboxKey = SymbolToken->resolvedSymbol;
-	kbool_t result = SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, TPOL_CONST);
+	kbool_t result = SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, TypeCheckPolicy_CONST);
 	if(result) {
 		kExpr *ConstExpr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL);
 		ktype_t type = ConstExpr->ty;

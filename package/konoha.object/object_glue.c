@@ -132,7 +132,7 @@ static KMETHOD TypeCheck_as(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kExpr *targetExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 2, gma, TY_var, 0);
-	kExpr *selfExpr   = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 1, gma, targetExpr->ty, 0);
+	kExpr *selfExpr   = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 1, gma, targetExpr->ty, TypeCheckPolicy_NOCHECK);
 	if(selfExpr != K_NULLEXPR && targetExpr != K_NULLEXPR) {
 		KonohaClass *selfClass = CT_(selfExpr->ty), *targetClass = CT_(targetExpr->ty);
 		if(selfExpr->ty == targetExpr->ty || selfClass->isSubType(kctx, selfClass, targetClass)) {
@@ -152,17 +152,18 @@ static KMETHOD TypeCheck_to(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kExpr *targetExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 2, gma, TY_var, 0);
-	kExpr *selfExpr   = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 1, gma, targetExpr->ty, 0);
+	kExpr *selfExpr   = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 1, gma, targetExpr->ty, TypeCheckPolicy_NOCHECK);
 	if(selfExpr != K_NULLEXPR && targetExpr != K_NULLEXPR) {
 		KonohaClass *selfClass = CT_(selfExpr->ty), *targetClass = CT_(targetExpr->ty);
 		if(selfExpr->ty == targetExpr->ty || selfClass->isSubType(kctx, selfClass, targetClass)) {
+			kStmtExpr_printMessage(kctx, stmt, selfExpr, InfoTag, "no need: %s to %s", TY_t(selfExpr->ty), TY_t(targetExpr->ty));
 			KReturn(selfExpr);
 		}
 		kNameSpace *ns = Stmt_nameSpace(stmt);
 		kMethod *mtd = KLIB kNameSpace_GetCoercionMethodNULL(kctx, ns, selfExpr->ty, targetExpr->ty);
 		if(mtd == NULL) {
 			mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, selfExpr->ty, MN_("to"), 0);
-			DBG_ASSERT(mtd != NULL);
+			DBG_ASSERT(mtd != NULL);  // because Object.to is found.
 			if(mtd->typeId != selfExpr->ty) {
 				KReturn(kStmtExpr_printMessage(kctx, stmt, selfExpr, ErrTag, "undefined coercion: %s to %s", TY_t(selfExpr->ty), TY_t(targetExpr->ty)));
 			}

@@ -610,10 +610,13 @@ typedef struct {
 	kArray            *definedMethodList;
 } SugarContext;
 
-#define TPOL_NOCHECK              1
-#define TPOL_ALLOWVOID      (1 << 1)
-#define TPOL_COERCION       (1 << 2)
-#define TPOL_CONST          (1 << 4)
+typedef enum {
+	TypeCheckPolicy_NOPOLICY              = 0,
+	TypeCheckPolicy_NOCHECK               = 1,
+	TypeCheckPolicy_ALLOWVOID      = (1 << 1),
+	TypeCheckPolicy_COERCION       = (1 << 2),
+	TypeCheckPolicy_CONST          = (1 << 4),
+} TypeCheckPolicy;
 
 #define new_ConstValueExpr(CTX, T, O)              SUGAR kExpr_setConstValue(CTX, NULL, T, O)
 #define new_UnboxConstValueExpr(CTX, T, D)         SUGAR kExpr_setUnboxConstValue(CTX, NULL, T, D)

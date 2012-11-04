@@ -128,12 +128,15 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 		kNameSpace *ns = Stmt_nameSpace(stmt);
 		//DBG_P("type=%s, reqty=%s", TY_t(expr->ty), TY_t(reqty));
 		if(texpr->ty == TY_void) {
-			if(!FLAG_is(pol, TPOL_ALLOWVOID)) {
+			if(!FLAG_is(pol, TypeCheckPolicy_ALLOWVOID)) {
 				texpr = kStmtExpr_printMessage(kctx, stmt, expr, ErrTag, "void is not acceptable");
 			}
 			return texpr;
 		}
-		if(reqty == TY_var || texpr->ty == reqty || FLAG_is(pol, TPOL_NOCHECK)) {
+		if(TY_is(TypeVar, texpr->ty)) {
+			return kStmtExpr_printMessage(kctx, stmt, expr, ErrTag, "not typed with type variable %s", TY_t(texpr->ty));
+		}
+		if(reqty == TY_var || texpr->ty == reqty || FLAG_is(pol, TypeCheckPolicy_NOCHECK)) {
 			return texpr;
 		}
 		if(CT_isa(kctx, texpr->ty, reqty)) {
@@ -147,7 +150,7 @@ static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma
 		kMethod *mtd = kNameSpace_GetCoercionMethodNULL(kctx, ns, texpr->ty, reqty);
 		DBG_P("finding cast %s => %s: %p", TY_t(texpr->ty), TY_t(reqty), mtd);
 		if(mtd != NULL) {
-			if(kMethod_is(Coercion, mtd) || FLAG_is(pol, TPOL_COERCION)) {
+			if(kMethod_is(Coercion, mtd) || FLAG_is(pol, TypeCheckPolicy_COERCION)) {
 				return new_TypedCallExpr(kctx, stmt, gma, reqty, mtd, 1, texpr);
 			}
 			if(kNameSpace_IsAllowed(ImplicitCoercion, ns)) {

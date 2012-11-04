@@ -469,7 +469,7 @@ static KMETHOD TypeCheck_Assign(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kNameSpace *ns = Stmt_nameSpace(stmt);  // leftHandExpr = rightHandExpr
-	kExpr *leftHandExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 1, gma, TY_var, TPOL_ALLOWVOID);
+	kExpr *leftHandExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 1, gma, TY_var, TypeCheckPolicy_ALLOWVOID);
 	kExpr *rightHandExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 2, gma, leftHandExpr->ty, 0);
 	if(rightHandExpr != K_NULLEXPR && leftHandExpr != K_NULLEXPR) {
 		if(leftHandExpr->build == TEXPR_LOCAL || leftHandExpr->build == TEXPR_FIELD || leftHandExpr->build == TEXPR_STACKTOP) {
@@ -664,7 +664,7 @@ static int param_policy(ksymbol_t fn)
 {
 	int pol = 0;
 	if(FN_isCOERCION(fn)) {
-		pol = pol | TPOL_COERCION;
+		pol = pol | TypeCheckPolicy_COERCION;
 	}
 	return pol;
 }
@@ -678,7 +678,7 @@ static kMethod *kStmt_lookupOverloadedMethod(KonohaContext *kctx, kStmt *stmt, k
 	for(i = 0; i < psize; i++) {
 		size_t n = i + 2;
 		ktype_t paramType = (i < pa->psize) ? ktype_var(kctx, pa->paramtypeItems[i].ty, thisClass) : TY_var;
-		kExpr *texpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, n, gma, paramType, TPOL_NOCHECK);
+		kExpr *texpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, n, gma, paramType, TypeCheckPolicy_NOCHECK);
 		if(texpr == K_NULLEXPR) {
 			return NULL;
 		}
@@ -933,7 +933,7 @@ static kExpr *Expr_tyCheckFuncParams(KonohaContext *kctx, kStmt *stmt, kExpr *ex
 static KMETHOD Statement_Expression(KonohaContext *kctx, KonohaStack *sfp)  // $Expr
 {
 	VAR_Statement(stmt, gma);
-	kbool_t r = kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, TPOL_ALLOWVOID);
+	kbool_t r = kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, TypeCheckPolicy_ALLOWVOID);
 	kStmt_typed(stmt, EXPR);
 	KReturnUnboxValue(r);
 }
