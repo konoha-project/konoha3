@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
-find_library(HAVE_LIBPTHREAD NAMES pthread)
-if(HAVE_LIBPTHREAD)
-	set(PACKAGE_EXTRA_LIBRARY ${HAVE_LIBPTHREAD})
-	set(PACKAGE_SOURCE_CODE thread_glue.c)
-	set(PACKAGE_SCRIPT_CODE thread_glue.k)
-	add_konoha_package(posix.thread)
-endif(HAVE_LIBPTHREAD)
+
+FIND_PACKAGE_EXTRA_LIBRARY(pthread)
+set(PACKAGE_SOURCE_CODE thread_glue.c)
+set(PACKAGE_SCRIPT_CODE thread_glue.k)
+add_konoha_package(posix.thread)
