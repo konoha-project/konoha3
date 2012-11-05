@@ -24,11 +24,13 @@
 
 import("cstyle", "while");
 import("cstyle", "break");
+import("cstyle", "null");
 import("konoha.array");
-import("cstyle"); // konoha.null is obsolate; use cstyle
 import("konoha.const");
+import("konoha.object");
 import("konoha.file");
 import("konoha.global");
+import("konoha.string");
 import("posix.path");
 import("dscript.subproc");
 import("sugar");
@@ -43,7 +45,10 @@ const DEBUG = false;
 		ret = ret + line + "\n";
 		line = this.readLine();
 	}
-	return ret;
+	if(ret == "") {
+		return ret;
+	}
+	return ret.substr(0, ret.getSize() - 1);
 }
 
 String[] concatTokenList(Token[] tokenList) {
@@ -138,9 +143,12 @@ String generateSubProcSequence(String[] args) {
 				ret = ret + prevname + ".pipe(" + varname + ", false);\n";
 			}
 			if(isCommandUseTty(args[startindex])) {
-				ret = ret + varname + ".bg();\n";
 				if(prevname != "") {
+					ret = ret + varname + ".bg();\n";
 					ret = ret + varname + ".communicate(" + prevname + ".getOutputStream().readAll());\n";
+				}
+				else {
+					ret = ret + varname + ".fg();\n";
 				}
 			}
 			else {
@@ -154,17 +162,17 @@ String generateSubProcSequence(String[] args) {
 			}
 			else {
 				ret = ret + varname + ".setOutputStream(stdout);\n";
-				if(isCommandUseTty(args[startindex])) {
-					ret = ret + varname + ".setErrorStream(stderr);\n";
-				}
 			}
 			if(prevname != "" && !isCommandUseTty(args[startindex])) {
 				ret = ret + prevname + ".pipe(" + varname + ", false);\n";
 			}
 			if(isCommandUseTty(args[startindex])) {
-				ret = ret + varname + ".bg();\n";
 				if(prevname != "") {
+					ret = ret + varname + ".bg();\n";
 					ret = ret + varname + ".communicate(" + prevname + ".getOutputStream().readAll());\n";
+				}
+				else {
+					ret = ret + varname + ".fg();\n";
 				}
 			}
 			else {
@@ -183,7 +191,7 @@ String generateSubProcSequence(String[] args) {
 
 boolean statementShell(Stmt stmt, Gamma gma) {
 	Token[] tokenList = stmt.getTokenList("$Token", null);
-	if(tokenList == null) {
+	if(tokenList.isNull()) {
 		return false;
 	}
 	String[] args = concatTokenList(tokenList);
@@ -222,8 +230,20 @@ boolean isCommand(String cmd) {
 int patternMatchShell(Stmt stmt, int nameid, Token[] tokenList, int beginIdx, int endIdx) {
 	Token firstToken = tokenList[beginIdx];
 	//System.p("firstToken='" + firstToken.getText() + "', isCommand=" + isCommand(firstToken.getText()));
-	if(firstToken.isSymbol() && isCommand(firstToken.getText())) {
-		return beginIdx;
+	if(firstToken.isSymbol()/* && isCommand(firstToken.getText())*/) {
+		/* == inlined == */
+		String[] dirs = ["/bin", "/sbin", "/usr/bin", "/usr/sbin"];
+		int i = 0;
+		while(i < dirs.getSize()) {
+			DIR d = System.opendir(dirs[i]);
+			String binname = d.readFileName();
+			while(binname != null) {
+				binname = d.readFileName();
+				if(binname == firstToken.getText()) return beginIdx;
+			}
+			i = i + 1;
+		}
+		/* ============= */
 	}
 	return -1;
 }
