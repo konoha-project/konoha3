@@ -1511,10 +1511,18 @@ struct KonohaPackageVar {
 };
 
 /* ----------------------------------------------------------------------- */
-// kklib
+// klib
 
 struct klogconf_t;
 typedef struct GcContext GcContext;
+
+typedef enum {
+	DefaultCompileOption = 0,
+	CrossCompile  = 1,
+	HatedLazyCompile   = (1 < 1),
+	O2Compile     = (1 < 2),
+	DebugCompile  = (1 < 3),
+} CompileOption;
 
 typedef struct KObjectVisitor {
 	void (*fn_visit)(struct KObjectVisitor *vistor, kObject *object);
@@ -1598,7 +1606,7 @@ struct KonohaLibVar {
 	kMethodVar*     (*new_kMethod)(KonohaContext*, kArray *gcstack, uintptr_t, ktype_t, kmethodn_t, MethodFunc);
 	kParam*         (*kMethod_setParam)(KonohaContext*, kMethod *, ktype_t, kushort_t, const kparamtype_t *);
 	void            (*kMethod_setFunc)(KonohaContext*, kMethod*, MethodFunc);
-	void            (*kMethod_genCode)(KonohaContext*, kMethod*, kBlock *bk);
+	void            (*kMethod_GenCode)(KonohaContext*, kMethod*, kBlock *bk, int options);
 	intptr_t        (*kMethod_indexOfField)(kMethod *);
 
 	kbool_t         (*KonohaRuntime_setModule)(KonohaContext*, int, struct KonohaModule *, KTraceInfo *);
@@ -1622,11 +1630,11 @@ struct KonohaLibVar {
 	kMethod*         (*kNameSpace_GetCoercionMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ktype_t tcid);
 	kMethod*         (*kNameSpace_GetMethodByParamSizeNULL)(KonohaContext*, kNameSpace *, ktype_t cid, kmethodn_t mn, int paramsize);
 	kMethod*         (*kNameSpace_GetMethodBySignatureNULL)(KonohaContext*, kNameSpace *, ktype_t cid, kmethodn_t mn, int paramdom, int paramsize, kparamtype_t *);
-	void             (*kMethod_DoLazyCompilation)(KonohaContext *kctx, kMethod *mtd);
+	kMethod*         (*kMethod_DoLazyCompilation)(KonohaContext *kctx, kMethod *mtd, kparamtype_t *, int options);
 //	void             (*kNameSpace_compileAllDefinedMethods)(KonohaContext *kctx);
 
 	// code generator package
-	void             (*KCodeGen)(KonohaContext*, kMethod *, kBlock *);
+//	void             (*KCodeGen)(KonohaContext*, kMethod *, kBlock *);
 	kbool_t          (*KonohaRuntime_tryCallMethod)(KonohaContext *, KonohaStack *);
 	void             (*KonohaRuntime_raise)(KonohaContext*, int symbol, int fault, kString *Nullable, KonohaStack *);
 	void             (*ReportRuntimeMessage)(KonohaContext *, KTraceInfo *, kinfotag_t, const char *fmt, ...);

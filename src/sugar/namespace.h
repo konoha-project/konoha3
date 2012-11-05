@@ -76,7 +76,7 @@ static void kNameSpace_SetTokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns, i
 {
 	kArray **list = (kArray**)kNameSpace_tokenFuncMatrix(kctx, ns);
 	kNameSpace_addFuncList(kctx, ns, list, konohaChar, fo);
-	KLIB kMethod_DoLazyCompilation(kctx, (fo)->mtd);
+	KLIB kMethod_DoLazyCompilation(kctx, (fo)->mtd, NULL, HatedLazyCompile);
 }
 
 // ---------------------------------------------------------------------------
@@ -207,7 +207,7 @@ static SugarSyntaxVar *kNameSpace_addSugarFunc(KonohaContext *kctx, kNameSpace *
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, keyword, 1/*new*/);
 	DBG_ASSERT(idx < SugarFunc_SIZE);
 	kNameSpace_addFuncList(kctx, ns, syn->sugarFuncListTable, idx, funcObject);
-	KLIB kMethod_DoLazyCompilation(kctx, (funcObject)->mtd);
+	KLIB kMethod_DoLazyCompilation(kctx, (funcObject)->mtd, NULL, HatedLazyCompile);
 	syn->lastLoadedPackageId = ns->packageId;
 	return syn;
 }
@@ -217,7 +217,7 @@ static SugarSyntaxVar *kNameSpace_SetTokenFunc(KonohaContext *kctx, kNameSpace *
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, keyword, 1/*new*/);
 	kArray **list = (kArray**)kNameSpace_tokenFuncMatrix(kctx, ns);
 	kNameSpace_addFuncList(kctx, ns, list, konohaChar, fo);
-	KLIB kMethod_DoLazyCompilation(kctx, (fo)->mtd);
+	KLIB kMethod_DoLazyCompilation(kctx, (fo)->mtd, NULL, HatedLazyCompile);
 	syn->tokenKonohaChar = konohaChar;
 	syn->sugarFuncTable[SugarFunc_TokenFunc] = fo;  // added in addFuncList
 	syn->lastLoadedPackageId = ns->packageId;
@@ -906,7 +906,7 @@ static kbool_t kNameSpace_LoadScript(KonohaContext *kctx, kNameSpace *ns, const 
 		size_t i, size = kArray_size(KonohaContext_getSugarContext(kctx)->definedMethodList);
 		for (i = 0; i < size; ++i) {
 			kMethod *mtd = KonohaContext_getSugarContext(kctx)->definedMethodList->MethodItems[i];
-			KLIB kMethod_DoLazyCompilation(kctx, mtd);
+			KLIB kMethod_DoLazyCompilation(kctx, mtd, NULL, DefaultCompileOption);
 		}
 		KLIB kArray_clear(kctx, KonohaContext_getSugarContext(kctx)->definedMethodList, 0);
 	}
