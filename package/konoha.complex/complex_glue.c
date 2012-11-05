@@ -733,7 +733,7 @@ static kbool_t Complex_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		{"FLOAT_EPSILON", TY_float, DBL_EPSILON},
 		{} /* <= sentinel */
 	};
-	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(FloatData), trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(FloatData), trace);
 	return true;
 }
 

@@ -51,7 +51,7 @@ int verbose_sugar = 0;
 /* Sugar Global Functions */
 
 
-static kstatus_t kNameSpace_eval(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline)
+static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline)
 {
 	kstatus_t result;
 	kmodsugar->h.setupModuleContext(kctx, (KonohaModule *)kmodsugar, 0/*lazy*/);
@@ -73,7 +73,7 @@ kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, kfileline_t uli
 		DUMP_P("\n>>>----\n'%s'\n------\n", script);
 	}
 	kmodsugar->h.setupModuleContext(kctx, (KonohaModule *)kmodsugar, 0/*lazy*/);
-	return kNameSpace_eval(kctx, KNULL(NameSpace), script, uline);    // FIXME
+	return kNameSpace_Eval(kctx, KNULL(NameSpace), script, uline);    // FIXME
 }
 
 /* ------------------------------------------------------------------------ */
@@ -127,13 +127,14 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	l->kNameSpace_defineClass    = kNameSpace_defineClass;
 	l->kNameSpace_LoadMethodData = kNameSpace_LoadMethodData;
 	l->kNameSpace_SetConstData   = kNameSpace_SetConstData;
-	l->kNameSpace_loadConstData  = kNameSpace_loadConstData;
+	l->kNameSpace_LoadConstData  = kNameSpace_LoadConstData;
 	l->kNameSpace_GetGetterMethodNULL  = kNameSpace_GetGetterMethodNULL;
 	l->kNameSpace_GetSetterMethodNULL  = kNameSpace_GetSetterMethodNULL;
 	l->kNameSpace_GetCoercionMethodNULL = kNameSpace_GetCoercionMethodNULL;
 	l->kNameSpace_GetMethodByParamSizeNULL  = kNameSpace_GetMethodByParamSizeNULL;
 	l->kNameSpace_GetMethodBySignatureNULL  = kNameSpace_GetMethodBySignatureNULL;
-	l->kNameSpace_compileAllDefinedMethods  = kNameSpace_compileAllDefinedMethods;
+	l->kMethod_DoLazyCompilation = kMethod_DoLazyCompilation;
+//	l->kNameSpace_compileAllDefinedMethods  = kNameSpace_compileAllDefinedMethods;
 //	l->kNameSpace_reftraceSugarExtension =  kNameSpace_reftraceSugarExtension;
 	l->kNameSpace_freeSugarExtension =  kNameSpace_freeSugarExtension;
 
@@ -184,7 +185,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 		{"System", VirtualType_KonohaClass, (uintptr_t)CT_System},
 		{NULL},
 	};
-	kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(ClassData), 0);
+	kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(ClassData), 0);
 
 	mod->kNameSpace_SetTokenFunc       = kNameSpace_SetTokenFunc;
 	mod->TokenSequence_tokenize        = TokenSequence_tokenize;
@@ -245,7 +246,7 @@ static KMETHOD NameSpace_loadScript(KonohaContext *kctx, KonohaStack *sfp)
 	char pathbuf[512];
 	const char *path = PLATAPI formatTransparentPath(pathbuf, sizeof(pathbuf), FileId_t(sfp[K_RTNIDX].calledFileLine), S_text(sfp[1].asString));
 	KMakeTrace(trace, sfp);
-	kNameSpace_loadScript(kctx, sfp[0].asNameSpace, path, trace);
+	kNameSpace_LoadScript(kctx, sfp[0].asNameSpace, path, trace);
 }
 
 // boolean NameSpace.import(String pkgname);

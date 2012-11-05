@@ -281,19 +281,19 @@ static void dse_define(KonohaContext *kctx, Message *msg)
 			{"DSE_SCRIPT_DIR", VirtualType_Text, scriptdir},
 			{}
 		};
-		KLIB kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(TextData), 0);
+		KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(TextData), 0);
 	}
 	else {
 		KDEFINE_TEXT_CONST TextData[] = {
 			{"DSE_SCRIPT_DIR", VirtualType_Text, scriptdir},
 			{}
 		};
-		KLIB kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(TextData), 0);
+		KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(TextData), 0);
 	}
 	KDEFINE_INT_CONST IntData[] = {
 		{"DSE_DEBUG", TY_int, verbose_debug}, {}
 	};
-	KLIB kNameSpace_loadConstData(kctx, KNULL(NameSpace), KonohaConst_(IntData), 0);
+	KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(IntData), 0);
 }
 
 static void *dse_dispatch(void *arg)

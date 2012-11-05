@@ -264,7 +264,7 @@ static kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 			{_KVf(SQRT2)},
 			{}
 	};
-	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(FloatData), 0);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(FloatData), 0);
 	return true;
 }
 

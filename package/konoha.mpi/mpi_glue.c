@@ -650,7 +650,7 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 			{"BXOR", TY_MPIOp, (kint_t)MPI_BXOR},
 			{}
 	};
-	KLIB kNameSpace_loadConstData(kctx, ns, (const char **)OpData, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, (const char **)OpData, trace);
 	return true;
 }
 

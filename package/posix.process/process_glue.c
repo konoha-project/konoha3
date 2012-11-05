@@ -349,7 +349,7 @@ static kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		{KDefineConstInt(PRIO_USER)},
 		{}
 	};
-	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(intData), 0);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(intData), 0);
 	return true;
 }
 

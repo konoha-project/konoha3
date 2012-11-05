@@ -194,7 +194,7 @@ static kbool_t object_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		{"Object", VirtualType_KonohaClass, (uintptr_t)CT_(TY_Object)},
 		{NULL},
 	};
-	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(ClassData), 0);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(ClassData), 0);
 	object_defineMethod(kctx, ns, trace);
 	subtype_defineSyntax(kctx, ns, trace);
 	return true;

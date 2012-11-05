@@ -502,10 +502,12 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 				KLIB Kwb_printf(kctx, &wb, "function %s(", CT_t(class));
 			}
 		}else if(kMethod_is(Static, mtd)) {
-			KLIB kNameSpace_compileAllDefinedMethods(kctx);
+			//KLIB kNameSpace_compileAllDefinedMethods(kctx);  // is it okay?
+			KLIB kMethod_DoLazyCompilation(kctx, mtd);  // is it okay?
 			KLIB Kwb_printf(kctx, &wb, "%s.%s%s = function(", CT_t(CT_(mtd->typeId)), MethodName_t(mtd->mn));
 		}else{
-			KLIB kNameSpace_compileAllDefinedMethods(kctx);
+			//KLIB kNameSpace_compileAllDefinedMethods(kctx);  is it okay?
+			KLIB kMethod_DoLazyCompilation(kctx, mtd);  // is it okay?
 			KLIB Kwb_printf(kctx, &wb, "%s.prototype.%s%s = function(", CT_t(CT_(mtd->typeId)), MethodName_t(mtd->mn));
 		}
 		for(i = 0; i < pa->psize; i++) {
@@ -560,7 +562,8 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 			}
 		}
 	}else{
-		KLIB kNameSpace_compileAllDefinedMethods(kctx);
+		KLIB kMethod_DoLazyCompilation(kctx, mtd);  // is it okay?
+		//KLIB kNameSpace_compileAllDefinedMethods(kctx);
 	}
 
 	KLIB Kwb_free(&wb);

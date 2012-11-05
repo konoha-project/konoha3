@@ -298,7 +298,7 @@ static kbool_t float_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		{"NaN", TY_float, NAN},
 		{}
 	};
-	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(FloatData), trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(FloatData), trace);
 	return true;
 }
 

@@ -130,7 +130,7 @@ static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		{"APLOG_DEBUG", TY_int, APLOG_DEBUG},
 		{NULL, 0, 0}
 	};
-	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), 0);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), 0);
 	return true;
 }
 

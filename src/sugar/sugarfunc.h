@@ -1123,19 +1123,14 @@ static void kMethod_setLazyCompilation(KonohaContext *kctx, kMethodVar *mtd, kSt
 	}
 }
 
-static void kNameSpace_compileAllDefinedMethods(KonohaContext *kctx)
+static void kMethod_DoLazyCompilation(KonohaContext *kctx, kMethod *mtd)
 {
-	size_t i, size = kArray_size(KonohaContext_getSugarContext(kctx)->definedMethodList);
-	for (i = 0; i < size; ++i) {
-		kMethod *mtd = KonohaContext_getSugarContext(kctx)->definedMethodList->MethodItems[i];
-		if(mtd != NULL && mtd->invokeMethodFunc == MethodFunc_lazyCompilation) {
-			kString *text = mtd->SourceToken->text;
-			kfileline_t uline = mtd->SourceToken->uline;
-			kMethod_compile(kctx, mtd, mtd->LazyCompileNameSpace, text, uline);
-			assert(mtd->invokeMethodFunc != MethodFunc_lazyCompilation);
-		}
+	if(mtd->invokeMethodFunc == MethodFunc_lazyCompilation) {
+		kString *text = mtd->SourceToken->text;
+		kfileline_t uline = mtd->SourceToken->uline;
+		kMethod_compile(kctx, mtd, mtd->LazyCompileNameSpace, text, uline);
+		DBG_ASSERT(mtd->invokeMethodFunc != MethodFunc_lazyCompilation);
 	}
-	KLIB kArray_clear(kctx, KonohaContext_getSugarContext(kctx)->definedMethodList, 0);
 }
 
 ///* ------------------------------------------------------------------------ */

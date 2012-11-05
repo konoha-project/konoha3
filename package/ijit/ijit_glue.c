@@ -733,7 +733,7 @@ static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	//	{"PTRSIZE", TY_int, sizeof(void *)},
 	//	{NULL},
 	//};
-	//KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(IntData), trace);
+	//KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), trace);
 
 	KLIB KonohaRuntime_setModule(kctx, MOD_jit, &base->h, trace);
 	return true;

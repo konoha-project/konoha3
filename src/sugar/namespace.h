@@ -76,6 +76,7 @@ static void kNameSpace_SetTokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns, i
 {
 	kArray **list = (kArray**)kNameSpace_tokenFuncMatrix(kctx, ns);
 	kNameSpace_addFuncList(kctx, ns, list, konohaChar, fo);
+	KLIB kMethod_DoLazyCompilation(kctx, (fo)->mtd);
 }
 
 // ---------------------------------------------------------------------------
@@ -206,6 +207,7 @@ static SugarSyntaxVar *kNameSpace_addSugarFunc(KonohaContext *kctx, kNameSpace *
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, keyword, 1/*new*/);
 	DBG_ASSERT(idx < SugarFunc_SIZE);
 	kNameSpace_addFuncList(kctx, ns, syn->sugarFuncListTable, idx, funcObject);
+	KLIB kMethod_DoLazyCompilation(kctx, (funcObject)->mtd);
 	syn->lastLoadedPackageId = ns->packageId;
 	return syn;
 }
@@ -215,6 +217,7 @@ static SugarSyntaxVar *kNameSpace_SetTokenFunc(KonohaContext *kctx, kNameSpace *
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, keyword, 1/*new*/);
 	kArray **list = (kArray**)kNameSpace_tokenFuncMatrix(kctx, ns);
 	kNameSpace_addFuncList(kctx, ns, list, konohaChar, fo);
+	KLIB kMethod_DoLazyCompilation(kctx, (fo)->mtd);
 	syn->tokenKonohaChar = konohaChar;
 	syn->sugarFuncTable[SugarFunc_TokenFunc] = fo;  // added in addFuncList
 	syn->lastLoadedPackageId = ns->packageId;
@@ -396,7 +399,7 @@ static kbool_t kNameSpace_SetConstData(KonohaContext *kctx, kNameSpace *ns, ksym
 	return ret;
 }
 
-static kbool_t kNameSpace_loadConstData(KonohaContext *kctx, kNameSpace *ns, const char **d, KTraceInfo *trace)
+static kbool_t kNameSpace_LoadConstData(KonohaContext *kctx, kNameSpace *ns, const char **d, KTraceInfo *trace)
 {
 	INIT_GCSTACK();
 	KKeyValue kv;
@@ -862,7 +865,7 @@ static void kNameSpace_LoadMethodData(KonohaContext *kctx, kNameSpace *ns, intpt
 
 // ---------------------------------------------------------------------------
 
-static kstatus_t kNameSpace_eval(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline);
+static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline);
 
 typedef struct {
 	KonohaContext *kctx;
@@ -875,7 +878,7 @@ static int evalHookFunc(const char *script, long uline, int *isBreak, void *thun
 //	if(verbose_sugar) {
 //		DUMP_P("\n>>>----\n'%s'\n------\n", script);
 //	}
-	kstatus_t result = kNameSpace_eval(t->kctx, t->ns, script, uline);
+	kstatus_t result = kNameSpace_Eval(t->kctx, t->ns, script, uline);
 	*isBreak = (result == K_BREAK);
 	return (result != K_FAILED);
 }
@@ -891,13 +894,21 @@ static kfileline_t uline_init(KonohaContext *kctx, const char *path, int line, i
 	return uline;
 }
 
-static kbool_t kNameSpace_loadScript(KonohaContext *kctx, kNameSpace *ns, const char *path, KTraceInfo *trace)
+static kbool_t kNameSpace_LoadScript(KonohaContext *kctx, kNameSpace *ns, const char *path, KTraceInfo *trace)
 {
 	SugarThunk thunk = {kctx, ns};
 	kfileline_t uline = uline_init(kctx, path, 1, true/*isRealPath*/);
 	if(!(PLATAPI loadScript(path, uline, (void *)&thunk, evalHookFunc))) {
 		KLIB ReportRuntimeMessage(kctx, trace, ErrTag, "failed to load script: %s", path);
 		return false;
+	}
+	if(KonohaContext_Is(CompileOnly, kctx)) {
+		size_t i, size = kArray_size(KonohaContext_getSugarContext(kctx)->definedMethodList);
+		for (i = 0; i < size; ++i) {
+			kMethod *mtd = KonohaContext_getSugarContext(kctx)->definedMethodList->MethodItems[i];
+			KLIB kMethod_DoLazyCompilation(kctx, mtd);
+		}
+		KLIB kArray_clear(kctx, KonohaContext_getSugarContext(kctx)->definedMethodList, 0);
 	}
 	return true;
 }
@@ -929,7 +940,7 @@ static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackageId_t packageI
 		packageHandler->initPackage(kctx, ns, 0, NULL, trace);
 	}
 	if(path != NULL) {
-		if(!kNameSpace_loadScript(kctx, ns, pathbuf, trace)) {
+		if(!kNameSpace_LoadScript(kctx, ns, pathbuf, trace)) {
 			return NULL;
 		}
 	}
@@ -1061,7 +1072,7 @@ kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len,
 	INIT_GCSTACK();
 	kpackageId_t packageId = KLIB KpackageId(kctx, "main", sizeof("main")-1, 0, _NEWID);
 	kNameSpace *ns = new_PackageNameSpace(kctx, packageId);
-	kstatus_t result = (kstatus_t)kNameSpace_loadScript(kctx, ns, path, trace);
+	kstatus_t result = (kstatus_t)kNameSpace_LoadScript(kctx, ns, path, trace);
 	RESET_GCSTACK();
 	return result;
 }

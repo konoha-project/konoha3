@@ -505,7 +505,7 @@ static void file_defineConst(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *tr
 		{"stderr", TY_File, KFileStdErr},
 		{NULL}, /* sentinel */
 	};
-	KLIB kNameSpace_loadConstData(kctx, ns, KonohaConst_(FileData), trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(FileData), trace);
 }
 
 static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
