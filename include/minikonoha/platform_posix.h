@@ -48,6 +48,7 @@ extern "C" {
 #endif
 
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <setjmp.h>
 #include <sys/time.h>
@@ -55,11 +56,15 @@ extern "C" {
 #include <dlfcn.h>
 #include <sys/stat.h>
 #include <errno.h>
-#if defined(K_USE_TRACEVM) && defined(HAVE_DB_H)
-#include <sys/types.h>
-#include <string.h>
+#include <fcntl.h>
+
+#if HAVE_DB_H
+#if defined(__linux__)
+#include <db_185.h>
+#else
 #include <db.h>
-#endif /*defined(K_USE_TRACEVM) && defined(HAVE_DB_H)*/
+#endif /*defined(__linux__)*/
+#endif /*HAVE_DB_H*/
 
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
@@ -638,10 +643,10 @@ static const char* shortFilePath(const char *path)
 	return (p == NULL) ? path : (const char *)p+1;
 }
 
-static const char* shortText(const char *msg)
-{
-	return msg;
-}
+//static const char* shortText(const char *msg)
+//{
+//	return msg;
+//}
 
 static const char *formatTransparentPath(char *buf, size_t bufsiz, const char *parentPath, const char *path)
 {
@@ -886,88 +891,53 @@ static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 	return userFault | SoftwareFault |SystemFault;
 }
 
-static kbool_t fetch_CoverageLog_from_Berkeley_DB(KonohaContext *kctx, const char *key)
+static kbool_t DEOS_fetchCoverageLog(KonohaContext *kctx, const char *filename, int line)
 {
-#if defined(HAVE_DB_H) && defined(__linux__)
+#if HAVE_DB_H
 #define DATABASE "test.db"
+#define BUFSIZE 128
 
-	DB *dbp = NULL;
-	DBC *dbcp = NULL;
-	DBT DB_key, DB_data;
-	int ret, t_ret;
+	DB *db = NULL;
+	DBT DBkey = {};
+	DBT DBvalue = {};
+	char key[BUFSIZE];
 
-	ret = db_create(&dbp, NULL, 0);
-	if (ret != 0) {
-		fprintf(stderr, "db_create: %s\n", db_strerror(ret));
-		goto err;
-	}
-
-	ret = dbp->open(dbp, NULL, DATABASE, NULL, DB_BTREE, DB_RDONLY, 0);
-	if (ret != 0) {
-		dbp->err(dbp, ret, "%s", DATABASE);
-		goto err;
-	}
-	
-	ret = dbp->cursor(dbp, NULL, &dbcp, 0);
-	if (ret != 0) {
-		dbp->err(dbp, ret, "%s", DATABASE);
-		goto err;
-	}
-	
-	while (1) {
-		memset(&DB_key, 0, sizeof(DB_key));
-		memset(&DB_data, 0, sizeof(DB_data));
-
-		ret = dbcp->c_get(dbcp, &DB_key, &DB_data, DB_NEXT);
-		if (ret == DB_NOTFOUND) {
-			ret = 0;
-			dbcp->c_close(dbcp);
-			dbp->close(dbp, 0);
-			return false;
-		}
-		else if (ret != 0) {
-			dbp->err(dbp, ret, "%s", DATABASE);
-			goto err;
-		}
-		if(strncmp(key, (const char *)DB_key.data, strlen(key)) == 0) {
-			//PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"event\": \"DiagnosisFaultType\", \"script_name\": \"%s\", \"line:%s, \"count\":%s, }", DB_key.data, DB_data.data);
-			dbcp->c_close(dbcp);
-			dbp->close(dbp, 0);
-			return true;
-		}
+	if((db = dbopen(DATABASE, O_RDONLY, S_IRGRP | S_IWGRP, DB_BTREE, NULL)) == NULL) {
+		return false;
 	}
 
-err:
-	if (dbcp) {
-		t_ret = dbcp->c_close(dbcp);
-		if (t_ret != 0 && ret == 0)
-			ret = t_ret;
+	PLATAPI snprintf_i(key, BUFSIZE, "\"%s:%d\"", filename, line);
+
+	DBkey.data = key;
+	DBkey.size = strlen(key);
+
+	if(!db->get(db, &DBkey, &DBvalue, 0)) {
+		PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"event\": \"DiagnosisFaultType\", \"ScriptName\": \"%s\", \"ScriptLine:%d, \"Count\":%s, }", filename, line, (char *)DBvalue.data);
+		db->close(db);
+		return true;
 	}
-	
-	if (dbp) {
-		t_ret = dbp->close(dbp, 0);
-		if (t_ret != 0 && ret == 0)
-			ret = t_ret;
+	else{
+		db->close(db);
+		return false;
 	}
-	
-	exit(ret);
-#endif
+#else
 	return false;
+#endif
 }
 
 static kbool_t DEOS_checkSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
 {
 	DBG_P("filename='%s', line=%d", filename, line);
 	if(!KonohaContext_Is(Trace, kctx)) {
-#define N 64
-		kbool_t res;
-		char key[N] = {'\0'};
-		snprintf(key, N, "\"%s:%d\"", filename, line);
-		res = fetch_CoverageLog_from_Berkeley_DB(kctx, key);
+		kbool_t res = false;
+#if HAVE_DB_H
+		res = DEOS_fetchCoverageLog(kctx, filename, line);
+#endif
 		return res;
 	}else{
 		return true;
 	}
+
 }
 
 static int DEOS_diagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
@@ -1139,7 +1109,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 
 // --------------------------------------------------------------------------
 
-static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
+static kunused PlatformApi *KonohaUtils_getDefaultPlatformApi(void)
 {
 	static KonohaFactory plat = {};
 	plat.name            = "shell";
@@ -1205,7 +1175,7 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	return (PlatformApi *)(&plat);
 }
 
-static void PosixFactory(KonohaFactory *factory)
+static kunused void PosixFactory(KonohaFactory *factory)
 {
 	factory->name            = "shell";
 	factory->stacksize       = K_PAGESIZE * 4;

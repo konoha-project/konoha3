@@ -1,0 +1,15 @@
+this is generated libvirt package
+
+
+*HOWTO Generate code
+1. checkout clang code from SVN HEAD and install clang
+2. download libvirt code (http://libvirt.org/sources/libvirt-0.10.2.tar.gz)
+3. execute tools/build.sh to compile header2csv.cpp
+4. execute a.out
+   $ ./a.out $PATH_TO_LIBVIRT/include/libvirt/libvirt.h > libvirt.info
+5. execute tools/genffi.k with libvrit.info
+   $ minikonoha ./tools/genffi.k libvrit.info
+
+*HOWTO Compile Package code
+1. create type cast
+thats all

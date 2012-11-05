@@ -26,13 +26,18 @@
 #include "minikonoha/klib.h"
 #include "minikonoha/gc.h"
 
-#ifdef K_USING_LOGPOOL
-#include <logpool.h>
+#include "src/vm/vm.h"
+#include "src/vm/minivm.h"
+
+#ifdef HAVE_DB_H
+#if defined(__linux__)
+#include <db_185.h>
+#else
+#include <db.h>
+#endif /*defined(__linux__)*/
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <fcntl.h>
 
 #include "minikonoha/local.h"
 
@@ -40,6 +45,10 @@ extern "C" {
 #include "klibexec.h"
 #include "datatype.h"
 #include "methods.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // -------------------------------------------------------------------------
 // util stack
@@ -193,6 +202,74 @@ void KonohaContext_reftraceAll(KonohaContext *kctx, KObjectVisitor *visitor)
 	KonohaContext_reftrace(kctx, (KonohaContextVar *)kctx, visitor);
 }
 
+#define BUFSIZE 64
+static void KonohaContext_storeCoverageLog(KonohaContext *kctx, const char *key, int value)
+{
+#ifdef HAVE_DB_H
+#define DATABASE "konoha_coverage.db" //TODO change name for ET.
+
+	DB *db = NULL;
+	DBT DBkey = {};
+	DBT DBvalue = {};
+	char buffer[BUFSIZE];
+
+	if((db = dbopen(DATABASE, O_CREAT | O_RDWR, S_IRWXU, DB_BTREE, NULL)) == NULL) {
+		exit(EXIT_FAILURE);
+	}
+
+	DBkey.data = (char *)key;
+	DBkey.size = strlen(key);
+
+	PLATAPI snprintf_i(buffer, BUFSIZE, "%d", value);
+	DBvalue.data = buffer;
+	DBvalue.size = strlen(buffer);
+
+	db->put(db, &DBkey, &DBvalue, R_NOOVERWRITE);
+	db->close(db);
+#endif
+}
+
+static void KonohaContext_emitCoverageLog(KonohaContext *kctx, VirtualCode *pc)
+{
+	kfileline_t uline = 0;
+	while(true) {
+		if (pc->opcode == OPCODE_RET) {
+			break;
+		}
+		if(pc->count > 0) {
+			if((kushort_t)uline != (kushort_t)pc->line) {
+				char key[BUFSIZE];
+				uline = pc->line;
+				PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptResult\", \"ScriptName\": \"%s\", \"ScriptLine\": %d , \"Count\": %d}", FileId_t(pc->line), (kushort_t)pc->line, pc->count);
+				PLATAPI snprintf_i(key, BUFSIZE, "\"%s:%d\"", FileId_t(pc->line), (kushort_t)pc->line);
+				KonohaContext_storeCoverageLog(kctx, key, pc->count);
+			}
+		}
+		pc++;
+	}
+}
+
+static void KonohaContext_emitCoverage(KonohaContext *kctx)
+{
+	KonohaRuntime *share = kctx->share;
+	size_t i;
+	for(i = 0; i < kArray_size(share->GlobalConstList); i++) {
+		kObject *o = share->GlobalConstList->ObjectItems[i];
+		if(O_ct(o) == CT_NameSpace) {
+			kNameSpace *ns = (kNameSpace *) o;
+			size_t j;
+			for(j = 0; j < kArray_size(ns->methodList_OnList); j++) {
+				kMethod *mtd = ns->methodList_OnList->MethodItems[j];
+				if(IS_NOTNULL((kObject*)mtd->SourceToken)) {
+					KonohaContext_emitCoverageLog(kctx, mtd->CodeObject->code);
+					//fprintf(stderr, "%s.%s%s\n", CT_t(CT_(mtd->typeId)), T_mn(mtd->mn));
+					//fprintf(stderr, "i = %d, j = %d\n", i, j);
+				}
+			}
+		}
+	}
+}
+
 static void KonohaContext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	size_t i;
@@ -204,6 +281,9 @@ static void KonohaContext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 	}
 	KonohaStackRuntime_free(kctx, ctx);
 	if(IS_RootKonohaContext(ctx)){  // share
+		if(KonohaContext_Is(Trace, kctx)) {
+			KonohaContext_emitCoverage(ctx);
+		}
 		KonohaLibVar *kklib = (KonohaLibVar *)ctx - 1;
 		for(i = 0; i < KonohaModule_MAXSIZE; i++) {
 			KonohaModule *p = ctx->modshare[i];
@@ -246,7 +326,7 @@ void konoha_close(KonohaContext* konoha)
 	KonohaContext_free(konoha, (KonohaContextVar *)konoha);
 }
 
-kbool_t konoha_load(KonohaContext* kctx, const char *scriptname)
+kbool_t Konoha_Load(KonohaContext* kctx, const char *scriptname)
 {
 	PLATAPI BEFORE_LoadScript(kctx, scriptname);
 	BEGIN_(kctx);
