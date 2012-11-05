@@ -430,7 +430,7 @@ static void kObject_setObject(KonohaContext *kctx, kAbstractObject *o, ksymbol_t
 {
 	kObjectVar *v = (kObjectVar *)o;
 	protomap_set((Kprotomap_t **)&v->h.kvproto, key | SYMKEY_BOXED, ty, (void *)val);
-	KLIB Kwrite_barrier(kctx, v);
+	PLATAPI WriteBarrier(kctx, v);
 }
 
 static uintptr_t kObject_getUnboxValue(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, uintptr_t defval)
@@ -443,7 +443,7 @@ static uintptr_t kObject_getUnboxValue(KonohaContext *kctx, kAbstractObject *o, 
 static void kObject_setUnboxValue(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, ktype_t ty, uintptr_t unboxValue)
 {
 	kObjectVar *v = (kObjectVar *)o;
-	KLIB Kwrite_barrier(kctx, v);
+	PLATAPI WriteBarrier(kctx, v);   // why ? need this? by kimio
 	protomap_set((Kprotomap_t **)&v->h.kvproto, key, ty, (void *)unboxValue);
 }
 

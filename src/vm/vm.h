@@ -180,10 +180,13 @@ static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStac
 
 static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *sfp, kfileline_t uline)
 {
+	PLATAPI ScheduleGC(kctx, NULL); // FIXME: NULL
 	if(kctx->modshare[MOD_EVENT] != NULL) {
 		KLIB KscheduleEvent(kctx);
 	}
-	KCheckSafePoint(kctx, sfp);
+//	if(PLATAPI ScheduleEvent != NULL) {
+//		PLATAPI ScheduleEvent(kctx, NULL); // FIXME: NULL
+//	}
 }
 
 //-------------------------------------------------------------------------

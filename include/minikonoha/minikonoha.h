@@ -429,6 +429,8 @@ typedef enum {
     KJSON_LONG
 } KJSONTYPE;
 
+struct KObjectVisitor *visitor;
+
 struct KonohaFactory {
 	// settings
 	const char *name;
@@ -506,6 +508,24 @@ struct KonohaFactory {
 	void (*ReportCaughtException)(KonohaContext *, const char *, int fault, const char *, struct KonohaValueVar *bottomStack, struct KonohaValueVar *topStack);
 	void (*ReportDebugMessage)(const char *file, const char *func, int line, const char *fmt, ...) __PRINTFMT(4, 5);
 
+	/* Garbage Collection API */
+	const char* Module_GC;
+	void* (*Kmalloc)(KonohaContext*, size_t, KTraceInfo *);
+	void* (*Kzmalloc)(KonohaContext*, size_t, KTraceInfo *);
+	void  (*Kfree)(KonohaContext*, void *, size_t);
+	void (*InitGcContext)(KonohaContext *kctx);
+	void (*DeleteGcContext)(KonohaContext *kctx);
+	void (*ScheduleGC)(KonohaContext *kctx, KTraceInfo *trace);
+	struct kObjectVar *(*AllocObject)(KonohaContext *kctx, size_t size, KTraceInfo *);
+	kbool_t (*IsKonohaObject)(KonohaContext *kctx, void *ptr);
+	void  (*VisitObject)(struct KObjectVisitor *visitor, struct kObjectVar *obj);
+	void  (*WriteBarrier)(KonohaContext *, struct kObjectVar *);
+	void  (*UpdateObjectField)(struct kObjectVar *parent, struct kObjectVar *oldPtr, struct kObjectVar *newVal);
+
+		/* Event Handler API */
+	const char* Module_Event;
+	void (*AddEventListener)(KonohaContext *, const char *name, void *thunk, void (*func)(KonohaContext *, void *thunk, struct JsonBuf*, KTraceInfo *));
+	void (*ScheduleEvent)(KonohaContext *, KTraceInfo *trace);
 
 	// I18N Module
 	const char* Module_I18N;
@@ -737,7 +757,7 @@ struct KonohaContextVar {
 	KonohaStackRuntimeVar            *stack;
 	KonohaModule                    **modshare;
 	KonohaModuleContext             **modlocal;
-	struct GcContext                 *gcContext;
+	void                             *gcContext; // defined in each module
 };
 
 // share, local
@@ -1530,24 +1550,19 @@ typedef struct KObjectVisitor {
 } KObjectVisitor;
 
 struct KonohaLibVar {
-	void* (*Kmalloc)(KonohaContext*, size_t, KTraceInfo *);
-	void* (*Kzmalloc)(KonohaContext*, size_t, KTraceInfo *);
-	void  (*Kfree)(KonohaContext*, void *, size_t);
 
-	/* Garbage Collection API */
-	/* This Must be Going to PlatformApi */
-	GcContext *(*KnewGcContext)(KonohaContext *kctx);
-	void (*KdeleteGcContext)(GcContext *gc);
-	void (*KscheduleGC)     (GcContext *gc);
-	struct kObjectVar *(*KallocObject)(GcContext *gc, KonohaClass *klass);
-	bool (*KisObject)   (GcContext *gc, void *ptr);
-	void (*KvisitObject)(struct KObjectVisitor *visitor, struct kObjectVar *obj);
-
-	/* Event Handler API */
+//	/* Garbage Collection API */
+//	/* This Must be Going to PlatformApi */
+//	GcContext *(*KnewGcContext)(KonohaContext *kctx);
+//	void (*KdeleteGcContext)(GcContext *gc);
+//	void (*KscheduleGC)     (GcContext *gc);
+//	struct kObjectVar *(*KallocObject)(GcContext *gc, KonohaClass *klass);
+//	bool (*KisObject)   (GcContext *gc, void *ptr);
+//	void (*KvisitObject)(struct KObjectVisitor *visitor, struct kObjectVar *obj);
+//
+//	/* Event Handler API */
+	/* This Must Be Going To Factory */
 	void (*KscheduleEvent)  (KonohaContext *);
-
-	void  (*Kwrite_barrier)(KonohaContext *, kObject *);
-	void  (*KupdateObjectField)(kObject *parent, kObject *oldPtr, kObject *newVal);
 
 	void  (*Karray_init)(KonohaContext *, KGrowingArray *, size_t);
 	void  (*Karray_resize)(KonohaContext*, KGrowingArray *, size_t);
@@ -1634,7 +1649,7 @@ struct KonohaLibVar {
 //	void             (*kNameSpace_compileAllDefinedMethods)(KonohaContext *kctx);
 
 	// code generator package
-//	void             (*KCodeGen)(KonohaContext*, kMethod *, kBlock *);
+	void             (*CheckSafePoint)(KonohaContext *kctx, KonohaStack *sfp, kfileline_t uline);
 	kbool_t          (*KonohaRuntime_tryCallMethod)(KonohaContext *, KonohaStack *);
 	void             (*KonohaRuntime_raise)(KonohaContext*, int symbol, int fault, kString *Nullable, KonohaStack *);
 	void             (*ReportRuntimeMessage)(KonohaContext *, KTraceInfo *, kinfotag_t, const char *fmt, ...);
@@ -1649,11 +1664,11 @@ struct KonohaLibVar {
 
 #define UPCAST(o)         ((kObject *)o)
 
-#define KMalloc(size, TRACE)           KLIB Kmalloc(kctx, size, TRACE)
-#define KCalloc(size, item, TRACE)     KLIB Kzmalloc(kctx, ((size) * (item)), TRACE)
-#define KMalloc_UNTRACE(size)          KLIB Kmalloc(kctx, size, NULL)
-#define KCalloc_UNTRACE(size, item)    KLIB Kzmalloc(kctx, ((size) * (item)), NULL)
-#define KFree(p, size)                 KLIB Kfree(kctx, p, size)
+#define KMalloc(size, TRACE)           PLATAPI Kmalloc(kctx, size, TRACE)
+#define KCalloc(size, item, TRACE)     PLATAPI Kzmalloc(kctx, ((size) * (item)), TRACE)
+#define KMalloc_UNTRACE(size)          PLATAPI Kmalloc(kctx, size, NULL)
+#define KCalloc_UNTRACE(size, item)    PLATAPI Kzmalloc(kctx, ((size) * (item)), NULL)
+#define KFree(p, size)                 PLATAPI Kfree(kctx, p, size)
 
 //#define KLIB Kwb_write(W,...)          KLIB Kwb_putc(kctx,W, ## __VA_ARGS__, -1)
 #define Kwb_bytesize(W)                 (((W)->m)->bytesize - (W)->pos)
@@ -1759,7 +1774,7 @@ typedef struct {
 
 
 #define GC_WRITE_BARRIER(kctx, PARENT, VAR, VAL)\
-	(KLIB KupdateObjectField((kObject *)(PARENT), (kObject *)(VAR), ((kObject *)(VAL))))
+	(PLATAPI UpdateObjectField((struct kObjectVar *)(PARENT), (struct kObjectVar *)(VAR), ((struct kObjectVar *)(VAL))))
 
 #define KUnsafeFieldInit(VAR, VAL) OBJECT_SET(VAR, VAL)
 #define KUnsafeFieldSet( VAR, VAL) (VAR) = (VAL) /* for c-compiler type check */
@@ -1795,7 +1810,7 @@ typedef struct {
 } while(0)
 
 #define KCheckSafePoint(kctx, sfp) do {\
-	KLIB KscheduleGC(kctx->gcContext);\
+	KLIB CheckSafePoint(kctx, sfp, 0);\
 } while(0)
 
 // method macro

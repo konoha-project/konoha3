@@ -262,7 +262,8 @@ static KMETHOD System_p(KonohaContext *kctx, KonohaStack *sfp)
 //## method void System.gc();
 static KMETHOD System_gc(KonohaContext *kctx, KonohaStack *sfp)
 {
-	KLIB KscheduleGC(kctx->gcContext);
+	KMakeTrace(trace, sfp);
+	PLATAPI ScheduleGC(kctx, trace);
 }
 
 // --------------------------------------------------------------------------

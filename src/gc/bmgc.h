@@ -823,7 +823,7 @@ static kObject *mstack_next(MarkStack *mstack)
 	return ref;
 }
 
-static HeapManager *KnewGcContext(KonohaContext *kctx)
+static void KnewGcContext(KonohaContext *kctx)
 {
 #ifdef GCSTAT
 	global_gc_stat.fp = fopen("KONOHA_BMGC_INFO", "a");
@@ -837,11 +837,12 @@ static HeapManager *KnewGcContext(KonohaContext *kctx)
 			default_size = (size_t) tmp;
 	}
 #endif
-	return HeapManager_init(kctx, default_size);
+	((KonohaContextVar*)kctx)->gcContext = HeapManager_init(kctx, default_size);
 }
 
-static void KdeleteGcContext(HeapManager *mng)
+static void KdeleteGcContext(KonohaContext *kctx)
 {
+	HeapManager *mng = (HeapManager *)kctx->gcContext;
 #ifdef USE_CONCURRENT_GC
 	KonohaContext *kctx = mng->kctx;
 	PLATAPI pthread_mutex_lock_i(&mng->lock);
@@ -1151,7 +1152,7 @@ static void *tryAlloc(HeapManager *mng, SubHeap *h)
 	bitmap_set(&mng->flags, GC_MAJOR_FLAG,
 			h->total > h->total_limit && mng->phase != GCPHASE_MARK_CONC);
 	KonohaContext *kctx = mng->kctx;
-	KLIB Kwrite_barrier(kctx, temp);
+	PLATAPI WriteBarrier(kctx, temp);
 #endif
 	return temp;
 }
@@ -2112,9 +2113,9 @@ void MODGC_check_malloced_size(KonohaContext *kctx)
 	o->fieldObjectItems[0] = NULL;\
 } while(0)
 
-static kObjectVar *KallocObject(HeapManager *mng, KonohaClass *ct)
+static kObjectVar *KallocObject(KonohaContext *kctx, size_t size, KTraceInfo *trace)
 {
-	size_t size = ct->cstruct_size;
+	HeapManager *mng = (HeapManager *)kctx->gcContext;
 	kObjectVar *o = (kObjectVar *)bm_malloc_internal(mng, size);
 	OBJECT_INIT(o);
 #if GCDEBUG
@@ -2126,10 +2127,10 @@ static kObjectVar *KallocObject(HeapManager *mng, KonohaClass *ct)
 	return o;
 }
 
-static kbool_t KisObject(HeapManager *mng, void *ptr)
+static kbool_t KisObject(KonohaContext *kctx, void *ptr)
 {
+	HeapManager *mng = (HeapManager *)kctx->gcContext;
 	kObject *o = (kObject *) ptr;
-
 	if((uintptr_t) o % PowerOf2(SUBHEAP_KLASS_MIN) != 0)
 		return false;
 
@@ -2153,8 +2154,9 @@ static kbool_t KisObject(HeapManager *mng, void *ptr)
 	return false;
 }
 
-static void KscheduleGC(HeapManager *mng)
+static void KscheduleGC(KonohaContext *kctx, KTraceInfo *trace)
 {
+	HeapManager *mng = (HeapManager *)kctx->gcContext;
 	enum gc_mode mode = (enum gc_mode)(mng->flags & 0x3);
 	if(mode) {
 		gc_info("scheduleGC mode=%d", mode);
@@ -2167,21 +2169,22 @@ static void KscheduleGC(HeapManager *mng)
 void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	if(IS_RootKonohaContext(ctx)) {
-		KSetKLibFunc(0, Kmalloc, Kmalloc, 0);
-		KSetKLibFunc(0, Kzmalloc, Kzmalloc, 0);
-		KSetKLibFunc(0, Kfree, Kfree, 0);
-		KSetKLibFunc(0, Kwrite_barrier, Kwrite_barrier, 0);
-		KSetKLibFunc(0, KnewGcContext, KnewGcContext, 0);
-		KSetKLibFunc(0, KdeleteGcContext, KdeleteGcContext, 0);
-		KSetKLibFunc(0, KscheduleGC, KscheduleGC, 0);
-		KSetKLibFunc(0, KallocObject, KallocObject, 0);
-		KSetKLibFunc(0, KupdateObjectField, KupdateObjectField, 0);
-		KSetKLibFunc(0, KisObject, KisObject, 0);
-
+		KonohaFactory *factory = (KonohaFactory *)ctx->platApi;
+		// remainig old function names for ide and matsu
+		factory->Kmalloc = Kmalloc;
+		factory->Kzmalloc = Kzmalloc;
+		factory->Kfree = Kfree;
+		factory->InitGcContext = KnewGcContext;
+		factory->DeleteGcContext = KdeleteGcContext;
+		factory->ScheduleGC = KscheduleGC;
+		factory->AllocObject = KallocObject;
+		factory->WriteBarrier = Kwrite_barrier;   // check this
+		factory->UpdateObjectField = KupdateObjectField;  // check this
+		factory->IsKonohaObject = KisObject;
 		assert(sizeof(BlockHeader) <= MIN_ALIGN
 				&& "Minimum size of Object may lager than sizeof BlockHeader");
 	}
-	ctx->gcContext = KnewGcContext(ctx);
+	PLATAPI InitGcContext(ctx);
 }
 
 /* ------------------------------------------------------------------------ */

@@ -295,7 +295,7 @@ static void KonohaContext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 				p->freeModule(kctx, p);
 			}
 		}
-		KLIB KdeleteGcContext(ctx->gcContext);
+		PLATAPI DeleteGcContext(ctx);
 		KonohaRuntime_free(kctx, ctx);
 		MODGC_check_malloced_size(kctx);
 		free(kctx->modlocal);
@@ -303,7 +303,7 @@ static void KonohaContext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 		free(kklib/*, sizeof(KonohaLib) + sizeof(KonohaContextVar)*/);
 	}
 	else {
-		KLIB KdeleteGcContext(ctx->gcContext);
+		PLATAPI DeleteGcContext(ctx);
 		KFree(ctx->modlocal, sizeof(KonohaModuleContext *) * KonohaModule_MAXSIZE);
 		KFree(ctx, sizeof(KonohaContextVar));
 	}

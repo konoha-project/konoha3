@@ -52,7 +52,7 @@ static void kObject_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vi
 static kObject *new_kObject(KonohaContext *kctx, kArray *gcstackNULL, KonohaClass *ct, uintptr_t conf)
 {
 	DBG_ASSERT(ct->cstruct_size > 0);
-	kObjectVar *o = KLIB KallocObject(kctx->gcContext, ct);
+	kObjectVar *o = PLATAPI AllocObject(kctx, ct->cstruct_size, NULL/*FIXME*/);
 	o->h.magicflag = ct->magicflag;
 	o->h.ct = ct;
 	o->h.kvproto = (KGrowingArray *) Kprotomap_new(0);

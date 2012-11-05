@@ -161,7 +161,7 @@ static kStringBase *kStringBase_InitRope(KonohaContext *kctx, kArray *gcstack, k
 	rope->base.length = len;
 	KUnsafeFieldInit(rope->left,  left);
 	KUnsafeFieldInit(rope->right, right);
-	KLIB Kwrite_barrier(kctx, (kObject *)rope);
+	PLATAPI WriteBarrier(kctx, (kObject *)rope);
 	return (kStringBase *) rope;
 }
 

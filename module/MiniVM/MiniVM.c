@@ -164,7 +164,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 	if(kctx->modshare[MOD_EVENT] != NULL) {
 		KLIB KscheduleEvent(kctx);
 	}
-	KCheckSafePoint(kctx, sfp);
+	// TODO
 }
 
 #ifdef USE_DIRECT_THREADED_CODE
