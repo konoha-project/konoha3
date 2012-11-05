@@ -22,28 +22,15 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#ifndef MINIOKNOHA_LOCAL_H_
-#define MINIOKNOHA_LOCAL_H_
-#ifndef MINIOKNOHA_H_
-#error Do not include local.h without minikonoha.h.
-#endif
-
+/* ************************************************************************ */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define IS_RootKonohaContext(o)   (kctx == (KonohaContext *)o)
+static int verbose_gc = 0;
 
-void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx);
-
-void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx);
-kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, KTraceInfo *trace);
-kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, kfileline_t uline);
-
-void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns);
+#include "bmgc.h"
 
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
-
-#endif /* MINIOKNOHA_LOCAL_H_ */

@@ -1587,6 +1587,7 @@ struct KonohaLibVar {
 
 	KonohaContextVar *(*KonohaContext_init)(KonohaContext *rootContext, const PlatformApi *api);
 	void              (*KonohaContext_free)(KonohaContext *rootContext, KonohaContextVar *ctx);
+	void              (*ReftraceAll)(KonohaContext *kctx, KObjectVisitor *);
 
 	kfileline_t     (*KfileId)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
 	kpackageId_t    (*KpackageId)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
@@ -1600,7 +1601,10 @@ struct KonohaLibVar {
 	kbool_t         (*KonohaClass_addField)(KonohaContext*, KonohaClass *, int flag, ktype_t ty, ksymbol_t sym);
 
 	kObject*        (*new_kObject)(KonohaContext*, kArray *gcstack, KonohaClass *, uintptr_t);
-	kbool_t         (*kObject_isManaged)(KonohaContext*, void *ptr);
+	void            (*kObject_FreeField)(KonohaContext *kctx, kObjectVar *);
+	void            (*kObject_ReftraceField)(KonohaContext *kctx, kObject *, KObjectVisitor *);
+
+	//kbool_t         (*kObject_isManaged)(KonohaContext*, void *ptr);
 	kObject*        (*Knull)(KonohaContext*, KonohaClass *);
 	kObject*        (*kObject_getObject)(KonohaContext*, kAbstractObject *, ksymbol_t, kAbstractObject *);
 	void            (*kObject_setObject)(KonohaContext*, kAbstractObject *, ksymbol_t, ktype_t, kAbstractObject *);

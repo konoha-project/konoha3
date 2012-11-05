@@ -131,6 +131,7 @@ static kbool_t KonohaRuntime_setModule(KonohaContext *kctx, int x, KonohaModule 
 /* [kcontext] */
 
 static void KonohaContext_free(KonohaContext *kctx, KonohaContextVar *ctx);
+static void ReftraceAll(KonohaContext *kctx, KObjectVisitor *visitor);
 
 static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformApi *platApi)
 {
@@ -141,15 +142,15 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 		KonohaLibVar *klib = (KonohaLibVar *)calloc(sizeof(KonohaLib) + sizeof(KonohaContextVar), 1);
 		klib_init(klib);
 		klib->KonohaRuntime_setModule    = KonohaRuntime_setModule;
+		klib->KonohaContext_init = new_KonohaContext;
+		klib->KonohaContext_free = KonohaContext_free;
+		klib->ReftraceAll = ReftraceAll;
 		newctx = (KonohaContextVar *)(klib + 1);
 		newctx->klib = (KonohaLib *)klib;
 		newctx->platApi = platApi;
-		((KonohaLibVar *)newctx->klib)->KonohaContext_init = new_KonohaContext;
-		((KonohaLibVar *)newctx->klib)->KonohaContext_free = KonohaContext_free;
 		kctx = (KonohaContext *)newctx;
 		newctx->modshare = (KonohaModule**)calloc(sizeof(KonohaModule *), KonohaModule_MAXSIZE);
 		newctx->modlocal = (KonohaModuleContext**)calloc(sizeof(KonohaModuleContext *), KonohaModule_MAXSIZE);
-
 		MODGC_init(kctx, newctx);
 		KonohaRuntime_init(kctx, newctx);
 	}
@@ -197,7 +198,7 @@ static void KonohaContext_reftrace(KonohaContext *kctx, KonohaContextVar *ctx, K
 	}
 }
 
-void KonohaContext_reftraceAll(KonohaContext *kctx, KObjectVisitor *visitor)
+static void ReftraceAll(KonohaContext *kctx, KObjectVisitor *visitor)
 {
 	KonohaContext_reftrace(kctx, (KonohaContextVar *)kctx, visitor);
 }

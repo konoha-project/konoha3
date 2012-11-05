@@ -2100,7 +2100,7 @@ static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o)
 }
 
 /* [MODGC API] */
-void MODGC_check_malloced_size(KonohaContext *kctx)
+void MODGC_check_malloced_size2(KonohaContext *kctx)
 {
 	if(verbose_gc) {
 		PLATAPI printf_i("\nklib:memory leaked=%ld\n", (long)klib_malloced);
@@ -2166,25 +2166,41 @@ static void KscheduleGC(KonohaContext *kctx, KTraceInfo *trace)
 
 /* ------------------------------------------------------------------------ */
 
-void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
+//void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
+//{
+//	if(IS_RootKonohaContext(ctx)) {
+//		KonohaFactory *factory = (KonohaFactory *)ctx->platApi;
+//		// remainig old function names for ide and matsu
+//		factory->Kmalloc = Kmalloc;
+//		factory->Kzmalloc = Kzmalloc;
+//		factory->Kfree = Kfree;
+//		factory->InitGcContext = KnewGcContext;
+//		factory->DeleteGcContext = KdeleteGcContext;
+//		factory->ScheduleGC = KscheduleGC;
+//		factory->AllocObject = KallocObject;
+//		factory->WriteBarrier = Kwrite_barrier;   // check this
+//		factory->UpdateObjectField = KupdateObjectField;  // check this
+//		factory->IsKonohaObject = KisObject;
+//		assert(sizeof(BlockHeader) <= MIN_ALIGN
+//				&& "Minimum size of Object may lager than sizeof BlockHeader");
+//	}
+//	PLATAPI InitGcContext(ctx);
+//}
+
+kbool_t LoadBitmapGenGCModule(KonohaFactory *factory, ModuleType type)
 {
-	if(IS_RootKonohaContext(ctx)) {
-		KonohaFactory *factory = (KonohaFactory *)ctx->platApi;
-		// remainig old function names for ide and matsu
-		factory->Kmalloc = Kmalloc;
-		factory->Kzmalloc = Kzmalloc;
-		factory->Kfree = Kfree;
-		factory->InitGcContext = KnewGcContext;
-		factory->DeleteGcContext = KdeleteGcContext;
-		factory->ScheduleGC = KscheduleGC;
-		factory->AllocObject = KallocObject;
-		factory->WriteBarrier = Kwrite_barrier;   // check this
-		factory->UpdateObjectField = KupdateObjectField;  // check this
-		factory->IsKonohaObject = KisObject;
-		assert(sizeof(BlockHeader) <= MIN_ALIGN
-				&& "Minimum size of Object may lager than sizeof BlockHeader");
-	}
-	PLATAPI InitGcContext(ctx);
+	factory->Module_GC            = "Bitmap Generational GC";
+	factory->Kmalloc = Kmalloc;
+	factory->Kzmalloc = Kzmalloc;
+	factory->Kfree = Kfree;
+	factory->InitGcContext = KnewGcContext;
+	factory->DeleteGcContext = KdeleteGcContext;
+	factory->ScheduleGC = KscheduleGC;
+	factory->AllocObject = KallocObject;
+	factory->WriteBarrier = Kwrite_barrier;   // check this
+	factory->UpdateObjectField = KupdateObjectField;  // check this
+	factory->IsKonohaObject = KisObject;
+	return true;
 }
 
 /* ------------------------------------------------------------------------ */

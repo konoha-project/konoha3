@@ -520,7 +520,7 @@ static kGCObject2 *new_ObjectArena2(GcManager *mng, size_t arenasize)
 		for(i = 0; i < PageObjectSize(j); ++i) {\
 			kGCObject##j *o = &opage->slots[i];\
 			if(o->h.ct == NULL) continue;\
-			KONOHA_freeObjectField(kctx, (kObjectVar*)o);\
+			KLIB kObject_FreeField(kctx, (kObjectVar*)o);\
 		}\
 		opage++;\
 	}\
@@ -733,13 +733,13 @@ static void msgc_gc_mark(GcManager *mng)
 	tracer.mng    = mng;
 	tracer.mstack = mstack;
 
-	KonohaContext_reftraceAll(kctx, &tracer.base);
+	KLIB ReftraceAll(kctx, &tracer.base);
 
 	ref = mstack_next(mstack);
 	if(unlikely(ref == 0))
 		return;
 	do {
-		KONOHA_reftraceObject(kctx, ref, &tracer.base);
+		KLIB kObject_ReftraceField(kctx, ref, &tracer.base);
 	} while((ref = mstack_next(mstack)) != NULL);
 }
 
@@ -760,7 +760,7 @@ static size_t sweep0(GcContext *mng, void *p, int n, size_t sizeOfObject)
 		if(!Object_isMark((kObject*)o)) {
 			if( O_ct(o)) {
 				DBG_P("~Object%d %s", n, O_ct(o)->DBG_NAME);
-				KONOHA_freeObjectField(kctx, (kObjectVar*)o);
+				KLIB kObject_FreeField(kctx, (kObjectVar*)o);
 				assert(O_ct(o)->cstruct_size == sizeOfObject);
 				++collected;
 				OBJECT_REUSE(o, n);

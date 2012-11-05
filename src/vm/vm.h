@@ -178,17 +178,6 @@ static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStac
 	return pc;
 }
 
-static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *sfp, kfileline_t uline)
-{
-	PLATAPI ScheduleGC(kctx, NULL); // FIXME: NULL
-	if(kctx->modshare[MOD_EVENT] != NULL) {
-		KLIB KscheduleEvent(kctx);
-	}
-//	if(PLATAPI ScheduleEvent != NULL) {
-//		PLATAPI ScheduleEvent(kctx, NULL); // FIXME: NULL
-//	}
-}
-
 //-------------------------------------------------------------------------
 
 #define PC_NEXT(pc)   pc+1
@@ -328,13 +317,13 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 		KLIB KonohaRuntime_raise(kctx, EXPT_("StackOverflow"), SoftwareFault, NULL, SFP(rbp));\
 	}\
 	kfileline_t uline = (UL == 0) ? rbp[K_ULINEIDX2].calledFileLine : UL;\
-	KonohaVirtualMachine_onSafePoint(kctx, (KonohaStack *)rbp, uline);\
+	KLIB CheckSafePoint(kctx, (KonohaStack *)rbp, uline);\
 } while(0)
 
 
 #define OPEXEC_SAFEPOINT(UL, espidx) do {\
 	KonohaRuntime_setesp(kctx, SFP(rshift(rbp, espidx)));\
-	KonohaVirtualMachine_onSafePoint(kctx, (KonohaStack *)rbp, UL); \
+	KLIB CheckSafePoint(kctx, (KonohaStack *)rbp, UL); \
 } while(0)
 
 #define OPEXEC_ERROR(UL, msg, ESP) do {\

@@ -394,14 +394,14 @@ static ksymbol_t Ksymbol(KonohaContext *kctx, const char *name, size_t len, int 
 // -------------------------------------------------------------------------
 // library
 
-void KONOHA_freeObjectField(KonohaContext *kctx, kObjectVar *o)
+static void kObject_FreeField(KonohaContext *kctx, kObjectVar *o)
 {
 	KonohaClass *ct = O_ct(o);
 	protomap_delete((Kprotomap_t *)o->h.kvproto);
 	ct->free(kctx, o);
 }
 
-void KONOHA_reftraceObject(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+static void kObject_ReftraceField(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	unsigned map_size;
 	O_ct(o)->reftrace(kctx, o, visitor);
@@ -516,6 +516,18 @@ static void KonohaRuntime_raise(KonohaContext *kctx, int symbol, int fault, kStr
 	PLATAPI exit_i(EXIT_FAILURE);
 }
 
+
+static void CheckSafePoint(KonohaContext *kctx, KonohaStack *sfp, kfileline_t uline)
+{
+	PLATAPI ScheduleGC(kctx, NULL); // FIXME: NULL
+	if(kctx->modshare[MOD_EVENT] != NULL) {
+		KLIB KscheduleEvent(kctx);
+	}
+//	if(PLATAPI ScheduleEvent != NULL) {
+//		PLATAPI ScheduleEvent(kctx, NULL); // FIXME: NULL
+//	}
+}
+
 /* ------------------------------------------------------------------------ */
 
 void TRACE_PrintMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_t taglevel, const char *fmt, ...);
@@ -540,6 +552,9 @@ static void klib_init(KonohaLibVar *l)
 	l->Kmap_get      = Kmap_getentry;
 	l->Kmap_remove   = Kmap_remove;
 	l->Kmap_getcode  = Kmap_getcode;
+	l->kObject_FreeField     = kObject_FreeField;
+	l->kObject_ReftraceField = kObject_ReftraceField;
+
 	l->kObject_getObject     = kObject_getObjectNULL;
 	l->kObject_setObject     = kObject_setObject;
 	l->kObject_getUnboxValue = kObject_getUnboxValue;
@@ -552,4 +567,5 @@ static void klib_init(KonohaLibVar *l)
 	l->KonohaRuntime_tryCallMethod = KonohaRuntime_tryCallMethod;
 	l->KonohaRuntime_raise         = KonohaRuntime_raise;
 	l->ReportRuntimeMessage        = TRACE_PrintMessage; /* perror.h */
+	l->CheckSafePoint              = CheckSafePoint;
 }

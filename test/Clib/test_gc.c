@@ -100,7 +100,7 @@ void test_gc(KonohaContext *kctx)
 		}
 		assert(__init__ == (i+1) * 100);
 		assert(__trace__ == -1);
-		KLIB KscheduleGC(kctx->gcContext);
+		PLATAPI ScheduleGC(kctx, NULL);
 	}
 
 	int small_object_count = __init__;
@@ -112,7 +112,7 @@ void test_gc(KonohaContext *kctx)
 		}
 		assert(__init__ == (i+1) * 1000 + small_object_count);
 		assert(__trace__ == -1);
-		KLIB KscheduleGC(kctx->gcContext);
+		PLATAPI ScheduleGC(kctx, NULL);
 	}
 }
 
