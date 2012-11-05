@@ -1521,7 +1521,7 @@ typedef enum {
 	CrossCompile  = 1,
 	HatedLazyCompile   = (1 < 1),
 	O2Compile     = (1 < 2),
-	DebugCompile  = (1 < 3),
+	DebugCompile  = (1 < 3)
 } CompileOption;
 
 typedef struct KObjectVisitor {
