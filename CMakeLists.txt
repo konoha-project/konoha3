@@ -101,6 +101,7 @@ set(PACKAGES
 	dscript.shell
 	curl
 	llvm
+	libvirt
 ##	ijit
 ##	json
 	jansson
