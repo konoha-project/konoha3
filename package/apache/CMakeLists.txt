@@ -28,5 +28,7 @@ set(PACKAGE_SOURCE_CODE apache_glue.c)
 set(PACKAGE_SCRIPT_CODE apache_glue.k)
 set(PACKAGE_EXTRA_LIBRARY ${APR_LIBRARY})
 add_konoha_package(apache)
-endif()
+else(APR_INCLUDE_DIR AND APR_LIBRARY AND APACHE_INCLUDE_DIR)
+show_package_warning(apache)
+endif(APR_INCLUDE_DIR AND APR_LIBRARY AND APACHE_INCLUDE_DIR)
 

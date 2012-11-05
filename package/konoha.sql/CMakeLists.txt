@@ -65,4 +65,6 @@ if(MYSQL_CONFIG OR HAVE_LIBSQLITE OR PG_CONFIG)
 		sql_glue.c
 	)
 	add_konoha_package(konoha.sql)
+else(MYSQL_CONFIG OR HAVE_LIBSQLITE OR PG_CONFIG)
+	show_package_warning(konoha.sql)
 endif(MYSQL_CONFIG OR HAVE_LIBSQLITE OR PG_CONFIG)

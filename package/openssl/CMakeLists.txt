@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
-find_library(HAVE_SSL NAMES ssl)
-find_library(HAVE_CRYPTO NAMES crypto)
-if(HAVE_SSL)
+
+FIND_PACKAGE_EXTRA_LIBRARY(ssl crypto)
 set(PACKAGE_SOURCE_CODE openssl_glue.c)
 set(PACKAGE_SCRIPT_CODE openssl_glue.k)
-set(PACKAGE_EXTRA_LIBRARY ${HAVE_SSL} ${HAVE_CRYPTO})
 add_konoha_package(openssl)
-endif(HAVE_SSL)
