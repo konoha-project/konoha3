@@ -318,7 +318,9 @@ static int kSubProc_exec(KonohaContext *kctx, kSubProc *sbp, KTraceInfo *trace)
 				close(cfd);  // close fildes except for 0, 1, and 2
 			}
 		}
-		setsid(); // separate from tty
+		if(!KonohaContext_Is(Interactive, kctx)) {
+			setsid(); // separate from tty
+		}
 //		if(!IS_NULL(sp->cwd)) { // TODO!!
 //			if(chdir(S_text((sp->cwd))) != 0) {
 //				//TODO: trace
@@ -361,6 +363,7 @@ static kString *kFILE_readAll(KonohaContext *kctx, kArray *gcstack, kFile *file,
 	char buf[K_PAGESIZE];
 	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	kString *ret = KNULL(String);
 	while(1) {
 		size_t size = fread(buf, 1, sizeof(buf), file->fp);
 		if(size > 0) {
@@ -374,14 +377,12 @@ static kString *kFILE_readAll(KonohaContext *kctx, kArray *gcstack, kFile *file,
 		// We should not use LogErrno here
 		KTraceErrorPoint(trace, SystemFault, "fread");
 		clearerr(file->fp);
-		fclose(file->fp);
-		file->fp = NULL;
-		return KNULL(String);
+		return ret;
 	}
-	kString *ret = KLIB new_kString(kctx, gcstack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), 0);
+	if(Kwb_bytesize(&wb) > 0) {
+		ret = KLIB new_kString(kctx, gcstack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), 0);
+	}
 	KLIB Kwb_free(&wb);
-	fclose(file->fp);
-	file->fp = NULL;
 	return ret;
 }
 
