@@ -214,7 +214,7 @@ static void konoha_startup(KonohaContext *kctx, const char *startup_script)
 		local = "/.minikonoha/script";
 	}
 	snprintf(buf, sizeof(buf), "%s%s/%s.k", path, local, startup_script);
-	if(!konoha_load((KonohaContext*)kctx, (const char*)buf)) {
+	if(!Konoha_Load((KonohaContext*)kctx, (const char*)buf)) {
 		PLATAPI exit_i(EXIT_FAILURE);
 	}
 }
@@ -347,7 +347,7 @@ static void konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
 	scriptidx = optind;
 	CommandLine_setARGV(konoha, argc - scriptidx, argv + scriptidx);
 	if(scriptidx < argc) {
-		ret = konoha_load(konoha, argv[scriptidx]);
+		ret = Konoha_Load(konoha, argv[scriptidx]);
 	}
 	else {
 		interactive_flag = 1;

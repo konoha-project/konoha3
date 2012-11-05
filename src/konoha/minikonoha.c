@@ -202,11 +202,11 @@ void KonohaContext_reftraceAll(KonohaContext *kctx, KObjectVisitor *visitor)
 	KonohaContext_reftrace(kctx, (KonohaContextVar *)kctx, visitor);
 }
 
+#define BUFSIZE 64
 static void KonohaContext_storeCoverageLog(KonohaContext *kctx, const char *key, int value)
 {
 #ifdef HAVE_DB_H
 #define DATABASE "konoha_coverage.db" //TODO change name for ET.
-#define BUFSIZE 64
 
 	DB *db = NULL;
 	DBT DBkey = {};
@@ -220,7 +220,7 @@ static void KonohaContext_storeCoverageLog(KonohaContext *kctx, const char *key,
 	DBkey.data = (char *)key;
 	DBkey.size = strlen(key);
 
-	snprintf(buffer, BUFSIZE, "%d", value);
+	PLATAPI snprintf_i(buffer, BUFSIZE, "%d", value);
 	DBvalue.data = buffer;
 	DBvalue.size = strlen(buffer);
 
@@ -232,16 +232,16 @@ static void KonohaContext_storeCoverageLog(KonohaContext *kctx, const char *key,
 static void KonohaContext_emitCoverageLog(KonohaContext *kctx, VirtualCode *pc)
 {
 	kfileline_t uline = 0;
-	char key[BUFSIZE];
 	while(true) {
 		if (pc->opcode == OPCODE_RET) {
 			break;
 		}
 		if(pc->count > 0) {
 			if((kushort_t)uline != (kushort_t)pc->line) {
+				char key[BUFSIZE];
 				uline = pc->line;
 				PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptResult\", \"ScriptName\": \"%s\", \"ScriptLine\": %d , \"Count\": %d}", FileId_t(pc->line), (kushort_t)pc->line, pc->count);
-				snprintf(key, BUFSIZE, "\"%s:%d\"", FileId_t(pc->line), (kushort_t)pc->line);
+				PLATAPI snprintf_i(key, BUFSIZE, "\"%s:%d\"", FileId_t(pc->line), (kushort_t)pc->line);
 				KonohaContext_storeCoverageLog(kctx, key, pc->count);
 			}
 		}
@@ -326,7 +326,7 @@ void konoha_close(KonohaContext* konoha)
 	KonohaContext_free(konoha, (KonohaContextVar *)konoha);
 }
 
-kbool_t konoha_load(KonohaContext* kctx, const char *scriptname)
+kbool_t Konoha_Load(KonohaContext* kctx, const char *scriptname)
 {
 	PLATAPI BEFORE_LoadScript(kctx, scriptname);
 	BEGIN_(kctx);

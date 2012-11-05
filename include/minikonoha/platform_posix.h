@@ -58,11 +58,13 @@ extern "C" {
 #include <errno.h>
 #include <fcntl.h>
 
+#if HAVE_DB_H
 #if defined(__linux__)
 #include <db_185.h>
 #else
 #include <db.h>
 #endif /*defined(__linux__)*/
+#endif /*HAVE_DB_H*/
 
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
@@ -641,10 +643,10 @@ static const char* shortFilePath(const char *path)
 	return (p == NULL) ? path : (const char *)p+1;
 }
 
-static const char* shortText(const char *msg)
-{
-	return msg;
-}
+//static const char* shortText(const char *msg)
+//{
+//	return msg;
+//}
 
 static const char *formatTransparentPath(char *buf, size_t bufsiz, const char *parentPath, const char *path)
 {
@@ -1101,7 +1103,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 
 // --------------------------------------------------------------------------
 
-static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
+static kunused PlatformApi *KonohaUtils_getDefaultPlatformApi(void)
 {
 	static KonohaFactory plat = {};
 	plat.name            = "shell";
@@ -1167,7 +1169,7 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	return (PlatformApi *)(&plat);
 }
 
-static void PosixFactory(KonohaFactory *factory)
+static kunused void PosixFactory(KonohaFactory *factory)
 {
 	factory->name            = "shell";
 	factory->stacksize       = K_PAGESIZE * 4;
