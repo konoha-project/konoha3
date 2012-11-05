@@ -432,7 +432,7 @@ add_builtin_test(Release/Kvproto --builtin-test=test_kvproto)
 
 macro(set_package_path test_name)
 set_tests_properties(${test_name} PROPERTIES ENVIRONMENT
-	"KONOHA_PACKAGEPATH=${PARENT_BINARY_DIR}/package")
+	"KONOHA_HOME=${PARENT_BINARY_DIR}")
 endmacro(set_package_path test_name)
 
 add_test(Shell/Release/Oneline

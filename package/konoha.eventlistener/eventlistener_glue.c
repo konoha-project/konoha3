@@ -336,7 +336,7 @@ static void *signalEventListener(void *args)
 				CASE(SIGILL)
 				CASE(SIGTRAP)
 				CASE(SIGABRT)
-				CASE(SIGEMT)
+//				CASE(SIGEMT)
 				CASE(SIGFPE)
 //				CASE(SIGKILL)
 				CASE(SIGBUS)
@@ -358,7 +358,7 @@ static void *signalEventListener(void *args)
 				CASE(SIGVTALRM)
 				CASE(SIGPROF)
 				CASE(SIGWINCH)
-				CASE(SIGINFO)
+//				CASE(SIGINFO)
 				CASE_USER_DEFINED_EVENT
 				DEFAULT
 			}
