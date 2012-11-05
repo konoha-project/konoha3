@@ -100,10 +100,10 @@ static kbool_t FormatModulePath(KonohaFactory *factory, char *buf, size_t bufsiz
 		path = factory->getenv_i("HOME");
 		local = "/.minikonoha/module";
 	}
-	snprintf(buf, bufsiz, "%s%s/%s%s", path, local, moduleName, ext);
+	snprintf(buf, bufsiz, "%s%s/%s/%s%s", path, local, moduleName, moduleName, ext);
 #ifdef K_PREFIX
 	if(!HasFile(buf)) {
-		snprintf(buf, bufsiz, K_PREFIX "/lib/minikonoha/" K_VERSION "/module" "/%s%s", moduleName, ext);
+		snprintf(buf, bufsiz, K_PREFIX "/lib/minikonoha/" K_VERSION "/module" "/%s/%s%s", moduleName, moduleName, ext);
 	}
 #endif
 	return HasFile(buf);

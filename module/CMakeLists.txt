@@ -15,7 +15,7 @@ macro(add_konoha_module ModuleName)
 	add_library(${ModuleName} SHARED ${MODULE_SOURCE_CODE})
 	target_link_libraries(${ModuleName} ${MODULE_EXTRA_LIBRARY})
 	set_target_properties(${ModuleName} PROPERTIES PREFIX "")
-	install(TARGETS ${ModuleName} DESTINATION ${KONOHA_MODULE_DIR})
+	install(TARGETS ${ModuleName} DESTINATION ${KONOHA_MODULE_DIR}/${ModuleName})
 endmacro(add_konoha_module ModuleName)
 
 file(GLOB dirs ${CMAKE_CURRENT_SOURCE_DIR}/*)
