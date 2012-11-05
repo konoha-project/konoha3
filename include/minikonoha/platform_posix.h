@@ -893,6 +893,7 @@ static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 
 static kbool_t DEOS_fetchCoverageLog(KonohaContext *kctx, const char *filename, int line)
 {
+#if HAVE_DB_H
 #define DATABASE "test.db"
 #define BUFSIZE 128
 
@@ -905,7 +906,7 @@ static kbool_t DEOS_fetchCoverageLog(KonohaContext *kctx, const char *filename, 
 		return false;
 	}
 
-	snprintf(key, BUFSIZE, "\"%s:%d\"", filename, line);
+	PLATAPI snprintf_i(key, BUFSIZE, "\"%s:%d\"", filename, line);
 
 	DBkey.data = key;
 	DBkey.size = strlen(key);
@@ -919,14 +920,19 @@ static kbool_t DEOS_fetchCoverageLog(KonohaContext *kctx, const char *filename, 
 		db->close(db);
 		return false;
 	}
+#else
+	return false;
+#endif
 }
 
 static kbool_t DEOS_checkSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
 {
 	DBG_P("filename='%s', line=%d", filename, line);
 	if(!KonohaContext_Is(Trace, kctx)) {
-		kbool_t res;
+		kbool_t res = false;
+#if HAVE_DB_H
 		res = DEOS_fetchCoverageLog(kctx, filename, line);
+#endif
 		return res;
 	}else{
 		return true;
