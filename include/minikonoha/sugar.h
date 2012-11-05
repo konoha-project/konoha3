@@ -614,7 +614,7 @@ typedef enum {
 	TypeCheckPolicy_NOCHECK               = 1,
 	TypeCheckPolicy_ALLOWVOID      = (1 << 1),
 	TypeCheckPolicy_COERCION       = (1 << 2),
-	TypeCheckPolicy_CONST          = (1 << 4),
+	TypeCheckPolicy_CONST          = (1 << 4)
 } TypeCheckPolicy;
 
 #define new_ConstValueExpr(CTX, T, O)              SUGAR kExpr_setConstValue(CTX, NULL, T, O)
