@@ -1,0 +1,2 @@
+## export KONOHA_TESTPROFILE=standard minikonoha -MOutputTest ${file}
+minimum  -MOutputTest -DBUFSIZ=1024 -DPASSWD="XXX"
