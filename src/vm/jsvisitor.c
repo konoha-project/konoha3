@@ -83,7 +83,7 @@ static void JSVisitor_emitIndent(KonohaContext *kctx, IRBuilder *self)
 	}
 }
 
-static void JSVisitor_emitNewLine(KonohaContext *kctx, IRBuilder *self, const char* endline)
+static void JSVisitor_emitNewLineWith(KonohaContext *kctx, IRBuilder *self, const char* endline)
 {
 	JSVisitor_emitIndent(kctx, self);
 	DUMPER(self)->isIndentEmitted = false;
@@ -98,7 +98,7 @@ static void JSVisitor_emitString(KonohaContext *kctx, IRBuilder *self, const cha
 
 static void JSVisitor_visitBlock(KonohaContext *kctx, IRBuilder *self, kBlock *block)
 {
-	JSVisitor_emitNewLine(kctx, self, "{");
+	JSVisitor_emitNewLineWith(kctx, self, "{");
 	DUMPER(self)->indent++;
 	visitBlock(kctx, self, block);
 	DUMPER(self)->indent--;
@@ -156,7 +156,7 @@ static void JSVisitor_visitExprStmt(KonohaContext *kctx, IRBuilder *self, kStmt 
 		}
 	}
 	handleExpr(kctx, self, expr);
-	JSVisitor_emitNewLine(kctx, self, ";");
+	JSVisitor_emitNewLineWith(kctx, self, ";");
 }
 
 static void JSVisitor_visitBlockStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
@@ -173,7 +173,7 @@ static void JSVisitor_visitReturnStmt(KonohaContext *kctx, IRBuilder *self, kStm
 	if(expr != NULL && IS_Expr(expr)) {
 		handleExpr(kctx, self, expr);
 	}
-	JSVisitor_emitNewLine(kctx, self, ";");
+	JSVisitor_emitNewLineWith(kctx, self, ";");
 }
 
 static void JSVisitor_visitIfStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
@@ -185,14 +185,14 @@ static void JSVisitor_visitIfStmt(KonohaContext *kctx, IRBuilder *self, kStmt *s
 		JSVisitor_emitString(kctx, self, "else", "", "");
 		JSVisitor_visitBlock(kctx, self, elseBlock);
 	}
-	JSVisitor_emitNewLine(kctx, self, "");
+	JSVisitor_emitNewLineWith(kctx, self, "");
 }
 
 static void JSVisitor_visitLoopStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
 {
 	JSVisitor_visitExpr(kctx, self, Stmt_getFirstExpr(kctx, stmt), "while(", ") ");
 	JSVisitor_visitBlock(kctx, self, Stmt_getFirstBlock(kctx, stmt));
-	JSVisitor_emitNewLine(kctx, self, "");
+	JSVisitor_emitNewLineWith(kctx, self, "");
 }
 
 static void JSVisitor_visitJumpStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
@@ -202,7 +202,7 @@ static void JSVisitor_visitJumpStmt(KonohaContext *kctx, IRBuilder *self, kStmt 
 
 static void JSVisitor_visitTryStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
 {
-	JSVisitor_emitNewLine(kctx, self, "try ");
+	JSVisitor_emitNewLineWith(kctx, self, "try ");
 	JSVisitor_visitBlock(kctx, self, Stmt_getFirstBlock(kctx, stmt));
 	kBlock *catchBlock   = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("catch"),   K_NULLBLOCK);
 	kBlock *finallyBlock = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("finally"), K_NULLBLOCK);
@@ -214,7 +214,7 @@ static void JSVisitor_visitTryStmt(KonohaContext *kctx, IRBuilder *self, kStmt *
 		JSVisitor_emitString(kctx, self, "finally", "", "");
 		JSVisitor_visitBlock(kctx, self, finallyBlock);
 	}
-	JSVisitor_emitNewLine(kctx, self, "");
+	JSVisitor_emitNewLineWith(kctx, self, "");
 }
 
 static void JSVisitor_visitUndefinedStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
@@ -433,13 +433,13 @@ static void JSVisitor_visitStackTopExpr(KonohaContext *kctx, IRBuilder *self, kE
 
 static void JSVisitor_emitExtendFunctionCode(KonohaContext *kctx, IRBuilder *builder)
 {
-	JSVisitor_emitNewLine(kctx, builder, "var __extends = this.__extends || function (d, b) {");
+	JSVisitor_emitNewLineWith(kctx, builder, "var __extends = this.__extends || function (d, b) {");
 	DUMPER(builder)->indent++;
-	JSVisitor_emitNewLine(kctx, builder, "function __() { this.constructor = d; }");
-	JSVisitor_emitNewLine(kctx, builder, "__.prototype = b.prototype;");
-	JSVisitor_emitNewLine(kctx, builder, "d.prototype = new __();");
+	JSVisitor_emitNewLineWith(kctx, builder, "function __() { this.constructor = d; }");
+	JSVisitor_emitNewLineWith(kctx, builder, "__.prototype = b.prototype;");
+	JSVisitor_emitNewLineWith(kctx, builder, "d.prototype = new __();");
 	DUMPER(builder)->indent--;
-	JSVisitor_emitNewLine(kctx, builder, "}");
+	JSVisitor_emitNewLineWith(kctx, builder, "}");
 }
 
 static void JSVisitor_visitClassFields(KonohaContext *kctx, IRBuilder *builder, KonohaClass *class)
@@ -454,7 +454,7 @@ static void JSVisitor_visitClassFields(KonohaContext *kctx, IRBuilder *builder, 
 		}else{
 			JSVisitor_emitConstValue(kctx, builder, constList->fieldObjectItems[i]);
 		}
-		JSVisitor_emitNewLine(kctx, builder, ";");
+		JSVisitor_emitNewLineWith(kctx, builder, ";");
 	}
 }
 
@@ -497,11 +497,11 @@ static void JSVisitor_emitClassHeader(KonohaContext *kctx, IRBuilder *builder, K
 	}else{
 		JSVisitor_emitString(kctx, builder, "var ", CT_t(class), " = (function () {");
 	}
-	JSVisitor_emitNewLine(kctx, builder, "");
+	JSVisitor_emitNewLineWith(kctx, builder, "");
 	DUMPER(builder)->indent++;
 	if(base->typeId != TY_Object){
 		JSVisitor_emitString(kctx, builder, "__extends(", CT_t(class), ", _super);");
-		JSVisitor_emitNewLine(kctx, builder, "");
+		JSVisitor_emitNewLineWith(kctx, builder, "");
 	}
 }
 
@@ -509,13 +509,13 @@ static void JSVisitor_emitClassFooter(KonohaContext *kctx, IRBuilder *builder, K
 {
 	KonohaClass *base = CT_(class->superTypeId);
 	JSVisitor_emitString(kctx, builder, "return ", CT_t(class), ";");
-	JSVisitor_emitNewLine(kctx, builder, "");
+	JSVisitor_emitNewLineWith(kctx, builder, "");
 	DUMPER(builder)->indent--;
 	if(base->typeId != TY_Object) {
 		JSVisitor_emitString(kctx, builder, "})(", CT_t(base), ");");
-		JSVisitor_emitNewLine(kctx, builder, "");
+		JSVisitor_emitNewLineWith(kctx, builder, "");
 	}else{
-		JSVisitor_emitNewLine(kctx, builder, "})();");
+		JSVisitor_emitNewLineWith(kctx, builder, "})();");
 	}
 }
 
@@ -539,11 +539,11 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 			JSVisitor_emitClassHeader(kctx, builder, class);
 		}
 		JSVisitor_emitMethodHeader(kctx, builder, mtd);
-		JSVisitor_emitNewLine(kctx, builder, " {");
+		JSVisitor_emitNewLineWith(kctx, builder, " {");
 		DUMPER(builder)->indent++;
 		if(isConstractor) {
 			if(base->typeId != TY_Object) {
-				JSVisitor_emitNewLine(kctx, builder, "_super.call(this);");
+				JSVisitor_emitNewLineWith(kctx, builder, "_super.call(this);");
 			}
 			JSVisitor_visitClassFields(kctx, builder, class);
 		}
@@ -556,7 +556,7 @@ static void JSVisitor_free(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 {
 	if(mtd->mn != 0) {
 		DUMPER(builder)->indent--;
-		JSVisitor_emitNewLine(kctx, builder, "}");
+		JSVisitor_emitNewLineWith(kctx, builder, "}");
 		if(strcmp(SYM_t(mtd->mn), "new") == 0) {
 			KonohaClass *class = CT_(mtd->typeId);
 			JSVisitor_emitClassFooter(kctx, builder, class);
