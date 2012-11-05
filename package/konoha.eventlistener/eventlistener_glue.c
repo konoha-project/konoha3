@@ -254,6 +254,14 @@ static void initMailbox(char *path)
 	fclose(mailbox);
 }
 
+static void signalHandler(KonohaContext *kctx, const char *signo)
+{
+	RawEvent rawEvent = createRawEvent(kctx, (unsigned char *)signo);
+	if(enqueueRawEventToLocalQueue(SignalEventQueue, rawEvent) == false) {
+		fprintf(stderr, "Event queue is full");
+	}
+}
+
 static void signalEventHandler(KonohaContext *kctx)
 {
 	FILE *mailbox;
@@ -279,14 +287,39 @@ static void signalEventHandler(KonohaContext *kctx)
 	fclose(mailbox);
 }
 
+#define CASE(signo) \
+	case signo:\
+		signalHandler(kctx, "{\"event\":\""#signo"\"}");\
+		break;\
+
+#define CASE_USER_DEFINED_EVENT \
+	case SIGUSR1:\
+		signalEventHandler(kctx);\
+		break;\
+	case SIGUSR2:\
+		signalEventHandler(kctx);\
+		break;\
+
+#define DEFAULT \
+	default:\
+		break;\
+
 static void *signalEventListener(void *args)
 {
 	KonohaContext *kctx = (KonohaContext *)args;
 	int signo;
 	sigset_t ss;
-	sigemptyset(&ss);
-	if(sigaddset(&ss, SIGUSR1)) {
-		fprintf(stderr, "sigaddset error!\n");
+	sigfillset(&ss);
+	if(sigdelset(&ss, SIGINT)) {
+		fprintf(stderr, "sigdelset error!\n");
+		pthread_exit(NULL);
+	}
+	if(sigdelset(&ss, SIGKILL)) {
+		fprintf(stderr, "sigdelset error!\n");
+		pthread_exit(NULL);
+	}
+	if(sigdelset(&ss, SIGTERM)) {
+		fprintf(stderr, "sigdelset error!\n");
 		pthread_exit(NULL);
 	}
 	if(sigprocmask(SIG_BLOCK, &ss, NULL)) {
@@ -297,11 +330,37 @@ static void *signalEventListener(void *args)
 	while(1) {
 		if(sigwait(&ss, &signo) == 0) {
 			switch(signo) {
-				case SIGUSR1:
-					signalEventHandler(kctx);
-					break;
-				default:
-					break;
+				CASE(SIGHUP)
+//				CASE(SIGINT)
+				CASE(SIGQUIT)
+				CASE(SIGILL)
+				CASE(SIGTRAP)
+				CASE(SIGABRT)
+				CASE(SIGEMT)
+				CASE(SIGFPE)
+//				CASE(SIGKILL)
+				CASE(SIGBUS)
+				CASE(SIGSEGV)
+				CASE(SIGSYS)
+				CASE(SIGPIPE)
+				CASE(SIGALRM)
+//				CASE(SIGTERM)
+				CASE(SIGURG)
+				CASE(SIGSTOP)
+				CASE(SIGTSTP)
+				CASE(SIGCONT)
+				CASE(SIGCHLD)
+				CASE(SIGTTIN)
+				CASE(SIGTTOU)
+				CASE(SIGIO)
+				CASE(SIGXCPU)
+				CASE(SIGXFSZ)
+				CASE(SIGVTALRM)
+				CASE(SIGPROF)
+				CASE(SIGWINCH)
+				CASE(SIGINFO)
+				CASE_USER_DEFINED_EVENT
+				DEFAULT
 			}
 		}
 	}
