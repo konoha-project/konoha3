@@ -691,7 +691,7 @@ static KMETHOD Pointer_toObject(KonohaContext *kctx, KonohaStack *sfp)
 //}
 
 /****************************************************************/
-static void _kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
+static void _kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 {
 	DBG_P("START CODE GENERATION..");
 	BEGIN_LOCAL(lsfp, 8);
@@ -715,7 +715,7 @@ static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	base->h.setup    = kmodjit_setup;
 	base->h.reftrace = kmodjit_reftrace;
 	base->h.free     = kmodjit_free;
-	base->defaultCodeGen = kctx->klib->kMethod_genCode;
+	base->defaultCodeGen = kctx->klib->kMethod_GenCode;
 	base->jitcache = KLIB Kmap_init(kctx, 0);
 	KUnsafeFieldInit(base->global_value, new_(Array, 18));
 	KUnsafeFieldInit(base->constPool, new_(Array, 0));
@@ -842,9 +842,9 @@ static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
 	KonohaLibVar *l = (KonohaLibVar *)kctx->klib;
-	l->kMethod_genCode = GenCodeDefault;
+	l->kMethod_GenCode = GenCodeDefault;
 	KLIB kNameSpace_compileAllDefinedMethods(kctx);
-	l->kMethod_genCode = _kMethod_genCode;
+	l->kMethod_GenCode = _kMethod_GenCode;
 
 	return true;
 }

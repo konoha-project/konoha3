@@ -129,7 +129,7 @@ static KMETHOD Thread_create(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
 	kFunc *f = sfp[1].asFunc;
-	KLIB kMethod_DoLazyCompilation(kctx, (f)->mtd);
+	KLIB kMethod_DoLazyCompilation(kctx, (f)->mtd, NULL, HatedLazyCompile);
 	kThread *thread = (kThread *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	thread->rootCtx = kctx; //TODO getRootContext
 	thread->kctx = KLIB KonohaContext_init(kctx, kctx->platApi);

@@ -898,7 +898,7 @@ static void _THCODE(KonohaContext *kctx, VirtualCode *pc, void **codeaddr)
 #endif
 }
 
-static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
+static void kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 {
 	DBG_P("START CODE GENERATION..");
 	INIT_GCSTACK();
@@ -1099,7 +1099,7 @@ void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	}
 	KonohaLibVar *l = (KonohaLibVar *)kctx->klib;
 	l->kMethod_setFunc = kMethod_setFunc;
-	l->kMethod_genCode = kMethod_genCode;
+	l->kMethod_GenCode = kMethod_GenCode;
 }
 
 /* ------------------------------------------------------------------------ */

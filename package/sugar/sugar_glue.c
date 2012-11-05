@@ -178,7 +178,6 @@ static KMETHOD NameSpace_setTokenFunc(KonohaContext *kctx, KonohaStack *sfp)
 	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
 	int konohaChar = (int)sfp[2].intValue;
 	SUGAR kNameSpace_SetTokenFunc(kctx, sfp[0].asNameSpace, keyword, konohaChar, sfp[3].asFunc);
-	KLIB kMethod_DoLazyCompilation(kctx, (sfp[3].asFunc)->mtd);
 }
 
 ////## void NameSpace.compileAllDefinedMethods();

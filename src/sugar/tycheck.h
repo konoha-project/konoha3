@@ -301,12 +301,12 @@ static kBlock* kMethod_newBlock(KonohaContext *kctx, kMethod *mtd, kNameSpace *n
 	return bk;
 }
 
-static void kGamma_initParam(KonohaContext *kctx, GammaAllocaData *genv, kParam *pa)
+static void kGamma_InitParam(KonohaContext *kctx, GammaAllocaData *genv, kParam *pa, kparamtype_t *callparam)
 {
 	int i, psize = (pa->psize + 1 < genv->localScope.capacity) ? pa->psize : genv->localScope.capacity - 1;
 	for(i = 0; i < psize; i++) {
 		genv->localScope.varItems[i+1].fn = pa->paramtypeItems[i].fn;
-		genv->localScope.varItems[i+1].ty = pa->paramtypeItems[i].ty;
+		genv->localScope.varItems[i+1].ty = (callparam == NULL) ? pa->paramtypeItems[i].ty : callparam[i].ty;
 	}
 	if(!kMethod_is(Static, genv->currentWorkingMethod)) {
 		genv->localScope.varItems[0].fn = FN_this;
@@ -315,27 +315,32 @@ static void kGamma_initParam(KonohaContext *kctx, GammaAllocaData *genv, kParam 
 	genv->localScope.varsize = psize+1;
 }
 
-static kbool_t kMethod_compile(KonohaContext *kctx, kMethod *mtd, kNameSpace *ns, kString *text, kfileline_t uline)
+static kMethod *kMethod_Compile(KonohaContext *kctx, kMethod *mtd, kparamtype_t *callparamNULL, kNameSpace *ns, kString *text, kfileline_t uline, int options)
 {
 	INIT_GCSTACK();
+	kParam *param = Method_param(mtd);
+	if(callparamNULL != NULL) {
+		//DynamicComplie();
+	}
 	kGamma *gma = KonohaContext_getSugarContext(kctx)->preparedGamma;
 	kBlock *bk = kMethod_newBlock(kctx, mtd, ns, text, uline);
-	GammaStackDecl lvarItems[32] = {};
 	GammaAllocaData newgma = {0};
+	GammaStackDecl lvarItems[32 + param->psize];
+	bzero(lvarItems, sizeof(GammaStackDecl) * (32 + param->psize));
 	newgma.currentWorkingMethod = mtd;
 	newgma.this_cid = (mtd)->typeId;
 	newgma.localScope.varItems = lvarItems;
-	newgma.localScope.capacity = 32;
+	newgma.localScope.capacity = 32 + param->psize;
 	newgma.localScope.varsize = 0;
 	newgma.localScope.allocsize = 0;
 
 	GAMMA_PUSH(gma, &newgma);
-	kGamma_initParam(kctx, &newgma, Method_param(mtd));
+	kGamma_InitParam(kctx, &newgma, param, callparamNULL);
 	kBlock_tyCheckAll(kctx, bk, gma);
-	KLIB kMethod_genCode(kctx, mtd, bk);
+	KLIB kMethod_GenCode(kctx, mtd, bk, options);
 	GAMMA_POP(gma, &newgma);
 	RESET_GCSTACK();
-	return 1;
+	return mtd;
 }
 
 /* ------------------------------------------------------------------------ */
@@ -415,9 +420,10 @@ static kstatus_t kBlock_EvalTopLevel(KonohaContext *kctx, kBlock *bk, kMethod *m
 	}
 	if(isTryEval) {
 		ktype_t rtype = kStmt_checkReturnType(kctx, stmt);
-		KLIB kMethod_genCode(kctx, mtd, bk);
+		KLIB kMethod_GenCode(kctx, mtd, bk, DefaultCompileOption);
 		return kMethod_runEval(kctx, mtd, rtype);
 	}
+	return K_CONTINUE;
 }
 
 static kstatus_t kMethod_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtype)

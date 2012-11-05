@@ -121,7 +121,7 @@ static const char* I18N_formatSystemPath(KonohaContext *kctx, char *buf, size_t 
 {
 	size_t newsize;
 	if(!PLATAPI isSystemCharsetUTF8(kctx)) {
-		DBG_P(">>>>>>>>>>>>>>>>>>>> path = '%s', pathsize=%d", path, pathsize);
+		//DBG_P(">>>>>>>>>>>>>>>>>>>> path = '%s', pathsize=%d", path, pathsize);
 		uintptr_t ic = PLATAPI iconvSystemCharsetToUTF8(kctx, trace);
 		int isTooBig;
 		ICONV_INBUF_CONST char *presentPtrFrom = (ICONV_INBUF_CONST char *)path;	// too dirty?
@@ -130,7 +130,7 @@ static const char* I18N_formatSystemPath(KonohaContext *kctx, char *buf, size_t 
 		size_t inBytesLeft = pathsize, outBytesLeft = bufsiz - 1;
 		PLATAPI iconv_i_memcpyStyle(kctx, ic, outbuf, &outBytesLeft, inbuf, &inBytesLeft, &isTooBig, trace);
 		newsize = (bufsiz - 1) - outBytesLeft;
-		DBG_P(">>>>>>>>>>>>>>>>>>>> buf = '%s', newsize=%d", buf, newsize);
+		//DBG_P(">>>>>>>>>>>>>>>>>>>> buf = '%s', newsize=%d", buf, newsize);
 	}
 	else {
 		DBG_ASSERT(bufsiz > pathsize);

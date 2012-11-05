@@ -1101,13 +1101,14 @@ static KMETHOD Statement_TypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 // ------------------
 // Method Utilities for MethodDecl
 
-static KMETHOD MethodFunc_lazyCompilation(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD MethodFunc_LazyCompilation(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KonohaStack *esp = kctx->esp;
 	kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 	kString *text = mtd->SourceToken->text;
 	kfileline_t uline = mtd->SourceToken->uline;
-	kMethod_compile(kctx, mtd, mtd->LazyCompileNameSpace, text, uline);
+	DBG_P("<<lazy compilation>>: %s.%s%s", TY_t(mtd->typeId), MethodName_t(mtd->mn));
+	kMethod_Compile(kctx, mtd, NULL, mtd->LazyCompileNameSpace, text, uline, DefaultCompileOption/*HatedLazyCompile*/);
 	((KonohaContextVar *)kctx)->esp = esp;
 	mtd->invokeMethodFunc(kctx, sfp); // call again;
 }
@@ -1118,19 +1119,23 @@ static void kMethod_setLazyCompilation(KonohaContext *kctx, kMethodVar *mtd, kSt
 	if(tcode != NULL && tcode->resolvedSyntaxInfo->keyword == TokenType_CODE) {
 		KFieldSet(mtd, mtd->SourceToken, tcode);
 		KFieldSet(mtd, mtd->LazyCompileNameSpace, ns);
-		KLIB kMethod_setFunc(kctx, mtd, MethodFunc_lazyCompilation);
+		KLIB kMethod_setFunc(kctx, mtd, MethodFunc_LazyCompilation);
 		KLIB kArray_add(kctx, KonohaContext_getSugarContext(kctx)->definedMethodList, mtd);
 	}
 }
 
-static void kMethod_DoLazyCompilation(KonohaContext *kctx, kMethod *mtd)
+/* In the future, DoLazyCompilation is extended to compile untyped parameters */
+
+static kMethod* kMethod_DoLazyCompilation(KonohaContext *kctx, kMethod *mtd, kparamtype_t *callparamNULL, int options)
 {
-	if(mtd->invokeMethodFunc == MethodFunc_lazyCompilation) {
+	if(mtd->invokeMethodFunc == MethodFunc_LazyCompilation) {
 		kString *text = mtd->SourceToken->text;
 		kfileline_t uline = mtd->SourceToken->uline;
-		kMethod_compile(kctx, mtd, mtd->LazyCompileNameSpace, text, uline);
-		DBG_ASSERT(mtd->invokeMethodFunc != MethodFunc_lazyCompilation);
+		((kMethodVar*)mtd)->invokeMethodFunc = NULL; // TO avoid recursive compile
+		mtd = kMethod_Compile(kctx, mtd, callparamNULL, mtd->LazyCompileNameSpace, text, uline, options|HatedLazyCompile);
+		DBG_ASSERT(mtd->invokeMethodFunc != MethodFunc_LazyCompilation);
 	}
+	return mtd;
 }
 
 ///* ------------------------------------------------------------------------ */

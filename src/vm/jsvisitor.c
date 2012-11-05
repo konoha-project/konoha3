@@ -470,7 +470,7 @@ static void JSVisitor_emitMethodHeader(KonohaContext *kctx, IRBuilder *builder, 
 	}else if(strcmp(SYM_t(mtd->mn), "new") == 0) {
 		KLIB Kwb_printf(kctx, &wb, "function %s(", CT_t(class));
 	}else{
-		KLIB kMethod_DoLazyCompilation(kctx, mtd);
+		KLIB kMethod_DoLazyCompilation(kctx, mtd, NULL, HatedLazyCompile|CrossCompile);
 		if(kMethod_is(Static, mtd)) {
 			KLIB Kwb_printf(kctx, &wb, "%s.%s%s = function(", CT_t(CT_(mtd->typeId)), MethodName_t(mtd->mn));
 		}else{
@@ -548,7 +548,7 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 			JSVisitor_visitClassFields(kctx, builder, class);
 		}
 	}else{
-		KLIB kMethod_DoLazyCompilation(kctx, mtd);
+		KLIB kMethod_DoLazyCompilation(kctx, mtd, NULL, HatedLazyCompile|CrossCompile);
 	}
 }
 

@@ -1079,7 +1079,7 @@ static void BUILD_compile(KonohaContext *kctx, kMethod *mtd, kBasicBlock *beginB
 	RESET_GCSTACK();
 }
 
-static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
+static void kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk, int options)
 {
 	DBG_P("START CODE GENERATION..");
 	INIT_GCSTACK();
@@ -1088,6 +1088,7 @@ static void kMethod_genCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	}
 
 	IRBuilder *builder, builderbuf;
+	// TODO: set options
 
 #ifdef USE_SMALLBUILD
 #define visitorType kVisitor_KonohaVM
@@ -1247,7 +1248,7 @@ void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	base->cByteCode = KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defByteCode, 0);
 	kmodcode_setup(kctx, &base->header, 0);
 	KonohaLibVar *l = (KonohaLibVar *)kctx->klib;
-	l->kMethod_genCode = kMethod_genCode;
+	l->kMethod_GenCode = kMethod_GenCode;
 	l->kMethod_setFunc = kMethod_setFunc;
 }
 
