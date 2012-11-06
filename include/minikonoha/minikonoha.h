@@ -503,10 +503,14 @@ struct KonohaFactory {
 
 	int (*diagnosisFaultType)(KonohaContext *, int fault, KTraceInfo *);
 
+	/* Console API */
 	void (*ReportUserMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *, int isNewLine);
 	void (*ReportCompilerMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *);
 	void (*ReportCaughtException)(KonohaContext *, const char *, int fault, const char *, struct KonohaValueVar *bottomStack, struct KonohaValueVar *topStack);
 	void (*ReportDebugMessage)(const char *file, const char *func, int line, const char *fmt, ...) __PRINTFMT(4, 5);
+	int         (*InputUserApproval)(KonohaContext *, const char *message, const char *yes, const char *no, int defval);
+	const char* (*InputUserText)(KonohaContext *, const char *message, int flag);
+	const char* (*InputUserPassword)(KonohaContext *, const char *message);
 
 	/* Garbage Collection API */
 	const char* Module_GC;

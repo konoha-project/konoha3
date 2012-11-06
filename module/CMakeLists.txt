@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
 
-macro(GET_MODULE_NAME _STR _RESULT)
-	string(REPLACE "/" ";" _tmp ${_STR})
-	list(REVERSE _tmp)
 	list(GET _tmp 0 ${_RESULT})
 endmacro()
 
