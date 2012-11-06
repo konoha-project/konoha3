@@ -329,6 +329,10 @@ static struct VirtualCode* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaS
 	return pc;
 }
 
+static void KonohaVirtualMachine_delete(KonohaContext *kctx)
+{
+}
+
 // -------------------------------------------------------------------------
 
 static struct VirtualCode  *BOOTCODE_ENTER = NULL;
@@ -385,6 +389,13 @@ static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack 
 //	((kMethodVar *)mtd)->pc_start = BOOTCODE_NCALL;
 //}
 
+static void kMethod_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
+{
+	func = (func != NULL) ? func : MethodFunc_invokeAbstractMethod;
+	((kMethodVar *)mtd)->invokeMethodFunc = func;
+	((kMethodVar *)mtd)->pc_start = BOOTCODE_NCALL;
+}
+
 // -------------------------------------------------------------------------
 
 kbool_t LoadMiniVMModule(KonohaFactory *factory, ModuleType type)
@@ -396,11 +407,11 @@ kbool_t LoadMiniVMModule(KonohaFactory *factory, ModuleType type)
 	factory->VirtualMachineInfo            = &ModuleInfo;
 	factory->IsSupportedVirtualCode        = IsSupportedVirtualCode;
 	factory->RunVirtualMachine             = KonohaVirtualMachine_run;
+	factory->DeleteVirtualMachine          = KonohaVirtualMachine_delete;
 	factory->GetVirtualMachineMethodFunc   = GetVritualMachineMethodFunc;
 	factory->GetBootCodeOfNativeMethodCall = GetBootCodeOfNativeMethodCall;
 	return true;
 }
-
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

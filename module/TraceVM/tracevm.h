@@ -112,6 +112,8 @@ typedef enum {
 #define BasicBlock_setVisited(o,B)   TFLAG_set(uintptr_t,((kObjectVar *)o)->h.magicflag,kObject_Local1,B)
 
 typedef struct kBasicBlockVar         kBasicBlock;
+typedef const struct kByteCodeVar     kByteCode;
+typedef struct kByteCodeVar           kByteCodeVar;
 
 struct kBasicBlockVar {
 	KonohaObjectHeader h;
@@ -130,6 +132,37 @@ struct kByteCodeVar {
 	kString  *source;
 	kfileline_t   fileid;
 };
+
+#define ctxcode          ((ctxcode_t *)kctx->modlocal[MOD_code])
+#define kmodcode         ((KModuleByteCode *)kctx->modshare[MOD_code])
+#define CT_BasicBlock    kmodcode->cBasicBlock
+#define TY_BasicBlock    kmodcode->cBasicBlock->typeId
+#define CT_ByteCode      kmodcode->cByteCode
+
+#define IS_BasicBlock(O)  (O_ct(O) == CT_BasicBlock)
+#define IS_ByteCode(O)    (O_ct(O) == CT_ByteCode)
+
+#define CODE_ENTER        kmodcode->PRECOMPILED_ENTER
+#define CODE_NCALL        kmodcode->PRECOMPILED_NCALL
+
+typedef struct {
+	KonohaModule     header;
+	KonohaClass     *cBasicBlock;
+	KonohaClass     *cByteCode;
+	kByteCode       *codeNull;
+	struct VirtualCode  *PRECOMPILED_ENTER;
+	struct VirtualCode  *PRECOMPILED_NCALL;
+} KModuleByteCode;
+
+typedef struct {
+	KonohaModuleContext      h;
+	kfileline_t      uline;
+	kArray          *codeList;
+	kBasicBlock     *lbINIT; // ON GCSTACK
+	kBasicBlock     *lbEND;  // ON GCSTACK
+	kArray          *constPools;
+	kBasicBlock     *currentWorkingBlock;
+} ctxcode_t;
 
 /* ------------------------------------------------------------------------- */
 
