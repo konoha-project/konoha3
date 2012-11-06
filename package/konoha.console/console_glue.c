@@ -40,6 +40,22 @@ static KMETHOD Console_inputUserApproval(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(PLATAPI InputUserApproval(kctx, S_text(sfp[1].asString), S_text(sfp[2].asString), S_text(sfp[3].asString), sfp[4].boolValue));
 }
 
+//## boolean Console.inputUserPassword(String msg)
+static KMETHOD Console_inputUserPassword(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kString *s;
+	const char *p = PLATAPI InputUserPassword(kctx, S_text(sfp[1].asString));
+	if(p != NULL) {
+		s = KLIB new_kString(kctx, OnStack, p, strlen(p), 0);
+		free(p);
+	}
+	else {
+		s = TS_EMPTY;
+	}
+	KReturn(s);
+}
+
+
 /* ------------------------------------------------------------------------ */
 
 #define _Public   kMethod_Public
@@ -59,6 +75,7 @@ static kbool_t console_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Static, _F(Console_inputUserApproval), TY_boolean, TY_Console, MN_("inputUserApproval"), 4,
 		    TY_String, FN_("message"), TY_String, FN_("yes"), TY_String, FN_("no"), TY_boolean, FN_("defval"),
+		_Public|_Static, _F(Console_inputUserPassword), TY_boolean, TY_Console, MN_("inputUserPassword"), 1, TY_String, FN_("message"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
