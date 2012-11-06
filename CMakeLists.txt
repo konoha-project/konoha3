@@ -59,6 +59,7 @@ set(PACKAGES
 	konoha.bytes
 	konoha.class
 	konoha.complex
+	konoha.console
 	konoha.const
 	konoha.date
 	konoha.defined
