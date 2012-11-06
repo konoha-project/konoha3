@@ -26,30 +26,69 @@
 extern "C" {
 #endif
 
-#include <iconv.h>
-#include <errno.h>
+#include <stdio.h>
+#include <sys/ioctl.h>
+//#include <asm/termbits.h>
 #include <minikonoha/minikonoha.h>
+#include <minikonoha/klib.h>
 
 // -------------------------------------------------------------------------
 /* Console */
 
+static void UI_ReportUserMessage(KonohaContext *kctx, kinfotag_t level, kfileline_t pline, const char *msg, int isNewLine)
+{
+
+}
+
+static void UI_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t pline, const char *msg)
+{
+}
+
+static void Kwb_writeValue(KonohaContext *kctx, KGrowingBuffer *wb, KonohaClass *c, KonohaStack *sfp)
+{
+
+}
+
+static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionName, int fault, const char *optionalMessage, KonohaStack *bottomStack, KonohaStack *topStack)
+{
+
+}
+
+static void ReportDebugMessage(const char *file, const char *func, int line, const char *fmt, ...)
+{
+
+}
+
+
+static int InputUserApproval(KonohaContext *kctx, const char *message, const char *yes, const char *no, int defval)
+{
+
+}
+
+static const char* InputUserText(KonohaContext *kctx, const char *message, int flag)
+{
+
+}
+
+static const char* InputUserPassword(KonohaContext *kctx, const char *message)
+{
+
+	return "";
+}
 
 // -------------------------------------------------------------------------
 
 kbool_t LoadDScriptConsoleModule(KonohaFactory *factory, ModuleType type)
 {
-//	factory->Module_I18N              = "IConv";
-//	factory->systemCharset            = "UTF-8";
-//	factory->iconv_open_i             = I18N_iconv_open;
-//	factory->iconv_i                  = I18N_iconv;
-//	factory->iconv_i_memcpyStyle      = I18N_iconv_memcpyStyle;
-//	factory->iconv_close_i            = I18N_iconv_close;
-//	factory->isSystemCharsetUTF8      = I18N_isSystemCharsetUTF8;
-//	factory->iconvSystemCharsetToUTF8 = I18N_iconvSystemCharsetToUTF8;
-//	factory->iconvUTF8ToSystemCharset = I18N_iconvUTF8ToSystemCharset;
-//	factory->formatKonohaPath         = I18N_formatKonohaPath;
-//	factory->formatSystemPath         = I18N_formatSystemPath;
 
+	factory->ReportUserMessage        = UI_ReportUserMessage;
+	factory->ReportCompilerMessage    = UI_ReportCompilerMessage;
+	factory->ReportCaughtException    = UI_ReportCaughtException;
+	factory->ReportDebugMessage       = ReportDebugMessage;
+	factory->InputUserApproval        = InputUserApproval;
+
+	factory->InputUserText            = InputUserText;
+	factory->InputUserPassword        = InputUserPassword;
 	return true;
 }
 
