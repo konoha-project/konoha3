@@ -1,7 +1,7 @@
 // writte by kimio kuramitsu
 
 import("konoha.class");
-// import("konoha.assign"); Don't use any more
+// //import("konoha.assign"); Don't use any more
 
 class Person {
 	String name;

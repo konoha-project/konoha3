@@ -2,7 +2,7 @@ import("sugar");
 import("konoha.float");
 import("llvm");
 import("konoha.array");
-// import("konoha.assign"); Don't use any more
+// //import("konoha.assign"); Don't use any more
 import("cstyle"); // konoha.null is obsolate; use cstyle
 import("konoha.string");
 import("konoha.class");

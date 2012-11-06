@@ -1,5 +1,5 @@
 // written by kimio kuramitsu
-// import("konoha.assign"); Don't use any more
+// //import("konoha.assign"); Don't use any more
 import("konoha.array");
 
 void test() {

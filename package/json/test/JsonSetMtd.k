@@ -4,7 +4,7 @@ import("cstyle"); // konoha.int was obsolete
 import("konoha.float");
 import("konoha.string");
 import("konoha.array");
-// import("konoha.assign"); Don't use any more
+// //import("konoha.assign"); Don't use any more
 import("json");
 
 void main() {

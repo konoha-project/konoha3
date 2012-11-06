@@ -8,7 +8,7 @@ import("cstyle");
 import("konoha.const");
 import("konoha.class");
 import("konoha.float");
-// import("konoha.assign"); Don't use any more
+// //import("konoha.assign"); Don't use any more
 import("konoha.array");
 import("konoha.bytes");
 import("konoha.file");

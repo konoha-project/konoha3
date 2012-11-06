@@ -6,7 +6,7 @@ Work out the first ten digits of the sum of the following one-hundred 50-digit n
 
 */
 import("konoha.class");
-// import("konoha.assign"); Don't use any more
+// //import("konoha.assign"); Don't use any more
 import("konoha.new");
 import("konoha.string");
 import("gmp")

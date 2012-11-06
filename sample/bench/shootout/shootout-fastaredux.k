@@ -11,7 +11,7 @@ import("konoha.global");
 import("konoha.class");
 import("konoha.array");
 import("konoha.new");
-// import("konoha.assign"); Don't use any more
+// //import("konoha.assign"); Don't use any more
 import("konoha.string");
 import("konoha.bytes");
 import("konoha.file");

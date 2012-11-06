@@ -8,7 +8,7 @@ What is the sum of the digits of the number 21000?
 */
 import("konoha.class");
 import("konoha.new");
-// import("konoha.assign"); Don't use any more
+// //import("konoha.assign"); Don't use any more
 import("konoha.string");
 import("cstyle");
 import("gmp");

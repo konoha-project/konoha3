@@ -1,7 +1,7 @@
 // import("sugar");
 // import("cstyle"); // use cstyle
 // import("konoha.string");
-// // import("konoha.assign"); Don't use any more
+// // //import("konoha.assign"); Don't use any more
 
 // int singleQuoteToken (Token tk, String source) {
 // 	String ch, prev = "'";

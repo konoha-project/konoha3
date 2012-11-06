@@ -10,7 +10,7 @@ import("konoha.global");
 import("konoha.class");
 import("konoha.float");
 import("konoha.array");
-// import("konoha.assign"); Don't use any more
+// //import("konoha.assign"); Don't use any more
 import("konoha.bytes");
 import("konoha.file");
 

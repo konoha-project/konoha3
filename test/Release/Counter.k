@@ -1,6 +1,6 @@
 // written by kimio
 
-// import("konoha.assign"); Don't use any more
+// //import("konoha.assign"); Don't use any more
 import("konoha.class");
 
 class Counter {

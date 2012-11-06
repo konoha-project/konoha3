@@ -814,17 +814,52 @@ record_result 0211_IntFloat $PASS 10
 PASS=0
 run_test 1 1 minimum "-MOutputTest" 0212_Math/Math.k
 record_result 0212_Math $PASS 1
-## 0214_StringAscii
+## 0215_Date
 PASS=0
-record_result 0214_StringAscii $PASS 0
-## 0215_StringUtf8
+run_test 1 4 minimum "-MOutputTest" 0215_Date/Date_Get.k
+run_test 2 4 minimum "-MOutputTest" 0215_Date/Date_GetUTC.k
+run_test 3 4 minimum "-MOutputTest" 0215_Date/Date_Set.k
+run_test 4 4 minimum "-MOutputTest" 0215_Date/Date_ToString.k
+record_result 0215_Date $PASS 4
+## 0221_StringAscii
 PASS=0
-record_result 0215_StringUtf8 $PASS 0
-## 0216_Regexp
+record_result 0221_StringAscii $PASS 0
+## 0222_StringUtf8
 PASS=0
-record_result 0216_Regexp $PASS 0
-## 0217_Date
+record_result 0222_StringUtf8 $PASS 0
+## 0223_RegexpAscii
 PASS=0
-record_result 0217_Date $PASS 0
+record_result 0223_RegexpAscii $PASS 0
+## 0224_RegexpUtf8
+PASS=0
+record_result 0224_RegexpUtf8 $PASS 0
+## 0225_BytesUft8
+PASS=0
+record_result 0225_BytesUft8 $PASS 0
+## 0226_BytesCharset
+PASS=0
+record_result 0226_BytesCharset $PASS 0
+## 0227_File
+PASS=0
+record_result 0227_File $PASS 0
+## 0250_IShell
+PASS=0
+record_result 0250_IShell $PASS 0
+## 0251_Global
+PASS=0
+run_test 1 13 minimum "-MOutputTest" 0251_Global/Global_Global.k
+run_test 2 13 minimum "-MOutputTest" 0251_Global/Global_GlobalAssign.k
+run_test 3 13 minimum "-MOutputTest" 0251_Global/Global_GlobalAssignString.k
+run_test 4 13 minimum "-MOutputTest" 0251_Global/Global_LocalAccessAllowed.k
+run_test 5 13 minimum "-MOutputTest" 0251_Global/Global_LocalAccessGlobal.k
+run_test 6 13 minimum "-MOutputTest" 0251_Global/Global_LocalAssignAllowed.k
+run_test 7 13 minimum "-MOutputTest" 0251_Global/Global_LocalAssignGlobal.k
+run_test 8 13 minimum "-MOutputTest" 0251_Global/Global_TypeDecl.k
+run_test 9 13 minimum "-MOutputTest" 0251_Global/Global_TypeDeclInit.k
+run_test 10 13 minimum "-MOutputTest" 0251_Global/Global_TypeDeclInitMulti.k
+run_test 11 13 minimum "-MOutputTest" 0251_Global/Global_TypeDeclInitString.k
+run_test 12 13 minimum "-MOutputTest" 0251_Global/Global_TypeDeclMulti.k
+run_test 13 13 minimum "-MOutputTest" 0251_Global/Global_TypeDeclString.k
+record_result 0251_Global $PASS 13
 total
 

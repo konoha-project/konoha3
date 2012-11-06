@@ -4,7 +4,7 @@
 */
 
 import("cstyle");
-// import("konoha.assign"); Don't use any more
+// //import("konoha.assign"); Don't use any more
 import("konoha.new");
 import("konoha.class");
 import("cstyle"); // konoha.null is obsolate; use cstyle

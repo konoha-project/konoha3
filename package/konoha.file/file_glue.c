@@ -506,12 +506,16 @@ static void file_defineConst(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *tr
 		{NULL}, /* sentinel */
 	};
 	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(FileData), trace);
+	KDEFINE_INT_CONST IntData[] = {
+		{"EOF", TY_int,  EOF},
+		{NULL}, /* sentinel */
+	};
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), trace);
 }
 
 static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	KRequireKonohaCommonModule(trace);
-	//KRequirePackage("konoha.bytes", trace);
 	if(CT_File == NULL) {
 		KDEFINE_CLASS defFile = {
 			.structname = "FILE",
