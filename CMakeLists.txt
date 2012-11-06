@@ -248,7 +248,7 @@ macro(add_test_with_property test_name)
 	add_test(${test_name} ${TEST_BIN} ${ARGN})
 	set_tests_properties(${test_name} PROPERTIES TIMEOUT 5)
 	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT
-		"KONOHA_PACKAGEPATH=${PARENT_BINARY_DIR}/package")
+		"KONOHA_HOME=${PARENT_BINARY_DIR}")
 endmacro(add_test_with_property test_name)
 
 option(TEST_STRESS "Use Stress Test" OFF)
@@ -457,7 +457,7 @@ foreach(f ${test_files})
 	endif(EXISTS ${TEST_SCRIPT})
 	set_tests_properties(${test_name} PROPERTIES TIMEOUT 5)
 	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT
-		"KONOHA_PACKAGEPATH=${PARENT_BINARY_DIR}/package")
+		"KONOHA_HOME=${PARENT_BINARY_DIR}")
 endforeach(f ${test_files})
 
 option(USE_TRACEVM "Use tracevm" ON)
