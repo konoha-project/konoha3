@@ -22,8 +22,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#ifndef OPCODE_H
-#define OPCODE_H
+#ifndef TRACEVM_H
+#define TRACEVM_H
 
 /* virtual machine */
 
@@ -105,6 +105,33 @@ typedef enum {
 	VMT_Object,
 	VMT_HCACHE,
 } VirtualCodeType;
+
+/* ------------------------------------------------------------------------ */
+
+#define BasicBlock_isVisited(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
+#define BasicBlock_setVisited(o,B)   TFLAG_set(uintptr_t,((kObjectVar *)o)->h.magicflag,kObject_Local1,B)
+
+typedef struct kBasicBlockVar         kBasicBlock;
+
+struct kBasicBlockVar {
+	KonohaObjectHeader h;
+	kushort_t id;     kushort_t incoming;
+	KGrowingArray codeTable;
+	kBasicBlock        *nextBlock;
+	kBasicBlock        *branchBlock;
+	VirtualCode *code;
+	VirtualCode *opjmp;
+};
+
+struct kByteCodeVar {
+	KonohaObjectHeader h;
+	VirtualCode*   code;
+	size_t    codesize;
+	kString  *source;
+	kfileline_t   fileid;
+};
+
+/* ------------------------------------------------------------------------- */
 
 #define PC_NEXT(pc)   pc+1
 
@@ -405,4 +432,4 @@ typedef struct OPTRACE {
 	F(kctx, (KonohaStack *)(rbp + THIS), trace);\
 } while(0)
 
-#endif /* OPCODE_H */
+#endif /* TRACEVM_H */

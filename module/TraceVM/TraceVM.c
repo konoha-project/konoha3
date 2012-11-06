@@ -29,7 +29,7 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/klib.h>
 #include <minikonoha/sugar.h>
-#include "opcode.h"
+#include "tracevm.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -172,12 +172,13 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #define NEXT_OP   (pc->codeaddr)
 #define JUMP      *(NEXT_OP)
 #ifdef K_USING_VMASMDISPATCH
-#define GOTO_NEXT()     \
-	asm volatile("jmp *%0;": : "g"(NEXT_OP));\
+#define GOTO_NEXT()								\
+	asm volatile("jmp *%0;": : "g"(NEXT_OP));	\
 	goto *(NEXT_OP)
 
 #else
 #define GOTO_NEXT()     goto *(NEXT_OP)
+#define GIVEOUT_COVERAGEELEMENT  op->count++
 #endif
 #define TC(c)
 #define DISPATCH_START(pc) goto *OPJUMP[pc->opcode]
@@ -211,121 +212,121 @@ static struct VirtualCode* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaS
 	DISPATCH_START(pc);
 	CASE(NOP) {
 		OPNOP *op = (OPNOP *)pc;
-		OPEXEC_NOP();  pc++;
+		OPEXEC_NOP();  GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(THCODE) {
 		OPTHCODE *op = (OPTHCODE *)pc;
-		OPEXEC_THCODE(op->threadCode); pc++;
+		OPEXEC_THCODE(op->threadCode); GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(ENTER) {
 		OPENTER *op = (OPENTER *)pc;
-		OPEXEC_ENTER(); pc++;
+		OPEXEC_ENTER(); GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(EXIT) {
 		OPEXIT *op = (OPEXIT *)pc;
-		OPEXEC_EXIT(); pc++;
+		OPEXEC_EXIT(); GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(NSET) {
 		OPNSET *op = (OPNSET *)pc;
-		OPEXEC_NSET(op->a, op->n, op->ty); pc++;
+		OPEXEC_NSET(op->a, op->n, op->ty); GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(NMOV) {
 		OPNMOV *op = (OPNMOV *)pc;
-		OPEXEC_NMOV(op->a, op->b, op->ty); pc++;
+		OPEXEC_NMOV(op->a, op->b, op->ty); GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(NMOVx) {
 		OPNMOVx *op = (OPNMOVx *)pc;
-		OPEXEC_NMOVx(op->a, op->b, op->bx, op->ty); pc++;
+		OPEXEC_NMOVx(op->a, op->b, op->bx, op->ty); GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(XNMOV) {
 		OPXNMOV *op = (OPXNMOV *)pc;
-		OPEXEC_XNMOV(op->a, op->ax, op->b, op->ty); pc++;
+		OPEXEC_XNMOV(op->a, op->ax, op->b, op->ty); GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(NEW) {
 		OPNEW *op = (OPNEW *)pc;
-		OPEXEC_NEW(op->a, op->p, op->ty); pc++;
+		OPEXEC_NEW(op->a, op->p, op->ty); GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(NULL) {
 		OPNULL *op = (OPNULL *)pc;
-		OPEXEC_NULL(op->a, op->ty); pc++;
+		OPEXEC_NULL(op->a, op->ty); GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(LOOKUP) {
 		OPLOOKUP *op = (OPLOOKUP *)pc;
-		OPEXEC_LOOKUP(op->thisidx, op->ns, op->mtd); pc++;
+		OPEXEC_LOOKUP(op->thisidx, op->ns, op->mtd); GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(CALL) {
 		OPCALL *op = (OPCALL *)pc;
-		OPEXEC_CALL(op->uline, op->thisidx, op->espshift, op->tyo); pc++;
+		OPEXEC_CALL(op->uline, op->thisidx, op->espshift, op->tyo); GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(RET) {
 		OPRET *op = (OPRET *)pc;
-		OPEXEC_RET(); pc++;
+		OPEXEC_RET(); GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(NCALL) {
 		OPNCALL *op = (OPNCALL *)pc;
-		OPEXEC_NCALL(); pc++;
+		OPEXEC_NCALL(); GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(BNOT) {
 		OPBNOT *op = (OPBNOT *)pc;
-		OPEXEC_BNOT(op->c, op->a); pc++;
+		OPEXEC_BNOT(op->c, op->a); GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(JMP) {
 		OPJMP *op = (OPJMP *)pc;
-		OPEXEC_JMP(pc = op->jumppc, JUMP); pc++;
+		OPEXEC_JMP(pc = op->jumppc, JUMP); GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(JMPF) {
 		OPJMPF *op = (OPJMPF *)pc;
-		OPEXEC_JMPF(pc = op->jumppc, JUMP, op->a);pc++;
+		OPEXEC_JMPF(pc = op->jumppc, JUMP, op->a);GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(TRYJMP) {
 		OPTRYJMP *op = (OPTRYJMP *)pc;
-		OPEXEC_TRYJMP(pc = op->jumppc, JUMP); pc++;
+		OPEXEC_TRYJMP(pc = op->jumppc, JUMP); GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(YIELD) {
 		OPYIELD *op = (OPYIELD *)pc;
-		OPEXEC_YIELD(); pc++;
+		OPEXEC_YIELD(); GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(ERROR) {
 		OPERROR *op = (OPERROR *)pc;
-		OPEXEC_ERROR(op->uline, op->msg, op->esp); pc++;
+		OPEXEC_ERROR(op->uline, op->msg, op->esp); GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(SAFEPOINT) {
 		OPSAFEPOINT *op = (OPSAFEPOINT *)pc;
-		OPEXEC_SAFEPOINT(op->uline, op->esp); pc++;
+		OPEXEC_SAFEPOINT(op->uline, op->esp); GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(CHKSTACK) {
 		OPCHKSTACK *op = (OPCHKSTACK *)pc;
-		OPEXEC_CHKSTACK(op->uline); pc++;
+		OPEXEC_CHKSTACK(op->uline); GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	CASE(TRACE) {
 		OPTRACE *op = (OPTRACE *)pc;
-		OPEXEC_TRACE(op->uline, op->thisidx, op->trace); pc++;
+		OPEXEC_TRACE(op->uline, op->thisidx, op->trace); GIVEOUT_COVERAGEELEMENT; pc++;
 		GOTO_NEXT();
 	}
 	DISPATCH_END(pc);
-	L_RETURN:;
+L_RETURN:;
 	return pc;
 }
 
@@ -387,12 +388,91 @@ static void kMethod_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
 
 // -------------------------------------------------------------------------
 
-kbool_t LoadMiniVMModule(KonohaFactory *factory, ModuleType type)
+#ifdef HAVE_DB_H
+#if defined(__linux__)
+#include <db_185.h>
+#else
+#include <db.h>
+#endif /*defined(__linux__)*/
+#endif
+#include <fcntl.h>
+
+#define BUFSIZE 64
+static void TraceVMStoreCoverageLog(KonohaContext *kctx, const char *key, int value)
+{
+#ifdef HAVE_DB_H
+#define DATABASE "konoha_coverage.db" //TODO change name for ET.
+
+	DB *db = NULL;
+	DBT DBkey = {};
+	DBT DBvalue = {};
+	char buffer[BUFSIZE];
+
+	if((db = dbopen(DATABASE, O_CREAT | O_RDWR, S_IRWXU, DB_BTREE, NULL)) == NULL) {
+		exit(EXIT_FAILURE);
+	}
+
+	DBkey.data = (char *)key;
+	DBkey.size = strlen(key);
+
+	PLATAPI snprintf_i(buffer, BUFSIZE, "%d", value);
+	DBvalue.data = buffer;
+	DBvalue.size = strlen(buffer);
+
+	db->put(db, &DBkey, &DBvalue, R_NOOVERWRITE);
+	db->close(db);
+#endif
+}
+
+static void TraceVMGiveOutCoverageLog(KonohaContext *kctx, VirtualCode *pc)
+{
+	kfileline_t uline = 0;
+	while(true) {
+		if (pc->opcode == OPCODE_RET) {
+			break;
+		}
+		if(pc->count > 0) {
+			if((kushort_t)uline != (kushort_t)pc->line) {
+				char key[BUFSIZE];
+				uline = pc->line;
+				PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptResult\", \"ScriptName\": \"%s\", \"ScriptLine\": %d , \"Count\": %d}", FileId_t(pc->line), (kushort_t)pc->line, pc->count);
+				PLATAPI snprintf_i(key, BUFSIZE, "\"%s:%d\"", FileId_t(pc->line), (kushort_t)pc->line);
+				TraceVMStoreCoverageLog(kctx, key, pc->count);
+			}
+		}
+		pc++;
+	}
+}
+
+static void TraceVMDeleteVirtualMachine(KonohaContext *kctx)
+{
+	KonohaRuntime *share = kctx->share;
+	size_t i;
+	for(i = 0; i < kArray_size(share->GlobalConstList); i++) {
+		kObject *o = share->GlobalConstList->ObjectItems[i];
+		if(O_ct(o) == CT_NameSpace) {
+			kNameSpace *ns = (kNameSpace *) o;
+			size_t j;
+			for(j = 0; j < kArray_size(ns->methodList_OnList); j++) {
+				kMethod *mtd = ns->methodList_OnList->MethodItems[j];
+				if(IS_NOTNULL((kObject*)mtd->SourceToken)) {
+					TraceVMGiveOutCoverageLog(kctx, mtd->CodeObject->code);
+					//KFree(mtd->CodeObject->code, mtd->CodeObject->codesize);
+				}
+			}
+		}
+	}
+}
+
+// -------------------------------------------------------------------------
+
+kbool_t LoadTraceVMModule(KonohaFactory *factory, ModuleType type)
 {
 	SetUpBootCode();
-	factory->Module_VirtualMachine         = "VirtualMachine";
+	factory->Module_TraceVM                = "TraceVM";
 	factory->IsSupportedVirtualCode        = IsSupportedVirtualCode;
 	factory->RunVirtualMachine             = KonohaVirtualMachine_run;
+	factory->DeleteVirtualMachine          = TraceVMDeleteVirtualMachine;
 	factory->GetVirtualMachineMethodFunc   = GetVritualMachineMethodFunc;
 	factory->GetBootCodeOfNativeMethodCall = GetBootCodeOfNativeMethodCall;
 	return true;
