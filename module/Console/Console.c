@@ -205,6 +205,11 @@ static int myadd_history(const char* line)
 	return 0;
 }
 
+static char* InputUserText(KonohaContext *kctx, const char *message, int flag)
+{
+	return myreadline(message);
+}
+
 static int InputUserApproval(KonohaContext *kctx, const char *message, const char *yes, const char *no, int defval)
 {
 	char buff[BUFSIZ] = {0};
@@ -223,12 +228,7 @@ static int InputUserApproval(KonohaContext *kctx, const char *message, const cha
 	}
 }
 
-static const char* InputUserText(KonohaContext *kctx, const char *message, int flag)
-{
-	return myreadline(message);
-}
-
-static const char* InputUserPassword(KonohaContext *kctx, const char *message)
+static char* InputUserPassword(KonohaContext *kctx, const char *message)
 {
 	char buff[BUFSIZ] = {0};
 	struct termios tm, tm_save;
@@ -238,6 +238,7 @@ static const char* InputUserPassword(KonohaContext *kctx, const char *message)
 //	tm.c_lflag |= ~ECHO;
 	tm.c_lflag &= ~ECHO;
 	tm.c_lflag |= ECHONL;
+	tcsetattr(fileno(stdin), TCSANOW, &tm);
 	fgets(buff, BUFSIZ, stdin);
 	tcsetattr(fileno(stdin), TCSANOW, &tm_save);
 	size_t len = strlen(buff) + 1;
