@@ -88,6 +88,7 @@ set(PACKAGES
 	konoha.untyped
 	konoha.var
 	konoha.eventlistener
+	konoha.eval
 	sugar
 	cstyle
 	cstyle.libc
