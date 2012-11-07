@@ -103,7 +103,7 @@ static kbool_t console_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	int TY_Console = cConsole->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static, _F(Console_notify), TY_void, TY_Console, MN_("nofity"), 1, TY_String, FN_("message"),
+		_Public|_Static, _F(Console_notify), TY_void, TY_Console, MN_("noifty"), 1, TY_String, FN_("message"),
 		_Public|_Static, _F(Console_readLine), TY_String, TY_Console, MN_("readLine"), 1, TY_String, FN_("message"),
 		_Public|_Static, _F(Console_inputUserApproval), TY_boolean, TY_Console, MN_("inputUserApproval"), 4,
 		    TY_String, FN_("message"), TY_String, FN_("yes"), TY_String, FN_("no"), TY_boolean, FN_("defval"),

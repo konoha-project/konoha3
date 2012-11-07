@@ -127,19 +127,22 @@ run_test 4 4 minivm "-MMiniVM" 0003_Module/Module_Empty.k
 record_result 0003_Module $PASS 4
 ## 0004_Import
 PASS=0
-run_test 1 12 minimum "-MOutputTest" 0004_Import/Import_konoha_float.k
-run_test 2 12 minimum "-MOutputTest" 0004_Import/Import_konoha_math.k
-run_test 3 12 minimum "-MOutputTest" 0004_Import/Import_konoha_object.k
-run_test 4 12 minimum "-MOutputTest" 0004_Import/Import_konoha_string.k
-run_test 5 12 cstyle "-MOutputTest -Icstyle" 0004_Import/Import_konoha_float.k
-run_test 6 12 cstyle "-MOutputTest -Icstyle" 0004_Import/Import_konoha_math.k
-run_test 7 12 cstyle "-MOutputTest -Icstyle" 0004_Import/Import_konoha_object.k
-run_test 8 12 cstyle "-MOutputTest -Icstyle" 0004_Import/Import_konoha_string.k
-run_test 9 12 konoha "-MOutputTest -Ikonoha" 0004_Import/Import_konoha_float.k
-run_test 10 12 konoha "-MOutputTest -Ikonoha" 0004_Import/Import_konoha_math.k
-run_test 11 12 konoha "-MOutputTest -Ikonoha" 0004_Import/Import_konoha_object.k
-run_test 12 12 konoha "-MOutputTest -Ikonoha" 0004_Import/Import_konoha_string.k
-record_result 0004_Import $PASS 12
+run_test 1 15 minimum "-MOutputTest" 0004_Import/Import_konoha_file.k
+run_test 2 15 minimum "-MOutputTest" 0004_Import/Import_konoha_float.k
+run_test 3 15 minimum "-MOutputTest" 0004_Import/Import_konoha_math.k
+run_test 4 15 minimum "-MOutputTest" 0004_Import/Import_konoha_object.k
+run_test 5 15 minimum "-MOutputTest" 0004_Import/Import_konoha_string.k
+run_test 6 15 cstyle "-MOutputTest -Icstyle" 0004_Import/Import_konoha_file.k
+run_test 7 15 cstyle "-MOutputTest -Icstyle" 0004_Import/Import_konoha_float.k
+run_test 8 15 cstyle "-MOutputTest -Icstyle" 0004_Import/Import_konoha_math.k
+run_test 9 15 cstyle "-MOutputTest -Icstyle" 0004_Import/Import_konoha_object.k
+run_test 10 15 cstyle "-MOutputTest -Icstyle" 0004_Import/Import_konoha_string.k
+run_test 11 15 konoha "-MOutputTest -Ikonoha" 0004_Import/Import_konoha_file.k
+run_test 12 15 konoha "-MOutputTest -Ikonoha" 0004_Import/Import_konoha_float.k
+run_test 13 15 konoha "-MOutputTest -Ikonoha" 0004_Import/Import_konoha_math.k
+run_test 14 15 konoha "-MOutputTest -Ikonoha" 0004_Import/Import_konoha_object.k
+run_test 15 15 konoha "-MOutputTest -Ikonoha" 0004_Import/Import_konoha_string.k
+record_result 0004_Import $PASS 15
 ## 0005_Parser
 PASS=0
 run_test 1 10 minimum "-MOutputTest" 0005_Parser/Parser_BlockOneLiner.k
@@ -841,7 +844,18 @@ PASS=0
 record_result 0226_BytesCharset $PASS 0
 ## 0227_File
 PASS=0
-record_result 0227_File $PASS 0
+run_test 1 11 minimum "-MOutputTest" 0227_File/File_GetC.k
+run_test 2 11 minimum "-MOutputTest" 0227_File/File_Getfileno.k
+run_test 3 11 minimum "-MOutputTest" 0227_File/File_Isatty.k
+run_test 4 11 minimum "-MOutputTest" 0227_File/File_PutC.k
+run_test 5 11 minimum "-MOutputTest" 0227_File/File_Read.k
+run_test 6 11 minimum "-MOutputTest" 0227_File/File_ReadLine_SJIS.k
+run_test 7 11 minimum "-MOutputTest" 0227_File/File_ScriptPath.k
+run_test 8 11 minimum "-MOutputTest" 0227_File/File_Stderr.k
+run_test 9 11 minimum "-MOutputTest" 0227_File/File_Stdin.k
+run_test 10 11 minimum "-MOutputTest" 0227_File/File_Stdout.k
+run_test 11 11 minimum "-MOutputTest" 0227_File/File_Write.k
+record_result 0227_File $PASS 11
 ## 0250_IShell
 PASS=0
 record_result 0250_IShell $PASS 0
@@ -861,5 +875,12 @@ run_test 11 13 minimum "-MOutputTest" 0251_Global/Global_TypeDeclInitString.k
 run_test 12 13 minimum "-MOutputTest" 0251_Global/Global_TypeDeclMulti.k
 run_test 13 13 minimum "-MOutputTest" 0251_Global/Global_TypeDeclString.k
 record_result 0251_Global $PASS 13
+## 0252_Console
+PASS=0
+run_test 1 4 minimum "-MOutputTest" 0252_Console/Console_Notify.k
+run_test 2 4 minimum "-MOutputTest" 0252_Console/Console_Password.k
+run_test 3 4 minimum "-MOutputTest" 0252_Console/Console_ReadLine.k
+run_test 4 4 minimum "-MOutputTest" 0252_Console/Console_UserApproval.k
+record_result 0252_Console $PASS 4
 total
 

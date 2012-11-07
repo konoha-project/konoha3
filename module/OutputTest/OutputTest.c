@@ -155,6 +155,22 @@ static void TEST_reportCaughtException(KonohaContext *kctx, const char *exceptio
 	fprintf(stdout, "LINE %d: %s %s\n", line, exceptionName, optionalMessage);
 }
 
+
+static char* TEST_InputUserText(KonohaContext *kctx, const char *message, int flag)
+{
+	return NULL;
+}
+
+static int TEST_InputUserApproval(KonohaContext *kctx, const char *message, const char *yes, const char *no, int defval)
+{
+	return defval;
+}
+
+static char* TEST_InputUserPassword(KonohaContext *kctx, const char *message)
+{
+	return NULL;
+}
+
 // -------------------------------------------------------------------------
 
 kbool_t LoadOutputTestModule(KonohaFactory *factory, ModuleType type)
@@ -169,6 +185,11 @@ kbool_t LoadOutputTestModule(KonohaFactory *factory, ModuleType type)
 	factory->ReportUserMessage           = TEST_ReportUserMessage;
 	factory->ReportCompilerMessage       = TEST_ReportCompilerMessage;
 	factory->ReportCaughtException       = TEST_reportCaughtException;
+
+	factory->InputUserApproval        = TEST_InputUserApproval;
+	factory->InputUserText            = TEST_InputUserText;
+	factory->InputUserPassword        = TEST_InputUserPassword;
+
 	return true;
 }
 

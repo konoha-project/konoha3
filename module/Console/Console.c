@@ -271,8 +271,8 @@ kbool_t LoadConsoleModule(KonohaFactory *factory, ModuleType type)
 	factory->ReportCompilerMessage    = UI_ReportCompilerMessage;
 	factory->ReportCaughtException    = UI_ReportCaughtException;
 	factory->ReportDebugMessage       = ReportDebugMessage;
-	factory->InputUserApproval        = InputUserApproval;
 
+	factory->InputUserApproval        = InputUserApproval;
 	factory->InputUserText            = InputUserText;
 	factory->InputUserPassword        = InputUserPassword;
 	return true;

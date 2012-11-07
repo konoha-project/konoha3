@@ -1107,6 +1107,24 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 	PLATAPI printf_i("%s\n", EndTag(kctx, InfoTag));
 }
 
+static char* InputUserText(KonohaContext *kctx, const char *message, int flag)
+{
+	PLATAPI ReportUserMessage(kctx, WarnTag, 0, "unsupported; use -M Console option or the like", true);
+	return NULL;
+}
+
+static int InputUserApproval(KonohaContext *kctx, const char *message, const char *yes, const char *no, int defval)
+{
+	PLATAPI ReportUserMessage(kctx, WarnTag, 0, "unsupported; use -M Console option or the like", true);
+	return defval;
+}
+
+static char* InputUserPassword(KonohaContext *kctx, const char *message)
+{
+	PLATAPI ReportUserMessage(kctx, WarnTag, 0, "unsupported; use -M Console option or the like", true);
+	return NULL;
+}
+
 // --------------------------------------------------------------------------
 
 static kunused PlatformApi *KonohaUtils_getDefaultPlatformApi(void)
@@ -1238,7 +1256,9 @@ static kunused void PosixFactory(KonohaFactory *factory)
 	factory->ReportUserMessage     = UI_ReportUserMessage;
 	factory->ReportCompilerMessage = UI_ReportCompilerMessage;
 	factory->ReportCaughtException = UI_ReportCaughtException;
-
+	factory->InputUserApproval     = InputUserApproval;
+	factory->InputUserText         = InputUserText;
+	factory->InputUserPassword     = InputUserPassword;
 }
 
 #ifdef __cplusplus
