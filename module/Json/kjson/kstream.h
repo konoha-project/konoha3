@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-
+#include "kexception.h"
 #include "kstack.h"
 
 #ifndef KJSON_STREAM_H
@@ -40,6 +40,7 @@ typedef struct input_stream {
     const uint8_t *pos;
     const uint8_t *end;
     kstack_t stack;
+    kexception_handler_t exception;
 } input_stream;
 
 static inline const uint8_t *_input_stream_save(input_stream *ins)
@@ -78,7 +79,7 @@ static input_stream *new_string_input_stream(input_stream *ins, const char *buf,
 static void string_input_stream_deinit(input_stream *ins)
 {
     ins->pos = ins->end = NULL;
-    kstack_deinit(&ins->stack);
+    kstack_deinit(&ins->stack, ins->exception.has_error == 0);
 }
 
 static void input_stream_delete(input_stream *ins)

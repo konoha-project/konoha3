@@ -29,14 +29,6 @@ extern "C" {
 #define KMAP_INITSIZE DICTMAP_THRESHOLD
 #define DELTA 16
 
-#ifndef unlikely
-#define unlikely(x)   __builtin_expect(!!(x), 0)
-#endif
-
-#ifndef likely
-#define likely(x)     __builtin_expect(!!(x), 1)
-#endif
-
 static void map_record_copy(map_record_t *dst, const map_record_t *src)
 {
     *dst = *src;

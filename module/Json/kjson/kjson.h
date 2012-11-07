@@ -39,6 +39,14 @@ extern "C" {
 #define KJSON_API
 #endif
 
+#ifndef unlikely
+#define unlikely(x)   __builtin_expect(!!(x), 0)
+#endif
+
+#ifndef likely
+#define likely(x)     __builtin_expect(!!(x), 1)
+#endif
+
 typedef enum kjson_type {
     /** ($type & 1 == 0) means $type extends Number */
     JSON_Double   =  0, /* 0b0000 */
@@ -331,6 +339,11 @@ static inline unsigned JSON_length(JSON json)
     assert((JSON_type(json) & 0x3) == 0x1);
     JSONArray *a = toAry(json.val);
     return ARRAY_size(a->array);
+}
+
+static inline const char *JSONError_get(JSON json)
+{
+    return toError(json.val);
 }
 
 static inline JSON JSONArray_get(JSON json, unsigned index)

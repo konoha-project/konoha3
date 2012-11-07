@@ -22,62 +22,51 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#ifndef KJSON_H
-#include "kjson.h"
-#endif
+#include <setjmp.h>
+#include <string.h>
 
-#ifndef KSTACK_H
-#define KSTACK_H
+#ifndef KEXCEPTION_H
+#define KEXCEPTION_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#ifndef KJSON_MALLOC
-#define KJSON_MALLOC(N) malloc(N)
-#define KJSON_FREE(PTR) free(PTR)
-#endif
+#define TRY(HANDLER)  int jumped__ = 0; if((jumped__ = setjmp((HANDLER).handler)) == 0)
+#define CATCH(X) if(jumped__ == (X))
+#define FINALLY() L_finally:
+#define THROW(HANDLER, EXCEPTION, ERROR_MSG) do {\
+    (HANDLER)->error_message = (ERROR_MSG);\
+    longjmp((HANDLER)->handler, (EXCEPTION));\
+} while(0)
 
-typedef ARRAY(JSON) kstack_t;
+enum kjson_exception_type {
+    KJSON_EXCEPTION     = 1,
+    PARSER_EXCEPTION,
+    STRINGIFY_EXCEPTION
+};
 
-static inline unsigned kstack_size(kstack_t *stack)
+typedef struct kexception_handler {
+    jmp_buf handler;
+    const char *error_message;
+    int has_error;
+} kexception_handler_t;
+
+static void kexception_handler_reset(kexception_handler_t *eh)
 {
-    return stack->size;
+    memset(eh->handler, 0, sizeof(jmp_buf));
 }
 
-static inline void kstack_init(kstack_t *stack)
+static void kexception_handler_init(kexception_handler_t *eh)
 {
-    ARRAY_init(JSON, stack, 8);
+    kexception_handler_reset(eh);
 }
 
-static inline void kstack_deinit(kstack_t *stack, int check_stack)
+static int kexception_handler_deinit(kexception_handler_t *eh)
 {
-    if(check_stack) {
-        assert(kstack_size(stack) == 0);
-    }
-    ARRAY_dispose(JSON, stack);
+    kexception_handler_reset(eh);
+    return 0;
 }
-
-static inline void kstack_push(kstack_t *stack, JSON v)
-{
-    ARRAY_add(JSON, stack, v);
-}
-
-static inline JSON kstack_pop(kstack_t *stack)
-{
-    unsigned size = --stack->size;
-    assert(size >= 0);
-    return ARRAY_get(JSON, stack, size);
-}
-
-static inline void kstack_move(kstack_t *stack, JSON *list, unsigned beginIdx, unsigned length)
-{
-    memcpy(list, stack->list+beginIdx, length*sizeof(JSON));
-    stack->size -= length;
-}
-
-#undef KJSON_MALLOC
-#undef KJSON_FREE
 
 #ifdef __cplusplus
 } /* extern "C" */

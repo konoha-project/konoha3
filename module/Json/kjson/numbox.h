@@ -43,6 +43,7 @@ enum NumBoxTag {
     FlagUString  = 0x09,
     FlagArray    = 0x05,
     FlagInt64    = 0x0b,
+    FlagError    = 0x0f,
 };
 
 #define TAG(T) ((TagBaseMask | (uint64_t)(Flag##T)) << TagBitShift)
@@ -95,6 +96,9 @@ static inline Value ValueU(struct JSONString *sval) {
 static inline Value ValueA(struct JSONArray *aval) {
     Value v; v.bits = toU64((long)aval) | TAG(Array); return v;
 }
+static inline Value ValueE(const char *emessage) {
+    Value v; v.bits = toU64((long)emessage) | TAG(Error); return v;
+}
 static inline Value ValueN() {
     Value v; v.bits = TAG(Null); return v;
 }
@@ -130,6 +134,9 @@ static inline struct JSONArray *toAry(Value v) {
 static inline struct JSONInt64 *toInt64(Value v) {
     return (struct JSONInt64 *) toPtr(v);
 }
+static inline const char *toError(Value v) {
+    return (const char *) toPtr(v);
+}
 static inline bool IsDouble(Value v) {
     return Tag(v) <= TAG(Double);
 }
@@ -150,5 +157,8 @@ static inline bool IsAry(Value v) {
 }
 static inline bool IsNull(Value v) {
     return Tag(v) == TAG(Null);
+}
+static inline bool IsError(Value v) {
+    return Tag(v) == TAG(Error);
 }
 #endif /* end of include guard */

@@ -40,6 +40,17 @@
 extern "C" {
 #endif
 
+#define THROW_IF(COND, EXCEPTION, MESSAGE) do {\
+    if(unlikely(COND)) {\
+        THROW(&(EXCEPTION), PARSER_EXCEPTION, MESSAGE);\
+    }\
+} while(0)
+
+static inline JSON JSONError_new(const char *emessage)
+{
+    return toJSON(ValueE(emessage));
+}
+
 static JSON JSONUString_new(JSONMemoryPool *jm, string_builder *builder)
 {
     size_t len;
@@ -191,6 +202,7 @@ static JSON parseString(JSONMemoryPool *jm, input_stream *ins, uint8_t c);
 
 static JSON parseNOP(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
 {
+    THROW(&ins->exception, PARSER_EXCEPTION, "invalid token");
     return JSON_NOP();
 }
 
@@ -263,7 +275,6 @@ static uint8_t skip_space(input_stream *ins, uint8_t c)
 #else
     int ch;
     for(ch = c; EOS(ins); ch = NEXT(ins)) {
-        assert(ch >= 0);
         if(!(0x40 & string_table[ch])) {
             return (uint8_t) ch;
         }
@@ -331,12 +342,12 @@ static uint8_t skipBSorDoubleQuote(input_stream *ins)
 #endif
 }
 
-static unsigned toHex(uint8_t c)
+static unsigned toHex(input_stream *ins, uint8_t c)
 {
-    return (c >= '0' && c <= '9') ? c - '0' :
-        (c >= 'a' && c <= 'f') ? c - 'a' + 10:
-        (c >= 'A' && c <= 'F') ? c - 'A' + 10:
-        (assert(0 && "invalid hex digit"), 0);
+    if(c >= '0' && c <= '9') return c - '0';
+    else if(c >= 'a' && c <= 'f') return c - 'a' + 10;
+    else if(c >= 'A' && c <= 'F') return c - 'A' + 10;
+    THROW(&ins->exception, PARSER_EXCEPTION, "invalid hex digit");
 }
 
 static void writeUnicode(unsigned data, string_builder *sb)
@@ -361,10 +372,10 @@ static void writeUnicode(unsigned data, string_builder *sb)
 static void parseUnicode(input_stream *ins, string_builder *sb)
 {
     unsigned data = 0;
-    data  = toHex(NEXT(ins)) * 4096; assert(EOS(ins));
-    data += toHex(NEXT(ins)) *  256; assert(EOS(ins));
-    data += toHex(NEXT(ins)) *   16; assert(EOS(ins));
-    data += toHex(NEXT(ins)) *    1; assert(EOS(ins));
+    data  = toHex(ins, NEXT(ins)) * 4096; assert(EOS(ins));
+    data += toHex(ins, NEXT(ins)) *  256; assert(EOS(ins));
+    data += toHex(ins, NEXT(ins)) *   16; assert(EOS(ins));
+    data += toHex(ins, NEXT(ins)) *    1; assert(EOS(ins));
     writeUnicode(data, sb);
 }
 
@@ -380,7 +391,7 @@ static void parseEscape(input_stream *ins, string_builder *sb, uint8_t c)
         case 'r': c = '\r';  break;
         case 't': c = '\t';  break;
         case 'u': parseUnicode(ins, sb); return;
-        default: assert(0 && "Unknown espace");
+        default: THROW(&ins->exception, PARSER_EXCEPTION, "Illegal escape token");
     }
     string_builder_add(sb, c);
 }
@@ -388,7 +399,7 @@ static void parseEscape(input_stream *ins, string_builder *sb, uint8_t c)
 static JSON parseString(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
 {
     const uint8_t *state1, *state2;
-    assert(c == '"' && "Missing open quote at start of JSONString");
+    THROW_IF(c != '"', ins->exception, "Missing open quote at start of JSONString");
     state1 = _input_stream_save(ins);
     c = skipBSorDoubleQuote(ins);
     state2 = _input_stream_save(ins);
@@ -400,7 +411,7 @@ static JSON parseString(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
     if(length > 0) {
         string_builder_add_string(&sb, (const char *) state1, length);
     }
-    assert(c == '\\');
+    THROW_IF(c != '\\', ins->exception, "Unexpected Token at middle of JSONString");
     parseEscape(ins, &sb, NEXT(ins));
     c = NEXT(ins);
     for(; EOS(ins); c = NEXT(ins)) {
@@ -437,19 +448,20 @@ static JSON parseChild(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
 
 static JSON parseObject(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
 {
-    assert(c == '{' && "Missing open brace '{' at start of json object");
+    THROW_IF(c != '{', ins->exception, "Missing open brace '{' at start of json object");
     unsigned stack_top = kstack_size(&ins->stack);
     for(c = skip_space(ins, NEXT(ins)); EOS(ins); c = skip_space(ins, NEXT(ins))) {
         if(c == '}') {
             break;
         }
-        assert(c == '"' && "Missing open quote for element key");
+        THROW_IF(c != '"', ins->exception, "Missing open quote for element key");
 
         JSON key = parseString(jm, ins, c);
+        THROW_IF(key.bits == 0, ins->exception, "JSONObject with extra comma");
         JSONString_hashCode(toStr(key.val));
         kstack_push(&ins->stack, key);
         c = skip_space(ins, NEXT(ins));
-        assert(c == ':' && "Missing ':' after key in object");
+        THROW_IF(c != ':', ins->exception, "Missing ':' after key in object");
 
         JSON val = parseChild(jm, ins, NEXT(ins));
         kstack_push(&ins->stack, val);
@@ -457,7 +469,7 @@ static JSON parseObject(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
         if(c == '}') {
             break;
         }
-        assert(c == ',' && "Missing comma or end of JSON Object '}'");
+        THROW_IF(c != ',', ins->exception, "Missing comma or end of JSON Object '}'");
     }
     unsigned field_size = (kstack_size(&ins->stack) - stack_top) / 2;
     JSON json = JSONObject_new(jm, field_size);
@@ -476,7 +488,7 @@ static JSON parseObject(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
 
 static JSON parseArray(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
 {
-    assert(c == '[' && "Missing open brace '[' at start of json array");
+    THROW_IF(c != '[', ins->exception, "Missing open brace '[' at start of json array");
     unsigned stack_top = kstack_size(&ins->stack);
     c = skip_space(ins, NEXT(ins));
     if(c == ']') {
@@ -485,12 +497,13 @@ static JSON parseArray(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
     }
     for(; EOS(ins); c = skip_space(ins, NEXT(ins))) {
         JSON val = parseChild(jm, ins, c);
+        THROW_IF(val.bits == 0, ins->exception, "JSONArray with extra comma");
         kstack_push(&ins->stack, val);
         c = skip_space(ins, NEXT(ins));
         if(c == ']') {
             break;
         }
-        assert(c == ',' && "Missing comma or end of JSON Array ']'");
+        THROW_IF(c != ',', ins->exception, "Missing comma or end of JSON Array ']'");
     }
 
     unsigned element_size = kstack_size(&ins->stack) - stack_top;
@@ -587,7 +600,7 @@ static JSON parseBoolean(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
         ins->pos += 4;
     }
     else {
-        assert(0 && "Cannot parse JSON bool variable");
+        THROW(&ins->exception, PARSER_EXCEPTION, "Cannot parse JSON bool variable");
     }
     return JSONBool_new(val);
 }
@@ -598,23 +611,27 @@ static JSON parseNull(JSONMemoryPool *jm, input_stream *ins, uint8_t c)
         ins->pos += 3;
         return JSONNull_new();
     }
-    assert(0 && "Cannot parse JSON null variable");
+    THROW(&ins->exception, PARSER_EXCEPTION, "Cannot parse JSON null variable");
     return JSON_NOP();
 }
 
 static JSON parse(JSONMemoryPool *jm, input_stream *ins)
 {
-    uint8_t c = 0;
-    for_each_istream(ins, c) {
-        JSON json;
-        if((c = skip_space(ins, c)) == 0) {
-            break;
-        }
-        json = parseChild(jm, ins, c);
-        if(json.obj != NULL)
-            return json;
+    uint8_t c = string_input_stream_next(ins);
+    JSON json;
+    if((c = skip_space(ins, c)) == 0) {
+        return JSONNull_new();
     }
-    return JSON_NOP();
+    json = parseChild(jm, ins, c);
+    assert(json.bits != 0);
+    THROW_IF(IsError(json.val), ins->exception, "Parse Error");
+#if 0
+    if(EOS(ins)) {
+        c = skip_space(ins, NEXT(ins));
+        THROW_IF(c != 0, ins->exception, "Rest of token are not parsed");
+    }
+#endif
+    return json;
 }
 
 #undef EOS
@@ -629,8 +646,20 @@ KJSON_API JSON parseJSON(JSONMemoryPool *jm, const char *s, const char *e)
 {
     input_stream insbuf;
     input_stream *ins = new_string_input_stream(&insbuf, s, e - s);
-    JSON json = parseJSON_stream(jm, ins);
-    input_stream_delete(ins);
+    kexception_handler_init(&ins->exception);
+    JSON json;
+    TRY(ins->exception) {
+        json = parseJSON_stream(jm, ins);
+    }
+    CATCH(PARSER_EXCEPTION) {
+        const char *emessage = ins->exception.error_message;
+        json = JSONError_new(emessage);
+        ins->exception.has_error = 1;
+        goto L_finally;
+    }
+    FINALLY() {
+        input_stream_delete(ins);
+    }
     return json;
 }
 
