@@ -331,18 +331,25 @@ static kStringBase *kStringBase_concat(KonohaContext *kctx, kArray *gcstack, kSt
 	}
 	size_t length = leftLen + rightLen;
 
+	bool isASCII = kString_is(ASCII, left) && kString_is(ASCII, right);
+	kStringBase *result = NULL;
+
 	if(length + 1 < SIZEOF_INLINETEXT) {
 		char *leftChar = kStringBase_getTextReference(kctx, left);
 		char *rightChar = kStringBase_getTextReference(kctx, right);
-		kInlineString *result = (kInlineString *) new_kStringBase(kctx, gcstack, MASK_INLINE);
-		result->base.length = length;
-		memcpy(result->inline_text, leftChar, leftLen);
-		memcpy(result->inline_text + leftLen, rightChar, rightLen);
-		result->inline_text[length] = '\0';
-		result->text = result->inline_text;
-		return (kStringBase *) result;
+		kInlineString *inlined = (kInlineString *) new_kStringBase(kctx, gcstack, MASK_INLINE);
+		inlined->base.length = length;
+		memcpy(inlined->inline_text, leftChar, leftLen);
+		memcpy(inlined->inline_text + leftLen, rightChar, rightLen);
+		inlined->inline_text[length] = '\0';
+		inlined->text = inlined->inline_text;
+
+		result = (kStringBase *) inlined;
+	} else {
+		result = kStringBase_InitRope(kctx, gcstack, left, right, length);
 	}
-	return kStringBase_InitRope(kctx, gcstack, left, right, length);
+	kString_set(ASCII, (kStringVar *)result, isASCII);
+	return result;
 }
 
 /* ------------------------------------------------------------------------ */
