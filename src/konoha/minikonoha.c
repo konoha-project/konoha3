@@ -137,7 +137,8 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 		kctx = (KonohaContext *)newctx;
 		newctx->modshare = (KonohaModule**)calloc(sizeof(KonohaModule *), KonohaModule_MAXSIZE);
 		newctx->modlocal = (KonohaModuleContext**)calloc(sizeof(KonohaModuleContext *), KonohaModule_MAXSIZE);
-		MODGC_init(kctx, newctx);
+		DBG_ASSERT(PLATAPI InitGcContext != NULL);
+		PLATAPI InitGcContext(newctx);
 		KonohaRuntime_init(kctx, newctx);
 	}
 	else {   // others take ctx as its parent
@@ -147,7 +148,7 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 		newctx->share = kctx->share;
 		newctx->modshare = kctx->modshare;
 		newctx->modlocal = (KonohaModuleContext**)KCalloc_UNTRACE(sizeof(KonohaModuleContext *), KonohaModule_MAXSIZE);
-		MODGC_init(kctx, newctx);
+		PLATAPI InitGcContext(kctx);
 	}
 	KonohaStackRuntime_init(kctx, newctx, platApi->stacksize);
 	if(IS_RootKonohaContext(newctx)) {
@@ -214,7 +215,7 @@ static void KonohaContext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 		}
 		PLATAPI DeleteGcContext(ctx);
 		KonohaRuntime_free(kctx, ctx);
-		MODGC_check_malloced_size(kctx);
+		//MODGC_check_malloced_size(kctx);
 		free(kctx->modlocal);
 		free(kctx->modshare);
 		free(kklib/*, sizeof(KonohaLib) + sizeof(KonohaContextVar)*/);

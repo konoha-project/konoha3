@@ -523,8 +523,8 @@ struct KonohaFactory {
 	struct kObjectVar *(*AllocObject)(KonohaContext *kctx, size_t size, KTraceInfo *);
 	kbool_t (*IsKonohaObject)(KonohaContext *kctx, void *ptr);
 	void  (*VisitObject)(struct KObjectVisitor *visitor, struct kObjectVar *obj);
-	void  (*WriteBarrier)(KonohaContext *, struct kObjectVar *);
-	void  (*UpdateObjectField)(struct kObjectVar *parent, struct kObjectVar *oldPtr, struct kObjectVar *newVal);
+	void  (*WriteBarrier)(KonohaContext *, const struct kObjectVar *);
+	void  (*UpdateObjectField)(const struct kObjectVar *parent, const struct kObjectVar *oldPtr, const struct kObjectVar *newVal);
 
 		/* Event Handler API */
 	const char* Module_Event;

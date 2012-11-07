@@ -22,24 +22,41 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-
-#ifndef MODGC_H_
-#define MODGC_H_
-
-#ifndef MINIOKNOHA_H_
-#error Do not include gc.h without minikonoha.h.
-#endif
-
+/* ************************************************************************ */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-//extern void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx);
-//extern void MODGC_check_malloced_size(KonohaContext *kctx);
+#include "minikonoha/minikonoha.h"
+#include "minikonoha/gc.h"
+#include "minikonoha/local.h"
 
-/* root reftrace */
+#ifdef K_USE_PTHREAD
+
+static int verbose_gc = 0;
+
+#define USE_CONCURRENT_GC 1
+#include "../BitmapGC/bmgc.h"
+
+/* ------------------------------------------------------------------------ */
+
+kbool_t LoadBitmapConcGCModule(KonohaFactory *factory, ModuleType type)
+{
+	factory->Module_GC            = "Bitmap Concurrent GC";
+	factory->Kmalloc = Kmalloc;
+	factory->Kzmalloc = Kzmalloc;
+	factory->Kfree = Kfree;
+	factory->InitGcContext = KnewGcContext;
+	factory->DeleteGcContext = KdeleteGcContext;
+	factory->ScheduleGC = KscheduleGC;
+	factory->AllocObject = KallocObject;
+	factory->WriteBarrier = Kwrite_barrier;   // check this
+	factory->UpdateObjectField = KupdateObjectField;  // check this
+	factory->IsKonohaObject = KisObject;
+	return true;
+}
+#endif /* K_USE_PTHREAD */
 
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
-#endif /* MODGC_H_ */

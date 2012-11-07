@@ -822,12 +822,13 @@ static void MarkAndSweepGC(GcManager *mng)
 
 /* ------------------------------------------------------------------------ */
 /* [MODGC API] */
-void MODGC_check_malloced_size(KonohaContext *kctx)
-{
-	if(verbose_gc) {
-		PLATAPI printf_i("\nklib:memory leaked=%ld\n", (long)klib_malloced);
-	}
-}
+
+//void MODGC_check_malloced_size(KonohaContext *kctx)
+//{
+//	if(verbose_gc) {
+//		PLATAPI printf_i("\nklib:memory leaked=%ld\n", (long)klib_malloced);
+//	}
+//}
 
 static kObjectVar *KallocObject(KonohaContext *kctx, size_t size, KTraceInfo *trace)
 {

@@ -2100,12 +2100,12 @@ static inline void bmgc_Object_free(KonohaContext *kctx, kObject *o)
 }
 
 /* [MODGC API] */
-void MODGC_check_malloced_size(KonohaContext *kctx)
-{
-	if(verbose_gc) {
-		PLATAPI printf_i("\nklib:memory leaked=%ld\n", (long)klib_malloced);
-	}
-}
+//void MODGC_check_malloced_size(KonohaContext *kctx)
+//{
+//	if(verbose_gc) {
+//		PLATAPI printf_i("\nklib:memory leaked=%ld\n", (long)klib_malloced);
+//	}
+//}
 
 #define OBJECT_INIT(o) do {\
 	o->h.magicflag = 0;\
@@ -2169,22 +2169,28 @@ static void KscheduleGC(KonohaContext *kctx, KTraceInfo *trace)
 void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	if(IS_RootKonohaContext(ctx)) {
-		KonohaFactory *factory = (KonohaFactory *)ctx->platApi;
-		// remainig old function names for ide and matsu
-		if(factory->Module_GC == NULL) {
-			factory->Kmalloc = Kmalloc;
-			factory->Kzmalloc = Kzmalloc;
-			factory->Kfree = Kfree;
-			factory->InitGcContext = KnewGcContext;
-			factory->DeleteGcContext = KdeleteGcContext;
-			factory->ScheduleGC = KscheduleGC;
-			factory->AllocObject = KallocObject;
-			factory->WriteBarrier = Kwrite_barrier;   // check this
-			factory->UpdateObjectField = KupdateObjectField;  // check this
-			factory->IsKonohaObject = KisObject;
-			assert(sizeof(BlockHeader) <= MIN_ALIGN
-					&& "Minimum size of Object may lager than sizeof BlockHeader");
-		}
+//<<<<<<< HEAD
+//		KonohaFactory *factory = (KonohaFactory *)ctx->platApi;
+//		// remainig old function names for ide and matsu
+//		if(factory->Module_GC == NULL) {
+//=======
+//		if(PLATAPI InitGcContext == NULL) {
+//			KonohaFactory *factory = (KonohaFactory *)ctx->platApi;
+//			// remainig old function names for ide and matsu
+//>>>>>>> 036b26044aa9dcbb0d984bdb5dab8d708ffc5b14
+//			factory->Kmalloc = Kmalloc;
+//			factory->Kzmalloc = Kzmalloc;
+//			factory->Kfree = Kfree;
+//			factory->InitGcContext = KnewGcContext;
+//			factory->DeleteGcContext = KdeleteGcContext;
+//			factory->ScheduleGC = KscheduleGC;
+//			factory->AllocObject = KallocObject;
+//			factory->WriteBarrier = Kwrite_barrier;   // check this
+//			factory->UpdateObjectField = KupdateObjectField;  // check this
+//			factory->IsKonohaObject = KisObject;
+//			assert(sizeof(BlockHeader) <= MIN_ALIGN
+//					&& "Minimum size of Object may lager than sizeof BlockHeader");
+//		}
 	}
 	PLATAPI InitGcContext(ctx);
 }
