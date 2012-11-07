@@ -468,7 +468,7 @@ static void KonohaVirtualMachine_delete(KonohaContext *kctx)
 {
 }
 
-static void VMFactory(KonohaFactory *factory)
+void KonohaFactory_CheckVirtualMachine(KonohaFactory *factory)
 {
 	factory->RunVirtualMachine    = KonohaVirtualMachine_run;
 	factory->DeleteVirtualMachine = KonohaVirtualMachine_delete;

@@ -2171,18 +2171,20 @@ void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	if(IS_RootKonohaContext(ctx)) {
 		KonohaFactory *factory = (KonohaFactory *)ctx->platApi;
 		// remainig old function names for ide and matsu
-		factory->Kmalloc = Kmalloc;
-		factory->Kzmalloc = Kzmalloc;
-		factory->Kfree = Kfree;
-		factory->InitGcContext = KnewGcContext;
-		factory->DeleteGcContext = KdeleteGcContext;
-		factory->ScheduleGC = KscheduleGC;
-		factory->AllocObject = KallocObject;
-		factory->WriteBarrier = Kwrite_barrier;   // check this
-		factory->UpdateObjectField = KupdateObjectField;  // check this
-		factory->IsKonohaObject = KisObject;
-		assert(sizeof(BlockHeader) <= MIN_ALIGN
-				&& "Minimum size of Object may lager than sizeof BlockHeader");
+		if(factory->Module_GC == NULL) {
+			factory->Kmalloc = Kmalloc;
+			factory->Kzmalloc = Kzmalloc;
+			factory->Kfree = Kfree;
+			factory->InitGcContext = KnewGcContext;
+			factory->DeleteGcContext = KdeleteGcContext;
+			factory->ScheduleGC = KscheduleGC;
+			factory->AllocObject = KallocObject;
+			factory->WriteBarrier = Kwrite_barrier;   // check this
+			factory->UpdateObjectField = KupdateObjectField;  // check this
+			factory->IsKonohaObject = KisObject;
+			assert(sizeof(BlockHeader) <= MIN_ALIGN
+					&& "Minimum size of Object may lager than sizeof BlockHeader");
+		}
 	}
 	PLATAPI InitGcContext(ctx);
 }

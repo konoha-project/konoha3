@@ -272,11 +272,10 @@ void KonohaFactory_LoadRuntimeModule(KonohaFactory *factory, const char *name, M
 	}
 }
 
-void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), void (*SetVMApi)(KonohaFactory *), int argc, char **argv)
+void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), int argc, char **argv)
 {
 	int i;
 	SetPlatformApi(factory);
-	SetVMApi(factory);
 	for(i = 0; i < argc; i++) {
 		const char *t = argv[i];
 		if(t[0] == '-' && t[1] == 'M') {   /* -MName */
@@ -290,9 +289,27 @@ void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformA
 	}
 }
 
+void KonohaFactory_CheckVirtualMachine(KonohaFactory *factory);  // For compatibility
+
+static void KonohaFactory_Check(KonohaFactory *factory)
+{
+	if(factory->Module_GC == NULL) {
+		const char *mod = factory->getenv_i("KONOHA_GC");
+		if(mod == NULL) mod = "BitmapGenGC";
+		KonohaFactory_LoadRuntimeModule(factory, mod, ReleaseModule);
+	}
+	if(factory->Module_I18N == NULL) {
+		const char *mod = factory->getenv_i("KONOHA_I18N");
+		if(mod == NULL) mod = "IConv";
+		KonohaFactory_LoadRuntimeModule(factory, mod, ReleaseModule);
+	}
+	KonohaFactory_CheckVirtualMachine(factory);
+}
+
 KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory)
 {
 	KonohaFactory *platapi = (KonohaFactory *)factory->malloc_i(sizeof(KonohaFactory));
+	KonohaFactory_Check(factory);
 	memcpy(platapi, factory, sizeof(KonohaFactory));
 	konoha_init();
 	return (KonohaContext *)new_KonohaContext(NULL, (PlatformApi *)platapi);
