@@ -31,19 +31,19 @@ extern "C" {
 #include "minikonoha/gc.h"
 #include "minikonoha/local.h"
 
-#if SIZEOF_VOIDP*8 == 64
-#define USE_GENERATIONAL_GC 1
-#endif
-
 static int verbose_gc = 0;
 
+#ifdef K_USE_PTHREAD
+#define USE_CONCURRENT_GC 1
 #include "../BitmapGC/bmgc.h"
+#endif /* K_USE_PTHREAD */
 
 /* ------------------------------------------------------------------------ */
 
-kbool_t LoadBitmapGenGCModule(KonohaFactory *factory, ModuleType type)
+#ifdef K_USE_PTHREAD
+kbool_t LoadBitmapConcGCModule(KonohaFactory *factory, ModuleType type)
 {
-	factory->Module_GC            = "Bitmap Generational GC";
+	factory->Module_GC            = "Bitmap Concurrent GC";
 	factory->Kmalloc = Kmalloc;
 	factory->Kzmalloc = Kzmalloc;
 	factory->Kfree = Kfree;
@@ -56,6 +56,7 @@ kbool_t LoadBitmapGenGCModule(KonohaFactory *factory, ModuleType type)
 	factory->IsKonohaObject = KisObject;
 	return true;
 }
+#endif
 
 #ifdef __cplusplus
 } /* extern "C" */

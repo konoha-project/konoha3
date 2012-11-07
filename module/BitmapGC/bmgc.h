@@ -28,10 +28,6 @@
 
 //#define GCDEBUG 1
 
-#include "minikonoha/minikonoha.h"
-#include "minikonoha/gc.h"
-#include "minikonoha/local.h"
-
 #ifndef BMGC_H_
 #define BMGC_H_
 
@@ -69,10 +65,6 @@ extern "C" {
 #define PowerOf2(N) (1UL << N)
 #define ALIGN(X,N)  (((X)+((N)-1))&(~((N)-1)))
 #define CEIL(F)     (F-(int)(F) > 0 ? (int)(F+1) : (int)(F))
-
-#if SIZEOF_VOIDP*8 == 64 && !defined(USE_CONCURRENT_GC)
-#define USE_GENERATIONAL_GC 1
-#endif
 
 #ifdef USE_GENERATIONAL_GC
 #define MINOR_COUNT 16
@@ -844,7 +836,6 @@ static void KdeleteGcContext(KonohaContext *kctx)
 {
 	HeapManager *mng = (HeapManager *)kctx->gcContext;
 #ifdef USE_CONCURRENT_GC
-	KonohaContext *kctx = mng->kctx;
 	PLATAPI pthread_mutex_lock_i(&mng->lock);
 	mng->phase = GCPHASE_EXIT;
 	PLATAPI pthread_cond_signal_i(&mng->stop_cond);
@@ -2047,8 +2038,8 @@ static void *concgc_thread_entry(void *o)
 		// init and firstmark phase
 		concgc_stop_the_world(mng, GCPHASE_INIT);
 		if(mng->phase == GCPHASE_EXIT) break;
-		((KonohaLibVar*)kctx->klib)->Kwrite_barrier = Kwrite_barrier_concmark_phase;
-		((KonohaLibVar*)kctx->klib)->KupdateObjectField = KupdateObjectField_concmark_phase;
+		((KonohaFactory*)kctx->platApi)->WriteBarrier = Kwrite_barrier_concmark_phase;
+		((KonohaFactory*)kctx->platApi)->UpdateObjectField = KupdateObjectField_concmark_phase;
 		KLIB ReftraceAll(kctx, &tracer.base);
 		if(count++ > 8) {
 			// concurrent mark phase
@@ -2065,8 +2056,8 @@ static void *concgc_thread_entry(void *o)
 		}
 		// sweep phase
 		bmgc_gc_sweep(mng);
-		KSET_KLIB(Kwrite_barrier, 0);
-		KSET_KLIB(KupdateObjectField, 0);
+		((KonohaFactory*)kctx->platApi)->WriteBarrier = Kwrite_barrier;
+		((KonohaFactory*)kctx->platApi)->UpdateObjectField = KupdateObjectField;
 		concgc_start_the_world(mng, GCPHASE_NONE);
 	}
 	return NULL;
@@ -2162,45 +2153,6 @@ static void KscheduleGC(KonohaContext *kctx, KTraceInfo *trace)
 		gc_info("scheduleGC mode=%d", mode);
 		bitmapMarkingGC(mng, mode);
 	}
-}
-
-/* ------------------------------------------------------------------------ */
-
-//void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
-//{
-//	if(IS_RootKonohaContext(ctx)) {
-//		KonohaFactory *factory = (KonohaFactory *)ctx->platApi;
-//		// remainig old function names for ide and matsu
-//		factory->Kmalloc = Kmalloc;
-//		factory->Kzmalloc = Kzmalloc;
-//		factory->Kfree = Kfree;
-//		factory->InitGcContext = KnewGcContext;
-//		factory->DeleteGcContext = KdeleteGcContext;
-//		factory->ScheduleGC = KscheduleGC;
-//		factory->AllocObject = KallocObject;
-//		factory->WriteBarrier = Kwrite_barrier;   // check this
-//		factory->UpdateObjectField = KupdateObjectField;  // check this
-//		factory->IsKonohaObject = KisObject;
-//		assert(sizeof(BlockHeader) <= MIN_ALIGN
-//				&& "Minimum size of Object may lager than sizeof BlockHeader");
-//	}
-//	PLATAPI InitGcContext(ctx);
-//}
-
-kbool_t LoadBitmapGenGCModule(KonohaFactory *factory, ModuleType type)
-{
-	factory->Module_GC            = "Bitmap Generational GC";
-	factory->Kmalloc = Kmalloc;
-	factory->Kzmalloc = Kzmalloc;
-	factory->Kfree = Kfree;
-	factory->InitGcContext = KnewGcContext;
-	factory->DeleteGcContext = KdeleteGcContext;
-	factory->ScheduleGC = KscheduleGC;
-	factory->AllocObject = KallocObject;
-	factory->WriteBarrier = Kwrite_barrier;   // check this
-	factory->UpdateObjectField = KupdateObjectField;  // check this
-	factory->IsKonohaObject = KisObject;
-	return true;
 }
 
 /* ------------------------------------------------------------------------ */
