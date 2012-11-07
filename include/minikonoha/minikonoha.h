@@ -554,7 +554,6 @@ struct KonohaFactory {
 
 	/* TraceVM */
 	const char             *Module_TraceVM;
-	void                  (*TraceVMGiveOutCoverage)(KonohaContext *kctx);
 
 	/* JSON_API */
 	const char  *Module_Json;
