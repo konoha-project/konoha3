@@ -89,6 +89,9 @@
 #include "llvm/Support/system_error.h"
 #endif
 #include "llvm/Bitcode/ReaderWriter.h"
+#if LLVM_VERSION <= 301
+#include "llvm/Target/TargetData.h"
+#endif
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/ADT/OwningPtr.h"
