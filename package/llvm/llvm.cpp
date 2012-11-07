@@ -89,7 +89,6 @@
 #include "llvm/Support/system_error.h"
 #endif
 #include "llvm/Bitcode/ReaderWriter.h"
-#include "llvm/Target/TargetData.h"
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/ADT/OwningPtr.h"
@@ -2791,9 +2790,11 @@ static KMETHOD LLVM_createLazyValueInfoPass(KonohaContext *kctx, KonohaStack *sf
 //## LoopPass LLVM.createLoopDependenceAnalysisPass();
 static KMETHOD LLVM_createLoopDependenceAnalysisPass(KonohaContext *kctx, KonohaStack *sfp)
 {
+#if LLVM_VERSION <= 301
 	LoopPass *ptr = createLoopDependenceAnalysisPass();
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
+#endif
 }
 
 //## FunctionPass LLVM.createInstCountPass();
@@ -3848,10 +3849,12 @@ static KMETHOD LLVM_createPruneEHPass(KonohaContext *kctx, KonohaStack *sfp)
 //## ModulePass LLVM.createInternalizePass(bool allButMain);
 static KMETHOD LLVM_createInternalizePass(KonohaContext *kctx, KonohaStack *sfp)
 {
+#if LLVM_VERSION <= 301
 	bool allButMain = sfp[0].boolValue;
 	ModulePass *ptr = createInternalizePass(allButMain);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
+#endif
 }
 
 //## ModulePass LLVM.createDeadArgEliminationPass();
