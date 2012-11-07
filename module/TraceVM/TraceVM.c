@@ -31,6 +31,7 @@
 #include <minikonoha/sugar.h>
 #include "tracevm.h"
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -395,6 +396,7 @@ static void kMethod_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
 #include <db.h>
 #endif /*defined(__linux__)*/
 #endif
+#include <sys/stat.h>
 #include <fcntl.h>
 
 #define BUFSIZE 64
