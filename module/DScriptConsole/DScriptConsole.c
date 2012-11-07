@@ -149,10 +149,11 @@ static int InputUserApproval(KonohaContext *kctx, const char *message, const cha
 	if(message == NULL) message = "Do you approve?";
 	if(yes == NULL) yes = "yes";
 	if(no == NULL) no = "no";
-	PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptAsk\", \"Body\": \"%s (%s %s, %s %s): \"}" , message, yes, ykey, no, nkey);
-
-	const char *host = "127.0.0.1";
+	const char host[] = "127.0.0.1";
 	int port = 8090;
+
+	PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptAsk\", \"Body\": \"%s (%s %s, %s %s): \", \"Ip\", \"%s:%d\"}" , message, yes, ykey, no, nkey, host, port);
+
 	struct event_base *base = event_base_new();
 	struct evhttp *httpd = evhttp_new(base);
 	if(evhttp_bind_socket(httpd, host, port) < 0) {
