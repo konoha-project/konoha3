@@ -469,7 +469,7 @@ static void TraceVMDeleteVirtualMachine(KonohaContext *kctx)
 kbool_t LoadTraceVMModule(KonohaFactory *factory, ModuleType type)
 {
 	SetUpBootCode();
-	factory->Module_TraceVM                = "TraceVM";
+	factory->Module_VirtualMachine         = "TraceVM";
 	factory->IsSupportedVirtualCode        = IsSupportedVirtualCode;
 	factory->RunVirtualMachine             = KonohaVirtualMachine_run;
 	factory->DeleteVirtualMachine          = TraceVMDeleteVirtualMachine;

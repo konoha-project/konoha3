@@ -552,9 +552,6 @@ struct KonohaFactory {
 	void */*MethodFunc*/  (*GetVirtualMachineMethodFunc)(void);
 	struct VirtualCode*   (*GetBootCodeOfNativeMethodCall)(void);
 
-	/* TraceVM */
-	const char             *Module_TraceVM;
-
 	/* JSON_API */
 	const char  *Module_Json;
 	void        *JsonHandler;  // define this in each module if necessary
