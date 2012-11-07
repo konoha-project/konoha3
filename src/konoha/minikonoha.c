@@ -32,6 +32,7 @@
 #ifdef HAVE_DB_H
 #if defined(__linux__)
 #include <db_185.h>
+#include <sys/stat.h>
 #else
 #include <db.h>
 #endif /*defined(__linux__)*/
