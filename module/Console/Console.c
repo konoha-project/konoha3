@@ -28,7 +28,8 @@ extern "C" {
 
 #include <stdio.h>
 #include <sys/ioctl.h>
-//#include <asm/termbits.h>
+#include <termios.h>
+#include <sys/ttydefaults.h>
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/klib.h>
 
@@ -204,6 +205,11 @@ static int myadd_history(const char* line)
 	return 0;
 }
 
+static char* InputUserText(KonohaContext *kctx, const char *message, int flag)
+{
+	return myreadline(message);
+}
+
 static int InputUserApproval(KonohaContext *kctx, const char *message, const char *yes, const char *no, int defval)
 {
 	char buff[BUFSIZ] = {0};
@@ -222,28 +228,25 @@ static int InputUserApproval(KonohaContext *kctx, const char *message, const cha
 	}
 }
 
-static const char* InputUserText(KonohaContext *kctx, const char *message, int flag)
+static char* InputUserPassword(KonohaContext *kctx, const char *message)
 {
-	return myreadline(message);
-}
-
-static const char* InputUserPassword(KonohaContext *kctx, const char *message)
-{
-//	char buff[BUFSIZ] = {0};
-//	struct termio tm, tm_save;
-//	ioctl(fileno(stdin), TCGETA, &tm);
-//	tm.c_lflag &= ~ECHO;
-//	tm.c_lflag |= ECHONL;
-//	ioctl(fileno(stdin), TCSETAF, &tm);
-//	fprintf(stdout, "%s", message);
-//	size_t len = fgets(buff, BUFSIZ, stdin);
-//	ioctl(fileno(stdin), TCSETAF, &tm_save);
-//	char *p = malloc(len + 1);
-//	if(p != NULL) {
-//		memcpy(p, buff, len + 1);
-//	}
-//	return p;
-	return "";
+	char buff[BUFSIZ] = {0};
+	struct termios tm, tm_save;
+	fprintf(stdout, "%s", message);
+	tcgetattr(fileno(stdin), &tm);
+	tm_save = tm;
+//	tm.c_lflag |= ~ECHO;
+	tm.c_lflag &= ~ECHO;
+	tm.c_lflag |= ECHONL;
+	tcsetattr(fileno(stdin), TCSANOW, &tm);
+	fgets(buff, BUFSIZ, stdin);
+	tcsetattr(fileno(stdin), TCSANOW, &tm_save);
+	size_t len = strlen(buff) + 1;
+	char *p = malloc(len);
+	if(p != NULL) {
+		memcpy(p, buff, len);
+	}
+	return p;
 }
 
 // -------------------------------------------------------------------------
