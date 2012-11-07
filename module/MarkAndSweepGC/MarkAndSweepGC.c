@@ -641,9 +641,10 @@ static kObject *mstack_next(MarkStack *mstack)
 	MSGC(i).freelist.list = (kGCObject *)p;\
 } while (0)
 
-static GcManager *KnewGcContext(KonohaContext *kctx)
+static void KnewGcContext(KonohaContext *kctx)
 {
-	GcManager *mng = Arena_init(kctx);
+	((KonohaContextVar*)kctx)->gcContext = Arena_init(kctx);
+	GcManager *mng = (GcManager *)kctx->gcContext;
 	mng->kctx = kctx;
 	MSGC_SETUP(0);
 	MSGC_SETUP(1);
@@ -656,8 +657,9 @@ static GcManager *KnewGcContext(KonohaContext *kctx)
 }
 
 #define  FinalFree(n) ObjectArena_FinalFree##n(mng->kctx, MSGC(n).arena_table.table, MSGC(n).arena_table.size);
-static void KdeleteGcContext(GcManager *mng)
+static void KdeleteGcContext(KonohaContext *kctx)
 {
+	GcManager *mng = (GcManager *)kctx->gcContext;
 	FinalFree(0);
 	FinalFree(1);
 	FinalFree(2);
@@ -827,14 +829,15 @@ void MODGC_check_malloced_size(KonohaContext *kctx)
 	}
 }
 
-static kObjectVar *KallocObject(GcManager *mng, KonohaClass *ct)
+static kObjectVar *KallocObject(KonohaContext *kctx, size_t size, KTraceInfo *trace)
 {
-	int page_size = (ct->cstruct_size / sizeof(kGCObject0)) >> 1;
+	GcManager *mng = (GcManager *)kctx->gcContext;
+	int page_size = (size / sizeof(kGCObject0)) >> 1;
 	DBG_ASSERT(page_size <= 4);
 	kGCObject *o = NULL;
 	FREELIST_POP(o,page_size);
 	MSGC(page_size).freelist.size -= 1;
-	do_bzero((void*)o, ct->cstruct_size);
+	do_bzero((void*)o, size);
 #if GCDEBUG
 	OLDTRACE_SWITCH_TO_KTrace(LOGPOL_DEBUG,
 			LogText("@", "new"),
@@ -856,8 +859,9 @@ static kObjectVar *KallocObject(GcManager *mng, KonohaClass *ct)
 	}\
 } while (0)
 
-static kbool_t KisObject(GcManager *mng, void *ptr)
+static kbool_t KisObject(KonohaContext *kctx, void *ptr)
 {
+	GcManager *mng = (GcManager *)kctx->gcContext;
 	uintptr_t o = (uintptr_t)ptr;
 	IS_Managed(0);
 	IS_Managed(1);
@@ -865,8 +869,9 @@ static kbool_t KisObject(GcManager *mng, void *ptr)
 	return false;
 }
 
-static void KscheduleGC(GcManager *mng)
+static void KscheduleGC(KonohaContext *kctx, KTraceInfo *trace)
 {
+	GcManager *mng = (GcManager *)kctx->gcContext;
 	if(mng->flags) {
 		//gc_info("scheduleGC mode=%d", mode);
 		MarkAndSweepGC(mng);
@@ -874,22 +879,20 @@ static void KscheduleGC(GcManager *mng)
 }
 /* ------------------------------------------------------------------------ */
 
-void MODGC_init(KonohaContext *kctx, KonohaContextVar *ctx)
+kbool_t LoadMarkAndSweepGCModule(KonohaFactory *factory, ModuleType type)
 {
-	if(IS_RootKonohaContext(ctx)) {
-		KSET_KLIB(Kmalloc, 0);
-		KSET_KLIB(Kzmalloc, 0);
-		KSET_KLIB(Kfree, 0);
-		KSET_KLIB(Kwrite_barrier, 0);
-		KSET_KLIB(KnewGcContext, 0);
-		KSET_KLIB(KdeleteGcContext, 0);
-		KSET_KLIB(KscheduleGC, 0);
-		KSET_KLIB(KallocObject, 0);
-		KSET_KLIB(KupdateObjectField, 0);
-		KSET_KLIB(KisObject, 0);
-		//TODO assert
-	}
-	ctx->gcContext = KnewGcContext(ctx);
+	factory->Module_GC            = "Mark & Sweep GC";
+	factory->Kmalloc = Kmalloc;
+	factory->Kzmalloc = Kzmalloc;
+	factory->Kfree = Kfree;
+	factory->InitGcContext = KnewGcContext;
+	factory->DeleteGcContext = KdeleteGcContext;
+	factory->ScheduleGC = KscheduleGC;
+	factory->AllocObject = KallocObject;
+	factory->WriteBarrier = Kwrite_barrier;   // check this
+	factory->UpdateObjectField = KupdateObjectField;  // check this
+	factory->IsKonohaObject = KisObject;
+	return true;
 }
 
 /* ------------------------------------------------------------------------ */
