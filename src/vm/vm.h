@@ -166,7 +166,7 @@ static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStac
 	}
 	memcpy(&lbuf, base->evaljmpbuf, sizeof(jmpbuf_i));
 	if((jmpresult = PLATAPI setjmp_i(*base->evaljmpbuf)) == 0) {
-		pc = KonohaVirtualMachine_run(kctx, sfp, pc);
+		pc = PLATAPI RunVirtualMachine(kctx, sfp, pc);
 	}
 	else {
 		DBG_P("Catch eval exception jmpresult=%d", jmpresult);

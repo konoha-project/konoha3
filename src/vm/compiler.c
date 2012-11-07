@@ -26,8 +26,8 @@
 #include <minikonoha/sugar.h>
 #include "vm.h"
 
-#ifdef K_USE_TRACEVM
-#include "tracevm.h"
+//#ifdef K_USE_TRACEVM
+//#include "tracevm.h"
 #if defined(HAVE_DB_H)
 #include <stdio.h>
 #include <sys/types.h>
@@ -35,9 +35,9 @@
 #include <string.h>
 #include <db.h>
 #endif /*defined(HAVE_DB_H)*/
-#else
+//#else
 #include "minivm.h"
-#endif /*K_USE_TRACEVM*/
+//#endif /*K_USE_TRACEVM*/
 
 /* ************************************************************************ */
 
@@ -1046,7 +1046,7 @@ static void _THCODE(KonohaContext *kctx, VirtualCode *pc, void **codeaddr)
 static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 {
 	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].calledMethod));
-	KonohaVirtualMachine_run(kctx, sfp, CODE_ENTER);
+	PLATAPI RunVirtualMachine(kctx, sfp, CODE_ENTER);
 }
 
 static void Method_threadCode(KonohaContext *kctx, kMethod *mtd, kByteCode *kcode)
@@ -1054,7 +1054,7 @@ static void Method_threadCode(KonohaContext *kctx, kMethod *mtd, kByteCode *kcod
 	kMethodVar *Wmtd = (kMethodVar *)mtd;
 	KLIB kMethod_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
 	KFieldSet(Wmtd, Wmtd->CodeObject, kcode);
-	Wmtd->pc_start = KonohaVirtualMachine_run(kctx, kctx->esp + 1, kcode->code);
+	Wmtd->pc_start = PLATAPI RunVirtualMachine(kctx, kctx->esp + 1, kcode->code);
 	if(verbose_code) {
 		DBG_P("DUMP CODE");
 		VirtualCode *pc = mtd->pc_start;
@@ -1217,7 +1217,8 @@ static void kmodcode_setup(KonohaContext *kctx, struct KonohaModule *def, int ne
 		kBasicBlock_add(ib, RET);   // NEED TERMINATION
 		ia->nextBlock = ib;
 		kmodcode->codeNull = new_ByteCode(kctx, ia, ib, OnContextConstList);
-		VirtualCode *pc = KonohaVirtualMachine_run(kctx, kctx->esp, kmodcode->codeNull->code);
+		VirtualCode *pc = PLATAPI RunVirtualMachine(kctx, kctx->esp, kmodcode->codeNull->code);
+		//VirtualCode *pc = KonohaVirtualMachine_run(kctx, kctx->esp, kmodcode->codeNull->code);
 		CODE_ENTER = pc+1;
 		KLIB kArray_clear(kctx, ctxcode->codeList, 0);
 		RESET_GCSTACK();

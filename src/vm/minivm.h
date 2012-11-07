@@ -464,4 +464,14 @@ static VirtualCode* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *s
 	return pc;
 }
 
+static void KonohaVirtualMachine_delete(KonohaContext *kctx)
+{
+}
+
+static void VMFactory(KonohaFactory *factory)
+{
+	factory->RunVirtualMachine    = KonohaVirtualMachine_run;
+	factory->DeleteVirtualMachine = KonohaVirtualMachine_delete;
+}
+
 #endif /* MINIVM_H */
