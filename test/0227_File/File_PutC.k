@@ -2,27 +2,26 @@
 
 import("posix.fd");
 import("konoha.bytes");
-import("posix.file");
+import("konoha.file");
 
 void test() {
-	FILE f = System.fopen("files/opentest.txt", "r+");
-	if( System.access("files/opentest.txt", F_OK) == -1) {
-	assert(f.putC(49) == false);
-	assert(f.putC(10) == false);
-	}
+	String file = FILE.scriptPath("files/opentest.txt");
+	FILE f = new FILE(file, "r+");
+	f.putc(49);
+	f.putc(10);
 	f.close();
-	f = System.fopen("files/opentest.txt", "w+");
-	assert(f.putC(49));
-	assert(f.putC(10));
+	FILE f = new FILE(file, "w+");
+	f.putc(49);
+	f.putc(10);
 	f.close();
-	f = System.fopen("files/opentest.txt", "r");
-	assert(f.putC(49) == false);
-	assert(f.putC(10) == false);
+	FILE f = new FILE(file, "w");
+	f.putc(49);
+	f.putc(10);
 	f.close();
-	f = System.fopen("files/opentest.txt", "w");
-	assert(f.putC(49));
-	assert(f.putC(10));
-	f.close();
+	//FILE f = new FILE(file, "r");
+	//f.putc(49);
+	//f.putc(10);
+	//f.close();
 }
 
 test();

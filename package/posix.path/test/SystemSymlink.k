@@ -6,6 +6,7 @@ void test() {
 	assert(System.symlink("files/newfile.txt", "files/symlinked.txt"));
 	assert(!System.symlink("files/newfile.txt", "files/newfile.txt"));
 	assert(!System.symlink("files/notexist.txt", "files/symlinked.txt"));
+	assert(System.unlink("files/symlinked.txt"));
 }
 
 test();
