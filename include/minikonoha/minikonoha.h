@@ -544,10 +544,11 @@ struct KonohaFactory {
 	const char* (*formatSystemPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
 	const char* (*formatKonohaPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
 
-	// VirtualMachine
+	/* VirtualMachine */
 	const char             *Module_VirtualMachine;
 	kbool_t               (*IsSupportedVirtualCode)(int opcode);
 	struct VirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, void *sfp, struct VirtualCode *pc);
+	void                  (*DeleteVirtualMachine)(KonohaContext *kctx);
 	void */*MethodFunc*/  (*GetVirtualMachineMethodFunc)(void);
 	struct VirtualCode*   (*GetBootCodeOfNativeMethodCall)(void);
 

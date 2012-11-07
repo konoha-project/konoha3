@@ -123,7 +123,8 @@ extern int verbose_gc;
 
 #include <minikonoha/platform.h>
 #include <minikonoha/libcode/minishell.h>
-
+#include "src/vm/vm.h"
+#include "src/vm/minivm.h"
 // -------------------------------------------------------------------------
 // KonohaContext
 
@@ -363,7 +364,7 @@ static void konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
 // ** main **
 
 void KonohaFactory_LoadRuntimeModule(KonohaFactory *factory, const char *name, ModuleType option);
-void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), int argc, char **argv);
+void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), void (*SetVMApi)(KonohaFactory *), int argc, char **argv);
 KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory);
 int Konoha_Destroy(KonohaContext *kctx);
 
@@ -376,7 +377,7 @@ int main(int argc, char *argv[])
 		verbose_code = 1;
 	}
 	struct KonohaFactory factory = {};
-	KonohaFactory_SetDefaultFactory(&factory, PosixFactory, argc, argv);
+	KonohaFactory_SetDefaultFactory(&factory, PosixFactory, VMFactory, argc, argv);
 	KonohaContext* konoha = KonohaFactory_CreateKonoha(&factory);
 	konoha_parseopt(konoha, argc, argv);
 	return Konoha_Destroy(konoha);
