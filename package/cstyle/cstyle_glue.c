@@ -40,8 +40,8 @@ static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = false;
 	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_boolean, 0)) {
 		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
-		kStmt_set(CatchContinue, stmt, true);  // set before tyCheckAll
-		kStmt_set(CatchBreak, stmt, true);
+		kStmt_Set(CatchContinue, stmt, true);  // set before tyCheckAll
+		kStmt_Set(CatchBreak, stmt, true);
 		ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
 		if(ret) {
 			kStmt_typed(stmt, LOOP);
@@ -57,8 +57,8 @@ static KMETHOD Statement_do(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = false;
 	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_boolean, 0)) {
 		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
-		kStmt_set(CatchContinue, stmt, true);  // set before tyCheckAll
-		kStmt_set(CatchBreak, stmt, true);
+		kStmt_Set(CatchContinue, stmt, true);  // set before tyCheckAll
+		kStmt_Set(CatchBreak, stmt, true);
 		ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
 		if(ret) {
 			kStmt_typed(stmt, LOOP);  // FIXME
@@ -74,8 +74,8 @@ static KMETHOD Statement_CStyleFor(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = false;
 	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_boolean, 0)) {
 		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
-		kStmt_set(CatchContinue, stmt, true);  // set before tyCheckAll
-		kStmt_set(CatchBreak, stmt, true);
+		kStmt_Set(CatchContinue, stmt, true);  // set before tyCheckAll
+		kStmt_Set(CatchBreak, stmt, true);
 		ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
 		if(ret) {
 			kStmt_typed(stmt, LOOP);
@@ -94,7 +94,7 @@ static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_Statement(stmt, gma);
 	kStmt *p = stmt;
 	while((p = kStmt_getParentNULL(p)) != NULL) {
-		if(kStmt_is(CatchBreak, p)) {
+		if(kStmt_Is(CatchBreak, p)) {
 			KLIB kObject_setObject(kctx, stmt, stmt->syn->keyword, TY_Stmt, p);
 			kStmt_typed(stmt, JUMP);
 			KReturnUnboxValue(true);
@@ -108,7 +108,7 @@ static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_Statement(stmt, gma);
 	kStmt *p = stmt;
 	while((p = kStmt_getParentNULL(p)) != NULL) {
-		if(kStmt_is(CatchContinue, p)) {
+		if(kStmt_Is(CatchContinue, p)) {
 			KLIB kObject_setObject(kctx, stmt, stmt->syn->keyword, TY_Stmt, p);
 			kStmt_typed(stmt, JUMP);
 			KReturnUnboxValue(true);

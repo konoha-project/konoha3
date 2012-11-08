@@ -450,11 +450,12 @@ struct kStmtVar {
 #define kStmtToken_printMessage(kctx, STMT, TK, PE, FMT, ...)   SUGAR kStmt_printMessage2(kctx, STMT, TK, PE, FMT, ## __VA_ARGS__)
 #define kStmtExpr_printMessage(kctx, STMT, EXPR, PE, FMT, ...)  SUGAR kStmt_printMessage2(kctx, STMT, (kToken *)EXPR, PE, FMT, ## __VA_ARGS__)
 
+#define kStmtFlag_RedoLoop           kObject_Local1
 #define kStmtFlag_CatchContinue      kObject_Local2
 #define kStmtFlag_CatchBreak         kObject_Local3
 
-#define kStmt_is(P, O)       (TFLAG_is(uintptr_t, (O)->h.magicflag, kStmtFlag_##P))
-#define kStmt_set(P, O, B)   TFLAG_set(uintptr_t,((kStmtVar *)O)->h.magicflag, kStmtFlag_##P, B)
+#define kStmt_Is(P, O)       (TFLAG_is(uintptr_t, (O)->h.magicflag, kStmtFlag_##P))
+#define kStmt_Set(P, O, B)   TFLAG_set(uintptr_t,((kStmtVar *)O)->h.magicflag, kStmtFlag_##P, B)
 
 struct kBlockVar {
 	KonohaObjectHeader   h;

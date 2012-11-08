@@ -456,15 +456,23 @@ static void KonohaVisitor_visitLoopStmt(KonohaContext *kctx, IRBuilder *self, kS
 	int espidx = self->espidx;
 	int a = self->a;
 	kBasicBlock* lbCONTINUE = new_BasicBlockLABEL(kctx);
+	kBasicBlock* lbREDO     = new_BasicBlockLABEL(kctx);
 	kBasicBlock* lbBREAK    = new_BasicBlockLABEL(kctx);
-
 	kStmt_setLabelBlock(kctx, stmt, SYM_("continue"), lbCONTINUE);
 	kStmt_setLabelBlock(kctx, stmt, SYM_("break"),    lbBREAK);
+	if(kStmt_Is(RedoLoop, stmt)) {
+		ASM_LABEL(kctx, lbREDO);
+	}
 	ASM_LABEL(kctx, lbCONTINUE);
 	ASM_SAFEPOINT(kctx, stmt->uline, espidx);
+	kBlock *iterBlock = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("Iterator"), NULL);
+	if(iterBlock != NULL) {
+		visitBlock(kctx, self, iterBlock);
+	}
 	self->a = espidx;
 	KonohaVisitor_asmJMPIF(kctx, self, Stmt_getFirstExpr(kctx, stmt), 0/*FALSE*/, lbBREAK);
 	self->a = a;
+	ASM_LABEL(kctx, lbREDO);
 	visitBlock(kctx, self, Stmt_getFirstBlock(kctx, stmt));
 	ASM_JMP(kctx, lbCONTINUE);
 	ASM_LABEL(kctx, lbBREAK);
