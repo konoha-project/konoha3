@@ -222,7 +222,6 @@ static kbool_t kNameSpace_RemoveSyntax(KonohaContext *kctx, kNameSpace *ns, ksym
 	return false;
 }
 
-
 static SugarSyntaxVar *kNameSpace_AddSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, size_t idx, kFunc *funcObject)
 {
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, keyword, 1/*new*/);
@@ -230,6 +229,7 @@ static SugarSyntaxVar *kNameSpace_AddSugarFunc(KonohaContext *kctx, kNameSpace *
 	kNameSpace_AddFuncList(kctx, ns, syn->sugarFuncListTable, idx, funcObject);
 	KLIB kMethod_DoLazyCompilation(kctx, (funcObject)->mtd, NULL, HatedLazyCompile);
 	syn->lastLoadedPackageId = ns->packageId;
+	DBG_P("@@@@@@@@@@@@@ %s%s", PSYM_t(keyword));
 	return syn;
 }
 

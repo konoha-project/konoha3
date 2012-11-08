@@ -717,7 +717,7 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 	KonohaClass *base  = CT_(class->superTypeId);
 	
 	if(mtd->mn != 0) {
-		kMethod_setFunc(kctx, mtd, NULL);
+		KLIB kMethod_setFunc(kctx, mtd, NULL);
 		if(strcmp(SYM_t(mtd->mn), "new") == 0) {
 			isConstractor = true;
 		}
