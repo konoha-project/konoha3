@@ -32,13 +32,6 @@ set(RUNTIME
 	src/konoha/minikonoha.c
 )
 
-set(KONOHA_GC_MODULE "" CACHE STRING "konoha gc module")
-if(KONOHA_GC_MODULE)
-	set(GC oldmodule/${KONOHA_GC_MODULE}gc/${KONOHA_GC_MODULE}gc.c)
-else(KONOHA_GC_MODULE)
-	set(GC src/gc/gc.c)
-endif(KONOHA_GC_MODULE)
-
 set(PARSER
 	src/sugar/sugar.c
 )
@@ -284,8 +277,8 @@ macro(SET_CXX_PROPERTY_IF_MSVC TARGET)
 	endif(MSVC)
 endmacro(SET_CXX_PROPERTY_IF_MSVC TARGET)
 
-add_library(minikonoha SHARED ${RUNTIME} ${GC} ${PARSER} ${VM})
-SET_CXX_PROPERTY_IF_MSVC(minikonoha ${RUNTIME} ${GC} ${PARSER} ${VM})
+add_library(minikonoha SHARED ${RUNTIME} ${PARSER} ${VM})
+SET_CXX_PROPERTY_IF_MSVC(minikonoha ${RUNTIME} ${PARSER} ${VM})
 target_link_libraries(minikonoha ${ExtraLibs})
 set(ExtraLibs ${ExtraLibs} minikonoha)
 
