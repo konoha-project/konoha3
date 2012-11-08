@@ -3,10 +3,11 @@
 
 import("konoha.new");
 import("konoha.bytes");
-import("posix.file");
+import("konoha.file");
 
 void test() {
-	FILE f = System.fopen("files/testfile.txt", "r");
+	String file = FILE.scriptPath("files/testfile.txt");
+	FILE f = new FILE(file, "r");
 	//the data of this file is "hoge\n" and the size is 5
 	int size = 32;
 	Bytes buf = new Bytes(size);

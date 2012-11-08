@@ -256,6 +256,7 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 
 static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
+	KRequirePackage("konoha.array", trace);
 	LoadRopeMethod(kctx, ns, trace);
 	int FN_s = FN_("s");
 	int FN_n = FN_("n");

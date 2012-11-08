@@ -1,6 +1,6 @@
 //Written by Joseph
 
-import("konoha.posix");
+import("posix.path");
 
 void test() {
 	assert(System.truncate("files/truncate.txt", 10));

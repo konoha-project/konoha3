@@ -1,7 +1,7 @@
 // Written by Joseph
 // Modified by Kimio
 
-import("posix.path");
+import("posix.stat");
 
 void test() {
 	FileStatus s = System.stat("/etc/passwd");
