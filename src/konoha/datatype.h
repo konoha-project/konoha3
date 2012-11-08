@@ -606,10 +606,7 @@ static void DEFAULT_free(KonohaContext *kctx, kObject *o)
 
 static void DEFAULT_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
-	KLIB Kwb_write(kctx, wb, TEXTSIZE("{\"class\": \""));
-	KLIB Kwb_write(kctx, wb, TY_t(O_typeId(v[pos].asObject)), 0);
-	KLIB Kwb_write(kctx, wb, TEXTSIZE("\"}"));
-	//KLIB Kwb_printf(kctx, wb, "&%p(:%s)", sfp[pos].asObject, TY_t(O_typeId(sfp[pos].asObject)));
+	KLIB Kwb_printf(kctx, wb, "&%p(:%s)", v[pos].asObject, TY_t(O_typeId(v[pos].asObject)));
 }
 
 static uintptr_t DEFAULT_unbox(KonohaContext *kctx, kObject *o)
