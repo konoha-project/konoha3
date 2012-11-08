@@ -185,7 +185,7 @@ static int KonohaContext_test(KonohaContext *kctx, const char *testname)
 	PLATAPI snprintf_i(result_file, 256,  "%s.tested", script_file);
 	FILE *fp = fopen(correct_file, "r");
 	stdlog = fopen(result_file, "w");
-	Konoha_Load((KonohaContext*)kctx, script_file);
+	Konoha_LoadScript((KonohaContext*)kctx, script_file);
 	fprintf(stdlog, "Q.E.D.\n");   // Q.E.D.
 	fclose(stdlog);
 
@@ -302,7 +302,7 @@ static void konoha_startup(KonohaContext *kctx, const char *startup_script)
 		local = "/.minikonoha/script";
 	}
 	snprintf(buf, sizeof(buf), "%s%s/%s.k", path, local, startup_script);
-	if(!Konoha_Load((KonohaContext*)kctx, (const char*)buf)) {
+	if(!Konoha_LoadScript((KonohaContext*)kctx, (const char*)buf)) {
 		PLATAPI exit_i(EXIT_FAILURE);
 	}
 }
@@ -1032,7 +1032,7 @@ static int konoha_parseopt(KonohaContext* konoha, KonohaFactory *plat, int argc,
 
 
 	if(scriptidx < argc) {
-		ret = Konoha_Load(konoha, argv[scriptidx]);
+		ret = Konoha_LoadScript(konoha, argv[scriptidx]);
 	}
 	else {
 		interactive_flag = 1;

@@ -1594,6 +1594,12 @@ struct KonohaLibVar {
 	void              (*KonohaContext_free)(KonohaContext *rootContext, KonohaContextVar *ctx);
 	void              (*ReftraceAll)(KonohaContext *kctx, KObjectVisitor *);
 
+	KonohaContext*    (*KonohaFactory_CreateKonoha)(KonohaFactory *factory);
+	int               (*Konoha_Destroy)(KonohaContext *kctx);
+	kbool_t           (*Konoha_LoadScript)(KonohaContext*, const char *);
+	kbool_t           (*Konoha_Eval)(KonohaContext*, const char *, kfileline_t);
+
+
 	kfileline_t     (*KfileId)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
 	kpackageId_t    (*KpackageId)(KonohaContext*, const char *, size_t, int spol, ksymbol_t def);
 	ksymbol_t       (*Ksymbol)(KonohaContext*, const char*, size_t, int spol, ksymbol_t def);
@@ -1912,8 +1918,8 @@ typedef struct {
 ///* Konoha API */
 extern KonohaContext* konoha_open(const PlatformApi *);
 extern void konoha_close(KonohaContext* konoha);
-extern kbool_t Konoha_Load(KonohaContext* konoha, const char *scriptfile);
-extern kbool_t konoha_eval(KonohaContext* konoha, const char *script, kfileline_t uline);
+extern kbool_t Konoha_LoadScript(KonohaContext* konoha, const char *scriptfile);
+extern kbool_t Konoha_Eval(KonohaContext* konoha, const char *script, kfileline_t uline);
 extern kbool_t konoha_run(KonohaContext* konoha);  // TODO
 
 #ifdef __cplusplus

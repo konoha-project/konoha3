@@ -162,7 +162,7 @@ static void KonohaContext_evalScript(KonohaContext *kctx, char *data, size_t len
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	KLIB Kwb_write(kctx, &wb,data,len);
 	kfileline_t uline = FILEID_("(kernel)") | 1;
-	konoha_eval((KonohaContext*)kctx, KLIB Kwb_top(kctx, &wb,1),uline);
+	Konoha_Eval((KonohaContext*)kctx, KLIB Kwb_top(kctx, &wb,1),uline);
 	KLIB Kwb_free(&wb);
 }
 //EXPORT_SYMBOL(KonohaContext_evalScript);

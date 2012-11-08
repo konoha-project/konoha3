@@ -217,13 +217,13 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 		KLIB Kwb_write(kctx, &wb, start+2, end-(start+2));
 		KLIB Kwb_write(kctx, &wb, ")", 1);
 
-		TokenSequence range = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
+		TokenSequence range = {ns, GetSugarContext(kctx)->preparedTokenList};
 		TokenSequence_push(kctx, range);
 		const char *buf = KLIB Kwb_top(kctx, &wb, 1);
 		SUGAR TokenSequence_tokenize(kctx, &range, buf, 0);
 
 		{
-			TokenSequence tokens = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
+			TokenSequence tokens = {ns, GetSugarContext(kctx)->preparedTokenList};
 			TokenSequence_push(kctx, tokens);
 			SUGAR TokenSequence_resolved(kctx, &tokens, NULL, &range, range.beginIdx);
 			/* +1 means for skiping first indent token. */

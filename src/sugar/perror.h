@@ -61,7 +61,7 @@ static kString* new_StringMessage(KonohaContext *kctx, kArray *gcstack, KGrowing
 
 static kString* SugarContext_vprintMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t uline, const char *fmt, va_list ap)
 {
-	SugarContext *sugarContext = KonohaContext_getSugarContext(kctx);
+	SugarContext *sugarContext = GetSugarContext(kctx);
 	if(isPrintMessage(kctx, sugarContext, taglevel)) {
 		KGrowingBuffer wb;
 		KLIB Kwb_init(&sugarContext->errorMessageBuffer, &wb);

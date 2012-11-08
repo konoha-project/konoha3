@@ -277,7 +277,7 @@ static int konoha_handler(request_rec *r)
 	//assert(cRequest != NULL);
 	r->content_encoding = "utf-8";
 	ap_log_rerror(APLOG_MARK, APLOG_CRIT, 0, r, "filename=%s", r->filename);
-	if(Konoha_Load(konoha, r->filename)) {
+	if(Konoha_LoadScript(konoha, r->filename)) {
 		return DECLINED;
 	}
 

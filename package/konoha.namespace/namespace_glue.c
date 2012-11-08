@@ -42,7 +42,7 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 	if(tk != NULL && tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
 		INIT_GCSTACK();
 		kNameSpace *ns = new_(NameSpace, Stmt_nameSpace(stmt), _GcStack);
-		kArray *a = KonohaContext_getSugarContext(kctx)->preparedTokenList;
+		kArray *a = GetSugarContext(kctx)->preparedTokenList;
 		TokenSequence range = {ns, a, kArray_size(a), kArray_size(a)};
 		SUGAR TokenSequence_tokenize(kctx, &range, S_text(tk->text), tk->uline);
 		result = SUGAR TokenSequence_eval(kctx, &range);

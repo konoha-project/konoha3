@@ -77,7 +77,7 @@ static void MacroSet_setTokenAt(KonohaContext *kctx, MacroSet *macroSet, int ind
 static kBlock *new_MacroBlock(KonohaContext *kctx, kStmt *stmt, kToken *IteratorTypeToken, kToken *IteratorExprToken, kToken *TypeToken, kToken *VariableToken)
 {
 	kNameSpace *ns = Stmt_nameSpace(stmt);
-	TokenSequence source = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
+	TokenSequence source = {ns, GetSugarContext(kctx)->preparedTokenList};
 	TokenSequence_push(kctx, source);
 	/* FIXME(imasahiro)
 	 * we need to implement template as Block

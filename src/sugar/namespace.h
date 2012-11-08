@@ -328,7 +328,7 @@ static kbool_t kNameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns,
 	}
 	else {
 		KGrowingBuffer wb;
-		KLIB Kwb_init(&(KonohaContext_getSugarContext(kctx)->errorMessageBuffer), &wb);
+		KLIB Kwb_init(&(GetSugarContext(kctx)->errorMessageBuffer), &wb);
 		for(i = 0; i < nitems; i++) {
 			ksymbol_t unboxKey = kvs[i].key;
 			KKeyValue* stored = kNameSpace_GetLocalConstNULL(kctx, ns, unboxKey);
@@ -903,12 +903,12 @@ static kbool_t kNameSpace_LoadScript(KonohaContext *kctx, kNameSpace *ns, const 
 		return false;
 	}
 	if(KonohaContext_Is(CompileOnly, kctx)) {
-		size_t i, size = kArray_size(KonohaContext_getSugarContext(kctx)->definedMethodList);
+		size_t i, size = kArray_size(GetSugarContext(kctx)->definedMethodList);
 		for (i = 0; i < size; ++i) {
-			kMethod *mtd = KonohaContext_getSugarContext(kctx)->definedMethodList->MethodItems[i];
+			kMethod *mtd = GetSugarContext(kctx)->definedMethodList->MethodItems[i];
 			KLIB kMethod_DoLazyCompilation(kctx, mtd, NULL, DefaultCompileOption);
 		}
-		KLIB kArray_clear(kctx, KonohaContext_getSugarContext(kctx)->definedMethodList, 0);
+		KLIB kArray_clear(kctx, GetSugarContext(kctx)->definedMethodList, 0);
 	}
 	return true;
 }
@@ -1064,15 +1064,3 @@ static kbool_t kNameSpace_importPackageSymbol(KonohaContext *kctx, kNameSpace *n
 
 // --------------------------------------------------------------------------
 
-kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, KTraceInfo *trace)
-{
-	if(KonohaContext_getSugarContext(kctx) == NULL) {
-		kmodsugar->h.setupModuleContext(kctx, (KonohaModule *)kmodsugar, 0/*lazy*/);
-	}
-	INIT_GCSTACK();
-	kpackageId_t packageId = KLIB KpackageId(kctx, "main", sizeof("main")-1, 0, _NEWID);
-	kNameSpace *ns = new_PackageNameSpace(kctx, packageId);
-	kstatus_t result = (kstatus_t)kNameSpace_LoadScript(kctx, ns, path, trace);
-	RESET_GCSTACK();
-	return result;
-}

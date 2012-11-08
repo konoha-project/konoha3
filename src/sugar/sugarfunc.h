@@ -1120,7 +1120,7 @@ static void kMethod_setLazyCompilation(KonohaContext *kctx, kMethodVar *mtd, kSt
 		KFieldSet(mtd, mtd->SourceToken, tcode);
 		KFieldSet(mtd, mtd->LazyCompileNameSpace, ns);
 		KLIB kMethod_setFunc(kctx, mtd, MethodFunc_LazyCompilation);
-		KLIB kArray_add(kctx, KonohaContext_getSugarContext(kctx)->definedMethodList, mtd);
+		KLIB kArray_add(kctx, GetSugarContext(kctx)->definedMethodList, mtd);
 	}
 }
 

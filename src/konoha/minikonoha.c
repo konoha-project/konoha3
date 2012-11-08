@@ -47,16 +47,6 @@ static void konoha_init(void)
 	}
 }
 
-static void knh_beginContext(KonohaContext *kctx, void **bottom)
-{
-	kctx->stack->cstack_bottom = bottom;
-}
-
-static void knh_endContext(KonohaContext *kctx)
-{
-	kctx->stack->cstack_bottom = NULL;
-}
-
 /* ------------------------------------------------------------------------ */
 /* stack */
 
@@ -83,14 +73,12 @@ static void KonohaStackRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx, 
 static void KonohaStackRuntime_reftrace(KonohaContext *kctx, KonohaContextVar *ctx, KObjectVisitor *visitor)
 {
 	KonohaStack *sp = ctx->stack->stack;
-	BEGIN_REFTRACE((kctx->esp - sp) + 2);
 	while(sp < ctx->esp) {
 		KREFTRACEv(sp[0].asObject);
 		sp++;
 	}
 	KREFTRACEv(ctx->stack->ContextConstList);
 	KREFTRACEv(ctx->stack->OptionalErrorInfo);
-	END_REFTRACE();
 }
 
 static void KonohaStackRuntime_free(KonohaContext *kctx, KonohaContextVar *ctx)
@@ -118,6 +106,8 @@ static kbool_t KonohaRuntime_setModule(KonohaContext *kctx, int x, KonohaModule 
 
 static void KonohaContext_free(KonohaContext *kctx, KonohaContextVar *ctx);
 static void ReftraceAll(KonohaContext *kctx, KObjectVisitor *visitor);
+KonohaContext*    KonohaFactory_CreateKonoha(KonohaFactory *factory);
+int               Konoha_Destroy(KonohaContext *kctx);
 
 static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformApi *platApi)
 {
@@ -131,6 +121,8 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 		klib->KonohaContext_init = new_KonohaContext;
 		klib->KonohaContext_free = KonohaContext_free;
 		klib->ReftraceAll = ReftraceAll;
+		klib->KonohaFactory_CreateKonoha = KonohaFactory_CreateKonoha;
+		klib->Konoha_Destroy = Konoha_Destroy;
 		newctx = (KonohaContextVar *)(klib + 1);
 		newctx->klib = (KonohaLib *)klib;
 		newctx->platApi = platApi;
@@ -230,46 +222,28 @@ static void KonohaContext_free(KonohaContext *kctx, KonohaContextVar *ctx)
 /* ------------------------------------------------------------------------ */
 /* konoha api */
 
-#define BEGIN_(kctx) knh_beginContext(kctx, (void**)&kctx)
-#define END_(kctx)   knh_endContext(kctx)
-
 KonohaContext* konoha_open(const PlatformApi *platform)
 {
+	assert(0);  // obsolate
 	konoha_init();
 	return (KonohaContext *)new_KonohaContext(NULL, platform);
 }
 
 void konoha_close(KonohaContext* konoha)
 {
+	assert(0);
 	KonohaContext_free(konoha, (KonohaContextVar *)konoha);
 }
 
-kbool_t Konoha_Load(KonohaContext* kctx, const char *scriptname)
-{
-	PLATAPI BEFORE_LoadScript(kctx, scriptname);
-	BEGIN_(kctx);
-	kbool_t res = (MODSUGAR_loadScript(kctx, scriptname, strlen(scriptname), 0) == K_CONTINUE);
-	END_(kctx);
-	PLATAPI AFTER_LoadScript(kctx, scriptname);
-	return res;
-}
-
-kbool_t konoha_eval(KonohaContext* konoha, const char *script, kfileline_t uline)
-{
-	BEGIN_(konoha);
-	kbool_t res = (MODSUGAR_eval(konoha, script, uline) == K_CONTINUE);
-	END_(konoha);
-	return res;
-}
-
 // -------------------------------------------------------------------------
-/* Factory */
+/* Konoha C API */
 
 void KonohaFactory_LoadRuntimeModule(KonohaFactory *factory, const char *name, ModuleType option)
 {
 	if(!factory->LoadRuntimeModule(factory, name, option)) {
+		factory->syslog_i(ErrTag, "failed to load module: %s\n", name);
 		factory->printf_i("failed to load module: %s\n", name);
-		factory->exit_i(1);
+		factory->exit_i(EXIT_FAILURE);
 	}
 }
 
@@ -296,15 +270,15 @@ static void KonohaFactory_Check(KonohaFactory *factory)
 {
 	if(factory->Module_GC == NULL) {
 		const char *mod = factory->getenv_i("KONOHA_GC");
-		if(mod == NULL) mod = "BitmapGenGC";
+		if(mod == NULL) mod = "BitmapGenGC";  // default
 		KonohaFactory_LoadRuntimeModule(factory, mod, ReleaseModule);
 	}
 	if(factory->Module_I18N == NULL) {
 		const char *mod = factory->getenv_i("KONOHA_I18N");
-		if(mod == NULL) mod = "IConv";
+		if(mod == NULL) mod = "IConv";        // default
 		KonohaFactory_LoadRuntimeModule(factory, mod, ReleaseModule);
 	}
-	KonohaFactory_CheckVirtualMachine(factory);
+	KonohaFactory_CheckVirtualMachine(factory);  // delete when all vms are on module
 }
 
 KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory)
@@ -324,7 +298,6 @@ int Konoha_Destroy(KonohaContext *kctx)
 	platapi->free_i(platapi);
 	return exitStatus;
 }
-
 
 #ifdef __cplusplus
 }

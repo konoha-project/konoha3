@@ -270,7 +270,7 @@ static kTokenVar* kToken_expandGroupMacro(KonohaContext *kctx, kTokenVar *tk, kN
 	TokenSequence source = {ns, tk->subTokenList, 0, kArray_size(tk->subTokenList)};
 	if(source.endIdx > 0) {
 		int isChanged = true;
-		TokenSequence group = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
+		TokenSequence group = {ns, GetSugarContext(kctx)->preparedTokenList};
 		TokenSequence_push(kctx, group);
 		TokenSequence_resolved2(kctx, &group, macroParam, &source, source.beginIdx);
 		if(group.endIdx - group.beginIdx == source.endIdx) {
@@ -335,7 +335,7 @@ static void TokenSequence_applyMacroGroup(KonohaContext *kctx, TokenSequence *to
 static void kNameSpace_SetMacroData(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, int paramsize, const char *data)
 {
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)SUGAR kNameSpace_GetSyntax(kctx, ns, keyword, /*new*/true);
-	TokenSequence source = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
+	TokenSequence source = {ns, GetSugarContext(kctx)->preparedTokenList};
 	TokenSequence_push(kctx, source);
 	TokenSequence_tokenize(kctx, &source, data, 0);
 	TokenSequence tokens = {source.ns, source.tokenList, source.endIdx};
@@ -372,7 +372,7 @@ static int TokenSequence_addGroup(KonohaContext *kctx, TokenSequence *tokens, Ma
 
 static kTokenVar* kToken_transformToBraceGroup(KonohaContext *kctx, kTokenVar *tk, kNameSpace *ns, MacroSet *macroSet)
 {
-	TokenSequence source = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
+	TokenSequence source = {ns, GetSugarContext(kctx)->preparedTokenList};
 	TokenSequence_push(kctx, source);
 	KdumpToken(kctx, tk);
 	TokenSequence_tokenize(kctx, &source, S_text(tk->text), tk->uline);
@@ -955,7 +955,7 @@ static kbool_t kArray_addSyntaxPattern(KonohaContext *kctx, kArray *patternList,
 
 static void kNameSpace_parseSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, const char *ruleSource, kfileline_t uline, kArray *patternList)
 {
-	TokenSequence source = {ns, KonohaContext_getSugarContext(kctx)->preparedTokenList};
+	TokenSequence source = {ns, GetSugarContext(kctx)->preparedTokenList};
 	TokenSequence_push(kctx, source);
 	TokenSequence_tokenize(kctx, &source, ruleSource, uline);
 	TokenSequence patterns = {ns, source.tokenList, source.endIdx};
