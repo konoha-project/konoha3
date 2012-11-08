@@ -26,7 +26,7 @@
 // ---------------------------------------------------------------------------
 // Utils
 
-static void kNameSpace_appendArrayRef(KonohaContext *kctx, kNameSpace *ns, const kArray **arrayRef, kObject *o)
+static void kNameSpace_AppendArrayRef(KonohaContext *kctx, kNameSpace *ns, const kArray **arrayRef, kObject *o)
 {
 	if(arrayRef[0] == NULL) {
 		((kArray**)arrayRef)[0] = new_(Array, 0, ns->NameSpaceConstList);
@@ -35,7 +35,7 @@ static void kNameSpace_appendArrayRef(KonohaContext *kctx, kNameSpace *ns, const
 	KLIB kArray_add(kctx, arrayRef[0], o);
 }
 
-static void kNameSpace_appendArrayRefArray(KonohaContext *kctx, kNameSpace *ns, kArray const **arrayRef, kArray *aList)
+static void kNameSpace_AppendArrayRefArray(KonohaContext *kctx, kNameSpace *ns, kArray const **arrayRef, kArray *aList)
 {
 	if(aList != NULL) {
 		size_t i;
@@ -50,7 +50,7 @@ static void kNameSpace_appendArrayRefArray(KonohaContext *kctx, kNameSpace *ns, 
 	}
 }
 
-static void kNameSpace_addFuncList(KonohaContext *kctx, kNameSpace *ns, kArray **funcListTable, int index, kFunc *fo)
+static void kNameSpace_AddFuncList(KonohaContext *kctx, kNameSpace *ns, kArray **funcListTable, int index, kFunc *fo)
 {
 	kArray *a = funcListTable[index];
 	KLIB kArray_add(kctx, ns->NameSpaceConstList, fo);
@@ -75,7 +75,7 @@ static kFunc **kNameSpace_tokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns);
 static void kNameSpace_SetTokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns, int konohaChar, kFunc *fo)
 {
 	kArray **list = (kArray**)kNameSpace_tokenFuncMatrix(kctx, ns);
-	kNameSpace_addFuncList(kctx, ns, list, konohaChar, fo);
+	kNameSpace_AddFuncList(kctx, ns, list, konohaChar, fo);
 	KLIB kMethod_DoLazyCompilation(kctx, (fo)->mtd, NULL, HatedLazyCompile);
 }
 
@@ -132,19 +132,19 @@ static kbool_t kNameSpace_ImportSyntax(KonohaContext *kctx, kNameSpace *ns, Suga
 		syn->precedence_op1 = target->precedence_op1;
 		syn->precedence_op2 = target->precedence_op2;
 		syn->macroParamSize = target->macroParamSize;
-		kNameSpace_appendArrayRefArray(kctx, ns, &syn->macroDataNULL_OnList, target->macroDataNULL_OnList);
-		kNameSpace_appendArrayRefArray(kctx, ns, &syn->syntaxPatternListNULL_OnList, target->syntaxPatternListNULL_OnList);
+		kNameSpace_AppendArrayRefArray(kctx, ns, &syn->macroDataNULL_OnList, target->macroDataNULL_OnList);
+		kNameSpace_AppendArrayRefArray(kctx, ns, &syn->syntaxPatternListNULL_OnList, target->syntaxPatternListNULL_OnList);
 		if(syn->syntaxPatternListNULL_OnList != NULL && SAFECHECK(0 < kArray_size(syn->syntaxPatternListNULL_OnList))) {
 			kToken *patternToken = syn->syntaxPatternListNULL_OnList->TokenItems[0];
 			if(kToken_isFirstPattern(patternToken)) {
-				kNameSpace_appendArrayRef(kctx, ns, &((kNameSpaceVar *)ns)->stmtPatternListNULL_OnList, UPCAST(patternToken));
+				kNameSpace_AppendArrayRef(kctx, ns, &((kNameSpaceVar *)ns)->stmtPatternListNULL_OnList, UPCAST(patternToken));
 			}
 		}
 		for(index = 0; index < SugarFunc_SIZE; index++) {
 			int j, size;
 			kFunc **FuncItems = SugarSyntax_funcTable(kctx, target, index, &size);
 			for(j = 0; j < size; j++) {
-				kNameSpace_addFuncList(kctx, ns, syn->sugarFuncListTable, index, FuncItems[j]);
+				kNameSpace_AddFuncList(kctx, ns, syn->sugarFuncListTable, index, FuncItems[j]);
 			}
 		}
 		if(target->tokenKonohaChar != 0) {
@@ -165,7 +165,7 @@ struct ImportSyntaxArgument {
 	KTraceInfo *trace;
 };
 
-static void importEachSyntax(KonohaContext *kctx, KHashMapEntry *e, void *thunk)
+static void ImportEachSyntax(KonohaContext *kctx, KHashMapEntry *e, void *thunk)
 {
 	struct ImportSyntaxArgument *argd = (struct ImportSyntaxArgument *)thunk;
 	kNameSpace_ImportSyntax(kctx, argd->ns, (SugarSyntax *)e->unboxValue, argd->trace);
@@ -175,7 +175,7 @@ static kbool_t kNameSpace_ImportSyntaxAll(KonohaContext *kctx, kNameSpace *ns, k
 {
 	if(targetNS->syntaxMapNN != NULL) {
 		struct ImportSyntaxArgument argumentData = { ns, trace };
-		KLIB Kmap_each(kctx, targetNS->syntaxMapNN, &argumentData, importEachSyntax);
+		KLIB Kmap_each(kctx, targetNS->syntaxMapNN, &argumentData, ImportEachSyntax);
 	}
 	return true;
 }
@@ -202,11 +202,32 @@ static SugarSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns, ks
 	return (isNew) ? kNameSpace_newSyntax(kctx, ns, NULL, keyword) : NULL;
 }
 
-static SugarSyntaxVar *kNameSpace_addSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, size_t idx, kFunc *funcObject)
+static kbool_t kNameSpace_RemoveSyntax(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, KTraceInfo *trace)
+{
+	uintptr_t hcode = keyword;
+	if(ns->syntaxMapNN != NULL) {
+		KHashMapEntry *e = KLIB Kmap_get(kctx, ns->syntaxMapNN, hcode);
+		while(e != NULL) {
+			if(e->hcode == hcode) {
+				SugarSyntaxVar *syn = (SugarSyntaxVar *)e->unboxValue;
+				KLIB ReportScriptMessage(kctx, trace, InfoTag, "@%s removing syntax %s%s", PackageId_t(syn->lastLoadedPackageId), PSYM_t(syn->keyword));
+				KLIB Kmap_remove(ns->syntaxMapNN, e);
+				bzero(syn, sizeof(SugarSyntax));
+				KFree(syn, sizeof(SugarSyntax));
+				return true;
+			}
+			e = e->next;
+		}
+	}
+	return false;
+}
+
+
+static SugarSyntaxVar *kNameSpace_AddSugarFunc(KonohaContext *kctx, kNameSpace *ns, ksymbol_t keyword, size_t idx, kFunc *funcObject)
 {
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, keyword, 1/*new*/);
 	DBG_ASSERT(idx < SugarFunc_SIZE);
-	kNameSpace_addFuncList(kctx, ns, syn->sugarFuncListTable, idx, funcObject);
+	kNameSpace_AddFuncList(kctx, ns, syn->sugarFuncListTable, idx, funcObject);
 	KLIB kMethod_DoLazyCompilation(kctx, (funcObject)->mtd, NULL, HatedLazyCompile);
 	syn->lastLoadedPackageId = ns->packageId;
 	return syn;
@@ -216,7 +237,7 @@ static SugarSyntaxVar *kNameSpace_SetTokenFunc(KonohaContext *kctx, kNameSpace *
 {
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, keyword, 1/*new*/);
 	kArray **list = (kArray**)kNameSpace_tokenFuncMatrix(kctx, ns);
-	kNameSpace_addFuncList(kctx, ns, list, konohaChar, fo);
+	kNameSpace_AddFuncList(kctx, ns, list, konohaChar, fo);
 	KLIB kMethod_DoLazyCompilation(kctx, (fo)->mtd, NULL, HatedLazyCompile);
 	syn->tokenKonohaChar = konohaChar;
 	syn->sugarFuncTable[SugarFunc_TokenFunc] = fo;  // added in addFuncList
@@ -865,11 +886,12 @@ static void kNameSpace_LoadMethodData(KonohaContext *kctx, kNameSpace *ns, intpt
 
 // ---------------------------------------------------------------------------
 
-static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline);
+static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline, KTraceInfo *trace);
 
 typedef struct {
 	KonohaContext *kctx;
 	kNameSpace *ns;
+	KTraceInfo *trace;
 } SugarThunk;
 
 static int evalHookFunc(const char *script, long uline, int *isBreak, void *thunk)
@@ -878,7 +900,7 @@ static int evalHookFunc(const char *script, long uline, int *isBreak, void *thun
 //	if(verbose_sugar) {
 //		DUMP_P("\n>>>----\n'%s'\n------\n", script);
 //	}
-	kstatus_t result = kNameSpace_Eval(t->kctx, t->ns, script, uline);
+	kstatus_t result = kNameSpace_Eval(t->kctx, t->ns, script, uline, t->trace);
 	*isBreak = (result == K_BREAK);
 	return (result != K_FAILED);
 }
@@ -896,7 +918,7 @@ static kfileline_t uline_init(KonohaContext *kctx, const char *path, int line, i
 
 static kbool_t kNameSpace_LoadScript(KonohaContext *kctx, kNameSpace *ns, const char *path, KTraceInfo *trace)
 {
-	SugarThunk thunk = {kctx, ns};
+	SugarThunk thunk = {kctx, ns, trace};
 	kfileline_t uline = uline_init(kctx, path, 1, true/*isRealPath*/);
 	if(!(PLATAPI loadScript(path, uline, (void *)&thunk, evalHookFunc))) {
 		KLIB ReportScriptMessage(kctx, trace, ErrTag, "failed to load script: %s", path);
@@ -1024,7 +1046,7 @@ static kbool_t kNameSpace_ImportAll(KonohaContext *kctx, kNameSpace *ns, kNameSp
 				return false;
 			}
 		}
-		kNameSpace_appendArrayRefArray(kctx, ns, &ns->stmtPatternListNULL_OnList, targetNS->stmtPatternListNULL_OnList);
+		kNameSpace_AppendArrayRefArray(kctx, ns, &ns->stmtPatternListNULL_OnList, targetNS->stmtPatternListNULL_OnList);
 		kNameSpace_ImportSyntaxAll(kctx, ns, targetNS, trace);
 		for(i = 0; i < kArray_size(targetNS->methodList_OnList); i++) {
 			kMethod *mtd = targetNS->methodList_OnList->MethodItems[i];

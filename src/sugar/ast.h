@@ -968,7 +968,7 @@ static void kNameSpace_parseSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, c
 		kToken *firstPattern = patternList->TokenItems[firstPatternIdx];
 		//DBG_P(">>>>>> firstPattern=%d", kToken_isFirstPattern(firstPattern));
 		if(kToken_isFirstPattern(firstPattern)) {
-			kNameSpace_appendArrayRef(kctx, ns, &((kNameSpaceVar *)ns)->stmtPatternListNULL_OnList, UPCAST(firstPattern));
+			kNameSpace_AppendArrayRef(kctx, ns, &((kNameSpaceVar *)ns)->stmtPatternListNULL_OnList, UPCAST(firstPattern));
 		}
 	}
 	TokenSequence_pop(kctx, source);

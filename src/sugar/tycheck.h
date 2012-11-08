@@ -371,9 +371,30 @@ static ktype_t kStmt_checkReturnType(KonohaContext *kctx, kStmt *stmt)
 	return TY_void;
 }
 
-static kstatus_t kMethod_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtype);
+static kstatus_t kMethod_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtype, kfileline_t uline, KTraceInfo *trace)
+{
+	BEGIN_LOCAL(lsfp, K_CALLDELTA);
+	KonohaStackRuntimeVar *runtime = kctx->stack;
+	if(runtime->evalty != TY_void) {
+		KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, runtime->stack[runtime->evalidx].asObject);
+		lsfp[K_CALLDELTA+1].intValue = runtime->stack[runtime->evalidx].intValue;
+	}
+	KonohaStack *sfp = lsfp + K_CALLDELTA;
+	KSetMethodCallStack(sfp, uline, mtd, 1, KLIB Knull(kctx, CT_(rtype)));
+	kstatus_t result = K_CONTINUE;
+	if(KLIB KonohaRuntime_tryCallMethod(kctx, sfp)) {
+		runtime->evalty = rtype;
+		runtime->evalidx = (lsfp - kctx->stack->stack);
+	}
+	else {
+		runtime->evalty = TY_void;  // no value
+		result = K_BREAK;        // message must be reported;
+	}
+	END_LOCAL();
+	return result;
+}
 
-static kstatus_t kBlock_EvalTopLevel(KonohaContext *kctx, kBlock *bk, kMethod *mtd)
+static kstatus_t kBlock_EvalAtTopLevel(KonohaContext *kctx, kBlock *bk, kMethod *mtd, KTraceInfo *trace)
 {
 	kGamma *gma = GetSugarContext(kctx)->preparedGamma;
 	GammaStackDecl lvarItems[32] = {};
@@ -421,33 +442,11 @@ static kstatus_t kBlock_EvalTopLevel(KonohaContext *kctx, kBlock *bk, kMethod *m
 	if(isTryEval) {
 		ktype_t rtype = kStmt_checkReturnType(kctx, stmt);
 		KLIB kMethod_GenCode(kctx, mtd, bk, DefaultCompileOption);
-		return kMethod_runEval(kctx, mtd, rtype);
+		return kMethod_runEval(kctx, mtd, rtype, stmt->uline, trace);
 	}
 	return K_CONTINUE;
 }
 
-static kstatus_t kMethod_runEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtype)
-{
-	BEGIN_LOCAL(lsfp, K_CALLDELTA);
-	KonohaStackRuntimeVar *runtime = kctx->stack;
-	if(runtime->evalty != TY_void) {
-		KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, runtime->stack[runtime->evalidx].asObject);
-		lsfp[K_CALLDELTA+1].intValue = runtime->stack[runtime->evalidx].intValue;
-	}
-	KonohaStack *sfp = lsfp + K_CALLDELTA;
-	KSetMethodCallStack(sfp, 0/*UL*/, mtd, 1, KLIB Knull(kctx, CT_(rtype)));
-	kstatus_t result = K_CONTINUE;
-	if(KLIB KonohaRuntime_tryCallMethod(kctx, sfp)) {
-		runtime->evalty = rtype;
-		runtime->evalidx = (lsfp - kctx->stack->stack);
-	}
-	else {
-		runtime->evalty = TY_void;  // no value
-		result = K_BREAK;        // message must be reported;
-	}
-	END_LOCAL();
-	return result;
-}
 
 static void TokenSequence_selectStatement(KonohaContext *kctx, TokenSequence *tokens, TokenSequence *source)
 {
@@ -472,7 +471,7 @@ static void TokenSequence_selectStatement(KonohaContext *kctx, TokenSequence *to
 	source->endIdx = sourceEndIdx;
 }
 
-static kstatus_t TokenSequence_eval(KonohaContext *kctx, TokenSequence *source)
+static kstatus_t TokenSequence_eval(KonohaContext *kctx, TokenSequence *source, KTraceInfo *trace)
 {
 	kstatus_t status = K_CONTINUE;
 	INIT_GCSTACK();
@@ -493,7 +492,7 @@ static kstatus_t TokenSequence_eval(KonohaContext *kctx, TokenSequence *source)
 				return K_BREAK;
 			}
 			if(kArray_size(singleBlock->StmtList) > 0) {
-				status = kBlock_EvalTopLevel(kctx, singleBlock, mtd);
+				status = kBlock_EvalAtTopLevel(kctx, singleBlock, mtd, trace);
 				if(status != K_CONTINUE) break;
 			}
 		}

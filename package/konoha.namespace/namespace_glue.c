@@ -33,7 +33,6 @@ extern "C" {
 
 // --------------------------------------------------------------------------
 
-
 static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Statement(stmt, gma);
@@ -45,7 +44,7 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 		kArray *a = GetSugarContext(kctx)->preparedTokenList;
 		TokenSequence range = {ns, a, kArray_size(a), kArray_size(a)};
 		SUGAR TokenSequence_tokenize(kctx, &range, S_text(tk->text), tk->uline);
-		result = SUGAR TokenSequence_eval(kctx, &range);
+		result = SUGAR TokenSequence_eval(kctx, &range, NULL/*trace*/);
 		RESET_GCSTACK();
 		kStmt_done(kctx, stmt);
 	}

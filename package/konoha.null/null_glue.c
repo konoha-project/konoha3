@@ -106,8 +106,8 @@ static kbool_t null_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo
 		{ KW_END, },
 	};
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
-	SUGAR kNameSpace_addSugarFunc(kctx, ns, SYM_("=="), SugarFunc_Expression, new_SugarFunc(ns, Expression_isNull));
-	SUGAR kNameSpace_addSugarFunc(kctx, ns, SYM_("!="), SugarFunc_Expression, new_SugarFunc(ns, Expression_isNotNull));
+	SUGAR kNameSpace_AddSugarFunc(kctx, ns, SYM_("=="), SugarFunc_Expression, new_SugarFunc(ns, Expression_isNull));
+	SUGAR kNameSpace_AddSugarFunc(kctx, ns, SYM_("!="), SugarFunc_Expression, new_SugarFunc(ns, Expression_isNotNull));
 	return true;
 }
 

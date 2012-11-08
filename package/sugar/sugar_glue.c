@@ -187,47 +187,47 @@ static KMETHOD NameSpace_setTokenFunc(KonohaContext *kctx, KonohaStack *sfp)
 //}
 
 //## void NameSpace.addPatternMatch(symbol keyword, Func f);
-static KMETHOD NameSpace_addPatternMatch(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD NameSpace_AddPatternMatch(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
-	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, keyword, SugarFunc_PatternMatch, sfp[2].asFunc);
+	SUGAR kNameSpace_AddSugarFunc(kctx, sfp[0].asNameSpace, keyword, SugarFunc_PatternMatch, sfp[2].asFunc);
 }
 
 //## void NameSpace.addExpression(symbol keyword, Func f);
-static KMETHOD NameSpace_addExpression(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD NameSpace_AddExpression(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
-	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, keyword, SugarFunc_Expression, sfp[2].asFunc);
+	SUGAR kNameSpace_AddSugarFunc(kctx, sfp[0].asNameSpace, keyword, SugarFunc_Expression, sfp[2].asFunc);
 }
 
 //## void NameSpace.addStatement(symbol keyword, Func f);
-static KMETHOD NameSpace_addStatement(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD NameSpace_AddStatement(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
-	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, keyword, SugarFunc_Statement, sfp[2].asFunc);
+	SUGAR kNameSpace_AddSugarFunc(kctx, sfp[0].asNameSpace, keyword, SugarFunc_Statement, sfp[2].asFunc);
 }
 
 
 //## void NameSpace.addTopLevelStatement(symbol keyword, Func f);
-static KMETHOD NameSpace_addTopLevelStatement(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD NameSpace_AddTopLevelStatement(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
-	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, keyword, SugarFunc_TopLevelStatement, sfp[2].asFunc);
+	SUGAR kNameSpace_AddSugarFunc(kctx, sfp[0].asNameSpace, keyword, SugarFunc_TopLevelStatement, sfp[2].asFunc);
 }
 
 //## void NameSpace.addTypeCheck(symbol keyword, Func f);
-static KMETHOD NameSpace_addTypeCheck(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD NameSpace_AddTypeCheck(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
-	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, keyword, SugarFunc_TypeCheck, sfp[2].asFunc);
+	SUGAR kNameSpace_AddSugarFunc(kctx, sfp[0].asNameSpace, keyword, SugarFunc_TypeCheck, sfp[2].asFunc);
 }
 
 ////## void NameSpace.addTermExpression(String keyword);
-//static KMETHOD NameSpace_addTermExpression(KonohaContext *kctx, KonohaStack *sfp)
+//static KMETHOD NameSpace_AddTermExpression(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kString *key = sfp[1].asString;
 //	DBG_P("termparseexpr=%p", kmodsugar->Expression_Term);
-//	SUGAR kNameSpace_addSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SugarFunc_Expression, kmodsugar->Expression_Term);
+//	SUGAR kNameSpace_AddSugarFunc(kctx, sfp[0].asNameSpace, ksymbolA(S_text(key), S_size(key), _NEWID), SugarFunc_Expression, kmodsugar->Expression_Term);
 //}
 
 // --------------------------------------------------------------------------
@@ -262,11 +262,11 @@ static void LoadNameSpaceMethodData(KonohaContext *kctx, kNameSpace *ns, int TY_
 		_Public|_Im, _F(NameSpace_DefinedBinaryOperator), TY_boolean, TY_NameSpace, MN_("definedBinaryOperator"), 1, TY_symbol, FN_keyword,
 //		_Public, _F(NameSpace_compileAllDefinedMethods), TY_void, TY_NameSpace, MN_("compileAllDefinedMethods"), 0,
 		_Public, _F(NameSpace_setTokenFunc), TY_void, TY_NameSpace, MN_("setTokenFunc"), 3, TY_symbol, FN_keyword, TY_int, FN_("kchar"), TY_FuncToken, FN_func,
-		_Public, _F(NameSpace_addPatternMatch), TY_void, TY_NameSpace, MN_("addPatternMatch"), 2, TY_symbol, FN_keyword, TY_FuncPatternMatch, FN_func,
-		_Public, _F(NameSpace_addExpression), TY_void, TY_NameSpace, MN_("addExpression"), 2, TY_symbol, FN_keyword, TY_FuncExpression, FN_func,
-		_Public, _F(NameSpace_addTopLevelStatement), TY_void, TY_NameSpace, MN_("addTopLevelStatement"), 2, TY_symbol, FN_keyword, TY_FuncStatement, FN_func,
-		_Public, _F(NameSpace_addStatement), TY_void, TY_NameSpace, MN_("addStatement"), 2, TY_symbol, FN_keyword, TY_FuncStatement, FN_func,
-		_Public, _F(NameSpace_addTypeCheck), TY_void, TY_NameSpace, MN_("addTypeCheck"), 2, TY_symbol, FN_keyword, TY_FuncTypeCheck, FN_func,
+		_Public, _F(NameSpace_AddPatternMatch), TY_void, TY_NameSpace, MN_("addPatternMatch"), 2, TY_symbol, FN_keyword, TY_FuncPatternMatch, FN_func,
+		_Public, _F(NameSpace_AddExpression), TY_void, TY_NameSpace, MN_("addExpression"), 2, TY_symbol, FN_keyword, TY_FuncExpression, FN_func,
+		_Public, _F(NameSpace_AddTopLevelStatement), TY_void, TY_NameSpace, MN_("addTopLevelStatement"), 2, TY_symbol, FN_keyword, TY_FuncStatement, FN_func,
+		_Public, _F(NameSpace_AddStatement), TY_void, TY_NameSpace, MN_("addStatement"), 2, TY_symbol, FN_keyword, TY_FuncStatement, FN_func,
+		_Public, _F(NameSpace_AddTypeCheck), TY_void, TY_NameSpace, MN_("addTypeCheck"), 2, TY_symbol, FN_keyword, TY_FuncTypeCheck, FN_func,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -857,7 +857,7 @@ static SugarSyntaxVar *kNameSpace_guessSyntaxFromTokenList(KonohaContext *kctx, 
 }
 
 // Copied from namespace.h.
-static void kNameSpace_appendArrayRef(KonohaContext *kctx, kNameSpace *ns, const kArray **arrayRef, kObject *o)
+static void kNameSpace_AppendArrayRef(KonohaContext *kctx, kNameSpace *ns, const kArray **arrayRef, kObject *o)
 {
 	if(arrayRef[0] == NULL) {
 		((kArray**)arrayRef)[0] = new_(Array, 0, ns->NameSpaceConstList);
@@ -897,7 +897,7 @@ static KMETHOD Statement_syntax(KonohaContext *kctx, KonohaStack *sfp)
 			if(firstPatternIdx < kArray_size(patternList)) {
 				kToken *firstPattern = patternList->TokenItems[firstPatternIdx];
 				if(kToken_isFirstPattern(firstPattern)) {
-					kNameSpace_appendArrayRef(kctx, ns, &((kNameSpaceVar *)ns)->stmtPatternListNULL_OnList, UPCAST(firstPattern));
+					kNameSpace_AppendArrayRef(kctx, ns, &((kNameSpaceVar *)ns)->stmtPatternListNULL_OnList, UPCAST(firstPattern));
 				}
 			}
 			r = 1;

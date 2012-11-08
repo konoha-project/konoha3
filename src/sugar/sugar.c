@@ -50,8 +50,7 @@ int verbose_sugar = 0;
 /* ------------------------------------------------------------------------ */
 /* Sugar Global Functions */
 
-
-static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline)
+static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline, KTraceInfo *trace)
 {
 	kstatus_t result;
 	kmodsugar->h.setupModuleContext(kctx, (KonohaModule *)kmodsugar, 0/*lazy*/);
@@ -60,7 +59,7 @@ static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char
 		TokenSequence tokens = {ns, GetSugarContext(kctx)->preparedTokenList};
 		TokenSequence_push(kctx, tokens);
 		TokenSequence_tokenize(kctx, &tokens, script, uline);
-		result = TokenSequence_eval(kctx, &tokens);
+		result = TokenSequence_eval(kctx, &tokens, trace);
 		TokenSequence_pop(kctx, tokens);
 	}
 	RESET_GCSTACK();
@@ -214,7 +213,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kNameSpace_GetSyntax       = kNameSpace_GetSyntax;
 	mod->kArray_addSyntaxRule       = kArray_addSyntaxPattern;
 //	mod->kNameSpace_SetSugarFunc    = kNameSpace_SetSugarFunc;
-	mod->kNameSpace_addSugarFunc    = kNameSpace_addSugarFunc;
+	mod->kNameSpace_AddSugarFunc    = kNameSpace_AddSugarFunc;
 	mod->new_kBlock                 = new_kBlock;
 	mod->new_kStmt                  = new_kStmt;
 	mod->kBlock_insertAfter         = kBlock_insertAfter;
@@ -262,6 +261,15 @@ static KMETHOD NameSpace_ImportPackageSymbol(KonohaContext *kctx, KonohaStack *s
 	kNameSpace_ImportPackageSymbol(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), keyword, trace);
 }
 
+// boolean NameSpace.hate(String symbol);
+static KMETHOD NameSpace_hate(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kString *key = sfp[2].asString;
+	ksymbol_t keyword = ksymbolA(S_text(key), S_size(key), _NEWID);
+	KMakeTrace(trace, sfp);
+	kNameSpace_RemoveSyntax(kctx, sfp[0].asNameSpace, keyword, trace);
+}
+
 static void kNameSpace_SetStaticFunction(KonohaContext *kctx, kNameSpace *ns, kArray *list, kpackageId_t packageId, ktype_t cid, KTraceInfo *trace)
 {
 	size_t i;
@@ -283,18 +291,18 @@ static KMETHOD NameSpace_useStaticFunction(KonohaContext *kctx, KonohaStack *sfp
 	KReturnVoid();
 }
 
-//## void NameSpace.useStaticFunction(String package, Object o);
-static KMETHOD NameSpace_useStaticFunction2(KonohaContext *kctx, KonohaStack *sfp)
-{
-	KMakeTrace(trace, sfp);
-	kpackageId_t packageId = KLIB KpackageId(kctx, S_text(sfp[1].asString), S_size(sfp[1].asString), 0, _NEWID);
-	KonohaPackage *pack = GetPackageNULL(kctx, packageId, trace);
-	if(pack != NULL) {
-		KonohaClass *ct = O_ct(sfp[2].asObject);
-		kNameSpace_SetStaticFunction(kctx, sfp[0].asNameSpace, ct->methodList_OnGlobalConstList, packageId, ct->typeId, trace);
-	}
-	KReturnVoid();
-}
+////## void NameSpace.useStaticFunction(String package, Object o);
+//static KMETHOD NameSpace_useStaticFunction2(KonohaContext *kctx, KonohaStack *sfp)
+//{
+//	KMakeTrace(trace, sfp);
+//	kpackageId_t packageId = KLIB KpackageId(kctx, S_text(sfp[1].asString), S_size(sfp[1].asString), 0, _NEWID);
+//	KonohaPackage *pack = GetPackageNULL(kctx, packageId, trace);
+//	if(pack != NULL) {
+//		KonohaClass *ct = O_ct(sfp[2].asObject);
+//		kNameSpace_SetStaticFunction(kctx, sfp[0].asNameSpace, ct->methodList_OnGlobalConstList, packageId, ct->typeId, trace);
+//	}
+//	KReturnVoid();
+//}
 
 #define _Public kMethod_Public
 #define _F(F)   (intptr_t)(F)
@@ -308,9 +316,11 @@ void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns)
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(NameSpace_ImportPackage), TY_void, TY_NameSpace, MN_("import"), 1, TY_String, FN_("package"),
 		_Public, _F(NameSpace_ImportPackageSymbol), TY_void, TY_NameSpace, MN_("import"), 2, TY_String, FN_("package"), TY_String, FN_("symbol"),
-		_Public, _F(NameSpace_useStaticFunction), TY_void, TY_NameSpace, MN_("useStaticFunction"), 1, TY_Object, FN_("class"),
-		_Public, _F(NameSpace_useStaticFunction2), TY_void, TY_NameSpace, MN_("useStaticFunction"), 2, TY_String, FN_("package"), TY_Object, FN_("class"),
+		_Public, _F(NameSpace_hate), TY_boolean, TY_NameSpace, MN_("hate"), 1, TY_String, FN_("symbol"),
 		_Public, _F(NameSpace_loadScript), TY_void, TY_NameSpace, MN_("load"), 1, TY_String, FN_("filename"),
+		_Public, _F(NameSpace_loadScript), TY_void, TY_NameSpace, MN_("include"), 1, TY_String, FN_("filename"),
+		_Public, _F(NameSpace_useStaticFunction), TY_void, TY_NameSpace, MN_("useStaticFunction"), 1, TY_Object, FN_("class"),
+//		_Public, _F(NameSpace_useStaticFunction2), TY_void, TY_NameSpace, MN_("useStaticFunction"), 2, TY_String, FN_("package"), TY_Object, FN_("class"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, NULL);
@@ -363,7 +373,7 @@ kbool_t Konoha_Eval(KonohaContext* kctx, const char *script, kfileline_t uline)
 		DUMP_P("\n>>>----\n'%s'\n------\n", script);
 	}
 	kmodsugar->h.setupModuleContext(kctx, (KonohaModule *)kmodsugar, 0/*lazy*/);
-	kbool_t res = (kNameSpace_Eval(kctx, KNULL(NameSpace), script, uline) == K_CONTINUE);    // FIXME
+	kbool_t res = (kNameSpace_Eval(kctx, KNULL(NameSpace), script, uline, NULL/*trace*/) == K_CONTINUE);    // FIXME
 	KEndKonohaContext();
 	return res;
 }

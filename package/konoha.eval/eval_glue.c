@@ -32,7 +32,7 @@ extern "C"{
 // --------------------------------------------------------------------------
 // duplicated from sugar.c
 
-static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline)
+static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char *script, kfileline_t uline, KTraceInfo *trace)
 {
 	kstatus_t result;
 	kmodsugar->h.setupModuleContext(kctx, (KonohaModule *)kmodsugar, 0/*lazy*/);
@@ -41,7 +41,7 @@ static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char
 		TokenSequence tokens = {ns, GetSugarContext(kctx)->preparedTokenList};
 		TokenSequence_push(kctx, tokens);
 		SUGAR TokenSequence_tokenize(kctx, &tokens, script, uline);
-		result = SUGAR TokenSequence_eval(kctx, &tokens);
+		result = SUGAR TokenSequence_eval(kctx, &tokens, trace);
 		TokenSequence_pop(kctx, tokens);
 	}
 	RESET_GCSTACK();
@@ -57,7 +57,8 @@ static KMETHOD NameSpace_eval(KonohaContext *kctx, KonohaStack *sfp)
 	const char *script = S_text(sfp[1].asString);
 	DBG_ASSERT(IS_NameSpace(ns));
 	kfileline_t uline = FILEID_("(eval)") | 1;
-	KReturnUnboxValue(kNameSpace_Eval(kctx, ns, script, uline) == K_CONTINUE);
+	KMakeTrace(trace, sfp);
+	KReturnUnboxValue(kNameSpace_Eval(kctx, ns, script, uline, trace) == K_CONTINUE);
 }
 
 // --------------------------------------------------------------------------
