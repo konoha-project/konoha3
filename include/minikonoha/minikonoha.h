@@ -1747,9 +1747,9 @@ struct KonohaLibVar {
 #define kArray_setsize(A, N)      ((kArrayVar *)A)->bytesize = (N) * sizeof(void *)
 #define new_kParam(CTX, R, PSIZE, P)       (KLIB kMethod_setParam(CTX, NULL, R, PSIZE, P))
 
-#define KRequirePackage(NAME, TRACE)       if(!KLIB kNameSpace_RequirePackage(kctx, NAME, TRACE)) { return false; } else {}
-#define KImportPackage(NS, NAME, TRACE)    if(!KLIB kNameSpace_ImportPackage(kctx, NS, NAME, TRACE)) { return false; } else {}
-#define KImportPackageSymbol(NS, NAME, SYMBOL, TRACE) if(!KLIB kNameSpace_ImportPackageSymbol(kctx, NS, NAME, SYM_(SYMBOL), TRACE)) { return false; } else {}
+#define KRequirePackage(NAME, TRACE)       KLIB kNameSpace_RequirePackage(kctx, NAME, TRACE)
+#define KImportPackage(NS, NAME, TRACE)    KLIB kNameSpace_ImportPackage(kctx, NS, NAME, TRACE)
+#define KImportPackageSymbol(NS, NAME, SYMBOL, TRACE) KLIB kNameSpace_ImportPackageSymbol(kctx, NS, NAME, SYM_(SYMBOL), TRACE)
 
 typedef intptr_t  KDEFINE_METHOD;
 
