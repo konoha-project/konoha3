@@ -6,9 +6,7 @@
   Find the sum of the digits in the number 100!
 
 */
-// //import("konoha.assign"); Don't use any more
 import("konoha.class");
-import("konoha.new");
 import("konoha.array");
 import("cstyle");
 import("gmp")

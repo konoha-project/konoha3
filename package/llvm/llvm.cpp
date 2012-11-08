@@ -4702,7 +4702,7 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 
 
 	static KDEFINE_CLASS ValueDef = DEFINE_CLASS_0("Value", 0, 0, 0);
-	base->cValue = KLIB kNameSpace_defineClass(kctx, ns, NULL, &ValueDef, trace);
+	base->cValue = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &ValueDef, trace);
 
 	static const char *TypeDefName[] = {
 		"Type",
@@ -4730,26 +4730,26 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		TypeDef.free = Type_free;
 		for (int i = 0; i < 6; i++) {
 			TypeDef.structname = TypeDefName[i];
-			CT_TypeTBL[i] = KLIB kNameSpace_defineClass(kctx, ns, NULL, &TypeDef, 0);
+			CT_TypeTBL[i] = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &TypeDef, 0);
 		}
 	}
 	static KDEFINE_CLASS BasicBlockDef = DEFINE_CLASS_0("LLVMBasicBlock",0, 0, BasicBlock_compareTo);
-	CT_BasicBlock = KLIB kNameSpace_defineClass(kctx, ns, NULL, &BasicBlockDef, trace);
+	CT_BasicBlock = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &BasicBlockDef, trace);
 
 	static KDEFINE_CLASS IRBuilderDef = DEFINE_CLASS_0("IRBuilder", 0, 0, 0);
-	CT_IRBuilder = KLIB kNameSpace_defineClass(kctx, ns, NULL, &IRBuilderDef, trace);
+	CT_IRBuilder = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &IRBuilderDef, trace);
 #if LLVM_VERSION >= 300
 	static KDEFINE_CLASS PassManagerBuilderDef = DEFINE_CLASS_0("PassManagerBuilder",
 			PassManagerBuilder_ptr_init, PassManagerBuilder_ptr_free, 0);
-	KonohaClass *CT_PassManagerBuilder = KLIB kNameSpace_defineClass(kctx, ns, NULL, &PassManagerBuilderDef, trace);
+	KonohaClass *CT_PassManagerBuilder = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &PassManagerBuilderDef, trace);
 #define TY_PassManagerBuilder         (CT_PassManagerBuilder)->typeId
 #endif
 	static KDEFINE_CLASS PassManagerDef = DEFINE_CLASS_0("PassManager",
 		PassManager_ptr_init, PassManager_ptr_free, 0);
 	static KDEFINE_CLASS FunctionPassManagerDef = DEFINE_CLASS_0("FunctionPassManager",
 			FunctionPassManager_ptr_init, FunctionPassManager_ptr_free, 0);
-	KonohaClass *CT_PassManager = KLIB kNameSpace_defineClass(kctx, ns, NULL, &PassManagerDef, trace);
-	KonohaClass *CT_FunctionPassManager = KLIB kNameSpace_defineClass(kctx, ns, NULL, &FunctionPassManagerDef, trace);
+	KonohaClass *CT_PassManager = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &PassManagerDef, trace);
+	KonohaClass *CT_FunctionPassManager = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &FunctionPassManagerDef, trace);
 	KonohaClass *CT_InstTBL[21];
 	{
 		static const char *InstDefName[] = {
@@ -4785,7 +4785,7 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		//InstDef.free = Inst_free;
 		for (unsigned int i = 0; i < ARRAY_SIZE(InstDefName); i++) {
 			InstDef.structname = InstDefName[i];
-			CT_InstTBL[i] = KLIB kNameSpace_defineClass(kctx, ns, NULL, &InstDef, trace);
+			CT_InstTBL[i] = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &InstDef, trace);
 		}
 	}
 #define TY_Instruction         (CT_InstTBL[ 0])->typeId
@@ -4825,7 +4825,7 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		//InstDef.free = Inst_free;
 		for (int i = 0; i < 4; i++) {
 			PassDef.structname = PassDefName[i];
-			CT_PassTBL[i] = KLIB kNameSpace_defineClass(kctx, ns, NULL, &PassDef, trace);
+			CT_PassTBL[i] = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &PassDef, trace);
 		}
 	}
 #define TY_Pass          (CT_PassTBL[0])->typeId
