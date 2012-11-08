@@ -313,6 +313,7 @@ void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns)
 	KSetKLibFunc(0, kNameSpace_RequirePackage,      kNameSpace_RequirePackage,      NULL);
 	KSetKLibFunc(0, kNameSpace_ImportPackage,       kNameSpace_ImportPackage,       NULL);
 	KSetKLibFunc(0, kNameSpace_ImportPackageSymbol, kNameSpace_ImportPackageSymbol, NULL);
+	KSetKLibFunc(0, kNameSpace_GetConstNULL,        kNameSpace_GetConstNULL,        NULL);
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(NameSpace_ImportPackage), TY_void, TY_NameSpace, MN_("import"), 1, TY_String, FN_("package"),
 		_Public, _F(NameSpace_ImportPackageSymbol), TY_void, TY_NameSpace, MN_("import"), 2, TY_String, FN_("package"), TY_String, FN_("symbol"),
