@@ -151,6 +151,22 @@ static KMETHOD String_toJson(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(jo);
 }
 
+//## float Json.toFloat();
+static KMETHOD Json_toFloat(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kJson *jo = (kJson *)sfp[0].asObject;
+	double ret = PLATAPI GetJsonFloat(kctx, &jo->jsonbuf, NULL, 0, 0.0);
+	KReturnFloatValue(ret);
+}
+
+//## Boolean Json.toBoolean();
+static KMETHOD Json_toBoolean(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kJson *jo = (kJson *)sfp[0].asObject;
+	kbool_t ret = PLATAPI GetJsonBoolean(kctx, &jo->jsonbuf, NULL, 0, false);
+	KReturnUnboxValue(ret);
+}
+
 //## boolean Json.hasKey(String key);
 static KMETHOD Json_hasKey(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -161,18 +177,38 @@ static KMETHOD Json_hasKey(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
+//## int Json.getSize();
+static KMETHOD Json_getSize(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kJson *jo = (kJson *)sfp[0].asObject;
+	int64_t ret = PLATAPI GetJsonSize(kctx, &jo->jsonbuf);
+	KReturnUnboxValue(ret);
+}
+
 //## Json Json.get(String key);
 static KMETHOD Json_getJson(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
 	struct JsonBuf jsonbuf = {};
+	kJson *jnew = (kJson *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
 	if(PLATAPI RetrieveJsonKeyValue(kctx, &jo->jsonbuf, S_text(sfp[1].asString), S_size(sfp[1].asString), &jsonbuf)) {
-		kJson *jnew = (kJson *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
 		memcpy(&jnew->jsonbuf, &jsonbuf, sizeof(struct JsonBuf));
-		KReturn(jnew);
 	}
-	KReturnDefaultValue();
+	KReturn(jnew);
 }
+
+//## Json Json.get(int index);
+static KMETHOD Json_getJson_index(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kJson *jo = (kJson *)sfp[0].asObject;
+	struct JsonBuf jsonbuf = {};
+	kJson *jnew = (kJson *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
+	if(PLATAPI RetrieveJsonArrayIndex(kctx, &jo->jsonbuf, sfp[1].unboxValue, &jsonbuf)) {
+		memcpy(&jnew->jsonbuf, &jsonbuf, sizeof(struct JsonBuf));
+	}
+	KReturn(jnew);
+}
+
 
 //## Boolean Json.getBoolean(String key);
 static KMETHOD Json_getBoolean(KonohaContext *kctx, KonohaStack *sfp)
@@ -203,8 +239,10 @@ static KMETHOD Json_getString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
 	const char *text = PLATAPI GetJsonText(kctx, &jo->jsonbuf, S_text(sfp[1].asString), S_size(sfp[1].asString), 0);
-	DBG_ASSERT(text != NULL);
-	KReturn(KLIB new_kString(kctx, OnStack, text, strlen(text), 0));
+	if(text != NULL){
+		KReturn(KLIB new_kString(kctx, OnStack, text, strlen(text), 0));
+	}
+	KReturn(KNULL(String));
 }
 
 //## void Json.setString(String key, String val);
@@ -222,19 +260,29 @@ static KMETHOD Json_setJson(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo  = (kJson *)sfp[0].asObject;
 	kJson *val = (kJson *)sfp[2].asObject;
-	//CHECK_JSON(jo, KReturnDefaultObjectValue());
-	//CHECK_JSON(val, KReturnDefaultObjectValue());
 	if(!PLATAPI SetJsonKeyValue(kctx, &jo->jsonbuf, S_text(sfp[1].asString), S_size(sfp[1].asString), val)) {
 		DBG_P("[WARNING] Json cannot set target object");
 	}
 	KReturnVoid();
 }
 
-//## void Json.setArray(String key, Json[] a);
-static KMETHOD Json_setArray(KonohaContext *kctx, KonohaStack *sfp)
+//## void Json.setJson(int key, Json value);
+static KMETHOD Json_setJson_index(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kJson *jo = (kJson *)sfp[0].asObject;
-	if(!PLATAPI SetJsonValue(kctx, &jo->jsonbuf, S_text(sfp[1].asString), S_size(sfp[1].asString), KJSON_ARRAY, sfp[2].asObject)) {
+	kJson *jo  = (kJson *)sfp[0].asObject;
+	kJson *val = (kJson *)sfp[2].asObject;
+	if(!PLATAPI SetJsonArrayIndex(kctx, &jo->jsonbuf, sfp[1].unboxValue, val)) {
+		DBG_P("[WARNING] Json cannot set target object");
+	}
+	KReturnVoid();
+}
+
+//## void Json.add(Json value);
+static KMETHOD Json_addJson(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kJson *jo  = (kJson *)sfp[0].asObject;
+	kJson *val = (kJson *)sfp[1].asObject;
+	if(!PLATAPI AppendJsonArray(kctx, &jo->jsonbuf, val)) {
 		DBG_P("[WARNING] Json cannot set target object");
 	}
 	KReturnVoid();
@@ -264,102 +312,11 @@ static KMETHOD Json_setFloat(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Json_setInt(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)sfp[0].asObject;
-	if(!PLATAPI SetJsonValue(kctx, &jo->jsonbuf, S_text(sfp[1].asString), S_size(sfp[1].asString), KJSON_INT64, sfp[2].unboxValue)) {
+	if(!PLATAPI SetJsonValue(kctx, &jo->jsonbuf, S_text(sfp[1].asString), S_size(sfp[1].asString), KJSON_INT, sfp[2].unboxValue)) {
 		DBG_P("[WARNING] Json cannot set target object");
 	}
 	KReturnVoid();
 }
-/*
-//## String[] Json.getKeys();
-static KMETHOD Json_getKeys(KonohaContext *kctx, KonohaStack *sfp)
-{
-	json_t* obj = ((struct kJsonVar *)sfp[0].asObject)->obj;
-	kArray *a = (kArray *)KLIB new_kObject(kctx, OnStack, CT_StringArray0, 0);
-	//CHECK_JSON(obj, KReturn(KNULL(Array)));
-	const char* key;
-	void* iter = json_object_iter(obj);
-	while(iter) {
-		key = json_object_iter_key(iter);
-		iter = json_object_iter_next(obj, iter);
-		KLIB kArray_add(kctx, a, KLIB new_kString(kctx, GcUnsafe, key, strlen(key), 0));
-	}
-	KReturn(a);
-}
-
-//## String Json.dump();
-static KMETHOD Json_dump(KonohaContext *kctx, KonohaStack *sfp)
-{
-	json_t* obj = ((struct kJsonVar *)sfp[0].asObject)->obj;
-	//CHECK_JSON(obj, KReturnDefaultObjectValue());
-	char* data = json_dumps(obj, JSON_ENSURE_ASCII);
-	if(data == NULL) {
-		KReturn(KNULL(String));
-	}
-	KReturn(KLIB new_kString(kctx, GcUnsafe, data, strlen(data), 0));
-}
-*/
-/* ------------------------------------------------------------------------ */
-/*
-static KMETHOD JsonArray_newArray(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
-	size_t asize = (size_t)sfp[1].intValue;
-	a->bytemax = asize * sizeof(void *);
-	kArray_setsize((kArray *)a, asize);
-	//a->list = (kObject**)KCalloc_UNTRACE(a->bytemax, 1);
-	a->ObjectItems = (kObject**)json_array();
-	KReturn(a);
-}
-
-//## void Json[].add(Json json);
-static KMETHOD JsonArray_add(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
-	json_t* ja = (json_t *)a->ObjectItems;
-	if(!json_is_array(ja)) {
-		DBG_P("[ERROR]: Object is not Json Array.");
-		//KLIB KonohaRuntime_raise(kctx, 1, sfp, pline, msg);
-		KReturnDefaultObjectValue();
-	}
-	struct kJsonVar *json = (struct kJsonVar *)sfp[1].asObject;
-	json_array_append(ja, json->obj);
-	json_incref(json->obj);
-	KReturnVoid();
-}
-
-//## int Json[].getSize();
-static KMETHOD JsonArray_getSize(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kArray *a = sfp[0].asArray;
-	const json_t *ja = (json_t *)a->ObjectItems;
-	KReturnUnboxValue(json_array_size(ja));
-}
-
-//## Json Json[].get(int idx);
-static KMETHOD JsonArray_get(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kArray *a = sfp[0].asArray;
-	json_t *ja = (json_t *)a->ObjectItems;
-	struct kJsonVar *json = (struct kJsonVar *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
-	json->obj = json_array_get(ja, sfp[1].intValue);
-	KReturn(json);
-}
-
-////## void Json[].set(Json json);
-//static KMETHOD Json_set(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//}
-
-//## void Json[].insert(Json json);
-//static KMETHOD JsonArray_insert(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//}
-
-//## void Json[].delete(Json json);
-//static KMETHOD JsonArray_delete(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//}
-*/
 /* ------------------------------------------------------------------------ */
 
 #define _Public   kMethod_Public
@@ -382,38 +339,35 @@ static kbool_t json_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		.p    = kJson_p,
 	};
 	KonohaClass *cJson = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &JsonDef, trace);
-	//ktype_t TY_JsonArray = CT_JsonArray->typeId;
-	//ktype_t TY_StringArray0 = CT_StringArray0->typeId;
-
 
 	int FN_k = FN_("key");
 	int FN_v = FN_("value");
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Const|_Im, _F(Json_toInt),     TY_int,       TY_Json, MN_to(TY_int),    0,
-		_Public|_Const|_Im, _F(Json_toString),  TY_String,    TY_Json, MN_to(TY_String), 0,
-		//_Public|_Const|_Im, _F(Json_dump),      TY_String,    TY_Json, MN_("dump"),      0,
-		_Public|_Const|_Im, _F(Json_getJson),   TY_Json,      TY_Json, MN_("getJson"),   1, TY_String, FN_k,
-		//_Public|_Const|_Im, _F(Json_getArray),  TY_JsonArray, TY_Json, MN_("getArray"),  1, TY_String, FN_k,
-		_Public|_Const|_Im, _F(Json_getBoolean),   TY_boolean,   TY_Json, MN_("getBoolean"),   1, TY_String, FN_k,
-		_Public|_Const|_Im, _F(Json_getFloat),  TY_float,     TY_Json, MN_("getFloat"),  1, TY_String, FN_k,
-		_Public|_Const|_Im, _F(Json_getInt),    TY_int,       TY_Json, MN_("getInt"),    1, TY_String, FN_k,
-		_Public|_Const|_Im, _F(Json_getString), TY_String,    TY_Json, MN_("getString"), 1, TY_String, FN_k,
-		_Public,            _F(Json_new),       TY_Json,      TY_Json, MN_("new"),       0,
-		_Public|_Static|_Const|_Im, _F(Json_parse), TY_Json,  TY_Json, MN_("parse"),     1, TY_String, FN_v,
-		_Public,            _F(Json_setJson),   TY_void,      TY_Json, MN_("setJson"),   2, TY_String, FN_k, TY_Json, FN_v,
-		//_Public,            _F(Json_setArray),  TY_void,      TY_Json, MN_("setArray"),  2, TY_String, FN_k, TY_JsonArray, FN_v,
-		_Public,            _F(Json_setBool),   TY_void,      TY_Json, MN_("setBool"),   2, TY_String, FN_k, TY_boolean, FN_v,
-		_Public,            _F(Json_setFloat),  TY_void,      TY_Json, MN_("setFloat"),  2, TY_String, FN_k, TY_float, FN_v,
-		_Public,            _F(Json_setInt),    TY_void,      TY_Json, MN_("setInt"),    2, TY_String, FN_k, TY_int, FN_v,
-		_Public,            _F(Json_setString), TY_void,      TY_Json, MN_("setString"), 2, TY_String, FN_k, TY_String, FN_v,
-		//_Public|_Const|_Im, _F(Json_getKeys),   TY_StringArray0, TY_Json, MN_("getKeys"), 0,
+		_Public|_Const|_Im, _F(Int_toJson),     TY_Json,       TY_int , MN_to(TY_Json),    0,
+		_Public|_Const|_Im, _F(String_toJson),  TY_Json,     TY_String, MN_to(TY_Json),    0,
+		_Public|_Const|_Im, _F(Json_toInt),     TY_int,        TY_Json, MN_to(TY_int),     0,
+		_Public|_Const|_Im, _F(Json_toString),  TY_String,     TY_Json, MN_to(TY_String),  0,
+		_Public|_Const|_Im, _F(Json_toFloat),   TY_String,     TY_Json, MN_to(TY_float),   0,
+		_Public|_Const|_Im, _F(Json_toBoolean), TY_String,     TY_Json, MN_to(TY_boolean), 0,
+		_Public|_Const|_Im, _F(Json_getSize),   TY_int,        TY_Json, MN_("getSize"),    0,
+		_Public|_Const|_Im, _F(Json_hasKey),    TY_boolean,    TY_Json, MN_("hasKey"),     1, TY_String, FN_k,
+		_Public|_Const|_Im, _F(Json_getJson),   TY_Json,       TY_Json, MN_("get"),        1, TY_String, FN_k,
+		_Public|_Const|_Im, _F(Json_getJson_index),TY_Json,    TY_Json, MN_("get"),        1, TY_int, FN_k,
+		_Public|_Const|_Im, _F(Json_getBoolean),   TY_boolean, TY_Json, MN_("getBoolean"), 1, TY_String, FN_k,
+		_Public|_Const|_Im, _F(Json_getFloat),  TY_float,      TY_Json, MN_("getFloat"),   1, TY_String, FN_k,
+		_Public|_Const|_Im, _F(Json_getInt),    TY_int,        TY_Json, MN_("getInt"),     1, TY_String, FN_k,
+		_Public|_Const|_Im, _F(Json_getString), TY_String,     TY_Json, MN_("getString"),  1, TY_String, FN_k,
+		_Public,            _F(Json_new),       TY_Json,       TY_Json, MN_("new"),        0,
+		_Public|_Static|_Const|_Im, _F(Json_parse), TY_Json,   TY_Json, MN_("parse"),      1, TY_String, FN_v,
+		_Public,            _F(Json_setJson),   TY_void,       TY_Json, MN_("set"),        2, TY_String, FN_k, TY_Json, FN_v,
+		_Public,            _F(Json_setJson),   TY_void,       TY_Json, MN_("set"),        2, TY_int,    FN_k, TY_Json, FN_v,
+		_Public,            _F(Json_addJson),   TY_void,       TY_Json, MN_("add"),        1, TY_Json,   FN_v,
+		_Public,            _F(Json_setBool),   TY_void,       TY_Json, MN_("setBool"),    2, TY_String, FN_k, TY_boolean, FN_v,
+		_Public,            _F(Json_setFloat),  TY_void,       TY_Json, MN_("setFloat"),   2, TY_String, FN_k, TY_float, FN_v,
+		_Public,            _F(Json_setInt),    TY_void,       TY_Json, MN_("setInt"),     2, TY_String, FN_k, TY_int, FN_v,
+		_Public,            _F(Json_setString), TY_void,       TY_Json, MN_("setString"),  2, TY_String, FN_k, TY_String, FN_v,
 
-//		_Public|_Const|_Im, _F(Json_dump),      TY_String,    TY_JsonArray, MN_("dump"), 0,
-//		_Public,            _F(JsonArray_newArray), TY_JsonArray,      TY_JsonArray, MN_("newArray"), 1, TY_int, FN_("size"),
-//		_Public|_Const|_Im, _F(JsonArray_get),  TY_Json,      TY_JsonArray, MN_("get"),  1, TY_int, FN_("idx"),
-//		_Public,            _F(JsonArray_add),  TY_void,      TY_JsonArray, MN_("add"),  1, TY_Json, FN_v,
-//		_Public|_Const|_Im, _F(JsonArray_getSize), TY_int,    TY_JsonArray, MN_("getSize"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
