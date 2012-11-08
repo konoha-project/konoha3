@@ -4,6 +4,7 @@ import("konoha.array");
 import("konoha.map");
 import("konoha.global");
 import("konoha.const");
+import("konoha.object");
 import("posix.thread");
 
 class EventQueue {
@@ -97,5 +98,8 @@ System.setEventInvokeFunc(invokeEvent);
 class EventHandler {
 	@Public @Static void setCallBack(String eventType, Func[void, Event] callback) {
 		global.dispatcher.setCallBack(eventType, callback);
+	}
+	@Public @Static void setCallBack(int eventType, Func[void, Event] callback) {
+		global.dispatcher.setCallBack(eventType.toString(), callback);
 	}
 }

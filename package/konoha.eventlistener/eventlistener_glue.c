@@ -169,6 +169,20 @@ static KMETHOD Event_getProperty(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(KLIB new_kString(kctx, OnStack, str, strlen(str), 0));
 }
 
+//## int Event.getInt(String key);
+static KMETHOD Event_getInt(KonohaContext *kctx, KonohaStack *sfp)
+{
+	json_t* obj = ((kEvent*)sfp[0].asObject)->j;
+	CHECK_JSON(obj, KReturnUnboxValue(0));
+	const char *key = S_text(sfp[1].asString);
+	json_t* ret = json_object_get(obj, key);
+	if(!json_is_integer(ret)) {
+		KReturnUnboxValue(0);
+	}
+	json_int_t val = json_integer_value(ret);
+	KReturnUnboxValue((kint_t)val);
+}
+
 /* ------------------------------------------------------------------------ */
 // HttpEventListener class
 static void httpEventHandler(struct evhttp_request *req, void *args)
@@ -287,9 +301,9 @@ static void signalEventHandler(KonohaContext *kctx)
 	fclose(mailbox);
 }
 
-#define CASE(signo) \
-	case signo:\
-		signalHandler(kctx, "{\"event\":\""#signo"\"}");\
+#define CASE(SIG) \
+	case SIG:\
+		signalHandler(kctx, eventbuf);\
 		break;\
 
 #define CASE_USER_DEFINED_EVENT \
@@ -310,6 +324,7 @@ static void *signalEventListener(void *args)
 	int signo;
 	sigset_t ss;
 	sigfillset(&ss);
+	char eventbuf[256] = {0};
 	if(sigdelset(&ss, SIGINT)) {
 		fprintf(stderr, "sigdelset error!\n");
 		pthread_exit(NULL);
@@ -329,6 +344,7 @@ static void *signalEventListener(void *args)
 
 	while(1) {
 		if(sigwait(&ss, &signo) == 0) {
+			snprintf(eventbuf, sizeof(eventbuf), "{\"event\":\"%d\"}", signo);
 			switch(signo) {
 				CASE(SIGHUP)
 //				CASE(SIGINT)
@@ -540,6 +556,8 @@ static void MODEVENT_init(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace
 #define TY_HttpEventListener cHttpEventListener->typeId
 #define TY_SignalEventListener cSignalEventListener->typeId
 
+#define KDefineConstInt(T) #T, TY_int, T
+
 static kbool_t eventlistener_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
 {
 	MODEVENT_init(kctx, ns, trace);
@@ -565,6 +583,7 @@ static kbool_t eventlistener_initPackage(KonohaContext *kctx, kNameSpace *ns, in
 		_Public|_Static, _F(SignalEventListener_start), TY_void, TY_SignalEventListener, MN_("start"), 0,
 		/* event */
 		_Public|_Const|_Im, _F(Event_getProperty), TY_String,    TY_Event, MN_("getProperty"), 1, TY_String, FN_("key"),
+		_Public|_Const|_Im, _F(Event_getInt),      TY_int,       TY_Event, MN_("getInt"),    1, TY_String, FN_("key"),
 
 		/* dispatch */
 		_Public|_Static, _F(System_setSafepoint), TY_void, TY_System, MN_("setSafepoint"), 0,
@@ -573,6 +592,42 @@ static kbool_t eventlistener_initPackage(KonohaContext *kctx, kNameSpace *ns, in
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
+
+	KDEFINE_INT_CONST IntData[] = {
+		{KDefineConstInt(SIGHUP)},
+		{KDefineConstInt(SIGINT)},
+		{KDefineConstInt(SIGQUIT)},
+		{KDefineConstInt(SIGILL)},
+		{KDefineConstInt(SIGTRAP)},
+		{KDefineConstInt(SIGABRT)},
+//		{KDefineConstInt(SIGEMT)},
+		{KDefineConstInt(SIGFPE)},
+//		{KDefineConstInt(SIGKILL)},
+		{KDefineConstInt(SIGBUS)},
+		{KDefineConstInt(SIGSEGV)},
+		{KDefineConstInt(SIGSYS)},
+		{KDefineConstInt(SIGPIPE)},
+		{KDefineConstInt(SIGALRM)},
+//		{KDefineConstInt(SIGTERM)},
+		{KDefineConstInt(SIGURG)},
+		{KDefineConstInt(SIGSTOP)},
+		{KDefineConstInt(SIGTSTP)},
+		{KDefineConstInt(SIGCONT)},
+		{KDefineConstInt(SIGCHLD)},
+		{KDefineConstInt(SIGTTIN)},
+		{KDefineConstInt(SIGTTOU)},
+		{KDefineConstInt(SIGIO)},
+		{KDefineConstInt(SIGXCPU)},
+		{KDefineConstInt(SIGXFSZ)},
+		{KDefineConstInt(SIGVTALRM)},
+		{KDefineConstInt(SIGPROF)},
+		{KDefineConstInt(SIGWINCH)},
+//		{KDefineConstInt(SIGINFO)},
+		{KDefineConstInt(SIGUSR1)},
+		{KDefineConstInt(SIGUSR2)},
+		{NULL, 0, 0}
+	};
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), trace);
 
 	return true;
 }
