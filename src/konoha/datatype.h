@@ -538,6 +538,12 @@ static void kNameSpace_free(KonohaContext *kctx, kObject *o)
 	KLIB Karray_free(kctx, &ns->constTable);
 }
 
+static void kNameSpace_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+{
+	kNameSpace *ns = v[pos].asNameSpace;
+	KLIB Kwb_printf(kctx, wb, "%s", PackageId_t(ns->packageId));
+}
+
 // ---------------
 // System
 
@@ -940,6 +946,7 @@ static void loadInitStructData(KonohaContext *kctx)
 	defNameSpace.init = kNameSpace_init;
 	defNameSpace.reftrace = kNameSpace_reftrace;
 	defNameSpace.free = kNameSpace_free;
+	defNameSpace.p    = kNameSpace_p;
 	
 	KDEFINE_CLASS defSystem = {0};
 	SETTYNAME(defSystem, System);

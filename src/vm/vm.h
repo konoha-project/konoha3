@@ -150,6 +150,7 @@ static void kNameSpace_lookupMethodWithInlineCache(KonohaContext *kctx, KonohaSt
 		mtd = KLIB kNameSpace_GetMethodBySignatureNULL(kctx, ns, typeId, mtd->mn, mtd->paramdom, 0, NULL);
 		cache[0] = mtd;
 	}
+	sfp[0].unboxValue = O_unbox(sfp[0].asObject);
 	sfp[K_MTDIDX].calledMethod = mtd;
 }
 

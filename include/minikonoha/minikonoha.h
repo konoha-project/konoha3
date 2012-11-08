@@ -1863,6 +1863,10 @@ typedef struct {
 	return; \
 } while(0)
 
+#define KReturnField(vv) do {\
+	KUnsafeFieldSet(sfp[(-(K_CALLDELTA))].asObject, ((kObject *)vv));\
+	return; \
+} while(0)
 
 #define KReturn(vv) do {\
 	KUnsafeFieldSet(sfp[(-(K_CALLDELTA))].asObject, ((kObject *)vv));\

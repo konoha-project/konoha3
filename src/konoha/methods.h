@@ -37,14 +37,17 @@ static KMETHOD Object_to(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KonohaClass *selfClass = O_ct(sfp[0].asObject), *targetClass = KGetReturnType(sfp);
 	if(selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass)) {
-		sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;
-		KReturn(sfp[0].asObject);
+		sfp[K_RTNIDX].unboxValue = O_unbox(sfp[0].asObject);
+		KReturnField(sfp[0].asObject);
 	}
 	else {
 		kNameSpace *ns = KGetLexicalNameSpace(sfp);
 		DBG_ASSERT(IS_NameSpace(ns));
 		kMethod *mtd = KLIB kNameSpace_GetCoercionMethodNULL(kctx, ns, selfClass->typeId, targetClass->typeId);
-		if(mtd != NULL) {
+//		DBG_P("BEFORE >>>>>>>>>>> %lld\n", sfp[0].unboxValue);
+		sfp[0].unboxValue = O_unbox(sfp[0].asObject);
+//		DBG_P("AFTER >>>>>>>>>>> %lld\n", sfp[0].unboxValue);
+		if(mtd != NULL && sfp[K_MTDIDX].calledMethod != mtd /* to avoid infinite loop */) {
 			sfp[K_MTDIDX].calledMethod = mtd;
 			mtd->invokeMethodFunc(kctx, sfp);
 			return;
@@ -52,7 +55,7 @@ static KMETHOD Object_to(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	kObject *returnValue = KLIB Knull(kctx, targetClass);
 	sfp[K_RTNIDX].unboxValue = O_unbox(returnValue);
-	KReturn(returnValue);
+	KReturnField(returnValue);
 }
 
 //## String Object.toString();
@@ -60,14 +63,16 @@ static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kObject *self = sfp[0].asObject;
 	if(IS_String(self)) {
-		KReturn(self);
+		KReturnField(self);
 	}
 	else {
 		kNameSpace *ns = KGetLexicalNameSpace(sfp);
 		DBG_ASSERT(IS_NameSpace(ns));
 		kMethod *mtd = KLIB kNameSpace_GetCoercionMethodNULL(kctx, ns, O_typeId(self), TY_String);
+//		DBG_P("BEFORE >>>>>>>>>>> %s %lld\n", TY_t(O_typeId(self)), sfp[0].unboxValue);
 		sfp[0].unboxValue = O_unbox(self);
-		if(mtd != NULL) {
+//		DBG_P("AFTER >>>>>>>>>>> %lld\n", sfp[0].unboxValue);
+		if(mtd != NULL && sfp[K_MTDIDX].calledMethod != mtd /* to avoid infinite loop */) {
 			sfp[K_MTDIDX].calledMethod = mtd;
 			mtd->invokeMethodFunc(kctx, sfp);
 			return;
@@ -79,6 +84,24 @@ static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 	kString* returnValue = KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
 	KLIB Kwb_free(&wb);
 	KReturn(returnValue);
+}
+
+//## @Const method Object Boolean.box();
+static KMETHOD Boolean_box(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kBoolean *o = !!(sfp[0].unboxValue) ? K_TRUE : K_FALSE;
+	sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;
+	KReturn(o);
+}
+
+//## @Const @SmartReturn method Object Int.box();
+static KMETHOD Int_box(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KonohaClass *c = KGetReturnType(sfp);
+	DBG_ASSERT(CT_isUnbox(c));
+	sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;
+//	DBG_P(">>>>>>>>>>> boxing %s %lld\n", TY_t(c->typeId), sfp[0].unboxValue);
+	KReturn(KLIB new_kObject(kctx, OnStack, c, sfp[0].unboxValue));
 }
 
 /* String */
@@ -184,29 +207,12 @@ static KMETHOD Int_opGTE(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(sfp[0].intValue >= sfp[1].intValue);
 }
 
-//## @Const method String Int.asString();
+//## @Const method String Int.toString();
 static KMETHOD Int_toString(KonohaContext *kctx, KonohaStack *sfp)
 {
 	char buf[40];
 	PLATAPI snprintf_i(buf, sizeof(buf), "%ld", (intptr_t)sfp[0].intValue);
 	KReturn(KLIB new_kString(kctx, OnStack, buf, strlen(buf), StringPolicy_ASCII));
-}
-
-//## @Const method Object Boolean.box();
-static KMETHOD Boolean_box(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kBoolean *o = !!(sfp[0].unboxValue) ? K_TRUE : K_FALSE;
-	sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;
-	KReturn(o);
-}
-
-//## @Const method Object Int.box();
-static KMETHOD Int_box(KonohaContext *kctx, KonohaStack *sfp)
-{
-	KonohaClass *c = KGetReturnType(sfp);
-	DBG_ASSERT(CT_isUnbox(c));
-	sfp[K_RTNIDX].unboxValue = sfp[0].unboxValue;
-	KReturn(KLIB new_kObject(kctx, OnStack, c, sfp[0].unboxValue));
 }
 
 //## @Const method String String.toInt();
