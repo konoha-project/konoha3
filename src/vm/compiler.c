@@ -247,7 +247,6 @@ static kBasicBlock *kStmt_getLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbo
 #define USE_DUMP_VISITOR
 #define USE_JS_VISITOR
 #include "dumpvisitor.c"
-#include "jsvisitor.c"
 #endif
 /* ------------------------------------------------------------------------ */
 #if defined(USE_DIRECT_THREADED_CODE)
@@ -1082,6 +1081,10 @@ static void BUILD_compile(KonohaContext *kctx, kMethod *mtd, kBasicBlock *beginB
 static void kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk, int options)
 {
 	DBG_P("START CODE GENERATION..");
+	if(PLATAPI GenerateCode != NULL){
+		PLATAPI GenerateCode(kctx, mtd, bk, options);
+		return;
+	}
 	INIT_GCSTACK();
 	if(ctxcode == NULL) {
 		kmodcode->header.setupModuleContext(kctx, NULL, 1/*new ctx*/);
@@ -1089,34 +1092,10 @@ static void kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk, int o
 
 	IRBuilder *builder, builderbuf;
 	// TODO: set options
-
-#ifdef USE_SMALLBUILD
-#define visitorType kVisitor_KonohaVM
-#else
-#define visitorType (kctx->stack->visitor)
-#endif
-	
-	switch(visitorType){
-	case kVisitor_Dump:
-		builder = createDumpVisitor(&builderbuf);
-		builder->api.fn_init(kctx, builder, mtd);
-		visitBlock(kctx, builder, bk);
-		builder->api.fn_free(kctx, builder, mtd);
-		break;
-	case kVisitor_JS:
-		builder = createJSVisitor(&builderbuf);
-		builder->api.fn_init(kctx, builder, mtd);
-		visitBlock(kctx, builder, bk);
-		builder->api.fn_free(kctx, builder, mtd);
-		break;
-	default:
-	case kVisitor_KonohaVM:
-		builder = createKonohaVisitor(&builderbuf);
-		builder->api.fn_init(kctx, builder, mtd);
-		visitBlock(kctx, builder, bk);
-		builder->api.fn_free(kctx, builder, mtd);
-		break;
-	}
+	builder = createKonohaVisitor(&builderbuf);
+	builder->api.fn_init(kctx, builder, mtd);
+	visitBlock(kctx, builder, bk);
+	builder->api.fn_free(kctx, builder, mtd);
 
 	RESET_GCSTACK();
 }
