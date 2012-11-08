@@ -317,12 +317,16 @@ static KMETHOD Token_setSubArray(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	KReturnUnboxValue(Token_isVirtualTypeLiteral(sfp[0].asToken));
 //}
-//
-////## boolean Token.isParenthesis();
-//static KMETHOD Token_isParenthesis(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	KReturnUnboxValue(sfp[0].asToken->keyword == KW_ParenthesisGroup);
-//}
+
+//## boolean Token.isParenthesis();
+static KMETHOD Token_isParenthesis(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kTokenVar *tk = (kTokenVar *)sfp[0].asToken;
+	if(tk->resolvedSyntaxInfo == NULL) {
+		KReturnUnboxValue(false);
+	}
+	KReturnUnboxValue(tk->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup);
+}
 
 //## String Token.getText();
 static KMETHOD Token_getText(KonohaContext *kctx, KonohaStack *sfp)
@@ -335,6 +339,9 @@ static KMETHOD Token_getText(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Token_isSymbol(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kTokenVar *tk = (kTokenVar *)sfp[0].asToken;
+	if(tk->resolvedSyntaxInfo == NULL) {
+		KReturnUnboxValue(false);
+	}
 	KReturnUnboxValue(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern);
 }
 
@@ -760,7 +767,7 @@ static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public, _F(Token_setText),  TY_void, TY_Token, MN_("setText"),  1, TY_String, FN_x,
 		_Public, _F(Token_setSubArray), TY_void, TY_Token, MN_("setSubArray"), 1, TY_StringArray, FN_x,
 //		_Public, _F(Token_isTypeName), TY_boolean, TY_Token, MN_("isTypeName"), 0,
-//		_Public, _F(Token_isParenthesis), TY_boolean, TY_Token, MN_("isParenthesis"), 0,
+		_Public, _F(Token_isParenthesis), TY_boolean, TY_Token, MN_("isParenthesis"), 0,
 		_Public, _F(Token_getText), TY_String, TY_Token, MN_("getText"), 0,
 		_Public, _F(Token_isSymbol), TY_boolean, TY_Token, MN_("isSymbol"), 0,
 		_Public, _F(Token_newUntypedExpr), TY_Expr, TY_Token, MN_("newUntypedExpr"), 0,
