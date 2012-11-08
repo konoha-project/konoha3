@@ -1679,6 +1679,7 @@ struct KonohaLibVar {
 
 	kbool_t          (*kNameSpace_SetConstData)(KonohaContext *, kNameSpace *, ksymbol_t, ktype_t, uintptr_t, KTraceInfo *);
 	kbool_t          (*kNameSpace_LoadConstData)(KonohaContext*, kNameSpace *, const char **d, KTraceInfo *);
+	KKeyValue*       (*kNameSpace_GetConstNULL)(KonohaContext *, kNameSpace *, ksymbol_t);
 	void             (*kNameSpace_LoadMethodData)(KonohaContext*, kNameSpace *, intptr_t *, KTraceInfo *);
 
 	kMethod*         (*kNameSpace_GetGetterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ksymbol_t mn, ktype_t);
