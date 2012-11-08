@@ -1,3 +1,0 @@
- - (error) (LocalAccess_Disallowed.k:8) undefined name: x
- ** RuntimeScriptException (LocalAccess_Disallowed.k:8)
-Q.E.D.

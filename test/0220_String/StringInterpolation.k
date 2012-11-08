@@ -1,6 +1,5 @@
 // written by ide
 
-import("cstyle"); // konoha.null is obsolate; use cstyle
 import("konoha.string");
 
 int add(int n) {
@@ -20,9 +19,9 @@ void interpolation() {
 interpolation();
 
 void literal() {
-    assert("abcd efgh".isNotNull());
+    //assert("abcd efgh".isNotNull());
     assert("abcd efgh".getSize() == 9);
-    assert("${".isNotNull());
+    //assert("${".isNotNull());
     assert("${".getSize() == 2);
 }
 

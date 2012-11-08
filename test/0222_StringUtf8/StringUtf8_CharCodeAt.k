@@ -8,8 +8,3 @@ void test() {
 
 test();
 
-void test1() {
-	"こんにちは、世界".charCodeAt(999); // throws Exception
-}
-
-test1();

@@ -830,12 +830,76 @@ run_test 2 4 minimum "-MOutputTest" 0215_Date/Date_GetUTC.k
 run_test 3 4 minimum "-MOutputTest" 0215_Date/Date_Set.k
 run_test 4 4 minimum "-MOutputTest" 0215_Date/Date_ToString.k
 record_result 0215_Date $PASS 4
+## 0220_String
+PASS=0
+run_test 1 25 minimum "-MOutputTest" 0220_String/String_GenAdd.k
+run_test 2 25 minimum "-MOutputTest" 0220_String/String_GenEndsWith.k
+run_test 3 25 minimum "-MOutputTest" 0220_String/String_GenEquals.k
+run_test 4 25 minimum "-MOutputTest" 0220_String/String_GenGraterThan.k
+run_test 5 25 minimum "-MOutputTest" 0220_String/String_GenGraterThanEquals.k
+run_test 6 25 minimum "-MOutputTest" 0220_String/String_GenIndexOf.k
+run_test 7 25 minimum "-MOutputTest" 0220_String/String_GenLastIndexOf.k
+run_test 8 25 minimum "-MOutputTest" 0220_String/String_GenLessThan.k
+run_test 9 25 minimum "-MOutputTest" 0220_String/String_GenLessThanEquals.k
+run_test 10 25 minimum "-MOutputTest" 0220_String/String_GenNotEquals.k
+run_test 11 25 minimum "-MOutputTest" 0220_String/String_GenStartsWith.k
+run_test 12 25 minimum "-MOutputTest" 0220_String/String_LiteralEscapeSequence.k
+run_test 13 25 minimum "-MOutputTest" 0220_String/String_VeryLongLiteral.k
+run_test 14 25 minimum "-MOutputTest" 0220_String/StringEndsWith.k
+run_test 15 25 minimum "-MOutputTest" 0220_String/StringGet.k
+run_test 16 25 minimum "-MOutputTest" 0220_String/StringGetSize.k
+run_test 17 25 minimum "-MOutputTest" 0220_String/StringIndexOf.k
+run_test 18 25 minimum "-MOutputTest" 0220_String/StringInterpolation.k
+run_test 19 25 minimum "-MOutputTest" 0220_String/StringLastIndexOf.k
+run_test 20 25 minimum "-MOutputTest" 0220_String/StringOpHAS.k
+run_test 21 25 minimum "-MOutputTest" 0220_String/StringReplaceAll.k
+run_test 22 25 minimum "-MOutputTest" 0220_String/StringStartsWith.k
+run_test 23 25 minimum "-MOutputTest" 0220_String/StringToLower.k
+run_test 24 25 minimum "-MOutputTest" 0220_String/StringToUpper.k
+run_test 25 25 minimum "-MOutputTest" 0220_String/StringTrim.k
+record_result 0220_String $PASS 25
 ## 0221_StringAscii
 PASS=0
-record_result 0221_StringAscii $PASS 0
+run_test 1 18 minimum "-MOutputTest" 0221_StringAscii/StringAscii_CharAt.k
+run_test 2 18 minimum "-MOutputTest" 0221_StringAscii/StringAscii_CharCodeAt.k
+run_test 3 18 minimum "-MOutputTest" 0221_StringAscii/StringAscii_Concat.k
+run_test 4 18 minimum "-MOutputTest" 0221_StringAscii/StringAscii_FromCharCode.k
+run_test 5 18 minimum "-MOutputTest" 0221_StringAscii/StringAscii_IndexOf.k
+run_test 6 18 minimum "-MOutputTest" 0221_StringAscii/StringAscii_LastIndexOf.k
+run_test 7 18 minimum "-MOutputTest" 0221_StringAscii/StringAscii_Length.k
+run_test 8 18 minimum "-MOutputTest" 0221_StringAscii/StringAscii_LocaleCompare.k
+run_test 9 18 minimum "-MOutputTest" 0221_StringAscii/StringAscii_Replace.k
+run_test 10 18 minimum "-MOutputTest" 0221_StringAscii/StringAscii_Search.k
+run_test 11 18 minimum "-MOutputTest" 0221_StringAscii/StringAscii_Slice.k
+run_test 12 18 minimum "-MOutputTest" 0221_StringAscii/StringAscii_Split.k
+run_test 13 18 minimum "-MOutputTest" 0221_StringAscii/StringAscii_Substr.k
+run_test 14 18 minimum "-MOutputTest" 0221_StringAscii/StringAscii_Substring.k
+run_test 15 18 minimum "-MOutputTest" 0221_StringAscii/StringAscii_ToLowerCase.k
+run_test 16 18 minimum "-MOutputTest" 0221_StringAscii/StringAscii_ToString.k
+run_test 17 18 minimum "-MOutputTest" 0221_StringAscii/StringAscii_ToUpperCase.k
+run_test 18 18 minimum "-MOutputTest" 0221_StringAscii/StringAscii_ValueOf.k
+record_result 0221_StringAscii $PASS 18
 ## 0222_StringUtf8
 PASS=0
-record_result 0222_StringUtf8 $PASS 0
+run_test 1 18 minimum "-MOutputTest" 0222_StringUtf8/StringUtf8_CharAt.k
+run_test 2 18 minimum "-MOutputTest" 0222_StringUtf8/StringUtf8_CharCodeAt.k
+run_test 3 18 minimum "-MOutputTest" 0222_StringUtf8/StringUtf8_Concat.k
+run_test 4 18 minimum "-MOutputTest" 0222_StringUtf8/StringUtf8_FromCharCode.k
+run_test 5 18 minimum "-MOutputTest" 0222_StringUtf8/StringUtf8_IndexOf.k
+run_test 6 18 minimum "-MOutputTest" 0222_StringUtf8/StringUtf8_LastIndexOf.k
+run_test 7 18 minimum "-MOutputTest" 0222_StringUtf8/StringUtf8_Length.k
+run_test 8 18 minimum "-MOutputTest" 0222_StringUtf8/StringUtf8_LocaleCompare.k
+run_test 9 18 minimum "-MOutputTest" 0222_StringUtf8/StringUtf8_Replace.k
+run_test 10 18 minimum "-MOutputTest" 0222_StringUtf8/StringUtf8_Search.k
+run_test 11 18 minimum "-MOutputTest" 0222_StringUtf8/StringUtf8_Slice.k
+run_test 12 18 minimum "-MOutputTest" 0222_StringUtf8/StringUtf8_Split.k
+run_test 13 18 minimum "-MOutputTest" 0222_StringUtf8/StringUtf8_Substr.k
+run_test 14 18 minimum "-MOutputTest" 0222_StringUtf8/StringUtf8_Substring.k
+run_test 15 18 minimum "-MOutputTest" 0222_StringUtf8/StringUtf8_ToLowerCase.k
+run_test 16 18 minimum "-MOutputTest" 0222_StringUtf8/StringUtf8_ToString.k
+run_test 17 18 minimum "-MOutputTest" 0222_StringUtf8/StringUtf8_ToUpperCase.k
+run_test 18 18 minimum "-MOutputTest" 0222_StringUtf8/StringUtf8_ValueOf.k
+record_result 0222_StringUtf8 $PASS 18
 ## 0223_RegexpAscii
 PASS=0
 record_result 0223_RegexpAscii $PASS 0
