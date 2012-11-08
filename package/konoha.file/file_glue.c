@@ -63,7 +63,7 @@ static int TRACE_fgetc(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
 
 static int TRACE_fputc(KonohaContext *kctx, kFile *file, int ch, KTraceInfo *trace)
 {
-	if(fputc(ch, file->fp) != 0) {
+	if(fputc(ch, file->fp) == EOF) {
 		KTraceErrorPoint(trace, SystemFault, "fputc", LogFile(file), LogErrno);
 		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
 	}
