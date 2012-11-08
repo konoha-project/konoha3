@@ -255,13 +255,14 @@ static kString* String_replaceFirst(KonohaContext *kctx, kString *self, kString 
 	const char *text = S_text(self);
 	const char *end  = text + S_size(self);
 	const char *pos  = strstr(text, S_text(oldText));
+	const size_t oldLen = S_size(oldText);
 	if(pos == NULL)
 		return self;
 	KGrowingBuffer wb;
 	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
 	KLIB Kwb_write(kctx, &wb, text, pos - text);
 	KLIB Kwb_write(kctx, &wb, S_text(newText), S_size(newText));
-	KLIB Kwb_write(kctx, &wb, pos, end - pos);
+	KLIB Kwb_write(kctx, &wb, pos + oldLen, end - pos - oldLen);
 	kString *ret = KLIB new_kString(kctx, OnGcStack, KLIB Kwb_top(kctx, &wb, 0),
 			Kwb_bytesize(&wb), StringPolicy_maskASCII(self));
 	KLIB Kwb_free(&wb);
