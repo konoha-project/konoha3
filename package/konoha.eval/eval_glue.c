@@ -50,28 +50,25 @@ static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char
 
 // --------------------------------------------------------------------------
 
-//## boolean System.eval(String command);
-static KMETHOD System_eval(KonohaContext *kctx, KonohaStack *sfp)
+//## boolean NameSpace.eval(String command);
+static KMETHOD NameSpace_eval(KonohaContext *kctx, KonohaStack *sfp)
 {
+	kNameSpace *ns = sfp[0].asNameSpace;
 	const char *script = S_text(sfp[1].asString);
-	kNameSpace *ns = KGetLexicalNameSpace(sfp);
 	DBG_ASSERT(IS_NameSpace(ns));
 	kfileline_t uline = FILEID_("(eval)") | 1;
 	KReturnUnboxValue(kNameSpace_Eval(kctx, ns, script, uline) == K_CONTINUE);
 }
 
-
 // --------------------------------------------------------------------------
 
 #define _Public   kMethod_Public
-#define _Static   kMethod_Static
-#define _Virtual  kMethod_Virtual
 #define _F(F)   (intptr_t)(F)
 
 static void eval_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Static|_Virtual, _F(System_eval), TY_boolean, TY_System, MN_("eval"), 1, TY_String, FN_("command"),
+		_Public, _F(NameSpace_eval), TY_boolean, TY_NameSpace, MN_("eval"), 1, TY_String, FN_("command"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -95,7 +92,7 @@ static kbool_t eval_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTim
 KDEFINE_PACKAGE* eval_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "eval", "1.0");
+	KSetPackageName(d, "konoha", K_VERSION);
 	d.initPackage    = eval_initPackage;
 	d.setupPackage   = eval_setupPackage;
 	return &d;
