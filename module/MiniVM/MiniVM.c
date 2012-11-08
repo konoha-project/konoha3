@@ -412,6 +412,7 @@ kbool_t LoadMiniVMModule(KonohaFactory *factory, ModuleType type)
 	factory->GetBootCodeOfNativeMethodCall = GetBootCodeOfNativeMethodCall;
 	return true;
 }
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

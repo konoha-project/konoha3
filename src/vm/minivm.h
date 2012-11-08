@@ -464,7 +464,6 @@ static VirtualCode* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *s
 	return pc;
 }
 
-
 static void KonohaVirtualMachine_delete(KonohaContext *kctx)
 {
 }

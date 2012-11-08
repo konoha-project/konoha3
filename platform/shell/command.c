@@ -122,6 +122,7 @@ extern int verbose_sugar;
 
 #include <minikonoha/platform.h>
 #include <minikonoha/libcode/minishell.h>
+
 // -------------------------------------------------------------------------
 // KonohaContext
 
