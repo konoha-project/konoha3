@@ -31,7 +31,6 @@
 #include <minikonoha/sugar.h>
 #include "tracevm.h"
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -457,9 +456,8 @@ static void TraceVMDeleteVirtualMachine(KonohaContext *kctx)
 			size_t j;
 			for(j = 0; j < kArray_size(ns->methodList_OnList); j++) {
 				kMethod *mtd = ns->methodList_OnList->MethodItems[j];
-				if(IS_NOTNULL((kObject*)mtd->SourceToken)) {
+				if(IS_ByteCode(mtd->CodeObject)) {
 					TraceVMGiveOutCoverageLog(kctx, mtd->CodeObject->code);
-					//KFree(mtd->CodeObject->code, mtd->CodeObject->codesize);
 				}
 			}
 		}
