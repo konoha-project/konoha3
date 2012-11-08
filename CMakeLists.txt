@@ -89,6 +89,7 @@ set(PACKAGES
 	konoha.var
 	konoha.eventlistener
 	konoha.eval
+	minikonoha
 	sugar
 	cstyle
 	cstyle.libc
