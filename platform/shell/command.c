@@ -119,7 +119,6 @@ static int interactive_flag = 0;
 extern int verbose_debug;
 extern int verbose_code;
 extern int verbose_sugar;
-extern int verbose_gc;
 
 #include <minikonoha/platform.h>
 #include <minikonoha/libcode/minishell.h>
@@ -237,7 +236,6 @@ static void CommandLine_SetARGV(KonohaContext *kctx, int argc, char** argv)
 static struct option long_options2[] = {
 	/* These options set a flag. */
 	{"verbose",         no_argument,       &verbose_debug, 1},
-	{"verbose:gc",      no_argument,       &verbose_gc,    1},
 	{"verbose:sugar",   no_argument,       &verbose_sugar, 1},
 	{"verbose:code",    no_argument,       &verbose_code,  1},
 	{"format",          required_argument, 0, 'f'},
@@ -312,7 +310,6 @@ static void Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **argv
 				KonohaContext_Set(Debug, kctx);
 				verbose_debug = 0;
 				verbose_sugar = 0;
-				verbose_gc    = 0;
 				verbose_code  = 0;
 			}
 			break;
@@ -368,7 +365,6 @@ int main(int argc, char *argv[])
 {
 	if(getenv("KONOHA_DEBUG") != NULL) {
 		verbose_debug = 1;
-		verbose_gc = 1;
 		verbose_sugar = 1;
 		verbose_code = 1;
 	}
