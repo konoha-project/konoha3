@@ -52,7 +52,7 @@ static	kbool_t global_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 	defGlobalObject.cflag = kClass_Singleton|kClass_Final;
 	defGlobalObject.cstruct_size = sizeof(kGlobalObject);
 
-	KLIB kNameSpace_defineClass(kctx, ns, NULL, &defGlobalObject, trace);
+	KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defGlobalObject, trace);
 
 	KRequirePackage("konoha.field", trace);
 	KDEFINE_METHOD MethodData[] = {

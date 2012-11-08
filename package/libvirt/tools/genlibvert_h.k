@@ -34,7 +34,7 @@ String2 generate(String type) {
 	konohaclass_defs = konohaclass_defs + "\t\t.init = virt_common_ptr_init,\n";
 	konohaclass_defs = konohaclass_defs + "\t\t.free = virt_common_ptr_free,\n";
 	konohaclass_defs = konohaclass_defs + "\t};\n";
-	konohaclass_defs = konohaclass_defs + "\tKonohaClass *ct" + type + " = KLIB kNameSpace_defineClass(kctx, nx, NULL, &def" + type + ", trace);\n";
+	konohaclass_defs = konohaclass_defs + "\tKonohaClass *ct" + type + " = KLIB kNameSpace_DefineClass(kctx, nx, NULL, &def" + type + ", trace);\n";
 	konohaclass_defs = konohaclass_defs + "\tTY_" + type + " = ct" + type + "->typeId;\n\n";
 
 	String2 res = new String2();

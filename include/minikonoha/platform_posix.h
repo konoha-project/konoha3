@@ -983,7 +983,6 @@ static void diagnosis(void)
 
 // --------------------------------------------------------------------------
 
-
 static const char* BeginTag(KonohaContext *kctx, kinfotag_t t)
 {
 	DBG_ASSERT(t <= NoneTag);
@@ -1125,6 +1124,14 @@ static char* InputUserPassword(KonohaContext *kctx, const char *message)
 	return NULL;
 }
 
+static void exit_i(int status, const char *file, int line)
+{
+	if(status != 0) {
+		fprintf(stderr, "exiting status = %d, file='%s' linenum=%d\n", status, file, line);
+	}
+	exit(status);
+}
+
 // --------------------------------------------------------------------------
 
 static kunused PlatformApi *KonohaUtils_getDefaultPlatformApi(void)
@@ -1144,7 +1151,7 @@ static kunused PlatformApi *KonohaUtils_getDefaultPlatformApi(void)
 	plat.snprintf_i      = snprintf;  // avoid to use Xsnprintf
 	plat.vsnprintf_i     = vsnprintf; // retreating..
 	plat.qsort_i         = qsort;
-	plat.exit_i          = exit;
+	plat.exit_i          = exit_i;
 
 	// pthread / mutex / cond
 	plat.pthread_create_i        = kpthread_create;
@@ -1208,7 +1215,7 @@ static kunused void PosixFactory(KonohaFactory *factory)
 	factory->snprintf_i      = snprintf;  // avoid to use Xsnprintf
 	factory->vsnprintf_i     = vsnprintf; // retreating..
 	factory->qsort_i         = qsort;
-	factory->exit_i          = exit;
+	factory->exit_i          = exit_i;
 
 	// mutex
 	factory->pthread_create_i        = kpthread_create;

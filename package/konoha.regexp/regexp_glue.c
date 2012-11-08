@@ -630,7 +630,7 @@ static kbool_t regexp_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 			.free = RegExp_free,
 			.p    = RegExp_p,
 		};
-		CT_RegExp = KLIB kNameSpace_defineClass(kctx, ns, NULL, &RegExpDef, trace);
+		CT_RegExp = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &RegExpDef, trace);
 	}
 
 	ktype_t TY_StringArray0 = CT_StringArray0->typeId;
@@ -712,7 +712,7 @@ static kbool_t regexp_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		{ .keyword = SYM_("$RegExp"),  TypeCheck_(RegExp), },
 		{ .keyword = KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, trace);
+	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	SUGAR kNameSpace_SetTokenFunc(kctx, ns, SYM_("$RegExp"), KonohaChar_Slash, new_SugarFunc(ns, TokenFunc_JavaScriptRegExp));
 	return true;
 }

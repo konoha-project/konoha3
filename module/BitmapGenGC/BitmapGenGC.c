@@ -619,7 +619,7 @@ static void BMGC_dump(HeapManager *mng);
 
 static void THROW_OutOfMemory(KonohaContext *kctx, size_t size)
 {
-	PLATAPI exit_i(EXIT_FAILURE);
+	KExit(EXIT_FAILURE);
 }
 
 static void *call_malloc_aligned(size_t size, size_t align)

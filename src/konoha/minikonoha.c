@@ -238,13 +238,14 @@ void konoha_close(KonohaContext* konoha)
 // -------------------------------------------------------------------------
 /* Konoha C API */
 
-void KonohaFactory_LoadPlatformModule(KonohaFactory *factory, const char *name, ModuleType option)
+kbool_t KonohaFactory_LoadPlatformModule(KonohaFactory *factory, const char *name, ModuleType option)
 {
 	if(!factory->LoadPlatformModule(factory, name, option)) {
-		factory->syslog_i(ErrTag, "failed to load module: %s\n", name);
-		factory->printf_i("failed to load module: %s\n", name);
-		factory->exit_i(EXIT_FAILURE);
+		factory->syslog_i(ErrTag, "failed to load platform module: %s\n", name);
+		factory->printf_i("failed to load platform module: %s\n", name);
+		return true;
 	}
+	return false;
 }
 
 void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), int argc, char **argv)

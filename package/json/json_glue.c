@@ -274,7 +274,7 @@ static kbool_t JSON_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 		.free = kJson_free,
 		.p    = kJson_p,
 	};
-	KonohaClass *cJson = KLIB kNameSpace_defineClass(kctx, ns, NULL, &JsonDef, trace);
+	KonohaClass *cJson = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &JsonDef, trace);
 	KonohaClass *CT_JSONArray    = CT_p0(kctx, CT_Array, TY_Json);
 	KonohaClass *CT_StringArray2 = CT_p0(kctx, CT_Array, TY_String);
 	ktype_t TY_JsonArray = CT_JSONArray->typeId;

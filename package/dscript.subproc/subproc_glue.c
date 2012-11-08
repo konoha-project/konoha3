@@ -618,7 +618,7 @@ static kbool_t subproc_initSubProc(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		.init     = kSubProc_init,
 		.reftrace = kSubProc_reftrace,
 	};
-	KonohaClass *cSubproc = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defSubProc, trace);
+	KonohaClass *cSubproc = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSubProc, trace);
 
 	kparamtype_t ps = {TY_String, FN_("str")};
 	KonohaClass *CT_StringArray2 = KLIB KonohaClass_Generics(kctx, CT_Array, TY_String, 1, &ps);
@@ -1745,7 +1745,7 @@ static kbool_t subproc_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		.reftrace = kSubproc_reftrace,
 	};
 
-	KonohaClass *cSubproc = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defSubproc, trace);
+	KonohaClass *cSubproc = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSubproc, trace);
 
 	kparamtype_t ps = {TY_String, FN_("str")};
 	KonohaClass *CT_StringArray2 = KLIB KonohaClass_Generics(kctx, CT_Array, TY_String, 1, &ps);

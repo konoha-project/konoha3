@@ -519,7 +519,7 @@ static void path_defineDIR(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trac
 	defDIR.reftrace  = kDir_reftrace;
 	defDIR.free  = kDir_free;
 	defDIR.p     = kDir_p;
-	KonohaClass *cDIR = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defDIR, trace);
+	KonohaClass *cDIR = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defDIR, trace);
 	int TY_DIR = cDIR->typeId;
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Static|_C, _F(System_opendir),   TY_DIR,    TY_System, MN_("opendir"),  1, TY_String, FN_("dirname"),

@@ -458,7 +458,7 @@
 //		.free = kJson_free,
 //		.p    = kJson_p,
 //	};
-//	KonohaClass *cJson = KLIB kNameSpace_defineClass(kctx, ns, NULL, &JsonDef, trace);
+//	KonohaClass *cJson = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &JsonDef, trace);
 //	ktype_t TY_JsonArray = CT_JsonArray->typeId;
 //	ktype_t TY_StringArray0 = CT_StringArray0->typeId;
 //

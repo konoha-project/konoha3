@@ -298,7 +298,7 @@ static void stat_defineClassAndMethod(KonohaContext *kctx, kNameSpace *ns, KTrac
 	defStat.init  = kFileStatus_init;
 	defStat.free  = kFileStatus_free;
 	defStat.p     = kFileStatus_p;
-	KonohaClass *cStat = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defStat, trace);
+	KonohaClass *cStat = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defStat, trace);
 	int TY_Stat = cStat->typeId;
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Static, _F(System_stat),  TY_Stat, TY_System, MN_("stat"), 1, TY_String, FN_("path"),

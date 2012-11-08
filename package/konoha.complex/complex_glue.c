@@ -655,7 +655,7 @@ static kbool_t Complex_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	defComplex.cflag     = kClass_Final;
 	defComplex.init      = Complex_init;
 	defComplex.free      = Complex_free;
-	KonohaClass *ComplexClass = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defComplex, trace);
+	KonohaClass *ComplexClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defComplex, trace);
 
 	/* You can define methods with the following procedures. */
 	int TY_Complex = ComplexClass->typeId;

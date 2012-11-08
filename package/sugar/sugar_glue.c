@@ -66,7 +66,7 @@ static KonohaClass *loadSymbolClass(KonohaContext *kctx, kNameSpace *ns, KTraceI
 	defSymbol.init = CT_(TY_int)->init;
 	defSymbol.unbox = CT_(TY_int)->unbox;
 	defSymbol.p = kSymbol_p;
-	KonohaClass *cSymbol = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defSymbol, trace);
+	KonohaClass *cSymbol = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSymbol, trace);
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Coercion|_Const, _F(String_toSymbol), cSymbol->typeId, TY_String, MN_to(cSymbol->typeId), 0,
 		DEND,
@@ -102,7 +102,7 @@ static KonohaClass *loadcidClass(KonohaContext *kctx, kNameSpace *ns, KTraceInfo
 	defcid.init = CT_(TY_int)->init;
 	defcid.unbox = CT_(TY_int)->unbox;
 	defcid.p = kcid_p;
-	KonohaClass *ccid = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defcid, trace);
+	KonohaClass *ccid = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defcid, trace);
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Coercion|_Const, _F(Object_tocid), ccid->typeId, TY_Object, MN_to(ccid->typeId), 0,
 		DEND,
@@ -133,7 +133,7 @@ static kbool_t SugarSyntax_hasSugarFunc(SugarSyntax *syn, int index)
 }
 
 //## boolean NameSpace.definedSyntax(symbol keyword);
-static KMETHOD NameSpace_definedSyntax(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD NameSpace_DefinedSyntax(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
 	SugarSyntax* syn = SYN_(sfp[0].asNameSpace, keyword);
@@ -141,7 +141,7 @@ static KMETHOD NameSpace_definedSyntax(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## boolean NameSpace.definedLiteral(symbol keyword);
-static KMETHOD NameSpace_definedLiteral(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD NameSpace_DefinedLiteral(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
 	SugarSyntax* syn = SYN_(sfp[0].asNameSpace, keyword);
@@ -149,7 +149,7 @@ static KMETHOD NameSpace_definedLiteral(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## boolean NameSpace.definedStatement(symbol keyword);
-static KMETHOD NameSpace_definedStatement(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD NameSpace_DefinedStatement(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
 	SugarSyntax* syn = SYN_(sfp[0].asNameSpace, keyword);
@@ -157,7 +157,7 @@ static KMETHOD NameSpace_definedStatement(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## boolean NameSpace.definedExpression(symbol keyword);
-static KMETHOD NameSpace_definedExpression(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD NameSpace_DefinedExpression(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
 	SugarSyntax* syn = SYN_(sfp[0].asNameSpace, keyword);
@@ -165,7 +165,7 @@ static KMETHOD NameSpace_definedExpression(KonohaContext *kctx, KonohaStack *sfp
 }
 
 //## boolean NameSpace.definedBinaryOperator(symbol keyword);
-static KMETHOD NameSpace_definedBinaryOperator(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD NameSpace_DefinedBinaryOperator(KonohaContext *kctx, KonohaStack *sfp)
 {
 	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
 	SugarSyntax* syn = SYN_(sfp[0].asNameSpace, keyword);
@@ -255,11 +255,11 @@ static void LoadNameSpaceMethodData(KonohaContext *kctx, kNameSpace *ns, int TY_
 	//DBG_P("func=%s", TY_t(TY_FuncTypeCheck));
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Im, _F(NameSpace_definedSyntax), TY_boolean, TY_NameSpace, MN_("definedSyntax"), 1, TY_symbol, FN_keyword,
-		_Public|_Im, _F(NameSpace_definedLiteral), TY_boolean, TY_NameSpace, MN_("definedLiteral"), 1, TY_symbol, FN_keyword,
-		_Public|_Im, _F(NameSpace_definedStatement), TY_boolean, TY_NameSpace, MN_("definedStatement"), 1, TY_symbol, FN_keyword,
-		_Public|_Im, _F(NameSpace_definedExpression), TY_boolean, TY_NameSpace, MN_("definedExpression"), 1, TY_symbol, FN_keyword,
-		_Public|_Im, _F(NameSpace_definedBinaryOperator), TY_boolean, TY_NameSpace, MN_("definedBinaryOperator"), 1, TY_symbol, FN_keyword,
+		_Public|_Im, _F(NameSpace_DefinedSyntax), TY_boolean, TY_NameSpace, MN_("definedSyntax"), 1, TY_symbol, FN_keyword,
+		_Public|_Im, _F(NameSpace_DefinedLiteral), TY_boolean, TY_NameSpace, MN_("definedLiteral"), 1, TY_symbol, FN_keyword,
+		_Public|_Im, _F(NameSpace_DefinedStatement), TY_boolean, TY_NameSpace, MN_("definedStatement"), 1, TY_symbol, FN_keyword,
+		_Public|_Im, _F(NameSpace_DefinedExpression), TY_boolean, TY_NameSpace, MN_("definedExpression"), 1, TY_symbol, FN_keyword,
+		_Public|_Im, _F(NameSpace_DefinedBinaryOperator), TY_boolean, TY_NameSpace, MN_("definedBinaryOperator"), 1, TY_symbol, FN_keyword,
 //		_Public, _F(NameSpace_compileAllDefinedMethods), TY_void, TY_NameSpace, MN_("compileAllDefinedMethods"), 0,
 		_Public, _F(NameSpace_setTokenFunc), TY_void, TY_NameSpace, MN_("setTokenFunc"), 3, TY_symbol, FN_keyword, TY_int, FN_("kchar"), TY_FuncToken, FN_func,
 		_Public, _F(NameSpace_addPatternMatch), TY_void, TY_NameSpace, MN_("addPatternMatch"), 2, TY_symbol, FN_keyword, TY_FuncPatternMatch, FN_func,
@@ -956,7 +956,7 @@ static kbool_t RENAMEME_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS
 		{ SYM_("syntax"), 0, "\"syntax\" $Token*", 0, 0, NULL, NULL, Statement_syntax, NULL, NULL, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, trace);
+	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;
 }
 

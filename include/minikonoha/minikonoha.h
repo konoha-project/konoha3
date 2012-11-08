@@ -1664,12 +1664,12 @@ struct KonohaLibVar {
 //	void (*kNameSpace_reftraceSugarExtension)(KonohaContext *, kNameSpace *, struct KObjectVisitor *visitor);
 	void (*kNameSpace_freeSugarExtension)(KonohaContext *, kNameSpaceVar *);
 
-	KonohaPackage*   (*kNameSpace_requirePackage)(KonohaContext*, const char *, KTraceInfo *);
-	kbool_t          (*kNameSpace_importPackage)(KonohaContext*, kNameSpace*, const char *, KTraceInfo *);
-	kbool_t          (*kNameSpace_importPackageSymbol)(KonohaContext *, kNameSpace *, const char *, ksymbol_t keyword, KTraceInfo *);
+	KonohaPackage*   (*kNameSpace_RequirePackage)(KonohaContext*, const char *, KTraceInfo *);
+	kbool_t          (*kNameSpace_ImportPackage)(KonohaContext*, kNameSpace*, const char *, KTraceInfo *);
+	kbool_t          (*kNameSpace_ImportPackageSymbol)(KonohaContext *, kNameSpace *, const char *, ksymbol_t keyword, KTraceInfo *);
 
 	KonohaClass*     (*kNameSpace_GetClass)(KonohaContext*, kNameSpace *, const char *, size_t, KonohaClass *);
-	KonohaClass*     (*kNameSpace_defineClass)(KonohaContext*, kNameSpace *, kString *, KDEFINE_CLASS *, KTraceInfo *);
+	KonohaClass*     (*kNameSpace_DefineClass)(KonohaContext*, kNameSpace *, kString *, KDEFINE_CLASS *, KTraceInfo *);
 
 	kbool_t          (*kNameSpace_SetConstData)(KonohaContext *, kNameSpace *, ksymbol_t, ktype_t, uintptr_t, KTraceInfo *);
 	kbool_t          (*kNameSpace_LoadConstData)(KonohaContext*, kNameSpace *, const char **d, KTraceInfo *);
@@ -1741,9 +1741,9 @@ struct KonohaLibVar {
 #define kArray_setsize(A, N)      ((kArrayVar *)A)->bytesize = (N) * sizeof(void *)
 #define new_kParam(CTX, R, PSIZE, P)       (KLIB kMethod_setParam(CTX, NULL, R, PSIZE, P))
 
-#define KRequirePackage(NAME, TRACE)       if(!KLIB kNameSpace_requirePackage(kctx, NAME, TRACE)) { return false; } else {}
-#define KImportPackage(NS, NAME, TRACE)    if(!KLIB kNameSpace_importPackage(kctx, NS, NAME, TRACE)) { return false; } else {}
-#define KImportPackageSymbol(NS, NAME, SYMBOL, TRACE) if(!KLIB kNameSpace_importPackageSymbol(kctx, NS, NAME, SYM_(SYMBOL), TRACE)) { return false; } else {}
+#define KRequirePackage(NAME, TRACE)       if(!KLIB kNameSpace_RequirePackage(kctx, NAME, TRACE)) { return false; } else {}
+#define KImportPackage(NS, NAME, TRACE)    if(!KLIB kNameSpace_ImportPackage(kctx, NS, NAME, TRACE)) { return false; } else {}
+#define KImportPackageSymbol(NS, NAME, SYMBOL, TRACE) if(!KLIB kNameSpace_ImportPackageSymbol(kctx, NS, NAME, SYM_(SYMBOL), TRACE)) { return false; } else {}
 
 typedef intptr_t  KDEFINE_METHOD;
 
@@ -1775,8 +1775,6 @@ typedef struct {
 	kObject *value;
 } KDEFINE_OBJECT_CONST;
 
-#define kreportf(LEVEL, UL, fmt, ...)  KLIB Kreportf(kctx, LEVEL, UL, fmt, ## __VA_ARGS__)
-#define kraise(PARAM)                  KLIB KonohaRuntime_raise(kctx, PARAM)
 
 
 #define KSetKLibFunc(PKGID, T, F, TRACE)   do {\
@@ -1891,6 +1889,12 @@ typedef struct {
 	return; \
 } while(0)
 
+#ifdef USE_SMALLBUILD
+#define KExit(S)           PLATAPI exit_i(S, NULL, 0)
+#else
+#define KExit(S)           PLATAPI exit_i(S, __FILE__, __LINE__)
+#endif
+
 #define FIXME_ASSERT(a)    assert(a)
 
 #ifndef USE_SMALLBUILD
@@ -1905,7 +1909,7 @@ typedef struct {
 #endif /* _MSC_VER */
 #define SAFECHECK(T)        (T)
 #define DBG_P(fmt, ...)     PLATAPI ReportDebugMessage(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__)
-#define DBG_ABORT(fmt, ...) PLATAPI ReportDebugMessage(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__); PLATAPI exit_i(EXIT_FAILURE)
+#define DBG_ABORT(fmt, ...) PLATAPI ReportDebugMessage(__FILE__, __FUNCTION__, __LINE__, fmt, ## __VA_ARGS__); KExit(EXIT_FAILURE)
 #define DUMP_P(fmt, ...)    PLATAPI printf_i(fmt, ## __VA_ARGS__)
 #else
 #define SAFECHECK(T)        (1)

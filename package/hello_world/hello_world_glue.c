@@ -126,7 +126,7 @@ static kbool_t HelloWorld_initPackage(KonohaContext *kctx, kNameSpace *ns, int a
 	defPerson.p         = Person_p;
 	defPerson.reftrace  = Person_reftrace;
 	defPerson.free      = Person_free;
-	KonohaClass *PersonClass = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defPerson, trace);
+	KonohaClass *PersonClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defPerson, trace);
 
 	/* You can define methods with the following procedures. */
 	int TY_Person = PersonClass->typeId;

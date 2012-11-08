@@ -527,7 +527,7 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 			.free  = kFile_free,
 			.p     = kFile_p,
 		};
-		CT_File = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defFile, trace);
+		CT_File = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defFile, trace);
 	}
 	file_defineConst(kctx, ns, trace);
 	file_defineMethod(kctx, ns, trace);

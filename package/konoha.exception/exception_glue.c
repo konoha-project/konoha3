@@ -220,7 +220,7 @@
 //		.reftrace = Exception_reftrace,
 //		.p     = Exception_p,
 //	};
-//	mod->cException = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defException, trace);
+//	mod->cException = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defException, trace);
 //
 //	KDEFINE_METHOD MethodData[] = {
 //		_Public, _F(Exception_new), TY_Exception,  TY_Exception, MN_("new"), 0, _Public|_Hidden, _F(System_throw), TY_void,  TY_System, MN_("throw"), 1, TY_Exception, FN_("e"),
@@ -338,7 +338,7 @@
 //		{ .keyword = SYM_("finally"), Statement_(finally), .rule = "\"finally\" $Block ",},
 //		{ .keyword = KW_END, },
 //	};
-//	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, trace);
+//	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 //	return true;
 //}
 //

@@ -516,7 +516,7 @@ static void MODEVENT_init(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace
 		.free = Event_free,
 	};
 
-	KonohaClass *cEvent = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defEvent, trace);
+	KonohaClass *cEvent = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defEvent, trace);
 	mod->cEvent = cEvent;
 	mod->flag = 0;
 
@@ -552,8 +552,8 @@ static kbool_t eventlistener_initPackage(KonohaContext *kctx, kNameSpace *ns, in
 		.structname = "SignalEventListener",
 		.typeId = TY_newid,
 	};
-	KonohaClass *cHttpEventListener = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defHttpEventListener, trace);
-	KonohaClass *cSignalEventListener = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defSignalEventListener, trace);
+	KonohaClass *cHttpEventListener = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defHttpEventListener, trace);
+	KonohaClass *cSignalEventListener = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSignalEventListener, trace);
 	KonohaClass *cEvent = kmodevent->cEvent;
 
 	kparamtype_t P_Func[] = {{TY_Event}};

@@ -955,8 +955,8 @@ static kbool_t gmp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	MpfDef.free  = Mpf_free;
 	MpfDef.p     = Mpf_p;
 
-	KonohaClass *cMpz = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MpzDef, trace);
-	KonohaClass *cMpf = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MpfDef, trace);
+	KonohaClass *cMpz = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MpzDef, trace);
+	KonohaClass *cMpf = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MpfDef, trace);
 
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {

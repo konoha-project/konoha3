@@ -78,7 +78,7 @@ static kbool_t dollar_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		{ SYM_("$"), 0, NULL, 0, Precedence_CStyleCALL, NULL, Expression_dollar, NULL, NULL, NULL, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, trace);
+	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;
 }
 

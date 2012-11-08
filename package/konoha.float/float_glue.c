@@ -258,7 +258,7 @@ static kbool_t float_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		defFloat.cflag = CFLAG_int;
 		defFloat.init = Float_init;
 		defFloat.p     = Float_p;
-		CT_Float = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defFloat, trace);
+		CT_Float = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defFloat, trace);
 	}
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
@@ -318,7 +318,7 @@ static kbool_t float_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		{ SYM_("$Float"), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, TypeCheck_Float, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, trace);
+	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;
 }
 

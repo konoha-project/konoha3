@@ -289,9 +289,9 @@ static kbool_t thread_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 		.init  = kCond_init,
 		.free  = kCond_free,
 	};
-	KonohaClass *cThread = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defThread, trace);
-	KonohaClass *cMutex  = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defMutex, trace);
-	KonohaClass *cCond   = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defCond, trace);
+	KonohaClass *cThread = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defThread, trace);
+	KonohaClass *cMutex  = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defMutex, trace);
+	KonohaClass *cCond   = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defCond, trace);
 	
 	kparamtype_t P_Func[] = {{}};
 	int TY_FUNC = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_void, 0, P_Func))->typeId;

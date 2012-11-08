@@ -423,7 +423,7 @@ static kbool_t jansson_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		.free = Jansson_free,
 		.p    = Jansson_p,
 	};
-	KonohaClass *cJson = KLIB kNameSpace_defineClass(kctx, ns, NULL, &JsonDef, trace);
+	KonohaClass *cJson = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &JsonDef, trace);
 	ktype_t TY_JsonArray = CT_JsonArray->typeId;
 	ktype_t TY_StringArray0 = CT_StringArray0->typeId;
 

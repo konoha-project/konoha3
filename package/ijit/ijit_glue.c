@@ -726,7 +726,7 @@ static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	static KDEFINE_CLASS PointerDef = {
 		STRUCTNAME(Pointer)
 	};
-	base->cPointer = KLIB kNameSpace_defineClass(kctx, ns, NULL, &PointerDef, trace);
+	base->cPointer = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &PointerDef, trace);
 
 	//FIXME
 	//KDEFINE_INT_CONST IntData[] = {

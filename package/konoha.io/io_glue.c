@@ -726,9 +726,9 @@
 //	defFile.free     = kFile_free;
 //
 //
-//	KonohaClass *cInputStream  = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defInputStream, trace);
-//	KonohaClass *cOutputStream = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defOutputStream, trace);
-//	KonohaClass *cFile         = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defFile, trace);
+//	KonohaClass *cInputStream  = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defInputStream, trace);
+//	KonohaClass *cOutputStream = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defOutputStream, trace);
+//	KonohaClass *cFile         = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defFile, trace);
 //	int TY_InputStream = cInputStream->typeId;
 //	int TY_OutputStream = cOutputStream->typeId;
 //	int TY_File = cFile->typeId;

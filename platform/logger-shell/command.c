@@ -270,12 +270,12 @@ static void CommandLine_define(KonohaContext *kctx, char *keyvalue)
 			unboxValue = (uintptr_t)(p+1);
 		}
 		if(!KLIB kNameSpace_SetConstData(kctx, KNULL(NameSpace), key, ty, unboxValue, 0)) {
-			PLATAPI exit_i(EXIT_FAILURE);
+			KExit(EXIT_FAILURE);
 		}
 	}
 	else {
 		fprintf(stdout, "invalid define option: use -D<key>=<value>\n");
-		PLATAPI exit_i(EXIT_FAILURE);
+		KExit(EXIT_FAILURE);
 	}
 }
 
@@ -284,8 +284,8 @@ static void CommandLine_import(KonohaContext *kctx, char *packageName)
 	size_t len = strlen(packageName)+1;
 	char bufname[len];
 	memcpy(bufname, packageName, len);
-	if(!(KLIB kNameSpace_importPackage(kctx, KNULL(NameSpace), bufname, 0))) {
-		PLATAPI exit_i(EXIT_FAILURE);
+	if(!(KLIB kNameSpace_ImportPackage(kctx, KNULL(NameSpace), bufname, 0))) {
+		KExit(EXIT_FAILURE);
 	}
 }
 
@@ -303,7 +303,7 @@ static void konoha_startup(KonohaContext *kctx, const char *startup_script)
 	}
 	snprintf(buf, sizeof(buf), "%s%s/%s.k", path, local, startup_script);
 	if(!Konoha_LoadScript((KonohaContext*)kctx, (const char*)buf)) {
-		PLATAPI exit_i(EXIT_FAILURE);
+		KExit(EXIT_FAILURE);
 	}
 }
 

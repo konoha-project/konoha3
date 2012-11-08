@@ -254,7 +254,7 @@ static kbool_t bytes_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		defBytes.free    = kBytes_free;
 		defBytes.init    = kBytes_init;
 		defBytes.p       = kBytes_p;
-		CT_Bytes = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defBytes, trace);
+		CT_Bytes = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defBytes, trace);
 	}
 	int FN_index = FN_("index");
 	int FN_c     = FN_("c");

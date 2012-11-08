@@ -119,7 +119,7 @@ static kshortflag_t kStmt_parseClassFlag(KonohaContext *kctx, kStmt *stmt, kshor
 	return (kshortflag_t)SUGAR kStmt_parseFlag(kctx, stmt, ClassDeclFlag, cflag);
 }
 
-static KonohaClassVar* kNameSpace_defineClassName(KonohaContext *kctx, kNameSpace *ns, kshortflag_t cflag, kString *name, KTraceInfo *trace)
+static KonohaClassVar* kNameSpace_DefineClassName(KonohaContext *kctx, kNameSpace *ns, kshortflag_t cflag, kString *name, KTraceInfo *trace)
 {
 	KDEFINE_CLASS defNewClass = {0};
 	defNewClass.cflag         = cflag | kClass_Nullable;
@@ -128,7 +128,7 @@ static KonohaClassVar* kNameSpace_defineClassName(KonohaContext *kctx, kNameSpac
 	defNewClass.superTypeId  = TY_Object; //superClass->typeId;
 	defNewClass.init = Object_initToMakeDefaultValueAsNull; // dummy for first generation of DefaultValueAsNull
 
-	KonohaClassVar *definedClass = (KonohaClassVar *)KLIB kNameSpace_defineClass(kctx, ns, name, &defNewClass, trace);
+	KonohaClassVar *definedClass = (KonohaClassVar *)KLIB kNameSpace_DefineClass(kctx, ns, name, &defNewClass, trace);
 	KDEFINE_CLASS_CONST ClassData[] = {
 		{S_text(name), VirtualType_KonohaClass, definedClass},
 		{NULL},
@@ -311,7 +311,7 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 	if(definedClass == NULL) {   // Already defined
 		kshortflag_t cflag = kStmt_parseClassFlag(kctx, stmt, kClass_Virtual);
 		KMakeTraceUL(trace, sfp, stmt->uline);
-		definedClass = kNameSpace_defineClassName(kctx, ns, cflag, tokenClassName->text, trace);
+		definedClass = kNameSpace_DefineClassName(kctx, ns, cflag, tokenClassName->text, trace);
 		isNewlyDefinedClass = true;
 	}
 	kBlock *bk = kStmt_parseClassBlockNULL(kctx, stmt, tokenClassName);
@@ -391,7 +391,7 @@ static kbool_t class_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		{ SYM_("."), 0, NULL, -1, 0, NULL, NULL, NULL, NULL, TypeCheck_Getter, },
 		{ KW_END, },
 	};
-	SUGAR kNameSpace_defineSyntax(kctx, ns, SYNTAX, trace);
+	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 	return true;
 }
 

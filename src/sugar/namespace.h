@@ -121,7 +121,7 @@ static kFunc** SugarSyntax_funcTable(KonohaContext *kctx, SugarSyntax *syn, int 
 	return (kFunc**)&(syn->sugarFuncTable[index]);
 }
 
-static kbool_t kNameSpace_importSyntax(KonohaContext *kctx, kNameSpace *ns, SugarSyntax *target, KTraceInfo *trace)
+static kbool_t kNameSpace_ImportSyntax(KonohaContext *kctx, kNameSpace *ns, SugarSyntax *target, KTraceInfo *trace)
 {
 	SugarSyntaxVar *syn = (SugarSyntaxVar *)kNameSpace_GetSyntax(kctx, ns, target->keyword, true/*isNew*/);
 	//DBG_P("<<<< packageId=%s,%s >>>>", PackageId_t(syn->lastLoadedPackageId), PackageId_t(target->lastLoadedPackageId));
@@ -168,10 +168,10 @@ struct ImportSyntaxArgument {
 static void importEachSyntax(KonohaContext *kctx, KHashMapEntry *e, void *thunk)
 {
 	struct ImportSyntaxArgument *argd = (struct ImportSyntaxArgument *)thunk;
-	kNameSpace_importSyntax(kctx, argd->ns, (SugarSyntax *)e->unboxValue, argd->trace);
+	kNameSpace_ImportSyntax(kctx, argd->ns, (SugarSyntax *)e->unboxValue, argd->trace);
 }
 
-static kbool_t kNameSpace_importSyntaxAll(KonohaContext *kctx, kNameSpace *ns, kNameSpace *targetNS, KTraceInfo *trace)
+static kbool_t kNameSpace_ImportSyntaxAll(KonohaContext *kctx, kNameSpace *ns, kNameSpace *targetNS, KTraceInfo *trace)
 {
 	if(targetNS->syntaxMapNN != NULL) {
 		struct ImportSyntaxArgument argumentData = { ns, trace };
@@ -235,7 +235,7 @@ static void SugarSyntax_setMethodFunc(KonohaContext *kctx, kNameSpace *ns, Sugar
 	}
 }
 
-static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE_SYNTAX *syndef, KTraceInfo *trace)
+static void kNameSpace_DefineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE_SYNTAX *syndef, KTraceInfo *trace)
 {
 	MethodFunc pPatternMatch = NULL, pExpression = NULL, pStatement = NULL, pTypeCheck = NULL;
 	kFunc *mPatternMatch = NULL, *mExpression = NULL, *mStatement = NULL, *mTypeCheck = NULL;
@@ -448,7 +448,7 @@ static KonohaClass *kNameSpace_GetClass(KonohaContext *kctx, kNameSpace *ns, con
 	return (ct != NULL) ? ct : defaultClass;
 }
 
-static KonohaClass *kNameSpace_defineClass(KonohaContext *kctx, kNameSpace *ns, kString *name, KDEFINE_CLASS *cdef, KTraceInfo *trace)
+static KonohaClass *kNameSpace_DefineClass(KonohaContext *kctx, kNameSpace *ns, kString *name, KDEFINE_CLASS *cdef, KTraceInfo *trace)
 {
 	KonohaClass *ct = KLIB KonohaClass_define(kctx, ns->packageId, name, cdef, trace);
 	if(!KLIB kNameSpace_SetConstData(kctx, ns, ct->classNameSymbol, VirtualType_KonohaClass, (uintptr_t)ct, trace)) {
@@ -978,11 +978,11 @@ static KonohaPackage *GetPackageNULL(KonohaContext *kctx, kpackageId_t packageId
 	return pack;
 }
 
-static kbool_t kNameSpace_importSymbol(KonohaContext *kctx, kNameSpace *ns, kNameSpace *targetNS, ksymbol_t keyword, KTraceInfo *trace)
+static kbool_t kNameSpace_ImportSymbol(KonohaContext *kctx, kNameSpace *ns, kNameSpace *targetNS, ksymbol_t keyword, KTraceInfo *trace)
 {
 	SugarSyntax *syn = SYN_(targetNS, keyword);
 	if(syn != NULL) {
-		return kNameSpace_importSyntax(kctx, ns, syn, trace);
+		return kNameSpace_ImportSyntax(kctx, ns, syn, trace);
 	}
 	else {
 		KKeyValue *kvs = kNameSpace_GetLocalConstNULL(kctx, targetNS, keyword);
@@ -1015,7 +1015,7 @@ static kbool_t kNameSpace_isImported(KonohaContext *kctx, kNameSpace *ns, kNameS
 	return false;
 }
 
-static kbool_t kNameSpace_importAll(KonohaContext *kctx, kNameSpace *ns, kNameSpace *targetNS, KTraceInfo *trace)
+static kbool_t kNameSpace_ImportAll(KonohaContext *kctx, kNameSpace *ns, kNameSpace *targetNS, KTraceInfo *trace)
 {
 	if(!kNameSpace_isImported(kctx, ns, targetNS, trace)) {
 		size_t i;
@@ -1025,7 +1025,7 @@ static kbool_t kNameSpace_importAll(KonohaContext *kctx, kNameSpace *ns, kNameSp
 			}
 		}
 		kNameSpace_appendArrayRefArray(kctx, ns, &ns->stmtPatternListNULL_OnList, targetNS->stmtPatternListNULL_OnList);
-		kNameSpace_importSyntaxAll(kctx, ns, targetNS, trace);
+		kNameSpace_ImportSyntaxAll(kctx, ns, targetNS, trace);
 		for(i = 0; i < kArray_size(targetNS->methodList_OnList); i++) {
 			kMethod *mtd = targetNS->methodList_OnList->MethodItems[i];
 			if(kMethod_is(Public, mtd) && mtd->packageId == targetNS->packageId) {
@@ -1038,19 +1038,19 @@ static kbool_t kNameSpace_importAll(KonohaContext *kctx, kNameSpace *ns, kNameSp
 	return false;
 }
 
-static KonohaPackage *kNameSpace_requirePackage(KonohaContext *kctx, const char *name, KTraceInfo *trace)
+static KonohaPackage *kNameSpace_RequirePackage(KonohaContext *kctx, const char *name, KTraceInfo *trace)
 {
 	kpackageId_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
 	return GetPackageNULL(kctx, packageId, trace);
 }
 
-static kbool_t kNameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, const char *name, KTraceInfo *trace)
+static kbool_t kNameSpace_ImportPackage(KonohaContext *kctx, kNameSpace *ns, const char *name, KTraceInfo *trace)
 {
 	kpackageId_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
 	if(ns->packageId != packageId) {
 		KonohaPackage *pack = GetPackageNULL(kctx, packageId, trace);
 		if(pack != NULL) {
-			kNameSpace_importAll(kctx, ns, pack->packageNameSpace_OnGlobalConstList, trace);
+			kNameSpace_ImportAll(kctx, ns, pack->packageNameSpace_OnGlobalConstList, trace);
 			if(pack->kick_script != 0) {
 				kNameSpace_LoadScript(kctx, ns, FileId_t(pack->kick_script), trace);
 			}
@@ -1059,13 +1059,13 @@ static kbool_t kNameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, con
 	return false;
 }
 
-static kbool_t kNameSpace_importPackageSymbol(KonohaContext *kctx, kNameSpace *ns, const char *name, ksymbol_t keyword, KTraceInfo *trace)
+static kbool_t kNameSpace_ImportPackageSymbol(KonohaContext *kctx, kNameSpace *ns, const char *name, ksymbol_t keyword, KTraceInfo *trace)
 {
 	kpackageId_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
 	if(ns->packageId != packageId) {
 		KonohaPackage *pack = GetPackageNULL(kctx, packageId, trace);
 		if(pack != NULL) {
-			return kNameSpace_importSymbol(kctx, ns, pack->packageNameSpace_OnGlobalConstList, keyword, trace);
+			return kNameSpace_ImportSymbol(kctx, ns, pack->packageNameSpace_OnGlobalConstList, keyword, trace);
 		}
 	}
 	return false;

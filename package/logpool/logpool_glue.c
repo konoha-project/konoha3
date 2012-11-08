@@ -369,7 +369,7 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		.init = RawPtr_init,
 		.free = Logpool_free,
 	};
-	KonohaClass *ct0 = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def0, trace);
+	KonohaClass *ct0 = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &Def0, trace);
 
 	static KDEFINE_CLASS Def1 = {
 		.structname = "Log"/*structname*/,
@@ -378,7 +378,7 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		.free = Log_free,
 		.p    = Log_p,
 	};
-	KonohaClass *ct1 = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def1, trace);
+	KonohaClass *ct1 = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &Def1, trace);
 
 	static KDEFINE_CLASS Def2 = {
 		.structname = "PoolPlugin",
@@ -386,7 +386,7 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 		.init = RawPtr_init,
 		.free = RawPtr_free,
 	};
-	KonohaClass *ct2 = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def2, trace);
+	KonohaClass *ct2 = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &Def2, trace);
 #define TY_Plugin ct2->typeId
 	static KDEFINE_CLASS Def3 = {
 		.structname = "",
@@ -417,7 +417,7 @@ static kbool_t logpool_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 
 	for (i = 0; i < 8; i++) {
 		Def3.structname = names[i];
-		tbls[i] = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def3, trace);
+		tbls[i] = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &Def3, trace);
 	}
 
 	int FN_x = FN_("x");

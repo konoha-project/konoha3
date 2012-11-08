@@ -569,11 +569,11 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	//	.structname = "MPIOp",
 	//	.typeId = TY_newid
 	//};
-	KonohaClass *CT_MPI = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MPIDef, trace);
-	KonohaClass *CT_MPIComm = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MPICommDef, trace);
-	KonohaClass *CT_MPIRequest = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MPIRequestDef, trace);
-	KonohaClass *CT_MPIData = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MPIDataDef, trace);
-	//KonohaClass *CT_MPIOp = KLIB kNameSpace_defineClass(kctx, ns, NULL, &MPIOpDef, trace);
+	KonohaClass *CT_MPI = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MPIDef, trace);
+	KonohaClass *CT_MPIComm = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MPICommDef, trace);
+	KonohaClass *CT_MPIRequest = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MPIRequestDef, trace);
+	KonohaClass *CT_MPIData = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MPIDataDef, trace);
+	//KonohaClass *CT_MPIOp = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MPIOpDef, trace);
 #define TY_MPI         (CT_MPI->typeId)
 #define TY_MPIComm     (CT_MPIComm->typeId)
 #define TY_MPIRequest  (CT_MPIRequest->typeId)

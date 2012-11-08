@@ -513,7 +513,7 @@ static void KonohaRuntime_raise(KonohaContext *kctx, int symbol, int fault, kStr
 		}
 		PLATAPI longjmp_i(*runtime->evaljmpbuf, symbol);  // in setjmp 0 means good
 	}
-	PLATAPI exit_i(EXIT_FAILURE);
+	KExit(EXIT_FAILURE);
 }
 
 

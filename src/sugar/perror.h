@@ -179,7 +179,7 @@ void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_
 		PLATAPI ReportCompilerMessage(kctx, taglevel, Trace_pline(trace), S_text(emsg));
 		if(taglevel <= ErrTag) {
 			if(trace == NULL) {
-				PLATAPI exit_i(EXIT_FAILURE);
+				KExit(EXIT_FAILURE);
 			}
 			if(trace->errorSymbol != 0 && trace->faultType != 0) {
 				KLIB KonohaRuntime_raise(kctx, trace->errorSymbol, trace->faultType, emsg, trace->baseStack);

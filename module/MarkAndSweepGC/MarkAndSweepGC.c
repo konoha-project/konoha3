@@ -233,7 +233,7 @@ static void Arena_free(GcManager *mng)
 
 static void THROW_OutOfMemory(KonohaContext *kctx, size_t size)
 {
-	PLATAPI exit_i(EXIT_FAILURE);
+	KExit(EXIT_FAILURE);
 }
 
 static inline void do_bzero(void *ptr, size_t size)

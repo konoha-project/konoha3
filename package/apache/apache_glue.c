@@ -112,10 +112,10 @@ static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	base->h.reftrace = kapacheshare_reftrace;
 	base->h.free     = kapacheshare_free;
 	KLIB KonohaRuntime_setModule(kctx, MOD_APACHE, &base->h, trace);
-	base->cRequest = KLIB kNameSpace_defineClass(kctx, ns, NULL, &Def, 0);
-	base->cAprTable = KLIB kNameSpace_defineClass(kctx, ns, NULL, &aprTableDef, 0);
-	base->cAprTableEntry = KLIB kNameSpace_defineClass(kctx, ns, NULL, &aprTableEntryDef, 0);
-	base->cApache = KLIB kNameSpace_defineClass(kctx, ns, NULL, &apacheDef, 0);
+	base->cRequest = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &Def, 0);
+	base->cAprTable = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &aprTableDef, 0);
+	base->cAprTableEntry = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &aprTableEntryDef, 0);
+	base->cApache = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &apacheDef, 0);
 
 	KDEFINE_INT_CONST IntData[] = {
 #define DEFINE_KEYWORD(KW) {#KW, TY_int, KW}

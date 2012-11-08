@@ -175,7 +175,7 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 		defIterator.cparamsize  = 1;
 		defIterator.cParamItems = &IteratorParam;
 
-		CT_Iterator = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defIterator, trace);
+		CT_Iterator = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defIterator, trace);
 		CT_StringIterator = CT_p0(kctx, CT_Iterator, TY_String);
 		CT_GenericIterator = CT_p0(kctx, CT_Iterator, TY_0);
 	}

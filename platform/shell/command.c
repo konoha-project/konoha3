@@ -180,12 +180,12 @@ static void CommandLine_Define(KonohaContext *kctx, char *keyvalue)
 		}
 		KBaseTrace(trace);
 		if(!KLIB kNameSpace_SetConstData(kctx, KNULL(NameSpace), key, ty, unboxValue, trace)) {
-			PLATAPI exit_i(EXIT_FAILURE);
+			KExit(EXIT_FAILURE);
 		}
 	}
 	else {
 		fprintf(stdout, "invalid define option: use -D<key>=<value>\n");
-		PLATAPI exit_i(EXIT_FAILURE);
+		KExit(EXIT_FAILURE);
 	}
 }
 
@@ -195,9 +195,7 @@ static void CommandLine_Import(KonohaContext *kctx, char *packageName)
 	char *bufname = ALLOCA(char, len);
 	memcpy(bufname, packageName, len);
 	KBaseTrace(trace);
-	if(!(KLIB kNameSpace_importPackage(kctx, KNULL(NameSpace), bufname, trace))) {
-		PLATAPI exit_i(EXIT_FAILURE);
-	}
+	KLIB kNameSpace_ImportPackage(kctx, KNULL(NameSpace), bufname, trace);
 }
 
 //static void konoha_startup(KonohaContext *kctx, const char *startup_script)
@@ -214,7 +212,7 @@ static void CommandLine_Import(KonohaContext *kctx, char *packageName)
 //	}
 //	snprintf(buf, sizeof(buf), "%s%s/%s.k", path, local, startup_script);
 //	if(!Konoha_LoadScript((KonohaContext*)kctx, (const char*)buf)) {
-//		PLATAPI exit_i(EXIT_FAILURE);
+//		KExit(EXIT_FAILURE);
 //	}
 //}
 
@@ -288,7 +286,7 @@ static void Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **argv
 
 		case 'q': {
 			fprintf(stdout, "%s-%lu\n", K_VERSION, (long unsigned)K_DATE);
-			PLATAPI exit_i(EXIT_SUCCESS);  //
+			KExit(EXIT_SUCCESS);  //
 		}
 		break;
 

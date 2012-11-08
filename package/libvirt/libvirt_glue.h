@@ -472,7 +472,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirConnectAuthPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirConnectAuthPtr, trace);
+	KonohaClass *ctvirConnectAuthPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirConnectAuthPtr, trace);
 	TY_virConnectAuthPtr = ctvirConnectAuthPtr->typeId;
 
 	KDEFINE_CLASS defvirConnectCloseFunc = {
@@ -483,7 +483,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirConnectCloseFunc = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirConnectCloseFunc, trace);
+	KonohaClass *ctvirConnectCloseFunc = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirConnectCloseFunc, trace);
 	TY_virConnectCloseFunc = ctvirConnectCloseFunc->typeId;
 
 	KDEFINE_CLASS defvirConnectDomainEventCallback = {
@@ -494,7 +494,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirConnectDomainEventCallback = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirConnectDomainEventCallback, trace);
+	KonohaClass *ctvirConnectDomainEventCallback = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirConnectDomainEventCallback, trace);
 	TY_virConnectDomainEventCallback = ctvirConnectDomainEventCallback->typeId;
 
 	KDEFINE_CLASS defvirConnectDomainEventGenericCallback = {
@@ -505,7 +505,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirConnectDomainEventGenericCallback = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirConnectDomainEventGenericCallback, trace);
+	KonohaClass *ctvirConnectDomainEventGenericCallback = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirConnectDomainEventGenericCallback, trace);
 	TY_virConnectDomainEventGenericCallback = ctvirConnectDomainEventGenericCallback->typeId;
 
 	KDEFINE_CLASS defvirConnectPtr = {
@@ -516,7 +516,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirConnectPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirConnectPtr, trace);
+	KonohaClass *ctvirConnectPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirConnectPtr, trace);
 	TY_virConnectPtr = ctvirConnectPtr->typeId;
 
 	KDEFINE_CLASS defvirDomainBlockInfoPtr = {
@@ -527,7 +527,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirDomainBlockInfoPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirDomainBlockInfoPtr, trace);
+	KonohaClass *ctvirDomainBlockInfoPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirDomainBlockInfoPtr, trace);
 	TY_virDomainBlockInfoPtr = ctvirDomainBlockInfoPtr->typeId;
 
 	KDEFINE_CLASS defvirDomainBlockJobInfoPtr = {
@@ -538,7 +538,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirDomainBlockJobInfoPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirDomainBlockJobInfoPtr, trace);
+	KonohaClass *ctvirDomainBlockJobInfoPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirDomainBlockJobInfoPtr, trace);
 	TY_virDomainBlockJobInfoPtr = ctvirDomainBlockJobInfoPtr->typeId;
 
 	KDEFINE_CLASS defvirDomainBlockStatsPtr = {
@@ -549,7 +549,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirDomainBlockStatsPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirDomainBlockStatsPtr, trace);
+	KonohaClass *ctvirDomainBlockStatsPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirDomainBlockStatsPtr, trace);
 	TY_virDomainBlockStatsPtr = ctvirDomainBlockStatsPtr->typeId;
 
 	KDEFINE_CLASS defvirDomainControlInfoPtr = {
@@ -560,7 +560,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirDomainControlInfoPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirDomainControlInfoPtr, trace);
+	KonohaClass *ctvirDomainControlInfoPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirDomainControlInfoPtr, trace);
 	TY_virDomainControlInfoPtr = ctvirDomainControlInfoPtr->typeId;
 
 	KDEFINE_CLASS defvirDomainDiskErrorPtr = {
@@ -571,7 +571,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirDomainDiskErrorPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirDomainDiskErrorPtr, trace);
+	KonohaClass *ctvirDomainDiskErrorPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirDomainDiskErrorPtr, trace);
 	TY_virDomainDiskErrorPtr = ctvirDomainDiskErrorPtr->typeId;
 
 	KDEFINE_CLASS defvirDomainInfoPtr = {
@@ -582,7 +582,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirDomainInfoPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirDomainInfoPtr, trace);
+	KonohaClass *ctvirDomainInfoPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirDomainInfoPtr, trace);
 	TY_virDomainInfoPtr = ctvirDomainInfoPtr->typeId;
 
 	KDEFINE_CLASS defvirDomainInterfaceStatsPtr = {
@@ -593,7 +593,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirDomainInterfaceStatsPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirDomainInterfaceStatsPtr, trace);
+	KonohaClass *ctvirDomainInterfaceStatsPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirDomainInterfaceStatsPtr, trace);
 	TY_virDomainInterfaceStatsPtr = ctvirDomainInterfaceStatsPtr->typeId;
 
 	KDEFINE_CLASS defvirDomainJobInfoPtr = {
@@ -604,7 +604,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirDomainJobInfoPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirDomainJobInfoPtr, trace);
+	KonohaClass *ctvirDomainJobInfoPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirDomainJobInfoPtr, trace);
 	TY_virDomainJobInfoPtr = ctvirDomainJobInfoPtr->typeId;
 
 	KDEFINE_CLASS defvirDomainMemoryStatPtr = {
@@ -615,7 +615,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirDomainMemoryStatPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirDomainMemoryStatPtr, trace);
+	KonohaClass *ctvirDomainMemoryStatPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirDomainMemoryStatPtr, trace);
 	TY_virDomainMemoryStatPtr = ctvirDomainMemoryStatPtr->typeId;
 
 	KDEFINE_CLASS defvirDomainPtr = {
@@ -626,7 +626,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirDomainPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirDomainPtr, trace);
+	KonohaClass *ctvirDomainPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirDomainPtr, trace);
 	TY_virDomainPtr = ctvirDomainPtr->typeId;
 
 	KDEFINE_CLASS defvirDomainPtrPtrPtr = {
@@ -637,7 +637,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirDomainPtrPtrPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirDomainPtrPtrPtr, trace);
+	KonohaClass *ctvirDomainPtrPtrPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirDomainPtrPtrPtr, trace);
 	TY_virDomainPtrPtrPtr = ctvirDomainPtrPtrPtr->typeId;
 
 	KDEFINE_CLASS defvirDomainSnapshotPtr = {
@@ -648,7 +648,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirDomainSnapshotPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirDomainSnapshotPtr, trace);
+	KonohaClass *ctvirDomainSnapshotPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirDomainSnapshotPtr, trace);
 	TY_virDomainSnapshotPtr = ctvirDomainSnapshotPtr->typeId;
 
 	KDEFINE_CLASS defvirDomainSnapshotPtrPtrPtr = {
@@ -659,7 +659,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirDomainSnapshotPtrPtrPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirDomainSnapshotPtrPtrPtr, trace);
+	KonohaClass *ctvirDomainSnapshotPtrPtrPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirDomainSnapshotPtrPtrPtr, trace);
 	TY_virDomainSnapshotPtrPtrPtr = ctvirDomainSnapshotPtrPtrPtr->typeId;
 
 	KDEFINE_CLASS defvirEventAddHandleFunc = {
@@ -670,7 +670,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirEventAddHandleFunc = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirEventAddHandleFunc, trace);
+	KonohaClass *ctvirEventAddHandleFunc = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirEventAddHandleFunc, trace);
 	TY_virEventAddHandleFunc = ctvirEventAddHandleFunc->typeId;
 
 	KDEFINE_CLASS defvirEventAddTimeoutFunc = {
@@ -681,7 +681,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirEventAddTimeoutFunc = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirEventAddTimeoutFunc, trace);
+	KonohaClass *ctvirEventAddTimeoutFunc = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirEventAddTimeoutFunc, trace);
 	TY_virEventAddTimeoutFunc = ctvirEventAddTimeoutFunc->typeId;
 
 	KDEFINE_CLASS defvirEventHandleCallback = {
@@ -692,7 +692,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirEventHandleCallback = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirEventHandleCallback, trace);
+	KonohaClass *ctvirEventHandleCallback = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirEventHandleCallback, trace);
 	TY_virEventHandleCallback = ctvirEventHandleCallback->typeId;
 
 	KDEFINE_CLASS defvirEventRemoveHandleFunc = {
@@ -703,7 +703,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirEventRemoveHandleFunc = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirEventRemoveHandleFunc, trace);
+	KonohaClass *ctvirEventRemoveHandleFunc = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirEventRemoveHandleFunc, trace);
 	TY_virEventRemoveHandleFunc = ctvirEventRemoveHandleFunc->typeId;
 
 	KDEFINE_CLASS defvirEventRemoveTimeoutFunc = {
@@ -714,7 +714,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirEventRemoveTimeoutFunc = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirEventRemoveTimeoutFunc, trace);
+	KonohaClass *ctvirEventRemoveTimeoutFunc = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirEventRemoveTimeoutFunc, trace);
 	TY_virEventRemoveTimeoutFunc = ctvirEventRemoveTimeoutFunc->typeId;
 
 	KDEFINE_CLASS defvirEventTimeoutCallback = {
@@ -725,7 +725,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirEventTimeoutCallback = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirEventTimeoutCallback, trace);
+	KonohaClass *ctvirEventTimeoutCallback = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirEventTimeoutCallback, trace);
 	TY_virEventTimeoutCallback = ctvirEventTimeoutCallback->typeId;
 
 	KDEFINE_CLASS defvirEventUpdateHandleFunc = {
@@ -736,7 +736,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirEventUpdateHandleFunc = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirEventUpdateHandleFunc, trace);
+	KonohaClass *ctvirEventUpdateHandleFunc = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirEventUpdateHandleFunc, trace);
 	TY_virEventUpdateHandleFunc = ctvirEventUpdateHandleFunc->typeId;
 
 	KDEFINE_CLASS defvirEventUpdateTimeoutFunc = {
@@ -747,7 +747,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirEventUpdateTimeoutFunc = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirEventUpdateTimeoutFunc, trace);
+	KonohaClass *ctvirEventUpdateTimeoutFunc = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirEventUpdateTimeoutFunc, trace);
 	TY_virEventUpdateTimeoutFunc = ctvirEventUpdateTimeoutFunc->typeId;
 
 	KDEFINE_CLASS defvirFreeCallback = {
@@ -758,7 +758,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirFreeCallback = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirFreeCallback, trace);
+	KonohaClass *ctvirFreeCallback = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirFreeCallback, trace);
 	TY_virFreeCallback = ctvirFreeCallback->typeId;
 
 	KDEFINE_CLASS defvirInterfacePtr = {
@@ -769,7 +769,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirInterfacePtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirInterfacePtr, trace);
+	KonohaClass *ctvirInterfacePtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirInterfacePtr, trace);
 	TY_virInterfacePtr = ctvirInterfacePtr->typeId;
 
 	KDEFINE_CLASS defvirInterfacePtrPtrPtr = {
@@ -780,7 +780,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirInterfacePtrPtrPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirInterfacePtrPtrPtr, trace);
+	KonohaClass *ctvirInterfacePtrPtrPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirInterfacePtrPtrPtr, trace);
 	TY_virInterfacePtrPtrPtr = ctvirInterfacePtrPtrPtr->typeId;
 
 	KDEFINE_CLASS defvirNWFilterPtr = {
@@ -791,7 +791,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirNWFilterPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirNWFilterPtr, trace);
+	KonohaClass *ctvirNWFilterPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirNWFilterPtr, trace);
 	TY_virNWFilterPtr = ctvirNWFilterPtr->typeId;
 
 	KDEFINE_CLASS defvirNWFilterPtrPtrPtr = {
@@ -802,7 +802,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirNWFilterPtrPtrPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirNWFilterPtrPtrPtr, trace);
+	KonohaClass *ctvirNWFilterPtrPtrPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirNWFilterPtrPtrPtr, trace);
 	TY_virNWFilterPtrPtrPtr = ctvirNWFilterPtrPtrPtr->typeId;
 
 	KDEFINE_CLASS defvirNetworkPtr = {
@@ -813,7 +813,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirNetworkPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirNetworkPtr, trace);
+	KonohaClass *ctvirNetworkPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirNetworkPtr, trace);
 	TY_virNetworkPtr = ctvirNetworkPtr->typeId;
 
 	KDEFINE_CLASS defvirNetworkPtrPtrPtr = {
@@ -824,7 +824,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirNetworkPtrPtrPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirNetworkPtrPtrPtr, trace);
+	KonohaClass *ctvirNetworkPtrPtrPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirNetworkPtrPtrPtr, trace);
 	TY_virNetworkPtrPtrPtr = ctvirNetworkPtrPtrPtr->typeId;
 
 	KDEFINE_CLASS defvirNodeCPUStatsPtr = {
@@ -835,7 +835,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirNodeCPUStatsPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirNodeCPUStatsPtr, trace);
+	KonohaClass *ctvirNodeCPUStatsPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirNodeCPUStatsPtr, trace);
 	TY_virNodeCPUStatsPtr = ctvirNodeCPUStatsPtr->typeId;
 
 	KDEFINE_CLASS defvirNodeDevicePtr = {
@@ -846,7 +846,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirNodeDevicePtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirNodeDevicePtr, trace);
+	KonohaClass *ctvirNodeDevicePtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirNodeDevicePtr, trace);
 	TY_virNodeDevicePtr = ctvirNodeDevicePtr->typeId;
 
 	KDEFINE_CLASS defvirNodeDevicePtrPtrPtr = {
@@ -857,7 +857,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirNodeDevicePtrPtrPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirNodeDevicePtrPtrPtr, trace);
+	KonohaClass *ctvirNodeDevicePtrPtrPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirNodeDevicePtrPtrPtr, trace);
 	TY_virNodeDevicePtrPtrPtr = ctvirNodeDevicePtrPtrPtr->typeId;
 
 	KDEFINE_CLASS defvirNodeInfoPtr = {
@@ -868,7 +868,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirNodeInfoPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirNodeInfoPtr, trace);
+	KonohaClass *ctvirNodeInfoPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirNodeInfoPtr, trace);
 	TY_virNodeInfoPtr = ctvirNodeInfoPtr->typeId;
 
 	KDEFINE_CLASS defvirNodeMemoryStatsPtr = {
@@ -879,7 +879,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirNodeMemoryStatsPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirNodeMemoryStatsPtr, trace);
+	KonohaClass *ctvirNodeMemoryStatsPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirNodeMemoryStatsPtr, trace);
 	TY_virNodeMemoryStatsPtr = ctvirNodeMemoryStatsPtr->typeId;
 
 	KDEFINE_CLASS defvirSecretPtr = {
@@ -890,7 +890,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirSecretPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirSecretPtr, trace);
+	KonohaClass *ctvirSecretPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirSecretPtr, trace);
 	TY_virSecretPtr = ctvirSecretPtr->typeId;
 
 	KDEFINE_CLASS defvirSecretPtrPtrPtr = {
@@ -901,7 +901,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirSecretPtrPtrPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirSecretPtrPtrPtr, trace);
+	KonohaClass *ctvirSecretPtrPtrPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirSecretPtrPtrPtr, trace);
 	TY_virSecretPtrPtrPtr = ctvirSecretPtrPtrPtr->typeId;
 
 	KDEFINE_CLASS defvirSecurityLabelPtr = {
@@ -912,7 +912,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirSecurityLabelPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirSecurityLabelPtr, trace);
+	KonohaClass *ctvirSecurityLabelPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirSecurityLabelPtr, trace);
 	TY_virSecurityLabelPtr = ctvirSecurityLabelPtr->typeId;
 
 	KDEFINE_CLASS defvirSecurityLabelPtrPtr = {
@@ -923,7 +923,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirSecurityLabelPtrPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirSecurityLabelPtrPtr, trace);
+	KonohaClass *ctvirSecurityLabelPtrPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirSecurityLabelPtrPtr, trace);
 	TY_virSecurityLabelPtrPtr = ctvirSecurityLabelPtrPtr->typeId;
 
 	KDEFINE_CLASS defvirSecurityModelPtr = {
@@ -934,7 +934,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirSecurityModelPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirSecurityModelPtr, trace);
+	KonohaClass *ctvirSecurityModelPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirSecurityModelPtr, trace);
 	TY_virSecurityModelPtr = ctvirSecurityModelPtr->typeId;
 
 	KDEFINE_CLASS defvirStoragePoolInfoPtr = {
@@ -945,7 +945,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirStoragePoolInfoPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirStoragePoolInfoPtr, trace);
+	KonohaClass *ctvirStoragePoolInfoPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirStoragePoolInfoPtr, trace);
 	TY_virStoragePoolInfoPtr = ctvirStoragePoolInfoPtr->typeId;
 
 	KDEFINE_CLASS defvirStoragePoolPtr = {
@@ -956,7 +956,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirStoragePoolPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirStoragePoolPtr, trace);
+	KonohaClass *ctvirStoragePoolPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirStoragePoolPtr, trace);
 	TY_virStoragePoolPtr = ctvirStoragePoolPtr->typeId;
 
 	KDEFINE_CLASS defvirStoragePoolPtrPtrPtr = {
@@ -967,7 +967,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirStoragePoolPtrPtrPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirStoragePoolPtrPtrPtr, trace);
+	KonohaClass *ctvirStoragePoolPtrPtrPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirStoragePoolPtrPtrPtr, trace);
 	TY_virStoragePoolPtrPtrPtr = ctvirStoragePoolPtrPtrPtr->typeId;
 
 	KDEFINE_CLASS defvirStorageVolInfoPtr = {
@@ -978,7 +978,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirStorageVolInfoPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirStorageVolInfoPtr, trace);
+	KonohaClass *ctvirStorageVolInfoPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirStorageVolInfoPtr, trace);
 	TY_virStorageVolInfoPtr = ctvirStorageVolInfoPtr->typeId;
 
 	KDEFINE_CLASS defvirStorageVolPtr = {
@@ -989,7 +989,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirStorageVolPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirStorageVolPtr, trace);
+	KonohaClass *ctvirStorageVolPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirStorageVolPtr, trace);
 	TY_virStorageVolPtr = ctvirStorageVolPtr->typeId;
 
 	KDEFINE_CLASS defvirStorageVolPtrPtrPtr = {
@@ -1000,7 +1000,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirStorageVolPtrPtrPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirStorageVolPtrPtrPtr, trace);
+	KonohaClass *ctvirStorageVolPtrPtrPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirStorageVolPtrPtrPtr, trace);
 	TY_virStorageVolPtrPtrPtr = ctvirStorageVolPtrPtrPtr->typeId;
 
 	KDEFINE_CLASS defvirStreamEventCallback = {
@@ -1011,7 +1011,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirStreamEventCallback = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirStreamEventCallback, trace);
+	KonohaClass *ctvirStreamEventCallback = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirStreamEventCallback, trace);
 	TY_virStreamEventCallback = ctvirStreamEventCallback->typeId;
 
 	KDEFINE_CLASS defvirStreamPtr = {
@@ -1022,7 +1022,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirStreamPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirStreamPtr, trace);
+	KonohaClass *ctvirStreamPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirStreamPtr, trace);
 	TY_virStreamPtr = ctvirStreamPtr->typeId;
 
 	KDEFINE_CLASS defvirStreamSinkFunc = {
@@ -1033,7 +1033,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirStreamSinkFunc = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirStreamSinkFunc, trace);
+	KonohaClass *ctvirStreamSinkFunc = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirStreamSinkFunc, trace);
 	TY_virStreamSinkFunc = ctvirStreamSinkFunc->typeId;
 
 	KDEFINE_CLASS defvirStreamSourceFunc = {
@@ -1044,7 +1044,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirStreamSourceFunc = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirStreamSourceFunc, trace);
+	KonohaClass *ctvirStreamSourceFunc = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirStreamSourceFunc, trace);
 	TY_virStreamSourceFunc = ctvirStreamSourceFunc->typeId;
 
 	KDEFINE_CLASS defvirTypedParameterPtr = {
@@ -1055,7 +1055,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirTypedParameterPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirTypedParameterPtr, trace);
+	KonohaClass *ctvirTypedParameterPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirTypedParameterPtr, trace);
 	TY_virTypedParameterPtr = ctvirTypedParameterPtr->typeId;
 
 	KDEFINE_CLASS defvirVcpuInfoPtr = {
@@ -1066,7 +1066,7 @@ static void virt_loadStructData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		.init = virt_common_ptr_init,
 		.free = virt_common_ptr_free,
 	};
-	KonohaClass *ctvirVcpuInfoPtr = KLIB kNameSpace_defineClass(kctx, ns, NULL, &defvirVcpuInfoPtr, trace);
+	KonohaClass *ctvirVcpuInfoPtr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defvirVcpuInfoPtr, trace);
 	TY_virVcpuInfoPtr = ctvirVcpuInfoPtr->typeId;
 
 }
