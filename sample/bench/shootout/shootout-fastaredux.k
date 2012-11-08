@@ -16,7 +16,7 @@ import("konoha.string");
 import("konoha.bytes");
 import("konoha.file");
 
-setTransparentGlobalVariable(true);
+AllowImplicitGlobalVariable(true);
 
 const LINE_LENGTH=60;
 const OUT_BUFFER_SIZE = 256*1024;

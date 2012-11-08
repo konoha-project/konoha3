@@ -31,7 +31,7 @@ extern "C"{
 
 // --------------------------------------------------------------------------
 
-static KMETHOD NameSpace_setTransparentGlobalVariable_(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD NameSpace_AllowImplicitGlobalVariable_(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kNameSpace_Set(TransparentGlobalVariable, sfp[0].asNameSpace, sfp[1].boolValue);
 }
@@ -56,7 +56,7 @@ static	kbool_t global_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 	KRequirePackage("konoha.field", trace);
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(NameSpace_setTransparentGlobalVariable_), TY_void, TY_NameSpace, MN_("setTransparentGlobalVariable"), 1, TY_boolean, FN_("enabled"),
+		_Public, _F(NameSpace_AllowImplicitGlobalVariable_), TY_void, TY_NameSpace, MN_("AllowImplicitGlobalVariable"), 1, TY_boolean, FN_("enabled"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

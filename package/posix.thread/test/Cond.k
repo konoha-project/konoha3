@@ -2,7 +2,7 @@
 import("konoha");
 import("konoha.global");
 import("posix.thread");
-setTransparentGlobalVariable(true);
+AllowImplicitGlobalVariable(true);
 
 Mutex m = new Mutex();
 Cond c = new Cond();

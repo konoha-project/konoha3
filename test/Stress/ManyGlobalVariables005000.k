@@ -1,7 +1,7 @@
 // written by kimio kuramitsu
 
 import("konoha.global");
-setTransparentGlobalVariable(true);
+AllowImplicitGlobalVariable(true);
 int v0 = 0;
 int v1 = 1;
 int v2 = 2;

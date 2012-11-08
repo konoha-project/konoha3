@@ -12,7 +12,7 @@ import("konoha.array");
 import("cstyle", "while");
 // //import("konoha.assign"); Don't use any more
 import("konoha.new");
-setTransparentGlobalVariable(true);
+AllowImplicitGlobalVariable(true);
 
 const width = 64;
 const height = 64;

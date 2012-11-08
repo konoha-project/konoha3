@@ -14,7 +14,7 @@ import("konoha.array");
 import("konoha.bytes");
 import("konoha.file");
 
-setTransparentGlobalVariable(true);
+AllowImplicitGlobalVariable(true);
 
 const N=250000; /*25000000*/
 const EOL = "\n";
