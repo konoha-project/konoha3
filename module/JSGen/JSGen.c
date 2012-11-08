@@ -4,10 +4,10 @@
  * modification, are permitted provided that the following conditions are met:
  *
  *  * Redistributions of source code must retain the above copyright notice,
- *	this list of conditions and the following disclaimer.
+ *    this list of conditions and the following disclaimer.
  *  * Redistributions in binary form must reproduce the above copyright
- *	notice, this list of conditions and the following disclaimer in the
- *	documentation and/or other materials provided with the distribution.
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
@@ -22,12 +22,198 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#ifdef USE_JS_VISITOR
 #include <stdio.h>
+#include <iconv.h>
+#include <errno.h>
+#include <minikonoha/minikonoha.h>
+#include <minikonoha/klib.h>
+#include <minikonoha/sugar.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+struct IRBuilder;
+
+typedef struct IRBuilder IRBuilder;
+
+typedef void (*VisitStmt_t)(KonohaContext *kctx, IRBuilder *self, kStmt *stmt);
+typedef void (*VisitExpr_t)(KonohaContext *kctx, IRBuilder *self, kExpr *expr);
+
+struct IRBuilderAPI {
+	VisitStmt_t visitErrStmt;
+	VisitStmt_t visitExprStmt;
+	VisitStmt_t visitBlockStmt;
+	VisitStmt_t visitReturnStmt;
+	VisitStmt_t visitIfStmt;
+	VisitStmt_t visitLoopStmt;
+	VisitStmt_t visitJumpStmt;
+	VisitStmt_t visitTryStmt;
+	VisitStmt_t visitUndefinedStmt;
+	VisitExpr_t visitConstExpr;
+	VisitExpr_t visitNConstExpr;
+	VisitExpr_t visitNewExpr;
+	VisitExpr_t visitNullExpr;
+	VisitExpr_t visitLocalExpr;
+	VisitExpr_t visitBlockExpr;
+	VisitExpr_t visitFieldExpr;
+	VisitExpr_t visitCallExpr;
+	VisitExpr_t visitAndExpr;
+	VisitExpr_t visitOrExpr;
+	VisitExpr_t visitLetExpr;
+	VisitExpr_t visitStackTopExpr;
+	void (*fn_init)(KonohaContext *kctx, struct IRBuilder *builder, kMethod *method);
+	void (*fn_free)(KonohaContext *kctx, struct IRBuilder *builder, kMethod *method);
+};
+
+#define VISITOR_LIST(OP) \
+	OP(ErrStmt)\
+	OP(ExprStmt)\
+	OP(BlockStmt)\
+	OP(ReturnStmt)\
+	OP(IfStmt)\
+	OP(LoopStmt)\
+	OP(JumpStmt)\
+	OP(TryStmt)\
+	OP(UndefinedStmt)\
+	OP(ConstExpr)\
+	OP(NConstExpr)\
+	OP(NewExpr)\
+	OP(NullExpr)\
+	OP(LocalExpr)\
+	OP(BlockExpr)\
+	OP(FieldExpr)\
+	OP(CallExpr)\
+	OP(AndExpr)\
+	OP(OrExpr)\
+	OP(LetExpr)\
+	OP(StackTopExpr)
+
+struct IRBuilder {
+	struct IRBuilderAPI api;
+	void *local_fields;
+	kStmt* currentStmt; /*FIXME(ide): need to reftrace currentStmt */
+	int a; /* whatis a ? */
+	int shift;
+	int espidx;
+};
+
+typedef struct DumpVisitor {
+	struct IRBuilder base;
+} DumpVisitor;
+
+typedef struct DumpVisitorLocal {
+	int indent;
+	kbool_t isIndentEmitted;
+	kMethod *visitingMethod;
+} DumpVisitorLocal;
+
+typedef DumpVisitor JSVisitor;
+typedef DumpVisitorLocal JSVisitorLocal;
+
+struct VMCodeBuilder {
+	struct IRBuilder base;
+};
+
+static void handleStmt(KonohaContext *kctx, IRBuilder *builder, kStmt *stmt)
+{
+	kStmt *beforeStmt = builder->currentStmt;
+	builder->currentStmt = stmt;
+	switch(stmt->build) {
+		case TSTMT_ERR:    builder->api.visitErrStmt(kctx, builder, stmt);    return;
+		case TSTMT_EXPR:   builder->api.visitExprStmt(kctx, builder, stmt);   break;
+		case TSTMT_BLOCK:  builder->api.visitBlockStmt(kctx, builder, stmt);  break;
+		case TSTMT_RETURN: builder->api.visitReturnStmt(kctx, builder, stmt); return;
+		case TSTMT_IF:     builder->api.visitIfStmt(kctx, builder, stmt);     break;
+		case TSTMT_LOOP:   builder->api.visitLoopStmt(kctx, builder, stmt);   break;
+		case TSTMT_JUMP:   builder->api.visitJumpStmt(kctx, builder, stmt);   break;
+		case TSTMT_TRY:    builder->api.visitTryStmt(kctx, builder, stmt);    break;
+		default: builder->api.visitUndefinedStmt(kctx, builder, stmt);        break;
+	}
+	builder->currentStmt = beforeStmt;
+}
+
+static void handleExpr(KonohaContext *kctx, IRBuilder *builder, kExpr *expr)
+{
+	int a = builder->a;
+	int espidx = builder->espidx;
+	int shift = builder->shift;
+	switch(expr->build) {
+	case TEXPR_CONST:    builder->api.visitConstExpr(kctx, builder, expr);  break;
+	case TEXPR_NEW:      builder->api.visitNewExpr(kctx, builder, expr);    break;
+	case TEXPR_NULL:     builder->api.visitNullExpr(kctx, builder, expr);   break;
+	case TEXPR_NCONST:   builder->api.visitNConstExpr(kctx, builder, expr); break;
+	case TEXPR_LOCAL:    builder->api.visitLocalExpr(kctx, builder, expr);  break;
+	case TEXPR_BLOCK:    builder->api.visitBlockExpr(kctx, builder, expr);  break;
+	case TEXPR_FIELD:    builder->api.visitFieldExpr(kctx, builder, expr);  break;
+	case TEXPR_CALL:     builder->api.visitCallExpr(kctx, builder, expr);   break;
+	case TEXPR_AND:      builder->api.visitAndExpr(kctx, builder, expr);    break;
+	case TEXPR_OR:       builder->api.visitOrExpr(kctx, builder, expr);     break;
+	case TEXPR_LET:      builder->api.visitLetExpr(kctx, builder, expr);    break;
+	case TEXPR_STACKTOP: builder->api.visitStackTopExpr(kctx, builder, expr);break;
+	default: DBG_ABORT("unknown expr=%d", expr->build);
+	}
+	builder->a = a;
+	builder->espidx = espidx;
+	builder->shift = shift;
+}
+
+static void visitBlock(KonohaContext *kctx, IRBuilder *builder, kBlock *bk)
+{
+	int a = builder->a;
+	int espidx = builder->espidx;
+	int shift = builder->shift;
+	builder->espidx = (bk->esp->build == TEXPR_STACKTOP) ? shift + bk->esp->index : bk->esp->index;
+	size_t i;
+	for (i = 0; i < kArray_size(bk->StmtList); i++) {
+		kStmt *stmt = bk->StmtList->StmtItems[i];
+		if(stmt->syn == NULL) continue;
+		//ctxcode->uline = stmt->uline;
+		handleStmt(kctx, builder, stmt);
+	}
+	builder->a = a;
+	builder->espidx = espidx;
+	builder->shift = shift;
+}
+
+/* ------------------------------------------------------------------------ */
+/* [Statement/Expression API] */
+static kBlock* Stmt_getFirstBlock(KonohaContext *kctx, kStmt *stmt)
+{
+	return SUGAR kStmt_getBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
+}
+
+static kBlock* Stmt_getElseBlock(KonohaContext *kctx, kStmt *stmt)
+{
+	return SUGAR kStmt_getBlock(kctx, stmt, NULL, KW_else, K_NULLBLOCK);
+}
+
+static kExpr* Stmt_getFirstExpr(KonohaContext *kctx, kStmt *stmt)
+{
+	return SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL);
+}
+
+static kStmt *kStmt_getStmt(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw)
+{
+	return (kStmt *) kStmt_getObject(kctx, stmt, kw, NULL);
+}
+
+static kMethod* CallExpr_getMethod(kExpr *expr)
+{
+	return expr->cons->MethodItems[0];
+}
+
+static int CallExpr_getArgCount(kExpr *expr)
+{
+	return kArray_size(expr->cons) - 2;
+}
+
+static kString* Stmt_getErrorMessage(KonohaContext *kctx, kStmt *stmt)
+{
+	kString* msg = (kString *)kStmt_getObjectNULL(kctx, stmt, KW_ERR);
+	DBG_ASSERT(IS_String(msg));
+	return msg;
+}
 
 #define MN_isNotNull MN_("isNotNull")
 #define MN_isNull    MN_("isNull")
@@ -576,9 +762,51 @@ static IRBuilder *createJSVisitor(IRBuilder *builder)
 	return builder;
 }
 
-#ifdef __cplusplus
+static void JSGen_GenerateCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk, int options)
+{
+	DBG_P("START CODE GENERATION..");
+	INIT_GCSTACK();
+	//if(ctxcode == NULL) {
+	//	kmodcode->header.setupModuleContext(kctx, NULL, 1/*new ctx*/);
+	//}
+
+	IRBuilder *builder, builderbuf;
+
+	builder = createJSVisitor(&builderbuf);
+	builder->api.fn_init(kctx, builder, mtd);
+	visitBlock(kctx, builder, bk);
+	builder->api.fn_free(kctx, builder, mtd);
+
+	RESET_GCSTACK();
 }
+
+
+
+static KMETHOD MethodFunc_GenerateCode(KonohaContext *kctx, KonohaStack *sfp)
+{
+	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].calledMethod));
+	JSGen_GenerateCode(kctx, (kMethod*)sfp[1].asObject, (kBlock*)sfp[2].asObject, sfp[3].unboxValue);
+}
+
+static void* GetCodeGenerateMethodFunc()
+{
+	return MethodFunc_GenerateCode;
+}
+
+// -------------------------------------------------------------------------
+
+kbool_t LoadJSGenModule(KonohaFactory *factory, ModuleType type)
+{
+	static KModuleInfo ModuleInfo = {
+		"JSGen", K_VERSION, 0, "jsgen",
+	};
+	factory->CodeGeneratorInfo         = &ModuleInfo;
+	factory->GenerateCode              = JSGen_GenerateCode;
+	factory->GetCodeGenerateMethodFunc = GetCodeGenerateMethodFunc;
+	return true;
+}
+
+#ifdef __cplusplus
+} /* extern "C" */
 #endif
 
-#undef DUMPER
-#endif /* USE_JS_VISITOR */

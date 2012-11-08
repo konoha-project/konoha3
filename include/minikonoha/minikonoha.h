@@ -449,6 +449,43 @@ typedef enum {
 
 struct KObjectVisitor *visitor;
 
+
+/* ------------------------------------------------------------------------ */
+
+#define kAbstractObject                 const void
+typedef const struct kObjectVar         kObject;
+typedef struct kObjectVar               kObjectVar;
+typedef const struct kBooleanVar        kBoolean;
+typedef struct kBooleanVar              kBooleanVar;
+typedef const struct kIntVar            kInt;
+typedef struct kIntVar                  kIntVar;
+typedef const struct kStringVar         kString;
+typedef struct kStringVar               kStringVar;
+typedef const struct kArrayVar          kArray;
+typedef struct kArrayVar                kArrayVar;
+typedef const struct kParamVar          kParam;
+typedef struct kParamVar                kParamVar;
+typedef const struct kMethodVar         kMethod;
+typedef struct kMethodVar               kMethodVar;
+typedef const struct kFuncVar           kFunc;
+typedef struct kFuncVar                 kFuncVar;
+typedef const struct kNameSpaceVar      kNameSpace;
+typedef struct kNameSpaceVar            kNameSpaceVar;
+
+/* sugar.h */
+typedef const struct kTokenVar          kToken;
+typedef struct kTokenVar                kTokenVar;
+typedef const struct kExprVar           kExpr;
+typedef struct kExprVar                 kExprVar;
+typedef const struct kStmtVar           kStmt;
+typedef const struct kStmtVar           kStmtNULL;  // Nullable
+typedef struct kStmtVar                 kStmtVar;
+typedef const struct kBlockVar          kBlock;
+typedef struct kBlockVar                kBlockVar;
+typedef struct kGammaVar                kGamma;
+typedef struct kGammaVar                kGammaVar;
+
+
 struct KonohaFactory {
 	// settings
 	const char *name;
@@ -545,7 +582,7 @@ struct KonohaFactory {
 	void  (*WriteBarrier)(KonohaContext *, const struct kObjectVar *);
 	void  (*UpdateObjectField)(const struct kObjectVar *parent, const struct kObjectVar *oldPtr, const struct kObjectVar *newVal);
 
-		/* Event Handler API */
+	/* Event Handler API */
 	KModuleInfo *EventInfo;
 	void (*AddEventListener)(KonohaContext *, const char *name, void *thunk, void (*func)(KonohaContext *, void *thunk, struct JsonBuf*, KTraceInfo *));
 	void (*ScheduleEvent)(KonohaContext *, KTraceInfo *trace);
@@ -563,8 +600,13 @@ struct KonohaFactory {
 	const char* (*formatSystemPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
 	const char* (*formatKonohaPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
 
-	/* VirtualMachine */
-	KModuleInfo *VirtualMachineInfo;
+	// CodeGenerator
+	KModuleInfo  *CodeGeneratorInfo;
+	void*       (*GetCodeGenerateMethodFunc)(void);
+	void*       (*GenerateCode)(KonohaContext *kctx, kMethod *mtd, kBlock *bk, int options);
+
+	// VirtualMachine
+	KModuleInfo            *VirtualMachineInfo;
 	kbool_t               (*IsSupportedVirtualCode)(int opcode);
 	struct VirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, void *sfp, struct VirtualCode *pc);
 	void                  (*DeleteVirtualMachine)(KonohaContext *kctx);
@@ -649,42 +691,6 @@ struct KonohaFactory {
 
 /* ------------------------------------------------------------------------ */
 /* type */
-
-
-/* ------------------------------------------------------------------------ */
-
-#define kAbstractObject                 const void
-typedef const struct kObjectVar         kObject;
-typedef struct kObjectVar               kObjectVar;
-typedef const struct kBooleanVar        kBoolean;
-typedef struct kBooleanVar              kBooleanVar;
-typedef const struct kIntVar            kInt;
-typedef struct kIntVar                  kIntVar;
-typedef const struct kStringVar         kString;
-typedef struct kStringVar               kStringVar;
-typedef const struct kArrayVar          kArray;
-typedef struct kArrayVar                kArrayVar;
-typedef const struct kParamVar          kParam;
-typedef struct kParamVar                kParamVar;
-typedef const struct kMethodVar         kMethod;
-typedef struct kMethodVar               kMethodVar;
-typedef const struct kFuncVar           kFunc;
-typedef struct kFuncVar                 kFuncVar;
-typedef const struct kNameSpaceVar      kNameSpace;
-typedef struct kNameSpaceVar            kNameSpaceVar;
-
-/* sugar.h */
-typedef const struct kTokenVar          kToken;
-typedef struct kTokenVar                kTokenVar;
-typedef const struct kExprVar           kExpr;
-typedef struct kExprVar                 kExprVar;
-typedef const struct kStmtVar           kStmt;
-typedef const struct kStmtVar           kStmtNULL;  // Nullable
-typedef struct kStmtVar                 kStmtVar;
-typedef const struct kBlockVar          kBlock;
-typedef struct kBlockVar                kBlockVar;
-typedef struct kGammaVar                kGamma;
-typedef struct kGammaVar                kGammaVar;
 
 /* ------------------------------------------------------------------------ */
 
