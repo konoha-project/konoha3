@@ -154,7 +154,7 @@ static kbool_t global_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstT
 KDEFINE_PACKAGE* global_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "konoha", "1.0");
+	KSetPackageName(d, "konoha", K_VERSION);
 	d.initPackage    = global_initPackage;
 	d.setupPackage   = global_setupPackage;
 	return &d;

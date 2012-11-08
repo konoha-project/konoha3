@@ -55,6 +55,32 @@ static KMETHOD Object_to(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(returnValue);
 }
 
+//## String Object.toString();
+static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kObject *self = sfp[0].asObject;
+	if(IS_String(self)) {
+		KReturn(self);
+	}
+	else {
+		kNameSpace *ns = KGetLexicalNameSpace(sfp);
+		DBG_ASSERT(IS_NameSpace(ns));
+		kMethod *mtd = KLIB kNameSpace_GetCoercionMethodNULL(kctx, ns, O_typeId(self), TY_String);
+		sfp[0].unboxValue = O_unbox(self);
+		if(mtd != NULL) {
+			sfp[K_MTDIDX].calledMethod = mtd;
+			mtd->invokeMethodFunc(kctx, sfp);
+			return;
+		}
+	}
+	KGrowingBuffer wb;
+	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb);
+	kString* returnValue = KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
+	KLIB Kwb_free(&wb);
+	KReturn(returnValue);
+}
+
 /* String */
 
 //## @Const method Boolean Boolean.toString();
@@ -281,6 +307,7 @@ static void LoadDefaultMethod(KonohaContext *kctx, kNameSpace *ns)
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Hidden|_Im|_Const|kMethod_SmartReturn|_Virtual, _F(Object_to), TY_Object, TY_Object, MN_("to"), 0,
+		_Public|_Im|_Const|_Virtual, _F(Object_toString), TY_String, TY_Object, MN_to(TY_String), 0,
 		_Public|_Im|_Const, _F(Boolean_toString), TY_String, TY_boolean, MN_to(TY_String), 0,
 		_Public|_Im|_Const, _F(Boolean_opNOT), TY_boolean, TY_boolean, MN_("!"), 0,
 		_Public|_Im|_Const, _F(Boolean_opEQ), TY_boolean, TY_boolean, MN_("=="), 1, TY_boolean, FN_x,

@@ -159,7 +159,7 @@ static int CommandLine_doBuiltInTest(KonohaContext* konoha, const char* name)
 	return 1;
 }
 
-static void CommandLine_Define(KonohaContext *kctx, char *keyvalue)
+static void CommandLine_Define(KonohaContext *kctx, char *keyvalue, KTraceInfo *trace)
 {
 	char *p = strchr(keyvalue, '=');
 	if(p != NULL) {
@@ -178,10 +178,7 @@ static void CommandLine_Define(KonohaContext *kctx, char *keyvalue)
 			ty = VirtualType_Text;
 			unboxValue = (uintptr_t)(p+1);
 		}
-		KBaseTrace(trace);
-		if(!KLIB kNameSpace_SetConstData(kctx, KNULL(NameSpace), key, ty, unboxValue, trace)) {
-			KExit(EXIT_FAILURE);
-		}
+		KLIB kNameSpace_SetConstData(kctx, KNULL(NameSpace), key, ty, unboxValue, trace);
 	}
 	else {
 		fprintf(stdout, "invalid define option: use -D<key>=<value>\n");
@@ -189,12 +186,11 @@ static void CommandLine_Define(KonohaContext *kctx, char *keyvalue)
 	}
 }
 
-static void CommandLine_Import(KonohaContext *kctx, char *packageName)
+static void CommandLine_Import(KonohaContext *kctx, char *packageName, KTraceInfo *trace)
 {
 	size_t len = strlen(packageName)+1;
 	char *bufname = ALLOCA(char, len);
 	memcpy(bufname, packageName, len);
-	KBaseTrace(trace);
 	KLIB kNameSpace_ImportPackage(kctx, KNULL(NameSpace), bufname, trace);
 }
 
@@ -216,7 +212,7 @@ static void CommandLine_Import(KonohaContext *kctx, char *packageName)
 //	}
 //}
 
-static void CommandLine_SetARGV(KonohaContext *kctx, int argc, char** argv)
+static void CommandLine_SetARGV(KonohaContext *kctx, int argc, char** argv, KTraceInfo *trace)
 {
 	INIT_GCSTACK();
 	KonohaClass *CT_StringArray0 = CT_p0(kctx, CT_Array, TY_String);
@@ -229,7 +225,6 @@ static void CommandLine_SetARGV(KonohaContext *kctx, int argc, char** argv)
 			{"SCRIPT_ARGV", CT_StringArray0->typeId, (kObject*)a},
 			{}
 	};
-	KBaseTrace(trace);
 	KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(ObjectData), trace);
 	RESET_GCSTACK();
 }
@@ -257,20 +252,13 @@ static void Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **argv
 {
 	kbool_t ret = true;
 	int scriptidx = 0;
+	KBaseTrace(trace);
+
 	while (1) {
 		int option_index = 0;
 		int c = getopt_long (argc, argv, "icqD:I:M:S:f:", long_options2, &option_index);
 		if(c == -1) break; /* Detect the end of the options. */
 		switch (c) {
-		case 0:
-			/* If this option set a flag, do nothing else now. */
-			if(long_options2[option_index].flag != 0)
-				break;
-			printf ("option %s", long_options2[option_index].name);
-			if(optarg)
-				printf (" with arg %s", optarg);
-			printf ("\n");
-			break;
 
 		case 'c': {
 			compileonly_flag = 1;
@@ -295,7 +283,7 @@ static void Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **argv
 			return;
 
 		case 'D':
-			CommandLine_Define(kctx, optarg);
+			CommandLine_Define(kctx, optarg, trace);
 			break;
 
 		case 'F':
@@ -303,7 +291,7 @@ static void Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **argv
 			break;
 
 		case 'I':
-			CommandLine_Import(kctx, optarg);
+			CommandLine_Import(kctx, optarg, trace);
 			break;
 
 		case 'M':
@@ -342,7 +330,7 @@ static void Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **argv
 		}
 	}
 	scriptidx = optind;
-	CommandLine_SetARGV(kctx, argc - scriptidx, argv + scriptidx);
+	CommandLine_SetARGV(kctx, argc - scriptidx, argv + scriptidx, trace);
 	if(scriptidx < argc) {
 		ret = Konoha_LoadScript(kctx, argv[scriptidx]);
 	}
@@ -351,7 +339,7 @@ static void Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **argv
 		KonohaContext_Set(Interactive, kctx);
 	}
 	if(interactive_flag) {
-		CommandLine_Import(kctx, "konoha.i");
+		CommandLine_Import(kctx, "konoha.i", trace);
 		ret = konoha_shell(kctx);
 	}
 }

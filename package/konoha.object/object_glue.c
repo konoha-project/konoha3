@@ -29,23 +29,6 @@
 extern "C"{
 #endif
 
-//## String Object.toString();
-static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
-{
-	KGrowingBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
-	if(TY_isUnbox(O_typeId(sfp[0].asObject))) {
-		sfp[0].unboxValue = (sfp[0].asNumber)->unboxValue;
-		O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb);
-	}
-	else {
-		O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb);
-//		kObject_writeToBuffer(kctx, sfp[0].asObject, false/*delim*/, &wb, sfp, 0);
-	}
-	kString* returnValue = KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
-	KLIB Kwb_free(&wb);
-	KReturn(returnValue);
-}
 
 // Object.getTypeId()
 static KMETHOD Object_getTypeId(KonohaContext *kctx, KonohaStack *sfp)
@@ -94,7 +77,6 @@ static KMETHOD NameSpace_AllowImplicitCoercion(KonohaContext *kctx, KonohaStack 
 static void object_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Im|_Const, _F(Object_toString), TY_String, TY_Object, MN_to(TY_String), 0,
 		_Public|_Im|_Const|_Final, _F(Object_getTypeId), TY_int, TY_Object, MN_("getTypeId"), 0,
 		_Public|_Hidden|_Im|_Const, _F(Object_instanceOf), TY_boolean, TY_Object, MN_("<:"), 1, TY_Object, FN_("type"),
 		_Public|_Hidden|_Im|_Const|kMethod_SmartReturn, _F(Object_as), TY_Object, TY_Object, MN_("as"), 0,
