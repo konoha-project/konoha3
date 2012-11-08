@@ -1,7 +1,5 @@
 import("gmp");
 import("konoha.class")
-import("konoha.new")
-import("konoha.assign")
 import("cstyle")
 
 void main() {
