@@ -797,7 +797,10 @@ static void* GetCodeGenerateMethodFunc()
 
 kbool_t LoadJSGenModule(KonohaFactory *factory, ModuleType type)
 {
-	factory->Module_CodeGenerator      = "JSGen";
+	static KModuleInfo ModuleInfo = {
+		"JSGen", K_VERSION, 0, "jsgen",
+	};
+	factory->CodeGeneratorInfo         = &ModuleInfo;
 	factory->GenerateCode              = JSGen_GenerateCode;
 	factory->GetCodeGenerateMethodFunc = GetCodeGenerateMethodFunc;
 	return true;
