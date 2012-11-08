@@ -39,7 +39,10 @@ static int verbose_gc = 0;
 
 kbool_t LoadBitmapGCModule(KonohaFactory *factory, ModuleType type)
 {
-	factory->Module_GC            = "Bitmap GC";
+	static KModuleInfo ModuleInfo = {
+		"BitmapGC", "0.1", 0, "bmgc",
+	};
+	factory->GCInfo            = &ModuleInfo;
 	factory->Kmalloc = Kmalloc;
 	factory->Kzmalloc = Kzmalloc;
 	factory->Kfree = Kfree;

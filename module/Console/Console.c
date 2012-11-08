@@ -261,6 +261,10 @@ kbool_t LoadConsoleModule(KonohaFactory *factory, ModuleType type)
 //		factory->readline_i = (char* (*)(const char *))dlsym(handler, "readline");
 //		factory->add_history_i = (int (*)(const char *))dlsym(handler, "add_history");
 //	}
+	static KModuleInfo ModuleInfo = {
+		"Console", "0.1", 0, "term",
+	};
+	factory->ConsoleInfo     = &ModuleInfo;
 	if(factory->readline_i == NULL) {
 		factory->readline_i = myreadline;
 	}

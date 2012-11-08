@@ -288,7 +288,7 @@ static KMETHOD NameSpace_useStaticFunction2(KonohaContext *kctx, KonohaStack *sf
 {
 	KMakeTrace(trace, sfp);
 	kpackageId_t packageId = KLIB KpackageId(kctx, S_text(sfp[1].asString), S_size(sfp[1].asString), 0, _NEWID);
-	KonohaPackage *pack = getPackageNULL(kctx, packageId, trace);
+	KonohaPackage *pack = GetPackageNULL(kctx, packageId, trace);
 	if(pack != NULL) {
 		KonohaClass *ct = O_ct(sfp[2].asObject);
 		kNameSpace_SetStaticFunction(kctx, sfp[0].asNameSpace, ct->methodList_OnGlobalConstList, packageId, ct->typeId, trace);
@@ -301,7 +301,7 @@ static KMETHOD NameSpace_useStaticFunction2(KonohaContext *kctx, KonohaStack *sf
 
 void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns)
 {
-	KSetKLibFunc(0, ReportRuntimeMessage,           TRACE_PrintMessage,           NULL);
+	KSetKLibFunc(0, ReportScriptMessage,           TRACE_ReportScriptMessage,           NULL);
 	KSetKLibFunc(0, kNameSpace_requirePackage,      kNameSpace_requirePackage,      NULL);
 	KSetKLibFunc(0, kNameSpace_importPackage,       kNameSpace_importPackage,       NULL);
 	KSetKLibFunc(0, kNameSpace_importPackageSymbol, kNameSpace_importPackageSymbol, NULL);

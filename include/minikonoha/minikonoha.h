@@ -400,6 +400,13 @@ typedef struct logconf_t {
 	void *formatter; // for precompiled formattings
 } logconf_t;
 
+typedef struct KModuleInfo {
+	const char *name;
+	const char *version;
+	int patchlevel;
+	const char *desc;
+} KModuleInfo;
+
 typedef struct KTraceInfo {
 	struct KonohaValueVar *baseStack;
 	kfileline_t pline;
@@ -409,8 +416,19 @@ typedef struct KTraceInfo {
 #define KMakeTrace(TRACENAME, sfp) \
 	KTraceInfo TRACENAME##REF_ = {sfp, sfp[K_RTNIDX].calledFileLine}, *TRACENAME = &TRACENAME##REF_;
 
+#define KBaseTrace(TRACENAME) \
+	KonohaStack *sfp_ = kctx->esp + K_CALLDELTA;\
+	KTraceInfo TRACENAME##REF_ = {sfp_, 0}, *TRACENAME = &TRACENAME##REF_;
+
 #define KMakeTraceUL(TRACENAME, sfp, UL) \
 	KTraceInfo TRACENAME##REF_ = {sfp, UL}, *TRACENAME = &TRACENAME##REF_;
+
+#define KBeginCritical(trace, T, F) \
+	int errorSymbol_ = trace->errorSymbol, faultType_ = trace->faultType;\
+	trace->errorSymbol = EXPT_(T); trace->faultType = F
+
+#define KEndCritical(trace) \
+	trace->errorSymbol = errorSymbol_; trace->faultType = faultType_
 
 #define Trace_pline(trace) (trace == NULL ? 0 : trace->pline)
 
@@ -458,7 +476,7 @@ struct KonohaFactory {
 
 	void    (*qsort_i)(void *base, size_t nel, size_t width, int (*compar)(const void *, const void *));
 	// abort
-	void    (*exit_i)(int p);
+	void    (*exit_i)(int p, const char *file, int line);
 
 	// pthread
 	int     (*pthread_create_i)(kthread_t *thread, const kthread_attr_t *attr, void *(*f)(void *), void *arg);
@@ -476,7 +494,7 @@ struct KonohaFactory {
 	int     (*pthread_cond_destroy_i)(kmutex_cond_t *cond);
 
 	/* high-level functions */
-	kbool_t  (*LoadRuntimeModule)(struct KonohaFactory*, const char *moduleName, ModuleType);
+	kbool_t  (*LoadPlatformModule)(struct KonohaFactory*, const char *moduleName, ModuleType);
 
 	// file load
 	const char* (*FormatPackagePath)(KonohaContext *, char *buf, size_t bufsiz, const char *packageName, const char *ext);
@@ -504,6 +522,7 @@ struct KonohaFactory {
 	int (*diagnosisFaultType)(KonohaContext *, int fault, KTraceInfo *);
 
 	/* Console API */
+	KModuleInfo *ConsoleInfo;
 	void (*ReportUserMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *, int isNewLine);
 	void (*ReportCompilerMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *);
 	void (*ReportCaughtException)(KonohaContext *, const char *, int fault, const char *, struct KonohaValueVar *bottomStack, struct KonohaValueVar *topStack);
@@ -513,7 +532,7 @@ struct KonohaFactory {
 	char* (*InputUserPassword)(KonohaContext *, const char *message);
 
 	/* Garbage Collection API */
-	const char* Module_GC;
+	KModuleInfo *GCInfo;
 	void* (*Kmalloc)(KonohaContext*, size_t, KTraceInfo *);
 	void* (*Kzmalloc)(KonohaContext*, size_t, KTraceInfo *);
 	void  (*Kfree)(KonohaContext*, void *, size_t);
@@ -527,12 +546,12 @@ struct KonohaFactory {
 	void  (*UpdateObjectField)(const struct kObjectVar *parent, const struct kObjectVar *oldPtr, const struct kObjectVar *newVal);
 
 		/* Event Handler API */
-	const char* Module_Event;
+	KModuleInfo *EventInfo;
 	void (*AddEventListener)(KonohaContext *, const char *name, void *thunk, void (*func)(KonohaContext *, void *thunk, struct JsonBuf*, KTraceInfo *));
 	void (*ScheduleEvent)(KonohaContext *, KTraceInfo *trace);
 
 	// I18N Module
-	const char* Module_I18N;
+	KModuleInfo *I18NInfo;
 	uintptr_t   (*iconv_open_i)(KonohaContext *, const char* tocode, const char* fromcode, KTraceInfo *);
 	size_t      (*iconv_i)(KonohaContext *, uintptr_t iconv, ICONV_INBUF_CONST char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft, int *isTooBigRef, KTraceInfo *trace);
 	size_t      (*iconv_i_memcpyStyle)(KonohaContext *, uintptr_t iconv, char **outbuf, size_t *outbytesleft, ICONV_INBUF_CONST char **inbuf, size_t *inbytesleft, int *isTooBigRef, KTraceInfo *trace);
@@ -545,7 +564,7 @@ struct KonohaFactory {
 	const char* (*formatKonohaPath)(KonohaContext *kctx, char *buf, size_t bufsiz, const char *path, size_t pathsize, KTraceInfo *);
 
 	/* VirtualMachine */
-	const char             *Module_VirtualMachine;
+	KModuleInfo *VirtualMachineInfo;
 	kbool_t               (*IsSupportedVirtualCode)(int opcode);
 	struct VirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, void *sfp, struct VirtualCode *pc);
 	void                  (*DeleteVirtualMachine)(KonohaContext *kctx);
@@ -553,7 +572,7 @@ struct KonohaFactory {
 	struct VirtualCode*   (*GetBootCodeOfNativeMethodCall)(void);
 
 	/* JSON_API */
-	const char  *Module_Json;
+	KModuleInfo *JsonDataInfo;
 	void        *JsonHandler;  // define this in each module if necessary
 	kbool_t     (*IsJsonType)(struct JsonBuf *, KJSONTYPE);
 	struct JsonBuf* (*CreateJson)(KonohaContext *, struct JsonBuf *jsonbuf, KJSONTYPE type, ...);
@@ -1533,6 +1552,7 @@ struct KonohaPackageVar {
 	kpackageId_t                 packageId;
 	kNameSpace                  *packageNameSpace_OnGlobalConstList;
 	KonohaPackageHandler        *packageHandler;
+	kfileline_t                  kick_script;
 };
 
 /* ----------------------------------------------------------------------- */
@@ -1667,7 +1687,7 @@ struct KonohaLibVar {
 	void             (*CheckSafePoint)(KonohaContext *kctx, KonohaStack *sfp, kfileline_t uline);
 	kbool_t          (*KonohaRuntime_tryCallMethod)(KonohaContext *, KonohaStack *);
 	void             (*KonohaRuntime_raise)(KonohaContext*, int symbol, int fault, kString *Nullable, KonohaStack *);
-	void             (*ReportRuntimeMessage)(KonohaContext *, KTraceInfo *, kinfotag_t, const char *fmt, ...);
+	void             (*ReportScriptMessage)(KonohaContext *, KTraceInfo *, kinfotag_t, const char *fmt, ...);
 };
 
 #define K_NULL            (kctx->share->constNull_OnGlobalConstList)
@@ -1763,7 +1783,7 @@ typedef struct {
 	void *func = kctx->klib->T;\
 	((KonohaLibVar *)kctx->klib)->T = F;\
 	if(TRACE && func != NULL) {\
-		KLIB ReportRuntimeMessage(kctx, TRACE, DebugTag, "overriding KLIB function " #T " in %s", PackageId_t(PKGID));\
+		KLIB ReportScriptMessage(kctx, TRACE, DebugTag, "overriding KLIB function " #T " in %s", PackageId_t(PKGID));\
 	}\
 } while(0)
 
@@ -1771,7 +1791,7 @@ typedef struct {
 		void *func = C->T;\
 		((KonohaClassVar *)C)->T = F;\
 		if(TRACE && func != NULL) {\
-			KLIB ReportRuntimeMessage(kctx, TRACE, DebugTag, "overriding CLASS %s funcion " #T " in %s", CT_t(C), PackageId_t(PKGID)) ;\
+			KLIB ReportScriptMessage(kctx, TRACE, DebugTag, "overriding CLASS %s funcion " #T " in %s", CT_t(C), PackageId_t(PKGID)) ;\
 		}\
 	}while(0)\
 

@@ -156,35 +156,39 @@ static kExpr* kStmt_printMessage2(KonohaContext *kctx, kStmt *stmt, kToken *tk, 
 
 int verbose_debug;
 
-void TRACE_PrintMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_t taglevel, const char *fmt, ...)
+void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_t taglevel, const char *fmt, ...)
 {
 	if(taglevel == DebugTag && !verbose_debug) return;
 	va_list ap;
 	va_start(ap, fmt);
-	if(trace !=NULL && IS_Stmt(trace->baseStack[1].asStmt)) {  // Static Compiler Message
+	if(trace != NULL && IS_Stmt(trace->baseStack[1].asStmt)) {  // Static Compiler Message
 		kStmt *stmt = trace->baseStack[1].asStmt;
 		kfileline_t uline = stmt->uline;
 		kString *emsg = SugarContext_vprintMessage(kctx, taglevel, uline, fmt, ap);
+		va_end(ap);
 		if(taglevel <= ErrTag && !Stmt_isERR(stmt)) {
 			kStmt_toERR(kctx, stmt, emsg);
 		}
 	}
-	else /* if(kctx->stack != NULL)*/ {  // TO AVOID SEGV
+	else {
 		INIT_GCSTACK();
 		KGrowingBuffer wb;
 		KLIB Kwb_init(&kctx->stack->cwb, &wb);
 		kString *emsg = new_StringMessage(kctx, _GcStack, &wb, taglevel, Trace_pline(trace), fmt, ap);
+		va_end(ap);
 		PLATAPI ReportCompilerMessage(kctx, taglevel, Trace_pline(trace), S_text(emsg));
-		if(taglevel <= ErrTag && trace != NULL && trace->errorSymbol != 0 && trace->faultType != 0) {
-			KLIB Kwb_free(&wb);
-			va_end(ap);
-			KLIB KonohaRuntime_raise(kctx, trace->errorSymbol, trace->faultType, emsg, trace->baseStack);
-			return; /* in case of that KonohaRuntime_raise cannot jump; */
+		if(taglevel <= ErrTag) {
+			if(trace == NULL) {
+				PLATAPI exit_i(EXIT_FAILURE);
+			}
+			if(trace->errorSymbol != 0 && trace->faultType != 0) {
+				KLIB KonohaRuntime_raise(kctx, trace->errorSymbol, trace->faultType, emsg, trace->baseStack);
+				return; /* in case of that KonohaRuntime_raise cannot jump; */
+			}
 		}
 		KLIB Kwb_free(&wb);
 		RESET_GCSTACK();
 	}
-	va_end(ap);
 }
 
 #define Token_text(tk) kToken_t_(kctx, tk)

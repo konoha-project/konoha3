@@ -378,25 +378,29 @@ static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack 
 	KReturnUnboxValue(0);
 }
 
-static void kMethod_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
-{
-	func = (func != NULL) ? func : MethodFunc_invokeAbstractMethod;
-	((kMethodVar *)mtd)->invokeMethodFunc = func;
-	((kMethodVar *)mtd)->pc_start = BOOTCODE_NCALL;
-}
+//static void kMethod_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
+//{
+//	func = (func != NULL) ? func : MethodFunc_invokeAbstractMethod;
+//	((kMethodVar *)mtd)->invokeMethodFunc = func;
+//	((kMethodVar *)mtd)->pc_start = BOOTCODE_NCALL;
+//}
 
 // -------------------------------------------------------------------------
 
 kbool_t LoadMiniVMModule(KonohaFactory *factory, ModuleType type)
 {
+	static KModuleInfo ModuleInfo = {
+		"MiniVM", K_VERSION, 0, "minivm",
+	};
 	SetUpBootCode();
-	factory->Module_VirtualMachine         = "VirtualMachine";
+	factory->VirtualMachineInfo            = &ModuleInfo;
 	factory->IsSupportedVirtualCode        = IsSupportedVirtualCode;
 	factory->RunVirtualMachine             = KonohaVirtualMachine_run;
 	factory->GetVirtualMachineMethodFunc   = GetVritualMachineMethodFunc;
 	factory->GetBootCodeOfNativeMethodCall = GetBootCodeOfNativeMethodCall;
 	return true;
 }
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

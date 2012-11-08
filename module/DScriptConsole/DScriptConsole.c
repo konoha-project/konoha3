@@ -192,6 +192,10 @@ static const char* InputUserPassword(KonohaContext *kctx, const char *message)
 
 kbool_t LoadDScriptConsoleModule(KonohaFactory *factory, ModuleType type)
 {
+	static KModuleInfo ModuleInfo = {
+		"DScriptConsole", "0.1", 0, "dscript",
+	};
+	factory->ConsoleInfo     = &ModuleInfo;
 
 	factory->ReportUserMessage        = UI_ReportUserMessage;
 	factory->ReportCompilerMessage    = UI_ReportCompilerMessage;

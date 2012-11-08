@@ -42,7 +42,10 @@ static int verbose_gc = 0;
 
 kbool_t LoadBitmapConcGCModule(KonohaFactory *factory, ModuleType type)
 {
-	factory->Module_GC            = "Bitmap Concurrent GC";
+	static KModuleInfo ModuleInfo = {
+		"BitmapConGC", "0.1", 0, "bmgc congc",
+	};
+	factory->GCInfo            = &ModuleInfo;
 	factory->Kmalloc = Kmalloc;
 	factory->Kzmalloc = Kzmalloc;
 	factory->Kfree = Kfree;

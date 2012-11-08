@@ -222,7 +222,10 @@ static kbool_t AppendJsonArray(KonohaContext *kctx, struct JsonBuf *jsonbuf, str
 
 kbool_t LoadJsonModule(KonohaFactory *factory, ModuleType type)
 {
-	factory->Module_Json            = "Json (i version)";
+	static KModuleInfo ModuleInfo = {
+		"Json", "0.1", 0, "json",
+	};
+	factory->JsonDataInfo            = &ModuleInfo;
 	factory->IsJsonType             = IsJsonType;
 	factory->CreateJson             = CreateJson;
 	factory->ParseJson              = ParseJson;

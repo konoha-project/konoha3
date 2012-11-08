@@ -530,7 +530,7 @@ static void CheckSafePoint(KonohaContext *kctx, KonohaStack *sfp, kfileline_t ul
 
 /* ------------------------------------------------------------------------ */
 
-void TRACE_PrintMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_t taglevel, const char *fmt, ...);
+void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_t taglevel, const char *fmt, ...);
 
 static void klib_init(KonohaLibVar *l)
 {
@@ -566,6 +566,6 @@ static void klib_init(KonohaLibVar *l)
 	l->Ksymbol       = Ksymbol;
 	l->KonohaRuntime_tryCallMethod = KonohaRuntime_tryCallMethod;
 	l->KonohaRuntime_raise         = KonohaRuntime_raise;
-	l->ReportRuntimeMessage        = TRACE_PrintMessage; /* perror.h */
+	l->ReportScriptMessage        = TRACE_ReportScriptMessage; /* perror.h */
 	l->CheckSafePoint              = CheckSafePoint;
 }

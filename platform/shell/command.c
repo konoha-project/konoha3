@@ -159,14 +159,14 @@ static int CommandLine_doBuiltInTest(KonohaContext* konoha, const char* name)
 	return 1;
 }
 
-static void CommandLine_define(KonohaContext *kctx, char *keyvalue)
+static void CommandLine_Define(KonohaContext *kctx, char *keyvalue)
 {
 	char *p = strchr(keyvalue, '=');
 	if(p != NULL) {
 		size_t len = p-keyvalue;
 		char *namebuf = ALLOCA(char, len+1);
 		memcpy(namebuf, keyvalue, len); namebuf[len] = 0;
-		DBG_P("name='%s'", namebuf);
+//		DBG_P("name='%s'", namebuf);
 		ksymbol_t key = KLIB Ksymbol(kctx, namebuf, len, 0, SYM_NEWID);
 		uintptr_t unboxValue;
 		ktype_t ty;
@@ -178,7 +178,8 @@ static void CommandLine_define(KonohaContext *kctx, char *keyvalue)
 			ty = VirtualType_Text;
 			unboxValue = (uintptr_t)(p+1);
 		}
-		if(!KLIB kNameSpace_SetConstData(kctx, KNULL(NameSpace), key, ty, unboxValue, 0)) {
+		KBaseTrace(trace);
+		if(!KLIB kNameSpace_SetConstData(kctx, KNULL(NameSpace), key, ty, unboxValue, trace)) {
 			PLATAPI exit_i(EXIT_FAILURE);
 		}
 	}
@@ -188,52 +189,50 @@ static void CommandLine_define(KonohaContext *kctx, char *keyvalue)
 	}
 }
 
-static void CommandLine_import(KonohaContext *kctx, char *packageName)
+static void CommandLine_Import(KonohaContext *kctx, char *packageName)
 {
 	size_t len = strlen(packageName)+1;
 	char *bufname = ALLOCA(char, len);
 	memcpy(bufname, packageName, len);
-	BEGIN_LOCAL(lsfp, K_CALLDELTA);
-	KMakeTrace(trace, kctx->esp);
+	KBaseTrace(trace);
 	if(!(KLIB kNameSpace_importPackage(kctx, KNULL(NameSpace), bufname, trace))) {
 		PLATAPI exit_i(EXIT_FAILURE);
 	}
-	END_LOCAL();
 }
 
-static void konoha_startup(KonohaContext *kctx, const char *startup_script)
-{
-	char buf[256];
-	const char *path = PLATAPI getenv_i("KONOHA_SCRIPTPATH"), *local = "";
-	if(path == NULL) {
-		path = PLATAPI getenv_i("KONOHA_HOME");
-		local = "/script";
-	}
-	if(path == NULL) {
-		path = PLATAPI getenv_i("HOME");
-		local = "/.minikonoha/script";
-	}
-	snprintf(buf, sizeof(buf), "%s%s/%s.k", path, local, startup_script);
-	if(!Konoha_LoadScript((KonohaContext*)kctx, (const char*)buf)) {
-		PLATAPI exit_i(EXIT_FAILURE);
-	}
-}
+//static void konoha_startup(KonohaContext *kctx, const char *startup_script)
+//{
+//	char buf[256];
+//	const char *path = PLATAPI getenv_i("KONOHA_SCRIPTPATH"), *local = "";
+//	if(path == NULL) {
+//		path = PLATAPI getenv_i("KONOHA_HOME");
+//		local = "/script";
+//	}
+//	if(path == NULL) {
+//		path = PLATAPI getenv_i("HOME");
+//		local = "/.minikonoha/script";
+//	}
+//	snprintf(buf, sizeof(buf), "%s%s/%s.k", path, local, startup_script);
+//	if(!Konoha_LoadScript((KonohaContext*)kctx, (const char*)buf)) {
+//		PLATAPI exit_i(EXIT_FAILURE);
+//	}
+//}
 
-static void CommandLine_setARGV(KonohaContext *kctx, int argc, char** argv)
+static void CommandLine_SetARGV(KonohaContext *kctx, int argc, char** argv)
 {
 	INIT_GCSTACK();
 	KonohaClass *CT_StringArray0 = CT_p0(kctx, CT_Array, TY_String);
 	kArray *a = (kArray*)KLIB new_kObject(kctx, _GcStack, CT_StringArray0, 0);
 	int i;
 	for(i = 0; i < argc; i++) {
-		DBG_P("argv=%d, '%s'", i, argv[i]);
 		KLIB kArray_add(kctx, a, KLIB new_kString(kctx, _GcStack, argv[i], strlen(argv[i]), StringPolicy_TEXT));
 	}
 	KDEFINE_OBJECT_CONST ObjectData[] = {
 			{"SCRIPT_ARGV", CT_StringArray0->typeId, (kObject*)a},
 			{}
 	};
-	KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(ObjectData), 0);
+	KBaseTrace(trace);
+	KLIB kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(ObjectData), trace);
 	RESET_GCSTACK();
 }
 
@@ -256,7 +255,7 @@ static struct option long_options2[] = {
 	{NULL, 0, 0, 0},  /* sentinel */
 };
 
-static void konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
+static void Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **argv)
 {
 	kbool_t ret = true;
 	int scriptidx = 0;
@@ -277,42 +276,42 @@ static void konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
 
 		case 'c': {
 			compileonly_flag = 1;
-			KonohaContext_Set(CompileOnly, konoha);
+			KonohaContext_Set(CompileOnly, kctx);
 		}
 		break;
 
 		case 'i': {
 			interactive_flag = 1;
-			KonohaContext_Set(Interactive, konoha);
+			KonohaContext_Set(Interactive, kctx);
 		}
 		break;
 
 		case 'q': {
 			fprintf(stdout, "%s-%lu\n", K_VERSION, (long unsigned)K_DATE);
-			exit(0);  //
+			PLATAPI exit_i(EXIT_SUCCESS);  //
 		}
 		break;
 
 		case 'B':
-			CommandLine_doBuiltInTest(konoha, optarg);
+			CommandLine_doBuiltInTest(kctx, optarg);
 			return;
 
 		case 'D':
-			CommandLine_define(konoha, optarg);
+			CommandLine_Define(kctx, optarg);
 			break;
 
 		case 'F':
-			KonohaContext_Set(Trace, konoha);
+			KonohaContext_Set(Trace, kctx);
 			break;
 
 		case 'I':
-			CommandLine_import(konoha, optarg);
+			CommandLine_Import(kctx, optarg);
 			break;
 
 		case 'M':
 			// already checked in KonohaFactory_SetDefaultModule
 			if(optarg != NULL && strcmp(optarg, "OutputTest") == 0) {
-				KonohaContext_Set(Debug, konoha);
+				KonohaContext_Set(Debug, kctx);
 				verbose_debug = 0;
 				verbose_sugar = 0;
 				verbose_gc    = 0;
@@ -320,9 +319,9 @@ static void konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
 			}
 			break;
 
-		case 'S':
-			konoha_startup(konoha, optarg);
-			break;
+//		case 'S':
+//			konoha_startup(kctx, optarg);
+//			break;
 
 		case '?':
 			/* getopt_long already printed an error message. */
@@ -331,38 +330,38 @@ static void konoha_parseopt(KonohaContext* konoha, int argc, char **argv)
 		case 'f':
 			//printf("%s\n", optarg);
 			if(strcmp(optarg, "JS") == 0){
-				KonohaContext_setVisitor(konoha, kVisitor_JS);
+				KonohaContext_setVisitor(kctx, kVisitor_JS);
 			}else if(strcmp(optarg, "Dump") == 0){
-				KonohaContext_setVisitor(konoha, kVisitor_Dump);
+				KonohaContext_setVisitor(kctx, kVisitor_Dump);
 			}else{
-				KonohaContext_setVisitor(konoha, kVisitor_KonohaVM);
+				KonohaContext_setVisitor(kctx, kVisitor_KonohaVM);
 			}
 			break;
 
 		default:
-			((KonohaFactory*)konoha->platApi)->exitStatus = 1;
+			((KonohaFactory*)kctx->platApi)->exitStatus = EXIT_FAILURE;
 			return;
 		}
 	}
 	scriptidx = optind;
-	CommandLine_setARGV(konoha, argc - scriptidx, argv + scriptidx);
+	CommandLine_SetARGV(kctx, argc - scriptidx, argv + scriptidx);
 	if(scriptidx < argc) {
-		ret = Konoha_LoadScript(konoha, argv[scriptidx]);
+		ret = Konoha_LoadScript(kctx, argv[scriptidx]);
 	}
 	else {
 		interactive_flag = 1;
-		KonohaContext_Set(Interactive, konoha);
+		KonohaContext_Set(Interactive, kctx);
 	}
 	if(interactive_flag) {
-		CommandLine_import(konoha, "konoha.i");
-		ret = konoha_shell(konoha);
+		CommandLine_Import(kctx, "konoha.i");
+		ret = konoha_shell(kctx);
 	}
 }
 
 // -------------------------------------------------------------------------
 // ** main **
 
-void KonohaFactory_LoadRuntimeModule(KonohaFactory *factory, const char *name, ModuleType option);
+void KonohaFactory_LoadPlatformModule(KonohaFactory *factory, const char *name, ModuleType option);
 void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), int argc, char **argv);
 KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory);
 int Konoha_Destroy(KonohaContext *kctx);
@@ -378,7 +377,7 @@ int main(int argc, char *argv[])
 	struct KonohaFactory factory = {};
 	KonohaFactory_SetDefaultFactory(&factory, PosixFactory, argc, argv);
 	KonohaContext* konoha = KonohaFactory_CreateKonoha(&factory);
-	konoha_parseopt(konoha, argc, argv);
+	Konoha_ParseCommandOption(konoha, argc, argv);
 	return Konoha_Destroy(konoha);
 }
 

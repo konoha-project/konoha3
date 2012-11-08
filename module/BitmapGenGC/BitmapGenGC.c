@@ -2196,7 +2196,10 @@ static void KscheduleGC(KonohaContext *kctx, KTraceInfo *trace)
 
 kbool_t LoadBitmapGenGCModule(KonohaFactory *factory, ModuleType type)
 {
-	factory->Module_GC = "Bitmap Generational GC";
+	static KModuleInfo ModuleInfo = {
+		"BitmapGenGC", "0.1", 0, "bmgc gengc",
+	};
+	factory->GCInfo            = &ModuleInfo;
 	factory->Kmalloc = Kmalloc;
 	factory->Kzmalloc = Kzmalloc;
 	factory->Kfree = Kfree;

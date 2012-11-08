@@ -131,9 +131,15 @@ static void shell(KonohaContext *kctx)
 	return;
 }
 
+static void show_module(KonohaContext *kctx, KModuleInfo *info)
+{
+	if(info != NULL && info->desc != NULL) {
+		PLATAPI printf_i(" %s", info->desc);
+	}
+}
+
 static void show_version(KonohaContext *kctx)
 {
-	int i;
 	PLATAPI printf_i(K_PROGNAME " " K_VERSION " (%s) (%s, %lu, %s)\n", K_CODENAME, K_REVISION, K_DATE, __DATE__);
 #if defined(__GNUC__)
 	PLATAPI printf_i("[gcc %s]\n", __VERSION__);
@@ -142,12 +148,12 @@ static void show_version(KonohaContext *kctx)
 #elif defined(__clang__)
 	PLATAPI printf_i("[clang %s]\n", __VERSION__);
 #endif
-	PLATAPI printf_i("options:");
-	for(i = 0; i < KonohaModule_MAXSIZE; i++) {
-		if(kctx->modshare[i] != NULL) {
-			PLATAPI printf_i(" %s", kctx->modshare[i]->name);
-		}
-	}
+	PLATAPI printf_i("modules:");
+	show_module(kctx, PLATAPI VirtualMachineInfo);
+	show_module(kctx, PLATAPI GCInfo);
+	show_module(kctx, PLATAPI ConsoleInfo);
+	show_module(kctx, PLATAPI EventInfo);
+	show_module(kctx, PLATAPI I18NInfo);
 	PLATAPI printf_i("\n");
 }
 

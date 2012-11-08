@@ -175,6 +175,11 @@ static char* TEST_InputUserPassword(KonohaContext *kctx, const char *message)
 
 kbool_t LoadOutputTestModule(KonohaFactory *factory, ModuleType type)
 {
+	static KModuleInfo ModuleInfo = {
+		"OutputTest", "0.1", 0, "test",
+	};
+	factory->ConsoleInfo     = &ModuleInfo;
+
 	factory->BEFORE_LoadScript = BEFORE_LoadScript;
 	factory->AFTER_LoadScript  = AFTER_LoadScript;
 

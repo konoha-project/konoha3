@@ -80,7 +80,7 @@ extern "C" {
 #endif
 
 // -------------------------------------------------------------------------
-/* LoadRuntimeModule */
+/* LoadPlatformModule */
 
 static kbool_t HasFile(char *path)
 {
@@ -109,7 +109,7 @@ static kbool_t FormatModulePath(KonohaFactory *factory, char *buf, size_t bufsiz
 	return HasFile(buf);
 }
 
-static kbool_t LoadRuntimeModule(KonohaFactory *factory, const char *moduleName, ModuleType type)
+static kbool_t LoadPlatformModule(KonohaFactory *factory, const char *moduleName, ModuleType type)
 {
 	char pathbuf[K_PATHMAX];
 	if(FormatModulePath(factory, pathbuf, sizeof(pathbuf), moduleName, K_OSDLLEXT)) {
@@ -1161,7 +1161,7 @@ static kunused PlatformApi *KonohaUtils_getDefaultPlatformApi(void)
 	plat.pthread_cond_broadcast_i= kpthread_cond_broadcast;
 	plat.pthread_cond_destroy_i  = kpthread_cond_destroy;
 
-	plat.LoadRuntimeModule   = LoadRuntimeModule;
+	plat.LoadPlatformModule   = LoadPlatformModule;
 	plat.FormatPackagePath   = FormatPackagePath;
 	plat.LoadPackageHandler  = LoadPackageHandler;
 	plat.BEFORE_LoadScript   = BEFORE_LoadScript;
@@ -1225,7 +1225,7 @@ static kunused void PosixFactory(KonohaFactory *factory)
 	factory->pthread_cond_broadcast_i= kpthread_cond_broadcast;
 	factory->pthread_cond_destroy_i  = kpthread_cond_destroy;
 
-	factory->LoadRuntimeModule   = LoadRuntimeModule;
+	factory->LoadPlatformModule   = LoadPlatformModule;
 	factory->FormatPackagePath   = FormatPackagePath;
 	factory->LoadPackageHandler  = LoadPackageHandler;
 	factory->BEFORE_LoadScript   = BEFORE_LoadScript;

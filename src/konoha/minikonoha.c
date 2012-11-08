@@ -94,7 +94,7 @@ static void KonohaStackRuntime_free(KonohaContext *kctx, KonohaContextVar *ctx)
 static kbool_t KonohaRuntime_setModule(KonohaContext *kctx, int x, KonohaModule *d, KTraceInfo *trace)
 {
 	if(kctx->modshare[x] != NULL) {
-		KLIB ReportRuntimeMessage(kctx, trace, ErrTag, "module %s already registered", kctx->modshare[x]->name);
+		KLIB ReportScriptMessage(kctx, trace, ErrTag, "module %s already registered", kctx->modshare[x]->name);
 		return false;
 	}
 	kctx->modshare[x] = d;
@@ -238,9 +238,9 @@ void konoha_close(KonohaContext* konoha)
 // -------------------------------------------------------------------------
 /* Konoha C API */
 
-void KonohaFactory_LoadRuntimeModule(KonohaFactory *factory, const char *name, ModuleType option)
+void KonohaFactory_LoadPlatformModule(KonohaFactory *factory, const char *name, ModuleType option)
 {
-	if(!factory->LoadRuntimeModule(factory, name, option)) {
+	if(!factory->LoadPlatformModule(factory, name, option)) {
 		factory->syslog_i(ErrTag, "failed to load module: %s\n", name);
 		factory->printf_i("failed to load module: %s\n", name);
 		factory->exit_i(EXIT_FAILURE);
@@ -259,7 +259,7 @@ void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformA
 				i++;
 				moduleName = argv[i];
 			}
-			KonohaFactory_LoadRuntimeModule(factory, moduleName, ReleaseModule);
+			KonohaFactory_LoadPlatformModule(factory, moduleName, ReleaseModule);
 		}
 	}
 }
@@ -268,15 +268,15 @@ void KonohaFactory_CheckVirtualMachine(KonohaFactory *factory);  // For compatib
 
 static void KonohaFactory_Check(KonohaFactory *factory)
 {
-	if(factory->Module_GC == NULL) {
+	if(factory->GCInfo == NULL) {
 		const char *mod = factory->getenv_i("KONOHA_GC");
 		if(mod == NULL) mod = "BitmapGenGC";  // default
-		KonohaFactory_LoadRuntimeModule(factory, mod, ReleaseModule);
+		KonohaFactory_LoadPlatformModule(factory, mod, ReleaseModule);
 	}
-	if(factory->Module_I18N == NULL) {
+	if(factory->I18NInfo == NULL) {
 		const char *mod = factory->getenv_i("KONOHA_I18N");
 		if(mod == NULL) mod = "IConv";        // default
-		KonohaFactory_LoadRuntimeModule(factory, mod, ReleaseModule);
+		KonohaFactory_LoadPlatformModule(factory, mod, ReleaseModule);
 	}
 	KonohaFactory_CheckVirtualMachine(factory);  // delete when all vms are on module
 }

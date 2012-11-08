@@ -127,7 +127,7 @@ static kbool_t kNameSpace_importSyntax(KonohaContext *kctx, kNameSpace *ns, Suga
 	//DBG_P("<<<< packageId=%s,%s >>>>", PackageId_t(syn->lastLoadedPackageId), PackageId_t(target->lastLoadedPackageId));
 	if(syn->lastLoadedPackageId != target->lastLoadedPackageId) {
 		int index;
-		KLIB ReportRuntimeMessage(kctx, trace, DebugTag, "@%s importing syntax %s%s", PackageId_t(ns->packageId), PSYM_t(syn->keyword));
+		KLIB ReportScriptMessage(kctx, trace, DebugTag, "@%s importing syntax %s%s", PackageId_t(ns->packageId), PSYM_t(syn->keyword));
 		syn->flag = target->flag;
 		syn->precedence_op1 = target->precedence_op1;
 		syn->precedence_op2 = target->precedence_op2;
@@ -273,7 +273,7 @@ static void kNameSpace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KDEFINE
 			}
 		}
 		DBG_ASSERT(syn == SYN_(ns, syndef->keyword));
-		KLIB ReportRuntimeMessage(kctx, trace, DebugTag, "@%s new syntax %s%s", PackageId_t(ns->packageId), PSYM_t(syn->keyword));
+		KLIB ReportScriptMessage(kctx, trace, DebugTag, "@%s new syntax %s%s", PackageId_t(ns->packageId), PSYM_t(syn->keyword));
 		syndef++;
 	}
 }
@@ -357,7 +357,7 @@ static kbool_t kNameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns,
 		if(Symbol_isBoxedKey(unboxKey)) {
 			KLIB kArray_add(kctx, ns->NameSpaceConstList, ns->constTable.keyValueItems[i].ObjectValue);
 		}
-		KLIB ReportRuntimeMessage(kctx, trace, DebugTag, "@%s loading const %s%s as %s", PackageId_t(ns->packageId), PSYM_t(SYMKEY_unbox(unboxKey)), TY_t(ns->constTable.keyValueItems[i].ty));
+		KLIB ReportScriptMessage(kctx, trace, DebugTag, "@%s loading const %s%s as %s", PackageId_t(ns->packageId), PSYM_t(SYMKEY_unbox(unboxKey)), TY_t(ns->constTable.keyValueItems[i].ty));
 	}
 	nitems = size + nitems;
 	ns->constTable.bytesize = nitems * sizeof(KKeyValue);
@@ -788,7 +788,7 @@ static kbool_t kNameSpace_AddMethod(KonohaContext *kctx, kNameSpace *ns, kMethod
 	KonohaClass *ct = CT_(mtd->typeId);
 	if(mtd->packageId == 0) {
 		((kMethodVar *)mtd)->packageId = ns->packageId;
-		TRACE_PrintMessage(kctx, trace, DebugTag, "@%s loading method %s.%s%s", PackageId_t(ns->packageId), Method_t(mtd));
+		TRACE_ReportScriptMessage(kctx, trace, DebugTag, "@%s loading method %s.%s%s", PackageId_t(ns->packageId), Method_t(mtd));
 	}
 	if(CT_is(Final, ct)) {
 		kMethod_set(Final, mtd, true);
@@ -797,21 +797,21 @@ static kbool_t kNameSpace_AddMethod(KonohaContext *kctx, kNameSpace *ns, kMethod
 	if(foundMethod != NULL) {  // same signature
 		if(foundMethod->typeId == mtd->typeId) {
 			if(kMethod_is(Override, mtd)) {
-				TRACE_PrintMessage(kctx, trace, DebugTag, "@%s overriding method %s.%s%s on %s", PackageId_t(ns->packageId), Method_t(mtd), PackageId_t(foundMethod->packageId));
+				TRACE_ReportScriptMessage(kctx, trace, DebugTag, "@%s overriding method %s.%s%s on %s", PackageId_t(ns->packageId), Method_t(mtd), PackageId_t(foundMethod->packageId));
 				kMethod_ReplaceWith(kctx, (kMethodVar *)foundMethod, mtd);
 			}
 			else {
-				TRACE_PrintMessage(kctx, trace, ErrTag, "duplicated method: %s.%s%s on %s", Method_t(foundMethod), PackageId_t(foundMethod->packageId));
+				TRACE_ReportScriptMessage(kctx, trace, ErrTag, "duplicated method: %s.%s%s on %s", Method_t(foundMethod), PackageId_t(foundMethod->packageId));
 			}
 			return false;
 		}
 		else {
 			if(!kMethod_is(Final, foundMethod)) {
-				TRACE_PrintMessage(kctx, trace, DebugTag, "@%s overriding method %s.%s%s on %s.%s%s", PackageId_t(ns->packageId), Method_t(mtd), Method_t(foundMethod));
+				TRACE_ReportScriptMessage(kctx, trace, DebugTag, "@%s overriding method %s.%s%s on %s.%s%s", PackageId_t(ns->packageId), Method_t(mtd), Method_t(foundMethod));
 				kMethod_set(Virtual, ((kMethodVar*)foundMethod), true);
 			}
 			else {
-				TRACE_PrintMessage(kctx, trace, ErrTag, "final method: %s.%s%s", Method_t(foundMethod));
+				TRACE_ReportScriptMessage(kctx, trace, ErrTag, "final method: %s.%s%s", Method_t(foundMethod));
 				return false;
 			}
 		}
@@ -899,7 +899,7 @@ static kbool_t kNameSpace_LoadScript(KonohaContext *kctx, kNameSpace *ns, const 
 	SugarThunk thunk = {kctx, ns};
 	kfileline_t uline = uline_init(kctx, path, 1, true/*isRealPath*/);
 	if(!(PLATAPI loadScript(path, uline, (void *)&thunk, evalHookFunc))) {
-		KLIB ReportRuntimeMessage(kctx, trace, ErrTag, "failed to load script: %s", path);
+		KLIB ReportScriptMessage(kctx, trace, ErrTag, "failed to load script: %s", path);
 		return false;
 	}
 	if(KonohaContext_Is(CompileOnly, kctx)) {
@@ -924,46 +924,53 @@ static kNameSpace *new_PackageNameSpace(KonohaContext *kctx, kpackageId_t packag
 	return (kNameSpace *)ns;
 }
 
-static KonohaPackage *loadPackageNULL(KonohaContext *kctx, kpackageId_t packageId, KTraceInfo *trace)
+static KonohaPackage *LoadPackageNULL(KonohaContext *kctx, kpackageId_t packageId, KTraceInfo *trace)
 {
 	const char *packageName = S_text(PackageId_s(packageId));
 	char pathbuf[256];
 	const char *path = PLATAPI FormatPackagePath(kctx, pathbuf, sizeof(pathbuf), packageName, "_glue.k");
 	KonohaPackageHandler *packageHandler = PLATAPI LoadPackageHandler(kctx, packageName);
 	if(path == NULL && packageHandler == NULL) {
-		//KLIB Kreportf(kctx, ErrTag, trace, "package not found: %s path=%s", packageName, PLATAPI shortText(pathbuf));
-		KLIB KonohaRuntime_raise(kctx, EXPT_("PackageNotFound"), SoftwareFault|SystemFault, NULL, trace->baseStack);
+		DBG_ASSERT(trace != NULL);
+		KBeginCritical(trace, "PackageNotFound", SoftwareFault|SystemFault);
+		PLATAPI FormatPackagePath(kctx, pathbuf, sizeof(pathbuf), packageName, "");
+		KLIB ReportScriptMessage(kctx, trace, ErrTag, "package not found: path=%s", pathbuf);
+		KEndCritical(trace);
 		return NULL;
 	}
 	kNameSpace *ns = new_PackageNameSpace(kctx, packageId);
+	KBeginCritical(trace, "PackageLoading", SoftwareFault|SystemFault);
 	if(packageHandler != NULL && packageHandler->initPackage != NULL) {
 		packageHandler->initPackage(kctx, ns, 0, NULL, trace);
 	}
 	if(path != NULL) {
-		if(!kNameSpace_LoadScript(kctx, ns, pathbuf, trace)) {
-			return NULL;
-		}
+		kNameSpace_LoadScript(kctx, ns, pathbuf, trace);
 	}
+	KEndCritical(trace);
 	KonohaPackage *pack = (KonohaPackage *)KCalloc(sizeof(KonohaPackage), 1, trace);
 	pack->packageId = packageId;
 	pack->packageNameSpace_OnGlobalConstList = ns;
 	pack->packageHandler = packageHandler;
+	path = PLATAPI FormatPackagePath(kctx, pathbuf, sizeof(pathbuf), packageName, "_kick.k");
+	if(path != NULL) {
+		pack->kick_script = uline_init(kctx, path, 1, true/*isRealPath*/);
+	}
 	return pack;
 }
 
-static KonohaPackage *getPackageNULL(KonohaContext *kctx, kpackageId_t packageId, KTraceInfo *trace)
+static KonohaPackage *GetPackageNULL(KonohaContext *kctx, kpackageId_t packageId, KTraceInfo *trace)
 {
 	KLock(kctx->share->filepackMutex);
 	KonohaPackage *pack = (KonohaPackage *)map_getu(kctx, kctx->share->packageMapNO, packageId, uNULL);
 	KUnlock(kctx->share->filepackMutex);
-	isFirstTime_t flag = FirstTime;
+	isFirstTime_t flag = Nope;
 	if(pack == NULL) {
-		pack = loadPackageNULL(kctx, packageId, trace);
+		pack = LoadPackageNULL(kctx, packageId, trace);
 		if(pack == NULL) return NULL;
 		KLock(kctx->share->filepackMutex);
 		map_addu(kctx, kctx->share->packageMapNO, packageId, (uintptr_t)pack);
 		KUnlock(kctx->share->filepackMutex);
-		flag = Nope;
+		flag = FirstTime;
 	}
 	if(pack->packageHandler != NULL && pack->packageHandler->setupPackage != NULL) {
 		pack->packageHandler->setupPackage(kctx, pack->packageNameSpace_OnGlobalConstList, flag, trace);
@@ -1002,7 +1009,7 @@ static kbool_t kNameSpace_isImported(KonohaContext *kctx, kNameSpace *ns, kNameS
 {
 	KKeyValue *value = kNameSpace_GetLocalConstNULL(kctx, ns, target->packageId | KW_PATTERN);
 	if(value != NULL) {
-		KLIB ReportRuntimeMessage(kctx, trace, DebugTag, "package %s has already imported in %s", PackageId_t(ns->packageId), PackageId_t(target->packageId));
+		KLIB ReportScriptMessage(kctx, trace, DebugTag, "package %s has already imported in %s", PackageId_t(ns->packageId), PackageId_t(target->packageId));
 		return true;
 	}
 	return false;
@@ -1034,17 +1041,19 @@ static kbool_t kNameSpace_importAll(KonohaContext *kctx, kNameSpace *ns, kNameSp
 static KonohaPackage *kNameSpace_requirePackage(KonohaContext *kctx, const char *name, KTraceInfo *trace)
 {
 	kpackageId_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
-	return getPackageNULL(kctx, packageId, trace);
+	return GetPackageNULL(kctx, packageId, trace);
 }
 
 static kbool_t kNameSpace_importPackage(KonohaContext *kctx, kNameSpace *ns, const char *name, KTraceInfo *trace)
 {
 	kpackageId_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
 	if(ns->packageId != packageId) {
-		KonohaPackage *pack = getPackageNULL(kctx, packageId, trace);
-		DBG_ASSERT(ns != NULL);
+		KonohaPackage *pack = GetPackageNULL(kctx, packageId, trace);
 		if(pack != NULL) {
-			return kNameSpace_importAll(kctx, ns, pack->packageNameSpace_OnGlobalConstList, trace);
+			kNameSpace_importAll(kctx, ns, pack->packageNameSpace_OnGlobalConstList, trace);
+			if(pack->kick_script != 0) {
+				kNameSpace_LoadScript(kctx, ns, FileId_t(pack->kick_script), trace);
+			}
 		}
 	}
 	return false;
@@ -1054,7 +1063,7 @@ static kbool_t kNameSpace_importPackageSymbol(KonohaContext *kctx, kNameSpace *n
 {
 	kpackageId_t packageId = KLIB KpackageId(kctx, name, strlen(name), 0, _NEWID);
 	if(ns->packageId != packageId) {
-		KonohaPackage *pack = getPackageNULL(kctx, packageId, trace);
+		KonohaPackage *pack = GetPackageNULL(kctx, packageId, trace);
 		if(pack != NULL) {
 			return kNameSpace_importSymbol(kctx, ns, pack->packageNameSpace_OnGlobalConstList, keyword, trace);
 		}

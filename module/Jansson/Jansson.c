@@ -242,7 +242,10 @@ static kbool_t AppendJsonArray(KonohaContext *kctx, struct JsonBuf *jsonbuf, str
 
 kbool_t LoadJanssonModule(KonohaFactory *factory, ModuleType type)
 {
-	factory->Module_Json            = "jansson";
+	static KModuleInfo ModuleInfo = {
+		"Janson", "0.1", 0, "json jansson",
+	};
+	factory->JsonDataInfo            = &ModuleInfo;
 	factory->IsJsonType             = IsJsonType;
 	factory->CreateJson             = CreateJson;
 	factory->ParseJson              = ParseJson;

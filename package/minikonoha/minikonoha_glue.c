@@ -110,7 +110,7 @@ static KMETHOD KonohaFactory_new(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD KonohaFactory_loadModule(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kKonohaFactory *f = (kKonohaFactory *)sfp[0].asObject;
-	KReturnUnboxValue(f->factory->LoadRuntimeModule(f->factory, S_text(sfp[1].asString), ReleaseModule));
+	KReturnUnboxValue(f->factory->LoadPlatformModule(f->factory, S_text(sfp[1].asString), ReleaseModule));
 }
 
 //## Konoha KonohaFactory.create();
