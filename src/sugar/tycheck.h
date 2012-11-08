@@ -28,7 +28,7 @@ extern "C" {
 
 /* ------------------------------------------------------------------------ */
 
-static kExpr *callTypeCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef, kStmt *stmt, kExpr *expr, kGamma *gma, int reqty)
+static kExpr *CallTypeCheckFunc(KonohaContext *kctx, kFunc *fo, int *countRef, kStmt *stmt, kExpr *expr, kGamma *gma, int reqty)
 {
 	INIT_GCSTACK();
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 5);
@@ -58,7 +58,7 @@ static kExpr *TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *g
 		int index, size;
 		kFunc **FuncItems = SugarSyntax_funcTable(kctx, syn, SugarFunc_TypeCheck, &size);
 		for(index = size - 1; index >= 0; index--) {
-			kExpr *texpr = callTypeCheckFunc(kctx, FuncItems[index], &callCount, stmt, expr, gma, reqty);
+			kExpr *texpr = CallTypeCheckFunc(kctx, FuncItems[index], &callCount, stmt, expr, gma, reqty);
 			if(Stmt_isERR(stmt)) return K_NULLEXPR;
 			if(texpr->ty != TY_var) return texpr;
 		}

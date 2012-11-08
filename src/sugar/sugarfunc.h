@@ -762,6 +762,18 @@ static kExpr* tyCheckDynamicCallParams(KonohaContext *kctx, kStmt *stmt, kExpr *
 	return TypeMethodCallExpr(kctx, expr, mtd, reqty);
 }
 
+static kMethod *kNameSpace_GuessCoercionMethodNULL(KonohaContext *kctx, kNameSpace *ns, kToken *tk, ktype_t this_cid)
+{
+	const char *name = S_text(tk->text);
+	if(name[1] == 'o' && (name[0] == 't' || name[0] == 'T')) {
+		KonohaClass *c = KLIB kNameSpace_GetClass(kctx, ns, name + 2, S_size(tk->text) - 2, NULL);
+		if(c != NULL) {
+			return KLIB kNameSpace_GetCoercionMethodNULL(kctx, ns, this_cid, c->typeId);
+		}
+	}
+	return NULL;
+}
+
 static kExpr *kStmtExpr_LookupMethod(KonohaContext *kctx, kStmt *stmt, kExpr *expr, ktype_t this_cid, kGamma *gma, ktype_t reqty)
 {
 	kNameSpace *ns = Stmt_nameSpace(stmt);
@@ -769,6 +781,9 @@ static kExpr *kStmtExpr_LookupMethod(KonohaContext *kctx, kStmt *stmt, kExpr *ex
 	DBG_ASSERT(IS_Token(tkMN));
 	size_t psize = kArray_size(expr->cons) - 2;
 	kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, ns, this_cid, tkMN->resolvedSymbol, psize);
+	if(mtd == NULL && psize == 0) {
+		mtd = kNameSpace_GuessCoercionMethodNULL(kctx, ns, tkMN, this_cid);
+	}
 	if(mtd == NULL) {
 		if(tkMN->text != TS_EMPTY) {  // find Dynamic Call ..
 			mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, this_cid, 0/*NONAME*/, 1);
