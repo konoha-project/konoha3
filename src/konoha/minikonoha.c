@@ -284,7 +284,6 @@ static void KonohaFactory_Check(KonohaFactory *factory)
 		if(mod == NULL) mod = "MiniVM";
 		KonohaFactory_LoadPlatformModule(factory, mod, ReleaseModule);
 	}
-		//KonohaFactory_CheckVirtualMachine(factory);  // delete when all vms are on module
 }
 
 KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory)

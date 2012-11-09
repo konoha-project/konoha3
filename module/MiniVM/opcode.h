@@ -166,9 +166,6 @@ typedef struct OPNCALL {
 	OPEXEC_RET();\
 } while(0)
 
-
-
-
 /* NSET */
 #define VPARAM_NSET        3, VMT_R, VMT_U, VMT_TY
 typedef struct OPNSET {
@@ -373,7 +370,7 @@ typedef struct OPSAFEPOINT {
 
 #define OPEXEC_SAFEPOINT(UL, espidx) do {\
 	KonohaRuntime_setesp(kctx, (KonohaStack *)(rbp+espidx));\
-	KonohaVirtualMachine_onSafePoint(kctx, (KonohaStack *)rbp, UL); \
+	KLIB CheckSafePoint(kctx, (KonohaStack *)rbp, UL);\
 } while(0)
 
 /* CHKSTACK */
@@ -387,8 +384,7 @@ typedef struct OPCHKSTACK {
 	if(unlikely(kctx->esp > kctx->stack->stack_uplimit)) {\
 		KLIB KonohaRuntime_raise(kctx, EXPT_("StackOverflow"), SoftwareFault, NULL, (KonohaStack *)(rbp));\
 	}\
-	kfileline_t uline = (UL == 0) ? rbp[K_ULINEIDX2].calledFileLine : UL;\
-	KonohaVirtualMachine_onSafePoint(kctx, (KonohaStack *)rbp, uline);\
+	(void)UL;\
 } while(0)
 
 /* TRACE */

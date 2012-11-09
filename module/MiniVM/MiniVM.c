@@ -129,6 +129,7 @@ static void kNameSpace_lookupMethodWithInlineCache(KonohaContext *kctx, KonohaSt
 		mtd = KLIB kNameSpace_GetMethodBySignatureNULL(kctx, ns, typeId, mtd->mn, mtd->paramdom, 0, NULL);
 		cache[0] = mtd;
 	}
+	sfp[0].unboxValue = O_unbox(sfp[0].asObject);
 	sfp[K_MTDIDX].calledMethod = mtd;
 }
 
@@ -379,13 +380,6 @@ static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack 
 {
 	KReturnUnboxValue(0);
 }
-
-//static void kMethod_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
-//{
-//	func = (func != NULL) ? func : MethodFunc_invokeAbstractMethod;
-//	((kMethodVar *)mtd)->invokeMethodFunc = func;
-//	((kMethodVar *)mtd)->pc_start = BOOTCODE_NCALL;
-//}
 
 static void kMethod_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
 {
