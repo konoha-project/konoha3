@@ -215,16 +215,16 @@ static int InputUserApproval(KonohaContext *kctx, const char *message, const cha
 	char buff[BUFSIZ] = {0};
 	const char *ykey = defval ? "Y" : "y";
 	const char *nkey = defval ? "n" : "N";
-	if(message == NULL) message = "Do you approve?";
-	if(yes == NULL) yes = "yes";
-	if(no == NULL) no = "no";
+	if(message == NULL || message[strlen(message)] == '\0') message = "Do you approve?";
+	if(yes == NULL || yes[0] == '\0') yes = "yes";
+	if(no == NULL || no[0] == '\0') no = "no";
 	fprintf(stdout, "%s (%s %s, %s %s): ", message, yes, ykey, no, nkey);
 	fgets(buff, BUFSIZ, stdin);
 	if(defval) {
-		return ((buff[0] == 'N' || buff[0] == 'n') && buff[1] == 0) ? false : true;
+		return ((buff[0] == 'N' || buff[0] == 'n') && buff[1] == '\n') ? false : true;
 	}
 	else {
-		return ((buff[0] == 'Y' || buff[0] == 'y') && buff[1] == 0);
+		return ((buff[0] == 'Y' || buff[0] == 'y') && buff[1] == '\n') ? false : true;
 	}
 }
 
