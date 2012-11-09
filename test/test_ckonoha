@@ -732,7 +732,82 @@ PASS=0
 record_result 0150_Sugar $PASS 0
 ## 0180_Class
 PASS=0
-record_result 0180_Class $PASS 0
+run_test 1 6 minimum "-MOutputTest" 0180_Class/Class_AsNull.k
+run_test 2 6 minimum "-MOutputTest" 0180_Class/Class_ConstAccess.k
+run_test 3 6 minimum "-MOutputTest" 0180_Class/Class_DynamicBinding.k
+run_test 4 6 minimum "-MOutputTest" 0180_Class/Class_MethodAddition.k
+run_test 5 6 minimum "-MOutputTest" 0180_Class/Class_Virtual.k
+run_test 6 6 minimum "-MOutputTest" 0180_Class/Class_Virtual2.k
+record_result 0180_Class $PASS 6
+## 0181_ClassDecl
+PASS=0
+run_test 1 8 minimum "-MOutputTest" 0181_ClassDecl/ClassDecl.k
+run_test 2 8 minimum "-MOutputTest" 0181_ClassDecl/ClassDecl_EmptyConstructor.k
+run_test 3 8 minimum "-MOutputTest" 0181_ClassDecl/ClassDecl_Field.k
+run_test 4 8 minimum "-MOutputTest" 0181_ClassDecl/ClassDecl_Interface.k
+run_test 5 8 minimum "-MOutputTest" 0181_ClassDecl/ClassDecl_NoBlock.k
+run_test 6 8 minimum "-MOutputTest" 0181_ClassDecl/ClassDecl_Private.k
+run_test 7 8 minimum "-MOutputTest" 0181_ClassDecl/ClassDecl_SelfTypedField.k
+run_test 8 8 minimum "-MOutputTest" 0181_ClassDecl/ClassDecl_Singleton.k
+record_result 0181_ClassDecl $PASS 8
+## 0182_Constructor
+PASS=0
+run_test 1 6 minimum "-MOutputTest" 0182_Constructor/Constructor_Default.k
+run_test 2 6 minimum "-MOutputTest" 0182_Constructor/Constructor_NoParam.k
+run_test 3 6 minimum "-MOutputTest" 0182_Constructor/Constructor_Overload.k
+run_test 4 6 minimum "-MOutputTest" 0182_Constructor/Constructor_OverloadDefault.k
+run_test 5 6 minimum "-MOutputTest" 0182_Constructor/Constructor_Param1.k
+run_test 6 6 minimum "-MOutputTest" 0182_Constructor/Constructor_Param2.k
+record_result 0182_Constructor $PASS 6
+## 0183_Field
+PASS=0
+run_test 1 12 minimum "-MOutputTest" 0183_Field/Field.k
+run_test 2 12 minimum "-MOutputTest" 0183_Field/Field_BooleanGetter.k
+run_test 3 12 minimum "-MOutputTest" 0183_Field/Field_BooleanGetter_LowerCase.k
+run_test 4 12 minimum "-MOutputTest" 0183_Field/Field_BooleanSetter.k
+run_test 5 12 minimum "-MOutputTest" 0183_Field/Field_Getter.k
+run_test 6 12 minimum "-MOutputTest" 0183_Field/Field_GetterLowerCase.k
+run_test 7 12 minimum "-MOutputTest" 0183_Field/Field_InitInt.k
+run_test 8 12 minimum "-MOutputTest" 0183_Field/Field_InitString.k
+run_test 9 12 minimum "-MOutputTest" 0183_Field/Field_ManyValues.k
+run_test 10 12 minimum "-MOutputTest" 0183_Field/Field_MultiDecl.k
+run_test 11 12 minimum "-MOutputTest" 0183_Field/Field_Setter.k
+run_test 12 12 minimum "-MOutputTest" 0183_Field/Field_SetterLowerCase.k
+record_result 0183_Field $PASS 12
+## 0184_Method
+PASS=0
+run_test 1 4 minimum "-MOutputTest" 0184_Method/Method.k
+run_test 2 4 minimum "-MOutputTest" 0184_Method/Method_Abstract.k
+run_test 3 4 minimum "-MOutputTest" 0184_Method/Method_Overload.k
+run_test 4 4 minimum "-MOutputTest" 0184_Method/Method_Virtual.k
+record_result 0184_Method $PASS 4
+## 0185_This
+PASS=0
+run_test 1 3 minimum "-MOutputTest" 0185_This/This_InnerExtendedField.k
+run_test 2 3 minimum "-MOutputTest" 0185_This/This_InnerField.k
+run_test 3 3 minimum "-MOutputTest" 0185_This/This_InnerThisField.k
+record_result 0185_This $PASS 3
+## 0188_ClassStress
+PASS=0
+run_test 1 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyClass00100.k
+run_test 2 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyClass00200.k
+run_test 3 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyClass00500.k
+run_test 4 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyClass01000.k
+run_test 5 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyClass02000.k
+run_test 6 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyClass05000.k
+run_test 7 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyClass10000.k
+run_test 8 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyExtends0010.k
+run_test 9 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyExtends0020.k
+run_test 10 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyExtends0050.k
+run_test 11 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyExtends0100.k
+run_test 12 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyExtends0200.k
+run_test 13 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyExtends0500.k
+run_test 14 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyExtends1000.k
+run_test 15 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_VeryManyField.k
+record_result 0188_ClassStress $PASS 15
+## 0189_ClassError
+PASS=0
+record_result 0189_ClassError $PASS 0
 ## 0200_Konoha
 PASS=0
 record_result 0200_Konoha $PASS 0
