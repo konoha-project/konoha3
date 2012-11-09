@@ -81,7 +81,7 @@ void childCallback(Event e) {
 	return ret.substr(0, ret.getSize() - 1);
 }
 
-EventHandler.setCallBack("ChildProcessExited", childCallback);
+//EventHandler.setCallBack("ChildProcessExited", childCallback);
 
 void parentCallback(Event e) {
 	if(DEBUG) {
@@ -98,9 +98,9 @@ boolean setDefaultEventCallback() {
 	return true;
 }
 
-setDefaultEventCallback();
+//setDefaultEventCallback();
 //HttpEventListener.start("0.0.0.0", 8100);
-SignalEventListener.start();
+//SignalEventListener.start();
 
 String[] concatTokenList(Token[] tokenList) {
 	int i = 0;
@@ -396,7 +396,7 @@ Expr expressionCommandReplace(Stmt stmt, Token[] tokenList, int beginIdx, int op
 	String funcName = getFuncName();
 	String evaltext = "@Public String " + funcName + "() { ";
 	evaltext = evaltext + generateSubProcSequence(args, false).replace("\n", " ");
-	evaltext = evaltext + "return " + getCurrentVarName() + ".getOutputStream().readAll(); }";
+	evaltext = evaltext + "return " + getCurrentVarName() + ".communicate(\"\")[0]; }";
 	if(DEBUG) {
 		System.p(evaltext);
 	}
