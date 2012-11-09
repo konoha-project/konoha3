@@ -962,7 +962,7 @@ static void kNameSpace_parseSyntaxPattern(KonohaContext *kctx, kNameSpace *ns, c
 	patterns.TargetPolicy.RemovingIndent = true;
 	TokenSequence_resolved2(kctx, &patterns, NULL, &source, source.beginIdx);
 	KLIB kArray_add(kctx, patternList, K_NULLTOKEN);  // delim
-	int firstPatternIdx = kArray_size(patternList);
+	size_t firstPatternIdx = kArray_size(patternList);
 	kArray_addSyntaxPattern(kctx, patternList, &patterns);
 	if(firstPatternIdx < kArray_size(patternList)) {
 		kToken *firstPattern = patternList->TokenItems[firstPatternIdx];

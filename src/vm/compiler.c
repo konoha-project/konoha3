@@ -243,12 +243,6 @@ static kBasicBlock *kStmt_getLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbo
 }
 
 /* ------------------------------------------------------------------------ */
-#if !defined(PLATAPIFORM_KERNEL) || !defined(USE_SMALLBUILD)
-#define USE_DUMP_VISITOR
-#define USE_JS_VISITOR
-#include "dumpvisitor.c"
-#endif
-/* ------------------------------------------------------------------------ */
 #if defined(USE_DIRECT_THREADED_CODE)
 #define TADDR   NULL, 0/*counter*/
 #else
@@ -276,12 +270,6 @@ static kBasicBlock *kStmt_getLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbo
 	OP##T op_ = {TADDR, OP, ASMLINE, ## __VA_ARGS__};\
 	union { VirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
 	BUILD_asm(kctx, &tmp_.op, sizeof(OP##T));\
-} while(0)
-
-#define ASMbranch(T, lb, ...) do {\
-	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, NULL, ## __VA_ARGS__};\
-	union { VirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
-	ASM_BRANCH_(kctx, lb, &tmp_.op, sizeof(OP##T));\
 } while(0)
 
 #define kBasicBlock_add(bb, T, ...) do {\

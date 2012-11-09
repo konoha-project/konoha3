@@ -60,8 +60,8 @@ static void kKonohaFactory_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kKonohaFactory_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
-{
+//static void kKonohaFactory_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+//{
 //	kKonohaFactory *file = (kKonohaFactory *)v[pos].asObject;
 //	if(file->PathInfoNULL != NULL) {
 //		KLIB Kwb_write(kctx, wb, S_text(file->PathInfoNULL), S_size(file->PathInfoNULL));
@@ -69,7 +69,7 @@ static void kKonohaFactory_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrow
 //	else {
 //		KLIB Kwb_printf(kctx, wb, "FILE:%p", file->fp);
 //	}
-}
+//}
 
 static void kKonoha_init(KonohaContext *kctx, kObject *o, void *conf)
 {
@@ -86,8 +86,8 @@ static void kKonoha_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void kKonoha_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
-{
+//static void kKonoha_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+//{
 //	kKonoha *file = (kKonoha *)v[pos].asObject;
 //	if(file->PathInfoNULL != NULL) {
 //		KLIB Kwb_write(kctx, wb, S_text(file->PathInfoNULL), S_size(file->PathInfoNULL));
@@ -95,7 +95,7 @@ static void kKonoha_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuff
 //	else {
 //		KLIB Kwb_printf(kctx, wb, "FILE:%p", file->fp);
 //	}
-}
+//}
 
 
 // --------------------------------------------------------------------------

@@ -294,9 +294,7 @@ static KMETHOD System_system(KonohaContext *kctx, KonohaStack *sfp)
 /* ------------------------------------------------------------------------ */
 
 #define _Public   kMethod_Public
-#define _Const    kMethod_Const
 #define _Static   kMethod_Static
-#define _Coercion kMethod_Coercion
 #define _F(F)   (intptr_t)(F)
 
 #define KDefineConstInt(T) #T, TY_int, T

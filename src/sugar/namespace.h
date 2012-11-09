@@ -633,7 +633,7 @@ static kbool_t MethodMatch_Signature(KonohaContext *kctx, kMethod *mtd, MethodMa
 	if(m->param != NULL && m->foundMethodNULL == NULL) {
 		kParam *param = Method_param(mtd);
 		if(param->psize == m->paramsize) {
-			int i;
+			kushort_t i;
 			for(i = 0; i < m->paramsize; i++) {
 				if(m->param[i].ty != param->paramtypeItems[i].ty) {
 					if(CT_isa(kctx, m->param[i].ty, param->paramtypeItems[i].ty)) {

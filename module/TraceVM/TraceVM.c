@@ -375,18 +375,6 @@ static struct VirtualCode* GetBootCodeOfNativeMethodCall(void)
 	return BOOTCODE_NCALL;
 }
 
-static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack *sfp)
-{
-	KReturnUnboxValue(0);
-}
-
-static void kMethod_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
-{
-	func = (func != NULL) ? func : MethodFunc_invokeAbstractMethod;
-	((kMethodVar *)mtd)->invokeMethodFunc = func;
-	((kMethodVar *)mtd)->pc_start = BOOTCODE_NCALL;
-}
-
 // -------------------------------------------------------------------------
 
 #ifdef HAVE_DB_H
