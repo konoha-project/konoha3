@@ -28,11 +28,12 @@
 #include "minikonoha/konoha_common.h"
 #include "minikonoha/gc.h"
 #include "minikonoha/platform.h"
+#include "test_konoha.h"
 
 /* checking header files can compile at g++ */
 int main(int argc, char const* argv[])
 {
-   KonohaContext* konoha = konoha_open(KonohaUtils_getDefaultPlatformApi());
-   konoha_close(konoha);
+    KonohaContext* konoha = CreateContext();
+    DeleteContext(konoha);
     return 0;
 }

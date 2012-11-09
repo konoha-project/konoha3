@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/gc.h"
-#include <minikonoha/platform.h>
+#include "test_konoha.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -182,9 +182,9 @@ static void test_bitops()
 int main(int argc, const char *argv[])
 {
 	int ret = 0;
-	KonohaContext* konoha = konoha_open(KonohaUtils_getDefaultPlatformApi());
+	KonohaContext* konoha = CreateContext();
 	test_gc(konoha);
-	konoha_close(konoha);
+	DeleteContext(konoha);
 	assert(__free__ == __init__);
 	fprintf(stderr, "alloced_object_count = %d, freed_object_count=%d\n", __init__, __free__);
 	test_bitops();
