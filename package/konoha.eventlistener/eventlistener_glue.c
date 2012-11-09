@@ -391,15 +391,15 @@ static KMETHOD SignalEventListener_start(KonohaContext *kctx, KonohaStack *sfp)
 	SignalEventQueue = (LocalQueue *)PLATAPI malloc_i(sizeof(LocalQueue));
 	LocalQueue_init(kctx, SignalEventQueue);
 
-	FILE *pid;
+	//FILE *pid;
 	pthread_t t;
-	if(!(pid = fopen("/usr/local/minikonoha/dse/pid", "w"))) {
-		fprintf(stderr, "cannot open pid file\n");
-		exit(1);
-	}
-	fprintf(pid, "%d", getpid());
-	fflush(pid);
-	fclose(pid);
+	//if(!(pid = fopen("/usr/local/minikonoha/dse/pid", "w"))) {
+	//	fprintf(stderr, "cannot open pid file\n");
+	//	exit(1);
+	//}
+	//fprintf(pid, "%d", getpid());
+	//fflush(pid);
+	//fclose(pid);
 	pthread_create(&t, NULL, signalEventListener, (void *)kctx);
 }
 
