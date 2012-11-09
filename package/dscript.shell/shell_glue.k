@@ -35,6 +35,7 @@ import("konoha.global");
 import("konoha.string");
 import("konoha.console");
 import("konoha.eventlistener");
+import("konoha.defined");
 import("posix.path");
 import("dscript.subproc");
 import("curl");
@@ -201,7 +202,7 @@ String join(String[] a, String separator) {
 	return ret;
 }
 
-String getPipeString(String prevname, String varname, String[] args, int startindex, int argsize, boolean enableStdout) {
+String getPipeString(String prevname, String varname, String[] args, int startindex, int argsize, boolean enableStdout, int index) {
 	String ret = "";
 	if(prevname != "" && !isCommandUseTty(args[startindex])) {
 		ret = ret + prevname + ".pipe(" + varname + ", false);\n";
@@ -209,7 +210,14 @@ String getPipeString(String prevname, String varname, String[] args, int startin
 	if(isCommandUseTty(args[startindex])) {
 		if(prevname != "") {
 			ret = ret + varname + ".bg();\n";
-			ret = ret + varname + ".communicate(" + prevname + ".getOutputStream().readAll());\n";
+			if(defined(USE_PRINT)) {
+				ret = ret + "System.p(";
+			}
+			ret = ret + varname + ".communicate(" + prevname + ".getOutputStream().readAll())";
+			if(defined(USE_PRINT)) {
+				ret = ret + "[0])";
+			}
+			ret = ret + ";\n";
 		}
 		else {
 			if(enableStdout) {
@@ -222,7 +230,19 @@ String getPipeString(String prevname, String varname, String[] args, int startin
 	}
 	else {
 		if(enableStdout) {
-			ret = ret + varname + ".fg();\n";
+			if(defined(USE_PRINT)) {
+				/* use System.p instead of pipe to stdout */
+				if(index < 0) {
+					ret = ret + varname + ".bg();\n";
+					ret = ret + "System.p(" + varname + ".communicate(\"\")[0]);\n";
+				}
+				else {
+					ret = ret + varname + ".fg();\n";
+				}
+			}
+			else {
+				ret = ret + varname + ".fg();\n";
+			}
 		}
 		else {
 			ret = ret + varname + ".bg();\n";
@@ -264,7 +284,7 @@ String generateSubProcSequence(String[] args, boolean enableStdout) {
 			ret = ret + varname + ".setArgumentList(" + expandArgs(slice(args, startindex + 1, argsize)) + ");\n";
 		}
 		if(index >= 0) {
-			ret = ret + getPipeString(prevname, varname, args, startindex, argsize, enableStdout);
+			ret = ret + getPipeString(prevname, varname, args, startindex, argsize, enableStdout, index);
 		}
 		else {
 			if(redirectindex >= 0) {
@@ -274,11 +294,11 @@ String generateSubProcSequence(String[] args, boolean enableStdout) {
 			}
 			else {
 				/* end of pipe */
-				if(enableStdout) {
+				if(enableStdout && !defined(USE_PRINT)) {
 					ret = ret + varname + ".setOutputStream(stdout);\n";
 				}
 			}
-			ret = ret + getPipeString(prevname, varname, args, startindex, argsize, enableStdout);
+			ret = ret + getPipeString(prevname, varname, args, startindex, argsize, enableStdout, index);
 			break;
 		}
 		prevname = varname;
