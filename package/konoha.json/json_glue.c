@@ -171,7 +171,7 @@ static KMETHOD Json_getJson(KonohaContext *kctx, KonohaStack *sfp)
 		memcpy(&jnew->jsonbuf, &jsonbuf, sizeof(struct JsonBuf));
 		KReturn(jnew);
 	}
-	KReturnDefaultValue();
+	KReturnDefaultObjectValue();
 }
 
 //## Boolean Json.getBoolean(String key);

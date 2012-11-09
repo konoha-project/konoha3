@@ -100,7 +100,6 @@ set(PACKAGES
 	llvm
 	libvirt
 ##	ijit
-##	json
 	jansson
 	mecab
 	python
