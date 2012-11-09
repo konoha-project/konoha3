@@ -24,8 +24,6 @@
 
 #define USE_DIRECT_THREADED_CODE
 
-#include <iconv.h>
-#include <errno.h>
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/klib.h>
 #include <minikonoha/sugar.h>
