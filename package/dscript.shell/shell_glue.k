@@ -25,7 +25,6 @@
 import("cstyle", "while");
 import("cstyle", "break");
 import("cstyle", "null");
-import("jansson");
 import("konoha.array");
 import("konoha.const");
 import("konoha.eval");
@@ -34,39 +33,13 @@ import("konoha.file");
 import("konoha.global");
 import("konoha.string");
 import("konoha.console");
-import("konoha.eventlistener");
 import("konoha.defined");
 import("posix.path");
 import("dscript.subproc");
-import("curl");
 import("sugar");
 
 int subproc_id = 0;
 int func_id = 0;
-const DEBUG = false;
-
-void childCallback(Event e) {
-	if(DEBUG) {
-		System.p("Event      : " + e.getProperty("event"));
-		System.p("Pid        : " + e.getInt("Pid"));
-		System.p("Command    : " + e.getProperty("Command"));
-		System.p("ReturnCode : " + e.getInt("ReturnCode"));
-	}
-}
-
-@Public void sendHttpEvent(String command, SubProc sp) {
-	Json sdata = new Json();
-	sdata.setString("event", "ChildProcessExited");
-	sdata.setString("Command", command);
-	sdata.setInt("ReturnCode", sp.getStatus());
-	sdata.setInt("Pid", sp.getPid());
-	String req = sdata.dump();
-	Curl c = new Curl();
-	String url = "http://0.0.0.0:8100";
-	c.setOpt(CURLOPT_URL, url);
-	c.setOpt(CURLOPT_POSTFIELDS, req);
-	c.perform();
-}
 
 @Public String FILE.readAll() {
 	String ret = "";
@@ -80,27 +53,6 @@ void childCallback(Event e) {
 	}
 	return ret.substr(0, ret.getSize() - 1);
 }
-
-//EventHandler.setCallBack("ChildProcessExited", childCallback);
-
-void parentCallback(Event e) {
-	if(DEBUG) {
-		System.p("Signal : " + e.getProperty("event"));
-	}
-}
-
-boolean setDefaultEventCallback() {
-	int i = 0;
-	while(i < 32/*_POSIX_SIGQUEUE_MAX*/) {
-		EventHandler.setCallBack(i, parentCallback);
-		i = i + 1;
-	}
-	return true;
-}
-
-//setDefaultEventCallback();
-//HttpEventListener.start("0.0.0.0", 8100);
-//SignalEventListener.start();
 
 String[] concatTokenList(Token[] tokenList) {
 	int i = 0;
@@ -202,29 +154,37 @@ String join(String[] a, String separator) {
 	return ret;
 }
 
-String getPipeString(String prevname, String varname, String[] args, int startindex, int argsize, boolean enableStdout, int index) {
+String getPipeString(String prevname, String varname, String[] args, int startindex, int argsize, boolean enableStdout, int index, String[] preexec) {
 	String ret = "";
 	if(prevname != "" && !isCommandUseTty(args[startindex])) {
-		ret = ret + prevname + ".pipe(" + varname + ", false);\n";
+		preexec.add(prevname + ".pipe(" + varname + ", false);\n");
+		//ret = ret + prevname + ".pipe(" + varname + ", false);\n";
 	}
 	if(isCommandUseTty(args[startindex])) {
 		if(prevname != "") {
-			ret = ret + varname + ".bg();\n";
+			preexec.add(varname + ".bg();\n");
+			//ret = ret + varname + ".bg();\n";
 			if(defined(USE_PRINT)) {
-				ret = ret + "System.p(";
+				preexec.add("System.p(");
+				//ret = ret + "System.p(";
 			}
-			ret = ret + varname + ".communicate(" + prevname + ".getOutputStream().readAll())";
+			preexec.add(varname + ".communicate(" + prevname + ".getOutputStream().readAll())");
+			//ret = ret + varname + ".communicate(" + prevname + ".getOutputStream().readAll())";
 			if(defined(USE_PRINT)) {
-				ret = ret + "[0])";
+				preexec.add("[0])");
+				//ret = ret + "[0])";
 			}
-			ret = ret + ";\n";
+			preexec.add(";\n");
+			//ret = ret + ";\n";
 		}
 		else {
 			if(enableStdout) {
-				ret = ret + varname + ".fg();\n";
+				preexec.add(varname + ".fg();\n");
+				//ret = ret + varname + ".fg();\n";
 			}
 			else {
-				ret = ret + varname + ".bg();\n";
+				preexec.add(varname + ".bg();\n");
+				//ret = ret + varname + ".bg();\n";
 			}
 		}
 	}
@@ -233,27 +193,31 @@ String getPipeString(String prevname, String varname, String[] args, int startin
 			if(defined(USE_PRINT)) {
 				/* use System.p instead of pipe to stdout */
 				if(index < 0) {
-					ret = ret + varname + ".bg();\n";
-					ret = ret + "System.p(" + varname + ".communicate(\"\")[0]);\n";
+					preexec.add(varname + ".bg();\n");
+					preexec.add("System.p(" + varname + ".communicate(\"\")[0]);\n");
+					//ret = ret + varname + ".bg();\n";
+					//ret = ret + "System.p(" + varname + ".communicate(\"\")[0]);\n";
 				}
 				else {
-					ret = ret + varname + ".fg();\n";
+					preexec.add(varname + ".fg();\n");
+					//ret = ret + varname + ".fg();\n";
 				}
 			}
 			else {
-				ret = ret + varname + ".fg();\n";
+				preexec.add(varname + ".fg();\n");
+				//ret = ret + varname + ".fg();\n";
 			}
 		}
 		else {
-			ret = ret + varname + ".bg();\n";
+			preexec.add(varname + ".bg();\n");
+			//ret = ret + varname + ".bg();\n";
 		}
 	}
-	//ret = ret + "sendHttpEvent(\"" + join(slice(args, startindex, argsize + 1), " ") + "\", " + varname + ");\n";
 	return ret;
 }
 
 String generateSubProcSequence(String[] args, boolean enableStdout) {
-	if(DEBUG) {
+	if(defined(DEBUG)) {
 		System.p(args);
 	}
 	String ret = "";
@@ -263,6 +227,7 @@ String generateSubProcSequence(String[] args, boolean enableStdout) {
 	String prevname = "";
 	int argsize = 0;
 	int redirectindex = -1;
+	String[] preexec = [];
 	while(true) {
 		/* pipe */
 		index = indexOf(args, "|", startindex);
@@ -284,7 +249,7 @@ String generateSubProcSequence(String[] args, boolean enableStdout) {
 			ret = ret + varname + ".setArgumentList(" + expandArgs(slice(args, startindex + 1, argsize)) + ");\n";
 		}
 		if(index >= 0) {
-			ret = ret + getPipeString(prevname, varname, args, startindex, argsize, enableStdout, index);
+			ret = ret + getPipeString(prevname, varname, args, startindex, argsize, enableStdout, index, preexec);
 		}
 		else {
 			if(redirectindex >= 0) {
@@ -298,13 +263,18 @@ String generateSubProcSequence(String[] args, boolean enableStdout) {
 					ret = ret + varname + ".setOutputStream(stdout);\n";
 				}
 			}
-			ret = ret + getPipeString(prevname, varname, args, startindex, argsize, enableStdout, index);
+			ret = ret + getPipeString(prevname, varname, args, startindex, argsize, enableStdout, index, preexec);
 			break;
 		}
 		prevname = varname;
 		startindex = index + 1;
 	}
-	if(DEBUG) {
+	index = 0;
+	while(index < preexec.getSize()) {
+		ret = ret + preexec[index];
+		index = index + 1;
+	}
+	if(defined(DEBUG)) {
 		System.p(ret);
 	}
 	return ret;
@@ -359,7 +329,7 @@ int tokenFuncDollar(Token tk, String source) {
 	int openParenthesis  = 40/*(*/;
 	int closeParenthesis = 41/*)*/;
 	if(source.charCodeAt(pos) != openParenthesis) {
-		if(DEBUG) {
+		if(defined(DEBUG)) {
 			System.p("skip dollar");
 		}
 		return 0;
@@ -375,14 +345,14 @@ int tokenFuncDollar(Token tk, String source) {
 		}
 		pos = pos + 1;
 	}
-	if(DEBUG) {
+	if(defined(DEBUG)) {
 		System.p("skip dollar");
 	}
 	return 0;
 }
 
 Expr expressionCommandReplace(Stmt stmt, Token[] tokenList, int beginIdx, int operatorIdx, int endIdx) {
-	if(DEBUG) {
+	if(defined(DEBUG)) {
 		int i = beginIdx;
 		while(i < endIdx) {
 			System.p(tokenList[i].getText());
@@ -397,7 +367,7 @@ Expr expressionCommandReplace(Stmt stmt, Token[] tokenList, int beginIdx, int op
 	String evaltext = "@Public String " + funcName + "() { ";
 	evaltext = evaltext + generateSubProcSequence(args, false).replace("\n", " ");
 	evaltext = evaltext + "return " + getCurrentVarName() + ".communicate(\"\")[0]; }";
-	if(DEBUG) {
+	if(defined(DEBUG)) {
 		System.p(evaltext);
 	}
 	eval(evaltext);
