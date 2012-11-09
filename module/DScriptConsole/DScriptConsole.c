@@ -35,57 +35,30 @@ extern "C" {
 // -------------------------------------------------------------------------
 /* Console */
 
-static const char* BeginTag(KonohaContext *kctx, kinfotag_t t)
+static char *file2CId(const char *file, char *cid)
 {
-	DBG_ASSERT(t <= NoneTag);
-	if(!KonohaContext_Is(Interactive, kctx)) t = NoneTag;
-	static const char* tags[] = {
-		"\x1b[1m\x1b[31m", /*CritTag*/
-		"\x1b[1m\x1b[31m", /*ErrTag*/
-		"\x1b[1m\x1b[31m", /*WarnTag*/
-		"\x1b[1m", /*NoticeTag*/
-		"\x1b[1m", /*InfoTag*/
-		"", /*DebugTag*/
-		"", /* NoneTag*/
-	};
-	return tags[(int)t];
-}
-
-static const char* EndTag(KonohaContext *kctx, kinfotag_t t)
-{
-	DBG_ASSERT(t <= NoneTag);
-	if(!KonohaContext_Is(Interactive, kctx)) t = NoneTag;
-	static const char* tags[] = {
-			"\x1b[0m", /*CritTag*/
-			"\x1b[0m", /*ErrTag*/
-			"\x1b[0m", /*WarnTag*/
-			"\x1b[0m", /*NoticeTag*/
-			"\x1b[0m", /*InfoTag*/
-			"", /* Debug */
-			"", /* NoneTag*/
-	};
-	return tags[(int)t];
+	memcpy(cid, file, strlen(file) + 1);
+	char *pos = strstr(cid, "\:");
+	if(pos != NULL) {
+		pos[0] = '\0';
+	}
+	return cid;
 }
 
 static void UI_ReportUserMessage(KonohaContext *kctx, kinfotag_t level, kfileline_t pline, const char *msg, int isNewLine)
 {
-	const char *beginTag = BeginTag(kctx, level);
-	const char *endTag = EndTag(kctx, level);
-	const char *kLF = isNewLine ? "\n" : "";
-	if(pline > 0) {
-		const char *file = FileId_t(pline);
-		PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptMessage\", \"Body\": \"%s - (%s:%d) %s%s%s\"}" , beginTag, PLATAPI shortFilePath(file), (kushort_t)pline, msg, kLF, endTag);
-	}
-	else {
-		PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptMessage\", \"Body\": \"%s%s%s%s\"}", beginTag,  msg, kLF, endTag);
-	}
+	const char *file = PLATAPI shortFilePath(FileId_t(pline));
+	char cid[64] = {0};
+	file2CId(file, cid);
+	PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptMessage\", \"CId\": \"%s\", \"Body\": \"%s\"}" , cid, msg);
 }
 
 static void UI_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t pline, const char *msg)
 {
-	const char *beginTag = BeginTag(kctx, taglevel);
-	const char *endTag = EndTag(kctx, taglevel);
-	PLATAPI syslog_i( 5/*LOG_NOTICE*/, "{\"Method\": \"DScriptMessage\", \"Body\": \"%s - %s%s\n\"}", beginTag, msg, endTag);
+	const char *file = PLATAPI shortFilePath(FileId_t(pline));
+	char cid[64] = {0};
+	file2CId(file, cid);
+	PLATAPI syslog_i( 5/*LOG_NOTICE*/, "{\"Method\": \"DScriptCompilerMessage\", \"CId\": \"%s\", \"Body\": \"%s\"}", cid, msg);
 }
 
 static void Kwb_writeValue(KonohaContext *kctx, KGrowingBuffer *wb, KonohaClass *c, KonohaStack *sfp)
@@ -114,13 +87,13 @@ static void ReportDebugMessage(const char *file, const char *func, int line, con
 typedef struct {
 	struct event_base *base;
 	char *buff;
-} UserApproval;
+} UserInput;
 
-static void checkUserApproval(struct evhttp_request *req, void *args)
+static void userInput2Buff(struct evhttp_request *req, void *args)
 {
-	UserApproval *ua = (UserApproval *)args;
-	struct event_base *base = ua->base;
-	char *buff = ua->buff;
+	UserInput *ui = (UserInput *)args;
+	struct event_base *base = ui->base;
+	char *buff = ui->buff;
 	struct evbuffer *body = evhttp_request_get_input_buffer(req);
 	size_t len = evbuffer_get_length(body);
 	unsigned char *requestLine;
@@ -141,51 +114,127 @@ static void checkUserApproval(struct evhttp_request *req, void *args)
 	event_base_loopbreak(base);
 }
 
+static char *getUserInput(KonohaContext *kctx, char *buff, const char *cid, const char *host, int port)
+{
+	struct event_base *base = event_base_new();
+	struct evhttp *httpd = evhttp_new(base);
+	if(evhttp_bind_socket(httpd, host, port) < 0) {
+		PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptError\", \"CId\": \"%s\", \"Body\": \"couldn't bind socket\"}", cid);
+		exit(1);
+	}
+
+	UserInput ui = {};
+	ui.base = base;
+	ui.buff = buff;
+	evhttp_set_gencb(httpd, userInput2Buff, (void *)&ui);
+	event_base_dispatch(base);
+	evhttp_free(httpd);
+	event_base_free(base);
+
+	return buff;
+}
+
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <unistd.h>
+
+static const char *getThisFileName(KonohaContext *kctx)
+{
+	static char shell[] = "shell";
+	kNameSpace *ns = (kNameSpace *)KLIB Knull(kctx, CT_NameSpace);
+	ksymbol_t sym = SYM_("SCRIPT_ARGV");
+	KKeyValue *kv = KLIB kNameSpace_GetConstNULL(kctx, ns, sym);
+	if(kv != NULL) {
+		kArray *sa = (kArray *)kv->ObjectValue;
+		if(sa->stringItems != NULL) {
+			const char *file = S_text(sa->stringItems[0]);
+			return file;
+		}
+	}
+	return shell;
+}
+
 static int InputUserApproval(KonohaContext *kctx, const char *message, const char *yes, const char *no, int defval)
 {
 	char buff[BUFSIZ] = {0};
 	const char *ykey = defval ? "Y" : "y";
 	const char *nkey = defval ? "n" : "N";
-	if(message == NULL) message = "Do you approve?";
-	if(yes == NULL) yes = "yes";
-	if(no == NULL) no = "no";
-	const char host[] = "127.0.0.1";
-	int port = 8090;
+	if(message == NULL || message[strlen(message)] == '\0') message = "Do you approve?";
+	if(yes == NULL || yes[0] == '\0') yes = "yes";
+	if(no == NULL || no[0] == '\0') no = "no";
 
-	PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptAsk\", \"Body\": \"%s (%s %s, %s %s): \", \"Ip\", \"%s:%d\"}" , message, yes, ykey, no, nkey, host, port);
+	const char *file = PLATAPI shortFilePath((getThisFileName(kctx)));
+	char cid[64] = {0};
+	file2CId(file, cid);
 
-	struct event_base *base = event_base_new();
-	struct evhttp *httpd = evhttp_new(base);
-	if(evhttp_bind_socket(httpd, host, port) < 0) {
-		PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptMessage\", \"Body\": \"couldn't bind socket\"}");
-		exit(1);
-	}
+//	char hostname[BUFSIZ] = {0};
+//	gethostname(hostname, BUFSIZ);
+//	struct addrinfo *res;
+//	struct in_addr addr;
+//	int err;
+//	if((err = getaddrinfo(hostname, NULL, NULL, &res)) != 0) {
+//		PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptError\", \"CId\": \"%s\", \"Body\": \"error %d\"}", cid, err);
+//		exit(1);
+//	}
+//	addr.s_addr = ((struct sockaddr_in *)(res->ai_addr))->sin_addr.s_addr;
+//	char host[16] = {0};
+//	memcpy(host, inet_ntoa(addr), 16);
+//	freeaddrinfo(res);
 
-	UserApproval ua = {};
-	ua.base = base;
-	ua.buff = buff;
-	evhttp_set_gencb(httpd, checkUserApproval, (void *)&ua);
-	event_base_dispatch(base);
-	evhttp_free(httpd);
-	event_base_free(base);
+	const char host[] = "127.0.0.1"; // TODO get localhost IP
+	int port = 8090; // TODO random port scan
 
+	PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptApproval\", \"CId\": \"%s\", \"Body\": \"%s (%s %s, %s %s): \", \"Ip\", \"%s:%d\"}" , cid, message, yes, ykey, no, nkey, host, port);
+	getUserInput(kctx, buff, cid, host, port);
 	if(defval) {
 		return ((buff[0] == 'N' || buff[0] == 'n') && buff[1] == 0) ? false : true;
 	}
 	else {
-		return ((buff[0] == 'Y' || buff[0] == 'y') && buff[1] == 0);
+		return ((buff[0] == 'Y' || buff[0] == 'y') && buff[1] == 0) ? false : true;
 	}
 }
 
-static const char* InputUserText(KonohaContext *kctx, const char *message, int flag)
+static char* InputUserText(KonohaContext *kctx, const char *message, int flag)
 {
-
+	return "";
 }
 
-static const char* InputUserPassword(KonohaContext *kctx, const char *message)
+static char* InputUserPassword(KonohaContext *kctx, const char *message)
 {
+	char buff[BUFSIZ] = {0};
 
-	return "";
+	const char *file = PLATAPI shortFilePath((getThisFileName(kctx)));
+	char cid[64] = {0};
+	file2CId(file, cid);
+
+//	char hostname[BUFSIZ] = {0};
+//	gethostname(hostname, BUFSIZ);
+//	struct addrinfo *res;
+//	struct in_addr addr;
+//	int err;
+//	if((err = getaddrinfo(hostname, NULL, NULL, &res)) != 0) {
+//		PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptError\", \"CId\": \"%s\", \"Body\": \"error %d\"}", cid, err);
+//		exit(1);
+//	}
+//	addr.s_addr = ((struct sockaddr_in *)(res->ai_addr))->sin_addr.s_addr;
+//	char host[16] = {0};
+//	memcpy(host, inet_ntoa(addr), 16);
+//	freeaddrinfo(res);
+
+	const char host[] = "127.0.0.1"; // TODO get localhost IP
+	int port = 8090; // TODO random port scan
+
+	PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptPassword\", \"CId\": \"%s\", \"Body\": \"%s\", \"Ip\": \"%s:%d\"}" , cid, message, host, port);
+	getUserInput(kctx, buff, cid, host, port);
+	size_t len = strlen(buff) + 1;
+	char *p = malloc(len);
+	if(p != NULL) {
+		memcpy(p, buff, len);
+	}
+	return p;
 }
 
 // -------------------------------------------------------------------------
