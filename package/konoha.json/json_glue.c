@@ -222,8 +222,8 @@ static KMETHOD Json_setJson(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo  = (kJson *)sfp[0].asObject;
 	kJson *val = (kJson *)sfp[2].asObject;
-	//CHECK_JSON(jo, KReturnDefaultObjectValue());
-	//CHECK_JSON(val, KReturnDefaultObjectValue());
+	//CHECK_JSON(jo, KReturnDefaultValue());
+	//CHECK_JSON(val, KReturnDefaultValue());
 	if(!PLATAPI SetJsonKeyValue(kctx, &jo->jsonbuf, S_text(sfp[1].asString), S_size(sfp[1].asString), val)) {
 		DBG_P("[WARNING] Json cannot set target object");
 	}
@@ -290,7 +290,7 @@ static KMETHOD Json_getKeys(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Json_dump(KonohaContext *kctx, KonohaStack *sfp)
 {
 	json_t* obj = ((struct kJsonVar *)sfp[0].asObject)->obj;
-	//CHECK_JSON(obj, KReturnDefaultObjectValue());
+	//CHECK_JSON(obj, KReturnDefaultValue());
 	char* data = json_dumps(obj, JSON_ENSURE_ASCII);
 	if(data == NULL) {
 		KReturn(KNULL(String));
@@ -319,7 +319,7 @@ static KMETHOD JsonArray_add(KonohaContext *kctx, KonohaStack *sfp)
 	if(!json_is_array(ja)) {
 		DBG_P("[ERROR]: Object is not Json Array.");
 		//KLIB KonohaRuntime_raise(kctx, 1, sfp, pline, msg);
-		KReturnDefaultObjectValue();
+		KReturnDefaultValue();
 	}
 	struct kJsonVar *json = (struct kJsonVar *)sfp[1].asObject;
 	json_array_append(ja, json->obj);

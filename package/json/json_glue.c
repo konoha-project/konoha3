@@ -87,7 +87,7 @@ static KMETHOD kJson_parse(KonohaContext *kctx, KonohaStack *sfp)
 	const char *text = S_text(sfp[1].asString);
 	KJson_t json = PLATAPI ParseJson(PLATAPI JsonContext, text, S_size(sfp[1].asString));
 	if(json == 0) {
-		KReturnDefaultObjectValue();
+		KReturnDefaultValue();
 	}
 	KReturn(NewJsonObject(kctx, sfp, json));
 }

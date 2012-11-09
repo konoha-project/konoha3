@@ -143,7 +143,7 @@ static KMETHOD Map_get(KonohaContext *kctx, KonohaStack *sfp)
 	else if(e != NULL) {
 		KReturn(e->ObjectValue);
 	}
-	KReturnDefaultObjectValue();
+	KReturnDefaultValue();
 }
 
 //## method void Map.set(String key, T0 value);

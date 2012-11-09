@@ -789,25 +789,26 @@ run_test 3 3 minimum "-MOutputTest" 0185_This/This_InnerThisField.k
 record_result 0185_This $PASS 3
 ## 0188_ClassStress
 PASS=0
-run_test 1 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyClass00100.k
-run_test 2 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyClass00200.k
-run_test 3 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyClass00500.k
-run_test 4 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyClass01000.k
-run_test 5 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyClass02000.k
-run_test 6 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyClass05000.k
-run_test 7 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyClass10000.k
-run_test 8 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyExtends0010.k
-run_test 9 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyExtends0020.k
-run_test 10 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyExtends0050.k
-run_test 11 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyExtends0100.k
-run_test 12 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyExtends0200.k
-run_test 13 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyExtends0500.k
-run_test 14 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyExtends1000.k
-run_test 15 15 minimum "-MOutputTest" 0188_ClassStress/ClassStress_VeryManyField.k
-record_result 0188_ClassStress $PASS 15
+run_test 1 14 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyClass00100.k
+run_test 2 14 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyClass00200.k
+run_test 3 14 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyClass00500.k
+run_test 4 14 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyClass01000.k
+run_test 5 14 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyClass02000.k
+run_test 6 14 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyClass05000.k
+run_test 7 14 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyClass10000.k
+run_test 8 14 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyExtends0010.k
+run_test 9 14 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyExtends0020.k
+run_test 10 14 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyExtends0050.k
+run_test 11 14 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyExtends0100.k
+run_test 12 14 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyExtends0200.k
+run_test 13 14 minimum "-MOutputTest" 0188_ClassStress/ClassStress_ManyExtends0500.k
+run_test 14 14 minimum "-MOutputTest" 0188_ClassStress/ClassStress_VeryManyField.k
+record_result 0188_ClassStress $PASS 14
 ## 0189_ClassError
 PASS=0
-record_result 0189_ClassError $PASS 0
+run_test 1 2 minimum "-MOutputTest" 0189_ClassError/ClassError_DuplicatedField.k
+run_test 2 2 minimum "-MOutputTest" 0189_ClassError/ClassError_ExtendVirtualClass.k
+record_result 0189_ClassError $PASS 2
 ## 0200_Konoha
 PASS=0
 record_result 0200_Konoha $PASS 0

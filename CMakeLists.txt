@@ -48,7 +48,6 @@ set(PACKAGES
 ## add konoha.xx package in an alphabetical order 
 	konoha
 	konoha.array
-	## konoha.assign     use cstyle
 	konoha.bytes
 	konoha.class
 	konoha.complex
@@ -57,32 +56,28 @@ set(PACKAGES
 	konoha.date
 	konoha.defined
 	konoha.dynamic
+	konoha.eval
+	konoha.eventlistener
 	konoha.field
 	konoha.file
 	konoha.float
 	konoha.foreach
 	konoha.global
 	konoha.i
-#	konoha.io
 	konoha.import
-##	konoha.int       use cstyle
 	konoha.iterator
+	konoha.json
 	konoha.math
 	konoha.map
 #	konoha.mpi
 	konoha.namespace
 	konoha.new
-#	konoha.null  use cstyle
 	konoha.object
 	konoha.regexp
 	konoha.string
-##	konoha.subtype   use cstyle
 ##konoha.sql
 	konoha.untyped
 	konoha.var
-	konoha.eventlistener
-	konoha.eval
-	konoha.json
 	minikonoha
 	sugar
 	cstyle

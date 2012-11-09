@@ -170,7 +170,7 @@ static KMETHOD Array_pop(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
 	if(kArray_size(a) == 0)
-		KReturnDefaultObjectValue();
+		KReturnDefaultValue();
 	size_t n = kArray_size(a) - 1;
 	if(kArray_isUnboxData(a)) {
 		uintptr_t v = a->unboxItems[n];

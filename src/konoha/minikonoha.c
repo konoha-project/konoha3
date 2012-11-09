@@ -269,6 +269,11 @@ void KonohaFactory_CheckVirtualMachine(KonohaFactory *factory);  // For compatib
 
 static void KonohaFactory_Check(KonohaFactory *factory)
 {
+	if(factory->VirtualMachineInfo == NULL) {
+		const char *mod = factory->getenv_i("KONOHA_VM");
+		if(mod == NULL) mod = "MiniVM";
+		KonohaFactory_LoadPlatformModule(factory, mod, ReleaseModule);
+	}
 	if(factory->GCInfo == NULL) {
 		const char *mod = factory->getenv_i("KONOHA_GC");
 		if(mod == NULL) mod = "BitmapGenGC";  // default
@@ -279,9 +284,9 @@ static void KonohaFactory_Check(KonohaFactory *factory)
 		if(mod == NULL) mod = "IConv";        // default
 		KonohaFactory_LoadPlatformModule(factory, mod, ReleaseModule);
 	}
-	if(factory->VirtualMachineInfo == NULL) {
-		const char *mod = factory->getenv_i("KONOHA_VM");
-		if(mod == NULL) mod = "MiniVM";
+	if(factory->JsonDataInfo == NULL) {
+		const char *mod = factory->getenv_i("KONOHA_JSON");
+		if(mod == NULL) mod = "Json";
 		KonohaFactory_LoadPlatformModule(factory, mod, ReleaseModule);
 	}
 }

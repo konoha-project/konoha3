@@ -158,7 +158,7 @@ static KMETHOD MecabNode_next(KonohaContext *kctx, KonohaStack *sfp)
 		KReturn(ret);
 	}
 	else {
-		KReturnDefaultObjectValue();
+		KReturnDefaultValue();
 	}
 }
 
@@ -174,7 +174,7 @@ static KMETHOD MecabNode_prev(KonohaContext *kctx, KonohaStack *sfp)
 		KReturn(ret);
 	}
 	else {
-		KReturnDefaultObjectValue();
+		KReturnDefaultValue();
 	}
 }
 
@@ -190,7 +190,7 @@ static KMETHOD MecabNode_enext(KonohaContext *kctx, KonohaStack *sfp)
 		KReturn(ret);
 	}
 	else {
-		KReturnDefaultObjectValue();
+		KReturnDefaultValue();
 	}
 }
 

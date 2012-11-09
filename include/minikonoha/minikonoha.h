@@ -1866,7 +1866,7 @@ typedef struct {
 	return; \
 } while(0)
 
-#define KReturnDefaultObjectValue() do {\
+#define KReturnDefaultValue() do {\
 	return; \
 } while(0)
 
