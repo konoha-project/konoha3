@@ -118,7 +118,7 @@ static kExpr *kStmtExpr_box(KonohaContext *kctx, kStmt *stmt, kExpr *texpr, kGam
 	ktype_t unboxType = (texpr->ty == TY_boolean) ? TY_boolean : TY_int;
 	kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, kStmt_nameSpace(stmt), unboxType, MN_box, 0);
 	DBG_P(">>>>>>>> boxing %s <<<<<<<<<", TY_t(unboxType));
-	kExprVar *boxExpr = new_TypedCallExpr(kctx, stmt, gma, texpr->ty, mtd, 1, texpr);
+	kExpr *boxExpr = new_TypedCallExpr(kctx, stmt, gma, texpr->ty, mtd, 1, texpr);
 	return boxExpr;
 }
 

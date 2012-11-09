@@ -35,9 +35,6 @@
 extern "C" {
 #endif
 
-#include "minikonoha/minikonoha.h"
-#include "minikonoha/gc.h"
-
 #if SIZEOF_VOIDP*8 == 64
 #define USE_GENERATIONAL_GC 1
 #endif
@@ -204,10 +201,6 @@ static inline void ARRAY_##T##_clear(ARRAY(T) *a) {\
 #define ARRAY_clear(T, a)       ARRAY_##T##_clear(a)
 #define ARRAY_n(a, n)  ((a).list[n])
 #define ARRAY_size(a)  ((a).size)
-#define ARRAY_init_1(T, a, e1) do {\
-	ARRAY_init(T, a);\
-	ARRAY_add(T, a, e1);\
-} while(0)
 
 #define FOR_EACH_ARRAY_(a, i)  for(i=0; i < ARRAY_size(a); ++i)
 #define FOR_EACH_ARRAY(a, x, i) \
@@ -368,6 +361,7 @@ typedef struct BlockHeader {
 #endif
 } BlockHeader;
 
+#ifdef GCSTAT
 typedef struct gc_stat {
 	size_t total_object;
 	size_t object_count[SUBHEAP_KLASS_MAX+1];
@@ -382,7 +376,6 @@ typedef struct gc_stat {
 	FILE *fp;
 } bmgc_stat;
 
-#ifdef GCSTAT
 static bmgc_stat global_gc_stat = {};
 #endif
 
@@ -590,7 +583,6 @@ static const unsigned BM_SIZE[] = {
 #define Object_setTenure(o) TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_GCFlag,1)
 #define Object_setYoung(o)  TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_GCFlag,0)
 #define Object_isTenure(o) (TFLAG_is(uintptr_t,(o)->h.magicflag, kObject_GCFlag))
-#define Object_isYoung(o)  (!Object_isTenure(o))
 
 enum gc_mode {
 #define GC_MINOR_FLAG 0
@@ -1385,9 +1377,6 @@ static void deferred_sweep(HeapManager *mng, kObject *o)
 #endif
 }
 
-#define minorGC(kctx, mng) bitmapMarkingGC(kctx, mng, GC_MAJOR)
-#define majorGC(kctx, mng) bitmapMarkingGC(kctx, mng, GC_MINOR)
-
 static kObject *bm_malloc_internal(HeapManager *mng, size_t n)
 {
 	kObject *temp = NULL;
@@ -1413,6 +1402,8 @@ static kObject *bm_malloc_internal(HeapManager *mng, size_t n)
 	HeapManager_expandHeap(mng, SUBHEAP_DEFAULT_SEGPOOL_SIZE*2);
 	newSegment(mng, h);
 #else
+#define minorGC(kctx, mng) bitmapMarkingGC(kctx, mng, GC_MAJOR)
+#define majorGC(kctx, mng) bitmapMarkingGC(kctx, mng, GC_MINOR)
 #ifdef USE_GENERATIONAL_GC
 	minorGC(kctx, mng);
 	temp = tryAlloc(mng, h);

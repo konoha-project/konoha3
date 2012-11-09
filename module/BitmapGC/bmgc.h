@@ -1138,12 +1138,13 @@ static void *tryAlloc(HeapManager *mng, SubHeap *h)
 #ifdef USE_GENERATIONAL_GC
 	bitmap_set(&mng->flags, GC_MAJOR_FLAG,
 			(mng->segmentList == NULL && h->freelist == NULL && isEmpty));
-#endif
-#ifdef USE_CONCURRENT_GC
+#elif USE_CONCURRENT_GC
 	bitmap_set(&mng->flags, GC_MAJOR_FLAG,
 			h->total > h->total_limit && mng->phase != GCPHASE_MARK_CONC);
 	KonohaContext *kctx = mng->kctx;
 	PLATAPI WriteBarrier(kctx, temp);
+#else
+	(void)isEmpty;
 #endif
 	return temp;
 }

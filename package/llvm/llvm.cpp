@@ -2797,6 +2797,8 @@ static KMETHOD LLVM_createLoopDependenceAnalysisPass(KonohaContext *kctx, Konoha
 	LoopPass *ptr = createLoopDependenceAnalysisPass();
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
+#else
+	(void)kctx;(void)sfp;
 #endif
 }
 
@@ -3857,6 +3859,8 @@ static KMETHOD LLVM_createInternalizePass(KonohaContext *kctx, KonohaStack *sfp)
 	ModulePass *ptr = createInternalizePass(allButMain);
 	kObject *p = new_ReturnCppObject(kctx, sfp, WRAP(ptr));
 	KReturn(p);
+#else
+	(void)kctx;(void)sfp;
 #endif
 }
 
@@ -5268,7 +5272,8 @@ KDEFINE_PACKAGE* llvm_init(void)
 		K_CHECKSUM,
 		"llvm", "3.0", "", "", "",
 		llvm_initPackage,
-		llvm_setupPackage
+		llvm_setupPackage,
+		NULL, K_REVISION
 	};
 
 	return &d;

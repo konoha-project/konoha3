@@ -641,7 +641,7 @@ static kObject *mstack_next(MarkStack *mstack)
 	MSGC(i).freelist.list = (kGCObject *)p;\
 } while (0)
 
-static void KnewGcContext(KonohaContext *kctx)
+static GcManager *KnewGcContext(KonohaContext *kctx)
 {
 	((KonohaContextVar*)kctx)->gcContext = Arena_init(kctx);
 	GcManager *mng = (GcManager *)kctx->gcContext;

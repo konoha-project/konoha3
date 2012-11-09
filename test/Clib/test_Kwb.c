@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/gc.h"
-#include <minikonoha/platform.h>
+#include "test_konoha.h"
 
 void test_Kwb(KonohaContext *kctx)
 {
@@ -44,11 +44,11 @@ void test_Kwb(KonohaContext *kctx)
 
 int main(int argc, const char *argv[])
 {
-    KonohaContext* konoha = konoha_open(KonohaUtils_getDefaultPlatformApi());
+    KonohaContext* konoha = CreateContext();
     int i;
     for (i = 0; i < 100; ++i) {
         test_Kwb(konoha);
     }
-    konoha_close(konoha);
+    DeleteContext(konoha);
     return 0;
 }

@@ -7,7 +7,7 @@ import konoha.math.*;
 
 System.p(Math.sin(1.0));
 
-import konoha.assign;
+import cstyle;
 void f() {
     int a = 10;
     System.p(a);

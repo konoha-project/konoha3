@@ -438,25 +438,64 @@ static KMETHOD Stmt_newExpr(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(SUGAR kStmt_parseExpr(kctx, stmt, tokenList, s, e, NULL));
 }
 
-//## Expr Stmt.newUntypedCallStyleExpr(Token token, Expr leftExpr);
+//## Expr Stmt.newUntypedCallStyleExpr(Token token, Expr expr1);
 static KMETHOD Stmt_newUntypedCallStyleExpr2(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kStmt *stmt      = sfp[0].asStmt;
-	kToken *token    = sfp[1].asToken;
-	kExpr *leftExpr  = sfp[2].asExpr;
+	kStmt *stmt   = sfp[0].asStmt;
+	kToken *token = sfp[1].asToken;
+	kExpr *expr1  = sfp[2].asExpr;
 	SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
-	KReturn(SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, token, leftExpr));
+	KReturn(SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, token, expr1));
 }
 
-//## Expr Stmt.newUntypedCallStyleExpr(Token token, Expr leftExpr, Expr rightExpr);
+//## Expr Stmt.newUntypedCallStyleExpr(Token token, Expr expr1, Expr expr2);
 static KMETHOD Stmt_newUntypedCallStyleExpr3(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kStmt *stmt      = sfp[0].asStmt;
-	kToken *token    = sfp[1].asToken;
-	kExpr *leftExpr  = sfp[2].asExpr;
-	kExpr *rightExpr = sfp[3].asExpr;
+	kStmt *stmt   = sfp[0].asStmt;
+	kToken *token = sfp[1].asToken;
+	kExpr *expr1  = sfp[2].asExpr;
+	kExpr *expr2  = sfp[3].asExpr;
 	SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
-	KReturn(SUGAR new_UntypedCallStyleExpr(kctx, syn, 3, token, leftExpr, rightExpr));
+	KReturn(SUGAR new_UntypedCallStyleExpr(kctx, syn, 3, token, expr1, expr2));
+}
+
+//## Expr Stmt.newUntypedCallStyleExpr(Token token, Expr expr1, Expr expr2, Expr expr3);
+static KMETHOD Stmt_newUntypedCallStyleExpr4(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kStmt *stmt   = sfp[0].asStmt;
+	kToken *token = sfp[1].asToken;
+	kExpr *expr1  = sfp[2].asExpr;
+	kExpr *expr2  = sfp[3].asExpr;
+	kExpr *expr3  = sfp[4].asExpr;
+	SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
+	KReturn(SUGAR new_UntypedCallStyleExpr(kctx, syn, 4, token, expr1, expr2, expr3));
+}
+
+//## Expr Stmt.newUntypedCallStyleExpr(Token token, Expr expr1, Expr expr2, Expr expr3, Expr expr4);
+static KMETHOD Stmt_newUntypedCallStyleExpr5(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kStmt *stmt   = sfp[0].asStmt;
+	kToken *token = sfp[1].asToken;
+	kExpr *expr1  = sfp[2].asExpr;
+	kExpr *expr2  = sfp[3].asExpr;
+	kExpr *expr3  = sfp[4].asExpr;
+	kExpr *expr4  = sfp[5].asExpr;
+	SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
+	KReturn(SUGAR new_UntypedCallStyleExpr(kctx, syn, 5, token, expr1, expr2, expr3, expr4));
+}
+
+//## Expr Stmt.newUntypedCallStyleExpr(Token token, Expr expr1, Expr expr2, Expr expr3, Expr expr4, Expr expr5);
+static KMETHOD Stmt_newUntypedCallStyleExpr6(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kStmt *stmt   = sfp[0].asStmt;
+	kToken *token = sfp[1].asToken;
+	kExpr *expr1  = sfp[2].asExpr;
+	kExpr *expr2  = sfp[3].asExpr;
+	kExpr *expr3  = sfp[4].asExpr;
+	kExpr *expr4  = sfp[5].asExpr;
+	kExpr *expr5  = sfp[6].asExpr;
+	SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
+	KReturn(SUGAR new_UntypedCallStyleExpr(kctx, syn, 6, token, expr1, expr2, expr3, expr4, expr5));
 }
 
 //## Expr Stmt.newTypedCallExpr(Gamma gma, cid typeId, symbol methodName, Expr firstExpr);
@@ -786,8 +825,11 @@ static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 		_Public, _F(Stmt_newExpr), TY_Expr, TY_Stmt, MN_("newExpr"), 3, TY_TokenArray, FN_tokenList, TY_int, FN_s, TY_int, FN_e,
 		_Public, _F(Stmt_setType), TY_void, TY_Stmt, MN_("setType"), 1, TY_int, FN_x,
 //		_Public, _F(kStmt_printMessage2arsedExpr), TY_Expr, TY_Stmt, MN_("parseExpr"), 3, TY_TokenArray, FN_tokenList, TY_int, FN_s, TY_int, FN_e,
-		_Public, _F(Stmt_newUntypedCallStyleExpr2), TY_Expr, TY_Stmt, MN_("newUntypedCallStyleExpr"), 2, TY_Token, FN_("token"), TY_Expr, FN_("leftExpr"),
-		_Public, _F(Stmt_newUntypedCallStyleExpr3), TY_Expr, TY_Stmt, MN_("newUntypedCallStyleExpr"), 3, TY_Token, FN_("token"), TY_Expr, FN_("leftExpr"), TY_Expr, FN_("rightExpr"),
+		_Public, _F(Stmt_newUntypedCallStyleExpr2), TY_Expr, TY_Stmt, MN_("newUntypedCallStyleExpr"), 2, TY_Token, FN_("token"), TY_Expr, FN_("expr1"),
+		_Public, _F(Stmt_newUntypedCallStyleExpr3), TY_Expr, TY_Stmt, MN_("newUntypedCallStyleExpr"), 3, TY_Token, FN_("token"), TY_Expr, FN_("expr1"), TY_Expr, FN_("expr2"),
+		_Public, _F(Stmt_newUntypedCallStyleExpr4), TY_Expr, TY_Stmt, MN_("newUntypedCallStyleExpr"), 4, TY_Token, FN_("token"), TY_Expr, FN_("expr1"), TY_Expr, FN_("expr2"), TY_Expr, FN_("expr3"),
+		_Public, _F(Stmt_newUntypedCallStyleExpr5), TY_Expr, TY_Stmt, MN_("newUntypedCallStyleExpr"), 5, TY_Token, FN_("token"), TY_Expr, FN_("expr1"), TY_Expr, FN_("expr2"), TY_Expr, FN_("expr3"), TY_Expr, FN_("expr4"),
+		_Public, _F(Stmt_newUntypedCallStyleExpr6), TY_Expr, TY_Stmt, MN_("newUntypedCallStyleExpr"), 6, TY_Token, FN_("token"), TY_Expr, FN_("expr1"), TY_Expr, FN_("expr2"), TY_Expr, FN_("expr3"), TY_Expr, FN_("expr4"), TY_Expr, FN_("expr5"),
 		_Public, _F(Stmt_newTypedCallExpr1), TY_Expr, TY_Stmt, MN_("newTypedCallExpr"), 4, TY_Gamma, FN_gma, TY_cid, FN_typeid, TY_symbol, FN_("methodName"), TY_Expr, FN_("firstExpr"),
 		_Public, _F(Stmt_newTypedCallExpr2), TY_Expr, TY_Stmt, MN_("newTypedCallExpr"), 5, TY_Gamma, FN_gma, TY_cid, FN_typeid, TY_symbol, FN_("methodName"), TY_Expr, FN_("firstExpr"), TY_Expr, FN_("secondExpr"),
 		_Public, _F(Stmt_rightJoinExpr), TY_Expr, TY_Stmt, MN_("rightJoinExpr"), 4, TY_Expr, FN_expr, TY_TokenArray, FN_tokenList, TY_int, FN_s, TY_int, FN_e,

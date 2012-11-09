@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/gc.h"
-#include <minikonoha/platform.h>
+#include "test_konoha.h"
 
 static int _sum_  = 0;
 static int _sum2_ = 0;
@@ -83,11 +83,11 @@ void test_Kmap(KonohaContext *kctx)
 
 int main(int argc, const char *argv[])
 {
-    KonohaContext* konoha = konoha_open(KonohaUtils_getDefaultPlatformApi());
+    KonohaContext* konoha = CreateContext();
     int i;
     for (i = 0; i < 100; ++i) {
         test_Kmap(konoha);
     }
-    konoha_close(konoha);
+    DeleteContext(konoha);
     return 0;
 }

@@ -256,17 +256,17 @@ static KMETHOD HttpEventListener_start(KonohaContext *kctx, KonohaStack *sfp)
 /* ------------------------------------------------------------------------ */
 // SignalEventListener class
 
-#define BUFSIZE 4096
+//#define BUFSIZE 4096
 
-static void initMailbox(char *path)
-{
-	FILE *mailbox;
-	if(!(mailbox = fopen(path, "w"))) {
-		fprintf(stderr, "cannot open mailbox file!\n");
-		pthread_exit(NULL);
-	}
-	fclose(mailbox);
-}
+//static void initMailbox(char *path)
+//{
+//	FILE *mailbox;
+//	if(!(mailbox = fopen(path, "w"))) {
+//		fprintf(stderr, "cannot open mailbox file!\n");
+//		pthread_exit(NULL);
+//	}
+//	fclose(mailbox);
+//}
 
 static void signalHandler(KonohaContext *kctx, const char *signo)
 {
@@ -276,36 +276,37 @@ static void signalHandler(KonohaContext *kctx, const char *signo)
 	}
 }
 
-static void signalEventHandler(KonohaContext *kctx)
-{
-	FILE *mailbox;
-	char mailboxPath[] = "/usr/local/minikonoha/dse/mailbox";
-	char buf[BUFSIZE];
-	RawEvent rawEvent;
-
-	if(!(mailbox = fopen(mailboxPath, "r"))) {
-		fprintf(stderr, "cannot open mailbox file!\n");
-		pthread_exit(NULL);
-	}
-
-	flock(fileno(mailbox), LOCK_EX);
-	while(true) {
-		if(fgets(buf, BUFSIZE, mailbox) == NULL) break;
-		rawEvent = createRawEvent(kctx, (unsigned char *)buf);
-		if(enqueueRawEventToLocalQueue(SignalEventQueue, rawEvent) == false) {
-			fprintf(stderr, "Event queue is full");
-		}
-	}
-	initMailbox(mailboxPath);
-	flock(fileno(mailbox), LOCK_UN);
-	fclose(mailbox);
-}
+//static void signalEventHandler(KonohaContext *kctx)
+//{
+//	FILE *mailbox;
+//	char mailboxPath[] = "/usr/local/minikonoha/dse/mailbox";
+//	char buf[BUFSIZE];
+//	RawEvent rawEvent;
+//
+//	if(!(mailbox = fopen(mailboxPath, "r"))) {
+//		fprintf(stderr, "cannot open mailbox file!\n");
+//		pthread_exit(NULL);
+//	}
+//
+//	flock(fileno(mailbox), LOCK_EX);
+//	while(true) {
+//		if(fgets(buf, BUFSIZE, mailbox) == NULL) break;
+//		rawEvent = createRawEvent(kctx, (unsigned char *)buf);
+//		if(enqueueRawEventToLocalQueue(SignalEventQueue, rawEvent) == false) {
+//			fprintf(stderr, "Event queue is full");
+//		}
+//	}
+//	initMailbox(mailboxPath);
+//	flock(fileno(mailbox), LOCK_UN);
+//	fclose(mailbox);
+//}
 
 #define CASE(SIG) \
 	case SIG:\
 		signalHandler(kctx, eventbuf);\
 		break;\
 
+/*
 #define CASE_USER_DEFINED_EVENT \
 	case SIGUSR1:\
 		signalEventHandler(kctx);\
@@ -313,6 +314,7 @@ static void signalEventHandler(KonohaContext *kctx)
 	case SIGUSR2:\
 		signalEventHandler(kctx);\
 		break;\
+*/
 
 #define DEFAULT \
 	default:\
@@ -375,7 +377,9 @@ static void *signalEventListener(void *args)
 				CASE(SIGPROF)
 				CASE(SIGWINCH)
 //				CASE(SIGINFO)
-				CASE_USER_DEFINED_EVENT
+//				CASE_USER_DEFINED_EVENT
+				CASE(SIGUSR1)
+				CASE(SIGUSR2)
 				DEFAULT
 			}
 		}
@@ -387,15 +391,15 @@ static KMETHOD SignalEventListener_start(KonohaContext *kctx, KonohaStack *sfp)
 	SignalEventQueue = (LocalQueue *)PLATAPI malloc_i(sizeof(LocalQueue));
 	LocalQueue_init(kctx, SignalEventQueue);
 
-	FILE *pid;
+	//FILE *pid;
 	pthread_t t;
-	if(!(pid = fopen("/usr/local/minikonoha/dse/pid", "w"))) {
-		fprintf(stderr, "cannot open pid file\n");
-		exit(1);
-	}
-	fprintf(pid, "%d", getpid());
-	fflush(pid);
-	fclose(pid);
+	//if(!(pid = fopen("/usr/local/minikonoha/dse/pid", "w"))) {
+	//	fprintf(stderr, "cannot open pid file\n");
+	//	exit(1);
+	//}
+	//fprintf(pid, "%d", getpid());
+	//fflush(pid);
+	//fclose(pid);
 	pthread_create(&t, NULL, signalEventListener, (void *)kctx);
 }
 

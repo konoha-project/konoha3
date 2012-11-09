@@ -1,6 +1,5 @@
 #include "minikonoha/minikonoha.h"
-#include "minikonoha/platform.h"
-#include <stdio.h>
+#include "test_konoha.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -256,10 +255,10 @@ static void test_proto_object(KonohaContext *kctx) {}
 
 int main(int argc, char const* argv[])
 {
-	KonohaContext* konoha = konoha_open(KonohaUtils_getDefaultPlatformApi());
+	KonohaContext* konoha = CreateContext();
 	test_proto_value(konoha);
 	test_proto_object(konoha);
-	konoha_close(konoha);
+	DeleteContext(konoha);
 	return 0;
 }
 
