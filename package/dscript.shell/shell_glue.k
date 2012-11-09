@@ -33,6 +33,7 @@ import("konoha.object");
 import("konoha.file");
 import("konoha.global");
 import("konoha.string");
+import("konoha.console");
 import("konoha.eventlistener");
 import("posix.path");
 import("dscript.subproc");
@@ -40,6 +41,7 @@ import("curl");
 import("sugar");
 
 int subproc_id = 0;
+int func_id = 0;
 const DEBUG = false;
 
 void childCallback(Event e) {
@@ -65,6 +67,19 @@ void childCallback(Event e) {
 	c.perform();
 }
 
+@Public String FILE.readAll() {
+	String ret = "";
+	String line = this.readLine();
+	while(line != null) {
+		ret = ret + line + "\n";
+		line = this.readLine();
+	}
+	if(ret == "") {
+		return ret;
+	}
+	return ret.substr(0, ret.getSize() - 1);
+}
+
 EventHandler.setCallBack("ChildProcessExited", childCallback);
 
 void parentCallback(Event e) {
@@ -83,21 +98,8 @@ boolean setDefaultEventCallback() {
 }
 
 setDefaultEventCallback();
-HttpEventListener.start("0.0.0.0", 8100);
+//HttpEventListener.start("0.0.0.0", 8100);
 SignalEventListener.start();
-
-@Public String FILE.readAll() {
-	String ret = "";
-	String line = this.readLine();
-	while(line != null) {
-		ret = ret + line + "\n";
-		line = this.readLine();
-	}
-	if(ret == "") {
-		return ret;
-	}
-	return ret.substr(0, ret.getSize() - 1);
-}
 
 String[] concatTokenList(Token[] tokenList) {
 	int i = 0;
@@ -121,8 +123,18 @@ String[] concatTokenList(Token[] tokenList) {
 }
 
 String getVarName() {
-	String ret = "s" + global.subproc_id;
+	String ret = "__s" + global.subproc_id;
 	global.subproc_id = global.subproc_id + 1;
+	return ret;
+}
+
+String getCurrentVarName() {
+	return "__s" + (global.subproc_id - 1);
+}
+
+String getFuncName() {
+	String ret = "__f" + global.func_id;
+	global.func_id = global.func_id + 1;
 	return ret;
 }
 
@@ -135,6 +147,27 @@ int indexOf(String[] a, String s, int startIdx) {
 		i = i + 1;
 	}
 	return -1;
+}
+
+String expandDollar(String arg) {
+	if(arg.startsWith("$")) {
+		return arg.substr(1) + ".toString()";
+	}
+	return "\"" + arg + "\"";
+}
+
+String expandArgs(String[] args) {
+	String ret = "[";
+	int i = 0;
+	while(i < args.getSize() - 1) {
+		ret = ret + expandDollar(args[i]) + ", ";
+		i = i + 1;
+	}
+	if(args.getSize() >= 1) {
+		ret = ret + expandDollar(args[args.getSize() - 1]);
+	}
+	ret = ret + "]";
+	return ret;
 }
 
 String[] slice(String[] a, int s, int length) {
@@ -168,7 +201,7 @@ String join(String[] a, String separator) {
 	return ret;
 }
 
-String getPipeString(String prevname, String varname, String[] args, int startindex, int argsize) {
+String getPipeString(String prevname, String varname, String[] args, int startindex, int argsize, boolean enableStdout) {
 	String ret = "";
 	if(prevname != "" && !isCommandUseTty(args[startindex])) {
 		ret = ret + prevname + ".pipe(" + varname + ", false);\n";
@@ -179,17 +212,27 @@ String getPipeString(String prevname, String varname, String[] args, int startin
 			ret = ret + varname + ".communicate(" + prevname + ".getOutputStream().readAll());\n";
 		}
 		else {
-			ret = ret + varname + ".fg();\n";
+			if(enableStdout) {
+				ret = ret + varname + ".fg();\n";
+			}
+			else {
+				ret = ret + varname + ".bg();\n";
+			}
 		}
 	}
 	else {
-		ret = ret + varname + ".fg();\n";
+		if(enableStdout) {
+			ret = ret + varname + ".fg();\n";
+		}
+		else {
+			ret = ret + varname + ".bg();\n";
+		}
 	}
-	ret = ret + "sendHttpEvent(\"" + join(slice(args, startindex, argsize + 1), " ") + "\", " + varname + ");\n";
+	//ret = ret + "sendHttpEvent(\"" + join(slice(args, startindex, argsize + 1), " ") + "\", " + varname + ");\n";
 	return ret;
 }
 
-String generateSubProcSequence(String[] args) {
+String generateSubProcSequence(String[] args, boolean enableStdout) {
 	if(DEBUG) {
 		System.p(args);
 	}
@@ -218,10 +261,10 @@ String generateSubProcSequence(String[] args) {
 		varname = getVarName();
 		ret = ret + "SubProc " + varname + " = new SubProc(\"" + args[startindex] + "\");\n";
 		if(argsize > 0) {
-			ret = ret + varname + ".setArgumentList(" + slice(args, startindex + 1, argsize) + ");\n";
+			ret = ret + varname + ".setArgumentList(" + expandArgs(slice(args, startindex + 1, argsize)) + ");\n";
 		}
 		if(index >= 0) {
-			ret = ret + getPipeString(prevname, varname, args, startindex, argsize);
+			ret = ret + getPipeString(prevname, varname, args, startindex, argsize, enableStdout);
 		}
 		else {
 			if(redirectindex >= 0) {
@@ -231,9 +274,11 @@ String generateSubProcSequence(String[] args) {
 			}
 			else {
 				/* end of pipe */
-				ret = ret + varname + ".setOutputStream(stdout);\n";
+				if(enableStdout) {
+					ret = ret + varname + ".setOutputStream(stdout);\n";
+				}
 			}
-			ret = ret + getPipeString(prevname, varname, args, startindex, argsize);
+			ret = ret + getPipeString(prevname, varname, args, startindex, argsize, enableStdout);
 			break;
 		}
 		prevname = varname;
@@ -251,7 +296,7 @@ boolean statementShell(Stmt stmt, Gamma gma) {
 		return false;
 	}
 	String[] args = concatTokenList(tokenList);
-	Block block = stmt.newBlock(generateSubProcSequence(args));
+	Block block = stmt.newBlock(generateSubProcSequence(args, true));
 	boolean ret = block.tyCheckAll(gma);
 	if(!ret) {
 		return false;
@@ -276,8 +321,78 @@ int patternMatchShell(Stmt stmt, int nameid, Token[] tokenList, int beginIdx, in
 	return -1;
 }
 
+Expr expressionAsk(Stmt stmt, Token[] tokenList, int beginIdx, int operatorIdx, int endIdx) {
+	if(beginIdx + 1 < endIdx) {
+		Token methodToken = new Token("inputUserApproval");
+		Expr classExpr = new Expr(Console);
+		Expr arg1 = new Expr(tokenList[beginIdx + 1].getText());
+		Expr arg2 = new Expr("YES");
+		Expr arg3 = new Expr("NO");
+		Expr arg4 = new Expr(false);
+		Expr expr = stmt.newUntypedCallStyleExpr(methodToken, classExpr, arg1, arg2, arg3, arg4);
+		return expr;
+	}
+}
+
+int tokenFuncDollar(Token tk, String source) {
+	int ch, pos    = 1;
+	int openParenthesis  = 40/*(*/;
+	int closeParenthesis = 41/*)*/;
+	if(source.charCodeAt(pos) != openParenthesis) {
+		if(DEBUG) {
+			System.p("skip dollar");
+		}
+		return 0;
+	}
+	while(pos < source.getSize()) {
+		ch = source.charCodeAt(pos);
+		if(ch == closeParenthesis) {
+			if(tk.isNotNull() && pos > 2) {
+				tk.setText(source.substr(2, pos - 2));
+				tk.setUnresolvedTokenType("$CommandReplace");
+			}
+			return pos + 1;
+		}
+		pos = pos + 1;
+	}
+	if(DEBUG) {
+		System.p("skip dollar");
+	}
+	return 0;
+}
+
+Expr expressionCommandReplace(Stmt stmt, Token[] tokenList, int beginIdx, int operatorIdx, int endIdx) {
+	if(DEBUG) {
+		int i = beginIdx;
+		while(i < endIdx) {
+			System.p(tokenList[i].getText());
+			System.p(tokenList[i].getText().getSize());
+			System.p(tokenList[i].isSymbol());
+			System.p(tokenList[i].isParenthesis());
+			i = i + 1;
+		}
+	}
+	String[] args = tokenList[operatorIdx].getText().trim().split(" ");
+	String funcName = getFuncName();
+	String evaltext = "@Public String " + funcName + "() { ";
+	evaltext = evaltext + generateSubProcSequence(args, false).replace("\n", " ");
+	evaltext = evaltext + "return " + getCurrentVarName() + ".getOutputStream().readAll(); }";
+	if(DEBUG) {
+		System.p(evaltext);
+	}
+	eval(evaltext);
+	Token methodToken = new Token(funcName);
+	Expr classExpr = new Expr(NameSpace);
+	Expr expr = stmt.newUntypedCallStyleExpr(methodToken, classExpr);
+	return expr;
+}
+
 addPatternMatch("$Shell", patternMatchShell);
 addStatement("$Shell", statementShell);
 addTopLevelStatement("$Shell", statementShell);
+addExpression("ask", expressionAsk);
 
 syntax $Shell $Token*
+
+setTokenFunc("$CommandReplace", 22/*KonohaChar_Dollar*/, tokenFuncDollar);
+addExpression("$CommandReplace", expressionCommandReplace);
