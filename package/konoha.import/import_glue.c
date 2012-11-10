@@ -31,6 +31,14 @@ extern "C"{
 
 #define makeStringConstValue(kctx, text) new_ConstValueExpr(kctx, TY_String, UPCAST(text))
 
+static kExpr *CreateImportCall(KonohaContext *kctx, SugarSyntaxVar *syn, kToken *tkImport, kNameSpace *ns, kString *pkgname)
+{
+	kExpr *ePKG = makeStringConstValue(kctx, pkgname);
+	kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 3,
+			tkImport, new_ConstValueExpr(kctx, O_typeId(ns), UPCAST(ns)), ePKG);
+	return expr;
+}
+
 static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int ret = false;
@@ -45,14 +53,20 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 	kTokenVar *tkImport = /*G*/new_(TokenVar, 0, OnGcStack);
 	tkImport->resolvedSymbol = MN_("import");
 	if(IS_Token(tokenList)) {
-		/* case : import("konoha.import"); */
 		kTokenArray *list = ((kToken *) tokenList)->subTokenList;
-		if(kArray_size(list) == 1) {
+		if(IS_String(list)) {
+			/* case: import cstyle; */
+			kString *pkgname = (kString *) list;
+			expr = CreateImportCall(kctx, syn, tkImport, ns, pkgname);
+		}
+		else if(kArray_size(list) == 1) {
+			/* case : import("konoha.import"); */
 			kExpr *param0 = makeStringConstValue(kctx, list->TokenItems[0]->text);
 			expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 3,
 					tkImport, new_ConstValueExpr(kctx, O_typeId(ns), UPCAST(ns)), param0);
 		}
 		else if(kArray_size(list) == 2) {
+			/* case : import("konoha.import", "import"); */
 			kExpr *param0 = makeStringConstValue(kctx, list->TokenItems[0]->text);
 			kExpr *param1 = makeStringConstValue(kctx, list->TokenItems[1]->text);
 			expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 4,
@@ -85,10 +99,8 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 		KLIB Kwb_write(kctx, &wb, S_text(name), S_size(name));
 
 		kString *pkgname = KLIB new_kString(kctx, OnGcStack, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
-		kExpr *ePKG = makeStringConstValue(kctx, pkgname);
-		expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 3, tkImport, new_ConstValueExpr(kctx, O_typeId(ns), UPCAST(ns)), ePKG);
+		expr = CreateImportCall(kctx, syn, tkImport, ns, pkgname);
 	}
-
 	KLIB kObject_setObject(kctx, stmt, KW_ExprPattern, TY_Expr, expr);
 	ret = SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_void, TypeCheckPolicy_ALLOWVOID);
 	if(ret) {
