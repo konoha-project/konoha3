@@ -305,10 +305,10 @@ static void KonohaFactory_Check(KonohaFactory *factory)
 		KonohaFactory_LoadPlatformModule(factory, mod, ReleaseModule);
 	}
 	if(factory->EventInfo == NULL) {
-		factory->StartEventHandler = DefaultEventHander;
-		factory->StopEventHandler  = DefaultEventHander;
-		factory->EnterEventContext = DefaultEventHander;
-		factory->ExitEventContext  = DefaultEventHander;
+		factory->StartEventHandler = DefaultEventHandler;
+		factory->StopEventHandler  = DefaultEventHandler;
+		factory->EnterEventContext = DefaultEventHandler;
+		factory->ExitEventContext  = DefaultEventHandler;
 		factory->EmitEvent         = DefaultEmitEvent;
 		factory->DispatchEvent     = DefaultDispatchEvent;
 		factory->WaitEvent         = NULL;  // check NULL

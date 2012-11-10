@@ -279,14 +279,18 @@ static void AddSignalEvent(KonohaContext *kctx, struct EventContext *eventContex
 static void StartEventHandler(KonohaContext *kctx)
 {
 	KNH_ASSERT(PLATAPI eventContext == NULL);
-	((KonohaFactory*)kctx->platApi)->eventContext = (struct EventContext*)PLATAPI malloc_i(sizeof(struct EventContext));
+	struct EventContext *eventContext = (struct EventContext*)PLATAPI malloc_i(sizeof(struct EventContext));
+	((KonohaFactory*)kctx->platApi)->eventContext = eventContext;
 	bzero(((KonohaFactory*)kctx->platApi)->eventContext, sizeof(struct EventContext));
+	eventContext->queue = (LocalQueue*)PLATAPI malloc_i(sizeof(LocalQueue));
+	LocalQueue_init(kctx, eventContext->queue);
 	SetSignal(kctx);
 }
 
 static void StopEventHandler(KonohaContext *kctx)
 {
 	ResetSignal(kctx);
+	LocalQueue_free(kctx, eventContext->queue);
 	PLATAPI free_i(((KonohaFactory*)kctx->platApi)->eventContext);
 }
 
