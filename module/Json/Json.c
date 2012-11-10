@@ -190,7 +190,7 @@ static size_t GetJsonSize(KonohaContext *kctx, struct JsonBuf *jsonbuf)
 	return JSON_length(toJSON(jsonbuf->json_i));
 }
 
-static kbool_t RetrieveJsonArrayIndex(KonohaContext *kctx, struct JsonBuf *jsonbuf, size_t index, struct JsonBuf *otherbuf)
+static kbool_t RetrieveJsonArrayAt(KonohaContext *kctx, struct JsonBuf *jsonbuf, size_t index, struct JsonBuf *otherbuf)
 {
 	if(JSON_TYPE_CHECK(Array, toJSON(jsonbuf->json_i))) {
 		otherbuf->json_i = JSONArray_get(toJSON(jsonbuf->json_i), index).bits;
@@ -199,7 +199,7 @@ static kbool_t RetrieveJsonArrayIndex(KonohaContext *kctx, struct JsonBuf *jsonb
 	return false;
 }
 
-static kbool_t SetJsonArrayIndex(KonohaContext *kctx, struct JsonBuf *jsonbuf, size_t index, struct JsonBuf *otherbuf)
+static kbool_t SetJsonArrayAt(KonohaContext *kctx, struct JsonBuf *jsonbuf, size_t index, struct JsonBuf *otherbuf)
 {
 	if(JSON_TYPE_CHECK(Array, toJSON(jsonbuf->json_i))) {
 		JSONArray_set(toJSON(jsonbuf->json_i), index, toJSON(otherbuf->json_i));
@@ -240,8 +240,8 @@ kbool_t LoadJsonModule(KonohaFactory *factory, ModuleType type)
 	factory->GetJsonFloat           = GetJsonFloat;
 	factory->GetJsonText            = GetJsonText;
 	factory->GetJsonSize            = GetJsonSize;
-	factory->RetrieveJsonArrayIndex = RetrieveJsonArrayIndex;
-	factory->SetJsonArrayIndex      = SetJsonArrayIndex;
+	factory->RetrieveJsonArrayAt = RetrieveJsonArrayAt;
+	factory->SetJsonArrayAt      = SetJsonArrayAt;
 	factory->AppendJsonArray        = AppendJsonArray;
 
 	factory->JsonHandler            = (JSONMemoryPool *) malloc(sizeof(JSONMemoryPool));

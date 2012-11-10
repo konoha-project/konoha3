@@ -649,8 +649,8 @@ struct KonohaFactory {
 	double      (*GetJsonFloat)(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, double defval);
 	const char* (*GetJsonText)(KonohaContext *kctx, struct JsonBuf *jsonbuf, const char *key, size_t keylen_or_zero, const char *defval);
 	size_t      (*GetJsonSize)(KonohaContext *kctx, struct JsonBuf *jsonbuf);
-	kbool_t     (*RetrieveJsonArrayIndex)(KonohaContext *kctx, struct JsonBuf *jsonbuf, size_t index, struct JsonBuf *otherbuf);
-	kbool_t     (*SetJsonArrayIndex)(KonohaContext *kctx, struct JsonBuf *jsonbuf, size_t index, struct JsonBuf *otherbuf);
+	kbool_t     (*RetrieveJsonArrayAt)(KonohaContext *kctx, struct JsonBuf *jsonbuf, size_t index, struct JsonBuf *otherbuf);
+	kbool_t     (*SetJsonArrayAt)(KonohaContext *kctx, struct JsonBuf *jsonbuf, size_t index, struct JsonBuf *otherbuf);
 	kbool_t     (*AppendJsonArray)(KonohaContext *kctx, struct JsonBuf *jsonbuf, struct JsonBuf *otherbuf);
 
 };

@@ -220,7 +220,7 @@ static size_t GetJsonSize(KonohaContext *kctx, struct JsonBuf *jsonbuf)
 	return 1;
 }
 
-static kbool_t RetrieveJsonArrayIndex(KonohaContext *kctx, struct JsonBuf *jsonbuf, size_t index, struct JsonBuf *otherbuf)
+static kbool_t RetrieveJsonArrayAt(KonohaContext *kctx, struct JsonBuf *jsonbuf, size_t index, struct JsonBuf *otherbuf)
 {
 	json_t *obj = json_array_get(jsonbuf->jsonobj, index);
 	if(obj != NULL) {
@@ -230,7 +230,7 @@ static kbool_t RetrieveJsonArrayIndex(KonohaContext *kctx, struct JsonBuf *jsonb
 	return false;
 }
 
-static kbool_t SetJsonArrayIndex(KonohaContext *kctx, struct JsonBuf *jsonbuf, size_t index, struct JsonBuf *otherbuf)
+static kbool_t SetJsonArrayAt(KonohaContext *kctx, struct JsonBuf *jsonbuf, size_t index, struct JsonBuf *otherbuf)
 {
 	return (json_array_set(jsonbuf->jsonobj, index, otherbuf->jsonobj) != -1);
 }
@@ -260,8 +260,8 @@ kbool_t LoadJanssonModule(KonohaFactory *factory, ModuleType type)
 	factory->GetJsonFloat           = GetJsonFloat;
 	factory->GetJsonText            = GetJsonText;
 	factory->GetJsonSize            = GetJsonSize;
-	factory->RetrieveJsonArrayIndex = RetrieveJsonArrayIndex;
-	factory->SetJsonArrayIndex      = SetJsonArrayIndex;
+	factory->RetrieveJsonArrayAt = RetrieveJsonArrayAt;
+	factory->SetJsonArrayAt      = SetJsonArrayAt;
 	factory->AppendJsonArray        = AppendJsonArray;
 	return true;
 }

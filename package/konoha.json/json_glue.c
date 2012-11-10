@@ -203,7 +203,7 @@ static KMETHOD Json_getJson_index(KonohaContext *kctx, KonohaStack *sfp)
 	kJson *jo = (kJson *)sfp[0].asObject;
 	struct JsonBuf jsonbuf = {};
 	kJson *jnew = (kJson *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
-	if(PLATAPI RetrieveJsonArrayIndex(kctx, &jo->jsonbuf, sfp[1].unboxValue, &jsonbuf)) {
+	if(PLATAPI RetrieveJsonArrayAt(kctx, &jo->jsonbuf, sfp[1].unboxValue, &jsonbuf)) {
 		memcpy(&jnew->jsonbuf, &jsonbuf, sizeof(struct JsonBuf));
 	}
 	KReturn(jnew);
@@ -271,7 +271,7 @@ static KMETHOD Json_setJson_index(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo  = (kJson *)sfp[0].asObject;
 	kJson *val = (kJson *)sfp[2].asObject;
-	if(!PLATAPI SetJsonArrayIndex(kctx, &jo->jsonbuf, sfp[1].unboxValue, val)) {
+	if(!PLATAPI SetJsonArrayAt(kctx, &jo->jsonbuf, sfp[1].unboxValue, val)) {
 		DBG_P("[WARNING] Json cannot set target object");
 	}
 	KReturnVoid();
