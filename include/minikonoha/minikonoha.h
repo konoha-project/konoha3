@@ -381,7 +381,7 @@ typedef enum {
 	SoftwareFault      =  (1<<2),  /* programmer's mistake */
 	UserFault          =  (1<<3),  /* user input, data mistake */
 	ExternalFault      =  (1<<4),  /* networking or remote services */
-	UnknownFault       =  (1<<5),  /* if you can distingish fault above */
+//	UnknownFault       =  (1<<5),  /* if you can distingish fault above */
 	// LogPoint
 	PeriodicPoint      =  (1<<6),  /* sampling */
 	ResponseCheckPoint =  (1<<7),  /* log point to expect a long term action time*/
@@ -391,7 +391,10 @@ typedef enum {
 	PrivacyCaution     =  (1<<10), /* including privacy information */
 	// Internal Use
 	SystemError        =  (1<<11),
-	HasEvidence        =  (1<<12),
+	NotSystemFault     =  (1<<12),
+	NotSoftwareFault   =  (1<<13),
+	NotUserFault       =  (1<<14),
+	NotExternalFault   =  (1<<15),
 	LOGPOOL_INIT       =  (1<<17)
 } logpolicy_t;
 
@@ -495,8 +498,9 @@ typedef struct kGammaVar                kGammaVar;
 struct KonohaFactory {
 	// settings
 	const char *name;
-	size_t  stacksize;
+	size_t       stacksize;
 	volatile int safePointFlag;
+	int          verbose;
 	int          exitStatus;
 
 	/* memory allocation / deallocation */
@@ -563,18 +567,20 @@ struct KonohaFactory {
 
 	/* Diagnosis API */
 	KModuleInfo *DiagnosisInfo;
-	int (*DiagnosisStaticRisk)(KonohaContext *, const char *keyword, size_t keylen, kfileline_t uline);
-	int (*DiagnosisFaultType)(KonohaContext *, int fault, KTraceInfo *);
-	int (*DiagnosisSoftwareFault)(KonohaContext *, kfileline_t uline, int fault, KTraceInfo *);
-	int (*DiagnosisFileSystem)(KonohaContext *, const char *path, size_t pathlen, int fault, KTraceInfo *);
-	int (*DiagnosisNetworking)(KonohaContext *, const char *path, size_t pathlen, int fault, KTraceInfo *);
+	kbool_t (*CheckStaticRisk)(KonohaContext *, const char *keyword, size_t keylen, kfileline_t uline);
+	void    (*CheckDynamicRisk)(KonohaContext *, const char *keyword, size_t keylen, KTraceInfo *);
+	int (*DiagnosisSoftwareProcess)(KonohaContext *, kfileline_t uline, KTraceInfo *);
+	int (*DiagnosisSystemError)(KonohaContext *, int fault);
+	int (*DiagnosisSystemResource)(KonohaContext *, KTraceInfo *);
+	int (*DiagnosisFileSystem)(KonohaContext *, const char *path, size_t pathlen, KTraceInfo *);
+	int (*DiagnosisNetworking)(KonohaContext *, const char *path, size_t pathlen, int port, KTraceInfo *);
 
 	/* Console API */
 	KModuleInfo *ConsoleInfo;
-	void (*ReportUserMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *, int isNewLine);
-	void (*ReportCompilerMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *);
-	void (*ReportCaughtException)(KonohaContext *, const char *, int fault, const char *, struct KonohaValueVar *bottomStack, struct KonohaValueVar *topStack);
-	void (*ReportDebugMessage)(const char *file, const char *func, int line, const char *fmt, ...) __PRINTFMT(4, 5);
+	void  (*ReportUserMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *, int isNewLine);
+	void  (*ReportCompilerMessage)(KonohaContext *, kinfotag_t, kfileline_t pline, const char *);
+	void  (*ReportCaughtException)(KonohaContext *, const char *, int fault, const char *, struct KonohaValueVar *bottomStack, struct KonohaValueVar *topStack);
+	void  (*ReportDebugMessage)(const char *file, const char *func, int line, const char *fmt, ...) __PRINTFMT(4, 5);
 	int   (*InputUserApproval)(KonohaContext *, const char *message, const char *yes, const char *no, int defval);
 	char* (*InputUserText)(KonohaContext *, const char *message, int flag);
 	char* (*InputUserPassword)(KonohaContext *, const char *message);
@@ -1711,6 +1717,7 @@ struct KonohaLibVar {
 	kbool_t          (*KonohaRuntime_tryCallMethod)(KonohaContext *, KonohaStack *);
 	void             (*KonohaRuntime_raise)(KonohaContext*, int symbol, int fault, kString *Nullable, KonohaStack *);
 	void             (*ReportScriptMessage)(KonohaContext *, KTraceInfo *, kinfotag_t, const char *fmt, ...);
+	int              (*DiagnosisFaultType)(KonohaContext *kctx, int fault, KTraceInfo *);
 };
 
 #define K_NULL            (kctx->share->constNull_OnGlobalConstList)

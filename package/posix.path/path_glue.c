@@ -210,7 +210,7 @@ static KMETHOD System_link(KonohaContext *kctx, KonohaStack *sfp)
 	const char *newpath = PLATAPI formatSystemPath(kctx, buffer2, sizeof(buffer2), S_text(path2), S_size(path2), trace);
 	int ret = link(oldpath, newpath);
 	if(ret == -1) {
-		int fault = PLATAPI DiagnosisFaultType(kctx, kString_guessUserFault(path)|kString_guessUserFault(path2)|SystemError, trace);
+		int fault = KLIB DiagnosisFaultType(kctx, kString_guessUserFault(path)|kString_guessUserFault(path2)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "link", LogFileName(S_text(path)), LogFileName2(S_text(path2)), LogErrno);
 	}
 	else {
@@ -228,7 +228,7 @@ static KMETHOD System_symlink(KonohaContext *kctx, KonohaStack *sfp)
 	const char *newpath = PLATAPI formatSystemPath(kctx, buffer2, sizeof(buffer2), S_text(path2), S_size(path2), trace);
 	int ret = symlink(oldpath, newpath);
 	if(ret == -1) {
-		int fault = PLATAPI DiagnosisFaultType(kctx, kString_guessUserFault(path)|kString_guessUserFault(path2)|SystemError, trace);
+		int fault = KLIB DiagnosisFaultType(kctx, kString_guessUserFault(path)|kString_guessUserFault(path2)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "symlink", LogFileName(S_text(path)), LogFileName2(S_text(path2)), LogErrno);
 	}
 	else {
@@ -246,7 +246,7 @@ static KMETHOD System_rename(KonohaContext *kctx, KonohaStack *sfp)
 	const char *newpath = PLATAPI formatSystemPath(kctx, buffer2, sizeof(buffer2), S_text(path2), S_size(path2), trace);
 	int ret = rename(oldpath, newpath);
 	if(ret == -1) {
-		int fault = PLATAPI DiagnosisFaultType(kctx, kString_guessUserFault(path)|kString_guessUserFault(path2)|SystemError, trace);
+		int fault = KLIB DiagnosisFaultType(kctx, kString_guessUserFault(path)|kString_guessUserFault(path2)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "rename", LogFileName(S_text(path)), LogFileName2(S_text(path2)), LogErrno);
 	}
 	else {
@@ -263,7 +263,7 @@ static KMETHOD System_unlink(KonohaContext *kctx, KonohaStack *sfp)
 	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), S_text(path), S_size(path), trace);
 	int ret = unlink(systemPath);
 	if(ret == -1) {
-		int fault = PLATAPI DiagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
+		int fault = KLIB DiagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "unlink", LogFileName(S_text(path)), LogErrno);
 	}
 	else {
@@ -281,7 +281,7 @@ static KMETHOD System_readlink(KonohaContext *kctx, KonohaStack *sfp)
 	char pathbuf[K_PATHMAX];
 	ssize_t ret = readlink(systemPath, pathbuf, K_PATHMAX);
 	if(ret == -1) {
-		int fault = PLATAPI DiagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
+		int fault = KLIB DiagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "readlink", LogFileName(S_text(path)), LogErrno);
 		KReturn(KNULL(String));
 	}
@@ -301,7 +301,7 @@ static KMETHOD System_truncate(KonohaContext *kctx, KonohaStack *sfp)
 	off_t length = (off_t)sfp[2].intValue;
 	int ret = truncate(systemPath, length);
 	if(ret == -1) {
-		int fault = PLATAPI DiagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
+		int fault = KLIB DiagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "truncate", LogFileName(S_text(path)), LogUint("length", length), LogErrno);
 	}
 	else {
@@ -354,7 +354,7 @@ static KMETHOD System_rmdir(KonohaContext *kctx, KonohaStack *sfp)
 	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), S_text(path), S_size(path), trace);
 	int ret = rmdir(systemPath);
 	if(ret == -1) {
-		int fault = PLATAPI DiagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
+		int fault = KLIB DiagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "rmdir", LogFileName(S_text(path)), LogErrno);
 	}
 	else {
@@ -419,7 +419,7 @@ static KMETHOD System_opendir(KonohaContext *kctx, KonohaStack *sfp)
 	const char *systemPath = PLATAPI formatSystemPath(kctx, buffer, sizeof(buffer), S_text(path), S_size(path), trace);
 	DIR *d = opendir(systemPath);
 	if(d == NULL) {
-		int fault = PLATAPI DiagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
+		int fault = KLIB DiagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "opendir", LogText("dirname", S_text(path)), LogErrno);
 		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), fault, NULL, sfp);
 	}

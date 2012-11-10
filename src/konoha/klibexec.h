@@ -516,6 +516,27 @@ static void KonohaRuntime_raise(KonohaContext *kctx, int symbol, int fault, kStr
 	KExit(EXIT_FAILURE);
 }
 
+static int DiagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
+{
+	//DBG_P("IN fault=%d %d,%d,%d,%d", fault, TFLAG_is(int, fault, SoftwareFault), TFLAG_is(int, fault, UserFault), TFLAG_is(int, fault, SystemFault), TFLAG_is(int, fault, ExternalFault));
+	if(TFLAG_is(int, fault, SystemError)) {
+		fault = PLATAPI DiagnosisSystemError(kctx, fault);
+	}
+	if(TFLAG_is(int, fault, NotSoftwareFault)) {
+		fault ^= SoftwareFault;
+	}
+	if(TFLAG_is(int, fault, NotUserFault)) {
+		fault ^= UserFault;
+	}
+	if(TFLAG_is(int, fault, NotSystemFault)) {
+		fault ^= SystemFault;
+	}
+	if(TFLAG_is(int, fault, NotExternalFault)) {
+		fault ^= ExternalFault;
+	}
+	return fault;
+}
+
 
 static void CheckSafePoint(KonohaContext *kctx, KonohaStack *sfp, kfileline_t uline)
 {
@@ -568,4 +589,5 @@ static void klib_init(KonohaLibVar *l)
 	l->KonohaRuntime_raise         = KonohaRuntime_raise;
 	l->ReportScriptMessage        = TRACE_ReportScriptMessage; /* perror.h */
 	l->CheckSafePoint              = CheckSafePoint;
+	l->DiagnosisFaultType          = DiagnosisFaultType;
 }

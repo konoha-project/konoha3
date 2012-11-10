@@ -251,7 +251,7 @@ static void kSubProc_execOnChild(KonohaContext *kctx, kSubProc *sbp, KTraceInfo 
 	KTraceChangeSystemPoint(trace, "execvp", LogText("command", args[0]), LogTextArray("argv", args), LogUint("pid", getpid()));
 	//	shell mode execlp("sh", "sh", "-c", S_text(command), NULL);
 	if(execvp(args[0], args) == -1) {
-		int fault = PLATAPI DiagnosisFaultType(kctx, kString_guessUserFault(sbp->Command)|SystemError, trace);
+		int fault = KLIB DiagnosisFaultType(kctx, kString_guessUserFault(sbp->Command)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "execvp", LogText("command", args[0]), LogTextArray("argv", args), LogErrno);
 		_exit(1);
 	}

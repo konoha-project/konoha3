@@ -180,7 +180,7 @@ static KMETHOD File_new(KonohaContext *kctx, KonohaStack *sfp)
 	const char *mode = S_text(sfp[2].asString);
 	FILE *fp = fopen(systemPath, mode);
 	if(fp == NULL) {
-		int fault = PLATAPI DiagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
+		int fault = KLIB DiagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "fopen",
 			LogText("filename", S_text(path)), LogText("mode", mode), LogErrno);
 		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), fault, NULL, sfp);

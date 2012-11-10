@@ -698,7 +698,6 @@ static void PlatformApi_loadReadline(KonohaFactory *plat)
 	}
 }
 
-
 static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 {
 	switch(errno) {  // C Standard Library
@@ -912,7 +911,7 @@ static kbool_t DEOS_fetchCoverageLog(KonohaContext *kctx, const char *filename, 
 	DBkey.size = strlen(key);
 
 	if(!db->get(db, &DBkey, &DBvalue, 0)) {
-		PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"event\": \"DiagnosisFaultType\", \"ScriptName\": \"%s\", \"ScriptLine:%d, \"Count\":%s, }", filename, line, (char *)DBvalue.data);
+		PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"event\": \"DiagnosisErrorCode\", \"ScriptName\": \"%s\", \"ScriptLine:%d, \"Count\":%s, }", filename, line, (char *)DBvalue.data);
 		db->close(db);
 		return true;
 	}
@@ -940,7 +939,7 @@ static kbool_t DEOS_checkSoftwareTestIsPass(KonohaContext *kctx, const char *fil
 
 }
 
-static int DEOS_DiagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
+static int DEOS_DiagnosisErrorCode(KonohaContext *kctx, int fault, KTraceInfo *trace)
 {
 	//DBG_P("IN fault=%d %d,%d,%d,%d", fault, TFLAG_is(int, fault, SoftwareFault), TFLAG_is(int, fault, UserFault), TFLAG_is(int, fault, SystemFault), TFLAG_is(int, fault, ExternalFault));
 	if(TFLAG_is(int, fault, SystemError)) {
@@ -958,24 +957,6 @@ static int DEOS_DiagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *t
 }
 
 // --------------------------------------------------------------------------
-
-#include "libcode/logtext_formatter.h"
-
-#define HasFault    (SystemFault|SoftwareFault|UserFault|ExternalFault)
-
-static void TraceDataLog(KonohaContext *kctx, KTraceInfo *trace, int logkey, logconf_t *logconf, ...)
-{
-	char buf[K_PAGESIZE];
-	va_list ap;
-	va_start(ap, logconf);
-	writeDataLogToBuffer(kctx, logconf, ap, buf, buf + (K_PAGESIZE - 4), trace);
-	int level = (logconf->policy & HasFault) ? LOG_ERR : LOG_NOTICE;
-	PLATAPI syslog_i(level, "%s", buf);
-	if(verbose_debug || KonohaContext_Is(Interactive, kctx)) {
-		fprintf(stderr, "SYSLOG %s\n", buf);
-	}
-	va_end(ap);
-}
 
 static void diagnosis(void)
 {
@@ -1134,71 +1115,68 @@ static void exit_i(int status, const char *file, int line)
 
 // --------------------------------------------------------------------------
 
-static kunused PlatformApi *KonohaUtils_getDefaultPlatformApi(void)
-{
-	static KonohaFactory plat = {};
-	plat.name            = "shell";
-	plat.stacksize       = K_PAGESIZE * 4;
-	plat.getenv_i        =  (const char *(*)(const char *))getenv;
-	plat.malloc_i        = malloc;
-	plat.free_i          = free;
-	plat.setjmp_i        = ksetjmp;
-	plat.longjmp_i       = klongjmp;
-	loadI18N(&plat, "UTF-8");
-
-	plat.printf_i        = printf;
-	plat.vprintf_i       = vprintf;
-	plat.snprintf_i      = snprintf;  // avoid to use Xsnprintf
-	plat.vsnprintf_i     = vsnprintf; // retreating..
-	plat.qsort_i         = qsort;
-	plat.exit_i          = exit_i;
-
-	// pthread / mutex / cond
-	plat.pthread_create_i        = kpthread_create;
-	plat.pthread_join_i          = kpthread_join;
-	plat.pthread_mutex_init_i    = kpthread_mutex_init;
-	plat.pthread_mutex_init_recursive = kpthread_mutex_init_recursive;
-	plat.pthread_mutex_lock_i    = kpthread_mutex_lock;
-	plat.pthread_mutex_unlock_i  = kpthread_mutex_unlock;
-	plat.pthread_mutex_trylock_i = kpthread_mutex_trylock;
-	plat.pthread_mutex_destroy_i = kpthread_mutex_destroy;
-	plat.pthread_cond_init_i     = kpthread_cond_init;
-	plat.pthread_cond_wait_i     = kpthread_cond_wait;
-	plat.pthread_cond_signal_i   = kpthread_cond_signal;
-	plat.pthread_cond_broadcast_i= kpthread_cond_broadcast;
-	plat.pthread_cond_destroy_i  = kpthread_cond_destroy;
-
-	plat.LoadPlatformModule   = LoadPlatformModule;
-	plat.FormatPackagePath   = FormatPackagePath;
-	plat.LoadPackageHandler  = LoadPackageHandler;
-	plat.BEFORE_LoadScript   = BEFORE_LoadScript;
-	plat.AFTER_LoadScript    = AFTER_LoadScript;
-
-	plat.shortFilePath       = shortFilePath;
-	plat.formatTransparentPath = formatTransparentPath;
-	plat.loadScript          = loadScript;
-	plat.ReportDebugMessage         = (!verbose_debug) ? NOP_ReportDebugMessage : ReportDebugMessage;
-
-	// timer
-	plat.getTimeMilliSecond  = getTimeMilliSecond;
-
-	// readline
-	PlatformApi_loadReadline(&plat);
-
-	// logger
-	plat.LOGGER_NAME         = "syslog";
-	plat.syslog_i            = syslog;
-	plat.vsyslog_i           = vsyslog;
-	plat.logger              = NULL;
-	plat.TraceDataLog        = TraceDataLog;
-	plat.diagnosis           = diagnosis;
-	plat.DiagnosisFaultType  = DEOS_DiagnosisFaultType;
-
-	plat.ReportUserMessage      = UI_ReportUserMessage;
-	plat.ReportCompilerMessage  = UI_ReportCompilerMessage;
-	plat.ReportCaughtException  = UI_ReportCaughtException;
-	return (PlatformApi *)(&plat);
-}
+//static kunused PlatformApi *KonohaUtils_getDefaultPlatformApi(void)
+//{
+//	static KonohaFactory plat = {};
+//	plat.name            = "shell";
+//	plat.stacksize       = K_PAGESIZE * 4;
+//	plat.getenv_i        =  (const char *(*)(const char *))getenv;
+//	plat.malloc_i        = malloc;
+//	plat.free_i          = free;
+//	plat.setjmp_i        = ksetjmp;
+//	plat.longjmp_i       = klongjmp;
+//	loadI18N(&plat, "UTF-8");
+//
+//	plat.printf_i        = printf;
+//	plat.vprintf_i       = vprintf;
+//	plat.snprintf_i      = snprintf;  // avoid to use Xsnprintf
+//	plat.vsnprintf_i     = vsnprintf; // retreating..
+//	plat.qsort_i         = qsort;
+//	plat.exit_i          = exit_i;
+//
+//	// pthread / mutex / cond
+//	plat.pthread_create_i        = kpthread_create;
+//	plat.pthread_join_i          = kpthread_join;
+//	plat.pthread_mutex_init_i    = kpthread_mutex_init;
+//	plat.pthread_mutex_init_recursive = kpthread_mutex_init_recursive;
+//	plat.pthread_mutex_lock_i    = kpthread_mutex_lock;
+//	plat.pthread_mutex_unlock_i  = kpthread_mutex_unlock;
+//	plat.pthread_mutex_trylock_i = kpthread_mutex_trylock;
+//	plat.pthread_mutex_destroy_i = kpthread_mutex_destroy;
+//	plat.pthread_cond_init_i     = kpthread_cond_init;
+//	plat.pthread_cond_wait_i     = kpthread_cond_wait;
+//	plat.pthread_cond_signal_i   = kpthread_cond_signal;
+//	plat.pthread_cond_broadcast_i= kpthread_cond_broadcast;
+//	plat.pthread_cond_destroy_i  = kpthread_cond_destroy;
+//
+//	plat.LoadPlatformModule   = LoadPlatformModule;
+//	plat.FormatPackagePath   = FormatPackagePath;
+//	plat.LoadPackageHandler  = LoadPackageHandler;
+//	plat.BEFORE_LoadScript   = BEFORE_LoadScript;
+//	plat.AFTER_LoadScript    = AFTER_LoadScript;
+//
+//	plat.shortFilePath       = shortFilePath;
+//	plat.formatTransparentPath = formatTransparentPath;
+//	plat.loadScript          = loadScript;
+//	plat.ReportDebugMessage         = (!verbose_debug) ? NOP_ReportDebugMessage : ReportDebugMessage;
+//
+//	// timer
+//	plat.getTimeMilliSecond  = getTimeMilliSecond;
+//
+//	// readline
+//	PlatformApi_loadReadline(&plat);
+//
+//	// logger
+//	plat.syslog_i            = syslog;
+//	plat.vsyslog_i           = vsyslog;
+//	plat.TraceDataLog        = TraceDataLog;
+//	plat.DiagnosisErrorCode  = DEOS_DiagnosisErrorCode;
+//
+//	plat.ReportUserMessage      = UI_ReportUserMessage;
+//	plat.ReportCompilerMessage  = UI_ReportCompilerMessage;
+//	plat.ReportCaughtException  = UI_ReportCaughtException;
+//	return (PlatformApi *)(&plat);
+//}
 
 static kunused void PosixFactory(KonohaFactory *factory)
 {
@@ -1252,13 +1230,11 @@ static kunused void PosixFactory(KonohaFactory *factory)
 	PlatformApi_loadReadline(factory);
 
 	// logger
-	factory->LOGGER_NAME           = "syslog";
-	factory->syslog_i              = syslog;
-	factory->vsyslog_i             = vsyslog;
-	factory->logger                = NULL;
-	factory->TraceDataLog          = TraceDataLog;
-	factory->diagnosis             = diagnosis;
-	factory->DiagnosisFaultType    = DEOS_DiagnosisFaultType;
+//	factory->syslog_i              = syslog;
+//	factory->vsyslog_i             = vsyslog;
+//	factory->TraceDataLog          = TraceDataLog;
+
+//	factory->DiagnosisErrorCode    = DEOS_DiagnosisErrorCode;
 
 	factory->ReportUserMessage     = UI_ReportUserMessage;
 	factory->ReportCompilerMessage = UI_ReportCompilerMessage;

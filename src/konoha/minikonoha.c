@@ -249,6 +249,48 @@ static void DefaultDispatchEvent(KonohaContext *kctx, kbool_t (*consume)(KonohaC
 {
 }
 
+static void DefaultTraceLog(KonohaContext *kctx, KTraceInfo *trace, int logkey, logconf_t *logconf, ...)
+{
+
+}
+
+// -------------------------------------------------------------------------
+/* Diagnosis */
+
+static kbool_t CheckStaticRisk(KonohaContext *kctx, const char *keyword, size_t keylen, kfileline_t uline)
+{
+	return true; // OK
+}
+
+static void CheckDynamicRisk(KonohaContext *kctx, const char *keyword, size_t keylen, KTraceInfo *trace)
+{
+}
+
+static int DiagnosisSoftwareProcess(KonohaContext *kctx, kfileline_t uline, KTraceInfo *trace)
+{
+	return 0;
+}
+
+static int DiagnosisSystemResource(KonohaContext *kctx, KTraceInfo *trace)
+{
+	return 0;
+}
+
+static int DiagnosisFileSystem(KonohaContext *kctx, const char *path, size_t pathlen, KTraceInfo *trace)
+{
+	return 0; // unknown
+}
+
+static int DiagnosisNetworking(KonohaContext *kctx, const char *path, size_t pathlen, int port, KTraceInfo *trace)
+{
+	return 0; // unknown
+}
+
+static int DiagnosisSystemError(KonohaContext *kctx, int userFault)
+{
+	return userFault | SoftwareFault | SystemFault;
+}
+
 
 // -------------------------------------------------------------------------
 /* Konoha C API */
@@ -284,6 +326,9 @@ void KonohaFactory_CheckVirtualMachine(KonohaFactory *factory);  // For compatib
 
 static void KonohaFactory_Check(KonohaFactory *factory)
 {
+	if(factory->LoggerInfo == NULL) {
+		factory->TraceDataLog = DefaultTraceLog;  // for safety
+	}
 	if(factory->VirtualMachineInfo == NULL) {
 		const char *mod = factory->getenv_i("KONOHA_VM");
 		if(mod == NULL) mod = "MiniVM";
@@ -312,6 +357,15 @@ static void KonohaFactory_Check(KonohaFactory *factory)
 		factory->EmitEvent         = DefaultEmitEvent;
 		factory->DispatchEvent     = DefaultDispatchEvent;
 		factory->WaitEvent         = NULL;  // check NULL
+	}
+	if(factory->DiagnosisInfo == NULL) {
+		factory->CheckStaticRisk         = CheckStaticRisk;
+		factory->CheckDynamicRisk        = CheckDynamicRisk;
+		factory->DiagnosisSystemError    = DiagnosisSystemError;
+		factory->DiagnosisSoftwareProcess = DiagnosisSoftwareProcess;
+		factory->DiagnosisSystemResource = DiagnosisSystemResource;
+		factory->DiagnosisFileSystem     = DiagnosisFileSystem;
+		factory->DiagnosisNetworking     = DiagnosisNetworking;
 	}
 }
 

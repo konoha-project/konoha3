@@ -290,8 +290,9 @@ static void StartEventHandler(KonohaContext *kctx)
 static void StopEventHandler(KonohaContext *kctx)
 {
 	ResetSignal(kctx);
+	struct EventContext *eventContext = ((KonohaFactory*)kctx->platApi)->eventContext;
 	LocalQueue_free(kctx, eventContext->queue);
-	PLATAPI free_i(((KonohaFactory*)kctx->platApi)->eventContext);
+	PLATAPI free_i(eventContext);
 }
 
 static void EnterEventContext(KonohaContext *kctx)
