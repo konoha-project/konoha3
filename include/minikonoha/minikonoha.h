@@ -447,6 +447,12 @@ typedef enum {
     KJSON_LONG
 } KJSONTYPE;
 
+typedef enum {
+	SafePoint_NOWAIT = 0,
+	SafePoint_GC     = 1,
+	SafePoint_Event  = (1 << 2),
+} SafePoint;
+
 struct KObjectVisitor *visitor;
 
 
@@ -568,6 +574,7 @@ struct KonohaFactory {
 	char* (*InputUserText)(KonohaContext *, const char *message, int flag);
 	char* (*InputUserPassword)(KonohaContext *, const char *message);
 
+	volatile int safePointFlag;
 	/* Garbage Collection API */
 	KModuleInfo *GCInfo;
 	void* (*Kmalloc)(KonohaContext*, size_t, KTraceInfo *);
@@ -584,8 +591,14 @@ struct KonohaFactory {
 
 	/* Event Handler API */
 	KModuleInfo *EventInfo;
-	void (*AddEventListener)(KonohaContext *, const char *name, void *thunk, void (*func)(KonohaContext *, void *thunk, struct JsonBuf*, KTraceInfo *));
-	void (*ScheduleEvent)(KonohaContext *, KTraceInfo *trace);
+	struct EventContext *eventContext;
+	void (*StartEventHandler)(KonohaContext *kctx);
+	void (*StopEventHandler)(KonohaContext *kctx);
+	void (*EnterEventContext)(KonohaContext *kctx);
+	void (*ExitEventContext)(KonohaContext *kctx);
+	kbool_t (*EmitEvent)(KonohaContext *kctx, struct JsonBuf *json, KTraceInfo *);
+	void (*DispatchEvent)(KonohaContext *kctx, kbool_t (*consume)(KonohaContext *kctx, struct JsonBuf *, KTraceInfo*), KTraceInfo*);
+	void (*WaitEvent)(KonohaContext *kctx, kbool_t (*consume)(KonohaContext *kctx, struct JsonBuf *, KTraceInfo*), KTraceInfo*);
 
 	// I18N Module
 	KModuleInfo *I18NInfo;

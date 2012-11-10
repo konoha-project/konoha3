@@ -461,6 +461,7 @@ static void GlobalQueue_absorbRawEventFromLocalQueues(KonohaContext *kctx, Local
 
 /* ------------------------------------------------------------------------ */
 // MODEVENT
+
 static void KscheduleEvent(KonohaContext *kctx) {
 	// collect events
 	GlobalQueue_absorbRawEventFromLocalQueues(kctx, kmodevent->localQueues);
