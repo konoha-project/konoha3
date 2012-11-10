@@ -58,7 +58,7 @@ static KMETHOD System_lseek(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret_offset == -1) {
 		// TODO: throw
 		KMakeTrace(trace, sfp);
-		int fault = PLATAPI diagnosisFaultType(kctx, SystemError, trace);
+		int fault = PLATAPI DiagnosisFaultType(kctx, SystemError, trace);
 		KTraceErrorPoint(trace, fault, "lseek",
 						LogUint("offset", offset),
 						LogUint("whence", whence)
@@ -76,7 +76,7 @@ static KMETHOD System_ftruncate(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret != 0) {
 		// TODO: throw
 		KMakeTrace(trace, sfp);
-		int fault = PLATAPI diagnosisFaultType(kctx, SystemError, trace);
+		int fault = PLATAPI DiagnosisFaultType(kctx, SystemError, trace);
 		KTraceErrorPoint(trace, fault, "ftruncate",
 						LogUint("fd", fd),
 						LogUint("length", length)
@@ -94,7 +94,7 @@ static KMETHOD System_fchmod(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret != -1) {
 		// TODO: throw
 		KMakeTrace(trace, sfp);
-		int fault = PLATAPI diagnosisFaultType(kctx, SystemError, trace);
+		int fault = PLATAPI DiagnosisFaultType(kctx, SystemError, trace);
 		KTraceErrorPoint(trace, fault, "fchmod",
 						LogUint("fd", fd),
 						LogUint("mode", mode)
@@ -132,7 +132,7 @@ static KMETHOD System_flock(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 		KMakeTrace(trace, sfp);
-		int fault = PLATAPI diagnosisFaultType(kctx, SystemError, trace);
+		int fault = PLATAPI DiagnosisFaultType(kctx, SystemError, trace);
 		KTraceErrorPoint(trace, fault, "flock",
 						LogUint("fd", fd),
 						LogUint("operation", operation)
@@ -149,7 +149,7 @@ static KMETHOD System_sync(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 		KMakeTrace(trace, sfp);
-		int fault = PLATAPI diagnosisFaultType(kctx, SystemError, trace);
+		int fault = PLATAPI DiagnosisFaultType(kctx, SystemError, trace);
 		KTraceErrorPoint(trace, fault, "sync", LogUint("fd", fd));
 	}
 	KReturnUnboxValue(ret == 0);
@@ -164,7 +164,7 @@ static KMETHOD System_fchown(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 		KMakeTrace(trace, sfp);
-		int fault = PLATAPI diagnosisFaultType(kctx, SystemError, trace);
+		int fault = PLATAPI DiagnosisFaultType(kctx, SystemError, trace);
 		KTraceErrorPoint(trace, fault, "fchown",
 						LogUint("fd", fd),
 						LogUint("owner", owner),
@@ -181,7 +181,7 @@ static KMETHOD System_fsync(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 		KMakeTrace(trace, sfp);
-		int fault = PLATAPI diagnosisFaultType(kctx, SystemError, trace);
+		int fault = PLATAPI DiagnosisFaultType(kctx, SystemError, trace);
 		KTraceErrorPoint(trace, fault, "fsync", LogUint("fd", fd));
 	}
 	KReturnUnboxValue(ret == 0);
@@ -205,7 +205,7 @@ static KMETHOD System_open(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 		KMakeTrace(trace, sfp);
-		int fault = PLATAPI diagnosisFaultType(kctx, kString_guessUserFault(s)|SystemError, trace);
+		int fault = PLATAPI DiagnosisFaultType(kctx, kString_guessUserFault(s)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "open",
 						LogText("pathname", pathname),
 						LogUint("flags", flags)
@@ -225,7 +225,7 @@ static KMETHOD System_open_mode(KonohaContext *kctx, KonohaStack *sfp)
 	if(ret == -1) {
 		// TODO: throw
 		KMakeTrace(trace, sfp);
-		int fault = PLATAPI diagnosisFaultType(kctx, kString_guessUserFault(s)|SystemError, trace);
+		int fault = PLATAPI DiagnosisFaultType(kctx, kString_guessUserFault(s)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "open_mode",
 						LogText("pathname", pathname),
 						LogUint("flags", flags),
@@ -242,7 +242,7 @@ static KMETHOD System_fchdir(KonohaContext *kctx, KonohaStack *sfp)
 	if(fd == -1) {
 		// TODO: throw
 		KMakeTrace(trace, sfp);
-		int fault = PLATAPI diagnosisFaultType(kctx, SystemError, trace);
+		int fault = PLATAPI DiagnosisFaultType(kctx, SystemError, trace);
 		KTraceErrorPoint(trace, fault, "fchdir", LogUint("fd", fd));
 	}
 	KReturnUnboxValue(fd == 0);
@@ -263,7 +263,7 @@ static KMETHOD System_ttyname(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = ttyname_r(fd, buf, sizeof(buf));
 	if(ret != 0) {
 		KMakeTrace(trace, sfp);
-		int fault = PLATAPI diagnosisFaultType(kctx, SystemError, trace);
+		int fault = PLATAPI DiagnosisFaultType(kctx, SystemError, trace);
 		KTraceErrorPoint(trace, fault, "ttyname", LogUint("fd", fd), LogErrno);
 	}
 	KReturn(KLIB new_kString(kctx, OnStack, buf, strlen(buf), 0));

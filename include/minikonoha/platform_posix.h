@@ -940,7 +940,7 @@ static kbool_t DEOS_checkSoftwareTestIsPass(KonohaContext *kctx, const char *fil
 
 }
 
-static int DEOS_diagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
+static int DEOS_DiagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
 {
 	//DBG_P("IN fault=%d %d,%d,%d,%d", fault, TFLAG_is(int, fault, SoftwareFault), TFLAG_is(int, fault, UserFault), TFLAG_is(int, fault, SystemFault), TFLAG_is(int, fault, ExternalFault));
 	if(TFLAG_is(int, fault, SystemError)) {
@@ -963,7 +963,7 @@ static int DEOS_diagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *t
 
 #define HasFault    (SystemFault|SoftwareFault|UserFault|ExternalFault)
 
-static void traceDataLog(KonohaContext *kctx, KTraceInfo *trace, int logkey, logconf_t *logconf, ...)
+static void TraceDataLog(KonohaContext *kctx, KTraceInfo *trace, int logkey, logconf_t *logconf, ...)
 {
 	char buf[K_PAGESIZE];
 	va_list ap;
@@ -1190,9 +1190,9 @@ static kunused PlatformApi *KonohaUtils_getDefaultPlatformApi(void)
 	plat.syslog_i            = syslog;
 	plat.vsyslog_i           = vsyslog;
 	plat.logger              = NULL;
-	plat.traceDataLog        = traceDataLog;
+	plat.TraceDataLog        = TraceDataLog;
 	plat.diagnosis           = diagnosis;
-	plat.diagnosisFaultType  = DEOS_diagnosisFaultType;
+	plat.DiagnosisFaultType  = DEOS_DiagnosisFaultType;
 
 	plat.ReportUserMessage      = UI_ReportUserMessage;
 	plat.ReportCompilerMessage  = UI_ReportCompilerMessage;
@@ -1256,9 +1256,9 @@ static kunused void PosixFactory(KonohaFactory *factory)
 	factory->syslog_i              = syslog;
 	factory->vsyslog_i             = vsyslog;
 	factory->logger                = NULL;
-	factory->traceDataLog          = traceDataLog;
+	factory->TraceDataLog          = TraceDataLog;
 	factory->diagnosis             = diagnosis;
-	factory->diagnosisFaultType    = DEOS_diagnosisFaultType;
+	factory->DiagnosisFaultType    = DEOS_DiagnosisFaultType;
 
 	factory->ReportUserMessage     = UI_ReportUserMessage;
 	factory->ReportCompilerMessage = UI_ReportCompilerMessage;

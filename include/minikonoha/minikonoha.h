@@ -496,6 +496,8 @@ struct KonohaFactory {
 	// settings
 	const char *name;
 	size_t  stacksize;
+	volatile int safePointFlag;
+	int          exitStatus;
 
 	/* memory allocation / deallocation */
 	void *(*malloc_i)(size_t size);
@@ -553,16 +555,19 @@ struct KonohaFactory {
 	char*  (*readline_i)(const char *prompt);
 	int    (*add_history_i)(const char *);
 
-	// logging, trace
-	int   exitStatus;
-	const char *LOGGER_NAME;
+	/* Logging API */
+	KModuleInfo *LoggerInfo;
 	void  (*syslog_i)(int priority, const char *message, ...) __PRINTFMT(2, 3);
 	void  (*vsyslog_i)(int priority, const char *message, va_list args);
-	void   *logger;  // logger handler
-	void  (*traceDataLog)(KonohaContext *kctx, KTraceInfo *trace, int, logconf_t *, ...);
-	void  (*diagnosis)(void);
+	void  (*TraceDataLog)(KonohaContext *kctx, KTraceInfo *trace, int, logconf_t *, ...);
 
-	int (*diagnosisFaultType)(KonohaContext *, int fault, KTraceInfo *);
+	/* Diagnosis API */
+	KModuleInfo *DiagnosisInfo;
+	int (*DiagnosisStaticRisk)(KonohaContext *, const char *keyword, size_t keylen, kfileline_t uline);
+	int (*DiagnosisFaultType)(KonohaContext *, int fault, KTraceInfo *);
+	int (*DiagnosisSoftwareFault)(KonohaContext *, kfileline_t uline, int fault, KTraceInfo *);
+	int (*DiagnosisFileSystem)(KonohaContext *, const char *path, size_t pathlen, int fault, KTraceInfo *);
+	int (*DiagnosisNetworking)(KonohaContext *, const char *path, size_t pathlen, int fault, KTraceInfo *);
 
 	/* Console API */
 	KModuleInfo *ConsoleInfo;
@@ -574,7 +579,6 @@ struct KonohaFactory {
 	char* (*InputUserText)(KonohaContext *, const char *message, int flag);
 	char* (*InputUserPassword)(KonohaContext *, const char *message);
 
-	volatile int safePointFlag;
 	/* Garbage Collection API */
 	KModuleInfo *GCInfo;
 	void* (*Kmalloc)(KonohaContext*, size_t, KTraceInfo *);
@@ -636,7 +640,6 @@ struct KonohaFactory {
 	const char* (*JsonToNewText)(KonohaContext *, struct JsonBuf *);
 	size_t      (*DoJsonEach)(KonohaContext *, struct JsonBuf *, void *thunk, void (*doEach)(KonohaContext *, const char *, struct JsonBuf *, void *));
 
-	//	void        (*WriteJsonToBuffer)(KonohaContext *, KGrowingBuffer *, struct JsonBuf *);
 	kbool_t     (*RetrieveJsonKeyValue)(KonohaContext *, struct JsonBuf *, const char *key, size_t keylen, struct JsonBuf *newbuf);
 	kbool_t     (*SetJsonKeyValue)(KonohaContext *, struct JsonBuf *, const char *key, size_t keylen, struct JsonBuf *otherbuf);
 	kbool_t     (*SetJsonValue)(KonohaContext *, struct JsonBuf *, const char *key, size_t keylen, KJSONTYPE, ...);
@@ -667,21 +670,21 @@ struct KonohaFactory {
 #define KTraceErrorPoint(TRACE, POLICY, APINAME, ...)    do {\
 		logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|POLICY)};\
 		if(trace != NULL && TFLAG_is(int, _logconf.policy, isRecord)) { \
-			PLATAPI traceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
+			PLATAPI TraceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
 		}\
 	} while(0)
 
 #define KTraceChangeSystemPoint(TRACE, APINAME, ...)    do {\
 		logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|SystemChangePoint)};\
 		if(trace != NULL && TFLAG_is(int, _logconf.policy, isRecord)) { \
-			PLATAPI traceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
+			PLATAPI TraceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
 		}\
 	} while(0)
 
 #define KTraceApi(TRACE, POLICY, APINAME, ...)    do {\
 		static logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|POLICY)};\
 		if(trace != NULL && TFLAG_is(int, _logconf.policy, isRecord)) {\
-			PLATAPI traceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
+			PLATAPI TraceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
 		}\
 	} while(0)
 
@@ -689,10 +692,10 @@ struct KonohaFactory {
 		static logconf_t _logconf = {(logpolicy_t)(isRecord|LOGPOOL_INIT|POLICY)};\
 		if(trace != NULL && TFLAG_is(int, _logconf.policy, isRecord)) {\
 			uint64_t _startTime = PLATAPI getTimeMilliSecond();\
-			PLATAPI traceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
+			PLATAPI TraceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), ## __VA_ARGS__, LOG_END);\
 			STMT;\
 			uint64_t _endTime = PLATAPI getTimeMilliSecond();\
-			PLATAPI traceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), LogUint("ElapsedTime", (_endTime - _startTime)), ## __VA_ARGS__, LOG_END);\
+			PLATAPI TraceDataLog(kctx, TRACE, 0/*LOGKEY*/, &_logconf, LogText("Api", APINAME), LogUint("ElapsedTime", (_endTime - _startTime)), ## __VA_ARGS__, LOG_END);\
 			/*counter++;*/\
 		}else { \
 			STMT;\

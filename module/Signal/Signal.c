@@ -375,7 +375,6 @@ kbool_t LoadSignalModule(KonohaFactory *factory, ModuleType type)
 	return true;
 }
 
-
 //// http://www.ibm.com/developerworks/jp/linux/library/l-sigdebug/index.html
 //#if defined(K_USING_MINGW_)
 //#define RECDATA

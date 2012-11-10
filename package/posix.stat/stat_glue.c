@@ -120,7 +120,7 @@ static KMETHOD System_stat(KonohaContext *kctx, KonohaStack *sfp)
 	struct stat buf = {}; /* zero */
 	int ret = stat(systemPath, &buf);
 	if(ret == -1) {
-		int fault = PLATAPI diagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
+		int fault = PLATAPI DiagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "stat", LogText("path", S_text(path)), LogErrno);
 	}
 	KReturn(KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)&buf));
@@ -136,7 +136,7 @@ static KMETHOD System_lstat(KonohaContext *kctx, KonohaStack *sfp)
 	struct stat buf = {}; /* zero */
 	int ret = lstat(systemPath, &buf);
 	if(ret == -1) {
-		int fault = PLATAPI diagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
+		int fault = PLATAPI DiagnosisFaultType(kctx, kString_guessUserFault(path)|SystemError, trace);
 		KTraceErrorPoint(trace, fault, "lstat", LogText("path", S_text(path)), LogErrno);
 	}
 	KReturn(KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), (uintptr_t)&buf));

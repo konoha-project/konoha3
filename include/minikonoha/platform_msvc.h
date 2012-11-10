@@ -482,7 +482,7 @@ static void PlatformApi_loadReadline(KonohaFactory *plat)
 #define EBUFSIZ 1024
 #include "libcode/logtext_formatter.h"
 
-static void traceDataLog(void *logger, int logkey, logconf_t *logconf, ...)
+static void TraceDataLog(void *logger, int logkey, logconf_t *logconf, ...)
 {
 	char buf[EBUFSIZ];
 	va_list ap;
@@ -549,7 +549,7 @@ static PlatformApi* KonohaUtils_getDefaultPlatformApi(void)
 	//plat.syslog_i            = syslog;
 	//plat.vsyslog_i           = vsyslog;
 	plat.logger              = NULL;
-	plat.traceDataLog        = traceDataLog;
+	plat.TraceDataLog        = TraceDataLog;
 	plat.diagnosis           = diagnosis;
 	return (PlatformApi *)(&plat);
 }
