@@ -24,7 +24,6 @@
 
 #include <stdio.h>
 #include "minikonoha/minikonoha.h"
-#include "minikonoha/gc.h"
 #include "test_konoha.h"
 
 int main(int argc, const char *argv[])

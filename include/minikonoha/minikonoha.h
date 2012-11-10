@@ -1965,6 +1965,4 @@ extern kbool_t konoha_run(KonohaContext* konoha);  // TODO
 } /* extern "C" */
 #endif
 
-#include "gc.h"
-
 #endif /* MINIOKNOHA_H_ */

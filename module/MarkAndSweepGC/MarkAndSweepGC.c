@@ -29,7 +29,6 @@
 //#define GCDEBUG 1
 
 #include "minikonoha/minikonoha.h"
-#include "minikonoha/gc.h"
 #include "minikonoha/local.h"
 
 #ifdef __cplusplus

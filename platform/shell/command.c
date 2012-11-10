@@ -24,7 +24,6 @@
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
-#include "minikonoha/gc.h"
 #include <minikonoha/klib.h>
 
 #define USE_BUILTINTEST 1
