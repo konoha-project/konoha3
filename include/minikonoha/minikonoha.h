@@ -453,7 +453,7 @@ typedef enum {
 typedef enum {
 	SafePoint_NOWAIT = 0,
 	SafePoint_GC     = 1,
-	SafePoint_Event  = (1 << 2),
+	SafePoint_Event  = (1 << 2)
 } SafePoint;
 
 struct KObjectVisitor *visitor;
@@ -1604,16 +1604,7 @@ typedef struct KObjectVisitor {
 
 struct KonohaLibVar {
 
-//	/* Garbage Collection API */
-//	/* This Must be Going to PlatformApi */
-//	GcContext *(*KnewGcContext)(KonohaContext *kctx);
-//	void (*KdeleteGcContext)(GcContext *gc);
-//	void (*KscheduleGC)     (GcContext *gc);
-//	struct kObjectVar *(*KallocObject)(GcContext *gc, KonohaClass *klass);
-//	bool (*KisObject)   (GcContext *gc, void *ptr);
-//	void (*KvisitObject)(struct KObjectVisitor *visitor, struct kObjectVar *obj);
-//
-//	/* Event Handler API */
+	/* Event Handler API */
 	/* This Must Be Going To Factory */
 	void (*KscheduleEvent)  (KonohaContext *);
 
@@ -1663,7 +1654,6 @@ struct KonohaLibVar {
 	void            (*kObject_FreeField)(KonohaContext *kctx, kObjectVar *);
 	void            (*kObject_ReftraceField)(KonohaContext *kctx, kObject *, KObjectVisitor *);
 
-	//kbool_t         (*kObject_isManaged)(KonohaContext*, void *ptr);
 	kObject*        (*Knull)(KonohaContext*, KonohaClass *);
 	kObject*        (*kObject_getObject)(KonohaContext*, kAbstractObject *, ksymbol_t, kAbstractObject *);
 	void            (*kObject_setObject)(KonohaContext*, kAbstractObject *, ksymbol_t, ktype_t, kAbstractObject *);
@@ -1689,7 +1679,6 @@ struct KonohaLibVar {
 
 	kbool_t         (*KonohaRuntime_setModule)(KonohaContext*, int, struct KonohaModule *, KTraceInfo *);
 
-//	void (*kNameSpace_reftraceSugarExtension)(KonohaContext *, kNameSpace *, struct KObjectVisitor *visitor);
 	void (*kNameSpace_freeSugarExtension)(KonohaContext *, kNameSpaceVar *);
 
 	KonohaPackage*   (*kNameSpace_RequirePackage)(KonohaContext*, const char *, KTraceInfo *);
@@ -1974,8 +1963,6 @@ typedef struct {
 #endif
 
 ///* Konoha API */
-extern KonohaContext* konoha_open(const PlatformApi *);
-extern void konoha_close(KonohaContext* konoha);
 extern kbool_t Konoha_LoadScript(KonohaContext* konoha, const char *scriptfile);
 extern kbool_t Konoha_Eval(KonohaContext* konoha, const char *script, kfileline_t uline);
 extern kbool_t konoha_run(KonohaContext* konoha);  // TODO
