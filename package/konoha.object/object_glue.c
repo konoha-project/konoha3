@@ -61,7 +61,7 @@ static KMETHOD Object_as(KonohaContext *kctx, KonohaStack *sfp)
 // void NameSpace_AllowImplicitCoercion(boolean t)
 static KMETHOD NameSpace_AllowImplicitCoercion(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kNameSpaceVar *ns = (kNameSpaceVar*)sfp[0].asNameSpace;
+	kNameSpaceVar *ns = (kNameSpaceVar *)sfp[0].asNameSpace;
 	kNameSpace_Set(ImplicitCoercion, ns, sfp[1].boolValue);
 }
 

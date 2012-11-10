@@ -78,7 +78,7 @@ void *MYSQL_qopen(KonohaContext *kctx, const char* url)
 			LogUint("port", port),
 			LogUint("errno", mysql_errno(db)),
 			LogText("error", mysql_error(db)));
-	return (void*)db;
+	return (void *)db;
 }
 /* ------------------------------------------------------------------------ */
 
@@ -86,16 +86,16 @@ void *MYSQL_qopen(KonohaContext *kctx, const char* url)
 int MYSQL_qnext(KonohaContext *kctx, kqcur_t *qcursor, kResultSet *rs)
 {
 	MYSQL_ROW row;
-	MYSQL_RES* res = (MYSQL_RES*)qcursor;
+	MYSQL_RES* res = (MYSQL_RES *)qcursor;
 	int i;
 	int num_fields = mysql_num_fields(res);
-	if ((row = mysql_fetch_row(res)) != NULL) {
+	if((row = mysql_fetch_row(res)) != NULL) {
 		OLDTRACE_SWITCH_TO_KTrace(_UserInputFault, LogText("@","mysql_fetch_row"));
 		kint_t ival;
 		kfloat_t fval;
 		for (i = 0; i < num_fields; i++) {
 		//for (i = 0; i < rs->column_size; i++) {
-			if (row[i] == NULL) {
+			if(row[i] == NULL) {
 				_ResultSet_setNULL(kctx, rs, i);
 				continue;
 			}
@@ -103,11 +103,11 @@ int MYSQL_qnext(KonohaContext *kctx, kqcur_t *qcursor, kResultSet *rs)
 			case MYSQL_TYPE_TINY:     case MYSQL_TYPE_SHORT:
 			case MYSQL_TYPE_INT24:    case MYSQL_TYPE_LONG:
 			case MYSQL_TYPE_LONGLONG: case MYSQL_TYPE_YEAR:
-				ival = parseInt((char*)row[i], strlen((char*)row[i]));
+				ival = parseInt((char *)row[i], strlen((char *)row[i]));
 				_ResultSet_setInt(kctx, rs, i, ival);
 				break;
 			case MYSQL_TYPE_FLOAT: case MYSQL_TYPE_DOUBLE:
-				fval = parseFloat((char*)row[i], strlen((char*)row[i]));
+				fval = parseFloat((char *)row[i], strlen((char *)row[i]));
 				_ResultSet_setFloat(kctx, rs, i, fval);
 				break;
 			case MYSQL_TYPE_NEWDECIMAL: case MYSQL_TYPE_STRING:
@@ -116,7 +116,7 @@ int MYSQL_qnext(KonohaContext *kctx, kqcur_t *qcursor, kResultSet *rs)
 			case MYSQL_TYPE_LONG_BLOB:  case MYSQL_TYPE_BIT:
 			case MYSQL_TYPE_TIME:       case MYSQL_TYPE_DATE:
 			case MYSQL_TYPE_DATETIME:   case MYSQL_TYPE_TIMESTAMP:
-				_ResultSet_setText(kctx, rs, i, (char*)row[i], strlen((char*)row[i]));
+				_ResultSet_setText(kctx, rs, i, (char *)row[i], strlen((char *)row[i]));
 				break;
 			case MYSQL_TYPE_NULL:
 			default:
@@ -162,10 +162,10 @@ kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char* sql, kResultSet
 				LogUint("errno", mysql_errno(db)),
 				LogText("error", mysql_error(db))
 		);
-		if (r == 0) { // success
-			res = mysql_store_result((MYSQL*)db);
-			if (res == NULL) { // NULL RESULT
-				if (mysql_errno(db) != 0) {
+		if(r == 0) { // success
+			res = mysql_store_result((MYSQL *)db);
+			if(res == NULL) { // NULL RESULT
+				if(mysql_errno(db) != 0) {
 					mysql_free_result(res);
 					OLDTRACE_SWITCH_TO_KTrace(_UserInputFault,
 							LogText("@","mysql_sotre_result"),
@@ -198,7 +198,7 @@ kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char* sql, kResultSet
 				}
 				//int num_fields = mysql_num_fields(res), k, j = 0;
 				//MYSQL_ROW row;
-				//while ((row = mysql_fetch_row(res))) {
+				//while((row = mysql_fetch_row(res))) {
 				//	for (k = 0; k < num_fields; k++) {
 				//		fprintf(stderr, "[%d] %s\n", j, row[k]);
 				//	}

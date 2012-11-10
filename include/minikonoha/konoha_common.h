@@ -37,7 +37,7 @@ extern "C" {
 #define KDefinedKonohaCommonModule() (kctx->modshare[MOD_konoha] != NULL)
 
 #define KRequireKonohaCommonModule(TRACE) \
-	if (KGetKonohaCommonModule() == NULL) {\
+	if(KGetKonohaCommonModule() == NULL) {\
 		KonohaCommonModule_init(kctx, TRACE);\
 	}\
 

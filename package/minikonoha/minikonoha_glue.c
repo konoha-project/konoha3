@@ -74,7 +74,7 @@ static void kKonohaFactory_free(KonohaContext *kctx, kObject *o)
 static void kKonoha_init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct kKonohaVar *ko = (struct kKonohaVar *)o;
-	ko->konoha = KLIB KonohaFactory_CreateKonoha((KonohaFactory*)conf);
+	ko->konoha = KLIB KonohaFactory_CreateKonoha((KonohaFactory *)conf);
 }
 
 static void kKonoha_free(KonohaContext *kctx, kObject *o)

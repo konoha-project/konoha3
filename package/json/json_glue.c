@@ -62,7 +62,7 @@ static void kJson_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer
 	size_t length;
 	const char *data = PLATAPI Json_toString_i(PLATAPI JsonContext, json->json, &length);
 	KLIB Kwb_printf(kctx, wb, "%s", data);
-	free((char*)data);
+	free((char *)data);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -248,7 +248,7 @@ static KMETHOD Json_toString(KonohaContext *kctx, KonohaStack *sfp)
 	size_t length;
 	const char *data = PLATAPI Json_toString_i(PLATAPI JsonContext, json, &length);
 	kString *ret = KLIB new_kString(kctx, OnStack, data, length, 0);
-	free((char*)data);
+	free((char *)data);
 	KReturn(ret);
 }
 

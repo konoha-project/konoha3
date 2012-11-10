@@ -570,7 +570,7 @@ static void KonohaVisitor_visitCallExpr(KonohaContext *kctx, IRBuilder *self, kE
 	ASM(CALL, ctxcode->uline, SFP_(thisidx), esp_, KLIB Knull(kctx, CT_(expr->ty)));
 
 	if(mtd->mn == MN_box) {  /* boxed value of unbox value must be shifted to OC */
-		((kExprVar*)expr)->ty = TY_Object;
+		((kExprVar *)expr)->ty = TY_Object;
 	}
 
 	if(a != espidx) {

@@ -1143,7 +1143,7 @@ static kMethod* kMethod_DoLazyCompilation(KonohaContext *kctx, kMethod *mtd, kpa
 	if(mtd->invokeMethodFunc == MethodFunc_LazyCompilation) {
 		kString *text = mtd->SourceToken->text;
 		kfileline_t uline = mtd->SourceToken->uline;
-		((kMethodVar*)mtd)->invokeMethodFunc = NULL; // TO avoid recursive compile
+		((kMethodVar *)mtd)->invokeMethodFunc = NULL; // TO avoid recursive compile
 		mtd = kMethod_Compile(kctx, mtd, callparamNULL, mtd->LazyCompileNameSpace, text, uline, options|HatedLazyCompile);
 		DBG_ASSERT(mtd->invokeMethodFunc != MethodFunc_LazyCompilation);
 	}
@@ -1266,7 +1266,7 @@ static KMETHOD Statement_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 	if(TY_is(Final, typeId)) { flag |= kMethod_Final; }
 	if(pa != NULL) {  // if pa is NULL, error is printed out.
 		INIT_GCSTACK();
-		kMethodVar *mtd = (kMethodVar*)KLIB new_kMethod(kctx, _GcStack, flag, typeId, mn, NULL);
+		kMethodVar *mtd = (kMethodVar *)KLIB new_kMethod(kctx, _GcStack, flag, typeId, mn, NULL);
 		KLIB kMethod_setParam(kctx, mtd, pa->rtype, pa->psize, (kparamtype_t *)pa->paramtypeItems);
 		KMakeTrace(trace, sfp);
 		if(kNameSpace_AddMethod(kctx, ns, mtd, trace)) {

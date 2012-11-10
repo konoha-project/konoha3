@@ -55,15 +55,15 @@ void *SQLITE3_qopen(KonohaContext* kctx,  const char* db)
 	sqlite3 *db_sqlite3 = NULL;
 	db += 9;
 	int r = sqlite3_open(db, &db_sqlite3);
-	if (r != SQLITE_OK) {
+	if(r != SQLITE_OK) {
 		return NULL;
 	}
-	return (void*)db_sqlite3;
+	return (void *)db_sqlite3;
 }
 
 int SQLITE3_qnext(KonohaContext* kctx, kqcur_t *qcur, kResultSet *rs)
 {
-	sqlite3_stmt *stmt = (sqlite3_stmt*)qcur;
+	sqlite3_stmt *stmt = (sqlite3_stmt *)qcur;
 	int r = sqlite3_step(stmt);
 	if(SQLITE_ROW == r) {
 		size_t i;
@@ -79,11 +79,11 @@ int SQLITE3_qnext(KonohaContext* kctx, kqcur_t *qcur, kResultSet *rs)
 					break;
 				}
 				case SQLITE_TEXT: {
-					_ResultSet_setText(kctx, rs, i, (char*)sqlite3_column_text(stmt,i), (size_t)sqlite3_column_bytes(stmt, i));
+					_ResultSet_setText(kctx, rs, i, (char *)sqlite3_column_text(stmt,i), (size_t)sqlite3_column_bytes(stmt, i));
 					break;
 				}
 				case SQLITE_BLOB: {
-					//_ResultSet_setBlob(kctx, rs, i, (const char*)sqlite3_column_blob(stmt, i), sqlite3_column_bytes(stmt, i));
+					//_ResultSet_setBlob(kctx, rs, i, (const char *)sqlite3_column_blob(stmt, i), sqlite3_column_bytes(stmt, i));
 					break;
 				}
 				case SQLITE_NULL:
@@ -94,7 +94,7 @@ int SQLITE3_qnext(KonohaContext* kctx, kqcur_t *qcur, kResultSet *rs)
 		}
 		return 1;
 	}
-	else if (r != SQLITE_DONE) {
+	else if(r != SQLITE_DONE) {
 	   //
 	}
 	return 0;  /* NOMORE */
@@ -112,7 +112,7 @@ kqcur_t *SQLITE3_query(KonohaContext* kctx, void *db, const char* query, kResult
 	else {
 		sqlite3_stmt *stmt = NULL;
 		sqlite3_prepare((sqlite3*)db, query, strlen(query), &stmt, NULL);
-	/* if (r != SQLITE_OK) { */
+	/* if(r != SQLITE_OK) { */
 	/* 	sqlite3_finalize(stmt); */
 	/* 	DBG_P("msg='%s", sqlite3_errmsg((sqlite3)db)); */
 	/* 	return NULL; */
@@ -130,7 +130,7 @@ kqcur_t *SQLITE3_query(KonohaContext* kctx, void *db, const char* query, kResult
 		}else if(column_size > 0) {
 			size_t i;
 			for(i = 0; i < column_size; i++) {
-				char *n = (char*)sqlite3_column_name(stmt, i);
+				char *n = (char *)sqlite3_column_name(stmt, i);
 				DBG_P("(%d) name = '%s'", i, n);
 				if(n != NULL) {
 					rs->column[i].dbtype = sqlite3_column_type(stmt, i);
@@ -139,7 +139,7 @@ kqcur_t *SQLITE3_query(KonohaContext* kctx, void *db, const char* query, kResult
 				}
 			}
 		}
-		return (kqcur_t*)stmt;
+		return (kqcur_t *)stmt;
 	}
 }
 
@@ -150,7 +150,7 @@ void SQLITE3_qclose(void *hdr)
 
 void SQLITE3_qfree(kqcur_t *qcur)
 {
-	sqlite3_stmt *stmt = (sqlite3_stmt*)qcur;
+	sqlite3_stmt *stmt = (sqlite3_stmt *)qcur;
 	sqlite3_finalize(stmt);
 }
 

@@ -279,7 +279,7 @@ static KMETHOD System_assert(KonohaContext *kctx, KonohaStack *sfp)
 	kbool_t cond = sfp[1].boolValue;
 	if(cond == false) {
 		KMakeTrace(trace, sfp);
-		((KonohaFactory*)kctx->platApi)->exitStatus = 1;  // just in case
+		((KonohaFactory *)kctx->platApi)->exitStatus = 1;  // just in case
 		KLIB KonohaRuntime_raise(kctx, EXPT_("Assertion"), SoftwareFault, NULL, trace->baseStack);
 	}
 }

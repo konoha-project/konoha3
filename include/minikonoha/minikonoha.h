@@ -607,8 +607,8 @@ struct KonohaFactory {
 	void (*EnterEventContext)(KonohaContext *kctx);
 	void (*ExitEventContext)(KonohaContext *kctx);
 	kbool_t (*EmitEvent)(KonohaContext *kctx, struct JsonBuf *json, KTraceInfo *);
-	void (*DispatchEvent)(KonohaContext *kctx, kbool_t (*consume)(KonohaContext *kctx, struct JsonBuf *, KTraceInfo*), KTraceInfo*);
-	void (*WaitEvent)(KonohaContext *kctx, kbool_t (*consume)(KonohaContext *kctx, struct JsonBuf *, KTraceInfo*), KTraceInfo*);
+	void (*DispatchEvent)(KonohaContext *kctx, kbool_t (*consume)(KonohaContext *kctx, struct JsonBuf *, KTraceInfo *), KTraceInfo *);
+	void (*WaitEvent)(KonohaContext *kctx, kbool_t (*consume)(KonohaContext *kctx, struct JsonBuf *, KTraceInfo *), KTraceInfo *);
 
 	// I18N Module
 	KModuleInfo *I18NInfo;
