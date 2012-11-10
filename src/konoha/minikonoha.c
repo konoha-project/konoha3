@@ -236,6 +236,21 @@ void konoha_close(KonohaContext* konoha)
 }
 
 // -------------------------------------------------------------------------
+// Default Platform Module API
+
+static void DefaultEventHandler(KonohaContext *kctx)
+{
+}
+static kbool_t DefaultEmitEvent(KonohaContext *kctx, struct JsonBuf *json, KTraceInfo *trace)
+{
+	return false;
+}
+static void DefaultDispatchEvent(KonohaContext *kctx, kbool_t (*consume)(KonohaContext *kctx, struct JsonBuf *, KTraceInfo *), KTraceInfo *trace)
+{
+}
+
+
+// -------------------------------------------------------------------------
 /* Konoha C API */
 
 kbool_t KonohaFactory_LoadPlatformModule(KonohaFactory *factory, const char *name, ModuleType option)
@@ -288,6 +303,15 @@ static void KonohaFactory_Check(KonohaFactory *factory)
 		const char *mod = factory->getenv_i("KONOHA_JSON");
 		if(mod == NULL) mod = "Json";
 		KonohaFactory_LoadPlatformModule(factory, mod, ReleaseModule);
+	}
+	if(factory->EventInfo == NULL) {
+		factory->StartEventHandler = DefaultEventHander;
+		factory->StopEventHandler  = DefaultEventHander;
+		factory->EnterEventContext = DefaultEventHander;
+		factory->ExitEventContext  = DefaultEventHander;
+		factory->EmitEvent         = DefaultEmitEvent;
+		factory->DispatchEvent     = DefaultDispatchEvent;
+		factory->WaitEvent         = NULL;  // check NULL
 	}
 }
 

@@ -274,6 +274,8 @@ static void AddSignalEvent(KonohaContext *kctx, struct EventContext *eventContex
 	}
 }
 
+// ---------------------------------------------------------------------------
+
 static void StartEventHandler(KonohaContext *kctx)
 {
 	KNH_ASSERT(PLATAPI eventContext == NULL);
