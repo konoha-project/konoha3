@@ -1476,10 +1476,9 @@ struct kNameSpaceVar {
 #define kNameSpace_Set(P, ns, B)                     TFLAG_set(kshortflag_t, ((kNameSpaceVar *)ns)->syntaxOption, kNameSpace_##P, B)
 
 #define kNameSpace_NoSemiColon                       ((kshortflag_t)(1<<1))
-
 #define kNameSpace_TypeInference                     ((kshortflag_t)(1<<2))
 #define kNameSpace_ImplicitField                     ((kshortflag_t)(1<<3))
-#define kNameSpace_ImplicitGlobalVariable         ((kshortflag_t)(1<<4))
+#define kNameSpace_ImplicitGlobalVariable            ((kshortflag_t)(1<<4))
 
 #define kNameSpace_ImplicitCoercion                  ((kshortflag_t)(1<<5))
 

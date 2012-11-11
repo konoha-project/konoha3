@@ -53,6 +53,9 @@ set(PACKAGES
 	cstyle.libc
 	cstyle.math
 ## YOU MUST add packages in an alphabetical order
+	java2.class
+	java2.object
+## YOU MUST add packages in an alphabetical order
 	konoha
 	konoha.array
 	konoha.bytes
@@ -87,6 +90,7 @@ set(PACKAGES
 	konoha.var
 	minikonoha
 	sugar
+## YOU MUST ADD packages in an alphabetical order
 	posix.fd
 	posix.path
 	posix.process

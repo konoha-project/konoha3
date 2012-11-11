@@ -1,9 +1,9 @@
 // written by kimio kuramitsu
 
 import("konoha.var");
-import("cstyle"); // konoha.null is obsolate; use cstyle
+import("cstyle");
 import("konoha.object");
-import("konoha.subtype", "<:");
+
 void test() {
 	var o = null;
 	assert(o <: Object);

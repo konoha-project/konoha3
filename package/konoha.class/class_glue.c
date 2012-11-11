@@ -31,6 +31,35 @@ extern "C"{
 #endif
 
 
+/* Method */
+
+// void NameSpace_AllowImplicitField(boolean t)
+static KMETHOD NameSpace_AllowImplicitField(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kNameSpaceVar *ns = (kNameSpaceVar *)sfp[0].asNameSpace;
+	kNameSpace_Set(ImplicitField, ns, sfp[1].boolValue);
+}
+
+#define _Public   kMethod_Public
+#define _Const    kMethod_Const
+#define _Ignored  kMethod_IgnoredOverride
+#define _Im       kMethod_Immutable
+#define _Final    kMethod_Final
+#define _Virtual  kMethod_Virtual
+#define _Hidden   kMethod_Hidden
+#define _F(F)   (intptr_t)(F)
+
+static void class_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
+{
+	KDEFINE_METHOD MethodData[] = {
+		_Public|_Const|_Ignored, _F(NameSpace_AllowImplicitField), TY_void, TY_NameSpace, MN_("AllowImplicitField"), 1, TY_boolean, FN_("allow"),
+		DEND,
+	};
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
+}
+
+
+
 static kbool_t KonohaClass_setClassFieldObjectValue(KonohaContext *kctx, KonohaClassVar *definedClass, ksymbol_t sym, kObject *ObjectValue)
 {
 	int i;
@@ -398,8 +427,8 @@ static kbool_t class_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 static kbool_t class_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequirePackage("konoha.field", trace);
-	//KRequirePackage("konoha.new", trace);
 	class_defineSyntax(kctx, ns, trace);
+	class_defineMethod(kctx, ns, trace);
 	return true;
 }
 
@@ -414,7 +443,7 @@ KDEFINE_PACKAGE* class_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "class", "1.0");
-	d.PackupNameSpace    = class_PackupNameSpace;
+	d.PackupNameSpace   = class_PackupNameSpace;
 	d.ExportNameSpace   = class_ExportNameSpace;
 	return &d;
 }
