@@ -62,16 +62,18 @@ static int kNameSpace_FindEndOfStatement(KonohaContext *kctx, kNameSpace *ns, kA
 static KMETHOD PatternMatch_Expression(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
-	INIT_GCSTACK();
 	int returnIdx = -1;
 	endIdx = kNameSpace_FindEndOfStatement(kctx, Stmt_ns(stmt), tokenList, beginIdx, endIdx);
-	kExpr *expr = kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, endIdx, NULL);
-	if(expr != K_NULLEXPR) {
-		KdumpExpr(kctx, expr);
-		kStmt_AddParsedObject(kctx, stmt, name, UPCAST(expr));
-		returnIdx = endIdx;
+	if(beginIdx < endIdx) {
+		INIT_GCSTACK();
+		kExpr *expr = kStmt_parseExpr(kctx, stmt, tokenList, beginIdx, endIdx, NULL);
+		if(expr != K_NULLEXPR) {
+			KdumpExpr(kctx, expr);
+			kStmt_AddParsedObject(kctx, stmt, name, UPCAST(expr));
+			returnIdx = endIdx;
+		}
+		RESET_GCSTACK();
 	}
-	RESET_GCSTACK();
 	KReturnUnboxValue(returnIdx);
 }
 
@@ -106,7 +108,6 @@ static void TokenSeq_checkCStyleParam(KonohaContext *kctx, TokenSeq* tokens)
 	int i;
 	for(i = 0; i < tokens->endIdx; i++) {
 		kTokenVar *tk = tokens->tokenList->TokenVarItems[i];
-		DBG_P("i=%d, %s%s", i, PSYM_t(tk->resolvedSymbol));
 		if(tk->resolvedSymbol == KW_void) {
 			tokens->endIdx = i; //  f(void) = > f()
 			return;

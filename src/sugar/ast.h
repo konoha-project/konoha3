@@ -115,6 +115,7 @@ static kExpr* kStmt_parseExpr(KonohaContext *kctx, kStmt *stmt, kArray *tokenLis
 		else {
 			if(hintBeforeText == NULL) hintBeforeText = "";
 			kStmt_printMessage(kctx, stmt, ErrTag, "expected expression after %s", hintBeforeText);
+			//DBG_ASSERT(hintBeforeText == NULL); // stop
 		}
 	}
 	return K_NULLEXPR;
