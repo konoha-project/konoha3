@@ -37,7 +37,7 @@ static void DeclVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t 
 	DBG_ASSERT(Expr_isSymbolTerm(termExpr));
 	kToken *termToken = termExpr->termToken;
 	if(Gamma_isTopLevel(gma)) {
-		kNameSpace *ns = Stmt_nameSpace(stmt);
+		kNameSpace *ns = Stmt_ns(stmt);
 		if(ns->globalObjectNULL_OnList == NULL) {
 			kStmtToken_printMessage(kctx, stmt, termToken, ErrTag, "unavailable global variable");
 			return;

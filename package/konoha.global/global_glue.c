@@ -59,7 +59,7 @@ static	kbool_t global_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObject *o, ktype_t ty, ksymbol_t symbol)
 {
 	ktype_t cid = O_typeId(o);
-	kNameSpace *ns = Stmt_nameSpace(stmt);
+	kNameSpace *ns = Stmt_ns(stmt);
 	kMethod *mtd = KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, cid, symbol, TY_var);
 	if(mtd != NULL) {
 		SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "already defined name: %s", SYM_t(symbol));
@@ -80,7 +80,7 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObj
 
 static kStmt* TypeDeclAndMakeSetter(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr, kExpr *valueExpr, kObject *scr)
 {
-	kNameSpace *ns = Stmt_nameSpace(stmt);
+	kNameSpace *ns = Stmt_ns(stmt);
 	kMethod *mtd = Object_newProtoSetterNULL(kctx, stmt, scr, ty, termExpr->termToken->resolvedSymbol);
 	if(mtd != NULL) {
 		kExpr *recvExpr =  new_ConstValueExpr(kctx, O_typeId(scr), scr);
@@ -112,7 +112,7 @@ static KMETHOD Statement_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Statement(stmt, gma);
 	kbool_t result = false;
-	kNameSpace *ns = Stmt_nameSpace(stmt);
+	kNameSpace *ns = Stmt_ns(stmt);
 	KMakeTrace(trace, sfp);
 	trace->pline = stmt->uline;
 	if(kNameSpace_initGlobalObject(kctx, ns, trace)) {

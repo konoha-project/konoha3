@@ -193,7 +193,7 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 	const char *start = NULL, *end = NULL;
 	const char *str = S_text(text);
 	expr = SUGAR kExpr_setConstValue(kctx, expr, TY_String, UPCAST(text));
-	kNameSpace *ns = Stmt_nameSpace(stmt);
+	kNameSpace *ns = Stmt_ns(stmt);
 	kMethod *concat = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, TY_String, MN_("+"), 1);
 
 	expr = new_ConstValueExpr(kctx, TY_String, UPCAST(TS_EMPTY));
@@ -217,18 +217,18 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 		KLIB Kwb_write(kctx, &wb, start+2, end-(start+2));
 		KLIB Kwb_write(kctx, &wb, ")", 1);
 
-		TokenSequence range = {ns, GetSugarContext(kctx)->preparedTokenList};
-		TokenSequence_push(kctx, range);
+		TokenSeq range = {ns, GetSugarContext(kctx)->preparedTokenList};
+		TokenSeq_push(kctx, range);
 		const char *buf = KLIB Kwb_top(kctx, &wb, 1);
-		SUGAR TokenSequence_tokenize(kctx, &range, buf, 0);
+		SUGAR TokenSeq_tokenize(kctx, &range, buf, 0);
 
 		{
-			TokenSequence tokens = {ns, GetSugarContext(kctx)->preparedTokenList};
-			TokenSequence_push(kctx, tokens);
-			SUGAR TokenSequence_resolved(kctx, &tokens, NULL, &range, range.beginIdx);
+			TokenSeq tokens = {ns, GetSugarContext(kctx)->preparedTokenList};
+			TokenSeq_push(kctx, tokens);
+			SUGAR TokenSeq_resolved(kctx, &tokens, NULL, &range, range.beginIdx);
 			/* +1 means for skiping first indent token. */
 			kExpr *newexpr = SUGAR kStmt_parseExpr(kctx, stmt, tokens.tokenList, tokens.beginIdx+1, tokens.endIdx, NULL);
-			TokenSequence_pop(kctx, tokens);
+			TokenSeq_pop(kctx, tokens);
 
 			if(start - str > 0) {
 				kExpr *first = new_ConstValueExpr(kctx, TY_String,
@@ -237,7 +237,7 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 			}
 			expr = SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_String, concat, 2, expr, newexpr);
 		}
-		TokenSequence_pop(kctx, range);
+		TokenSeq_pop(kctx, range);
 		KLIB Kwb_free(&wb);
 		str = end + 1;
 	}

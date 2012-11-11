@@ -104,7 +104,7 @@ static SugarSyntax* kNameSpace_GetSyntax(KonohaContext *kctx, kNameSpace *ns0, k
 static void kStmt_toERR(KonohaContext *kctx, kStmt *stmt, kString *errmsg)
 {
 	if(errmsg != NULL) { // not in case of isBlockedErrorMessage
-		((kStmtVar *)stmt)->syn   = SYN_(Stmt_nameSpace(stmt), KW_ERR);
+		((kStmtVar *)stmt)->syn   = SYN_(Stmt_ns(stmt), KW_ERR);
 		((kStmtVar *)stmt)->build = TSTMT_ERR;
 		KLIB kObject_setObject(kctx, stmt, KW_ERR, TY_String, errmsg);
 	}

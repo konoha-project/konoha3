@@ -254,14 +254,13 @@ static void Stmt_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visit
 	END_REFTRACE();
 }
 
-static kStmt* new_kStmt(KonohaContext *kctx, kArray *gcstack, kNameSpace *ns, ksymbol_t keyword, ...)
+static kStmtVar* new_kStmt(KonohaContext *kctx, kArray *gcstack, SugarSyntax *syn, ...)
 {
 	kStmtVar *stmt = new_(StmtVar, 0, gcstack);
-	stmt->syn = SYN_(ns, keyword);
+	stmt->syn = syn;
 	va_list ap;
-	va_start(ap, keyword);
-	/* 'ksymbol_t' is promoted to 'int' when passed through to 'va_arg' */
-	ksymbol_t kw = (ksymbol_t) va_arg(ap, int);
+	va_start(ap, syn);
+	ksymbol_t kw = (ksymbol_t) va_arg(ap, int); /* 'ksymbol_t' is promoted to 'int' through to 'va_arg' */
 	while(kw != 0) {
 		kObject *v = va_arg(ap, kObject *);
 		if(v == NULL) break;
@@ -341,7 +340,7 @@ static void kBlock_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vis
 	END_REFTRACE();
 }
 
-static void kBlock_insertAfter(KonohaContext *kctx, kBlock *bk, kStmtNULL *target, kStmt *stmt)
+static void kBlock_InsertAfter(KonohaContext *kctx, kBlock *bk, kStmtNULL *target, kStmt *stmt)
 {
 	KFieldSet(stmt, ((kStmtVar *)stmt)->parentBlockNULL, bk);
 	if(target != NULL) {

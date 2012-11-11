@@ -48,7 +48,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 	if(beginIdx + 1 < endIdx) {
 		kTokenVar *newToken = tokenList->TokenVarItems[beginIdx];
 		KonohaClass *foundClass = NULL;
-		kNameSpace *ns = Stmt_nameSpace(stmt);
+		kNameSpace *ns = Stmt_ns(stmt);
 		int nextIdx = SUGAR TokenUtils_parseTypePattern(kctx, ns, tokenList, beginIdx + 1, endIdx, &foundClass);
 		if((size_t)nextIdx < kArray_size(tokenList)) {
 			kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];

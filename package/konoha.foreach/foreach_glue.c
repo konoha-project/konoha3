@@ -76,15 +76,15 @@ static void MacroSet_setTokenAt(KonohaContext *kctx, MacroSet *macroSet, int ind
 
 static kBlock *new_MacroBlock(KonohaContext *kctx, kStmt *stmt, kToken *IteratorTypeToken, kToken *IteratorExprToken, kToken *TypeToken, kToken *VariableToken)
 {
-	kNameSpace *ns = Stmt_nameSpace(stmt);
-	TokenSequence source = {ns, GetSugarContext(kctx)->preparedTokenList};
-	TokenSequence_push(kctx, source);
+	kNameSpace *ns = Stmt_ns(stmt);
+	TokenSeq source = {ns, GetSugarContext(kctx)->preparedTokenList};
+	TokenSeq_push(kctx, source);
 	/* FIXME(imasahiro)
 	 * we need to implement template as Block
 	 * "T _ = E; if(_.hasNext()) { N = _.next(); }"
 	 *                           ^^^^^^^^^^^^^^^^^
 	 */
-	SUGAR TokenSequence_tokenize(kctx, &source, "T _ = E; if(_.hasNext()) N = _.next();", 0);
+	SUGAR TokenSeq_tokenize(kctx, &source, "T _ = E; if(_.hasNext()) N = _.next();", 0);
 	MacroSet macroSet[4] = {{0, NULL, 0, 0}};
 	MacroSet_setTokenAt(kctx, macroSet, 0, source.tokenList, "T", IteratorTypeToken, NULL);
 	MacroSet_setTokenAt(kctx, macroSet, 1, source.tokenList, "E", IteratorExprToken, NULL);
@@ -95,14 +95,14 @@ static kBlock *new_MacroBlock(KonohaContext *kctx, kStmt *stmt, kToken *Iterator
 		MacroSet_setTokenAt(kctx, macroSet, 2, source.tokenList, "N", TypeToken, VariableToken, NULL);
 	}
 	kBlock *bk = SUGAR new_kBlock(kctx, stmt, macroSet, &source);
-	TokenSequence_pop(kctx, source);
+	TokenSeq_pop(kctx, source);
 	return bk;
 }
 
 static void kStmt_appendBlock(KonohaContext *kctx, kStmt *stmt, kBlock *bk)
 {
 	if(bk != NULL) {
-		kBlock *block = SUGAR kStmt_getBlock(kctx, stmt, Stmt_nameSpace(stmt), KW_BlockPattern, NULL);
+		kBlock *block = SUGAR kStmt_getBlock(kctx, stmt, Stmt_ns(stmt), KW_BlockPattern, NULL);
 		size_t i;
 		for(i = 0; i < kArray_size(bk->StmtList); i++) {
 			KLIB kArray_add(kctx, block->StmtList, bk->StmtList->StmtItems[i]);
@@ -116,7 +116,7 @@ static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_P("for statement .. ");
 	int isOkay = false;
 	if(SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, 0)) {
-		kNameSpace *ns = Stmt_nameSpace(stmt);
+		kNameSpace *ns = Stmt_ns(stmt);
 		kToken *TypeToken = SUGAR kStmt_getToken(kctx, stmt, KW_TypePattern, NULL);
 		kToken *VariableToken  = SUGAR kStmt_getToken(kctx, stmt, KW_SymbolPattern, NULL);
 		DBG_P("typeToken=%p, varToken=%p", TypeToken, VariableToken);

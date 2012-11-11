@@ -56,11 +56,11 @@ static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char
 	kmodsugar->h.setupModuleContext(kctx, (KonohaModule *)kmodsugar, 0/*lazy*/);
 	INIT_GCSTACK();
 	{
-		TokenSequence tokens = {ns, GetSugarContext(kctx)->preparedTokenList};
-		TokenSequence_push(kctx, tokens);
-		TokenSequence_tokenize(kctx, &tokens, script, uline);
-		result = TokenSequence_eval(kctx, &tokens, trace);
-		TokenSequence_pop(kctx, tokens);
+		TokenSeq tokens = {ns, GetSugarContext(kctx)->preparedTokenList};
+		TokenSeq_push(kctx, tokens);
+		TokenSeq_tokenize(kctx, &tokens, script, uline);
+		result = TokenSeq_eval(kctx, &tokens, trace);
+		TokenSeq_pop(kctx, tokens);
 	}
 	RESET_GCSTACK();
 	return result;
@@ -184,14 +184,15 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(ClassData), 0);
 
 	mod->kNameSpace_SetTokenFunc       = kNameSpace_SetTokenFunc;
-	mod->TokenSequence_tokenize        = TokenSequence_tokenize;
-	mod->TokenSequence_applyMacro      = TokenSequence_applyMacro;
+	mod->TokenSeq_tokenize        = TokenSeq_tokenize;
+	mod->TokenSeq_applyMacro      = TokenSeq_applyMacro;
 	mod->kNameSpace_SetMacroData       = kNameSpace_SetMacroData;
-	mod->TokenSequence_resolved        = TokenSequence_resolved2;
-	mod->TokenSequence_eval            = TokenSequence_eval;
+	mod->TokenSeq_resolved        = TokenSeq_resolved2;
+	mod->TokenSeq_eval            = TokenSeq_eval;
 	mod->TokenUtils_parseTypePattern     = TokenUtils_parseTypePattern;
 	mod->kToken_transformToBraceGroup = kToken_transformToBraceGroup;
-	mod->kStmt_addParsedObject      = kStmt_addParsedObject;
+	mod->kStmt_AddParsedObject      = kStmt_AddParsedObject;
+	mod->kNameSpace_FindEndOfStatement = kNameSpace_FindEndOfStatement;
 	mod->kStmt_parseFlag            = kStmt_parseFlag;
 	mod->kStmt_getToken             = kStmt_getToken;
 	mod->kStmt_getBlock             = kStmt_getBlock;
@@ -216,7 +217,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kNameSpace_AddSugarFunc    = kNameSpace_AddSugarFunc;
 	mod->new_kBlock                 = new_kBlock;
 	mod->new_kStmt                  = new_kStmt;
-	mod->kBlock_insertAfter         = kBlock_insertAfter;
+	mod->kBlock_InsertAfter         = kBlock_InsertAfter;
 	mod->new_UntypedTermExpr        = new_UntypedTermExpr;
 	mod->new_UntypedCallStyleExpr   = new_UntypedCallStyleExpr;
 	mod->kStmt_parseOperatorExpr    = kStmt_parseOperatorExpr;

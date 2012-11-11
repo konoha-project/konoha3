@@ -169,11 +169,11 @@ static kBlock* kStmt_parseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToke
 	kToken *blockToken = (kToken *)kStmt_getObject(kctx, stmt, KW_BlockPattern, NULL);
 	if(blockToken != NULL && blockToken->resolvedSyntaxInfo->keyword == KW_BlockPattern) {
 		const char *cname = S_text(tokenClassName->text);
-		TokenSequence range = {Stmt_nameSpace(stmt), GetSugarContext(kctx)->preparedTokenList};
-		TokenSequence_push(kctx, range);
-		SUGAR TokenSequence_tokenize(kctx, &range,  S_text(blockToken->text), blockToken->uline);
+		TokenSeq range = {Stmt_ns(stmt), GetSugarContext(kctx)->preparedTokenList};
+		TokenSeq_push(kctx, range);
+		SUGAR TokenSeq_tokenize(kctx, &range,  S_text(blockToken->text), blockToken->uline);
 		{
-			TokenSequence sourceRange = {range.ns, range.tokenList, range.endIdx};
+			TokenSeq sourceRange = {range.ns, range.tokenList, range.endIdx};
 			kToken *prevToken = blockToken;
 			int i;
 			for(i = range.beginIdx; i < range.endIdx; i++) {
@@ -185,11 +185,11 @@ static kBlock* kStmt_parseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToke
 				KLIB kArray_add(kctx, sourceRange.tokenList, tk);
 				prevToken = tk;
 			}
-			TokenSequence_end(kctx, (&sourceRange));
+			TokenSeq_end(kctx, (&sourceRange));
 			bk = SUGAR new_kBlock(kctx, stmt/*parent*/, NULL, &sourceRange);
 			KLIB kObject_setObject(kctx, stmt, KW_BlockPattern, TY_Block, bk);
 		}
-		TokenSequence_pop(kctx, range);
+		TokenSeq_pop(kctx, range);
 	}
 	return bk;
 }
@@ -286,7 +286,7 @@ static void kBlock_addMethodDeclStmt(KonohaContext *kctx, kBlock *bk, kToken *to
 			if(stmt->syn->keyword == KW_MethodDeclPattern) {
 				kStmt *lastStmt = classStmt;
 				KLIB kObject_setObject(kctx, stmt, SYM_("ClassName"), TY_Token, tokenClassName);
-				SUGAR kBlock_insertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, stmt);
+				SUGAR kBlock_InsertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, stmt);
 				lastStmt = stmt;
 			}
 			else {
@@ -305,7 +305,7 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Statement(stmt, gma);
 	kToken *tokenClassName = SUGAR kStmt_getToken(kctx, stmt, SYM_("$ClassName"), NULL);
-	kNameSpace *ns = Stmt_nameSpace(stmt);
+	kNameSpace *ns = Stmt_ns(stmt);
 	int isNewlyDefinedClass = false;
 	KonohaClassVar *definedClass = (KonohaClassVar *)KLIB kNameSpace_GetClass(kctx, ns, S_text(tokenClassName->text), S_size(tokenClassName->text), NULL);
 	if(definedClass == NULL) {   // Already defined
@@ -372,7 +372,7 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 	kToken *tkN = expr->cons->TokenItems[0];
 	ksymbol_t fn = tkN->resolvedSymbol;
 	kExpr *self = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 1, gma, TY_var, 0);
-	kNameSpace *ns = Stmt_nameSpace(stmt);
+	kNameSpace *ns = Stmt_ns(stmt);
 	if(self != K_NULLEXPR) {
 		kMethod *mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, self->ty, fn, TY_var);
 		if(mtd != NULL) {

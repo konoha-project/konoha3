@@ -14,14 +14,14 @@
 // 			KReturn(lexpr);
 // 		}
 // 		if(lexpr->syn->keyword == KW_new) {  // new int[100]
-// 			kExpr_setsyn(lexpr, SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall));
+// 			kExpr_setsyn(lexpr, SYN_(Stmt_ns(stmt), KW_ExprMethodCall));
 // 			lexpr = SUGAR kStmt_addExprParam(kctx, stmt, lexpr, tk->subTokenList, 0, kArray_size(tk->subTokenList), 0/*allowEmpty*/);
 // 		}
 // 		else {   // X[1] => get X 1
 // 			kTokenVar *tkN = /*G*/new_(TokenVar, 0);
 // 			tkN->keyword = MN_toGETTER(0);
 // 			tkN->uline = tk->uline;
-// 			SugarSyntax *syn = SYN_(Stmt_nameSpace(stmt), KW_ExprMethodCall);
+// 			SugarSyntax *syn = SYN_(Stmt_ns(stmt), KW_ExprMethodCall);
 // 			lexpr  = SUGAR new_UntypedCallStyleExpr(kctx, syn, 2, tkN, lexpr);
 // 			lexpr = SUGAR kStmt_addExprParam(kctx, stmt, lexpr, tk->subTokenList, 0, kArray_size(tk->subTokenList), 1/*allowEmpty*/);
 // 		}

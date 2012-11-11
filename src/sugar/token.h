@@ -497,7 +497,7 @@ static kFunc **kNameSpace_tokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns)
 	return funcMatrix + KCHAR_MAX;
 }
 
-static void TokenSequence_tokenize(KonohaContext *kctx, TokenSequence *tokens, const char *source, kfileline_t uline)
+static void TokenSeq_tokenize(KonohaContext *kctx, TokenSeq *tokens, const char *source, kfileline_t uline)
 {
 	INIT_GCSTACK();
 	Tokenizer tenv = {};
@@ -511,7 +511,7 @@ static void TokenSequence_tokenize(KonohaContext *kctx, TokenSequence *tokens, c
 	tenv.FuncItems  = kNameSpace_tokenFuncMatrix(kctx, tokens->ns);
 	tenv.preparedString = KLIB new_kString(kctx, _GcStack, tenv.source, tenv.sourceLength, StringPolicy_ASCII|StringPolicy_TEXT|StringPolicy_NOPOOL);
 	Tokenizer_tokenize(kctx, &tenv);
-	TokenSequence_end(kctx, tokens);
+	TokenSeq_end(kctx, tokens);
 	RESET_GCSTACK();
 }
 

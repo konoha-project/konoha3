@@ -146,7 +146,7 @@ static KMETHOD Statement_dsh(KonohaContext *kctx, KonohaStack *sfp)
 
 	//TODO: generate eval("cmd") syntax
 
-	kNameSpace *ns = Stmt_nameSpace(stmt);
+	kNameSpace *ns = Stmt_ns(stmt);
 	SugarSyntaxVar *syn = (SugarSyntaxVar *) SYN_(ns, KW_ExprMethodCall);
 	kTokenVar *callToken = new_(TokenVar, 0, OnGcStack);
 	kExpr *callExpr = new_ConstValueExpr(kctx, TY_String, UPCAST(cmd));

@@ -78,7 +78,7 @@ static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
 		kTokenVar *pToken = tokenList->TokenVarItems[beginIdx+1];
 		if(IS_Array(pToken->subTokenList)) {
 			kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, definedToken->resolvedSyntaxInfo, 1, definedToken);
-			filterArrayList(kctx, Stmt_nameSpace(stmt), pToken->subTokenList, 0, kArray_size(pToken->subTokenList));
+			filterArrayList(kctx, Stmt_ns(stmt), pToken->subTokenList, 0, kArray_size(pToken->subTokenList));
 			KReturn(SUGAR kStmt_addExprParam(kctx, stmt, expr, pToken->subTokenList, 0, kArray_size(pToken->subTokenList), 0/*isAllowEmpty*/));
 		}
 	}

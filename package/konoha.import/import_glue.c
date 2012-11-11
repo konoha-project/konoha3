@@ -47,7 +47,7 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 	if(tokenList == NULL) {
 		KReturnUnboxValue(false);
 	}
-	kNameSpace *ns = Stmt_nameSpace(stmt);
+	kNameSpace *ns = Stmt_ns(stmt);
 	SugarSyntaxVar *syn = (SugarSyntaxVar *) SYN_(ns, KW_ExprMethodCall);
 	kExpr *expr;
 	kTokenVar *tkImport = /*G*/new_(TokenVar, 0, OnGcStack);

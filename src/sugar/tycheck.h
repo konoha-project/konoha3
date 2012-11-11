@@ -116,7 +116,7 @@ static kExpr* kStmtExpr_ToConstValue(KonohaContext *kctx, kStmt *stmt, kExpr *ex
 static kExpr *kStmtExpr_box(KonohaContext *kctx, kStmt *stmt, kExpr *texpr, kGamma *gma, ktype_t reqty)
 {
 	ktype_t unboxType = (texpr->ty == TY_boolean) ? TY_boolean : TY_int;
-	kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, kStmt_nameSpace(stmt), unboxType, MN_box, 0);
+	kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, kStmt_ns(stmt), unboxType, MN_box, 0);
 	DBG_P(">>>>>>>> boxing %s <<<<<<<<<", TY_t(unboxType));
 	kExpr *boxExpr = new_TypedCallExpr(kctx, stmt, gma, texpr->ty, mtd, 1, texpr);
 	return boxExpr;
@@ -134,7 +134,7 @@ static kExpr *Expr_TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGam
 	}
 	if(Stmt_isERR(stmt)) texpr = K_NULLEXPR;
 	if(texpr != K_NULLEXPR) {
-		kNameSpace *ns = Stmt_nameSpace(stmt);
+		kNameSpace *ns = Stmt_ns(stmt);
 		//DBG_P("type=%s, reqty=%s", TY_t(expr->ty), TY_t(reqty));
 		if(texpr->ty == TY_void) {
 			if(!FLAG_is(pol, TypeCheckPolicy_ALLOWVOID)) {
@@ -300,11 +300,11 @@ static kBlock* kMethod_newBlock(KonohaContext *kctx, kMethod *mtd, kNameSpace *n
 		script = S_text(mtd->SourceToken->text);
 		uline = mtd->SourceToken->uline;
 	}
-	TokenSequence tokens = {ns, GetSugarContext(kctx)->preparedTokenList, 0};
-	TokenSequence_push(kctx, tokens);
-	TokenSequence_tokenize(kctx, &tokens, script, uline);
+	TokenSeq tokens = {ns, GetSugarContext(kctx)->preparedTokenList, 0};
+	TokenSeq_push(kctx, tokens);
+	TokenSeq_tokenize(kctx, &tokens, script, uline);
 	kBlock *bk = new_kBlock(kctx, NULL/*parentStmt*/, NULL/*macro*/, &tokens);
-	TokenSequence_pop(kctx, tokens);
+	TokenSeq_pop(kctx, tokens);
 	return bk;
 }
 
@@ -370,7 +370,7 @@ static ktype_t kStmt_checkReturnType(KonohaContext *kctx, kStmt *stmt)
 		kExpr *expr = (kExpr *)kStmt_getObjectNULL(kctx, stmt, KW_ExprPattern);
 		DBG_ASSERT(expr != NULL);
 		if(expr->ty != TY_void) {
-			kStmt_setsyn(stmt, SYN_(Stmt_nameSpace(stmt), KW_return));
+			kStmt_setsyn(stmt, SYN_(Stmt_ns(stmt), KW_return));
 			kStmt_typed(stmt, RETURN);
 			return expr->ty;
 		}
@@ -455,7 +455,7 @@ static kstatus_t kBlock_EvalAtTopLevel(KonohaContext *kctx, kBlock *bk, kMethod 
 }
 
 
-static void TokenSequence_selectStatement(KonohaContext *kctx, TokenSequence *tokens, TokenSequence *source)
+static void TokenSeq_selectStatement(KonohaContext *kctx, TokenSeq *tokens, TokenSeq *source)
 {
 	int currentIdx, sourceEndIdx = source->endIdx, isPreviousIndent = false;
 	for(currentIdx = source->beginIdx; currentIdx < sourceEndIdx; currentIdx++) {
@@ -472,24 +472,24 @@ static void TokenSequence_selectStatement(KonohaContext *kctx, TokenSequence *to
 	}
 	KLIB kArray_clear(kctx, tokens->tokenList, tokens->beginIdx);
 	tokens->endIdx = 0;
-	TokenSequence_resolved2(kctx, tokens, NULL, source, source->beginIdx);
+	TokenSeq_resolved2(kctx, tokens, NULL, source, source->beginIdx);
 	//KdumpTokenArray(kctx, tokens->tokenList, tokens->beginIdx, tokens->endIdx);
 	source->beginIdx = source->endIdx;
 	source->endIdx = sourceEndIdx;
 }
 
-static kstatus_t TokenSequence_eval(KonohaContext *kctx, TokenSequence *source, KTraceInfo *trace)
+static kstatus_t TokenSeq_eval(KonohaContext *kctx, TokenSeq *source, KTraceInfo *trace)
 {
 	kstatus_t status = K_CONTINUE;
 	INIT_GCSTACK();
 	kMethod *mtd = KLIB new_kMethod(kctx, _GcStack, kMethod_Static, 0, 0, NULL);
 	KLIB kMethod_setParam(kctx, mtd, TY_Object, 0, NULL);
 	kBlock *singleBlock = new_(Block, source->ns, _GcStack);
-	TokenSequence tokens = {source->ns, source->tokenList};
+	TokenSeq tokens = {source->ns, source->tokenList};
 
 	while(source->beginIdx < source->endIdx) {
-		TokenSequence_push(kctx, tokens);
-		TokenSequence_selectStatement(kctx, &tokens, source);
+		TokenSeq_push(kctx, tokens);
+		TokenSeq_selectStatement(kctx, &tokens, source);
 		if(source->SourceConfig.foundErrorToken != NULL) {
 			return K_BREAK;
 		}
@@ -503,7 +503,7 @@ static kstatus_t TokenSequence_eval(KonohaContext *kctx, TokenSequence *source, 
 				if(status != K_CONTINUE) break;
 			}
 		}
-		TokenSequence_pop(kctx, tokens);
+		TokenSeq_pop(kctx, tokens);
 		if(status != K_CONTINUE) break;
 	}
 	RESET_GCSTACK();

@@ -647,7 +647,7 @@ static void CALL_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int s
 		ASM(NSET, NC_(thisidx-1), (intptr_t)mtd, CT_Method);
 	}
 	else {
-		ASM(LOOKUP, SFP_(thisidx), Stmt_nameSpace(stmt), mtd);
+		ASM(LOOKUP, SFP_(thisidx), Stmt_ns(stmt), mtd);
 	}
 	ASM(CALL, ctxcode->uline, SFP_(thisidx), ESP_(espidx, argc), KLIB Knull(kctx, CT_(expr->ty)));
 }

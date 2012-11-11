@@ -38,11 +38,11 @@ static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char
 	kmodsugar->h.setupModuleContext(kctx, (KonohaModule *)kmodsugar, 0/*lazy*/);
 	INIT_GCSTACK();
 	{
-		TokenSequence tokens = {ns, GetSugarContext(kctx)->preparedTokenList};
-		TokenSequence_push(kctx, tokens);
-		SUGAR TokenSequence_tokenize(kctx, &tokens, script, uline);
-		result = SUGAR TokenSequence_eval(kctx, &tokens, trace);
-		TokenSequence_pop(kctx, tokens);
+		TokenSeq tokens = {ns, GetSugarContext(kctx)->preparedTokenList};
+		TokenSeq_push(kctx, tokens);
+		SUGAR TokenSeq_tokenize(kctx, &tokens, script, uline);
+		result = SUGAR TokenSeq_eval(kctx, &tokens, trace);
+		TokenSeq_pop(kctx, tokens);
 	}
 	RESET_GCSTACK();
 	return result;

@@ -37,7 +37,7 @@ extern "C"{
 static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Statement(stmt, gma);
-	kNameSpace *ns = Stmt_nameSpace(stmt);
+	kNameSpace *ns = Stmt_ns(stmt);
 	kToken *SymbolToken = SUGAR kStmt_getToken(kctx, stmt, KW_SymbolPattern, NULL);
 	ksymbol_t unboxKey = SymbolToken->resolvedSymbol;
 	kbool_t result = SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, TypeCheckPolicy_CONST);
