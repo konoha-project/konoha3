@@ -938,7 +938,7 @@ static KMETHOD Float_opNEQ_mpf(KonohaContext *kctx, KonohaStack *sfp)
 #define TY_Mpf     cMpf->typeId
 
 
-static kbool_t gmp_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int argc, const char **args, KTraceInfo *trace)
+static kbool_t gmp_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequirePackage("konoha.float", trace);
 
@@ -1092,7 +1092,7 @@ KDEFINE_PACKAGE* gmp_init(void)
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "gmp", "1.0");
 	d.PackupNameSpace    = gmp_PackupNameSpace;
-	d.ExportNameSpace   = gmp_ExportNameSpace;
+	d.ExportNameSpace    = gmp_ExportNameSpace;
 	return &d;
 }
 

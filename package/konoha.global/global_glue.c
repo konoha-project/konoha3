@@ -143,6 +143,7 @@ static	kbool_t global_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 
 static kbool_t global_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
+	KImportPackage(exportNS, "konoha.field", trace);
 	return kNameSpace_initGlobalObject(kctx, exportNS, trace);
 }
 
