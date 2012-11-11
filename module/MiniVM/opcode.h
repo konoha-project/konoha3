@@ -37,7 +37,7 @@ typedef struct {
 } kMethodInlineCache;
 
 #if defined(USE_DIRECT_THREADED_CODE)
-#define OP_(T)  NULL, OPCODE_##T, 0
+#define OP_(T)  NULL, 0, OPCODE_##T, 0
 #define KCODE_HEAD\
 	void *codeaddr;\
 	size_t count;\
@@ -45,11 +45,11 @@ typedef struct {
 	kfileline_t line
 
 #else
-#define OP_(T)  OPCODE_##T, 0
+#define OP_(T)  0, OPCODE_##T, 0
 #define KCODE_HEAD \
 	size_t count; \
 	kopcode_t opcode; \
-	kfileline_t line \
+	kfileline_t line
 
 #endif/*USE_DIRECT_THREADED_CODE*/
 

@@ -828,7 +828,7 @@ static kbool_t kNameSpace_AddMethod(KonohaContext *kctx, kNameSpace *ns, kMethod
 		else {
 			if(!kMethod_is(Final, foundMethod)) {
 				TRACE_ReportScriptMessage(kctx, trace, DebugTag, "@%s overriding method %s.%s%s on %s.%s%s", PackageId_t(ns->packageId), Method_t(mtd), Method_t(foundMethod));
-				kMethod_set(Virtual, ((kMethodVar*)foundMethod), true);
+				kMethod_set(Virtual, ((kMethodVar *)foundMethod), true);
 			}
 			else {
 				TRACE_ReportScriptMessage(kctx, trace, ErrTag, "final method: %s.%s%s", Method_t(foundMethod));
@@ -839,7 +839,7 @@ static kbool_t kNameSpace_AddMethod(KonohaContext *kctx, kNameSpace *ns, kMethod
 	else {
 		foundMethod = kNameSpace_GetMethodToCheckOverloadNULL(kctx, ns, ct->typeId, mtd->mn, Method_paramsize(mtd));
 		if(foundMethod != NULL && foundMethod->mn == mtd->mn) {
-			kMethod_set(Overloaded, ((kMethodVar*)foundMethod), true);
+			kMethod_set(Overloaded, ((kMethodVar *)foundMethod), true);
 			kMethod_set(Overloaded, mtd, true);
 		}
 	}

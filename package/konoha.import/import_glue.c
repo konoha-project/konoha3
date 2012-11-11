@@ -47,12 +47,12 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 	if(IS_Token(tokenList)) {
 		/* case : import("konoha.import"); */
 		kTokenArray *list = ((kToken *) tokenList)->subTokenList;
-		if (kArray_size(list) == 1) {
+		if(kArray_size(list) == 1) {
 			kExpr *param0 = makeStringConstValue(kctx, list->TokenItems[0]->text);
 			expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 3,
 					tkImport, new_ConstValueExpr(kctx, O_typeId(ns), UPCAST(ns)), param0);
 		}
-		else if (kArray_size(list) == 2) {
+		else if(kArray_size(list) == 2) {
 			kExpr *param0 = makeStringConstValue(kctx, list->TokenItems[0]->text);
 			kExpr *param1 = makeStringConstValue(kctx, list->TokenItems[1]->text);
 			expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 4,

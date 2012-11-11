@@ -358,7 +358,7 @@ static KMETHOD Curl_setOptFile(KonohaContext *kctx, KonohaStack *sfp)
 	case CURLOPT_FILE:
 	case CURLOPT_STDERR:
 	case CURLOPT_WRITEHEADER: {
-		kFile *file = (kFile*)sfp[2].asObject;
+		kFile *file = (kFile *)sfp[2].asObject;
 		curl_easy_setopt(kcurl->curl, curlopt, file->fp);
 	}
 	default: {
@@ -375,7 +375,7 @@ static KMETHOD Curl_setOptFile(KonohaContext *kctx, KonohaStack *sfp)
 //	CURLoption curlopt = (CURLoption)sfp[1].intValue;
 //	switch(curlopt) {
 //		case CURLOPT_WRITEFUNCTION: {
-//		kFile *file = (kFile*)sfp[2].asObject;
+//		kFile *file = (kFile *)sfp[2].asObject;
 //		curl_easy_setopt(kcurl->curl, curlopt, file->fp);
 //	}
 //	default: {

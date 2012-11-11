@@ -79,7 +79,7 @@ static void *POSTGRESQL_qopen(KonohaContext *kctx, const char* url)
 	url += 13; // skip: 'postgresql://'
 	const char *btstr = url;
 	sscanf(btstr, "%16[^ :\r\n\t]:%255[^ @\r\n\t]@%255[^ :\r\n\t]:%8[^ /\r\n\t]/%64[^ \r\n\t]",
-			(char*)&user, (char*)&pass, (char*)&host, (char*)&port, (char*)&dbnm); // consider to buffer over run
+			(char *)&user, (char *)&pass, (char *)&host, (char *)&port, (char *)&dbnm); // consider to buffer over run
 
 	puser = (user[0]) ? user : NULL;
 	ppass = (pass[0]) ? pass : NULL;
@@ -97,18 +97,18 @@ static void *POSTGRESQL_qopen(KonohaContext *kctx, const char* url)
 			LogUint("port", port),
 			LogUint("errno", mysql_errno(db)),
 			LogText("error", mysql_error(db)));
-	if (PQstatus(conn) != CONNECTION_OK) {
+	if(PQstatus(conn) != CONNECTION_OK) {
 		fprintf(stderr, "Connection to database failed: %s", PQerrorMessage(conn));
 		return NULL;
 	}
-	return (void*)conn;
+	return (void *)conn;
 }
 
 static int POSTGRESQL_qnext(KonohaContext *kctx, kqcur_t *qcur, kResultSet *rs)
 {
-	PGresult* res = (PGresult*)qcur;
+	PGresult* res = (PGresult *)qcur;
 	size_t i, column_size = (size_t)PQnfields(res), row_size = PQntuples(res);
-	if (rs->rowidx < row_size) {
+	if(rs->rowidx < row_size) {
 		kint_t ival;
 		kfloat_t fval;
 		for (i = 0; i < column_size; i++) {
@@ -117,17 +117,17 @@ static int POSTGRESQL_qnext(KonohaContext *kctx, kqcur_t *qcur, kResultSet *rs)
 				case INT8OID:
 				case INT2OID:
 				case INT4OID:
-					ival = parseInt((char*)PQgetvalue(res, 0, i), strlen((char*)PQgetvalue(res, 0, i)));
+					ival = parseInt((char *)PQgetvalue(res, 0, i), strlen((char *)PQgetvalue(res, 0, i)));
 					_ResultSet_setInt(kctx, rs, i, ival);
 					break;
 				case FLOAT4OID:
 				case FLOAT8OID:
-					fval = parseFloat((char*)(PQgetvalue(res, 0, i)), strlen((char*)PQgetvalue(res, 0, i)));
+					fval = parseFloat((char *)(PQgetvalue(res, 0, i)), strlen((char *)PQgetvalue(res, 0, i)));
 					_ResultSet_setFloat(kctx, rs, i, fval);
 					break;
 				case TEXTOID:
 				case VARCHAROID:
-					_ResultSet_setText(kctx, rs, i, (char*)PQgetvalue(res, 0, i), (size_t)strlen((char*)PQgetvalue(res, 0, i)));
+					_ResultSet_setText(kctx, rs, i, (char *)PQgetvalue(res, 0, i), (size_t)strlen((char *)PQgetvalue(res, 0, i)));
 					break;
 				case DATEOID:
 					break;
@@ -148,16 +148,16 @@ static kqcur_t *POSTGRESQL_query(KonohaContext *kctx, void *db, const char* sql,
 {
 	PGresult* res;
 	if(rs == NULL) {
-		res = PQexec((PGconn*)db, sql);
-		if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+		res = PQexec((PGconn *)db, sql);
+		if(PQresultStatus(res) != PGRES_COMMAND_OK) {
 			// ktrace....
 		}
 		PQclear(res);
 		return NULL;
 	}
 	else {
-		res = PQexec((PGconn*)db, sql);
-		if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+		res = PQexec((PGconn *)db, sql);
+		if(PQresultStatus(res) != PGRES_COMMAND_OK) {
 			// ktrace....
 		}
 		size_t column_size = (size_t)PQnfields(res);
@@ -165,7 +165,7 @@ static kqcur_t *POSTGRESQL_query(KonohaContext *kctx, void *db, const char* sql,
 		if(column_size > 0) {
 			size_t i;
 			for(i = 0; i < rs->column_size; i++) {
-				char *name = (char*)PQfname(res, i);
+				char *name = (char *)PQfname(res, i);
 				if(name != NULL) {
 					rs->column[i].dbtype = (int)PQftype(res, i);
 					kString *s = KLIB new_kString(kctx, GcUnsafe, name, strlen(name), 0);
@@ -175,7 +175,7 @@ static kqcur_t *POSTGRESQL_query(KonohaContext *kctx, void *db, const char* sql,
 			}
 		}
 		//PQclear(res);
-		return (kqcur_t*)res;
+		return (kqcur_t *)res;
 	}
 	return NULL;
 }
@@ -188,7 +188,7 @@ static void POSTGRESQL_qclose(void *db)
 
 static void POSTGRESQL_qfree(kqcur_t *qcur)
 {
-//	sqlite3_stmt *stmt = (sqlite3_stmt*)qcur;
+//	sqlite3_stmt *stmt = (sqlite3_stmt *)qcur;
 //	sqlite3_finalize(stmt);
 }
 

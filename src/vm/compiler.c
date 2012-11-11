@@ -26,19 +26,6 @@
 #include <minikonoha/sugar.h>
 #include "vm.h"
 
-//#ifdef K_USE_TRACEVM
-//#include "tracevm.h"
-#if defined(HAVE_DB_H)
-#include <stdio.h>
-#include <sys/types.h>
-#include <stdlib.h>
-#include <string.h>
-#include <db.h>
-#endif /*defined(HAVE_DB_H)*/
-//#else
-#include "minivm.h"
-//#endif /*K_USE_TRACEVM*/
-
 /* ************************************************************************ */
 
 #ifdef __cplusplus
@@ -250,8 +237,6 @@ static kBasicBlock *kStmt_getLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbo
 #endif/*USE_DIRECT_THREADED_CODE*/
 #define ASMLINE  0
 
-#define OP_T(T) union { VirtualCode op; T op_; }
-
 #define NC_(sfpidx)       (((sfpidx) * 2) + 1)
 #define OC_(sfpidx)       ((sfpidx) * 2)
 #define TC_(sfpidx, TYPE) ((TY_isUnbox(TYPE)) ? NC_(sfpidx) : OC_(sfpidx))
@@ -262,12 +247,6 @@ static kBasicBlock *kStmt_getLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbo
 
 #define ASM(T, ...) do {\
 	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};\
-	union { VirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
-	BUILD_asm(kctx, &tmp_.op, sizeof(OP##T));\
-} while(0)
-
-#define ASMop(T, OP, ...) do {\
-	OP##T op_ = {TADDR, OP, ASMLINE, ## __VA_ARGS__};\
 	union { VirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
 	BUILD_asm(kctx, &tmp_.op, sizeof(OP##T));\
 } while(0)
@@ -591,7 +570,7 @@ static void KonohaVisitor_visitCallExpr(KonohaContext *kctx, IRBuilder *self, kE
 	ASM(CALL, ctxcode->uline, SFP_(thisidx), esp_, KLIB Knull(kctx, CT_(expr->ty)));
 
 	if(mtd->mn == MN_box) {  /* boxed value of unbox value must be shifted to OC */
-		((kExprVar*)expr)->ty = TY_Object;
+		((kExprVar *)expr)->ty = TY_Object;
 	}
 
 	if(a != espidx) {
@@ -690,7 +669,6 @@ static void KonohaVisitor_visitStackTopExpr(KonohaContext *kctx, IRBuilder *self
 	NMOV_asm(kctx, a, expr->ty, expr->index + shift);
 }
 
-static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sfp);
 static void _THCODE(KonohaContext *kctx, VirtualCode *pc, void **codeaddr);
 static void BUILD_compile(KonohaContext *kctx, kMethod *mtd, kBasicBlock *beginBlock, kBasicBlock *endBlock);
 
@@ -701,7 +679,7 @@ static void KonohaVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, k
 	builder->currentStmt = NULL;
 	builder->shift = 0;
 
-	KLIB kMethod_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
+	KLIB kMethod_setFunc(kctx, mtd, PLATAPI GetVirtualMachineMethodFunc());
 
 	DBG_ASSERT(kArray_size(ctxcode->codeList) == 0);
 	kBasicBlock* lbINIT  = new_BasicBlockLABEL(kctx);
@@ -1042,16 +1020,10 @@ static void _THCODE(KonohaContext *kctx, VirtualCode *pc, void **codeaddr)
 
 /* ------------------------------------------------------------------------ */
 
-static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
-{
-	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].calledMethod));
-	PLATAPI RunVirtualMachine(kctx, sfp, CODE_ENTER);
-}
-
 static void Method_threadCode(KonohaContext *kctx, kMethod *mtd, kByteCode *kcode)
 {
 	kMethodVar *Wmtd = (kMethodVar *)mtd;
-	KLIB kMethod_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
+	KLIB kMethod_setFunc(kctx, mtd, PLATAPI GetVirtualMachineMethodFunc());
 	KFieldSet(Wmtd, Wmtd->CodeObject, kcode);
 	Wmtd->pc_start = PLATAPI RunVirtualMachine(kctx, kctx->esp + 1, kcode->code);
 	if(verbose_code) {
@@ -1185,22 +1157,6 @@ static void kmodcode_setup(KonohaContext *kctx, struct KonohaModule *def, int ne
 		DBG_ASSERT(OnContextConstList != NULL);
 		base->codeList   = new_(Array, K_PAGESIZE/sizeof(void *), OnContextConstList);
 		base->constPools = new_(Array, 64, OnContextConstList);
-
-		INIT_GCSTACK();
-		kBasicBlock* ia = new_(BasicBlock, 0, _GcStack);
-		kBasicBlock* ib = new_(BasicBlock, 0, _GcStack);
-		kBasicBlock_add(ia, THCODE, _THCODE);
-		kBasicBlock_add(ia, NCALL); // FUNCCALL
-		kBasicBlock_add(ia, ENTER);
-		kBasicBlock_add(ia, EXIT);
-		kBasicBlock_add(ib, RET);   // NEED TERMINATION
-		ia->nextBlock = ib;
-		kmodcode->codeNull = new_ByteCode(kctx, ia, ib, OnContextConstList);
-		VirtualCode *pc = PLATAPI RunVirtualMachine(kctx, kctx->esp, kmodcode->codeNull->code);
-		//VirtualCode *pc = KonohaVirtualMachine_run(kctx, kctx->esp, kmodcode->codeNull->code);
-		CODE_ENTER = pc+1;
-		KLIB kArray_clear(kctx, ctxcode->codeList, 0);
-		RESET_GCSTACK();
 	}
 }
 

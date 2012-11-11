@@ -338,7 +338,7 @@ static struct VirtualCode  *BOOTCODE_NCALL = NULL;
 
 static void SetUpBootCode(void)
 {
-	if(BOOTCODE_ENTER != NULL) {
+	if(BOOTCODE_ENTER == NULL) {
 		static struct VirtualCode InitCode[6] = {};
 		struct OPTHCODE thcode = {OP_(THCODE), _THCODE};
 		struct OPNCALL ncall = {OP_(NCALL)};

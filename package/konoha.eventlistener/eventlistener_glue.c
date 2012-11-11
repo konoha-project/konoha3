@@ -144,7 +144,7 @@ static void Event_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visi
 }
 
 #define CHECK_JSON(obj, ret_stmt) do {\
-		if (!json_is_object(obj)) {\
+		if(!json_is_object(obj)) {\
 			DBG_P("[ERROR]: Object is not Json object.");\
 			/*KLIB KonohaRuntime_raise(kctx, 1, sfp, pline, msg);*/\
 			ret_stmt;\
@@ -154,16 +154,16 @@ static void Event_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visi
 //## String Event.getProperty(String key);
 static KMETHOD Event_getProperty(KonohaContext *kctx, KonohaStack *sfp)
 {
-	json_t* obj = ((kEvent*)sfp[0].asObject)->j;
+	json_t* obj = ((kEvent *)sfp[0].asObject)->j;
 	CHECK_JSON(obj, KReturn(KNULL(String)));
 	const char *key = S_text(sfp[1].asString);
 	json_t* ret = json_object_get(obj, key);
-	if (!json_is_string(ret)) {
+	if(!json_is_string(ret)) {
 		KReturn(KNULL(String));
 	}
 	ret = json_incref(ret);
 	const char* str = json_string_value(ret);
-	if (str == NULL) {
+	if(str == NULL) {
 		KReturn(KNULL(String));
 	}
 	KReturn(KLIB new_kString(kctx, OnStack, str, strlen(str), 0));
@@ -172,7 +172,7 @@ static KMETHOD Event_getProperty(KonohaContext *kctx, KonohaStack *sfp)
 //## int Event.getInt(String key);
 static KMETHOD Event_getInt(KonohaContext *kctx, KonohaStack *sfp)
 {
-	json_t* obj = ((kEvent*)sfp[0].asObject)->j;
+	json_t* obj = ((kEvent *)sfp[0].asObject)->j;
 	CHECK_JSON(obj, KReturnUnboxValue(0));
 	const char *key = S_text(sfp[1].asString);
 	json_t* ret = json_object_get(obj, key);
@@ -520,7 +520,7 @@ static void EventModule_free(KonohaContext *kctx, struct KonohaModule *def)
 
 static void MODEVENT_init(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	KModuleEvent *mod = (KModuleEvent*)KCalloc_UNTRACE(sizeof(KModuleEvent), 1);
+	KModuleEvent *mod = (KModuleEvent *)KCalloc_UNTRACE(sizeof(KModuleEvent), 1);
 	mod->h.name     = "event";
 	mod->h.allocSize = sizeof(KModuleEvent);
 	mod->h.setupModuleContext    = EventModule_setup;

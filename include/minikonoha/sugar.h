@@ -500,7 +500,7 @@ struct kGammaVar {
 /* ------------------------------------------------------------------------ */
 
 #define GetSugarContext(kctx)    ((SugarContext *)kctx->modlocal[MOD_sugar])
-#define kmodsugar       ((KModuleSugar*)kctx->modshare[MOD_sugar])
+#define kmodsugar       ((KModuleSugar *)kctx->modshare[MOD_sugar])
 #define CT_Token        kmodsugar->cToken
 #define CT_Expr         kmodsugar->cExpr
 #define CT_Stmt         kmodsugar->cStmt

@@ -57,16 +57,16 @@ kint_t parseInt(char* utext, size_t len)
 	}
 	for (;i < len; i++) {
 		int c = utext[i];
-		if ('0' <= c && c <= '9') {
+		if('0' <= c && c <= '9') {
 			prev = n;
 			n = n * base + (c - '0');
 		}
-		else if (base == 16) {
-			if ('A' <= c && c <= 'F') {
+		else if(base == 16) {
+			if('A' <= c && c <= 'F') {
 				prev = n;
 				n = n * 16 + (10 + c - 'A');
 			}
-			else if ('a' <= c && c <= 'f') {
+			else if('a' <= c && c <= 'f') {
 				prev = n;
 				n = n * 16 + (10 + c - 'a');
 			}
@@ -74,17 +74,17 @@ kint_t parseInt(char* utext, size_t len)
 				break;
 			}
 		}
-		else if (c == '_') {
+		else if(c == '_') {
 			continue;
 		}
 		else {
 			break;
 		}
-		//if (!(n >= prev)) {
+		//if(!(n >= prev)) {
 		//	return 0;
 		//}
 	}
-	if (utext[0] == '-') n = -((kint_t)n);
+	if(utext[0] == '-') n = -((kint_t)n);
 	return n;
 }
 
@@ -105,11 +105,11 @@ kfloat_t parseFloat(char* utext, size_t len)
 static size_t _NumberOfDigit(kint_t value, int base)
 {
 	size_t ret = 1;
-	if (value < 0) {
+	if(value < 0) {
 		ret++;
 		value = -1 * value;
 	}
-	while (value >= base) {
+	while(value >= base) {
 		value = value / base;
 		ret++;
 	}
@@ -130,8 +130,8 @@ static size_t _NumberOfDigit(kint_t value, int base)
 //		memcpy(newbody, b->buf, newsize);
 //	}
 //	KFree(b->buf, oldsize);
-//	((struct kBytesVar*)b)->buf = newbody;
-//	((struct kBytesVar*)b)->bytesize = newsize;
+//	((struct kBytesVar *)b)->buf = newbody;
+//	((struct kBytesVar *)b)->bytesize = newsize;
 //}
 
 /* ------------------------------------------------------------------------ */
@@ -141,7 +141,7 @@ void _ResultSet_setInt(KonohaContext *kctx, kResultSet *rs, size_t n, kint_t val
 	DBG_ASSERT(n < rs->column_size);
 	KGrowingBuffer wb;
 	size_t len = _NumberOfDigit(value, 10);
-	KLIB Kwb_init(&(((kResultSet*)rs)->databuf), &wb);
+	KLIB Kwb_init(&(((kResultSet *)rs)->databuf), &wb);
 	rs->column[n].ctype = kResultSet_CTYPE__integer;
 	rs->column[n].start = strlen(rs->databuf.bytebuf);
 	rs->column[n].len = len;
@@ -156,7 +156,7 @@ void _ResultSet_setFloat(KonohaContext *kctx, kResultSet *rs, size_t n, kfloat_t
 	KNH_ASSERT(n < rs->column_size);
 	KGrowingBuffer wb;
 	size_t len = 12; // sizeof KFLOAT_FMT
-	KLIB Kwb_init(&(((kResultSet*)rs)->databuf), &wb);
+	KLIB Kwb_init(&(((kResultSet *)rs)->databuf), &wb);
 	rs->column[n].ctype = kResultSet_CTYPE__float;
 	rs->column[n].start = strlen(rs->databuf.bytebuf);
 	rs->column[n].len = len;
@@ -170,22 +170,22 @@ void _ResultSet_setText(KonohaContext *kctx, kResultSet *rs, size_t n, char* tex
 {
 	DBG_ASSERT(n < rs->column_size);
 	KGrowingBuffer wb;
-	KLIB Kwb_init(&(((kResultSet*)rs)->databuf), &wb);
+	KLIB Kwb_init(&(((kResultSet *)rs)->databuf), &wb);
 	rs->column[n].ctype = kResultSet_CTYPE__text;
 	rs->column[n].start = strlen(rs->databuf.bytebuf);
 	rs->column[n].len = len;
-	KLIB Kwb_write(kctx, &wb, (const char*)(text), len);
+	KLIB Kwb_write(kctx, &wb, (const char *)(text), len);
 }
 
 //void _ResultSet_setBlob(KonohaContext *kctx, kResultSet *o, size_t n, kbytes_t t)
 //{
 //	KNH_ASSERT(n < o->column_size);
 //	KGrowingBuffer wb;
-//	KLIB Kwb_init(&(((kResultSet*)rs)->databuf), &wb);
+//	KLIB Kwb_init(&(((kResultSet *)rs)->databuf), &wb);
 //	o->column[n].ctype = kResultSet_CTYPE__bytes;
 //	o->column[n].start = strlen(o->databuf.bytebuf);
 //	o->column[n].len = t.len;
-//	KLIB Kwb_write(kctx, &wb, (const char*)(t.text), t.len);
+//	KLIB Kwb_write(kctx, &wb, (const char *)(t.text), t.len);
 //}
 
 void _ResultSet_setNULL(KonohaContext *kctx, kResultSet *o, size_t n)
@@ -200,7 +200,7 @@ void _ResultSet_setNULL(KonohaContext *kctx, kResultSet *o, size_t n)
 void _ResultSet_initColumn(KonohaContext *kctx, kResultSet *o, size_t column_size)
 {
 	size_t i;
-	kResultSet* rs = (kResultSet*)o;
+	kResultSet* rs = (kResultSet *)o;
 	//if(rs->column_size != 0) {
 	//	//for(i = 0; i < o->column_size; i++) {
 	//	//	KNH_FINALv(kctx, o->column[i].name); // free o->column[i].name
@@ -214,7 +214,7 @@ void _ResultSet_initColumn(KonohaContext *kctx, kResultSet *o, size_t column_siz
 	//}
 	rs->column_size = column_size;
 	if(column_size > 0) {
-		rs->column = (struct DBschema*)KMalloc_UNTRACE(sizeof(DBschema) * column_size);
+		rs->column = (struct DBschema *)KMalloc_UNTRACE(sizeof(DBschema) * column_size);
 		for(i = 0; i < column_size; i++) {
 			rs->column[i].type = TY_String;
 			/* TS_EMPTY would be tenure, so ignore WriteBarrier. */

@@ -63,11 +63,11 @@ static int MultiByteChar_length(unsigned char s)
 {
 	uint8_t u = (uint8_t) s;
 	assert (u >= 0x80);
-	if (0xc2 <= u && u <= 0xdf)
+	if(0xc2 <= u && u <= 0xdf)
 		return 2;
-	else if (0xe0 <= u && u <= 0xef)
+	else if(0xe0 <= u && u <= 0xef)
 		return 3;
-	else if (0xf0 <= u && u <= 0xf4)
+	else if(0xf0 <= u && u <= 0xf4)
 		return 4;
 	//assert(0 && "Invalid encoding");
 	return 0;
@@ -111,7 +111,7 @@ static uint32_t fnv1a(const char *p, uint32_t len)
 	uint32_t hash = 0x811c9dc5;
 	const uint8_t *s = (const uint8_t *) p;
 	const uint8_t *e = (const uint8_t *) p + len;
-	while (s < e) {
+	while(s < e) {
 		hash = (*s++ ^ hash) * 0x01000193;
 	}
 	return hash;
@@ -144,12 +144,12 @@ static uint32_t String_charAt(KonohaContext *kctx, kString *self, size_t index)
 	unsigned char *e = (unsigned char *) (text + S_size(self));
 	uint32_t v = 0;
 	int i, length = MultiByteChar_length((unsigned char) (*s));
-	if (length == 2) v = *s++ & 0x1f;
-	else if (length == 3) v = *s++ & 0xf;
-	else if (length == 4) v = *s++ & 0x7;
+	if(length == 2) v = *s++ & 0x1f;
+	else if(length == 3) v = *s++ & 0xf;
+	else if(length == 4) v = *s++ & 0x7;
 	for (i = 1; i < length && s < e; ++i) {
 		uint8_t tmp = (uint8_t) *s++;
-		if (tmp < 0x80 || tmp > 0xbf) {
+		if(tmp < 0x80 || tmp > 0xbf) {
 			return 0;
 		}
 		v = (v << 6) | (tmp & 0x3f);
