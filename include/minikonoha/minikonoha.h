@@ -1550,13 +1550,15 @@ struct _kSystem {
 #define KPACKNAME(N, V) \
 	.name = N, .version = V, .konoha_checksum = K_DATE
 
-#define KSetPackageName(VAR, N, V) \
- 	do{ VAR.name = N; VAR.version = V; VAR.konoha_checksum = K_DATE; } while(0)
+#define KSetPackageName(VAR, N, V) do{\
+	VAR.name = N; VAR.version = V; VAR.konoha_checksum = K_DATE;\
+} while(0)
 
 #define KPACKLIB(N, V) \
 	.libname = N, .libversion = V
-#define KSETPACKLIB(VAR, N, V) \
-	do{ VAR.libname = N; VAR.libversion = V; } while(0)
+#define KSETPACKLIB(VAR, N, V) do{\
+	VAR.libname = N; VAR.libversion = V;\
+} while(0)
 
 struct KonohaPackageHandlerVar {
 	long  konoha_checksum;

@@ -4619,10 +4619,10 @@ static void kmodllvm_free(KonohaContext *kctx, struct KonohaModule *baseh)
 #define _Im       kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char **args, KTraceInfo *trace)
+static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int argc, KTraceInfo *trace)
 {
 	KRequireKonohaCommonModule(trace)
-	(void)argc;(void)args;
+	(void)argc;
 	kmodllvm_t *base = (kmodllvm_t*)KCalloc_UNTRACE(sizeof(kmodllvm_t), 1);
 	base->h.name     = "llvm";
 	base->h.setupModuleContext = kmodllvm_setup;
@@ -5259,9 +5259,9 @@ static kbool_t llvm_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	return true;
 }
 
-static kbool_t llvm_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t llvm_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
-	(void)kctx;(void)ns;(void)isFirstTime;(void)trace;
+	(void)kctx;(void)ns;(void)exportNS;(void)trace;(void)option;
 	return true;
 }
 
@@ -5269,11 +5269,10 @@ KDEFINE_PACKAGE* llvm_init(void)
 {
 	InitializeNativeTarget();
 	static KDEFINE_PACKAGE d = {
-		K_CHECKSUM,
-		"llvm", "3.0", "", "", "",
-		llvm_initPackage,
-		llvm_setupPackage,
-		NULL, K_REVISION
+		0,
+		"llvm", "3.0", "", "",
+		llvm_PackupNameSpace,
+		llvm_ExportNameSpace,
 	};
 
 	return &d;
