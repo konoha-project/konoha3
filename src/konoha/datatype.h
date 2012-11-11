@@ -988,9 +988,9 @@ static void defineDefaultKeywordSymbol(KonohaContext *kctx)
 		"", "$Expr", "$Symbol", "$Text", "$Number", "$Type",
 		"()", "[]", "{}", "$Block", "$Param", "$TypeDecl", "$MethodDecl", "$Token",
 		".", "/", "%", "*", "+", "-", "<", "<=", ">", ">=", "==", "!=",
-		"&&", "||", "!", "=", ",", "$", ":", /*"@",*/
+		"&&", "||", "!", "=", ",", "$", ":", ";", /*"@",*/
 		"true", "false", "if", "else", "return", // syn
-		"new",
+		"new", "void"
 	};
 	for(i = 0; i < sizeof(keywords) / sizeof(const char *); i++) {
 		ksymbolSPOL(keywords[i], strlen(keywords[i]), StringPolicy_TEXT|StringPolicy_ASCII, SYM_NEWID);

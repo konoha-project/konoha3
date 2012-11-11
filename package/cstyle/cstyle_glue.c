@@ -73,8 +73,9 @@ static KMETHOD PatternMatch_ForBlock(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
 	int i;
 	for(i = beginIdx; i < endIdx; i++) {
-		kToken *tk = tokenList->TokenItems[i];
-		if(tk->topCharHint == ';') {
+		kTokenVar *tk = tokenList->TokenVarItems[i];
+		if(tk->resolvedSymbol == KW_SEMICOLON) {
+			kToken_set(StatementSeparator, tk, false);
 			break;
 		}
 	}
@@ -82,9 +83,8 @@ static KMETHOD PatternMatch_ForBlock(KonohaContext *kctx, KonohaStack *sfp)
 		TokenSequence tokens = {Stmt_nameSpace(stmt), tokenList, beginIdx, i};
 		kBlock *bk = SUGAR new_kBlock(kctx, stmt, NULL, &tokens);
 		SUGAR kStmt_addParsedObject(kctx, stmt, name, UPCAST(bk));
-		KReturnUnboxValue(i);
 	}
-	KReturnUnboxValue(-1);
+	KReturnUnboxValue(i);
 }
 
 
@@ -95,6 +95,7 @@ static KMETHOD Statement_CStyleFor(KonohaContext *kctx, KonohaStack *sfp)
 	int ret = false;
 	int KW_InitBlock = SYM_("init"), KW_IteratorBlock = SYM_("Iterator");
 	kBlock *initBlock = SUGAR kStmt_getBlock(kctx, stmt, NULL/*defaultNS*/, KW_InitBlock, NULL);
+	DBG_ASSERT(IS_Block(initBlock));
 	if(initBlock == NULL) {
 		if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_boolean, 0)) {
 			kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
@@ -114,7 +115,7 @@ static KMETHOD Statement_CStyleFor(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	}
 	else {
-		kStmt *forStmt = SUGAR new_kStmt(kctx, initBlock->StmtList, Stmt_nameSpace(stmt), KW_ExprPattern, SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL));
+		kStmt *forStmt = SUGAR new_kStmt(kctx, initBlock->StmtList, Stmt_nameSpace(stmt), KW_ExprPattern, SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL), 0);
 		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
 		kStmt_setObject(kctx, forStmt, KW_BlockPattern, bk);
 		bk = SUGAR kStmt_getBlock(kctx, stmt, NULL, KW_IteratorBlock, NULL);

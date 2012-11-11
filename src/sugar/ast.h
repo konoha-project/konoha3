@@ -570,7 +570,16 @@ static int SugarSyntax_matchPattern(KonohaContext *kctx, SugarSyntax *syn, kToke
 	return -1;
 }
 
-static int kStmt_matchSyntaxPattern(KonohaContext *kctx, kStmt *stmt, TokenSequence *tokens, TokenSequence *patterns, kToken **errRuleRef)
+static int TokenUtils_skipOnlyIndent(kArray *tokenList, int currentIdx, int endIdx)
+{
+	for(; currentIdx < endIdx; currentIdx++) {
+		kToken *tk = tokenList->TokenItems[currentIdx];
+		if(!kToken_isIndent(tk)) break;
+	}
+	return currentIdx;
+}
+
+static int kStmt_MatchSyntaxPattern(KonohaContext *kctx, kStmt *stmt, TokenSequence *tokens, TokenSequence *patterns, kToken **errRuleRef)
 {
 	int patternIdx = patterns->beginIdx, tokenIdx = tokens->beginIdx;
 	kNameSpace *ns = Stmt_nameSpace(stmt);
@@ -579,7 +588,7 @@ static int kStmt_matchSyntaxPattern(KonohaContext *kctx, kStmt *stmt, TokenSeque
 	for(; patternIdx < patterns->endIdx; patternIdx++) {
 		kToken *ruleToken = patterns->tokenList->TokenItems[patternIdx];
 		L_ReDo:;
-		tokenIdx = TokenUtils_skipIndent(tokens->tokenList, tokenIdx, tokens->endIdx);
+		tokenIdx = TokenUtils_skipOnlyIndent(tokens->tokenList, tokenIdx, tokens->endIdx);
 		//DBG_P("patternIdx=%d, tokenIdx=%d, tokenEndIdx=%d", patternIdx, tokenIdx, tokens->endIdx);
 		if(tokenIdx < tokens->endIdx) {
 			kToken *tk = tokens->tokenList->TokenItems[tokenIdx];
@@ -591,11 +600,12 @@ static int kStmt_matchSyntaxPattern(KonohaContext *kctx, kStmt *stmt, TokenSeque
 					errRuleRef[0] = ruleToken;
 					return -1;
 				}
+				tk = tokens->tokenList->TokenItems[tokenIdx];
 			}
 			else if(ruleToken->resolvedSymbol == KW_OptionalGroup) {
 				TokenSequence nrule = {ns, ruleToken->subTokenList, 0, kArray_size(ruleToken->subTokenList)};
 				tokens->beginIdx = tokenIdx;
-				int next = kStmt_matchSyntaxPattern(kctx, stmt, tokens, &nrule, errRuleRef);
+				int next = kStmt_MatchSyntaxPattern(kctx, stmt, tokens, &nrule, errRuleRef);
 				errRuleRef[0] = NULL;
 				if(Stmt_isERR(stmt)) return -1;
 				if(next != -1) {
@@ -610,7 +620,7 @@ static int kStmt_matchSyntaxPattern(KonohaContext *kctx, kStmt *stmt, TokenSeque
 				if(ruleToken->resolvedSymbol == KW_ParenthesisGroup || ruleToken->resolvedSymbol == KW_BracketGroup) {
 					TokenSequence nrule = {ns, ruleToken->subTokenList, 0, kArray_size(ruleToken->subTokenList)};
 					TokenSequence ntokens = {ns, tk->subTokenList, 0, kArray_size(tk->subTokenList)};
-					int next = kStmt_matchSyntaxPattern(kctx, stmt, &ntokens, &nrule, errRuleRef);
+					int next = kStmt_MatchSyntaxPattern(kctx, stmt, &ntokens, &nrule, errRuleRef);
 					if(next == -1) {
 						return -1;
 					}
@@ -719,7 +729,7 @@ static int kStmt_parseBySyntaxPattern(KonohaContext *kctx, kStmt *stmt, int inde
 			do {
 				patternEndIdx = TokenSequence_selectSyntaxPattern(kctx, &nrule, currentSyntax->syntaxPatternListNULL_OnList, patternEndIdx);
 				errRule[0] = NULL; errRule[1] = NULL;
-				int nextIdx = kStmt_matchSyntaxPattern(kctx, stmt, &tokens, &nrule, errRule);
+				int nextIdx = kStmt_MatchSyntaxPattern(kctx, stmt, &tokens, &nrule, errRule);
 				if(Stmt_isERR(stmt)) return -1;
 				if(beginIdx < nextIdx) return nextIdx;
 			} while(patternEndIdx > 0);
@@ -728,8 +738,8 @@ static int kStmt_parseBySyntaxPattern(KonohaContext *kctx, kStmt *stmt, int inde
 	}
 	if(!Stmt_isERR(stmt)) {
 		DBG_ASSERT(errRule[0] != NULL);
-		//KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
-		//KdumpTokenArray(kctx, stmtSyntax->syntaxPatternListNULL_OnList, 0, kArray_size(stmtSyntax->syntaxPatternListNULL_OnList));
+//		KdumpTokenArray(kctx, tokenList, beginIdx, endIdx);
+//		KdumpTokenArray(kctx, stmtSyntax->syntaxPatternListNULL_OnList, 0, kArray_size(stmtSyntax->syntaxPatternListNULL_OnList));
 #ifdef USE_SMALLBULD
 		kStmt_printMessage(kctx, stmt, ErrTag, "%s%s: %s%s is expected", KWSTMT_t(stmt->syn->keyword), PSYM_t(errRule[0]->resolvedSymbol));
 #else

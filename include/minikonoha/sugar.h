@@ -79,13 +79,13 @@ extern "C" {
 #define KW_DOLLAR  KW_PATTERN
 #define KW_ATMARK  MN_Annotation
 #define KW_COLON   (17+KW_DOT)
+#define KW_SEMICOLON (18+KW_DOT)
 
-#define KW_void      (32)
-#define KW_true      (0+KW_void)
-#define KW_false     (1+KW_void)
-#define KW_if        (2+KW_void)
-#define KW_else      (3+KW_void)
-#define KW_return    (4+KW_void)
+#define KW_true      33
+#define KW_false     (1+KW_true)
+#define KW_if        (2+KW_true)
+#define KW_else      (3+KW_true)
+#define KW_return    (4+KW_true)
 
 typedef enum {
 	TokenType_INDENT = 1,

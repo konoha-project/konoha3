@@ -1739,7 +1739,8 @@ struct KonohaLibVar {
 #define MN_(T)                    KLIB Ksymbol(kctx, T, (sizeof(T)-1), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID)
 #define MN_box                    MN_("box")
 
-#define MN_new                    37  /* @see KW_return + 1*/
+#define MN_new                    38  /* @see KW_return + 1*/
+#define KW_void                   39
 
 #define new_(C, A, STACK)                 (k##C *)(KLIB new_kObject(kctx, STACK, CT_##C, ((uintptr_t)A)))
 #define GcUnsafe                          NULL

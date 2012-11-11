@@ -106,7 +106,7 @@ static void TokenSequence_checkCStyleParam(KonohaContext *kctx, TokenSequence* t
 	int i;
 	for(i = 0; i < tokens->endIdx; i++) {
 		kTokenVar *tk = tokens->tokenList->TokenVarItems[i];
-		if(tk->resolvedSyntaxInfo->keyword == KW_void) {
+		if(tk->resolvedSyntaxInfo->keyword == SYM_("void")) {
 			tokens->endIdx = i; //  f(void) = > f()
 			return;
 		}
@@ -1291,6 +1291,7 @@ static void defineDefaultSyntax(KonohaContext *kctx, kNameSpace *ns)
 	DBG_ASSERT(SYM_(":") == KW_COLON);
 	DBG_ASSERT(SYM_("true") == KW_true);
 	DBG_ASSERT(SYM_("return") == KW_return);
+	DBG_P("MN_new=%d", SYM_("new"));
 	DBG_ASSERT(SYM_("new") == MN_new);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ TOKEN(ERR), SYNFLAG_StmtBreakExec, },
