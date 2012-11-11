@@ -22,9 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <stdio.h>
 #include "minikonoha/minikonoha.h"
-#include "minikonoha/gc.h"
 #include "test_konoha.h"
 
 void test_kString(KonohaContext *kctx)

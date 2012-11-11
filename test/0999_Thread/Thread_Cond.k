@@ -1,7 +1,7 @@
 // written by wakamatsu
-import("konoha");
 import("konoha.global");
 import("posix.thread");
+import("cstyle", "while");
 AllowImplicitGlobalVariable(true);
 
 Mutex m = new Mutex();
@@ -21,7 +21,7 @@ void test() {
 	Thread t = Thread.create(test_1);
 
 	m.lock();
-	counter += 1;
+	counter = counter + 1;
 	c.signal();
 	m.unlock();
 

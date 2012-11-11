@@ -26,7 +26,6 @@
 #include "minikonoha/klib.h"
 #include "minikonoha/sugar.h"
 #include "minikonoha/konoha_common.h"
-#include "minikonoha/gc.h"
 #include "minikonoha/platform.h"
 #include "test_konoha.h"
 

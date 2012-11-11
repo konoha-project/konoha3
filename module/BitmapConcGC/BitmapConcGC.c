@@ -28,7 +28,6 @@ extern "C" {
 #endif
 
 #include "minikonoha/minikonoha.h"
-#include "minikonoha/gc.h"
 #include "minikonoha/local.h"
 
 #ifdef K_USE_PTHREAD

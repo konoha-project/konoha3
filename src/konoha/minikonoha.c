@@ -24,7 +24,6 @@
 
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/klib.h"
-#include "minikonoha/gc.h"
 #include "minikonoha/local.h"
 
 #include "protomap.h"

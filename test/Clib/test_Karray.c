@@ -23,8 +23,7 @@
  ***************************************************************************/
 
 #include "minikonoha/minikonoha.h"
-#include "minikonoha/gc.h"
-#include <minikonoha/platform.h>
+#include "minikonoha/platform.h"
 #include "test_konoha.h"
 
 void test_Karray(KonohaContext *kctx)
