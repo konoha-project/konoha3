@@ -45,7 +45,12 @@ endif(KONOHA_VM_MODULE)
 
 ## Packages
 set(PACKAGES
-## add konoha.xx package in an alphabetical order 
+## YOU MUST add packages in an alphabetical order 
+	cstyle
+	cstyle.float
+	cstyle.libc
+	cstyle.math
+## YOU MUST add packages in an alphabetical order
 	konoha
 	konoha.array
 	konoha.bytes
@@ -80,8 +85,6 @@ set(PACKAGES
 	konoha.var
 	minikonoha
 	sugar
-	cstyle
-	cstyle.libc
 	posix.fd
 	posix.path
 	posix.process
