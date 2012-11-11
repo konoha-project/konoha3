@@ -29,30 +29,4 @@ import("konoha.file");
 	return new Bytes(size);
 }
 
-/* file */
-
-@Public @Static FILE System.fopen(String path, String mode) {
-	return new FILE(path, mode);
-}
-
-@Public @Static void System.fclose(FILE fp) {
-	fp.close();
-}
-
-@Public @Static int System.fwrite(Bytes buf, int size, int nitems, FILE fp) {
-	return fp.write(buf, 0, size * nitems);
-}
-
-@Public @Static int System.fread(Bytes buf, int size, int nitems, FILE fp) {
-	return fp.read(buf, 0, size * nitems);
-}
-
-@Public @Static void System.fprintln(FILE fp, String text) {
-	fp.println(msg);
-}
-
-@Public @Static void System.fprintf(FILE fp, String text) {
-	fp.print(msg);
-}
-
 

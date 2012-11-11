@@ -464,23 +464,17 @@ static void file_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *t
 		_Public, _F(File_println), TY_void, TY_File, MN_("println"), 1, TY_String, FN_("str")|FN_COERCION,
 		_Public, _F(File_println0), TY_void, TY_File, MN_("println"), 0,
 		_Public, _F(File_flush), TY_void, TY_File, MN_("flush"), 0,
+
 		_Public|_Const|_Im, _F(FILE_isatty), TY_boolean, TY_File, MN_("isatty"), 0,
 		_Public|_Const|_Im, _F(FILE_getfileno), TY_int, TY_File, MN_("getfileno"), 0,
+
+		_Public, _F(File_read),   TY_int, TY_File, MN_("read"), 1, TY_Bytes, FN_("buf"),
+		_Public, _F(File_read3),  TY_int, TY_File, MN_("read"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
+		_Public, _F(File_write),  TY_int, TY_File, MN_("write"), 1, TY_Bytes, FN_("buf"),
+		_Public, _F(File_write3), TY_int, TY_File, MN_("write"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
-
-	if(CT_Bytes != NULL && KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, TY_Bytes, MN_("read"), 3) == NULL) {
-		KDEFINE_METHOD MethodData[] = {
-			_Public, _F(File_read),   TY_int, TY_File, MN_("read"), 1, TY_Bytes, FN_("buf"),
-			_Public, _F(File_read3),  TY_int, TY_File, MN_("read"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
-			_Public, _F(File_write),  TY_int, TY_File, MN_("write"), 1, TY_Bytes, FN_("buf"),
-			_Public, _F(File_write3), TY_int, TY_File, MN_("write"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
-			DEND,
-		};
-		KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
-	}
-
 }
 
 typedef struct {
@@ -529,6 +523,7 @@ static void file_defineConst(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *tr
 static kbool_t file_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequireKonohaCommonModule(trace);
+	KRequirePackage("konoha.bytes", trace);
 	if(CT_File == NULL) {
 		KDEFINE_CLASS defFile = {
 			.structname = "File",

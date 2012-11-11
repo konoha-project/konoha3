@@ -47,7 +47,9 @@ endif(KONOHA_VM_MODULE)
 set(PACKAGES
 ## YOU MUST add packages in an alphabetical order 
 	cstyle
+	cstyle.file
 	cstyle.float
+	cstyle.global
 	cstyle.libc
 	cstyle.math
 ## YOU MUST add packages in an alphabetical order
