@@ -612,7 +612,7 @@ static kExpr* kStmt_tyCheckVariableNULL(KonohaContext *kctx, kStmt *stmt, kExpr 
 			}
 		}
 	}
-	if((Gamma_isTopLevel(gma) || kNameSpace_IsAllowed(TransparentGlobalVariable, ns)) && ns->globalObjectNULL_OnList != NULL) {
+	if((Gamma_isTopLevel(gma) || kNameSpace_IsAllowed(ImplicitGlobalVariable, ns)) && ns->globalObjectNULL_OnList != NULL) {
 		ktype_t cid = O_typeId(ns->globalObjectNULL_OnList);
 		kMethod *mtd = kNameSpace_GetGetterMethodNULL(kctx, ns, cid, symbol, TY_var);
 		if(mtd != NULL) {
@@ -876,7 +876,7 @@ static kMethod* kExpr_lookUpFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kE
 			return mtd;
 		}
 	}
-	if((Gamma_isTopLevel(gma) || kNameSpace_IsAllowed(TransparentGlobalVariable,ns)) && ns->globalObjectNULL_OnList != NULL) {
+	if((Gamma_isTopLevel(gma) || kNameSpace_IsAllowed(ImplicitGlobalVariable,ns)) && ns->globalObjectNULL_OnList != NULL) {
 		ktype_t cid = O_typeId(ns->globalObjectNULL_OnList);
 		kMethod *mtd = kNameSpace_GetGetterMethodNULL(kctx, ns, cid, fsymbol, TY_var);
 		if(mtd != NULL && TY_isFunc(Method_returnType(mtd))) {

@@ -1479,7 +1479,7 @@ struct kNameSpaceVar {
 
 #define kNameSpace_TypeInference                     ((kshortflag_t)(1<<2))
 #define kNameSpace_ImplicitField                     ((kshortflag_t)(1<<3))
-#define kNameSpace_TransparentGlobalVariable         ((kshortflag_t)(1<<4))
+#define kNameSpace_ImplicitGlobalVariable         ((kshortflag_t)(1<<4))
 
 #define kNameSpace_ImplicitCoercion                  ((kshortflag_t)(1<<5))
 

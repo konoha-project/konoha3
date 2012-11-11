@@ -33,7 +33,7 @@ extern "C"{
 
 static KMETHOD NameSpace_AllowImplicitGlobalVariable_(KonohaContext *kctx, KonohaStack *sfp)
 {
-	kNameSpace_Set(TransparentGlobalVariable, sfp[0].asNameSpace, sfp[1].boolValue);
+	kNameSpace_Set(ImplicitGlobalVariable, sfp[0].asNameSpace, sfp[1].boolValue);
 }
 
 #define _Public   kMethod_Public
@@ -46,15 +46,6 @@ struct _kGlobalObject {
 
 static	kbool_t global_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	KDEFINE_CLASS defGlobalObject = {0};
-	defGlobalObject.structname = "GlobalObject";
-	defGlobalObject.typeId = TY_newid;
-	defGlobalObject.cflag = kClass_Singleton|kClass_Final;
-	defGlobalObject.cstruct_size = sizeof(kGlobalObject);
-
-	KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defGlobalObject, trace);
-
-	KRequirePackage("konoha.field", trace);
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(NameSpace_AllowImplicitGlobalVariable_), TY_void, TY_NameSpace, MN_("AllowImplicitGlobalVariable"), 1, TY_boolean, FN_("enabled"),
 		DEND,
@@ -105,8 +96,12 @@ static kStmt* TypeDeclAndMakeSetter(KonohaContext *kctx, kStmt *stmt, kGamma *gm
 static kbool_t kNameSpace_initGlobalObject(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	if(ns->globalObjectNULL_OnList == NULL) {
-		const char *cname = "GlobalObject";
-		KonohaClass *cGlobalObject = KLIB kNameSpace_GetClass(kctx, ns, cname, strlen(cname), NULL);
+		KDEFINE_CLASS defGlobalObject = {0};
+		defGlobalObject.structname = "GlobalObject";
+		defGlobalObject.typeId = TY_newid;
+		defGlobalObject.cflag = kClass_Singleton|kClass_Final;
+		defGlobalObject.cstruct_size = sizeof(kGlobalObject);
+		KonohaClass *cGlobalObject = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defGlobalObject, trace);
 		((kNameSpaceVar *)ns)->globalObjectNULL_OnList =  KLIB Knull(kctx, cGlobalObject);
 		return KLIB kNameSpace_SetConstData(kctx, ns, SYM_("global"), cGlobalObject->typeId, (uintptr_t)ns->globalObjectNULL_OnList, trace);
 	}
@@ -132,7 +127,6 @@ static KMETHOD Statement_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t global_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
-	KImportPackage(ns, "konoha.field", trace);
 	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KW_TypeDeclPattern, SugarFunc_TopLevelStatement, new_SugarFunc(ns, Statement_GlobalTypeDecl));
 	return true;
 }
@@ -141,6 +135,7 @@ static kbool_t global_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 static	kbool_t global_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
+	KRequirePackage("konoha.field", trace);
 	global_defineMethod(kctx, ns, trace);
 	global_defineSyntax(kctx, ns, trace);
 	return true;
@@ -148,14 +143,14 @@ static	kbool_t global_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 
 static kbool_t global_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
-	return true;
+	return kNameSpace_initGlobalObject(kctx, exportNS, trace);
 }
 
 KDEFINE_PACKAGE* global_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", K_VERSION);
-	d.PackupNameSpace    = global_PackupNameSpace;
+	d.PackupNameSpace   = global_PackupNameSpace;
 	d.ExportNameSpace   = global_ExportNameSpace;
 	return &d;
 }
