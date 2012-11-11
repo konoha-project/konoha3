@@ -469,6 +469,18 @@ static void file_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *t
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
+
+	if(CT_Bytes != NULL && KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, TY_Bytes, MN_("read"), 3) == NULL) {
+		KDEFINE_METHOD MethodData[] = {
+			_Public, _F(File_read),   TY_int, TY_File, MN_("read"), 1, TY_Bytes, FN_("buf"),
+			_Public, _F(File_read3),  TY_int, TY_File, MN_("read"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
+			_Public, _F(File_write),  TY_int, TY_File, MN_("write"), 1, TY_Bytes, FN_("buf"),
+			_Public, _F(File_write3), TY_int, TY_File, MN_("write"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
+			DEND,
+		};
+		KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
+	}
+
 }
 
 typedef struct {
@@ -511,6 +523,7 @@ static void file_defineConst(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *tr
 		{NULL}, /* sentinel */
 	};
 	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), trace);
+
 }
 
 static kbool_t file_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
@@ -518,7 +531,7 @@ static kbool_t file_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 	KRequireKonohaCommonModule(trace);
 	if(CT_File == NULL) {
 		KDEFINE_CLASS defFile = {
-			.structname = "FILE",
+			.structname = "File",
 			.typeId = TY_newid,
 			.cstruct_size = sizeof(kFile),
 			.cflag = kClass_Final,
@@ -529,23 +542,18 @@ static kbool_t file_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 		};
 		CT_File = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defFile, trace);
 	}
-	file_defineConst(kctx, ns, trace);
 	file_defineMethod(kctx, ns, trace);
+	file_defineConst(kctx, ns, trace);
 	return true;
 }
 
 static kbool_t file_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
-	if(CT_Bytes != NULL && KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, TY_Bytes, MN_("read"), 3) == NULL) {
-		KDEFINE_METHOD MethodData[] = {
-			_Public, _F(File_read),   TY_int, TY_File, MN_("read"), 1, TY_Bytes, FN_("buf"),
-			_Public, _F(File_read3),  TY_int, TY_File, MN_("read"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
-			_Public, _F(File_write),  TY_int, TY_File, MN_("write"), 1, TY_Bytes, FN_("buf"),
-			_Public, _F(File_write3), TY_int, TY_File, MN_("write"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
-			DEND,
-		};
-		KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
-	}
+	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
+		{"FILE", VirtualType_KonohaClass, (uintptr_t)CT_File},
+		{NULL},
+	};
+	KLIB kNameSpace_LoadConstData(kctx, exportNS, KonohaConst_(ClassData), 0);
 	return true;
 }
 
