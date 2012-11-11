@@ -98,7 +98,6 @@ static kbool_t dynamic_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	defDynamic.structname = "dynamic";
 	defDynamic.cflag = kClass_Final|kClass_TypeVar;
 	KonohaClass *cDynamic = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defDynamic, trace);
-
 	int TY_Dynamic = cDynamic->typeId;
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Im, _F(Dynamic_), TY_Object, TY_Dynamic, MN_(""), 0,

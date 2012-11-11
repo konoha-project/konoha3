@@ -22,7 +22,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-
 // ---------------------------------------------------------------------------
 // Utils
 
@@ -949,35 +948,45 @@ static kNameSpace *new_PackageNameSpace(KonohaContext *kctx, kpackageId_t packag
 static KonohaPackage *LoadPackageNULL(KonohaContext *kctx, kpackageId_t packageId, KTraceInfo *trace)
 {
 	const char *packageName = S_text(PackageId_s(packageId));
-	char pathbuf[256];
-	const char *path = PLATAPI FormatPackagePath(kctx, pathbuf, sizeof(pathbuf), packageName, "_glue.k");
+	char packupbuf[256], kickbuf[256];
+	const char *path = PLATAPI FormatPackagePath(kctx, packupbuf, sizeof(packupbuf), packageName, "_packup.k");
+	if(path == NULL) {
+		path = PLATAPI FormatPackagePath(kctx, packupbuf, sizeof(packupbuf), packageName, "_glue.k");
+	}
+	const char *kickpath = PLATAPI FormatPackagePath(kctx, kickbuf, sizeof(kickbuf), packageName, "_kick.k");
 	KonohaPackageHandler *packageHandler = PLATAPI LoadPackageHandler(kctx, packageName);
-	if(path == NULL && packageHandler == NULL) {
+	if(path == NULL && packageHandler == NULL && kickpath == NULL) {
 		DBG_ASSERT(trace != NULL);
 		KBeginCritical(trace, "PackageNotFound", SoftwareFault|SystemFault);
-		PLATAPI FormatPackagePath(kctx, pathbuf, sizeof(pathbuf), packageName, "");
-		KLIB ReportScriptMessage(kctx, trace, ErrTag, "package not found: path=%s", pathbuf);
+		PLATAPI FormatPackagePath(kctx, packupbuf, sizeof(packupbuf), packageName, "");
+		KLIB ReportScriptMessage(kctx, trace, ErrTag, "package not found: path=%s", packupbuf);
 		KEndCritical(trace);
 		return NULL;
 	}
-	kNameSpace *ns = new_PackageNameSpace(kctx, packageId);
-	KBeginCritical(trace, "PackageLoading", SoftwareFault|SystemFault);
-	if(packageHandler != NULL && packageHandler->initPackage != NULL) {
-		packageHandler->initPackage(kctx, ns, 0, NULL, trace);
+	else {
+		KonohaPackage *pack = (KonohaPackage *)KCalloc(sizeof(KonohaPackage), 1, trace);
+		pack->packageId = packageId;
+		pack->packageHandler = packageHandler;
+		if(kickpath != NULL) {
+			pack->kick_script = uline_init(kctx, kickpath, 1, true/*isRealPath*/);
+		}
+		KLock(kctx->share->filepackMutex);
+		map_addu(kctx, kctx->share->packageMapNO, packageId, (uintptr_t)pack);
+		KUnlock(kctx->share->filepackMutex);
+		//
+		DBG_ASSERT(pack->packageNameSpace_OnGlobalConstList == NULL);
+		kNameSpace *ns = new_PackageNameSpace(kctx, packageId);
+		KBeginCritical(trace, "PackageLoading", SoftwareFault|SystemFault);
+		if(packageHandler != NULL && packageHandler->initPackage != NULL) {
+			packageHandler->initPackage(kctx, ns, 0, NULL, trace);
+		}
+		if(path != NULL) {
+			kNameSpace_LoadScript(kctx, ns, packupbuf, trace);
+		}
+		KEndCritical(trace);
+		pack->packageNameSpace_OnGlobalConstList = ns;
+		return pack;
 	}
-	if(path != NULL) {
-		kNameSpace_LoadScript(kctx, ns, pathbuf, trace);
-	}
-	KEndCritical(trace);
-	KonohaPackage *pack = (KonohaPackage *)KCalloc(sizeof(KonohaPackage), 1, trace);
-	pack->packageId = packageId;
-	pack->packageNameSpace_OnGlobalConstList = ns;
-	pack->packageHandler = packageHandler;
-	path = PLATAPI FormatPackagePath(kctx, pathbuf, sizeof(pathbuf), packageName, "_kick.k");
-	if(path != NULL) {
-		pack->kick_script = uline_init(kctx, path, 1, true/*isRealPath*/);
-	}
-	return pack;
 }
 
 static KonohaPackage *GetPackageNULL(KonohaContext *kctx, kpackageId_t packageId, KTraceInfo *trace)
@@ -989,13 +998,11 @@ static KonohaPackage *GetPackageNULL(KonohaContext *kctx, kpackageId_t packageId
 	if(pack == NULL) {
 		pack = LoadPackageNULL(kctx, packageId, trace);
 		if(pack == NULL) return NULL;
-		KLock(kctx->share->filepackMutex);
-		map_addu(kctx, kctx->share->packageMapNO, packageId, (uintptr_t)pack);
-		KUnlock(kctx->share->filepackMutex);
 		flag = FirstTime;
 	}
-	if(pack->packageHandler != NULL && pack->packageHandler->setupPackage != NULL) {
-		pack->packageHandler->setupPackage(kctx, pack->packageNameSpace_OnGlobalConstList, flag, trace);
+	if(pack->packageNameSpace_OnGlobalConstList == NULL) {
+		KLIB ReportScriptMessage(kctx, trace, ErrTag, "recursive importing: %s", PackageId_t(packageId));
+		return NULL;
 	}
 	return pack;
 }
@@ -1073,6 +1080,9 @@ static kbool_t kNameSpace_ImportPackage(KonohaContext *kctx, kNameSpace *ns, con
 		KonohaPackage *pack = GetPackageNULL(kctx, packageId, trace);
 		if(pack != NULL) {
 			kNameSpace_ImportAll(kctx, ns, pack->packageNameSpace_OnGlobalConstList, trace);
+			if(pack->packageHandler != NULL && pack->packageHandler->setupPackage != NULL) {
+				pack->packageHandler->setupPackage(kctx, pack->packageNameSpace_OnGlobalConstList, 1, trace);
+			}
 			if(pack->kick_script != 0) {
 				kNameSpace_LoadScript(kctx, ns, FileId_t(pack->kick_script), trace);
 			}
