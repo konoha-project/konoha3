@@ -335,6 +335,13 @@ static kbool_t float_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 
 static kbool_t float_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
+	if(sizeof(kfloat_t) == sizeof(double)) {
+		KDEFINE_INT_CONST ClassData[] = {   // add Array as available
+			{"double", VirtualType_KonohaClass, (uintptr_t)CT_Float},
+			{NULL},
+		};
+		KLIB kNameSpace_LoadConstData(kctx, exportNS, KonohaConst_(ClassData), 0);
+	}
 	return true;
 }
 

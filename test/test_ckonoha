@@ -177,69 +177,71 @@ run_test 16 16 minimum "-MOutputTest" 0010_Literal/Literal_VeryLargeNumber.k
 record_result 0010_Literal $PASS 16
 ## 0011_FuncDecl
 PASS=0
-run_test 1 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox01.k
-run_test 2 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox02.k
-run_test 3 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox03.k
-run_test 4 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox04.k
-run_test 5 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox05.k
-run_test 6 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox06.k
-run_test 7 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox07.k
-run_test 8 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox08.k
-run_test 9 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox09.k
-run_test 10 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox10.k
-run_test 11 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox11.k
-run_test 12 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox12.k
-run_test 13 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox13.k
-run_test 14 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox14.k
-run_test 15 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox15.k
-run_test 16 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox16.k
-run_test 17 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox17.k
-run_test 18 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox18.k
-run_test 19 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox19.k
-run_test 20 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox20.k
-run_test 21 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox21.k
-run_test 22 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox22.k
-run_test 23 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox23.k
-run_test 24 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox24.k
-run_test 25 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox25.k
-run_test 26 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox26.k
-run_test 27 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox27.k
-run_test 28 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox28.k
-run_test 29 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox29.k
-run_test 30 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_UnboxOverload30.k
-run_test 31 62 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Void.k
-run_test 32 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox01.k
-run_test 33 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox02.k
-run_test 34 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox03.k
-run_test 35 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox04.k
-run_test 36 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox05.k
-run_test 37 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox06.k
-run_test 38 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox07.k
-run_test 39 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox08.k
-run_test 40 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox09.k
-run_test 41 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox10.k
-run_test 42 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox11.k
-run_test 43 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox12.k
-run_test 44 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox13.k
-run_test 45 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox14.k
-run_test 46 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox15.k
-run_test 47 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox16.k
-run_test 48 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox17.k
-run_test 49 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox18.k
-run_test 50 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox19.k
-run_test 51 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox20.k
-run_test 52 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox21.k
-run_test 53 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox22.k
-run_test 54 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox23.k
-run_test 55 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox24.k
-run_test 56 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox25.k
-run_test 57 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox26.k
-run_test 58 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox27.k
-run_test 59 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox28.k
-run_test 60 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox29.k
-run_test 61 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_UnboxOverload30.k
-run_test 62 62 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Void.k
-record_result 0011_FuncDecl $PASS 62
+run_test 1 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Empty.k
+run_test 2 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox01.k
+run_test 3 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox02.k
+run_test 4 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox03.k
+run_test 5 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox04.k
+run_test 6 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox05.k
+run_test 7 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox06.k
+run_test 8 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox07.k
+run_test 9 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox08.k
+run_test 10 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox09.k
+run_test 11 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox10.k
+run_test 12 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox11.k
+run_test 13 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox12.k
+run_test 14 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox13.k
+run_test 15 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox14.k
+run_test 16 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox15.k
+run_test 17 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox16.k
+run_test 18 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox17.k
+run_test 19 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox18.k
+run_test 20 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox19.k
+run_test 21 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox20.k
+run_test 22 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox21.k
+run_test 23 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox22.k
+run_test 24 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox23.k
+run_test 25 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox24.k
+run_test 26 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox25.k
+run_test 27 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox26.k
+run_test 28 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox27.k
+run_test 29 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox28.k
+run_test 30 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Unbox29.k
+run_test 31 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_UnboxOverload30.k
+run_test 32 64 minimum "-MOutputTest" 0011_FuncDecl/FuncDecl_Void.k
+run_test 33 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Empty.k
+run_test 34 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox01.k
+run_test 35 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox02.k
+run_test 36 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox03.k
+run_test 37 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox04.k
+run_test 38 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox05.k
+run_test 39 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox06.k
+run_test 40 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox07.k
+run_test 41 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox08.k
+run_test 42 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox09.k
+run_test 43 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox10.k
+run_test 44 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox11.k
+run_test 45 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox12.k
+run_test 46 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox13.k
+run_test 47 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox14.k
+run_test 48 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox15.k
+run_test 49 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox16.k
+run_test 50 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox17.k
+run_test 51 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox18.k
+run_test 52 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox19.k
+run_test 53 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox20.k
+run_test 54 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox21.k
+run_test 55 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox22.k
+run_test 56 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox23.k
+run_test 57 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox24.k
+run_test 58 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox25.k
+run_test 59 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox26.k
+run_test 60 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox27.k
+run_test 61 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox28.k
+run_test 62 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Unbox29.k
+run_test 63 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_UnboxOverload30.k
+run_test 64 64 cstyle "-MOutputTest -Icstyle" 0011_FuncDecl/FuncDecl_Void.k
+record_result 0011_FuncDecl $PASS 64
 ## 0012_FuncReturn
 PASS=0
 run_test 1 62 minimum "-MOutputTest" 0012_FuncReturn/FuncReturn_Unbox01.k
@@ -661,7 +663,10 @@ run_test 1 1 minimum "-MOutputTest" 0096_NoType/NoType_TypeDecl.k
 record_result 0096_NoType $PASS 1
 ## 0100_CStyle
 PASS=0
-record_result 0100_CStyle $PASS 0
+run_test 1 3 minimum "-MOutputTest" 0100_CStyle/CStyle_Double.k
+run_test 2 3 minimum "-MOutputTest" 0100_CStyle/CStyle_File.k
+run_test 3 3 minimum "-MOutputTest" 0100_CStyle/CStyle_Math.k
+record_result 0100_CStyle $PASS 3
 ## 0101_While
 PASS=0
 run_test 1 7 minimum "-MOutputTest" 0101_While/While_Break.k
