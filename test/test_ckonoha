@@ -689,17 +689,20 @@ run_test 7 7 minimum "-MOutputTest" 0102_DoWhile/DoWhile_OneLiner.k
 record_result 0102_DoWhile $PASS 7
 ## 0103_For
 PASS=0
-run_test 1 10 minimum "-MOutputTest" 0103_For/For_Break.k
-run_test 2 10 minimum "-MOutputTest" 0103_For/For_Contine.k
-run_test 3 10 minimum "-MOutputTest" 0103_For/For_EmptyLoop.k
-run_test 4 10 minimum "-MOutputTest" 0103_For/For_False.k
-run_test 5 10 minimum "-MOutputTest" 0103_For/For_IfBreak.k
-run_test 6 10 minimum "-MOutputTest" 0103_For/For_IfContinue.k
-run_test 7 10 minimum "-MOutputTest" 0103_For/For_Nested.k
-run_test 8 10 minimum "-MOutputTest" 0103_For/For_OneLiner.k
-run_test 9 10 minimum "-MOutputTest" 0103_For/For_TypeDecl.k
-run_test 10 10 minimum "-MOutputTest" 0103_For/For_TypeDeclScope.k
-record_result 0103_For $PASS 10
+run_test 1 13 minimum "-MOutputTest" 0103_For/For_Break.k
+run_test 2 13 minimum "-MOutputTest" 0103_For/For_Contine.k
+run_test 3 13 minimum "-MOutputTest" 0103_For/For_EmptyInit.k
+run_test 4 13 minimum "-MOutputTest" 0103_For/For_EmptyIter.k
+run_test 5 13 minimum "-MOutputTest" 0103_For/For_EmptyLoop.k
+run_test 6 13 minimum "-MOutputTest" 0103_For/For_False.k
+run_test 7 13 minimum "-MOutputTest" 0103_For/For_IfBreak.k
+run_test 8 13 minimum "-MOutputTest" 0103_For/For_IfContinue.k
+run_test 9 13 minimum "-MOutputTest" 0103_For/For_Inc.k
+run_test 10 13 minimum "-MOutputTest" 0103_For/For_Nested.k
+run_test 11 13 minimum "-MOutputTest" 0103_For/For_OneLiner.k
+run_test 12 13 minimum "-MOutputTest" 0103_For/For_TypeDecl.k
+run_test 13 13 minimum "-MOutputTest" 0103_For/For_TypeDeclScope.k
+record_result 0103_For $PASS 13
 ## 0104_Switch
 PASS=0
 record_result 0104_Switch $PASS 0

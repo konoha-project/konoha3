@@ -10,7 +10,7 @@ void test() {
 		c = c + 1;
 	}
 	//System.p("c="+c+",i="+i);
-	assert(c == 5);
+	assert(c == 6);
 }
 test();
 
