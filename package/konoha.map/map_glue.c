@@ -249,14 +249,14 @@ static kbool_t map_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 	return true;
 }
 
-static kbool_t map_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t map_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	map_defineMethod(kctx, ns, trace);
 	map_defineSyntax(kctx, ns, trace);
 	return true;
 }
 
-static kbool_t map_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t map_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -265,8 +265,8 @@ KDEFINE_PACKAGE* map_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "map", "1.0");
-	d.initPackage    = map_initPackage;
-	d.setupPackage   = map_setupPackage;
+	d.PackupNameSpace    = map_PackupNameSpace;
+	d.ExportNameSpace   = map_ExportNameSpace;
 	return &d;
 }
 

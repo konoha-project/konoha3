@@ -533,7 +533,7 @@ static void kmodmpi_free(KonohaContext *kctx, struct KonohaModule *baseh)
 
 #define MOD_mpi 19/*TODO*/
 
-static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t mpi_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequirePackage("konoha.bytes", trace);
 	KRequirePackage("konoha.float", trace);
@@ -654,7 +654,7 @@ static kbool_t mpi_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	return true;
 }
 
-static kbool_t mpi_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t mpi_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -663,8 +663,8 @@ KDEFINE_PACKAGE* mpi_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("mpi", "1.0"),
-		.initPackage    = mpi_initPackage,
-		.setupPackage   = mpi_setupPackage,
+		.PackupNameSpace    = mpi_PackupNameSpace,
+		.ExportNameSpace   = mpi_ExportNameSpace,
 	};
 	return &d;
 }

@@ -324,7 +324,7 @@ static kbool_t float_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 
 //---
 
-static kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t float_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	/* Use cstyle package's Parser to parsing FloatLiteral */
 	KImportPackageSymbol(ns, "cstyle", "$Number", trace);
@@ -333,7 +333,7 @@ static kbool_t float_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	return true;
 }
 
-static kbool_t float_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t float_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -343,8 +343,8 @@ KDEFINE_PACKAGE* float_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "float", "1.0");
-	d.initPackage    = float_initPackage;
-	d.setupPackage   = float_setupPackage;
+	d.PackupNameSpace    = float_PackupNameSpace;
+	d.ExportNameSpace   = float_ExportNameSpace;
 	return &d;
 }
 

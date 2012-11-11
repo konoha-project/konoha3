@@ -116,7 +116,7 @@ static KMETHOD NameSpace_man(KonohaContext *kctx, KonohaStack *sfp)
 #define _Public   kMethod_Public
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t i_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KImportPackage(ns, "konoha.global", trace);
 	KDEFINE_METHOD MethodData[] = {
@@ -127,7 +127,7 @@ static kbool_t i_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, cons
 	return true;
 }
 
-static kbool_t i_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t i_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -136,8 +136,8 @@ KDEFINE_PACKAGE* i_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha.i", "1.0");
-	d.initPackage    = i_initPackage;
-	d.setupPackage   = i_setupPackage;
+	d.PackupNameSpace    = i_PackupNameSpace;
+	d.ExportNameSpace   = i_ExportNameSpace;
 	return &d;
 }
 

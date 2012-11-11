@@ -92,7 +92,7 @@ static KMETHOD Dynamic_(KonohaContext *kctx, KonohaStack *sfp)
 #define _Im       kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t dynamic_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t dynamic_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	static KDEFINE_CLASS defDynamic = {0};
 	defDynamic.structname = "dynamic";
@@ -107,7 +107,7 @@ static kbool_t dynamic_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	return true;
 }
 
-static kbool_t dynamic_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t dynamic_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -116,8 +116,8 @@ KDEFINE_PACKAGE* dynamic_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");
-	d.initPackage    = dynamic_initPackage;
-	d.setupPackage   = dynamic_setupPackage;
+	d.PackupNameSpace     = dynamic_PackupNameSpace;
+	d.ExportNameSpace = dynamic_ExportNameSpace;
 	return &d;
 }
 

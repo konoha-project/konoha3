@@ -83,7 +83,7 @@ static KMETHOD kSHA1_Final(KonohaContext *kctx, KonohaStack *sfp)
 #define TY_openssl  (ct0->typeId)
 #define TY_Log      (ct1->typeId)
 
-static kbool_t openssl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t openssl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	static const char *names[] = {
 		"MD5",
@@ -119,7 +119,7 @@ static kbool_t openssl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	return true;
 }
 
-static kbool_t openssl_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t openssl_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -128,8 +128,8 @@ KDEFINE_PACKAGE *openssl_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("openssl", "1.0"),
-		.initPackage    = openssl_initPackage,
-		.setupPackage   = openssl_setupPackage,
+		.PackupNameSpace    = openssl_PackupNameSpace,
+		.ExportNameSpace   = openssl_ExportNameSpace,
 	};
 	return &d;
 }

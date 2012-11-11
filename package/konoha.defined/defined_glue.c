@@ -84,7 +84,7 @@ static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static kbool_t defined_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t defined_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("defined"), 0, NULL, 0, Precedence_CStylePREUNARY, NULL, Expression_Defined, NULL, NULL, TypeCheck_Defined, },
@@ -94,7 +94,7 @@ static kbool_t defined_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	return true;
 }
 
-static kbool_t defined_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t defined_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -104,8 +104,8 @@ KDEFINE_PACKAGE* defined_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");
-	d.initPackage    = defined_initPackage;
-	d.setupPackage   = defined_setupPackage;
+	d.PackupNameSpace    = defined_PackupNameSpace;
+	d.ExportNameSpace   = defined_ExportNameSpace;
 	return &d;
 }
 

@@ -267,7 +267,7 @@ static KMETHOD Cond_broadcast(KonohaContext *kctx, KonohaStack *sfp)
 #define TY_Mutex  cMutex->typeId
 #define TY_Cond   cCond->typeId
 
-static kbool_t thread_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t thread_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KDEFINE_CLASS defThread = {
 		STRUCTNAME(Thread),
@@ -320,7 +320,7 @@ static kbool_t thread_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	return true;
 }
 
-static kbool_t thread_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t thread_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -329,8 +329,8 @@ KDEFINE_PACKAGE* thread_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("thread", "1.0"),
-		.initPackage    = thread_initPackage,
-		.setupPackage   = thread_setupPackage,
+		.PackupNameSpace    = thread_PackupNameSpace,
+		.ExportNameSpace   = thread_ExportNameSpace,
 	};
 	return &d;
 }

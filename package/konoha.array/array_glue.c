@@ -658,14 +658,14 @@ static kbool_t array_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 	return true;
 }
 
-static kbool_t array_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t array_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	array_defineMethod(kctx, ns, trace);
 	array_defineSyntax(kctx, ns, trace);
 	return true;
 }
 
-static kbool_t array_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t array_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -674,8 +674,8 @@ KDEFINE_PACKAGE* array_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "array", "1.0");
-	d.initPackage    = array_initPackage;
-	d.setupPackage   = array_setupPackage;
+	d.PackupNameSpace    = array_PackupNameSpace;
+	d.ExportNameSpace   = array_ExportNameSpace;
 	return &d;
 }
 

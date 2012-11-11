@@ -717,7 +717,7 @@ static kbool_t regexp_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 	return true;
 }
 
-static kbool_t regexp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t regexp_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequireKonohaCommonModule(trace);
 	regexp_defineMethod(kctx, ns, trace);
@@ -725,7 +725,7 @@ static kbool_t regexp_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	return true;
 }
 
-static kbool_t regexp_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t regexp_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -734,8 +734,8 @@ KDEFINE_PACKAGE* regexp_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("konoha", "1.0"),
-		.initPackage    = regexp_initPackage,
-		.setupPackage   = regexp_setupPackage,
+		.PackupNameSpace    = regexp_PackupNameSpace,
+		.ExportNameSpace   = regexp_ExportNameSpace,
 	};
 	return &d;
 }

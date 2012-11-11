@@ -115,7 +115,7 @@ static KMETHOD Person_say(KonohaContext *kctx, KonohaStack *sfp)
 
 #define _F(F)     (intptr_t)(F)
 
-static kbool_t HelloWorld_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t HelloWorld_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	/* Class Definition */
 	/* If you want to create Generic class like Array<T>, see konoha.map package */
@@ -148,7 +148,7 @@ static kbool_t HelloWorld_initPackage(KonohaContext *kctx, kNameSpace *ns, int a
 	return true;
 }
 
-static kbool_t HelloWorld_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t HelloWorld_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -157,8 +157,8 @@ KDEFINE_PACKAGE* hello_world_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "/* SET LIBRARY NAME */", "/* SET LIBRARY VERSION */");
-	d.initPackage    = HelloWorld_initPackage;
-	d.setupPackage   = HelloWorld_setupPackage;
+	d.PackupNameSpace    = HelloWorld_PackupNameSpace;
+	d.ExportNameSpace   = HelloWorld_ExportNameSpace;
 	return &d;
 }
 

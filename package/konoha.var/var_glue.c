@@ -30,7 +30,7 @@ extern "C"{
 #endif
 // --------------------------------------------------------------------------
 
-static kbool_t var_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t var_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
 		{"var", VirtualType_KonohaClass, (uintptr_t)CT_(TY_var)},
@@ -40,7 +40,7 @@ static kbool_t var_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	return true;
 }
 
-static kbool_t var_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t var_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -49,8 +49,8 @@ KDEFINE_PACKAGE* var_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "var", "1.0");
-	d.initPackage    = var_initPackage;
-	d.setupPackage   = var_setupPackage;
+	d.PackupNameSpace    = var_PackupNameSpace;
+	d.ExportNameSpace   = var_ExportNameSpace;
 	return &d;
 }
 

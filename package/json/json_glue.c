@@ -262,7 +262,7 @@ static KMETHOD Json_toString(KonohaContext *kctx, KonohaStack *sfp)
 
 #define TY_Json     cJson->typeId
 
-static kbool_t JSON_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t JSON_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequireKonohaCommonModule(trace);
 	KImportPackage(ns, "konoha.float", trace);
@@ -308,7 +308,7 @@ static kbool_t JSON_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	return true;
 }
 
-static kbool_t JSON_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t JSON_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -317,8 +317,8 @@ KDEFINE_PACKAGE* json_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("JSON", "1.0"),
-		.initPackage    = JSON_initPackage,
-		.setupPackage   = JSON_setupPackage,
+		.PackupNameSpace    = JSON_PackupNameSpace,
+		.ExportNameSpace   = JSON_ExportNameSpace,
 	};
 	return &d;
 }

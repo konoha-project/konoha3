@@ -617,7 +617,7 @@ static KMETHOD SockAddr_new (KonohaContext *kctx, KonohaStack *sfp)
 
 #define KDefineConstInt(T) #T, TY_int, T
 
-static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t socket_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KDEFINE_CLASS defSockAddr = {
 		STRUCTNAME(SockAddr),
@@ -716,7 +716,7 @@ static kbool_t socket_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	return true;
 }
 
-static kbool_t socket_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t socket_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -725,8 +725,8 @@ KDEFINE_PACKAGE* socket_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("socket", "1.0"),
-		.initPackage    = socket_initPackage,
-		.setupPackage   = socket_setupPackage,
+		.PackupNameSpace    = socket_PackupNameSpace,
+		.ExportNameSpace   = socket_ExportNameSpace,
 	};
 	return &d;
 }

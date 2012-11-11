@@ -395,7 +395,7 @@ static kbool_t class_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 	return true;
 }
 
-static kbool_t class_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t class_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequirePackage("konoha.field", trace);
 	//KRequirePackage("konoha.new", trace);
@@ -403,7 +403,7 @@ static kbool_t class_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	return true;
 }
 
-static kbool_t class_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t class_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -414,8 +414,8 @@ KDEFINE_PACKAGE* class_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "class", "1.0");
-	d.initPackage    = class_initPackage;
-	d.setupPackage   = class_setupPackage;
+	d.PackupNameSpace    = class_PackupNameSpace;
+	d.ExportNameSpace   = class_ExportNameSpace;
 	return &d;
 }
 

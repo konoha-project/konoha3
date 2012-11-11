@@ -77,13 +77,13 @@ static void eval_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *t
 
 // --------------------------------------------------------------------------
 
-static kbool_t eval_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t eval_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	eval_defineMethod(kctx, ns, trace);
 	return true;
 }
 
-static kbool_t eval_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t eval_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -94,8 +94,8 @@ KDEFINE_PACKAGE* eval_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", K_VERSION);
-	d.initPackage    = eval_initPackage;
-	d.setupPackage   = eval_setupPackage;
+	d.PackupNameSpace    = eval_PackupNameSpace;
+	d.ExportNameSpace   = eval_ExportNameSpace;
 	return &d;
 }
 

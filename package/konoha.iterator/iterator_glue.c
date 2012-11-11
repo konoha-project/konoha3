@@ -161,7 +161,7 @@ static KMETHOD String_toIterator(KonohaContext *kctx, KonohaStack *sfp)
 #define _Public   kMethod_Public
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t iterator_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequireKonohaCommonModule(trace);
 	if(CT_Iterator == NULL) {
@@ -191,7 +191,7 @@ static kbool_t iterator_initPackage(KonohaContext *kctx, kNameSpace *ns, int arg
 	return true;
 }
 
-static kbool_t iterator_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t iterator_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -200,8 +200,8 @@ KDEFINE_PACKAGE* iterator_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "iterator", "1.0");
-	d.initPackage    = iterator_initPackage;
-	d.setupPackage   = iterator_setupPackage;
+	d.PackupNameSpace    = iterator_PackupNameSpace;
+	d.ExportNameSpace   = iterator_ExportNameSpace;
 	return &d;
 }
 

@@ -314,7 +314,7 @@ static KMETHOD Expression_Increment(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(kStmtToken_printMessage(kctx, stmt, tk, ErrTag, "%s is defined as a statement", S_text(tk->text)));
 }
 
-static kbool_t cstyle_defineExpression(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t cstyle_defineExpression(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("[]"), SYNFLAG_ExprPostfixOp2, NULL, Precedence_CStyleCALL, 0, NULL, Expression_Indexer, NULL, NULL, NULL, },
@@ -722,7 +722,7 @@ static kbool_t null_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo
 	return true;
 }
 
-static kbool_t null_initPackage(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t null_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	null_defineMethod(kctx, ns, trace);
 	null_defineSyntax(kctx, ns, trace);
@@ -732,7 +732,7 @@ static kbool_t null_initPackage(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 
 // --------------------------------------------------------------------------
 
-static kbool_t cstyle_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t cstyle_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	cstyle_DefineStatement(kctx, ns, trace);
 	KDEFINE_SYNTAX defLiteral[] = {
@@ -756,11 +756,11 @@ static kbool_t cstyle_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	int_defineSyntax(kctx, ns, trace);
 	cstyle_defineAssign(kctx, ns, trace);
 
-	null_initPackage(kctx, ns, trace);
+	null_PackupNameSpace(kctx, ns, trace);
 	return true;
 }
 
-static kbool_t cstyle_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t cstyle_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -771,8 +771,8 @@ KDEFINE_PACKAGE* cstyle_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "cstyle", "1.0");
-	d.initPackage    = cstyle_initPackage;
-	d.setupPackage   = cstyle_setupPackage;
+	d.PackupNameSpace    = cstyle_PackupNameSpace;
+	d.ExportNameSpace   = cstyle_ExportNameSpace;
 	return &d;
 }
 

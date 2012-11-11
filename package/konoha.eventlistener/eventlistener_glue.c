@@ -563,7 +563,7 @@ static void MODEVENT_init(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace
 
 #define KDefineConstInt(T) #T, TY_int, T
 
-static kbool_t eventlistener_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t eventlistener_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	MODEVENT_init(kctx, ns, trace);
 
@@ -637,7 +637,7 @@ static kbool_t eventlistener_initPackage(KonohaContext *kctx, kNameSpace *ns, in
 	return true;
 }
 
-static kbool_t eventlistener_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t eventlistener_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -646,8 +646,8 @@ KDEFINE_PACKAGE* eventlistener_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("event", "1.0"),
-		.initPackage    = eventlistener_initPackage,
-		.setupPackage   = eventlistener_setupPackage,
+		.PackupNameSpace    = eventlistener_PackupNameSpace,
+		.ExportNameSpace   = eventlistener_ExportNameSpace,
 	};
 	return &d;
 }

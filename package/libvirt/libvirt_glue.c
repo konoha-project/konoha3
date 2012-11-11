@@ -3279,7 +3279,7 @@ static KMETHOD KvirNodeSetMemoryParameters(KonohaContext *kctx,  KonohaStack *sf
 }
 
 #define _Public   kMethod_Public
-static kbool_t PACKAGE_INIT_PKG(LIBVIRT_PACKAGE_NAME)(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t PACKAGE_INIT_PKG(LIBVIRT_PACKAGE_NAME)(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	virt_loadStructData(kctx, ns, trace);
 	int FN_0 = FN_("arg0");
@@ -3653,7 +3653,7 @@ static kbool_t PACKAGE_INIT_PKG(LIBVIRT_PACKAGE_NAME)(KonohaContext *kctx, kName
 
 	return true;
 }
-static kbool_t PACKAGE_SETUP_PKG(LIBVIRT_PACKAGE_NAME)(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t PACKAGE_SETUP_PKG(LIBVIRT_PACKAGE_NAME)(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -3662,7 +3662,7 @@ KDEFINE_PACKAGE* PACKAGE_INIT(LIBVIRT_PACKAGE_NAME)(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, LIBVIRT_PACKAGE_NAME, "1.0");
-	d.initPackage  = PACKAGE_INIT_PKG(LIBVIRT_PACKAGE_NAME);
-	d.setupPackage = PACKAGE_SETUP_PKG(LIBVIRT_PACKAGE_NAME);
+	d.PackupNameSpace  = PACKAGE_INIT_PKG(LIBVIRT_PACKAGE_NAME);
+	d.ExportNameSpace = PACKAGE_SETUP_PKG(LIBVIRT_PACKAGE_NAME);
 	return &d;
 }

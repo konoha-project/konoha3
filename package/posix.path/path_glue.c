@@ -533,7 +533,7 @@ static void path_defineDIR(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trac
 
 // --------------------------------------------------------------------------
 
-static kbool_t path_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t path_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	//	KRequireKonohaCommonModule(trace);
 	KDEFINE_METHOD MethodData[] = {
@@ -571,7 +571,7 @@ static kbool_t path_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	return true;
 }
 
-static kbool_t path_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t path_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -582,8 +582,8 @@ KDEFINE_PACKAGE* path_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("posix", "1.0"),
-		.initPackage    = path_initPackage,
-		.setupPackage   = path_setupPackage,
+		.PackupNameSpace    = path_PackupNameSpace,
+		.ExportNameSpace   = path_ExportNameSpace,
 	};
 	return &d;
 }

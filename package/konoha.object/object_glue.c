@@ -169,7 +169,7 @@ static kbool_t subtype_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceI
 
 // --------------------------------------------------------------------------
 
-static kbool_t object_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t object_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 //	KRequirePackage("konoha.subtype", trace);
 	KDEFINE_INT_CONST ClassData[] = {   // add Object as available
@@ -182,7 +182,7 @@ static kbool_t object_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	return true;
 }
 
-static kbool_t object_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t object_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -193,8 +193,8 @@ KDEFINE_PACKAGE* object_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");
-	d.initPackage    = object_initPackage;
-	d.setupPackage   = object_setupPackage;
+	d.PackupNameSpace    = object_PackupNameSpace;
+	d.ExportNameSpace   = object_ExportNameSpace;
 	return &d;
 }
 

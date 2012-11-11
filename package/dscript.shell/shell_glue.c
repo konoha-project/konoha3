@@ -243,13 +243,13 @@ static kbool_t shell_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 	return true;
 }
 
-static kbool_t shell_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t shell_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	shell_defineSyntax(kctx, ns, trace);
 	return true;
 }
 
-static kbool_t shell_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t shell_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -258,8 +258,8 @@ KDEFINE_PACKAGE* shell_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "dshell", "1.0");
-	d.initPackage    = shell_initPackage;
-	d.setupPackage   = shell_setupPackage;
+	d.PackupNameSpace    = shell_PackupNameSpace;
+	d.ExportNameSpace   = shell_ExportNameSpace;
 	return &d;
 }
 

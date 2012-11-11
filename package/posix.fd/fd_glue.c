@@ -285,7 +285,7 @@ static KMETHOD System_ttyname(KonohaContext *kctx, KonohaStack *sfp)
 //#define CT_Dirent       cDirent
 //#define TY_Dirent       cDirent->typeId
 
-static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t fd_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Static, _F(System_lseek),     TY_int,     TY_System, MN_("lseek"),     3, TY_int, FN_("fd"), TY_int, FN_("offset"), TY_int, FN_("whence"),
@@ -331,7 +331,7 @@ static kbool_t fd_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, con
 	return true;
 }
 
-static kbool_t fd_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t fd_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -342,8 +342,8 @@ KDEFINE_PACKAGE* fd_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("posix", "1.0"),
-		.initPackage    = fd_initPackage,
-		.setupPackage   = fd_setupPackage,
+		.PackupNameSpace    = fd_PackupNameSpace,
+		.ExportNameSpace   = fd_ExportNameSpace,
 	};
 	return &d;
 }

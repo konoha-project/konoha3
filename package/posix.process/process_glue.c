@@ -299,7 +299,7 @@ static KMETHOD System_system(KonohaContext *kctx, KonohaStack *sfp)
 
 #define KDefineConstInt(T) #T, TY_int, T
 
-static kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t process_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	kparamtype_t p = { .ty = TY_int,  };
 	KonohaClass *cintArray = KLIB KonohaClass_Generics(kctx, CT_(TY_Array), TY_void, 1, &p);
@@ -351,7 +351,7 @@ static kbool_t process_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	return true;
 }
 
-static kbool_t process_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t process_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -361,8 +361,8 @@ KDEFINE_PACKAGE* process_init(void)
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("process", "1.0"),
 		KPACKLIB("POSIX.1", "1.0"),
-		.initPackage    = process_initPackage,
-		.setupPackage   = process_setupPackage,
+		.PackupNameSpace    = process_PackupNameSpace,
+		.ExportNameSpace   = process_ExportNameSpace,
 	};
 	return &d;
 }

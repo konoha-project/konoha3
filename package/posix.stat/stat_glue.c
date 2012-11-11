@@ -341,14 +341,14 @@ static void stat_defineClassAndMethod(KonohaContext *kctx, kNameSpace *ns, KTrac
 
 // --------------------------------------------------------------------------
 
-static kbool_t stat_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t stat_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	//	KRequireKonohaCommonModule(trace);
 	stat_defineClassAndMethod(kctx, ns, trace);
 	return true;
 }
 
-static kbool_t stat_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t stat_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -359,8 +359,8 @@ KDEFINE_PACKAGE* stat_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("posix", "1.0"),
-		.initPackage    = stat_initPackage,
-		.setupPackage   = stat_setupPackage,
+		.PackupNameSpace    = stat_PackupNameSpace,
+		.ExportNameSpace   = stat_ExportNameSpace,
 	};
 	return &d;
 }

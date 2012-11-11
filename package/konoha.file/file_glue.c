@@ -513,7 +513,7 @@ static void file_defineConst(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *tr
 	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), trace);
 }
 
-static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t file_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequireKonohaCommonModule(trace);
 	if(CT_File == NULL) {
@@ -534,7 +534,7 @@ static kbool_t file_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	return true;
 }
 
-static kbool_t file_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t file_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	if(CT_Bytes != NULL && KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, TY_Bytes, MN_("read"), 3) == NULL) {
 		KDEFINE_METHOD MethodData[] = {
@@ -555,8 +555,8 @@ KDEFINE_PACKAGE* file_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("konoha", "1.0"),
-		.initPackage    = file_initPackage,
-		.setupPackage   = file_setupPackage,
+		.PackupNameSpace    = file_PackupNameSpace,
+		.ExportNameSpace   = file_ExportNameSpace,
 	};
 	return &d;
 }

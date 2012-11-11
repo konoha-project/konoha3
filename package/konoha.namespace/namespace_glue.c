@@ -69,13 +69,13 @@ static kbool_t namespace_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTrac
 
 // --------------------------------------------------------------------------
 
-static kbool_t namespace_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t namespace_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	namespace_defineSyntax(kctx, ns, trace);
 	return true;
 }
 
-static kbool_t namespace_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t namespace_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -84,8 +84,8 @@ KDEFINE_PACKAGE* namespace_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");
-	d.initPackage    = namespace_initPackage;
-	d.setupPackage   = namespace_setupPackage;
+	d.PackupNameSpace    = namespace_PackupNameSpace;
+	d.ExportNameSpace   = namespace_ExportNameSpace;
 	return &d;
 }
 

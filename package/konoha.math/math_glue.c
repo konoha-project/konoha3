@@ -205,7 +205,7 @@ static KMETHOD Math_random(KonohaContext *kctx, KonohaStack *sfp)
 #define _KVf(T) "MATH_" #T, TY_float, M_##T
 #define TY_Math  (cMath->typeId)
 
-static kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t math_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequirePackage("konoha.float", trace);
 	static KDEFINE_CLASS MathDef = {0};
@@ -268,7 +268,7 @@ static kbool_t math_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	return true;
 }
 
-static kbool_t math_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t math_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -277,8 +277,8 @@ KDEFINE_PACKAGE *math_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "math", "1.0");
-	d.initPackage    = math_initPackage;
-	d.setupPackage   = math_setupPackage;
+	d.PackupNameSpace    = math_PackupNameSpace;
+	d.ExportNameSpace   = math_ExportNameSpace;
 	return &d;
 }
 

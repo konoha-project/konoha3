@@ -165,13 +165,13 @@ static kbool_t minikonoha_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTra
 
 // ----
 
-static kbool_t minikonoha_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t minikonoha_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	minikonoha_defineMethod(kctx, ns, trace);
 	return true;
 }
 
-static kbool_t minikonoha_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t minikonoha_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -180,8 +180,8 @@ KDEFINE_PACKAGE* minikonoha_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "minikonoha", K_VERSION);
-	d.initPackage    = minikonoha_initPackage;
-	d.setupPackage   = minikonoha_setupPackage;
+	d.PackupNameSpace    = minikonoha_PackupNameSpace;
+	d.ExportNameSpace   = minikonoha_ExportNameSpace;
 	return &d;
 }
 

@@ -113,7 +113,7 @@ void main() {
         func_info.add(generate_signature(info));
     }
 	stdout.println("#define _Public   kMethod_Public");
-	stdout.println("static kbool_t PACKAGE_INIT_PKG(LIBVIRT_PACKAGE_NAME)(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)");
+	stdout.println("static kbool_t PACKAGE_INIT_PKG(LIBVIRT_PACKAGE_NAME)(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)");
     stdout.println("{");
     int i = 0;
 	stdout.println("\tvirt_loadStructData(kctx, ns, trace);");
@@ -131,7 +131,7 @@ void main() {
     stdout.println("\treturn true;");
     stdout.println("}");
 
-    stdout.println("static kbool_t PACKAGE_SETUP_PKG(LIBVIRT_PACKAGE_NAME)(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)");
+    stdout.println("static kbool_t PACKAGE_SETUP_PKG(LIBVIRT_PACKAGE_NAME)(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)");
     stdout.println("{");
     stdout.println("\treturn true;");
     stdout.println("}");
@@ -140,8 +140,8 @@ void main() {
     stdout.println("{");
     stdout.println("\tstatic KDEFINE_PACKAGE d = {0};");
     stdout.println("\tKSetPackageName(d, LIBVIRT_PACKAGE_NAME, \"1.0\");");
-    stdout.println("\td.initPackage  = PACKAGE_INIT_PKG(LIBVIRT_PACKAGE_NAME);");
-    stdout.println("\td.setupPackage = PACKAGE_SETUP_PKG(LIBVIRT_PACKAGE_NAME);");
+    stdout.println("\td.PackupNameSpace  = PACKAGE_INIT_PKG(LIBVIRT_PACKAGE_NAME);");
+    stdout.println("\td.ExportNameSpace = PACKAGE_SETUP_PKG(LIBVIRT_PACKAGE_NAME);");
     stdout.println("\treturn &d;");
     stdout.println("}");
 

@@ -601,7 +601,7 @@ static KMETHOD Date_toLocaleString(KonohaContext *kctx, KonohaStack *sfp)
 #define _F(F)   (intptr_t)(F)
 #define TY_Date     cDate->typeId
 
-static kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t date_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KDEFINE_CLASS defDate = {0};
 	SETSTRUCTNAME(defDate, Date);
@@ -667,7 +667,7 @@ static kbool_t date_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	return true;
 }
 
-static kbool_t date_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t date_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -676,8 +676,8 @@ KDEFINE_PACKAGE* date_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "date", "1.0");
-	d.initPackage    = date_initPackage;
-	d.setupPackage   = date_setupPackage;
+	d.PackupNameSpace    = date_PackupNameSpace;
+	d.ExportNameSpace   = date_ExportNameSpace;
 	return &d;
 }
 

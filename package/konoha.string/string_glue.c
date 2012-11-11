@@ -254,7 +254,7 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 // --------------------------------------------------------------------------
 
 
-static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t string_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	LoadRopeMethod(kctx, ns, trace);
 	int FN_s = FN_("s");
@@ -289,7 +289,7 @@ static kbool_t string_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	return true;
 }
 
-static kbool_t string_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t string_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -298,8 +298,8 @@ KDEFINE_PACKAGE* string_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");
-	d.initPackage    = string_initPackage;
-	d.setupPackage   = string_setupPackage;
+	d.PackupNameSpace    = string_PackupNameSpace;
+	d.ExportNameSpace   = string_ExportNameSpace;
 	return &d;
 }
 

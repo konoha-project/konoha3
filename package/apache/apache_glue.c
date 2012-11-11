@@ -82,7 +82,7 @@ static void kapacheshare_free(KonohaContext *kctx, struct KonohaModule *baseh)
 }
 
 
-static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t apache_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	static KDEFINE_CLASS Def = {
 		STRUCTNAME(Request),
@@ -134,7 +134,7 @@ static kbool_t apache_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	return true;
 }
 
-static kbool_t apache_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t apache_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -143,8 +143,8 @@ KDEFINE_PACKAGE* apache_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("apache", "1.0"),
-		.initPackage    = apache_initPackage,
-		.setupPackage   = apache_setupPackage,
+		.PackupNameSpace    = apache_PackupNameSpace,
+		.ExportNameSpace   = apache_ExportNameSpace,
 	};
 	return &d;
 }

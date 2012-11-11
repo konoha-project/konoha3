@@ -1086,7 +1086,7 @@ static void KonohaRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx)
 //	KObjectVisitor *visitor = (KObjectVisitor *) thunk;
 //	KonohaPackage *pack = (KonohaPackage *)p->unboxValue;
 //	BEGIN_REFTRACE(1);
-//	KREFTRACEn(pack->packageNameSpace_OnGlobalConstList);
+//	KREFTRACEn(pack->packageNS_onGlobalConstList);
 //	END_REFTRACE();
 //}
 

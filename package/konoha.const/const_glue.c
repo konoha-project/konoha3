@@ -81,13 +81,13 @@ static kbool_t const_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 	return true;
 }
 
-static kbool_t const_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t const_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	const_defineSyntax(kctx, ns, trace);
 	return true;
 }
 
-static kbool_t const_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t const_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -96,8 +96,8 @@ KDEFINE_PACKAGE* const_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "const", "1.0");
-	d.initPackage    = const_initPackage;
-	d.setupPackage   = const_setupPackage;
+	d.PackupNameSpace    = const_PackupNameSpace;
+	d.ExportNameSpace   = const_ExportNameSpace;
 	return &d;
 }
 

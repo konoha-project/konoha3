@@ -647,7 +647,7 @@ static KMETHOD Complex_conjl(KonohaContext *kctx, KonohaStack *sfp)
 #define _Public   kMethod_Public
 #define _F(F)     (intptr_t)(F)
 
-static kbool_t Complex_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t Complex_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequirePackage("konoha.float", trace);
 	KDEFINE_CLASS defComplex = {0};
@@ -737,7 +737,7 @@ static kbool_t Complex_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	return true;
 }
 
-static kbool_t Complex_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t Complex_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -746,8 +746,8 @@ KDEFINE_PACKAGE* complex_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");
-	d.initPackage    = Complex_initPackage;
-	d.setupPackage   = Complex_setupPackage;
+	d.PackupNameSpace    = Complex_PackupNameSpace;
+	d.ExportNameSpace   = Complex_ExportNameSpace;
 	return &d;
 }
 

@@ -532,7 +532,7 @@ KMETHOD ResultSet_getString(KonohaContext *kctx, KonohaStack *sfp)
 #define _Public   kMethod_Public
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t sql_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t sql_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequirePackage("konoha.float", trace);
 
@@ -578,7 +578,7 @@ static kbool_t sql_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, co
 	return true;
 }
 
-static kbool_t sql_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t sql_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -587,8 +587,8 @@ KDEFINE_PACKAGE* sql_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("Simple Sql", "1.0"),
-		.initPackage    = sql_initPackage,
-		.setupPackage   = sql_setupPackage,
+		.PackupNameSpace    = sql_PackupNameSpace,
+		.ExportNameSpace   = sql_ExportNameSpace,
 	};
 	return &d;
 }

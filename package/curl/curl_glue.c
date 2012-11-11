@@ -753,7 +753,7 @@ static KMETHOD Curl_getInfo(KonohaContext *kctx, KonohaStack *sfp)
 
 #define KDefineConstInt(T)  #T, TY_int, T
 
-static kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t curl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequireKonohaCommonModule(trace);
 	KRequirePackage("konoha.file", trace);
@@ -884,7 +884,7 @@ static kbool_t curl_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	return true;
 }
 
-static kbool_t curl_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t curl_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -893,8 +893,8 @@ KDEFINE_PACKAGE* curl_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("curl", "1.0"),
-		.initPackage    = curl_initPackage,
-		.setupPackage   = curl_setupPackage,
+		.PackupNameSpace    = curl_PackupNameSpace,
+		.ExportNameSpace   = curl_ExportNameSpace,
 	};
 	return &d;
 }

@@ -1547,40 +1547,34 @@ struct _kSystem {
 /* ----------------------------------------------------------------------- */
 /* Package */
 
-#define K_CHECKSUM 1
-
 #define KPACKNAME(N, V) \
-	.name = N, .version = V, .konoha_checksum = K_CHECKSUM, .konoha_revision = K_REVISION
+	.name = N, .version = V, .konoha_checksum = K_DATE
+
 #define KSetPackageName(VAR, N, V) \
- 	do{ VAR.name = N; VAR.version = V; VAR.konoha_checksum = K_CHECKSUM; VAR.konoha_revision = K_REVISION; } while(0)
+ 	do{ VAR.name = N; VAR.version = V; VAR.konoha_checksum = K_DATE; } while(0)
 
 #define KPACKLIB(N, V) \
 	.libname = N, .libversion = V
 #define KSETPACKLIB(VAR, N, V) \
 	do{ VAR.libname = N; VAR.libversion = V; } while(0)
 
-typedef enum {  Nope, FirstTime } isFirstTime_t;
-
 struct KonohaPackageHandlerVar {
-	int konoha_checksum;
+	long  konoha_checksum;
 	const char *name;
 	const char *version;
 	const char *libname;
 	const char *libversion;
-	const char *note;
-	kbool_t (*initPackage)     (KonohaContext *kctx, kNameSpace *, int, const char**, KTraceInfo *);
-	kbool_t (*setupPackage)    (KonohaContext *kctx, kNameSpace *, isFirstTime_t, KTraceInfo *);
-	kbool_t (*loadPlatformApi) (KonohaFactory *platapi);
-	const char *konoha_revision;
+	kbool_t (*PackupNameSpace)    (KonohaContext *kctx, kNameSpace *, int, KTraceInfo *);
+	kbool_t (*ExportNameSpace)    (KonohaContext *kctx, kNameSpace *, kNameSpace *, int, KTraceInfo *);
 };
 
 typedef struct KonohaPackageVar KonohaPackage;
 
 struct KonohaPackageVar {
 	kpackageId_t                 packageId;
-	kNameSpace                  *packageNameSpace_OnGlobalConstList;
+	kNameSpace                  *packageNS_onGlobalConstList;
 	KonohaPackageHandler        *packageHandler;
-	kfileline_t                  kick_script;
+	kfileline_t                  kickout_script;
 };
 
 /* ----------------------------------------------------------------------- */

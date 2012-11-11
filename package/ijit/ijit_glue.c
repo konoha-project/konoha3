@@ -702,7 +702,7 @@ static void _kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	END_LOCAL();
 }
 
-static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t ijit_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequirePackage("sugar", trace);
 	KRequirePackage("konoha.float", trace);
@@ -739,7 +739,7 @@ static kbool_t ijit_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, c
 	return true;
 }
 
-static kbool_t ijit_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t ijit_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	/* Array[Expr] */
 	kparamtype_t P_ExprArray[] = {{TY_Expr}};
@@ -853,8 +853,8 @@ KDEFINE_PACKAGE* ijit_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("ijit", "1.0"),
-		.initPackage    = ijit_initPackage,
-		.setupPackage   = ijit_setupPackage,
+		.PackupNameSpace    = ijit_PackupNameSpace,
+		.ExportNameSpace   = ijit_ExportNameSpace,
 	};
 	return &d;
 }

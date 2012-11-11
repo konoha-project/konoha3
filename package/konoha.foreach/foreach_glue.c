@@ -155,7 +155,7 @@ static kbool_t foreach_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceI
 	return true;
 }
 
-static kbool_t foreach_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t foreach_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequirePackage("konoha.iterator", trace);
 	KImportPackageSymbol(ns, "cstyle", "break", trace);
@@ -164,7 +164,7 @@ static kbool_t foreach_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc
 	return true;
 }
 
-static kbool_t foreach_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t foreach_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -174,8 +174,8 @@ KDEFINE_PACKAGE* foreach_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");
-	d.initPackage    = foreach_initPackage;
-	d.setupPackage   = foreach_setupPackage;
+	d.PackupNameSpace    = foreach_PackupNameSpace;
+	d.ExportNameSpace   = foreach_ExportNameSpace;
 	return &d;
 }
 

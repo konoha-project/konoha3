@@ -205,7 +205,7 @@
 //	KFree(baseh, sizeof(KonohaExceptionModule));
 //}
 //
-//static kbool_t exception_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char **args, KTraceInfo *trace)
+//static kbool_t exception_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int argc, const char **args, KTraceInfo *trace)
 //{
 //	KonohaExceptionModule *mod = (KonohaExceptionModule *)KCalloc_UNTRACE(sizeof(KonohaExceptionModule), 1);
 //	mod->h.name     = "exception";
@@ -231,7 +231,7 @@
 //	return true;
 //}
 //
-//static kbool_t exception_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+//static kbool_t exception_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 //{
 //	return true;
 //}
@@ -351,8 +351,8 @@
 //{
 //	static KDEFINE_PACKAGE d = {
 //		KPACKNAME("konoha", "1.0"),
-//		.initPackage    = exception_initPackage,
-//		.setupPackage   = exception_setupPackage,
+//		.PackupNameSpace    = exception_PackupNameSpace,
+//		.ExportNameSpace   = exception_ExportNameSpace,
 //	};
 //	return &d;
 //}

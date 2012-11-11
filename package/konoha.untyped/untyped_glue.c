@@ -69,14 +69,14 @@ static KMETHOD TypeCheck_UntypedAssign(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
-static kbool_t untyped_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t untyped_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequirePackage("konoha.var", trace);
 	SUGAR kNameSpace_AddSugarFunc(kctx, ns, SYM_("="), SugarFunc_TypeCheck, new_SugarFunc(ns, TypeCheck_UntypedAssign));
 	return true;
 }
 
-static kbool_t untyped_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t untyped_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -85,8 +85,8 @@ KDEFINE_PACKAGE* untyped_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");
-	d.initPackage    = untyped_initPackage;
-	d.setupPackage   = untyped_setupPackage;
+	d.PackupNameSpace    = untyped_PackupNameSpace;
+	d.ExportNameSpace   = untyped_ExportNameSpace;
 	return &d;
 }
 

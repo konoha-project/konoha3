@@ -82,13 +82,13 @@ static kbool_t dollar_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 	return true;
 }
 
-static kbool_t dollar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t dollar_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	dollar_defineSyntax(kctx, ns, trace);
 	return true;
 }
 
-static kbool_t dollar_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t dollar_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -97,8 +97,8 @@ KDEFINE_PACKAGE* dollar_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "dscript", "1.0");
-	d.initPackage    = dollar_initPackage;
-	d.setupPackage   = dollar_setupPackage;
+	d.PackupNameSpace    = dollar_PackupNameSpace;
+	d.ExportNameSpace   = dollar_ExportNameSpace;
 	return &d;
 }
 

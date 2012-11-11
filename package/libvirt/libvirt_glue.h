@@ -61,8 +61,8 @@ typedef kuint_t unsigned_int;
 #define LIBVIRT_PACKAGE_NAME "libvirt"
 
 #define PACKAGE_INIT(NAME)      NAME##_init
-#define PACKAGE_INIT_PKG(NAME)  NAME##_initPackage
-#define PACKAGE_SETUP_PKG(NAME) NAME##_setupPackage
+#define PACKAGE_INIT_PKG(NAME)  NAME##_PackupNameSpace
+#define PACKAGE_SETUP_PKG(NAME) NAME##_ExportNameSpace
 #define PACKAGE_TOSTRING(NAME) "" # NAME
 
 typedef struct kvirCommonPtr {

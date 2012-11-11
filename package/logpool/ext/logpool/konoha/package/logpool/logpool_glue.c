@@ -357,7 +357,7 @@ static KMETHOD LogPool_loadFile(CTX, ksfp_t *sfp _RIX)
 #define TY_Logpool  (ct0->cid)
 #define TY_Log      (ct1->cid)
 
-static kbool_t logpool_initPackage(CTX, kKonohaSpace *ks, int argc, const char**args, kline_t trace)
+static kbool_t logpool_PackupNameSpace(CTX, kKonohaSpace *ks, int option, kline_t trace)
 {
 	int i;
 	static KDEFINE_CLASS Def0 = {
@@ -442,7 +442,7 @@ static kbool_t logpool_initPackage(CTX, kKonohaSpace *ks, int argc, const char**
 	return true;
 }
 
-static kbool_t logpool_setupPackage(CTX, kKonohaSpace *ks, kline_t trace)
+static kbool_t logpool_ExportNameSpace(CTX, kKonohaSpace *ks, kline_t trace)
 {
 	return true;
 }
@@ -461,8 +461,8 @@ KDEFINE_PACKAGE* logpool_init(void)
 	logpool_global_init(LOGPOOL_DEFAULT);
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("logpool", "1.0"),
-		.initPackage = logpool_initPackage,
-		.setupPackage = logpool_setupPackage,
+		.PackupNameSpace = logpool_PackupNameSpace,
+		.ExportNameSpace = logpool_ExportNameSpace,
 		.initKonohaSpace = logpool_initKonohaSpace,
 		.setupKonohaSpace = logpool_setupKonohaSpace,
 	};

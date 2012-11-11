@@ -482,7 +482,7 @@ static int python_init_count = 0;
 #define _Im       kMethod_Immutable
 #define _F(F)   (intptr_t)(F)
 
-static kbool_t python_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t python_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	python_init_count++;
 	if(python_init_count == 1) {
@@ -563,7 +563,7 @@ static kbool_t python_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc,
 	return true;
 }
 
-static kbool_t python_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t python_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -572,8 +572,8 @@ KDEFINE_PACKAGE *python_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("python", "1.0"),
-		.initPackage    = python_initPackage,
-		.setupPackage   = python_setupPackage,
+		.PackupNameSpace    = python_PackupNameSpace,
+		.ExportNameSpace   = python_ExportNameSpace,
 	};
 	return &d;
 }

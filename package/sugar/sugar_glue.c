@@ -769,7 +769,7 @@ static KMETHOD Expr_addExpr(KonohaContext *kctx, KonohaStack *sfp)
 
 static kbool_t RENAMEME_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace);
 
-static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char**args, KTraceInfo *trace)
+static kbool_t sugar_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KonohaClass *cSymbol = loadSymbolClass(kctx, ns, trace);
 	KonohaClass *ccid = loadcidClass(kctx, ns, trace);
@@ -862,7 +862,7 @@ static kbool_t sugar_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	return true;
 }
 
-static kbool_t sugar_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t sugar_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -1013,8 +1013,8 @@ KDEFINE_PACKAGE* sugar_init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "sugar", "1.0");
-	d.initPackage    = sugar_initPackage;
-	d.setupPackage   = sugar_setupPackage;
+	d.PackupNameSpace    = sugar_PackupNameSpace;
+	d.ExportNameSpace   = sugar_ExportNameSpace;
 	return &d;
 }
 

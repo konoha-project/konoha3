@@ -329,7 +329,7 @@ static KMETHOD MecabNode_cost(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ------------------------------------------------------------------------ */
 
-static kbool_t mecab_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, const char **args, KTraceInfo *trace)
+static kbool_t mecab_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int argc, const char **args, KTraceInfo *trace)
 {
 	static KDEFINE_CLASS TaggerDef = {
 		STRUCTNAME(Tagger),
@@ -391,7 +391,7 @@ static kbool_t mecab_initPackage(KonohaContext *kctx, kNameSpace *ns, int argc, 
 	return true;
 }
 
-static kbool_t mecab_setupPackage(KonohaContext *kctx, kNameSpace *ns, isFirstTime_t isFirstTime, KTraceInfo *trace)
+static kbool_t mecab_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	return true;
 }
@@ -402,8 +402,8 @@ KDEFINE_PACKAGE* mecab_init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("mecab", "1.0"),
-		.initPackage    = mecab_initPackage,
-		.setupPackage   = mecab_setupPackage,
+		.PackupNameSpace    = mecab_PackupNameSpace,
+		.ExportNameSpace   = mecab_ExportNameSpace,
 	};
 	return &d;
 }
