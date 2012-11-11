@@ -271,12 +271,12 @@ static KMETHOD NameSpace_hate(KonohaContext *kctx, KonohaStack *sfp)
 	kNameSpace_RemoveSyntax(kctx, sfp[0].asNameSpace, keyword, trace);
 }
 
-static void kNameSpace_SetStaticFunction(KonohaContext *kctx, kNameSpace *ns, kArray *list, kpackageId_t packageId, ktype_t cid, KTraceInfo *trace)
+static void kNameSpace_SetStaticFunction(KonohaContext *kctx, kNameSpace *ns, kArray *list, ktype_t cid, KTraceInfo *trace)
 {
 	size_t i;
 	for(i = 0; i < kArray_size(list); i++) {
 		kMethod *mtd = list->MethodItems[i];
-		if(kMethod_is(Static, mtd) && mtd->typeId == cid && (packageId == mtd->packageId || packageId == -1)) {
+		if(kMethod_is(Static, mtd) && mtd->typeId == cid) {
 			uintptr_t mtdinfo = ((uintptr_t)cid | (((uintptr_t)mtd->mn) << (sizeof(ktype_t) * 8)));
 			KLIB kNameSpace_SetConstData(kctx, ns, mtd->mn, VirtualType_StaticMethod, mtdinfo, trace);
 		}
@@ -288,22 +288,14 @@ static KMETHOD NameSpace_useStaticFunc(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KMakeTrace(trace, sfp);
 	KonohaClass *ct = O_ct(sfp[1].asObject);
-	kNameSpace_SetStaticFunction(kctx, sfp[0].asNameSpace, ct->methodList_OnGlobalConstList, -1, ct->typeId, trace);
+	kNameSpace *ns = sfp[0].asNameSpace;
+	kNameSpace_SetStaticFunction(kctx, ns, ct->methodList_OnGlobalConstList, ct->typeId, trace);
+	while(ns != NULL) {
+		kNameSpace_SetStaticFunction(kctx, ns, ns->methodList_OnList, ct->typeId, trace);
+		ns = ns->parentNULL;
+	}
 	KReturnVoid();
 }
-
-////## void NameSpace.useStaticFunc(String package, Object o);
-//static KMETHOD NameSpace_useStaticFunc2(KonohaContext *kctx, KonohaStack *sfp)
-//{
-//	KMakeTrace(trace, sfp);
-//	kpackageId_t packageId = KLIB KpackageId(kctx, S_text(sfp[1].asString), S_size(sfp[1].asString), 0, _NEWID);
-//	KonohaPackage *pack = GetPackageNULL(kctx, packageId, trace);
-//	if(pack != NULL) {
-//		KonohaClass *ct = O_ct(sfp[2].asObject);
-//		kNameSpace_SetStaticFunction(kctx, sfp[0].asNameSpace, ct->methodList_OnGlobalConstList, packageId, ct->typeId, trace);
-//	}
-//	KReturnVoid();
-//}
 
 #define _Public kMethod_Public
 #define _F(F)   (intptr_t)(F)
@@ -322,7 +314,6 @@ void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns)
 		_Public, _F(NameSpace_loadScript), TY_void, TY_NameSpace, MN_("load"), 1, TY_String, FN_("filename"),
 		_Public, _F(NameSpace_loadScript), TY_void, TY_NameSpace, MN_("include"), 1, TY_String, FN_("filename"),
 		_Public, _F(NameSpace_useStaticFunc), TY_void, TY_NameSpace, MN_("useStaticFunc"), 1, TY_Object, FN_("class"),
-//		_Public, _F(NameSpace_useStaticFunc2), TY_void, TY_NameSpace, MN_("useStaticFunc"), 2, TY_String, FN_("package"), TY_Object, FN_("class"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, NULL);

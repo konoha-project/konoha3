@@ -106,7 +106,8 @@ static void TokenSeq_checkCStyleParam(KonohaContext *kctx, TokenSeq* tokens)
 	int i;
 	for(i = 0; i < tokens->endIdx; i++) {
 		kTokenVar *tk = tokens->tokenList->TokenVarItems[i];
-		if(tk->resolvedSyntaxInfo->keyword == SYM_("void")) {
+		DBG_P("i=%d, %s%s", i, PSYM_t(tk->resolvedSymbol));
+		if(tk->resolvedSymbol == KW_void) {
 			tokens->endIdx = i; //  f(void) = > f()
 			return;
 		}

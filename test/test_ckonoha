@@ -708,7 +708,12 @@ PASS=0
 record_result 0105_Block $PASS 0
 ## 0106_Increment
 PASS=0
-record_result 0106_Increment $PASS 0
+run_test 1 5 minimum "-MOutputTest" 0106_Increment/Increment_ArgInc.k
+run_test 2 5 minimum "-MOutputTest" 0106_Increment/Increment_Dec.k
+run_test 3 5 minimum "-MOutputTest" 0106_Increment/Increment_GlobalDec.k
+run_test 4 5 minimum "-MOutputTest" 0106_Increment/Increment_GlobalInc.k
+run_test 5 5 minimum "-MOutputTest" 0106_Increment/Increment_Inc.k
+record_result 0106_Increment $PASS 5
 ## 0109_CSyntaxError
 PASS=0
 run_test 1 2 minimum "-MOutputTest" 0109_CSyntaxError/CSyntaxError_TopLevelBreak.k
