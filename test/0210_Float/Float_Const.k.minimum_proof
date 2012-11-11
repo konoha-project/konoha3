@@ -2,5 +2,5 @@ LINE6: 'Nan == nan'
 LINE7: '+Infinity == inf'
 LINE8: '+Infinity == inf'
 LINE9: '-Infinity == -inf'
-LINE10: 'FLOAT_EPSILON == 0.000'
+LINE10: 'FLOAT_EPSILON == 0.0000'
 Q.E.D.

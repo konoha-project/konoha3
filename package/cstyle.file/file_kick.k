@@ -3,7 +3,7 @@ import("konoha.file");
 
 /* file */
 
-@Static FILE System.fopen(String path, String mode) {
+@Public @Static FILE System.fopen(String path, String mode) {
 	return new FILE(path, mode);
 }
 
@@ -27,6 +27,6 @@ import("konoha.file");
 	fp.print(msg);
 }
 
-UseStaticFunction(System);
+UseStaticFunc(System);
 
 

@@ -22,6 +22,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-UseStaticFunction(System);
+UseStaticFunc(System);
 
 

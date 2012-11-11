@@ -282,8 +282,8 @@ static void kNameSpace_SetStaticFunction(KonohaContext *kctx, kNameSpace *ns, kA
 	}
 }
 
-//## void NameSpace.useStaticFunction(Object o);
-static KMETHOD NameSpace_useStaticFunction(KonohaContext *kctx, KonohaStack *sfp)
+//## void NameSpace.useStaticFunc(Object o);
+static KMETHOD NameSpace_useStaticFunc(KonohaContext *kctx, KonohaStack *sfp)
 {
 	KMakeTrace(trace, sfp);
 	KonohaClass *ct = O_ct(sfp[1].asObject);
@@ -291,8 +291,8 @@ static KMETHOD NameSpace_useStaticFunction(KonohaContext *kctx, KonohaStack *sfp
 	KReturnVoid();
 }
 
-////## void NameSpace.useStaticFunction(String package, Object o);
-//static KMETHOD NameSpace_useStaticFunction2(KonohaContext *kctx, KonohaStack *sfp)
+////## void NameSpace.useStaticFunc(String package, Object o);
+//static KMETHOD NameSpace_useStaticFunc2(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	KMakeTrace(trace, sfp);
 //	kpackageId_t packageId = KLIB KpackageId(kctx, S_text(sfp[1].asString), S_size(sfp[1].asString), 0, _NEWID);
@@ -320,8 +320,8 @@ void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns)
 		_Public, _F(NameSpace_hate), TY_boolean, TY_NameSpace, MN_("hate"), 1, TY_String, FN_("symbol"),
 		_Public, _F(NameSpace_loadScript), TY_void, TY_NameSpace, MN_("load"), 1, TY_String, FN_("filename"),
 		_Public, _F(NameSpace_loadScript), TY_void, TY_NameSpace, MN_("include"), 1, TY_String, FN_("filename"),
-		_Public, _F(NameSpace_useStaticFunction), TY_void, TY_NameSpace, MN_("useStaticFunction"), 1, TY_Object, FN_("class"),
-//		_Public, _F(NameSpace_useStaticFunction2), TY_void, TY_NameSpace, MN_("useStaticFunction"), 2, TY_String, FN_("package"), TY_Object, FN_("class"),
+		_Public, _F(NameSpace_useStaticFunc), TY_void, TY_NameSpace, MN_("useStaticFunc"), 1, TY_Object, FN_("class"),
+//		_Public, _F(NameSpace_useStaticFunc2), TY_void, TY_NameSpace, MN_("useStaticFunc"), 2, TY_String, FN_("package"), TY_Object, FN_("class"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, NULL);
