@@ -5,5 +5,5 @@ import("cstyle.global");
 
 int i;
 i--;
-assert(i==-1);
+assert(i == -1);
 
