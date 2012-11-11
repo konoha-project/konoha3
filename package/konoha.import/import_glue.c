@@ -102,7 +102,7 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 		expr = CreateImportCall(kctx, syn, tkImport, ns, pkgname);
 	}
 	KLIB kObject_setObject(kctx, stmt, KW_ExprPattern, TY_Expr, expr);
-	ret = SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_void, TypeCheckPolicy_ALLOWVOID);
+	ret = SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_void, TypeCheckPolicy_ALLOWVOID);
 	if(ret) {
 		kStmt_typed(stmt, EXPR);
 	}

@@ -23,7 +23,7 @@
 // 	return pos-1;
 // }
 
-// Expr tyCheckSingleQuotedChar(Stmt stmt, Expr expr, Gamma gma, int typeid) {
+// Expr TypeCheckSingleQuotedChar(Stmt stmt, Expr expr, Gamma gma, int typeid) {
 // 	Token tk = expr.getTermToken();
 // 	String s = tk.getText();
 // 	if(s.getSize() == 1) {
@@ -36,5 +36,5 @@
 
 
 // setTokenFunc("'", singleQuoteToken);
-// addTypeCheck("$SingleQuotedChar", tyCheckSingleQuotedChar);
+// addTypeCheck("$SingleQuotedChar", TypeCheckSingleQuotedChar);
 // addTermExpression("$SingleQuotedChar");

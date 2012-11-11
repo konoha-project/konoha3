@@ -264,7 +264,7 @@ boolean statementShell(Stmt stmt, Gamma gma) {
 	}
 	String[] args = concatTokenList(tokenList);
 	Block block = stmt.newBlock(generateSubProcSequence(args, true));
-	boolean ret = block.tyCheckAll(gma);
+	boolean ret = block.TypeCheckAll(gma);
 	if(!ret) {
 		return false;
 	}

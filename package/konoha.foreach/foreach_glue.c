@@ -115,7 +115,7 @@ static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_Statement(stmt, gma);
 	DBG_P("for statement .. ");
 	int isOkay = false;
-	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, 0)) {
+	if(SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, 0)) {
 		kNameSpace *ns = Stmt_nameSpace(stmt);
 		kToken *TypeToken = SUGAR kStmt_getToken(kctx, stmt, KW_TypePattern, NULL);
 		kToken *VariableToken  = SUGAR kStmt_getToken(kctx, stmt, KW_SymbolPattern, NULL);
@@ -135,7 +135,7 @@ static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 		kStmt_appendBlock(kctx, IfStmt, SUGAR kStmt_getBlock(kctx, stmt, ns, KW_BlockPattern, NULL));
 		kStmt_Set(CatchBreak, IfStmt, true);
 		kStmt_Set(CatchContinue, IfStmt, true);
-		isOkay = SUGAR kBlock_tyCheckAll(kctx, block, gma);
+		isOkay = SUGAR kBlock_TypeCheckAll(kctx, block, gma);
 		if(isOkay) {
 			kStmt_typed(IfStmt, LOOP);
 			kStmt_setObject(kctx, stmt, KW_BlockPattern, block);

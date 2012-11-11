@@ -122,7 +122,7 @@ static kExpr *kStmtExpr_box(KonohaContext *kctx, kStmt *stmt, kExpr *texpr, kGam
 	return boxExpr;
 }
 
-static kExpr *Expr_tyCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, ktype_t reqty, int pol)
+static kExpr *Expr_TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, ktype_t reqty, int pol)
 {
 	kExpr *texpr = expr;
 	if(Stmt_isERR(stmt)) texpr = K_NULLEXPR;
@@ -173,18 +173,18 @@ static kExpr* kStmt_TypeCheckExprAt(KonohaContext *kctx, kStmt *stmt, kExpr *exp
 {
 	if(!Expr_isTerm(exprP) && pos < kArray_size(exprP->cons)) {
 		kExpr *expr = exprP->cons->ExprItems[pos];
-		expr = Expr_tyCheck(kctx, stmt, expr, gma, reqty, pol);
+		expr = Expr_TypeCheck(kctx, stmt, expr, gma, reqty, pol);
 		KFieldSet(exprP->cons, exprP->cons->ExprItems[pos], expr);
 		return expr;
 	}
 	return K_NULLEXPR;
 }
 
-static kbool_t kStmt_tyCheckByName(KonohaContext *kctx, kStmt *stmt, ksymbol_t classNameSymbol, kGamma *gma, ktype_t reqty, int pol)
+static kbool_t kStmt_TypeCheckByName(KonohaContext *kctx, kStmt *stmt, ksymbol_t classNameSymbol, kGamma *gma, ktype_t reqty, int pol)
 {
 	kExpr *expr = (kExpr *)kStmt_getObjectNULL(kctx, stmt, classNameSymbol);
 	if(expr != NULL && IS_Expr(expr)) {
-		kExpr *texpr = Expr_tyCheck(kctx, stmt, expr, gma, reqty, pol);
+		kExpr *texpr = Expr_TypeCheck(kctx, stmt, expr, gma, reqty, pol);
 //		DBG_P("reqty=%s, texpr->ty=%s isnull=%d", TY_t(reqty), TY_t(texpr->ty), (texpr == K_NULLEXPR));
 		if(texpr != K_NULLEXPR) {
 			if(texpr != expr) {
@@ -214,7 +214,7 @@ static kbool_t callStatementFunc(KonohaContext *kctx, kFunc *fo, int *countRef, 
 	return lsfp[0].boolValue;
 }
 
-static kbool_t SugarSyntax_tyCheckStmt(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, kGamma *gma)
+static kbool_t SugarSyntax_TypeCheckStmt(KonohaContext *kctx, SugarSyntax *syn, kStmt *stmt, kGamma *gma)
 {
 	int SugarFunc_index = Gamma_isTopLevel(gma) ? SugarFunc_TopLevelStatement : SugarFunc_Statement;
 	int callCount = 0;
@@ -243,7 +243,7 @@ static kbool_t SugarSyntax_tyCheckStmt(KonohaContext *kctx, SugarSyntax *syn, kS
 	return false;
 }
 
-static kbool_t kBlock_tyCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
+static kbool_t kBlock_TypeCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
 {
 	size_t i;
 	int result = true, lvarsize = gma->genv->localScope.varsize;
@@ -251,7 +251,7 @@ static kbool_t kBlock_tyCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
 		kStmt *stmt = (kStmt *)bk->StmtList->ObjectItems[i];
 		if(Stmt_isDone(stmt)) continue;
 		KdumpStmt(kctx, stmt);
-		if(Stmt_isERR(stmt) || !SugarSyntax_tyCheckStmt(kctx, stmt->syn, stmt, gma)) {
+		if(Stmt_isERR(stmt) || !SugarSyntax_TypeCheckStmt(kctx, stmt->syn, stmt, gma)) {
 			DBG_ASSERT(Stmt_isERR(stmt));
 			Gamma_setERROR(gma, 1);
 			result = false;
@@ -343,7 +343,7 @@ static kMethod *kMethod_Compile(KonohaContext *kctx, kMethod *mtd, kparamtype_t 
 
 	GAMMA_PUSH(gma, &newgma);
 	kGamma_InitParam(kctx, &newgma, param, callparamNULL);
-	kBlock_tyCheckAll(kctx, bk, gma);
+	kBlock_TypeCheckAll(kctx, bk, gma);
 	KLIB kMethod_GenCode(kctx, mtd, bk, options);
 	GAMMA_POP(gma, &newgma);
 	RESET_GCSTACK();
@@ -416,7 +416,7 @@ static kstatus_t kBlock_EvalAtTopLevel(KonohaContext *kctx, kBlock *bk, kMethod 
 
 	GAMMA_PUSH(gma, &newgma);
 	kGamma_initIt(kctx, &newgma, Method_param(mtd));
-	kBlock_tyCheckAll(kctx, bk, gma);
+	kBlock_TypeCheckAll(kctx, bk, gma);
 	GAMMA_POP(gma, &newgma);
 
 	kStmt *stmt = bk->StmtList->StmtItems[0];

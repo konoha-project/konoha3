@@ -38,11 +38,11 @@ static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_Statement(stmt, gma);
 	DBG_P("while statement .. ");
 	int ret = false;
-	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_boolean, 0)) {
+	if(SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_boolean, 0)) {
 		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
-		kStmt_Set(CatchContinue, stmt, true);  // set before tyCheckAll
+		kStmt_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
 		kStmt_Set(CatchBreak, stmt, true);
-		ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
+		ret = SUGAR kBlock_TypeCheckAll(kctx, bk, gma);
 		if(ret) {
 			kStmt_typed(stmt, LOOP);
 		}
@@ -55,11 +55,11 @@ static KMETHOD Statement_do(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_Statement(stmt, gma);
 	DBG_P("do statement .. ");
 	int ret = false;
-	if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_boolean, 0)) {
+	if(SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_boolean, 0)) {
 		kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
-		kStmt_Set(CatchContinue, stmt, true);  // set before tyCheckAll
+		kStmt_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
 		kStmt_Set(CatchBreak, stmt, true);
-		ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
+		ret = SUGAR kBlock_TypeCheckAll(kctx, bk, gma);
 		if(ret) {
 			kStmt_Set(RedoLoop, stmt, true);
 			kStmt_typed(stmt, LOOP);  // FIXME
@@ -96,16 +96,18 @@ static KMETHOD Statement_CStyleFor(KonohaContext *kctx, KonohaStack *sfp)
 	int KW_InitBlock = SYM_("init"), KW_IteratorBlock = SYM_("Iterator");
 	kBlock *initBlock = SUGAR kStmt_getBlock(kctx, stmt, NULL/*defaultNS*/, KW_InitBlock, NULL);
 	DBG_ASSERT(IS_Block(initBlock));
-	if(initBlock == NULL) {
-		if(SUGAR kStmt_tyCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_boolean, 0)) {
+	if(initBlock == NULL) {  // with out init
+		DBG_P("Without init block");
+		if(SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_boolean, 0)) {
 			kBlock *bk = SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
-			kStmt_Set(CatchContinue, stmt, true);  // set before tyCheckAll
+			kStmt_Set(CatchContinue, stmt, true);  // set before TypeCheckAll
 			kStmt_Set(CatchBreak, stmt, true);
-			ret = SUGAR kBlock_tyCheckAll(kctx, bk, gma);
+			ret = SUGAR kBlock_TypeCheckAll(kctx, bk, gma);
 			if(ret) {
 				kBlock *iterBlock = SUGAR kStmt_getBlock(kctx, stmt, NULL/*defaultNS*/, KW_IteratorBlock, NULL);
 				if(iterBlock != NULL) {
-					ret = SUGAR kBlock_tyCheckAll(kctx, iterBlock, gma);
+					ret = SUGAR kBlock_TypeCheckAll(kctx, iterBlock, gma);
+					DBG_P("result of iterBlock.TypeCheckAll %d", ret);
 				}
 			}
 			if(ret) {
@@ -123,7 +125,7 @@ static KMETHOD Statement_CStyleFor(KonohaContext *kctx, KonohaStack *sfp)
 			kStmt_setObject(kctx, forStmt, KW_IteratorBlock, bk);
 		}
 		kStmt_setObject(kctx, stmt, KW_BlockPattern, initBlock);
-		ret = SUGAR kBlock_tyCheckAll(kctx, initBlock, gma);
+		ret = SUGAR kBlock_TypeCheckAll(kctx, initBlock, gma);
 		if(ret) {
 			kStmt_typed(stmt, BLOCK);
 		}

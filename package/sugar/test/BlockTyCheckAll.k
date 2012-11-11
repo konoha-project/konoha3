@@ -5,11 +5,11 @@ import("sugar");
 
 syntax "hoge" $Block;
 
-boolean tyCheckHoge(Stmt stmt, Gamma gma) {
+boolean TypeCheckHoge(Stmt stmt, Gamma gma) {
 	Block b = stmt.getBlock("$Block", null);
 	boolean ret = false;
 	if(b != null) {
-		ret = b.tyCheckAll(gma);
+		ret = b.TypeCheckAll(gma);
 		if(ret) {
 			stmt.setType(TSTMT_BLOCK);
 		}
@@ -17,7 +17,7 @@ boolean tyCheckHoge(Stmt stmt, Gamma gma) {
 	return ret;
 }
 
-addStatement("hoge", tyCheckHoge);
+addStatement("hoge", TypeCheckHoge);
 
 void test() {
 	boolean executed = false;

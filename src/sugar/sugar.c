@@ -201,13 +201,13 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kExpr_setUnboxConstValue   = kExpr_setUnboxConstValue;
 	mod->kExpr_setVariable          = kExpr_setVariable;
 	mod->kStmt_TypeCheckExprAt        = kStmt_TypeCheckExprAt;
-	mod->kStmt_tyCheckByName        = kStmt_tyCheckByName;
-	mod->kBlock_tyCheckAll          = kBlock_tyCheckAll;
+	mod->kStmt_TypeCheckByName        = kStmt_TypeCheckByName;
+	mod->kBlock_TypeCheckAll          = kBlock_TypeCheckAll;
 	mod->kStmtExpr_TypeCheckCallParam = kStmtExpr_TypeCheckCallParam;
 	mod->new_TypedCallExpr          = new_TypedCallExpr;
 	mod->kGamma_declareLocalVariable = kGamma_declareLocalVariable;
 	mod->kStmt_declType             = kStmt_declType;
-	mod->kStmt_tyCheckVariableNULL  = kStmt_tyCheckVariableNULL;
+	mod->kStmt_TypeCheckVariableNULL  = kStmt_TypeCheckVariableNULL;
 
 	mod->kNameSpace_DefineSyntax    = kNameSpace_DefineSyntax;
 	mod->kNameSpace_GetSyntax       = kNameSpace_GetSyntax;
