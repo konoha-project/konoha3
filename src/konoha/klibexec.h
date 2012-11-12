@@ -516,6 +516,7 @@ static void KonohaRuntime_raise(KonohaContext *kctx, int symbol, int fault, kStr
 	KExit(EXIT_FAILURE);
 }
 
+
 static int DiagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
 {
 	//DBG_P("IN fault=%d %d,%d,%d,%d", fault, TFLAG_is(int, fault, SoftwareFault), TFLAG_is(int, fault, UserFault), TFLAG_is(int, fault, SystemFault), TFLAG_is(int, fault, ExternalFault));
@@ -533,6 +534,11 @@ static int DiagnosisFaultType(KonohaContext *kctx, int fault, KTraceInfo *trace)
 	}
 	if(TFLAG_is(int, fault, NotExternalFault)) {
 		fault ^= ExternalFault;
+	}
+	if(TFLAG_is(int, fault, SoftwareFault)) {
+		if(PLATAPI DiagnosisCheckSoftwareTestIsPass(kctx, FileId_t(trace->pline), (kushort_t)trace->pline)) {
+			TFLAG_set(int, fault, SoftwareFault, false);
+		}
 	}
 	return fault;
 }

@@ -239,7 +239,6 @@ static struct option long_options2[] = {
 	{"module",          required_argument, 0, 'M'},
 	{"startwith",       required_argument, 0, 'S'},
 	{"builtin-test",    required_argument, 0, 'B'},
-	{"trace",           no_argument,       0, 'F'},
 	{"id",              no_argument,       0, 'q'},
 	{NULL, 0, 0, 0},  /* sentinel */
 };
@@ -280,10 +279,6 @@ static void Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **argv
 
 		case 'D':
 			CommandLine_Define(kctx, optarg, trace);
-			break;
-
-		case 'F':
-			KonohaContext_Set(Trace, kctx);
 			break;
 
 		case 'I':
