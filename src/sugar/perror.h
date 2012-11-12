@@ -85,7 +85,7 @@ static kString* SugarContext_printMessage(KonohaContext *kctx, kinfotag_t taglev
 	return errmsg;
 }
 
-static void kToken_printMessage(KonohaContext *kctx, kTokenVar *tk, kinfotag_t taglevel, const char *fmt, ...)
+static void kToken_error(KonohaContext *kctx, kTokenVar *tk, kinfotag_t taglevel, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);

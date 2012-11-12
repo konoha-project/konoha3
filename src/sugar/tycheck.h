@@ -198,7 +198,7 @@ static kbool_t kStmt_TypeCheckByName(KonohaContext *kctx, kStmt *stmt, ksymbol_t
 
 /* ------------------------------------------------------------------------ */
 
-static kbool_t callStatementFunc(KonohaContext *kctx, kFunc *fo, int *countRef, kStmt *stmt, kGamma *gma)
+static kbool_t CallStatementFunc(KonohaContext *kctx, kFunc *fo, int *countRef, kStmt *stmt, kGamma *gma)
 {
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 3);
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, (kObject *)fo->self);
@@ -222,7 +222,7 @@ static kbool_t SugarSyntax_TypeCheckStmt(KonohaContext *kctx, SugarSyntax *syn, 
 		int index, size;
 		kFunc **FuncItems = SugarSyntax_funcTable(kctx, syn, SugarFunc_index, &size);
 		for(index = size - 1; index >= 0; index--) {
-			/*kbool_t result =*/ callStatementFunc(kctx, FuncItems[index], &callCount, stmt, gma);
+			CallStatementFunc(kctx, FuncItems[index], &callCount, stmt, gma);
 			if(Stmt_isDone(stmt)) return true;
 			if(Stmt_isERR(stmt)) return false;
 			if(stmt->build != TSTMT_UNDEFINED) {

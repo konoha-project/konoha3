@@ -439,7 +439,7 @@ static int TokenSeq_applyMacroSyntax(KonohaContext *kctx, TokenSeq *tokens, Suga
 		}
 		else {
 			kTokenVar *tk = source->tokenList->TokenVarItems[currentIdx];
-			kToken_printMessage(kctx, tk, ErrTag, "macro expects %d parameter(s)", (int)syn->macroParamSize);
+			kToken_error(kctx, tk, ErrTag, "macro expects %d parameter(s)", (int)syn->macroParamSize);
 			source->SourceConfig.foundErrorToken = tk;
 			nextIdx = source->endIdx;
 		}
@@ -507,7 +507,7 @@ static int TokenSeq_resolved2(KonohaContext *kctx, TokenSeq *tokens, MacroSet *m
 				tk->resolvedSyntaxInfo = SYN_(tokens->ns, tk->unresolvedTokenType);
 				if(!kToken_is(StatementSeparator, tk) && tk->unresolvedTokenType != TokenType_INDENT) {
 					if(tk->resolvedSyntaxInfo == NULL) {
-						kToken_printMessage(kctx, tk, ErrTag, "undefined pattern: %s%s", PSYM_t(tk->unresolvedTokenType));
+						kToken_error(kctx, tk, ErrTag, "undefined pattern: %s%s", PSYM_t(tk->unresolvedTokenType));
 						source->SourceConfig.foundErrorToken = tk;
 						goto RETURN_ERROR;
 					}
@@ -596,12 +596,20 @@ static int kStmt_MatchSyntaxPattern(KonohaContext *kctx, kStmt *stmt, TokenSeq *
 			errRuleRef[1] = tk;
 			if(KW_isPATTERN(ruleToken->resolvedSymbol)) {
 				SugarSyntax *syn = SYN_(ns, ruleToken->resolvedSymbol);
-				tokenIdx = SugarSyntax_matchPattern(kctx, syn, ruleToken, stmt, ruleToken->stmtEntryKey, tokens->tokenList, tokenIdx, tokens->endIdx);
-				if(tokenIdx == -1 && !kToken_is(MatchPreviousPattern, ruleToken)) {
-					errRuleRef[0] = ruleToken;
-					return -1;
+				int next = SugarSyntax_matchPattern(kctx, syn, ruleToken, stmt, ruleToken->stmtEntryKey, tokens->tokenList, tokenIdx, tokens->endIdx);
+				if(next < 0) {
+					if(!kToken_is(MatchPreviousPattern, ruleToken)) {
+						errRuleRef[0] = ruleToken;
+						return -1;
+					}
+					if(next == -2 /* see PatternMatch_Token */) {
+
+					}
+					continue;  /* to avoid check same rule */
 				}
-				tk = tokens->tokenList->TokenItems[tokenIdx];
+				else {  /*if(next != -1) */
+					tokenIdx = next ;
+				}
 			}
 			else if(ruleToken->resolvedSymbol == KW_OptionalGroup) {
 				TokenSeq nrule = {ns, ruleToken->subTokenList, 0, kArray_size(ruleToken->subTokenList)};
@@ -958,7 +966,7 @@ static kbool_t kArray_addSyntaxPattern(KonohaContext *kctx, kArray *patternList,
 			tk = NULL;
 			continue;
 		}
-		kToken_printMessage(kctx, tk, ErrTag, "illegal syntax pattern: %s", Token_text(tk));
+		kToken_error(kctx, tk, ErrTag, "illegal syntax pattern: %s", Token_text(tk));
 		return false;
 	}
 	return true;

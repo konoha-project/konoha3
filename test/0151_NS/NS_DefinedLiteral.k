@@ -2,5 +2,5 @@
 
 import("sugar");
 
-assert(definedExpression("-"));
+assert(DefinedStatement("if"));
 

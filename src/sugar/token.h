@@ -37,7 +37,7 @@ extern "C" {
 static void ERROR_UnclosedToken(KonohaContext *kctx, kTokenVar *tk, const char *ch)
 {
 	if(IS_NOTNULL(tk)) {
-		kToken_printMessage(kctx, tk, ErrTag, "must close with %s", ch);
+		kToken_error(kctx, tk, ErrTag, "must close with %s", ch);
 	}
 }
 
@@ -280,7 +280,7 @@ static int ParseSkip(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, i
 static int ParseUndefinedToken(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	if(IS_NOTNULL(tk)) {
-		kToken_printMessage(kctx, tk, ErrTag, "undefined token character: %c (ascii=%x)", tokenizer->source[tok_start], tokenizer->source[tok_start]);
+		kToken_error(kctx, tk, ErrTag, "undefined token character: %c (ascii=%x)", tokenizer->source[tok_start], tokenizer->source[tok_start]);
 		while(tokenizer->source[++tok_start] != 0);
 		return tok_start;
 	}

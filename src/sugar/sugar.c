@@ -224,7 +224,7 @@ void MODSUGAR_init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kStmt_parseExpr            = kStmt_parseExpr;
 	mod->kStmt_addExprParam         = kStmt_addExprParam;
 	mod->kStmt_rightJoinExpr        = kStmt_rightJoinExpr;
-	mod->kToken_printMessage        = kToken_printMessage;
+	mod->kToken_error        = kToken_error;
 	mod->kStmt_printMessage2        = kStmt_printMessage2;
 
 #ifndef USE_SMALLBUILD

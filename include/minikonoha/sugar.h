@@ -590,7 +590,7 @@ typedef struct {
 	kExpr*      (*kStmt_TypeCheckVariableNULL)(KonohaContext *, kStmt *, kExpr *, kGamma *, ktype_t);
 
 
-	void       (*kToken_printMessage)(KonohaContext *, kTokenVar *, kinfotag_t, const char *fmt, ...);
+	void       (*kToken_error)(KonohaContext *, kTokenVar *, kinfotag_t, const char *fmt, ...);
 	kExpr *    (*kStmt_printMessage2)(KonohaContext *, kStmt *, kToken *, kinfotag_t, const char *fmt, ...);
 
 	void (*dumpToken)(KonohaContext *kctx, kToken *tk, int n);

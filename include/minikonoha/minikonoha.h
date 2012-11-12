@@ -1875,6 +1875,7 @@ typedef struct {
 } while(0)
 
 #define KReturnDefaultValue() do {\
+	sfp[K_RTNIDX].intValue = 0;\
 	return; \
 } while(0)
 

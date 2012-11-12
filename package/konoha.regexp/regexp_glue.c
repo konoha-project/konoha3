@@ -691,7 +691,7 @@ static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 		prev = ch;
 	}
 	if(IS_NOTNULL(tk)) {
-		SUGAR kToken_printMessage(kctx, tk, ErrTag, "must close with %s", "/");
+		SUGAR kToken_error(kctx, tk, ErrTag, "must close with %s", "/");
 	}
 	KReturnUnboxValue(pos-1);
 }

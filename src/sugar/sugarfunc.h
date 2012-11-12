@@ -154,11 +154,11 @@ static KMETHOD PatternMatch_Token(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_PatternMatch(stmt, name, tokenList, beginIdx, endIdx);
 	DBG_ASSERT(beginIdx < endIdx);
 	kToken *tk = tokenList->TokenItems[beginIdx];
-	if(!kToken_is(StatementSeparator, tk)) {
+	if(!kToken_is(StatementSeparator, tk) && !kToken_isIndent(tk)) {
 		kStmt_AddParsedObject(kctx, stmt, name, UPCAST(tk));
 		KReturnUnboxValue(beginIdx+1);
 	}
-	KReturnUnboxValue(-1);
+	KReturnUnboxValue(-2);
 }
 
 static KMETHOD PatternMatch_TypeDecl(KonohaContext *kctx, KonohaStack *sfp)
