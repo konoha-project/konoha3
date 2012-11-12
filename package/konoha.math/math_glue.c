@@ -250,7 +250,7 @@ static kbool_t math_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 			_Public|_Const|_Static, _F(Math_acosh), TY_float, TY_Math, MN_("acosh"), 1, TY_float, FN_x,
 			_Public|_Const|_Static, _F(Math_atanh), TY_float, TY_Math, MN_("atanh"), 1, TY_float, FN_x,
 #endif
-			_Public|_Const, _F(Math_random), TY_float, TY_Math, MN_("random"), 0,
+			_Public, _F(Math_random), TY_float, TY_Math, MN_("random"), 0,
 			DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
