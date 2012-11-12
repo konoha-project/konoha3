@@ -29,11 +29,29 @@ extern "C" {
 #include <stdio.h>
 #include <sys/ioctl.h>
 //#include <asm/termbits.h>
+#include <syslog.h>
+#include <errno.h>
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/klib.h>
 
 // -------------------------------------------------------------------------
 /* Console */
+
+static const char *getThisFileName(KonohaContext *kctx)
+{
+	static char shell[] = "shell";
+	kNameSpace *ns = (kNameSpace *)KLIB Knull(kctx, CT_NameSpace);
+	ksymbol_t sym = SYM_("SCRIPT_ARGV");
+	KKeyValue *kv = KLIB kNameSpace_GetConstNULL(kctx, ns, sym);
+	if(kv != NULL) {
+		kArray *sa = (kArray *)kv->ObjectValue;
+		if(sa->stringItems != NULL) {
+			const char *file = S_text(sa->stringItems[0]);
+			return file;
+		}
+	}
+	return shell;
+}
 
 static char *file2CId(const char *file, char *cid)
 {
@@ -47,7 +65,7 @@ static char *file2CId(const char *file, char *cid)
 
 static void UI_ReportUserMessage(KonohaContext *kctx, kinfotag_t level, kfileline_t pline, const char *msg, int isNewLine)
 {
-	const char *file = PLATAPI shortFilePath(FileId_t(pline));
+	const char *file = PLATAPI shortFilePath(getThisFileName(kctx));
 	char cid[64] = {0};
 	file2CId(file, cid);
 	PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptMessage\", \"CId\": \"%s\", \"Body\": \"%s\"}" , cid, msg);
@@ -55,7 +73,7 @@ static void UI_ReportUserMessage(KonohaContext *kctx, kinfotag_t level, kfilelin
 
 static void UI_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t pline, const char *msg)
 {
-	const char *file = PLATAPI shortFilePath(FileId_t(pline));
+	const char *file = PLATAPI shortFilePath(getThisFileName(kctx));
 	char cid[64] = {0};
 	file2CId(file, cid);
 	PLATAPI syslog_i( 5/*LOG_NOTICE*/, "{\"Method\": \"DScriptCompilerMessage\", \"CId\": \"%s\", \"Body\": \"%s\"}", cid, msg);
@@ -141,28 +159,12 @@ static char *getUserInput(KonohaContext *kctx, char *buff, const char *cid, cons
 #include <netdb.h>
 #include <unistd.h>
 
-static const char *getThisFileName(KonohaContext *kctx)
-{
-	static char shell[] = "shell";
-	kNameSpace *ns = (kNameSpace *)KLIB Knull(kctx, CT_NameSpace);
-	ksymbol_t sym = SYM_("SCRIPT_ARGV");
-	KKeyValue *kv = KLIB kNameSpace_GetConstNULL(kctx, ns, sym);
-	if(kv != NULL) {
-		kArray *sa = (kArray *)kv->ObjectValue;
-		if(sa->stringItems != NULL) {
-			const char *file = S_text(sa->stringItems[0]);
-			return file;
-		}
-	}
-	return shell;
-}
-
 static int InputUserApproval(KonohaContext *kctx, const char *message, const char *yes, const char *no, int defval)
 {
 	char buff[BUFSIZ] = {0};
 	const char *ykey = defval ? "Y" : "y";
 	const char *nkey = defval ? "n" : "N";
-	if(message == NULL || message[strlen(message)] == '\0') message = "Do you approve?";
+	if(message == NULL || message[0] == '\0') message = "Do you approve?";
 	if(yes == NULL || yes[0] == '\0') yes = "yes";
 	if(no == NULL || no[0] == '\0') no = "no";
 
@@ -187,7 +189,7 @@ static int InputUserApproval(KonohaContext *kctx, const char *message, const cha
 	const char host[] = "127.0.0.1"; // TODO get localhost IP
 	int port = 8090; // TODO random port scan
 
-	PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptApproval\", \"CId\": \"%s\", \"Body\": \"%s (%s %s, %s %s): \", \"Ip\", \"%s:%d\"}" , cid, message, yes, ykey, no, nkey, host, port);
+	PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptApproval\", \"CId\": \"%s\", \"Body\": \"%s (%s %s, %s %s): \", \"Ip\": \"%s:%d\"}" , cid, message, yes, ykey, no, nkey, host, port);
 	getUserInput(kctx, buff, cid, host, port);
 	if(defval) {
 		return ((buff[0] == 'N' || buff[0] == 'n') && buff[1] == 0) ? false : true;
@@ -238,6 +240,245 @@ static char* InputUserPassword(KonohaContext *kctx, const char *message)
 }
 
 // -------------------------------------------------------------------------
+/* Logging */
+
+#define writeToBuffer(CH, buftop, bufend) { buftop[0] = CH; buftop++; }
+
+static char *writeFixedTextToBuffer(const char *text, size_t len, char *buftop, char *bufend)
+{
+	if((size_t)(bufend - buftop) > len) {
+		memcpy(buftop, text, len);
+		return buftop+len;
+	}
+	return buftop;
+}
+
+static char *writeTextToBuffer(const char *s, char *buftop, char *bufend)
+{
+	if(buftop < bufend) {
+		buftop[0] = '"';
+		buftop++;
+	}
+	while(*s != 0 && buftop < bufend) {
+		if(*s == '"') {
+			buftop[0] = '\"'; buftop++;
+			if(buftop < bufend) {
+				buftop[0] = s[0];
+				buftop++;
+			}
+		}
+		else if(*s == '\n') {
+			buftop[0] = '\\'; buftop++;
+			if(buftop < bufend) {
+				buftop[0] = 'n';
+				buftop++;
+			}
+		}
+		else {
+			buftop[0] = s[0];
+			buftop++;
+		}
+		s++;
+	}
+	if(buftop < bufend) {
+		buftop[0] = '"';
+		buftop++;
+	}
+	return buftop;
+}
+
+static void reverse(char *const start, char *const end, const int len)
+{
+	int i, l = len / 2;
+	register char *s = start;
+	register char *e = end - 1;
+	for (i = 0; i < l; i++) {
+		char tmp = *s;
+		*s++ = *e;
+		*e-- = tmp;
+	}
+}
+
+static char *writeUnsingedIntToBuffer(uintptr_t uint, char *const buftop, const char *const bufend)
+{
+	int i = 0;
+	while(buftop + i < bufend) {
+		int tmp = uint % 10;
+		uint /= 10;
+		buftop[i] = '0' + tmp;
+		++i;
+		if(uint == 0)
+			break;
+	}
+	reverse(buftop, buftop + i, i);
+	return buftop + i;
+}
+
+// the last entry of args must be NULL
+static char *writeCharArrayToBuffer(const char** args, char *buftop, char *bufend)
+{
+	int i;
+	buftop[0] = '['; buftop += 1;
+	for(i = 0; args[i] != NULL; i++) {
+		buftop = writeTextToBuffer(args[i], buftop, bufend);
+		if(args[i+1] != NULL) {
+			buftop[0] = ','; buftop[1] = ' '; buftop += 2;
+		}
+	}
+	buftop[0] = ']';
+	return buftop + 1;
+}
+
+static char* writeKeyToBuffer(const char *key, size_t keylen, char *buftop, char *bufend)
+{
+	if(buftop < bufend) {
+		writeToBuffer('"', buftop, bufend);
+	}
+	buftop = writeFixedTextToBuffer(key, keylen, buftop, bufend);
+	if(buftop + 3 < bufend) {
+		buftop[0] = '"';
+		buftop[1] = ':';
+		buftop[2] = ' ';
+		buftop+=3;
+	}
+	return buftop;
+}
+
+#define HasFault    (SystemFault|SoftwareFault|UserFault|ExternalFault)
+#define HasLocation (PeriodicPoint|ResponseCheckPoint|SystemChangePoint|SecurityAudit)
+
+static char* writePolicyToBuffer(KonohaContext *kctx, logconf_t *logconf, char *buftop, char *bufend, KTraceInfo *trace)
+{
+	if((logconf->policy & HasLocation)) {
+		buftop = writeKeyToBuffer(TEXTSIZE("LogPoint"), buftop, bufend);
+		writeToBuffer('"', buftop, bufend);
+		if(TFLAG_is(int, logconf->policy, PeriodicPoint)) {
+			buftop = writeFixedTextToBuffer(TEXTSIZE("PeriodicPoint,"), buftop, bufend);
+		}
+		if(TFLAG_is(int, logconf->policy, ResponseCheckPoint)) {
+			buftop = writeFixedTextToBuffer(TEXTSIZE("ResponseCheckPoint,"), buftop, bufend);
+		}
+		if(TFLAG_is(int, logconf->policy, SystemChangePoint)) {
+			buftop = writeFixedTextToBuffer(TEXTSIZE("SystemChangePoint,"), buftop, bufend);
+		}
+		if(TFLAG_is(int, logconf->policy, SecurityAudit)) {
+			buftop = writeFixedTextToBuffer(TEXTSIZE("SecurityAudit,"), buftop, bufend);
+		}
+		buftop[-1] = '"';
+		buftop[0] = ',';
+		buftop[1] = ' ';
+		buftop+=2;
+	}
+	if((logconf->policy & HasFault)) {
+		if(!(logconf->policy & HasLocation)) {
+			buftop = writeKeyToBuffer(TEXTSIZE("LogPoint"), buftop, bufend);
+			buftop = writeTextToBuffer("ErrorPoint", buftop, bufend);
+			buftop[0] = ',';
+			buftop[1] = ' ';
+			buftop+=2;
+		}
+		buftop = writeKeyToBuffer(TEXTSIZE("FaultType"), buftop, bufend);
+		writeToBuffer('"', buftop, bufend);
+		if(TFLAG_is(int, logconf->policy, SystemFault)) {
+			buftop = writeFixedTextToBuffer(TEXTSIZE("SystemFault,"), buftop, bufend);
+		}
+		if(TFLAG_is(int, logconf->policy, SoftwareFault)) {
+			buftop = writeFixedTextToBuffer(TEXTSIZE("SoftwareFault,"), buftop, bufend);
+		}
+		if(TFLAG_is(int, logconf->policy, UserFault)) {
+			buftop = writeFixedTextToBuffer(TEXTSIZE("UserFault,"), buftop, bufend);
+		}
+		if(TFLAG_is(int, logconf->policy, ExternalFault)) {
+			buftop = writeFixedTextToBuffer(TEXTSIZE("ExternalFault,"), buftop, bufend);
+		}
+		buftop[-1] = '"';
+		buftop[0] = ',';
+		buftop[1] = ' ';
+		buftop+=2;
+	}
+	if(trace != NULL) {
+		buftop = writeKeyToBuffer(TEXTSIZE("ScriptName"), buftop, bufend);
+		buftop = writeTextToBuffer(FileId_t(trace->pline), buftop, bufend);
+		buftop[0] = ','; buftop[1] = ' '; buftop += 2;
+		buftop = writeKeyToBuffer(TEXTSIZE("ScriptLine"), buftop, bufend);
+		buftop = writeUnsingedIntToBuffer((uintptr_t)(kushort_t)trace->pline, buftop, bufend);
+		buftop[0] = ','; buftop[1] = ' '; buftop += 2;
+	}
+	return buftop;
+}
+
+static char* writeErrnoToBuffer(logconf_t *logconf, char *buftop, char *bufend)
+{
+	if((logconf->policy & HasFault)) {
+		buftop = writeKeyToBuffer(TEXTSIZE("Errno"), buftop, bufend);
+		buftop = writeUnsingedIntToBuffer((uintptr_t)errno, buftop, bufend);
+		buftop[0] = ','; buftop[1] = ' '; buftop+=2;
+		buftop = writeKeyToBuffer(TEXTSIZE("Message"), buftop, bufend);
+		buftop = writeTextToBuffer(strerror(errno), buftop, bufend);
+		errno = 0;
+	}
+	return buftop;
+}
+
+static void writeDataLogToBuffer(KonohaContext *kctx, logconf_t *logconf, va_list ap, char *buftop, char *bufend, KTraceInfo *trace)
+{
+	int c = 0, logtype;
+	buftop[0] = '{'; buftop++;
+	buftop = writePolicyToBuffer(kctx, logconf, buftop, bufend, trace);
+	while((logtype = va_arg(ap, int)) != LOG_END) {
+		if(c > 0 && buftop + 3 < bufend) {
+			buftop[0] = ',';
+			buftop[1] = ' ';
+			buftop+=2;
+		}
+		switch(logtype) {
+		case LOG_s: {
+			const char *key = va_arg(ap, const char *);
+			const char *text = va_arg(ap, const char *);
+			buftop = writeKeyToBuffer(key, strlen(key), buftop, bufend);
+			buftop = writeTextToBuffer(text, buftop, bufend);
+			break;
+		}
+		case LOG_u: {
+			const char *key = va_arg(ap, const char *);
+			buftop = writeKeyToBuffer(key, strlen(key), buftop, bufend);
+			buftop = writeUnsingedIntToBuffer(va_arg(ap, uintptr_t), buftop, bufend);
+			break;
+		}
+		case LOG_ERRNO : {
+			buftop = writeErrnoToBuffer(logconf, buftop, bufend);
+			break;
+		}
+		case LOG_a : {
+			const char *key = va_arg(ap, const char *);
+			buftop = writeKeyToBuffer(key, strlen(key), buftop, bufend);
+			buftop = writeCharArrayToBuffer(va_arg(ap, const char**), buftop, bufend);
+			break;
+		}
+		}
+		c++;
+	}
+	buftop[0] = '}'; buftop++;
+	buftop[0] = '\0';
+}
+
+#define HasFault    (SystemFault|SoftwareFault|UserFault|ExternalFault)
+
+static void TraceDataLog(KonohaContext *kctx, KTraceInfo *trace, int logkey, logconf_t *logconf, ...)
+{
+	char buf[K_PAGESIZE];
+	va_list ap;
+	va_start(ap, logconf);
+	writeDataLogToBuffer(kctx, logconf, ap, buf, buf + (K_PAGESIZE - 4), trace);
+	int level = (logconf->policy & HasFault) ? LOG_ERR : LOG_NOTICE;
+	const char *file = PLATAPI shortFilePath(getThisFileName(kctx));
+	char cid[64] = {0};
+	file2CId(file, cid);
+	PLATAPI syslog_i(level, "{\"Method\": \"DScriptError\", \"CId\": \"%s\", \"Body\": \"%s\"}", cid, buf);
+	va_end(ap);
+}
+
+// -------------------------------------------------------------------------
 
 kbool_t LoadDScriptConsoleModule(KonohaFactory *factory, ModuleType type)
 {
@@ -254,6 +495,8 @@ kbool_t LoadDScriptConsoleModule(KonohaFactory *factory, ModuleType type)
 
 	factory->InputUserText            = InputUserText;
 	factory->InputUserPassword        = InputUserPassword;
+
+	factory->TraceDataLog             = TraceDataLog;
 	return true;
 }
 
