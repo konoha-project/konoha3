@@ -26,8 +26,8 @@
 #include <iconv.h>
 #include <errno.h>
 #include <minikonoha/minikonoha.h>
-#include <minikonoha/klib.h>
 #include <minikonoha/sugar.h>
+#include <minikonoha/klib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -471,7 +471,8 @@ static void JSVisitor_visitFieldExpr(KonohaContext *kctx, IRBuilder *self, kExpr
 
 static bool JSVisitor_importPackage(KonohaContext *kctx, kNameSpace *ns, kString *package, kfileline_t uline)
 {
-	KImportPackage(ns, S_text(package), NULL);
+	KBaseTrace(trace);
+	KImportPackage(ns, S_text(package), trace);
 	return true;
 }
 
@@ -617,6 +618,25 @@ static void JSVisitor_visitStackTopExpr(KonohaContext *kctx, IRBuilder *self, kE
 	JSVisitor_emitString(kctx, self, "/*FIXME*/STACKTOP", "", "");
 }
 
+static void compileAllDefinedMethods(KonohaContext *kctx)
+{
+	KonohaRuntime *share = kctx->share;
+	size_t i;
+	for(i = 0; i < kArray_size(share->GlobalConstList); i++) {
+		kObject *o = share->GlobalConstList->ObjectItems[i];
+		if(O_ct(o) == CT_NameSpace) {
+			kNameSpace *ns = (kNameSpace *) o;
+			size_t j;
+			for(j = 0; j < kArray_size(ns->methodList_OnList); j++) {
+				kMethod *mtd = ns->methodList_OnList->MethodItems[j];
+				if(IS_NameSpace(mtd->LazyCompileNameSpace)) {
+					KLIB kMethod_DoLazyCompilation(kctx, mtd, NULL, HatedLazyCompile|CrossCompile);
+				}
+			}
+		}
+	}
+}
+
 static void JSVisitor_emitExtendFunctionCode(KonohaContext *kctx, IRBuilder *builder)
 {
 	JSVisitor_emitNewLineWith(kctx, builder, "var __extends = this.__extends || function (d, b) {");
@@ -656,7 +676,7 @@ static void JSVisitor_emitMethodHeader(KonohaContext *kctx, IRBuilder *builder, 
 	}else if(strcmp(SYM_t(mtd->mn), "new") == 0) {
 		KLIB Kwb_printf(kctx, &wb, "function %s(", CT_t(class));
 	}else{
-		KLIB kMethod_DoLazyCompilation(kctx, mtd, NULL, HatedLazyCompile|CrossCompile);
+		compileAllDefinedMethods(kctx);
 		if(kMethod_is(Static, mtd)) {
 			KLIB Kwb_printf(kctx, &wb, "%s.%s%s = function(", CT_t(CT_(mtd->typeId)), MethodName_t(mtd->mn));
 		}else{
@@ -705,6 +725,8 @@ static void JSVisitor_emitClassFooter(KonohaContext *kctx, IRBuilder *builder, K
 	}
 }
 
+
+
 static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
 {
 	kbool_t isConstractor = false;
@@ -734,7 +756,7 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 			JSVisitor_visitClassFields(kctx, builder, class);
 		}
 	}else{
-		KLIB kMethod_DoLazyCompilation(kctx, mtd, NULL, HatedLazyCompile|CrossCompile);
+		compileAllDefinedMethods(kctx);
 	}
 }
 

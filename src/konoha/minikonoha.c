@@ -25,6 +25,7 @@
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/klib.h"
 #include "minikonoha/local.h"
+#include "minikonoha/sugar.h"
 
 #include "protomap.h"
 #include "klibexec.h"
@@ -64,7 +65,6 @@ static void KonohaStackRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx, 
 	KUnsafeFieldInit(base->OptionalErrorInfo, TS_EMPTY);
 	base->gcstack_OnContextConstList = new_(Array, K_PAGESIZE/sizeof(void *), base->ContextConstList);
 	KLIB Karray_init(kctx, &base->cwb, K_PAGESIZE * 4);
-	base->visitor = kVisitor_KonohaVM;
 	ctx->esp = base->stack;
 	ctx->stack = base;
 }
