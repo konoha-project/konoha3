@@ -13,7 +13,7 @@ class EventQueue {
 
 	EventQueue(void) {
 		this.data = new Event[0];
-		this.ctxlist = new KonohaContext[0];
+		//this.ctxlist = new KonohaContext[0];
 	}
 
 	void enqueue(Event event) {
