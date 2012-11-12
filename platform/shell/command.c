@@ -232,7 +232,6 @@ static struct option long_options2[] = {
 	{"verbose",         no_argument,       &verbose_debug, 1},
 	{"verbose:sugar",   no_argument,       &verbose_sugar, 1},
 	{"verbose:code",    no_argument,       &verbose_code,  1},
-	{"format",          required_argument, 0, 'f'},
 	{"interactive",     no_argument,       0, 'i'},
 	{"typecheck",       no_argument,       0, 'c'},
 	{"define",          required_argument, 0, 'D'},
@@ -307,17 +306,6 @@ static void Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **argv
 
 		case '?':
 			/* getopt_long already printed an error message. */
-			break;
-
-		case 'f':
-			//printf("%s\n", optarg);
-			if(strcmp(optarg, "JS") == 0){
-				KonohaContext_setVisitor(kctx, kVisitor_JS);
-			}else if(strcmp(optarg, "Dump") == 0){
-				KonohaContext_setVisitor(kctx, kVisitor_Dump);
-			}else{
-				KonohaContext_setVisitor(kctx, kVisitor_KonohaVM);
-			}
 			break;
 
 		default:
