@@ -35,6 +35,22 @@ extern "C" {
 // -------------------------------------------------------------------------
 /* Console */
 
+static const char *getThisFileName(KonohaContext *kctx)
+{
+	static char shell[] = "shell";
+	kNameSpace *ns = (kNameSpace *)KLIB Knull(kctx, CT_NameSpace);
+	ksymbol_t sym = SYM_("SCRIPT_ARGV");
+	KKeyValue *kv = KLIB kNameSpace_GetConstNULL(kctx, ns, sym);
+	if(kv != NULL) {
+		kArray *sa = (kArray *)kv->ObjectValue;
+		if(sa->stringItems != NULL) {
+			const char *file = S_text(sa->stringItems[0]);
+			return file;
+		}
+	}
+	return shell;
+}
+
 static char *file2CId(const char *file, char *cid)
 {
 	memcpy(cid, file, strlen(file) + 1);
@@ -47,7 +63,7 @@ static char *file2CId(const char *file, char *cid)
 
 static void UI_ReportUserMessage(KonohaContext *kctx, kinfotag_t level, kfileline_t pline, const char *msg, int isNewLine)
 {
-	const char *file = PLATAPI shortFilePath(FileId_t(pline));
+	const char *file = PLATAPI shortFilePath(getThisFileName(kctx));
 	char cid[64] = {0};
 	file2CId(file, cid);
 	PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptMessage\", \"CId\": \"%s\", \"Body\": \"%s\"}" , cid, msg);
@@ -55,7 +71,7 @@ static void UI_ReportUserMessage(KonohaContext *kctx, kinfotag_t level, kfilelin
 
 static void UI_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, kfileline_t pline, const char *msg)
 {
-	const char *file = PLATAPI shortFilePath(FileId_t(pline));
+	const char *file = PLATAPI shortFilePath(getThisFileName(kctx));
 	char cid[64] = {0};
 	file2CId(file, cid);
 	PLATAPI syslog_i( 5/*LOG_NOTICE*/, "{\"Method\": \"DScriptCompilerMessage\", \"CId\": \"%s\", \"Body\": \"%s\"}", cid, msg);
@@ -141,28 +157,12 @@ static char *getUserInput(KonohaContext *kctx, char *buff, const char *cid, cons
 #include <netdb.h>
 #include <unistd.h>
 
-static const char *getThisFileName(KonohaContext *kctx)
-{
-	static char shell[] = "shell";
-	kNameSpace *ns = (kNameSpace *)KLIB Knull(kctx, CT_NameSpace);
-	ksymbol_t sym = SYM_("SCRIPT_ARGV");
-	KKeyValue *kv = KLIB kNameSpace_GetConstNULL(kctx, ns, sym);
-	if(kv != NULL) {
-		kArray *sa = (kArray *)kv->ObjectValue;
-		if(sa->stringItems != NULL) {
-			const char *file = S_text(sa->stringItems[0]);
-			return file;
-		}
-	}
-	return shell;
-}
-
 static int InputUserApproval(KonohaContext *kctx, const char *message, const char *yes, const char *no, int defval)
 {
 	char buff[BUFSIZ] = {0};
 	const char *ykey = defval ? "Y" : "y";
 	const char *nkey = defval ? "n" : "N";
-	if(message == NULL || message[strlen(message)] == '\0') message = "Do you approve?";
+	if(message == NULL || message[0] == '\0') message = "Do you approve?";
 	if(yes == NULL || yes[0] == '\0') yes = "yes";
 	if(no == NULL || no[0] == '\0') no = "no";
 
@@ -187,7 +187,7 @@ static int InputUserApproval(KonohaContext *kctx, const char *message, const cha
 	const char host[] = "127.0.0.1"; // TODO get localhost IP
 	int port = 8090; // TODO random port scan
 
-	PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptApproval\", \"CId\": \"%s\", \"Body\": \"%s (%s %s, %s %s): \", \"Ip\", \"%s:%d\"}" , cid, message, yes, ykey, no, nkey, host, port);
+	PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptApproval\", \"CId\": \"%s\", \"Body\": \"%s (%s %s, %s %s): \", \"Ip\": \"%s:%d\"}" , cid, message, yes, ykey, no, nkey, host, port);
 	getUserInput(kctx, buff, cid, host, port);
 	if(defval) {
 		return ((buff[0] == 'N' || buff[0] == 'n') && buff[1] == 0) ? false : true;
