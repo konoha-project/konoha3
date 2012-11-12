@@ -162,7 +162,7 @@ static int InputUserApproval(KonohaContext *kctx, const char *message, const cha
 	char buff[BUFSIZ] = {0};
 	const char *ykey = defval ? "Y" : "y";
 	const char *nkey = defval ? "n" : "N";
-	if(message == NULL || message[strlen(message)] == '\0') message = "Do you approve?";
+	if(message == NULL || message[0] == '\0') message = "Do you approve?";
 	if(yes == NULL || yes[0] == '\0') yes = "yes";
 	if(no == NULL || no[0] == '\0') no = "no";
 
