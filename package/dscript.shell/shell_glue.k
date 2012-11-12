@@ -25,19 +25,17 @@
 import("cstyle", "while");
 import("cstyle", "break");
 import("cstyle", "null");
+import("cstyle", "float");
 import("konoha.array");
-import("konoha.eval");
-import("konoha.object");
-import("konoha.file");
-import("konoha.global");
-import("konoha.string");
 import("konoha.console");
 import("konoha.defined");
+import("konoha.eval");
+import("konoha.file");
+import("konoha.math");
+import("konoha.object");
+import("konoha.string");
 import("dscript.subproc");
 import("sugar");
-
-int subproc_id = 0;
-int func_id = 0;
 
 @Public String FILE.readAll() {
 	String ret = "";
@@ -74,18 +72,20 @@ String[] concatTokenList(Token[] tokenList) {
 }
 
 String getVarName() {
-	String ret = "__s" + global.subproc_id;
-	global.subproc_id = global.subproc_id + 1;
+	String rand = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	String ret = "__s";
+	while(ret.getSize() < 10) {
+		ret = ret + rand[(Math.random() * (rand.getSize() - 1)).toint()];
+	}
 	return ret;
 }
 
-String getCurrentVarName() {
-	return "__s" + (global.subproc_id - 1);
-}
-
 String getFuncName() {
-	String ret = "__f" + global.func_id;
-	global.func_id = global.func_id + 1;
+	String rand = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	String ret = "__f";
+	while(ret.getSize() < 10) {
+		ret = ret + rand[(Math.random() * (rand.getSize() - 1)).toint()];
+	}
 	return ret;
 }
 
@@ -254,6 +254,9 @@ String generateSubProcSequence(String[] args, boolean enableStdout) {
 	if(defined(DEBUG)) {
 		System.p(ret);
 	}
+	if(!enableStdout) {
+		ret = ret + "return " + varname + ".communicate(\"\")[0]; }";
+	}
 	return ret;
 }
 
@@ -345,7 +348,6 @@ Expr expressionCommandReplace(Stmt stmt, Token[] tokenList, int beginIdx, int op
 	String funcName = getFuncName();
 	String evaltext = "@Public String " + funcName + "() { ";
 	evaltext = evaltext + generateSubProcSequence(args, false).replace("\n", " ");
-	evaltext = evaltext + "return " + getCurrentVarName() + ".communicate(\"\")[0]; }";
 	if(defined(DEBUG)) {
 		System.p(evaltext);
 	}
