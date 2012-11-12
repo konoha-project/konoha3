@@ -56,7 +56,7 @@ static const char *getThisFileName(KonohaContext *kctx)
 static char *file2CId(const char *file, char *cid)
 {
 	memcpy(cid, file, strlen(file) + 1);
-	char *pos = strstr(cid, "\:");
+	char *pos = strstr(cid, ":");
 	if(pos != NULL) {
 		pos[0] = '\0';
 	}
