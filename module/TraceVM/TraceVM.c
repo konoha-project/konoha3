@@ -365,7 +365,7 @@ static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sf
 	PLATAPI RunVirtualMachine(kctx, sfp, BOOTCODE_ENTER);
 }
 
-static MethodFunc GetVritualMachineMethodFunc(void)
+static MethodFunc GetVirtualMachineMethodFunc(void)
 {
 	return MethodFunc_runVirtualMachine;
 }
@@ -440,7 +440,7 @@ static void TraceVMDeleteVirtualMachine(KonohaContext *kctx)
 	size_t i;
 	for(i = 0; i < kArray_size(share->GlobalConstList); i++) {
 		kObject *o = share->GlobalConstList->ObjectItems[i];
-		if(O_ct(o) == CT_NameSpace) {
+		if(IS_NameSpace(o)) {
 			kNameSpace *ns = (kNameSpace *) o;
 			size_t j;
 			for(j = 0; j < kArray_size(ns->methodList_OnList); j++) {
@@ -465,7 +465,7 @@ kbool_t LoadTraceVMModule(KonohaFactory *factory, ModuleType type)
 	factory->IsSupportedVirtualCode        = IsSupportedVirtualCode;
 	factory->RunVirtualMachine             = KonohaVirtualMachine_run;
 	factory->DeleteVirtualMachine          = TraceVMDeleteVirtualMachine;
-	factory->GetVirtualMachineMethodFunc   = GetVritualMachineMethodFunc;
+	factory->GetVirtualMachineMethodFunc   = GetVirtualMachineMethodFunc;
 	factory->GetBootCodeOfNativeMethodCall = GetBootCodeOfNativeMethodCall;
 	return true;
 }

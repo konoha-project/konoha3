@@ -290,7 +290,10 @@ static int DiagnosisSystemError(KonohaContext *kctx, int userFault)
 	return userFault | SoftwareFault | SystemFault;
 }
 
-
+static kbool_t DiagnosisCheckSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
+{
+	return false;
+}
 // -------------------------------------------------------------------------
 /* Konoha C API */
 
@@ -358,13 +361,14 @@ static void KonohaFactory_Check(KonohaFactory *factory)
 		factory->WaitEvent         = NULL;  // check NULL
 	}
 	if(factory->DiagnosisInfo == NULL) {
-		factory->CheckStaticRisk         = CheckStaticRisk;
-		factory->CheckDynamicRisk        = CheckDynamicRisk;
-		factory->DiagnosisSystemError    = DiagnosisSystemError;
+		factory->CheckStaticRisk          = CheckStaticRisk;
+		factory->CheckDynamicRisk         = CheckDynamicRisk;
+		factory->DiagnosisSystemError     = DiagnosisSystemError;
 		factory->DiagnosisSoftwareProcess = DiagnosisSoftwareProcess;
-		factory->DiagnosisSystemResource = DiagnosisSystemResource;
-		factory->DiagnosisFileSystem     = DiagnosisFileSystem;
-		factory->DiagnosisNetworking     = DiagnosisNetworking;
+		factory->DiagnosisSystemResource  = DiagnosisSystemResource;
+		factory->DiagnosisFileSystem      = DiagnosisFileSystem;
+		factory->DiagnosisNetworking      = DiagnosisNetworking;
+		factory->DiagnosisCheckSoftwareTestIsPass = DiagnosisCheckSoftwareTestIsPass;
 	}
 }
 

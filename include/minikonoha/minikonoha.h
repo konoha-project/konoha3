@@ -574,6 +574,7 @@ struct KonohaFactory {
 	int (*DiagnosisSystemResource)(KonohaContext *, KTraceInfo *);
 	int (*DiagnosisFileSystem)(KonohaContext *, const char *path, size_t pathlen, KTraceInfo *);
 	int (*DiagnosisNetworking)(KonohaContext *, const char *path, size_t pathlen, int port, KTraceInfo *);
+	kbool_t (*DiagnosisCheckSoftwareTestIsPass)(KonohaContext *, const char *filename, int line);
 
 	/* Console API */
 	KModuleInfo *ConsoleInfo;

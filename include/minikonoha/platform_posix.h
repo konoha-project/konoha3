@@ -893,7 +893,7 @@ static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 static kbool_t DEOS_fetchCoverageLog(KonohaContext *kctx, const char *filename, int line)
 {
 #if HAVE_DB_H
-#define DATABASE "test.db"
+#define DATABASE "coverage_test.db"
 #define BUFSIZE 128
 
 	DB *db = NULL;
@@ -927,16 +927,11 @@ static kbool_t DEOS_fetchCoverageLog(KonohaContext *kctx, const char *filename, 
 static kbool_t DEOS_checkSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
 {
 	DBG_P("filename='%s', line=%d", filename, line);
-	if(!KonohaContext_Is(Trace, kctx)) {
-		kbool_t res = false;
+	kbool_t res = false;
 #if HAVE_DB_H
-		res = DEOS_fetchCoverageLog(kctx, filename, line);
+	res = DEOS_fetchCoverageLog(kctx, filename, line);
 #endif
-		return res;
-	}else{
-		return true;
-	}
-
+	return res;
 }
 
 static int DEOS_DiagnosisErrorCode(KonohaContext *kctx, int fault, KTraceInfo *trace)
