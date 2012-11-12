@@ -29,6 +29,16 @@ extern "C" {
 #include <errno.h>
 #include <minikonoha/minikonoha.h>
 
+#if HAVE_DB_H
+#if defined(__linux__)
+#include <db_185.h>
+#else
+#include <db.h>
+#endif /*defined(__linux__)*/
+#endif /*HAVE_DB_H*/
+#include <sys/stat.h>
+#include <fcntl.h>
+
 // -------------------------------------------------------------------------
 /* Risk */
 
@@ -260,6 +270,50 @@ static int DiagnosisSystemError(KonohaContext *kctx, int userFault)
 	return userFault | SoftwareFault |SystemFault;
 }
 
+static kbool_t DiagnosisFetchCoverageLog(KonohaContext *kctx, const char *filename, int line)
+{
+#if HAVE_DB_H
+#define DATABASE "konoha_coverage.db"
+#define BUFSIZE 128
+
+	DB *db = NULL;
+	DBT DBkey = {};
+	DBT DBvalue = {};
+	char key[BUFSIZE];
+
+	if((db = dbopen(DATABASE, O_RDONLY, S_IRGRP | S_IWGRP, DB_BTREE, NULL)) == NULL) {
+		return false;
+	}
+
+	PLATAPI snprintf_i(key, BUFSIZE, "\"%s:%d\"", filename, line);
+
+	DBkey.data = key;
+	DBkey.size = strlen(key);
+
+	if(!db->get(db, &DBkey, &DBvalue, 0)) {
+		PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"event\": \"DiagnosisErrorCode\", \"ScriptName\": \"%s\", \"ScriptLine:%d, \"Count\":%s, }", filename, line, (char *)DBvalue.data);
+		db->close(db);
+		return true;
+	}
+	else{
+		db->close(db);
+		return false;
+	}
+#else
+	return false;
+#endif
+}
+
+static kbool_t DiagnosisCheckSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
+{
+	DBG_P("filename='%s', line=%d", filename, line);
+	kbool_t res = false;
+#if HAVE_DB_H
+	res = DiagnosisFetchCoverageLog(kctx, filename, line);
+#endif
+	return res;
+}
+
 // -------------------------------------------------------------------------
 
 kbool_t LoadDiagnosisModule(KonohaFactory *factory, ModuleType type)
@@ -267,14 +321,15 @@ kbool_t LoadDiagnosisModule(KonohaFactory *factory, ModuleType type)
 	static KModuleInfo ModuleInfo = {
 		"Diagnosis", "0.1", 0, "deos",
 	};
-	factory->DiagnosisInfo            = &ModuleInfo;
-	factory->CheckStaticRisk          = CheckStaticRisk;
-	factory->CheckDynamicRisk         = CheckDynamicRisk;
-	factory->DiagnosisSystemError     = DiagnosisSystemError;
-	factory->DiagnosisSoftwareProcess = DiagnosisSoftwareProcess;
-	factory->DiagnosisSystemResource  = DiagnosisSystemResource;
-	factory->DiagnosisFileSystem      = DiagnosisFileSystem;
-	factory->DiagnosisNetworking      = DiagnosisNetworking;
+	factory->DiagnosisInfo                    = &ModuleInfo;
+	factory->CheckStaticRisk                  = CheckStaticRisk;
+	factory->CheckDynamicRisk                 = CheckDynamicRisk;
+	factory->DiagnosisSystemError             = DiagnosisSystemError;
+	factory->DiagnosisSoftwareProcess         = DiagnosisSoftwareProcess;
+	factory->DiagnosisSystemResource          = DiagnosisSystemResource;
+	factory->DiagnosisFileSystem              = DiagnosisFileSystem;
+	factory->DiagnosisNetworking              = DiagnosisNetworking;
+	factory->DiagnosisCheckSoftwareTestIsPass = DiagnosisCheckSoftwareTestIsPass;
 	return true;
 }
 
