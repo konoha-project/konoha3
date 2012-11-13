@@ -219,9 +219,6 @@ if(HAVE_LIBICONV)
 	set(ExtraLibs ${ExtraLibs} ${HAVE_LIBICONV})
 endif(HAVE_LIBICONV)
 
-if(HAVE_LIBDB)
-	set(ExtraLibs ${ExtraLibs} ${HAVE_LIBDB})
-endif(HAVE_LIBDB)
 
 macro(POP _STR _DELIM _RESULT)
 	string(REPLACE ${_DELIM} ";" _tmp ${_STR})
@@ -459,11 +456,6 @@ foreach(f ${test_files})
 	set_tests_properties(${test_name} PROPERTIES ENVIRONMENT
 		"KONOHA_HOME=${PARENT_BINARY_DIR}")
 endforeach(f ${test_files})
-
-option(USE_TRACEVM "Use tracevm" ON)
-if(USE_TRACEVM)
-	add_definitions(-DK_USE_TRACEVM)
-endif(USE_TRACEVM)
 
 add_subdirectory(platform/dse)
 add_subdirectory(platform/apache)

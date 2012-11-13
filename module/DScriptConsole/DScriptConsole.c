@@ -56,7 +56,7 @@ static const char *getThisFileName(KonohaContext *kctx)
 static char *file2CId(const char *file, char *cid)
 {
 	memcpy(cid, file, strlen(file) + 1);
-	char *pos = strstr(cid, "\:");
+	char *pos = strstr(cid, ":");
 	if(pos != NULL) {
 		pos[0] = '\0';
 	}
@@ -474,7 +474,7 @@ static void TraceDataLog(KonohaContext *kctx, KTraceInfo *trace, int logkey, log
 	const char *file = PLATAPI shortFilePath(getThisFileName(kctx));
 	char cid[64] = {0};
 	file2CId(file, cid);
-	PLATAPI syslog_i(level, "{\"Method\": \"DScriptError\", \"CId\": \"%s\", \"Body\": \"%s\"}", cid, buf);
+	PLATAPI syslog_i(level, "{\"Method\": \"DScriptError\", \"CId\": \"%s\", \"Body\": %s}", cid, buf);
 	va_end(ap);
 }
 

@@ -58,14 +58,6 @@ extern "C" {
 #include <errno.h>
 #include <fcntl.h>
 
-#if HAVE_DB_H
-#if defined(__linux__)
-#include <db_185.h>
-#else
-#include <db.h>
-#endif /*defined(__linux__)*/
-#endif /*HAVE_DB_H*/
-
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
 #endif /* HAVE_ICONV_H */
@@ -888,72 +880,6 @@ static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 
 	}
 	return userFault | SoftwareFault |SystemFault;
-}
-
-static kbool_t DEOS_fetchCoverageLog(KonohaContext *kctx, const char *filename, int line)
-{
-#if HAVE_DB_H
-#define DATABASE "test.db"
-#define BUFSIZE 128
-
-	DB *db = NULL;
-	DBT DBkey = {};
-	DBT DBvalue = {};
-	char key[BUFSIZE];
-
-	if((db = dbopen(DATABASE, O_RDONLY, S_IRGRP | S_IWGRP, DB_BTREE, NULL)) == NULL) {
-		return false;
-	}
-
-	PLATAPI snprintf_i(key, BUFSIZE, "\"%s:%d\"", filename, line);
-
-	DBkey.data = key;
-	DBkey.size = strlen(key);
-
-	if(!db->get(db, &DBkey, &DBvalue, 0)) {
-		PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"event\": \"DiagnosisErrorCode\", \"ScriptName\": \"%s\", \"ScriptLine:%d, \"Count\":%s, }", filename, line, (char *)DBvalue.data);
-		db->close(db);
-		return true;
-	}
-	else{
-		db->close(db);
-		return false;
-	}
-#else
-	return false;
-#endif
-}
-
-static kbool_t DEOS_checkSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
-{
-	DBG_P("filename='%s', line=%d", filename, line);
-	if(!KonohaContext_Is(Trace, kctx)) {
-		kbool_t res = false;
-#if HAVE_DB_H
-		res = DEOS_fetchCoverageLog(kctx, filename, line);
-#endif
-		return res;
-	}else{
-		return true;
-	}
-
-}
-
-static int DEOS_DiagnosisErrorCode(KonohaContext *kctx, int fault, KTraceInfo *trace)
-{
-	//DBG_P("IN fault=%d %d,%d,%d,%d", fault, TFLAG_is(int, fault, SoftwareFault), TFLAG_is(int, fault, UserFault), TFLAG_is(int, fault, SystemFault), TFLAG_is(int, fault, ExternalFault));
-	if(TFLAG_is(int, fault, SystemError)) {
-		fault = DEOS_guessFaultFromErrno(kctx, fault);
-	}
-	if(fault == 0) {
-		fault = SoftwareFault | UserFault | SystemFault;  // unsure
-	}
-	if(TFLAG_is(int, fault, SoftwareFault)) {
-		if(DEOS_checkSoftwareTestIsPass(kctx, FileId_t(trace->pline), (kushort_t)trace->pline)) {
-			TFLAG_set(int, fault, SoftwareFault, false);
-		}
-	}
-	return fault;
 }
 
 // --------------------------------------------------------------------------

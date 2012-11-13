@@ -574,6 +574,7 @@ struct KonohaFactory {
 	int (*DiagnosisSystemResource)(KonohaContext *, KTraceInfo *);
 	int (*DiagnosisFileSystem)(KonohaContext *, const char *path, size_t pathlen, KTraceInfo *);
 	int (*DiagnosisNetworking)(KonohaContext *, const char *path, size_t pathlen, int port, KTraceInfo *);
+	kbool_t (*DiagnosisCheckSoftwareTestIsPass)(KonohaContext *, const char *filename, int line);
 
 	/* Console API */
 	KModuleInfo *ConsoleInfo;
@@ -844,8 +845,6 @@ struct KonohaRuntimeVar {
 	KHashMap                 *paramdomMap_KeyOnList;
 };
 
-enum kVisitorType{ kVisitor_KonohaVM, kVisitor_Dump, kVisitor_JS };
-
 #define kContext_Debug          ((kshortflag_t)(1<<0))
 #define kContext_Interactive    ((kshortflag_t)(1<<1))
 #define kContext_CompileOnly    ((kshortflag_t)(1<<2))
@@ -854,8 +853,6 @@ enum kVisitorType{ kVisitor_KonohaVM, kVisitor_Dump, kVisitor_JS };
 
 #define KonohaContext_Is(P, X)   (TFLAG_is(kshortflag_t,(X)->stack->flag, kContext_##P))
 #define KonohaContext_Set(P, X)   TFLAG_set1(kshortflag_t, (X)->stack->flag, kContext_##P)
-
-#define KonohaContext_setVisitor(X, V) ((X)->stack->visitor = (V))
 
 struct KonohaStackRuntimeVar {
 	KonohaStack*               stack;
@@ -875,7 +872,6 @@ struct KonohaStackRuntimeVar {
 	jmpbuf_i                  *evaljmpbuf;
 	KonohaStack               *bottomStack;
 	KonohaStack               *topStack;
-	enum kVisitorType          visitor;
 };
 
 // module

@@ -366,7 +366,7 @@ static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sf
 	PLATAPI RunVirtualMachine(kctx, sfp, BOOTCODE_ENTER);
 }
 
-static MethodFunc GetVritualMachineMethodFunc(void)
+static MethodFunc GetVirtualMachineMethodFunc(void)
 {
 	return MethodFunc_runVirtualMachine;
 }
@@ -388,7 +388,7 @@ kbool_t LoadMiniVMModule(KonohaFactory *factory, ModuleType type)
 	factory->IsSupportedVirtualCode        = IsSupportedVirtualCode;
 	factory->RunVirtualMachine             = KonohaVirtualMachine_run;
 	factory->DeleteVirtualMachine          = KonohaVirtualMachine_delete;
-	factory->GetVirtualMachineMethodFunc   = GetVritualMachineMethodFunc;
+	factory->GetVirtualMachineMethodFunc   = GetVirtualMachineMethodFunc;
 	factory->GetBootCodeOfNativeMethodCall = GetBootCodeOfNativeMethodCall;
 	return true;
 }

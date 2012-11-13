@@ -25,6 +25,7 @@
 #include "minikonoha/minikonoha.h"
 #include "minikonoha/klib.h"
 #include "minikonoha/local.h"
+#include "minikonoha/sugar.h"
 
 #include "protomap.h"
 #include "klibexec.h"
@@ -64,7 +65,6 @@ static void KonohaStackRuntime_init(KonohaContext *kctx, KonohaContextVar *ctx, 
 	KUnsafeFieldInit(base->OptionalErrorInfo, TS_EMPTY);
 	base->gcstack_OnContextConstList = new_(Array, K_PAGESIZE/sizeof(void *), base->ContextConstList);
 	KLIB Karray_init(kctx, &base->cwb, K_PAGESIZE * 4);
-	base->visitor = kVisitor_KonohaVM;
 	ctx->esp = base->stack;
 	ctx->stack = base;
 }
@@ -290,7 +290,10 @@ static int DiagnosisSystemError(KonohaContext *kctx, int userFault)
 	return userFault | SoftwareFault | SystemFault;
 }
 
-
+static kbool_t DiagnosisCheckSoftwareTestIsPass(KonohaContext *kctx, const char *filename, int line)
+{
+	return false;
+}
 // -------------------------------------------------------------------------
 /* Konoha C API */
 
@@ -358,13 +361,14 @@ static void KonohaFactory_Check(KonohaFactory *factory)
 		factory->WaitEvent         = NULL;  // check NULL
 	}
 	if(factory->DiagnosisInfo == NULL) {
-		factory->CheckStaticRisk         = CheckStaticRisk;
-		factory->CheckDynamicRisk        = CheckDynamicRisk;
-		factory->DiagnosisSystemError    = DiagnosisSystemError;
+		factory->CheckStaticRisk          = CheckStaticRisk;
+		factory->CheckDynamicRisk         = CheckDynamicRisk;
+		factory->DiagnosisSystemError     = DiagnosisSystemError;
 		factory->DiagnosisSoftwareProcess = DiagnosisSoftwareProcess;
-		factory->DiagnosisSystemResource = DiagnosisSystemResource;
-		factory->DiagnosisFileSystem     = DiagnosisFileSystem;
-		factory->DiagnosisNetworking     = DiagnosisNetworking;
+		factory->DiagnosisSystemResource  = DiagnosisSystemResource;
+		factory->DiagnosisFileSystem      = DiagnosisFileSystem;
+		factory->DiagnosisNetworking      = DiagnosisNetworking;
+		factory->DiagnosisCheckSoftwareTestIsPass = DiagnosisCheckSoftwareTestIsPass;
 	}
 }
 

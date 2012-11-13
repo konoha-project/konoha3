@@ -200,6 +200,7 @@ static kString *new_kString(KonohaContext *kctx, kArray *gcstack, const char *te
 	} else {
 		checkASCII(kctx, s, text, len);
 	}
+
 	if(len < SIZEOF_INLINETEXT)
 		return (kString *) kStringBase_InitInline(kctx, s, text, len);
 	if(TFLAG_is(int, policy, StringPolicy_TEXT))
