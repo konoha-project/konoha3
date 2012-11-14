@@ -30,6 +30,12 @@
 extern "C" {
 #endif
 
+static void CallSugarMethod(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd, int argc, kObject *obj)
+{
+	KSetMethodCallStack(sfp, 0/*UL*/, mtd, argc, obj);
+	KLIB KonohaRuntime_tryCallMethod(kctx, sfp);
+}
+
 /* ------------------------------------------------------------------------ */
 
 static kExpr *callFuncExpression(KonohaContext *kctx, SugarSyntax *syn, kFunc *fo, int *countRef, kStmt *stmt, kArray *tokenList, int beginIdx, int operatorIdx, int endIdx)
@@ -43,11 +49,7 @@ static kExpr *callFuncExpression(KonohaContext *kctx, SugarSyntax *syn, kFunc *f
 	lsfp[K_CALLDELTA+4].intValue = operatorIdx;
 	lsfp[K_CALLDELTA+5].intValue = endIdx;
 	countRef[0] += 1;
-	{
-		KonohaStack *sfp = lsfp + K_CALLDELTA;
-		KSetMethodCallStack(sfp, 0/*UL*/, fo->mtd, 5, K_NULLEXPR);
-		KonohaRuntime_callMethod(kctx, sfp);
-	}
+	CallSugarMethod(kctx, lsfp + K_CALLDELTA, fo->mtd, 5, UPCAST(K_NULLEXPR));
 	END_LOCAL();
 	DBG_ASSERT(IS_Expr(lsfp[0].asObject));
 	return lsfp[0].asExpr;
@@ -539,11 +541,7 @@ static int callPatternMatchFunc(KonohaContext *kctx, kFunc *fo, int *countRef, k
 	lsfp[K_CALLDELTA+4].intValue = beginIdx;
 	lsfp[K_CALLDELTA+5].intValue = endIdx;
 	countRef[0] += 1;
-	{
-		KonohaStack *sfp = lsfp + K_CALLDELTA;
-		KSetMethodCallStack(sfp, 0/*UL*/, fo->mtd, 5, KLIB Knull(kctx, CT_Int));
-		KonohaRuntime_callMethod(kctx, sfp);
-	}
+	CallSugarMethod(kctx, lsfp + K_CALLDELTA, fo->mtd, 5, KLIB Knull(kctx, CT_Int));
 	END_LOCAL();
 	RESET_GCSTACK();
 	return (int)lsfp[0].intValue;

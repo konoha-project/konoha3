@@ -978,6 +978,11 @@ static kbool_t sugar_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 	};
 	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(ClassData), 0);
 
+	int TY_Symbol = cSymbol->typeId;
+	sugar_defineTokenFunc(kctx, ns, TY_Symbol, trace);
+	sugar_defineMessageMethod(kctx, ns, TY_Symbol, trace);
+
+
 	int FN_buildid = FN_("buildid"), FN_key = FN_("key"), FN_defval = FN_("defval");
 	int FN_typeid = FN_("typeid"), FN_gma = FN_("gma"), FN_pol = FN_("pol");
 	int FN_msg = FN_("msg");
@@ -1201,6 +1206,17 @@ static kbool_t RENAMEME_initNameSpace(KonohaContext *kctx, kNameSpace *packageNS
 
 static kbool_t sugar_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
+	KDEFINE_INT_CONST IntData[] = {
+#define DEFINE_KEYWORD(KW) {#KW, TY_int, KW}
+		DEFINE_KEYWORD(ErrTag),
+		DEFINE_KEYWORD(WarnTag),
+		DEFINE_KEYWORD(NoticeTag),
+		DEFINE_KEYWORD(InfoTag),
+		DEFINE_KEYWORD(DebugTag),
+#undef DEFINE_KEYWORD
+		{NULL},
+	};
+	KLIB kNameSpace_LoadConstData(kctx, exportNS, KonohaConst_(IntData), trace);
 	return true;
 }
 
