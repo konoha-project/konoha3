@@ -324,12 +324,19 @@ void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformA
 	}
 }
 
-void KonohaFactory_CheckVirtualMachine(KonohaFactory *factory);  // For compatibility
+static void KonohaFactory_syslog_i(int priority, const char *message, ...)
+{
+	/*FIXME(ide)
+	 * If we cannot load default modules at KonohaFactory_LoadPlatformModule and
+	 * we emit log info with facotry->syslog_i. */
+	//abort();
+}
 
 static void KonohaFactory_Check(KonohaFactory *factory)
 {
 	if(factory->LoggerInfo == NULL) {
 		factory->TraceDataLog = DefaultTraceLog;  // for safety
+		factory->syslog_i     = KonohaFactory_syslog_i;
 	}
 	if(factory->VirtualMachineInfo == NULL) {
 		const char *mod = factory->getenv_i("KONOHA_VM");
@@ -369,6 +376,9 @@ static void KonohaFactory_Check(KonohaFactory *factory)
 		factory->DiagnosisFileSystem      = DiagnosisFileSystem;
 		factory->DiagnosisNetworking      = DiagnosisNetworking;
 		factory->DiagnosisCheckSoftwareTestIsPass = DiagnosisCheckSoftwareTestIsPass;
+	}
+	if(factory->syslog_i == KonohaFactory_syslog_i) {
+		factory->syslog_i = NULL;
 	}
 }
 
