@@ -685,7 +685,7 @@ static void KonohaVisitor_Init(KonohaContext *kctx, struct IRBuilder *builder, k
 	builder->currentStmt = NULL;
 	builder->shift = 0;
 
-	KLIB kMethod_setFunc(kctx, mtd, PLATAPI GetVirtualMachineMethodFunc());
+	KLIB kMethod_setFunc(kctx, mtd, (MethodFunc) PLATAPI GetVirtualMachineMethodFunc());
 
 	DBG_ASSERT(kArray_size(ctxcode->codeList) == 0);
 	kBasicBlock* lbINIT  = new_BasicBlockLABEL(kctx);

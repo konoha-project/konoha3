@@ -634,7 +634,7 @@ struct KonohaFactory {
 	kbool_t               (*IsSupportedVirtualCode)(int opcode);
 	struct VirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct VirtualCode *pc);
 	void                  (*DeleteVirtualMachine)(KonohaContext *kctx);
-	void */*MethodFunc*/  (*GetVirtualMachineMethodFunc)(void);
+	void *                (*GetVirtualMachineMethodFunc)(void);
 	struct VirtualCode*   (*GetBootCodeOfNativeMethodCall)(void);
 
 	/* JSON_API */

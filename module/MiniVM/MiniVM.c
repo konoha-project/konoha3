@@ -76,6 +76,11 @@ static const DEFINE_OPSPEC OPDATA[] = {
 static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeType type, VirtualCode *c, size_t i, VirtualCode *pc_start)
 {
 	switch(type) {
+	case VMT_UL:
+	case VMT_FX:
+	case VMT_C:
+	case VMT_Object:
+	case VMT_HCACHE:
 	case VMT_VOID: break;
 	case VMT_ADDR:
 		KLIB Kwb_printf(kctx, wb, " L%d", (int)((VirtualCode *)c->p[i] - pc_start));
@@ -178,7 +183,6 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #else
 #define GOTO_NEXT()     goto *(NEXT_OP)
 #endif
-#define TC(c)
 #define DISPATCH_START(pc) goto *OPJUMP[pc->opcode]
 #define DISPATCH_END(pc)
 #define GOTO_PC(pc)        GOTO_NEXT()
@@ -188,7 +192,6 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #define NEXT_OP     L_HEAD
 #define GOTO_NEXT() goto NEXT_OP
 #define JUMP        L_HEAD
-#define TC(c)
 #define DISPATCH_START(pc) L_HEAD:;switch(pc->opcode) {
 #define DISPATCH_END(pc)   } /*KNH_DIE("unknown opcode=%d", (int)pc->opcode)*/;
 #define GOTO_PC(pc)         GOTO_NEXT()
@@ -366,9 +369,9 @@ static KMETHOD MethodFunc_RunVirtualMachine(KonohaContext *kctx, KonohaStack *sf
 	PLATAPI RunVirtualMachine(kctx, sfp, BOOTCODE_ENTER);
 }
 
-static MethodFunc GetVirtualMachineMethodFunc(void)
+static void *GetVirtualMachineMethodFunc(void)
 {
-	return MethodFunc_RunVirtualMachine;
+	return (void *) MethodFunc_RunVirtualMachine;
 }
 
 static struct VirtualCode* GetBootCodeOfNativeMethodCall(void)

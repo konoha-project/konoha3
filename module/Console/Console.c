@@ -251,11 +251,8 @@ static char* InputUserPassword(KonohaContext *kctx, const char *message)
 
 // -------------------------------------------------------------------------
 
-#define K_OSDLLEXT ".dylib"
-
 kbool_t LoadConsoleModule(KonohaFactory *factory, ModuleType type)
 {
-	//factory->Module_Console           = "term";
 //	void *handler = dlopen("libreadline" K_OSDLLEXT, RTLD_LAZY);
 //	if(handler != NULL) {
 //		factory->readline_i = (char* (*)(const char *))dlsym(handler, "readline");

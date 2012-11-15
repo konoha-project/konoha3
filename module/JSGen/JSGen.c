@@ -215,10 +215,10 @@ static kString* Stmt_getErrorMessage(KonohaContext *kctx, kStmt *stmt)
 	return msg;
 }
 
-#define MN_isNotNull MN_("isNotNull")
-#define MN_isNull    MN_("isNull")
-#define MN_get    MN_("get")
-#define MN_set    MN_("set")
+//#define MN_isNotNull MN_("isNotNull")
+//#define MN_isNull    MN_("isNull")
+//#define MN_get    MN_("get")
+//#define MN_set    MN_("set")
 #define MN_opNOT  MN_("!")
 #define MN_opADD  MN_("+")
 #define MN_opSUB  MN_("-")

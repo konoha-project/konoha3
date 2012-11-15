@@ -238,8 +238,8 @@ static kbool_t SugarSyntax_TypeCheckStmt(KonohaContext *kctx, SugarSyntax *syn, 
 
 static kbool_t kBlock_TypeCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
 {
-	size_t i;
-	int result = true, lvarsize = gma->genv->localScope.varsize;
+	size_t i, lvarsize = gma->genv->localScope.varsize;
+	int result = true;
 	for(i = 0; i < kArray_size(bk->StmtList); i++) {
 		kStmt *stmt = (kStmt *)bk->StmtList->ObjectItems[i];
 		if(Stmt_isDone(stmt)) continue;

@@ -506,14 +506,16 @@ kbool_t LoadSignalModule(KonohaFactory *factory, ModuleType type)
 //
 //#endif
 //
-//#define KNH_SIGACTION(T, sa, sa_orig, n) do {                \
-//	if(T < n  && sigaction(T, sa, sa_orig + T) != 0 ) {        \
-//		KNH_NTRACE2(ctx, "sigaction", K_PERROR, \
-//				KNH_LDATA(LOG_i("signal", T)));        \
-//	}                                                          \
-//	knh_bzero(sa, sizeof(struct sigaction));                   \
-//} while (0)
-//
+#if 0
+#define KNH_SIGACTION(T, sa, sa_orig, n) do {                \
+	if(T < n  && sigaction(T, sa, sa_orig + T) != 0 ) {        \
+		KNH_NTRACE2(ctx, "sigaction", K_PERROR, \
+				KNH_LDATA(LOG_i("signal", T)));        \
+	}                                                          \
+	knh_bzero(sa, sizeof(struct sigaction));                   \
+} while (0)
+#endif
+
 //#endif /* defined(K_USING_MINGW_) */
 
 #ifdef __cplusplus

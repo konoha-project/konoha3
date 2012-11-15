@@ -690,7 +690,7 @@ static void PlatformApi_loadReadline(KonohaFactory *plat)
 	}
 }
 
-static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
+static kunused int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 {
 	switch(errno) {  // C Standard Library
 	case EILSEQ: /* Results from an illegal byte sequence */
@@ -884,7 +884,7 @@ static int DEOS_guessFaultFromErrno(KonohaContext *kctx, int userFault)
 
 // --------------------------------------------------------------------------
 
-static void diagnosis(void)
+static kunused void diagnosis(void)
 {
 }
 

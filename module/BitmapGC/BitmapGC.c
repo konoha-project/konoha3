@@ -28,9 +28,8 @@ extern "C" {
 #endif
 
 #include "minikonoha/minikonoha.h"
-#include "minikonoha/local.h"
 
-static int verbose_gc = 0;
+//static int verbose_gc = 0;
 
 #include "bmgc.h"
 
