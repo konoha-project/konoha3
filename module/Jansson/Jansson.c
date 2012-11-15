@@ -52,6 +52,10 @@ static void SetJsonBuf(struct JsonBuf *jsonbuf, json_t *json)
 	jsonbuf->jsonobj = json;
 }
 
+#if JANSSON_VERSION_HEX < 0x020400
+#define json_boolean(val)      ((val) ? json_true() : json_false())
+#endif /* JANSSON_VERSION_HEX < 0x020400 */
+
 static json_t* NewJsonRef(KJSONTYPE type, va_list ap)
 {
 	json_t *newref = NULL;
