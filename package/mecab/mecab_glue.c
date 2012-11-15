@@ -106,7 +106,7 @@ static KMETHOD Tagger_NBestInit(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kTagger *mecab = (struct _kTagger *)sfp[0].asObject;
 	const char *input = S_text(sfp[1].asString);
-	KReturnUnboxValue(mecab_nbest_Init(mecab->mecab, input));
+	KReturnUnboxValue(mecab_nbest_init(mecab->mecab, input));
 }
 
 // String Tagger.NBestNext()
@@ -329,7 +329,7 @@ static KMETHOD MecabNode_cost(KonohaContext *kctx, KonohaStack *sfp)
 
 /* ------------------------------------------------------------------------ */
 
-static kbool_t mecab_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int argc, const char **args, KTraceInfo *trace)
+static kbool_t mecab_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	static KDEFINE_CLASS TaggerDef = {
 		STRUCTNAME(Tagger),
