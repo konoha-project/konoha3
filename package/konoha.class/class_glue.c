@@ -207,7 +207,7 @@ static kBlock* kStmt_ParseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToke
 			int i;
 			for(i = range.beginIdx; i < range.endIdx; i++) {
 				kToken *tk = range.tokenList->TokenItems[i];
-				if(tk->topCharHint == '(' && prevToken->unresolvedTokenType == TokenType_SYMBOL && strcmp(cname, S_text(prevToken->text)) == 0) {
+				if(tk->hintChar == '(' && prevToken->unresolvedTokenType == TokenType_SYMBOL && strcmp(cname, S_text(prevToken->text)) == 0) {
 					kTokenVar *newToken = new_(TokenVar, TokenType_SYMBOL, sourceRange.tokenList);
 					KFieldSet(newToken, newToken->text, SYM_s(MN_new));
 				}

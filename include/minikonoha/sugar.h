@@ -294,6 +294,10 @@ typedef struct KDEFINE_SYNTAX {
 
 #define new_SugarFunc(ns, F)     new_(Func, KLIB new_kMethod(kctx, (ns)->NameSpaceConstList, 0, 0, 0, F), (ns)->NameSpaceConstList)
 
+#define kToken_SetHintChar(tk, ch, ch2)           tk->hintChar = ((ch << 8) | ((char)ch2))
+#define kToken_GetOpenHintChar(tk)                ((int)(tk->hintChar >> 8))
+#define kToken_GetCloseHintChar(tk)               ((char)tk->hintChar)
+
 /* Token */
 struct kTokenVar {
 	KonohaObjectHeader h;
@@ -311,7 +315,7 @@ struct kTokenVar {
 	};
 	union {
 		kushort_t   indent;               // indent when kw == TokenType_INDENT
-		kshort_t    topCharHint;
+		kshort_t    hintChar;
 		ksymbol_t   stmtEntryKey;         // pattern name for 'setting key in Stmt'
 	};
 };

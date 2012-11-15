@@ -108,7 +108,7 @@ static void kToken_setSymbolText(KonohaContext *kctx, kTokenVar *tk, const char 
 		}
 		tk->unresolvedTokenType = TokenType_SYMBOL;
 		if(len == 1) {
-			tk->topCharHint = t[0];
+			kToken_SetHintChar(tk, 0, t[0]);
 		}
 	}
 }
