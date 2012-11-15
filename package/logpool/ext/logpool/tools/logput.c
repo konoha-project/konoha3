@@ -18,7 +18,7 @@ extern logapi_t LOGAPI;
 
 int main(int argc, char **argv)
 {
-    logpool_global_init(LOGPOOL_TRACE);
+    logpool_global_Init(LOGPOOL_TRACE);
     logpool_t *logpool = logpool_open(NULL, &LOGAPI, LOGAPI_PARAM);
     void *logpool_args;
     if(argc < 2) {

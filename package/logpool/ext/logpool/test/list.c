@@ -24,7 +24,7 @@ static void emit_log(struct LogList *list, int i)
 int main(int argc, char const* argv[])
 {
     struct LogList list;
-    LogList_init(&list);
+    LogList_Init(&list);
     int i;
     for (i = 0; i < 100; ++i) {
         emit_log(&list, i);

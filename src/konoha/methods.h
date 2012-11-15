@@ -79,10 +79,10 @@ static KMETHOD Object_toString(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	}
 	KGrowingBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 	O_ct(sfp[0].asObject)->p(kctx, sfp, 0, &wb);
 	kString* returnValue = KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
-	KLIB Kwb_free(&wb);
+	KLIB Kwb_Free(&wb);
 	KReturn(returnValue);
 }
 

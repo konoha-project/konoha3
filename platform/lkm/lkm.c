@@ -156,16 +156,16 @@ PlatformApi* platform_kernel(void)
 	return (PlatformApi*)(&plat);
 }
 
-static void KonohaContext_evalScript(KonohaContext *kctx, char *data, size_t len)
+static void KonohaContext_EvalScript(KonohaContext *kctx, char *data, size_t len)
 {
 	KGrowingBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 	KLIB Kwb_write(kctx, &wb,data,len);
 	kfileline_t uline = FILEID_("(kernel)") | 1;
 	Konoha_Eval((KonohaContext*)kctx, KLIB Kwb_top(kctx, &wb,1),uline);
-	KLIB Kwb_free(&wb);
+	KLIB Kwb_Free(&wb);
 }
-//EXPORT_SYMBOL(KonohaContext_evalScript);
+//EXPORT_SYMBOL(KonohaContext_EvalScript);
 
 static ssize_t knh_dev_write(struct file *filp,const char __user *user_buf,
 		size_t count,loff_t *offset) {
@@ -178,7 +178,7 @@ static ssize_t knh_dev_write(struct file *filp,const char __user *user_buf,
 	len = copy_from_user(buf,user_buf,count);
 	memset(dev->buffer,0,sizeof(char)*MAXCOPYBUF);
 	buf[count] = '\0';
-	KonohaContext_evalScript(dev->konoha,buf,strlen(buf));
+	KonohaContext_EvalScript(dev->konoha,buf,strlen(buf));
 //	snprintf(dev->buffer,MAXCOPYBUF,"%s",((KonohaContext_t)dev->konoha)->buffer);
 //	strncpy(((KonohaContext_t)dev->konoha)->buffer,"\0",1);
 //	printk(KERN_DEBUG "[%s][dev->buffer='%s']\n",__func__ ,dev->buffer);
@@ -187,7 +187,7 @@ static ssize_t knh_dev_write(struct file *filp,const char __user *user_buf,
 }
 
 
-static void knh_dev_setup(struct konohadev_t *dev)
+static void knh_dev_Setup(struct konohadev_t *dev)
 {
 	int err = alloc_chrdev_region(&dev->id, 0, 1, msg);
 	if(err){
@@ -195,21 +195,21 @@ static void knh_dev_setup(struct konohadev_t *dev)
 				msg,err);
 		return;
 	}
-	cdev_init(&dev->cdev,&knh_fops);
+	cdev_Init(&dev->cdev,&knh_fops);
 	dev->cdev.owner = THIS_MODULE;
 	dev->konoha = konoha_open(platform_kernel());
 	dev->buffer = kmalloc(sizeof(char)*MAXCOPYBUF,GFP_KERNEL);
 	memset(dev->buffer,0,sizeof(char)*MAXCOPYBUF);
-	sema_init(&dev->sem,1);
+	sema_Init(&dev->sem,1);
 
-	err = cdev_add(&dev->cdev, dev->id, 1);
+	err = cdev_Add(&dev->cdev, dev->id, 1);
 	if(err) {
-		printk(KERN_ALERT "%s:cdev_add() failed(%d)\n",msg,err);
+		printk(KERN_ALERT "%s:cdev_Add() failed(%d)\n",msg,err);
 	}
 }
 
 // Start/Init function
-static int __init konohadev_init(void) {
+static int __Init konohadev_Init(void) {
 	konohadev_p = kmalloc(sizeof(struct konohadev_t),GFP_KERNEL);
 	if(!konohadev_p){
 		printk(KERN_ALERT "%s:kmalloc() failed\n",msg);
@@ -217,7 +217,7 @@ static int __init konohadev_init(void) {
 	}
 	memset(konohadev_p,0,sizeof(struct konohadev_t));
 	printk(KERN_INFO "konoha init!\n");
-	knh_dev_setup(konohadev_p);
+	knh_dev_Setup(konohadev_p);
 	return 0;
 }
 
@@ -231,5 +231,5 @@ static void __exit konohadev_exit(void) {
 	kfree(konohadev_p);
 }
 
-module_init(konohadev_init);
+module_Init(konohadev_Init);
 module_exit(konohadev_exit);

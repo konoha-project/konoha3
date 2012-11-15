@@ -179,18 +179,18 @@ static QueryDriver* LoadQueryDriver(KonohaContext *kctx, const char *dburl)
 /* ------------------------------------------------------------------------ */
 /* [Connection Class Define] */
 
-static void kConnection_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kConnection_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kConnection *con = (kConnection *)o;
 	con->db = conf;
 	con->driver = &NoQueryDriver;
 }
 
-static void kConnection_reftrace(KonohaContext *kctx, kObject *p, KObjectVisitor *visitor)
+static void kConnection_Reftrace(KonohaContext *kctx, kObject *p, KObjectVisitor *visitor)
 {
 }
 
-static void kConnection_free(KonohaContext *kctx, kObject *o)
+static void kConnection_Free(KonohaContext *kctx, kObject *o)
 {
 	kConnection *con = (kConnection *)o;
 	if(con->db != NULL) {
@@ -269,20 +269,20 @@ KMETHOD Connection_getInsertId(KonohaContext *kctx, KonohaStack *sfp)
 /* ------------------------------------------------------------------------ */
 /* [ResultSet Class Define] */
 
-static void kResultSet_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kResultSet_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kResultSet *rs = (kResultSet *)o;
 	rs->qcur = NULL;
 	rs->column_size = 0;
 	rs->column = NULL;
-	KLIB Karray_init(kctx, &rs->databuf, RESULTSET_BUFSIZE);
+	KLIB Karray_Init(kctx, &rs->databuf, RESULTSET_BUFSIZE);
 	KFieldInit(rs, rs->connection, (kConnection *)conf);
 	KFieldInit(rs, rs->tableName, KNULL(String));
 	rs->qcurfree = NULL;
 	rs->rowidx = 0;
 }
 
-static void kResultSet_reftrace(KonohaContext *kctx, kObject *p, KObjectVisitor *visitor)
+static void kResultSet_Reftrace(KonohaContext *kctx, kObject *p, KObjectVisitor *visitor)
 {
 	kResultSet *rs = (kResultSet *)p;
 	KREFTRACEv(rs->connection);
@@ -290,7 +290,7 @@ static void kResultSet_reftrace(KonohaContext *kctx, kObject *p, KObjectVisitor 
 	KREFTRACEv(rs->tableName);
 }
 
-static void kResultSet_free(KonohaContext *kctx, kObject *o)
+static void kResultSet_Free(KonohaContext *kctx, kObject *o)
 {
 	kResultSet *rs = (kResultSet *)o;
 	if(rs->column_size > 0) {
@@ -338,7 +338,7 @@ static void kResultSet_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingB
 /* ------------------------------------------------------------------------ */
 /* [ResultSet inner function] */
 
-static int _ResultSet_findColumn(KonohaContext *kctx, kResultSet *o, const char* name)
+static int _ResultSet_FindColumn(KonohaContext *kctx, kResultSet *o, const char* name)
 {
 	size_t i = 0;
 	for(i = 0; i < o->column_size; i++) {
@@ -359,7 +359,7 @@ static int _ResultSet_indexof_(KonohaContext *kctx, KonohaStack *sfp)
 		return n;
 	}
 	else if(IS_String(sfp[1].asObject)) {
-		int loc = _ResultSet_findColumn(kctx, o, S_text(sfp[1].asString));
+		int loc = _ResultSet_FindColumn(kctx, o, S_text(sfp[1].asString));
 		if(loc == -1) {
 			//THROW_OutOfRange(ctx, sfp, sfp[1].intValue, (o)->column_size);
 		}
@@ -539,17 +539,17 @@ static kbool_t sql_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 	static KDEFINE_CLASS ConnectionDef = {
 		STRUCTNAME(Connection),
 		.cflag = kClass_Final,
-		.init = kConnection_init,
-		.free = kConnection_free,
-		.reftrace = kConnection_reftrace,
+		.init = kConnection_Init,
+		.free = kConnection_Free,
+		.reftrace = kConnection_Reftrace,
 	};
 
 	static KDEFINE_CLASS ResultSetDef = {
 		STRUCTNAME(ResultSet),
 		.cflag = kClass_Final,
-		.init = kResultSet_init,
-		.free = kResultSet_free,
-		.reftrace = kResultSet_reftrace,
+		.init = kResultSet_Init,
+		.free = kResultSet_Free,
+		.reftrace = kResultSet_Reftrace,
 		.p = kResultSet_p,
 	};
 
@@ -583,7 +583,7 @@ static kbool_t sql_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpa
 	return true;
 }
 
-KDEFINE_PACKAGE* sql_init(void)
+KDEFINE_PACKAGE* sql_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("Simple Sql", "1.0"),

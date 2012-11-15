@@ -106,7 +106,7 @@ static int getopt_long(int argc, char * const *argv, const char *optstring, cons
 extern "C" {
 #endif
 
-kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, size_t len, kfileline_t uline);
+kstatus_t MODSUGAR_Eval(KonohaContext *kctx, const char *script, size_t len, kfileline_t uline);
 kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, KTraceInfo *trace);
 
 // -------------------------------------------------------------------------
@@ -217,7 +217,7 @@ static void CommandLine_SetARGV(KonohaContext *kctx, int argc, char** argv, KTra
 	kArray *a = (kArray*)KLIB new_kObject(kctx, _GcStack, CT_StringArray0, 0);
 	int i;
 	for(i = 0; i < argc; i++) {
-		KLIB kArray_add(kctx, a, KLIB new_kString(kctx, _GcStack, argv[i], strlen(argv[i]), StringPolicy_TEXT));
+		KLIB kArray_Add(kctx, a, KLIB new_kString(kctx, _GcStack, argv[i], strlen(argv[i]), StringPolicy_TEXT));
 	}
 	KDEFINE_OBJECT_CONST ObjectData[] = {
 			{"SCRIPT_ARGV", CT_StringArray0->typeId, (kObject*)a},

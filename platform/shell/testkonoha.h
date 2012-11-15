@@ -82,9 +82,9 @@ static int test_kwb(KonohaContext *kctx)
 	const char *t= "0123456789012345678901234567890123456789";
 	size_t i = 0;
 	KGrowingArray buf;
-	KLIB Karray_init(kctx, &buf, 64);
+	KLIB Karray_Init(kctx, &buf, 64);
 	KGrowingBuffer wb;
-	KLIB Kwb_init(&buf, &wb);
+	KLIB Kwb_Init(&buf, &wb);
 	KLIB Kwb_printf(kctx, &wb, "%s%s%s%s", t, t, t, t);
 	t = KLIB Kwb_top(kctx, &wb, 1);
 	while(*t != 0) {
@@ -93,8 +93,8 @@ static int test_kwb(KonohaContext *kctx)
 		i++; t++;
 	}
 	assert(i == Kwb_bytesize(&wb));
-	KLIB Kwb_free(&wb);
-	KLIB Karray_free(kctx, &buf);
+	KLIB Kwb_Free(&wb);
+	KLIB Karray_Free(kctx, &buf);
 	return 0;
 }
 

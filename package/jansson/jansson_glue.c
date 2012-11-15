@@ -46,13 +46,13 @@ struct kJanssonVar {
 
 /* ------------------------------------------------------------------------ */
 
-static void Jansson_init(KonohaContext *kctx, kObject *o, void *conf)
+static void Jansson_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct kJanssonVar *json = (struct kJanssonVar *)o;
 	json->obj = NULL;
 }
 
-static void Jansson_free(KonohaContext *kctx, kObject *o)
+static void Jansson_Free(KonohaContext *kctx, kObject *o)
 {
 	struct kJanssonVar *json = (struct kJanssonVar *)o;
 	if(json->obj != NULL) {
@@ -90,7 +90,7 @@ static KMETHOD Json_new (KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## @Static Json Json.parse(String str);
-static KMETHOD Json_parse(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Json_Parse(KonohaContext *kctx, KonohaStack *sfp)
 {
 	const char *buf = S_text(sfp[1].asString);
 	json_t* obj;
@@ -325,7 +325,7 @@ static KMETHOD Json_getKeys(KonohaContext *kctx, KonohaStack *sfp)
 	while(iter) {
 		key = json_object_iter_key(iter);
 		iter = json_object_iter_next(obj, iter);
-		KLIB kArray_add(kctx, a, KLIB new_kString(kctx, GcUnsafe, key, strlen(key), 0));
+		KLIB kArray_Add(kctx, a, KLIB new_kString(kctx, GcUnsafe, key, strlen(key), 0));
 	}
 	KReturn(a);
 }
@@ -356,7 +356,7 @@ static KMETHOD JsonArray_newArray(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void Json[].add(Json json);
-static KMETHOD JsonArray_add(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD JsonArray_Add(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
 	json_t* ja = (json_t *)a->ObjectItems;
@@ -419,8 +419,8 @@ static kbool_t jansson_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 		.structname = "Json",
 		.typeId = TY_newid,
 		.cflag = kClass_Final,
-		.init = Jansson_init,
-		.free = Jansson_free,
+		.init = Jansson_Init,
+		.free = Jansson_Free,
 		.p    = Jansson_p,
 	};
 	KonohaClass *cJson = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &JsonDef, trace);
@@ -439,7 +439,7 @@ static kbool_t jansson_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 		_Public|_Const|_Im, _F(Json_getInt),    TY_int,       TY_Json, MN_("getInt"),    1, TY_String, FN_k,
 		_Public|_Const|_Im, _F(Json_getString), TY_String,    TY_Json, MN_("getString"), 1, TY_String, FN_k,
 		_Public,            _F(Json_new),       TY_Json,      TY_Json, MN_("new"),       0,
-		_Public|_Static|_Const|_Im, _F(Json_parse), TY_Json,  TY_Json, MN_("parse"),     1, TY_String, FN_v,
+		_Public|_Static|_Const|_Im, _F(Json_Parse), TY_Json,  TY_Json, MN_("parse"),     1, TY_String, FN_v,
 		_Public,            _F(Json_setJson),   TY_void,      TY_Json, MN_("setJson"),   2, TY_String, FN_k, TY_Json, FN_v,
 		_Public,            _F(Json_setArray),  TY_void,      TY_Json, MN_("setArray"),  2, TY_String, FN_k, TY_JsonArray, FN_v,
 		_Public,            _F(Json_setBool),   TY_void,      TY_Json, MN_("setBool"),   2, TY_String, FN_k, TY_boolean, FN_v,
@@ -451,7 +451,7 @@ static kbool_t jansson_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 		_Public|_Const|_Im, _F(Json_dump),      TY_String,    TY_JsonArray, MN_("dump"), 0,
 		_Public,            _F(JsonArray_newArray), TY_JsonArray,      TY_JsonArray, MN_("newArray"), 1, TY_int, FN_("size"),
 		_Public|_Const|_Im, _F(JsonArray_get),  TY_Json,      TY_JsonArray, MN_("get"),  1, TY_int, FN_("idx"),
-		_Public,            _F(JsonArray_add),  TY_void,      TY_JsonArray, MN_("add"),  1, TY_Json, FN_v,
+		_Public,            _F(JsonArray_Add),  TY_void,      TY_JsonArray, MN_("add"),  1, TY_Json, FN_v,
 		_Public|_Const|_Im, _F(JsonArray_getSize), TY_int,    TY_JsonArray, MN_("getSize"), 0,
 		DEND,
 	};
@@ -464,7 +464,7 @@ static kbool_t jansson_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNam
 	return true;
 }
 
-KDEFINE_PACKAGE* jansson_init(void)
+KDEFINE_PACKAGE* jansson_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("jansson", "1.0"),

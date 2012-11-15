@@ -21,7 +21,7 @@ struct ARRAY(T);                    \
 typedef struct ARRAY(T) ARRAY(T)
 
 #define DEF_ARRAY_OP(T)\
-static inline ARRAY(T) *ARRAY_init_##T (ARRAY(T) *a, size_t initsize) {\
+static inline ARRAY(T) *ARRAY_Init_##T (ARRAY(T) *a, size_t initsize) {\
 	a->list = (T *) malloc(sizeof(T)*initsize);\
 	a->capacity  = initsize;\
 	a->size  = 0;\
@@ -33,7 +33,7 @@ static inline T *ARRAY_##T##_get(ARRAY(T) *a, int idx) {\
 static inline void ARRAY_##T##_set(ARRAY(T) *a, int idx, T *v){ \
 	memcpy(a->list+idx, v, sizeof(T));\
 }\
-static inline void ARRAY_##T##_add(ARRAY(T) *a, T *v) {\
+static inline void ARRAY_##T##_Add(ARRAY(T) *a, T *v) {\
 	if(a->size + 1 >= a->capacity) {\
 		a->capacity *= 2;\
 		a->list = (T *)realloc(a->list, sizeof(T) * a->capacity);\
@@ -51,15 +51,15 @@ static inline void ARRAY_##T##_dispose(ARRAY(T) *a) {\
 
 #define ARRAY_get(T, a, idx)    ARRAY_##T##_get(a, idx)
 #define ARRAY_set(T, a, idx, v) ARRAY_##T##_set(a, idx, v)
-#define ARRAY_add(T, a, v)      ARRAY_##T##_add(a, v)
+#define ARRAY_Add(T, a, v)      ARRAY_##T##_Add(a, v)
 #define ARRAY_dispose(T, a)     ARRAY_##T##_dispose(a)
-#define ARRAY_init(T, a, s)     ARRAY_init_##T (a, s)
+#define ARRAY_Init(T, a, s)     ARRAY_Init_##T (a, s)
 #define ARRAY_n(a, n)  ((a).list+n)
 #define ARRAY_size(a)  ((a).size)
 #define ARRAY_last(a)  ARRAY_n(a, ((a).size-1))
-#define ARRAY_init_1(T, a, e1) do {\
-	ARRAY_init(T, a);\
-	ARRAY_add(T, a, e1);\
+#define ARRAY_Init_1(T, a, e1) do {\
+	ARRAY_Init(T, a);\
+	ARRAY_Add(T, a, e1);\
 } while(0)
 
 #define FOR_EACH_ARRAY_(a, x, i) \

@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-static bool response_apply(struct pool_plugin *_p, struct LogEntry *e, uint32_t state)
+static bool response_Apply(struct pool_plugin *_p, struct LogEntry *e, uint32_t state)
 {
     struct pool_plugin_response *p = (struct pool_plugin_response *) _p;
     bufferevent_write(p->bev, &e->data, e->h.size-sizeof(struct LogHead));
@@ -23,9 +23,9 @@ static bool response_failed(struct pool_plugin *_p, struct LogEntry *e, uint32_t
 static struct pool_plugin *pool_plugin_response_create(struct pool_plugin *_p)
 {
     struct pool_plugin_response *p = (struct pool_plugin_response *) _p;
-    p->base.apply  = pool_plugin_init(_p->apply);
-    p->base.failed = pool_plugin_init(_p->failed);
-    p->base.Apply  = response_apply;
+    p->base.apply  = pool_plugin_Init(_p->apply);
+    p->base.failed = pool_plugin_Init(_p->failed);
+    p->base.Apply  = response_Apply;
     p->base.Failed = response_failed;
     p->base.name = "response";
     assert(p->bev);
@@ -42,7 +42,7 @@ static void pool_plugin_response_dispose(struct pool_plugin *p)
 }
 
 EXPORT_POOL_PLUGIN(pool_plugin_response) = {
-    {0, NULL, NULL, pool_plugin_response_create, pool_plugin_response_dispose, response_apply, response_failed, NULL},
+    {0, NULL, NULL, pool_plugin_response_create, pool_plugin_response_dispose, response_Apply, response_failed, NULL},
     NULL
 };
 

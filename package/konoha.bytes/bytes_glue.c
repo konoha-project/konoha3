@@ -33,7 +33,7 @@ extern "C"{
 /* ------------------------------------------------------------------------ */
 /* Bytes */
 
-static void kBytes_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kBytes_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct kBytesVar *ba = (struct kBytesVar *)o;
 	DBG_ASSERT((size_t)conf >= 0);
@@ -41,7 +41,7 @@ static void kBytes_init(KonohaContext *kctx, kObject *o, void *conf)
 	ba->byteptr = (ba->bytesize > 0) ? (const char *)KCalloc((size_t)conf, 1, NULL) : NULL;
 }
 
-static void kBytes_free(KonohaContext *kctx, kObject *o)
+static void kBytes_Free(KonohaContext *kctx, kObject *o)
 {
 	struct kBytesVar *ba = (struct kBytesVar *)o;
 	if(ba->byteptr != NULL) {
@@ -153,11 +153,11 @@ static KMETHOD String_toBytes(KonohaContext *kctx, KonohaStack *sfp)
 	else {
 		KMakeTrace(trace, sfp);
 		KGrowingBuffer wb;
-		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+		KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 		Kwb_convertCharset(kctx, &wb, PLATAPI systemCharset, "UTF-8", S_text(thisString), size, trace);
 		KReturnWith(
 			new_kBytes(kctx, OnStack, KGetReturnType(sfp), KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb)),
-			KLIB Kwb_free(&wb)
+			KLIB Kwb_Free(&wb)
 		);
 	}
 }
@@ -170,7 +170,7 @@ static KMETHOD String_new_fromBytes_withDefaultDecode(KonohaContext *kctx, Konoh
 	if(ba->bytesize != 0) {
 		KMakeTrace(trace, sfp);
 		KGrowingBuffer wb;
-		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+		KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 		Kwb_convertCharset(kctx, &wb, "UTF-8", PLATAPI systemCharset, ba->buf, ba->bytesize, trace);
 		s = KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), 0);
 	}
@@ -189,7 +189,7 @@ static KMETHOD String_new_fromSubBytes_withDefaultDecode(KonohaContext *kctx, Ko
 		DBG_ASSERT(ba->buf[ba->bytesize-1] == '\0');
 		KMakeTrace(trace, sfp);
 		KGrowingBuffer wb;
-		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+		KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 		Kwb_convertCharset(kctx, &wb, "UTF-8", PLATAPI systemCharset, ba->buf + offset, length, trace);
 		s = KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), 0);
 	}
@@ -210,7 +210,7 @@ static KMETHOD String_new_fromSubBytes_withSpecifiedDecode(KonohaContext *kctx, 
 		DBG_ASSERT(ba->buf[ba->bytesize-1] == '\0');
 		KMakeTrace(trace, sfp);
 		KGrowingBuffer wb;
-		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+		KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 		Kwb_convertCharset(kctx, &wb, "UTF-8", charset, ba->buf + offset, length, trace);
 		s = KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), 0);
 	}
@@ -228,7 +228,7 @@ static KMETHOD String_new_fromBytes_withSpecifiedDecode(KonohaContext *kctx, Kon
 		DBG_ASSERT(ba->buf[ba->bytesize] == '\0');
 		KMakeTrace(trace, sfp);
 		KGrowingBuffer wb;
-		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+		KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 		Kwb_convertCharset(kctx, &wb, S_text(charset), "UTF-8", ba->buf, ba->bytesize, trace);
 		s = KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), 0);
 	}
@@ -251,8 +251,8 @@ static kbool_t bytes_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 		KDEFINE_CLASS defBytes = {0};
 		SETSTRUCTNAME(defBytes, Bytes);
 		defBytes.cflag   = kClass_Final;
-		defBytes.free    = kBytes_free;
-		defBytes.init    = kBytes_init;
+		defBytes.free    = kBytes_Free;
+		defBytes.init    = kBytes_Init;
 		defBytes.p       = kBytes_p;
 		CT_Bytes = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defBytes, trace);
 	}
@@ -284,7 +284,7 @@ static kbool_t bytes_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 	return true;
 }
 
-KDEFINE_PACKAGE* bytes_init(void)
+KDEFINE_PACKAGE* bytes_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");

@@ -62,8 +62,8 @@ struct IRBuilderAPI {
 	VisitExpr_t visitOrExpr;
 	VisitExpr_t visitLetExpr;
 	VisitExpr_t visitStackTopExpr;
-	void (*fn_init)(KonohaContext *kctx, struct IRBuilder *builder, kMethod *method);
-	void (*fn_free)(KonohaContext *kctx, struct IRBuilder *builder, kMethod *method);
+	void (*fn_Init)(KonohaContext *kctx, struct IRBuilder *builder, kMethod *method);
+	void (*fn_Free)(KonohaContext *kctx, struct IRBuilder *builder, kMethod *method);
 };
 
 #define VISITOR_LIST(OP) \
@@ -180,22 +180,22 @@ static void visitBlock(KonohaContext *kctx, IRBuilder *builder, kBlock *bk)
 /* [Statement/Expression API] */
 static kBlock* Stmt_getFirstBlock(KonohaContext *kctx, kStmt *stmt)
 {
-	return SUGAR kStmt_getBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
+	return SUGAR kStmt_GetBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
 }
 
 static kBlock* Stmt_getElseBlock(KonohaContext *kctx, kStmt *stmt)
 {
-	return SUGAR kStmt_getBlock(kctx, stmt, NULL, KW_else, K_NULLBLOCK);
+	return SUGAR kStmt_GetBlock(kctx, stmt, NULL, KW_else, K_NULLBLOCK);
 }
 
 static kExpr* Stmt_getFirstExpr(KonohaContext *kctx, kStmt *stmt)
 {
-	return SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL);
+	return SUGAR kStmt_GetExpr(kctx, stmt, KW_ExprPattern, NULL);
 }
 
-static kStmt *kStmt_getStmt(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw)
+static kStmt *kStmt_GetStmt(KonohaContext *kctx, kStmt *stmt, ksymbol_t kw)
 {
-	return (kStmt *) kStmt_getObject(kctx, stmt, kw, NULL);
+	return (kStmt *) kStmt_GetObject(kctx, stmt, kw, NULL);
 }
 
 static kMethod* CallExpr_getMethod(kExpr *expr)
@@ -210,7 +210,7 @@ static int CallExpr_getArgCount(kExpr *expr)
 
 static kString* Stmt_getErrorMessage(KonohaContext *kctx, kStmt *stmt)
 {
-	kString* msg = (kString *)kStmt_getObjectNULL(kctx, stmt, KW_ERR);
+	kString* msg = (kString *)kStmt_GetObjectNULL(kctx, stmt, KW_ERR);
 	DBG_ASSERT(IS_String(msg));
 	return msg;
 }
@@ -328,7 +328,7 @@ static int MethodName_isUnaryOperator(KonohaContext *kctx, kmethodn_t mn)
 
 static void JSVisitor_visitErrStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
 {
-	JSVisitor_emitString(kctx, self, S_text(kStmt_getObjectNULL(kctx, stmt, KW_ERR)), "", "");
+	JSVisitor_emitString(kctx, self, S_text(kStmt_GetObjectNULL(kctx, stmt, KW_ERR)), "", "");
 }
 
 static void JSVisitor_visitExprStmt(KonohaContext *kctx, IRBuilder *self, kStmt *stmt)
@@ -390,8 +390,8 @@ static void JSVisitor_visitTryStmt(KonohaContext *kctx, IRBuilder *self, kStmt *
 {
 	JSVisitor_emitNewLineWith(kctx, self, "try ");
 	JSVisitor_visitBlock(kctx, self, Stmt_getFirstBlock(kctx, stmt));
-	kBlock *catchBlock   = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("catch"),   K_NULLBLOCK);
-	kBlock *finallyBlock = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("finally"), K_NULLBLOCK);
+	kBlock *catchBlock   = SUGAR kStmt_GetBlock(kctx, stmt, NULL, SYM_("catch"),   K_NULLBLOCK);
+	kBlock *finallyBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, SYM_("finally"), K_NULLBLOCK);
 	if(catchBlock != K_NULLBLOCK) {
 		JSVisitor_emitString(kctx, self, "catch(e) ", "", "");
 		JSVisitor_visitBlock(kctx, self, catchBlock);
@@ -411,11 +411,11 @@ static void JSVisitor_visitUndefinedStmt(KonohaContext *kctx, IRBuilder *self, k
 static void JSVisitor_emitKonohaValue(KonohaContext *kctx, IRBuilder *self, KonohaClass* ct, KonohaStack* sfp)
 {
 	KGrowingBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 	ct->p(kctx, sfp, 0, &wb);
 	char *str = (char*)KLIB Kwb_top(kctx, &wb, 0);
 	JSVisitor_emitString(kctx, self, str, "", "");
-	KLIB Kwb_free(&wb);
+	KLIB Kwb_Free(&wb);
 }
 
 static void JSVisitor_emitConstValue(KonohaContext *kctx, IRBuilder *self, kObject *obj)
@@ -668,7 +668,7 @@ static void JSVisitor_emitMethodHeader(KonohaContext *kctx, IRBuilder *builder, 
 {
 	KonohaClass *class = CT_(mtd->typeId);
 	KGrowingBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 	kParam *params = Method_param(mtd);
 	unsigned i;
 	if(mtd->typeId == TY_NameSpace) {
@@ -691,7 +691,7 @@ static void JSVisitor_emitMethodHeader(KonohaContext *kctx, IRBuilder *builder, 
 	}
 	KLIB Kwb_printf(kctx, &wb, ")");
 	JSVisitor_emitString(kctx, builder, KLIB Kwb_top(kctx, &wb, 1), "", "");
-	KLIB Kwb_free(&wb);
+	KLIB Kwb_Free(&wb);
 }
 
 static void JSVisitor_emitClassHeader(KonohaContext *kctx, IRBuilder *builder, KonohaClass *class)
@@ -727,7 +727,7 @@ static void JSVisitor_emitClassFooter(KonohaContext *kctx, IRBuilder *builder, K
 
 
 
-static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
+static void JSVisitor_Init(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
 {
 	kbool_t isConstractor = false;
 	builder->local_fields = (void*)KMalloc_UNTRACE(sizeof(JSVisitorLocal));
@@ -760,7 +760,7 @@ static void JSVisitor_init(KonohaContext *kctx, struct IRBuilder *builder, kMeth
 	}
 }
 
-static void JSVisitor_free(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
+static void JSVisitor_Free(KonohaContext *kctx, struct IRBuilder *builder, kMethod *mtd)
 {
 	if(mtd->mn != 0) {
 		DUMPER(builder)->indent--;
@@ -779,8 +779,8 @@ static IRBuilder *createJSVisitor(IRBuilder *builder)
 #define DEFINE_BUILDER_API(NAME) builder->api.visit##NAME = JSVisitor_visit##NAME;
 	VISITOR_LIST(DEFINE_BUILDER_API);
 #undef DEFINE_BUILDER_API
-	builder->api.fn_init = JSVisitor_init;
-	builder->api.fn_free = JSVisitor_free;
+	builder->api.fn_Init = JSVisitor_Init;
+	builder->api.fn_Free = JSVisitor_Free;
 	return builder;
 }
 
@@ -795,9 +795,9 @@ static void JSGen_GenerateCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk, in
 	IRBuilder *builder, builderbuf;
 
 	builder = createJSVisitor(&builderbuf);
-	builder->api.fn_init(kctx, builder, mtd);
+	builder->api.fn_Init(kctx, builder, mtd);
 	visitBlock(kctx, builder, bk);
-	builder->api.fn_free(kctx, builder, mtd);
+	builder->api.fn_Free(kctx, builder, mtd);
 
 	RESET_GCSTACK();
 }

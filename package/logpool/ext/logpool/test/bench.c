@@ -317,7 +317,7 @@ uint64_t logpool_ntrace_jit1(ltrace_t *ltrace)
 
 extern logapi_t FILE2_API;
 extern logapi_t LLVM_FILE2_API;
-void logpool_global_init(int mode);
+void logpool_global_Init(int mode);
 int main(int argc, const char *argv[])
 {
     static struct logpool_param_file ARGS = {
@@ -326,10 +326,10 @@ int main(int argc, const char *argv[])
     };
     konoha_ginit(argc, argv);
     konoha_t konoha = konoha_open();
-    logpool_global_init(LOGPOOL_DEFAULT);
+    logpool_global_Init(LOGPOOL_DEFAULT);
     ltrace_t *ltrace0, *ltrace1;
     ltrace0 = ltrace_open(NULL, &FILE2_API, ARGS);
-    logpool_global_init(LOGPOOL_JIT);
+    logpool_global_Init(LOGPOOL_JIT);
     ltrace1 = ltrace_open(NULL, &LLVM_FILE2_API, ARGS);
     devnull = fopen("/dev/null", "w");
     CTX ctx = konoha;

@@ -74,16 +74,16 @@ static uintptr_t entry_keygen(char *key, uint32_t klen)
     return hash0(hash, key, klen);
 }
 
-static void entry_log_free(pmap_record_t *r)
+static void entry_log_Free(pmap_record_t *r)
 {
     struct LogEntry *e = (struct LogEntry *) r->v;
     DecRC(e);
     r->v = 0;
 }
 
-static void react_init(struct react *re, char *traceName, const char *key)
+static void react_Init(struct react *re, char *traceName, const char *key)
 {
-    re->map = poolmap_new(4, entry_keygen, entry_key_cmp, entry_log_free);
+    re->map = poolmap_new(4, entry_keygen, entry_key_cmp, entry_log_Free);
     re->traceID0 = djbhash(traceName, strlen(traceName));
     re->traceID1 = hash0(38873, traceName, strlen(traceName));
     re->keyID0 = djbhash(key, strlen(key));
@@ -95,7 +95,7 @@ static void react_delete(struct react *re)
     poolmap_delete(re->map);
 }
 
-static bool react_apply(struct pool_plugin *_p, struct LogEntry *e, uint32_t state)
+static bool react_Apply(struct pool_plugin *_p, struct LogEntry *e, uint32_t state)
 {
     struct pool_plugin_react *p = (struct pool_plugin_react *) _p;
     struct Log *log = (struct Log *)&e->data;
@@ -123,12 +123,12 @@ static bool react_failed(struct pool_plugin *_p, struct LogEntry *e, uint32_t st
 static struct pool_plugin *pool_plugin_react_create(struct pool_plugin *_p)
 {
     struct pool_plugin_react *p = (struct pool_plugin_react *) _p;
-    p->base.apply  = pool_plugin_init(_p->apply);
-    p->base.failed = pool_plugin_init(_p->failed);
-    p->base.Apply  = react_apply;
+    p->base.apply  = pool_plugin_Init(_p->apply);
+    p->base.failed = pool_plugin_Init(_p->failed);
+    p->base.Apply  = react_Apply;
     p->base.Failed = react_failed;
     p->base.name = "react";
-    react_init(&p->r, p->conf.traceName, p->conf.key);
+    react_Init(&p->r, p->conf.traceName, p->conf.key);
     return _p;
 }
 
@@ -144,7 +144,7 @@ static void pool_plugin_react_dispose(struct pool_plugin *_p)
 }
 
 EXPORT_POOL_PLUGIN(pool_plugin_react) = {
-    {0, NULL, NULL, pool_plugin_react_create, pool_plugin_react_dispose, react_apply, react_failed, NULL}
+    {0, NULL, NULL, pool_plugin_react_create, pool_plugin_react_dispose, react_Apply, react_failed, NULL}
 };
 
 #ifdef __cplusplus

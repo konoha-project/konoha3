@@ -36,8 +36,8 @@ int main(int argc, char **argv)
     if(rc != MEMCACHED_SUCCESS) {
         fprintf(stderr, "memcached_server_list_append failed\n");
     }
-    rc = memcached_server_push(mc, servers);
-    memcached_server_list_free(servers);
+    rc = memcached_server_Push(mc, servers);
+    memcached_server_list_Free(servers);
 
     logpool_t *logpool = logpool_open_client(NULL, "0.0.0.0", 14801);
 

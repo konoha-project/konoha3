@@ -79,7 +79,7 @@ struct map_api {
     map_status_t  (*_set)(kmap_t *m, struct JSONString *key, uint64_t val);
     map_record_t *(*_next)(kmap_t *m, kmap_iterator *itr);
     void (*_remove)(kmap_t *m, struct JSONString *key);
-    void (*_init)(kmap_t *m, unsigned init);
+    void (*_Init)(kmap_t *m, unsigned init);
     void (*_dispose)(kmap_t *m);
 };
 
@@ -117,11 +117,11 @@ static inline unsigned kmap_size(kmap_t *m)
 
 extern const kmap_api_t DICT_API;
 extern const kmap_api_t HASH_API;
-static inline void kmap_init(kmap_t *m, unsigned init)
+static inline void kmap_Init(kmap_t *m, unsigned init)
 {
     const kmap_api_t *api = (init > DICTMAP_THRESHOLD) ? &HASH_API:&DICT_API;
     m->h.base.api = api;
-    api->_init(m, init);
+    api->_Init(m, init);
 }
 
 #ifdef __cplusplus

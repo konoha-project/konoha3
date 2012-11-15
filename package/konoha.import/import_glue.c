@@ -43,7 +43,7 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int ret = false;
 	VAR_Statement(stmt, gma);
-	kTokenArray *tokenList = (kTokenArray *) kStmt_getObjectNULL(kctx, stmt, KW_TokenPattern);
+	kTokenArray *tokenList = (kTokenArray *) kStmt_GetObjectNULL(kctx, stmt, KW_TokenPattern);
 	if(tokenList == NULL) {
 		KReturnUnboxValue(false);
 	}
@@ -77,7 +77,7 @@ static KMETHOD Statement_import(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	} else {
 		KGrowingBuffer wb;
-		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+		KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 		/* case : import konoha.import */
 		ksymbol_t star = SYM_("*");
 		size_t i = 0;
@@ -126,7 +126,7 @@ static kbool_t import_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 	return true;
 }
 
-KDEFINE_PACKAGE* import_init(void)
+KDEFINE_PACKAGE* import_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "import", "1.0");

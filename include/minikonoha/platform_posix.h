@@ -151,7 +151,7 @@ static KonohaPackageHandler *LoadPackageHandler(KonohaContext *kctx, const char 
 	void *gluehdr = dlopen(pathbuf, RTLD_LAZY);
 	if(gluehdr != NULL) {
 		char funcbuf[80];
-		snprintf(funcbuf, sizeof(funcbuf), "%s_init", ShortPackageName(packageName));
+		snprintf(funcbuf, sizeof(funcbuf), "%s_Init", ShortPackageName(packageName));
 		PackageLoadFunc f = (PackageLoadFunc)dlsym(gluehdr, funcbuf);
 		if(f != NULL) {
 			return f();
@@ -979,7 +979,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 
 	KonohaStack *sfp = topStack;
 	KGrowingBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 	while(bottomStack < sfp) {
 		kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 		kfileline_t uline = sfp[K_RTNIDX].calledFileLine;
@@ -992,7 +992,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 		if(!kMethod_is(Static, mtd)) {
 			Kwb_writeValue(kctx, &wb, cThis, sfp);
 			PLATAPI printf_i("this=(%s) %s, ", CT_t(cThis), KLIB Kwb_top(kctx, &wb, 1));
-			KLIB Kwb_free(&wb);
+			KLIB Kwb_Free(&wb);
 		}
 		unsigned i;
 		kParam *param = Method_param(mtd);
@@ -1004,12 +1004,12 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 			c = c->realtype(kctx, c, cThis);
 			Kwb_writeValue(kctx, &wb, c, sfp + i + 1);
 			PLATAPI printf_i("%s=(%s) %s", SYM_t(SYM_UNMASK(param->paramtypeItems[i].fn)), CT_t(c), KLIB Kwb_top(kctx, &wb, 1));
-			KLIB Kwb_free(&wb);
+			KLIB Kwb_Free(&wb);
 		}
 		PLATAPI printf_i(")\n");
 		sfp = sfp[K_SHIFTIDX].previousStack;
 	}
-	KLIB Kwb_free(&wb);
+	KLIB Kwb_Free(&wb);
 	PLATAPI printf_i("%s\n", EndTag(kctx, InfoTag));
 }
 

@@ -131,10 +131,10 @@ static KMETHOD String_fromCharCode(KonohaContext *kctx, KonohaStack *sfp)
 // String Interpolation
 
 /* copied from src/sugar/sugarfunc.h */
-static kString *kToken_resolvedEscapeSequence(KonohaContext *kctx, kToken *tk, size_t start)
+static kString *kToken_ResolveEscapeSequence(KonohaContext *kctx, kToken *tk, size_t start)
 {
 	KGrowingBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 	const char *text = S_text(tk->text) + start;
 	const char *end  = S_text(tk->text) + S_size(tk->text);
 	KLIB Kwb_write(kctx, &wb, S_text(tk->text), start);
@@ -165,7 +165,7 @@ static kString *kToken_resolvedEscapeSequence(KonohaContext *kctx, kToken *tk, s
 		text++;
 	}
 	kString *s = KLIB new_kString(kctx, OnGcStack, KLIB Kwb_top(kctx, &wb, 1), Kwb_bytesize(&wb), 0);
-	KLIB Kwb_free(&wb);
+	KLIB Kwb_Free(&wb);
 	return s;
 }
 
@@ -175,7 +175,7 @@ static kString *remove_escapes(KonohaContext *kctx, kToken *tk)
 	if(kToken_is(RequiredReformat, tk)) {
 		const char *escape = strchr(S_text(text), '\\');
 		DBG_ASSERT(escape != NULL);
-		text = kToken_resolvedEscapeSequence(kctx, tk, escape - S_text(text));
+		text = kToken_ResolveEscapeSequence(kctx, tk, escape - S_text(text));
 	}
 	return text;
 }
@@ -197,7 +197,7 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 	if(start == NULL) {
 		KReturnWith(K_NULLEXPR, RESET_GCSTACK());
 	}
-	expr = SUGAR kExpr_setConstValue(kctx, expr, TY_String, UPCAST(text));
+	expr = SUGAR kExpr_SetConstValue(kctx, expr, TY_String, UPCAST(text));
 	kNameSpace *ns = Stmt_ns(stmt);
 	kMethod *concat = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, TY_String, MN_("+"), 1);
 
@@ -217,23 +217,23 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 		}
 
 		KGrowingBuffer wb;
-		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+		KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 		KLIB Kwb_write(kctx, &wb, "(", 1);
 		KLIB Kwb_write(kctx, &wb, start+2, end-(start+2));
 		KLIB Kwb_write(kctx, &wb, ")", 1);
 
 		TokenSeq range = {ns, GetSugarContext(kctx)->preparedTokenList};
-		TokenSeq_push(kctx, range);
+		TokenSeq_Push(kctx, range);
 		const char *buf = KLIB Kwb_top(kctx, &wb, 1);
-		SUGAR TokenSeq_tokenize(kctx, &range, buf, 0);
+		SUGAR TokenSeq_Tokenize(kctx, &range, buf, 0);
 
 		{
 			TokenSeq tokens = {ns, GetSugarContext(kctx)->preparedTokenList};
-			TokenSeq_push(kctx, tokens);
-			SUGAR TokenSeq_resolved(kctx, &tokens, NULL, &range, range.beginIdx);
+			TokenSeq_Push(kctx, tokens);
+			SUGAR TokenSeq_Resolve(kctx, &tokens, NULL, &range, range.beginIdx);
 			/* +1 means for skiping first indent token. */
-			kExpr *newexpr = SUGAR kStmt_parseExpr(kctx, stmt, tokens.tokenList, tokens.beginIdx+1, tokens.endIdx, NULL);
-			TokenSeq_pop(kctx, tokens);
+			kExpr *newexpr = SUGAR kStmt_ParseExpr(kctx, stmt, tokens.tokenList, tokens.beginIdx+1, tokens.endIdx, NULL);
+			TokenSeq_Pop(kctx, tokens);
 
 			if(start - str > 0) {
 				kExpr *first = new_ConstValueExpr(kctx, TY_String,
@@ -242,8 +242,8 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 			}
 			expr = SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_String, concat, 2, expr, newexpr);
 		}
-		TokenSeq_pop(kctx, range);
-		KLIB Kwb_free(&wb);
+		TokenSeq_Pop(kctx, range);
+		KLIB Kwb_Free(&wb);
 		str = end + 1;
 	}
 
@@ -288,8 +288,8 @@ static kbool_t string_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 	// It is good to move these apis to other package such as java.string
 	LoadJavaAPI(kctx, ns, trace);
 	KSetClassFunc(ns->packageId, CT_String, unbox, String2_unbox, trace);
-	KSetClassFunc(ns->packageId, CT_String, free, String2_free, trace);
-	KSetClassFunc(ns->packageId, CT_String, reftrace, String2_reftrace, trace);
+	KSetClassFunc(ns->packageId, CT_String, free, String2_Free, trace);
+	KSetClassFunc(ns->packageId, CT_String, reftrace, String2_Reftrace, trace);
 	KSetKLibFunc(ns->packageId, new_kString, new_kString, trace);
 	return true;
 }
@@ -299,7 +299,7 @@ static kbool_t string_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 	return true;
 }
 
-KDEFINE_PACKAGE* string_init(void)
+KDEFINE_PACKAGE* string_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");

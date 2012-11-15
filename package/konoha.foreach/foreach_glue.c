@@ -63,7 +63,7 @@ static void MacroSet_setTokenAt(KonohaContext *kctx, MacroSet *macroSet, int ind
 	va_start(ap , symbol);
 	while((tk = va_arg(ap, kToken *)) != NULL) {
 		DBG_ASSERT(IS_Token(tk));
-		KLIB kArray_add(kctx, tokenList, tk);
+		KLIB kArray_Add(kctx, tokenList, tk);
 	}
 	va_end(ap);
 	macroSet[index].endIdx = kArray_size(tokenList);
@@ -78,13 +78,13 @@ static kBlock *new_MacroBlock(KonohaContext *kctx, kStmt *stmt, kToken *Iterator
 {
 	kNameSpace *ns = Stmt_ns(stmt);
 	TokenSeq source = {ns, GetSugarContext(kctx)->preparedTokenList};
-	TokenSeq_push(kctx, source);
+	TokenSeq_Push(kctx, source);
 	/* FIXME(imasahiro)
 	 * we need to implement template as Block
 	 * "T _ = E; if(_.hasNext()) { N = _.next(); }"
 	 *                           ^^^^^^^^^^^^^^^^^
 	 */
-	SUGAR TokenSeq_tokenize(kctx, &source, "T _ = E; if(_.hasNext()) N = _.next();", 0);
+	SUGAR TokenSeq_Tokenize(kctx, &source, "T _ = E; if(_.hasNext()) N = _.next();", 0);
 	MacroSet macroSet[4] = {{0, NULL, 0, 0}};
 	MacroSet_setTokenAt(kctx, macroSet, 0, source.tokenList, "T", IteratorTypeToken, NULL);
 	MacroSet_setTokenAt(kctx, macroSet, 1, source.tokenList, "E", IteratorExprToken, NULL);
@@ -95,17 +95,17 @@ static kBlock *new_MacroBlock(KonohaContext *kctx, kStmt *stmt, kToken *Iterator
 		MacroSet_setTokenAt(kctx, macroSet, 2, source.tokenList, "N", TypeToken, VariableToken, NULL);
 	}
 	kBlock *bk = SUGAR new_kBlock(kctx, stmt, macroSet, &source);
-	TokenSeq_pop(kctx, source);
+	TokenSeq_Pop(kctx, source);
 	return bk;
 }
 
 static void kStmt_appendBlock(KonohaContext *kctx, kStmt *stmt, kBlock *bk)
 {
 	if(bk != NULL) {
-		kBlock *block = SUGAR kStmt_getBlock(kctx, stmt, Stmt_ns(stmt), KW_BlockPattern, NULL);
+		kBlock *block = SUGAR kStmt_GetBlock(kctx, stmt, Stmt_ns(stmt), KW_BlockPattern, NULL);
 		size_t i;
 		for(i = 0; i < kArray_size(bk->StmtList); i++) {
-			KLIB kArray_add(kctx, block->StmtList, bk->StmtList->StmtItems[i]);
+			KLIB kArray_Add(kctx, block->StmtList, bk->StmtList->StmtItems[i]);
 		}
 	}
 }
@@ -117,14 +117,14 @@ static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 	int isOkay = false;
 	if(SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, 0)) {
 		kNameSpace *ns = Stmt_ns(stmt);
-		kToken *TypeToken = SUGAR kStmt_getToken(kctx, stmt, KW_TypePattern, NULL);
-		kToken *VariableToken  = SUGAR kStmt_getToken(kctx, stmt, KW_SymbolPattern, NULL);
+		kToken *TypeToken = SUGAR kStmt_GetToken(kctx, stmt, KW_TypePattern, NULL);
+		kToken *VariableToken  = SUGAR kStmt_GetToken(kctx, stmt, KW_SymbolPattern, NULL);
 		DBG_P("typeToken=%p, varToken=%p", TypeToken, VariableToken);
-		kExpr *IteratorExpr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL);
+		kExpr *IteratorExpr = SUGAR kStmt_GetExpr(kctx, stmt, KW_ExprPattern, NULL);
 		if(!TY_isIterator(IteratorExpr->ty)) {
 			kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, IteratorExpr->ty, MN_to(TY_Iterator), 0);
 			if(mtd == NULL) {
-				kStmtExpr_printMessage(kctx, stmt, IteratorExpr, ErrTag, "expected Iterator expression after in");
+				kStmtExpr_Message(kctx, stmt, IteratorExpr, ErrTag, "expected Iterator expression after in");
 				KReturnUnboxValue(false);
 			}
 			IteratorExpr = SUGAR new_TypedCallExpr(kctx, stmt, gma, TY_var, mtd, 1, IteratorExpr);
@@ -132,7 +132,7 @@ static KMETHOD Statement_for(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		kBlock *block = new_MacroBlock(kctx, stmt, new_TypeToken(kctx, ns, IteratorExpr->ty), new_ParsedExprToken(kctx, ns, IteratorExpr), TypeToken, VariableToken);
 		kStmt *IfStmt = block->StmtList->StmtItems[1]; // @see macro;
-		kStmt_appendBlock(kctx, IfStmt, SUGAR kStmt_getBlock(kctx, stmt, ns, KW_BlockPattern, NULL));
+		kStmt_appendBlock(kctx, IfStmt, SUGAR kStmt_GetBlock(kctx, stmt, ns, KW_BlockPattern, NULL));
 		kStmt_Set(CatchBreak, IfStmt, true);
 		kStmt_Set(CatchContinue, IfStmt, true);
 		isOkay = SUGAR kBlock_TypeCheckAll(kctx, block, gma);
@@ -170,7 +170,7 @@ static kbool_t foreach_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNam
 }
 
 
-KDEFINE_PACKAGE* foreach_init(void)
+KDEFINE_PACKAGE* foreach_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");

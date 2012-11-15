@@ -30,10 +30,10 @@ void test_Karray(KonohaContext *kctx)
 {
     intptr_t i;
     KGrowingArray a;
-    kctx->klib->Karray_init(kctx, &a, 4 * sizeof(intptr_t));
+    kctx->klib->Karray_Init(kctx, &a, 4 * sizeof(intptr_t));
     for (i = 0; i < 10; ++i) {
         if(a.bytesize == a.bytemax) {
-            kctx->klib->Karray_expand(kctx, &a, a.bytesize+1 * sizeof(intptr_t));
+            kctx->klib->Karray_Expand(kctx, &a, a.bytesize+1 * sizeof(intptr_t));
         }
         ((int*)a.bytebuf)[i] = i;
         a.bytesize += 1*sizeof(intptr_t);
@@ -42,7 +42,7 @@ void test_Karray(KonohaContext *kctx)
         assert (i*sizeof(intptr_t) < a.bytesize);
         assert(((int*)a.bytebuf)[i] == i);
     }
-    kctx->klib->Karray_free(kctx, &a);
+    kctx->klib->Karray_Free(kctx, &a);
 }
 
 int main(int argc, const char *argv[])

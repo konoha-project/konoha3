@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 
     llcache_t *llmc = llcache_new("0.0.0.0", 11211);
     logpool_t *logpool = logpool_open_client(NULL, "0.0.0.0", 14801);
-    llcache_set(llmc, "tid_usage_init", argv[1]);
+    llcache_set(llmc, "tid_usage_Init", argv[1]);
     logpool_procedure(logpool, "tid_usage", strlen("tid_usage"));
     struct Log *logbuf = alloca(sizeof(struct Log) + 256);
     while(1) {

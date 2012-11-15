@@ -68,7 +68,7 @@ static inline void LIST_OP(T, delete)(LIST(T) *list) {\
 }
 
 #define LIST_new(T)           LIST_OP(T, new)()
-#define LIST_init(T, L)       LIST_OP(T, init)(L)
+#define LIST_Init(T, L)       LIST_OP(T, init)(L)
 #define LIST_dispose(T, L)    LIST_OP(T, dispose)(L)
 #define LIST_delete(T, L)     LIST_OP(T, delete)(L)
 #define LIST_append(T, L, E)  LIST_OP(T, append)(L, E)

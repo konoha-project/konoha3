@@ -37,7 +37,7 @@ extern "C" {
 static void ERROR_UnclosedToken(KonohaContext *kctx, kTokenVar *tk, const char *ch)
 {
 	if(IS_NOTNULL(tk)) {
-		kToken_error(kctx, tk, ErrTag, "must close with %s", ch);
+		kToken_ToError(kctx, tk, ErrTag, "must close with %s", ch);
 	}
 }
 
@@ -280,7 +280,7 @@ static int ParseSkip(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, i
 static int ParseUndefinedToken(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int tok_start)
 {
 	if(IS_NOTNULL(tk)) {
-		kToken_error(kctx, tk, ErrTag, "undefined token character: %c (ascii=%x)", tokenizer->source[tok_start], tokenizer->source[tok_start]);
+		kToken_ToError(kctx, tk, ErrTag, "undefined token character: %c (ascii=%x)", tokenizer->source[tok_start], tokenizer->source[tok_start]);
 		while(tokenizer->source[++tok_start] != 0);
 		return tok_start;
 	}
@@ -333,8 +333,13 @@ static const TokenizeFunc MiniKonohaTokenMatrix[] = {
 	ParseSymbol,  /* KonohaChar_Underbar */
 };
 
+static void CallSugarMethod(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd, int argc, kObject *obj)
+{
+	KSetMethodCallStack(sfp, 0/*UL*/, mtd, argc, obj);
+	KLIB KonohaRuntime_tryCallMethod(kctx, sfp);
+}
 
-static int callTokenFunc(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, Tokenizer *tokenizer, kStringVar *preparedString, int tok_start)
+static int CallTokenFunc(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, Tokenizer *tokenizer, kStringVar *preparedString, int tok_start)
 {
 	DBG_ASSERT(IS_Func(fo));
 	BEGIN_LOCAL(lsfp, K_CALLDELTA + 2);
@@ -342,11 +347,7 @@ static int callTokenFunc(KonohaContext *kctx, kFunc *fo, kTokenVar *tk, Tokenize
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, (kObject *)tk);
 	lsfp[K_CALLDELTA+1].unboxValue = (uintptr_t)tokenizer;
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+2].asString, preparedString);
-	{
-		KonohaStack *sfp = lsfp + K_CALLDELTA;
-		KSetMethodCallStack(sfp, 0/*UL*/, fo->mtd, 2, KLIB Knull(kctx, CT_Int));
-		KonohaRuntime_callMethod(kctx, sfp);
-	}
+	CallSugarMethod(kctx, lsfp + K_CALLDELTA, fo->mtd, 2, KLIB Knull(kctx, CT_Int));
 	END_LOCAL();
 	int pos = lsfp[0].intValue + tok_start;
 	if(pos > tok_start && tokenizer->currentLine > 0) { // check new lines
@@ -370,7 +371,7 @@ static kFunc** Tokenizer_funcTable(KonohaContext *kctx, Tokenizer *tokenizer, in
 	return (kFunc**)&(tokenizer->FuncItems[kchar]);
 }
 
-static int Tokenizer_doEach(KonohaContext *kctx, Tokenizer *tokenizer, int kchar, int tok_start, kTokenVar* tk)
+static int Tokenizer_DoEach(KonohaContext *kctx, Tokenizer *tokenizer, int kchar, int tok_start, kTokenVar* tk)
 {
 	int pos;
 	if(tokenizer->FuncItems[kchar] != NULL) {
@@ -380,7 +381,7 @@ static int Tokenizer_doEach(KonohaContext *kctx, Tokenizer *tokenizer, int kchar
 		preparedString->text = tokenizer->source + tok_start;   // this is a really bad manner !!
 		preparedString->bytesize = tokenizer->sourceLength - tok_start;
 		for(i = size - 1; i >= 0; i--) {
-			pos = callTokenFunc(kctx, FuncItems[i], tk, tokenizer, preparedString, tok_start);
+			pos = CallTokenFunc(kctx, FuncItems[i], tk, tokenizer, preparedString, tok_start);
 			if(pos > tok_start) {
 				return pos;
 			}
@@ -428,21 +429,21 @@ static int AsciiToKonohaChar(int ascii)
 	return (ascii < 0) ? KonohaChar_Unicode : cMatrix[ascii];
 }
 
-static void Tokenizer_tokenize(KonohaContext *kctx, Tokenizer *tokenizer)
+static void Tokenizer_Tokenize(KonohaContext *kctx, Tokenizer *tokenizer)
 {
 	int ch, pos = 0;
 	kTokenVar *tk = new_(TokenVar, 0, OnGcStack);
 	pos = ParseIndent(kctx, tk, tokenizer, pos);
 	while((ch = AsciiToKonohaChar(tokenizer->source[pos])) != 0) {
 		if(tk->unresolvedTokenType != 0) {
-			KLIB kArray_add(kctx, tokenizer->tokenList, tk);
+			KLIB kArray_Add(kctx, tokenizer->tokenList, tk);
 			tk = new_(TokenVar, 0, OnGcStack);
 			tk->uline = tokenizer->currentLine;
 		}
-		pos = Tokenizer_doEach(kctx, tokenizer, ch, pos, tk);
+		pos = Tokenizer_DoEach(kctx, tokenizer, ch, pos, tk);
 	}
 	if(tk->unresolvedTokenType != 0) {
-		KLIB kArray_add(kctx, tokenizer->tokenList, tk);
+		KLIB kArray_Add(kctx, tokenizer->tokenList, tk);
 	}
 }
 
@@ -465,7 +466,7 @@ static int ParseLazyBlock(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokeniz
 			level++; pos++;
 		}
 		else {
-			pos = Tokenizer_doEach(kctx, tokenizer, ch, pos, (kTokenVar *)K_NULLTOKEN);
+			pos = Tokenizer_DoEach(kctx, tokenizer, ch, pos, (kTokenVar *)K_NULLTOKEN);
 		}
 	}
 	ERROR_UnclosedToken(kctx, tk, "}");
@@ -497,7 +498,7 @@ static kFunc **kNameSpace_tokenFuncMatrix(KonohaContext *kctx, kNameSpace *ns)
 	return funcMatrix + KCHAR_MAX;
 }
 
-static void TokenSeq_tokenize(KonohaContext *kctx, TokenSeq *tokens, const char *source, kfileline_t uline)
+static void TokenSeq_Tokenize(KonohaContext *kctx, TokenSeq *tokens, const char *source, kfileline_t uline)
 {
 	INIT_GCSTACK();
 	Tokenizer tenv = {};
@@ -510,7 +511,7 @@ static void TokenSeq_tokenize(KonohaContext *kctx, TokenSeq *tokens, const char 
 	tenv.cFuncItems = kNameSpace_tokenMatrix(kctx, tokens->ns);
 	tenv.FuncItems  = kNameSpace_tokenFuncMatrix(kctx, tokens->ns);
 	tenv.preparedString = KLIB new_kString(kctx, _GcStack, tenv.source, tenv.sourceLength, StringPolicy_ASCII|StringPolicy_TEXT|StringPolicy_NOPOOL);
-	Tokenizer_tokenize(kctx, &tenv);
+	Tokenizer_Tokenize(kctx, &tenv);
 	TokenSeq_end(kctx, tokens);
 	RESET_GCSTACK();
 }

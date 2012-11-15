@@ -6,9 +6,9 @@ extern "C" {
 
 int main(int argc, char const* argv[])
 {
-    struct qengine *e = qengine_init();
+    struct qengine *e = qengine_Init();
     struct qcode *c;
-    struct qcode_list qlist_, *qlist = qcode_list_init(&qlist_);
+    struct qcode_list qlist_, *qlist = qcode_list_Init(&qlist_);
     qcode_list_deinit(qlist);
     char *q = "match TraceID abcd1";
     c = qengine_compile(e, q);

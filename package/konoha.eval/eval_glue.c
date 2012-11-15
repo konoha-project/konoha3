@@ -39,10 +39,10 @@ static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char
 	INIT_GCSTACK();
 	{
 		TokenSeq tokens = {ns, GetSugarContext(kctx)->preparedTokenList};
-		TokenSeq_push(kctx, tokens);
-		SUGAR TokenSeq_tokenize(kctx, &tokens, script, uline);
-		result = SUGAR TokenSeq_eval(kctx, &tokens, trace);
-		TokenSeq_pop(kctx, tokens);
+		TokenSeq_Push(kctx, tokens);
+		SUGAR TokenSeq_Tokenize(kctx, &tokens, script, uline);
+		result = SUGAR TokenSeq_Eval(kctx, &tokens, trace);
+		TokenSeq_Pop(kctx, tokens);
 	}
 	RESET_GCSTACK();
 	return result;
@@ -51,7 +51,7 @@ static kstatus_t kNameSpace_Eval(KonohaContext *kctx, kNameSpace *ns, const char
 // --------------------------------------------------------------------------
 
 //## boolean NameSpace.eval(String command);
-static KMETHOD NameSpace_eval(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD NameSpace_Eval(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kNameSpace *ns = sfp[0].asNameSpace;
 	const char *script = S_text(sfp[1].asString);
@@ -69,7 +69,7 @@ static KMETHOD NameSpace_eval(KonohaContext *kctx, KonohaStack *sfp)
 static void eval_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
-		_Public, _F(NameSpace_eval), TY_boolean, TY_NameSpace, MN_("eval"), 1, TY_String, FN_("command"),
+		_Public, _F(NameSpace_Eval), TY_boolean, TY_NameSpace, MN_("eval"), 1, TY_String, FN_("command"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -90,7 +90,7 @@ static kbool_t eval_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE* eval_init(void)
+KDEFINE_PACKAGE* eval_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", K_VERSION);

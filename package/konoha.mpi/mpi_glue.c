@@ -106,13 +106,13 @@ static kMPIData *newMPIData(KonohaContext *kctx) {
 	return p;
 }
 
-static void MPIRequest_ptr_free(KonohaContext *kctx , kObject *po)
+static void MPIRequest_ptr_Free(KonohaContext *kctx , kObject *po)
 {
 	kMPIRequest *p = toRawPtr(kMPIRequest *, po);
 	KFree(p, sizeof(kMPIRequest));
 }
 
-static void MPIData_ptr_free(KonohaContext *kctx , kObject *po)
+static void MPIData_ptr_Free(KonohaContext *kctx , kObject *po)
 {
 	kMPIData *p = toRawPtr(kMPIData *, po);
 	switch(p->typeId) {
@@ -516,17 +516,17 @@ typedef struct {
 	KonohaClass *cValue;
 } kmodmpi_t;
 
-static void kmodmpi_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
+static void kmodmpi_Setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
 {
 	(void)kctx;(void)def;(void)newctx;
 }
 
-static void kmodmpi_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
+static void kmodmpi_Reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
 {
 	(void)kctx;(void)baseh;
 }
 
-static void kmodmpi_free(KonohaContext *kctx, struct KonohaModule *baseh)
+static void kmodmpi_Free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 	MPI_Finalize();
 }
@@ -539,9 +539,9 @@ static kbool_t mpi_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 	KRequirePackage("konoha.float", trace);
 	kmodmpi_t *base = (kmodmpi_t *)KCalloc_UNTRACE(sizeof(kmodmpi_t), 1);
 	base->h.name     = "mpi";
-	base->h.setup    = kmodmpi_setup;
-	base->h.reftrace = kmodmpi_reftrace;
-	base->h.free     = kmodmpi_free;
+	base->h.setup    = kmodmpi_Setup;
+	base->h.reftrace = kmodmpi_Reftrace;
+	base->h.free     = kmodmpi_Free;
 	KLIB KonohaRuntime_setModule(kctx, MOD_mpi, &base->h, trace);
 
 	MPI_Init(&argc, (char ***)&args);
@@ -558,12 +558,12 @@ static kbool_t mpi_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 	static KDEFINE_CLASS MPIRequestDef = {
 		.structname = "MPIRequest",
 		.typeId = TY_newid,
-		.free = MPIRequest_ptr_free
+		.free = MPIRequest_ptr_Free
 	};
 	static KDEFINE_CLASS MPIDataDef = {
 		.structname = "MPIData",
 		.typeId = TY_newid,
-		.free = MPIData_ptr_free
+		.free = MPIData_ptr_Free
 	};
 	//static KDEFINE_CLASS MPIOpDef = {
 	//	.structname = "MPIOp",
@@ -659,7 +659,7 @@ static kbool_t mpi_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpa
 	return true;
 }
 
-KDEFINE_PACKAGE* mpi_init(void)
+KDEFINE_PACKAGE* mpi_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("mpi", "1.0"),

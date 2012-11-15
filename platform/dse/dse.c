@@ -54,7 +54,7 @@
 
 // for memory management
 static void *dse_malloc(size_t size);
-static void  dse_free(void *ptr, size_t size);
+static void  dse_Free(void *ptr, size_t size);
 
 /* Message */
 struct Message {
@@ -141,12 +141,12 @@ static void *dse_malloc(size_t size)
 	return ptr;
 }
 
-static void dse_free(void *ptr, size_t size)
+static void dse_Free(void *ptr, size_t size)
 {
 	free(ptr);
 	if(verbose_debug) {
 		totalMalloc -= size;
-		fprintf(stderr, "totalMalloc:%ld @dse_free()\n", totalMalloc);
+		fprintf(stderr, "totalMalloc:%ld @dse_Free()\n", totalMalloc);
 		assert(totalMalloc >= 0);
 	}
 }
@@ -170,8 +170,8 @@ static Message *Message_new(unsigned char *requestLine, size_t length)
 static void Message_delete(Message *msg)
 {
 	if(msg == NULL) return;
-	dse_free(msg->data, msg->len + 1);
-	dse_free(msg, sizeof(Message));
+	dse_Free(msg->data, msg->len + 1);
+	dse_Free(msg, sizeof(Message));
 }
 
 // ---------------------------------------------------------------------------
@@ -191,7 +191,7 @@ static void Scheduler_delete(Scheduler *sched)
 {
 	pthread_mutex_destroy(&sched->lock);
 	pthread_cond_destroy(&sched->cond),
-		dse_free(sched, sizeof(Scheduler));
+		dse_Free(sched, sizeof(Scheduler));
 }
 
 static bool dse_enqueue(Scheduler *sched, Message *msg)
@@ -343,7 +343,7 @@ static void dse_req_handler(struct evhttp_request *req, void *arg)
 				pthread_cond_signal(&sched->cond);
 				buf = evbuffer_new();
 				evhttp_send_reply(req, HTTP_OK, "OK", buf);
-				evbuffer_free(buf);
+				evbuffer_Free(buf);
 				break;
 			}
 			Message_delete(msg);
@@ -392,10 +392,10 @@ static void DSE_start(DSE *dse, const char *addr, int ip)
 
 static void DSE_delete(DSE *dse)
 {
-	evhttp_free(dse->httpd);
-	event_base_free(dse->base);
+	evhttp_Free(dse->httpd);
+	event_base_Free(dse->base);
 	Scheduler_delete(dse->sched);
-	dse_free(dse, sizeof(DSE));
+	dse_Free(dse, sizeof(DSE));
 }
 
 static struct option long_option[] = {
@@ -408,7 +408,7 @@ static struct option long_option[] = {
 	{0, 0, 0, 0}
 };
 
-static void dse_parseopt(int argc, char *argv[])
+static void dse_Parseopt(int argc, char *argv[])
 {
 	char *e;
 	logpoolip = getenv("LOGPOOL_IP");
@@ -446,10 +446,10 @@ static void dse_parseopt(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-	dse_parseopt(argc, argv);
+	dse_Parseopt(argc, argv);
 	DEBUG_PRINT("DSE starts on port %d", port);
 	DEBUG_PRINT("LogPool is running on %s", logpoolip);
-	logpool_global_init(LOGPOOL_TRACE);
+	logpool_global_Init(LOGPOOL_TRACE);
 	DSE *dse = DSE_new();
 	DSE_start(dse, HTTPD_ADDR, port);
 	DSE_delete(dse);

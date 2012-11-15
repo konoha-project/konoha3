@@ -36,7 +36,7 @@ typedef struct Person {
 	kint_t   age;
 } kPerson;
 
-static void Person_init(KonohaContext *kctx, kObject *o, void *conf)
+static void Person_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	/* This function is called when generating the instance of this class.
 	 * Moreover, it is called when generating the Null object of this class. */
@@ -45,7 +45,7 @@ static void Person_init(KonohaContext *kctx, kObject *o, void *conf)
 	p->age  = 0;
 }
 
-static void Person_free(KonohaContext *kctx, kObject *o)
+static void Person_Free(KonohaContext *kctx, kObject *o)
 {
 	/* This function is called at the time of object destruction. 
 	 * It is not necessary to destruct the field of the object which GC has managed. */
@@ -64,7 +64,7 @@ static void Person_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffe
 	KLIB Kwb_printf(kctx, wb, KINT_FMT, p->age);
 }
 
-static void Person_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+static void Person_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	/* Garbage collector (GC) cannot recognize in which position of the field
 	 * an object exists. The function tells to GC which object should be traced. */
@@ -122,10 +122,10 @@ static kbool_t HelloWorld_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, i
 	KDEFINE_CLASS defPerson = {0};
 	SETSTRUCTNAME(defPerson, Person);
 	defPerson.cflag     = kClass_Final;
-	defPerson.init      = Person_init;
+	defPerson.init      = Person_Init;
 	defPerson.p         = Person_p;
-	defPerson.reftrace  = Person_reftrace;
-	defPerson.free      = Person_free;
+	defPerson.reftrace  = Person_Reftrace;
+	defPerson.free      = Person_Free;
 	KonohaClass *PersonClass = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defPerson, trace);
 
 	/* You can define methods with the following procedures. */
@@ -153,7 +153,7 @@ static kbool_t HelloWorld_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, k
 	return true;
 }
 
-KDEFINE_PACKAGE* hello_world_init(void)
+KDEFINE_PACKAGE* hello_world_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "/* SET LIBRARY NAME */", "/* SET LIBRARY VERSION */");

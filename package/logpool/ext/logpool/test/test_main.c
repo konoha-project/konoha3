@@ -36,7 +36,7 @@ static void logpool_test_write(logpool_t *logpool)
 
 int main(int argc, char const* argv[])
 {
-    logpool_global_init(LOGAPI_INIT_FLAG);
+    logpool_global_Init(LOGAPI_INIT_FLAG);
     logpool_t *logpool = logpool_open(NULL, &LOGAPI, LOGAPI_PARAM);
     int i, size = LOGPOOL_TEST_COUNT(argc, argv);
     for (i = 0; i < size; ++i) {

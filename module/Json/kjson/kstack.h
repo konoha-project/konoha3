@@ -45,9 +45,9 @@ static inline unsigned kstack_size(kstack_t *stack)
     return stack->size;
 }
 
-static inline void kstack_init(kstack_t *stack)
+static inline void kstack_Init(kstack_t *stack)
 {
-    ARRAY_init(JSON, stack, 8);
+    ARRAY_Init(JSON, stack, 8);
 }
 
 static inline void kstack_deinit(kstack_t *stack, int check_stack)
@@ -58,12 +58,12 @@ static inline void kstack_deinit(kstack_t *stack, int check_stack)
     ARRAY_dispose(JSON, stack);
 }
 
-static inline void kstack_push(kstack_t *stack, JSON v)
+static inline void kstack_Push(kstack_t *stack, JSON v)
 {
-    ARRAY_add(JSON, stack, v);
+    ARRAY_Add(JSON, stack, v);
 }
 
-static inline JSON kstack_pop(kstack_t *stack)
+static inline JSON kstack_Pop(kstack_t *stack)
 {
     unsigned size = --stack->size;
     assert(size >= 0);

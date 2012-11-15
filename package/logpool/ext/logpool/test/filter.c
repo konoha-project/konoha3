@@ -56,7 +56,7 @@ static void logpool_test_write1(logpool_t *logpool)
 
 int main(void)
 {
-    logpool_global_init(LOGPOOL_DEFAULT);
+    logpool_global_Init(LOGPOOL_DEFAULT);
     {
         logpool_t *logpool = logpool_open(NULL, &LOGAPI, LOGAPI_PARAM);
         int i;

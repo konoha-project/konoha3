@@ -51,12 +51,12 @@ typedef struct {
 	KonohaModuleContext h;
 } kjitmod_t;
 
-static void kmodjit_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
+static void kmodjit_Setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
 {
 	(void)kctx;(void)def;(void)newctx;
 }
 
-static void val_reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
+static void val_Reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
 {
 	KObjectVisitor *visitor = (KObjectVisitor *) thunk;
 	BEGIN_REFTRACE(1);
@@ -64,7 +64,7 @@ static void val_reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
 	END_REFTRACE();
 }
 
-static void kmodjit_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
+static void kmodjit_Reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor)
 {
 	kmodjit_t *mod = (kmodjit_t *) baseh;
 	BEGIN_REFTRACE(3);
@@ -72,20 +72,20 @@ static void kmodjit_reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KO
 	KREFTRACEv(mod->global_value);
 	KREFTRACEv(mod->constPool);
 	END_REFTRACE();
-	KLIB Kmap_each(kctx, mod->jitcache, (void *) visitor, val_reftrace);
+	KLIB Kmap_each(kctx, mod->jitcache, (void *) visitor, val_Reftrace);
 }
 
-static void kmodjit_free(KonohaContext *kctx, struct KonohaModule *baseh)
+static void kmodjit_Free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 	kmodjit_t *modshare = (kmodjit_t *) baseh;
-	KLIB Kmap_free(kctx, modshare->jitcache, NULL);
+	KLIB Kmap_Free(kctx, modshare->jitcache, NULL);
 	KFree(baseh, sizeof(kmodjit_t));
 }
 
 static void check_stack_size(KonohaContext *kctx, kArray *stack, int n)
 {
 	while(n >= kArray_size(stack)) {
-		KLIB kArray_add(kctx, stack, K_NULL);
+		KLIB kArray_Add(kctx, stack, K_NULL);
 	}
 }
 
@@ -260,11 +260,11 @@ static KMETHOD System_setRetVal(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void System.addConstPool(o);
-static KMETHOD System_addConstPool(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD System_AddConstPool(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kObject *o = sfp[1].asObject;
 	kArray  *a = kmodjit->constPool;
-	KLIB kArray_add(kctx, a, o);
+	KLIB kArray_Add(kctx, a, o);
 	KReturnVoid();
 }
 
@@ -440,7 +440,7 @@ static KMETHOD Stmt_hasSyntax(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Stmt_getObjectNULL(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kStmt *stmt = (kStmt *) sfp[0].asObject;
-	kObject *o = kStmt_getObjectNULL(kctx, stmt, sfp[1].intValue);
+	kObject *o = kStmt_GetObjectNULL(kctx, stmt, sfp[1].intValue);
 	if(!o) {
 		o = K_NULL;
 	}
@@ -480,7 +480,7 @@ static kArray *create_array(KonohaContext *kctx, KonohaStack *sfp, int n)
 	int i;
 	kArray *a = new_(Array, 0);
 	for (i = 1; i <= n; ++i) {
-		KLIB kArray_add(kctx, a, sfp[i].asObject);
+		KLIB kArray_Add(kctx, a, sfp[i].asObject);
 	}
 	return a;
 }
@@ -513,7 +513,7 @@ static KMETHOD Array_newN(KonohaContext *kctx, KonohaStack *sfp)
 	int i, n = sfp[1].intValue;
 	kArray *a = new_(Array, (uintptr_t)n);
 	for (i = 0; i < n; ++i) {
-		KLIB kArray_add(kctx, a, sfp[i].asObject);
+		KLIB kArray_Add(kctx, a, sfp[i].asObject);
 	}
 	KReturn(a);
 }
@@ -596,7 +596,7 @@ static KMETHOD Method_getFname(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].asMethod;
 	KGrowingBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 	KLIB Kwb_printf(kctx, &wb, "%s%s", MethodName_t(mtd->mn));
 	kString *fname = KLIB new_kString(kctx, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), StringPolicy_POOL);
 	KReturn(fname);
@@ -636,7 +636,7 @@ static KMETHOD Method_isVirtual_(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 /****************************************************************/
-static uintptr_t *get_addr(void *addr, intptr_t offset, intptr_t datasize)
+static uintptr_t *get_Addr(void *addr, intptr_t offset, intptr_t datasize)
 {
 	return (uintptr_t *)(((char *)addr)+offset);
 }
@@ -645,7 +645,7 @@ static uintptr_t *get_addr(void *addr, intptr_t offset, intptr_t datasize)
 static KMETHOD Pointer_get(KonohaContext *kctx, KonohaStack *sfp)
 {
 	intptr_t size   = sfp[3].intValue;
-	uintptr_t *p = get_addr((void *)sfp[1].intValue, sfp[2].intValue, size);
+	uintptr_t *p = get_Addr((void *)sfp[1].intValue, sfp[2].intValue, size);
 	assert(size <= PTR_SIZE);
 	KReturnUnboxValue(*p & (~0UL >> (PTR_SIZE - size)));
 }
@@ -655,7 +655,7 @@ static KMETHOD Pointer_set(KonohaContext *kctx, KonohaStack *sfp)
 {
 	intptr_t size   = sfp[3].intValue;
 	uintptr_t data  = sfp[4].intValue;
-	uintptr_t *p = get_addr((void *)sfp[1].intValue, sfp[2].intValue, sfp[3].intValue);
+	uintptr_t *p = get_Addr((void *)sfp[1].intValue, sfp[2].intValue, sfp[3].intValue);
 	uintptr_t mask = (~0UL >> (PTR_SIZE - size));
 	*p = (data & mask) | (*p & ~mask);
 	assert(size <= PTR_SIZE);
@@ -712,11 +712,11 @@ static kbool_t ijit_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 	KRequirePackage("konoha.string", trace);
 	kmodjit_t *base  = (kmodjit_t *)KCalloc_UNTRACE(sizeof(kmodjit_t), 1);
 	base->h.name     = "ijit";
-	base->h.setup    = kmodjit_setup;
-	base->h.reftrace = kmodjit_reftrace;
-	base->h.free     = kmodjit_free;
+	base->h.setup    = kmodjit_Setup;
+	base->h.reftrace = kmodjit_Reftrace;
+	base->h.free     = kmodjit_Free;
 	base->defaultCodeGen = kctx->klib->kMethod_GenCode;
-	base->jitcache = KLIB Kmap_init(kctx, 0);
+	base->jitcache = KLIB Kmap_Init(kctx, 0);
 	KUnsafeFieldInit(base->global_value, new_(Array, 18));
 	KUnsafeFieldInit(base->constPool, new_(Array, 0));
 
@@ -800,7 +800,7 @@ static kbool_t ijit_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 		_Public, _F(Stmt_getUline), TY_int, TY_Stmt,  MN_("getUline"), 0,
 		_Public, _F(Stmt_hasSyntax), TY_boolean, TY_Stmt,  MN_("hasSyntax"), 0,
 		_Public, _F(Stmt_getObjectNULL), TY_O, TY_Stmt, MN_("getObjectNULL"), 1, TY_int, FN_x,
-		_Public, _F(System_addConstPool), TY_void, TY_System, MN_("addConstPool"), 1, TY_O, FN_x,
+		_Public, _F(System_AddConstPool), TY_void, TY_System, MN_("addConstPool"), 1, TY_O, FN_x,
 		_Public, _F(Object_unbox), TY_int, TY_O, MN_("unbox"), 0,
 		_Public|_Static, _F(Array_new1), TY_Array, TY_Array, MN_("new1"), 1, TY_O, FN_x,
 		_Public|_Static, _F(Array_new2), TY_Array, TY_Array, MN_("new2"), 2, TY_O, FN_x, TY_O, FN_y,
@@ -849,7 +849,7 @@ static kbool_t ijit_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 	return true;
 }
 
-KDEFINE_PACKAGE* ijit_init(void)
+KDEFINE_PACKAGE* ijit_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("ijit", "1.0"),

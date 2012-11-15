@@ -63,14 +63,14 @@ struct LocalQueue {
 //#define HttpEventQueue   kmodevent->localQueues[HTTP_EVENT]
 //#define SignalEventQueue kmodevent->localQueues[SIGNAL_EVENT]
 
-static void LocalQueue_init(KonohaContext *kctx, struct LocalQueue *queue)
+static void LocalQueue_Init(KonohaContext *kctx, struct LocalQueue *queue)
 {
 	queue->front = 0;
 	queue->last  = 0;
 	queue->list  = (RawEvent**)PLATAPI malloc_i(sizeof(RawEvent) * QUEUESIZE);
 }
 
-static void LocalQueue_free(KonohaContext *kctx, LocalQueue *queue)
+static void LocalQueue_Free(KonohaContext *kctx, LocalQueue *queue)
 {
 	PLATAPI free_i(queue->list);
 	PLATAPI free_i(queue);
@@ -98,7 +98,7 @@ static RawEvent* dequeueRawEventFromLocalQueue(LocalQueue *queue)
 	return rawEvent;
 }
 
-//void knh_checkSafePoint(CTX ctx, ksfp_t *sfp, const char *file, int line)
+//void knh_CheckSafePoint(CTX ctx, ksfp_t *sfp, const char *file, int line)
 //{
 //	int safepoint = ctx->safepoint;
 //	WCTX(ctx)->safepoint = 0;
@@ -283,7 +283,7 @@ static void StartEventHandler(KonohaContext *kctx)
 	((KonohaFactory*)kctx->platApi)->eventContext = eventContext;
 	bzero(((KonohaFactory*)kctx->platApi)->eventContext, sizeof(struct EventContext));
 	eventContext->queue = (LocalQueue*)PLATAPI malloc_i(sizeof(LocalQueue));
-	LocalQueue_init(kctx, eventContext->queue);
+	LocalQueue_Init(kctx, eventContext->queue);
 	SetSignal(kctx);
 }
 
@@ -291,7 +291,7 @@ static void StopEventHandler(KonohaContext *kctx)
 {
 	ResetSignal(kctx);
 	struct EventContext *eventContext = ((KonohaFactory*)kctx->platApi)->eventContext;
-	LocalQueue_free(kctx, eventContext->queue);
+	LocalQueue_Free(kctx, eventContext->queue);
 	PLATAPI free_i(eventContext);
 }
 
@@ -448,7 +448,7 @@ kbool_t LoadSignalModule(KonohaFactory *factory, ModuleType type)
 //	record_signal(ctx, sig RECDATA);
 //#if !defined(K_USING_MINGW_)
 //	if (si->si_code == SEGV_ACCERR) {
-//		void* address = (void*)si->si_addr;
+//		void* address = (void*)si->si_Addr;
 //		fprintf(stderr, "address=%p\n", address);
 //	}
 //#endif /* defined(K_USING_MINGW_) */

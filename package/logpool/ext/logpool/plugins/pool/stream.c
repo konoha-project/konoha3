@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-static bool stream_apply(struct pool_plugin *_p, struct LogEntry *e, uint32_t state)
+static bool stream_Apply(struct pool_plugin *_p, struct LogEntry *e, uint32_t state)
 {
     struct pool_plugin_stream *p = (struct pool_plugin_stream *) _p;
     io_write(p->io, e, e->h.size);
@@ -20,9 +20,9 @@ static bool stream_failed(struct pool_plugin *p, struct LogEntry *e, uint32_t st
 static struct pool_plugin *pool_plugin_stream_create(struct pool_plugin *_p)
 {
     struct pool_plugin_stream *p = (struct pool_plugin_stream *) _p;
-    p->base.apply  = pool_plugin_init(_p->apply);
-    p->base.failed = pool_plugin_init(_p->failed);
-    p->base.Apply  = stream_apply;
+    p->base.apply  = pool_plugin_Init(_p->apply);
+    p->base.failed = pool_plugin_Init(_p->failed);
+    p->base.Apply  = stream_Apply;
     p->base.Failed = stream_failed;
     p->base.name = "stream";
     assert(p->io);
@@ -41,7 +41,7 @@ static void pool_plugin_stream_dispose(struct pool_plugin *_p)
 }
 
 EXPORT_POOL_PLUGIN(pool_plugin_stream) = {
-    {0, NULL, NULL, pool_plugin_stream_create, pool_plugin_stream_dispose, stream_apply, stream_failed, NULL},
+    {0, NULL, NULL, pool_plugin_stream_create, pool_plugin_stream_dispose, stream_Apply, stream_failed, NULL},
     NULL
 };
 

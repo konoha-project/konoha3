@@ -38,14 +38,14 @@ int main(int argc, char **argv)
     if(rc != MEMCACHED_SUCCESS) {
         fprintf(stderr, "memcached_server_list_append failed\n");
     }
-    rc = memcached_server_push(mc, servers);
-    memcached_server_list_free(servers);
+    rc = memcached_server_Push(mc, servers);
+    memcached_server_list_Free(servers);
 
     logpool_t *logpool = logpool_open_client(NULL, "0.0.0.0", 14801);
 
     size_t script_len;
     char *script = loadFile(argv[1], &script_len);
-    memcached_set(mc, "dump_init", strlen("dump_init"), script, script_len, 0, 0);
+    memcached_set(mc, "dump_Init", strlen("dump_Init"), script, script_len, 0, 0);
     logpool_procedure(logpool, "dump", strlen("dump"));
     struct Log *logbuf = alloca(sizeof(struct Log) + 256);
     while(1) {

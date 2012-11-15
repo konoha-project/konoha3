@@ -87,7 +87,7 @@ static void *POSTGRESQL_qopen(KonohaContext *kctx, const char* url)
 	pport = (port[0]) ? port : NULL;
 	pdbnm = (dbnm[0]) ? dbnm : NULL;
 
-	OLDTRACE_SWITCH_TO_KTrace(_UserInputFault, LogText("@","mysql_init"));
+	OLDTRACE_SWITCH_TO_KTrace(_UserInputFault, LogText("@","mysql_Init"));
 	conn = PQsetdbLogin(phost, port, NULL/* option */, NULL /* tty */, pdbnm, NULL /* user */, NULL /* passwd */);
 	OLDTRACE_SWITCH_TO_KTrace(_UserInputFault, LogText("@","mysql_real_connect"),
 			LogText("host", phost),
@@ -161,7 +161,7 @@ static kqcur_t *POSTGRESQL_query(KonohaContext *kctx, void *db, const char* sql,
 			// ktrace....
 		}
 		size_t column_size = (size_t)PQnfields(res);
-		_ResultSet_initColumn(kctx, rs, column_size);
+		_ResultSet_InitColumn(kctx, rs, column_size);
 		if(column_size > 0) {
 			size_t i;
 			for(i = 0; i < rs->column_size; i++) {

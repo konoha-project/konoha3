@@ -215,12 +215,12 @@ static KMETHOD KString_length(KonohaContext *kctx,  KonohaStack *sfp)
 }
 
 // Tells whether or not this string matches the given regular expression.
-//##["@Public", "boolean", "String_matches", "String regex"]
-static KMETHOD KString_matches(KonohaContext *kctx,  KonohaStack *sfp)
+//##["@Public", "boolean", "String_Matches", "String regex"]
+static KMETHOD KString_Matches(KonohaContext *kctx,  KonohaStack *sfp)
 {
 	//kString *self = sfp[0].asString;
 	//String regex = sfp[1].asString;
-	//boolean ret = String_matches(self, regex);
+	//boolean ret = String_Matches(self, regex);
 	//RETURNboolean(ret);
 	/* FIXME:this function need to implement regular expressions. */
 	Throw_NotImplement(kctx, sfp, __FUNCTION__);
@@ -382,7 +382,7 @@ static kbool_t LoadJavaAPI(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trac
 		_Public|_Const|_Im, _F(KString_lastIndexOf0), TY_int, TY_String, MN_("lastIndexOf"), 2, TY_int, FN_("ch"),TY_int, FN_("fromIndex"),
 		_Public|_Const|_Im, _F(KString_lastIndexOf1), TY_int, TY_String, MN_("lastIndexOf"), 2, TY_String, FN_("str"),TY_int, FN_("fromIndex"),
 		_Public|_Const|_Im, _F(KString_length), TY_int, TY_String, MN_("length"), 0,
-		_Public|_Const|_Im, _F(KString_matches), TY_boolean, TY_String, MN_("matches"), 1, TY_String, FN_("regex"),
+		_Public|_Const|_Im, _F(KString_Matches), TY_boolean, TY_String, MN_("matches"), 1, TY_String, FN_("regex"),
 		_Public|_Const|_Im, _F(KString_offsetByCodePoints), TY_int, TY_String, MN_("offsetByCodePoints"), 2, TY_int, FN_("index"),TY_int, FN_("codePointOffset"),
 		_Public|_Const|_Im, _F(KString_regionMatches), TY_boolean, TY_String, MN_("regionMaches"), 5, TY_boolean, FN_("ignoreCase"),TY_int, FN_("toffset"),TY_String, FN_("other"),TY_int, FN_("ooffset"),TY_int, FN_("len"),
 		_Public|_Const|_Im, _F(KString_replace), TY_String, TY_String, MN_("replace"), 2, TY_char, FN_("oldChar"),TY_char, FN_("newChar"),

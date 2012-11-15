@@ -68,7 +68,7 @@ static KonohaPackageHandler *apache_LoadPackageHandler(const char *packageName)
 	//fprintf(stderr, "pathbuf=%s, gluehdr=%p", pathbuf, gluehdr);
 	if(gluehdr != NULL) {
 		char funcbuf[80];
-		snprintf(funcbuf, sizeof(funcbuf), "%s_init", packname(packageName));
+		snprintf(funcbuf, sizeof(funcbuf), "%s_Init", packname(packageName));
 		PackageLoadFunc f = (PackageLoadFunc)dlsym(gluehdr, funcbuf);
 		if(f != NULL) {
 			return f();
@@ -175,12 +175,12 @@ static KMETHOD Request_getHeadersOut(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 // ## void AprTable.add(String key, String val)
-static KMETHOD AprTable_add(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD AprTable_Add(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kAprTable *self = (kAprTable *) sfp[0].asObject;
 	const char *key = S_text(sfp[1].asString);
 	const char *val = S_text(sfp[2].asString);
-	apr_table_add(self->tbl, key, val);
+	apr_table_Add(self->tbl, key, val);
 	KReturnVoid();
 }
 // ## void AprTable.set(String key, String val)
@@ -201,7 +201,7 @@ static KMETHOD AprTable_getElts(KonohaContext *kctx, KonohaStack *sfp)
 	const apr_table_entry_t *entries = (apr_table_entry_t *)apr_arr->elts;
 	int i=0;
 	for (i=0; i<apr_arr->nelts; i++) {
-		KLIB kArray_add(kctx, arr, (kAprTableEntry *)KLIB new_kObject(kctx, OnStack, CT_AprTableEntry, (uintptr_t)entries));
+		KLIB kArray_Add(kctx, arr, (kAprTableEntry *)KLIB new_kObject(kctx, OnStack, CT_AprTableEntry, (uintptr_t)entries));
 		entries++;
 	}
 	KReturn(arr);
@@ -249,7 +249,7 @@ KonohaContext* konoha_create(KonohaClass **cRequest)
 		_P, _F(Request_logError), TY_void, TY_Req, MN_("logError"), 3, TY_int, FN_("level"), TY_int, FN_("status"), TY_String, FN_("msg"),
 		_P, _F(Request_getHeadersIn), TY_Tbl, TY_Req, MN_("getHeadersIn"), 0,
 		_P, _F(Request_getHeadersOut), TY_Tbl, TY_Req, MN_("getHeadersOut"), 0,
-		_P, _F(AprTable_add), TY_void, TY_Tbl, MN_("add"), 2, TY_String, FN_("key"), TY_String, FN_("val"),
+		_P, _F(AprTable_Add), TY_void, TY_Tbl, MN_("add"), 2, TY_String, FN_("key"), TY_String, FN_("val"),
 		_P, _F(AprTable_set), TY_void, TY_Tbl, MN_("set"), 2, TY_String, FN_("key"), TY_String, FN_("val"),
 		_P, _F(AprTable_getElts), TY_TblEntryArray, TY_Tbl, MN_("getElts"), 0,
 		_P, _F(AprTableEntry_getKey), TY_String, TY_TblEntry, MN_("getKey"), 0,
@@ -303,14 +303,14 @@ static int konoha_handler(request_rec *r)
 	return lsfp[0].intValue;
 }
 
-static int mod_konoha_init(apr_pool_t *p, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
+static int mod_konoha_Init(apr_pool_t *p, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
 {
 	/* TODO: Create Global Instance to share constants objects */
 	(void)p;(void)plog;(void)ptemp;(void)s;
 	return 0;
 }
 
-static void mod_konoha_child_init(apr_pool_t *pool, server_rec *server)
+static void mod_konoha_child_Init(apr_pool_t *pool, server_rec *server)
 {
 	/* TODO: Create VM Instance per child process */
 	(void)pool;(void)server;
@@ -322,7 +322,7 @@ static void mod_konoha_child_init(apr_pool_t *pool, server_rec *server)
 static const char *set_package_dir(cmd_parms *cmd, void *vp, const char *arg)
 {
 	(void)vp;
-	const char *err = ap_check_cmd_context(cmd, NOT_IN_FILES | NOT_IN_LIMIT);
+	const char *err = ap_Check_cmd_context(cmd, NOT_IN_FILES | NOT_IN_LIMIT);
 	konoha_config_t *conf = (konoha_config_t *)
 		ap_get_module_config(cmd->server->module_config, &konoha_module);
 	if(err != NULL) {
@@ -348,8 +348,8 @@ static const command_rec konoha_cmds[] = {
 static void konoha_register_hooks(apr_pool_t *p)
 {
 	(void)p;
-	ap_hook_post_config(mod_konoha_init, NULL, NULL, APR_HOOK_MIDDLE);
-	ap_hook_child_init(mod_konoha_child_init, NULL, NULL, APR_HOOK_MIDDLE);
+	ap_hook_post_config(mod_konoha_Init, NULL, NULL, APR_HOOK_MIDDLE);
+	ap_hook_child_Init(mod_konoha_child_Init, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_handler(konoha_handler, NULL, NULL, APR_HOOK_FIRST);
 }
 

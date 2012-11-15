@@ -385,7 +385,7 @@ static KonohaPackageHandler *LoadPackageHandler(const char *packageName)
 	//fprintf(stderr, "pathbuf=%s, gluehdr=%p", pathbuf, gluehdr);
 	if(gluehdr != NULL) {
 		char funcbuf[80];
-		snprintf(funcbuf, sizeof(funcbuf), "%s_init", packname(packageName));
+		snprintf(funcbuf, sizeof(funcbuf), "%s_Init", packname(packageName));
 		PackageLoadFunc f = (PackageLoadFunc)GetProcAddress(gluehdr, funcbuf);
 		if(f != NULL) {
 			return f();

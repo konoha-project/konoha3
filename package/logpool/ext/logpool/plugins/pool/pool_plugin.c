@@ -17,7 +17,7 @@ extern "C" {
 
 static void pool_plugin_nop_dispose(struct pool_plugin *p);
 static struct pool_plugin *pool_plugin_nop_create(struct pool_plugin *_p);
-static bool nop_apply(struct pool_plugin *p, struct LogEntry *e, uint32_t state);
+static bool nop_Apply(struct pool_plugin *p, struct LogEntry *e, uint32_t state);
 static bool nop_failed(struct pool_plugin *p, struct LogEntry *e, uint32_t state);
 
 struct pool_plugin_nop {
@@ -25,10 +25,10 @@ struct pool_plugin_nop {
 };
 
 struct pool_plugin_nop pool_nop_plugin = {
-    {0, NULL, NULL, pool_plugin_nop_create, pool_plugin_nop_dispose, nop_apply, nop_failed, "nop"}
+    {0, NULL, NULL, pool_plugin_nop_create, pool_plugin_nop_dispose, nop_Apply, nop_failed, "nop"}
 };
 
-static bool nop_apply(struct pool_plugin *p, struct LogEntry *e, uint32_t state)
+static bool nop_Apply(struct pool_plugin *p, struct LogEntry *e, uint32_t state)
 {
     return true;
 }
@@ -48,7 +48,7 @@ static void pool_plugin_nop_dispose(struct pool_plugin *p)
     CHECK_PLUGIN("nop", p);
 }
 
-struct pool_plugin *pool_plugin_init(struct pool_plugin *p)
+struct pool_plugin *pool_plugin_Init(struct pool_plugin *p)
 {
     if(!p)
         return pool_plugin_nop_create(NULL);
@@ -145,30 +145,30 @@ void pool_exec(struct Log *log, int logsize, struct pool_list *plist)
     }
 }
 
-typedef pool_plugin_t *(*fpool_plugin_init)(struct bufferevent *bev);
-void konoha_plugin_init(KonohaContextVar **kctxp, memcached_st **mcp);
+typedef pool_plugin_t *(*fpool_plugin_Init)(struct bufferevent *bev);
+void konoha_plugin_Init(KonohaContextVar **kctxp, memcached_st **mcp);
 pool_plugin_t *konoha_plugin_get(KonohaContext *kctx, memcached_st *mc, char *buf, size_t len, void *req);
 
-void pool_add(struct Procedure *q, struct bufferevent *bev, struct pool_list *l)
+void pool_Add(struct Procedure *q, struct bufferevent *bev, struct pool_list *l)
 {
     char buf[128] = {};
     memcpy(buf, q->data, q->vlen);
     fprintf(stderr, "procedure: '%s':%d\n", buf, q->vlen);
 #if USE_LLVM
-    memcpy(buf+q->vlen, "_init", 6);
+    memcpy(buf+q->vlen, "_Init", 6);
 #endif
 #if USE_KONOHA
     pool_plugin_t *plugin = konoha_plugin_get(l->konoha, l->mc, buf, strlen(buf), bev);
     if(plugin == NULL)
         fprintf(stderr, "%s was not loaded.\n", buf);
 #else
-    fpool_plugin_init finit = (fpool_plugin_init) llcache_get(l->mc, buf);
+    fpool_plugin_Init finit = (fpool_plugin_Init) llcache_get(l->mc, buf);
     pool_plugin_t *plugin = finit(bev);
 #endif
     conn_t conn;
     conn.p = plugin;
     conn.bev = bev;
-    ARRAY_add(conn_t, &l->list, &conn);
+    ARRAY_Add(conn_t, &l->list, &conn);
 }
 
 void pool_delete_connection(struct pool_list *l, struct bufferevent *bev)
@@ -183,16 +183,16 @@ void pool_delete_connection(struct pool_list *l, struct bufferevent *bev)
     }
 }
 
-extern void konoha_plugin_init(KonohaContextVar **konohap, memcached_st **mcp);
+extern void konoha_plugin_Init(KonohaContextVar **konohap, memcached_st **mcp);
 struct pool_list * pool_new(void)
 {
     struct pool_list *l = malloc(sizeof(struct pool_list));
 #if USE_KONOHA
-    konoha_plugin_init((KonohaContextVar**)&l->konoha, &l->mc);
+    konoha_plugin_Init((KonohaContextVar**)&l->konoha, &l->mc);
 #else
     l->mc = llcache_new("127.0.0.1", 11211);
 #endif
-    ARRAY_init(conn_t, &l->list, 4);
+    ARRAY_Init(conn_t, &l->list, 4);
     return l;
 }
 

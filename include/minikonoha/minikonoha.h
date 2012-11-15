@@ -1543,10 +1543,10 @@ struct _kSystem {
 /* Package */
 
 #define KPACKNAME(N, V) \
-	.name = N, .version = V, .konoha_checksum = K_DATE
+	.name = N, .version = V, .konoha_Checksum = K_DATE
 
 #define KSetPackageName(VAR, N, V) do{\
-	VAR.name = N; VAR.version = V; VAR.konoha_checksum = K_DATE;\
+	VAR.name = N; VAR.version = V; VAR.konoha_Checksum = K_DATE;\
 } while(0)
 
 #define KPACKLIB(N, V) \
@@ -1556,7 +1556,7 @@ struct _kSystem {
 } while(0)
 
 struct KonohaPackageHandlerVar {
-	long  konoha_checksum;
+	long  konoha_Checksum;
 	const char *name;
 	const char *version;
 	const char *libname;
@@ -1599,29 +1599,29 @@ struct KonohaLibVar {
 	/* This Must Be Going To Factory */
 	void (*KscheduleEvent)  (KonohaContext *);
 
-	void  (*Karray_init)(KonohaContext *, KGrowingArray *, size_t);
+	void  (*Karray_Init)(KonohaContext *, KGrowingArray *, size_t);
 	void  (*Karray_resize)(KonohaContext*, KGrowingArray *, size_t);
-	void  (*Karray_expand)(KonohaContext*, KGrowingArray *, size_t);
-	void  (*Karray_free)(KonohaContext*, KGrowingArray *);
+	void  (*Karray_Expand)(KonohaContext*, KGrowingArray *, size_t);
+	void  (*Karray_Free)(KonohaContext*, KGrowingArray *);
 
-	void                (*Kwb_init)(KGrowingArray *, KGrowingBuffer *);
+	void                (*Kwb_Init)(KGrowingArray *, KGrowingBuffer *);
 	void                (*Kwb_write)(KonohaContext*, KGrowingBuffer *, const char *, size_t);
 	void                (*Kwb_vprintf)(KonohaContext*, KGrowingBuffer *, const char *fmt, va_list ap);
 	void                (*Kwb_printf)(KonohaContext*, KGrowingBuffer *, const char *fmt, ...);
 	const char*         (*Kwb_top)(KonohaContext*, KGrowingBuffer *, int);
-	void                (*Kwb_free)(KGrowingBuffer *);
+	void                (*Kwb_Free)(KGrowingBuffer *);
 	kbool_t             (*Kwb_iconv)(KonohaContext *, KGrowingBuffer*, uintptr_t iconv, const char *, size_t, KTraceInfo *);
 
-	KHashMap*           (*Kmap_init)(KonohaContext*, size_t);
+	KHashMap*           (*Kmap_Init)(KonohaContext*, size_t);
 	KHashMapEntry*      (*Kmap_newEntry)(KonohaContext*, KHashMap *, uintptr_t);
 	KHashMapEntry*      (*Kmap_get)(KonohaContext*, KHashMap *, uintptr_t);
 	void                (*Kmap_remove)(KHashMap *, KHashMapEntry *);
 	void                (*Kmap_each)(KonohaContext*, KHashMap *, void *thunk, void (*)(KonohaContext*, KHashMapEntry*, void *));
-	void                (*Kmap_free)(KonohaContext*, KHashMap *, void (*)(KonohaContext*, void *));
+	void                (*Kmap_Free)(KonohaContext*, KHashMap *, void (*)(KonohaContext*, void *));
 	ksymbol_t           (*Kmap_getcode)(KonohaContext*, KHashMap *, kArray *, const char *, size_t, uintptr_t, int, ksymbol_t);
 
-	KonohaContextVar *(*KonohaContext_init)(KonohaContext *rootContext, const PlatformApi *api);
-	void              (*KonohaContext_free)(KonohaContext *rootContext, KonohaContextVar *ctx);
+	KonohaContextVar *(*KonohaContext_Init)(KonohaContext *rootContext, const PlatformApi *api);
+	void              (*KonohaContext_Free)(KonohaContext *rootContext, KonohaContextVar *ctx);
 	void              (*ReftraceAll)(KonohaContext *kctx, KObjectVisitor *);
 
 	KonohaContext*    (*KonohaFactory_CreateKonoha)(KonohaFactory *factory);
@@ -1639,7 +1639,7 @@ struct KonohaLibVar {
 	KonohaClass*    (*KonohaClass_define)(KonohaContext*, kpackageId_t, kString *, KDEFINE_CLASS *, KTraceInfo *);
 	KonohaClass*    (*KonohaClass_Generics)(KonohaContext*, KonohaClass *, ktype_t rty, kushort_t psize, kparamtype_t *p);
 	kbool_t         (*KonohaClass_isSubtype)(KonohaContext*, KonohaClass *, KonohaClass *);
-	kbool_t         (*KonohaClass_addField)(KonohaContext*, KonohaClass *, int flag, ktype_t ty, ksymbol_t sym);
+	kbool_t         (*KonohaClass_AddField)(KonohaContext*, KonohaClass *, int flag, ktype_t ty, ksymbol_t sym);
 
 	kObject*        (*new_kObject)(KonohaContext*, kArray *gcstack, KonohaClass *, uintptr_t);
 	void            (*kObject_FreeField)(KonohaContext *kctx, kObjectVar *);
@@ -1657,7 +1657,7 @@ struct KonohaLibVar {
 	kString*        (*new_kString)(KonohaContext*, kArray *gcstack, const char *, size_t, int);
 //	kString*        (*new_kStringf)(KonohaContext*, kArray *gcstack, int, const char *, ...);
 
-	void            (*kArray_add)(KonohaContext*, kArray *, kAbstractObject *);
+	void            (*kArray_Add)(KonohaContext*, kArray *, kAbstractObject *);
 	void            (*kArray_insert)(KonohaContext*, kArray *, size_t, kAbstractObject *);
 	void            (*kArray_clear)(KonohaContext*, kArray *, size_t);
 
@@ -1670,7 +1670,7 @@ struct KonohaLibVar {
 
 	kbool_t         (*KonohaRuntime_setModule)(KonohaContext*, int, struct KonohaModule *, KTraceInfo *);
 
-	void (*kNameSpace_freeSugarExtension)(KonohaContext *, kNameSpaceVar *);
+	void (*kNameSpace_FreeSugarExtension)(KonohaContext *, kNameSpaceVar *);
 
 	KonohaPackage*   (*kNameSpace_RequirePackage)(KonohaContext*, const char *, KTraceInfo *);
 	kbool_t          (*kNameSpace_ImportPackage)(KonohaContext*, kNameSpace*, const char *, KTraceInfo *);
@@ -1814,7 +1814,7 @@ typedef struct {
 
 #define INIT_GCSTACK()         kArray* _GcStack = kctx->stack->gcstack_OnContextConstList; size_t _gcstackpos = kArray_size(_GcStack)
 #define RESET_GCSTACK()        KLIB kArray_clear(kctx, _GcStack, _gcstackpos)
-#define PUSH_GCSTACK2(o)       KLIB kArray_add(kctx, kctx->stack->gcstack_OnContextConstList, o)
+#define PUSH_GCSTACK2(o)       KLIB kArray_Add(kctx, kctx->stack->gcstack_OnContextConstList, o)
 
 
 #define GC_WRITE_BARRIER(kctx, PARENT, VAR, VAL)\
@@ -1958,7 +1958,7 @@ typedef struct {
 ///* Konoha API */
 extern kbool_t Konoha_LoadScript(KonohaContext* konoha, const char *scriptfile);
 extern kbool_t Konoha_Eval(KonohaContext* konoha, const char *script, kfileline_t uline);
-extern kbool_t konoha_run(KonohaContext* konoha);  // TODO
+extern kbool_t konoha_Run(KonohaContext* konoha);  // TODO
 
 #ifdef __cplusplus
 } /* extern "C" */

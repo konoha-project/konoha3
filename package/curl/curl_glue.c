@@ -177,7 +177,7 @@ static const char *getOptionSymbol(CURLoption opt)
 
 #define toCURL(o)         ((kCurl *)o)->curl
 
-static void Curl_init(KonohaContext *kctx, kObject *o, void *conf)
+static void Curl_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct kCurlVar *c = (struct kCurlVar *)o;
 	c->curl = curl_easy_init();
@@ -185,7 +185,7 @@ static void Curl_init(KonohaContext *kctx, kObject *o, void *conf)
 	c->bytesNULL = NULL;
 }
 
-static void Curl_free(KonohaContext *kctx, kObject *o)
+static void Curl_Free(KonohaContext *kctx, kObject *o)
 {
 	struct kCurlVar *c = (struct kCurlVar *)o;
 	if(c->headers != NULL) {
@@ -197,7 +197,7 @@ static void Curl_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void Curl_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+static void Curl_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	struct kCurlVar *c = (struct kCurlVar *)o;
 	KREFTRACEn(c->URLInfoNULL);
@@ -676,7 +676,7 @@ static KMETHOD Curl_receiveString(KonohaContext *kctx, KonohaStack *sfp)
 	/* presets */
 	struct ReceiveBuffer rbuf = {0};
 	rbuf.kctx = kctx;
-	KLIB Kwb_init(&(kctx->stack->cwb), &rbuf.wb);
+	KLIB Kwb_Init(&(kctx->stack->cwb), &rbuf.wb);
 	curl_easy_setopt(kcurl->curl, CURLOPT_WRITEFUNCTION, writeToBuffer);
 	curl_easy_setopt(kcurl->curl, CURLOPT_WRITEDATA, &rbuf);
 
@@ -696,7 +696,7 @@ static KMETHOD Curl_receiveString(KonohaContext *kctx, KonohaStack *sfp)
 
 	KReturnWith(
 		KLIB new_kString(rbuf.kctx, OnStack, KLIB Kwb_top(rbuf.kctx, &rbuf.wb, 0), Kwb_bytesize(&rbuf.wb), 0),
-		KLIB Kwb_free(&rbuf.wb)
+		KLIB Kwb_Free(&rbuf.wb)
 	);
 }
 
@@ -761,9 +761,9 @@ static kbool_t curl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 	KDEFINE_CLASS defCurl = {
 		STRUCTNAME(Curl),
 		.cflag = kClass_Final,
-		.init = Curl_init,
-		.reftrace = Curl_reftrace,
-		.free = Curl_free,
+		.init = Curl_Init,
+		.reftrace = Curl_Reftrace,
+		.free = Curl_Free,
 	};
 	KonohaClass *cCurl = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defCurl, trace);
 
@@ -889,7 +889,7 @@ static kbool_t curl_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 	return true;
 }
 
-KDEFINE_PACKAGE* curl_init(void)
+KDEFINE_PACKAGE* curl_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("curl", "1.0"),

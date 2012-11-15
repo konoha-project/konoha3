@@ -30,7 +30,7 @@ struct logapi SYSLOG_API = {
     logpool_string_raw,
     logpool_string_delim,
     logpool_syslog_flush,
-    logpool_string_init,
+    logpool_string_Init,
     logpool_string_close,
     logpool_default_priority
 };

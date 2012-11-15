@@ -55,10 +55,10 @@ static uint16_t *emit_header(char *buf, int protocol, int logsize)
     return (uint16_t *) buf;
 }
 
-static void *logpool_io_init(logpool_t *logpool, logpool_param_t *p)
+static void *logpool_io_Init(logpool_t *logpool, logpool_param_t *p)
 {
     struct io_plugin *lp;
-    lp = cast(struct io_plugin *, logpool_string_init(logpool, p));
+    lp = cast(struct io_plugin *, logpool_string_Init(logpool, p));
     char host[128] = {};
     int port = get_server_info((struct logpool_param_stream *) p, host);
     lp->io = io_open_trace(host, port);
@@ -132,21 +132,21 @@ struct logapi STREAM_API = {
     logpool_string_raw,
     logpool_io_delim,
     logpool_io_flush,
-    logpool_io_init,
+    logpool_io_Init,
     logpool_io_close,
     logpool_default_priority
 };
 
-extern struct keyapi *logpool_string_api_init(void);
+extern struct keyapi *logpool_string_api_Init(void);
 
-struct keyapi *logpool_trace_api_init(void)
+struct keyapi *logpool_trace_api_Init(void)
 {
 #if LOGPOOL_DEBUG
     char host[128] = {0};
     int port = get_server_info(NULL, host);
     fprintf(stderr,"default config [%s:%u]\n", host, port);
 #endif
-    return logpool_string_api_init();
+    return logpool_string_api_Init();
 }
 
 void logpool_trace_api_deinit(void)
@@ -162,7 +162,7 @@ int logpoold_start(char *host, int port)
 }
 
 
-static void *logpool_io_client_init(logpool_t *logpool, logpool_param_t *p)
+static void *logpool_io_client_Init(logpool_t *logpool, logpool_param_t *p)
 {
     extern struct io_api client_api;
     struct io_plugin *lp;
@@ -170,7 +170,7 @@ static void *logpool_io_client_init(logpool_t *logpool, logpool_param_t *p)
     char *host = (char *) args->host;
     long port = args->port;
 
-    lp = cast(struct io_plugin *, logpool_string_init(logpool, p));
+    lp = cast(struct io_plugin *, logpool_string_Init(logpool, p));
     lp->io = io_open(host, port, IO_MODE_READ|IO_MODE_WRITE, &client_api);
     return cast(void *, lp);
 }
@@ -192,7 +192,7 @@ static struct logapi CLIENT_API = {
     NULL,
     NULL,
     NULL,
-    logpool_io_client_init,
+    logpool_io_client_Init,
     logpool_io_client_close,
     NULL
 };
@@ -200,7 +200,7 @@ static struct logapi CLIENT_API = {
 logpool_t *logpool_open_client(logpool_t *parent, char *host, int port)
 {
     struct logpool_param_stream param = {8, 1024};
-    logpool_global_init(LOGPOOL_DEFAULT);
+    logpool_global_Init(LOGPOOL_DEFAULT);
     param.host = host;
     param.port = port;
     return logpool_open(parent, &CLIENT_API, (struct logpool_param *) &param);

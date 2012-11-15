@@ -152,11 +152,11 @@ static inline void kexit(int i)
 
 /* setjmp.S */
 #if defined(__i386__)
-/* return_addr, ebx, esp, ebp, esi, edi */
+/* return_Addr, ebx, esp, ebp, esi, edi */
 #define JMP_BUFFSIZE 6
 
 #elif defined(__x86_64__)
-/* return_addr, rbx, rsp, rbp, r12, r13, r14, r15 */
+/* return_Addr, rbx, rsp, rbp, r12, r13, r14, r15 */
 #define JMP_BUFFSIZE 8
 #endif
 

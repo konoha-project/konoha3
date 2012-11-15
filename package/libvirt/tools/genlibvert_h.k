@@ -31,8 +31,8 @@ String2 generate(String type) {
 	konohaclass_defs = konohaclass_defs + "\t\t.typeId = TY_newid,\n";
 	konohaclass_defs = konohaclass_defs + "\t\t.cstruct_size = sizeof(k" + type + "),\n";
 	konohaclass_defs = konohaclass_defs + "\t\t.cflag = kClass_Final,\n";
-	konohaclass_defs = konohaclass_defs + "\t\t.init = virt_common_ptr_init,\n";
-	konohaclass_defs = konohaclass_defs + "\t\t.free = virt_common_ptr_free,\n";
+	konohaclass_defs = konohaclass_defs + "\t\t.init = virt_common_ptr_Init,\n";
+	konohaclass_defs = konohaclass_defs + "\t\t.free = virt_common_ptr_Free,\n";
 	konohaclass_defs = konohaclass_defs + "\t};\n";
 	konohaclass_defs = konohaclass_defs + "\tKonohaClass *ct" + type + " = KLIB kNameSpace_DefineClass(kctx, nx, NULL, &def" + type + ", trace);\n";
 	konohaclass_defs = konohaclass_defs + "\tTY_" + type + " = ct" + type + "->typeId;\n\n";

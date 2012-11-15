@@ -76,7 +76,7 @@ static const char *NAMEs[] = {
 int main(int argc, const char *argv[])
 {
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
-    logpool_global_init(LOGPOOL_DEFAULT);
+    logpool_global_Init(LOGPOOL_DEFAULT);
     ltrace_t *ltrace;
     int i, j;
     for (j = 0; j < ARRAY_SIZE(APIs); ++j) {

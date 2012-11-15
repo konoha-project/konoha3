@@ -64,20 +64,20 @@ static void *spawn_start(void *v)
 //	KCALL(lsfp, 0, t->func->mtd, 0, K_NULL);
 //	END_LOCAL();
 
-	KLIB KonohaContext_free(t->rootCtx, (KonohaContextVar *)kctx);
+	KLIB KonohaContext_Free(t->rootCtx, (KonohaContextVar *)kctx);
 	t->kctx = NULL;
 	// TODO cond_signal gc
 	return NULL;
 }
 
-static void kThread_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kThread_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kThread *t = (kThread *)o;
 	KFieldInit(t, t->func, K_NULL);
 	//KFieldInit(t, t->args, K_NULL);
 }
 
-static void kThread_free(KonohaContext *kctx, kObject *o)
+static void kThread_Free(KonohaContext *kctx, kObject *o)
 {
 	//kThread *t = (kThread *)o;
 	//TODO
@@ -90,7 +90,7 @@ static int kThread_compareTo(kObject *o1, kObject *o2)
 	return pthread_equal(t1->thread, t2->thread) != 0 ? 0 : 1;
 }
 
-static void kThread_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+static void kThread_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kThread *t = (kThread *)o;
 	BEGIN_REFTRACE(1);
@@ -99,25 +99,25 @@ static void kThread_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vi
 	END_REFTRACE();
 }
 
-static void kMutex_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kMutex_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kMutex *m = (kMutex *)o;
 	pthread_mutex_init(&m->mutex, NULL);
 }
 
-static void kMutex_free(KonohaContext *kctx, kObject *o)
+static void kMutex_Free(KonohaContext *kctx, kObject *o)
 {
 	kMutex *m = (kMutex *)o;
 	pthread_mutex_destroy(&m->mutex);
 }
 
-static void kCond_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kCond_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kCond *c = (kCond *)o;
 	pthread_cond_init(&c->cond, NULL);
 }
 
-static void kCond_free(KonohaContext *kctx, kObject *o)
+static void kCond_Free(KonohaContext *kctx, kObject *o)
 {
 	kCond *c = (kCond *)o;
 	pthread_cond_destroy(&c->cond);
@@ -132,7 +132,7 @@ static KMETHOD Thread_create(KonohaContext *kctx, KonohaStack *sfp)
 	KLIB kMethod_DoLazyCompilation(kctx, (f)->mtd, NULL, HatedLazyCompile);
 	kThread *thread = (kThread *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	thread->rootCtx = kctx; //TODO getRootContext
-	thread->kctx = KLIB KonohaContext_init(kctx, kctx->platApi);
+	thread->kctx = KLIB KonohaContext_Init(kctx, kctx->platApi);
 	KFieldSet(thread, thread->func, f);
 	pthread_create(&(thread->thread), NULL, spawn_start, thread);
 	RESET_GCSTACK(); // FIXME?? Not sure this is okay??
@@ -272,22 +272,22 @@ static kbool_t thread_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 	KDEFINE_CLASS defThread = {
 		STRUCTNAME(Thread),
 		.cflag    = kClass_Final,
-		.init     = kThread_init,
-		.reftrace = kThread_reftrace,
-		.free     = kThread_free,
+		.init     = kThread_Init,
+		.reftrace = kThread_Reftrace,
+		.free     = kThread_Free,
 		.compareObject = kThread_compareTo,
 	};
 	KDEFINE_CLASS defMutex = {
 		STRUCTNAME(Mutex),
 		.cflag = kClass_Final,
-		.init  = kMutex_init,
-		.free  = kMutex_free,
+		.init  = kMutex_Init,
+		.free  = kMutex_Free,
 	};
 	KDEFINE_CLASS defCond = {
 		STRUCTNAME(Cond),
 		.cflag = kClass_Final,
-		.init  = kCond_init,
-		.free  = kCond_free,
+		.init  = kCond_Init,
+		.free  = kCond_Free,
 	};
 	KonohaClass *cThread = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defThread, trace);
 	KonohaClass *cMutex  = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defMutex, trace);
@@ -325,7 +325,7 @@ static kbool_t thread_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 	return true;
 }
 
-KDEFINE_PACKAGE* thread_init(void)
+KDEFINE_PACKAGE* thread_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("thread", "1.0"),

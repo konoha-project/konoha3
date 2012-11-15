@@ -42,7 +42,7 @@ static inline uint32_t poolmap_size(poolmap_t *m)
     return m->used_size;
 }
 
-int pool_global_init(void);
+int pool_global_Init(void);
 int pool_global_deinit(void);
 poolmap_t* poolmap_new(uint32_t init, fn_keygen fkey, fn_keycmp fcmp, fn_efree ffree);
 void poolmap_delete(poolmap_t *m);

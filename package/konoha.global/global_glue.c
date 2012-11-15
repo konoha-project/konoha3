@@ -62,19 +62,19 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObj
 	kNameSpace *ns = Stmt_ns(stmt);
 	kMethod *mtd = KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, cid, symbol, TY_var);
 	if(mtd != NULL) {
-		SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "already defined name: %s", SYM_t(symbol));
+		SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "already defined name: %s", SYM_t(symbol));
 		return NULL;
 	}
 	mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, cid, symbol, TY_var);
 	if(mtd != NULL && Method_returnType(mtd) != ty) {
-		SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "differently defined name: %s", SYM_t(symbol));
+		SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "differently defined name: %s", SYM_t(symbol));
 		return NULL;
 	}
 	int flag = kField_Setter;
 	if(mtd == NULL) { // no getter
 		flag |= kField_Getter;
 	}
-	KLIB KonohaClass_addField(kctx, O_ct(o), flag, ty, symbol);
+	KLIB KonohaClass_AddField(kctx, O_ct(o), flag, ty, symbol);
 	return KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, cid, symbol, ty);
 }
 
@@ -93,7 +93,7 @@ static kStmt* TypeDeclAndMakeSetter(KonohaContext *kctx, kStmt *stmt, kGamma *gm
 	return NULL;
 }
 
-static kbool_t kNameSpace_initGlobalObject(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
+static kbool_t kNameSpace_InitGlobalObject(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	if(ns->globalObjectNULL_OnList == NULL) {
 		KDEFINE_CLASS defGlobalObject = {0};
@@ -115,11 +115,11 @@ static KMETHOD Statement_GlobalTypeDecl(KonohaContext *kctx, KonohaStack *sfp)
 	kNameSpace *ns = Stmt_ns(stmt);
 	KMakeTrace(trace, sfp);
 	trace->pline = stmt->uline;
-	if(kNameSpace_initGlobalObject(kctx, ns, trace)) {
-		kToken *tk  = SUGAR kStmt_getToken(kctx, stmt, KW_TypePattern, NULL);
-		kExpr  *expr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL);
+	if(kNameSpace_InitGlobalObject(kctx, ns, trace)) {
+		kToken *tk  = SUGAR kStmt_GetToken(kctx, stmt, KW_TypePattern, NULL);
+		kExpr  *expr = SUGAR kStmt_GetExpr(kctx, stmt, KW_ExprPattern, NULL);
 		kStmt *lastStmt = stmt;
-		result = SUGAR kStmt_declType(kctx, stmt, gma, tk->resolvedTypeId, expr, ns->globalObjectNULL_OnList, TypeDeclAndMakeSetter, &lastStmt);
+		result = SUGAR kStmt_DeclType(kctx, stmt, gma, tk->resolvedTypeId, expr, ns->globalObjectNULL_OnList, TypeDeclAndMakeSetter, &lastStmt);
 	}
 	kStmt_done(kctx, stmt);
 	KReturnUnboxValue(result);
@@ -144,10 +144,10 @@ static	kbool_t global_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 static kbool_t global_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace *exportNS, int option, KTraceInfo *trace)
 {
 	KImportPackage(exportNS, "konoha.field", trace);
-	return kNameSpace_initGlobalObject(kctx, exportNS, trace);
+	return kNameSpace_InitGlobalObject(kctx, exportNS, trace);
 }
 
-KDEFINE_PACKAGE* global_init(void)
+KDEFINE_PACKAGE* global_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", K_VERSION);

@@ -91,7 +91,7 @@ static void kFile_close(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
 	}
 }
 
-static void kFile_checkEOF(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
+static void kFile_CheckEOF(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
 {
 	DBG_ASSERT(file->fp != NULL);
 	if(feof(file->fp) != 0) {
@@ -107,7 +107,7 @@ static size_t TRACE_fread(KonohaContext *kctx, kFile *file, char *buf, size_t bu
 		KTraceErrorPoint(trace, SystemFault, "fread", LogFile(file), LogErrno);
 		KLIB KonohaRuntime_raise(kctx, EXPT_("IO"), SystemFault, NULL, trace->baseStack);
 	}
-	kFile_checkEOF(kctx, file, trace);
+	kFile_CheckEOF(kctx, file, trace);
 	return size;
 }
 
@@ -134,7 +134,7 @@ static void TRACE_fflush(KonohaContext *kctx, kFile *file, KTraceInfo *trace)
 
 /* ------------------------------------------------------------------------ */
 
-static void kFile_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kFile_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct kFileVar *file = (struct kFileVar *)o;
 	file->fp = (conf != NULL) ? conf : NULL;
@@ -143,13 +143,13 @@ static void kFile_init(KonohaContext *kctx, kObject *o, void *conf)
 	file->writerIconv = ICONV_NULL;
 }
 
-static void kFile_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+static void kFile_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kFile *file = (kFile *)o;
 	KREFTRACEn(file->PathInfoNULL);
 }
 
-static void kFile_free(KonohaContext *kctx, kObject *o)
+static void kFile_Free(KonohaContext *kctx, kObject *o)
 {
 	struct kFileVar *file = (struct kFileVar *)o;
 	if(file->fp != NULL) {
@@ -239,7 +239,7 @@ static KMETHOD File_readLine(KonohaContext *kctx, KonohaStack *sfp)
 	kFile *file = (kFile *)sfp[0].asObject;
 	if(file->fp != NULL) {
 		KGrowingBuffer wb;
-		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+		KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 		int ch, pos = 0, hasUTF8 = false, bufferCount = 0, policy = StringPolicy_ASCII;
 		char buffer[K_PAGESIZE];
 		KMakeTrace(trace, sfp);
@@ -277,10 +277,10 @@ static KMETHOD File_readLine(KonohaContext *kctx, KonohaStack *sfp)
 				KLIB Kwb_write(kctx, &wb, buffer, pos);
 			}
 		}
-		kFile_checkEOF(kctx, file, trace);
+		kFile_CheckEOF(kctx, file, trace);
 		KReturnWith(
 			KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), policy),
-			KLIB Kwb_free(&wb)
+			KLIB Kwb_Free(&wb)
 		);
 	}
 	else {
@@ -307,10 +307,10 @@ static KMETHOD File_print(KonohaContext *kctx, KonohaStack *sfp)
 	}
 	else {
 		KGrowingBuffer wb;
-		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+		KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 		KLIB Kwb_iconv(kctx, &wb, file->writerIconv, S_text(line), S_size(line), trace);
 		TRACE_fwrite(kctx, file, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), trace);
-		KLIB Kwb_free(&wb);
+		KLIB Kwb_Free(&wb);
 	}
 }
 
@@ -530,9 +530,9 @@ static kbool_t file_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 			.typeId = TY_newid,
 			.cstruct_size = sizeof(kFile),
 			.cflag = kClass_Final,
-			.init  = kFile_init,
-			.reftrace = kFile_reftrace,
-			.free  = kFile_free,
+			.init  = kFile_Init,
+			.reftrace = kFile_Reftrace,
+			.free  = kFile_Free,
 			.p     = kFile_p,
 		};
 		CT_File = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defFile, trace);
@@ -554,7 +554,7 @@ static kbool_t file_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE* file_init(void)
+KDEFINE_PACKAGE* file_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("konoha", "1.0"),

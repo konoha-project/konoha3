@@ -70,7 +70,7 @@ static unsigned long long net(int i) {
 
 static void emu(int interval, int step, int pid)
 {
-  logpool_global_init(LOGAPI_INIT_FLAG);
+  logpool_global_Init(LOGAPI_INIT_FLAG);
   logpool_t *logpool = logpool_open(NULL, &LOGAPI, LOGAPI_PARAM);
   int i;
   void *args;

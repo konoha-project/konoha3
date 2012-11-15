@@ -81,7 +81,7 @@ struct map_api {
 	map_status_t  (*_set)(Kprotomap_t *m, unsigned hash, unsigned type, void *val, Kprotomap_t **map);
 	map_record_t *(*_next)(Kprotomap_t *m, protomap_iterator *itr);
 	void (*_remove)(Kprotomap_t *m, unsigned hash);
-	void (*_init)(Kprotomap_t *m, unsigned init);
+	void (*_Init)(Kprotomap_t *m, unsigned init);
 	void (*_dispose)(Kprotomap_t *m);
 };
 
@@ -231,16 +231,16 @@ static map_record_t *hashmap_get(hashmap_t *m, unsigned hash)
 	return NULL;
 }
 
-static void hashmap_init(hashmap_t *m, unsigned init)
+static void hashmap_Init(hashmap_t *m, unsigned init)
 {
 	if(init < MAP_INITSIZE)
 		init = MAP_INITSIZE;
 	hashmap_record_reset(m, 1U << (POWER_OF_TWO(init)));
 }
 
-static void hashmap_api_init(Kprotomap_t *m, unsigned init)
+static void hashmap_api_Init(Kprotomap_t *m, unsigned init)
 {
-	hashmap_init((hashmap_t *) m, init);
+	hashmap_Init((hashmap_t *) m, init);
 }
 
 static void hashmap_api_dispose(Kprotomap_t *_m)
@@ -298,19 +298,19 @@ static const protomap_api_t HASH_API = {
 	hashmap_api_set,
 	hashmap_api_next,
 	hashmap_api_remove,
-	hashmap_api_init,
+	hashmap_api_Init,
 	hashmap_api_dispose
 };
 
 static Kprotomap_t *hashmap_new(unsigned init)
 {
 	Kprotomap_t *m = protomap_create(&HASH_API);
-	hashmap_init((hashmap_t *) m, init);
+	hashmap_Init((hashmap_t *) m, init);
 	return m;
 }
 
 /* [DICTMAP] */
-static Kprotomap_t *dictmap_init(dictmap_t *m)
+static Kprotomap_t *dictmap_Init(dictmap_t *m)
 {
 	int i;
 	const size_t allocSize = sizeof(map_record_t)*DICTMAP_THRESHOLD;
@@ -323,9 +323,9 @@ static Kprotomap_t *dictmap_init(dictmap_t *m)
 	return (Kprotomap_t *) m;
 }
 
-static void dictmap_api_init(Kprotomap_t *_m, unsigned init)
+static void dictmap_api_Init(Kprotomap_t *_m, unsigned init)
 {
-	dictmap_init((dictmap_t *) _m);
+	dictmap_Init((dictmap_t *) _m);
 	(void)init;
 }
 
@@ -433,14 +433,14 @@ static const protomap_api_t DICT_API = {
 	dictmap_api_set,
 	dictmap_api_next,
 	dictmap_api_remove,
-	dictmap_api_init,
+	dictmap_api_Init,
 	dictmap_api_dispose
 };
 
 static Kprotomap_t *dictmap_new()
 {
 	Kprotomap_t *m = protomap_create(&DICT_API);
-	return dictmap_init((dictmap_t *) m);
+	return dictmap_Init((dictmap_t *) m);
 }
 
 /* [NULLMAP] */
@@ -449,7 +449,7 @@ typedef struct nullmap_t {
 	struct map_base base;
 } nullmap_t;
 
-static void nullmap_api_init(Kprotomap_t *m, unsigned init)
+static void nullmap_api_Init(Kprotomap_t *m, unsigned init)
 {
 	(void)m; (void) init;
 }
@@ -488,7 +488,7 @@ static const protomap_api_t NULL_API = {
 	nullmap_api_set,
 	nullmap_api_next,
 	nullmap_api_remove,
-	nullmap_api_init,
+	nullmap_api_Init,
 	nullmap_api_dispose
 };
 

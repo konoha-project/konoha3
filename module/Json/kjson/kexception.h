@@ -57,7 +57,7 @@ static void kexception_handler_reset(kexception_handler_t *eh)
     memset(eh->handler, 0, sizeof(jmp_buf));
 }
 
-static void kexception_handler_init(kexception_handler_t *eh)
+static void kexception_handler_Init(kexception_handler_t *eh)
 {
     kexception_handler_reset(eh);
 }

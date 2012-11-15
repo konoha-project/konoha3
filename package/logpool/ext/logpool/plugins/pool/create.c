@@ -22,7 +22,7 @@ static char *emit_message_header(char *buf, uint16_t protocol, uint16_t logsize,
     return buf;
 }
 
-static bool create_apply(struct pool_plugin *_p, struct LogEntry *e, uint32_t state)
+static bool create_Apply(struct pool_plugin *_p, struct LogEntry *e, uint32_t state)
 {
     struct pool_plugin_create *p = (struct pool_plugin_create *) _p;
     uint16_t i, logsize, datasize = 0;
@@ -55,9 +55,9 @@ static bool create_failed(struct pool_plugin *p, struct LogEntry *e, uint32_t st
 static struct pool_plugin *pool_plugin_create_create(struct pool_plugin *_p)
 {
     struct pool_plugin_create *p = (struct pool_plugin_create *) _p;
-    p->base.apply  = pool_plugin_init(_p->apply);
-    p->base.failed = pool_plugin_init(_p->failed);
-    p->base.Apply  = create_apply;
+    p->base.apply  = pool_plugin_Init(_p->apply);
+    p->base.failed = pool_plugin_Init(_p->failed);
+    p->base.Apply  = create_Apply;
     p->base.Failed = create_failed;
     p->base.name = "create";
     return _p;
@@ -91,12 +91,12 @@ static void nop_write_data(uintptr_t context, struct LogEntry *e, char *buf)
     //}
 }
 
-static uintptr_t nop_init(uintptr_t context, uint32_t t) { return 0; }
+static uintptr_t nop_Init(uintptr_t context, uint32_t t) { return 0; }
 static uintptr_t nop_exit(uintptr_t context) { return 0; }
 
 EXPORT_POOL_PLUGIN(pool_plugin_create) = {
-    {0, NULL, NULL, pool_plugin_create_create, pool_plugin_create_dispose, create_apply, create_failed, NULL},
-    0, nop_init, nop_exit, nop_write_size, nop_write_data
+    {0, NULL, NULL, pool_plugin_create_create, pool_plugin_create_dispose, create_Apply, create_failed, NULL},
+    0, nop_Init, nop_exit, nop_write_size, nop_write_data
 };
 
 #ifdef __cplusplus

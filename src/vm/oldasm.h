@@ -62,10 +62,10 @@
 	ASM_BRANCH_(kctx, lb, &tmp_.op, sizeof(OP##T));					\
 } while(0)
 
-#define kBasicBlock_add(bb, T, ...) do {								\
+#define kBasicBlock_Add(bb, T, ...) do {								\
 	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};		\
 	union { VirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
-	BasicBlock_add(kctx, bb, 0, &tmp_.op, sizeof(OP##T));			\
+	BasicBlock_Add(kctx, bb, 0, &tmp_.op, sizeof(OP##T));			\
 } while(0)
 
 #ifdef _CLASSICVM
@@ -94,17 +94,17 @@ static kBasicBlock* new_BasicBlockLABEL(KonohaContext *kctx)
 {
 	kBasicBlock *bb = new_(BasicBlock, 0);
 	bb->id = kArray_size(ctxcode->codeList);
-	KLIB kArray_add(kctx, ctxcode->codeList, bb);
+	KLIB kArray_Add(kctx, ctxcode->codeList, bb);
 	return bb;
 }
 
-static void BasicBlock_add(KonohaContext *kctx, kBasicBlock *bb, kushort_t line, VirtualCode *op, size_t size)
+static void BasicBlock_Add(KonohaContext *kctx, kBasicBlock *bb, kushort_t line, VirtualCode *op, size_t size)
 {
 	if(bb->codeTable.bytemax == 0) {
-		KLIB Karray_init(kctx, &(bb->codeTable), 1 * sizeof(VirtualCode));
+		KLIB Karray_Init(kctx, &(bb->codeTable), 1 * sizeof(VirtualCode));
 	}
 	else if(bb->codeTable.bytesize == bb->codeTable.bytemax) {
-		KLIB Karray_expand(kctx, &(bb->codeTable), 4 * sizeof(VirtualCode));
+		KLIB Karray_Expand(kctx, &(bb->codeTable), 4 * sizeof(VirtualCode));
 	}
 	VirtualCode *tailcode = bb->codeTable.codeItems + (bb->codeTable.bytesize/sizeof(VirtualCode));
 	memcpy(tailcode, op, size == 0 ? sizeof(VirtualCode) : size);
@@ -115,7 +115,7 @@ static void BasicBlock_add(KonohaContext *kctx, kBasicBlock *bb, kushort_t line,
 static void BUILD_asm(KonohaContext *kctx, VirtualCode *op, size_t opsize)
 {
 	assert(op->opcode != OPCODE_JMPF);
-	BasicBlock_add(kctx, ctxcode->currentWorkingBlock, ctxcode->uline, op, opsize);
+	BasicBlock_Add(kctx, ctxcode->currentWorkingBlock, ctxcode->uline, op, opsize);
 }
 
 static int BUILD_asmJMPF(KonohaContext *kctx, OPJMPF *op)
@@ -128,7 +128,7 @@ static int BUILD_asmJMPF(KonohaContext *kctx, OPJMPF *op)
 		return swap;
 	}
 #endif
-	BasicBlock_add(kctx, bb, ctxcode->uline, (VirtualCode *)op, 0);
+	BasicBlock_Add(kctx, bb, ctxcode->uline, (VirtualCode *)op, 0);
 	return swap;
 }
 
@@ -216,11 +216,11 @@ static void BasicBlock_join(KonohaContext *kctx, kBasicBlock *bb, kBasicBlock *b
 		return;
 	}
 	if(bb->codeTable.bytemax < bb->codeTable.bytesize + bbN->codeTable.bytesize) {
-		KLIB Karray_expand(kctx, &bb->codeTable, (bb->codeTable.bytesize + bbN->codeTable.bytesize));
+		KLIB Karray_Expand(kctx, &bb->codeTable, (bb->codeTable.bytesize + bbN->codeTable.bytesize));
 	}
 	memcpy(bb->codeTable.bytebuf + bb->codeTable.bytesize, bbN->codeTable.bytebuf, bbN->codeTable.bytesize);
 	bb->codeTable.bytesize += bbN->codeTable.bytesize;
-	KLIB Karray_free(kctx, &bbN->codeTable);
+	KLIB Karray_Free(kctx, &bbN->codeTable);
 }
 
 static void BasicBlock_strip1(KonohaContext *kctx, kBasicBlock *bb)
@@ -298,7 +298,7 @@ static size_t BasicBlock_size(KonohaContext *kctx, kBasicBlock *bb, size_t c)
 	}
 	if(bb->branchBlock != NULL) {
 		DBG_ASSERT(bb->nextBlock == NULL);
-		kBasicBlock_add(bb, JMP);
+		kBasicBlock_Add(bb, JMP);
 		c = BasicBlock_peephole(kctx, bb) + c;
 		bb = bb->branchBlock;
 		goto L_TAIL;
@@ -330,7 +330,7 @@ static VirtualCode* BasicBlock_copy(KonohaContext *kctx, VirtualCode *dst, kBasi
 			bb->opjmp = (dst + (BasicBlock_codesize(bb) - 1));
 		}
 		dst = dst + BasicBlock_codesize(bb);
-		KLIB Karray_free(kctx, &bb->codeTable);
+		KLIB Karray_Free(kctx, &bb->codeTable);
 		prev[0] = bb;
 	}
 	if(bb->nextBlock != NULL) {
@@ -424,18 +424,18 @@ static void dumpOPCODE(KonohaContext *kctx, VirtualCode *c, VirtualCode *pc_star
 	DUMP_P("\n");
 }
 
-static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD MethodFunc_RunVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 {
 	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].calledMethod));
-	KonohaVirtualMachine_run(kctx, sfp, CODE_ENTER);
+	KonohaVirtualMachine_Run(kctx, sfp, CODE_ENTER);
 }
 
 static void Method_threadCode(KonohaContext *kctx, kMethod *mtd, kByteCode *kcode)
 {
 	kMethodVar *Wmtd = (kMethodVar *)mtd;
-	KLIB kMethod_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
+	KLIB kMethod_setFunc(kctx, mtd, MethodFunc_RunVirtualMachine);
 	KSETv(Wmtd, Wmtd->kcode, kcode);
-	Wmtd->pc_start = KonohaVirtualMachine_run(kctx, kctx->esp + 1, kcode->code);
+	Wmtd->pc_start = KonohaVirtualMachine_Run(kctx, kctx->esp + 1, kcode->code);
 	if(verbose_code) {
 		DBG_P("DUMP CODE");
 		VirtualCode *pc = mtd->pc_start;
@@ -515,9 +515,9 @@ static kBasicBlock* EXPR_asmJMPIF(KonohaContext *kctx, kStmt *stmt, int a, kExpr
 
 #define ESP_(sfpidx, args)   SFP_(sfpidx + args + K_CALLDELTA + 1)
 
-static kObject* BUILD_addConstPool(KonohaContext *kctx, kObject *o)
+static kObject* BUILD_AddConstPool(KonohaContext *kctx, kObject *o)
 {
-	KLIB kArray_add(kctx, ctxcode->constPools, o);
+	KLIB kArray_Add(kctx, ctxcode->constPools, o);
 	return o;
 }
 
@@ -546,7 +546,7 @@ static void EXPR_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int s
 		kObject *v = expr->objectConstValue;
 		DBG_ASSERT(!TY_isUnbox(expr->ty));
 		DBG_ASSERT(Expr_hasObjectConstValue(expr));
-		v = BUILD_addConstPool(kctx, v);
+		v = BUILD_AddConstPool(kctx, v);
 		ASM(NSET, OC_(a), (uintptr_t)v, CT_(expr->ty));
 		break;
 	}
@@ -635,7 +635,7 @@ static void CALL_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, int s
 //		/* do nothing */
 //	} else
 //	if(kMethod_is(Final, mtd) || !kMethod_is(Virtual, mtd)) {
-//		if(mtd->invokeMethodFunc != MethodFunc_runVirtualMachine) {
+//		if(mtd->invokeMethodFunc != MethodFunc_RunVirtualMachine) {
 //		ASM(SCALL, ctxcode->uline, SFP_(thisidx), ESP_(espidx, argc), mtd, KLIB Knull(kctx, CT_(expr->ty)));
 //		}
 //		else {
@@ -727,14 +727,14 @@ static void LETEXPR_asm(KonohaContext *kctx, kStmt *stmt, int a, kExpr *expr, in
 //{
 //	kBasicBlock* lbCONTINUE = new_BasicBlockLABEL(kctx);
 //	kBasicBlock* lbBREAK = new_BasicBlockLABEL(kctx);
-//	BUILD_pushLABEL(kctx, stmt, lbCONTINUE, lbBREAK);
+//	BUILD_PushLABEL(kctx, stmt, lbCONTINUE, lbBREAK);
 //	ASM_LABEL(kctx, lbCONTINUE);
 //	ASM_SAFEPOINT(kctx, DP(stmt)->espidx);
 //	Tn_asmBLOCK(kctx, stmt, 0);
 //	EXPR_asmJMPIF(kctx, stmt, 1, 0/*FALSE*/, lbBREAK, DP(stmt)->espidx);
 //	ASM_JMP(kctx, lbCONTINUE);
 //	ASM_LABEL(kctx, lbBREAK);
-//	BUILD_popLABEL(kctx);
+//	BUILD_PopLABEL(kctx);
 //}
 
 /* ------------------------------------------------------------------------ */
@@ -752,14 +752,14 @@ static void ASM_SAFEPOINT(KonohaContext *kctx, int espidx)
 
 static void ErrStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
-	kString *msg = (kString *)kStmt_getObjectNULL(kctx, stmt, KW_ERR);
+	kString *msg = (kString *)kStmt_GetObjectNULL(kctx, stmt, KW_ERR);
 	DBG_ASSERT(IS_String(msg));
 	ASM(ERROR, stmt->uline, msg);
 }
 
 static void ExprStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
-	kExpr *expr = (kExpr *)kStmt_getObjectNULL(kctx, stmt, KW_ExprPattern);
+	kExpr *expr = (kExpr *)kStmt_GetObjectNULL(kctx, stmt, KW_ExprPattern);
 	if(IS_Expr(expr)) {
 		EXPR_asm(kctx, stmt, espidx, expr, shift, espidx);
 	}
@@ -767,7 +767,7 @@ static void ExprStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx
 
 static void BlockStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
-	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK), shift);
+	BLOCK_asm(kctx, SUGAR kStmt_GetBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK), shift);
 }
 
 static void IfStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
@@ -775,20 +775,20 @@ static void IfStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 	kBasicBlock*  lbELSE = new_BasicBlockLABEL(kctx);
 	kBasicBlock*  lbEND  = new_BasicBlockLABEL(kctx);
 	/* if */
-	lbELSE = EXPR_asmJMPIF(kctx, stmt, espidx, SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL), 0/*FALSE*/, lbELSE, shift, espidx);
+	lbELSE = EXPR_asmJMPIF(kctx, stmt, espidx, SUGAR kStmt_GetExpr(kctx, stmt, KW_ExprPattern, NULL), 0/*FALSE*/, lbELSE, shift, espidx);
 	/* then */
-	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK), shift);
+	BLOCK_asm(kctx, SUGAR kStmt_GetBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK), shift);
 	ASM_JMP(kctx, lbEND);
 	/* else */
 	ASM_LABEL(kctx, lbELSE);
-	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_else, K_NULLBLOCK), shift);
+	BLOCK_asm(kctx, SUGAR kStmt_GetBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_else, K_NULLBLOCK), shift);
 	/* endif */
 	ASM_LABEL(kctx, lbEND);
 }
 
 static void ReturnStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
-	kExpr *expr = (kExpr *)kStmt_getObjectNULL(kctx, stmt, KW_ExprPattern);
+	kExpr *expr = (kExpr *)kStmt_GetObjectNULL(kctx, stmt, KW_ExprPattern);
 	if(expr != NULL && IS_Expr(expr) && expr->ty != TY_void) {
 		EXPR_asm(kctx, stmt, K_RTNIDX, expr, shift, espidx);
 	}
@@ -799,23 +799,23 @@ static void LoopStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx
 {
 	kBasicBlock* lbCONTINUE = new_BasicBlockLABEL(kctx);
 	kBasicBlock* lbBREAK = new_BasicBlockLABEL(kctx);
-//	BUILD_pushLABEL(kctx, stmt, lbCONTINUE, lbBREAK);
+//	BUILD_PushLABEL(kctx, stmt, lbCONTINUE, lbBREAK);
 	KLIB kObject_setObject(kctx, stmt, SYM_("continue"), TY_BasicBlock, lbCONTINUE);
 	KLIB kObject_setObject(kctx, stmt, SYM_("break"), TY_BasicBlock, lbBREAK);
 	ASM_LABEL(kctx, lbCONTINUE);
 	ASM_SAFEPOINT(kctx, espidx);
-	EXPR_asmJMPIF(kctx, stmt, espidx, SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, NULL), 0/*FALSE*/, lbBREAK, shift, espidx);
-	//BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, KW_("iteration"), K_NULLBLOCK));
-	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK), shift);
+	EXPR_asmJMPIF(kctx, stmt, espidx, SUGAR kStmt_GetExpr(kctx, stmt, KW_ExprPattern, NULL), 0/*FALSE*/, lbBREAK, shift, espidx);
+	//BLOCK_asm(kctx, SUGAR kStmt_GetBlock(kctx, stmt, KW_("iteration"), K_NULLBLOCK));
+	BLOCK_asm(kctx, SUGAR kStmt_GetBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK), shift);
 	ASM_JMP(kctx, lbCONTINUE);
 	ASM_LABEL(kctx, lbBREAK);
-//	BUILD_popLABEL(kctx);
+//	BUILD_PopLABEL(kctx);
 }
 
 static void JumpStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
 	SugarSyntax *syn = stmt->syn;
-	kStmt *jump = (kStmt *)kStmt_getObject(kctx, stmt, syn->keyword, NULL);
+	kStmt *jump = (kStmt *)kStmt_GetObject(kctx, stmt, syn->keyword, NULL);
 	DBG_ASSERT(jump != NULL);
 	DBG_ASSERT(IS_Stmt(jump));
 	kBasicBlock* lbJUMP = (kBasicBlock *)KLIB kObject_getObject(kctx, jump, syn->keyword, NULL);
@@ -841,15 +841,15 @@ static void TryStmt_asm(KonohaContext *kctx, kStmt *stmt, int shift, int espidx)
 {
 	kBasicBlock* lbCatched = new_BasicBlockLABEL(kctx);
 	kBasicBlock* lbFinally = new_BasicBlockLABEL(kctx);
-	kBlock *catchBlock   = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("catch"),   K_NULLBLOCK);
-	kBlock *finallyBlock = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("finally"), K_NULLBLOCK);
+	kBlock *catchBlock   = SUGAR kStmt_GetBlock(kctx, stmt, NULL, SYM_("catch"),   K_NULLBLOCK);
+	kBlock *finallyBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, SYM_("finally"), K_NULLBLOCK);
 	PUSH_GCSTACK(catchBlock);
 	PUSH_GCSTACK(finallyBlock);
 	KLIB kObject_setObject(kctx, stmt, SYM_("catch"),   TY_BasicBlock, lbCatched);
 	KLIB kObject_setObject(kctx, stmt, SYM_("finally"), TY_BasicBlock, lbFinally);
 	ASMBranch(kctx/*, OPCODE_TRYJMP*/, lbCatched);
 
-	BLOCK_asm(kctx, SUGAR kStmt_getBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK), shift);
+	BLOCK_asm(kctx, SUGAR kStmt_GetBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK), shift);
 	ASM_JMP(kctx, lbFinally);
 	ASM_LABEL(kctx, lbCatched);
 	BLOCK_asm(kctx, catchBlock, shift);
@@ -905,7 +905,7 @@ static void kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	if(ctxcode == NULL) {
 		kmodcode->h.setup(kctx, NULL, 0);
 	}
-	KLIB kMethod_setFunc(kctx, mtd, MethodFunc_runVirtualMachine);
+	KLIB kMethod_setFunc(kctx, mtd, MethodFunc_RunVirtualMachine);
 	DBG_ASSERT(kArray_size(ctxcode->codeList) == 0);
 	kBasicBlock* lbINIT  = new_BasicBlockLABEL(kctx);
 	kBasicBlock* lbBEGIN = new_BasicBlockLABEL(kctx);
@@ -914,7 +914,7 @@ static void kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	PUSH_GCSTACK(lbBEGIN);
 	PUSH_GCSTACK(ctxcode->lbEND);
 	ctxcode->currentWorkingBlock = lbINIT;
-//	BUILD_pushLABEL(kctx, NULL, lbBEGIN, lbEND);
+//	BUILD_PushLABEL(kctx, NULL, lbBEGIN, lbEND);
 	ASM(THCODE, _THCODE);
 	ASM(CHKSTACK, 0);
 	ASM_LABEL(kctx, lbBEGIN);
@@ -925,7 +925,7 @@ static void kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 	}
 	ASM(RET);
 	assert(ctxcode->lbEND);/* scan-build: remove warning */
-//	BUILD_popLABEL(kctx);
+//	BUILD_PopLABEL(kctx);
 	BUILD_compile(kctx, mtd, lbINIT, ctxcode->lbEND);
 	ctxcode->lbEND = NULL;
 	RESET_GCSTACK();
@@ -936,7 +936,7 @@ static void kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kBlock *bk)
 
 //#define PACKSUGAR    .packageId = 1, .packageDomain = 1
 
-static void BasicBlock_init(KonohaContext *kctx, kObject *o, void *conf)
+static void BasicBlock_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kBasicBlock *bb = (kBasicBlock *)o;
 	bb->codeTable.bytemax = 0;
@@ -950,13 +950,13 @@ static void BasicBlock_init(KonohaContext *kctx, kObject *o, void *conf)
 	bb->opjmp = NULL;
 }
 
-static void BasicBlock_free(KonohaContext *kctx, kObject *o)
+static void BasicBlock_Free(KonohaContext *kctx, kObject *o)
 {
 	kBasicBlock *bb = (kBasicBlock *)o;
-	KLIB Karray_free(kctx, &bb->codeTable);
+	KLIB Karray_Free(kctx, &bb->codeTable);
 }
 
-static void ByteCode_init(KonohaContext *kctx, kObject *o, void *conf)
+static void ByteCode_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kByteCodeVar *b = (kByteCodeVar *)o;
 	b->codesize = 0;
@@ -965,7 +965,7 @@ static void ByteCode_init(KonohaContext *kctx, kObject *o, void *conf)
 	KFieldInit(b, b->source, TS_EMPTY);
 }
 
-static void ByteCode_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+static void ByteCode_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kByteCode *b = (kByteCode *)o;
 	BEGIN_REFTRACE(1);
@@ -973,7 +973,7 @@ static void ByteCode_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *v
 	END_REFTRACE();
 }
 
-static void ByteCode_free(KonohaContext *kctx, kObject *o)
+static void ByteCode_Free(KonohaContext *kctx, kObject *o)
 {
 	kByteCode *b = (kByteCode *)o;
 	KFree(b->code, b->codesize);
@@ -1010,7 +1010,7 @@ static void kMethod_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
 /* ------------------------------------------------------------------------ */
 /* [ctxcode] */
 
-static void ctxcode_reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh, KObjectVisitor *visitor)
+static void ctxcode_Reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh, KObjectVisitor *visitor)
 {
 	ctxcode_t *base = (ctxcode_t *)baseh;
 	BEGIN_REFTRACE(2);
@@ -1018,26 +1018,26 @@ static void ctxcode_reftrace(KonohaContext *kctx, struct KonohaModuleContext *ba
 	KREFTRACEv(base->constPools);
 	END_REFTRACE();
 }
-static void ctxcode_free(KonohaContext *kctx, struct KonohaModuleContext *baseh)
+static void ctxcode_Free(KonohaContext *kctx, struct KonohaModuleContext *baseh)
 {
 	ctxcode_t *base = (ctxcode_t *)baseh;
 	KFree(base, sizeof(ctxcode_t));
 }
 
-static void kmodcode_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
+static void kmodcode_Setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
 {
 	if(!newctx) { // lazy setup
 		assert(kctx->modlocal[MOD_code] == NULL);
 		ctxcode_t *base = (ctxcode_t *)KCalloc_UNTRACE(sizeof(ctxcode_t), 1);
-		base->h.reftrace = ctxcode_reftrace;
-		base->h.free     = ctxcode_free;
+		base->h.reftrace = ctxcode_Reftrace;
+		base->h.free     = ctxcode_Free;
 		KUnsafeFieldInit(base->codeList, new_(Array, K_PAGESIZE/sizeof(void *)));
 		KUnsafeFieldInit(base->constPools, new_(Array, 64));
 		kctx->modlocal[MOD_code] = (KonohaModuleContext *)base;
 	}
 }
 
-static void kmodcode_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
+static void kmodcode_Reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 	KModuleByteCode *base = (KModuleByteCode *)baseh;
 	BEGIN_REFTRACE(1);
@@ -1045,53 +1045,53 @@ static void kmodcode_reftrace(KonohaContext *kctx, struct KonohaModule *baseh)
 	END_REFTRACE();
 }
 
-static void kmodcode_free(KonohaContext *kctx, struct KonohaModule *baseh)
+static void kmodcode_Free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 //	KModuleByteCode *base = (KModuleByteCode *)baseh;
 	KFree(baseh, sizeof(KModuleByteCode));
 }
 
-void MODCODE_init(KonohaContext *kctx, KonohaContextVar *ctx)
+void MODCODE_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 {
 	KModuleByteCode *base = (KModuleByteCode *)KCalloc_UNTRACE(sizeof(KModuleByteCode), 1);
-	opcode_check();
+	opcode_Check();
 	base->h.name     = "minivm";
-	base->h.setup    = kmodcode_setup;
-	base->h.reftrace = kmodcode_reftrace;
-	base->h.free     = kmodcode_free;
+	base->h.setup    = kmodcode_Setup;
+	base->h.reftrace = kmodcode_Reftrace;
+	base->h.free     = kmodcode_Free;
 	KLIB KonohaRuntime_setModule(kctx, MOD_code, &base->h, 0);
 
 	KDEFINE_CLASS defBasicBlock = {
 		STRUCTNAME(BasicBlock),
-		.init = BasicBlock_init,
-		.free = BasicBlock_free,
+		.init = BasicBlock_Init,
+		.free = BasicBlock_Free,
 	};
 
 	KDEFINE_CLASS defByteCode = {
 		STRUCTNAME(ByteCode),
-		.init     = ByteCode_init,
-		.reftrace = ByteCode_reftrace,
-		.free     = ByteCode_free,
+		.init     = ByteCode_Init,
+		.reftrace = ByteCode_Reftrace,
+		.free     = ByteCode_Free,
 	};
 
 	base->cBasicBlock = KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defBasicBlock, 0);
 	base->cByteCode   = KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defByteCode, 0);
-	kmodcode_setup(kctx, &base->h, 0/*lazy*/);
+	kmodcode_Setup(kctx, &base->h, 0/*lazy*/);
 	{
 		INIT_GCSTACK();
 		kBasicBlock* ia = (kBasicBlock *)new_(BasicBlock, 0);
 		kBasicBlock* ib = (kBasicBlock *)new_(BasicBlock, 0);
 		PUSH_GCSTACK(ia);
 		PUSH_GCSTACK(ib);
-		kBasicBlock_add(ia, THCODE, _THCODE);
-		kBasicBlock_add(ia, NCALL); // FUNCCALL
-		kBasicBlock_add(ia, ENTER);
-		kBasicBlock_add(ia, EXIT);
-		kBasicBlock_add(ib, RET);   // NEED TERMINATION
+		kBasicBlock_Add(ia, THCODE, _THCODE);
+		kBasicBlock_Add(ia, NCALL); // FUNCCALL
+		kBasicBlock_Add(ia, ENTER);
+		kBasicBlock_Add(ia, EXIT);
+		kBasicBlock_Add(ib, RET);   // NEED TERMINATION
 		ia->nextBlock = ib;
 		kByteCode *kcode = new_ByteCode(kctx, ia, ib);
 		KUnsafeFieldInit(kmodcode->codeNull, kcode);
-		VirtualCode *pc = KonohaVirtualMachine_run(kctx, kctx->esp, kcode->code);
+		VirtualCode *pc = KonohaVirtualMachine_Run(kctx, kctx->esp, kcode->code);
 		CODE_ENTER = pc;
 		CODE_ENTER = pc+1;
 		KLIB kArray_clear(kctx, ctxcode->codeList, 0);

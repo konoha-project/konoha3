@@ -114,7 +114,7 @@ struct logapi {
     logFn fn_raw;
     void  (*fn_delim)(logpool_t *);
     void  (*fn_flush)(logpool_t *, void**);
-    void *(*fn_init) (logpool_t *, logpool_param_t *);
+    void *(*fn_Init) (logpool_t *, logpool_param_t *);
     void  (*fn_close)(logpool_t *);
     int   (*fn_priority)(logpool_t *, int);
 };
@@ -125,7 +125,7 @@ enum LOGPOOL_EXEC_MODE {
     LOGPOOL_TRACE   = 4
 };
 
-void logpool_global_init(int mode);
+void logpool_global_Init(int mode);
 void logpool_global_exit(void);
 
 struct logpool {
@@ -146,7 +146,7 @@ void logpool_close(logpool_t *p);
 
 void logpool_record(logpool_t *logpool, void *args, int priority, char *trace_id, ...);
 void logpool_record_ap(logpool_t *ctx, void *args, int priority, char *trace_id, va_list ap);
-int  logpool_check_priority(logpool_t *logpool, int priority);
+int  logpool_Check_priority(logpool_t *logpool, int priority);
 
 struct logdata {
     long  type;

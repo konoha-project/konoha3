@@ -338,7 +338,7 @@ static kbool_t fd_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpac
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE* fd_init(void)
+KDEFINE_PACKAGE* fd_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("posix", "1.0"),

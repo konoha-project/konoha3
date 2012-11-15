@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-void *logpool_string_init(logpool_t *ctx __UNUSED__, logpool_param_t *p)
+void *logpool_string_Init(logpool_t *ctx __UNUSED__, logpool_param_t *p)
 {
     struct logpool_param_string *args = cast(struct logpool_param_string *, p);
     buffer_t *buf;
@@ -126,7 +126,7 @@ struct logapi STRING_API = {
     logpool_string_raw,
     logpool_string_delim,
     logpool_string_flush__,
-    logpool_string_init,
+    logpool_string_Init,
     logpool_string_close,
     logpool_default_priority,
 };
@@ -163,7 +163,7 @@ static struct keyapi STRING_KEY_API = {
     logpool_key_string
 };
 
-struct keyapi *logpool_string_api_init(void)
+struct keyapi *logpool_string_api_Init(void)
 {
     return &STRING_KEY_API;
 }

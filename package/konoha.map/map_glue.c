@@ -41,16 +41,16 @@ struct kMapVar {
 #define Map_isUnboxData(o)    (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
 #define Map_setUnboxData(o,b) TFLAG_set(uintptr_t,(o)->h.magicflag,kObject_Local1,b)
 
-static void kMap_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kMap_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kMap *map = (kMap *)o;
-	map->map = KLIB Kmap_init(kctx, 17);
+	map->map = KLIB Kmap_Init(kctx, 17);
 	if(TY_isUnbox(O_p0(map))) {
 		Map_setUnboxData(map, true);
 	}
 }
 
-static void MapUnboxEntry_reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
+static void MapUnboxEntry_Reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
 {
 	KObjectVisitor *visitor = (KObjectVisitor *) thunk;
 	BEGIN_REFTRACE(1);
@@ -58,7 +58,7 @@ static void MapUnboxEntry_reftrace(KonohaContext *kctx, KHashMapEntry *p, void *
 	END_REFTRACE();
 }
 
-static void MapObjectEntry_reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
+static void MapObjectEntry_Reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
 {
 	KObjectVisitor *visitor = (KObjectVisitor *) thunk;
 	BEGIN_REFTRACE(2);
@@ -67,22 +67,22 @@ static void MapObjectEntry_reftrace(KonohaContext *kctx, KHashMapEntry *p, void 
 	END_REFTRACE();
 }
 
-static void kMap_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+static void kMap_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kMap *map = (kMap *)o;
 	if(TY_isUnbox(O_p0(map))) {
-		KLIB Kmap_each(kctx, map->map, (void *)visitor, MapUnboxEntry_reftrace);
+		KLIB Kmap_each(kctx, map->map, (void *)visitor, MapUnboxEntry_Reftrace);
 	}
 	else {
-		KLIB Kmap_each(kctx, map->map, (void *)visitor, MapObjectEntry_reftrace);
+		KLIB Kmap_each(kctx, map->map, (void *)visitor, MapObjectEntry_Reftrace);
 	}
 }
 
-static void kMap_free(KonohaContext *kctx, kObject *o)
+static void kMap_Free(KonohaContext *kctx, kObject *o)
 {
 	kMap *map = (kMap *)o;
 	if(map->map != NULL) {
-		KLIB Kmap_free(kctx, map->map, NULL);
+		KLIB Kmap_Free(kctx, map->map, NULL);
 	}
 }
 
@@ -174,7 +174,7 @@ static KMETHOD Map_remove(KonohaContext *kctx, KonohaStack *sfp)
 static void MapEntry_appendKey(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
 {
 	kArray *a = (kArray *)thunk;
-	KLIB kArray_add(kctx, a, p->StringKey);
+	KLIB kArray_Add(kctx, a, p->StringKey);
 }
 
 //## T0[] Map.keys();
@@ -211,9 +211,9 @@ static kbool_t map_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 	defMap.cflag     = kClass_Final;
 	defMap.cparamsize = 1;
 	defMap.cParamItems = &cparam;
-	defMap.init      = kMap_init;
-	defMap.reftrace  = kMap_reftrace;
-	defMap.free      = kMap_free;
+	defMap.init      = kMap_Init;
+	defMap.reftrace  = kMap_Reftrace;
+	defMap.free      = kMap_Free;
 
 	KonohaClass *cMap = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defMap, trace);
 	int FN_key = MN_("key");
@@ -261,7 +261,7 @@ static kbool_t map_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpa
 	return true;
 }
 
-KDEFINE_PACKAGE* map_init(void)
+KDEFINE_PACKAGE* map_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "map", "1.0");

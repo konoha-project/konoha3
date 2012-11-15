@@ -53,13 +53,13 @@ struct _kSockAddr {
 };
 
 /* ------------------------------------------------------------------------ */
-static void SockAddr_init(KonohaContext *kctx, kObject *o, void *conf)
+static void SockAddr_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct _kSockAddr *sa = (struct _kSockAddr *)o;
 	sa->sockaddr_in = (struct sockaddr_in *)KCalloc_UNTRACE(sizeof(struct sockaddr_in), 1);
 }
 
-static void SockAddr_free(KonohaContext *kctx, kObject *o)
+static void SockAddr_Free(KonohaContext *kctx, kObject *o)
 {
 	struct _kSockAddr *sa = (struct _kSockAddr *)o;
 	if(sa->sockaddr_in != NULL) {
@@ -84,7 +84,7 @@ void toSockaddr(struct sockaddr_in *addr, char *ip, const int port, const int fa
 //void fromSockaddr(KonohaContext *kctx, struct kMap* info, struct sockaddr_in addr)
 //{
 //	if(info != NULL ) {
-//		knh_DataMap_setString(kctx, info, "addr", inet_ntoa(addr.sin_addr));
+//		knh_DataMap_setString(kctx, info, "addr", inet_ntoa(addr.sin_Addr));
 //		knh_DataMap_setInt(kctx, info, "port", ntohs(addr.sin_port));
 //		knh_DataMap_setInt(kctx, info, "family", addr.sin_family);
 //	}
@@ -408,7 +408,7 @@ static KMETHOD System_recv(KonohaContext *kctx, KonohaStack* sfp)
 //}
 
 //## int System.select(int[] readsock, int[] writesock, int[] exceptsock, long timeoutSec, long timeoutUSec);
-static KMETHOD System_select(KonohaContext *kctx, KonohaStack* sfp)
+static KMETHOD System_Select(KonohaContext *kctx, KonohaStack* sfp)
 {
 	kArray *a1 = sfp[1].asArray;
 	kArray *a2 = sfp[2].asArray;
@@ -622,8 +622,8 @@ static kbool_t socket_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 	KDEFINE_CLASS defSockAddr = {
 		STRUCTNAME(SockAddr),
 		.cflag = kClass_Final,
-		.init = SockAddr_init,
-		.free = SockAddr_free,
+		.init = SockAddr_Init,
+		.free = SockAddr_Free,
 	};
 	KonohaClass *cSockAddr = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defSockAddr, trace);
 	kparamtype_t pi = {TY_int, FN_("intValue")};
@@ -640,7 +640,7 @@ static kbool_t socket_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		_Public|_Static|_Const|_Im, _F(System_getsockopt), TY_int, TY_System, MN_("getsockopt"), 2, TY_int, FN_("fd"), TY_int, FN_("opt"),
 		_Public|_Static|_Const|_Im, _F(System_setsockopt), TY_int, TY_System, MN_("setsockopt"), 3, TY_int, FN_("fd"), TY_int, FN_("opt"), TY_int, FN_("value"),
 //		_Public|_Static|_Const|_Im, _F(System_getpeername), TY_Map, TY_System, MN_("getpeername"), 1, TY_int, FN_("fd"),
-		_Public|_Static, _F(System_select), TY_int, TY_System, MN_("select"), 5, TY_intArray, FN_("readsocks"), TY_intArray, FN_("writesocks"), TY_intArray, FN_("exceptsocks"), TY_int, FN_("timeoutSec"), TY_int, FN_("timeoutUSec"),
+		_Public|_Static, _F(System_Select), TY_int, TY_System, MN_("select"), 5, TY_intArray, FN_("readsocks"), TY_intArray, FN_("writesocks"), TY_intArray, FN_("exceptsocks"), TY_int, FN_("timeoutSec"), TY_int, FN_("timeoutUSec"),
 		_Public|_Static|_Const|_Im, _F(System_shutdown), TY_int, TY_System, MN_("shutdown"), 2, TY_int, FN_("fd"), TY_int, FN_("how"),
 		_Public|_Static|_Const|_Im, _F(System_sockatmark), TY_int, TY_System, MN_("sockatmark"), 1, TY_int, FN_("fd"),
 		_Public|_Static|_Const|_Im, _F(System_socket), TY_int, TY_System, MN_("socket"), 3, TY_int, FN_("family"), TY_int, FN_("type"), TY_int, FN_("protocol"),
@@ -721,7 +721,7 @@ static kbool_t socket_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 	return true;
 }
 
-KDEFINE_PACKAGE* socket_init(void)
+KDEFINE_PACKAGE* socket_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("socket", "1.0"),

@@ -15,14 +15,14 @@ static struct LogEntry *LogEntry_new(uint32_t size, uint64_t time)
     return e;
 }
 
-static void LogList_init(struct LogList *list)
+static void LogList_Init(struct LogList *list)
 {
     struct LogEntry *head = LogEntry_new(sizeof(struct LogEntry), UINT64_MAX);
     list->head = head;
     list->tail = head;
 }
 
-static void LogList_check_timer(struct LogList *list, uint64_t current, uint64_t interval)
+static void LogList_Check_timer(struct LogList *list, uint64_t current, uint64_t interval)
 {
     struct LogEntry *head;
     head = list->head->h.next;
@@ -34,7 +34,7 @@ static void LogList_check_timer(struct LogList *list, uint64_t current, uint64_t
     }
 }
 
-static void LogList_check_interval(struct LogList *list)
+static void LogList_Check_interval(struct LogList *list)
 {
     struct LogEntry *e, *next, *prev;
     e    = list->head->h.next;
@@ -62,8 +62,8 @@ static void LogList_check_interval(struct LogList *list)
 static void LogList_append(struct LogList *list, struct LogEntry *log, uint64_t interval)
 {
     struct LogEntry *e;
-    LogList_check_timer(list, log->h.time, interval);
-    LogList_check_interval(list);
+    LogList_Check_timer(list, log->h.time, interval);
+    LogList_Check_interval(list);
     e = LogEntry_new(log->h.size, log->h.time);
     memcpy(e, log, log->h.size);
     list->tail->h.next = e;
@@ -91,7 +91,7 @@ static void LogList_dispose(struct LogList *list)
     }
 }
 
-static bool timer_apply(struct pool_plugin *_p, struct LogEntry *e, uint32_t state)
+static bool timer_Apply(struct pool_plugin *_p, struct LogEntry *e, uint32_t state)
 {
     struct pool_plugin_timer *p = (struct pool_plugin_timer *) _p;
     struct LogEntry *head, *next;
@@ -119,13 +119,13 @@ static bool timer_failed(struct pool_plugin *_p, struct LogEntry *e, uint32_t st
 static struct pool_plugin *pool_plugin_timer_create(struct pool_plugin *_p)
 {
     struct pool_plugin_timer *p = (struct pool_plugin_timer *) _p;
-    p->base.apply  = pool_plugin_init(_p->apply);
-    p->base.failed = pool_plugin_init(_p->failed);
-    p->base.Apply  = timer_apply;
+    p->base.apply  = pool_plugin_Init(_p->apply);
+    p->base.failed = pool_plugin_Init(_p->failed);
+    p->base.Apply  = timer_Apply;
     p->base.Failed = timer_failed;
     p->base.name = "timer";
     assert(p->timer > 0);
-    LogList_init(&p->list);
+    LogList_Init(&p->list);
     return _p;
 }
 
@@ -141,7 +141,7 @@ static void pool_plugin_timer_dispose(struct pool_plugin *_p)
 }
 
 EXPORT_POOL_PLUGIN(pool_plugin_timer) = {
-    {0, NULL, NULL, pool_plugin_timer_create, pool_plugin_timer_dispose, timer_apply, timer_failed, NULL}
+    {0, NULL, NULL, pool_plugin_timer_create, pool_plugin_timer_dispose, timer_Apply, timer_failed, NULL}
 };
 
 #ifdef __cplusplus

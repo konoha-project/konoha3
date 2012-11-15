@@ -30,7 +30,7 @@ struct io *io_open(char *host, int port, int mode, struct io_api *api)
     io->flags = mode & 0x3;
     io->api  = api;
     pthread_mutex_init(&io->lock, NULL);
-    api->f_init(io, host, port, ev_mode);
+    api->f_Init(io, host, port, ev_mode);
     return io;
 }
 

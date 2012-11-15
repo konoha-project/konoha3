@@ -51,7 +51,7 @@ static void Nothing_setNextResultUnbox(KonohaContext *kctx, KonohaStack* sfp)
 	KReturnUnboxValue(0);
 }
 
-static void Iterator_init(KonohaContext *kctx, kObject *o, void *conf)
+static void Iterator_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kIterator *itr = (kIterator *)o;
 	int isUnboxEntry = TY_isUnbox(O_ct(itr)->p0);
@@ -171,7 +171,7 @@ static kbool_t iterator_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int
 		KDEFINE_CLASS defIterator = {0};
 		SETSTRUCTNAME(defIterator, Iterator);
 		defIterator.cflag  = CFLAG_Iterator;
-		defIterator.init   = Iterator_init;
+		defIterator.init   = Iterator_Init;
 		defIterator.cparamsize  = 1;
 		defIterator.cParamItems = &IteratorParam;
 
@@ -196,7 +196,7 @@ static kbool_t iterator_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNa
 	return true;
 }
 
-KDEFINE_PACKAGE* iterator_init(void)
+KDEFINE_PACKAGE* iterator_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "iterator", "1.0");

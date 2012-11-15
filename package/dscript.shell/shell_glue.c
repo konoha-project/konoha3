@@ -88,7 +88,7 @@ static kString *splitWhiteSpace(KonohaContext *kctx, kTokenArray *tokenList)
 {
 	size_t i;
 	KGrowingBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 	if(O_typeId(tokenList) == TY_Token) {
 		/* Single token was passed (e.g. "dsh ls;"). */
 		kToken *token = (kToken *)tokenList;
@@ -109,7 +109,7 @@ static kString *splitWhiteSpace(KonohaContext *kctx, kTokenArray *tokenList)
 				}
 				const char *dollarstr = expandDollarToken(kctx, tokenList, start, i-1);
 				if(dollarstr == NULL) {
-					KLIB Kwb_free(&wb);
+					KLIB Kwb_Free(&wb);
 					return NULL;
 				}
 				else {
@@ -125,14 +125,14 @@ static kString *splitWhiteSpace(KonohaContext *kctx, kTokenArray *tokenList)
 		}
 	}
 	kString *cmd = KLIB new_kString(kctx, GcUnsafe, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), 0);
-	KLIB Kwb_free(&wb);
+	KLIB Kwb_Free(&wb);
 	return cmd;
 }
 
 static KMETHOD Statement_dsh(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Statement(stmt, gma);
-	kTokenArray *tokenList = (kTokenArray *)kStmt_getObjectNULL(kctx, stmt, KW_TokenPattern);
+	kTokenArray *tokenList = (kTokenArray *)kStmt_GetObjectNULL(kctx, stmt, KW_TokenPattern);
 	if(tokenList == NULL) {
 		KReturnUnboxValue(false);
 	}
@@ -162,7 +162,7 @@ static KMETHOD Statement_dsh(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(ret);
 }
 
-static kbool_t DSLib_checkExecutablePath(KonohaContext *kctx, const char *path, const char *cmd)
+static kbool_t DSLib_CheckExecutablePath(KonohaContext *kctx, const char *path, const char *cmd)
 {
 	char buf[PATH_MAX];
 	struct stat sb;
@@ -189,14 +189,14 @@ static kbool_t DSLib_isCommand(KonohaContext *kctx, const char *cmd)
 	char *pos, *p = buf;
 	while(p < buf + bufsize) {
 		if((pos = strchr(p, ':')) == NULL) {
-			if(DSLib_checkExecutablePath(kctx, p, cmd)) return true;
+			if(DSLib_CheckExecutablePath(kctx, p, cmd)) return true;
 			break;
 		}
 		p[pos - p] = '\0';
-		if(DSLib_checkExecutablePath(kctx, p, cmd)) return true;
+		if(DSLib_CheckExecutablePath(kctx, p, cmd)) return true;
 		p = pos + 1;
 	}
-	return DSLib_checkExecutablePath(kctx, "/bin", cmd);
+	return DSLib_CheckExecutablePath(kctx, "/bin", cmd);
 }
 
 
@@ -211,7 +211,7 @@ static KMETHOD PatternMatch_Shell(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Statement_Shell(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Statement(stmt, gma);
-	kTokenArray *tokenList = (kTokenArray *)kStmt_getObjectNULL(kctx, stmt, KW_TokenPattern);
+	kTokenArray *tokenList = (kTokenArray *)kStmt_GetObjectNULL(kctx, stmt, KW_TokenPattern);
 	if(tokenList != NULL) {
 		kString *cmd = NULL;
 		if(IS_Token(tokenList)) {
@@ -254,7 +254,7 @@ static kbool_t shell_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 	return true;
 }
 
-KDEFINE_PACKAGE* shell_init(void)
+KDEFINE_PACKAGE* shell_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "dshell", "1.0");

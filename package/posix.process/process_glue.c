@@ -356,7 +356,7 @@ static kbool_t process_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNam
 	return true;
 }
 
-KDEFINE_PACKAGE* process_init(void)
+KDEFINE_PACKAGE* process_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("process", "1.0"),

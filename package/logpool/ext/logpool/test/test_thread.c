@@ -25,7 +25,7 @@ static void *thread_main(void *args)
 
 int main(int argc, char const* argv[])
 {
-    logpool_global_init(LOGPOOL_TRACE);
+    logpool_global_Init(LOGPOOL_TRACE);
 #define N 16
     pthread_t threads[N];
     long i;

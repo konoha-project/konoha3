@@ -7,7 +7,7 @@ extern logapi_t LLVM_STRING_API;
 void ltrace_test(void) {
     ltrace_t *ltrace;
     const char *s = "hello world";
-    logpool_global_init(LOGPOOL_JIT);
+    logpool_global_Init(LOGPOOL_JIT);
     ltrace = ltrace_open(NULL, &LLVM_STRING_API,
             (logpool_param_t *) &LLVM_STRING_API_PARAM);
     ltrace_record(ltrace, LOG_NOTICE, "test",

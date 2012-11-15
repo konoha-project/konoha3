@@ -79,7 +79,7 @@ static void pmap_record_resize(poolmap_t *m)
             pmap_set_no_resize(m, r);
         }
     }
-    map_do_free(old, oldsize*sizeof(pmap_record_t));
+    map_do_Free(old, oldsize*sizeof(pmap_record_t));
 }
 
 static pmap_status_t pmap_set_(poolmap_t *m, pmap_record_t *rec)
@@ -127,8 +127,8 @@ void poolmap_delete(poolmap_t *m)
         }
     }
 
-    map_do_free(m->records, m->record_size * sizeof(pmap_record_t));
-    map_do_free(m, sizeof(*m));
+    map_do_Free(m->records, m->record_size * sizeof(pmap_record_t));
+    map_do_Free(m, sizeof(*m));
 }
 
 pmap_record_t *poolmap_get(poolmap_t *m, char *key, uint32_t klen)
@@ -181,7 +181,7 @@ pmap_record_t *poolmap_next(poolmap_t *m, poolmap_iterator *itr)
     return NULL;
 }
 
-int pool_global_init(void)
+int pool_global_Init(void)
 {
     return 0;
 }

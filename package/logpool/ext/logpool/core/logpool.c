@@ -19,7 +19,7 @@ static void logpool_new(logpool_t *ctx, struct logapi *api, logpool_param_t *par
     assert(lctx->logfmt_capacity > 0);
     lctx->fmt = cast(logfmt_t *, malloc(sizeof(logfmt_t) * lctx->logfmt_capacity));
     lctx->formatter   = api;
-    lctx->connection  = api->fn_init(ctx, param);
+    lctx->connection  = api->fn_Init(ctx, param);
     lctx->logkey.k.seq = 0;
     lctx->logfmt_size  = 0;
     lctx->is_flushed   = 0;
@@ -43,7 +43,7 @@ static void logpool_flush(logpool_t *ctx, void *args)
     ctx->formatter->fn_flush(ctx, args);
 }
 
-static int logpool_init_logkey(logpool_t *ctx, int priority, uint64_t v, short klen)
+static int logpool_Init_logkey(logpool_t *ctx, int priority, uint64_t v, short klen)
 {
     int emitLog = 1;//TODO ctx->formatter->fn_priority(ctx, priority);
     if(emitLog) {
@@ -75,7 +75,7 @@ void logpool_record_list(logpool_t *ctx, void *args, int priority, char *trace_i
     logFn f;
 
     assert(logsize < ctx->logfmt_capacity);
-    logpool_init_logkey(ctx, priority, (uintptr_t) trace_id, strlen(trace_id));
+    logpool_Init_logkey(ctx, priority, (uintptr_t) trace_id, strlen(trace_id));
     for (i = 0; i < logsize; ++i) {
         f = ((logFn *)ctx->formatter)[logfn_index[logs->type]];
         append_fmtdata(ctx, logs->key, (uint64_t)logs->val, f, logs->klen, logs->vlen);
@@ -160,28 +160,28 @@ void logpool_close(logpool_t *p)
 }
 
 #ifdef LOGPOOL_USE_LLVM
-extern struct keyapi *logpool_llvm_api_init(void);
+extern struct keyapi *logpool_llvm_api_Init(void);
 #endif
-extern struct keyapi *logpool_string_api_init(void);
-extern struct keyapi *logpool_trace_api_init(void);
+extern struct keyapi *logpool_string_api_Init(void);
+extern struct keyapi *logpool_trace_api_Init(void);
 static int exec_mode = 0;
 
-void logpool_global_init(int mode)
+void logpool_global_Init(int mode)
 {
     //assert(exec_mode == 0);
     exec_mode = mode;
     if(mode == LOGPOOL_JIT) {
 #ifdef LOGPOOL_USE_LLVM
-        KeyAPI = logpool_llvm_api_init();
+        KeyAPI = logpool_llvm_api_Init();
 #else
         assert(0 && "please enable USE_LLVM flag");
 #endif
     } else if(mode == LOGPOOL_TRACE) {
-        KeyAPI = logpool_trace_api_init();
+        KeyAPI = logpool_trace_api_Init();
     } else {
-        KeyAPI = logpool_string_api_init();
+        KeyAPI = logpool_string_api_Init();
     }
-    KeyAPI = logpool_string_api_init();
+    KeyAPI = logpool_string_api_Init();
 }
 
 extern void logpool_trace_api_deinit(void);

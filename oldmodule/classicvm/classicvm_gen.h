@@ -1227,7 +1227,7 @@ static const kOPDATA_t OPDATA[] = {
 	{"CHKIDXC", _JIT, 2, { VMT_RO, VMT_U, VMT_VOID}}, 
 };
 
-static void opcode_check(void)
+static void opcode_Check(void)
 {
 	assert(sizeof(klr_NOP_t) <= sizeof(VirtualCode));
 	assert(sizeof(klr_THCODE_t) <= sizeof(VirtualCode));
@@ -1434,7 +1434,7 @@ static kbool_t kopcode_hasjump(kopcode_t opcode)
 #define GOTO_PC(pc)         GOTO_NEXT()
 #endif/*USE_DIRECT_THREADED_CODE*/
 
-static VirtualCode* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, VirtualCode *pc)
+static VirtualCode* KonohaVirtualMachine_Run(KonohaContext *kctx, KonohaStack *sfp0, VirtualCode *pc)
 {
 #ifdef USE_DIRECT_THREADED_CODE
 	static void *OPJUMP[] = {

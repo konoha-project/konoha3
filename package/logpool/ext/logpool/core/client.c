@@ -20,7 +20,7 @@ static void client_cb_event(struct bufferevent *bev, short events, void *ctx)
         debug_print(0, "Connect okay.");
     } else if(events & BEV_EVENT_TIMEOUT) {
         debug_print(0, "server timeout");
-        bufferevent_free(bev);
+        bufferevent_Free(bev);
         event_base_loopexit(base, NULL);
         io->base = NULL;
         io->bev  = NULL;
@@ -30,7 +30,7 @@ static void client_cb_event(struct bufferevent *bev, short events, void *ctx)
             if(err)
                 fprintf(stderr, "DNS error: %s\n", evutil_gai_strerror(err));
         }
-        bufferevent_free(bev);
+        bufferevent_Free(bev);
         event_base_loopexit(base, NULL);
     }
 }
@@ -46,7 +46,7 @@ static void client_cb_write(struct bufferevent *bev, void *ctx)
 }
 
 static void client_thread_start(struct io *io);
-static int io_client_init(struct io *io, char *host, int port, int ev_mode)
+static int io_client_Init(struct io *io, char *host, int port, int ev_mode)
 {
     struct event_base *base = event_base_new();
     struct evdns_base *dns_base;
@@ -63,7 +63,7 @@ static int io_client_init(struct io *io, char *host, int port, int ev_mode)
     int ret = bufferevent_socket_connect_hostname(bev,
             dns_base, AF_INET, host, port);
     if(ret == -1) {
-        bufferevent_free(bev);
+        bufferevent_Free(bev);
         io->bev = NULL;
         return IO_FAILED;
     }
@@ -133,7 +133,7 @@ static int io_client_read(struct io *io, const void *data, uint32_t nbyte)
             goto L_failed;
         }
         if(log_data_process(log) == LOGPOOL_EVENT_QUIT) {
-            bufferevent_free(io->bev);
+            bufferevent_Free(io->bev);
             debug_print(1, "stream connection close");
             return IO_FAILED;
         }
@@ -160,7 +160,7 @@ static int io_client_close(struct io *io)
 
 struct io_api client_api = {
     "client",
-    io_client_init,
+    io_client_Init,
     io_client_read,
     io_client_write,
     io_client_close

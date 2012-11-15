@@ -45,13 +45,13 @@ struct kJsonVar {
 typedef struct kJsonVar kJson;
 /* ------------------------------------------------------------------------ */
 
-static void kJson_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kJson_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kJson *jo = (kJson *)o;
 	PLATAPI CreateJson(kctx, &jo->jsonbuf, KJSON_OBJECT);
 }
 
-static void kJson_free(KonohaContext *kctx, kObject *o)
+static void kJson_Free(KonohaContext *kctx, kObject *o)
 {
 	kJson *jo = (kJson *)o;
 	PLATAPI FreeJson(kctx, &jo->jsonbuf);
@@ -86,7 +86,7 @@ static KMETHOD Json_new (KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## @Static Json Json.parse(String str);
-static KMETHOD Json_parse(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Json_Parse(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo = (kJson *)KLIB new_kObject(kctx, OnStack, KGetReturnType(sfp), 0);
 	KMakeTrace(trace, sfp);
@@ -278,7 +278,7 @@ static KMETHOD Json_setJson_index(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## void Json.add(Json value);
-static KMETHOD Json_addJson(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Json_AddJson(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kJson *jo  = (kJson *)sfp[0].asObject;
 	kJson *val = (kJson *)sfp[1].asObject;
@@ -335,8 +335,8 @@ static kbool_t json_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 		.structname = "Json",
 		.typeId = TY_newid,
 		.cflag = kClass_Final,
-		.init = kJson_init,
-		.free = kJson_free,
+		.init = kJson_Init,
+		.free = kJson_Free,
 		.p    = kJson_p,
 	};
 	KonohaClass *cJson = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &JsonDef, trace);
@@ -360,10 +360,10 @@ static kbool_t json_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 		_Public|_Const|_Im, _F(Json_getInt),    TY_int,        TY_Json, MN_("getInt"),     1, TY_String, FN_k,
 		_Public|_Const|_Im, _F(Json_getString), TY_String,     TY_Json, MN_("getString"),  1, TY_String, FN_k,
 		_Public,            _F(Json_new),       TY_Json,       TY_Json, MN_("new"),        0,
-		_Public|_Static|_Const|_Im, _F(Json_parse), TY_Json,   TY_Json, MN_("parse"),      1, TY_String, FN_v,
+		_Public|_Static|_Const|_Im, _F(Json_Parse), TY_Json,   TY_Json, MN_("parse"),      1, TY_String, FN_v,
 		_Public,            _F(Json_setJson),   TY_void,       TY_Json, MN_("set"),        2, TY_String, FN_k, TY_Json, FN_v,
 		_Public,            _F(Json_setJson),   TY_void,       TY_Json, MN_("set"),        2, TY_int,    FN_k, TY_Json, FN_v,
-		_Public,            _F(Json_addJson),   TY_void,       TY_Json, MN_("add"),        1, TY_Json,   FN_v,
+		_Public,            _F(Json_AddJson),   TY_void,       TY_Json, MN_("add"),        1, TY_Json,   FN_v,
 		_Public,            _F(Json_setBool),   TY_void,       TY_Json, MN_("setBool"),    2, TY_String, FN_k, TY_boolean, FN_v,
 		_Public,            _F(Json_setFloat),  TY_void,       TY_Json, MN_("setFloat"),   2, TY_String, FN_k, TY_float, FN_v,
 		_Public,            _F(Json_setInt),    TY_void,       TY_Json, MN_("setInt"),     2, TY_String, FN_k, TY_int, FN_v,
@@ -380,7 +380,7 @@ static kbool_t json_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 	return true;
 }
 
-KDEFINE_PACKAGE* json_init(void)
+KDEFINE_PACKAGE* json_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("json", "1.0"),

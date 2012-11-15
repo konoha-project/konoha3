@@ -43,7 +43,7 @@ struct io {
 
 struct io_api {
     const char *name;
-    int (*f_init)(struct io *io, char *host, int port, int ev_mode);
+    int (*f_Init)(struct io *io, char *host, int port, int ev_mode);
     io_cb f_read;
     io_cb f_write;
     int (*f_close)(struct io *io);

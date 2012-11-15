@@ -35,24 +35,24 @@ typedef struct Dummy {
 } kDummy;
 
 
-static int __init__  = 0;
+static int __Init__  = 0;
 static int __trace__ = -1;
-static int __free__  = 0;
+static int __Free__  = 0;
 
-static void Dummy_init(KonohaContext *kctx, kObject *o, void *conf)
+static void Dummy_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	assert((uintptr_t)conf == 0xdeadbeaf);
-	((kDummy*)o)->x = __init__++;
+	((kDummy*)o)->x = __Init__++;
 }
 
-static void Dummy_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+static void Dummy_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	__trace__++;
 }
 
-static void Dummy_free(KonohaContext *kctx, kObject *o)
+static void Dummy_Free(KonohaContext *kctx, kObject *o)
 {
-	__free__++;
+	__Free__++;
 }
 
 static KDEFINE_CLASS DummyDef = {
@@ -68,9 +68,9 @@ static KDEFINE_CLASS DummyDef = {
 	0,
 	0,
 	0,
-	/*.init         = */ Dummy_init,
-	/*.reftrace     = */ Dummy_reftrace,
-	/*.free         = */ Dummy_free,
+	/*.init         = */ Dummy_Init,
+	/*.reftrace     = */ Dummy_Reftrace,
+	/*.free         = */ Dummy_Free,
 		0/*fnull*/,
 		0/*p*/,
 		0/*unbox*/,
@@ -95,21 +95,21 @@ void test_gc(KonohaContext *kctx)
 	for (i = 0; i < 10; ++i) {
 		for (j = 0; j < 100; ++j) {
 			kDummy *dummy = new_(Dummy, 0xdeadbeaf, NULL);
-			assert(__init__ == dummy->x+1);
+			assert(__Init__ == dummy->x+1);
 		}
-		assert(__init__ == (i+1) * 100);
+		assert(__Init__ == (i+1) * 100);
 		assert(__trace__ == -1);
 		PLATAPI ScheduleGC(kctx, NULL);
 	}
 
-	int small_object_count = __init__;
+	int small_object_count = __Init__;
 	/* middle size */
 	for (i = 0; i < 100; ++i) {
 		for (j = 0; j < 1000; ++j) {
 			kDummy *dummy = new_(Dummy, 0xdeadbeaf, NULL);
-			assert(__init__ == dummy->x+1);
+			assert(__Init__ == dummy->x+1);
 		}
-		assert(__init__ == (i+1) * 1000 + small_object_count);
+		assert(__Init__ == (i+1) * 1000 + small_object_count);
 		assert(__trace__ == -1);
 		PLATAPI ScheduleGC(kctx, NULL);
 	}
@@ -184,8 +184,8 @@ int main(int argc, const char *argv[])
 	KonohaContext* konoha = CreateContext();
 	test_gc(konoha);
 	DeleteContext(konoha);
-	assert(__free__ == __init__);
-	fprintf(stderr, "alloced_object_count = %d, freed_object_count=%d\n", __init__, __free__);
+	assert(__Free__ == __Init__);
+	fprintf(stderr, "alloced_object_count = %d, freed_object_count=%d\n", __Init__, __Free__);
 	test_bitops();
 	return ret;
 }

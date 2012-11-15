@@ -72,17 +72,17 @@ static void copyMethodList(KonohaContext *kctx, ktype_t cid, kArray *s, kArray *
 	for(i = 0; i < kArray_size(s); i++) {
 		kMethod *mtd = s->MethodItems[i];
 		if(mtd->typeId != cid) continue;
-		KLIB kArray_add(kctx, d, mtd);
+		KLIB kArray_Add(kctx, d, mtd);
 	}
 }
 
 static void dumpMethod(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd)
 {
 	KGrowingBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 	kMethod_writeToBuffer(kctx, mtd, &wb);
 	PLATAPI printf_i("%s\n", KLIB Kwb_top(kctx, &wb, 1));
-	KLIB Kwb_free(&wb);
+	KLIB Kwb_Free(&wb);
 	return;
 }
 
@@ -131,7 +131,7 @@ static kbool_t i_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpace
 	return true;
 }
 
-KDEFINE_PACKAGE* i_init(void)
+KDEFINE_PACKAGE* i_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", K_VERSION);

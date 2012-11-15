@@ -65,7 +65,7 @@ static kstatus_t readstmt(KonohaContext *kctx, KGrowingBuffer *wb, kfileline_t *
 		int check;
 		char *ln = PLATAPI readline_i(line == 1 ? ">>> " : "    ");
 		if(ln == NULL) {
-			KLIB Kwb_free(wb);
+			KLIB Kwb_Free(wb);
 			status = K_BREAK;
 			break;
 		}
@@ -81,7 +81,7 @@ static kstatus_t readstmt(KonohaContext *kctx, KGrowingBuffer *wb, kfileline_t *
 		}
 		if(check < 0) {
 			PLATAPI printf_i("(Cancelled)...\n");
-			KLIB Kwb_free(wb);
+			KLIB Kwb_Free(wb);
 		}
 		break;
 	}
@@ -110,7 +110,7 @@ static void dumpEval(KonohaContext *kctx, KGrowingBuffer *wb)
 static void shell(KonohaContext *kctx)
 {
 	KGrowingBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 	kfileline_t uline = FILEID_("(shell)") | 1;
 	while(1) {
 		kfileline_t inc = 0;
@@ -119,14 +119,14 @@ static void shell(KonohaContext *kctx)
 		if(status == K_CONTINUE && Kwb_bytesize(&wb) > 0) {
 			status = (kstatus_t)Konoha_Eval((KonohaContext *)kctx, KLIB Kwb_top(kctx, &wb, 1), uline);
 			uline += inc;
-			KLIB Kwb_free(&wb);
+			KLIB Kwb_Free(&wb);
 			if(status != K_FAILED) {
 				dumpEval(kctx, &wb);
-				KLIB Kwb_free(&wb);
+				KLIB Kwb_Free(&wb);
 			}
 		}
 	}
-	KLIB Kwb_free(&wb);
+	KLIB Kwb_Free(&wb);
 	PLATAPI printf_i("\n");
 	return;
 }

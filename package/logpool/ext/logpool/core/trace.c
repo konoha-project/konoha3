@@ -28,7 +28,7 @@ static void tracer_cb_event(struct bufferevent *bev, short events, void *ctx)
         debug_print(0, "Connect okay.");
     } else if(events & BEV_EVENT_TIMEOUT) {
         debug_print(1, "server timeout");
-        bufferevent_free(bev);
+        bufferevent_Free(bev);
         event_base_loopexit(base, NULL);
     } else if(events & (BEV_EVENT_ERROR|BEV_EVENT_EOF)) {
         if(events & BEV_EVENT_ERROR) {
@@ -36,7 +36,7 @@ static void tracer_cb_event(struct bufferevent *bev, short events, void *ctx)
             if(err)
                 fprintf(stderr, "DNS error: %s\n", evutil_gai_strerror(err));
         }
-        bufferevent_free(bev);
+        bufferevent_Free(bev);
         event_base_loopexit(base, NULL);
     }
 }
@@ -52,7 +52,7 @@ static void tracer_cb_write(struct bufferevent *bev, void *ctx)
 }
 
 static void trace_thread_start(struct io *io);
-static int io_tracer_init(struct io *io, char *host, int port, int ev_mode)
+static int io_tracer_Init(struct io *io, char *host, int port, int ev_mode)
 {
     struct event_base *base = event_base_new();
     struct evdns_base *dns_base;
@@ -69,7 +69,7 @@ static int io_tracer_init(struct io *io, char *host, int port, int ev_mode)
     dns_base = evdns_base_new(base, 1);
     int ret = bufferevent_socket_connect_hostname(bev, dns_base, AF_INET, host, port);
     if(ret == -1) {
-        bufferevent_free(bev);
+        bufferevent_Free(bev);
         io->bev = NULL;
         return IO_FAILED;
     }
@@ -144,7 +144,7 @@ static int io_tracer_close(struct io *io)
 
 struct io_api trace_api = {
     "tracer",
-    io_tracer_init,
+    io_tracer_Init,
     io_tracer_read,
     io_tracer_write,
     io_tracer_close

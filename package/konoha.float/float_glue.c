@@ -61,7 +61,7 @@ static void THROW_ZeroDividedException(KonohaContext *kctx, KonohaStack *sfp)
 
 // --------------------------------------------------------------------------
 
-static void Float_init(KonohaContext *kctx, kObject *o, void *conf)
+static void Float_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kNumberVar *n = (kNumberVar *)o;  // kFloat has the same structure
 	n->unboxValue = (uintptr_t)conf;  // conf is unboxed data
@@ -256,7 +256,7 @@ static kbool_t float_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		SETUNBOXNAME(defFloat, float);
 		defFloat.cstruct_size = sizeof(kFloat);
 		defFloat.cflag = CFLAG_int;
-		defFloat.init = Float_init;
+		defFloat.init = Float_Init;
 		defFloat.p     = Float_p;
 		CT_Float = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defFloat, trace);
 	}
@@ -309,7 +309,7 @@ static KMETHOD TypeCheck_Float(KonohaContext *kctx, KonohaStack *sfp)
 	VAR_TypeCheck(stmt, expr, gma, reqty);
 	kToken *tk = expr->termToken;
 	sfp[4].floatValue = strtod(S_text(tk->text), NULL);   // just using tramsformation float
-	KReturn(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_float, sfp[4].unboxValue));
+	KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, TY_float, sfp[4].unboxValue));
 }
 
 static kbool_t float_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
@@ -346,7 +346,7 @@ static kbool_t float_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 }
 
 
-KDEFINE_PACKAGE* float_init(void)
+KDEFINE_PACKAGE* float_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "float", "1.0");

@@ -40,17 +40,17 @@ typedef struct kRawPtr {
 	void *rawptr;
 } kRawPtr;
 
-static void RawPtr_init(KonohaContext *kctx, kObject *po, void *conf)
+static void RawPtr_Init(KonohaContext *kctx, kObject *po, void *conf)
 {
 	kRawPtr *o = (kRawPtr *)(po);
 	o->rawptr = conf;
 }
-static void RawPtr_free(KonohaContext *kctx, kObject *po)
+static void RawPtr_Free(KonohaContext *kctx, kObject *po)
 {
 	kRawPtr *o = (kRawPtr *)(po);
 	o->rawptr = NULL;
 }
-static void Logpool_free(KonohaContext *kctx, kObject *po)
+static void Logpool_Free(KonohaContext *kctx, kObject *po)
 {
 	kRawPtr *o = (kRawPtr *)(po);
 	if(o->rawptr) {
@@ -58,7 +58,7 @@ static void Logpool_free(KonohaContext *kctx, kObject *po)
 		o->rawptr = NULL;
 	}
 }
-static void Log_free(KonohaContext *kctx, kObject *po)
+static void Log_Free(KonohaContext *kctx, kObject *po)
 {
 	kRawPtr *o = (kRawPtr *)(po);
 	free(o->rawptr);
@@ -90,7 +90,7 @@ static void Log_p(KonohaContext *kctx, KonohaStack *sfp, int pos, KGrowingBuffer
 //static kObject *new_RawPtr(KonohaContext *kctx, const KonohaClass *ct, void *ptr)
 //{
 //	kObject *ret = KLIB new_kObjectDontUseThis(kctx, ct, ptr);
-//	RawPtr_init(kctx, ret, ptr);
+//	RawPtr_Init(kctx, ret, ptr);
 //	return ret;
 //}
 
@@ -100,7 +100,7 @@ static KMETHOD LogPool_new(KonohaContext *kctx, KonohaStack *sfp)
 	kRawPtr *ret = (kRawPtr *) sfp[0].asObject;
 	char *host = (char *) S_text(sfp[1].asString);
 	int   port = sfp[2].intValue;
-	RawPtr_init(kctx, sfp[0].asObject, logpool_open_client(NULL, host, port));
+	RawPtr_Init(kctx, sfp[0].asObject, logpool_open_client(NULL, host, port));
 	KReturn(ret);
 }
 
@@ -115,7 +115,7 @@ static KMETHOD LogPool_get(KonohaContext *kctx, KonohaStack *sfp)
 		kObject_set(NullObject, log, 1);
 		free(buf);
 	}
-	RawPtr_init(kctx, log, buf);
+	RawPtr_Init(kctx, log, buf);
 	KReturn(log);
 }
 
@@ -140,7 +140,7 @@ struct konoha_context {
 	kFunc *fexit;
 };
 
-static uintptr_t p_init(uintptr_t context)
+static uintptr_t p_Init(uintptr_t context)
 {
 	struct konoha_context *c = malloc(sizeof(struct konoha_context));
 	memcpy(c, (struct konoha_context *) context, sizeof(*c));
@@ -260,7 +260,7 @@ static KMETHOD Copy_create(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(ret);
 }
 
-static void *statics_init(KonohaContext *kctx, kFunc *initFo, kFunc *exitFo, kFunc *funcFo)
+static void *statics_Init(KonohaContext *kctx, kFunc *initFo, kFunc *exitFo, kFunc *funcFo)
 {
 	struct konoha_context *c = malloc(sizeof(struct konoha_context));
 	c->konoha = kctx;
@@ -275,8 +275,8 @@ static KMETHOD Statics_create(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct pool_plugin_statics *p = POOL_PLUGIN_CLONE(pool_plugin_statics);
 	kRawPtr *ret = (kRawPtr *) KLIB new_kObjectDontUseThis(kctx, KGetReturnType(sfp), (uintptr_t)p);
-	p->context = (uintptr_t)statics_init(kctx, sfp[1].asFunc, sfp[2].asFunc, sfp[3].asFunc);
-	p->finit = p_init;
+	p->context = (uintptr_t)statics_Init(kctx, sfp[1].asFunc, sfp[2].asFunc, sfp[3].asFunc);
+	p->finit = p_Init;
 	p->fexit = p_exit;
 	p->function = p_func;
 	KReturn(ret);
@@ -293,7 +293,7 @@ static KMETHOD Response_create(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 // void PoolPlugin.apply(PoolPlugin p);
-static KMETHOD PoolPlugin_apply(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD PoolPlugin_Apply(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kRawPtr *self = (kRawPtr *) sfp[0].asObject;
 	kRawPtr *plug = (kRawPtr *) sfp[1].asObject;
@@ -341,8 +341,8 @@ static KMETHOD LogPool_loadFile(KonohaContext *kctx, KonohaStack *sfp)
 		KReturnVoid();
 	}
 
-	rc = memcached_server_push(mc, servers);
-	memcached_server_list_free(servers);
+	rc = memcached_server_Push(mc, servers);
+	memcached_server_list_Free(servers);
 
 	size_t len;
 	char *script = loadFile(S_text(file), &len);
@@ -366,16 +366,16 @@ static kbool_t logpool_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 	static KDEFINE_CLASS Def0 = {
 		.structname = "LogPool"/*structname*/,
 		.typeId = TY_newid/*cid*/,
-		.init = RawPtr_init,
-		.free = Logpool_free,
+		.init = RawPtr_Init,
+		.free = Logpool_Free,
 	};
 	KonohaClass *ct0 = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &Def0, trace);
 
 	static KDEFINE_CLASS Def1 = {
 		.structname = "Log"/*structname*/,
 		.typeId = TY_newid/*cid*/,
-		.init = RawPtr_init,
-		.free = Log_free,
+		.init = RawPtr_Init,
+		.free = Log_Free,
 		.p    = Log_p,
 	};
 	KonohaClass *ct1 = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &Def1, trace);
@@ -383,16 +383,16 @@ static kbool_t logpool_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 	static KDEFINE_CLASS Def2 = {
 		.structname = "PoolPlugin",
 		.typeId = TY_newid,
-		.init = RawPtr_init,
-		.free = RawPtr_free,
+		.init = RawPtr_Init,
+		.free = RawPtr_Free,
 	};
 	KonohaClass *ct2 = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &Def2, trace);
 #define TY_Plugin ct2->typeId
 	static KDEFINE_CLASS Def3 = {
 		.structname = "",
 		.typeId = TY_newid,
-		.init = RawPtr_init,
-		.free = RawPtr_free,
+		.init = RawPtr_Init,
+		.free = RawPtr_Free,
 	};
 	Def3.superTypeId = ct2->typeId;
 	static const char *names[] = {
@@ -437,7 +437,7 @@ static kbool_t logpool_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 		_P|_S, _F(Statics_create  ), TY_Plugin, TY_Statics  , MN_("create"), 3, TY_Func, FN_x, TY_Func, FN_y, TY_Func, FN_z,
 		_P|_S, _F(Copy_create     ), TY_Plugin, TY_Copy     , MN_("create"), 0,
 		_P|_S, _F(Response_create ), TY_Plugin, TY_Response , MN_("create"), 1, TY_Object, FN_x,
-		_P   , _F(PoolPlugin_apply ), TY_void,  TY_Plugin   , MN_("apply"), 1, TY_Plugin, FN_x,
+		_P   , _F(PoolPlugin_Apply ), TY_void,  TY_Plugin   , MN_("apply"), 1, TY_Plugin, FN_x,
 		_P   , _F(PoolPlugin_failed), TY_void,  TY_Plugin   , MN_("failed"), 1, TY_Plugin, FN_x,
 		DEND,
 	};
@@ -450,9 +450,9 @@ static kbool_t logpool_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNam
 	return true;
 }
 
-KDEFINE_PACKAGE *logpool_init(void)
+KDEFINE_PACKAGE *logpool_Init(void)
 {
-	logpool_global_init(LOGPOOL_DEFAULT);
+	logpool_global_Init(LOGPOOL_DEFAULT);
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("logpool", "1.0"),
 		.PackupNameSpace    = logpool_PackupNameSpace,

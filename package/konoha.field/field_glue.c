@@ -138,7 +138,7 @@ static kMethod *new_PrototypeSetter(KonohaContext *kctx, kArray *gcstack, ktype_
 	return mtd;
 }
 
-static kbool_t KonohaClass_addField(KonohaContext *kctx, KonohaClass *ct, int flag, ktype_t ty, ksymbol_t sym)
+static kbool_t KonohaClass_AddField(KonohaContext *kctx, KonohaClass *ct, int flag, ktype_t ty, ksymbol_t sym)
 {
 	kushort_t pos = ct->fieldsize;
 	if(unlikely(ct->methodList_OnGlobalConstList == K_EMPTYARRAY)) {
@@ -162,22 +162,22 @@ static kbool_t KonohaClass_addField(KonohaContext *kctx, KonohaClass *ct, int fl
 		if(FLAG_is(flag, kField_Getter)) {
 			FLAG_unset(definedClass->fieldItems[pos].flag, kField_Getter);
 			kMethod *mtd = new_FieldGetter(kctx, _GcStack, definedClass->typeId, sym, ty, pos);
-			KLIB kArray_add(kctx, ct->methodList_OnGlobalConstList, mtd);
+			KLIB kArray_Add(kctx, ct->methodList_OnGlobalConstList, mtd);
 		}
 		if(FLAG_is(flag, kField_Setter)) {
 			FLAG_unset(definedClass->fieldItems[pos].flag, kField_Setter);
 			kMethod *mtd = new_FieldSetter(kctx, _GcStack, definedClass->typeId, sym, ty, pos);
-			KLIB kArray_add(kctx, ct->methodList_OnGlobalConstList, mtd);
+			KLIB kArray_Add(kctx, ct->methodList_OnGlobalConstList, mtd);
 		}
 	}
 	else {
 		if(FLAG_is(flag, kField_Getter)) {
 			kMethod *mtd = new_PrototypeGetter(kctx, _GcStack, ct->typeId, sym, ty);
-			KLIB kArray_add(kctx, ct->methodList_OnGlobalConstList, mtd);
+			KLIB kArray_Add(kctx, ct->methodList_OnGlobalConstList, mtd);
 		}
 		if(FLAG_is(flag, kField_Setter)) {
 			kMethod *mtd = new_PrototypeSetter(kctx, _GcStack, ct->typeId, sym, ty);
-			KLIB kArray_add(kctx, ct->methodList_OnGlobalConstList, mtd);
+			KLIB kArray_Add(kctx, ct->methodList_OnGlobalConstList, mtd);
 		}
 	}
 	RESET_GCSTACK();
@@ -197,9 +197,9 @@ static KMETHOD TypeCheck_Getter(KonohaContext *kctx, KonohaStack *sfp)
 		kMethod *mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, self->ty, fn, TY_var);
 		if(mtd != NULL) {
 			KFieldSet(expr->cons, expr->cons->MethodItems[0], mtd);
-			KReturn(SUGAR kStmtExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, reqty));
+			KReturn(SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, reqty));
 		}
-		SUGAR kStmt_printMessage2(kctx, stmt, tkN, ErrTag, "undefined field: %s", S_text(tkN->text));
+		SUGAR kStmt_Message2(kctx, stmt, tkN, ErrTag, "undefined field: %s", S_text(tkN->text));
 	}
 }
 
@@ -218,7 +218,7 @@ static kbool_t field_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 static kbool_t field_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KSetKLibFunc(ns->packageId, kMethod_indexOfField, KLIB2_Method_indexOfField, trace);
-	KSetKLibFunc(ns->packageId, KonohaClass_addField, KonohaClass_addField, trace);
+	KSetKLibFunc(ns->packageId, KonohaClass_AddField, KonohaClass_AddField, trace);
 	field_defineSyntax(kctx, ns, trace);
 	return true;
 }
@@ -230,7 +230,7 @@ static kbool_t field_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE* field_init(void)
+KDEFINE_PACKAGE* field_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "field", "1.0");

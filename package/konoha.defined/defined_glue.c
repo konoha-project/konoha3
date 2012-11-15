@@ -47,7 +47,7 @@ static KMETHOD TypeCheck_Defined(KonohaContext *kctx, KonohaStack *sfp)
 		}
 	}
 	sugarContext->isBlockedErrorMessage = popIsBlockingErrorMessage;
-	KReturn(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_boolean, isDefined));
+	KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, TY_boolean, isDefined));
 }
 
 static void filterArrayList(KonohaContext *kctx, kNameSpace *ns, kArray *tokenList, int beginIdx, int endIdx)
@@ -79,7 +79,7 @@ static KMETHOD Expression_Defined(KonohaContext *kctx, KonohaStack *sfp)
 		if(IS_Array(pToken->subTokenList)) {
 			kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, definedToken->resolvedSyntaxInfo, 1, definedToken);
 			filterArrayList(kctx, Stmt_ns(stmt), pToken->subTokenList, 0, kArray_size(pToken->subTokenList));
-			KReturn(SUGAR kStmt_addExprParam(kctx, stmt, expr, pToken->subTokenList, 0, kArray_size(pToken->subTokenList), 0/*isAllowEmpty*/));
+			KReturn(SUGAR kStmt_AddExprParam(kctx, stmt, expr, pToken->subTokenList, 0, kArray_size(pToken->subTokenList), 0/*isAllowEmpty*/));
 		}
 	}
 }
@@ -100,7 +100,7 @@ static kbool_t defined_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNam
 }
 
 
-KDEFINE_PACKAGE* defined_init(void)
+KDEFINE_PACKAGE* defined_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");

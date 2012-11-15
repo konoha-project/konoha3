@@ -18,15 +18,15 @@ static void server_event_callback(struct bufferevent *bev, short events, void *c
         debug_print(1, "client disconnect");
         range_stream_delete(cs);
         pool_delete_connection(io->pool, bev);
-        bufferevent_free(bev);
+        bufferevent_Free(bev);
     } else if(events & BEV_EVENT_TIMEOUT) {
         debug_print(1, "client timeout e=%p, events=%x", bev, events);
         pool_delete_connection(io->pool, bev);
-        bufferevent_free(bev);
+        bufferevent_Free(bev);
     } else {
         /* Other case, maybe error occur */
         pool_delete_connection(io->pool, bev);
-        bufferevent_free(bev);
+        bufferevent_Free(bev);
     }
 }
 
@@ -46,7 +46,7 @@ static void server_read_callback(struct bufferevent *bev, void *ctx)
         switch (log_data_protocol(log)) {
         case LOGPOOL_EVENT_READ:
             debug_print(1, "R %d %d, '%s'", log->klen, log->vlen, data);
-            pool_add((struct Procedure *) log, bev, io->pool);
+            pool_Add((struct Procedure *) log, bev, io->pool);
             break;
         case LOGPOOL_EVENT_WRITE:
 #if LOGPOOL_DEBUG >= 1
@@ -57,7 +57,7 @@ static void server_read_callback(struct bufferevent *bev, void *ctx)
         case LOGPOOL_EVENT_QUIT:
             debug_print(1, "Q %d, %d\n", log->klen, log->vlen);
             pool_delete_connection(io->pool, bev);
-            bufferevent_free(bev);
+            bufferevent_Free(bev);
             goto L_exit;
         case LOGPOOL_EVENT_NULL:
         default:
@@ -83,7 +83,7 @@ static void server_accept_callback(struct evconnlistener *lev, evutil_socket_t f
     struct bufferevent *bev;
 
     debug_print(1, "client connect from [%s:%u] over fd [%d]",
-            inet_ntoa(((struct sockaddr_in *) sa)->sin_addr),
+            inet_ntoa(((struct sockaddr_in *) sa)->sin_Addr),
             (unsigned short) ntohs(((struct sockaddr_in *) sa)->sin_port), fd);
 
     bev = bufferevent_socket_new(base, fd, BEV_OPT_CLOSE_ON_FREE);
@@ -106,12 +106,12 @@ static void server_accept_callback(struct evconnlistener *lev, evutil_socket_t f
     //bufferevent_set_timeouts(bev, &tv, &tv);
 }
 
-static int io_server_init(struct io *io, char *host, int port, int ev_mode)
+static int io_server_Init(struct io *io, char *host, int port, int ev_mode)
 {
     struct sockaddr_in sin;
     memset(&sin, 0, sizeof(sin));
     sin.sin_family = AF_INET;
-    sin.sin_addr.s_addr = inet_addr(host);
+    sin.sin_Addr.s_Addr = inet_Addr(host);
     sin.sin_port = htons(port);
 
     struct evconnlistener *lev;
@@ -153,7 +153,7 @@ static int io_server_close(struct io *io)
 
 struct io_api server_api = {
     "server",
-    io_server_init,
+    io_server_Init,
     io_server_read,
     io_server_write,
     io_server_close

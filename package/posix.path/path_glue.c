@@ -373,7 +373,7 @@ struct kDirVar {
 	uintptr_t readerIconv;
 };
 
-static void kDir_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kDir_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kDir *dir = (kDir *)o;
 	dir->dirp = conf;
@@ -381,7 +381,7 @@ static void kDir_init(KonohaContext *kctx, kObject *o, void *conf)
 	dir->readerIconv  = ICONV_NULL;
 }
 
-static void kDir_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+static void kDir_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kDir *dir = (kDir *)o;
 	KREFTRACEn(dir->PathInfoNULL);
@@ -399,7 +399,7 @@ static void kDir_close(KonohaContext *kctx, kDir *dir)
 	}
 }
 
-static void kDir_free(KonohaContext *kctx, kObject *o)
+static void kDir_Free(KonohaContext *kctx, kObject *o)
 {
 	kDir_close(kctx, (kDir *)o);
 }
@@ -453,11 +453,11 @@ static KMETHOD DIR_readFileName(KonohaContext *kctx, KonohaStack *sfp)
 			}
 			else {
 				KGrowingBuffer wb;
-				KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+				KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 				KLIB Kwb_iconv(kctx, &wb, dir->readerIconv, d_name, strlen(d_name), trace);
 				KReturnWith(
 					KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), StringPolicy_SystemInfo),
-					KLIB Kwb_free(&wb)
+					KLIB Kwb_Free(&wb)
 				);
 			}
 		}
@@ -480,7 +480,7 @@ static KMETHOD DIR_readPath(KonohaContext *kctx, KonohaStack *sfp)
 		if(result != NULL) {
 			char *d_name = result->d_name, delim[2] = {'/', 0};
 			KGrowingBuffer wb;
-			KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+			KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 			KLIB Kwb_write(kctx, &wb, S_text(dir->PathInfoNULL), S_size(dir->PathInfoNULL));
 			KLIB Kwb_write(kctx, &wb, delim, 1);
 			if(dir->readerIconv != ICONV_NULL) {
@@ -491,7 +491,7 @@ static KMETHOD DIR_readPath(KonohaContext *kctx, KonohaStack *sfp)
 			}
 			KReturnWith(
 				KLIB new_kString(kctx, OnStack, KLIB Kwb_top(kctx, &wb, 0), Kwb_bytesize(&wb), StringPolicy_SystemInfo),
-				KLIB Kwb_free(&wb)
+				KLIB Kwb_Free(&wb)
 			);
 		}
 		if(ret == -1) {
@@ -515,9 +515,9 @@ static void path_defineDIR(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trac
 	defDIR.typeId = TY_newid;
 	defDIR.cstruct_size = sizeof(struct kDirVar);
 	defDIR.cflag = kClass_Final;
-	defDIR.init  = kDir_init;
-	defDIR.reftrace  = kDir_reftrace;
-	defDIR.free  = kDir_free;
+	defDIR.init  = kDir_Init;
+	defDIR.reftrace  = kDir_Reftrace;
+	defDIR.free  = kDir_Free;
 	defDIR.p     = kDir_p;
 	KonohaClass *cDIR = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defDIR, trace);
 	int TY_DIR = cDIR->typeId;
@@ -578,7 +578,7 @@ static kbool_t path_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE* path_init(void)
+KDEFINE_PACKAGE* path_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("posix", "1.0"),

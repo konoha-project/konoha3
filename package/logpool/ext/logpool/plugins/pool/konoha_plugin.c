@@ -94,9 +94,9 @@ struct kRawPtr {
     void *rawptr;
 };
 
-extern kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, kfileline_t uline);
+extern kstatus_t MODSUGAR_Eval(KonohaContext *kctx, const char *script, kfileline_t uline);
 
-void konoha_plugin_init(KonohaContextVar **konohap, memcached_st **mcp)
+void konoha_plugin_Init(KonohaContextVar **konohap, memcached_st **mcp)
 {
     *konohap = (KonohaContextVar *)konoha_open(&logpool_platform);
     *mcp = memcached_create(NULL);
@@ -110,8 +110,8 @@ void konoha_plugin_init(KonohaContextVar **konohap, memcached_st **mcp)
     if(rc != MEMCACHED_SUCCESS) {
         fprintf(stderr, "memcached_server_list_append failed\n");
     }
-    rc = memcached_server_push(*mcp, servers);
-    memcached_server_list_free(servers);
+    rc = memcached_server_Push(*mcp, servers);
+    memcached_server_list_Free(servers);
 }
 
 struct pool_plugin *konoha_plugin_get(KonohaContext *kctx, memcached_st *mc, char *buf, size_t len, void *req)
@@ -121,7 +121,7 @@ struct pool_plugin *konoha_plugin_get(KonohaContext *kctx, memcached_st *mc, cha
     memcached_return_t rc;
     char *script = memcached_get(mc, buf, strlen(buf), &vlen, &flags, &rc);
     kObject *ev = KLIB new_kObjectDontUseThis(kctx, CT_Int/*Dummy*/, (uintptr_t)req);
-    MODSUGAR_eval(kctx, script, 0);
+    MODSUGAR_Eval(kctx, script, 0);
     kNameSpace *ns = KNULL(NameSpace);
     kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, TY_System, MN_("initPlugin"), 1, MPOL_PARAMSIZE|MPOL_FIRST);
     if(mtd) {
@@ -132,7 +132,7 @@ struct pool_plugin *konoha_plugin_get(KonohaContext *kctx, memcached_st *mc, cha
         END_LOCAL();
         kObject *ret = lsfp[0].asObject;
         struct pool_plugin *plugin = (struct pool_plugin *) ((struct kRawPtr *) ret)->rawptr;
-        plugin = pool_plugin_init(plugin);
+        plugin = pool_plugin_Init(plugin);
         return plugin;
     }
     return NULL;

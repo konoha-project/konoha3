@@ -175,13 +175,13 @@ static int InputUserApproval(KonohaContext *kctx, const char *message, const cha
 //	char hostname[BUFSIZ] = {0};
 //	gethostname(hostname, BUFSIZ);
 //	struct addrinfo *res;
-//	struct in_addr addr;
+//	struct in_Addr addr;
 //	int err;
 //	if((err = getaddrinfo(hostname, NULL, NULL, &res)) != 0) {
 //		PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptError\", \"CId\": \"%s\", \"Body\": \"error %d\"}", cid, err);
 //		exit(1);
 //	}
-//	addr.s_addr = ((struct sockaddr_in *)(res->ai_addr))->sin_addr.s_addr;
+//	addr.s_Addr = ((struct sockaddr_in *)(res->ai_Addr))->sin_Addr.s_Addr;
 //	char host[16] = {0};
 //	memcpy(host, inet_ntoa(addr), 16);
 //	freeaddrinfo(res);
@@ -215,13 +215,13 @@ static char* InputUserPassword(KonohaContext *kctx, const char *message)
 //	char hostname[BUFSIZ] = {0};
 //	gethostname(hostname, BUFSIZ);
 //	struct addrinfo *res;
-//	struct in_addr addr;
+//	struct in_Addr addr;
 //	int err;
 //	if((err = getaddrinfo(hostname, NULL, NULL, &res)) != 0) {
 //		PLATAPI syslog_i(5/*LOG_NOTICE*/, "{\"Method\": \"DScriptError\", \"CId\": \"%s\", \"Body\": \"error %d\"}", cid, err);
 //		exit(1);
 //	}
-//	addr.s_addr = ((struct sockaddr_in *)(res->ai_addr))->sin_addr.s_addr;
+//	addr.s_Addr = ((struct sockaddr_in *)(res->ai_Addr))->sin_Addr.s_Addr;
 //	char host[16] = {0};
 //	memcpy(host, inet_ntoa(addr), 16);
 //	freeaddrinfo(res);

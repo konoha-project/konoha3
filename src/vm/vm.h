@@ -355,7 +355,7 @@ static const DEFINE_OPSPEC OPDATA[] = {
 	{"TRACE", 0, 3, { VMT_U, VMT_RO, VMT_F, VMT_VOID}}, 
 };
 
-static void opcode_check(void)
+static void opcode_Check(void)
 {
 	assert(sizeof(OPNOP) <= sizeof(VirtualCode));
 	assert(sizeof(OPTHCODE) <= sizeof(VirtualCode));

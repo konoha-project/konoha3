@@ -100,7 +100,7 @@ struct pool_plugin_create {
 };
 
 void pool_process_log(struct pool_plugin *p, struct LogEntry *e);
-struct pool_plugin *pool_plugin_init(struct pool_plugin *p);
+struct pool_plugin *pool_plugin_Init(struct pool_plugin *p);
 struct pool_plugin *pool_plugin_clone(struct pool_plugin *p, uint32_t size);
 void pool_plugin_dispose(struct pool_plugin *p);
 #define POOL_PLUGIN_CLONE(T) ({\
@@ -114,7 +114,7 @@ void pool_plugin_dispose(struct pool_plugin *p);
 struct pool_list;
 struct pool_list * pool_new(void);
 void pool_exec(struct Log *log, int logsize, struct pool_list *plist);
-void pool_add(struct Procedure *q, struct bufferevent *bev, struct pool_list *l);
+void pool_Add(struct Procedure *q, struct bufferevent *bev, struct pool_list *l);
 void pool_delete_connection(struct pool_list *l, struct bufferevent *bev);
 void pool_delete(struct pool_list *l);
 

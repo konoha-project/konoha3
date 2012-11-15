@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-static bool key_apply(struct pool_plugin *_p, struct LogEntry *e, uint32_t state)
+static bool key_Apply(struct pool_plugin *_p, struct LogEntry *e, uint32_t state)
 {
     struct pool_plugin_key_filter *p = (struct pool_plugin_key_filter *) _p;
     struct Log *log = (struct Log *)&e->data;
@@ -31,9 +31,9 @@ static bool key_failed(struct pool_plugin *p, struct LogEntry *e, uint32_t state
 static struct pool_plugin *pool_plugin_key_create(struct pool_plugin *_p)
 {
     struct pool_plugin_key_filter *p = (struct pool_plugin_key_filter *) _p;
-    p->base.apply  = pool_plugin_init(_p->apply);
-    p->base.failed = pool_plugin_init(_p->failed);
-    p->base.Apply  = key_apply;
+    p->base.apply  = pool_plugin_Init(_p->apply);
+    p->base.failed = pool_plugin_Init(_p->failed);
+    p->base.Apply  = key_Apply;
     p->base.Failed = key_failed;
     p->base.name = "key";
     return _p;
@@ -49,7 +49,7 @@ static void pool_plugin_key_dispose(struct pool_plugin *p)
 }
 
 EXPORT_POOL_PLUGIN(pool_plugin_key_filter) = {
-    {0, NULL, NULL, pool_plugin_key_create, pool_plugin_key_dispose, key_apply, key_failed, NULL},
+    {0, NULL, NULL, pool_plugin_key_create, pool_plugin_key_dispose, key_Apply, key_failed, NULL},
     NULL, 0
 };
 

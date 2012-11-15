@@ -6,7 +6,7 @@ struct cpu_average {
     int size;
 };
 
-uintptr_t p4_init(uintptr_t context)
+uintptr_t p4_Init(uintptr_t context)
 {
     struct cpu_average *v = malloc(sizeof(struct cpu_average));
     return (uintptr_t) v;
@@ -65,14 +65,14 @@ int main(int argc, char const* argv[])
         p3->flag_finish = 2;
     }
     {
-        p4->finit = p4_init;
+        p4->finit = p4_Init;
         p4->fexit = p4_exit;
         p4->function = p4_func;
     }
     {
         p6->io = io_open_trace("0.0.0.0", 148001);
     }
-    p = (struct pool_plugin_print *) pool_plugin_init((struct pool_plugin *) p);
+    p = (struct pool_plugin_print *) pool_plugin_Init((struct pool_plugin *) p);
     struct LogEntry e = {};
     e.h.size = sizeof(struct LogEntry);
     pool_process_log((struct pool_plugin *) p, &e);

@@ -37,14 +37,14 @@ static KMETHOD Statement_namespace(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Statement(stmt, gma);
 	kstatus_t result = K_CONTINUE;
-	kToken *tk = SUGAR kStmt_getToken(kctx, stmt, KW_BlockPattern, NULL);
+	kToken *tk = SUGAR kStmt_GetToken(kctx, stmt, KW_BlockPattern, NULL);
 	if(tk != NULL && tk->resolvedSyntaxInfo->keyword == TokenType_CODE) {
 		INIT_GCSTACK();
 		kNameSpace *ns = new_(NameSpace, Stmt_ns(stmt), _GcStack);
 		kArray *a = GetSugarContext(kctx)->preparedTokenList;
 		TokenSeq range = {ns, a, kArray_size(a), kArray_size(a)};
-		SUGAR TokenSeq_tokenize(kctx, &range, S_text(tk->text), tk->uline);
-		result = SUGAR TokenSeq_eval(kctx, &range, NULL/*trace*/);
+		SUGAR TokenSeq_Tokenize(kctx, &range, S_text(tk->text), tk->uline);
+		result = SUGAR TokenSeq_Eval(kctx, &range, NULL/*trace*/);
 		RESET_GCSTACK();
 		kStmt_done(kctx, stmt);
 	}
@@ -80,7 +80,7 @@ static kbool_t namespace_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kN
 	return true;
 }
 
-KDEFINE_PACKAGE* namespace_init(void)
+KDEFINE_PACKAGE* namespace_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");

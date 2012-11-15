@@ -82,14 +82,14 @@ static RawEvent createRawEvent(KonohaContext *kctx, unsigned char *str)
 #define HttpEventQueue   kmodevent->localQueues[HTTP_EVENT]
 #define SignalEventQueue kmodevent->localQueues[SIGNAL_EVENT]
 
-static void LocalQueue_init(KonohaContext *kctx, LocalQueue *queue)
+static void LocalQueue_Init(KonohaContext *kctx, LocalQueue *queue)
 {
 	queue->front = 0;
 	queue->last  = 0;
 	queue->list  = (RawEventList)PLATAPI malloc_i(sizeof(RawEvent) * QUEUESIZE);
 }
 
-static void LocalQueue_free(KonohaContext *kctx, LocalQueue *queue)
+static void LocalQueue_Free(KonohaContext *kctx, LocalQueue *queue)
 {
 	PLATAPI free_i(queue->list);
 	PLATAPI free_i(queue);
@@ -124,13 +124,13 @@ typedef struct {
 	json_t *j;
 } kEvent;
 
-static void Event_init(KonohaContext *kctx, kObject *o, void *conf)
+static void Event_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kEvent *event = (kEvent *)o;
 	event->j = NULL;
 }
 
-static void Event_free(KonohaContext *kctx, kObject *o)
+static void Event_Free(KonohaContext *kctx, kObject *o)
 {
 	kEvent *event = (kEvent *)o;
 	if(event->j != NULL) {
@@ -139,7 +139,7 @@ static void Event_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void Event_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+static void Event_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 }
 
@@ -241,7 +241,7 @@ static void *httpEventListener(void *args)
 static KMETHOD HttpEventListener_start(KonohaContext *kctx, KonohaStack *sfp)
 {
 	HttpEventQueue = (LocalQueue *)PLATAPI malloc_i(sizeof(LocalQueue));
-	LocalQueue_init(kctx, HttpEventQueue);
+	LocalQueue_Init(kctx, HttpEventQueue);
 
 	const char *host = S_text(sfp[1].asString);
 	int port = sfp[2].intValue;
@@ -389,7 +389,7 @@ static void *signalEventListener(void *args)
 static KMETHOD SignalEventListener_start(KonohaContext *kctx, KonohaStack *sfp)
 {
 	SignalEventQueue = (LocalQueue *)PLATAPI malloc_i(sizeof(LocalQueue));
-	LocalQueue_init(kctx, SignalEventQueue);
+	LocalQueue_Init(kctx, SignalEventQueue);
 
 	//FILE *pid;
 	pthread_t t;
@@ -479,7 +479,7 @@ static void KscheduleEvent(KonohaContext *kctx) {
 	}
 }
 
-static void EventContext_reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh, KObjectVisitor *visitor)
+static void EventContext_Reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh, KObjectVisitor *visitor)
 {
 	EventContext *base = (EventContext *)baseh;
 //	BEGIN_REFTRACE(2);
@@ -488,43 +488,43 @@ static void EventContext_reftrace(KonohaContext *kctx, struct KonohaModuleContex
 //	END_REFTRACE();
 }
 
-static void EventContext_free(KonohaContext *kctx, struct KonohaModuleContext *baseh)
+static void EventContext_Free(KonohaContext *kctx, struct KonohaModuleContext *baseh)
 {
 	EventContext *base = (EventContext *)baseh;
 	KFree(base, sizeof(EventContext));
 }
 
-static void EventModule_setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
+static void EventModule_Setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
 {
 	if(!newctx && kctx->modlocal[MOD_EVENT] == NULL) {
 		EventContext *base = (EventContext *)KCalloc_UNTRACE(sizeof(EventContext), 1);
-		base->h.reftrace = EventContext_reftrace;
-		base->h.free     = EventContext_free;
+		base->h.reftrace = EventContext_Reftrace;
+		base->h.free     = EventContext_Free;
 		KUnsafeFieldInit(base->invokeFuncNULL, K_NULL);
 		KUnsafeFieldInit(base->enqFuncNULL, K_NULL);
 		kctx->modlocal[MOD_EVENT] = (KonohaModuleContext *)base;
 	}
 }
 
-static void EventModule_free(KonohaContext *kctx, struct KonohaModule *def)
+static void EventModule_Free(KonohaContext *kctx, struct KonohaModule *def)
 {
 	KModuleEvent *mod = (KModuleEvent *)def;
 	int i = 0;
 	for(; i < EVENT_TYPE_MAX; i++) {
 		if(mod->localQueues[i] != NULL) {
-			LocalQueue_free(kctx, mod->localQueues[i]);
+			LocalQueue_Free(kctx, mod->localQueues[i]);
 		}
 	}
 	KFree(mod, sizeof(KModuleEvent));
 }
 
-static void MODEVENT_init(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
+static void MODEVENT_Init(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KModuleEvent *mod = (KModuleEvent *)KCalloc_UNTRACE(sizeof(KModuleEvent), 1);
 	mod->h.name     = "event";
 	mod->h.allocSize = sizeof(KModuleEvent);
-	mod->h.setupModuleContext    = EventModule_setup;
-	mod->h.freeModule = EventModule_free;
+	mod->h.setupModuleContext    = EventModule_Setup;
+	mod->h.freeModule = EventModule_Free;
 	KLIB KonohaRuntime_setModule(kctx, MOD_EVENT, (KonohaModule *)mod, 0);
 
 	KSetKLibFunc(ns->packageId, KscheduleEvent, KscheduleEvent, trace);
@@ -532,9 +532,9 @@ static void MODEVENT_init(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace
 	KDEFINE_CLASS defEvent = {
 		STRUCTNAME(Event),
 		.cflag = kClass_Final,
-		.init = Event_init,
-		.reftrace = Event_reftrace,
-		.free = Event_free,
+		.init = Event_Init,
+		.reftrace = Event_Reftrace,
+		.free = Event_Free,
 	};
 
 	KonohaClass *cEvent = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defEvent, trace);
@@ -546,7 +546,7 @@ static void MODEVENT_init(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace
 		mod->localQueues[i]   = NULL;
 	}
 
-	EventModule_setup(kctx, &mod->h, 0);
+	EventModule_Setup(kctx, &mod->h, 0);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -565,7 +565,7 @@ static void MODEVENT_init(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace
 
 static kbool_t eventlistener_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	MODEVENT_init(kctx, ns, trace);
+	MODEVENT_Init(kctx, ns, trace);
 
 	KDEFINE_CLASS defHttpEventListener = {
 		.structname = "HttpEventListener",
@@ -642,7 +642,7 @@ static kbool_t eventlistener_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns
 	return true;
 }
 
-KDEFINE_PACKAGE* eventlistener_init(void)
+KDEFINE_PACKAGE* eventlistener_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("event", "1.0"),

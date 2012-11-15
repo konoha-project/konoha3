@@ -48,11 +48,11 @@ typedef struct subproc_resource_mon_t {
 	task_t     task;
 } subproc_resource_mon_t;
 
-#define setup_recv_port(port) k_setup_recv_port(kctx, port)
+#define setup_recv_port(port) k_Setup_recv_port(kctx, port)
 #define send_port(p1, p2) k_send_port (kctx, p1, p2)
 #define recv_port(p1, p2) k_recv_port (kctx, p1, p2)
 
-static int k_setup_recv_port (KonohaContext *kctx, mach_port_t *recv_port) {
+static int k_Setup_recv_port (KonohaContext *kctx, mach_port_t *recv_port) {
 	kern_return_t err;
 	mach_port_t port = MACH_PORT_NULL;
 	err = mach_port_allocate (mach_task_self (), MACH_PORT_RIGHT_RECEIVE, &port);

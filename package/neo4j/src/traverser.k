@@ -9,7 +9,7 @@ import("konoha.pcre");
 class Traverser {
 	String order;
 	Json   ret_filter;
-	String prune_eval;
+	String prune_Eval;
 	String uniqueness;
 	Json[] rels;
 	int    maxdepth;

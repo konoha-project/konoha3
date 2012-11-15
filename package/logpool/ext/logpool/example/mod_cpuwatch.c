@@ -6,7 +6,7 @@ struct cpu_average {
     int size;
 };
 
-static uintptr_t p5_init(uintptr_t context)
+static uintptr_t p5_Init(uintptr_t context)
 {
     struct cpu_average *v = malloc(sizeof(struct cpu_average));
     v->sum = v->size = 0;
@@ -42,7 +42,7 @@ static bool val_eq(void *v0, void *v1, uint16_t l0, uint16_t l1)
     return l0 == l1 && memcmp(v0, v1, l0) == 0;
 }
 
-struct pool_plugin *cpu_usage_init(struct bufferevent *bev)
+struct pool_plugin *cpu_usage_Init(struct bufferevent *bev)
 {
     struct pool_plugin_print *p0 = POOL_PLUGIN_CLONE(pool_plugin_print);
     struct pool_plugin_val_filter *p1 = POOL_PLUGIN_CLONE(pool_plugin_val_filter);
@@ -76,12 +76,12 @@ struct pool_plugin *cpu_usage_init(struct bufferevent *bev)
         p4->flag_finish = 2;
     }
     {
-        p5->finit = p5_init;
+        p5->finit = p5_Init;
         p5->fexit = p5_exit;
         p5->function = p5_func;
     }
     {
         p6->bev = bev;
     }
-    return pool_plugin_init((struct pool_plugin *) p0);
+    return pool_plugin_Init((struct pool_plugin *) p0);
 }

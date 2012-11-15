@@ -79,7 +79,7 @@ static char *range_stream_next(struct range_stream *cs, size_t offset)
     return d;
 }
 
-static int range_stream_check_size(struct range_stream *cs, int reqsize)
+static int range_stream_Check_size(struct range_stream *cs, int reqsize)
 {
     if(cs->len < reqsize) {
         if(range_stream_size(cs) <= 0) {
@@ -94,7 +94,7 @@ static int range_stream_check_size(struct range_stream *cs, int reqsize)
 
 struct Log *range_stream_get(struct range_stream *cs, int *log_size)
 {
-    if(!range_stream_check_size(cs, LOG_PROTOCOL_SIZE)) {
+    if(!range_stream_Check_size(cs, LOG_PROTOCOL_SIZE)) {
         return NULL;
     }
     debug_print(0, "len=%d", cs->len);
@@ -103,7 +103,7 @@ struct Log *range_stream_get(struct range_stream *cs, int *log_size)
     struct Log *d = (struct Log *) cs->cur;
     int reqsize = 0;
     logsize = d->logsize;
-    if(!range_stream_check_size(cs, LOG_PROTOCOL_SIZE + sizeof(uint16_t) * logsize * 2)) {
+    if(!range_stream_Check_size(cs, LOG_PROTOCOL_SIZE + sizeof(uint16_t) * logsize * 2)) {
         return NULL;
     }
     /**
@@ -120,7 +120,7 @@ struct Log *range_stream_get(struct range_stream *cs, int *log_size)
     reqsize = LOG_PROTOCOL_SIZE + sizeof(uint16_t) * logsize * 2 + klen + vlen;
     debug_print(0, "%d, reqsize=%d, logsize=%d", cs->len, reqsize, logsize);
 
-    if(!range_stream_check_size(cs, reqsize)) {
+    if(!range_stream_Check_size(cs, reqsize)) {
         return NULL;
     }
     *log_size = reqsize;

@@ -15,12 +15,12 @@ typedef struct mc {
 } mc_t;
 
 #define USE_BUFFER_REQ 1
-void *logpool_memcache_init(logpool_t *ctx, logpool_param_t *p)
+void *logpool_memcache_Init(logpool_t *ctx, logpool_param_t *p)
 {
     struct logpool_param_memcache *args = cast(struct logpool_param_memcache *, p);
     const char *host = args->host;
     long port = args->port;
-    mc_t *mc = cast(mc_t *, logpool_string_init(ctx, p));
+    mc_t *mc = cast(mc_t *, logpool_string_Init(ctx, p));
     memcached_return_t rc;
     memcached_server_list_st servers;
 
@@ -41,13 +41,13 @@ void *logpool_memcache_init(logpool_t *ctx, logpool_param_t *p)
         fprintf(stderr, "Error!! '%s'\n", memcached_strerror(mc->st, rc));
         abort();
     }
-    rc = memcached_server_push(mc->st, servers);
+    rc = memcached_server_Push(mc->st, servers);
     if(unlikely(rc != MEMCACHED_SUCCESS)) {
         /* TODO Error */
         fprintf(stderr, "Error!! '%s'\n", memcached_strerror(mc->st, rc));
         abort();
     }
-    memcached_server_list_free(servers);
+    memcached_server_list_Free(servers);
     return cast(void *, mc);
 }
 
@@ -63,7 +63,7 @@ void logpool_memcache_close(logpool_t *ctx)
         abort();
     }
 #endif
-    memcached_free(st);
+    memcached_Free(st);
     logpool_string_close(ctx);
 }
 
@@ -121,7 +121,7 @@ struct logapi MEMCACHE_API = {
     logpool_string_raw,
     logpool_string_delim,
     logpool_memcache_flush,
-    logpool_memcache_init,
+    logpool_memcache_Init,
     logpool_memcache_close,
     logpool_default_priority
 };

@@ -49,7 +49,7 @@ static int entry_key_eq(uintptr_t k0, uintptr_t k1)
     return l0[-1] == l1[-1] && strncmp(s0, s1, l0[-1]) == 0;
 }
 
-static void entry_free(pmap_record_t *r)
+static void entry_Free(pmap_record_t *r)
 {
     uint32_t *l = (uint32_t *)r->k;
     char *s0 = (char *) l;
@@ -67,8 +67,8 @@ static uintptr_t entry_keygen(char *key, uint32_t len)
 int main(int argc, char const* argv[])
 {
     int i;
-    pool_global_init();
-    poolmap_t *map = poolmap_new(4, entry_keygen, entry_key_eq, entry_free);
+    pool_global_Init();
+    poolmap_t *map = poolmap_new(4, entry_keygen, entry_key_eq, entry_Free);
     assert(argc == 2);
     for (i = 0; i < 100; ++i) {
         load(map, argv[1]);

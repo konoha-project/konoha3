@@ -208,7 +208,7 @@ static kString *new_kString(KonohaContext *kctx, kArray *gcstack, const char *te
 	return (kString *) kStringBase_InitLiner(kctx, s, text, len);
 }
 
-static void String2_free(KonohaContext *kctx, kObject *o)
+static void String2_Free(KonohaContext *kctx, kObject *o)
 {
 	kStringBase *base = (kStringBase *) o;
 	if((kStringBase_flag(base) & S_FLAG_EXTERNAL) == S_FLAG_LINER) {
@@ -217,22 +217,22 @@ static void String2_free(KonohaContext *kctx, kObject *o)
 	}
 }
 
-static void Stack_init(KonohaContext *kctx, KGrowingArray *stack)
+static void Stack_Init(KonohaContext *kctx, KGrowingArray *stack)
 {
-	KLIB Karray_init(kctx, stack, 4 * sizeof(kStringBase**));
+	KLIB Karray_Init(kctx, stack, 4 * sizeof(kStringBase**));
 }
 
-static void Stack_push(KonohaContext *kctx, KGrowingArray *stack, kStringBase *str)
+static void Stack_Push(KonohaContext *kctx, KGrowingArray *stack, kStringBase *str)
 {
 	size_t index = stack->bytesize / sizeof(kStringBase *);
 	if(stack->bytesize == stack->bytemax) {
-		KLIB Karray_expand(kctx, stack, stack->bytemax * 2);
+		KLIB Karray_Expand(kctx, stack, stack->bytemax * 2);
 	}
 	stack->ObjectItems[index] = (kObject *) str;
 	stack->bytesize += sizeof(kStringBase *);
 }
 
-static kStringBase *Stack_pop(KonohaContext *kctx, KGrowingArray *stack)
+static kStringBase *Stack_Pop(KonohaContext *kctx, KGrowingArray *stack)
 {
 	size_t index = (stack->bytesize / sizeof(kStringBase *));
 	if(index == 0) {
@@ -245,14 +245,14 @@ static kStringBase *Stack_pop(KonohaContext *kctx, KGrowingArray *stack)
 
 static void Stack_dispose(KonohaContext *kctx, KGrowingArray *stack)
 {
-	KLIB Karray_free(kctx, stack);
+	KLIB Karray_Free(kctx, stack);
 }
 
 static void copyText(KonohaContext *kctx, KGrowingArray *stack, char *dest, size_t size)
 {
 	kStringBase *base;
 	kRopeString *str;
-	while((base = Stack_pop(kctx, stack)) != NULL) {
+	while((base = Stack_Pop(kctx, stack)) != NULL) {
 		switch (kStringBase_flag(base)) {
 			case S_FLAG_LINER:
 			case S_FLAG_EXTERNAL:
@@ -266,8 +266,8 @@ static void copyText(KonohaContext *kctx, KGrowingArray *stack, char *dest, size
 				break;
 			case S_FLAG_ROPE:
 				str = (kRopeString *) base;
-				Stack_push(kctx, stack, str->right);
-				Stack_push(kctx, stack, str->left);
+				Stack_Push(kctx, stack, str->right);
+				Stack_Push(kctx, stack, str->left);
 				break;
 		}
 	}
@@ -278,9 +278,9 @@ static kLinerString *kRopeString_flatten(KonohaContext *kctx, kRopeString *rope)
 	size_t length = StringBase_length((kStringBase *) rope);
 	char  *dest = (char *) KMalloc_UNTRACE(length+1);
 	KGrowingArray stack;
-	Stack_init(kctx, &stack);
-	Stack_push(kctx, &stack, rope->right);
-	Stack_push(kctx, &stack, rope->left);
+	Stack_Init(kctx, &stack);
+	Stack_Push(kctx, &stack, rope->right);
+	Stack_Push(kctx, &stack, rope->left);
 	copyText(kctx, &stack, dest, length);
 	Stack_dispose(kctx, &stack);
 	return kRopeString_toLinerString(rope, dest, length);
@@ -303,7 +303,7 @@ static char *kStringBase_getTextReference(KonohaContext *kctx, kStringBase *s)
 	return NULL;
 }
 
-static void String2_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+static void String2_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kStringBase *s = (kStringBase *) o;
 	if(kStringBase_isRope(s)) {

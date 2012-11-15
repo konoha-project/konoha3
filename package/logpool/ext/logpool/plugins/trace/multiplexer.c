@@ -29,7 +29,7 @@ static char *logpool_Multiplexer_fn_key(logpool_t *ctx, uint64_t v, uint64_t seq
     return NULL;
 }
 
-static void *logpool_Multiplexer_init(logpool_t *ctx, logpool_param_t *p)
+static void *logpool_Multiplexer_Init(logpool_t *ctx, logpool_param_t *p)
 {
     struct logpool_param_multiplexer *args = cast(struct logpool_param_multiplexer *, p);
     int i, argc = args->argc;
@@ -40,7 +40,7 @@ static void *logpool_Multiplexer_init(logpool_t *ctx, logpool_param_t *p)
     for (i = 0; i < argc; ++i) {
         struct plugin_param *pa = args->args+i;
         mul->entries[i].api = pa->api;
-        mul->entries[i].connection = pa->api->fn_init(ctx, pa->param);
+        mul->entries[i].connection = pa->api->fn_Init(ctx, pa->param);
         mul->entries[i].fn_key = ctx->fn_key;
     }
     cast(struct logpool *, ctx)->fn_key = logpool_Multiplexer_fn_key;
@@ -160,7 +160,7 @@ struct logapi MULTIPLEX_API = {
     logpool_Multiplexer_raw,
     logpool_Multiplexer_delim,
     logpool_Multiplexer_flush,
-    logpool_Multiplexer_init,
+    logpool_Multiplexer_Init,
     logpool_Multiplexer_close,
     logpool_Multiplexer_priority
 };

@@ -47,7 +47,7 @@ struct _kMecabNode {
 
 /* ------------------------------------------------------------------------ */
 
-static void Tagger_init(KonohaContext *kctx, kObject *o, void *conf)
+static void Tagger_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct _kTagger *mecab = (struct _kTagger *)o;
 	const char* dummy = ""; // dummy
@@ -55,7 +55,7 @@ static void Tagger_init(KonohaContext *kctx, kObject *o, void *conf)
 	DBG_ASSERT(mecab->mecab != NULL);
 }
 
-static void Tagger_free(KonohaContext *kctx, kObject *o)
+static void Tagger_Free(KonohaContext *kctx, kObject *o)
 {
 	struct _kTagger *mecab = (struct _kTagger *)o;
 	mecab->mecab = (mecab_t *)((uintptr_t)mecab->mecab & ~(0xf)); // why is it need?
@@ -83,7 +83,7 @@ static KMETHOD Tagger_new (KonohaContext *kctx, KonohaStack *sfp)
 }
 
 // String Tagger.parse(String input)
-static KMETHOD Tagger_parse(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Tagger_Parse(KonohaContext *kctx, KonohaStack *sfp)
 {
 	mecab_t * mecab = ((struct _kTagger *)(sfp[0].asObject))->mecab;
 	const char *input = S_text(sfp[1].asString);
@@ -106,7 +106,7 @@ static KMETHOD Tagger_NBestInit(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kTagger *mecab = (struct _kTagger *)sfp[0].asObject;
 	const char *input = S_text(sfp[1].asString);
-	KReturnUnboxValue(mecab_nbest_init(mecab->mecab, input));
+	KReturnUnboxValue(mecab_nbest_Init(mecab->mecab, input));
 }
 
 // String Tagger.NBestNext()
@@ -118,7 +118,7 @@ static KMETHOD Tagger_NBestNext(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 // MecabNode Tagger.ParseToNode(String input)
-static KMETHOD Tagger_parseToNode(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD Tagger_ParseToNode(KonohaContext *kctx, KonohaStack *sfp)
 {
 	struct _kTagger *mecab = (struct _kTagger *)sfp[0].asObject;
 	const char *input = S_text(sfp[1].asString);
@@ -138,11 +138,11 @@ static KMETHOD Tagger_destroy(KonohaContext *kctx, KonohaStack *sfp)
 /* ------------------------------------------------------------------------ */
 /* MecabNode class */
 
-static void MecabNode_init(KonohaContext *kctx, kObject *o, void *conf)
+static void MecabNode_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 }
 
-static void MecabNode_free(KonohaContext *kctx, kObject *o)
+static void MecabNode_Free(KonohaContext *kctx, kObject *o)
 {
 }
 
@@ -334,15 +334,15 @@ static kbool_t mecab_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int ar
 	static KDEFINE_CLASS TaggerDef = {
 		STRUCTNAME(Tagger),
 		.cflag = kClass_Final,
-		.init = Tagger_init,
-		.free = Tagger_free,
+		.init = Tagger_Init,
+		.free = Tagger_Free,
 	};
 
 	static KDEFINE_CLASS MecabNodeDef = {
 		STRUCTNAME(MecabNode),
 		.cflag = kClass_Final,
-		.init = MecabNode_init,
-		.free = MecabNode_free,
+		.init = MecabNode_Init,
+		.free = MecabNode_Free,
 	};
 
 	KonohaClass *cTagger = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &TaggerDef, trace);
@@ -350,11 +350,11 @@ static kbool_t mecab_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int ar
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Const, _F(Tagger_new),         TY_Tagger,  TY_Tagger, MN_("new"),   0,
-		_Public|_Const, _F(Tagger_parse),       TY_String,  TY_Tagger, MN_("parse"), 1, TY_String, FN_("input"),
+		_Public|_Const, _F(Tagger_Parse),       TY_String,  TY_Tagger, MN_("parse"), 1, TY_String, FN_("input"),
 		_Public|_Const, _F(Tagger_NBestParse),  TY_String,  TY_Tagger, MN_("NBestParse"), 2, TY_int, FN_("n"), TY_String, FN_("input"),
 		_Public|_Const, _F(Tagger_NBestInit),   TY_String,  TY_Tagger, MN_("NBestInit"), 1, TY_String, FN_("input"),
 		_Public|_Const, _F(Tagger_NBestNext),   TY_String,  TY_Tagger, MN_("NBestNext"), 0,
-		_Public|_Const, _F(Tagger_parseToNode), TY_MecabNode,  TY_Tagger, MN_("parseToNode"), 1, TY_String, FN_("input"),
+		_Public|_Const, _F(Tagger_ParseToNode), TY_MecabNode,  TY_Tagger, MN_("parseToNode"), 1, TY_String, FN_("input"),
 		_Public|_Const, _F(Tagger_destroy),     TY_void,    TY_Tagger, MN_("destroy"), 0,
 
 		_Public|_Const, _F(MecabNode_next),        TY_MecabNode,  TY_MecabNode, MN_("next"), 0,
@@ -398,7 +398,7 @@ static kbool_t mecab_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 
 /* ======================================================================== */
 
-KDEFINE_PACKAGE* mecab_init(void)
+KDEFINE_PACKAGE* mecab_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("mecab", "1.0"),

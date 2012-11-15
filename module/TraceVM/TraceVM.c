@@ -123,7 +123,7 @@ static void _THCODE(KonohaContext *kctx, VirtualCode *pc, void **codeaddr)
 #endif
 }
 
-static void kNameSpace_lookupMethodWithInlineCache(KonohaContext *kctx, KonohaStack *sfp, kNameSpace *ns, kMethod **cache)
+static void kNameSpace_LookupMethodWithInlineCache(KonohaContext *kctx, KonohaStack *sfp, kNameSpace *ns, kMethod **cache)
 {
 	ktype_t typeId = O_typeId(sfp[0].asObject);
 	kMethod *mtd = cache[0];
@@ -135,7 +135,7 @@ static void kNameSpace_lookupMethodWithInlineCache(KonohaContext *kctx, KonohaSt
 	sfp[K_MTDIDX].calledMethod = mtd;
 }
 
-static VirtualCode* KonohaVirtualMachine_run(KonohaContext *, KonohaStack *, VirtualCode *);
+static VirtualCode* KonohaVirtualMachine_Run(KonohaContext *, KonohaStack *, VirtualCode *);
 
 static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStack *sfp, VirtualCode *pc)
 {
@@ -148,7 +148,7 @@ static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStac
 	}
 	memcpy(&lbuf, base->evaljmpbuf, sizeof(jmpbuf_i));
 	if((jmpresult = PLATAPI setjmp_i(*base->evaljmpbuf)) == 0) {
-		pc = KonohaVirtualMachine_run(kctx, sfp, pc);
+		pc = KonohaVirtualMachine_Run(kctx, sfp, pc);
 	}
 	else {
 		DBG_P("Catch eval exception jmpresult=%d", jmpresult);
@@ -197,7 +197,7 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #define GOTO_PC(pc)         GOTO_NEXT()
 #endif/*USE_DIRECT_THREADED_CODE*/
 
-static struct VirtualCode* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, struct VirtualCode *pc)
+static struct VirtualCode* KonohaVirtualMachine_Run(KonohaContext *kctx, KonohaStack *sfp0, struct VirtualCode *pc)
 {
 #ifdef USE_DIRECT_THREADED_CODE
 	static void *OPJUMP[] = {
@@ -348,7 +348,7 @@ static void SetUpBootCode(void)
 		memcpy(InitCode+1, &ncall,  sizeof(VirtualCode));
 		memcpy(InitCode+2, &enter,  sizeof(VirtualCode));
 		memcpy(InitCode+3, &exit,   sizeof(VirtualCode));
-		VirtualCode *pc = KonohaVirtualMachine_run(NULL, NULL, InitCode);
+		VirtualCode *pc = KonohaVirtualMachine_Run(NULL, NULL, InitCode);
 		BOOTCODE_NCALL = pc;
 		BOOTCODE_ENTER = pc+1;
 	}
@@ -359,7 +359,7 @@ static kbool_t IsSupportedVirtualCode(int opcode)
 	return (((size_t)opcode) < OPCODE_MAX);
 }
 
-static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD MethodFunc_RunVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 {
 	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].calledMethod));
 	PLATAPI RunVirtualMachine(kctx, sfp, BOOTCODE_ENTER);
@@ -367,7 +367,7 @@ static KMETHOD MethodFunc_runVirtualMachine(KonohaContext *kctx, KonohaStack *sf
 
 static MethodFunc GetVirtualMachineMethodFunc(void)
 {
-	return MethodFunc_runVirtualMachine;
+	return MethodFunc_RunVirtualMachine;
 }
 
 static struct VirtualCode* GetBootCodeOfNativeMethodCall(void)
@@ -463,7 +463,7 @@ kbool_t LoadTraceVMModule(KonohaFactory *factory, ModuleType type)
 	SetUpBootCode();
 	factory->VirtualMachineInfo            = &ModuleInfo;
 	factory->IsSupportedVirtualCode        = IsSupportedVirtualCode;
-	factory->RunVirtualMachine             = KonohaVirtualMachine_run;
+	factory->RunVirtualMachine             = KonohaVirtualMachine_Run;
 	factory->DeleteVirtualMachine          = TraceVMDeleteVirtualMachine;
 	factory->GetVirtualMachineMethodFunc   = GetVirtualMachineMethodFunc;
 	factory->GetBootCodeOfNativeMethodCall = GetBootCodeOfNativeMethodCall;

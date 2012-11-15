@@ -30,14 +30,14 @@ void test_Kwb(KonohaContext *kctx)
     KGrowingArray a;
     KGrowingBuffer wb;
     /* if we use karray as kwb, struct_size should be sizeof(char) */
-    kctx->klib->Karray_init(kctx, &a, 4);
-    kctx->klib->Kwb_init(&a, &wb);
+    kctx->klib->Karray_Init(kctx, &a, 4);
+    kctx->klib->Kwb_Init(&a, &wb);
     kctx->klib->Kwb_write(kctx, &wb, "abcd", 4);
     kctx->klib->Kwb_write(kctx, &wb, "abcd", 4);
     const char *data = kctx->klib->Kwb_top(kctx, &wb, 1);
     assert(strcmp(data, "abcdabcd") == 0);
-    kctx->klib->Kwb_free(&wb);
-    kctx->klib->Karray_free(kctx, &a);
+    kctx->klib->Kwb_Free(&wb);
+    kctx->klib->Karray_Free(kctx, &a);
 }
 
 int main(int argc, const char *argv[])

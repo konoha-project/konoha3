@@ -45,14 +45,14 @@ struct kKonohaVar {
 	KonohaContext *konoha;
 };
 
-static void kKonohaFactory_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kKonohaFactory_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct kKonohaFactoryVar *f = (struct kKonohaFactoryVar *)o;
 	f->factory = (KonohaFactory *)KMalloc(sizeof(KonohaFactory), NULL);
 	memcpy(f->factory, kctx->platApi, sizeof(KonohaFactory));
 }
 
-static void kKonohaFactory_free(KonohaContext *kctx, kObject *o)
+static void kKonohaFactory_Free(KonohaContext *kctx, kObject *o)
 {
 	struct kKonohaFactoryVar *f = (struct kKonohaFactoryVar *)o;
 	if(f->factory != NULL) {
@@ -71,13 +71,13 @@ static void kKonohaFactory_free(KonohaContext *kctx, kObject *o)
 //	}
 //}
 
-static void kKonoha_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kKonoha_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	struct kKonohaVar *ko = (struct kKonohaVar *)o;
 	ko->konoha = KLIB KonohaFactory_CreateKonoha((KonohaFactory *)conf);
 }
 
-static void kKonoha_free(KonohaContext *kctx, kObject *o)
+static void kKonoha_Free(KonohaContext *kctx, kObject *o)
 {
 	struct kKonohaVar *ko = (struct kKonohaVar *)o;
 	if(ko->konoha != NULL) {
@@ -140,12 +140,12 @@ static kbool_t minikonoha_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTra
 {
 	KDEFINE_CLASS defKonohaFactory = {0};
 	SETSTRUCTNAME(defKonohaFactory, KonohaFactory);
-	defKonohaFactory.init = kKonohaFactory_init;
-	defKonohaFactory.free = kKonohaFactory_free;
+	defKonohaFactory.init = kKonohaFactory_Init;
+	defKonohaFactory.free = kKonohaFactory_Free;
 	KDEFINE_CLASS defKonoha = {0};
 	SETSTRUCTNAME(defKonoha, Konoha);
-	defKonoha.init = kKonoha_init;
-	defKonoha.free = kKonoha_free;
+	defKonoha.init = kKonoha_Init;
+	defKonoha.free = kKonoha_Free;
 
 	KonohaClass *cKonohaFactory = KLIB KonohaClass_define(kctx, ns->packageId, NULL, &defKonohaFactory, trace);
 	KonohaClass *cKonoha =  KLIB KonohaClass_define(kctx, ns->packageId, NULL, &defKonoha, trace);
@@ -176,7 +176,7 @@ static kbool_t minikonoha_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, k
 	return true;
 }
 
-KDEFINE_PACKAGE* minikonoha_init(void)
+KDEFINE_PACKAGE* minikonoha_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "minikonoha", K_VERSION);

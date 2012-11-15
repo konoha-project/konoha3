@@ -26,7 +26,7 @@ CHECK_MALLOC(MEMORY_PREFIX);
 
 #define DO_BZERO  CONCAT2(MEMORY_PREFIX, do_bzero)
 #define DO_MALLOC CONCAT2(MEMORY_PREFIX, do_malloc)
-#define DO_FREE   CONCAT2(MEMORY_PREFIX, do_free)
+#define DO_FREE   CONCAT2(MEMORY_PREFIX, do_Free)
 static inline void DO_BZERO (void *ptr, size_t size)
 {
     memset(ptr, 0, size);

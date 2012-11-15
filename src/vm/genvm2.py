@@ -253,7 +253,7 @@ def getsize(t):
 	return ''
 
 class KCODE:
-	def __init__(self, opcode, line):
+	def __Init__(self, opcode, line):
 		self.tokens = line.split()
 		self.name = self.tokens[0].replace('@', '')
 		self.flag = self.tokens[1]
@@ -372,7 +372,7 @@ static const kOPDATA_t OPDATA[] = {''')
 	f.write('''
 };
 
-static void opcode_check(void)
+static void opcode_Check(void)
 {''')
 	for kc in KCODE_LIST:
 		f.write('''
@@ -457,7 +457,7 @@ def write_exec(f):
 #define GOTO_PC(pc)         GOTO_NEXT()
 #endif/*USE_DIRECT_THREADED_CODE*/
 
-static VirtualCode* KonohaVirtualMachine_run(KonohaContext *kctx, KonohaStack *sfp0, VirtualCode *pc)
+static VirtualCode* KonohaVirtualMachine_Run(KonohaContext *kctx, KonohaStack *sfp0, VirtualCode *pc)
 {
 #ifdef USE_DIRECT_THREADED_CODE
 	static void *OPJUMP[] = {''')

@@ -24,14 +24,14 @@ static char *logpool_Filter_fn_key(logpool_t *ctx, uint64_t v, uint64_t seq, sho
     return ret;
 }
 
-static void *logpool_Filter_init(logpool_t *ctx, logpool_param_t *p)
+static void *logpool_Filter_Init(logpool_t *ctx, logpool_param_t *p)
 {
     struct logpool_param_filter *args = cast(struct logpool_param_filter *, p);
     filter_t *filter = cast(filter_t *, malloc(sizeof(*filter)));
     filter->api = args->api;
     filter->emitLog    = 1;
     filter->priority   = args->priority;
-    filter->connection = args->api->fn_init(ctx, args->param);
+    filter->connection = args->api->fn_Init(ctx, args->param);
     filter->fn_key = ctx->fn_key;
     cast(struct logpool *, ctx)->fn_key = logpool_Filter_fn_key;
     return cast(void *, filter);
@@ -146,7 +146,7 @@ struct logapi FILTER_API = {
     logpool_Filter_raw,
     logpool_Filter_delim,
     logpool_Filter_flush,
-    logpool_Filter_init,
+    logpool_Filter_Init,
     logpool_Filter_close,
     logpool_Filter_priority
 };

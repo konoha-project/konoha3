@@ -130,7 +130,7 @@ static int pcre_nmatchsize(KonohaContext *kctx, kregexp_t *reg)
 	return capsize + 1;
 }
 
-static int pcre_parsecflags(KonohaContext *kctx, const char *option)
+static int pcre_ParseComplflags(KonohaContext *kctx, const char *option)
 {
 	int i, cflags = 0;
 	int optlen = strlen(option);
@@ -157,7 +157,7 @@ static int pcre_parsecflags(KonohaContext *kctx, const char *option)
 	return cflags;
 }
 
-static int pcre_parseeflags(KonohaContext *kctx, const char *option)
+static int pcre_ParseExecflags(KonohaContext *kctx, const char *option)
 {
 	int i, eflags = 0;
 	int optlen = strlen(option);
@@ -240,7 +240,7 @@ static void kRegExp_setOptions(kRegExp *re, const char *option)
 	}
 }
 
-static size_t knh_regexp_matched(kregmatch_t* r, size_t maxmatch)
+static size_t knh_regexp_Matched(kregmatch_t* r, size_t maxmatch)
 {
 	size_t n = 0;
 	for (; n < maxmatch && r[n].rm_so != -1; n++) {}
@@ -281,7 +281,7 @@ static void Kwb_writeRegexFormat(KonohaContext *kctx, KGrowingBuffer *wb, const 
 	}
 }
 
-static void RegExp_init(KonohaContext *kctx, kObject *o, void *conf)
+static void RegExp_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kRegExp *re = (kRegExp *)o;
 	re->reg = NULL;
@@ -290,7 +290,7 @@ static void RegExp_init(KonohaContext *kctx, kObject *o, void *conf)
 	re->lastIndex = 0;
 }
 
-static void RegExp_free(KonohaContext *kctx, kObject *o)
+static void RegExp_Free(KonohaContext *kctx, kObject *o)
 {
 	kRegExp *re = (kRegExp *)o;
 	if(re->reg != NULL) {
@@ -314,13 +314,13 @@ static void RegExp_set(KonohaContext *kctx, kRegExp *re, kString *ptns, kString 
 	kRegExp_setOptions(re, opt);
 	KFieldSet(re, re->pattern, ptns);
 	re->reg = pcre_regmalloc(kctx, ptns);
-	int cflags = pcre_parsecflags(kctx, opt);
+	int cflags = pcre_ParseComplflags(kctx, opt);
 	if(!kString_is(ASCII, ptns)) {
 		/* Add 'u' option when the pattern is multibyte string. */
 		cflags |= PCRE_UTF8;
 	}
 	pcre_regcomp(kctx, re->reg, ptn, cflags);
-	re->eflags = pcre_parseeflags(kctx, opt);
+	re->eflags = pcre_ParseExecflags(kctx, opt);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -439,7 +439,7 @@ static void kArray_executeRegExp(KonohaContext *kctx, kArray *resultArray, kRegE
 }
 
 //## @Const String[] String.match(RegExp regexp);
-static KMETHOD String_match(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD String_Match(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
 	kArray *resultArray = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
@@ -473,7 +473,7 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 	kString *s = s0;
 	if(IS_NOTNULL(re) && S_size(re->pattern) > 0) {
 		KGrowingBuffer wb;
-		KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+		KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 		const char *str = S_text(s0);  // necessary
 		const char *base = str;
 		const char *eos = str + S_size(s0); // end of str
@@ -491,7 +491,7 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 			if(pmatch[0].rm_so > 0) {
 				KLIB Kwb_write(kctx, &wb, str, pmatch[0].rm_so);
 			}
-			size_t matched = knh_regexp_matched(pmatch, KREGEXP_MATCHSIZE);
+			size_t matched = knh_regexp_Matched(pmatch, KREGEXP_MATCHSIZE);
 			if(len > 0) {
 				Kwb_writeRegexFormat(kctx, &wb, fmttext, fmtlen, base, pmatch, matched);
 				str += len;
@@ -504,7 +504,7 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 		} while(isGlobalOption);
 		KLIB Kwb_write(kctx, &wb, str, strlen(str)); // write out remaining string
 		s = Kwb_newString(kctx, OnStack, &wb); // close cwb
-		KLIB Kwb_free(&wb);
+		KLIB Kwb_Free(&wb);
 	}
 	KReturn(s);
 }
@@ -626,8 +626,8 @@ static kbool_t regexp_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		KDEFINE_CLASS RegExpDef = {
 			STRUCTNAME(RegExp),
 			.cflag = 0,
-			.init = RegExp_init,
-			.free = RegExp_free,
+			.init = RegExp_Init,
+			.free = RegExp_Free,
 			.p    = RegExp_p,
 		};
 		CT_RegExp = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &RegExpDef, trace);
@@ -640,7 +640,7 @@ static kbool_t regexp_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		/*JS*/_Public|_Const|_Im, _F(RegExp_getmultiline), TY_boolean, TY_RegExp, MN_("getmultiline"), 0,
 		/*JS*/_Public|_Const|_Im, _F(RegExp_getsource), TY_String, TY_RegExp, MN_("getsource"), 0,
 		/*JS*/_Public|_Const|_Im, _F(RegExp_getlastIndex), TY_int, TY_RegExp, MN_("getlastIndex"), 0,
-		/*JS*/_Public|_Im, _F(String_match), TY_StringArray0, TY_String, MN_("match"), 1, TY_RegExp, FN_("regexp"),
+		/*JS*/_Public|_Im, _F(String_Match), TY_StringArray0, TY_String, MN_("match"), 1, TY_RegExp, FN_("regexp"),
 		/*JS*/_Public|_Const|_Im, _F(String_replace), TY_String, TY_String, MN_("replace"), 2, TY_RegExp, FN_("searchvalue"), TY_String, FN_("newvalue"),
 		/*JS*/_Public|_Const|_Im, _F(String_search), TY_int, TY_String, MN_("search"), 1, TY_RegExp, FN_("searchvalue"),
 		/*JS*/_Public|_Im, _F(String_split), TY_StringArray0, TY_String, MN_("split"), 1, TY_RegExp, FN_("separator"),
@@ -691,7 +691,7 @@ static KMETHOD TokenFunc_JavaScriptRegExp(KonohaContext *kctx, KonohaStack *sfp)
 		prev = ch;
 	}
 	if(IS_NOTNULL(tk)) {
-		SUGAR kToken_error(kctx, tk, ErrTag, "must close with %s", "/");
+		SUGAR kToken_ToError(kctx, tk, ErrTag, "must close with %s", "/");
 	}
 	KReturnUnboxValue(pos-1);
 }
@@ -703,7 +703,7 @@ static KMETHOD TypeCheck_RegExp(KonohaContext *kctx, KonohaStack *sfp)
 	kRegExp *r = new_(RegExp, NULL, OnGcStack);
 	DBG_ASSERT(kArray_size(tk->subTokenList) == 2);
 	RegExp_set(kctx, r, tk->subTokenList->stringItems[0], tk->subTokenList->stringItems[1]);
-	KReturn(SUGAR kExpr_setConstValue(kctx, expr, TY_RegExp, UPCAST(r)));
+	KReturn(SUGAR kExpr_SetConstValue(kctx, expr, TY_RegExp, UPCAST(r)));
 }
 
 static kbool_t regexp_defineSyntax(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
@@ -730,7 +730,7 @@ static kbool_t regexp_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 	return true;
 }
 
-KDEFINE_PACKAGE* regexp_init(void)
+KDEFINE_PACKAGE* regexp_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("konoha", "1.0"),

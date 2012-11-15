@@ -45,7 +45,7 @@ static inline void buf_put_char3(buffer_t *buf, char c0, char c1, char c2)
     buf->buf += 3;
 }
 
-void *logpool_string_init(logpool_t *logpool, logpool_param_t *param);
+void *logpool_string_Init(logpool_t *logpool, logpool_param_t *param);
 void logpool_string_close(logpool_t *logpool);
 void logpool_string_null(logpool_t *logpool, const char *key, uint64_t v, short klen, short vlen);
 void logpool_string_bool(logpool_t *logpool, const char *key, uint64_t v, short klen, short vlen);

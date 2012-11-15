@@ -41,7 +41,7 @@ static void reftrace2(KonohaContext *kctx, void *e)
 void test_Kmap(KonohaContext *kctx)
 {
     uintptr_t i;
-    KHashMap* map = KLIB Kmap_init(kctx, 4);
+    KHashMap* map = KLIB Kmap_Init(kctx, 4);
     for (i = 0; i < 10; ++i) {
         KHashMapEntry *entry = KLIB Kmap_newEntry(kctx, map, i);
         assert(entry->hcode == i);
@@ -74,7 +74,7 @@ void test_Kmap(KonohaContext *kctx)
             assert(entry->unboxValue == i);
         }
     }
-    KLIB Kmap_free(kctx, map, reftrace2);
+    KLIB Kmap_Free(kctx, map, reftrace2);
     assert(_sum2_ == 25);
     fprintf(stderr, "%d\n", _sum2_);
     _sum_ = _sum2_ = 0;

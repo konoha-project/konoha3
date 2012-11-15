@@ -39,15 +39,15 @@ static void DeclVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t 
 	if(Gamma_isTopLevel(gma)) {
 		kNameSpace *ns = Stmt_ns(stmt);
 		if(ns->globalObjectNULL_OnList == NULL) {
-			kStmtToken_printMessage(kctx, stmt, termToken, ErrTag, "unavailable global variable");
+			kStmtToken_Message(kctx, stmt, termToken, ErrTag, "unavailable global variable");
 			return;
 		}
-		kStmtToken_printMessage(kctx, stmt, termToken, InfoTag, "global variable %s%s has type %s", PSYM_t(termToken->resolvedSymbol), TY_t(ty));
-		KLIB KonohaClass_addField(kctx, O_ct(ns->globalObjectNULL_OnList), kField_Getter|kField_Setter, ty, termToken->resolvedSymbol);
+		kStmtToken_Message(kctx, stmt, termToken, InfoTag, "global variable %s%s has type %s", PSYM_t(termToken->resolvedSymbol), TY_t(ty));
+		KLIB KonohaClass_AddField(kctx, O_ct(ns->globalObjectNULL_OnList), kField_Getter|kField_Setter, ty, termToken->resolvedSymbol);
 	}
 	else {
-		kStmtToken_printMessage(kctx, stmt, termToken, InfoTag, "%s%s has type %s", PSYM_t(termToken->resolvedSymbol), TY_t(ty));
-		SUGAR kGamma_declareLocalVariable(kctx, gma, ty, termToken->resolvedSymbol);
+		kStmtToken_Message(kctx, stmt, termToken, InfoTag, "%s%s has type %s", PSYM_t(termToken->resolvedSymbol), TY_t(ty));
+		SUGAR kGamma_AddLocalVariable(kctx, gma, ty, termToken->resolvedSymbol);
 	}
 }
 
@@ -81,7 +81,7 @@ static kbool_t untyped_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNam
 	return true;
 }
 
-KDEFINE_PACKAGE* untyped_init(void)
+KDEFINE_PACKAGE* untyped_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");

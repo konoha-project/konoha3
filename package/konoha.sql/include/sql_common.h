@@ -116,7 +116,7 @@ static size_t _NumberOfDigit(kint_t value, int base)
 	return ret;
 }
 
-//static void bytesArray_expand(KonohaContext *kctx, kBytes* b, size_t minsize)
+//static void bytesArray_Expand(KonohaContext *kctx, kBytes* b, size_t minsize)
 //{
 //	size_t oldsize = b->bytesize, newsize = oldsize * 2;
 //	if(minsize > newsize) newsize = minsize;
@@ -141,7 +141,7 @@ void _ResultSet_setInt(KonohaContext *kctx, kResultSet *rs, size_t n, kint_t val
 	DBG_ASSERT(n < rs->column_size);
 	KGrowingBuffer wb;
 	size_t len = _NumberOfDigit(value, 10);
-	KLIB Kwb_init(&(((kResultSet *)rs)->databuf), &wb);
+	KLIB Kwb_Init(&(((kResultSet *)rs)->databuf), &wb);
 	rs->column[n].ctype = kResultSet_CTYPE__integer;
 	rs->column[n].start = strlen(rs->databuf.bytebuf);
 	rs->column[n].len = len;
@@ -156,7 +156,7 @@ void _ResultSet_setFloat(KonohaContext *kctx, kResultSet *rs, size_t n, kfloat_t
 	KNH_ASSERT(n < rs->column_size);
 	KGrowingBuffer wb;
 	size_t len = 12; // sizeof KFLOAT_FMT
-	KLIB Kwb_init(&(((kResultSet *)rs)->databuf), &wb);
+	KLIB Kwb_Init(&(((kResultSet *)rs)->databuf), &wb);
 	rs->column[n].ctype = kResultSet_CTYPE__float;
 	rs->column[n].start = strlen(rs->databuf.bytebuf);
 	rs->column[n].len = len;
@@ -170,7 +170,7 @@ void _ResultSet_setText(KonohaContext *kctx, kResultSet *rs, size_t n, char* tex
 {
 	DBG_ASSERT(n < rs->column_size);
 	KGrowingBuffer wb;
-	KLIB Kwb_init(&(((kResultSet *)rs)->databuf), &wb);
+	KLIB Kwb_Init(&(((kResultSet *)rs)->databuf), &wb);
 	rs->column[n].ctype = kResultSet_CTYPE__text;
 	rs->column[n].start = strlen(rs->databuf.bytebuf);
 	rs->column[n].len = len;
@@ -181,7 +181,7 @@ void _ResultSet_setText(KonohaContext *kctx, kResultSet *rs, size_t n, char* tex
 //{
 //	KNH_ASSERT(n < o->column_size);
 //	KGrowingBuffer wb;
-//	KLIB Kwb_init(&(((kResultSet *)rs)->databuf), &wb);
+//	KLIB Kwb_Init(&(((kResultSet *)rs)->databuf), &wb);
 //	o->column[n].ctype = kResultSet_CTYPE__bytes;
 //	o->column[n].start = strlen(o->databuf.bytebuf);
 //	o->column[n].len = t.len;
@@ -197,7 +197,7 @@ void _ResultSet_setNULL(KonohaContext *kctx, kResultSet *o, size_t n)
 }
 
 #if defined(_MSC_VER)
-void _ResultSet_initColumn(KonohaContext *kctx, kResultSet *o, size_t column_size)
+void _ResultSet_InitColumn(KonohaContext *kctx, kResultSet *o, size_t column_size)
 {
 	size_t i;
 	kResultSet* rs = (kResultSet *)o;

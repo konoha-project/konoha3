@@ -56,7 +56,7 @@ struct kFileStatusVar {
 	struct stat *stat;
 };
 
-static void kFileStatus_init(KonohaContext *kctx, kObject *o, void *conf)
+static void kFileStatus_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kFileStatus *stat = (kFileStatus *)o;
 	if(conf != NULL) {
@@ -68,7 +68,7 @@ static void kFileStatus_init(KonohaContext *kctx, kObject *o, void *conf)
 	}
 }
 
-static void kFileStatus_free(KonohaContext *kctx, kObject *o)
+static void kFileStatus_Free(KonohaContext *kctx, kObject *o)
 {
 	kFileStatus *stat = (kFileStatus *)o;
 	if(stat->stat != NULL) {
@@ -295,8 +295,8 @@ static void stat_defineClassAndMethod(KonohaContext *kctx, kNameSpace *ns, KTrac
 	defStat.typeId = TY_newid;
 	defStat.cstruct_size = sizeof(struct kFileStatusVar);
 	defStat.cflag = kClass_Final;
-	defStat.init  = kFileStatus_init;
-	defStat.free  = kFileStatus_free;
+	defStat.init  = kFileStatus_Init;
+	defStat.free  = kFileStatus_Free;
 	defStat.p     = kFileStatus_p;
 	KonohaClass *cStat = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defStat, trace);
 	int TY_Stat = cStat->typeId;
@@ -355,7 +355,7 @@ static kbool_t stat_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE* stat_init(void)
+KDEFINE_PACKAGE* stat_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("posix", "1.0"),

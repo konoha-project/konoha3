@@ -259,13 +259,13 @@ static kString* String_replaceFirst(KonohaContext *kctx, kString *self, kString 
 	if(pos == NULL)
 		return self;
 	KGrowingBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 	KLIB Kwb_write(kctx, &wb, text, pos - text);
 	KLIB Kwb_write(kctx, &wb, S_text(newText), S_size(newText));
 	KLIB Kwb_write(kctx, &wb, pos + oldLen, end - pos - oldLen);
 	kString *ret = KLIB new_kString(kctx, OnGcStack, KLIB Kwb_top(kctx, &wb, 0),
 			Kwb_bytesize(&wb), StringPolicy_maskASCII(self));
-	KLIB Kwb_free(&wb);
+	KLIB Kwb_Free(&wb);
 	return ret;
 }
 
@@ -277,7 +277,7 @@ static kString* String_replace(KonohaContext *kctx, kString *self, const char *o
 	if(pos == NULL)
 		return self;
 	KGrowingBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 	KLIB Kwb_write(kctx, &wb, text, pos - text);
 	KLIB Kwb_write(kctx, &wb, newText, newLen);
 	text = pos + oldLen;
@@ -289,7 +289,7 @@ static kString* String_replace(KonohaContext *kctx, kString *self, const char *o
 	KLIB Kwb_write(kctx, &wb, text, end - text);
 	kString *ret = KLIB new_kString(kctx, OnGcStack, KLIB Kwb_top(kctx, &wb, 0),
 			Kwb_bytesize(&wb), StringPolicy_maskASCII(self));
-	KLIB Kwb_free(&wb);
+	KLIB Kwb_Free(&wb);
 	return ret;
 }
 
@@ -330,7 +330,7 @@ static kString *String_trim(KonohaContext *kctx, kString *self)
 static kString* String_toupper(KonohaContext *kctx, kString *self, const char *text, const char *pos, const char *end)
 {
 	KGrowingBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 	KLIB Kwb_write(kctx, &wb, text, pos - text);
 	size_t len = end - pos;
 	char *buf = ALLOCA(char, end - pos), *base = buf;
@@ -341,7 +341,7 @@ static kString* String_toupper(KonohaContext *kctx, kString *self, const char *t
 	KLIB Kwb_write(kctx, &wb, base, len);
 	kString *ret = KLIB new_kString(kctx, OnGcStack, KLIB Kwb_top(kctx, &wb, 0),
 			Kwb_bytesize(&wb), StringPolicy_maskASCII(self));
-	KLIB Kwb_free(&wb);
+	KLIB Kwb_Free(&wb);
 	return ret;
 }
 
@@ -349,7 +349,7 @@ static kString* String_toupper(KonohaContext *kctx, kString *self, const char *t
 static kString* String_tolower(KonohaContext *kctx, kString *self, const char *text, const char *pos, const char *end)
 {
 	KGrowingBuffer wb;
-	KLIB Kwb_init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 	KLIB Kwb_write(kctx, &wb, text, pos - text);
 	size_t len = end - pos;
 	char *buf = ALLOCA(char, end - pos), *base = buf;
@@ -360,7 +360,7 @@ static kString* String_tolower(KonohaContext *kctx, kString *self, const char *t
 	KLIB Kwb_write(kctx, &wb, base, len);
 	kString *ret = KLIB new_kString(kctx, OnGcStack, KLIB Kwb_top(kctx, &wb, 0),
 			Kwb_bytesize(&wb), StringPolicy_maskASCII(self));
-	KLIB Kwb_free(&wb);
+	KLIB Kwb_Free(&wb);
 	return ret;
 }
 
@@ -427,13 +427,13 @@ static kArray *String_split(KonohaContext *kctx, kArray *ret, kString *self, kSt
 		if(kString_is(ASCII, self)) {
 			len = S_size(self);
 			for(i = 0; i < len; i++) {
-				KLIB kArray_add(kctx, ret, KLIB new_kString(kctx, OnField, pos + i, 1, StringPolicy_ASCII));
+				KLIB kArray_Add(kctx, ret, KLIB new_kString(kctx, OnField, pos + i, 1, StringPolicy_ASCII));
 			}
 		}
 		else {
 			size_t len = MultibyteString_length(kctx, self);
 			for(i = 0; i < len; i++) {
-				KLIB kArray_add(kctx, ret, new_UTF8SubString(kctx, self, i, 1));
+				KLIB kArray_Add(kctx, ret, new_UTF8SubString(kctx, self, i, 1));
 			}
 		}
 	}
@@ -445,11 +445,11 @@ static kArray *String_split(KonohaContext *kctx, kArray *ret, kString *self, kSt
 				break;
 			}
 			if(res - pos > 0) {
-				KLIB kArray_add(kctx, ret, KLIB new_kString(kctx, OnField, pos, res - pos, StringPolicy_maskASCII(self)));
+				KLIB kArray_Add(kctx, ret, KLIB new_kString(kctx, OnField, pos, res - pos, StringPolicy_maskASCII(self)));
 			}
 			pos = res + skip_length;
 		}
-		KLIB kArray_add(kctx, ret, KLIB new_kString(kctx, OnField, pos, end - pos, StringPolicy_maskASCII(self)));
+		KLIB kArray_Add(kctx, ret, KLIB new_kString(kctx, OnField, pos, end - pos, StringPolicy_maskASCII(self)));
 	}
 	return ret;
 }

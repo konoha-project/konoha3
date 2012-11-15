@@ -38,7 +38,7 @@ extern "C" {
 
 #define KRequireKonohaCommonModule(TRACE) \
 	if(KGetKonohaCommonModule() == NULL) {\
-		KonohaCommonModule_init(kctx, TRACE);\
+		KonohaCommonModule_Init(kctx, TRACE);\
 	}\
 
 typedef struct {
@@ -58,7 +58,7 @@ typedef struct {
 } KonohaCommonModule;
 
 
-static void KonohaCommonModule_init(KonohaContext *kctx, KTraceInfo *trace)
+static void KonohaCommonModule_Init(KonohaContext *kctx, KTraceInfo *trace)
 {
 	KonohaCommonModule *base = (KonohaCommonModule *)KCalloc(sizeof(KonohaCommonModule), 1, trace);
 	base->h.name      = "KonohaCommon";

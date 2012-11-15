@@ -50,13 +50,13 @@ static void THROW_ZeroDividedException(KonohaContext *kctx, KonohaStack *sfp)
 /* [API methods] */
 /* Mpz class  */
 
-static void Mpz_init(KonohaContext *kctx, kObject *o, void *conf)
+static void Mpz_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kMpz *mpz = (kMpz *)o;
 	mpz_init(mpz->mpz);
 }
 
-static void Mpz_free(KonohaContext *kctx, kObject *o)
+static void Mpz_Free(KonohaContext *kctx, kObject *o)
 {
 	kMpz *mpz = (kMpz *)o;
 	mpz_clear(mpz->mpz);
@@ -456,13 +456,13 @@ static KMETHOD Int_opNEQ_mpz(KonohaContext *kctx, KonohaStack *sfp)
 /* [API methods] */
 /* Mpf class  */
 
-static void Mpf_init(KonohaContext *kctx, kObject *o, void *conf)
+static void Mpf_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kMpf *mpf = (kMpf *)o;
 	mpf_init(mpf->mpf);
 }
 
-static void Mpf_free(KonohaContext *kctx, kObject *o)
+static void Mpf_Free(KonohaContext *kctx, kObject *o)
 {
 	kMpf *mpf = (kMpf *)o;
 	mpf_clear(mpf->mpf);
@@ -945,14 +945,14 @@ static kbool_t gmp_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 	static KDEFINE_CLASS MpzDef = {0};
 	SETSTRUCTNAME(MpzDef, Mpz);
 	MpzDef.cflag = kClass_Final;
-	MpzDef.init  = Mpz_init;
-	MpzDef.free  = Mpz_free;
+	MpzDef.init  = Mpz_Init;
+	MpzDef.free  = Mpz_Free;
 	MpzDef.p     = Mpz_p;
 	static KDEFINE_CLASS MpfDef = {0};
 	SETSTRUCTNAME(MpfDef, Mpf);
 	MpfDef.cflag = kClass_Final;
-	MpfDef.init  = Mpf_init;
-	MpfDef.free  = Mpf_free;
+	MpfDef.init  = Mpf_Init;
+	MpfDef.free  = Mpf_Free;
 	MpfDef.p     = Mpf_p;
 
 	KonohaClass *cMpz = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &MpzDef, trace);
@@ -1087,7 +1087,7 @@ static kbool_t gmp_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpa
 
 /* ======================================================================== */
 
-KDEFINE_PACKAGE* gmp_init(void)
+KDEFINE_PACKAGE* gmp_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "gmp", "1.0");

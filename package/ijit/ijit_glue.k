@@ -1081,7 +1081,7 @@ Type getShortTy() {
 	//return Type.getInt32Ty();
 }
 
-void jit_init() {
+void jit_Init() {
 	Module m = Module.new("test");
 	ExecutionEngine ee = m.createExecutionEngine(2);
 
@@ -1176,13 +1176,13 @@ void jit_init() {
 
 	System.setModule(m);
 	System.setExecutionEngine(ee);
-	//base.jitcache = KLIB Kmap_init(kctx, 0);
+	//base.jitcache = KLIB Kmap_Init(kctx, 0);
 }
 
 void System.genCode(Method mtd, Block bk) {
 	//System.p("START CODE GENERATION..");
 	if(System.getModule().isNull()) {
-		jit_init();
+		jit_Init();
 	}
 	Module m = System.getModule();
 	Function f = create_function(m, mtd);

@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-static bool copy_apply(struct pool_plugin *p, struct LogEntry *e, uint32_t state)
+static bool copy_Apply(struct pool_plugin *p, struct LogEntry *e, uint32_t state)
 {
     struct LogEntry *newe = malloc(e->h.size);
     memcpy(newe, e, e->h.size);
@@ -23,9 +23,9 @@ static bool copy_failed(struct pool_plugin *p, struct LogEntry *e, uint32_t stat
 static struct pool_plugin *pool_plugin_copy_create(struct pool_plugin *_p)
 {
     struct pool_plugin *p = (struct pool_plugin *) _p;
-    p->apply  = pool_plugin_init(_p->apply);
-    p->failed = pool_plugin_init(_p->failed);
-    p->Apply  = copy_apply;
+    p->apply  = pool_plugin_Init(_p->apply);
+    p->failed = pool_plugin_Init(_p->failed);
+    p->Apply  = copy_Apply;
     p->Failed = copy_failed;
     p->name = "copy";
     return p;
@@ -41,7 +41,7 @@ static void pool_plugin_copy_dispose(struct pool_plugin *p)
 }
 
 EXPORT_POOL_PLUGIN(pool_plugin_copy) = {
-    {0, NULL, NULL, pool_plugin_copy_create, pool_plugin_copy_dispose, copy_apply, copy_failed, NULL}
+    {0, NULL, NULL, pool_plugin_copy_create, pool_plugin_copy_dispose, copy_Apply, copy_failed, NULL}
 };
 
 #ifdef __cplusplus

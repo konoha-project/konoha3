@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-static bool val_apply(struct pool_plugin *_p, struct LogEntry *e, uint32_t state)
+static bool val_Apply(struct pool_plugin *_p, struct LogEntry *e, uint32_t state)
 {
     struct pool_plugin_val_filter *p = (struct pool_plugin_val_filter *) _p;
     struct Log *log = (struct Log *)&e->data;
@@ -34,9 +34,9 @@ static bool val_failed(struct pool_plugin *p, struct LogEntry *e, uint32_t state
 static struct pool_plugin *pool_plugin_val_create(struct pool_plugin *_p)
 {
     struct pool_plugin_val_filter *p = (struct pool_plugin_val_filter *) _p;
-    p->base.apply  = pool_plugin_init(_p->apply);
-    p->base.failed = pool_plugin_init(_p->failed);
-    p->base.Apply  = val_apply;
+    p->base.apply  = pool_plugin_Init(_p->apply);
+    p->base.failed = pool_plugin_Init(_p->failed);
+    p->base.Apply  = val_Apply;
     p->base.Failed = val_failed;
     p->base.name = "val";
     return _p;
@@ -52,7 +52,7 @@ static void pool_plugin_val_dispose(struct pool_plugin *p)
 }
 
 EXPORT_POOL_PLUGIN(pool_plugin_val_filter) = {
-    {0, NULL, NULL, pool_plugin_val_create, pool_plugin_val_dispose, val_apply, val_failed, NULL},
+    {0, NULL, NULL, pool_plugin_val_create, pool_plugin_val_dispose, val_Apply, val_failed, NULL},
     NULL, NULL, NULL, 0, 0
 };
 

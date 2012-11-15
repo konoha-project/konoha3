@@ -47,7 +47,7 @@ typedef struct {
 
 // -------------------------------------------------------------------------
 
-kstatus_t MODSUGAR_eval(KonohaContext *kctx, const char *script, size_t len, kfileline_t uline);
+kstatus_t MODSUGAR_Eval(KonohaContext *kctx, const char *script, size_t len, kfileline_t uline);
 kstatus_t MODSUGAR_loadScript(KonohaContext *kctx, const char *path, size_t len, KTraceInfo *trace);
 
 // -------------------------------------------------------------------------
@@ -314,7 +314,7 @@ static void CommandLine_setARGV(KonohaContext *kctx, int argc, char** argv)
 	int i;
 	for(i = 0; i < argc; i++) {
 		DBG_P("argv=%d, '%s'", i, argv[i]);
-		KLIB kArray_add(kctx, a, KLIB new_kString(kctx, _GcStack, argv[i], strlen(argv[i]), StringPolicy_TEXT));
+		KLIB kArray_Add(kctx, a, KLIB new_kString(kctx, _GcStack, argv[i], strlen(argv[i]), StringPolicy_TEXT));
 	}
 	KDEFINE_OBJECT_CONST ObjectData[] = {
 			{"SCRIPT_ARGV", CT_StringArray0->typeId, (kObject*)a},
@@ -525,7 +525,7 @@ struct libproc {
 	unsigned long long *Hertz;   /* clock tick frequency */
 	unsigned long *kb_main_buffers;
 	unsigned long *kb_main_cached;
-	unsigned long *kb_main_free;
+	unsigned long *kb_main_Free;
 	unsigned long *kb_main_total;
 	unsigned long *kb_swap_used;
 
@@ -559,7 +559,7 @@ static struct libproc *getLibproc(void) {
 		fprintf(stderr, "%s\n", dlerror());
 		exit(1);
 	}
-	if(!(LIBPROC.kb_main_free = dlsym(handler, "kb_main_free"))) {
+	if(!(LIBPROC.kb_main_Free = dlsym(handler, "kb_main_Free"))) {
 		fprintf(stderr, "%s\n", dlerror());
 		exit(1);
 	}
@@ -738,7 +738,7 @@ static void _diagnosis(void) {
 	static unsigned int       tog = 0;
 	unsigned                  swap_si, swap_so, io_bi, io_bo, system_in, system_cs;
 	static unsigned           cpu_us, cpu_sy, cpu_id, cpu_wa;
-	unsigned long             memory_swpd, memory_free, memory_buff, memory_cache;
+	unsigned long             memory_swpd, memory_Free, memory_buff, memory_cache;
 	float                     percent_cpu_usage, percent_mem_usage;
 	unsigned                  kb_mem_usage;
 
@@ -818,7 +818,7 @@ static void _diagnosis(void) {
 
 	LIBPROC->meminfo();
 	memory_swpd  = *(LIBPROC->kb_swap_used);
-	memory_free  = *(LIBPROC->kb_main_free);
+	memory_Free  = *(LIBPROC->kb_main_Free);
 	memory_buff  = *(LIBPROC->kb_main_buffers);
 	memory_cache = *(LIBPROC->kb_main_cached);
 
@@ -835,10 +835,10 @@ static void _diagnosis(void) {
 	static void *arg;
 	trace(&arg,
 			LogUint("time(ms)",                           getTime()),
-			LogUint("procs_running",                      running),
+			LogUint("procs_Running",                      running),
 			LogUint("procs_blocked",                      blocked),
 			LogUint("memory_swpd(kb)",                    memory_swpd),
-			LogUint("memory_free(kb)",                    memory_free),
+			LogUint("memory_Free(kb)",                    memory_Free),
 			LogUint("memory_buff(kb)",                    memory_buff),
 			LogUint("memory_cache(kb)",                   memory_cache),
 			LogUint("swap_si(kb/s)",                      swap_si),
@@ -900,7 +900,7 @@ static struct option long_options2[] = {
 	{NULL,            0,                 0,               0},
 };
 
-static int konoha_parseopt(KonohaContext* konoha, KonohaFactory *plat, int argc, char **argv)
+static int konoha_Parseopt(KonohaContext* konoha, KonohaFactory *plat, int argc, char **argv)
 {
 	char lineOfArgs[128];
 	char *p = lineOfArgs;
@@ -1060,7 +1060,7 @@ int main(int argc, char *argv[])
 	KonohaFactory *logger_platformVar = (KonohaFactory *)logger_platform;
 	logger_platformVar->diagnosis = _diagnosis;
 	KonohaContext* konoha = konoha_open(logger_platform);
-	ret = konoha_parseopt(konoha, logger_platformVar, argc, argv);
+	ret = konoha_Parseopt(konoha, logger_platformVar, argc, argv);
 	konoha_close(konoha);
 	return ret ? konoha_detectFailedAssert: 0;
 }

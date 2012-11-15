@@ -88,7 +88,7 @@ static kbool_t ParseJson(KonohaContext *kctx, struct JsonBuf *jsonbuf, const cha
 
 static void FreeJson(KonohaContext *kctx, struct JsonBuf *jsonbuf)
 {
-	JSON_free(toJSON(jsonbuf->json_i));
+	JSON_Free(toJSON(jsonbuf->json_i));
 }
 
 static const char *JsonToNewText(KonohaContext *kctx, struct JsonBuf *jsonbuf)

@@ -6,7 +6,7 @@
 extern "C"{
 #endif
 
-static void RawPtr_free(KonohaContext *kctx, kObject *po)
+static void RawPtr_Free(KonohaContext *kctx, kObject *po)
 {
 	kRawPtr *o = (kRawPtr *)(po);
 	if(o->rawptr) {
@@ -14,7 +14,7 @@ static void RawPtr_free(KonohaContext *kctx, kObject *po)
 	}
 	o->rawptr = NULL;
 }
-static void RawPtr_init(KonohaContext *kctx, kObject *po, void *conf)
+static void RawPtr_Init(KonohaContext *kctx, kObject *po, void *conf)
 {
 	kRawPtr *o = (kRawPtr *)(po);
 	o->rawptr = conf;
@@ -24,7 +24,7 @@ static KMETHOD kMD5_Init(KonohaContext *kctx, KonohaStack *sfp)
 {
 	MD5state_st *c = malloc(sizeof(*c));
 	int ret_ = MD5_Init(c);
-	RawPtr_init(kctx, sfp[0].asObject, c);
+	RawPtr_Init(kctx, sfp[0].asObject, c);
 	KReturn(sfp[0].asObject);
 }
 static KMETHOD kMD5_Update(KonohaContext *kctx, KonohaStack *sfp)
@@ -51,7 +51,7 @@ static KMETHOD kSHA1_Init(KonohaContext *kctx, KonohaStack *sfp)
 {
 	SHAstate_st *c = malloc(sizeof(*c));
 	int ret_ = SHA1_Init(c);
-	RawPtr_init(kctx, sfp[0].asObject, c);
+	RawPtr_Init(kctx, sfp[0].asObject, c);
 	KReturn(sfp[0].asObject);
 }
 static KMETHOD kSHA1_Update(KonohaContext *kctx, KonohaStack *sfp)
@@ -93,8 +93,8 @@ static kbool_t openssl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 	static KDEFINE_CLASS Def = {
 			.structname = "",
 			.typeId = TY_newid,
-			.init = RawPtr_init,
-			.free = RawPtr_free,
+			.init = RawPtr_Init,
+			.free = RawPtr_Free,
 	};
 #define TY_MD5  tbls[0]->typeId
 #define TY_SHA1 tbls[1]->typeId
@@ -124,7 +124,7 @@ static kbool_t openssl_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNam
 	return true;
 }
 
-KDEFINE_PACKAGE *openssl_init(void)
+KDEFINE_PACKAGE *openssl_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
 		KPACKNAME("openssl", "1.0"),

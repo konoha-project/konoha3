@@ -43,21 +43,21 @@ typedef struct string_builder {
     ARRAY(char) buf;
 } string_builder;
 
-static inline void string_builder_init(string_builder *sb)
+static inline void string_builder_Init(string_builder *sb)
 {
-    ARRAY_init(char, &sb->buf, 4);
+    ARRAY_Init(char, &sb->buf, 4);
 }
 
-static inline void string_builder_add_no_check(string_builder *sb, char c)
+static inline void string_builder_Add_no_Check(string_builder *sb, char c)
 {
     char *p = sb->buf.list + ARRAY_size(sb->buf);
     *p = c;
     sb->buf.size += 1;
 }
 
-static inline void string_builder_add(string_builder *sb, char c)
+static inline void string_builder_Add(string_builder *sb, char c)
 {
-    ARRAY_add(char, &sb->buf, c);
+    ARRAY_Add(char, &sb->buf, c);
 }
 
 static void reverse(char *const start, char *const end)
@@ -105,7 +105,7 @@ static inline char *put_i(char *p, int64_t value)
     return put_d(p, (uint64_t)value);
 }
 
-static inline void string_builder_add_hex_no_check(string_builder *sb, uint32_t i)
+static inline void string_builder_Add_hex_no_Check(string_builder *sb, uint32_t i)
 {
     ARRAY_ensureSize(char, &sb->buf, 4/* = sizeof("abcd") */);
     char *p = sb->buf.list + ARRAY_size(sb->buf);
@@ -113,7 +113,7 @@ static inline void string_builder_add_hex_no_check(string_builder *sb, uint32_t 
     sb->buf.size += e - p;
 }
 
-static inline void string_builder_add_int(string_builder *sb, int32_t i)
+static inline void string_builder_Add_int(string_builder *sb, int32_t i)
 {
     ARRAY_ensureSize(char, &sb->buf, 12/* = sizeof("-2147483648") */);
     char *p = sb->buf.list + ARRAY_size(sb->buf);
@@ -121,7 +121,7 @@ static inline void string_builder_add_int(string_builder *sb, int32_t i)
     sb->buf.size += e - p;
 }
 
-static inline void string_builder_add_int64(string_builder *sb, int64_t i)
+static inline void string_builder_Add_int64(string_builder *sb, int64_t i)
 {
     ARRAY_ensureSize(char, &sb->buf, 20/* = sizeof("-9223372036854775807") */);
     char *p = sb->buf.list + ARRAY_size(sb->buf);
@@ -134,7 +134,7 @@ static inline void string_builder_ensure_size(string_builder *sb, size_t len)
     ARRAY_ensureSize(char, &sb->buf, len);
 }
 
-static inline void string_builder_add_string_no_check(string_builder *sb, const char *s, size_t len)
+static inline void string_builder_Add_string_no_Check(string_builder *sb, const char *s, size_t len)
 {
     char *p = sb->buf.list + ARRAY_size(sb->buf);
 #ifdef USE_MEMCPY
@@ -148,10 +148,10 @@ static inline void string_builder_add_string_no_check(string_builder *sb, const 
     sb->buf.size += len;
 }
 
-static inline void string_builder_add_string(string_builder *sb, const char *s, size_t len)
+static inline void string_builder_Add_string(string_builder *sb, const char *s, size_t len)
 {
     string_builder_ensure_size(sb, len);
-    string_builder_add_string_no_check(sb, s, len);
+    string_builder_Add_string_no_Check(sb, s, len);
 }
 
 static inline void string_builder_dispose(string_builder *sb)
@@ -163,7 +163,7 @@ static inline char *string_builder_tostring(string_builder *sb,
         size_t *len, int ensureZero)
 {
     if(ensureZero) {
-        ARRAY_add(char, &sb->buf, '\0');
+        ARRAY_Add(char, &sb->buf, '\0');
     }
     char *list = sb->buf.list;
     *len = (size_t) sb->buf.size;

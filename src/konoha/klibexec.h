@@ -22,7 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-static void Karray_init(KonohaContext *kctx, KGrowingArray *m, size_t bytemax)
+static void Karray_Init(KonohaContext *kctx, KGrowingArray *m, size_t bytemax)
 {
 	m->bytesize = 0;
 	m->bytemax  = bytemax;
@@ -45,10 +45,10 @@ static void Karray_resize(KonohaContext *kctx, KGrowingArray *m, size_t newsize)
 	m->bytemax = newsize;
 }
 
-static void Karray_expand(KonohaContext *kctx, KGrowingArray *m, size_t minsize)
+static void Karray_Expand(KonohaContext *kctx, KGrowingArray *m, size_t minsize)
 {
 	if(m->bytemax == 0) {
-		if(minsize > 0) Karray_init(kctx, m, minsize);
+		if(minsize > 0) Karray_Init(kctx, m, minsize);
 	}
 	else {
 		size_t oldsize = m->bytemax, newsize = oldsize * 2;
@@ -57,7 +57,7 @@ static void Karray_expand(KonohaContext *kctx, KGrowingArray *m, size_t minsize)
 	}
 }
 
-static void Karray_free(KonohaContext *kctx, KGrowingArray *m)
+static void Karray_Free(KonohaContext *kctx, KGrowingArray *m)
 {
 	if(m->bytemax > 0) {
 		KFree(m->bytebuf, m->bytemax);
@@ -67,7 +67,7 @@ static void Karray_free(KonohaContext *kctx, KGrowingArray *m)
 	}
 }
 
-static void Kwb_init(KGrowingArray *m, KGrowingBuffer *wb)
+static void Kwb_Init(KGrowingArray *m, KGrowingBuffer *wb)
 {
 	wb->m = m;
 	wb->pos = m->bytesize;
@@ -77,7 +77,7 @@ static void Kwb_write(KonohaContext *kctx, KGrowingBuffer *wb, const char *data,
 {
 	KGrowingArray *m = wb->m;
 	if(!(m->bytesize + bytelen < m->bytemax)) {
-		Karray_expand(kctx, m, m->bytesize + bytelen);
+		Karray_Expand(kctx, m, m->bytesize + bytelen);
 	}
 	memcpy(m->bytebuf + m->bytesize, data, bytelen);
 	m->bytesize += bytelen;
@@ -95,7 +95,7 @@ static void Kwb_vprintf(KonohaContext *kctx, KGrowingBuffer *wb, const char *fmt
 	size_t s = m->bytesize;
 	size_t n = PLATAPI vsnprintf_i( m->bytebuf + s, m->bytemax - s, fmt, ap);
 	if(n >= (m->bytemax - s)) {
-		Karray_expand(kctx, m, n + 1);
+		Karray_Expand(kctx, m, n + 1);
 		n = PLATAPI vsnprintf_i(m->bytebuf + s, m->bytemax - s, fmt, ap2);
 	}
 	va_end(ap2);
@@ -115,14 +115,14 @@ static const char* Kwb_top(KonohaContext *kctx, KGrowingBuffer *wb, int ensureZe
 	KGrowingArray *m = wb->m;
 	if(ensureZero) {
 		if(!(m->bytesize + 1 < m->bytemax)) {
-			Karray_expand(kctx, m, m->bytesize + 1);
+			Karray_Expand(kctx, m, m->bytesize + 1);
 		}
 		m->bytebuf[m->bytesize] = 0;
 	}
 	return (const char *)m->bytebuf + wb->pos;
 }
 
-static void Kwb_free(KGrowingBuffer *wb)
+static void Kwb_Free(KGrowingBuffer *wb)
 {
 	KGrowingArray *m = wb->m;
 	bzero(m->bytebuf + wb->pos, m->bytesize - wb->pos);
@@ -232,7 +232,7 @@ static KHashMapEntry *Kmap_newEntry(KonohaContext *kctx, KHashMap *kmap, kuint_t
 	return e;
 }
 
-static KHashMap *Kmap_init(KonohaContext *kctx, size_t init)
+static KHashMap *Kmap_Init(KonohaContext *kctx, size_t init)
 {
 	KHashMap *kmap = (KHashMap *)KCalloc_UNTRACE(sizeof(KHashMap), 1);
 	if(init < HMAP_INIT) init = HMAP_INIT;
@@ -257,7 +257,7 @@ static void Kmap_each(KonohaContext *kctx, KHashMap *kmap, void *thunk, void (*f
 	}
 }
 
-static void Kmap_free(KonohaContext *kctx, KHashMap *kmap, void (*f)(KonohaContext *kctx, void *))
+static void Kmap_Free(KonohaContext *kctx, KHashMap *kmap, void (*f)(KonohaContext *kctx, void *))
 {
 	if(f != NULL) {
 		size_t i;
@@ -314,7 +314,7 @@ static void Kmap_remove(KHashMap* kmap, KHashMapEntry *oe)
 
 // key management
 
-static void Kmap_addStringUnboxValue(KonohaContext *kctx, KHashMap *kmp, uintptr_t hcode, kString *StringKey, uintptr_t unboxValue)
+static void Kmap_AddStringUnboxValue(KonohaContext *kctx, KHashMap *kmp, uintptr_t hcode, kString *StringKey, uintptr_t unboxValue)
 {
 	KHashMapEntry *e = KLIB Kmap_newEntry(kctx, kmp, hcode);
 	KUnsafeFieldInit(e->StringKey, StringKey);
@@ -333,7 +333,7 @@ static ksymbol_t Kmap_getcode(KonohaContext *kctx, KHashMap *kmp, kArray *list, 
 	if(def == SYM_NEWID) {
 		uintptr_t sym = kArray_size(list);
 		kString *stringKey = KLIB new_kString(kctx, list, name, len, spol);
-		Kmap_addStringUnboxValue(kctx, kmp, hcode, stringKey, sym);
+		Kmap_AddStringUnboxValue(kctx, kmp, hcode, stringKey, sym);
 		return (ksymbol_t)sym;
 	}
 	return def;
@@ -559,21 +559,21 @@ static void CheckSafePoint(KonohaContext *kctx, KonohaStack *sfp, kfileline_t ul
 
 void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_t taglevel, const char *fmt, ...);
 
-static void klib_init(KonohaLibVar *l)
+static void klib_Init(KonohaLibVar *l)
 {
-	l->Karray_init   = Karray_init;
+	l->Karray_Init   = Karray_Init;
 	l->Karray_resize = Karray_resize;
-	l->Karray_expand = Karray_expand;
-	l->Karray_free   = Karray_free;
-	l->Kwb_init      = Kwb_init;
+	l->Karray_Expand = Karray_Expand;
+	l->Karray_Free   = Karray_Free;
+	l->Kwb_Init      = Kwb_Init;
 	l->Kwb_write     = Kwb_write;
 	l->Kwb_vprintf   = Kwb_vprintf;
 	l->Kwb_printf    = Kwb_printf;
 	l->Kwb_top       = Kwb_top;
-	l->Kwb_free      = Kwb_free;
+	l->Kwb_Free      = Kwb_Free;
 	l->Kwb_iconv     = Kwb_iconv;
-	l->Kmap_init     = Kmap_init;
-	l->Kmap_free     = Kmap_free;
+	l->Kmap_Init     = Kmap_Init;
+	l->Kmap_Free     = Kmap_Free;
 	l->Kmap_each     = Kmap_each;
 	l->Kmap_newEntry = Kmap_newEntry;
 	l->Kmap_get      = Kmap_getentry;

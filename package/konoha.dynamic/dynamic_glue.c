@@ -34,7 +34,7 @@ struct _kDynamic {
 	KonohaObjectHeader h;
 };
 
-//static void Dynamic_init(KonohaContext *kctx, kObject *o, void *conf)
+//static void Dynamic_Init(KonohaContext *kctx, kObject *o, void *conf)
 //{
 //}
 //
@@ -42,11 +42,11 @@ struct _kDynamic {
 //{
 //}
 //
-//static void Dynamic_free(KonohaContext *kctx, kObject *o)
+//static void Dynamic_Free(KonohaContext *kctx, kObject *o)
 //{
 //}
 
-static kbool_t kMethod_checkMethodCallStack(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd, int argc)
+static kbool_t kMethod_CheckMethodCallStack(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd, int argc)
 {
 	int i;
 	kParam *param = Method_param(mtd);
@@ -75,7 +75,7 @@ static KMETHOD Dynamic_(KonohaContext *kctx, KonohaStack *sfp)
 	DBG_ASSERT(IS_NameSpace(ns));
 	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, O_typeId(obj), symbol, argc);
 	if(mtd != NULL) {
-		if(kMethod_checkMethodCallStack(kctx, sfp, mtd, argc)) {
+		if(kMethod_CheckMethodCallStack(kctx, sfp, mtd, argc)) {
 			KonohaRuntime_setesp(kctx, kctx->esp - 1);
 			sfp[K_MTDIDX].calledMethod = mtd;
 			//kObject *returnValue = sfp[K_RTNIDX].asObject;
@@ -112,7 +112,7 @@ static kbool_t dynamic_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNam
 	return true;
 }
 
-KDEFINE_PACKAGE* dynamic_init(void)
+KDEFINE_PACKAGE* dynamic_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");

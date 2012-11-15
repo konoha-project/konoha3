@@ -97,16 +97,16 @@ static KMETHOD TypeCheck_InstanceOf(KonohaContext *kctx, KonohaStack *sfp)
 		KonohaClass *selfClass = CT_(selfExpr->ty), *targetClass = CT_(targetExpr->ty);
 		if(CT_is(Final, selfClass)) {
 			kbool_t staticSubType = (selfClass == targetClass || selfClass->isSubType(kctx, selfClass, targetClass));
-			KReturn(SUGAR kExpr_setUnboxConstValue(kctx, expr, TY_boolean, staticSubType));
+			KReturn(SUGAR kExpr_SetUnboxConstValue(kctx, expr, TY_boolean, staticSubType));
 		}
 		kNameSpace *ns = Stmt_ns(stmt);
 		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, TY_Object, MN_("<:"), 1);
 		DBG_ASSERT(mtd != NULL);
 		KFieldSet(expr->cons, expr->cons->MethodItems[0], mtd);
-		kExpr *classValue = SUGAR kExpr_setConstValue(kctx,
+		kExpr *classValue = SUGAR kExpr_SetConstValue(kctx,
 				expr->cons->ExprItems[2], targetExpr->ty, KLIB Knull(kctx, targetClass));
 		KFieldSet(expr->cons, expr->cons->ExprItems[2], classValue);
-		KReturn(SUGAR kStmtExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, TY_boolean));
+		KReturn(SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, TY_boolean));
 	}
 }
 
@@ -124,9 +124,9 @@ static KMETHOD TypeCheck_as(KonohaContext *kctx, KonohaStack *sfp)
 			kNameSpace *ns = Stmt_ns(stmt);
 			kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, TY_Object, MN_("as"), 0);
 			DBG_ASSERT(mtd != NULL);
-			KReturn(SUGAR kStmtExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, targetClass->typeId));
+			KReturn(SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, targetClass->typeId));
 		}
-		KReturn(kStmtExpr_printMessage(kctx, stmt, selfExpr, ErrTag, "unable to downcast: %s as %s", TY_t(selfExpr->ty), TY_t(targetExpr->ty)));
+		KReturn(kStmtExpr_Message(kctx, stmt, selfExpr, ErrTag, "unable to downcast: %s as %s", TY_t(selfExpr->ty), TY_t(targetExpr->ty)));
 	}
 }
 
@@ -138,7 +138,7 @@ static KMETHOD TypeCheck_to(KonohaContext *kctx, KonohaStack *sfp)
 	if(selfExpr != K_NULLEXPR && targetExpr != K_NULLEXPR) {
 		KonohaClass *selfClass = CT_(selfExpr->ty), *targetClass = CT_(targetExpr->ty);
 		if(selfExpr->ty == targetExpr->ty || selfClass->isSubType(kctx, selfClass, targetClass)) {
-			kStmtExpr_printMessage(kctx, stmt, selfExpr, InfoTag, "no need: %s to %s", TY_t(selfExpr->ty), TY_t(targetExpr->ty));
+			kStmtExpr_Message(kctx, stmt, selfExpr, InfoTag, "no need: %s to %s", TY_t(selfExpr->ty), TY_t(targetExpr->ty));
 			KReturn(selfExpr);
 		}
 		kNameSpace *ns = Stmt_ns(stmt);
@@ -147,10 +147,10 @@ static KMETHOD TypeCheck_to(KonohaContext *kctx, KonohaStack *sfp)
 			mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, selfExpr->ty, MN_("to"), 0);
 			DBG_ASSERT(mtd != NULL);  // because Object.to is found.
 			if(mtd->typeId != selfExpr->ty) {
-				KReturn(kStmtExpr_printMessage(kctx, stmt, selfExpr, ErrTag, "undefined coercion: %s to %s", TY_t(selfExpr->ty), TY_t(targetExpr->ty)));
+				KReturn(kStmtExpr_Message(kctx, stmt, selfExpr, ErrTag, "undefined coercion: %s to %s", TY_t(selfExpr->ty), TY_t(targetExpr->ty)));
 			}
 		}
-		KReturn(SUGAR kStmtExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, targetClass->typeId));
+		KReturn(SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, targetClass->typeId));
 	}
 }
 
@@ -189,7 +189,7 @@ static kbool_t object_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 
 // --------------------------------------------------------------------------
 
-KDEFINE_PACKAGE* object_init(void)
+KDEFINE_PACKAGE* object_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "konoha", "1.0");

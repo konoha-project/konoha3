@@ -124,7 +124,7 @@ kqcur_t *SQLITE3_query(KonohaContext* kctx, void *db, const char* query, kResult
 		size_t column_size = (size_t)sqlite3_column_count(stmt);
 		DBG_P("column_size=%d", column_size);
 
-		_ResultSet_initColumn(kctx, rs, column_size);
+		_ResultSet_InitColumn(kctx, rs, column_size);
 		if(column_size == 0) {
 			sqlite3_exec((sqlite3*)db, query, NULL, NULL, NULL);
 		}else if(column_size > 0) {

@@ -308,7 +308,7 @@ typedef struct OPLOOKUP {
 } OPLOOKUP;
 
 #define OPEXEC_LOOKUP(THIS, NS, MTD) do {\
-	kNameSpace_lookupMethodWithInlineCache(kctx, (KonohaStack *)(rbp + THIS), NS, (kMethod**)&MTD);\
+	kNameSpace_LookupMethodWithInlineCache(kctx, (KonohaStack *)(rbp + THIS), NS, (kMethod**)&MTD);\
 } while(0)
 
 /* OPCALL*/

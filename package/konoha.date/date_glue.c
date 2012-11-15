@@ -316,7 +316,7 @@ static KMETHOD Date_getYear(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## int Date.parse(String dateString); Not implemented
-//static KMETHOD Date_parse(KonohaContext *kctx, KonohaStack *sfp)
+//static KMETHOD Date_Parse(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	KReturnUnboxValue(0);
 //}
@@ -633,7 +633,7 @@ static kbool_t date_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 		_Public|_Im, _F(Date_getUTCMonth), TY_int, TY_Date, MN_("getUTCMonth"), 0,
 		_Public|_Im, _F(Date_getUTCSeconds), TY_int, TY_Date, MN_("getUTCSeconds"), 0,
 		_Public|_Im, _F(Date_getYear), TY_int, TY_Date, MN_("getYear"), 0,
-//		_Public|_Static, _F(Date_parse), TY_int, TY_Date, MN_("parse"), 1, TY_String, FN_("dateString"),
+//		_Public|_Static, _F(Date_Parse), TY_int, TY_Date, MN_("parse"), 1, TY_String, FN_("dateString"),
 		_Public, _F(Date_setDate), TY_int, TY_Date, MN_("setDate"), 1, TY_int, FN_("date"),
 		_Public, _F(Date_setFullYear), TY_int, TY_Date, MN_("setFullYear"), 1, TY_int, FN_("year"),
 		_Public, _F(Date_setHours), TY_int, TY_Date, MN_("setHours"), 1, TY_int, FN_("hours"),
@@ -672,7 +672,7 @@ static kbool_t date_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 	return true;
 }
 
-KDEFINE_PACKAGE* date_init(void)
+KDEFINE_PACKAGE* date_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "date", "1.0");

@@ -1,6 +1,6 @@
 import("konoha.float")
 
-boolean float_operator_add() { 
+boolean float_operator_Add() { 
 	float f1000000 = 1.000000;
 	float f2000000 = 2.000000;
 	assert( 1.000000  +  2.000000  - (3.000000) <= FLOAT_EPSILON*10);
@@ -80,7 +80,7 @@ boolean float_operator_cmpMoreThanEqual() {
 	assert( f1000000  >=  1.000000  == true);
 	assert( f1000000  >=  f2000000  == false);
 }
-float_operator_add();
+float_operator_Add();
 float_operator_sub();
 float_operator_mul();
 float_operator_div();

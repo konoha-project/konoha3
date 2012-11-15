@@ -66,11 +66,11 @@
 //
 ///* ------------------------------------------------------------------------ */
 //
-//static void kException_addStackTrace(KonohaContext *kctx, KonohaStack *sfp, kException *e)
+//static void kException_AddStackTrace(KonohaContext *kctx, KonohaStack *sfp, kException *e)
 //{
 //	kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 //	KGrowingBuffer wb;
-//	KLIB Kwb_init(&kctx->stack->cwb, &wb);
+//	KLIB Kwb_Init(&kctx->stack->cwb, &wb);
 //	kfileline_t uline = sfp[K_RTNIDX].calledFileLine;
 //	if(uline > 0) {
 //		const char *file = FileId_t(uline);
@@ -101,7 +101,7 @@
 ////		if(DP(e)->tracesNULL == NULL) {
 ////			KNH_INITv(DP(e)->tracesNULL, new_Array(ctx, CLASS_String, 0));
 ////		}
-////		knh_Array_add(ctx, DP(e)->tracesNULL, knh_cwb_newString(ctx, cwb));
+////		knh_Array_Add(ctx, DP(e)->tracesNULL, knh_cwb_newString(ctx, cwb));
 ////	}
 //}
 //
@@ -124,7 +124,7 @@
 //		KonohaStack *bottom = kctx->stack->jump_bottom;
 //		while(bottom < p) {
 //			if(p[0].calledMethod != NULL && isCalledMethod(kctx, p)) {
-//				kException_addStackTrace(kctx, p+1, e);
+//				kException_AddStackTrace(kctx, p+1, e);
 //				p[0].calledMethod = 0;
 //				//p = p[-1];
 //			}
@@ -166,7 +166,7 @@
 //
 //// --------------------------------------------------------------------------
 //
-//static void Exception_init(KonohaContext *kctx, kObject *o, void *conf)
+//static void Exception_Init(KonohaContext *kctx, kObject *o, void *conf)
 //{
 //	kExceptionVar *e = (kExceptionVar *)o;
 //	e->flag = 0;
@@ -176,7 +176,7 @@
 //	KFieldInit(e, e->StackTraceList, K_EMPTYARRAY);
 //}
 //
-//static void Exception_reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+//static void Exception_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 //{
 //	BEGIN_REFTRACE(2);
 //	kExceptionVar *e = (kExceptionVar *)o;
@@ -191,16 +191,16 @@
 //	KLIB Kwb_printf(kctx, wb, "%s", S_text(v[pos].asException->message));
 //}
 //
-//static void kModuleException_setup(KonohaContext *kctx, KonohaModule *def, int newctx)
+//static void kModuleException_Setup(KonohaContext *kctx, KonohaModule *def, int newctx)
 //{
 //
 //}
 //
-//static void kModuleException_reftrace(KonohaContext *kctx, KonohaModule *baseh, KObjectVisitor *visitor)
+//static void kModuleException_Reftrace(KonohaContext *kctx, KonohaModule *baseh, KObjectVisitor *visitor)
 //{
 //}
 //
-//static void kModuleException_free(KonohaContext *kctx, KonohaModule *baseh)
+//static void kModuleException_Free(KonohaContext *kctx, KonohaModule *baseh)
 //{
 //	KFree(baseh, sizeof(KonohaExceptionModule));
 //}
@@ -209,15 +209,15 @@
 //{
 //	KonohaExceptionModule *mod = (KonohaExceptionModule *)KCalloc_UNTRACE(sizeof(KonohaExceptionModule), 1);
 //	mod->h.name     = "exception";
-//	mod->h.setup    = kModuleException_setup;
-//	mod->h.reftrace = kModuleException_reftrace;
-//	mod->h.free     = kModuleException_free;
+//	mod->h.setup    = kModuleException_Setup;
+//	mod->h.reftrace = kModuleException_Reftrace;
+//	mod->h.free     = kModuleException_Free;
 //	KLIB KonohaRuntime_setModule(kctx, MOD_exception, &mod->h, trace);
 //	KDEFINE_CLASS defException = {
 //		STRUCTNAME(Exception),
 //		.cflag = CFLAG_Exception,
-//		.init  = Exception_init,
-//		.reftrace = Exception_reftrace,
+//		.init  = Exception_Init,
+//		.reftrace = Exception_Reftrace,
 //		.p     = Exception_p,
 //	};
 //	mod->cException = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defException, trace);
@@ -236,7 +236,7 @@
 //	return true;
 //}
 //
-//static kStmt *Stmt_lookupTryOrCatchStmtNULL(KonohaContext *kctx, kStmt *stmt)
+//static kStmt *Stmt_LookupTryOrCatchStmtNULL(KonohaContext *kctx, kStmt *stmt)
 //{
 //	int i;
 //	kArray *bka = stmt->parentBlockNULL->StmtList;
@@ -264,14 +264,14 @@
 //	DBG_P("try statement .. \n");
 //	int ret = false;
 //	kBlock *tryBlock, *catchBlock, *finallyBlock;
-//	tryBlock     = SUGAR kStmt_getBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
+//	tryBlock     = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
 //	ret = SUGAR kBlock_TypeCheckAll(kctx, tryBlock,   gma);
 //	if(ret == false) {
 //		KReturnUnboxValue(ret);
 //	}
 //
-//	catchBlock   = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("catch"),   K_NULLBLOCK);
-//	finallyBlock = SUGAR kStmt_getBlock(kctx, stmt, NULL, SYM_("finally"), K_NULLBLOCK);
+//	catchBlock   = SUGAR kStmt_GetBlock(kctx, stmt, NULL, SYM_("catch"),   K_NULLBLOCK);
+//	finallyBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, SYM_("finally"), K_NULLBLOCK);
 //	ret = SUGAR kBlock_TypeCheckAll(kctx, tryBlock,   gma);
 //	ret = SUGAR kBlock_TypeCheckAll(kctx, catchBlock, gma);
 //	if(ret == false) {
@@ -295,17 +295,17 @@
 //	// check "catch(...)"
 //	//ret = SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_Exception, 0);
 //
-//	kBlock *catchBlock = SUGAR kStmt_getBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
-//	kStmt *parentStmt = Stmt_lookupTryOrCatchStmtNULL(kctx, stmt);
+//	kBlock *catchBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
+//	kStmt *parentStmt = Stmt_LookupTryOrCatchStmtNULL(kctx, stmt);
 //
 //	if(catchBlock != K_NULLBLOCK && parentStmt != NULL) {
 //		ret = SUGAR kBlock_TypeCheckAll(kctx, catchBlock, gma);
-//		kExpr *expr = SUGAR kStmt_getExpr(kctx, stmt, KW_ExprPattern, K_NULLEXPR);
+//		kExpr *expr = SUGAR kStmt_GetExpr(kctx, stmt, KW_ExprPattern, K_NULLEXPR);
 //		KLIB kObject_setObject(kctx, parentStmt, KW_ExprPattern, TY_Exception, expr);
 //		KLIB kObject_setObject(kctx, parentStmt, SYM_("catch"), TY_Block, stmt);
 //		kStmt_done(kctx, stmt);
 //	} else {
-//		kStmt_printMessage(kctx, stmt, ErrTag, "upper stmt is not try/catch");
+//		kStmt_Message(kctx, stmt, ErrTag, "upper stmt is not try/catch");
 //		KReturnUnboxValue(false);
 //	}
 //	KReturnUnboxValue(ret);
@@ -316,10 +316,10 @@
 //	VAR_Statement(stmt, gma);
 //	DBG_P("finally statement .. \n");
 //	int ret = false;
-//	kBlock *finallyBlock = SUGAR kStmt_getBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
+//	kBlock *finallyBlock = SUGAR kStmt_GetBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
 //
 //	if(finallyBlock != K_NULLBLOCK) {
-//		kStmt *tryStmt = Stmt_lookupTryOrCatchStmtNULL(kctx, stmt);
+//		kStmt *tryStmt = Stmt_LookupTryOrCatchStmtNULL(kctx, stmt);
 //		if(tryStmt != NULL) {
 //			ret = SUGAR kBlock_TypeCheckAll(kctx, finallyBlock, gma);
 //			KLIB kObject_setObject(kctx, tryStmt, SYM_("finally"), TY_Block, finallyBlock);
@@ -342,12 +342,12 @@
 //	return true;
 //}
 //
-//static kbool_t exception_setupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
+//static kbool_t exception_SetupNameSpace(KonohaContext *kctx, kNameSpace *packageNS, kNameSpace *ns, KTraceInfo *trace)
 //{
 //	return true;
 //}
 //
-//KDEFINE_PACKAGE *exception_init(void)
+//KDEFINE_PACKAGE *exception_Init(void)
 //{
 //	static KDEFINE_PACKAGE d = {
 //		KPACKNAME("konoha", "1.0"),

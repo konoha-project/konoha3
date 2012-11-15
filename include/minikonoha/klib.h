@@ -145,7 +145,7 @@ static kinline KonohaClass *CT_p0(KonohaContext *kctx, KonohaClass *ct, ktype_t 
 }
 
 #define uNULL   ((uintptr_t)NULL)
-static kinline void map_addu(KonohaContext *kctx, KHashMap *kmp, uintptr_t hcode, uintptr_t unboxValue)
+static kinline void map_Addu(KonohaContext *kctx, KHashMap *kmp, uintptr_t hcode, uintptr_t unboxValue)
 {
 	KHashMapEntry *e = KLIB Kmap_newEntry(kctx, kmp, hcode);
 	e->unboxValue = unboxValue;

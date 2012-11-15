@@ -81,17 +81,17 @@ typedef struct JSONMemoryPool {
 static inline void JSONMemoryPool_Init(JSONMemoryPool *pool)
 {
     int i;
-    ARRAY_init(PageData,  &pool->array, MAX_ALIGN_LOG2 - MIN_ALIGN_LOG2);
-    ARRAY_init(BlockInfo, &pool->current_block, MAX_ALIGN_LOG2 - MIN_ALIGN_LOG2);
+    ARRAY_Init(PageData,  &pool->array, MAX_ALIGN_LOG2 - MIN_ALIGN_LOG2);
+    ARRAY_Init(BlockInfo, &pool->current_block, MAX_ALIGN_LOG2 - MIN_ALIGN_LOG2);
     for(i = MIN_ALIGN_LOG2; i <= MAX_ALIGN_LOG2; ++i) {
         PageData page;
         BlockInfo block;
-        ARRAY_init(CharPtr, &page.block, 4);
-        ARRAY_add(CharPtr, &page.block, (char *) malloc(MEMORYBLOCK_SIZE));
-        ARRAY_add(PageData, &pool->array, &page);
+        ARRAY_Init(CharPtr, &page.block, 4);
+        ARRAY_Add(CharPtr, &page.block, (char *) malloc(MEMORYBLOCK_SIZE));
+        ARRAY_Add(PageData, &pool->array, &page);
         block.base = ARRAY_get(CharPtr, &page.block, 0);
         block.current = block.base;
-        ARRAY_add(BlockInfo, &pool->current_block, &block);
+        ARRAY_Add(BlockInfo, &pool->current_block, &block);
     }
 }
 
@@ -115,7 +115,7 @@ static void *JSONMemoryPool_Alloc(JSONMemoryPool *pool, size_t n, bool *malloced
     void *newblock = malloc(MEMORYBLOCK_SIZE);
     block->base    = (char *)newblock;
     block->current = (char *)newblock + size;
-    ARRAY_add(CharPtr, &page->block, block->base);
+    ARRAY_Add(CharPtr, &page->block, block->base);
     return newblock;
 }
 

@@ -45,13 +45,13 @@ static KMETHOD Expression_dollar(KonohaContext *kctx, KonohaStack *sfp)
 
 	}
 //	KonohaClass *foundClass = NULL;
-//	int nextIdx = SUGAR TokenUtils_parseTypePattern(kctx, stmt, Stmt_ns(stmt), tokenList, beginIdx + 1, endIdx, &foundClass);
+//	int nextIdx = SUGAR TokenUtils_ParseTypePattern(kctx, stmt, Stmt_ns(stmt), tokenList, beginIdx + 1, endIdx, &foundClass);
 //	if(nextIdx != -1 && nextIdx < kArray_size(tokenList)) {
 //		kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
 ////		if(ct->typeId == TY_void) {
-////			KReturn(SUGAR kStmt_printMessage2(kctx, stmt, tk1, ErrTag, "undefined class: %s", S_text(tk1->text)));
+////			KReturn(SUGAR kStmt_Message2(kctx, stmt, tk1, ErrTag, "undefined class: %s", S_text(tk1->text)));
 ////		} else if(CT_is(Virtual, ct)) {
-////			SUGAR kStmt_printMessage2(kctx, stmt, NULL, ErrTag, "invalid application of 'dollar' to incomplete class %s", CT_t(ct));
+////			SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "invalid application of 'dollar' to incomplete class %s", CT_t(ct));
 ////		}
 //		if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {  // dollar C (...)
 //			SugarSyntax *syn = SYN_(Stmt_ns(stmt), KW_ExprMethodCall);
@@ -93,7 +93,7 @@ static kbool_t dollar_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 	return true;
 }
 
-KDEFINE_PACKAGE* dollar_init(void)
+KDEFINE_PACKAGE* dollar_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "dscript", "1.0");

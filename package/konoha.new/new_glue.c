@@ -49,7 +49,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 		kTokenVar *newToken = tokenList->TokenVarItems[beginIdx];
 		KonohaClass *foundClass = NULL;
 		kNameSpace *ns = Stmt_ns(stmt);
-		int nextIdx = SUGAR TokenUtils_parseTypePattern(kctx, ns, tokenList, beginIdx + 1, endIdx, &foundClass);
+		int nextIdx = SUGAR TokenUtils_ParseTypePattern(kctx, ns, tokenList, beginIdx + 1, endIdx, &foundClass);
 		if((size_t)nextIdx < kArray_size(tokenList)) {
 			kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
 			if(nextTokenAfterClassName->resolvedSyntaxInfo->keyword == KW_ParenthesisGroup) {  // new C (...)
@@ -65,7 +65,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 				kExpr *expr;
 				int hasGenerics = -1;
 				if(kArray_size(subTokenList) > 0) {
-					hasGenerics = SUGAR TokenUtils_parseTypePattern(kctx, ns, subTokenList, 0, kArray_size(subTokenList), &classT0);
+					hasGenerics = SUGAR TokenUtils_ParseTypePattern(kctx, ns, subTokenList, 0, kArray_size(subTokenList), &classT0);
 				}
 				if(hasGenerics != -1) {
 					/* new Type1[Type2[]] => Type1<Type2>.new Or Type1<Type2>.newList */
@@ -114,7 +114,7 @@ static kbool_t new_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSpa
 	return true;
 }
 
-KDEFINE_PACKAGE* new_init(void)
+KDEFINE_PACKAGE* new_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
 	KSetPackageName(d, "new", "1.0");
