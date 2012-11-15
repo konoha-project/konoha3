@@ -2519,7 +2519,7 @@ static KMETHOD Function_getArguments(KonohaContext *kctx, KonohaStack *sfp)
 			I != E; ++I) {
 		Value *v = I;
 		kObject *o = new_CppObject(kctx, CT_(cid)/*"Value"*/, WRAP(v));
-		KLIB kArray_add(kctx, a, o);
+		KLIB kArray_Add(kctx, a, o);
 	}
 	KReturn(a);
 }
@@ -5265,7 +5265,7 @@ static kbool_t llvm_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameSp
 	return true;
 }
 
-KDEFINE_PACKAGE* llvm_init(void)
+KDEFINE_PACKAGE* llvm_Init(void)
 {
 	InitializeNativeTarget();
 	static KDEFINE_PACKAGE d = {

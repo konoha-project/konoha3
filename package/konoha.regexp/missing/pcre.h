@@ -340,7 +340,7 @@ typedef struct pcre_callout_block {
   int         *offset_vector;     /* The offset vector */
   PCRE_SPTR    subject;           /* The subject being matched */
   int          subject_length;    /* The length of the subject */
-  int          start_Match;       /* Offset to start of this match attempt */
+  int          start_match;       /* Offset to start of this match attempt */
   int          current_position;  /* Where we currently are in the subject */
   int          capture_top;       /* Max current capture */
   int          capture_last;      /* Most recently closed capture */
@@ -362,7 +362,7 @@ typedef struct pcre16_callout_block {
   int         *offset_vector;     /* The offset vector */
   PCRE_SPTR16  subject;           /* The subject being matched */
   int          subject_length;    /* The length of the subject */
-  int          start_Match;       /* Offset to start of this match attempt */
+  int          start_match;       /* Offset to start of this match attempt */
   int          current_position;  /* Where we currently are in the subject */
   int          capture_top;       /* Max current capture */
   int          capture_last;      /* Most recently closed capture */
@@ -383,27 +383,27 @@ have to take another form. */
 
 #ifndef VPCOMPAT
 PCRE_EXP_DECL void *(*pcre_malloc)(size_t);
-PCRE_EXP_DECL void  (*pcre_Free)(void *);
+PCRE_EXP_DECL void  (*pcre_free)(void *);
 PCRE_EXP_DECL void *(*pcre_stack_malloc)(size_t);
-PCRE_EXP_DECL void  (*pcre_stack_Free)(void *);
+PCRE_EXP_DECL void  (*pcre_stack_free)(void *);
 PCRE_EXP_DECL int   (*pcre_callout)(pcre_callout_block *);
 
 PCRE_EXP_DECL void *(*pcre16_malloc)(size_t);
-PCRE_EXP_DECL void  (*pcre16_Free)(void *);
+PCRE_EXP_DECL void  (*pcre16_free)(void *);
 PCRE_EXP_DECL void *(*pcre16_stack_malloc)(size_t);
-PCRE_EXP_DECL void  (*pcre16_stack_Free)(void *);
+PCRE_EXP_DECL void  (*pcre16_stack_free)(void *);
 PCRE_EXP_DECL int   (*pcre16_callout)(pcre16_callout_block *);
 #else   /* VPCOMPAT */
 PCRE_EXP_DECL void *pcre_malloc(size_t);
-PCRE_EXP_DECL void  pcre_Free(void *);
+PCRE_EXP_DECL void  pcre_free(void *);
 PCRE_EXP_DECL void *pcre_stack_malloc(size_t);
-PCRE_EXP_DECL void  pcre_stack_Free(void *);
+PCRE_EXP_DECL void  pcre_stack_free(void *);
 PCRE_EXP_DECL int   pcre_callout(pcre_callout_block *);
 
 PCRE_EXP_DECL void *pcre16_malloc(size_t);
-PCRE_EXP_DECL void  pcre16_Free(void *);
+PCRE_EXP_DECL void  pcre16_free(void *);
 PCRE_EXP_DECL void *pcre16_stack_malloc(size_t);
-PCRE_EXP_DECL void  pcre16_stack_Free(void *);
+PCRE_EXP_DECL void  pcre16_stack_free(void *);
 PCRE_EXP_DECL int   pcre16_callout(pcre16_callout_block *);
 #endif  /* VPCOMPAT */
 
@@ -440,10 +440,10 @@ PCRE_EXP_DECL int  pcre_exec(const pcre *, const pcre_extra *, PCRE_SPTR,
                    int, int, int, int *, int);
 PCRE_EXP_DECL int  pcre16_exec(const pcre16 *, const pcre16_extra *,
                    PCRE_SPTR16, int, int, int, int *, int);
-PCRE_EXP_DECL void pcre_Free_substring(const char *);
-PCRE_EXP_DECL void pcre16_Free_substring(PCRE_SPTR16);
-PCRE_EXP_DECL void pcre_Free_substring_list(const char **);
-PCRE_EXP_DECL void pcre16_Free_substring_list(PCRE_SPTR16 *);
+PCRE_EXP_DECL void pcre_free_substring(const char *);
+PCRE_EXP_DECL void pcre16_free_substring(PCRE_SPTR16);
+PCRE_EXP_DECL void pcre_free_substring_list(const char **);
+PCRE_EXP_DECL void pcre16_free_substring_list(PCRE_SPTR16 *);
 PCRE_EXP_DECL int  pcre_fullinfo(const pcre *, const pcre_extra *, int,
                   void *);
 PCRE_EXP_DECL int  pcre16_fullinfo(const pcre16 *, const pcre16_extra *, int,
@@ -472,8 +472,8 @@ PCRE_EXP_DECL int  pcre_refcount(pcre *, int);
 PCRE_EXP_DECL int  pcre16_refcount(pcre16 *, int);
 PCRE_EXP_DECL pcre_extra *pcre_study(const pcre *, int, const char **);
 PCRE_EXP_DECL pcre16_extra *pcre16_study(const pcre16 *, int, const char **);
-PCRE_EXP_DECL void pcre_Free_study(pcre_extra *);
-PCRE_EXP_DECL void pcre16_Free_study(pcre16_extra *);
+PCRE_EXP_DECL void pcre_free_study(pcre_extra *);
+PCRE_EXP_DECL void pcre16_free_study(pcre16_extra *);
 PCRE_EXP_DECL const char *pcre_version(void);
 PCRE_EXP_DECL const char *pcre16_version(void);
 
@@ -489,8 +489,8 @@ PCRE_EXP_DECL int  pcre16_utf16_to_host_byte_order(PCRE_UCHAR16 *,
 
 PCRE_EXP_DECL pcre_jit_stack *pcre_jit_stack_alloc(int, int);
 PCRE_EXP_DECL pcre16_jit_stack *pcre16_jit_stack_alloc(int, int);
-PCRE_EXP_DECL void pcre_jit_stack_Free(pcre_jit_stack *);
-PCRE_EXP_DECL void pcre16_jit_stack_Free(pcre16_jit_stack *);
+PCRE_EXP_DECL void pcre_jit_stack_free(pcre_jit_stack *);
+PCRE_EXP_DECL void pcre16_jit_stack_free(pcre16_jit_stack *);
 PCRE_EXP_DECL void pcre_assign_jit_stack(pcre_extra *,
                   pcre_jit_callback, void *);
 PCRE_EXP_DECL void pcre16_assign_jit_stack(pcre16_extra *,
