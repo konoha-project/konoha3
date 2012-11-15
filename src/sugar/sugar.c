@@ -136,8 +136,9 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 
 	KDEFINE_CLASS defToken = {0};
 	SETSTRUCTNAME(defToken, Token);
-	defToken.init = Token_Init;
-	defToken.reftrace = Token_Reftrace;
+	defToken.init = kToken_Init;
+	defToken.reftrace = kToken_Reftrace;
+	defToken.p = kToken_p;
 	
 	KDEFINE_CLASS defExpr = {0};
 	SETSTRUCTNAME(defExpr, Expr);

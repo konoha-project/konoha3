@@ -74,7 +74,7 @@ static void kNameSpace_FreeSugarExtension(KonohaContext *kctx, kNameSpaceVar *ns
 /* --------------- */
 /* Token */
 
-static void Token_Init(KonohaContext *kctx, kObject *o, void *conf)
+static void kToken_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kTokenVar *tk = (kTokenVar *)o;
 	tk->uline     =   0;
@@ -88,10 +88,38 @@ static void Token_Init(KonohaContext *kctx, kObject *o, void *conf)
 	tk->resolvedSyntaxInfo = NULL;
 }
 
-static void Token_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+static void kToken_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kToken *tk = (kToken *)o;
 	KREFTRACEv(tk->text);
+}
+
+static void kToken_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingBuffer *wb)
+{
+#ifndef USE_SMALLBUILD
+	kToken *tk = values[pos].asToken;
+	if(IS_String(tk)) {
+		KLIB Kwb_printf(kctx, wb, "%s%s '%s'", PSYM_t(tk->resolvedSymbol), S_text(tk->text));
+	}
+	else if(IS_Array(tk)) {
+		size_t i;
+		kArray *a = tk->subTokenList;
+		KLIB Kwb_printf(kctx, wb, "%s%s [", PSYM_t(tk->resolvedSymbol));
+		if(kArray_size(a) > 0) {
+			KUnsafeFieldSet(values[pos+1].asToken, a->TokenItems[0]);
+			kToken_p(kctx, values, pos+1, wb);
+		}
+		for(i = 1; i < kArray_size(a); i++) {
+			KLIB Kwb_write(kctx, wb, " ", 1);
+			KUnsafeFieldSet(values[pos+1].asToken, a->TokenItems[i]);
+			kToken_p(kctx, values, pos+1, wb);
+		}
+		KLIB Kwb_write(kctx, wb, "]", 1);
+	}
+	else {
+		KLIB Kwb_printf(kctx, wb, "%s%s", PSYM_t(tk->resolvedSymbol));
+	}
+#endif
 }
 
 /* --------------- */
