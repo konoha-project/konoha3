@@ -41,6 +41,22 @@ static void ERROR_UnclosedToken(KonohaContext *kctx, kTokenVar *tk, const char *
 	}
 }
 
+static int ParseFirstIndent(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int pos)
+{
+	int ch, indent = 0;
+	while((ch = tokenizer->source[pos++]) != 0) {
+		if(ch == '\t') { indent += tokenizer->tabsize; }
+		else if(ch == ' ') { indent += 1; }
+		break;
+	}
+	if(IS_NOTNULL(tk) && (indent > 0 || tokenizer->currentLine != 0)) {
+		tk->unresolvedTokenType = TokenType_INDENT;
+		tk->indent = indent;
+		tk->uline = tokenizer->currentLine;
+	}
+	return pos-1;
+}
+
 static int ParseIndent(KonohaContext *kctx, kTokenVar *tk, Tokenizer *tokenizer, int pos)
 {
 	int ch, indent = 0;
@@ -433,7 +449,7 @@ static void Tokenizer_Tokenize(KonohaContext *kctx, Tokenizer *tokenizer)
 {
 	int ch, pos = 0;
 	kTokenVar *tk = new_(TokenVar, 0, OnGcStack);
-	pos = ParseIndent(kctx, tk, tokenizer, pos);
+	pos = ParseFirstIndent(kctx, tk, tokenizer, pos);
 	while((ch = AsciiToKonohaChar(tokenizer->source[pos])) != 0) {
 		if(tk->unresolvedTokenType != 0) {
 			KLIB kArray_Add(kctx, tokenizer->tokenList, tk);

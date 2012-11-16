@@ -339,7 +339,7 @@ static void kNameSpace_SetMacroData(KonohaContext *kctx, kNameSpace *ns, ksymbol
 	tokens.TargetPolicy.ExpandingBraceGroup = true;
 	TokenSeq_Resolve(kctx, &tokens, NULL, &source, source.beginIdx);
 	syn->macroParamSize = paramsize;
-	syn->macroDataNULL_OnList =  new_kArraySubset(kctx, ns->NameSpaceConstList, tokens.tokenList, tokens.beginIdx + 1 /* removing head indent*/, tokens.endIdx);
+	syn->macroDataNULL_OnList =  new_kArraySubset(kctx, ns->NameSpaceConstList, tokens.tokenList, tokens.beginIdx, tokens.endIdx);
 	TokenSeq_Pop(kctx, source);
 }
 
