@@ -65,6 +65,7 @@ set(PACKAGES
 	konoha.const
 	konoha.date
 	konoha.defined
+	konoha.desugar
 	konoha.dynamic
 	konoha.eval
 	konoha.eventlistener
