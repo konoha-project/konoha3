@@ -181,7 +181,6 @@ static KMETHOD Token_toString(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD NameSpace_tokenize(KonohaContext *kctx, KonohaStack *sfp)
 {
 	INIT_GCSTACK();
-	int flag = sfp[0].intValue;
 	kArray *a = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
 	TokenSeq source = {sfp[0].asNameSpace, GetSugarContext(kctx)->preparedTokenList};
 	TokenSeq_Push(kctx, source);
@@ -202,6 +201,14 @@ static KMETHOD Token_new(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(tk);
 }
 
+//## boolean Token.Is(Symbol s);
+static KMETHOD Token_Is(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kTokenVar *tk = (kTokenVar *)sfp[0].asToken;
+	ksymbol_t keyword = (ksymbol_t)sfp[1].intValue;
+	KReturnUnboxValue(tk->resolvedSyntaxInfo != NULL && tk->resolvedSyntaxInfo->keyword == keyword);
+}
+
 //## String Token.getText();
 static KMETHOD Token_getText(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -210,13 +217,13 @@ static KMETHOD Token_getText(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnField(s);
 }
 
-#define TP_kw       TY_Symbol, FN_("keyword")
-#define TP_source   TY_String, FN_("source")
-#define TP_pos      TY_int, FN_("pos")
-#define TP_begin    TY_int, FN_("begin")
-#define TP_end      TY_int, FN_("end")
+#define TP_kw           TY_Symbol, FN_("keyword")
+#define TP_source       TY_String, FN_("source")
+#define TP_pos          TY_int, FN_("pos")
+#define TP_begin        TY_int, FN_("begin")
+#define TP_end          TY_int, FN_("end")
 #define TP_message      TY_String, FN_("message")
-#define TP_source   TY_String, FN_("source")
+#define TP_source       TY_String, FN_("source")
 
 static void desugar_defineTokenFunc(KonohaContext *kctx, kNameSpace *ns, int TY_Symbol, KTraceInfo *trace)
 {
@@ -225,6 +232,8 @@ static void desugar_defineTokenFunc(KonohaContext *kctx, kNameSpace *ns, int TY_
 		_Public, _F(Token_setText), TY_int, TY_Token, MN_("SetText"), 4, TP_kw, TP_source, TP_begin, TP_end,
 		_Public, _F(Token_setError), TY_int, TY_Token, MN_("SetError"), 4, TP_message, TP_source, TP_begin, TP_end,
 		_Public|_Coercion|_Im|_Const, _F(Token_toString), TY_String, TY_Token, MN_to(TY_String), 0,
+		_Public|_Const, _F(Token_getText), TY_String, TY_Token, MN_("GetText"), 0,
+		_Public|_Const, _F(Token_Is), TY_boolean, TY_Token, MN_("Is"), 1, TP_kw,
 		_Public|_Im, _F(NameSpace_tokenize), TY_TokenArray, TY_NameSpace, MN_("Tokenize"), 1, TP_source,
 		DEND,
 	};
@@ -993,8 +1002,6 @@ static kbool_t desuga_defineSyntaxStatement(KonohaContext *kctx, kNameSpace *pac
 //		_Public, _F(Token_setSubArray), TY_void, TY_Token, MN_("setSubArray"), 1, TY_StringArray, FN_x,
 ////		_Public, _F(Token_isTypeName), TY_boolean, TY_Token, MN_("isTypeName"), 0,
 //		_Public, _F(Token_isParenthesis), TY_boolean, TY_Token, MN_("isParenthesis"), 0,
-//		_Public, _F(Token_getText), TY_String, TY_Token, MN_("getText"), 0,
-//		_Public, _F(Token_isSymbol), TY_boolean, TY_Token, MN_("isSymbol"), 0,
 //		_Public, _F(Token_newUntypedExpr), TY_Expr, TY_Token, MN_("newUntypedExpr"), 0,
 //		_Public, _F(Token_isBeforeWhiteSpace), TY_boolean, TY_Token, MN_("isBeforeWhiteSpace"), 0,
 //

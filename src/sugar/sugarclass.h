@@ -94,17 +94,29 @@ static void kToken_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vis
 	KREFTRACEv(tk->text);
 }
 
+static void Kwb_WriteTokenSymbol(KonohaContext *kctx, KGrowingBuffer *wb, kToken *tk)
+{
+	if(tk->resolvedSymbol == TokenType_INDENT) {
+		KLIB Kwb_printf(kctx, wb, "$Indent ");
+	}
+	else {
+		ksymbol_t symbolType = tk->resolvedSyntaxInfo == NULL ? tk->resolvedSymbol : tk->resolvedSyntaxInfo->keyword;
+		KLIB Kwb_printf(kctx, wb, "%s%s ", PSYM_t(symbolType));
+	}
+}
+
 static void kToken_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingBuffer *wb)
 {
 #ifndef USE_SMALLBUILD
 	kToken *tk = values[pos].asToken;
-	if(IS_String(tk)) {
-		KLIB Kwb_printf(kctx, wb, "%s%s '%s'", PSYM_t(tk->resolvedSymbol), S_text(tk->text));
+	Kwb_WriteTokenSymbol(kctx, wb, tk);
+	if(IS_String(tk->text)) {
+		KLIB Kwb_printf(kctx, wb, "'%s'", S_text(tk->text));
 	}
-	else if(IS_Array(tk)) {
+	else if(IS_Array(tk->subTokenList)) {
 		size_t i;
 		kArray *a = tk->subTokenList;
-		KLIB Kwb_printf(kctx, wb, "%s%s [", PSYM_t(tk->resolvedSymbol));
+		KLIB Kwb_write(kctx, wb, "[", 1);
 		if(kArray_size(a) > 0) {
 			KUnsafeFieldSet(values[pos+1].asToken, a->TokenItems[0]);
 			kToken_p(kctx, values, pos+1, wb);
@@ -115,9 +127,6 @@ static void kToken_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowing
 			kToken_p(kctx, values, pos+1, wb);
 		}
 		KLIB Kwb_write(kctx, wb, "]", 1);
-	}
-	else {
-		KLIB Kwb_printf(kctx, wb, "%s%s", PSYM_t(tk->resolvedSymbol));
 	}
 #endif
 }
