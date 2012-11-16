@@ -132,15 +132,6 @@ static KMETHOD Token_setError(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnUnboxValue(sfp[4].intValue);
 }
 
-
-//## String Token.getText();
-static KMETHOD Token_getText(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kToken *tk = sfp[0].asToken;
-	kString *s = IS_String(tk->text) ? tk->text : TS_EMPTY;
-	KReturnField(s);
-}
-
 static void Kwb_WriteToken(KonohaContext *kctx, KGrowingBuffer *wb, kToken *tk)
 {
 	char c = kToken_GetOpenHintChar(tk);
@@ -186,20 +177,55 @@ static KMETHOD Token_toString(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
+//## Token[] NameSpace.tokenize(String s);
+static KMETHOD NameSpace_tokenize(KonohaContext *kctx, KonohaStack *sfp)
+{
+	INIT_GCSTACK();
+	int flag = sfp[0].intValue;
+	kArray *a = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
+	TokenSeq source = {sfp[0].asNameSpace, GetSugarContext(kctx)->preparedTokenList};
+	TokenSeq_Push(kctx, source);
+	SUGAR TokenSeq_Tokenize(kctx, &source, S_text(sfp[1].asString), 0);
+	TokenSeq tokens = {source.ns, a, 0};
+	tokens.TargetPolicy.ExpandingBraceGroup = true;
+	SUGAR TokenSeq_Resolve(kctx, &tokens, NULL, &source, source.beginIdx);
+	TokenSeq_Pop(kctx, source);
+	KReturnWith(a, RESET_GCSTACK());
+}
+
+//## Token Token.new(symbol key);
+static KMETHOD Token_new(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kTokenVar *tk = (kTokenVar *)sfp[0].asToken;
+	ksymbol_t key = (ksymbol_t)sfp[1].intValue;
+	tk->resolvedSymbol = key;
+	KReturn(tk);
+}
+
+//## String Token.getText();
+static KMETHOD Token_getText(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kToken *tk = sfp[0].asToken;
+	kString *s = IS_String(tk->text) ? tk->text : TS_EMPTY;
+	KReturnField(s);
+}
+
 #define TP_kw       TY_Symbol, FN_("keyword")
 #define TP_source   TY_String, FN_("source")
 #define TP_pos      TY_int, FN_("pos")
 #define TP_begin    TY_int, FN_("begin")
 #define TP_end      TY_int, FN_("end")
 #define TP_message      TY_String, FN_("message")
+#define TP_source   TY_String, FN_("source")
 
 static void desugar_defineTokenFunc(KonohaContext *kctx, kNameSpace *ns, int TY_Symbol, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(String_AsciiAt), TY_int, TY_String, MN_("AsciiAt"), 1, TP_pos,
-		_Public, _F(Token_setText), TY_int, TY_Token, MN_("setText"), 4, TP_kw, TP_source, TP_begin, TP_end,
-		_Public, _F(Token_setError), TY_int, TY_Token, MN_("setError"), 4, TP_message, TP_source, TP_begin, TP_end,
+		_Public, _F(Token_setText), TY_int, TY_Token, MN_("SetText"), 4, TP_kw, TP_source, TP_begin, TP_end,
+		_Public, _F(Token_setError), TY_int, TY_Token, MN_("SetError"), 4, TP_message, TP_source, TP_begin, TP_end,
 		_Public|_Coercion|_Im|_Const, _F(Token_toString), TY_String, TY_Token, MN_to(TY_String), 0,
+		_Public|_Im, _F(NameSpace_tokenize), TY_TokenArray, TY_NameSpace, MN_("Tokenize"), 1, TP_source,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -250,7 +276,6 @@ static void desugar_defineMessageMethod(KonohaContext *kctx, kNameSpace *ns, int
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 }
 
-
 // --------------------------------------------------------------------------
 /* Pattern */
 
@@ -270,24 +295,6 @@ int patternMatchShell(Stmt stmt, int nameid, Token[] tokenList, int beginIdx, in
 	return -1;
 }
 **/
-
-//## Token[] NameSpace.tokenize(String s, int flag);
-static KMETHOD NameSpace_tokenize(KonohaContext *kctx, KonohaStack *sfp)
-{
-	INIT_GCSTACK();
-	int flag = sfp[0].intValue;
-	kArray *a = (kArray *)KLIB new_kObject(kctx, _GcStack, KGetReturnType(sfp), 0);
-	TokenSeq source = {sfp[0].asNameSpace, (flag == 0) ? a : GetSugarContext(kctx)->preparedTokenList};
-	TokenSeq_Push(kctx, source);
-	SUGAR TokenSeq_Tokenize(kctx, &source, S_text(sfp[1].asString), 0);
-	if(flag > 0) {
-		TokenSeq tokens = {source.ns, a, 0};
-		tokens.TargetPolicy.ExpandingBraceGroup = (flag == 1);
-		SUGAR TokenSeq_Resolve(kctx, &tokens, NULL, &source, source.beginIdx);
-	}
-	TokenSeq_Pop(kctx, source);
-	KReturnWith(a, RESET_GCSTACK());
-}
 
 ////## Token[] NameSpace.TestPatternMatch(Symbol symbol, String source);
 //static KMETHOD NameSpace_TestPatternMatch(KonohaContext *kctx, KonohaStack *sfp)
@@ -458,7 +465,7 @@ static KMETHOD NameSpace_AddTypeCheck(KonohaContext *kctx, KonohaStack *sfp)
 	SUGAR kNameSpace_AddSugarFunc(kctx, sfp[0].asNameSpace, keyword, SugarFunc_TypeCheck, sfp[2].asFunc);
 }
 
-static void LoadNameSpaceMethodData(KonohaContext *kctx, kNameSpace *ns, int TY_symbol, KTraceInfo *trace)
+static void desugar_defineNameSpaceMethod(KonohaContext *kctx, kNameSpace *ns, int TY_symbol, KTraceInfo *trace)
 {
 	int FN_keyword = SYM_("keyword");
 	int FN_func = SYM_("func");
@@ -500,15 +507,6 @@ static void LoadNameSpaceMethodData(KonohaContext *kctx, kNameSpace *ns, int TY_
 
 // --------------------------------------------------------------------------
 /* Token */
-
-//## Token Token.new(symbol key);
-static KMETHOD Token_new(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kTokenVar *tk = (kTokenVar *)sfp[0].asToken;
-	ksymbol_t key = (ksymbol_t)sfp[1].intValue;
-	tk->resolvedSymbol = key;
-	KReturn(tk);
-}
 
 ////## void Token.setSubArray(String[] sub);
 //static KMETHOD Token_setSubArray(KonohaContext *kctx, KonohaStack *sfp)
@@ -1172,6 +1170,7 @@ static kbool_t desugar_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 	int TY_Symbol = cSymbol->typeId;
 	desugar_defineTokenFunc(kctx, ns, TY_Symbol, trace);
 	desugar_defineMessageMethod(kctx, ns, TY_Symbol, trace);
+	desugar_defineNameSpaceMethod(kctx, ns, TY_Symbol, trace);
 	desugar_defineSyntaxStatement(kctx, ns, trace);
 	return true;
 }
