@@ -409,13 +409,11 @@ static void kObject_ReftraceField(KonohaContext *kctx, kObject *o, KObjectVisito
 	if(map_size) {
 		protomap_iterator itr = {0};
 		KKeyValue *d;
-		BEGIN_REFTRACE(map_size);
 		while((d = protomap_next((Kprotomap_t *)o->h.kvproto, &itr)) != NULL) {
 			if(Symbol_isBoxedKey(d->key)) {
 				KREFTRACEv(d->ObjectValue);
 			}
 		}
-		END_REFTRACE();
 	}
 }
 

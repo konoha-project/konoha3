@@ -123,13 +123,11 @@ static void ObjectField_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor
 	KonohaClass *c =O_ct(o);
 	KonohaClassField *fieldItems = c->fieldItems;
 	size_t i, fieldsize = c->fieldsize;
-	BEGIN_REFTRACE(fieldsize);
 	for (i = 0; i < fieldsize; i++) {
 		if(fieldItems[i].isobj) {
-			KREFTRACEn(o->fieldObjectItems[i]);
+			KREFTRACEn(o->fieldObjectItems[i]);   // FIXME:
 		}
 	}
-	END_REFTRACE();
 }
 
 static kshortflag_t kStmt_ParseClassFlag(KonohaContext *kctx, kStmt *stmt, kshortflag_t cflag)

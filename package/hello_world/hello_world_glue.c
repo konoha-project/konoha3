@@ -69,13 +69,11 @@ static void Person_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vis
 	/* Garbage collector (GC) cannot recognize in which position of the field
 	 * an object exists. The function tells to GC which object should be traced. */
 	struct Person *p = (struct Person *) o;
-	BEGIN_REFTRACE(1/* == field size */);
 	/* If p->some_field is Nullable, please use 
 	 * KREFTRACEn() macro instead of KREFTRACEv(). */
 	KREFTRACEv(p->name);
 	/* It is not necessary to trace p->age field,
 	 * because p->age is not an Object */
-	END_REFTRACE();
 }
 
 //## Person Person.new(String name, int age);

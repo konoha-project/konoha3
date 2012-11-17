@@ -39,14 +39,12 @@ static void kObject_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vi
 {
 	kObject *of = (kObject *)o;
 	KonohaClass *ct = O_ct(of);
-	BEGIN_REFTRACE(ct->fieldsize);
 	size_t i;
 	for(i = 0; i < ct->fieldsize; i++) {
 		if(ct->fieldItems[i].isobj) {
 			KREFTRACEv(of->fieldObjectItems[i]);
 		}
 	}
-	END_REFTRACE();
 }
 
 static kObject *new_kObject(KonohaContext *kctx, kArray *gcstackNULL, KonohaClass *ct, uintptr_t conf)
@@ -272,11 +270,9 @@ static void kArray_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vis
 	kArray *a = (kArray *)o;
 	if(!kArray_isUnboxData(a)) {
 		size_t i;
-		BEGIN_REFTRACE(kArray_size(a));
 		for(i = 0; i < kArray_size(a); i++) {
 			KREFTRACEv(a->ObjectItems[i]);
 		}
-		END_REFTRACE();
 	}
 }
 
@@ -474,11 +470,9 @@ static void kMethod_Init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void kMethod_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
-	BEGIN_REFTRACE(3);
 	kMethod *mtd = (kMethod *)o;
 	KREFTRACEv(mtd->SourceToken);
 	KREFTRACEv(mtd->CodeObject);
-	END_REFTRACE();
 }
 
 #define CT_MethodVar CT_Method
@@ -556,11 +550,9 @@ static void Func_Init(KonohaContext *kctx, kObject *o, void *conf)
 
 static void Func_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
-	BEGIN_REFTRACE(2);
 	kFunc *fo = (kFunc *)o;
 	KREFTRACEv(fo->self);
 	KREFTRACEv(fo->mtd);
-	END_REFTRACE();
 }
 
 // ---------------
@@ -1109,7 +1101,6 @@ static void KonohaRuntime_Reftrace(KonohaContext *kctx, KonohaContextVar *ctx, K
 //		}
 //	}
 //	KLIB Kmap_each(kctx, share->packageMapNO, (void *) visitor, packageMap_Reftrace);
-	BEGIN_REFTRACE(10);
 	KREFTRACEv(share->GlobalConstList);
 //	KREFTRACEv(share->constNull);
 //	KREFTRACEv(share->constTrue);
@@ -1121,7 +1112,6 @@ static void KonohaRuntime_Reftrace(KonohaContext *kctx, KonohaContextVar *ctx, K
 //	KREFTRACEv(share->symbolList_OnGlobalConstList);
 //	KREFTRACEv(share->paramList_OnGlobalConstList);
 //	KREFTRACEv(share->paramdomList_OnGlobalConstList);
-	END_REFTRACE();
 }
 
 static void KonohaRuntime_FreeClassTable(KonohaContext *kctx)

@@ -1837,8 +1837,8 @@ typedef struct {
 	}\
 } while(0)
 
-#define BEGIN_REFTRACE(SIZE)
-#define END_REFTRACE()
+#define BEGIN_REFTRACE(SIZE) JJ
+#define END_REFTRACE() JJ
 
 #define KREFTRACEv(p)  do {\
 	DBG_ASSERT(p != NULL);\

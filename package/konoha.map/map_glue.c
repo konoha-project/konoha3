@@ -53,18 +53,14 @@ static void kMap_Init(KonohaContext *kctx, kObject *o, void *conf)
 static void MapUnboxEntry_Reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
 {
 	KObjectVisitor *visitor = (KObjectVisitor *) thunk;
-	BEGIN_REFTRACE(1);
 	KREFTRACEv(p->StringKey);
-	END_REFTRACE();
 }
 
 static void MapObjectEntry_Reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
 {
 	KObjectVisitor *visitor = (KObjectVisitor *) thunk;
-	BEGIN_REFTRACE(2);
 	KREFTRACEn(p->StringKey);
 	KREFTRACEv(p->ObjectValue);
-	END_REFTRACE();
 }
 
 static void kMap_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)

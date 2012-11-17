@@ -1806,11 +1806,9 @@ static void kSubproc_Free(KonohaContext *kctx, kObject *o)
 static void kSubproc_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	struct kSubprocVar *proc = (struct kSubprocVar *)o;
-	BEGIN_REFTRACE(3);
 	KREFTRACEv(proc->env);
 	KREFTRACEv(proc->command);
 	KREFTRACEv(proc->cwd);
-	END_REFTRACE();
 }
 
 /* ------------------------------------------------------------------------ */

@@ -182,12 +182,10 @@ static void kExpr_Init(KonohaContext *kctx, kObject *o, void *conf)
 static void kExpr_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kExpr *expr = (kExpr *)o;
-	BEGIN_REFTRACE(2);
 	KREFTRACEv(expr->termToken);
 	if(Expr_hasObjectConstValue(expr)) {
 		KREFTRACEv(expr->objectConstValue);
 	}
-	END_REFTRACE();
 }
 
 #ifndef USE_SMALLBUILD
@@ -479,12 +477,10 @@ static void kBlock_Init(KonohaContext *kctx, kObject *o, void *conf)
 static void kBlock_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kBlock *bk = (kBlock *)o;
-	BEGIN_REFTRACE(4);
 	KREFTRACEv(bk->BlockNameSpace);
 	KREFTRACEv(bk->StmtList);
 	KREFTRACEv(bk->esp);
 	KREFTRACEn(bk->parentStmtNULL);
-	END_REFTRACE();
 }
 
 static void kBlock_InsertAfter(KonohaContext *kctx, kBlock *bk, kStmtNULL *target, kStmt *stmt)

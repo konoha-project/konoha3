@@ -27,17 +27,16 @@
 #include "minikonoha/local.h"
 #include "minikonoha/sugar.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "import/protomap.h"
 #include "import/klibexec.h"
 #include "import/datatype.h"
 #include "import/methods.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // -------------------------------------------------------------------------
-// util stack
 
 static void konoha_Init(void)
 {
