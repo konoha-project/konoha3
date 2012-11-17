@@ -155,6 +155,7 @@ static void Expr_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visit
 	END_REFTRACE();
 }
 
+
 static kExpr* new_UntypedTermExpr(KonohaContext *kctx, kToken *tk)
 {
 	kExprVar *expr = new_(ExprVar, tk->resolvedSyntaxInfo, OnGcStack);
@@ -218,7 +219,6 @@ static kExpr* new_TypedCallExpr(KonohaContext *kctx, kStmt *stmt, kGamma *gma, k
 	return kStmtkExpr_TypeCheckCallParam(kctx, stmt, (kExpr *)expr, mtd, gma, ty);
 }
 
-
 static kExpr* kExpr_Add(KonohaContext *kctx, kExpr *expr, kExpr *e)
 {
 	DBG_ASSERT(IS_Array(expr->cons));
@@ -270,7 +270,7 @@ static kExpr* SUGAR kExpr_SetVariable(KonohaContext *kctx, kExpr *expr, kGamma *
 /* --------------- */
 /* Stmt */
 
-static void Stmt_Init(KonohaContext *kctx, kObject *o, void *conf)
+static void kStmt_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kStmtVar *stmt = (kStmtVar *)o;
 	stmt->uline    = (kfileline_t)conf;
@@ -281,12 +281,23 @@ static void Stmt_Init(KonohaContext *kctx, kObject *o, void *conf)
 	stmt->build    = 0;
 }
 
-static void Stmt_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+static void kStmt_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kStmt *stmt = (kStmt *)o;
-	BEGIN_REFTRACE(1);
 	KREFTRACEn(stmt->parentBlockNULL);
-	END_REFTRACE();
+}
+
+static void kStmt_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingBuffer *wb)
+{
+	kStmt *stmt = values[pos].asStmt;
+	if(stmt->syn == NULL) {
+		KLIB Kwb_printf(kctx, wb, "DONE {uline: %d, ", (kshort_t)stmt->uline);
+	}
+	else {
+		KLIB Kwb_printf(kctx, wb, "%s%s {uline: %d, ", PSYM_t(stmt->syn->keyword), (kshort_t)stmt->uline);
+	}
+	KLIB kObjectProto_p(kctx, values, pos, wb, 0);
+	KLIB Kwb_write(kctx, wb, "}", 1);
 }
 
 static kStmtVar* new_kStmt(KonohaContext *kctx, kArray *gcstack, SugarSyntax *syn, ...)

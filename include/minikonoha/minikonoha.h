@@ -1651,8 +1651,10 @@ struct KonohaLibVar {
 	uintptr_t       (*kObject_getUnboxValue)(KonohaContext*, kAbstractObject *, ksymbol_t, uintptr_t);
 	void            (*kObject_setUnboxValue)(KonohaContext*, kAbstractObject *, ksymbol_t, ktype_t, uintptr_t);
 	void            (*kObject_protoEach)(KonohaContext*, kAbstractObject *, void *thunk, void (*f)(KonohaContext*, void *, KKeyValue *d));
+	int             (*kObjectProto_p)(KonohaContext *, KonohaStack *, int, KGrowingBuffer *, int count);
 	void            (*kObject_removeKey)(KonohaContext*, kAbstractObject *, ksymbol_t);
 	void            (*kObject_writeToBuffer)(KonohaContext *, kObject *, int, KGrowingBuffer *, KonohaValue *, int);
+
 
 	kString*        (*new_kString)(KonohaContext*, kArray *gcstack, const char *, size_t, int);
 //	kString*        (*new_kStringf)(KonohaContext*, kArray *gcstack, int, const char *, ...);
@@ -1692,12 +1694,13 @@ struct KonohaLibVar {
 	kMethod*         (*kMethod_DoLazyCompilation)(KonohaContext *kctx, kMethod *mtd, kparamtype_t *, int options);
 //	void             (*kNameSpace_compileAllDefinedMethods)(KonohaContext *kctx);
 
-	// code generator package
+	// misc
 	void             (*CheckSafePoint)(KonohaContext *kctx, KonohaStack *sfp, kfileline_t uline);
 	kbool_t          (*KonohaRuntime_tryCallMethod)(KonohaContext *, KonohaStack *);
 	void             (*KonohaRuntime_raise)(KonohaContext*, int symbol, int fault, kString *Nullable, KonohaStack *);
 	void             (*ReportScriptMessage)(KonohaContext *, KTraceInfo *, kinfotag_t, const char *fmt, ...);
 	int              (*DiagnosisFaultType)(KonohaContext *kctx, int fault, KTraceInfo *);
+	void             (*DumpObject)(KonohaContext *, kObject *, const char *, const char *, int);
 };
 
 #define K_NULL            (kctx->share->constNull_OnGlobalConstList)

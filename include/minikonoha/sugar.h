@@ -227,6 +227,7 @@ typedef enum {
 	SugarFunc_SIZE              = 6
 } SugerFunc;
 
+
 #define SYNFLAG_Macro               ((kshortflag_t)1)
 
 #define SYNFLAG_ExprLeftJoinOp2     ((kshortflag_t)1 << 1)
@@ -235,6 +236,9 @@ typedef enum {
 #define SYNFLAG_StmtBreakExec       ((kshortflag_t)1 << 8)  /* return, throw */
 #define SYNFLAG_StmtJumpAhead0      ((kshortflag_t)1 << 9)  /* continue */
 #define SYNFLAG_StmtJumpSkip0       ((kshortflag_t)1 << 10)  /* break */
+
+#define SYN_Is(P, o)      (TFLAG_is(uintptr_t,(o)->flag, SYNFLAG_##P))
+#define SYN_Set(P,o,B)     TFLAG_set(uintptr_t,(o)->flag, SYNFLAG_##P, B)
 
 struct SugarSyntaxVar {
 	ksymbol_t  keyword;               kshortflag_t  flag;
@@ -671,7 +675,7 @@ static kExpr* kExpr_SetVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, k
 #define KdumpToken(ctx, tk)              ((const KModuleSugar *)kmodsugar)->dumpToken(ctx, tk, 0)
 #define KdumpTokenArray(CTX, TLS, S, E)  DBG_P("@"); ((const KModuleSugar *)kmodsugar)->dumpTokenArray(CTX, 1, TLS, S, E)
 #define KdumpTokenSeq(CTX, MSG, R)     DBG_P(MSG); ((const KModuleSugar *)kmodsugar)->dumpTokenArray(CTX, 1, R->tokenList, R->beginIdx, R->endIdx)
-#define KdumpStmt(CTX, STMT)             ((const KModuleSugar *)kmodsugar)->dumpStmt(CTX, STMT)
+#define KdumpStmt(CTX, STMT)             KLIB DumpObject(CTX, STMT, __FILE__, __FUNCTION__, __LINE__)
 #define KdumpExpr(CTX, EXPR)             ((const KModuleSugar *)kmodsugar)->dumpExpr(CTX, 0, 0, EXPR)
 #endif
 

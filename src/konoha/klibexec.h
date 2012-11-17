@@ -471,6 +471,56 @@ static void kObject_protoEach(KonohaContext *kctx, kAbstractObject *o, void *thu
 	}
 }
 
+struct wbenv {
+	KonohaValue *values;
+	int pos;
+	KGrowingBuffer *wb;
+	int count;
+};
+
+static void dumpProto(KonohaContext *kctx, void *arg, KKeyValue *d)
+{
+	struct wbenv *w = (struct wbenv*)arg;
+	ksymbol_t key = SYMKEY_unbox(d->key);
+	if(w->count > 0) {
+		KLIB Kwb_write(kctx, w->wb, ", ", 2);
+	}
+	KLIB Kwb_printf(kctx, w->wb, "%s%s: (%s)", PSYM_t(key), TY_t(d->ty));
+	if(Symbol_isBoxedKey(d->key)) {
+		KUnsafeFieldSet(w->values[w->pos].asObject, d->ObjectValue);
+	}
+	else {
+		w->values[w->pos].unboxValue = d->unboxValue;
+	}
+	O_ct(d->ObjectValue)->p(kctx, w->values, w->pos, w->wb);
+	w->count++;
+}
+
+static int kObjectProto_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingBuffer *wb, int count)
+{
+	struct wbenv w = {values, pos+1, wb, count};
+	KLIB kObject_protoEach(kctx, values[0].asObject, &w, dumpProto);
+	return w.count;
+}
+
+static void DumpObject(KonohaContext *kctx, kObject *o, const char *file, const char *func, int line)
+{
+	KGrowingBuffer wb;
+	KonohaStack *lsfp = kctx->esp;
+	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
+	KUnsafeFieldSet(lsfp[0].asObject, o);
+	O_ct(o)->p(kctx, lsfp, 0, &wb);
+	const char *msg = KLIB Kwb_top(kctx, &wb, 1);
+	if(file == NULL) {
+		PLATAPI printf_i("(%s)%s\n", CT_t(O_ct(o)), msg);
+	}
+	else {
+		PLATAPI ReportDebugMessage(file, func, line, "(%s)%s", CT_t(O_ct(o)), msg);
+	}
+	KLIB Kwb_Free(&wb);
+}
+
+
 // -------------------------------------------------------------------------
 
 static kbool_t KonohaRuntime_tryCallMethod(KonohaContext *kctx, KonohaStack *sfp)
@@ -588,6 +638,8 @@ static void klib_Init(KonohaLibVar *l)
 	l->kObject_setUnboxValue = kObject_setUnboxValue;
 	l->kObject_removeKey     = kObject_removeKey;
 	l->kObject_protoEach     = kObject_protoEach;
+	l->kObjectProto_p        = kObjectProto_p;
+	l->DumpObject            = DumpObject;
 	l->KfileId       = KfileId;
 	l->KpackageId    = KpackageId;
 	l->Ksymbol       = Ksymbol;

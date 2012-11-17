@@ -146,8 +146,9 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	
 	KDEFINE_CLASS defStmt = {0};
 	SETSTRUCTNAME(defStmt, Stmt);
-	defStmt.init = Stmt_Init;
-	defStmt.reftrace = Stmt_Reftrace;
+	defStmt.init = kStmt_Init;
+	defStmt.reftrace = kStmt_Reftrace;
+	defStmt.p        = kStmt_p;
 	
 	KDEFINE_CLASS defBlock = {0};
 	SETSTRUCTNAME(defBlock, Block);
@@ -231,7 +232,6 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->dumpToken      = dumpToken;
 	mod->dumpTokenArray = dumpTokenArray;
 	mod->dumpExpr       = dumpExpr;
-	mod->dumpStmt       = dumpStmt;
 #endif
 
 	DefineDefaultSyntax(kctx, KNULL(NameSpace));
