@@ -73,6 +73,24 @@ static void Kwb_Init(KGrowingArray *m, KGrowingBuffer *wb)
 	wb->pos = m->bytesize;
 }
 
+static void* Kwb_Alloca(KonohaContext *kctx, KGrowingBuffer *wb, size_t bytelen)
+{
+	KGrowingArray *m = wb->m;
+	if(m->bytesize % sizeof(void*) != 0) {
+		m->bytesize = ((m->bytesize / sizeof(void*))+1) * sizeof(void*);
+	}
+	if(bytelen % sizeof(void*) != 0) {
+		bytelen = ((bytelen / sizeof(void*))+1) * sizeof(void*);
+	}
+	if(!(m->bytesize + bytelen < m->bytemax)) {
+		Karray_Expand(kctx, m, m->bytesize + bytelen);
+	}
+	void *p = m->bytebuf + m->bytesize;
+	bzero(p, bytelen);
+	m->bytesize += bytelen;
+	return p;
+}
+
 static void Kwb_write(KonohaContext *kctx, KGrowingBuffer *wb, const char *data, size_t bytelen)
 {
 	KGrowingArray *m = wb->m;
@@ -614,6 +632,7 @@ static void klib_Init(KonohaLibVar *l)
 	l->Karray_Expand = Karray_Expand;
 	l->Karray_Free   = Karray_Free;
 	l->Kwb_Init      = Kwb_Init;
+	l->Kwb_Alloca    = Kwb_Alloca;
 	l->Kwb_write     = Kwb_write;
 	l->Kwb_vprintf   = Kwb_vprintf;
 	l->Kwb_printf    = Kwb_printf;

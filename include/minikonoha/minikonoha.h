@@ -1605,6 +1605,7 @@ struct KonohaLibVar {
 	void  (*Karray_Free)(KonohaContext*, KGrowingArray *);
 
 	void                (*Kwb_Init)(KGrowingArray *, KGrowingBuffer *);
+	void*               (*Kwb_Alloca)(KonohaContext *, KGrowingBuffer *, size_t);
 	void                (*Kwb_write)(KonohaContext*, KGrowingBuffer *, const char *, size_t);
 	void                (*Kwb_vprintf)(KonohaContext*, KGrowingBuffer *, const char *fmt, va_list ap);
 	void                (*Kwb_printf)(KonohaContext*, KGrowingBuffer *, const char *fmt, ...);

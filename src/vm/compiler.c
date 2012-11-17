@@ -235,6 +235,15 @@ static kBasicBlock *kStmt_GetLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbo
 }
 
 /* ------------------------------------------------------------------------ */
+
+typedef struct BasicBlock BasicBlock;
+
+struct BasicBlock {
+
+};
+
+
+
 #if defined(USE_DIRECT_THREADED_CODE)
 #define TADDR   NULL, 0/*counter*/
 #else
