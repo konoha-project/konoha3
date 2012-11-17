@@ -27,11 +27,12 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/klib.h>
 #include <minikonoha/sugar.h>
-#include "opcode.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <minikonoha/arch/minivm.h>
 
 /* ------------------------------------------------------------------------ */
 /* [data] */
@@ -73,39 +74,39 @@ static const DEFINE_OPSPEC OPDATA[] = {
 	{OPSPEC_(TRACE)},
 };
 
-static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeType type, VirtualCode *c, size_t i, VirtualCode *pc_start)
-{
-	switch(type) {
-	case VMT_VOID: break;
-	case VMT_ADDR:
-		KLIB Kwb_printf(kctx, wb, " L%d", (int)((VirtualCode *)c->p[i] - pc_start));
-		break;
-	case VMT_R:
-		KLIB Kwb_printf(kctx, wb, " sfp[%d,r=%d]", (int)c->data[i]/2, (int)c->data[i]);
-		break;
-	case VMT_U:
-		KLIB Kwb_printf(kctx, wb, " u(%lu, ", c->data[i]); break;
-	case VMT_F:
-		KLIB Kwb_printf(kctx, wb, " function(%p)", c->p[i]); break;
-	case VMT_TY:
-		KLIB Kwb_printf(kctx, wb, "(%s)", CT_t(c->ct[i])); break;
-	}/*switch*/
-}
-
-static void DumpOpCode(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c, VirtualCode *pc_start)
-{
-	KLIB Kwb_printf(kctx, wb, "[L%d:%d] %s(%d)", (int)(c - pc_start), c->line, OPDATA[c->opcode].name, (int)c->opcode);
-	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg1, c, 0, pc_start);
-	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg2, c, 1, pc_start);
-	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg3, c, 2, pc_start);
-	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg4, c, 3, pc_start);
-	KLIB Kwb_printf(kctx, wb, "\n");
-}
-
-static void WriteVirtualCode(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c)
-{
-
-}
+//static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeType type, VirtualCode *c, size_t i, VirtualCode *pc_start)
+//{
+//	switch(type) {
+//	case VMT_VOID: break;
+//	case VMT_ADDR:
+//		KLIB Kwb_printf(kctx, wb, " L%d", (int)((VirtualCode *)c->p[i] - pc_start));
+//		break;
+//	case VMT_R:
+//		KLIB Kwb_printf(kctx, wb, " sfp[%d,r=%d]", (int)c->data[i]/2, (int)c->data[i]);
+//		break;
+//	case VMT_U:
+//		KLIB Kwb_printf(kctx, wb, " u(%lu, ", c->data[i]); break;
+//	case VMT_F:
+//		KLIB Kwb_printf(kctx, wb, " function(%p)", c->p[i]); break;
+//	case VMT_TY:
+//		KLIB Kwb_printf(kctx, wb, "(%s)", CT_t(c->ct[i])); break;
+//	}/*switch*/
+//}
+//
+//static void DumpOpCode(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c, VirtualCode *pc_start)
+//{
+//	KLIB Kwb_printf(kctx, wb, "[L%d:%d] %s(%d)", (int)(c - pc_start), c->line, OPDATA[c->opcode].name, (int)c->opcode);
+//	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg1, c, 0, pc_start);
+//	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg2, c, 1, pc_start);
+//	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg3, c, 2, pc_start);
+//	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg4, c, 3, pc_start);
+//	KLIB Kwb_printf(kctx, wb, "\n");
+//}
+//
+//static void WriteVirtualCode(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c)
+//{
+//
+//}
 
 /* ------------------------------------------------------------------------ */
 /* VirtualMacine */
