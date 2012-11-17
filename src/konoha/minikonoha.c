@@ -72,11 +72,11 @@ static void KonohaStackRuntime_Reftrace(KonohaContext *kctx, KonohaContextVar *c
 {
 	KonohaStack *sp = ctx->stack->stack;
 	while(sp < ctx->esp) {
-		KREFTRACEv(sp[0].asObject);
+		KRefTrace(sp[0].asObject);
 		sp++;
 	}
-	KREFTRACEv(ctx->stack->ContextConstList);
-	KREFTRACEv(ctx->stack->OptionalErrorInfo);
+	KRefTrace(ctx->stack->ContextConstList);
+	KRefTrace(ctx->stack->OptionalErrorInfo);
 }
 
 static void KonohaStackRuntime_Free(KonohaContext *kctx, KonohaContextVar *ctx)

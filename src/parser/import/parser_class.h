@@ -33,10 +33,10 @@
 //	KObjectVisitor *visitor = (KObjectVisitor *) thunk;
 //	SugarSyntax *syn = (SugarSyntax *)p->unboxValue;
 //	BEGIN_REFTRACE(6);
-//	KREFTRACEn(syn->syntaxPatternListNULL);
+//	KRefTraceNullable(syn->syntaxPatternListNULL);
 //	size_t i;
 //	for(i = 0; i < SugarFunc_SIZE; i++) {
-//		KREFTRACEn(syn->sugarFuncTable[i]);
+//		KRefTraceNullable(syn->sugarFuncTable[i]);
 //	}
 //	END_REFTRACE();
 //}
@@ -50,7 +50,7 @@
 //		size_t i;
 //		kFunc** items = ((kFunc**)ns->tokenMatrix) + KCHAR_MAX;
 //		for(i = 0; i < KCHAR_MAX; i++) {
-//			KREFTRACEn(items[i]);
+//			KRefTraceNullable(items[i]);
 //		}
 //		END_REFTRACE();
 //	}
@@ -91,7 +91,7 @@ static void kToken_Init(KonohaContext *kctx, kObject *o, void *conf)
 static void kToken_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kToken *tk = (kToken *)o;
-	KREFTRACEv(tk->text);
+	KRefTrace(tk->text);
 }
 
 #define KToken_t(tk) kToken_t(kctx, tk)
@@ -182,9 +182,9 @@ static void kExpr_Init(KonohaContext *kctx, kObject *o, void *conf)
 static void kExpr_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kExpr *expr = (kExpr *)o;
-	KREFTRACEv(expr->termToken);
+	KRefTrace(expr->termToken);
 	if(Expr_hasObjectConstValue(expr)) {
-		KREFTRACEv(expr->objectConstValue);
+		KRefTrace(expr->objectConstValue);
 	}
 }
 
@@ -383,7 +383,7 @@ static void kStmt_Init(KonohaContext *kctx, kObject *o, void *conf)
 static void kStmt_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kStmt *stmt = (kStmt *)o;
-	KREFTRACEn(stmt->parentBlockNULL);
+	KRefTraceNullable(stmt->parentBlockNULL);
 }
 
 static void kStmt_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingBuffer *wb)
@@ -477,10 +477,10 @@ static void kBlock_Init(KonohaContext *kctx, kObject *o, void *conf)
 static void kBlock_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kBlock *bk = (kBlock *)o;
-	KREFTRACEv(bk->BlockNameSpace);
-	KREFTRACEv(bk->StmtList);
-	KREFTRACEv(bk->esp);
-	KREFTRACEn(bk->parentStmtNULL);
+	KRefTrace(bk->BlockNameSpace);
+	KRefTrace(bk->StmtList);
+	KRefTrace(bk->esp);
+	KRefTraceNullable(bk->parentStmtNULL);
 }
 
 static void kBlock_InsertAfter(KonohaContext *kctx, kBlock *bk, kStmtNULL *target, kStmt *stmt)

@@ -1125,7 +1125,7 @@ static void ByteCode_Init(KonohaContext *kctx, kObject *o, void *conf)
 static void ByteCode_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kByteCode *b = (kByteCode *)o;
-	KREFTRACEv(b->source);
+	KRefTrace(b->source);
 }
 
 static void ByteCode_Free(KonohaContext *kctx, kObject *o)
@@ -1137,8 +1137,8 @@ static void ByteCode_Free(KonohaContext *kctx, kObject *o)
 static void ctxcode_Reftrace(KonohaContext *kctx, struct KonohaModuleContext *baseh, KObjectVisitor *visitor)
 {
 	ctxcode_t *base = (ctxcode_t *)baseh;
-	KREFTRACEv(base->codeList);
-	KREFTRACEv(base->constPools);
+	KRefTrace(base->codeList);
+	KRefTrace(base->constPools);
 }
 
 static void ctxcode_Free(KonohaContext *kctx, struct KonohaModuleContext *baseh)

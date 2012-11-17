@@ -125,7 +125,7 @@ static void ObjectField_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor
 	size_t i, fieldsize = c->fieldsize;
 	for (i = 0; i < fieldsize; i++) {
 		if(fieldItems[i].isobj) {
-			KREFTRACEn(o->fieldObjectItems[i]);   // FIXME:
+			KRefTraceNullable(o->fieldObjectItems[i]);   // FIXME:
 		}
 	}
 }

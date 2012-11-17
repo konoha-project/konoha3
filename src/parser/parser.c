@@ -72,10 +72,10 @@ static void SugarContext_Reftrace(KonohaContext *kctx, struct KonohaModuleContex
 {
 //	SugarContext *base = (SugarContext *)baseh;
 //	BEGIN_REFTRACE(4);
-//	KREFTRACEv(base->preparedTokenList);
-//	KREFTRACEv(base->errorMessageList);
-//	KREFTRACEv(base->preparedGamma);
-//	KREFTRACEv(base->definedMethodList);
+//	KRefTrace(base->preparedTokenList);
+//	KRefTrace(base->errorMessageList);
+//	KRefTrace(base->preparedGamma);
+//	KRefTrace(base->definedMethodList);
 //	END_REFTRACE();
 }
 static void SugarContext_Free(KonohaContext *kctx, struct KonohaModuleContext *baseh)

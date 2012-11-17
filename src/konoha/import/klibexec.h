@@ -411,7 +411,7 @@ static void kObject_ReftraceField(KonohaContext *kctx, kObject *o, KObjectVisito
 		KKeyValue *d;
 		while((d = protomap_next((Kprotomap_t *)o->h.kvproto, &itr)) != NULL) {
 			if(Symbol_isBoxedKey(d->key)) {
-				KREFTRACEv(d->ObjectValue);
+				KRefTrace(d->ObjectValue);
 			}
 		}
 	}

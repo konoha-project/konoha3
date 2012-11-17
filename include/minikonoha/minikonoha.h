@@ -1825,6 +1825,7 @@ typedef struct {
 
 #define KUnsafeFieldInit(VAR, VAL) OBJECT_SET(VAR, VAL)
 #define KUnsafeFieldSet( VAR, VAL) (VAR) = (VAL) /* for c-compiler type check */
+#define KStackSet(VAR, VAL)  (VAR) = (VAL)
 
 #define KFieldInit(PARENT, VAR, VAL) GC_WRITE_BARRIER(kctx, PARENT, VAR, VAL); KUnsafeFieldInit(VAR, VAL)
 #define KFieldSet(PARENT, VAR, VAL)  GC_WRITE_BARRIER(kctx, PARENT, VAR, VAL); KUnsafeFieldSet( VAR, VAL)
@@ -1837,24 +1838,22 @@ typedef struct {
 	}\
 } while(0)
 
-#define BEGIN_REFTRACE(SIZE) JJ
-#define END_REFTRACE() JJ
-
-#define KREFTRACEv(p)  do {\
+#define KRefTrace(p)  do {\
 	DBG_ASSERT(p != NULL);\
 	visitor->fn_visit(visitor, (kObject *)(p));\
 } while(0)
 
-#define KREFTRACE_RANGE(BEGIN, END)  do {\
-	DBG_ASSERT(p != NULL);\
-	visitor->fn_visitRange(visitor, (kObject **)(BEGIN), (kObject **)(END));\
-} while(0)
-
-#define KREFTRACEn(p) do {\
+#define KRefTraceNullable(p) do {\
 	if(p != NULL) {\
 		visitor->fn_visit(visitor, (kObject *)(p));\
 	}\
 } while(0)
+
+#define KRefTraceRange(BEGIN, END)  do {\
+	DBG_ASSERT(p != NULL);\
+	visitor->fn_visitRange(visitor, (kObject **)(BEGIN), (kObject **)(END));\
+} while(0)
+
 
 #define KCheckSafePoint(kctx, sfp) do {\
 	KLIB CheckSafePoint(kctx, sfp, 0);\

@@ -384,7 +384,7 @@ static void kDir_Init(KonohaContext *kctx, kObject *o, void *conf)
 static void kDir_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kDir *dir = (kDir *)o;
-	KREFTRACEn(dir->PathInfoNULL);
+	KRefTraceNullable(dir->PathInfoNULL);
 }
 
 static void kDir_close(KonohaContext *kctx, kDir *dir)

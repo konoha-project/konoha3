@@ -308,8 +308,8 @@ static void String2_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vi
 	kStringBase *s = (kStringBase *) o;
 	if(kStringBase_isRope(s)) {
 		kRopeString *rope = (kRopeString *) s;
-		KREFTRACEv(rope->left);
-		KREFTRACEv(rope->right);
+		KRefTrace(rope->left);
+		KRefTrace(rope->right);
 	}
 }
 

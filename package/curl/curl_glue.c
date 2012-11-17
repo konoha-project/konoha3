@@ -200,8 +200,8 @@ static void Curl_Free(KonohaContext *kctx, kObject *o)
 static void Curl_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	struct kCurlVar *c = (struct kCurlVar *)o;
-	KREFTRACEn(c->URLInfoNULL);
-	KREFTRACEn(c->bytesNULL);
+	KRefTraceNullable(c->URLInfoNULL);
+	KRefTraceNullable(c->bytesNULL);
 }
 
 /* ------------------------------------------------------------------------ */

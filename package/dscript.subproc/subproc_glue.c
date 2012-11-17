@@ -163,11 +163,11 @@ static void kSubProc_Init(KonohaContext *kctx, kObject *o, void *conf)
 static void kSubProc_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kSubProc *sbp = (kSubProc *)o;
-	KREFTRACEv(sbp->Command);
-	KREFTRACEv(sbp->ArgumentList);
-	KREFTRACEn(sbp->InNULL);
-	KREFTRACEn(sbp->OutNULL);
-	KREFTRACEn(sbp->ErrNULL);
+	KRefTrace(sbp->Command);
+	KRefTrace(sbp->ArgumentList);
+	KRefTraceNullable(sbp->InNULL);
+	KRefTraceNullable(sbp->OutNULL);
+	KRefTraceNullable(sbp->ErrNULL);
 }
 
 static void cleanUp_fds(int *fds)
@@ -1806,9 +1806,9 @@ static void kSubproc_Free(KonohaContext *kctx, kObject *o)
 static void kSubproc_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	struct kSubprocVar *proc = (struct kSubprocVar *)o;
-	KREFTRACEv(proc->env);
-	KREFTRACEv(proc->command);
-	KREFTRACEv(proc->cwd);
+	KRefTrace(proc->env);
+	KRefTrace(proc->command);
+	KRefTrace(proc->cwd);
 }
 
 /* ------------------------------------------------------------------------ */

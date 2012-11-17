@@ -483,8 +483,8 @@ static void EventContext_Reftrace(KonohaContext *kctx, struct KonohaModuleContex
 {
 	EventContext *base = (EventContext *)baseh;
 //	BEGIN_REFTRACE(2);
-	KREFTRACEn(base->invokeFuncNULL);
-	KREFTRACEn(base->enqFuncNULL);
+	KRefTraceNullable(base->invokeFuncNULL);
+	KRefTraceNullable(base->enqFuncNULL);
 //	END_REFTRACE();
 }
 

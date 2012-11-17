@@ -60,7 +60,7 @@ static void val_Reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
 {
 	KObjectVisitor *visitor = (KObjectVisitor *) thunk;
 	BEGIN_REFTRACE(1);
-	KREFTRACEv(p->ObjectValue);
+	KRefTrace(p->ObjectValue);
 	END_REFTRACE();
 }
 
@@ -68,9 +68,9 @@ static void kmodjit_Reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KO
 {
 	kmodjit_t *mod = (kmodjit_t *) baseh;
 	BEGIN_REFTRACE(3);
-	KREFTRACEv(mod->genCode);
-	KREFTRACEv(mod->global_value);
-	KREFTRACEv(mod->constPool);
+	KRefTrace(mod->genCode);
+	KRefTrace(mod->global_value);
+	KRefTrace(mod->constPool);
 	END_REFTRACE();
 	KLIB Kmap_each(kctx, mod->jitcache, (void *) visitor, val_Reftrace);
 }

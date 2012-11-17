@@ -285,9 +285,9 @@ static void kResultSet_Init(KonohaContext *kctx, kObject *o, void *conf)
 static void kResultSet_Reftrace(KonohaContext *kctx, kObject *p, KObjectVisitor *visitor)
 {
 	kResultSet *rs = (kResultSet *)p;
-	KREFTRACEv(rs->connection);
-	KREFTRACEv(rs->column->name);
-	KREFTRACEv(rs->tableName);
+	KRefTrace(rs->connection);
+	KRefTrace(rs->column->name);
+	KRefTrace(rs->tableName);
 }
 
 static void kResultSet_Free(KonohaContext *kctx, kObject *o)

@@ -180,8 +180,8 @@
 //{
 //	BEGIN_REFTRACE(2);
 //	kExceptionVar *e = (kExceptionVar *)o;
-//	KREFTRACEv(e->message);
-//	KREFTRACEv(e->StackTraceList);
+//	KRefTrace(e->message);
+//	KRefTrace(e->StackTraceList);
 //	END_REFTRACE();
 //
 //}

@@ -42,7 +42,7 @@ static void kObject_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vi
 	size_t i;
 	for(i = 0; i < ct->fieldsize; i++) {
 		if(ct->fieldItems[i].isobj) {
-			KREFTRACEv(of->fieldObjectItems[i]);
+			KRefTrace(of->fieldObjectItems[i]);
 		}
 	}
 }
@@ -271,7 +271,7 @@ static void kArray_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vis
 	if(!kArray_isUnboxData(a)) {
 		size_t i;
 		for(i = 0; i < kArray_size(a); i++) {
-			KREFTRACEv(a->ObjectItems[i]);
+			KRefTrace(a->ObjectItems[i]);
 		}
 	}
 }
@@ -471,8 +471,8 @@ static void kMethod_Init(KonohaContext *kctx, kObject *o, void *conf)
 static void kMethod_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kMethod *mtd = (kMethod *)o;
-	KREFTRACEv(mtd->SourceToken);
-	KREFTRACEv(mtd->CodeObject);
+	KRefTrace(mtd->SourceToken);
+	KRefTrace(mtd->CodeObject);
 }
 
 #define CT_MethodVar CT_Method
@@ -522,7 +522,7 @@ static void kNameSpace_Init(KonohaContext *kctx, kObject *o, void *conf)
 static void kNameSpace_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kNameSpace *ns = (kNameSpace *)o;
-	KREFTRACEv(ns->NameSpaceConstList);
+	KRefTrace(ns->NameSpaceConstList);
 }
 
 static void kNameSpace_Free(KonohaContext *kctx, kObject *o)
@@ -551,8 +551,8 @@ static void Func_Init(KonohaContext *kctx, kObject *o, void *conf)
 static void Func_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kFunc *fo = (kFunc *)o;
-	KREFTRACEv(fo->self);
-	KREFTRACEv(fo->mtd);
+	KRefTrace(fo->self);
+	KRefTrace(fo->mtd);
 }
 
 // ---------------
@@ -1078,7 +1078,7 @@ static void KonohaRuntime_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 //	KObjectVisitor *visitor = (KObjectVisitor *) thunk;
 //	KonohaPackage *pack = (KonohaPackage *)p->unboxValue;
 //	BEGIN_REFTRACE(1);
-//	KREFTRACEn(pack->packageNS_onGlobalConstList);
+//	KRefTraceNullable(pack->packageNS_onGlobalConstList);
 //	END_REFTRACE();
 //}
 
@@ -1091,9 +1091,9 @@ static void KonohaRuntime_Reftrace(KonohaContext *kctx, KonohaContextVar *ctx, K
 //		KonohaClass *ct = cts[i];
 //		{
 //			BEGIN_REFTRACE(3);
-//			KREFTRACEv(ct->methodList);
-//			KREFTRACEn(ct->shortClassNameNULL_OnGlobalConstList);
-//			KREFTRACEn(ct->defaultNullValue_OnGlobalConstList);
+//			KRefTrace(ct->methodList);
+//			KRefTraceNullable(ct->shortClassNameNULL_OnGlobalConstList);
+//			KRefTraceNullable(ct->defaultNullValue_OnGlobalConstList);
 //			END_REFTRACE();
 //		}
 //		if(ct->constPoolMapNO != NULL) {
@@ -1101,17 +1101,17 @@ static void KonohaRuntime_Reftrace(KonohaContext *kctx, KonohaContextVar *ctx, K
 //		}
 //	}
 //	KLIB Kmap_each(kctx, share->packageMapNO, (void *) visitor, packageMap_Reftrace);
-	KREFTRACEv(share->GlobalConstList);
-//	KREFTRACEv(share->constNull);
-//	KREFTRACEv(share->constTrue);
-//	KREFTRACEv(share->constFalse);
-//	KREFTRACEv(share->emptyString);
-//	KREFTRACEv(share->emptyArray);
-//	KREFTRACEv(share->fileIdList_OnGlobalConstList);
-//	KREFTRACEv(share->packageIdList_OnGlobalConstList);
-//	KREFTRACEv(share->symbolList_OnGlobalConstList);
-//	KREFTRACEv(share->paramList_OnGlobalConstList);
-//	KREFTRACEv(share->paramdomList_OnGlobalConstList);
+	KRefTrace(share->GlobalConstList);
+//	KRefTrace(share->constNull);
+//	KRefTrace(share->constTrue);
+//	KRefTrace(share->constFalse);
+//	KRefTrace(share->emptyString);
+//	KRefTrace(share->emptyArray);
+//	KRefTrace(share->fileIdList_OnGlobalConstList);
+//	KRefTrace(share->packageIdList_OnGlobalConstList);
+//	KRefTrace(share->symbolList_OnGlobalConstList);
+//	KRefTrace(share->paramList_OnGlobalConstList);
+//	KRefTrace(share->paramdomList_OnGlobalConstList);
 }
 
 static void KonohaRuntime_FreeClassTable(KonohaContext *kctx)

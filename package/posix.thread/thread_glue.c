@@ -93,8 +93,8 @@ static int kThread_compareTo(kObject *o1, kObject *o2)
 static void kThread_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kThread *t = (kThread *)o;
-	KREFTRACEv(t->func);
-	//KREFTRACEv(t->args);
+	KRefTrace(t->func);
+	//KRefTrace(t->args);
 }
 
 static void kMutex_Init(KonohaContext *kctx, kObject *o, void *conf)

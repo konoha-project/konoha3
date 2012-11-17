@@ -146,7 +146,7 @@ static void kFile_Init(KonohaContext *kctx, kObject *o, void *conf)
 static void kFile_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kFile *file = (kFile *)o;
-	KREFTRACEn(file->PathInfoNULL);
+	KRefTraceNullable(file->PathInfoNULL);
 }
 
 static void kFile_Free(KonohaContext *kctx, kObject *o)

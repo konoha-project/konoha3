@@ -70,8 +70,8 @@ static void Person_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vis
 	 * an object exists. The function tells to GC which object should be traced. */
 	struct Person *p = (struct Person *) o;
 	/* If p->some_field is Nullable, please use 
-	 * KREFTRACEn() macro instead of KREFTRACEv(). */
-	KREFTRACEv(p->name);
+	 * KRefTraceNullable() macro instead of KRefTrace(). */
+	KRefTrace(p->name);
 	/* It is not necessary to trace p->age field,
 	 * because p->age is not an Object */
 }
