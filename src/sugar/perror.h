@@ -191,34 +191,13 @@ void TRACE_ReportScriptMessage(KonohaContext *kctx, KTraceInfo *trace, kinfotag_
 	}
 }
 
-#define Token_text(tk) kToken_t_(kctx, tk)
-
-static const char *kToken_t_(KonohaContext *kctx, kToken *tk)
-{
-	if(IS_String(tk->text)) {
-		if(tk->unresolvedTokenType == TokenType_CODE) {
-			return "{... }";
-		}
-		return S_text(tk->text);
-	}
-	else {
-		switch(tk->resolvedSymbol) {
-			case TokenType_CODE:
-			case KW_BraceGroup: return "{... }";
-			case KW_ParenthesisGroup: return "(... )";
-			case KW_BracketGroup: return "[... ]";
-		}
-		return "";
-	}
-}
-
 // libperror
 
 #ifdef USE_SMALLBUILD
 
 static kExpr* ERROR_SyntaxErrorToken(KonohaContext *kctx, kStmt *stmt, kToken *tk)
 {
-	return kStmtToken_Message(kctx, stmt, tk, ErrTag, "syntax error at %s", Token_text(tk));
+	return kStmtToken_Message(kctx, stmt, tk, ErrTag, "syntax error at %s", KToken_t(tk));
 }
 
 #define ERROR_UndefinedEscapeSequence(kctx, stmt, tk) ERROR_SyntaxErrorToken(kctx, stmt, tk)

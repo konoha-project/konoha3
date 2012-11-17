@@ -245,7 +245,7 @@ static KMETHOD Expression_OperatorMethod(KonohaContext *kctx, KonohaStack *sfp)
 		syn = SYN_(Stmt_ns(stmt), KW_ExprMethodCall);  // switch type checker
 	}
 	kTokenVar *tk = tokenList->TokenVarItems[operatorIdx];
-	kExpr *expr, *rexpr = kStmt_ParseExpr(kctx, stmt, tokenList, operatorIdx + 1, endIdx, Token_text(tk));
+	kExpr *expr, *rexpr = kStmt_ParseExpr(kctx, stmt, tokenList, operatorIdx + 1, endIdx, KToken_t(tk));
 	if(beginIdx == operatorIdx) { // unary operator
 		expr = new_UntypedCallStyleExpr(kctx, syn, 2, tk, rexpr);
 	}
@@ -348,7 +348,7 @@ static KMETHOD Expression_new(KonohaContext *kctx, KonohaStack *sfp)
 		int nextIdx = SUGAR TokenUtils_ParseTypePattern(kctx, ns, tokenList, beginIdx + 1, endIdx, &foundClass);
 		if(foundClass == NULL) {
 			kToken *classNameToken = tokenList->TokenVarItems[beginIdx+1];
-			KReturn(SUGAR kStmt_Message2(kctx, stmt, classNameToken, ErrTag, "not class: %s", Token_text(classNameToken)));
+			KReturn(SUGAR kStmt_Message2(kctx, stmt, classNameToken, ErrTag, "not class: %s", KToken_t(classNameToken)));
 		}
 		if((size_t)nextIdx < kArray_size(tokenList)) {
 			kToken *nextTokenAfterClassName = tokenList->TokenItems[nextIdx];
@@ -574,7 +574,7 @@ static KMETHOD TypeCheck_Block(KonohaContext *kctx, KonohaStack *sfp)
 		}
 		KReturn(texpr);
 	}
-	kStmtExpr_Message(kctx, stmt, expr, ErrTag, "undefined expression: %s", Token_text(expr->termToken));
+	kStmtExpr_Message(kctx, stmt, expr, ErrTag, "undefined expression: %s", KToken_t(expr->termToken));
 }
 
 static kExpr* new_GetterExpr(KonohaContext *kctx, kToken *tkU, kMethod *mtd, kExpr *expr)
@@ -650,7 +650,7 @@ static KMETHOD TypeCheck_Symbol(KonohaContext *kctx, KonohaStack *sfp)
 	kExpr *texpr = kStmt_TypeCheckVariableNULL(kctx, stmt, expr, gma, reqty);
 	if(texpr == NULL) {
 		kToken *tk = expr->termToken;
-		texpr = kStmtToken_Message(kctx, stmt, tk, ErrTag, "undefined name: %s", Token_text(tk));
+		texpr = kStmtToken_Message(kctx, stmt, tk, ErrTag, "undefined name: %s", KToken_t(tk));
 	}
 	KReturn(texpr);
 }
@@ -907,7 +907,7 @@ static KMETHOD TypeCheck_FuncStyleCall(KonohaContext *kctx, KonohaStack *sfp)
 		if(!TY_isFunc(kExpr_at(expr, 0)->ty)) {
 			kToken *tk = kExpr_at(expr, 0)->termToken;
 			DBG_ASSERT(IS_Token(tk));  // TODO: make error message in case of not Token
-			KReturn(kStmtToken_Message(kctx, stmt, tk, ErrTag, "undefined function: %s", Token_text(tk)));
+			KReturn(kStmtToken_Message(kctx, stmt, tk, ErrTag, "undefined function: %s", KToken_t(tk)));
 		}
 	}
 	else {

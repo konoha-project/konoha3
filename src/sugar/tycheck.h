@@ -64,7 +64,7 @@ static kExpr *TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *g
 	}
 	if(callCount == 0) {
 		if(Expr_isTerm(expr)) {
-			return kStmtToken_Message(kctx, stmt, expr->termToken, ErrTag, "undefined token type checker: '%s'", Token_text(expr->termToken));
+			return kStmtToken_Message(kctx, stmt, expr->termToken, ErrTag, "undefined token type checker: '%s'", KToken_t(expr->termToken));
 		}
 		else {
 			DBG_P("syn=%p, parent=%p, syn->keyword='%s%s'", expr->syn, expr->syn->parentSyntaxNULL, PSYM_t(syn->keyword));
@@ -243,7 +243,7 @@ static kbool_t kBlock_TypeCheckAll(KonohaContext *kctx, kBlock *bk, kGamma *gma)
 	for(i = 0; i < kArray_size(bk->StmtList); i++) {
 		kStmt *stmt = (kStmt *)bk->StmtList->ObjectItems[i];
 		if(Stmt_isDone(stmt)) continue;
-		KdumpStmt(kctx, stmt);
+		KDump(stmt);
 		if(Stmt_isERR(stmt) || !SugarSyntax_TypeCheckStmt(kctx, stmt->syn, stmt, gma)) {
 			DBG_ASSERT(Stmt_isERR(stmt));
 			Gamma_setERROR(gma, 1);

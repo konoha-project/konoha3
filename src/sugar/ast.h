@@ -67,7 +67,7 @@ static kExpr *kStmt_ParseOperatorExpr(KonohaContext *kctx, kStmt *stmt, SugarSyn
 		currentSyntax = currentSyntax->parentSyntaxNULL;
 	}
 	const char *emesg = (callCount > 0) ? "syntax error: expression %s" : "undefined expression: %s";
-	kStmt_Message(kctx, stmt, ErrTag, emesg, Token_text(tokenList->TokenItems[operatorIdx]));
+	kStmt_Message(kctx, stmt, ErrTag, emesg, KToken_t(tokenList->TokenItems[operatorIdx]));
 	return K_NULLEXPR;
 }
 
@@ -144,10 +144,10 @@ static kExpr *kStmt_RightJoinExpr(KonohaContext *kctx, kStmt *stmt, kExpr *expr,
 			DBG_ASSERT(c >= 1);
 			kToken *previousToken = tokenList->TokenItems[c-1];
 			const char *white = kToken_is(BeforeWhiteSpace, previousToken) ? " " : "";
-			kStmtToken_Message(kctx, stmt, tk, ErrTag, "undefined syntax: %s%s%s ...", Token_text(previousToken), white, Token_text(tk));
+			kStmtToken_Message(kctx, stmt, tk, ErrTag, "undefined syntax: %s%s%s ...", KToken_t(previousToken), white, KToken_t(tk));
 			return K_NULLEXPR;
 		}
-		kStmtToken_Message(kctx, stmt, tk, WarnTag, "ignored term: %s...", Token_text(tk));
+		kStmtToken_Message(kctx, stmt, tk, WarnTag, "ignored term: %s...", KToken_t(tk));
 	}
 	return expr;
 }
@@ -746,7 +746,7 @@ static int kStmt_ParseBySyntaxPattern(KonohaContext *kctx, kStmt *stmt, int inde
 		kStmt_Message(kctx, stmt, ErrTag, "%s%s: %s%s is expected", KWSTMT_t(stmt->syn->keyword), PSYM_t(errRule[0]->resolvedSymbol));
 #else
 		if(errRule[1] != NULL) {
-			kStmt_Message(kctx, stmt, ErrTag, "%s%s: %s%s is expected before %s", KWSTMT_t(stmt->syn->keyword), PSYM_t(errRule[0]->resolvedSymbol), Token_text(errRule[1]));
+			kStmt_Message(kctx, stmt, ErrTag, "%s%s: %s%s is expected before %s", KWSTMT_t(stmt->syn->keyword), PSYM_t(errRule[0]->resolvedSymbol), KToken_t(errRule[1]));
 		} else {
 			kStmt_Message(kctx, stmt, ErrTag, "%s%s: %s%s is expected", KWSTMT_t(stmt->syn->keyword), PSYM_t(errRule[0]->resolvedSymbol));
 		}
@@ -959,7 +959,7 @@ static kbool_t kArray_AddSyntaxPattern(KonohaContext *kctx, kArray *patternList,
 			tk = NULL;
 			continue;
 		}
-		kToken_ToError(kctx, tk, ErrTag, "illegal syntax pattern: %s", Token_text(tk));
+		kToken_ToError(kctx, tk, ErrTag, "illegal syntax pattern: %s", KToken_t(tk));
 		return false;
 	}
 	return true;

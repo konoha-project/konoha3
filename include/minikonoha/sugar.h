@@ -669,13 +669,12 @@ static kExpr* kExpr_SetVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, k
 #define KdumpToken(ctx, tk)
 #define KdumpTokenArray(CTX, TLS, S, E)
 #define KdumpTokenSeq(CTX, MSG, R)
-#define KdumpStmt(CTX, STMT)
 #define KdumpExpr(CTX, EXPR)
 #else
+#define KDump(O)                         KLIB DumpObject(kctx, (kObject *)O, __FILE__, __FUNCTION__, __LINE__)
 #define KdumpToken(ctx, tk)              ((const KModuleSugar *)kmodsugar)->dumpToken(ctx, tk, 0)
 #define KdumpTokenArray(CTX, TLS, S, E)  DBG_P("@"); ((const KModuleSugar *)kmodsugar)->dumpTokenArray(CTX, 1, TLS, S, E)
 #define KdumpTokenSeq(CTX, MSG, R)     DBG_P(MSG); ((const KModuleSugar *)kmodsugar)->dumpTokenArray(CTX, 1, R->tokenList, R->beginIdx, R->endIdx)
-#define KdumpStmt(CTX, STMT)             KLIB DumpObject(CTX, STMT, __FILE__, __FUNCTION__, __LINE__)
 #define KdumpExpr(CTX, EXPR)             ((const KModuleSugar *)kmodsugar)->dumpExpr(CTX, 0, 0, EXPR)
 #endif
 

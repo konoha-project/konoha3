@@ -141,8 +141,9 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	
 	KDEFINE_CLASS defExpr = {0};
 	SETSTRUCTNAME(defExpr, Expr);
-	defExpr.init = Expr_Init;
-	defExpr.reftrace = Expr_Reftrace;
+	defExpr.init = kExpr_Init;
+	defExpr.reftrace = kExpr_Reftrace;
+	defExpr.p        = kExpr_p;
 	
 	KDEFINE_CLASS defStmt = {0};
 	SETSTRUCTNAME(defStmt, Stmt);

@@ -94,6 +94,28 @@ static void kToken_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vis
 	KREFTRACEv(tk->text);
 }
 
+#define KToken_t(tk) kToken_t(kctx, tk)
+
+static const char *kToken_t(KonohaContext *kctx, kToken *tk)
+{
+	if(IS_String(tk->text)) {
+		if(tk->unresolvedTokenType == TokenType_CODE) {
+			return "{... }";
+		}
+		return S_text(tk->text);
+	}
+	else {
+		switch(tk->resolvedSymbol) {
+			case TokenType_CODE:
+			case KW_BraceGroup: return "{... }";
+			case KW_ParenthesisGroup: return "(... )";
+			case KW_BracketGroup: return "[... ]";
+		}
+		return "";
+	}
+}
+
+#ifndef USE_SMALLBUILD
 static void Kwb_WriteTokenSymbol(KonohaContext *kctx, KGrowingBuffer *wb, kToken *tk)
 {
 	if(tk->resolvedSymbol == TokenType_INDENT) {
@@ -104,6 +126,19 @@ static void Kwb_WriteTokenSymbol(KonohaContext *kctx, KGrowingBuffer *wb, kToken
 		KLIB Kwb_printf(kctx, wb, "%s%s ", PSYM_t(symbolType));
 	}
 }
+
+static void Kwb_WriteTokenText(KonohaContext *kctx, KGrowingBuffer *wb, kToken *tk)
+{
+	const char *text = IS_String(tk->text) ? S_text(tk->text) : "...";
+	char c = kToken_GetOpenHintChar(tk);
+	if(c != 0) {
+		KLIB Kwb_printf(kctx, wb, "%c%s%c", c, text, kToken_GetCloseHintChar(tk));
+	}
+	else {
+		KLIB Kwb_printf(kctx, wb, "%s", text);
+	}
+}
+#endif/*USE_SMALLBUILD*/
 
 static void kToken_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingBuffer *wb)
 {
@@ -134,7 +169,7 @@ static void kToken_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowing
 /* --------------- */
 /* Expr */
 
-static void Expr_Init(KonohaContext *kctx, kObject *o, void *conf)
+static void kExpr_Init(KonohaContext *kctx, kObject *o, void *conf)
 {
 	kExprVar *expr = (kExprVar *)o;
 	expr->build    = TEXPR_UNTYPED;
@@ -144,7 +179,7 @@ static void Expr_Init(KonohaContext *kctx, kObject *o, void *conf)
 	expr->syn = (SugarSyntax *)conf;
 }
 
-static void Expr_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+static void kExpr_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	kExpr *expr = (kExpr *)o;
 	BEGIN_REFTRACE(2);
@@ -155,6 +190,72 @@ static void Expr_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visit
 	END_REFTRACE();
 }
 
+#ifndef USE_SMALLBUILD
+static void kExprTerm_p(KonohaContext *kctx, kObject *o, KonohaValue *values, int pos, KGrowingBuffer *wb)
+{
+	if(IS_Token(o)) {
+		Kwb_WriteTokenText(kctx, wb, (kToken *)o);
+	}
+	else {
+		KUnsafeFieldSet(values[pos].asObject, o);
+		O_ct(o)->p(kctx, values, pos, wb);
+	}
+}
+#endif
+
+static void kExpr_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingBuffer *wb)
+{
+#ifndef USE_SMALLBUILD
+	kExpr *expr = values[pos].asExpr;
+	KLIB Kwb_write(kctx, wb, "(", 1);
+	if(expr->build == TEXPR_CONST) {
+		KLIB Kwb_write(kctx, wb, TEXTSIZE("const "));
+		kExprTerm_p(kctx, (kObject *)expr->objectConstValue, values, pos+1, wb);
+	}
+	else if(expr->build == TEXPR_NEW) {
+		KLIB Kwb_printf(kctx, wb, "new %s", TY_t(expr->ty));
+	}
+	else if(expr->build == TEXPR_NULL) {
+		KLIB Kwb_write(kctx, wb, TEXTSIZE("null"));
+	}
+	else if(expr->build == TEXPR_NCONST) {
+		KLIB Kwb_write(kctx, wb, TEXTSIZE("const "));
+		values[pos+1].unboxValue = expr->unboxConstValue;
+		CT_(expr->ty)->p(kctx, values, pos+1, wb);
+	}
+	else if(expr->build == TEXPR_LOCAL) {
+		KLIB Kwb_printf(kctx, wb, "local sfp[%d]", (int)expr->index);
+	}
+	else if(expr->build == TEXPR_BLOCK) {
+		KLIB Kwb_printf(kctx, wb, "block %d", expr->index);
+	}
+	else if(expr->build == TEXPR_FIELD) {
+		kshort_t index  = (kshort_t)expr->index;
+		kshort_t xindex = (kshort_t)(expr->index >> (sizeof(kshort_t)*8));
+		KLIB Kwb_printf(kctx, wb, "field sfp[%d][%d]", (int)index, (int)xindex);
+	}
+	else if(expr->build == TEXPR_STACKTOP) {
+		KLIB Kwb_printf(kctx, wb, "stack %d", expr->index);
+	}
+	else if(Expr_isTerm(expr)) {
+		KLIB Kwb_write(kctx, wb, TEXTSIZE("term "));
+		kExprTerm_p(kctx, (kObject *)expr->termToken, values, pos+1, wb);
+	}
+	else if(IS_Array(expr->cons)) {
+		size_t i;
+		for(i = 0; i < kArray_size(expr->cons); i++) {
+			if(i > 0) {
+				KLIB Kwb_write(kctx, wb, " ", 1);
+			}
+			kExprTerm_p(kctx, expr->cons->ObjectItems[i], values, pos+1, wb);
+		}
+	}
+	KLIB Kwb_write(kctx, wb, ")", 1);
+	if(expr->ty != TY_var) {
+		KLIB Kwb_printf(kctx, wb, ":%s", TY_t(expr->ty));
+	}
+#endif
+}
 
 static kExpr* new_UntypedTermExpr(KonohaContext *kctx, kToken *tk)
 {
