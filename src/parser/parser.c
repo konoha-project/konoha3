@@ -37,15 +37,14 @@ extern "C" {
 // global variable
 int verbose_sugar = 0;
 
-#include "perror.h"
-#include "sugarclass.h"
-#include "namespace.h"
-#include "macro.h"
-#include "token.h"
-#include "ast.h"
-#include "tycheck.h"
-#include "sugarfunc.h"
-#include "sugardump.h"
+#include "import/perror.h"
+#include "import/parser_class.h"
+#include "import/namespace.h"
+#include "import/token.h"
+#include "import/ast.h"
+#include "import/typecheck.h"
+#include "import/desugar.h"
+#include "import/parser_dump.h"
 
 /* ------------------------------------------------------------------------ */
 /* Sugar Global Functions */

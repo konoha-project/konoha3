@@ -33,7 +33,7 @@ set(RUNTIME
 )
 
 set(PARSER
-	src/sugar/sugar.c
+	src/parser/parser.c
 )
 
 set(KONOHA_VM_MODULE "" CACHE STRING "konoha vm module")

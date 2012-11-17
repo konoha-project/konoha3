@@ -26,10 +26,6 @@
 extern "C" {
 #endif
 
-#ifdef _MSC_VER
-#define strtoll _strtoi64
-#endif
-
 /* @Object */
 
 // @SmartReturn Object Object.to()
@@ -299,14 +295,8 @@ static KMETHOD System_gc(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 // --------------------------------------------------------------------------
-#define _Public    kMethod_Public
-#define _Const     kMethod_Const
-#define _Static    kMethod_Static
-#define _Im        kMethod_Immutable
-#define _Coercion  kMethod_Coercion
-#define _Hidden    kMethod_Hidden
-#define _Virtual  kMethod_Virtual
-#define _F(F)      (intptr_t)(F)
+
+#include <minikonoha/import/methoddecl.h>
 
 static void LoadDefaultMethod(KonohaContext *kctx, kNameSpace *ns)
 {

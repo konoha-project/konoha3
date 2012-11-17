@@ -27,10 +27,10 @@
 #include "minikonoha/local.h"
 #include "minikonoha/sugar.h"
 
-#include "protomap.h"
-#include "klibexec.h"
-#include "datatype.h"
-#include "methods.h"
+#include "import/protomap.h"
+#include "import/klibexec.h"
+#include "import/datatype.h"
+#include "import/methods.h"
 
 #ifdef __cplusplus
 extern "C" {
