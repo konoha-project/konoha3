@@ -382,6 +382,8 @@ static BasicBlock* new_BasicBlock(KonohaContext *kctx, size_t max, BasicBlock *o
 	KGrowingBuffer wb;
 	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 	BasicBlock *bb = (BasicBlock*)KLIB Kwb_Alloca(kctx, &wb, max);
+	//BasicBlock *bb = (BasicBlock*)KCalloc_UNTRACE(max, 1);
+
 	if(oldbb != NULL) {
 		memcpy(bb, oldbb, oldbb->size);
 		oldbb->newid = BasicBlock_id(kctx, bb);
@@ -1019,7 +1021,7 @@ static struct VirtualCode* MiniVM_GenerateVirtualCode(KonohaContext *kctx, kBloc
 	builder->bbMainId = builder->bbBeginId;
 	ASM(THCODE, 0, _THCODE);
 	ASM(CHKSTACK, 0);
-	ASM_LABEL(kctx, builder, builder->bbBeginId);
+	//ASM_LABEL(kctx, builder, builder->bbBeginId);
 
 	SUGAR VisitBlock(kctx, builder, block);
 
