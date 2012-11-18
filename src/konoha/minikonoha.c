@@ -142,7 +142,7 @@ static KonohaContextVar* new_KonohaContext(KonohaContext *kctx, const PlatformAp
 	}
 	KonohaStackRuntime_Init(kctx, newctx, platApi->stacksize);
 	if(IS_RootKonohaContext(newctx)) {
-		MODCODE_Init(kctx, newctx);
+//		MODCODE_Init(kctx, newctx);
 		MODSUGAR_Init(kctx, newctx);
 		LoadDefaultMethod(kctx, KNULL(NameSpace));
 		LoadDefaultSugarMethod(kctx, KNULL(NameSpace));

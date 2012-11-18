@@ -1155,6 +1155,7 @@ kbool_t LoadMiniVMModule(KonohaFactory *factory, ModuleType type)
 //	factory->DeleteVirtualMachine          = KonohaVirtualMachine_delete;
 //	factory->GetVirtualMachineMethodFunc   = GetVirtualMachineMethodFunc;
 	factory->GetDefaultBootCode            = GetDefaultBootCode;
+	factory->GetDefaultBuilderAPI          = GetDefaultBuilderAPI;
 	return true;
 }
 

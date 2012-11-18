@@ -116,7 +116,7 @@ static int compileonly_flag = 0;
 static int interactive_flag = 0;
 
 extern int verbose_debug;
-extern int verbose_code;
+int verbose_code;
 extern int verbose_sugar;
 
 #include <minikonoha/platform.h>
