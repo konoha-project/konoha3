@@ -672,7 +672,7 @@ static KonohaClassVar* new_KonohaClass(KonohaContext *kctx, KonohaClass *bct, KD
 		ct->fieldsize  = s->fieldsize;
 		ct->fieldAllocSize = s->fieldAllocSize;
 		ct->cstruct_size = size64(s->cstruct_size);
-		DBG_ASSERT(ct->cstruct_size <= 128);
+		DBG_ASSERT(ct->cstruct_size <= 256);
 		ct->DBG_NAME = (s->structname != NULL) ? s->structname : "N/A";
 		if(s->cparamsize > 0 && s->cParamItems != NULL) {
 			ct->p0 = s->cParamItems[0].ty;

@@ -1442,11 +1442,11 @@ struct kFuncVar {
 	kMethod *mtd;
 };
 
+
 /* ------------------------------------------------------------------------ */
 /* NameSpace */
 
 #define IS_NameSpace(O)  (O_ct(O) == CT_NameSpace)
-
 #define kNameSpace_sizeConstTable(ns)    (ns->constTable.bytesize / sizeof(KKeyValue))
 
 struct kNameSpaceVar {
@@ -1463,6 +1463,7 @@ struct kNameSpaceVar {
 	void                              *tokenMatrix;
 	KHashMap                          *syntaxMapNN;
 	kArray                            *stmtPatternListNULL_OnList;
+	struct KBuilderAPI                 *builderApi;
 };
 
 // NameSpace_syntaxOption
