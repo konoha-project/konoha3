@@ -64,10 +64,10 @@ typedef struct {
 	KonohaModuleContext      h;
 	kfileline_t      uline;
 	kArray          *codeList;
-	kBasicBlock     *lbINIT; // ON GCSTACK
-	kBasicBlock     *lbEND;  // ON GCSTACK
-	kArray          *constPools;
-	kBasicBlock     *currentWorkingBlock;
+	struct BasicBlock     *lbINIT; // ON GCSTACK
+	struct BasicBlock     *lbEND;  // ON GCSTACK
+	kArray             *constPools;
+	struct BasicBlock  *currentWorkingBlock;
 } ctxcode_t;
 
 /* ------------------------------------------------------------------------ */
@@ -119,18 +119,18 @@ typedef struct VirtualCode {
 
 /* ------------------------------------------------------------------------ */
 
-#define BasicBlock_isVisited(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
-#define BasicBlock_setVisited(o,B)   TFLAG_set(uintptr_t,((kObjectVar *)o)->h.magicflag,kObject_Local1,B)
-
-struct kBasicBlockVar {
-	KonohaObjectHeader h;
-	kushort_t id;     kushort_t incoming;
-	KGrowingArray codeTable;
-	kBasicBlock        *nextBlock;
-	kBasicBlock        *branchBlock;
-	VirtualCode *code;
-	VirtualCode *opjmp;
-};
+//#define BasicBlock_isVisited(o)      (TFLAG_is(uintptr_t,(o)->h.magicflag,kObject_Local1))
+//#define BasicBlock_setVisited(o,B)   TFLAG_set(uintptr_t,((kObjectVar *)o)->h.magicflag,kObject_Local1,B)
+//
+//struct kBasicBlockVar {
+//	KonohaObjectHeader h;
+//	kushort_t id;     kushort_t incoming;
+//	KGrowingArray codeTable;
+//	kBasicBlock        *nextBlock;
+//	kBasicBlock        *branchBlock;
+//	VirtualCode *code;
+//	VirtualCode *opjmp;
+//};
 
 struct kByteCodeVar {
 	KonohaObjectHeader h;
