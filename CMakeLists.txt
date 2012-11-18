@@ -10,7 +10,7 @@ set(VERSION_MAJOR "0")
 set(VERSION_MINOR "2")
 set(VERSION_PATCH "0")
 
-SET(CFLAGS "-Wfloat-equal -Wsign-compare -Wformat")
+SET(CFLAGS "-Wsign-compare -Wformat")
 SET(CFLAGS "${CFLAGS} -Wall -Wcomment -Wunused-macros")
 SET(CMAKE_C_FLAGS   "${CFLAGS} -Wno-long-long")
 SET(CMAKE_CXX_FLAGS "${CFLAGS}")

@@ -1272,7 +1272,10 @@ static void HeapManager_ExpandHeap(HeapManager *mng, size_t list_size)
 #endif
 }
 
+#if defined(USE_CONCURRENT_GC)
 static void *concgc_thread_entry(void *o);
+#endif
+
 static HeapManager *HeapManager_Init(KonohaContext *kctx, size_t list_size)
 {
 	size_t i;

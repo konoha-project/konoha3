@@ -43,10 +43,6 @@ static KMETHOD NameSpace_AllowImplicitField(KonohaContext *kctx, KonohaStack *sf
 #define _Public   kMethod_Public
 #define _Const    kMethod_Const
 #define _Ignored  kMethod_IgnoredOverride
-#define _Im       kMethod_Immutable
-#define _Final    kMethod_Final
-#define _Virtual  kMethod_Virtual
-#define _Hidden   kMethod_Hidden
 #define _F(F)   (intptr_t)(F)
 
 static void class_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)

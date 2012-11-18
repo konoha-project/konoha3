@@ -365,9 +365,9 @@ static KMETHOD MethodFunc_RunVirtualMachine(KonohaContext *kctx, KonohaStack *sf
 	PLATAPI RunVirtualMachine(kctx, sfp, BOOTCODE_ENTER);
 }
 
-static MethodFunc GetVirtualMachineMethodFunc(void)
+static void *GetVirtualMachineMethodFunc(void)
 {
-	return MethodFunc_RunVirtualMachine;
+	return (void *) MethodFunc_RunVirtualMachine;
 }
 
 static struct VirtualCode* GetBootCodeOfNativeMethodCall(void)

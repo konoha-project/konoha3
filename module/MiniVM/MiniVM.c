@@ -74,49 +74,55 @@ static const DEFINE_OPSPEC OPDATA[] = {
 	{OPSPEC_(TRACE)},
 };
 
-//static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeType type, VirtualCode *c, size_t i, VirtualCode *pc_start)
-//{
-//	switch(type) {
-//	case VMT_VOID: break;
-//	case VMT_ADDR:
-//		KLIB Kwb_printf(kctx, wb, " L%d", (int)((VirtualCode *)c->p[i] - pc_start));
-//		break;
-//	case VMT_R:
-//		KLIB Kwb_printf(kctx, wb, " sfp[%d,r=%d]", (int)c->data[i]/2, (int)c->data[i]);
-//		break;
-//	case VMT_U:
-//		KLIB Kwb_printf(kctx, wb, " u(%lu, ", c->data[i]); break;
-//	case VMT_F:
-//		KLIB Kwb_printf(kctx, wb, " function(%p)", c->p[i]); break;
-//	case VMT_TY:
-//		KLIB Kwb_printf(kctx, wb, "(%s)", CT_t(c->ct[i])); break;
-//	}/*switch*/
-//}
-//
-//static void DumpOpCode(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c, VirtualCode *pc_start)
-//{
-//	KLIB Kwb_printf(kctx, wb, "[L%d:%d] %s(%d)", (int)(c - pc_start), c->line, OPDATA[c->opcode].name, (int)c->opcode);
-//	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg1, c, 0, pc_start);
-//	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg2, c, 1, pc_start);
-//	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg3, c, 2, pc_start);
-//	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg4, c, 3, pc_start);
-//	KLIB Kwb_printf(kctx, wb, "\n");
-//}
-//
-//static void WriteVirtualCode(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c)
-//{
-//
-//}
+static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeType type, VirtualCode *c, size_t i, VirtualCode *pc_start)
+{
+	switch(type) {
+	case VMT_UL:
+	case VMT_FX:
+	case VMT_C:
+	case VMT_Object:
+	case VMT_HCACHE:
+	case VMT_VOID: break;
+	case VMT_ADDR:
+		KLIB Kwb_printf(kctx, wb, " L%d", (int)((VirtualCode *)c->p[i] - pc_start));
+		break;
+	case VMT_R:
+		KLIB Kwb_printf(kctx, wb, " sfp[%d,r=%d]", (int)c->data[i]/2, (int)c->data[i]);
+		break;
+	case VMT_U:
+		KLIB Kwb_printf(kctx, wb, " u(%lu, ", c->data[i]); break;
+	case VMT_F:
+		KLIB Kwb_printf(kctx, wb, " function(%p)", c->p[i]); break;
+	case VMT_TY:
+		KLIB Kwb_printf(kctx, wb, "(%s)", CT_t(c->ct[i])); break;
+	}/*switch*/
+}
+
+static void DumpOpCode(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c, VirtualCode *pc_start)
+{
+	KLIB Kwb_printf(kctx, wb, "[L%d:%d] %s(%d)", (int)(c - pc_start), c->line, OPDATA[c->opcode].name, (int)c->opcode);
+	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg1, c, 0, pc_start);
+	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg2, c, 1, pc_start);
+	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg3, c, 2, pc_start);
+	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg4, c, 3, pc_start);
+	KLIB Kwb_printf(kctx, wb, "\n");
+}
+
+static void WriteVirtualCode(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c)
+{
+
+}
 
 /* ------------------------------------------------------------------------ */
 /* VirtualMacine */
 
-static void _THCODE(KonohaContext *kctx, VirtualCode *pc, void **codeaddr)
+static void _THCODE(KonohaContext *kctx, VirtualCode *pc, void **codeaddr, size_t codesize)
 {
 #ifdef USE_DIRECT_THREADED_CODE
-	while(1) {
+	size_t i, n = codesize / sizeof(VirtualCode);
+	for(i = 0; i < n; i++) {
 		pc->codeaddr = codeaddr[pc->opcode];
-		if(pc->opcode == OPCODE_RET || pc->opcode == OPCODE_EXIT) break;
+		if(pc->opcode == OPCODE_EXIT) break;
 		pc++;
 	}
 #endif
@@ -179,7 +185,6 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #else
 #define GOTO_NEXT()     goto *(NEXT_OP)
 #endif
-#define TC(c)
 #define DISPATCH_START(pc) goto *OPJUMP[pc->opcode]
 #define DISPATCH_END(pc)
 #define GOTO_PC(pc)        GOTO_NEXT()
@@ -189,7 +194,6 @@ static void KonohaVirtualMachine_onSafePoint(KonohaContext *kctx, KonohaStack *s
 #define NEXT_OP     L_HEAD
 #define GOTO_NEXT() goto NEXT_OP
 #define JUMP        L_HEAD
-#define TC(c)
 #define DISPATCH_START(pc) L_HEAD:;switch(pc->opcode) {
 #define DISPATCH_END(pc)   } /*KNH_DIE("unknown opcode=%d", (int)pc->opcode)*/;
 #define GOTO_PC(pc)         GOTO_NEXT()
@@ -216,7 +220,7 @@ static struct VirtualCode* KonohaVirtualMachine_Run(KonohaContext *kctx, KonohaS
 	}
 	CASE(THCODE) {
 		OPTHCODE *op = (OPTHCODE *)pc;
-		OPEXEC_THCODE(op->threadCode); pc++;
+		OPEXEC_THCODE(op->codesize, op->threadCode); pc++;
 		GOTO_NEXT();
 	}
 	CASE(ENTER) {
@@ -342,7 +346,7 @@ static void SetUpBootCode(void)
 {
 	if(BOOTCODE_ENTER == NULL) {
 		static struct VirtualCode InitCode[6] = {};
-		struct OPTHCODE thcode = {OP_(THCODE), _THCODE};
+		struct OPTHCODE thcode = {OP_(THCODE), 4 * sizeof(VirtualCode), _THCODE};
 		struct OPNCALL ncall = {OP_(NCALL)};
 		struct OPENTER enter = {OP_(ENTER)};
 		struct OPEXIT  exit  = {OP_(EXIT)};
@@ -367,9 +371,9 @@ static KMETHOD MethodFunc_RunVirtualMachine(KonohaContext *kctx, KonohaStack *sf
 	PLATAPI RunVirtualMachine(kctx, sfp, BOOTCODE_ENTER);
 }
 
-static MethodFunc GetVirtualMachineMethodFunc(void)
+static void *GetVirtualMachineMethodFunc(void)
 {
-	return MethodFunc_RunVirtualMachine;
+	return (void *) MethodFunc_RunVirtualMachine;
 }
 
 static struct VirtualCode* GetBootCodeOfNativeMethodCall(void)

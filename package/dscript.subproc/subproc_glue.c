@@ -28,6 +28,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <sys/time.h>
+#include <sys/wait.h>
 
 #define USE_FILE 1
 #include <minikonoha/minikonoha.h>

@@ -150,6 +150,7 @@ typedef struct OPNOP {
 #define OPCODE_THCODE ((kopcode_t)1)
 typedef struct OPTHCODE {
 	KCODE_HEAD;
+	size_t codesize;
 	ThreadCodeFunc threadCode;
 } OPTHCODE;
 

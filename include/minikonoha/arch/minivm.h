@@ -28,7 +28,7 @@
 /* minivm arch */
 
 typedef intptr_t   kreg_t;
-typedef void (*ThreadCodeFunc)(KonohaContext *kctx, struct VirtualCode *, void**);
+typedef void (*ThreadCodeFunc)(KonohaContext *kctx, struct VirtualCode *, void**, size_t size);
 typedef void (*TraceFunc)(KonohaContext *kctx, KonohaStack *sfp, KTraceInfo *trace);
 
 typedef struct {
@@ -119,15 +119,16 @@ typedef struct OPNOP {
 #endif
 
 /* THCODE */
-#define VPARAM_THCODE 1, VMT_F
+#define VPARAM_THCODE 2, VMT_U, VMT_F
 typedef struct OPTHCODE {
 	KCODE_HEAD;
+	size_t codesize;
 	ThreadCodeFunc threadCode;
 } OPTHCODE;
 
 #ifndef OPEXEC_THCODE
-#define OPEXEC_THCODE(F) do {\
-	F(kctx, pc, OPJUMP); \
+#define OPEXEC_THCODE(SIZE, F) do {\
+	F(kctx, pc, OPJUMP, SIZE); \
 	pc = PC_NEXT(pc);\
 	goto L_RETURN; \
 } while(0)
