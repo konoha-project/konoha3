@@ -678,7 +678,71 @@ static kExpr* kExpr_SetVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, k
 #define KdumpExpr(CTX, EXPR)             ((const KModuleSugar *)kmodsugar)->dumpExpr(CTX, 0, 0, EXPR)
 #endif
 
-///* ------------------------------------------------------------------------ */
+/* ------------------------------------------------------------------------ */
+/* BuilderAPI */
+
+struct KBuilder;
+typedef struct KBuilder KBuilder;
+
+typedef void (*VisitStmtFunc)(KonohaContext *kctx, KBuilder *builder, kStmt *stmt);
+typedef void (*VisitExprFunc)(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr);
+
+struct KBuilderAPI2 {
+	struct KBuilder *     (*GetNameSpaceBuilder)(KonohaContext *, kNameSpace *, struct KBuilder *);
+	struct VirtualCode*   (*GenerateVirtualCode)(KonohaContext *, struct KBuilder *build, kBlock *block);
+	void                  (*FreeVirtualCode)(KonohaContext *kctx, struct VirtualCode *vcode);
+	struct VirtualCode*   (*GetBootCodeOfNativeMethodCall)(void);
+	MethodFunc            (*GenerateMethodFunc)(KonohaContext *, struct KBuilder *build, struct VirtualCode *);
+	struct VirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct VirtualCode *pc);
+
+	VisitStmtFunc visitErrStmt;
+	VisitStmtFunc visitExprStmt;
+	VisitStmtFunc visitBlockStmt;
+	VisitStmtFunc visitReturnStmt;
+	VisitStmtFunc visitIfStmt;
+	VisitStmtFunc visitLoopStmt;
+	VisitStmtFunc visitJumpStmt;
+	VisitStmtFunc visitTryStmt;
+	VisitStmtFunc visitUndefinedStmt;
+	VisitExprFunc visitConstExpr;
+	VisitExprFunc visitNConstExpr;
+	VisitExprFunc visitNewExpr;
+	VisitExprFunc visitNullExpr;
+	VisitExprFunc visitLocalExpr;
+	VisitExprFunc visitBlockExpr;
+	VisitExprFunc visitFieldExpr;
+	VisitExprFunc visitCallExpr;
+	VisitExprFunc visitAndExpr;
+	VisitExprFunc visitOrExpr;
+	VisitExprFunc visitLetExpr;
+	VisitExprFunc visitStackTopExpr;
+	size_t allocSize;
+};
+
+#define VISITOR_LIST(OP) \
+	OP(ErrStmt)\
+	OP(ExprStmt)\
+	OP(BlockStmt)\
+	OP(ReturnStmt)\
+	OP(IfStmt)\
+	OP(LoopStmt)\
+	OP(JumpStmt)\
+	OP(TryStmt)\
+	OP(UndefinedStmt)\
+	OP(ConstExpr)\
+	OP(NConstExpr)\
+	OP(NewExpr)\
+	OP(NullExpr)\
+	OP(LocalExpr)\
+	OP(BlockExpr)\
+	OP(FieldExpr)\
+	OP(CallExpr)\
+	OP(AndExpr)\
+	OP(OrExpr)\
+	OP(LetExpr)\
+	OP(StackTopExpr)
+
+/* ------------------------------------------------------------------------ */
 
 static inline void kToken_setTypeId(KonohaContext *kctx, kToken *tk, kNameSpace *ns, ktype_t type)
 {

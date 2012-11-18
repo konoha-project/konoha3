@@ -39,12 +39,6 @@ static void kMethod_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func);
 
 /* ------------------------------------------------------------------------ */
 
-struct KBuilder;
-typedef struct KBuilder KBuilder;
-
-typedef void (*VisitStmtFunc)(KonohaContext *kctx, KBuilder *builder, kStmt *stmt);
-typedef void (*VisitExprFunc)(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr);
-
 struct KBuilderAPI {
 	VisitStmtFunc visitErrStmt;
 	VisitStmtFunc visitExprStmt;
