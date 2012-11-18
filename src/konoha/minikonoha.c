@@ -191,7 +191,7 @@ static void KonohaContext_Free(KonohaContext *kctx, KonohaContextVar *ctx)
 	}
 	KonohaStackRuntime_Free(kctx, ctx);
 	if(IS_RootKonohaContext(ctx)){  // share
-		PLATAPI DeleteVirtualMachine(ctx);
+		//PLATAPI DeleteVirtualMachine(ctx);
 		KonohaLibVar *kklib = (KonohaLibVar *)ctx - 1;
 		for(i = 0; i < KonohaModule_MAXSIZE; i++) {
 			KonohaModule *p = ctx->modshare[i];

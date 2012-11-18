@@ -632,10 +632,11 @@ struct KonohaFactory {
 	// VirtualMachine
 	KModuleInfo            *VirtualMachineInfo;
 	kbool_t               (*IsSupportedVirtualCode)(int opcode);
-	struct VirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct VirtualCode *pc);
-	void                  (*DeleteVirtualMachine)(KonohaContext *kctx);
-	void *                (*GetVirtualMachineMethodFunc)(void);
-	struct VirtualCode*   (*GetBootCodeOfNativeMethodCall)(void);
+//	struct VirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct VirtualCode *pc);
+//	void                  (*DeleteVirtualMachine)(KonohaContext *kctx);
+//	void *                (*GetVirtualMachineMethodFunc)(void);
+	struct VirtualCode*   (*GetDefaultBootCode)(void);
+	struct KBuilderAPI2*  (*GetDefaultBuilderAPI)(void);
 
 	/* JSON_API */
 	KModuleInfo *JsonDataInfo;
@@ -1463,7 +1464,7 @@ struct kNameSpaceVar {
 	void                              *tokenMatrix;
 	KHashMap                          *syntaxMapNN;
 	kArray                            *stmtPatternListNULL_OnList;
-	struct KBuilderAPI                 *builderApi;
+	struct KBuilderAPI2               *builderApi;
 };
 
 // NameSpace_syntaxOption
@@ -1669,7 +1670,7 @@ struct KonohaLibVar {
 	kMethodVar*     (*new_kMethod)(KonohaContext*, kArray *gcstack, uintptr_t, ktype_t, kmethodn_t, MethodFunc);
 	kParam*         (*kMethod_setParam)(KonohaContext*, kMethod *, ktype_t, kushort_t, const kparamtype_t *);
 	void            (*kMethod_setFunc)(KonohaContext*, kMethod*, MethodFunc);
-	void            (*kMethod_GenCode)(KonohaContext*, kMethod*, kBlock *bk, int options);
+	void            (*kMethod_GenCode)(KonohaContext*, kMethod*, kBlock *, int options);
 	intptr_t        (*kMethod_indexOfField)(kMethod *);
 
 	kbool_t         (*KonohaRuntime_setModule)(KonohaContext*, int, struct KonohaModule *, KTraceInfo *);

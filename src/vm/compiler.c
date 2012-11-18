@@ -182,6 +182,7 @@ static void visitBlock(KonohaContext *kctx, KBuilder *builder, kBlock *block)
 
 /* ------------------------------------------------------------------------ */
 /* [Statement/Expression API] */
+
 static kBlock* Stmt_getFirstBlock(KonohaContext *kctx, kStmt *stmt)
 {
 	return SUGAR kStmt_GetBlock(kctx, stmt, NULL, KW_BlockPattern, K_NULLBLOCK);
@@ -823,7 +824,7 @@ static void KonohaVisitor_Init(KonohaContext *kctx, struct KBuilder *builder, kM
 	builder->common.a = 0;
 	builder->common.shift = 0;
 
-	KLIB kMethod_setFunc(kctx, mtd, (MethodFunc) PLATAPI GetVirtualMachineMethodFunc());
+//	KLIB kMethod_setFunc(kctx, mtd, builder->common.api->GetVirtualMethodFunc());
 
 	DBG_ASSERT(kArray_size(ctxcode->codeList) == 0);
 	int lbINIT  = new_BasicBlockLABEL(kctx);
@@ -937,21 +938,21 @@ static void _THCODE(KonohaContext *kctx, VirtualCode *pc, void **codeaddr, size_
 
 static void Method_threadCode(KonohaContext *kctx, kMethod *mtd, kByteCode *kcode)
 {
-	kMethodVar *Wmtd = (kMethodVar *)mtd;
-	KLIB kMethod_setFunc(kctx, mtd, PLATAPI GetVirtualMachineMethodFunc());
-	KFieldSet(Wmtd, Wmtd->CodeObject, kcode);
-	OPTHCODE *opTHCODE = (OPTHCODE *)kcode->code;
-	opTHCODE->codesize = kcode->codesize;
-	Wmtd->pc_start = PLATAPI RunVirtualMachine(kctx, kctx->esp + 1, kcode->code);
-	if(verbose_code) {
-		DBG_P("DUMP CODE");
-		VirtualCode *pc = mtd->pc_start;
-		size_t i, n = kcode->codesize / sizeof(VirtualCode);
-		for(i = 1; i < n; i++) {
-			dumpOPCODE(kctx, pc, mtd->pc_start);
-			pc++;
-		}
-	}
+//	kMethodVar *Wmtd = (kMethodVar *)mtd;
+//	KLIB kMethod_setFunc(kctx, mtd, PLATAPI GetVirtualMachineMethodFunc());
+//	KFieldSet(Wmtd, Wmtd->CodeObject, kcode);
+//	OPTHCODE *opTHCODE = (OPTHCODE *)kcode->code;
+//	opTHCODE->codesize = kcode->codesize;
+//	Wmtd->pc_start = PLATAPI RunVirtualMachine(kctx, kctx->esp + 1, kcode->code);
+//	if(verbose_code) {
+//		DBG_P("DUMP CODE");
+//		VirtualCode *pc = mtd->pc_start;
+//		size_t i, n = kcode->codesize / sizeof(VirtualCode);
+//		for(i = 1; i < n; i++) {
+//			dumpOPCODE(kctx, pc, mtd->pc_start);
+//			pc++;
+//		}
+//	}
 }
 
 static void BUILD_compile(KonohaContext *kctx, kMethod *mtd, int beginBlock, int endBlock)

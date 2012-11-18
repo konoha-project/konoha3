@@ -362,7 +362,7 @@ static kbool_t IsSupportedVirtualCode(int opcode)
 static KMETHOD MethodFunc_RunVirtualMachine(KonohaContext *kctx, KonohaStack *sfp)
 {
 	DBG_ASSERT(IS_Method(sfp[K_MTDIDX].calledMethod));
-	PLATAPI RunVirtualMachine(kctx, sfp, BOOTCODE_ENTER);
+	KonohaVirtualMachine_Run(kctx, sfp, BOOTCODE_ENTER);
 }
 
 static void *GetVirtualMachineMethodFunc(void)
@@ -370,7 +370,7 @@ static void *GetVirtualMachineMethodFunc(void)
 	return (void *) MethodFunc_RunVirtualMachine;
 }
 
-static struct VirtualCode* GetBootCodeOfNativeMethodCall(void)
+static struct VirtualCode* GetDefaultBootCode(void)
 {
 	return BOOTCODE_NCALL;
 }
@@ -463,10 +463,10 @@ kbool_t LoadTraceVMModule(KonohaFactory *factory, ModuleType type)
 	SetUpBootCode();
 	factory->VirtualMachineInfo            = &ModuleInfo;
 	factory->IsSupportedVirtualCode        = IsSupportedVirtualCode;
-	factory->RunVirtualMachine             = KonohaVirtualMachine_Run;
-	factory->DeleteVirtualMachine          = TraceVMDeleteVirtualMachine;
-	factory->GetVirtualMachineMethodFunc   = GetVirtualMachineMethodFunc;
-	factory->GetBootCodeOfNativeMethodCall = GetBootCodeOfNativeMethodCall;
+//	factory->RunVirtualMachine             = KonohaVirtualMachine_Run;
+//	factory->DeleteVirtualMachine          = TraceVMDeleteVirtualMachine;
+//	factory->GetVirtualMachineMethodFunc   = GetVirtualMachineMethodFunc;
+	factory->GetDefaultBootCode = GetDefaultBootCode;
 	return true;
 }
 #ifdef __cplusplus

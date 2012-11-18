@@ -45,6 +45,7 @@ int verbose_sugar = 0;
 #include "import/typecheck.h"
 #include "import/desugar.h"
 #include "import/parser_dump.h"
+#include "import/visitor.h"
 
 /* ------------------------------------------------------------------------ */
 /* Sugar Global Functions */
@@ -130,7 +131,8 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	l->kNameSpace_FreeSugarExtension =  kNameSpace_FreeSugarExtension;
 	l->Konoha_LoadScript = Konoha_LoadScript;
 	l->Konoha_Eval       = Konoha_Eval;
-
+	l->kMethod_GenCode   = kMethod_GenCode;
+	l->kMethod_setFunc   = kMethod_setFunc;
 
 	KDEFINE_CLASS defToken = {0};
 	SETSTRUCTNAME(defToken, Token);
@@ -227,6 +229,10 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	mod->kStmt_RightJoinExpr        = kStmt_RightJoinExpr;
 	mod->kToken_ToError        = kToken_ToError;
 	mod->kStmt_Message2        = kStmt_Message2;
+
+	mod->VisitStmt                  = VisitStmt;
+	mod->VisitExpr                  = VisitExpr;
+	mod->VisitBlock                 = VisitBlock;
 
 #ifndef USE_SMALLBUILD
 	mod->dumpToken      = dumpToken;

@@ -539,6 +539,7 @@ struct kGammaVar {
 #define K_NULLBLOCK  (kBlock *)((CT_Block)->defaultNullValue_OnGlobalConstList)
 
 typedef kStmt* (*TypeDeclFunc)(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr, kExpr *vexpr, kObject *thunk);
+struct KBuilder;
 
 typedef struct {
 	KonohaModule  h;
@@ -597,9 +598,12 @@ typedef struct {
 	kbool_t     (*kStmt_DeclType)(KonohaContext *, kStmt *, kGamma *, ktype_t, kExpr *, kObject *, TypeDeclFunc, kStmt **);
 	kExpr*      (*kStmt_TypeCheckVariableNULL)(KonohaContext *, kStmt *, kExpr *, kGamma *, ktype_t);
 
-
 	void       (*kToken_ToError)(KonohaContext *, kTokenVar *, kinfotag_t, const char *fmt, ...);
 	kExpr *    (*kStmt_Message2)(KonohaContext *, kStmt *, kToken *, kinfotag_t, const char *fmt, ...);
+
+	void (*VisitStmt)(KonohaContext *, struct KBuilder *, kStmt *stmt);
+	void (*VisitExpr)(KonohaContext *, struct KBuilder *, kStmt *stmt, kExpr *expr);
+	void (*VisitBlock)(KonohaContext *, struct KBuilder *, kBlock *block);
 
 	void (*dumpToken)(KonohaContext *kctx, kToken *tk, int n);
 	void (*dumpTokenArray)(KonohaContext *kctx, int nest, kArray *a, int s, int e);
@@ -687,12 +691,20 @@ typedef struct KBuilder KBuilder;
 typedef void (*VisitStmtFunc)(KonohaContext *kctx, KBuilder *builder, kStmt *stmt);
 typedef void (*VisitExprFunc)(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr);
 
+struct KBuilderCommon {
+	struct KBuilderAPI2* api;
+	int option;
+	kfileline_t uline;
+	int a; /* whatis a ? */
+	int shift;
+	int espidx;
+};
+
 struct KBuilderAPI2 {
-	struct KBuilder *     (*GetNameSpaceBuilder)(KonohaContext *, kNameSpace *, struct KBuilder *);
-	struct VirtualCode*   (*GenerateVirtualCode)(KonohaContext *, struct KBuilder *build, kBlock *block);
+	const char *target;
+	struct VirtualCode*   (*GenerateVirtualCode)(KonohaContext *, kBlock *block, int option);
 	void                  (*FreeVirtualCode)(KonohaContext *kctx, struct VirtualCode *vcode);
-	struct VirtualCode*   (*GetBootCodeOfNativeMethodCall)(void);
-	MethodFunc            (*GenerateMethodFunc)(KonohaContext *, struct KBuilder *build, struct VirtualCode *);
+	MethodFunc            (*GenerateMethodFunc)(KonohaContext *, struct VirtualCode *);
 	struct VirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct VirtualCode *pc);
 
 	VisitStmtFunc visitErrStmt;

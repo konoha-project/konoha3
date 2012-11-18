@@ -517,6 +517,7 @@ static void kNameSpace_Init(KonohaContext *kctx, kObject *o, void *conf)
 		ns->syntaxOption  = ns->parentNULL->syntaxOption;
 	}
 	ns->methodList_OnList = K_EMPTYARRAY;
+	ns->builderApi = PLATAPI GetDefaultBuilderAPI();
 }
 
 static void kNameSpace_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
