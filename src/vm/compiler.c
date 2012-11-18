@@ -308,6 +308,7 @@ static int BasicBlock_Add(KonohaContext *kctx, BasicBlock *bb, kfileline_t uline
 {
 	DBG_ASSERT(bb->newid == -1);
 	DBG_ASSERT(size <= padding_size);
+	DBG_ASSERT(bb->nextid == -1 && bb->branchid == -1);
 	if(!(bb->size + size < bb->max)) {
 		bb = new_BasicBlock(kctx, bb->max * 2, bb);
 	}
@@ -360,9 +361,7 @@ static void ASM_LABEL(KonohaContext *kctx, int labelId)
 {
 	BasicBlock *bb = BasicBlock_(kctx, ctxcode->bbCurId);
 	DBG_ASSERT(bb != NULL);
-	while(bb->nextid != -1) {
-		bb = BasicBlock_(kctx, bb->nextid);
-	}
+	DBG_ASSERT(bb->nextid == -1);
 	BasicBlock *labelBlock = BasicBlock_(kctx, labelId);
 	if(bb->branchid == -1) {
 		DBG_ASSERT(bb->nextid == -1);
@@ -374,17 +373,16 @@ static void ASM_LABEL(KonohaContext *kctx, int labelId)
 
 static void ASM_JMP(KonohaContext *kctx, int mainId, int labelId)
 {
-	BasicBlock *bb = BasicBlock_(kctx, mainId);
+	BasicBlock *bb = BasicBlock_(kctx, ctxcode->bbCurId/*mainId*/);
 	DBG_ASSERT(bb != NULL);
-	while(bb->nextid != -1) {
-		bb = BasicBlock_(kctx, bb->nextid);
-	}
+	DBG_ASSERT(bb->nextid == -1);
 	if(bb->branchid == -1) {
 		BasicBlock *labelBlock = BasicBlock_(kctx, labelId);
+		ASM(JMP, NULL);
+		bb = BasicBlock_(kctx, ctxcode->bbCurId);
 		bb->branchid = BasicBlock_id(kctx, labelBlock);
 		labelBlock->incoming += 1;
 		ctxcode->bbCurId = BasicBlock_id(kctx, bb);
-		ASM(JMP, NULL);
 	}
 }
 
@@ -397,6 +395,7 @@ static int ASM_JMPF(KonohaContext *kctx, int flocal, int jumpId)
 	int nextId = new_BasicBlockLABEL(kctx);
 	BasicBlock *lbNEXT = BasicBlock_(kctx, nextId);
 	ASM(JMPF, NULL, NC_(flocal));
+	bb = BasicBlock_(kctx, ctxcode->bbCurId);
 	bb->branchid = BasicBlock_id(kctx, lbJUMP);
 	bb->nextid = nextId;
 	lbNEXT->incoming += 1;
@@ -422,6 +421,9 @@ static void BasicBlock_writeBuffer(KonohaContext *kctx, BasicBlock *bb0, KGrowin
 			KLIB Kwb_write(kctx, wb, buf, len);
 			bb->lastoffset = CodeOffset(wb) - sizeof(VirtualCode);
 			DBG_ASSERT(bb->codeoffset + ((len / sizeof(VirtualCode)) - 1) * sizeof(VirtualCode) == bb->lastoffset);
+		}
+		else {
+			DBG_ASSERT(bb->branchid == -1);
 		}
 		bb = BasicBlock_(kctx, bb->nextid);
 		if(bb != NULL) {
@@ -706,7 +708,7 @@ static void KonohaVisitor_visitAndExpr(KonohaContext *kctx, KBuilder *builder, k
 	int a = builder->common.a;
 	int lbTRUE  = new_BasicBlockLABEL(kctx);
 	int lbFALSE = new_BasicBlockLABEL(kctx);
-	int lbMAIN;
+	int lbMAIN = ctxcode->bbCurId;
 	/*
 	 * [AndExpr] := (arg0 && arg1 && arg2 && ...)
 	 * expr->cons = [NULL, arg0, arg1, arg2, ...]
@@ -727,7 +729,7 @@ static void KonohaVisitor_visitOrExpr(KonohaContext *kctx, KBuilder *builder, kS
 	int a = builder->common.a;
 	int lbTRUE  = new_BasicBlockLABEL(kctx);
 	int lbFALSE = new_BasicBlockLABEL(kctx);
-	int lbMAIN;
+	int lbMAIN = ctxcode->bbCurId;
 	int i, size = kArray_size(expr->cons);
 	for (i = 1; i < size; i++) {
 		lbMAIN = KonohaVisitor_asmJMPIF(kctx, builder, stmt, kExpr_at(expr, i), 1/*TRUE*/, lbTRUE);
