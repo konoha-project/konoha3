@@ -64,10 +64,10 @@ typedef struct {
 	KonohaModuleContext      h;
 	kfileline_t      uline;
 	kArray          *codeList;
-	struct BasicBlock     *lbINIT; // ON GCSTACK
-	struct BasicBlock     *lbEND;  // ON GCSTACK
-	kArray             *constPools;
-	struct BasicBlock  *currentWorkingBlock;
+	kArray          *constPools;
+	int bbInitId;
+	int bbEndId;
+	int bbCurId;
 } ctxcode_t;
 
 /* ------------------------------------------------------------------------ */
