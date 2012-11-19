@@ -89,7 +89,7 @@ typedef struct OPNOP {
 } OPNOP;
 
 #ifndef OPEXEC_NOP
-#define OPEXEC_NOP(PC)
+#define OPEXEC_NOP()
 #endif
 
 /* THCODE */
@@ -101,7 +101,7 @@ typedef struct OPTHCODE {
 } OPTHCODE;
 
 #ifndef OPEXEC_THCODE
-#define OPEXEC_THCODE(pc) do {\
+#define OPEXEC_THCODE() do {\
 	OPTHCODE *op = (OPTHCODE *)pc;\
 	op->threadCode(kctx, pc, OPJUMP, op->opcode); \
 	return PC_NEXT(pc);\
@@ -115,7 +115,7 @@ typedef struct OPENTER {
 } OPENTER;
 
 #ifndef OPEXEC_ENTER
-#define OPEXEC_ENTER(PC) do {\
+#define OPEXEC_ENTER() do {\
 	rbp[K_PCIDX2].pc = PC_NEXT(pc);\
 	pc = (rbp[K_MTDIDX2].calledMethod)->pc_start;\
 	GOTO_PC(pc); \
@@ -129,7 +129,7 @@ typedef struct OPEXIT {
 } OPEXIT;
 
 #ifndef OPEXEC_EXIT
-#define OPEXEC_EXIT(pc) do {\
+#define OPEXEC_EXIT() do {\
 	pc = NULL; \
 	goto L_RETURN;\
 } while(0)
@@ -142,9 +142,9 @@ typedef struct OPNCALL {
 } OPNCALL;
 
 #ifndef OPEXEC_NCALL
-#define OPEXEC_NCALL(pc) do {\
+#define OPEXEC_NCALL() do {\
 	(rbp[K_MTDIDX2].calledMethod)->invokeMethodFunc(kctx, (KonohaStack *)(rbp));\
-	OPEXEC_RET(pc);\
+	OPEXEC_RET();\
 } while(0)
 #endif
 
@@ -158,7 +158,7 @@ typedef struct OPNSET {
 } OPNSET;
 
 #ifndef OPEXEC_NSET
-#define OPEXEC_NSET(pc) do {\
+#define OPEXEC_NSET() do {\
 	OPNSET *op = (OPNSET *)pc;\
 	rbp[op->a].unboxValue = (op->n);\
 } while(0)
@@ -174,7 +174,7 @@ typedef struct OPNMOV {
 } OPNMOV;
 
 #ifndef OPEXEC_NMOV
-#define OPEXEC_NMOV(pc) do {\
+#define OPEXEC_NMOV() do {\
 	OPNMOV *op = (OPNMOV *)pc;\
 	rbp[op->a].unboxValue = rbp[op->b].unboxValue;\
 } while(0)
@@ -191,7 +191,7 @@ typedef struct OPNMOVx {
 } OPNMOVx;
 
 #ifndef OPEXEC_NMOVx
-#define OPEXEC_NMOVx(pc) do {\
+#define OPEXEC_NMOVx() do {\
 	OPNMOVx *op = (OPNMOVx *)pc;\
 	rbp[op->a].unboxValue = (rbp[op->b].asObject)->fieldUnboxItems[op->bx];\
 } while(0)
@@ -208,7 +208,7 @@ typedef struct OPXNMOV {
 } OPXNMOV;
 
 #ifndef OPEXEC_XNMOV
-#define OPEXEC_XNMOV(pc) do {\
+#define OPEXEC_XNMOV() do {\
 	OPXNMOV *op = (OPXNMOV *)pc;\
 	(rbp[op->a].asObjectVar)->fieldUnboxItems[op->ax] = rbp[op->b].unboxValue;\
 } while(0)
@@ -224,7 +224,7 @@ typedef struct OPNEW {
 } OPNEW;
 
 #ifndef OPEXEC_NEW
-#define OPEXEC_NEW(pc) do {\
+#define OPEXEC_NEW() do {\
 	OPNEW *op = (OPNEW *)pc;\
 	rbp[op->a].asObject = KLIB new_kObject(kctx, OnStack, op->ty, op->p);\
 } while(0)
@@ -239,7 +239,7 @@ typedef struct OPNULL {
 } OPNULL;
 
 #ifndef OPEXEC_NULL
-#define OPEXEC_NULL(pc) do {\
+#define OPEXEC_NULL() do {\
 	OPNULL *op = (OPNULL *)pc;\
 	rbp[op->a].asObject = KLIB Knull(kctx, op->ty);\
 } while(0)
@@ -256,7 +256,7 @@ typedef struct OPLOOKUP {
 } OPLOOKUP;
 
 #ifndef OPEXEC_LOOKUP
-#define OPEXEC_LOOKUP(pc) do {\
+#define OPEXEC_LOOKUP() do {\
 	OPLOOKUP *op = (OPLOOKUP *)pc;\
 	kNameSpace_LookupMethodWithInlineCache(kctx, (KonohaStack *)(rbp + op->thisidx), op->ns, (kMethod**)&(op->mtd));\
 } while(0)
@@ -273,7 +273,7 @@ typedef struct OPCALL {
 } OPCALL;
 
 #ifndef OPEXEC_CALL
-#define OPEXEC_CALL(pc) do {\
+#define OPEXEC_CALL() do {\
 	OPCALL *op = (OPCALL *)pc;\
 	kMethod *mtd_ = rbp[op->thisidx + K_MTDIDX2].calledMethod;\
 	KonohaStack *sfp_ = (KonohaStack *)(rbp + op->thisidx); \
@@ -294,7 +294,7 @@ typedef struct OPRET {
 } OPRET;
 
 #ifndef OPEXEC_RET
-#define OPEXEC_RET(PC) do {\
+#define OPEXEC_RET() do {\
 	VirtualCode *vpc = rbp[K_PCIDX2].pc;\
 	rbp = (krbp_t *)rbp[K_SHIFTIDX2].previousStack;\
 	pc = vpc; \
@@ -312,7 +312,7 @@ typedef struct OPBNOT {
 } OPBNOT;
 
 #ifndef OPEXEC_BNOT
-#define OPEXEC_BNOT(pc) do {\
+#define OPEXEC_BNOT() do {\
 	OPBNOT *op = (OPBNOT *)pc;\
 	rbp[op->c].boolValue = !(rbp[op->a].boolValue);\
 } while(0)
@@ -326,7 +326,7 @@ typedef struct OPJMP {
 } OPJMP;
 
 #ifndef OPEXEC_JMP
-#define OPEXEC_JMP(pc) do {\
+#define OPEXEC_JMP() do {\
 	OPJMP *op = (OPJMP *)pc;\
 	pc = op->jumppc;\
 	goto JUMP; \
@@ -342,7 +342,7 @@ typedef struct OPJMPF {
 } OPJMPF;
 
 #ifndef OPEXEC_JMPF
-#define OPEXEC_JMPF(pc) do {\
+#define OPEXEC_JMPF() do {\
 	OPJMPF *op = (OPJMPF *)pc;\
 	if(!rbp[op->a].boolValue) {\
 		pc = op->jumppc;\
@@ -359,7 +359,7 @@ typedef struct OPTRYJMP {
 } OPTRYJMP;
 
 #ifndef OPEXEC_TRYJMP
-#define OPEXEC_TRYJMP(pc) do {\
+#define OPEXEC_TRYJMP() do {\
 	OPTRYJMP *op = (OPTRYJMP *)pc;\
 	pc = KonohaVirtualMachine_tryJump(kctx, (KonohaStack *)rbp, pc+1);\
 	if(pc == NULL) {\
@@ -376,7 +376,7 @@ typedef struct OPYIELD {
 } OPYIELD;
 
 #ifndef OPEXEC_YIELD
-#define OPEXEC_YIELD(pc) do {\
+#define OPEXEC_YIELD() do {\
 	return pc;\
 } while(0)
 #endif
@@ -391,7 +391,7 @@ typedef struct OPERROR {
 } OPERROR;
 
 #ifndef OPEXEC_ERROR
-#define OPEXEC_ERROR(pc) do {\
+#define OPEXEC_ERROR() do {\
 	OPERROR *op = (OPERROR *)pc;\
 	((KonohaStack *)rbp)[K_RTNIDX].calledFileLine = op->uline;\
 	KLIB KonohaRuntime_raise(kctx, EXPT_("RuntimeScript"), SoftwareFault, op->msg, (KonohaStack *)rbp);\
@@ -407,7 +407,7 @@ typedef struct OPSAFEPOINT {
 } OPSAFEPOINT;
 
 #ifndef OPEXEC_SAFEPOINT
-#define OPEXEC_SAFEPOINT(pc) do {\
+#define OPEXEC_SAFEPOINT() do {\
 	OPSAFEPOINT *op = (OPSAFEPOINT *)pc;\
 	KonohaRuntime_setesp(kctx, (KonohaStack *)(rbp + op->esp));\
 	KLIB CheckSafePoint(kctx, (KonohaStack *)rbp, op->uline);\
@@ -422,7 +422,7 @@ typedef struct OPCHKSTACK {
 } OPCHKSTACK;
 
 #ifndef OPEXEC_CHKSTACK
-#define OPEXEC_CHKSTACK(pc) do {\
+#define OPEXEC_CHKSTACK() do {\
 	if(unlikely(kctx->esp > kctx->stack->stack_uplimit)) {\
 		KLIB KonohaRuntime_raise(kctx, EXPT_("StackOverflow"), SoftwareFault, NULL, (KonohaStack *)(rbp));\
 	}\
@@ -439,7 +439,7 @@ typedef struct OPTRACE {
 } OPTRACE;
 
 #ifndef OPEXEC_TRACE
-#define OPEXEC_TRACE(pc)
+#define OPEXEC_TRACE()
 #endif
 
 #endif /* MINIVM_H */
