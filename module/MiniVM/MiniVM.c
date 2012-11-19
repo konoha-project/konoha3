@@ -223,6 +223,8 @@ static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStac
 #define GOTO_PC(pc)         GOTO_NEXT()
 #endif/*USE_DIRECT_THREADED_CODE*/
 
+#include<stdio.h>
+
 #define OPLABEL(T)  &&L_##T,
 #define OPEXEC(T)  L_##T : { OPEXEC_##T(pc); pc++; goto *(pc->codeaddr); }
 
@@ -236,6 +238,122 @@ static struct VirtualCode* KonohaVirtualMachine_Run(KonohaContext *kctx, KonohaS
 	krbp_t *rbp = (krbp_t *)sfp0;
 	DISPATCH_START(pc);
 	OPDEFINE(OPEXEC)
+	//	CASE(NOP) {
+	//		OPNOP *op = (OPNOP *)pc;
+	//		OPEXEC_NOP();  pc++;
+	//		GOTO_NEXT();
+	//	}
+	//	CASE(THCODE) {
+	//		OPTHCODE *op = (OPTHCODE *)pc;
+	//		OPEXEC_THCODE(op->codesize, op->threadCode); pc++;
+	//		GOTO_NEXT();
+	//	}
+	//	CASE(ENTER) {
+	//		OPENTER *op = (OPENTER *)pc;
+	//		OPEXEC_ENTER(); pc++;
+	//		GOTO_NEXT();
+	//	}
+	//	CASE(EXIT) {
+	//		OPEXIT *op = (OPEXIT *)pc;
+	//		OPEXEC_EXIT(); pc++;
+	//		GOTO_NEXT();
+	//	}
+	//	CASE(NSET) {
+	//		OPNSET *op = (OPNSET *)pc;
+	//		OPEXEC_NSET(op->a, op->n, op->ty); pc++;
+	//		GOTO_NEXT();
+	//	}
+	//	CASE(NMOV) {
+	//		OPNMOV *op = (OPNMOV *)pc;
+	//		OPEXEC_NMOV(op->a, op->b, op->ty); pc++;
+	//		GOTO_NEXT();
+	//	}
+	//	CASE(NMOVx) {
+	//		OPNMOVx *op = (OPNMOVx *)pc;
+	//		OPEXEC_NMOVx(op->a, op->b, op->bx, op->ty); pc++;
+	//		GOTO_NEXT();
+	//	}
+	//	CASE(XNMOV) {
+	//		OPXNMOV *op = (OPXNMOV *)pc;
+	//		OPEXEC_XNMOV(op->a, op->ax, op->b, op->ty); pc++;
+	//		GOTO_NEXT();
+	//	}
+	//	CASE(NEW) {
+	//		OPNEW *op = (OPNEW *)pc;
+	//		OPEXEC_NEW(op->a, op->p, op->ty); pc++;
+	//		GOTO_NEXT();
+	//	}
+	//	CASE(NULL) {
+	//		OPNULL *op = (OPNULL *)pc;
+	//		OPEXEC_NULL(op->a, op->ty); pc++;
+	//		GOTO_NEXT();
+	//	}
+	//	CASE(LOOKUP) {
+	//		OPLOOKUP *op = (OPLOOKUP *)pc;
+	//		OPEXEC_LOOKUP(op->thisidx, op->ns, op->mtd); pc++;
+	//		GOTO_NEXT();
+	//	}
+	//	CASE(CALL) {
+	//		OPCALL *op = (OPCALL *)pc;
+	//		OPEXEC_CALL(op->uline, op->thisidx, op->espshift, op->tyo); pc++;
+	//		GOTO_NEXT();
+	//	}
+	//	CASE(RET) {
+	//		OPRET *op = (OPRET *)pc;
+	//		OPEXEC_RET(); pc++;
+	//		GOTO_NEXT();
+	//	}
+	//	CASE(NCALL) {
+	//		OPNCALL *op = (OPNCALL *)pc;
+	//		OPEXEC_NCALL(); pc++;
+	//		GOTO_NEXT();
+	//	}
+	//	CASE(BNOT) {
+	//		OPBNOT *op = (OPBNOT *)pc;
+	//		OPEXEC_BNOT(op->c, op->a); pc++;
+	//		GOTO_NEXT();
+	//	}
+	//	CASE(JMP) {
+	//		OPJMP *op = (OPJMP *)pc;
+	//		OPEXEC_JMP(pc = op->jumppc, JUMP); pc++;
+	//		GOTO_NEXT();
+	//	}
+	//	CASE(JMPF) {
+	//		OPJMPF *op = (OPJMPF *)pc;
+	//		OPEXEC_JMPF(pc = op->jumppc, JUMP, op->a);pc++;
+	//		GOTO_NEXT();
+	//	}
+	//	CASE(TRYJMP) {
+	//		OPTRYJMP *op = (OPTRYJMP *)pc;
+	//		OPEXEC_TRYJMP(pc = op->jumppc, JUMP); pc++;
+	//		GOTO_NEXT();
+	//	}
+	//	CASE(YIELD) {
+	//		OPYIELD *op = (OPYIELD *)pc;
+	//		OPEXEC_YIELD(); pc++;
+	//		GOTO_NEXT();
+	//	}
+	//	CASE(ERROR) {
+	//		OPERROR *op = (OPERROR *)pc;
+	//		OPEXEC_ERROR(op->uline, op->msg, op->esp); pc++;
+	//		GOTO_NEXT();
+	//	}
+	//	CASE(SAFEPOINT) {
+	//		OPSAFEPOINT *op = (OPSAFEPOINT *)pc;
+	//		OPEXEC_SAFEPOINT(op->uline, op->esp); pc++;
+	//		GOTO_NEXT();
+	//	}
+	//	CASE(CHKSTACK) {
+	//		OPCHKSTACK *op = (OPCHKSTACK *)pc;
+	//		OPEXEC_CHKSTACK(op->uline); pc++;
+	//		GOTO_NEXT();
+	//	}
+	//	CASE(TRACE) {
+	//		OPTRACE *op = (OPTRACE *)pc;
+	//		OPEXEC_TRACE(op->uline, op->thisidx, op->trace); pc++;
+	//		GOTO_NEXT();
+	//	}
+
 	DISPATCH_END(pc);
 	L_RETURN:;
 	return pc;
