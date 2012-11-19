@@ -22,7 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#define USE_DIRECT_THREADED_CODE
+//#define USE_DIRECT_THREADED_CODE
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/klib.h>
@@ -212,6 +212,11 @@ static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStac
 #define DISPATCH_START(pc) goto *OPJUMP[pc->opcode]
 #define DISPATCH_END(pc)
 #define GOTO_PC(pc)        GOTO_NEXT()
+
+#define OPLABEL(T)  &&L_##T,
+#define OPEXEC(T)  L_##T : { OPEXEC_##T(); pc++; goto *(pc->codeaddr); }
+
+
 #else/*USE_DIRECT_THREADED_CODE*/
 #define OPJUMP      NULL
 #define CASE(x)     case OPCODE_##x :
@@ -221,12 +226,13 @@ static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStac
 #define DISPATCH_START(pc) L_HEAD:;switch(pc->opcode) {
 #define DISPATCH_END(pc)   } /*KNH_DIE("unknown opcode=%d", (int)pc->opcode)*/;
 #define GOTO_PC(pc)         GOTO_NEXT()
+
+#define OPEXEC(T)  case OPCODE_##T : { OPEXEC_##T(); pc++; GOTO_NEXT(); }
+
 #endif/*USE_DIRECT_THREADED_CODE*/
 
 #include<stdio.h>
 
-#define OPLABEL(T)  &&L_##T,
-#define OPEXEC(T)  L_##T : { OPEXEC_##T(); pc++; goto *(pc->codeaddr); }
 
 static struct VirtualCode* KonohaVirtualMachine_Run(KonohaContext *kctx, KonohaStack *sfp0, struct VirtualCode *pc)
 {
@@ -237,99 +243,99 @@ static struct VirtualCode* KonohaVirtualMachine_Run(KonohaContext *kctx, KonohaS
 #endif
 	krbp_t *rbp = (krbp_t *)sfp0;
 	DISPATCH_START(pc);
-//	OPDEFINE(OPEXEC)
-	CASE(NOP) {
-		OPEXEC_NOP();  pc++;
-		GOTO_NEXT();
-	}
-	CASE(THCODE) {
-		OPEXEC_THCODE(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(ENTER) {
-		OPEXEC_ENTER(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(EXIT) {
-		OPEXEC_EXIT(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(NSET) {
-		OPEXEC_NSET(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(NMOV) {
-		OPEXEC_NMOV(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(NMOVx) {
-		OPEXEC_NMOVx(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(XNMOV) {
-		OPEXEC_XNMOV(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(NEW) {
-		OPEXEC_NEW(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(NULL) {
-		OPEXEC_NULL(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(LOOKUP) {
-		OPEXEC_LOOKUP(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(CALL) {
-		OPEXEC_CALL(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(RET) {
-		OPEXEC_RET(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(NCALL) {
-		OPEXEC_NCALL(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(BNOT) {
-		OPEXEC_BNOT(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(JMP) {
-		OPEXEC_JMP(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(JMPF) {
-		OPEXEC_JMPF();pc++;
-		GOTO_NEXT();
-	}
-	CASE(TRYJMP) {
-		OPEXEC_TRYJMP(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(YIELD) {
-		OPEXEC_YIELD(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(ERROR) {
-		OPEXEC_ERROR(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(SAFEPOINT) {
-		OPEXEC_SAFEPOINT(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(CHKSTACK) {
-		OPEXEC_CHKSTACK(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(TRACE) {
-		OPEXEC_TRACE(); pc++;
-		GOTO_NEXT();
-	}
+	OPDEFINE(OPEXEC)
+//	CASE(NOP) {
+//		OPEXEC_NOP();  pc++;
+//		GOTO_NEXT();
+//	}
+//	CASE(THCODE) {
+//		OPEXEC_THCODE(); pc++;
+//		GOTO_NEXT();
+//	}
+//	CASE(ENTER) {
+//		OPEXEC_ENTER(); pc++;
+//		GOTO_NEXT();
+//	}
+//	CASE(EXIT) {
+//		OPEXEC_EXIT(); pc++;
+//		GOTO_NEXT();
+//	}
+//	CASE(NSET) {
+//		OPEXEC_NSET(); pc++;
+//		GOTO_NEXT();
+//	}
+//	CASE(NMOV) {
+//		OPEXEC_NMOV(); pc++;
+//		GOTO_NEXT();
+//	}
+//	CASE(NMOVx) {
+//		OPEXEC_NMOVx(); pc++;
+//		GOTO_NEXT();
+//	}
+//	CASE(XNMOV) {
+//		OPEXEC_XNMOV(); pc++;
+//		GOTO_NEXT();
+//	}
+//	CASE(NEW) {
+//		OPEXEC_NEW(); pc++;
+//		GOTO_NEXT();
+//	}
+//	CASE(NULL) {
+//		OPEXEC_NULL(); pc++;
+//		GOTO_NEXT();
+//	}
+//	CASE(LOOKUP) {
+//		OPEXEC_LOOKUP(); pc++;
+//		GOTO_NEXT();
+//	}
+//	CASE(CALL) {
+//		OPEXEC_CALL(); pc++;
+//		GOTO_NEXT();
+//	}
+//	CASE(RET) {
+//		OPEXEC_RET(); pc++;
+//		GOTO_NEXT();
+//	}
+//	CASE(NCALL) {
+//		OPEXEC_NCALL(); pc++;
+//		GOTO_NEXT();
+//	}
+//	CASE(BNOT) {
+//		OPEXEC_BNOT(); pc++;
+//		GOTO_NEXT();
+//	}
+//	CASE(JMP) {
+//		OPEXEC_JMP(); pc++;
+//		GOTO_NEXT();
+//	}
+//	CASE(JMPF) {
+//		OPEXEC_JMPF();pc++;
+//		GOTO_NEXT();
+//	}
+//	CASE(TRYJMP) {
+//		OPEXEC_TRYJMP(); pc++;
+//		GOTO_NEXT();
+//	}
+//	CASE(YIELD) {
+//		OPEXEC_YIELD(); pc++;
+//		GOTO_NEXT();
+//	}
+//	CASE(ERROR) {
+//		OPEXEC_ERROR(); pc++;
+//		GOTO_NEXT();
+//	}
+//	CASE(SAFEPOINT) {
+//		OPEXEC_SAFEPOINT(); pc++;
+//		GOTO_NEXT();
+//	}
+//	CASE(CHKSTACK) {
+//		OPEXEC_CHKSTACK(); pc++;
+//		GOTO_NEXT();
+//	}
+//	CASE(TRACE) {
+//		OPEXEC_TRACE(); pc++;
+//		GOTO_NEXT();
+//	}
 
 	DISPATCH_END(pc);
 	L_RETURN:;
@@ -436,23 +442,28 @@ static bblock_t new_BasicBlockLABEL(KonohaContext *kctx)
 	return BasicBlock_id(kctx, new_BasicBlock(kctx, sizeof(VirtualCode) * 2 + sizeof(BasicBlock), -1));
 }
 
-#if defined(USE_DIRECT_THREADED_CODE)
-#define TADDR   NULL, 0/*counter*/
-#else
-#define TADDR   0/*counter*/
-#endif/*USE_DIRECT_THREADED_CODE*/
 #define ASMLINE  0
+#if defined(USE_DIRECT_THREADED_CODE)
+#define ASM(T, ...) do {\
+	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};\
+	union { VirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
+	KBuilder_Asm(kctx, builder, &tmp_.op, sizeof(OP##T));\
+} while(0)
+
+#else
+#define ASM(T, ...) do {\
+	OP##T op_ = {OPCODE_##T, ASMLINE, ## __VA_ARGS__};\
+	union { VirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
+	KBuilder_Asm(kctx, builder, &tmp_.op, sizeof(OP##T));\
+} while(0)
+
+#endif/*USE_DIRECT_THREADED_CODE*/
 
 #define NC_(sfpidx)       (((sfpidx) * 2) + 1)
 #define OC_(sfpidx)       ((sfpidx) * 2)
 #define TC_(sfpidx, TYPE) ((TY_isUnbox(TYPE)) ? NC_(sfpidx) : OC_(sfpidx))
 #define SFP_(sfpidx)   ((sfpidx) * 2)
 
-#define ASM(T, ...) do {\
-	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};\
-	union { VirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
-	KBuilder_Asm(kctx, builder, &tmp_.op, sizeof(OP##T));\
-} while(0)
 
 static void KBuilder_Asm(KonohaContext *kctx, KBuilder *builder, VirtualCode *op, size_t opsize)
 {
