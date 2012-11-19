@@ -469,7 +469,7 @@ static void ASM_JMP(KonohaContext *kctx, KBuilder *builder, int labelId)
 		bb = BasicBlock_(kctx, builder->bbMainId);
 		bb->branchid = BasicBlock_id(kctx, labelBlock);
 		labelBlock->incoming += 1;
-		builder->bbMainId = BasicBlock_id(kctx, bb);
+		//builder->bbMainId = BasicBlock_id(kctx, bb);
 	}
 }
 
