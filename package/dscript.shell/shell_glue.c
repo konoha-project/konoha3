@@ -92,7 +92,7 @@ static kString *splitWhiteSpace(KonohaContext *kctx, kTokenArray *tokenList)
 	if(O_typeId(tokenList) == TY_Token) {
 		/* Single token was passed (e.g. "dsh ls;"). */
 		kToken *token = (kToken *)tokenList;
-		KLIB Kwb_write(kctx, &wb, S_text(token->text), S_size(token->text));
+		KLIB Kwb_Write(kctx, &wb, S_text(token->text), S_size(token->text));
 	}
 	else {
 		/* Multiple tokens was passed (e.g. "dsh ls -la;"). */
@@ -113,14 +113,14 @@ static kString *splitWhiteSpace(KonohaContext *kctx, kTokenArray *tokenList)
 					return NULL;
 				}
 				else {
-					KLIB Kwb_write(kctx, &wb, dollarstr, strlen(dollarstr));
+					KLIB Kwb_Write(kctx, &wb, dollarstr, strlen(dollarstr));
 				}
 			}
 			else {
-				KLIB Kwb_write(kctx, &wb, S_text(token->text), S_size(token->text));
+				KLIB Kwb_Write(kctx, &wb, S_text(token->text), S_size(token->text));
 			}
 			if(kToken_is(BeforeWhiteSpace, token)) {
-				KLIB Kwb_write(kctx, &wb, " ", 1);
+				KLIB Kwb_Write(kctx, &wb, " ", 1);
 			}
 		}
 	}

@@ -151,17 +151,17 @@ static void kToken_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowing
 	else if(IS_Array(tk->subTokenList)) {
 		size_t i;
 		kArray *a = tk->subTokenList;
-		KLIB Kwb_write(kctx, wb, "[", 1);
+		KLIB Kwb_Write(kctx, wb, "[", 1);
 		if(kArray_size(a) > 0) {
 			KUnsafeFieldSet(values[pos+1].asToken, a->TokenItems[0]);
 			kToken_p(kctx, values, pos+1, wb);
 		}
 		for(i = 1; i < kArray_size(a); i++) {
-			KLIB Kwb_write(kctx, wb, " ", 1);
+			KLIB Kwb_Write(kctx, wb, " ", 1);
 			KUnsafeFieldSet(values[pos+1].asToken, a->TokenItems[i]);
 			kToken_p(kctx, values, pos+1, wb);
 		}
-		KLIB Kwb_write(kctx, wb, "]", 1);
+		KLIB Kwb_Write(kctx, wb, "]", 1);
 	}
 #endif
 }
@@ -205,19 +205,19 @@ static void kExpr_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingB
 {
 #ifndef USE_SMALLBUILD
 	kExpr *expr = values[pos].asExpr;
-	KLIB Kwb_write(kctx, wb, "(", 1);
+	KLIB Kwb_Write(kctx, wb, "(", 1);
 	if(expr->build == TEXPR_CONST) {
-		KLIB Kwb_write(kctx, wb, TEXTSIZE("const "));
+		KLIB Kwb_Write(kctx, wb, TEXTSIZE("const "));
 		kExprTerm_p(kctx, (kObject *)expr->objectConstValue, values, pos+1, wb);
 	}
 	else if(expr->build == TEXPR_NEW) {
 		KLIB Kwb_printf(kctx, wb, "new %s", TY_t(expr->ty));
 	}
 	else if(expr->build == TEXPR_NULL) {
-		KLIB Kwb_write(kctx, wb, TEXTSIZE("null"));
+		KLIB Kwb_Write(kctx, wb, TEXTSIZE("null"));
 	}
 	else if(expr->build == TEXPR_NCONST) {
-		KLIB Kwb_write(kctx, wb, TEXTSIZE("const "));
+		KLIB Kwb_Write(kctx, wb, TEXTSIZE("const "));
 		values[pos+1].unboxValue = expr->unboxConstValue;
 		CT_(expr->ty)->p(kctx, values, pos+1, wb);
 	}
@@ -236,19 +236,19 @@ static void kExpr_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingB
 		KLIB Kwb_printf(kctx, wb, "stack %d", expr->index);
 	}
 	else if(Expr_isTerm(expr)) {
-		KLIB Kwb_write(kctx, wb, TEXTSIZE("term "));
+		KLIB Kwb_Write(kctx, wb, TEXTSIZE("term "));
 		kExprTerm_p(kctx, (kObject *)expr->termToken, values, pos+1, wb);
 	}
 	else if(IS_Array(expr->cons)) {
 		size_t i;
 		for(i = 0; i < kArray_size(expr->cons); i++) {
 			if(i > 0) {
-				KLIB Kwb_write(kctx, wb, " ", 1);
+				KLIB Kwb_Write(kctx, wb, " ", 1);
 			}
 			kExprTerm_p(kctx, expr->cons->ObjectItems[i], values, pos+1, wb);
 		}
 	}
-	KLIB Kwb_write(kctx, wb, ")", 1);
+	KLIB Kwb_Write(kctx, wb, ")", 1);
 	if(expr->ty != TY_var) {
 		KLIB Kwb_printf(kctx, wb, ":%s", TY_t(expr->ty));
 	}
@@ -396,7 +396,7 @@ static void kStmt_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingB
 		KLIB Kwb_printf(kctx, wb, "%s%s {uline: %d, ", PSYM_t(stmt->syn->keyword), (kshort_t)stmt->uline);
 	}
 	KLIB kObjectProto_p(kctx, values, pos, wb, 0);
-	KLIB Kwb_write(kctx, wb, "}", 1);
+	KLIB Kwb_Write(kctx, wb, "}", 1);
 }
 
 static kStmtVar* new_kStmt(KonohaContext *kctx, kArray *gcstack, SugarSyntax *syn, ...)

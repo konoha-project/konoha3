@@ -91,7 +91,7 @@ static void* Kwb_Alloca(KonohaContext *kctx, KGrowingBuffer *wb, size_t bytelen)
 	return p;
 }
 
-static void Kwb_write(KonohaContext *kctx, KGrowingBuffer *wb, const char *data, size_t bytelen)
+static void Kwb_Write(KonohaContext *kctx, KGrowingBuffer *wb, const char *data, size_t bytelen)
 {
 	KGrowingArray *m = wb->m;
 	if(!(m->bytesize + bytelen < m->bytemax)) {
@@ -162,7 +162,7 @@ static kbool_t Kwb_iconv(KonohaContext *kctx, KGrowingBuffer* wb, uintptr_t ic, 
 //		size_t iconv_ret = PLATAPI iconv_i(kctx, iconv, inbuf, &inBytesLeft, outbuf, &outBytesLeft, &isTooBig, trace);
 		size_t iconv_ret = PLATAPI iconv_i_memcpyStyle(kctx, ic, outbuf, &outBytesLeft, inbuf, &inBytesLeft, &isTooBig, trace);
 		size_t processedSize = K_PAGESIZE - outBytesLeft;
-		KLIB Kwb_write(kctx, wb, convBuf, processedSize);
+		KLIB Kwb_Write(kctx, wb, convBuf, processedSize);
 		if(isTooBig) {   // input is too big. reset convbuf
 			presentPtrTo = convBuf;
 			outBytesLeft = K_PAGESIZE;
@@ -499,7 +499,7 @@ static void dumpProto(KonohaContext *kctx, void *arg, KKeyValue *d)
 	struct wbenv *w = (struct wbenv*)arg;
 	ksymbol_t key = SYMKEY_unbox(d->key);
 	if(w->count > 0) {
-		KLIB Kwb_write(kctx, w->wb, ", ", 2);
+		KLIB Kwb_Write(kctx, w->wb, ", ", 2);
 	}
 	KLIB Kwb_printf(kctx, w->wb, "%s%s: (%s)", PSYM_t(key), TY_t(d->ty));
 	if(Symbol_isBoxedKey(d->key)) {
@@ -633,7 +633,7 @@ static void klib_Init(KonohaLibVar *l)
 	l->Karray_Free   = Karray_Free;
 	l->Kwb_Init      = Kwb_Init;
 	l->Kwb_Alloca    = Kwb_Alloca;
-	l->Kwb_write     = Kwb_write;
+	l->Kwb_Write     = Kwb_Write;
 	l->Kwb_vprintf   = Kwb_vprintf;
 	l->Kwb_printf    = Kwb_printf;
 	l->Kwb_top       = Kwb_top;

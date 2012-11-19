@@ -45,14 +45,14 @@ struct io_api {
     const char *name;
     int (*f_Init)(struct io *io, char *host, int port, int ev_mode);
     io_cb f_read;
-    io_cb f_write;
+    io_cb f_Write;
     int (*f_close)(struct io *io);
 };
 
 extern struct io *io_open(char *host, int port, int mode, struct io_api *api);
 extern struct io *io_open_trace(char *host, int port);
 extern int io_close(struct io *io);
-extern int io_write(struct io *io, const void *data, uint32_t nbyte);
+extern int io_Write(struct io *io, const void *data, uint32_t nbyte);
 extern int io_read(struct io *io, void *data, uint32_t nbyte);
 extern int io_sync(struct io *io);
 extern int io_dispatch(struct io *io);

@@ -389,7 +389,7 @@ static KMETHOD Curl_setOptFile(KonohaContext *kctx, KonohaStack *sfp)
 //		break;
 //	//case CURLOPT_WRITEFUNCTION: {
 //	//	if(IS_OutputStream(sfp[2].w)) {
-//	//		curl_write_callback cc = knh_curl_callback;
+//	//		curl_Write_callback cc = knh_curl_callback;
 //	//		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cc);
 //	//	}
 //	//	break;
@@ -664,7 +664,7 @@ static size_t writeToBuffer(void *buffer, size_t size, size_t nmemb, void *obj)
 	struct ReceiveBuffer *rbuf = (struct ReceiveBuffer *)obj;
 	KonohaContext *kctx = rbuf->kctx;
 	size_t writeSize = size * nmemb;
-	KLIB Kwb_write(kctx, &rbuf->wb, (char *)buffer, writeSize);
+	KLIB Kwb_Write(kctx, &rbuf->wb, (char *)buffer, writeSize);
 	return writeSize;
 }
 

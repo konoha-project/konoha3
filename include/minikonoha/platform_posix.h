@@ -943,13 +943,13 @@ static void UI_ReportCompilerMessage(KonohaContext *kctx, kinfotag_t taglevel, k
 	PLATAPI printf_i("%s - %s%s\n", beginTag, msg, endTag);
 }
 
-static void Kwb_writeValue(KonohaContext *kctx, KGrowingBuffer *wb, KonohaClass *c, KonohaStack *sfp)
+static void Kwb_WriteValue(KonohaContext *kctx, KGrowingBuffer *wb, KonohaClass *c, KonohaStack *sfp)
 {
 	if(CT_isUnbox(c)) {
 		c->p(kctx, sfp, 0, wb);
 	}
 	else {
-		KLIB kObject_writeToBuffer(kctx, sfp[0].asObject, false/*delim*/, wb, NULL, 0);
+		KLIB kObject_WriteToBuffer(kctx, sfp[0].asObject, false/*delim*/, wb, NULL, 0);
 	}
 }
 
@@ -990,7 +990,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 			cThis = O_ct(sfp[0].asObject);
 		}
 		if(!kMethod_is(Static, mtd)) {
-			Kwb_writeValue(kctx, &wb, cThis, sfp);
+			Kwb_WriteValue(kctx, &wb, cThis, sfp);
 			PLATAPI printf_i("this=(%s) %s, ", CT_t(cThis), KLIB Kwb_top(kctx, &wb, 1));
 			KLIB Kwb_Free(&wb);
 		}
@@ -1002,7 +1002,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 			}
 			KonohaClass *c = CT_(param->paramtypeItems[i].ty);
 			c = c->realtype(kctx, c, cThis);
-			Kwb_writeValue(kctx, &wb, c, sfp + i + 1);
+			Kwb_WriteValue(kctx, &wb, c, sfp + i + 1);
 			PLATAPI printf_i("%s=(%s) %s", SYM_t(SYM_UNMASK(param->paramtypeItems[i].fn)), CT_t(c), KLIB Kwb_top(kctx, &wb, 1));
 			KLIB Kwb_Free(&wb);
 		}

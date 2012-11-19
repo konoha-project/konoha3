@@ -27,7 +27,7 @@ static struct logpool_param_filter FILTERED_STRING_API_PARAM = {
 
 extern logapi_t LOGAPI;
 
-static void logpool_test_write0(logpool_t *logpool)
+static void logpool_test_Write0(logpool_t *logpool)
 {
     double f = 3.14;
     long   i = 128;
@@ -40,7 +40,7 @@ static void logpool_test_write0(logpool_t *logpool)
             );
 }
 
-static void logpool_test_write1(logpool_t *logpool)
+static void logpool_test_Write1(logpool_t *logpool)
 {
     double f = 3.14;
     long   i = 128;
@@ -61,8 +61,8 @@ int main(void)
         logpool_t *logpool = logpool_open(NULL, &LOGAPI, LOGAPI_PARAM);
         int i;
         for (i = 0; i < 5; ++i) {
-            logpool_test_write0(logpool);
-            logpool_test_write1(logpool);
+            logpool_test_Write0(logpool);
+            logpool_test_Write1(logpool);
         }
         logpool_close(logpool);
     }

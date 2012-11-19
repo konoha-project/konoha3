@@ -48,7 +48,7 @@ static struct logpool_param_multiplexer MULTIPREXED_STRING_FILTERED_STRING_API_P
 #define LogText(K,V)    LOG_s, (K), (V)
 
 
-static void logpool_test_write0(logpool_t *logpool)
+static void logpool_test_Write0(logpool_t *logpool)
 {
     double f = 3.14;
     long   i = 128;
@@ -61,7 +61,7 @@ static void logpool_test_write0(logpool_t *logpool)
             );
 }
 
-static void logpool_test_write1(void)
+static void logpool_test_Write1(void)
 {
     int j;
     double f = 3.14;
@@ -86,8 +86,8 @@ int main(void)
         logpool_t *logpool = logpool_open(NULL, &MULTIPLEX_API, LOGAPI_PARAM);
         int i;
         for (i = 0; i < 5; ++i) {
-            logpool_test_write0(logpool);
-            logpool_test_write1();
+            logpool_test_Write0(logpool);
+            logpool_test_Write1();
         }
         logpool_close(logpool);
     }

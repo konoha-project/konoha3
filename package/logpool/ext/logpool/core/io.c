@@ -43,9 +43,9 @@ int io_close(struct io *io)
     return IO_OK;
 }
 
-int io_write(struct io *io, const void *data, uint32_t nbyte)
+int io_Write(struct io *io, const void *data, uint32_t nbyte)
 {
-    return io->api->f_write(io, data, nbyte);
+    return io->api->f_Write(io, data, nbyte);
 }
 
 int io_read(struct io *io, void *data, uint32_t nbyte)

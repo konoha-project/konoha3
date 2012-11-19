@@ -32,7 +32,7 @@
 extern "C"{
 #endif
 
-static void Method_writeAttributeToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuffer *wb)
+static void Method_WriteAttributeToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuffer *wb)
 {
 	size_t i;
 	for(i = 0; i < sizeof(MethodFlagData)/sizeof(const char *); i++) {
@@ -43,24 +43,24 @@ static void Method_writeAttributeToBuffer(KonohaContext *kctx, kMethod *mtd, KGr
 	}
 }
 
-static void kMethod_writeToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuffer *wb)
+static void kMethod_WriteToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuffer *wb)
 {
 	kParam *pa = Method_param(mtd);
-	Method_writeAttributeToBuffer(kctx, mtd, wb);
+	Method_WriteAttributeToBuffer(kctx, mtd, wb);
 	KLIB Kwb_printf(kctx, wb, "%s %s.%s%s", TY_t(pa->rtype), TY_t(mtd->typeId), MethodName_t(mtd->mn));
 	{
 		size_t i;
-		KLIB Kwb_write(kctx, wb, "(", 1);
+		KLIB Kwb_Write(kctx, wb, "(", 1);
 		for(i = 0; i < pa->psize; i++) {
 			if(i > 0) {
-				KLIB Kwb_write(kctx, wb, ", ", 2);
+				KLIB Kwb_Write(kctx, wb, ", ", 2);
 			}
 			if(FN_isCOERCION(pa->paramtypeItems[i].fn)) {
 				KLIB Kwb_printf(kctx, wb, "@Coercion ");
 			}
 			KLIB Kwb_printf(kctx, wb, "%s %s", TY_t(pa->paramtypeItems[i].ty), SYM_t(pa->paramtypeItems[i].fn));
 		}
-		KLIB Kwb_write(kctx, wb, ")", 1);
+		KLIB Kwb_Write(kctx, wb, ")", 1);
 	}
 }
 
@@ -80,7 +80,7 @@ static void dumpMethod(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd)
 {
 	KGrowingBuffer wb;
 	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
-	kMethod_writeToBuffer(kctx, mtd, &wb);
+	kMethod_WriteToBuffer(kctx, mtd, &wb);
 	PLATAPI printf_i("%s\n", KLIB Kwb_top(kctx, &wb, 1));
 	KLIB Kwb_Free(&wb);
 	return;

@@ -360,7 +360,7 @@ static kbool_t kNameSpace_mergeConstData(KonohaContext *kctx, kNameSpaceVar *ns,
 				KLIB Kwb_Free(&wb);
 				return false;
 			}
-			KLIB Kwb_write(kctx, &wb, (const char *)(kvs+i), sizeof(KKeyValue));
+			KLIB Kwb_Write(kctx, &wb, (const char *)(kvs+i), sizeof(KKeyValue));
 		}
 		kvs = (KKeyValue *)KLIB Kwb_top(kctx, &wb, 0);
 		nitems = Kwb_bytesize(&wb)/sizeof(KKeyValue);
@@ -430,7 +430,7 @@ static kbool_t kNameSpace_LoadConstData(KonohaContext *kctx, kNameSpace *ns, con
 		SetKeyValue(kctx, &kv,
 			ksymbolSPOL(d[0], strlen(d[0]), StringPolicy_TEXT|StringPolicy_ASCII, _NEWID),
 			(ktype_t)(uintptr_t)d[1], (uintptr_t)d[2], _GcStack);
-		KLIB Kwb_write(kctx, &wb, (const char *)(&kv), sizeof(KKeyValue));
+		KLIB Kwb_Write(kctx, &wb, (const char *)(&kv), sizeof(KKeyValue));
 		d += 3;
 	}
 	size_t nitems = Kwb_bytesize(&wb) / sizeof(KKeyValue);

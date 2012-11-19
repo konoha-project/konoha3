@@ -481,10 +481,10 @@ static KMETHOD DIR_readPath(KonohaContext *kctx, KonohaStack *sfp)
 			char *d_name = result->d_name, delim[2] = {'/', 0};
 			KGrowingBuffer wb;
 			KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
-			KLIB Kwb_write(kctx, &wb, S_text(dir->PathInfoNULL), S_size(dir->PathInfoNULL));
-			KLIB Kwb_write(kctx, &wb, delim, 1);
+			KLIB Kwb_Write(kctx, &wb, S_text(dir->PathInfoNULL), S_size(dir->PathInfoNULL));
+			KLIB Kwb_Write(kctx, &wb, delim, 1);
 			if(dir->readerIconv != ICONV_NULL) {
-				KLIB Kwb_write(kctx, &wb, d_name, strlen(d_name));
+				KLIB Kwb_Write(kctx, &wb, d_name, strlen(d_name));
 			}
 			else {
 				KLIB Kwb_iconv(kctx, &wb, dir->readerIconv, d_name, strlen(d_name), trace);

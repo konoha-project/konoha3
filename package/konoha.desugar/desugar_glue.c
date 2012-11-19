@@ -150,25 +150,25 @@ static void Kwb_WriteToken(KonohaContext *kctx, KGrowingBuffer *wb, kToken *tk)
 	char c = kToken_GetOpenHintChar(tk);
 	if(IS_String(tk)) {
 		if (c != 0) {
-			KLIB Kwb_write(kctx, wb, &c, 1);
-			KLIB Kwb_write(kctx, wb, S_text(tk->text), S_size(tk->text));
-			KLIB Kwb_write(kctx, wb, &c, 1);
+			KLIB Kwb_Write(kctx, wb, &c, 1);
+			KLIB Kwb_Write(kctx, wb, S_text(tk->text), S_size(tk->text));
+			KLIB Kwb_Write(kctx, wb, &c, 1);
 		}
 		else {
-			KLIB Kwb_write(kctx, wb, S_text(tk->text), S_size(tk->text));
+			KLIB Kwb_Write(kctx, wb, S_text(tk->text), S_size(tk->text));
 		}
 	}
 	else if(IS_Array(tk)) {
 		size_t i;
 		kArray *a = tk->subTokenList;
-		KLIB Kwb_write(kctx, wb, &c, 1);
+		KLIB Kwb_Write(kctx, wb, &c, 1);
 		for(i = 0; i < kArray_size(a); i++) {
-			KLIB Kwb_write(kctx, wb, " ", 1);
+			KLIB Kwb_Write(kctx, wb, " ", 1);
 			Kwb_WriteToken(kctx, wb, a->TokenItems[i]);
 		}
-		KLIB Kwb_write(kctx, wb, " ", 1);
+		KLIB Kwb_Write(kctx, wb, " ", 1);
 		c = kToken_GetCloseHintChar(tk);
-		KLIB Kwb_write(kctx, wb, &c, 1);
+		KLIB Kwb_Write(kctx, wb, &c, 1);
 	}
 	else {
 		KLIB Kwb_printf(kctx, wb, "%s%s", PSYM_t(tk->resolvedSymbol));

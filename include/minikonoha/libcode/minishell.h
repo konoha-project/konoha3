@@ -70,9 +70,9 @@ static kstatus_t readstmt(KonohaContext *kctx, KGrowingBuffer *wb, kfileline_t *
 			break;
 		}
 		if(line > 1) {
-			KLIB Kwb_write(kctx, wb, "\n", 1);
+			KLIB Kwb_Write(kctx, wb, "\n", 1);
 		}
-		KLIB Kwb_write(kctx, wb, ln, strlen(ln));
+		KLIB Kwb_Write(kctx, wb, ln, strlen(ln));
 		free(ln);
 		if((check = checkstmt(KLIB Kwb_top(kctx, wb, 0), Kwb_bytesize(wb))) > 0) {
 			uline[0]++;

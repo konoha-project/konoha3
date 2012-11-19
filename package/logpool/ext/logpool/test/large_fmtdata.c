@@ -23,7 +23,7 @@ extern logapi_t LOGAPI;
 #define LogText(K,V)    LOG_s, (K), (V)
 
 
-static void logpool_test_write(logpool_t *logpool)
+static void logpool_test_Write(logpool_t *logpool)
 {
     double f = 3.14;
     long   i = 128;
@@ -67,7 +67,7 @@ int main()
     logpool_global_Init(LOGPOOL_DEFAULT);
     {
         logpool_t *logpool = logpool_open(NULL, &LOGAPI, LOGAPI_PARAM);
-        logpool_test_write(logpool);
+        logpool_test_Write(logpool);
         logpool_close(logpool);
     }
     return 0;

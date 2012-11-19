@@ -247,7 +247,7 @@ static size_t knh_regexp_Matched(kregmatch_t* r, size_t maxmatch)
 	return n;
 }
 
-static void Kwb_writeRegexFormat(KonohaContext *kctx, KGrowingBuffer *wb, const char *fmttext, size_t fmtlen, const char *base, kregmatch_t *r, size_t matched)
+static void Kwb_WriteRegexFormat(KonohaContext *kctx, KGrowingBuffer *wb, const char *fmttext, size_t fmtlen, const char *base, kregmatch_t *r, size_t matched)
 {
 	const char *ch = fmttext;
 	const char *eof = ch + fmtlen; // end of fmt
@@ -255,7 +255,7 @@ static void Kwb_writeRegexFormat(KonohaContext *kctx, KGrowingBuffer *wb, const 
 	for (; ch < eof; ch++) {
 		if(*ch == '\\') {
 			buf[0] = *ch;
-			KLIB Kwb_write(kctx, wb, buf, 1);
+			KLIB Kwb_Write(kctx, wb, buf, 1);
 			ch++;
 		} else if(*ch == '$' && isdigit(ch[1])) {
 			size_t grpidx = (size_t)ch[1] - '0'; // get head of grourp_index
@@ -272,12 +272,12 @@ static void Kwb_writeRegexFormat(KonohaContext *kctx, KGrowingBuffer *wb, const 
 					}
 				}
 				kregmatch_t *rp = &r[grpidx];
-				KLIB Kwb_write(kctx, wb, base + rp->rm_so, rp->rm_eo - rp->rm_so);
+				KLIB Kwb_Write(kctx, wb, base + rp->rm_so, rp->rm_eo - rp->rm_so);
 				continue; // skip putc
 			}
 		}
 		buf[0] = *ch;
-		KLIB Kwb_write(kctx, wb, buf, 1);
+		KLIB Kwb_Write(kctx, wb, buf, 1);
 	}
 }
 
@@ -489,20 +489,20 @@ static KMETHOD String_replace(KonohaContext *kctx, KonohaStack *sfp)
 			}
 			size_t len = pmatch[0].rm_eo;
 			if(pmatch[0].rm_so > 0) {
-				KLIB Kwb_write(kctx, &wb, str, pmatch[0].rm_so);
+				KLIB Kwb_Write(kctx, &wb, str, pmatch[0].rm_so);
 			}
 			size_t matched = knh_regexp_Matched(pmatch, KREGEXP_MATCHSIZE);
 			if(len > 0) {
-				Kwb_writeRegexFormat(kctx, &wb, fmttext, fmtlen, base, pmatch, matched);
+				Kwb_WriteRegexFormat(kctx, &wb, fmttext, fmtlen, base, pmatch, matched);
 				str += len;
 			} else {
 				if(str == base) { // 0-length match at head of string
-					Kwb_writeRegexFormat(kctx, &wb, fmttext, fmtlen, base, pmatch, matched);
+					Kwb_WriteRegexFormat(kctx, &wb, fmttext, fmtlen, base, pmatch, matched);
 				}
 				break;
 			}
 		} while(isGlobalOption);
-		KLIB Kwb_write(kctx, &wb, str, strlen(str)); // write out remaining string
+		KLIB Kwb_Write(kctx, &wb, str, strlen(str)); // write out remaining string
 		s = Kwb_newString(kctx, OnStack, &wb); // close cwb
 		KLIB Kwb_Free(&wb);
 	}

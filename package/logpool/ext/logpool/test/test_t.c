@@ -15,7 +15,7 @@ static void emit_log(struct lio *lio, char *key, char *val, char *key1, char *va
             strlen(key2), strlen(val2), key2, val2,
             NULL);
     fprintf(stderr, "len=%zd, buf=%s\n", len, buf+LOG_PROTOCOL_SIZE*4);
-    assert(lio_write(lio, buf, len) == LIO_OK);
+    assert(lio_Write(lio, buf, len) == LIO_OK);
 }
 
 static void emit_int(struct lio *lio, char *key, int n)

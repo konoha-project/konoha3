@@ -517,7 +517,7 @@ KMETHOD ResultSet_getString(KonohaContext *kctx, KonohaStack *sfp)
 //			{
 //				kBytes *ba = new_Bytes(ctx, BA_totext((o)->databuf) + (o)->column[n].start, (o)->column[n].len);
 //				kbytes_t t = {{BA_totext((o)->databuf) + (o)->column[n].start}, (o)->column[n].len};
-//				kBytes_write(ctx, ba, t);
+//				kBytes_Write(ctx, ba, t);
 //				v = UPCAST(ba);
 //			}
 //			break;

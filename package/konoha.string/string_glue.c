@@ -137,7 +137,7 @@ static kString *kToken_ResolveEscapeSequence(KonohaContext *kctx, kToken *tk, si
 	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 	const char *text = S_text(tk->text) + start;
 	const char *end  = S_text(tk->text) + S_size(tk->text);
-	KLIB Kwb_write(kctx, &wb, S_text(tk->text), start);
+	KLIB Kwb_Write(kctx, &wb, S_text(tk->text), start);
 	while(text < end) {
 		int ch = *text;
 		if(ch == '\\' && *(text+1) != '\0') {
@@ -160,7 +160,7 @@ static kString *kToken_ResolveEscapeSequence(KonohaContext *kctx, kToken *tk, si
 		}
 		{
 			char buf[1] = {ch};
-			KLIB Kwb_write(kctx, &wb, (const char *)buf, 1);
+			KLIB Kwb_Write(kctx, &wb, (const char *)buf, 1);
 		}
 		text++;
 	}
@@ -218,9 +218,9 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 
 		KGrowingBuffer wb;
 		KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
-		KLIB Kwb_write(kctx, &wb, "(", 1);
-		KLIB Kwb_write(kctx, &wb, start+2, end-(start+2));
-		KLIB Kwb_write(kctx, &wb, ")", 1);
+		KLIB Kwb_Write(kctx, &wb, "(", 1);
+		KLIB Kwb_Write(kctx, &wb, start+2, end-(start+2));
+		KLIB Kwb_Write(kctx, &wb, ")", 1);
 
 		TokenSeq range = {ns, GetSugarContext(kctx)->preparedTokenList};
 		TokenSeq_Push(kctx, range);

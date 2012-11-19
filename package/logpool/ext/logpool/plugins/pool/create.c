@@ -72,12 +72,12 @@ static void pool_plugin_create_dispose(struct pool_plugin *p)
     free(p);
 }
 
-static uint16_t nop_write_size(uintptr_t context, uint32_t state, uint16_t lengths[])
+static uint16_t nop_Write_size(uintptr_t context, uint32_t state, uint16_t lengths[])
 {
     return 0;
 }
 
-static void nop_write_data(uintptr_t context, struct LogEntry *e, char *buf)
+static void nop_Write_data(uintptr_t context, struct LogEntry *e, char *buf)
 {
     //for (i = 0; i < logsize; ++i) {
     //    if(klen) {
@@ -96,7 +96,7 @@ static uintptr_t nop_exit(uintptr_t context) { return 0; }
 
 EXPORT_POOL_PLUGIN(pool_plugin_create) = {
     {0, NULL, NULL, pool_plugin_create_create, pool_plugin_create_dispose, create_Apply, create_failed, NULL},
-    0, nop_Init, nop_exit, nop_write_size, nop_write_data
+    0, nop_Init, nop_exit, nop_Write_size, nop_Write_data
 };
 
 #ifdef __cplusplus

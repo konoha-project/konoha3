@@ -32,7 +32,38 @@
 extern "C" {
 #endif
 
+#define OPDEFINE(MACRO)\
+	MACRO(NOP)\
+	MACRO(THCODE)\
+	MACRO(ENTER)\
+	MACRO(EXIT)\
+	MACRO(NSET)\
+	MACRO(NMOV)\
+	MACRO(NMOVx)\
+	MACRO(XNMOV)\
+	MACRO(NEW)\
+	MACRO(NULL)\
+	MACRO(LOOKUP)\
+	MACRO(CALL)\
+	MACRO(RET)\
+	MACRO(NCALL)\
+	MACRO(BNOT)\
+	MACRO(JMP)\
+	MACRO(JMPF)\
+	MACRO(TRYJMP)\
+	MACRO(YIELD)\
+	MACRO(ERROR)\
+	MACRO(SAFEPOINT)\
+	MACRO(CHKSTACK)\
+	MACRO(TRACE)\
+
 #include <minikonoha/arch/minivm.h>
+
+#define OPCODE(T)  OPCODE_##T,
+typedef enum {
+	OPDEFINE(OPCODE)
+	OPCODE_MAX,
+} MiniVM;
 
 /* ------------------------------------------------------------------------ */
 /* [data] */
@@ -47,59 +78,58 @@ typedef struct {
 	VirtualCodeType arg4;
 } DEFINE_OPSPEC;
 
-
-#define OPSPEC_(T)  #T, 0, VPARAM_##T
-
+#define OPSPEC(T)   {#T, 0, VPARAM_##T},
 static const DEFINE_OPSPEC OPDATA[] = {
-	{OPSPEC_(NOP)},
-	{OPSPEC_(THCODE)},
-	{OPSPEC_(ENTER)},
-	{OPSPEC_(EXIT)},
-	{OPSPEC_(NMOV)},
-	{OPSPEC_(NMOVx)},
-	{OPSPEC_(XNMOV)},
-	{OPSPEC_(NEW)},
-	{OPSPEC_(NULL)},
-	{OPSPEC_(LOOKUP)},
-	{OPSPEC_(CALL)},
-	{OPSPEC_(RET)},
-	{OPSPEC_(NCALL)},
-	{OPSPEC_(BNOT)},
-	{OPSPEC_(JMP)},
-	{OPSPEC_(JMPF)},
-	{OPSPEC_(TRYJMP)},
-	{OPSPEC_(YIELD)},
-	{OPSPEC_(ERROR)},
-	{OPSPEC_(SAFEPOINT)},
-	{OPSPEC_(CHKSTACK)},
-	{OPSPEC_(TRACE)},
+	OPDEFINE(OPSPEC)
 };
 
 static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeType type, VirtualCode *c, size_t i, VirtualCode *pc_start)
 {
 	switch(type) {
-	case VMT_UL:
-	case VMT_FX:
-	case VMT_C:
-	case VMT_Object:
-	case VMT_HCACHE:
 	case VMT_VOID: break;
 	case VMT_ADDR:
 		KLIB Kwb_printf(kctx, wb, " L%d", (int)((VirtualCode *)c->p[i] - pc_start));
 		break;
-	case VMT_R:
+	case VMT_UL: {
+		kfileline_t uline = (kfileline_t)c->data[i];
+		KLIB Kwb_printf(kctx, wb, " (%s:%d)", PLATAPI shortFilePath(FileId_t(uline)), (kshort_t)uline);
+		break;
+	}
+	case VMT_R: {
 		KLIB Kwb_printf(kctx, wb, " sfp[%d,r=%d]", (int)c->data[i]/2, (int)c->data[i]);
 		break;
+	}
+	case VMT_FX: {
+		kshort_t index  = (kshort_t)c->data[i];
+		kshort_t xindex = (kshort_t)(c->data[i] >> (sizeof(kshort_t)*8));
+		KLIB Kwb_printf(kctx, wb, " sfp[%d,r=%d][%d]", (int)index/2, (int)index, (int)xindex);
+		break;
+	}
 	case VMT_U:
-		KLIB Kwb_printf(kctx, wb, " u(%lu, ", c->data[i]); break;
-	case VMT_F:
-		KLIB Kwb_printf(kctx, wb, " function(%p)", c->p[i]); break;
+		KLIB Kwb_printf(kctx, wb, " i%ld", (long)c->data[i]); break;
+	case VMT_C:
 	case VMT_TY:
 		KLIB Kwb_printf(kctx, wb, "(%s)", CT_t(c->ct[i])); break;
+	case VMT_F:
+		KLIB Kwb_printf(kctx, wb, " function(%p)", c->p[i]); break;
+	case VMT_Object: {
+		kObject *o = c->o[i];
+		if(IS_Method(o)) {
+			kMethod *mtd = (kMethod*)o;
+			KLIB Kwb_printf(kctx, wb, " %s.%s%s", TY_t(mtd->typeId), MethodName_t(mtd->mn));
+		}
+		else {
+			KLIB Kwb_printf(kctx, wb, " (%s)", CT_t(O_ct(o)));
+			KLIB kObject_WriteToBuffer(kctx, o, 0, wb, NULL, 0);
+		}
+		break;
+	}
+	case VMT_HCACHE:
+		break;
 	}/*switch*/
 }
 
-static void DumpVirtualCode1(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c, VirtualCode *pc_start)
+static void WriteVirtualCode1(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c, VirtualCode *pc_start)
 {
 	KLIB Kwb_printf(kctx, wb, "[L%d:%d] %s(%d)", (int)(c - pc_start), c->line, OPDATA[c->opcode].name, (int)c->opcode);
 	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg1, c, 0, pc_start);
@@ -109,13 +139,22 @@ static void DumpVirtualCode1(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCod
 	KLIB Kwb_printf(kctx, wb, "\n");
 }
 
-static void DumpVirtualCode(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c)
+static void WriteVirtualCode(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c)
 {
 	OPTHCODE *opTHCODE = (OPTHCODE *)(c-1);
 	size_t i, n = (opTHCODE->codesize / sizeof(VirtualCode)) - 1;
 	for(i = 0; i < n; i++) {
-		DumpVirtualCode1(kctx, wb, c+i, c);
+		WriteVirtualCode1(kctx, wb, c+i, c);
 	}
+}
+
+static void DumpVirtualCode(KonohaContext *kctx, VirtualCode *c)
+{
+	KGrowingBuffer wb;
+	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
+	WriteVirtualCode(kctx, &wb, c);
+	DBG_P(">>>\n%s", KLIB Kwb_top(kctx, &wb, true));
+	KLIB Kwb_Free(&wb);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -184,135 +223,19 @@ static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStac
 #define GOTO_PC(pc)         GOTO_NEXT()
 #endif/*USE_DIRECT_THREADED_CODE*/
 
+#define OPLABEL(T)  &&L_##T,
+#define OPEXEC(T)  L_##T : { OPEXEC_##T(pc); pc++; goto *(pc->codeaddr); }
+
 static struct VirtualCode* KonohaVirtualMachine_Run(KonohaContext *kctx, KonohaStack *sfp0, struct VirtualCode *pc)
 {
 #ifdef USE_DIRECT_THREADED_CODE
 	static void *OPJUMP[] = {
-		&&L_NOP, &&L_THCODE, &&L_ENTER, &&L_EXIT,
-		&&L_NSET, &&L_NMOV, &&L_NMOVx, &&L_XNMOV,
-		&&L_NEW, &&L_NULL, &&L_LOOKUP, &&L_CALL,
-		&&L_RET, &&L_NCALL, &&L_BNOT, &&L_JMP,
-		&&L_JMPF, &&L_TRYJMP, &&L_YIELD, &&L_ERROR,
-		&&L_SAFEPOINT, &&L_CHKSTACK, &&L_TRACE,
+		OPDEFINE(OPLABEL)
 	};
 #endif
 	krbp_t *rbp = (krbp_t *)sfp0;
 	DISPATCH_START(pc);
-	CASE(NOP) {
-		OPNOP *op = (OPNOP *)pc;
-		OPEXEC_NOP();  pc++;
-		GOTO_NEXT();
-	}
-	CASE(THCODE) {
-		OPTHCODE *op = (OPTHCODE *)pc;
-		OPEXEC_THCODE(op->codesize, op->threadCode); pc++;
-		GOTO_NEXT();
-	}
-	CASE(ENTER) {
-		OPENTER *op = (OPENTER *)pc;
-		OPEXEC_ENTER(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(EXIT) {
-		OPEXIT *op = (OPEXIT *)pc;
-		OPEXEC_EXIT(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(NSET) {
-		OPNSET *op = (OPNSET *)pc;
-		OPEXEC_NSET(op->a, op->n, op->ty); pc++;
-		GOTO_NEXT();
-	}
-	CASE(NMOV) {
-		OPNMOV *op = (OPNMOV *)pc;
-		OPEXEC_NMOV(op->a, op->b, op->ty); pc++;
-		GOTO_NEXT();
-	}
-	CASE(NMOVx) {
-		OPNMOVx *op = (OPNMOVx *)pc;
-		OPEXEC_NMOVx(op->a, op->b, op->bx, op->ty); pc++;
-		GOTO_NEXT();
-	}
-	CASE(XNMOV) {
-		OPXNMOV *op = (OPXNMOV *)pc;
-		OPEXEC_XNMOV(op->a, op->ax, op->b, op->ty); pc++;
-		GOTO_NEXT();
-	}
-	CASE(NEW) {
-		OPNEW *op = (OPNEW *)pc;
-		OPEXEC_NEW(op->a, op->p, op->ty); pc++;
-		GOTO_NEXT();
-	}
-	CASE(NULL) {
-		OPNULL *op = (OPNULL *)pc;
-		OPEXEC_NULL(op->a, op->ty); pc++;
-		GOTO_NEXT();
-	}
-	CASE(LOOKUP) {
-		OPLOOKUP *op = (OPLOOKUP *)pc;
-		OPEXEC_LOOKUP(op->thisidx, op->ns, op->mtd); pc++;
-		GOTO_NEXT();
-	}
-	CASE(CALL) {
-		OPCALL *op = (OPCALL *)pc;
-		OPEXEC_CALL(op->uline, op->thisidx, op->espshift, op->tyo); pc++;
-		GOTO_NEXT();
-	}
-	CASE(RET) {
-		OPRET *op = (OPRET *)pc;
-		OPEXEC_RET(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(NCALL) {
-		OPNCALL *op = (OPNCALL *)pc;
-		OPEXEC_NCALL(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(BNOT) {
-		OPBNOT *op = (OPBNOT *)pc;
-		OPEXEC_BNOT(op->c, op->a); pc++;
-		GOTO_NEXT();
-	}
-	CASE(JMP) {
-		OPJMP *op = (OPJMP *)pc;
-		OPEXEC_JMP(pc = op->jumppc, JUMP); pc++;
-		GOTO_NEXT();
-	}
-	CASE(JMPF) {
-		OPJMPF *op = (OPJMPF *)pc;
-		OPEXEC_JMPF(pc = op->jumppc, JUMP, op->a);pc++;
-		GOTO_NEXT();
-	}
-	CASE(TRYJMP) {
-		OPTRYJMP *op = (OPTRYJMP *)pc;
-		OPEXEC_TRYJMP(pc = op->jumppc, JUMP); pc++;
-		GOTO_NEXT();
-	}
-	CASE(YIELD) {
-		OPYIELD *op = (OPYIELD *)pc;
-		OPEXEC_YIELD(); pc++;
-		GOTO_NEXT();
-	}
-	CASE(ERROR) {
-		OPERROR *op = (OPERROR *)pc;
-		OPEXEC_ERROR(op->uline, op->msg, op->esp); pc++;
-		GOTO_NEXT();
-	}
-	CASE(SAFEPOINT) {
-		OPSAFEPOINT *op = (OPSAFEPOINT *)pc;
-		OPEXEC_SAFEPOINT(op->uline, op->esp); pc++;
-		GOTO_NEXT();
-	}
-	CASE(CHKSTACK) {
-		OPCHKSTACK *op = (OPCHKSTACK *)pc;
-		OPEXEC_CHKSTACK(op->uline); pc++;
-		GOTO_NEXT();
-	}
-	CASE(TRACE) {
-		OPTRACE *op = (OPTRACE *)pc;
-		OPEXEC_TRACE(op->uline, op->thisidx, op->trace); pc++;
-		GOTO_NEXT();
-	}
+	OPDEFINE(OPEXEC)
 	DISPATCH_END(pc);
 	L_RETURN:;
 	return pc;
@@ -498,7 +421,7 @@ static int CodeOffset(KGrowingBuffer *wb)
 	return Kwb_bytesize(wb);
 }
 
-static void BasicBlock_writeBuffer(KonohaContext *kctx, bblock_t blockId, KGrowingBuffer *wb)
+static void BasicBlock_WriteBuffer(KonohaContext *kctx, bblock_t blockId, KGrowingBuffer *wb)
 {
 	BasicBlock *bb = BasicBlock_(kctx, blockId);
 	while(bb != NULL && bb->codeoffset == -1) {
@@ -508,7 +431,7 @@ static void BasicBlock_writeBuffer(KonohaContext *kctx, bblock_t blockId, KGrowi
 			bblock_t id = BasicBlock_id(kctx, bb);
 			char buf[len];  // bb is growing together with wb.
 			memcpy(buf, ((char*)bb) + sizeof(BasicBlock), len);
-			KLIB Kwb_write(kctx, wb, buf, len);
+			KLIB Kwb_Write(kctx, wb, buf, len);
 			bb = BasicBlock_(kctx, id);  // recheck
 			bb->lastoffset = CodeOffset(wb) - sizeof(VirtualCode);
 			DBG_ASSERT(bb->codeoffset + ((len / sizeof(VirtualCode)) - 1) * sizeof(VirtualCode) == bb->lastoffset);
@@ -523,7 +446,7 @@ static void BasicBlock_writeBuffer(KonohaContext *kctx, bblock_t blockId, KGrowi
 		if(bb->branchid != -1 /*&& bb->branchid != builder->bbReturnId*/) {
 			BasicBlock *bbJ = BasicBlock_(kctx, bb->branchid);
 			if(bbJ->codeoffset == -1) {
-				BasicBlock_writeBuffer(kctx, bb->branchid, wb);
+				BasicBlock_WriteBuffer(kctx, bb->branchid, wb);
 			}
 		}
 		bb = BasicBlock_(kctx, bb->nextid);
@@ -953,7 +876,7 @@ static void FreeVirtualCode(KonohaContext *kctx, struct VirtualCode *vcode)
 }
 
 static struct VirtualCodeAPI vapi = {
-		FreeVirtualCode, DumpVirtualCode
+		FreeVirtualCode, WriteVirtualCode
 };
 
 static struct VirtualCode *MakeThreadedCode(KonohaContext *kctx, KBuilder *builder, VirtualCode *vcode, size_t codesize)
@@ -969,8 +892,8 @@ static struct VirtualCode *CompileVirtualCode(KonohaContext *kctx, KBuilder *bui
 {
 	KGrowingBuffer wb;
 	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
-	BasicBlock_writeBuffer(kctx, beginId, &wb);
-	BasicBlock_writeBuffer(kctx, returnId, &wb);
+	BasicBlock_WriteBuffer(kctx, beginId, &wb);
+	BasicBlock_WriteBuffer(kctx, returnId, &wb);
 
 	size_t codesize = Kwb_bytesize(&wb);
 	DBG_P(">>>>>> codesize=%d", codesize);
@@ -979,7 +902,9 @@ static struct VirtualCode *CompileVirtualCode(KonohaContext *kctx, KBuilder *bui
 	memcpy((void*)vcode, KLIB Kwb_top(kctx, &wb, 0), codesize);
 	BasicBlock_setJumpAddr(kctx, BasicBlock_(kctx, beginId), (char*)vcode);
 	KLIB Kwb_Free(&wb);
-	return MakeThreadedCode(kctx, builder, vcode, codesize);
+	vcode = MakeThreadedCode(kctx, builder, vcode, codesize);
+	DumpVirtualCode(kctx, vcode);
+	return vcode;
 }
 
 static void _THCODE(KonohaContext *kctx, VirtualCode *pc, void **codeaddr, size_t codesize)

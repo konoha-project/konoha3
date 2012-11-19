@@ -261,7 +261,7 @@
 //	return bb;
 //}
 //
-//static void DumpVirtualCode(KonohaContext *kctx, VirtualCode *op, size_t n)
+//static void WriteVirtualCode(KonohaContext *kctx, VirtualCode *op, size_t n)
 //{
 //	int i;
 //	for(i = 0; i < n; i++) {
@@ -275,7 +275,7 @@
 //	VirtualCode *op = (VirtualCode *)((char*)bb + sizeof(BasicBlock));
 //	int id = BasicBlock_id(kctx, bb);
 //	DBG_P("BB(%d) newid=%d, nextid=%d, branch=%d, codeoffset=%d, lastoffset=%d", id, bb->newid, bb->nextid, bb->branchid, bb->codeoffset, bb->lastoffset);
-//	DumpVirtualCode(kctx, op, n);
+//	WriteVirtualCode(kctx, op, n);
 //}
 //
 //static BasicBlock* new_BasicBlock(KonohaContext *kctx, size_t max, BasicBlock *oldbb)
@@ -411,7 +411,7 @@
 //	return Kwb_bytesize(wb);
 //}
 //
-//static void BasicBlock_writeBuffer(KonohaContext *kctx, int blockId, KGrowingBuffer *wb)
+//static void BasicBlock_WriteBuffer(KonohaContext *kctx, int blockId, KGrowingBuffer *wb)
 //{
 //	BasicBlock *bb = BasicBlock_(kctx, blockId);
 //	while(bb != NULL && bb->codeoffset == -1) {
@@ -421,7 +421,7 @@
 //			int id = BasicBlock_id(kctx, bb);
 //			char buf[len];  // bb is growing together with wb.
 //			memcpy(buf, ((char*)bb) + sizeof(BasicBlock), len);
-//			KLIB Kwb_write(kctx, wb, buf, len);
+//			KLIB Kwb_Write(kctx, wb, buf, len);
 //			bb = BasicBlock_(kctx, id);  // recheck
 //			bb->lastoffset = CodeOffset(wb) - sizeof(VirtualCode);
 //			DBG_ASSERT(bb->codeoffset + ((len / sizeof(VirtualCode)) - 1) * sizeof(VirtualCode) == bb->lastoffset);
@@ -436,7 +436,7 @@
 //		if(bb->branchid != -1 /*&& bb->branchid != ctxcode->bbEndId*/) {
 //			BasicBlock *bbJ = BasicBlock_(kctx, bb->branchid);
 //			if(bbJ->codeoffset == -1) {
-//				BasicBlock_writeBuffer(kctx, bb->branchid, wb);
+//				BasicBlock_WriteBuffer(kctx, bb->branchid, wb);
 //			}
 //		}
 //		bb = BasicBlock_(kctx, bb->nextid);
@@ -868,8 +868,8 @@
 //{
 //	KGrowingBuffer wb;
 //	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
-//	BasicBlock_writeBuffer(kctx, beginBlock, &wb);
-//	BasicBlock_writeBuffer(kctx, returnId, &wb);
+//	BasicBlock_WriteBuffer(kctx, beginBlock, &wb);
+//	BasicBlock_WriteBuffer(kctx, returnId, &wb);
 //
 //	kByteCodeVar *kcode = new_(ByteCodeVar, NULL, gcstackNULL);
 //	kcode->codesize = Kwb_bytesize(&wb);

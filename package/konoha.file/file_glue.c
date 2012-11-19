@@ -161,7 +161,7 @@ static void kFile_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer
 {
 	kFile *file = (kFile *)v[pos].asObject;
 	if(file->PathInfoNULL != NULL) {
-		KLIB Kwb_write(kctx, wb, S_text(file->PathInfoNULL), S_size(file->PathInfoNULL));
+		KLIB Kwb_Write(kctx, wb, S_text(file->PathInfoNULL), S_size(file->PathInfoNULL));
 	}
 	else {
 		KLIB Kwb_printf(kctx, wb, "FILE:%p", file->fp);
@@ -262,7 +262,7 @@ static KMETHOD File_readLine(KonohaContext *kctx, KonohaStack *sfp)
 					KLIB Kwb_iconv(kctx, &wb, file->readerIconv, buffer, pos, trace);
 				}
 				else {
-					KLIB Kwb_write(kctx, &wb, buffer, pos);
+					KLIB Kwb_Write(kctx, &wb, buffer, pos);
 				}
 				bufferCount++;
 				hasUTF8 = false;
@@ -274,7 +274,7 @@ static KMETHOD File_readLine(KonohaContext *kctx, KonohaStack *sfp)
 				KLIB Kwb_iconv(kctx, &wb, file->readerIconv, buffer, pos, trace);
 			}
 			else {
-				KLIB Kwb_write(kctx, &wb, buffer, pos);
+				KLIB Kwb_Write(kctx, &wb, buffer, pos);
 			}
 		}
 		kFile_CheckEOF(kctx, file, trace);
@@ -359,7 +359,7 @@ static KMETHOD File_read3(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## @Native int File.write(Bytes buf);
-static KMETHOD File_write(KonohaContext *kctx , KonohaStack *sfp)
+static KMETHOD File_Write(KonohaContext *kctx , KonohaStack *sfp)
 {
 	kFile *file = sfp[0].asFile;
 	kBytes *ba  = sfp[1].asBytes;
@@ -369,7 +369,7 @@ static KMETHOD File_write(KonohaContext *kctx , KonohaStack *sfp)
 }
 
 //## @Native int File.write(Bytes buf, int offset, int len);
-static KMETHOD File_write3(KonohaContext *kctx , KonohaStack *sfp)
+static KMETHOD File_Write3(KonohaContext *kctx , KonohaStack *sfp)
 {
 	kFile *file = sfp[0].asFile;
 	kBytes *ba  = sfp[1].asBytes;
@@ -470,8 +470,8 @@ static void file_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *t
 
 		_Public, _F(File_read),   TY_int, TY_File, MN_("read"), 1, TY_Bytes, FN_("buf"),
 		_Public, _F(File_read3),  TY_int, TY_File, MN_("read"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
-		_Public, _F(File_write),  TY_int, TY_File, MN_("write"), 1, TY_Bytes, FN_("buf"),
-		_Public, _F(File_write3), TY_int, TY_File, MN_("write"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
+		_Public, _F(File_Write),  TY_int, TY_File, MN_("write"), 1, TY_Bytes, FN_("buf"),
+		_Public, _F(File_Write3), TY_int, TY_File, MN_("write"), 3, TY_Bytes, FN_("buf"), TY_int, FN_("offset"), TY_int, FN_("len"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

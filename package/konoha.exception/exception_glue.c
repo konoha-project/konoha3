@@ -84,18 +84,18 @@
 ////		if(i > 0) {
 ////			knh_putc(ctx, cwb->w, ',');
 ////		}
-////		knh_write_fn(ctx, cwb->w, p->fn);
+////		knh_Write_fn(ctx, cwb->w, p->fn);
 ////		knh_putc(ctx, cwb->w, '=');
-////		knh_write_sfp(ctx, cwb->w, type, &sfp[i+1], FMT_line);
+////		knh_Write_sfp(ctx, cwb->w, type, &sfp[i+1], FMT_line);
 ////	}
 //	const char *msg = KLIB Kwb_top(kctx, &wb, 1);
 //	KLIB new_kString(kctx, e->StackTraceList, msg, strlen(msg), 0);
 ////	if((mtd)->mn != MN_LAMBDA) {
 ////		knh_uline_t uline = knh_stack_uline(ctx, sfp);
-////		knh_write_uline(ctx, cwb->w, uline);
-////		knh_write_type(ctx, cwb->w, (mtd)->cid);
+////		knh_Write_uline(ctx, cwb->w, uline);
+////		knh_Write_type(ctx, cwb->w, (mtd)->cid);
 ////		knh_putc(ctx, cwb->w, '.');
-////		knh_write_mn(ctx, cwb->w, (mtd)->mn);
+////		knh_Write_mn(ctx, cwb->w, (mtd)->mn);
 ////		knh_putc(ctx, cwb->w, '(');
 ////		knh_putc(ctx, cwb->w, ')');
 ////		if(DP(e)->tracesNULL == NULL) {

@@ -596,7 +596,7 @@ typedef struct io_t {
 	unsigned long syscw;
 	unsigned long read_bytes;
 	unsigned long write_bytes;
-	unsigned long cancelled_write_bytes;
+	unsigned long cancelled_Write_bytes;
 } io_t;
 
 #include <fcntl.h>
@@ -626,14 +626,14 @@ static void str2io(const char *S, io_t *io)
 			"syscw: %lu\n"
 			"read_bytes: %lu\n"
 			"write_bytes: %lu\n"
-			"cancelled_write_bytes: %lu\n",
+			"cancelled_Write_bytes: %lu\n",
 			&io->rchar,
 			&io->wchar,
 			&io->syscr,
 			&io->syscw,
 			&io->read_bytes,
 			&io->write_bytes,
-			&io->cancelled_write_bytes
+			&io->cancelled_Write_bytes
 			);
 	if(num < 7) exit(1);
 
@@ -860,7 +860,7 @@ static void _diagnosis(void) {
 			LogUint("[process] syscw(b)",                 io->syscw),
 			LogUint("[process] read_bytes(b)",            io->read_bytes),
 			LogUint("[process] write_bytes(b)",           io->write_bytes),
-			LogUint("[process] cancelled_write_bytes(b)", io->cancelled_write_bytes)
+			LogUint("[process] cancelled_Write_bytes(b)", io->cancelled_Write_bytes)
 		);
 }
 

@@ -1608,7 +1608,7 @@ struct KonohaLibVar {
 
 	void                (*Kwb_Init)(KGrowingArray *, KGrowingBuffer *);
 	void*               (*Kwb_Alloca)(KonohaContext *, KGrowingBuffer *, size_t);
-	void                (*Kwb_write)(KonohaContext*, KGrowingBuffer *, const char *, size_t);
+	void                (*Kwb_Write)(KonohaContext*, KGrowingBuffer *, const char *, size_t);
 	void                (*Kwb_vprintf)(KonohaContext*, KGrowingBuffer *, const char *fmt, va_list ap);
 	void                (*Kwb_printf)(KonohaContext*, KGrowingBuffer *, const char *fmt, ...);
 	const char*         (*Kwb_top)(KonohaContext*, KGrowingBuffer *, int);
@@ -1656,7 +1656,7 @@ struct KonohaLibVar {
 	void            (*kObject_protoEach)(KonohaContext*, kAbstractObject *, void *thunk, void (*f)(KonohaContext*, void *, KKeyValue *d));
 	int             (*kObjectProto_p)(KonohaContext *, KonohaStack *, int, KGrowingBuffer *, int count);
 	void            (*kObject_removeKey)(KonohaContext*, kAbstractObject *, ksymbol_t);
-	void            (*kObject_writeToBuffer)(KonohaContext *, kObject *, int, KGrowingBuffer *, KonohaValue *, int);
+	void            (*kObject_WriteToBuffer)(KonohaContext *, kObject *, int, KGrowingBuffer *, KonohaValue *, int);
 
 
 	kString*        (*new_kString)(KonohaContext*, kArray *gcstack, const char *, size_t, int);
@@ -1721,7 +1721,7 @@ struct KonohaLibVar {
 #define KCalloc_UNTRACE(size, item)    PLATAPI Kzmalloc(kctx, ((size) * (item)), NULL)
 #define KFree(p, size)                 PLATAPI Kfree(kctx, p, size)
 
-//#define KLIB Kwb_write(W,...)          KLIB Kwb_putc(kctx,W, ## __VA_ARGS__, -1)
+//#define KLIB Kwb_Write(W,...)          KLIB Kwb_putc(kctx,W, ## __VA_ARGS__, -1)
 #define Kwb_bytesize(W)                 (((W)->m)->bytesize - (W)->pos)
 
 #define kclass(CID, UL)           KLIB Kclass(kctx, CID, UL)

@@ -50,14 +50,14 @@ static int knh_dev_open (struct inode *inode , struct file *filp);
 static ssize_t knh_dev_read(struct file *filp, char __user *user_buf,
 		size_t count, loff_t *offset);
 
-static ssize_t knh_dev_write(struct file *filp,const char __user *user_buf,
+static ssize_t knh_dev_Write(struct file *filp,const char __user *user_buf,
 		size_t count,loff_t *offset);
 
 static struct file_operations knh_fops = {
 	.owner = THIS_MODULE,
 	.open  = knh_dev_open,
 	.read  = knh_dev_read,
-	.write = knh_dev_write,
+	.write = knh_dev_Write,
 };
 
 static int knh_dev_open (struct inode* inode, struct file *filp)
@@ -160,14 +160,14 @@ static void KonohaContext_EvalScript(KonohaContext *kctx, char *data, size_t len
 {
 	KGrowingBuffer wb;
 	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
-	KLIB Kwb_write(kctx, &wb,data,len);
+	KLIB Kwb_Write(kctx, &wb,data,len);
 	kfileline_t uline = FILEID_("(kernel)") | 1;
 	Konoha_Eval((KonohaContext*)kctx, KLIB Kwb_top(kctx, &wb,1),uline);
 	KLIB Kwb_Free(&wb);
 }
 //EXPORT_SYMBOL(KonohaContext_EvalScript);
 
-static ssize_t knh_dev_write(struct file *filp,const char __user *user_buf,
+static ssize_t knh_dev_Write(struct file *filp,const char __user *user_buf,
 		size_t count,loff_t *offset) {
 	char buf[MAXCOPYBUF];
 	struct konohadev_t *dev = filp->private_data;

@@ -385,7 +385,7 @@ static kString *kFILE_readAll(KonohaContext *kctx, kArray *gcstack, kFile *file,
 	while(1) {
 		size_t size = fread(buf, 1, sizeof(buf), file->fp);
 		if(size > 0) {
-			KLIB Kwb_write(kctx, &wb, buf, size);
+			KLIB Kwb_Write(kctx, &wb, buf, size);
 		}
 		else {
 			break;
@@ -1280,7 +1280,7 @@ static kString *kPipeReadStringNULL(KonohaContext *kctx, FILE *fp)
 	while(1) {
 		size_t size = fread(buf, 1, sizeof(buf), fp);
 		if(size > 0) {
-			KLIB Kwb_write(kctx, &wb, buf, size);
+			KLIB Kwb_Write(kctx, &wb, buf, size);
 		}
 		else {
 			break;

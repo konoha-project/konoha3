@@ -61,23 +61,23 @@ static kObject *new_kObject(KonohaContext *kctx, kArray *gcstackNULL, KonohaClas
 	return (kObject *)o;
 }
 
-static void KonohaClass_writeUnboxValueToBuffer(KonohaContext *kctx, KonohaClass *c, uintptr_t unboxValue, int isDelim, KGrowingBuffer *wb)
+static void KonohaClass_WriteUnboxValueToBuffer(KonohaContext *kctx, KonohaClass *c, uintptr_t unboxValue, int isDelim, KGrowingBuffer *wb)
 {
 	if(isDelim > 0) {
-		KLIB Kwb_write(kctx, wb, ", ", 2);
+		KLIB Kwb_Write(kctx, wb, ", ", 2);
 	}
 	KonohaValue v = {};
 	v.unboxValue = unboxValue;
 	c->p(kctx, &v, 0, wb);
 }
 
-static void kObject_writeToBuffer(KonohaContext *kctx, kObject *o, int isDelim, KGrowingBuffer *wb, KonohaValue *sfp, int pos)
+static void kObject_WriteToBuffer(KonohaContext *kctx, kObject *o, int isDelim, KGrowingBuffer *wb, KonohaValue *sfp, int pos)
 {
 	if(isDelim > 0) {
-		KLIB Kwb_write(kctx, wb, ", ", 2);
+		KLIB Kwb_Write(kctx, wb, ", ", 2);
 	}
 	if(IS_NULL(o)) {
-		KLIB Kwb_write(kctx, wb, TEXTSIZE("null"));
+		KLIB Kwb_Write(kctx, wb, TEXTSIZE("null"));
 	}
 	else {
 		if(sfp == NULL) {
@@ -91,7 +91,6 @@ static void kObject_writeToBuffer(KonohaContext *kctx, kObject *o, int isDelim, 
 			}
 		}
 		if(TY_isUnbox(O_typeId(o))) {
-			DBG_P("sfp[pos]=%d, unbox=%d", sfp[pos].unboxValue, O_unbox(o));
 			sfp[pos].unboxValue = O_unbox(o);
 		}
 		else {
@@ -117,10 +116,10 @@ static void kNumber_Init(KonohaContext *kctx, kObject *o, void *conf)
 static void kBoolean_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
 {
 	if(v[pos].boolValue) {
-		KLIB Kwb_write(kctx, wb, TEXTSIZE("true"));
+		KLIB Kwb_Write(kctx, wb, TEXTSIZE("true"));
 	}
 	else {
-		KLIB Kwb_write(kctx, wb, TEXTSIZE("false"));
+		KLIB Kwb_Write(kctx, wb, TEXTSIZE("false"));
 	}
 }
 
@@ -155,26 +154,26 @@ static void kString_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuff
 {
 	const char *t = S_text(v[pos].asString);
 	size_t i, len = S_size(v[pos].asString);
-	Kwb_write(kctx, wb, "\"", 1);
+	Kwb_Write(kctx, wb, "\"", 1);
 	for(i = 0; i < len; i++) {
 		int ch = t[i];
 		char buf[2] = {'\\', ch};
 		if(ch == '\\' || ch == '"') {
-			KLIB Kwb_write(kctx, wb, buf, 2);
+			KLIB Kwb_Write(kctx, wb, buf, 2);
 		}
 		else if(t[i] == '\n'){
 			buf[1] = 'n';
-			KLIB Kwb_write(kctx, wb, buf, 2);
+			KLIB Kwb_Write(kctx, wb, buf, 2);
 		}
 		else if(t[i] == '\t'){
 			buf[1] = 't';
-			KLIB Kwb_write(kctx, wb, buf, 2);
+			KLIB Kwb_Write(kctx, wb, buf, 2);
 		}
 		else {
-			KLIB Kwb_write(kctx, wb, buf+1, 1);
+			KLIB Kwb_Write(kctx, wb, buf+1, 1);
 		}
 	}
-	Kwb_write(kctx, wb, "\"", 1);
+	Kwb_Write(kctx, wb, "\"", 1);
 }
 
 static uintptr_t kString_unbox(KonohaContext *kctx, kObject *o)
@@ -286,20 +285,20 @@ static void kArray_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowing
 {
 	size_t i;
 	kArray *a = values[pos].asArray;
-	KLIB Kwb_write(kctx, wb, "[", 1);
+	KLIB Kwb_Write(kctx, wb, "[", 1);
 	if(kArray_isUnboxData(a)) {
 		KonohaClass *c = CT_(O_p0(a));
 		for(i = 0; i < kArray_size(a); i++) {
-			KonohaClass_writeUnboxValueToBuffer(kctx, c, a->unboxItems[i], (i > 0)/*delim*/, wb);
+			KonohaClass_WriteUnboxValueToBuffer(kctx, c, a->unboxItems[i], (i > 0)/*delim*/, wb);
 		}
 	}
 	else {
 		for(i = 0; i < kArray_size(a); i++) {
 			kObject *o = a->ObjectItems[i];
-			kObject_writeToBuffer(kctx, o, (i>0)/*delim*/, wb, values, pos+1);
+			kObject_WriteToBuffer(kctx, o, (i>0)/*delim*/, wb, values, pos+1);
 		}
 	}
-	KLIB Kwb_write(kctx, wb, "]", 1);
+	KLIB Kwb_Write(kctx, wb, "]", 1);
 }
 
 static void kArray_ensureMinimumSize(KonohaContext *kctx, struct _kAbstractArray *a, size_t min)
@@ -800,18 +799,18 @@ static kString* KonohaClass_shortName(KonohaContext *kctx, KonohaClass *ct)
 			}
 			Kwb_Init(&(kctx->stack->cwb), &wb);
 			kString *s = SYM_s(ct->classNameSymbol);
-			KLIB Kwb_write(kctx, &wb, S_text(s), S_size(s));
-			KLIB Kwb_write(kctx, &wb, "[", 1);
+			KLIB Kwb_Write(kctx, &wb, S_text(s), S_size(s));
+			KLIB Kwb_Write(kctx, &wb, "[", 1);
 			if(ct->baseTypeId == TY_Func) {
 				s = KonohaClass_shortName(kctx, CT_(ct->p0));
-				KLIB Kwb_write(kctx, &wb, S_text(s), S_size(s)); c++;
+				KLIB Kwb_Write(kctx, &wb, S_text(s), S_size(s)); c++;
 			}
 			for(i = 0; i < cparam->psize; i++) {
-				if(c > 0) KLIB Kwb_write(kctx, &wb, ",", 1);
+				if(c > 0) KLIB Kwb_Write(kctx, &wb, ",", 1);
 				s = KonohaClass_shortName(kctx, CT_(cparam->paramtypeItems[i].ty));
-				KLIB Kwb_write(kctx, &wb, S_text(s), S_size(s));
+				KLIB Kwb_Write(kctx, &wb, S_text(s), S_size(s));
 			}
-			KLIB Kwb_write(kctx, &wb, "]", 1);
+			KLIB Kwb_Write(kctx, &wb, "]", 1);
 			const char *text = Kwb_top(kctx, &wb, 1);
 			((KonohaClassVar *)ct)->shortClassNameNULL_OnGlobalConstList = new_kString(kctx, OnGlobalConstList, text, Kwb_bytesize(&wb), StringPolicy_ASCII);
 			KLIB Kwb_Free(&wb);
@@ -1010,7 +1009,7 @@ static void initKonohaLib(KonohaLibVar *l)
 	l->Kclass                  = Kclass;
 	l->new_kObject             = new_kObject;
 	l->new_kString             = new_kString;
-	l->kObject_writeToBuffer   = kObject_writeToBuffer;
+	l->kObject_WriteToBuffer   = kObject_WriteToBuffer;
 
 	l->kArray_Add           = kArray_Add;
 	l->kArray_insert        = kArray_insert;

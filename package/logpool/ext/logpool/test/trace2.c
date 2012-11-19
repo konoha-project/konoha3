@@ -33,7 +33,7 @@ extern logapi_t LOGAPI;
 #define LogText(K,V)    LOG_s, (K), (V)
 
 int n = 0;
-static void logpool_test_write(logpool_t *logpool)
+static void logpool_test_Write(logpool_t *logpool)
 {
     long   i = n;
     const char *s = "Good Bye";
@@ -52,7 +52,7 @@ int main(int argc, char const* argv[])
     logpool_t *logpool = logpool_open(NULL, &LOGAPI, LOGAPI_PARAM);
     int i, size = LOGPOOL_TEST_COUNT(argc, argv);
     for (i = 0; i < size; ++i) {
-        logpool_test_write(logpool);
+        logpool_test_Write(logpool);
         if(i % 2) {
             usleep(1);
         }

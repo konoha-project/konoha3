@@ -8,7 +8,7 @@ extern "C" {
 static bool stream_Apply(struct pool_plugin *_p, struct LogEntry *e, uint32_t state)
 {
     struct pool_plugin_stream *p = (struct pool_plugin_stream *) _p;
-    io_write(p->io, e, e->h.size);
+    io_Write(p->io, e, e->h.size);
     return true;
 }
 

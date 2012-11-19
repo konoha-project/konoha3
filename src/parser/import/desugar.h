@@ -371,7 +371,7 @@ static kString *kToken_ResolveEscapeSequence(KonohaContext *kctx, kToken *tk, si
 	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 	const char *text = S_text(tk->text) + start;
 	const char *end  = S_text(tk->text) + S_size(tk->text);
-	KLIB Kwb_write(kctx, &wb, S_text(tk->text), start);
+	KLIB Kwb_Write(kctx, &wb, S_text(tk->text), start);
 	while(text < end) {
 		int ch = *text;
 		if(ch == '\\' && *(text+1) != '\0') {
@@ -394,7 +394,7 @@ static kString *kToken_ResolveEscapeSequence(KonohaContext *kctx, kToken *tk, si
 		}
 		{
 			char buf[1] = {ch};
-			KLIB Kwb_write(kctx, &wb, (const char *)buf, 1);
+			KLIB Kwb_Write(kctx, &wb, (const char *)buf, 1);
 		}
 		text++;
 	}

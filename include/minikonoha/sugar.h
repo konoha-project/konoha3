@@ -756,7 +756,7 @@ struct KBuilderAPI2 {
 
 struct VirtualCodeAPI {
 	void (*FreeVirtualCode)(KonohaContext *kctx, struct VirtualCode *);
-	void (*DumpVirtualCode)(KonohaContext *kctx, KGrowingBuffer *, struct VirtualCode *);
+	void (*WriteVirtualCode)(KonohaContext *kctx, KGrowingBuffer *, struct VirtualCode *);
 };
 
 /* ------------------------------------------------------------------------ */

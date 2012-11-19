@@ -69,7 +69,7 @@ static void server_read_callback(struct bufferevent *bev, void *ctx)
     return;
 }
 
-static void server_write_callback(struct bufferevent *bev, void *ctx)
+static void server_Write_callback(struct bufferevent *bev, void *ctx)
 {
     //debug_print(0, "write_cb bev=%p", bev);
 }
@@ -95,7 +95,7 @@ static void server_accept_callback(struct evconnlistener *lev, evutil_socket_t f
 
     struct range_stream *cs = range_stream_new(io, bev);
     bufferevent_setcb(bev, server_read_callback,
-            server_write_callback, server_event_callback, cs);
+            server_Write_callback, server_event_callback, cs);
 
     bufferevent_enable(bev, EV_READ|EV_WRITE);
 
@@ -129,9 +129,9 @@ static int io_server_Init(struct io *io, char *host, int port, int ev_mode)
     return IO_OK;
 }
 
-static int io_server_write(struct io *io, const void *data, uint32_t nbyte)
+static int io_server_Write(struct io *io, const void *data, uint32_t nbyte)
 {
-    if(bufferevent_write(io->bev, data, nbyte) != 0) {
+    if(bufferevent_Write(io->bev, data, nbyte) != 0) {
         fprintf(stderr, "write error, v=('%p', %u)\n", data, nbyte);
         return IO_FAILED;
     }
@@ -155,7 +155,7 @@ struct io_api server_api = {
     "server",
     io_server_Init,
     io_server_read,
-    io_server_write,
+    io_server_Write,
     io_server_close
 };
 

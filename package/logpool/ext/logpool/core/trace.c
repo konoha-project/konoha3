@@ -14,7 +14,7 @@ static inline int util_send_quit_msg(struct bufferevent *bev)
 {
     char buf[16];
     int size = emit_message(buf, LOGPOOL_EVENT_QUIT, 1, 0, 0, NULL, NULL);
-    if(bufferevent_write(bev, buf, size) != 0) {
+    if(bufferevent_Write(bev, buf, size) != 0) {
         debug_print(0, "[util:quit] write error");
         return IO_FAILED;
     }
@@ -46,7 +46,7 @@ static void tracer_cb_read(struct bufferevent *bev, void *ctx)
     //debug_print(0, "read_cb");
 }
 
-static void tracer_cb_write(struct bufferevent *bev, void *ctx)
+static void tracer_cb_Write(struct bufferevent *bev, void *ctx)
 {
     //debug_print(0, "write_cb");
 }
@@ -63,7 +63,7 @@ static int io_tracer_Init(struct io *io, char *host, int port, int ev_mode)
         fprintf(stderr, "Error constructing bufferevent\n");
         return IO_FAILED;
     }
-    bufferevent_setcb(bev, tracer_cb_read, tracer_cb_write, tracer_cb_event, base);
+    bufferevent_setcb(bev, tracer_cb_read, tracer_cb_Write, tracer_cb_event, base);
 
     bufferevent_enable(bev, ev_mode);
     dns_base = evdns_base_new(base, 1);
@@ -112,10 +112,10 @@ static void trace_thread_start(struct io *io)
     fprintf(stderr, "thread started\n");
 }
 
-static int io_tracer_write(struct io *io, const void *data, uint32_t nbyte)
+static int io_tracer_Write(struct io *io, const void *data, uint32_t nbyte)
 {
     //fprintf(stderr, "io=%p, bev=%p, data=%p, %d\n", io, io->bev, data, nbyte);
-    if(bufferevent_write(io->bev, data, nbyte) != 0) {
+    if(bufferevent_Write(io->bev, data, nbyte) != 0) {
         fprintf(stderr, "write error, v=('%p', %u)\n", data, nbyte);
         return IO_FAILED;
     }
@@ -146,7 +146,7 @@ struct io_api trace_api = {
     "tracer",
     io_tracer_Init,
     io_tracer_read,
-    io_tracer_write,
+    io_tracer_Write,
     io_tracer_close
 };
 

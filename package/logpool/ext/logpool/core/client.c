@@ -40,7 +40,7 @@ static void client_cb_read(struct bufferevent *bev, void *ctx)
     debug_print(0, "read_cb");
 }
 
-static void client_cb_write(struct bufferevent *bev, void *ctx)
+static void client_cb_Write(struct bufferevent *bev, void *ctx)
 {
     debug_print(0, "write_cb");
 }
@@ -56,7 +56,7 @@ static int io_client_Init(struct io *io, char *host, int port, int ev_mode)
     io->bev  = bev;
     io->base = base;
     bufferevent_setcb(bev, client_cb_read,
-            client_cb_write, client_cb_event, io);
+            client_cb_Write, client_cb_event, io);
 
     bufferevent_enable(bev, ev_mode);
     dns_base = evdns_base_new(base, 1);
@@ -99,9 +99,9 @@ static void client_thread_start(struct io *io)
     }
 }
 
-static int io_client_write(struct io *io, const void *data, uint32_t nbyte)
+static int io_client_Write(struct io *io, const void *data, uint32_t nbyte)
 {
-    if(io->bev == NULL || bufferevent_write(io->bev, data, nbyte) != 0) {
+    if(io->bev == NULL || bufferevent_Write(io->bev, data, nbyte) != 0) {
         fprintf(stderr, "write error, v=('%p', %u)\n", data, nbyte);
         return IO_FAILED;
     }
@@ -162,7 +162,7 @@ struct io_api client_api = {
     "client",
     io_client_Init,
     io_client_read,
-    io_client_write,
+    io_client_Write,
     io_client_close
 };
 

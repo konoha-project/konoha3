@@ -10,7 +10,7 @@ static void emit_procedure(struct io *io, char *q)
     char buf[128] = {};
     size_t len = emit_message(buf, LOGPOOL_EVENT_READ, 1,
             0, strlen(q), NULL, q);
-    assert(io_write(io, buf, len) == IO_OK);
+    assert(io_Write(io, buf, len) == IO_OK);
 }
 
 static void read_log(struct io *io, struct Log *tmp)

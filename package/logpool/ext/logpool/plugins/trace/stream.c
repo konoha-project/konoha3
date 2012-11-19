@@ -102,7 +102,7 @@ static void logpool_io_flush(logpool_t *logpool, void **args __UNUSED__)
     }
     cast(struct logpool *, logpool)->logfmt_size = 0;
     bufsize = (char *) lp->buf - buf_orig;
-    ret = io_write(lp->io, buf_orig, bufsize);
+    ret = io_Write(lp->io, buf_orig, bufsize);
     if(ret != LOGPOOL_SUCCESS) {
         /* TODO Error */
         fprintf(stderr, "Error!!\n");
@@ -212,7 +212,7 @@ void logpool_procedure(logpool_t *logpool, char *q, int qlen)
     char buf[128] = {};
     size_t len = emit_message(buf, LOGPOOL_EVENT_READ, 1,
             0, qlen, NULL, q);
-    assert(io_write(lp->io, buf, len) == IO_OK);
+    assert(io_Write(lp->io, buf, len) == IO_OK);
 }
 
 void *logpool_client_get(logpool_t *logpool, void *logbuf, size_t bufsize)

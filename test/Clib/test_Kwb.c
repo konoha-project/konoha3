@@ -32,8 +32,8 @@ void test_Kwb(KonohaContext *kctx)
     /* if we use karray as kwb, struct_size should be sizeof(char) */
     kctx->klib->Karray_Init(kctx, &a, 4);
     kctx->klib->Kwb_Init(&a, &wb);
-    kctx->klib->Kwb_write(kctx, &wb, "abcd", 4);
-    kctx->klib->Kwb_write(kctx, &wb, "abcd", 4);
+    kctx->klib->Kwb_Write(kctx, &wb, "abcd", 4);
+    kctx->klib->Kwb_Write(kctx, &wb, "abcd", 4);
     const char *data = kctx->klib->Kwb_top(kctx, &wb, 1);
     assert(strcmp(data, "abcdabcd") == 0);
     kctx->klib->Kwb_Free(&wb);
