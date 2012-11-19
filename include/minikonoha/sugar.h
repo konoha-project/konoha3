@@ -703,7 +703,6 @@ struct KBuilderCommon {
 struct KBuilderAPI2 {
 	const char *target;
 	struct VirtualCode*   (*GenerateVirtualCode)(KonohaContext *, kBlock *block, int option);
-	void                  (*FreeVirtualCode)(KonohaContext *kctx, struct VirtualCode *vcode);
 	MethodFunc            (*GenerateMethodFunc)(KonohaContext *, struct VirtualCode *);
 	struct VirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct VirtualCode *pc);
 
@@ -753,6 +752,12 @@ struct KBuilderAPI2 {
 	OP(OrExpr)\
 	OP(LetExpr)\
 	OP(StackTopExpr)
+
+
+struct VirtualCodeAPI {
+	void (*FreeVirtualCode)(KonohaContext *kctx, struct VirtualCode *);
+	void (*DumpVirtualCode)(KonohaContext *kctx, KGrowingBuffer *, struct VirtualCode *);
+};
 
 /* ------------------------------------------------------------------------ */
 

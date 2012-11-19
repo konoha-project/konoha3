@@ -788,13 +788,15 @@ run_test 3 3 minimum "-MOutputTest" 0134_Indexer/Indexer_TooManyParam.k
 record_result 0134_Indexer $PASS 3
 ## 0150_Sugar
 PASS=0
-run_test 1 6 minimum "-MOutputTest" 0150_Sugar/Sugar_BlockTypeCheck.k
-run_test 2 6 minimum "-MOutputTest" 0150_Sugar/Sugar_ErrorMessage.k
-run_test 3 6 minimum "-MOutputTest" 0150_Sugar/Sugar_Expression.k
-run_test 4 6 minimum "-MOutputTest" 0150_Sugar/Sugar_Symbol.k
-run_test 5 6 minimum "-MOutputTest" 0150_Sugar/Sugar_TokenDecl.k
-run_test 6 6 minimum "-MOutputTest" 0150_Sugar/Sugar_TypeChecker.k
-record_result 0150_Sugar $PASS 6
+run_test 1 8 minimum "-MOutputTest" 0150_Sugar/Sugar_BlockTypeCheck.k
+run_test 2 8 minimum "-MOutputTest" 0150_Sugar/Sugar_ErrorMessage.k
+run_test 3 8 minimum "-MOutputTest" 0150_Sugar/Sugar_Expression.k
+run_test 4 8 minimum "-MOutputTest" 0150_Sugar/Sugar_InfoMessage.k
+run_test 5 8 minimum "-MOutputTest" 0150_Sugar/Sugar_Symbol.k
+run_test 6 8 minimum "-MOutputTest" 0150_Sugar/Sugar_TokenDecl.k
+run_test 7 8 minimum "-MOutputTest" 0150_Sugar/Sugar_TypeChecker.k
+run_test 8 8 minimum "-MOutputTest" 0150_Sugar/Sugar_WarningMessage.k
+record_result 0150_Sugar $PASS 8
 ## 0151_NS
 PASS=0
 run_test 1 5 minimum "-MOutputTest" 0151_NS/NS_DefinedBinaryOperator.k

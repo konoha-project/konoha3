@@ -47,6 +47,7 @@ typedef struct {
 	VirtualCodeType arg4;
 } DEFINE_OPSPEC;
 
+
 #define OPSPEC_(T)  #T, 0, VPARAM_##T
 
 static const DEFINE_OPSPEC OPDATA[] = {
@@ -98,7 +99,7 @@ static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeT
 	}/*switch*/
 }
 
-static void DumpOpCode(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c, VirtualCode *pc_start)
+static void DumpVirtualCode1(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c, VirtualCode *pc_start)
 {
 	KLIB Kwb_printf(kctx, wb, "[L%d:%d] %s(%d)", (int)(c - pc_start), c->line, OPDATA[c->opcode].name, (int)c->opcode);
 	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg1, c, 0, pc_start);
@@ -106,6 +107,15 @@ static void DumpOpCode(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c, 
 	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg3, c, 2, pc_start);
 	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg4, c, 3, pc_start);
 	KLIB Kwb_printf(kctx, wb, "\n");
+}
+
+static void DumpVirtualCode(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c)
+{
+	OPTHCODE *opTHCODE = (OPTHCODE *)(c-1);
+	size_t i, n = (opTHCODE->codesize / sizeof(VirtualCode)) - 1;
+	for(i = 0; i < n; i++) {
+		DumpVirtualCode1(kctx, wb, c+i, c);
+	}
 }
 
 /* ------------------------------------------------------------------------ */
@@ -352,31 +362,6 @@ static int BasicBlock_id(KonohaContext *kctx, BasicBlock *bb)
 	return ((char*)bb) - kctx->stack->cwb.bytebuf;
 }
 
-//static BasicBlock* BasicBlock_self(KonohaContext *kctx, BasicBlock *bb)
-//{
-//	while(bb->newid != -1) {
-//		bb = BasicBlock_(kctx, bb->newid);
-//	}
-//	return bb;
-//}
-
-//static void DumpVirtualCode(KonohaContext *kctx, VirtualCode *op, size_t n)
-//{
-//	int i;
-//	for(i = 0; i < n; i++) {
-//		DBG_P(" %p [%d] %s", op, i, T_opcode(op[i].opcode));
-//	}
-//}
-//
-//static void BasicBlock_Dump(KonohaContext *kctx, BasicBlock *bb)
-//{
-//	size_t n = (bb->size - sizeof(BasicBlock)) / sizeof(VirtualCode);
-//	VirtualCode *op = (VirtualCode *)((char*)bb + sizeof(BasicBlock));
-//	int id = BasicBlock_id(kctx, bb);
-//	DBG_P("BB(%d) newid=%d, nextid=%d, branch=%d, codeoffset=%d, lastoffset=%d", id, bb->newid, bb->nextid, bb->branchid, bb->codeoffset, bb->lastoffset);
-//	DumpVirtualCode(kctx, op, n);
-//}
-
 static BasicBlock* new_BasicBlock(KonohaContext *kctx, size_t max, BasicBlock *oldbb)
 {
 	KGrowingBuffer wb;
@@ -466,10 +451,9 @@ static void ASM_LABEL(KonohaContext *kctx, KBuilder *builder, int labelId)
 	DBG_ASSERT(bb != NULL);
 	DBG_ASSERT(bb->nextid == -1);
 	BasicBlock *labelBlock = BasicBlock_(kctx, labelId);
-	if(bb->branchid == -1) {
-		DBG_ASSERT(bb->nextid == -1);
-		bb->nextid = BasicBlock_id(kctx, labelBlock);
-	}
+//	if(bb->branchid == -1) {
+//		bb->nextid = BasicBlock_id(kctx, labelBlock);
+//	}
 	labelBlock->incoming += 1;
 	builder->bbMainId = BasicBlock_id(kctx, labelBlock);
 }
@@ -571,7 +555,6 @@ static void BasicBlock_setJumpAddr(KonohaContext *kctx, BasicBlock *bb, char *vc
 		if(bb->branchid != -1) {
 			BasicBlock *bbJ = BasicBlock_leapJump(kctx, BasicBlock_(kctx, bb->branchid));
 			OPJMP *j = (OPJMP *)(vcode + bb->lastoffset);
-//			BasicBlock_Dump(kctx, bbJ);
 			DBG_ASSERT(j->opcode == OPCODE_JMP || j->opcode == OPCODE_JMPF);
 			j->jumppc = (VirtualCode*)(vcode + bbJ->codeoffset);
 			bbJ = BasicBlock_(kctx, bb->branchid);
@@ -915,7 +898,7 @@ static void KBuilder_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt 
 
 	kExpr *leftHandExpr = kExpr_at(expr, 1);
 	kExpr *rightHandExpr = kExpr_at(expr, 2);
-	DBG_P("LET (%s) a=%d, shift=%d, espidx=%d", TY_t(expr->ty), a, shift, espidx);
+	//DBG_P("LET (%s) a=%d, shift=%d, espidx=%d", TY_t(expr->ty), a, shift, espidx);
 	if(leftHandExpr->build == TEXPR_LOCAL) {
 		builder->common.a = leftHandExpr->index;
 		SUGAR VisitExpr(kctx, builder, stmt, rightHandExpr);
@@ -925,7 +908,7 @@ static void KBuilder_VisitLetExpr(KonohaContext *kctx, KBuilder *builder, kStmt 
 		}
 	}
 	else if(leftHandExpr->build == TEXPR_STACKTOP) {
-		DBG_P("LET TEXPR_STACKTOP a=%d, leftHandExpr->index=%d, espidx=%d", a, leftHandExpr->index, espidx);
+		//DBG_P("LET TEXPR_STACKTOP a=%d, leftHandExpr->index=%d, espidx=%d", a, leftHandExpr->index, espidx);
 		builder->common.a = leftHandExpr->index + shift;
 		SUGAR VisitExpr(kctx, builder, stmt, rightHandExpr);
 		builder->common.a = a;
@@ -962,16 +945,22 @@ static void KBuilder_VisitStackTopExpr(KonohaContext *kctx, KBuilder *builder, k
 static void FreeVirtualCode(KonohaContext *kctx, struct VirtualCode *vcode)
 {
 	OPTHCODE * opTHCODE = (OPTHCODE *)(vcode - 1);
-	if(opTHCODE->codesize > 0) {
+	if(opTHCODE->opcode == OPCODE_THCODE && opTHCODE->codesize > 0) {
 		KFree(opTHCODE, opTHCODE->codesize);
 	}
 }
+
+static struct VirtualCodeAPI vapi = {
+		FreeVirtualCode, DumpVirtualCode
+};
 
 static struct VirtualCode *MakeThreadedCode(KonohaContext *kctx, KBuilder *builder, VirtualCode *vcode, size_t codesize)
 {
 	OPTHCODE *opTHCODE = (OPTHCODE *)vcode;
 	opTHCODE->codesize = codesize;
-	return builder->common.api->RunVirtualMachine(kctx, kctx->esp + 1, vcode);
+	struct VirtualCodeAPI** p = (struct VirtualCodeAPI **)builder->common.api->RunVirtualMachine(kctx, kctx->esp + 1, vcode);
+	p[-1] = &vapi;
+	return (VirtualCode *)p;
 }
 
 static struct VirtualCode *CompileVirtualCode(KonohaContext *kctx, KBuilder *builder, int beginId, int returnId)
@@ -980,8 +969,7 @@ static struct VirtualCode *CompileVirtualCode(KonohaContext *kctx, KBuilder *bui
 	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 	BasicBlock_writeBuffer(kctx, beginId, &wb);
 	BasicBlock_writeBuffer(kctx, returnId, &wb);
-//
-//	kByteCodeVar *kcode = new_(ByteCodeVar, NULL, gcstackNULL);
+
 	size_t codesize = Kwb_bytesize(&wb);
 	DBG_P(">>>>>> codesize=%d", codesize);
 	DBG_ASSERT(codesize != 0);
@@ -1036,48 +1024,6 @@ static struct VirtualCode* MiniVM_GenerateVirtualCode(KonohaContext *kctx, kBloc
 	KLIB Kwb_Free(&wb);
 	return vcode;
 }
-
-
-//static void dumpOPCODE(KonohaContext *kctx, VirtualCode *c, VirtualCode *pc_start)
-//{
-//	size_t i, size = OPDATA[c->opcode].size;
-//	const kushort_t *vmt = OPDATA[c->opcode].types;
-//	if(pc_start == NULL) {
-//		DUMP_P("[%p:%d]\t%s(%d)", c, c->line, T_opcode(c->opcode), (int)c->opcode);
-//	}
-//	else {
-//		DUMP_P("[L%d:%d]\t%s(%d)", (int)(c - pc_start), c->line, T_opcode(c->opcode), (int)c->opcode);
-//	}
-//	for (i = 0; i < size; i++) {
-//		DUMP_P(" ");
-//		switch(vmt[i]) {
-//		case VMT_VOID: break;
-//		case VMT_ADDR:
-//			if(pc_start == NULL) {
-//				DUMP_P("%p", c->p[i]);
-//			}
-//			else {
-//				DUMP_P("L%d", (int)((VirtualCode *)c->p[i] - pc_start));
-//			}
-//			break;
-//		case VMT_R:
-//			DUMP_P("sfp[%d,r=%d]", (int)c->data[i]/2, (int)c->data[i]);
-//			break;
-//		case VMT_U:
-//			DUMP_P("u%lu", c->data[i]); break;
-//		case VMT_I:
-//		case VMT_INT:
-//			DUMP_P("i%ld", c->data[i]); break;
-//		case VMT_F:
-//			DUMP_P("function(%p)", c->p[i]); break;
-//		case VMT_CID:
-//			DUMP_P("CT(%s)", CT_t(c->ct[i])); break;
-//		case VMT_CO:
-//			DUMP_P("CT(%s)", CT_t(O_ct(c->o[i]))); break;
-//		}/*switch*/
-//	}
-//	DUMP_P("\n");
-//}
 
 // -------------------------------------------------------------------------
 
