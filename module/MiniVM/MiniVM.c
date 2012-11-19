@@ -362,13 +362,13 @@ static int BasicBlock_id(KonohaContext *kctx, BasicBlock *bb)
 	return ((char*)bb) - kctx->stack->cwb.bytebuf;
 }
 
-static BasicBlock* new_BasicBlock(KonohaContext *kctx, size_t max, BasicBlock *oldbb)
+static BasicBlock* new_BasicBlock(KonohaContext *kctx, size_t max, int oldId)
 {
 	KGrowingBuffer wb;
 	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 	BasicBlock *bb = (BasicBlock*)KLIB Kwb_Alloca(kctx, &wb, max);
-
-	if(oldbb != NULL) {
+	if(oldId != -1) {
+		BasicBlock *oldbb = BasicBlock_(kctx, oldId);
 		memcpy(bb, oldbb, oldbb->size);
 		oldbb->newid = BasicBlock_id(kctx, bb);
 		oldbb->size = 0;
@@ -389,15 +389,16 @@ static size_t newsize2(size_t max) {
 	return ((max - sizeof(BasicBlock)) * 2) + sizeof(BasicBlock);
 }
 
-static int BasicBlock_Add(KonohaContext *kctx, BasicBlock *bb, kfileline_t uline, VirtualCode *op, size_t size, size_t padding_size)
+static int BasicBlock_Add(KonohaContext *kctx, int blockId, kfileline_t uline, VirtualCode *op, size_t size, size_t padding_size)
 {
+	BasicBlock *bb = BasicBlock_(kctx, blockId);
 	DBG_ASSERT(bb->newid == -1);
 	DBG_ASSERT(size <= padding_size);
 	DBG_ASSERT(bb->nextid == -1 && bb->branchid == -1);
 	if(!(bb->size + size < bb->max)) {
 		size_t newsize = newsize2(bb->max);
 		if(newsize < 1000) newsize = newsize2(newsize);
-		bb = new_BasicBlock(kctx, newsize, bb);
+		bb = new_BasicBlock(kctx, newsize, blockId);
 	}
 	memcpy(((char*)bb) + bb->size, op, size);
 	bb->size += padding_size;
@@ -408,7 +409,7 @@ static int BasicBlock_Add(KonohaContext *kctx, BasicBlock *bb, kfileline_t uline
 
 static int new_BasicBlockLABEL(KonohaContext *kctx)
 {
-	return BasicBlock_id(kctx, new_BasicBlock(kctx, sizeof(VirtualCode) * 2 + sizeof(BasicBlock), NULL));
+	return BasicBlock_id(kctx, new_BasicBlock(kctx, sizeof(VirtualCode) * 2 + sizeof(BasicBlock), -1));
 }
 
 #if defined(USE_DIRECT_THREADED_CODE)
@@ -431,7 +432,7 @@ static int new_BasicBlockLABEL(KonohaContext *kctx)
 
 static void KBuilder_Asm(KonohaContext *kctx, KBuilder *builder, VirtualCode *op, size_t opsize)
 {
-	builder->bbMainId = BasicBlock_Add(kctx, BasicBlock_(kctx, builder->bbMainId), builder->common.uline, op, opsize, sizeof(VirtualCode));
+	builder->bbMainId = BasicBlock_Add(kctx, builder->bbMainId, builder->common.uline, op, opsize, sizeof(VirtualCode));
 }
 
 static void kStmt_setLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbol_t label, int labelId)
@@ -990,8 +991,6 @@ static struct VirtualCode* MiniVM_GenerateVirtualCode(KonohaContext *kctx, kBloc
 {
 	KGrowingBuffer wb;
 	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
-	KLIB Kwb_Alloca(kctx, &wb, 1024*1024*128);
-	KLIB Kwb_Free(&wb);
 
 	INIT_GCSTACK();
 	KBuilder builderbuf = {}, *builder = &builderbuf;
