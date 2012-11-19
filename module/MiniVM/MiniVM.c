@@ -490,6 +490,7 @@ static void ASM_LABEL(KonohaContext *kctx, KBuilder *builder, bblock_t labelId)
 	BasicBlock *labelBlock = BasicBlock_FindById(kctx, labelId);
 	labelBlock->incoming += 1;
 	builder->bbMainId = BasicBlock_id(kctx, labelBlock);
+	bb->nextid = builder->bbMainId;
 }
 
 static void ASM_JMP(KonohaContext *kctx, KBuilder *builder, bblock_t labelId)
@@ -714,6 +715,7 @@ static void KBuilder_VisitIfStmt(KonohaContext *kctx, KBuilder *builder, kStmt *
 	/* else */
 	ASM_LABEL(kctx, builder, lbELSE);
 	SUGAR VisitBlock(kctx, builder, Stmt_getElseBlock(kctx, stmt));
+	//ASM(NOP);
 	/* endif */
 	ASM_LABEL(kctx, builder, lbEND);
 }
@@ -885,15 +887,9 @@ static void KBuilder_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt
 
 static void KBuilder_VisitAndExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
-//	bblock_t lbFALSE = new_BasicBlockLABEL(kctx);
 	bblock_t lbFINAL  = new_BasicBlockLABEL(kctx);
 	KBuilder_asmJMPIF(kctx, builder, stmt, kExpr_at(expr, 1), 0/*FALSE*/, lbFINAL);
 	SUGAR VisitExpr(kctx, builder, stmt, kExpr_at(expr, 2));
-//	ASM_JMP(kctx, builder, lbFINAL);
-//
-//	ASM_LABEL(kctx, builder, lbFALSE); // false
-	//ASM(NSET, NC_(a), 0/*FALSE*/, CT_Boolean);
-	//ASM(NOP);
 	ASM_LABEL(kctx, builder, lbFINAL);
 }
 

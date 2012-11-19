@@ -74,6 +74,7 @@ static void VisitBlock(KonohaContext *kctx, KBuilder *builder, kBlock *block)
 	size_t i;
 	for (i = 0; i < kArray_size(block->StmtList); i++) {
 		kStmt *stmt = block->StmtList->StmtItems[i];
+		DBG_P("i=%d, stmt->syn=%p", i, stmt->syn);
 		if(stmt->syn == NULL) continue;
 		cbuilder->uline = stmt->uline;
 		VisitStmt(kctx, builder, stmt);
