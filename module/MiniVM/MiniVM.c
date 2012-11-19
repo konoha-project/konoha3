@@ -885,13 +885,13 @@ static void KBuilder_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt
 
 static void KBuilder_VisitAndExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
-	bblock_t lbFALSE = new_BasicBlockLABEL(kctx);
+//	bblock_t lbFALSE = new_BasicBlockLABEL(kctx);
 	bblock_t lbFINAL  = new_BasicBlockLABEL(kctx);
-	KBuilder_asmJMPIF(kctx, builder, stmt, kExpr_at(expr, 1), 0/*FALSE*/, lbFALSE);
+	KBuilder_asmJMPIF(kctx, builder, stmt, kExpr_at(expr, 1), 0/*FALSE*/, lbFINAL);
 	SUGAR VisitExpr(kctx, builder, stmt, kExpr_at(expr, 2));
-	ASM_JMP(kctx, builder, lbFINAL);
-
-	ASM_LABEL(kctx, builder, lbFALSE); // false
+//	ASM_JMP(kctx, builder, lbFINAL);
+//
+//	ASM_LABEL(kctx, builder, lbFALSE); // false
 	//ASM(NSET, NC_(a), 0/*FALSE*/, CT_Boolean);
 	//ASM(NOP);
 	ASM_LABEL(kctx, builder, lbFINAL);
