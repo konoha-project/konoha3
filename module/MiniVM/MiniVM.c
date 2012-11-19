@@ -320,13 +320,15 @@ static struct VirtualCode* KonohaVirtualMachine_Run(KonohaContext *kctx, KonohaS
 
 /* ------------------------------------------------------------------------ */
 
+typedef intptr_t bblock_t;
+
 struct KBuilder {   /* MiniVM Builder */
 	struct KBuilderCommon common;
 	// minivm local setting
 	kArray          *constPools;
-	int              bbBeginId;
-	int              bbMainId;
-	int              bbReturnId;
+	bblock_t              bbBeginId;
+	bblock_t              bbMainId;
+	bblock_t              bbReturnId;
 };
 
 /* ------------------------------------------------------------------------ */
@@ -334,17 +336,17 @@ struct KBuilder {   /* MiniVM Builder */
 typedef struct BasicBlock BasicBlock;
 
 struct BasicBlock {
-	int incoming;
-	int newid;
-	int nextid;
-	int branchid;
-	int codeoffset;
-	int lastoffset;
-	int size;
-	int max;
+	long     incoming;
+	bblock_t newid;
+	bblock_t nextid;
+	bblock_t branchid;
+	size_t   codeoffset;
+	size_t   lastoffset;
+	size_t   size;
+	size_t   max;
 };
 
-static BasicBlock *BasicBlock_(KonohaContext *kctx, int id)
+static BasicBlock *BasicBlock_(KonohaContext *kctx, bblock_t id)
 {
 	BasicBlock *bb = NULL;
 	while(id != -1) {
@@ -354,7 +356,7 @@ static BasicBlock *BasicBlock_(KonohaContext *kctx, int id)
 	return bb;
 }
 
-static int BasicBlock_id(KonohaContext *kctx, BasicBlock *bb)
+static bblock_t BasicBlock_id(KonohaContext *kctx, BasicBlock *bb)
 {
 	while(bb->newid != -1) {
 		bb = BasicBlock_(kctx, bb->newid);
@@ -362,7 +364,7 @@ static int BasicBlock_id(KonohaContext *kctx, BasicBlock *bb)
 	return ((char*)bb) - kctx->stack->cwb.bytebuf;
 }
 
-static BasicBlock* new_BasicBlock(KonohaContext *kctx, size_t max, int oldId)
+static BasicBlock* new_BasicBlock(KonohaContext *kctx, size_t max, bblock_t oldId)
 {
 	KGrowingBuffer wb;
 	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
@@ -394,7 +396,7 @@ static inline size_t newsize2(size_t max) {
 	return ((max - sizeof(BasicBlock)) * 2) + sizeof(BasicBlock);
 }
 
-static int BasicBlock_Add(KonohaContext *kctx, int blockId, kfileline_t uline, VirtualCode *op, size_t size, size_t padding_size)
+static bblock_t BasicBlock_Add(KonohaContext *kctx, bblock_t blockId, kfileline_t uline, VirtualCode *op, size_t size, size_t padding_size)
 {
 	BasicBlock *bb = BasicBlock_(kctx, blockId);
 	DBG_ASSERT(bb->newid == -1);
@@ -411,7 +413,7 @@ static int BasicBlock_Add(KonohaContext *kctx, int blockId, kfileline_t uline, V
 
 /* ------------------------------------------------------------------------ */
 
-static int new_BasicBlockLABEL(KonohaContext *kctx)
+static bblock_t new_BasicBlockLABEL(KonohaContext *kctx)
 {
 	return BasicBlock_id(kctx, new_BasicBlock(kctx, sizeof(VirtualCode) * 2 + sizeof(BasicBlock), -1));
 }
@@ -439,17 +441,17 @@ static void KBuilder_Asm(KonohaContext *kctx, KBuilder *builder, VirtualCode *op
 	builder->bbMainId = BasicBlock_Add(kctx, builder->bbMainId, builder->common.uline, op, opsize, sizeof(VirtualCode));
 }
 
-static void kStmt_setLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbol_t label, int labelId)
+static void kStmt_setLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbol_t label, bblock_t labelId)
 {
 	KLIB kObject_setUnboxValue(kctx, stmt, label, TY_int, labelId);
 }
 
-static int kStmt_GetLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbol_t label)
+static bblock_t kStmt_GetLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbol_t label)
 {
 	return KLIB kObject_getUnboxValue(kctx, stmt, label, -1);
 }
 
-static void ASM_LABEL(KonohaContext *kctx, KBuilder *builder, int labelId)
+static void ASM_LABEL(KonohaContext *kctx, KBuilder *builder, bblock_t labelId)
 {
 	BasicBlock *bb = BasicBlock_(kctx, builder->bbMainId);
 	DBG_ASSERT(bb != NULL);
@@ -459,7 +461,7 @@ static void ASM_LABEL(KonohaContext *kctx, KBuilder *builder, int labelId)
 	builder->bbMainId = BasicBlock_id(kctx, labelBlock);
 }
 
-static void ASM_JMP(KonohaContext *kctx, KBuilder *builder, int labelId)
+static void ASM_JMP(KonohaContext *kctx, KBuilder *builder, bblock_t labelId)
 {
 	BasicBlock *bb = BasicBlock_(kctx, builder->bbMainId);
 	DBG_ASSERT(bb != NULL);
@@ -473,16 +475,16 @@ static void ASM_JMP(KonohaContext *kctx, KBuilder *builder, int labelId)
 	}
 }
 
-static int KBuilder_AsmJMPF(KonohaContext *kctx, KBuilder *builder, int flocal, int jumpId)
+static bblock_t KBuilder_AsmJMPF(KonohaContext *kctx, KBuilder *builder, int flocal, bblock_t jumpId)
 {
 	BasicBlock *bb = BasicBlock_(kctx, builder->bbMainId);
 	DBG_ASSERT(bb != NULL);
 	DBG_ASSERT(bb->nextid == -1 && bb->branchid == -1);
-	int nextId = new_BasicBlockLABEL(kctx);
-	BasicBlock *lbJUMP = BasicBlock_(kctx, jumpId);
-	BasicBlock *lbNEXT = BasicBlock_(kctx, nextId);
+	bblock_t nextId = new_BasicBlockLABEL(kctx);
 	ASM(JMPF, NULL, NC_(flocal));
 	bb = BasicBlock_(kctx, builder->bbMainId);
+	BasicBlock *lbJUMP = BasicBlock_(kctx, jumpId);
+	BasicBlock *lbNEXT = BasicBlock_(kctx, nextId);
 	bb->branchid = BasicBlock_id(kctx, lbJUMP);
 	bb->nextid = nextId;
 	lbNEXT->incoming += 1;
@@ -496,14 +498,14 @@ static int CodeOffset(KGrowingBuffer *wb)
 	return Kwb_bytesize(wb);
 }
 
-static void BasicBlock_writeBuffer(KonohaContext *kctx, int blockId, KGrowingBuffer *wb)
+static void BasicBlock_writeBuffer(KonohaContext *kctx, bblock_t blockId, KGrowingBuffer *wb)
 {
 	BasicBlock *bb = BasicBlock_(kctx, blockId);
 	while(bb != NULL && bb->codeoffset == -1) {
 		size_t len = bb->size - sizeof(BasicBlock);
 		bb->codeoffset = CodeOffset(wb);
 		if(len > 0) {
-			int id = BasicBlock_id(kctx, bb);
+			bblock_t id = BasicBlock_id(kctx, bb);
 			char buf[len];  // bb is growing together with wb.
 			memcpy(buf, ((char*)bb) + sizeof(BasicBlock), len);
 			KLIB Kwb_write(kctx, wb, buf, len);
@@ -583,7 +585,7 @@ static void KBuilder_AsmNMOV(KonohaContext *kctx, KBuilder *builder, int a, ktyp
 	ASM(NMOV, TC_(a, ty), TC_(b, ty), CT_(ty));
 }
 
-static int KBuilder_asmJMPIF(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr, int isTRUE, int labelId)
+static bblock_t KBuilder_asmJMPIF(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr, int isTRUE, bblock_t labelId)
 {
 	int a = builder->common.a;
 	SUGAR VisitExpr(kctx, builder, stmt, expr);
@@ -668,8 +670,8 @@ static void KBuilder_VisitIfStmt(KonohaContext *kctx, KBuilder *builder, kStmt *
 {
 	int espidx = builder->common.espidx;
 	int a = builder->common.a;
-	int lbELSE = new_BasicBlockLABEL(kctx);
-	int lbEND  = new_BasicBlockLABEL(kctx);
+	bblock_t lbELSE = new_BasicBlockLABEL(kctx);
+	bblock_t lbEND  = new_BasicBlockLABEL(kctx);
 	/* if */
 	builder->common.a = espidx;
 	KBuilder_asmJMPIF(kctx, builder, stmt, Stmt_getFirstExpr(kctx, stmt), 0/*FALSE*/, lbELSE);
@@ -688,9 +690,9 @@ static void KBuilder_VisitLoopStmt(KonohaContext *kctx, KBuilder *builder, kStmt
 {
 	int espidx = builder->common.espidx;
 	int a = builder->common.a;
-	int lbCONTINUE = new_BasicBlockLABEL(kctx);
-	int lbENTRY    = new_BasicBlockLABEL(kctx);
-	int lbBREAK    = new_BasicBlockLABEL(kctx);
+	bblock_t lbCONTINUE = new_BasicBlockLABEL(kctx);
+	bblock_t lbENTRY    = new_BasicBlockLABEL(kctx);
+	bblock_t lbBREAK    = new_BasicBlockLABEL(kctx);
 	kStmt_setLabelBlock(kctx, stmt, SYM_("continue"), lbCONTINUE);
 	kStmt_setLabelBlock(kctx, stmt, SYM_("break"),    lbBREAK);
 	if(kStmt_Is(RedoLoop, stmt)) {
@@ -722,7 +724,7 @@ static void KBuilder_VisitJumpStmt(KonohaContext *kctx, KBuilder *builder, kStmt
 	SugarSyntax *syn = stmt->syn;
 	kStmt *jump = kStmt_GetStmt(kctx, stmt, syn->keyword);
 	DBG_ASSERT(jump != NULL && IS_Stmt(jump));
-	int lbJUMP = kStmt_GetLabelBlock(kctx, jump, syn->keyword);
+	bblock_t lbJUMP = kStmt_GetLabelBlock(kctx, jump, syn->keyword);
 	ASM_JMP(kctx, builder, lbJUMP);
 }
 
@@ -852,8 +854,8 @@ static void KBuilder_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt
 static void KBuilder_VisitAndExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
 	int a = builder->common.a;
-	int lbTRUE  = new_BasicBlockLABEL(kctx);
-	int lbFALSE = new_BasicBlockLABEL(kctx);
+	bblock_t lbTRUE  = new_BasicBlockLABEL(kctx);
+	bblock_t lbFALSE = new_BasicBlockLABEL(kctx);
 	/*
 	 * [AndExpr] := (arg0 && arg1 && arg2 && ...)
 	 * expr->cons = [NULL, arg0, arg1, arg2, ...]
@@ -872,8 +874,8 @@ static void KBuilder_VisitAndExpr(KonohaContext *kctx, KBuilder *builder, kStmt 
 static void KBuilder_VisitOrExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
 {
 	int a = builder->common.a;
-	int lbTRUE  = new_BasicBlockLABEL(kctx);
-	int lbFALSE = new_BasicBlockLABEL(kctx);
+	bblock_t lbTRUE  = new_BasicBlockLABEL(kctx);
+	bblock_t lbFALSE = new_BasicBlockLABEL(kctx);
 	int i, size = kArray_size(expr->cons);
 	for (i = 1; i < size; i++) {
 		KBuilder_asmJMPIF(kctx, builder, stmt, kExpr_at(expr, i), 1/*TRUE*/, lbTRUE);
@@ -963,7 +965,7 @@ static struct VirtualCode *MakeThreadedCode(KonohaContext *kctx, KBuilder *build
 	return (VirtualCode *)p;
 }
 
-static struct VirtualCode *CompileVirtualCode(KonohaContext *kctx, KBuilder *builder, int beginId, int returnId)
+static struct VirtualCode *CompileVirtualCode(KonohaContext *kctx, KBuilder *builder, bblock_t beginId, bblock_t returnId)
 {
 	KGrowingBuffer wb;
 	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
