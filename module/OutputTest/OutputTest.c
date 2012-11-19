@@ -51,7 +51,7 @@ static FILE *GetLogFile(void)
 		snprintf(result_file, sizeof(result_file), "%s.%s_tested", filename2, GetProfile());
 		stdlog2 = fopen(result_file, "w");
 		if(stdlog2 == NULL) {
-			fprintf(stdout, "cannot open logfile: %s\n", result_file);
+			fprintf(stdout, "cannot open logfile: %s (%s)\n", result_file, strerror(errno));
 			exit(1);
 		}
 	}

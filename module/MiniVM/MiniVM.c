@@ -367,7 +367,6 @@ static BasicBlock* new_BasicBlock(KonohaContext *kctx, size_t max, BasicBlock *o
 	KGrowingBuffer wb;
 	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
 	BasicBlock *bb = (BasicBlock*)KLIB Kwb_Alloca(kctx, &wb, max);
-	//BasicBlock *bb = (BasicBlock*)KCalloc_UNTRACE(max, 1);
 
 	if(oldbb != NULL) {
 		memcpy(bb, oldbb, oldbb->size);
@@ -451,9 +450,6 @@ static void ASM_LABEL(KonohaContext *kctx, KBuilder *builder, int labelId)
 	DBG_ASSERT(bb != NULL);
 	DBG_ASSERT(bb->nextid == -1);
 	BasicBlock *labelBlock = BasicBlock_(kctx, labelId);
-//	if(bb->branchid == -1) {
-//		bb->nextid = BasicBlock_id(kctx, labelBlock);
-//	}
 	labelBlock->incoming += 1;
 	builder->bbMainId = BasicBlock_id(kctx, labelBlock);
 }
@@ -469,7 +465,6 @@ static void ASM_JMP(KonohaContext *kctx, KBuilder *builder, int labelId)
 		bb = BasicBlock_(kctx, builder->bbMainId);
 		bb->branchid = BasicBlock_id(kctx, labelBlock);
 		labelBlock->incoming += 1;
-		//builder->bbMainId = BasicBlock_id(kctx, bb);
 	}
 }
 
@@ -995,6 +990,9 @@ static struct VirtualCode* MiniVM_GenerateVirtualCode(KonohaContext *kctx, kBloc
 {
 	KGrowingBuffer wb;
 	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
+	KLIB Kwb_Alloca(kctx, &wb, 1024*1024*128);
+	KLIB Kwb_Free(&wb);
+
 	INIT_GCSTACK();
 	KBuilder builderbuf = {}, *builder = &builderbuf;
 	kNameSpace *ns = block->BlockNameSpace;
