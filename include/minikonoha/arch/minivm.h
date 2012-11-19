@@ -53,14 +53,17 @@ typedef struct {
 
 #endif/*USE_DIRECT_THREADED_CODE*/
 
+
+#define OPARGSIZE 4
+
 typedef struct VirtualCode {
 	KCODE_HEAD;
 	union {
-		intptr_t data[5];
-		void *p[5];
-		kObject *o[5];
-		KonohaClass *ct[5];
-		char *u[5];
+		intptr_t data[OPARGSIZE];
+		void *p[OPARGSIZE];
+		kObject *o[OPARGSIZE];
+		KonohaClass *ct[OPARGSIZE];
+		char *u[OPARGSIZE];
 	};
 } VirtualCode;
 
