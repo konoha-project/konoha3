@@ -369,6 +369,11 @@ static BasicBlock* new_BasicBlock(KonohaContext *kctx, size_t max, int oldId)
 	BasicBlock *bb = (BasicBlock*)KLIB Kwb_Alloca(kctx, &wb, max);
 	if(oldId != -1) {
 		BasicBlock *oldbb = BasicBlock_(kctx, oldId);
+		if(((char*)oldbb) + oldbb->max == (char*)bb) {
+			oldbb->max += (max - sizeof(BasicBlock));
+			wb.m->bytesize -= sizeof(BasicBlock);
+			return oldbb;
+		}
 		memcpy(bb, oldbb, oldbb->size);
 		oldbb->newid = BasicBlock_id(kctx, bb);
 		oldbb->size = 0;
@@ -385,7 +390,7 @@ static BasicBlock* new_BasicBlock(KonohaContext *kctx, size_t max, int oldId)
 	return bb;
 }
 
-static size_t newsize2(size_t max) {
+static inline size_t newsize2(size_t max) {
 	return ((max - sizeof(BasicBlock)) * 2) + sizeof(BasicBlock);
 }
 
@@ -397,7 +402,6 @@ static int BasicBlock_Add(KonohaContext *kctx, int blockId, kfileline_t uline, V
 	DBG_ASSERT(bb->nextid == -1 && bb->branchid == -1);
 	if(!(bb->size + size < bb->max)) {
 		size_t newsize = newsize2(bb->max);
-		if(newsize < 1000) newsize = newsize2(newsize);
 		bb = new_BasicBlock(kctx, newsize, blockId);
 	}
 	memcpy(((char*)bb) + bb->size, op, size);
