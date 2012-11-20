@@ -32,6 +32,69 @@
 #include<minikonoha/minikonoha.h>
 #include<minikonoha/sugar.h>
 
+typedef const struct QueryDriver QueryDriver;
+typedef struct kConnectionVar kConnection;
+typedef struct kResultSetVar  kResultSet;
+typedef struct DBschema DBschema;
+
+typedef void kqcur_t;
+
+struct QueryDriver {
+	int   type;
+	const char *name;
+	void* (*qopen)(KonohaContext* kctx, const char* db, KTraceInfo *trace);
+	kqcur_t* (*qexec)(KonohaContext* kctx, void* db, const char* query, kResultSet* rs, KTraceInfo *trace);
+	void   (*qclose)(void* hdr);
+	int    (*qcurnext)(KonohaContext* kctx, kqcur_t * qcur, kResultSet* rs, KTraceInfo *trace);
+	void   (*qcurfree)(kqcur_t *);
+};
+
+struct kConnectionVar {
+	KonohaObjectHeader  h;
+	void                *db;
+	QueryDriver *driver;
+};
+
+#define TY_Connection     cConnection->typeId
+
+/* [ResultSet] */
+
+struct DBschema {
+	ktype_t   type;   // konoha defined type
+	kushort_t ctype;  // ResultSet defined type. ... Is it obsolate?
+	kString   *name;
+	size_t    start;
+	size_t    len;
+	int       dbtype; // DBMS defined type
+};
+
+struct kResultSetVar {
+	KonohaObjectHeader  h;
+	kConnection         *connection;
+	void                *qcur;
+	void                (*qcurfree)(kqcur_t *); /* necessary if conn is closed before */
+	kushort_t           column_size;
+	kString             *tableName;
+	struct DBschema     *column;
+	KGrowingArray       databuf;
+	size_t              rowidx;
+};
+
+#define TY_ResultSet     cResultSet->typeId
+
+/* ------------------------------------------------------------------------ */
+/* [Macros] */
+
+typedef enum {
+	kResultSet_CTYPE__null,
+	kResultSet_CTYPE__integer,
+	kResultSet_CTYPE__float,
+	kResultSet_CTYPE__text,
+} kResultSet_CTYPE;
+
+#define RESULTSET_BUFSIZE 256
+#define K_DSPI_QUERY 1
+
 /* ------------------------------------------------------------------------ */
 /* [bytes API] */
 
