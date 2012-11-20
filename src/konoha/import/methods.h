@@ -270,7 +270,7 @@ static KMETHOD Func_invoke(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 //## @Const @Static void System.assert(boolean x)
-static KMETHOD System_assert(KonohaContext *kctx, KonohaStack *sfp)
+static KMETHOD NameSpace_assert(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kbool_t cond = sfp[1].boolValue;
 	if(cond == false) {
@@ -278,6 +278,13 @@ static KMETHOD System_assert(KonohaContext *kctx, KonohaStack *sfp)
 		((KonohaFactory *)kctx->platApi)->exitStatus = 1;  // just in case
 		KLIB KonohaRuntime_raise(kctx, EXPT_("Assertion"), SoftwareFault, NULL, trace->baseStack);
 	}
+}
+
+// void NameSpace_AllowImplicitCoercion(boolean t)
+static KMETHOD NameSpace_AllowImplicitCoercion(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kNameSpaceVar *ns = (kNameSpaceVar *)sfp[0].asNameSpace;
+	kNameSpace_Set(ImplicitCoercion, ns, sfp[1].boolValue);
 }
 
 //## method void System.p(@Coercion String msg);
@@ -330,7 +337,8 @@ static void LoadDefaultMethod(KonohaContext *kctx, kNameSpace *ns)
 		_Public|_Im|_Const, _F(String_opADD), TY_String, TY_String, MN_("+"), 1, TY_String, FN_x | FN_COERCION,
 		_Public|_Const|_Hidden, _F(Func_new), TY_Func, TY_Func, MN_new, 2, TY_Object, FN_x, TY_Method, FN_x,
 		_Public|kMethod_SmartReturn|_Hidden, _F(Func_invoke), TY_Object, TY_Func, MN_("invoke"), 0,
-		_Static|_Public|_Im, _F(System_assert), TY_void, TY_NameSpace, MN_("assert"), 1, TY_boolean, FN_x,
+		_Static|_Public|_Im, _F(NameSpace_assert), TY_void, TY_NameSpace, MN_("assert"), 1, TY_boolean, FN_x,
+		_Public|_Const, _F(NameSpace_AllowImplicitCoercion), TY_void, TY_NameSpace, MN_("AllowImplicitCoercion"), 1, TY_boolean, FN_("allow"),
 		_Static|_Public|_Im, _F(System_p), TY_void, TY_System, MN_("p"), 1, TY_String, FN_("s") | FN_COERCION,
 		_Static|_Public|_Im, _F(System_gc), TY_void, TY_System, MN_("gc"), 0,
 		DEND,

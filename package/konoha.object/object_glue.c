@@ -58,13 +58,6 @@ static KMETHOD Object_as(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(returnValue);
 }
 
-// void NameSpace_AllowImplicitCoercion(boolean t)
-static KMETHOD NameSpace_AllowImplicitCoercion(KonohaContext *kctx, KonohaStack *sfp)
-{
-	kNameSpaceVar *ns = (kNameSpaceVar *)sfp[0].asNameSpace;
-	kNameSpace_Set(ImplicitCoercion, ns, sfp[1].boolValue);
-}
-
 #define _Public   kMethod_Public
 #define _Const    kMethod_Const
 #define _Ignored  kMethod_IgnoredOverride
@@ -80,7 +73,6 @@ static void object_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo 
 		_Public|_Im|_Const|_Final, _F(Object_getTypeId), TY_int, TY_Object, MN_("getTypeId"), 0,
 		_Public|_Hidden|_Im|_Const, _F(Object_instanceOf), TY_boolean, TY_Object, MN_("<:"), 1, TY_Object, FN_("type"),
 		_Public|_Hidden|_Im|_Const|kMethod_SmartReturn, _F(Object_as), TY_Object, TY_Object, MN_("as"), 0,
-		_Public|_Const|_Ignored, _F(NameSpace_AllowImplicitCoercion), TY_void, TY_NameSpace, MN_("AllowImplicitCoercion"), 1, TY_boolean, FN_("allow"),
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);

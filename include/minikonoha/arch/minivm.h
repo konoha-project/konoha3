@@ -36,6 +36,7 @@ typedef struct {
 	ktype_t typeId; kparamId_t signature;
 } kMethodInlineCache;
 
+#ifndef KCODE_HEAD
 #if defined(USE_DIRECT_THREADED_CODE)
 #define OP_(T)  NULL, 0, OPCODE_##T, 0
 #define KCODE_HEAD\
@@ -51,6 +52,7 @@ typedef struct {
 	kushort_t line
 
 #endif/*USE_DIRECT_THREADED_CODE*/
+#endif
 
 #define OPARGSIZE 4
 
