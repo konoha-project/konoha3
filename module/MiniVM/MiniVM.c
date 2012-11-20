@@ -22,7 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-//#define USE_DIRECT_THREADED_CODE
+#define USE_DIRECT_THREADED_CODE
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/klib.h>
@@ -42,7 +42,7 @@ extern "C" {
 	MACRO(NMOVx)\
 	MACRO(XNMOV)\
 	MACRO(NEW)\
-	MACRO(NULL)\
+	MACRO(NUL)\
 	MACRO(LOOKUP)\
 	MACRO(CALL)\
 	MACRO(RET)\
@@ -244,99 +244,6 @@ static struct VirtualCode* KonohaVirtualMachine_Run(KonohaContext *kctx, KonohaS
 	krbp_t *rbp = (krbp_t *)sfp0;
 	DISPATCH_START(pc);
 	OPDEFINE(OPEXEC)
-//	CASE(NOP) {
-//		OPEXEC_NOP();  pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(THCODE) {
-//		OPEXEC_THCODE(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(ENTER) {
-//		OPEXEC_ENTER(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(EXIT) {
-//		OPEXEC_EXIT(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(NSET) {
-//		OPEXEC_NSET(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(NMOV) {
-//		OPEXEC_NMOV(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(NMOVx) {
-//		OPEXEC_NMOVx(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(XNMOV) {
-//		OPEXEC_XNMOV(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(NEW) {
-//		OPEXEC_NEW(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(NULL) {
-//		OPEXEC_NULL(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(LOOKUP) {
-//		OPEXEC_LOOKUP(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(CALL) {
-//		OPEXEC_CALL(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(RET) {
-//		OPEXEC_RET(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(NCALL) {
-//		OPEXEC_NCALL(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(BNOT) {
-//		OPEXEC_BNOT(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(JMP) {
-//		OPEXEC_JMP(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(JMPF) {
-//		OPEXEC_JMPF();pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(TRYJMP) {
-//		OPEXEC_TRYJMP(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(YIELD) {
-//		OPEXEC_YIELD(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(ERROR) {
-//		OPEXEC_ERROR(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(SAFEPOINT) {
-//		OPEXEC_SAFEPOINT(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(CHKSTACK) {
-//		OPEXEC_CHKSTACK(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(TRACE) {
-//		OPEXEC_TRACE(); pc++;
-//		GOTO_NEXT();
-//	}
-
 	DISPATCH_END(pc);
 	L_RETURN:;
 	return pc;
@@ -364,7 +271,7 @@ struct BasicBlock {
 	bblock_t newid;
 	bblock_t nextid;
 	bblock_t branchid;
-	size_t   codeoffset;
+	long     codeoffset;
 	size_t   lastoffset;
 	size_t   size;
 	size_t   max;
@@ -444,17 +351,16 @@ static bblock_t new_BasicBlockLABEL(KonohaContext *kctx)
 	return BasicBlock_id(kctx, bb);
 }
 
-#define ASMLINE  0
 #if defined(USE_DIRECT_THREADED_CODE)
 #define ASM(T, ...) do {\
-	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};\
+	OP##T op_ = {OP_(T), ## __VA_ARGS__};\
 	union { VirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
 	KBuilder_Asm(kctx, builder, &tmp_.op, sizeof(OP##T));\
 } while(0)
 
 #else
 #define ASM(T, ...) do {\
-	OP##T op_ = {OPCODE_##T, ASMLINE, ## __VA_ARGS__};\
+	OP##T op_ = {OP_(T), ## __VA_ARGS__};\
 	union { VirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
 	KBuilder_Asm(kctx, builder, &tmp_.op, sizeof(OP##T));\
 } while(0)
@@ -808,7 +714,7 @@ static void KBuilder_VisitNullExpr(KonohaContext *kctx, KBuilder *builder, kStmt
 		ASM(NSET, NC_(a), 0, CT_(expr->ty));
 	}
 	else {
-		ASM(NULL, OC_(a), CT_(expr->ty));
+		ASM(NUL, OC_(a), CT_(expr->ty));
 	}
 }
 

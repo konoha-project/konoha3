@@ -40,7 +40,7 @@ typedef struct {
 #define OP_(T)  NULL, 0, OPCODE_##T, 0
 #define KCODE_HEAD\
 	void *codeaddr;\
-	size_t count;\
+	kushort_t count;\
 	kushort_t opcode;\
 	kfileline_t line
 
@@ -102,7 +102,7 @@ typedef struct OPTHCODE {
 #ifndef OPEXEC_THCODE
 #define OPEXEC_THCODE() do {\
 	OPTHCODE *op = (OPTHCODE *)pc;\
-	op->threadCode(kctx, pc, OPJUMP, op->opcode); \
+	op->threadCode(kctx, pc, OPJUMP, op->codesize); \
 	return PC_NEXT(pc);\
 } while(0)
 #endif
@@ -229,17 +229,17 @@ typedef struct OPNEW {
 } while(0)
 #endif
 
-/* OPNULL */
-#define VPARAM_NULL       2, VMT_R, VMT_C
-typedef struct OPNULL {
+/* OPNLL */
+#define VPARAM_NUL       2, VMT_R, VMT_C
+typedef struct OPNLL {
 	KCODE_HEAD;
 	kreg_t a;
 	KonohaClass* ty;
-} OPNULL;
+} OPNUL;
 
-#ifndef OPEXEC_NULL
-#define OPEXEC_NULL() do {\
-	OPNULL *op = (OPNULL *)pc;\
+#ifndef OPEXEC_NUL
+#define OPEXEC_NUL() do {\
+	OPNUL *op = (OPNUL *)pc;\
 	rbp[op->a].asObject = KLIB Knull(kctx, op->ty);\
 } while(0)
 #endif
