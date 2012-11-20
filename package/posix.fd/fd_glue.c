@@ -91,7 +91,7 @@ static KMETHOD System_fchmod(KonohaContext *kctx, KonohaStack *sfp)
 	int fd = sfp[1].intValue;
 	int mode = sfp[2].intValue;
 	int ret = fchmod(fd, mode);
-	if(ret != -1) {
+	if(ret != 0) {
 		// TODO: throw
 		KMakeTrace(trace, sfp);
 		int fault = KLIB DiagnosisFaultType(kctx, SystemError, trace);
@@ -145,7 +145,7 @@ static KMETHOD System_flock(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD System_sync(KonohaContext *kctx, KonohaStack *sfp)
 {
 	int fd = sfp[1].intValue;
-	int ret =  fsync(fd);
+	int ret = fsync(fd);
 	if(ret == -1) {
 		// TODO: throw
 		KMakeTrace(trace, sfp);
