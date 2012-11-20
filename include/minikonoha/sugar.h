@@ -601,9 +601,9 @@ typedef struct {
 	void       (*kToken_ToError)(KonohaContext *, kTokenVar *, kinfotag_t, const char *fmt, ...);
 	kExpr *    (*kStmt_Message2)(KonohaContext *, kStmt *, kToken *, kinfotag_t, const char *fmt, ...);
 
-	void (*VisitStmt)(KonohaContext *, struct KBuilder *, kStmt *stmt);
-	void (*VisitExpr)(KonohaContext *, struct KBuilder *, kStmt *stmt, kExpr *expr);
-	void (*VisitBlock)(KonohaContext *, struct KBuilder *, kBlock *block);
+	kbool_t (*VisitBlock)(KonohaContext *, struct KBuilder *, kBlock *block);
+	kbool_t (*VisitStmt)(KonohaContext *, struct KBuilder *, kStmt *stmt);
+	void    (*VisitExpr)(KonohaContext *, struct KBuilder *, kStmt *stmt, kExpr *expr);
 
 	void (*dumpToken)(KonohaContext *kctx, kToken *tk, int n);
 	void (*dumpTokenArray)(KonohaContext *kctx, int nest, kArray *a, int s, int e);
@@ -688,7 +688,7 @@ static kExpr* kExpr_SetVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, k
 struct KBuilder;
 typedef struct KBuilder KBuilder;
 
-typedef void (*VisitStmtFunc)(KonohaContext *kctx, KBuilder *builder, kStmt *stmt);
+typedef kbool_t (*VisitStmtFunc)(KonohaContext *kctx, KBuilder *builder, kStmt *stmt);
 typedef void (*VisitExprFunc)(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr);
 
 struct KBuilderCommon {

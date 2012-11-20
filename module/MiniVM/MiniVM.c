@@ -55,9 +55,6 @@ extern "C" {
 	MACRO(SAFEPOINT)\
 	MACRO(CHKSTACK)\
 
-//	MACRO(BNOT)\
-//	MACRO(TRACE)\
-
 #include <minikonoha/arch/minivm.h>
 
 #define OPCODE(T)  OPCODE_##T,
@@ -576,25 +573,27 @@ static kString* Stmt_getErrorMessage(KonohaContext *kctx, kStmt *stmt)
 
 /* Visitor */
 
-static void KBuilder_VisitErrStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
+static kbool_t KBuilder_VisitErrStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
 	ASM(ERROR, stmt->uline, Stmt_getErrorMessage(kctx, stmt));
+	return false;
 }
 
-static void KBuilder_VisitExprStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
+static kbool_t KBuilder_VisitExprStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
 	int a = builder->common.a;
 	builder->common.a = builder->common.espidx;
 	SUGAR VisitExpr(kctx, builder, stmt, Stmt_getFirstExpr(kctx, stmt));
 	builder->common.a = a;
+	return true;
 }
 
-static void KBuilder_VisitBlockStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
+static kbool_t KBuilder_VisitBlockStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
-	SUGAR VisitBlock(kctx, builder, Stmt_getFirstBlock(kctx, stmt));
+	return SUGAR VisitBlock(kctx, builder, Stmt_getFirstBlock(kctx, stmt));
 }
 
-static void KBuilder_VisitReturnStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
+static kbool_t KBuilder_VisitReturnStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
 	kExpr *expr = SUGAR kStmt_GetExpr(kctx, stmt, KW_ExprPattern, NULL);
 	if(expr != NULL && IS_Expr(expr) && expr->ty != TY_void) {
@@ -604,9 +603,10 @@ static void KBuilder_VisitReturnStmt(KonohaContext *kctx, KBuilder *builder, kSt
 		builder->common.a = a;
 	}
 	ASM_JMP(kctx, builder, builder->bbReturnId); // RET
+	return false;
 }
 
-static void KBuilder_VisitIfStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
+static kbool_t KBuilder_VisitIfStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
 	int espidx = builder->common.espidx;
 	int a = builder->common.a;
@@ -625,9 +625,10 @@ static void KBuilder_VisitIfStmt(KonohaContext *kctx, KBuilder *builder, kStmt *
 	//ASM(NOP);
 	/* endif */
 	ASM_LABEL(kctx, builder, lbEND);
+	return true;
 }
 
-static void KBuilder_VisitLoopStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
+static kbool_t KBuilder_VisitLoopStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
 	int espidx = builder->common.espidx;
 	int a = builder->common.a;
@@ -658,18 +659,20 @@ static void KBuilder_VisitLoopStmt(KonohaContext *kctx, KBuilder *builder, kStmt
 	SUGAR VisitBlock(kctx, builder, Stmt_getFirstBlock(kctx, stmt));
 	ASM_JMP(kctx, builder, lbCONTINUE);
 	ASM_LABEL(kctx, builder, lbBREAK);
+	return true;
 }
 
-static void KBuilder_VisitJumpStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
+static kbool_t KBuilder_VisitJumpStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
 	SugarSyntax *syn = stmt->syn;
 	kStmt *jump = kStmt_GetStmt(kctx, stmt, syn->keyword);
 	DBG_ASSERT(jump != NULL && IS_Stmt(jump));
 	bblock_t lbJUMP = kStmt_GetLabelBlock(kctx, jump, syn->keyword);
 	ASM_JMP(kctx, builder, lbJUMP);
+	return false;
 }
 
-static void KBuilder_VisitTryStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
+static kbool_t KBuilder_VisitTryStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
 	//FIXME
 	//kBlock *catchBlock   = SUGAR kStmt_GetBlock(kctx, stmt, NULL, SYM_("catch"),   K_NULLBLOCK);
@@ -678,12 +681,14 @@ static void KBuilder_VisitTryStmt(KonohaContext *kctx, KBuilder *builder, kStmt 
 	//}
 	//if(finallyBlock != K_NULLBLOCK){
 	//}
+	return true;
 }
 
 
-static void KBuilder_VisitUndefinedStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
+static kbool_t KBuilder_VisitUndefinedStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
 	DBG_P("undefined asm syntax kw='%s'", SYM_t(stmt->syn->keyword));
+	return true;
 }
 
 static void KBuilder_VisitConstExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)

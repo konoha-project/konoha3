@@ -22,20 +22,22 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-static void VisitStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
+static kbool_t VisitStmt(KonohaContext *kctx, KBuilder *builder, kStmt *stmt)
 {
+	kbool_t ret = false;
 	struct KBuilderCommon *cbuilder = (struct KBuilderCommon*)builder;
 	switch(stmt->build) {
-		case TSTMT_ERR:    cbuilder->api->visitErrStmt(kctx, builder, stmt);    return;
-		case TSTMT_EXPR:   cbuilder->api->visitExprStmt(kctx, builder, stmt);   break;
-		case TSTMT_BLOCK:  cbuilder->api->visitBlockStmt(kctx, builder, stmt);  break;
-		case TSTMT_RETURN: cbuilder->api->visitReturnStmt(kctx, builder, stmt); return;
-		case TSTMT_IF:     cbuilder->api->visitIfStmt(kctx, builder, stmt);     break;
-		case TSTMT_LOOP:   cbuilder->api->visitLoopStmt(kctx, builder, stmt);   break;
-		case TSTMT_JUMP:   cbuilder->api->visitJumpStmt(kctx, builder, stmt);   break;
-		case TSTMT_TRY:    cbuilder->api->visitTryStmt(kctx, builder, stmt);    break;
+		case TSTMT_ERR:   ret = cbuilder->api->visitErrStmt(kctx, builder, stmt); break;
+		case TSTMT_EXPR:  ret = cbuilder->api->visitExprStmt(kctx, builder, stmt);   break;
+		case TSTMT_BLOCK: ret = cbuilder->api->visitBlockStmt(kctx, builder, stmt);  break;
+		case TSTMT_RETURN: ret = cbuilder->api->visitReturnStmt(kctx, builder, stmt); break;
+		case TSTMT_IF:    ret = cbuilder->api->visitIfStmt(kctx, builder, stmt);     break;
+		case TSTMT_LOOP:  ret = cbuilder->api->visitLoopStmt(kctx, builder, stmt);   break;
+		case TSTMT_JUMP:  ret = cbuilder->api->visitJumpStmt(kctx, builder, stmt);   break;
+		case TSTMT_TRY:   ret = cbuilder->api->visitTryStmt(kctx, builder, stmt);    break;
 		default: cbuilder->api->visitUndefinedStmt(kctx, builder, stmt);        break;
 	}
+	return ret;
 }
 
 static void VisitExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr)
@@ -64,7 +66,7 @@ static void VisitExpr(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr
 	cbuilder->shift = shift;
 }
 
-static void VisitBlock(KonohaContext *kctx, KBuilder *builder, kBlock *block)
+static kbool_t VisitBlock(KonohaContext *kctx, KBuilder *builder, kBlock *block)
 {
 	struct KBuilderCommon *cbuilder = (struct KBuilderCommon*)builder;
 	int a = cbuilder->a;
@@ -76,11 +78,12 @@ static void VisitBlock(KonohaContext *kctx, KBuilder *builder, kBlock *block)
 		kStmt *stmt = block->StmtList->StmtItems[i];
 		if(stmt->syn == NULL) continue;
 		cbuilder->uline = stmt->uline;
-		VisitStmt(kctx, builder, stmt);
+		if(!VisitStmt(kctx, builder, stmt)) return false;
 	}
 	cbuilder->a = a;
 	cbuilder->espidx = espidx;
 	cbuilder->shift = shift;
+	return true;
 }
 
 static void kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kBlock *block, int option)
