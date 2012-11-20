@@ -198,14 +198,12 @@ static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStac
 }
 
 #ifdef USE_DIRECT_THREADED_CODE
-#define CASE(x)  L_##x :
 #define NEXT_OP   (pc->codeaddr)
 #define JUMP      *(NEXT_OP)
 #ifdef K_USING_VMASMDISPATCH
 #define GOTO_NEXT()     \
 	asm volatile("jmp *%0;": : "g"(NEXT_OP));\
 	goto *(NEXT_OP)
-
 #else
 #define GOTO_NEXT()     goto *(NEXT_OP)
 #endif
@@ -219,7 +217,6 @@ static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStac
 
 #else/*USE_DIRECT_THREADED_CODE*/
 #define OPJUMP      NULL
-#define CASE(x)     case OPCODE_##x :
 #define NEXT_OP     L_HEAD
 #define GOTO_NEXT() goto NEXT_OP
 #define JUMP        L_HEAD
@@ -230,9 +227,6 @@ static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStac
 #define OPEXEC(T)  case OPCODE_##T : { OPEXEC_##T(); pc++; GOTO_NEXT(); }
 
 #endif/*USE_DIRECT_THREADED_CODE*/
-
-#include<stdio.h>
-
 
 static struct VirtualCode* KonohaVirtualMachine_Run(KonohaContext *kctx, KonohaStack *sfp0, struct VirtualCode *pc)
 {
