@@ -212,7 +212,7 @@ KMETHOD System_bind(KonohaContext *kctx, KonohaStack* sfp)
 {
 	struct sockaddr_in addr;
 	toSockaddr(&addr,
-			(char *)sfp[2].asString,
+			S_text(sfp[2].asString),
 			WORD2INT(sfp[3].intValue),
 			WORD2INT(sfp[4].intValue)
 	);
@@ -250,7 +250,7 @@ KMETHOD System_connect(KonohaContext *kctx, KonohaStack* sfp)
 {
 	struct sockaddr_in addr;
 	toSockaddr(&addr,
-				(char *)S_text(sfp[2].asString),
+				S_text(sfp[2].asString),
 				WORD2INT(sfp[3].intValue),
 				WORD2INT(sfp[4].intValue)
 	);

@@ -22,7 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-//#define USE_DIRECT_THREADED_CODE
+#define USE_DIRECT_THREADED_CODE
 
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/klib.h>
@@ -42,7 +42,7 @@ extern "C" {
 	MACRO(NMOVx)\
 	MACRO(XNMOV)\
 	MACRO(NEW)\
-	MACRO(NULL)\
+	MACRO(NUL)\
 	MACRO(LOOKUP)\
 	MACRO(CALL)\
 	MACRO(RET)\
@@ -196,14 +196,12 @@ static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStac
 }
 
 #ifdef USE_DIRECT_THREADED_CODE
-#define CASE(x)  L_##x :
 #define NEXT_OP   (pc->codeaddr)
 #define JUMP      *(NEXT_OP)
 #ifdef K_USING_VMASMDISPATCH
 #define GOTO_NEXT()     \
 	asm volatile("jmp *%0;": : "g"(NEXT_OP));\
 	goto *(NEXT_OP)
-
 #else
 #define GOTO_NEXT()     goto *(NEXT_OP)
 #endif
@@ -217,7 +215,6 @@ static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStac
 
 #else/*USE_DIRECT_THREADED_CODE*/
 #define OPJUMP      NULL
-#define CASE(x)     case OPCODE_##x :
 #define NEXT_OP     L_HEAD
 #define GOTO_NEXT() goto NEXT_OP
 #define JUMP        L_HEAD
@@ -266,7 +263,7 @@ struct BasicBlock {
 	bblock_t newid;
 	bblock_t nextid;
 	bblock_t branchid;
-	size_t   codeoffset;
+	long     codeoffset;
 	size_t   lastoffset;
 	size_t   size;
 	size_t   max;
@@ -427,17 +424,16 @@ static bblock_t new_BasicBlockLABEL(KonohaContext *kctx)
 	return BasicBlock_id(kctx, bb);
 }
 
-#define ASMLINE  0
 #if defined(USE_DIRECT_THREADED_CODE)
 #define ASM(T, ...) do {\
-	OP##T op_ = {TADDR, OPCODE_##T, ASMLINE, ## __VA_ARGS__};\
+	OP##T op_ = {OP_(T), ## __VA_ARGS__};\
 	union { VirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
 	KBuilder_Asm(kctx, builder, &tmp_.op, sizeof(OP##T));\
 } while(0)
 
 #else
 #define ASM(T, ...) do {\
-	OP##T op_ = {OPCODE_##T, ASMLINE, ## __VA_ARGS__};\
+	OP##T op_ = {OP_(T), ## __VA_ARGS__};\
 	union { VirtualCode op; OP##T op_; } tmp_; tmp_.op_ = op_; \
 	KBuilder_Asm(kctx, builder, &tmp_.op, sizeof(OP##T));\
 } while(0)
@@ -720,7 +716,7 @@ static void KBuilder_VisitNullExpr(KonohaContext *kctx, KBuilder *builder, kStmt
 		ASM(NSET, NC_(a), 0, CT_(expr->ty));
 	}
 	else {
-		ASM(NULL, OC_(a), CT_(expr->ty));
+		ASM(NUL, OC_(a), CT_(expr->ty));
 	}
 }
 

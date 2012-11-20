@@ -67,7 +67,7 @@ void *MYSQL_qopen(KonohaContext *kctx, const char* url)
 	phost = (host[0]) ? host : NULL;
 	pdbnm = (dbnm[0]) ? dbnm : NULL;
 
-	MYSQL *db = mysql_Init(NULL);
+	MYSQL *db = mysql_init(NULL);
 	OLDTRACE_SWITCH_TO_KTrace(_UserInputFault, LogText("@","mysql_Init"));
 	db = mysql_real_connect(db, phost, puser, ppass, pdbnm, port, NULL, 0);
 	OLDTRACE_SWITCH_TO_KTrace(_UserInputFault, LogText("@","mysql_real_connect"),
@@ -166,7 +166,7 @@ kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char* sql, kResultSet
 			res = mysql_store_result((MYSQL *)db);
 			if(res == NULL) { // NULL RESULT
 				if(mysql_errno(db) != 0) {
-					mysql_Free_result(res);
+					mysql_free_result(res);
 					OLDTRACE_SWITCH_TO_KTrace(_UserInputFault,
 							LogText("@","mysql_sotre_result"),
 							LogUint("errno", mysql_errno(db)),
@@ -204,7 +204,7 @@ kqcur_t *MYSQL_query(KonohaContext *kctx, void *hdr, const char* sql, kResultSet
 				//	}
 				//	j++;
 				//}
-				//mysql_Free_result(res);
+				//mysql_free_result(res);
 				//mysql_close(db);
 				//exit(1);
 			}
@@ -227,7 +227,7 @@ void MYSQL_qfree(kqcur_t *qcur)
 {
 	if(qcur != NULL) {
 		MYSQL_RES *res = (MYSQL_RES *)qcur;
-		mysql_Free_result(res);
+		mysql_free_result(res);
 	}
 }
 
