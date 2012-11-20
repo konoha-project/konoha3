@@ -74,7 +74,6 @@ static void VisitBlock(KonohaContext *kctx, KBuilder *builder, kBlock *block)
 	size_t i;
 	for (i = 0; i < kArray_size(block->StmtList); i++) {
 		kStmt *stmt = block->StmtList->StmtItems[i];
-		DBG_P("i=%d, stmt->syn=%p", i, stmt->syn);
 		if(stmt->syn == NULL) continue;
 		cbuilder->uline = stmt->uline;
 		VisitStmt(kctx, builder, stmt);
@@ -88,7 +87,7 @@ static void kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kBlock *block, in
 {
 	DBG_P("START CODE GENERATION..");
 	kNameSpace *ns = block->BlockNameSpace;
-	struct VirtualCode *vcode = ns->builderApi->GenerateVirtualCode(kctx, block, option);
+	struct VirtualCode *vcode = ns->builderApi->GenerateVirtualCode(kctx, mtd, block, option);
 	MethodFunc func = ns->builderApi->GenerateMethodFunc(kctx, vcode);
 	((kMethodVar *)mtd)->invokeMethodFunc = func;
 	((kMethodVar *)mtd)->pc_start = vcode;

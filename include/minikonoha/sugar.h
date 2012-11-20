@@ -702,7 +702,7 @@ struct KBuilderCommon {
 
 struct KBuilderAPI2 {
 	const char *target;
-	struct VirtualCode*   (*GenerateVirtualCode)(KonohaContext *, kBlock *block, int option);
+	struct VirtualCode*   (*GenerateVirtualCode)(KonohaContext *, kMethod *mtd, kBlock *block, int option);
 	MethodFunc            (*GenerateMethodFunc)(KonohaContext *, struct VirtualCode *);
 	struct VirtualCode *  (*RunVirtualMachine)(KonohaContext *kctx, struct KonohaValueVar *sfp, struct VirtualCode *pc);
 

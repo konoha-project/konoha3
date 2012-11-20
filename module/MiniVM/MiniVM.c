@@ -47,7 +47,6 @@ extern "C" {
 	MACRO(CALL)\
 	MACRO(RET)\
 	MACRO(NCALL)\
-	MACRO(BNOT)\
 	MACRO(JMP)\
 	MACRO(JMPF)\
 	MACRO(TRYJMP)\
@@ -55,7 +54,9 @@ extern "C" {
 	MACRO(ERROR)\
 	MACRO(SAFEPOINT)\
 	MACRO(CHKSTACK)\
-	MACRO(TRACE)\
+
+//	MACRO(BNOT)\
+//	MACRO(TRACE)\
 
 #include <minikonoha/arch/minivm.h>
 
@@ -231,9 +232,6 @@ static VirtualCode *KonohaVirtualMachine_tryJump(KonohaContext *kctx, KonohaStac
 
 #endif/*USE_DIRECT_THREADED_CODE*/
 
-#include<stdio.h>
-
-
 static struct VirtualCode* KonohaVirtualMachine_Run(KonohaContext *kctx, KonohaStack *sfp0, struct VirtualCode *pc)
 {
 #ifdef USE_DIRECT_THREADED_CODE
@@ -244,99 +242,6 @@ static struct VirtualCode* KonohaVirtualMachine_Run(KonohaContext *kctx, KonohaS
 	krbp_t *rbp = (krbp_t *)sfp0;
 	DISPATCH_START(pc);
 	OPDEFINE(OPEXEC)
-//	CASE(NOP) {
-//		OPEXEC_NOP();  pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(THCODE) {
-//		OPEXEC_THCODE(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(ENTER) {
-//		OPEXEC_ENTER(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(EXIT) {
-//		OPEXEC_EXIT(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(NSET) {
-//		OPEXEC_NSET(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(NMOV) {
-//		OPEXEC_NMOV(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(NMOVx) {
-//		OPEXEC_NMOVx(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(XNMOV) {
-//		OPEXEC_XNMOV(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(NEW) {
-//		OPEXEC_NEW(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(NULL) {
-//		OPEXEC_NULL(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(LOOKUP) {
-//		OPEXEC_LOOKUP(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(CALL) {
-//		OPEXEC_CALL(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(RET) {
-//		OPEXEC_RET(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(NCALL) {
-//		OPEXEC_NCALL(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(BNOT) {
-//		OPEXEC_BNOT(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(JMP) {
-//		OPEXEC_JMP(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(JMPF) {
-//		OPEXEC_JMPF();pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(TRYJMP) {
-//		OPEXEC_TRYJMP(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(YIELD) {
-//		OPEXEC_YIELD(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(ERROR) {
-//		OPEXEC_ERROR(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(SAFEPOINT) {
-//		OPEXEC_SAFEPOINT(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(CHKSTACK) {
-//		OPEXEC_CHKSTACK(); pc++;
-//		GOTO_NEXT();
-//	}
-//	CASE(TRACE) {
-//		OPEXEC_TRACE(); pc++;
-//		GOTO_NEXT();
-//	}
-
 	DISPATCH_END(pc);
 	L_RETURN:;
 	return pc;
@@ -436,6 +341,87 @@ static bblock_t BasicBlock_Add(KonohaContext *kctx, bblock_t blockId, kfileline_
 	return BasicBlock_id(kctx, bb);
 }
 
+static int CodeOffset(KGrowingBuffer *wb)
+{
+	return Kwb_bytesize(wb);
+}
+
+static void BasicBlock_WriteBuffer(KonohaContext *kctx, bblock_t blockId, KGrowingBuffer *wb)
+{
+	BasicBlock *bb = BasicBlock_FindById(kctx, blockId);
+	while(bb != NULL && bb->codeoffset == -1) {
+		size_t len = bb->size - sizeof(BasicBlock);
+		bb->codeoffset = CodeOffset(wb);
+		if(bb->nextid == bb->branchid  && bb->nextid != -1) {
+			bb->branchid = -1;
+			len -= sizeof(VirtualCode); // remove unnecesarry jump ..
+		}
+		if(len > 0) {
+			bblock_t id = BasicBlock_id(kctx, bb);
+			char buf[len];  // bb is growing together with wb.
+			memcpy(buf, ((char*)bb) + sizeof(BasicBlock), len);
+			KLIB Kwb_Write(kctx, wb, buf, len);
+			bb = BasicBlock_FindById(kctx, id);  // recheck
+			bb->lastoffset = CodeOffset(wb) - sizeof(VirtualCode);
+			DBG_ASSERT(bb->codeoffset + ((len / sizeof(VirtualCode)) - 1) * sizeof(VirtualCode) == bb->lastoffset);
+		}
+		else {
+			DBG_ASSERT(bb->branchid == -1);
+		}
+		bb = BasicBlock_FindById(kctx, bb->nextid);
+	}
+	bb = BasicBlock_FindById(kctx, blockId);
+	while(bb != NULL) {
+		if(bb->branchid != -1 /*&& bb->branchid != builder->bbReturnId*/) {
+			BasicBlock *bbJ = BasicBlock_FindById(kctx, bb->branchid);
+			if(bbJ->codeoffset == -1) {
+				BasicBlock_WriteBuffer(kctx, bb->branchid, wb);
+			}
+		}
+		bb = BasicBlock_FindById(kctx, bb->nextid);
+	}
+}
+
+static int BasicBlock_size(BasicBlock *bb)
+{
+	return (bb->size - sizeof(BasicBlock)) / sizeof(VirtualCode);
+}
+
+static BasicBlock *BasicBlock_leapJump(KonohaContext *kctx, BasicBlock *bb)
+{
+	while(bb->nextid != -1) {
+		if(BasicBlock_size(bb) != 0) return bb;
+		bb = BasicBlock_FindById(kctx, bb->nextid);
+	}
+	if(bb->nextid == -1 && bb->branchid != -1 && BasicBlock_size(bb) == 1) {
+		return BasicBlock_leapJump(kctx, BasicBlock_FindById(kctx, bb->branchid));
+	}
+	return bb;
+}
+
+#define BasicBlock_isVisited(bb)     (bb->incoming == -1)
+#define BasicBlock_setVisited(bb)    bb->incoming = -1
+
+static void BasicBlock_setJumpAddr(KonohaContext *kctx, BasicBlock *bb, char *vcode)
+{
+	while(bb != NULL) {
+		BasicBlock_setVisited(bb);
+		if(bb->branchid != -1) {
+			BasicBlock *bbJ = BasicBlock_leapJump(kctx, BasicBlock_FindById(kctx, bb->branchid));
+			OPJMP *j = (OPJMP *)(vcode + bb->lastoffset);
+			DBG_ASSERT(j->opcode == OPCODE_JMP || j->opcode == OPCODE_JMPF);
+			j->jumppc = (VirtualCode*)(vcode + bbJ->codeoffset);
+			bbJ = BasicBlock_FindById(kctx, bb->branchid);
+			if(!BasicBlock_isVisited(bbJ)) {
+				BasicBlock_setVisited(bbJ);
+				BasicBlock_setJumpAddr(kctx, bbJ, vcode);
+			}
+		}
+		bb = BasicBlock_FindById(kctx, bb->nextid);
+	}
+}
+
+
 /* ------------------------------------------------------------------------ */
 
 static bblock_t new_BasicBlockLABEL(KonohaContext *kctx)
@@ -529,86 +515,7 @@ static bblock_t KBuilder_asmJMPIF(KonohaContext *kctx, KBuilder *builder, kStmt 
 {
 	int a = builder->common.a;
 	SUGAR VisitExpr(kctx, builder, stmt, expr);
-	if(isTRUE) {
-		ASM(BNOT, NC_(a), NC_(a));
-	}
 	return KBuilder_AsmJMPF(kctx, builder, a, labelId);
-}
-
-static int CodeOffset(KGrowingBuffer *wb)
-{
-	return Kwb_bytesize(wb);
-}
-
-static void BasicBlock_WriteBuffer(KonohaContext *kctx, bblock_t blockId, KGrowingBuffer *wb)
-{
-	BasicBlock *bb = BasicBlock_FindById(kctx, blockId);
-	while(bb != NULL && bb->codeoffset == -1) {
-		size_t len = bb->size - sizeof(BasicBlock);
-		bb->codeoffset = CodeOffset(wb);
-		if(len > 0) {
-			bblock_t id = BasicBlock_id(kctx, bb);
-			char buf[len];  // bb is growing together with wb.
-			memcpy(buf, ((char*)bb) + sizeof(BasicBlock), len);
-			KLIB Kwb_Write(kctx, wb, buf, len);
-			bb = BasicBlock_FindById(kctx, id);  // recheck
-			bb->lastoffset = CodeOffset(wb) - sizeof(VirtualCode);
-			DBG_ASSERT(bb->codeoffset + ((len / sizeof(VirtualCode)) - 1) * sizeof(VirtualCode) == bb->lastoffset);
-		}
-		else {
-			DBG_ASSERT(bb->branchid == -1);
-		}
-		bb = BasicBlock_FindById(kctx, bb->nextid);
-	}
-	bb = BasicBlock_FindById(kctx, blockId);
-	while(bb != NULL) {
-		if(bb->branchid != -1 /*&& bb->branchid != builder->bbReturnId*/) {
-			BasicBlock *bbJ = BasicBlock_FindById(kctx, bb->branchid);
-			if(bbJ->codeoffset == -1) {
-				BasicBlock_WriteBuffer(kctx, bb->branchid, wb);
-			}
-		}
-		bb = BasicBlock_FindById(kctx, bb->nextid);
-	}
-}
-
-static int BasicBlock_size(BasicBlock *bb)
-{
-	return (bb->size - sizeof(BasicBlock)) / sizeof(VirtualCode);
-}
-
-static BasicBlock *BasicBlock_leapJump(KonohaContext *kctx, BasicBlock *bb)
-{
-	while(bb->nextid != -1) {
-		if(BasicBlock_size(bb) != 0) return bb;
-		bb = BasicBlock_FindById(kctx, bb->nextid);
-	}
-	if(bb->nextid == -1 && bb->branchid != -1 && BasicBlock_size(bb) == 1) {
-		return BasicBlock_leapJump(kctx, BasicBlock_FindById(kctx, bb->branchid));
-	}
-	return bb;
-}
-
-#define BasicBlock_isVisited(bb)     (bb->incoming == -1)
-#define BasicBlock_setVisited(bb)    bb->incoming = -1
-
-static void BasicBlock_setJumpAddr(KonohaContext *kctx, BasicBlock *bb, char *vcode)
-{
-	while(bb != NULL) {
-		BasicBlock_setVisited(bb);
-		if(bb->branchid != -1) {
-			BasicBlock *bbJ = BasicBlock_leapJump(kctx, BasicBlock_FindById(kctx, bb->branchid));
-			OPJMP *j = (OPJMP *)(vcode + bb->lastoffset);
-			DBG_ASSERT(j->opcode == OPCODE_JMP || j->opcode == OPCODE_JMPF);
-			j->jumppc = (VirtualCode*)(vcode + bbJ->codeoffset);
-			bbJ = BasicBlock_FindById(kctx, bb->branchid);
-			if(!BasicBlock_isVisited(bbJ)) {
-				BasicBlock_setVisited(bbJ);
-				BasicBlock_setJumpAddr(kctx, bbJ, vcode);
-			}
-		}
-		bb = BasicBlock_FindById(kctx, bb->nextid);
-	}
 }
 
 static kObject* KBuilder_AddConstPool(KonohaContext *kctx, KBuilder *builder, kObject *o)
@@ -1013,7 +920,7 @@ static void _THCODE(KonohaContext *kctx, VirtualCode *pc, void **codeaddr, size_
 #endif
 }
 
-static struct VirtualCode* MiniVM_GenerateVirtualCode(KonohaContext *kctx, kBlock *block, int option)
+static struct VirtualCode* MiniVM_GenerateVirtualCode(KonohaContext *kctx, kMethod *mtd, kBlock *block, int option)
 {
 	KGrowingBuffer wb;
 	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
@@ -1038,9 +945,9 @@ static struct VirtualCode* MiniVM_GenerateVirtualCode(KonohaContext *kctx, kBloc
 
 	builder->common.shift = 0;
 	ASM_LABEL(kctx, builder,  builder->bbReturnId);
-//	if(mtd->mn == MN_new) {
-//		ASM(NMOV, OC_(K_RTNIDX), OC_(0), CT_(mtd->typeId));   // FIXME: Type 'This' must be resolved
-//	}
+	if(mtd->mn == MN_new) {
+		ASM(NMOV, OC_(K_RTNIDX), OC_(0), CT_(mtd->typeId));   // FIXME: Type 'This' must be resolved
+	}
 	ASM(RET);
 	VirtualCode *vcode = CompileVirtualCode(kctx, builder, builder->bbBeginId, builder->bbReturnId);
 	RESET_GCSTACK();
