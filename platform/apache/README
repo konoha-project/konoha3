@@ -22,7 +22,7 @@ konoha apache module.
   
   @Public int System.handler(Request r) {
       r.puts("<strong>hello world!</strong>")
-      return APACHE_OK;
+      return OK;
   }
 
 * Access to http://localhost/hello.k

@@ -3,11 +3,11 @@
 
 #ifndef APACHE_GLUE_H
 #define APACHE_GLUE_H
-#define kapacheshare      ((kapacheshare_t *)kctx->modshare[MOD_APACHE])
-#define CT_Request        kapacheshare->cRequest
-#define CT_AprTable       kapacheshare->cAprTable
-#define CT_AprTableEntry  kapacheshare->cAprTableEntry
-#define CT_Apache         kapacheshare->cApache
+#define kmodapache        ((KModuleApache *)kctx->modshare[MOD_APACHE])
+#define CT_Request        kmodapache->cRequest
+#define CT_AprTable       kmodapache->cAprTable
+#define CT_AprTableEntry  kmodapache->cAprTableEntry
+#define CT_Apache         kmodapache->cApache
 
 typedef struct kRequest {
 	KonohaObjectHeader h;
@@ -34,7 +34,7 @@ typedef struct {
 	KonohaClass *cAprTable;
 	KonohaClass *cAprTableEntry;
 	KonohaClass *cApache;
-} kapacheshare_t;
+} KModuleApache;
 
 typedef struct {
 	KonohaModuleContext h;
