@@ -712,7 +712,7 @@ static kbool_t socket_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 			{KDefineConstInt(SOMAXCONN)},
 			{}
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), false/*isOverride*/, trace);
 	return true;
 }
 
@@ -724,7 +724,7 @@ static kbool_t socket_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kName
 KDEFINE_PACKAGE* socket_Init(void)
 {
 	static KDEFINE_PACKAGE d = {
-		KPACKNAME("socket", "1.0"),
+		KPACKNAME("posix", "1.0"),
 		.PackupNameSpace    = socket_PackupNameSpace,
 		.ExportNameSpace   = socket_ExportNameSpace,
 	};

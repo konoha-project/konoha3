@@ -296,9 +296,9 @@ static kbool_t float_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 		{"FLOAT_EPSILON", TY_float, DBL_EPSILON},
 		{"Infinity", TY_float, INFINITY},
 		{"NaN", TY_float, NAN},
-		{}
+		{NULL} /* sentinel */
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(FloatData), trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(FloatData), false/*isOverride*/, trace);
 	return true;
 }
 
@@ -340,7 +340,7 @@ static kbool_t float_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 			{"double", VirtualType_KonohaClass, (uintptr_t)CT_Float},
 			{NULL},
 		};
-		KLIB kNameSpace_LoadConstData(kctx, exportNS, KonohaConst_(ClassData), 0);
+		KLIB kNameSpace_LoadConstData(kctx, exportNS, KonohaConst_(ClassData), false/*isOverride*/, trace);
 	}
 	return true;
 }

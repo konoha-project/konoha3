@@ -428,7 +428,7 @@ static void kObject_ReftraceField(KonohaContext *kctx, kObject *o, KObjectVisito
 		protomap_iterator itr = {0};
 		KKeyValue *d;
 		while((d = protomap_next((Kprotomap_t *)o->h.kvproto, &itr)) != NULL) {
-			if(Symbol_isBoxedKey(d->key)) {
+			if(SymbolKey_isBoxed(d->key)) {
 				KRefTrace(d->ObjectValue);
 			}
 		}
@@ -438,14 +438,14 @@ static void kObject_ReftraceField(KonohaContext *kctx, kObject *o, KObjectVisito
 static kObject* kObject_getObjectNULL(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, kAbstractObject *defval)
 {
 	kObject *v = (kObject *)o;
-	KKeyValue *d = protomap_get((Kprotomap_t *)v->h.kvproto, key | SYMKEY_BOXED);
+	KKeyValue *d = protomap_get((Kprotomap_t *)v->h.kvproto, key | SymbolKey_BOXED);
 	return (d != NULL) ? d->ObjectValue : defval;
 }
 
 static void kObject_setObject(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, ktype_t ty, kAbstractObject *val)
 {
 	kObjectVar *v = (kObjectVar *)o;
-	protomap_set((Kprotomap_t **)&v->h.kvproto, key | SYMKEY_BOXED, ty, (void *)val);
+	protomap_set((Kprotomap_t **)&v->h.kvproto, key | SymbolKey_BOXED, ty, (void *)val);
 	PLATAPI WriteBarrier(kctx, v);
 }
 
@@ -466,7 +466,7 @@ static void kObject_setUnboxValue(KonohaContext *kctx, kAbstractObject *o, ksymb
 static void kObject_removeKey(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key)
 {
 	kObjectVar *v = (kObjectVar *)o;
-	KKeyValue *d = protomap_get((Kprotomap_t *)v->h.kvproto, key | SYMKEY_BOXED);
+	KKeyValue *d = protomap_get((Kprotomap_t *)v->h.kvproto, key | SymbolKey_BOXED);
 	if(d != NULL) {
 		d->key = 0; d->ty = 0; d->unboxValue = 0;
 	}
@@ -497,12 +497,12 @@ struct wbenv {
 static void dumpProto(KonohaContext *kctx, void *arg, KKeyValue *d)
 {
 	struct wbenv *w = (struct wbenv*)arg;
-	ksymbol_t key = SYMKEY_unbox(d->key);
+	ksymbol_t key = SymbolKey_unbox(d->key);
 	if(w->count > 0) {
 		KLIB Kwb_Write(kctx, w->wb, ", ", 2);
 	}
 	KLIB Kwb_printf(kctx, w->wb, "%s%s: (%s)", PSYM_t(key), TY_t(d->ty));
-	if(Symbol_isBoxedKey(d->key)) {
+	if(SymbolKey_isBoxed(d->key)) {
 		KUnsafeFieldSet(w->values[w->pos].asObject, d->ObjectValue);
 	}
 	else {

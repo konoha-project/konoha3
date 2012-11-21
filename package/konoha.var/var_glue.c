@@ -36,7 +36,7 @@ static kbool_t var_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 		{"var", VirtualType_KonohaClass, (uintptr_t)CT_(TY_var)},
 		{NULL},
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(ClassData), trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(ClassData), false/*isOverride*/, trace);
 	return true;
 }
 

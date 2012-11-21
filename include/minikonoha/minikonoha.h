@@ -239,9 +239,9 @@ typedef struct {
 #define _NEWID              SYM_NEWID
 #define _NEWRAW             SYM_NEWRAW
 
-#define SYMKEY_BOXED            KFLAG_H3
-#define SYMKEY_unbox(sym)       (sym & ~(SYMKEY_BOXED))
-#define Symbol_isBoxedKey(sym)     ((sym & SYMKEY_BOXED) == SYMKEY_BOXED)
+#define SymbolKey_BOXED            KFLAG_H3
+#define SymbolKey_unbox(sym)       (sym & ~(SymbolKey_BOXED))
+#define SymbolKey_isBoxed(sym)     ((sym & SymbolKey_BOXED) == SymbolKey_BOXED)
 
 #define FN_COERCION             KFLAG_H3
 #define FN_Coersion             FN_COERCION
@@ -1686,8 +1686,8 @@ struct KonohaLibVar {
 	KonohaClass*     (*kNameSpace_GetClassByFullName)(KonohaContext*, kNameSpace *, const char *, size_t, KonohaClass *);
 	KonohaClass*     (*kNameSpace_DefineClass)(KonohaContext*, kNameSpace *, kString *, KDEFINE_CLASS *, KTraceInfo *);
 
-	kbool_t          (*kNameSpace_SetConstData)(KonohaContext *, kNameSpace *, ksymbol_t, ktype_t, uintptr_t, KTraceInfo *);
-	kbool_t          (*kNameSpace_LoadConstData)(KonohaContext*, kNameSpace *, const char **d, KTraceInfo *);
+	kbool_t          (*kNameSpace_SetConstData)(KonohaContext *, kNameSpace *, ksymbol_t, ktype_t, uintptr_t, int isOverride, KTraceInfo *);
+	kbool_t          (*kNameSpace_LoadConstData)(KonohaContext*, kNameSpace *, const char **d, int isOverride, KTraceInfo *);
 	KKeyValue*       (*kNameSpace_GetConstNULL)(KonohaContext *, kNameSpace *, ksymbol_t);
 	void             (*kNameSpace_LoadMethodData)(KonohaContext*, kNameSpace *, intptr_t *, KTraceInfo *);
 

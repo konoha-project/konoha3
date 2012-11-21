@@ -184,7 +184,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 		{"System", VirtualType_KonohaClass, (uintptr_t)CT_System},
 		{NULL},
 	};
-	kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(ClassData), 0);
+	kNameSpace_LoadConstData(kctx, KNULL(NameSpace), KonohaConst_(ClassData), true/*isOverride*/, 0);
 
 	mod->kNameSpace_SetTokenFunc       = kNameSpace_SetTokenFunc;
 	mod->TokenSeq_Tokenize        = TokenSeq_Tokenize;
@@ -284,7 +284,7 @@ static void kNameSpace_SetStaticFunction(KonohaContext *kctx, kNameSpace *ns, kA
 		kMethod *mtd = list->MethodItems[i];
 		if(kMethod_is(Static, mtd) && mtd->typeId == cid) {
 			uintptr_t mtdinfo = ((uintptr_t)cid | (((uintptr_t)mtd->mn) << (sizeof(ktype_t) * 8)));
-			KLIB kNameSpace_SetConstData(kctx, ns, mtd->mn, VirtualType_StaticMethod, mtdinfo, trace);
+			KLIB kNameSpace_SetConstData(kctx, ns, mtd->mn, VirtualType_StaticMethod, mtdinfo, false/*isOverride*/, trace);
 		}
 	}
 }

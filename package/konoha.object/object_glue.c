@@ -168,7 +168,7 @@ static kbool_t object_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		{"Object", VirtualType_KonohaClass, (uintptr_t)CT_(TY_Object)},
 		{NULL},
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(ClassData), 0);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(ClassData), false/*isOverride*/, trace);
 	object_defineMethod(kctx, ns, trace);
 	subtype_defineSyntax(kctx, ns, trace);
 	return true;

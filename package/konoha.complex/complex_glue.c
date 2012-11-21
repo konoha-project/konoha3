@@ -728,12 +728,12 @@ static kbool_t Complex_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 
-	/* You can define constant variable with the following procedures. */
-	KDEFINE_FLOAT_CONST FloatData[] = {
-		{"FLOAT_EPSILON", TY_float, DBL_EPSILON},
-		{} /* <= sentinel */
-	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(FloatData), trace);
+//	/* You can define constant variable with the following procedures. */
+//	KDEFINE_FLOAT_CONST FloatData[] = {
+//		{"FLOAT_EPSILON", TY_float, DBL_EPSILON},
+//		{NULL} /* <= sentinel */
+//	};
+//	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(FloatData), false/*isOverride*/, trace);
 	return true;
 }
 

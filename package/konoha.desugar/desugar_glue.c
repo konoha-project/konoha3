@@ -1199,7 +1199,7 @@ static kbool_t desugar_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 		{"symbol", VirtualType_KonohaClass, (uintptr_t)cSymbol},
 		{NULL},
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(ClassData), 0);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(ClassData), false/*isOverride*/, 0);
 	int TY_Symbol = cSymbol->typeId;
 	desugar_defineTokenFunc(kctx, ns, TY_Symbol, trace);
 	desugar_defineMessageMethod(kctx, ns, TY_Symbol, trace);
@@ -1246,7 +1246,7 @@ static kbool_t desugar_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNam
 #undef DEFINE_KEYWORD
 		{NULL},
 	};
-	KLIB kNameSpace_LoadConstData(kctx, exportNS, KonohaConst_(IntData), trace);
+	KLIB kNameSpace_LoadConstData(kctx, exportNS, KonohaConst_(IntData), false/*isOverride*/, trace);
 	return true;
 }
 

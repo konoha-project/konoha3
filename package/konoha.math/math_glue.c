@@ -265,7 +265,7 @@ static kbool_t math_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 			{MATH_(SQRT2)},
 			{}
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(FloatData), 0);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(FloatData), false/*isOverride*/, trace);
 	return true;
 }
 

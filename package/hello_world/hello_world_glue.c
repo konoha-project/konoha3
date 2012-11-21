@@ -142,7 +142,7 @@ static kbool_t HelloWorld_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, i
 		{"NARUTO_AGE", TY_int, 18},
 		{} /* <= sentinel */
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), false/*isOverride*/, trace);
 	return true;
 }
 

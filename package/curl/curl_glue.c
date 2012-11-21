@@ -880,7 +880,7 @@ static kbool_t curl_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opt
 		{KDefineConstInt(CURLINFO_CONTENT_TYPE)},
 		{} // end of const data
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), false/*isOverride*/, trace);
 	return true;
 }
 

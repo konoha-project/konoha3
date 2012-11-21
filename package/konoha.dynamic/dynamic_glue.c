@@ -96,7 +96,7 @@ static kbool_t dynamic_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 {
 	static KDEFINE_CLASS defDynamic = {0};
 	defDynamic.structname = "dynamic";
-	defDynamic.cflag = kClass_Final|kClass_TypeVar;
+	defDynamic.cflag = kClass_Final;
 	KonohaClass *cDynamic = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &defDynamic, trace);
 	int TY_Dynamic = cDynamic->typeId;
 	KDEFINE_METHOD MethodData[] = {

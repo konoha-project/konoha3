@@ -976,7 +976,7 @@ static kbool_t sugar_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 		{"symbol", VirtualType_KonohaClass, (uintptr_t)cSymbol},
 		{NULL},
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(ClassData), 0);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(ClassData), false/*isOverride*/, trace);
 
 	int TY_Symbol = cSymbol->typeId;
 	sugar_defineTokenFunc(kctx, ns, TY_Symbol, trace);
@@ -1195,7 +1195,7 @@ static kbool_t RENAMEME_InitNameSpace(KonohaContext *kctx, kNameSpace *packageNS
 #undef DEFINE_KEYWORD
 		{NULL},
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), false/*isOverride*/, trace);
 	KDEFINE_SYNTAX SYNTAX[] = {
 		{ SYM_("syntax"), 0, "\"syntax\" $Token*", 0, 0, NULL, NULL, Statement_syntax, NULL, NULL, },
 		{ KW_END, },
@@ -1216,7 +1216,7 @@ static kbool_t sugar_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 #undef DEFINE_KEYWORD
 		{NULL},
 	};
-	KLIB kNameSpace_LoadConstData(kctx, exportNS, KonohaConst_(IntData), trace);
+	KLIB kNameSpace_LoadConstData(kctx, exportNS, KonohaConst_(IntData), false/*isOverride*/, trace);
 	return true;
 }
 

@@ -327,7 +327,7 @@ static kbool_t fd_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int optio
 		{KDefineConstInt(O_NOCTTY)},
 		{NULL}, /* sentinel */
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(intData), 0);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(intData), false/*isOverride*/, trace);
 	return true;
 }
 
