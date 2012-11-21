@@ -17,8 +17,8 @@ add_custom_command(OUTPUT
 		${CMAKE_CURRENT_BINARY_DIR}/files/readlink.txt)
 add_custom_target(link_fd_test_file ALL DEPENDS
 		${CMAKE_CURRENT_BINARY_DIR}/files/readlink.txt)
-set(PACKAGE_TEST_FILE files/another.txt files/ftruncate.txt files/newfile.txt
-	files/openfile.txt)
+#set(PACKAGE_TEST_FILE files/another.txt files/ftruncate.txt files/newfile.txt
+#	files/openfile.txt)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_konoha_package(posix.fd)
 endif()
