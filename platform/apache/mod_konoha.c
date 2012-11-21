@@ -47,28 +47,28 @@ typedef struct konoha_config {
 module AP_MODULE_DECLARE_DATA konoha_module;
 static const char *apache_package_path = NULL;
 
-static const char *apache_FormatPackagePath(char *buf, size_t bufsiz, const char *packageName, const char *ext)
+static const char *apache_FormatPackagePath(KonohaContext *kctx, char *buf, size_t bufsiz, const char *packageName, const char *ext)
 {
 	if(apache_package_path) {
-		snprintf(buf, bufsiz, "%s/%s/%s%s", apache_package_path, packageName, packname(packageName), ext);
+		snprintf(buf, bufsiz, "%s/%s/%s%s", apache_package_path, packageName, ShortPackageName(packageName), ext);
 		FILE *fp = fopen(buf, "r");
 		if(fp != NULL) {
 			fclose(fp);
 			return buf;
 		}
 	}
-	return FormatPackagePath(buf, bufsiz, packageName, ext);
+	return FormatPackagePath(kctx, buf, bufsiz, packageName, ext);
 }
 
-static KonohaPackageHandler *apache_LoadPackageHandler(const char *packageName)
+static KonohaPackageHandler *apache_LoadPackageHandler(KonohaContext *kctx, const char *packageName)
 {
 	char pathbuf[256];
-	apache_FormatPackagePath(pathbuf, sizeof(pathbuf), packageName, "_glue" K_OSDLLEXT);
+	apache_FormatPackagePath(kctx, pathbuf, sizeof(pathbuf), packageName, "_glue" K_OSDLLEXT);
 	void *gluehdr = dlopen(pathbuf, RTLD_LAZY);
 	//fprintf(stderr, "pathbuf=%s, gluehdr=%p", pathbuf, gluehdr);
 	if(gluehdr != NULL) {
 		char funcbuf[80];
-		snprintf(funcbuf, sizeof(funcbuf), "%s_Init", packname(packageName));
+		snprintf(funcbuf, sizeof(funcbuf), "%s_Init", ShortPackageName(packageName));
 		PackageLoadFunc f = (PackageLoadFunc)dlsym(gluehdr, funcbuf);
 		if(f != NULL) {
 			return f();
@@ -77,19 +77,12 @@ static KonohaPackageHandler *apache_LoadPackageHandler(const char *packageName)
 	return NULL;
 }
 
-static const char* apache_beginTag(kinfotag_t t) { (void)t; return ""; }
-static const char* apache_endTag(kinfotag_t t) { (void)t; return ""; }
-
-static PlatformApi *getApachePlatform()
+static void ApacheFactory(KonohaFactory *factory)
 {
-	KonohaFactory *apache_platformvar = (KonohaFactory *)KonohaUtils_getDefaultPlatformApi();
-	apache_platformvar->name               = "apache";
-	apache_platformvar->stacksize          = K_PAGESIZE;
-	apache_platformvar->FormatPackagePath  = apache_FormatPackagePath;
-	apache_platformvar->LoadPackageHandler = apache_LoadPackageHandler;
-	apache_platformvar->beginTag           = apache_beginTag;
-	apache_platformvar->endTag             = apache_endTag;
-	return (PlatformApi *)apache_platformvar;
+	factory->name               = "apache";
+	factory->stacksize          = K_PAGESIZE;
+	factory->FormatPackagePath  = apache_FormatPackagePath;
+	factory->LoadPackageHandler = apache_LoadPackageHandler;
 }
 
 // class methodList start ==============================================================================================
@@ -180,7 +173,7 @@ static KMETHOD AprTable_Add(KonohaContext *kctx, KonohaStack *sfp)
 	kAprTable *self = (kAprTable *) sfp[0].asObject;
 	const char *key = S_text(sfp[1].asString);
 	const char *val = S_text(sfp[2].asString);
-	apr_table_Add(self->tbl, key, val);
+	apr_table_add(self->tbl, key, val);
 	KReturnVoid();
 }
 // ## void AprTable.set(String key, String val)
@@ -220,12 +213,21 @@ static KMETHOD AprTableEntry_getVal(KonohaContext *kctx, KonohaStack *sfp)
 }
 // class methodList end ==============================================================================================
 
+void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), int argc, char **argv);
+KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory);
+int Konoha_Destroy(KonohaContext *kctx);
+
 KonohaContext* konoha_create(KonohaClass **cRequest)
 {
-	PlatformApi *apache_platform = getApachePlatform();
-	KonohaContext* kctx = konoha_open(apache_platform);
+	struct KonohaFactory factory = {};
+	int argc = 0;
+	char *argv[1] = {0};
+	KonohaFactory_SetDefaultFactory(&factory, PosixFactory, argc, argv);
+	ApacheFactory(&factory);
+	KonohaContext* kctx = KonohaFactory_CreateKonoha(&factory);
+	KBaseTrace(trace);
 	kNameSpace *ns = KNULL(NameSpace);
-	KImportPackage(ns, "apache", 0);
+	KImportPackage(ns, "apache", trace);
 	*cRequest = CT_Request;
 #define _P    kMethod_Public
 #define _F(F) (intptr_t)(F)
@@ -285,7 +287,7 @@ static int konoha_handler(request_rec *r)
 	kNameSpace *ns = KNULL(NameSpace);
 	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, TY_System, MN_("handler"), -1);  // fixme
 	if(mtd == NULL) {
-		ap_log_rerror(APLOG_MARK, APLOG_CRIT, 0, r, "Apache.handler() not found");
+		ap_log_rerror(APLOG_MARK, APLOG_CRIT, 0, r, "System.handler() not found");
 		return -1;
 	}
 
@@ -300,7 +302,9 @@ static int konoha_handler(request_rec *r)
 		KonohaRuntime_callMethod(kctx, sfp);
 	}
 	END_LOCAL();
-	return lsfp[0].intValue;
+	int ret = lsfp[0].intValue;
+	Konoha_Destroy(konoha);
+	return ret;
 }
 
 static int mod_konoha_Init(apr_pool_t *p, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
@@ -322,7 +326,7 @@ static void mod_konoha_child_Init(apr_pool_t *pool, server_rec *server)
 static const char *set_package_dir(cmd_parms *cmd, void *vp, const char *arg)
 {
 	(void)vp;
-	const char *err = ap_Check_cmd_context(cmd, NOT_IN_FILES | NOT_IN_LIMIT);
+	const char *err = ap_check_cmd_context(cmd, NOT_IN_FILES | NOT_IN_LIMIT);
 	konoha_config_t *conf = (konoha_config_t *)
 		ap_get_module_config(cmd->server->module_config, &konoha_module);
 	if(err != NULL) {
@@ -349,7 +353,7 @@ static void konoha_register_hooks(apr_pool_t *p)
 {
 	(void)p;
 	ap_hook_post_config(mod_konoha_Init, NULL, NULL, APR_HOOK_MIDDLE);
-	ap_hook_child_Init(mod_konoha_child_Init, NULL, NULL, APR_HOOK_MIDDLE);
+	ap_hook_child_init(mod_konoha_child_Init, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_handler(konoha_handler, NULL, NULL, APR_HOOK_FIRST);
 }
 
