@@ -71,6 +71,16 @@ static void kNameSpace_FreeSugarExtension(KonohaContext *kctx, kNameSpaceVar *ns
 	}
 }
 
+
+/* --------------- */
+/* Symbol */
+
+static void kSymbol_p(KonohaContext *kctx, KonohaValue *v, int pos, KGrowingBuffer *wb)
+{
+	ksymbol_t symbol = (ksymbol_t)v[pos].unboxValue;
+	KLIB Kwb_printf(kctx, wb, "%s%s", PSYM_t(symbol));
+}
+
 /* --------------- */
 /* Token */
 

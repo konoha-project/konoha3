@@ -3,7 +3,7 @@
 import("konoha.desugar");
 
 void test() {
-	symbol keyword = "$Symbol";
+	Symbol keyword = "$Symbol";
 	System.p(keyword);
 }
 

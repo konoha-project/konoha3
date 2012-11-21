@@ -134,6 +134,14 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	l->kMethod_GenCode   = kMethod_GenCode;
 	l->kMethod_setFunc   = kMethod_setFunc;
 
+	KDEFINE_CLASS defSymbol = {0};
+	defSymbol.structname = "Symbol";
+	defSymbol.typeId = TY_newid;
+	defSymbol.cflag = CFLAG_int;
+	defSymbol.init = CT_(TY_int)->init;
+	defSymbol.unbox = CT_(TY_int)->unbox;
+	defSymbol.p = kSymbol_p;
+
 	KDEFINE_CLASS defToken = {0};
 	SETSTRUCTNAME(defToken, Token);
 	defToken.init = kToken_Init;
@@ -161,6 +169,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	SETSTRUCTNAME(defGamma, Gamma);
 	defGamma.init = Gamma_Init;
 
+	mod->cSymbol =    KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defSymbol, 0);
 	mod->cToken =     KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defToken, 0);
 	mod->cExpr  =     KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defExpr, 0);
 	mod->cStmt  =     KLIB KonohaClass_define(kctx, PackageId_sugar, NULL, &defStmt, 0);
@@ -303,8 +312,13 @@ static KMETHOD NameSpace_useStaticFunc(KonohaContext *kctx, KonohaStack *sfp)
 	KReturnVoid();
 }
 
-#define _Public kMethod_Public
-#define _F(F)   (intptr_t)(F)
+//## @Public @Const @Immutable @Coercion Symbol String.toSymbol();
+static KMETHOD String_toSymbol(KonohaContext *kctx, KonohaStack *sfp)
+{
+	KReturnUnboxValue(ksymbolA(S_text(sfp[0].asString), S_size(sfp[0].asString), _NEWID));
+}
+
+#include <minikonoha/import/methoddecl.h>
 
 void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns)
 {
@@ -320,6 +334,7 @@ void LoadDefaultSugarMethod(KonohaContext *kctx, kNameSpace *ns)
 		_Public, _F(NameSpace_loadScript), TY_void, TY_NameSpace, MN_("load"), 1, TY_String, FN_("filename"),
 		_Public, _F(NameSpace_loadScript), TY_void, TY_NameSpace, MN_("include"), 1, TY_String, FN_("filename"),
 		_Public, _F(NameSpace_useStaticFunc), TY_void, TY_NameSpace, MN_("useStaticFunc"), 1, TY_Object, FN_("class"),
+		_Public|_Coercion|_Const, _F(String_toSymbol), TY_Symbol, TY_String, MN_to(TY_Symbol), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, NULL);

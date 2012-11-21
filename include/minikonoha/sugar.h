@@ -509,12 +509,14 @@ struct kGammaVar {
 
 #define GetSugarContext(kctx)    ((SugarContext *)kctx->modlocal[MOD_sugar])
 #define kmodsugar       ((KModuleSugar *)kctx->modshare[MOD_sugar])
+#define CT_Symbol       kmodsugar->cSymbol
 #define CT_Token        kmodsugar->cToken
 #define CT_Expr         kmodsugar->cExpr
 #define CT_Stmt         kmodsugar->cStmt
 #define CT_Block        kmodsugar->cBlock
 #define CT_Gamma        kmodsugar->cGamma
 
+#define CT_SymbolVar        kmodsugar->cSymbol
 #define CT_TokenVar        kmodsugar->cToken
 #define CT_ExprVar         kmodsugar->cExpr
 #define CT_StmtVar         kmodsugar->cStmt
@@ -543,6 +545,7 @@ struct KBuilder;
 
 typedef struct {
 	KonohaModule  h;
+	KonohaClass *cSymbol;
 	KonohaClass *cToken;
 	KonohaClass *cExpr;
 	KonohaClass *cStmt;
@@ -643,6 +646,7 @@ static kExpr* kExpr_SetConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, 
 static kExpr* kExpr_SetUnboxConstValue(KonohaContext *kctx, kExpr *expr, ktype_t ty, uintptr_t unboxValue);
 static kExpr* kExpr_SetVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, kexpr_t build, ktype_t ty, intptr_t index);
 
+#define TY_Symbol                          kmodsugar->cSymbol->typeId
 #define TY_Token                           kmodsugar->cToken->typeId
 #define TY_Stmt                            kmodsugar->cStmt->typeId
 #define TY_Block                           kmodsugar->cBlock->typeId
@@ -656,6 +660,7 @@ static kExpr* kExpr_SetVariable(KonohaContext *kctx, kExpr *expr, kGamma *gma, k
 #else/*SUGAR_EXPORTS*/
 
 #define SUGAR        ((const KModuleSugar *)kmodsugar)->
+#define TY_Symbol                            SUGAR cSymbol->typeId
 #define TY_Token                             SUGAR cToken->typeId
 #define TY_Stmt                              SUGAR cStmt->typeId
 #define TY_Block                             SUGAR cBlock->typeId

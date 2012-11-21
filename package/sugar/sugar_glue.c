@@ -139,7 +139,7 @@ static KMETHOD Token_error(KonohaContext *kctx, KonohaStack *sfp)
 #define TP_end      TY_int, FN_("end")
 #define TP_message      TY_String, FN_("message")
 
-static void sugar_defineTokenFunc(KonohaContext *kctx, kNameSpace *ns, int TY_Symbol, KTraceInfo *trace)
+static void sugar_defineTokenFunc(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(String_AsciiAt), TY_int, TY_String, MN_("AsciiAt"), 1, TP_pos,
@@ -269,7 +269,7 @@ static KMETHOD StmtExpr_Message(KonohaContext *kctx, KonohaStack *sfp)
 #define TP_token         TY_Token, FN_("token")
 #define TP_expr          TY_Expr,  FN_("expr")
 
-static void sugar_defineMessageMethod(KonohaContext *kctx, kNameSpace *ns, int TY_Symbol, KTraceInfo *trace)
+static void sugar_defineMessageMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Stmt_Message), TY_Expr, TY_Stmt, MN_("message"), 2, TP_level, TP_message,
@@ -428,7 +428,7 @@ static KMETHOD NameSpace_AddTypeCheck(KonohaContext *kctx, KonohaStack *sfp)
 	SUGAR kNameSpace_AddSugarFunc(kctx, sfp[0].asNameSpace, keyword, SugarFunc_TypeCheck, sfp[2].asFunc);
 }
 
-static void LoadNameSpaceMethodData(KonohaContext *kctx, kNameSpace *ns, int TY_symbol, KTraceInfo *trace)
+static void LoadNameSpaceMethodData(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	int FN_keyword = SYM_("keyword");
 	int FN_func = SYM_("func");
@@ -451,18 +451,18 @@ static void LoadNameSpaceMethodData(KonohaContext *kctx, kNameSpace *ns, int TY_
 	//DBG_P("func=%s", TY_t(TY_FuncTypeCheck));
 
 	KDEFINE_METHOD MethodData[] = {
-		_Public|_Im, _F(NameSpace_DefinedSyntax), TY_boolean, TY_NameSpace, MN_("definedSyntax"), 1, TY_symbol, FN_keyword,
-		_Public|_Im, _F(NameSpace_DefinedLiteral), TY_boolean, TY_NameSpace, MN_("definedLiteral"), 1, TY_symbol, FN_keyword,
-		_Public|_Im, _F(NameSpace_DefinedStatement), TY_boolean, TY_NameSpace, MN_("definedStatement"), 1, TY_symbol, FN_keyword,
-		_Public|_Im, _F(NameSpace_DefinedExpression), TY_boolean, TY_NameSpace, MN_("definedExpression"), 1, TY_symbol, FN_keyword,
-		_Public|_Im, _F(NameSpace_DefinedBinaryOperator), TY_boolean, TY_NameSpace, MN_("definedBinaryOperator"), 1, TY_symbol, FN_keyword,
+		_Public|_Im, _F(NameSpace_DefinedSyntax), TY_boolean, TY_NameSpace, MN_("definedSyntax"), 1, TY_Symbol, FN_keyword,
+		_Public|_Im, _F(NameSpace_DefinedLiteral), TY_boolean, TY_NameSpace, MN_("definedLiteral"), 1, TY_Symbol, FN_keyword,
+		_Public|_Im, _F(NameSpace_DefinedStatement), TY_boolean, TY_NameSpace, MN_("definedStatement"), 1, TY_Symbol, FN_keyword,
+		_Public|_Im, _F(NameSpace_DefinedExpression), TY_boolean, TY_NameSpace, MN_("definedExpression"), 1, TY_Symbol, FN_keyword,
+		_Public|_Im, _F(NameSpace_DefinedBinaryOperator), TY_boolean, TY_NameSpace, MN_("definedBinaryOperator"), 1, TY_Symbol, FN_keyword,
 //		_Public, _F(NameSpace_compileAllDefinedMethods), TY_void, TY_NameSpace, MN_("compileAllDefinedMethods"), 0,
-		_Public, _F(NameSpace_setTokenFunc), TY_void, TY_NameSpace, MN_("setTokenFunc"), 3, TY_symbol, FN_keyword, TY_int, FN_("kchar"), TY_FuncToken, FN_func,
-		_Public, _F(NameSpace_AddPatternMatch), TY_void, TY_NameSpace, MN_("addPatternMatch"), 2, TY_symbol, FN_keyword, TY_FuncPatternMatch, FN_func,
-		_Public, _F(NameSpace_AddExpression), TY_void, TY_NameSpace, MN_("addExpression"), 2, TY_symbol, FN_keyword, TY_FuncExpression, FN_func,
-		_Public, _F(NameSpace_AddTopLevelStatement), TY_void, TY_NameSpace, MN_("addTopLevelStatement"), 2, TY_symbol, FN_keyword, TY_FuncStatement, FN_func,
-		_Public, _F(NameSpace_AddStatement), TY_void, TY_NameSpace, MN_("addStatement"), 2, TY_symbol, FN_keyword, TY_FuncStatement, FN_func,
-		_Public, _F(NameSpace_AddTypeCheck), TY_void, TY_NameSpace, MN_("addTypeCheck"), 2, TY_symbol, FN_keyword, TY_FuncTypeCheck, FN_func,
+		_Public, _F(NameSpace_setTokenFunc), TY_void, TY_NameSpace, MN_("setTokenFunc"), 3, TY_Symbol, FN_keyword, TY_int, FN_("kchar"), TY_FuncToken, FN_func,
+		_Public, _F(NameSpace_AddPatternMatch), TY_void, TY_NameSpace, MN_("addPatternMatch"), 2, TY_Symbol, FN_keyword, TY_FuncPatternMatch, FN_func,
+		_Public, _F(NameSpace_AddExpression), TY_void, TY_NameSpace, MN_("addExpression"), 2, TY_Symbol, FN_keyword, TY_FuncExpression, FN_func,
+		_Public, _F(NameSpace_AddTopLevelStatement), TY_void, TY_NameSpace, MN_("addTopLevelStatement"), 2, TY_Symbol, FN_keyword, TY_FuncStatement, FN_func,
+		_Public, _F(NameSpace_AddStatement), TY_void, TY_NameSpace, MN_("addStatement"), 2, TY_Symbol, FN_keyword, TY_FuncStatement, FN_func,
+		_Public, _F(NameSpace_AddTypeCheck), TY_void, TY_NameSpace, MN_("addTypeCheck"), 2, TY_Symbol, FN_keyword, TY_FuncTypeCheck, FN_func,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
@@ -964,23 +964,22 @@ static kbool_t RENAMEME_InitNameSpace(KonohaContext *kctx, kNameSpace *packageNS
 
 static kbool_t sugar_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
-	KonohaClass *cSymbol = defineSymbolClass(kctx, ns, trace);
+//	KonohaClass *cSymbol = defineSymbolClass(kctx, ns, trace);
 	KonohaClass *ccid = loadcidClass(kctx, ns, trace);
 	KDEFINE_INT_CONST ClassData[] = {   // add Array as available
+		{"Symbol", VirtualType_KonohaClass, (uintptr_t)CT_Symbol},
 		{"Token", VirtualType_KonohaClass, (uintptr_t)CT_Token},
 		{"Stmt", VirtualType_KonohaClass,  (uintptr_t)CT_Stmt},
 		{"Expr", VirtualType_KonohaClass,  (uintptr_t)CT_Expr},
 		{"Block", VirtualType_KonohaClass, (uintptr_t)CT_Block},
 		{"Gamma", VirtualType_KonohaClass, (uintptr_t)CT_Gamma},
 		{"NameSpace", VirtualType_KonohaClass, (uintptr_t)CT_NameSpace},
-		{"symbol", VirtualType_KonohaClass, (uintptr_t)cSymbol},
 		{NULL},
 	};
 	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(ClassData), false/*isOverride*/, trace);
 
-	int TY_Symbol = cSymbol->typeId;
-	sugar_defineTokenFunc(kctx, ns, TY_Symbol, trace);
-	sugar_defineMessageMethod(kctx, ns, TY_Symbol, trace);
+	sugar_defineTokenFunc(kctx, ns, trace);
+	sugar_defineMessageMethod(kctx, ns, trace);
 
 
 	int FN_buildid = FN_("buildid"), FN_key = FN_("key"), FN_defval = FN_("defval");
@@ -994,13 +993,12 @@ static kbool_t sugar_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 	kparamtype_t P_StringArray[] = {{TY_String}};
 	int TY_StringArray = (KLIB KonohaClass_Generics(kctx, CT_Array, TY_void, 1, P_StringArray))->typeId;
 
-	ktype_t TY_symbol = cSymbol->typeId;
 	ktype_t TY_cid = ccid->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
 		/* Token */
-		_Public, _F(Token_new), TY_Token, TY_Token, MN_("new"), 1, TY_symbol, FN_key,
-		_Public, _F(Token_setUnresolvedTokenType),  TY_void, TY_Token, MN_("setUnresolvedTokenType"),  1, TY_symbol, FN_x,
+		_Public, _F(Token_new), TY_Token, TY_Token, MN_("new"), 1, TY_Symbol, FN_key,
+		_Public, _F(Token_setUnresolvedTokenType),  TY_void, TY_Token, MN_("setUnresolvedTokenType"),  1, TY_Symbol, FN_x,
 		_Public, _F(Token_setText),  TY_void, TY_Token, MN_("setText"),  1, TY_String, FN_x,
 		_Public, _F(Token_setSubArray), TY_void, TY_Token, MN_("setSubArray"), 1, TY_StringArray, FN_x,
 //		_Public, _F(Token_isTypeName), TY_boolean, TY_Token, MN_("isTypeName"), 0,
@@ -1013,11 +1011,11 @@ static kbool_t sugar_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 		/* Stmt */
 		_Public, _F(Stmt_getBuild), TY_int, TY_Stmt,  MN_("getBuild"), 0,
 		_Public, _F(Stmt_setBuild), TY_void, TY_Stmt, MN_("setBuild"), 1, TY_int, FN_buildid,
-		_Public, _F(Stmt_getBlock), TY_Block, TY_Stmt, MN_("getBlock"), 2, TY_symbol, FN_key, TY_Block, FN_defval,
-		_Public, _F(Stmt_getToken), TY_Token, TY_Stmt, MN_("getToken"), 2, TY_symbol, FN_key, TY_Token, FN_defval,
-		_Public, _F(Stmt_getExpr), TY_Expr, TY_Stmt, MN_("getExpr"), 2, TY_symbol, FN_key, TY_Expr, FN_defval,
-		_Public, _F(Stmt_TypeCheckExpr), TY_boolean, TY_Stmt, MN_("TypeCheckExpr"), 3, TY_symbol, FN_key, TY_Gamma, FN_gma, TY_cid, FN_typeid,
-		_Public, _F(Stmt_TypeCheckExprPol), TY_boolean, TY_Stmt, MN_("TypeCheckExpr"), 4, TY_symbol, FN_key, TY_Gamma, FN_gma, TY_cid, FN_typeid, TY_int, FN_pol,
+		_Public, _F(Stmt_getBlock), TY_Block, TY_Stmt, MN_("getBlock"), 2, TY_Symbol, FN_key, TY_Block, FN_defval,
+		_Public, _F(Stmt_getToken), TY_Token, TY_Stmt, MN_("getToken"), 2, TY_Symbol, FN_key, TY_Token, FN_defval,
+		_Public, _F(Stmt_getExpr), TY_Expr, TY_Stmt, MN_("getExpr"), 2, TY_Symbol, FN_key, TY_Expr, FN_defval,
+		_Public, _F(Stmt_TypeCheckExpr), TY_boolean, TY_Stmt, MN_("TypeCheckExpr"), 3, TY_Symbol, FN_key, TY_Gamma, FN_gma, TY_cid, FN_typeid,
+		_Public, _F(Stmt_TypeCheckExprPol), TY_boolean, TY_Stmt, MN_("TypeCheckExpr"), 4, TY_Symbol, FN_key, TY_Gamma, FN_gma, TY_cid, FN_typeid, TY_int, FN_pol,
 		_Public, _F(Stmt_Message2rintError), TY_Expr, TY_Stmt, MN_("printError"), 1, TY_String, FN_msg,
 
 		_Public, _F(Stmt_newExpr), TY_Expr, TY_Stmt, MN_("newExpr"), 3, TY_TokenArray, FN_tokenList, TY_int, FN_s, TY_int, FN_e,
@@ -1028,13 +1026,13 @@ static kbool_t sugar_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 		_Public, _F(Stmt_newUntypedCallStyleExpr4), TY_Expr, TY_Stmt, MN_("newUntypedCallStyleExpr"), 4, TY_Token, FN_("token"), TY_Expr, FN_("expr1"), TY_Expr, FN_("expr2"), TY_Expr, FN_("expr3"),
 		_Public, _F(Stmt_newUntypedCallStyleExpr5), TY_Expr, TY_Stmt, MN_("newUntypedCallStyleExpr"), 5, TY_Token, FN_("token"), TY_Expr, FN_("expr1"), TY_Expr, FN_("expr2"), TY_Expr, FN_("expr3"), TY_Expr, FN_("expr4"),
 		_Public, _F(Stmt_newUntypedCallStyleExpr6), TY_Expr, TY_Stmt, MN_("newUntypedCallStyleExpr"), 6, TY_Token, FN_("token"), TY_Expr, FN_("expr1"), TY_Expr, FN_("expr2"), TY_Expr, FN_("expr3"), TY_Expr, FN_("expr4"), TY_Expr, FN_("expr5"),
-		_Public, _F(Stmt_newTypedCallExpr1), TY_Expr, TY_Stmt, MN_("newTypedCallExpr"), 4, TY_Gamma, FN_gma, TY_cid, FN_typeid, TY_symbol, FN_("methodName"), TY_Expr, FN_("firstExpr"),
-		_Public, _F(Stmt_newTypedCallExpr2), TY_Expr, TY_Stmt, MN_("newTypedCallExpr"), 5, TY_Gamma, FN_gma, TY_cid, FN_typeid, TY_symbol, FN_("methodName"), TY_Expr, FN_("firstExpr"), TY_Expr, FN_("secondExpr"),
+		_Public, _F(Stmt_newTypedCallExpr1), TY_Expr, TY_Stmt, MN_("newTypedCallExpr"), 4, TY_Gamma, FN_gma, TY_cid, FN_typeid, TY_Symbol, FN_("methodName"), TY_Expr, FN_("firstExpr"),
+		_Public, _F(Stmt_newTypedCallExpr2), TY_Expr, TY_Stmt, MN_("newTypedCallExpr"), 5, TY_Gamma, FN_gma, TY_cid, FN_typeid, TY_Symbol, FN_("methodName"), TY_Expr, FN_("firstExpr"), TY_Expr, FN_("secondExpr"),
 		_Public, _F(Stmt_rightJoinExpr), TY_Expr, TY_Stmt, MN_("rightJoinExpr"), 4, TY_Expr, FN_expr, TY_TokenArray, FN_tokenList, TY_int, FN_s, TY_int, FN_e,
-		_Public, _F(Stmt_getTokenList), TY_TokenArray, TY_Stmt, MN_("getTokenList"), 2, TY_symbol, FN_key, TY_TokenArray, FN_defval,
+		_Public, _F(Stmt_getTokenList), TY_TokenArray, TY_Stmt, MN_("getTokenList"), 2, TY_Symbol, FN_key, TY_TokenArray, FN_defval,
 		_Public, _F(Stmt_done), TY_void, TY_Stmt, MN_("done"), 0,
-		_Public, _F(Stmt_setObject), TY_void, TY_Stmt, MN_("setExpr"), 2, TY_symbol, FN_key, TY_Expr, FN_expr,
-		_Public, _F(Stmt_setObject), TY_void, TY_Stmt, MN_("setBlock"), 2, TY_symbol, FN_key, TY_Block, FN_("block"),
+		_Public, _F(Stmt_setObject), TY_void, TY_Stmt, MN_("setExpr"), 2, TY_Symbol, FN_key, TY_Expr, FN_expr,
+		_Public, _F(Stmt_setObject), TY_void, TY_Stmt, MN_("setBlock"), 2, TY_Symbol, FN_key, TY_Block, FN_("block"),
 		_Public, _F(Stmt_declType), TY_boolean, TY_Stmt, MN_("declType"), 3, TY_Gamma, FN_gma, TY_cid, FN_typeid, TY_Expr, FN_("declExpr"),
 		_Public, _F(Stmt_newBlock), TY_Block, TY_Stmt, MN_("newBlock"), 1, TY_String, FN_("macro"),
 
@@ -1051,11 +1049,11 @@ static kbool_t sugar_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 		_Public, _F(Block_TypeCheckAll), TY_boolean, TY_Block, MN_("TypeCheckAll"), 1, TY_Gamma, FN_gma,
 
 		/* Gamma */
-		_Public, _F(Gamma_declareLocalVariable), TY_int, TY_Gamma, MN_("declareLocalVariable"), 2, TY_cid, FN_typeid, TY_symbol, FN_key,
+		_Public, _F(Gamma_declareLocalVariable), TY_int, TY_Gamma, MN_("declareLocalVariable"), 2, TY_cid, FN_typeid, TY_Symbol, FN_key,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
-	LoadNameSpaceMethodData(kctx, ns, TY_symbol, trace);
+	LoadNameSpaceMethodData(kctx, ns, trace);
 	RENAMEME_InitNameSpace(kctx, ns, ns, trace);
 	return true;
 }
