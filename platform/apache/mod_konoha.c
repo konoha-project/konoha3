@@ -215,6 +215,7 @@ static KMETHOD AprTableEntry_getVal(KonohaContext *kctx, KonohaStack *sfp)
 
 void KonohaFactory_SetDefaultFactory(KonohaFactory *factory, void (*SetPlatformApi)(KonohaFactory *), int argc, char **argv);
 KonohaContext* KonohaFactory_CreateKonoha(KonohaFactory *factory);
+int Konoha_Destroy(KonohaContext *kctx);
 
 KonohaContext* konoha_create(KonohaClass **cRequest)
 {
@@ -301,7 +302,9 @@ static int konoha_handler(request_rec *r)
 		KonohaRuntime_callMethod(kctx, sfp);
 	}
 	END_LOCAL();
-	return lsfp[0].intValue;
+	int ret = lsfp[0].intValue;
+	Konoha_Destroy(konoha);
+	return ret;
 }
 
 static int mod_konoha_Init(apr_pool_t *p, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
