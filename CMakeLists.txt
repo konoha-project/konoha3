@@ -36,13 +36,6 @@ set(PARSER
 	src/parser/parser.c
 )
 
-set(KONOHA_VM_MODULE "" CACHE STRING "konoha vm module")
-if(KONOHA_VM_MODULE)
-	set(VM module/${KONOHA_VM_MODULE}vm/${KONOHA_VM_MODULE}compiler.c)
-else(KONOHA_VM_MODULE)
-	set(VM src/vm/compiler.c)
-endif(KONOHA_VM_MODULE)
-
 ## Packages
 set(PACKAGES
 ## YOU MUST add packages in an alphabetical order 
