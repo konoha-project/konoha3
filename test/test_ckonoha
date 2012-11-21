@@ -583,7 +583,7 @@ run_test 2 2 minimum "-MOutputTest" 0080_GC/GC_ManyStringLoop.k
 record_result 0080_GC $PASS 2
 ## 0081_Stack
 PASS=0
-run_test 1 1 minimum "-MOutputTest" 0081_Stack/Stack_RecursiceCall.k
+run_test 1 1 minimum "-MOutputTest" 0081_Stack/Stack_RecursiveCall.k
 record_result 0081_Stack $PASS 1
 ## 0089_Stress
 PASS=0
@@ -1123,21 +1123,60 @@ PASS=0
 record_result 0226_BytesCharset $PASS 0
 ## 0227_File
 PASS=0
-run_test 1 11 minimum "-MOutputTest" 0227_File/File_GetC.k
-run_test 2 11 minimum "-MOutputTest" 0227_File/File_Getfileno.k
-run_test 3 11 minimum "-MOutputTest" 0227_File/File_Isatty.k
-run_test 4 11 minimum "-MOutputTest" 0227_File/File_PutC.k
-run_test 5 11 minimum "-MOutputTest" 0227_File/File_Read.k
-run_test 6 11 minimum "-MOutputTest" 0227_File/File_ReadLine_SJIS.k
-run_test 7 11 minimum "-MOutputTest" 0227_File/File_ScriptPath.k
-run_test 8 11 minimum "-MOutputTest" 0227_File/File_Stderr.k
-run_test 9 11 minimum "-MOutputTest" 0227_File/File_Stdin.k
-run_test 10 11 minimum "-MOutputTest" 0227_File/File_Stdout.k
-run_test 11 11 minimum "-MOutputTest" 0227_File/File_Write.k
-record_result 0227_File $PASS 11
+run_test 1 7 minimum "-MOutputTest" 0227_File/File_GetC.k
+run_test 2 7 minimum "-MOutputTest" 0227_File/File_Getfileno.k
+run_test 3 7 minimum "-MOutputTest" 0227_File/File_ReadLine_SJIS.k
+run_test 4 7 minimum "-MOutputTest" 0227_File/File_ScriptPath.k
+run_test 5 7 minimum "-MOutputTest" 0227_File/File_Stderr.k
+run_test 6 7 minimum "-MOutputTest" 0227_File/File_Stdin.k
+run_test 7 7 minimum "-MOutputTest" 0227_File/File_Stdout.k
+record_result 0227_File $PASS 7
 ## 0230_Array
 PASS=0
-record_result 0230_Array $PASS 0
+run_test 1 30 minimum "-MOutputTest" 0230_Array/Array_Add.k
+run_test 2 30 minimum "-MOutputTest" 0230_Array/Array_Clear.k
+run_test 3 30 minimum "-MOutputTest" 0230_Array/Array_Concat.k
+run_test 4 30 minimum "-MOutputTest" 0230_Array/Array_GetSize.k
+run_test 5 30 minimum "-MOutputTest" 0230_Array/Array_IndexOf.k
+run_test 6 30 minimum "-MOutputTest" 0230_Array/Array_IntGetSyntax.k
+run_test 7 30 minimum "-MOutputTest" 0230_Array/Array_IntLiteral.k
+run_test 8 30 minimum "-MOutputTest" 0230_Array/Array_IntSetGet.k
+run_test 9 30 minimum "-MOutputTest" 0230_Array/Array_Literal.k
+run_test 10 30 minimum "-MOutputTest" 0230_Array/Array_LiteralEmptyInt.k
+run_test 11 30 minimum "-MOutputTest" 0230_Array/Array_LiteralEmptyString.k
+run_test 12 30 minimum "-MOutputTest" 0230_Array/Array_LiteralInt.k
+run_test 13 30 minimum "-MOutputTest" 0230_Array/Array_LiteralMixedValue.k
+run_test 14 30 minimum "-MOutputTest" 0230_Array/Array_LiteralObjectInt.k
+run_test 15 30 minimum "-MOutputTest" 0230_Array/Array_LiteralObjectString.k
+run_test 16 30 minimum "-MOutputTest" 0230_Array/Array_LiteralString.k
+run_test 17 30 minimum "-MOutputTest" 0230_Array/Array_Map.k
+run_test 18 30 minimum "-MOutputTest" 0230_Array/Array_NewArray.k
+run_test 19 30 minimum "-MOutputTest" 0230_Array/Array_NewBigArray.k
+run_test 20 30 minimum "-MOutputTest" 0230_Array/Array_NewIntArray.k
+run_test 21 30 minimum "-MOutputTest" 0230_Array/Array_NewIntArrayList.k
+run_test 22 30 minimum "-MOutputTest" 0230_Array/Array_NewObjectArray.k
+run_test 23 30 minimum "-MOutputTest" 0230_Array/Array_NewPersonArray.k
+run_test 24 30 minimum "-MOutputTest" 0230_Array/Array_NewStringArray.k
+run_test 25 30 minimum "-MOutputTest" 0230_Array/Array_removeAt.k
+run_test 26 30 minimum "-MOutputTest" 0230_Array/Array_StringGetSyntax.k
+run_test 27 30 minimum "-MOutputTest" 0230_Array/Array_toString.k
+run_test 28 30 minimum "-MOutputTest" 0230_Array/Array_UserDefinedClass.k
+run_test 29 30 minimum "-MOutputTest" 0230_Array/Array_UserDefinedClassDirectAccess.k
+run_test 30 30 minimum "-MOutputTest" 0230_Array/Array_VeryLargeLiteral500.k
+record_result 0230_Array $PASS 30
+## 0231_IntArray
+PASS=0
+run_test 1 10 minimum "-MOutputTest" 0231_IntArray/IntArray_Get.k
+run_test 2 10 minimum "-MOutputTest" 0231_IntArray/IntArray_GetIndex.k
+run_test 3 10 minimum "-MOutputTest" 0231_IntArray/IntArray_IndexOf.k
+run_test 4 10 minimum "-MOutputTest" 0231_IntArray/IntArray_Inject.k
+run_test 5 10 minimum "-MOutputTest" 0231_IntArray/IntArray_Map.k
+run_test 6 10 minimum "-MOutputTest" 0231_IntArray/IntArray_Set.k
+run_test 7 10 minimum "-MOutputTest" 0231_IntArray/IntArray_SetIndex.k
+run_test 8 10 minimum "-MOutputTest" 0231_IntArray/IntArray_toString.k
+run_test 9 10 minimum "-MOutputTest" 0231_IntArray/IntArrayAdd.k
+run_test 10 10 minimum "-MOutputTest" 0231_IntArray/IntArraySet.k
+record_result 0231_IntArray $PASS 10
 ## 0240_Map
 PASS=0
 record_result 0240_Map $PASS 0
@@ -1193,26 +1232,5 @@ record_result 0262_Untyped $PASS 5
 PASS=0
 run_test 1 1 minimum "-MOutputTest" 0263_Dynamic/Dynamic_Type.k
 record_result 0263_Dynamic $PASS 1
-## 0999_Complex
-PASS=0
-run_test 1 12 minimum "-MOutputTest" 0999_Complex/Complex_AbsoluteValue.k
-run_test 2 12 minimum "-MOutputTest" 0999_Complex/Complex_ArcHyperbolic.k
-run_test 3 12 minimum "-MOutputTest" 0999_Complex/Complex_ArcTrigonometric.k
-run_test 4 12 minimum "-MOutputTest" 0999_Complex/Complex_Arg.k
-run_test 5 12 minimum "-MOutputTest" 0999_Complex/Complex_Conj.k
-run_test 6 12 minimum "-MOutputTest" 0999_Complex/Complex_Exponential.k
-run_test 7 12 minimum "-MOutputTest" 0999_Complex/Complex_Hyperbolic.k
-run_test 8 12 minimum "-MOutputTest" 0999_Complex/Complex_Logarithmic.k
-run_test 9 12 minimum "-MOutputTest" 0999_Complex/Complex_Power.k
-run_test 10 12 minimum "-MOutputTest" 0999_Complex/Complex_RealImag.k
-run_test 11 12 minimum "-MOutputTest" 0999_Complex/Complex_SquareRoot.k
-run_test 12 12 minimum "-MOutputTest" 0999_Complex/Complex_Trigonometric.k
-record_result 0999_Complex $PASS 12
-## 0999_xPath
-PASS=0
-record_result 0999_xPath $PASS 0
-## 0999_xThread
-PASS=0
-record_result 0999_xThread $PASS 0
 total
 

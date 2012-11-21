@@ -1,5 +1,5 @@
 // written by kimio kuramitsu
 
-import("sugar");
+import("konoha.desugar");
 
 syntax "token" $Token*;

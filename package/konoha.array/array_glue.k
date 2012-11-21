@@ -1,4 +1,4 @@
-// import("sugar")
+// import("konoha.desugar")
 // import("konoha.while")
 // import("konoha.string")
 // import("konoha.assign")

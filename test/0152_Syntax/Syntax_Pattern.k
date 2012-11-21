@@ -1,5 +1,5 @@
 // written by kimio kuramitsu
 
-import("sugar");
+import("konoha.desugar");
 
 syntax $CDecl $Type ClassName: $Type "." $Symbol [$Text] $Param $CDeclBody;

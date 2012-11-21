@@ -1,6 +1,6 @@
 // written by kimio
 
-import("sugar");
+import("konoha.desugar");
 
 assert(DefinedSyntax("if"));
 assert(DefinedSyntax("$Token"));
