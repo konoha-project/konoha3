@@ -70,13 +70,6 @@ static KMETHOD Array_getSize(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Array_newArray(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
-	if(sfp[1].intValue < 0) {
-		OLDTRACE_SWITCH_TO_KTrace(_UserInputFault,
-				LogText("error", "Invalid argument"),
-				LogUint("length", sfp[1].intValue)
-		);
-		KReturn(a);
-	}
 	size_t asize = (size_t)sfp[1].intValue;
 	a->bytemax = asize * sizeof(uintptr_t);
 	kArray_SetSize(a, asize);
@@ -582,7 +575,7 @@ static KMETHOD TypeCheck_Bracket(KonohaContext *kctx, KonohaStack *sfp)
 		if(typedExpr == K_NULLEXPR) {
 			KReturn(typedExpr);
 		}
-		DBG_P("i=%d, paramType=%s, typedExpr->ty=%s", i, TY_t(paramType), TY_t(typedExpr->ty));
+		//DBG_P("i=%d, paramType=%s, typedExpr->ty=%s", i, TY_t(paramType), TY_t(typedExpr->ty));
 		if(paramType == TY_var) {
 			paramType = typedExpr->ty;
 		}
