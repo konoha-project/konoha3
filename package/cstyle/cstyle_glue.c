@@ -31,6 +31,12 @@
 extern "C" {
 #endif
 
+#define _Public   kMethod_Public
+#define _Const    kMethod_Const
+#define _Im       kMethod_Immutable
+#define _Final    kMethod_Final
+#define _F(F)   (intptr_t)(F)
+
 /* Statement */
 
 static KMETHOD Statement_while(KonohaContext *kctx, KonohaStack *sfp)
@@ -239,6 +245,26 @@ static void cstyle_DefineStatement(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 /* ArrayLiteral */
 
+static KMETHOD Array_newList(KonohaContext *kctx, KonohaStack *sfp)
+{
+	kArrayVar *a = (kArrayVar *)sfp[0].asObject;
+	size_t i = 0;
+	KonohaStack *p = sfp+1;
+	if(kArray_isUnboxData(a)) {
+		for(i = 0; p + i < kctx->esp; i++) {
+			a->unboxItems[i] = p[i].unboxValue;
+		}
+	}
+	else {
+		for(i = 0; p + i < kctx->esp; i++) {
+			KFieldSet(a, a->ObjectItems[i], p[i].asObject);
+		}
+	}
+	kArray_SetSize(a, i);
+	DBG_ASSERT(a->bytesize <= a->bytemax);
+	KReturn(a);
+}
+
 static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
@@ -273,10 +299,10 @@ static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 		if(requestClass == NULL) {
 			requestClass = (paramType == TY_var) ? CT_Array : CT_p0(kctx, CT_Array, paramType);
 		}
-		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), TY_Array, MN_("newList"), -1);
+		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), TY_Array, MN_("{}"), -1);
 		DBG_ASSERT(mtd != NULL);
 		KFieldSet(arrayExpr, arrayExpr->cons->MethodItems[0], mtd);
-		KFieldSet(arrayExpr, arrayExpr->cons->ExprItems[1], SUGAR kExpr_SetVariable(kctx, NULL, gma, TEXPR_NEW, requestClass->typeId, 0));
+		KFieldSet(arrayExpr, arrayExpr->cons->ExprItems[1], SUGAR kExpr_SetVariable(kctx, NULL, gma, TEXPR_NEW, requestClass->typeId, kArray_size(arrayExpr->cons) - 2));
 		KReturn(Expr_typed(arrayExpr, TEXPR_CALL, requestClass->typeId));
 	}
 }
@@ -284,6 +310,12 @@ static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 static kbool_t cstyle_defineArrayLiteral(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
 	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KW_BlockPattern, SugarFunc_TypeCheck, new_SugarFunc(ns, TypeCheck_ArrayLiteral));
+	KDEFINE_METHOD MethodData[] = {
+		_Public|kMethod_Hidden, _F(Array_newList), TY_Array, TY_Array, MN_("{}"), 0,
+		DEND,
+	};
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
+
 	return true;
 }
 
@@ -434,12 +466,6 @@ static KMETHOD Int_opXOR(KonohaContext *kctx, KonohaStack *sfp)
 }
 
 /* ------------------------------------------------------------------------ */
-
-#define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Im       kMethod_Immutable
-#define _Final    kMethod_Final
-#define _F(F)   (intptr_t)(F)
 
 static kbool_t int_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {

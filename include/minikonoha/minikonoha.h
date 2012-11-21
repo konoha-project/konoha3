@@ -1755,7 +1755,7 @@ struct KonohaLibVar {
 #define KNULL(C)                  (k##C *)KLIB Knull(kctx, CT_##C)
 
 #define kArray_size(A)            (((A)->bytesize)/sizeof(void *))
-#define kArray_setsize(A, N)      ((kArrayVar *)A)->bytesize = (N) * sizeof(void *)
+#define kArray_SetSize(A, N)      ((kArrayVar *)A)->bytesize = ((N) * sizeof(void *))
 #define new_kParam(CTX, R, PSIZE, P)       (KLIB kMethod_setParam(CTX, NULL, R, PSIZE, P))
 
 #define KRequirePackage(NAME, TRACE)       KLIB kNameSpace_RequirePackage(kctx, NAME, TRACE)
