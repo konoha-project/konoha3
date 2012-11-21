@@ -140,7 +140,7 @@ static kExpr *kExpr_TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGa
 			return texpr;
 		}
 		if(TY_is(TypeVar, texpr->ty)) {
-			return kStmtExpr_Message(kctx, stmt, expr, ErrTag, "not typed with type variable %s", TY_t(texpr->ty));
+			return kStmtExpr_Message(kctx, stmt, expr, ErrTag, "not type variable %s", TY_t(texpr->ty));
 		}
 		if(reqty == TY_var || texpr->ty == reqty || FLAG_is(pol, TypeCheckPolicy_NOCHECK)) {
 			return texpr;
@@ -161,6 +161,7 @@ static kExpr *kExpr_TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGa
 				return new_TypedCallExpr(kctx, stmt, gma, reqty, mtd, 1, texpr);
 			}
 		}
+		DBG_P("%s(%d) is requested, but %s(%d) is given", TY_t(reqty), reqty, TY_t(texpr->ty), texpr->ty);
 		return kStmtExpr_Message(kctx, stmt, expr, ErrTag, "%s is requested, but %s is given", TY_t(reqty), TY_t(texpr->ty));
 	}
 	return texpr;

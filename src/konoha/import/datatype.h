@@ -761,7 +761,8 @@ static void checkTypeVar(KonohaContext *kctx, KonohaClassVar *newct, ktype_t rty
 static KonohaClass *KonohaClass_Generics(KonohaContext *kctx, KonohaClass *ct, ktype_t rtype, kushort_t psize, kparamtype_t *p)
 {
 	kparamId_t paramdom = Kparamdom(kctx, psize, p);
-	KonohaClass *ct0 = ct;
+	KonohaClass *ct0 = CT_(ct->baseTypeId);
+	ct = ct0;
 	int isNotFuncClass = (ct->baseTypeId != TY_Func);
 	do {
 		if(ct->cparamdom == paramdom && (isNotFuncClass || ct->p0 == rtype)) {
@@ -780,6 +781,7 @@ static KonohaClass *KonohaClass_Generics(KonohaContext *kctx, KonohaClass *ct, k
 	}
 	checkTypeVar(kctx, newct, rtype, psize, p);
 	((KonohaClassVar *)ct)->searchSimilarClassNULL = (KonohaClass *)newct;
+	DBG_P(">>>>>>>> %s ct->typeId=%d, ct->paradom=%d, p[0]=%s", TY_t(ct->typeId), ct->typeId, ct->cparamdom, TY_t(p[0].ty));
 	return ct->searchSimilarClassNULL;
 }
 
