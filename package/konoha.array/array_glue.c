@@ -135,7 +135,7 @@ static void UnboxArray_insert(KonohaContext *kctx, kArray *o, size_t n, uintptr_
 static KMETHOD Array_clear(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *a = sfp[0].asArray;
-	KLIB kArray_clear(kctx, a, 0);
+	KLIB kArray_Clear(kctx, a, 0);
 }
 
 static KMETHOD Array_Add1(KonohaContext *kctx, KonohaStack *sfp)
@@ -161,7 +161,7 @@ static KMETHOD Array_unshift(KonohaContext *kctx, KonohaStack *sfp)
 	if(kArray_isUnboxData(a)) {
 		UnboxArray_insert(kctx, a, 0, sfp[1].unboxValue);
 	} else {
-		KLIB kArray_insert(kctx, a, 0, sfp[1].asObject);
+		KLIB kArray_Insert(kctx, a, 0, sfp[1].asObject);
 	}
 	KReturnUnboxValue(kArray_size(a));
 }
@@ -673,7 +673,7 @@ static kbool_t array_ExportNameSpace(KonohaContext *kctx, kNameSpace *ns, kNameS
 KDEFINE_PACKAGE* array_Init(void)
 {
 	static KDEFINE_PACKAGE d = {0};
-	KSetPackageName(d, "array", "1.0");
+	KSetPackageName(d, "konoha", K_VERSION);
 	d.PackupNameSpace    = array_PackupNameSpace;
 	d.ExportNameSpace   = array_ExportNameSpace;
 	return &d;

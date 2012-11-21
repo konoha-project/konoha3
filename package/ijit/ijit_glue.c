@@ -160,7 +160,7 @@ static KMETHOD System_clearValue(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kArray *g = kmodjit->global_value;
 	kArray *stack = get_stack(kctx, g);
-	KLIB kArray_clear(kctx, stack, 0);
+	KLIB kArray_Clear(kctx, stack, 0);
 }
 
 //## Module System.getModule();

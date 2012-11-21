@@ -463,7 +463,7 @@ static void TokenSeq_SelectStatement(KonohaContext *kctx, TokenSeq *tokens, Toke
 		}
 		isPreviousIndent = (kToken_isIndent(tk));
 	}
-	KLIB kArray_clear(kctx, tokens->tokenList, tokens->beginIdx);
+	KLIB kArray_Clear(kctx, tokens->tokenList, tokens->beginIdx);
 	tokens->endIdx = 0;
 	TokenSeq_Resolve(kctx, tokens, NULL, source, source->beginIdx);
 	//KdumpTokenArray(kctx, tokens->tokenList, tokens->beginIdx, tokens->endIdx);
@@ -487,7 +487,7 @@ static kstatus_t TokenSeq_Eval(KonohaContext *kctx, TokenSeq *source, KTraceInfo
 			return K_BREAK;
 		}
 		while(tokens.beginIdx < tokens.endIdx) {
-			KLIB kArray_clear(kctx, singleBlock->StmtList, 0);
+			KLIB kArray_Clear(kctx, singleBlock->StmtList, 0);
 			if(!kBlock_AddNewStmt(kctx, singleBlock, &tokens)) {
 				return K_BREAK;
 			}

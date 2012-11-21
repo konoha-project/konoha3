@@ -117,9 +117,24 @@ static kExpr* kStmt_ParseExpr(KonohaContext *kctx, kStmt *stmt, kArray *tokenLis
 	return K_NULLEXPR;
 }
 
+static int kTokenArray_RemoveIndent(KonohaContext *kctx, kArray *tokenList, int s, int e)
+{
+	int i, p = s;
+	for(i = s; i < e; i++) {
+		kToken *tk = tokenList->TokenItems[i];
+		if(kToken_isIndent(tk)) continue;
+		if(p < i) {
+			tokenList->TokenItems[p] = tokenList->TokenItems[i]; // TODO: GC
+		}
+		p++;
+	}
+	return p;
+}
+
 static kExpr *kStmt_AddExprParam(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kArray *tokenList, int s, int e, const char *hintBeforeText/* if NULL empty isAllowed */)
 {
 	int i, start = s;
+	e = kTokenArray_RemoveIndent(kctx, tokenList, s, e);
 	for(i = s; i < e; i++) {
 		kToken *tk = tokenList->TokenItems[i];
 		if(tk->resolvedSyntaxInfo->keyword == KW_COMMA) {

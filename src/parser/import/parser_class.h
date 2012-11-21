@@ -490,7 +490,7 @@ static void kBlock_InsertAfter(KonohaContext *kctx, kBlock *bk, kStmtNULL *targe
 		size_t i;
 		for(i = 0; i < kArray_size(bk->StmtList); i++) {
 			if(bk->StmtList->StmtItems[i] == target) {
-				KLIB kArray_insert(kctx, bk->StmtList, i+1, stmt);
+				KLIB kArray_Insert(kctx, bk->StmtList, i+1, stmt);
 				return;
 			}
 		}

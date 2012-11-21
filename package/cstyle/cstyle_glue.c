@@ -237,6 +237,57 @@ static void cstyle_DefineStatement(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 	SUGAR kNameSpace_DefineSyntax(kctx, ns, SYNTAX, trace);
 }
 
+/* ArrayLiteral */
+
+static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
+{
+	VAR_TypeCheck(stmt, expr, gma, reqty);
+	kToken *termToken = expr->termToken;
+	DBG_ASSERT(Expr_isTerm(expr) && IS_Token(termToken));
+	//DBG_P("termToken='%s'", S_text(termToken->text));
+	if(termToken->unresolvedTokenType == TokenType_CODE) {
+		SUGAR kToken_ToBraceGroup(kctx, (kTokenVar*)termToken, Stmt_ns(stmt), NULL);
+	}
+	if(termToken->resolvedSyntaxInfo->keyword == KW_BraceGroup) {
+		kExpr *arrayExpr = SUGAR new_UntypedCallStyleExpr(kctx, stmt->syn/*DUMMY*/, 2, K_NULL, K_NULL);
+		SUGAR kStmt_AddExprParam(kctx, stmt, arrayExpr, termToken->subTokenList, 0, kArray_size(termToken->subTokenList), NULL);
+		size_t i;
+		KonohaClass *requestClass = CT_(reqty);
+		ktype_t paramType = TY_var; // default
+		if(requestClass->baseTypeId == TY_Array) {
+			paramType = requestClass->p0;
+		}
+		else {
+			requestClass = NULL; // undefined
+		}
+		for(i = 2; i < kArray_size(arrayExpr->cons); i++) {
+			kExpr *typedExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, arrayExpr, i, gma, paramType, 0);
+			if(typedExpr == K_NULLEXPR) {
+				KReturn(typedExpr);
+			}
+			DBG_P("i=%d, paramType=%s, typedExpr->ty=%s", i, TY_t(paramType), TY_t(typedExpr->ty));
+			if(paramType == TY_var) {
+				paramType = typedExpr->ty;
+			}
+		}
+		if(requestClass == NULL) {
+			requestClass = (paramType == TY_var) ? CT_Array : CT_p0(kctx, CT_Array, paramType);
+		}
+		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), TY_Array, MN_("newList"), -1);
+		DBG_ASSERT(mtd != NULL);
+		KFieldSet(arrayExpr, arrayExpr->cons->MethodItems[0], mtd);
+		KFieldSet(arrayExpr, arrayExpr->cons->ExprItems[1], SUGAR kExpr_SetVariable(kctx, NULL, gma, TEXPR_NEW, requestClass->typeId, 0));
+		KReturn(Expr_typed(arrayExpr, TEXPR_CALL, requestClass->typeId));
+	}
+}
+
+static kbool_t cstyle_defineArrayLiteral(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
+{
+	SUGAR kNameSpace_AddSugarFunc(kctx, ns, KW_BlockPattern, SugarFunc_TypeCheck, new_SugarFunc(ns, TypeCheck_ArrayLiteral));
+	return true;
+}
+
+
 /* Literal */
 
 static KMETHOD TokenFunc_SingleQuotedChar(KonohaContext *kctx, KonohaStack *sfp)
@@ -687,7 +738,7 @@ static kbool_t null_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo
 	return true;
 }
 
-/* Syntax */
+/* null */
 
 static KMETHOD TypeCheck_null(KonohaContext *kctx, KonohaStack *sfp)
 {
@@ -760,6 +811,7 @@ static kbool_t cstyle_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 	SUGAR kNameSpace_SetTokenFunc(kctx, ns, SYM_("$SingleQuotedChar"), KonohaChar_Quote, new_SugarFunc(ns, TokenFunc_SingleQuotedChar));
 
 	cstyle_defineExpression(kctx, ns, option, trace);
+	cstyle_defineArrayLiteral(kctx, ns, trace);
 
 	int_defineMethod(kctx, ns, trace);
 	int_defineSyntax(kctx, ns, trace);

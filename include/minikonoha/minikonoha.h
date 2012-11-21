@@ -1663,8 +1663,8 @@ struct KonohaLibVar {
 //	kString*        (*new_kStringf)(KonohaContext*, kArray *gcstack, int, const char *, ...);
 
 	void            (*kArray_Add)(KonohaContext*, kArray *, kAbstractObject *);
-	void            (*kArray_insert)(KonohaContext*, kArray *, size_t, kAbstractObject *);
-	void            (*kArray_clear)(KonohaContext*, kArray *, size_t);
+	void            (*kArray_Insert)(KonohaContext*, kArray *, size_t, kAbstractObject *);
+	void            (*kArray_Clear)(KonohaContext*, kArray *, size_t);
 
 	kparamId_t      (*Kparamdom)(KonohaContext*, kushort_t, const kparamtype_t *);
 	kMethodVar*     (*new_kMethod)(KonohaContext*, kArray *gcstack, uintptr_t, ktype_t, kmethodn_t, MethodFunc);
@@ -1819,7 +1819,7 @@ typedef struct {
 #endif /* defined(_MSC_VER) */
 
 #define INIT_GCSTACK()         kArray* _GcStack = kctx->stack->gcstack_OnContextConstList; size_t _gcstackpos = kArray_size(_GcStack)
-#define RESET_GCSTACK()        KLIB kArray_clear(kctx, _GcStack, _gcstackpos)
+#define RESET_GCSTACK()        KLIB kArray_Clear(kctx, _GcStack, _gcstackpos)
 #define PUSH_GCSTACK2(o)       KLIB kArray_Add(kctx, kctx->stack->gcstack_OnContextConstList, o)
 
 

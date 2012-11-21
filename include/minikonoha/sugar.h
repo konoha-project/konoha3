@@ -372,7 +372,7 @@ typedef struct TokenSeq {
 	range.endIdx   = 0;\
 
 #define TokenSeq_Pop(kctx, range)   do {\
-	KLIB kArray_clear(kctx, range.tokenList, _PopCheckIdx);\
+	KLIB kArray_Clear(kctx, range.tokenList, _PopCheckIdx);\
 	DBG_ASSERT(_PopCheckIdx == kArray_size(range.tokenList));\
 } while(0)
 

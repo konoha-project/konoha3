@@ -929,7 +929,7 @@ static kbool_t kNameSpace_LoadScript(KonohaContext *kctx, kNameSpace *ns, const 
 			kMethod *mtd = GetSugarContext(kctx)->definedMethodList->MethodItems[i];
 			KLIB kMethod_DoLazyCompilation(kctx, mtd, NULL, DefaultCompileOption);
 		}
-		KLIB kArray_clear(kctx, GetSugarContext(kctx)->definedMethodList, 0);
+		KLIB kArray_Clear(kctx, GetSugarContext(kctx)->definedMethodList, 0);
 	}
 	return true;
 }

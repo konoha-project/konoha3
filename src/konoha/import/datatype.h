@@ -320,7 +320,7 @@ static void kArray_Add(KonohaContext *kctx, kArray *o, kAbstractObject *value)
 	a->a.bytesize = (asize+1) * sizeof(void *);
 }
 
-static void kArray_insert(KonohaContext *kctx, kArray *o, size_t n, kAbstractObject *v)
+static void kArray_Insert(KonohaContext *kctx, kArray *o, size_t n, kAbstractObject *v)
 {
 	size_t asize = kArray_size(o);
 	struct _kAbstractArray *a = (struct _kAbstractArray *)o;
@@ -335,7 +335,7 @@ static void kArray_insert(KonohaContext *kctx, kArray *o, size_t n, kAbstractObj
 	}
 }
 
-static void kArray_clear(KonohaContext *kctx, kArray *o, size_t n)
+static void kArray_Clear(KonohaContext *kctx, kArray *o, size_t n)
 {
 	DBG_ASSERT(IS_Array(o));
 	size_t asize = kArray_size(o);
@@ -1012,8 +1012,8 @@ static void initKonohaLib(KonohaLibVar *l)
 	l->kObject_WriteToBuffer   = kObject_WriteToBuffer;
 
 	l->kArray_Add           = kArray_Add;
-	l->kArray_insert        = kArray_insert;
-	l->kArray_clear         = kArray_clear;
+	l->kArray_Insert        = kArray_Insert;
+	l->kArray_Clear         = kArray_Clear;
 
 	l->KonohaClass_define   = KonohaClass_define;
 	l->Knull = Knull;

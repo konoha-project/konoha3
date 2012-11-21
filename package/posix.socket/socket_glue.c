@@ -438,9 +438,9 @@ static KMETHOD System_Select(KonohaContext *kctx, KonohaStack* sfp)
 			);
 		}
 		// TODO::error or timeout is socket list all clear [pending]
-		KLIB kArray_clear(kctx, a1, 0);
-		KLIB kArray_clear(kctx, a2, 0);
-		KLIB kArray_clear(kctx, a3, 0);
+		KLIB kArray_Clear(kctx, a1, 0);
+		KLIB kArray_Clear(kctx, a2, 0);
+		KLIB kArray_Clear(kctx, a3, 0);
 	}
 	KReturnUnboxValue(ret);
 }
