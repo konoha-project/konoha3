@@ -3,7 +3,7 @@ compiler:
   - gcc
 
 before_install:
-  - "sudo apt-get install cmake"
+  - "sudo apt-get install cmake llvm-dev"
 
 before_script:
   - "mkdir -p build"
