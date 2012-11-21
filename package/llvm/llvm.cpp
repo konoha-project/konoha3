@@ -120,6 +120,10 @@ struct kRawPtr {
 #define kmodllvm ((kmodllvm_t*)kctx->modshare[MOD_llvm])
 #define CT_Value (kmodllvm)->cValue
 #define TY_Value (CT_Value)->typeId
+#define LLVM_TODO(MSG) do {\
+    fprintf(stderr, "FIXME " MSG "\n");\
+    abort();\
+} while(0)
 
 typedef struct {
 	KonohaModule h;
