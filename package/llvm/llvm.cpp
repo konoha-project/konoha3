@@ -5252,9 +5252,9 @@ static kbool_t llvm_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int arg
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, methoddata, trace);
-	KLIB kNameSpace_LoadConstData(kctx, ns, (const char **)IntAttributes, 0);
-	KLIB kNameSpace_LoadConstData(kctx, ns, (const char **)IntIntrinsic, 0);
-	KLIB kNameSpace_LoadConstData(kctx, ns, (const char **)IntGlobalVariable, 0);
+	KLIB kNameSpace_LoadConstData(kctx, ns, (const char **)IntAttributes, 0, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, (const char **)IntIntrinsic, 0, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, (const char **)IntGlobalVariable, 0, trace);
 
 	return true;
 }
