@@ -496,7 +496,7 @@ static void JSVisitor_visitExprParams(KonohaContext *kctx, IRBuilder *self, kExp
 
 static void JSVisitor_ConvertAndEmitMethodName(KonohaContext *kctx, IRBuilder *self, kExpr *expr, kExpr *receiver, kMethod *mtd)
 {
-	KonohaClass *globalObjectClass = KLIB kNameSpace_GetClass(kctx, self->currentStmt->parentBlockNULL->BlockNameSpace, "GlobalObject", 12, NULL);
+	KonohaClass *globalObjectClass = KLIB kNameSpace_GetClassByFullName(kctx, self->currentStmt->parentBlockNULL->BlockNameSpace, "GlobalObject", 12, NULL);
 	kbool_t isGlobal = (CT_(receiver->ty) == globalObjectClass || receiver->ty == TY_NameSpace);
 	const char *methodName = SYM_t(mtd->mn);
 	if(receiver->ty == TY_NameSpace) {

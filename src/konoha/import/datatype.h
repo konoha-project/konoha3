@@ -781,7 +781,6 @@ static KonohaClass *KonohaClass_Generics(KonohaContext *kctx, KonohaClass *ct, k
 	}
 	checkTypeVar(kctx, newct, rtype, psize, p);
 	((KonohaClassVar *)ct)->searchSimilarClassNULL = (KonohaClass *)newct;
-	DBG_P(">>>>>>>> %s ct->typeId=%d, ct->paradom=%d, p[0]=%s", TY_t(ct->typeId), ct->typeId, ct->cparamdom, TY_t(p[0].ty));
 	return ct->searchSimilarClassNULL;
 }
 

@@ -765,7 +765,7 @@ static kMethod *kNameSpace_GuessCoercionMethodNULL(KonohaContext *kctx, kNameSpa
 {
 	const char *name = S_text(tk->text);
 	if(name[1] == 'o' && (name[0] == 't' || name[0] == 'T')) {
-		KonohaClass *c = KLIB kNameSpace_GetClass(kctx, ns, name + 2, S_size(tk->text) - 2, NULL);
+		KonohaClass *c = KLIB kNameSpace_GetClassByFullName(kctx, ns, name + 2, S_size(tk->text) - 2, NULL);
 		if(c != NULL) {
 			return KLIB kNameSpace_GetCoercionMethodNULL(kctx, ns, this_cid, c->typeId);
 		}

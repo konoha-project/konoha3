@@ -216,9 +216,8 @@ static int TokenUtils_ParseTypePattern(KonohaContext *kctx, kNameSpace *ns, kArr
 		nextIdx = beginIdx + 1;
 	}
 	else if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern) { // check
-		foundClass = KLIB kNameSpace_GetClass(kctx, ns, S_text(tk->text), S_size(tk->text), NULL);
+		foundClass = KLIB kNameSpace_GetClassByFullName(kctx, ns, S_text(tk->text), S_size(tk->text), NULL);
 		if(foundClass != NULL) {
-			//kToken_setTypeId(kctx, tk, ns, foundClass->typeId);
 			nextIdx = beginIdx + 1;
 		}
 	}

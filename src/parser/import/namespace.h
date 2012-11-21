@@ -445,7 +445,27 @@ static kbool_t kNameSpace_LoadConstData(KonohaContext *kctx, kNameSpace *ns, con
 // ---------------------------------------------------------------------------
 /* ClassName in ConstTable */
 
-static KonohaClass *kNameSpace_GetClass(KonohaContext *kctx, kNameSpace *ns, const char *name, size_t len, KonohaClass *defaultClass)
+
+
+static KonohaClass *kNameSpace_GetClass(KonohaContext *kctx, kNameSpace *ns, ksymbol_t uname, KonohaClass *defaultClass)
+{
+	KonohaClass *ct = NULL;
+//	if(ns->typeVariableItems != NULL) {
+//		size_t i;
+//		for(i = 0; i < ns->typesize; i++) {
+//			if(ns->typeVariableItems[i].key == uname) {
+//				return (KonohaClass *)ns->typeVariableItems[i].unboxValue;
+//			}
+//		}
+//	}
+	KKeyValue *kvs = kNameSpace_GetConstNULL(kctx, ns, uname);
+	if(kvs != NULL && kvs->ty == VirtualType_KonohaClass) {
+		return (KonohaClass *)kvs->unboxValue;
+	}
+	return (ct != NULL) ? ct : defaultClass;
+}
+
+static KonohaClass *kNameSpace_GetClassByFullName(KonohaContext *kctx, kNameSpace *ns, const char *name, size_t len, KonohaClass *defaultClass)
 {
 	KonohaClass *ct = NULL;
 	kpackageId_t packageId = PN_konoha;

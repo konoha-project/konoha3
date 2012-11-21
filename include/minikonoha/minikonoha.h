@@ -1465,6 +1465,8 @@ struct kNameSpaceVar {
 	KHashMap                          *syntaxMapNN;
 	kArray                            *stmtPatternListNULL_OnList;
 	struct KBuilderAPI2               *builderApi;
+	KKeyValue                         *typeVariableItems;
+	size_t                             typesize;
 };
 
 // NameSpace_syntaxOption
@@ -1681,7 +1683,7 @@ struct KonohaLibVar {
 	kbool_t          (*kNameSpace_ImportPackage)(KonohaContext*, kNameSpace*, const char *, KTraceInfo *);
 	kbool_t          (*kNameSpace_ImportPackageSymbol)(KonohaContext *, kNameSpace *, const char *, ksymbol_t keyword, KTraceInfo *);
 
-	KonohaClass*     (*kNameSpace_GetClass)(KonohaContext*, kNameSpace *, const char *, size_t, KonohaClass *);
+	KonohaClass*     (*kNameSpace_GetClassByFullName)(KonohaContext*, kNameSpace *, const char *, size_t, KonohaClass *);
 	KonohaClass*     (*kNameSpace_DefineClass)(KonohaContext*, kNameSpace *, kString *, KDEFINE_CLASS *, KTraceInfo *);
 
 	kbool_t          (*kNameSpace_SetConstData)(KonohaContext *, kNameSpace *, ksymbol_t, ktype_t, uintptr_t, KTraceInfo *);

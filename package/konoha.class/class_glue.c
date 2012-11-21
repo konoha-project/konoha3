@@ -86,7 +86,7 @@ static kbool_t KonohaClass_setClassFieldUnboxValue(KonohaContext *kctx, KonohaCl
 //// int NameSpace.getCid(String name, int defval)
 //static KMETHOD NameSpace_getCid(KonohaContext *kctx, KonohaStack *sfp)
 //{
-//	KonohaClass *ct = KLIB kNameSpace_GetClass(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), S_size(sfp[1].asString), NULL);
+//	KonohaClass *ct = KLIB kNameSpace_GetClassByFullName(kctx, sfp[0].asNameSpace, S_text(sfp[1].asString), S_size(sfp[1].asString), NULL);
 //	kint_t cid = ct != NULL ? ct->typeId : sfp[2].intValue;
 //	KReturnUnboxValue(cid);
 //}
@@ -330,7 +330,7 @@ static KMETHOD Statement_class(KonohaContext *kctx, KonohaStack *sfp)
 	kToken *tokenClassName = SUGAR kStmt_GetToken(kctx, stmt, SYM_("$ClassName"), NULL);
 	kNameSpace *ns = Stmt_ns(stmt);
 	int isNewlyDefinedClass = false;
-	KonohaClassVar *definedClass = (KonohaClassVar *)KLIB kNameSpace_GetClass(kctx, ns, S_text(tokenClassName->text), S_size(tokenClassName->text), NULL);
+	KonohaClassVar *definedClass = (KonohaClassVar *)KLIB kNameSpace_GetClassByFullName(kctx, ns, S_text(tokenClassName->text), S_size(tokenClassName->text), NULL);
 	if(definedClass == NULL) {   // Already defined
 		kshortflag_t cflag = kStmt_ParseClassFlag(kctx, stmt, kClass_Virtual);
 		KMakeTraceUL(trace, sfp, stmt->uline);
