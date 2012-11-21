@@ -74,11 +74,10 @@ static void AprTableEntry_Free(KonohaContext *kctx, kObject *po)
 	((kAprTableEntry *)po)->entry = NULL;
 }
 
-static void kapacheshare_Setup(KonohaContext *kctx, struct KonohaModule *def, int newctx) {}
-static void kapacheshare_Reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KObjectVisitor *visitor) {}
-static void kapacheshare_Free(KonohaContext *kctx, struct KonohaModule *baseh)
+static void ApacheModule_Setup(KonohaContext *kctx, struct KonohaModule *def, int newctx) {}
+static void ApacheModule_Free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
-	KFree(baseh, sizeof(kapacheshare_t));
+	KFree(baseh, sizeof(KModuleApache));
 }
 
 
@@ -106,31 +105,31 @@ static kbool_t apache_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int o
 		STRUCTNAME(Apache),
 	};
 
-	kapacheshare_t *base = (kapacheshare_t *)KCalloc_UNTRACE(sizeof(kapacheshare_t), 1);
-	base->h.name     = "apache";
-	base->h.setup    = kapacheshare_Setup;
-	base->h.reftrace = kapacheshare_Reftrace;
-	base->h.free     = kapacheshare_Free;
-	KLIB KonohaRuntime_setModule(kctx, MOD_APACHE, &base->h, trace);
-	base->cRequest = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &Def, 0);
-	base->cAprTable = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &aprTableDef, 0);
-	base->cAprTableEntry = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &aprTableEntryDef, 0);
-	base->cApache = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &apacheDef, 0);
+	KModuleApache *mod = (KModuleApache *)KCalloc_UNTRACE(sizeof(KModuleApache), 1);
+	mod->h.name               = "apache";
+	mod->h.allocSize          = sizeof(KModuleApache);
+	mod->h.setupModuleContext = ApacheModule_Setup;
+	mod->h.freeModule         = ApacheModule_Free;
+	KLIB KonohaRuntime_setModule(kctx, MOD_APACHE, (KonohaModule *)mod, trace);
+	mod->cRequest       = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &Def, 0);
+	mod->cAprTable      = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &aprTableDef, 0);
+	mod->cAprTableEntry = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &aprTableEntryDef, 0);
+	mod->cApache        = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &apacheDef, 0);
 
 	KDEFINE_INT_CONST IntData[] = {
 #define DEFINE_KEYWORD(KW) {#KW, TY_int, KW}
-		{"APACHE_OK", TY_int, OK},
-		{"APLOG_EMERG", TY_int, APLOG_EMERG},
-		{"APLOG_ALERT", TY_int, APLOG_ALERT},
-		{"APLOG_CRIT", TY_int, APLOG_CRIT},
-		{"APLOG_ERR", TY_int, APLOG_ERR},
-		{"APLOG_WARNING", TY_int, APLOG_WARNING},
-		{"APLOG_NOTICE", TY_int, APLOG_NOTICE},
-		{"APLOG_INFO", TY_int, APLOG_INFO},
-		{"APLOG_DEBUG", TY_int, APLOG_DEBUG},
+		DEFINE_KEYWORD(OK),
+		DEFINE_KEYWORD(APLOG_EMERG),
+		DEFINE_KEYWORD(APLOG_ALERT),
+		DEFINE_KEYWORD(APLOG_CRIT),
+		DEFINE_KEYWORD(APLOG_ERR),
+		DEFINE_KEYWORD(APLOG_WARNING),
+		DEFINE_KEYWORD(APLOG_NOTICE),
+		DEFINE_KEYWORD(APLOG_INFO),
+		DEFINE_KEYWORD(APLOG_DEBUG),
 		{NULL, 0, 0}
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), 0);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), false/*isOverride*/, trace);
 	return true;
 }
 

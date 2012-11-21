@@ -3,7 +3,7 @@ import("cstyle"); // use cstyle
 import("konoha.array");
 import("apache");
 
-@Public int Apache.handler(Request req) {
+@Public int System.handler(Request req) {
 	req.setContentType("text/html");
 	req.setContentEncoding("utf-8");
 	req.logError(APLOG_WARNING, 0, "log error's test");
@@ -28,6 +28,5 @@ import("apache");
 		req.puts("<p>HEADERS: "+resHeaders[i].getKey() + "=>" + resHeaders[i].getVal() + "</p>\n");
 		i = i + 1;
 	}
-	return APACHE_OK;
+	return OK;
 }
-
