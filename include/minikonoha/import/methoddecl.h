@@ -26,6 +26,7 @@
 #define METHODDECL_H_
 
 #define _Public    kMethod_Public
+#define _Final     kMethod_Final
 #define _Const     kMethod_Const
 #define _Static    kMethod_Static
 #define _Im        kMethod_Immutable

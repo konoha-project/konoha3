@@ -77,6 +77,7 @@ set(PACKAGES
 	konoha.namespace
 	konoha.new
 	konoha.object
+	konoha.prototype
 	konoha.regexp
 	konoha.string
 ##konoha.sql

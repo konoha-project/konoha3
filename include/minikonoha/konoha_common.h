@@ -43,6 +43,7 @@ extern "C" {
 
 typedef struct {
 	KonohaModule h;
+	KonohaClass *cPrototype;
 	KonohaClass *cFloat;
 	KonohaClass *cRegExp;
 
@@ -80,6 +81,20 @@ static void KonohaCommonModule_Init(KonohaContext *kctx, KTraceInfo *trace)
 #define TY_RegExp         ((CT_RegExp)->typeId)
 #define IS_RegExp(O)      (O_ct(O) == CT_RegExp)
 
+
+/* ------------------------------------------------------------------------ */
+/* Prototype */
+
+#define CT_Prototype          (KGetKonohaCommonModule()->cPrototype)
+#define TY_Prototype          ((CT_Prototype)->typeId)
+#define IS_Prototype(O)       (O_ct(O)->baseTypeId == TY_Prototype)
+//#define KFLOAT_FMT        "%.4f"  // NEVER CHANGE THIS
+
+typedef const struct kPrototypeVar kPrototype;
+struct kPrototypeVar {
+	KonohaObjectHeader h;
+//	kfloat_t floatValue;
+};
 
 /* ------------------------------------------------------------------------ */
 /* Float */

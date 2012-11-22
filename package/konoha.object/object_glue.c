@@ -58,21 +58,15 @@ static KMETHOD Object_as(KonohaContext *kctx, KonohaStack *sfp)
 	KReturn(returnValue);
 }
 
-#define _Public   kMethod_Public
-#define _Const    kMethod_Const
-#define _Ignored  kMethod_IgnoredOverride
-#define _Im       kMethod_Immutable
-#define _Final    kMethod_Final
-#define _Virtual  kMethod_Virtual
-#define _Hidden   kMethod_Hidden
-#define _F(F)   (intptr_t)(F)
+#include <minikonoha/import/methoddecl.h>
 
 static void object_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *trace)
 {
+	int FN_key = FN_("key"), FN_value = FN_("value");
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Im|_Const|_Final, _F(Object_getTypeId), TY_int, TY_Object, MN_("getTypeId"), 0,
-		_Public|_Hidden|_Im|_Const, _F(Object_instanceOf), TY_boolean, TY_Object, MN_("<:"), 1, TY_Object, FN_("type"),
-		_Public|_Hidden|_Im|_Const|kMethod_SmartReturn, _F(Object_as), TY_Object, TY_Object, MN_("as"), 0,
+		_Public|_Hidden|_Im|_Const|_Final, _F(Object_instanceOf), TY_boolean, TY_Object, MN_("<:"), 1, TY_Object, FN_("type"),
+		_Public|_Hidden|_Im|_Const|kMethod_SmartReturn|_Final, _F(Object_as), TY_Object, TY_Object, MN_("as"), 0,
 		DEND,
 	};
 	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
