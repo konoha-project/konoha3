@@ -231,8 +231,7 @@ static KMETHOD TypeCheck_ExtendedTextLiteral(KonohaContext *kctx, KonohaStack *s
 			TokenSeq tokens = {ns, GetSugarContext(kctx)->preparedTokenList};
 			TokenSeq_Push(kctx, tokens);
 			SUGAR TokenSeq_Resolve(kctx, &tokens, NULL, &range, range.beginIdx);
-			/* +1 means for skiping first indent token. */
-			kExpr *newexpr = SUGAR kStmt_ParseExpr(kctx, stmt, tokens.tokenList, tokens.beginIdx+1, tokens.endIdx, NULL);
+			kExpr *newexpr = SUGAR kStmt_ParseExpr(kctx, stmt, tokens.tokenList, tokens.beginIdx, tokens.endIdx, NULL);
 			TokenSeq_Pop(kctx, tokens);
 
 			if(start - str > 0) {
