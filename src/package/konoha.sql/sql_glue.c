@@ -141,9 +141,6 @@ static void kConnection_Free(KonohaContext *kctx, kObject *o)
 /* ------------------------------------------------------------------------ */
 /* [Connection API] */
 
-
-#define DB_NAMESIZE 32
-
 //## Connection Connection.new(String dburl);
 static KMETHOD Connection_new(KonohaContext *kctx, KonohaStack *sfp)
 {
