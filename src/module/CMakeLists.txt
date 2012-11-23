@@ -7,7 +7,7 @@ macro(GET_MODULE_NAME _STR _RESULT)
 endmacro()
 
 set(KONOHA_MODULE_DIR
-	"lib/minikonoha/${SO_VERSION}/module/${KONOHA_VERSION}/${ModuleName}")
+	"lib/minikonoha/${SO_VERSION}/module/${ModuleName}")
 
 macro(add_konoha_module ModuleName)
 	MESSAGE(STATUS "Compiling ${ModuleName} Module")
@@ -17,6 +17,12 @@ macro(add_konoha_module ModuleName)
 	add_library(${ModuleName} SHARED ${MODULE_SOURCE_CODE})
 	target_link_libraries(${ModuleName} ${MODULE_EXTRA_LIBRARY})
 	set_target_properties(${ModuleName} PROPERTIES PREFIX "")
+	add_custom_command(OUTPUT ${PARENT_BINARY_DIR}/module/${ModuleName}
+		COMMAND ${CMAKE_COMMAND} -E create_symlink
+		${CMAKE_CURRENT_BINARY_DIR}
+		${PARENT_BINARY_DIR}/module/${ModuleName})
+	add_custom_target(create_symlink_${ModuleName} ALL DEPENDS
+		${PARENT_BINARY_DIR}/module/${ModuleName})
 	install(TARGETS ${ModuleName} DESTINATION ${KONOHA_MODULE_DIR}/${ModuleName})
 endmacro(add_konoha_module ModuleName)
 

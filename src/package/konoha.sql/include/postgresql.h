@@ -66,7 +66,7 @@
 //{
 //}
 
-static void *POSTGRESQL_qopen(KonohaContext *kctx, const char* url)
+static void *POSTGRESQL_qopen(KonohaContext *kctx, const char* url, KTraceInfo *trace)
 {
 	char *puser, user[PQ_USER_MAXLEN+1] = {0};
 	char *ppass, pass[PQ_PASS_MAXLEN+1] = {0}; // temporary defined
@@ -103,7 +103,7 @@ static void *POSTGRESQL_qopen(KonohaContext *kctx, const char* url)
 	return (void *)conn;
 }
 
-static int POSTGRESQL_qnext(KonohaContext *kctx, kqcur_t *qcur, kResultSet *rs)
+static int POSTGRESQL_qnext(KonohaContext *kctx, kqcur_t *qcur, kResultSet *rs, KTraceInfo *trace)
 {
 	PGresult* res = (PGresult *)qcur;
 	size_t i, column_size = (size_t)PQnfields(res), row_size = PQntuples(res);
@@ -143,7 +143,7 @@ static int POSTGRESQL_qnext(KonohaContext *kctx, kqcur_t *qcur, kResultSet *rs)
 	}
 }
 
-static kqcur_t *POSTGRESQL_query(KonohaContext *kctx, void *db, const char* sql, kResultSet *rs)
+static kqcur_t *POSTGRESQL_query(KonohaContext *kctx, void *db, const char* sql, kResultSet *rs, KTraceInfo *trace)
 {
 	PGresult* res;
 	if(rs == NULL) {

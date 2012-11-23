@@ -8,9 +8,6 @@ find_path(APACHE_INCLUDE_DIR
                 ${APACHE_LOCATION}
           DOC "Path to the apache include files"
 )
-if(APACHE_INCLUDE_DIR)
-  message(STATUS "apache includes found in ${APACHE_INCLUDE_DIR}")
-endif()
 
 find_path(APR_INCLUDE_DIR apr.h
         /usr/local/include/apr-1
