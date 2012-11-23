@@ -458,7 +458,11 @@ static void kStmt_setLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbol_t labe
 
 static bblock_t kStmt_GetLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbol_t label)
 {
-	return KLIB kObjectProto_GetKeyValue(kctx, stmt, label, -1);
+	KKeyValue *kvs = KLIB kObjectProto_GetKeyValue(kctx, stmt, label);
+	if(kvs != NULL) {
+		return (bblock_t)kvs->unboxValue;
+	}
+	return -1;
 }
 
 static void ASM_LABEL(KonohaContext *kctx, KBuilder *builder, bblock_t labelId)

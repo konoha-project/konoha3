@@ -33,6 +33,12 @@ static void each(KonohaContext *kctx, void *thunk, KKeyValue *d)
 	*val += d->unboxValue;
 }
 
+static uintptr_t kObjectProto_GetUnboxValue(KonohaContext *kctx, kObject *o, ksymbol_t key, uintptr_t defval)
+{
+	KKeyValue *kvs = KLIB kObjectProto_GetKeyValue(kctx, o, key);
+	return (kvs == NULL) ?  defval : kvs->unboxValue;
+}
+
 static void test_proto_value(KonohaContext *kctx)
 {
 	struct timeval timer;
@@ -49,14 +55,14 @@ static void test_proto_value(KonohaContext *kctx)
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		uintptr_t val = KLIB kObjectProto_GetKeyValue(kctx, o0, -(i+1), 0);
+		uintptr_t val = kObjectProto_GetUnboxValue(kctx, o0, -(i+1), 0);
 		assert(val == 0);
 	}
 	show_timer(&timer, "Map.get:missN");
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		uintptr_t val = KLIB kObjectProto_GetKeyValue(kctx, o0, i, 0);
+		uintptr_t val = kObjectProto_GetUnboxValue(kctx, o0, i, 0);
 		assert(val == i);
 	}
 	show_timer(&timer, "Map.getN");
@@ -91,7 +97,7 @@ static void test_proto_value(KonohaContext *kctx)
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		uintptr_t val = KLIB kObjectProto_GetKeyValue(kctx, o1, i%4, 0);
+		uintptr_t val = kObjectProto_GetUnboxValue(kctx, o1, i%4, 0);
 		assert(val == i%4);
 	}
 	show_timer(&timer, "Map[4].getN");
@@ -118,7 +124,7 @@ static void test_proto_value(KonohaContext *kctx)
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		uintptr_t val = KLIB kObjectProto_GetKeyValue(kctx, o2, i%16, 0);
+		uintptr_t val = kObjectProto_GetUnboxValue(kctx, o2, i%16, 0);
 		assert(val == i%16);
 	}
 	show_timer(&timer, "Map[16].getN");

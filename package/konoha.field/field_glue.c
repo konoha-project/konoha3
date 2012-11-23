@@ -97,7 +97,8 @@ static KMETHOD MethodFunc_UnboxPrototypeGetter(KonohaContext *kctx, KonohaStack 
 {
 	kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
-	KReturnUnboxValue(KLIB kObjectProto_GetKeyValue(kctx, sfp[0].asObject, key, 0));
+	KKeyValue *kvs = KLIB kObjectProto_GetKeyValue(kctx, sfp[0].asObject, key);
+	KReturnUnboxValue((kvs == NULL) ? 0 : kvs->unboxValue);
 }
 
 static KMETHOD MethodFunc_ObjectPrototypeSetter(KonohaContext *kctx, KonohaStack *sfp)

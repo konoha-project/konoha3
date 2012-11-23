@@ -449,7 +449,6 @@ struct kStmtVar {
 #define kStmt_GetObjectNULL(CTX, O, K)            (KLIB kObject_getObject(CTX, UPCAST(O), K, NULL))
 #define kStmt_GetObject(CTX, O, K, DEF)           (KLIB kObject_getObject(CTX, UPCAST(O), K, DEF))
 #define kStmt_setObject(CTX, O, K, V)             KLIB kObjectProto_SetObject(CTX, UPCAST(O), K, O_typeId(V), UPCAST(V))
-#define kStmt_GetUnboxValue(CTX, O, K, DEF)       (KLIB kObjectProto_GetKeyValue(CTX, UPCAST(O), K, DEF))
 #define kStmt_setUnboxValue(CTX, O, K, T, V)      KLIB kObjectProto_SetUnboxValue(CTX, UPCAST(O), K, T, V)
 #define kStmt_removeKey(CTX, O, K)                KLIB kObjectProto_RemoveKey(CTX, UPCAST(O), K)
 #define kStmt_protoEach(CTX, O, THUNK, F)         KLIB kObjectProto_Each(CTX, UPCAST(O), THUNK, F)

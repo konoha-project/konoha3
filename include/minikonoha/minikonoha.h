@@ -1662,7 +1662,7 @@ struct KonohaLibVar {
 	void            (*kObjectProto_Reftrace)(KonohaContext *kctx, kObject *, KObjectVisitor *);
 
 	kObject*        (*Knull)(KonohaContext*, KonohaClass *);
-	KKeyValue*      (*kObjectProto_GetKeyValue)(KonohaContext*, kAbstractObject *, ksymbol_t, uintptr_t);
+	KKeyValue*      (*kObjectProto_GetKeyValue)(KonohaContext*, kAbstractObject *, ksymbol_t);
 	kObject*        (*kObject_getObject)(KonohaContext*, kAbstractObject *, ksymbol_t, kAbstractObject *);
 	void            (*kObjectProto_SetObject)(KonohaContext*, kAbstractObject *, ksymbol_t, ktype_t, kAbstractObject *);
 	void            (*kObjectProto_SetUnboxValue)(KonohaContext*, kAbstractObject *, ksymbol_t, ktype_t, uintptr_t);

@@ -129,34 +129,6 @@ extern int verbose_sugar;
 #define strcasecmp stricmp
 #endif
 
-#ifdef USE_BUILTINTEST
-extern DEFINE_TESTFUNC KonohaTestSet[];
-static BuiltInTestFunc lookupTestFunc(DEFINE_TESTFUNC *d, const char *name)
-{
-	while(d->name != NULL) {
-		if(strcasecmp(name, d->name) == 0) {
-			return d->f;
-		}
-		d++;
-	}
-	return NULL;
-}
-#endif
-
-static int CommandLine_doBuiltInTest(KonohaContext* konoha, const char* name)
-{
-#ifdef USE_BUILTINTEST
-	BuiltInTestFunc f = lookupTestFunc(KonohaTestSet, name);
-	if(f != NULL) {
-		return f(konoha);
-	}
-	fprintf(stderr, "Built-in test is not found: '%s'\n", name);
-#else
-	fprintf(stderr, "Built-in tests are not built; rebuild with -DUSE_BUILTINTEST\n");
-#endif
-	return 1;
-}
-
 static void CommandLine_Define(KonohaContext *kctx, char *keyvalue, KTraceInfo *trace)
 {
 	char *p = strchr(keyvalue, '=');
@@ -238,7 +210,6 @@ static struct option long_options2[] = {
 	{"import",          required_argument, 0, 'I'},
 	{"module",          required_argument, 0, 'M'},
 	{"startwith",       required_argument, 0, 'S'},
-	{"builtin-test",    required_argument, 0, 'B'},
 	{"id",              no_argument,       0, 'q'},
 	{NULL, 0, 0, 0},  /* sentinel */
 };
@@ -272,10 +243,6 @@ static void Konoha_ParseCommandOption(KonohaContext* kctx, int argc, char **argv
 			KExit(EXIT_SUCCESS);  //
 		}
 		break;
-
-		case 'B':
-			CommandLine_doBuiltInTest(kctx, optarg);
-			return;
 
 		case 'D':
 			CommandLine_Define(kctx, optarg, trace);
