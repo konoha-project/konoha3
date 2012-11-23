@@ -481,6 +481,7 @@ static kExpr* kStmtExpr_ToSetter(KonohaContext *kctx, kStmt *stmt, kExpr *expr, 
 {
 	kMethod *mtd = expr->cons->MethodItems[0];
 	DBG_ASSERT(MN_isGETTER(mtd->mn));
+	kNameSpace *ns = Stmt_ns(stmt);  // leftHandExpr = rightHandExpr
 	ktype_t cid = mtd->typeId;
 	kParam *pa = kMethod_GetParam(mtd);
 	int i, psize = pa->psize + 1;
@@ -490,7 +491,6 @@ static kExpr* kStmtExpr_ToSetter(KonohaContext *kctx, kStmt *stmt, kExpr *expr, 
 	}
 	p[pa->psize].ty = expr->ty;
 	kparamId_t paramdom = KLIB Kparamdom(kctx, psize, p);
-	kNameSpace *ns = Stmt_ns(stmt);  // leftHandExpr = rightHandExpr
 	kMethod *foundMethod = kNameSpace_GetMethodBySignatureNULL(kctx, ns, cid, MN_toSETTER(mtd->mn), paramdom, psize, p);
 	if(foundMethod != NULL) {
 		p[pa->psize].ty = pa->rtype;   /* transform "T1 A.get(T2)" to "void A.set(T2, T1)" */
@@ -502,7 +502,7 @@ static kExpr* kStmtExpr_ToSetter(KonohaContext *kctx, kStmt *stmt, kExpr *expr, 
 		KLIB kArray_Add(kctx, expr->cons, rightHandExpr);
 		return SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, foundMethod, gma, reqty);
 	}
-	return SUGAR kStmt_Message2(kctx, stmt, (kToken *)expr, ErrTag, "variable name is expected");
+	return SUGAR kStmt_Message2(kctx, stmt, (kToken *)expr, ErrTag, "undefined setter");
 }
 
 static KMETHOD TypeCheck_Assign(KonohaContext *kctx, KonohaStack *sfp)
@@ -522,7 +522,7 @@ static KMETHOD TypeCheck_Assign(KonohaContext *kctx, KonohaStack *sfp)
 			returnExpr = kStmtExpr_ToSetter(kctx, stmt, leftHandExpr, gma, rightHandExpr, reqty);
 		}
 		else {
-			returnExpr = SUGAR kStmt_Message2(kctx, stmt, (kToken *)expr, ErrTag, "variable name is expected");
+			returnExpr = SUGAR kStmt_Message2(kctx, stmt, (kToken *)expr, ErrTag, "assignment: variable name is expected");
 		}
 	}
 	KReturn(returnExpr);
