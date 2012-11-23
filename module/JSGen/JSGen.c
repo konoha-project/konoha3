@@ -352,7 +352,7 @@ static void JSBuilder_VisitExprParams(KonohaContext *kctx, KBuilder *builder, kS
 
 static void JSBuilder_ConvertAndEmitMethodName(KonohaContext *kctx, KBuilder *builder, kStmt *stmt, kExpr *expr, kExpr *receiver, kMethod *mtd)
 {
-	KonohaClass *globalObjectClass = KLIB kNameSpace_GetClassByFullName(kctx, self->currentStmt->parentBlockNULL->BlockNameSpace, "GlobalObject", 12, NULL);
+	KonohaClass *globalObjectClass = KLIB kNameSpace_GetClassByFullName(kctx, Stmt_ns(stmt), "GlobalObject", 12, NULL);
 	kbool_t isGlobal = (CT_(receiver->ty) == globalObjectClass || receiver->ty == TY_NameSpace);
 	const char *methodName = SYM_t(mtd->mn);
 	if(receiver->ty == TY_NameSpace) {

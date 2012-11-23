@@ -467,6 +467,7 @@ static KMETHOD TypeCheck_OrOperator(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
+
 static KMETHOD TypeCheck_Assign(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
