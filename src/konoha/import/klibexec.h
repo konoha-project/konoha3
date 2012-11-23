@@ -412,14 +412,14 @@ static ksymbol_t Ksymbol(KonohaContext *kctx, const char *name, size_t len, int 
 // -------------------------------------------------------------------------
 // library
 
-static void kObject_FreeField(KonohaContext *kctx, kObjectVar *o)
+static void kObjectProto_Free(KonohaContext *kctx, kObjectVar *o)
 {
 	KonohaClass *ct = O_ct(o);
 	protomap_delete((Kprotomap_t *)o->h.kvproto);
 	ct->free(kctx, o);
 }
 
-static void kObject_ReftraceField(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
+static void kObjectProto_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *visitor)
 {
 	unsigned map_size;
 	O_ct(o)->reftrace(kctx, o, visitor);
@@ -428,56 +428,52 @@ static void kObject_ReftraceField(KonohaContext *kctx, kObject *o, KObjectVisito
 		protomap_iterator itr = {0};
 		KKeyValue *d;
 		while((d = protomap_next((Kprotomap_t *)o->h.kvproto, &itr)) != NULL) {
-			if(SymbolKey_isBoxed(d->key)) {
+			if(TypeAttr_Is(Boxed, d->attrTypeId)) {
 				KRefTrace(d->ObjectValue);
 			}
 		}
 	}
 }
 
-static kObject* kObject_getObjectNULL(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, kAbstractObject *defval)
+static KKeyValue* kObjectProto_GetKeyValue(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key)
 {
 	kObject *v = (kObject *)o;
-	KKeyValue *d = protomap_get((Kprotomap_t *)v->h.kvproto, key | SymbolKey_BOXED);
-	return (d != NULL) ? d->ObjectValue : defval;
+	return protomap_get((Kprotomap_t *)v->h.kvproto, key);
 }
 
-static void kObject_setObject(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, ktype_t ty, kAbstractObject *val)
-{
-	kObjectVar *v = (kObjectVar *)o;
-	protomap_set((Kprotomap_t **)&v->h.kvproto, key | SymbolKey_BOXED, ty, (void *)val);
-	PLATAPI WriteBarrier(kctx, v);
-}
-
-static uintptr_t kObject_getUnboxValue(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, uintptr_t defval)
+static kObject* kObjectProto_GetObject(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, kAbstractObject *defval)
 {
 	kObject *v = (kObject *)o;
 	KKeyValue *d = protomap_get((Kprotomap_t *)v->h.kvproto, key);
-	return (d != NULL) ? d->unboxValue : defval;
+	return (d != NULL) ? d->ObjectValue : defval;
 }
 
-static void kObject_setUnboxValue(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, ktype_t ty, uintptr_t unboxValue)
+static void kObjectProto_SetObject(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, ktype_t ty, kAbstractObject *val)
 {
 	kObjectVar *v = (kObjectVar *)o;
-	PLATAPI WriteBarrier(kctx, v);   // why ? need this? by kimio
+	if(ty == 0) ty = O_ct(v)->typeId;
+	protomap_set((Kprotomap_t **)&v->h.kvproto, key, ty | TypeAttr_Boxed, (void *)val);
+	PLATAPI WriteBarrier(kctx, v);
+}
+
+static void kObjectProto_SetUnboxValue(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, ktype_t ty, uintptr_t unboxValue)
+{
+	kObjectVar *v = (kObjectVar *)o;
+	//PLATAPI WriteBarrier(kctx, v);   // why ? need this? by kimio
 	protomap_set((Kprotomap_t **)&v->h.kvproto, key, ty, (void *)unboxValue);
 }
 
-static void kObject_removeKey(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key)
+static void kObjectProto_RemoveKey(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key)
 {
 	kObjectVar *v = (kObjectVar *)o;
-	KKeyValue *d = protomap_get((Kprotomap_t *)v->h.kvproto, key | SymbolKey_BOXED);
+	KKeyValue *d = protomap_get((Kprotomap_t *)v->h.kvproto, key);
 	if(d != NULL) {
-		d->key = 0; d->ty = 0; d->unboxValue = 0;
-	}
-	d = protomap_get((Kprotomap_t *)v->h.kvproto, key);
-	if(d != NULL) {
-		d->key = 0; d->ty = 0; d->unboxValue = 0;
+		d->key = 0; d->attrTypeId = 0; d->unboxValue = 0;
 	}
 }
 
 typedef void (*feach)(KonohaContext *kctx, void *, KKeyValue *d);
-static void kObject_protoEach(KonohaContext *kctx, kAbstractObject *o, void *thunk, feach f)
+static void kObjectProto_Each(KonohaContext *kctx, kAbstractObject *o, void *thunk, feach f)
 {
 	kObjectVar *v = (kObjectVar *)o;
 	KKeyValue *r;
@@ -497,12 +493,12 @@ struct wbenv {
 static void dumpProto(KonohaContext *kctx, void *arg, KKeyValue *d)
 {
 	struct wbenv *w = (struct wbenv*)arg;
-	ksymbol_t key = SymbolKey_unbox(d->key);
+	ksymbol_t key = d->key;
 	if(w->count > 0) {
 		KLIB Kwb_Write(kctx, w->wb, ", ", 2);
 	}
-	KLIB Kwb_printf(kctx, w->wb, "%s%s: (%s)", PSYM_t(key), TY_t(d->ty));
-	if(SymbolKey_isBoxed(d->key)) {
+	KLIB Kwb_printf(kctx, w->wb, "%s%s: (%s)", PSYM_t(key), ATY_t(d->attrTypeId));
+	if(TypeAttr_Is(Boxed, d->attrTypeId)) {
 		KUnsafeFieldSet(w->values[w->pos].asObject, d->ObjectValue);
 	}
 	else {
@@ -515,7 +511,7 @@ static void dumpProto(KonohaContext *kctx, void *arg, KKeyValue *d)
 static int kObjectProto_p(KonohaContext *kctx, KonohaValue *values, int pos, KGrowingBuffer *wb, int count)
 {
 	struct wbenv w = {values, pos+1, wb, count};
-	KLIB kObject_protoEach(kctx, values[0].asObject, &w, dumpProto);
+	KLIB kObjectProto_Each(kctx, values[0].asObject, &w, dumpProto);
 	return w.count;
 }
 
@@ -646,15 +642,15 @@ static void klib_Init(KonohaLibVar *l)
 	l->Kmap_get      = Kmap_getentry;
 	l->Kmap_remove   = Kmap_remove;
 	l->Kmap_getcode  = Kmap_getcode;
-	l->kObject_FreeField     = kObject_FreeField;
-	l->kObject_ReftraceField = kObject_ReftraceField;
+	l->kObjectProto_Free     = kObjectProto_Free;
+	l->kObjectProto_Reftrace = kObjectProto_Reftrace;
 
-	l->kObject_getObject     = kObject_getObjectNULL;
-	l->kObject_setObject     = kObject_setObject;
-	l->kObject_getUnboxValue = kObject_getUnboxValue;
-	l->kObject_setUnboxValue = kObject_setUnboxValue;
-	l->kObject_removeKey     = kObject_removeKey;
-	l->kObject_protoEach     = kObject_protoEach;
+	l->kObject_getObject     = kObjectProto_GetObject;
+	l->kObjectProto_SetObject     = kObjectProto_SetObject;
+	l->kObjectProto_GetKeyValue = kObjectProto_GetKeyValue;
+	l->kObjectProto_SetUnboxValue = kObjectProto_SetUnboxValue;
+	l->kObjectProto_RemoveKey     = kObjectProto_RemoveKey;
+	l->kObjectProto_Each     = kObjectProto_Each;
 	l->kObjectProto_p        = kObjectProto_p;
 	l->DumpObject            = DumpObject;
 	l->KfileId       = KfileId;

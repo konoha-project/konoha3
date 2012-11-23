@@ -224,8 +224,15 @@ typedef struct {
 #define TY_newid           ((ktype_t)-1)
 #define TY_unknown         ((ktype_t)-2)
 
-#define Type_Attr(t)        (t  & (KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3))
-#define Type_Unmask(t)      (t  & (~(KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3))
+#define TypeAttr_Attr(t)        (t  & (KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3))
+#define TypeAttr_Unmask(t)      (t  & (~(KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3)))
+
+#define TypeAttr_Boxed      KFLAG_H0
+#define TypeAttr_Is(P, t)   ((t & TypeAttr_##P) == TypeAttr_##P)
+
+#define SymbolKey_BOXED            NONE
+#define SymbolKey_unbox(sym)       NONE
+
 
 #define CT_(t)              (kctx->share->classTable.classItems[t])
 #define CT_cparam(CT)       (kctx->share->paramdomList_OnGlobalConstList->ParamItems[(CT)->cparamdom])
@@ -242,9 +249,9 @@ typedef struct {
 #define _NEWID              SYM_NEWID
 #define _NEWRAW             SYM_NEWRAW
 
-#define SymbolKey_BOXED            KFLAG_H3
-#define SymbolKey_unbox(sym)       (sym & ~(SymbolKey_BOXED))
-#define SymbolKey_isBoxed(sym)     ((sym & SymbolKey_BOXED) == SymbolKey_BOXED)
+//#define SymbolKey_BOXED            KFLAG_H3
+//#define SymbolKey_unbox(sym)       (sym & ~(SymbolKey_BOXED))
+//#define TypeAttr_Is(Boxed, FIXME(sym)     ((sym & SymbolKey_BOXED) == SymbolKey_BOXED)
 
 #define FN_COERCION             KFLAG_H3
 #define FN_Coersion             FN_COERCION
@@ -723,7 +730,7 @@ struct KonohaFactory {
 
 typedef struct {
 	ksymbol_t key;
-	ktype_t   ty;
+	ktype_t   attrTypeId;
 	union {
 		uintptr_t                unboxValue;  //unboxValue
 		kObject                 *ObjectValue;  //ObjectValue
@@ -1651,17 +1658,17 @@ struct KonohaLibVar {
 	kbool_t         (*KonohaClass_AddField)(KonohaContext*, KonohaClass *, int flag, ktype_t ty, ksymbol_t sym);
 
 	kObject*        (*new_kObject)(KonohaContext*, kArray *gcstack, KonohaClass *, uintptr_t);
-	void            (*kObject_FreeField)(KonohaContext *kctx, kObjectVar *);
-	void            (*kObject_ReftraceField)(KonohaContext *kctx, kObject *, KObjectVisitor *);
+	void            (*kObjectProto_Free)(KonohaContext *kctx, kObjectVar *);
+	void            (*kObjectProto_Reftrace)(KonohaContext *kctx, kObject *, KObjectVisitor *);
 
 	kObject*        (*Knull)(KonohaContext*, KonohaClass *);
+	KKeyValue*      (*kObjectProto_GetKeyValue)(KonohaContext*, kAbstractObject *, ksymbol_t, uintptr_t);
 	kObject*        (*kObject_getObject)(KonohaContext*, kAbstractObject *, ksymbol_t, kAbstractObject *);
-	void            (*kObject_setObject)(KonohaContext*, kAbstractObject *, ksymbol_t, ktype_t, kAbstractObject *);
-	uintptr_t       (*kObject_getUnboxValue)(KonohaContext*, kAbstractObject *, ksymbol_t, uintptr_t);
-	void            (*kObject_setUnboxValue)(KonohaContext*, kAbstractObject *, ksymbol_t, ktype_t, uintptr_t);
-	void            (*kObject_protoEach)(KonohaContext*, kAbstractObject *, void *thunk, void (*f)(KonohaContext*, void *, KKeyValue *d));
+	void            (*kObjectProto_SetObject)(KonohaContext*, kAbstractObject *, ksymbol_t, ktype_t, kAbstractObject *);
+	void            (*kObjectProto_SetUnboxValue)(KonohaContext*, kAbstractObject *, ksymbol_t, ktype_t, uintptr_t);
+	void            (*kObjectProto_Each)(KonohaContext*, kAbstractObject *, void *thunk, void (*f)(KonohaContext*, void *, KKeyValue *d));
 	int             (*kObjectProto_p)(KonohaContext *, KonohaStack *, int, KGrowingBuffer *, int count);
-	void            (*kObject_removeKey)(KonohaContext*, kAbstractObject *, ksymbol_t);
+	void            (*kObjectProto_RemoveKey)(KonohaContext*, kAbstractObject *, ksymbol_t);
 	void            (*kObject_WriteToBuffer)(KonohaContext *, kObject *, int, KGrowingBuffer *, KonohaValue *, int);
 
 

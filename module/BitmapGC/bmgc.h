@@ -1807,7 +1807,7 @@ static void RememberSet_Reftrace(KonohaContext *kctx, HeapManager *mng, KObjectV
 #ifdef USE_CONCURRENT_GC
 					mark_object(kctx, o);
 #endif
-					KLIB kObject_ReftraceField(kctx, o, visitor);
+					KLIB kObjectProto_Reftrace(kctx, o, visitor);
 				}
 				bitmap_reset(m, 0);
 			}
@@ -1838,7 +1838,7 @@ static void bmgc_gc_mark(HeapManager *mng, enum gc_mode mode)
 	if(unlikely(ref == 0))
 		return;
 	do {
-		KLIB kObject_ReftraceField(kctx, ref, &tracer.base);
+		KLIB kObjectProto_Reftrace(kctx, ref, &tracer.base);
 	} while((ref = mstack_next(mstack)) != NULL);
 }
 
@@ -2003,7 +2003,7 @@ static void concgc_mark(HeapManager *mng, MarkStack *mstack, KObjectVisitor *vis
 	KonohaContext *kctx = mng->kctx;
 	kObject *ref;
 	while ((ref = mstack_next(mstack)) != NULL) {
-		KLIB kObject_ReftraceField(kctx, ref, visitor);
+		KLIB kObjectProto_Reftrace(kctx, ref, visitor);
 	}
 }
 
@@ -2083,7 +2083,7 @@ static inline void bmgc_Object_Free(KonohaContext *kctx, kObject *o)
 				LogUint("cid", ct->typeId));
 #endif
 		gc_info("~Object ptr=%p, cid=%d", o, ct->typeId);
-		KLIB kObject_FreeField(kctx, (kObjectVar *)o);
+		KLIB kObjectProto_Free(kctx, (kObjectVar *)o);
 		do_bzero((void *)o, ct->cstruct_size);
 #ifdef GCSTAT
 		Segment *seg;

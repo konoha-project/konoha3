@@ -210,7 +210,7 @@ static kBlock* kStmt_ParseClassBlockNULL(KonohaContext *kctx, kStmt *stmt, kToke
 			}
 			TokenSeq_end(kctx, (&sourceRange));
 			bk = SUGAR new_kBlock(kctx, stmt/*parent*/, NULL, &sourceRange);
-			KLIB kObject_setObject(kctx, stmt, KW_BlockPattern, TY_Block, bk);
+			KLIB kObjectProto_SetObject(kctx, stmt, KW_BlockPattern, TY_Block, bk);
 		}
 		TokenSeq_Pop(kctx, range);
 	}
@@ -308,7 +308,7 @@ static void kBlock_AddMethodDeclStmt(KonohaContext *kctx, kBlock *bk, kToken *to
 			if(stmt->syn->keyword == KW_TypeDeclPattern) continue;
 			if(stmt->syn->keyword == KW_MethodDeclPattern) {
 				kStmt *lastStmt = classStmt;
-				KLIB kObject_setObject(kctx, stmt, SYM_("ClassName"), TY_Token, tokenClassName);
+				KLIB kObjectProto_SetObject(kctx, stmt, SYM_("ClassName"), TY_Token, tokenClassName);
 				SUGAR kBlock_InsertAfter(kctx, lastStmt->parentBlockNULL, lastStmt, stmt);
 				lastStmt = stmt;
 			}
@@ -381,7 +381,7 @@ static KMETHOD PatternMatch_ClassName(KonohaContext *kctx, KonohaStack *sfp)
 	kTokenVar *tk = tokenList->TokenVarItems[beginIdx];
 	int returnIdx = -1;
 	if(tk->resolvedSyntaxInfo->keyword == KW_SymbolPattern || tk->resolvedSyntaxInfo->keyword == KW_TypePattern) {
-		KLIB kObject_setObject(kctx, stmt, name, O_typeId(tk), tk);
+		KLIB kObjectProto_SetObject(kctx, stmt, name, O_typeId(tk), tk);
 		returnIdx = beginIdx + 1;
 	}
 	KReturnUnboxValue(returnIdx);

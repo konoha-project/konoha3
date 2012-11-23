@@ -824,7 +824,7 @@ static int kStmt_AddAnnotation(KonohaContext *kctx, kStmtVar *stmt, TokenSeq *ra
 				currentIdx++;
 			}
 			if(value != NULL) {
-				KLIB kObject_setObject(kctx, stmt, tk->resolvedSymbol, O_typeId(value), value);
+				KLIB kObjectProto_SetObject(kctx, stmt, tk->resolvedSymbol, O_typeId(value), value);
 			}
 		}
 	}
@@ -884,7 +884,7 @@ static kBlock* kStmt_GetBlock(KonohaContext *kctx, kStmt *stmt, kNameSpace *ns, 
 		if(tk->resolvedSyntaxInfo->keyword == KW_BraceGroup) {
 			TokenSeq range = {ns, tk->subTokenList, 0, kArray_size(tk->subTokenList)};
 			bk = new_kBlock(kctx, stmt, NULL, &range);
-			KLIB kObject_setObject(kctx, stmt, kw, TY_Block, bk);
+			KLIB kObjectProto_SetObject(kctx, stmt, kw, TY_Block, bk);
 		}
 	}
 	return (IS_Block(bk)) ? bk : def;

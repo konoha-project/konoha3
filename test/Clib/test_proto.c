@@ -43,20 +43,20 @@ static void test_proto_value(KonohaContext *kctx)
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		KLIB kObject_setUnboxValue(kctx, o0, i, TY_int, i);
+		KLIB kObjectProto_SetUnboxValue(kctx, o0, i, TY_int, i);
 	}
 	show_timer(&timer, "Map.setN");
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		uintptr_t val = KLIB kObject_getUnboxValue(kctx, o0, -(i+1), 0);
+		uintptr_t val = KLIB kObjectProto_GetKeyValue(kctx, o0, -(i+1), 0);
 		assert(val == 0);
 	}
 	show_timer(&timer, "Map.get:missN");
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		uintptr_t val = KLIB kObject_getUnboxValue(kctx, o0, i, 0);
+		uintptr_t val = KLIB kObjectProto_GetKeyValue(kctx, o0, i, 0);
 		assert(val == i);
 	}
 	show_timer(&timer, "Map.getN");
@@ -64,34 +64,34 @@ static void test_proto_value(KonohaContext *kctx)
 	reset_timer(&timer);
 	for (i = 0; i < EACH; i++) {
 		uintptr_t val = 0;
-		KLIB kObject_protoEach(kctx, o0, (void*) &val, each);
+		KLIB kObjectProto_Each(kctx, o0, (void*) &val, each);
 		assert(val == SUM);
 	}
 	show_timer(&timer, "Map.eachN");
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		KLIB kObject_removeKey(kctx, o0, i);
+		KLIB kObjectProto_RemoveKey(kctx, o0, i);
 	}
 	show_timer(&timer, "Map.removeN");
 
 	reset_timer(&timer);
 	for (i = 0; i < EACH; i++) {
 		uintptr_t val = 0;
-		KLIB kObject_protoEach(kctx, o0, (void*) &val, each);
+		KLIB kObjectProto_Each(kctx, o0, (void*) &val, each);
 		assert(val == 0);
 	}
 	show_timer(&timer, "Map.each:emptyN");
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		KLIB kObject_setUnboxValue(kctx, o1, i%4, TY_int, i%4);
+		KLIB kObjectProto_SetUnboxValue(kctx, o1, i%4, TY_int, i%4);
 	}
 	show_timer(&timer, "Map[4].setN");
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		uintptr_t val = KLIB kObject_getUnboxValue(kctx, o1, i%4, 0);
+		uintptr_t val = KLIB kObjectProto_GetKeyValue(kctx, o1, i%4, 0);
 		assert(val == i%4);
 	}
 	show_timer(&timer, "Map[4].getN");
@@ -99,26 +99,26 @@ static void test_proto_value(KonohaContext *kctx)
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
 		uintptr_t val = 0;
-		KLIB kObject_protoEach(kctx, o1, (void*) &val, each);
+		KLIB kObjectProto_Each(kctx, o1, (void*) &val, each);
 		assert(val == 6);
 	}
 	show_timer(&timer, "Map[4].eachN");
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		KLIB kObject_removeKey(kctx, o1, i);
+		KLIB kObjectProto_RemoveKey(kctx, o1, i);
 	}
 	show_timer(&timer, "Map[4].removeN");
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		KLIB kObject_setUnboxValue(kctx, o2, i%16, TY_int, i%16);
+		KLIB kObjectProto_SetUnboxValue(kctx, o2, i%16, TY_int, i%16);
 	}
 	show_timer(&timer, "Map[16].setN");
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		uintptr_t val = KLIB kObject_getUnboxValue(kctx, o2, i%16, 0);
+		uintptr_t val = KLIB kObjectProto_GetKeyValue(kctx, o2, i%16, 0);
 		assert(val == i%16);
 	}
 	show_timer(&timer, "Map[16].getN");
@@ -126,14 +126,14 @@ static void test_proto_value(KonohaContext *kctx)
 	reset_timer(&timer);
 	for (i = 0; i < COUNT/2; i++) {
 		uintptr_t val = 0;
-		KLIB kObject_protoEach(kctx, o2, (void*) &val, each);
+		KLIB kObjectProto_Each(kctx, o2, (void*) &val, each);
 		assert(val == 120);
 	}
 	show_timer(&timer, "Map[16].eachN");
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		KLIB kObject_removeKey(kctx, o2, i);
+		KLIB kObjectProto_RemoveKey(kctx, o2, i);
 	}
 	show_timer(&timer, "Map[16].removeN");
 }
@@ -155,7 +155,7 @@ static void test_proto_object(KonohaContext *kctx)
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		KLIB kObject_setObject(kctx, o0, i, TY_Object, o0);
+		KLIB kObjectProto_SetObject(kctx, o0, i, TY_Object, o0);
 	}
 	show_timer(&timer, "Map.setO");
 
@@ -176,28 +176,28 @@ static void test_proto_object(KonohaContext *kctx)
 	reset_timer(&timer);
 	for (i = 0; i < EACH; i++) {
 		uintptr_t val = 0;
-		KLIB kObject_protoEach(kctx, o0, (void*) &val, each_object);
+		KLIB kObjectProto_Each(kctx, o0, (void*) &val, each_object);
 		assert(val == ((uintptr_t)o0) * COUNT);
 	}
 	show_timer(&timer, "Map.eachO");
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		KLIB kObject_removeKey(kctx, o0, i);
+		KLIB kObjectProto_RemoveKey(kctx, o0, i);
 	}
 	show_timer(&timer, "Map.removeO");
 
 	reset_timer(&timer);
 	for (i = 0; i < EACH; i++) {
 		uintptr_t val = 0;
-		KLIB kObject_protoEach(kctx, o0, (void*) &val, each_object);
+		KLIB kObjectProto_Each(kctx, o0, (void*) &val, each_object);
 		assert(val == 0);
 	}
 	show_timer(&timer, "Map.each:emptyO");
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		KLIB kObject_setObject(kctx, o1, i%4, TY_Object, o1);
+		KLIB kObjectProto_SetObject(kctx, o1, i%4, TY_Object, o1);
 	}
 	show_timer(&timer, "Map[4].setO");
 
@@ -211,20 +211,20 @@ static void test_proto_object(KonohaContext *kctx)
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
 		uintptr_t val = 0;
-		KLIB kObject_protoEach(kctx, o1, (void*) &val, each_object);
+		KLIB kObjectProto_Each(kctx, o1, (void*) &val, each_object);
 		assert(val == 4*(uintptr_t)o1);
 	}
 	show_timer(&timer, "Map[4].eachO");
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		KLIB kObject_removeKey(kctx, o1, i);
+		KLIB kObjectProto_RemoveKey(kctx, o1, i);
 	}
 	show_timer(&timer, "Map[4].removeO");
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		KLIB kObject_setObject(kctx, o2, i%16, TY_Object, o2);
+		KLIB kObjectProto_SetObject(kctx, o2, i%16, TY_Object, o2);
 	}
 	show_timer(&timer, "Map[16].setO");
 
@@ -238,14 +238,14 @@ static void test_proto_object(KonohaContext *kctx)
 	reset_timer(&timer);
 	for (i = 0; i < COUNT/2; i++) {
 		uintptr_t val = 0;
-		KLIB kObject_protoEach(kctx, o2, (void*) &val, each_object);
+		KLIB kObjectProto_Each(kctx, o2, (void*) &val, each_object);
 		assert(val == 16*(uintptr_t)o2);
 	}
 	show_timer(&timer, "Map[16].eachO");
 
 	reset_timer(&timer);
 	for (i = 0; i < COUNT; i++) {
-		KLIB kObject_removeKey(kctx, o2, i);
+		KLIB kObjectProto_RemoveKey(kctx, o2, i);
 	}
 	show_timer(&timer, "Map[16].removeO");
 }

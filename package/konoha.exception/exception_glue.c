@@ -301,8 +301,8 @@
 //	if(catchBlock != K_NULLBLOCK && parentStmt != NULL) {
 //		ret = SUGAR kBlock_TypeCheckAll(kctx, catchBlock, gma);
 //		kExpr *expr = SUGAR kStmt_GetExpr(kctx, stmt, KW_ExprPattern, K_NULLEXPR);
-//		KLIB kObject_setObject(kctx, parentStmt, KW_ExprPattern, TY_Exception, expr);
-//		KLIB kObject_setObject(kctx, parentStmt, SYM_("catch"), TY_Block, stmt);
+//		KLIB kObjectProto_SetObject(kctx, parentStmt, KW_ExprPattern, TY_Exception, expr);
+//		KLIB kObjectProto_SetObject(kctx, parentStmt, SYM_("catch"), TY_Block, stmt);
 //		kStmt_done(kctx, stmt);
 //	} else {
 //		kStmt_Message(kctx, stmt, ErrTag, "upper stmt is not try/catch");
@@ -322,7 +322,7 @@
 //		kStmt *tryStmt = Stmt_LookupTryOrCatchStmtNULL(kctx, stmt);
 //		if(tryStmt != NULL) {
 //			ret = SUGAR kBlock_TypeCheckAll(kctx, finallyBlock, gma);
-//			KLIB kObject_setObject(kctx, tryStmt, SYM_("finally"), TY_Block, finallyBlock);
+//			KLIB kObjectProto_SetObject(kctx, tryStmt, SYM_("finally"), TY_Block, finallyBlock);
 //			kStmt_done(kctx, stmt);
 //		}
 //	}

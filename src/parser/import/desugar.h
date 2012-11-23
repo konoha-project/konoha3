@@ -30,7 +30,7 @@ static void kStmt_AddParsedObject(KonohaContext *kctx, kStmt *stmt, ksymbol_t ke
 {
 	kArray* valueList = (kArray *)KLIB kObject_getObject(kctx, stmt, keyid, NULL);
 	if(valueList == NULL) {
-		KLIB kObject_setObject(kctx, stmt, keyid, O_typeId(o), o);
+		KLIB kObjectProto_SetObject(kctx, stmt, keyid, O_typeId(o), o);
 	}
 	else {
 		//DBG_P(">>> keyid=%s%s valueList=%s, value=%s", PSYM_t(keyid), CT_t(O_ct(valueList)), CT_t(O_ct(o)));
@@ -38,7 +38,7 @@ static void kStmt_AddParsedObject(KonohaContext *kctx, kStmt *stmt, ksymbol_t ke
 			INIT_GCSTACK();
 			kArray *newList = /*G*/new_(Array, 0, _GcStack);
 			KLIB kArray_Add(kctx, newList, valueList);
-			KLIB kObject_setObject(kctx, stmt, keyid, O_typeId(newList), newList);
+			KLIB kObjectProto_SetObject(kctx, stmt, keyid, O_typeId(newList), newList);
 			valueList = newList;
 			RESET_GCSTACK();
 		}
@@ -577,7 +577,7 @@ static KMETHOD TypeCheck_Block(KonohaContext *kctx, KonohaStack *sfp)
 			ktype_t ty = rexpr->ty;
 			if(ty != TY_void) {
 				kExpr *letexpr = new_TypedConsExpr(kctx, TEXPR_LET, TY_void, 3, K_NULL, lvar, rexpr);
-				KLIB kObject_setObject(kctx, lastExpr, KW_ExprPattern, TY_Expr, letexpr);
+				KLIB kObjectProto_SetObject(kctx, lastExpr, KW_ExprPattern, TY_Expr, letexpr);
 				texpr = SUGAR kExpr_SetVariable(kctx, expr, gma, TEXPR_BLOCK, ty, lvarsize);
 			}
 			gma->genv->blockScopeShiftSize = popBlockScopeShiftSize;
@@ -649,11 +649,11 @@ static kExpr* kStmt_TypeCheckVariableNULL(KonohaContext *kctx, kStmt *stmt, kExp
 	if(symbol != SYM_NONAME) {
 		KKeyValue *kv = kNameSpace_GetConstNULL(kctx, ns, symbol);
 		if(kv != NULL) {
-			if(SymbolKey_isBoxed(kv->key)) {
-				SUGAR kExpr_SetConstValue(kctx, expr, kv->ty, kv->ObjectValue);
+			if(TypeAttr_Is(Boxed, kv->attrTypeId)) {
+				SUGAR kExpr_SetConstValue(kctx, expr, TypeAttr_Unmask(kv->attrTypeId), kv->ObjectValue);
 			}
 			else {
-				SUGAR kExpr_SetUnboxConstValue(kctx, expr, kv->ty, kv->unboxValue);
+				SUGAR kExpr_SetUnboxConstValue(kctx, expr, TypeAttr_Unmask(kv->attrTypeId), kv->unboxValue);
 			}
 			return expr;
 		}
@@ -878,7 +878,7 @@ static kMethod* kExpr_LookupFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kE
 	}
 	{
 		KKeyValue* kvs = kNameSpace_GetConstNULL(kctx, ns, fsymbol);
-		if(kvs != NULL && kvs->ty == VirtualType_StaticMethod) {
+		if(kvs != NULL && TypeAttr_Unmask(kvs->attrTypeId) == VirtualType_StaticMethod) {
 			ktype_t cid = (ktype_t)kvs->unboxValue;
 			ksymbol_t alias = (ksymbol_t)(kvs->unboxValue >> (sizeof(ktype_t) * 8));
 			kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, ns, cid, alias, paramsize, MethodMatch_NoOption);
@@ -1025,7 +1025,7 @@ static KMETHOD Statement_else(KonohaContext *kctx, KonohaStack *sfp)
 	kStmt *stmtIf = Stmt_LookupIfStmtNULL(kctx, stmt);
 	if(stmtIf != NULL) {
 		kBlock *bkElse = SUGAR kStmt_GetBlock(kctx, stmt, NULL/*DefaultNameSpace*/, KW_BlockPattern, K_NULLBLOCK);
-		KLIB kObject_setObject(kctx, stmtIf, KW_else, TY_Block, bkElse);
+		KLIB kObjectProto_SetObject(kctx, stmtIf, KW_else, TY_Block, bkElse);
 		kStmt_done(kctx, stmt);
 		r = kBlock_TypeCheckAll(kctx, bkElse, gma);
 	}
@@ -1049,7 +1049,7 @@ static KMETHOD Statement_return(KonohaContext *kctx, KonohaStack *sfp)
 		if(expr != NULL) {
 			kStmt_Message(kctx, stmt, WarnTag, "ignored return value");
 			r = kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_var, 0);
-			KLIB kObject_removeKey(kctx, stmt, 1);
+			KLIB kObjectProto_RemoveKey(kctx, stmt, 1);
 		}
 	}
 	KReturnUnboxValue(r);
@@ -1067,7 +1067,7 @@ static kStmt* TypeDeclLocalVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gm
 	kStmt *newstmt = new_(Stmt, stmt->uline, OnGcStack);
 	kStmt_setsyn(newstmt, SYN_(Stmt_ns(stmt), KW_ExprPattern));
 	kExpr_typed(termExpr, LET, TY_void);
-	KLIB kObject_setObject(kctx, newstmt, KW_ExprPattern, TY_Expr, termExpr);
+	KLIB kObjectProto_SetObject(kctx, newstmt, KW_ExprPattern, TY_Expr, termExpr);
 	return newstmt;
 }
 
@@ -1225,7 +1225,7 @@ static KMETHOD Statement_ParamsDecl(KonohaContext *kctx, KonohaStack *sfp)
 		pa = new_kParam(kctx, rtype, psize, p);
 	}
 	if(pa != NULL && IS_Param(pa)) {
-		KLIB kObject_setObject(kctx, stmt, KW_ParamPattern, TY_Param, pa);
+		KLIB kObjectProto_SetObject(kctx, stmt, KW_ParamPattern, TY_Param, pa);
 		kStmt_done(kctx, stmt);
 		KReturnUnboxValue(true);
 	}

@@ -154,7 +154,7 @@ static KMETHOD Statement_dsh(KonohaContext *kctx, KonohaStack *sfp)
 	const char cname[] = "Subproc";
 	kExpr *expr = SUGAR new_UntypedCallStyleExpr(kctx, syn, 3, callToken,
 			new_UnboxConstValueExpr(kctx, KLIB kNameSpace_GetClassByFullName(kctx, ns, cname, strlen(cname), NULL)->typeId, 0), callExpr);
-	KLIB kObject_setObject(kctx, stmt, KW_ExprPattern, TY_Expr, expr);
+	KLIB kObjectProto_SetObject(kctx, stmt, KW_ExprPattern, TY_Expr, expr);
 	kbool_t ret = SUGAR kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, TY_int, 0);
 	if(ret) {
 		kStmt_typed(stmt, EXPR);

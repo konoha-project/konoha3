@@ -453,12 +453,12 @@ static void KBuilder_Asm(KonohaContext *kctx, KBuilder *builder, VirtualCode *op
 
 static void kStmt_setLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbol_t label, bblock_t labelId)
 {
-	KLIB kObject_setUnboxValue(kctx, stmt, label, TY_int, labelId);
+	KLIB kObjectProto_SetUnboxValue(kctx, stmt, label, TY_int, labelId);
 }
 
 static bblock_t kStmt_GetLabelBlock(KonohaContext *kctx, kStmt *stmt, ksymbol_t label)
 {
-	return KLIB kObject_getUnboxValue(kctx, stmt, label, -1);
+	return KLIB kObjectProto_GetKeyValue(kctx, stmt, label, -1);
 }
 
 static void ASM_LABEL(KonohaContext *kctx, KBuilder *builder, bblock_t labelId)

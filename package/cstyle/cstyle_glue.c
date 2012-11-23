@@ -148,7 +148,7 @@ static KMETHOD Statement_break(KonohaContext *kctx, KonohaStack *sfp)
 	kStmt *p = stmt;
 	while((p = kStmt_GetParentNULL(p)) != NULL) {
 		if(kStmt_Is(CatchBreak, p)) {
-			KLIB kObject_setObject(kctx, stmt, stmt->syn->keyword, TY_Stmt, p);
+			KLIB kObjectProto_SetObject(kctx, stmt, stmt->syn->keyword, TY_Stmt, p);
 			kStmt_typed(stmt, JUMP);
 			KReturnUnboxValue(true);
 		}
@@ -162,7 +162,7 @@ static KMETHOD Statement_continue(KonohaContext *kctx, KonohaStack *sfp)
 	kStmt *p = stmt;
 	while((p = kStmt_GetParentNULL(p)) != NULL) {
 		if(kStmt_Is(CatchContinue, p)) {
-			KLIB kObject_setObject(kctx, stmt, stmt->syn->keyword, TY_Stmt, p);
+			KLIB kObjectProto_SetObject(kctx, stmt, stmt->syn->keyword, TY_Stmt, p);
 			kStmt_typed(stmt, JUMP);
 			KReturnUnboxValue(true);
 		}

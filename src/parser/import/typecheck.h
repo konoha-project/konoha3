@@ -184,7 +184,7 @@ static kbool_t kStmt_TypeCheckByName(KonohaContext *kctx, kStmt *stmt, ksymbol_t
 //		DBG_P("reqty=%s, texpr->ty=%s isnull=%d", TY_t(reqty), TY_t(texpr->ty), (texpr == K_NULLEXPR));
 		if(texpr != K_NULLEXPR) {
 			if(texpr != expr) {
-				KLIB kObject_setObject(kctx, stmt, classNameSymbol, TY_Expr, texpr);
+				KLIB kObjectProto_SetObject(kctx, stmt, classNameSymbol, TY_Expr, texpr);
 			}
 			return 1;
 		}

@@ -57,21 +57,21 @@ static int test_kvproto(KonohaContext *kctx)
 	assert(sizeof(KKeyValue) == sizeof(void*) * 2);
 	for(i=0; i < sizeof(keys)/sizeof(uintptr_t); i++) {
 		ksymbol_t key = (ksymbol_t)keys[i];
-		KLIB kObject_setUnboxValue(kctx, o, key, TY_int, i);
+		KLIB kObjectProto_SetUnboxValue(kctx, o, key, TY_int, i);
 	}
 	for(i=0; i < sizeof(keys)/sizeof(uintptr_t); i++) {
 		ksymbol_t key = (ksymbol_t)keys[i];
-		uintptr_t val = KLIB kObject_getUnboxValue(kctx, o, key, -1);
+		uintptr_t val = KLIB kObjectProto_GetKeyValue(kctx, o, key, -1);
 		//DBG_P("key=%d, val=%d, %d, results=%d", key, val, i, checkkvs(key, val));
 		assert(checkkvs(key, val));
 	}
 	for(i=0; i < sizeof(keys)/sizeof(uintptr_t); i++) {
 		ksymbol_t key = (ksymbol_t)keys[i];
-		KLIB kObject_removeKey(kctx, o, key);
+		KLIB kObjectProto_RemoveKey(kctx, o, key);
 	}
 	for(i=0; i < sizeof(keys)/sizeof(uintptr_t); i++) {
 		ksymbol_t key = (ksymbol_t)keys[i];
-		intptr_t val = (intptr_t)KLIB kObject_getUnboxValue(kctx, o, key, -1);
+		intptr_t val = (intptr_t)KLIB kObjectProto_GetKeyValue(kctx, o, key, -1);
 		assert(val == -1); // removed
 	}
 	return 0;
