@@ -467,49 +467,65 @@ static KMETHOD TypeCheck_OrOperator(KonohaContext *kctx, KonohaStack *sfp)
 	}
 }
 
+static kbool_t kExpr_IsGetter(kExpr *expr)
+{
+	if(expr->build == TEXPR_CALL) {  // check getter and transform to setter
+		kMethod *mtd = expr->cons->MethodItems[0];
+		DBG_ASSERT(IS_Method(mtd));
+		if(MN_isGETTER(mtd->mn)) return true;
+	}
+	return false;
+}
+
+static kExpr* kStmtExpr_ToSetter(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, kExpr *rightHandExpr, ktype_t reqty)
+{
+	kMethod *mtd = expr->cons->MethodItems[0];
+	DBG_ASSERT(MN_isGETTER(mtd->mn));
+	ktype_t cid = mtd->typeId;
+	kParam *pa = Method_param(mtd);
+	int i, psize = pa->psize + 1;
+	kparamtype_t p[psize];
+	for(i = 0; i < pa->psize; i++) {
+		p[i].ty = pa->paramtypeItems[i].ty;
+	}
+	p[pa->psize].ty = expr->ty;
+	kparamId_t paramdom = KLIB Kparamdom(kctx, psize, p);
+	kNameSpace *ns = Stmt_ns(stmt);  // leftHandExpr = rightHandExpr
+	kMethod *foundMethod = kNameSpace_GetMethodBySignatureNULL(kctx, ns, cid, MN_toSETTER(mtd->mn), paramdom, psize, p);
+	if(foundMethod != NULL) {
+		p[pa->psize].ty = pa->rtype;   /* transform "T1 A.get(T2)" to "void A.set(T2, T1)" */
+		paramdom = KLIB Kparamdom(kctx, psize, p);
+		foundMethod = kNameSpace_GetMethodBySignatureNULL(kctx, ns, cid, MN_toSETTER(mtd->mn), paramdom, psize, p);
+	}
+	if(foundMethod != NULL) {
+		KFieldSet(expr->cons, expr->cons->MethodItems[0], foundMethod);
+		KLIB kArray_Add(kctx, expr->cons, rightHandExpr);
+		return SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, foundMethod, gma, reqty);
+	}
+	return SUGAR kStmt_Message2(kctx, stmt, (kToken *)expr, ErrTag, "variable name is expected");
+}
 
 static KMETHOD TypeCheck_Assign(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_TypeCheck(stmt, expr, gma, reqty);
-	kNameSpace *ns = Stmt_ns(stmt);  // leftHandExpr = rightHandExpr
 	kExpr *leftHandExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 1, gma, TY_var, TypeCheckPolicy_ALLOWVOID);
 	kExpr *rightHandExpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 2, gma, leftHandExpr->ty, 0);
+	kExpr *returnExpr = K_NULLEXPR;
 	if(rightHandExpr != K_NULLEXPR && leftHandExpr != K_NULLEXPR) {
 		if(leftHandExpr->build == TEXPR_LOCAL || leftHandExpr->build == TEXPR_FIELD || leftHandExpr->build == TEXPR_STACKTOP) {
 			((kExprVar *)expr)->build = TEXPR_LET;
 			((kExprVar *)expr)->ty    = leftHandExpr->ty;
 			((kExprVar *)rightHandExpr)->ty = leftHandExpr->ty;
-			KReturn(expr);
+			returnExpr = expr;
 		}
-		if(leftHandExpr->build == TEXPR_CALL) {  // check getter and transform to setter
-			kMethod *mtd = leftHandExpr->cons->MethodItems[0];
-			DBG_ASSERT(IS_Method(mtd));
-			if(MN_isGETTER(mtd->mn)) {
-				ktype_t cid = leftHandExpr->cons->ExprItems[1]->ty;
-				ktype_t paramType = leftHandExpr->ty;
-				ksymbol_t sym = SYM_UNMASK(mtd->mn);
-				kMethod *foundMethod = KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, cid, sym, paramType);  // FIXME
-				if(foundMethod != NULL) {
-					KFieldSet(leftHandExpr->cons, leftHandExpr->cons->MethodItems[0], foundMethod);
-					KLIB kArray_Add(kctx, leftHandExpr->cons, rightHandExpr);
-					KReturn(SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, leftHandExpr, foundMethod, gma, reqty));
-				}
-				kParam *pa = Method_param(mtd);
-				if(pa->psize == 1) { /* transform "T1 A.get(T2)" to "void A.set(T2, T1)" */
-					kparamtype_t p[2] = {{pa->paramtypeItems[0].ty}, {pa->rtype}};
-					kparamId_t paramdom = KLIB Kparamdom(kctx, 2, p);
-					foundMethod = kNameSpace_GetMethodBySignatureNULL(kctx, ns, cid, MN_toSETTER(sym), paramdom, 2, p);
-					if(foundMethod != NULL) {
-						KFieldSet(leftHandExpr->cons, leftHandExpr->cons->MethodItems[0], foundMethod);
-						KLIB kArray_Add(kctx, leftHandExpr->cons, rightHandExpr);
-						KReturn(SUGAR kStmtkExpr_TypeCheckCallParam(kctx, stmt, leftHandExpr, foundMethod, gma, reqty));
-					}
-				}
-			}
+		else if(kExpr_IsGetter(leftHandExpr)) {
+			returnExpr = kStmtExpr_ToSetter(kctx, stmt, leftHandExpr, gma, rightHandExpr, reqty);
 		}
-		SUGAR kStmt_Message2(kctx, stmt, (kToken *)expr, ErrTag, "variable name is expected");
+		else {
+			returnExpr = SUGAR kStmt_Message2(kctx, stmt, (kToken *)expr, ErrTag, "variable name is expected");
+		}
 	}
-	KReturn(K_NULLEXPR);
+	KReturn(returnExpr);
 }
 
 static int kGamma_AddLocalVariable(KonohaContext *kctx, kGamma *gma, ktype_t ty, ksymbol_t fn)
