@@ -36,77 +36,6 @@ set(PARSER
 	src/parser/parser.c
 )
 
-## Packages
-set(PACKAGES
-## YOU MUST add packages in an alphabetical order 
-	cstyle
-	cstyle.file
-	cstyle.float
-	cstyle.global
-	cstyle.libc
-	cstyle.math
-## YOU MUST add packages in an alphabetical order
-	java2.class
-	java2.object
-## YOU MUST add packages in an alphabetical order
-	konoha
-	konoha.array
-	konoha.bytes
-	konoha.class
-	konoha.complex
-	konoha.console
-	konoha.const
-	konoha.date
-	konoha.defined
-	konoha.desugar
-	konoha.dynamic
-	konoha.eval
-	konoha.eventlistener
-	konoha.field
-	konoha.file
-	konoha.float
-	konoha.foreach
-	konoha.global
-	konoha.i
-	konoha.import
-	konoha.iterator
-	konoha.json
-	konoha.math
-	konoha.map
-#	konoha.mpi
-	konoha.namespace
-	konoha.new
-	konoha.object
-	konoha.prototype
-	konoha.regexp
-	konoha.string
-##konoha.sql
-	konoha.untyped
-	konoha.var
-	minikonoha
-	sugar
-## YOU MUST ADD packages in an alphabetical order
-	posix.fd
-	posix.path
-	posix.process
-	posix.socket
-	posix.stat
-	posix.thread
-	dscript.dollar
-	dscript.subproc
-	dscript.shell
-	curl
-	llvm
-	libvirt
-##	ijit
-	jansson
-	mecab
-	python
-#	apache   ## removed Module bugs
-#	openssl
-	gmp
-)
-
 set(PACKAGE_NAME    ${PROJECT_NAME})
 set(PACKAGE_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 set(PACKAGE_STRING  ${CMAKE_PROJECT_NAME}-${PACKAGE_VERSION})
@@ -387,14 +316,21 @@ macro(add_konoha_package _PKGNAME)
 	endif(NOT __NOT_BUILD)
 endmacro(add_konoha_package)
 
-add_subdirectory(module)
+add_subdirectory(src/module)
 
+file(GLOB PACKAGES ${CMAKE_CURRENT_SOURCE_DIR}/src/package/*)
 foreach(dir ${PACKAGES})
-	set(dir "${CMAKE_CURRENT_SOURCE_DIR}/package/${dir}")
 	if(IS_DIRECTORY ${dir} AND EXISTS ${dir}/CMakeLists.txt)
 		add_subdirectory(${dir})
-	endif()
-endforeach()
+	endif(IS_DIRECTORY ${dir} AND EXISTS ${dir}/CMakeLists.txt)
+endforeach(dir ${PACKAGES})
+
+file(GLOB DEVEL_PACKAGES ${CMAKE_CURRENT_SOURCE_DIR}/src/package-devel/*)
+foreach(dir ${DEVEL_PACKAGES})
+	if(IS_DIRECTORY ${dir} AND EXISTS ${dir}/CMakeLists.txt)
+		add_subdirectory(${dir})
+	endif(IS_DIRECTORY ${dir} AND EXISTS ${dir}/CMakeLists.txt)
+endforeach(dir ${DEVE_PACKAGES})
 
 macro(add_clib_test test_name)
 	add_executable(${test_name} ${ARGN})

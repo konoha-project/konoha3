@@ -25,7 +25,6 @@
 #include <minikonoha/minikonoha.h>
 #include <minikonoha/sugar.h>
 #include <minikonoha/konoha_common.h>
-#include <minikonoha/bytes.h>
 #include <stdio.h>
 #define TRACE(POLICY, ...) OLDTRACE_SWITCH_TO_KTrace(POLICY, __VA_ARGS__);
 
@@ -45,7 +44,7 @@ typedef struct {
 
 static inline kObject *new_ReturnCppObject(KonohaContext *kctx,KonohaStack *sfp, void *ptr) {
 	kObject *defobj = sfp[(-(K_CALLDELTA))].asObject;
-	kObject *ret = KLIB new_kObjectDontUseThis(kctx, O_ct(defobj), (uintptr_t)ptr, OnStack);
+	kObject *ret = KLIB new_kObject(kctx, OnStack, O_ct(defobj), (uintptr_t)ptr);
 	((kRawPtr *)ret)->rawptr = ptr;
 	return ret;
 }
@@ -67,7 +66,7 @@ static void MPIData_extend(KonohaContext *kctx, kMPIData *p, int size) {
 	if(p->size < newSize) {
 		switch(p->typeId) {
 		case KMPI_BYTES: {
-			kBytes *b = (kBytes *)KLIB new_kObjectDontUseThis(kctx, CT_Bytes, (uintptr_t)newSize, OnStack);
+			kBytes *b = (kBytes *)KLIB new_kObject(kctx, OnField, CT_Bytes, (uintptr_t)newSize);
 			memcpy(b->buf, p->b->buf, p->size);
 			p->b = b;
 			p->size = newSize;
@@ -514,9 +513,9 @@ static KMETHOD MPIData_seti(KonohaContext *kctx, KonohaStack *sfp)
 typedef struct {
 	KonohaModule h;
 	KonohaClass *cValue;
-} kmodmpi_t;
+} KModuleMpi;
 
-static void kmodmpi_Setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
+static void MpiModule_Setup(KonohaContext *kctx, struct KonohaModule *def, int newctx)
 {
 	(void)kctx;(void)def;(void)newctx;
 }
@@ -526,24 +525,23 @@ static void kmodmpi_Reftrace(KonohaContext *kctx, struct KonohaModule *baseh, KO
 	(void)kctx;(void)baseh;
 }
 
-static void kmodmpi_Free(KonohaContext *kctx, struct KonohaModule *baseh)
+static void MpiModule_Free(KonohaContext *kctx, struct KonohaModule *baseh)
 {
 	MPI_Finalize();
 }
-
-#define MOD_mpi 19/*TODO*/
 
 static kbool_t mpi_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int option, KTraceInfo *trace)
 {
 	KRequirePackage("konoha.bytes", trace);
 	KRequirePackage("konoha.float", trace);
-	kmodmpi_t *base = (kmodmpi_t *)KCalloc_UNTRACE(sizeof(kmodmpi_t), 1);
-	base->h.name     = "mpi";
-	base->h.setup    = kmodmpi_Setup;
-	base->h.reftrace = kmodmpi_Reftrace;
-	base->h.free     = kmodmpi_Free;
-	KLIB KonohaRuntime_setModule(kctx, MOD_mpi, &base->h, trace);
+	KModuleMpi *mod = (KModuleMpi *)KCalloc_UNTRACE(sizeof(KModuleMpi), 1);
+	mod->h.name     = "mpi";
+	mod->h.setupModuleContext    = MpiModule_Setup;
+	mod->h.freeModule     = MpiModule_Free;
+	KLIB KonohaRuntime_setModule(kctx, MOD_mpi, (KonohaModule *)mod, trace);
 
+	int argc = 0;
+	char *args[1] = {};
 	MPI_Init(&argc, (char ***)&args);
 	g_comm_world = (kMPIComm *)KMalloc_UNTRACE(sizeof(kMPIComm));
 	g_comm_world->comm = MPI_COMM_WORLD;
@@ -636,7 +634,7 @@ static kbool_t mpi_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 		_Public, _F(MPIData_getSize), TY_int, TY_MPIData, MN_("getSize"), 0, 
 		DEND,
 	};
-	KLIB kNameSpace_LoadMethodData(kctx, NULL, MethodData);
+	KLIB kNameSpace_LoadMethodData(kctx, ns, MethodData, trace);
 	KDEFINE_INT_CONST OpData[] = {
 			{"MAX",  TY_MPIOp, (kint_t)MPI_MAX},
 			{"MIN",  TY_MPIOp, (kint_t)MPI_MIN},
@@ -650,7 +648,7 @@ static kbool_t mpi_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int opti
 			{"BXOR", TY_MPIOp, (kint_t)MPI_BXOR},
 			{}
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, (const char **)OpData, trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(OpData), true/*isOverride*/, trace);
 	return true;
 }
 
