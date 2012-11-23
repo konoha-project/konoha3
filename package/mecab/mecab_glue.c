@@ -387,7 +387,7 @@ static kbool_t mecab_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int op
 			{KDefineConstInt(MECAB_EOS_NODE)},
 			{}
 	};
-	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), trace);
+	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(IntData), false/*isOverride*/, trace);
 	return true;
 }
 
