@@ -89,7 +89,7 @@ static void kToken_Init(KonohaContext *kctx, kObject *o, void *conf)
 	kTokenVar *tk = (kTokenVar *)o;
 	tk->uline     =   0;
 	tk->unresolvedTokenType = (ksymbol_t)(intptr_t)conf;
-	if(tk->unresolvedTokenType == 0  || SYM_UNMASK(tk->unresolvedTokenType) != tk->unresolvedTokenType) {
+	if(tk->unresolvedTokenType == 0  || Symbol_Unmask(tk->unresolvedTokenType) != tk->unresolvedTokenType) {
 		KUnsafeFieldInit(tk->text, TS_EMPTY);
 	}
 	else {

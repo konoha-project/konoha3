@@ -734,7 +734,7 @@ static kExpr* BoxThisExpr(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kExpr *
 	DBG_ASSERT(IS_Method(mtd));
 	DBG_ASSERT(thisClass->typeId != TY_var);
 	if(!TY_isUnbox(mtd->typeId) && CT_isUnbox(thisClass)) {
-		KFieldSet(expr->cons, expr->cons->ExprItems[1], kStmtExpr_box(kctx, stmt, thisExpr, gma, thisClass->typeId));
+		KFieldSet(expr->cons, expr->cons->ExprItems[1], kStmtExpr_ToBox(kctx, stmt, thisExpr, gma, thisClass->typeId));
 	}
 	return thisExpr;
 }
@@ -796,13 +796,13 @@ static kExpr *kStmtExpr_LookupMethod(KonohaContext *kctx, kStmt *stmt, kExpr *ex
 	kTokenVar *tkMN = expr->cons->TokenVarItems[0];
 	DBG_ASSERT(IS_Token(tkMN));
 	size_t psize = kArray_size(expr->cons) - 2;
-	kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, ns, this_cid, tkMN->resolvedSymbol, psize);
+	kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, ns, this_cid, tkMN->resolvedSymbol, psize, MethodMatch_CamelStyle);
 	if(mtd == NULL && psize == 0) {
 		mtd = kNameSpace_GuessCoercionMethodNULL(kctx, ns, tkMN, this_cid);
 	}
 	if(mtd == NULL) {
 		if(tkMN->text != TS_EMPTY) {  // find Dynamic Call ..
-			mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, this_cid, 0/*NONAME*/, 1);
+			mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, ns, this_cid, 0/*NONAME*/, 1, MethodMatch_NoOption);
 			if(mtd != NULL) {
 				return TypeCheckDynamicCallParams(kctx, stmt, expr, mtd, gma, tkMN->text, tkMN->resolvedSymbol, reqty);
 			}
@@ -856,7 +856,7 @@ static kMethod* kExpr_LookupFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kE
 	int paramsize = kArray_size(exprN->cons) - 2;
 	if(genv->localScope.varItems[0].ty != TY_void) {
 		DBG_ASSERT(genv->this_cid == genv->localScope.varItems[0].ty);
-		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, genv->this_cid, fsymbol, paramsize);
+		kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, ns, genv->this_cid, fsymbol, paramsize, MethodMatch_CamelStyle);
 		if(mtd != NULL) {
 			KFieldSet(exprN->cons, exprN->cons->ExprItems[1], new_VariableExpr(kctx, gma, TEXPR_LOCAL, gma->genv->this_cid, 0));
 			return mtd;
@@ -881,7 +881,7 @@ static kMethod* kExpr_LookupFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kE
 		if(kvs != NULL && kvs->ty == VirtualType_StaticMethod) {
 			ktype_t cid = (ktype_t)kvs->unboxValue;
 			ksymbol_t alias = (ksymbol_t)(kvs->unboxValue >> (sizeof(ktype_t) * 8));
-			kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, ns, cid, alias, paramsize);
+			kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, ns, cid, alias, paramsize, MethodMatch_NoOption);
 			if(mtd != NULL && kMethod_Is(Static, mtd)) {
 				KFieldSet(exprN->cons, exprN->cons->ExprItems[1], new_ConstValueExpr(kctx, cid, KLIB Knull(kctx, CT_(cid))));
 				return mtd;
@@ -889,7 +889,7 @@ static kMethod* kExpr_LookupFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kE
 		}
 	}
 	{
-		kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, ns, O_typeId(ns), fsymbol, paramsize);
+		kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, ns, O_typeId(ns), fsymbol, paramsize, MethodMatch_CamelStyle);
 		if(mtd != NULL) {
 			KFieldSet(exprN->cons, exprN->cons->ExprItems[1], new_ConstValueExpr(kctx, O_typeId(ns), UPCAST(ns)));
 			return mtd;
@@ -952,7 +952,7 @@ static kExpr *kExpr_TypeCheckFuncParams(KonohaContext *kctx, kStmt *stmt, kExpr 
 			return texpr;
 		}
 	}
-	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), TY_Func, MN_("invoke"), -1);
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), TY_Func, MN_("invoke"), -1, MethodMatch_NoOption);
 	DBG_ASSERT(mtd != NULL);
 	KFieldSet(expr->cons, expr->cons->ExprItems[1], expr->cons->ExprItems[0]);
 	return TypeMethodCallExpr(kctx, expr, mtd, rtype);

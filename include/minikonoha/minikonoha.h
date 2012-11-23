@@ -224,14 +224,17 @@ typedef struct {
 #define TY_newid           ((ktype_t)-1)
 #define TY_unknown         ((ktype_t)-2)
 
+#define Type_Attr(t)        (t  & (KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3))
+#define Type_Unmask(t)      (t  & (~(KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3))
+
 #define CT_(t)              (kctx->share->classTable.classItems[t])
 #define CT_cparam(CT)       (kctx->share->paramdomList_OnGlobalConstList->ParamItems[(CT)->cparamdom])
 #define TY_isUnbox(t)       FLAG_is(CT_(t)->cflag, kClass_UnboxType)
 #define CT_isUnbox(C)       FLAG_is(C->cflag, kClass_UnboxType)
 
 #define SYM_MAX            KFLAG_H3
-#define SYM_HEAD(sym)      (sym  & (KFLAG_H0|KFLAG_H1|KFLAG_H2))
-#define SYM_UNMASK(sym)    (sym & (~(KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3)))
+#define Symbol_Attr(sym)      (sym  & (KFLAG_H0|KFLAG_H1|KFLAG_H2))
+#define Symbol_Unmask(sym)    (sym & (~(KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3)))
 
 #define SYM_NONAME          ((ksymbol_t)-1)
 #define SYM_NEWID           ((ksymbol_t)-2)
@@ -267,21 +270,21 @@ typedef struct {
 #define MN_SETTER     KFLAG_H2
 
 #define MN_UNMASK(mn)        (mn & (~(KFLAG_H1|KFLAG_H2)))
-#define MN_isGETTER(mn)      (SYM_HEAD(mn) == MN_GETTER)
+#define MN_isGETTER(mn)      (Symbol_Attr(mn) == MN_GETTER)
 #define MN_toGETTER(mn)      ((MN_UNMASK(mn)) | MN_GETTER)
-#define MN_isSETTER(mn)      (SYM_HEAD(mn) == MN_SETTER)
+#define MN_isSETTER(mn)      (Symbol_Attr(mn) == MN_SETTER)
 #define MN_toSETTER(mn)      ((MN_UNMASK(mn)) | MN_SETTER)
 
 #define MN_to(cid)           ((cid) | MN_TOCID)
-#define MN_isTOCID(mn)       ((SYM_UNMASK(mn)) == MN_TOCID)
+#define MN_isTOCID(mn)       ((Symbol_Unmask(mn)) == MN_TOCID)
 #define MN_as(cid)           ((cid) | MN_ASCID)
-#define MN_isASCID(mn)       ((SYM_UNMASK(mn)) == MN_ASCID)
-#define MethodName_t(mn)     SYM_PRE(mn), ((mn & MN_TYPEID) == MN_TYPEID ? TY_t(SYM_UNMASK(mn)) : SYM_t(SYM_UNMASK(mn)))
+#define MN_isASCID(mn)       ((Symbol_Unmask(mn)) == MN_ASCID)
+#define MethodName_t(mn)     SYM_PRE(mn), ((mn & MN_TYPEID) == MN_TYPEID ? TY_t(Symbol_Unmask(mn)) : SYM_t(Symbol_Unmask(mn)))
 
 //#define MN_to(cid)           ((CT_(cid)->classNameSymbol) | MN_TOCID)
-//#define MN_isTOCID(mn)       ((SYM_UNMASK(mn)) == MN_TOCID)
+//#define MN_isTOCID(mn)       ((Symbol_Unmask(mn)) == MN_TOCID)
 //#define MN_as(cid)           ((CT_(cid)->classNameSymbol) | MN_ASCID)
-//#define MN_isASCID(mn)       ((SYM_UNMASK(mn)) == MN_ASCID)
+//#define MN_isASCID(mn)       ((Symbol_Unmask(mn)) == MN_ASCID)
 
 
 /* ------------------------------------------------------------------------ */
@@ -1410,6 +1413,12 @@ typedef struct MethodMatch {
 	kArray       *foundMethodListNULL;
 } MethodMatch;
 
+typedef enum {
+	MethodMatch_NoOption   = 1,
+	MethodMatch_CamelStyle      = 1 << 1,
+} MethodMatchOption;
+
+
 typedef kbool_t (*MethodMatchFunc)(KonohaContext *kctx, kMethod *mtd, MethodMatch *m);
 
 #define K_CALLDELTA   4
@@ -1473,8 +1482,9 @@ struct kNameSpaceVar {
 #define kNameSpace_TypeInference                     ((kshortflag_t)(1<<2))
 #define kNameSpace_ImplicitField                     ((kshortflag_t)(1<<3))
 #define kNameSpace_ImplicitGlobalVariable            ((kshortflag_t)(1<<4))
-
 #define kNameSpace_ImplicitCoercion                  ((kshortflag_t)(1<<5))
+
+
 
 /* ------------------------------------------------------------------------ */
 /* System */
@@ -1688,7 +1698,7 @@ struct KonohaLibVar {
 	kMethod*         (*kNameSpace_GetGetterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ksymbol_t mn, ktype_t);
 	kMethod*         (*kNameSpace_GetSetterMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ksymbol_t mn, ktype_t);
 	kMethod*         (*kNameSpace_GetCoercionMethodNULL)(KonohaContext*, kNameSpace *, ktype_t cid, ktype_t tcid);
-	kMethod*         (*kNameSpace_GetMethodByParamSizeNULL)(KonohaContext*, kNameSpace *, ktype_t cid, kmethodn_t mn, int paramsize);
+	kMethod*         (*kNameSpace_GetMethodByParamSizeNULL)(KonohaContext*, kNameSpace *, ktype_t cid, kmethodn_t mn, int paramsize, MethodMatchOption option);
 	kMethod*         (*kNameSpace_GetMethodBySignatureNULL)(KonohaContext*, kNameSpace *, ktype_t cid, kmethodn_t mn, int paramdom, int paramsize, kparamtype_t *);
 	kMethod*         (*kMethod_DoLazyCompilation)(KonohaContext *kctx, kMethod *mtd, kparamtype_t *, int options);
 //	void             (*kNameSpace_compileAllDefinedMethods)(KonohaContext *kctx);

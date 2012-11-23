@@ -779,7 +779,7 @@ static kMethod *kNameSpace_GetSetterMethodNULL(KonohaContext *kctx, kNameSpace *
 	return NULL;
 }
 
-static kMethod *kNameSpace_GetMethodByParamSizeNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ksymbol_t symbol, int paramsize)
+static kMethod *kNameSpace_GetMethodByParamSizeNULL(KonohaContext *kctx, kNameSpace *ns, ktype_t cid, ksymbol_t symbol, int paramsize, MethodMatchOption option)
 {
 	MethodMatch m = {};
 	m.mn = symbol;
@@ -787,11 +787,12 @@ static kMethod *kNameSpace_GetMethodByParamSizeNULL(KonohaContext *kctx, kNameSp
 	MethodMatchFunc func = paramsize == 0 ? MethodMatch_Param0 : MethodMatch_ParamSize;
 	if(paramsize == -1) func = MethodMatch_ParamNoCheck;
 	kMethod *mtd = kNameSpace_MatchMethodNULL(kctx, ns, cid, func, &m);
-	if(mtd == NULL) {
+	if(mtd == NULL && TFLAG_is(int, option, MethodMatch_CamelStyle)) {
+		ksymbol_t attr = Symbol_Attr(symbol);
 		ksymbol_t anotherSymbols[ANOTHER_NAME_MAXSIZ];
-		size_t i, foundNames = FindAnotherSymbol(kctx, symbol, anotherSymbols);
+		size_t i, foundNames = FindAnotherSymbol(kctx, Symbol_Unmask(symbol), anotherSymbols);
 		for(i = 0; i < foundNames; i++) {
-			m.mn = anotherSymbols[i];
+			m.mn = anotherSymbols[i] | attr;
 			mtd = kNameSpace_MatchMethodNULL(kctx, ns, cid, func, &m);
 			if(mtd != NULL) break;
 		}

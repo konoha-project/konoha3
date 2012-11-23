@@ -999,7 +999,7 @@ static void defineDefaultKeywordSymbol(KonohaContext *kctx)
 	for(i = 0; i < sizeof(keywords) / sizeof(const char *); i++) {
 		ksymbolSPOL(keywords[i], strlen(keywords[i]), StringPolicy_TEXT|StringPolicy_ASCII, SYM_NEWID);
 		//ksymbol_t sym = ksymbolSPOL(keywords[i], strlen(keywords[i]), StringPolicy_TEXT|StringPolicy_ASCII, SYM_NEWID);
-		//fprintf(stdout, "#define KW_%s (((ksymbol_t)%d)|0) /*%s*/\n", SYM_t(sym), SYM_UNMASK(sym), keywords[i]);
+		//fprintf(stdout, "#define KW_%s (((ksymbol_t)%d)|0) /*%s*/\n", SYM_t(sym), Symbol_Unmask(sym), keywords[i]);
 	}
 }
 

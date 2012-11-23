@@ -94,7 +94,7 @@ static kinline kString* TY_s_(KonohaContext *kctx, ktype_t ty)
 #define SYM_t(sym)   S_text(SYM_s_(kctx, sym))
 static kinline kString* SYM_s_(KonohaContext *kctx, ksymbol_t sym)
 {
-	size_t index = (size_t) SYM_UNMASK(sym);
+	size_t index = (size_t) Symbol_Unmask(sym);
 //	if(!(index < kArray_size(kctx->share->symbolList_OnGlobalConstList))) {
 //		DBG_P("index=%d, size=%d", index, kArray_size(kctx->share->symbolList_OnGlobalConstList));
 //	}
@@ -105,7 +105,7 @@ static kinline kString* SYM_s_(KonohaContext *kctx, ksymbol_t sym)
 #define PSYM_t(sym)   SYM_PRE(sym),S_text(SYM_s_(kctx, sym))
 static kinline const char* SYM_PRE(ksymbol_t sym)
 {
-	size_t mask = ((size_t)(SYM_HEAD(sym)) >> ((sizeof(ksymbol_t) * 8)-3));
+	size_t mask = ((size_t)(Symbol_Attr(sym)) >> ((sizeof(ksymbol_t) * 8)-3));
 	DBG_ASSERT(mask < 8);
 	static const char* prefixes[] = {
 		/*000*/ "",   /*001*/ "set", /*010*/ "get", /*011*/ "@",
@@ -117,9 +117,9 @@ static kinline const char* SYM_PRE(ksymbol_t sym)
 #define SYM_equals(S1, S2)     sym_equals(kctx, S1, S2)
 static kinline kbool_t sym_equals(KonohaContext *kctx, ksymbol_t s1, ksymbol_t s2)
 {
-	if(SYM_HEAD(s1) == SYM_HEAD(s2)) {
-		const char *t1 = S_text(kctx->share->symbolList_OnGlobalConstList->stringItems[SYM_UNMASK(s1)]);
-		const char *t2 = S_text(kctx->share->symbolList_OnGlobalConstList->stringItems[SYM_UNMASK(s2)]);
+	if(Symbol_Attr(s1) == Symbol_Attr(s2)) {
+		const char *t1 = S_text(kctx->share->symbolList_OnGlobalConstList->stringItems[Symbol_Unmask(s1)]);
+		const char *t2 = S_text(kctx->share->symbolList_OnGlobalConstList->stringItems[Symbol_Unmask(s2)]);
 		while(1) {
 			if(t1[0] != t2[0]) {
 				if(t1[0] == '_') { t1++; continue; }

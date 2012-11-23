@@ -96,7 +96,7 @@ enum kSymbolPrefix{
 
 static enum kSymbolPrefix SYM_PRE_ID(ksymbol_t sym)
 {
-	size_t mask = ((size_t)(SYM_HEAD(sym)) >> ((sizeof(ksymbol_t) * 8)-3));
+	size_t mask = ((size_t)(Symbol_Attr(sym)) >> ((sizeof(ksymbol_t) * 8)-3));
 	DBG_ASSERT(mask < 8);
 	return (enum kSymbolPrefix)mask;
 }

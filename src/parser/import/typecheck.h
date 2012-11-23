@@ -110,13 +110,11 @@ static kExpr* kStmtExpr_ToConstValue(KonohaContext *kctx, kStmt *stmt, kExpr *ex
 	return SUGAR kExpr_SetConstValue(kctx, expr, rtype, lsfp[0].asObject);
 }
 
-static kExpr *kStmtExpr_box(KonohaContext *kctx, kStmt *stmt, kExpr *texpr, kGamma *gma, ktype_t reqty)
+static kExpr *kStmtExpr_ToBox(KonohaContext *kctx, kStmt *stmt, kExpr *texpr, kGamma *gma, ktype_t reqty)
 {
 	ktype_t unboxType = (texpr->ty == TY_boolean) ? TY_boolean : TY_int;
-	kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, kStmt_ns(stmt), unboxType, MN_box, 0);
-	DBG_P(">>>>>>>> boxing %s <<<<<<<<<", TY_t(unboxType));
-	kExpr *boxExpr = new_TypedCallExpr(kctx, stmt, gma, texpr->ty, mtd, 1, texpr);
-	return boxExpr;
+	kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, kStmt_ns(stmt), unboxType, MN_box, 0, MethodMatch_NoOption);
+	return new_TypedCallExpr(kctx, stmt, gma, texpr->ty, mtd, 1, texpr);
 }
 
 static kExpr *kExpr_TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGamma *gma, ktype_t reqty, int pol)
@@ -147,7 +145,7 @@ static kExpr *kExpr_TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGa
 		}
 		if(CT_isa(kctx, texpr->ty, reqty)) {
 			if(TY_isUnbox(texpr->ty) && !TY_isUnbox(reqty)) {
-				return kStmtExpr_box(kctx, stmt, texpr, gma, reqty);
+				return kStmtExpr_ToBox(kctx, stmt, texpr, gma, reqty);
 			}
 			return texpr;
 		}

@@ -299,7 +299,7 @@ static KMETHOD TypeCheck_ArrayLiteral(KonohaContext *kctx, KonohaStack *sfp)
 		if(requestClass == NULL) {
 			requestClass = (paramType == TY_var) ? CT_Array : CT_p0(kctx, CT_Array, paramType);
 		}
-		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), TY_Array, MN_("{}"), -1);
+		kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), TY_Array, MN_("{}"), -1, MethodMatch_NoOption);
 		DBG_ASSERT(mtd != NULL);
 		KFieldSet(arrayExpr, arrayExpr->cons->MethodItems[0], mtd);
 		KFieldSet(arrayExpr, arrayExpr->cons->ExprItems[1], SUGAR kExpr_SetVariable(kctx, NULL, gma, TEXPR_NEW, requestClass->typeId, kArray_size(arrayExpr->cons) - 2));

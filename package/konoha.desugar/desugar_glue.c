@@ -551,7 +551,7 @@ static KMETHOD Stmt_newTypedCallExpr1(KonohaContext *kctx, KonohaStack *sfp)
 	ktype_t cid          = (ktype_t)sfp[2].intValue;
 	ksymbol_t methodName = (ksymbol_t)sfp[3].intValue;
 	kExpr *firstExpr     = sfp[4].asExpr;
-	kMethod *method = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), cid, methodName, 1);
+	kMethod *method = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), cid, methodName, 1, MethodMatch_CamelStyle);
 	if(method == NULL) {
 		KReturn(KNULL(Expr));
 	}
@@ -567,7 +567,7 @@ static KMETHOD Stmt_newTypedCallExpr2(KonohaContext *kctx, KonohaStack *sfp)
 	ksymbol_t methodName = (ksymbol_t)sfp[3].intValue;
 	kExpr *firstExpr     = sfp[4].asExpr;
 	kExpr *secondExpr    = sfp[5].asExpr;
-	kMethod *method = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), cid, methodName, 2);
+	kMethod *method = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), cid, methodName, 2, MethodMatch_CamelStyle);
 	if(method == NULL) {
 		KReturn(KNULL(Expr));
 	}

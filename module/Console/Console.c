@@ -149,7 +149,7 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 			KonohaClass *c = CT_(param->paramtypeItems[i].ty);
 			c = c->realtype(kctx, c, cThis);
 			Kwb_WriteValue(kctx, &wb, c, sfp + i + 1);
-			PLATAPI printf_i("%s=(%s) %s", SYM_t(SYM_UNMASK(param->paramtypeItems[i].fn)), CT_t(c), KLIB Kwb_top(kctx, &wb, 1));
+			PLATAPI printf_i("%s=(%s) %s", SYM_t(Symbol_Unmask(param->paramtypeItems[i].fn)), CT_t(c), KLIB Kwb_top(kctx, &wb, 1));
 			KLIB Kwb_Free(&wb);
 		}
 		PLATAPI printf_i(")\n");

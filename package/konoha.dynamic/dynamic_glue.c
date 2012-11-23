@@ -73,7 +73,7 @@ static KMETHOD Dynamic_(KonohaContext *kctx, KonohaStack *sfp)
 //	kString  *symbolString = kctx->esp[-1].asString;
 	kNameSpace *ns = sfp[K_NSIDX].asNameSpace;
 	DBG_ASSERT(IS_NameSpace(ns));
-	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, O_typeId(obj), symbol, argc);
+	kMethod *mtd = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, O_typeId(obj), symbol, argc, MethodMatch_CamelStyle);
 	if(mtd != NULL) {
 		if(kMethod_CheckMethodCallStack(kctx, sfp, mtd, argc)) {
 			KonohaRuntime_setesp(kctx, kctx->esp - 1);
