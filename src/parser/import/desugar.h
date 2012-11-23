@@ -701,7 +701,7 @@ static kExpr* TypeMethodCallExpr(KonohaContext *kctx, kExpr *expr, kMethod *mtd,
 		type = thisExpr->ty;
 	}
 	else if(kMethod_is(SmartReturn, mtd)) {
-		type = reqty;
+		type = reqty == TY_var ? ktype_var(kctx, Method_returnType(mtd), CT_(thisExpr->ty)) : reqty;
 	}
 	else {
 		type = ktype_var(kctx, Method_returnType(mtd), CT_(thisExpr->ty));
@@ -797,11 +797,11 @@ static kExpr *kStmtExpr_LookupMethod(KonohaContext *kctx, kStmt *stmt, kExpr *ex
 	}
 	if(mtd != NULL) {
 		if(kMethod_is(Overloaded, mtd)) {
-			DBG_P("found overloaded method %s.%s%s", Method_t(mtd));
+			//DBG_P("found overloaded method %s.%s%s", Method_t(mtd));
 			mtd = kStmt_LookupOverloadedMethod(kctx, stmt, expr, mtd, gma);
 		}
 		if(mtd != NULL) {
-			DBG_P("found resolved method %s.%s%s isOverloaded=%d", Method_t(mtd), kMethod_is(Overloaded, mtd));
+			//DBG_P("found resolved method %s.%s%s isOverloaded=%d", Method_t(mtd), kMethod_is(Overloaded, mtd));
 			return kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, reqty);
 		}
 	}
