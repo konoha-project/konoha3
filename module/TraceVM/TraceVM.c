@@ -75,12 +75,12 @@ static const DEFINE_OPSPEC OPDATA[] = {
 	{OPSPEC_(TRACE)},
 };
 
-static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeType type, VirtualCode *c, size_t i, VirtualCode *pc_start)
+static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeType type, VirtualCode *c, size_t i, VirtualCode *vcode_start)
 {
 	switch(type) {
 	case VMT_VOID: break;
 	case VMT_ADDR:
-		KLIB Kwb_printf(kctx, wb, " L%d", (int)((VirtualCode *)c->p[i] - pc_start));
+		KLIB Kwb_printf(kctx, wb, " L%d", (int)((VirtualCode *)c->p[i] - vcode_start));
 		break;
 	case VMT_R:
 		KLIB Kwb_printf(kctx, wb, " sfp[%d,r=%d]", (int)c->data[i]/2, (int)c->data[i]);
@@ -94,13 +94,13 @@ static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeT
 	}/*switch*/
 }
 
-static void DumpOpCode(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c, VirtualCode *pc_start)
+static void DumpOpCode(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c, VirtualCode *vcode_start)
 {
-	KLIB Kwb_printf(kctx, wb, "[L%d:%d] %s(%d)", (int)(c - pc_start), c->line, OPDATA[c->opcode].name, (int)c->opcode);
-	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg1, c, 0, pc_start);
-	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg2, c, 1, pc_start);
-	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg3, c, 2, pc_start);
-	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg4, c, 3, pc_start);
+	KLIB Kwb_printf(kctx, wb, "[L%d:%d] %s(%d)", (int)(c - vcode_start), c->line, OPDATA[c->opcode].name, (int)c->opcode);
+	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg1, c, 0, vcode_start);
+	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg2, c, 1, vcode_start);
+	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg3, c, 2, vcode_start);
+	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg4, c, 3, vcode_start);
 	KLIB Kwb_printf(kctx, wb, "\n");
 }
 
@@ -445,9 +445,10 @@ static void TraceVMDeleteVirtualMachine(KonohaContext *kctx)
 			size_t j;
 			for(j = 0; j < kArray_size(ns->methodList_OnList); j++) {
 				kMethod *mtd = ns->methodList_OnList->MethodItems[j];
-				if(IS_ByteCode(mtd->CodeObject)) {
-					TraceVMGiveOutCoverageLog(kctx, mtd->CodeObject->code);
-				}
+//              @CodeObject was Deprecated (use vcode_start to find virtual code pointer);
+//				if(IS_ByteCode(mtd->CodeObject)) {
+//					TraceVMGiveOutCoverageLog(kctx, mtd->CodeObject->code);
+//				}
 			}
 		}
 	}

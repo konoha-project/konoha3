@@ -66,7 +66,7 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObj
 		return NULL;
 	}
 	mtd = KLIB kNameSpace_GetGetterMethodNULL(kctx, ns, cid, symbol, TY_var);
-	if(mtd != NULL && Method_returnType(mtd) != ty) {
+	if(mtd != NULL && kMethod_GetReturnType(mtd) != ty) {
 		SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "differently defined name: %s", SYM_t(symbol));
 		return NULL;
 	}

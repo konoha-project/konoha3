@@ -81,12 +81,12 @@ static const DEFINE_OPSPEC OPDATA[] = {
 	OPDEFINE(OPSPEC)
 };
 
-static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeType type, VirtualCode *c, size_t i, VirtualCode *pc_start)
+static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeType type, VirtualCode *c, size_t i, VirtualCode *vcode_start)
 {
 	switch(type) {
 	case VMT_VOID: break;
 	case VMT_ADDR:
-		KLIB Kwb_printf(kctx, wb, " L%d", (int)((VirtualCode *)c->p[i] - pc_start));
+		KLIB Kwb_printf(kctx, wb, " L%d", (int)((VirtualCode *)c->p[i] - vcode_start));
 		break;
 	case VMT_UL: {
 		kfileline_t uline = (kfileline_t)c->data[i];
@@ -127,13 +127,13 @@ static void DumpOpArgument(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCodeT
 	}/*switch*/
 }
 
-static void WriteVirtualCode1(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c, VirtualCode *pc_start)
+static void WriteVirtualCode1(KonohaContext *kctx, KGrowingBuffer *wb, VirtualCode *c, VirtualCode *vcode_start)
 {
-	KLIB Kwb_printf(kctx, wb, "[L%d:%d] %s(%d)", (int)(c - pc_start), c->line, OPDATA[c->opcode].name, (int)c->opcode);
-	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg1, c, 0, pc_start);
-	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg2, c, 1, pc_start);
-	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg3, c, 2, pc_start);
-	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg4, c, 3, pc_start);
+	KLIB Kwb_printf(kctx, wb, "[L%d:%d] %s(%d)", (int)(c - vcode_start), c->line, OPDATA[c->opcode].name, (int)c->opcode);
+	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg1, c, 0, vcode_start);
+	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg2, c, 1, vcode_start);
+	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg3, c, 2, vcode_start);
+	DumpOpArgument(kctx, wb, OPDATA[c->opcode].arg4, c, 3, vcode_start);
 	KLIB Kwb_printf(kctx, wb, "\n");
 }
 
@@ -756,7 +756,7 @@ static void KBuilder_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt
 	 * expr->cons = [method, this, arg1, arg2, ...]
 	 **/
 	int i, a = builder->common.a;
-	int s = kMethod_is(Static, mtd) ? 2 : 1;
+	int s = kMethod_Is(Static, mtd) ? 2 : 1;
 	int espidx  = builder->common.espidx;
 	int thisidx = espidx + K_CALLDELTA;
 	int argc = CallExpr_getArgCount(expr);
@@ -769,9 +769,9 @@ static void KBuilder_VisitCallExpr(KonohaContext *kctx, KBuilder *builder, kStmt
 	builder->common.espidx = espidx;
 	builder->common.a = a;
 
-	if(kMethod_is(Final, mtd) || !kMethod_is(Virtual, mtd)) {
+	if(kMethod_Is(Final, mtd) || !kMethod_Is(Virtual, mtd)) {
 		ASM(NSET, NC_(thisidx-1), (intptr_t)mtd, CT_Method);
-		if(kMethod_is(Virtual, mtd)) {
+		if(kMethod_Is(Virtual, mtd)) {
 			// set namespace to enable method lookups
 			ASM(NSET, OC_(thisidx-2), (intptr_t)Stmt_ns(stmt), CT_NameSpace);
 		}
@@ -969,13 +969,17 @@ static void SetUpBootCode(void)
 		struct OPNCALL ncall = {OP_(NCALL)};
 		struct OPENTER enter = {OP_(ENTER)};
 		struct OPEXIT  exit  = {OP_(EXIT)};
-		memcpy(InitCode,   &thcode, sizeof(VirtualCode));
-		memcpy(InitCode+1, &ncall,  sizeof(VirtualCode));
-		memcpy(InitCode+2, &enter,  sizeof(VirtualCode));
-		memcpy(InitCode+3, &exit,   sizeof(VirtualCode));
+		memcpy(InitCode,   &thcode, sizeof(OPTHCODE));
+		memcpy(InitCode+1, &ncall,  sizeof(OPNCALL));
+		memcpy(InitCode+2, &enter,  sizeof(OPENTER));
+		memcpy(InitCode+3, &exit,   sizeof(OPEXIT));
 		VirtualCode *pc = KonohaVirtualMachine_Run(NULL, NULL, InitCode);
 		BOOTCODE_NCALL = pc;
 		BOOTCODE_ENTER = pc+1;
+//		struct VirtualCodeAPI **vapi = pc;  // check NULL
+//		DBG_ASSERT(vapi[-1] == NULL);
+//		vapi = pc + 1;
+//		DBG_ASSERT(vapi[-1] == NULL);
 	}
 }
 
@@ -1030,9 +1034,6 @@ kbool_t LoadMiniVMModule(KonohaFactory *factory, ModuleType type)
 	SetUpBootCode();
 	factory->VirtualMachineInfo            = &ModuleInfo;
 	factory->IsSupportedVirtualCode        = IsSupportedVirtualCode;
-//	factory->RunVirtualMachine             = KonohaVirtualMachine_Run;
-//	factory->DeleteVirtualMachine          = KonohaVirtualMachine_delete;
-//	factory->GetVirtualMachineMethodFunc   = GetVirtualMachineMethodFunc;
 	factory->GetDefaultBootCode            = GetDefaultBootCode;
 	factory->GetDefaultBuilderAPI          = GetDefaultBuilderAPI;
 	return true;

@@ -198,7 +198,7 @@ typedef struct OPENTER {
 #define OPEXEC_ENTER() do {\
 	(void)op;\
 	rbp[K_PCIDX2].pc = PC_NEXT(pc);\
-	pc = (rbp[K_MTDIDX2].calledMethod)->pc_start;\
+	pc = (rbp[K_MTDIDX2].calledMethod)->vcode_start;\
 	GOTO_PC(pc); \
 } while(0)
 

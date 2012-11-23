@@ -135,13 +135,13 @@ static void UI_ReportCaughtException(KonohaContext *kctx, const char *exceptionN
 		if(!CT_isUnbox(cThis)) {
 			cThis = O_ct(sfp[0].asObject);
 		}
-		if(!kMethod_is(Static, mtd)) {
+		if(!kMethod_Is(Static, mtd)) {
 			Kwb_WriteValue(kctx, &wb, cThis, sfp);
 			PLATAPI printf_i("this=(%s) %s, ", CT_t(cThis), KLIB Kwb_top(kctx, &wb, 1));
 			KLIB Kwb_Free(&wb);
 		}
 		unsigned i;
-		kParam *param = Method_param(mtd);
+		kParam *param = kMethod_GetParam(mtd);
 		for(i = 0; i < param->psize; i++) {
 			if(i > 0) {
 				PLATAPI printf_i(", ");

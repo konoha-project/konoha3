@@ -245,7 +245,7 @@ static KMETHOD Array_map(KonohaContext *kctx, KonohaStack *sfp)
 	kArray *a = sfp[0].asArray;
 	kFunc  *f = sfp[1].asFunc;
 	size_t asize = kArray_size(a);
-	ktype_t resolve_type = Method_returnType(f->mtd);  // FIXME
+	ktype_t resolve_type = kMethod_GetReturnType(f->mtd);  // FIXME
 	KonohaClass *CT_ArrayT0 = CT_p0(kctx, CT_Array, resolve_type);
 	kArrayVar *returnValue = (kArrayVar *)KLIB new_kObject(kctx, _GcStack, CT_ArrayT0, asize);
 
@@ -290,7 +290,7 @@ static KMETHOD Array_inject(KonohaContext *kctx, KonohaStack *sfp)
 	kArray *a = sfp[0].asArray;
 	kFunc  *f = sfp[1].asFunc;
 	size_t asize = kArray_size(a);
-	ktype_t resolve_type = Method_returnType(f->mtd);
+	ktype_t resolve_type = kMethod_GetReturnType(f->mtd);
 
 	size_t i;
 	if(kArray_isUnboxData(a)) {

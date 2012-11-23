@@ -532,7 +532,7 @@ static void JSBuilder_EmitMethodHeader(KonohaContext *kctx, KBuilder *builder, k
 	KonohaClass *class = CT_(mtd->typeId);
 	KGrowingBuffer wb;
 	KLIB Kwb_Init(&(kctx->stack->cwb), &wb);
-	kParam *params = Method_param(mtd);
+	kParam *params = kMethod_GetParam(mtd);
 	unsigned i;
 	if(mtd->typeId == TY_NameSpace) {
 		KLIB Kwb_printf(kctx, &wb, "%s%s = function(", MethodName_t(mtd->mn));
@@ -540,7 +540,7 @@ static void JSBuilder_EmitMethodHeader(KonohaContext *kctx, KBuilder *builder, k
 		KLIB Kwb_printf(kctx, &wb, "function %s(", CT_t(class));
 	}else{
 		compileAllDefinedMethods(kctx);
-		if(kMethod_is(Static, mtd)) {
+		if(kMethod_Is(Static, mtd)) {
 			KLIB Kwb_printf(kctx, &wb, "%s.%s%s = function(", CT_t(CT_(mtd->typeId)), MethodName_t(mtd->mn));
 		}else{
 			KLIB Kwb_printf(kctx, &wb, "%s.prototype.%s%s = function(", CT_t(CT_(mtd->typeId)), MethodName_t(mtd->mn));
@@ -605,7 +605,7 @@ static void JSBuilder_Init(KonohaContext *kctx, KBuilder *builder, kMethod *mtd)
 	KonohaClass *base  = CT_(class->superTypeId);
 	
 	if(mtd->mn != 0) {
-		KLIB kMethod_setFunc(kctx, mtd, NULL);
+		KLIB kMethod_SetFunc(kctx, mtd, NULL);
 		if(strcmp(SYM_t(mtd->mn), "new") == 0) {
 			isConstractor = true;
 		}

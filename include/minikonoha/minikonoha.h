@@ -1360,38 +1360,33 @@ static const char* MethodFlagData[] = {
 #define kMethod_DynamicCall          ((uintptr_t)(1<<21))
 
 #define kMethod_Warning              ((uintptr_t)(1<<22))
-
 #define kMethod_WeakCoercion         kMethod_Coercion|kMethod_Warning
 
-#define kMethod_is(P, MTD)            (TFLAG_is(uintptr_t, (MTD)->flag, kMethod_##P))
-#define kMethod_set(P, MTD, B)        TFLAG_set(uintptr_t, (MTD)->flag, kMethod_##P, B)
+#define kMethod_Is(P, MTD)            (TFLAG_is(uintptr_t, (MTD)->flag, kMethod_##P))
+#define kMethod_Set(P, MTD, B)        TFLAG_set(uintptr_t, (MTD)->flag, kMethod_##P, B)
 
-#define Method_isTransCast(mtd)    MN_isTOCID(mtd->mn)
-#define Method_isCast(mtd)         MN_isASCID(mtd->mn)
-
-#define Method_param(mtd)        kctx->share->paramList_OnGlobalConstList->ParamItems[mtd->paramid]
-#define Method_returnType(mtd)   ((Method_param(mtd))->rtype)
-#define Method_paramsize(mtd)    ((Method_param(mtd))->psize)
-#define Method_t(mtd)            TY_t((mtd)->typeId),  MethodName_t((mtd)->mn)
+#define kMethod_GetParam(mtd)        kctx->share->paramList_OnGlobalConstList->ParamItems[mtd->paramid]
+#define kMethod_GetReturnType(mtd)   ((kMethod_GetParam(mtd))->rtype)
+#define kMethod_ParamSize(mtd)       ((kMethod_GetParam(mtd))->psize)
+#define Method_t(mtd)                TY_t((mtd)->typeId),  MethodName_t((mtd)->mn)
 
 /* method data */
 #define DEND     (-1)
 
 #define KMETHOD    void  /*CC_FASTCALL_*/
-#define KMETHODCC  int  /*CC_FASTCALL_*/
 typedef KMETHOD   (*MethodFunc)(KonohaContext*, KonohaStack *);
-typedef KMETHOD   (*FastCallMethodFunc)(KonohaContext*, KonohaStack * _KFASTCALL);
-typedef KMETHODCC (*FmethodCallCC)(KonohaContext*, KonohaStack *, int, int, struct VirtualCode *);
+
+struct VirtualCodeAPI {
+	void (*FreeVirtualCode)(KonohaContext *kctx, struct VirtualCode *);
+	void (*WriteVirtualCode)(KonohaContext *kctx, KGrowingBuffer *, struct VirtualCode *);
+};
 
 struct kMethodVar {
 	KonohaObjectHeader     h;
+	MethodFunc              invokeMethodFunc;
 	union {
-		MethodFunc              invokeMethodFunc;
-		FastCallMethodFunc      invokeFastCallMethodFunc;
-	};
-	union {/* body*/
-		struct VirtualCode        *pc_start;
-		FmethodCallCC         callcc_1;
+		struct VirtualCode     *vcode_start;
+		struct VirtualCodeAPI   **virtualCodeApi_plus1;
 	};
 	uintptr_t         flag;
 	ktype_t           typeId;       kmethodn_t  mn;
@@ -1399,7 +1394,6 @@ struct kMethodVar {
 	kshort_t          delta;        kpackageId_t packageId;
 	kToken           *SourceToken;
 	union {
-		const struct kByteCodeVar    *CodeObject;
 		kNameSpace   *LazyCompileNameSpace;       // lazy compilation
 	};
 	uintptr_t         serialNumber;
@@ -1670,8 +1664,8 @@ struct KonohaLibVar {
 
 	kparamId_t      (*Kparamdom)(KonohaContext*, kushort_t, const kparamtype_t *);
 	kMethodVar*     (*new_kMethod)(KonohaContext*, kArray *gcstack, uintptr_t, ktype_t, kmethodn_t, MethodFunc);
-	kParam*         (*kMethod_setParam)(KonohaContext*, kMethod *, ktype_t, kushort_t, const kparamtype_t *);
-	void            (*kMethod_setFunc)(KonohaContext*, kMethod*, MethodFunc);
+	kParam*         (*kMethod_SetParam)(KonohaContext*, kMethod *, ktype_t, kushort_t, const kparamtype_t *);
+	void            (*kMethod_SetFunc)(KonohaContext*, kMethod*, MethodFunc);
 	void            (*kMethod_GenCode)(KonohaContext*, kMethod*, kBlock *, int options);
 	intptr_t        (*kMethod_indexOfField)(kMethod *);
 
@@ -1758,7 +1752,7 @@ struct KonohaLibVar {
 
 #define kArray_size(A)            (((A)->bytesize)/sizeof(void *))
 #define kArray_SetSize(A, N)      ((kArrayVar *)A)->bytesize = ((N) * sizeof(void *))
-#define new_kParam(CTX, R, PSIZE, P)       (KLIB kMethod_setParam(CTX, NULL, R, PSIZE, P))
+#define new_kParam(CTX, R, PSIZE, P)       (KLIB kMethod_SetParam(CTX, NULL, R, PSIZE, P))
 
 #define KRequirePackage(NAME, TRACE)       KLIB kNameSpace_RequirePackage(kctx, NAME, TRACE)
 #define KImportPackage(NS, NAME, TRACE)    KLIB kNameSpace_ImportPackage(kctx, NS, NAME, TRACE)

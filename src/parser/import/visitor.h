@@ -93,7 +93,7 @@ static void kMethod_GenCode(KonohaContext *kctx, kMethod *mtd, kBlock *block, in
 	struct VirtualCode *vcode = ns->builderApi->GenerateVirtualCode(kctx, mtd, block, option);
 	MethodFunc func = ns->builderApi->GenerateMethodFunc(kctx, vcode);
 	((kMethodVar *)mtd)->invokeMethodFunc = func;
-	((kMethodVar *)mtd)->pc_start = vcode;
+	((kMethodVar *)mtd)->vcode_start = vcode;
 }
 
 static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack *sfp)
@@ -101,10 +101,10 @@ static KMETHOD MethodFunc_invokeAbstractMethod(KonohaContext *kctx, KonohaStack 
 	KReturnUnboxValue(0);
 }
 
-static void kMethod_setFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
+static void kMethod_SetFunc(KonohaContext *kctx, kMethod *mtd, MethodFunc func)
 {
 	func = (func != NULL) ? func : MethodFunc_invokeAbstractMethod;
 	((kMethodVar *)mtd)->invokeMethodFunc = func;
-	((kMethodVar *)mtd)->pc_start = PLATAPI GetDefaultBootCode();
+	((kMethodVar *)mtd)->vcode_start = PLATAPI GetDefaultBootCode();
 }
 

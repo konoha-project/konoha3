@@ -482,7 +482,7 @@ static kExpr* kStmtExpr_ToSetter(KonohaContext *kctx, kStmt *stmt, kExpr *expr, 
 	kMethod *mtd = expr->cons->MethodItems[0];
 	DBG_ASSERT(MN_isGETTER(mtd->mn));
 	ktype_t cid = mtd->typeId;
-	kParam *pa = Method_param(mtd);
+	kParam *pa = kMethod_GetParam(mtd);
 	int i, psize = pa->psize + 1;
 	kparamtype_t p[psize];
 	for(i = 0; i < pa->psize; i++) {
@@ -596,7 +596,7 @@ static KMETHOD TypeCheck_Block(KonohaContext *kctx, KonohaStack *sfp)
 
 static kExpr* new_GetterExpr(KonohaContext *kctx, kToken *tkU, kMethod *mtd, kExpr *expr)
 {
-	kExprVar *expr1 = (kExprVar *)new_TypedConsExpr(kctx, TEXPR_CALL, Method_returnType(mtd), 2, mtd, expr);
+	kExprVar *expr1 = (kExprVar *)new_TypedConsExpr(kctx, TEXPR_CALL, kMethod_GetReturnType(mtd), 2, mtd, expr);
 	//KFieldSet(expr1->tk, tkU); // for uline
 	return (kExpr *)expr1;
 }
@@ -640,7 +640,7 @@ static kExpr* kStmt_TypeCheckVariableNULL(KonohaContext *kctx, kStmt *stmt, kExp
 	}
 	kMethod *mtd = kNameSpace_GetNameSpaceFuncNULL(kctx, ns, symbol, reqty);  // finding function
 	if(mtd != NULL) {
-		kParam *pa = Method_param(mtd);
+		kParam *pa = kMethod_GetParam(mtd);
 		KonohaClass *ct = KLIB KonohaClass_Generics(kctx, CT_Func, pa->rtype, pa->psize, (kparamtype_t *)pa->paramtypeItems);
 		kFuncVar *fo = (kFuncVar *)KLIB new_kObject(kctx, OnGcStack, ct, (uintptr_t)mtd);
 		KFieldSet(fo, fo->self, UPCAST(ns));
@@ -693,7 +693,7 @@ static kMethod *kStmt_LookupOverloadedMethod(KonohaContext *kctx, kStmt *stmt, k
 	KonohaClass *thisClass = CT_(expr->cons->ExprItems[1]->ty);
 	size_t i, psize = kArray_size(expr->cons) - 2;
 	kparamtype_t *p = ALLOCA(kparamtype_t, psize);
-	kParam *pa = Method_param(mtd);
+	kParam *pa = kMethod_GetParam(mtd);
 	for(i = 0; i < psize; i++) {
 		size_t n = i + 2;
 		ktype_t paramType = (i < pa->psize) ? ktype_var(kctx, pa->paramtypeItems[i].ty, thisClass) : TY_var;
@@ -717,11 +717,11 @@ static kExpr* TypeMethodCallExpr(KonohaContext *kctx, kExpr *expr, kMethod *mtd,
 	if(thisExpr->build == TEXPR_NEW) {
 		type = thisExpr->ty;
 	}
-	else if(kMethod_is(SmartReturn, mtd)) {
-		type = reqty == TY_var ? ktype_var(kctx, Method_returnType(mtd), CT_(thisExpr->ty)) : reqty;
+	else if(kMethod_Is(SmartReturn, mtd)) {
+		type = reqty == TY_var ? ktype_var(kctx, kMethod_GetReturnType(mtd), CT_(thisExpr->ty)) : reqty;
 	}
 	else {
-		type = ktype_var(kctx, Method_returnType(mtd), CT_(thisExpr->ty));
+		type = ktype_var(kctx, kMethod_GetReturnType(mtd), CT_(thisExpr->ty));
 	}
 	kExpr_typed(expr, CALL, type);
 	return expr;
@@ -744,7 +744,7 @@ static kExpr *kStmtkExpr_TypeCheckCallParam(KonohaContext *kctx, kStmt *stmt, kE
 	kExpr *thisExpr = BoxThisExpr(kctx, stmt, gma, expr, mtd);
 	KonohaClass *thisClass = CT_(thisExpr->ty);
 	kbool_t isConst = kExpr_IsConstValue(thisExpr);
-	kParam *pa = Method_param(mtd);
+	kParam *pa = kMethod_GetParam(mtd);
 	DBG_ASSERT(pa->psize +2 <= kArray_size(expr->cons));
 	size_t i;
 	for(i = 0; i < pa->psize; i++) {
@@ -758,7 +758,7 @@ static kExpr *kStmtkExpr_TypeCheckCallParam(KonohaContext *kctx, kStmt *stmt, kE
 		if(!kExpr_IsConstValue(texpr)) isConst = 0;
 	}
 	expr = TypeMethodCallExpr(kctx, expr, mtd, reqty);
-	if(isConst && kMethod_is(Const, mtd)) {
+	if(isConst && kMethod_Is(Const, mtd)) {
 		ktype_t rtype = ktype_var(kctx, pa->rtype, thisClass);
 		return kStmtExpr_ToConstValue(kctx, stmt, expr, expr->cons, rtype);
 	}
@@ -768,7 +768,7 @@ static kExpr *kStmtkExpr_TypeCheckCallParam(KonohaContext *kctx, kStmt *stmt, kE
 static kExpr* TypeCheckDynamicCallParams(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kMethod *mtd, kGamma *gma, kString *name, kmethodn_t mn, ktype_t reqty)
 {
 	size_t i;
-	kParam *pa = Method_param(mtd);
+	kParam *pa = kMethod_GetParam(mtd);
 	ktype_t ptype = (pa->psize == 0) ? TY_Object : pa->paramtypeItems[0].ty;
 	for(i = 2; i < kArray_size(expr->cons); i++) {
 		kExpr *texpr = SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, i, gma, ptype, 0);
@@ -813,12 +813,12 @@ static kExpr *kStmtExpr_LookupMethod(KonohaContext *kctx, kStmt *stmt, kExpr *ex
 		kStmtToken_Message(kctx, stmt, tkMN, ErrTag, "undefined method: %s.%s%s", TY_t(this_cid), PSYM_t(tkMN->resolvedSymbol));
 	}
 	if(mtd != NULL) {
-		if(kMethod_is(Overloaded, mtd)) {
+		if(kMethod_Is(Overloaded, mtd)) {
 			//DBG_P("found overloaded method %s.%s%s", Method_t(mtd));
 			mtd = kStmt_LookupOverloadedMethod(kctx, stmt, expr, mtd, gma);
 		}
 		if(mtd != NULL) {
-			//DBG_P("found resolved method %s.%s%s isOverloaded=%d", Method_t(mtd), kMethod_is(Overloaded, mtd));
+			//DBG_P("found resolved method %s.%s%s isOverloaded=%d", Method_t(mtd), kMethod_Is(Overloaded, mtd));
 			return kStmtkExpr_TypeCheckCallParam(kctx, stmt, expr, mtd, gma, reqty);
 		}
 	}
@@ -871,7 +871,7 @@ static kMethod* kExpr_LookupFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kE
 			}
 		}
 		mtd = kNameSpace_GetGetterMethodNULL(kctx, ns, genv->this_cid, fsymbol, TY_var);
-		if(mtd != NULL && TY_isFunc(Method_returnType(mtd))) {
+		if(mtd != NULL && TY_isFunc(kMethod_GetReturnType(mtd))) {
 			KFieldSet(exprN->cons, exprN->cons->ExprItems[0], new_GetterExpr(kctx, termToken, mtd, new_VariableExpr(kctx, gma, TEXPR_LOCAL, genv->this_cid, 0)));
 			return NULL;
 		}
@@ -882,7 +882,7 @@ static kMethod* kExpr_LookupFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kE
 			ktype_t cid = (ktype_t)kvs->unboxValue;
 			ksymbol_t alias = (ksymbol_t)(kvs->unboxValue >> (sizeof(ktype_t) * 8));
 			kMethod *mtd = kNameSpace_GetMethodByParamSizeNULL(kctx, ns, cid, alias, paramsize);
-			if(mtd != NULL && kMethod_is(Static, mtd)) {
+			if(mtd != NULL && kMethod_Is(Static, mtd)) {
 				KFieldSet(exprN->cons, exprN->cons->ExprItems[1], new_ConstValueExpr(kctx, cid, KLIB Knull(kctx, CT_(cid))));
 				return mtd;
 			}
@@ -898,7 +898,7 @@ static kMethod* kExpr_LookupFuncOrMethod(KonohaContext *kctx, kNameSpace *ns, kE
 	if((Gamma_isTopLevel(gma) || kNameSpace_IsAllowed(ImplicitGlobalVariable,ns)) && ns->globalObjectNULL_OnList != NULL) {
 		ktype_t cid = O_typeId(ns->globalObjectNULL_OnList);
 		kMethod *mtd = kNameSpace_GetGetterMethodNULL(kctx, ns, cid, fsymbol, TY_var);
-		if(mtd != NULL && TY_isFunc(Method_returnType(mtd))) {
+		if(mtd != NULL && TY_isFunc(kMethod_GetReturnType(mtd))) {
 			KFieldSet(exprN->cons, exprN->cons->ExprItems[0], new_GetterExpr(kctx, termToken, mtd, new_ConstValueExpr(kctx, cid, ns->globalObjectNULL_OnList)));
 			return NULL;
 		}
@@ -915,7 +915,7 @@ static KMETHOD TypeCheck_FuncStyleCall(KonohaContext *kctx, KonohaStack *sfp)
 	if(Expr_isSymbolTerm(kExpr_at(expr, 0))) {
 		kMethod *mtd = kExpr_LookupFuncOrMethod(kctx, Stmt_ns(stmt), expr, gma, reqty);
 		if(mtd != NULL) {
-			if(kMethod_is(Overloaded, mtd)) {
+			if(kMethod_Is(Overloaded, mtd)) {
 				DBG_P("overloaded found %s.%s%s", Method_t(mtd));
 				mtd = kStmt_LookupOverloadedMethod(kctx, stmt, expr, mtd, gma);
 			}
@@ -1040,7 +1040,7 @@ static KMETHOD Statement_return(KonohaContext *kctx, KonohaStack *sfp)
 {
 	VAR_Statement(stmt, gma);
 	kbool_t r = 1;
-	ktype_t rtype = Method_returnType(gma->genv->currentWorkingMethod);
+	ktype_t rtype = kMethod_GetReturnType(gma->genv->currentWorkingMethod);
 	kStmt_typed(stmt, RETURN);
 	if(rtype != TY_void) {
 		r = kStmt_TypeCheckByName(kctx, stmt, KW_ExprPattern, gma, rtype, 0);
@@ -1144,13 +1144,13 @@ static KMETHOD MethodFunc_LazyCompilation(KonohaContext *kctx, KonohaStack *sfp)
 	mtd->invokeMethodFunc(kctx, sfp); // call again;
 }
 
-static void kMethod_setLazyCompilation(KonohaContext *kctx, kMethodVar *mtd, kStmt *stmt, kNameSpace *ns)
+static void kMethod_SetLazyCompilation(KonohaContext *kctx, kMethodVar *mtd, kStmt *stmt, kNameSpace *ns)
 {
 	kToken *tcode = SUGAR kStmt_GetToken(kctx, stmt, KW_BlockPattern, NULL);
 	if(tcode != NULL && tcode->resolvedSyntaxInfo->keyword == TokenType_CODE) {
 		KFieldSet(mtd, mtd->SourceToken, tcode);
 		KFieldSet(mtd, mtd->LazyCompileNameSpace, ns);
-		KLIB kMethod_setFunc(kctx, mtd, MethodFunc_LazyCompilation);
+		KLIB kMethod_SetFunc(kctx, mtd, MethodFunc_LazyCompilation);
 		KLIB kArray_Add(kctx, GetSugarContext(kctx)->definedMethodList, mtd);
 	}
 }
@@ -1286,10 +1286,10 @@ static KMETHOD Statement_MethodDecl(KonohaContext *kctx, KonohaStack *sfp)
 	if(pa != NULL) {  // if pa is NULL, error is printed out.
 		INIT_GCSTACK();
 		kMethodVar *mtd = (kMethodVar *)KLIB new_kMethod(kctx, _GcStack, flag, typeId, mn, NULL);
-		KLIB kMethod_setParam(kctx, mtd, pa->rtype, pa->psize, (kparamtype_t *)pa->paramtypeItems);
+		KLIB kMethod_SetParam(kctx, mtd, pa->rtype, pa->psize, (kparamtype_t *)pa->paramtypeItems);
 		KMakeTrace(trace, sfp);
 		if(kNameSpace_AddMethod(kctx, ns, mtd, trace)) {
-			kMethod_setLazyCompilation(kctx, mtd, stmt, ns);
+			kMethod_SetLazyCompilation(kctx, mtd, stmt, ns);
 		}
 		RESET_GCSTACK();
 	}

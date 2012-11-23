@@ -153,7 +153,7 @@ static kExpr *kExpr_TypeCheck(KonohaContext *kctx, kStmt *stmt, kExpr *expr, kGa
 		}
 		kMethod *mtd = kNameSpace_GetCoercionMethodNULL(kctx, ns, texpr->ty, reqty);
 		if(mtd != NULL) {
-			if(kMethod_is(Coercion, mtd) || FLAG_is(pol, TypeCheckPolicy_COERCION)) {
+			if(kMethod_Is(Coercion, mtd) || FLAG_is(pol, TypeCheckPolicy_COERCION)) {
 				return new_TypedCallExpr(kctx, stmt, gma, reqty, mtd, 1, texpr);
 			}
 			if(kNameSpace_IsAllowed(ImplicitCoercion, ns)) {
@@ -309,7 +309,7 @@ static void kGamma_InitParam(KonohaContext *kctx, GammaAllocaData *genv, kParam 
 		genv->localScope.varItems[i+1].fn = pa->paramtypeItems[i].fn;
 		genv->localScope.varItems[i+1].ty = (callparam == NULL) ? pa->paramtypeItems[i].ty : callparam[i].ty;
 	}
-	if(!kMethod_is(Static, genv->currentWorkingMethod)) {
+	if(!kMethod_Is(Static, genv->currentWorkingMethod)) {
 		genv->localScope.varItems[0].fn = FN_this;
 		genv->localScope.varItems[0].ty = genv->this_cid;
 	}
@@ -319,7 +319,7 @@ static void kGamma_InitParam(KonohaContext *kctx, GammaAllocaData *genv, kParam 
 static kMethod *kMethod_Compile(KonohaContext *kctx, kMethod *mtd, kparamtype_t *callparamNULL, kNameSpace *ns, kString *text, kfileline_t uline, int options)
 {
 	INIT_GCSTACK();
-	kParam *param = Method_param(mtd);
+	kParam *param = kMethod_GetParam(mtd);
 	if(callparamNULL != NULL) {
 		//DynamicComplie();
 	}
@@ -409,7 +409,7 @@ static kstatus_t kBlock_EvalAtTopLevel(KonohaContext *kctx, kBlock *bk, kMethod 
 	newgma.localScope.allocsize = 0;
 
 	GAMMA_PUSH(gma, &newgma);
-	kGamma_InitIt(kctx, &newgma, Method_param(mtd));
+	kGamma_InitIt(kctx, &newgma, kMethod_GetParam(mtd));
 	kBlock_TypeCheckAll(kctx, bk, gma);
 	GAMMA_POP(gma, &newgma);
 
@@ -432,7 +432,7 @@ static kstatus_t kBlock_EvalAtTopLevel(KonohaContext *kctx, kBlock *bk, kMethod 
 				DBG_ASSERT(expr != NULL);
 				if(expr->build == TEXPR_CALL) {  // Check NameSpace method
 					kMethod *callMethod = expr->cons->MethodItems[0];
-					if(callMethod->typeId == TY_NameSpace && kMethod_is(Public, callMethod) && !kMethod_is(Static, callMethod)) {
+					if(callMethod->typeId == TY_NameSpace && kMethod_Is(Public, callMethod) && !kMethod_Is(Static, callMethod)) {
 						isTryEval = true;
 						break;
 					}
@@ -477,7 +477,7 @@ static kstatus_t TokenSeq_Eval(KonohaContext *kctx, TokenSeq *source, KTraceInfo
 	kstatus_t status = K_CONTINUE;
 	INIT_GCSTACK();
 	kMethod *mtd = KLIB new_kMethod(kctx, _GcStack, kMethod_Static, 0, 0, NULL);
-	KLIB kMethod_setParam(kctx, mtd, TY_Object, 0, NULL);
+	KLIB kMethod_SetParam(kctx, mtd, TY_Object, 0, NULL);
 	kBlock *singleBlock = new_(Block, source->ns, _GcStack);
 	TokenSeq tokens = {source->ns, source->tokenList};
 

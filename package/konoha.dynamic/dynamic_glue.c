@@ -49,7 +49,7 @@ struct _kDynamic {
 static kbool_t kMethod_CheckMethodCallStack(KonohaContext *kctx, KonohaStack *sfp, kMethod *mtd, int argc)
 {
 	int i;
-	kParam *param = Method_param(mtd);
+	kParam *param = kMethod_GetParam(mtd);
 	for(i = 1; i <= argc; i++) {
 		KonohaClass *paramClass = O_ct(sfp[i].asObject);
 		ktype_t ptype = param->paramtypeItems[i-1].ty;

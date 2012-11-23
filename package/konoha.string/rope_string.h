@@ -369,7 +369,7 @@ static kbool_t LoadRopeMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInfo *t
 	int FN_s = FN_("s");
 	kMethod *concat = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, ns, TY_String, MN_("+"), 1);
 	if(concat != NULL) {
-		KLIB kMethod_setFunc(kctx, concat, Rope_opADD);
+		KLIB kMethod_SetFunc(kctx, concat, Rope_opADD);
 	} else {
 		KDEFINE_METHOD MethodData[] = {
 			_Public|_Const|_Im, _F(Rope_opADD), TY_String, TY_String, MN_("+"), 1, TY_String, FN_s,

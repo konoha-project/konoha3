@@ -76,8 +76,8 @@
 //		const char *file = FileId_t(uline);
 //		KLIB Kwb_printf(kctx, &wb, "(%s:%d) %s.%s%s" , PLATAPI shortFilePath(file), (kushort_t)uline, Method_t(mtd));
 //	}
-////	int i = 0, psize = Method_paramsize(mtd);
-////	kParam *pa = Method_param(mtd);
+////	int i = 0, psize = kMethod_ParamSize(mtd);
+////	kParam *pa = kMethod_GetParam(mtd);
 ////	KonohaClass *thisClass = O_cid(sfp[0]);
 ////	for(i = 0; i < psize; i++) {
 ////		pa->paramtypeItems[0].ty;

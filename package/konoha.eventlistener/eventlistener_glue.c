@@ -432,7 +432,7 @@ static void enqueueEventToGlobalQueue(KonohaContext *kctx, RawEvent rawEvent)
 {
 	kEvent *ev = (kEvent *)KLIB new_kObject(kctx, OnStack, CT_Event, 0);
 	ev->j = (json_t *)rawEvent;
-	ktype_t resolve_type = Method_returnType(KonohaContext_getEventContext(kctx)->enqFuncNULL->mtd);
+	ktype_t resolve_type = kMethod_GetReturnType(KonohaContext_getEventContext(kctx)->enqFuncNULL->mtd);
 	BEGIN_LOCAL(lsfp, K_CALLDELTA+1);
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+0].asObject, K_NULL);
 	KUnsafeFieldSet(lsfp[K_CALLDELTA+1].asObject, (kObject *)ev);

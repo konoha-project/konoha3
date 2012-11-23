@@ -564,14 +564,14 @@ static KMETHOD Method_getCid(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Method_getParamSize(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].asMethod;
-	KReturnUnboxValue(Method_param(mtd)->psize);
+	KReturnUnboxValue(kMethod_GetParam(mtd)->psize);
 }
 
 //## Param Method.getParam(int n);
 static KMETHOD Method_getParam(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].asMethod;
-	kParam *pa = Method_param(mtd);
+	kParam *pa = kMethod_GetParam(mtd);
 	KReturn(pa);
 }
 
@@ -588,7 +588,7 @@ static KMETHOD Method_getReturnType(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].asMethod;
 	assert(IS_Method(mtd));
-	KReturnUnboxValue(Method_param(mtd)->rtype);
+	KReturnUnboxValue(kMethod_GetParam(mtd)->rtype);
 }
 
 //## String mtd.getFname();
@@ -623,7 +623,7 @@ static KMETHOD System_getNULL(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Method_isStatic_(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].asMethod;
-	kbool_t b = kMethod_is(Static, mtd);
+	kbool_t b = kMethod_Is(Static, mtd);
 	KReturnUnboxValue(b);
 }
 
@@ -631,7 +631,7 @@ static KMETHOD Method_isStatic_(KonohaContext *kctx, KonohaStack *sfp)
 static KMETHOD Method_isVirtual_(KonohaContext *kctx, KonohaStack *sfp)
 {
 	kMethod *mtd = sfp[0].asMethod;
-	kbool_t b = kMethod_is(Virtual, mtd);
+	kbool_t b = kMethod_Is(Virtual, mtd);
 	KReturnUnboxValue(b);
 }
 

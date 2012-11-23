@@ -132,7 +132,7 @@ void MODSUGAR_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	l->Konoha_LoadScript = Konoha_LoadScript;
 	l->Konoha_Eval       = Konoha_Eval;
 	l->kMethod_GenCode   = kMethod_GenCode;
-	l->kMethod_setFunc   = kMethod_setFunc;
+	l->kMethod_SetFunc   = kMethod_SetFunc;
 
 	KDEFINE_CLASS defSymbol = {0};
 	defSymbol.structname = "Symbol";
@@ -291,7 +291,7 @@ static void kNameSpace_SetStaticFunction(KonohaContext *kctx, kNameSpace *ns, kA
 	size_t i;
 	for(i = 0; i < kArray_size(list); i++) {
 		kMethod *mtd = list->MethodItems[i];
-		if(kMethod_is(Static, mtd) && mtd->typeId == cid) {
+		if(kMethod_Is(Static, mtd) && mtd->typeId == cid) {
 			uintptr_t mtdinfo = ((uintptr_t)cid | (((uintptr_t)mtd->mn) << (sizeof(ktype_t) * 8)));
 			KLIB kNameSpace_SetConstData(kctx, ns, mtd->mn, VirtualType_StaticMethod, mtdinfo, false/*isOverride*/, trace);
 		}

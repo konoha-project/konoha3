@@ -61,7 +61,7 @@ static kMethod *new_FieldGetter(KonohaContext *kctx, kArray *gcstack, ktype_t ci
 	kmethodn_t mn = MN_toGETTER(sym);
 	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_UnboxFieldGetter : MethodFunc_ObjectFieldGetter;
 	kMethod *mtd = KLIB new_kMethod(kctx, gcstack, kMethod_Public|kMethod_Immutable, cid, mn, f);
-	KLIB kMethod_setParam(kctx, mtd, ty, 0, NULL);
+	KLIB kMethod_SetParam(kctx, mtd, ty, 0, NULL);
 	((kMethodVar *)mtd)->delta = idx;  // FIXME
 	return mtd;
 }
@@ -72,7 +72,7 @@ static kMethod *new_FieldSetter(KonohaContext *kctx, kArray *gcstack, ktype_t ci
 	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_UnboxFieldSetter : MethodFunc_ObjectFieldSetter;
 	kparamtype_t p = {ty, FN_("x")};
 	kMethod *mtd = KLIB new_kMethod(kctx, gcstack, kMethod_Public, cid, mn, f);
-	KLIB kMethod_setParam(kctx, mtd, ty, 1, &p);
+	KLIB kMethod_SetParam(kctx, mtd, ty, 1, &p);
 	((kMethodVar *)mtd)->delta = idx;   // FIXME
 	return mtd;
 }
@@ -112,7 +112,7 @@ static KMETHOD MethodFunc_UnboxPrototypeSetter(KonohaContext *kctx, KonohaStack 
 {
 	kMethod *mtd = sfp[K_MTDIDX].calledMethod;
 	ksymbol_t key = (ksymbol_t)mtd->delta;
-	kParam *pa = Method_param(mtd);
+	kParam *pa = kMethod_GetParam(mtd);
 	KLIB kObject_setUnboxValue(kctx, sfp[0].asObject, key, pa->paramtypeItems[0].ty, sfp[1].unboxValue);
 	KReturnUnboxValue(sfp[1].unboxValue);
 }
@@ -122,7 +122,7 @@ static kMethod *new_PrototypeGetter(KonohaContext *kctx, kArray *gcstack, ktype_
 	kmethodn_t mn = MN_toGETTER(sym);
 	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_UnboxPrototypeGetter : MethodFunc_ObjectPrototypeGetter;
 	kMethod *mtd = KLIB new_kMethod(kctx, gcstack, kMethod_Public|kMethod_Immutable, cid, mn, f);
-	KLIB kMethod_setParam(kctx, mtd, ty, 0, NULL);
+	KLIB kMethod_SetParam(kctx, mtd, ty, 0, NULL);
 	((kMethodVar *)mtd)->delta = sym;
 	return mtd;
 }
@@ -133,7 +133,7 @@ static kMethod *new_PrototypeSetter(KonohaContext *kctx, kArray *gcstack, ktype_
 	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_UnboxPrototypeSetter : MethodFunc_ObjectPrototypeSetter;
 	kparamtype_t p = {ty, FN_("x")};
 	kMethod *mtd = KLIB new_kMethod(kctx, gcstack, kMethod_Public, cid, mn, f);
-	KLIB kMethod_setParam(kctx, mtd, ty, 1, &p);
+	KLIB kMethod_SetParam(kctx, mtd, ty, 1, &p);
 	((kMethodVar *)mtd)->delta = sym;
 	return mtd;
 }

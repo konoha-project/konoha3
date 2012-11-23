@@ -759,11 +759,6 @@ struct KBuilderAPI2 {
 	OP(StackTopExpr)
 
 
-struct VirtualCodeAPI {
-	void (*FreeVirtualCode)(KonohaContext *kctx, struct VirtualCode *);
-	void (*WriteVirtualCode)(KonohaContext *kctx, KGrowingBuffer *, struct VirtualCode *);
-};
-
 /* ------------------------------------------------------------------------ */
 
 static inline void kToken_setTypeId(KonohaContext *kctx, kToken *tk, kNameSpace *ns, ktype_t type)

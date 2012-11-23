@@ -602,7 +602,7 @@ static kbool_t MethodMatch_Func(KonohaContext *kctx, kMethod *mtd, MethodMatch *
 
 static kbool_t MethodMatch_ParamSize(KonohaContext *kctx, kMethod *mtd, MethodMatch *m)
 {
-	kParam *param = Method_param(mtd);
+	kParam *param = kMethod_GetParam(mtd);
 	if(param->psize == m->paramsize) {
 		if(m->foundMethodNULL != NULL) {
 			if(m->foundMethodNULL->serialNumber < mtd->serialNumber) return true;
@@ -616,7 +616,7 @@ static kbool_t MethodMatch_ParamSize(KonohaContext *kctx, kMethod *mtd, MethodMa
 
 static kbool_t MethodMatch_Param0(KonohaContext *kctx, kMethod *mtd, MethodMatch *m)
 {
-	kParam *param = Method_param(mtd);
+	kParam *param = kMethod_GetParam(mtd);
 	if(param->psize == 0) {
 		m->foundMethodNULL = mtd;
 		m->isBreak = true;
@@ -657,7 +657,7 @@ static kbool_t MethodMatch_Signature(KonohaContext *kctx, kMethod *mtd, MethodMa
 		return true;
 	}
 	if(m->param != NULL && m->foundMethodNULL == NULL) {
-		kParam *param = Method_param(mtd);
+		kParam *param = kMethod_GetParam(mtd);
 		if(param->psize == m->paramsize) {
 			kushort_t i;
 			for(i = 0; i < m->paramsize; i++) {
@@ -666,7 +666,7 @@ static kbool_t MethodMatch_Signature(KonohaContext *kctx, kMethod *mtd, MethodMa
 						continue;
 					}
 					kMethod *castMethod = kNameSpace_GetCoercionMethodNULL(kctx, m->ns, m->param[i].ty, param->paramtypeItems[i].ty);
-					if(castMethod != NULL && (kMethod_is(Coercion, castMethod) || FN_isCOERCION(param->paramtypeItems[i].fn))) {
+					if(castMethod != NULL && (kMethod_Is(Coercion, castMethod) || FN_isCOERCION(param->paramtypeItems[i].fn))) {
 						continue;
 					}
 					return false;
@@ -838,12 +838,12 @@ static kbool_t kNameSpace_AddMethod(KonohaContext *kctx, kNameSpace *ns, kMethod
 		TRACE_ReportScriptMessage(kctx, trace, DebugTag, "@%s loading method %s.%s%s", PackageId_t(ns->packageId), Method_t(mtd));
 	}
 	if(CT_is(Final, ct)) {
-		kMethod_set(Final, mtd, true);
+		kMethod_Set(Final, mtd, true);
 	}
 	kMethod *foundMethod = kNameSpace_GetMethodBySignatureNULL(kctx, ns, ct->typeId, mtd->mn, mtd->paramdom, 0, NULL);
 	if(foundMethod != NULL) {  // same signature
 		if(foundMethod->typeId == mtd->typeId) {
-			if(kMethod_is(Override, mtd)) {
+			if(kMethod_Is(Override, mtd)) {
 				TRACE_ReportScriptMessage(kctx, trace, DebugTag, "@%s overriding method %s.%s%s on %s", PackageId_t(ns->packageId), Method_t(mtd), PackageId_t(foundMethod->packageId));
 				kMethod_ReplaceWith(kctx, (kMethodVar *)foundMethod, mtd);
 			}
@@ -853,9 +853,9 @@ static kbool_t kNameSpace_AddMethod(KonohaContext *kctx, kNameSpace *ns, kMethod
 			return false;
 		}
 		else {
-			if(!kMethod_is(Final, foundMethod)) {
+			if(!kMethod_Is(Final, foundMethod)) {
 				TRACE_ReportScriptMessage(kctx, trace, DebugTag, "@%s overriding method %s.%s%s on %s.%s%s", PackageId_t(ns->packageId), Method_t(mtd), Method_t(foundMethod));
-				kMethod_set(Virtual, ((kMethodVar *)foundMethod), true);
+				kMethod_Set(Virtual, ((kMethodVar *)foundMethod), true);
 			}
 			else {
 				TRACE_ReportScriptMessage(kctx, trace, ErrTag, "final method: %s.%s%s", Method_t(foundMethod));
@@ -864,13 +864,13 @@ static kbool_t kNameSpace_AddMethod(KonohaContext *kctx, kNameSpace *ns, kMethod
 		}
 	}
 	else {
-		foundMethod = kNameSpace_GetMethodToCheckOverloadNULL(kctx, ns, ct->typeId, mtd->mn, Method_paramsize(mtd));
+		foundMethod = kNameSpace_GetMethodToCheckOverloadNULL(kctx, ns, ct->typeId, mtd->mn, kMethod_ParamSize(mtd));
 		if(foundMethod != NULL && foundMethod->mn == mtd->mn) {
-			kMethod_set(Overloaded, ((kMethodVar *)foundMethod), true);
-			kMethod_set(Overloaded, mtd, true);
+			kMethod_Set(Overloaded, ((kMethodVar *)foundMethod), true);
+			kMethod_Set(Overloaded, mtd, true);
 		}
 	}
-	if(kMethod_is(Public, mtd)) {
+	if(kMethod_Is(Public, mtd)) {
 		if(unlikely(ct->methodList_OnGlobalConstList == K_EMPTYARRAY)) {
 			((KonohaClassVar *)ct)->methodList_OnGlobalConstList = new_(MethodArray, 8, OnGlobalConstList);
 		}
@@ -904,7 +904,7 @@ static void kNameSpace_LoadMethodData(KonohaContext *kctx, kNameSpace *ns, intpt
 			d += 2;
 		}
 		kMethodVar *mtd = KLIB new_kMethod(kctx, _GcStack, flag, cid, mn, f);
-		KLIB kMethod_setParam(kctx, mtd, rtype, psize, p);
+		KLIB kMethod_SetParam(kctx, mtd, rtype, psize, p);
 		kNameSpace_AddMethod(kctx, ns, mtd, trace);
 	}
 	RESET_GCSTACK();
@@ -1047,7 +1047,7 @@ static kbool_t kNameSpace_ImportSymbol(KonohaContext *kctx, kNameSpace *ns, kNam
 					ktype_t typeId = ((KonohaClass *)kvs->unboxValue)->typeId;
 					for(i = 0; i < kArray_size(packageNS->methodList_OnList); i++) {
 						kMethod *mtd = packageNS->methodList_OnList->MethodItems[i];
-						if(mtd->typeId == typeId /*&& !kMethod_is(Private, mtd)*/) {
+						if(mtd->typeId == typeId /*&& !kMethod_Is(Private, mtd)*/) {
 							KLIB kArray_Add(kctx, ns->methodList_OnList, mtd);
 						}
 					}
@@ -1082,7 +1082,7 @@ static kbool_t kNameSpace_ImportAll(KonohaContext *kctx, kNameSpace *ns, kNameSp
 		kNameSpace_ImportSyntaxAll(kctx, ns, packageNS, trace);
 		for(i = 0; i < kArray_size(packageNS->methodList_OnList); i++) {
 			kMethod *mtd = packageNS->methodList_OnList->MethodItems[i];
-			if(kMethod_is(Public, mtd) && mtd->packageId == packageNS->packageId) {
+			if(kMethod_Is(Public, mtd) && mtd->packageId == packageNS->packageId) {
 				KLIB kArray_Add(kctx, ns->methodList_OnList, mtd);
 			}
 		}

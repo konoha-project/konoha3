@@ -463,7 +463,7 @@ static void kMethod_Init(KonohaContext *kctx, kObject *o, void *conf)
 	kMethodVar *mtd = (kMethodVar *)o;
 	bzero(&mtd->invokeMethodFunc, sizeof(kMethod) - sizeof(KonohaObjectHeader));
 	KFieldInit(mtd, mtd->SourceToken, (struct kToken *)K_NULL);
-	KFieldInit(mtd, mtd->CodeObject, K_NULL);
+	KFieldInit(mtd, mtd->LazyCompileNameSpace, K_NULL);
 	mtd->serialNumber = methodSerialNumber++;
 }
 
@@ -471,7 +471,17 @@ static void kMethod_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vi
 {
 	kMethod *mtd = (kMethod *)o;
 	KRefTrace(mtd->SourceToken);
-	KRefTrace(mtd->CodeObject);
+	KRefTrace(mtd->LazyCompileNameSpace);
+}
+
+static void kMethod_Free(KonohaContext *kctx, kObject *o)
+{
+	kMethodVar *mtd = (kMethodVar *)o;
+	if(mtd->virtualCodeApi_plus1 != NULL && mtd->virtualCodeApi_plus1[-1] != NULL) {
+		DBG_P("p=%p", mtd->virtualCodeApi_plus1[-1]);
+		mtd->virtualCodeApi_plus1[-1]->FreeVirtualCode(kctx, mtd->vcode_start);
+		mtd->vcode_start = NULL;
+	}
 }
 
 #define CT_MethodVar CT_Method
@@ -481,11 +491,11 @@ static kMethodVar* new_kMethod(KonohaContext *kctx, kArray *gcstack, uintptr_t f
 	mtd->flag       = flag;
 	mtd->typeId     = cid;
 	mtd->mn         = mn;
-	KLIB kMethod_setFunc(kctx, mtd, func);
+	KLIB kMethod_SetFunc(kctx, mtd, func);
 	return mtd;
 }
 
-static kParam* kMethod_setParam(KonohaContext *kctx, kMethod *mtd_, ktype_t rtype, kushort_t psize, const kparamtype_t *p)
+static kParam* kMethod_SetParam(KonohaContext *kctx, kMethod *mtd_, ktype_t rtype, kushort_t psize, const kparamtype_t *p)
 {
 	kparamId_t paramId = Kparam(kctx, rtype, psize, p);
 	if(mtd_ != NULL) {
@@ -925,6 +935,7 @@ static void loadInitStructData(KonohaContext *kctx)
 	SETTYNAME(defMethod, Method);
 	defMethod.init = kMethod_Init;
 	defMethod.reftrace = kMethod_Reftrace;
+	defMethod.free     = kMethod_Free;
 	
 	KDEFINE_CLASS defFunc = {0};
 	SETTYNAME(defFunc, Func);
@@ -1023,7 +1034,7 @@ static void initKonohaLib(KonohaLibVar *l)
 
 	l->new_kMethod          = new_kMethod;
 	l->Kparamdom            = Kparamdom;
-	l->kMethod_setParam     = kMethod_setParam;
+	l->kMethod_SetParam     = kMethod_SetParam;
 	l->kMethod_indexOfField = STUB_Method_indexOfField;
 }
 
@@ -1068,51 +1079,16 @@ static void KonohaRuntime_Init(KonohaContext *kctx, KonohaContextVar *ctx)
 	kparamtype_t p = {TY_Object};
 	Kparamdom(kctx, 1, &p);          // PARAMDOM_DefaultGenericsParam  1
 	FILEID_("(konoha.c)");
-	PN_("konoha");    // PN_konoha
-	PN_("sugar");     // PKG_sugar
+	PN_("konoha");                   // PN_konoha
+	PN_("sugar");                    // PKG_sugar
 	defineDefaultKeywordSymbol(kctx);
 	initStructData(kctx);
 }
 
-//static void packageMap_Reftrace(KonohaContext *kctx, KHashMapEntry *p, void *thunk)
-//{
-//	KObjectVisitor *visitor = (KObjectVisitor *) thunk;
-//	KonohaPackage *pack = (KonohaPackage *)p->unboxValue;
-//	BEGIN_REFTRACE(1);
-//	KRefTraceNullable(pack->packageNS_onGlobalConstList);
-//	END_REFTRACE();
-//}
-
 static void KonohaRuntime_Reftrace(KonohaContext *kctx, KonohaContextVar *ctx, KObjectVisitor *visitor)
 {
 	KonohaRuntime *share = ctx->share;
-//	KonohaClass **cts = (KonohaClass**)kctx->share->classTable.classItems;
-//	size_t i, size = kctx->share->classTable.bytesize/sizeof(KonohaClassVar *);
-//	for(i = 0; i < size; i++) {
-//		KonohaClass *ct = cts[i];
-//		{
-//			BEGIN_REFTRACE(3);
-//			KRefTrace(ct->methodList);
-//			KRefTraceNullable(ct->shortClassNameNULL_OnGlobalConstList);
-//			KRefTraceNullable(ct->defaultNullValue_OnGlobalConstList);
-//			END_REFTRACE();
-//		}
-//		if(ct->constPoolMapNO != NULL) {
-//			KLIB Kmap_each(kctx, ct->constPoolMapNO, (void *) visitor, constPoolMap_Reftrace);
-//		}
-//	}
-//	KLIB Kmap_each(kctx, share->packageMapNO, (void *) visitor, packageMap_Reftrace);
 	KRefTrace(share->GlobalConstList);
-//	KRefTrace(share->constNull);
-//	KRefTrace(share->constTrue);
-//	KRefTrace(share->constFalse);
-//	KRefTrace(share->emptyString);
-//	KRefTrace(share->emptyArray);
-//	KRefTrace(share->fileIdList_OnGlobalConstList);
-//	KRefTrace(share->packageIdList_OnGlobalConstList);
-//	KRefTrace(share->symbolList_OnGlobalConstList);
-//	KRefTrace(share->paramList_OnGlobalConstList);
-//	KRefTrace(share->paramdomList_OnGlobalConstList);
 }
 
 static void KonohaRuntime_FreeClassTable(KonohaContext *kctx)
