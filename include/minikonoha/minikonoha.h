@@ -230,10 +230,6 @@ typedef struct {
 #define TypeAttr_ReadOnly   KFLAG_H1    /* Variable, Field */
 #define TypeAttr_Coercion   KFLAG_H2    /* Variable, Field */
 
-#define FN_COERCION             J
-#define FN_Coersion             FN_COERCION
-#define FN_isCOERCION(fn)       ((fn & FN_COERCION) == FN_COERCION)
-
 #define TypeAttr_Is(P, t)   ((t & TypeAttr_##P) == TypeAttr_##P)
 
 #define CT_(t)              (kctx->share->classTable.classItems[TypeAttr_Unmask(t)])
@@ -251,12 +247,10 @@ typedef struct {
 #define _NEWID              SYM_NEWID
 #define _NEWRAW             SYM_NEWRAW
 
-
 #define MN_Annotation        (KFLAG_H1|KFLAG_H2)
 #define MN_isAnnotation(S)   ((S & KW_PATTERN) == MN_Annotation)
 #define KW_PATTERN           (KFLAG_H0|KFLAG_H1|KFLAG_H2)
 #define KW_isPATTERN(S)      ((S & KW_PATTERN) == KW_PATTERN)
-
 
 /* MethodName
  * 110   to$(TypeId)
@@ -282,12 +276,6 @@ typedef struct {
 #define MN_as(cid)           ((cid) | MN_ASCID)
 #define MN_isASCID(mn)       ((Symbol_Unmask(mn)) == MN_ASCID)
 #define MethodName_t(mn)     SYM_PRE(mn), ((mn & MN_TYPEID) == MN_TYPEID ? TY_t(Symbol_Unmask(mn)) : SYM_t(Symbol_Unmask(mn)))
-
-//#define MN_to(cid)           ((CT_(cid)->classNameSymbol) | MN_TOCID)
-//#define MN_isTOCID(mn)       ((Symbol_Unmask(mn)) == MN_TOCID)
-//#define MN_as(cid)           ((CT_(cid)->classNameSymbol) | MN_ASCID)
-//#define MN_isASCID(mn)       ((Symbol_Unmask(mn)) == MN_ASCID)
-
 
 /* ------------------------------------------------------------------------ */
 /* platform */
@@ -719,9 +707,6 @@ struct KonohaFactory {
 #define OLDTRACE_SWITCH_TO_KTrace(POLICY, ...)
 
 /* ------------------------------------------------------------------------ */
-/* type */
-
-/* ------------------------------------------------------------------------ */
 
 typedef struct {
 	ksymbol_t key;
@@ -1052,9 +1037,7 @@ struct KonohaClassVar {
 };
 
 struct KonohaClassField {
-	kshortflag_t    flag;
-	kshort_t        isobj;
-	kattrtype_t         attrTypeId;
+	kattrtype_t     attrTypeId;
 	ksymbol_t       name;
 };
 
@@ -1125,14 +1108,14 @@ struct KonohaClassField {
 
 #define TY_isFunc(T)         (CT_(T)->baseTypeId == TY_Func)
 
-#define kField_Hidden          ((kshortflag_t)(1<<0))
-#define kField_Protected       ((kshortflag_t)(1<<1))
-#define kField_Getter          ((kshortflag_t)(1<<2))
-#define kField_Setter          ((kshortflag_t)(1<<3))
-#define kField_Key             ((kshortflag_t)(1<<4))
-#define kField_Volatile        ((kshortflag_t)(1<<5))
-#define kField_ReadOnly        ((kshortflag_t)(1<<6))
-#define kField_Property        ((kshortflag_t)(1<<7))
+//#define kField_Hidden          ((kshortflag_t)(1<<0))
+//#define kField_Protected       ((kshortflag_t)(1<<1))
+//#define kField_Getter          ((kshortflag_t)(1<<2))
+//#define kField_Setter          ((kshortflag_t)(1<<3))
+//#define kField_Key             ((kshortflag_t)(1<<4))
+//#define kField_Volatile        ((kshortflag_t)(1<<5))
+//#define kField_ReadOnly        ((kshortflag_t)(1<<6))
+//#define kField_Property        ((kshortflag_t)(1<<7))
 
 /* ------------------------------------------------------------------------ */
 /* Object */
@@ -1651,7 +1634,7 @@ struct KonohaLibVar {
 	KonohaClass*    (*KonohaClass_define)(KonohaContext*, kpackageId_t, kString *, KDEFINE_CLASS *, KTraceInfo *);
 	KonohaClass*    (*KonohaClass_Generics)(KonohaContext*, KonohaClass *, kattrtype_t rty, kushort_t psize, kparamtype_t *p);
 	kbool_t         (*KonohaClass_isSubtype)(KonohaContext*, KonohaClass *, KonohaClass *);
-	kbool_t         (*KonohaClass_AddField)(KonohaContext*, KonohaClass *, int flag, kattrtype_t ty, ksymbol_t sym);
+	kbool_t         (*KonohaClass_AddField)(KonohaContext*, KonohaClass *, kattrtype_t, ksymbol_t);
 
 	kObject*        (*new_kObject)(KonohaContext*, kArray *gcstack, KonohaClass *, uintptr_t);
 	void            (*kObjectProto_Free)(KonohaContext *kctx, kObjectVar *);
@@ -1669,7 +1652,6 @@ struct KonohaLibVar {
 
 
 	kString*        (*new_kString)(KonohaContext*, kArray *gcstack, const char *, size_t, int);
-//	kString*        (*new_kStringf)(KonohaContext*, kArray *gcstack, int, const char *, ...);
 
 	void            (*kArray_Add)(KonohaContext*, kArray *, kAbstractObject *);
 	void            (*kArray_Insert)(KonohaContext*, kArray *, size_t, kAbstractObject *);

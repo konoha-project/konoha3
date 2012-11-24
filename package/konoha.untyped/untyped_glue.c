@@ -43,7 +43,7 @@ static void DeclVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kattrtyp
 			return;
 		}
 		kStmtToken_Message(kctx, stmt, termToken, InfoTag, "global variable %s%s has type %s", PSYM_t(termToken->resolvedSymbol), TY_t(ty));
-		KLIB KonohaClass_AddField(kctx, O_ct(ns->globalObjectNULL_OnList), kField_Getter|kField_Setter, ty, termToken->resolvedSymbol);
+		KLIB KonohaClass_AddField(kctx, O_ct(ns->globalObjectNULL_OnList), ty, termToken->resolvedSymbol);
 	}
 	else {
 		kStmtToken_Message(kctx, stmt, termToken, InfoTag, "%s%s has type %s", PSYM_t(termToken->resolvedSymbol), TY_t(ty));

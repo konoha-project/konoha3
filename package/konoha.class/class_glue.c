@@ -120,7 +120,7 @@ static void ObjectField_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor
 	KonohaClassField *fieldItems = c->fieldItems;
 	size_t i, fieldsize = c->fieldsize;
 	for (i = 0; i < fieldsize; i++) {
-		if(fieldItems[i].isobj) {
+		if(TypeAttr_Is(Boxed, fieldItems[i].attrTypeId)) {
 			KRefTraceNullable(o->fieldObjectItems[i]);   // FIXME:
 		}
 	}
@@ -238,12 +238,12 @@ static size_t kBlock_countFieldSize(KonohaContext *kctx, kBlock *bk)
 	return c;
 }
 
-static kbool_t kStmt_AddClassField(KonohaContext *kctx, kStmt *stmt, kGamma *gma, KonohaClassVar *definedClass, kshortflag_t flag, kattrtype_t ty, kExpr *expr)
+static kbool_t kStmt_AddClassField(KonohaContext *kctx, kStmt *stmt, kGamma *gma, KonohaClassVar *definedClass, kattrtype_t ty, kExpr *expr)
 {
 	if(Expr_isTerm(expr)) {  // String name
 		kString *name = expr->termToken->text;
 		ksymbol_t symbol = ksymbolA(S_text(name), S_size(name), SYM_NEWID);
-		KLIB KonohaClass_AddField(kctx, definedClass, flag, ty, symbol);
+		KLIB KonohaClass_AddField(kctx, definedClass, ty, symbol);
 		return true;
 	}
 	else if(expr->syn->keyword == KW_LET) {  // String name = "naruto";
@@ -254,15 +254,15 @@ static kbool_t kStmt_AddClassField(KonohaContext *kctx, kStmt *stmt, kGamma *gma
 			kExpr *vexpr =  SUGAR kStmt_TypeCheckExprAt(kctx, stmt, expr, 2, gma, CT_(ty), 0);
 			if(vexpr == K_NULLEXPR) return false;
 			if(vexpr->build == TEXPR_CONST) {
-				KLIB KonohaClass_AddField(kctx, definedClass, flag, ty, symbol);
+				KLIB KonohaClass_AddField(kctx, definedClass, ty, symbol);
 				KonohaClass_setClassFieldObjectValue(kctx, definedClass, symbol, vexpr->objectConstValue);
 			}
 			else if(vexpr->build == TEXPR_NCONST) {
-				KLIB KonohaClass_AddField(kctx, definedClass, flag, ty, symbol);
+				KLIB KonohaClass_AddField(kctx, definedClass, ty, symbol);
 				KonohaClass_setClassFieldUnboxValue(kctx, definedClass, symbol, vexpr->unboxConstValue);
 			}
 			else if(vexpr->build == TEXPR_NULL) {
-				KLIB KonohaClass_AddField(kctx, definedClass, flag, ty, symbol);
+				KLIB KonohaClass_AddField(kctx, definedClass, ty, symbol);
 			}
 			else {
 				SUGAR kStmt_Message2(kctx, stmt, lexpr->termToken, ErrTag, "field initial value must be const: %s", S_text(name));
@@ -273,7 +273,7 @@ static kbool_t kStmt_AddClassField(KonohaContext *kctx, kStmt *stmt, kGamma *gma
 	} else if(expr->syn->keyword == KW_COMMA) {   // String (firstName = naruto, lastName)
 		size_t i;
 		for(i = 1; i < kArray_size(expr->cons); i++) {
-			if(!kStmt_AddClassField(kctx, stmt, gma, definedClass, flag, ty, kExpr_at(expr, i))) return false;
+			if(!kStmt_AddClassField(kctx, stmt, gma, definedClass, ty, kExpr_at(expr, i))) return false;
 		}
 		return true;
 	}
@@ -288,10 +288,9 @@ static kbool_t kBlock_declClassField(KonohaContext *kctx, kBlock *bk, kGamma *gm
 	for(i = 0; i < kArray_size(bk->StmtList); i++) {
 		kStmt *stmt = bk->StmtList->StmtItems[i];
 		if(stmt->syn->keyword == KW_TypeDeclPattern) {
-			kshortflag_t flag = kField_Getter | kField_Setter;
 			kToken *tk  = SUGAR kStmt_GetToken(kctx, stmt, KW_TypePattern, NULL);
 			kExpr *expr = SUGAR kStmt_GetExpr(kctx, stmt,  KW_ExprPattern, NULL);
-			if(!kStmt_AddClassField(kctx, stmt, gma, ct, flag, Token_typeLiteral(tk), expr)) {
+			if(!kStmt_AddClassField(kctx, stmt, gma, ct, Token_typeLiteral(tk), expr)) {
 				failedOnce = true;
 			}
 		}

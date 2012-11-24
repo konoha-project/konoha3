@@ -41,7 +41,7 @@ static void kObject_Reftrace(KonohaContext *kctx, kObject *o, KObjectVisitor *vi
 	KonohaClass *ct = O_ct(of);
 	size_t i;
 	for(i = 0; i < ct->fieldsize; i++) {
-		if(ct->fieldItems[i].isobj) {
+		if(TypeAttr_Is(Boxed, ct->fieldItems[i].attrTypeId)) {
 			KRefTrace(of->fieldObjectItems[i]);
 		}
 	}

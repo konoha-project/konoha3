@@ -69,11 +69,7 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObj
 		SUGAR kStmt_Message2(kctx, stmt, NULL, ErrTag, "differently defined name: %s", SYM_t(symbol));
 		return NULL;
 	}
-	int flag = kField_Setter;
-	if(mtd == NULL) { // no getter
-		flag |= kField_Getter;
-	}
-	KLIB KonohaClass_AddField(kctx, O_ct(o), flag, ty, symbol);
+	KLIB KonohaClass_AddField(kctx, O_ct(o), ty, symbol);
 	return KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, O_ct(o), symbol, ty);
 }
 
