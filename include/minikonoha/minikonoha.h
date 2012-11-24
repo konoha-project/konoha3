@@ -222,7 +222,7 @@ typedef struct {
 
 /* ktype_t */
 #define TY_newid           ((ktype_t)-1)
-#define TY_unknown         ((ktype_t)-2)
+//#define TY_unknown         ((ktype_t)-2)
 
 #define TypeAttr_Attr(t)        (t  & (KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3))
 #define TypeAttr_Unmask(t)      (t  & (~(KFLAG_H0|KFLAG_H1|KFLAG_H2|KFLAG_H3)))

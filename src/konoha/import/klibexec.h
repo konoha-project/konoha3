@@ -448,7 +448,7 @@ static kObject* kObjectProto_GetObject(KonohaContext *kctx, kAbstractObject *o, 
 	return (d != NULL) ? d->ObjectValue : defval;
 }
 
-static void kObjectProto_SetObject(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, ktype_t ty, kAbstractObject *val)
+static void kObjectProto_SetObject(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, kattrtype_t ty, kAbstractObject *val)
 {
 	kObjectVar *v = (kObjectVar *)o;
 	if(ty == 0) ty = O_ct(v)->typeId;
@@ -456,7 +456,7 @@ static void kObjectProto_SetObject(KonohaContext *kctx, kAbstractObject *o, ksym
 	PLATAPI WriteBarrier(kctx, v);
 }
 
-static void kObjectProto_SetUnboxValue(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, ktype_t ty, uintptr_t unboxValue)
+static void kObjectProto_SetUnboxValue(KonohaContext *kctx, kAbstractObject *o, ksymbol_t key, kattrtype_t ty, uintptr_t unboxValue)
 {
 	kObjectVar *v = (kObjectVar *)o;
 	//PLATAPI WriteBarrier(kctx, v);   // why ? need this? by kimio

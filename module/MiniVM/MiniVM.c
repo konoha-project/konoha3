@@ -160,7 +160,7 @@ static void DumpVirtualCode(KonohaContext *kctx, VirtualCode *c)
 
 static void kNameSpace_LookupMethodWithInlineCache(KonohaContext *kctx, KonohaStack *sfp, kNameSpace *ns, kMethod **cache)
 {
-	ktype_t typeId = O_typeId(sfp[0].asObject);
+	kattrtype_t typeId = O_typeId(sfp[0].asObject);
 	kMethod *mtd = cache[0];
 	if(mtd->typeId != typeId) {
 		mtd = KLIB kNameSpace_GetMethodBySignatureNULL(kctx, ns, O_ct(sfp[0].asObject), mtd->mn, mtd->paramdom, 0, NULL);

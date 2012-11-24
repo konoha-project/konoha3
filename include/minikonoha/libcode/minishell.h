@@ -97,7 +97,7 @@ static kstatus_t readstmt(KonohaContext *kctx, KGrowingBuffer *wb, kfileline_t *
 static void dumpEval(KonohaContext *kctx, KGrowingBuffer *wb)
 {
 	KonohaStackRuntimeVar *base = kctx->stack;
-	ktype_t ty = base->evalty;
+	kattrtype_t ty = base->evalty;
 	if(ty != TY_void) {
 		KonohaStack *lsfp = base->stack + base->evalidx;
 		CT_(ty)->p(kctx, lsfp, 0, wb);

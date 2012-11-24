@@ -327,7 +327,7 @@ static kExpr* SUGAR kExpr_SetConstValue(KonohaContext *kctx, kExprVar *expr, Kon
 	return (kExpr *)expr;
 }
 
-static kExpr* SUGAR kExpr_SetUnboxConstValue(KonohaContext *kctx, kExprVar *expr, ktype_t attrTypeId, uintptr_t unboxValue)
+static kExpr* SUGAR kExpr_SetUnboxConstValue(KonohaContext *kctx, kExprVar *expr, kattrtype_t attrTypeId, uintptr_t unboxValue)
 {
 	expr = (expr == NULL) ? new_(ExprVar, 0, OnGcStack) : (kExprVar *)expr;
 	expr->build = TEXPR_NCONST;
@@ -336,7 +336,7 @@ static kExpr* SUGAR kExpr_SetUnboxConstValue(KonohaContext *kctx, kExprVar *expr
 	return (kExpr *)expr;
 }
 
-static kExpr* SUGAR kExpr_SetVariable(KonohaContext *kctx, kExprVar *expr, kGamma *gma, kexpr_t build, ktype_t attrTypeId, intptr_t index)
+static kExpr* SUGAR kExpr_SetVariable(KonohaContext *kctx, kExprVar *expr, kGamma *gma, kexpr_t build, kattrtype_t attrTypeId, intptr_t index)
 {
 	expr = (expr == NULL) ? new_(ExprVar, 0, OnGcStack) : (kExprVar *)expr;
 	expr->build = build;

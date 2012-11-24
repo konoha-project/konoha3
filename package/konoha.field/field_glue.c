@@ -56,7 +56,7 @@ static KMETHOD MethodFunc_UnboxFieldSetter(KonohaContext *kctx, KonohaStack *sfp
 	(sfp[0].asObjectVar)->fieldUnboxItems[delta] = sfp[1].unboxValue;
 	KReturnUnboxValue(sfp[1].unboxValue);
 }
-static kMethod *new_FieldGetter(KonohaContext *kctx, kArray *gcstack, ktype_t cid, ksymbol_t sym, ktype_t ty, int idx)
+static kMethod *new_FieldGetter(KonohaContext *kctx, kArray *gcstack, kattrtype_t cid, ksymbol_t sym, kattrtype_t ty, int idx)
 {
 	kmethodn_t mn = MN_toGETTER(sym);
 	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_UnboxFieldGetter : MethodFunc_ObjectFieldGetter;
@@ -66,7 +66,7 @@ static kMethod *new_FieldGetter(KonohaContext *kctx, kArray *gcstack, ktype_t ci
 	return mtd;
 }
 
-static kMethod *new_FieldSetter(KonohaContext *kctx, kArray *gcstack, ktype_t cid, kmethodn_t sym, ktype_t ty, int idx)
+static kMethod *new_FieldSetter(KonohaContext *kctx, kArray *gcstack, kattrtype_t cid, kmethodn_t sym, kattrtype_t ty, int idx)
 {
 	kmethodn_t mn = MN_toSETTER(sym);
 	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_UnboxFieldSetter : MethodFunc_ObjectFieldSetter;
@@ -118,7 +118,7 @@ static KMETHOD MethodFunc_UnboxPrototypeSetter(KonohaContext *kctx, KonohaStack 
 	KReturnUnboxValue(sfp[1].unboxValue);
 }
 
-static kMethod *new_PrototypeGetter(KonohaContext *kctx, kArray *gcstack, ktype_t cid, ksymbol_t sym, ktype_t ty)
+static kMethod *new_PrototypeGetter(KonohaContext *kctx, kArray *gcstack, kattrtype_t cid, ksymbol_t sym, kattrtype_t ty)
 {
 	kmethodn_t mn = MN_toGETTER(sym);
 	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_UnboxPrototypeGetter : MethodFunc_ObjectPrototypeGetter;
@@ -128,7 +128,7 @@ static kMethod *new_PrototypeGetter(KonohaContext *kctx, kArray *gcstack, ktype_
 	return mtd;
 }
 
-static kMethod *new_PrototypeSetter(KonohaContext *kctx, kArray *gcstack, ktype_t cid, ksymbol_t sym, ktype_t ty)
+static kMethod *new_PrototypeSetter(KonohaContext *kctx, kArray *gcstack, kattrtype_t cid, ksymbol_t sym, kattrtype_t ty)
 {
 	kmethodn_t mn = MN_toSETTER(sym);
 	MethodFunc f = (TY_isUnbox(ty)) ? MethodFunc_UnboxPrototypeSetter : MethodFunc_ObjectPrototypeSetter;
@@ -139,7 +139,7 @@ static kMethod *new_PrototypeSetter(KonohaContext *kctx, kArray *gcstack, ktype_
 	return mtd;
 }
 
-static kbool_t KonohaClass_AddField(KonohaContext *kctx, KonohaClass *ct, int flag, ktype_t ty, ksymbol_t sym)
+static kbool_t KonohaClass_AddField(KonohaContext *kctx, KonohaClass *ct, int flag, kattrtype_t ty, ksymbol_t sym)
 {
 	kushort_t pos = ct->fieldsize;
 	if(unlikely(ct->methodList_OnGlobalConstList == K_EMPTYARRAY)) {

@@ -32,7 +32,7 @@ extern "C"{
 // --------------------------------------------------------------------------
 /* Decl */
 
-static void DeclVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr)
+static void DeclVariable(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kattrtype_t ty, kExpr *termExpr)
 {
 	DBG_ASSERT(kExpr_isSymbolTerm(termExpr));
 	kToken *termToken = termExpr->termToken;

@@ -56,7 +56,7 @@ static	kbool_t global_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 // ---------------------------------------------------------------------------
 
-static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObject *o, ktype_t ty, ksymbol_t symbol)
+static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObject *o, kattrtype_t ty, ksymbol_t symbol)
 {
 	kNameSpace *ns = Stmt_ns(stmt);
 	kMethod *mtd = KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, O_ct(o), symbol, TY_var);
@@ -77,7 +77,7 @@ static kMethod *Object_newProtoSetterNULL(KonohaContext *kctx, kStmt *stmt, kObj
 	return KLIB kNameSpace_GetSetterMethodNULL(kctx, ns, O_ct(o), symbol, ty);
 }
 
-static kStmt* TypeDeclAndMakeSetter(KonohaContext *kctx, kStmt *stmt, kGamma *gma, ktype_t ty, kExpr *termExpr, kExpr *valueExpr, kObject *scr)
+static kStmt* TypeDeclAndMakeSetter(KonohaContext *kctx, kStmt *stmt, kGamma *gma, kattrtype_t ty, kExpr *termExpr, kExpr *valueExpr, kObject *scr)
 {
 	kNameSpace *ns = Stmt_ns(stmt);
 	kMethod *mtd = Object_newProtoSetterNULL(kctx, stmt, scr, ty, termExpr->termToken->resolvedSymbol);

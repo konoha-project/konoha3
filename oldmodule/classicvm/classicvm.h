@@ -310,12 +310,12 @@ static kbool_t OPR_hasCONST(KonohaContext *kctx, kExpr *expr, kmethodn_t *mn, in
 
 static kbool_t CLASSICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr, int shift, int espidx)
 {
-	ktype_t mtd_cid = (mtd)->typeId;
+	kattrtype_t mtd_cid = (mtd)->typeId;
 	kmethodn_t mtd_mn = (mtd)->mn;
 	int a = espidx + 1;
 #if 1/*TODO*/
 	if(mtd_cid == TY_Array) {
-		ktype_t p1 = 0;//C_p1(cid);
+		kattrtype_t p1 = 0;//C_p1(cid);
 		if(mtd_mn == MN_get) {
 			EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);
 			if(kExpr_at(expr, 2)->build == TEXPR_NCONST) {
@@ -353,7 +353,7 @@ static kbool_t CLASSICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr
 				if(n < 0) {
 					return 0;
 				}
-				ktype_t p1 = 0;//TODO C_p1(cid);
+				kattrtype_t p1 = 0;//TODO C_p1(cid);
 				ASM_CHKIDXC(kctx, OC_(a), n);
 				if(TY_isUnbox(p1)) {
 					ASM(NSETIDXC, NC_(espidx), OC_(a), n, NC_(v));
@@ -432,7 +432,7 @@ static kbool_t CLASSICVM_CALL_asm(KonohaContext *kctx, kMethod *mtd, kExpr *expr
 	}
 #endif
 	kopcode_t opcode;
-	ktype_t cid    = mtd_cid;
+	kattrtype_t cid    = mtd_cid;
 	kmethodn_t mn = mtd_mn;
 	if(mtd_cid == TY_boolean && mtd_mn == MN_opNOT) {
 		EXPR_asm(kctx, a, kExpr_at(expr, 1), shift, a);

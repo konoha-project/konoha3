@@ -633,7 +633,7 @@ static kbool_t regexp_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 		CT_RegExp = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &RegExpDef, trace);
 	}
 
-	ktype_t TY_StringArray0 = CT_StringArray0->typeId;
+	kattrtype_t TY_StringArray0 = CT_StringArray0->typeId;
 	KDEFINE_METHOD MethodData[] = {
 		/*JS*/_Public|_Const|_Im, _F(RegExp_getglobal), TY_boolean, TY_RegExp, MN_("getglobal"), 0,
 		/*JS*/_Public|_Const|_Im, _F(RegExp_getignoreCase), TY_boolean, TY_RegExp, MN_("getignoreCase"), 0,

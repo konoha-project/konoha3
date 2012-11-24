@@ -245,7 +245,7 @@ static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
 //	kArray *a = sfp[0].asArray;
 //	kFunc  *f = sfp[1].asFunc;
 //	size_t asize = kArray_size(a);
-//	ktype_t resolve_type = kMethod_GetReturnType(f->mtd);  // FIXME
+//	kattrtype_t resolve_type = kMethod_GetReturnType(f->mtd);  // FIXME
 //	KonohaClass *CT_ArrayT0 = CT_p0(kctx, CT_Array, resolve_type);
 //	kArrayVar *returnValue = (kArrayVar *)KLIB new_kObject(kctx, _GcStack, CT_ArrayT0, asize);
 //
@@ -290,7 +290,7 @@ static KMETHOD Array_reverse(KonohaContext *kctx, KonohaStack *sfp)
 //	kArray *a = sfp[0].asArray;
 //	kFunc  *f = sfp[1].asFunc;
 //	size_t asize = kArray_size(a);
-//	ktype_t resolve_type = kMethod_GetReturnType(f->mtd);
+//	kattrtype_t resolve_type = kMethod_GetReturnType(f->mtd);
 //
 //	size_t i;
 //	if(kArray_isUnboxData(a)) {
@@ -517,13 +517,13 @@ static kbool_t array_defineMethod(KonohaContext *kctx, kNameSpace *ns, KTraceInf
 	KLIB kNameSpace_LoadConstData(kctx, ns, KonohaConst_(ClassData), false/*isOverride*/, trace);
 
 	KonohaClass *CT_ArrayT0 = CT_p0(kctx, CT_Array, TY_0);
-	ktype_t TY_ArrayT0 = CT_ArrayT0->typeId;
+	kattrtype_t TY_ArrayT0 = CT_ArrayT0->typeId;
 
 	kparamtype_t p[] = {{TY_0}};
-	ktype_t TY_FuncMap = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_0 , 1, p))->typeId;
+	kattrtype_t TY_FuncMap = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_0 , 1, p))->typeId;
 
 	kparamtype_t P_inject[] = {{TY_0},{TY_0}};
-	ktype_t TY_FuncInject = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_0 , 2, P_inject))->typeId;
+	kattrtype_t TY_FuncInject = (KLIB KonohaClass_Generics(kctx, CT_Func, TY_0 , 2, P_inject))->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public|_Im,    _F(Array_get), TY_0,   TY_Array, MN_("get"), 1, TY_int, FN_("index"),

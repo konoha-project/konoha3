@@ -60,7 +60,7 @@ struct kConnectionVar {
 /* [ResultSet] */
 
 struct DBschema {
-	ktype_t   type;   // konoha defined type
+	kattrtype_t   type;   // konoha defined type
 	kushort_t ctype;  // ResultSet defined type. ... Is it obsolate?
 	kString   *name;
 	size_t    start;

@@ -85,7 +85,7 @@ static kinline kString* CT_s_(KonohaContext *kctx, KonohaClass *ct)
 #define TY_s(X)   TY_s_(kctx, X)
 #define TY_t(X)   S_text(TY_s(X))
 #define ATY_t(X)  TY_t(TypeAttr_Unmask(X))
-static kinline kString* TY_s_(KonohaContext *kctx, ktype_t ty)
+static kinline kString* TY_s_(KonohaContext *kctx, kattrtype_t ty)
 {
 	DBG_ASSERT(ty < KARRAYSIZE(kctx->share->classTable.bytemax, intptr));
 	return CT_s_(kctx, CT_(ty));
@@ -140,7 +140,7 @@ static kinline uintptr_t longid(kushort_t packageDomain, kushort_t un)
 	return (hcode << (sizeof(kshort_t)*8)) | un;
 }
 
-static kinline KonohaClass *CT_p0(KonohaContext *kctx, KonohaClass *ct, ktype_t ty)
+static kinline KonohaClass *CT_p0(KonohaContext *kctx, KonohaClass *ct, kattrtype_t ty)
 {
 	kparamtype_t p = {ty, 0};
 	return KLIB KonohaClass_Generics(kctx, ct, TY_void, 1, &p);

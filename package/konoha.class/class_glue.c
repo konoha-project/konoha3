@@ -238,7 +238,7 @@ static size_t kBlock_countFieldSize(KonohaContext *kctx, kBlock *bk)
 	return c;
 }
 
-static kbool_t kStmt_AddClassField(KonohaContext *kctx, kStmt *stmt, kGamma *gma, KonohaClassVar *definedClass, kshortflag_t flag, ktype_t ty, kExpr *expr)
+static kbool_t kStmt_AddClassField(KonohaContext *kctx, kStmt *stmt, kGamma *gma, KonohaClassVar *definedClass, kshortflag_t flag, kattrtype_t ty, kExpr *expr)
 {
 	if(Expr_isTerm(expr)) {  // String name
 		kString *name = expr->termToken->text;

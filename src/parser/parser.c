@@ -286,13 +286,13 @@ static KMETHOD NameSpace_hate(KonohaContext *kctx, KonohaStack *sfp)
 	kNameSpace_RemoveSyntax(kctx, sfp[0].asNameSpace, keyword, trace);
 }
 
-static void kNameSpace_SetStaticFunction(KonohaContext *kctx, kNameSpace *ns, kArray *list, ktype_t cid, KTraceInfo *trace)
+static void kNameSpace_SetStaticFunction(KonohaContext *kctx, kNameSpace *ns, kArray *list, kattrtype_t cid, KTraceInfo *trace)
 {
 	size_t i;
 	for(i = 0; i < kArray_size(list); i++) {
 		kMethod *mtd = list->MethodItems[i];
 		if(kMethod_Is(Static, mtd) && mtd->typeId == cid) {
-			uintptr_t mtdinfo = ((uintptr_t)cid | (((uintptr_t)mtd->mn) << (sizeof(ktype_t) * 8)));
+			uintptr_t mtdinfo = ((uintptr_t)cid | (((uintptr_t)mtd->mn) << (sizeof(kattrtype_t) * 8)));
 			KLIB kNameSpace_SetConstData(kctx, ns, mtd->mn, VirtualType_StaticMethod, mtdinfo, false/*isOverride*/, trace);
 		}
 	}

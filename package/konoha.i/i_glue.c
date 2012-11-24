@@ -66,7 +66,7 @@ static void kMethod_WriteToBuffer(KonohaContext *kctx, kMethod *mtd, KGrowingBuf
 
 // --------------------------------------------------------------------------
 
-static void copyMethodList(KonohaContext *kctx, ktype_t cid, kArray *s, kArray *d)
+static void copyMethodList(KonohaContext *kctx, kattrtype_t cid, kArray *s, kArray *d)
 {
 	size_t i;
 	for(i = 0; i < kArray_size(s); i++) {

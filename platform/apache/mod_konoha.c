@@ -236,7 +236,7 @@ KonohaContext* konoha_create(KonohaClass **cRequest)
 #define TY_TblEntry  (CT_AprTableEntry->typeId)
 
 	KonohaClass *CT_TblEntryArray = CT_p0(kctx, CT_Array, TY_TblEntry);
-	ktype_t TY_TblEntryArray = CT_TblEntryArray->typeId;
+	kattrtype_t TY_TblEntryArray = CT_TblEntryArray->typeId;
 
 	int FN_x = FN_("x");
 	KDEFINE_METHOD MethodData[] = {

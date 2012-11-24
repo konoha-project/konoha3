@@ -424,8 +424,8 @@ static kbool_t jansson_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 		.p    = Jansson_p,
 	};
 	KonohaClass *cJson = KLIB kNameSpace_DefineClass(kctx, ns, NULL, &JsonDef, trace);
-	ktype_t TY_JsonArray = CT_JsonArray->typeId;
-	ktype_t TY_StringArray0 = CT_StringArray0->typeId;
+	kattrtype_t TY_JsonArray = CT_JsonArray->typeId;
+	kattrtype_t TY_StringArray0 = CT_StringArray0->typeId;
 
 	int FN_k = FN_("key");
 	int FN_v = FN_("value");

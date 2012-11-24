@@ -33,7 +33,7 @@ typedef void (*TraceFunc)(KonohaContext *kctx, KonohaStack *sfp, KTraceInfo *tra
 
 typedef struct {
 	kMethod *mtd;
-	ktype_t typeId; kparamId_t signature;
+	kattrtype_t typeId; kparamId_t signature;
 } kMethodInlineCache;
 
 #ifndef KCODE_HEAD
@@ -253,7 +253,7 @@ typedef struct OPLOOKUP {
 	kreg_t thisidx;
 	kNameSpace* ns;
 	kMethod*    mtd;
-	ktype_t typeId; kparamId_t signature;  // invisible
+	kattrtype_t typeId; kparamId_t signature;  // invisible
 } OPLOOKUP;
 
 #ifndef OPEXEC_LOOKUP

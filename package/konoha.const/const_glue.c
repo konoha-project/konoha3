@@ -40,7 +40,7 @@ static KMETHOD Statement_ConstDecl(KonohaContext *kctx, KonohaStack *sfp)
 	if(result) {
 		kExpr *constExpr = SUGAR kStmt_GetExpr(kctx, stmt, KW_ExprPattern, NULL);
 		KonohaClass *constClass = CT_(constExpr->attrTypeId);
-		ktype_t type = constClass->typeId;
+		kattrtype_t type = constClass->typeId;
 		uintptr_t unboxValue;
 		result = false;
 		if(constExpr->build == TEXPR_NULL) {   // const C = String

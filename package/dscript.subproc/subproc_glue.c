@@ -709,7 +709,7 @@ static kbool_t subproc_InitSubProc(KonohaContext *kctx, kNameSpace *ns, KTraceIn
 
 	kparamtype_t ps = {TY_String, FN_("str")};
 	KonohaClass *CT_StringArray2 = KLIB KonohaClass_Generics(kctx, CT_Array, TY_String, 1, &ps);
-	ktype_t TY_StringArray = CT_StringArray2->typeId, TY_SubProc = cSubproc->typeId;
+	kattrtype_t TY_StringArray = CT_StringArray2->typeId, TY_SubProc = cSubproc->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public,     _F(SubProc_new),             TY_SubProc, TY_SubProc, MN_("new"), 1, TY_String, FN_("command"),
@@ -1838,7 +1838,7 @@ static kbool_t subproc_PackupNameSpace(KonohaContext *kctx, kNameSpace *ns, int 
 
 	kparamtype_t ps = {TY_String, FN_("str")};
 	KonohaClass *CT_StringArray2 = KLIB KonohaClass_Generics(kctx, CT_Array, TY_String, 1, &ps);
-	ktype_t TY_StringArray = CT_StringArray2->typeId;
+	kattrtype_t TY_StringArray = CT_StringArray2->typeId;
 
 	KDEFINE_METHOD MethodData[] = {
 		_Public, _F(Subproc_new), TY_Subproc, TY_Subproc,MN_("new"), 2, TY_String, FN_("path"), TY_boolean, FN_("mode"),

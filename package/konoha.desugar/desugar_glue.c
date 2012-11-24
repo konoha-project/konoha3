@@ -444,7 +444,7 @@ int patternMatchShell(Stmt stmt, int nameid, Token[] tokenList, int beginIdx, in
 //static KMETHOD Stmt_TypeCheckExpr(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	ksymbol_t key = (ksymbol_t)sfp[1].intValue;
-//	ktype_t typeId = O_typeId(sfp[3].asObject);
+//	kattrtype_t typeId = O_typeId(sfp[3].asObject);
 //	KReturnUnboxValue(SUGAR kStmt_TypeCheckByName(kctx, sfp[0].asStmt, key, sfp[2].asGamma, typeId, sfp[4].intValue));
 //}
 //
@@ -548,7 +548,7 @@ int patternMatchShell(Stmt stmt, int nameid, Token[] tokenList, int beginIdx, in
 //{
 //	kStmt *stmt          = sfp[0].asStmt;
 //	kGamma *gma          = sfp[1].asGamma;
-//	ktype_t cid          = (ktype_t)sfp[2].intValue;
+//	kattrtype_t cid          = (kattrtype_t)sfp[2].intValue;
 //	ksymbol_t methodName = (ksymbol_t)sfp[3].intValue;
 //	kExpr *firstExpr     = sfp[4].asExpr;
 //	kMethod *method = KLIB kNameSpace_GetMethodByParamSizeNULL(kctx, Stmt_ns(stmt), cid, methodName, 1, MethodMatch_CamelStyle);
@@ -563,7 +563,7 @@ int patternMatchShell(Stmt stmt, int nameid, Token[] tokenList, int beginIdx, in
 //{
 //	kStmt *stmt          = sfp[0].asStmt;
 //	kGamma *gma          = sfp[1].asGamma;
-//	ktype_t cid          = (ktype_t)sfp[2].intValue;
+//	kattrtype_t cid          = (kattrtype_t)sfp[2].intValue;
 //	ksymbol_t methodName = (ksymbol_t)sfp[3].intValue;
 //	kExpr *firstExpr     = sfp[4].asExpr;
 //	kExpr *secondExpr    = sfp[5].asExpr;
@@ -626,7 +626,7 @@ int patternMatchShell(Stmt stmt, int nameid, Token[] tokenList, int beginIdx, in
 //{
 //	kStmt *stmt     = sfp[0].asStmt;
 //	kGamma *gma     = sfp[1].asGamma;
-//	ktype_t cid     = (ktype_t)sfp[2].intValue;
+//	kattrtype_t cid     = (kattrtype_t)sfp[2].intValue;
 //	kExpr *declExpr = sfp[3].asExpr;
 //	KReturnUnboxValue(SUGAR kStmt_DeclType(kctx, stmt, gma, cid, declExpr, NULL, NULL, &stmt));
 //}
@@ -659,7 +659,7 @@ int patternMatchShell(Stmt stmt, int nameid, Token[] tokenList, int beginIdx, in
 //	kExpr *expr    = sfp[0].asExpr;
 //	kGamma *gma    = sfp[1].asGamma;
 //	kexpr_t build  = (kexpr_t)sfp[2].intValue;
-//	ktype_t cid    = (ktype_t)sfp[3].intValue;
+//	kattrtype_t cid    = (kattrtype_t)sfp[3].intValue;
 //	intptr_t index = sfp[4].unboxValue;
 //	KReturn(SUGAR kExpr_SetVariable(kctx, expr, gma, build, cid, index));
 //}
@@ -669,7 +669,7 @@ int patternMatchShell(Stmt stmt, int nameid, Token[] tokenList, int beginIdx, in
 //{
 //	kGamma *gma    = sfp[1].asGamma;
 //	kexpr_t build  = (kexpr_t)sfp[2].intValue;
-//	ktype_t cid    = (ktype_t)sfp[3].intValue;
+//	kattrtype_t cid    = (kattrtype_t)sfp[3].intValue;
 //	intptr_t index = sfp[4].unboxValue;
 //	KReturn(new_VariableExpr(kctx, gma, build, cid, index));
 //}
@@ -689,7 +689,7 @@ int patternMatchShell(Stmt stmt, int nameid, Token[] tokenList, int beginIdx, in
 //{
 //	kExprVar *expr = (kExprVar *)sfp[0].asExpr;
 //	kexpr_t build  = (kexpr_t)sfp[1].intValue;
-//	ktype_t cid    = (ktype_t)sfp[2].intValue;
+//	kattrtype_t cid    = (kattrtype_t)sfp[2].intValue;
 //	expr->build = build;
 //	expr->attrTypeId = cid;
 //	KReturnVoid();
@@ -702,7 +702,7 @@ int patternMatchShell(Stmt stmt, int nameid, Token[] tokenList, int beginIdx, in
 //static KMETHOD Gamma_declareLocalVariable(KonohaContext *kctx, KonohaStack *sfp)
 //{
 //	kGamma *gma       = sfp[0].asGamma;
-//	ktype_t cid       = (ktype_t)sfp[1].intValue;
+//	kattrtype_t cid       = (kattrtype_t)sfp[1].intValue;
 //	ksymbol_t keyword = (ksymbol_t)sfp[2].intValue;
 //	KReturnUnboxValue(SUGAR kGamma_AddLocalVariable(kctx, gma, cid, keyword));
 //}
@@ -824,8 +824,8 @@ int patternMatchShell(Stmt stmt, int nameid, Token[] tokenList, int beginIdx, in
 //	kparamtype_t P_StringArray[] = {{TY_String}};
 //	int TY_StringArray = (KLIB KonohaClass_Generics(kctx, CT_Array, TY_void, 1, P_StringArray))->typeId;
 //
-//	ktype_t TY_Symbol = cSymbol->typeId;
-//	ktype_t TY_cid = ccid->typeId;
+//	kattrtype_t TY_Symbol = cSymbol->typeId;
+//	kattrtype_t TY_cid = ccid->typeId;
 //
 //	KDEFINE_METHOD MethodData[] = {
 //		/* Token */

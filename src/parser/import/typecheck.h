@@ -354,7 +354,7 @@ static void kGamma_InitIt(KonohaContext *kctx, GammaAllocaData *genv, kParam *pa
 	}
 }
 
-static ktype_t kStmt_CheckReturnType(KonohaContext *kctx, kStmt *stmt)
+static kattrtype_t kStmt_CheckReturnType(KonohaContext *kctx, kStmt *stmt)
 {
 	if(stmt->syn != NULL && stmt->syn->keyword == KW_ExprPattern) {
 		kExpr *expr = (kExpr *)kStmt_GetObjectNULL(kctx, stmt, KW_ExprPattern);
@@ -368,7 +368,7 @@ static ktype_t kStmt_CheckReturnType(KonohaContext *kctx, kStmt *stmt)
 	return TY_void;
 }
 
-static kstatus_t kMethod_RunEval(KonohaContext *kctx, kMethod *mtd, ktype_t rtype, kfileline_t uline, KTraceInfo *trace)
+static kstatus_t kMethod_RunEval(KonohaContext *kctx, kMethod *mtd, kattrtype_t rtype, kfileline_t uline, KTraceInfo *trace)
 {
 	BEGIN_LOCAL(lsfp, K_CALLDELTA);
 	KonohaStackRuntimeVar *runtime = kctx->stack;
@@ -437,7 +437,7 @@ static kstatus_t kBlock_EvalAtTopLevel(KonohaContext *kctx, kBlock *bk, kMethod 
 		}
 	}
 	if(isTryEval) {
-		ktype_t rtype = kStmt_CheckReturnType(kctx, stmt);
+		kattrtype_t rtype = kStmt_CheckReturnType(kctx, stmt);
 		KLIB kMethod_GenCode(kctx, mtd, bk, DefaultCompileOption);
 		return kMethod_RunEval(kctx, mtd, rtype, stmt->uline, trace);
 	}

@@ -37,7 +37,7 @@ extern "C" {
 
 #define TY_isIterator(T)     (CT_(T)->baseTypeId == TY_Iterator)
 
-static kToken* new_TypeToken(KonohaContext *kctx, kNameSpace *ns, ktype_t typeId)
+static kToken* new_TypeToken(KonohaContext *kctx, kNameSpace *ns, kattrtype_t typeId)
 {
 	kToken *TypeToken = new_(Token, 0, OnGcStack);
 	kToken_setTypeId(kctx, TypeToken, ns, typeId);
